@@ -6,7 +6,7 @@
 #define __GUARD_0xF675E0C0__
 
 #include "substring.h"
-#include "map-generics.h"
+#include "map/map.h"
 #include "context.h"
 typedef struct MapSubInt{
   Scope scope;

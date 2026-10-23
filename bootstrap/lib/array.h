@@ -2,11 +2,10 @@
 
 #pragma once
 
-#ifndef __GUARD_0x0C64D6F9__
-#define __GUARD_0x0C64D6F9__
+#ifndef __GUARD_0x8B0AA4C3__
+#define __GUARD_0x8B0AA4C3__
 
 #include "error-macros.h"
-#include "array-generics.h"
 #include "private-keywords.h"
 #include "common.h"
 typedef Block Array;
@@ -18,11 +17,10 @@ typedef Block Array;
 #include <stdio.h>
 #include "buffer.h"
 #include "exception.h"
-#include "func.h"
+#include "func/func.h"
 #include "iter.h"
 #include "block.h"
 #include "var/var.h"
-#include "varconvert.h"
 Array Array_new(void);
 
 int Array_try_next(Array _x2c_gensym_macro_array_15, int * _x2c_gensym_macro_cursor_1, Var * _x2c_gensym_macro_out_4);
@@ -138,4 +136,4 @@ void Array_free(Array a0);
 void Array_truncate(Array a0, size_t a1);
 
 
-#endif /* __GUARD_0x0C64D6F9__ */
+#endif /* __GUARD_0x8B0AA4C3__ */

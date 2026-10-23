@@ -9,7 +9,7 @@
 #include "error-macros.h"
 #include <stdlib.h>
 #include <string.h>
-#include "map-generics.h"
+#include "map/map.h"
 #include "integer-ops.h"
 #include "substring.h"
 typedef struct MapIntInt{

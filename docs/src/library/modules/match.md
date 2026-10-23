@@ -17,12 +17,16 @@ Pattern matching and transformation utilities for lists.
 | [`x2c_match_site_try_match`](#x2c_match_site_try_match) | Matches through one compiler-owned site, writing bindings on success. |
 | [`x2c_match_site_try_match_replace`](#x2c_match_site_try_match_replace) | `Match`-replaces through one compiler-owned site. |
 | [`x2c_match_site_try_search`](#x2c_match_site_try_search) | Searches through one compiler-owned site, writing the first match. |
+| [`x2c_match_thread_release`](#x2c_match_thread_release) | Disposes this thread's default `Match` plan cache. |
 | [`List.replace`](#List.replace) | Replaces named binders in `template` according to `bindings`. |
 | [`List.search`](#List.search) | Returns every matching subtree of `input` with its bindings. |
 | [`List.search_replace`](#List.search_replace) | Replaces every matching subtree in `input` from the leaves upward. |
 | [`List.try_match`](#List.try_match) | Matches `input` against `pat`, writing bindings on success. |
 | [`List.try_match_replace`](#List.try_match_replace) | Matches `input` and writes the instantiated `template` on success. |
 | [`List.try_search`](#List.try_search) | Searches `input` for `pat`, writing the first match and bindings. |
+| [`MatchCache.context_close`](#MatchCache.context_close) | Disposes and removes the top `Context`'s default `Match` cache. |
+| [`MatchCache.context_open`](#MatchCache.context_open) | Opens one `Context`-local default `Match`-cache state. |
+| [`MatchLease.plan`](#MatchLease.plan) | Borrows the acquired program until this active lease is released. |
 | [`MatchPlan.admits`](#MatchPlan.admits) | Reports whether `input`, seen through `view` when one is given, begins as one of the keys of prepared `plan` requires. |
 
 ### Functions
@@ -102,6 +106,20 @@ Searches through one compiler-owned site, writing the first match.
 Results follow `List.try_search`.
 
 Source: `lib/match/sites.x:210`
+
+#### x2c_match_thread_release
+
+`void x2c_match_thread_release(void)`
+
+Disposes this thread's default `Match` plan cache.
+`x2c_thread_state_release` calls it before `Scope` releases the `Scope`
+that holds that cache; a thread that never matched has no cache and
+nothing happens. All default-cache leases and `Context` states must
+already be closed.
+
+**Raises:** `<bad-state>` when a lease remains active.
+
+Source: `lib/match/cache.x:517`
 
 ### `List`
 
@@ -198,6 +216,48 @@ returns 0 and leaves both outputs unchanged. Either null output returns 0.
 **Raises:** the same causes as `List.search`.
 
 Source: `lib/match/operations.x:90`
+
+### `MatchCache`
+
+<a id="MatchCache.context_close"></a>
+#### MatchCache.context_close
+
+`void MatchCache.context_close(void *token)`
+
+Disposes and removes the top `Context`'s default `Match` cache.
+A null token is ignored. Successful close restores the previous default;
+the token storage remains owned by its `Context` `Scope`.
+
+**Raises:** `<bad-state>` when `token` is not the top state or its cache has an
+active lease. The failure leaves the state installed.
+
+Source: `lib/match/cache.x:500`
+
+<a id="MatchCache.context_open"></a>
+#### MatchCache.context_open
+
+`void *MatchCache.context_open(void)`
+
+Opens one `Context`-local default `Match`-cache state.
+The returned opaque token becomes the top of a thread-local LIFO stack;
+its cache is created only on first use. The token is allocated in the
+active `Scope` and must be passed to `MatchCache.context_close` before that
+`Scope` ends.
+
+**Raises:** `<alloc-fail>` when the state cannot be allocated.
+
+Source: `lib/match/cache.x:486`
+
+### `MatchLease`
+
+<a id="MatchLease.plan"></a>
+#### MatchLease.plan
+
+`MatchPlan MatchLease.plan(MatchLease *m)`
+
+Borrows the acquired program until this active lease is released.
+
+Source: `lib/match/cache.x:313`
 
 ### `MatchPlan`
 
@@ -358,15 +418,55 @@ for source readers but are not supported as user API.
 
 | Function | Summary |
 | --- | --- |
+| [`MachineBuilder.binder`](#MachineBuilder.binder) | Intern a binder by raw Atom bits and return its fixed-table index. |
+| [`MachineBuilder.cleanup`](#MachineBuilder.cleanup) | Cleanup's value receiver releases the same shallow backing arrays. |
+| [`MachineBuilder.constant`](#MachineBuilder.constant) | Intern a constant by raw Var bits and return its byte-sized index. |
+| [`MachineBuilder.drop`](#MachineBuilder.drop) | Free the mutable arrays. |
+| [`MachineBuilder.emit`](#MachineBuilder.emit) | Append one range-checked instruction and return its site. |
+| [`MachineBuilder.free`](#MachineBuilder.free) | Release the owned mutable arrays, invalidating this builder and its copies. |
+| [`MachineBuilder.freeze`](#MachineBuilder.freeze) | Copy a prepared builder with a selected root into one immutable Scope allocation. |
+| [`MachineBuilder.init`](#MachineBuilder.init) | Prepare fresh builder storage with no root selected. |
+| [`MachineBuilder.new`](#MachineBuilder.new) | Return an empty builder with no root selected. |
+| [`MachineBuilder.patch`](#MachineBuilder.patch) | Apply one validated target to the listed patch sites in order. |
+| [`MachineBuilder.set_target`](#MachineBuilder.set_target) | Set a nonnegative instruction site's branch target; a negative site is a no-op placeholder. |
+| [`MachineProgram.bytes`](#MachineProgram.bytes) | Return the exact byte size of the program's single packed allocation. |
+| [`MachineProgram.view`](#MachineProgram.view) | Borrow a frozen program's packed sections until the program is freed. |
+| [`MachineSlot.final_equal`](#MachineSlot.final_equal) | Compares a captured value or span with an exact final List. |
+| [`MachineSlot.prefix_equal`](#MachineSlot.prefix_equal) | Compares a captured value or span with an exact List prefix. |
+| [`MatchCache.acquire`](#MatchCache.acquire) | Acquires a lease for a cached prepared pattern. |
+| [`MatchCache.current`](#MatchCache.current) | Returns the active default `Match` cache, creating it on first use. |
+| [`MatchCache.dispose`](#MatchCache.dispose) | Destroys a `Match` cache with no active leases. |
+| [`MatchCache.flush_default`](#MatchCache.flush_default) | Destroys the active `Context`-local or thread-local `Match` cache. |
+| [`MatchCache.new`](#MatchCache.new) | Creates a `MatchCache` retaining up to `capacity` prepared patterns. |
+| [`MatchCache.search`](#MatchCache.search) | Searches through `cache`, writing every match. |
+| [`MatchCache.search_replace`](#MatchCache.search_replace) | Replaces every match through `cache` from the leaves upward. |
+| [`MatchCache.try_capture`](#MatchCache.try_capture) | Matches through `cache` into caller-owned positional storage. |
+| [`MatchCache.try_match`](#MatchCache.try_match) | Matches through `cache`, writing bindings on success. |
+| [`MatchCache.try_match_replace`](#MatchCache.try_match_replace) | `Match`-replaces through `cache`, writing the replacement on success. |
+| [`MatchCache.try_search`](#MatchCache.try_search) | Searches through `cache`, writing the first match and bindings. |
 | [`MatchCaptureBuffer.has`](#MatchCaptureBuffer.has) | Reports whether a committed capture slot is present. |
 | [`MatchCaptureLayout.analyze`](#MatchCaptureLayout.analyze) | Analyzes one `Match` pattern into its canonical positional layout. |
 | [`MatchCaptureLayout.definite_list`](#MatchCaptureLayout.definite_list) | Returns definite binders in canonical positional order. |
 | [`MatchCaptureLayout.free`](#MatchCaptureLayout.free) | Releases one canonical `Match` capture layout. |
 | [`MatchCaptureLayout.index`](#MatchCaptureLayout.index) | Returns the canonical slot for `binder`, or -1 when it is absent. |
 | [`MatchCaptureLayout.possible_list`](#MatchCaptureLayout.possible_list) | Returns possible binders in canonical positional order. |
+| [`MatchLease.release`](#MatchLease.release) | Releases the prepared program held by `lease`. |
+| [`MatchMachine.acquire`](#MatchMachine.acquire) | Returns an open machine reporting to `stats`, one of this thread's spares or a new one. |
+| [`MatchMachine.begin`](#MatchMachine.begin) | Begin execution of a valid Match program in opened, completed storage and borrow its view and input Lists until finish. |
+| [`MatchMachine.clean`](#MatchMachine.clean) | Report whether the observable invocation state is idle and cleared. |
+| [`MatchMachine.dispose`](#MatchMachine.dispose) | Free reusable materialization scratch. |
+| [`MatchMachine.finish`](#MatchMachine.finish) | Return a stopped invocation to idle and clear its borrowed execution state. |
+| [`MatchMachine.materialize_span`](#MatchMachine.materialize_span) | Materialize a borrowed span. |
+| [`MatchMachine.open`](#MatchMachine.open) | Initialize fresh caller-owned storage without touching unused fixed arrays. |
+| [`MatchMachine.release`](#MatchMachine.release) | Disposes `m` and keeps it as a spare of this thread, or frees it. |
+| [`MatchMachine.release_spares`](#MatchMachine.release_spares) | Frees this thread's spare machines. |
+| [`MatchMachine.run`](#MatchMachine.run) | Execute Match words until success, failure, or a stored machine error. |
+| [`MatchMachine.step`](#MatchMachine.step) | Execute one Match word and report whether another word remains. |
 | [`MatchPlan.borrowable`](#MatchPlan.borrowable) | Reports whether a plan may borrow `pattern` by its canonical identity. |
 | [`MatchPlan.execute`](#MatchPlan.execute) | Executes `plan` against `input` and publishes association bindings. |
 | [`MatchPlan.execute_capture`](#MatchPlan.execute_capture) | Executes a prepared plan into caller-owned positional storage. |
+| [`MatchPlan.free`](#MatchPlan.free) | Releases resources owned by `plan`. |
+| [`MatchPlan.prepare`](#MatchPlan.prepare) | Compiles `pattern` into a reusable immutable `MatchPlan`. |
 | [`MatchPlan.raise_ineligible`](#MatchPlan.raise_ineligible) | Raises the fence an ineligible plan crossed, naming `owner`. |
 | [`MatchPlan.search`](#MatchPlan.search) | Writes all matches of `plan` within `input` to `out_results`. |
 | [`MatchPlan.search_replace`](#MatchPlan.search_replace) | Replaces every match of `plan` from the leaves upward. |
@@ -374,6 +474,341 @@ for source readers but are not supported as user API.
 | [`MatchPlan.try_match`](#MatchPlan.try_match) | Executes prepared `plan` against `input`, writing bindings on success. |
 | [`MatchPlan.try_match_replace`](#MatchPlan.try_match_replace) | Executes `plan` and writes the instantiated `template` on success. |
 | [`MatchPlan.try_search`](#MatchPlan.try_search) | Searches `input` with `plan`, writing the first match and bindings. |
+
+### `MachineBuilder`
+
+<a id="MachineBuilder.binder"></a>
+#### MachineBuilder.binder
+
+`int MachineBuilder.binder(MachineBuilder &b, Atom binder)`
+
+Intern a binder by raw Atom bits and return its fixed-table index.
+
+Source: `lib/match/wordcode.x:347`
+
+<a id="MachineBuilder.cleanup"></a>
+#### MachineBuilder.cleanup
+
+`inline void MachineBuilder.cleanup(MachineBuilder b)`
+
+Cleanup's value receiver releases the same shallow backing arrays.
+
+Source: `lib/match/wordcode.x:459`
+
+<a id="MachineBuilder.constant"></a>
+#### MachineBuilder.constant
+
+`int MachineBuilder.constant(MachineBuilder &b, Var value)`
+
+Intern a constant by raw Var bits and return its byte-sized index. The
+stored value is shallow; capacity failure makes the builder ineligible.
+
+Source: `lib/match/wordcode.x:323`
+
+<a id="MachineBuilder.drop"></a>
+#### MachineBuilder.drop
+
+`void MachineBuilder.drop(MachineBuilder &b)`
+
+Free the mutable arrays. Any builder view becomes invalid; constant and
+binder pointees are not freed.
+
+Source: `lib/match/wordcode.x:449`
+
+<a id="MachineBuilder.emit"></a>
+#### MachineBuilder.emit
+
+`int MachineBuilder.emit( MachineBuilder &b, int op, int a, int operand_b, int c, int d, int target)`
+
+Append one range-checked instruction and return its site. The opcode need
+only fit in a byte; a decoder reports unsupported words. `a` and `target`
+may be -1, the patch placeholder. A failed builder keeps its first reason
+and all later emissions return -1. Allocation can raise.
+
+Source: `lib/match/wordcode.x:296`
+
+<a id="MachineBuilder.free"></a>
+#### MachineBuilder.free
+
+`void MachineBuilder.free(MachineBuilder &b)`
+
+Release the owned mutable arrays, invalidating this builder and its copies.
+Assign a new builder before reusing its storage.
+
+Source: `lib/match/wordcode.x:456`
+
+<a id="MachineBuilder.freeze"></a>
+#### MachineBuilder.freeze
+
+`MachineProgram MachineBuilder.freeze(MachineBuilder &b)`
+
+Copy a prepared builder with a selected root into one immutable Scope
+allocation. Return null for an ineligible or rootless builder. The producer
+must make root name emitted code; freeze only checks that it is
+nonnegative.
+
+Source: `lib/match/wordcode.x:394`
+
+<a id="MachineBuilder.init"></a>
+#### MachineBuilder.init
+
+`void MachineBuilder.init(MachineBuilder &b)`
+
+Prepare fresh builder storage with no root selected.
+
+Source: `lib/match/wordcode.x:442`
+
+<a id="MachineBuilder.new"></a>
+#### MachineBuilder.new
+
+`MachineBuilder MachineBuilder.new(void)`
+
+Return an empty builder with no root selected.
+
+Source: `lib/match/wordcode.x:435`
+
+<a id="MachineBuilder.patch"></a>
+#### MachineBuilder.patch
+
+`void MachineBuilder.patch( MachineBuilder &b, int *sites, int count, int target)`
+
+Apply one validated target to the listed patch sites in order. Negative
+sites are ignored; each nonnegative site must name emitted code. An
+invalid target raises even when `count` is zero.
+
+Source: `lib/match/wordcode.x:374`
+
+<a id="MachineBuilder.set_target"></a>
+#### MachineBuilder.set_target
+
+`void MachineBuilder.set_target(MachineBuilder &b, int site, int target)`
+
+Set a nonnegative instruction site's branch target; a negative site is a
+no-op placeholder. The site must name emitted code. A target at the word
+after full code fails the builder with `code-capacity` instead.
+
+**Raises:** `<bad-arg>` when target is otherwise outside the code domain. A
+failure leaves the patch site unchanged.
+
+Source: `lib/match/wordcode.x:362`
+
+### `MachineProgram`
+
+<a id="MachineProgram.bytes"></a>
+#### MachineProgram.bytes
+
+`size_t MachineProgram.bytes(MachineProgram program)`
+
+Return the exact byte size of the program's single packed allocation.
+
+Source: `lib/match/wordcode.x:429`
+
+<a id="MachineProgram.view"></a>
+#### MachineProgram.view
+
+`MachineView MachineProgram.view(MachineProgram program)`
+
+Borrow a frozen program's packed sections until the program is freed.
+
+Source: `lib/match/wordcode.x:416`
+
+### `MachineSlot`
+
+<a id="MachineSlot.final_equal"></a>
+#### MachineSlot.final_equal
+
+`inline int MachineSlot.final_equal( MachineSlot *slot, List input, MachineStats *stats)`
+
+Compares a captured value or span with an exact final List.
+
+A repeated binder means equal values, so both kinds use language equality
+on each element, as `prefix_equal` does. SPAN slots also require the exact
+range boundary. Interned consing can make a materialized interior prefix
+identical to an existing suffix, and a successful instruction then
+memoizes that suffix as VALUE.
+
+Source: `lib/match/wordcode.x:261`
+
+<a id="MachineSlot.prefix_equal"></a>
+#### MachineSlot.prefix_equal
+
+`inline int MachineSlot.prefix_equal( MachineSlot *slot, List input, int length, MachineStats *stats)`
+
+Compares a captured value or span with an exact List prefix.
+
+VALUE slots use language equality and require an exact-length List. SPAN
+slots compare exactly `length` cells and require the stored end boundary.
+The inputs and span remain borrowed.
+
+Source: `lib/match/wordcode.x:236`
+
+### `MatchCache`
+
+<a id="MatchCache.acquire"></a>
+#### MatchCache.acquire
+
+`Symbol MatchCache.acquire( MatchCache m, Var pattern, MatchLease &lease, const char *owner)`
+
+Acquires a lease for a cached prepared pattern.
+`cache` and `lease` must be nonnull, and `owner` names the operation a
+fence diagnostic should report. The lease is initialized on every
+returning path. An admitted pattern reuses or creates an LRU entry; an
+inadmissible pattern gets a transient plan owned by the lease. Returns the
+plan's status symbol, or `<pressure>` when every entry is pinned.
+Release the lease after any returned status; releasing the
+inactive pressure lease is a no-op.
+
+**Raises:** `<size-limit>` when `pattern` exceeds a lowering limit. Such a
+pattern compiles to no program, so it is never cached and never leased.
+`<alloc-fail>` may also be raised while preparing or growing storage.
+
+Source: `lib/match/cache.x:84`
+
+<a id="MatchCache.current"></a>
+#### MatchCache.current
+
+`MatchCache MatchCache.current(void)`
+
+Returns the active default `Match` cache, creating it on first use.
+
+**Raises:** `<alloc-fail>` when the cache cannot be created.
+
+Source: `lib/match/cache.x:453`
+
+<a id="MatchCache.dispose"></a>
+#### MatchCache.dispose
+
+`void MatchCache.dispose(MatchCache cache)`
+
+Destroys a `Match` cache with no active leases.
+A null cache is ignored. Disposal frees all plans and cache storage and
+invalidates every alias.
+
+**Raises:** `<bad-state>` when a lease remains active. The failure leaves the
+cache intact.
+
+Source: `lib/match/cache.x:562`
+
+<a id="MatchCache.flush_default"></a>
+#### MatchCache.flush_default
+
+`void MatchCache.flush_default(void)`
+
+Destroys the active `Context`-local or thread-local `Match` cache.
+A missing cache is ignored; the next `Match` recreates it lazily. Static
+compiler capture sites are unaffected.
+
+**Raises:** `<bad-state>` when a lease remains active. The failure leaves the
+cache installed.
+
+Source: `lib/match/cache.x:472`
+
+<a id="MatchCache.new"></a>
+#### MatchCache.new
+
+`MatchCache MatchCache.new(int capacity)`
+
+Creates a `MatchCache` retaining up to `capacity` prepared patterns.
+The returned cache owns a named `Scope` and is not synchronized. It borrows
+admitted pattern identities, so dispose it before their owning canonical
+pools. `MatchCache.dispose` is required after every lease is released.
+
+**Raises:** `<bad-arg>` when capacity is not positive, `<size-limit>` when its
+storage dimensions cannot be represented, and `<alloc-fail>` when cache
+storage cannot be allocated.
+
+Source: `lib/match/cache.x:534`
+
+<a id="MatchCache.search"></a>
+#### MatchCache.search
+
+`int MatchCache.search( MatchCache cache, List input, Var pattern, List &out_results, const char *owner)`
+
+Searches through `cache`, writing every match.
+`out_results` must be nonnull. It receives the reverse-visitation result
+`List`, or `nil` when there are no matches, the pattern is malformed, cache
+pressure prevents execution, or the machine fails. Returns 1 exactly when
+that `List` is nonempty.
+
+**Raises:** `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
+preparing or constructing results.
+
+Source: `lib/match/cache.x:393`
+
+<a id="MatchCache.search_replace"></a>
+#### MatchCache.search_replace
+
+`int MatchCache.search_replace( MatchCache cache, List input, Var pattern, Var template, List &out, const char *owner)`
+
+Replaces every match through `cache` from the leaves upward.
+`out` must be nonnull. A completed prepared traversal returns 1 and writes
+its result even when nothing matched. A malformed pattern, cache pressure,
+or machine error returns 0 and writes `input` unchanged.
+
+**Raises:** `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
+preparing, traversing, or replacing.
+
+Source: `lib/match/cache.x:424`
+
+<a id="MatchCache.try_capture"></a>
+#### MatchCache.try_capture
+
+`int MatchCache.try_capture( MatchCache cache, List input, Var pattern, MatchCaptureBuffer &?captures, const char *owner)`
+
+Matches through `cache` into caller-owned positional storage.
+Returns 1 only after atomically committing a valid buffer. A miss,
+malformed pattern, invalid buffer, cache pressure, or machine error returns
+0 and leaves it unchanged.
+
+**Raises:** `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
+preparing or matching.
+
+Source: `lib/match/cache.x:350`
+
+<a id="MatchCache.try_match"></a>
+#### MatchCache.try_match
+
+`int MatchCache.try_match( MatchCache cache, List input, Var pattern, List &?out_bindings, const char *owner)`
+
+Matches through `cache`, writing bindings on success.
+`out_bindings` must be nonnull. Returns 0 and leaves it unchanged for a
+miss, malformed pattern, cache pressure, or machine error. Successful
+binding shape and order follow `MatchPlan.execute`.
+
+**Raises:** `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
+preparing, materializing, or publishing.
+
+Source: `lib/match/cache.x:364`
+
+<a id="MatchCache.try_match_replace"></a>
+#### MatchCache.try_match_replace
+
+`int MatchCache.try_match_replace( MatchCache cache, List input, Var pattern, Var template, Var &?out, const char *owner)`
+
+`Match`-replaces through `cache`, writing the replacement on success.
+`out` must be nonnull. Returns 0 and leaves it unchanged on a miss,
+malformed pattern, cache pressure, or machine error. The successful result
+may be any `Var`.
+
+**Raises:** `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
+preparing, materializing, or replacing.
+
+Source: `lib/match/cache.x:410`
+
+<a id="MatchCache.try_search"></a>
+#### MatchCache.try_search
+
+`int MatchCache.try_search( MatchCache cache, List input, Var pattern, Var &?out_match, List &?out_bindings, const char *owner)`
+
+Searches through `cache`, writing the first match and bindings.
+Both outputs must be nonnull. Returns 0 and leaves them unchanged on a
+miss, malformed pattern, cache pressure, or machine error. Traversal order
+follows `MatchPlan.try_search`.
+
+**Raises:** `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
+preparing or constructing bindings.
+
+Source: `lib/match/cache.x:378`
 
 ### `MatchCaptureBuffer`
 
@@ -451,6 +886,142 @@ follows the module pool-chain lifetime above.
 
 Source: `lib/match/layout.x:312`
 
+### `MatchLease`
+
+<a id="MatchLease.release"></a>
+#### MatchLease.release
+
+`void MatchLease.release(MatchLease *lease)`
+
+Releases the prepared program held by `lease`.
+Releasing an inactive lease has no effect. A successful release destroys a
+transient plan or unpins its cached entry and makes the lease inactive.
+
+**Raises:** `<bad-arg>` when lease is NULL and `<bad-state>` when its cache or
+entry state is inconsistent. The failure leaves the lease active.
+
+Source: `lib/match/cache.x:289`
+
+### `MatchMachine`
+
+<a id="MatchMachine.acquire"></a>
+#### MatchMachine.acquire
+
+`MatchMachine *MatchMachine.acquire(MachineStats *stats)`
+
+Returns an open machine reporting to `stats`, one of this thread's spares
+or a new one. `MatchMachine.release` returns it.
+
+**Raises:** `<alloc-fail>` when a new machine cannot be allocated.
+
+Source: `lib/match/machine.x:558`
+
+<a id="MatchMachine.begin"></a>
+#### MatchMachine.begin
+
+`void MatchMachine.begin(MatchMachine &m, MachineView program, Var input)`
+
+Begin execution of a valid Match program in opened, completed storage and
+borrow its view and input Lists until finish. Zero undo entries prove every
+slot of the previous program was restored, so only the new program's binder
+slots are initialized. A dirty machine records <not-idle> and stops.
+
+Source: `lib/match/machine.x:486`
+
+<a id="MatchMachine.clean"></a>
+#### MatchMachine.clean
+
+`int MatchMachine.clean(MatchMachine &m)`
+
+Report whether the observable invocation state is idle and cleared. Scratch
+capacity and the optional stats pointer do not affect the answer.
+
+Source: `lib/match/machine.x:525`
+
+<a id="MatchMachine.dispose"></a>
+#### MatchMachine.dispose
+
+`void MatchMachine.dispose(MatchMachine &m)`
+
+Free reusable materialization scratch. Finish active execution first;
+this does not clear invocation state.
+
+Source: `lib/match/machine.x:533`
+
+<a id="MatchMachine.finish"></a>
+#### MatchMachine.finish
+
+`void MatchMachine.finish(MatchMachine &m)`
+
+Return a stopped invocation to idle and clear its borrowed execution state.
+Reusable scratch and the optional stats pointer remain installed.
+
+**Raises:** `<bad-state>` when execution is still running.
+
+Source: `lib/match/machine.x:508`
+
+<a id="MatchMachine.materialize_span"></a>
+#### MatchMachine.materialize_span
+
+`List MatchMachine.materialize_span(MatchMachine &m, MachineSpan span)`
+
+Materialize a borrowed span. A complete suffix shares the existing
+immutable List directly, an empty span returns nil, and a proper prefix
+copies through growable machine scratch once. An invalid end stores
+<bad-span>; allocation and consing can raise.
+
+Source: `lib/match/machine.x:386`
+
+<a id="MatchMachine.open"></a>
+#### MatchMachine.open
+
+`void MatchMachine.open(MatchMachine &m)`
+
+Initialize fresh caller-owned storage without touching unused fixed
+arrays. The caller must eventually dispose any materialization scratch.
+
+Source: `lib/match/machine.x:463`
+
+<a id="MatchMachine.release"></a>
+#### MatchMachine.release
+
+`void MatchMachine.release(MatchMachine *m)`
+
+Disposes `m` and keeps it as a spare of this thread, or frees it.
+
+Source: `lib/match/machine.x:569`
+
+<a id="MatchMachine.release_spares"></a>
+#### MatchMachine.release_spares
+
+`void MatchMachine.release_spares(void)`
+
+Frees this thread's spare machines.
+
+Source: `lib/match/machine.x:577`
+
+<a id="MatchMachine.run"></a>
+#### MatchMachine.run
+
+`void MatchMachine.run(MatchMachine &m)`
+
+Execute Match words until success, failure, or a stored machine error.
+
+Source: `lib/match/machine.x:41`
+
+<a id="MatchMachine.step"></a>
+#### MatchMachine.step
+
+`int MatchMachine.step(MatchMachine &m)`
+
+Execute one Match word and report whether another word remains. Fetch
+advances pc before dispatch, so calls save the following word and branches
+replace it. Machine invariant failures roll back all captures and store an
+error; predicates that raise can instead transfer out while the machine is
+marked running.
+
+Source: `lib/match/machine.x:50`
+
 ### `MatchPlan`
 
 <a id="MatchPlan.borrowable"></a>
@@ -497,6 +1068,33 @@ the indicated values; all other results leave the buffer unchanged.
 materializing captures.
 
 Source: `lib/match/execution.x:48`
+
+<a id="MatchPlan.free"></a>
+#### MatchPlan.free
+
+`void MatchPlan.free(MatchPlan plan)`
+
+Releases resources owned by `plan`.
+A null plan is ignored; the plan, layout, program, and all aliases to them
+are invalid afterward. Borrowed pattern constants are not released.
+
+Source: `lib/match/plan.x:76`
+
+<a id="MatchPlan.prepare"></a>
+#### MatchPlan.prepare
+
+`MatchPlan MatchPlan.prepare(Var pattern)`
+
+Compiles `pattern` into a reusable immutable `MatchPlan`.
+The caller owns the returned plan in the active `Scope`. Preparation
+records `<prepared>`, `<malformed>`, or `<ineligible>`
+in the plan and raises for none of them; only a prepared plan has a
+program. `reason` is a borrowed static category string. The plan borrows
+pattern constants, which must outlive it.
+
+**Raises:** `<alloc-fail>` while analyzing, lowering, or freezing.
+
+Source: `lib/match/plan.x:43`
 
 <a id="MatchPlan.raise_ineligible"></a>
 #### MatchPlan.raise_ineligible
@@ -617,7 +1215,7 @@ begins lists the `keys` it may begin with; `key_bits` says that raw bits
 compare them. Pattern constants are borrowed, so the caller must free
 the plan before their canonical pools or other owners expire.
 
-Source: `lib/match/match.x:68`
+Source: `lib/match/types.x:49`
 
 ## Internal types
 
@@ -627,10 +1225,149 @@ user API.
 
 | Type | Kind | Summary |
 | --- | --- | --- |
+| [`MachineBuilder`](#MachineBuilder) | struct | Accumulates a mutable program in the active Scope. |
+| [`MachineMark`](#MachineMark) | struct | Records an undo-journal position for a later rollback. |
+| [`MachineProgram`](#MachineProgram) | class | Owns an exact-sized immutable frozen wordcode program. |
+| [`MachineRegs`](#MachineRegs) | struct | Stores the cursors, integers, and journal mark for one frame depth. |
+| [`MachineSlot`](#MachineSlot) | struct | Stores either one captured value or one borrowed List span. |
+| [`MachineSpan`](#MachineSpan) | struct | Borrows the half-open List range from begin to end with its cell count. |
+| [`MachineStats`](#MachineStats) | struct | Collects optional, caller-owned execution counters. |
+| [`MachineUndo`](#MachineUndo) | struct | Records the prior value of one capture slot for rollback. |
+| [`MachineView`](#MachineView) | struct | Borrows code, constants, binders, counts, and an entry root. |
+| [`MachineWord`](#MachineWord) | struct | Stores one eight-byte machine instruction. |
+| [`MatchCache`](#MatchCache) | struct | Names an explicit cache of immutable prepared Match plans. |
 | [`MatchCaptureBuffer`](#MatchCaptureBuffer) | struct | Supplies caller-owned positional storage for one `Match` invocation. |
 | [`MatchCaptureLayout`](#MatchCaptureLayout) | struct | Describes the canonical binder slots and preparation status of a pattern. |
 | [`MatchCaptureSite`](#MatchCaptureSite) | struct | Stores the process-lifetime plan for one compiler-emitted `Match` site. |
+| [`MatchFrame`](#MatchFrame) | struct | Saves a Match call's return pc, undo position, and caller value. |
 | [`MatchKey`](#MatchKey) | struct | Describes one way an input a plan matches can begin: its first element equals `head` and, when `index` is nonzero, its element at `index` equals `inner`, or is a List whose first element does when `nested` is set. |
+| [`MatchLease`](#MatchLease) | struct | Represents one acquired use of a cached or transient Match plan. |
+| [`MatchMachine`](#MatchMachine) | struct | Holds one caller-owned Match-machine invocation. |
+
+<a id="MachineBuilder"></a>
+### MachineBuilder
+
+`typedef struct MachineBuilder { MachineWord *code; Var *consts; Atom binders[MACHINE_BINDER_MAX]; int length, code_capacity, const_count, const_capacity, binder_count, root; Symbol status, const char *reason; } MachineBuilder`
+
+Accumulates a mutable program in the active Scope.
+
+The first ineligibility reason is sticky. Constants and binders are
+shallow values whose pointees must outlive any frozen program. Copying
+a builder shares its mutable arrays; release them through one owner.
+Status is `<prepared>`, `<ineligible>`, or `<malformed>`.
+
+Source: `lib/match/wordcode.x:128`
+
+<a id="MachineMark"></a>
+### MachineMark
+
+`typedef struct MachineMark { int undo_count; } MachineMark`
+
+Records an undo-journal position for a later rollback.
+
+Source: `lib/match/wordcode.x:162`
+
+<a id="MachineProgram"></a>
+### MachineProgram
+
+`class MachineProgram struct { int length, const_count, binder_count, root; } *`
+
+Owns an exact-sized immutable frozen wordcode program.
+
+One allocation holds this header followed by aligned code, constant, and
+binder sections. The copied Var and Atom bits do not own their pointees.
+The program contains no execution state and never changes after freeze.
+
+Source: `lib/match/match.x:39`
+
+<a id="MachineRegs"></a>
+### MachineRegs
+
+`typedef struct MachineRegs { List cursors[MACHINE_CURSOR_REGS]; int distances[MACHINE_CURSOR_REGS], ints[MACHINE_INT_REGS]; MachineMark mark; } MachineRegs`
+
+Stores the cursors, integers, and journal mark for one frame depth.
+
+One register bank per depth means the frame pointer names the active bank
+and teardown is one clear.
+
+Source: `lib/match/wordcode.x:179`
+
+<a id="MachineSlot"></a>
+### MachineSlot
+
+`typedef struct MachineSlot { Symbol kind; Var value; MachineSpan span; } MachineSlot`
+
+Stores either one captured value or one borrowed List span.
+
+The value's pointee and the span's List cells are borrowed.
+Kind is `<invalid>`, `<value>`, or `<span>`.
+
+Source: `lib/match/wordcode.x:149`
+
+<a id="MachineSpan"></a>
+### MachineSpan
+
+`typedef struct MachineSpan { List begin, end, int length; } MachineSpan`
+
+Borrows the half-open List range from begin to end with its cell count.
+
+Source: `lib/match/wordcode.x:141`
+
+<a id="MachineStats"></a>
+### MachineStats
+
+`typedef struct MachineStats { long scan_cells, retries, calls, returns; long range_comparisons, final_range_comparisons; long span_descriptors, cons_requests; long materialization_requests, materialization_completions; long materializations_avoided, materialized_cells, direct_shares; int max_frames; } MachineStats`
+
+Collects optional, caller-owned execution counters.
+
+Initialize the structure before use and keep it alive while a machine
+retains its pointer. Updates are not synchronized.
+
+Source: `lib/match/wordcode.x:189`
+
+<a id="MachineUndo"></a>
+### MachineUndo
+
+`typedef struct MachineUndo { int slot; MachineSlot prior; } MachineUndo`
+
+Records the prior value of one capture slot for rollback.
+
+Source: `lib/match/wordcode.x:156`
+
+<a id="MachineView"></a>
+### MachineView
+
+`typedef struct MachineView { const MachineWord *code; const Var *consts; const Atom *binders, int length, const_count, binder_count, root; } MachineView`
+
+Borrows code, constants, binders, counts, and an entry root.
+
+A builder view observes in-place target patches. Growth may invalidate its
+pointers, emissions and additions leave its counts stale, and free
+invalidates it. A frozen-program view stays valid while the program is
+allocated.
+
+Source: `lib/match/wordcode.x:116`
+
+<a id="MachineWord"></a>
+### MachineWord
+
+`typedef struct MachineWord { unsigned char op, b, c, d; short a, target; } MachineWord`
+
+Stores one eight-byte machine instruction.
+
+Source: `lib/match/wordcode.x:105`
+
+<a id="MatchCache"></a>
+### MatchCache
+
+`typedef struct MatchCache *MatchCache`
+
+Names an explicit cache of immutable prepared Match plans.
+A cache is not synchronized. Its caller must serialize access, keep every
+admitted pattern value alive until disposal, and dispose it when no lease
+remains active.
+
+Source: `lib/match/cache.x:18`
 
 <a id="MatchCaptureBuffer"></a>
 ### MatchCaptureBuffer
@@ -643,7 +1380,7 @@ elements `Match` wrote; presence is separate from a captured `void` value.
 A miss or error leaves `values` and `present` unchanged. Captured values
 are borrowed and keep their ordinary `Var`, `List`, and pool lifetimes.
 
-Source: `lib/match/match.x:42`
+Source: `lib/match/types.x:23`
 
 <a id="MatchCaptureLayout"></a>
 ### MatchCaptureLayout
@@ -657,7 +1394,7 @@ binder in lexical preorder. `definite` and `possible` select those slots.
 caller owns the layout returned by `MatchCaptureLayout.analyze` and must
 free it before those values or its allocating `Scope` expire.
 
-Source: `lib/match/match.x:29`
+Source: `lib/match/types.x:10`
 
 <a id="MatchCaptureSite"></a>
 ### MatchCaptureSite
@@ -669,7 +1406,19 @@ The object must be zero-initialized static storage. Its first admissible
 pattern binds it permanently; `Match` shutdown frees the plan and clears
 the site. Direct callers must not reuse a site for another pattern.
 
-Source: `lib/match/match.x:81`
+Source: `lib/match/types.x:62`
+
+<a id="MatchFrame"></a>
+### MatchFrame
+
+`typedef struct MatchFrame { int return_pc, caller_entry_undo; Var caller_value; } MatchFrame`
+
+Saves a Match call's return pc, undo position, and caller value.
+
+MW_CALL jumps within the single view that `begin` bound. No Match opcode
+assigns `program`, and a Match frame has no caller program to restore.
+
+Source: `lib/match/wordcode.x:170`
 
 <a id="MatchKey"></a>
 ### MatchKey
@@ -681,12 +1430,44 @@ equals `head` and, when `index` is nonzero, its element at `index`
 equals `inner`, or is a List whose first element does when `nested` is
 set. Both values are borrowed pattern constants.
 
-Source: `lib/match/match.x:53`
+Source: `lib/match/types.x:34`
+
+<a id="MatchLease"></a>
+### MatchLease
+
+`typedef struct MatchLease { MatchCache cache; MatchPlan transient_plan; unsigned long generation; int slot, active; } MatchLease`
+
+Represents one acquired use of a cached or transient Match plan.
+A cached lease pins its entry; a transient lease owns its plan. Initialize
+it only through `MatchCache.acquire` and call `MatchLease.release` on every
+exit after acquisition returns, including a pressure result.
+
+Source: `lib/match/cache.x:25`
+
+<a id="MatchMachine"></a>
+### MatchMachine
+
+`typedef struct MatchMachine { MachineView program; int pc, Symbol status, int running; Var value, error; int fp, current_entry_undo, undo_count, slot_count; MachineStats *stats; int (*relation)(void *, int, Var, Var, void *); void *relation_context; Var (*view)(Var); Var *scratch; int scratch_capacity; MatchFrame frames[MACHINE_FRAME_MAX]; MachineRegs regs[MACHINE_FRAME_MAX]; MachineSlot slots[MACHINE_BINDER_MAX]; MachineUndo undo[MACHINE_UNDO_MAX]; } MatchMachine`
+
+Holds one caller-owned Match-machine invocation.
+
+Callers declare the storage as a value:
+
+ MatchMachine m;
+ m.open();
+
+`open` initializes fresh storage cheaply; `begin` binds a program and
+initializes only its binder slots. Count fields guard every array, so
+unused capacity is never touched or cleared. The program, input Lists,
+and optional stats sink must outlive execution and span materialization.
+`dispose` releases the reusable materialization scratch allocation.
+
+Source: `lib/match/wordcode.x:210`
 
 ## Design notes
 
 Match owns the pattern vocabulary, capture layouts, and the execution of
-plans that `match-plan.x` prepares and `match-cache.x` retains. Core
+plans that `plan.x` prepares and `cache.x` retains. Core
 matching runs only prepared plans; `unittest/match-recursive.x` is the
 reference matcher of the differential tests. An invocation commits
 captures to caller-owned storage only after the whole match succeeds.
@@ -697,4 +1478,4 @@ an ancestor and lives until its owning pool is released.
 
 ## Tests and examples
 
-`make verify` (`unittest/test-match.x`) and `make examples` (`match-nested`).
+`make verify` (`unittest/test-match.x`, `unittest/test-match-plan.x`, `unittest/test-match-cache.x`, and `unittest/test-machine.x`) and `make examples` (`match-nested`).

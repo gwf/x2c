@@ -7,6 +7,20 @@
 
 #include "error-macros.h"
 #include "common.h"
+typedef struct X2CVarNumericInfo{
+  Symbol tag;
+  int floating, unsigned_value, bits, rank;
+}
+X2CVarNumericInfo;
+
+typedef struct X2CVarNumeric{
+  Symbol tag;
+  int floating, unsigned_value, bits, rank;
+  unsigned long long raw;
+  long double floating_value;
+}
+X2CVarNumeric;
+
 #include "dispatch.h"
 #include <stdint.h>
 #include <stdio.h>
@@ -136,6 +150,110 @@ int Var_wide_compare(Var a, Var b);
 int Var_integer_compare(Var a, Var b);
 
 int Var_integer_floating_compare(Var integer, Var floating);
+
+String Var_string(Var value);
+
+Array Var_array(Var _x2c_gensym_macro_value_0);
+
+Block Var_block(Var _x2c_gensym_macro_value_1);
+
+Buffer Var_buffer(Var _x2c_gensym_macro_value_2);
+
+Bytes Var_bytes(Var _x2c_gensym_macro_value_3);
+
+File Var_file(Var _x2c_gensym_macro_value_4);
+
+Iter Var_as_iter(Var _x2c_gensym_macro_value_5);
+
+List Var_list(Var _x2c_gensym_macro_value_6);
+
+Map Var_map(Var _x2c_gensym_macro_value_7);
+
+extern const SymbolSet x2c_var_numeric_tags;
+
+extern const X2CVarNumericInfo x2c_var_numerics[];
+
+Var Var_convert(Var value, Symbol target);
+
+int Var_numeric_info(Symbol tag, X2CVarNumericInfo * out);
+
+void Var_numeric_decode(Var value, X2CVarNumeric * out);
+
+Var Var_integer_box(Symbol target, unsigned long long raw);
+
+Symbol Var_integer_tag(int rank, int unsigned_value);
+
+unsigned long long Var_width_mask(int bits);
+
+long long Var_signed_from_bits(unsigned long long raw, int bits);
+
+float X2CVarNumeric_f32(X2CVarNumeric * value);
+
+double X2CVarNumeric_f64(X2CVarNumeric * value);
+
+long double X2CVarNumeric_ldouble(X2CVarNumeric * value);
+
+char x2c_var_update_i8(volatile char * lhs, Symbol op, Var rhs);
+
+signed char x2c_var_update_schar(volatile signed char * lhs, Symbol op, Var rhs);
+
+uchar x2c_var_update_u8(volatile uchar * lhs, Symbol op, Var rhs);
+
+short x2c_var_update_i16(volatile short * lhs, Symbol op, Var rhs);
+
+ushort x2c_var_update_u16(volatile ushort * lhs, Symbol op, Var rhs);
+
+int x2c_var_update_i32(volatile int * lhs, Symbol op, Var rhs);
+
+uint x2c_var_update_u32(volatile uint * lhs, Symbol op, Var rhs);
+
+long x2c_var_update_long(volatile long * lhs, Symbol op, Var rhs);
+
+ulong x2c_var_update_ulong(volatile ulong * lhs, Symbol op, Var rhs);
+
+long long x2c_var_update_long_long(volatile long long * lhs, Symbol op, Var rhs);
+
+unsigned long long x2c_var_update_ulong_long(volatile unsigned long long * lhs, Symbol op, Var rhs);
+
+float x2c_var_update_f32(volatile float * lhs, Symbol op, Var rhs);
+
+double x2c_var_update_f64(volatile double * lhs, Symbol op, Var rhs);
+
+long double x2c_var_update_long_double(volatile long double * lhs, Symbol op, Var rhs);
+
+Var Var_binary(Var lhs, Symbol op, Var rhs);
+
+Var Var_add(Var lhs, Var rhs);
+
+Var Var_sub(Var lhs, Var rhs);
+
+Var Var_mul(Var lhs, Var rhs);
+
+Var Var_matmul(Var lhs, Var rhs);
+
+Var Var_div(Var lhs, Var rhs);
+
+Var Var_mod(Var lhs, Var rhs);
+
+Var Var_neg(Var value);
+
+int x2c_var_equal(Var a, Var b);
+
+int x2c_var_identical(Var a, Var b);
+
+double x2c_var_order(Var a, Var b);
+
+int Var_truth(Var value);
+
+int Var_fallback_truth(Var value);
+
+Var Var_update(Var * lhs, Symbol op, Var rhs);
+
+Var x2c_var_update_volatile(volatile Var * lhs, Symbol op, Var rhs);
+
+Var Var_postfix(Var * lhs, Symbol op);
+
+Var x2c_var_postfix_volatile(volatile Var * lhs, Symbol op);
 
 
 #endif /* __GUARD_0x74CEA5DF__ */

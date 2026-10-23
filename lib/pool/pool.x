@@ -59,7 +59,7 @@ typedef struct PoolStats {
 #include "block.x"
 #include "exception.x"
 #include "mutex.x"
-#include "map-generics.x"
+#include "map/map.x"
 
 module unsigned long value_epoch;
 

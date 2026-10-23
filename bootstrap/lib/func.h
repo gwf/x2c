@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0xC7068438__
-#define __GUARD_0xC7068438__
+#ifndef __GUARD_0x68CE974F__
+#define __GUARD_0x68CE974F__
 
 #include "common.h"
 #include "var/var.h"
@@ -23,14 +23,12 @@ FuncArg;
 
 typedef Var(* FuncAdapter)(Func fn, const FuncArg * argv);
 
-#include "varconvert.h"
 #include "error/error.h"
 #include "exception.h"
 #include "match/match.h"
 #include "symbol.h"
 #include "scope/scope.h"
 #include "meta.h"
-#include "func-errors.h"
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
@@ -99,4 +97,4 @@ Var Func_var(Func function);
 Func Var_func(Var v);
 
 
-#endif /* __GUARD_0xC7068438__ */
+#endif /* __GUARD_0x68CE974F__ */

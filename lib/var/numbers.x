@@ -172,7 +172,7 @@ Scope Var.wide_owner(Var v) => v.is_wide() ? Scope.owner(_wide_box(v)) : NULL;
     Like the other raw payload readers this one is silent. An integer, a
     `String`, or `void` reads as 0.0, and nothing distinguishes that from a
     stored zero. When the tag is not already known, convert with
-    `Var.convert` in `lib/varconvert.x`, which raises a conversion failure;
+    `Var.convert` in `lib/var/conversion.x`, which raises a conversion failure;
     the scalar-named readers such as `Var.double` do this for you.
 
     An unhandled tag yields 0.0.
@@ -209,7 +209,7 @@ static double _f64_floating(Var v) {
     `Symbol` reads as its numeric `Symbol` value.
 
     When the tag might not be what you expect, convert instead of reading.
-    `Var.convert` in `lib/varconvert.x` raises a conversion failure.
+    `Var.convert` in `lib/var/conversion.x` raises a conversion failure.
     Assigning a `Var` to an `int` or a `long`, and the scalar-named readers
     such as `Var.int`, go through `Var.convert` too.
 

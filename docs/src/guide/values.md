@@ -516,7 +516,5 @@ int clamp(int value, int low, int high) {
 - [Idioms](idioms.md) for practical usage, and
   [the language reference](../reference/language.md) for the full rules.
 
-The generated [Var](../library/modules/var.md),
-[conversion](../library/modules/varconvert.md), and
-[operation](../library/modules/varops.md) references list every callable by
-API tier.
+The generated [Var reference](../library/modules/var.md) lists every
+callable, including conversion and operators, by API tier.

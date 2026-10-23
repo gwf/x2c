@@ -173,6 +173,7 @@ static List _declaration_form(Compiler c, int skip_body) {
   if (c.meta_form_is_declaration()) meta = _take_meta_marker(c, native);
   Token first = c.token;
   List decl;
+  $let(c.module_declaration, c.module_declaration || meta != NULL)
   $let(c.shallow, c.shallow || c.public_bodies)
   $let(c.macro_holes, c.signature_only && !c.macro_holes
          ? {} : c.macro_holes)

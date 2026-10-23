@@ -19,6 +19,6 @@ callback conversion, start with `callbacks.x`.
 
 [Lambda functions](../components/lambda-functions.x) supplies lambda bodies.
 [Adapter memoization](../adapter-memo.x) reuses generated helpers. The runtime
-calling convention is in [lib/func.x](../../lib/func.x).
+calling convention is in [lib/func/func.x](../../lib/func/func.x).
 
 [Source guide](../README.md)

@@ -22,7 +22,7 @@
 #include "system-macros.x"
 #include "thread.x"
 #include "var-tags.x"
-#include "varops.x"
+#include "var/var.x"
 #include "fields.x"
 #include "grammar.x"
 #include "operator-ledger.x"
@@ -177,7 +177,7 @@ List _tag_id_checks(void) {
   return checks;
 }
 
-/* --- lib/varops.x -------------------------------------------------------- */
+/* --- lib/var/var.x ------------------------------------------------------- */
 
 static List _update_rows(void) => %(
   (char    (i8 "Var_box_i8" "Var_integer" (() (char))))

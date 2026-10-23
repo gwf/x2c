@@ -107,16 +107,16 @@ grep -q '^int cache_external(int value);' "$BUILD/solo/unit.h" ||
 # Its generated protocol callables must survive that replacement for later
 # consumers, just as they do when loaded directly from the artifact.
 cat >"$BUILD/src/array-consumer.x" <<'EOF'
-#include "array.x"
+#include "array/array.x"
 void release(Array items) { items.free(); }
 size_t count(Array items) { return items.len(); }
 EOF
 mkdir -p "$BUILD/owner-batch" "$BUILD/owner-parallel"
 "$X2C" translate --out-dir "$BUILD/solo" "$BUILD/src/array-consumer.x"
 "$X2C" translate --out-dir "$BUILD/owner-batch" \
-  "$ROOT/lib/array.x" "$BUILD/src/array-consumer.x"
+  "$ROOT/lib/array/array.x" "$BUILD/src/array-consumer.x"
 "$X2C" translate -j 2 --out-dir "$BUILD/owner-parallel" \
-  "$ROOT/lib/array.x" "$BUILD/src/array-consumer.x"
+  "$ROOT/lib/array/array.x" "$BUILD/src/array-consumer.x"
 for extension in c h; do
   for mode in owner-batch owner-parallel; do
     cmp -s "$BUILD/solo/array-consumer.$extension" \
@@ -1052,7 +1052,7 @@ done
 mkdir -p "$FAKE/builds/0/lib"
 cat >"$FAKE/src/native-aliases.x" <<'EOF_NATIVE_ALIASES'
 #include "string/string.x"
-#include "array.x"
+#include "array/array.x"
 int main(void) {
   String value = %"hello";
   Array items = %[1, 2, 3];
@@ -1122,13 +1122,13 @@ if grep -q 'late-parent.x:' "$LATE/alone.log"; then
 fi
 
 # A runtime operand spelled through a symlinked home is the prelude's copy of
-# that file, even where the working directory holds another lib/array.x.
+# that file, even where the working directory holds another lib/array/array.x.
 ln -s "$FAKE" "$BUILD/fake-link"
 mkdir -p "$BUILD/elsewhere/lib" "$BUILD/linked-out"
-cp "$FAKE/lib/array.x" "$BUILD/elsewhere/lib/"
+cp -R "$FAKE/lib/array" "$BUILD/elsewhere/lib/"
 (cd "$BUILD/elsewhere" && X2C_HOME="$BUILD/fake-link" \
   "$BUILD/fake-link/builds/0/x2c" translate \
-  --out-dir "$BUILD/linked-out" "$BUILD/fake-link/lib/array.x" \
+  --out-dir "$BUILD/linked-out" "$BUILD/fake-link/lib/array/array.x" \
   "$BUILD/fake-link/lib/x2c.x") >"$BUILD/linked.log" 2>&1 ||
   fail "a runtime operand spelled through a symlinked home did not translate"
 

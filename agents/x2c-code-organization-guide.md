@@ -64,18 +64,17 @@ var-ledger, var-tags,         tag and C scalar ledgers, pointer converter
 var-adapters, integer-ops,    templates, and raw integer arithmetic
 native-scalar-types
 dispatch, protocols, cleanup  dynamic behavior and protocol adoption
-string, string-classify,      canonical immutable values, string
-string-number, string-format, classification, numeric parsing, checked
-string-escape, split,         formatting, escaped spelling, splitting,
+string/string                canonical immutable values, classification,
+                              numeric parsing, formatting, escaping,
+                              splitting, and lazy field cursors
 symbol, symbolset, atom,      closed vocabularies, and the optional
 list, list-selectors          compound List selectors
 block, buffer, array, map,    mutable storage and builders, and the Array
 array-generics, map-generics  and Map family generators
 typed-array, typed-map,       typed collection families and their
 typed-list                    typed views
-iter, match, match-plan,      traversal, pattern matching, plan lowering
-match-cache, machine,         and caching, and the Match wordcode machine
-match-machine
+iter, match/match            traversal, pattern matching, plan lowering
+                              and caching, and the Match wordcode machine
 macrovalue, system-macros    macros as values that build and recognize
                               code, and convenience macros
 error, error_init,            ambient errors, their shared causes and

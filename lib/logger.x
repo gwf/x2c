@@ -59,7 +59,7 @@ typedef void (*LogFlusher)(Logger logger, Var data);
 #include <sys/time.h>
 #include <unistd.h>
 
-#include "array.x"
+#include "array/array.x"
 #include "block.x"
 #include "buffer.x"
 #include "exception.x"

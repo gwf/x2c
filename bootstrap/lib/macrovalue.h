@@ -29,14 +29,13 @@ typedef struct MacroCaseSite{
 }
 MacroCaseSite;
 
-#include "array.h"
+#include "array/array.h"
 #include "atom.h"
 #include "list/list.h"
-#include "match-machine.h"
-#include "match-cache.h"
+#include "match/match.h"
 #include "meta.h"
 #include "string/string.h"
-#include "varconvert.h"
+#include "var/var.h"
 #include <math.h>
 static int List_truth(List);
 

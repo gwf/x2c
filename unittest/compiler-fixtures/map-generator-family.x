@@ -1,6 +1,6 @@
 #include "x2c.x"
 #include "error-macros.x"
-#include "map-generics.x"
+#include "map/map.x"
 
 #include <stdlib.h>
 

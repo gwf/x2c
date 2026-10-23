@@ -1,5 +1,5 @@
 #include "x2c.x"
-#include "array-generics.x"
+#include "array/array.x"
 
 /* Distinct families must keep distinct private helpers across expansions. */
 typedef Block Foo;

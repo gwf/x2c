@@ -297,7 +297,7 @@ directory keep their distinct path-derived objects under `<dir>/obj/`.
   `src/macros/macros.x`.
 - Type initialization: `src/parse/parse.x`, `src/generate/generate.x`, and `src/cache.x`.
 - Type conversion: `src/type.x`, `src/expressions/expressions.x`, `src/transform/transform.x`,
-  `lib/varconvert.x`, and `lib/varops.x`.
+  `lib/var/conversion.x`, and `lib/var/operators.x`.
 - C token emission and formatting: `src/emit/emit.x` and `src/format.x`.
 - Native actions and project lowering: `src/toolchain.x`, `commands/build/build.x`, and
   `src/project/project.x`.

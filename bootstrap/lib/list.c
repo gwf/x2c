@@ -21,13 +21,13 @@ typedef struct List{
 #include "block.h"
 #include "buffer.h"
 #include "exception.h"
-#include "func.h"
-#include "map.h"
+#include "func/func.h"
+#include "map/map.h"
 #include "scope/scope.h"
 #include "pool/pool.h"
 #include "string/string.h"
 #include "iter.h"
-#include "array.h"
+#include "array/array.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -390,8 +390,6 @@ static void f5_cells____promote_node(Var node){
 int List_try_own(List lst){
   return ! List_truth(lst) || f5_cells____try_own_node(List_var(lst));
 }
-
-String Var_string(Var);
 
 static int f5_cells____try_own_node(Var node){
   if(Var_is_row(node, 11, 7, 1)) return String_try_own(Var_string(node));
@@ -1567,8 +1565,6 @@ Buffer List_write_repr(List lst, Buffer out){
   f9_rendering____value(&(r), List_var(lst));
   return out;
 }
-
-List Var_list(Var);
 
 static void f9_rendering____value(f9_rendering___Render * r, Var elem){
   Buffer out =(* r).out;

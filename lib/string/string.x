@@ -46,10 +46,10 @@ protocol const char *(String);
 
 #include "var/var.x"
 #include "list/list.x"
-#include "array.x"
+#include "array/array.x"
 #include "buffer.x"
 #include "exception.x"
-#include "func.x"
+#include "func/func.x"
 #include "symbol.x"
 #include "pool/pool.x"
 
@@ -65,4 +65,9 @@ module {
   "splitting.x",
   "mapping.x",
   "adapters.x",
+  "classify.x",
+  "escape.x",
+  "format.x",
+  "number.x",
+  "cursors.x",
 }

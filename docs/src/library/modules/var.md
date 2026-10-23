@@ -12,8 +12,18 @@ Variant type for dynamic typing.
 | [`x2c_var_custom_descriptor`](#x2c_var_custom_descriptor) | Returns a boxed custom object's descriptor, or NULL for another value. |
 | [`x2c_var_declare`](#x2c_var_declare) | Returns the process-lifetime descriptor declared for custom `tag`, declaring it on first use. |
 | [`x2c_var_descriptor_index`](#x2c_var_descriptor_index) | Returns `value`'s dense built-in descriptor row, or `-1` when it has none. |
+| [`x2c_var_equal`](#x2c_var_equal) | Evaluates `==` on two `Var` operands. |
+| [`x2c_var_identical`](#x2c_var_identical) | Evaluates `===` on two `Var` operands. |
+| [`x2c_var_order`](#x2c_var_order) | Orders two `Var` operands for `<`, `<=`, `>`, and `>=`. |
+| [`x2c_var_postfix_volatile`](#x2c_var_postfix_volatile) | Applies `Var.postfix` semantics to a volatile destination in generated code. |
 | [`x2c_var_tag_descriptor_index`](#x2c_var_tag_descriptor_index) | Returns a built-in object or `Symbol` tag's descriptor row, or `-1`. |
+| [`x2c_var_update_volatile`](#x2c_var_update_volatile) | Applies `Var.update` semantics to a volatile destination in generated code. |
+| [`Var.add`](#Var.add) | Adds dynamic values through numeric, `String`, or registered `add` behavior. |
+| [`Var.binary`](#Var.binary) | Applies a dynamic arithmetic, bitwise, comparison, or logical operator. |
 | [`Var.box_record`](#Var.box_record) | Boxes a copy of the `size`-byte record at `record` as custom `tag`. |
+| [`Var.convert`](#Var.convert) | Converts `value` to a numeric `target`, or returns exact-tag identity. |
+| [`Var.div`](#Var.div) | Divides dynamic values through numeric or registered `div` behavior. |
+| [`Var.fallback_truth`](#Var.fallback_truth) | Returns built-in truthiness without consulting a registered descriptor. |
 | [`Var.is`](#Var.is) | Reports whether `value` has the requested runtime tag. |
 | [`Var.is_floating`](#Var.is_floating) | Reports whether `v` belongs to the floating runtime family. |
 | [`Var.is_integer`](#Var.is_integer) | Reports whether `v` belongs to the integer runtime family. |
@@ -23,10 +33,21 @@ Variant type for dynamic typing.
 | [`Var.is_pointer`](#Var.is_pointer) | Reports whether `v` holds a native pointer. |
 | [`Var.is_reference`](#Var.is_reference) | Reports whether `v` holds a pointer to a boxed handle. |
 | [`Var.is_void`](#Var.is_void) | Reports whether `v` is the absence sentinel `void`. |
+| [`Var.matmul`](#Var.matmul) | Multiplies matrices through a registered `matmul` behavior. |
+| [`Var.mod`](#Var.mod) | Computes dynamic remainder through integer or registered `mod` behavior. |
+| [`Var.mul`](#Var.mul) | Multiplies dynamic values through numeric or registered `mul` behavior. |
+| [`Var.neg`](#Var.neg) | Negates a dynamic value through registered `neg` or numeric subtraction. |
 | [`Var.new`](#Var.new) | Constructs a `Var` with `tag` from its tag-directed variadic payload. |
 | [`Var.null`](#Var.null) | Returns `Null`, the all-zero `Var` that stands for external `nil`. |
+| [`Var.postfix`](#Var.postfix) | Applies dynamic postfix `++` or `--` and returns the prior value. |
+| [`Var.sub`](#Var.sub) | Subtracts dynamic values through numeric or registered `sub` behavior. |
 | [`Var.tag_bottom`](#Var.tag_bottom) | Returns the bottom encoding field of built-in `tag`. |
 | [`Var.tag_top`](#Var.tag_top) | Returns the top encoding field of built-in `tag`. |
+| [`Var.truth`](#Var.truth) | Returns dynamic truthiness through registered dispatch or built-in rules. |
+| [`Var.update`](#Var.update) | Applies a failure-atomic dynamic compound update and returns the new value. |
+| [`X2CVarNumeric.f32`](#X2CVarNumeric.f32) | Converts a decoded numeric value to native `float` without boxing. |
+| [`X2CVarNumeric.f64`](#X2CVarNumeric.f64) | Converts a decoded numeric value to native `double` without boxing. |
+| [`X2CVarNumeric.ldouble`](#X2CVarNumeric.ldouble) | Converts a decoded numeric value to native `long double` without boxing. |
 
 ### Functions
 
@@ -59,6 +80,56 @@ built-in row.
 
 Source: `lib/var/encoding.x:273`
 
+#### x2c_var_equal
+
+`int x2c_var_equal(Var a, Var b)`
+
+Evaluates `==` on two `Var` operands.
+Two numbers compare as their native values do in C after the usual
+arithmetic conversions, so `3 == 3L` and `-1 == 4294967295u` hold and a
+NaN equals nothing. Other values compare through `Var.equal`.
+
+**Raises:** `<bad-enc>` when a numeric comparison meets invalid `Var` bits.
+
+Source: `lib/var/operators.x:407`
+
+#### x2c_var_identical
+
+`int x2c_var_identical(Var a, Var b)`
+
+Evaluates `===` on two `Var` operands.
+Two numbers are identical when they have the same tag and the same bits,
+so two boxes of one `long` are identical, `NaN === NaN` holds, and
+`+0.0 === -0.0` does not. Other values are identical when their `Var`
+bits are, as `Var.same` reports.
+
+Source: `lib/var/operators.x:419`
+
+#### x2c_var_order
+
+`double x2c_var_order(Var a, Var b)`
+
+Orders two `Var` operands for `<`, `<=`, `>`, and `>=`.
+Two numbers order as their native values do in C after the usual
+arithmetic conversions. The result is -1, 0, or 1, or NaN when a NaN
+leaves the pair unordered, so each relation to zero is false. Other
+values return the order `Var.compare` gives.
+
+**Raises:** `<void-op>` when either operand is `void`, and `<bad-enc>` when
+a numeric comparison meets invalid `Var` bits.
+
+Source: `lib/var/operators.x:429`
+
+#### x2c_var_postfix_volatile
+
+`Var x2c_var_postfix_volatile(volatile Var &?lhs, Symbol op)`
+
+Applies `Var.postfix` semantics to a volatile destination in generated
+code. Volatile preserves accesses across exception transfer, without
+providing thread synchronization.
+
+Source: `lib/var/operators.x:605`
+
 #### x2c_var_tag_descriptor_index
 
 `int x2c_var_tag_descriptor_index(Symbol tag)`
@@ -67,7 +138,54 @@ Returns a built-in object or `Symbol` tag's descriptor row, or `-1`.
 
 Source: `lib/var/encoding.x:289`
 
+#### x2c_var_update_volatile
+
+`Var x2c_var_update_volatile(volatile Var &?lhs, Symbol op, Var rhs)`
+
+Applies `Var.update` semantics to a volatile destination in generated code.
+Volatile preserves accesses across exception transfer, without providing
+thread synchronization.
+
+Source: `lib/var/operators.x:561`
+
 ### `Var`
+
+<a id="Var.add"></a>
+#### Var.add
+
+`meta native Var Var.add(Var lhs, Var rhs)`
+
+Adds dynamic values through numeric, `String`, or registered `add`
+behavior.
+Numeric promotion, failure, and result ownership follow `Var.binary`;
+`String` addition returns a canonical concatenation, and a protocol result
+keeps the ownership chosen by its callback.
+
+Source: `lib/var/operators.x:148`
+
+<a id="Var.binary"></a>
+#### Var.binary
+
+`Var Var.binary(Var lhs, Symbol op, Var rhs)`
+
+Applies a dynamic arithmetic, bitwise, comparison, or logical operator.
+Integers use C-style promotion and wrap to the result type's width;
+shifts use the promoted left operand's type and sign-fill signed right
+shifts. Floating arithmetic uses the widest floating-point operand type.
+Comparisons and identity tests give the operators' results on `Var`
+operands, so two numbers compare as their native values do in C.
+The logical operators are eager in this direct API. Equality and identity
+are the only operations that accept `void` and return an `<i32>` predicate.
+Immediate results are self-contained, canonical `String`s keep their pool
+lifetime, and newly boxed wide results belong to the active `Scope`.
+
+**Raises:** `<bad-enc>`, `<void-op>`, or `<bad-op>` at the dynamic boundary;
+numeric operations may additionally raise `<bad-types>`, `<div-zero>`,
+or `<bad-shift>`, and `String` concatenation or wide boxing may raise
+`<size-limit>`, `<alloc-fail>`, or `<bad-enc>`.
+A selected protocol, truth, or comparison callback may raise its own cause.
+
+Source: `lib/var/operators.x:104`
 
 <a id="Var.box_record"></a>
 #### Var.box_record
@@ -82,6 +200,55 @@ are taken, the copy carries its descriptor in front of it.
 `<alloc-fail>` when the copy cannot be allocated.
 
 Source: `lib/var/classes.x:96`
+
+<a id="Var.convert"></a>
+#### Var.convert
+
+`meta native Var Var.convert(Var value, Symbol target)`
+
+Converts `value` to a numeric `target`, or returns exact-tag identity.
+All fifteen numeric families cross through the rules in this module.
+Integer narrowing keeps low bits, floating-to-integer truncates toward
+zero with a range check, and floating results follow host conversion.
+Identity returns the original `Var` and preserves its ownership; a newly
+boxed wide numeric result belongs to the active `Scope`. Converting a
+discrete `<nan>`, `<-inf>`, or `<+inf>` value to `<f64>` also returns the
+original `Var`, preserving its discrete tag.
+
+**Raises:** `<bad-enc>` for invalid `Var` bits, `<void-op>` for `void`,
+`<bad-target>` for an unsupported target, `<no-convert>` for a nonnumeric
+source, `<conv-range>` when the result does not fit, or `<alloc-fail>`
+while boxing a wide result. A nonnumeric source is rejected before
+decoding, with the decoder's `<bad-types>` detail nested under
+`<no-convert>`.
+
+Source: `lib/var/conversion.x:122`
+
+<a id="Var.div"></a>
+#### Var.div
+
+`meta native Var Var.div(Var lhs, Var rhs)`
+
+Divides dynamic values through numeric or registered `div` behavior.
+Numeric integer zero divisors raise; floating division uses host infinity
+and NaN behavior. Other promotion, failure, and ownership follow
+`Var.binary`.
+
+Source: `lib/var/operators.x:177`
+
+<a id="Var.fallback_truth"></a>
+#### Var.fallback_truth
+
+`int Var.fallback_truth(Var value)`
+
+Returns built-in truthiness without consulting a registered descriptor.
+Numeric and `Symbol` zero and null pointer-bearing values are false; other
+supported built-ins are true. Container-specific truth comes from dispatch.
+
+**Raises:** `<bad-enc>` for invalid `Var` bits, `<void-op>` for `void`, or
+`<bad-types>` when no truthiness rule exists.
+
+Source: `lib/var/operators.x:523`
 
 <a id="Var.is"></a>
 #### Var.is
@@ -210,6 +377,55 @@ This is the test that accepts a `void` argument.
 
 Source: `lib/var/encoding.x:234`
 
+<a id="Var.matmul"></a>
+#### Var.matmul
+
+`Var Var.matmul(Var lhs, Var rhs)`
+
+Multiplies matrices through a registered `matmul` behavior.
+`@` has no numeric meaning, so numeric operands raise `<bad-op>`; a
+protocol result keeps the ownership chosen by its callback.
+
+Source: `lib/var/operators.x:169`
+
+<a id="Var.mod"></a>
+#### Var.mod
+
+`meta native Var Var.mod(Var lhs, Var rhs)`
+
+Computes dynamic remainder through integer or registered `mod` behavior.
+Numeric operands use the common promoted integer type and reject a zero
+divisor; floating operands are not accepted. Other failure and ownership
+follow `Var.binary`.
+
+Source: `lib/var/operators.x:185`
+
+<a id="Var.mul"></a>
+#### Var.mul
+
+`meta native Var Var.mul(Var lhs, Var rhs)`
+
+Multiplies dynamic values through numeric or registered `mul` behavior.
+Numeric promotion, failure, and result ownership follow `Var.binary`; a
+protocol result keeps the ownership chosen by its callback.
+
+Source: `lib/var/operators.x:162`
+
+<a id="Var.neg"></a>
+#### Var.neg
+
+`meta native Var Var.neg(Var value)`
+
+Negates a dynamic value through registered `neg` or numeric subtraction.
+Without a selected protocol, this computes `0 - value` with ordinary `Var`
+promotion and wrapping, so a narrow integer promotes before negation.
+
+**Raises:** `<bad-enc>` for invalid bits, `<void-op>` for `void`, `<no-member>`
+for an object without `neg`, or any cause from protocol or numeric
+subtraction.
+
+Source: `lib/var/operators.x:214`
+
 <a id="Var.new"></a>
 #### Var.new
 
@@ -251,6 +467,34 @@ Generated call adapters return it for a `void` target.
 
 Source: `lib/var/encoding.x:250`
 
+<a id="Var.postfix"></a>
+#### Var.postfix
+
+`Var Var.postfix(Var &?lhs, Symbol op)`
+
+Applies dynamic postfix `++` or `--` and returns the prior value.
+The update adds or subtracts an `<i32>` one through `Var.update`,
+preserving the destination tag. If a delegated protocol operation returns
+`void`, the function leaves the destination unchanged and returns `void`.
+
+**Raises:** `<bad-arg>` for a null destination, `<bad-enc>` for invalid `Var`
+bits, `<void-op>` for `void`, `<bad-op>` for an operator other than
+`++` or `--`, or any cause from `Var.update`. These failures leave the
+stored value unchanged.
+
+Source: `lib/var/operators.x:599`
+
+<a id="Var.sub"></a>
+#### Var.sub
+
+`meta native Var Var.sub(Var lhs, Var rhs)`
+
+Subtracts dynamic values through numeric or registered `sub` behavior.
+Numeric promotion, failure, and result ownership follow `Var.binary`; a
+protocol result keeps the ownership chosen by its callback.
+
+Source: `lib/var/operators.x:155`
+
 <a id="Var.tag_bottom"></a>
 #### Var.tag_bottom
 
@@ -269,36 +513,412 @@ Returns the top encoding field of built-in `tag`.
 
 Source: `lib/var/encoding.x:62`
 
+<a id="Var.truth"></a>
+#### Var.truth
+
+`meta native int Var.truth(Var value)`
+
+Returns dynamic truthiness through registered dispatch or built-in rules.
+Numeric and `Symbol` zero and null unhandled pointer-bearing values are
+false; their nonzero or nonnull counterparts are true. A registered truth
+callback supplies its own result, including for a custom object, so it may
+return false independently of object state. The call does not retain
+`value` or inspect the contents of an iterator itself.
+
+**Raises:** `<bad-enc>` for invalid `Var` bits, `<void-op>` for `void`, or
+`<bad-types>` when no truthiness rule exists, plus any cause raised by a
+selected descriptor callback.
+
+Source: `lib/var/operators.x:505`
+
+<a id="Var.update"></a>
+#### Var.update
+
+`Var Var.update(Var &?lhs, Symbol op, Var rhs)`
+
+Applies a failure-atomic dynamic compound update and returns the new value.
+The operation is limited to arithmetic, remainder, bitwise, and shift
+operators. The result is converted back to the destination's original tag
+and stored only after both computation and conversion complete; this does
+not provide thread synchronization. If a delegated protocol operation
+returns `void`, the function leaves the destination unchanged.
+
+**Raises:** `<bad-arg>` for a null destination, or any cause from
+`Var.binary` and `Var.convert`. These failures leave the stored value
+unchanged.
+
+Source: `lib/var/operators.x:554`
+
+### `X2CVarNumeric`
+
+<a id="X2CVarNumeric.f32"></a>
+#### X2CVarNumeric.f32
+
+`float X2CVarNumeric.f32(X2CVarNumeric &value)`
+
+Converts a decoded numeric value to native `float` without boxing.
+Uses the target host cast, preserving its rounding behavior.
+
+Source: `lib/var/conversion.x:326`
+
+<a id="X2CVarNumeric.f64"></a>
+#### X2CVarNumeric.f64
+
+`double X2CVarNumeric.f64(X2CVarNumeric &value)`
+
+Converts a decoded numeric value to native `double` without boxing.
+Uses the target host cast, preserving its rounding behavior.
+
+Source: `lib/var/conversion.x:335`
+
+<a id="X2CVarNumeric.ldouble"></a>
+#### X2CVarNumeric.ldouble
+
+`long double X2CVarNumeric.ldouble(X2CVarNumeric &value)`
+
+Converts a decoded numeric value to native `long double` without boxing.
+Uses the target host cast, preserving its rounding behavior.
+
+Source: `lib/var/conversion.x:344`
+
 ## Advanced and interop API
 
 | Function | Summary |
 | --- | --- |
+| [`x2c_var_update_f32`](#x2c_var_update_f32) | Applies a dynamic compound `op` to a native `float` lvalue. |
+| [`x2c_var_update_f64`](#x2c_var_update_f64) | Applies a dynamic compound `op` to a native `double` lvalue. |
+| [`x2c_var_update_i16`](#x2c_var_update_i16) | Applies a dynamic compound `op` to a native `short` lvalue. |
+| [`x2c_var_update_i32`](#x2c_var_update_i32) | Applies a dynamic compound `op` to a native `int` lvalue. |
+| [`x2c_var_update_i8`](#x2c_var_update_i8) | Applies a dynamic compound `op` to a native `char` lvalue. |
+| [`x2c_var_update_long`](#x2c_var_update_long) | Applies a dynamic compound `op` to a native `long` lvalue. |
+| [`x2c_var_update_long_double`](#x2c_var_update_long_double) | Applies a dynamic compound `op` to a native `long double` lvalue. |
+| [`x2c_var_update_long_long`](#x2c_var_update_long_long) | Applies a dynamic compound `op` to a native `long long` lvalue. |
+| [`x2c_var_update_schar`](#x2c_var_update_schar) | Applies a dynamic compound `op` to a native `signed char` lvalue. |
+| [`x2c_var_update_u16`](#x2c_var_update_u16) | Applies a dynamic compound `op` to a native `ushort` lvalue. |
+| [`x2c_var_update_u32`](#x2c_var_update_u32) | Applies a dynamic compound `op` to a native `uint` lvalue. |
+| [`x2c_var_update_u8`](#x2c_var_update_u8) | Applies a dynamic compound `op` to a native `uchar` lvalue. |
+| [`x2c_var_update_ulong`](#x2c_var_update_ulong) | Applies a dynamic compound `op` to a native `ulong` lvalue. |
+| [`x2c_var_update_ulong_long`](#x2c_var_update_ulong_long) | Applies a dynamic compound `op` to a native `unsigned long long` lvalue. |
+| [`Var.array`](#Var.array) | Extracts the `Array` payload of `value`. |
+| [`Var.as_iter`](#Var.as_iter) | Extracts the `Iter` payload of `value`. |
+| [`Var.block`](#Var.block) | Extracts the `Block` payload of `value`. |
 | [`Var.box_long`](#Var.box_long) | Boxes a `long` into a scope-owned `<long>` value. |
 | [`Var.box_long_double`](#Var.box_long_double) | Boxes a `long double` into a scope-owned `<ldouble>` value. |
 | [`Var.box_long_long`](#Var.box_long_long) | Boxes a native signed long-long value without losing precision. |
 | [`Var.box_ulong`](#Var.box_ulong) | Boxes an `unsigned long` into a scope-owned `<ulong>` value. |
 | [`Var.box_ulong_long`](#Var.box_ulong_long) | Boxes a native unsigned long-long value without losing precision. |
+| [`Var.buffer`](#Var.buffer) | Extracts the `Buffer` payload of `value`. |
+| [`Var.bytes`](#Var.bytes) | Extracts the `Bytes` payload of `value`. |
 | [`Var.encoding_valid`](#Var.encoding_valid) | Reports whether `value` has a valid structural `Var` encoding. |
+| [`Var.file`](#Var.file) | Extracts the `File` payload of `value`. |
 | [`Var.floating`](#Var.floating) | Returns `v`'s payload as a `double` when its tag is floating, or 0.0. |
 | [`Var.integer`](#Var.integer) | Returns `v`'s payload as a `long` when its tag is integral, or 0. |
+| [`Var.integer_box`](#Var.integer_box) | Boxes the low target-width bits of `raw` using integer `target`. |
 | [`Var.integer_compare`](#Var.integer_compare) | Orders the integer payloads of `a` and `b`, returning -1, 0, or 1. |
 | [`Var.integer_floating_compare`](#Var.integer_floating_compare) | Orders an integer-kinded `integer` against a floating `floating`. |
+| [`Var.integer_tag`](#Var.integer_tag) | Returns the integer tag selected by `rank` and signedness. |
 | [`Var.kind`](#Var.kind) | Returns the `Symbol` naming the coarse category of `v`'s payload. |
 | [`Var.known_tag`](#Var.known_tag) | Reports whether `tag` has a built-in encoding or declared custom class. |
+| [`Var.list`](#Var.list) | Extracts the `List` payload of `value`. |
 | [`Var.long_double_value`](#Var.long_double_value) | Returns the payload of an `<ldouble>` box, or 0.0 if `v` has another tag. |
 | [`Var.long_long_value`](#Var.long_long_value) | Returns an `<llong>` box's signed payload, or 0 for another tag. |
 | [`Var.long_value`](#Var.long_value) | Returns the payload of a `<long>` box, or 0 if `v` has a different tag. |
+| [`Var.map`](#Var.map) | Extracts the `Map` payload of `value`. |
+| [`Var.numeric_decode`](#Var.numeric_decode) | Decodes a numeric `value` into caller-owned `out` storage. |
+| [`Var.numeric_info`](#Var.numeric_info) | Writes numeric-family metadata for `tag` and returns nonzero. |
 | [`Var.parse`](#Var.parse) | Parses `str` as source text of kind `kind` and returns the boxed value. |
 | [`Var.pointer`](#Var.pointer) | Returns the raw address stored in `v`, or NULL if it holds no address. |
 | [`Var.register_object_tag`](#Var.register_object_tag) | Declares custom boxed-object `tag` and returns 0. |
+| [`Var.signed_from_bits`](#Var.signed_from_bits) | Interprets the low `bits` of `raw` as a two's-complement signed value. |
+| [`Var.string`](#Var.string) | Extracts the `String` payload of `value`. |
 | [`Var.tag`](#Var.tag) | Returns the `Symbol` naming the exact family of `v`'s payload. |
 | [`Var.ulong_long_value`](#Var.ulong_long_value) | Returns a `<ullong>` box's unsigned payload, or 0 for another tag. |
 | [`Var.ulong_value`](#Var.ulong_value) | Returns the payload of a `<ulong>` box, or 0 if `v` has a different tag. |
 | [`Var.wide_compare`](#Var.wide_compare) | Orders two wide boxes carrying the same tag, returning -1, 0, or 1. |
 | [`Var.wide_equal`](#Var.wide_equal) | Reports content equality for supported wide scalar boxes. |
 | [`Var.wide_hash`](#Var.wide_hash) | Returns a supported wide scalar box's content hash, or 0 otherwise. |
+| [`Var.width_mask`](#Var.width_mask) | Returns a mask containing the low `bits` bits. |
+
+### Functions
+
+#### x2c_var_update_f32
+
+`float x2c_var_update_f32(volatile float *lhs, Symbol op, Var rhs)`
+
+Applies a dynamic compound `op` to a native `float` lvalue.
+The current value is boxed in its declared family, combined with `rhs`,
+converted back to that family, and stored only after all steps succeed.
+Returns the stored native value. This is failure-atomic but provides no
+thread synchronization despite accepting a volatile pointer.
+
+**Raises:** `<bad-arg>` for a null lvalue, or any cause from `Var.binary`,
+`Var.convert`, or wide boxing. A transferring failure leaves the lvalue
+unchanged. If a delegated protocol operation returns `void`, the helper
+also leaves it unchanged and returns the native zero for `float`.
+
+Source: `lib/var/operators.x:56`
+
+#### x2c_var_update_f64
+
+`double x2c_var_update_f64(volatile double *lhs, Symbol op, Var rhs)`
+
+Applies a dynamic compound `op` to a native `double` lvalue.
+The current value is boxed in its declared family, combined with `rhs`,
+converted back to that family, and stored only after all steps succeed.
+Returns the stored native value. This is failure-atomic but provides no
+thread synchronization despite accepting a volatile pointer.
+
+**Raises:** `<bad-arg>` for a null lvalue, or any cause from `Var.binary`,
+`Var.convert`, or wide boxing. A transferring failure leaves the lvalue
+unchanged. If a delegated protocol operation returns `void`, the helper
+also leaves it unchanged and returns the native zero for `double`.
+
+Source: `lib/var/operators.x:57`
+
+#### x2c_var_update_i16
+
+`short x2c_var_update_i16(volatile short *lhs, Symbol op, Var rhs)`
+
+Applies a dynamic compound `op` to a native `short` lvalue.
+The current value is boxed in its declared family, combined with `rhs`,
+converted back to that family, and stored only after all steps succeed.
+Returns the stored native value. This is failure-atomic but provides no
+thread synchronization despite accepting a volatile pointer.
+
+**Raises:** `<bad-arg>` for a null lvalue, or any cause from `Var.binary`,
+`Var.convert`, or wide boxing. A transferring failure leaves the lvalue
+unchanged. If a delegated protocol operation returns `void`, the helper
+also leaves it unchanged and returns the native zero for `short`.
+
+Source: `lib/var/operators.x:48`
+
+#### x2c_var_update_i32
+
+`int x2c_var_update_i32(volatile int *lhs, Symbol op, Var rhs)`
+
+Applies a dynamic compound `op` to a native `int` lvalue.
+The current value is boxed in its declared family, combined with `rhs`,
+converted back to that family, and stored only after all steps succeed.
+Returns the stored native value. This is failure-atomic but provides no
+thread synchronization despite accepting a volatile pointer.
+
+**Raises:** `<bad-arg>` for a null lvalue, or any cause from `Var.binary`,
+`Var.convert`, or wide boxing. A transferring failure leaves the lvalue
+unchanged. If a delegated protocol operation returns `void`, the helper
+also leaves it unchanged and returns the native zero for `int`.
+
+Source: `lib/var/operators.x:50`
+
+#### x2c_var_update_i8
+
+`char x2c_var_update_i8(volatile char *lhs, Symbol op, Var rhs)`
+
+Applies a dynamic compound `op` to a native `char` lvalue.
+The current value is boxed in its declared family, combined with `rhs`,
+converted back to that family, and stored only after all steps succeed.
+Returns the stored native value. This is failure-atomic but provides no
+thread synchronization despite accepting a volatile pointer.
+
+**Raises:** `<bad-arg>` for a null lvalue, or any cause from `Var.binary`,
+`Var.convert`, or wide boxing. A transferring failure leaves the lvalue
+unchanged. If a delegated protocol operation returns `void`, the helper
+also leaves it unchanged and returns the native zero for `char`.
+
+Source: `lib/var/operators.x:45`
+
+#### x2c_var_update_long
+
+`long x2c_var_update_long(volatile long *lhs, Symbol op, Var rhs)`
+
+Applies a dynamic compound `op` to a native `long` lvalue.
+The current value is boxed in its declared family, combined with `rhs`,
+converted back to that family, and stored only after all steps succeed.
+Returns the stored native value. This is failure-atomic but provides no
+thread synchronization despite accepting a volatile pointer.
+
+**Raises:** `<bad-arg>` for a null lvalue, or any cause from `Var.binary`,
+`Var.convert`, or wide boxing. A transferring failure leaves the lvalue
+unchanged. If a delegated protocol operation returns `void`, the helper
+also leaves it unchanged and returns the native zero for `long`.
+
+Source: `lib/var/operators.x:52`
+
+#### x2c_var_update_long_double
+
+`long double x2c_var_update_long_double(volatile long double *lhs, Symbol op, Var rhs)`
+
+Applies a dynamic compound `op` to a native `long double` lvalue.
+The current value is boxed in its declared family, combined with `rhs`,
+converted back to that family, and stored only after all steps succeed.
+Returns the stored native value. This is failure-atomic but provides no
+thread synchronization despite accepting a volatile pointer.
+
+**Raises:** `<bad-arg>` for a null lvalue, or any cause from `Var.binary`,
+`Var.convert`, or wide boxing. A transferring failure leaves the lvalue
+unchanged. If a delegated protocol operation returns `void`, the helper
+also leaves it unchanged and returns the native zero for `long double`.
+
+Source: `lib/var/operators.x:58`
+
+#### x2c_var_update_long_long
+
+`long long x2c_var_update_long_long(volatile long long *lhs, Symbol op, Var rhs)`
+
+Applies a dynamic compound `op` to a native `long long` lvalue.
+The current value is boxed in its declared family, combined with `rhs`,
+converted back to that family, and stored only after all steps succeed.
+Returns the stored native value. This is failure-atomic but provides no
+thread synchronization despite accepting a volatile pointer.
+
+**Raises:** `<bad-arg>` for a null lvalue, or any cause from `Var.binary`,
+`Var.convert`, or wide boxing. A transferring failure leaves the lvalue
+unchanged. If a delegated protocol operation returns `void`, the helper
+also leaves it unchanged and returns the native zero for `long long`.
+
+Source: `lib/var/operators.x:54`
+
+#### x2c_var_update_schar
+
+`signed char x2c_var_update_schar(volatile signed char *lhs, Symbol op, Var rhs)`
+
+Applies a dynamic compound `op` to a native `signed char` lvalue.
+The current value is boxed in its declared family, combined with `rhs`,
+converted back to that family, and stored only after all steps succeed.
+Returns the stored native value. This is failure-atomic but provides no
+thread synchronization despite accepting a volatile pointer.
+
+**Raises:** `<bad-arg>` for a null lvalue, or any cause from `Var.binary`,
+`Var.convert`, or wide boxing. A transferring failure leaves the lvalue
+unchanged. If a delegated protocol operation returns `void`, the helper
+also leaves it unchanged and returns the native zero for `signed char`.
+
+Source: `lib/var/operators.x:46`
+
+#### x2c_var_update_u16
+
+`ushort x2c_var_update_u16(volatile ushort *lhs, Symbol op, Var rhs)`
+
+Applies a dynamic compound `op` to a native `ushort` lvalue.
+The current value is boxed in its declared family, combined with `rhs`,
+converted back to that family, and stored only after all steps succeed.
+Returns the stored native value. This is failure-atomic but provides no
+thread synchronization despite accepting a volatile pointer.
+
+**Raises:** `<bad-arg>` for a null lvalue, or any cause from `Var.binary`,
+`Var.convert`, or wide boxing. A transferring failure leaves the lvalue
+unchanged. If a delegated protocol operation returns `void`, the helper
+also leaves it unchanged and returns the native zero for `ushort`.
+
+Source: `lib/var/operators.x:49`
+
+#### x2c_var_update_u32
+
+`uint x2c_var_update_u32(volatile uint *lhs, Symbol op, Var rhs)`
+
+Applies a dynamic compound `op` to a native `uint` lvalue.
+The current value is boxed in its declared family, combined with `rhs`,
+converted back to that family, and stored only after all steps succeed.
+Returns the stored native value. This is failure-atomic but provides no
+thread synchronization despite accepting a volatile pointer.
+
+**Raises:** `<bad-arg>` for a null lvalue, or any cause from `Var.binary`,
+`Var.convert`, or wide boxing. A transferring failure leaves the lvalue
+unchanged. If a delegated protocol operation returns `void`, the helper
+also leaves it unchanged and returns the native zero for `uint`.
+
+Source: `lib/var/operators.x:51`
+
+#### x2c_var_update_u8
+
+`uchar x2c_var_update_u8(volatile uchar *lhs, Symbol op, Var rhs)`
+
+Applies a dynamic compound `op` to a native `uchar` lvalue.
+The current value is boxed in its declared family, combined with `rhs`,
+converted back to that family, and stored only after all steps succeed.
+Returns the stored native value. This is failure-atomic but provides no
+thread synchronization despite accepting a volatile pointer.
+
+**Raises:** `<bad-arg>` for a null lvalue, or any cause from `Var.binary`,
+`Var.convert`, or wide boxing. A transferring failure leaves the lvalue
+unchanged. If a delegated protocol operation returns `void`, the helper
+also leaves it unchanged and returns the native zero for `uchar`.
+
+Source: `lib/var/operators.x:47`
+
+#### x2c_var_update_ulong
+
+`ulong x2c_var_update_ulong(volatile ulong *lhs, Symbol op, Var rhs)`
+
+Applies a dynamic compound `op` to a native `ulong` lvalue.
+The current value is boxed in its declared family, combined with `rhs`,
+converted back to that family, and stored only after all steps succeed.
+Returns the stored native value. This is failure-atomic but provides no
+thread synchronization despite accepting a volatile pointer.
+
+**Raises:** `<bad-arg>` for a null lvalue, or any cause from `Var.binary`,
+`Var.convert`, or wide boxing. A transferring failure leaves the lvalue
+unchanged. If a delegated protocol operation returns `void`, the helper
+also leaves it unchanged and returns the native zero for `ulong`.
+
+Source: `lib/var/operators.x:53`
+
+#### x2c_var_update_ulong_long
+
+`unsigned long long x2c_var_update_ulong_long(volatile unsigned long long *lhs, Symbol op, Var rhs)`
+
+Applies a dynamic compound `op` to a native `unsigned long long` lvalue.
+The current value is boxed in its declared family, combined with `rhs`,
+converted back to that family, and stored only after all steps succeed.
+Returns the stored native value. This is failure-atomic but provides no
+thread synchronization despite accepting a volatile pointer.
+
+**Raises:** `<bad-arg>` for a null lvalue, or any cause from `Var.binary`,
+`Var.convert`, or wide boxing. A transferring failure leaves the lvalue
+unchanged. If a delegated protocol operation returns `void`, the helper
+also leaves it unchanged and returns the native zero for `unsigned long long`.
+
+Source: `lib/var/operators.x:55`
 
 ### `Var`
+
+<a id="Var.array"></a>
+#### Var.array
+
+`Array Var.array(Var value)`
+
+Extracts the `Array` payload of `value`.
+
+**Raises:** `<no-convert>` for any other tag. An implicit conversion
+from `Var` to `Array` uses `Var.array_payload`, which reads the payload or
+NULL without raising.
+
+Source: `lib/var/conversion.x:64`
+
+<a id="Var.as_iter"></a>
+#### Var.as_iter
+
+`Iter Var.as_iter(Var value)`
+
+Extracts the `Iter` payload of `value`.
+
+**Raises:** `<no-convert>` for any other tag. An implicit conversion
+from `Var` to `Iter` uses `Var.iter_payload`, which reads the payload or
+NULL without raising.
+
+Source: `lib/var/conversion.x:69`
+
+<a id="Var.block"></a>
+#### Var.block
+
+`Block Var.block(Var value)`
+
+Extracts the `Block` payload of `value`.
+
+**Raises:** `<no-convert>` for any other tag. An implicit conversion
+from `Var` to `Block` uses `Var.block_payload`, which reads the payload or
+NULL without raising.
+
+Source: `lib/var/conversion.x:65`
 
 <a id="Var.box_long"></a>
 #### Var.box_long
@@ -390,6 +1010,32 @@ initialization, allocation failure uses the raw fatal floor.
 
 Source: `lib/var/numbers.x:104`
 
+<a id="Var.buffer"></a>
+#### Var.buffer
+
+`Buffer Var.buffer(Var value)`
+
+Extracts the `Buffer` payload of `value`.
+
+**Raises:** `<no-convert>` for any other tag. An implicit conversion
+from `Var` to `Buffer` uses `Var.buffer_payload`, which reads the payload or
+NULL without raising.
+
+Source: `lib/var/conversion.x:66`
+
+<a id="Var.bytes"></a>
+#### Var.bytes
+
+`Bytes Var.bytes(Var value)`
+
+Extracts the `Bytes` payload of `value`.
+
+**Raises:** `<no-convert>` for any other tag. An implicit conversion
+from `Var` to `Bytes` uses `Var.bytes_payload`, which reads the payload or
+NULL without raising.
+
+Source: `lib/var/conversion.x:67`
+
 <a id="Var.encoding_valid"></a>
 #### Var.encoding_valid
 
@@ -400,6 +1046,19 @@ An address-bearing encoding must still refer to live storage of the right
 type; wide encodings in particular require a readable `Scope`-owned box.
 
 Source: `lib/var/encoding.x:264`
+
+<a id="Var.file"></a>
+#### Var.file
+
+`File Var.file(Var value)`
+
+Extracts the `File` payload of `value`.
+
+**Raises:** `<no-convert>` for any other tag. An implicit conversion
+from `Var` to `File` uses `Var.file_payload`, which reads the payload or
+NULL without raising.
+
+Source: `lib/var/conversion.x:68`
 
 <a id="Var.floating"></a>
 #### Var.floating
@@ -415,7 +1074,7 @@ precision.
 Like the other raw payload readers this one is silent. An integer, a
 `String`, or `void` reads as 0.0, and nothing distinguishes that from a
 stored zero. When the tag is not already known, convert with
-`Var.convert` in `lib/varconvert.x`, which raises a conversion failure;
+`Var.convert` in `lib/var/conversion.x`, which raises a conversion failure;
 the scalar-named readers such as `Var.double` do this for you.
 
 An unhandled tag yields 0.0.
@@ -437,7 +1096,7 @@ negative. `Var.ulong_value` preserves the unsigned payload. A
 `Symbol` reads as its numeric `Symbol` value.
 
 When the tag might not be what you expect, convert instead of reading.
-`Var.convert` in `lib/varconvert.x` raises a conversion failure.
+`Var.convert` in `lib/var/conversion.x` raises a conversion failure.
 Assigning a `Var` to an `int` or a `long`, and the scalar-named readers
 such as `Var.int`, go through `Var.convert` too.
 
@@ -450,6 +1109,21 @@ printf("small=%ld text=%ld\n", small.integer(), text.integer());
 An unhandled tag yields 0.
 
 Source: `lib/var/numbers.x:224`
+
+<a id="Var.integer_box"></a>
+#### Var.integer_box
+
+`Var Var.integer_box(Symbol target, unsigned long long raw)`
+
+Boxes the low target-width bits of `raw` using integer `target`.
+Signed targets interpret those bits as two's-complement. Immediate targets
+return self-contained values; wide targets allocate their boxes in the
+active `Scope`.
+
+**Raises:** `<bad-target>` for a noninteger target, or `<alloc-fail>` or
+`<bad-enc>` while boxing a wide result.
+
+Source: `lib/var/conversion.x:251`
 
 <a id="Var.integer_compare"></a>
 #### Var.integer_compare
@@ -485,6 +1159,19 @@ first if that distinction matters.
 
 Source: `lib/var/ordering.x:60`
 
+<a id="Var.integer_tag"></a>
+#### Var.integer_tag
+
+`Symbol Var.integer_tag(int rank, int unsigned_value)`
+
+Returns the integer tag selected by `rank` and signedness.
+`rank` must be positive. Ranks one through three map to `<i32>` or `<u32>`;
+callers applying integer promotion must first select its resulting
+signedness. Ranks four through six select the 48-bit, `long`, and
+`long long` families. A rank above six returns the null `Symbol`.
+
+Source: `lib/var/conversion.x:280`
+
 <a id="Var.kind"></a>
 #### Var.kind
 
@@ -510,7 +1197,20 @@ Source: `lib/var/encoding.x:178`
 
 Reports whether `tag` has a built-in encoding or declared custom class.
 
-Source: `lib/var/var.x:62`
+Source: `lib/var/var.x:87`
+
+<a id="Var.list"></a>
+#### Var.list
+
+`List Var.list(Var value)`
+
+Extracts the `List` payload of `value`.
+
+**Raises:** `<no-convert>` for any other tag. An implicit conversion
+from `Var` to `List` uses `Var.list_payload`, which reads the payload or
+NULL without raising.
+
+Source: `lib/var/conversion.x:70`
 
 <a id="Var.long_double_value"></a>
 #### Var.long_double_value
@@ -548,6 +1248,45 @@ use this one when the tag is known and the payload must survive intact.
 A tag mismatch yields 0.
 
 Source: `lib/var/numbers.x:276`
+
+<a id="Var.map"></a>
+#### Var.map
+
+`Map Var.map(Var value)`
+
+Extracts the `Map` payload of `value`.
+
+**Raises:** `<no-convert>` for any other tag. An implicit conversion
+from `Var` to `Map` uses `Var.map_payload`, which reads the payload or
+NULL without raising.
+
+Source: `lib/var/conversion.x:71`
+
+<a id="Var.numeric_decode"></a>
+#### Var.numeric_decode
+
+`void Var.numeric_decode(Var value, X2CVarNumeric &?out)`
+
+Decodes a numeric `value` into caller-owned `out` storage.
+The result retains no pointer into `value`; integer and floating payloads
+use the members described by `X2CVarNumeric`.
+
+**Raises:** `<bad-arg>` for a null output, `<bad-enc>` for invalid `Var` bits,
+`<void-op>` for `void`, or `<bad-types>` for a nonnumeric tag. These
+failures leave `out` unchanged.
+
+Source: `lib/var/conversion.x:168`
+
+<a id="Var.numeric_info"></a>
+#### Var.numeric_info
+
+`int Var.numeric_info(Symbol tag, X2CVarNumericInfo &?out)`
+
+Writes numeric-family metadata for `tag` and returns nonzero.
+The special `<nan>`, `<-inf>`, and `<+inf>` tags report the `<f64>` family.
+A null `out` or nonnumeric tag returns zero and leaves storage untouched.
+
+Source: `lib/var/conversion.x:152`
 
 <a id="Var.parse"></a>
 #### Var.parse
@@ -621,6 +1360,29 @@ changing the registry. Declaration must finish before the first successful
 failure aborts.
 
 Source: `lib/var/classes.x:207`
+
+<a id="Var.signed_from_bits"></a>
+#### Var.signed_from_bits
+
+`long long Var.signed_from_bits(unsigned long long raw, int bits)`
+
+Interprets the low `bits` of `raw` as a two's-complement signed value.
+`bits` must be between one and the width of `unsigned long long`.
+
+Source: `lib/var/conversion.x:299`
+
+<a id="Var.string"></a>
+#### Var.string
+
+`String Var.string(Var value)`
+
+Extracts the `String` payload of `value`.
+
+**Raises:** `<no-convert>` for any other tag. A `String` destination converts
+a `Var` implicitly through `Var.as_string` instead, and
+`Var.string_payload` reads the payload or NULL without raising.
+
+Source: `lib/var/conversion.x:46`
 
 <a id="Var.tag"></a>
 #### Var.tag
@@ -715,6 +1477,17 @@ Returns a supported wide scalar box's content hash, or 0 otherwise.
 
 Source: `lib/var/numbers.x:316`
 
+<a id="Var.width_mask"></a>
+#### Var.width_mask
+
+`unsigned long long Var.width_mask(int bits)`
+
+Returns a mask containing the low `bits` bits.
+Zero yields zero and a width at least `unsigned long long` yields
+`ULLONG_MAX`; `bits` must not be negative.
+
+Source: `lib/var/conversion.x:292`
+
 ## Runtime-internal callables
 
 These callables connect runtime translation units. They are documented
@@ -778,6 +1551,37 @@ Returns the `Scope` owning a live wide numeric box, or NULL otherwise.
 
 Source: `lib/var/numbers.x:162`
 
+## Public types
+
+| Type | Kind | Summary |
+| --- | --- | --- |
+| [`X2CVarNumeric`](#X2CVarNumeric) | struct | Holds a decoded numeric `Var` and its promotion metadata. |
+| [`X2CVarNumericInfo`](#X2CVarNumericInfo) | struct | Describes one numeric `Var` family without holding a value. |
+
+<a id="X2CVarNumeric"></a>
+### X2CVarNumeric
+
+`typedef struct X2CVarNumeric { Symbol tag, int floating, unsigned_value, bits, rank; unsigned long long raw; long double floating_value; } X2CVarNumeric`
+
+Holds a decoded numeric `Var` and its promotion metadata.
+Integer values use the low `bits` of `raw`, with signed values represented
+in two's-complement; floating values use `floating_value`. The record
+holds no storage and retains nothing from the source `Var`.
+
+Source: `lib/var/var.x:31`
+
+<a id="X2CVarNumericInfo"></a>
+### X2CVarNumericInfo
+
+`typedef struct X2CVarNumericInfo { Symbol tag, int floating, unsigned_value, bits, rank; } X2CVarNumericInfo`
+
+Describes one numeric `Var` family without holding a value.
+`tag` is canonical, `floating` and `unsigned_value` classify it, `bits` is
+its native payload width, and `rank` orders promotion. Callers normally
+obtain a valid record from `Var.numeric_info`.
+
+Source: `lib/var/var.x:22`
+
 ## Internal types
 
 These types connect runtime translation units and compiler-generated
@@ -799,7 +1603,7 @@ Names the built-in `Var` tags in `var-tags.x` ledger order, which
 is the order of `x2c_var_taginfo`; `lib/var-ledger.x` checks the two
 agree.
 
-Source: `lib/var/var.x:28`
+Source: `lib/var/var.x:53`
 
 <a id="VarDecodeGroup"></a>
 ### VarDecodeGroup
@@ -810,7 +1614,7 @@ Resolves one encoding top: the selector is the middle field when
 `by_middle` is set and the bottom field under `mask` otherwise, and
 `ids` maps it to a `TagId`, or `_invalid_` where no tag has it.
 
-Source: `lib/var/var.x:56`
+Source: `lib/var/var.x:81`
 
 <a id="VarTagInfo"></a>
 ### VarTagInfo
@@ -819,7 +1623,7 @@ Source: `lib/var/var.x:56`
 
 Describes one built-in `Var` tag's kind and encoding fields.
 
-Source: `lib/var/var.x:48`
+Source: `lib/var/var.x:73`
 
 ## Design notes
 
@@ -831,4 +1635,4 @@ value-bearing protocols.
 
 ## Tests and examples
 
-`make verify` (`unittest/test-var.x`) and `make examples` (`type-conversion-matrix`).
+`make verify` (`unittest/test-var.x` and `unittest/test-varops.x`) and `make examples` (`type-conversion-matrix`).

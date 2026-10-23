@@ -8,9 +8,8 @@ OPTIONAL_SOURCES := args.x datum.x diff.x digest.x json.x list-selectors.x \
                     meta.x type.x path.x process.x regex.x \
                     rewrite.x scripting.x substring.x substring-map.x \
                     typed-array.x typed-list.x typed-map.x \
-                    var-ledger.x lisp-init.x lisp-targets.x \
-                    array-generics.x cleanup.x error-macros.x error-private.x \
-                    func-errors.x integer-ops.x map-generics.x \
+                    var-ledger.x lisp-targets/lisp-targets.x \
+                    cleanup.x error-macros.x error-private.x integer-ops.x \
                     native-scalar-types.x private-keywords.x system-macros.x \
                     var-adapters.x var-tags.x
 SOURCES := $(sort $(filter-out x2c.x $(OPTIONAL_SOURCES),$(patsubst ../lib/%,%,$(shell ../tools/sources.sh --root .. --area lib))))

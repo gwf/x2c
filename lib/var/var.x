@@ -13,6 +13,31 @@
 
 #include "error-macros.x"
 #include "common.x"
+
+/** Describes one numeric `Var` family without holding a value.
+    `tag` is canonical, `floating` and `unsigned_value` classify it, `bits` is
+    its native payload width, and `rank` orders promotion. Callers normally
+    obtain a valid record from `Var.numeric_info`.
+*/
+typedef struct X2CVarNumericInfo {
+  Symbol tag, int floating, unsigned_value, bits, rank;
+} X2CVarNumericInfo;
+
+/** Holds a decoded numeric `Var` and its promotion metadata.
+    Integer values use the low `bits` of `raw`, with signed values represented
+    in two's-complement; floating values use `floating_value`. The record
+    holds no storage and retains nothing from the source `Var`.
+*/
+typedef struct X2CVarNumeric {
+  Symbol tag, int floating, unsigned_value, bits, rank;
+  unsigned long long raw;
+  long double floating_value;
+} X2CVarNumeric;
+
+float X2CVarNumeric.f32(X2CVarNumeric &value);
+double X2CVarNumeric.f64(X2CVarNumeric &value);
+long double X2CVarNumeric.ldouble(X2CVarNumeric &value);
+
 #include "dispatch.x"
 
 #include <stdint.h>
@@ -64,15 +89,81 @@ int Var.known_tag(Symbol tag) =>
 
 #include <string.h>
 #include "symbol.x"
-#include "map.x"
+#include "map/map.x"
 #include "scope/scope.x"
 #include "exception.x"
-#include "string-number.x"
+#include "string/string.x"
 #include "symbolset.x"
 
 extern const VarTagInfo x2c_var_taginfo[];
 extern const SymbolSet x2c_var_tags;
 extern const VarDecodeGroup x2c_var_decode_groups[];
+
+#include "meta.x"
+
+/* One row per native integer and floating family. Each $native.update
+   invocation reads its Var tag, boxing operations, and the casts for its
+   two representation crossings. */
+
+/* Keyed by the tag the invocation names. A row is the `Var` tag, the boxer,
+   the decoder, and the cast pair: into the boxer's parameter type and back
+   to the storage type, each empty where the two types already agree. */
+meta static List _update_rows(void) => %(
+  (char    (i8 "Var_box_i8" "Var_integer" (() (char))))
+  (schar   (i8 "Var_box_i8" "Var_integer" ((char) (signed char))))
+  (u8      (u8 "Var_box_u8" "Var_integer" (() ("uchar"))))
+  (i16     (i16 "Var_box_i16" "Var_integer" (() (short))))
+  (u16     (u16 "Var_box_u16" "Var_integer" (() ("ushort"))))
+  (i32     (i32 "Var_box_i32_bits" "Var_integer" ((unsigned) (int))))
+  (u32     (u32 "Var_box_u32" "Var_integer" (() ("uint"))))
+  (long    (long "Var_box_long" "Var_long_value" (() ())))
+  (ulong   (ulong "Var_box_ulong" "Var_ulong_value" (() ())))
+  (llong   (llong "Var_box_long_long" "Var_long_long_value" (() ())))
+  (ullong  (ullong "Var_box_ulong_long" "Var_ulong_long_value" (() ())))
+  (f32     (f32 "Var_box_f32" "Var_decode_f32" (() ())))
+  (f64     (f64 "Var_box_f64" "Var_decode_f64" (() ())))
+  (ldouble (ldouble "Var_box_long_double" "Var_long_double_value" (() ())))
+);
+
+/* The row the invocation's `<tag>` literal names. The capture is a literal,
+   so its Symbol value is its last part. */
+meta static List _update_row(List id) {
+  match (id)
+    case %(expr ? (literal ? ? ?key)): return _update_rows().assoc(key);
+  return %();
+}
+
+meta static Symbol _update_tag(List id)     => _update_row(id)[0];
+meta static String _update_boxer(List id)   => _update_row(id)[1];
+meta static String _update_decoder(List id) => _update_row(id)[2];
+
+/* Empty stands for "no cast", so these two tests read emptiness rather than
+   absence, which is what an empty entry in the row's cast pair means. */
+meta static List _update_cast_in(List id)  => _update_row(id)[3].car();
+meta static List _update_cast_out(List id) => _update_row(id)[3].cdr().car();
+
+/* The destination's current value, boxed in the family the row names. */
+meta static List _update_box(List id, List lhs) {
+  List value = $!( $lhs[0] );
+  Type into = _update_cast_in(id);
+  if (into) value = $!( ($into)$value );
+  return $!( ${x2c_ident(_update_boxer(id))}($value) );
+}
+
+/* The converted result read back as the storage type. */
+meta static List _update_decode(List id, List value) {
+  List decoded = $!( ${x2c_ident(_update_decoder(id))}($value) );
+  Type back = _update_cast_out(id);
+  if (back) return $!( ($back)$decoded );
+  return decoded;
+}
+
+/* The function's name for a raise payload. Built only when the raise runs,
+   so the update path needs no cached String and no initialization check. */
+meta static List _update_operation(Var function) {
+  String spelling = Code.binding_spelling(function);
+  return $!(String){ String.new($spelling) };
+}
 
 module {
   "encoding.x",
@@ -80,4 +171,6 @@ module {
   "construction.x",
   "numbers.x",
   "ordering.x",
+  "conversion.x",
+  "operators.x",
 }

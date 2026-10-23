@@ -83,7 +83,7 @@ PoolStats;
 #include "block.h"
 #include "exception.h"
 #include "mutex.h"
-#include "map-generics.h"
+#include "map/map.h"
 static unsigned long value_epoch;
 
 static int pool_multithreaded;

@@ -45,14 +45,13 @@ typedef struct MacroCaseSite {
   int ready;
 } MacroCaseSite;
 
-#include "array.x"
+#include "array/array.x"
 #include "atom.x"
 #include "list/list.x"
-#include "match-machine.x"
-#include "match-cache.x"
+#include "match/match.x"
 #include "meta.x"
 #include "string/string.x"
-#include "varconvert.x"
+#include "var/var.x"
 #include <math.h>
 
 /** Starts a macro-valued `case` without `Macro_case_root` when `code` is

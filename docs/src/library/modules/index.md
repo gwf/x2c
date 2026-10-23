@@ -15,7 +15,7 @@ points used by generated code, native callers, and compiler setup.
 | Module | Description |
 | --- | --- |
 | [`lib/args.x`](args.md) | parse program arguments against a declarative spec. |
-| [`lib/array.x`](array.md) | dynamic contiguous arrays of `Var` elements. |
+| [`lib/array/array.x`](array.md) | dynamic contiguous arrays of `Var` elements. |
 | [`lib/atom.x`](atom.md) | canonical exact names. |
 | [`lib/block.x`](block.md) | checked dynamic storage for fixed-width elements. |
 | [`lib/buffer.x`](buffer.md) | growable text buffer with indentation support. |
@@ -28,7 +28,7 @@ points used by generated code, native callers, and compiler setup.
 | [`lib/error/error.x`](error.md) | handler stack and accumulated errors. |
 | [`lib/exception.x`](exception.md) | transfer frames for x2c `Error` unwinding and cleanup. |
 | [`lib/file.x`](file.md) | `File` I/O operations and stream handling. |
-| [`lib/func.x`](func.md) | generic native function binding. |
+| [`lib/func/func.x`](func.md) | generic native function binding. |
 | [`lib/iter.x`](iter.md) | single-pass pull iterators. |
 | [`lib/json.x`](json.md) | JSON text to and from ordinary x2c values. |
 | [`lib/lib.x`](lib.md) | disjoint sets with union-find. |
@@ -37,9 +37,7 @@ points used by generated code, native callers, and compiler setup.
 | [`lib/list/list.x`](list.md) | linked list with `Var` elements. |
 | [`lib/logger.x`](logger.md) | owned structured event delivery. |
 | [`lib/macrovalue/macrovalue.x`](macrovalue.md) | macros as values that build and recognize code. |
-| [`lib/map.x`](map.md) | hash table mapping `Var` keys to `Var` values. |
-| [`lib/match-cache.x`](match-cache.md) | caches of prepared Match plans. |
-| [`lib/match-plan.x`](match-plan.md) | lowering Match patterns to prepared plans. |
+| [`lib/map/map.x`](map.md) | hash table mapping `Var` keys to `Var` values. |
 | [`lib/match/match.x`](match.md) | pattern matching and transformation utilities for lists. |
 | [`lib/meta.x`](meta.md) | the compiler surface a `meta` function calls. |
 | [`lib/mutex.x`](mutex.md) | shared mutable-state coordination. |
@@ -50,11 +48,6 @@ points used by generated code, native callers, and compiler setup.
 | [`lib/rewrite.x`](rewrite.md) | Pattern registration for compiler rewrites. |
 | [`lib/scope/scope.x`](scope.md) | memory allocation scope management. |
 | [`lib/scripting.x`](scripting.md) | the modules every script unit includes. |
-| [`lib/split.x`](split.md) | `String` field splitting and repeatable typed cursors. |
-| [`lib/string-classify.x`](string-classify.md) | byte classification for canonical strings. |
-| [`lib/string-escape.x`](string-escape.md) | escaped spelling of canonical strings. |
-| [`lib/string-format.x`](string-format.md) | checked formatting of `Var` values into a `String`. |
-| [`lib/string-number.x`](string-number.md) | numeric parsing from canonical byte strings. |
 | [`lib/string/string.x`](string.md) | canonical byte strings and core text operations. |
 | [`lib/substring-map.x`](substring-map.md) | native counts of borrowed String views. |
 | [`lib/substring.x`](substring.md) | borrowed immutable views of String bytes. |
@@ -67,8 +60,6 @@ points used by generated code, native callers, and compiler setup.
 | [`lib/typed-list.x`](typed-list.md) | typed cons chains generated from typed methods. |
 | [`lib/typed-map.x`](typed-map.md) | typed `Map`s generated from shared storage. |
 | [`lib/var/var.x`](var.md) | variant type for dynamic typing. |
-| [`lib/varconvert.x`](varconvert.md) | `Var` numeric conversion policy. |
-| [`lib/varops.x`](varops.md) | boxed `Var` operators, updates, and truthiness. |
 
 ## Optional x2c modules
 
@@ -80,7 +71,7 @@ prelude. Include one explicitly to use its declarations.
 - [`lib/digest.x`](digest.md) - SHA-256 digests of `String`s and streams; explicitly include `digest.x` to use them.
 - [`lib/json.x`](json.md) - JSON text to and from ordinary `Map`, `Array`, `String`, and number values; explicitly include `json.x` to use it.
 - [`lib/list-selectors.x`](list-selectors.md) - Compound selectors beyond caar, cadr, cddr, and caddr; explicitly include `list-selectors.x` to use them.
-- [`lib/meta.x`](meta.md) - Syntax builders and compiler operations for `meta` functions. Pure builders also run at runtime; operations that query the compiler remain compile-time only. Every unit reaches it through the prelude's `varops.x`; include `meta.x` explicitly where `meta` functions are written.
+- [`lib/meta.x`](meta.md) - Syntax builders and compiler operations for `meta` functions. Pure builders also run at runtime; operations that query the compiler remain compile-time only. Every unit reaches it through the prelude's `var/var.x`; include `meta.x` explicitly where `meta` functions are written.
 - [`lib/path.x`](path.md) - Filesystem operations on path `String`s; explicitly include `path.x` to use them.
 - [`lib/process.x`](process.md) - Commands, pipelines, and background jobs without a shell; explicitly include `process.x` to use them.
 - [`lib/regex.x`](regex.md) - Regular expressions over the bytes of a `String`; explicitly include `regex.x` to use them.
@@ -98,7 +89,6 @@ prelude. Include one explicitly to use its declarations.
 
 These modules implement the runtime and are not public APIs.
 
-- `lib/array-generics.x` - Shared declaration templates for typed array operations.
 - `lib/cleanup.x` - Cleanup adoption templates used by runtime owners.
 - `lib/clibc.x` - C library prototypes for integer and string conversions, and string comparison, marked `meta` so compile-time code calls the native functions; it includes the C headers it declares from.
 - `lib/cmath.x` - C99 `<math.h>` prototypes, declared so a `Var` argument unboxes at a math call; the unit still includes `<math.h>`.
@@ -106,13 +96,8 @@ These modules implement the runtime and are not public APIs.
 - `lib/error-macros.x` - Structured Error causes shared by runtime modules.
 - `lib/error-private.x` - Error transfer templates used by the exception machinery.
 - `lib/error_init.x` - Type-owned initialization shim that preserves `Error`'s pre-initialization boundary.
-- `lib/func-errors.x` - Structured callable errors shared by runtime modules.
 - `lib/integer-ops.x` - Integer conversion and arithmetic templates shared by runtime owners.
-- `lib/lisp-init.x` - The standard Lisp algorithms `etc/init.xlisp` binds by name into every `Lisp` session.
-- `lib/lisp-targets.x` - The native operations a `Lisp` session can bind, built outside the implicit prelude so the optional modules that supply them stay out of it.
-- `lib/machine.x` - `Match` wordcode, builder, and execution-state definitions.
-- `lib/map-generics.x` - Shared declaration templates for typed map operations.
-- `lib/match-machine.x` - Private `Match` wordcode decoder.
+- `lib/lisp-targets/lisp-targets.x` - The native operations a `Lisp` session can bind, built outside the implicit prelude so the optional modules that supply them stay out of it.
 - `lib/native-scalar-types.x` - The exact C scalar ledger and its compile-time projections.
 - `lib/private-keywords.x` - Keyword aliases used by runtime implementation code.
 - `lib/protocols.x` - The built-in `Cleanup`, `Block`, `Iter`, and `Var` protocol declarations used to generate runtime dispatch adapters.

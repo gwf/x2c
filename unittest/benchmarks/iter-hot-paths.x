@@ -10,7 +10,7 @@ typedef struct {
   int stop;
 } BenchState;
 
-/* Mirrors the private record in lib/map.x so the inline-scan lane below
+/* Mirrors the private record in lib/map/map.x so the inline-scan lane below
    walks exactly the memory Map.try_next walks. */
 struct BenchMapRecord { Var key, val; };
 

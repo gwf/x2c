@@ -13,10 +13,10 @@ typedef char * String;
 #include <string.h>
 #include "var/var.h"
 #include "list/list.h"
-#include "array.h"
+#include "array/array.h"
 #include "buffer.h"
 #include "exception.h"
-#include "func.h"
+#include "func/func.h"
 #include "symbol.h"
 #include "pool/pool.h"
 typedef struct f7_storage___StringHeader{
@@ -40,7 +40,7 @@ _Static_assert(_Generic(& strcmp, int(*)(const char *, const char *) : 1, defaul
 _Static_assert(_Generic(& strchr, char *(*)(const char *, int) : 1, default: 0), "native alias String_c_find does not match strchr");
 #endif
 #define String_c_find strchr
-static String _2, _1, _0;
+static String _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 static int _init_guard_ = 0;
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 static inline f7_storage___StringHeader f7_storage____header(String str);
@@ -60,6 +60,113 @@ static void f8_building____join_into(char * out, List strings, String sep, int s
 static String f8_building____pad(String str, int width, char fill, int side);
 static int f9_splitting____newline_width(String str);
 static int f8_adapters____next(Iter iter, Var * out);
+#include <ctype.h>
+#include <limits.h>
+#include "buffer.h"
+#include "exception.h"
+#include "scan.h"
+static inline int f6_escape____escape_byte(unsigned char ch, char * out);
+static inline char f6_escape____escape_letter(unsigned char ch);
+static int f6_escape____unescape_into(char * out, const char * src);
+static inline int f6_escape____decode_escape(const char * * at);
+static inline int f6_escape____hex_escape(const char * * at, int esc);
+static inline int f6_escape____octal_escape(const char * * at, int esc);
+static inline int f6_escape____named_escape(int esc);
+#include <limits.h>
+#include <stdio.h>
+#include <string.h>
+#include "var/var.h"
+#include "list/list.h"
+#include "buffer.h"
+#include "exception.h"
+typedef struct f6_format___Spec{
+  int flags, width, precision;  Symbol modifier;  char conversion;
+}
+f6_format___Spec;
+static const char f6_format____format_flags[] = "-+ #0";
+enum{
+  FORMAT_LEFT = 1
+}
+;
+static const SymbolSet f6_format___format_modifiers =(SymbolSet) "\001\000\000\000\006\000\000\000\003\000\000\000\030\151\335\120\354\303\354\157\000\004\007\000\003\005\000\000\004\005\000\000\212\173\016\000\000\000\000\000\144\100\003\000\000\000\000\000\250\174\150\002\000\000\000\000\216\173\014\000\000\000\000\000\216\173\214\001\000\000\000\000\012\023\365\021\006\000\000\000";
+static const char * const f6_format____format_modifiers[] ={
+  "", "hh", "h", "l", "ll", "L"
+}
+;
+typedef struct f6_format___Format{
+  String fmt;  int length, literal, cursor, offset;  List args;  Buffer out;
+}
+f6_format___Format;
+static void f6_format____conversion(f6_format___Format * f);
+static void f6_format____write_literal(f6_format___Format * f);
+static void f6_format____need_byte(f6_format___Format * f);
+static f6_format___Spec f6_format____spec(f6_format___Format * f);
+static int f6_format____flags(f6_format___Format * f);
+static void f6_format____width(f6_format___Format * f, f6_format___Spec * spec);
+static int f6_format____star(f6_format___Format * f);
+static void f6_format____precision(f6_format___Format * f, f6_format___Spec * spec);
+static int f6_format____decimal(f6_format___Format * f, String label);
+static int f6_format____byte(f6_format___Format * f);
+static int f6_format____digit(f6_format___Format * f);
+static Symbol f6_format____modifier(f6_format___Format * f);
+static Symbol f6_format____doubled(f6_format___Format * f, char letter, Symbol once, Symbol twice);
+static void f6_format____check(f6_format___Format * f, f6_format___Spec spec);
+static Var f6_format____take(f6_format___Format * f, String reason);
+static Buffer f6_format____print(f6_format___Format * f, f6_format___Spec spec, Var arg);
+static void f6_format____spell(f6_format___Spec s, char * out);
+static const Symbol f6_format____integer_targets[][2] ={
+  {
+    3453797, 3847013
+  }
+  , {
+    26993, 30065
+  }
+  , {
+    3453293, 3846509
+  }
+  , {
+    818062, 44858254
+  }
+  , {
+    25983886, 1435270030
+  }
+
+}
+;
+static Buffer f6_format____integer(f6_format___Format * f, f6_format___Spec spec, Var arg);
+static Buffer f6_format____floating(f6_format___Format * f, const char * text, Symbol modifier, Var arg);
+static Buffer f6_format____character(f6_format___Format * f, const char * text, Var arg);
+static Buffer f6_format____string(f6_format___Format * f, const char * text, Var arg);
+static Var f6_format____number(f6_format___Format * f, Var arg, Symbol target);
+_Noreturn static void f6_format____format_error(int offset, String reason);
+static void f6_format____fail(f6_format___Format * f, String reason);
+_Noreturn static void f6_format____nested(f6_format___Format * f, String reason, Var code, List details);
+#include <ctype.h>
+#include <errno.h>
+#include <limits.h>
+#include <stdlib.h>
+static int f6_number____only_space(const char * rest);
+typedef struct Split * Split;
+#include <ctype.h>
+#include <string.h>
+#include "var/var.h"
+#include "list/list.h"
+#include "array/array.h"
+#include "iter.h"
+#include "scope/scope.h"
+struct Split{
+  String str, sep;  int(* next)(Split split, int * cursor, String * out);
+}
+;
+static inline int f7_cursors____end(String str, String sep, int start, int * next);
+static inline int f7_cursors____line_end(String str, int start, int keep_ends, int * next);
+static Split f7_cursors____new(String str, String sep, int(* next)(Split split, int * cursor, String * out));
+static int f7_cursors____words_next(Split split, int * cursor, String * out);
+static int f7_cursors____lines_next(Split split, int * cursor, String * out);
+static int f7_cursors____splits_next(Split split, int * cursor, String * out);
+static int f7_cursors____iter_next(Iter iter, Var * out);
+static inline Iter _x2c_gensym_proto_split_iter_0(Var a0, Iter a1);
+static VarMethods _x2c_gensym_protocol_methods_0;
 typedef struct _x2c_gensym_defer_env_0{
   const void * _x2c_gensym_defer_capture_0;  const void * _x2c_gensym_defer_capture_1;
 }
@@ -85,13 +192,23 @@ typedef struct _x2c_gensym_defer_env_4{
 }
 _x2c_gensym_defer_env_4;
 static void _x2c_gensym_defer_cleanup_4(void * _x2c_gensym_defer_opaque_4);
+typedef struct _x2c_gensym_defer_env_5{
+  const void * _x2c_gensym_defer_capture_10;
+}
+_x2c_gensym_defer_env_5;
+static void _x2c_gensym_defer_cleanup_5(void * _x2c_gensym_defer_opaque_5);
+int x2c_register_builtin_descriptor(Symbol, VarMethods);
+void x2c_register_descriptor(String, VarMethods);
 #include "exception.h"
 
 
 
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
-  x2c_initialize_protocols();  if(_init_guard_) return;  _init_guard_ = 1;  _0 = String_new("\n");  _1 = String_new("\n");  _2 = String_new("\r\n");
+  x2c_initialize_protocols();  if(_init_guard_) return;  _init_guard_ = 1;  _x2c_gensym_protocol_methods_0 =(VarMethods){
+    .iter = _x2c_gensym_proto_split_iter_0
+  }
+  ;  if(! x2c_register_builtin_descriptor(40919656, _x2c_gensym_protocol_methods_0)) x2c_register_descriptor(String_new("split"), _x2c_gensym_protocol_methods_0);  _0 = String_new("\n");  _1 = String_new("\n");  _2 = String_new("\r\n");  _3 = String_new("\"\"");  _4 = String_new("\"%s\"");  _5 = String_new("\\");  _6 = String_new("excess values");  _7 = String_new("missing value");  _8 = String_new("incomplete conversion");  _9 = String_new("width exceeds int range");  _10 = String_new("width");  _11 = String_new("missing star value");  _12 = String_new("precision");  _13 = String_new(" exceeds int range");  _14 = String_new("unsupported length modifier");  _15 = String_new("positional formats are unsupported");  _16 = String_new("unsupported conversion");  _17 = String_new("unsupported integer length");  _18 = String_new("unsupported floating length");  _19 = String_new("wide strings and characters are unsupported");  _20 = String_new("unsupported flag for conversion");  _21 = String_new("unsupported precision for %c");  _22 = String_new("%c cannot produce an embedded NUL");  _23 = String_new("string conversion failed");  _24 = String_new("value conversion failed");
 }
 
 static inline f7_storage___StringHeader f7_storage____header(String str){
@@ -179,7 +296,6 @@ static String f7_storage____intern_owned(String string){
   if(found != string) _free_unchecked(string);  return found;
 }
 
-String Var_string(Var);
 void String_free(String str){
   if(str == NULL) return;  if(f7_storage____header(str) -> hash){
     Var existing = Pool_lookup(Pool_current(), String_var(str));  if(! Var_is_void(existing) && Var_string(existing) == str) return;
@@ -618,7 +734,6 @@ Symbol String_symbol(String str){
   if(! String_truth(str) || ! * str) return 0;  return Symbol_new(str);
 }
 
-Iter Iter_init(Iter, Var, IterNextFn, Var);
 Iter String_iter(String x, Iter dest){
   if(! Iter_truth(dest)) return NULL;  return Iter_init(dest, String_var(x), f8_adapters____next, int_var(0));
 }
@@ -629,6 +744,469 @@ static int f8_adapters____next(Iter iter, Var * out){
 
 int String_try_next(String str, int * cursor, int * out){
   if(! cursor) return 0;  if(! out) return 0;  if(! String_truth(str) ||(* cursor) < 0) return 0;  if((* cursor) >= String_len(str)) return 0; (* out) = String_getindex(str, (* cursor)); (* cursor) += 1;  return 1;
+}
+
+int String_contains_digit(String str){
+  if(! String_truth(str) || ! * str) return 0;  for(unsigned char * p =(unsigned char *) str;  * p;  p ++) if(isdigit(* p)) return 1;  return 0;
+}
+
+int String_is_alpha(String s){
+  if(! String_truth(s)) return 0;  for(unsigned char * p =(unsigned char *) s;  * p;  p ++) if(! isalpha(* p)) return 0;  return 1;
+}
+
+int String_is_alpha_under(String s){
+  if(! String_truth(s)) return 0;  for(unsigned char * p =(unsigned char *) s;  * p;  p ++) if(! isalpha(* p) && * p != '_') return 0;  return 1;
+}
+
+int String_is_digit(String s){
+  if(! String_truth(s)) return 0;  for(unsigned char * p =(unsigned char *) s;  * p;  p ++) if(! isdigit(* p)) return 0;  return 1;
+}
+
+int String_is_alnum(String s){
+  if(! String_truth(s)) return 0;  for(unsigned char * p =(unsigned char *) s;  * p;  p ++) if(! isalnum(* p)) return 0;  return 1;
+}
+
+int String_is_alnum_under(String s){
+  if(! String_truth(s)) return 0;  for(unsigned char * p =(unsigned char *) s;  * p;  p ++) if(! isalnum(* p) && * p != '_') return 0;  return 1;
+}
+
+int String_is_identifier(String s){
+  if(! String_truth(s) || ! * s) return 0;  unsigned char * bytes =(unsigned char *) s;  if(! isalpha(* bytes) && * bytes != '_') return 0;  for(unsigned char * p = bytes + 1;  * p;  p ++) if(! isalnum(* p) && * p != '_') return 0;  return 1;
+}
+
+int String_is_space(String s){
+  if(! String_truth(s)) return 0;  for(unsigned char * p =(unsigned char *) s;  * p;  p ++) if(! isspace(* p)) return 0;  return 1;
+}
+
+int String_is_lower(String s){
+  if(! String_truth(s)) return 0;  for(unsigned char * p =(unsigned char *) s;  * p;  p ++) if(! islower(* p)) return 0;  return 1;
+}
+
+int String_is_lower_under(String s){
+  if(! String_truth(s)) return 0;  for(unsigned char * p =(unsigned char *) s;  * p;  p ++) if(! islower(* p) && * p != '_') return 0;  return 1;
+}
+
+int String_is_upper(String s){
+  if(! String_truth(s)) return 0;  for(unsigned char * p =(unsigned char *) s;  * p;  p ++) if(! isupper(* p)) return 0;  return 1;
+}
+
+int String_is_upper_under(String s){
+  if(! String_truth(s)) return 0;  for(unsigned char * p =(unsigned char *) s;  * p;  p ++) if(! isupper(* p) && * p != '_') return 0;  return 1;
+}
+
+String String_escape(String str){
+  if(! String_truth(str)) return NULL;  int bytes = 0;  for(const char * at = str;  * at;  at ++){
+    int width = f6_escape____escape_byte((unsigned char) * at, NULL);  if(bytes > INT_MAX - width - 1) return NULL;  bytes += width;
+  }
+  String string = String_malloc(bytes + 1);  char * dst = string;  for(const char * at = str;  * at;  at ++) dst += f6_escape____escape_byte((unsigned char) * at, dst);  * dst = '\0';  return String_intern_free(string);
+}
+
+static inline int f6_escape____escape_byte(unsigned char ch, char * out){
+  char letter = f6_escape____escape_letter(ch);  if(letter){
+    if(out){
+      out[0] = '\\';  out[1] = letter;
+    }
+    return 2;
+  }
+  if(ch >= 32 && ch <= 126){
+    if(out) out[0] = ch;  return 1;
+  }
+  if(out){
+    out[0] = '\\';  out[1] =((ch >> 6) & 0x03) + '0';  out[2] =((ch >> 3) & 0x07) + '0';  out[3] =(ch & 0x07) + '0';
+  }
+  return 4;
+}
+
+static inline char f6_escape____escape_letter(unsigned char ch){
+  switch(ch){
+    case '\n' : return 'n';  case '\r' : return 'r';  case '\t' : return 't';  case '\b' : return 'b';  case '\f' : return 'f';  case '\v' : return 'v';  case '\\' : return '\\';  case '"' : return '"';  case '\'' : return '\'';
+  }
+  return 0;
+}
+
+String String_repr(String str){
+  if(! _init_guard_) _file_init_();  if(! String_truth(str) || ! * str) return _3;  return String_printf(_4, String_escape(str));
+}
+
+Buffer String_write_repr(String str, Buffer out){
+  Buffer_write_char(out, '"');  for(const char * at = str;  at && * at;  at ++){
+    char escaped[4];  int width = f6_escape____escape_byte((unsigned char) * at, escaped);  Buffer_write_len(out, escaped, width);
+  }
+  return Buffer_write_char(out, '"');
+}
+
+String String_unescape(String str){
+  if(! _init_guard_) _file_init_();  int n = String_len(str);  if(n == 0) return NULL;  if(!(String_contains(str, _5))) return str;  String string = String_malloc(n + 1);  if(f6_escape____unescape_into(string, str) < 0){
+    String_free(string); {
+      static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/string/escape.x",.function = "String_unescape",.line = 126,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_7, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("String.unescape")), NULL))));  __builtin_unreachable();
+    }
+
+  }
+  return String_intern_free(string);
+}
+
+static int f6_escape____unescape_into(char * out, const char * src){
+  char * dst = out;  while(* src){
+    if(* src != '\\'){
+      * dst ++ = * src ++;  continue;
+    }
+    src ++;  if(! * src) break;  int byte = f6_escape____decode_escape(&(src));  if(byte > 0377) return - 1;  if(byte > 0) * dst ++ = byte;
+  }
+  * dst = '\0';  return(int)(dst - out);
+}
+
+static inline int f6_escape____decode_escape(const char * * at){
+  int esc =(unsigned char) *(* at) ++;  switch(esc){
+    case 'x' : case 'X' : case 'u' : case 'U' : return f6_escape____hex_escape(&((* at)), esc);  case '0' : case '1' : case '2' : case '3' : case '4' : case '5' : case '6' : case '7' : return f6_escape____octal_escape(&((* at)), esc);  case '\n' : return - 1;
+  }
+  return f6_escape____named_escape(esc);
+}
+
+static inline int f6_escape____hex_escape(const char * * at, int esc){
+  int byte = 0, digits = 0;  for(;  *(* at) && digits < 2; (* at) ++, digits ++){
+    int hex = scan_ascii_hex_value(*(* at));  if(hex < 0) break;  byte =(byte << 4) | hex;
+  }
+  return digits ? byte : esc;
+}
+
+static inline int f6_escape____octal_escape(const char * * at, int esc){
+  int byte = esc - '0';  for(int digits = 1;  *(* at) && digits < 3; (* at) ++, digits ++){
+    char next = *(* at);  if(next < '0' || next > '7') break;  byte =(byte << 3) |(next - '0');
+  }
+  return byte;
+}
+
+static inline int f6_escape____named_escape(int esc){
+  switch(esc){
+    case 'a' : return '\a';  case 'b' : return '\b';  case 'f' : return '\f';  case 'n' : return '\n';  case 'r' : return '\r';  case 't' : return '\t';  case 'v' : return '\v';
+  }
+  return esc;
+}
+
+int String_parse_char(String str){
+  if(! String_truth(str) || ! * str) return - 1;  const char * at = str;  if(* at ++ != '\'' || ! * at) return - 1;  int byte = * at ++;  if(byte == '\\'){
+    if(! * at) return - 1;  byte = f6_escape____decode_escape(&(at));  if(byte < 0 || byte > 0377) return - 1;
+  }
+  return * at == '\'' ? byte : - 1;
+}
+
+String String_parse(String str){
+  if(! _init_guard_) _file_init_();  if(! String_truth(str) || ! * str) return NULL;  int n = String_len(str);  if(String_getindex(str, 0) == '%' && String_getindex(str, 1) == '"' && String_getindex(str, n - 1) == '"') return String_unescape(String_new_len(str + 2, n - 3));  if(String_getindex(str, 0) == '"' && String_getindex(str, n - 1) == '"') return String_unescape(String_new_len(str + 1, n - 2));  return String_unescape(str);
+}
+
+String String_format(String fmt, List values){
+  if(! _init_guard_) _file_init_();  Buffer out = Buffer_new(0);  const Buffer _x2c_gensym_macro_acquired_0 = out; {
+    _x2c_gensym_defer_env_5 _x2c_gensym_macro_environment_5 ={
+      0
+    }
+    ;  _x2c_gensym_macro_environment_5._x2c_gensym_defer_capture_10 =(const void *) & _x2c_gensym_macro_acquired_0;  X2CCleanup _x2c_gensym_defer_record_5 ={
+      .fn = _x2c_gensym_defer_cleanup_5, .env = & _x2c_gensym_macro_environment_5
+    }
+    ;  x2c_cleanup_push(& _x2c_gensym_defer_record_5); {
+      f6_format___Format f ={
+        .fmt = fmt, .length = String_len(fmt), .args = values, .out = out
+      }
+      ;  while(f.cursor < f.length) if(f6_format____byte(&(f)) == '%') f6_format____conversion(&(f));  else f.cursor ++;  f6_format____write_literal(&(f));  if(List_truth(f.args)) f6_format____format_error(f.length, _6); {
+        String _x2c_gensym_return_value_5 = Buffer_str(out); {
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_5);  return _x2c_gensym_return_value_5;
+        }
+
+      }
+
+    }
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_5);
+  }
+
+}
+
+static void f6_format____conversion(f6_format___Format * f){
+  f6_format____write_literal(&((* f))); (* f).offset =(* f).cursor ++;  f6_format____need_byte(&((* f)));  if(f6_format____byte(&((* f))) == '%'){
+    Buffer_write_char((* f).out, '%'); (* f).cursor ++;
+  }
+  else{
+    f6_format___Spec spec = f6_format____spec(&((* f)));  f6_format____print(&((* f)), spec, f6_format____take(&((* f)), _7));
+  }
+  (* f).literal =(* f).cursor;
+}
+
+static void f6_format____write_literal(f6_format___Format * f){
+  if((* f).cursor ==(* f).literal) return;  Buffer_write_len((* f).out, (* f).fmt +(* f).literal, (size_t)((* f).cursor -(* f).literal));
+}
+
+static void f6_format____need_byte(f6_format___Format * f){
+  if((* f).cursor ==(* f).length) f6_format____fail(&((* f)), _8);
+}
+
+static f6_format___Spec f6_format____spec(f6_format___Format * f){
+  f6_format___Spec spec ={
+    .flags = f6_format____flags(&((* f))), .precision = - 1
+  }
+  ;  f6_format____width(&((* f)), &(spec));  f6_format____precision(&((* f)), &(spec));  f6_format____need_byte(&((* f)));  spec.modifier = f6_format____modifier(&((* f)));  f6_format____need_byte(&((* f)));  spec.conversion = String_getindex((* f).fmt, (* f).cursor ++);  f6_format____check(&((* f)), spec);  return spec;
+}
+
+static int f6_format____flags(f6_format___Format * f){
+  int flags = 0;  for(const char * flag; (flag = strchr(f6_format____format_flags, f6_format____byte(&((* f))))); ){
+    flags |= 1 <<(flag - f6_format____format_flags); (* f).cursor ++;  f6_format____need_byte(&((* f)));
+  }
+  return flags;
+}
+
+int abs(int);
+static void f6_format____width(f6_format___Format * f, f6_format___Spec * spec){
+  if(f6_format____byte(&((* f))) == '*'){
+    int width = f6_format____star(&((* f)));  if(width == INT_MIN) f6_format____fail(&((* f)), _9);  if(width < 0)(* spec).flags |= FORMAT_LEFT; (* spec).width = abs(width); (* f).cursor ++;
+  }
+  else(* spec).width = f6_format____decimal(&((* f)), _10);
+}
+
+static int f6_format____star(f6_format___Format * f){
+  return(int) Var_integer(f6_format____number(&((* f)), f6_format____take(&((* f)), _11), 3453797));
+}
+
+static void f6_format____precision(f6_format___Format * f, f6_format___Spec * spec){
+  if(f6_format____byte(&((* f))) != '.') return; (* f).cursor ++;  f6_format____need_byte(&((* f)));  if(f6_format____byte(&((* f))) == '*'){
+    (* spec).precision = f6_format____star(&((* f))); (* f).cursor ++;
+  }
+  else(* spec).precision = f6_format____decimal(&((* f)), _12);
+}
+
+static int f6_format____decimal(f6_format___Format * f, String label){
+  int number = 0, start =(* f).cursor;  while(f6_format____digit(&((* f)))){
+    int digit = f6_format____byte(&((* f))) - '0';  if(number >(INT_MAX - digit) / 10) f6_format____format_error(start, String_join(NULL, cons(String_var(label), cons(String_var(_13), NULL))));  number = number * 10 + digit; (* f).cursor ++;
+  }
+  return number;
+}
+
+static int f6_format____byte(f6_format___Format * f){
+  return String_getindex((* f).fmt, (* f).cursor);
+}
+
+static int f6_format____digit(f6_format___Format * f){
+  return f6_format____byte(&((* f))) >= '0' && f6_format____byte(&((* f))) <= '9';
+}
+
+static Symbol f6_format____modifier(f6_format___Format * f){
+  switch(f6_format____byte(&((* f)))){
+    case 'h' : return f6_format____doubled(&((* f)), 'h', 40402088, 213092);  case 'l' : return f6_format____doubled(&((* f)), 'l', 818062, 25983886);  case 'L' :(* f).cursor ++;  return 26071077642;  case 'j' : case 'z' : case 't' : f6_format____fail(&((* f)), _14);
+  }
+  return 949130;
+}
+
+static Symbol f6_format____doubled(f6_format___Format * f, char letter, Symbol once, Symbol twice){
+  (* f).cursor ++;  if(f6_format____byte(&((* f))) != letter) return once; (* f).cursor ++;  return twice;
+}
+
+static void f6_format____check(f6_format___Format * f, f6_format___Spec spec){
+  char ch = spec.conversion;  int integer = strchr("diouxX", ch) != NULL;  int floating = strchr("fFeEgGaA", ch) != NULL, text = ch == 'c' || ch == 's';  if(ch == '$') f6_format____fail(&((* f)), _15);  if(! integer && ! floating && ! text) f6_format____fail(&((* f)), _16);  if(integer && spec.modifier == 26071077642) f6_format____fail(&((* f)), _17);  if(floating && spec.modifier != 949130 && spec.modifier != 818062 && spec.modifier != 26071077642) f6_format____fail(&((* f)), _18);  if(text && spec.modifier != 949130) f6_format____fail(&((* f)), _19);  if(text &&(spec.flags & ~ FORMAT_LEFT)) f6_format____fail(&((* f)), _20);  if(ch == 'c' && spec.precision >= 0) f6_format____fail(&((* f)), _21);
+}
+
+static Var f6_format____take(f6_format___Format * f, String reason){
+  if(! List_truth((* f).args)) f6_format____fail(&((* f)), reason);  Var arg = List_car((* f).args); (* f).args = List_cdr((* f).args);  return arg;
+}
+
+static Buffer f6_format____print(f6_format___Format * f, f6_format___Spec spec, Var arg){
+  if(strchr("diouxX", spec.conversion)) return f6_format____integer(&((* f)), spec, arg);  char text[48];  f6_format____spell(spec, text);  switch(spec.conversion){
+    case 'c' : return f6_format____character(&((* f)), text, arg);  case 's' : return f6_format____string(&((* f)), text, arg);
+  }
+  return f6_format____floating(&((* f)), text, spec.modifier, arg);
+}
+
+int SymbolSet_index(SymbolSet, Symbol);
+static void f6_format____spell(f6_format___Spec s, char * out){
+  int n = 0;  out[n ++] = '%';  for(int bit = 0;  f6_format____format_flags[bit];  bit ++) if(s.flags & 1 << bit) out[n ++] = f6_format____format_flags[bit];  if(s.width) n += snprintf(out + n, 16, "%d", s.width);  if(s.precision >= 0) n += snprintf(out + n, 16, ".%d", s.precision);  snprintf(out + n, 8, "%s%c", f6_format____format_modifiers[SymbolSet_index(f6_format___format_modifiers, s.modifier)], s.conversion);
+}
+
+static Buffer f6_format____integer(f6_format___Format * f, f6_format___Spec spec, Var arg){
+  int is_unsigned = strchr("ouxX", spec.conversion) != NULL;  int modifier = SymbolSet_index(f6_format___format_modifiers, spec.modifier);  Var value = f6_format____number(&((* f)), arg, f6_format____integer_targets[modifier][is_unsigned]);  char text[48];  spec.modifier = 25983886;  f6_format____spell(spec, text);  if(is_unsigned) return Buffer_printf((* f).out, text, Var_ulong_long(value));  return Buffer_printf((* f).out, text, Var_long_long(value));
+}
+
+static Buffer f6_format____floating(f6_format___Format * f, const char * text, Symbol modifier, Var arg){
+  if(modifier == 26071077642) return Buffer_printf((* f).out, text, Var_long_double_value(f6_format____number(&((* f)), arg, 26071077642)));  return Buffer_printf((* f).out, text, Var_floating(f6_format____number(&((* f)), arg, 3356265)));
+}
+
+static Buffer f6_format____character(f6_format___Format * f, const char * text, Var arg){
+  int byte =(int) Var_integer(f6_format____number(&((* f)), arg, 3453797));  if(!(unsigned char) byte) f6_format____fail(&((* f)), _22);  return Buffer_printf((* f).out, text, byte);
+}
+
+int x2c_error_catch_site_pending(ErrorCatchSite *);
+ErrorHandler x2c_error_catch_site_push(void *, ErrorCatchSite *, Var *);
+int x2c_error_catch_selected(ErrorHandler);
+void x2c_error_catch_detach(ErrorHandler);
+void x2c_error_catch_close(ErrorHandler);
+static Buffer f6_format____string(f6_format___Format * f, const char * text, Var arg){
+  String volatile string = NULL; {
+    ExceptionFrame _x2c_gensym_exception_frame_0;  static MatchCaptureSite _x2c_gensym_macro_arms_0[1];  Var _x2c_gensym_macro_patterns_0[1];  static ErrorCatchSite _x2c_gensym_macro_site_0 ={
+      _x2c_gensym_macro_arms_0, -1, 1, ERROR_CATCH_PENDING, - 1
+    }
+    ;  if(x2c_error_catch_site_pending(& _x2c_gensym_macro_site_0)){
+      _x2c_gensym_macro_patterns_0[0] = List_var(cons(Symbol_var(61045002), cons(Symbol_var(1864393378598), NULL)));
+    }
+    volatile ErrorHandler _x2c_gensym_error_handler_0 = x2c_error_catch_site_push(& _x2c_gensym_exception_frame_0, & _x2c_gensym_macro_site_0, _x2c_gensym_macro_patterns_0);  x2c_exception_push(& _x2c_gensym_exception_frame_0);  if(! sigsetjmp(_x2c_gensym_exception_frame_0.env, 0)) string = Var_str(arg);  else{
+      x2c_exception_landed(& _x2c_gensym_exception_frame_0);  if(x2c_exception_is_error_target(& _x2c_gensym_exception_frame_0)){
+        int _x2c_gensym_macro_selected_0 = x2c_error_catch_selected(_x2c_gensym_error_handler_0);  x2c_error_catch_detach(_x2c_gensym_error_handler_0);  x2c_exception_mark_handled(& _x2c_gensym_exception_frame_0);  if(_x2c_gensym_macro_selected_0 == 0){
+          Var volatile code;  code = x2c_error_catch_capture(_x2c_gensym_error_handler_0, 0);  List volatile details;  details = Var_list_payload(x2c_error_catch_capture(_x2c_gensym_error_handler_0, 1));  f6_format____nested(&((* f)), _23, code, details);
+        }
+
+      }
+      else{
+        x2c_error_catch_close(_x2c_gensym_error_handler_0);  _x2c_gensym_error_handler_0 = NULL;  x2c_exception_leave(& _x2c_gensym_exception_frame_0);  __builtin_unreachable();
+      }
+
+    }
+    x2c_error_catch_close(_x2c_gensym_error_handler_0);  _x2c_gensym_error_handler_0 = NULL;  x2c_exception_leave(& _x2c_gensym_exception_frame_0);
+  }
+  return Buffer_printf((* f).out, text, String_truth(string) ? string : "");
+}
+
+static Var f6_format____number(f6_format___Format * f, Var arg, Symbol target){
+  Var volatile converted =((void) 0, Void); {
+    ExceptionFrame _x2c_gensym_exception_frame_1;  static MatchCaptureSite _x2c_gensym_macro_arms_1[1];  Var _x2c_gensym_macro_patterns_1[1];  static ErrorCatchSite _x2c_gensym_macro_site_1 ={
+      _x2c_gensym_macro_arms_1, -1, 1, ERROR_CATCH_PENDING, - 1
+    }
+    ;  if(x2c_error_catch_site_pending(& _x2c_gensym_macro_site_1)){
+      _x2c_gensym_macro_patterns_1[0] = List_var(cons(Symbol_var(61045002), cons(Symbol_var(1864393378598), NULL)));
+    }
+    volatile ErrorHandler _x2c_gensym_error_handler_1 = x2c_error_catch_site_push(& _x2c_gensym_exception_frame_1, & _x2c_gensym_macro_site_1, _x2c_gensym_macro_patterns_1);  x2c_exception_push(& _x2c_gensym_exception_frame_1);  if(! sigsetjmp(_x2c_gensym_exception_frame_1.env, 0)) converted = Var_convert(arg, target);  else{
+      x2c_exception_landed(& _x2c_gensym_exception_frame_1);  if(x2c_exception_is_error_target(& _x2c_gensym_exception_frame_1)){
+        int _x2c_gensym_macro_selected_1 = x2c_error_catch_selected(_x2c_gensym_error_handler_1);  x2c_error_catch_detach(_x2c_gensym_error_handler_1);  x2c_exception_mark_handled(& _x2c_gensym_exception_frame_1);  if(_x2c_gensym_macro_selected_1 == 0){
+          Var volatile code;  code = x2c_error_catch_capture(_x2c_gensym_error_handler_1, 0);  List volatile details;  details = Var_list_payload(x2c_error_catch_capture(_x2c_gensym_error_handler_1, 1));  f6_format____nested(&((* f)), _24, code, details);
+        }
+
+      }
+      else{
+        x2c_error_catch_close(_x2c_gensym_error_handler_1);  _x2c_gensym_error_handler_1 = NULL;  x2c_exception_leave(& _x2c_gensym_exception_frame_1);  __builtin_unreachable();
+      }
+
+    }
+    x2c_error_catch_close(_x2c_gensym_error_handler_1);  _x2c_gensym_error_handler_1 = NULL;  x2c_exception_leave(& _x2c_gensym_exception_frame_1);
+  }
+  return converted;
+}
+
+_Noreturn static void f6_format____format_error(int offset, String reason){
+  {
+    static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/string/format.x",.function = "f6_format____format_error",.line = 330,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_8, 435316840, 2, Symbol_var(1019648360), int_var(offset), Symbol_var(1218550748), String_var(reason));  __builtin_unreachable();
+  }
+
+}
+
+static void f6_format____fail(f6_format___Format * f, String reason){
+  f6_format____format_error((* f).offset, reason);
+}
+
+_Noreturn static void f6_format____nested(f6_format___Format * f, String reason, Var code, List details){
+  List cause = cons(code, details); {
+    Var _x2c_gensym_literal_part_4 = int_var((* f).offset); {
+      static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/string/format.x",.function = "f6_format____nested",.line = 341,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_9, 435316840, 3, Symbol_var(1019648360), _x2c_gensym_literal_part_4, Symbol_var(1218550748), String_var(reason), Symbol_var(6401226), List_var(cause));  __builtin_unreachable();
+    }
+
+  }
+
+}
+
+static int f6_number____only_space(const char * rest){
+  while(isspace((unsigned char) * rest)) rest ++;  return ! * rest;
+}
+
+int String_try_long(String str, long * out){
+  if(! String_truth(str) || ! out) return 0;  const char * digits = str;  while(isspace((unsigned char) * digits)) digits ++;  int negative = 0;  if(* digits == '+' || * digits == '-'){
+    negative = * digits == '-';  digits ++;
+  }
+  if(digits[0] == '0' &&(digits[1] == 'b' || digits[1] == 'B' || digits[1] == 'o' || digits[1] == 'O')){
+    int base = digits[1] == 'b' || digits[1] == 'B' ? 2 : 8;  const char * number = digits + 2;  char * stop = NULL;  if(number[0] < '0' || number[0] >= '0' + base) return 0;  errno = 0;  unsigned long magnitude = strtoul(number, & stop, base);  if(stop == number || errno == ERANGE || ! f6_number____only_space(stop)) return 0;  unsigned long limit = negative ?(unsigned long) LONG_MAX + 1ul :(unsigned long) LONG_MAX;  if(magnitude > limit) return 0;  * out = negative ?(magnitude == limit ? LONG_MIN : -(long) magnitude) :(long) magnitude;  return 1;
+  }
+  char * stop = NULL;  errno = 0;  long value = strtol(str, & stop, 0);  if(stop ==(const char *) str || errno == ERANGE || ! f6_number____only_space(stop)) return 0;  * out = value;  return 1;
+}
+
+int String_try_double(String str, double * out){
+  if(! String_truth(str) || ! out) return 0;  char * stop = NULL;  errno = 0;  double value = strtod(str, & stop);  if(stop ==(const char *) str || errno == ERANGE || ! f6_number____only_space(stop)) return 0;  * out = value;  return 1;
+}
+
+Var Split_var(Split split){
+  return Var_new(40919656, split);
+}
+
+Split Var_split(Var value){
+  return(Split) Var_pointer(value);
+}
+
+static inline int f7_cursors____end(String str, String sep, int start, int * next){
+  int length = String_len(str);  if(! String_truth(str) || start < 0 || start > length) return - 1;  if(! String_truth(sep)){
+    (* next) = - 1;  return length;
+  }
+  const char * found = strstr(str + start, sep);  if(! found){
+    (* next) = - 1;  return length;
+  }
+  int end = found - str; (* next) = end + String_len(sep);  return end;
+}
+
+static inline int f7_cursors____line_end(String str, int start, int keep_ends, int * next){
+  int length = String_len(str);  if(! String_truth(str) || start < 0 || start >= length) return - 1;  const char * text = str;  int end = start;  while(end < length && text[end] != '\n' && text[end] != '\r') end ++;  int ending = 0;  if(end < length) ending = text[end] == '\r' && end + 1 < length && text[end + 1] == '\n' ? 2 : 1; (* next) = end + ending;  return keep_ends ?(* next) : end;
+}
+
+List String_split_n(String str, String sep, int max_splits){
+  if(! String_truth(str)) return NULL;  Array results = Array_new();  int start = 0, splits = 0;  while(start >= 0){
+    int next = - 1;  int end = max_splits >= 0 && splits >= max_splits ? String_len(str) : f7_cursors____end(str, sep, start, &(next));  String field = String_new_len(str + start, end - start);  Array_push(results, String_var(field));  start = next;  splits ++;
+  }
+  return Array_list_free(results);
+}
+
+List String_split(String str, String sep){
+  return String_split_n(str, sep, - 1);
+}
+
+List String_split_lines(String str, int keep_ends){
+  if(! String_truth(str)) return NULL;  Array results = Array_new();  int start = 0;  while(start < String_len(str)){
+    int next, end = f7_cursors____line_end(str, start, keep_ends, &(next));  String field = String_new_len(str + start, end - start);  Array_push(results, String_var(field));  start = next;
+  }
+  return Array_list_free(results);
+}
+
+static Split f7_cursors____new(String str, String sep, int(* next)(Split split, int * cursor, String * out)){
+  Split split = Scope_malloc(sizeof(struct Split));  * split =(struct Split){
+    .str = str, .sep = sep, .next = next
+  }
+  ;  return split;
+}
+
+static int f7_cursors____words_next(Split split, int * cursor, String * out){
+  if(! split || ! String_truth(split -> str)) return 0;  const char * p = split -> str;  int length = String_len(split -> str), index = * cursor;  while(index < length && isspace((unsigned char) p[index])) index ++;  if(index >= length) return 0;  int start = index;  while(index < length && ! isspace((unsigned char) p[index])) index ++;  String field = x2c_string_from_bytes(p + start, index - start);  * out = field;  * cursor = index;  return 1;
+}
+
+static int f7_cursors____lines_next(Split split, int * cursor, String * out){
+  if(! split || ! String_truth(split -> str)) return 0;  int start = * cursor, next, end = f7_cursors____line_end(split -> str, start, 0, &(next));  if(end < 0) return 0;  String field = String_new_len(split -> str + start, end - start);  * out = field;  * cursor = next;  return 1;
+}
+
+static int f7_cursors____splits_next(Split split, int * cursor, String * out){
+  if(! split || ! String_truth(split -> str)) return 0;  int start = * cursor, next;  int end = f7_cursors____end(split -> str, split -> sep, start, &(next));  if(end < 0) return 0;  String field = String_new_len(split -> str + start, end - start);  * out = field;  * cursor = next;  return 1;
+}
+
+Split String_words(String str){
+  return f7_cursors____new(str, NULL, f7_cursors____words_next);
+}
+
+Split String_lines(String str){
+  return f7_cursors____new(str, NULL, f7_cursors____lines_next);
+}
+
+Split String_splits(String str, String sep){
+  return f7_cursors____new(str, sep, f7_cursors____splits_next);
+}
+
+int Split_try_next(Split split, int * cursor, String * out){
+  if(! split || ! cursor || ! out || ! split -> next) return 0;  return split -> next(split, cursor, out);
+}
+
+static int f7_cursors____iter_next(Iter iter, Var * out){
+  Split split = Var_split(iter -> obj);  int cursor = Var_int(Var_convert(iter -> state, 3453797));  String value;  if(! Split_try_next(split, &(cursor), &(value))) return 0;  iter -> state = int_var(cursor);  * out = String_var(value);  return 1;
+}
+
+Iter Split_iter(Split split, Iter dest){
+  if(! Iter_truth(dest)) return NULL;  return Iter_init(dest, Var_new(3683441, (void *) split), split ? f7_cursors____iter_next : NULL, int_var(0));
+}
+
+static inline Iter _x2c_gensym_proto_split_iter_0(Var a0, Iter a1){
+  return Split_iter(Var_split(a0), a1);
 }
 
 static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0){
@@ -649,5 +1227,9 @@ static void _x2c_gensym_defer_cleanup_3(void * _x2c_gensym_defer_opaque_3){
 
 static void _x2c_gensym_defer_cleanup_4(void * _x2c_gensym_defer_opaque_4){
   _x2c_gensym_defer_env_4 * _x2c_gensym_defer_data_4 =(_x2c_gensym_defer_env_4 *) _x2c_gensym_defer_opaque_4;  if(!(*(int *) _x2c_gensym_defer_data_4->_x2c_gensym_defer_capture_8)) String_free((*(String *) _x2c_gensym_defer_data_4->_x2c_gensym_defer_capture_9));
+}
+
+static void _x2c_gensym_defer_cleanup_5(void * _x2c_gensym_defer_opaque_5){
+  _x2c_gensym_defer_env_5 * _x2c_gensym_defer_data_5 =(_x2c_gensym_defer_env_5 *) _x2c_gensym_defer_opaque_5;  Buffer_cleanup((*(const Buffer *) _x2c_gensym_defer_data_5->_x2c_gensym_defer_capture_10));
 }
 

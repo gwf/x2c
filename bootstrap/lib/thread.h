@@ -16,7 +16,7 @@ typedef struct Thread * Thread;
 
 #include "context.h"
 #include "dispatch.h"
-#include "func.h"
+#include "func/func.h"
 #include "rewrite.h"
 #include "error/error.h"
 #include "error_init.h"

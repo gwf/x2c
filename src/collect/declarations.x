@@ -285,6 +285,7 @@ module void _bind_pending_inline_bodies(
     body.tokenize(text);
     if (markers is not void) body.line_markers = markers;
     List ast = body.full_parse(symbols, 0);
+    _retain_rows(%($hashes));
     Map additions = _inline_type_dependencies(body, ast);
     _publish_inline_dependencies(body, path, own, statics, additions);
     foreach (Var part in _entry(body, path).car())

@@ -50,7 +50,7 @@ cannot favor one layout.
 ## Generated typed Map lane
 
 `lib/typed-map.x` generates `MapIntInt` from the same `$map.core.family` and
-`$map.typed.family` expansions that `lib/map.x` uses, with `int` keys and
+`$map.typed.family` expansions that `lib/map/map.x` uses, with `int` keys and
 values stored in the record instead of `Var`. It is shipped runtime code, not
 a benchmark specimen, so it isolates the cost of the `Var` value layer from
 the cost of the table.
@@ -75,7 +75,7 @@ split-layout specimen even though production Map uses parallel hash and
 entry arrays. Its 0.75 load factor matches production Map and khashl.
 It replaces `Var`, `Scope`, `Bytes`, and dynamic updates with
 `malloc`/`realloc`/`free` and direct typed value pointers. It does not include
-or depend on `lib/map.x`.
+or depend on `lib/map/map.x`.
 
 The x2c source compiles to private static C. A plain-C bridge includes that
 generated C and exports the benchmark ABI; the resulting scalar binaries do
@@ -160,7 +160,7 @@ unchanged for the shipped-Map control campaign.
 
 ## Comparing implementations fairly
 
-- The adapters use the checked-in `lib/map.x` and `lib/typed-map.x` without
+- The adapters use the checked-in `lib/map/map.x` and `lib/typed-map.x` without
   benchmark-only changes and call only their production C API.
 - `khashl-typed` is given the fmix64 hash `lib/typed-map.x` computes for
   `MapIntInt`, so the native pair differs only in table storage, exactly as the

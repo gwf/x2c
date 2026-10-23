@@ -9,7 +9,7 @@
 #include "protocols.h"
 #include <limits.h>
 #include <stdint.h>
-#include "array.h"
+#include "array/array.h"
 #include "block.h"
 #include "iter.h"
 #include "scope/scope.h"

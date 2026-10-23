@@ -16,13 +16,12 @@
 
 #include "error-macros.x"
 #include "common.x"
-#include "map.x"
+#include "map/map.x"
 
 #include "var/var.x"
-#include "varconvert.x"
 #include "symbol.x"
 #include "string/string.x"
-#include "array.x"
+#include "array/array.x"
 #include "buffer.x"
 #include "list/list.x"
 #include "file.x"

@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0x409392BC__
-#define __GUARD_0x409392BC__
+#ifndef __GUARD_0xD41B6D49__
+#define __GUARD_0xD41B6D49__
 
 #include "error-macros.h"
 typedef struct Map * Map;
@@ -27,8 +27,6 @@ typedef struct Map{
 #include "scope/scope.h"
 #include "block.h"
 #include "buffer.h"
-#include "varconvert.h"
-#include "map-generics.h"
 Scope Map_scope(Map _x2c_gensym_macro_map_2);
 
 void Map_move_to(Map _x2c_gensym_macro_map_3, Scope * _x2c_gensym_macro_destination_0);
@@ -100,4 +98,4 @@ Iter Map_enumerate(Map _x2c_gensym_macro_map_47, Iter _x2c_gensym_macro_dest_2);
 void Map_cleanup(Map value);
 
 
-#endif /* __GUARD_0x409392BC__ */
+#endif /* __GUARD_0xD41B6D49__ */

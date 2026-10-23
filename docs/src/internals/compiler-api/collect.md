@@ -70,7 +70,7 @@ of `names`, including their receiver rows. Includes contribute their
 selected declarations, without replaying compile-time effects.
 Unselected functions and variables do not enter the result.
 
-Source: `src/collect/declarations.x:422`
+Source: `src/collect/declarations.x:423`
 
 <a id="Compiler.collect_package"></a>
 #### Compiler.collect_package
@@ -160,7 +160,7 @@ declares, in no particular order. A file that imports a package
 declares none here: the walk that records them for a cold entry does
 not install a package's surface.
 
-Source: `src/collect/declarations.x:613`
+Source: `src/collect/declarations.x:614`
 
 <a id="Compiler.forget_provisional_entries"></a>
 #### Compiler.forget_provisional_entries
@@ -384,7 +384,7 @@ Source: `src/collect/walk.x:51`
 Promotes the selected type families after the owning ordinary full
 parse. The header and Xi then use the same complete family selection.
 
-Source: `src/collect/declarations.x:496`
+Source: `src/collect/declarations.x:497`
 
 <a id="Compiler.publishes_type_family"></a>
 #### Compiler.publishes_type_family
@@ -415,7 +415,7 @@ publishes, as `record_generated_symbol` adds its rows. A row an earlier
 cold walk recorded may sit in an earlier map. The cache retains each key
 and value.
 
-Source: `src/collect/declarations.x:589`
+Source: `src/collect/declarations.x:590`
 
 <a id="Compiler.record_generated_symbol"></a>
 #### Compiler.record_generated_symbol
@@ -427,7 +427,7 @@ current file's collected entry contributes, which is the map its
 interface publishes. A file without a collected declaration map records
 nothing. The cache retains `signature`.
 
-Source: `src/collect/declarations.x:569`
+Source: `src/collect/declarations.x:570`
 
 <a id="Compiler.refresh_source_collections"></a>
 #### Compiler.refresh_source_collections

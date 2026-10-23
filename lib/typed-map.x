@@ -13,7 +13,7 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include "map-generics.x"
+#include "map/map.x"
 #include "integer-ops.x"
 #include "substring.x"
 

@@ -60,13 +60,13 @@ List List.cons_in(Pool pool, Var head, List tail) {
 #include "block.x"
 #include "buffer.x"
 #include "exception.x"
-#include "func.x"
-#include "map.x"
+#include "func/func.x"
+#include "map/map.x"
 #include "scope/scope.x"
 #include "pool/pool.x"
 #include "string/string.x"
 #include "iter.x"
-#include "array.x"
+#include "array/array.x"
 
 #include <stdlib.h>
 #include <string.h>

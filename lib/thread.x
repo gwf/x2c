@@ -40,7 +40,7 @@ typedef struct Thread *Thread;
 
 #include "context.x"
 #include "dispatch.x"
-#include "func.x"
+#include "func/func.x"
 #include "rewrite.x"
 #include "error/error.x"
 #include "error_init.x"

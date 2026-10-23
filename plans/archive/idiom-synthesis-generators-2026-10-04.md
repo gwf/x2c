@@ -54,13 +54,13 @@ deletions.
 
 | File | Total lines | Relevant range | Range lines | Finding |
 | --- | ---: | --- | ---: | --- |
-| [map-generics.x](../../lib/map-generics.x) | 961 | 354-618 | 265 | One operations generator mixes native and boxed policies through constant holes. Its `unbox` slot is never read. |
-| [map-generics.x](../../lib/map-generics.x) | 961 | 691-736 | 46 | The observation generator accepts five arguments but uses only `map`. |
-| [map-generics.x](../../lib/map-generics.x) | 961 | 503-556 | 54 | Update and postfix functions carry boxed/native admission, missing-key, numeric, and postfix policy branches. |
-| [map-generics.x](../../lib/map-generics.x) | 961 | 69-352 | 284 | Fourteen slots supply actual storage layout, callbacks, and error owners. These are not all incidental parameters. |
-| [array-generics.x](../../lib/array-generics.x) | 911 | 27-152 | 126 | Integer, floating, and String update generators state different native arithmetic policies separately. |
-| [array-generics.x](../../lib/array-generics.x) | 911 | 345-628 | 284 | Array also uses a boxed flag in common operations. It is not uniformly a policy-free counterpart to Map. |
-| [array-generics.x](../../lib/array-generics.x) | 911 | 668-708 | 41 | The observer already takes only the three facts it uses and calls ordinary Buffer owners. |
+| [map-generics.x](../../lib/map/generics.x) | 961 | 354-618 | 265 | One operations generator mixes native and boxed policies through constant holes. Its `unbox` slot is never read. |
+| [map-generics.x](../../lib/map/generics.x) | 961 | 691-736 | 46 | The observation generator accepts five arguments but uses only `map`. |
+| [map-generics.x](../../lib/map/generics.x) | 961 | 503-556 | 54 | Update and postfix functions carry boxed/native admission, missing-key, numeric, and postfix policy branches. |
+| [map-generics.x](../../lib/map/generics.x) | 961 | 69-352 | 284 | Fourteen slots supply actual storage layout, callbacks, and error owners. These are not all incidental parameters. |
+| [array-generics.x](../../lib/array/generics.x) | 911 | 27-152 | 126 | Integer, floating, and String update generators state different native arithmetic policies separately. |
+| [array-generics.x](../../lib/array/generics.x) | 911 | 345-628 | 284 | Array also uses a boxed flag in common operations. It is not uniformly a policy-free counterpart to Map. |
+| [array-generics.x](../../lib/array/generics.x) | 911 | 668-708 | 41 | The observer already takes only the three facts it uses and calls ordinary Buffer owners. |
 | [typed-map.x](../../lib/typed-map.x) | 356 | 225-338 | 114 | Four built-in families repeat mechanical wiring, but String export bodies interrupt that family wiring for a real ownership reason. |
 | [typed-array.x](../../lib/typed-array.x) | 189 | 103-165 | 63 | Seven typed families compose storage, public operations, observation, update, publication, and iteration. |
 | [typed-list.x](../../lib/typed-list.x) | 102 | 23-102 | 80 | A typed List retains canonical List representation and inherits operations instead of generating storage algorithms. |

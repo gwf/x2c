@@ -65,9 +65,9 @@ struct UnzipShared {
 #include "var/var.x"
 #include "symbol.x"
 #include "scope/scope.x"
-#include "array.x"
+#include "array/array.x"
 #include "block.x"
-#include "func.x"
+#include "func/func.x"
 #include <limits.h>
 #include <stdlib.h>
 

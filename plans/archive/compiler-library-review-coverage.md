@@ -93,9 +93,9 @@ baseline probes and integrated mitigation validation are separate.
 | File | Lines | Operations reviewed | Gap or retained boundary |
 | --- | ---: | --- | --- |
 | [lib/var.x](../../lib/var/var.x) | 1291 | encoding, constructors, registry/direct and overflow object dispatch, equality/identity, wide boxes, native readers | Keep exact tag/pointer/wide identities; numeric consumer proposal P4; enum projection remains unproved |
-| [lib/varconvert.x](../../lib/varconvert.x) | 289 | fifteen-family decode/metadata; checked float-to-int and modular int conversion; target casts | One decoded-to-native owner P4; no numeric record ABI merge |
-| [lib/varops.x](../../lib/varops.x) | 583 | fast i32/f64 paths; promotion; shifts/overflow policy; general floating reboxing; truth | Delete promotion intermediate P4; full family parity and timing unrun |
-| [lib/varops.x](../../lib/varops.x) | 79 | operator row/template projection and update routing | Small shared policy owner already; no new generic operator framework |
+| [lib/varconvert.x](../../lib/var/conversion.x) | 289 | fifteen-family decode/metadata; checked float-to-int and modular int conversion; target casts | One decoded-to-native owner P4; no numeric record ABI merge |
+| [lib/varops.x](../../lib/var/operators.x) | 583 | fast i32/f64 paths; promotion; shifts/overflow policy; general floating reboxing; truth | Delete promotion intermediate P4; full family parity and timing unrun |
+| [lib/varops.x](../../lib/var/operators.x) | 79 | operator row/template projection and update routing | Small shared policy owner already; no new generic operator framework |
 | [lib/var-ledger.x](../../lib/var-ledger.x) | 24 | generated table invocations from tag ledger | One tag projection owner already; no independent duplicate table removal |
 | [lib/var-tags.x](../../lib/var-tags.x) | 414 | ledger rows and AST projections: descriptors, unbox, numeric, IDs/checks | TagId redundancy candidate unproved due declaration collection/bootstrap |
 | [lib/common.x](../../lib/common.x) | 31 | checked numeric unbox readers projected from native scalar ledger | Keep numeric conversion owner, do not substitute raw decode |
@@ -104,15 +104,15 @@ baseline probes and integrated mitigation validation are separate.
 | [lib/integer-ops.x](../../lib/integer-ops.x) | 45 | native integer update policy, bit arithmetic and shifts | TypedMap modular policy differs native typedArray C operations; retain distinction |
 | [lib/datum.x](../../lib/datum.x) | 264 | write/read tagged values, nested containers, frame protocol and result rejection | decode-list scratch candidate P2 follow-up; malformed/cycle corpus not executed |
 | [lib/string.x](../../lib/string/string.x) | 1842 | all constructors, Pool ownership, byte operations, replace/slice/join, callbacks, format, escapes, conversions and cursors | find-all/render scratch and Symbol roundtrip follow-ups; callback construction guards already present |
-| [lib/string-classify.x](../../lib/string-classify.x) | 98 | byte classification and whole-string predicates | Locale/byte policy explicit; no duplicate-owner deletion established |
-| [lib/string-number.x](../../lib/string-number.x) | 98 | checked number parsing and native formatting conversions | Parse vs scan distinction intentional; no alternate parser consolidation proposed |
+| [lib/string-classify.x](../../lib/string/classify.x) | 98 | byte classification and whole-string predicates | Locale/byte policy explicit; no duplicate-owner deletion established |
+| [lib/string-number.x](../../lib/string/number.x) | 98 | checked number parsing and native formatting conversions | Parse vs scan distinction intentional; no alternate parser consolidation proposed |
 | [lib/list.x](../../lib/list/list.x) | 1037 | canonical cells, ownership, builders, selectors, functional loops, conversions, sorts and iteration | List.array producer guard then sort copy-walk deletion; shared kernels already |
 | [lib/list-selectors.x](../../lib/list-selectors.x) | 113 | optional compound selector projections and receiver behavior | Optional surface intentional, not obsolete aliases without caller inventory |
 | [lib/typed-list.x](../../lib/typed-list.x) | 102 | typed List view helpers/methods and value transforms | Zero-copy validated view differs packed arrays; keep |
-| [lib/array.x](../../lib/array.x) | 455 | Var-array instantiations, functional and heap operations, observers/exports | Producer and managed-render follow-ups; no wholesale typed-family replay |
-| [lib/array-generics.x](../../lib/array-generics.x) | 912 | all shared storage mutation/copy/slice/sort/observe/typed publish/update/iterate kernels | Guarded typed publish is model P2; native bracket/update behavior deliberate |
-| [lib/map.x](../../lib/map.x) | 226 | boxed Map instantiations, public observations, cycle-aware export staging | Rehash callback/cycle owner mandatory; render/result follow-ups |
-| [lib/map-generics.x](../../lib/map-generics.x) | 930 | Robin Hood insertion/backshift/growth, facade policies, observe/iterate/typed convert/export/box | P2 proved; setindex and insertion-tail cleanup source-only; staged growth already guarded |
+| [lib/array.x](../../lib/array/array.x) | 455 | Var-array instantiations, functional and heap operations, observers/exports | Producer and managed-render follow-ups; no wholesale typed-family replay |
+| [lib/array-generics.x](../../lib/array/generics.x) | 912 | all shared storage mutation/copy/slice/sort/observe/typed publish/update/iterate kernels | Guarded typed publish is model P2; native bracket/update behavior deliberate |
+| [lib/map.x](../../lib/map/map.x) | 226 | boxed Map instantiations, public observations, cycle-aware export staging | Rehash callback/cycle owner mandatory; render/result follow-ups |
+| [lib/map-generics.x](../../lib/map/generics.x) | 930 | Robin Hood insertion/backshift/growth, facade policies, observe/iterate/typed convert/export/box | P2 proved; setindex and insertion-tail cleanup source-only; staged growth already guarded |
 | [lib/typed-array.x](../../lib/typed-array.x) | 205 | all native family instantiations, comparators, exports and literal meta prototypes | Literal meta prototypes/shallow collection boundary retained; guards already present |
 | [lib/typed-list.x](../../lib/typed-list.x) | 123 | all view families and conversion/iteration publication | Typed storage/identity deliberate; wide element limitations remain |
 | [lib/typed-map.x](../../lib/typed-map.x) | 402 | four native key/value families, hashing, width/update policies, staged exports | P2 owns shared conversion; no native policy unification |
@@ -120,13 +120,13 @@ baseline probes and integrated mitigation validation are separate.
 | [lib/protocols.x](../../lib/protocols.x) | 85 | concrete lifecycle, iteration and Var protocol declarations | No second representation; generic protocol cleanup must respect borrowed returns |
 | [lib/lib.x](../../lib/lib.x) | 93 | DisjointSet find/union/roots/sizes and observers | Sizes Array finish-only candidate; no rank/parent derived-state deletion proved |
 | [lib/lisp.x](../../lib/lisp/lisp.x) | 2161 | session lifecycle, recursive/tail evaluator, special identities, capture/lookup, native bridges, budgets/interrupt, reader and API | P6 separate semantics; accepted capture/limit/adoption/reader work already root candidate |
-| [lib/lisp-init.x](../../lib/lisp-init.x) | 163 | native standard binder/signature/construction algorithms and registration adapters | Prior flat binder/let repairs done; no duplicate old proposal |
-| [lib/lisp-targets.x](../../lib/lisp-targets.x) | 35 | optional native binding rows/filter boundary | Target isolation purposeful; no reintroducing optional packages into prelude |
+| [lib/lisp-init.x](../../lib/lisp-targets/algorithms.x) | 163 | native standard binder/signature/construction algorithms and registration adapters | Prior flat binder/let repairs done; no duplicate old proposal |
+| [lib/lisp-targets.x](../../lib/lisp-targets/lisp-targets.x) | 35 | optional native binding rows/filter boundary | Target isolation purposeful; no reintroducing optional packages into prelude |
 | [lib/context.x](../../lib/context.x) | 365 | complete open rollback/close ordering, built-in graph export, cycles and custom hooks | Keep move-identity-before-walk/Map rehash; generic transfer collapse unsupported |
-| [lib/func.x](../../lib/func.x) | 426 | signature construction, copied native contexts, adapters, arity/reference/return checks | Native crossing checks protect hand-written adapters; no blanket redundant-check deletion |
+| [lib/func.x](../../lib/func/func.x) | 426 | signature construction, copied native contexts, adapters, arity/reference/return checks | Native crossing checks protect hand-written adapters; no blanket redundant-check deletion |
 | [lib/match.x](../../lib/match/match.x) | 2777 | all grammar/normalization/layout/lowering/execution/search/template/cache/site/shutdown paths | P1 and P5; two replacement lookup policies differ; no direct-map cache rollback |
-| [lib/match-machine.x](../../lib/match-machine.x) | 526 | all opcode execution, undo/span/relation/materialization/lifecycle | Relation scratch early return candidate unprobed; public finish running refusal deliberate |
-| [lib/machine.x](../../lib/machine.x) | 471 | instruction/builder/program/view/decoder and capacity ownership | Match-only current architecture; no Lisp machine reinvention |
+| [lib/match-machine.x](../../lib/match/machine.x) | 526 | all opcode execution, undo/span/relation/materialization/lifecycle | Relation scratch early return candidate unprobed; public finish running refusal deliberate |
+| [lib/machine.x](../../lib/match/wordcode.x) | 471 | instruction/builder/program/view/decoder and capacity ownership | Match-only current architecture; no Lisp machine reinvention |
 | [lib/meta.x](../../lib/meta.x) | 1040 | all syntax/type/source/literal/statement/function/macro construction helpers and compiler-only declarations | Ordinary AST values; scratch request lifetime needs complete caller audit; no blanket map callbacks |
 | [lib/scripting.x](../../lib/scripting.x) | 18 | script-unit optional-module include owner | Small explicit composition; no core prelude expansion |
 | [lib/scan.x](../../lib/scan.x) | 693 | all status scanners, numbers/suffixes, C/x2c escapes, atoms/symbols, byte positions | Allocation-free recognition vs conversion intentionally separate |
@@ -165,7 +165,7 @@ baseline probes and integrated mitigation validation are separate.
 | [lib/dispatch.x](../../lib/dispatch.x) | 942 | Descriptor selection, rendering recursion, primitive String/Buffer paths, equality/order/truth/iteration/member/index adapters | Indirect collection/error/json/logger tests; complete primitive format/performance corpus not run |
 | [lib/common.x](../../lib/common.x) | 906 | Var ABI/tag assertions/aliases/callback rows, native scalar readers and startup/index boundaries | Compiled by all tests; ABI left unchanged; cross-platform ABI assumptions not independently proven |
 | [lib/args.x](../../lib/args.x) | 312 | Complete spec/property reader, long/short parsing, repeated/default/operand/required rules, usage formatting | Args suite and n=50/100/200 Pool allocation probe; proposed scratch owner not implemented |
-| [lib/split.x](../../lib/split.x) | 283 | Eager split/join and borrowed stateful split/word/line cursors, next/out parameter behavior | seven split tests; borrowed source lifetime preserved |
+| [lib/split.x](../../lib/string/cursors.x) | 283 | Eager split/join and borrowed stateful split/word/line cursors, next/out parameter behavior | seven split tests; borrowed source lifetime preserved |
 | [lib/clibc.x](../../lib/clibc.x) | 27 | All current compile-time C scalar/string declarations | Parsed through baseline library; each individual C call not reprobed |
 | [lib/cmath.x](../../lib/cmath.x) | 129 | All native math meta declarations including pointer-out functions | Declaration surface read; no full numeric-domain/native-symbol sweep |
 | [lib/static-init.x](../../lib/static-init.x) | 147 | Acquire/retry storage, ready publication, wait/owner cycle, commit/abort and thread/process shutdown | Source coverage; runtime compiler statics exercised indirectly; static-init suite not run separately |

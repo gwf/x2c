@@ -2,7 +2,6 @@
 
 #define __GUARD_0x83555A03__
 #include "var/var.h"
-#include "varconvert.h"
 #include "meta.h"
 #include "var-tags.h"
 _Static_assert(_u8_ == 0, "TagId matches the var tag ledger");

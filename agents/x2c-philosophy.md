@@ -951,14 +951,14 @@ Exemplars endorse a property, not every line in a file:
   perfect-hash storage; the literal owns membership, index, and order.
 - `lib/path.x` - a file in reading order; `_stat` and `_open` own every
   failure spelling, so each operation stays one line.
-- `lib/split.x` - one strategy record serves eager and lazy splitting, and
-  every strategy is a short named function.
+- `lib/string/cursors.x` - one strategy record serves eager and lazy splitting,
+  and every strategy is a short named function.
 - `src/deps.x` - a header that states ownership, four short functions with
   one idea each, and decision comments at the point of use.
-- `lib/array-generics.x` - one imported implementation shared by ordinary
+- `lib/array/generics.x` - one imported implementation shared by ordinary
   `Array` and six explicitly instantiated packed numeric families; `%[...]`
   remains the ordinary `Var` Array path.
-- `lib/map-generics.x` - one Robin Hood implementation shared by ordinary
+- `lib/map/generics.x` - one Robin Hood implementation shared by ordinary
   `Map` and explicitly instantiated native numeric families; hashing, equality,
   errors, boxing, and iteration remain visible per-family choices.
 - `examples/programs/literate-lisp.x` - the current language written the way

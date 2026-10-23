@@ -29,14 +29,13 @@ typedef struct MacroCaseSite{
 }
 MacroCaseSite;
 
-#include "array.h"
+#include "array/array.h"
 #include "atom.h"
 #include "list/list.h"
-#include "match-machine.h"
-#include "match-cache.h"
+#include "match/match.h"
 #include "meta.h"
 #include "string/string.h"
-#include "varconvert.h"
+#include "var/var.h"
 #include <math.h>
 static List _130, _129, _128, _126, _125, _119, _118, _117, _115, _114, _113, _111, _110, _109, _108, _106, _105, _100, _96, _94, _64, _63, _61, _59, _58, _57, _56, _54, _53, _51, _50, _48, _46, _43, _39, _38, _32, _26, _25, _23, _22, _21, _20, _15, _14, _11, _10, _9, _8;
 
@@ -386,10 +385,6 @@ static List f12_construction____group(Macro t, List values){
   return Array_list_free(grouped);
 }
 
-int Var_is_integer(Var);
-
-int Var_is_floating(Var);
-
 static int f12_construction____items(List items){
   if(! List_truth(items)) return 1;
   {
@@ -491,8 +486,6 @@ static List _expr_values(List values){
   return Array_list_free(lifted);
 }
 
-Symbol Var_tag(Var);
-
 List Macro_number_type(Var value){
   if(! _init_guard_) _file_init_();
   switch(Var_tag(value)){
@@ -592,8 +585,6 @@ void Macro_use_subject(Var rows){
   if(! _init_guard_) _file_init_();
   macro_subject = rows;
 }
-
-int Var_is_void(Var);
 
 static Var f8_patterns____free_reference(String spelling){
   if(Var_is_void(macro_subject)) return List_var(cons(_74, cons(_75, cons(String_var(spelling), NULL))));
@@ -1177,8 +1168,6 @@ static int f11_recognition____capture(List code, MatchPlan plan, MacroFixedSlots
   return f11_recognition____case_match(code, plan, policy, & captured) && f11_recognition____publish(route, & captured, published);
 }
 
-MatchPlan MatchPlan_prepare(Var);
-
 static int f11_recognition____derived_capture(MacroCaseSite * site, List code, Macro t, List names, MatchCaptureBuffer * published){
   macro_subject_used = 0;
   List pattern = f11_recognition____case_shape(t, names);
@@ -1344,8 +1333,6 @@ static MacroFixedSlots f11_recognition____fixed_slots(Macro t, List names, Match
   }
   return policy;
 }
-
-MachineView MachineProgram_view(MachineProgram);
 
 static int f11_recognition____case_match(List code, MatchPlan plan, MacroFixedSlots * policy, MatchCaptureBuffer * captured){
   if(plan -> status != 1138535534920) return MatchPlan_execute_capture(plan, List_var(code), &(* captured), NULL) == 1;
@@ -1560,8 +1547,6 @@ static void _x2c_gensym_defer_cleanup_1(void * _x2c_gensym_defer_opaque_1){
   _x2c_gensym_defer_env_1 * _x2c_gensym_defer_data_1 =(_x2c_gensym_defer_env_1 *) _x2c_gensym_defer_opaque_1;
   MatchLease_release(&((*(MatchLease *) _x2c_gensym_defer_data_1->_x2c_gensym_defer_capture_1)));
 }
-
-void MatchPlan_free(MatchPlan);
 
 static void _x2c_gensym_defer_cleanup_2(void * _x2c_gensym_defer_opaque_2){
   _x2c_gensym_defer_env_2 * _x2c_gensym_defer_data_2 =(_x2c_gensym_defer_env_2 *) _x2c_gensym_defer_opaque_2;

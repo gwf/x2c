@@ -137,10 +137,10 @@ Current proven shapes include:
 - Private pointer conversion pairs in `lib/iter.x`. The tagged
   form preserves `Var.new` and `Var.pointer`; the raw form preserves the
   direct `p64` store and load used by iterator callbacks.
-- The native update family, `$native.update` at `lib/varops.x:95` and its
+- The native update family, `$native.update` at `lib/var/operators.x` and its
   invocations after it. Each invocation supplies the facts that differ.
 - Local resource setup in `$match.machine` in `lib/match/match.x` and
-  `$match.plan` in `lib/match-cache.x`. The macro hides stack-storage
+  `$match.plan` in `lib/match/cache.x`. The macro hides stack-storage
   mechanics while release and fallback policy stay visible.
 - Test registration in `unittest/test-macros.x:1`. The macro removes a
   mechanical name-to-registration conversion.
@@ -148,7 +148,7 @@ Current proven shapes include:
   `lib/var-ledger.x` and `src/type-ledger.x`. One row supplies the tag
   tables, the decoder table, the `TagId` check, and the compiler's lookups.
 
-`lib/map-generics.x` also shows how to remove fake adapters without
+`lib/map/generics.x` also shows how to remove fake adapters without
 discarding real ones. Its generated families call ordinary `Scope`, `Bytes`,
 and `Block` operations directly as `Scope_malloc` and sibling C entries.
 Passing those
@@ -189,7 +189,7 @@ macros: direct aligns,
 offsets, and copies keep a frozen program's byte layout visible.
 A one-use data-only module adds a file boundary without sharing an
 implementation;
-`lib/lisp-targets.x` therefore declares its native target rows directly. Its
+`lib/lisp-targets/lisp-targets.x` therefore declares its native target rows directly. Its
 local expression macro remains necessary because `x2c.ident` is valid only
 during macro expansion; a direct top-level Lisp splice fails before
 translation.
@@ -206,7 +206,7 @@ clearest possible ledger: the enum itself.
 
 Do not make a reader reverse-engineer public function names, C types, or
 failure modes from clever Lisp. The native update macro at
-`lib/varops.x:95` explicitly receives both the native type and public
+`lib/var/operators.x` explicitly receives both the native type and public
 function name at each invocation. That repetition is useful documentation at
 the call site.
 
@@ -325,7 +325,7 @@ must not use it because shared causes never return to the raise.
 `commands/build/build.x` reaches the runtime's own
 `Path.make_dirs` and `Path.remove_tree` rather than keeping compiler-local
 filesystem helpers. The Lisp evaluator's local target
-rows in `lib/lisp-targets.x` produce the native-target Map. Use macros,
+rows in `lib/lisp-targets/lisp-targets.x` produce the native-target Map. Use macros,
 compile-time Lisp, or ordinary helpers according to which form leaves the
 facts easiest to inspect.
 
@@ -384,7 +384,7 @@ second set lookup to remove a second switch — widen the indexed row instead.
 
 Status: proven
 Checked: 2026-08-03 at `66448562`
-Owner: `lib/array-generics.x`, `lib/array.x`, and `lib/typed-array.x`
+Owner: `lib/array/generics.x`, `lib/array/array.x`, and `lib/typed-array.x`
 
 Problem: packed typed arrays over six scalar element types would repeat one
 ~300-line module per type, the shape drifting independently six ways.
@@ -409,7 +409,7 @@ or over-aligned elements, and `%[...]` still constructs ordinary `Array`.
 
 Status: proven
 Checked: 2026-08-08 at `f83edbdb`
-Owner: `lib/map-generics.x`, `lib/map.x`, and `lib/typed-map.x`
+Owner: `lib/map/generics.x`, `lib/map/map.x`, and `lib/typed-map.x`
 
 Problem: a second Robin Hood table for native key and value types would
 repeat the probing, record reuse, growth, deletion, and traversal algorithms
@@ -421,7 +421,7 @@ storage and every algorithm; ordinary `Map` instantiates it with Var hashing
 and equality, and each typed family instantiates the same core with concrete
 key and value operations. Iter and Var publication is a separate opt-in
 expansion, so a family that never boxes pays nothing for it.
-Economics: `lib/map.x` lost roughly 300 authored lines while gaining three
+Economics: `lib/map/map.x` lost roughly 300 authored lines while gaining three
 typed families; the generated C stays specialized on their record fields.
 Proof: the Map suite checks ordinary Map behavior,
 `unittest/test-typed-map.x` covers all three shipped families including
@@ -541,7 +541,7 @@ Problem: a macro that generates code has to build AST nodes, and the SDK
 shipped constructors only for a String literal, a cast, and a call — the last
 two private. Every generator that needed anything else wrote the node shape by
 hand. `lib/var-tags.x` defined its own `var.tag.int-expr` and
-`var.tag.symbol-expr`; `lib/varops.x` spelled a three-level index node inline;
+`var.tag.symbol-expr`; `lib/var/operators.x` spelled a three-level index node inline;
 the `(expr () (composite (commas ...)))` initializer wrapper appeared four
 times across two files. The shapes are only discoverable by reading
 `src/emit/emit.x`, and getting one wrong fails as `compile-time Lisp evaluation
@@ -562,7 +562,7 @@ argument reports `x2c.literal.int requires a number` instead of failing later
 inside an expansion.
 
 Proof: generated `.h` and `.c` byte-identical for `lib/var/var.x` and
-`lib/varops.x` before and after adoption; `make precommit` and `make check`.
+`lib/var/operators.x` before and after adoption; `make precommit` and `make check`.
 
 Limits or counterexample: the SDK declares no other constructors. A
 `switch`, a `case`, and every other shape are quotations in `meta` code or

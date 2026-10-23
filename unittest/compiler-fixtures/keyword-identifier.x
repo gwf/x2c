@@ -1,5 +1,5 @@
 #include "x2c.x"
-#include "array.x"
+#include "array/array.x"
 
 struct Counter { int value; };
 

@@ -6,7 +6,7 @@
 #define __GUARD_0xDF23AB2E__
 
 #include "meta.h"
-#include "array.h"
+#include "array/array.h"
 #include "list/list.h"
 #include "match/match.h"
 #include "symbolset.h"

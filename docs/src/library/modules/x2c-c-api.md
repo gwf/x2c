@@ -32,14 +32,14 @@ prefix.
 | [`x2c_exception_mark_handled`](exception.md#x2c_exception_mark_handled) | `lib/exception.x` | `void x2c_exception_mark_handled(ExceptionFrame *frame)` |
 | [`x2c_exception_push`](exception.md#x2c_exception_push) | `lib/exception.x` | `void x2c_exception_push(ExceptionFrame *e)` |
 | [`x2c_exception_unwinding`](exception.md#x2c_exception_unwinding) | `lib/exception.x` | `int x2c_exception_unwinding(void)` |
-| [`x2c_func_declared_reference_argument`](func.md#x2c_func_declared_reference_argument) | `lib/func.x` | `void *x2c_func_declared_reference_argument( Func fn, const FuncArg *argv, unsigned i, List declared_target, List want)` |
-| [`x2c_func_pointer_argument`](func.md#x2c_func_pointer_argument) | `lib/func.x` | `void *x2c_func_pointer_argument(Func fn, const FuncArg *argv, unsigned i)` |
-| [`x2c_func_record_result`](func.md#x2c_func_record_result) | `lib/func.x` | `Var x2c_func_record_result(const void *bytes, size_t size)` |
-| [`x2c_func_reference_argument`](func.md#x2c_func_reference_argument) | `lib/func.x` | `void *x2c_func_reference_argument( Func fn, const FuncArg *argv, unsigned i, List want)` |
-| [`x2c_func_reference_type`](func.md#x2c_func_reference_type) | `lib/func.x` | `List x2c_func_reference_type(Func fn, unsigned argc, unsigned index)` |
-| [`x2c_func_shared`](func.md#x2c_func_shared) | `lib/func.x` | `Func x2c_func_shared(FuncAdapter adapter, List signature)` |
-| [`x2c_func_unrepresentable_argument`](func.md#x2c_func_unrepresentable_argument) | `lib/func.x` | `FuncArg x2c_func_unrepresentable_argument(Func fn, unsigned i, List source)` |
-| [`x2c_func_value_argument`](func.md#x2c_func_value_argument) | `lib/func.x` | `Var x2c_func_value_argument( Func fn, const FuncArg *argv, unsigned i, Symbol want)` |
+| [`x2c_func_declared_reference_argument`](func.md#x2c_func_declared_reference_argument) | `lib/func/func.x` | `void *x2c_func_declared_reference_argument( Func fn, const FuncArg *argv, unsigned i, List declared_target, List want)` |
+| [`x2c_func_pointer_argument`](func.md#x2c_func_pointer_argument) | `lib/func/func.x` | `void *x2c_func_pointer_argument(Func fn, const FuncArg *argv, unsigned i)` |
+| [`x2c_func_record_result`](func.md#x2c_func_record_result) | `lib/func/func.x` | `Var x2c_func_record_result(const void *bytes, size_t size)` |
+| [`x2c_func_reference_argument`](func.md#x2c_func_reference_argument) | `lib/func/func.x` | `void *x2c_func_reference_argument( Func fn, const FuncArg *argv, unsigned i, List want)` |
+| [`x2c_func_reference_type`](func.md#x2c_func_reference_type) | `lib/func/func.x` | `List x2c_func_reference_type(Func fn, unsigned argc, unsigned index)` |
+| [`x2c_func_shared`](func.md#x2c_func_shared) | `lib/func/func.x` | `Func x2c_func_shared(FuncAdapter adapter, List signature)` |
+| [`x2c_func_unrepresentable_argument`](func.md#x2c_func_unrepresentable_argument) | `lib/func/func.x` | `FuncArg x2c_func_unrepresentable_argument(Func fn, unsigned i, List source)` |
+| [`x2c_func_value_argument`](func.md#x2c_func_value_argument) | `lib/func/func.x` | `Var x2c_func_value_argument( Func fn, const FuncArg *argv, unsigned i, Symbol want)` |
 | `x2c_get_executable` | `src/utils.x` | `String x2c_get_executable(void)` |
 | `x2c_get_root` | `src/utils.x` | `String x2c_get_root(void)` |
 | [`x2c_hash_bytes`](common.md#x2c_hash_bytes) | `lib/common.x` | `inline unsigned x2c_hash_bytes( unsigned long seed, const void *data, size_t width)` |
@@ -59,7 +59,7 @@ prefix.
 | [`x2c_match_site_try_match`](match.md#x2c_match_site_try_match) | `lib/match/match.x` | `int x2c_match_site_try_match( MatchCaptureSite *site, List input, Var pat, List *out_bindings)` |
 | [`x2c_match_site_try_match_replace`](match.md#x2c_match_site_try_match_replace) | `lib/match/match.x` | `int x2c_match_site_try_match_replace( MatchCaptureSite *site, List input, Var pat, Var template, Var *out)` |
 | [`x2c_match_site_try_search`](match.md#x2c_match_site_try_search) | `lib/match/match.x` | `int x2c_match_site_try_search( MatchCaptureSite *site, List input, Var pat, Var *out_match, List *out_bindings)` |
-| [`x2c_match_thread_release`](match-cache.md#x2c_match_thread_release) | `lib/match-cache.x` | `void x2c_match_thread_release(void)` |
+| [`x2c_match_thread_release`](match.md#x2c_match_thread_release) | `lib/match/match.x` | `void x2c_match_thread_release(void)` |
 | [`x2c_match_try_capture`](match.md#x2c_match_try_capture) | `lib/match/match.x` | `int x2c_match_try_capture( List input, Var pattern, MatchCaptureBuffer *captures)` |
 | [`x2c_mix64`](common.md#x2c_mix64) | `lib/common.x` | `inline unsigned long x2c_mix64(unsigned long word)` |
 | [`x2c_normalize_index`](common.md#x2c_normalize_index) | `lib/common.x` | `int x2c_normalize_index(int index, int length)` |
@@ -86,25 +86,25 @@ prefix.
 | [`x2c_var_custom_descriptor`](var.md#x2c_var_custom_descriptor) | `lib/var/var.x` | `VarDescriptor *x2c_var_custom_descriptor(Var value)` |
 | [`x2c_var_declare`](var.md#x2c_var_declare) | `lib/var/var.x` | `VarDescriptor *x2c_var_declare(Symbol tag)` |
 | [`x2c_var_descriptor_index`](var.md#x2c_var_descriptor_index) | `lib/var/var.x` | `int x2c_var_descriptor_index(Var value)` |
-| [`x2c_var_equal`](varops.md#x2c_var_equal) | `lib/varops.x` | `int x2c_var_equal(Var a, Var b)` |
-| [`x2c_var_identical`](varops.md#x2c_var_identical) | `lib/varops.x` | `int x2c_var_identical(Var a, Var b)` |
-| [`x2c_var_order`](varops.md#x2c_var_order) | `lib/varops.x` | `double x2c_var_order(Var a, Var b)` |
-| [`x2c_var_postfix_volatile`](varops.md#x2c_var_postfix_volatile) | `lib/varops.x` | `Var x2c_var_postfix_volatile(volatile Var &?lhs, Symbol op)` |
+| [`x2c_var_equal`](var.md#x2c_var_equal) | `lib/var/var.x` | `int x2c_var_equal(Var a, Var b)` |
+| [`x2c_var_identical`](var.md#x2c_var_identical) | `lib/var/var.x` | `int x2c_var_identical(Var a, Var b)` |
+| [`x2c_var_order`](var.md#x2c_var_order) | `lib/var/var.x` | `double x2c_var_order(Var a, Var b)` |
+| [`x2c_var_postfix_volatile`](var.md#x2c_var_postfix_volatile) | `lib/var/var.x` | `Var x2c_var_postfix_volatile(volatile Var &?lhs, Symbol op)` |
 | [`x2c_var_tag_descriptor_index`](var.md#x2c_var_tag_descriptor_index) | `lib/var/var.x` | `int x2c_var_tag_descriptor_index(Symbol tag)` |
-| [`x2c_var_update_f32`](varops.md#x2c_var_update_f32) | `lib/varops.x` | `float x2c_var_update_f32(volatile float *lhs, Symbol op, Var rhs)` |
-| [`x2c_var_update_f64`](varops.md#x2c_var_update_f64) | `lib/varops.x` | `double x2c_var_update_f64(volatile double *lhs, Symbol op, Var rhs)` |
-| [`x2c_var_update_i16`](varops.md#x2c_var_update_i16) | `lib/varops.x` | `short x2c_var_update_i16(volatile short *lhs, Symbol op, Var rhs)` |
-| [`x2c_var_update_i32`](varops.md#x2c_var_update_i32) | `lib/varops.x` | `int x2c_var_update_i32(volatile int *lhs, Symbol op, Var rhs)` |
-| [`x2c_var_update_i8`](varops.md#x2c_var_update_i8) | `lib/varops.x` | `char x2c_var_update_i8(volatile char *lhs, Symbol op, Var rhs)` |
-| [`x2c_var_update_long`](varops.md#x2c_var_update_long) | `lib/varops.x` | `long x2c_var_update_long(volatile long *lhs, Symbol op, Var rhs)` |
-| [`x2c_var_update_long_double`](varops.md#x2c_var_update_long_double) | `lib/varops.x` | `long double x2c_var_update_long_double(volatile long double *lhs, Symbol op, Var rhs)` |
-| [`x2c_var_update_long_long`](varops.md#x2c_var_update_long_long) | `lib/varops.x` | `long long x2c_var_update_long_long(volatile long long *lhs, Symbol op, Var rhs)` |
-| [`x2c_var_update_schar`](varops.md#x2c_var_update_schar) | `lib/varops.x` | `signed char x2c_var_update_schar(volatile signed char *lhs, Symbol op, Var rhs)` |
-| [`x2c_var_update_u16`](varops.md#x2c_var_update_u16) | `lib/varops.x` | `ushort x2c_var_update_u16(volatile ushort *lhs, Symbol op, Var rhs)` |
-| [`x2c_var_update_u32`](varops.md#x2c_var_update_u32) | `lib/varops.x` | `uint x2c_var_update_u32(volatile uint *lhs, Symbol op, Var rhs)` |
-| [`x2c_var_update_u8`](varops.md#x2c_var_update_u8) | `lib/varops.x` | `uchar x2c_var_update_u8(volatile uchar *lhs, Symbol op, Var rhs)` |
-| [`x2c_var_update_ulong`](varops.md#x2c_var_update_ulong) | `lib/varops.x` | `ulong x2c_var_update_ulong(volatile ulong *lhs, Symbol op, Var rhs)` |
-| [`x2c_var_update_ulong_long`](varops.md#x2c_var_update_ulong_long) | `lib/varops.x` | `unsigned long long x2c_var_update_ulong_long(volatile unsigned long long *lhs, Symbol op, Var rhs)` |
-| [`x2c_var_update_volatile`](varops.md#x2c_var_update_volatile) | `lib/varops.x` | `Var x2c_var_update_volatile(volatile Var &?lhs, Symbol op, Var rhs)` |
+| [`x2c_var_update_f32`](var.md#x2c_var_update_f32) | `lib/var/var.x` | `float x2c_var_update_f32(volatile float *lhs, Symbol op, Var rhs)` |
+| [`x2c_var_update_f64`](var.md#x2c_var_update_f64) | `lib/var/var.x` | `double x2c_var_update_f64(volatile double *lhs, Symbol op, Var rhs)` |
+| [`x2c_var_update_i16`](var.md#x2c_var_update_i16) | `lib/var/var.x` | `short x2c_var_update_i16(volatile short *lhs, Symbol op, Var rhs)` |
+| [`x2c_var_update_i32`](var.md#x2c_var_update_i32) | `lib/var/var.x` | `int x2c_var_update_i32(volatile int *lhs, Symbol op, Var rhs)` |
+| [`x2c_var_update_i8`](var.md#x2c_var_update_i8) | `lib/var/var.x` | `char x2c_var_update_i8(volatile char *lhs, Symbol op, Var rhs)` |
+| [`x2c_var_update_long`](var.md#x2c_var_update_long) | `lib/var/var.x` | `long x2c_var_update_long(volatile long *lhs, Symbol op, Var rhs)` |
+| [`x2c_var_update_long_double`](var.md#x2c_var_update_long_double) | `lib/var/var.x` | `long double x2c_var_update_long_double(volatile long double *lhs, Symbol op, Var rhs)` |
+| [`x2c_var_update_long_long`](var.md#x2c_var_update_long_long) | `lib/var/var.x` | `long long x2c_var_update_long_long(volatile long long *lhs, Symbol op, Var rhs)` |
+| [`x2c_var_update_schar`](var.md#x2c_var_update_schar) | `lib/var/var.x` | `signed char x2c_var_update_schar(volatile signed char *lhs, Symbol op, Var rhs)` |
+| [`x2c_var_update_u16`](var.md#x2c_var_update_u16) | `lib/var/var.x` | `ushort x2c_var_update_u16(volatile ushort *lhs, Symbol op, Var rhs)` |
+| [`x2c_var_update_u32`](var.md#x2c_var_update_u32) | `lib/var/var.x` | `uint x2c_var_update_u32(volatile uint *lhs, Symbol op, Var rhs)` |
+| [`x2c_var_update_u8`](var.md#x2c_var_update_u8) | `lib/var/var.x` | `uchar x2c_var_update_u8(volatile uchar *lhs, Symbol op, Var rhs)` |
+| [`x2c_var_update_ulong`](var.md#x2c_var_update_ulong) | `lib/var/var.x` | `ulong x2c_var_update_ulong(volatile ulong *lhs, Symbol op, Var rhs)` |
+| [`x2c_var_update_ulong_long`](var.md#x2c_var_update_ulong_long) | `lib/var/var.x` | `unsigned long long x2c_var_update_ulong_long(volatile unsigned long long *lhs, Symbol op, Var rhs)` |
+| [`x2c_var_update_volatile`](var.md#x2c_var_update_volatile) | `lib/var/var.x` | `Var x2c_var_update_volatile(volatile Var &?lhs, Symbol op, Var rhs)` |
 
 Total: 95 functions.

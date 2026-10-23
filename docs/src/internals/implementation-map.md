@@ -76,7 +76,7 @@ set of dump flags is listed under [compiler options](../reference/cli.md).
 - Parse: `src/literals/literals.x`
 - Lower/generate: `src/components/collection-literals.x`, `src/transform/transform.x`,
   `src/cache.x`
-- Runtime: `lib/list/list.x`, `lib/array.x`, `lib/map.x`, `lib/string/string.x`
+- Runtime: `lib/list/list.x`, `lib/array/array.x`, `lib/map/map.x`, `lib/string/string.x`
 - Tests: literal-cache and mutable-empty fixtures, collection suites
 - See also: [collections](../guide/collections.md)
 
@@ -153,8 +153,8 @@ set of dump flags is listed under [compiler options](../reference/cli.md).
   `tools/gen-meta-queries.sh` generates from `lib/meta.x` into
   `etc/meta-queries.x`
 - Embedded native bindings: `etc/lisp-bindings.x`,
-  `etc/lisp-bindings.xlisp`, `lib/lisp-targets.x`, `lib/lisp/lisp.x`, and
-  `lib/func.x`
+  `etc/lisp-bindings.xlisp`, `lib/lisp-targets/lisp-targets.x`, `lib/lisp/lisp.x`, and
+  `lib/func/func.x`
 - Tests: macro import, template, decorator, inline-Lisp, and inferred-binding
   compiler fixtures; Lisp and `Func` suites; compile-time-macros, decorators,
   and inline-lisp examples
@@ -218,7 +218,7 @@ set of dump flags is listed under [compiler options](../reference/cli.md).
 - Parse and expand `$lisp.bind`, `$lisp.binding`, and `$lisp.install`:
   `src/macros/macros.x`, `etc/lisp-bindings.x`, and
   `etc/lisp-bindings.xlisp`
-- Runtime call boundary: `lib/lisp/lisp.x`, `lib/func.x`
+- Runtime call boundary: `lib/lisp/lisp.x`, `lib/func/func.x`
 - Tests: Lisp binding compiler fixtures, Lisp/`Func` suites, and the
 inline-lisp example
 - See also: [compile-time macros](../reference/language.md#compile-time-macros)
@@ -234,9 +234,9 @@ inline-lisp example
 - Sentinel literal parsing and C spelling: `src/literals/literals.x`, `src/emit/emit.x`;
   expression context distinguishes the literal from C `void` type positions
 - Runtime representation: `lib/common.x`, `lib/var/var.x`, `lib/scope/scope.x`
-- Numeric metadata, conversion, and failure causes: `lib/varconvert.x`;
+- Numeric metadata, conversion, and failure causes: `lib/var/conversion.x`;
   shared representation declarations: `lib/common.x`
-- Arithmetic, truthiness, and compound assignment: `lib/varops.x`
+- Arithmetic, truthiness, and compound assignment: `lib/var/operators.x`
 - Comparison policy and nonnumeric dispatch: `lib/dispatch.x`; exact numeric
   comparison mechanics delegate to `Var.integer_compare` and
   `Var.integer_floating_compare`
@@ -277,7 +277,7 @@ inline-lisp example
   `src/transform/transform.x`
 - Direct `Func` calls and conversions: `src/callables/callables.x`,
   `src/expressions/expressions.x`
-- Runtime: `lib/func.x` and receiving callback APIs
+- Runtime: `lib/func/func.x` and receiving callback APIs
 - Tests: captured-lambda and lambda-lowering fixtures, lambda and `Func` suites
 
 ### Foreach
@@ -293,7 +293,7 @@ inline-lisp example
 
 ### Status-bearing Map operations
 
-- Runtime owner: `lib/map.x`
+- Runtime owner: `lib/map/map.x`
 - Literal boundary: `src/components/collection-literals.x`; see [builtin
   components](architecture.md#builtin-components)
 - Generic routing: `lib/dispatch.x`
@@ -305,7 +305,7 @@ inline-lisp example
 
 ### Counted Array construction
 
-- Runtime owner: `lib/array.x` through `Array.update_n` and `Array.push`
+- Runtime owner: `lib/array/array.x` through `Array.update_n` and `Array.push`
 - Literal boundary: `src/components/collection-literals.x`; see [builtin
   components](architecture.md#builtin-components)
 - Value contract: raw `Null` is data; `void` is rejected
@@ -317,7 +317,7 @@ inline-lisp example
 - Parse and type the call: `src/expressions/expressions.x`
 - Lower: `src/components/printf-format.x`; see [builtin
   components](architecture.md#builtin-components)
-- Runtime: `Var.convert` in `lib/varconvert.x` and `Var.str` in
+- Runtime: `Var.convert` in `lib/var/conversion.x` and `Var.str` in
   `lib/dispatch.x`
 - Tests: the `printf-var` compiler fixtures
 - See also: [values and Var](../guide/values.md)
@@ -392,7 +392,7 @@ responsibility.
 The compiler and `Lisp.new()` load the same `etc/init.xlisp`: the evaluator
 primitives, macros, native bindings, and the standard algorithms (list
 traversal, numeric wrappers, selectors, predicates, and pattern helpers).
-The algorithms without callbacks are x2c functions in `lib/lisp-init.x`,
+The algorithms without callbacks are x2c functions in `lib/lisp-targets/algorithms.x`,
 which that file binds by name; `map`, `filter`, and `foldl` stay in Lisp.
 Those algorithms use fixed primitive operations internally; their public
 Lisp names remain replaceable. In particular, rebinding `car`, `cdr`, or

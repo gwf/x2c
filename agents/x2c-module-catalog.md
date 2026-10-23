@@ -9,7 +9,7 @@ not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
 - Compiler modules: 61
-- Runtime modules: 80
+- Runtime modules: 65
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
 ## Compiler modules
@@ -815,32 +815,6 @@ Public functions:
 
 `Args.parse`, `Args.usage`, `Args.from_argv`
 
-### [lib/array-generics.x](../lib/array-generics.x)
-
-fixed-width Array family generation.
-
-Public functions:
-
-None. This module has no non-static function definitions.
-
-### [lib/array.x](../lib/array.x)
-
-dynamic contiguous arrays of `Var` elements.
-
-Public functions:
-
-`Array.new`, `Array.try_next`, `Array.push`, `Array.try_take_last`,
-`Array.take_last`, `Array.shift`, `Array.unshift`, `Array.insert`,
-`Array.remove`, `Array.copy`, `Array.getslice`, `Array.setslice`,
-`Array.remslice`, `Array.splice`, `Array.find`, `Array.contains`,
-`Array.count`, `Array.indexof`, `Array.concat`, `Array.reverse`, `Array.equal`,
-`Array.getindex`, `Array.setindex`, `Array.block`, `Block.array`, `Array.free`,
-`Array.resize`, `Array.update_n`, `Array.updateindex`, `Array.postfixindex`,
-`Array.map`, `Array.map2`, `Array.foldl`, `Array.compare`, `Array.write_repr`,
-`Array.write_str`, `Array.str`, `Array.repr`, `Array.iter`, `Array.sort`,
-`Array.sort_with`, `Array.sort_by`, `Array.heap_push`, `Array.heap_pop`,
-`Array.heapify`, `Array.join`, `Iter.array`, `Array.cleanup`
-
 ### [lib/atom.x](../lib/atom.x)
 
 canonical exact names.
@@ -1044,28 +1018,6 @@ Public functions:
 `File.path_error`, `String.open`, `File.open`, `File.fdopen`, `File.popen`,
 `File.reopen`, `File.initialize`
 
-### [lib/func-errors.x](../lib/func-errors.x)
-
-structured Func binding and adapter errors.
-
-Public functions:
-
-None. This module has no non-static function definitions.
-
-### [lib/func.x](../lib/func.x)
-
-generic native function binding.
-
-Public functions:
-
-`Func.apply`, `FuncArg.value`, `FuncArg.reference`, `Func.apply_value`,
-`Func.apply_values`, `x2c_func_reference_type`, `x2c_func_value_argument`,
-`x2c_func_pointer_argument`, `x2c_func_unrepresentable_argument`,
-`x2c_func_record_result`, `x2c_func_reference_argument`,
-`x2c_func_declared_reference_argument`, `Func.new`, `Func.new_rest`,
-`Func.new_context`, `x2c_func_shared`, `Func.signature`, `Func.context`,
-`Func.move`, `Func.var`, `Var.func`
-
 ### [lib/integer-ops.x](../lib/integer-ops.x)
 
 shared raw integer arithmetic.
@@ -1106,27 +1058,6 @@ Public functions:
 `DisjointSet.init`, `DisjointSet.drop`, `DisjointSet.find`,
 `DisjointSet.union`, `DisjointSet.sizes`, `DisjointSet.num_components`
 
-### [lib/lisp-init.x](../lib/lisp-init.x)
-
-native standard algorithms for every Lisp session.
-
-Public functions:
-
-`lisp_last`, `lisp_begin`, `lisp_member`, `lisp_assoc`, `lisp_append`,
-`lisp_not`, `lisp_null`, `lisp_sub`, `lisp_mul`, `lisp_div`, `lisp_mod`,
-`lisp_caar`, `lisp_cadr`, `lisp_cdar`, `lisp_cddr`, `lisp_caaar`, `lisp_caadr`,
-`lisp_cadar`, `lisp_caddr`, `lisp_cdaar`, `lisp_cdadr`, `lisp_cddar`,
-`lisp_cdddr`, `lisp_match`, `lisp_bound`, `lisp_search_replace`, `lisp_binder`,
-`lisp_binders`, `lisp_binder_lets`, `lisp_string_append_all`
-
-### [lib/lisp-targets.x](../lib/lisp-targets.x)
-
-the native operations a Lisp session can bind.
-
-Public functions:
-
-`lisp_native_targets`
-
 ### [lib/list-selectors.x](../lib/list-selectors.x)
 
 optional compound `List` selectors.
@@ -1159,74 +1090,6 @@ Public functions:
 `Logger.info`, `Logger.warn`, `Logger.error`, `Logger.fatal`, `log_trace`,
 `log_debug`, `log_info`, `log_warn`, `log_error`, `log_fatal`, `Logger.new`,
 `Logger.free`, `Logger.initialize`, `Logger.shutdown`
-
-### [lib/machine.x](../lib/machine.x)
-
-`Match` wordcode and execution state.
-
-Public functions:
-
-`MachineSlot.prefix_equal`, `MachineSlot.final_equal`, `MachineBuilder.emit`,
-`MachineBuilder.constant`, `MachineBuilder.binder`,
-`MachineBuilder.set_target`, `MachineBuilder.patch`, `MachineBuilder.freeze`,
-`MachineProgram.view`, `MachineProgram.bytes`, `MachineBuilder.new`,
-`MachineBuilder.init`, `MachineBuilder.drop`, `MachineBuilder.free`,
-`MachineBuilder.cleanup`
-
-### [lib/map-generics.x](../lib/map-generics.x)
-
-shared Robin Hood Map family generation.
-
-Public functions:
-
-None. This module has no non-static function definitions.
-
-### [lib/map.x](../lib/map.x)
-
-hash table mapping `Var` keys to `Var` values.
-
-Public functions:
-
-`Map.scope`, `Map.move_to`, `Map.new_capacity`, `Map.new`, `Map.len`,
-`Map.try_get`, `Map.get`, `Map.getindex`, `Map.getdefault`, `Map.setdefault`,
-`Map.contains`, `Map.set`, `Map.setindex`, `Map.try_del`, `Map.del`,
-`Map.copy`, `Map.merge`, `Map.try_next`, `Map.truth`, `Map.equal`,
-`Map.merge_with`, `Map.updateindex`, `Map.postfixindex`, `Map.get_hashed`,
-`Map.update_n`, `Map.export_to`, `Map.compare`, `Map.write_repr`,
-`Map.write_str`, `Map.str`, `Map.repr`, `Map.iter`, `Map.keys`,
-`Map.enumerate`, `Map.cleanup`
-
-### [lib/match-cache.x](../lib/match-cache.x)
-
-caches of prepared Match plans.
-
-Public functions:
-
-`MatchCache.acquire`, `MatchLease.release`, `MatchLease.plan`,
-`MatchCache.try_capture`, `MatchCache.try_match`, `MatchCache.try_search`,
-`MatchCache.search`, `MatchCache.try_match_replace`,
-`MatchCache.search_replace`, `MatchCache.current`, `MatchCache.flush_default`,
-`MatchCache.context_open`, `MatchCache.context_close`,
-`x2c_match_thread_release`, `MatchCache.new`, `MatchCache.dispose`
-
-### [lib/match-machine.x](../lib/match-machine.x)
-
-`Match` wordcode execution.
-
-Public functions:
-
-`MatchMachine.run`, `MatchMachine.step`, `MatchMachine.materialize_span`,
-`MatchMachine.open`, `MatchMachine.begin`, `MatchMachine.finish`,
-`MatchMachine.clean`, `MatchMachine.dispose`, `MatchMachine.acquire`,
-`MatchMachine.release`, `MatchMachine.release_spares`
-
-### [lib/match-plan.x](../lib/match-plan.x)
-
-lowering Match patterns to prepared plans.
-
-Public functions:
-
-`MatchPlan.prepare`, `MatchPlan.free`
 
 ### [lib/meta.x](../lib/meta.x)
 
@@ -1340,16 +1203,6 @@ Public functions:
 
 None. This module has no non-static function definitions.
 
-### [lib/split.x](../lib/split.x)
-
-`String` field splitting and repeatable typed cursors.
-
-Public functions:
-
-`Split.var`, `Var.split`, `String.split_n`, `String.split`,
-`String.split_lines`, `String.words`, `String.lines`, `String.splits`,
-`Split.try_next`, `Split.iter`
-
 ### [lib/static-init.x](../lib/static-init.x)
 
 first-use storage for dynamic local statics.
@@ -1358,42 +1211,6 @@ Public functions:
 
 `x2c_static_acquire`, `x2c_static_commit`, `x2c_static_abort`,
 `x2c_static_thread_release`, `x2c_static_shutdown`
-
-### [lib/string-classify.x](../lib/string-classify.x)
-
-byte classification for canonical strings.
-
-Public functions:
-
-`String.contains_digit`, `String.is_alpha`, `String.is_alpha_under`,
-`String.is_digit`, `String.is_alnum`, `String.is_alnum_under`,
-`String.is_identifier`, `String.is_space`, `String.is_lower`,
-`String.is_lower_under`, `String.is_upper`, `String.is_upper_under`
-
-### [lib/string-escape.x](../lib/string-escape.x)
-
-escaped spelling of canonical strings.
-
-Public functions:
-
-`String.escape`, `String.repr`, `String.write_repr`, `String.unescape`,
-`String.parse_char`, `String.parse`
-
-### [lib/string-format.x](../lib/string-format.x)
-
-checked formatting of `Var` values into a `String`.
-
-Public functions:
-
-`String.format`
-
-### [lib/string-number.x](../lib/string-number.x)
-
-numeric parsing from canonical byte strings.
-
-Public functions:
-
-`String.try_long`, `String.try_double`
 
 ### [lib/substring-map.x](../lib/substring-map.x)
 
@@ -1691,33 +1508,23 @@ Public functions:
 `_tag_constant_row`, `_tag_list`, `_tag_sibling_counts`, `_tag_row_entry`,
 `_tag_constant_rows`, `_tag_group_top`, `_tag_types`
 
-### [lib/varconvert.x](../lib/varconvert.x)
+### [lib/array/array.x](../lib/array/array.x)
 
-`Var` numeric conversion policy.
-
-Public functions:
-
-`Var.string`, `Var.array`, `Var.block`, `Var.buffer`, `Var.bytes`, `Var.file`,
-`Var.as_iter`, `Var.list`, `Var.map`, `Var.convert`, `Var.numeric_info`,
-`Var.numeric_decode`, `Var.integer_box`, `Var.integer_tag`, `Var.width_mask`,
-`Var.signed_from_bits`, `X2CVarNumeric.f32`, `X2CVarNumeric.f64`,
-`X2CVarNumeric.ldouble`
-
-### [lib/varops.x](../lib/varops.x)
-
-boxed `Var` operators, updates, and truthiness.
+dynamic contiguous arrays of `Var` elements.
 
 Public functions:
 
-`x2c_var_update_i8`, `x2c_var_update_schar`, `x2c_var_update_u8`,
-`x2c_var_update_i16`, `x2c_var_update_u16`, `x2c_var_update_i32`,
-`x2c_var_update_u32`, `x2c_var_update_long`, `x2c_var_update_ulong`,
-`x2c_var_update_long_long`, `x2c_var_update_ulong_long`, `x2c_var_update_f32`,
-`x2c_var_update_f64`, `x2c_var_update_long_double`, `Var.binary`, `Var.add`,
-`Var.sub`, `Var.mul`, `Var.matmul`, `Var.div`, `Var.mod`, `Var.neg`,
-`x2c_var_equal`, `x2c_var_identical`, `x2c_var_order`, `Var.truth`,
-`Var.fallback_truth`, `Var.update`, `x2c_var_update_volatile`, `Var.postfix`,
-`x2c_var_postfix_volatile`
+`Array.new`, `Array.try_next`, `Array.push`, `Array.try_take_last`,
+`Array.take_last`, `Array.shift`, `Array.unshift`, `Array.insert`,
+`Array.remove`, `Array.copy`, `Array.getslice`, `Array.setslice`,
+`Array.remslice`, `Array.splice`, `Array.find`, `Array.contains`,
+`Array.count`, `Array.indexof`, `Array.concat`, `Array.reverse`, `Array.equal`,
+`Array.getindex`, `Array.setindex`, `Array.block`, `Block.array`, `Array.free`,
+`Array.resize`, `Array.update_n`, `Array.updateindex`, `Array.postfixindex`,
+`Array.map`, `Array.map2`, `Array.foldl`, `Array.compare`, `Array.write_repr`,
+`Array.write_str`, `Array.str`, `Array.repr`, `Array.iter`, `Array.sort`,
+`Array.sort_with`, `Array.sort_by`, `Array.heap_push`, `Array.heap_pop`,
+`Array.heapify`, `Array.join`, `Iter.array`, `Array.cleanup`
 
 ### [lib/error/error.x](../lib/error/error.x)
 
@@ -1736,6 +1543,34 @@ Public functions:
 `x2c_error_catch_capture`, `x2c_error_catch_detach`, `x2c_error_catch_close`,
 `Error.unwind_head`, `Error.restore_landing`, `Error.trim`, `Error.restore`,
 `Error.initialize_raw`, `Error.shutdown_raw`, `Error.ready`
+
+### [lib/func/func.x](../lib/func/func.x)
+
+generic native function binding.
+
+Public functions:
+
+`Func.apply`, `FuncArg.value`, `FuncArg.reference`, `Func.apply_value`,
+`Func.apply_values`, `x2c_func_reference_type`, `x2c_func_value_argument`,
+`x2c_func_pointer_argument`, `x2c_func_unrepresentable_argument`,
+`x2c_func_record_result`, `x2c_func_reference_argument`,
+`x2c_func_declared_reference_argument`, `Func.new`, `Func.new_rest`,
+`Func.new_context`, `x2c_func_shared`, `Func.signature`, `Func.context`,
+`Func.move`, `Func.var`, `Var.func`
+
+### [lib/lisp-targets/lisp-targets.x](../lib/lisp-targets/lisp-targets.x)
+
+the native operations a Lisp session can bind.
+
+Public functions:
+
+`lisp_last`, `lisp_begin`, `lisp_member`, `lisp_assoc`, `lisp_append`,
+`lisp_not`, `lisp_null`, `lisp_sub`, `lisp_mul`, `lisp_div`, `lisp_mod`,
+`lisp_caar`, `lisp_cadr`, `lisp_cdar`, `lisp_cddr`, `lisp_caaar`, `lisp_caadr`,
+`lisp_cadar`, `lisp_caddr`, `lisp_cdaar`, `lisp_cdadr`, `lisp_cddar`,
+`lisp_cdddr`, `lisp_match`, `lisp_bound`, `lisp_search_replace`, `lisp_binder`,
+`lisp_binders`, `lisp_binder_lets`, `lisp_string_append_all`,
+`lisp_native_targets`
 
 ### [lib/lisp/lisp.x](../lib/lisp/lisp.x)
 
@@ -1793,23 +1628,53 @@ Public functions:
 `Macro_case_capture_at`, `Macro_case_root`, `Macro_case_view`, `Macro.matcher`,
 `MacroMatcher.matches`, `Macro.matches`
 
+### [lib/map/map.x](../lib/map/map.x)
+
+hash table mapping `Var` keys to `Var` values.
+
+Public functions:
+
+`Map.scope`, `Map.move_to`, `Map.new_capacity`, `Map.new`, `Map.len`,
+`Map.try_get`, `Map.get`, `Map.getindex`, `Map.getdefault`, `Map.setdefault`,
+`Map.contains`, `Map.set`, `Map.setindex`, `Map.try_del`, `Map.del`,
+`Map.copy`, `Map.merge`, `Map.try_next`, `Map.truth`, `Map.equal`,
+`Map.merge_with`, `Map.updateindex`, `Map.postfixindex`, `Map.get_hashed`,
+`Map.update_n`, `Map.export_to`, `Map.compare`, `Map.write_repr`,
+`Map.write_str`, `Map.str`, `Map.repr`, `Map.iter`, `Map.keys`,
+`Map.enumerate`, `Map.cleanup`
+
 ### [lib/match/match.x](../lib/match/match.x)
 
 pattern matching and transformation utilities for lists.
 
 Public functions:
 
-`Var.is_atom_binder`, `Var.is_list_binder`, `Var.is_binder`, `Var.is_match_op`,
-`MatchCaptureLayout.analyze`, `MatchCaptureLayout.free`,
-`MatchCaptureLayout.definite_list`, `MatchCaptureLayout.possible_list`,
-`MatchCaptureLayout.index`, `MatchCaptureBuffer.has`,
-`MatchPlan.raise_ineligible`, `MatchPlan.execute_capture`,
-`MatchPlan.try_capture`, `MatchPlan.admits`, `MatchPlan.execute`,
-`MatchPlan.try_match`, `MatchPlan.try_match_replace`, `List.replace`,
-`MatchPlan.try_search`, `MatchPlan.search`, `MatchPlan.search_replace`,
-`MatchPlan.borrowable`, `x2c_match_site_try_capture`,
-`x2c_match_pattern_retainable`, `x2c_match_site_prepare`,
-`x2c_match_site_try_match`, `x2c_match_site_match`,
+`MachineSlot.prefix_equal`, `MachineSlot.final_equal`, `MachineBuilder.emit`,
+`MachineBuilder.constant`, `MachineBuilder.binder`,
+`MachineBuilder.set_target`, `MachineBuilder.patch`, `MachineBuilder.freeze`,
+`MachineProgram.view`, `MachineProgram.bytes`, `MachineBuilder.new`,
+`MachineBuilder.init`, `MachineBuilder.drop`, `MachineBuilder.free`,
+`MachineBuilder.cleanup`, `MatchMachine.run`, `MatchMachine.step`,
+`MatchMachine.materialize_span`, `MatchMachine.open`, `MatchMachine.begin`,
+`MatchMachine.finish`, `MatchMachine.clean`, `MatchMachine.dispose`,
+`MatchMachine.acquire`, `MatchMachine.release`, `MatchMachine.release_spares`,
+`MatchPlan.prepare`, `MatchPlan.free`, `MatchCache.acquire`,
+`MatchLease.release`, `MatchLease.plan`, `MatchCache.try_capture`,
+`MatchCache.try_match`, `MatchCache.try_search`, `MatchCache.search`,
+`MatchCache.try_match_replace`, `MatchCache.search_replace`,
+`MatchCache.current`, `MatchCache.flush_default`, `MatchCache.context_open`,
+`MatchCache.context_close`, `x2c_match_thread_release`, `MatchCache.new`,
+`MatchCache.dispose`, `Var.is_atom_binder`, `Var.is_list_binder`,
+`Var.is_binder`, `Var.is_match_op`, `MatchCaptureLayout.analyze`,
+`MatchCaptureLayout.free`, `MatchCaptureLayout.definite_list`,
+`MatchCaptureLayout.possible_list`, `MatchCaptureLayout.index`,
+`MatchCaptureBuffer.has`, `MatchPlan.raise_ineligible`,
+`MatchPlan.execute_capture`, `MatchPlan.try_capture`, `MatchPlan.admits`,
+`MatchPlan.execute`, `MatchPlan.try_match`, `MatchPlan.try_match_replace`,
+`List.replace`, `MatchPlan.try_search`, `MatchPlan.search`,
+`MatchPlan.search_replace`, `MatchPlan.borrowable`,
+`x2c_match_site_try_capture`, `x2c_match_pattern_retainable`,
+`x2c_match_site_prepare`, `x2c_match_site_try_match`, `x2c_match_site_match`,
 `x2c_match_site_try_search`, `x2c_match_site_search`,
 `x2c_match_site_try_match_replace`, `x2c_match_site_match_replace`,
 `x2c_match_site_search_replace`, `x2c_match_initialize`,
@@ -1865,7 +1730,16 @@ Public functions:
 `String.remove_suffix`, `String.partition`, `String.rpartition`,
 `String.lower`, `String.upper`, `String.capitalize`, `String.filter`,
 `String.map`, `String.keep`, `String.reject`, `String.squeeze`, `String.str`,
-`String.write_str`, `String.symbol`, `String.iter`, `String.try_next`
+`String.write_str`, `String.symbol`, `String.iter`, `String.try_next`,
+`String.contains_digit`, `String.is_alpha`, `String.is_alpha_under`,
+`String.is_digit`, `String.is_alnum`, `String.is_alnum_under`,
+`String.is_identifier`, `String.is_space`, `String.is_lower`,
+`String.is_lower_under`, `String.is_upper`, `String.is_upper_under`,
+`String.escape`, `String.repr`, `String.write_repr`, `String.unescape`,
+`String.parse_char`, `String.parse`, `String.format`, `String.try_long`,
+`String.try_double`, `Split.var`, `Var.split`, `String.split_n`,
+`String.split`, `String.split_lines`, `String.words`, `String.lines`,
+`String.splits`, `Split.try_next`, `Split.iter`
 
 ### [lib/var/var.x](../lib/var/var.x)
 
@@ -1885,4 +1759,17 @@ Public functions:
 `Var.floating`, `Var.integer`, `Var.long_value`, `Var.ulong_value`,
 `Var.long_long_value`, `Var.ulong_long_value`, `Var.long_double_value`,
 `Var.wide_hash`, `Var.wide_equal`, `Var.wide_compare`, `Var.integer_compare`,
-`Var.integer_floating_compare`
+`Var.integer_floating_compare`, `Var.string`, `Var.array`, `Var.block`,
+`Var.buffer`, `Var.bytes`, `Var.file`, `Var.as_iter`, `Var.list`, `Var.map`,
+`Var.convert`, `Var.numeric_info`, `Var.numeric_decode`, `Var.integer_box`,
+`Var.integer_tag`, `Var.width_mask`, `Var.signed_from_bits`,
+`X2CVarNumeric.f32`, `X2CVarNumeric.f64`, `X2CVarNumeric.ldouble`,
+`x2c_var_update_i8`, `x2c_var_update_schar`, `x2c_var_update_u8`,
+`x2c_var_update_i16`, `x2c_var_update_u16`, `x2c_var_update_i32`,
+`x2c_var_update_u32`, `x2c_var_update_long`, `x2c_var_update_ulong`,
+`x2c_var_update_long_long`, `x2c_var_update_ulong_long`, `x2c_var_update_f32`,
+`x2c_var_update_f64`, `x2c_var_update_long_double`, `Var.binary`, `Var.add`,
+`Var.sub`, `Var.mul`, `Var.matmul`, `Var.div`, `Var.mod`, `Var.neg`,
+`x2c_var_equal`, `x2c_var_identical`, `x2c_var_order`, `Var.truth`,
+`Var.fallback_truth`, `Var.update`, `x2c_var_update_volatile`, `Var.postfix`,
+`x2c_var_postfix_volatile`

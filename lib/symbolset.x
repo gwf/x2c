@@ -22,7 +22,7 @@ protocol Contains(SymbolSet);
 #include <limits.h>
 #include <stdint.h>
 
-#include "array.x"
+#include "array/array.x"
 #include "block.x"
 #include "iter.x"
 #include "scope/scope.x"

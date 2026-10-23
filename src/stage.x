@@ -16,7 +16,6 @@
 #include "type.x"
 #include "var/var.x"
 #include "string/string.x"
-#include "varconvert.x"
 #include "datum.x"
 #include <limits.h>
 #include <stdio.h>

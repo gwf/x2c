@@ -134,7 +134,7 @@ mkdir -p "$results_dir"
   echo "suite_commit=$suite_commit"
   echo "x2c_commit=$(git -C "$root" rev-parse HEAD)"
   echo "x2c_dirty_files=$dirty_files"
-  if git -C "$root" diff --quiet origin/dev -- lib/map.x; then
+  if git -C "$root" diff --quiet origin/dev -- lib/map; then
     echo "map_matches_origin_dev=yes"
   else
     echo "map_matches_origin_dev=no"

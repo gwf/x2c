@@ -67,7 +67,7 @@ Stores in `*cursor` the List a macro-valued `case` examines for
 one. A List headed by another Symbol than a wrapper or `expr` is its
 own view.
 
-Source: `lib/macrovalue/macrovalue.x:95`
+Source: `lib/macrovalue/macrovalue.x:94`
 
 <a id="Macro_case_own"></a>
 #### Macro_case_own
@@ -78,7 +78,7 @@ Whether an `expr` node whose content is `content` is its own view: the
 content is not a List headed by an Atom, as a retained invocation's is,
 or by the `expr` a template shell holds.
 
-Source: `lib/macrovalue/macrovalue.x:78`
+Source: `lib/macrovalue/macrovalue.x:77`
 
 <a id="Macro_case_pattern"></a>
 #### Macro_case_pattern
@@ -129,7 +129,7 @@ for a subject headed by `head`, 0 for an empty subject or one headed by
 another Symbol than a wrapper, `expr`, or `seq`, which cannot match,
 and -1 when `Macro_case_root` must decide.
 
-Source: `lib/macrovalue/macrovalue.x:64`
+Source: `lib/macrovalue/macrovalue.x:63`
 
 <a id="Macro_case_symbol"></a>
 #### Macro_case_symbol
@@ -138,7 +138,7 @@ Source: `lib/macrovalue/macrovalue.x:64`
 
 The short Symbol `value` holds, or 0 for any other value.
 
-Source: `lib/macrovalue/macrovalue.x:86`
+Source: `lib/macrovalue/macrovalue.x:85`
 
 <a id="Macro_case_view"></a>
 #### Macro_case_view
@@ -335,7 +335,7 @@ independent of subject bindings is derived once; contextual references
 are resolved against each subject. The caller keeps the source values
 alive as long as this record. Match plans use the active Match cache.
 
-Source: `lib/macrovalue/macrovalue.x:108`
+Source: `lib/macrovalue/macrovalue.x:107`
 
 ## Internal types
 

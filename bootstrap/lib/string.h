@@ -17,10 +17,10 @@ typedef char * String;
 #include <string.h>
 #include "var/var.h"
 #include "list/list.h"
-#include "array.h"
+#include "array/array.h"
 #include "buffer.h"
 #include "exception.h"
-#include "func.h"
+#include "func/func.h"
 #include "symbol.h"
 #include "pool/pool.h"
 #define STRING_STACK_BYTES 256
@@ -94,5 +94,37 @@ Buffer String_write_str(String str, Buffer out);
 Symbol String_symbol(String str);
 Iter String_iter(String x, Iter dest);
 int String_try_next(String str, int * cursor, int * out);
+int String_contains_digit(String str);
+int String_is_alpha(String s);
+int String_is_alpha_under(String s);
+int String_is_digit(String s);
+int String_is_alnum(String s);
+int String_is_alnum_under(String s);
+int String_is_identifier(String s);
+int String_is_space(String s);
+int String_is_lower(String s);
+int String_is_lower_under(String s);
+int String_is_upper(String s);
+int String_is_upper_under(String s);
+String String_escape(String str);
+String String_repr(String str);
+Buffer String_write_repr(String str, Buffer out);
+String String_unescape(String str);
+int String_parse_char(String str);
+String String_parse(String str);
+String String_format(String fmt, List values);
+int String_try_long(String str, long * out);
+int String_try_double(String str, double * out);
+typedef struct Split * Split;
+Var Split_var(Split split);
+Split Var_split(Var value);
+List String_split_n(String str, String sep, int max_splits);
+List String_split(String str, String sep);
+List String_split_lines(String str, int keep_ends);
+Split String_words(String str);
+Split String_lines(String str);
+Split String_splits(String str, String sep);
+int Split_try_next(Split split, int * cursor, String * out);
+Iter Split_iter(Split split, Iter dest);
 
 #endif /* __GUARD_0x487584EF__ */

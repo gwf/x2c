@@ -10,9 +10,13 @@ Canonical byte strings and core text operations.
 | Function | Summary |
 | --- | --- |
 | [`x2c_string_from_bytes`](#x2c_string_from_bytes) | Canonicalizes a known NUL-free byte span in the active pool chain. |
+| [`Split.iter`](#Split.iter) | Returns an iterator over a lazy `String` cursor. |
+| [`Split.try_next`](#Split.try_next) | Yields the next field and advances a caller-owned position on success. |
+| [`Split.var`](#Split.var) | Boxes a borrowed descriptor as a `<split>` `Var`, so a `Split` can cross into compile-time code or a `Var` container. |
 | [`String.add`](#String.add) | Returns `str` followed by `other`. |
 | [`String.capitalize`](#String.capitalize) | Upper-cases the first byte of `str` and lower-cases the remainder. |
 | [`String.contains`](#String.contains) | Reports whether the bytes of `sub` occur anywhere in `str`. |
+| [`String.contains_digit`](#String.contains_digit) | Reports whether `str` contains a decimal digit. |
 | [`String.count`](#String.count) | Returns the non-overlapping count of `sub` in `str`. |
 | [`String.dedent`](#String.dedent) | Removes the indentation the text was written with. |
 | [`String.endswith`](#String.endswith) | Reports whether `str` ends with `suffix`. |
@@ -20,12 +24,25 @@ Canonical byte strings and core text operations.
 | [`String.find`](#String.find) | Returns the index of the first occurrence of `sub` in `str`, or -1. |
 | [`String.find_all`](#String.find_all) | Returns each non-overlapping starting index at which `sub` occurs. |
 | [`String.find_within`](#String.find_within) | Returns the first index of `sub` within `str[start:end]`, or -1. |
+| [`String.format`](#String.format) | Formats `values` through a checked, C-style subset of `fmt`. |
 | [`String.getindex`](#String.getindex) | Returns the byte at `index` in `str` as an int, or -1 if out of range. |
 | [`String.getslice`](#String.getslice) | Returns the canonical `String` `s[start:stop:step]`. |
+| [`String.is_alnum`](#String.is_alnum) | Reports whether every byte of nonempty `s` is alphanumeric. |
+| [`String.is_alnum_under`](#String.is_alnum_under) | Reports whether nonempty `s` is alphanumeric or underscore. |
+| [`String.is_alpha`](#String.is_alpha) | Reports whether every byte of nonempty `s` is alphabetic. |
+| [`String.is_alpha_under`](#String.is_alpha_under) | Reports whether every byte of nonempty `s` is alphabetic or underscore. |
+| [`String.is_digit`](#String.is_digit) | Reports whether every byte of nonempty `s` is a decimal digit. |
+| [`String.is_identifier`](#String.is_identifier) | Reports whether `s` is a C identifier under C character classes. |
+| [`String.is_lower`](#String.is_lower) | Reports whether every byte of nonempty `s` is lower-case. |
+| [`String.is_lower_under`](#String.is_lower_under) | Reports whether every byte of nonempty `s` is lower-case or underscore. |
+| [`String.is_space`](#String.is_space) | Reports whether every byte of nonempty `s` is whitespace. |
+| [`String.is_upper`](#String.is_upper) | Reports whether every byte of nonempty `s` is upper-case. |
+| [`String.is_upper_under`](#String.is_upper_under) | Reports whether every byte of nonempty `s` is upper-case or underscore. |
 | [`String.iter`](#String.iter) | Initializes `dest` as a lazy iterator over the bytes of `x`. |
 | [`String.join`](#String.join) | Joins `strings` into one canonical `String` with `sep` between elements. |
 | [`String.keep`](#String.keep) | Returns a canonical `String` containing only bytes found in `chars`. |
 | [`String.len`](#String.len) | Returns the byte length of `str`, excluding the terminating NUL. |
+| [`String.lines`](#String.lines) | Returns a lazy cursor over lines in `str`, with endings removed. |
 | [`String.lower`](#String.lower) | Returns `str` with every upper-case byte lowered. |
 | [`String.lstrip`](#String.lstrip) | Removes leading bytes found in the C string `negChars`. |
 | [`String.map`](#String.map) | Returns `str` with `fn` applied to every byte. |
@@ -43,13 +60,20 @@ Canonical byte strings and core text operations.
 | [`String.rfind`](#String.rfind) | Returns the index of the last occurrence of `sub` in `str`, or -1. |
 | [`String.rpartition`](#String.rpartition) | Splits `str` around its final occurrence of `sep`. |
 | [`String.rstrip`](#String.rstrip) | Removes trailing bytes found in the C string `negChars`. |
+| [`String.split`](#String.split) | Splits `str` on every occurrence of `sep` into a `List` of `String`s. |
+| [`String.split_lines`](#String.split_lines) | Splits `str` into a `List` of lines. |
+| [`String.split_n`](#String.split_n) | Splits `str` at no more than `max_splits` separators. |
+| [`String.splits`](#String.splits) | Returns a lazy cursor over fields separated by `sep`. |
 | [`String.squeeze`](#String.squeeze) | Collapses adjacent runs of each byte listed in `chars`. |
 | [`String.startswith`](#String.startswith) | Reports whether `str` starts with `prefix`. |
 | [`String.strip`](#String.strip) | Returns `str` with leading and trailing bytes in `negChars` removed. |
 | [`String.try_next`](#String.try_next) | Writes the next byte, advances `cursor`, and returns one. |
+| [`String.unescape`](#String.unescape) | Decodes supported backslash escapes in `str` into a canonical `String`. |
 | [`String.upper`](#String.upper) | Returns `str` with every lower-case byte raised. |
 | [`String.withindex`](#String.withindex) | Returns a canonical copy of `str` with the byte at `index` set. |
+| [`String.words`](#String.words) | Returns a lazy cursor over whitespace-delimited words in `str`. |
 | [`String.write_str`](#String.write_str) | Appends `str` to `out` unchanged. |
+| [`Var.split`](#Var.split) | Unboxes a descriptor from a `Var` produced by `Split.var`. |
 
 ### Functions
 
@@ -63,6 +87,68 @@ Null input or a nonpositive length returns the empty String.
 Raises alloc-fail if canonical storage cannot be allocated.
 
 Source: `lib/string/storage.x:148`
+
+### `Split`
+
+<a id="Split.iter"></a>
+#### Split.iter
+
+`Iter Split.iter(Split split, Iter dest)`
+
+Returns an iterator over a lazy `String` cursor.
+This adapter over `Split.try_next` boxes each field into a `Var` and
+keeps the `Iter` state in step. Use the typed cursor in hot code and this
+method when you need the `Iter` protocol.
+
+The cursor descriptor is `Scope`-owned; `dest` is caller-supplied iterator
+storage. Every iterator keeps its own byte position, so cursors can be
+nested or traversed concurrently. The `Split` descriptor, its borrowed
+input `String`s, and `dest` must remain live until iteration ends.
+
+Constructing the iterator does not raise. Pulling may raise
+`<alloc-fail>` as `Split.try_next` does. A null `dest` returns NULL.
+
+Source: `lib/string/cursors.x:275`
+
+<a id="Split.try_next"></a>
+#### Split.try_next
+
+`int Split.try_next(Split split, int &?cursor, String &?out)`
+
+Yields the next field and advances a caller-owned position on success.
+Position must start at zero and thereafter retain only values written by
+this method. Both it and `out` are written only on success, so an empty
+`String` field stays distinct from exhaustion and a walk that has ended
+leaves the last field in place. The position belongs to the caller, so one
+descriptor supports repeated, nested, and concurrent walks, including
+alongside a `Split.iter` iterator over the same descriptor. A yielded
+canonical `String` remains live until its actual owning pool is released.
+
+```x2c
+Split words = "ada lovelace".words();
+int cursor = 0;
+String word;
+while (words.try_next(cursor, word)) printf("%s\n", word);
+```
+
+This is what `foreach(String word in split)` lowers to; `Split.iter` is the
+boxing adapter for every other binder.
+
+**Raises:** `<alloc-fail>` while canonicalizing a nonempty field. `Null`
+arguments produce exhaustion without raising.
+
+Source: `lib/string/cursors.x:249`
+
+<a id="Split.var"></a>
+#### Split.var
+
+`Var Split.var(Split split)`
+
+Boxes a borrowed descriptor as a `<split>` `Var`, so a `Split` can cross
+into compile-time code or a `Var` container. The box does not own the
+descriptor, which stays live only as long as its `Scope`.
+
+Source: `lib/string/cursors.x:27`
 
 ### `String`
 
@@ -111,6 +197,16 @@ so a truth test on user-supplied text should check for emptiness
 separately if that matters.
 
 Source: `lib/string/search.x:119`
+
+<a id="String.contains_digit"></a>
+#### String.contains_digit
+
+`meta native int String.contains_digit(String str)`
+
+Reports whether `str` contains a decimal digit.
+A null or empty `String` returns false.
+
+Source: `lib/string/classify.x:14`
 
 <a id="String.count"></a>
 #### String.count
@@ -219,6 +315,31 @@ printf("%d %d %d\n", text.find_within("c", 0, -1),
 
 Source: `lib/string/search.x:29`
 
+<a id="String.format"></a>
+#### String.format
+
+`String String.format(String fmt, List values)`
+
+Formats `values` through a checked, C-style subset of `fmt`.
+The receiver is decoded runtime text, so this fixed-signature operation is
+safe to call through the interpreter as `fmt.format(values)`. It supports
+`%%`, flags `-+ #0`, numeric or `*` width and precision, integer
+conversions `d i o u x X` with `hh h l ll`, floating conversions
+`f F e E g G a A` with default, `l`, or `L`, and `%c` and `%s`.
+Numeric values are converted with `Var.convert`; `%s` uses `Var.str`.
+
+Pointer and write-count conversions, wide strings and characters,
+positional arguments, `j z t` lengths, malformed formats, and missing or
+excess values are rejected. `%c` also rejects NUL because canonical
+`String`s cannot contain it. Output is staged privately and no result is
+published on failure. Formatting follows the process locale.
+
+**Raises:** `<format>` with byte `offset` and `reason`; numeric and string
+conversion failures are nested as `cause`. Allocation failures may also
+transfer while staging or canonicalizing the result.
+
+Source: `lib/string/format.x:91`
+
 <a id="String.getindex"></a>
 #### String.getindex
 
@@ -252,6 +373,107 @@ range, a range that runs the wrong way for its `step`, or a `step` of zero
 also returns NULL, the empty `String`, without raising.
 
 Source: `lib/string/editing.x:99`
+
+<a id="String.is_alnum"></a>
+#### String.is_alnum
+
+`meta native int String.is_alnum(String s)`
+
+Reports whether every byte of nonempty `s` is alphanumeric.
+
+Source: `lib/string/classify.x:48`
+
+<a id="String.is_alnum_under"></a>
+#### String.is_alnum_under
+
+`meta native int String.is_alnum_under(String s)`
+
+Reports whether nonempty `s` is alphanumeric or underscore.
+
+Source: `lib/string/classify.x:53`
+
+<a id="String.is_alpha"></a>
+#### String.is_alpha
+
+`meta native int String.is_alpha(String s)`
+
+Reports whether every byte of nonempty `s` is alphabetic.
+
+Source: `lib/string/classify.x:33`
+
+<a id="String.is_alpha_under"></a>
+#### String.is_alpha_under
+
+`meta native int String.is_alpha_under(String s)`
+
+Reports whether every byte of nonempty `s` is alphabetic or underscore.
+
+Source: `lib/string/classify.x:38`
+
+<a id="String.is_digit"></a>
+#### String.is_digit
+
+`meta native int String.is_digit(String s)`
+
+Reports whether every byte of nonempty `s` is a decimal digit.
+
+Source: `lib/string/classify.x:43`
+
+<a id="String.is_identifier"></a>
+#### String.is_identifier
+
+`meta native int String.is_identifier(String s)`
+
+Reports whether `s` is a C identifier under C character classes.
+The first byte must be alphabetic or underscore; later bytes may also be
+decimal digits. A null or empty `String` returns false.
+
+Source: `lib/string/classify.x:61`
+
+<a id="String.is_lower"></a>
+#### String.is_lower
+
+`meta native int String.is_lower(String s)`
+
+Reports whether every byte of nonempty `s` is lower-case.
+
+Source: `lib/string/classify.x:76`
+
+<a id="String.is_lower_under"></a>
+#### String.is_lower_under
+
+`meta native int String.is_lower_under(String s)`
+
+Reports whether every byte of nonempty `s` is lower-case or underscore.
+
+Source: `lib/string/classify.x:81`
+
+<a id="String.is_space"></a>
+#### String.is_space
+
+`meta native int String.is_space(String s)`
+
+Reports whether every byte of nonempty `s` is whitespace.
+
+Source: `lib/string/classify.x:71`
+
+<a id="String.is_upper"></a>
+#### String.is_upper
+
+`meta native int String.is_upper(String s)`
+
+Reports whether every byte of nonempty `s` is upper-case.
+
+Source: `lib/string/classify.x:86`
+
+<a id="String.is_upper_under"></a>
+#### String.is_upper_under
+
+`meta native int String.is_upper_under(String s)`
+
+Reports whether every byte of nonempty `s` is upper-case or underscore.
+
+Source: `lib/string/classify.x:91`
 
 <a id="String.iter"></a>
 #### String.iter
@@ -319,6 +541,27 @@ count.
 The empty `String` is the null pointer, whose length is 0.
 
 Source: `lib/string/storage.x:36`
+
+<a id="String.lines"></a>
+#### String.lines
+
+`meta native Split String.lines(String str)`
+
+Returns a lazy cursor over lines in `str`, with endings removed.
+LF, CR, and CRLF end a line, with CRLF counted as one ending. The yielded
+fields agree with `str.split_lines(0)`, including empty interior lines and
+the rule that a trailing ending does not add a final empty line.
+
+Each yielded field is a canonical `String`. Distinct fields remain resident
+in the active `String` pool; bracket bulk traversal with `Pool.open` /
+`Pool.close` and promote retained values when that residency should be
+temporary. The cursor borrows `str`, whose
+actual owning pool must remain live through traversal.
+
+**Raises:** `<alloc-fail>` when the cursor descriptor cannot be allocated.
+An empty `String` produces an exhausted cursor.
+
+Source: `lib/string/cursors.x:211`
 
 <a id="String.lower"></a>
 #### String.lower
@@ -577,6 +820,84 @@ returns NULL and an unchanged input is returned as-is.
 
 Source: `lib/string/splitting.x:42`
 
+<a id="String.split"></a>
+#### String.split
+
+`meta native List String.split(String str, String sep)`
+
+Splits `str` on every occurrence of `sep` into a `List` of `String`s.
+Separators are not coalesced, so adjacent ones produce empty fields and
+the result holds one more element than the number of separators found.
+An empty field is the empty `String`, the null pointer. An empty or null
+`sep` yields a one-element `List` holding `str`, and splitting the empty
+`String` yields the empty `List`. The canonical fields and `List` remain
+live
+until their actual `String` and `List` pools are released.
+
+```x2c
+printf("%s\n", "a:b:c".split(":").repr());
+printf("%s\n", "a::b".split(":").repr());
+```
+
+**Raises:** the same causes as `String.split_n`.
+
+Source: `lib/string/cursors.x:117`
+
+<a id="String.split_lines"></a>
+#### String.split_lines
+
+`meta native List String.split_lines(String str, int keep_ends)`
+
+Splits `str` into a `List` of lines.
+LF, CR, and CRLF all end a line, and CRLF counts as one ending. A
+nonzero `keep_ends` leaves each line's ending attached to it. A trailing
+line ending does not produce a final empty line, so text that ends in a
+newline yields as many lines as it has endings. A null or empty `str`
+returns `nil`. The canonical fields and `List` remain live until their
+actual
+`String` and `List` pools are released.
+
+**Raises:** `<alloc-fail>` or `<size-limit>` while constructing fields or the
+result.
+
+Source: `lib/string/cursors.x:130`
+
+<a id="String.split_n"></a>
+#### String.split_n
+
+`meta native List String.split_n(String str, String sep, int max_splits)`
+
+Splits `str` at no more than `max_splits` separators.
+A negative limit splits every occurrence; zero returns `str` as one field.
+A null `str` returns `nil`. A null or empty `sep` returns `str` as one
+field.
+The canonical fields and `List` remain live until their actual `String` and
+`List` pools are released.
+
+**Raises:** `<alloc-fail>` or `<size-limit>` while constructing the result.
+
+Source: `lib/string/cursors.x:87`
+
+<a id="String.splits"></a>
+#### String.splits
+
+`meta native Split String.splits(String str, String sep)`
+
+Returns a lazy cursor over fields separated by `sep`.
+Separators are not coalesced, so adjacent separators produce empty
+fields. The yielded fields agree with `str.split(sep)`. A null or empty
+separator yields `str` once, while an empty `str` yields nothing.
+
+Each yielded field is a canonical `String`. Distinct fields remain resident
+in the active `String` pool; bracket bulk traversal with `Pool.open` /
+`Pool.close` and promote retained values when that residency should be
+temporary. The cursor borrows `str` and
+`sep`; both actual owning pools must remain live through traversal.
+
+**Raises:** `<alloc-fail>` when the cursor descriptor cannot be allocated.
+
+Source: `lib/string/cursors.x:225`
+
 <a id="String.squeeze"></a>
 #### String.squeeze
 
@@ -635,6 +956,23 @@ loop.
 
 Source: `lib/string/adapters.x:65`
 
+<a id="String.unescape"></a>
+#### String.unescape
+
+`meta native String String.unescape(String str)`
+
+Decodes supported backslash escapes in `str` into a canonical `String`.
+Standard single-byte escapes, up to two hexadecimal digits after `x`, `u`,
+or `U`, and up to three octal digits are consumed. A backslash-newline is
+removed, an unknown escape yields its following byte, and a trailing
+backslash is dropped. `Null` input returns NULL and input without a
+backslash is returned unchanged.
+
+**Raises:** `<bad-arg>` for an octal escape above `\377`, which does not fit
+a byte, or `<alloc-fail>` while constructing a changed result.
+
+Source: `lib/string/escape.x:119`
+
 <a id="String.upper"></a>
 #### String.upper
 
@@ -673,6 +1011,27 @@ returns `str` unchanged.
 
 Source: `lib/string/editing.x:127`
 
+<a id="String.words"></a>
+#### String.words
+
+`meta native Split String.words(String str)`
+
+Returns a lazy cursor over whitespace-delimited words in `str`.
+Runs of C `isspace` bytes are coalesced, leading and trailing whitespace
+is ignored, and no empty `String` is yielded. `str.splits(" ")` instead
+preserves empty fields around every explicit separator.
+
+Each yielded field is a canonical `String`. Distinct fields remain resident
+in the active `String` pool; bracket bulk traversal with `Pool.open` /
+`Pool.close` and promote retained values when that residency should be
+temporary. The cursor borrows `str`, whose
+actual owning pool must remain live through traversal.
+
+**Raises:** `<alloc-fail>` when the cursor descriptor cannot be allocated.
+An empty `String` produces an exhausted cursor.
+
+Source: `lib/string/cursors.x:196`
+
 <a id="String.write_str"></a>
 #### String.write_str
 
@@ -687,12 +1046,24 @@ borrowed `out` is returned and not retained.
 
 Source: `lib/string/adapters.x:16`
 
+### `Var`
+
+<a id="Var.split"></a>
+#### Var.split
+
+`Split Var.split(Var value)`
+
+Unboxes a descriptor from a `Var` produced by `Split.var`.
+
+Source: `lib/string/cursors.x:30`
+
 ## Advanced and interop API
 
 | Function | Summary |
 | --- | --- |
 | [`String.compare`](#String.compare) | Compares `x` and `y` bytewise, returning negative, zero, or positive. |
 | [`String.equal`](#String.equal) | Reports whether `x` and `y` contain the same bytes. |
+| [`String.escape`](#String.escape) | Returns a canonical escaped representation of the bytes in `str`. |
 | [`String.free`](#String.free) | Releases a transient `String.malloc` buffer early. |
 | [`String.hash`](#String.hash) | Returns the content hash of `str`, or zero for the empty `String`. |
 | [`String.intern`](#String.intern) | Returns the canonical `String` for the borrowed bytes of `string`. |
@@ -701,10 +1072,16 @@ Source: `lib/string/adapters.x:16`
 | [`String.new_fill`](#String.new_fill) | Returns the canonical `String` containing `count` copies of `fill`. |
 | [`String.new_in`](#String.new_in) | Returns the canonical `String` for at most `length` borrowed bytes in `pool`. |
 | [`String.new_len`](#String.new_len) | Returns the canonical `String` holding at most `len` bytes of `str`. |
+| [`String.parse`](#String.parse) | Returns the canonical unescaped contents of `str`. |
+| [`String.parse_char`](#String.parse_char) | Parses one leading single-quoted escaped or literal byte, or returns -1. |
 | [`String.printf`](#String.printf) | Formats a canonical `String` from `fmt` and the trailing arguments. |
 | [`String.promote`](#String.promote) | Moves `str` from the active pool to its parent and returns the same pointer. |
+| [`String.repr`](#String.repr) | Returns a canonical quoted and escaped representation of `str`. |
 | [`String.str`](#String.str) | Returns `str` itself as its display `String` without copying or retaining it. |
 | [`String.symbol`](#String.symbol) | Returns the compact `Symbol` encoded from `str`, or zero for empty input. |
+| [`String.try_double`](#String.try_double) | Parses all of `str` as a floating-point number, writing `out`. |
+| [`String.try_long`](#String.try_long) | Parses all of `str` as an integer, writing it through `out`. |
+| [`String.write_repr`](#String.write_repr) | Appends a quoted escaped representation of `str` to borrowed `out`. |
 
 ### `String`
 
@@ -734,6 +1111,20 @@ are equal, since the null pointer is the empty `String`, and a null
 equals no non-empty `String`.
 
 Source: `lib/string/storage.x:59`
+
+<a id="String.escape"></a>
+#### String.escape
+
+`meta native String String.escape(String str)`
+
+Returns a canonical escaped representation of the bytes in `str`.
+Common control and delimiter bytes use named escapes, printable ASCII is
+copied, and every other byte uses a three-digit octal escape. `Null`
+input or an oversized result returns NULL.
+
+**Raises:** `<alloc-fail>` while constructing the result.
+
+Source: `lib/string/escape.x:28`
 
 <a id="String.free"></a>
 #### String.free
@@ -884,6 +1275,33 @@ without raising.
 
 Source: `lib/string/storage.x:110`
 
+<a id="String.parse"></a>
+#### String.parse
+
+`meta native String String.parse(String str)`
+
+Returns the canonical unescaped contents of `str`.
+Matching outer `%"..."` or `"..."` delimiters are removed; unquoted input
+is unescaped directly. `Null` or empty input returns NULL. An unquoted
+input without backslashes is returned unchanged.
+
+**Raises:** `<alloc-fail>` while copying or decoding.
+
+Source: `lib/string/escape.x:227`
+
+<a id="String.parse_char"></a>
+#### String.parse_char
+
+`meta native int String.parse_char(String str)`
+
+Parses one leading single-quoted escaped or literal byte, or returns -1.
+The opening quote, one decoded byte, and a closing quote are required.
+Text after that closing quote is ignored. A decoded NUL is returned as
+zero; malformed and null input returns -1, as does an octal escape above
+`\377`, which does not fit a byte.
+
+Source: `lib/string/escape.x:208`
+
 <a id="String.printf"></a>
 #### String.printf
 
@@ -917,6 +1335,18 @@ the promotion.
 
 Source: `lib/string/storage.x:314`
 
+<a id="String.repr"></a>
+#### String.repr
+
+`String String.repr(String str)`
+
+Returns a canonical quoted and escaped representation of `str`.
+Empty input returns the canonical literal spelling `"\"\""`.
+
+**Raises:** `<alloc-fail>` while escaping or formatting a nonempty `String`.
+
+Source: `lib/string/escape.x:87`
+
 <a id="String.str"></a>
 #### String.str
 
@@ -938,6 +1368,64 @@ use seven-bit bytes, and input beyond the selected encoding's capacity is
 truncated. Use `Symbol.try_new` when every byte must be preserved.
 
 Source: `lib/string/adapters.x:23`
+
+<a id="String.try_double"></a>
+#### String.try_double
+
+`meta native int String.try_double(String str, double *out)`
+
+Parses all of `str` as a floating-point number, writing `out`.
+Returns 1 and writes `out` on success; returns 0 and leaves `out`
+untouched on failure.
+
+The whole string must be the number, on the same terms as
+`String.try_long`: leading and trailing whitespace are allowed and any
+other unconsumed character is a failure, so `1.5junk` does not parse.
+
+It accepts what C's `strtod` accepts, including hex-float literals such
+as `0x1p4` and the `inf` and `nan` spellings. A value that overflows or
+underflows `double` fails. It does not know the `0o` and `0b` prefixes
+that the integer parser adds, so `0b101` fails instead of yielding the
+leading zero.
+
+Source: `lib/string/number.x:84`
+
+<a id="String.try_long"></a>
+#### String.try_long
+
+`meta native int String.try_long(String str, long *out)`
+
+Parses all of `str` as an integer, writing it through `out`.
+Returns 1 and writes `out` on success; returns 0 and leaves `out`
+untouched on failure.
+
+The whole string must be the number. Leading and trailing whitespace are
+allowed and any other unconsumed character is a failure, so `42` succeeds
+and `42junk` does not. A `+` or `-` sign is accepted, and the radix
+prefixes `0x`, `0o`, `0b`, and C's leading-zero octal are recognized.
+A value outside the range of `long` fails.
+
+```x2c
+~long value = 0;
+printf("%d %ld\n", " -0b101 ".try_long(&value), value);
+printf("%d\n", "42junk".try_long(&value));
+```
+
+Source: `lib/string/number.x:34`
+
+<a id="String.write_repr"></a>
+#### String.write_repr
+
+`Buffer String.write_repr(String str, Buffer out)`
+
+Appends a quoted escaped representation of `str` to borrowed `out`.
+Bytes are streamed without first allocating an intermediate `String`. The
+same `out` is returned and not retained. Text written before a failure
+remains in the `Buffer`.
+
+**Raises:** any cause from `Buffer.write_char` or `Buffer.write_len`.
+
+Source: `lib/string/escape.x:98`
 
 ## Runtime-internal callables
 
@@ -984,7 +1472,22 @@ Source: `lib/string/storage.x:328`
 
 | Type | Kind | Summary |
 | --- | --- | --- |
+| [`Split`](#Split) | struct | Describes an immutable, repeatable lazy traversal of a borrowed `String`. |
 | [`String`](#String) | alias | An immutable canonical NUL-terminated byte string, or NULL for empty. |
+
+<a id="Split"></a>
+### Split
+
+`typedef struct Split *Split`
+
+Describes an immutable, repeatable lazy traversal of a borrowed `String`.
+The descriptor is `Scope`-owned and keeps no position; each caller or
+`Iter`
+keeps its own cursor. The input and separator are not retained, so their
+actual `String` pools must remain live through every traversal. No cleanup
+is needed before the descriptor's `Scope` is released.
+
+Source: `lib/string/cursors.x:19`
 
 <a id="String"></a>
 ### String
@@ -1016,4 +1519,4 @@ never return to the constructing operation.
 
 ## Tests and examples
 
-`make verify` (`unittest/test-string.x`) and `make examples` (`docs-word-count`).
+`make verify` (`unittest/test-string.x`, `unittest/test-string-classify.x`, `unittest/test-string-number.x`, and `unittest/test-split.x`) and `make examples` (`docs-word-count`).

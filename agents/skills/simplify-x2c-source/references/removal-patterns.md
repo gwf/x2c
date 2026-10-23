@@ -158,7 +158,7 @@ lifecycle; a shared table may expose redundant switches.
 Calibration for FA-7 in [the standard](../../../x2c-code-standard.md).
 
 The Map generator cleanup removed standard allocation, scope, and byte-storage
-forwarders from `lib/map.x`, `lib/typed-map.x`, and its fixtures. The first
+forwarders from `lib/map/map.x`, `lib/typed-map.x`, and its fixtures. The first
 direct macro spelling failed the hygiene check. That did not prove the
 forwarders necessary: exact `x2c.ident` references let the generator call the
 existing operations directly.

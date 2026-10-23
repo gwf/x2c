@@ -8,7 +8,7 @@
 
 #pragma once
 #include "meta.x"
-#include "array.x"
+#include "array/array.x"
 #include "list/list.x"
 #include "match/match.x"
 #include "symbolset.x"

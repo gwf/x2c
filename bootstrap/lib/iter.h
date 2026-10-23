@@ -41,9 +41,9 @@ struct UnzipShared{
 #include "var/var.h"
 #include "symbol.h"
 #include "scope/scope.h"
-#include "array.h"
+#include "array/array.h"
 #include "block.h"
-#include "func.h"
+#include "func/func.h"
 #include <limits.h>
 #include <stdlib.h>
 #define UNZIP_COMPACT_THRESHOLD 256

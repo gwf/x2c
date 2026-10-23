@@ -33,14 +33,14 @@
     result also refers to. `$auto` is built on them.
 
     The library builds it as an optional module, but the prelude's
-    `varops.x` includes it for its own `meta` rows, so every unit sees its
+    `var/var.x` includes it for its own `meta` rows, so every unit sees its
     declarations. Include it explicitly where `meta` functions are written.
     Shared compile-time definitions use ordinary source includes.
 */
 
 #pragma once
 
-#include "array.x"
+#include "array/array.x"
 #include "atom.x"
 #include "common.x"
 #include "list/list.x"

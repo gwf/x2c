@@ -23,11 +23,11 @@ ErrorCatchSite;
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "array.h"
+#include "array/array.h"
 #include "block.h"
 #include "exception.h"
 #include "list/list.h"
-#include "map.h"
+#include "map/map.h"
 #include "pool/pool.h"
 #include "scope/scope.h"
 #include "string/string.h"

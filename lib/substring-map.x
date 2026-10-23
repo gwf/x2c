@@ -2,7 +2,7 @@
 
 #pragma once
 #include "substring.x"
-#include "map-generics.x"
+#include "map/map.x"
 #include "context.x"
 
 /** A scope-owned count table that borrows Substr keys. Keep every source

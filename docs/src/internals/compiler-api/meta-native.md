@@ -33,7 +33,7 @@ Meta functions and the native code they call.
 | [`Compiler.matches_macro`](#Compiler.matches_macro) | Tests a registered macro with the candidate's global and source bindings. |
 | [`Compiler.native_meta_accepts`](#Compiler.native_meta_accepts) | Answers whether the native target `function` matches the declared `signature`. |
 | [`Compiler.native_meta_module`](#Compiler.native_meta_module) | Returns the selected file-backed native module that supplies `name`, with its native `type`, or NULL for a linked or absent target. |
-| [`Compiler.native_meta_targets`](#Compiler.native_meta_targets) | Returns the declared native targets advertised by `meta` interface rows, in the row form `lib/lisp-targets.x` generates its target inventory from, or only those declared in the files `paths` names when it is not empty. |
+| [`Compiler.native_meta_targets`](#Compiler.native_meta_targets) | Returns the declared native targets advertised by `meta` interface rows, in the row form `lib/lisp-targets/lisp-targets.x` uses for its inventory, or only those declared in the files `paths` names when it is not empty. |
 | [`Compiler.native_module_targets`](#Compiler.native_module_targets) | Returns the name-to-`Func` Map of the loaded native module at absolute `path`. |
 | [`Compiler.preload_native_module`](#Compiler.preload_native_module) | Loads the native module at absolute `path` when this compiler built it and the platform loads modules. |
 | [`Compiler.record_native_meta_effect`](#Compiler.record_native_meta_effect) | The shallow interface retains the advertisement separately from the C declaration. |
@@ -284,9 +284,9 @@ Source: `src/meta-native/bindings.x:214`
 `List Compiler.native_meta_targets(List paths)`
 
 Returns the declared native targets advertised by `meta` interface
-rows, in the row form `lib/lisp-targets.x` generates its target
-inventory from, or only those declared in the files `paths` names when
-it is not empty. Sorting makes that inventory independent of Map order.
+rows, in the row form `lib/lisp-targets/lisp-targets.x` uses for its
+inventory, or only those declared in the files `paths` names when it is
+not empty. Sorting makes that inventory independent of Map order.
 
 Source: `src/meta-native/bindings.x:305`
 

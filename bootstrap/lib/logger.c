@@ -43,7 +43,7 @@ typedef void(* LogFlusher)(Logger logger, Var data);
 #include <time.h>
 #include <sys/time.h>
 #include <unistd.h>
-#include "array.h"
+#include "array/array.h"
 #include "block.h"
 #include "buffer.h"
 #include "exception.h"

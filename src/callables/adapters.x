@@ -4,18 +4,18 @@
 
 static macro Stmt $fail.callable_shared(Expr $c, Expr $source) =>
   _adapter_error(
-    $c, "function conversion needs x2c_func_shared from lib/func.x",
+    $c, "function conversion needs x2c_func_shared from lib/func/func.x",
     %("Func"), $source, NULL);
 
 static macro Stmt $fail.callable_context(Expr $c, Expr $source) =>
   _adapter_error(
-    $c, "function pointer conversion needs Func.new_context from lib/func.x",
+    $c, "function pointer conversion needs Func.new_context from lib/func/func.x",
     %("Func"), $source, NULL);
 
 static macro Stmt $fail.callable_native_context(
   Expr $c, Expr $target, Expr $source) =>
   _adapter_error(
-    $c, "native binding needs Func.context from lib/func.x",
+    $c, "native binding needs Func.context from lib/func/func.x",
     $target, $source, NULL);
 
 static macro Stmt $fail.callable_direct(
@@ -36,7 +36,7 @@ static macro Stmt $fail.callable_variadic(
 static macro Stmt $fail.callable_readers(
   Expr $c, Expr $target, Expr $source) =>
   _adapter_error(
-    $c, "native binding needs Func argument readers from lib/func.x",
+    $c, "native binding needs Func argument readers from lib/func/func.x",
     $target, $source, NULL);
 
 static macro Stmt $fail.callable_parameter(

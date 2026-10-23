@@ -3,14 +3,13 @@
     Copyright (c) 2025 Gary William Flake
 
     `var-tags.x` holds the ledger. This optional module is the one
-    runtime unit that imports it, so other units include `var.x` and
-    `varconvert.x` without loading the ledger. It defines the tag table, the
-    tag sets, the numeric table, and the decoder table those modules
-    declare, and checks `TagId` in `lib/var/var.x` against the ledger.
+    runtime unit that imports it. Other units include `var/var.x` without
+    loading the ledger. This module defines the tag table, tag sets, numeric
+    table, and decoder table that Var declares, and checks `TagId` in
+    `lib/var/var.x` against the ledger.
 */
 
 #include "var/var.x"
-#include "varconvert.x"
 #include "meta.x"
 
 #include "var-tags.x"

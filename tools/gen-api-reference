@@ -790,9 +790,10 @@ static const char *evidence_rows[][2] = {
   {"rewrite", "`make verify` (`rewrite-index-entry-points`, "
               "`rewrite-independent-rules`, and `rewrite-typed-operator` "
               "compiler fixtures)."},
-  {"match", "`make verify` (`unittest/test-match.x`) and `make examples` "
+  {"match", "`make verify` (`unittest/test-match.x`, "
+            "`unittest/test-match-plan.x`, `unittest/test-match-cache.x`, "
+            "and `unittest/test-machine.x`) and `make examples` "
             "(`match-nested`)."},
-  {"match-cache", "`make verify` (`unittest/test-match-cache.x`)."},
   {"match-recursive", "`make verify` (`unittest/test-match.x`)."},
   {"mutex", "`make verify` (`unittest/test-mutex.x`)."},
   {"pool", "`make verify` (`unittest/test-pool.x`)."},
@@ -802,13 +803,12 @@ static const char *evidence_rows[][2] = {
               "`make examples` (`scripts/line-counts`)."},
   {"scope", "`make verify` (`unittest/test-scope.x`) and `make examples` "
             "(`docs-tour`)."},
-  {"split", "`make verify` (`unittest/test-split.x`)."},
   {"substring", "`make verify` (`unittest/test-substring.x`); `examples/c2x2c/words-v2.x` demonstrates borrowed word iteration."},
   {"substring-map", "`make verify` (`unittest/test-substring.x`); `examples/c2x2c/words-v4.x` demonstrates native word counts."},
-  {"string-classify", "`make verify` (`unittest/test-string-classify.x`)."},
-  {"string-escape", "`make verify` (`unittest/test-string.x`)."},
-  {"string-format", "`make verify` (`unittest/test-string.x`)."},
-  {"string", "`make verify` (`unittest/test-string.x`) and `make examples` "
+  {"string", "`make verify` (`unittest/test-string.x`, "
+             "`unittest/test-string-classify.x`, "
+             "`unittest/test-string-number.x`, and `unittest/test-split.x`) "
+             "and `make examples` "
              "(`docs-word-count`)."},
   {"symbol", "`make verify` (`unittest/test-symbol.x`) and `make examples` "
              "(`symbol-literal-demo`)."},
@@ -818,10 +818,9 @@ static const char *evidence_rows[][2] = {
   {"typed-array", "`make verify` (`unittest/test-typed-array.x`)."},
   {"typed-list", "`make verify` (`unittest/test-typed-list.x`)."},
   {"typed-map", "`make verify` (`unittest/test-typed-map.x`)."},
-  {"var", "`make verify` (`unittest/test-var.x`) and `make examples` "
+  {"var", "`make verify` (`unittest/test-var.x` and "
+          "`unittest/test-varops.x`) and `make examples` "
           "(`type-conversion-matrix`)."},
-  {"varconvert", "`make verify` (`unittest/test-var.x`)."},
-  {"varops", "`make verify` (`unittest/test-varops.x`)."},
   {NULL, NULL}}
 
 Path self = String.new(argv[0])

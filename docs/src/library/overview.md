@@ -23,9 +23,8 @@ if (value is String)
   printf("%s\n", value);
 ```
 
-Dynamic arithmetic and truthiness are in
-[Var operations](modules/varops.md). Checked conversion is in
-[Var conversion](modules/varconvert.md). `void` means missing or exhausted,
+The [Var reference](modules/var.md) covers dynamic arithmetic, truthiness,
+and checked conversion. `void` means missing or exhausted,
 and collections and iterators never carry it as a payload.
 
 ## Choose a collection

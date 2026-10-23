@@ -2,7 +2,7 @@
 
 #define __GUARD_0x229C9016__
 #include "x2c.h"
-#include "array-generics.h"
+#include "array/array.h"
 #include <limits.h>
 #include <string.h>
 typedef Block ArrayChar;
@@ -2079,8 +2079,6 @@ String ArrayChar_repr(ArrayChar _x2c_gensym_macro_array_39){
   return Buffer_str_free(_x2c_gensym_macro_out_10);
 }
 
-Array Array_new(void);
-
 Array ArrayChar_array(ArrayChar _x2c_gensym_macro_array_41){
   if(! _init_guard_) _file_init_();
   if(_x2c_gensym_macro_array_41 == NULL) return NULL;
@@ -2118,8 +2116,6 @@ Array ArrayChar_array(ArrayChar _x2c_gensym_macro_array_41){
   }
 
 }
-
-Var Array_getindex(Array, int);
 
 ArrayChar Array_arraychar(Array _x2c_gensym_macro_values_4){
   if(! _init_guard_) _file_init_();

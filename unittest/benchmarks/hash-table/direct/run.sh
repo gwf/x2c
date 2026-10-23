@@ -78,7 +78,8 @@ mkdir -p "$generated_dir"
 cp "$root/unittest/benchmarks/hash-table/x2c/flat-map.x" \
   "$result_dir/flat-map.x"
 
-cp "$root/lib/map.x" "$result_dir/map.x"
+cp "$root/lib/map/map.x" "$result_dir/map.x"
+cp "$root/lib/map/generics.x" "$result_dir/generics.x"
 
 printf '%s\n' \
   "reference=attractivechaos/klib@$khashl_commit khashl r30" \

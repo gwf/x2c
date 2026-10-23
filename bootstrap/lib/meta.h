@@ -5,7 +5,7 @@
 #ifndef __GUARD_0xD219AB39__
 #define __GUARD_0xD219AB39__
 
-#include "array.h"
+#include "array/array.h"
 #include "atom.h"
 #include "common.h"
 #include "list/list.h"

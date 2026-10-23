@@ -17,7 +17,7 @@
 
 protocol Cleanup(Context);
 
-#include "array.x"
+#include "array/array.x"
 #include "atom.x"
 #include "block.x"
 #include "buffer.x"
@@ -25,8 +25,8 @@ protocol Cleanup(Context);
 #include "error/error.x"
 #include "exception.x"
 #include "list/list.x"
-#include "map.x"
-#include "match-cache.x"
+#include "map/map.x"
+#include "match/match.x"
 #include "pool/pool.x"
 #include "scope/scope.x"
 #include "string/string.x"

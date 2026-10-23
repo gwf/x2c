@@ -12,7 +12,7 @@
 # Every lib/*.x file needs exactly one row. tools/gen-api-reference fails
 # rather than guessing, so a new module cannot be silently dropped from the
 # reference. lib/x2c.x is excluded: lib/Makefile generates it.
-lib/array.x|api|
+lib/array/array.x|api|
 lib/atom.x|api|
 lib/block.x|api|
 lib/buffer.x|api|
@@ -26,35 +26,25 @@ lib/error/error.x|api|
 lib/error_init.x|internal|Type-owned initialization shim that preserves `Error`'s pre-initialization boundary.
 lib/exception.x|api|
 lib/file.x|api|
-lib/func.x|api|
+lib/func/func.x|api|
 lib/iter.x|api|
 lib/lib.x|api|
-lib/lisp-init.x|internal|The standard Lisp algorithms `etc/init.xlisp` binds by name into every `Lisp` session.
-lib/lisp-targets.x|internal|The native operations a `Lisp` session can bind, built outside the implicit prelude so the optional modules that supply them stay out of it.
+lib/lisp-targets/lisp-targets.x|internal|The native operations a `Lisp` session can bind, built outside the implicit prelude so the optional modules that supply them stay out of it.
 lib/lisp/lisp.x|api|
 lib/list/list.x|api|
 lib/list-selectors.x|optional|Compound selectors beyond caar, cadr, cddr, and caddr; explicitly include `list-selectors.x` to use them.
 lib/logger.x|api|
-lib/machine.x|internal|`Match` wordcode, builder, and execution-state definitions.
 lib/macrovalue/macrovalue.x|api|
-lib/map.x|api|
-lib/match-cache.x|api|
-lib/match-machine.x|internal|Private `Match` wordcode decoder.
-lib/match-plan.x|api|
+lib/map/map.x|api|
 lib/match/match.x|api|
-lib/meta.x|optional|Syntax builders and compiler operations for `meta` functions. Pure builders also run at runtime; operations that query the compiler remain compile-time only. Every unit reaches it through the prelude's `varops.x`; include `meta.x` explicitly where `meta` functions are written.
+lib/meta.x|optional|Syntax builders and compiler operations for `meta` functions. Pure builders also run at runtime; operations that query the compiler remain compile-time only. Every unit reaches it through the prelude's `var/var.x`; include `meta.x` explicitly where `meta` functions are written.
 lib/type.x|optional|Structural operations on captured Type values, available at runtime and compile time; include `type.x` to use them.
 lib/mutex.x|api|
 lib/pool/pool.x|api|
 lib/protocols.x|internal|The built-in `Cleanup`, `Block`, `Iter`, and `Var` protocol declarations used to generate runtime dispatch adapters.
 lib/scan.x|internal|Allocation-free character scanners used by the tokenizer.
 lib/scope/scope.x|api|
-lib/split.x|api|
 lib/static-init.x|internal|Compiler-owned first-use static storage and initialization guards.
-lib/string-classify.x|api|
-lib/string-escape.x|api|
-lib/string-format.x|api|
-lib/string-number.x|api|
 lib/string/string.x|api|
 lib/symbol.x|api|
 lib/symbolset.x|api|
@@ -77,15 +67,10 @@ lib/substring-map.x|optional|Native Substr occurrence counts; explicitly include
 lib/typed-map.x|optional|Typed maps over native numeric or canonical `String` fields; explicitly include `typed-map.x` to use them.
 lib/var-ledger.x|internal|The `Var` tag tables and decoder table projected from `lib/var-tags.x`, in the one runtime unit that includes the ledger.
 lib/var/var.x|api|
-lib/varconvert.x|api|
-lib/varops.x|api|
-lib/array-generics.x|internal|Shared declaration templates for typed array operations.
 lib/cleanup.x|internal|Cleanup adoption templates used by runtime owners.
 lib/error-macros.x|internal|Structured Error causes shared by runtime modules.
 lib/error-private.x|internal|Error transfer templates used by the exception machinery.
-lib/func-errors.x|internal|Structured callable errors shared by runtime modules.
 lib/integer-ops.x|internal|Integer conversion and arithmetic templates shared by runtime owners.
-lib/map-generics.x|internal|Shared declaration templates for typed map operations.
 lib/native-scalar-types.x|internal|The exact C scalar ledger and its compile-time projections.
 lib/private-keywords.x|internal|Keyword aliases used by runtime implementation code.
 lib/system-macros.x|optional|Compile-time convenience macros; explicitly include system-macros.x to use them.

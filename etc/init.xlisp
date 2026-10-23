@@ -120,7 +120,7 @@
 (def len length)
 (def lower string-downcase)
 
-// Standard algorithms from lib/lisp-init.x.
+// Standard algorithms from lib/lisp-targets/algorithms.x.
 
 (def last (bind "lisp_last" nil))
 (def member (bind "lisp_member" nil))

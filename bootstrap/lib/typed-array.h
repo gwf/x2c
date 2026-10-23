@@ -6,7 +6,7 @@
 #define __GUARD_0x229C9016__
 
 #include "x2c.h"
-#include "array-generics.h"
+#include "array/array.h"
 #include <limits.h>
 #include <string.h>
 typedef Block ArrayChar;

@@ -181,8 +181,6 @@ char Symbol_last(Symbol symbol){
   return value & 0x7F;
 }
 
-String String_unescape(String);
-
 Symbol Symbol_parse(char * text){
   int scan_symbol_literal(char * s);
   int scan_atom(char * s);

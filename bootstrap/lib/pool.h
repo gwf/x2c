@@ -47,7 +47,7 @@ PoolStats;
 #include "block.h"
 #include "exception.h"
 #include "mutex.h"
-#include "map-generics.h"
+#include "map/map.h"
 String x2c_pool_lookup_string(Pool inner, const char * bytes, int length, unsigned hash);
 
 Var Pool_lookup(Pool inner, Var key);

@@ -16,7 +16,7 @@ builds/0/libexec/x2c-graph focus Compiler_bind_syntax \
 grep -rn 'bind_syntax' src
 
 # Inspect returned allocation before removing an apparent copy.
-builds/0/libexec/x2c-graph allocation-returns String_split_n lib/split.x
+builds/0/libexec/x2c-graph allocation-returns String_split_n lib/string/string.x
 
 # Find repeated full walks that may merit source inspection.
 builds/0/libexec/x2c-graph walks $(tools/sources.sh --area src)

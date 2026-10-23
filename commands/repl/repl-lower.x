@@ -41,7 +41,6 @@ String ReplLower.declined(ReplLower self) => self.reason;
 #include "atom.x"
 #include "logger.x"
 #include "path.x"
-#include "varconvert.x"
 #include <math.h>
 
 /* Bool has no independent Var tag; preserve its C truth conversion. */
@@ -2338,7 +2337,7 @@ static Var _lower_store(
 /* `right` is already lowered: a step supplies its own one, and a compound
    assignment supplies its lowered right-hand side. The operation promotes,
    so the result converts back to the place's own type, which is what
-   `$native.update` in `lib/varops.x` does for each family. */
+   `$native.update` in `lib/var/operators.x` does for each family. */
 static Var _lower_update(
   Lowering &l, Var target, Var operator, Var right, List rest, List k) {
   int id = _lower_target(target);

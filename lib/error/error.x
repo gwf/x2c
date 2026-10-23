@@ -56,11 +56,11 @@ typedef struct ErrorCatchSite {
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "array.x"
+#include "array/array.x"
 #include "block.x"
 #include "exception.x"
 #include "list/list.x"
-#include "map.x"
+#include "map/map.x"
 #include "pool/pool.x"
 #include "scope/scope.x"
 #include "string/string.x"

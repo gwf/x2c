@@ -6,7 +6,6 @@
 #define __GUARD_0x83555A03__
 
 #include "var/var.h"
-#include "varconvert.h"
 #include "meta.h"
 #include "var-tags.h"
 extern const VarTagInfo x2c_var_taginfo[];

@@ -656,20 +656,19 @@ divisions:
 
 - `lib/scope/scope.x` owns allocation lifetime, and `lib/pool/pool.x` the nested
   interning pools layered over it;
-- `lib/var/var.x`, `lib/varconvert.x`, `lib/varops.x`, and `lib/dispatch.x` own
+- `lib/var/var.x`, `lib/var/conversion.x`, `lib/var/operators.x`, and `lib/dispatch.x` own
   tagged values, cause-raising conversion, operators, and dynamic dispatch;
 - `lib/string/string.x`, `lib/symbol.x`, `lib/atom.x`, and `lib/list/list.x` own
   canonical immutable values;
-- `lib/block.x`, `lib/buffer.x`, `lib/array.x`, and `lib/map.x` own mutable
+- `lib/block.x`, `lib/buffer.x`, `lib/array/array.x`, and `lib/map/map.x` own mutable
   storage;
 - `lib/iter.x` owns status-bearing traversal;
-- `lib/match/match.x` owns list-pattern matching; `lib/match-plan.x` compiles
-  patterns to plans, `lib/match-cache.x` retains them, and
-  `lib/match-machine.x` executes them over the wordcode and state
-  definitions in `lib/machine.x`;
+- `lib/match/match.x` owns list-pattern matching; its `plan.x` member compiles
+  patterns to plans, `cache.x` retains them, and `machine.x` executes them
+  over the wordcode and state definitions in `wordcode.x`;
 - `lib/lisp/lisp.x` owns the embedded Lisp reader, session, and evaluator; the
   compiler uses it to read `.xi` interfaces and to run compile-time macros;
-- `lib/func.x` owns generic native calls through generated adapters;
+- `lib/func/func.x` owns generic native calls through generated adapters;
 - `lib/tokenizer.x` and `lib/scan.x` own tokenization, so the compiler's
   first phase is library code;
 - `lib/error/error.x` owns failure records, handlers, and policy;

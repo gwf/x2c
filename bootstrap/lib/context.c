@@ -7,7 +7,7 @@
 #define __GUARD_0xC34B3F4F__
 #include "error-macros.h"
 #include "common.h"
-#include "array.h"
+#include "array/array.h"
 #include "atom.h"
 #include "block.h"
 #include "buffer.h"
@@ -15,8 +15,8 @@
 #include "error/error.h"
 #include "exception.h"
 #include "list/list.h"
-#include "map.h"
-#include "match-cache.h"
+#include "map/map.h"
+#include "match/match.h"
 #include "pool/pool.h"
 #include "scope/scope.h"
 #include "string/string.h"
@@ -365,8 +365,6 @@ static Var _export_map(Context c, Var value){
 static Var _export_callback(Var value, Context c){
   return _export_value(c, value);
 }
-
-Bytes Var_bytes(Var);
 
 static Var _export_storage(Context c, Var v){
   void * allocation = Var_is_row(v, 8, 7, 3) ? Bytes_block(Var_bytes(v)) : Var_pointer(v);

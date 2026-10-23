@@ -14,7 +14,7 @@
 #include "system-macros.h"
 #include "thread.h"
 #include "var-tags.h"
-#include "varops.h"
+#include "var/var.h"
 #include "fields.h"
 #include "grammar.h"
 #include "operator-ledger.h"

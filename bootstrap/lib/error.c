@@ -23,11 +23,11 @@ ErrorCatchSite;
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "array.h"
+#include "array/array.h"
 #include "block.h"
 #include "exception.h"
 #include "list/list.h"
-#include "map.h"
+#include "map/map.h"
 #include "pool/pool.h"
 #include "scope/scope.h"
 #include "string/string.h"
@@ -710,8 +710,6 @@ static Var f7_records____clone_in(Scope * owner, Var v){
   return copy;
 }
 
-String Var_string(Var);
-
 static Var f7_records____copy_text(ErrorRegion * region, Var value){
   String source = Var_is(value, 826970) ? Var_str(value) : Var_string(value);
   if(! region) return f7_records____snapshot_text(value, source);
@@ -828,8 +826,6 @@ Var Error_snapshot_in(Var value, Scope * values, Pool pool){
   * values = region.values;
   return copy;
 }
-
-List Var_list(Var);
 
 static Symbol _catch_match(ErrorHandler h){
   if(Error_count() <= h -> watermark) return 285842436424;
@@ -949,8 +945,6 @@ static void _free(ErrorHandler handle){
   _destroy(&(handle -> view));
   Scope_free(handle);
 }
-
-void MatchPlan_free(MatchPlan);
 
 static void f8_handlers____plans_free(Block plans){
   if(plans == NULL) return;
@@ -1073,8 +1067,6 @@ static void f8_handlers____site_lock(void){
 static void f8_handlers____site_unlock(void){
   Mutex_recursive_unlock(& f8_handlers___catch_site_mutex, "Error: could not unlock catch site");
 }
-
-MatchPlan MatchPlan_prepare(Var);
 
 static const char * f8_handlers____prepare_plans(ErrorHandler h, Var * patterns, int * fenced_arm){
   ErrorCatchSite * site = h -> site;

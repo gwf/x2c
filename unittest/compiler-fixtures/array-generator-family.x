@@ -1,5 +1,5 @@
 #include "x2c.x"
-#include "array-generics.x"
+#include "array/array.x"
 
 #include <string.h>
 

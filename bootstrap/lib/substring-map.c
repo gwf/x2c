@@ -2,7 +2,7 @@
 
 #define __GUARD_0xF675E0C0__
 #include "substring.h"
-#include "map-generics.h"
+#include "map/map.h"
 #include "context.h"
 typedef struct MapSubInt{
   Scope scope;
@@ -609,10 +609,6 @@ void MapSubInt_increment(MapSubInt map, Substr word){
 int MapSubInt_try_next(MapSubInt map, unsigned * cursor, Substr * word, int * count){
   return MapSubInt_try_next_entry(map, &(* cursor), &(* word), &(* count));
 }
-
-Map Map_new(void);
-
-Var Map_setindex(Map, Var, Var);
 
 Map MapSubInt_strings(MapSubInt map){
   Map result = Map_new();

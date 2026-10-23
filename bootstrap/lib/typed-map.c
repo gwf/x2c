@@ -5,7 +5,7 @@
 #include "error-macros.h"
 #include <stdlib.h>
 #include <string.h>
-#include "map-generics.h"
+#include "map/map.h"
 #include "integer-ops.h"
 #include "substring.h"
 typedef struct MapIntInt{
@@ -1712,8 +1712,6 @@ int MapIntInt_postfixindex(MapIntInt _x2c_gensym_macro_map_46, int _x2c_gensym_m
   return _x2c_gensym_macro_old_0;
 }
 
-int Map_try_next(Map, unsigned *, Var *, Var *);
-
 MapIntInt Map_mapintint(Map _x2c_gensym_macro_entries_4){
   if(! _init_guard_) _file_init_();
   if((void *) _x2c_gensym_macro_entries_4 == 0) return 0;
@@ -1916,10 +1914,6 @@ String MapIntInt_repr(MapIntInt _x2c_gensym_macro_map_51){
   MapIntInt_write_repr(_x2c_gensym_macro_map_51, _x2c_gensym_macro_out_13);
   return Buffer_str_free(_x2c_gensym_macro_out_13);
 }
-
-Map Map_new(void);
-
-Var Map_setindex(Map, Var, Var);
 
 Map MapIntInt_map(MapIntInt _x2c_gensym_macro_map_52){
   if(_x2c_gensym_macro_map_52 == NULL) return NULL;
@@ -4971,8 +4965,6 @@ static void _x2c_gensym_defer_cleanup_6(void * _x2c_gensym_defer_opaque_6){
   _x2c_gensym_defer_env_6 * _x2c_gensym_defer_data_6 =(_x2c_gensym_defer_env_6 *) _x2c_gensym_defer_opaque_6;
   RenderPath_leave(&((*(RenderPath *) _x2c_gensym_defer_data_6->_x2c_gensym_defer_capture_10)));
 }
-
-void Map_cleanup(Map);
 
 static void _x2c_gensym_defer_cleanup_7(void * _x2c_gensym_defer_opaque_7){
   _x2c_gensym_defer_env_7 * _x2c_gensym_defer_data_7 =(_x2c_gensym_defer_env_7 *) _x2c_gensym_defer_opaque_7;

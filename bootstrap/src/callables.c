@@ -453,7 +453,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _249 = cons(_246, _248);
   _250 = List_var(_249);
   _251 = Symbol_var(1133019155420);
-  _252 = int_var(4177);
+  _252 = int_var(4197);
   _253 = cons(_252, NULL);
   _254 = cons(_251, _253);
   _255 = List_var(_254);
@@ -527,7 +527,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _323 = String_var(_322);
   _324 = cons(_323, NULL);
   _325 = cons(_321, _324);
-  _326 = String_new("native binding needs Func argument readers from lib/func.x");
+  _326 = String_new("native binding needs Func argument readers from lib/func/func.x");
   _327 = Symbol_var(7304424);
   _328 = String_new("FuncArg");
   _329 = String_var(_328);
@@ -610,7 +610,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _406 = cons(_405, NULL);
   _407 = cons(_238, _406);
   _408 = List_var(_407);
-  _409 = int_var(2831);
+  _409 = int_var(2851);
   _410 = cons(_409, NULL);
   _411 = cons(_251, _410);
   _412 = List_var(_411);
@@ -669,7 +669,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _465 = cons(_464, NULL);
   _466 = cons(_238, _465);
   _467 = List_var(_466);
-  _468 = int_var(2895);
+  _468 = int_var(2915);
   _469 = cons(_468, NULL);
   _470 = cons(_251, _469);
   _471 = List_var(_470);
@@ -1017,7 +1017,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _810 = cons(_809, _314);
   _811 = Symbol_var(13424796426);
   _812 = String_new("x2c_func_shared");
-  _813 = String_new("function conversion needs x2c_func_shared from lib/func.x");
+  _813 = String_new("function conversion needs x2c_func_shared from lib/func/func.x");
   _814 = String_new("func_handle");
   _815 = cons(_41, _314);
   _816 = List_var(_815);
@@ -1031,12 +1031,12 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _824 = String_new("func_from_pointer");
   _825 = String_new("func_pointer");
   _826 = String_new("Func_new_context");
-  _827 = String_new("function pointer conversion needs Func.new_context from lib/func.x");
+  _827 = String_new("function pointer conversion needs Func.new_context from lib/func/func.x");
   _828 = String_new("func_pointer_context");
   _829 = Symbol_var(93);
   _830 = Symbol_var(13842968094952);
   _831 = String_new("Func_context");
-  _832 = String_new("native binding needs Func.context from lib/func.x");
+  _832 = String_new("native binding needs Func.context from lib/func/func.x");
   _833 = Symbol_var(11645);
   _834 = Atom_intern(String_new("indirect-adapter"));
   _835 = cons(_327, _350);
