@@ -1,8 +1,9 @@
 # auto declarations and complete initializers
 
-> Status: active
-> Scope selected by Gary on 2026-10-23. Implementation is in progress.
-> Focused managed/auto fixtures and the defer suite pass. Publication is pending.
+> Status: done
+> Implemented on 2026-10-23 in `060b131e1` and `d0f5e8dda`.
+> All 25 focused auto/managed fixtures and the defer suite pass.
+> Publication validation and delivery follow the root workflow.
 
 ## Behavior
 
@@ -54,6 +55,12 @@ a destination type cannot supply an inferred object type. Reject use of the
 declared name in its own inferred initializer; do not deduce from an outer
 binding of the same spelling.
 
+Gary selected a type-representation extension on 2026-10-23 for typedefs
+that hide outer qualifiers. The internal `(unqual TYPE...)` projection keeps
+the typedef identity for methods and Cleanup, normalizes to its value type
+without outer qualifiers, and emits an unevaluated native `__typeof__` value
+type. Qualifiers outside the projection and pointee qualifiers remain.
+
 Finish inference as an ordinary explicit-type declaration before destination
 conversion. Source parsing and constructed declarations share this operation.
 Preserve the declaration's binding identity and update its ordinary symbol
@@ -94,10 +101,9 @@ and revise the old missing-Cleanup expectation to assert no-op behavior.
 Inspect generated C for the inferred type, saved versus live cleanup target,
 and absence of added allocation or runtime cleanup infrastructure.
 
-This request ends with the plan; it does not start implementation or publish
-changes. When implementation is requested, deliver one coherent change under
-the root AGENTS.md workflow, including the applicable performance checkpoint
-and `tools/gate-state.py ensure agent-pr-check`. The existing gate owns
+Gary authorized implementation after selecting this plan. Deliver one coherent
+change under the root AGENTS.md workflow, including the applicable performance
+checkpoint and `tools/gate-state.py ensure agent-pr-check`. The existing gate owns
 bootstrap regeneration and publication proof; add no recurring checks.
 
 ## Plan review
@@ -108,9 +114,10 @@ initializers and splits declarators in source order. Defer already owns exit
 cleanup. Consumers reuse these facts rather than validate them again.
 
 Reuse the existing acquisition macro, placement, protocol lookup, binding,
-conversion, and defer paths. The shared inference completion is necessary
-because omitted types are new; no new runtime representation, Scope, dynamic
-capture records, AST traversal, cache, or general expression lowering is needed.
+conversion, and defer paths. Shared inference completion handles omitted
+types; the approved unqualified-value projection separates typedef identity
+from its outer qualifications. No new runtime representation, Scope, dynamic
+capture records, cache, or general expression lowering is needed.
 
 The new checks and negative fixtures protect deliberate public boundaries:
 combined modes must fail instead of scheduling two releases; inferred forms
@@ -119,3 +126,17 @@ must not bind an outer name; managed declarations require initialization and
 the supported block position. Existing placement and duplicate-acquisition
 diagnostics remain their owners. Remove the missing-Cleanup rejection because
 the selected contract permits no-op types. No broader validator is proposed.
+
+## Completed source review
+
+Declaration cleanup reuses placement and ordinary defer; initializer cleanup
+reuses `$auto`. Both preserve normal initialization hooks and conversion.
+Inference uses ordinary binding facts and the existing native-alias map for
+anonymous types. The approved type projection preserves nominal cleanup
+identity while normalizing qualifications. No runtime state was added.
+
+Review probes exposed hidden typedef qualifications, anonymous native names,
+array typedef decay, and initialization-hook ordering. Focused fixtures now
+cover those cases, acquired versus live cleanup, lazy Scope creation, macros,
+no-op values, and excluded syntax. The defer suite covers cleanup after a later
+initializer raises.
