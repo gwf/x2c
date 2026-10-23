@@ -1,7 +1,7 @@
 # c2x2c
 
-Eight versions of a word-frequency program, from native C to parallel
-directory counting. These files are the canonical tutorial sources.
+Nine versions of a word-frequency program, from native C to a reusable
+parallel directory-counting API. These files are the canonical tutorial sources.
 [versions.json](versions.json) supplies their order and labels to the
 [source viewer](../../tools/version-viewer/README.md).
 
@@ -13,16 +13,54 @@ directory counting. These files are the canonical tutorial sources.
 | [3](words-v3.x) | 102 | Bounded Array min-heap of `(count word)` Lists and typed destructured printing. |
 | [4](words-v4.x) | 47 | A native Substr count map and mixed-type foreach replace the explicit table traversal. |
 | [5](words-v5.x) | 42 | One file counting function; interpolated output. |
-| [6](words-v6.x) | 57 | Recursive directory traversal; merge native per-file count maps into MapStringInt. |
-| [7](words-v7.x) | 57 | Four persistent workers return native count maps; the caller converts keys and merges. |
+| [6](words-v6.x) | 59 | A file or recursive directory traversal; merge native per-file count maps into MapStringInt. |
+| [7](words-v7.x) | 59 | Four persistent workers for directories; a single file runs directly. |
+| [8](words-v8.x) | 102 | A Frequencies class and Path.frequencies API for files or directories; explicit ownership reclaims intermediates without export. Includes frequencies.x. |
 
 Line counts include comments. The viewer hides comments and calculates its
 diffs and displayed line numbers from that representation.
 
+## Version 8: a reusable API
+
+[frequencies.x](frequencies.x) defines `class Frequencies MapStringInt` and
+`Frequencies Path.frequencies(Path root)`. The driver keeps argument handling
+and `print_top_ten`; the module counts one file directly or a directory
+recursively using four workers, with the same normalization and ranking
+results as V7. Invalid roots raise
+`bad-arg` rather than terminating the calling program directly.
+
+```sh
+builds/0/x2c build -O2 -I lib examples/c2x2c/words-v8.x \
+  examples/c2x2c/frequencies.x --output /tmp/c2x2c-v8 \
+  --build-dir /tmp/c2x2c-v8-build
+/tmp/c2x2c-v8 docs/src
+/tmp/c2x2c-v8 site/public/llms-full.txt
+```
+
+Include `frequencies.x` and compile that source alongside another program to
+use the API independently. The viewer appends the module after the V8 driver
+so both parts remain visible in the version comparison.
+
+Earlier stages rely on the implicit top-level lifetime and shutdown cleanup
+for remaining allocations. V8 creates its result in the caller's Scope before
+opening an isolated Context for the operation. Each file is counted into a
+MapSubInt backed by a private string pool. The pool is detached when counting
+returns, and a finalizer in the callback Scope releases it after the reducer
+finishes borrowing the parked worker's result. The reducer converts words
+directly into the caller's pool, updates the caller-owned result, and releases
+the per-file map. Context cleanup reclaims traversal storage and, for a single
+file, the detached pool before the API returns.
+
+The returned map and its keys have the caller's Scope and pool lifetimes.
+No context export, graph traversal, or table rebuild is needed. If the
+operation fails, the unfinished result is released as well. Private iteration
+helpers accept MapStringInt to select its native typed cursor while the public
+result remains Frequencies.
+
 ## Build and run
 
 Run these commands from the repository root after building the local compiler.
-Version 0 uses the host C compiler. Versions 1-7 need the compiler and runtime
+Version 0 uses the host C compiler. Versions 1-8 need the compiler and runtime
 additions saved with this tutorial; an older installed x2c is insufficient.
 
 ```sh
@@ -46,8 +84,8 @@ builds/0/x2c build -I lib examples/c2x2c/words-v7.x \
 
 Substitute Version 3 in the Version 2 commands, Version 4 in the Version 5
 commands, or Version 6 in the Version 7 commands. Version 1 needs neither
-Substring source file. Versions 0-5 accept one file; Versions 6-7 accept one
-directory. The file input is the book introduction. The directory input covers
+Substring source file. Versions 0-5 accept one file; Versions 6-8 accept one
+file or directory. The file input is the book introduction. The directory input covers
 the complete book source tree, including the generated library reference and
 syntax files, without scanning rendered book output.
 
@@ -57,7 +95,7 @@ fixture: one file and one nested file. Versions 0-2 print that file as
 `1 beta`, `1 gamma`, `2 alpha`. Versions 6-7 print `1 delta`, `1 gamma`,
 `2 alpha`, `2 beta` for that directory.
 
-The seven x2c stages use `probe|none` in the existing example manifest.
+The eight x2c stages use `probe|none` in the existing example manifest.
 This preserves manual tutorial checks without adding recurring build work.
 The native C stage is outside that manifest's `.x`/`.xp` source contract.
 
@@ -74,13 +112,15 @@ Versions 6-7, including file symlinks but not child directory symlinks.
 separate rankings without directory totals. `aggregate` collects the paths
 from `find` and executes the C aggregate program once. The native argument
 limit can reject an oversized file list; the driver never splits it into
-independent totals.
+independent totals. The driver also accepts a single file in either mode;
+the aggregate C executable already accepts one or more named files directly.
 
 ```sh
 cc -std=gnu11 -O2 examples/c2x2c/words-v0.c -o /tmp/c2x2c-v0
 cc -std=gnu11 -O2 examples/c2x2c/words-v0-aggregate.c -o /tmp/c2x2c-v0-aggregate
 examples/c2x2c/bench-directory.sh per-file /tmp/c2x2c-v0 docs > /dev/null
 examples/c2x2c/bench-directory.sh aggregate /tmp/c2x2c-v0-aggregate docs
+/tmp/c2x2c-v0-aggregate site/public/llms-full.txt
 ```
 
 Time the complete driver command, including discovery and process startup.
@@ -98,7 +138,7 @@ in the early stages. Versions 0-1 classify punctuation with C's current
 locale. Versions 2-7 reject a fixed ASCII punctuation set. All versions
 remove punctuation before lowercasing with C's current locale; the programs
 do not change it.
-`count_words` and `dir_unique_words` return Maps with unique word keys
+`count_words` and `path_unique_words` return Maps with unique word keys
 and occurrence counts as values.
 
 Versions 2-7 use `lib/substring.x`. A `Substr` (also named `Substring`) is a
@@ -138,7 +178,8 @@ per-file Maps still retain all unique words.
 Versions 2-7 read and transform the whole file before counting. File read
 failures raise; close status is ignored. No stage adds stdout flush or error checks.
 
-Versions 6-7 validate the root directory. `Path.walk` includes hidden entries,
+Versions 6-7 count a file directly, or validate and traverse a root directory.
+`Path.walk` includes hidden entries,
 skips unreadable child directories, and does not traverse child directory
 symlinks. An explicit root directory symlink is accepted. `Path.is_file`
 follows file symlinks. Unreadable files still raise.

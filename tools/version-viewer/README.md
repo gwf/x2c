@@ -52,6 +52,8 @@ python3 tools/version-viewer/refresh-snapshots.py path/to/versions.json
 This replaces the viewer's generated payload. Regenerate with the default
 manifest to restore c2x2c. The generator locates its own files independently
 of the current directory. It embeds source text, not workstation paths.
+An optional `append` array lists additional source paths to display after a
+version's primary file, as V8 does for its reusable frequencies module.
 
 The UI can also load a JSON snapshot set or add pasted/uploaded source.
 Snapshot JSON uses `filename` and `source` instead of manifest `path` fields.

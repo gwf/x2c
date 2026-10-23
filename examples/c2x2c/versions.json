@@ -1,7 +1,7 @@
 {
   "title": "c2x2c: word frequency",
   "status": "Compiled and tested locally",
-  "note": "Inputs: docs/src/index.md (V0-5); docs/src/ (V6-7). Each word's aggregate count must fit in int (up to INT_MAX).",
+  "note": "Inputs: docs/src/index.md (V0-5); either a file or directory (V6-8), normally docs/src/. Each word's aggregate count must fit in int (up to INT_MAX).",
   "versions": [
     {
       "label": "Version 0",
@@ -34,6 +34,11 @@
     {
       "label": "Version 7",
       "path": "words-v7.x"
+    },
+    {
+      "label": "Version 8",
+      "path": "words-v8.x",
+      "append": ["frequencies.x"]
     }
   ]
 }

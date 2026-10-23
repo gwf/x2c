@@ -6,6 +6,8 @@ c2x2c/words-v4|probe|none||-|C to x2c tutorial stage 4; manual commands in c2x2c
 c2x2c/words-v5|probe|none||-|C to x2c tutorial stage 5; manual commands in c2x2c/README.md.
 c2x2c/words-v6|probe|none||-|C to x2c tutorial stage 6; manual commands in c2x2c/README.md.
 c2x2c/words-v7|probe|none||-|C to x2c tutorial stage 7; manual commands in c2x2c/README.md.
+c2x2c/words-v8|probe|none||-|C to x2c tutorial stage 8; manual commands in c2x2c/README.md.
+c2x2c/frequencies|probe|none||-|Reusable word-frequency module for c2x2c stage 8.
 foreach|showcase|run||expected/foreach.stdout|Basic List iteration.
 love/arrays|showcase|run||expected/love-arrays.stdout|Standalone love arrays gallery example.
 love/basic-literals|showcase|run||expected/static-test.stdout|Runtime collection and String literals.

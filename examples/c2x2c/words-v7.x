@@ -1,8 +1,8 @@
-/*  words-v7.x -- parallel recursive directory counting
+/*  words-v7.x -- parallel file or directory counting
 
-    Replaces V6's sequential map with four persistent workers. The caller
-    accumulates each returned MapSubInt while its worker waits, then releases
-    the table. Counting, accumulation, and ranking otherwise match V6.
+    Replaces V6's directory map with four persistent workers; files run
+    directly. The caller merges each returned MapSubInt while its worker
+    waits, then releases the table. Other operations match V6.
 */
 
 #include "substring-map.x"
@@ -13,8 +13,8 @@
 
 int main(int argc, char **argv) {
   if (argc != 2)
-    fail("Usage: " + argv[0] + " DIR");
-  print_top_ten(dir_unique_words(argv[1]));
+    fail("Usage: " + argv[0] + " FILE_OR_DIR");
+  print_top_ten(path_unique_words(argv[1]));
   return EXIT_SUCCESS; // Root scope reclaims the Map and ranking Array.
 }
 
@@ -34,9 +34,11 @@ static void print_top_ten(MapStringInt counts) {
     puts(%"$count\t$word");
 }
 
-static MapStringInt dir_unique_words(Path root) {
+static MapStringInt path_unique_words(Path root) {
+  if (root.is_file())
+    return accumulate(MapStringInt.new(), count_words(root));
   if (!root.is_dir())
-    fail("Not a directory: " + root);
+    fail("Not a file or directory: " + root);
   return root.walk().filter(Path.is_file).parallel_map(count_words, 4)
     .foldl(MapStringInt.new(), accumulate);
 }

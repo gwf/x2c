@@ -2,14 +2,14 @@
 # Manual benchmark driver; keep file discovery outside the C implementations.
 set -eo pipefail
 if [ "$#" -ne 3 ]; then
-  printf 'Usage: %s per-file|aggregate PROGRAM DIRECTORY\n' "$0" >&2
+  printf 'Usage: %s per-file|aggregate PROGRAM FILE_OR_DIR\n' "$0" >&2
   exit 1
 fi
 mode=$1
 program=$2
 root=$3
-if [ ! -d "$root" ]; then
-  printf 'Not a directory: %s\n' "$root" >&2
+if [ ! -f "$root" ] && [ ! -d "$root" ]; then
+  printf 'Not a file or directory: %s\n' "$root" >&2
   exit 1
 fi
 find_files() {

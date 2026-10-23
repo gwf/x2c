@@ -1,8 +1,8 @@
-/*  words-v6.x -- sequential recursive directory counting
+/*  words-v6.x -- sequential file or directory counting
 
-    Extends V5 to every normal file under a directory. Returns each file's
-    MapSubInt directly and folds it into one MapStringInt, converting a view
-    to String only when inserting a new word into the total.
+    Extends V5 to a file or normal files under a directory. Returns each
+    file's MapSubInt directly and folds it into one MapStringInt, converting
+    a view to String only when inserting a new word into the total.
 */
 
 #include "substring-map.x"
@@ -13,8 +13,8 @@
 
 int main(int argc, char **argv) {
   if (argc != 2)
-    fail("Usage: " + argv[0] + " DIR");
-  print_top_ten(dir_unique_words(argv[1]));
+    fail("Usage: " + argv[0] + " FILE_OR_DIR");
+  print_top_ten(path_unique_words(argv[1]));
   return EXIT_SUCCESS; // Root scope reclaims the Map and ranking Array.
 }
 
@@ -34,9 +34,11 @@ static void print_top_ten(MapStringInt counts) {
     puts(%"$count\t$word");
 }
 
-static MapStringInt dir_unique_words(Path root) {
+static MapStringInt path_unique_words(Path root) {
+  if (root.is_file())
+    return accumulate(MapStringInt.new(), count_words(root));
   if (!root.is_dir())
-    fail("Not a directory: " + root);
+    fail("Not a file or directory: " + root);
   return root.walk().filter(Path.is_file).map(count_words)
     .foldl(MapStringInt.new(), accumulate);
 }
