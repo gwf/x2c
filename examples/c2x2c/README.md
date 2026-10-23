@@ -15,7 +15,7 @@ parallel directory-counting API. These files are the canonical tutorial sources.
 | [5](words-v5.x) | 42 | One file counting function; interpolated output. |
 | [6](words-v6.x) | 59 | A file or recursive directory traversal; merge native per-file count maps into MapStringInt. |
 | [7](words-v7.x) | 59 | Four persistent workers for directories; a single file runs directly. |
-| [8](words-v8.x) | 98 | A Frequencies class and Path.frequencies API for files or directories; one temporary pool and one deferred cleanup block. Includes frequencies.x. |
+| [8](words-v8.x) | 104 | A Frequencies class with Path.frequencies and top(k); counting and ranking move into a reusable module. Includes frequencies.x. |
 
 Line counts include comments. The viewer hides comments and calculates its
 diffs and displayed line numbers from that representation.
@@ -23,11 +23,16 @@ diffs and displayed line numbers from that representation.
 ## Version 8: a reusable API
 
 [frequencies.x](frequencies.x) defines `class Frequencies MapStringInt` and
-`Frequencies Path.frequencies(Path root)`. The driver keeps argument handling
-and `print_top_ten`; the module counts one file directly or a directory
-recursively using four workers, with the same normalization and ranking
-results as V7. Invalid roots raise
-`bad-arg` rather than terminating the calling program directly.
+`Frequencies Path.frequencies(Path root)`. `Frequencies.top(k)` returns a
+sorted List of up to k `(count word)` pairs. The driver handles arguments,
+reports errors, and prints the pairs from `root.frequencies().top(10)`.
+The module counts one file directly or a directory recursively using four
+workers, with the same normalization and ranking results as V7. Invalid roots
+raise `bad-arg` rather than terminating the calling program directly.
+
+`top(k)` keeps the largest pairs, then returns them in ascending count and
+word order. A nonpositive k returns an empty List. The temporary ranking
+Array is freed; the returned List belongs to the caller's pool.
 
 ```sh
 builds/0/x2c build -O2 -I lib examples/c2x2c/words-v8.x \
@@ -39,7 +44,8 @@ builds/0/x2c build -O2 -I lib examples/c2x2c/words-v8.x \
 
 Include `frequencies.x` and compile that source alongside another program to
 use the API independently. The viewer appends the module after the V8 driver
-so both parts remain visible in the version comparison.
+so both parts remain visible in the version comparison. The driver catches
+API errors, reports the cause and details to stderr, and exits with failure.
 
 Earlier stages rely on the implicit top-level lifetime and shutdown cleanup
 for remaining allocations. V8 creates its result in the caller's Scope, then
@@ -61,9 +67,9 @@ the operation ends; sharing the pool may introduce interning contention.
 
 The returned map and its keys have the caller's Scope and pool lifetimes.
 No context export, graph traversal, or table rebuild is needed. If the
-operation fails, the unfinished result is released as well. Private iteration
-helpers accept MapStringInt to select its native typed cursor while the public
-result remains Frequencies.
+operation fails, the unfinished result is released as well. Iteration uses
+MapStringInt's native typed cursor internally; the public count result remains
+Frequencies.
 
 ## Build and run
 

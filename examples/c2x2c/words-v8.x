@@ -1,8 +1,9 @@
 /*  words-v8.x -- a reusable word-frequency API
 
-    V7 becomes Path.frequencies(), returning class Frequencies MapStringInt.
+    V7 becomes Path.frequencies() and Frequencies.top(k). The Frequencies
+    class wraps MapStringInt; ranking returns a sorted List.
     The module releases intermediate storage before returning; main only
-    handles arguments and prints the result. Earlier versions rely on root
+    handles arguments, errors, and output. Earlier versions rely on root
     Scope and canonical-pool shutdown for their remaining allocations.
 */
 
@@ -14,22 +15,13 @@ int main(int argc, char **argv) {
   if (argc != 2)
     fail("Usage: " + argv[0] + " FILE_OR_DIR");
   Path root = argv[1];
-  print_top_ten(root.frequencies());
+  try foreach ((int count, String word) in root.frequencies().top(10))
+    puts(%"$count\t$word");
+  catch %(?code *detail): fail(cons(code, detail).repr());
   return EXIT_SUCCESS;
 }
 
 static void fail(const char *message) {
   fprintf(stderr, "%s\n", message);
   exit(EXIT_FAILURE);
-}
-
-static void print_top_ten(MapStringInt counts) {
-  Array ranked = [];
-  foreach ((String word, int count) in counts) {
-    if (ranked.len() == 10 && count < ranked[0][0]) continue;
-    ranked.heap_push(%($count $word));
-    if (ranked.len() > 10) ranked.heap_pop();
-  }
-  foreach ((int count, String word) in ranked.sort())
-    puts(%"$count\t$word");
 }

@@ -4,7 +4,6 @@
     Accumulates directly into caller-owned storage without context export.
 */
 
-#pragma once
 #include "substring-map.x"
 #include "typed-map.x"
 #include "path.x"
@@ -34,17 +33,32 @@ Frequencies Path.frequencies(Path root) {
     List files = root.walk().filter(Path.is_file);
     Pool.detach();
     files.iter().parallel_map_in(work, count_words, 4).foldl(result, accumulate);
-    complete = 1;
-    return result;
   }
-  if (root.is_file()) {
+  else if (root.is_file()) {
     MapSubInt counts = count_words(root);
     Pool.detach();
     accumulate(result, counts);
-    complete = 1;
-    return result;
   }
-  raise %(bad-arg (operation "Path.frequencies") (path $root));
+  else
+    raise %(bad-arg (operation "Path.frequencies") (path $root));
+  complete = 1;
+  return result;
+}
+
+/** Returns up to k (count word) pairs, sorted by ascending count and word.
+    Keeps the largest pairs, matching the earlier examples' tie ordering.
+    A nonpositive k returns an empty List. The caller's pool owns the result.
+*/
+List Frequencies.top(Frequencies self, int k) {
+  if (k <= 0) return NULL;
+  MapStringInt counts = self;
+  Array ranked = $auto([]);
+  foreach ((String word, int count) in counts) {
+    if (ranked.len() == k && count < ranked[0][0]) continue;
+    ranked.heap_push(%($count $word));
+    if (ranked.len() > k) ranked.heap_pop();
+  }
+  return ranked.sort();
 }
 
 static Var count_words(Var filename) {
