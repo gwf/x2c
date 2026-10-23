@@ -9,7 +9,7 @@ int Disk.truth(Disk value) {
 }
 
 int main(void) {
-  Disk disk = Scope.malloc(sizeof(struct Disk));
+  Disk disk = xmalloc(sizeof(struct Disk));
   disk.radius = 3;
   Var boxed = disk;
   printf("test %d\n", disk ? 1 : 0);

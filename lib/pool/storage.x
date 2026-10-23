@@ -174,7 +174,7 @@ void Pool.free(Pool inner, void *alloc) {
   PoolBlock block = _find_block(alloc);
   pool_free_calls++;
   if (block) _free_slot(block, alloc);
-  else Scope.free(alloc);
+  else xfree(alloc);
 }
 
 /* The freed slot is reused first, from a block that becomes its class's

@@ -44,7 +44,7 @@ char *escaping_filled_slot(void) {
 
 char *escaping_moved_slot(void) {
   Scope slot = NULL;
-  char *text = Scope.malloc(8);
+  char *text = xmalloc(8);
   Scope.move(text, &slot);
   Scope saved = $auto(slot);
   return text;

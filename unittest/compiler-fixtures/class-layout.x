@@ -52,7 +52,7 @@ unsigned Fixed.hash(Fixed value) {
 
 ConstNested ConstNested.new(int x, int y) {
   const struct ConstNested initial = { { x, y } };
-  return Scope.memdup(&initial, sizeof(initial));
+  return xmemdup(&initial, sizeof(initial));
 }
 
 Custom Custom.new(int value) {

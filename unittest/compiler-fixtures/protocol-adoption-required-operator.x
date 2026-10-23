@@ -20,8 +20,8 @@ int Vec.equal(Vec left, Vec right) {
 }
 
 int main(void) {
-  Vec left = Scope.malloc(sizeof(struct Vec));
-  Vec right = Scope.malloc(sizeof(struct Vec));
+  Vec left = xmalloc(sizeof(struct Vec));
+  Vec right = xmalloc(sizeof(struct Vec));
   left.value = 7;
   right.value = 7;
   printf("%d %d\n", left == right, equal_calls);

@@ -28,12 +28,12 @@ module int _wide_encoding_valid(Var value, Symbol tag) {
 // wide scalars
 
 static Var _new_wide(TagId id, VarWideValue value) {
-  VarWideBox box = Scope.malloc(sizeof(struct VarWideBox));
+  VarWideBox box = xmalloc(sizeof(struct VarWideBox));
   box.tag = x2c_var_taginfo[id].tag;
   box.value = value;
   uintptr_t raw = (uintptr_t) box;
   if ((raw & 0x7) != 0 || raw >= (1ul << 48)) {
-    Scope.free(box);
+    xfree(box);
     raise %(bad-enc (operation "Var.box"));
   }
   Var v = { .u64 = raw };
@@ -131,11 +131,11 @@ Var Var.box_long_double(long double value) {
 meta native Var Var.clone_wide(Var value) {
   if (!value.is_wide()) return void;
   VarWideBox source = _wide_box(value);
-  VarWideBox box = Scope.malloc(sizeof(struct VarWideBox));
+  VarWideBox box = xmalloc(sizeof(struct VarWideBox));
   *box = *source;
   uintptr_t raw = (uintptr_t) box;
   if ((raw & 0x7) != 0 || raw >= (1ul << 48)) {
-    Scope.free(box);
+    xfree(box);
     raise %(bad-enc (operation "Var.clone_wide"));
   }
   unsigned long pointer_mask = _bitmask(48) - 0x7;

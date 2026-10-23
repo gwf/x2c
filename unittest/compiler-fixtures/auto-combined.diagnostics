@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/auto-combined.x:3:41: parse: declaration auto cannot be combined with a managed initializer
+  int main(void) { auto int value = auto 1; return value; }
+                                          ^
+

@@ -85,7 +85,7 @@ allocation calls go into the retained region:
 
 ```x2c
 Scope.retain();
-char *line = Scope.malloc(32);
+char *line = xmalloc(32);
 snprintf(line, 32, "%d bytes", 32);
 puts(line);
 Scope.release();
@@ -232,7 +232,7 @@ it. The pointer does not change:
 ```x2c
 Scope keep = Scope.new_named("results");
 Scope.retain();
-char *text = Scope.memdup("survivor", 9);
+char *text = xmemdup("survivor", 9);
 Scope.move(text, &keep);
 Scope.release();
 puts(text);
@@ -353,7 +353,7 @@ A scope does not prevent dangling pointers:
 ```x2c
 static char *leaked_label(void) {
   Scope.retain();
-  char *label = Scope.memdup("temporary", 10);
+  char *label = xmemdup("temporary", 10);
   Scope.release();
   return label;
 }
@@ -420,7 +420,7 @@ Code that follows the patterns in this chapter compiles without warnings:
 ~  Scope.pop(); Scope.destroy(keep); return e != NULL && !label().len(); }
 static Entry adopt(Scope *keep) {
   $scope() {
-    Entry entry = Scope.calloc(1, sizeof(struct Entry));
+    Entry entry = xcalloc(1, sizeof(struct Entry));
     Scope.move(entry, keep);
     return entry;
   }

@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/auto-declaration-file.x:3:19: parse: auto requires an initialized block-local object declaration
+  auto int value = 1;
+                    ^
+

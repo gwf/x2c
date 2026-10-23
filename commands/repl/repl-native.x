@@ -221,8 +221,8 @@ Func ReplSession.compile_function(ReplSession session, List syntax) {
     %!(Compiler c) using &prompt => _prepare(c, prompt), failure);
   if (!targets) raise %(repl (reason $failure));
   Func factory = targets["__repl_factory"];
-  void **captures = Scope.malloc(prompt.values.len() * sizeof(void *));
-  defer Scope.free(captures);
+  void **captures = xmalloc(prompt.values.len() * sizeof(void *));
+  defer xfree(captures);
   for (int i = 0; i < prompt.values.len(); i++)
     captures[i] = prompt.values[i].pointer();
   FuncArg argument = FuncArg.value(Var.new(<p48>, captures));

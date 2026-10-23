@@ -11,7 +11,7 @@ Var Vec.var(Vec value) => Var.new(<vec>, value);
 Vec Var.vec(Var value) => (Vec) value.pointer();
 
 Vec Vec.new(int value) {
-  Vec result = Scope.malloc(sizeof(struct Vec));
+  Vec result = xmalloc(sizeof(struct Vec));
   result.value = value;
   return result;
 }

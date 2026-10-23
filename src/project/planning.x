@@ -24,7 +24,7 @@ ProjectBuild ProjectBuild.plan(CliRequest request) {
 
 /* A project whose manifest text is read and not yet parsed. */
 static Project _open_project(CliRequest request) {
-  Project p = Scope.calloc(1, sizeof(struct Project));
+  Project p = xcalloc(1, sizeof(struct Project));
   *p = (struct Project) {
     .seen = {}, .sources = request.sources, .command = request,
     .path = request.project_manifest()};
@@ -138,7 +138,7 @@ static void _plan_target(Project p, ProjectTarget target) {
 }
 
 static void _append_plan(Project p, CliRequest request) {
-  ProjectBuild node = Scope.calloc(1, sizeof(struct ProjectBuild));
+  ProjectBuild node = xcalloc(1, sizeof(struct ProjectBuild));
   node.request = request;
   if (p.tail) p.tail.next = node;
   else p.head = node;
@@ -152,7 +152,7 @@ static void _append_plan(Project p, CliRequest request) {
    enter fingerprints through the lowered request and action arguments. */
 static CliRequest _target_request(Project p, ProjectTarget target) {
   CliRequest command = p.command;
-  CliRequest request = Scope.malloc(sizeof(struct CliRequest));
+  CliRequest request = xmalloc(sizeof(struct CliRequest));
   *request = *command;
   _set_product(p, target, request);
   request.inputs = _target_inputs(p, target, request.kind);

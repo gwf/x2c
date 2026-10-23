@@ -17,8 +17,8 @@ String Vec.str(Vec value) {
 }
 
 int main(void) {
-  Vec left = Scope.malloc(sizeof(struct Vec));
-  Vec right = Scope.malloc(sizeof(struct Vec));
+  Vec left = xmalloc(sizeof(struct Vec));
+  Vec right = xmalloc(sizeof(struct Vec));
   Vec sum = left + right;
   return sum.x;
 }

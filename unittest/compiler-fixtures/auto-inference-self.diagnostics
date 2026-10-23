@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/auto-inference-self.x:3:48: type: identifier ("value") has no semantic type
+  int main(void) { int value = 1; { auto value = value; (void) value; } return 0; }
+                                                 ^^^^^
+

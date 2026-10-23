@@ -292,11 +292,11 @@ Heap example:
 
 ```c
 Sample Sample.new(void) {
-  Sample sample = Scope.calloc(1, sizeof(*sample));
+  Sample sample = xcalloc(1, sizeof(*sample));
   sample.init();
   return sample;
 }
-void Sample.free(Sample sample) => Scope.free(sample);
+void Sample.free(Sample sample) => xfree(sample);
 ```
 
 For a value aggregate, zero a local value and call `void T.init(T *)` through

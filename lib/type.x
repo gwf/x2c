@@ -216,8 +216,8 @@ int Type.is_typedef(Type type) => type && type.car() == <typedef>;
 */
 Type Type.base_type(Type type) => type_base_suffix(type);
 
-/** Removes non-typedef storage classes, `inline`, and type qualifiers from
-    `type`.
+/** Removes non-typedef storage classes, `inline`, type qualifiers, and
+    unqualified-value projections from `type`, retaining typedef identity.
 */
 Type Type.canonicalize(Type type) => _canonical(type, 0);
 
@@ -242,7 +242,8 @@ static int _kept(Var item, int keep_qualifiers) =>
 
 static int _omit_specifier(Symbol first, int keep_qualifiers) =>
   (first.is_storage_class() ||
-   (!keep_qualifiers && first.is_type_qualifier()) || first.is_inline()) &&
+   (!keep_qualifiers && (first.is_type_qualifier() || first == <unqual>)) ||
+   first.is_inline()) &&
   first != <typedef>;
 
 /** Returns whether handing a `source` value to a `target` declaration would

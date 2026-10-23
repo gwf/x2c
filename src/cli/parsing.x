@@ -582,7 +582,7 @@ CliRequest CliRequest.package_options(String path, String package) {
   Array words = $auto([]);
   foreach (String word in _response_arguments(path))
     words.push(word.replace("{package}", package));
-  CliRequest request = Scope.calloc(1, sizeof(struct CliRequest));
+  CliRequest request = xcalloc(1, sizeof(struct CliRequest));
   request.command = <build>;
   Parse p = {
     .request = request, .args = words, .include_dirs = [],

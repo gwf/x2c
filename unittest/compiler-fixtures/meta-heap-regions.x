@@ -4,15 +4,15 @@
    free of storage no Scope allocator returned, are errors. */
 
 meta int read_after_realloc(void) {
-  int *p = Scope.calloc(2, sizeof(int));
-  int *q = Scope.realloc(p, 4 * sizeof(int));
+  int *p = xcalloc(2, sizeof(int));
+  int *q = xrealloc(p, 4 * sizeof(int));
   q[3] = 1;
   return p[0];
 }
 
 meta int free_local(void) {
   int x = 1;
-  Scope.free(&x);
+  xfree(&x);
   return x;
 }
 

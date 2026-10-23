@@ -339,7 +339,7 @@ Source: `src/symtab/namespaces.x:146`
 
 Resolves typedefs or one pointer layer to an aggregate tag, or `NULL`.
 
-Source: `src/symtab/types.x:320`
+Source: `src/symtab/types.x:329`
 
 <a id="Sym.at_file_scope"></a>
 #### Sym.at_file_scope
@@ -452,7 +452,7 @@ Records declaration AST fields in source order after binding finishes.
 `Field` types already use member keys. Unnamed rows retain their type
 and an empty name so initializer traversal preserves anonymous subobjects.
 
-Source: `src/symtab/types.x:276`
+Source: `src/symtab/types.x:285`
 
 <a id="Sym.declare_resolved"></a>
 #### Sym.declare_resolved
@@ -534,7 +534,7 @@ Source: `src/symtab/bindings.x:157`
 
 Returns recorded fields in source order, or `NULL`.
 
-Source: `src/symtab/types.x:298`
+Source: `src/symtab/types.x:307`
 
 <a id="Sym.file_statics"></a>
 #### Sym.file_statics
@@ -618,7 +618,7 @@ Source: `src/symtab/bindings.x:139`
 
 Reports whether `type` reaches the named `Array` value type.
 
-Source: `src/symtab/types.x:234`
+Source: `src/symtab/types.x:243`
 
 <a id="Sym.is_file_static"></a>
 #### Sym.is_file_static
@@ -636,7 +636,7 @@ Source: `src/symtab/declarations.x:101`
 
 Reports whether `type` reaches the named `Map` value type.
 
-Source: `src/symtab/types.x:238`
+Source: `src/symtab/types.x:247`
 
 <a id="Sym.is_named_value_type"></a>
 #### Sym.is_named_value_type
@@ -645,7 +645,7 @@ Source: `src/symtab/types.x:238`
 
 Reports whether `type` reaches a named value type before its definition.
 
-Source: `src/symtab/types.x:241`
+Source: `src/symtab/types.x:250`
 
 <a id="Sym.is_string_type"></a>
 #### Sym.is_string_type
@@ -654,7 +654,7 @@ Source: `src/symtab/types.x:241`
 
 Reports whether `type` reaches the named `String` value type.
 
-Source: `src/symtab/types.x:230`
+Source: `src/symtab/types.x:239`
 
 <a id="Sym.is_var_type"></a>
 #### Sym.is_var_type
@@ -663,7 +663,7 @@ Source: `src/symtab/types.x:230`
 
 Reports whether `type` reaches the named `Var` value type.
 
-Source: `src/symtab/types.x:227`
+Source: `src/symtab/types.x:236`
 
 <a id="Sym.local_type"></a>
 #### Sym.local_type
@@ -675,7 +675,7 @@ File-scope names retain their semantic identity. Local alias definitions
 are resolved before they are installed, so one lookup crosses the whole
 local chain without consulting names shadowed since its declaration.
 
-Source: `src/symtab/types.x:119`
+Source: `src/symtab/types.x:128`
 
 <a id="Sym.lookup"></a>
 #### Sym.lookup
@@ -699,7 +699,7 @@ A member of an anonymous struct or union belongs to its enclosing
 aggregate in C, so unnamed rows are searched the way a designated
 initializer already reaches them.
 
-Source: `src/symtab/types.x:256`
+Source: `src/symtab/types.x:265`
 
 <a id="Sym.lookup_macro"></a>
 #### Sym.lookup_macro
@@ -718,7 +718,7 @@ Source: `src/symtab/scopes.x:178`
 Records that the field `name` of `aggregate` was declared with the field
 keyword `mark`, such as `delegate`, and that `aggregate` declares one.
 
-Source: `src/symtab/types.x:302`
+Source: `src/symtab/types.x:311`
 
 <a id="Sym.mark_static"></a>
 #### Sym.mark_static
@@ -737,7 +737,7 @@ Source: `src/symtab/scopes.x:128`
 Returns the `(NAME TYPE)` rows of the fields of `aggregate` declared with
 `mark`, in declaration order.
 
-Source: `src/symtab/types.x:309`
+Source: `src/symtab/types.x:318`
 
 <a id="Sym.new"></a>
 #### Sym.new
@@ -759,7 +759,7 @@ Resolves one typedef hop and counts against the shared cycle budget.
 Returns `NULL` for an unresolved link. The shared budget turns a cycle
 into the same diagnostic as full-chain resolution.
 
-Source: `src/symtab/types.x:67`
+Source: `src/symtab/types.x:70`
 
 <a id="Sym.normalize_declared_type"></a>
 #### Sym.normalize_declared_type
@@ -768,7 +768,7 @@ Source: `src/symtab/types.x:67`
 
 Resolves typedef bases while retaining every declarator qualifier.
 
-Source: `src/symtab/types.x:88`
+Source: `src/symtab/types.x:91`
 
 <a id="Sym.pop_scope"></a>
 #### Sym.pop_scope
@@ -889,7 +889,7 @@ Resolves a numeric typedef without reducing semantic object types.
 Returns `NULL` when resolution yields neither a numeric type nor a
 recognized builtin numeric typedef.
 
-Source: `src/symtab/types.x:158`
+Source: `src/symtab/types.x:167`
 
 <a id="Sym.scope_count"></a>
 #### Sym.scope_count
@@ -926,7 +926,7 @@ Source: `src/symtab/bindings.x:6`
 Returns the name of the one file-scope typedef declared directly as
 `type`, or NULL when no typedef or several typedefs are.
 
-Source: `src/symtab/types.x:75`
+Source: `src/symtab/types.x:78`
 
 <a id="Sym.transacting"></a>
 #### Sym.transacting
@@ -981,7 +981,7 @@ Returns a type's `Var` tag and optionally stores its resolved type.
 `resolved` receives the final type even when the result is zero because no
 `Var` tag is registered. A null input stores `NULL` and returns zero.
 
-Source: `src/symtab/types.x:206`
+Source: `src/symtab/types.x:215`
 
 <a id="Sym.visible_symbols"></a>
 #### Sym.visible_symbols

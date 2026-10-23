@@ -16,7 +16,7 @@ static double consumer_second_reading(Feet value) {
 }
 
 int main(void) {
-  Feet feet = Scope.malloc(sizeof(struct Feet));
+  Feet feet = xmalloc(sizeof(struct Feet));
   feet.value = 3.0;
   printf("%.1f %.1f %.1f %.1f\n",
          owner_first_reading(feet), owner_second_reading(feet),

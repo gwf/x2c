@@ -25,10 +25,10 @@ protocol Var(Vec);
 
 int main(void) {
   x2c_register_type(%"vec");
-  Vec zero = Scope.malloc(sizeof(struct Vec));
+  Vec zero = xmalloc(sizeof(struct Vec));
   zero.x = 0;
   zero.y = 0;
-  Vec one = Scope.malloc(sizeof(struct Vec));
+  Vec one = xmalloc(sizeof(struct Vec));
   one.x = 1;
   one.y = 0;
   int result = zero && one;

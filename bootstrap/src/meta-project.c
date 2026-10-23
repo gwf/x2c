@@ -2009,7 +2009,7 @@ static String _x2c_gensym_proto_string_add_update(volatile String * _x2c_gensym_
 
 static void _x2c_gensym_defer_cleanup_2(void * _x2c_gensym_defer_opaque_2){
   _x2c_gensym_defer_env_2 * _x2c_gensym_defer_data_2 =(_x2c_gensym_defer_env_2 *) _x2c_gensym_defer_opaque_2;
-  if((*(*(Helper * *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_3)).meta) Scope_free((*(*(Helper * *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_3)).meta);
+  if((*(*(Helper * *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_3)).meta) xfree((*(*(Helper * *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_3)).meta);
 }
 
 static void _x2c_gensym_defer_cleanup_3(void * _x2c_gensym_defer_opaque_3){

@@ -23,21 +23,21 @@ int certify_pure_branch(Var value, int choose) {
 }
 
 int certify_conditional_alloc(int choose) {
-  if (choose) Scope.malloc(8);
+  if (choose) xmalloc(8);
   return 0;
 }
 
 char *certify_conditional_dangle(int choose) {
   Scope.retain();
   defer Scope.release();
-  if (choose) return Scope.malloc(8);
+  if (choose) return xmalloc(8);
   return NULL;
 }
 
 void certify_conditional_store(int **out, int choose) {
   Scope.retain();
   defer Scope.release();
-  if (choose) out[0] = Scope.malloc(sizeof(int));
+  if (choose) out[0] = xmalloc(sizeof(int));
 }
 
 int certify_literal_printf(void) {
@@ -63,13 +63,13 @@ int certify_dynamic_printf(const char *format) {
 void certify_index_escape(int **out) {
   Scope.retain();
   defer Scope.release();
-  out[0] = Scope.malloc(sizeof(int));
+  out[0] = xmalloc(sizeof(int));
 }
 
 int certify_safe(int choose) {
   Scope.retain();
   defer Scope.release();
-  Scope.malloc(8);
+  xmalloc(8);
   if (choose) return 1;
   return 2;
 }
@@ -77,11 +77,11 @@ int certify_safe(int choose) {
 int certify_nested(int choose) {
   Scope.retain();
   defer Scope.release();
-  Scope.malloc(8);
+  xmalloc(8);
   {
     Scope.retain();
     defer Scope.release();
-    Scope.malloc(4);
+    xmalloc(4);
     if (choose) return 1;
   }
   return 2;
@@ -90,7 +90,7 @@ int certify_nested(int choose) {
 char *certify_dangle(void) {
   Scope.retain();
   defer Scope.release();
-  return Scope.malloc(8);
+  return xmalloc(8);
 }
 
 int certify_native_call(void) {
@@ -114,14 +114,14 @@ int certify_indirect(int (*callback)(void)) {
 char *certify_transfer(Scope destination) {
   Scope.retain();
   defer Scope.release();
-  char *result = Scope.malloc(8);
+  char *result = xmalloc(8);
   Scope.move(result, &destination);
   return result;
 }
 
 int certify_unclosed(void) {
   Scope.retain();
-  Scope.malloc(8);
+  xmalloc(8);
   return 1;
 }
 

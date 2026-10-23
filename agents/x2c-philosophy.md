@@ -296,8 +296,8 @@ runtime call.
 Downstream code therefore does not check whether a valid Scope allocation,
 growth operation, `[]`, or `{}` succeeded. Null remains meaningful only
 where the API documents it, including empty String and nil/List, optional
-inputs, absence, null-safe destruction, `Scope.memdup(NULL, 0)`, and
-`Scope.realloc(ptr, 0)`.
+inputs, absence, null-safe destruction, `xmemdup(NULL, 0)`, and
+`xrealloc(ptr, 0)`.
 
 `void` is the universal terminal/tombstone complement to empty and uses the
 all-ones 64-bit representation. It is outside the ordinary value domain and

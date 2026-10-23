@@ -7,4 +7,27 @@ current value 7
 value 6
 volatile 9
 release 8
+release 12
+release 11
+initializer 14
+release 13
+value 18
+release 16
+qualified 21
+release 21
+release 20
+macro 25
+release 27
+release 24
+release 23
+inferred 7 1 1 1 5 17
+aggregate 28
+anonymous 29 29 1
+anonymous copy 41
+projection 31 36
+projected const 39 1 251
+frozen 39
+release 38
+frozen value 33
+frozen 31
 lazy 1 1

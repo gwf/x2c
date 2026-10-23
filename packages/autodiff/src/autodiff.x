@@ -48,13 +48,13 @@ meta native AdNode Var.adnode(Var value) => (AdNode) value.pointer();
 
 /** Creates an empty tape in the active `Scope`. */
 AdTape AdTape.new(void) {
-  AdTape tape = Scope.malloc(sizeof(struct AdTape));
+  AdTape tape = xmalloc(sizeof(struct AdTape));
   tape.nodes = [];
   return tape;
 }
 
 static AdNode _record(AdTape tape, double value, Func back) {
-  AdNode node = Scope.malloc(sizeof(struct AdNode));
+  AdNode node = xmalloc(sizeof(struct AdNode));
   *node = (struct AdNode) {
     .value = value, .adjoint = 0.0, .back = back, .tape = tape};
   tape.nodes.push(node);

@@ -312,7 +312,7 @@ static void _write_images(String path, long count) {
   _put_be32(out, count);
   _put_be32(out, 28);
   _put_be32(out, 28);
-  unsigned char *pixels = Scope.calloc(784, 1);
+  unsigned char *pixels = xcalloc(784, 1);
   for (long image = 0; image < count; image++) {
     for (int pixel = 0; pixel < 784; pixel++)
       pixels[pixel] = (unsigned char) ((image * 31 + pixel * 7) % 256);
@@ -325,7 +325,7 @@ static void _write_labels(String path, long count) {
   defer out.close();
   _put_be32(out, 2049);
   _put_be32(out, count);
-  unsigned char *classes = Scope.calloc(count, 1);
+  unsigned char *classes = xcalloc(count, 1);
   for (long index = 0; index < count; index++)
     classes[index] = (unsigned char) (index % 10);
   out.write_all(classes, count);

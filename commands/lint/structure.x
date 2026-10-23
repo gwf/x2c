@@ -162,8 +162,8 @@ static Array _route(Lint l, List function, Map ids):
 static int _matched(Array a, int alo, int ahi, Array b, int blo, int bhi):
   if alo >= ahi || blo >= bhi: return 0
   int best = 0, besti = alo, bestj = blo
-  int *lengths = Scope.calloc(bhi - blo + 1, sizeof(int))
-  int *next = Scope.calloc(bhi - blo + 1, sizeof(int))
+  int *lengths = xcalloc(bhi - blo + 1, sizeof(int))
+  int *next = xcalloc(bhi - blo + 1, sizeof(int))
   for (int i = alo; i < ahi; i++):
     for (int j = blo; j < bhi; j++):
       int k = a[i] == b[j] ? (j > blo ? lengths[j - blo - 1] : 0) + 1 : 0

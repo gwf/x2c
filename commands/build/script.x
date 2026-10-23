@@ -129,7 +129,7 @@ int CliRequest.run_script(CliRequest c) {
 static void _exec(CliRequest c) {
   String executable = _executable(c);
   if (c.verbose) _print_run(c);
-  char **argv = Scope.calloc(c.run_args.len() + 2, sizeof(char *));
+  char **argv = xcalloc(c.run_args.len() + 2, sizeof(char *));
   int n = 0;
   argv[n++] = c.inputs.car().str();
   // An empty word is a NULL String, which would end the vector early.

@@ -677,7 +677,7 @@ static ParallelMap _parallel_map(
     String operation = pool ? "Iter.parallel_map_in" : "Iter.parallel_map";
     raise %(bad-arg (operation $operation));
   }
-  ParallelMap map = Scope.malloc(sizeof(struct ParallelMap));
+  ParallelMap map = xmalloc(sizeof(struct ParallelMap));
   *map = (struct ParallelMap) { i, function, workers, pool };
   return map;
 }
@@ -705,7 +705,7 @@ static ParallelMap _parallel_map(
     including <void-op> for a void worker result. */
 Var ParallelMap.foldl(ParallelMap map, Var seed, Func accumulate) {
   if (!map) return seed;
-  struct ParallelRun *run = Scope.calloc(1, sizeof(struct ParallelRun));
+  struct ParallelRun *run = xcalloc(1, sizeof(struct ParallelRun));
   Array workers = NULL;
   defer _parallel_stop(run, workers);
   workers = [];
@@ -795,7 +795,7 @@ static void _parallel_assign(Thread worker, Var input) {
 static void _parallel_stop(struct ParallelRun *run, Array workers) {
   stop_mask++;
   defer --stop_mask;
-  defer Scope.free(run);
+  defer xfree(run);
   defer workers.cleanup();
   defer run.ready.cleanup();
   defer if (workers.len()) {

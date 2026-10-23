@@ -164,8 +164,8 @@ static int _shipped_definition(void) {
 
 static Var _apply_linked(Func function, List arguments) {
   unsigned count = arguments.len(), index = 0;
-  FuncArg *argv = Scope.calloc(count + 1, sizeof(FuncArg));
-  defer Scope.free(argv);
+  FuncArg *argv = xcalloc(count + 1, sizeof(FuncArg));
+  defer xfree(argv);
   foreach (Var argument in arguments) argv[index++] = FuncArg.value(argument);
   return function.apply(count, argv);
 }

@@ -44,7 +44,7 @@ protocol FirstTruth(Choice);
 protocol SecondTruth(Choice);
 
 int main(void) {
-  Choice value = Scope.malloc(sizeof(struct Choice));
+  Choice value = xmalloc(sizeof(struct Choice));
   value.value = 7;
   printf("%d\n", value.truth());
   return 0;

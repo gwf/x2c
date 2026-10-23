@@ -15,6 +15,6 @@ StaticGap Var.staticgap(Var value) {
 protocol Var(StaticGap);
 
 int main(void) {
-  StaticGap value = Scope.malloc(sizeof(struct StaticGap));
+  StaticGap value = xmalloc(sizeof(struct StaticGap));
   return (int) value.hash();
 }

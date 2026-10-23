@@ -37,11 +37,11 @@ static List _loaded_entry(Compiler c, List binding, Type type) {
     $!Unit{
       static int $entry(Array values) {
         int count = values.len();
-        char **argv = Scope.calloc((size_t) count + 1, sizeof(char *));
+        char **argv = xcalloc((size_t) count + 1, sizeof(char *));
         for (int i = 0; i < count; i++) {
           String text = values[i];
           size_t size = text.len();
-          argv[i] = Scope.calloc(size + 1, 1);
+          argv[i] = xcalloc(size + 1, 1);
           if (size) memcpy(argv[i], (char *) text, size);
         }
         return $target(count, argv);

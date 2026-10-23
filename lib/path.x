@@ -567,7 +567,7 @@ Path Path.temp_dir(void) {
   const char *parent = getenv("TMPDIR");
   Path root = parent && *parent ? String.new(parent) : "/tmp";
   String pattern = root.join("x2c-XXXXXX");
-  char *created = Scope.memdup(pattern, pattern.len() + 1);
+  char *created = xmemdup(pattern, pattern.len() + 1);
   if (!mkdtemp(created)) File.path_error("Path.temp_dir", root, errno);
   return String.new(created);
 }

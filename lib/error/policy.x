@@ -162,7 +162,7 @@ void Error.policy_release(void *capture) => free(capture);
 void *Error.context_open(void) {
   if (!Error.ready()) return NULL;
   ErrorThreadState state = _thread();
-  ErrorContextState context = Scope.malloc(sizeof(struct ErrorContextState));
+  ErrorContextState context = xmalloc(sizeof(struct ErrorContextState));
   *context = (struct ErrorContextState) {
     .prev = state.context_top, .policy = {}, .bound = Error.bound(),
     .handler_depth = Error.handler_depth(), .stack_height = Error.count()};

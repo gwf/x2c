@@ -60,16 +60,16 @@ static void _release_wrong_slot(void) {
 }
 
 static void _malloc_overflow(void) {
-  Scope.malloc(SIZE_MAX);
+  xmalloc(SIZE_MAX);
 }
 
 static void _calloc_overflow(void) {
-  Scope.calloc(SIZE_MAX, 2);
+  xcalloc(SIZE_MAX, 2);
 }
 
 static void _realloc_overflow(void) {
-  void *allocation = Scope.malloc(8);
-  Scope.realloc(allocation, SIZE_MAX);
+  void *allocation = xmalloc(8);
+  xrealloc(allocation, SIZE_MAX);
 }
 
 static void fill(char *dst, const char *src) {
@@ -78,7 +78,7 @@ static void fill(char *dst, const char *src) {
 
 static void scope_alloc_release(void) {
   Scope.retain();
-  char *buf = Scope.malloc(8);
+  char *buf = xmalloc(8);
   EXPECT_NOT_NULL(buf);
   if (buf) {
     fill(buf, "x2c");
@@ -91,10 +91,10 @@ static void scope_push_pop_destroy(void) {
   Scope.retain();
   Scope outer = Scope.new(), inner = Scope.new(), *initial = Scope.top();
   Scope.push(&outer);
-  char *outer_mem = Scope.malloc(6);
+  char *outer_mem = xmalloc(6);
   fill(outer_mem, "outer");
   Scope.push(&inner);
-  Scope.malloc(6);
+  xmalloc(6);
 
   EXPECT_TRUE(Scope.top() == &inner);
   EXPECT_STR_EQ(outer_mem, "outer");
@@ -110,47 +110,47 @@ static void scope_push_pop_destroy(void) {
 
 static void scope_realloc_grows_and_shrinks(void) {
   Scope.retain();
-  char *buf = Scope.malloc(8);
+  char *buf = xmalloc(8);
   fill(buf, "1234");
-  char *bigger = Scope.realloc(buf, 32);
+  char *bigger = xrealloc(buf, 32);
   EXPECT_NOT_NULL(bigger);
   if (bigger) EXPECT_STR_EQ(bigger, "1234");
-  char *smaller = Scope.realloc(bigger, 6);
+  char *smaller = xrealloc(bigger, 6);
   EXPECT_NOT_NULL(smaller);
   if (smaller) {
     smaller[4] = '\0';
     EXPECT_STR_EQ(smaller, "1234");
-    EXPECT_NULL(Scope.realloc(smaller, 0));
+    EXPECT_NULL(xrealloc(smaller, 0));
   }
   Scope.release();
 }
 
 static void scope_free_unlinks_any_position(void) {
   Scope.retain();
-  char *tail = Scope.memdup("tail", 5);
-  char *middle = Scope.memdup("middle", 7);
-  char *head = Scope.memdup("head", 5);
+  char *tail = xmemdup("tail", 5);
+  char *middle = xmemdup("middle", 7);
+  char *head = xmemdup("head", 5);
 
-  Scope.free(head);
+  xfree(head);
   EXPECT_STR_EQ(middle, "middle");
   EXPECT_STR_EQ(tail, "tail");
-  Scope.free(tail);
+  xfree(tail);
   EXPECT_STR_EQ(middle, "middle");
-  Scope.free(middle);
-  Scope.free(NULL);
+  xfree(middle);
+  xfree(NULL);
   Scope.release();
 }
 
 static void scope_realloc_updates_any_position(void) {
   Scope.retain();
-  char *tail = Scope.memdup("tail", 5);
-  char *middle = Scope.memdup("middle", 7);
-  char *head = Scope.memdup("head", 5);
+  char *tail = xmemdup("tail", 5);
+  char *middle = xmemdup("middle", 7);
+  char *head = xmemdup("head", 5);
 
-  middle = Scope.realloc(middle, 64);
+  middle = xrealloc(middle, 64);
   EXPECT_NOT_NULL(middle);
   if (middle) EXPECT_STR_EQ(middle, "middle");
-  head = Scope.realloc(head, 64);
+  head = xrealloc(head, 64);
   EXPECT_NOT_NULL(head);
   if (head) EXPECT_STR_EQ(head, "head");
   EXPECT_STR_EQ(tail, "tail");
@@ -192,20 +192,20 @@ static void scope_named_direct_allocation(void) {
 static void scope_allocator_edge_behavior(void) {
   ScopeStats before = Scope.stats();
   Scope.retain();
-  void *zero = Scope.malloc(0);
-  void *zeroed = Scope.calloc(0, sizeof(int));
-  void *from_null = Scope.realloc(NULL, 8);
+  void *zero = xmalloc(0);
+  void *zeroed = xcalloc(0, sizeof(int));
+  void *from_null = xrealloc(NULL, 8);
 
   EXPECT_NOT_NULL(zero);
   EXPECT_NOT_NULL(zeroed);
   EXPECT_NOT_NULL(from_null);
-  EXPECT_NULL(Scope.memdup(NULL, 4));
-  EXPECT_NULL(Scope.memdup("x", 0));
+  EXPECT_NULL(xmemdup(NULL, 4));
+  EXPECT_NULL(xmemdup("x", 0));
   EXPECT_INT_EQ(
     Scope.stats().live_requested_bytes, before.live_requested_bytes + 8);
-  EXPECT_NULL(Scope.realloc(from_null, 0));
-  Scope.free(zero);
-  Scope.free(zeroed);
+  EXPECT_NULL(xrealloc(from_null, 0));
+  xfree(zero);
+  xfree(zeroed);
   Scope.release();
   EXPECT_INT_EQ(
     Scope.stats().live_requested_bytes, before.live_requested_bytes);
@@ -288,7 +288,7 @@ static void scope_nested_stats_restore(void) {
   ScopeStats before = Scope.stats();
   Scope.retain();
   Scope.retain();
-  Scope.malloc(16);
+  xmalloc(16);
   ScopeStats nested = Scope.stats();
   EXPECT_INT_EQ(nested.live_scopes, before.live_scopes + 2);
   EXPECT_INT_EQ(nested.live_allocations, before.live_allocations + 1);
@@ -315,7 +315,7 @@ static void scope_stack_grows_and_restores(void) {
   Scope slots[20] = { NULL }, *before = Scope.top();
   for (int i = 0; i < 20; i++) {
     Scope.push(&slots[i]);
-    Scope.malloc(1);
+    xmalloc(1);
   }
   EXPECT_TRUE(Scope.top() == &slots[19]);
   for (int i = 19; i >= 0; i--) {
@@ -327,7 +327,7 @@ static void scope_stack_grows_and_restores(void) {
 
 static void _move_without_slot(void) {
   Scope.retain();
-  void *ptr = Scope.malloc(4);
+  void *ptr = xmalloc(4);
   Scope.move(ptr, NULL);
 }
 
@@ -359,7 +359,7 @@ static void scope_move_materializes_and_self_moves(void) {
   Scope.move(NULL, NULL);  // NULL pointer is a no-op even without a slot
   Scope slot = NULL;
   Scope.retain();
-  char *a = Scope.malloc(8);
+  char *a = xmalloc(8);
   fill(a, "kept");
   Scope.move(a, &slot);  // materializes the destination scope
   Scope.release();
@@ -386,9 +386,9 @@ static void scope_destroy_detached_contract(void) {
   Scope slot = NULL;
   Scope.push(&slot);
   Scope.retain();
-  Scope.malloc(4);
+  xmalloc(4);
   Scope.retain();
-  Scope.malloc(8);
+  xmalloc(8);
   Scope.pop();
   slot.destroy();
 
@@ -477,9 +477,9 @@ static void scope_finalizer_runs_once(void) {
   Scope.retain();
   char *b = Scope.malloc_finalized(16, _count_drop);
   char *c = Scope.malloc_finalized(16, _count_drop);
-  Scope.free(b);
+  xfree(b);
   EXPECT_INT_EQ(drop_count, 1);
-  EXPECT_TRUE(Scope.realloc(c, 0) == NULL);
+  EXPECT_TRUE(xrealloc(c, 0) == NULL);
   EXPECT_INT_EQ(drop_count, 2);
   Scope.release();
   EXPECT_INT_EQ(drop_count, 2);
@@ -522,16 +522,16 @@ static void scope_finalizer_realloc_and_scratch(void) {
   ScopeStats before = Scope.stats();
   drop_count = 0;
   Scope.retain();
-  Scope.malloc(8);
+  xmalloc(8);
   char *a = Scope.malloc_finalized(8, _count_drop);
-  Scope.malloc(8);
+  xmalloc(8);
   fill(a, "grow");
-  a = Scope.realloc(a, 4096);
+  a = xrealloc(a, 4096);
   EXPECT_INT_EQ(
     Scope.stats().live_requested_bytes,
     before.live_requested_bytes + 8 + 4096 + 8);
   EXPECT_STR_EQ(a, "grow");
-  a = Scope.realloc(a, 8);
+  a = xrealloc(a, 8);
   EXPECT_INT_EQ(
     Scope.stats().live_requested_bytes,
     before.live_requested_bytes + 24);

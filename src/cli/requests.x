@@ -35,7 +35,7 @@ TargetKind *TargetKind.of(Symbol kind) {
 
 /** Constructs a request with the command's ordinary CLI defaults. */
 CliRequest CliRequest.new(Symbol command) {
-  CliRequest request = Scope.calloc(1, sizeof(struct CliRequest));
+  CliRequest request = xcalloc(1, sizeof(struct CliRequest));
   request.command = command;
   request.jobs = _default_jobs();
   request.max_errors = 20;

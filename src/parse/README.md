@@ -16,6 +16,7 @@ macro-produced syntax, start with `binding.x`.
 | [units.x](units.x) | Dispatches top-level forms, imports, meta declarations, and interactive submissions; binds generated declaration bundles and aliases. |
 | [declarations.x](declarations.x) | Parses declarations and typedefs, handles destructuring and initializers, and binds declarations in context. |
 | [declarators.x](declarators.x) | Parses pointers, arrays, parameters, method names, and identifiers; installs bindings and completes template declarators. |
+| [auto.x](auto.x) | Completes managed declarations and local type inference. |
 | [types.x](types.x) | Parses storage, qualifiers, attributes, type specifiers, fields, named types, and enumerators. |
 | [functions.x](functions.x) | Parses and binds function definitions and bodies, including expression bodies and lifecycle signatures. |
 | [binding.x](binding.x) | Binds constructed syntax by context, including statements, blocks, branches, loops, exception forms, match arms, and callable bodies. |

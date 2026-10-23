@@ -76,7 +76,7 @@ int main(void) {
   Var double_pointer_value = double_pointer;
   Var null_value = (void *) NULL;
   Var absent = void;
-  IsWidget widget = Scope.malloc(sizeof(struct IsWidgetData));
+  IsWidget widget = xmalloc(sizeof(struct IsWidgetData));
   widget.value = 9;
   IsWidgetAlias widget_alias = widget;
   Var custom = widget_alias;

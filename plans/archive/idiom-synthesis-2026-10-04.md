@@ -425,7 +425,7 @@ For MatchCache construction, replace the complete push/pop bracket:
 Scope owner = Scope.new_named("Match plan cache");
 MatchCache cache;
 $scope(&owner) {
-  cache = Scope.calloc(1, sizeof(struct MatchCache));
+  cache = xcalloc(1, sizeof(struct MatchCache));
   // Existing cache fields, entries, buckets, and bucket initialization.
 }
 return cache;

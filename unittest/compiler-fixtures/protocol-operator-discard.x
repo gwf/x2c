@@ -19,9 +19,9 @@ protocol Arith(T) {
 }
 
 Cell Cell.new(double value) {
-  Cell cell = Scope.calloc(1, sizeof(struct Cell));
+  Cell cell = xcalloc(1, sizeof(struct Cell));
   cell.value = value;
-  cell.storage = Scope.malloc(sizeof(double));
+  cell.storage = xmalloc(sizeof(double));
   *cell.storage = value;
   live++;
   return cell;
@@ -54,7 +54,7 @@ void Cell.consume(Cell a) { consumed += a.value; }
 void Cell.discard(Cell a) {
   if (a.discarded) return;
   a.discarded = 1;
-  Scope.free(a.storage);
+  xfree(a.storage);
   a.storage = NULL;
   live--;
   discards++;

@@ -27,8 +27,8 @@ static void _sort(int *a, int left, int right) {
 int main(int argc, char **argv) {
   if (argc != 3) return 2;
   int n = atoi(argv[1]), runs = atoi(argv[2]);
-  int *data = Scope.malloc(n * sizeof(int));
-  int *copy = Scope.malloc(n * sizeof(int));
+  int *data = xmalloc(n * sizeof(int));
+  int *copy = xmalloc(n * sizeof(int));
   uint32_t state = 1, checksum = 0;
   for (int i = 0; i < n; i++) {
     state = state * 1664525u + 1013904223u;

@@ -329,8 +329,8 @@ Self Array.sort_by(Self array, Func key) {
   if (!array || !array.length) return array;
   size_t count = array.length;
   struct ArraySortEntry *entries =
-    Scope.calloc(count, sizeof(struct ArraySortEntry));
-  defer Scope.free(entries);
+    xcalloc(count, sizeof(struct ArraySortEntry));
+  defer xfree(entries);
   for (size_t index = 0; index < count; index++) {
     Var value = array[index];
     entries[index].key = key.apply_value(value);

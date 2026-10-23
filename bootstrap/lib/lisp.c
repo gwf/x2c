@@ -1300,7 +1300,7 @@ Var Func_apply(Func, unsigned, const FuncArg *);
 
 int x2c_exception_claim(ExceptionFrame *);
 
-void Scope_free(void *);
+void xfree(void *);
 
 void x2c_exception_leave(ExceptionFrame *);
 
@@ -1341,7 +1341,7 @@ static Var f8_evaluate____apply(Lisp lisp, Var callable, List raw, LispEnv * env
         Var _x2c_gensym_return_value_0 = Func_apply(fn, argc, argv);
         {
           if(x2c_exception_claim(& _x2c_gensym_exception_frame_0)){
-            if(argv != narrow) Scope_free(argv);
+            if(argv != narrow) xfree(argv);
           }
           x2c_exception_leave(& _x2c_gensym_exception_frame_0);
           return _x2c_gensym_return_value_0;
@@ -1354,7 +1354,7 @@ static Var f8_evaluate____apply(Lisp lisp, Var callable, List raw, LispEnv * env
       x2c_exception_landed(& _x2c_gensym_exception_frame_0);
       {
         if(x2c_exception_claim(& _x2c_gensym_exception_frame_0)){
-          if(argv != narrow) Scope_free(argv);
+          if(argv != narrow) xfree(argv);
         }
         x2c_exception_leave(& _x2c_gensym_exception_frame_0);
         __builtin_unreachable();
@@ -1362,7 +1362,7 @@ static Var f8_evaluate____apply(Lisp lisp, Var callable, List raw, LispEnv * env
 
     }
     if(x2c_exception_claim(& _x2c_gensym_exception_frame_0)){
-      if(argv != narrow) Scope_free(argv);
+      if(argv != narrow) xfree(argv);
     }
     x2c_exception_leave(& _x2c_gensym_exception_frame_0);
   }
@@ -1422,7 +1422,7 @@ static Var f8_evaluate____call_native(Lisp lisp, Func fn, List values){
         Var _x2c_gensym_return_value_1 = Func_apply(fn, argc, argv);
         {
           if(x2c_exception_claim(& _x2c_gensym_exception_frame_1)){
-            if(argv != narrow) Scope_free(argv);
+            if(argv != narrow) xfree(argv);
           }
           x2c_exception_leave(& _x2c_gensym_exception_frame_1);
           return _x2c_gensym_return_value_1;
@@ -1435,7 +1435,7 @@ static Var f8_evaluate____call_native(Lisp lisp, Func fn, List values){
       x2c_exception_landed(& _x2c_gensym_exception_frame_1);
       {
         if(x2c_exception_claim(& _x2c_gensym_exception_frame_1)){
-          if(argv != narrow) Scope_free(argv);
+          if(argv != narrow) xfree(argv);
         }
         x2c_exception_leave(& _x2c_gensym_exception_frame_1);
         __builtin_unreachable();
@@ -1443,7 +1443,7 @@ static Var f8_evaluate____call_native(Lisp lisp, Func fn, List values){
 
     }
     if(x2c_exception_claim(& _x2c_gensym_exception_frame_1)){
-      if(argv != narrow) Scope_free(argv);
+      if(argv != narrow) xfree(argv);
     }
     x2c_exception_leave(& _x2c_gensym_exception_frame_1);
   }
@@ -2117,7 +2117,7 @@ static Var f8_evaluate____call_lambda_slots(Lisp lisp, Lambda lambda, const Var 
             }
             lambda = lisp -> tail_lambda;
             lisp -> tail_lambda = NULL;
-            if(owned) Scope_free(owned);
+            if(owned) xfree(owned);
             values = owned = lisp -> tail_values;
             count = lisp -> tail_count;
             f8_evaluate____spend_call(lisp);
@@ -4067,7 +4067,7 @@ static void _x2c_gensym_defer_cleanup_1(void * _x2c_gensym_defer_opaque_1){
 
 static void _x2c_gensym_defer_cleanup_2(void * _x2c_gensym_defer_opaque_2){
   _x2c_gensym_defer_env_2 * _x2c_gensym_defer_data_2 =(_x2c_gensym_defer_env_2 *) _x2c_gensym_defer_opaque_2;
-  if(Var_is_void((*(Var *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_4))) Scope_free((*(Lambda *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_5));
+  if(Var_is_void((*(Var *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_4))) xfree((*(Lambda *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_5));
 }
 
 void Scope_pop(void);
@@ -4078,17 +4078,17 @@ static void _x2c_gensym_defer_cleanup_3(void * _x2c_gensym_defer_opaque_3){
 
 static void _x2c_gensym_defer_cleanup_4(void * _x2c_gensym_defer_opaque_4){
   _x2c_gensym_defer_env_3 * _x2c_gensym_defer_data_3 =(_x2c_gensym_defer_env_3 *) _x2c_gensym_defer_opaque_4;
-  Scope_free((*(Var * *) _x2c_gensym_defer_data_3->_x2c_gensym_defer_capture_6));
+  xfree((*(Var * *) _x2c_gensym_defer_data_3->_x2c_gensym_defer_capture_6));
 }
 
 static void _x2c_gensym_defer_cleanup_5(void * _x2c_gensym_defer_opaque_5){
   _x2c_gensym_defer_env_4 * _x2c_gensym_defer_data_4 =(_x2c_gensym_defer_env_4 *) _x2c_gensym_defer_opaque_5;
-  Scope_free((*(Var * *) _x2c_gensym_defer_data_4->_x2c_gensym_defer_capture_7));
+  xfree((*(Var * *) _x2c_gensym_defer_data_4->_x2c_gensym_defer_capture_7));
 }
 
 static void _x2c_gensym_defer_cleanup_6(void * _x2c_gensym_defer_opaque_6){
   _x2c_gensym_defer_env_5 * _x2c_gensym_defer_data_5 =(_x2c_gensym_defer_env_5 *) _x2c_gensym_defer_opaque_6;
-  if((*(Var * *) _x2c_gensym_defer_data_5->_x2c_gensym_defer_capture_8)) Scope_free((*(Var * *) _x2c_gensym_defer_data_5->_x2c_gensym_defer_capture_8));
+  if((*(Var * *) _x2c_gensym_defer_data_5->_x2c_gensym_defer_capture_8)) xfree((*(Var * *) _x2c_gensym_defer_data_5->_x2c_gensym_defer_capture_8));
 }
 
 static void _x2c_gensym_defer_cleanup_7(void * _x2c_gensym_defer_opaque_7){
@@ -4118,7 +4118,7 @@ static void _x2c_gensym_defer_cleanup_10(void * _x2c_gensym_defer_opaque_10){
 
 static void _x2c_gensym_defer_cleanup_11(void * _x2c_gensym_defer_opaque_11){
   _x2c_gensym_defer_env_9 * _x2c_gensym_defer_data_9 =(_x2c_gensym_defer_env_9 *) _x2c_gensym_defer_opaque_11;
-  if(!(*(int *) _x2c_gensym_defer_data_9->_x2c_gensym_defer_capture_14)) Scope_free((*(Var * *) _x2c_gensym_defer_data_9->_x2c_gensym_defer_capture_15));
+  if(!(*(int *) _x2c_gensym_defer_data_9->_x2c_gensym_defer_capture_14)) xfree((*(Var * *) _x2c_gensym_defer_data_9->_x2c_gensym_defer_capture_15));
 }
 
 static void _x2c_gensym_defer_cleanup_12(void * _x2c_gensym_defer_opaque_12){

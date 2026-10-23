@@ -641,7 +641,7 @@ elements, as in C.
 struct Node { int value; struct Node *next; };
 
 meta static struct Node *push(struct Node *head, int value) {
-  struct Node *node = Scope.malloc(sizeof *node);
+  struct Node *node = xmalloc(sizeof *node);
   node->value = value;
   node.next = head;
   return node;
@@ -650,20 +650,20 @@ meta static struct Node *push(struct Node *head, int value) {
 meta static long heap_sum(int count) {
   struct Node *head = NULL;
   for (int i = 1; i <= count; i++) head = push(head, i);
-  long *squares = Scope.calloc(1, sizeof(long));
+  long *squares = xcalloc(1, sizeof(long));
   int size = 0;
   for (struct Node *at = head; at; at = at->next) {
-    squares = Scope.realloc(squares, (size + 1) * sizeof *squares);
+    squares = xrealloc(squares, (size + 1) * sizeof *squares);
     squares[size] = at->value * at->value;
     size += 1;
   }
   long total = 0;
   for (long *at = squares + size - 1; at >= squares; at = at - 1)
     total += *at;
-  Scope.free(squares);
+  xfree(squares);
   while (head) {
     struct Node *next = head->next;
-    Scope.free(head);
+    xfree(head);
     head = next;
   }
   return total;

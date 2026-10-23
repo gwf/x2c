@@ -2585,7 +2585,7 @@ static List _ancestry(Compiler c, Type participant){
   List result = NULL;  Var _x2c_gensym_macro_cached_2;  if(Map_try_get(c -> proto_cache, List_var(cons(_379, cons(List_var(participant), NULL))), &(_x2c_gensym_macro_cached_2))) result = Var_list_payload(_x2c_gensym_macro_cached_2);  else{
     {
       Array ancestry = Array_new();  Type current = participant;  for(int distance = 0;  List_truth(Type_list(current)) && distance <= 128;  distance ++){
-        Array_push(ancestry, List_var(current));  if(! Type_is_typedef_name(current) && ! Type_is_typedef(current)) break;  current = List_type(Sym_get(c -> sym, Type_list(current)));
+        Array_push(ancestry, List_var(current));  if(! Type_is_typedef_name(current) && ! Type_is_typedef(current)) break;  current = Type_canonicalize(List_type(Sym_get(c -> sym, Type_list(current))));
       }
       result = Array_list_free(ancestry);
     }

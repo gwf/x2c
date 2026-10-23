@@ -176,7 +176,7 @@ static int _integer_dtype(int dtype) =>
 
 static int64_t *_shape(List sizes, int &rank) {
   int count = sizes.len();
-  int64_t *shape = Scope.calloc(count ? count : 1, sizeof(int64_t));
+  int64_t *shape = xcalloc(count ? count : 1, sizeof(int64_t));
   int index = 0;
   foreach (Var size, sizes) {
     long extent = size;  // converting; a Symbol or text raises
@@ -188,7 +188,7 @@ static int64_t *_shape(List sizes, int &rank) {
 
 static xt_tensor *_handles(List tensors, int &count) {
   int total = tensors.len();
-  xt_tensor *handles = Scope.calloc(total ? total : 1, sizeof(xt_tensor));
+  xt_tensor *handles = xcalloc(total ? total : 1, sizeof(xt_tensor));
   int index = 0;
   foreach (Tensor tensor, tensors) handles[index++] = tensor.native;
   count = total;
@@ -253,12 +253,12 @@ Tensor Tensor.of(List values, List shape, int dtype) {
   int64_t *sizes = _shape(shape, rank), total = 1, count = 0;
   for (int i = 0; i < rank; i++) total *= sizes[i];
   if (_integer_dtype(dtype)) {
-    int64_t *whole = Scope.calloc(total ? total : 1, sizeof(int64_t));
+    int64_t *whole = xcalloc(total ? total : 1, sizeof(int64_t));
     _flatten_integers(values, whole, count, total);
     _expect_filled(count, total);
     return _wrap(xt_from_int64s(whole, sizes, rank, dtype), "of");
   }
-  double *data = Scope.calloc(total ? total : 1, sizeof(double));
+  double *data = xcalloc(total ? total : 1, sizeof(double));
   _flatten(values, data, count, total);
   _expect_filled(count, total);
   return _wrap(xt_from_doubles(data, sizes, rank, dtype), "of");
@@ -421,12 +421,12 @@ Array Tensor.to_values(Tensor t) {
   int64_t count = t.numel();
   Array values = [];
   if (_integer_dtype(t.dtype())) {
-    int64_t *whole = Scope.calloc(count ? count : 1, sizeof(int64_t));
+    int64_t *whole = xcalloc(count ? count : 1, sizeof(int64_t));
     _check(xt_copy_out_int64s(t.native, whole, count), "to_values");
     for (int64_t i = 0; i < count; i++) values.push(whole[i]);
     return values;
   }
-  double *out = Scope.calloc(count ? count : 1, sizeof(double));
+  double *out = xcalloc(count ? count : 1, sizeof(double));
   _check(xt_copy_out_doubles(t.native, out, count), "to_values");
   for (int64_t i = 0; i < count; i++) values.push(out[i]);
   return values;
@@ -1273,8 +1273,8 @@ long Scheduler.steps(Scheduler s) => s.steps;
 /** Writes a Map of String name to Tensor. */
 void Checkpoint.save(Map values, String path) {
   int count = values.len();
-  const char **names = Scope.calloc(count ? count : 1, sizeof(char *));
-  xt_tensor *handles = Scope.calloc(count ? count : 1, sizeof(xt_tensor));
+  const char **names = xcalloc(count ? count : 1, sizeof(char *));
+  xt_tensor *handles = xcalloc(count ? count : 1, sizeof(xt_tensor));
   int index = 0;
   foreach (Var (name, value), values) {
     names[index] = name.str();
@@ -1340,7 +1340,7 @@ List JitModule.forward(JitModule m, List inputs) {
   /* A forward returning more tensors than this reports as a failure
      rather than a truncated List. */
   int limit = 16;
-  xt_tensor *produced = Scope.calloc(limit, sizeof(xt_tensor));
+  xt_tensor *produced = xcalloc(limit, sizeof(xt_tensor));
   int total;
   _check(xt_jit_forward(m.native, handles, count, produced, limit, &total),
          "jit forward");

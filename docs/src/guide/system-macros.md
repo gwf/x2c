@@ -287,8 +287,8 @@ region per iteration. No hidden loop changes the meaning of `break` or
 
 ```x2c
 ~int main(void) {
-$scope() for (int i = 0; i < 3; i++) { Scope.malloc(8); }
-for (int i = 0; i < 3; i++) $scope() { Scope.malloc(8); }
+$scope() for (int i = 0; i < 3; i++) { xmalloc(8); }
+for (int i = 0; i < 3; i++) $scope() { xmalloc(8); }
 ~  return 0;
 ~}
 ```
@@ -315,7 +315,7 @@ that destination, and restores the previous destination on exit:
 ```x2c
 ~int main(void) {
 Scope destination = $auto(Scope.new());
-$scope(&destination) { Scope.malloc(8); }
+$scope(&destination) { xmalloc(8); }
 ~  return 0;
 ~}
 ```
@@ -329,7 +329,7 @@ The corresponding body placement is:
   Scope.push(&destination);
   {
     defer Scope.pop();
-    { Scope.malloc(8); }
+    { xmalloc(8); }
   }
 }
 ~  return 0;

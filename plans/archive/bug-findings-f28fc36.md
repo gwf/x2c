@@ -340,7 +340,7 @@ String scope_transient(size_t size) {
   return NULL;
 }
 
-static void *allocate(void) => Scope.malloc(8);
+static void *allocate(void) => xmalloc(8);
 
 static List make_list(int value) => cons(value, NULL);
 
@@ -360,7 +360,7 @@ void same_pool(int value) {
 
 void allocation_loop(char *bytes, size_t size) {
   for (int i = 0; i < 2; i++) {
-    void *a = Scope.malloc(8);
+    void *a = xmalloc(8);
     String b = String.new_len(bytes, size);
     void *c = allocate();
     (void) a; (void) b; (void) c;

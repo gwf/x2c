@@ -23,9 +23,9 @@ int Reading.value(Reading reading) {
 protocol Reading(Gauge);
 
 int main(void) {
-  Reading reading = Scope.malloc(sizeof(struct Reading));
+  Reading reading = xmalloc(sizeof(struct Reading));
   reading.value = 42;
-  Gauge gauge = Scope.malloc(sizeof(struct Gauge));
+  Gauge gauge = xmalloc(sizeof(struct Gauge));
   gauge.reading = reading;
   printf("%d\n", gauge.value());
   return gauge.value() == 42 ? 0 : 1;

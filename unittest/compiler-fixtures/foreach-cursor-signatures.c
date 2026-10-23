@@ -203,7 +203,7 @@ int DirectThree_try_next(DirectThree bag, unsigned * cursor, int * first, int * 
 int main(void){
   x2c_initialize();
   if(! _init_guard_) _file_init_();
-  DirectOne direct_one = Scope_malloc(sizeof(struct DirectOne));
+  DirectOne direct_one = xmalloc(sizeof(struct DirectOne));
   direct_one -> values = _5;
   long one_total = 0;
   {
@@ -217,7 +217,7 @@ int main(void){
     }
 
   }
-  DirectTwo direct_two = Scope_malloc(sizeof(struct DirectTwo));
+  DirectTwo direct_two = xmalloc(sizeof(struct DirectTwo));
   direct_two -> values = _11;
   int two_total = 0;
   {
@@ -233,19 +233,19 @@ int main(void){
     }
 
   }
-  ValueCursor value_cursor = Scope_malloc(sizeof(struct ValueCursor));
+  ValueCursor value_cursor = xmalloc(sizeof(struct ValueCursor));
   value_cursor -> values = _5;
-  FloatCursor float_cursor = Scope_malloc(sizeof(struct FloatCursor));
+  FloatCursor float_cursor = xmalloc(sizeof(struct FloatCursor));
   float_cursor -> values = _5;
-  StringCursor string_cursor = Scope_malloc(sizeof(struct StringCursor));
+  StringCursor string_cursor = xmalloc(sizeof(struct StringCursor));
   string_cursor -> values = _5;
-  VoidCursor void_cursor = Scope_malloc(sizeof(struct VoidCursor));
+  VoidCursor void_cursor = xmalloc(sizeof(struct VoidCursor));
   void_cursor -> values = _5;
-  ValueOutput value_output = Scope_malloc(sizeof(struct ValueOutput));
+  ValueOutput value_output = xmalloc(sizeof(struct ValueOutput));
   value_output -> values = _5;
-  WrongReturn wrong_return = Scope_malloc(sizeof(struct WrongReturn));
+  WrongReturn wrong_return = xmalloc(sizeof(struct WrongReturn));
   wrong_return -> values = _5;
-  DirectThree direct_three = Scope_malloc(sizeof(struct DirectThree));
+  DirectThree direct_three = xmalloc(sizeof(struct DirectThree));
   direct_three -> values = _17;
   int three_total = 0;
   {

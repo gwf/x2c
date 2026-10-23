@@ -40,6 +40,8 @@ List Compiler.parse_simple_declaration(Compiler c) => _declaration_group(c, 0);
 */
 List Compiler.parse_type_operand(Compiler c, Type *type) {
   List declaration = c.parse_simple_declaration();
+  if (!c.macro_holes && _auto_storage(declaration))
+    $fail.parse_auto_storage(c, c.token);
   if (type) *type = declaration.type_from_ast();
   return %(decl @{declaration.cdr()});
 }
@@ -79,7 +81,13 @@ static List _typedef(Compiler c, List context, int row) {
    its short tag; the declared type keeps the body. */
 module List _declaration_types(Compiler c, List storage) {
   List quals = _type_qualifiers(c);
-  Type spec = _type_specifier(c);
+  int managed = <auto> in storage;
+  List hole = managed ? c.peek_macro_hole() : NULL;
+  int inferred = managed &&
+    ((c.peek(0) == <ident> &&
+      (c.peek(1) == <=> || c.peek(1) == <;> || c.peek(1) == <,>)) ||
+     (hole && hole.assoc(<kind>) == <name>));
+  Type spec = inferred ? NULL : _type_specifier(c);
   Array trailing = [];
   // C11 6.11.5: a storage class after the type is obsolescent but legal, and
   // preprocessed source spells an expanded storage macro that way.
@@ -322,6 +330,9 @@ static List _linked_static_base(Compiler c, List base, List declarators) {
 module List _finish_declaration(
   Compiler c, Symbol tag, List base, List declarators,
   int preserved_self) {
+  List before = NULL;
+  if (<auto> in base && !c.macro_holes && !c.shallow)
+    base = _auto_declaration(c, tag, base, declarators, before);
   if (tag == <typedef> && c.source_private > 0 &&
       !base.type().is_static()) base = %(static @base);
   if (tag == <declare>) base = _linked_static_base(c, base, declarators);
@@ -339,9 +350,10 @@ module List _finish_declaration(
       c.check_reference_placement(type);
     }
   List declaration = %($tag $base (bindings @declarators));
-  return tag == <declare> && !preserved_self
+  declaration = tag == <declare> && !preserved_self
     ? _lower_self_declaration(c, declaration)
     : declaration;
+  return before ? %(seq $before $declaration) : declaration;
 }
 
 /* Keep Self only in method metadata. The binding and AST receive the
@@ -419,6 +431,8 @@ module List _bind_declaration(
   if (c.public_bodies && context == <unit>) c.shallow = 1;
   defer c.shallow = shallow;
   if (!_declaration_legal(tag, context)) return _construction_error(c);
+  if (<auto> in base.list() && !c.macro_holes && !c.shallow &&
+      context != <block>) $fail.parse_auto_storage(c, c.token);
   base = _finish_type(c, base);
   List field_context = context == <field> ? c.aggregate_type : NULL;
   List declaration_context = tag == <typedef> ? %(typedef) : field_context;

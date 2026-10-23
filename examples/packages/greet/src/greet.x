@@ -15,7 +15,7 @@ String repeat(String text, int times);
 
 
 Greeting Greeting.new(String subject) {
-  Greeting greeting = Scope.malloc(sizeof(struct GreetingData));
+  Greeting greeting = xmalloc(sizeof(struct GreetingData));
   greeting.subject = subject;
   greeting.count = 0;
   return greeting;

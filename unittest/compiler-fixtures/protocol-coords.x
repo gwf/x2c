@@ -17,14 +17,14 @@ protocol Cartesian(T) {
 }
 
 Cartesian Cartesian.new(double x, double y) {
-  Cartesian value = Scope.malloc(sizeof(struct Cartesian));
+  Cartesian value = xmalloc(sizeof(struct Cartesian));
   value.x = x;
   value.y = y;
   return value;
 }
 
 Polar Polar.new(double r, double t) {
-  Polar value = Scope.malloc(sizeof(struct Polar));
+  Polar value = xmalloc(sizeof(struct Polar));
   value.r = r;
   value.t = t;
   return value;

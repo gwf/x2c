@@ -4,14 +4,14 @@ static int frees, inits, fail_init, drops, allocs;
 class Item struct { Array values; } *;
 Item Item.new(int value) {
   if (value < 0) raise %(make-fail);
-  Item item = Scope.calloc(1, sizeof(*item));
+  Item item = xcalloc(1, sizeof(*item));
   item.values = %[$value];
   return item;
 }
 void Item.free(Item item) {
   frees++;
   item.values.free();
-  Scope.free(item);
+  xfree(item);
 }
 class Initialized struct { Array values; } *;
 void Initialized.init(Initialized item) {
@@ -32,7 +32,7 @@ void Sized.drop(Sized sized) {
 class Guarded struct { int level; } *;
 Guarded Guarded.alloc(void) {
   allocs++;
-  return Scope.calloc(1, sizeof(struct Guarded));
+  return xcalloc(1, sizeof(struct Guarded));
 }
 int Guarded.init(Guarded guarded, int level) {
   guarded.level = level;

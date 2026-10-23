@@ -1347,7 +1347,7 @@ static String f7_strings____decode_segment(String raw){
   raw = f7_strings____normalize_newlines(raw);
   if(!(String_contains(raw, _195))) return String_unescape(raw);
   int n = String_len(raw), dst = 0;
-  char * buf = Scope_malloc(n + 1);
+  char * buf = xmalloc(n + 1);
   for(int i = 0;  i < n;  i ++){
     char ch = String_getindex(raw, i);
     buf[dst ++] = ch;
@@ -1356,13 +1356,13 @@ static String f7_strings____decode_segment(String raw){
   }
   buf[dst] = '\0';
   String text = String_new_len(buf, dst);
-  Scope_free(buf);
+  xfree(buf);
   return String_unescape(text);
 }
 
 static String f7_strings____normalize_newlines(String raw){
   int n = String_len(raw);
-  char * buf = Scope_malloc(n + 1);
+  char * buf = xmalloc(n + 1);
   int dst = 0, changed = 0, i = 0;
   while(i < n){
     char ch = String_getindex(raw, i);
@@ -1384,7 +1384,7 @@ static String f7_strings____normalize_newlines(String raw){
 
   }
   String normalized = changed ? String_new_len(buf, dst) : raw;
-  Scope_free(buf);
+  xfree(buf);
   return normalized;
 }
 

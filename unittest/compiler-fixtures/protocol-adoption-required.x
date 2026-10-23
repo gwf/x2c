@@ -23,7 +23,7 @@ String Vec.str(Vec v) {
 }
 
 int main(void) {
-  Vec v = Scope.malloc(sizeof(struct Vec));
+  Vec v = xmalloc(sizeof(struct Vec));
   v.x = 1;
   v.y = 2;
   /* `hash` is a Var protocol member Vec does not implement. An adoption row

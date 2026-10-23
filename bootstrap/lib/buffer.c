@@ -110,7 +110,7 @@ Buffer Buffer_printf(Buffer buf, const char * format, ...){
     __builtin_unreachable();
   }
   if((size_t) length < sizeof stack) return Buffer_write_len(buf, stack, length);
-  char * bytes = Scope_malloc((size_t) length + 1);
+  char * bytes = xmalloc((size_t) length + 1);
   {
     _x2c_gensym_defer_env_0 _x2c_gensym_macro_environment_0 ={
       0
@@ -352,7 +352,7 @@ int Buffer_truth(Buffer b){
 }
 
 Buffer Buffer_new(size_t padding){
-  Buffer buf = Scope_malloc(sizeof(struct Buffer));
+  Buffer buf = xmalloc(sizeof(struct Buffer));
   buf -> content = Block_new(sizeof(char));
   buf -> indents = Block_new(sizeof(size_t));
   buf -> padding = padding;
@@ -383,12 +383,12 @@ void Buffer_free(Buffer buf){
   if(buf == NULL) return;
   if(buf -> content != NULL) Block_free(buf -> content);
   if(buf -> indents != NULL) Block_free(buf -> indents);
-  Scope_free(buf);
+  xfree(buf);
 }
 
 static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0){
   _x2c_gensym_defer_env_0 * _x2c_gensym_defer_data_0 =(_x2c_gensym_defer_env_0 *) _x2c_gensym_defer_opaque_0;
-  Scope_free((*(char * *) _x2c_gensym_defer_data_0->_x2c_gensym_defer_capture_0));
+  xfree((*(char * *) _x2c_gensym_defer_data_0->_x2c_gensym_defer_capture_0));
 }
 
 static void _x2c_gensym_defer_cleanup_1(void * _x2c_gensym_defer_opaque_1){

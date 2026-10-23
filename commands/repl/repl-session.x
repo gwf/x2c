@@ -130,7 +130,7 @@ ReplSession ReplSession.new(Compiler compiler) {
   if (compiler.source_facts)
     raise %(bad-arg (operation "ReplSession.new")
                    (reason "source facts retain temporary symbol maps"));
-  ReplSession session = Scope.calloc(1, sizeof(struct ReplSession));
+  ReplSession session = xcalloc(1, sizeof(struct ReplSession));
   session.compiler = compiler;
   session.names = {};
   session.files = {};
@@ -786,7 +786,7 @@ static ReplResult _submit(ReplSession session, String source) {
       Map globals = storage;
       foreach (Var id, ids) {
         Var address;
-        if (globals.try_get(id, address)) Scope.free(address.pointer());
+        if (globals.try_get(id, address)) xfree(address.pointer());
         globals.del(id);
       }
     }
@@ -816,9 +816,9 @@ void ReplSession.close(ReplSession session) {
     ReplLoadedFile file = value;
     file.symbols.cleanup();
     file.signatures.cleanup();
-    Scope.free(file);
+    xfree(file);
   }
-  Scope.free(session.helper);
+  xfree(session.helper);
   session.helper = NULL;
   session.files.cleanup();
   session.files = NULL;

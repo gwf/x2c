@@ -119,7 +119,7 @@ Termbox Termbox.open(void) {
     $error.termbox.owned();
   }
 
-  Termbox terminal = Scope.calloc(1, sizeof(struct Termbox));
+  Termbox terminal = xcalloc(1, sizeof(struct Termbox));
   TermboxSignal previous = { 0 };
   _termbox_save_winch(previous);
   int result = tb_init();

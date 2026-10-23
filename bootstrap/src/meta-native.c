@@ -1076,11 +1076,11 @@ static int f7_modules____module_stamp(String path){
   fseek(input, 0, SEEK_END);
   long end = ftell(input);
   rewind(input);
-  char * data = Scope_malloc(end > 0 ?(size_t) end : 1);
+  char * data = xmalloc(end > 0 ?(size_t) end : 1);
   size_t size = end > 0 ? fread(data, 1, (size_t) end, input) : 0;
   File_close(input);
   int stamp = f7_modules____stamp_in(data, size, expected);
-  Scope_free(data);
+  xfree(data);
   return stamp;
 }
 
@@ -2322,7 +2322,7 @@ static int f5_calls____shipped_definition(void){
 
 static Var f5_calls____apply_linked(Func function, List arguments){
   unsigned count = List_len(arguments), index = 0;
-  FuncArg * argv = Scope_calloc(count + 1, sizeof(FuncArg));
+  FuncArg * argv = xcalloc(count + 1, sizeof(FuncArg));
   {
     _x2c_gensym_defer_env_17 _x2c_gensym_macro_environment_17 ={
       0
@@ -3553,7 +3553,7 @@ static void _x2c_gensym_defer_cleanup_21(void * _x2c_gensym_defer_opaque_21){
 
 static void _x2c_gensym_defer_cleanup_22(void * _x2c_gensym_defer_opaque_22){
   _x2c_gensym_defer_env_17 * _x2c_gensym_defer_data_17 =(_x2c_gensym_defer_env_17 *) _x2c_gensym_defer_opaque_22;
-  Scope_free((*(FuncArg * *) _x2c_gensym_defer_data_17->_x2c_gensym_defer_capture_30));
+  xfree((*(FuncArg * *) _x2c_gensym_defer_data_17->_x2c_gensym_defer_capture_30));
 }
 
 #undef _x2c_gensym_initializer_choice_65953FEE_0_expanded

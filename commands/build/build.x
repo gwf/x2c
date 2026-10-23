@@ -173,7 +173,7 @@ Build CliRequest.prepare(CliRequest request) {
   if (!request.inputs)
     Diagnostics.driver_error(
       "build requires input operands or a project manifest");
-  Build b = Scope.calloc(1, sizeof(struct Build));
+  Build b = xcalloc(1, sizeof(struct Build));
   *b = (struct Build) {
     .request = request, .c_sources = [], .gen_dirs = [], .units = [],
     .native_inputs = [], .objects = []};
@@ -510,7 +510,7 @@ CliRequest Build.extension_entries(Build b) {
 }
 
 static CliRequest _entry_request(Build b, List entries) {
-  CliRequest request = Scope.memdup(b.request, sizeof(struct CliRequest));
+  CliRequest request = xmemdup(b.request, sizeof(struct CliRequest));
   request.inputs = entries;
   b.xlat_n += entries.len();
   return request;
@@ -651,7 +651,7 @@ static typedef struct CcPool {
 static int _compile_sources(Build b) {
   if (b.compile_commands != NULL) b.compile_directory = Path.absolute(".");
   CcPool pool = {
-    .b = b, .running = Scope.calloc(b.request.jobs, sizeof(CcJob))};
+    .b = b, .running = xcalloc(b.request.jobs, sizeof(CcJob))};
   b.cc_n = b.c_sources.len();
   b.cc_start = report_now_us();
   int failed = 0;
@@ -660,7 +660,7 @@ static int _compile_sources(Build b) {
     if (failed) break;
   }
   while (pool.count) failed |= _wait(pool);
-  Scope.free(pool.running);
+  xfree(pool.running);
   if (failed || !b.cc_n) return failed;
   String noun = b.cc_n == 1 ? "C file" : "C files";
   report_phase(

@@ -21,7 +21,7 @@ int main(int argc, char **argv) {
   if (argc != 4) return 2;
   int w = atoi(argv[1]), h = atoi(argv[2]), steps = atoi(argv[3]);
   int n = w * h;
-  Grid cells = { Scope.malloc(n), w, h }, next = { Scope.malloc(n), w, h };
+  Grid cells = { xmalloc(n), w, h }, next = { xmalloc(n), w, h };
   for (int i = 0; i < n; i++) cells.alive[i] = (i * 17 + i / w * 23) % 11 == 0;
   for (int step = 0; step < steps; step++) {
     for (int y = 0; y < h; y++)

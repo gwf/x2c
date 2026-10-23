@@ -241,11 +241,11 @@ String DisjointSet_repr(DisjointSet value){
 
 }
 
-void * Scope_malloc(size_t);
+void * xmalloc(size_t);
 
 void DisjointSet_init(DisjointSet set, int n){
-  set -> parent = Scope_malloc(sizeof(int) * n);
-  set -> size = Scope_malloc(sizeof(int) * n);
+  set -> parent = xmalloc(sizeof(int) * n);
+  set -> size = xmalloc(sizeof(int) * n);
   set -> length = n;
   set -> ncmpnts = n;
   for(int i = 0;  i < n;  i ++){
@@ -255,9 +255,11 @@ void DisjointSet_init(DisjointSet set, int n){
 
 }
 
+void xfree(void *);
+
 void DisjointSet_drop(DisjointSet set){
-  Scope_free(set -> parent);
-  Scope_free(set -> size);
+  xfree(set -> parent);
+  xfree(set -> size);
 }
 
 int DisjointSet_find(DisjointSet set, int x){

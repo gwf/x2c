@@ -35,7 +35,7 @@ Span Span.add(Span a, Span b) {
 }
 
 Reading Reading.new(Span span) {
-  Reading reading = Scope.malloc(sizeof(struct Reading));
+  Reading reading = xmalloc(sizeof(struct Reading));
   reading.span = span;
   return reading;
 }

@@ -80,8 +80,8 @@ static typedef int *Trace;
    emitting the edits, or -1 past `_LIMIT`. */
 static int _myers(Script &s) {
   int max = s.n + s.m < _LIMIT ? s.n + s.m : _LIMIT;
-  Trace trace = Scope.calloc((max + 1) * (max + 1), sizeof(int));
-  defer Scope.free(trace);
+  Trace trace = xcalloc((max + 1) * (max + 1), sizeof(int));
+  defer xfree(trace);
   int found = _forward(s, trace, max);
   if (found < 0) return -1;
   foreach (List step in _path(trace, found, s.n, s.m)) {

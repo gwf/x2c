@@ -36,7 +36,7 @@ ModuleSource Compiler.module_source(Compiler c, String path, String text) {
   String own = _file_prefix(Path.stem(path));
   s.prefixes[own] = Path.basename(path);
   if (!_file(s, path, text, NULL, own)) return NULL;
-  ModuleSource source = Scope.calloc(1, sizeof(struct ModuleSource));
+  ModuleSource source = xcalloc(1, sizeof(struct ModuleSource));
   *source = (struct ModuleSource) {
     .text = s.out.str(), .own = text, .markers = s.markers,
     .members = s.members};
@@ -81,7 +81,7 @@ static Token _block(Splice &s) {
   Tokenizer tokenizer = Tokenizer.new(s.text, <x2c>);
   tokenizer.layout = Path.is_layout_source(s.path);
   tokenizer.scan();
-  Compiler scan = Scope.calloc(1, sizeof(struct Compiler));
+  Compiler scan = xcalloc(1, sizeof(struct Compiler));
   scan.tokenizer = tokenizer;
   scan.scan_conditionals();
   Token block = NULL, previous = NULL;

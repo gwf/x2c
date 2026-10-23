@@ -32,7 +32,7 @@ module void _parse_manifest(Project p) {
    and surrounding space. */
 static char *_content(String text) {
   int length = text ? strlen(text) : 0;
-  char *line = Scope.malloc(length + 1);
+  char *line = xmalloc(length + 1);
   if (length) memcpy(line, text, length);
   line[length] = 0;
   _strip_comment(line);
@@ -194,7 +194,7 @@ static void _set_project_field(Project p, int line, String key, String value) {
 
 /* One `[dependencies]` entry: an index package name and its exact version. */
 static void _set_dependency(Project p, int line, String key, String value) {
-  ProjectDependency entry = Scope.calloc(1, sizeof(struct ProjectDependency));
+  ProjectDependency entry = xcalloc(1, sizeof(struct ProjectDependency));
   *entry = (struct ProjectDependency) {
     .name = key, .version = _string_value(p, line, value)};
   ProjectDependency *link = &p.dependencies;
@@ -342,7 +342,7 @@ module ProjectTarget _target(Project p, String name) {
 }
 
 static ProjectTarget _new_target(Project p, String name) {
-  ProjectTarget target = Scope.calloc(1, sizeof(struct ProjectTarget));
+  ProjectTarget target = xcalloc(1, sizeof(struct ProjectTarget));
   *target = (struct ProjectTarget) {
     .name = name, .kind = <executable>, .seen = {}, .next = p.targets};
   p.targets = target;
@@ -356,7 +356,7 @@ module ProjectProfile _profile(ProjectTarget target, String name) {
 }
 
 static ProjectProfile _new_profile(ProjectTarget target, String name) {
-  ProjectProfile profile = Scope.calloc(1, sizeof(struct ProjectProfile));
+  ProjectProfile profile = xcalloc(1, sizeof(struct ProjectProfile));
   *profile = (struct ProjectProfile) {
     .name = name, .seen = {}, .next = target.profiles};
   target.profiles = profile;

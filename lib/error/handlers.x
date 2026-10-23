@@ -49,13 +49,13 @@ static int _catch_arm(
   MatchPlan plan = _arm_plan(h, i);
   MatchCaptureLayout layout = plan ? plan.layout : NULL;
   int binders = layout ? layout.binder_count : 0;
-  Var *values = binders ? Scope.malloc(sizeof(Var) * binders) : NULL;
+  Var *values = binders ? xmalloc(sizeof(Var) * binders) : NULL;
   MatchCaptureBuffer captures = {values, 0, binders};
   int matched = i == h.site.default_arm ||
     (plan.status == <prepared> &&
      plan.execute_capture(projection, captures, NULL) == 1);
   if (matched) _commit_captures(h, record, layout, &captures);
-  if (values) Scope.free(values);
+  if (values) xfree(values);
   return matched;
 }
 
@@ -169,12 +169,12 @@ void Error.pop(ErrorHandler handle) {
 module void _free(ErrorHandler handle) {
   if (!handle) return;
   // a per-call site has no static arm storage and belongs to this handler
-  if (handle.site && !handle.site.arms) Scope.free(handle.site);
+  if (handle.site && !handle.site.arms) xfree(handle.site);
   _plans_free(handle.plans);
   if (handle.capture_values != NULL) handle.capture_values.free();
   _retained_destroy(handle.retained);
   _destroy(&(handle.view));
-  Scope.free(handle);
+  xfree(handle);
 }
 
 static void _plans_free(Block plans) {

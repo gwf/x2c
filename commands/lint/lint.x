@@ -248,20 +248,20 @@ Lint Lint.new(String path, String text, Map selected):
   scanner.scan()
   struct Token *all = (struct Token *) scanner.tokens
   int total = scanner.tokens.len() - 1
-  Lint l = Scope.calloc(1, sizeof(struct Lint))
+  Lint l = xcalloc(1, sizeof(struct Lint))
   l.path = path, l.text = text, l.selected = selected
   l.findings = [], l.edits = [], l.functions = [], l.unused = []
   l.allowances = {}
   l.layout = scanner.layout || path.endswith(".xp")
-  l.tokens = Scope.calloc(total + 1, sizeof(struct Token))
+  l.tokens = xcalloc(total + 1, sizeof(struct Token))
   for (int at = 0; at < total; at++):
     if all[at].len: l.tokens[l.count++] = all[at]
   l.lines = 1
   for (char *ch = text; ch && *ch; ch++):
     if *ch == '\n' && ch[1]: l.lines++
-  l.partner = Scope.calloc(l.count + 1, sizeof(int))
-  l.quoted = Scope.calloc(l.count + 1, 1)
-  l.first = Scope.calloc(l.lines + 2, sizeof(int))
+  l.partner = xcalloc(l.count + 1, sizeof(int))
+  l.quoted = xcalloc(l.count + 1, 1)
+  l.first = xcalloc(l.lines + 2, sizeof(int))
   for (int line = 0; line <= l.lines + 1; line++): l.first[line] = -1
   Array open = [], states = []
   int quoted = 0

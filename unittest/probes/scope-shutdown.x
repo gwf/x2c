@@ -14,7 +14,7 @@ static int hook_order[2], hook_count;
 static void hook_one(void) { hook_order[hook_count++] = 1; }
 static void hook_two(void) {
   Scope.retain();
-  Scope.malloc(8);
+  xmalloc(8);
   Scope.release();
   hook_order[hook_count++] = 2;
 }
@@ -59,7 +59,7 @@ int main(int argc, char **argv) {
 
   if (!strcmp(argv[1], "clean")) {
     Scope.retain();
-    Scope.malloc(8);
+    xmalloc(8);
     Scope.release();
     Scope_shutdown();
     ScopeStats stats = Scope.stats();
@@ -107,11 +107,11 @@ int main(int argc, char **argv) {
   if (!strcmp(argv[1], "overflow")) {
     int caught = 0;
     try {
-      Scope.malloc(SIZE_MAX);
+      xmalloc(SIZE_MAX);
     }
     catch %(size-limit *): caught++;
     try {
-      Scope.calloc(SIZE_MAX, 2);
+      xcalloc(SIZE_MAX, 2);
     }
     catch %(size-limit *): caught++;
     Scope_shutdown();
@@ -120,7 +120,7 @@ int main(int argc, char **argv) {
 
   if (!strcmp(argv[1], "after")) {
     Scope_shutdown();
-    Scope.malloc(8);
+    xmalloc(8);
     return 1;
   }
 

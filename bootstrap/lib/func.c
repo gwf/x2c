@@ -359,7 +359,7 @@ _Noreturn FuncArg x2c_func_unrepresentable_argument(Func fn, unsigned i, List so
 }
 
 Var x2c_func_record_result(const void * bytes, size_t size){
-  return Var_new(3683441, Scope_memdup(bytes, size));
+  return Var_new(3683441, xmemdup(bytes, size));
 }
 
 void * x2c_func_reference_argument(Func fn, const FuncArg * argv, unsigned i, List want){
@@ -467,7 +467,7 @@ static Func f4_func____new(FuncAdapter adapter, List signature, int rest, const 
     }
 
   }
-  int n = List_len(params);  int void_params = n == 1 && Var_is_row(List_car(params), 9, 7, 4) && x2c_var_equal(List_car(params), List_var(_33));  Func fn = Scope_calloc(1, context_offset + context_size);  fn -> sig = signature;  fn -> params = void_params ? NULL : params;  fn -> adapter = adapter;  fn -> rest = rest;  fn -> context_size = context_size;  fn -> nparams = void_params ? 0 : n;  if(context_size) memcpy(f4_func____context(fn), context, context_size);  return fn;
+  int n = List_len(params);  int void_params = n == 1 && Var_is_row(List_car(params), 9, 7, 4) && x2c_var_equal(List_car(params), List_var(_33));  Func fn = xcalloc(1, context_offset + context_size);  fn -> sig = signature;  fn -> params = void_params ? NULL : params;  fn -> adapter = adapter;  fn -> rest = rest;  fn -> context_size = context_size;  fn -> nparams = void_params ? 0 : n;  if(context_size) memcpy(f4_func____context(fn), context, context_size);  return fn;
 }
 
 List Func_signature(Func function){

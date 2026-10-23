@@ -150,7 +150,7 @@ int main(void){
   }
   ;
   PrivateRight right_value = & right_storage;
-  PrivateBox box_value = Scope_malloc(sizeof(struct PrivateBox));
+  PrivateBox box_value = xmalloc(sizeof(struct PrivateBox));
   box_value -> value = 23;
   Var boxed = PrivateBox_var(box_value);
   PrivateBox restored = Var_privatebox(boxed);

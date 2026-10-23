@@ -12,7 +12,7 @@ static Array _fresh_array(void) {
   return a;
 }
 
-static Node _fresh_node(void) => Scope.calloc(1, sizeof(struct Node));
+static Node _fresh_node(void) => xcalloc(1, sizeof(struct Node));
 
 static void _link(Node holder, Node item) {
   holder.next = item;
@@ -70,7 +70,7 @@ static void escaping_through_callee(Node holder) {
 // A String pointer block is region storage, not a canonical String.
 static String *escaping_string_block(void) {
   $scope() {
-    String *names = Scope.calloc(4, sizeof(String));
+    String *names = xcalloc(4, sizeof(String));
     return names;
   }
   return NULL;

@@ -64,7 +64,7 @@ module List _ancestry(Compiler c, Type participant) {
     for (int distance = 0; current && distance <= 128; distance++) {
       ancestry.push(current);
       if (!current.is_typedef_name() && !current.is_typedef()) break;
-      current = c.sym.get(current);
+      current = c.sym.get(current).type().canonicalize();
     }
     result = ancestry.list_free();
   }

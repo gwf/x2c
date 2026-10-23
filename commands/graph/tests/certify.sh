@@ -133,7 +133,7 @@ check_target_order() {
 
 check_contracts() {
   cat >"$tmp/certify-invalid.effects" <<'EOF'
-(native "Scope_malloc" (summary 0 ()))
+(native "xmalloc" (summary 0 ()))
 EOF
   if $tool certify --root certify_safe \
        --contracts "$tmp/certify-invalid.effects" "$fixtures/certify.x" \

@@ -430,7 +430,7 @@ static List _remove(
   List kept = retired.types.filter(%!(List family) => !(family in dropped));
   retired.symbols.cleanup();
   retired.signatures.cleanup();
-  Scope.free(retired);
+  xfree(retired);
   return kept;
 }
 
@@ -627,7 +627,7 @@ static void _publish(
   ReplSession session, String filename, LoadedSource &loaded) {
   ReplLoadedFile file = session.files[filename].pointer();
   if (!file) {
-    file = Scope.calloc(1, sizeof(struct ReplLoadedFile));
+    file = xcalloc(1, sizeof(struct ReplLoadedFile));
     file.path = filename;
   }
   Map visible = $auto(session.compiler.sym.unit_symbols());
@@ -695,13 +695,13 @@ ReplResult ReplSession.load(
   Map prepared = $auto({}), dropped = $auto({});
   Array removed = $auto([]);
   defer {
-    if (helper) Scope.free(helper);
+    if (helper) xfree(helper);
     foreach (Var (path, value), prepared) {
       LoadedSource *loaded = value.pointer();
       if (loaded->globals) loaded->globals.cleanup();
       if (loaded->symbols) loaded->symbols.cleanup();
       if (loaded->signatures) loaded->signatures.cleanup();
-      Scope.free(loaded);
+      xfree(loaded);
     }
   }
   String failure = helper.failure(filename);
@@ -716,7 +716,7 @@ ReplResult ReplSession.load(
       foreach (Var key, retired.symbols.keys())
         if (!_shared(session, retired, key)) visible.del(key);
     foreach (String path, paths) {
-      LoadedSource *loaded = Scope.calloc(1, sizeof(LoadedSource));
+      LoadedSource *loaded = xcalloc(1, sizeof(LoadedSource));
       prepared[path] = (void *) loaded;
       *loaded = _prepare(frontend, path, helper);
       if (loaded->result.status != <loaded>) return loaded->result;
@@ -770,7 +770,7 @@ ReplResult ReplSession.load(
   MetaHelper previous = session.helper;
   session.helper = helper;
   helper = NULL;
-  Scope.free(previous);
+  xfree(previous);
   result.status = replacing ? <reloaded> : <loaded>;
   return result;
 }

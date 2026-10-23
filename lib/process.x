@@ -254,7 +254,7 @@ static void _spawn(Job job, int index, List stage, Stdio stdio) {
 
 static char **_argv(List stage) {
   if (!stage) $error.start.empty();
-  char **argv = Scope.calloc(stage.len() + 1, sizeof(char *));
+  char **argv = xcalloc(stage.len() + 1, sizeof(char *));
   int index = 0;
   // An empty word is a NULL String, which would end the vector early.
   foreach (Var word in stage) {
@@ -676,7 +676,7 @@ static char **_environment(Map env) {
     if (!((equals < 0 ? text : text[:equals]) in names)) entries.push(text);
   }
   foreach (Var (name, value) in env) entries.push(%"$name=$value");
-  char **out = Scope.calloc(entries.len() + 1, sizeof(char *));
+  char **out = xcalloc(entries.len() + 1, sizeof(char *));
   int index = 0;
   foreach (String entry in entries) out[index++] = entry;
   return out;

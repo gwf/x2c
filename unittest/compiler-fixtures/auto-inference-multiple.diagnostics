@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/auto-inference-multiple.x:3:44: type: auto inference requires one initialized plain name with an object value
+  int main(void) { auto first = 1, second = 2; return first + second; }
+                                             ^
+

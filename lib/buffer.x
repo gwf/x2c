@@ -87,8 +87,8 @@ Self Buffer.printf(Self buf, const char *format, ...) {
   va_end(args);
   if (length < 0) raise %(format);
   if ((size_t) length < sizeof stack) return buf.write_len(stack, length);
-  char *bytes = Scope.malloc((size_t) length + 1);
-  defer Scope.free(bytes);
+  char *bytes = xmalloc((size_t) length + 1);
+  defer xfree(bytes);
   va_start(args, format);
   int written = vsnprintf(bytes, (size_t) length + 1, format, args);
   va_end(args);
@@ -302,7 +302,7 @@ int Buffer.truth(Buffer b) => b != NULL && b.content.length != 0;
     backing `Block`s.
 */
 meta native Buffer Buffer.new(size_t padding) {
-  Buffer buf = Scope.malloc(sizeof(struct Buffer));
+  Buffer buf = xmalloc(sizeof(struct Buffer));
   buf.content = Block.new(sizeof(char));
   /* Allocating the indent Block here puts it in the Buffer's owning scope.
      The first push may run under another scope. */
@@ -349,5 +349,5 @@ void Buffer.free(Buffer buf) {
   if (buf == NULL) return;
   if (buf.content != NULL) buf.content.free();
   if (buf.indents != NULL) buf.indents.free();
-  Scope.free(buf);
+  xfree(buf);
 }

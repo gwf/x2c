@@ -2855,7 +2855,7 @@ int main(int argc, char **argv) {
   String left = options.getdefault("LEFT", NULL);
   String right = options.getdefault("RIGHT", NULL);
   inputs.sort();
-  CliRequest request = Scope.calloc(1, sizeof(struct CliRequest));
+  CliRequest request = xcalloc(1, sizeof(struct CliRequest));
   request.command = <translate>;
   request.include_dirs = options["I"];
   if (libraries)

@@ -9,7 +9,7 @@ static void context_open_close_restores_scope(void) {
   ScopeStats before = Scope.stats();
   Context context = Context.open_named("test Context");
   EXPECT_PTR_EQ(Context.current(), context);
-  char *scratch = Scope.memdup("scratch", 8);
+  char *scratch = xmemdup("scratch", 8);
   EXPECT_STR_EQ(scratch, "scratch");
   context.close();
   EXPECT_NULL(Context.current());
@@ -136,7 +136,7 @@ static void context_exports_registered_object(void) {
 
   Context outer = Context.open_isolated_named("custom destination");
   Context inner = Context.open_isolated_named("custom source");
-  ContextProbe probe = Scope.malloc(sizeof(struct ContextProbe));
+  ContextProbe probe = xmalloc(sizeof(struct ContextProbe));
   probe.value = String.new("custom private value");
   probe.exports = 0;
   probe.fail_at = 0;
@@ -150,7 +150,7 @@ static void context_exports_registered_object(void) {
 
 static void _failed_export_round(void) {
   Context context = Context.open_isolated_named("failed export source");
-  ContextProbe probe = Scope.malloc(sizeof(struct ContextProbe));
+  ContextProbe probe = xmalloc(sizeof(struct ContextProbe));
   probe.value = String.new("failed private value");
   probe.exports = 1;
   probe.fail_at = 1;

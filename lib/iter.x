@@ -149,7 +149,7 @@ Self Iter.init(Self iter, Var obj, IterNextFn next, Var state) {
     traversal because it allocates nothing.
     Raises: `<alloc-fail>` when storage cannot be allocated.
 */
-meta native Iter Iter.new(void) => Scope.calloc(1, sizeof(struct Iter));
+meta native Iter Iter.new(void) => xcalloc(1, sizeof(struct Iter));
 
 /** Advances `iter`, writing the next element through `out`.
     Returns nonzero when it produced an element and zero once the iterator

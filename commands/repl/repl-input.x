@@ -724,7 +724,7 @@ static void _render_buffer(
   if (!_render_folds(l, fs)) {
     /* Keep the refresh code simple: it always owns a temporary render
      * buffer, even when the render is identical to the real edit buffer. */
-    r = Scope.malloc(l.len + 1);
+    r = xmalloc(l.len + 1);
     memcpy(r,l.buf,l.len);
     r[l.len] = '\0';
     out = r;
@@ -742,7 +742,7 @@ static void _render_buffer(
     len -= f.end - f.start;
     len += f.displaylen;
   }
-  r = Scope.malloc(len + 1);
+  r = xmalloc(len + 1);
 
   src = dst = 0;
   pos = 0;
@@ -893,7 +893,7 @@ static void _render(EditState &l, int flags) {
   int fd = l.input.ofd, j;
 
   _render_buffer(l, render, render_len, render_pos);
-  defer Scope.free(render);
+  defer xfree(render);
   bufwidth = _display_width(render, render_len);
   poswidth = _display_width(render, render_pos);
   rows = (pwidth+bufwidth+l.cols-1)/l.cols;
@@ -971,7 +971,7 @@ static int _grow(EditState &l, size_t needed) {
   }
 
   /* Allocate one extra byte for the nul terminator. */
-  newbuf = Scope.realloc(l.buf, newlen + 1);
+  newbuf = xrealloc(l.buf, newlen + 1);
   l.buf = newbuf;
   l.buflen = newlen;
   return 0;
@@ -1046,8 +1046,8 @@ static void _recall(EditState &l, int dir) {
     /* Update the current history entry before to
      * overwrite it with the next one. */
     int current = l.history_len - 1 - l.history_index;
-    Scope.free(l.history[current]);
-    l.history[current] = Scope.memdup(l.buf, l.len + 1);
+    xfree(l.history[current]);
+    l.history[current] = xmemdup(l.buf, l.len + 1);
     /* Show the new entry */
     l.history_index += (dir == LINENOISE_HISTORY_PREV) ? 1 : -1;
     if (l.history_index < 0) {
@@ -1123,7 +1123,7 @@ static void _delete_previous_word(EditState &l) {
 }
 
 static char *_copy_text(const char *text) =>
-  Scope.memdup(text, strlen(text) + 1);
+  xmemdup(text, strlen(text) + 1);
 
 static void _prepare(
   EditState &l, ReplInput input, String prompt,
@@ -1132,7 +1132,7 @@ static void _prepare(
   l.input = input;
   input.ifd = STDIN_FILENO;
   input.ofd = STDOUT_FILENO;
-  l.buf = Scope.malloc(LINENOISE_INITIAL_BUFLEN);
+  l.buf = xmalloc(LINENOISE_INITIAL_BUFLEN);
   l.buflen = LINENOISE_INITIAL_BUFLEN - 1;
   l.buflen_max = LINENOISE_MAX_LINE;
   l.prompt = prompt;
@@ -1143,16 +1143,16 @@ static void _prepare(
   l.buf[0] = '\0';
 
   l.history_len = input.history_len + 1;
-  l.history = Scope.calloc(l.history_len, sizeof(char *));
+  l.history = xcalloc(l.history_len, sizeof(char *));
   for (int i = 0; i < input.history_len; i++)
     l.history[i] = _copy_text(input.history[i]);
   l.history[l.history_len - 1] = _copy_text("");
 }
 
 static void _close(EditState &l) {
-  for (int i = 0; i < l.history_len; i++) Scope.free(l.history[i]);
-  Scope.free(l.history);
-  Scope.free(l.buf);
+  for (int i = 0; i < l.history_len; i++) xfree(l.history[i]);
+  xfree(l.history);
+  xfree(l.buf);
 }
 
 /* Make sure the temporary paste buffer can hold len+need bytes. Return -1 on
@@ -1178,8 +1178,8 @@ static int _reserve_paste(char *&buf, size_t &cap, size_t len, size_t need) {
   }
   if (want < len + need) return -1;
 
-  /* Scope.realloc(NULL, want) handles the first allocation too. */
-  nb = Scope.realloc(buf, want);
+  /* xrealloc(NULL, want) handles the first allocation too. */
+  nb = xrealloc(buf, want);
   buf = nb;
   cap = want;
   return 0;
@@ -1216,7 +1216,7 @@ static void _paste(EditState &l) {
   static const char END[] = "\x1b[201~";
   const size_t ENDLEN = sizeof(END)-1;
   char *buf = NULL;
-  defer Scope.free(buf);
+  defer xfree(buf);
   size_t cap = 0, len = 0, match = 0;
   size_t maxlen = l.buflen_max ? l.buflen_max : l.buflen;
   int overflowed = 0;
@@ -1575,7 +1575,7 @@ static ReplInputResult _read_interactive(
 
 /** Creates an interactive terminal owner with empty in-memory history. */
 ReplInput ReplInput.new(void) {
-  ReplInput input = Scope.calloc(1, sizeof(struct ReplInput));
+  ReplInput input = xcalloc(1, sizeof(struct ReplInput));
   input.storage = Scope.new_named("repl-input");
   input.history = Scope.calloc_in(
     &input.storage, REPL_HISTORY_MAX, sizeof(char *));
@@ -1610,7 +1610,7 @@ void ReplInput.remember(ReplInput r, String text) {
 
   char *copy = Scope.memdup_in(&r.storage, text, text.len() + 1);
   if (r.history_len == REPL_HISTORY_MAX) {
-    Scope.free(r.history[0]);
+    xfree(r.history[0]);
     memmove(
       r.history, r.history + 1,
       sizeof(char *) * (REPL_HISTORY_MAX - 1));

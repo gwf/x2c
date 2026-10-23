@@ -3,7 +3,7 @@ char *summary_ambiguous(void);
 char *summary_missing(void);
 
 static char *_summary_direct(void) {
-  return Scope.memdup("direct", 7);
+  return xmemdup("direct", 7);
 }
 
 static char *_summary_transitive(void) {
@@ -11,11 +11,11 @@ static char *_summary_transitive(void) {
 }
 
 static char *_summary_static(void) {
-  return Scope.memdup("static", 7);
+  return xmemdup("static", 7);
 }
 
 static char *_summary_recursive_seed(int base) {
-  if (base) return Scope.memdup("recursive", 10);
+  if (base) return xmemdup("recursive", 10);
   return _summary_recursive_seed(1);
 }
 
@@ -28,7 +28,7 @@ static char *_summary_indirect(char *(*callback)(void)) {
 }
 
 static char *_summary_mixed(int allocate) {
-  if (allocate) return Scope.memdup("mixed", 6);
+  if (allocate) return xmemdup("mixed", 6);
   return NULL;
 }
 

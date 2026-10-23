@@ -21,7 +21,7 @@ static int _next_int(int maximum) {
 }
 
 static char *_make_text(int word_count) {
-  char *text = Scope.malloc((size_t) word_count * 9 + 1);
+  char *text = xmalloc((size_t) word_count * 9 + 1);
   size_t length = 0;
   for (int i = 0; i < word_count; i++) {
     int word_length = _next_int(4) + _next_int(3) + 3;
@@ -58,7 +58,7 @@ static uint64_t _count_words(const char *text, int word_count) {
   Scope.retain();
   size_t size = 1;
   while (size < (size_t) word_count * 2) size *= 2;
-  WordCount *table = Scope.calloc(size, sizeof(WordCount));
+  WordCount *table = xcalloc(size, sizeof(WordCount));
 
   const char *start = text;
   for (const char *cursor = text;; cursor++) {

@@ -1163,7 +1163,7 @@ List String_split_lines(String str, int keep_ends){
 }
 
 static Split f7_cursors____new(String str, String sep, int(* next)(Split split, int * cursor, String * out)){
-  Split split = Scope_malloc(sizeof(struct Split));  * split =(struct Split){
+  Split split = xmalloc(sizeof(struct Split));  * split =(struct Split){
     .str = str, .sep = sep, .next = next
   }
   ;  return split;

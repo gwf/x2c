@@ -855,7 +855,7 @@ static int _run_workers(Translation * t, Array slices){
   if(jobs > count) jobs = count;
   if((* t).request -> verbose) fprintf(stderr, "x2c: translate with %d workers over %d files\n", jobs, (* t).total);
   _workers =(Workers){
-    .t = &(* t), .slices = slices, .pids = Scope_calloc(jobs, sizeof(long)), .carried = Scope_calloc(jobs, sizeof(int)), .captures = Scope_calloc(jobs, sizeof(File)), .output = Scope_calloc(count, sizeof(Block))
+    .t = &(* t), .slices = slices, .pids = xcalloc(jobs, sizeof(long)), .carried = xcalloc(jobs, sizeof(int)), .captures = xcalloc(jobs, sizeof(File)), .output = xcalloc(count, sizeof(Block))
   }
   ;
   struct sigaction term, interrupt;
@@ -868,10 +868,10 @@ static int _run_workers(Translation * t, Array slices){
   }
   sigaction(SIGTERM, & term, NULL);
   sigaction(SIGINT, & interrupt, NULL);
-  Scope_free(_workers.output);
-  Scope_free(_workers.captures);
-  Scope_free(_workers.carried);
-  Scope_free(_workers.pids);
+  xfree(_workers.output);
+  xfree(_workers.captures);
+  xfree(_workers.carried);
+  xfree(_workers.pids);
   return _workers.failed;
 }
 

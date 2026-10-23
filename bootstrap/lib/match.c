@@ -1126,7 +1126,7 @@ static int f8_wordcode____grow_code(MachineBuilder * b){
   if((* b).code_capacity >= MACHINE_CODE_MAX) return f8_wordcode____fail(&((* b)), "code-capacity");
   int capacity =(* b).code_capacity ?(* b).code_capacity * 2 : 64;
   if(capacity > MACHINE_CODE_MAX) capacity = MACHINE_CODE_MAX;
-  MachineWord * grown = Scope_realloc((* b).code, sizeof(MachineWord) * capacity);
+  MachineWord * grown = xrealloc((* b).code, sizeof(MachineWord) * capacity);
   (* b).code = grown;
   (* b).code_capacity = capacity;
   return 0;
@@ -1146,7 +1146,7 @@ static int f8_wordcode____grow_consts(MachineBuilder * b){
   if((* b).const_capacity >= MACHINE_CONST_MAX) return f8_wordcode____fail(&((* b)), "constant-capacity");
   int capacity =(* b).const_capacity ?(* b).const_capacity * 2 : 16;
   if(capacity > MACHINE_CONST_MAX) capacity = MACHINE_CONST_MAX;
-  Var * grown = Scope_realloc((* b).consts, sizeof(Var) * capacity);
+  Var * grown = xrealloc((* b).consts, sizeof(Var) * capacity);
   (* b).consts = grown;
   (* b).const_capacity = capacity;
   return 0;
@@ -1199,7 +1199,7 @@ MachineProgram MachineBuilder_freeze(MachineBuilder * b){
   if(! _init_guard_) _file_init_();
   if((* b).status != 1138535534920 ||(* b).root < 0) return NULL;
   size_t bytes = f8_wordcode____program_bytes((* b).length, (* b).const_count, (* b).binder_count);
-  MachineProgram program = Scope_malloc(bytes);
+  MachineProgram program = xmalloc(bytes);
   * program =(struct MachineProgram){
     .length =(* b).length, .const_count =(* b).const_count, .binder_count =(* b).binder_count, .root =(* b).root
   }
@@ -1253,8 +1253,8 @@ void MachineBuilder_init(MachineBuilder * b){
 
 void MachineBuilder_drop(MachineBuilder * b){
   if(! _init_guard_) _file_init_();
-  Scope_free((* b).code);
-  Scope_free((* b).consts);
+  xfree((* b).code);
+  xfree((* b).consts);
 }
 
 void MachineBuilder_free(MachineBuilder * b){
@@ -1634,7 +1634,7 @@ static void f7_machine____ensure_scratch(MatchMachine * m, int length){
   if(length <=(* m).scratch_capacity) return;
   int capacity =(* m).scratch_capacity ?(* m).scratch_capacity : 16;
   while(capacity < length) capacity *= 2;
-  Var * grown = Scope_realloc((* m).scratch, sizeof(Var) * capacity);
+  Var * grown = xrealloc((* m).scratch, sizeof(Var) * capacity);
   (* m).scratch = grown;
   (* m).scratch_capacity = capacity;
 }
@@ -1736,7 +1736,7 @@ int MatchMachine_clean(MatchMachine * m){
 
 void MatchMachine_dispose(MatchMachine * m){
   if(! _init_guard_) _file_init_();
-  if((* m).scratch) Scope_free((* m).scratch);
+  if((* m).scratch) xfree((* m).scratch);
   (* m).scratch = NULL;
   (* m).scratch_capacity = 0;
 }
@@ -1783,7 +1783,7 @@ MatchCaptureLayout MatchCaptureLayout_analyze(Var pattern);
 
 MatchPlan MatchPlan_prepare(Var pattern){
   if(! _init_guard_) _file_init_();
-  MatchPlan plan = Scope_malloc(sizeof(struct MatchPlan));
+  MatchPlan plan = xmalloc(sizeof(struct MatchPlan));
   plan -> program = NULL;
   plan -> layout = MatchCaptureLayout_analyze(pattern);
   plan -> status = plan -> layout -> status;
@@ -1818,7 +1818,7 @@ static void f4_plan____lower(MatchPlan plan, Var pattern){
       plan -> status = l.b.status;
       plan -> reason = l.b.reason;
       if(plan -> status == 1138535534920) plan -> program = MachineBuilder_freeze(&(l.b));
-      if(l.sites) Scope_free(l.sites);
+      if(l.sites) xfree(l.sites);
     }
     x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
   }
@@ -1832,7 +1832,7 @@ void MatchPlan_free(MatchPlan plan){
   if(! plan) return;
   MachineProgram_free(plan -> program);
   MatchCaptureLayout_free(plan -> layout);
-  Scope_free(plan);
+  xfree(plan);
 }
 
 static int f4_plan____compile_value(f4_plan___MatchLower * l, Var pattern){
@@ -1954,7 +1954,7 @@ static int f4_plan____fail_site(f4_plan___MatchLower * l, int op, int a, int b, 
   if(site < 0) return 0;
   if((* l).site_count >=(* l).site_capacity){
     int capacity =(* l).site_capacity ?(* l).site_capacity * 2 : 64;
-    (* l).sites = Scope_realloc((* l).sites, sizeof(int) * capacity);
+    (* l).sites = xrealloc((* l).sites, sizeof(int) * capacity);
     (* l).site_capacity = capacity;
   }
   (* l).sites[(* l).site_count ++] = site;
@@ -3073,7 +3073,7 @@ void MatchCache_flush_default(void){
 
 void * MatchCache_context_open(void){
   if(! _init_guard_) _file_init_();
-  f5_cache___MatchContextState state = Scope_malloc(sizeof(struct f5_cache___MatchContextState));
+  f5_cache___MatchContextState state = xmalloc(sizeof(struct f5_cache___MatchContextState));
   state -> prev = f5_cache___match_thread.context_top;
   state -> cache = NULL;
   f5_cache___match_thread.context_top = state;
@@ -3134,14 +3134,14 @@ MatchCache MatchCache_new(int capacity){
         x2c_cleanup_push(& _x2c_gensym_defer_record_11);
         {
           {
-            cache = Scope_calloc(1, sizeof(struct MatchCache));
+            cache = xcalloc(1, sizeof(struct MatchCache));
             cache -> scope = owner;
             cache -> capacity = capacity;
             cache -> bucket_count = capacity * 2 + 1;
             cache -> lru_head = - 1;
             cache -> pool_epoch = Pool_epoch();
-            cache -> entries = Scope_calloc(capacity, sizeof(f5_cache___MatchCacheEntry));
-            cache -> buckets = Scope_malloc(sizeof(int) * cache -> bucket_count);
+            cache -> entries = xcalloc(capacity, sizeof(f5_cache___MatchCacheEntry));
+            cache -> buckets = xmalloc(sizeof(int) * cache -> bucket_count);
             for(int i = 0;  i < cache -> bucket_count;  i ++) cache -> buckets[i] = - 1;
           }
 
@@ -3347,7 +3347,7 @@ static const char * f6_layout____malformed(f6_layout___MatchLayoutBuilder * b){
 
 static MatchCaptureLayout f6_layout____layout(f6_layout___MatchLayoutBuilder * b, Var normalized, const char * malformed){
   size_t bytes = sizeof(struct MatchCaptureLayout) + sizeof(Atom) *(* b).count;
-  MatchCaptureLayout layout = Scope_calloc(1, bytes);
+  MatchCaptureLayout layout = xcalloc(1, bytes);
   layout -> binders =(Atom *)((char *) layout + sizeof(struct MatchCaptureLayout));
   layout -> binder_count =(* b).count;
   layout -> status = malformed ? 28682226919752 : 1138535534920;
@@ -3464,7 +3464,7 @@ static int f6_layout____find(MatchCaptureLayout layout, Atom binder){
 
 void MatchCaptureLayout_free(MatchCaptureLayout layout){
   if(! _init_guard_) _file_init_();
-  if(layout) Scope_free(layout);
+  if(layout) xfree(layout);
 }
 
 List MatchCaptureLayout_definite_list(MatchCaptureLayout layout){

@@ -64,7 +64,7 @@ static Var pick_rhs(int value) {
 
 int main(void) {
   x2c_register_type(%"bag");
-  Bag bag = Scope.malloc(sizeof(struct Bag));
+  Bag bag = xmalloc(sizeof(struct Bag));
   bag.slot[1] = 4;
 
   order = 0;

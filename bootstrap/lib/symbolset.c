@@ -164,7 +164,7 @@ Block SymbolSet_encode(Array symbols){
   _put(bytes, h.seed, 8);
   for(int vertex = 0;  vertex < h.vertices;  vertex ++) _put(bytes, h.table[vertex], width);
   for(int index = 0;  index < count;  index ++) _put(bytes, Var_symbol(Array_getindex(symbols, index)), 8);
-  Scope_free(h.table);
+  xfree(h.table);
   return bytes;
 }
 
@@ -186,14 +186,14 @@ static Hash _hash(Array symbols){
   while((uint64_t) h.span * 3 <(uint64_t) count * 3 / 2) h.span <<= 1;
   while(! built){
     h.vertices =(int) h.span * 3;
-    h.table = Scope_calloc(h.vertices, sizeof(uint32_t));
+    h.table = xcalloc(h.vertices, sizeof(uint32_t));
     for(uint64_t attempt = 0;  ! built && attempt < 4096;  attempt ++){
       memset(h.table, 0, (size_t) h.vertices * sizeof(uint32_t));
       h.seed = UINT64_C(0x9e3779b97f4a7c15) + attempt * UINT64_C(0xd1b54a32d192ed03);
       built = _try_seed(symbols, h.span, h.seed, h.table);
     }
     if(! built){
-      Scope_free(h.table);
+      xfree(h.table);
       h.span <<= 1;
     }
 
@@ -254,13 +254,13 @@ static Graph _graph(Array symbols, uint32_t span, uint64_t seed){
     .count = count, .vertices = vertices
   }
   ;
-  g.edges = Scope_calloc(count, sizeof(Edge));
-  g.degree = Scope_calloc(vertices, sizeof(int));
-  g.edge_xor = Scope_calloc(vertices, sizeof(int));
-  g.queue = Scope_calloc(vertices, sizeof(int));
-  g.order_edges = Scope_calloc(count, sizeof(int));
-  g.order_vertices = Scope_calloc(count, sizeof(int));
-  g.removed = Scope_calloc(count, 1);
+  g.edges = xcalloc(count, sizeof(Edge));
+  g.degree = xcalloc(vertices, sizeof(int));
+  g.edge_xor = xcalloc(vertices, sizeof(int));
+  g.queue = xcalloc(vertices, sizeof(int));
+  g.order_edges = xcalloc(count, sizeof(int));
+  g.order_vertices = xcalloc(count, sizeof(int));
+  g.removed = xcalloc(count, 1);
   for(int edge = 0;  edge < count;  edge ++){
     _place(Var_symbol(Array_getindex(symbols, edge)), seed, span - 1, g.edges[edge].vertices);
     for(int part = 0;  part < 3;  part ++){

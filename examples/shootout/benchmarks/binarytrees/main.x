@@ -16,7 +16,7 @@ static Var _tree(int item, int depth) {
   if (!depth) return item;
   Var left = _tree(item * 2 - 1, depth - 1);
   Var right = _tree(item * 2, depth - 1);
-  Node node = Scope.malloc(sizeof(struct Node));
+  Node node = xmalloc(sizeof(struct Node));
   *node = (struct Node) {item, left, right};
   Var result = (void *) node;
   return result;

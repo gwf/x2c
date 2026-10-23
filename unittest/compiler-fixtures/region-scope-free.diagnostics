@@ -7,22 +7,22 @@ unittest/compiler-fixtures/region-scope-free.x:14:3: after-free: 'p' is used aft
     ^^^^^^
 
 unittest/compiler-fixtures/region-scope-free.x:21:3: bad-free: Scope.free is given the address of 'x', which no Scope allocator returned
-    Scope.free(&x);
+    xfree(&x);
     ^^^^^
   note: only Scope.malloc, calloc, memdup, and realloc storage can be freed or reallocated
 
 unittest/compiler-fixtures/region-scope-free.x:22:3: bad-free: Scope.free is given 'p', which no Scope allocator returned
-    Scope.free(p);
+    xfree(p);
     ^^^^^
   note: only Scope.malloc, calloc, memdup, and realloc storage can be freed or reallocated
 
 unittest/compiler-fixtures/region-scope-free.x:23:3: bad-free: Scope.free is given the address of 'local', which no Scope allocator returned
-    Scope.free(local);
+    xfree(local);
     ^^^^^
   note: only Scope.malloc, calloc, memdup, and realloc storage can be freed or reallocated
 
 unittest/compiler-fixtures/region-scope-free.x:24:3: bad-free: Scope.realloc is given a literal, which no Scope allocator returned
-    char *s = Scope.realloc("abc", 8);
+    char *s = xrealloc("abc", 8);
     ^^^^
   note: only Scope.malloc, calloc, memdup, and realloc storage can be freed or reallocated
 

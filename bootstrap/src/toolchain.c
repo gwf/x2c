@@ -270,7 +270,7 @@ Toolchain Toolchain_for_meta(String cc){
 }
 
 static Toolchain _toolchain(String cc, String ar){
-  Toolchain t = Scope_calloc(1, sizeof(struct Toolchain));
+  Toolchain t = xcalloc(1, sizeof(struct Toolchain));
   t -> cc = _tool(cc, _0, _1);
   t -> ar = _tool(ar, _2, _3);
   _layout(t);
@@ -365,7 +365,7 @@ String Toolchain_meta_cc(String explicit){
 
 ToolAction ToolAction_new(Symbol phase, List arguments, int verbose, int dry_run){
   if(! _init_guard_) _file_init_();
-  ToolAction action = Scope_calloc(1, sizeof(struct ToolAction));
+  ToolAction action = xcalloc(1, sizeof(struct ToolAction));
   * action =(struct ToolAction){
     .phase = phase, .arguments = arguments, .verbose = verbose, .dry_run = dry_run, .report = 1
   }
@@ -448,7 +448,7 @@ ToolRun ToolAction_start(ToolAction action){
     report_suspend();
     _print_action(action -> phase, action -> arguments);
   }
-  ToolRun execution = Scope_calloc(1, sizeof(struct ToolRun));
+  ToolRun execution = xcalloc(1, sizeof(struct ToolRun));
   execution -> action = action;
   if(action -> dry_run) return execution;
   Job command = action -> inherit_stdio ? Job_live(List_job(action -> arguments)) : _captured(action -> arguments);

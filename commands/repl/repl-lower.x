@@ -16,7 +16,7 @@ typedef struct ReplLower {
 } *ReplLower;
 
 ReplLower ReplLower.new(Compiler compiler, Lisp lisp) {
-  ReplLower self = Scope.calloc(1, sizeof(struct ReplLower));
+  ReplLower self = xcalloc(1, sizeof(struct ReplLower));
   self.compiler = compiler;
   self.lisp = lisp;
   self.layouts = {};
@@ -28,7 +28,7 @@ ReplLower ReplLower.new(Compiler compiler, Lisp lisp) {
 void ReplLower.free(ReplLower self) {
   if (!self) return;
   self.layouts.cleanup();
-  Scope.free(self);
+  xfree(self);
 }
 
 String ReplLower.declined(ReplLower self) => self.reason;

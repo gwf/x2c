@@ -81,14 +81,14 @@ Lines
 static inline int _masked(Token t) =>
   t.type == <space> || t.type == <comment> || lint_text(t)
 
-static int *_ints(int n) => Scope.calloc(n, sizeof(int))
+static int *_ints(int n) => xcalloc(n, sizeof(int))
 
 /* Collects the facts of lines `first_line` onward from the tokens `from`
    up to `to`. */
 static Lines _lines(Lint l, int from, int to, int first_line):
   int n = l.tokens[to - 1].line - first_line + 1
   Lines lines = {n, _ints(n), _ints(n), _ints(n), _ints(n), _ints(n),
-                 _ints(n), _ints(n), Scope.calloc(n, 1)}
+                 _ints(n), _ints(n), xcalloc(n, 1)}
   for (int at = from; at < to; at++):
     Token t = l.at(at)
     int line = t.line - first_line

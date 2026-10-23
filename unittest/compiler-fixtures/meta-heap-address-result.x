@@ -6,7 +6,7 @@
 struct Node { int value; struct Node *next; };
 
 meta struct Node *make_node(int value) {
-  struct Node *node = Scope.malloc(sizeof *node);
+  struct Node *node = xmalloc(sizeof *node);
   node->value = value;
   node->next = NULL;
   return node;

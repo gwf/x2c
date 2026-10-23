@@ -25,12 +25,11 @@
 #include "torch.x"
 #include "xt_ops.h"
 
-
 static xt_tensor _native(Tensor t) => t ? t.native() : NULL;
 
 static int64_t *_dims(List sizes, int64_t &count) {
   int len = sizes.len();
-  int64_t *dims = Scope.calloc(len ? len : 1, sizeof(int64_t));
+  int64_t *dims = xcalloc(len ? len : 1, sizeof(int64_t));
   int index = 0;
   foreach (Var size, sizes) dims[index++] = size.integer();
   count = len;
@@ -39,7 +38,7 @@ static int64_t *_dims(List sizes, int64_t &count) {
 
 static xt_tensor *_handles(List tensors, int64_t &count) {
   int len = tensors ? tensors.len() : 0;
-  xt_tensor *items = Scope.calloc(len ? len : 1, sizeof(xt_tensor));
+  xt_tensor *items = xcalloc(len ? len : 1, sizeof(xt_tensor));
   int index = 0;
   if (tensors) foreach (Var item, tensors) items[index++] = _native(
     item.tensor());

@@ -564,7 +564,7 @@ void * Error_context_open(void){
   if(! _init_guard_) _file_init_();
   if(! Error_ready()) return NULL;
   ErrorThreadState state = _thread();
-  ErrorContextState context = Scope_malloc(sizeof(struct ErrorContextState));
+  ErrorContextState context = xmalloc(sizeof(struct ErrorContextState));
   * context =(struct ErrorContextState){
     .prev = state -> context_top, .policy = Map_new(), .bound = Error_bound(), .handler_depth = Error_handler_depth(), .stack_height = Error_count()
   }
@@ -855,14 +855,14 @@ static int f8_handlers____catch_arm(ErrorHandler h, ErrorRecord * record, List p
   MatchPlan plan = f8_handlers____arm_plan(h, i);
   MatchCaptureLayout layout = plan ? plan -> layout : NULL;
   int binders = layout ? layout -> binder_count : 0;
-  Var * values = binders ? Scope_malloc(sizeof(Var) * binders) : NULL;
+  Var * values = binders ? xmalloc(sizeof(Var) * binders) : NULL;
   MatchCaptureBuffer captures ={
     values, 0, binders
   }
   ;
   int matched = i == h -> site -> default_arm ||(plan -> status == 1138535534920 && MatchPlan_execute_capture(plan, List_var(projection), &(captures), NULL) == 1);
   if(matched) f8_handlers____commit_captures(h, record, layout, & captures);
-  if(values) Scope_free(values);
+  if(values) xfree(values);
   return matched;
 }
 
@@ -938,12 +938,12 @@ void Error_pop(ErrorHandler handle){
 
 static void _free(ErrorHandler handle){
   if(! handle) return;
-  if(handle -> site && ! handle -> site -> arms) Scope_free(handle -> site);
+  if(handle -> site && ! handle -> site -> arms) xfree(handle -> site);
   f8_handlers____plans_free(handle -> plans);
   if(handle -> capture_values != NULL) Block_free(handle -> capture_values);
   f8_handlers____retained_destroy(handle -> retained);
   _destroy(&(handle -> view));
-  Scope_free(handle);
+  xfree(handle);
 }
 
 static void f8_handlers____plans_free(Block plans){

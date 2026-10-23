@@ -98,8 +98,8 @@ Var Var.box_record(Symbol tag, const void *record, size_t size) {
   int row = _custom_row(tag, descriptor);
   if (row < 0) raise %(bad-target (operation "Var.box_record") (target $tag));
   if (row < VAR_DIRECT_ROWS)
-    return _new_custom_pointer(row, Scope.memdup(record, size));
-  char *copy = Scope.malloc(RECORD_PREFIX + size);
+    return _new_custom_pointer(row, xmemdup(record, size));
+  char *copy = xmalloc(RECORD_PREFIX + size);
   *(VarDescriptor **) copy = descriptor;
   memcpy(copy + RECORD_PREFIX, record, size);
   return _new_custom_pointer(VAR_RECORD_ROW, copy + RECORD_PREFIX);
@@ -146,7 +146,7 @@ module VarCell *_cell(VarDescriptor *descriptor, void *pointer) {
     cell = first;
     while (cell && cell.descriptor != descriptor) cell = cell.next;
     if (!cell) {
-      cell = Scope.malloc(sizeof(VarCell));
+      cell = xmalloc(sizeof(VarCell));
       *cell = (VarCell) { descriptor, pointer, first };
       cells[key] = (void *) cell;
     }
@@ -228,7 +228,7 @@ VarDescriptor *x2c_var_declare(Symbol tag) {
   }
   $scope(&class_scope) {
     if (declared == NULL) declared = {};
-    descriptor = Scope.calloc(1, sizeof(VarDescriptor));
+    descriptor = xcalloc(1, sizeof(VarDescriptor));
     descriptor.tag = tag;
     descriptor.row = -1;
     declared[tag] = (void *) descriptor;

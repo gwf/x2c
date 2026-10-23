@@ -14,9 +14,9 @@ int main(int argc, char **argv) {
   if (argc != 3) return 2;
   int n = atoi(argv[1]), runs = atoi(argv[2]);
   size_t count = (size_t) n * n;
-  double *a = Scope.malloc(count * sizeof(double));
-  double *b = Scope.malloc(count * sizeof(double));
-  double *c = Scope.malloc(count * sizeof(double));
+  double *a = xmalloc(count * sizeof(double));
+  double *b = xmalloc(count * sizeof(double));
+  double *c = xmalloc(count * sizeof(double));
   for (int i = 0; i < n; i++)
     for (int j = 0; j < n; j++) {
       a[i * n + j] = (double) ((i * 31 + j * 17) % 100) / 100.0;

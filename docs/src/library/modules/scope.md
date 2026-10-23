@@ -227,7 +227,7 @@ slot through every call. Slots stack, and each push needs one pop.
 ~int main(void) {
 Scope work = NULL;
 Scope.push(&work);
-char *buffer = Scope.malloc(16);
+char *buffer = xmalloc(16);
 snprintf(buffer, 16, "in work");
 Scope.pop();
 puts(buffer);
@@ -432,7 +432,7 @@ Copies `size` bytes from `ptr` into a new allocation in the active scope.
 The copy is ordinary scope-owned memory, freed by `Scope.free` or by the
 release that ends the region. Nothing about the source is remembered, so
 duplicating a C string means copying its terminator too:
-`Scope.memdup(text, strlen(text) + 1)`.
+`xmemdup(text, strlen(text) + 1)`.
 
 A NULL `ptr` or a zero `size` returns NULL and allocates nothing, so a
 duplicate of nothing is indistinguishable from failure; check the
@@ -475,7 +475,7 @@ allocators do.
 ~int main(void) {
 Scope keep = Scope.new_named("results");
 Scope.retain();
-char *text = Scope.memdup("survivor", 9);
+char *text = xmemdup("survivor", 9);
 Scope.move(text, &keep);
 Scope.release();
 puts(text);
@@ -609,7 +609,7 @@ can raise.
 ~static void report(int width) {
 Scope.retain();
 defer Scope.release();
-char *line = Scope.malloc(width + 1);
+char *line = xmalloc(width + 1);
 snprintf(line, width + 1, "%d bytes", width);
 puts(line);
 ~}
@@ -649,7 +649,7 @@ remain valid after shutdown.
 ~int main(void) {
 size_t before = Scope.stats().live_allocations;
 Scope.retain();
-char *scratch = Scope.malloc(128);
+char *scratch = xmalloc(128);
 scratch[0] = 0;
 Scope.release();
 printf("reclaimed = %d\n", Scope.stats().live_allocations == before);

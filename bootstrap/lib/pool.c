@@ -1173,7 +1173,7 @@ void Pool_free(Pool inner, void * alloc){
           f7_storage___PoolBlock block = f7_storage____find_block(alloc);
           f7_storage___pool_free_calls ++;
           if(block) f7_storage____free_slot(block, alloc);
-          else Scope_free(alloc);
+          else xfree(alloc);
         }
         x2c_cleanup_leave(& _x2c_gensym_defer_record_13);
       }

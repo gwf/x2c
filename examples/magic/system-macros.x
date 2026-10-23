@@ -18,7 +18,7 @@ void Notebook.record(Notebook notebook, Point point) {
 
 void Notebook.free(Notebook notebook) {
   notebook.readings.free();
-  Scope.free(notebook);
+  xfree(notebook);
 }
 
 String Notebook.repr(Notebook notebook) {

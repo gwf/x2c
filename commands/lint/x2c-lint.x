@@ -141,7 +141,7 @@ int main(int argc, char **argv):
     Rule.select_family(selected, <style>)
   if !selected.len(): Rule.select_family(selected, <language>)
   int fix = options["fix"].int()
-  CliRequest request = Scope.calloc(1, sizeof(struct CliRequest))
+  CliRequest request = xcalloc(1, sizeof(struct CliRequest))
   request.command = <translate>
   request.include_dirs = options["I"]
   Frontend frontend = Frontend.new(request)
@@ -158,7 +158,7 @@ int main(int argc, char **argv):
     translate.push(dir)
   Path work = fix ? Path.temp_dir() : NULL
   int status = 0, count = 0
-  Lint *lints = Scope.calloc(inputs.len() + 1, sizeof(Lint))
+  Lint *lints = xcalloc(inputs.len() + 1, sizeof(Lint))
   foreach Path file in inputs:
     String source
     if !_read(file, source):

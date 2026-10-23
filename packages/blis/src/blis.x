@@ -101,7 +101,7 @@ static BlisObject _blis_owned(
     _blis_bad_shape(operation, rows, columns, 0, 0);
   }
 
-  BlisObject object = Scope.calloc(1, sizeof(struct BlisObject));
+  BlisObject object = xcalloc(1, sizeof(struct BlisObject));
   bli_obj_create(storage, (dim_t) rows, (dim_t) columns, 0, 0, &object.native);
   object.owner = object;
   object.owns_buffer = 1;
@@ -117,10 +117,10 @@ static BlisObject _blis_scoped(
     _blis_bad_shape(operation, rows, columns, 0, 0);
   }
 
-  BlisObject object = Scope.calloc(1, sizeof(struct BlisObject));
+  BlisObject object = xcalloc(1, sizeof(struct BlisObject));
   size_t count = (size_t) rows * (size_t) columns;
   size_t width = storage == BLIS_FLOAT ? sizeof(float) : sizeof(double);
-  object.scoped_buffer = Scope.calloc(count ? count : 1, width);
+  object.scoped_buffer = xcalloc(count ? count : 1, width);
   bli_obj_create_with_attached_buffer(
     storage, (dim_t) rows, (dim_t) columns, object.scoped_buffer,
     1, (inc_t) rows, &object.native
@@ -131,7 +131,7 @@ static BlisObject _blis_scoped(
 }
 
 static BlisObject _blis_view(BlisObject source) {
-  BlisObject view = Scope.calloc(1, sizeof(struct BlisObject));
+  BlisObject view = xcalloc(1, sizeof(struct BlisObject));
   view.owner = source.owner;
   view.transposed = source.transposed;
   view.row_offset = source.row_offset;
@@ -319,7 +319,7 @@ BlisObject BlisObject.free(BlisObject object) {
   }
   if (object.released) return NULL;
   if (object.scoped_buffer) {
-    Scope.free(object.scoped_buffer);
+    xfree(object.scoped_buffer);
     object.scoped_buffer = NULL;
   }
   else {

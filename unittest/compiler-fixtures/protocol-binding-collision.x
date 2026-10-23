@@ -13,13 +13,13 @@ protocol Cartesian(T) {
 }
 
 Cartesian Polar.cartesian(Polar value) {
-  Cartesian result = Scope.malloc(sizeof(struct Cartesian));
+  Cartesian result = xmalloc(sizeof(struct Cartesian));
   result.x = value.r;
   return result;
 }
 
 Polar Cartesian.polar(Cartesian value) {
-  Polar result = Scope.malloc(sizeof(struct Polar));
+  Polar result = xmalloc(sizeof(struct Polar));
   result.r = value.x;
   return result;
 }

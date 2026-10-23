@@ -194,7 +194,7 @@ static void storage_failed_export_can_retry_adopted_graph(void) {
   EXPECT_FALSE(Pool.is_permanent(text));
   parent["child"] = child;
   child[key] = text;
-  child["bad"] = Scope.malloc(4);
+  child["bad"] = xmalloc(4);
   int caught = 0;
   try context.export(parent);
   catch %(bad-types *): caught = 1;
@@ -303,7 +303,7 @@ static void _storage_export_order(int child_first) {
     block.push(&number);
     Buffer buffer = Buffer.new(0);
     buffer.write("ordered buffer");
-    ContextProbe probe = Scope.malloc(sizeof(struct ContextProbe));
+    ContextProbe probe = xmalloc(sizeof(struct ContextProbe));
     *probe = (struct ContextProbe) {.value = text};
     Var object = Var.new(<ctxprobe>, probe);
     Var wide = Var.box_long(0x123456789L), clone = wide.clone_wide();

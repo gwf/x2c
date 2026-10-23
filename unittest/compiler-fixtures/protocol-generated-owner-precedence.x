@@ -35,8 +35,8 @@ protocol Var(Packet);
 protocol SemanticTruth(Packet);
 
 static Packet packet(int value) {
-  Packet result = Scope.malloc(sizeof(struct Packet));
-  result.view = Scope.malloc(sizeof(struct SemanticTruth));
+  Packet result = xmalloc(sizeof(struct Packet));
+  result.view = xmalloc(sizeof(struct SemanticTruth));
   result.view.value = value;
   return result;
 }

@@ -491,7 +491,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _224 = cons(_34, _223);
   _225 = List_var(_224);
   _226 = Atom_intern(String_new("binding-name"));
-  _227 = String_new("Scope_calloc");
+  _227 = String_new("xcalloc");
   _228 = String_var(_227);
   _229 = cons(_228, NULL);
   _230 = cons(_226, _229);

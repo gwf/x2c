@@ -212,7 +212,7 @@ void Block.reserve(Block block, size_t minimum) {
     size_t width = block.width;
     raise %(size-limit (width $width) (cap $cap));
   }
-  _attach(block, Scope.realloc(_allocation(block), size));
+  _attach(block, xrealloc(_allocation(block), size));
   block.cap = cap;
 }
 
@@ -288,11 +288,11 @@ inline void Block.pop(Block block) {
 */
 Block Block.new(size_t width) {
   if (!width) raise %(bad-arg);
-  Block block = Scope.malloc(sizeof(struct Block));
+  Block block = xmalloc(sizeof(struct Block));
   *block = (struct Block) {.width = width, .length = 0, .cap = 1};
   size_t size = _allocation_size(width, block.cap);
   if (!size) raise %(size-limit (width $width));
-  _attach(block, Scope.malloc(size));
+  _attach(block, xmalloc(size));
   return block;
 }
 
@@ -322,8 +322,8 @@ Bytes Bytes.new(size_t width) => Block.new(width).bytes;
 void Block.free(Block b) {
   if (b == NULL) return;
   if (b.lifetime) b.lifetime.destroy();
-  if (b.bytes != NULL) Scope.free(_allocation(b));
-  Scope.free(b);
+  if (b.bytes != NULL) xfree(_allocation(b));
+  xfree(b);
 }
 
 /** Moves `block`, its backing allocation, and owned contents into `scope`.

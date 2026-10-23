@@ -69,6 +69,15 @@ type. Type existence and a valid scalar combination remain semantic checks.
 The scalar-word production does not include `_Bool`: the current parser
 handles names outside that list through its named-type path.
 
+After declaration `auto` and its qualifiers, a name followed by `=` selects
+local type inference instead of a type reference. The inferred form requires
+one plain initialized name. Otherwise `auto` prefixes an explicitly typed
+declaration. An `auto` immediately after a declarator's `=` wraps the complete
+initializer through `$auto`; it does not begin a general expression.
+These managed forms require initialized block-item objects and cannot combine
+declaration and initializer `auto` in one declaration group. See
+[managed declarations and initializers](../language.md#managed-declarations-and-initializers).
+
 ### D2. Declaration commas and parentheses
 
 In a declaration row, a comma starts a new group only when `_group_comma`

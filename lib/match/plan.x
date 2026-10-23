@@ -41,7 +41,7 @@ static typedef struct MatchLower {
     Raises: `<alloc-fail>` while analyzing, lowering, or freezing.
 */
 MatchPlan MatchPlan.prepare(Var pattern) {
-  MatchPlan plan = Scope.malloc(sizeof(struct MatchPlan));
+  MatchPlan plan = xmalloc(sizeof(struct MatchPlan));
   plan.program = NULL;
   plan.layout = MatchCaptureLayout.analyze(pattern);
   plan.status = plan.layout.status;
@@ -66,7 +66,7 @@ static void _lower(MatchPlan plan, Var pattern) {
   plan.status = l.b.status;
   plan.reason = l.b.reason;
   if (plan.status == <prepared>) plan.program = l.b.freeze();
-  if (l.sites) Scope.free(l.sites);
+  if (l.sites) xfree(l.sites);
 }
 
 /** Releases resources owned by `plan`.
@@ -77,7 +77,7 @@ void MatchPlan.free(MatchPlan plan) {
   if (!plan) return;
   MachineProgram.free(plan.program);
   MatchCaptureLayout.free(plan.layout);
-  Scope.free(plan);
+  xfree(plan);
 }
 
 /* Compiles one pattern into a block and returns its entry, or -1. */
@@ -217,7 +217,7 @@ static int _fail_site(
   if (site < 0) return 0;
   if (l.site_count >= l.site_capacity) {
     int capacity = l.site_capacity ? l.site_capacity * 2 : 64;
-    l.sites = Scope.realloc(l.sites, sizeof(int) * capacity);
+    l.sites = xrealloc(l.sites, sizeof(int) * capacity);
     l.site_capacity = capacity;
   }
   l.sites[l.site_count++] = site;

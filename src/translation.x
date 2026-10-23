@@ -420,10 +420,10 @@ static int _run_workers(Translation &t, Array slices) {
   if (t.request.verbose)
     $progress.main_workers_started(jobs, t.total);
   _workers = (Workers) {
-    .t = &t, .slices = slices, .pids = Scope.calloc(jobs, sizeof(long)),
-    .carried = Scope.calloc(jobs, sizeof(int)),
-    .captures = Scope.calloc(jobs, sizeof(File)),
-    .output = Scope.calloc(count, sizeof(Block))};
+    .t = &t, .slices = slices, .pids = xcalloc(jobs, sizeof(long)),
+    .carried = xcalloc(jobs, sizeof(int)),
+    .captures = xcalloc(jobs, sizeof(File)),
+    .output = xcalloc(count, sizeof(Block))};
   struct sigaction term, interrupt;
   _forward_stop_signal(SIGTERM, &term);
   _forward_stop_signal(SIGINT, &interrupt);
@@ -434,10 +434,10 @@ static int _run_workers(Translation &t, Array slices) {
   }
   sigaction(SIGTERM, &term, NULL);
   sigaction(SIGINT, &interrupt, NULL);
-  Scope.free(_workers.output);
-  Scope.free(_workers.captures);
-  Scope.free(_workers.carried);
-  Scope.free(_workers.pids);
+  xfree(_workers.output);
+  xfree(_workers.captures);
+  xfree(_workers.carried);
+  xfree(_workers.pids);
   return _workers.failed;
 }
 

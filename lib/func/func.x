@@ -273,7 +273,7 @@ FuncArg x2c_func_unrepresentable_argument(Func fn, unsigned i, List source) {
 /** Boxes a record result as a `<p48>` to a copy of its `size` bytes in the
     active `Scope`. */
 Var x2c_func_record_result(const void *bytes, size_t size) =>
-  Var.new(<p48>, Scope.memdup(bytes, size));
+  Var.new(<p48>, xmemdup(bytes, size));
 
 // reference arguments
 
@@ -418,7 +418,7 @@ static Func _new(
   int n = params.len();
   int void_params = n == 1 && params.car() is <list> &&
                     params.car() == %(void);
-  Func fn = Scope.calloc(1, context_offset + context_size);
+  Func fn = xcalloc(1, context_offset + context_size);
   fn.sig = signature;
   fn.params = void_params ? NULL : params;
   fn.adapter = adapter;

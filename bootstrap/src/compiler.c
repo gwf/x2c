@@ -1367,7 +1367,7 @@ static void f9_lifecycle____own_unit(Compiler c){
   c -> package_aliases = Map_new();
   c -> package_members = Map_new();
   c -> package_effects = Map_new();
-  c -> names = Scope_calloc(1, sizeof(struct GenNames));
+  c -> names = xcalloc(1, sizeof(struct GenNames));
   c -> names -> counters = Map_new();
   c -> names -> adapters = Map_new();
   c -> names -> file_scope_owners = Map_new();
@@ -3140,7 +3140,7 @@ static List f28_declarations_portable_syntax____thaw_rows(Compiler c, List rows)
 }
 
 static Token f28_declarations_portable_syntax____thaw_token(Var type, Var text, Var line, Var column, Var length, Var position){
-  Token token = Scope_calloc(1, sizeof(struct Token));  * token =(struct Token){
+  Token token = xcalloc(1, sizeof(struct Token));  * token =(struct Token){
     .text = Var_as_string(text), .type = Symbol_new(Var_string(type)), .line = Var_int(Var_convert(line, 3453797)), .col = Var_int(Var_convert(column, 3453797)), .len = Var_int(Var_convert(length, 3453797)), .pos = Var_int(Var_convert(position, 3453797))
   }
   ;  return token;

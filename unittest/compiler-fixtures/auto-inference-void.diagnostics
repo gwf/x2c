@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/auto-inference-void.x:4:41: type: auto inference requires one initialized plain name with an object value
+  int main(void) { auto value = (Nothing)0; return 0; }
+                                          ^
+

@@ -17,7 +17,7 @@ Vec Var.vec(Var value) {
 
 Vec Vec.neg(Vec value) {
   neg_calls++;
-  Vec result = Scope.malloc(sizeof(struct Vec));
+  Vec result = xmalloc(sizeof(struct Vec));
   result.value = -value.value;
   return result;
 }
@@ -25,7 +25,7 @@ Vec Vec.neg(Vec value) {
 protocol Var(Vec);
 
 int main(void) {
-  Vec value = Scope.malloc(sizeof(struct Vec));
+  Vec value = xmalloc(sizeof(struct Vec));
   value.value = 7;
   Vec result = -value;
   printf("%d %d\n", result.value, neg_calls);

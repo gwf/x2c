@@ -12,7 +12,8 @@ module int _identifier_needs_resolution(
   Var type;
   if (%(automatic $binding) in facts &&
       facts.try_get(%(type $binding), type) && type is <list> &&
-      type.list() !== %(<macro-expr>)) return 0;
+      type.list() !== %(<macro-expr>))
+    return <auto> in type.list() && !type.list().type().base_type();
   return !spelling ||
     (c.sym.lookup(%($spelling), NULL) != binding &&
      !retained_parameter && !retained_capture);
@@ -47,6 +48,8 @@ module List _resolve_identifier(
     type = NULL;
   if (!type) type = _identifier_type(
     c, binding, spelling, binding_facts, origin);
+  if (!c.macro_holes && <auto> in type && !type.base_type())
+    $fail.expressions_ident_semantic(c, origin, value);
   if (!type && require_type)
     $fail.expressions_ident_semantic(c, origin, value);
   List result = %(expr $type (ident $binding));

@@ -101,6 +101,8 @@ List syntax_grammar(void) => %(grammar
     (rule declaration-group
       (choice
         (ref typedef-declaration)
+        (seq (token "auto") (repeat 0 (ref qualifier))
+          (ref declaration-name) (token "=") (ref assignment))
         (seq (ref specifiers) (ref declarator-list))
         (seq
           (ref specifiers)
@@ -184,7 +186,8 @@ List syntax_grammar(void) => %(grammar
     (rule init-declarator
       (seq
         (choice (ref declarator) (ref declarator-row-slot))
-        (optional (seq (token "=") (ref assignment)))))
+        (optional (seq (token "=") (optional (token "auto"))
+          (ref assignment)))))
 
     (rule declarator
       (seq

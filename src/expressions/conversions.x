@@ -726,6 +726,7 @@ static void _check_native_crossing(
       declared_target.is_bare_typedef_name() &&
       declared_source != declared_target &&
       c.sym.resolve_key(declared_target).is_pointer() &&
+      !c.sym.resolve_key(declared_source).is_array() &&
       c.sym.resolve_key(declared_source).base_type() !== %(void) &&
       !(declared_target in _typedef_names(c, declared_source)) &&
       !(declared_source in _typedef_names(c, declared_target))) {

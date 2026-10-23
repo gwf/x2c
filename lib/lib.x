@@ -29,8 +29,8 @@ class DisjointSet struct {
     its arrays.
 */
 void DisjointSet.init(DisjointSet set, int n) {
-  set.parent = Scope.malloc(sizeof(int) * n);
-  set.size = Scope.malloc(sizeof(int) * n);
+  set.parent = xmalloc(sizeof(int) * n);
+  set.size = xmalloc(sizeof(int) * n);
   set.length = n;
   set.ncmpnts = n;
   for (int i = 0; i < n; i++) {
@@ -41,8 +41,8 @@ void DisjointSet.init(DisjointSet set, int n) {
 
 /** Releases the set's arrays when `DisjointSet.free` releases the set. */
 void DisjointSet.drop(DisjointSet set) {
-  Scope.free(set.parent);
-  Scope.free(set.size);
+  xfree(set.parent);
+  xfree(set.size);
 }
 
 /** Returns the representative of `x` and compresses its traversed path.

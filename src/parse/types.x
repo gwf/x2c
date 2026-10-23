@@ -398,6 +398,8 @@ static List _field_row(Compiler c, List context) {
 
 static List _field_group(Compiler c, List context) {
   List storage = _storage_class(c);
+  if (<auto> in storage && !c.macro_holes && !c.shallow)
+    $fail.parse_auto_storage(c, c.token);
   List (type, binding_type) = _declaration_types(c, storage);
   List binds = _declarator_list(c, binding_type, context, 1);
   return _finish_declaration(c, <declare>, type, binds, 0);

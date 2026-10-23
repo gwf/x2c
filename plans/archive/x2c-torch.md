@@ -42,7 +42,7 @@ void *Scope.malloc_finalized_in(Scope *slot, size_t size,
 ```
 
 `drop(ptr)` runs exactly once when the block is reclaimed by `Scope.free`,
-`Scope.realloc(ptr, 0)`, `Scope.release`, `Scope.destroy`, thread release, or
+`xrealloc(ptr, 0)`, `Scope.release`, `Scope.destroy`, thread release, or
 `Scope_shutdown`. It survives `Scope.move` and `Scope.retain`; `Scope.realloc`
 preserves it and `drop` receives whichever pointer is live. `drop == NULL`
 raises `<bad-arg>`.

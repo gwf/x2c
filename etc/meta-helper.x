@@ -312,7 +312,7 @@ static FuncArg _loaded_argument(List argument) {
         match (failure) case %(failure (?code *detail)): Error.raise(code, detail);
         Func selector = target;
         unsigned count = indices.len(), i = 0;
-        FuncArg *args = Scope.calloc(count ? count : 1, sizeof(FuncArg));
+        FuncArg *args = xcalloc(count ? count : 1, sizeof(FuncArg));
         foreach (Var value, indices) args[i++] = FuncArg.value(value);
         List selected = selector.apply(count, args);
         void *address = selected.cadr().pointer();
@@ -331,7 +331,7 @@ static FuncArg _loaded_argument(List argument) {
 $scope() static void _apply(
   Var target, String name, List arguments, int objects) {
   unsigned count = arguments.len(), i = 0;
-  FuncArg *argv = Scope.calloc(count ? count : 1, sizeof(FuncArg));
+  FuncArg *argv = xcalloc(count ? count : 1, sizeof(FuncArg));
   Var result = void;
   List failure = NULL;
   try {

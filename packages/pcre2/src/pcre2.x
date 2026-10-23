@@ -112,7 +112,7 @@ Regexp Regexp.compile_context(
     return NULL;
   }
 
-  Regexp regexp = Scope.calloc(1, sizeof(struct Regexp));
+  Regexp regexp = xcalloc(1, sizeof(struct Regexp));
   regexp.code = code;
   regexp.pattern = pattern.intern();
   regexp.match_data = pcre2_match_data_create_from_pattern(code, NULL);
@@ -129,7 +129,7 @@ Regexp Regexp.compile_context(
 
   uint32_t captures = pcre2_get_ovector_count(regexp.match_data);
   regexp.capture_count = captures ? captures - 1 : 0;
-  regexp.capture_names = Scope.calloc(captures, sizeof(*regexp.capture_names));
+  regexp.capture_names = xcalloc(captures, sizeof(*regexp.capture_names));
   int info_result = _regexp_load_names(regexp);
   if (info_result < 0) {
     regexp.free();

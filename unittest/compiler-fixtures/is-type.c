@@ -110,7 +110,7 @@ int main(void){
   Var double_pointer_value = Var_new(56587004501, double_pointer);
   Var null_value = Var_new(3683441, (void *) NULL);
   Var absent =((void) 0, Void);
-  IsWidget widget = Scope_malloc(sizeof(struct IsWidgetData));
+  IsWidget widget = xmalloc(sizeof(struct IsWidgetData));
   widget -> value = 9;
   IsWidgetAlias widget_alias = widget;
   Var custom = IsWidget_var(widget_alias);
