@@ -35,5 +35,10 @@ int main(void) {
     int values[2] = {1, 2}, *pointer = values;
     printf("modifiers %d %d\n", values[1], *pointer);
   }
+  {
+    auto int values[2] = { 3, 4 };
+    auto pointer = values;
+    printf("auto %d\n", pointer[1]);
+  }
   return 0;
 }

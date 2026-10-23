@@ -32,6 +32,7 @@ import-member = ( identifier , [ ( "as" , identifier ) ] ) ;
 static-assert = ( "_Static_assert" , "(" , assignment , "," , assignment , ")" , ";" ) ;
 declaration-row = ( declaration-group , { ( "," , declaration-group ) } ) ;
 declaration-group = ( typedef-declaration |
+    ( "auto" , { qualifier } , declaration-name , "=" , assignment ) |
     ( specifiers , declarator-list ) |
     ( specifiers , destructuring-targets , "=" , assignment ) ) ;
 typedef-declaration = ( "typedef" , { qualifier } , type-specifier , declarator-list ) ;
@@ -47,7 +48,7 @@ type-reference = ( identifier , [ ( "." , identifier ) ] ) ;
 type-name = ( { qualifier } , type-specifier , { pointer-part } ) ;
 type-operand = declaration-group ;
 declarator-list = ( init-declarator , { ( "," , init-declarator ) } ) ;
-init-declarator = ( ( declarator | declarator-row-slot ) , [ ( "=" , assignment ) ] ) ;
+init-declarator = ( ( declarator | declarator-row-slot ) , [ ( "=" , [ "auto" ] , assignment ) ] ) ;
 declarator = ( { pointer-part } , [ direct-declarator ] , { declarator-suffix } ) ;
 pointer-part = ( "*" | "^" | ( "&" , [ "?" ] ) | qualifier | qualifier-macro ) ;
 direct-declarator = ( declaration-name | ( "(" , declarator , ")" ) ) ;

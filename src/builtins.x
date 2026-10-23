@@ -30,8 +30,7 @@ static List _scope_expand(List body, List destinations) {
 
 /* Preserve the acquired value after its declaration's checks. */
 static macro Stmt $auto_release(Decl $local, Expr $binding) using $acquired {
-  const $(auto.release $local) $acquired = $binding;
-  defer $acquired.cleanup();
+  @(auto.release $local $binding $acquired)
 }
 
 /* `$auto(value)` returns `value` and places the release after the
@@ -70,19 +69,18 @@ static void _auto_reject_managed(List value) {
   }
 }
 
-/* A managed declaration has automatic storage and a type that participates
-   in Cleanup. */
-static Type _auto_release(Code local) {
+/* Automatic locals release through Cleanup when their type participates. */
+static List _auto_release(Code local, List binding, List acquired) {
   Type base = local.cadr();
   if (base.is_static() || base.is_extern() || base.is_threaded())
     _auto_fail(
       <parse>, "managed initializer requires automatic local storage", %());
   Type type = local.type();
-  if (!type.protocol_member("cleanup"))
-    _auto_fail(
-      <protocol>, "managed initializer requires Cleanup participation",
-      %("type: ${type.repr()}"));
-  return type;
+  if (!type.protocol_member("cleanup")) return %(seq);
+  return $!{
+    const $type $acquired = $binding;
+    defer $acquired.cleanup();
+  };
 }
 
 // Reports at the block item that holds the managed declaration.

@@ -218,6 +218,21 @@ static macro Stmt $fail.parse_init_incomplete(Expr $c, Expr $origin) =>
     "managed initializer requires a complete block-local initializer",
     $origin, NULL);
 
+static macro Stmt $fail.parse_auto_storage(Expr $c, Expr $origin) =>
+  $c.report_error(
+    <parse>, "auto requires an initialized block-local object declaration",
+    $origin, NULL);
+
+static macro Stmt $fail.parse_auto_combined(Expr $c, Expr $origin) =>
+  $c.report_error(
+    <parse>, "declaration auto cannot be combined with a managed initializer",
+    $origin, NULL);
+
+static macro Stmt $fail.parse_auto_inference(Expr $c, Expr $origin) =>
+  $c.report_error(
+    <type>, "auto inference requires one initialized plain name with an object value",
+    $origin, NULL);
+
 static macro Stmt $fail.parse_placement_repeated(Expr $c, Expr $origin) =>
   $c.report_error(
     <parse>, "code placed after a declarator repeats an earlier placement",
@@ -309,6 +324,7 @@ module {
   "declarations.x",
   "types.x",
   "declarators.x",
+  "auto.x",
   "functions.x",
   "placement.x",
   "binding.x",

@@ -169,7 +169,8 @@ static List _take_placements(Compiler c, int depth) {
 List Compiler.finish_initializers(
   Compiler c, List declaration, Token origin) {
   if (c.macro_holes ||
-      (!c.placements.len() && !c.has_rewrites(<decl>, <init>)))
+      (!c.placements.len() && !c.has_rewrites(<decl>, <init>) &&
+       !_auto_storage(declaration)))
     return declaration;
   Array output = [];
   _append_managed(c, declaration, output, origin);
@@ -195,9 +196,10 @@ static void _append_managed(
 /* A declarator followed by code ends the declaration of the ordinary
    declarators before it, is declared alone, and is followed by its code. */
 static void _append_managed_rows(
-  Compiler c, Var base, List declarators, Array output, Token origin) {
+  Compiler c, List base, List declarators, Array output, Token origin) {
   Array ordinary = $auto([]);
-  Var source_base = base;
+  List source_base = base;
+  if (<auto> in base) base = base.filter(%!(item) => item != <auto>);
   size_t remaining = declarators.len();
   foreach (List declarator in declarators) {
     remaining--;
@@ -223,7 +225,7 @@ static void _append_managed_rows(
    placing expansion's result as its initializer, or else the items an
    after-initialization rewrite adds, or NULL. */
 static List _after_declarator(
-  Compiler c, Var base, List &declarator, Token origin) {
+  Compiler c, List base, List &declarator, Token origin) {
   match (declarator)
     case %(op = (bind ?name ?mods) ?value): {
       List result = NULL;
@@ -232,9 +234,19 @@ static List _after_declarator(
         declarator = %(op = (bind $name $mods) $result);
         return placed;
       }
-      return c.rewrite(
-        <decl>, <init>, %(declare $base (bindings $declarator)), <block>,
+      List ordinary = <auto> in base
+        ? base.filter(%!(item) => item != <auto>) : base;
+      List rewritten = c.rewrite(
+        <decl>, <init>, %(declare $ordinary (bindings $declarator)), <block>,
         c.return_type, origin);
+      if (<auto> in base) {
+        Type type = %(declare $base (bindings (bind $name $mods))).type_from_ast();
+        List release = c.resolve_protocol_member(type, "cleanup")
+          ? c.bind_syntax($!{ defer $name.cleanup(); }, <block>, c.return_type)
+          : NULL;
+        if (release) return rewritten ? %(seq $release $rewritten) : release;
+      }
+      return rewritten;
     }
   return NULL;
 }

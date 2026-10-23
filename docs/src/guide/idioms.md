@@ -288,13 +288,13 @@ in the result domain and the caller does not need a failure reason.
 ## Put cleanup beside acquisition
 
 `Scope` groups allocations by lifetime and `$scope()` retains one region
-around a statement. `$auto` attaches an owned local's cleanup to its
-declaration, so the acquisition and its release are one line:
+around a statement. Initializer `auto` attaches cleanup to the acquired value,
+so the acquisition and its release are one line:
 
 ```x2c
 $scope() {
   String path = "/tmp/x2c-idioms.txt";
-  File output = $auto(File.open(path, "w"));
+  File output = auto File.open(path, "w");
   output.puts("ready\n");
 }
 ```
@@ -311,19 +311,22 @@ defer free(buffer);
 ~}
 ```
 
-`$auto` needs a type that adopts `Cleanup(T)`, directly or through its typedef
-ancestry, as the runtime's owning types do. It releases the value it acquired,
-even after the local is reassigned. Use `defer` when cleanup must read a
-binding at exit, such as a `Scope` slot filled later:
+Initializer `auto`, also spelled `$auto(value)`, releases the acquired value
+even after the local is reassigned. Declaration `auto` instead reads the
+variable at exit, such as a `Scope` slot filled later:
 
 ```x2c
 ~int main(void) {
-Scope work = NULL;
-defer work.cleanup();
+auto Scope work = NULL;
 $scope(&work) { Array items = []; items.push(1); }
 ~  return 0;
 ~}
 ```
+
+`auto output = File.open(path, "w");` infers the type and uses declaration
+cleanup. Both forms call the type's `Cleanup` operation when it participates,
+including through typedef ancestry; ordinary and pooled values need no
+operation. Do not combine declaration and initializer `auto` on one declaration.
 
 ## Raise failures; return ordinary outcomes
 

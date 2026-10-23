@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/auto-combined-forward.x:4:46: parse: declaration auto cannot be combined with a managed initializer
+  int main(void) { auto int value = $forward(1); return value; }
+                                               ^
+

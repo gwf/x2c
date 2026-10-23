@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/auto-declaration-uninitialized.x:3:32: parse: auto requires an initialized block-local object declaration
+  int main(void) { auto int value; return 0; }
+                                 ^
+

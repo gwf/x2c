@@ -316,8 +316,8 @@ static void managed_local_cleans_before_failed_later_acquisition(void) {
   managed_acquisitions = 0;
   int caught = 0;
   try {
-    ManagedResource first = $auto(_managed_acquire(1)),
-      second = $auto(_managed_acquire(-2));
+    auto ManagedResource first = _managed_acquire(1),
+      second = _managed_acquire(-2);
     (void) first, (void) second;
     TEST_FAIL("raising initializer returned");
   }

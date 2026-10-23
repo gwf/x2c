@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/auto-declaration-for.x:3:41: parse: auto requires an initialized block-local object declaration
+  int main(void) { for (auto int value = 1; value; value--) {} return 0; }
+                                          ^
+

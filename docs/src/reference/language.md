@@ -2797,7 +2797,31 @@ on the active rendering path print their pointer form. Descriptor registration r
 runtime's worker-start freeze rule. Overflow descriptors extend the compact
 descriptor table's capacity.
 
-### Managed initializers
+### Managed declarations and initializers
+
+Declaration `auto` arranges cleanup of the variable's value at block exit:
+
+```x2c
+~int main(void) {
+auto Scope work = NULL;
+$scope(&work) { Array items = []; items.push(1); }
+~  return 0;
+~}
+```
+
+With no explicit type, `auto name = expression` infers the initializer's
+value type and uses the same variable cleanup. Inference requires one plain
+name and an initializer with a known non-void type. Arrays and functions decay
+to pointers; outer value qualifiers are removed, declaration qualifiers are
+applied, and pointee qualifiers remain. Integer types are not promoted.
+The declared name cannot occur in its own inferred initializer.
+
+An `auto` immediately after `=` instead manages the acquired value. For
+example, `Buffer buffer = auto Buffer.new(0);` has the same meaning as
+`Buffer buffer = $auto(Buffer.new(0));`. The keyword covers the complete
+initializer; it is not accepted inside an operator or call argument.
+Declaration `auto` cannot be combined with initializer `auto` or `$auto`
+in the same declaration group, including through forwarding macros.
 
 `$auto(value)` is an ordinary expression macro. Its expansion asks
 `x2c.enclosing` for the initialized declarator, places a release after that
@@ -2805,24 +2829,30 @@ declarator with `x2c.place`, and returns `value` unchanged. Forwarding through
 another macro or parentheses keeps that result the complete initializer. When
 the declaration finishes, the compiler checks that the result is the
 declarator's complete initializer. Then it binds the release. The release
-requires automatic storage and Cleanup participation. It saves the initialized
+requires automatic storage. For a Cleanup participant it saves the initialized
 value in a private const local and defers that saved value's `cleanup` call.
 The declaration keeps its type, binding identity, initialization conversions,
 and enclosing scope.
 
-The declared type must participate in `Cleanup(T)`, whose member is
-`void T.cleanup(T)`, directly or through its ordinary typedef ancestry.
+Cleanup uses `Cleanup(T)`, whose member is `void T.cleanup(T)`, directly or
+through ordinary typedef ancestry. Types without participation have no cleanup
+operation; both forms of `auto` and `$auto` then leave the value unchanged.
+This includes ordinary scalars and pooled String/List values. A raw pointer
+does not acquire a release operation merely because it points to heap storage.
 Initializers run once in source order. Each successful initializer registers
 its cleanup before the following initializer runs, including within a compound
 declaration. Cleanup releases the acquired value even if the declared binding
 is reassigned. Reassignment does not release that value early, and returning
 or storing an alias does not cancel cleanup. An argument that is itself an
 `$auto` form, or a plain name of a local that an earlier `$auto` manages, is
-rejected, since the value would be released twice. Use an explicit `defer` when
-cleanup must instead read the binding's value at exit, such as a lazily filled
-Scope slot or a staging buffer cleared after ownership transfer.
+rejected, since the value would be released twice. Declaration `auto` instead
+reads the binding at exit, which supports a lazily filled Scope slot or a
+staging buffer cleared after ownership transfer. Neither form releases old
+values on reassignment, and returning an alias does not cancel cleanup.
 
-Static, external, or threaded storage, field initializers, for-header
+Managed declarations require an initializer and an enclosing function block.
+This is block-local inference, not full C23 declaration support.
+Static, external, or threaded storage, fields, parameters, for-header
 declarations, assignments, returns, call arguments, and forms nested inside
 operators are outside this enclosing-block position. There is no runtime
 expression helper or expression-exit cleanup.

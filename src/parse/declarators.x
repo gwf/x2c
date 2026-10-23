@@ -58,7 +58,10 @@ static List _initialized(
     return bind;
   }
   c.enter((Ancestor){ .what = <declarator>, .base = type, .node = bind });
+  int managed = c.test(<auto>);
   List init = c.parse_assignment();
+  if (managed)
+    init = c.bind_syntax($!( $auto($init) ), <expression>, c.return_type);
   c.ancestors.pop();
   c.check_explicit_converter(
     init, %(declare $type (bindings $bind)).type_from_ast(), 0);
@@ -509,6 +512,8 @@ module List _finish_parameter(
   Compiler c, List base, List declarator, List method_identity,
   Token source_first, Token source_after) {
   base = _finish_type(c, base);
+  if (<auto> in base && !c.macro_holes && !c.shallow)
+    $fail.parse_auto_storage(c, c.token);
   int preserved_self = 0;
   declarator = _install_declarator(
     c, base, NULL, declarator,
