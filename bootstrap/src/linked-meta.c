@@ -1376,11 +1376,11 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _500 = cons(_499, NULL);
   _501 = cons(_89, _500);
   _502 = List_var(_501);
-  _503 = int_var(635);
+  _503 = int_var(639);
   _504 = cons(_503, NULL);
   _505 = cons(_95, _504);
   _506 = List_var(_505);
-  _507 = int_var(24414);
+  _507 = int_var(24420);
   _508 = cons(_507, NULL);
   _509 = cons(_108, _508);
   _510 = List_var(_509);
@@ -6358,7 +6358,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_10(void
   _5452 = String_var(_5451);
   _5453 = cons(_5452, _5377);
   _5454 = List_var(_5453);
-  _5455 = String_new("63afe276");
+  _5455 = String_new("902c3d30");
   _5456 = String_var(_5455);
   _5457 = cons(_5456, NULL);
   _5458 = cons(_499, _5457);
@@ -12513,7 +12513,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_22(void
   _11571 = List_var(_11570);
   _11572 = String_new("lib/pool/threads.x");
   _11573 = String_var(_11572);
-  _11574 = String_new("4e4cc640");
+  _11574 = String_new("92b60e9a");
   _11575 = String_var(_11574);
   _11576 = cons(_11575, NULL);
   _11577 = cons(_11573, _11576);
