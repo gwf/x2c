@@ -1,7 +1,7 @@
 # auto declarations and complete initializers
 
 > Status: done
-> Implemented on 2026-10-23 in `060b131e1` and `d0f5e8dda`.
+> Implemented on 2026-10-23 in `eeecdad1c` and `47e4f0ba4`.
 > All 25 focused auto/managed fixtures and the defer suite pass.
 > Publication validation and delivery follow the root workflow.
 
