@@ -81,8 +81,9 @@ static List _typedef(Compiler c, List context, int row) {
    its short tag; the declared type keeps the body. */
 module List _declaration_types(Compiler c, List storage) {
   List quals = _type_qualifiers(c);
-  List hole = c.peek_macro_hole();
-  int inferred = <auto> in storage &&
+  int managed = <auto> in storage;
+  List hole = managed ? c.peek_macro_hole() : NULL;
+  int inferred = managed &&
     ((c.peek(0) == <ident> &&
       (c.peek(1) == <=> || c.peek(1) == <;> || c.peek(1) == <,>)) ||
      (hole && hole.assoc(<kind>) == <name>));

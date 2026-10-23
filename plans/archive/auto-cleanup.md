@@ -145,3 +145,17 @@ The full fixture run also exposed a native array-decay rejection after hidden
 qualifiers became visible to type resolution. The existing
 `typedef-index-elements` fixture passes on the baseline. The native crossing
 check now keeps array decay out of its sibling-pointer typedef rule.
+
+## Performance observation
+
+Five alternating samples in matching temporary checkouts translated four
+unchanged primary units: transform, generate, type, and tokenizer. The median
+instruction count was 27.75 billion at `c563b5c5e` and 29.86 billion with this
+implementation, an increase of 7.6%. Imported compiler headers include the
+extension, so this is a compiler-development workload, not a comparison with
+an unchanged transitive source graph. The result is advisory.
+
+Controlled probes of the old acquisition macro and the declaration lookahead
+did not materially remove that increase. The implementation keeps the small
+lookahead guard because ordinary declarations need no inference-hole lookup.
+No runtime cleanup representation or allocation path was added.

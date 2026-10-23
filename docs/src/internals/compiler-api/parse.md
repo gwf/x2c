@@ -168,7 +168,7 @@ Source: `src/parse/declarators.x:295`
 Rejects transparent references in object and function-result types.
 References inside a function's parameter list remain supported.
 
-Source: `src/parse/declarations.x:304`
+Source: `src/parse/declarations.x:305`
 
 <a id="Compiler.close_placements"></a>
 #### Compiler.close_placements
@@ -349,7 +349,7 @@ Parses a non-function, non-typedef `Decl` macro argument.
 Parentheses group declarations with independent types. The invocation
 delimiter remains current; flat destructuring may omit its initializer.
 
-Source: `src/parse/declarations.x:117`
+Source: `src/parse/declarations.x:118`
 
 <a id="Compiler.parse_declaration_row"></a>
 #### Compiler.parse_declaration_row
@@ -498,7 +498,7 @@ Source: `src/parse/declarations.x:35`
 Parses a C assertion declaration; native C owns constant-expression
 checks.
 
-Source: `src/parse/declarations.x:143`
+Source: `src/parse/declarations.x:144`
 
 <a id="Compiler.parse_submission"></a>
 #### Compiler.parse_submission
@@ -636,7 +636,7 @@ Tests whether the current token can begin a declaration without consuming.
 Typedefs, package aliases, and macro-hole kinds are resolved through the
 current compiler state.
 
-Source: `src/parse/declarations.x:170`
+Source: `src/parse/declarations.x:171`
 
 <a id="Compiler.test_static_assert"></a>
 #### Compiler.test_static_assert
@@ -645,7 +645,7 @@ Source: `src/parse/declarations.x:170`
 
 Reports whether the current identifier starts a C static assertion.
 
-Source: `src/parse/declarations.x:138`
+Source: `src/parse/declarations.x:139`
 
 ## Design notes
 
