@@ -52,6 +52,7 @@
     const a = tokens(before), b = tokens(after);
     const edits = compareSequence(a, b, (x, y) => a[x] === b[y]);
     return {
+      unified: edits,
       before: edits.filter((edit) => edit.type !== "add").map((edit) => ({ text: edit.text, changed: edit.type === "remove" })),
       after: edits.filter((edit) => edit.type !== "remove").map((edit) => ({ text: edit.text, changed: edit.type === "add" }))
     };
