@@ -1472,7 +1472,6 @@ void thread_borrowed_pool_suite(void) {
 }
 
 void thread_parallel_map_suite(void) {
-  thread_borrowed_pool_suite();
   $test.run(parallel_map_coordinator_stop_wakes_workers);
   $test.run(parallel_map_borrows_until_reducer_returns);
   $test.run(parallel_map_stops_channel_wait_on_reducer_failure);

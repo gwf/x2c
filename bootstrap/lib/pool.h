@@ -80,6 +80,8 @@ void Pool_thread_start(void);
 
 Pool Pool_current(void);
 
+Pool x2c_pool_exchange(Pool pool);
+
 void Pool_initialize(void);
 
 void Pool_thread_initialize(void);

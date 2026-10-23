@@ -36,8 +36,10 @@ Pool Pool.current(void) {
   return value_thread.current;
 }
 
-/* Borrows a pool for one runtime callback. The owner keeps it and its
-   ancestors alive; exchanging the thread-local pointer transfers nothing. */
+/** Borrows a pool for one runtime callback and returns the previous pool.
+    The owner keeps the pool and its ancestors alive. Exchanging the
+    thread-local pointer transfers no ownership; restore it after the callback.
+*/
 Pool x2c_pool_exchange(Pool pool) {
   Pool previous = Pool.current();
   value_thread.current = pool;

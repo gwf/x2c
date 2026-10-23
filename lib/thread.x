@@ -75,7 +75,11 @@ static struct Thread {
   pthread_cond_t *waiting;
 };
 
-static struct ThreadValueInput { ThreadValueFn function; Var value; Pool pool; };
+static struct ThreadValueInput {
+  ThreadValueFn function;
+  Var value;
+  Pool pool;
+};
 static struct ParallelMap {
   Iter source;
   ThreadValueFn function;

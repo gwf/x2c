@@ -64,6 +64,7 @@ prefix.
 | [`x2c_mix64`](common.md#x2c_mix64) | `lib/common.x` | `inline unsigned long x2c_mix64(unsigned long word)` |
 | [`x2c_normalize_index`](common.md#x2c_normalize_index) | `lib/common.x` | `int x2c_normalize_index(int index, int length)` |
 | [`x2c_normalize_slice`](common.md#x2c_normalize_slice) | `lib/common.x` | `int x2c_normalize_slice(int *start, int *stop, int step, int length)` |
+| [`x2c_pool_exchange`](pool.md#x2c_pool_exchange) | `lib/pool/pool.x` | `Pool x2c_pool_exchange(Pool pool)` |
 | [`x2c_pool_lookup_string`](pool.md#x2c_pool_lookup_string) | `lib/pool/pool.x` | `String x2c_pool_lookup_string( Pool inner, const char *bytes, int length, unsigned hash)` |
 | [`x2c_register_builtin_descriptor`](dispatch.md#x2c_register_builtin_descriptor) | `lib/dispatch.x` | `int x2c_register_builtin_descriptor(Symbol tag, VarMethods methods)` |
 | [`x2c_register_descriptor`](dispatch.md#x2c_register_descriptor) | `lib/dispatch.x` | `void x2c_register_descriptor(String name, VarMethods methods)` |
@@ -106,4 +107,4 @@ prefix.
 | [`x2c_var_update_ulong_long`](varops.md#x2c_var_update_ulong_long) | `lib/varops.x` | `unsigned long long x2c_var_update_ulong_long(volatile unsigned long long *lhs, Symbol op, Var rhs)` |
 | [`x2c_var_update_volatile`](varops.md#x2c_var_update_volatile) | `lib/varops.x` | `Var x2c_var_update_volatile(volatile Var &?lhs, Symbol op, Var rhs)` |
 
-Total: 94 functions.
+Total: 95 functions.

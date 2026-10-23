@@ -67,6 +67,8 @@ void Thread_run(Array jobs, Func completed);
 
 ParallelMap Iter_parallel_map(Iter i, ThreadValueFn function, int workers);
 
+ParallelMap Iter_parallel_map_in(Iter i, Pool pool, ThreadValueFn function, int workers);
+
 Var ParallelMap_foldl(ParallelMap map, Var seed, Func accumulate);
 
 

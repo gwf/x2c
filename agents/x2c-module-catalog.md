@@ -1461,7 +1461,8 @@ Public functions:
 `x2c_thread_wait_stopped`, `x2c_thread_stopping`, `x2c_thread_wait`,
 `x2c_thread_cancel`, `Thread.stop`, `Thread.start_raw`, `Thread.start`,
 `Thread.wait_any`, `Thread.join`, `Thread.free`, `Thread.finish_any`,
-`Thread.finish_all`, `Thread.run`, `Iter.parallel_map`, `ParallelMap.foldl`
+`Thread.finish_all`, `Thread.run`, `Iter.parallel_map`, `Iter.parallel_map_in`,
+`ParallelMap.foldl`
 
 ### [lib/tokenizer.x](../lib/tokenizer.x)
 
@@ -1825,7 +1826,7 @@ Public functions:
 `x2c_pool_lookup_string`, `Pool.lookup`, `Pool.intern`, `Pool.intern_new`,
 `Pool.insert`, `Pool.owns`, `Pool.retain_named`, `Pool.retain`, `Pool.release`,
 `Pool.malloc`, `Pool.free`, `Pool.promote`, `Pool.own`, `Pool.stats`,
-`Pool.thread_start`, `Pool.current`, `Pool.initialize`,
+`Pool.thread_start`, `Pool.current`, `x2c_pool_exchange`, `Pool.initialize`,
 `Pool.thread_initialize`, `Pool.shutdown`, `Pool.open_named`, `Pool.open`,
 `Pool.close`, `Pool.detach`, `Pool.is_permanent`, `Pool.epoch`
 

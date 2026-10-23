@@ -46,7 +46,7 @@ pool are reclaimed unless promoted; ancestor-owned values remain live.
 **Raises:** `<bad-state>` when no bracket is open. The failure leaves the
 active pool unchanged.
 
-Source: `lib/pool/threads.x:101`
+Source: `lib/pool/threads.x:111`
 
 <a id="Pool.current"></a>
 #### Pool.current
@@ -72,7 +72,7 @@ explicit `Pool.release`.
 **Raises:** `<bad-state>` when no bracket is open. The failure leaves the
 active pool unchanged.
 
-Source: `lib/pool/threads.x:113`
+Source: `lib/pool/threads.x:123`
 
 <a id="Pool.epoch"></a>
 #### Pool.epoch
@@ -85,7 +85,7 @@ entry: a released level's addresses can be reused, so identities admitted
 under an earlier value prove nothing. The counter only advances, so a
 reader needs no lock to tell that something was released.
 
-Source: `lib/pool/threads.x:132`
+Source: `lib/pool/threads.x:142`
 
 <a id="Pool.intern_new"></a>
 #### Pool.intern_new
@@ -121,7 +121,7 @@ this with one `Pool.close` or detach it for transfer.
 **See:** [`Pool.close`](#Pool.close), [`Pool.open_named`](#Pool.open_named),
 [`List.promote`](list.md#List.promote)
 
-Source: `lib/pool/threads.x:93`
+Source: `lib/pool/threads.x:103`
 
 <a id="Pool.open_named"></a>
 #### Pool.open_named
@@ -138,7 +138,7 @@ diagnostics.
 
 **See:** [`Pool.open`](#Pool.open), [`Pool.close`](#Pool.close)
 
-Source: `lib/pool/threads.x:78`
+Source: `lib/pool/threads.x:88`
 
 <a id="Pool.stats"></a>
 #### Pool.stats
@@ -209,6 +209,7 @@ for source readers but are not supported as user API.
 
 | Function | Summary |
 | --- | --- |
+| [`x2c_pool_exchange`](#x2c_pool_exchange) | Borrows a pool for one runtime callback and returns the previous pool. |
 | [`Pool.free`](#Pool.free) | Releases a losing or transient allocation from `inner`'s pool chain. |
 | [`Pool.initialize`](#Pool.initialize) | Creates the process-wide canonical-value root and makes it active here. |
 | [`Pool.insert`](#Pool.insert) | Installs `object` as its own canonical value in exactly `inner`. |
@@ -222,6 +223,18 @@ for source readers but are not supported as user API.
 | [`Pool.shutdown`](#Pool.shutdown) | Releases this thread's open brackets and then the process root. |
 | [`Pool.thread_initialize`](#Pool.thread_initialize) | Installs the existing process root in a newly created worker thread. |
 | [`Pool.thread_start`](#Pool.thread_start) | Makes `Pool` lock from here on, for a process about to start a worker. |
+
+### Functions
+
+#### x2c_pool_exchange
+
+`Pool x2c_pool_exchange(Pool pool)`
+
+Borrows a pool for one runtime callback and returns the previous pool.
+The owner keeps the pool and its ancestors alive. Exchanging the
+thread-local pointer transfers no ownership; restore it after the callback.
+
+Source: `lib/pool/threads.x:43`
 
 ### `Pool`
 
@@ -250,7 +263,7 @@ Creates the process-wide canonical-value root and makes it active here.
 **Raises:** `<alloc-fail>` if the root cannot be constructed. Native mutex
 initialization failure aborts.
 
-Source: `lib/pool/threads.x:44`
+Source: `lib/pool/threads.x:54`
 
 <a id="Pool.insert"></a>
 #### Pool.insert
@@ -297,7 +310,7 @@ Reports whether the process root owns `value` as its canonical identity.
 Nothing is promoted, and no open bracket can reclaim a value that answers
 one.
 
-Source: `lib/pool/threads.x:124`
+Source: `lib/pool/threads.x:134`
 
 <a id="Pool.lookup"></a>
 #### Pool.lookup
@@ -378,7 +391,7 @@ Releases this thread's open brackets and then the process root.
 Call it only after every worker has stopped and no canonical value is
 still in use. A repeat call after the root is gone does nothing.
 
-Source: `lib/pool/threads.x:63`
+Source: `lib/pool/threads.x:73`
 
 <a id="Pool.thread_initialize"></a>
 #### Pool.thread_initialize
@@ -388,7 +401,7 @@ Source: `lib/pool/threads.x:63`
 Installs the existing process root in a newly created worker thread.
 The root must already exist; otherwise the process aborts.
 
-Source: `lib/pool/threads.x:53`
+Source: `lib/pool/threads.x:63`
 
 <a id="Pool.thread_start"></a>
 #### Pool.thread_start

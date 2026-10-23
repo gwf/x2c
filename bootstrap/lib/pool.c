@@ -1621,6 +1621,13 @@ Pool Pool_current(void){
   return f7_threads___value_thread.current;
 }
 
+Pool x2c_pool_exchange(Pool pool){
+  if(! _init_guard_) Pool_initialize();
+  Pool previous = Pool_current();
+  f7_threads___value_thread.current = pool;
+  return previous;
+}
+
 void Pool_shutdown(void);
 
 void Pool_initialize(void){
@@ -1665,7 +1672,7 @@ Pool Pool_open(void){
 void Pool_close(void){
   if(! _init_guard_) Pool_initialize();
   if(! Pool_current() -> up){
-    static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../lib/pool/threads.x",.function = "Pool_close",.line = 102,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../lib/pool/threads.x",.function = "Pool_close",.line = 110,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_10, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Pool.close")), NULL))));
     __builtin_unreachable();
   }
@@ -1676,7 +1683,7 @@ Pool Pool_detach(void){
   if(! _init_guard_) Pool_initialize();
   Pool detached = Pool_current();
   if(! detached -> up){
-    static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../lib/pool/threads.x",.function = "Pool_detach",.line = 115,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../lib/pool/threads.x",.function = "Pool_detach",.line = 123,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_11, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Pool.detach")), NULL))));
     __builtin_unreachable();
   }
