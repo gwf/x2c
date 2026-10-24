@@ -68,10 +68,14 @@ passing tests support that result rather than replace it.
   `using name`; `using $name` creates a fresh private name. Do not make
   definition-site binding a default. See "Keeping a file-scope name with
   `using`" in `docs/src/reference/language.md`.
-- Trust facts established by the producing operation. Add validation or a
-  dedicated diagnostic only to preserve deliberate public behavior or prevent
-  wrong output, corrupted state, or an unsafe native crossing. Earlier or
-  more specific rejection alone does not justify another check or fixture.
+- Treat established contracts as correctness premises. Enforce each guarantee
+  at its owning boundary and rely on it downstream, including ownership,
+  lifetime, access, and failure behavior. Do not add checks, copies, exports,
+  locks, or state to reconstruct guarantees already supplied, or introduce a
+  boundary that discards them and then repairs their loss. A safety or
+  compatibility concern must identify a concrete contract gap or conflict;
+  uncertainty alone does not justify extra machinery. Earlier or more specific
+  rejection alone does not justify another check or fixture.
 - Every shared Error cause in `lib/error-macros.x` transfers to a matching
   catch or terminates; it never returns to the raising call. Rely on that
   behavior after valid allocation, growth, open, read, write, format, and
