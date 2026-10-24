@@ -2,6 +2,7 @@ bad-suppression 0
 blank-line-stack 0
 comment-history 0
 comment-null-guard 0
+compound-auto 0
 continuation-indent 0
 deferred-initialization 0
 detached-doc 0

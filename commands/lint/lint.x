@@ -108,6 +108,7 @@ static const Rule rules[] = {
   {"silent-shape-guard", <style>, <candidate>, "PR-4"},
   {"static-match-capture", <style>, <candidate>, "MA-7"},
   {"struct-copy", <style>, <candidate>, "FA-3"},
+  {"compound-auto", <style>, <violation>, "LT-1"},
   {"manual-bookkeeping", <style>, <candidate>, "LT-1"},
   {"repeated-routes", <style>, <candidate>, "FA-5"},
   {"lifecycle-pair", <style>, <candidate>, "LT-1"},

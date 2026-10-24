@@ -78,6 +78,11 @@ These managed forms require initialized block-item objects and cannot combine
 declaration and initializer `auto` in one declaration group. See
 [managed declarations and initializers](../language.md#managed-declarations-and-initializers).
 
+A leading `auto` shares its storage class across the declarators in one
+group. Prefer `auto Array left = [], right = [];` when both bindings keep
+their acquired values. Retain initializer `auto` when a binding changes or
+only part of the group needs cleanup.
+
 ### D2. Declaration commas and parentheses
 
 In a declaration row, a comma starts a new group only when `_group_comma`
@@ -218,6 +223,16 @@ This is the external `native-string-word` recognizer.
 ## Statement, directive, and pattern contracts
 
 ### G1. Positions and directives
+
+At statement start, `auto` introduces a cleanup region before a block,
+`if`, `while`, `for`, `do`, `switch`, `match`, `try`, `return`, `raise`,
+`defer`, `break`, `continue`, `goto`, `foreach`, or `with`. Before a typed
+function definition, it wraps the body, including an expression body.
+`auto(destination)` supplies an explicit Scope destination and takes a
+statement or function target. The destination is required between the
+parentheses: `auto()` is not a form. These native prefixes use ordinary
+statement-decorator expansion; declaration and initializer `auto` retain
+the managed-object meanings in D1.
 
 A block accepts declarations and statements;
 a governed position requires one statement. A macro expansion yielding

@@ -183,6 +183,7 @@ test('class declarations and C expression forms from the source grammar have sco
 
 test('managed declarations and acquired initializers highlight auto', async () => {
   for (const line of ['auto Scope work = NULL;', 'auto value = Buffer.new(0);',
+    'auto Array left = [], right = [];',
     'auto const value = 1;', 'Buffer value = auto Buffer.new(0);',
     'void work() { auto value = 1; }']) {
     await check(line, 'auto', 'storage.modifier.auto.x2c');
@@ -190,6 +191,16 @@ test('managed declarations and acquired initializers highlight auto', async () =
   for (const line of ['// auto value = 1;', 'char *s = "auto";',
     'int automatic = 1;', 'Buffer value = $auto(Buffer.new(0));'])
     await check(line, 'auto', 'storage.modifier.auto.x2c', false);
+});
+
+test('native auto regions retain modifier scope at each target', async () => {
+  for (const source of ['auto { work(); }',
+    'auto for (int i = 0; i < n; i++) work();',
+    'auto int work(void) => 1;', 'auto(&slot) { work(); }',
+    'auto(&slot) int work(void) { return 1; }']) {
+    await check(source, 'auto', 'storage.modifier.auto.x2c');
+    await check(source, 'auto', 'entity.name.function.call.x2c', false);
+  }
 });
 
 test('module declarations can follow another declaration on the same line', async () => {

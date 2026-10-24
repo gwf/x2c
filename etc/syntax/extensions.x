@@ -35,11 +35,13 @@ List syntax_extensions(void) => %(
       (summary "Name methods, borrow parameters, and unpack List values.")
       (grammar declaration-row declaration-group pointer-part method-name
                type-reference storage field destructuring-targets
-               typed-destructuring class-declaration named-type assignment)
+               typed-destructuring class-declaration named-type assignment
+               init-declarator)
       (lexical c-tokens)
-      (grammar-note "Mixed-type rows, T.method names, & and &? parameters, delegate fields, destructuring, class/NamedType forms, and static type visibility.")
+      (grammar-note "Managed declarations and initializers, mixed-type rows, T.method names, & and &? parameters, delegate fields, destructuring, class/NamedType forms, and static type visibility.")
       (lexical-note "delegate and threaded are keywords; Self is contextual. Existing punctuation gains declaration roles.")
-      (spellings "T.method" "&" "&?" "delegate" "threaded" "Self"
+      (spellings "auto T a = x, b = y" "T a = auto x" "T.method"
+                 "&" "&?" "delegate" "threaded" "Self"
                  "class" "static typedef" "int i, float x"
                  "Var (a, b) = values")
       (reference "../reference/language.md#c-foundation"))
@@ -110,12 +112,14 @@ List syntax_extensions(void) => %(
     (feature cleanup-errors
       (title "Cleanup and errors")
       (summary "Scope resources, defer work, and handle structured errors.")
-      (grammar with-statement statement try-statement catch-arm catch-payload
+      (grammar auto-region-prefix auto-region-function auto-region-statement
+               with-statement statement try-statement catch-arm catch-payload
                catch-detail raise-statement raise-detail)
       (lexical c-tokens percent-forms list-atom)
-      (grammar-note "with/as blocks, defer statements, try/catch/finally, and raise with structured details.")
+      (grammar-note "auto regions with optional nonempty destination, with/as blocks, defer statements, try/catch/finally, and raise with structured details.")
       (lexical-note "defer, try, catch, finally, and raise are keywords; with/as are contextual; error patterns reuse List mode.")
-      (spellings "with" "as" "defer" "try" "catch" "finally" "raise")
+      (spellings "auto { ... }" "auto(destination)" "with" "as"
+                 "defer" "try" "catch" "finally" "raise")
       (reference "../reference/language.md#errors-and-cleanup"))
     (feature macros-meta
       (title "Syntax-producing code")
