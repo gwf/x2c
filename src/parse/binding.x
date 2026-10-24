@@ -128,7 +128,7 @@ static List _bind_form(
       return _bind_alias(c, decl, native_syntax);
     case %(!set ?expr (expr *)) if (context == <expression>):
       return _resolve(c, expr);
-    case %((!set ?tag (!or declare decl typedef))
+    case %((!or ?tag declare decl typedef)
            ?base (bindings *declarators)):
       return _bind_declaration(c, tag, base, declarators, context);
     case %(dstrdecl ?base (targets *targets) ?source) if (block):
@@ -152,7 +152,7 @@ static List _bind_form(
       return c.finish_return_statement(expr);
     case %((!or break continue default empty)) if (statement): return input;
     case %(case ?expr) if (statement): return %(case ${_resolve(c, expr)});
-    case %((!set ?tag (!or goto label)) ?name) if (statement):
+    case %((!or ?tag goto label) ?name) if (statement):
       return %($tag $name);
     case $expression_statement(?expr) if (statement):
       return _bind_expression_statement(c, expr, context);

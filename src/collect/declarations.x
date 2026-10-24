@@ -8,7 +8,7 @@
    require an otherwise static family, including through an alias chain. */
 module List _type_family(List key) {
   match (key) {
-    case %((!set ?kind (!or typedef struct union enum)) ?name *):
+    case %((!or ?kind typedef struct union enum) ?name *):
       return %($kind $name);
   }
   return NULL;
@@ -462,7 +462,7 @@ static Map _inline_type_dependencies(Compiler c, List ast) {
         $ast.walk(body, node) {
           match (node) {
             case %(expr ?type ?): if (type) types[type] = 1;
-            case %((!set ?tag (!or declare decl typedef)) ?base
+            case %((!or ?tag declare decl typedef) ?base
                      (bindings *bindings)):
               foreach (List binding in bindings) {
                 Type type = %(declare $base (bindings $binding))

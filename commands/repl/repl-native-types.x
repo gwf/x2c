@@ -16,7 +16,7 @@ static List _family(Type type) {
   Type base = type.base_type();
   match (base) {
     case %(?(String name)): return %(typedef $name);
-    case %((!set ?kind (!or struct union enum)) ?name *):
+    case %((!or ?kind struct union enum) ?name *):
       return %($kind $name);
   }
   return NULL;

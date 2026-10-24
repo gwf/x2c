@@ -651,9 +651,9 @@ static Var _finish_type_spec(Compiler c, Var spec) {
   }
   if (spec is not <list>) return spec;
   match (spec) {
-    case %((!set ?tag (!or struct union)) ?name):
+    case %((!or ?tag struct union) ?name):
       return %($tag ${_finish_tag_name(c, name)});
-    case %((!set ?tag (!or struct union)) ?name (fields *members)):
+    case %((!or ?tag struct union) ?name (fields *members)):
       return _finish_aggregate_type(c, tag, name, members);
     case %(enum ?name):
       return %(enum ${_finish_tag_name(c, name)});

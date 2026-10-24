@@ -37,7 +37,7 @@ static Type _resolve_chain(
     Type type = _typedef_target(s, key);
     if (type) return _resolve_chain(s, type, stop, origin, hops + 1);
   }
-  match (key) case %((!set ?kind (!or struct union))
+  match (key) case %((!or ?kind struct union)
       (binding ? ?spelling)):
     if (!s.field_order(key)) return %($kind $spelling);
   return key;

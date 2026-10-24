@@ -207,6 +207,6 @@ static Symbol _type_kind(Token first, List base, List modifiers) {
     case %(?pointer (fnmod *) *):
       if (pointer == <*>) return <callback>;
   match (base)
-    case %((!set ?kind (!or struct union enum)) *): return kind;
+    case %((!or ?kind struct union enum) *): return kind;
   return <alias>;
 }

@@ -134,7 +134,7 @@ Code Code.register_rewrite(Code function, List pattern, List holes) {
       { point = <access>; kinds = %(prefix); }
     case %(expr ? (postfix ? (expr ? (index ? ?)))):
       { point = <access>; kinds = %(postfix); }
-    case %(expr ?type ((!set ?form (!or op postfix)) ?position ?operand)):
+    case %(expr ?type ((!or ?form op postfix) ?position ?operand)):
       if (_rule_dynamic(type, %($operand))) {
         point = <unary>;
         kinds = _rule_dynamic_kinds(_rule_operators(position), form);
@@ -148,13 +148,13 @@ Code Code.register_rewrite(Code function, List pattern, List holes) {
     case %(expr ? (call (expr ? (ident (binding ? ?(String callee)))) ?)):
       { point = <call>; kinds = %($callee); }
     case %(expr ?
-           ((!set ?head (!or array map segments dstrasgn lambda)) *)):
+           ((!or ?head array map segments dstrasgn lambda) *)):
       { point = <literal>; kinds = %($head); }
     case %((!quote !or)
-           ((!set ?head (!or switch try raise match dstrdecl conform))
+           ((!or ?head switch try raise match dstrdecl conform)
             *) *):
       { point = <node>; kinds = %($head); }
-    case %((!set ?head (!or switch try raise match dstrdecl conform)) *):
+    case %((!or ?head switch try raise match dstrdecl conform) *):
       { point = <node>; kinds = %($head); }
     case %(stmnt (expr ? (dstrasgn *))): { point = <node>; kinds = %(stmnt); }
     case %(!or (api-source ? ? (function ?type *)) (function ?type *)):

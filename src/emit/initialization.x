@@ -294,7 +294,7 @@ module List _source_initializer(Emitter &e, List function) {
 static List _capture_source(
   Emitter &e, List node, Array inputs, Array declarations) {
   match (node) {
-    case %((!set ?kind (!or initval initcode))
+    case %((!or ?kind initval initcode)
            (!set ?input (input *)) *body): {
       List captured = _capture_source(e, input, inputs, declarations);
       return %($kind $captured @body);
