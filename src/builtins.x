@@ -30,20 +30,17 @@ static List _scope_expand(List body, List destinations) {
 
 /* `with (place = value, ...)` nests one block per assignment around the
    body, the first outermost. Each block captures its place's address once,
-   saves the value there, defers restoring it, and assigns. The names that
-   blocks share are fresh for the invocation; an inner block's shadow its
-   enclosing block's. */
-static List _with_expand(
-  List body, List assignments, Var address, Var previous) {
+   saves the value there, defers restoring it, and assigns. Each quotation
+   application declares its own private `address` and `previous`. */
+static List _with_expand(List body, List assignments) {
   if (!assignments)
     x2c_diagnostic_fail("with requires at least one assignment", %());
   foreach (List assignment in assignments.reverse())
-    body = _with_assignment(assignment, body, address, previous);
+    body = _with_assignment(assignment, body);
   return body;
 }
 
-static List _with_assignment(
-  List assignment, List body, Var address, Var previous) {
+static List _with_assignment(List assignment, List body) {
   List place = NULL, value = NULL;
   match (assignment)
     case %(expr ? (op = ?target ?source)): place = target, value = source;
@@ -53,10 +50,10 @@ static List _with_assignment(
       %("parenthesize a comma expression inside an entry"));
   Type type = ((Code) place).type();
   return $!{ {
-    $type *$address = &$place;
-    $type $previous = *$address;
-    defer *$address = $previous;
-    *$address = $value;
+    $type *address = &$place;
+    $type previous = *address;
+    defer *address = previous;
+    *address = $value;
     $body
   } };
 }
