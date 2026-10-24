@@ -13,7 +13,9 @@ publish a release or supply the staging App credential and domain configuration.
 The legacy `pages.yml` source remains unchanged, but its workflow registration
 is disabled. Retain it until first-release baseline recovery is settled.
 
-The governing design is [public-release-workflow.md](../../plans/public-release-workflow.md).
+The [archived workflow plan](../../plans/archive/public-release-workflow.md)
+records the implementation design and staging history. Current release
+operations follow [releasing](../../agents/releasing.md) and this document.
 The source repository stays public at `gwf/x2c`. `gwf/x2c-staging` stores generated
 output and immutable candidates; it is not another development source tree.
 

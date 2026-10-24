@@ -3,6 +3,14 @@
 > Status: reference, 2026-09-25. The selected-root audit is shipped on
 > `dev`. The extension below is a follow-up proposal, not dispatched work.
 
+## Current disposition, 2026-10-24
+
+Keep this optional extension dormant. The selected-root command still
+exists; identify a current blocked program before extending its model.
+The old corpus and word-count obstacle totals below were not rerun and
+must not be presented as current counts.
+
+
 ## Current disposition, 2026-10-12
 
 Reference and optional investigation candidate. The selected-root audit is

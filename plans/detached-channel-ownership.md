@@ -1,6 +1,29 @@
 # Detached Channel payload ownership
 
-> Status: active
+> Status: active - delivery evidence closeout, 2026-10-24.
+> The correction is present in `dev` at `7e9fd0178`. Final benchmark
+> comparison and the resolution of the historical publication hold were
+> not located in the reviewed repository records.
+
+## Current disposition
+
+Detached Scope transfer and owned Channel handoff are present, including
+`fc6ea2d51` and `27ddb7464`. Receiver transport cleanup landed in
+`43bf899a7`; constant-time Map replacement landed in `cee694038`. Current
+Array and Map code creates contents scopes lazily. These commits are
+ancestors of the inspected `dev` tip; the implementation is not merely a
+local candidate waiting to be written.
+
+Keep this plan open to recover and link the final baseline comparison,
+combined verification, and delivery/hold decision. The old focused-test
+counts below are dated evidence, not a current run. This review does not
+infer recovered performance or renewed publication authorization from
+the code's presence. It does not reopen the ownership design or dispatch
+new implementation. Ordinary later work follows current root guidance.
+
+## Earlier checkpoint
+
+> Historical status: active
 > Authorized on 2026-10-22 to correct the implementation shipped at 38f2d503e.
 > Coordinator owns combined review, performance comparison, and verification.
 > Publication held by Gary: show benchmark results before publishing.

@@ -23,7 +23,7 @@ discarded benchmark reproductions, incorrect starting revisions, repeated
 checks, correction-handling failures, and incomplete metrics. Full raw session
 history remains outside the repository. The delivered tool changes repair the observed
 benchmark cleanup and metrics defects.
-The tracked [evidence record](../harness-evidence-2026-10-05.md) preserves the
+The tracked [evidence record](../reference/harness-evidence-2026-10-05.md) preserves the
 observations, validation, transport limits, and external reproduction reports.
 Private raw transcripts are supporting evidence, not a continuation dependency.
 

@@ -1,314 +1,60 @@
-> Status: active - selected follow-ups recorded on 2026-10-12.
-> Earlier quotation adoption and PRs #131, #142, and #143 are delivered.
-> Remaining work owns typed _Alignof, scalar cleanup, and individual adoption.
-> TagId generation is a lower-priority candidate, not a selected change.
+# Remaining quotation adoption
 
-# Quotation adoption audit, October 3
-
-## Scope and counting
-
-The survey screened authored src/, lib/, etc/, commands/, packages/,
-examples/, and book code for List construction, syntax builders, source
-content helpers, named templates, quotation use, and compile-time Lisp.
-The classified inventory below counts named construction operations or
-coherent families. It is not an exhaustive count of every raw List literal.
-Patterns, type data, diagnostic data, transport records, and toy languages
-are not quotation opportunities. The two source-file rows instead count
-individual `%(` openings outside comments; their unit is explicit.
-
-| Area and counting unit | Convertible now | Needs language refinement | Retained |
-| --- | ---: | ---: | ---: |
-| lib generators, operations | 4 | 2 | 11 public builder operations |
-| builtins, operations | 6 | 0 | 4 conditional/already quoted operations |
-| grammar.x, List literal openings | 0 | 0 | 15 |
-| meta-sdk.x, List literal openings | 0 | 0 | 78 |
-| REPL, construction operations | 0 | 0 | 2 |
-| packages, candidate operations/families | 1 | 1 | 17 |
-| executable examples, production family | 1 | 0 | toy List interpreters |
-| book, code production examples | 3 | 0 | canonical-builder demonstrations |
-| etc, builder operations/internal forms | 0 | 0 | 4 builders and 3 internal forms |
-
-The package row counts yyjson's `_json_call` as convertible. It retains
-17 screened autodiff operations pending connected caller-stage and cost
-review: `ad_zero`, `ad_one`, `ad_neg`, `ad_id`, `ad_assign`,
-`ad_call`, `ad_select`, `ad_less`, `ad_less_eq`, `ad_fwd_decl`, `ad_fwd_body`,
-`ad_fwd_item`, `ad_stmnt`, `ad_accum`, `ad_set`, `ad_cast`, and `ad_code_is`.
-The parameter gap is `ad_fwd_params`. Dynamic-operator `ad_raw` and
-textual numeric `ad_lit`/`ad_int` are additional retained producers, outside
-that curated 17-operation inventory. Other reverse-mode constructors were
-screened, but not fully classified or experimentally rewritten.
-
-An initial expression-level shortlist counted 13 package candidates. Caller
-inspection superseded that count before package implementation. Canonical
-inspection is confirmed for core expression utilities such as ad_zero,
-ad_one, ad_id, and ad_stmnt. Other operations, such as ad_code_is, have
-source-expressible output but remain unprobed candidates; the audit does
-not establish that every retained operation must stay raw permanently.
-
-Generated src/linked-meta.x contains 92 raw List openings. It mirrors
-lib/meta.x and imported macros; it is not a second authored opportunity.
-
-## Ranked ten
-
-| Rank | Site on audited base | Before | After sketch | Risk/cost |
-| --- | --- | --- | --- | --- |
-| 1 | lib/var-tags.x `_tag_id_checks` | equality + c-assert + message AST | `$!Unit{ _Static_assert($id == $index, "..."); }` | low; cold ledger projection |
-| 2 | lib/var-tags.x `_tag_bits_expr` | nested sizeof declaration/operator AST | `Type type = bits; $!( sizeof($type) * CHAR_BIT )` | low; verify width and spelling |
-| 3 | lib/varops.x `_update_box` | index/cast/call builders | quoted index, optional cast, then `$!( $boxer($value) )` | low; keep existing identifier child |
-| 4 | lib/varops.x `_update_decode` | call and optional cast builders | `$!( $decoder($value) )`, optionally `$!( ($back)$decoded )` | low; Type cast hole |
-| 5 | src/builtins.x `_assign` | statement wrapping operator builder | `$!{ $target = $value; }` | caller-stage and cost review |
-| 6 | src/builtins.x `_declare` | bind/modifier/initializer Lists | initialized/uninitialized declaration quotations | shared-name and Type-hole review |
-| 7 | src/builtins.x Foreach.with_cursor | block List around assignments/body | `$!{ { $assignments... $body } }` | expansion-cost measurement |
-| 8 | src/builtins.x Foreach.with_iter | same block assembly | same quotation | expansion-cost measurement |
-| 9 | packages/yyjson/src/json-api.x | nested identifier/call builders | `$!( $callee($argument) )` | low; package-specific check |
-| 10 | examples/magic/meta-functions.x field_reads | dynamic member builder | `$!( $receiver.$member )` | low; name-hole check |
-
-Two more builtin candidates are `_call` and `_binding_call`; both can use
-a callee expression local and argument sequence in one quote. Retained
-conditional families are `_iter_call` (explicit Iter root type),
-`_fields_hash` (one name shared by separately built statements),
-`_binding_target` (composition/phase review), and `_hash` (already quoted).
-
-## Findings beyond the shortlist
-
-- src/grammar.x's 15 List literal sites comprise three exact
-  constructors, ten structural patterns, and two pattern-binding Lists.
-  The content helpers deliberately preserve arbitrary operator tokens,
-  type shells, omitted fields, and parser-introduced data.
-- src/meta-sdk.x has eight AST construction sites among 78 List literals.
-  Six preserve typed binding leaves; two reconstruct a declaration for an
-  immediate type query. Quotations would alter stage or add binding work.
-- The 11 lib/meta.x public expression/statement/declaration/parameter
-  builders return inspectable canonical syntax. Changing them to pending
-  quotations changes their contracts. Adopt quotations at callers instead.
-- etc/meta-helper.x duplicates four such builders. Preserve their output.
-  etc/builtin-macros.x constructs falias, tadapt, and managed-init;
-  these are internal operations, not C fragments.
-- etc/compiler-sdk.xlisp delegates to canonical builders. Other .xlisp
-  files build Lisp forms or runtime data, not replacement C syntax.
-- commands/repl `_thunk` owns its sentinel binding identity; `_result_body`
-  constructs a typed return. Graph/lint and C* tools inspect syntax or
-  build analysis records. No command change is recommended.
-- examples/power/match.x and independent Lisp interpreters manipulate
-  their own data languages. Their AST-looking Lists should stay raw.
-- Named source macro screening found 30 macros with one additional textual
-  reference. This is a discovery count, not proof of single semantic use.
-  Descriptor tables, defer callbacks, aggregate initialization, and module
-  entry functions are follow-up families. Inlining them adds no capability
-  and needs stage, identity, and cost evidence.
-- docs/src/guide/meta-functions.md incorrectly said nested hand-built call
-  arguments leave quotations unexpanded. src/expressions.x resolves their
-  carriers, and macro-quotation.x exercises that behavior.
-
-## Language refinements, proposals only
-
-1. Sequence holes in List and composite literal quotations. Two concrete
-   producer operations are `_tag_list` and `_tag_composite` in
-   lib/var-tags.x. `$!( [$items...] )` and `$!( { $items... } )` both
-   fail with sequence insertion illegal in an expression slot. This proves
-   those spellings fail; it does not rule out another representation.
-   Reuse literal element/comma parsers and produce the same canonical AST.
-   Keep one-element composite versus statement-expression rules explicit.
-2. Standalone existing syntax categories, especially Param, Type, and Decl.
-   macro_categories already has their hole categories but no result kind.
-   Three parameter-producing operations are x2c_param_make in lib/meta.x,
-   its etc/meta-helper.x counterpart, and ad_fwd_params in autodiff.
-   `$!Param{ $type $name }` could serve new source-facing callers; it must
-   not silently change immediate canonical builder contracts. Specify one
-   node versus sequence and semantic Type versus declaration AST first.
-3. Category-specific structural rebuild for Unit/Field/declarator syntax.
-   Four concrete families are meta-group helper prototypes and entry
-   functions, callable capture fields, and cleanup capture fields. Reuse
-   `_rebuild` if a measured connected adoption justifies it. Keep supplied
-   lowered children and binding identities; do not bind the result again.
-
-There are no operator holes. Dynamic operator/type/identity records are
-not grounds for replacing Lists with a second AST representation. Source
-quotations should stay another producer of the existing canonical grammar.
-
-## Implementation and validation decisions
-
-Adopt four library generator operations, yyjson's call generator, one
-executable field-projection family, and three corresponding book examples.
-Correct the nested-expansion prose. Add no compiler semantic operation,
-public syntax, validator, diagnostic, fixture, or recurring gate.
-
-These library generators run when producing ledger tables or native
-family definitions, not for each resolved compiler expression or call.
-No new bind_syntax/rebuild_expression invocation is added.
-The first library build met the old shipped-meta hashes. A temporary
-compiler was built with the existing runtime archive and refreshed
-linked-meta source; the next build and bootstrap refresh used that compiler.
-The ordinary bootstrap refresh and safe rebuild then repeat without an
-override to verify the supported seed path. Compiler
-hot-path candidates are intentionally unimplemented; they need the user's
-converged instruction-count A/B before any such rewrite.
-
-Validate with before/after self-translation of all src/*.x in this checkout,
-focused example/package checks, every compiler fixture, and make verify.
-Review all generated-C differences. If bootstrap is refreshed, rebuild
-it safely and repeat source translation and compiler fixtures. Do not run
-the publication gate. Submit a ready PR to dev through integrate-dev.py.
-
-## Plan review
-
-The existing binder owns source semantics and expands quotation carriers
-nested in expression syntax. The casts retain declared Type holes; binding
-leaves retain their existing construction. Supplied member/callee names
-remain external holes rather than private declarations. The change deletes
-manual source construction and reuses anonymous macros. No helper system,
-representation, traversal, cache, validator, diagnostic, or negative fixture
-is added. Canonical builders, shared names, and lowered nodes stay intact.
-
-## Generated-C review
-
-Before/after self-translation at the same source path changes only
-linked-meta.c; 44 other C files and all 45 headers are byte-identical.
-The four changed bodies now construct pending quotation carriers instead
-of direct builder ASTs. Their inline Macro definition/pattern/type data
-adds cached List, String, and Var constants; removed literal-builder data
-disappears, and later cache identifiers are renumbered. The shipped meta
-hashes and function-call metadata update for those four bodies. Remaining
-function changes are cache-name references and macro temporary numbering.
-No other compiler operation changes. Stage output uses ../../src paths,
-while the audit uses src paths; quotation origin cache rows therefore differ
-between those two invocations. Compare before and after with matching paths.
-
-The generated linked-meta.c workload grows from 197,890 to 227,339 bytes
-in the matching-path comparison. Static text contains 1,617 versus 2,125
-cons calls; these are source counts, not measured retired instructions or
-runtime allocations. Anonymous template definitions explain that increase.
-No throughput improvement is claimed. Separate translation of lib/var.x
-and lib/varops.x produces byte-identical C and headers before and after.
-
-## Validation outcome
-
-- Ordinary bootstrap refresh and safe rebuild passed after the intermediate
-  transition. Every bootstrap C/H file matches the rebuilt stage 0 output.
-- Matching-path self-translation: linked-meta.c alone changes among 45 C
-  files; all 45 headers match. Both focused library C/H pairs match.
-- Compiler fixtures passed twice: 999 fixtures and 2,274 artifacts, including
-  the run inside make verify after the final seed rebuild.
-- make verify passed: 939 unit tests, 24,918 assertions, all compiler
-  fixtures, and the CLI, scope, error, varops, and other required probes.
-- The executable meta example matches its checked-in stdout. yyjson tests
-  passed: 27 tests and 149 assertions, using its existing dependency cache.
-- make doc-examples reports only the unrelated site imports sample needing
-  packages/pcre2/builds/libpcre2.a. No edited sample fails.
-- git diff --check passed. No publication gate or hot-path instruction A/B
-  was run; compiler hot-path rewrites were not attempted.
-
-## Follow-up: sequence splices in literals
-
-Refinement 1 is implemented. A quotation's `$name...` now splices into
-`%[...]` Array literals (inside `%[...]` the splice scans as the atom
-`...`), and Map entries splice as `%{${$rows...}}`, as in templates. A
-sequence hole also splices into braced initializers in templates and
-quotations: `(T){ $first, $rest... }`, `$!( { $items... } )`, and
-`T v = { $items... };`. A Lisp slot or meta call inside braces stays one
-element.
-
-Converted with it: the lib/var-tags.x tag, numeric, and decode tables
-(deleting `_tag_composite`; the generated tables are unchanged apart from
-`0x8000` keeping its spelling), the protocol descriptor table (deleting
-`$methods_table` and `$methods_value`), `CaptureBuild._storage`, builtins
-`_positional_new`, and the three `x2c_expr_composite(reads)` teaching
-copies. Generated C outside the edited compiler files is unchanged.
-
-Kept raw: hand-built `char *` literal producers in stage.x, expressions.x,
-and literals.x (they are the literal constructors), transform.x's raw
-string segments (per segment), meta-group.x's lowered module stamp, and
-stage.x's Array and Map forms (no shorter), and the descriptor
-registration calls. Bound as quotations, those calls add the runtime
-prototypes to every unit with protocol registrations, and a string literal
-at their `String` parameter was emitted as a bare C literal, which has no
-String header. That is not a binder defect: `Compiler.add_init` statements
-are spliced after the transform, so they must already be lowered, and a
-bound `String` literal is not. add_init's documentation now says so.
-
-Measured and declined: writing builtins `_declare`, `_assign`, and the
-foreach loop bodies as quotations left generated C unchanged but cost
-about 3% of retired instructions translating src/ and lib/ (241.8 G
-against 234.0-235.3 G, converged trees), because every `foreach`
-expansion applies them. Foreach expansion is a hot path.
-
-## Follow-ups delivered
-
-- PR #117 (2026-10-03) delivered the accompanying change above. PR #120
-  (2026-10-03) delivered refinement 1.
-- PRs #129 and #130 made a quotation that applies no other template cost
-  about what the equal List costs; see
-  [macro application cost](archive/macro-application-cost.md).
-- PR #131 (2026-10-03) added `${expression}` holes and removed 60
-  single-use temporary locals. It also wrote `_declare`, `_assign`, the
-  foreach and class builders, and the `$switch` decorator as quotations.
-  That reverses the decline above: after #129 and #130, self-translation
-  changed by +0.04%, within noise.
-- PR #142 (2026-10-04) lifts an `x2c_ident` value in a hole to an
-  identifier, so one local serves as declarator and reference. It wrote 17
-  more sites as quotations, including `_fields_hash`. It kept two hot paths
-  as Lists after measuring them: `_assignment` in `src/cache.x` (+2.1%) and
-  the Lisp binding rows (+5.6% on `lisp-targets.x`).
-- PR #143 adds typed quotations, `$!(T)( expression )`, and writes 47 typed
-  compiler expressions with them. They include `_iter_call`, which this
-  audit retained for its explicit Iter root type.
-- [Choosing how to build syntax](../agents/lowering-with-macros.md#choosing-how-to-build-syntax)
-  records which construction new code uses.
+> Status: active, narrowed 2026-10-24 against `7e9fd0178`.
+> Earlier adoption and scalar-generator helper migration are delivered.
+> The selected typed `_Alignof` follow-up needs a fresh exact probe.
 
 ## Remaining work
 
-Recorded with Gary on 2026-10-12. Type and Param adoption is delivered;
-the old claim that their quotation support remains unimplemented is obsolete.
-
 ### Typed _Alignof and scalar generator cleanup
 
-Allow a Type hole in `_Alignof`:
+The selected behavior is a Type hole in `_Alignof`:
 
 ```x2c
 Type type = $!Type{ double };
 Code expression = $!( _Alignof($type) );
 ```
 
-The expression emits `_Alignof(double)` and uses the target C compiler's
-alignment. It must not substitute the host meta process's alignment.
-`lib/native-scalar-types.x` is the current caller: it constructs alignment
-syntax through Lisp because direct typed quotation is missing.
+The result must emit `_Alignof(double)` for the target C compiler, not
+substitute the host meta process's alignment. Re-probe this exact form
+before implementing: `macro-type-names-land.x` covers a spelled typedef,
+not a Type-value hole, and this review ran no new quotation probe.
 
-Replace `native.scalar.list`, `native.scalar.access-name`,
-`native.scalar.alignment`, and `native.scalar.access-entry` with ordinary meta
-operations and quotations where they express the same work directly.
-Keep the scalar table as the single owner. Preserve exact C spellings,
-List keys, sort order, native size and alignment, load/store behavior, and
-wide-value ownership. The existing quoted load/store bodies need no parallel
-implementation. Verify target alignment and scalar access when implementing.
+`lib/native-scalar-types.x` now uses meta functions and templates. The four
+old Lisp helper replacements landed through `b6f4f7bff`, `7ed248f46`, and
+`5d886389c`; do not repeat them. `_scalar_alignment` still constructs
+canonical alignment syntax manually. If the probe confirms the gap, pair
+the smallest quotation repair with that caller. If it already works,
+restrict implementation to useful caller simplification.
+
+Preserve the scalar table, exact C spellings, List keys, sort order, target
+size/alignment, load/store behavior, and wide-value ownership. Verify target
+alignment and scalar access with existing relevant checks when implementing.
 
 ### Individual quotation adoption
 
-Review structural declaration rebuilds and the 17 retained autodiff operations
-one at a time. Change only cases where quotation simplifies the complete
-operation while preserving binding, canonical Lists, stage, timing, and ownership.
-`ad_is_zero` and `ad_is_one` require inspectable syntax from `ad_zero()` and
-`ad_one()`. This is not authorization for a blanket syntax-builder rewrite or
-a new Decl API without a useful caller.
+Treat structural declaration rebuilds and retained autodiff operations as
+individual candidates. Select only a demonstrated simplification that
+preserves binding, canonical Lists, staging, timing, and ownership.
+Historical site counts are not a current census or a blanket rewrite request.
 
 ### Candidate: generate TagId from its rows
 
-Lower priority, not selected for implementation. `lib/var.x` and
-`lib/var-tags.x` repeat tag ordering; existing assertions already check it.
-A useful cleanup must preserve every numeric ID and name, including
-`_invalid_ = -1` and `_tag_count_`, without making ordinary Var users import
-meta machinery. Reject a cleanup that adds a framework or more work than it removes.
+Lower priority and not selected. Compare current `lib/var/var.x` and
+`lib/var-tags.x` before proposing work. Preserve every numeric ID and name,
+including `_invalid_ = -1` and `_tag_count_`, without adding meta dependencies
+for ordinary Var users. Existing assertions already check their agreement.
 
-### Dropped callback wrapper
+## Delivered work and evidence
 
-Do not add a shared ErrorSlot abstraction. libuv already snapshots the first
-callback error and stops its loop. libcurl batch failures belong to individual
-items and remain available for repeated response access. A shared wrapper does
-not remove those distinct policies or meaningful duplication.
+The [adoption audit](archive/quotation-adoption-audit-2026-10-03.md) retains
+earlier measurements, accepted and declined conversions, and the dropped
+shared ErrorSlot proposal. Current construction guidance is
+[choosing how to build syntax](../agents/lowering-with-macros.md#choosing-how-to-build-syntax).
 
-## Review of the remaining scope
+## Plan review
 
-The typed `_Alignof` hole has a current caller. Pair it with the scalar cleanup.
-Preserve the existing scalar table and conversion owners. Other quotation
-adoption needs a concrete simplification; TagId remains a candidate only.
-This documentation update starts no implementation and adds no validation gate.
+Use ordinary quotation and type owners, and reuse the existing scalar table.
+No parallel syntax-builder API, validator, dedicated diagnostic, negative
+fixture, or recurring gate is proposed. The initial probe determines whether
+any compiler change remains necessary.

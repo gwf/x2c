@@ -7,7 +7,7 @@
 
 ## Follow-ups recorded on 2026-10-12
 
-The [remediation plan](../review-remediation-2026-10-11.md#module-follow-ups)
+The [remediation plan](review-remediation-2026-10-11.md#module-follow-ups)
 owns included-member effect replay locations and normalized companion-path
 containment. Commit `9db47909` fixed entry-file columns and context after the
 module block's closing brace. It did not repair exported member effects that

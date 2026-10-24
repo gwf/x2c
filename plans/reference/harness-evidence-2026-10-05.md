@@ -6,6 +6,14 @@
 > observed failures, validation, and unresolved runtime reproductions.
 > It is sufficient to continue without the original worktree or session.
 
+## Reference disposition, 2026-10-24
+
+Retained as dated evidence, not a current defect or task list. The move
+preserves the original observations; no historical probe was rerun.
+Repository repairs were delivered. External runtime incidents require
+current-version reproduction; this closeout does not claim they were fixed.
+
+
 ## Evidence boundary
 
 The audit window is [2026-09-28T07:00:00Z, 2026-10-05T14:46:21Z).

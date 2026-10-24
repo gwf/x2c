@@ -1,7 +1,7 @@
 # Component authoring study
 
 > Status: retired
-> Historical authoring study. See [the active plan](../language-components-foundation.md).
+> Historical authoring study. See [the active plan](language-components-foundation.md).
 
 > 2026-10-08, branch `gwf/language-components`, compiler at 0e61a65d.
 > This records executable authoring probes and the missing connections they

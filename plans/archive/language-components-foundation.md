@@ -1,6 +1,29 @@
 # Language component foundation
 
-> Status: active
+> Status: done, 2026-10-24.
+> The foundation and selected component extractions are delivered on `dev`.
+> The October 16 binding correction is `bcb22ae7a`; this closeout was
+> checked against `7e9fd0178`.
+
+## Closeout
+
+Template free names resolve where the expansion lands. Only names listed
+with `using name` retain a declaration from the author's file scope;
+body-declared names remain private to each expansion. The October 12/13
+author-binding default was superseded, as the decision below records.
+The [language reference](../../docs/src/reference/language.md#hygiene-and-generated-names)
+owns the current contract.
+
+Compiler-inserted support calls remain outside program rules. Constructed
+`with` uses ordinary language owners. The three residual research questions
+are preserved in [review follow-ups](../reference/review-followups-2026-10-24.md#component-boundaries).
+They do not keep the completed extraction campaign active.
+
+## Historical decisions and delivery
+
+The following status was recorded before this closeout:
+
+> Historical status: active
 > The foundation work is on `dev`; its working branch, started from dev
 > `7e946b86663f9f069fe14e284c41e2aed73c57e0`, is history. Gary authorized
 > publication to `dev` on 2026-10-09 after Milestone 0, the three component
@@ -65,7 +88,7 @@ supersede the initial recovery exclusions and milestone list preserved below.
 Repository review decision 7 settled the self-meta function-rule observation
 discrepancy without a code change; `docs/src/guide/meta-functions.md` states it.
 The confirmed acquired-value cleanup repair is tracked in
-[review remediation](review-remediation-2026-10-11.md); the initial phrase
+[review remediation](../review-remediation-2026-10-11.md); the initial phrase
 "cleanup of the declared binding" does not override that requirement.
 
 ## Initial recovery scope (historical)
@@ -90,9 +113,9 @@ Excluded from the active implementation:
   kernel-minimal architecture campaign.
 
 Original refs remain intact. Historical plans are preserved in
-[experiments](archive/language-components-experiments.md),
-[authoring](archive/language-components-authoring.md), and
-[kernel hypotheses](archive/compiler-kernel-hypotheses.md).
+[experiments](language-components-experiments.md),
+[authoring](language-components-authoring.md), and
+[kernel hypotheses](compiler-kernel-hypotheses.md).
 Their instructions, future-tense tasks, and projected savings are historical.
 Raw copied evidence lives under `.context/language-components/`; bootstrap
 transition and recovery logs live under `debug/foundation-*`.

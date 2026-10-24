@@ -3,8 +3,17 @@
 > Status: reference, 2026-10-11.
 > Baseline: fetched `origin/dev` `6529e8689702d98db2754571ef7f3d9b43b0d5b9`.
 > Final delta checked at `9004c40b63ad489625d1a19371124f4b4f32978a`.
-> Supports [the remediation plan](review-remediation-2026-10-11.md).
+> Supports [the remediation plan](../review-remediation-2026-10-11.md).
 > Source defects, observed behavior, and proposed policy are distinct below.
+
+## Reference disposition, 2026-10-24
+
+Retained as dated evidence, not a current defect or task list. The move
+preserves the original observations; no historical probe was rerun.
+Use the active [writing plan](../review-remediation-2026-10-11.md) and
+[review follow-ups](review-followups-2026-10-24.md) for remaining scope.
+The language ledger accounts for 181 historical study rows, not 181 tasks.
+
 
 ## Evidence standard
 

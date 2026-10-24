@@ -7,6 +7,7 @@ data stay in `etc/`; ephemeral per-workspace state goes in `.context/`.
   `> Status:` blockquote, usually several lines: the state, then a note
   saying where the work actually stands. The states in use are `active`,
   `blocked`, `reference`, and `needs author scoping`.
+- `plans/reference/` - dated evidence and unselected research inputs.
 - `plans/archive/` - finished plans. The same blockquote, recording the
   outcome, its date, and the commit or PR that closed the plan. Write
   `done`, `rejected`, `obsolete`, or `retired`. Older entries also say
@@ -37,75 +38,69 @@ as `do not reopen` or `no other candidate` as historical unless current
 
 ## Current work and backlog
 
-Consolidated with Gary's decisions on 2026-10-12, against `origin/dev`
-`71e933b0`. Source and delivery history were inspected; no build was rerun.
-Each remaining change has one owning plan. The descriptions below record scope
-and next actions, not implementation completed by this documentation update.
-Earlier question lists and branch restrictions are historical.
-The [merged repair notes](review-remediation-2026-10-11.md#repairs-merged-during-planning-recorded-2026-10-12)
-record the additional literal, cleanup, and post-module diagnostic repairs.
-Their impact was reviewed against `2b5ee957`; no executable reproduction was rerun.
+Reviewed with Gary on 2026-10-24 against `dev` `7e9fd0178`, using source
+and Git history. Historical runtime probes, performance measurements, and
+live release state were not rechecked. This cleanup changes plan ownership
+and status; it does not implement the remaining features.
 
-### Decided work
+### Active work
 
-| Owning plan | Accepted behavior or deliverable | Next action |
+| Owning plan | Remaining scope | Next action |
 | --- | --- | --- |
-| [Review remediation: writing](review-remediation-2026-10-11.md#writing-and-supported-features) | Explain legal source forms, rewrite behavior, and compile-time Lisp behavior. Maintain the factual support list. | Finish the three book explanations with accepted examples. |
-| [Language component foundation](language-components-foundation.md#recorded-decisions) | Rules see developer-written expressions and program meta definitions. Compiler-inserted support calls stay outside program rules. Templates retain author bindings. Constructed `with` behaves like handwritten `with`. | Delivered: the support-call and author-binding boundaries in PR #193 on 2026-10-13; constructed `with` already behaved as decided. The plan's [open list](language-components-foundation.md#open-needing-research-before-a-decision) holds the remaining items. |
-| [Repository review](repository-review-2026-10-12.md#execution-log) | Decisions 1-11 recorded on 2026-10-12: numeric comparisons, 32-bit indices, non-List match, Var to String, component dispatch, cleanup labels, self-meta, SDK, seams, AR-3, and deferrals and hygiene. | Carried out in ten batches through `4b387196` on dev, plus hygiene. No delivery is recorded for the section D cleanup backlog, the section E documentation drift, or the typed list views that batch 10 left as a follow-up. |
-| [Quotation adoption](quotation-adoption-audit-2026-10-03.md#typed-_alignof-and-scalar-generator-cleanup) | `_Alignof($type)` accepts a typed Type hole and emits target C alignment. Simplify the scalar generator while preserving exact native behavior. | Deferred past the cleanup phase (repository review decision 11). Then pair the missing quotation form with its current scalar caller. |
-| [Lint and format](x2c-lint-and-format.md#current-remaining-work-2026-10-12) | Finish already-approved structured List findings and compiler consumption. Keep lint optional. | Continue phase 8 and the existing optional editor workflow; add no recurring gate. |
+| [Language-reference writing](review-remediation-2026-10-11.md) | Complete the selected source-form, rewrite, and Lisp explanations. | Identify exact missing coverage in the existing book, then fill it. |
+| [Quotation adoption](quotation-adoption-audit-2026-10-03.md) | Typed `_Alignof` quotation and its existing scalar caller. | Re-probe the Type-value hole; scalar helper migration is already delivered. |
+| [Structured lint findings](x2c-lint-and-format.md) | Approved phase 8 List output and compiler consumption. | Add the optional interface; preserve the experimental distribution and conditional editor integration. |
+| [Detached Channel ownership](detached-channel-ownership.md) | Close out evidence for the correction already present on `dev`. | Recover final benchmark, verification, and delivery/hold records; do not repeat implementation. |
 
-The [repository review](repository-review-2026-10-12.md#decisions-recorded-2026-10-12)
-delivered the remediation decisions for numeric comparisons, non-List match,
-Var-to-String crossings, and the module follow-ups through `3db5216c` and
-`c397213b`. Its decisions govern where the earlier remediation text differs:
-indices are 32-bit `int` (decision 2), a non-List Var subject reaches
-`default` (decision 3), explicit Var readers raise `<no-convert>` for another
-tag (decision 4 and batch 10), and a function rule does not rewrite the
-compile-time copy of a self-meta definition (decision 7). The same review
-deferred String `switch` and typed `_Alignof` past the cleanup phase.
+### Research and reference
 
-A practical starting order is the book explanations and then the foundation
-boundaries. This order is a recommendation, not another planning or
-validation requirement.
-
-### Candidates, not selected implementation
-
-| Candidate | Condition for pursuing it |
-| --- | --- |
-| [Generate TagId from its rows](quotation-adoption-audit-2026-10-03.md#candidate-generate-tagid-from-its-rows) | Remove real duplication while preserving every numeric ID and avoiding new meta dependencies for ordinary Var users. Lower priority. |
-| [Expand lifetime proof](lifetime-proof-followup.md#current-disposition-2026-10-12) | Name a current program and reproduce its actual obstacle before extending the delivered selected-root audit. |
-
-### Reference material
-
-These files supply evidence or describe future operations. They do not create
-additional implementation tasks or questions for Gary.
+These records do not commission implementation. Reproduce a current problem
+or establish a useful caller before selecting a candidate.
 
 | Record | Use |
 | --- | --- |
-| [Compiler kernel](compiler-kernel-minimal.md) | Evidence for a specifically selected component extraction. |
-| [Compiler ownership](compiler-ownership-investigation.md) | Bounded ownership investigation and field inventory; no broad refactor commissioned. |
-| [Compiler ownership evidence](reference/compiler-ownership-evidence.md) | Static field inventory at `548b381f`, the companion to the ownership investigation. |
-| [SDK and system macros](macro-sdk-and-system-macros.md) | Delivered located errors and historical warning/enum ideas; require a current caller for new work. |
-| [Meta follow-ups](meta-followups.md) | Recorded native type and aggregate constraints; packing proposal withdrawn. |
-| [Prepared formats](prepared-format.md) | Completed feasibility work; a real repeated-format workload is needed. |
-| [Overengineering ledger](overengineering-candidates.md) | Forensic reference. The removed `comptime.x` candidate is obsolete. |
-| [Public release workflow](public-release-workflow.md) | Future release operation and delivered staging evidence. This cleanup does not select a production version or authorize promotion to main. |
-| [Harness evidence](harness-evidence-2026-10-05.md) | Dated external runtime incidents, not x2c feature requirements. |
-| [Remediation evidence](review-remediation-evidence-2026-10-11.md) | Dated repair and reproduction evidence. |
-| [Remediation language ledger](review-remediation-language-ledger-2026-10-11.md) | Coverage evidence, not 181 tasks; current decisions belong to the remediation plan. |
+| [Review follow-ups](reference/review-followups-2026-10-24.md) | Component coverage questions, typed List policy, surviving duplication, dated build-cost evidence, and SDK/native-type candidates. |
+| [Compiler ownership](compiler-ownership-investigation.md) | Refresh individual sharing/restoration candidates before selection; module splits do not establish semantic completion. |
+| [Compiler ownership evidence](reference/compiler-ownership-evidence.md) | Static field inventory at `548b381f`, not a current census. |
+| [Lifetime proof](lifetime-proof-followup.md) | Dormant extension; first name a current program and reproduce its obstacle. |
+| [Prepared formats](prepared-format.md) | Dormant feasibility work; first establish a repeated checked-format workload. |
+| [Overengineering ledger](overengineering-candidates.md) | Current forensic entry point used by the audit skills; no live candidates selected. |
+| [Harness evidence](reference/harness-evidence-2026-10-05.md) | Dated external runtime incidents; repository repairs landed, external outcomes are not asserted. |
+| [Remediation evidence](reference/review-remediation-evidence-2026-10-11.md) | Dated repair and reproduction evidence. |
+| [Language ledger](reference/review-remediation-language-ledger-2026-10-11.md) | Coverage of 181 historical study rows, not an active task list. |
 
-The recorded decisions withdraw the foreign-C-thread API, CPP/module guarantees,
-u128 feature claim, blanket typedef restrictions, lexical defer, packaging
-redesign, and expanded recurring gates. They first withdrew generic unboxing
-checks; repository review batch 10 later made the explicit Var readers, such
-as `.list()` and `.map()`, raise for another tag. The closed self-expression campaign retains other unsupported feature proposals as history.
-Shared ErrorSlot is dropped because it does not simplify the existing callback
-owners. Unselected consolidation, formatting, Match, descriptor, Torch, numeric
-table, and arbitrary script-port experiments remain reference material.
+Individual quotation adoption and TagId generation remain optional candidates
+in the quotation plan. Future releases use [releasing](../agents/releasing.md)
+and [deployment operations](../etc/release/README.md), including the unresolved
+first-cutover recovery prerequisite. No production promotion is selected here.
 
 ### Decisions and completed records
+
+Archived 2026-10-24 after checking source and delivery history:
+
+- [Component foundation](archive/language-components-foundation.md): selected
+  extractions delivered. Free names resolve at expansion sites except explicit
+  `using` declarations, as corrected in `bcb22ae7a`.
+- [October 12 review](archive/repository-review-2026-10-12.md): repair batches
+  delivered; later String cast, String switch, naming, documentation, and module
+  work supersede the old backlog. Remaining questions have the reference owner above.
+- [c2x2c continuation](archive/c2x2c-continuation.md): delivery through
+  `e2a78078e`; later explicit result ownership and Channel APIs supersede its
+  concurrency description.
+- [Compiler kernel](archive/compiler-kernel-minimal.md): superseded architectural
+  research; old projections are not a current extraction commitment.
+- [SDK and system macros](archive/macro-sdk-and-system-macros.md): delivered
+  umbrella; located failure/error reporting exists. Warning and enum ideas
+  remain unselected.
+- [Meta follow-ups](archive/meta-followups.md): completed or declined tracks;
+  native-type limitations remain dated research.
+- [Public release workflow](archive/public-release-workflow.md): workflow
+  implementation delivered, including staging evidence at `a3084897c`.
+  Closure does not claim a production release or current staging health.
+- Historical [lint implementation](archive/x2c-lint-and-format-implementation.md),
+  [remediation](archive/review-remediation-2026-10-11.md), and
+  [quotation audit](archive/quotation-adoption-audit-2026-10-03.md): delivered
+  work and earlier decisions retained; their short active plans own the remainder.
 
 Archived 2026-10-21:
 
@@ -129,8 +124,8 @@ Archived 2026-10-09 to 2026-10-11:
   [component authoring study](archive/language-components-authoring.md), and
   [component experiments](archive/language-components-experiments.md):
   retired; historical records superseded by the
-  [foundation plan](language-components-foundation.md) and the
-  [kernel catalog](compiler-kernel-minimal.md).
+  [foundation plan](archive/language-components-foundation.md) and the
+  [kernel catalog](archive/compiler-kernel-minimal.md).
 
 Archived 2026-10-15:
 

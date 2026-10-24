@@ -3,7 +3,7 @@
 > Status: done
 > Delivered to `dev` as `db86d4b7` on 2026-09-22 after the full gate and two
 > independent reviews. Follow-up work is dispatched from
-> [meta follow-ups](../meta-followups.md). Earlier designs and checkpoints
+> [meta follow-ups](meta-followups.md). Earlier designs and checkpoints
 > are archived as [values and types](meta-values-types.md),
 > [checkpoints](meta-recovery-checkpoints.md),
 > [design](meta-recovery-design.md) and [review](meta-recovery-review.md).

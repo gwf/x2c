@@ -9,7 +9,28 @@ deleted or became `Code` and `Type` methods, and `lib/meta.x` declares the
 current set.
 
 
-> Status: reference - diagnostic-location and enum-consumer follow-ups remain
+> Status: retired, 2026-10-24.
+> The delivered SDK and system-macro campaign is closed. Current source
+> at `7e9fd0178` supersedes the old diagnostic and constructor backlog.
+
+## Closeout
+
+`lib/meta.x` declares `x2c_diagnostic_fail_at` and
+`x2c_diagnostic_error_at`; `src/meta-sdk/context.x` implements them.
+Located failure/error reporting is therefore delivered. Warning location
+remains a separate possible follow-up, since `x2c_diagnostic_warn` takes
+message and notes only. No concrete enum consumer is selected.
+
+The current SDK supplies Code/Type operations and declares no constructor
+API. Preserve warning and enum ideas in
+[review follow-ups](../reference/review-followups-2026-10-24.md#sdk-and-native-types).
+The historical vocabulary and instructions below do not commission work.
+
+## Historical campaign
+
+The following status was recorded before this closeout:
+
+> Historical status: reference - diagnostic-location and enum-consumer follow-ups remain
 > open; no current dispatch recorded. Phases 1 and 3 and most of Phase 4 are
 > shipped. Phase 1 landed in four commits, `f3623b66` through `765e2cdc`:
 > both spellings bound and refreshed into `bootstrap/`, then every caller

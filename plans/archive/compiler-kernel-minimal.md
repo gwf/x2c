@@ -1,6 +1,25 @@
 # How small the compiler kernel can get
 
-> Status: reference
+> Status: retired, 2026-10-24.
+> Pre-delivery architectural research, superseded by the delivered
+> foundation campaign and later decisions. Reviewed at `7e9fd0178`.
+
+## Closeout
+
+The [foundation record](language-components-foundation.md) records the
+delivered extractions, including try. Projections such as the 8,000-line
+reduction below are historical estimates, not a current deletion backlog.
+Several proposed placements and carrier effects did not land. Current root
+guidance permits a bootstrap transition and adoption in one publication batch.
+
+Retain the measurements and alternatives as research. Select any new
+extraction against current source and its whole implementation cost.
+
+## Historical analysis
+
+The following status was recorded before this closeout:
+
+> Historical status: reference
 > Analysis updated 2026-10-09 against the recovered foundation branch
 > `codex/language-components-foundation` at 8b78c595 (dev 7e946b86 plus one
 > commit), whose continuation is owned by

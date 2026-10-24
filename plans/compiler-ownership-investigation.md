@@ -3,6 +3,17 @@
 > 548b381f18653089b0285082881f27d65df3bf94. Recommendations below are design
 > candidates, not an approved compiler refactor or reproduced defect report.
 
+## Current disposition, 2026-10-24
+
+Retain this as dated research. Module splits changed the paths and partially
+addressed navigation through `src/compiler/declarations/portable-syntax.x`.
+They do not prove that the sharing questions are resolved. Diagnostics still
+stores a Compiler printer, borrowing setup remains distributed, and
+`src/meta-group/emission.x` still saves/restores Compiler and GenNames state.
+Refresh one bounded candidate and its consumers before selecting work.
+No leak, rollback defect, or performance regression was reproduced here.
+
+
 # Compiler ownership and dependencies
 
 The compiler has useful existing owners, but several operations distribute

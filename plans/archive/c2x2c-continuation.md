@@ -1,6 +1,27 @@
 # c2x2c continuation
 
-> Status: reference. Saved on 2026-10-21, then prepared for direct delivery to
+> Status: done, 2026-10-24.
+> The saved tutorial and tooling were delivered through `e2a78078e`.
+> Later thread and Channel work supersedes the implementation described here.
+
+## Closeout
+
+Checked against `7e9fd0178`. Commit `2d6ef8746` changed ParallelMap results
+to borrowed values with reducer-controlled ownership transfer. Public
+Channel and cooperative `Thread.stop` now exist. Use the current
+[thread guide](../../docs/src/guide/contexts-and-threads.md),
+[Channel guide](../../docs/src/guide/channels.md), and
+[ownership closeout](../detached-channel-ownership.md).
+
+The material below records the original checkpoint. Its automatic export
+description, absent-Channel claim, and publication waiver are historical;
+they do not describe current behavior or authorize future gate exceptions.
+
+## Historical delivery record
+
+The following status was recorded before this closeout:
+
+> Historical status: reference. Saved on 2026-10-21, then prepared for direct delivery to
 > origin/dev at Gary's explicit request. He waived broad publication gates for
 > this delivery. The record below distinguishes the original checkpoints from
 > subsequent bootstrap and focused checks. Thread/channel redesign remains

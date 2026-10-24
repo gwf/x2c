@@ -6,11 +6,29 @@ Historical citations below refer to files that have been removed:
 `--system-headers` option is removed too. They describe the earlier tree.
 
 
-> Status: reference with selected follow-ups. A and C shipped, B was
+> Status: retired, 2026-10-24.
+> Tracks A, C, E, F, and G were delivered; B was measured and declined.
+> The packing proposal was withdrawn. Closeout checked at `7e9fd0178`.
+
+## Closeout
+
+Native layout limitations remain reference material, not a dispatched
+implementation. `src/symtab/types.x` still maps `off_t` and `time_t` to
+`long`; a target-specific caller must establish any required change.
+The [remaining questions](../reference/review-followups-2026-10-24.md#sdk-and-native-types)
+preserve that boundary. The old adoption campaign is already archived.
+
+The measurements and alternative designs below remain dated evidence.
+
+## Historical tracks
+
+The following status was recorded before this closeout:
+
+> Historical status: reference with selected follow-ups. A and C shipped, B was
 > measured and declined, and F's selected-root lifetime proof is done.
 > Track E's Iter adoptions and track G's loadable modules shipped; the
 > broader protocol and package extension work completed under
-> [meta sequencing](archive/meta-sequencing.md) on 2026-09-25. Track D's
+> [meta sequencing](meta-sequencing.md) on 2026-09-25. Track D's
 > layout limitations and `off_t`/`time_t` mapping remain recorded below.
 
 ## Implementation tracks
@@ -175,7 +193,7 @@ prove. The `_Atomic` limit above remains separate.
 ## Delivered design tracks
 
 Tracks E, F and G and their broader follow-ups were delivered through
-[meta sequencing](archive/meta-sequencing.md). The descriptions below retain
+[meta sequencing](meta-sequencing.md). The descriptions below retain
 the design and validation record.
 
 ### E. Meta-capable protocols
@@ -183,7 +201,7 @@ the design and validation record.
 Make protocol conformances the source of compile-time bindings, replacing
 hand-listed targets such as the Iter `_into` rows in `lib/lisp.x` and the
 `C.iterator` table in `etc/comptime.xlisp`. See
-[meta authoring and coverage](archive/meta-authoring-and-coverage.md#meta-capable-protocol-opportunity).
+[meta authoring and coverage](meta-authoring-and-coverage.md#meta-capable-protocol-opportunity).
 
 Gary decided on 2026-09-22:
 
@@ -261,7 +279,7 @@ it returns (`lib/lisp.x` `_call_lambda_slots`), so `return &local` or
 `&local` stored into a `meta static` read freed memory. The goal is for
 compile-time code to consume the compiler's shared lifetime analysis rather
 than add its own. The lifetime-certified tranche of the
-[internal adoption campaign](archive/internal-adoption-campaign.md) depends on it.
+[internal adoption campaign](internal-adoption-campaign.md) depends on it.
 
 Gary approved the design on 2026-09-22; the first delivery implements it.
 
@@ -308,7 +326,7 @@ Not covered, as the book's meta and region chapters list: an address kept
 in a field of a local struct that is returned by value or assigned to a
 `meta static` struct, pointer arithmetic, and native calls that retain an
 argument. The remaining project audit is the optional selected-root
-conditional lifetime proof in [meta sequencing](archive/meta-sequencing.md); it
+conditional lifetime proof in [meta sequencing](meta-sequencing.md); it
 reports unknown calls as proof obstacles and lists native effect assumptions.
 File and Job finalizers were delivered with the narrower meta lifetime work.
 
@@ -320,7 +338,7 @@ binding path as the compiler's linked functions.
 
 Gary decided the four open questions on 2026-09-22, and the first delivery
 implements them; the book documents it under
-[native modules](../docs/src/guide/meta-functions.md#native-modules).
+[native modules](../../docs/src/guide/meta-functions.md#native-modules).
 
 - **Spelling.** `x2c build --kind meta-module` and `kind = "meta-module"`
   build a module; `--native-module <file>` on `translate`, `build`, `run` and
@@ -339,7 +357,7 @@ implements them; the book documents it under
   `x2c_module_stamp`, the content hash of the building compiler. The loader
   rejects any other hash.
 - **Runtime coverage.** Superseded on 2026-09-24: the compiler links the
-  whole runtime ([package meta modules](archive/package-meta-modules.md)).
+  whole runtime ([package meta modules](package-meta-modules.md)).
   Gary chose on 2026-09-22 to link whole every runtime
   object that reserves no Var class row. `etc/runtime-objects.sh` derives the
   set from the objects' symbol tables at each compiler link: an object the
@@ -421,5 +439,5 @@ Follow-ups:
 ## Unblocked elsewhere
 
 The generalized-meta tranche of the
-[internal adoption campaign](archive/internal-adoption-campaign.md), starting with
+[internal adoption campaign](internal-adoption-campaign.md), starting with
 Autodiff, was waiting on this work and can start now.

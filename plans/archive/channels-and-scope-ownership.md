@@ -37,7 +37,7 @@ automatic payload adoption, recursive transport export, or inferred dependency
 on all users of a Channel. Ordinary Thread.start/join and ParallelMap remain
 compatible. General callable.go is deferred, not needed by this selected batch.
 
-The [tutorial continuation](../c2x2c-continuation.md) records existing behavior.
+The [tutorial continuation](c2x2c-continuation.md) records existing behavior.
 The contracts below describe intended additions, not implemented capabilities.
 
 ## Agreed ownership semantics

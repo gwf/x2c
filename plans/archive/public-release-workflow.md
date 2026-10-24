@@ -1,4 +1,24 @@
-> Status: reference - delivered staging work and future release procedure.
+> Status: done, 2026-10-24.
+> Workflow implementation and staging evidence are delivered, including
+> `a3084897c`. This closes the implementation plan, not a production release.
+
+## Closeout
+
+The candidate, stage, promote, verify, and restore workflows exist at
+`7e9fd0178`. Use [releasing](../../agents/releasing.md) for current workflow
+and [deployment operations](../../etc/release/README.md) for provisioning,
+recovery, and the first-cutover prerequisite. Those owners include later
+changes such as book PDF distribution.
+
+Production baseline recovery, candidate/version selection, and explicit
+promotion authorization remain future release work. This review did not
+check live staging or production and authorizes no tag or `main` advancement.
+
+## Historical implementation and staging evidence
+
+The following status was recorded before this closeout:
+
+> Historical status: reference - delivered staging work and future release procedure.
 > The staging observations below are dated evidence, not a current deployment check.
 > A future explicitly selected release owns baseline recovery, version, and promotion.
 > This consolidation authorizes no production release or advancement of main.

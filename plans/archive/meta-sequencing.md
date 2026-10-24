@@ -4,7 +4,7 @@
 > (last commit `7a371fa6`); step 4 was delivered through `fd9d7d3e`.
 
 The remaining meta work spans four threads from
-[meta follow-ups](../meta-followups.md): Var class capacity, native
+[meta follow-ups](meta-followups.md): Var class capacity, native
 extensions (track G), meta-capable protocols (track E), and an optional
 lifetime proof (track F phase 8). They are not independent. This
 plan fixes the order so that no step builds on machinery a later step
@@ -90,7 +90,7 @@ root-wide proof, no reported violation, no native assumptions, and more than
 
 ## Not in this sequence
 
-The smaller track C items stay in [meta follow-ups](../meta-followups.md):
+The smaller track C items stay in [meta follow-ups](meta-followups.md):
 an MSYS2 run of the LLP64 `size_t` mapping, `off_t` and `time_t` widths,
 and enum values across translation units.
 

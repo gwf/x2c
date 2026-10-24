@@ -1,6 +1,33 @@
 # Repository review before the cleanup phase, 2026-10-12
 
-> Status: active - review record at `origin/dev` `2ec6ea71`, 2026-10-12.
+> Status: retired, 2026-10-24.
+> The October 12 review and its delivered batches are historical evidence.
+> Remaining questions were separated after source/history review at `7e9fd0178`.
+
+## Closeout
+
+The ten repair batches landed through `4b387196`. A10's String-literal
+cast repair subsequently landed in `05835d4ba`, with the exact expression
+covered by `unittest/compiler-fixtures/string-literal-cast.x`. String switch
+was delivered on October 15. Documentation repair `8dfea5479`, naming
+campaign `2d8f89996`, and later module splits supersede the old section D
+census and section E backlog.
+
+This does not establish that every cleanup candidate is resolved.
+[Review follow-ups](../reference/review-followups-2026-10-24.md#repository-review)
+retains typed List conversion policy, surviving duplication, and the dated
+build-cost question. The active [writing plan](../review-remediation-2026-10-11.md)
+and [quotation plan](../quotation-adoption-audit-2026-10-03.md) own their
+remaining scope. No historical runtime or performance probe was rerun here.
+
+The sections below describe their recorded revisions, even where they use
+the words current, open, or next. Later decisions and this closeout govern.
+
+## Historical review
+
+The following status was recorded before this closeout:
+
+> Historical status: active - review record at `origin/dev` `2ec6ea71`, 2026-10-12.
 > Every finding below was reproduced at that commit in this worktree unless a
 > row says "by reading". Gary decided the rows on 2026-10-12; the
 > [decisions](#decisions-recorded-2026-10-12) section records them, and the

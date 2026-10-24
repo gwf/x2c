@@ -8,6 +8,14 @@
 > Recommendation: retain the experiment, but do not add the optional
 > declaration without an actual checked-format workload that needs it.
 
+## Current disposition, 2026-10-24
+
+Keep this dormant feasibility reference. Source inspection found no shipped
+prepared-format API or newly identified production caller that changes its
+recommendation. Revisit for a measured repeated checked-format workload;
+the old experiment is not a permanent rejection of alternative designs.
+
+
 ## Result and recommendation
 
 The prototype accelerates repeated checked formatting, but current repository
