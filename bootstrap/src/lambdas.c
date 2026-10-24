@@ -1363,8 +1363,11 @@ static List _bind_body(Compiler c, List body){
       }
       ;  x2c_cleanup_push(& _x2c_gensym_defer_record_9); {
         * _x2c_gensym_macro_address_3 = _66; {
-          List _x2c_gensym_return_value_9 = Compiler_resolve_expression(c, body, c -> token); {
-            x2c_cleanup_leave(& _x2c_gensym_defer_record_9);  return _x2c_gensym_return_value_9;
+          {
+            List _x2c_gensym_return_value_9 = Compiler_resolve_expression(c, body, c -> token); {
+              x2c_cleanup_leave(& _x2c_gensym_defer_record_9);  return _x2c_gensym_return_value_9;
+            }
+
           }
 
         }
@@ -1511,8 +1514,11 @@ static List _resolve_outside(Compiler c, List frame, Var value){
       }
       ;  x2c_cleanup_push(& _x2c_gensym_defer_record_10); {
         * _x2c_gensym_macro_address_4 = List_cdr(outside); {
-          List _x2c_gensym_return_value_10 = Compiler_resolve_expression(c, Var_list_payload(value), c -> token); {
-            x2c_cleanup_leave(& _x2c_gensym_defer_record_10);  return _x2c_gensym_return_value_10;
+          {
+            List _x2c_gensym_return_value_10 = Compiler_resolve_expression(c, Var_list_payload(value), c -> token); {
+              x2c_cleanup_leave(& _x2c_gensym_defer_record_10);  return _x2c_gensym_return_value_10;
+            }
+
           }
 
         }

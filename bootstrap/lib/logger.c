@@ -723,7 +723,10 @@ void Logger_flush(Logger logger){
           x2c_cleanup_push(& _x2c_gensym_defer_record_11);
           {
             * _x2c_gensym_macro_address_1 = logger -> emission_depth + 1;
-            for(LogSink sink = logger -> first_sink;  sink;  sink = sink -> next) if(sink -> flush) sink -> flush(logger, sink -> data);
+            {
+              for(LogSink sink = logger -> first_sink;  sink;  sink = sink -> next) if(sink -> flush) sink -> flush(logger, sink -> data);
+            }
+
           }
           x2c_cleanup_leave(& _x2c_gensym_defer_record_11);
         }
@@ -783,7 +786,7 @@ static LogSink _new_sink(Logger logger, LogEmitter emit, LogFlusher flush, Var d
 
 static void _require_quiescent(Logger logger, String owner){
   if(logger && logger -> emission_depth != 0){
-    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/logger.x",.function = "_require_quiescent",.line = 332,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/logger.x",.function = "_require_quiescent",.line = 333,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_0, 4477477457162, 1, Symbol_var(34096809266140), String_var(owner));
     __builtin_unreachable();
   }
