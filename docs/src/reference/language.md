@@ -225,8 +225,8 @@ function named `main` at file scope:
 - **Without `main`**, its top-level statements run in order as the program.
 
 A script unit that defines `main` and also has a top-level statement, such
-as an expression, control flow, a `with` block, or a statement macro, is an
-error.
+as an expression, control flow, a `with` statement, or a statement macro, is
+an error.
 
 In the second form these top-level forms stay at file scope:
 
@@ -236,6 +236,7 @@ In the second form these top-level forms stay at file scope:
   syntax, including decorators of functions and types;
 - `typedef`, `static`, `module`, `extern`, and `meta` declarations and static
   assertions;
+- [`alias`](#expression-aliases-with-alias) declarations in either form;
 - type definitions such as `struct Point { int x; };` and classes;
 - function definitions, including expression-bodied ones, and prototypes,
   meaning declarations that end with a parameter list.
@@ -343,6 +344,8 @@ indentation returns:
 | `while x:`, `switch x:`, `match x:` | `while (x) {`, `switch (x) {`, `match (x) {` |
 | `foreach T v in c:` and a block | `foreach (T v in c) {` ... `}` |
 | `for (a; b; c):` and a block | `for (a; b; c) {` ... `}` |
+| `with (p = v):` and a block | `with (p = v) {` ... `}` |
+| `alias e as n:` and a block | `alias e as n {` ... `}` |
 | `if x: s` | `if (x) s;` |
 | `else: s` | `else s;` |
 | `case X:`, `default:`, `catch P:` and a block | `case X: {` ... `}` |
@@ -1257,8 +1260,8 @@ Its name becomes visible at the definition and remains visible to the end of
 that block and in nested blocks. An inner definition of the same name shadows
 it until the inner block ends. A later definition in the same block replaces
 it for following source. Fixed C and x2c keywords are not identifiers and
-cannot be local macro names; `with` is also reserved because it introduces the
-lexical `with` statement.
+cannot be local macro names; `with` is also reserved because it introduces
+[temporary assignments](#temporary-assignments-with-with).
 
 A bare `name(...)` selects the innermost local macro before a file-local
 `keyword` alias or an ordinary call or typedef-style cast. A bare `name`
@@ -3891,10 +3894,10 @@ int main(void) {
 
 ### System block decorators
 
-Region `auto`, `$let`, and `$lock` need no per-source import. They retain
-normal runtime declaration requirements. Region `auto` uses native syntax;
-`$let` and `$lock` retain their explicit macro spelling. The compatibility
-`$scope` decorator retains its macro collision policy.
+Region `auto` and `$lock` need no per-source import. They retain normal
+runtime declaration requirements. Region `auto` uses native syntax; `$lock`
+retains its explicit macro spelling. The compatibility `$scope` decorator
+retains its macro collision policy.
 
 Region `auto` retains one region around its following statement and defers
 release inside an inner block containing that statement. `auto(pointer)`
@@ -3904,12 +3907,6 @@ previous destination without destroying the selected Scope. More than one
 argument is an invocation error. A decorator around a loop creates one
 region; a decorator around its body creates one per iteration.
 
-`$let(place, value)` captures the address of the place once, saves its value,
-registers restoration, assigns the new value once, and runs its body. The
-place must be addressable and assignable, and its storage must outlive the
-body. Restoration uses the captured address even when later changes would
-cause the original expression to name different storage.
-
 `$lock(mutex)` evaluates a Mutex expression once, calls `lock`, then defers
 `unlock` around its body. A failed acquisition registers no unlock. These
 forms add ordinary blocks and defers and no hidden loops.
@@ -3917,62 +3914,185 @@ forms add ordinary blocks and defers and no hidden loops.
 See [Classes and System Macros](../guide/system-macros.md) for examples and
 expansions.
 
-### With
+### Temporary assignments with `with`
 
-> Planned migration (not implemented): `$let` will become `with`, with
-> comma-separated temporary assignments. The alias construct below will
-> become `alias`, with both braced and scope-wide declaration forms. Current
-> syntax and behavior remain as documented in this section. The
-> [implementation plan](https://github.com/gwf/x2c/blob/dev/plans/with-and-alias.md)
-> records the agreed design and migration.
+> Migration: `$let(place, value)` became `with (place = value)`; give a
+> formerly unbraced body braces. The old expression alias
+> `with expression [as name] { ... }` became
+> `alias expression [as name] { ... }`, described in
+> [Expression aliases with `alias`](#expression-aliases-with-alias).
 
-`with expression [as name] { ... }` gives an expression a short lexical name.
-The name defaults to `_`:
-
-```x2c
-~typedef struct Point { int x, y, z; } Point;
-~int main(void) {
-Point point = { 0 };
-with point {
-  _.x = 1;
-  _.y = 2;
-  _.z = 3;
-}
-~  return point.x == 1 && point.y == 2 && point.z == 3 ? 0 : 1;
-~}
-```
-
-The expression may be any x2c expression. Each use acts as a parenthesized copy
-of that expression. A call used twice is called twice, and an unused expression
-is not evaluated.
-
-The name is available only in the required braced body and only in expression
-positions. It does not replace field names, labels, declaration names, type
-syntax, or literal atoms. A declaration of the same name shadows it from that
-declaration onward.
-
-`with` nests lexically. An inner use of the same name shadows the outer one,
-and the outer meaning resumes after the inner block. Naming the outer
-expression keeps it available through an inner default shorthand:
+`with (destination = value, ...) { body }` assigns temporary values to
+storage and restores the previous values when the body exits:
 
 ```x2c
-~typedef struct Point { int x, y; } Point;
-~typedef struct Pair { Point left, right; } Pair;
+~typedef struct Settings { int mode, depth; } Settings;
+~static Settings settings = { 1, 5 };
 ~int main(void) {
-~  Pair pair = { 0 };
-with pair.left as left {
-  with pair.right {
-    _.x = left.x;
-  }
+with (settings.mode = 2, settings.depth = settings.depth + 1) {
+  printf("%d %d\n", settings.mode, settings.depth);
 }
+printf("%d %d\n", settings.mode, settings.depth);
 ~  return 0;
 ~}
 ```
 
-At the beginning of a statement, `with` always introduces this construct. It
-remains a contextual identifier in declarations and other expression positions.
-A statement that calls a function named `with` uses the spelling
-`(with)(arguments);`.
+```text
+2 6
+1 5
+```
+
+The parentheses, at least one entry, and the braced body are required.
+Entries are separated by commas. Each entry is a simple `=` assignment;
+`+=` and the other compound assignments are rejected. Parenthesize a comma
+expression inside an entry, as in `with (count = (prepare(), 0))`.
+
+Entries run from left to right. Each entry evaluates its destination once,
+saves the value there, registers its restoration, and assigns the new value.
+A later entry sees the assignments of earlier entries. Each entry behaves
+like a nested single-entry `with`.
+
+Exit restores the destinations in reverse order. Restoration runs on every
+exit from the body: its end, `return`, `break`, `continue`, an outward
+`goto`, and a raise. If a later entry's value raises, the entries already
+assigned are restored.
+
+Restoration writes through the address captured at entry, so changes to the
+variables that located the destination do not redirect it. If the body
+assigns a destination again, exit still restores the saved value. A
+destination may appear in more than one entry. Restoration affects only the
+destinations, not other effects of the values or the body.
+
+A destination must be addressable and assignable, and its storage must
+outlive the body. Ordinary typing rejects a `const` destination. A bit-field
+is not supported as a destination. Each entry adds an ordinary block and a
+`defer`; `with` adds no runtime state.
+
+`with` is a contextual word. At the start of a statement, `with` always
+begins a temporary assignment, including after a control header such as
+`if (...)`.
+Elsewhere `with` is an ordinary name: `with(41)` in an expression calls a
+function named `with`. A statement that calls such a function uses the
+spelling `(with)(arguments);`. A macro template may contain `with`.
+`import ... with` keeps its meaning.
+
+### Expression aliases with `alias`
+
+`alias expression as name;` gives an expression a short lexical name. The
+braced form `alias expression as name { ... }` limits the name to its body.
+In the braced form, `as name` may be omitted, and the name is then `_`:
+
+```x2c
+~typedef struct Settings { int width, height; } Settings;
+~typedef struct Window { Settings settings; } Window;
+~int main(void) {
+Window window = { { 3, 4 } };
+alias window.settings as settings;
+settings.width = 5;
+alias window.settings {
+  _.height = 6;
+}
+printf("%d %d\n", window.settings.width, window.settings.height);
+~  return 0;
+~}
+```
+
+```text
+5 6
+```
+
+An alias holds no value. Each use of its name in an expression position
+stands for the parsed expression, grouped as one operand. After
+`alias a + b as sum;`, `sum * 2` means `(a + b) * 2`. An unused alias
+evaluates nothing, and each use evaluates the expression again, so a call
+used twice is called twice. A use can be assigned when the expression is
+assignable. An alias expression may use an earlier alias.
+
+The expression keeps the bindings visible at the declaration. A later
+declaration that hides one of its names does not change what the alias
+names:
+
+```x2c
+~int main(void) {
+int x = 1;
+alias x as y;
+{
+  int x = 2;
+  y = y + 10;
+  printf("%d %d\n", x, y);
+}
+printf("%d\n", x);
+~  return 0;
+~}
+```
+
+```text
+2 11
+11
+```
+
+The name is visible from the end of the declaration to the end of the
+enclosing scope. A braced alias's name ends at its closing brace. An inner
+scope may declare the same name and hide the alias there. Inside a
+function, the body of a braced alias is such a scope. A conflicting
+declaration in the same scope is rejected with
+`declaration 'name' is already bound`. The name is not substituted in
+declaration names, field names, labels, types, or literal atoms.
+
+An alias may appear at file scope, in a module member, among the
+statements of a function, in a `struct` or `union` body, and in an `enum`
+body. An alias in an `enum` body needs no comma after it. The semicolon
+form contributes no statement, field, or enumerator. Inside a function, the
+braced form is an ordinary block. The semicolon form cannot be the body of
+`if` or another statement; use the braced form there.
+
+At file scope and in a type body, a braced alias wraps declarations. Its
+name ends at the closing brace, and the wrapped functions, fields, or
+enumerators keep their ordinary placement:
+
+```x2c
+enum Kinds {
+  alias 10 as base;
+  ONE = base + 1,
+  alias base * 2 { TWO = _, THREE, }
+  FOUR
+};
+
+typedef struct Grid {
+  alias 3 as side;
+  int cells[side * side];
+} Grid;
+
+alias 100 as limit {
+  static int capacity(void) { return limit; }
+}
+
+int main(void) {
+  printf("%d %d %d %d %d %d\n", ONE, TWO, THREE, FOUR,
+         (int) (sizeof(Grid) / sizeof(int)), capacity());
+  return 0;
+}
+```
+
+```text
+11 20 21 22 9 100
+```
+
+A file-scope alias follows the source order of
+[macro definitions](#compile-time-macros): a file that includes it sees it
+from the `#include` line onward. That alias belongs to the including file's
+file scope: another alias of its name there conflicts in either order, and
+so does a later declaration of that name. In a
+[module unit](#module-blocks), a member's alias is visible to later members
+and to the entry text after the module block.
+`static alias expression as name;` keeps the alias in its declaring file, or
+in its member within a module unit, including while that member splices a
+nested member. An alias inside a macro template belongs to that template:
+its name does not capture a caller's name of the same spelling.
+
+`alias` is a contextual word. It stays an ordinary name where it continues
+an operand, as in `alias = 3;` or `alias(4)`, and where it names a type
+that no `as` follows.
 
 ### Foreach
 

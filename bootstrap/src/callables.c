@@ -2109,10 +2109,10 @@ static int f9_callbacks____allows(f9_callbacks___Callback * cb, Type target, Typ
   source = Type_canonicalize(source);
   if(List_equal(Type_list(target), Type_list(source))) return 1;
   {
-    if(Sym_is_var_type(((* cb).c -> sym), target) && Sym_is_var_type(((* cb).c -> sym), source)) return 1;
-    if(! Sym_is_var_type(((* cb).c -> sym), target)) return 0;
-    if(Sym_is_named_value_type(((* cb).c -> sym), source, _919)) return 1;
-    return Type_is_pointer(Sym_resolve_key(((* cb).c -> sym), source));
+    if(Sym_is_var_type((* cb).c -> sym, target) && Sym_is_var_type((* cb).c -> sym, source)) return 1;
+    if(! Sym_is_var_type((* cb).c -> sym, target)) return 0;
+    if(Sym_is_named_value_type((* cb).c -> sym, source, _919)) return 1;
+    return Type_is_pointer(Sym_resolve_key((* cb).c -> sym, source));
   }
 
 }

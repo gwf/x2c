@@ -1,9 +1,9 @@
 # Compile-time Macros
 
-For using the shipped `class`, region `auto`, `$let`, `$lock`, and initializer `auto`
-facilities, see [Classes and System Macros](system-macros.md). This chapter
-explains how to author macros, including the ordinary facilities those
-definitions compose.
+For using the shipped `class`, region `auto`, `with`, `$lock`, and initializer
+`auto` facilities, see [Classes and System Macros](system-macros.md). This
+chapter explains how to author macros, including the ordinary facilities
+those definitions compose.
 
 x2c macros generate source at compile time using C-like x2c syntax. They bind
 parsed, typed source rather than preprocessor text. The compiler constructs,
@@ -60,25 +60,27 @@ function when that fits better.
 
 ## Local expression shorthand
 
-Use `with` when the repeated source is local to one braced block and does not
-need a reusable macro:
+Use `alias` when one scope repeats an expression and does not need a
+reusable macro:
 
 ```x2c
 ~typedef struct Point { int x, y; } Point;
+~typedef struct Shape { Point origin; } Shape;
 ~int main(void) {
-~  Point point = { 0 };
-with point {
-  _.x = 1;
-  _.y = 2;
-}
-~  return point.x == 1 && point.y == 2 ? 0 : 1;
+~  Shape shape = { { 0, 0 } };
+alias shape.origin as origin;
+origin.x = 1;
+origin.y = 2;
+~  return shape.origin.x == 1 && shape.origin.y == 2 ? 0 : 1;
 ~}
 ```
 
-The optional `as name` form replaces `_` with a chosen lexical name. Like a
-macro hole, every use substitutes the original expression and may evaluate it
-again; `with` does not create a runtime temporary. It declares no reusable
-generator and has no name outside its block.
+The name lasts to the end of the enclosing scope. The braced form
+`alias shape.origin { ... }` limits the name `_` to its body. Like a macro
+hole, every use substitutes the original expression and may evaluate it
+again; `alias` does not create a runtime temporary. It declares no reusable
+generator. See
+[expression aliases](../reference/language.md#expression-aliases-with-alias).
 
 ## Keep a generator inside one block
 
@@ -114,7 +116,7 @@ position inside the local name's lifetime. A macro may generate a local
 definition; it has the same source-order visibility and capture behavior as a
 direct one.
 
-`with` remains the smaller choice when the only need is repeated substitution
+`alias` remains the smaller choice when the only need is repeated substitution
 of one expression. A local macro is worth defining when it needs typed
 holes, declarations, control flow, computed source, or more than one input.
 

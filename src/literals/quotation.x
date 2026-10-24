@@ -37,8 +37,8 @@ List Compiler.parse_list_literal(Compiler c) {
   c.next();
   if (c.test(<)>)) return %(expr ("List") (nil));
   Symbol operator = _match_operator_head(c);
-  $let(c.match_is, operator == <!is>)
-  $let(c.match_types, operator == <!quote> ? NULL : c.match_types) {
+  with (c.match_is = operator == <!is>,
+        c.match_types = operator == <!quote> ? NULL : c.match_types) {
     // A `%(` literal that holds only a reader form is that form.
     List reader_form = percent ? _parse_reader_prefix(c) : NULL;
     if (reader_form && c.test(<)>)) return reader_form;

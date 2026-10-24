@@ -3,7 +3,7 @@
 x2c adds structured errors to C. `raise` records an `Error`, a filtered
 `catch` selects it by cause, and `finally` and `defer` run cleanup when a
 block exits early. The [system macros](system-macros.md) attach the same
-`defer` cleanup to managed locals and to region `auto`, `$let`, and `$lock`
+`defer` cleanup to managed locals and to region `auto`, `with`, and `$lock`
 bodies. The [language reference](../reference/language.md#errors-and-cleanup)
 gives the full statement rules.
 

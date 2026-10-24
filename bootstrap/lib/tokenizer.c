@@ -1362,11 +1362,11 @@ void Tokenizer_init(Tokenizer tokenizer, char * text, Symbol mode){
 Token Tokenizer_next(Tokenizer tokenizer){
   if(! tokenizer) return NULL;
   {
-    if((tokenizer -> cursor) &&(tokenizer -> cursor) -> type == 11212) return(tokenizer -> cursor);
-    if(!(tokenizer -> cursor) && ! Bytes_len(tokenizer -> tokens)) return NULL;
-    Token token =(tokenizer -> cursor) ?(tokenizer -> cursor) + 1 :(void *) tokenizer -> tokens;
+    if(tokenizer -> cursor && tokenizer -> cursor -> type == 11212) return tokenizer -> cursor;
+    if(! tokenizer -> cursor && ! Bytes_len(tokenizer -> tokens)) return NULL;
+    Token token = tokenizer -> cursor ? tokenizer -> cursor + 1 :(void *) tokenizer -> tokens;
     while(token -> type == 40896714 || token -> type == 7477210024) token ++;
-    (tokenizer -> cursor) = token;
+    tokenizer -> cursor = token;
     return token;
   }
 

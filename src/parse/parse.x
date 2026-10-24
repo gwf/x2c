@@ -162,11 +162,6 @@ static macro Stmt $fail.parse_method_owner(Expr $c, Expr $site) =>
     <type>, "method name has no concrete owner",
     $site, NULL);
 
-static macro Stmt $fail.parse_decl_bound(Expr $c, Expr $site, Expr $exact) =>
-  $c.report_error(
-    <parse>, %"declaration '${$exact}' is already bound",
-    $site, %("prior binding: '${$exact}'"));
-
 static macro Stmt $fail.parse_params_close(
   Expr $c, Expr $site, Expr $params, Expr $unexpected) =>
   $c.report_error(

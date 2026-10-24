@@ -2,6 +2,8 @@
 
 int main(void) {
   int value = 1;
-  with value as {}
-  return 0;
+  with () {
+    value = 2;
+  }
+  return value;
 }

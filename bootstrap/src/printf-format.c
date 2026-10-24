@@ -4,11 +4,11 @@
 #include "x2c.h"
 
 #include "rewrite.h"
-static List _14, _13, _12, _11, _10, _8, _6, _5;
+static List _17, _16, _14, _13, _12, _8, _6, _5;
 
-static String _17, _16, _15, _2, _1, _0;
+static String _15, _10, _9, _2, _1, _0;
 
-static Var _9, _7, _4, _3;
+static Var _11, _7, _4, _3;
 
 static int _init_guard_ = 0;
 
@@ -19,8 +19,6 @@ static int _printf_valid(String length, int conversion);
 static Type _printf_type(String length, int conversion);
 
 static String _printf_length(const char * * at);
-
-static int _x2c_gensym_string_switch_0(String s);
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -35,15 +33,15 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _6 = cons(_3, _5);
   _7 = Symbol_var(19368);
   _8 = cons(_7, NULL);
-  _9 = Symbol_var(1474468213064);
-  _10 = cons(_9, NULL);
-  _11 = cons(_3, NULL);
-  _12 = cons(_9, _11);
-  _13 = cons(_3, _11);
-  _14 = cons(_9, _13);
-  _15 = String_new("hh");
-  _16 = String_new("h");
-  _17 = String_new("ll");
+  _9 = String_new("hh");
+  _10 = String_new("h");
+  _11 = Symbol_var(1474468213064);
+  _12 = cons(_11, NULL);
+  _13 = cons(_3, NULL);
+  _14 = cons(_11, _13);
+  _15 = String_new("ll");
+  _16 = cons(_3, _13);
+  _17 = cons(_11, _16);
 }
 
 static int _printf_valid(String length, int conversion){
@@ -58,12 +56,10 @@ static Type _printf_type(String length, int conversion){
   if(conversion == 'c') return String_equal(length, _1) ? _8 : NULL;
   if(! strchr("diouxX", conversion)) return NULL;
   int is_signed = conversion == 'd' || conversion == 'i';
-  switch(_x2c_gensym_string_switch_0(length)){
-    case 1 : case 2 : return _8;
-    case 3 : return is_signed ? _8 : _10;
-    case 4 : return is_signed ? _11 : _12;
-    case 5 : return is_signed ? _13 : _14;
-  }
+  if(String_equal(length, _9) || String_equal(length, _10)) return _8;
+  if(String_equal(length, _1)) return is_signed ? _8 : _12;
+  if(String_equal(length, _2)) return is_signed ? _13 : _14;
+  if(String_equal(length, _15)) return is_signed ? _16 : _17;
   return NULL;
 }
 
@@ -71,14 +67,5 @@ static String _printf_length(const char * * at){
   const char * start =(* at);
   if(*(* at) && strchr("hljztL", *(* at)))(* at) +=(*(* at) == 'h' || *(* at) == 'l') &&(* at)[1] == *(* at) ? 2 : 1;
   return String_new_len(start, (int)((* at) - start));
-}
-
-static int _x2c_gensym_string_switch_0(String s){
-  if(String_equal(s, _15)) return 1;
-  if(String_equal(s, _16)) return 2;
-  if(String_equal(s, _1)) return 3;
-  if(String_equal(s, _2)) return 4;
-  if(String_equal(s, _17)) return 5;
-  return 0;
 }
 

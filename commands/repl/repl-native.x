@@ -150,7 +150,7 @@ static List _rewrite_lambda(
   PromptFunction &p, Type type, List params, List captures, List body) {
   Compiler c = p.session.compiler;
   captures = _rewrite(p, captures);
-  $let(c.lambda_scopes, c.lambda_scopes) {
+  with (c.lambda_scopes = c.lambda_scopes) {
     c.begin_lambda_captures(NULL, NULL);
     c.sym.push_new_scope();
     defer c.sym.pop_scope();

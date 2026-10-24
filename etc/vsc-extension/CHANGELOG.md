@@ -5,6 +5,13 @@ first.
 
 ## Unreleased
 
+- Highlight `with (place = value, ...)` assignment blocks at statement
+  start, including inside function bodies, and leave `with(...)` calls in
+  expressions uncolored. Highlight `alias expression as name` declarations
+  and braced `alias` bodies, with `static alias` at file scope. `import`
+  clauses keep their `with` and `as` scopes. Stop highlighting `$let` and
+  the former expression-alias `with` form.
+
 - Give `meta` and `native` standard keyword colors. Recognize declarations
   after another declaration, across line breaks, and through comments.
 
@@ -33,7 +40,7 @@ first.
   `Block` is gone, and `Expr`, `Declaration`, `DeclaratorRow`,
   `NamedType`, `Catch`, `Captures`, and `MatchRow` are recognized.
 - Highlight contextual `meta native` function definitions and distinguish
-  always available `$auto`, `$scope`, `$let`, and `$lock` calls.
+  always available `$auto`, `$scope`, and `$lock` calls.
 - Associate ordinary `.xp` indentation syntax files with x2c.
 - Highlight `static keyword` aliases; macros use ordinary source modules.
 

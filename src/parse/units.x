@@ -21,13 +21,16 @@ List Compiler.parse_top_level_mode(Compiler c, int skip_body) {
   List slot = skip_body ? NULL : c.try_parse_macro_slot(<unit>);
   if (slot) return slot;
   if (c.keyword_form_is_definition()) return _keyword_definition(c, skip_body);
+  if (c.alias_form_starts()) return c.parse_alias_declaration(skip_body);
   if (_module_storage_form(c)) {
     c.token.type = <static>;
-    $let(c.module_declaration, 1) return c.parse_top_level_mode(skip_body);
+    with (c.module_declaration = 1) {
+      return c.parse_top_level_mode(skip_body);
+    }
   }
   if (_static_interface_form(c)) {
     c.next();
-    $let(c.source_private, 1) {
+    with (c.source_private = 1) {
       List retained = skip_body ? NULL : c.replay_declaration_source();
       return retained ? retained : c.parse_top_level_mode(skip_body);
     }
@@ -173,11 +176,12 @@ static List _declaration_form(Compiler c, int skip_body) {
   if (c.meta_form_is_declaration()) meta = _take_meta_marker(c, native);
   Token first = c.token;
   List decl;
-  $let(c.module_declaration, c.module_declaration || meta != NULL)
-  $let(c.shallow, c.shallow || c.public_bodies)
-  $let(c.macro_holes, c.signature_only && !c.macro_holes
-         ? {} : c.macro_holes)
+  with (c.module_declaration = c.module_declaration || meta != NULL,
+        c.shallow = c.shallow || c.public_bodies,
+        c.macro_holes =
+          c.signature_only && !c.macro_holes ? {} : c.macro_holes) {
     decl = c.parse_declaration_row();
+  }
   int body = c.peek(0) == <"{"> || _x2c_at_function_arrow(c);
   Type type = decl.type_from_ast();
   if (skip_body || (c.public_bodies && body &&
@@ -264,6 +268,7 @@ int Compiler.script_statement_starts(Compiler c) {
       c.protocol_form_starts())
     return 0;
   if (c.peek(0) == <auto>) return !c.auto_region_function_starts();
+  if (c.alias_form_starts()) return 0;
   if (c.at_word("with")) return 1;
   if (c.macro_starts_target_at(<unit>)) return !c.macro_targets_unit();
   return !c.test_declaration() || !_declaration_stays(c);
@@ -453,7 +458,9 @@ static List _defined(
   Token staged = native ? NULL : meta;
   if (staged) _reject_expanded_meta(c, decl, meta);
   if (native) c.install_native_meta_function(decl, meta);
-  $let(c.meta_body, staged != NULL) function = _finish_function(c, decl, NULL);
+  with (c.meta_body = staged != NULL) {
+    function = _finish_function(c, decl, NULL);
+  }
   _record_meta_hash(c, function, first, 0);
   _publish_definition(c, decl, function, meta, staged);
   if (staged && c.capture_unit && c.shallow)

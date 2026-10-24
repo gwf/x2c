@@ -10,16 +10,16 @@ usually supplied by `#include "x2c.x"`.
 | --- | --- | --- |
 | `class` | Shipped keyword alias | Declare a type and its applicable defaults |
 | Region `auto` | Keyword before a statement or function | Retain a region or select a Scope destination |
-| `$let` | Shipped decorator | Temporarily replace one captured storage location |
+| `with` | Contextual grammar | Temporarily assign storage within a block |
 | `$lock` | Shipped decorator | Hold a Mutex while a statement runs |
 | Initializer `auto` | Keyword after `=` | Clean up the acquired value at block exit |
 | `foreach` | Shipped keyword alias | Traverse through the ordinary Iter protocol |
-| `with` | Contextual grammar | Substitute a source expression within a block |
+| `alias` | Contextual grammar | Name a source expression within a scope |
 | `$dedent`, `$assert`, `$time` | Shipped, explicit import | Remove boilerplate C leaves to every caller |
 | Project macros | Explicit import | Supply project-specific syntax and policy |
 
 `class` and `foreach` are keyword aliases. Use the `$` spelling for
-`$let` and `$lock`. Initializer `auto` follows `=`; its compatibility spelling
+`$lock`. Initializer `auto` follows `=`; its compatibility spelling
 is `$auto(value)`. For authoring your own macros, continue with
 [Compile-time Macros](macros.md).
 
@@ -316,8 +316,8 @@ auto static int distinct(List words) {
 ```
 
 The `Map` belongs to the retained region, and the region closes on every
-exit, so the `return` releases it. `$lock` and `$let` decorate a function
-the same way.
+exit, so the `return` releases it. `$lock` decorates a function the same
+way.
 
 With one Scope-pointer argument, region `auto` evaluates the argument once, pushes
 that destination, and restores the previous destination on exit:
@@ -351,29 +351,99 @@ The corresponding body placement is:
 
 ## Temporarily change one location
 
-The planned replacement for `$let` is `with`, supporting multiple temporary
-assignments. This change is not implemented; the following examples describe
-the current compiler. See the [migration note](../reference/language.md#with).
-
-`$let(place, value)` captures the address of an assignable place, saves its
-previous value, installs the new value, and restores that same storage on
-exit. Both locating the place and computing the new value happen once:
+`with (place = value) { ... }` saves the value in an assignable place,
+installs a new value, and restores that same storage on exit. Locating the
+place and computing the new value each happen once:
 
 ```x2c
 ~int main(void) {
 int levels[2] = { 1, 2 }, index = 0;
-$let(levels[index++], 7) {
+with (levels[index++] = 7) {
   printf("%d\n", levels[0]);
   index = 1;
 }
+printf("%d %d\n", levels[0], index);
 ~  return levels[0] == 1 && levels[1] == 2 ? 0 : 1;
 ~}
 ```
 
-Changing `index` does not redirect restoration. The place's storage must
-outlive the body. Ordinary typing rejects const assignment or taking a
-bitfield's address. By comparison, `with` substitutes its source expression
-on each use and creates no temporary; it is not a saved-value binding.
+```text
+7
+1 1
+```
+
+Changing `index` does not redirect restoration. Each entry expands to an
+ordinary block with a `defer`:
+
+```x2c
+~int main(void) {
+~int levels[2] = { 1, 2 }, index = 0;
+{
+  int *address = &levels[index++];
+  int previous = *address;
+  defer *address = previous;
+  *address = 7;
+  {
+    printf("%d\n", levels[0]);
+    index = 1;
+  }
+}
+~  return levels[0] == 1 ? 0 : 1;
+~}
+```
+
+Several entries, separated by commas, behave like nested blocks. They run
+from left to right and are restored in reverse order:
+
+```x2c
+~int main(void) {
+int mode = 1, depth = 5;
+with (mode = 2, depth = depth + 1) {
+  printf("%d %d\n", mode, depth);
+}
+printf("%d %d\n", mode, depth);
+~  return 0;
+~}
+```
+
+```text
+2 6
+1 5
+```
+
+The place's storage must outlive the body. Ordinary typing rejects a
+`const` place, and a bit-field is not supported. The
+[reference](../reference/language.md#temporary-assignments-with-with) gives
+the complete rules.
+
+## Name an expression
+
+`alias expression as name;` gives an expression a short name for the rest
+of the scope. `alias expression { ... }` names it `_` within the body:
+
+```x2c
+~typedef struct Point { int x, y; } Point;
+~typedef struct Box { Point corner; } Box;
+~int main(void) {
+Box box = { { 0, 0 } };
+alias box.corner as corner;
+corner.x = 3;
+alias box.corner {
+  _.y = 4;
+}
+printf("%d %d\n", box.corner.x, box.corner.y);
+~  return 0;
+~}
+```
+
+```text
+3 4
+```
+
+Unlike `with`, an alias saves nothing and creates no temporary. Each use
+substitutes the source expression again. See
+[expression aliases](../reference/language.md#expression-aliases-with-alias)
+for the scopes where an alias may appear.
 
 ## Hold a Mutex
 
@@ -463,7 +533,7 @@ cleans the variable's value at exit. See
 
 ## Include the rest of the set
 
-`class`, `foreach`, `$let`, `$lock`, and `auto` need no include. A
+`class`, `foreach`, `with`, `alias`, `$lock`, and `auto` need no include. A
 second set ships in `lib/system-macros.x` and becomes available with one
 line:
 

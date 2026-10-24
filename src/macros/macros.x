@@ -53,4 +53,5 @@ module {
   "templates.x",
   "values.x",
   "lisp.x",
+  "aliases.x",
 }

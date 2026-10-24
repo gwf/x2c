@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/alias-missing-expression.x:4:9: parse: alias requires an expression
+    alias {}
+          ^
+

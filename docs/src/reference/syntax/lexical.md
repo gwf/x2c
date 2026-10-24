@@ -82,8 +82,8 @@ while retaining original token text:
 | `__restrict`, `__restrict__` | `restrict` |
 | `thread_local`, `_Thread_local` | `threaded` |
 
-Other words initially emit `ident`, including `is`, `not`, `with`, `as`,
-`tag`, `macro`, `keyword`, `using`, `meta`, `native`, `Self`, `class`,
+Other words initially emit `ident`, including `is`, `not`, `with`, `alias`,
+`as`, `tag`, `macro`, `keyword`, `using`, `meta`, `native`, `Self`, `class`,
 `foreach`, `module`, `_Static_assert`, `_Generic`, `offsetof`, and `va_arg`.
 Parser context or visible macro definitions give these words their roles.
 A named-reference sigil scans the immediately following identifier as

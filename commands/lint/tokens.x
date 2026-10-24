@@ -157,11 +157,11 @@ static void _prose_rules(Lint l):
       line++
 
 /* The parentheses of a call or signature: a `(` after a name that is not
-   a macro invocation. */
+   a macro invocation or the header of `foreach` or `with`. */
 static int _call(Lint l, int at):
   if l.tokens[at].type != <"(">: return 0
   int name = l.prev(at)
-  if name < 1 || l.tokens[name].text == "foreach": return 0
+  if name < 1 || l.tokens[name].text in %("foreach" "with"): return 0
   String before = l.tokens[name - 1].text
   if l.tokens[name].type != <ident> && before != "." && before != "->":
     return 0

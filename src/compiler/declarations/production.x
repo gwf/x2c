@@ -36,9 +36,7 @@ void Compiler.run_declaration_effects(Compiler c) {
       c.read_source(file, text);
       markers = NULL;
     }
-    $let(c.filename, file)
-    $let(c.text, text)
-    $let(c.line_markers, markers) {
+    with (c.filename = file, c.text = text, c.line_markers = markers) {
       c.import_stack.push(context);
       defer c.import_stack.take_last();
       Token token = c.thaw_declaration_syntax(site);
@@ -76,7 +74,7 @@ static int _try_unit_macro(Compiler c) {
   int failed = 0;
   SymTxn transaction = c.begin_semantic_transaction();
   DiagnosticsHold hold = c.diagnostics.hold();
-  $let(c.recovery_depth, c.recovery_depth + 1) {
+  with (c.recovery_depth = c.recovery_depth + 1) {
     try _expand_unit_macro(c);
     catch %(malformed *): failed = 1;
   }
@@ -129,7 +127,7 @@ List Compiler.replay_declaration_source(Compiler c) {
   match (source)
     case %(declaration-source ?(int end) ?syntax ?facts): {
       List bound;
-      $let(c.replaying_declaration, 1) {
+      with (c.replaying_declaration = 1) {
         _restore_declaration_bindings(c, syntax, facts, {});
         bound = c.bind_syntax(syntax, <unit>, NULL);
       }

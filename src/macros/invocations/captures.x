@@ -69,7 +69,7 @@ static void _argument_separator(Compiler c, Symbol kind) {
 
 static Var _parse_argument(Compiler c, Symbol kind) {
   // Captures retain complete syntax even while collection skips other bodies.
-  $let(c.shallow, 0) {
+  with (c.shallow = 0) {
     if (!kind) return c.parse_assignment();
     switch (kind) {
       case <expr>:       return c.parse_assignment();

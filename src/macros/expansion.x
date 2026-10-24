@@ -28,12 +28,12 @@ List Compiler.expand_macro_invocation_node(
                     x.definition.assoc(<target>) == <block>;
   if (block_scope) c.sym.push_new_scope();
   defer if (block_scope) c.sym.pop_scope();
-  $let(c.token, invocation) {
+  with (c.token = invocation) {
     _check(x);
     List result = NULL;
-    $let(c.expansion_floor,
-         c.macro_stack ? c.expansion_floor : c.names.next_binding)
-    $let(c.macro_stack, c.macro_stack) {
+    with (c.expansion_floor =
+            c.macro_stack ? c.expansion_floor : c.names.next_binding,
+          c.macro_stack = c.macro_stack) {
       result = _bind_expansion(x, position);
     }
     return result;
@@ -121,7 +121,7 @@ static List _bind_expansion(Expansion &x, Symbol position) {
   int placed = c.placements.len();
   Ast constructed = matched ? _construct(x, template_bindings) : NULL;
   List result = NULL;
-  $let(c.origin, expansion_origin) {
+  with (c.origin = expansion_origin) {
     result = c.bind_syntax(
       matched ? constructed : void,
       position, c.return_type);

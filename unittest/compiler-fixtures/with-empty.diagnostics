@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/with-empty.x:5:3: macro: with requires at least one assignment
+    with () {
+    ^^^^
+

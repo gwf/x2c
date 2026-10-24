@@ -291,7 +291,7 @@ static void _serve(Var request) {
 
 static void _call(Map table, String name, List arguments, int objects) {
   Var target;
-  $let(helper_notices, []) {
+  with (helper_notices = []) {
     if (!table || !table.try_get(name, target)) _reply(%(missing));
     else _apply(target, name, arguments, objects);
   }

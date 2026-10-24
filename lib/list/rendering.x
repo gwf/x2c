@@ -39,7 +39,7 @@ String List.str(List lst) {
 */
 Buffer List.write_str(List lst, Buffer out) {
   Render r = {out, <str>};
-  $let(out.padding, 1) _value(r, lst);
+  with (out.padding = 1) { _value(r, lst); }
   return out;
 }
 

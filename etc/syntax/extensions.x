@@ -45,6 +45,18 @@ List syntax_extensions(void) => %(
                  "class" "static typedef" "int i, float x"
                  "Var (a, b) = values")
       (reference "../reference/language.md#c-foundation"))
+    (feature aliases
+      (title "Expression aliases")
+      (summary "Name an expression for the rest of a scope or for one body.")
+      (grammar unit-alias block-item statement field enumerator-list
+               alias-head alias-name named-alias alias-wrapper
+               alias-statement field-alias enumerator-alias)
+      (lexical c-tokens)
+      (grammar-note "alias expression as name declarations at file, module, block, aggregate, and enumerator positions; braced alias bodies whose omitted name defaults to _; and file-private static alias.")
+      (lexical-note "alias and as are contextual words; an alias needs no comma among enumerators.")
+      (spellings "alias e as name;" "alias e as name { ... }"
+                 "alias e { ... _ ... }" "static alias e as name;")
+      (reference "../reference/language.md#statements"))
     (feature protocols
       (title "Protocols")
       (summary "Declare a method contract and adopt it for a type.")
@@ -113,12 +125,13 @@ List syntax_extensions(void) => %(
       (title "Cleanup and errors")
       (summary "Scope resources, defer work, and handle structured errors.")
       (grammar auto-region-prefix auto-region-function auto-region-statement
-               with-statement statement try-statement catch-arm catch-payload
+               with-statement with-entry statement try-statement catch-arm catch-payload
                catch-detail raise-statement raise-detail)
       (lexical c-tokens percent-forms list-atom)
-      (grammar-note "auto regions with optional nonempty destination, with/as blocks, defer statements, try/catch/finally, and raise with structured details.")
-      (lexical-note "defer, try, catch, finally, and raise are keywords; with/as are contextual; error patterns reuse List mode.")
-      (spellings "auto { ... }" "auto(destination)" "with" "as"
+      (grammar-note "auto regions with optional nonempty destination, with blocks that assign and restore places, defer statements, try/catch/finally, and raise with structured details.")
+      (lexical-note "defer, try, catch, finally, and raise are keywords; with is contextual at statement start; error patterns reuse List mode.")
+      (spellings "auto { ... }" "auto(destination)"
+                 "with (place = value, ...)"
                  "defer" "try" "catch" "finally" "raise")
       (reference "../reference/language.md#errors-and-cleanup"))
     (feature macros-meta

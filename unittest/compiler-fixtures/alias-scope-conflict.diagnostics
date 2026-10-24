@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/alias-scope-conflict.x:6:12: parse: declaration 'copy' is already bound
+    int copy = 2;
+             ^
+  note: prior binding: 'copy'
+

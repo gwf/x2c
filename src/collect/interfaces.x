@@ -377,7 +377,7 @@ Map Compiler.linked_prelude_records(Compiler c) {
   walker.sources = c.sources;
   walker.include_dirs = c.include_dirs;
   walker.filename = c.filename;
-  $let(interface_mirror, NULL)
+  with (interface_mirror = NULL) {
     foreach (String source in _linked_prelude_sources()) {
       String path = %"${x2c_get_root()}/$source";
       String canonical = _canonical_path(path);
@@ -388,6 +388,7 @@ Map Compiler.linked_prelude_records(Compiler c) {
         _stored_record(canonical, _process_cache()[canonical]));
       if (text) records[Compiler.portable_path(canonical)] = text;
     }
+  }
   foreach ((String canonical, Var entry) in saved)
     if (entry is <list>) _process_cache()[canonical] = entry;
   return records;

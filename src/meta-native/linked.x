@@ -36,9 +36,11 @@ static int _project_meta_uses_linked(
   Map linked = _linked_module();
   if (!(name in linked)) return 0;
   Map hashes = c.meta_provider_hashes(provider);
-  $let(c.filename, Compiler.absolute_home_path(provider))
-  $let(c.meta_hashes, hashes) $let(c.meta_calls, {})
+  with (c.filename = Compiler.absolute_home_path(provider),
+        c.meta_hashes = hashes,
+        c.meta_calls = {}) {
     return _linked_copy(c, name, linked);
+  }
 }
 
 /* linked meta definitions
@@ -125,9 +127,11 @@ static int _linked_texts_match(
       Var (_, provider) = advertisement;
       Map hashes = c.meta_provider_hashes(provider);
       if (!(name in hashes)) return 0;
-      $let(c.filename, Compiler.absolute_home_path(provider))
-      $let(c.meta_hashes, hashes) $let(c.meta_calls, {})
+      with (c.filename = Compiler.absolute_home_path(provider),
+            c.meta_hashes = hashes,
+            c.meta_calls = {}) {
         return _linked_texts_match(c, name, linked, reached);
+      }
     }
     return !(name in linked_hashes);
   }

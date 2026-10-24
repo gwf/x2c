@@ -53,7 +53,7 @@ capture, `using &name`, moves the local into a cell of the active region, so
 the closure holds that cell, which the active region owns.
 
 A store into a place that an earlier `defer` in the same block writes
-back, as `$let` does, is undone before the block ends and is not reported.
+back, as `with` does, is undone before the block ends and is not reported.
 A store made before that `defer`, or after a `defer` that runs on only one
 branch, is reported, because a `return` between them leaves the place
 holding the value.

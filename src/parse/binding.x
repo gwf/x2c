@@ -38,8 +38,9 @@ List Compiler.bind_syntax(
   if (context == <map-entry> && input.car() != <seq> &&
       input.car() != Atom.intern("macro-invoke"))
     return c.resolve_map_entry(input, c.token);
-  $let(c.return_type, return_type)
+  with (c.return_type = return_type) {
     return _bind_form(c, input, context, pending);
+  }
 }
 
 /* Replaces `syntax` with a staged code value and reports whether that
@@ -230,7 +231,7 @@ static List _bind_invocation(
   if (invocation != <m-invoke>)
     return c.expand_macro_invocation_node(
       definition, arguments, site, context);
-  $let(c.macro_application, c.macro_application + 1) {
+  with (c.macro_application = c.macro_application + 1) {
     SymTxn transaction = { 0 };
     if (c.recovery_depth > 0)
       transaction = c.begin_semantic_transaction();

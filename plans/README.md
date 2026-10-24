@@ -47,7 +47,6 @@ and status; it does not implement the remaining features.
 
 | Owning plan | Remaining scope | Next action |
 | --- | --- | --- |
-| [Temporary assignments and lexical aliases](with-and-alias.md) | Implement `with` temporary assignments and both `alias` forms; migrate old spellings. | Follow the agreed design and staged bootstrap transition. |
 | [Language-reference writing](review-remediation-2026-10-11.md) | Complete the selected source-form, rewrite, and Lisp explanations. | Identify exact missing coverage in the existing book, then fill it. |
 | [Structured lint findings](x2c-lint-and-format.md) | Approved phase 8 List output and compiler consumption. | Add the optional interface; preserve the experimental distribution and conditional editor integration. |
 | [Detached Channel ownership](detached-channel-ownership.md) | Close out evidence for the correction already present on `dev`. | Recover final benchmark, verification, and delivery/hold records; do not repeat implementation. |
@@ -95,6 +94,9 @@ Archived 2026-10-24 after checking source and delivery history:
   remain unselected.
 - [Meta follow-ups](archive/meta-followups.md): completed or declined tracks;
   native-type limitations remain dated research.
+- [Temporary assignments and aliases](archive/with-and-alias.md):
+  `with` assignment lists and both `alias` forms replaced `$let` and the old
+  `with` alias; implemented from `ab9645f0c`.
 - [Public release workflow](archive/public-release-workflow.md): workflow
   implementation delivered, including staging evidence at `a3084897c`.
   Closure does not claim a production release or current staging health.

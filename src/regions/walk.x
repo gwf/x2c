@@ -187,7 +187,7 @@ static void _walk_defer(Walk &w, Var body) {
   _scan(w, body, 1);
 }
 
-/* `$let` saves a place, installs a value, and restores the place in a
+/* A `with` entry saves a place, installs a value, and restores the place in a
    defer. A store into a place this block restores is undone before the
    block ends, so it is not an escape. */
 static int _note_restored(Walk &w, Var body) {
@@ -423,8 +423,9 @@ static void _store(Walk &w, Var target, Var value) {
   _flow(w, value, type, sink, object);
 }
 
-/* The place a store target names, seen through the pointer a `$let` holds:
-   `*address` and the place `address` was taken from are one storage. */
+/* The place a store target names, seen through the pointer a `with` entry
+   holds: `*address` and the place `address` was taken from are one
+   storage. */
 static Var _target_place(Walk &w, Var target) {
   Var inner = _unwrap(target);
   match (inner)

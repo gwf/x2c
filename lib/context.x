@@ -366,7 +366,7 @@ Context Context.open_isolated_named(const char *name) => _open(name, 1);
 static Context _open(const char *name, int isolated) {
   Context.initialize();
   Context context = xcalloc(1, sizeof(struct Context));
-  with context {
+  alias context {
     _.parent = current_context;
     _.destination_scope = Scope.top();
     int pushed = 0, installed = 0;

@@ -36,6 +36,7 @@ typedef struct GenNames{
 
 typedef struct SymScope{
   Map symbols, bindings, enumerators, macros;
+  int aliases;
 }
 SymScope;
 
@@ -94,6 +95,7 @@ typedef struct Compiler{
   Map proto_cache;
   Map adoptions;
   Map macro_holes;
+  int alias_level;
   Map local_macro_captures;
   int macro_application;
   List lambda_scopes;

@@ -31,7 +31,7 @@ static macro Stmt $fail.literals_catch_detail(Expr $c, Expr $origin) =>
 */
 List Compiler.parse_raise_literal(Compiler c) {
   c.expect(<"%(">);
-  $let(c.runtime_literals, 1) {
+  with (c.runtime_literals = 1) {
     List code = _parse_raise_code(c);
     Array args = [];
     while (c.peek(0) != <)>) {
@@ -97,8 +97,7 @@ static List _parse_detail_value(
 */
 List Compiler.parse_catch_pattern_literal(Compiler c) {
   c.expect(<"%(">);
-  $let(c.in_pattern, 1)
-  $let(c.runtime_literals, 1) {
+  with (c.in_pattern = 1, c.runtime_literals = 1) {
     List code = _parse_catch_code(c);
     Array elements = [];
     elements.push(code);

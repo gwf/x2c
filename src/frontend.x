@@ -338,8 +338,9 @@ static Map _preprocess_input(Frontend frontend, ParsedUnit &unit) {
   /* Owning-source collection already counted declaration names. CPP adds
      host declarations without counting the same source's names again. */
   if (request.live_symbols) cpp.shallow_parse(globs);
-  else $let(c.names.counters, c.names.counters.copy())
+  else with (c.names.counters = c.names.counters.copy()) {
     cpp.shallow_parse(globs);
+  }
   Map symbols = cpp.sym.global_symbols();
   foreach (List row in private_rows) {
     if (row.len() == 1) symbols.del(row.car());
@@ -373,7 +374,7 @@ static List _unit_private_row(Map globs, List key) {
 static Map _collect_input(Frontend frontend, ParsedUnit &unit) {
   Compiler c = unit.compiler;
   unit.globals = {};
-  $let(c.package, c.package) {
+  with (c.package = c.package) {
     _enter_package(frontend, c);
     return c.collect_symbols(unit.globals);
   }

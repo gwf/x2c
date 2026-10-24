@@ -58,7 +58,7 @@ List Compiler.lower_typed_adapter_expr(Compiler c, List expression) {
       Callback cb = {.c = c};
       cb.source = source;
       match (payload) case %(ident ?binding): cb.source_binding = binding;
-      $let(c.origin, at) {
+      with (c.origin = at) {
         cb.target = c.sym.resolve_key(spelling);
         _split(cb);
         _check_signature(cb);
@@ -116,7 +116,7 @@ static int _allows(Callback &cb, Type target, Type source) {
   target = target.canonicalize();
   source = source.canonicalize();
   if (target == source) return 1;
-  with cb.c.sym {
+  alias cb.c.sym {
     if (_.is_var_type(target) && _.is_var_type(source)) return 1;
     if (!_.is_var_type(target)) return 0;
     if (_.is_named_value_type(source, "Symbol")) return 1;

@@ -66,7 +66,7 @@ module List _function(Emitter &e, List ast) {
   bindings = %( $bindings );
   body = %( $body );
   List decl, body_code;
-  $let(e.static_objects, {}) {
+  with (e.static_objects = {}) {
     decl = _emit(e, bindings);
     body_code = _emit(e, body);
   }
@@ -101,8 +101,9 @@ module List _typedef(Emitter &e, List ast) {
 }
 
 module List _block(Emitter &e, List ast) {
-  $let(e.native_aliases, e.native_aliases)
+  with (e.native_aliases = e.native_aliases) {
     return %("{" @{_emit(e, ast.cdr())} "}");
+  }
 }
 
 module List _binding(Emitter &e, List ast) =>

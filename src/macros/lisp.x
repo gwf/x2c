@@ -26,8 +26,7 @@ void Compiler.ensure_macro_lisp(Compiler c) {
 module Var _eval_string(Compiler c, String source, Token invocation) {
   Var result;
   MetaContext *context = MetaContext.current();
-  $let(context.site, invocation)
-  $let(context.evaluator, c) {
+  with (context.site = invocation, context.evaluator = c) {
     /* A compiler operation called from Lisp has already reported its
        failure; wrapping the transfer would report it a second time. */
     try result = c.macro_lisp.eval_string(source);
@@ -107,7 +106,7 @@ void Compiler.evaluate_declaration_effect(
                ${invocation.pos} $form);
   if (key in c.evaluated_effects ||
       (!library_filling && library_imports && key in library_imports)) return;
-  $let(c.collect_protocols, 1) {
+  with (c.collect_protocols = 1) {
     c.ensure_macro_lisp();
     _eval_string(c, form, invocation);
   }
@@ -249,10 +248,14 @@ module Var _rebind_imported(Compiler c, Var stored) {
   if (stored is not <list>) return stored;
   List definition = stored;
   if (definition.car() != <macrodef>) return definition;
+  return _rebind_globals(c, definition);
+}
+
+/* Binds each identifier of cached syntax in the current global scope. */
+module List _rebind_globals(Compiler c, List syntax) {
   Map replacements = {};
-  _reference_bindings(c, definition, replacements);
-  if (!replacements.len()) return definition;
-  return _replace_bindings(definition, replacements);
+  _reference_bindings(c, syntax, replacements);
+  return replacements.len() ? _replace_bindings(syntax, replacements) : syntax;
 }
 
 static void _reference_bindings(
@@ -367,8 +370,9 @@ Lisp Compiler.open_macro_library(Compiler c) {
     library_imports = {};
     library_definitions = {};
     library_comptime = {};
-    $let(c.macro_lisp, shared)
+    with (c.macro_lisp = shared) {
       return _fill_library(c, shared);
+    }
   }
 }
 

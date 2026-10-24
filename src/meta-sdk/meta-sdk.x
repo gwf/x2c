@@ -20,7 +20,7 @@
     `has_bindings` whether it bound captured values. `evaluator` is the
     compiler evaluating Lisp and `site` where that evaluation stands, which
     a nested import changes without an expansion. Each evaluation installs
-    its part with `$let`, so a captured entry is valid only while its
+    its part with `with`, so a captured entry is valid only while its
     expansion is active. */
 typedef struct MetaContext {
   Compiler expander, evaluator;

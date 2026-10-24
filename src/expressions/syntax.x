@@ -642,14 +642,12 @@ static List _parse_ident_primary(Compiler c) {
     if (c.macro_holes) return %(expr ("Macro") (macro-value $definition));
     return c.capture_macro_value(definition);
   }
-  List binding = c.with_binding();
-  Var stored;
-  if (binding && c.semantic_binding_facts().try_get(
-    %(with $binding), stored)) {
-    List expression = stored;
+  /* An alias use is its parsed expression, already grouped as one operand,
+     so `(name)` stays the only source spelling of a parenthesized name. */
+  List alias = c.alias_expression();
+  if (alias) {
     c.next();
-    match (expression)
-      case %(expr ?type ?): return %(expr $type (parens $expression));
+    return alias;
   }
   List keyword = c.try_parse_macro_expression();
   if (keyword) return keyword;

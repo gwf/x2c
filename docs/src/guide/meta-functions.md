@@ -787,7 +787,7 @@ list.
 ### Lifetime and state
 
 A block that holds a cleanup keeps its C meaning in a meta body. `defer`,
-region `auto`, and `$let` run their cleanup when the block ends and on every
+region `auto`, and `with` run their cleanup when the block ends and on every
 exit through it:
 
 - A `return` computes its value first, then runs every pending cleanup,
@@ -811,7 +811,7 @@ meta int exits(int n) {
     defer total += 1;
     if (n > 5) return total * 100;
   }
-  $let(total, 0) total = 7;
+  with (total = 0) { total = 7; }
   auto {
     Array scratch = [total];
     total += (int) scratch.len();
@@ -832,8 +832,8 @@ int main(void) {
 ```
 
 `$exits(2)` runs both turns, adds 1 as its block ends, restores `total` after
-`$let`, and adds the one element counted in region `auto`. `$exits(9)` leaves the
-loop at the `break` after four cleanups. Its `return` computes 2,000 before
+`with`, and adds the one element counted in region `auto`. `$exits(9)` leaves
+the loop at the `break` after four cleanups. Its `return` computes 2,000 before
 the block's cleanup adds 1 to `total`. A loop with a cleanup on its
 iteration path still runs each turn in constant space.
 

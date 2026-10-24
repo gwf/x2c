@@ -1,9 +1,15 @@
 # Temporary assignments with `with`; lexical substitution with `alias`
 
-> Status: active
-> Design agreed with Gary on 2026-10-24. Implementation has not started.
-> This document records future language behavior; the current compiler still
-> uses `$let` and the existing `with` expression-alias construct.
+> Status: done, 2026-10-24.
+> Implemented as designed in the batch that begins at `ab9645f0c`, which
+> goes to `dev` through the shared integrator. The built-in `$x2c.with` decorator lowers `with` through
+> `with.expand` in `src/builtins.x`; `src/macros/aliases.x` owns both
+> `alias` forms. Local aliases are Sym rows; file-scope and body aliases are
+> macro-state entries, for the reason its header records. Two interactions
+> surfaced during implementation: a substituted plain name read as `(name)`
+> destructuring, and a hidden local shared its C spelling with the local
+> that hid it. Substitution therefore returns the expression without a
+> `parens` node, and `Compiler.reveal_binding` respells the hidden local.
 
 ## Summary
 
@@ -91,19 +97,19 @@ file. Local and declaration-body aliases do not escape their lexical scope.
 
 ### Existing behavior and owners
 
-- [Built-in macros](../etc/builtin-macros.x) implement `$let` with a captured
+- [Built-in macros](../../etc/builtin-macros.x) implement `$let` with a captured
   address, saved value, assignment, and `defer`.
-- [Statement parsing](../src/statements.x) implements current `with` aliases
+- [Statement parsing](../../src/statements.x) implements current `with` aliases
   with a parsed expression, a lexical binding, and semantic binding facts.
-  [Expression parsing](../src/expressions/syntax.x) substitutes that expression;
-  [declarator parsing](../src/parse/declarators.x) handles template shadowing.
-- [Local macro rules](../docs/src/reference/language.md#local-definitions)
+  [Expression parsing](../../src/expressions/syntax.x) substitutes that expression;
+  [declarator parsing](../../src/parse/declarators.x) handles template shadowing.
+- [Local macro rules](../../docs/src/reference/language.md#local-definitions)
   provide lexical visibility and macro-generated local definitions, but
   require invocation parentheses. Free names resolve where expansion lands.
-- [Decorator and keyword rules](../docs/src/reference/language.md#decorators)
+- [Decorator and keyword rules](../../docs/src/reference/language.md#decorators)
   let `keyword` give a macro an identifier spelling. They retain its argument
   grammar and do not provide `alias expression as name;`.
-- [Current alias semantics](../docs/src/reference/language.md#with) establish
+- [Current alias semantics](../../docs/src/reference/language.md#expression-aliases-with-alias) establish
   repeated expression substitution, not a stored value or captured reference.
 
 Keep aliases on the existing parsed-expression representation rather than

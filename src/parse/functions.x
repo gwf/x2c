@@ -157,7 +157,7 @@ static void _publish_lifecycle(
 }
 
 static List _expression_body(Compiler c) {
-  with c {
+  alias c {
     _.expect(<=>);
     _.expect(<">">);
     Token origin = _.token;
@@ -188,11 +188,12 @@ module List _bind_collected_function(
   Type type = %(declare $return_type (bindings $declarator)).type_from_ast();
   if (c.public_bodies &&
       (!type.is_inline() || type.is_static() || c.source_private)) return NULL;
-  $let(c.macro_stack, construction) {
+  with (c.macro_stack = construction) {
     Token invocation = c.macro_stack ? c.macro_stack.last().list()[3] : NULL;
-    $let(c.origin, invocation ? c.record_origin(invocation) : c.origin)
+    with (c.origin = invocation ? c.record_origin(invocation) : c.origin) {
     return c.bind_syntax(
       %(function $return_type $declarator $body), <unit>, c.return_type);
+    }
   }
 }
 
