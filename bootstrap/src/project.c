@@ -84,11 +84,11 @@ typedef struct f8_manifest___Manifest{
 }
 f8_manifest___Manifest;
 
-static List _107, _105, _104, _102, _100, _99, _95, _94, _92, _90, _85;
+static List _92, _90, _89, _87, _85, _84, _80, _79, _77, _75, _70;
 
-static String _124, _123, _122, _121, _120, _119, _118, _117, _116, _115, _114, _113, _112, _111, _110, _109, _108, _97, _88, _86, _83, _82, _81, _80, _79, _78, _77, _76, _75, _74, _73, _72, _71, _70, _69, _68, _67, _66, _65, _64, _63, _62, _61, _60, _59, _58, _57, _56, _55, _54, _53, _52, _51, _50, _49, _48, _47, _46, _45, _44, _43, _42, _41, _40, _39, _38, _37, _36, _35, _34, _33, _32, _31, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _124, _123, _122, _121, _120, _119, _118, _117, _116, _115, _114, _113, _112, _111, _110, _109, _108, _107, _106, _105, _104, _103, _102, _101, _100, _99, _98, _97, _96, _95, _94, _93, _82, _73, _71, _68, _67, _66, _65, _64, _63, _62, _61, _60, _59, _58, _57, _56, _55, _54, _53, _52, _51, _50, _49, _48, _47, _46, _45, _44, _43, _42, _41, _40, _39, _38, _37, _36, _35, _34, _33, _32, _31, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
-static Var _106, _103, _101, _98, _96, _93, _91, _89, _87, _84;
+static Var _91, _88, _86, _83, _81, _78, _76, _74, _72, _69;
 
 static int _init_guard_ = 0;
 
@@ -220,27 +220,33 @@ static String f7_sources____glob_literal(String text);
 
 static Array f7_sources____named_file(Project p, String pattern);
 
+static int _x2c_gensym_string_switch_0(String s);
+
+static int _x2c_gensym_string_switch_1(String s);
+
+static int _x2c_gensym_string_switch_2(String s);
+
 static Var _x2c_gensym_lambda_0(Var library);
 
 static Var _x2c_gensym_func_adapt_0(Func _x2c_gensym_func_binding_0, const FuncArg * _x2c_gensym_func_argv_0);
 
 static Func _x2c_gensym_func_handle_0;
 
-_x2c_gensym_initializer_choice_0D185262_0((_x2c_gensym_func_handle_0 = x2c_func_shared(_x2c_gensym_func_adapt_0, _107)))
+_x2c_gensym_initializer_choice_0D185262_0((_x2c_gensym_func_handle_0 = x2c_func_shared(_x2c_gensym_func_adapt_0, _92)))
 static Var _x2c_gensym_lambda_1(String flag);
 
 static Var _x2c_gensym_func_adapt_1(Func _x2c_gensym_func_binding_1, const FuncArg * _x2c_gensym_func_argv_1);
 
 static Func _x2c_gensym_func_handle_1;
 
-_x2c_gensym_initializer_choice_0D185262_1((_x2c_gensym_func_handle_1 = x2c_func_shared(_x2c_gensym_func_adapt_1, _100)))
+_x2c_gensym_initializer_choice_0D185262_1((_x2c_gensym_func_handle_1 = x2c_func_shared(_x2c_gensym_func_adapt_1, _85)))
 static Var _x2c_gensym_lambda_2(Var value);
 
 static Var _x2c_gensym_func_adapt_2(Func _x2c_gensym_func_binding_2, const FuncArg * _x2c_gensym_func_argv_2);
 
 static Func _x2c_gensym_func_handle_2;
 
-_x2c_gensym_initializer_choice_0D185262_2((_x2c_gensym_func_handle_2 = x2c_func_shared(_x2c_gensym_func_adapt_2, _107)))
+_x2c_gensym_initializer_choice_0D185262_2((_x2c_gensym_func_handle_2 = x2c_func_shared(_x2c_gensym_func_adapt_2, _92)))
 typedef struct _x2c_gensym_lambda_context_0{
   Var c0;
 }
@@ -280,111 +286,111 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _14 = String_new("invalid field name");
   _15 = String_new(" ");
   _16 = String_new("duplicate manifest field");
-  _17 = String_new("name");
-  _18 = String_new("default-target");
-  _19 = String_new("build-dir");
-  _20 = String_new("unknown project field");
-  _21 = String_new("kind");
-  _22 = String_new("output");
-  _23 = String_new("unknown target field");
-  _24 = String_new("sources");
-  _25 = String_new("exclude");
-  _26 = String_new("native-modules");
-  _27 = String_new("include-dirs");
-  _28 = String_new("package-dirs");
-  _29 = String_new("defines");
-  _30 = String_new("c-flags");
-  _31 = String_new("library-dirs");
-  _32 = String_new("libraries");
-  _33 = String_new("link-flags");
-  _34 = String_new("unknown target kind");
-  _35 = String_new("optimization");
-  _36 = String_new("debug");
-  _37 = String_new("unknown profile field");
-  _38 = String_new("unexpected text after string");
-  _39 = String_new("expected an array of quoted strings");
-  _40 = String_new("expected ',' or ']' in array");
-  _41 = String_new("unexpected text after array");
-  _42 = String_new("expected a quoted string");
-  _43 = String_new("unterminated quoted string");
-  _44 = String_new("unsupported string escape");
-  _45 = String_new("true");
-  _46 = String_new("false");
-  _47 = String_new("expected true or false");
-  _48 = String_new(":%d");
-  _49 = String_new("manifest \'");
-  _50 = String_new("\'");
-  _51 = String_new(": ");
-  _52 = String_new(" \'");
-  _53 = String_new("no explicit inputs and no x2c.toml found");
-  _54 = String_new("cannot read manifest");
-  _55 = String_new(".");
-  _56 = String_new("x2c.toml");
-  _57 = String_new("/");
-  _58 = String_new("select --target or set project.default-target");
-  _59 = String_new("unknown target");
-  _60 = String_new("run requires an executable target");
-  _61 = String_new("/.x2c-build");
-  _62 = String_new("target dependency cycle reaches");
-  _63 = String_new("unknown target dependency");
-  _64 = String_new("target has no profile");
-  _65 = String_new("/x2c.lock");
-  _66 = String_new("ensure");
-  _67 = String_new("--lock");
-  _68 = String_new("--index");
-  _69 = String_new("--quiet");
-  _70 = String_new("--");
-  _71 = String_new("package");
-  _72 = String_new("\ntarget=");
-  _73 = String_new("\nprofile=");
-  _74 = String_new("/.x2c/");
-  _75 = String_new("/");
-  _76 = String_new("static-library target cannot contain target dependencies");
-  _77 = String_new("dependency target is not a static library");
-  _78 = String_new("native module target is not a meta-module");
-  _79 = String_new("-I");
-  _80 = String_new("-L");
-  _81 = String_new("-g");
-  _82 = String_new("-");
-  _83 = String_new("-g");
-  _84 = String_var(_83);
-  _85 = cons(_84, NULL);
-  _86 = String_new("C dependency option is driver-owned");
-  _87 = Symbol_var(437126);
-  _88 = String_new("String");
-  _89 = String_var(_88);
-  _90 = cons(_89, NULL);
+  _17 = String_new("unknown project field");
+  _18 = String_new("kind");
+  _19 = String_new("output");
+  _20 = String_new("unknown target field");
+  _21 = String_new("unknown target kind");
+  _22 = String_new("unknown profile field");
+  _23 = String_new("unexpected text after string");
+  _24 = String_new("expected an array of quoted strings");
+  _25 = String_new("expected ',' or ']' in array");
+  _26 = String_new("unexpected text after array");
+  _27 = String_new("expected a quoted string");
+  _28 = String_new("unterminated quoted string");
+  _29 = String_new("unsupported string escape");
+  _30 = String_new("true");
+  _31 = String_new("false");
+  _32 = String_new("expected true or false");
+  _33 = String_new(":%d");
+  _34 = String_new("manifest \'");
+  _35 = String_new("\'");
+  _36 = String_new(": ");
+  _37 = String_new(" \'");
+  _38 = String_new("no explicit inputs and no x2c.toml found");
+  _39 = String_new("cannot read manifest");
+  _40 = String_new(".");
+  _41 = String_new("x2c.toml");
+  _42 = String_new("/");
+  _43 = String_new("select --target or set project.default-target");
+  _44 = String_new("unknown target");
+  _45 = String_new("run requires an executable target");
+  _46 = String_new("/.x2c-build");
+  _47 = String_new("target dependency cycle reaches");
+  _48 = String_new("unknown target dependency");
+  _49 = String_new("target has no profile");
+  _50 = String_new("/x2c.lock");
+  _51 = String_new("ensure");
+  _52 = String_new("--lock");
+  _53 = String_new("--index");
+  _54 = String_new("--quiet");
+  _55 = String_new("--");
+  _56 = String_new("package");
+  _57 = String_new("\ntarget=");
+  _58 = String_new("\nprofile=");
+  _59 = String_new("/.x2c/");
+  _60 = String_new("/");
+  _61 = String_new("static-library target cannot contain target dependencies");
+  _62 = String_new("dependency target is not a static library");
+  _63 = String_new("native module target is not a meta-module");
+  _64 = String_new("-I");
+  _65 = String_new("-L");
+  _66 = String_new("-g");
+  _67 = String_new("-");
+  _68 = String_new("-g");
+  _69 = String_var(_68);
+  _70 = cons(_69, NULL);
+  _71 = String_new("C dependency option is driver-owned");
+  _72 = Symbol_var(437126);
+  _73 = String_new("String");
+  _74 = String_var(_73);
+  _75 = cons(_74, NULL);
+  _76 = List_var(_75);
+  _77 = cons(_76, NULL);
+  _78 = List_var(_77);
+  _79 = cons(_78, NULL);
+  _80 = cons(_72, _79);
+  _81 = List_var(_80);
+  _82 = String_new("Var");
+  _83 = String_var(_82);
+  _84 = cons(_83, NULL);
+  _85 = cons(_81, _84);
+  _86 = List_var(_84);
+  _87 = cons(_86, NULL);
+  _88 = List_var(_87);
+  _89 = cons(_88, NULL);
+  _90 = cons(_72, _89);
   _91 = List_var(_90);
-  _92 = cons(_91, NULL);
-  _93 = List_var(_92);
-  _94 = cons(_93, NULL);
-  _95 = cons(_87, _94);
-  _96 = List_var(_95);
-  _97 = String_new("Var");
-  _98 = String_var(_97);
-  _99 = cons(_98, NULL);
-  _100 = cons(_96, _99);
-  _101 = List_var(_99);
-  _102 = cons(_101, NULL);
-  _103 = List_var(_102);
-  _104 = cons(_103, NULL);
-  _105 = cons(_87, _104);
-  _106 = List_var(_105);
-  _107 = cons(_106, _99);
-  _108 = String_new("target has no sources");
-  _109 = String_new("source");
-  _110 = String_new(".c");
-  _111 = String_new("manifest source is not .x or .c");
-  _112 = String_new("unmatched ");
-  _113 = String_new(" pattern");
-  _114 = String_new("\\");
-  _115 = String_new("\\\\");
-  _116 = String_new("*");
-  _117 = String_new("\\*");
-  _118 = String_new("?");
-  _119 = String_new("\\?");
-  _120 = String_new("[");
-  _121 = String_new("\\[");
+  _92 = cons(_91, _84);
+  _93 = String_new("target has no sources");
+  _94 = String_new("source");
+  _95 = String_new("exclude");
+  _96 = String_new(".c");
+  _97 = String_new("manifest source is not .x or .c");
+  _98 = String_new("unmatched ");
+  _99 = String_new(" pattern");
+  _100 = String_new("\\");
+  _101 = String_new("\\\\");
+  _102 = String_new("*");
+  _103 = String_new("\\*");
+  _104 = String_new("?");
+  _105 = String_new("\\?");
+  _106 = String_new("[");
+  _107 = String_new("\\[");
+  _108 = String_new("name");
+  _109 = String_new("default-target");
+  _110 = String_new("build-dir");
+  _111 = String_new("sources");
+  _112 = String_new("native-modules");
+  _113 = String_new("include-dirs");
+  _114 = String_new("package-dirs");
+  _115 = String_new("defines");
+  _116 = String_new("c-flags");
+  _117 = String_new("library-dirs");
+  _118 = String_new("libraries");
+  _119 = String_new("link-flags");
+  _120 = String_new("optimization");
+  _121 = String_new("debug");
   _122 = String_new("-l");
   _123 = String_new("-O");
   _124 = String_new("-D");
@@ -562,10 +568,16 @@ static void f8_manifest____set(f8_manifest___Manifest * m){
 }
 
 static void f8_manifest____set_project_field(Project p, int line, String key, String value){
-  if(String_equal(key, _17))(void) f8_manifest____string_value(p, line, value);
-  else if(String_equal(key, _18)) p -> default_target = f8_manifest____string_value(p, line, value);
-  else if(String_equal(key, _19)) p -> build_dir = f8_manifest____string_value(p, line, value);
-  else _error_name(p, line, _20, key);
+  switch(_x2c_gensym_string_switch_0(key)){
+    case 1 :(void) f8_manifest____string_value(p, line, value);
+    break;
+    case 2 : p -> default_target = f8_manifest____string_value(p, line, value);
+    break;
+    case 3 : p -> build_dir = f8_manifest____string_value(p, line, value);
+    break;
+    default: _error_name(p, line, _17, key);
+  }
+
 }
 
 static void f8_manifest____set_dependency(Project p, int line, String key, String value){
@@ -582,23 +594,25 @@ static void f8_manifest____set_dependency(Project p, int line, String key, Strin
 static void f8_manifest____set_target_field(Project p, ProjectTarget target, int line, String key, String value){
   List * list = f8_manifest____target_list(target, key);
   if(list) * list = f8_manifest____string_array(p, line, value);
-  else if(String_equal(key, _21)) f8_manifest____set_kind(p, target, line, value);
-  else if(String_equal(key, _22)) target -> output = f8_manifest____string_value(p, line, value);
-  else _error_name(p, line, _23, key);
+  else if(String_equal(key, _18)) f8_manifest____set_kind(p, target, line, value);
+  else if(String_equal(key, _19)) target -> output = f8_manifest____string_value(p, line, value);
+  else _error_name(p, line, _20, key);
 }
 
 static List * f8_manifest____target_list(ProjectTarget target, String key){
-  if(String_equal(key, _24)) return & target -> sources;
-  if(String_equal(key, _25)) return & target -> exclude;
-  if(String_equal(key, _4)) return & target -> dependencies;
-  if(String_equal(key, _26)) return & target -> native_modules;
-  if(String_equal(key, _27)) return & target -> include_dirs;
-  if(String_equal(key, _28)) return & target -> package_dirs;
-  if(String_equal(key, _29)) return & target -> defines;
-  if(String_equal(key, _30)) return & target -> c_flags;
-  if(String_equal(key, _31)) return & target -> library_dirs;
-  if(String_equal(key, _32)) return & target -> libraries;
-  if(String_equal(key, _33)) return & target -> link_flags;
+  switch(_x2c_gensym_string_switch_1(key)){
+    case 1 : return & target -> sources;
+    case 2 : return & target -> exclude;
+    case 3 : return & target -> dependencies;
+    case 4 : return & target -> native_modules;
+    case 5 : return & target -> include_dirs;
+    case 6 : return & target -> package_dirs;
+    case 7 : return & target -> defines;
+    case 8 : return & target -> c_flags;
+    case 9 : return & target -> library_dirs;
+    case 10 : return & target -> libraries;
+    case 11 : return & target -> link_flags;
+  }
   return NULL;
 }
 
@@ -606,50 +620,58 @@ static void f8_manifest____set_kind(Project p, ProjectTarget target, int line, S
   String kind = f8_manifest____string_value(p, line, value), refusal = NULL;
   target -> kind = TargetKind_named(kind, &(refusal));
   if(String_truth(refusal)) _error(p, line, refusal);
-  if(! target -> kind) _error_name(p, line, _34, kind);
+  if(! target -> kind) _error_name(p, line, _21, kind);
 }
 
 static void f8_manifest____set_profile_field(Project p, ProjectProfile profile, int line, String key, String value){
-  if(String_equal(key, _35)) profile -> optimization = f8_manifest____string_value(p, line, value);
-  else if(String_equal(key, _36)) profile -> debug = f8_manifest____bool_value(p, line, value);
-  else if(String_equal(key, _29)) profile -> defines = f8_manifest____string_array(p, line, value);
-  else if(String_equal(key, _30)) profile -> c_flags = f8_manifest____string_array(p, line, value);
-  else if(String_equal(key, _33)) profile -> link_flags = f8_manifest____string_array(p, line, value);
-  else _error_name(p, line, _37, key);
+  switch(_x2c_gensym_string_switch_2(key)){
+    case 1 : profile -> optimization = f8_manifest____string_value(p, line, value);
+    break;
+    case 2 : profile -> debug = f8_manifest____bool_value(p, line, value);
+    break;
+    case 3 : profile -> defines = f8_manifest____string_array(p, line, value);
+    break;
+    case 4 : profile -> c_flags = f8_manifest____string_array(p, line, value);
+    break;
+    case 5 : profile -> link_flags = f8_manifest____string_array(p, line, value);
+    break;
+    default: _error_name(p, line, _22, key);
+  }
+
 }
 
 static String f8_manifest____string_value(Project p, int line, String value){
   char * at = value;
   String text = f8_manifest____parse_string(p, line, & at);
-  if(* f8_manifest____skip_space(at)) _error(p, line, _38);
+  if(* f8_manifest____skip_space(at)) _error(p, line, _23);
   return text;
 }
 
 static List f8_manifest____string_array(Project p, int line, String value){
   char * at = f8_manifest____skip_space(String_truth(value) ? value : "");
-  if(* at != '[') _error(p, line, _39);
+  if(* at != '[') _error(p, line, _24);
   at = f8_manifest____skip_space(at + 1);
   Array values = Array_new();
   while(* at != ']'){
     Array_push(values, String_var(f8_manifest____parse_string(p, line, & at)));
     at = f8_manifest____skip_space(at);
     if(* at == ',') at = f8_manifest____skip_space(at + 1);
-    else if(* at != ']') _error(p, line, _40);
+    else if(* at != ']') _error(p, line, _25);
   }
-  if(* f8_manifest____skip_space(at + 1)) _error(p, line, _41);
+  if(* f8_manifest____skip_space(at + 1)) _error(p, line, _26);
   return Array_list_free(values);
 }
 
 static String f8_manifest____parse_string(Project p, int line, char * * cursor){
   char * at = f8_manifest____skip_space(* cursor ? * cursor : "");
-  if(* at != '"') _error(p, line, _42);
+  if(* at != '"') _error(p, line, _27);
   Buffer out = Buffer_new(0);
   for(at ++;  * at && * at != '"';  at ++){
     char ch = * at;
     if(ch == '\\') ch = f8_manifest____escape(p, line, * ++ at);
     Buffer_write_char(out, ch);
   }
-  if(* at != '"') _error(p, line, _43);
+  if(* at != '"') _error(p, line, _28);
   * cursor = at + 1;
   return Buffer_str_free(out);
 }
@@ -658,13 +680,13 @@ static char f8_manifest____escape(Project p, int line, char ch){
   if(ch == '"' || ch == '\\') return ch;
   if(ch == 'n') return '\n';
   if(ch == 't') return '\t';
-  _error(p, line, _44);
+  _error(p, line, _29);
 }
 
 static int f8_manifest____bool_value(Project p, int line, String value){
-  if(String_truth(value) && String_equal(value, _45)) return 1;
-  if(String_truth(value) && String_equal(value, _46)) return 0;
-  _error(p, line, _47);
+  if(String_truth(value) && String_equal(value, _30)) return 1;
+  if(String_truth(value) && String_equal(value, _31)) return 0;
+  _error(p, line, _32);
 }
 
 static int f8_manifest____array_open(String value){
@@ -740,14 +762,14 @@ static ProjectProfile f8_manifest____new_profile(ProjectTarget target, String na
 }
 
 _Noreturn static void _error(Project p, int line, String message){
-  String at = line ? String_printf(_48, line) : NULL;
-  if(p && String_truth(p -> path)) message = String_join(NULL, cons(String_var(_49), cons(String_var(p -> path), cons(String_var(_50), cons(String_var(at), cons(String_var(_51), cons(String_var(message), NULL)))))));
+  String at = line ? String_printf(_33, line) : NULL;
+  if(p && String_truth(p -> path)) message = String_join(NULL, cons(String_var(_34), cons(String_var(p -> path), cons(String_var(_35), cons(String_var(at), cons(String_var(_36), cons(String_var(message), NULL)))))));
   fprintf(stderr, "x2c: error: %s\n", message);
   exit(2);
 }
 
 static void _error_name(Project p, int line, String message, String name){
-  _error(p, line, String_join(NULL, cons(String_var(message), cons(String_var(_52), cons(String_var(name), cons(String_var(_50), NULL))))));
+  _error(p, line, String_join(NULL, cons(String_var(message), cons(String_var(_37), cons(String_var(name), cons(String_var(_35), NULL))))));
 }
 
 ProjectBuild ProjectBuild_plan(CliRequest request){
@@ -776,9 +798,9 @@ static Project f8_planning____open_project(CliRequest request){
     .seen = Map_new(), .sources = request -> sources, .command = request, .path = CliRequest_project_manifest(request)
   }
   ;
-  if(! String_truth(p -> path)) _error(NULL, 0, _53);
+  if(! String_truth(p -> path)) _error(NULL, 0, _38);
   p -> path = Path_absolute(p -> path);
-  if(! SourceView_read(p -> sources, p -> path, &(p -> text))) _error(p, 0, _54);
+  if(! SourceView_read(p -> sources, p -> path, &(p -> text))) _error(p, 0, _39);
   p -> root = Path_dirname(p -> path);
   return p;
 }
@@ -790,10 +812,10 @@ int SourceView_exists(SourceView, String);
 String CliRequest_project_manifest(CliRequest c){
   if(! _init_guard_) _file_init_();
   if(String_truth(c -> manifest)) return c -> manifest;
-  for(Path directory = Path_absolute(_55); ;  directory = Path_dirname(directory)){
-    String candidate = Path_join(directory, _56);
+  for(Path directory = Path_absolute(_40); ;  directory = Path_dirname(directory)){
+    String candidate = Path_join(directory, _41);
     if(SourceView_exists(c -> sources, candidate)) return candidate;
-    if(String_equal(directory, _57)) return NULL;
+    if(String_equal(directory, _42)) return NULL;
   }
 
 }
@@ -801,26 +823,26 @@ String CliRequest_project_manifest(CliRequest c){
 static ProjectTarget f8_planning____selected_target(Project p){
   CliRequest request = p -> command;
   String name = String_truth(request -> target) ? request -> target : p -> default_target;
-  if(! String_truth(name) && p -> targets -> next) _error(p, 0, _58);
+  if(! String_truth(name) && p -> targets -> next) _error(p, 0, _43);
   if(! String_truth(name)) name = p -> targets -> name;
   ProjectTarget selected = _target(p, name);
-  if(! selected) _error_name(p, 0, _59, name);
+  if(! selected) _error_name(p, 0, _44, name);
   Symbol kind = request -> kind_explicit ? request -> kind : selected -> kind;
-  if(request -> command == 38236 && kind != 404971770155786) _error(p, 0, _60);
+  if(request -> command == 38236 && kind != 404971770155786) _error(p, 0, _45);
   (void) f8_planning____selected_profile(p, selected, request -> profile);
   return selected;
 }
 
 static String f8_planning____build_root(Project p){
   String dir = p -> command -> build_dir;
-  if(String_truth(dir)) return Path_join(Path_absolute(_55), dir);
+  if(String_truth(dir)) return Path_join(Path_absolute(_40), dir);
   if(String_truth(p -> build_dir)) return Path_join(p -> root, p -> build_dir);
-  return String_join(NULL, cons(String_var(p -> root), cons(String_var(_61), NULL)));
+  return String_join(NULL, cons(String_var(p -> root), cons(String_var(_46), NULL)));
 }
 
 static void f8_planning____validate_target(Project p, ProjectTarget target){
   if(target -> visited) return;
-  if(target -> visiting) _error_name(p, 0, _62, target -> name);
+  if(target -> visiting) _error_name(p, 0, _47, target -> name);
   target -> visiting = 1;
   {
     String name;
@@ -831,7 +853,7 @@ static void f8_planning____validate_target(Project p, ProjectTarget target){
       name = Var_as_string(_x2c_gensym_macro_cursor_output_2);
       {
         ProjectTarget prerequisite = _target(p, name);
-        if(! prerequisite) _error_name(p, 0, _63, name);
+        if(! prerequisite) _error_name(p, 0, _48, name);
         f8_planning____validate_target(p, prerequisite);
       }
 
@@ -849,7 +871,7 @@ static List f8_planning____prerequisites(ProjectTarget target){
 static ProjectProfile f8_planning____selected_profile(Project p, ProjectTarget target, String name){
   if(! String_truth(name)) return NULL;
   ProjectProfile profile = _profile(target, name);
-  if(! profile) _error_name(p, 0, _64, name);
+  if(! profile) _error_name(p, 0, _49, name);
   return profile;
 }
 
@@ -858,21 +880,21 @@ int Compiler_run_command(String, List);
 static void f8_planning____resolve_dependencies(Project p){
   CliRequest request = p -> command;
   if(p -> sources || request -> dry_run) return;
-  String path = String_join(NULL, cons(String_var(p -> root), cons(String_var(_65), NULL)));
+  String path = String_join(NULL, cons(String_var(p -> root), cons(String_var(_50), NULL)));
   struct stat lock;
   if(! p -> dependencies && lstat(path, & lock) && errno == ENOENT) return;
-  Array args = Array_update_n(Array_new(), 3, String_var(_66), String_var(_67), String_var(path));
+  Array args = Array_update_n(Array_new(), 3, String_var(_51), String_var(_52), String_var(path));
   if(String_truth(request -> index)){
-    Array_push(args, String_var(_68));
+    Array_push(args, String_var(_53));
     Array_push(args, String_var(request -> index));
   }
-  if(request -> quiet) Array_push(args, String_var(_69));
-  Array_push(args, String_var(_70));
+  if(request -> quiet) Array_push(args, String_var(_54));
+  Array_push(args, String_var(_55));
   for(ProjectDependency entry = p -> dependencies;  entry;  entry = entry -> next){
     Array_push(args, String_var(entry -> name));
     Array_push(args, String_var(entry -> version));
   }
-  int status = Compiler_run_command(_71, Array_list(args));
+  int status = Compiler_run_command(_56, Array_list(args));
   if(status) exit(status);
 }
 
@@ -921,7 +943,7 @@ static CliRequest f8_planning____target_request(Project p, ProjectTarget target)
   );
   f8_planning____set_flags(p, target, request);
   request -> label = target -> name;
-  request -> state_seed = String_join(NULL, cons(String_var(p -> path), cons(String_var(_72), cons(String_var(target -> name), cons(String_var(_73), cons(String_var(command -> profile), NULL))))));
+  request -> state_seed = String_join(NULL, cons(String_var(p -> path), cons(String_var(_57), cons(String_var(target -> name), cons(String_var(_58), cons(String_var(command -> profile), NULL))))));
   return request;
 }
 
@@ -933,18 +955,18 @@ static void f8_planning____set_product(Project p, ProjectTarget target, CliReque
   request -> compile_only = 0;
   request -> kind = chosen && command -> kind_explicit ? command -> kind : target -> kind;
   request -> output = chosen && String_truth(command -> output) ? command -> output : f8_planning____target_output(p, target, request -> kind);
-  request -> build_dir = String_join(NULL, cons(String_var(p -> build_root), cons(String_var(_74), cons(String_var(target -> name), NULL))));
+  request -> build_dir = String_join(NULL, cons(String_var(p -> build_root), cons(String_var(_59), cons(String_var(target -> name), NULL))));
   request -> save_temps = 0;
 }
 
 static String f8_planning____target_output(Project p, ProjectTarget target, Symbol kind){
   if(String_truth(target -> output)) return Path_join(p -> root, target -> output);
   TargetKind * row = TargetKind_of(kind);
-  return String_join(NULL, cons(String_var(p -> build_root), cons(String_var(_75), cons(String_var(row -> prefix), cons(String_var(target -> name), cons(String_var(row -> suffix), NULL))))));
+  return String_join(NULL, cons(String_var(p -> build_root), cons(String_var(_60), cons(String_var(row -> prefix), cons(String_var(target -> name), cons(String_var(row -> suffix), NULL))))));
 }
 
 static List f8_planning____target_inputs(Project p, ProjectTarget target, Symbol kind){
-  if(kind == 1381098885964356 && List_truth(target -> dependencies)) _error_name(p, 0, _76, target -> name);
+  if(kind == 1381098885964356 && List_truth(target -> dependencies)) _error_name(p, 0, _61, target -> name);
   Array inputs = _target_sources(p, target);
   {
     String name;
@@ -955,7 +977,7 @@ static List f8_planning____target_inputs(Project p, ProjectTarget target, Symbol
       name = Var_as_string(_x2c_gensym_macro_cursor_output_4);
       {
         ProjectTarget dependency = _target(p, name);
-        if(dependency -> kind != 1381098885964356) _error_name(p, 0, _77, dependency -> name);
+        if(dependency -> kind != 1381098885964356) _error_name(p, 0, _62, dependency -> name);
         Array_push(inputs, String_var(f8_planning____target_output(p, dependency, dependency -> kind)));
       }
 
@@ -976,7 +998,7 @@ static List f8_planning____target_modules(Project p, ProjectTarget target){
       name = Var_as_string(_x2c_gensym_macro_cursor_output_5);
       {
         ProjectTarget loaded = _target(p, name);
-        if(loaded -> kind != 904178442) _error_name(p, 0, _78, name);
+        if(loaded -> kind != 904178442) _error_name(p, 0, _63, name);
         Array_push(modules, String_var(f8_planning____target_output(p, loaded, 904178442)));
       }
 
@@ -998,11 +1020,11 @@ static void f8_planning____set_flags(Project p, ProjectTarget target, CliRequest
   }
   request -> cpp_args = List_append(defines, List_append(profile_defines, List_append(command -> cpp_args, NULL)));
   request -> cc_args =({
-    List _x2c_gensym_literal_part_8 = defines;  List _x2c_gensym_literal_part_9 = f8_planning____c_flags(p, target -> c_flags);  List _x2c_gensym_literal_part_10 = profile_defines;  List _x2c_gensym_literal_part_11 = compile;  List _x2c_gensym_literal_part_12 = command -> cc_args;  List _x2c_gensym_literal_part_13 = f8_planning____path_options(p -> root, target -> include_dirs, _79);  List_append(_x2c_gensym_literal_part_8, List_append(_x2c_gensym_literal_part_9, List_append(_x2c_gensym_literal_part_10, List_append(_x2c_gensym_literal_part_11, List_append(_x2c_gensym_literal_part_12, List_append(_x2c_gensym_literal_part_13, NULL))))));
+    List _x2c_gensym_literal_part_8 = defines;  List _x2c_gensym_literal_part_9 = f8_planning____c_flags(p, target -> c_flags);  List _x2c_gensym_literal_part_10 = profile_defines;  List _x2c_gensym_literal_part_11 = compile;  List _x2c_gensym_literal_part_12 = command -> cc_args;  List _x2c_gensym_literal_part_13 = f8_planning____path_options(p -> root, target -> include_dirs, _64);  List_append(_x2c_gensym_literal_part_8, List_append(_x2c_gensym_literal_part_9, List_append(_x2c_gensym_literal_part_10, List_append(_x2c_gensym_literal_part_11, List_append(_x2c_gensym_literal_part_12, List_append(_x2c_gensym_literal_part_13, NULL))))));
   }
   );
   request -> ld_args =({
-    List _x2c_gensym_literal_part_14 = f8_planning____path_options(p -> root, target -> library_dirs, _80);  List _x2c_gensym_literal_part_15 = List_map(target -> libraries, _x2c_gensym_func_handle_0);  List_append(_x2c_gensym_literal_part_14, List_append(_x2c_gensym_literal_part_15, List_append(target -> link_flags, List_append(link, List_append(command -> ld_args, NULL)))));
+    List _x2c_gensym_literal_part_14 = f8_planning____path_options(p -> root, target -> library_dirs, _65);  List _x2c_gensym_literal_part_15 = List_map(target -> libraries, _x2c_gensym_func_handle_0);  List_append(_x2c_gensym_literal_part_14, List_append(_x2c_gensym_literal_part_15, List_append(target -> link_flags, List_append(link, List_append(command -> ld_args, NULL)))));
   }
   );
 }
@@ -1016,9 +1038,9 @@ static ProjectProfile f8_planning____target_profile(Project p, ProjectTarget tar
 static List f8_planning____profile_flags(Project p, ProjectProfile profile){
   List cc_args = p -> command -> cc_args;
   int optimized = List_any(cc_args, _x2c_gensym_func_handle_1);
-  int debug = profile -> debug && !(List_contains(cc_args, String_var(_81)));
+  int debug = profile -> debug && !(List_contains(cc_args, String_var(_66)));
   return({
-    List _x2c_gensym_literal_part_16 = f8_planning____c_flags(p, profile -> c_flags);  List _x2c_gensym_literal_part_17 = String_truth(profile -> optimization) && ! optimized ? cons(String_var(String_join(NULL, cons(String_var(_82), cons(String_var(profile -> optimization), NULL)))), NULL) : NULL;  List _x2c_gensym_literal_part_18 = debug ? _85 : NULL;  List_append(_x2c_gensym_literal_part_16, List_append(_x2c_gensym_literal_part_17, List_append(_x2c_gensym_literal_part_18, NULL)));
+    List _x2c_gensym_literal_part_16 = f8_planning____c_flags(p, profile -> c_flags);  List _x2c_gensym_literal_part_17 = String_truth(profile -> optimization) && ! optimized ? cons(String_var(String_join(NULL, cons(String_var(_67), cons(String_var(profile -> optimization), NULL)))), NULL) : NULL;  List _x2c_gensym_literal_part_18 = debug ? _70 : NULL;  List_append(_x2c_gensym_literal_part_16, List_append(_x2c_gensym_literal_part_17, List_append(_x2c_gensym_literal_part_18, NULL)));
   }
   );
 }
@@ -1031,7 +1053,7 @@ static List f8_planning____c_flags(Project p, List values){
     Var _x2c_gensym_macro_cursor_output_6;
     while(List_try_next(_x2c_gensym_macro_object_6, &(_x2c_gensym_macro_cursor_6), &(_x2c_gensym_macro_cursor_output_6))){
       value = Var_as_string(_x2c_gensym_macro_cursor_output_6);
-      if(CliRequest_dependency_option(value)) _error_name(p, 0, _86, value);
+      if(CliRequest_dependency_option(value)) _error_name(p, 0, _71, value);
     }
 
   }
@@ -1047,7 +1069,7 @@ static List f8_planning____paths(String root, List values){
     Var _x2c_gensym_lambda_capture_value_0 = String_var(root);  struct _x2c_gensym_lambda_context_0 _x2c_gensym_lambda_context_1 ={
       _x2c_gensym_lambda_capture_value_0
     }
-    ;  Func_new_context(_x2c_gensym_lambda_4, _100, & _x2c_gensym_lambda_context_1, sizeof _x2c_gensym_lambda_context_1);
+    ;  Func_new_context(_x2c_gensym_lambda_4, _85, & _x2c_gensym_lambda_context_1, sizeof _x2c_gensym_lambda_context_1);
   }
   ));
 }
@@ -1057,7 +1079,7 @@ static List f8_planning____path_options(String root, List values, String option)
     Var _x2c_gensym_lambda_capture_value_1 = String_var(option);  struct _x2c_gensym_lambda_context_2 _x2c_gensym_lambda_context_3 ={
       _x2c_gensym_lambda_capture_value_1
     }
-    ;  Func_new_context(_x2c_gensym_lambda_6, _107, & _x2c_gensym_lambda_context_3, sizeof _x2c_gensym_lambda_context_3);
+    ;  Func_new_context(_x2c_gensym_lambda_6, _92, & _x2c_gensym_lambda_context_3, sizeof _x2c_gensym_lambda_context_3);
   }
   )));
 }
@@ -1065,9 +1087,9 @@ static List f8_planning____path_options(String root, List values, String option)
 int Path_is_x2c_source(String);
 
 static Array _target_sources(Project p, ProjectTarget target){
-  if(! List_truth(target -> sources)) _error_name(p, 0, _108, target -> name);
-  Array sources = f7_sources____expand_patterns(p, target -> sources, _109);
-  Array excluded = f7_sources____expand_patterns(p, target -> exclude, _25);
+  if(! List_truth(target -> sources)) _error_name(p, 0, _93, target -> name);
+  Array sources = f7_sources____expand_patterns(p, target -> sources, _94);
+  Array excluded = f7_sources____expand_patterns(p, target -> exclude, _95);
   Array kept = Array_new();
   {
     String path;
@@ -1094,7 +1116,7 @@ static Array _target_sources(Project p, ProjectTarget target){
     Var _x2c_gensym_macro_cursor_output_8;
     while(Array_try_next(_x2c_gensym_macro_object_8, &(_x2c_gensym_macro_cursor_8), &(_x2c_gensym_macro_cursor_output_8))){
       path = Var_as_string(_x2c_gensym_macro_cursor_output_8);
-      if(!(Path_is_x2c_source(path) || String_endswith(path, _110))) _error_name(p, 0, _111, path);
+      if(!(Path_is_x2c_source(path) || String_endswith(path, _96))) _error_name(p, 0, _97, path);
     }
 
   }
@@ -1134,7 +1156,7 @@ static Array f7_sources____expand_patterns(Project p, List patterns, String owne
 
 static Array f7_sources____expand_pattern(Project p, String pattern, String owner){
   Array matches = f7_sources____has_glob(pattern) ? f7_sources____glob(p, pattern) : f7_sources____named_file(p, pattern);
-  if(! Array_len(matches)) _error_name(p, 0, String_join(NULL, cons(String_var(_112), cons(String_var(owner), cons(String_var(_113), NULL)))), pattern);
+  if(! Array_len(matches)) _error_name(p, 0, String_join(NULL, cons(String_var(_98), cons(String_var(owner), cons(String_var(_99), NULL)))), pattern);
   return Array_sort(matches);
 }
 
@@ -1147,7 +1169,7 @@ List Path_glob(Path);
 int Path_glob_match(Path, Path);
 
 static Array f7_sources____glob(Project p, String pattern){
-  String prefix = String_equal(p -> root, _57) ? _57 : String_join(NULL, cons(String_var(p -> root), cons(String_var(_75), NULL)));
+  String prefix = String_equal(p -> root, _42) ? _42 : String_join(NULL, cons(String_var(p -> root), cons(String_var(_60), NULL)));
   List found = Path_glob(Path_join(f7_sources____glob_literal(p -> root), pattern));
   if(p -> sources) found = List_append(found, Iter_list(Map_keys(p -> sources -> overlays, &(struct Iter){
     int_var(0)
@@ -1161,7 +1183,7 @@ static Array f7_sources____glob(Project p, String pattern){
     Var _x2c_gensym_macro_cursor_output_11;
     while(List_try_next(_x2c_gensym_macro_object_11, &(_x2c_gensym_macro_cursor_11), &(_x2c_gensym_macro_cursor_output_11))){
       path = Var_as_string(_x2c_gensym_macro_cursor_output_11);
-      if(String_startswith(path, prefix) && Path_glob_match(pattern, String_remove_prefix(path, prefix)) && !(String_truth(p -> build_root) && String_startswith(path, String_join(NULL, cons(String_var(p -> build_root), cons(String_var(_75), NULL))))) && SourceView_exists(p -> sources, path) && !(Array_contains(matches, String_var(path)))) Array_push(matches, String_var(path));
+      if(String_startswith(path, prefix) && Path_glob_match(pattern, String_remove_prefix(path, prefix)) && !(String_truth(p -> build_root) && String_startswith(path, String_join(NULL, cons(String_var(p -> build_root), cons(String_var(_60), NULL))))) && SourceView_exists(p -> sources, path) && !(Array_contains(matches, String_var(path)))) Array_push(matches, String_var(path));
     }
 
   }
@@ -1169,7 +1191,7 @@ static Array f7_sources____glob(Project p, String pattern){
 }
 
 static String f7_sources____glob_literal(String text){
-  return String_replace(String_replace(String_replace(String_replace(text, _114, _115), _116, _117), _118, _119), _120, _121);
+  return String_replace(String_replace(String_replace(String_replace(text, _100, _101), _102, _103), _104, _105), _106, _107);
 }
 
 static Array f7_sources____named_file(Project p, String pattern){
@@ -1177,6 +1199,37 @@ static Array f7_sources____named_file(Project p, String pattern){
   String path = Path_join(p -> root, pattern);
   if(SourceView_exists(p -> sources, path)) Array_push(matches, String_var(path));
   return matches;
+}
+
+static int _x2c_gensym_string_switch_0(String s){
+  if(String_equal(s, _108)) return 1;
+  if(String_equal(s, _109)) return 2;
+  if(String_equal(s, _110)) return 3;
+  return 0;
+}
+
+static int _x2c_gensym_string_switch_1(String s){
+  if(String_equal(s, _111)) return 1;
+  if(String_equal(s, _95)) return 2;
+  if(String_equal(s, _4)) return 3;
+  if(String_equal(s, _112)) return 4;
+  if(String_equal(s, _113)) return 5;
+  if(String_equal(s, _114)) return 6;
+  if(String_equal(s, _115)) return 7;
+  if(String_equal(s, _116)) return 8;
+  if(String_equal(s, _117)) return 9;
+  if(String_equal(s, _118)) return 10;
+  if(String_equal(s, _119)) return 11;
+  return 0;
+}
+
+static int _x2c_gensym_string_switch_2(String s){
+  if(String_equal(s, _120)) return 1;
+  if(String_equal(s, _121)) return 2;
+  if(String_equal(s, _115)) return 3;
+  if(String_equal(s, _116)) return 4;
+  if(String_equal(s, _119)) return 5;
+  return 0;
 }
 
 static Var _x2c_gensym_lambda_0(Var library){
