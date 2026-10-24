@@ -59,7 +59,7 @@ NativeScalarAccess native_scalar_access(List exact_type) =>
 typedef struct Lisp *Lisp;
 
 macro Expression $lisp._standard.source() =>
-  $(x2c.literal.string (x2c.embed.text "../../etc/init.xlisp"));
+  $x2c_embed_text("../../etc/init.xlisp");
 
 $cleanup.by(Lisp, destroy);
 

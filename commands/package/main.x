@@ -13,15 +13,17 @@ static List _spec(String operation) {
   List quiet = %((-q --quiet (help "Suppress successful receipts")));
   List index = %((--index (value url-or-path)
     (help "Resolve package names through this index")));
-  if (operation == "install") return %(
-    @help @quiet @index
-    (--sha256 (value hex) (help "Require this archive digest"))
-    (--force (help "Install a bundle built for another x2c version"))
-    (package required));
-  if (operation == "remove") return %(@help @quiet (name required));
-  if (operation == "list") return help;
-  if (operation == "ensure") return %(
-    @help @quiet @index (--lock (value path) required) (pins repeated));
+  switch (operation) {
+    case "install": return %(
+      @help @quiet @index
+      (--sha256 (value hex) (help "Require this archive digest"))
+      (--force (help "Install a bundle built for another x2c version"))
+      (package required));
+    case "remove": return %(@help @quiet (name required));
+    case "list": return help;
+    case "ensure": return %(
+      @help @quiet @index (--lock (value path) required) (pins repeated));
+  }
   Diagnostics.driver_error(%"package: unknown operation '$operation'");
   return NULL;
 }
@@ -65,20 +67,24 @@ int main(int argc, char **argv) {
     .index = parsed["index"], .sha256 = parsed["sha256"],
     .quiet = parsed["quiet"].integer(), .force = parsed["force"].integer()
   };
-  if (operation == "install") request.inputs = %(${parsed["package"]});
-  else if (operation == "remove") request.inputs = %(${parsed["name"]});
-  else if (operation == "ensure") {
-    request.lock = parsed["lock"];
-    request.inputs = parsed["pins"];
-    if (request.inputs.len() % 2)
-      Diagnostics.driver_error("package ensure: expected name/version pairs");
+  switch (operation) {
+    case "install": request.inputs = %(${parsed["package"]}); break;
+    case "remove": request.inputs = %(${parsed["name"]}); break;
+    case "ensure":
+      request.lock = parsed["lock"];
+      request.inputs = parsed["pins"];
+      if (request.inputs.len() % 2)
+        Diagnostics.driver_error("package ensure: expected name/version pairs");
+      break;
   }
   return _run(operation, request);
 }
 
 static int _run(String operation, PackageOptions request) {
-  if (operation == "list") return request.list_packages();
-  if (operation == "install") return request.install();
-  if (operation == "remove") return request.remove_package();
+  switch (operation) {
+    case "list": return request.list_packages();
+    case "install": return request.install();
+    case "remove": return request.remove_package();
+  }
   return request.ensure();
 }

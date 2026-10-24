@@ -46,7 +46,7 @@ macro Decorator $x2c.with(Stmt $body, Expr @assignments) {
 
 macro Decorator $lock(Stmt $body, Expr $mutex) {
   {
-    $(list "Mutex") held = $mutex;
+    Mutex held = $mutex;
     held.lock();
     defer held.unlock();
     $body

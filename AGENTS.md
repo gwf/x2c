@@ -6,6 +6,12 @@ compiler (`src/`) and runtime (`lib/`) are working examples of the language.
 Make each requested change useful, idiomatic, and verified, moving the
 repository from one healthy state to the next.
 
+Treat the user's architecture and established boundary contracts as premises.
+Uncertainty calls for inspecting the owning contract, not adding compensating
+machinery or new caller obligations. A concrete conflict must be surfaced
+before changing that architecture. This rule takes precedence over generic
+robustness, verification, and completion guidance in repository instructions.
+
 ## Start with the task
 
 Read the nearest `AGENTS.md`, any plan or specification the user named, and

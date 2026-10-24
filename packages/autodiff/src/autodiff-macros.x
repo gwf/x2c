@@ -141,16 +141,6 @@ macro Unit $ad.dual(
   protocol Var($D);
 }
 
-$(def ad_tangent (lambda (. rest) 0))
-$(def ad_grad_slots (lambda (. rest) 0))
-$(def ad_adjoint (lambda (. rest) 0))
-$(def ad_loop (lambda (. rest) 0))
-$(def ad_rev_do (lambda (. rest) 0))
-$(def ad_rev_item (lambda (. rest) 0))
-$(def ad_fwd_for (lambda (. rest) 0))
-$(def ad_fwd_item (lambda (. rest) 0))
-$(def ad_declared_join (lambda (. rest) 0))
-
 meta void ad_fail(String message, Var form) {
   x2c_diagnostic_fail("ad: " + message, %(${form.repr()}));
 }
