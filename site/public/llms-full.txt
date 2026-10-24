@@ -6482,8 +6482,8 @@ program's `--help`. Built-in commands retain response-file expansion.
 The style rule `compound-auto` enforces one leading `auto` for compound
 declarations whose bindings keep their acquired values. It checks bound
 writes, address escapes, and reference arguments before reporting a group.
-Select it with `x2c lint --rule compound-auto FILE` or `--all`. The same rule
-is available through `x2c-lint`. It reports the change without an automatic
+Use `x2c help lint` for rule-selection options. The same rule is available
+through `x2c-lint`. It reports the change without an automatic
 fix; mixed cleanup groups and bindings that can change keep initializer
 `auto`.
 
