@@ -206,3 +206,52 @@ test('macro using accepts retained names and fresh names', async () => {
   for (const line of ['int using = 1;', '// using scale;', 'char *s = "using scale;";'])
     await check(line, 'using', 'keyword.other.macro.using.x2c', false);
 });
+
+test('meta declarations retain scopes across comments, lines and preceding declarations', async () => {
+  for (const source of [
+    'int first; meta int one(void) => 1;',
+    'meta /* comment */ int two(void) => 2;',
+    'meta\nint three(void) => 3;',
+    'meta // comment\nstatic int four(void) => 4;',
+    'meta /* comment\ncontinued */ native int five(void) { return 5; }',
+    'meta\nnative\nstatic int six(void) { return 6; }',
+    'int first; meta protocol Iter(List);',
+    'meta\nprotocol Iter(List);'
+  ]) {
+    let state;
+    for (const line of source.split('\n')) {
+      const result = (await grammar).tokenizeLine(line, state);
+      state = result.ruleStack;
+      for (const word of ['meta', 'native']) {
+        const at = line.indexOf(word);
+        if (at < 0) continue;
+        const token = result.tokens.find(t => t.startIndex <= at && at < t.endIndex);
+        assert.ok(token.scopes.includes(`storage.modifier.${word}.x2c`), `${source}: ${word}`);
+        assert.ok(token.scopes.includes(`keyword.other.${word}.x2c`), `${source}: visible ${word}`);
+      }
+    }
+    const after = (await grammar).tokenizeLine('native(); int meta = 0;', state);
+    assert.ok(after.tokens.every(t => !t.scopes.includes('storage.modifier.native.x2c') &&
+      !t.scopes.includes('storage.modifier.meta.x2c')), source);
+  }
+});
+
+test('meta and native receive keyword colors without x2c theme overrides', async () => {
+  const themedRegistry = new Registry({ onigLib, loadGrammar: async () => grammarData,
+    theme: { settings: [
+      { settings: { foreground: '#D4D4D4', background: '#1E1E1E' } },
+      { scope: 'keyword', settings: { foreground: '#C586C0' } }
+    ] }
+  });
+  const themed = await themedRegistry.loadGrammar('source.x2c');
+  const line = 'meta native int work(void);';
+  const tokens = themed.tokenizeLine2(line).tokens;
+  for (const word of ['meta', 'native']) {
+    let metadata;
+    for (let i = 0; i < tokens.length; i += 2)
+      if (tokens[i] <= line.indexOf(word)) metadata = tokens[i + 1];
+    assert.equal(themedRegistry.getColorMap()[(metadata >>> 15) & 511], '#C586C0');
+  }
+  themedRegistry.dispose();
+  await check('meta int native(void);', 'native', 'storage.modifier.native.x2c', false);
+});

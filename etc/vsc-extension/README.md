@@ -211,7 +211,10 @@ runtime types. Result and hole positions retain their existing specific
 scopes and italic type color.
 
 Declarations use `meta`, `meta static`, `meta native`, or `meta native static`.
-The `meta` and `native` tokens have distinct modifier scopes. A `static macro`
+The `meta` and `native` tokens have distinct modifier scopes and standard
+keyword scopes, so ordinary themes color them without custom settings.
+Declarations can follow another declaration on the same line or continue
+across comments and line breaks. A `static macro`
 uses the ordinary `static` modifier and the macro declaration scope. Named,
 local, and anonymous macro definitions share the macro declaration scope.
 
