@@ -1314,91 +1314,50 @@ static void f7_parsing____apply(f7_parsing___Parse * p, f7_parsing___Given given
   CliRequest r =(* p).request;
   String spelling = given.spelling, value = given.value;
   switch(given.option -> id){
-    case 535328 :{
-      _help_exit(r -> command, 0);
-      break;
-    }
-    case 7300068 :{
-      r -> color_mode = f7_parsing____color_mode(value);
-      break;
-    }
-    case 20273998090 :{
-      f7_parsing____include_dir(&((* p)), value);
-      break;
-    }
-    case 54927135910154 :{
-      Array_push((* p).include_dirs, String_var(value));
-      break;
-    }
-    case 1374366630 : case 320883072032 : case 247458062609318 : case 320883068136 : case 1447057375073126 : case 10268258302218 : case 42507336486 : case 10268258311770 : case 328584264751626 : case 7478869146 : case 10268258347430 :{
-      r -> dump = given.option -> id;
-      break;
-    }
-    case 740232 :{
-      r -> kind_explicit = 1;
-      r -> kind = f7_parsing____target_kind(value);
-      break;
-    }
-    case 686246 :{
-      r -> jobs = f7_parsing____count(value, 1, _94);
-      break;
-    }
-    case 918708911504550 :{
-      r -> max_errors = f7_parsing____count(value, 0, _95);
-      break;
-    }
-    case 6551812 :{
-      r -> compile_commands = value;
-      r -> save_temps = 1;
-      break;
-    }
-    case 8747647543562 :{
-      f7_parsing____push_pair((* p).cc_args, _41, value);
-      break;
-    }
-    case 274059207002 :{
-      f7_parsing____push_pair((* p).cc_args, _96, value);
-      break;
-    }
-    case 31784 : case 14 :{
-      Array_push((* p).cc_args, String_var(spelling));
-      break;
-    }
-    case 279333770 : case 1473453116298 :{
-      f7_parsing____forward((* p).cpp_args, given);
-      f7_parsing____forward((* p).cc_args, given);
-      break;
-    }
-    case 49350 :{
-      Array_push((* p).cc_args, String_var(f7_parsing____xcc_argument(value)));
-      break;
-    }
-    case 26380018276 : case 26379160754 :{
-      f7_parsing____forward((* p).ld_args, given);
-      break;
-    }
-    case 38800656 :{
-      Array_push((* p).ld_args, String_var(String_join(NULL, cons(String_var(_97), cons(String_var(value), NULL)))));
-      break;
-    }
-    case 35719882824 :{
-      Array_push((* p).cc_args, String_var(spelling));
-      Array_push((* p).ld_args, String_var(spelling));
-      break;
-    }
-    case 14434122038422 : case 52364728676 :{
-      f7_parsing____push_pair((* p).ld_args, spelling, value);
-      break;
-    }
-    case 1496 :{
-      Array_push((* p).ld_args, String_var(spelling));
-      break;
-    }
-    default:{
-      f7_parsing____set_field(r, &(* given.option), value);
-      break;
-    }
-
+    case 535328 : _help_exit(r -> command, 0);
+    break;
+    case 7300068 : r -> color_mode = f7_parsing____color_mode(value);
+    break;
+    case 20273998090 : f7_parsing____include_dir(&((* p)), value);
+    break;
+    case 54927135910154 : Array_push((* p).include_dirs, String_var(value));
+    break;
+    case 1374366630 : case 320883072032 : case 247458062609318 : case 320883068136 : case 1447057375073126 : case 10268258302218 : case 42507336486 : case 10268258311770 : case 328584264751626 : case 7478869146 : case 10268258347430 : r -> dump = given.option -> id;
+    break;
+    case 740232 : r -> kind_explicit = 1;
+    r -> kind = f7_parsing____target_kind(value);
+    break;
+    case 686246 : r -> jobs = f7_parsing____count(value, 1, _94);
+    break;
+    case 918708911504550 : r -> max_errors = f7_parsing____count(value, 0, _95);
+    break;
+    case 6551812 : r -> compile_commands = value;
+    r -> save_temps = 1;
+    break;
+    case 8747647543562 : f7_parsing____push_pair((* p).cc_args, _41, value);
+    break;
+    case 274059207002 : f7_parsing____push_pair((* p).cc_args, _96, value);
+    break;
+    case 31784 : case 14 : Array_push((* p).cc_args, String_var(spelling));
+    break;
+    case 279333770 : case 1473453116298 : f7_parsing____forward((* p).cpp_args, given);
+    f7_parsing____forward((* p).cc_args, given);
+    break;
+    case 49350 : Array_push((* p).cc_args, String_var(f7_parsing____xcc_argument(value)));
+    break;
+    case 26380018276 : case 26379160754 : f7_parsing____forward((* p).ld_args, given);
+    break;
+    case 38800656 : Array_push((* p).ld_args, String_var(String_join(NULL, cons(String_var(_97), cons(String_var(value), NULL)))));
+    break;
+    case 35719882824 : Array_push((* p).cc_args, String_var(spelling));
+    Array_push((* p).ld_args, String_var(spelling));
+    break;
+    case 14434122038422 : case 52364728676 : f7_parsing____push_pair((* p).ld_args, spelling, value);
+    break;
+    case 1496 : Array_push((* p).ld_args, String_var(spelling));
+    break;
+    default: f7_parsing____set_field(r, &(* given.option), value);
+    break;
   }
 
 }
@@ -1459,19 +1418,12 @@ int CliRequest_dependency_option(String s){
 static void f7_parsing____set_field(CliRequest r, CliOption * option, String value){
   char * field =(char *) r +(* option).offset;
   switch((* option).apply){
-    case 417870 :{
-      *(int *) field = 1;
-      break;
-    }
-    case 1322536 :{
-      *(String *) field = value;
-      break;
-    }
-    case 806120 :{
-      *(List *) field = cons(String_var(value), *(List *) field);
-      break;
-    }
-
+    case 417870 : *(int *) field = 1;
+    break;
+    case 1322536 : *(String *) field = value;
+    break;
+    case 806120 : *(List *) field = cons(String_var(value), *(List *) field);
+    break;
   }
 
 }

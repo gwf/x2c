@@ -35,10 +35,10 @@ The following status was recorded before this closeout:
 > shipped. Phase 1 landed in four commits, `f3623b66` through `765e2cdc`:
 > both spellings bound and refreshed into `bootstrap/`, then every caller
 > switched and the old rows dropped, then the transitional entry-point
-> aliases removed. Phase 3 and `$switch` shipped earlier, with unit coverage
+> aliases removed. Phase 3 and the former switch decorator shipped earlier, with unit coverage
 > in `unittest/test-system-macros.x` and a chapter section in
 > `docs/src/guide/system-macros.md`. Phase 2 shipped smaller than scoped,
-> because `$switch` showed that captured syntax is an ordinary walkable List.
+> because the former switch decorator showed that captured syntax is an ordinary walkable List.
 > `$table` is dropped. What remains is the diagnostic location argument and
 > enum consumers. The old `lib/varops.xlisp` row-accessor task was superseded
 > by ed863ce0, which replaced that file with `lib/varops.x`.
@@ -123,8 +123,8 @@ invocation token's column rather than the line's indentation and
 `x2c.source.text` cannot see behind its capture. Deriving the prefix from the
 content needs no location at all.
 
-**Switch semantics.** `$switch` is a decorator with a `Block` target and one
-`Expr` argument, written `$switch(condition) { case 1: ... }`. It builds the
+**Historical switch semantics.** The former decorator took a `Block` target
+and one `Expr` argument. It built the
 switch rather than rewriting an existing one, which keeps it clear of the rule
 that a fixed C keyword cannot serve as a `keyword` alias. A switch body is a
 flat item list with a regular shape, so the whole transform is one `match-case`
@@ -184,7 +184,7 @@ callers now use the public names.
 `x2c.type.members` and the constructors are pure Lisp over `x2c.type.resolve`
 and quasiquotes, so `x2c.block.items` and `x2c.syntax.kind` were never built:
 captured syntax is an ordinary walkable List and `match-case` reaches it
-directly, which `$switch` proved.
+directly, which the former switch decorator proved.
 
 Widening `x2c.literal.value` moved one rejection. `lisp.binding.record` relied
 on the reader refusing a non-String, and the fixture
@@ -226,7 +226,7 @@ Follow-ups from the original scope:
 
 ## Phase 4 - switch
 
-`$switch` shipped. `$table` is dropped.
+The switch decorator shipped and was subsequently removed. `$table` is dropped.
 
 `$table` would have expanded an aligned text table in a string literal into a
 static array of records. The six tables in this repository show why that does
@@ -264,13 +264,13 @@ neither belongs in an exact-match expectation; they get unit coverage instead.
 operation for a literal's text; `$dedent` and `$table` consume its result
 without re-validating the literal. The macro binder already rejects malformed
 and forged captures, so the new constructors trust their operands and add no
-second check. `x2c.block.items` returns what the parser produced; `$switch`
+second check. `x2c.block.items` returns what the parser produced; the former switch decorator
 dispatches on `x2c.syntax.kind` rather than re-parsing.
 
 **Deletions and reuse.** The design deletes the row accessor, the cast
 constructor, and the embedded AST literals in `lib/varops.xlisp`, and removes
 hand-written node shapes from `etc/builtin-macros.xlisp`. `String.dedent` reuses
-`String.startswith` and `String.replace` rather than adding a scanner. `$switch`
+`String.startswith` and `String.replace` rather than adding a scanner. The former switch decorator
 reuses the existing `Stmt` decorator capture and adds one reader; it
 introduces no traversal, cache, or registry. The promoted operations add no
 compiler code at all. The one lasting new mechanism is the constructor family,
@@ -286,7 +286,7 @@ are.
 **Validators, diagnostics, and negative fixtures.** One. `x2c.type.members`
 rejects a non-enum `Type`, mirroring the existing rejection in
 `x2c.type.fields` and preventing a generator from emitting a table from an
-unrelated type. `$switch` has no validator: an earlier draft rejected any
+unrelated type. The former switch decorator has no validator: an earlier draft rejected any
 block item that was not a label or a declaration, and the working
 implementation shows that check would reject legal `goto` labels and
 preprocessor directives while buying nothing, because passing every non-label

@@ -177,7 +177,7 @@ feature merely because the study called its absence a gap.
 | C11 | decision | `iteration.md:144-147` | Input claim: Non-convertible `foreach` type is left to the C compiler. Review: Element conversion failure delegated to native compiler may be deliberate C boundary. Probe specific nonconvertible binding before proposing x2c diagnostic. |
 | C12 | verified | `language.md:3708-3712` vs `src/component-raise.x:21-26` | Input claim: `raise` detail types: whether `NULL` and enums are accepted. Review: Fresh translation enum detail succeeds; untyped $NULL detail rejects raise detail type () is not immutable. This distinguishes untyped NULL from a Var Null value; do not claim all null details fail. Book allowed Null payload can remain, but explicit raw NULL usability needs intent decision. |
 | C13 | verified | `src/cleanup.x` handles listed transfers only | Input claim: `exit()` or `longjmp` across `defer`. Review: Fresh foreign-exit prints before but no cleanup; foreign-jump returns to setjmp with cleaned=0. cleanup.x:435-463 lowers lexical return/break/continue/goto and blocks, not arbitrary foreign calls. Document native exit/longjmp bypass; adding cleanup interception would be public behavior/API change. |
-| C14 | verified | `lib/system-macros.x:86-96` | Input claim: `$switch` system macro versus C `switch`. Review: system-macros.x:86-96 supplies separately named $switch decorator. Informative distinction suffices; no new core switch semantics. |
+| C14 | retired | Former system switch decorator | The decorator was removed. Ordinary `switch` retains C control flow and supports String selectors. |
 
 ## Macros and compile-time execution
 
@@ -330,8 +330,8 @@ line citations and historical counts must not become current proof.
   private match dispatch, C3, E4, E5, E7, C5, C6, C7, C8, C9, E12,
   E2, C10, C11, E9, C4, S19, E11, E8, C12, S20, T20, C13, C14,
   and E10. Private match dispatch is an implementation explanation, not
-  missing public syntax. The separately named `$switch` macro is not
-  ordinary String switch.
+  missing public syntax. The former switch decorator was separate
+  from ordinary String switch and has since been removed.
 
 | Appendix D gap | Main ID or disposition | Additional evidence/acceptance |
 | --- | --- | --- |

@@ -48,53 +48,6 @@ macro Decorator $time(Stmt $target, Literal $label) {
   }
 }
 
-meta int _cases_label(List item) {
-  match (item) {
-    case %(at ? (case ?)): return 1;
-    case %(at ? (default)): return 1;
-  }
-  return 0;
-}
-
-meta int _cases_transfers(List item) {
-  match (item) {
-    case %(at ? (break)): return 1;
-    case %(at ? (continue)): return 1;
-    case %(at ? (goto ?)): return 1;
-    case %(at ? (return ? ?)): return 1;
-    case %(at ? (return ?)): return 1;
-  }
-  return 0;
-}
-
-meta List _cases_split(List items, int labelled) {
-  if (!items) return %();
-  List item = items.car();
-  if (_cases_label(item))
-    return %($item @{_cases_split(items.cdr(), 1)});
-  if (!labelled)
-    return %($item @{_cases_split(items.cdr(), 0)});
-  Array run = [];
-  while (items && !_cases_label(items.car())) {
-    run.push(items.car());
-    items = items.cdr();
-  }
-  if (!_cases_transfers(run[-1])) run.push(%(break));
-  return %((block @run) @{_cases_split(items, 0)});
-}
-
-meta List _cases_switch(List condition, List body) {
-  List selected =
-    $!{ switch ($condition) { @{_cases_split(body.cdr(), 0)} } };
-  return %($selected);
-}
-
-/* Gives every case run its own block and its own break. Deliberate
-   fallthrough is written by nesting an ordinary switch. */
-macro Decorator $switch(Stmt $body, Expr $condition) {
-  @_cases_switch($condition, $body)
-}
-
 meta List _macros_location(void) =>
   $!String{ ${x2c_invocation_file() + ":" + x2c_invocation_line().str()} };
 

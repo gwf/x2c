@@ -53,7 +53,7 @@ The ready-tranche findings now stand as follows:
 - Phase 4 renamed the two executable x2c tools to `tools/check-release` and
   `tools/gen-package-index`. Both use the existing suffix-independent script
   classifier and launcher.
-- The ready-tranche follow-up adopted `$switch` in the two largest CLI
+- The ready-tranche follow-up adopted the former switch decorator in the two largest CLI
   dispatches, deleting 62 explicit terminal `break`s, and replaced eight
   manual temporary parser and analysis state bindings with `$let`.
 
@@ -167,11 +167,9 @@ use proves the missing association material.
 
 ### Ready-tranche system-macro follow-up (complete)
 
-Use `$switch` for `_print_help` and `_apply_option` in `src/cli.x`, which
-already imports the system macro pack for `$dedent`. Remove only each case
-run's terminal switch `break`; preserve grouped labels and any early or nested
-control transfer. The remaining return-only switches and switches with
-deliberate fallthrough gain no useful deletion and stay direct.
+The former switch decorator was adopted for `_print_help` and `_apply_option`
+in `src/cli.x`. That adoption has since been reversed: ordinary switches
+now carry explicit control transfers.
 
 Use `$let` for the exact temporary-state regions in the list, raise and catch
 literal parsers, aggregate-member binding, and the two recursive

@@ -28,6 +28,8 @@ int Compiler_defines_main(Compiler c);
 
 int Compiler_script_statement_starts(Compiler c);
 
+int Compiler_auto_region_function_starts(Compiler c);
+
 int Compiler_script_statement_executes(Compiler c);
 
 int Compiler_protocol_form_starts(Compiler c);

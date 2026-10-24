@@ -15,7 +15,7 @@ usually supplied by `#include "x2c.x"`.
 | Initializer `auto` | Keyword after `=` | Clean up the acquired value at block exit |
 | `foreach` | Shipped keyword alias | Traverse through the ordinary Iter protocol |
 | `with` | Contextual grammar | Substitute a source expression within a block |
-| `$switch`, `$dedent`, `$assert`, `$todo`, `$unreachable`, `$time` | Shipped, explicit import | Remove boilerplate C leaves to every caller |
+| `$dedent`, `$assert`, `$todo`, `$unreachable`, `$time` | Shipped, explicit import | Remove boilerplate C leaves to every caller |
 | Project macros | Explicit import | Supply project-specific syntax and policy |
 
 `class` and `foreach` are keyword aliases. Use the `$` spelling for
@@ -467,41 +467,6 @@ line:
 ```x2c,ignore
 #include "system-macros.x"
 ```
-
-### Give every case its own block and its own break
-
-C makes you write the block and the `break` yourself, and forgetting either is
-a familiar defect. `$switch` takes the condition and the body, keeps each run
-of `case` and `default` labels where you wrote it, and turns the statements
-after a run into one block carrying that run's `break`:
-
-```x2c
-~#include "system-macros.x"
-int main(void) {
-  int code = 2;
-  String reached = "none";
-  $switch(code)
-  {
-    case 1:
-    case 2:
-      String shared = "low";
-      reached = shared;
-    case 3:
-      String shared = "three";
-      reached = shared;
-    default:
-      reached = "other";
-  }
-  return reached == "low" ? 0 : 1;
-}
-```
-
-Both cases declare `shared`, which plain C rejects without hand-written
-braces. A run that already transfers gets no added `break`, so a case ending
-in `return` stays free of unreachable code. Items that are not labels pass
-through untouched, including a declaration before the first case, a `goto`
-label, and a preprocessor directive. To fall through, nest an ordinary
-`switch`.
 
 ### Write indented text without indenting the text
 

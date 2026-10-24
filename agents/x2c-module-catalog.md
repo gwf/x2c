@@ -1257,7 +1257,7 @@ convenience macros for text, timing, and processes.
 
 Public functions:
 
-`_cases_label`, `_cases_transfers`, `_cases_split`, `_cases_switch`
+None. This module has no non-static function definitions.
 
 ### [lib/thread-state.x](../lib/thread-state.x)
 

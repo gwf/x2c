@@ -32,7 +32,7 @@ empty `String`, which is null. Everything else is C `switch`: adjacent
 labels, `default` in any position, fallthrough, `break`, an enclosing loop's
 `continue`, nested switches, and labels inside nested blocks of the body.
 
-This is not `match`, and `$switch` in `lib/system-macros.x` is unchanged.
+This is not `match`. The separate switch decorator was later removed.
 It also serves as the second design check from the archived
 [unit initialization plan](unit-initialization-and-assembly.md): the
 feature contributes one helper to unit support and its literals to the

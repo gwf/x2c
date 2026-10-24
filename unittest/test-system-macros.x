@@ -25,42 +25,6 @@ static String _captured_stderr(File file, int saved) {
   return file.string_close();
 }
 
-static String _classify(int code) {
-  String reached = "none";
-  $switch(code)
-  {
-    case 1:
-    case 2:
-      String shared = "low";
-      reached = shared;
-    case 3:
-      String shared = "three";
-      reached = shared;
-    default:
-      reached = "other";
-  }
-  return reached;
-}
-
-static int _returns_early(int code) {
-  $switch(code)
-  {
-    case 1:
-      return 10;
-    default:
-      return -1;
-  }
-}
-
-static void system_macro_switch_scopes_and_breaks_each_run(void) {
-  EXPECT_TRUE(_classify(1) == "low");
-  EXPECT_TRUE(_classify(2) == "low");
-  EXPECT_TRUE(_classify(3) == "three");
-  EXPECT_TRUE(_classify(9) == "other");
-  EXPECT_INT_EQ(_returns_early(1), 10);
-  EXPECT_INT_EQ(_returns_early(2), -1);
-}
-
 /* A multi-line literal cannot sit inside a function-like C macro invocation,
    so each block binds a local before the assertion reads it. */
 static void system_macro_dedent_folds_and_defers(void) {
@@ -194,7 +158,6 @@ static void system_macro_type_members_reads_every_initializer(void) {
 }
 
 void system_macros_suite(void) {
-  $test.run(system_macro_switch_scopes_and_breaks_each_run);
   $test.run(system_macro_dedent_folds_and_defers);
   $test.run(system_macro_assert_reports_the_written_check);
   $test.run(system_macro_assert_passes_a_true_check);
