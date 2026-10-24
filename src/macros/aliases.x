@@ -213,8 +213,8 @@ List Compiler.parse_alias_member(
 static void _declare(Compiler c, AliasHead &head) {
   int depth = c.sym.scope_count(), level = c.alias_level;
   match (_entry(c, head.name))
-    case %(declared ?(int prior_depth) ?(int prior_level) *):
-      if (prior_depth == depth && prior_level == level)
+    case %(declared ?(int prior_depth) ?(int prior_level) ?(String owner) *):
+      if (prior_depth == depth && prior_level == level && _seen(c, owner))
         $fail.parse_decl_bound(c, head.start, head.name);
   int file_scope = !level && c.sym.at_file_scope();
   if (file_scope && c.sym.get_exact(%(${head.name})))
@@ -269,6 +269,21 @@ void Compiler.leave_alias_body(Compiler c, Map mark) {
 module void _install_imported_alias(Compiler c, String name, List frozen) =>
   _install(c, name, %(imported $frozen));
 
+/** Reports whether the current scope declares an alias named `name`,
+    including a file-scope alias an include delivered. A declaration of that
+    name in the same scope conflicts with it. */
+int Compiler.scope_declares_alias(Compiler c, String name) {
+  List row = c.sym.current_binding(%($name));
+  if (row && c.fact(%(alias $row))) return 1;
+  match (_entry(c, name)) {
+    case %(imported ?): return !c.alias_level && c.sym.at_file_scope();
+    case %(declared ?(int depth) ?(int level) ?(String file) *):
+      return depth == c.sym.scope_count() && level == c.alias_level &&
+             _seen(c, file);
+  }
+  return 0;
+}
+
 // uses
 
 /** Returns the expression that the identifier at the cursor stands for when
@@ -314,7 +329,10 @@ static List _visible(
   }
   match (entry)
     case %(declared ?(int depth) ? ?(String file) ?expression):
-      if (depth > scope && (!file.len() || file == c.file_prefix()))
-        return expression;
+      if (depth > scope && _seen(c, file)) return expression;
   return NULL;
 }
+
+/* A `static` alias of a module file is seen only in that file. */
+static int _seen(Compiler c, String file) =>
+  !file.len() || file == c.file_prefix();

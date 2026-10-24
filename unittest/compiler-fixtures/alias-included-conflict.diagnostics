@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/alias-included-conflict.x:12:11: parse: declaration 'level' is already bound
+  int level = 4;
+            ^
+  note: prior binding: 'level'
+

@@ -96,7 +96,7 @@ Archived 2026-10-24 after checking source and delivery history:
   native-type limitations remain dated research.
 - [Temporary assignments and aliases](archive/with-and-alias.md):
   `with` assignment lists and both `alias` forms replaced `$let` and the old
-  `with` alias; delivered from `ab9645f0c`.
+  `with` alias; implemented from `ab9645f0c`.
 - [Public release workflow](archive/public-release-workflow.md): workflow
   implementation delivered, including staging evidence at `a3084897c`.
   Closure does not claim a production release or current staging health.

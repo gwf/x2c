@@ -408,9 +408,9 @@ static Var _method_spelling(
    in its scope. */
 static void _check_rebinding(
   Compiler c, String exact, int exact_name, List declaration) {
-  List existing = exact ? c.sym.current_binding(%($exact)) : NULL;
-  if (existing && %(alias $existing) in c.semantic_binding_facts())
+  if (exact && c.scope_declares_alias(exact))
     $fail.parse_decl_bound(c, c.token, exact);
+  List existing = exact ? c.sym.current_binding(%($exact)) : NULL;
   if (exact_name || (existing &&
       %(parameter $existing) in c.semantic_binding_facts())) {
     Var prior = existing

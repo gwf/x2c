@@ -1,8 +1,8 @@
 # Temporary assignments with `with`; lexical substitution with `alias`
 
 > Status: done, 2026-10-24.
-> Implemented as designed and delivered to `dev` in the batch that begins at
-> `ab9645f0c`. The built-in `$x2c.with` decorator lowers `with` through
+> Implemented as designed in the batch that begins at `ab9645f0c`, which
+> goes to `dev` through the shared integrator. The built-in `$x2c.with` decorator lowers `with` through
 > `with.expand` in `src/builtins.x`; `src/macros/aliases.x` owns both
 > `alias` forms. Local aliases are Sym rows; file-scope and body aliases are
 > macro-state entries, for the reason its header records. Two interactions
