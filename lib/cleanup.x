@@ -5,7 +5,7 @@
 
 #pragma once
 
-/* Adopts `Cleanup` for `$type` by calling its `$release` method, so `$auto`
+/* Adopts `Cleanup` for `$type` by calling its `$release` method, so `auto`
    can name the handle's lifetime. The release method may be defined later
    in the unit. */
 macro Unit $cleanup.by(Type $type, Name $release) {

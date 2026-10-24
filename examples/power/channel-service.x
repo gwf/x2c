@@ -4,11 +4,11 @@
 #include <stdio.h>
 
 int main(void) {
-  Channel requests = $auto(Channel.new(2));
-  Channel first_reply = $auto(Channel.new());
-  Channel second_reply = $auto(Channel.new());
-  Array answers = $auto([]);
-  Array jobs = $auto([]);
+  Channel requests = auto Channel.new(2);
+  Channel first_reply = auto Channel.new();
+  Channel second_reply = auto Channel.new();
+  Array answers = auto [];
+  Array jobs = auto [];
   int remaining_clients = 2;
 
   jobs.push(%!(void) => {

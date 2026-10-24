@@ -5,7 +5,7 @@
 // omitted one; INT_MIN + 1 is the control. An unsigned literal that
 // converts to INT_MIN behaves as the same value held in a variable.
 int main(void) {
-  Array a = $auto([10, 20, 30]);
+  Array a = auto [10, 20, 30];
   String s = "abc";
   List l = %(1 2 3);
   int lo = INT_MIN, near = INT_MIN + 1;

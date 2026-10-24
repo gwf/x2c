@@ -99,7 +99,7 @@ String File.string(File file) {
     _string_allocation(remaining);
     return _regular_text(file, (size_t) remaining);
   }
-  Block content = $auto(Block.new(sizeof(char)));
+  Block content = auto Block.new(sizeof(char));
   _append_rest(content, file);
   return _text(content.bytes, content.length);
 }
@@ -113,7 +113,7 @@ String File.string(File file) {
     represented, or `<alloc-fail>` while constructing the result.
 */
 String File.readline(File file) {
-  Block line = $auto(Block.new(sizeof(char)));
+  Block line = auto Block.new(sizeof(char));
   line.reserve(BUFSIZ);
   FileReadStatus status = file.readline_into(line);
   return status == <data> ? _text(line.bytes, line.length) : NULL;

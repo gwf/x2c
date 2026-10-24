@@ -14,11 +14,11 @@ links:
 ```x2c,ignore
 import "pcre2" with Regexp, RegexpMatch;
 
-Regexp entry = $auto(Regexp.compile(
+Regexp entry = auto Regexp.compile(
   %"^(?<time>\\d\\d:\\d\\d:\\d\\d) (?<program>\\w+)\\[\\d+\\]: (?<text>.*)$$",
   0
-));
-Regexp fields = $auto(Regexp.compile("\\s*\\|\\s*", 0));
+);
+Regexp fields = auto Regexp.compile("\\s*\\|\\s*", 0);
 Map counts = {};
 
 foreach(String line in lines) {

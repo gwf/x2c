@@ -31,9 +31,9 @@ static Node caller_owned(void) {
   return n;
 }
 
-// The $auto array is used only inside its own block.
+// The array with initializer auto is used only inside its own block.
 static int auto_local(void) {
-  Array a = $auto([]);
+  Array a = auto [];
   a.push(2);
   return (int) a.len();
 }
@@ -151,9 +151,9 @@ static Var copied_into_var(Array out) {
   return text;
 }
 
-// A List parameter copies an $auto Array into fresh List cells.
+// A List parameter copies an Array with initializer auto into fresh List cells.
 static List copied_into_list(void) {
-  Array items = $auto([]);
+  Array items = auto [];
   items.push(1);
   return cons(<items>, items);
 }

@@ -161,7 +161,7 @@ static void _print_ast(List ast) {
    cold. A dump numbers bindings by their first appearance in its text. */
 static List _renumbered_bindings(List ast) {
   Map numbers = {}, replaced = {};
-  Array pending = $auto([ast]);
+  Array pending = auto [ast];
   while (pending.len()) {
     Var node = pending.take_last();
     if (node is not <list> || node.is_nil()) continue;

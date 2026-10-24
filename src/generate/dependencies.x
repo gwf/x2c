@@ -80,8 +80,8 @@ static int _inline_binding(Compiler c, List binding) =>
    as C requires of a body that uses the macro. Source initializer helpers
    stay at their capture positions. */
 module List _move_bodies(List source, Map inline_bodies) {
-  Array out = [], bodies = $auto([]);
-  Map undefs = $auto(_undef_positions(source)), List arms = NULL;
+  Array out = [], bodies = auto [];
+  Map undefs = auto _undef_positions(source), List arms = NULL;
   int position = 0;
   foreach (List node in source) {
     if (position in undefs) _place_bodies(out, bodies, arms);
@@ -109,7 +109,7 @@ module List _move_bodies(List source, Map inline_bodies) {
    each conditional group that contains one. */
 static Map _undef_positions(List source) {
   Map positions = {};
-  Array open = $auto([]);
+  Array open = auto [];
   int position = 0;
   foreach (List node in source) {
     match (node) case %(preproc ?(String content)): {
@@ -225,7 +225,7 @@ static void _set_static(Map statics, Var base, List declarator) {
    dependencies recurse; ordinary expressions share the same worklist. */
 static void _dependencies(Forward &f, Var value) {
   if (value is not <list> || value.is_nil()) return;
-  Array resume = $auto([]);
+  Array resume = auto [];
   for (List node = value; node; node = _next(node, resume)) _visit(f, node);
 }
 

@@ -673,7 +673,7 @@ macro Unit $map.core.observe(
     if (asz != bsz) return asz < bsz ? -1 : 1;
     if (!asz) return 0;
 
-    Scope scratch = $auto(Scope.new());
+    Scope scratch = auto Scope.new();
     $entry *arecs = Scope.malloc_in(&scratch, asz * sizeof($entry));
     $entry *brecs = Scope.malloc_in(&scratch, bsz * sizeof($entry));
     unsigned cursor = 0, index = 0;

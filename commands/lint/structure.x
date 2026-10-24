@@ -331,7 +331,7 @@ void Lint.structure_rules(Lint l):
    space as one, as the duplicate-body rule compares it. */
 static String _body_text(Lint l, List function):
   (String name, int start, int body, int end) = function
-  Buffer out = $auto(Buffer.new(0))
+  Buffer out = auto Buffer.new(0)
   for (int at = body + 1; at < end - 1; at++):
     Token t = l.at(at)
     int blank = t.type == <space> || t.type == <comment> || lint_text(t)

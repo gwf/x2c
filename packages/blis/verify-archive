@@ -24,7 +24,7 @@ Path header = Path.join(prefix, "include/blis/blis.h");
 Map profile = Json.read_file(profile_path);
 
 String expected = profile["header_sha256"].str();
-File header_file = $auto(File.open(header, "rb"));
+File header_file = auto File.open(header, "rb");
 String actual = header_file.sha256();
 if (actual != expected) _fail(%"blis.h is $actual, not $expected");
 

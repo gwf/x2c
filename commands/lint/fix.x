@@ -14,7 +14,7 @@
 /* Returns `text` with the sorted `(START END TEXT)` `edits` applied. An
    edit that overlaps an earlier one is dropped, for a later run. */
 static String _apply(String text, List edits):
-  Buffer out = $auto(Buffer.new(0))
+  Buffer out = auto Buffer.new(0)
   int cursor = 0
   foreach List edit in edits:
     Var (start, end, replacement) = edit

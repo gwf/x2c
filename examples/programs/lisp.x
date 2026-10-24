@@ -39,7 +39,7 @@ static int _eval_file(Lisp lisp, const char *path, int print) {
 }
 
 static int _repl(Lisp lisp) {
-  Buffer source = $auto(Buffer.new(0));
+  Buffer source = auto Buffer.new(0);
   unsigned cursor = 0;
   int failed = 0, incomplete = 0, interactive = isatty(Stdin.fileno());
   while (1) {
@@ -118,7 +118,7 @@ static const char *_default_init(char *buffer, size_t size) {
 }
 
 int main(int argc, char **argv) {
-  Lisp lisp = $auto(Lisp.kernel());
+  Lisp lisp = auto Lisp.kernel();
   const char *init = NULL;
   char probed[512];
   int arg = 1;

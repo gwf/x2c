@@ -14,7 +14,7 @@
 static Path root
 
 static String digest(String path):
-  File file = $auto(File.open(path, "rb"))
+  File file = auto File.open(path, "rb")
   return file.sha256()
 
 /* The walk visits parents first and siblings in sorted order, and each member

@@ -23,7 +23,7 @@ static Map _batch_payload(void) {
 static void channel_batch_failure_reclaims_queued_owned_payload(void) {
   $test.scoped();
   Channel results = Channel.new(1);
-  Channel ready = $auto(Channel.new());
+  Channel ready = auto Channel.new();
   atomic_store(&batch_payload_drops, 0);
   int caught = 0;
   try Thread.run([
@@ -47,7 +47,7 @@ static void channel_batch_failure_reclaims_queued_owned_payload(void) {
 
 static void channel_batch_receiver_failure_reclaims_owned_payload(void) {
   $test.scoped();
-  Channel results = $auto(Channel.new());
+  Channel results = auto Channel.new();
   atomic_store(&batch_payload_drops, 0);
   int caught = 0;
   try Thread.run([
@@ -69,7 +69,7 @@ static void channel_batch_receiver_failure_reclaims_owned_payload(void) {
 
 static void channel_batch_transfers_nested_storage_after_worker_exit(void) {
   $test.scoped();
-  Channel results = $auto(Channel.new(1));
+  Channel results = auto Channel.new(1);
   atomic_store(&batch_payload_drops, 0);
   Thread.run([
     %!(void) => {
@@ -99,10 +99,10 @@ static void channel_batch_transfers_nested_storage_after_worker_exit(void) {
 
 static void channel_batch_worker_failure_stops_both_directions(void) {
   $test.scoped();
-  Channel files = $auto(Channel.new());
-  Channel results = $auto(Channel.new());
-  Channel ready = $auto(Channel.new(2));
-  Array jobs = $auto([]);
+  Channel files = auto Channel.new();
+  Channel results = auto Channel.new();
+  Channel ready = auto Channel.new(2);
+  Array jobs = auto [];
   atomic_int finished = 0;
   int callbacks = 0, caught = 0;
 
@@ -142,9 +142,9 @@ static void channel_batch_worker_failure_stops_both_directions(void) {
 
 static void channel_batch_service_failure_stops_reply_wait(void) {
   $test.scoped();
-  Channel requests = $auto(Channel.new());
-  Channel reply = $auto(Channel.new());
-  Array jobs = $auto([]);
+  Channel requests = auto Channel.new();
+  Channel reply = auto Channel.new();
+  Array jobs = auto [];
   atomic_int finished = 0;
   int callbacks = 0, caught = 0;
 

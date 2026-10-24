@@ -168,7 +168,7 @@ Var List.assoc(List list, Var key) {
     Raises: `<alloc-fail>` or `<size-limit>` while constructing that prefix.
 */
 meta native Self List.head(Self list, unsigned count) {
-  List original = list, Array values = $auto([]);
+  List original = list, Array values = auto [];
   while (list && count--) {
     values.push(list.car);
     list = list.cdr();
@@ -209,7 +209,7 @@ meta native Self List.subseq(Self list, int start, int stop, int step) {
 static List _collect_subseq(List list, int start, int step, int span) {
   if (span <= 0) return NULL;
   for (int i = 0; list && i < start; i++) list = list.cdr();
-  Array values = $auto([]);
+  Array values = auto [];
   while (list && span--) {
     values.push(list.car);
     for (int i = 0; list && i < step; i++) list = list.cdr();
@@ -232,8 +232,8 @@ meta native Self List.getslice(Self list, int start, int stop, int step) {
       (!list || _is_active_canonical(list))) return list;
   if (step > 0) return _collect_subseq(list, start, step, span);
   if (span <= 0) return NULL;
-  Array source = $auto(list);
-  Array values = $auto([]);
+  Array source = auto list;
+  Array values = auto [];
   for (int i = 0; i < span; i++) values.push(source[start + i * step]);
   return values;
 }

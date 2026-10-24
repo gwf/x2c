@@ -27,7 +27,7 @@ static typedef struct Splice {
 */
 ModuleSource Compiler.module_source(Compiler c, String path, String text) {
   if (!_spells_block(text)) return NULL;
-  Buffer out = $auto(Buffer.new(0));
+  Buffer out = auto Buffer.new(0);
   Splice s = {
     .c = c, .out = out, .markers = [], .members = {}, .splicing = {},
     .prefixes = {}, .line = 1,
@@ -152,7 +152,7 @@ static String _relative_member(String root, String path) {
   int shared = 0;
   for (int i = 0; i < base.len() && i < path.len() && base[i] == path[i]; i++)
     if (base[i] == '/') shared = i + 1;
-  Buffer out = $auto(Buffer.new(0));
+  Buffer out = auto Buffer.new(0);
   for (int i = shared; i < base.len(); i++)
     if (base[i] == '/') out.write("../");
   out.write(path[shared:]);
@@ -170,7 +170,7 @@ static String _relative_member(String root, String path) {
    since C reserves file-scope names that begin with `_`. */
 static String _file_prefix(String path) {
   if (path.startswith("./")) path = path[2:];
-  Buffer spelling = $auto(Buffer.new(0));
+  Buffer spelling = auto Buffer.new(0);
   if (isdigit((unsigned char) path[0])) spelling.write_char('x');
   foreach (char ch in path)
     spelling.write_char(isalnum((unsigned char) ch) ? ch : '_');

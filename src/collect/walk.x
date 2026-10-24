@@ -173,7 +173,7 @@ static void _walk_file(
 }
 
 static void _split(FileWalk &w, Token first) {
-  Array arms = $auto([]);
+  Array arms = auto [];
   for (Token token = first; token.type != <eof>; token++) {
     if (token.type != <preproc> || !_starts_line(first, token)) continue;
     if (!_track_arms(arms, token.text)) _directive(w, token, _hidden(arms));
@@ -418,8 +418,8 @@ static String _resolve_include(
     if (walk) _include_search_dependency(walk, target);
     return sources.exists(target) ? target : NULL;
   }
-  Array dirs = $auto(_include_dirs(
-    extra_dirs, angle ? NULL : includer_dir, !walk));
+  Array dirs = auto _include_dirs(
+    extra_dirs, angle ? NULL : includer_dir, !walk);
   for (int i = 0; i < dirs.len(); i++) {
     String dir = dirs[i], path = %"$dir/$target";
     covered = dir == _canonical_lib() || dir == _canonical_include();

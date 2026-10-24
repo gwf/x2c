@@ -113,7 +113,7 @@ static Var Interp.eval(Interp &self, LispEnv *env, Var form) {
    If evaluation defines globals, reads files, or raises an error, a later
    failure leaves earlier effects intact. */
 static List Interp.eval_args(Interp &self, LispEnv *env, List forms) {
-  Array values = $auto([]);                                                      // Array literal; cleanup on exit.
+  Array values = auto [];                                                        // Array literal; cleanup on exit.
   foreach (Var form in forms) values.push(self.eval(env, form));                   // Typed List iteration.
   return values;                                                                 // Build List before Array cleanup.
 }
@@ -305,7 +305,7 @@ static Var Interp.closure(
    Lookup searches parameters, captures, globals, then reserved names.
    The caller's local bindings are outside this chain. */
 static Var Interp.invoke(Interp &self, Fn closure, List values) {
-  Map bindings = $auto({});                                                      // Map literal; cleanup on exit.
+  Map bindings = auto {};                                                        // Map literal; cleanup on exit.
   for (List params = closure.params; params; params = params.cdr()) {            // Walk parameters to the empty List.
     Var (name, rest) = params;                                                   // Extract and convert by position.
     if (name.is_atom() && name.str() == ".") {                                   // Canonical String identity test.
@@ -361,7 +361,7 @@ static Var Interp.quasiquote(Interp &self, LispEnv *env, Var form, int depth) {
 
 static List Interp.quoted_elements(
   Interp &self, LispEnv *env, List items, int depth) {
-  Array values = $auto([]);                                                      // Collect values in a temporary Array.
+  Array values = auto [];                                                        // Collect values in a temporary Array.
   foreach (Var item in items) {                                                    // Recurse only into nested forms.
     match (item) {
       case %(unquote-splicing ?argument) if (!depth): {
@@ -465,7 +465,7 @@ static Var Reader.form(Reader &self, Token token) {
         return self.error(<incomplete>, self.start);                             // Receiver call builds a source error.
       break;
     case <"(">: {                                                                // Quoted Symbol in a switch.
-      Array elements = $auto([]);                                                // Array literal; cleanup on exit.
+      Array elements = auto [];                                                  // Array literal; cleanup on exit.
       while (1) {
         Token next = self.tokens.next();                                         // Pull a token with receiver syntax.
         if (next && next.type == <")">) return elements.list();                  // List result boxes as Var.
@@ -833,7 +833,7 @@ static List _stdlib = %(                                                        
    so its definitions are available to the importing program.                             one shared environment
 */
 static Var _eval_text(Interp &self, String source) {
-  Scope storage = $auto(Scope.new());                                            // Destroy Scope on block exit.
+  Scope storage = auto Scope.new();                                              // Destroy Scope on block exit.
   Reader reader = Reader.scan(source, 0, &storage);                              // Pass the token Scope by address.
   Var form, result = %();                                                        // Empty List implicitly boxes as Var.
   while ((form = reader.read()) is not void)                                     // Receiver call; distinct void value.
@@ -842,8 +842,8 @@ static Var _eval_text(Interp &self, String source) {
 }
 
 static Var _import_file(Interp &self, String path) {
-  File source = $auto(path.open("r"));                                           // Close File on block exit.
-  Block content = $auto(Block.new(sizeof(char)));                                // Release Block on block exit.
+  File source = auto path.open("r");                                             // Close File on block exit.
+  Block content = auto Block.new(sizeof(char));                                  // Release Block on block exit.
   if (source.read_into(content) == <eof>) return %();                            // EOF gives an empty List result.
   if (content.length > INT_MAX) {                                                // Native C size limit.
     size_t size = content.length, int limit = INT_MAX;                           // Mixed types in one declaration.
@@ -945,7 +945,7 @@ static Var Repl.read_unit(Repl &self) {
 }
 
 static int _repl(Interp &self) {
-  Buffer source = $auto(Buffer.new(0));                                          // Release Buffer on block exit.
+  Buffer source = auto Buffer.new(0);                                            // Release Buffer on block exit.
   Repl repl = { .source = source, .interactive = isatty(Stdin.fileno()) };       // Named fields; POSIX terminal check.
   defer repl.storage.destroy();                                                  // Destroy remaining tokens on exit.
   while (!repl.done) {                                                           // Same dot for a stack struct value.

@@ -2089,7 +2089,7 @@ static String _dataset_function_id(String path, String name) {
 
 static void _dataset_write_rows(
   String path, String header, Array rows) {
-  File output = $auto(path.open("w"));
+  File output = auto path.open("w");
   output.printf("%s\n", header);
   foreach (String row, rows) output.printf("%s\n", row);
 }

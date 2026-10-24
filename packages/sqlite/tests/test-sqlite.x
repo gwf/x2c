@@ -13,15 +13,15 @@ import "sqlite" with Database, Prepared;
 #include "../../../unittest/test-macros.x"
 
 static long count_rows(Database db) {
-  Prepared query = $auto(db.prepare("SELECT count(*) FROM item"));
+  Prepared query = auto db.prepare("SELECT count(*) FROM item");
   List row = query.next();
   return row[0].long_long_value();
 }
 
 static void positional_parameters_reset_and_reuse(void) {
-  Database db = $auto(Database.open(":memory:"));
+  Database db = auto Database.open(":memory:");
   db.execute("CREATE TABLE item(id INTEGER PRIMARY KEY, name TEXT)");
-  Prepared insert = $auto(db.prepare("INSERT INTO item(name) VALUES (?)"));
+  Prepared insert = auto db.prepare("INSERT INTO item(name) VALUES (?)");
   insert.bind(%("first")).execute();
   EXPECT_INT_EQ(db.changes(), 1);
   EXPECT_INT_EQ(db.last_insert_rowid(), 1);
@@ -29,7 +29,7 @@ static void positional_parameters_reset_and_reuse(void) {
   EXPECT_INT_EQ(db.last_insert_rowid(), 2);
   EXPECT_INT_EQ(count_rows(db), 2);
 
-  Prepared query = $auto(db.prepare("SELECT name FROM item WHERE id = ?"));
+  Prepared query = auto db.prepare("SELECT name FROM item WHERE id = ?");
   query.bind(%(1));
   EXPECT_STR_EQ(query.next()[0].string(), "first");
   EXPECT_TRUE(query.next() == NULL);
@@ -48,8 +48,8 @@ static void positional_parameters_reset_and_reuse(void) {
 }
 
 static void named_parameters_replace_all_values(void) {
-  Database db = $auto(Database.open(":memory:"));
-  Prepared query = $auto(db.prepare("SELECT :left + :right, :left"));
+  Database db = auto Database.open(":memory:");
+  Prepared query = auto db.prepare("SELECT :left + :right, :left");
   query.bind_named({":left": 4, ":right": 7});
   List row = query.next();
   EXPECT_INT_EQ(row[0].long_long_value(), 11);
@@ -67,8 +67,8 @@ static void named_parameters_replace_all_values(void) {
 }
 
 static void null_empty_rows_and_duplicate_columns_are_distinct(void) {
-  Database db = $auto(Database.open(":memory:"));
-  Prepared query = $auto(db.prepare("SELECT NULL AS value, 7 AS value"));
+  Database db = auto Database.open(":memory:");
+  Prepared query = auto db.prepare("SELECT NULL AS value, 7 AS value");
   List names = query.columns();
   EXPECT_INT_EQ(names.len(), 2);
   EXPECT_STR_EQ(names[0].string(), "value");
@@ -79,12 +79,12 @@ static void null_empty_rows_and_duplicate_columns_are_distinct(void) {
   EXPECT_INT_EQ(row[1].long_long_value(), 7);
   EXPECT_TRUE(query.next() == NULL);
   EXPECT_TRUE(query.next() == NULL);
-  Prepared empty = $auto(db.prepare("SELECT NULL WHERE 0"));
+  Prepared empty = auto db.prepare("SELECT NULL WHERE 0");
   EXPECT_TRUE(empty.next() == NULL);
 }
 
 static void rows_copy_text_blobs_and_nul_text(void) {
-  Database db = $auto(Database.open(":memory:"));
+  Database db = auto Database.open(":memory:");
   Prepared query = db.prepare(
     "SELECT 'first', x'410042', CAST(x'610062' AS TEXT), x'' "
     "UNION ALL SELECT 'second', x'ff', 'plain', x'12'"
@@ -108,9 +108,9 @@ static void rows_copy_text_blobs_and_nul_text(void) {
 }
 
 static void bound_values_copy_binary_and_preserve_numeric_edges(void) {
-  Database db = $auto(Database.open(":memory:"));
-  Prepared query = $auto(db.prepare("SELECT ?, ?, ?, ?, ?, ?"));
-  Block block = $auto(Block.new(1));
+  Database db = auto Database.open(":memory:");
+  Prepared query = auto db.prepare("SELECT ?, ?, ?, ?, ?, ?");
+  Block block = auto Block.new(1);
   block.append("A\0B", 3);
   Bytes bytes = block.bytes;
   Var absent = NULL;
@@ -127,9 +127,9 @@ static void bound_values_copy_binary_and_preserve_numeric_edges(void) {
   Bytes copy = row[5];
   EXPECT_TRUE(memcmp(copy, "A\0B", 3) == 0);
 
-  Prepared empty = $auto(db.prepare(
+  Prepared empty = auto db.prepare(
     "SELECT typeof(?), length(?), typeof(?), length(?)"
-  ));
+  );
   Bytes empty_blob = Bytes.new(1);
   empty.bind(%($empty_blob $empty_blob "" ""));
   List kinds = empty.next();
@@ -138,7 +138,7 @@ static void bound_values_copy_binary_and_preserve_numeric_edges(void) {
   EXPECT_STR_EQ(kinds[2].string(), "text");
   EXPECT_INT_EQ(kinds[3].integer(), 0);
 
-  Prepared integer = $auto(db.prepare("SELECT ?"));
+  Prepared integer = auto db.prepare("SELECT ?");
   unsigned long long outside = (unsigned long long) LLONG_MAX + 1;
   int caught = 0;
   try { integer.bind(%($outside)); }
@@ -167,10 +167,10 @@ static void bound_values_copy_binary_and_preserve_numeric_edges(void) {
 }
 
 static void native_failures_preserve_operation_code_and_message(void) {
-  Database db = $auto(Database.open(":memory:"));
+  Database db = auto Database.open(":memory:");
   db.execute("CREATE TABLE item(value INTEGER UNIQUE); "
              "INSERT INTO item VALUES(1)");
-  Prepared insert = $auto(db.prepare("INSERT INTO item VALUES(?)"));
+  Prepared insert = auto db.prepare("INSERT INTO item VALUES(?)");
   int caught = 0;
   try { insert.bind(%(1)).execute(); }
   catch %(?code *detail): {
@@ -195,7 +195,7 @@ static void native_failures_preserve_operation_code_and_message(void) {
 }
 
 static void transactions_commit_and_preserve_rollback_error(void) {
-  Database db = $auto(Database.open(":memory:"));
+  Database db = auto Database.open(":memory:");
   db.execute("CREATE TABLE item(value INTEGER)");
   Var result = db.transaction(%!() => {
     db.execute("INSERT INTO item VALUES(1); INSERT INTO item VALUES(2)");
@@ -220,7 +220,7 @@ static void transactions_commit_and_preserve_rollback_error(void) {
 }
 
 static void nested_transactions_reject_without_partial_commit(void) {
-  Database db = $auto(Database.open(":memory:"));
+  Database db = auto Database.open(":memory:");
   db.execute("CREATE TABLE item(value INTEGER)");
   int caught = 0;
   try {
@@ -243,11 +243,11 @@ static void file_reopen_readonly_and_busy_are_observable(void) {
   String filename = "builds/test-sqlite.db";
   remove(filename);
   defer remove(filename);
-  Database db = $auto(Database.open(filename));
+  Database db = auto Database.open(filename);
   db.execute("CREATE TABLE item(value INTEGER); INSERT INTO item VALUES(9)");
   db.close();
   Database readonly =
-    $auto(Database.open_with(filename, SQLITE_OPEN_READONLY));
+    auto Database.open_with(filename, SQLITE_OPEN_READONLY);
   EXPECT_INT_EQ(count_rows(readonly), 1);
   int caught = 0;
   try { readonly.execute("INSERT INTO item VALUES(10)"); }
@@ -259,8 +259,8 @@ static void file_reopen_readonly_and_busy_are_observable(void) {
   EXPECT_TRUE(caught);
   readonly.close();
 
-  Database first = $auto(Database.open(filename));
-  Database second = $auto(Database.open(filename));
+  Database first = auto Database.open(filename);
+  Database second = auto Database.open(filename);
   second.busy_timeout(1);
   first.execute("BEGIN IMMEDIATE");
   caught = 0;

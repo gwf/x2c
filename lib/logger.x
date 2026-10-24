@@ -651,7 +651,7 @@ static Var _retain_lisp_symbol(LogMemorySink l, Var value) {
    constant native stack; only nesting recurses. A retained tail is shared. */
 static List _retain_list(LogMemorySink l, List list) {
   if (!list || _pool_chain_owns(l.pool, list)) return list;
-  Block heads = $auto(Block.new(sizeof(Var)));
+  Block heads = auto Block.new(sizeof(Var));
   List tail = list;
   while (tail && !_pool_chain_owns(l.pool, tail)) {
     Var head = _retain(l, tail.car);

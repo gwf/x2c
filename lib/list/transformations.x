@@ -12,7 +12,7 @@
 */
 List List.map(List lst, Func fn) {
   if (!lst) return NULL;
-  Array values = $auto([]);
+  Array values = auto [];
   foreach (Var value in lst) values.push(fn.apply_value(value));
   return values;
 }
@@ -26,7 +26,7 @@ List List.map(List lst, Func fn) {
 */
 Self List.filter(Self lst, Func pred) {
   if (!lst) return NULL;
-  Array values = $auto([]);
+  Array values = auto [];
   foreach (Var value in lst) if (pred.apply_value(value)) values.push(value);
   return values;
 }
@@ -86,7 +86,7 @@ int List.all(List lst, Func pred) {
     Raises: whatever `Func.apply`, `fn`, or result canonicalization raises.
 */
 List List.zip_with(List a, List b, Func fn) {
-  Array values = $auto([]);
+  Array values = auto [];
   for (; a && b; a = a.cdr(), b = b.cdr()) {
     Var left = a.car, right = b.car;
     if (fn) values.push(fn.apply_values(left, right));
@@ -115,7 +115,7 @@ List List.map2(List a, List b, Func fn) {
 */
 Self List.sort(Self lst) {
   if (!lst || !lst.cdr()) return lst;
-  Array values = $auto(lst);
+  Array values = auto lst;
   values.sort();
   return values;
 }
@@ -126,7 +126,7 @@ Self List.sort(Self lst) {
 */
 Self List.sort_with(Self lst, Func compare) {
   if (!lst || !lst.cdr()) return lst;
-  Array values = $auto(lst);
+  Array values = auto lst;
   values.sort_with(compare);
   return values;
 }
@@ -138,7 +138,7 @@ Self List.sort_with(Self lst, Func compare) {
 */
 Self List.sort_by(Self lst, Func key) {
   if (!lst) return lst;
-  Array values = $auto(lst);
+  Array values = auto lst;
   values.sort_by(key);
   return values;
 }
@@ -168,7 +168,7 @@ meta native Self List.unique(Self lst) {
 */
 meta native Self List.flatten(Self lst) {
   if (!lst) return lst;
-  Array values = $auto([]);
+  Array values = auto [];
   foreach (Var head in lst) {
     if (head is <list>) {
       List inner = head;
@@ -185,7 +185,7 @@ meta native Self List.flatten(Self lst) {
 */
 meta native Self List.flatten_all(Self lst) {
   if (!lst) return lst;
-  Array values = $auto([]);
+  Array values = auto [];
   _flatten_into(values, lst);
   return values;
 }
@@ -216,7 +216,7 @@ static Var _sublis_node(List alist, Var node) {
   }
   List list = node;
   if (!list) return list;
-  Array items = $auto([]);
+  Array items = auto [];
   foreach (Var source in list) items.push(_sublis_node(alist, source));
   return items.list();
 }

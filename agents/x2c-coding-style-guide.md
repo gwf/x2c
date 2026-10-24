@@ -933,7 +933,7 @@ Prefer:
 
 ```x2c
 $scope() {
-  File output = $auto(File.open(path, "w"));
+  File output = auto File.open(path, "w");
   output.puts(report);
 }
 ```

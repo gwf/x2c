@@ -9,23 +9,23 @@ int main(void) {
   List pages = %("index" "guide" "reference" "download" "blog");
 
   /*  links[i][j] is page j's share of its outbound links that reach i. */
-  BlisObject links = $auto(BlisObject.copy_rows(
+  BlisObject links = auto BlisObject.copy_rows(
     %((0.00 0.50 0.50 0.50 0.00)
       (0.50 0.00 0.50 0.00 0.50)
       (0.25 0.50 0.00 0.50 0.50)
       (0.25 0.00 0.00 0.00 0.00)
       (0.00 0.00 0.00 0.00 0.00)),
     BLIS_DOUBLE
-  ));
+  );
 
   /*  Rank owns its buffer across rounds. Each round releases its operator
       temporaries after copying the next rank into that owned buffer. */
-  BlisObject rank = $auto(BlisObject.copy_vector(
+  BlisObject rank = auto BlisObject.copy_vector(
     %(0.2 0.2 0.2 0.2 0.2), BLIS_DOUBLE
-  ));
-  BlisObject ones = $auto(BlisObject.copy_vector(
+  );
+  BlisObject ones = auto BlisObject.copy_vector(
     %(1.0 1.0 1.0 1.0 1.0), BLIS_DOUBLE
-  ));
+  );
 
   double shift = 1.0;
   int round = 0;

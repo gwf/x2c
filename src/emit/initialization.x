@@ -359,7 +359,7 @@ static List _capture_children(
 }
 
 static int _source_type_definition(List value) {
-  Array pending = $auto([]);
+  Array pending = auto [];
   pending.push(value);
   while (pending.len()) {
     List node = pending.take_last();

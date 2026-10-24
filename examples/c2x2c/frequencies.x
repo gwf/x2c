@@ -52,7 +52,7 @@ Frequencies Path.frequencies(Path root) {
 List Frequencies.top(Frequencies self, int k) {
   if (k <= 0) return NULL;
   MapStringInt counts = self;
-  Array ranked = $auto([]);
+  Array ranked = auto [];
   foreach ((String word, int count) in counts) {
     if (ranked.len() == k && count < ranked[0][0]) continue;
     ranked.heap_push(%($count $word));

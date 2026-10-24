@@ -337,9 +337,9 @@ module Region _innermost(Walk &w, Symbol kind) {
 }
 
 /* The region an allocation goes into: the innermost open scope, or the
-   storage of the Scope a pushed slot names. A bare `$auto` Scope local is
-   not active, so what is allocated beside it belongs to the region around
-   it. */
+   storage of the Scope a pushed slot names. A Scope local with initializer
+   auto is not active, so what is allocated beside it belongs to the region
+   around it. */
 static Region _active(Walk &w) {
   Region region = w.open;
   while (region && (region.closed ||

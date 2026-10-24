@@ -17,7 +17,7 @@ int main(void) {
     "{\"version\":\"2.2.7\",\"channel\":\"stable\","
     "\"downloads\":870}]}"
   ));
-  json.JsonDocument catalog = $auto(json.JsonDocument.parse(source));
+  json.JsonDocument catalog = auto json.JsonDocument.parse(source);
 
   json.JsonObject root = catalog.root().object();
   json.JsonObject service = root["service"].object();
@@ -53,7 +53,7 @@ int main(void) {
       "value": releases.len()
     }
   ];
-  json.JsonDocument published = $auto(catalog.patch(operations));
+  json.JsonDocument published = auto catalog.patch(operations);
 
   json.JsonObject published_root = published.root().object();
   String name = published_root["service"].object()["name"].string();

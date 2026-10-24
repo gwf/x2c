@@ -165,7 +165,7 @@ void SymTxn.commit_transient(SymTxn &s) {
 /* Gives `original` exactly the rows of `staged` and keeps its identity.
    Source-definition rollback also removes rows added by the transaction. */
 static void _replace_map(Map original, Map staged) {
-  Array keys = $auto(original.keys());
+  Array keys = auto original.keys();
   foreach (Var key in keys) if (!(key in staged)) original.del(key);
   original.merge(staged);
 }

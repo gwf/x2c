@@ -901,7 +901,7 @@ static void _render(EditState &l, int flags) {
 
   /* First step: clear all the lines used before. To do so start by
    * going to the last row. */
-  Buffer ab = $auto(Buffer.new(0));
+  Buffer ab = auto Buffer.new(0);
 
   if (flags & REFRESH_CLEAN) {
     if (old_rows-rpos > 0) ab.printf("\x1b[%dB", old_rows-rpos);

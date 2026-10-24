@@ -4,7 +4,7 @@
 #include "class-adoptions-included/box.x"
 
 int main(void) {
-  Box box = $auto(Box.new(3));
+  Box box = auto Box.new(3);
   Var value = box;
   printf("%s\n", (char *) value.repr());
   return 0;

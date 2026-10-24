@@ -197,7 +197,7 @@ static void _append_managed(
    declarators before it, is declared alone, and is followed by its code. */
 static void _append_managed_rows(
   Compiler c, List base, List declarators, Array output, Token origin) {
-  Array ordinary = $auto([]);
+  Array ordinary = auto [];
   List source_base = base;
   if (<auto> in base) base = base.filter(%!(item) => item != <auto>);
   size_t remaining = declarators.len();

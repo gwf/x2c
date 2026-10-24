@@ -664,7 +664,7 @@ static int _iteration(
    with its references expanded. */
 static String _rebuild(
   Regex r, String subject, int all, Func fn, String replacement) {
-  Buffer out = $auto(Buffer.new(0));
+  Buffer out = auto Buffer.new(0);
   int cursor = 0;
   for (RegexMatch found = _search(r, subject, 0); found;
        found = all ? _next(r, subject, found) : NULL) {
@@ -731,7 +731,7 @@ List Regex.capture_names(Regex regex) => regex.capture_names;
     underscore escaped, so that it matches itself inside a pattern.
 */
 String Regex.escape(String literal) {
-  Buffer out = $auto(Buffer.new(0));
+  Buffer out = auto Buffer.new(0);
   int n = literal.len();
   for (int i = 0; i < n; i++) {
     int byte = (unsigned char) literal[i];
@@ -756,7 +756,7 @@ RegexMatch Regex.match(Regex r, String subject) => _search(r, subject, 0);
     An empty match advances one byte. No match returns an empty `List`.
 */
 List Regex.find_all(Regex r, String subject) {
-  Array found = $auto([]);
+  Array found = auto [];
   for (RegexMatch next = _search(r, subject, 0); next;
        next = _next(r, subject, next))
     found.push(next);
@@ -767,7 +767,7 @@ List Regex.find_all(Regex r, String subject) {
     an empty field where two matches touch or a match sits at either end.
 */
 List Regex.split(Regex regex, String subject) {
-  Array parts = $auto([]);
+  Array parts = auto [];
   int cursor = 0;
   for (RegexMatch found = _search(regex, subject, 0); found;
        found = _next(regex, subject, found)) {

@@ -143,8 +143,8 @@ static List _op_chain_first(List ast) {
 }
 
 static Ast _op_chain(Compiler c, Ast ast) {
-  Array levels = $auto([]);
-  Array types = $auto([]);
+  Array levels = auto [];
+  Array types = auto [];
   Ast rebuilt = NULL;
   for (;;) {
     List first = _op_chain_first(ast);

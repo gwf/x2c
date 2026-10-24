@@ -393,7 +393,7 @@ static List _adapt_choices(
   Compiler c, List source, List choices, List placeholder) {
   Type from = _adapter_type(c, source.cadr());
   if (!from || !Ast.contains_head(source, <fields>)) return NULL;
-  Array prepared = $auto([]);
+  Array prepared = auto [];
   foreach (List choice in choices) {
     (List condition, List path, Type destination, List value) = choice;
     if (destination && !_adapter_type(c, destination)) return NULL;

@@ -163,7 +163,7 @@ static void whole_file_io_is_bounded_and_binary_safe(void) {
   String path = _fs_path("whole");
   unlink(path);
   defer unlink(path);
-  UvLoop loop = $auto(UvLoop.new());
+  UvLoop loop = auto UvLoop.new();
   size_t length = 160 * 1024 + 3;
   unsigned char byte = 'x';
   Bytes payload = Bytes.new(1).append_fill(&byte, length);
@@ -307,7 +307,7 @@ static void stat_and_scan_results_are_independent_copies(void) {
     rmdir(directory);
   }
 
-  UvLoop loop = $auto(UvLoop.new());
+  UvLoop loop = auto UvLoop.new();
   MetadataState state = { 0 };
   Var value = Var.new(<p48>, &state);
   loop.stat(file_path, value, _stat_done);
@@ -461,7 +461,7 @@ static void _expect_missing(UvLoop loop, UvFs request, String operation) {
 static void missing_paths_preserve_libuv_errors(void) {
   String path = _fs_path("absent");
   unlink(path);
-  UvLoop loop = $auto(UvLoop.new());
+  UvLoop loop = auto UvLoop.new();
   int calls = 0;
   Var value = Var.new(<p48>, &calls);
   UvFs read = loop.read_file(path, 32, value, _count_fs);
@@ -628,7 +628,7 @@ static void _failing_stat(UvFs request, Var value) {
 }
 
 static void filesystem_callback_error_returns_and_loop_resumes(void) {
-  UvLoop loop = $auto(UvLoop.new());
+  UvLoop loop = auto UvLoop.new();
   FailureState failed = { 0 };
   loop.stat("/tmp", Var.new(<p48>, &failed), _failing_stat);
   int caught = 0;

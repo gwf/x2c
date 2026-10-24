@@ -101,7 +101,7 @@ order so each step has a direct, falsifiable result.
    `try_get` must fail the proof.
 3. **Native handle obligations.** Model successful `File.open` as an owned
    stream and `File.close` or `File.cleanup` as its discharge. Check lexical
-   `defer`, `$auto`, early returns, and exception exits. Report transfer to
+   `defer`, initializer `auto`, early returns, and exception exits. Report transfer to
    a caller explicitly. A missing close, double close, borrowed standard
    stream close, or use after close must not pass.
 4. **Known iterator producers and pulls.** At the bound `foreach`, connect

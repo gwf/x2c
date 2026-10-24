@@ -140,7 +140,7 @@ static void _run_command(Array arguments) {
 int main(int argc, char **argv) {
   x2c_initialize_environment(argv[0]);
   if (argc > 1) _run_external(argc, argv);
-  Array arguments = $auto(CliRequest.read_arguments(argc, argv));
+  Array arguments = auto CliRequest.read_arguments(argc, argv);
   _run_command(arguments);
   CliRequest request = CliRequest.parse_arguments(arguments);
   String diagnostics = request.diagnostics_file;

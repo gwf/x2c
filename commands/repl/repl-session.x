@@ -150,7 +150,7 @@ ReplSession ReplSession.new(Compiler compiler) {
 /** Returns an immutable snapshot of (kind "name") entries, sorted by name.
     Only session definitions appear; storage is borrowed until unit close. */
 List ReplSession.symbols(ReplSession session) {
-  Array names = $auto([]), entries = [];
+  Array names = auto [], entries = [];
   foreach (Var (name, entry), session.names) names.push(name);
   foreach (String name, names.sort()) {
     List entry = session.names[name];
@@ -294,7 +294,7 @@ static List _completion_filter(
     `native` also includes loaded functions and bound native prototypes. */
 List ReplSession.complete_functions(
   ReplSession session, String prefix, int native) {
-  Array names = $auto([]), candidates = [];
+  Array names = auto [], candidates = [];
   foreach (Var (candidate, stored), session.names) {
     if (candidate is not <string> || stored is not <list>) continue;
     String name = candidate;
@@ -326,7 +326,7 @@ ReplCompletion ReplSession.complete(
   Compiler c = session.compiler;
   DiagnosticsHold diagnostics = c.diagnostics.hold();
   defer c.diagnostics.release(diagnostics, 0);
-  Scope scratch = $auto(Scope.new());
+  Scope scratch = auto Scope.new();
   struct _ParserInput input = _parser_input(c);
   defer _restore_parser_input(c, input);
   Array braces = c.braces;
@@ -445,7 +445,7 @@ static void _add_value(
    the typed call no longer carries. Calls and their token groups share
    source order. A compiled prompt function keeps C's own `assert`. */
 static List _asserts(Compiler c, List node) {
-  Array texts = $auto([]);
+  Array texts = auto [];
   for (Token token = c.tokenizer.tokens; token.type != <eof>; token++) {
     Token open = Token.skip_trivia(token + 1);
     if (token.type != <ident> || token.text != "assert" || open.type != <(>)
@@ -473,7 +473,7 @@ static Var _assert_calls(Var node, Array texts, int &index) {
 }
 
 static List _initializers(List node, Map names, Array added, Array ids) {
-  Array statements = $auto([]);
+  Array statements = auto [];
   match (_bare(node)) {
     /* `T (a, b) = source;` publishes each target as a session value. */
     case %(dstrdecl ?spec (targets *targets) ?source): {
@@ -516,7 +516,7 @@ static List _initializers(List node, Map names, Array added, Array ids) {
 static List _result_body(ReplSession session, List fn, int &prints) {
   match (fn) {
     case %(function ? ? (block *body)): {
-      Array items = $auto(body);
+      Array items = auto body;
       if (items.len()) {
         List last = _bare(items[items.len() - 1]);
         match (last) {
@@ -564,7 +564,7 @@ ReplResult ReplSession.submit(ReplSession session, String source) {
   ReplResult result = _submit(session, source);
   if (result.source == source) return result;
   String filename = session.compiler.filename;
-  Array entries = $auto([]);
+  Array entries = auto [];
   foreach (List entry, result.diagnostics)
     entries.push(_submission_entry(entry, filename, source));
   result.diagnostics = entries;
@@ -631,7 +631,7 @@ static ReplResult _submit(ReplSession session, String source) {
   Map names = session.names;
   ReplResult result = { .status = <rejected>, .value = void };
   c.diagnostics.reset();
-  Scope scratch = $auto(Scope.new());
+  Scope scratch = auto Scope.new();
   struct _ParserInput input = _parser_input(c);
   defer _restore_parser_input(c, input);
   Array braces = c.braces;

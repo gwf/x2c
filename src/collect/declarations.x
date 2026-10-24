@@ -35,7 +35,7 @@ static int _private_row(Map statics, List key, List family) {
 /* Only names that this file declares are candidates. Includes already
    contribute their selected interface at their recorded source position. */
 module void _needed_types(List syntax, Map rows, Map needed) {
-  Array pending = $auto([syntax]);
+  Array pending = auto [syntax];
   while (pending.len()) {
     Var item = pending.take_last();
     if (item is not <list>) continue;
@@ -89,7 +89,7 @@ module void _select_public(FileWalk &w) {
   } while (changed);
   foreach (Var part in w.parts) {
     if (part is not <map>) continue;
-    Array dropped = $auto([]);
+    Array dropped = auto [];
     foreach (Var key in part.map().keys())
       if (!(key in selected)) dropped.push(key);
     foreach (Var key in dropped) part.map().del(key);
@@ -525,7 +525,7 @@ static void _publish_inline_dependencies(
   foreach (Var part in entry.car())
     if (part is <map>)
       foreach (Var key in part.map().keys()) published[key] = part;
-  Array dropped = $auto([]);
+  Array dropped = auto [];
   foreach (List key in additions.keys()) {
     Var owner;
     if (published.try_get(key, owner) &&
@@ -536,7 +536,7 @@ static void _publish_inline_dependencies(
   if (!additions.len()) return;
   Map retained = _cache_copy(additions);
   _retain_rows(%($retained));
-  Array replaced = $auto([]);
+  Array replaced = auto [];
   foreach ((List key, Var value) in retained) {
     Var owner;
     if (!published.try_get(key, owner)) continue;
@@ -594,7 +594,7 @@ void Compiler.record_conformance_rows(Compiler c, Map rows) {
   foreach (Var part in cached.list().car()) {
     if (part is not <map>) continue;
     contribution = part;
-    Array stale = $auto([]);
+    Array stale = auto [];
     foreach (Var (key, value) in contribution)
       match (value) case %(conformance *): stale.push(key);
     foreach (Var key in stale) contribution.del(key);
@@ -614,7 +614,7 @@ void Compiler.record_conformance_rows(Compiler c, Map rows) {
 List Compiler.declared_adoptions(Compiler c) {
   Var cached = _process_cache()[_canonical_path(c.filename)];
   if (cached is void) return NULL;
-  Array adoptions = $auto([]);
+  Array adoptions = auto [];
   foreach (Var part in cached.list().car())
     if (part is <map>)
       foreach (Var value in part.map())

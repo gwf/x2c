@@ -103,7 +103,7 @@ static Array _cache_ids(Compiler c, List code) {
    replaces one memo entry and may cause harmless extra work. */
 static void _collect_ids(
   Compiler c, Var value, List *seen, Array ids) {
-  Array pending = $auto([%($value)]), marked = $auto([]);
+  Array pending = auto [%($value)], marked = auto [];
   marked.resize(c.id_keys.len());
   while (pending) {
     Var frame = pending[-1];
@@ -448,7 +448,7 @@ static List _header_cache(
   Compiler c, List header, Array ids, String prefix, String guard_name,
   String initializer_name) {
   if (!ids) return header;
-  Map bindings = $auto(_cache_bindings(c, ids, prefix));
+  Map bindings = auto _cache_bindings(c, ids, prefix);
   HeaderCache cache = {
     c, prefix, c.sym.reference(%($guard_name), NULL),
     c.sym.reference(%($initializer_name), NULL), bindings};

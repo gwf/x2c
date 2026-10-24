@@ -148,7 +148,7 @@ static void args_from_argv_skips_the_program(void) {
 
 static void args_repeated_values_finish_once(void) {
   $test.scoped();
-  Array words = $auto([]);
+  Array words = auto [];
   for (int i = 0; i < 200; i++) words.push(%"$i");
   List input = words;
   List spec = %((items repeated (default (fallback))));

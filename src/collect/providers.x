@@ -208,7 +208,7 @@ static Type _loaded_declaration(Compiler c, Type type) {
 void Compiler.name_loaded_provider(
   Compiler c, String path, int index, List provider) {
   (Map declarations, Map symbols) = provider;
-  Map visible = $auto(c.sym.unit_symbols());
+  Map visible = auto c.sym.unit_symbols();
   foreach ((String name, Type expected) in declarations) {
     if (%($name) in c.sym.file_statics() ||
         %(function $name) in c.sym.file_statics()) continue;
@@ -234,7 +234,7 @@ static int _loaded_types_equal(Type declared, Type defined) {
 /* Compare complete type families actually named by the declaration. A
    forward declaration can remain incomplete in the calling source. */
 static int _loaded_type_rows(Type type, Map visible, Map provider) {
-  Map needed = $auto({}), checked = $auto({});
+  Map needed = auto {}, checked = auto {};
   _needed_types(type, visible, needed);
   int changed = 1;
   while (changed) {

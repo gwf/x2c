@@ -369,7 +369,7 @@ static List _pattern_content(Compiler c, List node) {
    and a typed binder's test joins the whole pattern. */
 static List _typed_list(
   Compiler c, List node, List content, Map tags) {
-  Array elements = $auto([]);
+  Array elements = auto [];
   List tail = _pattern_elements(c, content, elements);
   Var operator = c.match_pattern_value(elements[0]), tag;
   if (operator == <!quote>) return node;

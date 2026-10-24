@@ -176,7 +176,7 @@ module List _emit(Emitter &e, List ast) {
    each String is written as it is, so a lowered carrier can hold C text
    around the nodes it lowers. A Symbol ends the run and heads a node. */
 static List _sequence(Emitter &e, List ast) {
-  Array emitted = $auto([]);
+  Array emitted = auto [];
   while (ast && ast.car() is not <symbol>) {
     Var item = ast.car();
     emitted.push(item is <list> ? _emit(e, item) : item);

@@ -28,10 +28,10 @@ String Notebook.repr(Notebook notebook) {
 
 int main(void) {
   $scope() {
-    Scope samples = $auto(Scope.new());
-    Notebook notebook = $auto(Notebook.new());
-    IntPointer step = $auto(IntPointer.new(2));
-    Mutex mutex = $auto(Mutex.new());
+    Scope samples = auto Scope.new();
+    Notebook notebook = auto Notebook.new();
+    IntPointer step = auto IntPointer.new(2);
+    Mutex mutex = auto Mutex.new();
     Count count = Count.new(3);
 
     for (int i = 0; i < count; i++) $scope() {
@@ -44,14 +44,14 @@ int main(void) {
 
     assert(notebook.scale == 1);
     printf("%s\n", notebook.readings.repr());
-    Array display = $auto([notebook]);
+    Array display = auto [notebook];
     printf("%s\n", display.repr());
 
     Point point = Point.new(1, 2);
     Var boxed = point;
     point.x = 99;
     Point copy = boxed;
-    Map labels = $auto({});
+    Map labels = auto {};
     labels[boxed] = "same point";
     Var lookup = Point.new(1, 2);
     assert(boxed == lookup && boxed.hash() == lookup.hash());

@@ -53,7 +53,7 @@ static int _same_tokens(Lint a, Lint b):
 /** Returns the formatted text of `l`, or NULL when formatting would change
     a token other than space. */
 String Lint.formatted(Lint l):
-  Buffer out = $auto(Buffer.new(0))
+  Buffer out = auto Buffer.new(0)
   int cursor = 0, before = -1
   for (int at = 0; at <= l.count; at++):
     if at < l.count && l.tokens[at].type == <space>: continue

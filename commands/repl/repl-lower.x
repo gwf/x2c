@@ -228,7 +228,7 @@ static void _lower_scan_cursor_block(Lowering &l, List parts) {
   match (_lower_bare(parts.last())) case %(while ?test ?body): {
     if (!_lower_cursor(test, walk) || _lower_cursor_addressed(body, walk))
       return;
-    Map declared = $auto({});
+    Map declared = auto {};
     for (List rest = parts; rest.cdr(); rest = rest.cdr()) {
       Var part = _lower_bare(rest.car());
       if (_lower_cursor_addressed(part, walk)) return;
@@ -681,7 +681,7 @@ static List _lower_param_type(List params) {
 
 static List _lower_args(
   Lowering &l, List params, List args, String callee_name) {
-  Array values = $auto([]);
+  Array values = auto [];
   for (List p = params, a = args; a; p = p.cdr(), a = a.cdr()) {
     List argument = a.car();
     match (argument) case %(expr (void) ()): continue;
@@ -740,7 +740,7 @@ static Var _lower_native_call(
   List values = _lower_args(l, params, args, name);
   if (l.declined) return void;
   Var argv = _lower_name(l, "argv");
-  Array prepare = $auto([]);
+  Array prepare = auto [];
   int index = 0;
   List p = params;
   foreach (Var value, values) {
@@ -765,7 +765,7 @@ static Var _lower_native_call(
    General statement blocks retain their separate control-flow boundary. */
 static Var _lower_statement_value(Lowering &l, List content) {
   match (content) case %(parens (block *items)) if (items): {
-    Array declarations = $auto([]);
+    Array declarations = auto [];
     while (items.cdr()) {
       List item = Ast.without_origin(items.car());
       if (!item.match(%(declare ? ?)))
@@ -796,7 +796,7 @@ static Var _lower_application(Lowering &l, Var content) {
   if (_lower_failed(l, callee)) return void;
   Var fn = _lower_name(l, "func"), argv = _lower_name(l, "argv");
   int count = parts.len() - 1, index = 0;
-  Array prepare = $auto([]);
+  Array prepare = auto [];
   foreach (List part, parts.cdr())
     match (part) case %(func-arg ?value ?address ?source): {
       Var type = List.match(
@@ -836,7 +836,7 @@ static Var _lower_func_adapter(Lowering &l, Type type, Var callable) {
     result = returned;
   }
   Var fn = _lower_name(l, "func"), argv = _lower_name(l, "argv");
-  Array arguments = $auto([]);
+  Array arguments = auto [];
   int index = 0;
   foreach (Type parameter, params) {
     if (parameter.equal(%(void))) continue;
@@ -960,7 +960,7 @@ static Var _lower_pointer_move(
 
 static Var _lower_operands(
   Lowering &l, Type result, Var operator, List operands) {
-  Array values = $auto([]);
+  Array values = auto [];
   foreach (Var operand, operands) {
     Var value = _lower_expr(l, operand);
     if (_lower_failed(l, value)) return void;
@@ -1019,10 +1019,10 @@ static Var _lower_lambda(Lowering &l, List params, List held, Var body) {
     l.env = previous;
     l.automatic = automatic;
   }
-  Array names = $auto([]), types = $auto([]);
-  Array boxes = $auto([]), values = $auto([]);
-  Array captures = $auto([]), captured = $auto([]);
-  Array saved = $auto([]);
+  Array names = auto [], types = auto [];
+  Array boxes = auto [], values = auto [];
+  Array captures = auto [], captured = auto [];
+  Array saved = auto [];
   foreach (List capture, held) {
     match (capture)
       case %(capture (binding ?(int id) ?) ?type ?source): {
@@ -1451,7 +1451,7 @@ static Var _lower_apply_k(Lowering &l, List k) {
       return result;
     }
     case %(again ?name (*ids)): {
-      Array values = $auto([]);
+      Array values = auto [];
       values.push(name);
       foreach (Var id, ids) {
         Var value = _lower_read(l, id);
@@ -1623,11 +1623,11 @@ static int _lower_breaks(Var form) {
 static Var _lower_loop(
   Lowering &l, Var test, List body, List step, List rest, List k) {
   Var name = _lower_name(l, "loop");
-  Array boxes = $auto([]);
+  Array boxes = auto [];
   _lower_loop_cells(l, body, boxes);
   /* A loop carries the locals its forms read, the cells it declares, and
      the values an enclosing continuation needs. */
-  Map used = $auto({});
+  Map used = auto {};
   foreach (Var form, %($test $body $step $rest $k))
     _lower_scan_names(form, used, used);
   /* The element is read where it is used, so the loop does not carry it. */
@@ -1637,8 +1637,8 @@ static Var _lower_loop(
     used.del(walk.item);
     if (walk.value) used.del(walk.value);
   }
-  Array ids = $auto([]);
-  Array slots = $auto([]);
+  Array ids = auto [];
+  Array slots = auto [];
   Array entry = [];
   _lower_live_ids(l, used, ids);
   foreach (Var id, ids) {
@@ -1715,8 +1715,8 @@ static Var _lower_loop(
                                     (true $exiting)))));
   Var call = cons(name, entry.list_free());
   if (!boxes.len()) return call;
-  Array names = $auto([]);
-  Array storage = $auto([]);
+  Array names = auto [];
+  Array storage = auto [];
   foreach (Var id, boxes) {
     names.push(l.env[id]);
     List layout = _lower_storage_layout(l, id);
@@ -1768,7 +1768,7 @@ static Var _lower_switch(
     return $decline.switch.binding(l);
   Var slot = value;
   if (bound) slot = _lower_name(l, "subject");
-  Array arms = $auto([]);
+  Array arms = auto [];
   Array tests = [];
   Array body = [];
   int fallback = 0;
@@ -1804,7 +1804,7 @@ static Var _lower_switch(
   List exit = %(then ${rest} ${k} ${l.on_break});
   List saved_break = l.on_break;
   l.on_break = _lower_here(l, exit);
-  Array clauses = $auto([]);
+  Array clauses = auto [];
   Var otherwise = void;
   int count = (int) arms.len();
   for (int i = 0; i < count; i++) {
@@ -1898,7 +1898,7 @@ static Var _lower_record_braced(
   Var fresh = _lower_record_zero(l, record, into);
   if (_lower_failed(l, fresh) || !items) return fresh;
   Var slot = _lower_name(l, "record");
-  Array stores = $auto([]);
+  Array stores = auto [];
   foreach (List row, l.compiler.initializer_rows(record, items, NULL)) {
     List choices = row.cadr();
     if (!choices || choices.cdr())
@@ -2200,7 +2200,7 @@ static Var _lower_global_destructure(
   if (_lower_failed(l, source)) return void;
   source = _lower_coerce(l, %("List"), init, source);
   Var held = _lower_name(l, "hold");
-  Array stores = $auto([]);
+  Array stores = auto [];
   int index = 0;
   foreach (List target, targets)
     match (target) case %(binding ?(int id) ?): {
@@ -2439,7 +2439,7 @@ static void _lower_scan_cleanups(Lowering &l, Var form) {
     Var item = _lower_bare(rest.car());
     match (item) case %(seq *parts): item = _lower_bare(parts.last());
     match (item) case %(defer ?): {
-      Map named = $auto({}), declared = $auto({});
+      Map named = auto {}, declared = auto {};
       _lower_scan_names(item, named, declared);
       _lower_scan_names(rest.cdr(), named, declared);
       foreach (Var id, named.keys())
@@ -2496,13 +2496,13 @@ static Var _lower_expression_stmnt(
    after the wrapper selects the exit the body took, so a loop continuing
    from inside the block calls its next turn from here, in tail position. */
 static Var _lower_defer(Lowering &l, Var cleanup, List rest, List k) {
-  Map used = $auto({});
+  Map used = auto {};
   _lower_scan_names(cleanup, used, used);
   _lower_scan_names(rest, used, used);
   Array entry = [];
-  Array slots = $auto([]);
+  Array slots = auto [];
   Map inside = _lower_scratch_map(l.scratch);
-  Array ids = $auto([]);
+  Array ids = auto [];
   _lower_live_ids(l, used, ids);
   foreach (Var id, ids) {
     Var slot = _lower_name(l, "live");
@@ -2510,7 +2510,7 @@ static Var _lower_defer(Lowering &l, Var cleanup, List rest, List k) {
     inside[id] = slot;
     entry.push(l.env[id]);
   }
-  Array exits = $auto([]);
+  Array exits = auto [];
   struct LowerCleanup frame = {
     .env = _lower_env_copy(l, l.env), .exits = exits,
     .depth = _lower_depth(l) + 1, .returns = 0, .outer = l.pending
@@ -2535,7 +2535,7 @@ static Var _lower_defer(Lowering &l, Var cleanup, List rest, List k) {
   l.definitions.push(%(def $undo_name (lambda $live $undo)));
   l.definitions.push(%(def $body_name (lambda $live $body)));
   Var packet = _lower_name(l, "packet");
-  Array clauses = $auto([]);
+  Array clauses = auto [];
   int count = (int) frame.exits.len();
   for (int i = 0; i < count; i++) {
     Var code = frame.exits[i];
@@ -2590,7 +2590,7 @@ static Var _lower_stmnt(Lowering &l, Var form, List rest, List k) {
     case %(dstrdecl (params *params) ?init):
       return _lower_destructure(l, params, init, rest, k);
     case %(declare ?type (bindings *declarators)): {
-      Array expanded = $auto([]);
+      Array expanded = auto [];
       foreach (List declarator, declarators)
         expanded.push(%(declare $type (bindings $declarator)));
       return _lower_block(l, %(@{expanded.list()} @rest), k);
@@ -2658,8 +2658,8 @@ List ReplLower.lower(ReplLower self, List fn) {
   // A rejected submission can reuse anonymous type identities after rollback.
   self.layouts.cleanup();
   self.layouts = {};
-  Scope scratch = $auto(Scope.new());
-  Array definitions = $auto([]);
+  Scope scratch = auto Scope.new();
+  Array definitions = auto [];
   Lowering l = {
     .compiler = self.compiler, .owner = self, .scratch = scratch,
     .env = _lower_scratch_map(scratch), .locals = _lower_scratch_map(scratch),
@@ -2689,9 +2689,9 @@ List ReplLower.lower(ReplLower self, List fn) {
         else if (l.uncallable) l.owner.reason = l.owner.unbound;
       }
       if (l.declined || l.rejected || l.uncallable) return NULL;
-      Array slots = $auto([]);
-      Array boxes = $auto([]);
-      Array boxed_values = $auto([]);
+      Array slots = auto [];
+      Array boxes = auto [];
+      Array boxed_values = auto [];
       foreach (List parameter, params) {
         match (parameter)
           case %(param ? (bind (binding ?(int id) ?) *)): {

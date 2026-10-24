@@ -19,7 +19,7 @@ int main(void) {
     printf("values=%ld name=%s\n",
            facts[<values>], facts[<name>]);
 
-    File input = $auto(tmpfile());
+    File input = auto tmpfile();
     input.puts("alpha beta\nbeta gamma\n");
     input.rewind();
     Map counts = {};
@@ -35,7 +35,7 @@ int main(void) {
       case %(build ?amount fast): printf("match=ready %ld\n", amount);
     }
 
-    Lisp lisp = $auto(Lisp.new());
+    Lisp lisp = auto Lisp.new();
     printf("lisp=%s\n", lisp.eval_string("'(x2c has lisp)").repr());
   }
   return 0;

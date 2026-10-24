@@ -621,7 +621,7 @@ static void _batch_check_stop(void) {
     failure aborts if cleanup cannot establish that borrowed storage is idle.
     Raises: startup, callback, captured-error, stop, or worker join causes. */
 void Thread.run(Array jobs, Func completed) {
-  Array pending = $auto([]);
+  Array pending = auto [];
   ((Block) pending).reserve(jobs.len());
   defer _batch_stop(pending);
   foreach (Func job in jobs) {

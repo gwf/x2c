@@ -201,7 +201,7 @@ static int _validator_name(String name):
 
 /* The source text of the tokens from `from` to `to` without spaces. */
 static String _compact(Lint l, int from, int to):
-  Buffer out = $auto(Buffer.new(0))
+  Buffer out = auto Buffer.new(0)
   for (int at = from; at <= to; at = l.next(at)): out.write(l.tokens[at].text)
   return out
 

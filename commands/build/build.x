@@ -1348,7 +1348,7 @@ static void _state_write(String path, uint64_t hash) =>
    Lines after the fingerprint list the files it covers, for a reader that
    must check it without rebuilding the list. */
 static void _state_write_lines(String path, uint64_t hash, List lines) {
-  Buffer out = $auto(Buffer.new(0));
+  Buffer out = auto Buffer.new(0);
   out.write(_state_line(hash));
   out.write_char('\n');
   foreach (String line, lines) {

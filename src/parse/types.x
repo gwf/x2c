@@ -99,7 +99,7 @@ static int _unseen_prefix(Compiler c) {
 }
 
 module List _type_qualifiers(Compiler c) {
-  Array quals = $auto([]);
+  Array quals = auto [];
   loop {
     _x2c_complete_here(c, <type>, _type_keywords());
     Symbol symbol = c.peek(0);

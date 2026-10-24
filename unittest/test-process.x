@@ -396,8 +396,8 @@ static void process_cleanup_kills_a_job_ignoring_term(void) {
   long pid = 0;
   time_t start = time(NULL);
   {
-    Job stubborn = $auto(%(sh -c "trap '' TERM; exec sleep 30").job()
-                           .start());
+    Job stubborn = auto %(sh -c "trap '' TERM; exec sleep 30").job()
+                           .start();
     pid = stubborn.pids[0];
     usleep(100000);
   }
@@ -478,14 +478,14 @@ static void process_jobs_wait_kill_and_clean_up(void) {
 
   long pid = 0;
   {
-    Job sleeper = $auto(%(sleep 30).job().start());
+    Job sleeper = auto %(sleep 30).job().start();
     pid = sleeper.pids[0];
   }
   EXPECT_TRUE(pid > 0 && kill((pid_t) pid, 0) != 0);
 
   pid = 0;
   try {
-    Job sleeper = $auto(%(sleep 30).job().start());
+    Job sleeper = auto %(sleep 30).job().start();
     pid = sleeper.pids[0];
     raise %(bad-state (operation "test"));
   }

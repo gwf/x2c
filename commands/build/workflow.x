@@ -53,7 +53,7 @@ static int _build_target(CliRequest request, Array commands) {
   /* A target has its own build graph and native-action scratch. Isolate
      its Scope allocations and canonical values so a manifest dependency is
      reclaimed before the next target starts. */
-  Context target = $auto(Context.open_isolated_named("build target"));
+  Context target = auto Context.open_isolated_named("build target");
   defer Compiler.reset_macro_library();
   Build b = request.prepare();
   request.cc = target.export(request.cc);

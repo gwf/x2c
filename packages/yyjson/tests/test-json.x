@@ -174,7 +174,7 @@ static void json_rejects_values_outside_json_domain(void) {
 
 static void json_document_preserves_duplicate_member_order(void) {
   String source = "{\"key\":1,\"key\":2,\"last\":3}";
-  json.JsonDocument document = $auto(json.JsonDocument.parse(source));
+  json.JsonDocument document = auto json.JsonDocument.parse(source);
   json.JsonObject object = document.root().object();
 
   EXPECT_NOT_NULL(document.native());
@@ -211,7 +211,7 @@ static void json_empty_collections_and_required_members_are_explicit(void) {
   EXPECT_INT_EQ(count, 0);
 
   json.JsonDocument document =
-    $auto(json.JsonDocument.parse("{\"name\":\"x2c\"}"));
+    auto json.JsonDocument.parse("{\"name\":\"x2c\"}");
   json.JsonObject object = document.root().object();
   EXPECT_NULL(object["missing"]);
 
@@ -229,9 +229,9 @@ static void json_empty_collections_and_required_members_are_explicit(void) {
 }
 
 static void json_document_preserves_numeric_intent(void) {
-  json.JsonDocument document = $auto(json.JsonDocument.parse(
+  json.JsonDocument document = auto json.JsonDocument.parse(
     "[1,-2,3.5,18446744073709551615]"
-  ));
+  );
   json.JsonArray values = document.root().array();
 
   EXPECT_TRUE(values[0].kind() == <uint>);
@@ -250,9 +250,9 @@ static void json_document_preserves_numeric_intent(void) {
 }
 
 static void json_document_conversion_is_explicit_and_lossy(void) {
-  json.JsonDocument document = $auto(json.JsonDocument.parse(
+  json.JsonDocument document = auto json.JsonDocument.parse(
     "{\"key\":1,\"key\":2,\"last\":3}"
-  ));
+  );
 
   Map converted = document.to_x2c();
   EXPECT_INT_EQ(converted.len(), 2);
@@ -261,9 +261,9 @@ static void json_document_conversion_is_explicit_and_lossy(void) {
 }
 
 static void json_document_patch_preserves_unrelated_duplicates(void) {
-  json.JsonDocument document = $auto(json.JsonDocument.parse(
+  json.JsonDocument document = auto json.JsonDocument.parse(
     "{\"key\":1,\"key\":2,\"last\":3}"
-  ));
+  );
   Array operations = [
     {
       "op": "replace",
@@ -276,7 +276,7 @@ static void json_document_patch_preserves_unrelated_duplicates(void) {
       "value": json.Json.bool(1)
     }
   ];
-  json.JsonDocument patched = $auto(document.patch(operations));
+  json.JsonDocument patched = auto document.patch(operations);
 
   json.JsonObject object = patched.root().object();
   EXPECT_INT_EQ(object.all("key").len(), 2);
@@ -312,7 +312,7 @@ static void json_document_borrowed_views_check_owner(void) {
 
 static void json_document_can_preserve_unrepresentable_string(void) {
   json.JsonDocument document =
-    $auto(json.JsonDocument.parse("\"before\\u0000after\""));
+    auto json.JsonDocument.parse("\"before\\u0000after\"");
   EXPECT_STR_EQ(document.json(), "\"before\\u0000after\"");
 
   int caught = 0;
@@ -325,7 +325,7 @@ static void json_document_can_preserve_unrepresentable_string(void) {
 }
 
 static void json_boolean_and_value_vars_stay_distinct(void) {
-  json.JsonDocument document = $auto(json.JsonDocument.parse("{\"n\":7}"));
+  json.JsonDocument document = auto json.JsonDocument.parse("{\"n\":7}");
   Var view = document.root();
   Var flag = json.Json.bool(1);
 
@@ -346,20 +346,20 @@ static void json_boolean_and_value_vars_stay_distinct(void) {
 static void json_document_round_trips_through_a_file(void) {
   String path = "/tmp/x2c-yyjson-document.json";
   String source = "{\"key\":1,\"key\":2,\"tail\":[1,2]}";
-  json.JsonDocument written = $auto(json.JsonDocument.parse(source));
+  json.JsonDocument written = auto json.JsonDocument.parse(source);
   EXPECT_NOT_NULL(written.write_file(path));
 
   /*  The document path keeps order, duplicates, and numeric intent across
       the file, which is why it exists beside Json.read_file.
   */
-  json.JsonDocument read = $auto(json.JsonDocument.read_file(path));
+  json.JsonDocument read = auto json.JsonDocument.read_file(path);
   EXPECT_STR_EQ(read.json(), source);
   EXPECT_INT_EQ(read.root().object().all("key").len(), 2);
 
   /*  The flag has to be checked against the file's bytes: re-reading and
       re-serializing would look identical without it.
   */
-  json.JsonDocument pretty = $auto(json.JsonDocument.parse("{\"a\":1}"));
+  json.JsonDocument pretty = auto json.JsonDocument.parse("{\"a\":1}");
   pretty.write_file_opts(path, YYJSON_WRITE_PRETTY_TWO_SPACES);
   File indented = File.open(path, "r");
   String bytes = indented.string_close();
@@ -386,7 +386,7 @@ static void json_write_file_failure_names_its_operation(void) {
   }
   EXPECT_TRUE(caught);
 
-  json.JsonDocument document = $auto(json.JsonDocument.parse("{\"a\":1}"));
+  json.JsonDocument document = auto json.JsonDocument.parse("{\"a\":1}");
   caught = 0;
   try document.write_file(path);
   catch %(format *detail): {
@@ -447,7 +447,7 @@ static void json_file_read_rejects_in_situ(void) {
 }
 
 static void json_lisp_surface_uses_x2c_values(void) {
-  Lisp lisp = $auto(Lisp.new());
+  Lisp lisp = auto Lisp.new();
   json.JsonLisp.install(lisp);
 
   /*  A parsed document arrives as ordinary x2c values, so the Lisp session
@@ -517,7 +517,7 @@ static void json_lisp_surface_uses_x2c_values(void) {
 }
 
 static void json_lisp_binding_raises_yyjson_detail(void) {
-  Lisp lisp = $auto(Lisp.new());
+  Lisp lisp = auto Lisp.new();
   json.JsonLisp.install(lisp);
 
   int caught = 0;

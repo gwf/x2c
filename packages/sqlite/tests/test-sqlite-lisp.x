@@ -9,7 +9,7 @@ import "sqlite" with SqliteLisp;
 #include "../../../unittest/test-macros.x"
 
 static void lisp_reads_rows_null_and_binary(void) {
-  Lisp lisp = $auto(Lisp.new());
+  Lisp lisp = auto Lisp.new();
   SqliteLisp.install(lisp);
   List rows = lisp.eval(%(
     sqlite-query ":memory:" "SELECT ?, ?, ?, ?"
@@ -38,7 +38,7 @@ static void lisp_persists_parameters_and_reports_errors(void) {
   String path = "builds/test-sqlite-lisp.db";
   remove(path);
   defer remove(path);
-  Lisp lisp = $auto(Lisp.new());
+  Lisp lisp = auto Lisp.new();
   SqliteLisp.install(lisp);
   EXPECT_INT_EQ(lisp.eval(%(sqlite-execute $path
     "CREATE TABLE item(name TEXT, value INTEGER)" '())).integer(), 0);

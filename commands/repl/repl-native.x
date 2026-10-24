@@ -69,7 +69,7 @@ static List _session_value(PromptFunction &p, Type type, List binding) {
 static List _rewrite_call(
   PromptFunction &p, Type result, Var target, List arguments) {
   Compiler c = p.session.compiler;
-  Array rewritten = $auto([]);
+  Array rewritten = auto [];
   foreach (Var argument, arguments) rewritten.push(_rewrite(p, argument));
   match (target)
     case %(expr ? (ident ${p.original})):

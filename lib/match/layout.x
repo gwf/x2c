@@ -104,7 +104,7 @@ static List _normalize_pattern(List pattern) {
 
 /* Normalizes siblings iteratively and retains every unchanged suffix. */
 static List _normalize_elements(List elements) {
-  Block spine = $auto(Block.new(sizeof(NormalizedCell)));
+  Block spine = auto Block.new(sizeof(NormalizedCell));
   for (List cell = elements; cell; cell = cell.cdr()) {
     Var head = cell.car();
     NormalizedCell row = {

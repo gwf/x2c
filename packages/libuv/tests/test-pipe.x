@@ -105,7 +105,7 @@ static void pipe_exchanges_binary_data_and_copies_names(void) {
   String path = _pipe_path("exchange");
   unlink(path);
   defer unlink(path);
-  UvLoop loop = $auto(UvLoop.new());
+  UvLoop loop = auto UvLoop.new();
   PipeExchange state = {
     .loop = loop,
     .path = path,
@@ -186,7 +186,7 @@ static void pipe_accepted_connection_outlives_listener_and_removes_path(void) {
   String path = _pipe_path("owned");
   unlink(path);
   defer unlink(path);
-  UvLoop loop = $auto(UvLoop.new());
+  UvLoop loop = auto UvLoop.new();
   OwnedPipe state = {
     .received = Bytes.new(1)
   };
@@ -252,7 +252,7 @@ static void pipe_failed_bind_does_not_remove_another_listeners_path(void) {
   String path = _pipe_path("occupied");
   unlink(path);
   defer unlink(path);
-  UvLoop loop = $auto(UvLoop.new());
+  UvLoop loop = auto UvLoop.new();
   UvPipe first = loop.pipe().bind(path);
   UvPipe second = loop.pipe();
 
@@ -302,7 +302,7 @@ static void pipe_read_error_returns_from_run_and_the_loop_resumes(void) {
   String path = _pipe_path("read-fail");
   unlink(path);
   defer unlink(path);
-  UvLoop loop = $auto(UvLoop.new());
+  UvLoop loop = auto UvLoop.new();
   PipeFailure state = { .path = path };
   Var value = Var.new(<p48>, &state);
   state.listener = loop.pipe().bind(path)
@@ -340,7 +340,7 @@ static void pipe_accept_error_closes_listener_and_accepted_connection(void) {
   String path = _pipe_path("accept-fail");
   unlink(path);
   defer unlink(path);
-  UvLoop loop = $auto(UvLoop.new());
+  UvLoop loop = auto UvLoop.new();
   PipeFailure state = { .path = path };
   Var value = Var.new(<p48>, &state);
   state.listener = loop.pipe().bind(path)
@@ -368,7 +368,7 @@ static void _ignore_pipe_read(UvPipe pipe, Bytes chunk, Var value) {
 }
 
 static void pipe_rejects_invalid_names_and_operations_before_connection(void) {
-  UvLoop loop = $auto(UvLoop.new());
+  UvLoop loop = auto UvLoop.new();
   UvPipe pipe = loop.pipe();
   int caught = 0;
   try pipe.bind(NULL);

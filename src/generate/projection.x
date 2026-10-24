@@ -109,7 +109,7 @@ static void _publish_node(Partition &p, List node) {
    nest deeply. */
 static int _names_static(List node, Map statics) {
   if (!statics.len()) return 0;
-  Array pending = $auto([node]);
+  Array pending = auto [node];
   while (pending.len()) {
     Var item = pending.take_last();
     if (item is not <list>) continue;
@@ -124,7 +124,7 @@ static int _names_static(List node, Map statics) {
 /* Adds to `statics` each binding `node` declares: each one it holds other
    than through an `ident` reference. */
 static void _add_declared(List node, Map statics) {
-  Array pending = $auto([node]);
+  Array pending = auto [node];
   while (pending.len()) {
     Var item = pending.take_last();
     if (item is not <list>) continue;

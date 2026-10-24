@@ -14,13 +14,13 @@ links:
 ```x2c,ignore
 import "libuv" with UvLoop, UvProcess;
 
-UvLoop loop = $auto(UvLoop.new());
+UvLoop loop = auto UvLoop.new();
 
 UvProcess normalized =
-  $auto(loop.spawn(%("/usr/bin/tr" "[:lower:]" "[:upper:]")));
+  auto loop.spawn(%("/usr/bin/tr" "[:lower:]" "[:upper:]"));
 normalized.write("alpha\nbeta\ngamma\n").close_stdin();
 
-UvProcess counted = $auto(loop.spawn(%("/usr/bin/wc" "-l")));
+UvProcess counted = auto loop.spawn(%("/usr/bin/wc" "-l"));
 counted.write("alpha\nbeta\ngamma\n").close_stdin();
 loop.run(UV_RUN_DEFAULT);
 

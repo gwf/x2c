@@ -384,7 +384,7 @@ meta List ad_call_tangent(
   }
   if (name in ad_forward_siblings) {
     List ptypes = ((List) ftype[0])[1];
-    Array out = $auto([]);
+    Array out = auto [];
     foreach (List argument, args) {
       out.push(ad_unbind(argument));
       if (((List) ptypes.car()).equal(%(double)))
@@ -551,7 +551,7 @@ meta List ad_fwd_item(List s, List names) {
 
 /* A declarator's name, for the declared-double scan. */
 meta List ad_declarator_names(List decls) {
-  Array names = $auto([]);
+  Array names = auto [];
   foreach (List d, decls) {
     match (d) {
       case %(op = (bind (binding ? ?n) ()) ?): names.push(n);
@@ -591,7 +591,7 @@ meta List ad_declared_join(List items) {
 
 /* Every double parameter is a name to differentiate. */
 meta List ad_param_doubles(List params) {
-  Array names = $auto([]);
+  Array names = auto [];
   foreach (List param, params) {
     match (param) {
       case %(param (double) (bind (binding ? ?n) ())): names.push(n);
@@ -602,7 +602,7 @@ meta List ad_param_doubles(List params) {
 
 /* A double parameter is followed by its tangent. */
 meta List ad_fwd_params(List params) {
-  Array out = $auto([]);
+  Array out = auto [];
   foreach (List param, params) {
     match (param) {
       case %(param (double) (bind (binding ? ?n) ())): {
@@ -746,7 +746,7 @@ meta List ad_with_pruned(List x, List pruned) {
 /* An exit inside item i has run items 1..i-1 completely, so its pruned
    reverse gains everything already reversed. */
 meta List ad_move_exits(List exits, List rev) {
-  Array out = $auto([]);
+  Array out = auto [];
   foreach (List x, exits)
     out.push(ad_with_pruned(x, %(@{ad_exit_pruned(x)} @rev)));
   return out;
@@ -784,7 +784,7 @@ meta List ad_call_adjoint(
     List ptypes = ((List) ftype[0])[1];
     List slots = ad_grad_slots(ptypes, args);
     Var value = ad_fresh("_ad_call", %(double));
-    Array addresses = $auto([]);
+    Array addresses = auto [];
     foreach (List slot, slots)
       addresses.push(%(expr () (op & ${ad_id(slot[0])})));
     List out = %(${ad_set(value,
@@ -983,7 +983,7 @@ meta List ad_loop_parts(List c, List body, List step, List names) {
 }
 
 meta List ad_through_exits(List exits, Var n, List dispatch) {
-  Array out = $auto([]);
+  Array out = auto [];
   foreach (List x, exits)
     out.push(ad_with_pruned(x, %(@{ad_exit_pruned(x)} ${ad_count(n, <->)}
                                  ${ad_countdown(n, dispatch)})));
@@ -1054,7 +1054,7 @@ meta List ad_rev_item(List s, List names) {
 /* --- the emitted sibling ------------------------------------------------ */
 
 meta List ad_grad_slots_params(List params) {
-  Array slots = $auto([]);
+  Array slots = auto [];
   foreach (List param, params) {
     match (param) {
       case %(param (double) (bind (binding ? ?n) ())):
@@ -1071,7 +1071,7 @@ meta List ad_grad_params(List params) {
 }
 
 meta List ad_param_locals(List params) {
-  Array locals = $auto([]);
+  Array locals = auto [];
   foreach (List param, params) {
     match (param) {
       case %(param ?type (bind (binding ? ?n) ())): {
@@ -1085,7 +1085,7 @@ meta List ad_param_locals(List params) {
 }
 
 meta List ad_param_names(List params) {
-  Array names = $auto([]);
+  Array names = auto [];
   foreach (List param, params) {
     match (param) {
       case %(param ? (bind (binding ? ?n) ?)): {
@@ -1106,7 +1106,7 @@ meta List ad_hoisted(List locals, List params) =>
   locals.filter(%!(List entry) => !(entry[0] in params));
 
 meta List ad_declare_locals(List locals) {
-  Array out = $auto([]);
+  Array out = auto [];
   foreach (List entry, locals) {
     List type = entry[1];
     out.push($ad.local(type, entry[0], ad_zero_of(type)));
@@ -1115,14 +1115,14 @@ meta List ad_declare_locals(List locals) {
 }
 
 meta List ad_declare_bars(List names) {
-  Array out = $auto([]);
+  Array out = auto [];
   foreach (Var name, names)
     out.push($ad.local(%(double), ad_bar(name), ad_zero()));
   return out;
 }
 
 meta List ad_write_slots(List inputs) {
-  Array out = $auto([]);
+  Array out = auto [];
   foreach (Var name, inputs)
     out.push($ad.write_slot(ad_grad(name), ad_bar(name)));
   return out;
@@ -1201,14 +1201,14 @@ meta List ad_fwd_clause(List e, List names) {
   if (!e) return e;
   match (e) {
     case %(expr ? (commas *items)): {
-      Array out = $auto([]);
+      Array out = auto [];
       foreach (List item, items) out.push(ad_fwd_clause(item, names));
       return %(expr () (commas @out));
     }
   }
   List updates = ad_fwd_update(ad_stmnt(e), ad_update(e), names);
   if (!updates.cdr()) return ((List) updates.car())[1];
-  Array out = $auto([]);
+  Array out = auto [];
   foreach (List update, updates) out.push(update[1]);
   return %(expr () (commas @out));
 }
@@ -1280,7 +1280,7 @@ meta List ad_rev_checkpoint(
   (Var n, List iteration, List dispatch, List through, List condition) =
     ad_loop_parts(c, body, step, names);
   List inner = ad_declared_names(%($body $step), %());
-  Array changed = $auto([]);
+  Array changed = auto [];
   foreach (Var name, ad_assigned(%($body $step), %()))
     if (!(name in inner)) changed.push(name);
   Var total = ad_fresh("_ad_total", %(int));
@@ -1288,7 +1288,7 @@ meta List ad_rev_checkpoint(
   Var remaining = ad_fresh("_ad_remaining", %(int));
   Var replay = ad_fresh("_ad_replay", %(int));
   List size = ad_state.checkpoint;
-  Array snapshot = $auto([]);
+  Array snapshot = auto [];
   List recover = %();
   foreach (Var name, changed) {
     snapshot.push(ad_push(ad_id(name)));

@@ -105,7 +105,7 @@ Choose existing x2c facilities according to their documented meaning:
 - Indexing for real keyed or positional access, and iteration with a stable
   lifetime and exhaustion behavior.
 - `protocol Cleanup(T)` on every handle wrapper that owns native storage, so a
-  client writes `T handle = $auto(T.open(...))` instead of a release at each
+  client writes `T handle = auto T.open(...);` instead of a release at each
   call site; `$cleanup.by(T, release)` from `cleanup.x` adopts it when
   one method releases the handle. Use `defer` beside a native acquisition
   the wrapper does not own.

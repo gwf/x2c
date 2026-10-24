@@ -18,9 +18,9 @@ static void _link(Node holder, Node item) {
   holder.next = item;
 }
 
-// An $auto array is returned.
+// An Array with initializer auto is returned.
 static Array escaping_auto(void) {
-  Array a = $auto([]);
+  Array a = auto [];
   a.push(1);
   return a;
 }
@@ -114,9 +114,9 @@ static List escaping_list_literal(void) {
   return NULL;
 }
 
-// A closure that captures an $auto Array is returned.
+// A closure that captures an Array with initializer auto is returned.
 static Func escaping_closure(void) {
-  Array a = $auto([]);
+  Array a = auto [];
   return %!() => a.len();
 }
 

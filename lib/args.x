@@ -87,7 +87,7 @@ Map Args.parse(List args, List spec) {
   defer if ((void *) complete == 0) result.cleanup();
   for (int i = 0; i < parsed.count; i++)
     result[parsed.options[i].name] = parsed.options[i].fallback;
-  Array operands = $auto([]);
+  Array operands = auto [];
   int options_ended = 0;
   for (List rest = args; rest; rest = rest.cdr()) {
     String word = rest.car().str();
@@ -293,8 +293,8 @@ static void _bad_spec(String why, Var entry) {
 String Args.usage(String program, List spec) {
   Spec parsed = _read_spec(spec);
   defer _free(parsed);
-  Buffer synopsis = $auto(Buffer.new(0)), options = $auto(Buffer.new(0));
-  Buffer operands = $auto(Buffer.new(0)), out = $auto(Buffer.new(0));
+  Buffer synopsis = auto Buffer.new(0), options = auto Buffer.new(0);
+  Buffer operands = auto Buffer.new(0), out = auto Buffer.new(0);
   for (int i = 0; i < parsed.count; i++) {
     Option *option = &parsed.options[i];
     String label = _label((*option));

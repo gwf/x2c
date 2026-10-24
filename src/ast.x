@@ -227,7 +227,7 @@ int Ast.contains_head(Var value, Symbol kind) {
     returns itself when nothing beneath it is swapped. The walk keeps deep
     expression chains off the C stack. */
 Var Ast.replace_nodes(Var root, Map replaced) {
-  Array levels = $auto([]);
+  Array levels = auto [];
   List node;
   $ast.walk(root, node) {
     if (_replaced_node(node, replaced) !== node) continue;
@@ -406,7 +406,7 @@ List Ast.initializer_functions(Ast ast, List &source) {
   List input = header.cadr();
   List value = input.cadr();
   List argument = %(expr ${value.cadr()} ${input.car()});
-  Array functions = $auto([]);
+  Array functions = auto [];
   foreach (List choice in cases) {
     List function = _arm_function(choice, argument);
     if (!function) return NULL;

@@ -443,7 +443,7 @@ static List _build(Helper &h) {
    later in the load order. Each source still parses in its own Context. */
 static String _loaded_providers(Helper &h) {
   h.providers = {};
-  Map owners = $auto({}), packaged = $auto({});
+  Map owners = auto {}, packaged = auto {};
   int index = 1;
   foreach (String path in h.owners) {
     List provider = _loaded_provider(h, path, index++);
@@ -475,7 +475,7 @@ static int _package_source(Helper &h, String path) {
 /* An import merges its package's definitions into the importing file's
    collection. The package's own provider defines them. */
 static void _drop_imported(Map declarations, Map packaged) {
-  Array imported = $auto([]);
+  Array imported = auto [];
   foreach (String name in declarations.keys())
     if (name in packaged) imported.push(name);
   foreach (String name in imported) declarations.del(name);
@@ -732,7 +732,7 @@ static List _write_manifest(Helper &h, String failure) {
   List manifest = %(
     (groups ${h.groups.list()}) (failures ${h.failures.list()})
     (failure ${failure ? failure : ""}) (deps ${_digests(h.deps)}));
-  Buffer out = $auto(Buffer.new(0));
+  Buffer out = auto Buffer.new(0);
   datum_write(out, manifest, 0);
   Path.write_text(%"${h.directory}/manifest", out);
   return manifest;

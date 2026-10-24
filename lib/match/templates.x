@@ -83,7 +83,7 @@ module Var _replace(Var input, ReplacementSource &source) {
   List list = input;
   if (!list) return input;
   if (list.car() == <!quote>) return list.cadr();
-  Block spine = $auto(Block.new(sizeof(ReplacementCell)));
+  Block spine = auto Block.new(sizeof(ReplacementCell));
   Var tail = (List) NULL;
   for (; list; list = list.cdr()) {
     Var head = list.car();

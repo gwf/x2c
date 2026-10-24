@@ -253,7 +253,7 @@ static CliCommand *_command_row(const char *word) {
     constructing request values.
 */
 CliRequest CliRequest.parse(int argc, char **argv) {
-  Array args = $auto(CliRequest.read_arguments(argc, argv));
+  Array args = auto CliRequest.read_arguments(argc, argv);
   return CliRequest.parse_arguments(args);
 }
 
@@ -579,7 +579,7 @@ static void _set_field(
     options are returned.
 */
 CliRequest CliRequest.package_options(String path, String package) {
-  Array words = $auto([]);
+  Array words = auto [];
   foreach (String word in _response_arguments(path))
     words.push(word.replace("{package}", package));
   CliRequest request = xcalloc(1, sizeof(struct CliRequest));

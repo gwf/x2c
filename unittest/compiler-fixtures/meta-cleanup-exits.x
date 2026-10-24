@@ -4,7 +4,7 @@
     `$let` run their cleanup when the block ends, when a `return` leaves it
     after computing its value, and when `break` or `continue` leaves it for
     an enclosing loop. A loop with a cleanup on its iteration path runs
-    10,000 turns in constant space. The bound lifetime operations - `$auto`,
+    10,000 turns in constant space. The bound lifetime operations - `auto`,
     `free`, `Context` export, named Scopes, and `List.promote` - run as they
     do natively. Each probe prints its compile-time and run-time answers.
 */
@@ -94,21 +94,21 @@ meta int many_turns(int n) {
 }
 
 meta int auto_array(int n) {
-  Array a = $auto([]);
+  Array a = auto [];
   a.push(n);
   a.push(n);
   return (int) a.len() + n;
 }
 
 meta int auto_map(int n) {
-  Map m = $auto({});
+  Map m = auto {};
   m[<a>] = n;
   m[<b>] = n * 2;
   return (int) m.len() + m[<b>].int();
 }
 
 meta int auto_scope(int n) {
-  Scope work = $auto(Scope.new_named("meta work"));
+  Scope work = auto Scope.new_named("meta work");
   Scope.push(&work);
   Array scratch = [n, n, n];
   Scope.pop();

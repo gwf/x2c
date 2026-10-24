@@ -253,7 +253,7 @@ List Compiler.rewrite_lowered(
     lowered statement `source`, and keeps each part of `source` it holds as
     it is, so no statement rule is offered that part again. */
 List Compiler.lower_replacement(Compiler c, List replacement, List source) {
-  Array parts = $auto([]);
+  Array parts = auto [];
   _held_parts(source, <node>, parts);
   struct SlotWatch kept = {parts.list()};
   kept.kept = 1;
@@ -322,7 +322,7 @@ static List _rewrite(
       int held = point == <node>;
       match (result) case %(code-value "lowered" *): held = 1;
       if (held) {
-        Array parts = $auto([]);
+        Array parts = auto [];
         _held_parts(source, point, parts);
         return _watched(c, result, parts, position, expected, site);
       }
@@ -368,7 +368,7 @@ static List _bound(
   Symbol position, Type expected, Token site, int lower) {
   if (point != <node>)
     return _bind_replacement(c, result, position, expected);
-  Array parts = $auto([]);
+  Array parts = auto [];
   _held_parts(source, point, parts);
   if (lower) result = _kept_lowered(result, source, parts);
   List bound = _bind_replacement(c, result, position, expected);
@@ -394,7 +394,7 @@ static List _bind_replacement(
    is already. */
 static Var _kept_lowered(Var result, List source, Array parts) {
   match (result) case %(code-value "lowered" *): return result;
-  Map kept = $auto({});
+  Map kept = auto {};
   kept[(void *) source] = Code.lowered(source, NULL);
   foreach (List part in parts) kept[(void *) part] = Code.lowered(part, NULL);
   return Ast.replace_nodes(result, kept);
@@ -489,7 +489,7 @@ static int _same(Effects a, Effects b) =>
 static List _prepared(
   Compiler c, List source, Var result, Symbol position, Type expected,
   Token site) {
-  Array sources = $auto([]), values = $auto([]);
+  Array sources = auto [], values = auto [];
   _expression_nodes(source, sources);
   match (result) case %(code-value *):
     return _watched(c, result, sources, position, expected, site);
@@ -629,7 +629,7 @@ static int _carries(Var shape) {
    anchor, block, sequence, statement, or declaration, whose lowering gives
    a slot a context that lowering the value alone would not. */
 static List _skeleton(List lowered, Array outputs) {
-  Array found = $auto([]);
+  Array found = auto [];
   foreach (List output in outputs) found.push(0);
   int refused = 0;
   List skeleton = _marked(lowered, outputs, found, refused);
@@ -656,7 +656,7 @@ static Var _marked(Var node, Array outputs, Array found, int &refused) {
    first lowering reached them and fills the skeleton with the results. */
 static List _fill_values(Compiler c, List prepared, Array values) {
   (List skeleton, List order) = prepared;
-  Array lowered = $auto(values.copy());
+  Array lowered = auto values.copy();
   $let(c.active_rewrites, c.active_rewrites.cdr())
     foreach (int slot in order)
       lowered[slot] = c.normalize(values[slot]);

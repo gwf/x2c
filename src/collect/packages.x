@@ -113,7 +113,7 @@ static void _merge_surface(Surface &s, String path, Map rows) {
 
 /* Compile-time definitions follow the package's ordinary include walk. */
 static void _take_exports(Surface &s, Map rows) {
-  Array found = $auto([]);
+  Array found = auto [];
   foreach (Var (key, value) in rows)
     match (%($key $value))
       case %(("source-node" (? ? ?position))

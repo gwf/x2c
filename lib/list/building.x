@@ -62,7 +62,7 @@ meta native List Map.list(Map map) {
     constructing the result.
 */
 meta native List Iter.list(Iter iter) {
-  Array values = $auto([]);
+  Array values = auto [];
   foreach (Var item in iter) values.push(item);
   return values;
 }
@@ -79,7 +79,7 @@ meta native List Iter.list(Iter iter) {
 Self List.append(Self a, Self b) {
   if (!a) return b;
   if (!b) return a;
-  Array values = $auto(a);
+  Array values = auto a;
   return _prepend_array(values, b);
 }
 
@@ -99,7 +99,7 @@ List List.concat_n(unsigned list_count, ...) {
 
 static List _concat_va(unsigned n, va_list ap) {
   if (n > INT_MAX) raise %(size-limit (operation "List.concat_n") (count $n));
-  Array lists = $auto([]);
+  Array lists = auto [];
   for (unsigned i = 0; i < n; i++) lists.push(va_arg(ap, List));
   return _concat_lists(lists);
 }
@@ -129,7 +129,7 @@ List List.list_n(unsigned element_count, ...) {
 }
 
 static List _list_va(unsigned n, va_list ap) {
-  Array values = $auto([]);
+  Array values = auto [];
   for (unsigned i = 0; i < n; i++) {
     Var value = va_arg(ap, Var);
     if (value is void) raise %(void-op (operation "List.list_n") (index $i));

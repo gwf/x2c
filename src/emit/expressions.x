@@ -59,8 +59,8 @@ module List _operand(Emitter &e, Var node, int level) {
    stops where the nested operator needs parentheses, leaving that operand to
    the ordinary recursion. */
 static List _op_spine(Emitter &e, Var operator, Var left, Var right) {
-  Array operators = $auto([]);
-  Array rights = $auto([]);
+  Array operators = auto [];
+  Array rights = auto [];
   Var op_item = operator, left_item = left, right_item = right;
   int level = 0;
   for (;;) {
@@ -79,7 +79,7 @@ static List _op_spine(Emitter &e, Var operator, Var left, Var right) {
     if (!deeper) break;
   }
   List result = _operand(e, left_item, level);
-  Array pieces = $auto([]);
+  Array pieces = auto [];
   for (int i = (int) operators.len() - 1; i >= 0; i--) {
     Symbol binary = operators[i];
     pieces.push(operators[i]);
