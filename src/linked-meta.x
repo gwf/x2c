@@ -2339,10 +2339,6 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_scalar_tag", _scalar_tag);
   $linked.row(rows, "_scalar_key", _scalar_key);
   $linked.row(rows, "_scalar_access_units", _scalar_access_units);
-  $linked.row(rows, "_cases_label", _cases_label);
-  $linked.row(rows, "_cases_transfers", _cases_transfers);
-  $linked.row(rows, "_cases_split", _cases_split);
-  $linked.row(rows, "_cases_switch", _cases_switch);
   $linked.row(rows, "_tag_groups", _tag_groups);
   $linked.row(rows, "_tag_rows", _tag_rows);
   $linked.row(rows, "_tag_id", _tag_id);

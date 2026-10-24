@@ -195,7 +195,7 @@ Source: `src/linked-meta.x:911`
 
 Returns linked definition hashes and provider source dependencies.
 
-Source: `src/linked-meta.x:2418`
+Source: `src/linked-meta.x:2414`
 
 #### linked_meta_targets
 

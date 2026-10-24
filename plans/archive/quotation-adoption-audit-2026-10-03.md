@@ -254,7 +254,7 @@ expansion applies them. Foreach expansion is a hot path.
   [macro application cost](macro-application-cost.md).
 - PR #131 (2026-10-03) added `${expression}` holes and removed 60
   single-use temporary locals. It also wrote `_declare`, `_assign`, the
-  foreach and class builders, and the `$switch` decorator as quotations.
+  foreach and class builders, and the former switch decorator as quotations.
   That reverses the decline above: after #129 and #130, self-translation
   changed by +0.04%, within noise.
 - PR #142 (2026-10-04) lifts an `x2c_ident` value in a hole to an

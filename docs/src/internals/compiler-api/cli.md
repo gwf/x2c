@@ -48,7 +48,7 @@ Returns whether `s` contains a driver-owned dependency option.
 Recognizes `-MMD`, `-MP`, `-MF`, and `-MT` as leading spellings or in a
 comma-delimited pass-through argument; `NULL` returns zero.
 
-Source: `src/cli/parsing.x:553`
+Source: `src/cli/parsing.x:552`
 
 <a id="CliRequest.inspects"></a>
 #### CliRequest.inspects
@@ -66,7 +66,7 @@ Source: `src/cli/requests.x:65`
 
 Reports whether a raw command name belongs to the built-in parser.
 
-Source: `src/cli/parsing.x:655`
+Source: `src/cli/parsing.x:653`
 
 <a id="CliRequest.new"></a>
 #### CliRequest.new
@@ -89,7 +89,7 @@ and the `-Wl,` and `-Xlinker` linker pass-throughs are admitted.
 `cc_args` and `ld_args` serve native actions; no source-preprocessing
 options are returned.
 
-Source: `src/cli/parsing.x:581`
+Source: `src/cli/parsing.x:579`
 
 <a id="CliRequest.package_roots"></a>
 #### CliRequest.package_roots

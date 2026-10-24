@@ -466,32 +466,31 @@ static CliOption *_find_option(
 static void _apply(Parse &p, Given given) {
   CliRequest r = p.request;
   String spelling = given.spelling, value = given.value;
-  $switch(given.option.id)
-  {
-    case <help>: _help_exit(r.command, 0);
-    case <color>: r.color_mode = _color_mode(value);
-    case <include>: _include_dir(p, value);
-    case <x-include>: p.include_dirs.push(value);
+  switch (given.option.id) {
+    case <help>: _help_exit(r.command, 0); break;
+    case <color>: r.color_mode = _color_mode(value); break;
+    case <include>: _include_dir(p, value); break;
+    case <x-include>: p.include_dirs.push(value); break;
     case <tokens>: case <dump-cpp>: case <cpp-tokens>: case <dump-ast>:
     case <transforms>: case <dump-code>: case <symbols>: case <dump-csym>:
     case <dump-cache>: case <conform>: case <dump-defs>:
-      r.dump = given.option.id;
-    case <kind>: r.kind_explicit = 1; r.kind = _target_kind(value);
-    case <jobs>: r.jobs = _count(value, 1, "job count");
-    case <max-errors>: r.max_errors = _count(value, 0, "error limit");
-    case <cc-db>: r.compile_commands = value; r.save_temps = 1;
-    case <c-include>: _push_pair(p.cc_args, "-I", value);
-    case <c-system>: _push_pair(p.cc_args, "-isystem", value);
-    case <opt>: case <g>: p.cc_args.push(spelling);
+      r.dump = given.option.id; break;
+    case <kind>: r.kind_explicit = 1; r.kind = _target_kind(value); break;
+    case <jobs>: r.jobs = _count(value, 1, "job count"); break;
+    case <max-errors>: r.max_errors = _count(value, 0, "error limit"); break;
+    case <cc-db>: r.compile_commands = value; r.save_temps = 1; break;
+    case <c-include>: _push_pair(p.cc_args, "-I", value); break;
+    case <c-system>: _push_pair(p.cc_args, "-isystem", value); break;
+    case <opt>: case <g>: p.cc_args.push(spelling); break;
     case <define>: case <undefine>:
-      _forward(p.cpp_args, given); _forward(p.cc_args, given);
-    case <xcc>: p.cc_args.push(_xcc_argument(value));
-    case <lib-dir>: case <library>: _forward(p.ld_args, given);
-    case <rpath>: p.ld_args.push(%"-Wl,-rpath,$value");
-    case <pthread>: p.cc_args.push(spelling); p.ld_args.push(spelling);
-    case <framework>: case <xlinker>: _push_pair(p.ld_args, spelling, value);
-    case <wl>: p.ld_args.push(spelling);
-    default: _set_field(r, *given.option, value);
+      _forward(p.cpp_args, given); _forward(p.cc_args, given); break;
+    case <xcc>: p.cc_args.push(_xcc_argument(value)); break;
+    case <lib-dir>: case <library>: _forward(p.ld_args, given); break;
+    case <rpath>: p.ld_args.push(%"-Wl,-rpath,$value"); break;
+    case <pthread>: p.cc_args.push(spelling); p.ld_args.push(spelling); break;
+    case <framework>: case <xlinker>: _push_pair(p.ld_args, spelling, value); break;
+    case <wl>: p.ld_args.push(spelling); break;
+    default: _set_field(r, *given.option, value); break;
   }
 }
 
@@ -561,11 +560,10 @@ int CliRequest.dependency_option(String s) {
 static void _set_field(
   CliRequest r, CliOption &option, String value) {
   char *field = (char *) r + option.offset;
-  $switch(option.apply)
-  {
-    case <flag>: *(int *) field = 1;
-    case <text>: *(String *) field = value;
-    case <list>: *(List *) field = cons(value, *(List *) field);
+  switch (option.apply) {
+    case <flag>: *(int *) field = 1; break;
+    case <text>: *(String *) field = value; break;
+    case <list>: *(List *) field = cons(value, *(List *) field); break;
   }
 }
 

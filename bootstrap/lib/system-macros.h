@@ -6,13 +6,5 @@
 #define __GUARD_0xD49E6725__
 
 #include "meta.h"
-int _cases_label(List item);
-
-int _cases_transfers(List item);
-
-List _cases_split(List items, int labelled);
-
-List _cases_switch(List condition, List body);
-
 
 #endif /* __GUARD_0xD49E6725__ */

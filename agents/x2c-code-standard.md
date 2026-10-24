@@ -199,8 +199,7 @@ exhaustion status is the point. Use `map`, `filter`, and folds for direct
 transformations. Never call `len()` on a List inside a loop over it.
 
 **ST-13** In a `switch`, end every case with `return`, `break`, or another
-transfer, or state the intended fallthrough on the line before it. Use
-`$switch` when each case run needs its own block and break.
+transfer, or state the intended fallthrough on the line before it.
 
 **ST-14** Keep typedefs at file scope.
 
