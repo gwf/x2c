@@ -5,16 +5,16 @@
  (bind (binding 1 "filtered") 
   ((fnmod (params (param (int) (bind (binding 2 "mode") ())))))) 
  (block 
-  (at 13 
+  (at 15 
    (try (block 
-         (at 9 (if (expr (int) 
-                    (op == (expr (int) (ident (binding 2 "mode"))) 
-                     (expr (int) (literal (int) "1")))) 
-                (raise 
-                 (expr ("Symbol") (literal ("Symbol") "alloc-fail" alloc-fail)) 
-                 (args (expr ("Symbol") (literal ("Symbol") "bytes" bytes)) 
-                  (expr (int) (ident (binding 2 "mode"))))))) 
-         (at 10 
+         (at 11 
+          (if (expr (int) 
+               (op == (expr (int) (ident (binding 2 "mode"))) 
+                (expr (int) (literal (int) "1")))) 
+           (raise (expr ("Symbol") (literal ("Symbol") "alloc-fail" alloc-fail)) 
+            (args (expr ("Symbol") (literal ("Symbol") "bytes" bytes)) 
+             (expr (int) (ident (binding 2 "mode"))))))) 
+         (at 12 
           (if (expr (int) 
                (op == (expr (int) (ident (binding 2 "mode"))) 
                 (expr (int) (literal (int) "2")))) 
@@ -95,7 +95,7 @@
                             (ident (binding 6 "_x2c_gensym_error_handler_0"))) 
                       (expr (int) (literal (int) "0"))))))))))) 
         (block 
-         (at 11 
+         (at 13 
           (return (int) 
            (expr (int) 
             (call (expr ((func (("List"))) (int)) (ident (binding 9 "List_len"))) 
@@ -104,6 +104,6 @@
            (return (int) (expr (int) (op - (expr (int) (literal (int) "1")))))))) 
      (binding 6 "_x2c_gensym_error_handler_0")) 
     (block 
-     (at 12 
+     (at 14 
       (stmnt (expr (int) (postfix ++ (expr (int) (ident (binding 2 "mode")))))))))) 
-  (at 14 (return (int) (expr (int) (literal (int) "0"))))))
+  (at 16 (return (int) (expr (int) (literal (int) "0"))))))

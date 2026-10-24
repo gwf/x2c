@@ -6,15 +6,16 @@
 (function (int) 
  (bind (binding 2 "main") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 9 (declare ("Values") 
-         (bindings 
-          (op = (bind (binding 3 "values") ()) 
-           (expr ("List") (expr ("List") (cache 3))))))) 
-  (at 10 
+  (at 11 
+   (declare ("Values") 
+    (bindings 
+     (op = (bind (binding 3 "values") ()) 
+      (expr ("List") (expr ("List") (cache 3))))))) 
+  (at 12 
    (declare ("Var") 
     (bindings (bind (binding 4 "a") ()) (bind (binding 5 "b") ()) 
      (bind (binding 6 "c") ()) (bind (binding 7 "d") ())))) 
-  (at 11 
+  (at 13 
    (declare ("Values") 
     (bindings 
      (op = (bind (binding 8 "result") ()) 
@@ -27,7 +28,7 @@
           (targets (expr ("Var") (ident (binding 4 "a"))) 
            (expr ("Var") (ident (binding 5 "b")))) 
           (expr ("Values") (ident (binding 3 "values"))))))))))) 
-  (at 12 
+  (at 14 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 9 "printf"))) 
@@ -47,7 +48,7 @@
        (expr (int) 
         (op === (expr ("Values") (ident (binding 8 "result"))) 
          (expr ("Values") (ident (binding 3 "values")))))))))) 
-  (at 13 
+  (at 15 
    (return (int) 
     (expr (int) 
      (op ? (expr (int) 

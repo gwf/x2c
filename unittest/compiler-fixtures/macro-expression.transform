@@ -6,11 +6,11 @@
 (function (int) 
  (bind (binding 1 "main") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 10 
+  (at 12 
    (declare (int) 
     (bindings 
      (op = (bind (binding 2 "value") ()) (expr (int) (literal (int) "21")))))) 
-  (at 12 
+  (at 14 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 3 "printf"))) 
@@ -18,4 +18,4 @@
        (expr (int) 
         (op + (expr (int) (ident (binding 2 "value"))) 
          (expr (int) (ident (binding 2 "value")))))))))) 
-  (at 14 (return (expr (int) (literal (int) "0"))))))
+  (at 16 (return (expr (int) (literal (int) "0"))))))

@@ -13,21 +13,22 @@
 (function (int) 
  (bind (binding 3 "main") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 9 (declare ("Lisp") 
-         (bindings 
-          (op = (bind (binding 4 "lisp") ()) 
-           (expr ("Lisp") 
-            (call (expr ((func ((void))) "Lisp") (ident (binding 5 "Lisp_new"))) 
-             (args (expr (void) ())))))))) 
-  (at 10 
+  (at 11 
+   (declare ("Lisp") 
+    (bindings 
+     (op = (bind (binding 4 "lisp") ()) 
+      (expr ("Lisp") 
+       (call (expr ((func ((void))) "Lisp") (ident (binding 5 "Lisp_new"))) 
+        (args (expr (void) ())))))))) 
+  (at 12 
    (declare (unsigned) 
     (bindings 
      (op = (bind (binding 6 "cursor") ()) (expr (int) (literal (int) "0")))))) 
-  (at 11 
+  (at 13 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 7 "read") ()) (expr ("Var") (literal ("Var") "void")))))) 
-  (at 12 
+  (at 14 
    (declare ("Symbol") 
     (bindings 
      (op = (bind (binding 8 "status") ()) 
@@ -42,7 +43,7 @@
            (args (expr ("List") (ident (binding 1 "first")))))) 
          (expr (unsigned) (ident (binding 6 "cursor"))) 
          (expr ("Var") (ident (binding 7 "read")))))))))) 
-  (at 13 
+  (at 15 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 11 "printf"))) 
@@ -105,9 +106,9 @@
                (ident (binding 14 "List_getindex"))) 
          (args (expr ("List") (ident (binding 1 "first"))) 
           (expr (int) (literal (int) "7")))))))))) 
-  (at 14 
+  (at 16 
    (stmnt 
     (expr (void) 
      (call (expr ((func (("Lisp"))) void) (ident (binding 15 "Lisp_destroy"))) 
       (args (expr ("Lisp") (ident (binding 4 "lisp")))))))) 
-  (at 15 (return (int) (expr (int) (literal (int) "0"))))))
+  (at 17 (return (int) (expr (int) (literal (int) "0"))))))

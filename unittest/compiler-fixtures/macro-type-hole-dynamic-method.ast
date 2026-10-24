@@ -17,7 +17,7 @@
       (bind (binding 3 "_x2c_gensym_macro_value_0") 
        ())))))) 
  (block 
-  (at 11 
+  (at 13 
    (return ("Var") 
     (expr ("Var") 
      (call (expr ((func (("Symbol") (...))) "Var") 
@@ -34,7 +34,7 @@
       (bind (binding 6 "_x2c_gensym_macro_value_1") 
        ())))))) 
  (block 
-  (at 12 
+  (at 14 
    (return ("Var") 
     (expr ("Var") 
      (call (expr ((func (("Symbol") (...))) "Var") 
@@ -46,7 +46,7 @@
 (function (int) 
  (bind (binding 7 "main") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 13 
+  (at 15 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 8 "value") ()) 
@@ -58,7 +58,7 @@
                 (expr ("MacroDynamicOwner") 
                  (cast (decl ("MacroDynamicOwner") (bindings (bind () ()))) 
                   (expr (int) (literal (int) "42"))))))))))))) 
-  (at 14 
+  (at 16 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 9 "boxed") ()) 
@@ -70,7 +70,7 @@
                 (expr ("MacroDynamicOwner") 
                  (cast (decl ("MacroDynamicOwner") (bindings (bind () ()))) 
                   (expr (int) (literal (int) "43"))))))))))))) 
-  (at 15 
+  (at 17 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 10 "printf"))) 
@@ -81,7 +81,7 @@
        (expr (int) 
         (call (expr ((func (("Var"))) (int)) (ident (binding 11 "Var_int"))) 
          (args (expr ("Var") (ident (binding 9 "boxed"))))))))))) 
-  (at 16 
+  (at 18 
    (return (int) 
     (expr (int) 
      (op ? (expr (int) 

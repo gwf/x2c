@@ -20,35 +20,36 @@
 (function (static "Scores") 
  (bind (binding 9 "array_base") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 9 (stmnt 
-         (expr (int) (postfix ++ (expr (int) (ident (binding 6 "base_calls"))))))) 
-  (at 50 (return (expr ("Scores") (ident (binding 4 "saved_array")))))))
+  (at 11 
+   (stmnt 
+    (expr (int) (postfix ++ (expr (int) (ident (binding 6 "base_calls"))))))) 
+  (at 52 (return (expr ("Scores") (ident (binding 4 "saved_array")))))))
 
 (function (static "Totals") 
  (bind (binding 10 "map_base") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 11 
+  (at 13 
    (stmnt 
     (expr (int) (postfix ++ (expr (int) (ident (binding 6 "base_calls"))))))) 
-  (at 51 (return (expr ("Totals") (ident (binding 5 "saved_map")))))))
+  (at 53 (return (expr ("Totals") (ident (binding 5 "saved_map")))))))
 
 (function (static int) 
  (bind (binding 11 "next_index") 
   ((fnmod (params (param (int) (bind (binding 12 "value") ())))))) 
  (block 
-  (at 13 
+  (at 15 
    (stmnt 
     (expr (int) (postfix ++ (expr (int) (ident (binding 7 "selector_calls"))))))) 
-  (at 52 (return (expr (int) (ident (binding 12 "value")))))))
+  (at 54 (return (expr (int) (ident (binding 12 "value")))))))
 
 (function (static "Var") 
  (bind (binding 13 "next_key") 
   ((fnmod (params (param ("String") (bind (binding 14 "value") ())))))) 
  (block 
-  (at 15 
+  (at 17 
    (stmnt 
     (expr (int) (postfix ++ (expr (int) (ident (binding 7 "selector_calls"))))))) 
-  (at 53 
+  (at 55 
    (return 
     (expr ("Var") 
      (call (expr ((func (("String"))) "Var") (ident (binding 15 "String_var"))) 
@@ -58,9 +59,9 @@
  (bind (binding 16 "next_rhs") 
   ((fnmod (params (param (int) (bind (binding 17 "value") ())))))) 
  (block 
-  (at 17 
+  (at 19 
    (stmnt (expr (int) (postfix ++ (expr (int) (ident (binding 8 "rhs_calls"))))))) 
-  (at 54 
+  (at 56 
    (return 
     (expr ("Var") 
      (call (expr ((func ((int))) "Var") (ident (binding 18 "int_var"))) 
@@ -69,7 +70,7 @@
 (function (int) 
  (bind (binding 19 "main") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 55 
+  (at 57 
    (declare ("Scores") 
     (bindings 
      (op = (bind (binding 20 "dst_array") ()) 
@@ -112,7 +113,7 @@
          (expr ("Var") 
           (call (expr ((func ((int))) "Var") (ident (binding 18 "int_var"))) 
            (args (expr (int) (literal (int) "3")))))))))))) 
-  (at 56 
+  (at 58 
    (declare ("Totals") 
     (bindings 
      (op = (bind (binding 24 "dst_map") ()) 
@@ -152,17 +153,17 @@
          (expr ("Var") 
           (call (expr ((func ((int))) "Var") (ident (binding 18 "int_var"))) 
            (args (expr (int) (literal (int) "4")))))))))))) 
-  (at 21 
+  (at 23 
    (stmnt 
     (expr ("Scores") 
      (op = (expr ("Scores") (ident (binding 4 "saved_array"))) 
       (expr ("Scores") (ident (binding 20 "dst_array"))))))) 
-  (at 22 
+  (at 24 
    (stmnt 
     (expr ("Totals") 
      (op = (expr ("Totals") (ident (binding 5 "saved_map"))) 
       (expr ("Totals") (ident (binding 24 "dst_map"))))))) 
-  (at 57 
+  (at 59 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 28 "value") ()) 
@@ -179,7 +180,7 @@
          (expr ("Var") 
           (call (expr ((func ((int))) "Var") (ident (binding 16 "next_rhs"))) 
            (args (expr (int) (literal (int) "3")))))))))))) 
-  (at 58 
+  (at 60 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 30 "aa") ()) 
@@ -200,7 +201,7 @@
             (expr (int) 
              (call (expr ((func ((int))) int) (ident (binding 11 "next_index"))) 
               (args (expr (int) (literal (int) "0"))))))))))))))) 
-  (at 59 
+  (at 61 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 32 "am") ()) 
@@ -224,7 +225,7 @@
                (call (expr ((func (("String"))) "Var") 
                       (ident (binding 13 "next_key"))) 
                 (args (expr ("String") (cache 2))))))))))))))))) 
-  (at 60 
+  (at 62 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 34 "ma") ()) 
@@ -246,7 +247,7 @@
             (expr (int) 
              (call (expr ((func ((int))) int) (ident (binding 11 "next_index"))) 
               (args (expr (int) (literal (int) "1"))))))))))))))) 
-  (at 61 
+  (at 63 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 36 "mm") ()) 
@@ -269,7 +270,7 @@
              (call (expr ((func (("String"))) "Var") 
                     (ident (binding 13 "next_key"))) 
               (args (expr ("String") (cache 2))))))))))))))) 
-  (at 63 
+  (at 65 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 37 "complex") ()) 
@@ -284,7 +285,7 @@
            (args (expr (int) (literal (int) "3"))))) 
          (expr ("Symbol") (literal ("Symbol") "+" +)) 
          (expr ("Var") 
-          (at 62 
+          (at 64 
            (call (expr (macro-expr) (ident (binding-name "Var_binary"))) 
             (args (expr ("Var") 
                    (call (expr ((func (("Array") (int))) "Var") 
@@ -298,7 +299,7 @@
              (expr ("Var") 
               (call (expr ((func ((int))) "Var") (ident (binding 18 "int_var"))) 
                (args (expr (int) (literal (int) "2")))))))))))))))) 
-  (at 64 
+  (at 66 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 38 "casted") ()) 
@@ -320,7 +321,7 @@
              (expr (int) 
               (call (expr ((func ((int))) int) (ident (binding 11 "next_index"))) 
                (args (expr (int) (literal (int) "1")))))))))))))))) 
-  (at 65 
+  (at 67 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 39 "same") ()) 
@@ -341,7 +342,7 @@
             (expr (int) 
              (call (expr ((func ((int))) int) (ident (binding 11 "next_index"))) 
               (args (expr (int) (literal (int) "4"))))))))))))))) 
-  (at 66 
+  (at 68 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 40 "prefix") ()) 
@@ -358,7 +359,7 @@
          (expr ("Var") 
           (call (expr ((func ((int))) "Var") (ident (binding 18 "int_var"))) 
            (args (expr (int) (literal (int) "1")))))))))))) 
-  (at 67 
+  (at 69 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 41 "postfix") ()) 
@@ -372,14 +373,14 @@
           (call (expr ((func ((int))) int) (ident (binding 11 "next_index"))) 
            (args (expr (int) (literal (int) "5"))))) 
          (expr ("Symbol") (literal ("Symbol") "--" --))))))))) 
-  (at 68 
+  (at 70 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 43 "counter") ()) 
       (expr ("Var") 
        (call (expr ((func ((int))) "Var") (ident (binding 18 "int_var"))) 
         (args (expr (int) (literal (int) "7"))))))))) 
-  (at 69 
+  (at 71 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 44 "direct_prefix") ()) 
@@ -391,7 +392,7 @@
          (expr ("Var") 
           (call (expr ((func ((int))) "Var") (ident (binding 18 "int_var"))) 
            (args (expr (int) (literal (int) "1")))))))))))) 
-  (at 70 
+  (at 72 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 45 "direct_postfix") ()) 
@@ -400,7 +401,7 @@
         (args (expr (* "Var") 
                (op & (parens (expr ("Var") (ident (binding 43 "counter")))))) 
          (expr ("Symbol") (literal ("Symbol") "--" --))))))))) 
-  (at 37 
+  (at 39 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 46 "dynamic") ()) 
@@ -409,17 +410,17 @@
               (ident (binding 47 "Var_new"))) 
         (args (expr ("Symbol") (literal ("Symbol") "<string>" string)) 
          (expr ("String") (cache 3))))))))) 
-  (at 72 
+  (at 74 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 48 "sum") ()) 
       (expr ("Var") 
-       (at 71 
+       (at 73 
         (call (expr (macro-expr) (ident (binding-name "Var_binary"))) 
          (args (expr ("Var") (ident (binding 46 "dynamic"))) 
           (expr ("Symbol") (literal ("Symbol") "+" +)) 
           (expr ("Var") (call "String_var" (args (expr ("String") (cache 6))))))))))))) 
-  (at 73 
+  (at 75 
    (stmnt 
     (expr ("Var") 
      (call "x2c_var_update_volatile" 
@@ -430,17 +431,17 @@
         (call (expr ((func (("String"))) "Var") 
                (ident (binding 15 "String_var"))) 
          (args (expr ("String") (cache 4)))))))))) 
-  (at 41 
+  (at 43 
    (declare ("Text") 
     (bindings (op = (bind (binding 49 "text") ()) (expr ("String") (cache 5)))))) 
-  (at 74 
+  (at 76 
    (stmnt 
     (expr ("Text") 
      (call "_x2c_gensym_proto_string_add_update" 
       (args (expr (* "Text") 
              (op & (parens (expr ("Text") (ident (binding 49 "text")))))) 
        (expr ("Symbol") "56") (expr ("String") (cache 7))))))) 
-  (at 75 
+  (at 77 
    (declare (int) 
     (bindings 
      (op = (bind (binding 50 "native") ((dim (expr (int) (literal (int) "2"))))) 
@@ -448,7 +449,7 @@
        (composite 
         (commas (expr (int) (literal (int) "1")) 
          (expr (int) (literal (int) "2"))))))))) 
-  (at 44 
+  (at 46 
    (stmnt 
     (expr (int) 
      (op += 
@@ -458,14 +459,14 @@
       (expr (int) 
        (index (expr ((dim ("2")) int) (ident (binding 50 "native"))) 
         (expr (int) (literal (int) "1")))))))) 
-  (at 45 
+  (at 47 
    (stmnt 
     (expr (int) 
      (postfix ++ 
       (expr (int) 
        (index (expr ((dim ("2")) int) (ident (binding 50 "native"))) 
         (expr (int) (literal (int) "1")))))))) 
-  (at 46 
+  (at 48 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 51 "printf"))) 
@@ -501,7 +502,7 @@
        (expr (int) 
         (call (expr ((func (("Var"))) (int)) (ident (binding 52 "Var_int"))) 
          (args (expr ("Var") (ident (binding 41 "postfix"))))))))))) 
-  (at 47 
+  (at 49 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 51 "printf"))) 
@@ -532,7 +533,7 @@
        (expr (int) 
         (index (expr ((dim ("2")) int) (ident (binding 50 "native"))) 
          (expr (int) (literal (int) "1"))))))))) 
-  (at 48 
+  (at 50 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 51 "printf"))) 
@@ -540,7 +541,7 @@
        (expr (int) (ident (binding 6 "base_calls"))) 
        (expr (int) (ident (binding 7 "selector_calls"))) 
        (expr (int) (ident (binding 8 "rhs_calls")))))))) 
-  (at 76 (return (expr (int) (literal (int) "0"))))))
+  (at 78 (return (expr (int) (literal (int) "0"))))))
 
 (function (static "String") 
  (bind (binding 54 "_x2c_gensym_proto_string_add_update") 
@@ -551,7 +552,7 @@
        (*))) (param ("Symbol") (bind (binding 56 "_x2c_gensym_macro_op_0") ())) 
      (param ("String") (bind (binding 57 "_x2c_gensym_macro_rhs_0") ())))))) 
  (block 
-  (at 78 
+  (at 80 
    (stmnt 
     (expr (volatile "String") 
      (op = (expr (volatile "String") 
@@ -568,7 +569,7 @@
                  (ident (binding 55 "_x2c_gensym_macro_lhs_0"))) 
                 (expr (int) (literal (int) "0")))) 
          (expr ("String") (ident (binding 57 "_x2c_gensym_macro_rhs_0")))))))))) 
-  (at 79 
+  (at 81 
    (return 
     (expr (volatile "String") 
      (index 

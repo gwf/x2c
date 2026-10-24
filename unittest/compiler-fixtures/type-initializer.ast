@@ -16,22 +16,22 @@
 
 (function (static int) 
  (bind (binding 6 "setup") ((fnmod (params (param (void) (bind () ())))))) 
- (block (at 9 (return (int) (expr (int) (literal (int) "42"))))))
+ (block (at 11 (return (int) (expr (int) (literal (int) "42"))))))
 
 (function (void) 
  (bind (binding 7 "InitializerFixture_initialize") 
   ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 10 
+  (at 12 
    (stmnt (expr (int) (postfix ++ (expr (int) (ident (binding 2 "calls"))))))) 
-  (at 11 
+  (at 13 
    (stmnt 
     (expr (int) 
      (op = (expr (int) (ident (binding 3 "ready"))) 
       (expr (int) 
        (call (expr ((func ((void))) int) (ident (binding 6 "setup"))) 
         (args (expr (void) ())))))))) 
-  (at 12 
+  (at 14 
    (stmnt 
     (expr ("String") 
      (op = (expr ("String") (ident (binding 4 "label"))) 
@@ -40,13 +40,13 @@
 (function (int) 
  (bind (binding 8 "main") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 13 
+  (at 15 
    (stmnt 
     (expr (void) 
      (call (expr ((func ((void))) void) 
             (ident (binding 7 "InitializerFixture_initialize"))) 
       (args (expr (void) ())))))) 
-  (at 14 
+  (at 16 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 9 "printf"))) 
@@ -54,7 +54,7 @@
        (expr (int) (ident (binding 2 "calls"))) 
        (expr (int) (ident (binding 3 "ready"))) 
        (expr ("String") (ident (binding 4 "label")))))))) 
-  (at 15 
+  (at 17 
    (return (int) 
     (expr (int) 
      (op ? (expr (int) 

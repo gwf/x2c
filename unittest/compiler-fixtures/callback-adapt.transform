@@ -29,7 +29,7 @@
 (function (static "String") 
  (bind (binding 10 "echo") 
   ((fnmod (params (param ("String") (bind (binding 11 "value") ())))))) 
- (block (at 29 (return (expr ("String") (ident (binding 11 "value")))))))
+ (block (at 31 (return (expr ("String") (ident (binding 11 "value")))))))
 
 (declare (static "Callbacks") 
  (bindings 
@@ -64,15 +64,15 @@
 (function (int) 
  (bind (binding 19 "main") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 16 
+  (at 18 
    (stmnt 
     (expr (void) 
      (call (expr ((func ((void))) void) (ident (binding 20 "Scope_retain"))) 
       (args (expr (void) ())))))) 
-  (at 17 
+  (at 19 
    (declare ("String") 
     (bindings (op = (bind (binding 21 "text") ()) (expr ("String") (cache 0)))))) 
-  (at 30 
+  (at 32 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 22 "boxed_text") ()) 
@@ -91,14 +91,14 @@
       (expr ("Var") 
        (cast ("Var") 
         (expr ("Var") (composite (commas (expr (int) (literal (int) "0"))))))))))) 
-  (at 31 
+  (at 33 
    (declare ("Array") 
     (bindings 
      (op = (bind (binding 28 "values") ()) 
       (expr ("Array") 
        (call (expr ((func ((void))) "Array") (ident (binding 29 "Array_new"))) 
         (args (expr (void) ())))))))) 
-  (at 32 
+  (at 34 
    (stmnt 
     (expr ("Var") 
      (call (expr ((func (("Array") ("Var"))) ("Var")) 
@@ -107,15 +107,15 @@
        (expr ("Var") 
         (call (expr ((func ((int))) "Var") (ident (binding 31 "int_var"))) 
          (args (expr (int) (literal (int) "42")))))))))) 
-  (at 33 
+  (at 35 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 32 "boxed_values") ()) 
       (expr ("Var") 
        (call (expr ((func (("Array"))) "Var") (ident (binding 33 "Array_var"))) 
         (args (expr ("Array") (ident (binding 28 "values")))))))))) 
-  (at 22 (declare (struct "Iter") (bindings (bind (binding 34 "storage") ())))) 
-  (at 23 
+  (at 24 (declare (struct "Iter") (bindings (bind (binding 34 "storage") ())))) 
+  (at 25 
    (declare ("Iter") 
     (bindings 
      (op = (bind (binding 35 "iter") ()) 
@@ -128,8 +128,8 @@
         (args (expr ("Var") (ident (binding 32 "boxed_values"))) 
          (expr (* struct "Iter") 
           (op & (expr (struct "Iter") (ident (binding 34 "storage")))))))))))) 
-  (at 24 (declare ("Var") (bindings (bind (binding 36 "item") ())))) 
-  (at 34 
+  (at 26 (declare ("Var") (bindings (bind (binding 36 "item") ())))) 
+  (at 36 
    (declare (int) 
     (bindings 
      (op = (bind (binding 37 "advanced") ()) 
@@ -139,7 +139,7 @@
         (args (expr ("Iter") (ident (binding 35 "iter"))) 
          (expr (opt-ref "Var") 
           (op & (parens (expr ("Var") (ident (binding 36 "item"))))))))))))) 
-  (at 26 
+  (at 28 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 39 "printf"))) 
@@ -192,12 +192,12 @@
           (call (expr ((func (("Var"))) (int)) (ident (binding 40 "Var_int"))) 
            (args (expr ("Var") (ident (binding 36 "item")))))) 
          (expr (int) (op - (expr (int) (literal (int) "1"))))))))))) 
-  (at 27 
+  (at 29 
    (stmnt 
     (expr (void) 
      (call (expr ((func ((void))) void) (ident (binding 41 "Scope_release"))) 
       (args (expr (void) ())))))) 
-  (at 35 (return (expr (int) (literal (int) "0"))))))
+  (at 37 (return (expr (int) (literal (int) "0"))))))
 
 (function (static "String") 
  (bind (binding 13 "_x2c_gensym_callback_adapt_0") 

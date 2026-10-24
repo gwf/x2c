@@ -4,32 +4,33 @@
 (function (static void) 
  (bind (binding 1 "raise_empty") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 9 (raise (expr ("Symbol") (literal ("Symbol") "raise-prob" raise-prob)) 
-         (args)))))
+  (at 11 
+   (raise (expr ("Symbol") (literal ("Symbol") "raise-prob" raise-prob)) 
+    (args)))))
 
 (function (int) 
  (bind (binding 2 "main") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 10 
+  (at 12 
    (stmnt 
     (expr (void) 
      (call (expr ((func ((void))) void) (ident (binding 3 "Error_initialize"))) 
       (args (expr (void) ())))))) 
-  (at 11 
+  (at 13 
    (stmnt 
     (expr (void) 
      (call (expr ((func (("Symbol") ("Symbol"))) void) 
             (ident (binding 4 "Error_policy_set"))) 
       (args (expr ("Symbol") (literal ("Symbol") "<collected>" collected)) 
        (expr ("Symbol") (literal ("Symbol") "<collect>" collect))))))) 
-  (at 12 
+  (at 14 
    (stmnt 
     (expr (void) 
      (call (expr ((func (("Symbol") ("Symbol"))) void) 
             (ident (binding 4 "Error_policy_set"))) 
       (args (expr ("Symbol") (literal ("Symbol") "<raise-prob>" raise-prob)) 
        (expr ("Symbol") (literal ("Symbol") "<collect>" collect))))))) 
-  (at 13 
+  (at 15 
    (declare (int) 
     (bindings 
      (op = (bind (binding 5 "bytes") ()) (expr (int) (literal (int) "64"))) 
@@ -37,7 +38,7 @@
       (expr (int) 
        (call (expr ((func ((void))) int) (ident (binding 7 "Error_mark"))) 
         (args (expr (void) ())))))))) 
-  (at 30 
+  (at 32 
    (block 
     (declare ("Var") 
      (bindings 
@@ -71,7 +72,7 @@
        (call (expr ((func (("Symbol"))) "Var") (ident (binding 14 "Symbol_var"))) 
         (args (expr ("Symbol") (literal ("Symbol") "operation" operation))))) 
       (expr ("Var") (ident (binding 10 "_x2c_gensym_literal_part_1"))))))) 
-  (at 31 
+  (at 33 
    (declare ("List") 
     (bindings 
      (op = (bind (binding 15 "entry") ()) 
@@ -85,7 +86,7 @@
                        (call (expr ((func ((int))) "List") 
                               (ident (binding 18 "Error_since"))) 
                         (args (expr (int) (ident (binding 6 "mark")))))))))))))))) 
-  (at 32 
+  (at 34 
    (declare ("List") 
     (bindings 
      (op = (bind (binding 19 "detail") ()) 
@@ -100,7 +101,7 @@
                   (call (expr ((func (("Symbol"))) "Var") 
                          (ident (binding 14 "Symbol_var"))) 
                    (args (expr ("Symbol") (literal ("Symbol") "<detail>" detail))))))))))))))) 
-  (at 33 
+  (at 35 
    (declare ("List") 
     (bindings 
      (op = (bind (binding 21 "location") ()) 
@@ -116,19 +117,19 @@
                          (ident (binding 14 "Symbol_var"))) 
                    (args (expr ("Symbol") 
                           (literal ("Symbol") "<location>" location))))))))))))))) 
-  (at 18 
+  (at 20 
    (declare (int) 
     (bindings 
      (op = (bind (binding 22 "empty_mark") ()) 
       (expr (int) 
        (call (expr ((func ((void))) int) (ident (binding 7 "Error_mark"))) 
         (args (expr (void) ())))))))) 
-  (at 19 
+  (at 21 
    (stmnt 
     (expr (void) 
      (call (expr ((func ((void))) void) (ident (binding 1 "raise_empty"))) 
       (args (expr (void) ())))))) 
-  (at 34 
+  (at 36 
    (declare ("List") 
     (bindings 
      (op = (bind (binding 23 "empty_entry") ()) 
@@ -142,7 +143,7 @@
                        (call (expr ((func ((int))) "List") 
                               (ident (binding 18 "Error_since"))) 
                         (args (expr (int) (ident (binding 22 "empty_mark")))))))))))))))) 
-  (at 35 
+  (at 37 
    (declare ("List") 
     (bindings 
      (op = (bind (binding 24 "empty_detail") ()) 
@@ -157,7 +158,7 @@
                   (call (expr ((func (("Symbol"))) "Var") 
                          (ident (binding 14 "Symbol_var"))) 
                    (args (expr ("Symbol") (literal ("Symbol") "<detail>" detail))))))))))))))) 
-  (at 36 
+  (at 38 
    (declare ("List") 
     (bindings 
      (op = (bind (binding 25 "empty_location") ()) 
@@ -173,7 +174,7 @@
                          (ident (binding 14 "Symbol_var"))) 
                    (args (expr ("Symbol") 
                           (literal ("Symbol") "<location>" location))))))))))))))) 
-  (at 37 
+  (at 39 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 26 "printf"))) 
@@ -271,28 +272,28 @@
                           (ident (binding 14 "Symbol_var"))) 
                     (args (expr ("Symbol") 
                            (literal ("Symbol") "<function>" function)))))))))))))))) 
-  (at 38 (return (expr (int) (literal (int) "0"))))))
+  (at 40 (return (expr (int) (literal (int) "0"))))))
 
 (function (static void) 
  (bind (binding 35 "raise_terminal") 
   ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 25 (raise (expr ("Symbol") (literal ("Symbol") "bad-arg" bad-arg)) (args)))))
+  (at 27 (raise (expr ("Symbol") (literal ("Symbol") "bad-arg" bad-arg)) (args)))))
 
 (function (static void) 
  (bind (binding 36 "raise_after_return") 
   ((fnmod (params (param (int) (bind (binding 37 "code") ())))))) 
  (block 
-  (at 26 
+  (at 28 
    (if (expr (int) (op ! (expr (int) (ident (binding 37 "code"))))) 
     (return))) 
-  (at 27 (raise (expr ("Symbol") (literal ("Symbol") "bad-arg" bad-arg)) (args)))))
+  (at 29 (raise (expr ("Symbol") (literal ("Symbol") "bad-arg" bad-arg)) (args)))))
 
 (function (static void) 
  (bind (binding 38 "raise_caught") 
   ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 29 
+  (at 31 
    (block 
     (declare ("ExceptionFrame") 
      (bindings (bind (binding 39 "_x2c_gensym_exception_frame_0") ()))) 
@@ -370,7 +371,7 @@
                                 (binding 39 "_x2c_gensym_exception_frame_0"))) 
                          ("env"))) (expr (int) (literal (int) "0"))))))) 
      (block 
-      (at 28 
+      (at 30 
        (raise (expr ("Symbol") (literal ("Symbol") "bad-arg" bad-arg)) 
         (args)))) 
      (block 

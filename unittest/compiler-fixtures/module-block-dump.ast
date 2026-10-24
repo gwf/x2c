@@ -15,4 +15,4 @@
 
 (function (int) 
  (bind (binding 3 "main") ((fnmod (params (param (void) (bind () ())))))) 
- (block (at 9 (return (int) (expr (int) (literal (int) "0"))))))
+ (block (at 11 (return (int) (expr (int) (literal (int) "0"))))))

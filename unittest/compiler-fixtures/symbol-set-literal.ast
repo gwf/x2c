@@ -13,17 +13,18 @@
 (function (static "SymbolSet") 
  (bind (binding 2 "same_values") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 9 (return ("SymbolSet") 
-         (expr ("SymbolSet") 
-          (cast (decl ("SymbolSet") (bindings (bind () ()))) 
-           (expr (* char) 
-            (literal (* char) 
-             "\"\\001\\000\\000\\000\\004\\000\\000\\000\\001\\000\\000\\000\\033\\126\\160\\042\\037\\016\\242\\101\\001\\003\\001\\000\\001\\000\\336\\063\\000\\000\\000\\000\\000\\000\\144\\020\\000\\000\\000\\000\\000\\000\\331\\141\\373\\213\\114\\176\\003\\000\\160\\255\\021\\000\\000\\000\\000\\000\""))))))))
+  (at 11 
+   (return ("SymbolSet") 
+    (expr ("SymbolSet") 
+     (cast (decl ("SymbolSet") (bindings (bind () ()))) 
+      (expr (* char) 
+       (literal (* char) 
+        "\"\\001\\000\\000\\000\\004\\000\\000\\000\\001\\000\\000\\000\\033\\126\\160\\042\\037\\016\\242\\101\\001\\003\\001\\000\\001\\000\\336\\063\\000\\000\\000\\000\\000\\000\\144\\020\\000\\000\\000\\000\\000\\000\\331\\141\\373\\213\\114\\176\\003\\000\\160\\255\\021\\000\\000\\000\\000\\000\""))))))))
 
 (function (int) 
  (bind (binding 3 "main") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 10 
+  (at 12 
    (declare ("SymbolSet") 
     (bindings 
      (op = (bind (binding 4 "empty") ()) 
@@ -32,12 +33,12 @@
         (expr (* char) 
          (literal (* char) 
           "\"\\001\\000\\000\\000\\000\\000\\000\\000\\000\\000\\000\\000\\000\\000\\000\\000\\000\\000\\000\\000\"")))))))) 
-  (at 11 
+  (at 13 
    (declare ("List") 
     (bindings 
      (op = (bind (binding 5 "ordinary") ()) 
       (expr ("List") (expr ("List") (cache 3))))))) 
-  (at 12 
+  (at 14 
    (declare (int) 
     (bindings 
      (op = (bind (binding 6 "ordered") ()) 
@@ -132,7 +133,7 @@
                     (args (expr (void) ())))) 
              (expr ("Symbol") (literal ("Symbol") "<odd/val>" odd/val))))) 
           (expr (int) (literal (int) "2")))))))))) 
-  (at 13 
+  (at 15 
    (declare (int) 
     (bindings 
      (op = (bind (binding 10 "membership") ()) 
@@ -168,7 +169,7 @@
             (args (expr ("SymbolSet") (ident (binding 4 "empty"))) 
              (expr ("Symbol") (literal ("Symbol") "<foo>" foo))))) 
           (expr (int) (op - (expr (int) (literal (int) "1")))))))))))) 
-  (at 14 
+  (at 16 
    (declare (int) 
     (bindings 
      (op = (bind (binding 12 "atoms") ()) 
@@ -188,12 +189,12 @@
                         (ident (binding 14 "List_getindex"))) 
                   (args (expr ("List") (ident (binding 5 "ordinary"))) 
                    (expr (int) (literal (int) "1")))))))))))))) 
-  (at 15 
+  (at 17 
    (declare (int) 
     (bindings 
      (op = (bind (binding 15 "iteration") ()) 
       (expr (int) (literal (int) "0")))))) 
-  (at 23 
+  (at 25 
    (block (declare ("Symbol") (bindings (bind (binding 16 "symbol") ()))) 
     (declare ("Iter") 
      (bindings 
@@ -209,7 +210,7 @@
                     (composite (commas (expr (int) (literal (int) "0"))))))))))))))) 
     (declare ("Var") 
      (bindings (bind (binding 19 "_x2c_gensym_macro_item_0") ()))) 
-    (at 17 
+    (at 19 
      (while 
       (expr (int) 
        (call (expr ((func (("Iter") (opt-ref "Var"))) int) 
@@ -233,7 +234,7 @@
                    (args (expr ("SymbolSet") (ident (binding 1 "values"))) 
                     (expr ("Symbol") (ident (binding 16 "symbol")))))) 
             (expr (int) (literal (int) "1")))))))))))) 
-  (at 24 
+  (at 26 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 21 "printf"))) 
@@ -242,7 +243,7 @@
        (expr (int) (ident (binding 10 "membership"))) 
        (expr (int) (ident (binding 12 "atoms"))) 
        (expr (int) (ident (binding 15 "iteration")))))))) 
-  (at 25 
+  (at 27 
    (return (int) 
     (expr (int) 
      (op ? (expr (int) 

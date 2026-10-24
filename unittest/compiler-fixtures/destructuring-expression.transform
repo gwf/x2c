@@ -6,15 +6,16 @@
 (function (int) 
  (bind (binding 2 "main") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 9 (declare ("Values") 
-         (bindings 
-          (op = (bind (binding 3 "values") ()) 
-           (expr ("List") (expr ("List") (cache 3))))))) 
-  (at 10 
+  (at 11 
+   (declare ("Values") 
+    (bindings 
+     (op = (bind (binding 3 "values") ()) 
+      (expr ("List") (expr ("List") (cache 3))))))) 
+  (at 12 
    (declare ("Var") 
     (bindings (bind (binding 4 "a") ()) (bind (binding 5 "b") ()) 
      (bind (binding 6 "c") ()) (bind (binding 7 "d") ())))) 
-  (at 14 
+  (at 16 
    (declare ("Values") 
     (bindings 
      (op = (bind (binding 8 "result") ()) 
@@ -83,7 +84,7 @@
          (stmnt 
           (expr ("Values") 
            (ident (binding 9 "_x2c_gensym_destructure_result_0"))))))))))) 
-  (at 15 
+  (at 17 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 14 "printf"))) 
@@ -103,7 +104,7 @@
        (expr (int) 
         (op == (expr ("Values") (ident (binding 8 "result"))) 
          (expr ("Values") (ident (binding 3 "values")))))))))) 
-  (at 16 
+  (at 18 
    (return 
     (expr (int) 
      (op ? (expr (int) 

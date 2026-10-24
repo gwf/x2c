@@ -4,11 +4,12 @@
 (function (int) 
  (bind (binding 1 "main") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 9 (declare ("List") 
-         (bindings 
-          (op = (bind (binding 2 "values") ()) 
-           (expr ("List") (expr ("List") (cache 5))))))) 
-  (at 16 
+  (at 11 
+   (declare ("List") 
+    (bindings 
+     (op = (bind (binding 2 "values") ()) 
+      (expr ("List") (expr ("List") (cache 5))))))) 
+  (at 18 
    (declare ("List") 
     (bindings 
      (op = (bind (binding 3 "doubled") ()) 
@@ -17,12 +18,12 @@
               (ident (binding 4 "List_map"))) 
         (args (expr ("List") (ident (binding 2 "values"))) 
          (expr ("Func") (ident (binding 5 "_x2c_gensym_func_handle_0")))))))))) 
-  (at 11 
+  (at 13 
    (declare ("List") 
     (bindings 
      (op = (bind (binding 6 "nested") ()) 
       (expr ("List") (expr ("List") (cache 13))))))) 
-  (at 17 
+  (at 19 
    (declare ("List") 
     (bindings 
      (op = (bind (binding 7 "heads") ()) 
@@ -31,7 +32,7 @@
               (ident (binding 4 "List_map"))) 
         (args (expr ("List") (ident (binding 6 "nested"))) 
          (expr ("Func") (ident (binding 8 "_x2c_gensym_func_handle_1")))))))))) 
-  (at 13 
+  (at 15 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 9 "printf"))) 
@@ -57,7 +58,7 @@
                        (ident (binding 11 "List_getindex"))) 
                  (args (expr ("List") (ident (binding 3 "doubled"))) 
                   (expr (int) (literal (int) "2"))))))))))))) 
-  (at 14 
+  (at 16 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 9 "printf"))) 
@@ -76,13 +77,13 @@
                        (ident (binding 11 "List_getindex"))) 
                  (args (expr ("List") (ident (binding 7 "heads"))) 
                   (expr (int) (literal (int) "1"))))))))))))) 
-  (at 18 (return (expr (int) (literal (int) "0"))))))
+  (at 20 (return (expr (int) (literal (int) "0"))))))
 
 (function (static "Var") 
  (bind (binding 12 "_x2c_gensym_lambda_0") 
   ((fnmod (params (param ("Var") (bind (binding 13 "value") ())))))) 
  (block 
-  (at 10 
+  (at 12 
    (stmnt 
     (return 
      (expr ("Var") 
@@ -129,7 +130,7 @@
  (bind (binding 21 "_x2c_gensym_lambda_1") 
   ((fnmod (params (param ("Var") (bind (binding 22 "value") ())))))) 
  (block 
-  (at 19 
+  (at 21 
    (stmnt 
     (return 
      (expr ("Var") 

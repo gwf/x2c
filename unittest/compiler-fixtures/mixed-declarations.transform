@@ -30,18 +30,18 @@
 (function (int) 
  (bind (binding 10 "main") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 22 
+  (at 24 
    (declare (int) 
     (bindings (op = (bind (binding 11 "i") ()) (expr (int) (literal (int) "3")))))) 
-  (at 23 
+  (at 25 
    (declare (float) 
     (bindings 
      (op = (bind (binding 12 "x") ()) (expr (double) (literal (double) "4.5")))))) 
-  (at 24 
+  (at 26 
    (declare (char) 
     (bindings 
      (op = (bind (binding 13 "c") ()) (expr (char) (literal (char) "\'b\'")))))) 
-  (at 17 
+  (at 19 
    (declare ("MixedFields") 
     (bindings 
      (op = (bind (binding 14 "fields") ()) 
@@ -50,23 +50,23 @@
         (commas (expr (int) (literal (int) "5")) 
          (expr (double) (literal (double) "6.5")) 
          (expr (char) (literal (char) "\'f\'"))))))))) 
-  (at 11 
+  (at 13 
    (declare (int) 
     (bindings 
      (op = (bind (binding 15 "ordinary") ()) (expr (int) (literal (int) "7"))) 
      (op = (bind (binding 16 "MixedValue") ()) (expr (int) (literal (int) "8")))))) 
-  (at 20 
+  (at 22 
    (block 
-    (at 18 
+    (at 20 
      (declare (int) 
       (bindings 
        (op = (bind (binding 17 "count") ()) (expr (int) (literal (int) "9")))))) 
-    (at 19 
+    (at 21 
      (declare ("MixedValues") 
       (bindings 
        (op = (bind (binding 18 "values") ()) 
         (expr ("List") (expr ("List") (cache 1))))))) 
-    (at 13 
+    (at 15 
      (stmnt 
       (expr () 
        (call (expr () (ident (binding 19 "printf"))) 
@@ -79,7 +79,7 @@
                   (call (expr ((func (("List"))) ("Var")) 
                          (ident (binding 21 "List_car"))) 
                    (args (expr ("MixedValues") (ident (binding 18 "values")))))))))))))))) 
-  (at 15 
+  (at 17 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 22 "printf"))) 
@@ -103,4 +103,4 @@
        (expr (int) 
         (op + (expr (int) (ident (binding 15 "ordinary"))) 
          (expr (int) (ident (binding 16 "MixedValue")))))))))) 
-  (at 21 (return (expr (int) (literal (int) "0"))))))
+  (at 23 (return (expr (int) (literal (int) "0"))))))

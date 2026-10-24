@@ -13,14 +13,15 @@
     (params (param (int) (bind (binding 4 "x") ())) 
      (param (int) (bind (binding 5 "y") ())))))) 
  (block 
-  (at 9 (declare (struct "MetaPoint") 
-         (bindings 
-          (op = (bind (binding 6 "result") ()) 
-           (expr () 
-            (composite 
-             (commas (dotinit ("x") (expr (int) (ident (binding 4 "x")))) 
-              (dotinit ("y") (expr (int) (ident (binding 5 "y"))))))))))) 
-  (at 10 
+  (at 11 
+   (declare (struct "MetaPoint") 
+    (bindings 
+     (op = (bind (binding 6 "result") ()) 
+      (expr () 
+       (composite 
+        (commas (dotinit ("x") (expr (int) (ident (binding 4 "x")))) 
+         (dotinit ("y") (expr (int) (ident (binding 5 "y"))))))))))) 
+  (at 12 
    (return (struct "MetaPoint") 
     (expr (struct "MetaPoint") (ident (binding 6 "result")))))))
 
@@ -28,14 +29,14 @@
  (bind (binding 7 "mr_sum") 
   ((fnmod (params (param (struct "MetaPoint") (bind (binding 8 "point") ())))))) 
  (block 
-  (at 11 
+  (at 13 
    (stmnt 
     (expr (int) 
      (op += 
       (expr (int) 
        (op . (expr (struct "MetaPoint") (ident (binding 8 "point"))) 
         ("x"))) (expr (int) (literal (int) "1")))))) 
-  (at 12 
+  (at 14 
    (return (int) 
     (expr (int) 
      (op + (expr (int) 
@@ -49,7 +50,7 @@
  (bind (binding 9 "mr_probe") 
   ((fnmod (params (param (int) (bind (binding 10 "seed") ())))))) 
  (block 
-  (at 13 
+  (at 15 
    (declare (struct "MetaPoint") 
     (bindings 
      (op = (bind (binding 11 "original") ()) 
@@ -60,18 +61,18 @@
          (expr (int) 
           (op + (expr (int) (ident (binding 10 "seed"))) 
            (expr (int) (literal (int) "1"))))))))))) 
-  (at 14 
+  (at 16 
    (declare (struct "MetaPoint") 
     (bindings 
      (op = (bind (binding 12 "copy") ()) 
       (expr (struct "MetaPoint") (ident (binding 11 "original"))))))) 
-  (at 15 
+  (at 17 
    (stmnt 
     (expr (int) 
      (op = (expr (int) 
             (op . (expr (struct "MetaPoint") (ident (binding 12 "copy"))) 
              ("x"))) (expr (int) (literal (int) "20")))))) 
-  (at 16 
+  (at 18 
    (declare (int) 
     (bindings 
      (op = (bind (binding 13 "field") (*)) 
@@ -79,24 +80,24 @@
        (op & (expr (int) 
               (op . (expr (struct "MetaPoint") (ident (binding 11 "original"))) 
                ("y"))))))))) 
-  (at 17 
+  (at 19 
    (stmnt 
     (expr (int) 
      (op += (expr (int) (op * (expr (* int) (ident (binding 13 "field"))))) 
       (expr (int) (literal (int) "2")))))) 
-  (at 18 
+  (at 20 
    (declare (struct "MetaPoint") 
     (bindings 
      (op = (bind (binding 14 "address") (*)) 
       (expr (* struct "MetaPoint") 
        (op & (expr (struct "MetaPoint") (ident (binding 12 "copy"))))))))) 
-  (at 19 
+  (at 21 
    (stmnt 
     (expr (int) 
      (op = (expr (int) 
             (op -> (expr (* struct "MetaPoint") (ident (binding 14 "address"))) 
              ("y"))) (expr (int) (literal (int) "30")))))) 
-  (at 20 
+  (at 22 
    (return (int) 
     (expr (int) 
      (op + (expr (int) 
@@ -132,12 +133,12 @@
     (params (param (int) (bind (binding 16 "argc") ())) 
      (param (char) (bind (binding 17 "argv") (* *))))))) 
  (block 
-  (at 21 
+  (at 23 
    (stmnt 
     (expr (void) 
      (cast (decl (void) (bindings (bind () ()))) 
       (expr (* * char) (ident (binding 17 "argv"))))))) 
-  (at 22 
+  (at 24 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 18 "printf"))) 
@@ -148,4 +149,4 @@
          (args (expr (int) 
                 (op + (expr (int) (ident (binding 16 "argc"))) 
                  (expr (int) (literal (int) "2")))))))))))) 
-  (at 23 (return (int) (expr (int) (literal (int) "0"))))))
+  (at 25 (return (int) (expr (int) (literal (int) "0"))))))

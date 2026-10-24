@@ -13,7 +13,7 @@
  (bind (binding 2 "Box_var") 
   ((fnmod (params (param ("Box") (bind (binding 3 "value") ())))))) 
  (block 
-  (at 10 
+  (at 12 
    (return ("Var") 
     (expr ("Var") 
      (call (expr ((func (("Symbol") (...))) "Var") 
@@ -24,7 +24,7 @@
 (function (int) 
  (bind (binding 5 "main") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 11 
+  (at 13 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 6 "printf"))) 
@@ -32,4 +32,4 @@
        (expr ("Var") 
         (call (expr ((func (("Box"))) "Var") (ident (binding 2 "Box_var"))) 
          (args (expr (int) (literal (int) "42")))))))))) 
-  (at 12 (return (int) (expr (int) (literal (int) "0"))))))
+  (at 14 (return (int) (expr (int) (literal (int) "0"))))))

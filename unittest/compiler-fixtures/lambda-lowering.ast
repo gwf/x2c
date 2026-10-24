@@ -4,11 +4,12 @@
 (function (int) 
  (bind (binding 1 "main") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 9 (declare ("List") 
-         (bindings 
-          (op = (bind (binding 2 "values") ()) 
-           (expr ("List") (expr ("List") (cache 5))))))) 
-  (at 10 
+  (at 11 
+   (declare ("List") 
+    (bindings 
+     (op = (bind (binding 2 "values") ()) 
+      (expr ("List") (expr ("List") (cache 5))))))) 
+  (at 12 
    (declare ("List") 
     (bindings 
      (op = (bind (binding 3 "doubled") ()) 
@@ -24,12 +25,12 @@
                           (ident (binding 6 "Var_int"))) 
                     (args (expr ("Var") (ident (binding 5 "value")))))) 
              (expr (int) (literal (int) "2"))))))))))))) 
-  (at 11 
+  (at 13 
    (declare ("List") 
     (bindings 
      (op = (bind (binding 7 "nested") ()) 
       (expr ("List") (expr ("List") (cache 13))))))) 
-  (at 12 
+  (at 14 
    (declare ("List") 
     (bindings 
      (op = (bind (binding 8 "heads") ()) 
@@ -46,7 +47,7 @@
                      (ident (binding 10 "Var_list"))) 
                (args (expr ("Var") (ident (binding 9 "value")))))) 
              (expr (int) (literal (int) "0"))))))))))))) 
-  (at 13 
+  (at 15 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 11 "printf"))) 
@@ -72,7 +73,7 @@
                        (ident (binding 12 "List_getindex"))) 
                  (args (expr ("List") (ident (binding 3 "doubled"))) 
                   (expr (int) (literal (int) "2"))))))))))))) 
-  (at 14 
+  (at 16 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 11 "printf"))) 
@@ -91,4 +92,4 @@
                        (ident (binding 12 "List_getindex"))) 
                  (args (expr ("List") (ident (binding 8 "heads"))) 
                   (expr (int) (literal (int) "1"))))))))))))) 
-  (at 15 (return (int) (expr (int) (literal (int) "0"))))))
+  (at 17 (return (int) (expr (int) (literal (int) "0"))))))

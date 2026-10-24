@@ -13,7 +13,7 @@
  (bind (binding 5 "make_alias") 
   ((fnmod (params (param (long) (bind (binding 6 "value") ())))))) 
  (block 
-  (at 37 
+  (at 39 
    (return 
     (expr ("Var") 
      (call "Var_box_long" (args (expr (long) (ident (binding 6 "value"))))))))))
@@ -22,19 +22,19 @@
  (bind (binding 7 "pass_alias") 
   ((fnmod (params (param ("Dynamic") (bind (binding 8 "value") ())))))) 
  (block 
-  (at 10 
+  (at 12 
    (stmnt 
     (expr (int) (postfix ++ (expr (int) (ident (binding 3 "pass_calls"))))))) 
-  (at 38 (return (expr ("Dynamic") (ident (binding 8 "value")))))))
+  (at 40 (return (expr ("Dynamic") (ident (binding 8 "value")))))))
 
 (function (static long) 
  (bind (binding 9 "take_alias") 
   ((fnmod (params (param ("DynamicAlias") (bind (binding 10 "value") ())))))) 
  (block 
-  (at 12 
+  (at 14 
    (stmnt 
     (expr (int) (postfix ++ (expr (int) (ident (binding 4 "take_calls"))))))) 
-  (at 39 
+  (at 41 
    (return 
     (expr (long) 
      (call "Var_long" 
@@ -46,25 +46,25 @@
 (function (int) 
  (bind (binding 11 "main") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 14 
+  (at 16 
    (declare (long) 
     (bindings 
      (op = (bind (binding 12 "precise") ()) 
       (expr (long) (literal (long) "9007199254740993L")))))) 
-  (at 40 
+  (at 42 
    (declare ("Dynamic") 
     (bindings 
      (op = (bind (binding 13 "initialized") ()) 
       (expr ("Var") 
        (call "Var_box_long" (args (expr (long) (ident (binding 12 "precise")))))))))) 
-  (at 41 
+  (at 43 
    (declare ("DynamicAlias") 
     (bindings 
      (op = (bind (binding 14 "assigned") ()) 
       (expr ("Var") 
        (call "Var_new" 
         (args (expr ("Symbol") "3453797") (expr (int) (literal (int) "0"))))))))) 
-  (at 17 
+  (at 19 
    (stmnt 
     (expr ("DynamicAlias") 
      (op = (expr ("DynamicAlias") (ident (binding 14 "assigned"))) 
@@ -73,7 +73,7 @@
         (args (expr (long) 
                (op + (expr (long) (ident (binding 12 "precise"))) 
                 (expr (int) (literal (int) "1"))))))))))) 
-  (at 42 
+  (at 44 
    (declare ("DynamicAlias") 
     (bindings 
      (op = (bind (binding 15 "argument") ()) 
@@ -88,7 +88,7 @@
        (call (expr ((func ((long))) "DynamicAlias") 
               (ident (binding 5 "make_alias"))) 
         (args (expr (long) (ident (binding 12 "precise")))))))))) 
-  (at 43 
+  (at 45 
    (declare (long) 
     (bindings 
      (op = (bind (binding 17 "direct") ()) 
@@ -103,21 +103,21 @@
        (call (expr ((func (("DynamicAlias"))) long) 
               (ident (binding 9 "take_alias"))) 
         (args (expr ("Dynamic") (ident (binding 13 "initialized")))))))))) 
-  (at 48 
+  (at 50 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 19 "printf"))) 
       (args (expr (* char) 
              (literal (* char) "\"crossings=%d,%d,%d,%d,%d,%d calls=%d\\n\"")) 
        (expr (int) 
-        (at 44 
+        (at 46 
          (call (expr (macro-expr) (ident (binding-name "x2c_var_equal"))) 
           (args (expr ("Dynamic") (ident (binding 13 "initialized"))) 
            (expr ("Var") 
             (call (expr ((func ((long))) "Var") (ident (binding 20 "long_var"))) 
              (args (expr (long) (ident (binding 12 "precise")))))))))) 
        (expr (int) 
-        (at 45 
+        (at 47 
          (call (expr (macro-expr) (ident (binding-name "x2c_var_equal"))) 
           (args (expr ("DynamicAlias") (ident (binding 14 "assigned"))) 
            (expr ("Var") 
@@ -126,14 +126,14 @@
                     (op + (expr (long) (ident (binding 12 "precise"))) 
                      (expr (int) (literal (int) "1"))))))))))) 
        (expr (int) 
-        (at 46 
+        (at 48 
          (call (expr (macro-expr) (ident (binding-name "x2c_var_equal"))) 
           (args (expr ("DynamicAlias") (ident (binding 15 "argument"))) 
            (expr ("Var") 
             (call (expr ((func ((long))) "Var") (ident (binding 20 "long_var"))) 
              (args (expr (long) (ident (binding 12 "precise")))))))))) 
        (expr (int) 
-        (at 47 
+        (at 49 
          (call (expr (macro-expr) (ident (binding-name "x2c_var_equal"))) 
           (args (expr ("DynamicAlias") (ident (binding 16 "returned"))) 
            (expr ("Var") 
@@ -148,7 +148,7 @@
        (expr (int) 
         (op + (expr (int) (ident (binding 3 "pass_calls"))) 
          (expr (int) (ident (binding 4 "take_calls")))))))))) 
-  (at 59 
+  (at 61 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 19 "printf"))) 
@@ -156,24 +156,24 @@
              (literal (* char) 
               "\"compare=%d,%d,%d,%d,%d,%d,%d,%d mixed=%d,%d\\n\"")) 
        (expr (int) 
-        (at 49 
+        (at 51 
          (call (expr (macro-expr) (ident (binding-name "x2c_var_equal"))) 
           (args (expr ("DynamicAlias") (ident (binding 16 "returned"))) 
            (expr ("Dynamic") (ident (binding 13 "initialized"))))))) 
        (expr (int) 
-        (at 50 
+        (at 52 
          (expr (int) 
           (op ! (expr (macro-expr) 
                  (call (expr (macro-expr) (ident (binding-name "x2c_var_equal"))) 
                   (args (expr ("DynamicAlias") (ident (binding 16 "returned"))) 
                    (expr ("DynamicAlias") (ident (binding 14 "assigned")))))))))) 
        (expr (int) 
-        (at 51 
+        (at 53 
          (call (expr (macro-expr) (ident (binding-name "x2c_var_identical"))) 
           (args (expr ("DynamicAlias") (ident (binding 16 "returned"))) 
            (expr ("Dynamic") (ident (binding 13 "initialized"))))))) 
        (expr (int) 
-        (at 52 
+        (at 54 
          (expr (int) 
           (op ! (expr (macro-expr) 
                  (call (expr (macro-expr) 
@@ -181,14 +181,14 @@
                   (args (expr ("DynamicAlias") (ident (binding 16 "returned"))) 
                    (expr ("Dynamic") (ident (binding 13 "initialized")))))))))) 
        (expr (int) 
-        (at 53 
+        (at 55 
          (expr (int) 
           (op < (call "x2c_var_order" 
                  (args (expr ("DynamicAlias") (ident (binding 16 "returned"))) 
                   (expr ("DynamicAlias") (ident (binding 14 "assigned"))))) 
            (expr (int) (literal (int) "0")))))) 
        (expr (int) 
-        (at 54 
+        (at 56 
          (expr (int) 
           (op <= 
            (call "x2c_var_order" 
@@ -196,14 +196,14 @@
              (expr ("Dynamic") (ident (binding 13 "initialized"))))) 
            (expr (int) (literal (int) "0")))))) 
        (expr (int) 
-        (at 55 
+        (at 57 
          (expr (int) 
           (op > (call "x2c_var_order" 
                  (args (expr ("DynamicAlias") (ident (binding 14 "assigned"))) 
                   (expr ("DynamicAlias") (ident (binding 16 "returned"))))) 
            (expr (int) (literal (int) "0")))))) 
        (expr (int) 
-        (at 56 
+        (at 58 
          (expr (int) 
           (op >= 
            (call "x2c_var_order" 
@@ -211,14 +211,14 @@
              (expr ("DynamicAlias") (ident (binding 16 "returned"))))) 
            (expr (int) (literal (int) "0")))))) 
        (expr (int) 
-        (at 57 
+        (at 59 
          (call (expr (macro-expr) (ident (binding-name "x2c_var_equal"))) 
           (args (expr ("DynamicAlias") (ident (binding 15 "argument"))) 
            (expr ("Var") 
             (call (expr ((func ((long))) "Var") (ident (binding 20 "long_var"))) 
              (args (expr (long) (ident (binding 12 "precise")))))))))) 
        (expr (int) 
-        (at 58 
+        (at 60 
          (expr (int) 
           (op < (call "x2c_var_order" 
                  (args (expr ("Var") 
@@ -227,4 +227,4 @@
                          (args (expr (long) (ident (binding 12 "precise")))))) 
                   (expr ("DynamicAlias") (ident (binding 14 "assigned"))))) 
            (expr (int) (literal (int) "0"))))))))))) 
-  (at 60 (return (expr (int) (literal (int) "0"))))))
+  (at 62 (return (expr (int) (literal (int) "0"))))))

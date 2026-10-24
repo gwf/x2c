@@ -156,12 +156,13 @@
 (function (int) 
  (bind (binding 21 "main") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 9 (stmnt 
-         (expr () 
-          (call (expr () (ident (binding 22 "printf"))) 
-           (args (expr (* char) (literal (* char) "\"%s\\n\"")) 
-            (expr ("String") (ident (binding 1 "path")))))))) 
-  (at 10 
+  (at 11 
+   (stmnt 
+    (expr () 
+     (call (expr () (ident (binding 22 "printf"))) 
+      (args (expr (* char) (literal (* char) "\"%s\\n\"")) 
+       (expr ("String") (ident (binding 1 "path")))))))) 
+  (at 12 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 22 "printf"))) 
@@ -170,7 +171,7 @@
         (call (expr ((func (("List"))) ("String")) 
                (ident (binding 23 "List_repr"))) 
          (args (expr ("List") (ident (binding 6 "values"))))))))))) 
-  (at 11 
+  (at 13 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 22 "printf"))) 
@@ -179,7 +180,7 @@
         (call (expr ((func (("Array"))) ("String")) 
                (ident (binding 24 "Array_repr"))) 
          (args (expr ("Array") (ident (binding 7 "positions"))))))))))) 
-  (at 12 
+  (at 14 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 22 "printf"))) 
@@ -188,7 +189,7 @@
         (call (expr ((func (("Map"))) ("String")) 
                (ident (binding 25 "Map_repr"))) 
          (args (expr ("Map") (ident (binding 10 "lookup"))))))))))) 
-  (at 13 
+  (at 15 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 22 "printf"))) 
@@ -197,7 +198,7 @@
         (call (expr ((func (("Var"))) ("String")) 
                (ident (binding 26 "Var_string"))) 
          (args (expr ("Var") (ident (binding 14 "boxed_string"))))))))))) 
-  (at 14 
+  (at 16 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 22 "printf"))) 
@@ -209,7 +210,7 @@
                 (call (expr ((func (("Var"))) ("List")) 
                        (ident (binding 27 "Var_list"))) 
                  (args (expr ("Var") (ident (binding 15 "boxed_list")))))))))))))) 
-  (at 15 
+  (at 17 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 22 "printf"))) 
@@ -221,7 +222,7 @@
                 (call (expr ((func (("Var"))) ("Array")) 
                        (ident (binding 28 "Var_array"))) 
                  (args (expr ("Var") (ident (binding 17 "boxed_array")))))))))))))) 
-  (at 16 
+  (at 18 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 22 "printf"))) 
@@ -233,4 +234,4 @@
                 (call (expr ((func (("Var"))) ("Map")) 
                        (ident (binding 29 "Var_map"))) 
                  (args (expr ("Var") (ident (binding 19 "boxed_map")))))))))))))) 
-  (at 18 (return (expr (int) (literal (int) "0"))))))
+  (at 20 (return (expr (int) (literal (int) "0"))))))

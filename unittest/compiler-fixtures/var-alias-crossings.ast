@@ -13,45 +13,45 @@
  (bind (binding 5 "make_alias") 
   ((fnmod (params (param (long) (bind (binding 6 "value") ())))))) 
  (block 
-  (at 9 (return ("DynamicAlias") (expr (long) (ident (binding 6 "value")))))))
+  (at 11 (return ("DynamicAlias") (expr (long) (ident (binding 6 "value")))))))
 
 (function (static "DynamicAlias") 
  (bind (binding 7 "pass_alias") 
   ((fnmod (params (param ("Dynamic") (bind (binding 8 "value") ())))))) 
  (block 
-  (at 10 
+  (at 12 
    (stmnt 
     (expr (int) (postfix ++ (expr (int) (ident (binding 3 "pass_calls"))))))) 
-  (at 11 
+  (at 13 
    (return ("DynamicAlias") (expr ("Dynamic") (ident (binding 8 "value")))))))
 
 (function (static long) 
  (bind (binding 9 "take_alias") 
   ((fnmod (params (param ("DynamicAlias") (bind (binding 10 "value") ())))))) 
  (block 
-  (at 12 
+  (at 14 
    (stmnt 
     (expr (int) (postfix ++ (expr (int) (ident (binding 4 "take_calls"))))))) 
-  (at 13 (return (long) (expr ("DynamicAlias") (ident (binding 10 "value")))))))
+  (at 15 (return (long) (expr ("DynamicAlias") (ident (binding 10 "value")))))))
 
 (function (int) 
  (bind (binding 11 "main") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 14 
+  (at 16 
    (declare (long) 
     (bindings 
      (op = (bind (binding 12 "precise") ()) 
       (expr (long) (literal (long) "9007199254740993L")))))) 
-  (at 15 
+  (at 17 
    (declare ("Dynamic") 
     (bindings 
      (op = (bind (binding 13 "initialized") ()) 
       (expr (long) (ident (binding 12 "precise"))))))) 
-  (at 16 
+  (at 18 
    (declare ("DynamicAlias") 
     (bindings 
      (op = (bind (binding 14 "assigned") ()) (expr (int) (literal (int) "0")))))) 
-  (at 17 
+  (at 19 
    (stmnt 
     (expr ("DynamicAlias") 
      (op = (expr ("DynamicAlias") (ident (binding 14 "assigned"))) 
@@ -60,7 +60,7 @@
         (args (expr (long) 
                (op + (expr (long) (ident (binding 12 "precise"))) 
                 (expr (int) (literal (int) "1"))))))))))) 
-  (at 18 
+  (at 20 
    (declare ("DynamicAlias") 
     (bindings 
      (op = (bind (binding 15 "argument") ()) 
@@ -73,7 +73,7 @@
        (call (expr ((func ((long))) "DynamicAlias") 
               (ident (binding 5 "make_alias"))) 
         (args (expr (long) (ident (binding 12 "precise")))))))))) 
-  (at 19 
+  (at 21 
    (declare (long) 
     (bindings 
      (op = (bind (binding 17 "direct") ()) 
@@ -83,28 +83,28 @@
        (call (expr ((func (("DynamicAlias"))) long) 
               (ident (binding 9 "take_alias"))) 
         (args (expr ("Dynamic") (ident (binding 13 "initialized")))))))))) 
-  (at 24 
+  (at 26 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 19 "printf"))) 
       (args (expr (* char) 
              (literal (* char) "\"crossings=%d,%d,%d,%d,%d,%d calls=%d\\n\"")) 
        (expr (int) 
-        (at 20 
+        (at 22 
          (op == (expr ("Dynamic") (ident (binding 13 "initialized"))) 
           (expr (long) (ident (binding 12 "precise")))))) 
        (expr (int) 
-        (at 21 
+        (at 23 
          (op == (expr ("DynamicAlias") (ident (binding 14 "assigned"))) 
           (expr (long) 
            (op + (expr (long) (ident (binding 12 "precise"))) 
             (expr (int) (literal (int) "1"))))))) 
        (expr (int) 
-        (at 22 
+        (at 24 
          (op == (expr ("DynamicAlias") (ident (binding 15 "argument"))) 
           (expr (long) (ident (binding 12 "precise")))))) 
        (expr (int) 
-        (at 23 
+        (at 25 
          (op == (expr ("DynamicAlias") (ident (binding 16 "returned"))) 
           (expr (long) (ident (binding 12 "precise")))))) 
        (expr (int) 
@@ -116,7 +116,7 @@
        (expr (int) 
         (op + (expr (int) (ident (binding 3 "pass_calls"))) 
          (expr (int) (ident (binding 4 "take_calls")))))))))) 
-  (at 35 
+  (at 37 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 19 "printf"))) 
@@ -124,43 +124,43 @@
              (literal (* char) 
               "\"compare=%d,%d,%d,%d,%d,%d,%d,%d mixed=%d,%d\\n\"")) 
        (expr (int) 
-        (at 25 
+        (at 27 
          (op == (expr ("DynamicAlias") (ident (binding 16 "returned"))) 
           (expr ("Dynamic") (ident (binding 13 "initialized")))))) 
        (expr (int) 
-        (at 26 
+        (at 28 
          (op != (expr ("DynamicAlias") (ident (binding 16 "returned"))) 
           (expr ("DynamicAlias") (ident (binding 14 "assigned")))))) 
        (expr (int) 
-        (at 27 
+        (at 29 
          (op === (expr ("DynamicAlias") (ident (binding 16 "returned"))) 
           (expr ("Dynamic") (ident (binding 13 "initialized")))))) 
        (expr (int) 
-        (at 28 
+        (at 30 
          (op !== (expr ("DynamicAlias") (ident (binding 16 "returned"))) 
           (expr ("Dynamic") (ident (binding 13 "initialized")))))) 
        (expr (int) 
-        (at 29 
+        (at 31 
          (op < (expr ("DynamicAlias") (ident (binding 16 "returned"))) 
           (expr ("DynamicAlias") (ident (binding 14 "assigned")))))) 
        (expr (int) 
-        (at 30 
+        (at 32 
          (op <= (expr ("DynamicAlias") (ident (binding 16 "returned"))) 
           (expr ("Dynamic") (ident (binding 13 "initialized")))))) 
        (expr (int) 
-        (at 31 
+        (at 33 
          (op > (expr ("DynamicAlias") (ident (binding 14 "assigned"))) 
           (expr ("DynamicAlias") (ident (binding 16 "returned")))))) 
        (expr (int) 
-        (at 32 
+        (at 34 
          (op >= (expr ("Dynamic") (ident (binding 13 "initialized"))) 
           (expr ("DynamicAlias") (ident (binding 16 "returned")))))) 
        (expr (int) 
-        (at 33 
+        (at 35 
          (op == (expr ("DynamicAlias") (ident (binding 15 "argument"))) 
           (expr (long) (ident (binding 12 "precise")))))) 
        (expr (int) 
-        (at 34 
+        (at 36 
          (op < (expr (long) (ident (binding 12 "precise"))) 
           (expr ("DynamicAlias") (ident (binding 14 "assigned"))))))))))) 
-  (at 36 (return (int) (expr (int) (literal (int) "0"))))))
+  (at 38 (return (int) (expr (int) (literal (int) "0"))))))

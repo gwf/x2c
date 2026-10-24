@@ -30,7 +30,7 @@
  (bind (binding 10 "echo") 
   ((fnmod (params (param ("String") (bind (binding 11 "value") ())))))) 
  (block 
-  (at 9 (return ("String") (expr ("String") (ident (binding 11 "value")))))))
+  (at 11 (return ("String") (expr ("String") (ident (binding 11 "value")))))))
 
 (declare (static "Callbacks") 
  (bindings 
@@ -43,26 +43,26 @@
         (commas 
          (dotinit ("owner") 
           (expr ("StringCallback") 
-           (tadapt 10 
+           (tadapt 12 
             (expr ((func (("String"))) "String") 
              (ident (binding 13 "String_str")))))) 
          (dotinit ("free") 
           (expr ("StringCallback") 
-           (tadapt 11 
+           (tadapt 13 
             (expr ((func (("String"))) "String") (ident (binding 10 "echo")))))) 
          (dotinit ("symbol_compare") 
           (expr ("CompareCallback") 
-           (tadapt 12 
+           (tadapt 14 
             (expr ((func (("Symbol") ("Symbol"))) int) 
              (ident (binding 14 "Symbol_compare")))))) 
          (dotinit ("file_equal") 
           (expr ("CompareCallback") 
-           (tadapt 13 
+           (tadapt 15 
             (expr ((func (("File") ("File"))) int) 
              (ident (binding 15 "File_equal")))))) 
          (dotinit ("iter") 
           (expr ("IterCallback") 
-           (tadapt 14 
+           (tadapt 16 
             (expr ((func (("Array") ("Iter"))) "Iter") 
              (ident (binding 16 "Array_iter")))))))))))))))
 
@@ -70,21 +70,21 @@
  (bindings 
   (op = (bind (binding 17 "duplicate") ()) 
    (expr ("StringCallback") 
-    (tadapt 15 
+    (tadapt 17 
      (expr ((func (("String"))) "String") (ident (binding 13 "String_str"))))))))
 
 (function (int) 
  (bind (binding 18 "main") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 16 
+  (at 18 
    (stmnt 
     (expr (void) 
      (call (expr ((func ((void))) void) (ident (binding 19 "Scope_retain"))) 
       (args (expr (void) ())))))) 
-  (at 17 
+  (at 19 
    (declare ("String") 
     (bindings (op = (bind (binding 20 "text") ()) (expr ("String") (cache 0)))))) 
-  (at 18 
+  (at 20 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 21 "boxed_text") ()) 
@@ -97,23 +97,23 @@
       (expr ("Var") 
        (cast (decl ("Var") (bindings (bind () ()))) 
         (expr () (composite (commas (expr (int) (literal (int) "0"))))))))))) 
-  (at 19 
+  (at 21 
    (declare ("Array") 
     (bindings (op = (bind (binding 25 "values") ()) (expr ("Array") (array)))))) 
-  (at 20 
+  (at 22 
    (stmnt 
     (expr ("Var") 
      (call (expr ((func (("Array") ("Var"))) ("Var")) 
             (ident (binding 26 "Array_push"))) 
       (args (expr ("Array") (ident (binding 25 "values"))) 
        (expr (int) (literal (int) "42"))))))) 
-  (at 21 
+  (at 23 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 27 "boxed_values") ()) 
       (expr ("Array") (ident (binding 25 "values"))))))) 
-  (at 22 (declare (struct "Iter") (bindings (bind (binding 28 "storage") ())))) 
-  (at 23 
+  (at 24 (declare (struct "Iter") (bindings (bind (binding 28 "storage") ())))) 
+  (at 25 
    (declare ("Iter") 
     (bindings 
      (op = (bind (binding 29 "iter") ()) 
@@ -126,8 +126,8 @@
         (args (expr ("Var") (ident (binding 27 "boxed_values"))) 
          (expr (* struct "Iter") 
           (op & (expr (struct "Iter") (ident (binding 28 "storage")))))))))))) 
-  (at 24 (declare ("Var") (bindings (bind (binding 30 "item") ())))) 
-  (at 25 
+  (at 26 (declare ("Var") (bindings (bind (binding 30 "item") ())))) 
+  (at 27 
    (declare (int) 
     (bindings 
      (op = (bind (binding 31 "advanced") ()) 
@@ -136,7 +136,7 @@
               (ident (binding 32 "Iter_try_next"))) 
         (args (expr ("Iter") (ident (binding 29 "iter"))) 
          (expr ("Var") (ident (binding 30 "item")))))))))) 
-  (at 26 
+  (at 28 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 33 "printf"))) 
@@ -189,9 +189,9 @@
           (call (expr ((func (("Var"))) (int)) (ident (binding 34 "Var_int"))) 
            (args (expr ("Var") (ident (binding 30 "item")))))) 
          (expr (int) (op - (expr (int) (literal (int) "1"))))))))))) 
-  (at 27 
+  (at 29 
    (stmnt 
     (expr (void) 
      (call (expr ((func ((void))) void) (ident (binding 35 "Scope_release"))) 
       (args (expr (void) ())))))) 
-  (at 28 (return (int) (expr (int) (literal (int) "0"))))))
+  (at 30 (return (int) (expr (int) (literal (int) "0"))))))

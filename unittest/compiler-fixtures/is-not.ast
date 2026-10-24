@@ -10,37 +10,38 @@
 (function (static "Var") 
  (bind (binding 3 "next_value") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 9 (stmnt 
-         (expr (int) (postfix ++ (expr (int) (ident (binding 1 "value_calls"))))))) 
-  (at 10 (return ("Var") (expr (int) (literal (int) "7"))))))
+  (at 11 
+   (stmnt 
+    (expr (int) (postfix ++ (expr (int) (ident (binding 1 "value_calls"))))))) 
+  (at 12 (return ("Var") (expr (int) (literal (int) "7"))))))
 
 (function (static "Symbol") 
  (bind (binding 4 "next_other_tag") 
   ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 11 
+  (at 13 
    (stmnt (expr (int) (postfix ++ (expr (int) (ident (binding 2 "tag_calls"))))))) 
-  (at 12 (return ("Symbol") (expr ("Symbol") (literal ("Symbol") "<f64>" f64))))))
+  (at 14 (return ("Symbol") (expr ("Symbol") (literal ("Symbol") "<f64>" f64))))))
 
 (function (int) 
  (bind (binding 5 "main") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 13 
+  (at 15 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 6 "value") ()) (expr (int) (literal (int) "7"))) 
      (op = (bind (binding 7 "absent") ()) 
       (expr ("Var") (literal ("Var") "void")))))) 
-  (at 14 
+  (at 16 
    (declare ("Symbol") 
     (bindings 
      (op = (bind (binding 8 "other_tag") ()) 
       (expr ("Symbol") (literal ("Symbol") "<f64>" f64)))))) 
-  (at 15 
+  (at 17 
    (declare (int) 
     (bindings (op = (bind (binding 9 "is") ()) (expr (int) (literal (int) "1"))) 
      (op = (bind (binding 10 "not") ()) (expr (int) (literal (int) "1")))))) 
-  (at 16 
+  (at 18 
    (declare (int) 
     (bindings 
      (op = (bind (binding 11 "ok") ()) 
@@ -123,7 +124,7 @@
               (expr (int) (literal (int) "1")))))) 
           (expr (int) (ident (binding 9 "is"))))) 
         (expr (int) (ident (binding 10 "not"))))))))) 
-  (at 17 
+  (at 19 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 14 "printf"))) 
@@ -131,7 +132,7 @@
        (expr (int) (ident (binding 11 "ok"))) 
        (expr (int) (ident (binding 1 "value_calls"))) 
        (expr (int) (ident (binding 2 "tag_calls")))))))) 
-  (at 18 
+  (at 20 
    (return (int) 
     (expr (int) 
      (op ? (expr (int) (ident (binding 11 "ok"))) 
