@@ -3,7 +3,8 @@
     Entries run from left to right, each evaluating its destination once,
     and later entries see earlier assignments. Exit restores the saved
     values in reverse order on every path: normal exit, return, loop exits,
-    and a raise from the body or from a later entry's initializer.
+    and a raise from the body or from a later entry's initializer. Entries
+    of different types each save their own value.
 */
 
 #include "x2c.x"
@@ -51,6 +52,12 @@ int main(void) {
     printf("repeated %d places %d\n", value, places);
   }
   printf("restored %d places %d\n", value, places);
+
+  String label = "base";
+  with (value = 3, label = "temporary") {
+    printf("mixed %d %s\n", value, label);
+  }
+  printf("mixed %d %s\n", value, label);
 
   printf("returned %d mode %d\n", returns_inside(), state.mode);
   loop_exits();

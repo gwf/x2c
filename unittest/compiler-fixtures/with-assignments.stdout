@@ -2,6 +2,8 @@ inside 2 6 6
 after 1 5
 repeated 80 places 1
 restored 1 places 1
+mixed 3 temporary
+mixed 1 base
 returned 9 mode 1
 loops depth 5
 body raise mode 1

@@ -199,7 +199,7 @@ itself. Compilers that share one store take the stream in turn with
 keeps and prints them. During `Compiler.full_parse`, the reporter raises
 `<malformed>` with the diagnostic category. A filtered catch rewinds to the
 start of the failed top-level declaration and skips it whole. State set before
-a raise must be restored by `defer` or `$let`, or later declarations parse in
+a raise must be restored by `defer` or `with`, or later declarations parse in
 the wrong mode. A `<malformed>` transfer out of compile-time Lisp continues
 outward, since its diagnostic is already reported. Outside that recovery region
 the reporter exits with status 1.

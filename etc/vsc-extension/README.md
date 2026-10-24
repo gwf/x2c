@@ -7,9 +7,10 @@ and `.xp`) and compile-time Lisp files (`.xlisp`).
 It highlights x2c list, array, map, string, Symbol, and SymbolSet literals,
 including data-first Array and Map contents and their runtime unquotes;
 pattern variables; runtime unquote and List splice forms; protocols; macros;
-decorators; `with` blocks; List destructuring; imports; delegate fields;
-`Self` method types; embedded and standalone compile-time Lisp; and the
-C-compatible syntax used by the language.
+decorators; `with` assignment blocks; `alias` declarations; List
+destructuring; imports; delegate fields; `Self` method types; embedded and
+standalone compile-time Lisp; and the C-compatible syntax used by the
+language.
 
 Macro signatures use `$value` for one syntax value and `@items` for a
 sequence. Code templates highlight `@items`, `@producer(args)`, `@(form)`,
@@ -77,6 +78,7 @@ Dark backgrounds:
         "keyword.declaration.module.x2c",
         "keyword.control.import.x2c",
         "keyword.control.with.x2c",
+        "keyword.declaration.alias.x2c",
         "keyword.declaration.protocol.x2c",
         "keyword.declaration.class.x2c",
         "keyword.control.foreach.x2c",
@@ -135,6 +137,7 @@ Light backgrounds:
         "keyword.declaration.module.x2c",
         "keyword.control.import.x2c",
         "keyword.control.with.x2c",
+        "keyword.declaration.alias.x2c",
         "keyword.declaration.protocol.x2c",
         "keyword.declaration.class.x2c",
         "keyword.control.foreach.x2c",
@@ -174,9 +177,9 @@ Light backgrounds:
 ![Dark and light x2c highlighting](https://raw.githubusercontent.com/gwf/x2c/main/etc/vsc-extension/images/vscode-highlighting-sample.png)
 
 The syntax scopes cover `in`, `try`, `catch`, `finally`, `defer`, `raise`,
-`match`, `delegate`, `threaded`, `import`, `with`, `as`, `protocol`,
-`associated`, `foreach`, `is not`, `Self`, `macro`, `keyword`, `using`, and
-`=>`. Prelude types use `support.type.prelude.x2c`: `Array`, `Atom`, `Block`,
+`match`, `delegate`, `threaded`, `import`, `with`, `alias`, `as`,
+`protocol`, `associated`, `foreach`, `is not`, `Self`, `macro`, `keyword`,
+`using`, and `=>`. Prelude types use `support.type.prelude.x2c`: `Array`, `Atom`, `Block`,
 `Buffer`, `Bytes`, `Context`, `Error`, `ErrorHandler`, `File`, `Func`, `Iter`,
 `Lambda`, `Lisp`, `List`, `Logger`, `LogSink`, `Map`, `Mutex`, `Pool`, `Scope`,
 `Split`, `String`, `Symbol`, `SymbolSet`, `Thread`, `Token`, `Tokenizer`, and

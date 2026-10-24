@@ -583,8 +583,8 @@ vowels.
 role names, and the only abbreviations, are in the
 [glossary](#appendix-b-role-names). Never use `tmp`, `data`, `result`, or
 `value` for a role that stays ambiguous across a nontrivial function.
-Locals used only to save and restore state become `$let`, including
-`old_`, `saved_`, and `previous_` locals with that role.
+Locals used only to save and restore state become a `with` assignment,
+including `old_`, `saved_`, and `previous_` locals with that role.
 
 **NM-5** Name a helper for the semantic action it performs. Avoid
 `process`, `handle`, `request`, `do`, and `check` as whole names.
@@ -716,8 +716,8 @@ return a pointer, a borrowed handle, or a helper-process address.
 
 **LT-1** Name the lifetime at the acquisition. Use initializer `auto` for an owned
 local of a `Cleanup(T)` type, `auto` for a region of temporaries,
-`auto(&slot)` to allocate into a chosen Scope, `$let` to replace one
-location for a block, and `$lock` to hold a Mutex. Use `defer` directly
+`auto(&slot)` to allocate into a chosen Scope, `with` to replace locations
+for a block, and `$lock` to hold a Mutex. Use `defer` directly
 only for a native release the runtime does not own, a conditional
 acquisition or rollback, a consuming parameter, paired state that is not a
 resource, or cleanup that writes a result.
@@ -840,7 +840,7 @@ with the supported form when exactly one fix applies:
 
 **DG-6** Stop at one error per compile by default. Recover in `full_parse`
 by skipping the failed top-level declaration; restore mode state with
-`$let` or `defer`; bracket a speculative parse with `Diagnostics.hold` and
+`with` or `defer`; bracket a speculative parse with `Diagnostics.hold` and
 `release`.
 
 **DG-7** Use one detail vocabulary for runtime Errors: `operation` for the
@@ -865,8 +865,8 @@ suppression.
 
 **MA-1** Choose the smallest tool: a function for runtime computation; a
 `meta` function for compile-time calculation; a protocol for shared typed
-behavior; a `delegate` field for forwarding to a contained value; `with`
-for repeated substitution in one block; a macro for a repeated source shape
+behavior; a `delegate` field for forwarding to a contained value; `alias`
+for repeated substitution in one scope; a macro for a repeated source shape
 whose call reads more clearly than its expansion; a decorator for an
 orthogonal wrapper on one recognizable target; a ledger when the same rows
 drive several artifacts. Write direct source when generation hides more
@@ -1132,7 +1132,7 @@ supported cause. The checkpoint remains advisory during the baseline period;
 [performance checkpoints](performance-checkpoints.md) owns the method and
 acceptance policy.
 
-**HP-2** On a hot path, measure additions of `defer`, `auto`, `$let`, allocation, locks, passes, or calls before accepting them. An
+**HP-2** On a hot path, measure additions of `defer`, `auto`, `with`, allocation, locks, passes, or calls before accepting them. An
 absolute ban or a new acceptance requirement is a proposal for Gary's
 review, not a current publication gate.
 
@@ -1142,7 +1142,7 @@ inline (move it to a cold helper that takes Symbols), constant widths in
 calls that should unroll, and no String literal argument that adds a lazy
 interning guard.
 
-**HP-4** In a recursive walker, keep an arm that holds `$let` or `defer`
+**HP-4** In a recursive walker, keep an arm that holds `with` or `defer`
 inline unless the depth fixtures pass; each helper frame costs C stack per
 level.
 
@@ -1324,7 +1324,7 @@ Gary's approval under the process ceiling.
 | Neutral respelling, rename, reorder, receiver, `=>`, `in`, `.` | compare affected generated output before and after where needed; `stage-diff-0` compares bootstrap with stage 0, not the pre-edit tree |
 | Compiler beautification | existing beautify proof: `make stage-1 && make stage-diff-1` once per file; use relevant driver probes |
 | A pure move | the multiset of non-blank lines is unchanged except section labels |
-| Adopting `auto`, `$let`, quotations | emission changes: refresh bootstrap through its target, then the focused fixtures and suites |
+| Adopting `auto`, `with`, quotations | emission changes: refresh bootstrap through its target, then the focused fixtures and suites |
 | Deletion of a check or mechanism | the observable result of valid input is unchanged; invalid input is still rejected before wrong output, corrupt state, or an unsafe crossing |
 | Hot-path change | HP-1 paired instruction counts |
 | Defect fix | TE-2 fail-before and pass-after |
@@ -1346,7 +1346,7 @@ operations, quoted AST, causes, details, wording, and origin ancestry.
 
 Never rebaseline a stage diff or a fixture to make a neutral rewrite pass;
 a difference is a behavior change to fix or to report. Report each neutral
-tweak a rewrite makes, such as `$let` now restoring on an error exit.
+tweak a rewrite makes, such as `with` now restoring on an error exit.
 
 ### Procedures by task
 
@@ -1390,7 +1390,7 @@ These results set the rules above; the evidence is in the adoption plan.
 - Helpers clang would not fold added instructions on runtime hot paths: +11 per
   integer read from a fallback `return 0`, and an interning guard on every fast
   add from a String literal argument. HP-3 records them.
-- An extracted arm with `$let` in the recursive transform walk added a C frame
+- An extracted arm with `with` in the recursive transform walk added a C frame
   per level and was put back inline. HP-4 records it.
 - A string-keyed central diagnostic catalogue raised the clean stage-1 build
   from 10.04 s to 24.97 s and hid raises from lint. The final form is named
@@ -1437,7 +1437,7 @@ These results set the rules above; the evidence is in the adoption plan.
 | owned local of a `Cleanup(T)` type | `T value = auto acquire();` |
 | region of temporaries | `auto` |
 | allocate into a chosen Scope | `auto(&slot)` |
-| replace a location for a block | `$let(place, value)` |
+| replace locations for a block | `with (place = value) { }` |
 | hold a Mutex | `$lock(m)` |
 | native release, rollback, result-writing cleanup | `defer` |
 | cleanup belonging to an existing `try` | `finally` |
