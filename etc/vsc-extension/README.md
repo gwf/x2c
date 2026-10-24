@@ -221,6 +221,12 @@ classes, and aggregate types. A `module { ... }` member block uses
 `keyword.declaration.module.x2c`. Private `static` type declarations keep the
 ordinary `static` modifier scope.
 
+`auto` uses `storage.modifier.auto.x2c` for both managed declarations
+(including inferred types) and acquired-value initializers after `=`.
+Declaration `auto` cleans up the variable at block exit; initializer `auto`
+manages the acquired value like `$auto(...)`. Macro `using` clauses recognize
+both retained names and fresh `$name` entries.
+
 `$!`, `$name`, `${expression}`, `$(form)`, and a standalone `$` use pronounced
 sigil styling with the settings above. `@` sequence forms share that styling.
 The grammar supplies scopes; the active VS Code theme controls their color

@@ -3855,7 +3855,7 @@
 					}
 				},
 				{
-					"match": "^[ \\t]*(module)\\b(?=\\s+[A-Za-z_]\\w*)",
+					"match": "(?<![\\w.])(module)\\b(?=\\s+[A-Za-z_]\\w*)",
 					"captures": {
 						"1": { "name": "storage.modifier.x2c storage.modifier.module.x2c" }
 					}
@@ -3884,7 +3884,7 @@
 					"name": "keyword.declaration.protocol.x2c"
 				},
 				{
-					"match": "\\b(delegate|threaded)\\b",
+					"match": "\\b(auto|delegate|threaded)\\b",
 					"name": "storage.modifier.x2c",
 					"captures": {
 						"1": { "name": "storage.modifier.$1.x2c" }
@@ -3919,7 +3919,7 @@
 			}
 		},
 		"x2c_macro_using_directive": {
-			"begin": "\\b(using)(?=\\s+\\$[A-Za-z_][A-Za-z0-9_]*(?:\\s*,\\s*\\$[A-Za-z_][A-Za-z0-9_]*)*\\s*;)",
+			"begin": "\\b(using)(?=\\s+\\$?[A-Za-z_][A-Za-z0-9_]*(?:\\s*,\\s*\\$?[A-Za-z_][A-Za-z0-9_]*)*\\s*;)",
 			"beginCaptures": {
 				"1": { "name": "keyword.other.macro.using.x2c" }
 			},
@@ -3947,7 +3947,7 @@
 					}
 				},
 				{
-					"match": "\\busing(?=\\s+\\$)",
+					"match": "\\busing(?=\\s+\\$?[A-Za-z_][A-Za-z0-9_]*(?:\\s*,\\s*\\$?[A-Za-z_][A-Za-z0-9_]*)*\\s*=>|\\s+\\$)",
 					"name": "keyword.other.macro.using.x2c"
 				}
 			]
