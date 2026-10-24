@@ -1,0 +1,7 @@
+#!/usr/bin/env -S x2c script
+
+puts(String.new(argv[1]).open("r")
+  .string_close().lower().words().iter()
+  .foldl({},  %!(Map m, String w) => (m[w] += 1, m))
+  .map().enumerate().array()
+  .sort_by(%!(List p) => -p[1].int())[:10].repr());
