@@ -238,7 +238,7 @@ values normally last for the process. See [scopes and lifetime](https://x2c-lang
 
 ```x2c
 int main(void) {
-$scope() {
+auto {
   File file = auto tmpfile();
   file.puts("hello\n");
   Array scratch = [1, 2, 3];
@@ -247,7 +247,7 @@ return 0;
 }
 ```
 
-`$scope()` retains an allocation region around a statement, and
+`auto` retains an allocation region around a statement, and
 Initializer `auto` releases the acquired value at block exit. `$lock` and `$let` give
 scoped locking and temporary replacement. See
 [classes and system macros](https://x2c-lang.dev/docs/guide/system-macros.html). `defer statement;` runs the
@@ -341,7 +341,7 @@ usually supplied by `#include "x2c.x"`.
 | Facility | Availability | Purpose |
 | --- | --- | --- |
 | `class` | Shipped keyword alias | Declare a type and its applicable defaults |
-| `$scope` | Shipped decorator | Retain a region or select a Scope destination |
+| Region `auto` | Keyword before a statement or function | Retain a region or select a Scope destination |
 | `$let` | Shipped decorator | Temporarily replace one captured storage location |
 | `$lock` | Shipped decorator | Hold a Mutex while a statement runs |
 | Initializer `auto` | Keyword after `=` | Clean up the acquired value at block exit |
@@ -350,8 +350,8 @@ usually supplied by `#include "x2c.x"`.
 | `$dedent`, `$assert`, `$todo`, `$unreachable`, `$time` | Shipped, explicit import | Remove boilerplate C leaves to every caller |
 | Project macros | Explicit import | Supply project-specific syntax and policy |
 
-`class` and `foreach` are keyword aliases. Use the `$` spelling for `$scope`,
-`$let`, and `$lock`. Initializer `auto` follows `=`; its compatibility spelling
+`class` and `foreach` are keyword aliases. Use the `$` spelling for
+`$let` and `$lock`. Initializer `auto` follows `=`; its compatibility spelling
 is `$auto(value)`. For authoring your own macros, continue with
 [Compile-time Macros](https://x2c-lang.dev/docs/guide/macros.html).
 
@@ -588,13 +588,22 @@ Tag collisions are errors.
 
 ## Retain or select a Scope
 
-Without an argument, `$scope()` retains one region around the following
+Region `auto` precedes a block, control statement, or function definition.
+`auto(destination)` selects a Scope destination for a following statement or
+function. Empty `auto()` is not accepted. A variable declaration such as
+`auto Array values = [];` still manages that variable; initializer `auto`
+still manages the acquired value.
+
+The compatibility decorator `$scope()` retains a region, and
+`$scope(destination)` selects a destination with the same semantics.
+
+Without an argument, `auto` retains one region around the following
 statement. Its expansion keeps the body inside the deferred
 release:
 
 ```x2c
 int main(void) {
-$scope() { Array values = []; values.push(1); }
+auto { Array values = []; values.push(1); }
   return 0;
 }
 ```
@@ -620,8 +629,8 @@ region per iteration. No hidden loop changes the meaning of `break` or
 
 ```x2c
 int main(void) {
-$scope() for (int i = 0; i < 3; i++) { xmalloc(8); }
-for (int i = 0; i < 3; i++) $scope() { xmalloc(8); }
+auto for (int i = 0; i < 3; i++) { xmalloc(8); }
+for (int i = 0; i < 3; i++) auto { xmalloc(8); }
   return 0;
 }
 ```
@@ -630,7 +639,7 @@ Place it before a file-scope function definition to retain one region around
 that whole function, without indenting the body a further level:
 
 ```x2c
-$scope() static int distinct(List words) {
+auto static int distinct(List words) {
   Map seen = {};
   foreach (String word in words) seen[word] = 1;
   return seen.len();
@@ -642,13 +651,13 @@ The `Map` belongs to the retained region, and the region closes on every
 exit, so the `return` releases it. `$lock` and `$let` decorate a function
 the same way.
 
-With one Scope-pointer argument, `$scope` evaluates the argument once, pushes
+With one Scope-pointer argument, region `auto` evaluates the argument once, pushes
 that destination, and restores the previous destination on exit:
 
 ```x2c
 int main(void) {
 Scope destination = auto Scope.new();
-$scope(&destination) { xmalloc(8); }
+auto(&destination) { xmalloc(8); }
   return 0;
 }
 ```
@@ -782,7 +791,7 @@ cleans the variable's value at exit. See
 
 ## Include the rest of the set
 
-`class`, `foreach`, `$scope`, `$let`, `$lock`, and `auto` need no include. A
+`class`, `foreach`, `$let`, `$lock`, and `auto` need no include. A
 second set ships in `lib/system-macros.x` and becomes available with one
 line:
 
@@ -879,7 +888,7 @@ void History.drop(History self) {
 
 int main(int argc, char **argv) {
   if (argc != 2) return 0;
-  $scope() {
+  auto {
     History history = auto History.new();
     File input = auto File.open(argv[1], "r");
     for (String line; (line = input.readline()) != NULL; )
@@ -896,7 +905,7 @@ int main(int argc, char **argv) {
 
 Use the shipped [classes and system macros](https://x2c-lang.dev/docs/guide/system-macros.html) where they
 express a complete constructor or block lifetime: initializer `auto` for an owned local,
-`$scope` for a region, `$let` for saved storage, and `$lock` for a Mutex.
+region `auto` for a region, `$let` for saved storage, and `$lock` for a Mutex.
 
 These idioms combine the features introduced in the guide.
 
@@ -1181,12 +1190,12 @@ in the result domain and the caller does not need a failure reason.
 
 ## Put cleanup beside acquisition
 
-`Scope` groups allocations by lifetime and `$scope()` retains one region
+`Scope` groups allocations by lifetime and `auto` retains one region
 around a statement. Initializer `auto` attaches cleanup to the acquired value,
 so the acquisition and its release are one line:
 
 ```x2c
-$scope() {
+auto {
   String path = "/tmp/x2c-idioms.txt";
   File output = auto File.open(path, "w");
   output.puts("ready\n");
@@ -1212,7 +1221,7 @@ variable at exit, such as a `Scope` slot filled later:
 ```x2c
 int main(void) {
 auto Scope work = NULL;
-$scope(&work) { Array items = []; items.push(1); }
+auto(&work) { Array items = []; items.push(1); }
   return 0;
 }
 ```
@@ -2855,7 +2864,7 @@ within the body runs the decorator's deferred cleanup before leaving:
 
 ```x2c
 #include "x2c.x"
-$scope() static int total(List values, int bias) {
+auto static int total(List values, int bias) {
   int sum = bias;
   foreach (int value in values) sum += value;
   return sum;
@@ -4055,6 +4064,23 @@ on the active rendering path print their pointer form. Descriptor registration r
 runtime's worker-start freeze rule. Overflow descriptors extend the compact
 descriptor table's capacity.
 
+### Allocation regions
+
+`auto { ... }` retains an allocation region and releases it on every exit.
+The same prefix can wrap a control statement, such as `auto for (...) ...`,
+or a function definition, such as `auto int f(void) { ... }`. An
+expression-bodied function can use the prefix too. Normal `return`, `break`,
+`continue`, and error transfer retain their meaning.
+
+`auto(pointer)` evaluates the Scope-pointer expression once, selects that
+allocation destination for the following statement or function body, and
+restores the previous destination on exit. It does not release the selected
+Scope. The argument is required: empty `auto()` is not accepted.
+
+These forms use the existing region operations and cleanup boundaries.
+`$scope()` and `$scope(pointer)` remain compatibility spellings. Variable
+declaration `auto` and initializer `auto` keep their distinct meanings below.
+
 ### Managed declarations and initializers
 
 Declaration `auto` arranges cleanup of the variable's value at block exit:
@@ -4062,7 +4088,7 @@ Declaration `auto` arranges cleanup of the variable's value at block exit:
 ```x2c
 int main(void) {
 auto Scope work = NULL;
-$scope(&work) { Array items = []; items.push(1); }
+auto(&work) { Array items = []; items.push(1); }
   return 0;
 }
 ```
@@ -5119,12 +5145,13 @@ int main(void) {
 
 ### System block decorators
 
-The built-in macro module installs `$scope`, `$let`, and `$lock` without a
-per-source import. They retain the normal runtime declaration requirements
-and macro collision policy. None has a bare keyword alias.
+Region `auto`, `$let`, and `$lock` need no per-source import. They retain
+normal runtime declaration requirements. Region `auto` uses native syntax;
+`$let` and `$lock` retain their explicit macro spelling. The compatibility
+`$scope` decorator retains its macro collision policy.
 
-`$scope()` retains one region around its following statement and defers
-release inside an inner block containing that statement. `$scope(pointer)`
+Region `auto` retains one region around its following statement and defers
+release inside an inner block containing that statement. `auto(pointer)`
 evaluates the Scope-pointer expression once, pushes that destination, and
 uses the same inner-block placement for a deferred pop. Pop restores the
 previous destination without destroying the selected Scope. More than one

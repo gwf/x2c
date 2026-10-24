@@ -13,6 +13,7 @@ X2c declarations, parsed from source or constructed.
 | Function | Summary |
 | --- | --- |
 | [`Ast.declared_return`](#Ast.declared_return) | The declared result type of the function `declaration`, which its `return` statements convert to, or NULL. |
+| [`Compiler.auto_region_function_starts`](#Compiler.auto_region_function_starts) | Reports whether an `auto` prefix targets file-scope declaration syntax. |
 | [`Compiler.bind_callable_body`](#Compiler.bind_callable_body) | Binds a callable's outer block in its active parameter scope. |
 | [`Compiler.bind_catch_arm`](#Compiler.bind_catch_arm) | Binds one catch arm's `body` in a scope of its own, with declarations of the definite binders of `pattern`, read through `handle`, before it. |
 | [`Compiler.bind_match_arm`](#Compiler.bind_match_arm) | Binds one match arm's `body` in a scope of its own, which defines the definite binders of `pattern` when the arm `binds`. |
@@ -78,6 +79,16 @@ The declared result type of the function `declaration`, which its
 Source: `src/parse/functions.x:102`
 
 ### `Compiler`
+
+<a id="Compiler.auto_region_function_starts"></a>
+#### Compiler.auto_region_function_starts
+
+`int Compiler.auto_region_function_starts(Compiler c)`
+
+Reports whether an `auto` prefix targets file-scope declaration syntax.
+The ordinary function parser then requires a function body.
+
+Source: `src/parse/units.x:274`
 
 <a id="Compiler.bind_callable_body"></a>
 #### Compiler.bind_callable_body
@@ -202,7 +213,7 @@ starting at `start`, or NULL. A doc comment opens with two asterisks and
 ends on the line before `start` or on its line. Macro templates carry the
 text until their selected body binds at the invocation.
 
-Source: `src/parse/units.x:592`
+Source: `src/parse/units.x:605`
 
 <a id="Compiler.enclosing"></a>
 #### Compiler.enclosing
@@ -261,7 +272,7 @@ Constructs a foreign alias from one direct function declaration and target.
 typed, a function. Storage is limited to `static` or `inline`, when
 present, and variadic parameters are rejected.
 
-Source: `src/parse/units.x:763`
+Source: `src/parse/units.x:776`
 
 <a id="Compiler.finish_initializers"></a>
 #### Compiler.finish_initializers
@@ -307,7 +318,7 @@ Source: `src/parse/placement.x:131`
 Reports whether the cursor begins a contextual top-level `meta`
 declaration: a function or an initialized file-static value.
 
-Source: `src/parse/units.x:309`
+Source: `src/parse/units.x:322`
 
 <a id="Compiler.package_alias_spelling"></a>
 #### Compiler.package_alias_spelling
@@ -591,7 +602,7 @@ Reports whether the cursor begins a protocol declaration or adoption,
 including its `meta` and `static` markers. This query does not consume
 tokens.
 
-Source: `src/parse/units.x:301`
+Source: `src/parse/units.x:314`
 
 <a id="Compiler.script_statement_executes"></a>
 #### Compiler.script_statement_executes
@@ -602,7 +613,7 @@ Reports whether the top-level item at the cursor is a script statement
 that runs, rather than a declaration: an expression, control flow, a
 `with` block, or a statement macro. This query does not consume tokens.
 
-Source: `src/parse/units.x:292`
+Source: `src/parse/units.x:304`
 
 <a id="Compiler.script_statement_starts"></a>
 #### Compiler.script_statement_starts

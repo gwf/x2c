@@ -16,6 +16,7 @@ Source macros and the compile-time Lisp they run.
 | [`Compiler.add_library_dependencies`](#Compiler.add_library_dependencies) | Records the compile-time Lisp libraries as dependencies of `c`, as each use of its session does. |
 | [`Compiler.after_hole`](#Compiler.after_hole) | Returns the token after the named or expression hole at the cursor. |
 | [`Compiler.applying_shipped`](#Compiler.applying_shipped) | Whether the rule whose meta function now runs is shipped, so that the names it calls resolve to the copies the compiler links. |
+| [`Compiler.auto_region_statement_starts`](#Compiler.auto_region_statement_starts) | Reports whether `auto` introduces a region statement, rather than a managed declaration. |
 | [`Compiler.bind_code_value`](#Compiler.bind_code_value) | Binds a code-value carrier that a meta call returned outside a macro value application as an application binds it, under a transaction that also covers its effects. |
 | [`Compiler.bind_macro_lisp_statement`](#Compiler.bind_macro_lisp_statement) | Binds a compile-time Lisp code `value` returned to a statement at `context`. |
 | [`Compiler.bind_meta_operation`](#Compiler.bind_meta_operation) | Binds `function`, the operation `lib/meta.x` declares as `name`, under its Lisp name in `lisp`. |
@@ -129,6 +130,16 @@ Whether the rule whose meta function now runs is shipped, so that the
 names it calls resolve to the copies the compiler links.
 
 Source: `src/macros/rewrites.x:443`
+
+<a id="Compiler.auto_region_statement_starts"></a>
+#### Compiler.auto_region_statement_starts
+
+`int Compiler.auto_region_statement_starts(Compiler c)`
+
+Reports whether `auto` introduces a region statement, rather than a
+managed declaration. Does not consume tokens.
+
+Source: `src/macros/invocations/recognition.x:274`
 
 <a id="Compiler.bind_code_value"></a>
 #### Compiler.bind_code_value
@@ -412,7 +423,7 @@ named-type decorator, and local `Unit` macro whose template contains
 protocol or adoption rows. `<tried>` covers Unit decorators and other
 local `Unit` macros. Other invocations return zero.
 
-Source: `src/macros/invocations/recognition.x:358`
+Source: `src/macros/invocations/recognition.x:377`
 
 <a id="Compiler.macro_invocation_site"></a>
 #### Compiler.macro_invocation_site
@@ -479,7 +490,7 @@ Reports whether the macro invocation at the cursor produces file-scope
 syntax, directly or through the target it decorates. A script unit keeps
 such an invocation at file scope. This query does not consume tokens.
 
-Source: `src/macros/invocations/recognition.x:402`
+Source: `src/macros/invocations/recognition.x:421`
 
 <a id="Compiler.macro_value_literal"></a>
 #### Compiler.macro_value_literal
@@ -780,7 +791,7 @@ Source: `src/macros/lisp.x:486`
 Consumes a macro invocation name and its balanced argument list.
 The invocation terminator or following decorator target remains current.
 
-Source: `src/macros/invocations/recognition.x:378`
+Source: `src/macros/invocations/recognition.x:397`
 
 <a id="Compiler.skip_named_type_declaration"></a>
 #### Compiler.skip_named_type_declaration
@@ -790,7 +801,7 @@ Source: `src/macros/invocations/recognition.x:378`
 Consumes a NamedType target already projected by owning-source collection.
 CPP scanning does not produce the declaration or parse its fields again.
 
-Source: `src/macros/invocations/recognition.x:389`
+Source: `src/macros/invocations/recognition.x:408`
 
 <a id="Compiler.source_path"></a>
 #### Compiler.source_path
