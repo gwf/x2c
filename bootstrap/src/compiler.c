@@ -45,6 +45,7 @@ typedef struct GenNames{
 
 typedef struct SymScope{
   Map symbols, bindings, enumerators, macros;
+  int aliases;
 }
 SymScope;
 
@@ -103,6 +104,7 @@ typedef struct Compiler{
   Map proto_cache;
   Map adoptions;
   Map macro_holes;
+  int alias_level;
   Map local_macro_captures;
   int macro_application;
   List lambda_scopes;
@@ -1003,7 +1005,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _386 = String_var(_385);
   _387 = List_var(NULL);
   _388 = Symbol_var(106239471489226);
-  _389 = int_var(2293);
+  _389 = int_var(2297);
   _390 = String_new("");
   _391 = String_var(_390);
   _392 = Atom_intern(String_new("macro-param"));

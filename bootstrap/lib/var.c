@@ -1864,23 +1864,23 @@ static void f10_conversion____numeric_decode(Var value, X2CVarNumericInfo info, 
   ;
   {
     switch(info.tag){
-      case 26993 : case 30065 : case 3453293 : case 3846509 : case 3453797 : case 3847013 :(decoded).raw = Var_payload32(value) & Var_width_mask((decoded).bits);
+      case 26993 : case 30065 : case 3453293 : case 3846509 : case 3453797 : case 3847013 : decoded.raw = Var_payload32(value) & Var_width_mask(decoded.bits);
       break;
-      case 3454065 : case 3847281 :(decoded).raw = value.u64 & Var_width_mask(48);
+      case 3454065 : case 3847281 : decoded.raw = value.u64 & Var_width_mask(48);
       break;
-      case 818062 :(decoded).raw =(unsigned long long) Var_long_value(value);
+      case 818062 : decoded.raw =(unsigned long long) Var_long_value(value);
       break;
-      case 44858254 :(decoded).raw =(unsigned long long) Var_ulong_value(value);
+      case 44858254 : decoded.raw =(unsigned long long) Var_ulong_value(value);
       break;
-      case 25983886 :(decoded).raw =(unsigned long long) Var_long_long_value(value);
+      case 25983886 : decoded.raw =(unsigned long long) Var_long_long_value(value);
       break;
-      case 1435270030 :(decoded).raw = Var_ulong_long_value(value);
+      case 1435270030 : decoded.raw = Var_ulong_long_value(value);
       break;
-      case 3355493 :(decoded).floating_value =(long double) Var_decode_f32(value);
+      case 3355493 : decoded.floating_value =(long double) Var_decode_f32(value);
       break;
-      case 3356265 :(decoded).floating_value =(long double) Var_decode_f64(value);
+      case 3356265 : decoded.floating_value =(long double) Var_decode_f64(value);
       break;
-      case 26071077642 :(decoded).floating_value = Var_long_double_value(value);
+      case 26071077642 : decoded.floating_value = Var_long_double_value(value);
       break;
     }
 

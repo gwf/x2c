@@ -436,8 +436,8 @@ static Context _open(const char * name, int isolated){
   Context_initialize();
   Context context = xcalloc(1, sizeof(struct Context));
   {
-    (context) -> parent = current_context;
-    (context) -> destination_scope = Scope_top();
+    context -> parent = current_context;
+    context -> destination_scope = Scope_top();
     int pushed = 0, installed = 0;
     {
       _x2c_gensym_defer_env_2 _x2c_gensym_macro_environment_2 ={
@@ -453,19 +453,19 @@ static Context _open(const char * name, int isolated){
       ;
       x2c_cleanup_push(& _x2c_gensym_defer_record_3);
       {
-        (context) -> scope = name ? Scope_new_named(name) : Scope_new();
-        Scope_push(&(context) -> scope);
+        context -> scope = name ? Scope_new_named(name) : Scope_new();
+        Scope_push(& context -> scope);
         pushed = 1;
         if(isolated){
-          (context) -> pool = Pool_open_named(name);
-          (context) -> destination_pool =(context) -> pool -> up;
+          context -> pool = Pool_open_named(name);
+          context -> destination_pool = context -> pool -> up;
         }
-        (context) -> error_state = Error_context_open();
-        (context) -> match_state = MatchCache_context_open();
-        current_context =(context);
+        context -> error_state = Error_context_open();
+        context -> match_state = MatchCache_context_open();
+        current_context = context;
         installed = 1;
         {
-          Context _x2c_gensym_return_value_2 =(context);
+          Context _x2c_gensym_return_value_2 = context;
           {
             x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
             return _x2c_gensym_return_value_2;
@@ -550,12 +550,12 @@ static void _x2c_gensym_defer_cleanup_2(void * _x2c_gensym_defer_opaque_2){
 static void _x2c_gensym_defer_cleanup_3(void * _x2c_gensym_defer_opaque_3){
   _x2c_gensym_defer_env_2 * _x2c_gensym_defer_data_2 =(_x2c_gensym_defer_env_2 *) _x2c_gensym_defer_opaque_3;
   if(!(*(int *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_2)){
-    if(((*(Context *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_3)) -> match_state) MatchCache_context_close(((*(Context *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_3)) -> match_state);
-    if(((*(Context *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_3)) -> error_state) Error_context_close(((*(Context *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_3)) -> error_state, x2c_exception_unwinding());
-    if(((*(Context *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_3)) -> pool) Pool_close();
+    if((*(Context *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_3) -> match_state) MatchCache_context_close((*(Context *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_3) -> match_state);
+    if((*(Context *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_3) -> error_state) Error_context_close((*(Context *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_3) -> error_state, x2c_exception_unwinding());
+    if((*(Context *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_3) -> pool) Pool_close();
     if((*(int *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_4)) Scope_pop();
-    if(((*(Context *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_3)) -> scope) Scope_destroy(((*(Context *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_3)) -> scope);
-    xfree(((*(Context *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_3)));
+    if((*(Context *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_3) -> scope) Scope_destroy((*(Context *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_3) -> scope);
+    xfree((*(Context *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_3));
   }
 
 }
