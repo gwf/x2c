@@ -5031,13 +5031,12 @@ static int f9_providers____loaded_types_equal(Type declared, Type defined){
 
 static int f9_providers____loaded_type_rows(Type type, Map visible, Map provider){
   Map needed = Map_new();
-  const Map _x2c_gensym_macro_acquired_15 = needed;
   {
     _x2c_gensym_defer_env_37 _x2c_gensym_macro_environment_37 ={
       0
     }
     ;
-    _x2c_gensym_macro_environment_37._x2c_gensym_defer_capture_58 =(const void *) & _x2c_gensym_macro_acquired_15;
+    _x2c_gensym_macro_environment_37._x2c_gensym_defer_capture_58 =(const void *) & needed;
     X2CCleanup _x2c_gensym_defer_record_40 ={
       .fn = _x2c_gensym_defer_cleanup_41, .env = & _x2c_gensym_macro_environment_37
     }
@@ -5045,13 +5044,12 @@ static int f9_providers____loaded_type_rows(Type type, Map visible, Map provider
     x2c_cleanup_push(& _x2c_gensym_defer_record_40);
     {
       Map checked = Map_new();
-      const Map _x2c_gensym_macro_acquired_16 = checked;
       {
         _x2c_gensym_defer_env_36 _x2c_gensym_macro_environment_36 ={
           0
         }
         ;
-        _x2c_gensym_macro_environment_36._x2c_gensym_defer_capture_57 =(const void *) & _x2c_gensym_macro_acquired_16;
+        _x2c_gensym_macro_environment_36._x2c_gensym_defer_capture_57 =(const void *) & checked;
         X2CCleanup _x2c_gensym_defer_record_41 ={
           .fn = _x2c_gensym_defer_cleanup_40, .env = & _x2c_gensym_macro_environment_36
         }
@@ -5281,13 +5279,13 @@ static void f8_packages____merge_surface(f8_packages___Surface * s, String path,
 
 static void f8_packages____take_exports(f8_packages___Surface * s, Map rows){
   Array found = Array_new();
-  const Array _x2c_gensym_macro_acquired_17 = found;
+  const Array _x2c_gensym_macro_acquired_15 = found;
   {
     _x2c_gensym_defer_env_39 _x2c_gensym_macro_environment_39 ={
       0
     }
     ;
-    _x2c_gensym_macro_environment_39._x2c_gensym_defer_capture_61 =(const void *) & _x2c_gensym_macro_acquired_17;
+    _x2c_gensym_macro_environment_39._x2c_gensym_defer_capture_61 =(const void *) & _x2c_gensym_macro_acquired_15;
     X2CCleanup _x2c_gensym_defer_record_43 ={
       .fn = _x2c_gensym_defer_cleanup_43, .env = & _x2c_gensym_macro_environment_39
     }
@@ -5920,13 +5918,13 @@ String Compiler_interface_text(Compiler c){
   Var cached = Map_getindex(_process_cache(), String_var(canonical));
   if(Var_is_void(cached)) return NULL;
   Buffer out = Buffer_new(0);
-  const Buffer _x2c_gensym_macro_acquired_18 = out;
+  const Buffer _x2c_gensym_macro_acquired_16 = out;
   {
     _x2c_gensym_defer_env_42 _x2c_gensym_macro_environment_42 ={
       0
     }
     ;
-    _x2c_gensym_macro_environment_42._x2c_gensym_defer_capture_65 =(const void *) & _x2c_gensym_macro_acquired_18;
+    _x2c_gensym_macro_environment_42._x2c_gensym_defer_capture_65 =(const void *) & _x2c_gensym_macro_acquired_16;
     X2CCleanup _x2c_gensym_defer_record_47 ={
       .fn = _x2c_gensym_defer_cleanup_47, .env = & _x2c_gensym_macro_environment_42
     }
@@ -6247,13 +6245,13 @@ static List f10_interfaces____linked_prelude_sources(void){
 
 static String f10_interfaces____record_text(List record){
   Buffer out = Buffer_new(0);
-  const Buffer _x2c_gensym_macro_acquired_19 = out;
+  const Buffer _x2c_gensym_macro_acquired_17 = out;
   {
     _x2c_gensym_defer_env_44 _x2c_gensym_macro_environment_44 ={
       0
     }
     ;
-    _x2c_gensym_macro_environment_44._x2c_gensym_defer_capture_68 =(const void *) & _x2c_gensym_macro_acquired_19;
+    _x2c_gensym_macro_environment_44._x2c_gensym_defer_capture_68 =(const void *) & _x2c_gensym_macro_acquired_17;
     X2CCleanup _x2c_gensym_defer_record_50 ={
       .fn = _x2c_gensym_defer_cleanup_50, .env = & _x2c_gensym_macro_environment_44
     }
@@ -6481,12 +6479,12 @@ static void _x2c_gensym_defer_cleanup_39(void * _x2c_gensym_defer_opaque_39){
 
 static void _x2c_gensym_defer_cleanup_40(void * _x2c_gensym_defer_opaque_40){
   _x2c_gensym_defer_env_36 * _x2c_gensym_defer_data_36 =(_x2c_gensym_defer_env_36 *) _x2c_gensym_defer_opaque_40;
-  Map_cleanup((*(const Map *) _x2c_gensym_defer_data_36->_x2c_gensym_defer_capture_57));
+  Map_cleanup((*(Map *) _x2c_gensym_defer_data_36->_x2c_gensym_defer_capture_57));
 }
 
 static void _x2c_gensym_defer_cleanup_41(void * _x2c_gensym_defer_opaque_41){
   _x2c_gensym_defer_env_37 * _x2c_gensym_defer_data_37 =(_x2c_gensym_defer_env_37 *) _x2c_gensym_defer_opaque_41;
-  Map_cleanup((*(const Map *) _x2c_gensym_defer_data_37->_x2c_gensym_defer_capture_58));
+  Map_cleanup((*(Map *) _x2c_gensym_defer_data_37->_x2c_gensym_defer_capture_58));
 }
 
 static void _x2c_gensym_defer_cleanup_42(void * _x2c_gensym_defer_opaque_42){

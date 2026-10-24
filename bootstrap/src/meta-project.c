@@ -1087,13 +1087,12 @@ static List _build(Helper * h){
 static String _loaded_providers(Helper * h){
   (* h).providers = Map_new();
   Map owners = Map_new();
-  const Map _x2c_gensym_macro_acquired_0 = owners;
   {
     _x2c_gensym_defer_env_4 _x2c_gensym_macro_environment_4 ={
       0
     }
     ;
-    _x2c_gensym_macro_environment_4._x2c_gensym_defer_capture_5 =(const void *) & _x2c_gensym_macro_acquired_0;
+    _x2c_gensym_macro_environment_4._x2c_gensym_defer_capture_5 =(const void *) & owners;
     X2CCleanup _x2c_gensym_defer_record_3 ={
       .fn = _x2c_gensym_defer_cleanup_4, .env = & _x2c_gensym_macro_environment_4
     }
@@ -1101,13 +1100,12 @@ static String _loaded_providers(Helper * h){
     x2c_cleanup_push(& _x2c_gensym_defer_record_3);
     {
       Map packaged = Map_new();
-      const Map _x2c_gensym_macro_acquired_1 = packaged;
       {
         _x2c_gensym_defer_env_3 _x2c_gensym_macro_environment_3 ={
           0
         }
         ;
-        _x2c_gensym_macro_environment_3._x2c_gensym_defer_capture_4 =(const void *) & _x2c_gensym_macro_acquired_1;
+        _x2c_gensym_macro_environment_3._x2c_gensym_defer_capture_4 =(const void *) & packaged;
         X2CCleanup _x2c_gensym_defer_record_4 ={
           .fn = _x2c_gensym_defer_cleanup_3, .env = & _x2c_gensym_macro_environment_3
         }
@@ -1259,13 +1257,13 @@ static int _package_source(Helper * h, String path){
 
 static void _drop_imported(Map declarations, Map packaged){
   Array imported = Array_new();
-  const Array _x2c_gensym_macro_acquired_2 = imported;
+  const Array _x2c_gensym_macro_acquired_0 = imported;
   {
     _x2c_gensym_defer_env_5 _x2c_gensym_macro_environment_5 ={
       0
     }
     ;
-    _x2c_gensym_macro_environment_5._x2c_gensym_defer_capture_6 =(const void *) & _x2c_gensym_macro_acquired_2;
+    _x2c_gensym_macro_environment_5._x2c_gensym_defer_capture_6 =(const void *) & _x2c_gensym_macro_acquired_0;
     X2CCleanup _x2c_gensym_defer_record_5 ={
       .fn = _x2c_gensym_defer_cleanup_5, .env = & _x2c_gensym_macro_environment_5
     }
@@ -1789,13 +1787,13 @@ static List _write_manifest(Helper * h, String failure){
   }
   );
   Buffer out = Buffer_new(0);
-  const Buffer _x2c_gensym_macro_acquired_3 = out;
+  const Buffer _x2c_gensym_macro_acquired_1 = out;
   {
     _x2c_gensym_defer_env_12 _x2c_gensym_macro_environment_12 ={
       0
     }
     ;
-    _x2c_gensym_macro_environment_12._x2c_gensym_defer_capture_16 =(const void *) & _x2c_gensym_macro_acquired_3;
+    _x2c_gensym_macro_environment_12._x2c_gensym_defer_capture_16 =(const void *) & _x2c_gensym_macro_acquired_1;
     X2CCleanup _x2c_gensym_defer_record_12 ={
       .fn = _x2c_gensym_defer_cleanup_12, .env = & _x2c_gensym_macro_environment_12
     }
@@ -2014,12 +2012,12 @@ static void _x2c_gensym_defer_cleanup_2(void * _x2c_gensym_defer_opaque_2){
 
 static void _x2c_gensym_defer_cleanup_3(void * _x2c_gensym_defer_opaque_3){
   _x2c_gensym_defer_env_3 * _x2c_gensym_defer_data_3 =(_x2c_gensym_defer_env_3 *) _x2c_gensym_defer_opaque_3;
-  Map_cleanup((*(const Map *) _x2c_gensym_defer_data_3->_x2c_gensym_defer_capture_4));
+  Map_cleanup((*(Map *) _x2c_gensym_defer_data_3->_x2c_gensym_defer_capture_4));
 }
 
 static void _x2c_gensym_defer_cleanup_4(void * _x2c_gensym_defer_opaque_4){
   _x2c_gensym_defer_env_4 * _x2c_gensym_defer_data_4 =(_x2c_gensym_defer_env_4 *) _x2c_gensym_defer_opaque_4;
-  Map_cleanup((*(const Map *) _x2c_gensym_defer_data_4->_x2c_gensym_defer_capture_5));
+  Map_cleanup((*(Map *) _x2c_gensym_defer_data_4->_x2c_gensym_defer_capture_5));
 }
 
 static void _x2c_gensym_defer_cleanup_5(void * _x2c_gensym_defer_opaque_5){

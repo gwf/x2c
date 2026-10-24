@@ -140,13 +140,12 @@ Path Path_absolute(Path);
 
 static String _contents(CliRequest request, Compiler compiler, String input, String output_dir){
   Array paths = Array_new();
-  const Array _x2c_gensym_macro_acquired_0 = paths;
   {
     _x2c_gensym_defer_env_2 _x2c_gensym_macro_environment_2 ={
       0
     }
     ;
-    _x2c_gensym_macro_environment_2._x2c_gensym_defer_capture_2 =(const void *) & _x2c_gensym_macro_acquired_0;
+    _x2c_gensym_macro_environment_2._x2c_gensym_defer_capture_2 =(const void *) & paths;
     X2CCleanup _x2c_gensym_defer_record_0 ={
       .fn = _x2c_gensym_defer_cleanup_2, .env = & _x2c_gensym_macro_environment_2
     }
@@ -154,13 +153,12 @@ static String _contents(CliRequest request, Compiler compiler, String input, Str
     x2c_cleanup_push(& _x2c_gensym_defer_record_0);
     {
       Array searches = Array_new();
-      const Array _x2c_gensym_macro_acquired_1 = searches;
       {
         _x2c_gensym_defer_env_1 _x2c_gensym_macro_environment_1 ={
           0
         }
         ;
-        _x2c_gensym_macro_environment_1._x2c_gensym_defer_capture_1 =(const void *) & _x2c_gensym_macro_acquired_1;
+        _x2c_gensym_macro_environment_1._x2c_gensym_defer_capture_1 =(const void *) & searches;
         X2CCleanup _x2c_gensym_defer_record_1 ={
           .fn = _x2c_gensym_defer_cleanup_1, .env = & _x2c_gensym_macro_environment_1
         }
@@ -188,13 +186,13 @@ static String _contents(CliRequest request, Compiler compiler, String input, Str
           if(! Array_len(paths)) Array_push(paths, String_var(input));
           Array_sort(paths);
           Buffer out = Buffer_new(0);
-          const Buffer _x2c_gensym_macro_acquired_2 = out;
+          const Buffer _x2c_gensym_macro_acquired_0 = out;
           {
             _x2c_gensym_defer_env_0 _x2c_gensym_macro_environment_0 ={
               0
             }
             ;
-            _x2c_gensym_macro_environment_0._x2c_gensym_defer_capture_0 =(const void *) & _x2c_gensym_macro_acquired_2;
+            _x2c_gensym_macro_environment_0._x2c_gensym_defer_capture_0 =(const void *) & _x2c_gensym_macro_acquired_0;
             X2CCleanup _x2c_gensym_defer_record_2 ={
               .fn = _x2c_gensym_defer_cleanup_0, .env = & _x2c_gensym_macro_environment_0
             }
@@ -357,11 +355,11 @@ static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0){
 
 static void _x2c_gensym_defer_cleanup_1(void * _x2c_gensym_defer_opaque_1){
   _x2c_gensym_defer_env_1 * _x2c_gensym_defer_data_1 =(_x2c_gensym_defer_env_1 *) _x2c_gensym_defer_opaque_1;
-  Array_cleanup((*(const Array *) _x2c_gensym_defer_data_1->_x2c_gensym_defer_capture_1));
+  Array_cleanup((*(Array *) _x2c_gensym_defer_data_1->_x2c_gensym_defer_capture_1));
 }
 
 static void _x2c_gensym_defer_cleanup_2(void * _x2c_gensym_defer_opaque_2){
   _x2c_gensym_defer_env_2 * _x2c_gensym_defer_data_2 =(_x2c_gensym_defer_env_2 *) _x2c_gensym_defer_opaque_2;
-  Array_cleanup((*(const Array *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_2));
+  Array_cleanup((*(Array *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_2));
 }
 
