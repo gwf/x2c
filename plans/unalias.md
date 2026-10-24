@@ -1,9 +1,9 @@
 # Ending an alias with `unalias`
 
-> Status: active, proposed 2026-10-24 and awaiting Gary's approval.
-> Depends on the `with` and `alias` implementation
-> ([archived plan](archive/with-and-alias.md)) reaching `dev`. Nothing is
-> implemented.
+> Status: active, approved by Gary on 2026-10-24.
+> Depends on the `with` and `alias` implementation (PR 286,
+> [archived plan](archive/with-and-alias.md)). Implementation follows as a
+> separate PR that also depends on PR 286.
 
 ## Summary
 
