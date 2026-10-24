@@ -101,7 +101,7 @@ module List _initializer_macro(Emitter &e, List input, List body) {
   String hash = Path.identifier_hash(e.c.filename);
   String name = e.c.fresh_name(%"initializer_choice_$hash");
   String replacement;
-  $let(e.c.source_map, 0) {
+  with (e.c.source_map = 0) {
     List tokens = _emit(e, body).flatten_all();
     String formatted = e.c.code_pretty_string(tokens, NULL);
     replacement = formatted.rstrip("\n").replace("\n", "\\\n");

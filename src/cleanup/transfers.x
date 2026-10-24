@@ -78,8 +78,9 @@ static List _lower_function(Compiler c, List node) {
   match (node)
     case %(function ?type ?bindings ?body): {
       List declaration = %(declare $type (bindings $bindings));
-      $let(c.return_type, Ast.declared_return(declaration))
+      with (c.return_type = Ast.declared_return(declaration)) {
         return _lowered_function(c, type, bindings, body);
+      }
     }
   return node;
 }
@@ -370,8 +371,9 @@ static List _region_path(Walk &w) {
 /* Report at `origin`, and leave the compiler's origin as it was for whatever
    reports next. */
 static void _report_at(Walk &w, int origin, String message, List note) {
-  $let(w.c.origin, origin)
+  with (w.c.origin = origin) {
     w.c.report_error(<emit>, message, NULL, note);
+  }
 }
 
 /* Introduce a name this pass owns. The emitted declaration spells this

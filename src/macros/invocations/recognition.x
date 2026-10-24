@@ -57,9 +57,7 @@ void Compiler.install_compile_time_effects(Compiler c, List rows) {
       Token token = c.thaw_declaration_syntax(site);
       String file = Compiler.absolute_home_path(path), text = NULL;
       c.read_source(file, text);
-      $let(c.filename, file)
-      $let(c.text, text)
-      $let(c.line_markers, NULL) {
+      with (c.filename = file, c.text = text, c.line_markers = NULL) {
         if (c.shallow) c.queue_declaration_effect(form, token, NULL);
         else c.evaluate_declaration_effect(form, token);
       }
@@ -68,10 +66,9 @@ void Compiler.install_compile_time_effects(Compiler c, List rows) {
       Token token = c.thaw_declaration_syntax(site);
       String file = Compiler.absolute_home_path(source), text = NULL;
       c.read_source(file, text);
-      $let(c.filename, file)
-      $let(c.text, text)
-      $let(c.line_markers, NULL)
+      with (c.filename = file, c.text = text, c.line_markers = NULL) {
         _import(c, Compiler.absolute_home_path(path), token);
+      }
     }
     case %(project-meta *): c.install_project_meta_effect(row);
   }

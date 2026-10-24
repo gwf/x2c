@@ -76,8 +76,9 @@ List Compiler.function_entry(Compiler c, int depth) {
   List declaration = ((Ancestor *) c.ancestors.bytes)[depth].node;
   c.sym.push_new_scope();
   List entry;
-  $let(c.return_type, Ast.declared_return(declaration))
+  with (c.return_type = Ast.declared_return(declaration)) {
     entry = _entry_code(c, depth);
+  }
   c.sym.pop_scope();
   return entry;
 }
@@ -139,8 +140,9 @@ List Compiler.leave_item(Compiler c) {
     (Var anchor, List binding, Var result, Var code) = placement;
     (void) anchor, (void) result;
     if (binding)
-      $let(c.origin, row.origin ? row.origin : c.origin)
+      with (c.origin = row.origin ? row.origin : c.origin) {
         $fail.parse_init_incomplete(c, row.token);
+      }
     _push_items(items, c.bind_syntax(code, <block>, c.return_type));
   }
   return items.list_free();

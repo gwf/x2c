@@ -257,7 +257,7 @@ List Compiler.lower_replacement(Compiler c, List replacement, List source) {
   _held_parts(source, <node>, parts);
   struct SlotWatch kept = {parts.list()};
   kept.kept = 1;
-  $let(c.slot_watch, &kept) return c.normalize(replacement);
+  with (c.slot_watch = &kept) { return c.normalize(replacement); }
 }
 
 /** Binds the replacement a shipped rule gives the lowered statement
@@ -267,9 +267,10 @@ List Compiler.lower_replacement(Compiler c, List replacement, List source) {
 List Compiler.rewrite_written(
   Compiler c, Symbol kind, List source, Type expected) {
   struct SlotWatch written = {.shipped = 1};
-  $let(c.slot_watch, &written)
+  with (c.slot_watch = &written) {
     return c.rewrite_lowered(
       <node>, kind, source, <statement>, expected, NULL);
+  }
 }
 
 /** Binds and lowers a replacement while its rule remains active. The
@@ -304,8 +305,9 @@ static List _rewrite(
     if (lower > 0 && rule.builtin && point == <function>) {
       List lifted = c.lift_lambda_types(source);
       if (lifted !== source)
-        $let(c.applying, cons(rule, c.active_rewrites))
+        with (c.applying = cons(rule, c.active_rewrites)) {
           return _lowered_definition(c, lifted);
+        }
     }
     MacroMatcher *matcher = _prepared_matcher(rule);
     if (matcher.shape ? !c.matches_macro(*matcher, source)
@@ -314,7 +316,7 @@ static List _rewrite(
     if (result is void ||
         (result is <list> && (!result.list() || result.list() === source)))
       continue;
-    $let(c.active_rewrites, cons(rule, c.active_rewrites)) {
+    with (c.active_rewrites = cons(rule, c.active_rewrites)) {
       if (lower <= 0)
         return _bound(
           c, point, kind, source, result, position, expected, site, lower);
@@ -336,8 +338,9 @@ static List _rewrite(
    while it runs is that rule's, as its replacement is. */
 static Var _applied(
   Compiler c, RewriteRule rule, List source, Token site) {
-  $let(c.applying, cons(rule, c.active_rewrites))
+  with (c.applying = cons(rule, c.active_rewrites)) {
     return c.apply_meta_function(rule.name, %($source), site);
+  }
 }
 
 /* Pushes the parts of `source` that its replacement may hold onto
@@ -423,7 +426,9 @@ static List _lowered_definition(Compiler c, Var result) {
   List bound = c.bind_syntax(result, <unit>, NULL);
   match (bound) case %(seq ?only): bound = only;
   match (result) case %(code-value "lowered" *): return bound;
-  $let(c.slot_watch, NULL) return c.normalize(_written_support(c, bound));
+  with (c.slot_watch = NULL) {
+    return c.normalize(_written_support(c, bound));
+  }
 }
 
 /* The bound file-scope code `bound` that the rule now writing gives,
@@ -517,8 +522,9 @@ static List _prepared(
   foreach (List value in values) preparation.outputs.push(NULL);
   Effects before = _effects(c);
   List lowered;
-  $let(c.slot_watch, &watch)
+  with (c.slot_watch = &watch) {
     lowered = _lowered(c, result, position, expected, site);
+  }
   // A memo the template fills adds state only on its first lowering.
   if (!_same(_since(_effects(c), before), preparation.inner)) return lowered;
   List skeleton =
@@ -539,8 +545,9 @@ static List _watched(
   if (c.slot_watch && !c.slot_watch.preparation) watch.parent = c.slot_watch;
   RewriteRule rule = c.active_rewrites.car();
   watch.shipped = rule.builtin || (watch.parent && watch.parent.shipped);
-  $let(c.slot_watch, &watch)
+  with (c.slot_watch = &watch) {
     return _lowered(c, result, position, expected, site);
+  }
 }
 
 /* Pushes each expression within `source`, which a translator may insert
@@ -657,9 +664,10 @@ static Var _marked(Var node, Array outputs, Array found, int &refused) {
 static List _fill_values(Compiler c, List prepared, Array values) {
   (List skeleton, List order) = prepared;
   Array lowered = auto values.copy();
-  $let(c.active_rewrites, c.active_rewrites.cdr())
+  with (c.active_rewrites = c.active_rewrites.cdr()) {
     foreach (int slot in order)
       lowered[slot] = c.normalize(values[slot]);
+  }
   return _filled(skeleton, lowered);
 }
 
@@ -715,8 +723,9 @@ Ast Compiler.watched_step(Compiler c, Ast ast) {
   Effects before = {0};
   if (preparation) before = _effects(c);
   Ast lowered;
-  $let(c.slot_watch, owner.parent) $let(c.active_rewrites, owner.outer)
+  with (c.slot_watch = owner.parent, c.active_rewrites = owner.outer) {
     lowered = c.normalize(ast);
+  }
   if (preparation) {
     preparation.inner = _add(preparation.inner, _since(_effects(c), before));
     if (preparation.outputs[slot].list_payload()) preparation.repeated = 1;

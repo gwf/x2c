@@ -26,8 +26,7 @@ void Compiler.ensure_macro_lisp(Compiler c) {
 module Var _eval_string(Compiler c, String source, Token invocation) {
   Var result;
   MetaContext *context = MetaContext.current();
-  $let(context.site, invocation)
-  $let(context.evaluator, c) {
+  with (context.site = invocation, context.evaluator = c) {
     /* A compiler operation called from Lisp has already reported its
        failure; wrapping the transfer would report it a second time. */
     try result = c.macro_lisp.eval_string(source);
@@ -107,7 +106,7 @@ void Compiler.evaluate_declaration_effect(
                ${invocation.pos} $form);
   if (key in c.evaluated_effects ||
       (!library_filling && library_imports && key in library_imports)) return;
-  $let(c.collect_protocols, 1) {
+  with (c.collect_protocols = 1) {
     c.ensure_macro_lisp();
     _eval_string(c, form, invocation);
   }
@@ -371,8 +370,9 @@ Lisp Compiler.open_macro_library(Compiler c) {
     library_imports = {};
     library_definitions = {};
     library_comptime = {};
-    $let(c.macro_lisp, shared)
+    with (c.macro_lisp = shared) {
       return _fill_library(c, shared);
+    }
   }
 }
 

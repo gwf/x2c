@@ -26,7 +26,7 @@ List Compiler.parse_macro_definition(Compiler c) {
   d.nested = !!c.macro_holes;
   Map enclosing = c.macro_holes;
   // A rejected signature must not leave later declarations as templates.
-  $let(c.macro_holes, {}) {
+  with (c.macro_holes = {}) {
     d.locals = {};
     c.macro_holes[%(locals)] = d.locals;
     if (enclosing != NULL) c.macro_holes[%(enclosing)] = enclosing;
@@ -192,11 +192,11 @@ module void _announce(Definition &d) {
    whole template, initializers included, as the full parse does. */
 module void _body(Definition &d) {
   Compiler c = d.c;
-  $let(c.shallow, 0)
-  $let(c.return_type, NULL)
-  $let(c.runtime_literals, c.runtime_literals || d.anonymous)
-  $let(c.local_macro_captures, d.local ? {} : NULL)
-  $let(c.local_macro_capture_scopes, c.sym.scope_count()) {
+  with (c.shallow = 0,
+        c.return_type = NULL,
+        c.runtime_literals = c.runtime_literals || d.anonymous,
+        c.local_macro_captures = d.local ? {} : NULL,
+        c.local_macro_capture_scopes = c.sym.scope_count()) {
     c.sym.push_new_scope();
     defer c.sym.pop_scope();
     d.template = _read_body(d);

@@ -71,7 +71,7 @@ meta int scoped(int n) {
 
 meta int let_restores(int n) {
   int r = n;
-  $let(r, 5) { r = r + 1; }
+  with (r = 5) { r = r + 1; }
   return r;
 }
 

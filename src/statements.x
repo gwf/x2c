@@ -125,7 +125,7 @@ static List _expression_statement(Compiler c, Symbol position) {
   if (label) return label;
   Token start = c.token;
   List expr;
-  $let(c.meta_statement, start) expr = c.parse_expression();
+  with (c.meta_statement = start) { expr = c.parse_expression(); }
   c.expect(<;>);
   if (!c.macro_holes)
     match (expr) case %(expr ? (meta-call *)):
@@ -398,8 +398,7 @@ static List _case_pattern(Compiler c, Token start, List &types) {
 static List _parse_pattern(Compiler c, List &types) {
   Array captures = auto [];
   List pattern = NULL;
-  $let(c.in_pattern, 1)
-  $let(c.match_types, captures) {
+  with (c.in_pattern = 1, c.match_types = captures) {
     pattern = c.try_parse_macro_pattern();
     if (!pattern) pattern = c.try_parse_macro_pattern_insertion(0);
     if (!pattern) pattern = c.parse_expression();

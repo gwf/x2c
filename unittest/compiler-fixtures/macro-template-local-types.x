@@ -18,7 +18,7 @@ macro Stmt $count_cast(Expr $root, Name $n) {
 
 macro Stmt $let_local(Name $n) {
   int local = 1;
-  $let(local, 7) { $n += local; }
+  with (local = 7) { $n += local; }
   $n += local;
 }
 

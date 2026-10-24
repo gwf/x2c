@@ -1098,7 +1098,7 @@ static int _custom_call(void *pointer, xt_autograd_context native,
     Use `backward_callbacks` to differentiate the result. */
 Tensor Tensor.custom(Func forward, Func backward, List inputs) {
   TorchCallbackError error = {0};
-  $let(callback_error, &error) {
+  with (callback_error = &error) {
     int count;
     xt_tensor *handles = _handles(inputs, count);
     xt_tensor result =
@@ -1113,7 +1113,7 @@ Tensor Tensor.custom(Func forward, Func backward, List inputs) {
     Nested backward and higher-order differentiation are not supported. */
 void Tensor.backward_callbacks(Tensor tensor) {
   TorchCallbackError error = {0};
-  $let(callback_error, &error) {
+  with (callback_error = &error) {
     int status = xt_backward_callbacks(tensor.native);
     if (error.cause) Error.raise(error.cause, error.detail);
     _check(status, "backward_callbacks");

@@ -416,7 +416,7 @@ static void _lower_parameter_self(Compiler c, Var replacement) {
 module List _bind_collected_initializers(
   Compiler c, List input, Var declaration, Var construction) {
   if (c.shallow) return input;
-  $let(c.macro_stack, construction) {
+  with (c.macro_stack = construction) {
     return c.bind_syntax(declaration, <unit>, c.return_type);
   }
 }

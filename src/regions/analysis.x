@@ -155,7 +155,7 @@ void Compiler.check_meta_regions(Compiler c, List fn) {
   _fixpoint(w, fn);
   if (!w.warnings.len()) return;
   (Symbol code, int at, String message, List notes) = w.warnings[0];
-  $let(c.origin, at) { c.report_error(code, message, NULL, notes); }
+  with (c.origin = at) { c.report_error(code, message, NULL, notes); }
 }
 
 /** Computes one unit's region summaries and findings for an optional

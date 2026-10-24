@@ -620,7 +620,7 @@ String JsonValue.str(JsonValue value) {
 
 Symbol JsonValue.kind(JsonValue value) {
   _json_value_live(value, "kind");
-  with value.native {
+  alias value.native {
     if (yyjson_is_null(_)) return <null>;
     if (yyjson_is_bool(_)) return <bool>;
     if (yyjson_is_sint(_)) return <sint>;

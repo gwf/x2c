@@ -360,8 +360,9 @@ List Compiler.parse_field(Compiler c, List context) {
    the aggregate as the current aggregate type. */
 static List _member_macro(Compiler c, List context, Symbol position) {
   if (c.peek(0) != <$> && c.peek(0) != <ident>) return NULL;
-  $let(c.aggregate_type, context)
+  with (c.aggregate_type = context) {
     return c.try_parse_macro_target_at(position);
+  }
 }
 
 static List _field(Compiler c, List context, int delegated) {
@@ -693,7 +694,7 @@ static List _finish_aggregate_type(
   List type = %($tag $name);
   Array bound = [];
   Symbol position = tag == <enum> ? <enumerator> : <field>;
-  $let(c.aggregate_type, type) {
+  with (c.aggregate_type = type) {
     foreach (List member in members)
       foreach (Var row in c.evaluate_macro_rows(member))
         _push_items(bound, c.bind_syntax(row, position, c.return_type));

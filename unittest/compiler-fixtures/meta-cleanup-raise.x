@@ -11,7 +11,7 @@
 meta static int depth = 0;
 
 meta void fails(void) {
-  $let(depth, 5) {
+  with (depth = 5) {
     x2c_diagnostic_fail("failed inside the cleanup block", %());
   }
 }

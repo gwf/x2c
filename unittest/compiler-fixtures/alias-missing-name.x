@@ -2,6 +2,6 @@
 
 int main(void) {
   int value = 1;
-  with value as {}
+  alias value as {}
   return 0;
 }

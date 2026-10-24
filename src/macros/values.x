@@ -340,7 +340,7 @@ static void _place_support(Compiler c, Var code) {
 List Compiler.bind_code_value(
   Compiler c, List carrier, Symbol position, Type return_type) {
   List bound = NULL;
-  $let(c.macro_application, c.macro_application + 1) {
+  with (c.macro_application = c.macro_application + 1) {
     SymTxn transaction = { 0 };
     if (c.recovery_depth > 0)
       transaction = c.begin_semantic_transaction();

@@ -1552,8 +1552,9 @@ static Var _lower_arms(
     captures[slot] = %(bound $result (quote $binder));
   }
   Var taken;
-  $let(l.match_values, captures)
+  with (l.match_values = captures) {
     taken = _lower_block_apart(l, %(${arm.cadr()} @rest), k);
+  }
   if (_lower_failed(l, taken)) return void;
   Map saved = _lower_env_copy(l, l.env);
   Var other = _lower_arms(l, value, arms.cdr(), rest, k);
@@ -2517,11 +2518,11 @@ static Var _lower_defer(Lowering &l, Var cleanup, List rest, List k) {
   };
   Map outer = l.env;
   Var undo = void, body = void;
-  $let(l.on_break, NULL) $let(l.on_continue, NULL) $let(l.pending, NULL) {
+  with (l.on_break = NULL, l.on_continue = NULL, l.pending = NULL) {
     l.env = _lower_env_copy(l, inside);
     undo = _lower_block(l, %($cleanup), %(end));
   }
-  $let(l.pending, &frame) {
+  with (l.pending = &frame) {
     l.env = inside;
     body = _lower_block(l, rest, %(at-depth ${frame.depth - 1} $k));
   }

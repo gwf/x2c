@@ -53,10 +53,13 @@ static int _spells_block(const char *text) =>
    prefix. Diagnostics locate the block in this file. */
 static int _file(
   Splice &s, String path, String text, String prefix, String file_prefix) {
-  $let(s.path, path) $let(s.text, text) $let(s.prefix, prefix)
-  $let(s.file_prefix, file_prefix)
-  $let(s.c.filename, path) $let(s.c.text, text)
-  $let(s.c.line_markers, NULL) {
+  with (s.path = path,
+        s.text = text,
+        s.prefix = prefix,
+        s.file_prefix = file_prefix,
+        s.c.filename = path,
+        s.c.text = text,
+        s.c.line_markers = NULL) {
     _mark(s, 1, 0);
     Token block = _block(s), close = NULL;
     if (!block) {

@@ -14,7 +14,7 @@ List Compiler.full_parse(Compiler c, Map globs, int generated_symbols) {
   c.unit_nodes = nodes;
   _reset_parse(c, globs, generated_symbols);
   if (c.script) _parse_script(c, nodes);
-  else $let(c.recovery_depth, c.recovery_depth + 1) {
+  else with (c.recovery_depth = c.recovery_depth + 1) {
     _append_preproc(c, nodes);
     _parse_forms(c, nodes);
   }

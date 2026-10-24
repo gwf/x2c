@@ -146,7 +146,7 @@ static List _decorate(
     return %(seq $node);
   }
   List result = _bind_decoration(d, node);
-  $let(c.token, invocation) {
+  with (c.token = invocation) {
     transaction.commit();
   }
   return result;
@@ -207,7 +207,7 @@ static List _target(Decoration &d) {
 static List _positional_target(Compiler c, Symbol position) {
   switch (position) {
     case <unit>:
-      $let(c.capture_unit, 1) return c.parse_top_level();
+      with (c.capture_unit = 1) { return c.parse_top_level(); }
     case <block>: case <statement>:
       return c.parse_governed(position);
     case <field>:      return c.parse_field(c.aggregate_type);
@@ -261,7 +261,7 @@ static List _bind_decoration(Decoration &d, List node) {
 static List _bind_body(Compiler c, List node, List decorated) {
   Type declared = _declared_result(decorated);
   List result = NULL;
-  $let(c.return_type, declared) {
+  with (c.return_type = declared) {
     result = c.bind_syntax(node, <block>, c.return_type);
   }
   List items = result.car() == <seq> ? result.cdr() : %($result);

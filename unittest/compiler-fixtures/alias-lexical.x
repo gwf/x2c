@@ -34,19 +34,19 @@ static int with(int with) {
 }
 
 static void helper(Point *point) {
-  with point as value {
+  alias point as value {
     value->z = 70;
   }
 }
 
 static void contextual_as(Point *as) {
-  with as {
+  alias as {
     _->y += 1;
   }
 }
 
 macro Stmt $fixture.set_x(Expr $target, Expr $value) {
-  with $target {
+  alias $target {
     _.x = $value;
   }
 }
@@ -57,7 +57,7 @@ macro Stmt $fixture.assign(Expr $target, Expr $value) {
 
 macro Stmt $fixture.template_shadow(Expr $target) {
   Point _ = { 0 };
-  with $target {
+  alias $target {
     _.x += 1;
     {
       Point _ = { 0 };
@@ -75,72 +75,72 @@ int main(void) {
   Box box = { 0 };
   box.pointer = &box.points[0];
 
-  with box.point {
+  alias box.point {
     _.x = 1;
     _.y = 2;
     _.z = 3;
   }
-  with box.points[next_index()] {
+  alias box.points[next_index()] {
     _.x = 10;
     _.x += 1;
   }
-  with *box.pointer {
+  alias *box.pointer {
     _.y = 20;
   }
-  with counted(&box.point) {
+  alias counted(&box.point) {
     _->x += 1;
     _->y += 1;
   }
-  with counted(&box.point) {
+  alias counted(&box.point) {
     ;
   }
 
   int scaled = 0;
-  with 1 + 2 {
+  alias 1 + 2 {
     scaled = _ * 3;
   }
-  if (scaled == 9) with box.point {
+  if (scaled == 9) alias box.point {
     _.z += 1;
   }
 
   Point _ = { 30, 0, 0 };
   int shadow_local = 0;
-  with box.point {
+  alias box.point {
     _.x += 1;
     Point _ = { 40, 0, 0 };
     _.x += 2;
     shadow_local = _.x;
   }
 
-  with box.point {
+  alias box.point {
     _.x += 1;
-    with box.points[0] {
+    alias box.points[0] {
       _.y += 1;
     }
     _.y += 1;
   }
-  with box.point as item {
+  alias box.point as item {
     item.z += 1;
-    with box.points[0] as item {
+    alias box.points[0] as item {
       item.z = 30;
     }
     item.z += 1;
   }
-  with box.point as outer {
-    with box.points[1] {
+  alias box.point as outer {
+    alias box.points[1] {
       _.x = outer.x + 1;
     }
   }
 
   $fixture.set_x(box.points[1], 6);
-  with box.points[1] {
+  alias box.points[1] {
     $fixture.assign(_.z, 50);
   }
   helper(&box.points[0]);
   contextual_as(&box.points[1]);
   $fixture.template_shadow(box.points[1]);
 
-  with box.point as point {
+  alias box.point as point {
     point.x += 1;
   }
   int keyword = point();

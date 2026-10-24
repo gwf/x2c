@@ -295,9 +295,10 @@ static int _load_source(
     return 0;
   }
   ReplResult result = session.load(frontend, path.text.parse());
-  $let(session.compiler.text, result.source)
+  with (session.compiler.text = result.source) {
     foreach (Var entry, result.diagnostics)
       session.compiler.print_diagnostic(entry);
+  }
   if (result.status == <loaded> || result.status == <reloaded>) {
     foreach (List row, result.removed)
       printf("removed %s from %s\n", row.cadr().repr(), row.car());
@@ -398,7 +399,7 @@ int repl_run(CliRequest request, ReplOptions options) {
       fprintf(stderr, "typed: %%%s\n", result.syntax.repr());
     if (options.dump && result.lowered)
       fprintf(stderr, "lowered: %s\n", result.lowered.repr());
-    $let(unit.compiler.text, result.source) {
+    with (unit.compiler.text = result.source) {
       foreach (Var entry, result.diagnostics)
         unit.compiler.print_diagnostic(entry);
     }

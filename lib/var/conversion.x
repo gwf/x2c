@@ -188,7 +188,7 @@ static void _numeric_decode(
     .tag = info.tag, .floating = info.floating,
     .unsigned_value = info.unsigned_value, .bits = info.bits,
     .rank = info.rank};
-  with decoded {
+  alias decoded {
     switch (info.tag) {
       case <i8>: case <u8>: case <i16>: case <u16>: case <i32>: case <u32>:
         _.raw = value.payload32() & Var.width_mask(_.bits); break;

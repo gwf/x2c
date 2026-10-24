@@ -1,6 +1,6 @@
 #include "x2c.x"
 
 int main(void) {
-  with {}
+  alias {}
   return 0;
 }

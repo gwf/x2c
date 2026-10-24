@@ -7,7 +7,7 @@ int main(void) {
   int outer = 1;
   try {
     outer = 2;
-    $let(outer, 5) printf("inside %d\n", outer);
+    with (outer = 5) { printf("inside %d\n", outer); }
   }
   finally printf("after %d\n", outer);
   return 0;

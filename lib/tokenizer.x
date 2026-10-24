@@ -965,7 +965,7 @@ void Tokenizer.init(Tokenizer tokenizer, char *text, Symbol mode) {
    Tokenizer storage. A null Tokenizer or empty stream returns NULL. */
 Token Tokenizer.next(Tokenizer tokenizer) {
   if (!tokenizer) return NULL;
-  with tokenizer.cursor {
+  alias tokenizer.cursor {
     if (_ && _.type == <eof>) return _;
     if (!_ && !tokenizer.tokens.len()) return NULL;
     Token token = _ ? _ + 1 : (void *) tokenizer.tokens;

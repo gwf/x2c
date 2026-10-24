@@ -79,14 +79,15 @@ Var Compiler.apply_meta_function(
   Compiler c, String name, List arguments, Token site) {
   c.ensure_macro_lisp();
   MetaContext *context = MetaContext.current();
-  $let(context.has_bindings, 0)
-  $let(context.captures, NULL)
-  $let(context.definition_file, c.filename)
-  $let(context.expander, c)
-  $let(context.evaluator, c)
-  $let(context.site, site)
-  $let(meta_call_form, meta_call_form)
+  with (context.has_bindings = 0,
+        context.captures = NULL,
+        context.definition_file = c.filename,
+        context.expander = c,
+        context.evaluator = c,
+        context.site = site,
+        meta_call_form = meta_call_form) {
     return _run_meta(c, NULL, name, arguments, site, 0);
+  }
 }
 
 /* Runs the meta call `expression`, or else `name` applied to `arguments`,

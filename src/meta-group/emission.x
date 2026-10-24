@@ -102,7 +102,7 @@ static String _diagnostic_line(List entry) {
    from nothing, so restoring those undoes the emission. */
 static void _isolate(
   Compiler c, struct Compiler &saved, struct GenNames &names, String stem) {
-  with c {
+  alias c {
     _.names.adapters = names.adapters.copy();
     _.names.file_scope_owners = names.file_scope_owners.copy();
     _.id_keys = saved.id_keys.copy();

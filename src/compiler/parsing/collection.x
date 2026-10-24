@@ -40,7 +40,7 @@ static void _shallow_parse_loop(Compiler c) {
       int line = start.line;
       String package = c.owns_package_source(c.token_source(start, line))
                      ? c.package : NULL;
-      $let(c.package, package) (void) c.parse_top_level_mode(1);
+      with (c.package = package) { (void) c.parse_top_level_mode(1); }
     }
     else (void) c.parse_top_level_mode(1);
     _debug_tokens(start, c.token);
@@ -82,7 +82,7 @@ void Compiler.collect_compile_time_definition(Compiler c, int keyword) {
   }
   int failed = 0;
   DiagnosticsHold hold = c.diagnostics.hold();
-  $let(c.recovery_depth, c.recovery_depth + 1) {
+  with (c.recovery_depth = c.recovery_depth + 1) {
     try {
       if (keyword) c.parse_keyword_definition();
       else c.parse_macro_definition();

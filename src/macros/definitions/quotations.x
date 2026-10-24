@@ -175,7 +175,7 @@ static List _quotation(
   _naming(d);
   d.nested = !!c.macro_holes;
   Map enclosing = c.macro_holes;
-  $let(c.macro_holes, holes) {
+  with (c.macro_holes = holes) {
     d.locals = {};
     c.macro_holes[%(locals)] = d.locals;
     if (enclosing != NULL) c.macro_holes[%(enclosing)] = enclosing;

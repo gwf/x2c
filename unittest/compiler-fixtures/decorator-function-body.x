@@ -17,8 +17,10 @@ $lock(mutex) static void bump(Mutex mutex, int *count) {
   (*count)++;
 }
 
-$let(level, 7) static int borrowed(void) {
-  return level;
+static int borrowed(void) {
+  with (level = 7) {
+    return level;
+  }
 }
 
 /* A return that needs a conversion still gets one: the produced items are

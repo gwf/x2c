@@ -4,7 +4,7 @@
 macro Stmt $sum_lengths(Name $out) {
   $declare_list(items);
   foreach (String item, items) $out += item.len();
-  $let(items, %("f")) {
+  with (items = %("f")) {
     foreach (String item, items) $out += item.len();
   }
 }

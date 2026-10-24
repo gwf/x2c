@@ -259,7 +259,7 @@ static List _parse_associated(Compiler c, Map names) {
 static List _parse_member(
   Compiler c, String participant, Map members) {
   List declaration = NULL;
-  $let(c.in_proto, 1) {
+  with (c.in_proto = 1) {
     declaration = c.parse_simple_declaration();
   }
   List binding = NULL, identity = NULL;

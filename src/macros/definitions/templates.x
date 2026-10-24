@@ -193,7 +193,7 @@ static int _uses_holes_once(Definition &d, Map uses) {
 /* Makes the finished definition visible in place of its signature. */
 module List _publish(Definition &d) {
   List node = _definition_node(d);
-  $let(d.c.token, d.start) _show(d, node);
+  with (d.c.token = d.start) { _show(d, node); }
   return node;
 }
 
