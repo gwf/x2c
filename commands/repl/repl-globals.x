@@ -182,7 +182,7 @@ static List _object_argument(
   if (record && c.sym.resolve_key(source).canonicalize() !=
                 c.sym.resolve_key(wanted).canonicalize())
     raise %(repl (reason "loaded record argument has a different type"));
-  Array setup = auto [], values = auto [];
+  auto Array setup = [], values = [];
   foreach (List index, indices) {
     List temporary = c.sym.introduce(c.fresh_name("repl_index"));
     setup.push(c.rebuild_statement($!{ long long $temporary = $index; }).cadr());
@@ -229,7 +229,7 @@ static List _loaded_call(
     objects |= !!object;
   }
   if (!objects) return NULL;
-  Array values = auto [], setup = auto [];
+  auto Array values = [], setup = [];
   int i = 0;
   foreach (List argument, arguments) {
     List value = selected[i++];

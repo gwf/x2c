@@ -103,7 +103,7 @@ static void _new_types(Compiler c, Var value, Map names, Array pending) {
 /* Reuse visible identities and mint new ones only for newly reachable
    anonymous types. Unnamed families with no public reference are omitted. */
 static Map _stable_types(Compiler c, Map visible, Map symbols) {
-  Map forward = auto {}, reverse = auto {};
+  auto Map forward = {}, reverse = {};
   Array pairs = auto [];
   ReloadTypes types = {.forward = forward, .reverse = reverse, .pairs = pairs};
   foreach (Var (key, value), symbols) {
@@ -692,7 +692,7 @@ ReplResult ReplSession.load(
   if (!replacing) paths.push(filename);
   paths.sort();
   MetaHelper helper = frontend.build_loaded(paths);
-  Map prepared = auto {}, dropped = auto {};
+  auto Map prepared = {}, dropped = {};
   Array removed = auto [];
   defer {
     if (helper) xfree(helper);

@@ -118,7 +118,7 @@ static int _runtime_static_declaration(
     that way, or is `NULL` at file scope.
 */
 int Compiler.static_value_is_runtime(Compiler c, List value, Map runtime) {
-  Array pending = auto [], modes = auto [];
+  auto Array pending = [], modes = [];
   RuntimeScan s = {
     .c = c, .runtime = runtime, .pending = pending, .modes = modes
   };

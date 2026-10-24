@@ -1019,9 +1019,9 @@ static Var _lower_lambda(Lowering &l, List params, List held, Var body) {
     l.env = previous;
     l.automatic = automatic;
   }
-  Array names = auto [], types = auto [];
-  Array boxes = auto [], values = auto [];
-  Array captures = auto [], captured = auto [];
+  auto Array names = [], types = [];
+  auto Array boxes = [], values = [];
+  auto Array captures = [], captured = [];
   Array saved = auto [];
   foreach (List capture, held) {
     match (capture)
@@ -2439,7 +2439,7 @@ static void _lower_scan_cleanups(Lowering &l, Var form) {
     Var item = _lower_bare(rest.car());
     match (item) case %(seq *parts): item = _lower_bare(parts.last());
     match (item) case %(defer ?): {
-      Map named = auto {}, declared = auto {};
+      auto Map named = {}, declared = {};
       _lower_scan_names(item, named, declared);
       _lower_scan_names(rest.cdr(), named, declared);
       foreach (Var id, named.keys())

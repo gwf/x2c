@@ -347,7 +347,7 @@ static List _array_form(Compiler c, Var value) {
 
 static List _map_form(Compiler c, Var value) {
   Map map = value;
-  Array keys = auto [], entries = auto [];
+  auto Array keys = [], entries = [];
   foreach (Var (key, item) in map) keys.push(key);
   // Cache ids and emission must not depend on bucket layout.
   foreach (Var key in keys.sort()) {

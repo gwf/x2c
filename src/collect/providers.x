@@ -234,7 +234,7 @@ static int _loaded_types_equal(Type declared, Type defined) {
 /* Compare complete type families actually named by the declaration. A
    forward declaration can remain incomplete in the calling source. */
 static int _loaded_type_rows(Type type, Map visible, Map provider) {
-  Map needed = auto {}, checked = auto {};
+  auto Map needed = {}, checked = {};
   _needed_types(type, visible, needed);
   int changed = 1;
   while (changed) {

@@ -489,7 +489,7 @@ static int _same(Effects a, Effects b) =>
 static List _prepared(
   Compiler c, List source, Var result, Symbol position, Type expected,
   Token site) {
-  Array sources = auto [], values = auto [];
+  auto Array sources = [], values = [];
   _expression_nodes(source, sources);
   match (result) case %(code-value *):
     return _watched(c, result, sources, position, expected, site);

@@ -443,7 +443,7 @@ static List _build(Helper &h) {
    later in the load order. Each source still parses in its own Context. */
 static String _loaded_providers(Helper &h) {
   h.providers = {};
-  Map owners = auto {}, packaged = auto {};
+  auto Map owners = {}, packaged = {};
   int index = 1;
   foreach (String path in h.owners) {
     List provider = _loaded_provider(h, path, index++);
