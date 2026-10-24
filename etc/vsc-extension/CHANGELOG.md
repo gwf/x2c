@@ -5,6 +5,10 @@ first.
 
 ## Unreleased
 
+- Highlight managed `auto` declarations and acquired-value initializers.
+  Recognize `module` declarations after another declaration on the same
+  line. Highlight retained names in macro `using` clauses.
+
 - Highlight `module` declarations and member blocks, including private
   macros, functions, protocols, keyword aliases, and types. Cover `static`
   typedefs and aggregate types with scope tests. Color uppercase macro kinds

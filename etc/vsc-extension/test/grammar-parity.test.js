@@ -180,3 +180,29 @@ test('class declarations and C expression forms from the source grammar have sco
   for (const name of ['_Generic', 'offsetof', 'va_arg'])
     await check(`int value = ${name}(value, int);`, name, `keyword.operator.${name}.x2c`);
 });
+
+test('managed declarations and acquired initializers highlight auto', async () => {
+  for (const line of ['auto Scope work = NULL;', 'auto value = Buffer.new(0);',
+    'auto const value = 1;', 'Buffer value = auto Buffer.new(0);',
+    'void work() { auto value = 1; }']) {
+    await check(line, 'auto', 'storage.modifier.auto.x2c');
+  }
+  for (const line of ['// auto value = 1;', 'char *s = "auto";',
+    'int automatic = 1;', 'Buffer value = $auto(Buffer.new(0));'])
+    await check(line, 'auto', 'storage.modifier.auto.x2c', false);
+});
+
+test('module declarations can follow another declaration on the same line', async () => {
+  for (const line of ['int first; module int second;',
+    'int first; module inline int work(void) => 1;'])
+    await check(line, 'module', 'storage.modifier.module.x2c');
+  await check('struct module { int value; };', 'module', 'keyword.declaration.module.x2c', false);
+});
+
+test('macro using accepts retained names and fresh names', async () => {
+  for (const line of ['using scale;', 'using scale, $temporary;',
+    'macro Expression $scaled(Expr $value) using scale => $value * scale;'])
+    await check(line, 'using', 'keyword.other.macro.using.x2c');
+  for (const line of ['int using = 1;', '// using scale;', 'char *s = "using scale;";'])
+    await check(line, 'using', 'keyword.other.macro.using.x2c', false);
+});
