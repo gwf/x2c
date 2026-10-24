@@ -320,7 +320,7 @@ void Compiler.place(Compiler c, List where, Var code) {
     }
     case %(unit-init):
       c.add_init(<finish>, c.bind_syntax(code, <block>, NULL));
-    case %(unit-init (!set ?area (!or protocol prepare statics finish))):
+    case %(unit-init (!or ?area protocol prepare statics finish)):
       c.add_init(area, c.bind_syntax(code, <block>, NULL));
     default: $fail.macros_placement(c, c.token, where);
   }

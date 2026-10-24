@@ -595,7 +595,7 @@ static Var _slot_shape(Compiler c, Var content) {
     case %(ident ?binding):
       return %(lambda-snapshot $binding) in c.semantic_binding_facts()
         ? %(ident snapshot) : <ident>;
-    case %((!set ?head (!or call index getindex postfix cast cache)) *):
+    case %((!or ?head call index getindex postfix cast cache) *):
       return head;
     case %(parens (expr ? ?inner)): return _nested_shape(c, <parens>, inner);
     case %(op . (expr ? ?base) ?): return _nested_shape(c, %(op .), base);

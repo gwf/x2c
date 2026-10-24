@@ -311,7 +311,7 @@ static Var _rewrite(ReplSession session, Var node) {
         return _with_indices(_write(session, entry, type, value, 0), setup);
       }
     }
-    case %(expr ?type ((!set ?kind (!or op postfix)) ?operator ?target))
+    case %(expr ?type ((!or ?kind op postfix) ?operator ?target))
       if (operator == <++> || operator == <"--">): {
         List entry = _global(session, target);
         if (entry) return _increment(session, entry, type, operator, kind);

@@ -55,7 +55,7 @@ List Compiler.optional_reference_test(
       return c.optional_reference_test(operand, truth);
     }
     case %(expr ? ${$source_operator_content(
-        %((!set ?op (!or == !=)) ?left ?right))}):
+        %((!or ?op == !=) ?left ?right))}):
       return _null_comparison(c, op, left, right, truth);
     case %(expr (opt-ref *) ${$source_identifier_content(%(?binding))}):
       if (%(optional-reference-param $binding) in

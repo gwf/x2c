@@ -17,13 +17,13 @@ void Compiler.record_declaration_visibility(Compiler c, List declaration) {
       if (name) c.sym.mark_static(%($name));
     }
     case %(
-      (!set ?kind (!or typedef declare)) ?type (bindings *rows)
+      (!or ?kind typedef declare) ?type (bindings *rows)
     ): {
       int mark = private || type.type().is_static();
       if (mark) {
         Type base = type.type().base_type();
         match (base)
-          case %((!set ?tag (!or struct union enum)) ?name *body):
+          case %((!or ?tag struct union enum) ?name *body):
             if (name && (body || !rows || rows === %((bind () ()))))
               c.sym.mark_static(%($tag $name));
       }

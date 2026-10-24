@@ -273,7 +273,7 @@ static void _serve(Var request) {
   Var found;
   match (request) {
     case %(reset): _reset();
-    case %((!set ?operation (!or call load-call))
+    case %((!or ?operation call load-call)
            ?(int index) ?(String name) ?(List arguments)
            ?(List globals)): {
       Macro.use_subject(globals);

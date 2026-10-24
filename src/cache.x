@@ -179,12 +179,12 @@ static List _rewrite_statics(Compiler c, List code, StaticQueue &q) {
    assigns its slot. */
 static List _rewrite_static(Compiler c, List decl, StaticQueue &q) {
   match (decl)
-    case %(declare (!set ?decltype (!and (static *) (!not (* const *))))
+    case %(declare (!and ?decltype (static *) (!not (* const *)))
                    (bindings *bound_list)):
       return _defer_bindings(c, decltype, bound_list, q);
   if (!c.static_value_is_runtime(decl, NULL)) return decl;
   match (decl)
-    case %(declare (!set ?decltype (!not (* const *)))
+    case %(declare (!not ?decltype (* const *))
                    (bindings *bound_list)):
       return _defer_bindings(c, decltype, bound_list, q);
   match (decl)
@@ -306,7 +306,7 @@ List Compiler.zero_initializer(Compiler c, List value) {
         zeroed.push(c.zero_initializer(item));
       return %(composite (commas @{zeroed.list_free()}));
     }
-    case %((!set ?tag (!or dotinit indexinit)) ?key ?inner):
+    case %((!or ?tag dotinit indexinit) ?key ?inner):
       return %($tag $key ${c.zero_initializer(inner)});
   }
   return zero;

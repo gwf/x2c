@@ -236,7 +236,7 @@ static List _declared_type_names(List node) {
   if (names) return names;
   match (node) case %(declare ?type ?): {
     List base = type.list().type().base_type();
-    match (base) case %((!set ?kind (!or struct union enum)) ?name (*)):
+    match (base) case %((!or ?kind struct union enum) ?name (*)):
       return %(($kind $name));
   }
   return NULL;
@@ -299,7 +299,7 @@ module void _spelled_types(List node, Map names) {
       base = base.cdr();
     if (base.car() is <string> && !base.cdr()) names[base.car()] = 1;
     match (base)
-      case %((!set ?kind (!or struct union enum)) ?name *):
+      case %((!or ?kind struct union enum) ?name *):
         names[%($kind $name)] = 1;
   }
 }
@@ -361,7 +361,7 @@ module List _prototype(List type, List declarator) =>
    tag the prototype spells keeps it the file-scope type. */
 static void _forward_tags(Partition &p, List node) {
   match (node)
-    case %((!set ?tag (!or struct union)) ?(String name)): {
+    case %((!or ?tag struct union) ?(String name)): {
       if (name in p.forwarded) return;
       p.forwarded[name] = 1;
       p.header.push(%(declare ($tag $name) (bindings (bind () ()))));

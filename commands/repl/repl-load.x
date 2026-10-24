@@ -147,7 +147,7 @@ static void _check_type_rows(Map before, Map after) {
   foreach (Var key, before.keys()) {
     List family = NULL;
     match (key) {
-      case %((!set ?kind (!or typedef struct union enum)) ?name *):
+      case %((!or ?kind typedef struct union enum) ?name *):
         family = %($kind $name);
       case %(?name "layout-attribute"): family = %(typedef $name);
     }
@@ -233,7 +233,7 @@ static String _row_name(List key) {
 /* The type family a row belongs to, or NULL for a function or global. */
 static List _row_family(List key, Var declaration) {
   match (key) {
-    case %((!set ?kind (!or typedef struct union enum)) ?name *):
+    case %((!or ?kind typedef struct union enum) ?name *):
       return %($kind $name);
     case %(?name "layout-attribute"): return %(typedef $name);
     case %(?name): if (declaration == %(typedef $name)) return declaration;

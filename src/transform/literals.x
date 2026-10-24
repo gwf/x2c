@@ -178,7 +178,7 @@ module Ast _interpolation(Compiler c, Ast ast) {
         return c.cache(%(string (expr ("String") (literal ("String") $text))));
   Array rows = [];
   foreach (List row in ast.cdr()) match (row) {
-    case %((!set ?tag (!or segvar segexp)) ?value):
+    case %((!or ?tag segvar segexp) ?value):
       rows.push(%($tag ${c.convert_segment_to_string(value)}));
     default: rows.push(row);
   }

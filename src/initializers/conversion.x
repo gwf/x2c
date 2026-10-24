@@ -193,7 +193,7 @@ static List _convert_homogeneous_row(
 
 static List _replace_value(List original, List value) {
   match (original)
-    case %((!set ?tag (!or dotinit indexinit)) ?key ?inner):
+    case %((!or ?tag dotinit indexinit) ?key ?inner):
       return %($tag $key ${_replace_value(inner, value)});
   return value;
 }
@@ -320,7 +320,7 @@ static List _convert_mixed_row(
 static List _capture_leaves(
   Compiler c, List value, Array inputs) {
   match (value) {
-    case %((!set ?kind (!or dotinit indexinit)) ?key ?inner):
+    case %((!or ?kind dotinit indexinit) ?key ?inner):
       return %($kind $key ${_capture_leaves(c, inner, inputs)});
     case %(expr ?type ${$source_composite_content(%(*items))}): {
       Array captured = [];
@@ -469,13 +469,13 @@ List Compiler.convert_compound_literal(
 List Compiler.initializer_native_types(Compiler c, Type type) {
   Type base = type.base_type(), definition = base, reference = base;
   match (base) {
-    case %(!or ((!set ?kind (!or struct union)) (gensym ? ?) ?body)
-               ((!set ?kind (!or struct union)) (!set ?body (fields *)))): {
+    case %(!or ((!or ?kind struct union) (gensym ? ?) ?body)
+               ((!or ?kind struct union) (!set ?body (fields *)))): {
       String name = c.fresh_name("initializer_type");
       definition = %($kind $name $body);
       reference = %($kind $name);
     }
-    case %((!set ?kind (!or struct union)) ?name (fields *)):
+    case %((!or ?kind struct union) ?name (fields *)):
       reference = %($kind $name);
   }
   Array definitions = [], references = [];
