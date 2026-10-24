@@ -21,7 +21,7 @@ meta static String _delegate_type_name(Type type) {
   List base = type_base_suffix(type);
   match (base)
     case %((!or struct union)
-           (!set ?tag (!or (!not (*)) (gensym ? ?) (binding ? ?)))):
+           (!or ?tag (!not (*)) (gensym ? ?) (binding ? ?))):
       return tag.str();
   return base.car().str();
 }

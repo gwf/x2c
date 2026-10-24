@@ -180,7 +180,7 @@ static List _bind_references(
 static String _rewrite_references(String form, List references) {
   Tokenizer tokenizer = Tokenizer.new(form, <macro-lisp>);
   tokenizer.scan();
-  Buffer rewritten = $auto(Buffer.new(0));
+  Buffer rewritten = auto Buffer.new(0);
   int copied = 0;
   Token token = tokenizer.next();
   while (token && token.type != <eof>) {
@@ -222,7 +222,7 @@ static String _with_construction(
 static Var _replace_target(Var produced, Var target, Var required) {
   if (produced is not <list>) return void;
   List produced_items = produced;
-  Array items = $auto(produced_items);
+  Array items = auto produced_items;
   int at = produced_items.index(target);
   if (at >= 0) {
     items[at] = required;

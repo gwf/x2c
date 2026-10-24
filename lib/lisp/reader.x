@@ -76,7 +76,7 @@ static Var _prefixed(LispReader &r, Var prefix, int depth) {
 static Var _list(LispReader &r, int depth) {
   if (depth >= LISP_READ_DEPTH_MAX)
     raise %(size-limit (operation "Lisp.read") (depth $depth));
-  Array elements = $auto([]);
+  Array elements = auto [];
   Var out = void;
   loop {
     Token token = r.tokenizer.next();
@@ -175,7 +175,7 @@ Symbol Lisp.read(Lisp lisp, String source, unsigned &?cursor, Var &?out) {
   if (!source) return <eof>;
   if (!cursor) return <eof>;
   unsigned base = cursor;
-  Scope tokens_scope = $auto(Scope.new_named("Lisp tokens"));
+  Scope tokens_scope = auto Scope.new_named("Lisp tokens");
   Tokenizer tokenizer = _scan_lisp_tokens(source + base, &tokens_scope);
   return _read_form(tokenizer, source, base, cursor, out);
 }

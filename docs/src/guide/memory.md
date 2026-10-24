@@ -10,7 +10,7 @@ decide when each allocation is freed. x2c storage is of three kinds:
   together.
 
 The [system macros](system-macros.md) provide `$scope()` for a retained
-region, `$scope(pointer)` for a temporary destination, and `$auto` for an
+region, `$scope(pointer)` for a temporary destination, and initializer `auto` for an
 explicitly owned local. Classes can also supply early `free` operations.
 The [standard library overview](../library/overview.md) links to the detailed
 API reference.
@@ -328,7 +328,7 @@ leading indentation of the current line for `push`, `pop`, `indent`, and
 ```x2c
 String text;
 $scope() {
-  Buffer out = $auto(Buffer.new(0));
+  Buffer out = auto Buffer.new(0);
   out.write("case ").printf("%d", 7).write(":").newline_indent();
   text = out;
 }
@@ -382,7 +382,7 @@ To avoid dangling pointers:
 
 Every allocation in this chapter belongs to a region: a part of the program
 that owns storage and ends at a known point. Regions are `$scope()` blocks,
-`Scope.retain` and `Scope.release` pairs, `$scope(&slot)` pushes, `$auto`
+`Scope.retain` and `Scope.release` pairs, `$scope(&slot)` pushes, initializer `auto`
 locals, `Scope` locals that `Scope.destroy` ends, `Pool.open` brackets, and
 the function's own locals and parameters.
 

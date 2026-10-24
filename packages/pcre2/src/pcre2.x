@@ -512,7 +512,7 @@ RegexpMatch Var.regexpmatch(Var value) => (RegexpMatch) value.list();
 
 $lisp.binding(pcre2_lisp, "regex-match")
 static List _lisp_regex_match(String pattern, String subject) {
-  Regexp regexp = $auto(Regexp.compile(pattern, 0));
+  Regexp regexp = auto Regexp.compile(pattern, 0);
   RegexpMatch found = regexp.match(subject);
   if (!found) return NULL;
   List texts = NULL;
@@ -523,7 +523,7 @@ static List _lisp_regex_match(String pattern, String subject) {
 
 $lisp.binding(pcre2_lisp, "regex-find-all")
 static List _lisp_regex_find_all(String pattern, String subject) {
-  Regexp regexp = $auto(Regexp.compile(pattern, 0));
+  Regexp regexp = auto Regexp.compile(pattern, 0);
   List texts = NULL;
   foreach (RegexpMatch found, regexp.find_all(subject))
     texts = cons(found[0], texts);
@@ -532,14 +532,14 @@ static List _lisp_regex_find_all(String pattern, String subject) {
 
 $lisp.binding(pcre2_lisp, "regex-split")
 static List _lisp_regex_split(String pattern, String subject) {
-  Regexp regexp = $auto(Regexp.compile(pattern, 0));
+  Regexp regexp = auto Regexp.compile(pattern, 0);
   return regexp.split(subject);
 }
 
 $lisp.binding(pcre2_lisp, "regex-replace")
 static String _lisp_regex_replace(
   String pattern, String subject, String replacement) {
-  Regexp regexp = $auto(Regexp.compile(pattern, 0));
+  Regexp regexp = auto Regexp.compile(pattern, 0);
   return regexp.replace_all(subject, replacement);
 }
 

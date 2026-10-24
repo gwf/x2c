@@ -16,7 +16,7 @@
  (params ("value")))
 (function (name "tidy__exercise") (display "tidy__exercise") 
  (line 6) (source "unittest/compiler-fixtures/package-generated-cleanup.x" 6) 
- (span 152 253) (static 0) (origin source) 
+ (span 152 251) (static 0) (origin source) 
  (doc "") (text "int exercise(void)") (type ((func ((void))) int)) 
  (params ("")))
 (type (name "_x2c_gensym_defer_env_0") (kind alias) 

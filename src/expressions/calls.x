@@ -362,7 +362,7 @@ List Compiler.func_call_parts(Compiler c, Var content) {
   match (%(expr () $content)) {
     case apply(?callee): return %($callee);
     case call(?callee, ?count, *arguments): {
-      Array parts = $auto([callee]);
+      Array parts = auto [callee];
       foreach (List argument in _slot_statements(arguments)) {
         List part = _func_arg_part(argument);
         if (!part) return NULL;
@@ -399,7 +399,7 @@ static List _func_arg_part(List argument) {
 
 /* Open statement groups in a slot. */
 static List _slot_statements(List items) {
-  Array opened = $auto([]);
+  Array opened = auto [];
   foreach (List item in items)
     match (item) {
       case %(seq *group):

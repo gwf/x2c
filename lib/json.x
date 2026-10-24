@@ -484,7 +484,7 @@ void Json.write_file(Var value, Path path) {
 }
 
 static String _json(Var value, int pretty) {
-  Buffer out = $auto(Buffer.new(0));
+  Buffer out = auto Buffer.new(0);
   Writer w = {.out = out, .pretty = pretty};
   _write_value(w, value, 0);
   return out;
@@ -520,7 +520,7 @@ static void _elements(Writer &w, Var sequence, int depth) {
 }
 
 static void _members(Writer &w, Map object, int depth) {
-  Array names = $auto([]);
+  Array names = auto [];
   foreach (Var (name, member) in object) {
     if (name is not <string> && !name.is_atom()) {
       Symbol tag = name.tag();

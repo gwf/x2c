@@ -266,7 +266,7 @@ Source: `lib/process.x:49`
 `class Job { List stages; JobLaunch launch; long *pids; int *statuses; int count, started, finished, status, nul_output, nul_errors; File output_file, errors_file; String output_text, errors_text; } *`
 
 A command or pipeline and the record of its one run.
-A job that is still running when its Scope ends, or when its `$auto`
+A job that is still running when its Scope ends, or when its `auto`
 block exits, is terminated and reaped.
 
 Source: `lib/process.x:33`

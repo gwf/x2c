@@ -144,8 +144,8 @@ static typedef struct ArmScan {
     macro expands to one.
 */
 void Compiler.scan_conditionals(Compiler c) {
-  Array stack = $auto([]);
-  Map layout = $auto({});
+  Array stack = auto [];
+  Map layout = auto {};
   ArmScan scan = {.c = c, .stack = stack, .layout = layout};
   c.arm_stacks = {};
   c.layout_marks = [];

@@ -198,7 +198,7 @@ static size_t _curl_stream(
   size_t length = size * count;
   if (!length) return 0;
   try {
-    Bytes chunk = $auto(Bytes.new(1).append(data, length));
+    Bytes chunk = auto Bytes.new(1).append(data, length);
     stream.consume(chunk, stream.data);
   }
   catch %(?cause *detail): {
@@ -982,23 +982,23 @@ static CurlEasy _lisp_easy(void) =>
 
 $lisp.binding(libcurl_lisp, "http-get")
 static String _lisp_http_get(String url) {
-  CurlEasy easy = $auto(_lisp_easy());
-  CurlResponse response = $auto(easy.get(url));
+  CurlEasy easy = auto _lisp_easy();
+  CurlResponse response = auto easy.get(url);
   return response.text();
 }
 
 $lisp.binding(libcurl_lisp, "http-post")
 static String _lisp_http_post(String url, String content_type, String body) {
-  CurlEasy easy = $auto(_lisp_easy());
-  CurlResponse response = $auto(
-    easy.body(content_type, body).request("POST", url));
+  CurlEasy easy = auto _lisp_easy();
+  CurlResponse response = auto
+    easy.body(content_type, body).request("POST", url);
   return response.text();
 }
 
 $lisp.binding(libcurl_lisp, "http-status")
 static int _lisp_http_status(String url) {
-  CurlEasy easy = $auto(_lisp_easy());
-  CurlResponse response = $auto(easy.get(url));
+  CurlEasy easy = auto _lisp_easy();
+  CurlResponse response = auto easy.get(url);
   return (int) response.response_code();
 }
 
@@ -1007,8 +1007,8 @@ static int _lisp_http_status(String url) {
 */
 $lisp.binding(libcurl_lisp, "http-headers")
 static List _lisp_http_headers(String url) {
-  CurlEasy easy = $auto(_lisp_easy());
-  CurlResponse response = $auto(easy.request("HEAD", url));
+  CurlEasy easy = auto _lisp_easy();
+  CurlResponse response = auto easy.request("HEAD", url);
   CurlResponseBlock block = response.blocks().last();
   List lines = NULL;
   foreach(CurlHeader header, block.headers())

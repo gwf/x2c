@@ -28,7 +28,7 @@ static List _spec(String operation) {
 
 int main(int argc, char **argv) {
   x2c_initialize_command_environment(argv[0], x2c_embedded_identity());
-  Array arguments = $auto(CliRequest.command_arguments(argc, argv));
+  Array arguments = auto CliRequest.command_arguments(argc, argv);
   if (arguments) {
     CliRequest parsed = CliRequest.parse_arguments(arguments);
     PackageOptions request = {

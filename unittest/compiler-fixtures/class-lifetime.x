@@ -50,7 +50,7 @@ void Scaled.init(Scaled &scaled, int x) {
 static int _failing_constructors(void) {
   int caught = 0;
   try {
-    Item item = $auto(Item.new(-1));
+    Item item = auto Item.new(-1);
   }
   catch %(make-fail): caught++;
   $scope() {
@@ -71,7 +71,7 @@ int main(void) {
   assert(frees == 0);
   assert(Scope.stats().live_allocations == before);
   $scope() {
-    Item item = $auto(Item.new(2));
+    Item item = auto Item.new(2);
     assert(item.values[0].int() == 2);
   }
   assert(frees == 1);
@@ -83,7 +83,7 @@ int main(void) {
     assert(good.values.len() == 0);
   }
   $scope() {
-    Sized sized = $auto(Sized.new(4, 7));
+    Sized sized = auto Sized.new(4, 7);
     assert(sized.limit == 4 && sized.values[0].int() == 7);
     Sized none = NULL;
     none.free();

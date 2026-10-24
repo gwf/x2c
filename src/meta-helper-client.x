@@ -342,7 +342,7 @@ static String _exit_reason(void) {
    `deadline` passes. A helper that has exited must not end the compiler
    with SIGPIPE; a helper not reading must not block its deadline. */
 static int _write_frame(List message, double deadline) {
-  Buffer out = $auto(Buffer.new(0));
+  Buffer out = auto Buffer.new(0);
   if (!datum_frame(out, message)) return 0;
   String frame = %"$out";
   void (*previous)(int) = signal(SIGPIPE, SIG_IGN);

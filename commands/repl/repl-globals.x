@@ -48,7 +48,7 @@ static List _path(
 
 static List _global(ReplSession session, List expression) {
   String path = NULL;
-  Array arguments = $auto([]);
+  Array arguments = auto [];
   List global = _path(session, expression, path, arguments);
   if (!global) return NULL;
   Map paths = global.caddr();
@@ -91,7 +91,7 @@ static List _write(
 /* A read-modify-write shares its evaluated indices between both calls. */
 static List _indices(ReplSession session, List entry, Array setup) {
   Compiler c = session.compiler;
-  Array arguments = $auto([]);
+  Array arguments = auto [];
   foreach (List value, entry.caddr().list()) {
     List temporary = c.sym.introduce(c.fresh_name("repl_index"));
     setup.push(
@@ -166,7 +166,7 @@ static List _object_argument(
     }
   }
   String path = NULL;
-  Array indices = $auto([]);
+  Array indices = auto [];
   List entry = _path(session, object, path, indices);
   if (!entry) return NULL;
   Type object_type = object.cadr();
@@ -182,7 +182,7 @@ static List _object_argument(
   if (record && c.sym.resolve_key(source).canonicalize() !=
                 c.sym.resolve_key(wanted).canonicalize())
     raise %(repl (reason "loaded record argument has a different type"));
-  Array setup = $auto([]), values = $auto([]);
+  Array setup = auto [], values = auto [];
   foreach (List index, indices) {
     List temporary = c.sym.introduce(c.fresh_name("repl_index"));
     setup.push(c.rebuild_statement($!{ long long $temporary = $index; }).cadr());
@@ -219,7 +219,7 @@ static List _loaded_call(
   List parameters = NULL;
   type.function_parts(parameters, NULL);
   if (parameters.len() != arguments.len()) return NULL;
-  Array selected = $auto([]);
+  Array selected = auto [];
   int objects = 0;
   List remaining = parameters;
   foreach (List argument, arguments) {
@@ -229,7 +229,7 @@ static List _loaded_call(
     objects |= !!object;
   }
   if (!objects) return NULL;
-  Array values = $auto([]), setup = $auto([]);
+  Array values = auto [], setup = auto [];
   int i = 0;
   foreach (List argument, arguments) {
     List value = selected[i++];
@@ -255,7 +255,7 @@ static List _increment(
       (reason "loaded global increments require a numeric type"));
   if (kind == <postfix>) return _write(
     session, entry, type, $!int{ 0 }, operator == <++> ? 1 : 2);
-  Array setup = $auto([]);
+  Array setup = auto [];
   entry = _indices(session, entry, setup);
   Symbol applied = operator == <++> ? <+> : <->;
   List value = session.compiler.resolve_expression(
@@ -302,7 +302,7 @@ static Var _rewrite(ReplSession session, Var node) {
       List entry = _global(session, target);
       Symbol applied = Symbol.compound_operator(operator);
       if (entry) {
-        Array setup = $auto([]);
+        Array setup = auto [];
         if (applied) entry = _indices(session, entry, setup);
         List value = _rewrite(session, rhs);
         if (applied) value = c.resolve_expression(
@@ -311,7 +311,7 @@ static Var _rewrite(ReplSession session, Var node) {
         return _with_indices(_write(session, entry, type, value, 0), setup);
       }
     }
-    case %(expr ?type ((!set ?kind (!or op postfix)) ?operator ?target))
+    case %(expr ?type ((!or ?kind op postfix) ?operator ?target))
       if (operator == <++> || operator == <"--">): {
         List entry = _global(session, target);
         if (entry) return _increment(session, entry, type, operator, kind);

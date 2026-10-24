@@ -77,7 +77,7 @@ int main(void) {
   );
   _publish(Image.perlin_noise(tile_size, tile_size, 128, 128, 6.0f), 3);
 
-  Image sheet = $auto(Image.new(900, 600, Color.rgb(247, 248, 252)));
+  Image sheet = auto Image.new(900, 600, Color.rgb(247, 248, 252));
   sheet.draw_text("Procedural texture tiles", 36, 30, 32, ink);
   sheet.draw_text(
     "generated, written to builds/, and read back from disk",
@@ -97,7 +97,7 @@ int main(void) {
   /* Read the noise tile back as x2c values, make its dark pixels
      transparent, and rebuild an image from the result. */
   Image noise = Image.load(_tile_path(3));
-  ImagePixels pixels = $auto(noise.pixels());
+  ImagePixels pixels = auto noise.pixels();
   noise.free();
 
   int cleared = 0;
@@ -108,10 +108,10 @@ int main(void) {
     cleared++;
   }
 
-  Image backdrop = $auto(Image.checked(
+  Image backdrop = auto Image.checked(
     32, 32, 4, 4, Color.rgb(202, 212, 228), Color.rgb(248, 250, 253)
-  ));
-  Image knockout = $auto(pixels.image());
+  );
+  Image knockout = auto pixels.image();
 
   // The backdrop only exists so the transparent pixels read as transparent.
   Rectangle whole = { 0, 0, 32, 32 }, panel = { 36, 330, 220, 220 };

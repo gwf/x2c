@@ -210,18 +210,18 @@ while (running.len()) Job.wait_any(running).check();
 ~}
 ```
 
-`kill` sends a signal to every stage still running. A job held with `$auto`
+`kill` sends a signal to every stage still running. A job held with initializer `auto`
 is terminated and reaped if it is still running when its block exits,
 including when an error leaves the block. Each stage receives `SIGTERM`,
 and a stage still running a second later receives `SIGKILL`. A job
-abandoned without `$auto` is terminated and reaped the same way when the
+abandoned without initializer `auto` is terminated and reaped the same way when the
 Scope that owns it ends:
 
 ```x2c
 ~#include "process.x"
 ~int main(void) {
 {
-  Job server = $auto(%(python3 -m http.server 8000).job().live().start());
+  Job server = auto %(python3 -m http.server 8000).job().live().start();
   %(curl -fsS "http://localhost:8000/").job().run();
 }
 ~  return 0;
@@ -421,7 +421,7 @@ end, so it also works on binary files that `read_text` rejects:
 ```x2c
 ~#include "digest.x"
 ~int main(void) {
-File shell = $auto(File.open("/bin/sh", "rb"));
+File shell = auto File.open("/bin/sh", "rb");
 printf("%s  /bin/sh\n", shell.sha256());
 String abc = "abc".sha256();
 ~  return abc.startswith("ba7816bf8f01cfea") ? 0 : 1;

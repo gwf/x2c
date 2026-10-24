@@ -3,17 +3,17 @@
 import "pcre2" with Regexp, RegexpCapture, RegexpMatch;
 
 int main(void) {
-  Regexp request = $auto(Regexp.compile(
+  Regexp request = auto Regexp.compile(
     %"^(?<method>[A-Z]+) (?<path>[^ ]+) HTTP/[0-9.]+ (?<status>[0-9]{3})$$",
     PCRE2_UTF | PCRE2_UCP
-  ));
+  );
 
-  Regexp api_path = $auto(Regexp.compile("^/api/", PCRE2_UTF | PCRE2_UCP));
-  Regexp parameter = $auto(Regexp.compile(
+  Regexp api_path = auto Regexp.compile("^/api/", PCRE2_UTF | PCRE2_UCP);
+  Regexp parameter = auto Regexp.compile(
     "(?:[?&])(?<name>[^=&]+)=(?<value>[^&]*)",
     PCRE2_UTF | PCRE2_UCP
-  ));
-  Regexp token = $auto(Regexp.compile("token=[^& ]+", PCRE2_UTF | PCRE2_UCP));
+  );
+  Regexp token = auto Regexp.compile("token=[^& ]+", PCRE2_UTF | PCRE2_UCP);
 
   List lines = %(
     "GET /docs?lang=en HTTP/1.1 200"

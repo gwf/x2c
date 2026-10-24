@@ -222,7 +222,7 @@ static void _help(void) {
 }
 
 static int _stats_mode(String command, int &verbose) {
-  Array words = $auto([]);
+  Array words = auto [];
   foreach (String word, command.words()) words.push(word);
   if (words.len() == 1) {
     verbose = 0;
@@ -237,7 +237,7 @@ static int _stats_mode(String command, int &verbose) {
 
 static int _inspect(
   ReplSession session, const struct ReplCommand *descriptor, String command) {
-  Array words = $auto([]);
+  Array words = auto [];
   foreach (String word, command.words()) words.push(word);
   if (descriptor->dispatch == <symbols>) {
     if (words.len() > 2)
@@ -286,7 +286,7 @@ static int _inspect(
 
 static int _load_source(
   ReplSession session, Frontend frontend, String argument) {
-  Tokenizer tokens = $auto(Tokenizer.new(argument, <x2c>));
+  Tokenizer tokens = auto Tokenizer.new(argument, <x2c>);
   tokens.scan();
   Token path = tokens.next();
   if (tokens.status() != <ok> || path.type != <lit-char*> ||

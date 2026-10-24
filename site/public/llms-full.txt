@@ -239,7 +239,7 @@ values normally last for the process. See [scopes and lifetime](https://x2c-lang
 ```x2c
 int main(void) {
 $scope() {
-  File file = $auto(tmpfile());
+  File file = auto tmpfile();
   file.puts("hello\n");
   Array scratch = [1, 2, 3];
 }
@@ -248,7 +248,7 @@ return 0;
 ```
 
 `$scope()` retains an allocation region around a statement, and
-`$auto(initializer)` releases a local at block exit. `$lock` and `$let` give
+Initializer `auto` releases the acquired value at block exit. `$lock` and `$let` give
 scoped locking and temporary replacement. See
 [classes and system macros](https://x2c-lang.dev/docs/guide/system-macros.html). `defer statement;` runs the
 statement at block exit, in reverse order of registration.
@@ -332,9 +332,9 @@ the exact rules. [Idioms](https://x2c-lang.dev/docs/guide/idioms.html) shows how
 
 # Classes and System Macros
 
-The compiler ships a small set of macros for declaring ordinary types and
-managing block lifetimes. They use the same methods, protocols, allocation,
-and `defer` rules as handwritten x2c. Their definitions are available without
+The compiler ships a small set of macros and keywords for declaring ordinary
+types and managing block lifetimes. They use the same methods, protocols,
+allocation, and `defer` rules as handwritten x2c. They are available without
 an import; runtime operations still require their ordinary declarations,
 usually supplied by `#include "x2c.x"`.
 
@@ -344,15 +344,16 @@ usually supplied by `#include "x2c.x"`.
 | `$scope` | Shipped decorator | Retain a region or select a Scope destination |
 | `$let` | Shipped decorator | Temporarily replace one captured storage location |
 | `$lock` | Shipped decorator | Hold a Mutex while a statement runs |
-| `$auto` | Shipped expression macro | Attach cleanup to an initialized local |
+| Initializer `auto` | Keyword after `=` | Clean up the acquired value at block exit |
 | `foreach` | Shipped keyword alias | Traverse through the ordinary Iter protocol |
 | `with` | Contextual grammar | Substitute a source expression within a block |
 | `$switch`, `$dedent`, `$assert`, `$todo`, `$unreachable`, `$time` | Shipped, explicit import | Remove boilerplate C leaves to every caller |
 | Project macros | Explicit import | Supply project-specific syntax and policy |
 
-Only `class` and `foreach` have bare keyword aliases. Use the `$` spelling for
-`$scope`, `$let`, `$lock`, and `$auto`. For authoring your own macros, continue
-with [Compile-time Macros](https://x2c-lang.dev/docs/guide/macros.html).
+`class` and `foreach` are keyword aliases. Use the `$` spelling for `$scope`,
+`$let`, and `$lock`. Initializer `auto` follows `=`; its compatibility spelling
+is `$auto(value)`. For authoring your own macros, continue with
+[Compile-time Macros](https://x2c-lang.dev/docs/guide/macros.html).
 
 ## Classes are ordinary named types
 
@@ -369,7 +370,7 @@ printed without writing its constructor, converters, hash, or printer:
 class Point { int x; int y; };
 int main(void) {
 Point point = Point.new(3, 4);
-Map labels = $auto({});
+Map labels = auto {};
 labels[point] = "origin";
 printf("%s: %s\n", point.repr(), labels[Point.new(3, 4)]);
   return 0;
@@ -388,7 +389,7 @@ every method.
 | `T.alloc` | Returns zeroed Scope storage for a new pointer class with a record representation. Replace it when the object lives elsewhere. |
 | `T.new` | Constructs a scalar, value record, or pointer object. When the class defines `init`, `new` takes the remaining parameters of `init`, calls it on storage from `alloc` (or a zeroed value), and returns the object. An alias forwards the applicable constructor of its underlying named type. Some layouts require an explicit constructor or `init`, as described below. |
 | `T.free` | Releases a new pointer class's Scope allocation early. When the class defines `void T.drop(T)`, `free` first calls it on a non-NULL object. `free` accepts NULL. |
-| `T.cleanup` | Calls the selected `free` for a new pointer class and supplies `Cleanup` participation for `$auto`. |
+| `T.cleanup` | Calls the selected `free` for a new pointer class and supplies `Cleanup` participation for `auto`. |
 | `T.var` | Converts a new class to `Var`: a scalar uses its underlying representation, a pointer boxes identity, and a value record boxes a Scope-owned copy. |
 | `Var.t` | Converts a `Var` back to the new class; for example, `Var.point` for `Point`. |
 | `T.equal`, `T.hash` | Use identity for new pointer classes and fields for supported flat value records. Other value records require compatible explicit methods. |
@@ -510,7 +511,7 @@ void History.drop(History self) {
   self.items.free();
 }
 int main(void) {
-History history = $auto(History.new(8));
+History history = auto History.new(8);
 history.items.push(42);
   return history.limit == 8 ? 0 : 1;
 }
@@ -548,7 +549,7 @@ class Point { int x; int y; };
 int main(void) {
 Point point = Point.new(3, 4);
 Var first = point, second = Point.new(3, 4);
-Map labels = $auto({});
+Map labels = auto {};
 labels[first] = "origin";
 printf("%s\n", labels[second]);
   return second in labels ? 0 : 1;
@@ -646,7 +647,7 @@ that destination, and restores the previous destination on exit:
 
 ```x2c
 int main(void) {
-Scope destination = $auto(Scope.new());
+Scope destination = auto Scope.new();
 $scope(&destination) { xmalloc(8); }
   return 0;
 }
@@ -656,7 +657,7 @@ The corresponding body placement is:
 
 ```x2c
 int main(void) {
-Scope destination = $auto(Scope.new());
+Scope destination = auto Scope.new();
 {
   Scope.push(&destination);
   {
@@ -701,7 +702,7 @@ succeeds:
 
 ```x2c
 int main(void) {
-Mutex mutex = $auto(Mutex.new());
+Mutex mutex = auto Mutex.new();
 $lock(mutex) { printf("held\n"); }
   return 0;
 }
@@ -713,12 +714,13 @@ private synchronized decorator keeps its own policy.
 
 ## Clean up an initialized local
 
-`$auto` is the complete initializer of an ordinary local declaration:
+Write `auto` immediately after `=` to manage the complete initializer of an
+ordinary local declaration:
 
 ```x2c
 int main(void) {
-Array items = $auto([]);
-Buffer text = $auto(Buffer.new(0));
+Array items = auto [];
+Buffer text = auto Buffer.new(0);
 items.push(42);
 text.write(items.repr());
 printf("%s\n", text.str());
@@ -746,12 +748,12 @@ the existing typedef/protocol ancestry, and keeps ordinary method precedence:
 | Other types | An explicitly adopted compatible cleanup method |
 
 Cleanup releases the acquired value even if the local is reassigned. Each
-`$auto` below protects its own Array:
+initializer `auto` below protects its own Array:
 
 ```x2c
 int main(void) {
-Array current = $auto([]);
-Array replacement = $auto([]);
+Array current = auto [];
+Array replacement = auto [];
 current = replacement;
   return 0;
 }
@@ -760,21 +762,27 @@ current = replacement;
 Both Arrays are cleaned up at block exit. Reassignment neither releases the
 first Array early nor transfers its cleanup to the replacement. Returning or
 storing an alias does not cancel cleanup; the caller must choose an
-appropriate lifetime. A managed local cannot be managed again: `$auto` of a
-local that an earlier `$auto` manages, or of another `$auto`, is a
-compile-time error, because the value would be released twice. There is no move or recursive ownership system. Var
-itself has no owning cleanup contract, and Pool's `free` operation requires a
-separate allocation argument.
+appropriate lifetime. A managed local cannot be managed again: initializing
+another managed local from that name is a compile-time error, because the
+value would be released twice. There is no move or recursive ownership system.
+Var itself has no owning cleanup contract, and Pool's `free` operation requires
+a separate allocation argument.
 
 Only an initialized automatic local that is a compound-statement item accepts
-`$auto`. Parentheses and macro construction preserve that position. Static or
-threaded storage, fields, assignment, returns, call arguments, for-header
-declarations, and wrappers nested inside arithmetic or conditionals do not
-supply this enclosing-block lifetime.
+initializer `auto`. Static or threaded storage, fields, assignment, returns,
+call arguments, for-header declarations, and wrappers nested inside arithmetic
+or conditionals do not supply this enclosing-block lifetime.
+
+The compatibility macro `$auto(value)` has the same acquired-value cleanup.
+Parentheses and forwarding macros can preserve its complete-initializer
+position; nested `$auto` calls are rejected. Initializer `auto` itself must
+follow `=`. Declaration `auto`, written before the type or name, instead
+cleans the variable's value at exit. See
+[Managed declarations and initializers](https://x2c-lang.dev/docs/reference/language.html#managed-declarations-and-initializers).
 
 ## Include the rest of the set
 
-`class`, `foreach`, `$scope`, `$let`, `$lock`, and `$auto` need no include. A
+`class`, `foreach`, `$scope`, `$let`, `$lock`, and `auto` need no include. A
 second set ships in `lib/system-macros.x` and becomes available with one
 line:
 
@@ -907,8 +915,8 @@ void History.drop(History self) {
 int main(int argc, char **argv) {
   if (argc != 2) return 0;
   $scope() {
-    History history = $auto(History.new());
-    File input = $auto(File.open(argv[1], "r"));
+    History history = auto History.new();
+    File input = auto File.open(argv[1], "r");
     for (String line; (line = input.readline()) != NULL; )
       history.lengths.push(line.len());
     printf("%s\n", history.lengths.repr());
@@ -922,7 +930,7 @@ int main(int argc, char **argv) {
 # Programming Idioms
 
 Use the shipped [classes and system macros](https://x2c-lang.dev/docs/guide/system-macros.html) where they
-express a complete constructor or block lifetime: `$auto` for an owned local,
+express a complete constructor or block lifetime: initializer `auto` for an owned local,
 `$scope` for a region, `$let` for saved storage, and `$lock` for a Mutex.
 
 These idioms combine the features introduced in the guide.

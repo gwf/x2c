@@ -24,7 +24,7 @@ static typedef struct LoadedCall {
 /* Collection selects the requested public names and complete type families.
    Generated accessor functions remain private helper targets. */
 static List _public_definitions(Compiler c, Map &symbols, Map globals) {
-  Array candidates = $auto([]), names = [];
+  Array candidates = auto [], names = [];
   foreach (List entry, c.meta_group)
     match (entry) {
       case %(function ?fn ?(String name) ?):
@@ -103,8 +103,8 @@ static void _new_types(Compiler c, Var value, Map names, Array pending) {
 /* Reuse visible identities and mint new ones only for newly reachable
    anonymous types. Unnamed families with no public reference are omitted. */
 static Map _stable_types(Compiler c, Map visible, Map symbols) {
-  Map forward = $auto({}), reverse = $auto({});
-  Array pairs = $auto([]);
+  Map forward = auto {}, reverse = auto {};
+  Array pairs = auto [];
   ReloadTypes types = {.forward = forward, .reverse = reverse, .pairs = pairs};
   foreach (Var (key, value), symbols) {
     Var old;
@@ -121,7 +121,7 @@ static Map _stable_types(Compiler c, Map visible, Map symbols) {
           _pair_types(value, replacement, types);
       }
   }
-  Array pending = $auto([]);
+  Array pending = auto [];
   foreach (Var name, types.reverse.keys()) pending.push(name);
   foreach (Var (key, value), symbols)
     if (_anonymous_family(key) is void)
@@ -130,7 +130,7 @@ static Map _stable_types(Compiler c, Map visible, Map symbols) {
     foreach (Var (key, value), symbols)
       if (_anonymous_family(key) == pending[i])
         _new_types(c, value, types.reverse, pending);
-  Map replacements = $auto({}), normalized = {};
+  Map replacements = auto {}, normalized = {};
   foreach (Var (name, identity), types.reverse)
     replacements[(void *) name.list()] = identity;
   foreach (Var (key, value), symbols) {
@@ -147,7 +147,7 @@ static void _check_type_rows(Map before, Map after) {
   foreach (Var key, before.keys()) {
     List family = NULL;
     match (key) {
-      case %((!set ?kind (!or typedef struct union enum)) ?name *):
+      case %((!or ?kind typedef struct union enum) ?name *):
         family = %($kind $name);
       case %(?name "layout-attribute"): family = %(typedef $name);
     }
@@ -233,7 +233,7 @@ static String _row_name(List key) {
 /* The type family a row belongs to, or NULL for a function or global. */
 static List _row_family(List key, Var declaration) {
   match (key) {
-    case %((!set ?kind (!or typedef struct union enum)) ?name *):
+    case %((!or ?kind typedef struct union enum) ?name *):
       return %($kind $name);
     case %(?name "layout-attribute"): return %(typedef $name);
     case %(?name): if (declaration == %(typedef $name)) return declaration;
@@ -249,7 +249,7 @@ static List _row_family(List key, Var declaration) {
 static List _check_removed(
   ReplSession session, ReplLoadedFile file, Map published, int retiring,
   Map dropped) {
-  Array names = $auto([]);
+  Array names = auto [];
   foreach (Var (key, declaration), file.symbols) {
     List family = _row_family(key, declaration);
     // Another file or the runtime introduced this type.
@@ -315,7 +315,7 @@ static void _check_type_unreferenced(ReplSession session, String name) {
     }
   foreach (List declaration, session.declarations) {
     if (!_mentions_type(declaration, name)) continue;
-    Array declared = $auto([]);
+    Array declared = auto [];
     _type_submission_names(declaration, declared);
     _referred(%"$name is used by prompt type ${declared[0]}");
   }
@@ -535,7 +535,7 @@ static Var _call(Func function, const FuncArg *argv) {
   List signature = function.signature();
   List parameters = signature.car().list().cadr();
   int count = parameters == %((void)) ? 0 : parameters.len();
-  Array arguments = $auto([]);
+  Array arguments = auto [];
   List parameter = parameters;
   for (int i = 0; i < count; i++, parameter = parameter.cdr()) {
     if (_is_record(c, parameter.car()))
@@ -589,7 +589,7 @@ static List _accessor(
   ReplSession session, ReplLoadedFile file, String name, Type bridge,
   int dimensions, int setter) {
   Compiler c = session.compiler;
-  Array parameters = $auto([]);
+  Array parameters = auto [];
   for (int i = 0; i < dimensions; i++) parameters.push(%(long long));
   if (setter) { parameters.push(bridge); parameters.push(%(int)); }
   if (!parameters.len()) parameters.push(%(void));
@@ -630,7 +630,7 @@ static void _publish(
     file = xcalloc(1, sizeof(struct ReplLoadedFile));
     file.path = filename;
   }
-  Map visible = $auto(session.compiler.sym.unit_symbols());
+  Map visible = auto session.compiler.sym.unit_symbols();
   foreach (Var (key, type), loaded.symbols) {
     if (!(key in visible))
       match (key)
@@ -686,14 +686,14 @@ ReplResult ReplSession.load(
     result.message = why;
     return result;
   }
-  Array paths = $auto([]);
+  Array paths = auto [];
   foreach (String path, session.files.keys())
     if (!retired || path != retired.path) paths.push(path);
   if (!replacing) paths.push(filename);
   paths.sort();
   MetaHelper helper = frontend.build_loaded(paths);
-  Map prepared = $auto({}), dropped = $auto({});
-  Array removed = $auto([]);
+  Map prepared = auto {}, dropped = auto {};
+  Array removed = auto [];
   defer {
     if (helper) xfree(helper);
     foreach (Var (path, value), prepared) {
@@ -710,8 +710,8 @@ ReplResult ReplSession.load(
     return result;
   }
   try {
-    Map visible = $auto(session.compiler.sym.unit_symbols());
-    Map published = $auto({});
+    Map visible = auto session.compiler.sym.unit_symbols();
+    Map published = auto {};
     if (retired)
       foreach (Var key, retired.symbols.keys())
         if (!_shared(session, retired, key)) visible.del(key);

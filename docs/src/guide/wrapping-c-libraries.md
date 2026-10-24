@@ -198,8 +198,9 @@ the region. Keep the explicit `free` method either way: it clears the native
 field, so after an early release the finalizer does nothing. See [attaching a
 finalizer](memory.md#attaching-a-finalizer).
 
-Adopt `Cleanup(T)` beside the type so a caller can write `$auto`. Without it
-the managed initializer is refused and every caller repeats the release.
+Adopt `Cleanup(T)` beside the type so initializer `auto` can release it.
+Without participation, the managed initializer adds no cleanup and the caller
+must arrange the release separately.
 When one method releases the handle, `$cleanup.by` from `cleanup.x`
 defines `Feed.cleanup` to call it and adopts the protocol:
 
@@ -231,7 +232,7 @@ The caller then names the lifetime at the acquisition:
 ~protocol Cleanup(Feed);
 ~List Feed.titles(Feed feed) { return NULL; }
 static int count_titles(String document) {
-  Feed feed = $auto(Feed.open(document));
+  Feed feed = auto Feed.open(document);
   return feed.titles().len();
 }
 ```

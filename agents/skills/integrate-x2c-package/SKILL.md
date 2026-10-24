@@ -28,8 +28,8 @@ approved task list directly.
 
 Judge the surface as a client writes it. A handle wrapper that owns native
 storage adopts `protocol Cleanup(T)`, so the client can write
-`$auto(T.open(...))`; without it the client cannot use the macro at all and
-must repeat a release at every call site.
+`T handle = auto T.open(...);`; without participation, `auto` has no cleanup
+operation and the client must arrange the release separately.
 
 Use source and upstream documentation to form hypotheses, then prove task
 reachability with actual programs. Inspect imported constants and raw options

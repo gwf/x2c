@@ -26,7 +26,7 @@ static typedef struct Render {
     Raises: `<alloc-fail>` or `<size-limit>` while constructing the result.
 */
 String List.str(List lst) {
-  Buffer buf = $auto(Buffer.new(0));
+  Buffer buf = auto Buffer.new(0);
   lst.write_str(buf);
   return buf;
 }
@@ -53,7 +53,7 @@ Buffer List.write_str(List lst, Buffer out) {
     Raises: `<alloc-fail>` or `<size-limit>` while constructing the result.
 */
 String List.repr(List lst) {
-  Buffer buf = $auto(Buffer.new(0));
+  Buffer buf = auto Buffer.new(0);
   lst.write_repr(buf);
   return buf;
 }
@@ -95,7 +95,7 @@ static void _nil(Buffer out) {
 /* Writes a List flat when it fits in the rest of the line. Returns zero,
    having written nothing, when it does not fit. */
 static int _fits(Render &r, Var elem) {
-  Buffer line = $auto(Buffer.new(r.out.padding));
+  Buffer line = auto Buffer.new(r.out.padding);
   Render flat = {line, r.mode};
   _flat(flat, elem);
   if (r.out.pos + line.content.length > _WIDTH) return 0;

@@ -3,7 +3,7 @@
     Copyright (c) 2026 Gary William Flake.
 
     A region is a `$scope()` block, a `Scope.retain` and `Scope.release`
-    pair, a `$scope(&slot)` push, a `Pool.open` bracket, an `$auto`
+    pair, a `$scope(&slot)` push, a `Pool.open` bracket, an initializer `auto`
     local, a Scope local that `Scope.destroy` ends, or the function's own
     storage, which an address taken with `&` borrows. The pass reads the
     typed forms the parser produced, before the transform driver rewrites

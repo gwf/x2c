@@ -10,7 +10,7 @@ static keyword loop $private.loop;
 
 module List _declarator_list(
   Compiler c, List type, List context, int row) {
-  Array bindings = $auto([]);
+  Array bindings = auto [];
   loop {
     bindings.push(_declarator_init(c, type, context));
     if ((row && _group_comma(c)) ||
@@ -102,7 +102,7 @@ module List _pointer(Compiler c) {
     }
     if (c.peek(0) != <ident> || !(c.token.text in c.object_macros))
       return ptr;
-    Array quals = $auto([]);
+    Array quals = auto [];
     if (!_prefix_macro_words(c, 1, quals)) return ptr;
     foreach (Symbol qualifier in quals) ptr = cons(qualifier, ptr);
   }
@@ -477,7 +477,7 @@ static List _function_parameters(Compiler c, int loaded_main) {
     current.
 */
 List Compiler.parse_parameter_list(Compiler c) {
-  Array parameters = $auto([]);
+  Array parameters = auto [];
   while (1) {
     _x2c_complete_here(c, <type>, _type_keywords());
     List parameter = c.try_parse_macro_slot(<param>);

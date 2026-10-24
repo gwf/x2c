@@ -229,7 +229,7 @@ values normally last for the process. See [scopes and lifetime](memory.md).
 ```x2c
 ~int main(void) {
 $scope() {
-  File file = $auto(tmpfile());
+  File file = auto tmpfile();
   file.puts("hello\n");
   Array scratch = [1, 2, 3];
 }
@@ -238,7 +238,7 @@ $scope() {
 ```
 
 `$scope()` retains an allocation region around a statement, and
-`$auto(initializer)` releases a local at block exit. `$lock` and `$let` give
+Initializer `auto` releases the acquired value at block exit. `$lock` and `$let` give
 scoped locking and temporary replacement. See
 [classes and system macros](system-macros.md). `defer statement;` runs the
 statement at block exit, in reverse order of registration.

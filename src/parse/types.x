@@ -99,7 +99,7 @@ static int _unseen_prefix(Compiler c) {
 }
 
 module List _type_qualifiers(Compiler c) {
-  Array quals = $auto([]);
+  Array quals = auto [];
   loop {
     _x2c_complete_here(c, <type>, _type_keywords());
     Symbol symbol = c.peek(0);
@@ -651,9 +651,9 @@ static Var _finish_type_spec(Compiler c, Var spec) {
   }
   if (spec is not <list>) return spec;
   match (spec) {
-    case %((!set ?tag (!or struct union)) ?name):
+    case %((!or ?tag struct union) ?name):
       return %($tag ${_finish_tag_name(c, name)});
-    case %((!set ?tag (!or struct union)) ?name (fields *members)):
+    case %((!or ?tag struct union) ?name (fields *members)):
       return _finish_aggregate_type(c, tag, name, members);
     case %(enum ?name):
       return %(enum ${_finish_tag_name(c, name)});

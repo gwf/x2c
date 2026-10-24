@@ -1,7 +1,7 @@
 # Programming Idioms
 
 Use the shipped [classes and system macros](system-macros.md) where they
-express a complete constructor or block lifetime: `$auto` for an owned local,
+express a complete constructor or block lifetime: initializer `auto` for an owned local,
 `$scope` for a region, `$let` for saved storage, and `$lock` for a Mutex.
 
 These idioms combine the features introduced in the guide.

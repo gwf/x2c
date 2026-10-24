@@ -9,11 +9,11 @@
 
 static void channel_constructor_forms_and_boxing(void) {
   $test.scoped();
-  Channel rendezvous = $auto(Channel.new());
-  Channel bounded = $auto(Channel.new(2));
-  Channel typed = $auto(Channel.new(<map>));
-  Channel typed_buffer = $auto(Channel.new(<i32>, 2));
-  Channel unbounded = $auto(Channel.new(<unbounded>));
+  Channel rendezvous = auto Channel.new();
+  Channel bounded = auto Channel.new(2);
+  Channel typed = auto Channel.new(<map>);
+  Channel typed_buffer = auto Channel.new(<i32>, 2);
+  Channel unbounded = auto Channel.new(<unbounded>);
   Var boxed = bounded;
   EXPECT_TRUE(boxed is <channel>);
   EXPECT_PTR_EQ(boxed.channel(), bounded);
@@ -27,7 +27,7 @@ static void channel_constructor_forms_and_boxing(void) {
 
 static void channel_close_drains_and_preserves_null_data(void) {
   $test.scoped();
-  Channel channel = $auto(Channel.new(3));
+  Channel channel = auto Channel.new(3);
   channel.send(11);
   channel.send(NULL);
   channel.send(nil);
@@ -46,7 +46,7 @@ static void channel_close_drains_and_preserves_null_data(void) {
 
 static void channel_rejects_void_and_exact_tag_mismatch(void) {
   $test.scoped();
-  Channel channel = $auto(Channel.new(<i32>, 1));
+  Channel channel = auto Channel.new(<i32>, 1);
   int no_void = 0, no_wrong_type = 0;
   try channel.send(void);
   catch %(void-op *): no_void = 1;
@@ -56,10 +56,10 @@ static void channel_rejects_void_and_exact_tag_mismatch(void) {
   EXPECT_TRUE(no_wrong_type);
   channel.send(3);
   EXPECT_INT_EQ(channel.receive().integer(), 3);
-  Channel lists = $auto(Channel.new(<list>, 1));
+  Channel lists = auto Channel.new(<list>, 1);
   lists.send(nil);
   EXPECT_TRUE(lists.receive().is_nil());
-  Channel handles = $auto(Channel.new(<channel>, 1));
+  Channel handles = auto Channel.new(<channel>, 1);
   handles.send(Channel.var(NULL));
   EXPECT_NULL(handles.receive().channel());
 }
@@ -79,7 +79,7 @@ static void channel_rejects_invalid_construction(void) {
 
 static void channel_unbounded_fifo(void) {
   $test.scoped();
-  Channel channel = $auto(Channel.new(<i32>, <unbounded>));
+  Channel channel = auto Channel.new(<i32>, <unbounded>);
   for (int i = 0; i < 128; ++i) channel.send(i);
   channel.close();
   for (int i = 0; i < 128; ++i)
@@ -89,7 +89,7 @@ static void channel_unbounded_fifo(void) {
 
 static void channel_rendezvous_iteration(void) {
   $test.scoped();
-  Channel channel = $auto(Channel.new());
+  Channel channel = auto Channel.new();
   int sum = 0, count = 0;
   Thread.run([
     %!(void) => {
@@ -106,7 +106,7 @@ static void channel_rendezvous_iteration(void) {
 
 static void channel_many_senders_share_bounded_queue(void) {
   $test.scoped();
-  Channel channel = $auto(Channel.new(2));
+  Channel channel = auto Channel.new(2);
   Array jobs = [];
   int remaining = 4, total = 0;
   for (int worker = 0; worker < 4; ++worker)
@@ -155,7 +155,7 @@ static void _channel_expect_stopped(Thread thread) {
 
 static void channel_stopped_sender_does_not_enqueue(void) {
   $test.scoped();
-  Channel channel = $auto(Channel.new(1));
+  Channel channel = auto Channel.new(1);
   channel.send(12);
   atomic_store(&channel_probe_ready, 0);
   Thread sender = Thread.start_raw(_channel_sender, &channel, sizeof(channel));
@@ -169,7 +169,7 @@ static void channel_stopped_sender_does_not_enqueue(void) {
 
 static void channel_stopped_receiver_does_not_consume(void) {
   $test.scoped();
-  Channel channel = $auto(Channel.new(1));
+  Channel channel = auto Channel.new(1);
   atomic_store(&channel_probe_ready, 0);
   Thread receiver = Thread.start_raw(
     _channel_receiver, &channel, sizeof(channel));
@@ -182,7 +182,7 @@ static void channel_stopped_receiver_does_not_consume(void) {
 
 static void channel_rendezvous_commit_survives_later_stop(void) {
   $test.scoped();
-  Channel channel = $auto(Channel.new());
+  Channel channel = auto Channel.new();
   for (int i = 0; i < 32; ++i) {
     Thread sender = Thread.start_raw(_channel_sender, &channel, sizeof(channel));
     EXPECT_INT_EQ(channel.receive().integer(), 71);
@@ -200,7 +200,7 @@ static void channel_rendezvous_commit_survives_later_stop(void) {
 
 static void channel_stopped_rendezvous_peer_is_not_matched(void) {
   $test.scoped();
-  Channel channel = $auto(Channel.new());
+  Channel channel = auto Channel.new();
   Thread stopped = Thread.start_raw(_channel_receiver, &channel, sizeof(channel));
   stopped.stop();
   Thread live = Thread.start_raw(_channel_receiver, &channel, sizeof(channel));
@@ -212,7 +212,7 @@ static void channel_stopped_rendezvous_peer_is_not_matched(void) {
 
 static void channel_close_rejects_unaccepted_rendezvous_send(void) {
   $test.scoped();
-  Channel channel = $auto(Channel.new());
+  Channel channel = auto Channel.new();
   Thread sender = Thread.start_raw(_channel_sender, &channel, sizeof(channel));
   channel.close();
   int rejected = 0;
@@ -225,7 +225,7 @@ static void channel_close_rejects_unaccepted_rendezvous_send(void) {
 
 static void channel_payload_ownership_is_unchanged(void) {
   $test.scoped();
-  Channel channel = $auto(Channel.new(2));
+  Channel channel = auto Channel.new(2);
   Map payload = {};
   payload[<value>] = 83;
   Scope parent = payload.scope().parent();
@@ -280,7 +280,7 @@ static void channel_cleanup_reclaims_only_owned_storage(void) {
 static void channel_close_wakes_exhausted_receivers(void) {
   $test.scoped();
   for (int capacity = 0; capacity < 2; ++capacity) {
-    Channel channel = $auto(Channel.new(capacity));
+    Channel channel = auto Channel.new(capacity);
     atomic_store(&channel_probe_ready, 0);
     Thread receiver = Thread.start_raw(
       _channel_receiver, &channel, sizeof(channel));
@@ -302,7 +302,7 @@ static Map _channel_owned_result(void) {
 static void channel_owned_receive_joins_receiver_scope(void) {
   $test.scoped();
   atomic_store(&channel_payload_drops, 0);
-  Channel channel = $auto(Channel.new(1));
+  Channel channel = auto Channel.new(1);
   Scope source = Scope.child();
   Scope.push(&source);
   Map part = _channel_owned_result();
@@ -320,7 +320,7 @@ static void channel_owned_receive_joins_receiver_scope(void) {
 static void channel_owned_closed_send_restores_parent(void) {
   $test.scoped();
   atomic_store(&channel_payload_drops, 0);
-  Channel channel = $auto(Channel.new(1));
+  Channel channel = auto Channel.new(1);
   channel.close();
   Map part = _channel_owned_result();
   Scope original = Scope.owner(part);
@@ -348,7 +348,7 @@ static void channel_owned_closed_send_restores_parent(void) {
 
 static void channel_owned_type_failure_keeps_sender_ownership(void) {
   $test.scoped();
-  Channel channel = $auto(Channel.new(<i32>, 1));
+  Channel channel = auto Channel.new(<i32>, 1);
   Map part = {};
   Scope original = Scope.owner(part);
   int rejected = 0;
@@ -375,7 +375,7 @@ static void channel_owned_stopped_send_restores_parent(void) {
   $test.scoped();
   for (int capacity = 0; capacity < 2; ++capacity) {
     atomic_store(&channel_payload_drops, 0);
-    Channel channel = $auto(Channel.new(capacity));
+    Channel channel = auto Channel.new(capacity);
     if (capacity) channel.send(109);
     atomic_store(&channel_probe_ready, 0);
     Thread sender = Thread.start_raw(
@@ -450,7 +450,7 @@ static Var _channel_owned_return(Var input) {
 static void channel_owned_rendezvous_commit_survives_stop(void) {
   $test.scoped();
   atomic_store(&channel_payload_drops, 0);
-  Channel channel = $auto(Channel.new());
+  Channel channel = auto Channel.new();
   for (int i = 0; i < 16; ++i) {
     Thread sender = Thread.start_raw(
       _channel_owned_sender, &channel, sizeof(channel));
@@ -477,7 +477,7 @@ static void channel_owned_rendezvous_commit_survives_stop(void) {
 
 static void channel_owned_plain_map_moves_and_grows(void) {
   $test.scoped();
-  Channel channel = $auto(Channel.new(1));
+  Channel channel = auto Channel.new(1);
   Scope source = Scope.child();
   Scope.push(&source);
   Map part = {};
@@ -495,7 +495,7 @@ static void channel_owned_plain_map_moves_and_grows(void) {
 
 static void channel_owned_plain_array_moves_and_grows(void) {
   $test.scoped();
-  Channel channel = $auto(Channel.new(1));
+  Channel channel = auto Channel.new(1);
   Scope source = Scope.child();
   Scope.push(&source);
   Array part = [3];
@@ -513,7 +513,7 @@ static void channel_owned_plain_array_moves_and_grows(void) {
 static void channel_owned_nested_contents_move_with_record(void) {
   $test.scoped();
   atomic_store(&channel_payload_drops, 0);
-  Channel channel = $auto(Channel.new(1));
+  Channel channel = auto Channel.new(1);
   Scope source = Scope.child();
   Scope.push(&source);
   Map part = _channel_owned_result();
@@ -539,7 +539,7 @@ static void channel_owned_nested_contents_move_with_record(void) {
 static void channel_owned_failure_restores_contents_parent(void) {
   $test.scoped();
   atomic_store(&channel_payload_drops, 0);
-  Channel channel = $auto(Channel.new(1));
+  Channel channel = auto Channel.new(1);
   channel.close();
   for (int detached = 0; detached < 2; ++detached) {
     Map part = _channel_owned_result();
@@ -561,7 +561,7 @@ static void channel_owned_failure_restores_contents_parent(void) {
 
 static void channel_owned_typed_array_uses_explicit_group(void) {
   $test.scoped();
-  Channel channel = $auto(Channel.new(1));
+  Channel channel = auto Channel.new(1);
   Scope source = Scope.child();
   Scope.push(&source);
   ArrayInt part = ArrayInt.new();
@@ -581,7 +581,7 @@ static void channel_owned_typed_array_uses_explicit_group(void) {
 
 static void channel_owned_receive_releases_transport_scope(void) {
   $test.scoped();
-  Channel channel = $auto(Channel.new(1));
+  Channel channel = auto Channel.new(1);
   size_t scopes = Scope.stats().live_scopes;
   for (int i = 0; i < 32; ++i) {
     Map map = _channel_owned_result();

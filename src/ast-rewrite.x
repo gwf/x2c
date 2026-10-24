@@ -29,7 +29,7 @@ macro Stmt $ast.rewrite_children(
    keeps deep operator chains off the C stack, and the inline body costs no
    call per node. */
 macro Decorator $ast.walk(Stmt $body, Expr $root, Name $node) {
-  Array pending = $auto([$root]);
+  Array pending = auto [$root];
   while (pending.len()) {
     Var current = pending.take_last();
     if (current is not <list> || current.is_nil()) continue;

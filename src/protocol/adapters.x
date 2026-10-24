@@ -301,7 +301,7 @@ static List _default_part(
       a.c.record_generated_symbol(spelling, expected);
       return %((default $name $storage));
     }
-    case %((!set ?kind (!or linkage conflict)) ?first ?second *):
+    case %((!or ?kind linkage conflict) ?first ?second *):
       _report_collision(a.c, a.participant, member, kind, first, second);
   }
   return NULL;
@@ -320,7 +320,7 @@ static List _inherited_part(
         return %((inherited $name $owner_expected));
       }
     }
-    case %((!set ?kind (!or linkage conflict)) ?first ?second *):
+    case %((!or ?kind linkage conflict) ?first ?second *):
       _report_collision(a.c, a.participant, member, kind, first, second);
   }
   return NULL;

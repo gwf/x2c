@@ -229,7 +229,7 @@ static Var _special_import(Lisp lisp, List args, LispEnv *env) {
   Var hook;
   if (_global_lookup(lisp, Atom.intern("_x2c.import-hook"), hook))
     return lisp.apply(hook, %($path));
-  File source = $auto(File.open(path, "r"));
+  File source = auto File.open(path, "r");
   return lisp.eval_file(source);
 }
 
@@ -260,7 +260,7 @@ static Var _qq(Lisp l, Var expr, LispEnv *env, int depth) {
 
 /* Walk siblings as elements, never as another headed quoted form. */
 static List _qq_elements(Lisp lisp, List items, LispEnv *env, int depth) {
-  Array values = $auto([]);
+  Array values = auto [];
   foreach (Var item in items) {
     if (!depth && _is_splice(item))
       foreach (Var value in _splice(lisp, item, env)) values.push(value);
@@ -785,7 +785,7 @@ $lisp.entry("Lisp.eval_string")
 Var Lisp.eval_string(Lisp lisp, String source) {
   if (!source) return %();
   _open_call_budget(lisp);
-  Scope tokens_scope = $auto(Scope.new_named("Lisp tokens"));
+  Scope tokens_scope = auto Scope.new_named("Lisp tokens");
   Tokenizer tokenizer = _scan_lisp_tokens(source, &tokens_scope);
   unsigned cursor = 0;
   Var result = %();
@@ -809,7 +809,7 @@ Var Lisp.eval_string(Lisp lisp, String source) {
 */
 Var Lisp.eval_file(Lisp l, File source) {
   if (!source) raise %(bad-arg (operation "Lisp.eval_file"));
-  Block content = $auto(Block.new(sizeof(char)));
+  Block content = auto Block.new(sizeof(char));
   if (source.read_into(content) == <eof>) return l.eval_string(NULL);
   if (content.length > INT_MAX) {
     size_t size = content.length, int limit = INT_MAX;

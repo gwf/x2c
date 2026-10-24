@@ -374,7 +374,7 @@ static List _match_arms(Compiler c) {
 }
 
 static List _match_cases(Compiler c) {
-  Array cases = [], groups = $auto([]);
+  Array cases = [], groups = auto [];
   Symbol peek = c.peek(0), int saw_default = 0;
   loop {
     saw_default = _arm_directives(c, cases, groups, saw_default);
@@ -450,7 +450,7 @@ static List _case_pattern(Compiler c, Token start, List &types) {
 
 /* Parses a pattern while `c.match_types` collects its typed captures. */
 static List _parse_pattern(Compiler c, List &types) {
-  Array captures = $auto([]);
+  Array captures = auto [];
   List pattern = NULL;
   $let(c.in_pattern, 1)
   $let(c.match_types, captures) {
@@ -618,7 +618,7 @@ static List _catch_filter(Compiler c) {
     as in C.
 */
 List Compiler.parse_governed(Compiler c, Symbol position) {
-  Array items = $auto([]);
+  Array items = auto [];
   int depth = _take_directives(c, items);
   loop {
     Token start = c.token;
@@ -752,7 +752,7 @@ List Compiler.parse_block_items(Compiler c, int anchor_items) {
 List Compiler.parse_callable_body(Compiler c) => _block_items(c, 1);
 
 static List _block_items(Compiler c, int anchor_items) {
-  Array block = $auto([]);
+  Array block = auto [];
   List present_before = c.present_references();
   defer c.restore_reference_presence(present_before);
   loop {

@@ -2,7 +2,7 @@
 
 module List _ordered_raise(
   Compiler c, List cause, List arguments) {
-  Array values = [cause], orders = $auto([_part_order(c, cause)]);
+  Array values = [cause], orders = auto [_part_order(c, cause)];
   foreach (List argument in arguments) {
     values.push(argument);
     orders.push(_part_order(c, argument));
@@ -27,7 +27,7 @@ module Ast _collection_literal(Compiler c, Ast ast, Symbol tag) {
     c, <literal>, head, %(expr $type ($head @{ast.cdr()})), <expression>,
     type, %"${type.repr()} literal");
   match (lowered) case %(expr ? (call ?callee (args *arguments))): {
-    Array values = $auto([]), orders = $auto([]);
+    Array values = auto [], orders = auto [];
     foreach (List argument in arguments) {
       Type passed = argument.cadr();
       values.push(argument);
@@ -114,7 +114,7 @@ static List _ordered(List declarations, Type type, List content) =>
    order, then its final tail. Convert before classifying each part, so an
    implicit custom converter participates in the same ordering as a call. */
 module List _ordered_list(Compiler c, List chain) {
-  Array kinds = $auto([]), values = $auto([]), orders = $auto([]);
+  Array kinds = auto [], values = auto [], orders = auto [];
   List node = chain;
   int spliced = 0;
   for (List cell = _list_cell(node); cell; cell = _list_cell(node)) {
@@ -178,7 +178,7 @@ module Ast _interpolation(Compiler c, Ast ast) {
         return c.cache(%(string (expr ("String") (literal ("String") $text))));
   Array rows = [];
   foreach (List row in ast.cdr()) match (row) {
-    case %((!set ?tag (!or segvar segexp)) ?value):
+    case %((!or ?tag segvar segexp) ?value):
       rows.push(%($tag ${c.convert_segment_to_string(value)}));
     default: rows.push(row);
   }

@@ -195,7 +195,7 @@ static Var _export_atom(Context c, Var value) {
 
 static List _export_list(Context c, List list) {
   if (!list || (c.pool && !c.pool.owns(list))) return list;
-  Block heads = $auto(Block.new(sizeof(Var)));
+  Block heads = auto Block.new(sizeof(Var));
   List tail = list;
   while (tail && (!c.pool || c.pool.owns(tail))) {
     Var head = _export_value(c, tail.car);

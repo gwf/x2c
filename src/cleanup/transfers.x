@@ -43,8 +43,8 @@ static Array _expression_blocks(List expression) {
 /* Rebuild only the ancestors of changed blocks, from the leaves upward.
    Keys are node addresses: structural hashing would revisit the same spine. */
 module List _rewrite_expression(List expression, Func rewrite) {
-  Array blocks = $auto(_expression_blocks(expression));
-  Map changed = $auto({});
+  Array blocks = auto _expression_blocks(expression);
+  Map changed = auto {};
   // The worklist visits siblings last first; initializers run in source order.
   while (blocks.len()) {
     List block = blocks.take_last();
@@ -128,7 +128,7 @@ static void _collect_labels(Walk &w, Var value, List path) {
 }
 
 static void _collect_blocks(Walk &w, List node, List path) {
-  Array blocks = $auto(_expression_blocks(node));
+  Array blocks = auto _expression_blocks(node);
   foreach (List block in blocks) _collect_labels(w, block, path);
 }
 
@@ -404,7 +404,7 @@ static List _address_of(String spelling, List binding) {
 
 static List _lower_landing(Walk &w, Var code, List rows) {
   Compiler c = w.c;
-  Map parts = $auto({});
+  Map parts = auto {};
   List exits = NULL;
   foreach (List row in rows)
     match (row) {

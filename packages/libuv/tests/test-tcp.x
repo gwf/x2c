@@ -107,7 +107,7 @@ static void _client_accepted(UvTcp listener, UvTcp tcp, Var value) {
 }
 
 static void tcp_exchanges_copied_binary_data_with_several_clients(void) {
-  UvLoop loop = $auto(UvLoop.new());
+  UvLoop loop = auto UvLoop.new();
   TcpTest test = {
     .loop = loop,
     .driver = uv_thread_self(),
@@ -209,7 +209,7 @@ static void _restart_accepted(UvTcp listener, UvTcp tcp, Var value) {
 }
 
 static void tcp_reads_stop_and_restart_and_eof_is_null(void) {
-  UvLoop loop = $auto(UvLoop.new());
+  UvLoop loop = auto UvLoop.new();
   RestartState state = { .loop = loop, .received = Bytes.new(1) };
   defer state.received.free();
   Var value = Var.new(<p48>, &state);
@@ -264,7 +264,7 @@ static void _owned_accepted(UvTcp listener, UvTcp tcp, Var value) {
 }
 
 static void tcp_accepted_connection_outlives_its_listener(void) {
-  UvLoop loop = $auto(UvLoop.new());
+  UvLoop loop = auto UvLoop.new();
   OwnedState state = { .received = Bytes.new(1) };
   defer state.received.free();
   Var value = Var.new(<p48>, &state);
@@ -345,7 +345,7 @@ static void _pressure_accepted(UvTcp listener, UvTcp tcp, Var value) {
 }
 
 static void tcp_large_writes_own_their_copy_and_report_backpressure(void) {
-  UvLoop loop = $auto(UvLoop.new());
+  UvLoop loop = auto UvLoop.new();
   PressureState state = { .loop = loop, .received = Bytes.new(1) };
   defer state.received.free();
   Var value = Var.new(<p48>, &state);
@@ -443,7 +443,7 @@ static void _failure_accepted(UvTcp listener, UvTcp tcp, Var value) {
 }
 
 static void tcp_read_error_returns_from_run_and_the_loop_resumes(void) {
-  UvLoop loop = $auto(UvLoop.new());
+  UvLoop loop = auto UvLoop.new();
   FailureState state = { 0 };
   Var value = Var.new(<p48>, &state);
   state.listener = loop.tcp().bind(UvAddress.ip4("127.0.0.1", 0), 0)
@@ -477,7 +477,7 @@ static void _empty_connect(UvTcp tcp, Var value) {
 }
 
 static void tcp_accept_error_closes_listener_and_accepted_connection(void) {
-  UvLoop loop = $auto(UvLoop.new());
+  UvLoop loop = auto UvLoop.new();
   FailureState state = { 0 };
   Var value = Var.new(<p48>, &state);
   state.listener = loop.tcp().bind(UvAddress.ip4("127.0.0.1", 0), 0)
@@ -499,7 +499,7 @@ static void tcp_accept_error_closes_listener_and_accepted_connection(void) {
 }
 
 static void tcp_rejects_stream_operations_before_connection(void) {
-  UvLoop loop = $auto(UvLoop.new());
+  UvLoop loop = auto UvLoop.new();
   UvTcp tcp = loop.tcp();
   int caught = 0;
   try tcp.write("x");

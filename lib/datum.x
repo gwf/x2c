@@ -154,7 +154,7 @@ int datum_read_plain(String text, unsigned &cursor, Var &out) {
   Var value = void;
   unsigned at = cursor;
   if (text) while (_blank(text[at])) at++;
-  Array items = $auto([]);
+  Array items = auto [];
   if (text && text[at] && _plain_form(text, at, value, items, 1))
     cursor = at;
   else if (Lisp.read(NULL, text, cursor, value) != <value>) return 0;
@@ -297,7 +297,7 @@ static Map _decode_map(List entries) {
    decimal and a newline before it, and returns 1, or writes nothing and
    returns 0 for a value the grammar cannot spell. */
 int datum_frame(Buffer out, Var value) {
-  Buffer body = $auto(Buffer.new(0));
+  Buffer body = auto Buffer.new(0);
   if (!datum_write(body, value, 1)) return 0;
   out.write(%"${body.len()}\n$body");
   return 1;

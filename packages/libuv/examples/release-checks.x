@@ -113,7 +113,7 @@ static int _report_finished(Array checks, int &passed, int &expired) {
 int main(void) {
   String work = "/tmp/x2c-libuv-release";
   String output = _sandbox(work);
-  UvLoop loop = $auto(UvLoop.new());
+  UvLoop loop = auto UvLoop.new();
   Map environment = {
     "PATH": "/usr/bin:/bin", "RELEASE_MODE": "strict"
   };

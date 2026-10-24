@@ -416,7 +416,7 @@ static List _array_layout(
 static List _record_layout(
   Compiler c, Type type, Type owner, List target, List string,
   int &symbolic) {
-  Array children = $auto([]);
+  Array children = auto [];
   List count = NULL;
   List fields = c.sym.field_order(owner).cdr();
   while (fields) {

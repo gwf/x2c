@@ -6,7 +6,7 @@
 static void _fixpoint(Walk &w, List ast) {
   w.frame = xcalloc(1, sizeof(struct Region));
   w.frame.kind = <frame>;
-  Array functions = $auto([]);
+  Array functions = auto [];
   _collect_functions(ast, functions);
   foreach (List function in functions)
     if (w.summaries[function.car()] is void)
@@ -17,7 +17,7 @@ static void _fixpoint(Walk &w, List ast) {
      round changes no summary. Each function's last walk then read final
      summaries, and its warnings are the unit's. */
   int count = functions.len();
-  Array found = $auto([]);
+  Array found = auto [];
   w.readers = {};
   w.stale = [];
   for (int i = 0; i < count; i++) {

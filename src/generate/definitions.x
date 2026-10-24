@@ -177,7 +177,7 @@ static List _definition_source(
 /* Source text between two tokens with comments removed and each run of
    whitespace written as one space. */
 static String _source_text(Token first, Token last) {
-  Buffer output = $auto(Buffer.new(0));
+  Buffer output = auto Buffer.new(0);
   int gap = 0;
   for (Token token = first; token < last; token++) {
     if (token.type == <space> || token.type == <comment>) gap = 1;
@@ -207,6 +207,6 @@ static Symbol _type_kind(Token first, List base, List modifiers) {
     case %(?pointer (fnmod *) *):
       if (pointer == <*>) return <callback>;
   match (base)
-    case %((!set ?kind (!or struct union enum)) *): return kind;
+    case %((!or ?kind struct union enum) *): return kind;
   return <alias>;
 }

@@ -67,7 +67,7 @@ static Var _read(void) {
   if (lookahead == '(') {
     _next();
     // Append in source order, then freeze as an immutable proper List.
-    Array items = $auto([]);
+    Array items = auto [];
     for (_skip(); lookahead != ')'; _skip()) items.push(_read());
     _next();
     return items.list();
@@ -75,8 +75,8 @@ static Var _read(void) {
 
   /* Atom spellings are arbitrary-length Strings, including numeric text.
      Interning preserves each complete spelling and shares repeated names.
-     str() interns the contents before $auto frees the temporary Buffer. */
-  Buffer spelling = $auto(Buffer.new(0));
+     str() interns the contents before auto frees the temporary Buffer. */
+  Buffer spelling = auto Buffer.new(0);
   do {
     spelling.write_char(lookahead);
     _next();
@@ -155,14 +155,14 @@ static Var _eval(Var expression, Map environment) {
           /* Evaluate every actual argument in the caller before installing
              parameters. Copy the environment afterward: an argument's def
              must be visible both to later arguments and to the body. */
-          Array values = $auto([]);
+          Array values = auto [];
           foreach (Var argument in arguments)
             values.push(_eval(argument, environment));
 
           /* Dynamic scope starts from the caller's current bindings. A
              shallow copy isolates local definitions while sharing immutable
              values. Later duplicate parameter names replace earlier ones. */
-          Map local = $auto(environment.copy());
+          Map local = auto environment.copy();
           foreach (Var value in values) {
             if (parameters.car() is not String) return _fail();
             local[parameters.car()] = value;
@@ -176,7 +176,7 @@ static Var _eval(Var expression, Map environment) {
 }
 
 int main(void) {
-  /* The outer scope owns the mutable top-level environment. $auto releases
+  /* The outer scope owns the mutable top-level environment. auto releases
      temporary Buffers, Arrays, and call Maps at their lexical scope exits.
      Strings and Lists belong to the default interning pool until process
      shutdown, so returned values outlive those temporary containers. There

@@ -89,7 +89,7 @@ static typedef struct Format {
     transfer while staging or canonicalizing the result.
 */
 String String.format(String fmt, List values) {
-  Buffer out = $auto(Buffer.new(0));
+  Buffer out = auto Buffer.new(0);
   Format f = {.fmt = fmt, .length = fmt.len(), .args = values, .out = out};
   while (f.cursor < f.length)
     if (_byte(f) == '%') _conversion(f);

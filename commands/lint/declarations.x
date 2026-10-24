@@ -234,7 +234,7 @@ static void _subject(Lint l, int start, int body, int end):
   int line_start = l.tokens[from].pos - (l.tokens[from].col - 1)
   int stop = l.tokens[end - 1].pos + l.tokens[end - 1].len
   String before = String.new_len(l.text + line_start, stop - line_start)
-  Buffer after = $auto(Buffer.new(0))
+  Buffer after = auto Buffer.new(0)
   after.write_len(l.text + line_start, l.tokens[from].pos - line_start)
   for (int at = from; at < end; at++):
     Token t = l.at(at)

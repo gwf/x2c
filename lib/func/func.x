@@ -407,7 +407,7 @@ static Func _new(
   if (!adapter) $error.bind.sig(signature);
   List params = NULL;
   match (signature)
-    case %((func (!set ?captured (!is type list))) ? *):
+    case %((func (!is ?captured type list)) ? *):
       params = captured;
   if (!params) $error.bind.sig(signature);
   if (context_size && !context)

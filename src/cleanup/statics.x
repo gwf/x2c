@@ -62,7 +62,7 @@ static List _landing_form(Compiler c, List node, Map runtime) {
     Array parts = [];
     foreach (List row in rows)
       match (row) {
-        case %((!set ?kind (!or outer region)) ?token ?part):
+        case %((!or ?kind outer region) ?token ?part):
           parts.push(%($kind $token ${_static_regions(c, part, runtime)}));
         default: parts.push(row);
       }
@@ -118,7 +118,7 @@ static int _runtime_static_declaration(
     that way, or is `NULL` at file scope.
 */
 int Compiler.static_value_is_runtime(Compiler c, List value, Map runtime) {
-  Array pending = $auto([]), modes = $auto([]);
+  Array pending = auto [], modes = auto [];
   RuntimeScan s = {
     .c = c, .runtime = runtime, .pending = pending, .modes = modes
   };

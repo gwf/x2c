@@ -15,9 +15,9 @@ static Map word_count(Path filename) {
 
 static Map directory_count(Path root) {
   Map counts = {};
-  Channel files = $auto(Channel.new(4));
-  Channel results = $auto(Channel.new(4));
-  Array jobs = $auto([]);
+  Channel files = auto Channel.new(4);
+  Channel results = auto Channel.new(4);
+  Array jobs = auto [];
   int remaining_workers = 4;
 
   jobs.push(%!(void) => {
@@ -54,8 +54,8 @@ static Map directory_count(Path root) {
 int main(int argc, char **argv) {
   Path root = argc > 1 ? argv[1]
     : "examples/data/power-channel-word-count/words";
-  Map counts = $auto(directory_count(root));
-  Array words = $auto(counts.keys().array().sort());
+  Map counts = auto directory_count(root);
+  Array words = auto counts.keys().array().sort();
   foreach (String word in words) puts(%"$word ${counts[word]}");
   return 0;
 }

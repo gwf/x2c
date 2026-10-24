@@ -563,7 +563,7 @@ static void lisp_eval_capture_semantics(void) {
 }
 
 static void lisp_captures_reserved_spelled_local_values(void) {
-  Lisp lisp = $auto(Lisp.kernel());
+  Lisp lisp = auto Lisp.kernel();
   lisp.set_global("make", _ev(lisp, "lambda"));
   const char *names[] = {
     "quote", "quasiquote", "lambda", "macro", "cond", "def", "bind",
@@ -575,7 +575,7 @@ static void lisp_captures_reserved_spelled_local_values(void) {
 }
 
 static void lisp_reader_releases_scratch_after_failure(void) {
-  Lisp lisp = $auto(Lisp.kernel());
+  Lisp lisp = auto Lisp.kernel();
   String source = "(a (b \"\\z\"))";
   int caught = 0, mark = Error.mark(), depth = Error.handler_depth();
   ScopeStats before = {0};
@@ -596,7 +596,7 @@ static void lisp_reader_releases_scratch_after_failure(void) {
 static void lisp_retains_reads_after_global_special_rebinding(void) {
   const char *names[] = {"quote", "quasiquote"};
   for (int i = 0; i < 2; i++) {
-    Lisp lisp = $auto(Lisp.kernel());
+    Lisp lisp = auto Lisp.kernel();
     lisp.set_global("make", _ev(lisp, "lambda"));
     String name = String.new(names[i]);
     _ev(lisp, %"(def saved ((make (x) (make () ($name x))) 42))");
@@ -606,7 +606,7 @@ static void lisp_retains_reads_after_global_special_rebinding(void) {
   }
   const char *makers[] = {"lambda", "macro"};
   for (int i = 0; i < 2; i++) {
-    Lisp lisp = $auto(Lisp.kernel());
+    Lisp lisp = auto Lisp.kernel();
     lisp.set_global("make", _ev(lisp, "lambda"));
     String name = String.new(makers[i]);
     _ev(lisp, %"(def saved ((make (x) (make () ($name () x))) 42))");
@@ -617,7 +617,7 @@ static void lisp_retains_reads_after_global_special_rebinding(void) {
 }
 
 static void lisp_capture_follows_local_callable_identity(void) {
-  Lisp lisp = $auto(Lisp.kernel());
+  Lisp lisp = auto Lisp.kernel();
   lisp.set_global("make", _ev(lisp, "lambda"));
   EXPECT_TRUE(_ev(lisp,
     "(((make (quote) (make () (quote 9))) (make (x) 42)))") == 42);
@@ -637,7 +637,7 @@ static void lisp_capture_follows_local_callable_identity(void) {
 }
 
 static void lisp_interrupt_transfers_until_owner_clears_it(void) {
-  Lisp lisp = $auto(Lisp.kernel());
+  Lisp lisp = auto Lisp.kernel();
   lisp.set_interrupted(1);
   defer lisp.set_interrupted(0);
   EXPECT_INT_EQ(_raised_code(lisp, "((lambda (x) x) 9)"), <interrupt>);
@@ -942,7 +942,7 @@ static void lisp_numeric_comparison_reads_the_value(void) {
    size rather than exhausting the C stack. */
 static void lisp_read_fences_nesting_depth(void) {
   Lisp lisp = Lisp.kernel();
-  Buffer deep = $auto(Buffer.new(0));
+  Buffer deep = auto Buffer.new(0);
   for (int i = 0; i < 20000; i++) deep.write("(");
   for (int i = 0; i < 20000; i++) deep.write(")");
   Symbol code = 0;
@@ -969,7 +969,7 @@ static String _read_outcome(Lisp lisp, String source, int plain) {
   catch %(incomplete *): status = <incomplete>;
   catch %(malformed *): status = <malformed>;
   catch %(size-limit *): status = <size-limit>;
-  Buffer out = $auto(Buffer.new(0));
+  Buffer out = auto Buffer.new(0);
   out.printf("%s %u ", (char *) status.str(), cursor);
   if (value is not void) datum_write(out, value, 1);
   return out;
@@ -992,7 +992,7 @@ static void lisp_plain_datum_read_matches_reader(void) {
                   _read_outcome(lisp, source, 0));
   for (int depth = LISP_READ_DEPTH_MAX - 1;
        depth <= LISP_READ_DEPTH_MAX; depth++) {
-    Buffer source = $auto(Buffer.new(0));
+    Buffer source = auto Buffer.new(0);
     for (int i = 0; i < depth; i++) source.write("(");
     source.write("x");
     for (int i = 0; i < depth; i++) source.write(")");
@@ -1043,7 +1043,7 @@ static void lisp_datum_reads_valid_string_escapes(void) {
    reader comment. */
 static void lisp_datum_atom_round_trips(void) {
   foreach (String spelling, %("/" "/=" "//b" "/*b" "//" "/*")) {
-    Buffer out = $auto(Buffer.new(0));
+    Buffer out = auto Buffer.new(0);
     EXPECT_TRUE(datum_write(out, Atom.intern(spelling), 1));
     unsigned cursor = 0;
     Var back = void;
@@ -1059,7 +1059,7 @@ static void lisp_datum_symbol_round_trips(void) {
   foreach (String spelling, %("<<" "<x" "a b" "<<=" "a\"b" "a\\b" "line\n"))
     for (int tagged = 0; tagged < 2; tagged++) {
       Symbol symbol = Symbol.new(spelling);
-      Buffer out = $auto(Buffer.new(0));
+      Buffer out = auto Buffer.new(0);
       EXPECT_TRUE(datum_write(out, symbol, tagged));
       unsigned cursor = 0;
       Var back = void;
@@ -1070,7 +1070,7 @@ static void lisp_datum_symbol_round_trips(void) {
       EXPECT_INT_EQ(Lisp.read(NULL, out.str(), cursor, back), <value>);
       EXPECT_VAR_EQ(back, Symbol.var(symbol));
     }
-  Buffer out = $auto(Buffer.new(0));
+  Buffer out = auto Buffer.new(0);
   EXPECT_FALSE(datum_write(out, (Symbol) 0, 0));
 }
 

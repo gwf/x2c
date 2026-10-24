@@ -177,7 +177,7 @@ module Ast _finish(Compiler c, Ast ast) {
    Children transform left to right, then reverse assembly preserves source
    order while allocating generated splice origins from right to left. */
 static Ast _sequence(Compiler c, Ast ast, int value_tail) {
-  Array transformed = $auto([]);
+  Array transformed = auto [];
   for (List cursor = ast; cursor; cursor = cursor.cdr())
     transformed.push(
       _sequence_item(c, cursor.car(), value_tail && !cursor.cdr()));

@@ -91,7 +91,7 @@ static List _expression_rewrite(Compiler c, List expression) {
         kind = operator;
         source = source_operator_expression(type, %($operator $target $right));
       }
-    case %(expr ?type (op (!set ?operator (!or ++ --)) ?operand)): {
+    case %(expr ?type (op (!or ?operator ++ --) ?operand)): {
       List target = _access_source(operand);
       if (target == operand) return NULL;
       kind = <prefix>;
@@ -143,8 +143,8 @@ static List _op_chain_first(List ast) {
 }
 
 static Ast _op_chain(Compiler c, Ast ast) {
-  Array levels = $auto([]);
-  Array types = $auto([]);
+  Array levels = auto [];
+  Array types = auto [];
   Ast rebuilt = NULL;
   for (;;) {
     List first = _op_chain_first(ast);
@@ -234,7 +234,7 @@ module List _index(Compiler c, List ast) {
 
 module List _declaration(Compiler c, List ast) {
   match (ast) {
-    case %((!set ?head (!or declare decl)) ?target
+    case %((!or ?head declare decl) ?target
            (bindings *bound_list)): {
       Array values = [], List new_bind = NULL;
       foreach (Ast binding in bound_list) {

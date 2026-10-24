@@ -142,7 +142,7 @@ static Array _stub_arguments(Func function, const FuncArg *argv) {
 int Compiler.matches_macro(Compiler c, MacroMatcher &matcher, List code) {
   if (matcher.pattern) return matcher.matches(code);
   Var previous = Macro.subject();
-  Array arguments = $auto([code]);
+  Array arguments = auto [code];
   Macro.use_subject(_subject_rows(c, arguments));
   defer Macro.use_subject(previous);
   return matcher.matches(code);

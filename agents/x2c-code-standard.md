@@ -716,7 +716,7 @@ return a pointer, a borrowed handle, or a helper-process address.
 
 ## Lifetime and memory
 
-**LT-1** Name the lifetime at the acquisition. Use `$auto` for an owned
+**LT-1** Name the lifetime at the acquisition. Use initializer `auto` for an owned
 local of a `Cleanup(T)` type, `$scope()` for a region of temporaries,
 `$scope(&slot)` to allocate into a chosen Scope, `$let` to replace one
 location for a block, and `$lock` to hold a Mutex. Use `defer` directly
@@ -726,7 +726,7 @@ resource, or cleanup that writes a result.
 
 **LT-2** Adopt `Cleanup(T)` beside a type that owns native storage, through
 `$cleanup.by(T, release)` when one method releases it, so every caller can
-write `$auto`. Never spell a release at each call site.
+write `T handle = auto acquire();`. Never spell a release at each call site.
 
 **LT-3** Choose scopes by lifetime. Do not create a scope for values whose
 owner already provides the lifetime. Return a canonical value (`String`,
@@ -787,7 +787,7 @@ new cause with the old one as detail. Copy matched details with
 `Error.snapshot` when they must outlive the arm.
 
 **ER-7** Every resource owner on a raising path has its cleanup in place
-before the raising call (`$auto`, `$scope`, `defer`, or `finally`).
+before the raising call (`auto`, `$scope`, `defer`, or `finally`).
 
 **ER-8** Never let an Error unwind through a C frame. In a callback, catch
 at the boundary, snapshot what must survive, return a status the library
@@ -1126,7 +1126,7 @@ supported cause. The checkpoint remains advisory during the baseline period;
 acceptance policy.
 
 **HP-2** On a hot path, measure additions of `defer`, `$scope`, `$let`,
-`$auto`, allocation, locks, passes, or calls before accepting them. An
+`auto`, allocation, locks, passes, or calls before accepting them. An
 absolute ban or a new acceptance requirement is a proposal for Gary's
 review, not a current publication gate.
 
@@ -1318,7 +1318,7 @@ Gary's approval under the process ceiling.
 | Neutral respelling, rename, reorder, receiver, `=>`, `in`, `.` | compare affected generated output before and after where needed; `stage-diff-0` compares bootstrap with stage 0, not the pre-edit tree |
 | Compiler beautification | existing beautify proof: `make stage-1 && make stage-diff-1` once per file; use relevant driver probes |
 | A pure move | the multiset of non-blank lines is unchanged except section labels |
-| Adopting `$auto`, `$let`, `$scope`, quotations | emission changes: refresh bootstrap through its target, then the focused fixtures and suites |
+| Adopting `auto`, `$let`, `$scope`, quotations | emission changes: refresh bootstrap through its target, then the focused fixtures and suites |
 | Deletion of a check or mechanism | the observable result of valid input is unchanged; invalid input is still rejected before wrong output, corrupt state, or an unsafe crossing |
 | Hot-path change | HP-1 paired instruction counts |
 | Defect fix | TE-2 fail-before and pass-after |
@@ -1428,7 +1428,7 @@ These results set the rules above; the evidence is in the adoption plan.
 
 | Need | Use |
 | --- | --- |
-| owned local of a `Cleanup(T)` type | `$auto(...)` |
+| owned local of a `Cleanup(T)` type | `T value = auto acquire();` |
 | region of temporaries | `$scope()` |
 | allocate into a chosen Scope | `$scope(&slot)` |
 | replace a location for a block | `$let(place, value)` |

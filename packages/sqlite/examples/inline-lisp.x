@@ -5,7 +5,7 @@ import "sqlite" with SqliteLisp;
 int main(void) {
   Scope.retain();
   defer Scope.release();
-  Lisp lisp = $auto(Lisp.new());
+  Lisp lisp = auto Lisp.new();
   SqliteLisp.install(lisp);
 
   List report = lisp.eval(%(

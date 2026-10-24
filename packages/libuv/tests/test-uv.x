@@ -17,11 +17,11 @@ static String _scratch(String name) {
 }
 
 static void process_captures_stdout_stderr_and_exit(void) {
-  UvLoop loop = $auto(UvLoop.new());
-  UvProcess child = $auto(loop.spawn(%(
+  UvLoop loop = auto UvLoop.new();
+  UvProcess child = auto loop.spawn(%(
     "/bin/sh" "-c"
     "printf 'ordinary output'; printf 'diagnostic' >&2; exit 7"
-  )));
+  ));
   child.close_stdin();
 
   EXPECT_TRUE(child.pid() > 0);
@@ -30,7 +30,7 @@ static void process_captures_stdout_stderr_and_exit(void) {
   EXPECT_TRUE(child.exited());
   EXPECT_STR_EQ(child.stdout(), "ordinary output");
   EXPECT_STR_EQ(child.stderr(), "diagnostic");
-  Bytes diagnostic = $auto(child.stderr_bytes());
+  Bytes diagnostic = auto child.stderr_bytes();
   EXPECT_INT_EQ(diagnostic.len(), 10);
   EXPECT_INT_EQ(child.exit_status(), 7);
   EXPECT_INT_EQ(child.term_signal(), 0);
@@ -38,13 +38,13 @@ static void process_captures_stdout_stderr_and_exit(void) {
 }
 
 static void process_stdin_and_concurrent_children(void) {
-  UvLoop loop = $auto(UvLoop.new());
+  UvLoop loop = auto UvLoop.new();
 
   UvProcess upper =
-    $auto(loop.spawn(%("/usr/bin/tr" "[:lower:]" "[:upper:]")));
+    auto loop.spawn(%("/usr/bin/tr" "[:lower:]" "[:upper:]"));
   upper.write("one\n").write("two\n").close_stdin();
 
-  UvProcess lines = $auto(loop.spawn(%("/usr/bin/wc" "-l")));
+  UvProcess lines = auto loop.spawn(%("/usr/bin/wc" "-l"));
   lines.write("one\ntwo\n").close_stdin();
 
   EXPECT_TRUE(loop.alive());
@@ -61,12 +61,12 @@ static void process_stdin_and_concurrent_children(void) {
 }
 
 static void process_binary_output_uses_bytes(void) {
-  UvLoop loop = $auto(UvLoop.new());
-  UvProcess child = $auto(loop.spawn(%("/usr/bin/printf" "a\\0b")));
+  UvLoop loop = auto UvLoop.new();
+  UvProcess child = auto loop.spawn(%("/usr/bin/printf" "a\\0b"));
   child.close_stdin();
   loop.run(UV_RUN_DEFAULT);
 
-  Bytes output = $auto(child.stdout_bytes());
+  Bytes output = auto child.stdout_bytes();
   EXPECT_INT_EQ(output.len(), 3);
   EXPECT_INT_EQ(((unsigned char *) output)[0], 'a');
   EXPECT_INT_EQ(((unsigned char *) output)[1], 0);
@@ -79,9 +79,9 @@ static void process_binary_output_uses_bytes(void) {
 }
 
 static void process_output_limit_reports_libuv_error(void) {
-  UvLoop loop = $auto(UvLoop.new());
-  UvProcess child = $auto(loop.command(%("/usr/bin/printf" "four"))
-    .max_output(2).start());
+  UvLoop loop = auto UvLoop.new();
+  UvProcess child = auto loop.command(%("/usr/bin/printf" "four"))
+    .max_output(2).start();
   child.close_stdin();
   loop.run(UV_RUN_DEFAULT);
 
@@ -96,7 +96,7 @@ static void process_output_limit_reports_libuv_error(void) {
 }
 
 static void process_free_waits_for_every_close_callback(void) {
-  UvLoop loop = $auto(UvLoop.new());
+  UvLoop loop = auto UvLoop.new();
   UvProcess child = loop.spawn(%("/usr/bin/printf" "done"));
   child.close_stdin();
 
@@ -120,12 +120,12 @@ static void process_free_waits_for_every_close_callback(void) {
 
 static void command_sets_directory_and_environment(void) {
   String work = _scratch("cwd");
-  UvLoop loop = $auto(UvLoop.new());
+  UvLoop loop = auto UvLoop.new();
 
-  UvProcess child = $auto(loop.command(%("/bin/sh" "-c" "pwd; printenv MODE"))
+  UvProcess child = auto loop.command(%("/bin/sh" "-c" "pwd; printenv MODE"))
     .directory(work)
     .environment({"MODE": "strict", "PATH": "/usr/bin:/bin"})
-    .start());
+    .start();
   child.close_stdin();
   loop.run(UV_RUN_DEFAULT);
 
@@ -135,8 +135,8 @@ static void command_sets_directory_and_environment(void) {
 }
 
 static void command_rejects_options_after_it_starts(void) {
-  UvLoop loop = $auto(UvLoop.new());
-  UvProcess child = $auto(loop.spawn(%("/usr/bin/printf" "x")));
+  UvLoop loop = auto UvLoop.new();
+  UvProcess child = auto loop.spawn(%("/usr/bin/printf" "x"));
   child.close_stdin();
 
   int caught = 0;
@@ -150,7 +150,7 @@ static void command_rejects_options_after_it_starts(void) {
 }
 
 static void command_rejects_bad_argv_environment_and_stdio(void) {
-  UvLoop loop = $auto(UvLoop.new());
+  UvLoop loop = auto UvLoop.new();
   int caught = 0;
 
   try loop.command(%("/usr/bin/printf" 7));
@@ -179,9 +179,9 @@ static void command_rejects_bad_argv_environment_and_stdio(void) {
 }
 
 static void process_stdio_can_be_captured_inherited_or_ignored(void) {
-  UvLoop loop = $auto(UvLoop.new());
-  UvProcess child = $auto(loop.command(%("/bin/sh" "-c" "printf captured"))
-    .stdio(<ignore>, <pipe>, <ignore>).start());
+  UvLoop loop = auto UvLoop.new();
+  UvProcess child = auto loop.command(%("/bin/sh" "-c" "printf captured"))
+    .stdio(<ignore>, <pipe>, <ignore>).start();
   child.close_stdin();
   loop.run(UV_RUN_DEFAULT);
   EXPECT_STR_EQ(child.stdout(), "captured");
@@ -194,16 +194,16 @@ static void process_stdio_can_be_captured_inherited_or_ignored(void) {
   }
   EXPECT_TRUE(caught);
 
-  UvProcess inherited = $auto(loop.command(%("/usr/bin/true"))
-    .stdio(<ignore>, <inherit>, <inherit>).start());
+  UvProcess inherited = auto loop.command(%("/usr/bin/true"))
+    .stdio(<ignore>, <inherit>, <inherit>).start();
   loop.run(UV_RUN_DEFAULT);
   EXPECT_INT_EQ(inherited.exit_status(), 0);
 }
 
 static void deadline_kills_a_child_that_overruns(void) {
-  UvLoop loop = $auto(UvLoop.new());
-  UvProcess slow = $auto(loop.command(%("/bin/sh" "-c" "exec sleep 30"))
-    .deadline(150).start());
+  UvLoop loop = auto UvLoop.new();
+  UvProcess slow = auto loop.command(%("/bin/sh" "-c" "exec sleep 30"))
+    .deadline(150).start();
   slow.close_stdin();
 
   EXPECT_INT_EQ(loop.run(UV_RUN_DEFAULT), 0);
@@ -213,9 +213,9 @@ static void deadline_kills_a_child_that_overruns(void) {
 }
 
 static void deadline_leaves_a_prompt_child_alone(void) {
-  UvLoop loop = $auto(UvLoop.new());
-  UvProcess quick = $auto(loop.command(%("/usr/bin/printf" "quick"))
-    .deadline(30000).start());
+  UvLoop loop = auto UvLoop.new();
+  UvProcess quick = auto loop.command(%("/usr/bin/printf" "quick"))
+    .deadline(30000).start();
   quick.close_stdin();
 
   EXPECT_INT_EQ(loop.run(UV_RUN_DEFAULT), 0);
@@ -239,7 +239,7 @@ static void _record_async(UvAsync async, Var value) {
 }
 
 static void async_sends_coalesce_and_stop_is_idempotent(void) {
-  UvLoop loop = $auto(UvLoop.new());
+  UvLoop loop = auto UvLoop.new();
   Array calls = [];
   UvAsync async = loop.async(calls, _record_async);
 
@@ -287,7 +287,7 @@ static void _join_async_sender(UvAsync async, Var value) {
 }
 
 static void async_thread_wakes_the_loop_and_exports_its_result(void) {
-  UvLoop loop = $auto(UvLoop.new());
+  UvLoop loop = auto UvLoop.new();
   AsyncNotifyState state = { 0 };
   state.loop_thread = uv_thread_self();
   UvAsync async = loop.async(
@@ -313,7 +313,7 @@ static void _record_tick(UvTimer timer, Var value) {
 }
 
 static void timer_fires_once_and_repeats(void) {
-  UvLoop loop = $auto(UvLoop.new());
+  UvLoop loop = auto UvLoop.new();
   Array once = [];
   Array repeated = [];
 
@@ -372,7 +372,7 @@ static void _record_check(UvCheck check, Var value) {
 }
 
 static void loop_phases_keep_their_order_and_native_handles(void) {
-  UvLoop loop = $auto(UvLoop.new());
+  UvLoop loop = auto UvLoop.new();
   PhaseState state = { 0 };
   state.order = [];
   state.loop_thread = uv_thread_self();
@@ -419,7 +419,7 @@ static void _ignore_idle(UvIdle idle, Var value) {
 }
 
 static void idle_forces_a_zero_timeout_poll(void) {
-  UvLoop loop = $auto(UvLoop.new());
+  UvLoop loop = auto UvLoop.new();
   UvPrepare prepare = loop.prepare(void, _ignore_prepare);
   UvCheck check = loop.check(void, _ignore_check);
   loop.run(UV_RUN_NOWAIT);
@@ -458,7 +458,7 @@ static void _close_async(UvAsync async, Var value) {
 }
 
 static void phase_callback_errors_are_independent_and_resumable(void) {
-  UvLoop loop = $auto(UvLoop.new());
+  UvLoop loop = auto UvLoop.new();
   Array guard = [];
   UvTimer guard_timer = loop.timer(250, 0, guard, _stop_the_loop);
   loop.idle(void, _raise_inside_idle);
@@ -510,7 +510,7 @@ static void phase_callback_errors_are_independent_and_resumable(void) {
 }
 
 static void loop_phases_reject_bad_arguments(void) {
-  UvLoop loop = $auto(UvLoop.new());
+  UvLoop loop = auto UvLoop.new();
   int caught = 0;
 
   try loop.idle(void, NULL);
@@ -538,8 +538,8 @@ static void loop_phases_reject_bad_arguments(void) {
 }
 
 static void timer_deadline_stops_a_running_loop(void) {
-  UvLoop loop = $auto(UvLoop.new());
-  UvProcess slow = $auto(loop.spawn(%("/bin/sh" "-c" "exec sleep 30")));
+  UvLoop loop = auto UvLoop.new();
+  UvProcess slow = auto loop.spawn(%("/bin/sh" "-c" "exec sleep 30"));
   slow.close_stdin();
 
   Array reached = [];
@@ -562,8 +562,8 @@ static void _handle_interrupt(UvSignal signal, Var value) {
 }
 
 static void signal_handler_runs_inside_the_loop(void) {
-  UvLoop loop = $auto(UvLoop.new());
-  UvProcess slow = $auto(loop.spawn(%("/bin/sh" "-c" "exec sleep 30")));
+  UvLoop loop = auto UvLoop.new();
+  UvProcess slow = auto loop.spawn(%("/bin/sh" "-c" "exec sleep 30"));
   slow.close_stdin();
 
   Array seen = [];
@@ -598,7 +598,7 @@ static void _abandon_watch(UvTimer timer, Var value) {
 */
 static void watch_reports_an_entry_a_child_creates(void) {
   String work = _scratch("same-name");
-  UvLoop loop = $auto(UvLoop.new());
+  UvLoop loop = auto UvLoop.new();
 
   unlink(%"$work/x2c-libuv-same-name");
   Array seen = [];
@@ -606,9 +606,9 @@ static void watch_reports_an_entry_a_child_creates(void) {
   EXPECT_NULL(watch.entry());
   UvTimer timeout = loop.timer(60000, 0, seen, _abandon_watch);
 
-  UvProcess touch = $auto(loop.command(%(
+  UvProcess touch = auto loop.command(%(
     "/bin/sh" "-c" "while :; do touch x2c-libuv-same-name; sleep 0.1; done"
-  )).directory(work).start());
+  )).directory(work).start();
   touch.close_stdin();
   loop.run(UV_RUN_DEFAULT);
   timeout.stop();
@@ -635,13 +635,13 @@ static void watch_distinguishes_content_changes(void) {
   seed.puts("before\n");
   seed.close();
 
-  UvLoop loop = $auto(UvLoop.new());
+  UvLoop loop = auto UvLoop.new();
   Array seen = [];
   UvWatch watch = loop.watch(path, seen, _record_change);
   UvTimer timeout = loop.timer(5000, 0, seen, _abandon_watch);
-  UvProcess append = $auto(loop.command(%(
+  UvProcess append = auto loop.command(%(
     "/bin/sh" "-c" "printf 'after\\n' >> content.txt"
-  )).directory(work).start());
+  )).directory(work).start();
   append.close_stdin();
   loop.run(UV_RUN_DEFAULT);
   timeout.stop();
@@ -653,8 +653,8 @@ static void watch_distinguishes_content_changes(void) {
 }
 
 static void native_handles_reach_the_pinned_api(void) {
-  UvLoop loop = $auto(UvLoop.new());
-  UvProcess child = $auto(loop.spawn(%("/usr/bin/printf" "native")));
+  UvLoop loop = auto UvLoop.new();
+  UvProcess child = auto loop.spawn(%("/usr/bin/printf" "native"));
   child.close_stdin();
 
   EXPECT_NOT_NULL(loop.native());
@@ -674,7 +674,7 @@ static void _raise_inside_a_timer(UvTimer timer, Var value) {
 }
 
 static void a_failed_callback_reaches_the_caller(void) {
-  UvLoop loop = $auto(UvLoop.new());
+  UvLoop loop = auto UvLoop.new();
   loop.timer(1, 1, 0, _raise_inside_a_timer);
 
   int caught = 0;
@@ -694,8 +694,8 @@ static void _raise_inside_a_signal(UvSignal signal, Var value) {
 }
 
 static void a_failed_signal_callback_reaches_the_caller_once(void) {
-  UvLoop loop = $auto(UvLoop.new());
-  UvProcess slow = $auto(loop.spawn(%("/bin/sh" "-c" "exec sleep 30")));
+  UvLoop loop = auto UvLoop.new();
+  UvProcess slow = auto loop.spawn(%("/bin/sh" "-c" "exec sleep 30"));
   slow.close_stdin();
   loop.signal(SIGUSR2, 0, _raise_inside_a_signal);
   Array guard = [];
@@ -729,8 +729,8 @@ static void _raise_inside_async(UvAsync async, Var value) {
 }
 
 static void a_failed_async_callback_stops_and_resumes_the_loop(void) {
-  UvLoop loop = $auto(UvLoop.new());
-  UvProcess slow = $auto(loop.spawn(%("/bin/sh" "-c" "exec sleep 30")));
+  UvLoop loop = auto UvLoop.new();
+  UvProcess slow = auto loop.spawn(%("/bin/sh" "-c" "exec sleep 30"));
   slow.close_stdin();
   UvAsync async = loop.async(void, _raise_inside_async);
   Array guard = [];
@@ -771,7 +771,7 @@ static void a_failed_watch_callback_reaches_the_caller(void) {
   String work = _scratch("failed-watch");
   String path = %"$work/watched.txt";
   _write_watched_file(NULL, path);
-  UvLoop loop = $auto(UvLoop.new());
+  UvLoop loop = auto UvLoop.new();
   loop.watch(path, void, _raise_inside_a_watch);
   UvTimer writer = loop.timer(1, 10, path, _write_watched_file);
   UvTimer timeout = loop.timer(5000, 0, void, _abandon_watch);
@@ -798,7 +798,7 @@ static void loop_free_closes_active_handles(void) {
 }
 
 static void async_watch_and_timer_reject_bad_arguments(void) {
-  UvLoop loop = $auto(UvLoop.new());
+  UvLoop loop = auto UvLoop.new();
 
   int caught = 0;
   try loop.async(void, NULL);

@@ -263,7 +263,7 @@ List Compiler.meta_value_expression(
 
 /* Reports at `site` a result that cannot become data in the program. */
 static void _refuse(Compiler c, Var value, Token site) {
-  Map marks = $auto({});
+  Map marks = auto {};
   List problem = datum_result_problem(value, marks);
   if (problem) c.report_error(<macro>, problem.car(), site, problem.cadr());
 }
@@ -336,7 +336,7 @@ static List _list_form(Compiler c, Var value) {
 }
 
 static List _array_form(Compiler c, Var value) {
-  Array items = $auto([]);
+  Array items = auto [];
   foreach (Var item in value.array()) {
     List code = _data_form(c, item);
     if (!code) return NULL;
@@ -347,7 +347,7 @@ static List _array_form(Compiler c, Var value) {
 
 static List _map_form(Compiler c, Var value) {
   Map map = value;
-  Array keys = $auto([]), entries = $auto([]);
+  Array keys = auto [], entries = auto [];
   foreach (Var (key, item) in map) keys.push(key);
   // Cache ids and emission must not depend on bucket layout.
   foreach (Var key in keys.sort()) {

@@ -48,9 +48,6 @@
 			"include": "#x2c_protocol_header"
 		},
 		{
-			"include": "#x2c_native_meta_declaration"
-		},
-		{
 			"include": "#x2c_meta_declaration"
 		},
 		{
@@ -3665,9 +3662,9 @@
 		},
 		"x2c_protocol_header": {
 			"name": "meta.declaration.protocol.x2c",
-			"begin": "^\\s*(?:(meta)\\s+)?(?:(static|module)\\s+)?(protocol)\\b",
+			"begin": "(?<![\\w.$])(?:(meta)\\s+)?(?:(static|module)\\s+)?(protocol)\\b",
 			"beginCaptures": {
-				"1": { "name": "storage.modifier.meta.x2c" },
+				"1": { "name": "storage.modifier.meta.x2c keyword.other.meta.x2c" },
 				"2": { "name": "storage.modifier.x2c storage.modifier.$2.x2c" },
 				"3": { "name": "keyword.declaration.protocol.x2c" }
 			},
@@ -3695,18 +3692,27 @@
 			]
 		},
 		"x2c_meta_declaration": {
-			"match": "^[ \\t]*(meta)\\b(?=[ \\t]+(?!protocol\\b|native\\b)(?:(?:static|const|inline|extern|volatile|restrict|_Noreturn|unsigned|signed|long|short)[ \\t]+)*[A-Za-z_]\\w*(?:\\.[A-Za-z_]\\w*)?(?:[ \\t]*[*&]+[ \\t]*|[ \\t]+)[A-Za-z_]\\w*(?:\\.[A-Za-z_]\\w*)?[ \\t]*(?:\\(|=|;|\\[))",
-			"captures": {
-				"1": { "name": "storage.modifier.meta.x2c" }
-			}
+			"begin": "(?<![\\w.$])(meta)\\b(?=(?:[ \\t]|/\\*.*?\\*/)+(?:native(?:[ \\t]|/\\*.*?\\*/)+)?(?:(?:static|const|inline|extern|volatile|restrict|_Noreturn|unsigned|signed|long|short)(?:[ \\t]|/\\*.*?\\*/)+)*[A-Za-z_]\\w*(?:\\.[A-Za-z_]\\w*)?(?:(?:[ \\t]|/\\*.*?\\*/)*[*&]+(?:[ \\t]|/\\*.*?\\*/)*|(?:[ \\t]|/\\*.*?\\*/)+)[A-Za-z_]\\w*(?:\\.[A-Za-z_]\\w*)?(?:[ \\t]|/\\*.*?\\*/)*(?:\\(|=|;|\\[)|[ \\t]*(?://|/\\*|$))",
+			"beginCaptures": {
+				"1": {
+					"name": "storage.modifier.meta.x2c keyword.other.meta.x2c"
+				}
+			},
+			"end": "(?=[(;={])",
+			"patterns": [
+				{
+					"include": "#comments"
+				},
+				{
+					"match": "\\bnative\\b(?=[ \\t]*(?:[A-Za-z_]|/\\*|//|$))",
+					"name": "storage.modifier.native.x2c keyword.other.native.x2c"
+				},
+				{
+					"include": "$self"
+				}
+			]
 		},
-		"x2c_native_meta_declaration": {
-			"match": "^[ \\t]*(meta)[ \\t]+(native)\\b(?=[ \\t]+(?:(?:static|const|inline|extern|volatile|restrict|_Noreturn|unsigned|signed|long|short)[ \\t]+)*[A-Za-z_]\\w*(?:\\.[A-Za-z_]\\w*)?(?:[ \\t]*[*&]+[ \\t]*|[ \\t]+)[A-Za-z_]\\w*(?:\\.[A-Za-z_]\\w*)?[ \\t]*\\()",
-			"captures": {
-				"1": { "name": "storage.modifier.meta.x2c" },
-				"2": { "name": "storage.modifier.native.x2c" }
-			}
-		},
+
 		"x2c_foreach_statement": {
 			"name": "meta.block.foreach.x2c",
 			"begin": "\\b(foreach)(\\s*)(\\()",

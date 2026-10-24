@@ -283,8 +283,8 @@ static int _sort_order(Func compare, Var left, Var right) =>
 Self Array.sort_with(Self array, Func compare) {
   if (!array || array.length < 2) return array;
   size_t count = array.length;
-  Array source = $auto(array.copy());
-  Array target = $auto([]);
+  Array source = auto array.copy();
+  Array target = auto [];
   target.resize(count);
   for (size_t width = 1; width < count; width *= 2) {
     for (size_t base = 0; base < count; base += 2 * width) {

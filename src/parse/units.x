@@ -528,7 +528,7 @@ static void _store_meta_hash(
 /* Adds referenced names in source order. Deferred sibling cursors keep deep
    expression chains off the C stack without reversing their children. */
 static void _referenced_names(Var node, Map seen, Array names) {
-  Array pending = $auto([]);
+  Array pending = auto [];
   List rest = %($node);
   while (rest || pending.len()) {
     if (!rest) {

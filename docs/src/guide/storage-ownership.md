@@ -63,7 +63,7 @@ reports an individual managed allocation's owner without acquiring any scope.
 Object references may form cycles. The lifetime hierarchy must not.
 
 ```x2c
-Scope graph = $auto(Scope.new());
+Scope graph = auto Scope.new();
 Array first = [], second = [];
 first.move_to(&graph);
 second.move_to(&graph);

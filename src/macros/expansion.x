@@ -315,7 +315,7 @@ module void _file_scope_locals(List rows, Map locals) {
     }
     case %(function ?type (bind ?binder ?) ?):
       if (binder.is_binder() && !type.type().is_static()) locals[binder] = 1;
-    case %((!set ?kind (!or declare typedef)) ?type (bindings *rows)): {
+    case %((!or ?kind declare typedef) ?type (bindings *rows)): {
       match (type) case %(* (!or struct union enum) ?tag *):
         if (tag.is_binder()) locals[tag] = 1;
       match (type) case %(* enum ? (*members) *):

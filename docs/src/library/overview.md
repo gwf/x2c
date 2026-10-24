@@ -49,7 +49,7 @@ numeric parsing. Its operations work on bytes; they do not decode Unicode.
 Use [Buffer](modules/buffer.md) for incremental text:
 
 ```x2c
-Buffer output = $auto(Buffer.new(0));
+Buffer output = auto Buffer.new(0);
 output.write("count=");
 output.printf("%d", 4);
 String text = output;

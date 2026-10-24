@@ -377,7 +377,7 @@ static List _segments(Resolve &r, List items) {
   Array resolved = [];
   Type type = %("String");
   foreach (List item in items) match (item) {
-    case %((!set ?tag (!or segvar segexp)) ?value): {
+    case %((!or ?tag segvar segexp) ?value): {
       List expression = r.c.resolve_expression(value, r.origin);
       if (_deferred_receiver(expression)) {
         type = %(<macro-expr>);

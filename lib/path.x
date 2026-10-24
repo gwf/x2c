@@ -391,7 +391,7 @@ List Path.glob(Path pattern) {
   int cut = wildcard - (const char *) text;
   while (cut && text[cut - 1] != '/') cut--;
   Path base = cut ? text[:cut] : NULL, root = base ? base : ".";
-  Array matches = $auto([]);
+  Array matches = auto [];
   Glob g = {pattern, matches, !!base, text.endswith("/"),
             pattern.startswith(".") || "/." in pattern};
   if (root.is_dir()) _glob(g, root, _glob_depth(text[cut:]));
@@ -431,7 +431,7 @@ static void _remove_entries(Path path, String &failed, int &failure) {
   struct dirent *entry;
   while ((entry = readdir(directory))) {
     if (!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, "..")) continue;
-    Context context = $auto(Context.open_isolated());
+    Context context = auto Context.open_isolated();
     String child_failed = NULL;
     int child_failure = 0;
     _remove_tree(
@@ -476,13 +476,13 @@ void Path.remove_tree(Path path) {
     Raises: `<not-found>` or `<io-fail>`, including for a directory `source`.
 */
 void Path.copy_file(Path source, Path target) {
-  File input = $auto(_open("Path.copy_file", source, "rb"));
+  File input = auto _open("Path.copy_file", source, "rb");
   struct stat info, existing;
   if (input.stat(&info)) File.path_error("Path.copy_file", source, errno);
   if (!stat(target, &existing) && existing.st_dev == info.st_dev &&
       existing.st_ino == info.st_ino)
     return;
-  File output = $auto(_open("Path.copy_file", target, "wb"));
+  File output = auto _open("Path.copy_file", target, "wb");
   input.copy_to(output, NULL);
   if (output.flush()) File.path_error("Path.copy_file", target, errno);
   if (chmod(target, info.st_mode & 07777))
@@ -554,7 +554,7 @@ String Path.read_text(Path path) =>
     Raises: `<not-found>` when the directory does not exist, or `<io-fail>`.
 */
 void Path.write_text(Path path, String text) {
-  File output = $auto(_open("Path.write_text", path, "w"));
+  File output = auto _open("Path.write_text", path, "w");
   output.write_all(text, text.len());
   if (output.flush()) File.path_error("Path.write_text", path, errno);
 }

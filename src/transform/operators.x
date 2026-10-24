@@ -10,14 +10,14 @@ module List _operator(Compiler c, List ast) {
              (!set ?lhs (expr ?lhs_type ?)) (!set ?rhs (expr ?rhs_type ?)))):
       return _binary_operator(c, ast, operator, lhs, lhs_type, rhs, rhs_type);
     case $source_operator_content(%(
-             (!set ?operator (!or + - ~))
+             (!or ?operator + - ~)
              (!set ?argument (expr ?argument_type ?)))):
       if (c.sym.is_var_type(argument_type)) {
         List operation = source_operator_content(%($operator $argument));
         return _dynamic(c, <unary>, argument_type, operation);
       }
     case $source_operator_content(%(
-             (!set ?operator (!or ++ --))
+             (!or ?operator ++ --)
              (!set ?argument (expr ?argument_type ?)))):
       return _change(c, ast, operator, argument, argument_type, 0);
   }
@@ -84,7 +84,7 @@ module List _truthy(Compiler c, List ast) {
         for_loop(
           init, _truthy_expression(c, condition), increment,
           body)).cadr();
-    case $source_operator_content(%((!set ?operator (!or && ||)) ?lhs ?rhs)): {
+    case $source_operator_content(%((!or ?operator && ||) ?lhs ?rhs)): {
       List left = _truthy_expression(c, lhs);
       List right = _truthy_expression(c, rhs);
       return source_operator_content(%($operator $left $right));

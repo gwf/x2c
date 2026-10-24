@@ -6,7 +6,7 @@ int main(void) {
   Scope.retain();
   defer Scope.release();
 
-  Lisp lisp = $auto(Lisp.new());
+  Lisp lisp = auto Lisp.new();
   json.JsonLisp.install(lisp);
 
   String source = "{\"service\":\"artifact-api\",\"ports\":[80,443,8080]}";

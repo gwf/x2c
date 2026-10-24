@@ -29,7 +29,7 @@ module int _expression_holds_landing(List body) {
    as deeply as it is long, so the walk keeps its pending work off the C
    stack. */
 module void _collect_writes(Preserve &p, List body) {
-  Array pending = $auto([body]), flags = $auto([0]);
+  Array pending = auto [body], flags = auto [0];
   while (pending.len()) {
     Var current = pending.take_last();
     int inside = flags.take_last();

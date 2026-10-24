@@ -497,7 +497,7 @@ static String _fetch(String url, String directory, String name) {
 }
 
 static void _verify(Path p, String expected) {
-  File input = $auto(File.open(p, "rb"));
+  File input = auto File.open(p, "rb");
   String actual = input.sha256();
   if (actual != expected.lower())
     $report.install.digest_mismatch(p, expected, actual);
@@ -619,7 +619,7 @@ static List _locked_row(List rows, String name, String version) {
 }
 
 static void _write_lock(String path, List rows) {
-  Buffer out = $auto(Buffer.new(0));
+  Buffer out = auto Buffer.new(0);
   out.write(
     "# x2c lockfile. Written by x2c build; keep it with the manifest.\n"
     "# name version kind platform url sha256\n");

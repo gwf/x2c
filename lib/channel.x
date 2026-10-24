@@ -352,7 +352,7 @@ void Channel.send(Channel c, Var value) => _send(c, value, 0);
     scope is recovered through the root's allocation header while queued.
     Failed sends restore the container allocation owner and contents parent,
     or the custom subtree parent, before raising. Acceptance transfers access
-    and cleanup responsibility. This cannot disarm an existing $auto or defer;
+    and cleanup responsibility. This cannot disarm initializer auto or defer;
     the caller must not leave such cleanup armed after acceptance. A subtree
     must not be handed off twice. Canonical Strings/Lists and independent
     referenced objects are not implicitly adopted. Pointer provenance and

@@ -50,7 +50,7 @@ static const List catalog_labels = %(
    a capital follows a lower-case letter or digit. */
 static Array _words(String text):
   Array words = []
-  Buffer word = $auto(Buffer.new(0))
+  Buffer word = auto Buffer.new(0)
   for (char *ch = text ? text : ""; ; ch++):
     int c = (unsigned char) *ch
     int split = isupper(c) && word.len() &&
@@ -79,7 +79,7 @@ static int _shared(Map a, Map b):
 
 /* `text` with each run of space collapsed to one space and trimmed. */
 static String _normal(String text):
-  Buffer out = $auto(Buffer.new(0))
+  Buffer out = auto Buffer.new(0)
   int gap = 0
   for (char *ch = text ? text : ""; *ch; ch++):
     if isspace((unsigned char) *ch):

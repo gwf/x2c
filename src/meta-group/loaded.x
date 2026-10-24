@@ -143,7 +143,7 @@ static List _loaded_snapshot(
     Type element = c.sym.normalize_declared_type(type).dereference();
     List selected = %(expr $element
       (index $target ${$!(unsigned long long){ $index }}));
-    Array items = $auto([]);
+    Array items = auto [];
     List item = _loaded_snapshot(c, element, selected, budget, 0, items);
     body = $!{
       Array $value = [];
@@ -157,7 +157,7 @@ static List _loaded_snapshot(
     };
   }
   else {
-    Array fields = $auto([]);
+    Array fields = auto [];
     _loaded_snapshot_fields(c, type, target, value, budget, fields);
     body = $!{ Map $value = {}; @{fields.list()} };
   }
@@ -176,7 +176,7 @@ static void _loaded_snapshot_fields(
       continue;
     }
     List selected = %(expr $field (op . $target ($name)));
-    Array items = $auto([]);
+    Array items = auto [];
     List item = _loaded_snapshot(c, field, selected, budget, 0, items);
     fields.push(
       $!{
@@ -244,7 +244,7 @@ static void _loaded_path(LoadedPath path, Type type, List target, int root) {
   else {
     bridge = %("Var");
     List budget = c.sym.introduce(c.fresh_name("remaining"));
-    Array statements = $auto([]);
+    Array statements = auto [];
     List snapshot = _loaded_snapshot(
       c, type, target, budget, root, statements);
     _loaded_accessor(

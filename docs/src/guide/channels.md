@@ -18,7 +18,7 @@ for draining. It does not acknowledge that consumers finished using a payload.
 
 ```x2c
 int main(void) {
-  Channel numbers = $auto(Channel.new(<i32>, 2));
+  Channel numbers = auto Channel.new(<i32>, 2);
   int total = 0;
 
   Thread.run([
@@ -99,7 +99,7 @@ The empty transport Scope is destroyed before the error is raised. Failures
 before preparation leave ownership unchanged.
 
 On successful acceptance, the sender relinquishes access and cleanup. A subtree
-must not be sent twice. Do not leave a separate `$auto` or deferred cleanup armed
+must not be sent twice. Do not leave a separate initializer `auto` or deferred cleanup armed
 for it; sending cannot disarm existing cleanup. Unrelated aliases do not disappear
 when ownership changes.
 
@@ -146,7 +146,7 @@ no Scope or replacement tree mutex coordinates senders through a Channel.
 Finish every user and waiter before freeing a Channel or destroying its owner.
 Cleanup explicitly destroys undelivered owned subtrees and frees native queue
 nodes outside the queue monitor. It never destroys ordinary borrowed payloads.
-`$auto` closes and frees the Channel; it does not join its users. `Thread.run`
+Initializer `auto` closes and frees the Channel; it does not join its users. `Thread.run`
 finishes every participant before surrounding Channel cleanup on success or
 failure. Parent-scope destruction uses the same native-resource finalizer.
 

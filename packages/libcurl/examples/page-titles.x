@@ -12,10 +12,10 @@ int main(int argc, char **argv) {
   String site = String.new(argv[1]);
   List pages = %("/guide" "/reference" "/source");
 
-  CurlEasy curl = $auto(CurlEasy.new().timeouts(1000, 3000));
+  CurlEasy curl = auto CurlEasy.new().timeouts(1000, 3000);
 
   List urls = pages.map(%!(String page) => site + page);
-  CurlBatch batch = $auto(curl.get_all(urls, 3));
+  CurlBatch batch = auto curl.get_all(urls, 3);
   for (int i = 0; i < batch.len(); i++)
     printf("%s: %s\n", pages[i].string()[1:],
       page_title(batch.response(i).text()));

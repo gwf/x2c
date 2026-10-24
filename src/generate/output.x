@@ -53,7 +53,7 @@ static List _without_trivia(List ast) =>
 /* The header and source of `ast` as `(hfile htext cfile ctext)`, named from
    `basename`. */
 static List _generated_code(Compiler c, List ast, String basename) {
-  Map inline_bodies = $auto({});
+  Map inline_bodies = auto {};
   List (header, source) = _header_and_source(c, ast, inline_bodies);
   String hash = Path.identifier_hash(c.filename);
   Map bindings;
@@ -142,7 +142,7 @@ static int _is_function(List item) {
 }
 
 static int _needs_errors(List item) {
-  Map types = $auto({});
+  Map types = auto {};
   _spelled_types(item, types);
   return Ast.contains_head(item, <raise>) ||
     "ErrorCatchSite" in types || "ErrorHandler" in types;

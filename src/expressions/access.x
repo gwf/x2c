@@ -327,7 +327,7 @@ static String _member_type_name(Type type) {
 List Compiler.postfix_completions(
   Compiler c, Type receiver, Symbol access) {
   Map seen = {};
-  Array names = $auto([]), accepted = [];
+  Array names = auto [], accepted = [];
   Type fields = c.sym.resolve_key(receiver);
   if (fields.is_pointer()) fields = fields.dereference();
   _completion_fields(c, fields, seen, names, {});

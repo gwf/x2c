@@ -139,7 +139,7 @@ List LoopAllocations.analyze_unit(Compiler compiler, List ast, String path) {
 static void _loop_add_event(
   Map groups, Map totals, Map functions, List event) {
   match (event)
-    case %((!set ?tag (!or direct allocation-return))
+    case %((!or ?tag direct allocation-return)
            ?kind ?unit ?function ?visibility ?operation ?use ?location
            ?depth): {
       Symbol source = tag == <direct> ? <direct> : <helper>;

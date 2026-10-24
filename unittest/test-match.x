@@ -588,7 +588,7 @@ static void match_binder_bytes_keep_identifier_rules(void) {
 
 static void replace_flat_width_and_quote_suffix(void) {
   $test.scoped();
-  Array values = $auto([]);
+  Array values = auto [];
   for (int i = 0; i < 500000; i++) values.push(i);
   List wide = values;
   EXPECT_TRUE(wide.replace(%((?unused unused))) == wide);

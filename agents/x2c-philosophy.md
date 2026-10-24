@@ -962,7 +962,7 @@ Exemplars endorse a property, not every line in a file:
   `Map` and explicitly instantiated native numeric families; hashing, equality,
   errors, boxing, and iteration remain visible per-family choices.
 - `examples/programs/literate-lisp.x` - the current language written the way
-  it is meant to be read: `$auto` and `$scope` for lifetimes, `in` and `is`
+  it is meant to be read: `auto` and `$scope` for lifetimes, `in` and `is`
   for membership and tags, destructuring, `=>` bodies, bare literals, and `.`
   through every pointer the compiler owns.
 - `examples/magic/system-macros.x` - `class`, `$let`, and `$lock` in one

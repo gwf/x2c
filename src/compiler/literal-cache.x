@@ -71,7 +71,7 @@ static List _cache_boxed(Compiler c, List literal) {
 }
 
 static List _cache_literal_list(Compiler c, List values) {
-  Array heads = $auto([]);
+  Array heads = auto [];
   foreach (Var value in values) heads.push(c.cache_literal_var(value));
   List cached = %(nil);
   for (int i = (int) heads.len() - 1; i >= 0; i--) {

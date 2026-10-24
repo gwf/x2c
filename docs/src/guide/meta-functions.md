@@ -473,7 +473,7 @@ A module function may take or return a handle:
 
 - A returned handle is a fresh allocation in the active `Scope`. Allocate it
   with `Scope.malloc`, so that compile-time code can release it with
-  `Scope.free` or hold it in an `$auto` local.
+  `Scope.free` or hold it in a local with initializer `auto`.
 - A handle argument is borrowed for the call. Keeping it after the call
   returns is not supported.
 - A handle whose type is a runtime class, or adopts `Var` or `Cleanup`, is
@@ -837,13 +837,13 @@ loop at the `break` after four cleanups. Its `return` computes 2,000 before
 the block's cleanup adds 1 to `total`. A loop with a cleanup on its
 iteration path still runs each turn in constant space.
 
-A scratch collection that only builds the result takes `$auto`. The
+A scratch collection that only builds the result takes initializer `auto`. The
 return converts the Array to a new List first, then the cleanup frees the
 Array:
 
 ```x2c
 meta static List evens(int n) {
-  Array out = $auto([]);
+  Array out = auto [];
   for (int i = 0; i < n; i++) out.push(2 * i);
   return out;
 }

@@ -10,7 +10,7 @@ pointer whose target the compiler cannot identify, including a pointer that
 a called function stores into for the caller.
 
 A region is a `$scope()` block, a `Scope.retain` and `Scope.release` pair, a
-`$scope(&slot)` push, a `Pool.open` bracket, an `$auto` local, the
+`$scope(&slot)` push, a `Pool.open` bracket, a local with initializer `auto`, the
 storage of a `Scope` local that `Scope.destroy` ends, or the function's own
 locals and parameters, whose storage ends when the function returns.
 `src/regions/regions.x` analyzes these forms before the transform driver lowers
@@ -88,7 +88,7 @@ cover:
   of storage it can see is not from a Scope allocator: a literal, the
   function's own storage, or a pooled value;
 - `Context` regions, which are not modeled;
-- `$auto` and `defer` cleanups other than the runtime's own `Array`, `Map`,
+- Initializer `auto` and `defer` cleanups other than the runtime's own `Array`, `Map`,
   `Block`, `Bytes`, `Buffer`, `Context`, and `Scope` cleanups;
 - a release inside a branch, which leaves the region open for the
   statements after that branch.

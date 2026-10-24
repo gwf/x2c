@@ -55,7 +55,7 @@ int Compiler.write_depfile(
    paths are sorted to write the same depfile from both routes. */
 static String _contents(
   CliRequest request, Compiler compiler, String input, String output_dir) {
-  Array paths = $auto([]), searches = $auto([]);
+  Array paths = auto [], searches = auto [];
   foreach ((String path, Var content_hash) in compiler.deps) {
     if (content_hash is <string> && String.startswith(content_hash, "search:"))
       searches.push(path.startswith("cwd:") ? path[4:] : path);
@@ -63,7 +63,7 @@ static String _contents(
   }
   if (!paths.len()) paths.push(input);
   paths.sort();
-  Buffer out = $auto(Buffer.new(0));
+  Buffer out = auto Buffer.new(0);
   _write_targets(out, request, input, output_dir);
   out.write_char(':');
   foreach (String path in paths) {

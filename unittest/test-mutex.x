@@ -17,7 +17,7 @@ static int _locked_return(Mutex mutex) {
 }
 
 static void mutex_system_lock_evaluation_and_transfer(void) {
-  Mutex mutex = $auto(Mutex.new());
+  Mutex mutex = auto Mutex.new();
   int evaluations = 0, caught = 0;
   try {
     $lock((evaluations++, mutex)) {

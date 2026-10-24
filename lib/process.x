@@ -27,7 +27,7 @@ typedef struct _JobLaunch {
 } JobLaunch;
 
 /** A command or pipeline and the record of its one run.
-    A job that is still running when its Scope ends, or when its `$auto`
+    A job that is still running when its Scope ends, or when its `auto`
     block exits, is terminated and reaped.
 */
 class Job {
@@ -196,7 +196,7 @@ static void _open_streams(Job j, Stdio &stdio) {
 /* The first stage reads a copy of the descriptor of a capture file that
    holds `text`. */
 static int _input(String text) {
-  File file = $auto(_capture_file());
+  File file = auto _capture_file();
   file.write_all(text, text.len());
   file.rewind();
   int fd = dup(file.fileno());
