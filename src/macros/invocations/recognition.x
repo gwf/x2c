@@ -50,6 +50,8 @@ void Compiler.install_compile_time_effects(Compiler c, List rows) {
       if (!c.kw_aliases) c.kw_aliases = {};
       c.kw_aliases[alias] = %(imported-macro $definition);
     }
+    case %(compile-time alias ?(String name) ?expression):
+      _install_imported_alias(c, name, expression);
     case %(compile-time rewrite *): _install_rewrite(c, row);
     case %(compile-time lisp ?form (source ?path ?site)): {
       Token token = c.thaw_declaration_syntax(site);
@@ -251,6 +253,9 @@ module List _peek_invocation(Compiler c, Symbol position) {
       return _lookup(c, Atom.intern("x2c.auto.region"), c.token);
     return NULL;
   }
+  if (c.at_word("with") && c.peek(1) == <(> &&
+      (position == <statement> || position == <block>))
+    return _lookup(c, Atom.intern("x2c.with"), c.token);
   if (c.peek(0) == <$> || c.peek(0) == <@>) {
     String spelling;
     _scan_name(c, spelling);

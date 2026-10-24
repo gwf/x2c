@@ -21,6 +21,7 @@ List Compiler.parse_top_level_mode(Compiler c, int skip_body) {
   List slot = skip_body ? NULL : c.try_parse_macro_slot(<unit>);
   if (slot) return slot;
   if (c.keyword_form_is_definition()) return _keyword_definition(c, skip_body);
+  if (c.alias_form_starts()) return c.parse_alias_declaration(skip_body);
   if (_module_storage_form(c)) {
     c.token.type = <static>;
     $let(c.module_declaration, 1) return c.parse_top_level_mode(skip_body);
@@ -264,6 +265,7 @@ int Compiler.script_statement_starts(Compiler c) {
       c.protocol_form_starts())
     return 0;
   if (c.peek(0) == <auto>) return !c.auto_region_function_starts();
+  if (c.alias_form_starts()) return 0;
   if (c.at_word("with")) return 1;
   if (c.macro_starts_target_at(<unit>)) return !c.macro_targets_unit();
   return !c.test_declaration() || !_declaration_stays(c);

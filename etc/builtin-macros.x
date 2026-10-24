@@ -51,6 +51,11 @@ macro Decorator $let(Stmt $body, Expr $place, Expr $value) {
   }
 }
 
+macro Decorator $x2c.with(Stmt $body, Expr @assignments) {
+  using $address, $previous;
+  $(with.expand $body $assignments $address $previous)
+}
+
 macro Decorator $lock(Stmt $body, Expr $mutex) {
   {
     $(list "Mutex") held = $mutex;

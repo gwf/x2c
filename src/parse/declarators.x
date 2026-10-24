@@ -241,10 +241,10 @@ static List _template_declarator(Compiler c, int member) {
                              : c.try_parse_macro_slot(<name>)} ());
     case <ident>: {
       String spelling = c.token.text;
-      int shadows_with = !!c.with_binding();
+      int shadows_alias = !!c.alias_expression();
       c.next();
       if (member) return %(bind ($spelling) ());
-      if (shadows_with) c.sym.define(%($spelling), NULL);
+      if (shadows_alias) c.sym.define(%($spelling), NULL);
       return %(bind ${c.macro_introduced_name(spelling)} ());
     }
   }
@@ -404,10 +404,13 @@ static Var _method_spelling(
 }
 
 /* An exact spelling, or a name a parameter holds, may be declared again only
-   as another prototype of a function. */
+   as another prototype of a function. An alias's name is not declared again
+   in its scope. */
 static void _check_rebinding(
   Compiler c, String exact, int exact_name, List declaration) {
   List existing = exact ? c.sym.current_binding(%($exact)) : NULL;
+  if (existing && %(alias $existing) in c.semantic_binding_facts())
+    $fail.parse_decl_bound(c, c.token, exact);
   if (exact_name || (existing &&
       %(parameter $existing) in c.semantic_binding_facts())) {
     Var prior = existing

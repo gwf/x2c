@@ -249,10 +249,14 @@ module Var _rebind_imported(Compiler c, Var stored) {
   if (stored is not <list>) return stored;
   List definition = stored;
   if (definition.car() != <macrodef>) return definition;
+  return _rebind_globals(c, definition);
+}
+
+/* Binds each identifier of cached syntax in the current global scope. */
+module List _rebind_globals(Compiler c, List syntax) {
   Map replacements = {};
-  _reference_bindings(c, definition, replacements);
-  if (!replacements.len()) return definition;
-  return _replace_bindings(definition, replacements);
+  _reference_bindings(c, syntax, replacements);
+  return replacements.len() ? _replace_bindings(syntax, replacements) : syntax;
 }
 
 static void _reference_bindings(

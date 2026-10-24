@@ -46,6 +46,7 @@ static void _clear_symbols(Sym s, Map globals, int base_scopes) {
   s.prefixed = {};
   s.base_scopes = base_scopes;
   s.local_macro_names = 0;
+  s.aliases = 0;
   s.binding_facts = {};
 }
 
@@ -66,11 +67,26 @@ SymScope Sym.pop_scope(Sym s) {
   struct SymScope scope = { 0 };
   s.scopes.try_pop(&scope);
   if (scope.macros != NULL) s.local_macro_names -= scope.macros.len();
+  s.aliases -= scope.aliases;
   return scope;
+}
+
+/** Returns the index of the innermost scope whose symbols hold `key`, or
+    -1 when none does. */
+int Sym.declaring_scope(Sym s, List key) {
+  for (int i = (int) s.scopes.len() - 1; i >= 0; i--)
+    if (key in _scope_at(s, i).symbols) return i;
+  return -1;
 }
 
 /** Returns the number of semantic scopes, including base scopes. */
 int Sym.scope_count(Sym s) => s.scopes.len();
+
+/** Returns the number of base scopes, which hold file-scope declarations. */
+int Sym.base_scope_count(Sym s) => s.base_scopes;
+
+/** Returns whether any open scope defines an alias row. */
+int Sym.has_aliases(Sym s) => s.aliases != 0;
 
 /** Returns whether declarations currently bind at file scope. */
 int Sym.at_file_scope(Sym s) => (int) s.scopes.len() <= s.base_scopes;

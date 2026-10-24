@@ -121,7 +121,7 @@ static macro Stmt $fail.symbols_typedef_depth(
     transactions retain the rows each write replaces in `undo`. */
 module typedef struct Sym {
   Block scopes, Map globals, statics, binding_facts, prefixed;
-  int base_scopes, local_macro_names;
+  int base_scopes, local_macro_names, aliases;
   Block undo, int transactions;
   // Owning compiler, so type resolution can report its own diagnostics.
   Compiler c;

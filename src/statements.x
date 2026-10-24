@@ -24,11 +24,6 @@ static macro Stmt $fail.statements_with_body(Expr $c, Expr $site) =>
     <parse>, "with requires a braced body",
     $site, NULL);
 
-static macro Stmt $fail.statements_with_expr(Expr $c, Expr $site) =>
-  $c.report_error(
-    <parse>, "with requires an expression",
-    $site, NULL);
-
 static macro Stmt $fail.statements_raise_payload(Expr $c, Expr $site) =>
   $c.report_error(
     <parse>, "raise requires a %() payload literal",
@@ -79,8 +74,10 @@ static List _statement(Compiler c, Symbol position) {
   _x2c_complete_here(c, <statement>, _statement_keywords());
   List slot = c.try_parse_macro_slot(<statement>);
   if (slot) return slot;
-  if (c.at_word("with")) return _with_statement(c);
-  if (!c.with_binding() && c.macro_starts_target_at(<statement>))
+  if (c.at_word("with")) return _with_statement(c, position);
+  if (c.alias_form_starts())
+    return c.parse_alias_statement(position == <block>);
+  if (!c.alias_expression() && c.macro_starts_target_at(<statement>))
     return _macro_statement(c);
   switch (c.peek(0)) {
     case <if>: case <while>: case <for>: case <do>: case <match>: case <try>:
@@ -103,7 +100,7 @@ static List _statement(Compiler c, Symbol position) {
 
 static List _statement_keywords(void) => %(
   "if" "while" "for" "do" "return" "case" "break" "continue" "goto"
-  "try" "raise" "defer" "match" "switch" "default" "with"
+  "try" "raise" "defer" "match" "switch" "default" "with" "alias"
 );
 
 /* A statement-position macro target, or else a macro expression ended by
@@ -152,65 +149,14 @@ static List _label_statement(Compiler c) {
 
 // with statements
 
-/* A `with` alias stands for its source expression. Its `Sym` scope and
-   semantic rows exist only while the body parses, so every use substitutes
-   the expression and an unused alias does not evaluate it. */
-static List _with_statement(Compiler c) {
-  c.next();
-  if ((c.peek(0) == <"{"> && c.peek(1) == <"}">) ||
-      c.peek(0) == <;> || c.peek(0) == <eof>)
-    $fail.statements_with_expr(c, c.token);
-  List expression = c.parse_expression();
-  String alias = _with_alias(c);
-  if (c.peek(0) != <"{">)
-    $fail.statements_with_body(c, c.token);
-  return _with_body(c, expression, alias);
-}
-
-/* The name after `as`, or `_` when the statement names none. */
-static String _with_alias(Compiler c) {
-  if (!c.take_word("as")) return "_";
-  if (c.peek(0) != <ident>)
-    $fail.parse_alias_name(c, c.token);
-  String alias = c.token.text;
-  c.next();
-  return alias;
-}
-
-/* Parses the braced body with `alias` bound to `expression`. The alias
-   shadows any outer `with` of the same name until the body ends. */
-static List _with_body(Compiler c, List expression, String alias) {
-  List type = NULL;
-  match (expression)
-    case %(expr ?expression_type ?): type = expression_type;
-  c.sym.push_new_scope();
-  List binding = c.sym.define(%($alias), type);
-  c.set_fact(%(with $binding), expression);
-  Var shadowed;
-  int shadows = c.semantic_binding_facts().try_get(
-    %(with-name $alias), shadowed);
-  c.set_fact(%(with-name $alias), binding);
-  defer {
-    c.drop_fact(%(with $binding));
-    if (shadows) c.set_fact(%(with-name $alias), shadowed);
-    else c.drop_fact(%(with-name $alias));
-    c.sym.pop_scope();
-  }
-  c.next();
-  return c.parse_compound_statement();
-}
-
-/** Returns the binding of the current identifier when it names a live
-    `with` expression, or NULL.
-*/
-List Compiler.with_binding(Compiler c) {
-  Var candidate;
-  if (c.peek(0) != <ident> ||
-      !c.semantic_binding_facts().try_get(
-        %(with-name ${c.token.text}), candidate))
-    return NULL;
-  List binding = c.sym.lookup(%(${c.token.text}), NULL);
-  return binding.equal(candidate) ? binding : NULL;
+/* `with (place = value, ...) { ... }` expands the built-in `$x2c.with`
+   decorator over its braced body at `position`. */
+static List _with_statement(Compiler c, Symbol position) {
+  if (c.peek(1) != <(>) return c.parse_alias_statement(1);
+  Token body = Token.skip_trivia(c.token + 1).after_group();
+  if (body.type != <"{">)
+    $fail.statements_with_body(c, body);
+  return c.try_parse_macro_target_at(position);
 }
 
 // conditionals and loops
@@ -705,10 +651,11 @@ List Compiler.parse_block_item(Compiler c) {
   List slot = c.try_parse_macro_slot(<block>);
   if (slot) return slot;
   if (c.local_macro_form_is_definition()) return _local_macro(c);
-  if (c.at_word("with")) return _parse_statement(c);
-  // An identifier naming a live `with` expression is no macro target.
-  int with_expression = !!c.with_binding();
-  List macro = with_expression ? NULL : c.try_parse_macro_target_at(<block>);
+  if (c.alias_form_starts()) return c.parse_alias_statement(1);
+  if (c.at_word("with")) return _statement(c, <block>);
+  // An identifier naming a visible alias is no macro target.
+  List macro =
+    c.alias_expression() ? NULL : c.try_parse_macro_target_at(<block>);
   if (macro) return macro;
   if (c.test_declaration()) return _declaration_item(c);
   return _statement(c, <block>);
@@ -718,7 +665,7 @@ static List _block_keywords(void) => %(
   "void" "char" "short" "int" "long" "float" "double"
   "signed" "unsigned" "if" "while" "for" "do" "return"
   "case" "break" "continue" "goto" "try" "raise" "defer"
-  "match" "switch" "default" "with"
+  "match" "switch" "default" "with" "alias"
 );
 
 /* A local macro definition, which only a template keeps as an item. */

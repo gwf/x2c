@@ -26,6 +26,41 @@ static List _scope_expand(List body, List destinations) {
   return $!{ { $enter; { defer $leave; $body } } };
 }
 
+// with
+
+/* `with (place = value, ...)` nests one block per assignment around the
+   body, the first outermost. Each block captures its place's address once,
+   saves the value there, defers restoring it, and assigns. The names that
+   blocks share are fresh for the invocation; an inner block's shadow its
+   enclosing block's. */
+static List _with_expand(
+  List body, List assignments, Var address, Var previous) {
+  if (!assignments)
+    x2c_diagnostic_fail("with requires at least one assignment", %());
+  foreach (List assignment in assignments.reverse())
+    body = _with_assignment(assignment, body, address, previous);
+  return body;
+}
+
+static List _with_assignment(
+  List assignment, List body, Var address, Var previous) {
+  List place = NULL, value = NULL;
+  match (assignment)
+    case %(expr ? (op = ?target ?source)): place = target, value = source;
+  if (!place)
+    x2c_diagnostic_fail(
+      "with requires 'destination = expression' entries",
+      %("parenthesize a comma expression inside an entry"));
+  Type type = ((Code) place).type();
+  return $!{ {
+    $type *$address = &$place;
+    $type $previous = *$address;
+    defer *$address = $previous;
+    *$address = $value;
+    $body
+  } };
+}
+
 // $auto
 
 /* Preserve the acquired value after its declaration's checks. */
@@ -938,6 +973,7 @@ Map Compiler.builtin_targets(void) {
   $builtin.row(rows, "Ast_defer_captures", Ast.defer_captures);
   $builtin.row(rows, "foreach.expand", _foreach_expand);
   $builtin.row(rows, "auto.expand", _auto_expand);
+  $builtin.row(rows, "with.expand", _with_expand);
   $builtin.row(rows, "auto.release", _auto_release);
   $builtin.row(rows, "class.initializer", _class_initializer);
   $builtin.row(rows, "class.write-fields", _class_write_fields);
