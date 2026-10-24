@@ -1315,7 +1315,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _479 = cons(_476, _478);
   _480 = List_var(_479);
   _481 = Symbol_var(1133019155420);
-  _482 = int_var(1421);
+  _482 = int_var(1411);
   _483 = cons(_482, NULL);
   _484 = cons(_481, _483);
   _485 = List_var(_484);

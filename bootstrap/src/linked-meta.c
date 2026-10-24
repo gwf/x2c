@@ -13000,7 +13000,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_23(void
   _12063 = List_var(_12062);
   _12064 = String_new("lib/lisp/lisp.x");
   _12065 = String_var(_12064);
-  _12066 = String_new("5b00aa68");
+  _12066 = String_new("431f2f5d");
   _12067 = String_var(_12066);
   _12068 = cons(_12067, NULL);
   _12069 = cons(_12065, _12068);
@@ -14791,7 +14791,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_27(void
   _13842 = List_var(_13841);
   _13843 = String_new("src/macros/lisp.x");
   _13844 = String_var(_13843);
-  _13845 = String_new("fdd263a5");
+  _13845 = String_new("d1d657b1");
   _13846 = String_var(_13845);
   _13847 = cons(_13846, NULL);
   _13848 = cons(_13844, _13847);
