@@ -546,3 +546,12 @@ int removed_matrix_update = left @= right;
 List operator_data = %(@ @=);
 //                     ^ constant.other.atom.x2c
 //                       ^^ constant.other.atom.x2c
+
+auto { Array temporary = []; }
+// <- storage.modifier.auto.x2c
+auto for (int i = 0; i < 2; i++) {}
+// <- storage.modifier.auto.x2c
+auto((choose(), &destination)) { work(); }
+// <- storage.modifier.auto.x2c
+auto static int regional(void) { return 1; }
+// <- storage.modifier.auto.x2c

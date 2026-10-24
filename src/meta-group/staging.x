@@ -70,7 +70,7 @@ static String _stage(Compiler c, String &failure) {
   Map targets = Compiler.native_module_targets(module);
   if (!(module in c.meta_group_bound)) {
     c.meta_group_bound[module] = 1;
-    $scope(&session_meta_scope)
+    auto(&session_meta_scope)
       ((Func) targets["x2c_module_reset"].pointer()).apply(0, NULL);
   }
   foreach (List entry in c.meta_group)

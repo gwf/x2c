@@ -31,7 +31,7 @@ static Tensor _forward(Module model, Tensor x) =>
   _affine(model.child("l2"), _affine(model.child("l1"), x).tanh());
 
 static double _loss(Module model, Tensor x, Tensor y) {
-  $scope() {
+  auto {
     Torch.no_grad();
     return Tensor.mse_loss(_forward(model, x), y).item().double();
   }
@@ -53,7 +53,7 @@ static int _train(void) {
 
   Optimizer adam = Optimizer.adam(model, LR);
   for (int step = 0; step < STEPS; step++) {
-    $scope() {
+    auto {
       adam.zero_grad();
       Tensor error = Tensor.mse_loss(_forward(model, x), y);
       error.backward();
@@ -75,7 +75,7 @@ static int _load(void) {
 }
 
 int main(int argc, char **argv) {
-  $scope() {
+  auto {
     if (argc > 1 && !strcmp(argv[1], "load")) return _load();
     return _train();
   }

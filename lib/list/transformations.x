@@ -153,7 +153,7 @@ Self List.sort_by(Self lst, Func key) {
 */
 meta native Self List.unique(Self lst) {
   if (!lst || !lst.cdr()) return lst;
-  $scope() {
+  auto {
     struct Iter iter_storage, unique_storage;
     Iter iter = lst.iter(&iter_storage);
     Iter unique = iter.unique(&unique_storage);

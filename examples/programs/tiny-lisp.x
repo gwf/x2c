@@ -44,4 +44,4 @@ Var E(Var x,Map e){
   }
   return F();
 }
-int main(void){$scope(){Map e={};for(W();c!=EOF;W())puts(E(R(),e).str());}return 0;}
+int main(void){auto{Map e={};for(W();c!=EOF;W())puts(E(R(),e).str());}return 0;}

@@ -87,7 +87,7 @@ static List _dataset(String root, int train) {
 }
 
 static double _accuracy(Module model, Tensor images, Tensor targets) {
-  $scope() {
+  auto {
     Torch.no_grad();
     model.eval();
     long total = images.size(0), correct = 0;
@@ -195,7 +195,7 @@ static int _check(String artifacts, String out, String root) {
   Bench.record("trained_accuracy",
                _accuracy(trained, test_images, test_targets));
   {
-    $scope() {
+    auto {
       /* Everything the checkpoint holds is created in this scope and saved
          before it closes: a Map outlives a scope, but the Tensor wrappers
          it refers to do not. `no_grad` rather than inference mode, because
@@ -266,7 +266,7 @@ static int _diagnose(String artifacts, String out, String root, int count) {
   Tensor images = train[0].tensor(), targets = train[1].tensor();
   Bench.record("load_seconds", Bench.now() - start);
   {
-    $scope() {
+    auto {
       Module warm = _built(artifacts, "mnist-init.pt");
       _train(warm, Optimizer.adam(warm, LR), images, targets, order, 50, 0);
     }
@@ -281,7 +281,7 @@ static int _diagnose(String artifacts, String out, String root, int count) {
   double last_loss = 0;
   for (int index = 0; index < count; index++) {
     start = Bench.now();
-    $scope() {
+    auto {
       int position = index % per_epoch;
       long epoch = (index / per_epoch) % epochs;
       long offset = (long) position * BATCH;
@@ -325,7 +325,7 @@ static int _diagnose(String artifacts, String out, String root, int count) {
   restored_adam.load(saved_adam);
   Bench.record("checkpoint_load_seconds", Bench.now() - start);
   {
-    $scope() {
+    auto {
       Torch.no_grad();
       model.eval();
       restored.eval();
@@ -346,7 +346,7 @@ static int _diagnose(String artifacts, String out, String root, int count) {
 
 
 int main(int argc, char **argv) {
-  $scope() {
+  auto {
     if (argc < 4) {
       fprintf(stderr, "usage: mnist <check|time|diagnose|startup> <artifacts> <out>"
                       " [variant] [batches]\n");

@@ -280,7 +280,7 @@ static void storage_detached_subtree_survives_and_reattaches(void) {
 }
 
 static void _storage_export_order(int child_first) {
-  $scope() {
+  auto {
     Context work = Context.open_isolated();
     Map parent = {}, child = {};
     ArrayString strings = ArrayString.new();

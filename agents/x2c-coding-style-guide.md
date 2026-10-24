@@ -932,7 +932,7 @@ See LT-1 in [the standard](x2c-code-standard.md).
 Prefer:
 
 ```x2c
-$scope() {
+auto {
   File output = auto File.open(path, "w");
   output.puts(report);
 }

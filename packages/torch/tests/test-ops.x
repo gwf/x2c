@@ -154,7 +154,7 @@ static void ops_lifetimes(void) {
   $test.scoped();
   ScopeStats before = Scope.stats();
   {
-    $scope() {
+    auto {
       Tensor a = _grid();
       for (int i = 0; i < 50; i++) {
         List rows = a.split(1, 0);

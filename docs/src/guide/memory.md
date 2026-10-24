@@ -9,8 +9,8 @@ decide when each allocation is freed. x2c storage is of three kinds:
 - Mutable storage belongs to a *scope*. A scope frees its allocations
   together.
 
-The [system macros](system-macros.md) provide `$scope()` for a retained
-region, `$scope(pointer)` for a temporary destination, and initializer `auto` for an
+The [system macros](system-macros.md) provide `auto` for a retained
+region, `auto(pointer)` for a temporary destination, and initializer `auto` for an
 explicitly owned local. Classes can also supply early `free` operations.
 The [standard library overview](../library/overview.md) links to the detailed
 API reference.
@@ -147,7 +147,7 @@ in use: the active root, a slot still on the pushed stack, or a scope that a
 later `Scope.retain` layered another region on top of. The scope is left
 intact. Uncaught, `<bad-state>` aborts the program.
 
-To release a region on every exit from a block, write it as `$scope()` or put
+To release a region on every exit from a block, write it as `auto` or put
 the release in a `defer`. [Errors and
 Cleanup](exceptions.md#finally-and-defer) gives the exit rules.
 
@@ -327,7 +327,7 @@ leading indentation of the current line for `push`, `pop`, `indent`, and
 
 ```x2c
 String text;
-$scope() {
+auto {
   Buffer out = auto Buffer.new(0);
   out.write("case ").printf("%d", 7).write(":").newline_indent();
   text = out;
@@ -381,8 +381,8 @@ To avoid dangling pointers:
 ## Lifetime warnings
 
 Every allocation in this chapter belongs to a region: a part of the program
-that owns storage and ends at a known point. Regions are `$scope()` blocks,
-`Scope.retain` and `Scope.release` pairs, `$scope(&slot)` pushes, initializer `auto`
+that owns storage and ends at a known point. Regions are `auto` blocks,
+`Scope.retain` and `Scope.release` pairs, `auto(&slot)` pushes, initializer `auto`
 locals, `Scope` locals that `Scope.destroy` ends, `Pool.open` brackets, and
 the function's own locals and parameters.
 
@@ -419,7 +419,7 @@ Code that follows the patterns in this chapter compiles without warnings:
 ~int main(void) { Scope keep = NULL; Scope.push(&keep); Entry e = adopt(&keep);
 ~  Scope.pop(); Scope.destroy(keep); return e != NULL && !label().len(); }
 static Entry adopt(Scope *keep) {
-  $scope() {
+  auto {
     Entry entry = xcalloc(1, sizeof(struct Entry));
     Scope.move(entry, keep);
     return entry;
@@ -428,7 +428,7 @@ static Entry adopt(Scope *keep) {
 }
 
 static String label(void) {
-  $scope() {
+  auto {
     Buffer out = Buffer.new(0);
     out.write("ready");
     return out;

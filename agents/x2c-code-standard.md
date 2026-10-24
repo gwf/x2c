@@ -717,8 +717,8 @@ return a pointer, a borrowed handle, or a helper-process address.
 ## Lifetime and memory
 
 **LT-1** Name the lifetime at the acquisition. Use initializer `auto` for an owned
-local of a `Cleanup(T)` type, `$scope()` for a region of temporaries,
-`$scope(&slot)` to allocate into a chosen Scope, `$let` to replace one
+local of a `Cleanup(T)` type, `auto` for a region of temporaries,
+`auto(&slot)` to allocate into a chosen Scope, `$let` to replace one
 location for a block, and `$lock` to hold a Mutex. Use `defer` directly
 only for a native release the runtime does not own, a conditional
 acquisition or rollback, a consuming parameter, paired state that is not a
@@ -787,7 +787,7 @@ new cause with the old one as detail. Copy matched details with
 `Error.snapshot` when they must outlive the arm.
 
 **ER-7** Every resource owner on a raising path has its cleanup in place
-before the raising call (`auto`, `$scope`, `defer`, or `finally`).
+before the raising call (`auto`, `defer`, or `finally`).
 
 **ER-8** Never let an Error unwind through a C frame. In a callback, catch
 at the boundary, snapshot what must survive, return a status the library
@@ -1125,8 +1125,7 @@ supported cause. The checkpoint remains advisory during the baseline period;
 [performance checkpoints](performance-checkpoints.md) owns the method and
 acceptance policy.
 
-**HP-2** On a hot path, measure additions of `defer`, `$scope`, `$let`,
-`auto`, allocation, locks, passes, or calls before accepting them. An
+**HP-2** On a hot path, measure additions of `defer`, `auto`, `$let`, allocation, locks, passes, or calls before accepting them. An
 absolute ban or a new acceptance requirement is a proposal for Gary's
 review, not a current publication gate.
 
@@ -1318,7 +1317,7 @@ Gary's approval under the process ceiling.
 | Neutral respelling, rename, reorder, receiver, `=>`, `in`, `.` | compare affected generated output before and after where needed; `stage-diff-0` compares bootstrap with stage 0, not the pre-edit tree |
 | Compiler beautification | existing beautify proof: `make stage-1 && make stage-diff-1` once per file; use relevant driver probes |
 | A pure move | the multiset of non-blank lines is unchanged except section labels |
-| Adopting `auto`, `$let`, `$scope`, quotations | emission changes: refresh bootstrap through its target, then the focused fixtures and suites |
+| Adopting `auto`, `$let`, quotations | emission changes: refresh bootstrap through its target, then the focused fixtures and suites |
 | Deletion of a check or mechanism | the observable result of valid input is unchanged; invalid input is still rejected before wrong output, corrupt state, or an unsafe crossing |
 | Hot-path change | HP-1 paired instruction counts |
 | Defect fix | TE-2 fail-before and pass-after |
@@ -1429,8 +1428,8 @@ These results set the rules above; the evidence is in the adoption plan.
 | Need | Use |
 | --- | --- |
 | owned local of a `Cleanup(T)` type | `T value = auto acquire();` |
-| region of temporaries | `$scope()` |
-| allocate into a chosen Scope | `$scope(&slot)` |
+| region of temporaries | `auto` |
+| allocate into a chosen Scope | `auto(&slot)` |
 | replace a location for a block | `$let(place, value)` |
 | hold a Mutex | `$lock(m)` |
 | native release, rollback, result-writing cleanup | `defer` |

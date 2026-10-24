@@ -225,7 +225,7 @@ static Hash _hash(Array symbols) {
 
 static int _try_seed(
   Array symbols, uint32_t span, uint64_t seed, uint32_t *table) {
-  $scope() {
+  auto {
     Graph g = _graph(symbols, span, seed);
     if (!_peel(g)) return 0;
     _assign(g, table);

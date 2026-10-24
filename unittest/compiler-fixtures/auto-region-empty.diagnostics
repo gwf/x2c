@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/auto-region-empty.x:1:23: parse: macro invocation has too few arguments
+  int main(void) { auto() {} return 0; }
+                        ^
+

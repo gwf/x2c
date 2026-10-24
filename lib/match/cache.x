@@ -117,7 +117,7 @@ static Symbol _transient(
 static MatchPlan _prepare(
   MatchCache cache, Var pattern, const char *owner) {
   MatchPlan plan = NULL;
-  $scope(&cache.scope) { plan = MatchPlan.prepare(pattern); }
+  auto(&cache.scope) { plan = MatchPlan.prepare(pattern); }
   return _unfenced(plan, owner);
 }
 
@@ -539,7 +539,7 @@ MatchCache MatchCache.new(int capacity) {
 
   Scope owner = Scope.new_named("Match plan cache");
   MatchCache cache;
-  $scope(&owner) {
+  auto(&owner) {
     cache = xcalloc(1, sizeof(struct MatchCache));
     cache.scope = owner;
     cache.capacity = capacity;

@@ -3,7 +3,7 @@
 x2c adds structured errors to C. `raise` records an `Error`, a filtered
 `catch` selects it by cause, and `finally` and `defer` run cleanup when a
 block exits early. The [system macros](system-macros.md) attach the same
-`defer` cleanup to managed locals and to `$scope`, `$let`, and `$lock`
+`defer` cleanup to managed locals and to region `auto`, `$let`, and `$lock`
 bodies. The [language reference](../reference/language.md#errors-and-cleanup)
 gives the full statement rules.
 
@@ -297,12 +297,12 @@ the source path.
 ## Cleanup and scopes
 
 `Error` transfer does not release a `Scope` automatically. Write the region as
-`$scope()` whenever a raising call can cross the release; its deferred release
+`auto` whenever a raising call can cross the release; its deferred release
 runs on the error path too:
 
 ```x2c
 static void render(String text, int width) {
-  $scope() {
+  auto {
     char *line = xmalloc(width + 1);
     if (!text) {
       raise %(bad-arg (operation "render"));

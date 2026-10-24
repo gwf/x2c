@@ -102,7 +102,7 @@ Lisp Lisp.kernel(void) {
   lisp.scope = session;
   lisp.user = Scope.new_named("Lisp user");
   lisp.call_step_max = LISP_CALL_STEP_MAX;
-  $scope(&lisp.scope) {
+  auto(&lisp.scope) {
     lisp.globals = {};
     lisp.reserved = {};
     _install_specials(lisp);
@@ -165,7 +165,7 @@ void Lisp.destroy(Lisp lisp) {
 void Lisp.adopt(Lisp lisp, Lisp parent) {
   if (!lisp || !parent) return;
   lisp.parent = parent;
-  $scope(&lisp.scope) lisp.reserved = {};
+  auto(&lisp.scope) lisp.reserved = {};
   for (unsigned i = 0; i < _canonical_count(); i++)
     lisp.specials[i] = parent.specials[i];
 }
@@ -206,7 +206,7 @@ void Lisp.set_global(Lisp lisp, String name, Var value) {
   if (!lisp || !name) $error.global.args();
   if (lisp.frozen)
     $error.global.frozen("Lisp.set_global");
-  $scope(&lisp.scope) {
+  auto(&lisp.scope) {
     Var interned = Atom.intern(name);
     _binding_set(&lisp.scope, lisp.globals, interned, value);
     if (name.startswith("x2c.")) lisp.protect_x2c = 1;

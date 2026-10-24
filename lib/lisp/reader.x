@@ -148,7 +148,7 @@ static Var _incomplete(String source, unsigned at) {
 
 module Tokenizer _scan_lisp_tokens(String source, Scope *scope) {
   Tokenizer tokenizer = NULL;
-  $scope(scope) {
+  auto(scope) {
     tokenizer = Tokenizer.new(source, <lisp>);
     tokenizer.scan();
   }

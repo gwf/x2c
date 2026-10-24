@@ -29,7 +29,7 @@ macro Unit $match_function(Name $name) {
 $match_function(template_reader);
 
 int main(void) {
-  $scope() {
+  auto {
     Func snapshot = NULL, shared = NULL;
     match (%(entry 5)) {
       case %(entry ?shadow): {

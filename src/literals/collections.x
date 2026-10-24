@@ -90,7 +90,7 @@ static int _duplicate_index(List values) {
 }
 
 static List _set_expression(Array symbols) {
-  $scope() {
+  auto {
     String text = _octal_literal(SymbolSet.encode(symbols));
     List bytes = %(expr (* char) (literal (* char) $text));
     List decl = %(decl ("SymbolSet") (bindings (bind () ())));

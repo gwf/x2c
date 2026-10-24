@@ -42,7 +42,7 @@ static Map _artifact(String directory, String name) {
 /* One request. Out-of-place throughout: every step allocates its result,
    which is the behavior being measured. */
 static double _chain(Tensor x, Tensor a, Tensor b, int operations) {
-  $scope() {
+  auto {
     Torch.inference_mode();
     Tensor y = x;
     for (int i = 0; i < operations; i++) y = (y * a + b).relu();
@@ -157,7 +157,7 @@ static void _note_live(void) {
 }
 
 static double _chain_natural(Tensor x, Tensor a, Tensor b, int operations) {
-  $scope() {
+  auto {
     Torch.inference_mode();
     Tensor y = x;
     for (int i = 0; i < operations; i++) y = (y * a + b).relu();
@@ -167,7 +167,7 @@ static double _chain_natural(Tensor x, Tensor a, Tensor b, int operations) {
 }
 
 static double _chain_freed(Tensor x, Tensor a, Tensor b, int operations) {
-  $scope() {
+  auto {
     Torch.inference_mode();
     Tensor y = x;
     for (int i = 0; i < operations; i++) {
@@ -186,7 +186,7 @@ static double _chain_subscope(Tensor x, Tensor a, Tensor b, int operations) {
   Tensor y = x;
   for (int i = 0; i < operations; i++) {
     Scope replacement = NULL;
-    $scope() {
+    auto {
       Torch.inference_mode();
       y = (y * a + b).relu();
       Scope.move(y, &replacement);
@@ -196,7 +196,7 @@ static double _chain_subscope(Tensor x, Tensor a, Tensor b, int operations) {
   }
   if (interop_observe) _note_live();
   double total;
-  $scope() {
+  auto {
     Torch.inference_mode();
     total = y.sum().item().double();
   }
@@ -276,7 +276,7 @@ static int _memory(String artifacts, String out, int profile, int requests) {
   Bench.sample("short-scope-start", 16);
   for (int block = 0; block < 512 / 16; block++) {
     Scope replacement = NULL;
-    $scope() {
+    auto {
       Torch.inference_mode();
       for (int i = 0; i < 16; i++) y = (y * a + b).relu();
       Scope.move(y, &replacement);
@@ -294,7 +294,7 @@ static int _memory(String artifacts, String out, int profile, int requests) {
 
 
 int main(int argc, char **argv) {
-  $scope() {
+  auto {
     if (argc < 4) {
       fprintf(stderr, "usage: interop <check|time|memory> <artifacts> <out>"
                       " [variant] [count]\n");

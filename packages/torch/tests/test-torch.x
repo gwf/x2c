@@ -131,7 +131,7 @@ static void torch_autograd(void) {
   EXPECT_NEAR(grad[0].double(), 4.0, 1e-12);
   EXPECT_NEAR(grad[1].double(), 6.0, 1e-12);
   EXPECT_TRUE(Torch.grad_enabled());
-  $scope() {
+  auto {
     Torch.no_grad();
     EXPECT_FALSE(Torch.grad_enabled());
     w.add_(w.grad(), -0.5);
@@ -146,10 +146,10 @@ static void torch_autograd(void) {
 static void torch_no_grad_is_scoped(void) {
   $test.scoped();
   EXPECT_TRUE(Torch.grad_enabled());
-  $scope() {
+  auto {
     Torch.no_grad();
     EXPECT_FALSE(Torch.grad_enabled());
-    $scope() {
+    auto {
       Torch.no_grad();
       EXPECT_FALSE(Torch.grad_enabled());
     }
@@ -159,7 +159,7 @@ static void torch_no_grad_is_scoped(void) {
 
   int caught = 0;
   try {
-    $scope() {
+    auto {
       Torch.no_grad();
       EXPECT_FALSE(Torch.grad_enabled());
       Tensor a = Tensor.ones(%(2 3), XT_FLOAT64);
@@ -171,7 +171,7 @@ static void torch_no_grad_is_scoped(void) {
   EXPECT_INT_EQ(caught, 1);
   EXPECT_TRUE(Torch.grad_enabled());
 
-  $scope() {
+  auto {
     Torch.inference_mode();
     EXPECT_FALSE(Torch.grad_enabled());
   }
@@ -239,7 +239,7 @@ static void torch_optimizers(void) {
   Optimizer adam = Optimizer.adam(model, 0.05);
   double first = 0.0, last = 0.0;
   for (int step = 0; step < 50; step++) {
-    $scope() {
+    auto {
       adam.zero_grad();
       Tensor error = Tensor.mse_loss(_mlp_forward(model, data), target);
       error.backward();
@@ -254,7 +254,7 @@ static void torch_optimizers(void) {
      saved state and the saved parameters gives the same next step. */
   adam.save("builds/test-optim.pt");
   model.save("builds/test-resume.pt");
-  $scope() {
+  auto {
     adam.zero_grad();
     Tensor error = Tensor.mse_loss(_mlp_forward(model, data), target);
     error.backward();
@@ -265,7 +265,7 @@ static void torch_optimizers(void) {
   model.load("builds/test-resume.pt");
   Optimizer resumed = Optimizer.adam(model, 0.05);
   resumed.load("builds/test-optim.pt");
-  $scope() {
+  auto {
     resumed.zero_grad();
     Tensor error = Tensor.mse_loss(_mlp_forward(model, data), target);
     error.backward();
@@ -338,7 +338,7 @@ static void torch_checkpoints(void) {
 }
 
 static void _errors_and_lifetimes_once(void) {
-  $scope() {
+  auto {
     Tensor a = Tensor.ones(%(2 3), XT_FLOAT64);
     Tensor b = Tensor.ones(%(2 2), XT_FLOAT64);
     int caught = 0;

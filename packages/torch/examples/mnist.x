@@ -25,7 +25,7 @@ static Module _model(void) {
 /* The fraction of `images` the model classifies correctly, in chunks so
    the whole test set never forms one graph. */
 static double _accuracy(Module model, Tensor images, Tensor targets) {
-  $scope() {
+  auto {
     Torch.no_grad();
     model.eval();
     long total = images.size(0), correct = 0;
@@ -59,7 +59,7 @@ static void _explain(String root) {
 }
 
 int main(int argc, char **argv) {
-  $scope() {
+  auto {
     String root = argc > 1 ? argv[1] : getenv("TORCH_MNIST");
     if (!root) root = "data/mnist";
 

@@ -29,7 +29,7 @@ int main(void) {
   assert(nested_name[-1] == 'c');
   assert(numbers[1] == 4);
 
-  $scope() {
+  auto {
     Regex regex = Regex.compile("(hi)");
     RegexMatch found = regex.match("hi");
     RegexCapture capture = found.capture(1);

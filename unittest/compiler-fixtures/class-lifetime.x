@@ -53,7 +53,7 @@ static int _failing_constructors(void) {
     Item item = auto Item.new(-1);
   }
   catch %(make-fail): caught++;
-  $scope() {
+  auto {
     Initialized failed = NULL;
     try failed = Initialized.new();
     catch %(init-fail): caught++;
@@ -64,32 +64,32 @@ static int _failing_constructors(void) {
 
 int main(void) {
   size_t before = Scope.stats().live_allocations;
-  $scope() {
+  auto {
     Item item = Item.new(1);
     assert(item.values[0].int() == 1);
   }
   assert(frees == 0);
   assert(Scope.stats().live_allocations == before);
-  $scope() {
+  auto {
     Item item = auto Item.new(2);
     assert(item.values[0].int() == 2);
   }
   assert(frees == 1);
   assert(Scope.stats().live_allocations == before);
 
-  $scope() {
+  auto {
     Initialized good = Initialized.new();
     assert(inits == 1);
     assert(good.values.len() == 0);
   }
-  $scope() {
+  auto {
     Sized sized = auto Sized.new(4, 7);
     assert(sized.limit == 4 && sized.values[0].int() == 7);
     Sized none = NULL;
     none.free();
   }
   assert(drops == 1);
-  $scope() {
+  auto {
     size_t live = Scope.stats().live_allocations;
     assert(Guarded.new(-1) == NULL);
     assert(Scope.stats().live_allocations == live);

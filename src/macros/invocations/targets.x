@@ -140,6 +140,9 @@ static List _decorate(
   List node = _decoration_node(d, _arguments(d, block_scope));
   if (deferred) {
     transaction.commit();
+    if (_on_body(d))
+      match (d.function) case %(function ?rtype ?declarator ?):
+        return %(seq (function $rtype $declarator (block $node)));
     return %(seq $node);
   }
   List result = _bind_decoration(d, node);

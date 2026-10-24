@@ -4,7 +4,7 @@ import "libcurl" with CurlEasy, CurlResponse;
 import "yyjson" with Json;
 
 int main(int argc, char **argv) {
-  $scope() {
+  auto {
 
     String url = argc > 1 ? String.new(argv[1]) :
       "https://api.github.com/repos/PCRE2Project/pcre2/releases?per_page=5";

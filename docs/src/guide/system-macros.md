@@ -9,7 +9,7 @@ usually supplied by `#include "x2c.x"`.
 | Facility | Availability | Purpose |
 | --- | --- | --- |
 | `class` | Shipped keyword alias | Declare a type and its applicable defaults |
-| `$scope` | Shipped decorator | Retain a region or select a Scope destination |
+| Region `auto` | Keyword before a statement or function | Retain a region or select a Scope destination |
 | `$let` | Shipped decorator | Temporarily replace one captured storage location |
 | `$lock` | Shipped decorator | Hold a Mutex while a statement runs |
 | Initializer `auto` | Keyword after `=` | Clean up the acquired value at block exit |
@@ -18,8 +18,8 @@ usually supplied by `#include "x2c.x"`.
 | `$switch`, `$dedent`, `$assert`, `$todo`, `$unreachable`, `$time` | Shipped, explicit import | Remove boilerplate C leaves to every caller |
 | Project macros | Explicit import | Supply project-specific syntax and policy |
 
-`class` and `foreach` are keyword aliases. Use the `$` spelling for `$scope`,
-`$let`, and `$lock`. Initializer `auto` follows `=`; its compatibility spelling
+`class` and `foreach` are keyword aliases. Use the `$` spelling for
+`$let` and `$lock`. Initializer `auto` follows `=`; its compatibility spelling
 is `$auto(value)`. For authoring your own macros, continue with
 [Compile-time Macros](macros.md).
 
@@ -256,13 +256,22 @@ Tag collisions are errors.
 
 ## Retain or select a Scope
 
-Without an argument, `$scope()` retains one region around the following
+Region `auto` precedes a block, control statement, or function definition.
+`auto(destination)` selects a Scope destination for a following statement or
+function. Empty `auto()` is not accepted. A variable declaration such as
+`auto Array values = [];` still manages that variable; initializer `auto`
+still manages the acquired value.
+
+The compatibility decorator `$scope()` retains a region, and
+`$scope(destination)` selects a destination with the same semantics.
+
+Without an argument, `auto` retains one region around the following
 statement. Its expansion keeps the body inside the deferred
 release:
 
 ```x2c
 ~int main(void) {
-$scope() { Array values = []; values.push(1); }
+auto { Array values = []; values.push(1); }
 ~  return 0;
 ~}
 ```
@@ -288,8 +297,8 @@ region per iteration. No hidden loop changes the meaning of `break` or
 
 ```x2c
 ~int main(void) {
-$scope() for (int i = 0; i < 3; i++) { xmalloc(8); }
-for (int i = 0; i < 3; i++) $scope() { xmalloc(8); }
+auto for (int i = 0; i < 3; i++) { xmalloc(8); }
+for (int i = 0; i < 3; i++) auto { xmalloc(8); }
 ~  return 0;
 ~}
 ```
@@ -298,7 +307,7 @@ Place it before a file-scope function definition to retain one region around
 that whole function, without indenting the body a further level:
 
 ```x2c
-$scope() static int distinct(List words) {
+auto static int distinct(List words) {
   Map seen = {};
   foreach (String word in words) seen[word] = 1;
   return seen.len();
@@ -310,13 +319,13 @@ The `Map` belongs to the retained region, and the region closes on every
 exit, so the `return` releases it. `$lock` and `$let` decorate a function
 the same way.
 
-With one Scope-pointer argument, `$scope` evaluates the argument once, pushes
+With one Scope-pointer argument, region `auto` evaluates the argument once, pushes
 that destination, and restores the previous destination on exit:
 
 ```x2c
 ~int main(void) {
 Scope destination = auto Scope.new();
-$scope(&destination) { xmalloc(8); }
+auto(&destination) { xmalloc(8); }
 ~  return 0;
 ~}
 ```
@@ -450,7 +459,7 @@ cleans the variable's value at exit. See
 
 ## Include the rest of the set
 
-`class`, `foreach`, `$scope`, `$let`, `$lock`, and `auto` need no include. A
+`class`, `foreach`, `$let`, `$lock`, and `auto` need no include. A
 second set ships in `lib/system-macros.x` and becomes available with one
 line:
 
@@ -582,7 +591,7 @@ void History.drop(History self) {
 
 int main(int argc, char **argv) {
   if (argc != 2) return 0;
-  $scope() {
+  auto {
     History history = auto History.new();
     File input = auto File.open(argv[1], "r");
     for (String line; (line = input.readline()) != NULL; )

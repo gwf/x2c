@@ -1,6 +1,6 @@
 # Compile-time Macros
 
-For using the shipped `class`, `$scope`, `$let`, `$lock`, and initializer `auto`
+For using the shipped `class`, region `auto`, `$let`, `$lock`, and initializer `auto`
 facilities, see [Classes and System Macros](system-macros.md). This chapter
 explains how to author macros, including the ordinary facilities those
 definitions compose.

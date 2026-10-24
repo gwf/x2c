@@ -123,7 +123,7 @@ static List _read_record(String source) {
 module Lisp _interface_lisp(void) {
   if (interface_reader) return interface_reader;
   _process_cache();
-  $scope(&process_cache_scope) {
+  auto(&process_cache_scope) {
     interface_reader = Lisp.kernel();
     source_hashes = {};
     linked_providers = {};
@@ -400,7 +400,7 @@ static macro Expression $linked.prelude() => $(_x2c.prelude.linked);
 static List _linked_record(String canonical) {
   if (!linked_records) {
     _process_cache();
-    $scope(&process_cache_scope) linked_records = $linked.prelude();
+    auto(&process_cache_scope) linked_records = $linked.prelude();
   }
   Var text;
   if (!linked_records.try_get(Compiler.portable_path(canonical), text))

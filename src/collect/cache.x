@@ -16,7 +16,7 @@ static Map process_cache = NULL;
 
 module Map _process_cache(void) {
   if (process_cache != NULL) return process_cache;
-  $scope(&process_cache_scope) {
+  auto(&process_cache_scope) {
     Scope.shutdown_hook(_cache_shutdown);
     process_cache = {};
   }
@@ -34,11 +34,11 @@ static void _cache_shutdown(void) {
 }
 
 module Map _cache_map(void) {
-  $scope(&process_cache_scope) return {};
+  auto(&process_cache_scope) return {};
 }
 
 module Map _cache_copy(Map map) {
-  $scope(&process_cache_scope) return map.copy();
+  auto(&process_cache_scope) return map.copy();
 }
 
 /* A file's entry: collected in this process, or read from its interface. */

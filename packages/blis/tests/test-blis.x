@@ -156,7 +156,7 @@ static void blis_operators_are_scoped_blis_operations(void) {
   BlisObject left = auto BlisObject.copy_rows(%((1 2) (3 4)), BLIS_DOUBLE);
   BlisObject right = auto BlisObject.copy_rows(%((2 0) (1 2)), BLIS_DOUBLE);
   ScopeStats before = Scope.stats();
-  $scope() {
+  auto {
     BlisObject sum = left + right;
     EXPECT_NEAR(sum.at(0, 0), 3.0, 1e-12);
     BlisObject restored = sum - right;
@@ -259,7 +259,7 @@ static void blis_scale_is_negation_with_a_parameter(void) {
   );
 
   ScopeStats before = Scope.stats();
-  $scope() {
+  auto {
     BlisObject halved = matrix.scale(0.5);
     EXPECT_NEAR(halved.at(0, 0), 0.5, 1e-12);
     EXPECT_NEAR(halved.at(0, 1), -1.0, 1e-12);
@@ -353,7 +353,7 @@ static void blis_operator_temporaries_are_bounded_per_iteration(void) {
   ScopeStats before = Scope.stats();
 
   for (int round = 0; round < 64; round++) {
-    $scope() {
+    auto {
       BlisObject next = matrix.matmul(rank);
       rank.copy_from(next);
     }

@@ -29,7 +29,7 @@ int main(void) {
   long baseline = _live();
   Func forward = _square, backward = _gradient;
   for (int i = 0; i < 64; i++) {
-    $scope() {
+    auto {
       Tensor input = Tensor.ones(%(16), XT_FLOAT32).requires_grad_(1);
       Tensor output = Tensor.custom(forward, backward, %($input));
       output.sum().backward_callbacks();

@@ -8,7 +8,7 @@ typedef struct { int x, y; } Point;
 static Point origin(void) => (Point){3, 4};
 
 int main(void) {
-  $scope() {
+  auto {
     const int k = 42;
     Func read = %!() using &k => k;
     const double half = 0.5;

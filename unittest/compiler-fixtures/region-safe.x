@@ -6,7 +6,7 @@ static Node _fresh_node(void) => xcalloc(1, sizeof(struct Node));
 
 // The node is moved into a scope the caller owns.
 static Node moved_out(Scope *keep) {
-  $scope() {
+  auto {
     Node n = _fresh_node();
     Scope.move(n, keep);
     return n;
@@ -16,7 +16,7 @@ static Node moved_out(Scope *keep) {
 
 // The result is a canonical String, not the Buffer's storage.
 static String canonical_result(void) {
-  $scope() {
+  auto {
     Buffer b = Buffer.new(0);
     b.write("x");
     return b;
@@ -46,7 +46,7 @@ static void node_close(Node node) { (void) node; }
 
 // A function named like a container store stores nothing.
 static void named_push(Node holder) {
-  $scope() {
+  auto {
     Node n = _fresh_node();
     queue_push(holder, n);
   }

@@ -10,7 +10,7 @@ static void row(const char *label, Var a, Var b) {
 }
 
 int main(void) {
-  $scope() {
+  auto {
     double negative_zero = -0.0;
     Var nan = 0.0 / 0.0;
     row("3 3L", 3, 3L);
