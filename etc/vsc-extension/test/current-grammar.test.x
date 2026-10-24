@@ -555,3 +555,9 @@ auto((choose(), &destination)) { work(); }
 // <- storage.modifier.auto.x2c
 auto static int regional(void) { return 1; }
 // <- storage.modifier.auto.x2c
+
+auto Array left = [], right = [];
+// <- storage.modifier.auto.x2c
+auto Array first = [],
+// <- storage.modifier.auto.x2c
+  second = [];

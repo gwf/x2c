@@ -46,6 +46,7 @@ List syntax_grammar(void) => %(grammar
         (ref module-declaration)
         (ref lisp-escape)
         (ref linkage-group)
+        (ref auto-region-function)
         (ref declaration-definition)
         (ref unit-extension)))
 
@@ -62,6 +63,18 @@ List syntax_grammar(void) => %(grammar
         (optional (seq (token "meta") (optional (token "native"))))
         (ref declaration-row)
         (choice (token ";") (ref function-body))))
+
+    (rule auto-region-prefix
+      (seq (token "auto")
+        (optional (seq (token "(") (ref assignment) (token ")")))))
+
+    (rule auto-region-function
+      (seq (ref auto-region-prefix)
+        (ref declaration-row) (ref function-body)))
+
+    (rule auto-region-statement
+      (seq (ref auto-region-prefix)
+        (external "region target selected in statement position; G1")))
 
     (rule function-body
       (choice
@@ -391,6 +404,7 @@ List syntax_grammar(void) => %(grammar
 
     (rule statement
       (choice
+        (ref auto-region-statement)
         (ref block)
         (token ";")
         (seq (ref expression) (token ";"))

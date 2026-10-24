@@ -230,6 +230,13 @@ Declaration `auto` cleans up the variable at block exit; initializer `auto`
 manages the acquired value like `$auto(...)`. Macro `using` clauses recognize
 both retained names and fresh `$name` entries.
 
+Managed compound declarations use one leading `auto` when cleanup semantics
+are unchanged: `auto Array left = [], right = [];`. Initializer `auto`
+remains available for bindings that change or mixed ownership groups.
+The grammar also highlights native `auto` regions, control statements, and
+function definitions, with `auto(destination)` for an explicit Scope.
+Empty `auto()` is rejected by the compiler, not the TextMate highlighter.
+
 `$!`, `$name`, `${expression}`, `$(form)`, and a standalone `$` use pronounced
 sigil styling with the settings above. `@` sequence forms share that styling.
 The grammar supplies scopes; the active VS Code theme controls their color

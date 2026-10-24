@@ -33,6 +33,7 @@
 #include "lint.x"
 #include "tokens.x"
 #include "declarations.x"
+#include "lifetime.x"
 #include "idioms.x"
 #include "comments.x"
 #include "validation.x"
@@ -75,6 +76,7 @@ static int _parse(Lint l, Frontend frontend, String path):
   List rows = parsed.compiler.definition_rows(parsed.ast)
   l.comment_rules(parsed.compiler, parsed.ast, rows)
   l.declaration_rules(parsed.compiler, parsed.ast, rows)
+  l.lifetime_rules(parsed.compiler, parsed.ast)
   l.member_arrows(parsed.compiler, parsed.ast)
   l.validation_rules(parsed.compiler, parsed.ast)
   foreach List finding in l.findings: finding.promote()

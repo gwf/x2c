@@ -119,6 +119,9 @@ run() {
     (cd "$work" && run --rule empty-constructor --rule x2c-ident \
       --rule literal-report-error trailing.x)
   done
+  echo "# compound managed declarations"
+  run --rule compound-auto "$tests/src/compound-auto.x" \
+    "$tests/src/compound-auto-indent.x"
 } >"$out"
 diff -u "$tests/expected.txt" "$out"
 diff -u "$tests/fixed/idioms.x" "$work/idioms.x"
@@ -227,3 +230,10 @@ cmp "$work/direct" "$work/dispatched"
 
 builds/0/x2c help lint >"$work/help" 2>&1
 grep -q '^usage: x2c-lint ' "$work/help"
+
+# The driver exposes the same binding-aware lifetime rule.
+builds/0/x2c lint --rule compound-auto "$tests/src/compound-auto.x" \
+  >"$work/compound-dispatched"
+"$tool" --rule compound-auto "$tests/src/compound-auto.x" \
+  >"$work/compound-direct"
+cmp "$work/compound-direct" "$work/compound-dispatched"

@@ -18,10 +18,14 @@ unit-item = ( directive |
     module-declaration |
     lisp-escape |
     linkage-group |
+    auto-region-function |
     declaration-definition |
     unit-extension ) ;
 linkage-group = ( "extern" , c-string , "{" , { unit-item } , "}" ) ;
 declaration-definition = ( [ ( "meta" , [ "native" ] ) ] , declaration-row , ( ";" | function-body ) ) ;
+auto-region-prefix = ( "auto" , [ ( "(" , assignment , ")" ) ] ) ;
+auto-region-function = ( auto-region-prefix , declaration-row , function-body ) ;
+auto-region-statement = ( auto-region-prefix , ? region target selected in statement position; G1 ? ) ;
 function-body = ( raw-block | ( "=" , ">" , expression , ";" ) ) ;
 import-declaration = ( "import" ,
     c-string ,
@@ -112,7 +116,8 @@ block-item = ( directive |
     local-macro-definition |
     statement |
     block-extension ) ;
-statement = ( block |
+statement = ( auto-region-statement |
+    block |
     ";" |
     ( expression , ";" ) |
     typed-destructuring |

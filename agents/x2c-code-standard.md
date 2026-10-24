@@ -722,6 +722,15 @@ only for a native release the runtime does not own, a conditional
 acquisition or rollback, a consuming parameter, paired state that is not a
 resource, or cleanup that writes a result.
 
+For a compound declaration, use one leading `auto` when every declarator
+needs cleanup and the cleanup semantics stay the same:
+`auto Array kinds = [], values = [], orders = [];`.
+Do not repeat initializer `auto` on each declarator. Keep initializer `auto`
+when a binding can be reassigned, including through a reference or escaped
+address, or when only some declarators need cleanup. Declaration `auto`
+cleans the final binding; initializer `auto` cleans the acquired value.
+Changing a container's contents does not reassign its pointer binding.
+
 **LT-2** Adopt `Cleanup(T)` beside a type that owns native storage, through
 `$cleanup.by(T, release)` when one method releases it, so every caller can
 write `T handle = auto acquire();`. Never spell a release at each call site.

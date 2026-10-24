@@ -212,3 +212,10 @@ exit 1
 exit 1
 exit 1
 exit 1
+# compound managed declarations
+commands/lint/tests/src/compound-auto.x:7: violation compound-auto LT-1: use one leading auto for this compound declaration; its bindings keep their acquired values
+commands/lint/tests/src/compound-auto.x:13: violation compound-auto LT-1: use one leading auto for this compound declaration; its bindings keep their acquired values
+commands/lint/tests/src/compound-auto.x:48: violation compound-auto LT-1: use one leading auto for this compound declaration; its bindings keep their acquired values
+commands/lint/tests/src/compound-auto.x:63: violation compound-auto LT-1: use one leading auto for this compound declaration; its bindings keep their acquired values
+commands/lint/tests/src/compound-auto-indent.x:6: violation compound-auto LT-1: use one leading auto for this compound declaration; its bindings keep their acquired values
+exit 0
