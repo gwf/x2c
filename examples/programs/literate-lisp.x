@@ -510,7 +510,7 @@ static Var Reader.form(Reader &self, Token token) {
    a definition can save a body for a later call. */
 static Reader Reader.scan(String source, unsigned base, Scope *storage) {
   Reader reader = { .source = source, .base = base };                            // Named struct initializers.
-  $scope(storage) {                                                              // Redirect Scope; restore on exit.
+  auto(storage) {                                                              // Redirect Scope; restore on exit.
     reader.tokens = Tokenizer.new(                                               // Ordinary runtime tokenizer.
       source ? source + base : NULL, <lisp>);                                    // C pointer offset; Symbol mode.
     reader.tokens.scan();                                                        // Receiver-style function call.
@@ -969,7 +969,7 @@ static int _repl(Interp &self) {
    runs a small check; a path loads a Lisp file. Every mode first loads
    the native functions and the Lisp definitions in _stdlib. */
 int main(int argc, char **argv) {                                                // Standard C argc/argv entry point.
-  $scope() {                                                                     // Session-wide allocation region.
+  auto {                                                                     // Session-wide allocation region.
     try {                                                                        // Structured exception boundary.
       Array args = range(0, argc - 1, 1)                                         // Lazy range iterator.
         .map(%!(int i) using &argv => String.new(argv[i]));                      // Capture &argv; convert each entry.

@@ -34,7 +34,7 @@ macro Stmt $inner(Expr $caller) {
 }
 
 int main(void) {
-  $scope() {
+  auto {
     Var n = 77;
     $matched(n);
     $caught(n);

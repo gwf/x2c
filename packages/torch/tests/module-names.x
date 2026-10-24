@@ -15,7 +15,7 @@ static void _print(String kind, Module m) {
 }
 
 int main(void) {
-  $scope() {
+  auto {
     _print("Conv2d", Module.conv2d(1, 8, 3));
     _print("Conv1d", Module.conv1d(2, 4, 3));
     _print("BatchNorm2d", Module.batch_norm2d(3));

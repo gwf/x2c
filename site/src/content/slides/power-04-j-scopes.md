@@ -37,13 +37,13 @@ tab: scopes
 // Reclaim working storage regularly in a long-running survey.
 size_t total = 0;
 // Each day's file list lives until that survey finishes.
-while (wait_for_day()) $scope() {
+while (wait_for_day()) auto {
 ~  assert(Scope.stats().live_allocations == before);
   Array files = survey_files();
 ~  size_t daily = Scope.stats().live_allocations;
 
   // Working data is reclaimed after every file.
-  foreach (String path in files) $scope() {
+  foreach (String path in files) auto {
 ~    assert(Scope.stats().live_allocations == daily);
     Map findings = inspect_file(path);
     save_findings(path, findings);
@@ -62,7 +62,7 @@ printf("processed: %zu files\n", total);
 ~}
 ```
 
-The `Scope` module frees memory by lifetime, not by pointer. `$scope()`
+The `Scope` module frees memory by lifetime, not by pointer. `auto`
 retains a region around the statement it decorates and releases it on every
 exit, including a `return` or an `Error`. Decorating a loop body gives
 one region per iteration, so each file's working data is freed before the

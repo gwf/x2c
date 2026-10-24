@@ -9,12 +9,12 @@ static Var pass(int choose) => make(choose);
 static Var identity(Var value) => value;
 
 Var direct_scope(int choose) {
-  $scope() { return make(choose); }
+  auto { return make(choose); }
   return void;
 }
 
 Var stored_scope(int choose) {
-  $scope() {
+  auto {
     Var value = make(choose);
     return value;
   }
@@ -22,7 +22,7 @@ Var stored_scope(int choose) {
 }
 
 Var returned_argument(int choose) {
-  $scope() {
+  auto {
     Var value = make(choose);
     return identity(value);
   }

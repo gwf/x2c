@@ -99,7 +99,7 @@ static void _device(String device) {
   x.square().sum().backward();
   EXPECT_TRUE(x.grad().allclose(x * 2, 1e-6, 1e-6));
   {
-    $scope() {
+    auto {
       Torch.inference_mode();
       Tensor a = Tensor.ones(%(2), XT_FLOAT32)
         .to_device(device, XT_FLOAT32, 0, 0);

@@ -79,7 +79,7 @@ void Compiler.select_package_module(
   if (!_native_module_loaded(module))
     _load_package_module(c, name, module, token);
   if (module in native_module_order) return;
-  $scope(&native_module_scope) {
+  auto(&native_module_scope) {
     native_module_order = native_module_order.append(%($module));
     native_module_order.try_own();
   }
@@ -162,7 +162,7 @@ static int _stamp_in(char *data, size_t size, String expected) {
    code. */
 static void _open_native_module(String path) {
   void *handle = NULL;
-  $scope(&native_module_scope) handle = dlopen(path, RTLD_NOW | RTLD_LOCAL);
+  auto(&native_module_scope) handle = dlopen(path, RTLD_NOW | RTLD_LOCAL);
   if (!handle)
     $fail.meta_native_module_load(path, String.new(dlerror()));
   Map (*entry)(void) = (Map (*)(void)) dlsym(handle, "x2c_module_targets");
@@ -176,7 +176,7 @@ static void _open_native_module(String path) {
 */
 module void _add_native_module(String path, Map (*entry)(void)) {
   Map targets = NULL;
-  $scope(&native_module_scope) {
+  auto(&native_module_scope) {
     if (!(void *) native_modules) {
       Scope.shutdown_hook(_native_module_shutdown);
       native_modules = {};

@@ -1,6 +1,6 @@
 /*  meta-cleanup-exits.x -- cleanups on every exit from a meta body
 
-    A block that holds a cleanup keeps its boundary: `defer`, `$scope`, and
+    A block that holds a cleanup keeps its boundary: `defer`, region `auto`, and
     `$let` run their cleanup when the block ends, when a `return` leaves it
     after computing its value, and when `break` or `continue` leaves it for
     an enclosing loop. A loop with a cleanup on its iteration path runs
@@ -60,7 +60,7 @@ meta int nested_return(int n) {
 
 meta int scoped(int n) {
   int r = 0;
-  $scope() {
+  auto {
     Array a = [];
     a.push(n);
     a.push(n);
@@ -88,7 +88,7 @@ meta int retained(int n) {
 meta int many_turns(int n) {
   int total = 0;
   for (int i = 0; i < n; i++) {
-    $scope() { total += 1; }
+    auto { total += 1; }
   }
   return total;
 }

@@ -151,7 +151,7 @@ int main(void) {
   // An overflow heap box outlives the Scope it was made in.
   H38 object = heaps[38];
   Var inner;
-  $scope() {
+  auto {
     inner = object;
   }
   Var outer = object;

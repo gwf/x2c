@@ -3,7 +3,7 @@
 import "yyjson" as json;
 
 int main(void) {
-  $scope() {
+  auto {
     Map config = json.Json.read_file("examples/services.json");
     Array services = config["services"];
     Array unhealthy = [];

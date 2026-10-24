@@ -1610,7 +1610,7 @@ within the body runs the decorator's deferred cleanup before leaving:
 
 ```x2c
 ~#include "x2c.x"
-$scope() static int total(List values, int bias) {
+auto static int total(List values, int bias) {
   int sum = bias;
   foreach (int value in values) sum += value;
   return sum;
@@ -2810,6 +2810,23 @@ on the active rendering path print their pointer form. Descriptor registration r
 runtime's worker-start freeze rule. Overflow descriptors extend the compact
 descriptor table's capacity.
 
+### Allocation regions
+
+`auto { ... }` retains an allocation region and releases it on every exit.
+The same prefix can wrap a control statement, such as `auto for (...) ...`,
+or a function definition, such as `auto int f(void) { ... }`. An
+expression-bodied function can use the prefix too. Normal `return`, `break`,
+`continue`, and error transfer retain their meaning.
+
+`auto(pointer)` evaluates the Scope-pointer expression once, selects that
+allocation destination for the following statement or function body, and
+restores the previous destination on exit. It does not release the selected
+Scope. The argument is required: empty `auto()` is not accepted.
+
+These forms use the existing region operations and cleanup boundaries.
+`$scope()` and `$scope(pointer)` remain compatibility spellings. Variable
+declaration `auto` and initializer `auto` keep their distinct meanings below.
+
 ### Managed declarations and initializers
 
 Declaration `auto` arranges cleanup of the variable's value at block exit:
@@ -2817,7 +2834,7 @@ Declaration `auto` arranges cleanup of the variable's value at block exit:
 ```x2c
 ~int main(void) {
 auto Scope work = NULL;
-$scope(&work) { Array items = []; items.push(1); }
+auto(&work) { Array items = []; items.push(1); }
 ~  return 0;
 ~}
 ```
@@ -3874,12 +3891,13 @@ int main(void) {
 
 ### System block decorators
 
-The built-in macro module installs `$scope`, `$let`, and `$lock` without a
-per-source import. They retain the normal runtime declaration requirements
-and macro collision policy. None has a bare keyword alias.
+Region `auto`, `$let`, and `$lock` need no per-source import. They retain
+normal runtime declaration requirements. Region `auto` uses native syntax;
+`$let` and `$lock` retain their explicit macro spelling. The compatibility
+`$scope` decorator retains its macro collision policy.
 
-`$scope()` retains one region around its following statement and defers
-release inside an inner block containing that statement. `$scope(pointer)`
+Region `auto` retains one region around its following statement and defers
+release inside an inner block containing that statement. `auto(pointer)`
 evaluates the Scope-pointer expression once, pushes that destination, and
 uses the same inner-block placement for a deferred pop. Pop restores the
 previous destination without destroying the selected Scope. More than one

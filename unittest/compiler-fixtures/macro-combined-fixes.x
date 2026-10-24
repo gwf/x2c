@@ -35,7 +35,7 @@ macro Stmt $celled(Expr $caller) {
 static int bias = 10;
 
 int main(void) {
-  $scope() {
+  auto {
     int bias = 1000;
     Var n = 77;
     $celled(n);

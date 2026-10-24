@@ -290,7 +290,7 @@ static int divisible_by_four(Var value) {
 }
 
 int main(void) {
-  $scope() {
+  auto {
     Array values = range(1, 8, 1)
       .map(double_value)
       .filter(divisible_by_four);
@@ -341,7 +341,7 @@ storage, and any dynamic or captured callback must outlive the returned
 value.
 
 The iterators need no cleanup. A collected `List` or `Array` is scope-owned
-data, so the first program brackets its work with `$scope()`. See
+data, so the first program brackets its work with `auto`. See
 [scopes and lifetime](memory.md) for the region lifetime.
 
 ## Pipeline operations

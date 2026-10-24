@@ -28,7 +28,7 @@ static Array escaping_auto(void) {
 // A region-born value reaches a local declared outside the region.
 static Array escaping_outer_local(void) {
   Array out = NULL;
-  $scope() {
+  auto {
     Array a = _fresh_array();
     out = a;
   }
@@ -37,7 +37,7 @@ static Array escaping_outer_local(void) {
 
 // A region-born node is stored into a static.
 static void escaping_static(void) {
-  $scope() {
+  auto {
     Node n = _fresh_node();
     registry["k"] = n.value;
     global_node = n;
@@ -61,7 +61,7 @@ static int use_after_free(void) {
 
 // A callee stores the region-born node in its other parameter's object.
 static void escaping_through_callee(Node holder) {
-  $scope() {
+  auto {
     Node n = _fresh_node();
     _link(holder, n);
   }
@@ -69,7 +69,7 @@ static void escaping_through_callee(Node holder) {
 
 // A String pointer block is region storage, not a canonical String.
 static String *escaping_string_block(void) {
-  $scope() {
+  auto {
     String *names = xcalloc(4, sizeof(String));
     return names;
   }
@@ -78,7 +78,7 @@ static String *escaping_string_block(void) {
 
 // A cons cell holding a region-born Array is stored into a static.
 static void escaping_static_cons(void) {
-  $scope() {
+  auto {
     Array a = [];
     saved = cons(a, saved);
   }
@@ -88,7 +88,7 @@ static void escaping_static_cons(void) {
 static Node escaping_destroyed_slot(void) {
   Scope keep = NULL;
   Node n = NULL;
-  $scope() {
+  auto {
     n = _fresh_node();
     Scope.move(n, &keep);
   }
@@ -98,7 +98,7 @@ static Node escaping_destroyed_slot(void) {
 
 // Either arm of a conditional can be returned.
 static Array escaping_conditional(int flag) {
-  $scope() {
+  auto {
     Array a = [];
     return flag ? a : NULL;
   }
@@ -107,7 +107,7 @@ static Array escaping_conditional(int flag) {
 
 // A List cell outlives the region of the Array it holds.
 static List escaping_list_literal(void) {
-  $scope() {
+  auto {
     Array a = [];
     return %($a);
   }
@@ -126,7 +126,7 @@ static void _keep_two(Var first, Var second) {
 
 // One statement sinks the same value twice, and reports it once.
 static void escaping_twice(void) {
-  $scope() {
+  auto {
     Array a = [];
     _keep_two(a, a);
   }

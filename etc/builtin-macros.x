@@ -26,6 +26,14 @@ macro Decorator $x2c.foreach(
 
 keyword foreach $x2c.foreach;
 
+macro Decorator $x2c.auto.region(Stmt $body) {
+  @(scope.expand $body ())
+}
+
+macro Decorator $x2c.auto.destination(Stmt $body, Expr $destination) {
+  @(scope.expand $body (list $destination))
+}
+
 macro Decorator $scope(Stmt $body, Expr @destination) {
   @(scope.expand $body $destination)
 }

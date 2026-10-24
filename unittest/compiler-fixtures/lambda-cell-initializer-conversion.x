@@ -13,7 +13,7 @@ static int moved(Point p) {
 }
 
 int main(void) {
-  $scope() {
+  auto {
     Var count = 5;
     Func bump = %!() using &count => count = count + 1;
     bump();

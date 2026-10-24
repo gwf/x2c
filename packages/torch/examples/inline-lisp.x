@@ -3,7 +3,7 @@
 import "torch" with Torch, TorchLisp;
 
 int main(void) {
-  $scope() {
+  auto {
     Torch.manual_seed(7);
     Lisp lisp = Lisp.new();
     defer lisp.destroy();

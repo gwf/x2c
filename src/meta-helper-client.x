@@ -451,7 +451,7 @@ MetaHelper MetaHelper.new(String path, Map failures, Map units) {
   MetaHelper helper = Scope.malloc_finalized(sizeof(struct MetaHelper), _drop);
   *helper = (struct MetaHelper) {
     .path = path, .to = -1, .from = -1, .status = -1};
-  $scope(&helper.scope) {
+  auto(&helper.scope) {
     helper.failures = failures ? failures.copy() : NULL;
     helper.units = units ? units.copy() : NULL;
     helper.input = Buffer.new(0);

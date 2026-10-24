@@ -27,17 +27,17 @@ String Notebook.repr(Notebook notebook) {
 }
 
 int main(void) {
-  $scope() {
+  auto {
     Scope samples = auto Scope.new();
     Notebook notebook = auto Notebook.new();
     IntPointer step = auto IntPointer.new(2);
     Mutex mutex = auto Mutex.new();
     Count count = Count.new(3);
 
-    for (int i = 0; i < count; i++) $scope() {
+    for (int i = 0; i < count; i++) auto {
       Point point = Point.new(i, i * (*step));
       // The copied Points must outlive this iteration's temporary region.
-      $scope(&samples) $lock(mutex) $let(notebook.scale, 2) {
+      auto(&samples) $lock(mutex) $let(notebook.scale, 2) {
         notebook.record(point);
       }
     }

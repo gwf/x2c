@@ -31,7 +31,7 @@ protocol Meters(Km);
 static protocol Meters(Cm);
 
 int main(void) {
-  $scope() {
+  auto {
     Km trip = Km.new(3);
     Cm pencil = Cm.new(1800);
 

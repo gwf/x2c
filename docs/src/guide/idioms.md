@@ -2,7 +2,7 @@
 
 Use the shipped [classes and system macros](system-macros.md) where they
 express a complete constructor or block lifetime: initializer `auto` for an owned local,
-`$scope` for a region, `$let` for saved storage, and `$lock` for a Mutex.
+region `auto` for a region, `$let` for saved storage, and `$lock` for a Mutex.
 
 These idioms combine the features introduced in the guide.
 
@@ -287,12 +287,12 @@ in the result domain and the caller does not need a failure reason.
 
 ## Put cleanup beside acquisition
 
-`Scope` groups allocations by lifetime and `$scope()` retains one region
+`Scope` groups allocations by lifetime and `auto` retains one region
 around a statement. Initializer `auto` attaches cleanup to the acquired value,
 so the acquisition and its release are one line:
 
 ```x2c
-$scope() {
+auto {
   String path = "/tmp/x2c-idioms.txt";
   File output = auto File.open(path, "w");
   output.puts("ready\n");
@@ -318,7 +318,7 @@ variable at exit, such as a `Scope` slot filled later:
 ```x2c
 ~int main(void) {
 auto Scope work = NULL;
-$scope(&work) { Array items = []; items.push(1); }
+auto(&work) { Array items = []; items.push(1); }
 ~  return 0;
 ~}
 ```

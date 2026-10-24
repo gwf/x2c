@@ -17,7 +17,7 @@ static List _swish_gradient(AutogradContext context, Tensor gradient) {
 }
 
 int main(void) {
-  $scope() {
+  auto {
     Torch.manual_seed(7);
     String device = getenv("TORCH_DEVICE");
     if (!device) device = "cpu";

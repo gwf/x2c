@@ -9,8 +9,8 @@ at, or a static), an object owned by an outer or sibling region, and any
 pointer whose target the compiler cannot identify, including a pointer that
 a called function stores into for the caller.
 
-A region is a `$scope()` block, a `Scope.retain` and `Scope.release` pair, a
-`$scope(&slot)` push, a `Pool.open` bracket, a local with initializer `auto`, the
+A region is an `auto` block, a `Scope.retain` and `Scope.release` pair, a
+`auto(&slot)` push, a `Pool.open` bracket, a local with initializer `auto`, the
 storage of a `Scope` local that `Scope.destroy` ends, or the function's own
 locals and parameters, whose storage ends when the function returns.
 `src/regions/regions.x` analyzes these forms before the transform driver lowers
@@ -165,7 +165,7 @@ regions part of the type system of a C-like language and checked pointer
 lifetimes against them. From the ML Kit, x2c takes the idea that regions are
 the unit of deallocation; from Cyclone, the idea that a C program can be
 checked against them. The regions are the ones the author wrote with
-`$scope` and the retain and release calls. The check adds nothing to the
+region `auto` and the retain and release calls. The check adds nothing to the
 program text and produces only warnings, except in compile-time code.
 
 Rust and Swift put ownership and lifetime in the signature. Every call is

@@ -20,7 +20,7 @@ module Var _linked_target(
   if (!_project_meta_uses_linked(c, name, provider)) return 0;
   function = _linked_module()[name];
   if (!c.native_meta_accepts(function, signature)) return 0;
-  if (c.builtin_defs) $scope(&native_module_scope) {
+  if (c.builtin_defs) auto(&native_module_scope) {
     if (!shipped_targets) shipped_targets = {};
     key.try_own();
     shipped_targets[key] = function;
@@ -83,7 +83,7 @@ int Compiler.bind_linked_meta(Compiler c, List fn, Type type) {
 module Map _linked_module(void) {
   if (!_native_module_loaded(linked_supplier)) {
     _add_native_module(linked_supplier, linked_meta_targets);
-    $scope(&native_module_scope) linked_hashes = linked_meta_hashes();
+    auto(&native_module_scope) linked_hashes = linked_meta_hashes();
     foreach ((String name, List row) in linked_hashes) {
       name.try_own();
       row.try_own();

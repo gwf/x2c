@@ -393,7 +393,7 @@ static LogSink _add_text_sink(
   context.file = file;
   context.color = color;
   context.flush_each = flush_each;
-  $scope(&logger.storage) {
+  auto(&logger.storage) {
     context.scratch = Block.new(sizeof(Buffer));
   }
   handed_off = 1;
@@ -418,7 +418,7 @@ static void _emit_text(Logger logger, const LogEvent *event, Var data) {
    backing store, so the Buffer and the store live in logger storage, outside
    the caller's transient scope. */
 static void _add_scratch(Logger logger, LogTextSink context) {
-  $scope(&logger.storage) {
+  auto(&logger.storage) {
     Buffer added = Buffer.new(0), int appended = 0;
     defer if (!appended) added.free();
     context.scratch.append(&added, 1);
@@ -585,7 +585,7 @@ LogSink Logger.add_memory_sink(Logger logger, List *destination) {
   context.pool = logger.pool;
   context.destination_scope = &logger.owner_scope;
   context.values = Scope.new_named("Logger memory values");
-  $scope(&logger.storage) {
+  auto(&logger.storage) {
     context.wide_values = Block.new(sizeof(Var));
   }
   return _new_sink(logger, _emit_memory, NULL, context, _destroy_memory);
@@ -629,7 +629,7 @@ static Var _retain(LogMemorySink l, Var value) {
 
 static Var _retain_wide(LogMemorySink l, Var value) {
   Var copy;
-  $scope(&l.values) { copy = value.clone_wide(); }
+  auto(&l.values) { copy = value.clone_wide(); }
   l.wide_values.push(&copy);
   return copy;
 }

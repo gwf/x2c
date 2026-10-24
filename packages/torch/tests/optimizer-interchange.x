@@ -26,7 +26,7 @@ int main(int argc, char **argv) {
   Tensor x = Tensor.of(%((1 2) (2 1) (-1 3) (0 2)), %(4 2), XT_FLOAT64);
   Tensor y = Tensor.of(%((2) (4) (-3) (-1)), %(4 1), XT_FLOAT64);
   for (int i = 0; i < atoi(argv[4]); i++) {
-    $scope() {
+    auto {
       optimizer.zero_grad();
       Tensor loss = Tensor.mse_loss(model.forward(x), y);
       loss.backward();

@@ -11,7 +11,7 @@
     generated origins or diagnostics to `c`.
 */
 List Compiler.transform(Compiler c, List ast) {
-  /* Regions are read before lowering, while `$scope`, `$auto`, and the
+  /* Regions are read before lowering, while region `auto`, initializer `auto`, and the
      `defer` beside each region are still the forms the parser produced. */
   c.check_regions(ast);
   List newast = _sequence(c, ast, 0);

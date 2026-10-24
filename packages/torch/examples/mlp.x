@@ -24,14 +24,14 @@ static Tensor _forward(Module model, Tensor x) =>
   _affine(model.child("l2"), _affine(model.child("l1"), x).tanh());
 
 static double _loss(Module model, Tensor x, Tensor y) {
-  $scope() {
+  auto {
     Torch.no_grad();
     return Tensor.mse_loss(_forward(model, x), y).item().double();
   }
 }
 
 int main(void) {
-  $scope() {
+  auto {
     Torch.manual_seed(0);
 
     /* y is a fixed linear combination of the inputs plus a small offset and
@@ -44,7 +44,7 @@ int main(void) {
     Module model = _mlp();
     Optimizer adam = Optimizer.adam(model, 0.05);
     for (int step = 0; step < 200; step++) {
-      $scope() {
+      auto {
         /* A mini-batch is a permutation and an index_select, written here
            rather than borrowed from a C++ DataLoader. */
         Tensor pick = Torch.randperm(64).narrow(0, 0, 16);

@@ -3,7 +3,7 @@
 import "torch" with Torch, Tensor;
 
 int main(void) {
-  $scope() {
+  auto {
     Torch.manual_seed(7);
 
     Tensor x = Tensor.arange(0.0, 8.0, 1.0, XT_FLOAT64).reshape(%(8 1));
@@ -16,7 +16,7 @@ int main(void) {
       /* Releasing this region frees the step's tensors and restores the grad
          mode that Torch.no_grad turned off, even if a raise crosses the
          release. */
-      $scope() {
+      auto {
         Tensor error = Tensor.mse_loss(x.matmul(w) + b, y);
         error.backward();
         loss = error.item().double();

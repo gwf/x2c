@@ -112,7 +112,7 @@ runtime matching functions when the patterns are themselves data.
 [Scope](modules/scope.md) groups runtime allocations:
 
 ```x2c
-$scope() {
+auto {
   String text = "temporary";
   Array values = [text, 1, 2, 3];
   printf("%s\n", values.repr());

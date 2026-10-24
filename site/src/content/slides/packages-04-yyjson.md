@@ -14,7 +14,7 @@ links:
 ```x2c,ignore
 import "yyjson" as json;
 
-$scope() {
+auto {
   Map config = json.Json.read_file("examples/services.json");
   Array services = config["services"];
   Array unhealthy = [];

@@ -91,7 +91,7 @@ static Tensor _apply(List layers, Tensor x, int native) =>
   native ? _forward(layers, x) : _forward_explicit(layers, x);
 
 static double _evaluate(List layers, Tensor x, Tensor y, int native) {
-  $scope() {
+  auto {
     Torch.inference_mode();
     return Tensor.mse_loss(_apply(layers, x, native), y).item().double();
   }
@@ -102,7 +102,7 @@ static double _evaluate(List layers, Tensor x, Tensor y, int native) {
    live in the caller's scope. */
 static double _step(List layers, Optimizer adam, Tensor x, Tensor y,
                     Tensor batches, long row, int native, int want_loss) {
-  $scope() {
+  auto {
     Tensor pick = batches.select(0, row);
     adam.zero_grad();
     Tensor error = Tensor.mse_loss(_apply(layers, x.index_select(0, pick),
@@ -141,7 +141,7 @@ static void _train(List layers, Optimizer adam, Tensor x, Tensor y,
    beat. A row of ones times the mean row broadcasts without relying on
    an implicit shape rule the two languages might differ on. */
 static double _mean_baseline(Tensor y_train, Tensor y_val) {
-  $scope() {
+  auto {
     Torch.inference_mode();
     Tensor mean = y_train.mean_dim(0, 1);
     long rows = y_val.size(0);
@@ -213,7 +213,7 @@ static int _check(String artifacts, String out) {
   Bench.record("trained_val_mse",
                _evaluate(trained_layers, x_val, y_val, 1));
   {
-    $scope() {
+    auto {
       Torch.inference_mode();
       Map final = {};
       foreach (List pair, trained.named_parameters()) {
@@ -259,7 +259,7 @@ static int _check(String artifacts, String out) {
     long count = requests.size(0);
     double total = 0.0;
     for (long index = 0; index < count; index++) {
-      $scope() {
+      auto {
         Torch.inference_mode();
         Tensor batch = x_val.index_select(0, requests.select(0, index));
         total += _forward(trained_layers, batch).abs().sum().item().double();
@@ -286,7 +286,7 @@ static int _time_predict(String artifacts, String out, int size,
   List layers = _layers(model);
 
   for (int index = 0; index < WARMUP; index++) {
-    $scope() {
+    auto {
       Torch.inference_mode();
       Tensor batch = rows.select(0, index % available);
       (void) _forward(layers, x_val.index_select(0, batch));
@@ -296,7 +296,7 @@ static int _time_predict(String artifacts, String out, int size,
   double checksum = 0.0;
   double start = Bench.now();
   for (int index = 0; index < requests; index++) {
-    $scope() {
+    auto {
       Torch.inference_mode();
       Tensor batch = x_val.index_select(0, rows.select(0, index % available));
       checksum += _forward(layers, batch).abs().sum().item().double();
@@ -438,7 +438,7 @@ static void _memory_steady(String artifacts, Map data, Map batches,
   Tensor requests = batches["requests.32"].tensor();
   long available = requests.size(0);
   for (int index = 0; index < steps; index++) {
-    $scope() {
+    auto {
       Torch.inference_mode();
       (void) _forward(layers, x_val.index_select(
                                 0, requests.select(0, index % available)));
@@ -525,7 +525,7 @@ static void _memory_survivor(void) {
   Scope survivor = NULL, cloned_owner = NULL;
   Tensor view = NULL, cloned = NULL;
   Bench.sample("before", 0);
-  $scope() {
+  auto {
     Tensor big = Tensor.randn(%(4194304 4), XT_FLOAT32);
     Bench.sample("allocated", 0);
     view = big.narrow(0, 0, 16);
@@ -555,7 +555,7 @@ static void _memory_lifetime(String artifacts, String out, Map data,
   String checkpoint = %"$out/tabular-x2c-cycle.pt";
   int requests = 0, every = cycles / 16 > 0 ? cycles / 16 : 1;
   for (int cycle = 0; cycle < cycles; cycle++) {
-    $scope() {
+    auto {
       Module model = _built(artifacts, "tabular-init.pt");
       List layers = _layers(model);
       Optimizer adam = Optimizer.adam(model, LR);
@@ -569,7 +569,7 @@ static void _memory_lifetime(String artifacts, String out, Map data,
       requests += 20;
       if (requests % 100 == 0) {
         try {
-          $scope() {
+          auto {
             (void) _forward(reloaded_layers,
                             Tensor.randn(%(4 129), XT_FLOAT32));
           }
@@ -580,7 +580,7 @@ static void _memory_lifetime(String artifacts, String out, Map data,
         /* Valid work still runs, and the mode is what it was. */
         reloaded.eval();
         {
-          $scope() {
+          auto {
             Torch.inference_mode();
             (void) _forward(reloaded_layers, x_val.narrow(0, 0, 4));
           }
@@ -602,7 +602,7 @@ static void _memory_control(String artifacts, Map data, int steps) {
   Module model = _built(artifacts, "tabular-init.pt");
   List layers = _layers(model);
   int every = steps / 16 > 0 ? steps / 16 : 1;
-  $scope() {
+  auto {
     Array retained = [];
     Tensor block = x_val.narrow(0, 0, 2048);
     long held = 0, capacity = RETAIN_CAP_BYTES;
@@ -645,7 +645,7 @@ static int _diagnose(String artifacts, String out, int native, int count) {
   double batch_time = 0, forward_time = 0, backward_time = 0;
   double optimizer_time = 0, cleanup_time = 0, loss = 0;
   for (int i = 0; i < count; i++) {
-    $scope() {
+    auto {
       start = Bench.now();
       Tensor pick = rows.select(0, i % rows.size(0));
       Tensor bx = x.index_select(0, pick), by = y.index_select(0, pick);
@@ -691,7 +691,7 @@ static int _diagnose(String artifacts, String out, int native, int count) {
    variation is whether the request's canonical message changes. */
 static void _failed_request(List layers, int request, int unique) {
   try {
-    $scope() {
+    auto {
       Torch.inference_mode();
       (void) _forward(layers, Tensor.zeros(%(4 129), XT_FLOAT32));
     }
@@ -711,7 +711,7 @@ static int _errors(String artifacts, int count, int unique) {
   double checksum = 0;
   Bench.sample("errors-start", 0);
   for (int i = 0; i < count; i++) {
-    $scope() {
+    auto {
       try { _failed_request(layers, i, unique); }
       catch %(bad-arg *detail): { caught++; }
       if (!Torch.grad_enabled())
@@ -754,7 +754,7 @@ static int _memory(String artifacts, String out, int profile, int steps,
 
 
 int main(int argc, char **argv) {
-  $scope() {
+  auto {
     if (argc < 4) {
       fprintf(stderr, "usage: tabular <check|time|memory|trace> <artifacts>"
                       " <out>"

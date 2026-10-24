@@ -122,7 +122,7 @@ static void _train(List layers, Optimizer adam, Tensor streams, int count,
   for (int index = 0; index < count; index++) {
     int position = (offset + index) % per_epoch;
     long start = (long) position * window;
-    $scope() {
+    auto {
       /* A stream boundary resets the state; a truncation boundary keeps
          it and detaches it. */
       if (position == 0 || !carry.state)
@@ -163,7 +163,7 @@ static void _train(List layers, Optimizer adam, Tensor streams, int count,
 /* Held-out MSE of the next observation, with the state carried through
    the whole stream under inference mode. */
 static double _score(List layers, Tensor streams) {
-  $scope() {
+  auto {
     Torch.inference_mode();
     long count = streams.size(0), steps = streams.size(1);
     Tensor h = _zero_state(count);
@@ -180,7 +180,7 @@ static double _score(List layers, Tensor streams) {
 /* The constant-mean and last-value predictors. Both are reported even
    when last-value wins. */
 static void _baselines(Tensor train, Tensor val) {
-  $scope() {
+  auto {
     Torch.inference_mode();
     long steps = val.size(1);
     Tensor target = val.slice(1, 1, steps, 1);
@@ -244,7 +244,7 @@ static int _check(String artifacts, String out) {
          0, 1, 0);
   Bench.record("trained_val_mse", _score(trained_layers, val));
   {
-    $scope() {
+    auto {
       Map final = {};
       foreach (List pair, trained.named_parameters()) {
         String name = pair[0].str();
@@ -322,7 +322,7 @@ static int _memory(String artifacts, String out, int profile, int count) {
 
   int sweep[3] = { 8, 32, 128 };
   for (int i = 0; i < 3; i++) {
-    $scope() {
+    auto {
       Module model = _built(artifacts, "sequence-init.pt");
       Bench.sample("window-start", sweep[i]);
       _train(_layers(model), Optimizer.adam(model, LR), train, count, sweep[i],
@@ -332,7 +332,7 @@ static int _memory(String artifacts, String out, int profile, int count) {
     Bench.sample("window-released", sweep[i]);
   }
 
-  $scope() {
+  auto {
     Module model = _built(artifacts, "sequence-init.pt");
     List layers = _layers(model);
     Bench.sample("accumulate-start", 4);
@@ -355,7 +355,7 @@ static int _diagnose(String artifacts, String out, int count) {
   Tensor streams = data["data.train"].tensor();
   Bench.record("load_seconds", Bench.now() - start);
   {
-    $scope() {
+    auto {
       Module warm = _built(artifacts, "sequence-init.pt");
       _train(_layers(warm), Optimizer.adam(warm, LR), streams, 50, WINDOW,
              0, 1, 0);
@@ -374,7 +374,7 @@ static int _diagnose(String artifacts, String out, int count) {
   double last_loss = 0;
   for (int index = 0; index < count; index++) {
     start = Bench.now();
-    $scope() {
+    auto {
       int position = index % per_epoch;
       long offset = (long) position * WINDOW;
       if (position == 0 || !carry.state)
@@ -422,7 +422,7 @@ static int _diagnose(String artifacts, String out, int count) {
   restored_adam.load(saved_adam);
   Bench.record("checkpoint_load_seconds", Bench.now() - start);
   {
-    $scope() {
+    auto {
       Torch.no_grad();
       Tensor inputs = streams.slice(1, 0, WINDOW, 1);
       Tensor targets = streams.slice(1, 1, WINDOW + 1, 1);
@@ -442,7 +442,7 @@ static int _diagnose(String artifacts, String out, int count) {
 
 
 int main(int argc, char **argv) {
-  $scope() {
+  auto {
     if (argc < 4) {
       fprintf(stderr, "usage: sequence <check|time|memory|diagnose|startup> <artifacts> <out>"
                       " [variant] [count]\n");

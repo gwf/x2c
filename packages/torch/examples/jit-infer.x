@@ -15,7 +15,7 @@ static void _print_row(String label, Tensor row) {
 }
 
 int main(int argc, char **argv) {
-  $scope() {
+  auto {
     String path = argc > 1 ? argv[1] : "builds/scripted.pt";
 
     JitModule model = JitModule.load(path);

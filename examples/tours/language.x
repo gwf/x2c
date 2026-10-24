@@ -2,7 +2,7 @@
 
 
 int main(void) {
-  $scope() {
+  auto {
     Var answer = 41;
     answer += 1;
     String language = "x2c";

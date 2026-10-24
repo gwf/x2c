@@ -114,7 +114,7 @@ void Compiler.evaluate_declaration_effect(
   c.evaluated_effects[key] = 1;
   if (library_filling) {
     key.try_own();
-    $scope(&library_scope) library_imports[key] = 1;
+    auto(&library_scope) library_imports[key] = 1;
   }
 }
 
@@ -358,7 +358,7 @@ static int library_hooked = 0;
 */
 Lisp Compiler.open_macro_library(Compiler c) {
   if (library_session != NULL) return NULL;
-  $scope(&library_scope) {
+  auto(&library_scope) {
     if (!library_hooked) {
       Scope.shutdown_hook(_library_shutdown);
       library_hooked = 1;
@@ -457,7 +457,7 @@ int Compiler.inherits_import(String path) {
 void Compiler.record_comptime(Compiler c, String name) {
   c.meta_comptime[name] = 1;
   if (!library_filling || !(void *) library_comptime) return;
-  $scope(&library_scope) library_comptime[name] = 1;
+  auto(&library_scope) library_comptime[name] = 1;
   name.try_own();
 }
 

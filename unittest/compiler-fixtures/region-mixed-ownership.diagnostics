@@ -1,6 +1,6 @@
-unittest/compiler-fixtures/region-mixed-ownership.x:12:14: region: a fresh allocation can outlive the region it was allocated in when returned
-    $scope() { return make(choose); }
-               ^^^^^^
+unittest/compiler-fixtures/region-mixed-ownership.x:12:10: region: a fresh allocation can outlive the region it was allocated in when returned
+    auto { return make(choose); }
+           ^^^^^^
   note: region opened at line 12
 
 unittest/compiler-fixtures/region-mixed-ownership.x:19:5: region: 'value' can outlive the region it was allocated in when returned

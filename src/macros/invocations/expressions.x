@@ -18,7 +18,8 @@ List Compiler.try_parse_macro_expression(Compiler c) {
     List value = _named_macro_value(c, invocation);
     if (value) return value;
   }
-  if ((c.peek(0) == <$> || c.peek(0) == <@>) && !_peek_invocation(c))
+  if ((c.peek(0) == <$> || c.peek(0) == <@>) &&
+      !_peek_invocation(c, <expression>))
     return _parse_meta_call(c, invocation);
   List definition = _take_invocation(c, <expression>);
   if (!definition) return NULL;

@@ -170,7 +170,7 @@ module void _record_alias(Compiler c, Map aliases) {
     This query does not consume tokens.
 */
 int Compiler.macro_starts_target_at(Compiler c, Symbol position) =>
-  _claims(c, _peek_invocation(c), position);
+  _claims(c, _peek_invocation(c, position), position);
 
 /* An invocation is claimed where its result fits. A statement or map entry
    that does not fit parses as an expression. Elsewhere a `$` name, or an
@@ -180,6 +180,7 @@ int Compiler.macro_starts_target_at(Compiler c, Symbol position) =>
 static int _claims(Compiler c, List definition, Symbol position) {
   Symbol kind = definition ? _result_kind(definition) : 0;
   if (kind == _position(position).kind) return 1;
+  if (definition && c.peek(0) == <auto> && position == <unit>) return 1;
   if (position == <statement> || position == <map-entry>) return 0;
   if (!definition) {
     if (c.peek(0) == <$> && (position == <block> || c.macro_holes) &&
@@ -240,8 +241,16 @@ module Symbol _result_kind(List definition) {
    NULL. A `$` name invokes its visible definition. An identifier invokes the
    innermost local macro of that name, or else its keyword alias, when an
    argument list follows or the invocation is bare. */
-module List _peek_invocation(Compiler c) {
+module List _peek_invocation(Compiler c, Symbol position) {
   Var stored;
+  if (c.peek(0) == <auto>) {
+    if (c.peek(1) == <(>)
+      return _lookup(c, Atom.intern("x2c.auto.destination"), c.token);
+    if (c.auto_region_statement_starts() ||
+        (position == <unit> && c.auto_region_function_starts()))
+      return _lookup(c, Atom.intern("x2c.auto.region"), c.token);
+    return NULL;
+  }
   if (c.peek(0) == <$> || c.peek(0) == <@>) {
     String spelling;
     _scan_name(c, spelling);
@@ -258,6 +267,16 @@ module List _peek_invocation(Compiler c) {
     definition = stored;
   return definition && (c.peek(1) == <(> || _bare(c.token, definition))
        ? definition : NULL;
+}
+
+/** Reports whether `auto` introduces a region statement, rather than a
+    managed declaration. Does not consume tokens. */
+int Compiler.auto_region_statement_starts(Compiler c) {
+  if (c.peek(0) != <auto>) return 0;
+  Token next = Token.skip_trivia(c.token + 1);
+  return next.type == <(> || next.text == "foreach" || next.text == "with" ||
+    next.type in %<<"{" "%{" if while for do switch match try return raise
+      defer break continue goto>>;
 }
 
 /* Scans the dotted name after the current `$` without consuming tokens.
@@ -292,7 +311,7 @@ module int _bare(Token invocation, List definition) =>
    neither visible nor followed by arguments is a replacement variable
    missing from a template. */
 module List _take_invocation(Compiler c, Symbol position) {
-  List definition = _peek_invocation(c);
+  List definition = _peek_invocation(c, position);
   if (!_claims(c, definition, position)) return NULL;
   if (c.peek(0) != <$> && c.peek(0) != <@>) {
     c.next();
@@ -356,7 +375,7 @@ static int _try_macro(
     local `Unit` macros. Other invocations return zero.
 */
 Symbol Compiler.macro_invocation_collection(Compiler c) =>
-  _collection(_peek_invocation(c));
+  _collection(_peek_invocation(c, <unit>));
 
 static Symbol _collection(List definition) {
   if (!definition) return 0;
@@ -376,7 +395,7 @@ static Symbol _collection(List definition) {
     The invocation terminator or following decorator target remains current.
 */
 void Compiler.skip_macro_invocation(Compiler c) {
-  int bare = _bare(c.token, _peek_invocation(c));
+  int bare = _bare(c.token, _peek_invocation(c, <unit>));
   String spelling;
   if (c.peek(0) == <$>) c.token = _scan_name(c, spelling);
   else c.next();
@@ -387,7 +406,7 @@ void Compiler.skip_macro_invocation(Compiler c) {
     CPP scanning does not produce the declaration or parse its fields again.
 */
 int Compiler.skip_named_type_declaration(Compiler c) {
-  List definition = _peek_invocation(c);
+  List definition = _peek_invocation(c, <unit>);
   if (!definition || definition.assoc(<target>) != <named-type>) return 0;
   c.skip_macro_invocation();
   _x2c_skip_shallow_expression(c, 0);
@@ -400,7 +419,7 @@ int Compiler.skip_named_type_declaration(Compiler c) {
     such an invocation at file scope. This query does not consume tokens.
 */
 int Compiler.macro_targets_unit(Compiler c) {
-  List definition = _peek_invocation(c);
+  List definition = _peek_invocation(c, <unit>);
   if (!definition) return 0;
   Symbol kind = _result_kind(definition);
   return kind == <unit> || kind == <decl-unit>;

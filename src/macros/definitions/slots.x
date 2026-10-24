@@ -18,7 +18,7 @@ List Compiler.try_parse_macro_slot(Compiler c, Symbol role) {
   String name;
   if (role != <expression> && role != <statement> &&
       c.peek(0) == <$> && _scan_name(c, name).type == <(> &&
-      !c.peek_macro_hole() && !_peek_invocation(c))
+      !c.peek_macro_hole() && !_peek_invocation(c, _slot_position(role)))
     return _meta_call_slot(c, role);
   if (c.peek(0) == <"$("> || c.peek(0) == <"@(">)
     return _lisp_slot(c, role);
@@ -32,7 +32,7 @@ static List _meta_call_slot(Compiler c, Symbol role) {
     $fail.macros_splice_position(c, c.token);
   if (!sequence && (role == <block> || role in declaration_roles))
     return NULL;
-  List definition = _peek_invocation(c);
+  List definition = _peek_invocation(c, _slot_position(role));
   if (sequence && definition && _result_kind(definition) != <expression>)
     return _target_at(c, _slot_position(role), 1);
   List call = c.try_parse_macro_expression();
@@ -181,7 +181,7 @@ static int _kind_accepts_role(Symbol kind, Symbol role) {
 int Compiler.macro_lisp_starts_declaration(Compiler c) {
   Token opening = c.token;
   if (opening.type == <$>) {
-    if (_peek_invocation(c)) return 0;
+    if (_peek_invocation(c, <expression>)) return 0;
     String name;
     opening = _scan_name(c, name);
     if (opening.type != <(>) return 0;

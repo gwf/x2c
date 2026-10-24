@@ -32,7 +32,7 @@ static String _make_text(int word_count) {
 }
 
 static uint64_t _count(String text) {
-  $scope() {
+  auto {
     MapSubInt counts = MapSubInt.new();
     foreach (Substr word in text) counts.increment(word);
 

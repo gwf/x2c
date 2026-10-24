@@ -138,7 +138,7 @@ cat >"$BUILD/src/region-use.x" <<'EOF'
 static RegionNode local_stash;
 static void _local_keep(RegionNode n) { local_stash = n; }
 void region_use(void) {
-  $scope() {
+  auto {
     RegionNode n = xcalloc(1, sizeof(struct RegionNode));
     region_keep(n);
     _local_keep(n);

@@ -219,7 +219,7 @@ static Array _declared_functions(List entry) {
   if (!declared_functions) declared_functions = _cache_map();
   Var cached = declared_functions[entry];
   if (cached is <array>) return cached;
-  $scope(&process_cache_scope) {
+  auto(&process_cache_scope) {
     Array names = [];
     foreach (Var part in entry.car()) {
       if (part is not <map>) continue;

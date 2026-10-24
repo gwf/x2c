@@ -4,12 +4,12 @@
 #include <signal.h>
 
 /* A Job that a compile-time call starts ends when that call returns, with
-   or without an inner `$scope` block around it, so the process is gone
+   or without an inner region `auto` block around it, so the process is gone
    before the program runs. */
 
 meta long started(void) {
   long pid = 0;
-  $scope() {
+  auto {
     List command = %(sleep 30);
     Job job = List.job(command);
     job.start();
