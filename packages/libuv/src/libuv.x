@@ -1182,7 +1182,7 @@ static macro Unit $uv.stream(
   Literal $init_operation, Expr $init, Expr @init_arguments
 ) {
   /* A Type hole cannot spell a struct tag, so the tag comes from its name. */
-  struct $(x2c.ident (str (car $endpoint))) {
+  struct $x2c_ident($Code.binding_spelling($endpoint)) {
     $native handle;
     struct UvStream stream;
     Var connect_value;
@@ -2509,7 +2509,7 @@ static macro Unit $uv.phase(
   Literal $start_operation
 ) {
   /* A Type hole cannot spell a struct tag, so the tag comes from its name. */
-  struct $(x2c.ident (str (car $phase))) {
+  struct $x2c_ident($Code.binding_spelling($phase)) {
     $native handle;
     UvLoop loop;
     Var value;
