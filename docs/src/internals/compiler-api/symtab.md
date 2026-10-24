@@ -34,6 +34,7 @@ The compiler's semantic symbol table.
 | [`Compiler.unprefixed`](#Compiler.unprefixed) | Returns the source name of a spelling this unit gave a file prefix, or `name`. |
 | [`Sym.aggregate_of`](#Sym.aggregate_of) | Resolves typedefs or one pointer layer to an aggregate tag, or `NULL`. |
 | [`Sym.at_file_scope`](#Sym.at_file_scope) | Returns whether declarations currently bind at file scope. |
+| [`Sym.base_scope_count`](#Sym.base_scope_count) | Returns the number of base scopes, which hold file-scope declarations. |
 | [`Sym.base_symbols`](#Sym.base_symbols) | Copies all base-scope symbols into a fresh map in source order. |
 | [`Sym.bind_identity`](#Sym.bind_identity) | Installs an existing binding with `ast`'s qualifier-preserving type. |
 | [`Sym.binding_is_local`](#Sym.binding_is_local) | Reports whether `binding` belongs to a scope inside the base scopes. |
@@ -46,7 +47,9 @@ The compiler's semantic symbol table.
 | [`Sym.declare_field_order`](#Sym.declare_field_order) | Records declaration AST fields in source order after binding finishes. |
 | [`Sym.declare_resolved`](#Sym.declare_resolved) | Installs an aggregate or named type whose parser resolved its spelling. |
 | [`Sym.declared_key`](#Sym.declared_key) | Returns the key a declaration of `key` with type `ast` takes in this unit: its file-private or package spelling at file scope, else `key`. |
+| [`Sym.declaring_scope`](#Sym.declaring_scope) | Returns the index of the innermost scope whose symbols hold `key`, or -1 when none does. |
 | [`Sym.define`](#Sym.define) | Defines `key` and returns its stable binding in the active scope. |
+| [`Sym.define_alias`](#Sym.define_alias) | Defines `name` in the active scope as an alias of the parsed `expression` and returns its binding. |
 | [`Sym.define_global`](#Sym.define_global) | Defines `key` in the unit's writable base scope. |
 | [`Sym.define_macro`](#Sym.define_macro) | Defines or replaces a macro in the active lexical scope. |
 | [`Sym.drop`](#Sym.drop) | Deletes `key` from `map` so that an active transaction can restore it. |
@@ -56,6 +59,7 @@ The compiler's semantic symbol table.
 | [`Sym.get`](#Sym.get) | Returns `key`'s type, or `NULL`. |
 | [`Sym.get_exact`](#Sym.get_exact) | Returns `key`'s type without package fallback, or `NULL`. |
 | [`Sym.global_symbols`](#Sym.global_symbols) | Returns the mutable global symbol map supplied to the latest reset. |
+| [`Sym.has_aliases`](#Sym.has_aliases) | Returns whether any open scope defines an alias row. |
 | [`Sym.has_local`](#Sym.has_local) | Reports whether a scope inside the base scopes declares `key`. |
 | [`Sym.has_local_macros`](#Sym.has_local_macros) | Returns whether any lexical scope contains a local macro definition. |
 | [`Sym.introduce`](#Sym.introduce) | Allocates a fresh binding identity for a compiler-introduced spelling. |
@@ -151,7 +155,7 @@ Source: `src/symtab/namespaces.x:112`
 
 Deletes one semantic binding fact.
 
-Source: `src/symtab/bindings.x:198`
+Source: `src/symtab/bindings.x:211`
 
 <a id="Compiler.fact"></a>
 #### Compiler.fact
@@ -161,7 +165,7 @@ Source: `src/symtab/bindings.x:198`
 Returns the List one semantic binding fact holds, or NULL when it is
 absent.
 
-Source: `src/symtab/bindings.x:188`
+Source: `src/symtab/bindings.x:201`
 
 <a id="Compiler.file_prefixes"></a>
 #### Compiler.file_prefixes
@@ -201,7 +205,7 @@ Source: `src/symtab/namespaces.x:244`
 
 Returns the active macro definition's borrowed local map, or `NULL`.
 
-Source: `src/symtab/scopes.x:189`
+Source: `src/symtab/scopes.x:205`
 
 <a id="Compiler.macro_template_local"></a>
 #### Compiler.macro_template_local
@@ -212,7 +216,7 @@ Reports whether `binding` is a local of the active macro definition or
 of a template that encloses it; a nested definition's literal names
 share the enclosing template's names.
 
-Source: `src/symtab/scopes.x:197`
+Source: `src/symtab/scopes.x:213`
 
 <a id="Compiler.package_member_spelling"></a>
 #### Compiler.package_member_spelling
@@ -309,7 +313,7 @@ Returns the borrowed semantic-facts map indexed by binding.
 Write it through `set_fact` and `drop_fact`, which a semantic
 transaction can restore.
 
-Source: `src/symtab/bindings.x:184`
+Source: `src/symtab/bindings.x:197`
 
 <a id="Compiler.set_fact"></a>
 #### Compiler.set_fact
@@ -318,7 +322,7 @@ Source: `src/symtab/bindings.x:184`
 
 Sets one semantic binding fact.
 
-Source: `src/symtab/bindings.x:194`
+Source: `src/symtab/bindings.x:207`
 
 <a id="Compiler.unprefixed"></a>
 #### Compiler.unprefixed
@@ -348,7 +352,16 @@ Source: `src/symtab/types.x:329`
 
 Returns whether declarations currently bind at file scope.
 
-Source: `src/symtab/scopes.x:76`
+Source: `src/symtab/scopes.x:92`
+
+<a id="Sym.base_scope_count"></a>
+#### Sym.base_scope_count
+
+`int Sym.base_scope_count(Sym s)`
+
+Returns the number of base scopes, which hold file-scope declarations.
+
+Source: `src/symtab/scopes.x:86`
 
 <a id="Sym.base_symbols"></a>
 #### Sym.base_symbols
@@ -360,7 +373,7 @@ Copies all base-scope symbols into a fresh map in source order.
 Package collection uses this so it resolves against the prelude and the
 importing unit's already-visible includes without mutating either.
 
-Source: `src/symtab/scopes.x:104`
+Source: `src/symtab/scopes.x:120`
 
 <a id="Sym.bind_identity"></a>
 #### Sym.bind_identity
@@ -378,7 +391,7 @@ Source: `src/symtab/declarations.x:254`
 
 Reports whether `binding` belongs to a scope inside the base scopes.
 
-Source: `src/symtab/bindings.x:164`
+Source: `src/symtab/bindings.x:177`
 
 <a id="Sym.binding_is_local_before"></a>
 #### Sym.binding_is_local_before
@@ -389,7 +402,7 @@ Reports whether `binding` belongs to a local scope below `scope_count`.
 
 Counts beyond the current scope depth are clamped to that depth.
 
-Source: `src/symtab/bindings.x:171`
+Source: `src/symtab/bindings.x:184`
 
 <a id="Sym.close_local_scopes"></a>
 #### Sym.close_local_scopes
@@ -399,7 +412,7 @@ Source: `src/symtab/bindings.x:171`
 Sets aside the local scopes now open, so declarations bind at file
 scope until `Sym.reopen_scopes` restores the returned scopes.
 
-Source: `src/symtab/scopes.x:80`
+Source: `src/symtab/scopes.x:96`
 
 <a id="Sym.current_binding"></a>
 #### Sym.current_binding
@@ -408,7 +421,7 @@ Source: `src/symtab/scopes.x:80`
 
 Returns `key`'s binding in the current scope, or `NULL`.
 
-Source: `src/symtab/bindings.x:150`
+Source: `src/symtab/bindings.x:163`
 
 <a id="Sym.current_symbols"></a>
 #### Sym.current_symbols
@@ -417,7 +430,7 @@ Source: `src/symtab/bindings.x:150`
 
 Returns the current scope's mutable symbol map, or `NULL`.
 
-Source: `src/symtab/scopes.x:111`
+Source: `src/symtab/scopes.x:127`
 
 <a id="Sym.declare"></a>
 #### Sym.declare
@@ -440,7 +453,7 @@ Source: `src/symtab/declarations.x:12`
 
 Associates an enumerator key with its owner in the active scope.
 
-Source: `src/symtab/bindings.x:86`
+Source: `src/symtab/bindings.x:99`
 
 <a id="Sym.declare_field_order"></a>
 #### Sym.declare_field_order
@@ -474,6 +487,16 @@ Retained declarations keep their already resolved spelling.
 
 Source: `src/symtab/declarations.x:45`
 
+<a id="Sym.declaring_scope"></a>
+#### Sym.declaring_scope
+
+`int Sym.declaring_scope(Sym s, List key)`
+
+Returns the index of the innermost scope whose symbols hold `key`, or
+-1 when none does.
+
+Source: `src/symtab/scopes.x:76`
+
 <a id="Sym.define"></a>
 #### Sym.define
 
@@ -482,6 +505,17 @@ Source: `src/symtab/declarations.x:45`
 Defines `key` and returns its stable binding in the active scope.
 
 Source: `src/symtab/bindings.x:18`
+
+<a id="Sym.define_alias"></a>
+#### Sym.define_alias
+
+`List Sym.define_alias(Sym s, String name, List expression)`
+
+Defines `name` in the active scope as an alias of the parsed
+`expression` and returns its binding. The row carries the expression's
+type; the `(alias binding)` fact carries the expression.
+
+Source: `src/symtab/bindings.x:28`
 
 <a id="Sym.define_global"></a>
 #### Sym.define_global
@@ -495,7 +529,7 @@ binding is issued at the first reference, as for a row an included file
 contributes, so the unit numbers its bindings the same whether it defined
 the row here or replayed it from an interface.
 
-Source: `src/symtab/bindings.x:70`
+Source: `src/symtab/bindings.x:83`
 
 <a id="Sym.define_macro"></a>
 #### Sym.define_macro
@@ -507,7 +541,7 @@ Defines or replaces a macro in the active lexical scope.
 Replacing a name already defined in this scope does not increase the
 local macro count.
 
-Source: `src/symtab/scopes.x:167`
+Source: `src/symtab/scopes.x:183`
 
 <a id="Sym.drop"></a>
 #### Sym.drop
@@ -525,7 +559,7 @@ Source: `src/symtab/transactions.x:12`
 
 Returns the current scope's enum owner for `key`, or zero.
 
-Source: `src/symtab/bindings.x:157`
+Source: `src/symtab/bindings.x:170`
 
 <a id="Sym.field_order"></a>
 #### Sym.field_order
@@ -543,7 +577,7 @@ Source: `src/symtab/types.x:307`
 
 Returns the borrowed set of file-static declaration keys.
 
-Source: `src/symtab/scopes.x:125`
+Source: `src/symtab/scopes.x:141`
 
 <a id="Sym.get"></a>
 #### Sym.get
@@ -553,7 +587,7 @@ Source: `src/symtab/scopes.x:125`
 Returns `key`'s type, or `NULL`. A plain key tries the current module
 file's static spelling first and retries a miss in package space.
 
-Source: `src/symtab/bindings.x:205`
+Source: `src/symtab/bindings.x:218`
 
 <a id="Sym.get_exact"></a>
 #### Sym.get_exact
@@ -562,7 +596,7 @@ Source: `src/symtab/bindings.x:205`
 
 Returns `key`'s type without package fallback, or `NULL`.
 
-Source: `src/symtab/bindings.x:213`
+Source: `src/symtab/bindings.x:226`
 
 <a id="Sym.global_symbols"></a>
 #### Sym.global_symbols
@@ -571,7 +605,16 @@ Source: `src/symtab/bindings.x:213`
 
 Returns the mutable global symbol map supplied to the latest reset.
 
-Source: `src/symtab/scopes.x:97`
+Source: `src/symtab/scopes.x:113`
+
+<a id="Sym.has_aliases"></a>
+#### Sym.has_aliases
+
+`int Sym.has_aliases(Sym s)`
+
+Returns whether any open scope defines an alias row.
+
+Source: `src/symtab/scopes.x:89`
 
 <a id="Sym.has_local"></a>
 #### Sym.has_local
@@ -580,7 +623,7 @@ Source: `src/symtab/scopes.x:97`
 
 Reports whether a scope inside the base scopes declares `key`.
 
-Source: `src/symtab/bindings.x:216`
+Source: `src/symtab/bindings.x:229`
 
 <a id="Sym.has_local_macros"></a>
 #### Sym.has_local_macros
@@ -589,7 +632,7 @@ Source: `src/symtab/bindings.x:216`
 
 Returns whether any lexical scope contains a local macro definition.
 
-Source: `src/symtab/scopes.x:175`
+Source: `src/symtab/scopes.x:191`
 
 <a id="Sym.introduce"></a>
 #### Sym.introduce
@@ -598,7 +641,7 @@ Source: `src/symtab/scopes.x:175`
 
 Allocates a fresh binding identity for a compiler-introduced spelling.
 
-Source: `src/symtab/bindings.x:147`
+Source: `src/symtab/bindings.x:160`
 
 <a id="Sym.introduced"></a>
 #### Sym.introduced
@@ -609,7 +652,7 @@ Returns how many introduced bindings no scope holds: those
 `Sym.introduce` made, as opposed to the ones each scope makes once for
 a name it resolves.
 
-Source: `src/symtab/bindings.x:139`
+Source: `src/symtab/bindings.x:152`
 
 <a id="Sym.is_array_type"></a>
 #### Sym.is_array_type
@@ -687,7 +730,7 @@ Resolves an existing key and optionally stores its semantic type.
 A symbol row without a binding receives a stable binding identity. A total
 miss returns `NULL` and stores `NULL` through `type` when provided.
 
-Source: `src/symtab/bindings.x:263`
+Source: `src/symtab/bindings.x:276`
 
 <a id="Sym.lookup_field"></a>
 #### Sym.lookup_field
@@ -708,7 +751,7 @@ Source: `src/symtab/types.x:265`
 
 Returns the innermost visible local macro named `name`, or `NULL`.
 
-Source: `src/symtab/scopes.x:178`
+Source: `src/symtab/scopes.x:194`
 
 <a id="Sym.mark_field"></a>
 #### Sym.mark_field
@@ -727,7 +770,7 @@ Source: `src/symtab/types.x:311`
 
 Marks a declaration key as file-static.
 
-Source: `src/symtab/scopes.x:128`
+Source: `src/symtab/scopes.x:144`
 
 <a id="Sym.marked_fields"></a>
 #### Sym.marked_fields
@@ -777,7 +820,7 @@ Source: `src/symtab/types.x:91`
 
 Pops the innermost scope, or returns an empty scope when none exists.
 
-Source: `src/symtab/scopes.x:65`
+Source: `src/symtab/scopes.x:66`
 
 <a id="Sym.push_new_scope"></a>
 #### Sym.push_new_scope
@@ -786,7 +829,7 @@ Source: `src/symtab/scopes.x:65`
 
 Pushes a new empty lexical scope.
 
-Source: `src/symtab/scopes.x:59`
+Source: `src/symtab/scopes.x:60`
 
 <a id="Sym.push_scope"></a>
 #### Sym.push_scope
@@ -795,7 +838,7 @@ Source: `src/symtab/scopes.x:59`
 
 Pushes a caller-supplied lexical scope while retaining its map objects.
 
-Source: `src/symtab/scopes.x:62`
+Source: `src/symtab/scopes.x:63`
 
 <a id="Sym.put"></a>
 #### Sym.put
@@ -816,7 +859,7 @@ Resolves `key` or creates a forward binding in the current scope.
 
 Stores `NULL` through `type` when no declaration supplies a type.
 
-Source: `src/symtab/bindings.x:270`
+Source: `src/symtab/bindings.x:283`
 
 <a id="Sym.reference_global"></a>
 #### Sym.reference_global
@@ -826,7 +869,7 @@ Source: `src/symtab/bindings.x:270`
 Resolves a global name or creates its forward binding in the base scope.
 Local declarations cannot capture a retained macro's global reference.
 
-Source: `src/symtab/bindings.x:283`
+Source: `src/symtab/bindings.x:296`
 
 <a id="Sym.reopen_scopes"></a>
 #### Sym.reopen_scopes
@@ -835,7 +878,7 @@ Source: `src/symtab/bindings.x:283`
 
 Reopens the local scopes `Sym.close_local_scopes` set aside.
 
-Source: `src/symtab/scopes.x:89`
+Source: `src/symtab/scopes.x:105`
 
 <a id="Sym.reset"></a>
 #### Sym.reset
@@ -868,7 +911,7 @@ Resolves a binding through base scopes and optionally stores its type.
 
 Returns `NULL` when no base scope contains the key.
 
-Source: `src/symtab/bindings.x:277`
+Source: `src/symtab/bindings.x:290`
 
 <a id="Sym.resolve_key"></a>
 #### Sym.resolve_key
@@ -898,7 +941,7 @@ Source: `src/symtab/types.x:167`
 
 Returns the number of semantic scopes, including base scopes.
 
-Source: `src/symtab/scopes.x:73`
+Source: `src/symtab/scopes.x:83`
 
 <a id="Sym.seed_var_tags"></a>
 #### Sym.seed_var_tags
@@ -907,7 +950,7 @@ Source: `src/symtab/scopes.x:73`
 
 Registers declared `T_var` converters in the active `Type` unit.
 
-Source: `src/symtab/bindings.x:57`
+Source: `src/symtab/bindings.x:70`
 
 <a id="Sym.set"></a>
 #### Sym.set
@@ -946,7 +989,7 @@ Removes `key`'s definition and binding from the unit's writable base
 scope. A later reference no longer resolves; a later definition receives
 a fresh binding.
 
-Source: `src/symtab/bindings.x:79`
+Source: `src/symtab/bindings.x:92`
 
 <a id="Sym.unit_symbols"></a>
 #### Sym.unit_symbols
@@ -956,7 +999,7 @@ Source: `src/symtab/bindings.x:79`
 Returns a fresh map of the base symbols with the current scope's rows
 merged in.
 
-Source: `src/symtab/scopes.x:118`
+Source: `src/symtab/scopes.x:134`
 
 <a id="Sym.unshadow_visible"></a>
 #### Sym.unshadow_visible
@@ -991,7 +1034,7 @@ Source: `src/symtab/types.x:215`
 Returns the visible one-part source names and their semantic types.
 Inner scopes win. The result is a fresh List; types remain borrowed.
 
-Source: `src/symtab/scopes.x:132`
+Source: `src/symtab/scopes.x:148`
 
 ### `SymTxn`
 
@@ -1046,7 +1089,7 @@ Source: `src/symtab/transactions.x:176`
 <a id="Sym"></a>
 ### Sym
 
-`module typedef struct Sym { Block scopes, Map globals, statics, binding_facts, prefixed; int base_scopes, local_macro_names; Block undo, int transactions; Compiler c; } *Sym`
+`module typedef struct Sym { Block scopes, Map globals, statics, binding_facts, prefixed; int base_scopes, local_macro_names, aliases; Block undo, int transactions; Compiler c; } *Sym`
 
 Holds a compiler's declarations in nested scopes.
 The lowest `base_scopes` contain file-scope declarations. Active

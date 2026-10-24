@@ -79,7 +79,7 @@ same, or always for a prelude component's, instead of staging it.
 Returns whether it did; another edited definition is staged as user
 code.
 
-Source: `src/meta-native/linked.x:60`
+Source: `src/meta-native/linked.x:62`
 
 <a id="Compiler.bind_native_meta"></a>
 #### Compiler.bind_native_meta
@@ -213,7 +213,7 @@ Source: `src/meta-native/functions.x:216`
 
 Returns a linked provider's source and dependency hashes.
 
-Source: `src/meta-native/linked.x:99`
+Source: `src/meta-native/linked.x:101`
 
 <a id="Compiler.links_extension"></a>
 #### Compiler.links_extension
@@ -232,7 +232,7 @@ Source: `src/meta-native/modules.x:245`
 
 Reports whether the compiler links the `meta` function `name`.
 
-Source: `src/meta-native/linked.x:96`
+Source: `src/meta-native/linked.x:98`
 
 <a id="Compiler.load_native_module"></a>
 #### Compiler.load_native_module

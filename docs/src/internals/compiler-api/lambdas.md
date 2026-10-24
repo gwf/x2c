@@ -34,7 +34,7 @@ Opens lexical capture resolution while a lambda body is parsed or bound.
 contains canonical capture rows supplied by constructed syntax. Evolving
 rows live in semantic binding facts so macro transactions restore them.
 
-Source: `src/lambdas.x:454`
+Source: `src/lambdas.x:456`
 
 <a id="Compiler.bind_lambda_expression"></a>
 #### Compiler.bind_lambda_expression
@@ -57,7 +57,7 @@ Fresh captured bindings keep sibling snapshots independent of shared-cell
 rewriting. Reference captures preserve qualifiers; snapshots of reference
 parameters copy their current referents.
 
-Source: `src/lambdas.x:485`
+Source: `src/lambdas.x:487`
 
 <a id="Compiler.end_lambda_captures"></a>
 #### Compiler.end_lambda_captures
@@ -66,7 +66,7 @@ Source: `src/lambdas.x:485`
 
 Finishes the active lambda's captures in first-use order.
 
-Source: `src/lambdas.x:463`
+Source: `src/lambdas.x:465`
 
 <a id="Compiler.lambda_capture_required"></a>
 #### Compiler.lambda_capture_required
@@ -75,7 +75,7 @@ Source: `src/lambdas.x:463`
 
 Reports whether the active lambda still needs to capture a binding.
 
-Source: `src/lambdas.x:472`
+Source: `src/lambdas.x:474`
 
 <a id="Compiler.lambda_param_types"></a>
 #### Compiler.lambda_param_types
@@ -119,7 +119,7 @@ Source: `src/lambdas.x:155`
 Gives the captures of `binding` that the enclosing lambdas already
 recorded the C spelling `binding` emits under.
 
-Source: `src/lambdas.x:621`
+Source: `src/lambdas.x:624`
 
 ## Design notes
 
