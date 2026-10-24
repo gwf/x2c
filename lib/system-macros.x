@@ -54,19 +54,6 @@ meta List _macros_location(void) =>
 meta List _macros_source(Source code) =>
   $!String{ ${Code.source_text(code)} };
 
-/* Marks a path that is not written yet. Reaching it raises `<invariant>`
-   naming the note and the source line the macro was written on. */
-macro Stmt $todo(Expr $note) {
-  raise %(invariant (note ${$note})
-    (at ${$_macros_location()}));
-}
-
-/* Marks a path the surrounding logic excludes. */
-macro Stmt $unreachable() {
-  raise %(invariant (note "unreachable")
-    (at ${$_macros_location()}));
-}
-
 /* Checks an invariant and reports the failing expression as it was written.
    Unlike C `assert` this transfers to a catch and is not compiled out. */
 macro Stmt $assert(Expr $check) {

@@ -176,8 +176,7 @@ literal parsers, aggregate-member binding, and the two recursive
 `lifetime.origin` walks. This makes their documented temporary state restore
 on every exit without adding helpers or another state owner. Raw pthread
 locks, native assertions, structured timing and native unreachable markers
-retain semantics that `$lock`, `$assert`, `$time` and `$unreachable` do not
-replace.
+retain semantics that the system macro pack does not replace.
 
 Acceptance is CLI boundary parity, focused literal/match/error and aggregate
 fixtures, the existing system-macro suite, graph-tool translation, and the

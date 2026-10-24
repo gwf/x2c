@@ -15,7 +15,7 @@ usually supplied by `#include "x2c.x"`.
 | Initializer `auto` | Keyword after `=` | Clean up the acquired value at block exit |
 | `foreach` | Shipped keyword alias | Traverse through the ordinary Iter protocol |
 | `with` | Contextual grammar | Substitute a source expression within a block |
-| `$dedent`, `$assert`, `$todo`, `$unreachable`, `$time` | Shipped, explicit import | Remove boilerplate C leaves to every caller |
+| `$dedent`, `$assert`, `$time` | Shipped, explicit import | Remove boilerplate C leaves to every caller |
 | Project macros | Explicit import | Supply project-specific syntax and policy |
 
 `class` and `foreach` are keyword aliases. Use the `$` spelling for
@@ -509,11 +509,6 @@ int main(void) {
   return written == "limit > 0 && limit < 10" ? 0 : 1;
 }
 ```
-
-`$todo` and `$unreachable` mark a path that is unwritten or excluded by the
-surrounding logic. Both raise `<invariant>` with a note and the same location
-detail, so an unfinished path reports where it is rather than returning
-something plausible.
 
 ### Measure a statement in place
 
