@@ -5,6 +5,9 @@ first.
 
 ## Unreleased
 
+- Give `meta` and `native` standard keyword colors. Recognize declarations
+  after another declaration, across line breaks, and through comments.
+
 - Highlight managed `auto` declarations and acquired-value initializers.
   Recognize `module` declarations after another declaration on the same
   line. Highlight retained names in macro `using` clauses.
