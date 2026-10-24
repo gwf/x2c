@@ -2551,7 +2551,10 @@ static void f9_selection____check_runtime_meta_calls(Compiler c, Var root){
                             .fn = _x2c_gensym_defer_cleanup_5, .env = & _x2c_gensym_macro_environment_4
                           }
                           ;  x2c_cleanup_push(& _x2c_gensym_defer_record_5); {
-                            * _x2c_gensym_macro_address_0 = origin;  f9_selection____check_runtime_meta_calls(c, inner);
+                            * _x2c_gensym_macro_address_0 = origin; {
+                              f9_selection____check_runtime_meta_calls(c, inner);
+                            }
+
                           }
                           x2c_cleanup_leave(& _x2c_gensym_defer_record_5);
                         }

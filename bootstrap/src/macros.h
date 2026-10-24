@@ -218,6 +218,8 @@ Map Compiler_enter_alias_body(Compiler c);
 
 void Compiler_leave_alias_body(Compiler c, Map mark);
 
+int Compiler_scope_declares_alias(Compiler c, String name);
+
 List Compiler_alias_expression(Compiler c);
 
 

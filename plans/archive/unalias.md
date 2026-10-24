@@ -89,10 +89,10 @@ after it, as an alias does; a member cannot remove another member's
   runs only during collection, where the symbol map holds the declarations
   before the alias; the declaration-site check covers declarations after it
   in both passes.
-- Check an included alias against the including file at the include line: an
-  imported alias whose name the including file already declares, or already
-  aliases at file scope, is a conflict there. Today the imported entry
-  silently replaces an earlier alias of the including file.
+- Preserve include-time conflicts while making declaration checks
+  source-ordered. An imported alias whose name the including file already
+  declares or aliases at file scope remains a conflict. The alias owner
+  already rejects an included alias that repeats a file-scope alias.
 
 ## Documentation and tools
 
@@ -123,6 +123,6 @@ Deliver through the shared integrator as one PR. The integrator runs
 The removal reuses the alias owner's scope query, copy-on-write table, Sym
 rows, and compile-time effects. It adds no state: removal deletes existing
 rows and entries. Limiting `unalias` to the current scope keeps
-removal from needing hiding rows or restoration bookkeeping. The include-time
-conflict check closes a gap the `with` and `alias` work leaves rather than
-adding a second validator; it runs where the imported entry is installed.
+removal from needing hiding rows or restoration bookkeeping. Include-time
+conflicts remain enforced where the imported entry is installed, reusing
+the existing boundary rather than adding a second validator.

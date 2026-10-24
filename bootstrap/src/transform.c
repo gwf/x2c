@@ -2432,24 +2432,24 @@ static Ast f9_traversal____written_function(Compiler c, List function){
 Map Compiler_semantic_binding_facts(Compiler);
 static Ast f9_traversal____function_node(Compiler c, List function, List return_type, List declarator, List binding, List body, int written){
   List replaced = f9_traversal____function_rewrite(c, function, return_type, written);  if(List_truth(replaced)) return replaced;  String owner = Ast_binding_spelling(binding);  Var stored_owner;  int callback = Map_try_get(Compiler_semantic_binding_facts(c), List_var(cons(_66, cons(List_var(binding), NULL))), &(stored_owner));  if(callback) owner = Var_as_string(stored_owner);  Type function_type = List_type(return_type);  int inline_header = Type_is_inline(function_type) && ! Type_is_static(function_type);  List transformed; {
-    String * _x2c_gensym_macro_address_3 = & c -> fn_name;  String _x2c_gensym_macro_previous_3 = * _x2c_gensym_macro_address_3; {
+    String * _x2c_gensym_macro_address_2 = & c -> fn_name;  String _x2c_gensym_macro_previous_2 = * _x2c_gensym_macro_address_2; {
       _x2c_gensym_defer_env_3 _x2c_gensym_macro_environment_4 ={
         0
       }
-      ;  _x2c_gensym_macro_environment_4._x2c_gensym_defer_capture_5 =(const void *) & _x2c_gensym_macro_address_3;  _x2c_gensym_macro_environment_4._x2c_gensym_defer_capture_6 =(const void *) & _x2c_gensym_macro_previous_3;  X2CCleanup _x2c_gensym_defer_record_3 ={
+      ;  _x2c_gensym_macro_environment_4._x2c_gensym_defer_capture_5 =(const void *) & _x2c_gensym_macro_address_2;  _x2c_gensym_macro_environment_4._x2c_gensym_defer_capture_6 =(const void *) & _x2c_gensym_macro_previous_2;  X2CCleanup _x2c_gensym_defer_record_3 ={
         .fn = _x2c_gensym_defer_cleanup_3, .env = & _x2c_gensym_macro_environment_4
       }
       ;  x2c_cleanup_push(& _x2c_gensym_defer_record_3); {
-        * _x2c_gensym_macro_address_3 = owner; {
-          int * _x2c_gensym_macro_address_2 = & c -> inline_header;  int _x2c_gensym_macro_previous_2 = * _x2c_gensym_macro_address_2; {
+        * _x2c_gensym_macro_address_2 = owner; {
+          int * _x2c_gensym_macro_address_3 = & c -> inline_header;  int _x2c_gensym_macro_previous_3 = * _x2c_gensym_macro_address_3; {
             _x2c_gensym_defer_env_4 _x2c_gensym_macro_environment_3 ={
               0
             }
-            ;  _x2c_gensym_macro_environment_3._x2c_gensym_defer_capture_7 =(const void *) & _x2c_gensym_macro_address_2;  _x2c_gensym_macro_environment_3._x2c_gensym_defer_capture_8 =(const void *) & _x2c_gensym_macro_previous_2;  X2CCleanup _x2c_gensym_defer_record_4 ={
+            ;  _x2c_gensym_macro_environment_3._x2c_gensym_defer_capture_7 =(const void *) & _x2c_gensym_macro_address_3;  _x2c_gensym_macro_environment_3._x2c_gensym_defer_capture_8 =(const void *) & _x2c_gensym_macro_previous_3;  X2CCleanup _x2c_gensym_defer_record_4 ={
               .fn = _x2c_gensym_defer_cleanup_4, .env = & _x2c_gensym_macro_environment_3
             }
             ;  x2c_cleanup_push(& _x2c_gensym_defer_record_4); {
-              * _x2c_gensym_macro_address_2 = inline_header; {
+              * _x2c_gensym_macro_address_3 = inline_header; {
                 List new_return = _step(c, return_type);  List new_decl = _step(c, declarator);  List declaration =({
                   Var _x2c_gensym_literal_part_2 = List_var(return_type);  Var _x2c_gensym_literal_part_3 = List_var(cons(_67, cons(List_var(declarator), NULL)));  cons(_68, cons(_x2c_gensym_literal_part_2, cons(_x2c_gensym_literal_part_3, NULL)));
                 }

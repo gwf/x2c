@@ -21,7 +21,6 @@ X2c statement parsing.
 | [`Compiler.parse_governed`](#Compiler.parse_governed) | Parses the statement a control keyword or statement macro governs, or a block item at `<block>`. |
 | [`Compiler.parse_match_row_argument`](#Compiler.parse_match_row_argument) | Parses one MatchRow macro argument with the ordinary match-arm owner. |
 | [`Compiler.parse_source_clause`](#Compiler.parse_source_clause) | Parses the clause `kind` of a source `if`, `while`, `do`, `for`, `match`, or `try`, with the punctuation after it, when the binder reaches that clause. |
-| [`Compiler.with_binding`](#Compiler.with_binding) | Returns the binding of the current identifier when it names a live `with` expression, or NULL. |
 
 ### `Compiler`
 
@@ -34,7 +33,7 @@ Builds a return node for an optional expression without consuming tokens.
 A present expression is resolved in the current `Sym` scope and includes
 the current `return_type` for later conversion.
 
-Source: `src/statements.x:303`
+Source: `src/statements.x:255`
 
 <a id="Compiler.parse_block_item"></a>
 #### Compiler.parse_block_item
@@ -45,7 +44,7 @@ Parses one block-position declaration, statement, or macro insertion.
 The caller owns the surrounding scope; a macro insertion may return a
 `(seq ...)` node containing several block items.
 
-Source: `src/statements.x:702`
+Source: `src/statements.x:653`
 
 <a id="Compiler.parse_block_items"></a>
 #### Compiler.parse_block_items
@@ -55,7 +54,7 @@ Source: `src/statements.x:702`
 Parses block items after an already-consumed opening brace through `}` in
 a new lexical scope. `anchor_items` records statement origins.
 
-Source: `src/statements.x:745`
+Source: `src/statements.x:697`
 
 <a id="Compiler.parse_callable_body"></a>
 #### Compiler.parse_callable_body
@@ -64,7 +63,7 @@ Source: `src/statements.x:745`
 
 Parses a callable's outer block in its active parameter scope.
 
-Source: `src/statements.x:752`
+Source: `src/statements.x:704`
 
 <a id="Compiler.parse_case_body"></a>
 #### Compiler.parse_case_body
@@ -74,7 +73,7 @@ Source: `src/statements.x:752`
 Parses a source match arm's guard and body, declaring its typed
 `types` captures, inside the arm scope that the binder opened.
 
-Source: `src/statements.x:475`
+Source: `src/statements.x:426`
 
 <a id="Compiler.parse_compound_statement"></a>
 #### Compiler.parse_compound_statement
@@ -84,7 +83,7 @@ Source: `src/statements.x:475`
 Parses a compound body after its opening brace and consumes the closing
 `}`, returning an origin-anchored `(block ...)` node.
 
-Source: `src/statements.x:740`
+Source: `src/statements.x:692`
 
 <a id="Compiler.parse_governed"></a>
 #### Compiler.parse_governed
@@ -100,7 +99,7 @@ statement macro that wraps its body in braces keeps the whole group
 inside them. A later statement in the same arm follows the governed one,
 as in C.
 
-Source: `src/statements.x:620`
+Source: `src/statements.x:571`
 
 <a id="Compiler.parse_match_row_argument"></a>
 #### Compiler.parse_match_row_argument
@@ -109,7 +108,7 @@ Source: `src/statements.x:620`
 
 Parses one MatchRow macro argument with the ordinary match-arm owner.
 
-Source: `src/statements.x:427`
+Source: `src/statements.x:379`
 
 <a id="Compiler.parse_source_clause"></a>
 #### Compiler.parse_source_clause
@@ -121,17 +120,7 @@ Parses the clause `kind` of a source `if`, `while`, `do`, `for`,
 reaches that clause. An absent `else`, `for` header, `catch`, or
 `finally` clause is NULL.
 
-Source: `src/statements.x:223`
-
-<a id="Compiler.with_binding"></a>
-#### Compiler.with_binding
-
-`List Compiler.with_binding(Compiler c)`
-
-Returns the binding of the current identifier when it names a live
-`with` expression, or NULL.
-
-Source: `src/statements.x:206`
+Source: `src/statements.x:175`
 
 ## Design notes
 

@@ -33,6 +33,7 @@ Expression syntax and its resolution.
 | [`Compiler.resolve_expression`](#Compiler.resolve_expression) | Resolves and type-annotates one expression AST in current compiler state. |
 | [`Compiler.resolve_map_entry`](#Compiler.resolve_map_entry) | Resolves the key and value of one `(map-entry key value)` AST row. |
 | [`Compiler.resolve_postfix_member`](#Compiler.resolve_postfix_member) | Resolves one field or method selection without consuming parser tokens. |
+| [`Compiler.reveal_binding`](#Compiler.reveal_binding) | Keeps `binding` reachable from the cursor where a later declaration of its spelling hides it. |
 | [`Compiler.var_tag_expression`](#Compiler.var_tag_expression) | Builds an exact tag expression, deferring macro type slots until binding. |
 
 ### `Compiler`
@@ -222,7 +223,7 @@ Source: `src/expressions/syntax.x:607`
 Parses and resolves one complex identifier expression.
 Parsing starts at `c.token` and leaves it after the identifier.
 
-Source: `src/expressions/syntax.x:680`
+Source: `src/expressions/syntax.x:678`
 
 <a id="Compiler.postfix_completions"></a>
 #### Compiler.postfix_completions
@@ -296,6 +297,17 @@ row, or NULL when no member is visible. Method lookup is enabled only by
 `call_context` and records the selected binding in `c.sym`.
 
 Source: `src/expressions/access.x:177`
+
+<a id="Compiler.reveal_binding"></a>
+#### Compiler.reveal_binding
+
+`void Compiler.reveal_binding(Compiler c, List binding)`
+
+Keeps `binding` reachable from the cursor where a later declaration of
+its spelling hides it. A hidden local takes a fresh emitted spelling;
+a hidden file-scope name makes the visible automatic locals take one.
+
+Source: `src/expressions/identifiers.x:194`
 
 <a id="Compiler.var_tag_expression"></a>
 #### Compiler.var_tag_expression
