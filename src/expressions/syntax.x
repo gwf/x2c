@@ -656,7 +656,20 @@ static List _parse_ident_primary(Compiler c) {
   if (c.token.text == "va_arg") return _parse_va_arg(c);
   if (c.token.text == "_Generic") return _parse_generic(c);
   if (c.token.text == "offsetof") return _parse_offsetof(c);
+  if (c.token.text == "_Alignof") return _parse_alignof(c);
   return c.parse_variable();
+}
+
+static List _parse_alignof(Compiler c) {
+  c.next();
+  c.expect(<(>);
+  int declaration = c.test_declaration();
+  List operand = declaration ? c.parse_type_operand(NULL)
+                             : c.parse_assignment();
+  c.expect(<)>);
+  int named = declaration && _casts_to_typedef_name(c, operand);
+  Type type = named ? %(<macro-expr>) : %("size_t");
+  return %(expr $type (call "_Alignof" (args $operand)));
 }
 
 /** Parses and resolves one complex identifier expression.

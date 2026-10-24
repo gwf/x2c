@@ -5,7 +5,9 @@
 
 module List _native(Resolve &r, String callee, List supplied) {
   List arguments = _resolve_call_arguments(r.c, NULL, supplied, r.origin);
-  return %(expr ${r.type} (call $callee (args @arguments)));
+  Type type = callee == "_Alignof" && r.type === %(<macro-expr>)
+            ? %("size_t") : r.type;
+  return %(expr $type (call $callee (args @arguments)));
 }
 
 /* One call being resolved: its expected result type, the arguments it

@@ -3,11 +3,11 @@
 #define __GUARD_0xA5BC2A2E__
 #include "common.h"
 #include "macrovalue/macrovalue.h"
-static List _160, _157, _156, _155, _153, _150, _147, _145, _144, _142, _141, _140, _129, _128, _127, _121, _120, _119, _118, _112, _110, _109, _108, _102, _100, _99, _98, _92, _91, _90, _89, _83, _82, _81, _80, _74, _73, _72, _71, _66, _64, _63, _62, _56, _55, _54, _53, _47, _45, _44, _43, _37, _36, _35, _34, _28, _26, _25, _24, _18, _16, _15, _14, _11, _9, _8, _7, _1;
+static List _143, _140, _139, _138, _136, _133, _129, _128, _127, _121, _120, _119, _118, _112, _110, _109, _108, _102, _100, _99, _98, _92, _91, _90, _89, _83, _82, _81, _80, _74, _73, _72, _71, _66, _64, _63, _62, _56, _55, _54, _53, _47, _45, _44, _43, _37, _36, _35, _34, _28, _26, _25, _24, _18, _16, _15, _14, _11, _9, _8, _7, _1;
 
-static String _158, _148, _133, _125, _123, _116, _114, _106, _104, _96, _94, _87, _85, _78, _76, _69, _67, _60, _58, _51, _49, _41, _39, _32, _30, _22, _20, _12, _5, _3;
+static String _141, _131, _125, _123, _116, _114, _106, _104, _96, _94, _87, _85, _78, _76, _69, _67, _60, _58, _51, _49, _41, _39, _32, _30, _22, _20, _12, _5, _3;
 
-static Var _161, _159, _154, _152, _151, _149, _146, _143, _139, _138, _137, _136, _135, _134, _132, _131, _130, _126, _124, _122, _117, _115, _113, _111, _107, _105, _103, _101, _97, _95, _93, _88, _86, _84, _79, _77, _75, _70, _68, _65, _61, _59, _57, _52, _50, _48, _46, _42, _40, _38, _33, _31, _29, _27, _23, _21, _19, _17, _13, _10, _6, _4, _2, _0;
+static Var _144, _142, _137, _135, _134, _132, _130, _126, _124, _122, _117, _115, _113, _111, _107, _105, _103, _101, _97, _95, _93, _88, _86, _84, _79, _77, _75, _70, _68, _65, _61, _59, _57, _52, _50, _48, _46, _42, _40, _38, _33, _31, _29, _27, _23, _21, _19, _17, _13, _10, _6, _4, _2, _0;
 
 static int _init_guard_ = 0;
 
@@ -148,37 +148,20 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _128 = cons(_124, _127);
   _129 = cons(_122, _128);
   _130 = Symbol_var(377892);
-  _131 = List_var(_74);
-  _132 = Symbol_var(199448);
-  _133 = String_new("_Alignof");
-  _134 = String_var(_133);
-  _135 = Symbol_var(102886);
-  _136 = Symbol_var(272600);
-  _137 = Symbol_var(157714837990);
-  _138 = Symbol_var(150408);
-  _139 = List_var(NULL);
-  _140 = cons(_139, NULL);
-  _141 = cons(_139, _140);
-  _142 = cons(_138, _141);
-  _143 = List_var(_142);
-  _144 = cons(_143, NULL);
-  _145 = cons(_137, _144);
-  _146 = List_var(_145);
-  _147 = cons(_146, NULL);
-  _148 = String_new("List");
-  _149 = String_var(_148);
-  _150 = cons(_149, NULL);
-  _151 = List_var(_150);
-  _152 = Symbol_var(29272);
-  _153 = cons(_152, NULL);
-  _154 = List_var(_153);
-  _155 = cons(_154, NULL);
-  _156 = cons(_151, _155);
-  _157 = cons(_130, _156);
-  _158 = String_new("Symbol");
-  _159 = String_var(_158);
-  _160 = cons(_159, NULL);
-  _161 = Symbol_var(228262);
+  _131 = String_new("List");
+  _132 = String_var(_131);
+  _133 = cons(_132, NULL);
+  _134 = List_var(_133);
+  _135 = Symbol_var(29272);
+  _136 = cons(_135, NULL);
+  _137 = List_var(_136);
+  _138 = cons(_137, NULL);
+  _139 = cons(_134, _138);
+  _140 = cons(_130, _139);
+  _141 = String_new("Symbol");
+  _142 = String_var(_141);
+  _143 = cons(_142, NULL);
+  _144 = Symbol_var(228262);
 }
 
 Map Map_update_n(Map, unsigned, ...);
@@ -199,18 +182,13 @@ Symbol _scalar_tag(Type type){
   return Var_symbol(List_car(Var_list(Map_getindex(native_scalar_types(), List_var(type)))));
 }
 
-List _scalar_alignment(Type type){
-  if(! _init_guard_) _file_init_();
-  return cons(_130, cons(_131, cons(List_var(cons(_132, cons(_134, cons(List_var(cons(_135, cons(List_var(cons(_136, cons(List_var(type), _147))), NULL))), NULL)))), NULL)));
-}
-
 List List_reverse(List);
 
 static int List_try_next(List, List *, Var *);
 
 List _scalar_key(Type type){
   if(! _init_guard_) _file_init_();
-  List key = _157;
+  List key = _140;
   {
     Symbol word;
     List _x2c_gensym_macro_object_1 = List_reverse(((List) type));
@@ -218,8 +196,8 @@ List _scalar_key(Type type){
     Var _x2c_gensym_macro_cursor_output_1;
     while(List_try_next(_x2c_gensym_macro_object_1, &(_x2c_gensym_macro_cursor_1), &(_x2c_gensym_macro_cursor_output_1))){
       word = Var_symbol(_x2c_gensym_macro_cursor_output_1);
-      key = cons(_130, cons(_151, cons(List_var(({
-        Var _x2c_gensym_literal_part_0 = List_var(Macro_typed(_160, Symbol_var(word)));  cons(_161, cons(_x2c_gensym_literal_part_0, cons(List_var(key), NULL)));
+      key = cons(_130, cons(_134, cons(List_var(({
+        Var _x2c_gensym_literal_part_0 = List_var(Macro_typed(_143, Symbol_var(word)));  cons(_144, cons(_x2c_gensym_literal_part_0, cons(List_var(key), NULL)));
       }
       )), NULL)));
     }

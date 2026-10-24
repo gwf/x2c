@@ -11,8 +11,6 @@ Map native_scalar_types(void);
 
 Symbol _scalar_tag(Type type);
 
-List _scalar_alignment(Type type);
-
 List _scalar_key(Type type);
 
 List _scalar_access_units(Macro access);

@@ -53,12 +53,6 @@ meta List _scalar_access_record(Type type) {
 meta Symbol _scalar_tag(Type type) =>
   native_scalar_types()[type].list().car();
 
-/* x2c has no `_Alignof(type-name)` syntax, so this call keeps its native
-   callee as a String. */
-meta List _scalar_alignment(Type type) =>
-  %(expr (unsigned long)
-    (call "_Alignof" (args (decl $type (bindings (bind () ()))))));
-
 /* `type` as the List expression of its words, as the parser builds
    `%(unsigned long)`. A quotation hole does not reach inside `%(...)`. */
 meta List _scalar_key(Type type) {
@@ -84,7 +78,7 @@ macro Unit $native.scalar.access(Type $type) {
   }
 
   static struct NativeScalarAccess $_scalar_access_record($type) = {
-    $_scalar_tag($type), sizeof($type), $_scalar_alignment($type),
+    $_scalar_tag($type), sizeof($type), _Alignof($type),
     _load, _store
   };
 }

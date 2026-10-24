@@ -48,7 +48,6 @@ and status; it does not implement the remaining features.
 | Owning plan | Remaining scope | Next action |
 | --- | --- | --- |
 | [Language-reference writing](review-remediation-2026-10-11.md) | Complete the selected source-form, rewrite, and Lisp explanations. | Identify exact missing coverage in the existing book, then fill it. |
-| [Quotation adoption](quotation-adoption-audit-2026-10-03.md) | Typed `_Alignof` quotation and its existing scalar caller. | Re-probe the Type-value hole; scalar helper migration is already delivered. |
 | [Structured lint findings](x2c-lint-and-format.md) | Approved phase 8 List output and compiler consumption. | Add the optional interface; preserve the experimental distribution and conditional editor integration. |
 | [Detached Channel ownership](detached-channel-ownership.md) | Close out evidence for the correction already present on `dev`. | Recover final benchmark, verification, and delivery/hold records; do not repeat implementation. |
 
@@ -60,6 +59,7 @@ or establish a useful caller before selecting a candidate.
 | Record | Use |
 | --- | --- |
 | [Review follow-ups](reference/review-followups-2026-10-24.md) | Component coverage questions, typed List policy, surviving duplication, dated build-cost evidence, and SDK/native-type candidates. |
+| [Quotation adoption](quotation-adoption-audit-2026-10-03.md) | Typed `_Alignof` and direct scalar-generator adoption are implemented; individual adoption and TagId generation remain optional candidates. |
 | [Compiler ownership](compiler-ownership-investigation.md) | Refresh individual sharing/restoration candidates before selection; module splits do not establish semantic completion. |
 | [Compiler ownership evidence](reference/compiler-ownership-evidence.md) | Static field inventory at `548b381f`, not a current census. |
 | [Lifetime proof](lifetime-proof-followup.md) | Dormant extension; first name a current program and reproduce its obstacle. |

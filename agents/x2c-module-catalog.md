@@ -1115,8 +1115,7 @@ exact C scalar ledger.
 
 Public functions:
 
-`native_scalar_types`, `_scalar_tag`, `_scalar_alignment`, `_scalar_key`,
-`_scalar_access_units`
+`native_scalar_types`, `_scalar_tag`, `_scalar_key`, `_scalar_access_units`
 
 ### [lib/path.x](../lib/path.x)
 

@@ -1848,6 +1848,13 @@ while removing the stored value's outer qualifiers, including qualifiers
 hidden by the typedef. Qualifiers before the projection and pointee
 qualifiers remain. This is type data, not a source keyword.
 
+`_Alignof` accepts a Type hole in a template or quotation. For example,
+`$!( _Alignof($type) )` with `Type type = $!Type{ double };` constructs
+`_Alignof(double)`. Its result has type `size_t`. The emitted C retains the
+alignment operator, so the target C compiler computes alignment; the host
+meta process does not substitute its own alignment. A typedef name in a
+template operand resolves where the expansion lands, as with `sizeof`.
+
 A typed quotation is written `$!T{ expression }`, where `T` is one identifier
 that names a type, or `$!(T){ expression }`, where `T` is any type, a `Type`
 local, or a `${...}` hole of type `Type`. An identifier after `$!` that spells
