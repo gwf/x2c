@@ -48,6 +48,7 @@ and status; it does not implement the remaining features.
 | Owning plan | Remaining scope | Next action |
 | --- | --- | --- |
 | [Language-reference writing](review-remediation-2026-10-11.md) | Complete the selected source-form, rewrite, and Lisp explanations. | Identify exact missing coverage in the existing book, then fill it. |
+| [Ending an alias with `unalias`](unalias.md) | Proposed: remove an alias the current scope declares, including an included one. | Gary approves or revises the design; implementation follows the `with` and `alias` PR. |
 | [Structured lint findings](x2c-lint-and-format.md) | Approved phase 8 List output and compiler consumption. | Add the optional interface; preserve the experimental distribution and conditional editor integration. |
 | [Detached Channel ownership](detached-channel-ownership.md) | Close out evidence for the correction already present on `dev`. | Recover final benchmark, verification, and delivery/hold records; do not repeat implementation. |
 
