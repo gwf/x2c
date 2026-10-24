@@ -208,10 +208,9 @@ a swap, or consecutive `(void) name;` statements. Keep separate lines when a
 step branches, can fail, or deserves a comment.
 
 **ST-16** Keep statements free of debug output and temporary instrumentation.
-Use `$assert` for an invariant whose failure PR-4 would justify checking,
-`$todo` and `$unreachable` for unwritten or
-excluded paths; never return a plausible value from a path that should not
-run.
+Use `$assert` for an invariant whose failure PR-4 would justify checking.
+Use an explicit `raise` for unwritten or excluded paths; never return a
+plausible value from a path that should not run.
 
 ### Expressions and literals
 
@@ -1444,7 +1443,7 @@ These results set the rules above; the evidence is in the adoption plan.
 | value domain includes Null | `try_*` |
 | sentinel impossible and no reason needed | `void` or `NULL` |
 | failure that may cross frames | `raise %(cause ...)` |
-| impossible internal state | `$assert`, `$unreachable` |
+| impossible internal state | `$assert`, `raise %(invariant ...)` |
 | wrong macro argument | `x2c_diagnostic_fail` |
 
 ### Matching and traversal

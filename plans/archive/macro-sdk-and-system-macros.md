@@ -214,8 +214,9 @@ Follow-ups from the original scope:
   `(expr ("String") (cache 0))` with no text in the node, while `source.text`
   returns the complete spelling. The fold applies when that spelling carries no
   escape and no interpolation hole; every other form emits the runtime call.
-- `$todo` and `$unreachable` - expand to a raise carrying file, line, and
-  column from the existing `x2c.invocation.*`.
+- The former unfinished-path and unreachable-path macros raised errors with
+  invocation locations. Both were subsequently removed in favor of explicit
+  `raise`.
 - `$time` - `Stmt` target decorator wrapping the target in a timing pair.
 - `$assert` - raises `<invariant>` carrying the failing check as written, from
   `x2c.source.text`, and the caller's source line.
@@ -255,8 +256,8 @@ the new macro's expansion and one for its rejection case. Publication uses
 `examples/magic/system-macros.x` is the existing showcase for the shipped macro
 set and is registered in `examples/manifest.txt:33`. Phase 3 and Phase 4 extend
 it and update `examples/expected/system-macros.stdout` rather than adding a
-second showcase. `$time` writes a measured duration and `$todo` raises, so
-neither belongs in an exact-match expectation; they get unit coverage instead.
+second showcase. `$time` writes a measured duration, so its report gets unit
+coverage instead of an exact-match expectation.
 
 ## Plan review
 

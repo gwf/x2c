@@ -75,16 +75,6 @@ static void system_macro_assert_passes_a_true_check(void) {
   EXPECT_INT_EQ(limit, 5);
 }
 
-static void system_macro_todo_and_unreachable_carry_a_note(void) {
-  String note = NULL, dead = NULL;
-  try $todo("column alignment");
-  catch %(invariant (note ?text) (at ?where)): note = text;
-  EXPECT_TRUE(note == "column alignment");
-  try $unreachable();
-  catch %(invariant (note ?text) (at ?where)): dead = text;
-  EXPECT_TRUE(dead == "unreachable");
-}
-
 static void system_macro_time_runs_its_target(void) {
   long total = 0;
   $time("unit")
@@ -161,7 +151,6 @@ void system_macros_suite(void) {
   $test.run(system_macro_dedent_folds_and_defers);
   $test.run(system_macro_assert_reports_the_written_check);
   $test.run(system_macro_assert_passes_a_true_check);
-  $test.run(system_macro_todo_and_unreachable_carry_a_note);
   $test.run(system_macro_time_runs_its_target);
   $test.run(system_macro_time_reports_a_body_that_leaves);
   $test.run(system_macro_type_members_reads_an_enum);
