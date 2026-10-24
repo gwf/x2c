@@ -103,7 +103,7 @@ static Array _cache_ids(Compiler c, List code) {
    replaces one memo entry and may cause harmless extra work. */
 static void _collect_ids(
   Compiler c, Var value, List *seen, Array ids) {
-  Array pending = auto [%($value)], marked = auto [];
+  auto Array pending = [%($value)], marked = [];
   marked.resize(c.id_keys.len());
   while (pending) {
     Var frame = pending[-1];

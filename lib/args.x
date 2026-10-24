@@ -293,8 +293,8 @@ static void _bad_spec(String why, Var entry) {
 String Args.usage(String program, List spec) {
   Spec parsed = _read_spec(spec);
   defer _free(parsed);
-  Buffer synopsis = auto Buffer.new(0), options = auto Buffer.new(0);
-  Buffer operands = auto Buffer.new(0), out = auto Buffer.new(0);
+  auto Buffer synopsis = Buffer.new(0), options = Buffer.new(0);
+  auto Buffer operands = Buffer.new(0), out = Buffer.new(0);
   for (int i = 0; i < parsed.count; i++) {
     Option *option = &parsed.options[i];
     String label = _label((*option));

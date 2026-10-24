@@ -27,7 +27,7 @@ module Ast _collection_literal(Compiler c, Ast ast, Symbol tag) {
     c, <literal>, head, %(expr $type ($head @{ast.cdr()})), <expression>,
     type, %"${type.repr()} literal");
   match (lowered) case %(expr ? (call ?callee (args *arguments))): {
-    Array values = auto [], orders = auto [];
+    auto Array values = [], orders = [];
     foreach (List argument in arguments) {
       Type passed = argument.cadr();
       values.push(argument);
@@ -114,7 +114,7 @@ static List _ordered(List declarations, Type type, List content) =>
    order, then its final tail. Convert before classifying each part, so an
    implicit custom converter participates in the same ordering as a call. */
 module List _ordered_list(Compiler c, List chain) {
-  Array kinds = auto [], values = auto [], orders = auto [];
+  auto Array kinds = [], values = [], orders = [];
   List node = chain;
   int spliced = 0;
   for (List cell = _list_cell(node); cell; cell = _list_cell(node)) {
