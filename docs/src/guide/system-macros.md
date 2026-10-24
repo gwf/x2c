@@ -351,6 +351,10 @@ The corresponding body placement is:
 
 ## Temporarily change one location
 
+The planned replacement for `$let` is `with`, supporting multiple temporary
+assignments. This change is not implemented; the following examples describe
+the current compiler. See the [migration note](../reference/language.md#with).
+
 `$let(place, value)` captures the address of an assignable place, saves its
 previous value, installs the new value, and restores that same storage on
 exit. Both locating the place and computing the new value happen once:

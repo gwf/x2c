@@ -683,6 +683,10 @@ Scope destination = auto Scope.new();
 
 ## Temporarily change one location
 
+The planned replacement for `$let` is `with`, supporting multiple temporary
+assignments. This change is not implemented; the following examples describe
+the current compiler. See the [migration note](https://x2c-lang.dev/docs/reference/language.html#with).
+
 `$let(place, value)` captures the address of an assignable place, saves its
 previous value, installs the new value, and restores that same storage on
 exit. Both locating the place and computing the new value happen once:
@@ -5167,6 +5171,13 @@ See [Classes and System Macros](https://x2c-lang.dev/docs/guide/system-macros.ht
 expansions.
 
 ### With
+
+> Planned migration (not implemented): `$let` will become `with`, with
+> comma-separated temporary assignments. The alias construct below will
+> become `alias`, with both braced and scope-wide declaration forms. Current
+> syntax and behavior remain as documented in this section. The
+> [implementation plan](https://github.com/gwf/x2c/blob/dev/plans/with-and-alias.md)
+> records the agreed design and migration.
 
 `with expression [as name] { ... }` gives an expression a short lexical name.
 The name defaults to `_`:
