@@ -22,7 +22,7 @@
 (type (name "_x2c_gensym_defer_env_0") (kind alias) 
  (line 0) (span) (source) (doc "") (text ""))
 (function (name "_x2c_gensym_defer_cleanup_0") 
- (display "_x2c_gensym_defer_cleanup_0") (line 1272) 
+ (display "_x2c_gensym_defer_cleanup_0") (line 1274) 
  (source "unittest/compiler-fixtures/package-generated-cleanup.x" 11) 
  (span) (static 1) (origin macro) (doc "") 
  (text "") (type ((func ((* void))) static void)) 
