@@ -2872,51 +2872,54 @@ int main(int argc, char **argv) {
   int status = 0;
   try {
     List result = NULL;
-    if (verb == "certify") {
-      int valid = 0;
-      Map contracts = certify_contracts(options["contracts"], valid);
-      if (!valid) status = 2;
-      else result = certify_result(
-        frontend, inputs, options["root"].list(), contracts, status
-      );
-    }
-    else if (verb == "clones")
-      result = graph_clones(frontend, inputs, clone_minimum);
-    else if (verb == "field")
-      result = _parse_field_units(frontend, inputs, left, right);
-    else if (verb == "field-sites")
-      result = _parse_field_sites(frontend, inputs, left, right);
-    else if (verb == "sites")
-      result = _parse_sites(frontend, inputs, name);
-    else if (verb == "walks")
-      result = _parse_walk_units(frontend, inputs);
-    else if (verb == "tail-calls")
-      result = _parse_tail_units(frontend, inputs);
-    else if (verb == "loop-allocations")
-      result = _parse_loop_allocation_units(
-        frontend, inputs,
-        options["all"] ? INT_MAX : LOOP_ALLOCATION_LIMIT);
-    else if (verb == "lifetime-escapes" || verb == "allocation-returns")
-      result = _parse_lifetime_units(frontend, inputs, name);
-    else if (verb == "flows")
-      result = _parse_flow_units(frontend, inputs, left, right);
-    else {
-      List units = _parse_units(
-        frontend, inputs, datasets ? subtrees : NULL);
-      if (units) {
-        Map attributes = datasets || verb == "structure" ? {} : NULL;
-        List graph = _resolve_graph(units, attributes);
-        if (datasets) _write_datasets(name, graph, attributes);
-        result = datasets || verb == "graph" ? graph
-               : verb == "digest" ? _digest(graph)
-               : verb == "architecture" ? _architecture(graph)
-               : verb == "structure"
-               ? _structure(graph, attributes, _display_input(name))
-               : verb == "between"
-               ? _between(graph, _display_input(left), _display_input(right))
-               : compare ? _compare_result(
-                 graph, left, right, options["TARGET"].list().sort())
-               : _focus(graph, name);
+    switch (verb) {
+      case "certify": {
+        int valid = 0;
+        Map contracts = certify_contracts(options["contracts"], valid);
+        if (!valid) status = 2;
+        else result = certify_result(
+          frontend, inputs, options["root"].list(), contracts, status
+        );
+        break;
+      }
+      case "clones":
+        result = graph_clones(frontend, inputs, clone_minimum); break;
+      case "field":
+        result = _parse_field_units(frontend, inputs, left, right); break;
+      case "field-sites":
+        result = _parse_field_sites(frontend, inputs, left, right); break;
+      case "sites":
+        result = _parse_sites(frontend, inputs, name); break;
+      case "walks": result = _parse_walk_units(frontend, inputs); break;
+      case "tail-calls": result = _parse_tail_units(frontend, inputs); break;
+      case "loop-allocations":
+        result = _parse_loop_allocation_units(
+          frontend, inputs,
+          options["all"] ? INT_MAX : LOOP_ALLOCATION_LIMIT);
+        break;
+      case "lifetime-escapes": case "allocation-returns":
+        result = _parse_lifetime_units(frontend, inputs, name); break;
+      case "flows":
+        result = _parse_flow_units(frontend, inputs, left, right); break;
+      default: {
+        List units = _parse_units(
+          frontend, inputs, datasets ? subtrees : NULL);
+        if (units) {
+          Map attributes = datasets || verb == "structure" ? {} : NULL;
+          List graph = _resolve_graph(units, attributes);
+          if (datasets) _write_datasets(name, graph, attributes);
+          result = datasets || verb == "graph" ? graph
+                 : verb == "digest" ? _digest(graph)
+                 : verb == "architecture" ? _architecture(graph)
+                 : verb == "structure"
+                 ? _structure(graph, attributes, _display_input(name))
+                 : verb == "between"
+                 ? _between(graph, _display_input(left), _display_input(right))
+                 : compare ? _compare_result(
+                   graph, left, right, options["TARGET"].list().sort())
+                 : _focus(graph, name);
+        }
+        break;
       }
     }
     if (!result) status = 1;

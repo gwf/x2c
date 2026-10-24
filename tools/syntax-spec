@@ -274,15 +274,19 @@ String command = args.car().str();
 String operand = args.cadr().str();
 try {
     validate();
-    if (command == "write" || command == "check") return outputs(command == "write");
-    if (command == "summary") { summary(); return 0; }
-    if (command == "modes") { modes(); return 0; }
-    if (command == "ebnf") { printf("%s", grammar_text()); return 0; }
-    if (command == "uses" || command == "graph") { dependencies(command, operand); return 0; }
-    if (command == "dump") {
-        if (operand == "grammar") { printf("%s\n", grammar.repr()); return 0; }
-        if (operand == "lexical") { printf("%s\n", lexical.repr()); return 0; }
-        if (operand == "extensions") { printf("%s\n", extensions.repr()); return 0; }
+    switch (command) {
+        case "write": case "check": return outputs(command == "write");
+        case "summary": summary(); return 0;
+        case "modes": modes(); return 0;
+        case "ebnf": printf("%s", grammar_text()); return 0;
+        case "uses": case "graph": dependencies(command, operand); return 0;
+        case "dump":
+            switch (operand) {
+                case "grammar": printf("%s\n", grammar.repr()); return 0;
+                case "lexical": printf("%s\n", lexical.repr()); return 0;
+                case "extensions": printf("%s\n", extensions.repr()); return 0;
+            }
+            break;
     }
     printf("usage: tools/syntax-spec summary | check | write | ebnf | modes\n"
            "       tools/syntax-spec dump grammar|lexical|extensions\n"

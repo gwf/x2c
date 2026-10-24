@@ -653,10 +653,12 @@ static List _parse_ident_primary(Compiler c) {
   }
   List keyword = c.try_parse_macro_expression();
   if (keyword) return keyword;
-  if (c.token.text == "va_arg") return _parse_va_arg(c);
-  if (c.token.text == "_Generic") return _parse_generic(c);
-  if (c.token.text == "offsetof") return _parse_offsetof(c);
-  if (c.token.text == "_Alignof") return _parse_alignof(c);
+  switch (c.token.text) {
+    case "va_arg": return _parse_va_arg(c);
+    case "_Generic": return _parse_generic(c);
+    case "offsetof": return _parse_offsetof(c);
+    case "_Alignof": return _parse_alignof(c);
+  }
   return c.parse_variable();
 }
 
