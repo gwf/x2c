@@ -1,4 +1,4 @@
-unittest/compiler-fixtures/with-missing-body.x:5:13: parse: with requires a braced body
-    with value;
-              ^
+unittest/compiler-fixtures/with-missing-body.x:5:19: parse: with requires a braced body
+    with (value = 2);
+                    ^
 

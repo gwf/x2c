@@ -38,19 +38,8 @@ macro Decorator $scope(Stmt $body, Expr @destination) {
   @(scope.expand $body $destination)
 }
 
-/* Built-in macros install before any declaration of a unit, including the
-   unit that reads `lib/meta.x`, so `$Code.type` has no prototype here. The
-   Lisp form reaches the compiler's binding when the macro expands. */
-macro Decorator $let(Stmt $body, Expr $place, Expr $value) {
-  {
-    $(Code.type $place) *address = &$place;
-    $(Code.type $place) previous = *address;
-    defer *address = previous;
-    *address = $value;
-    $body
-  }
-}
-
+/* `with (place = value, ...) { ... }` at statement position expands
+   this decorator; `with.expand` nests one saving block per assignment. */
 macro Decorator $x2c.with(Stmt $body, Expr @assignments) {
   $(with.expand $body $assignments)
 }

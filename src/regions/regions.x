@@ -78,7 +78,7 @@ module typedef struct Fact {
 
 /* The walk state for one unit. `facts` maps a binding to its Fact, `open`
    is the innermost open region, `frame` is the region of the function's
-   own storage, and `restored` holds the places a `$let` or another `defer`
+   own storage, and `restored` holds the places a `with` or another `defer`
    puts back before its block ends. `fresh` and `sinks` accumulate the
    current function's summary, `warnings` holds the current walk's, and
    `pending` and `freed` are the expression walk's stacks. `readers` maps a

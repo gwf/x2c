@@ -1,6 +1,6 @@
 #include "x2c.x"
 
-/* A local assigned inside `try` is volatile, so the address `$let` saves
+/* A local assigned inside `try` is volatile, so the address `with` saves
    points at a volatile object. */
 
 int main(void) {

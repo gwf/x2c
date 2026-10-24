@@ -24,6 +24,11 @@ static macro Stmt $fail.statements_with_body(Expr $c, Expr $site) =>
     <parse>, "with requires a braced body",
     $site, NULL);
 
+static macro Stmt $fail.statements_with_header(Expr $c, Expr $site) =>
+  $c.report_error(
+    <parse>, "with requires '(destination = expression, ...)'",
+    $site, %("name an expression with alias"));
+
 static macro Stmt $fail.statements_raise_payload(Expr $c, Expr $site) =>
   $c.report_error(
     <parse>, "raise requires a %() payload literal",
@@ -152,7 +157,8 @@ static List _label_statement(Compiler c) {
 /* `with (place = value, ...) { ... }` expands the built-in `$x2c.with`
    decorator over its braced body at `position`. */
 static List _with_statement(Compiler c, Symbol position) {
-  if (c.peek(1) != <(>) return c.parse_alias_statement(1);
+  if (c.peek(1) != <(>)
+    $fail.statements_with_header(c, c.token);
   Token body = Token.skip_trivia(c.token + 1).after_group();
   if (body.type != <"{">)
     $fail.statements_with_body(c, body);

@@ -21,7 +21,7 @@ static macro Expression $note.meta_sdk_value_notes(Expr $value) =>
 module MetaContext active;
 
 /** Returns the context of the running compile-time call, which an
-    evaluation changes with `$let` for its own extent. */
+    evaluation changes with `with` for its own extent. */
 MetaContext *MetaContext.current(void) => &active;
 
 /** Returns the compiler running the current compile-time call. A slot

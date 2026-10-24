@@ -1,4 +1,4 @@
-unittest/compiler-fixtures/with-missing-alias.x:5:17: parse: expected an alias identifier after 'as'
-    with value as {}
-                  ^
+unittest/compiler-fixtures/alias-missing-name.x:5:18: parse: expected an alias identifier after 'as'
+    alias value as {}
+                   ^
 

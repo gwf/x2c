@@ -1,7 +1,7 @@
 /*  meta-cleanup-exits.x -- cleanups on every exit from a meta body
 
     A block that holds a cleanup keeps its boundary: `defer`, region `auto`, and
-    `$let` run their cleanup when the block ends, when a `return` leaves it
+    `with` run their cleanup when the block ends, when a `return` leaves it
     after computing its value, and when `break` or `continue` leaves it for
     an enclosing loop. A loop with a cleanup on its iteration path runs
     10,000 turns in constant space. The bound lifetime operations - `auto`,
