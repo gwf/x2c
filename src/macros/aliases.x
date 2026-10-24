@@ -262,19 +262,32 @@ static Map _table(Compiler c) {
   return c.macros.try_get(<alias>, stored) ? stored : NULL;
 }
 
-/* The entry of `name` where the cursor stands, and its `key`: the current
-   module file's `static` alias, else the alias every file sees. */
+/* The entry of `name` where the cursor stands, and its `key`. A closer
+   body alias shadows the current module file's `static` alias. */
 static List _entry(Compiler c, String name, Var &?key) {
   Map table = _table(c);
   if (!table) return NULL;
   String file = c.file_prefix();
   Var entry, own = file ? %($file $name) : NULL;
   if (own && table.try_get(own, entry)) {
+    Var shared;
+    if (table.try_get(name, shared) && _inner_entry(shared, entry)) {
+      own = name;
+      entry = shared;
+    }
     if (key) key = own;
     return entry;
   }
   if (key) key = name;
   return table.try_get(name, entry) ? entry : NULL;
+}
+
+static int _inner_entry(List inner, List outer) {
+  match (inner) case %(declared ?(int depth) ?(int level) ?):
+    match (outer) case %(declared ?(int prior_depth) ?(int prior_level) ?):
+      return depth > prior_depth ||
+             (depth == prior_depth && level > prior_level);
+  return 0;
 }
 
 /** Starts a declaration body whose aliases end at its closing brace, and
