@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/alias-included-redeclared.x:15:1: parse: declaration 'level' is already bound
+  alias 1 as level;
+  ^^^^^
+  note: prior binding: 'level'
+

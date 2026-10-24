@@ -16,7 +16,9 @@
     compile-time effect, as a macro does. An aggregate or enumerator body
     opens no Sym scope, because its members declare into the enclosing
     one; the body level tells its aliases from those of the scope around
-    it at the same Sym depth.
+    it at the same Sym depth. The table therefore owns what Sym owns for
+    ordinary names: conflicts at file scope, including those an include
+    brings, and the file a `static` alias belongs to.
 */
 
 /* aliases diagnostics. */
@@ -30,6 +32,12 @@ static macro Stmt $fail.macros_alias_end(Expr $c, Expr $site) =>
   $c.report_error(
     <parse>, "expected ';' or '{' after an alias expression",
     $site, NULL);
+
+static macro Stmt $problem.macros_alias_included(
+  Expr $c, Expr $site, Expr $name) =>
+  $c.report_problem(
+    <parse>, %"declaration '${$name}' is already bound",
+    $site, %("this include aliases '${$name}' again"));
 
 static macro Stmt $fail.macros_alias_governed(Expr $c, Expr $site) =>
   $c.report_error(
@@ -169,7 +177,8 @@ static List _wrapped_forms(Compiler c, int skip_body) {
   Array forms = [];
   loop {
     List directives = c.leading_preproc();
-    if (!skip_body && c.included_effects) c.install_included_effects();
+    if (!skip_body && c.included_effects != NULL)
+      c.install_included_effects();
     foreach (List directive in directives) forms.push(directive);
     if (c.peek(0) == <"}"> || c.peek(0) == <eof>) break;
     List form = skip_body ? NULL : c.replay_declaration_source();
@@ -204,37 +213,47 @@ List Compiler.parse_alias_member(
   return %(seq @members);
 }
 
-/* An entry is `(declared depth level file expression)`: the Sym scope
-   count and body level at its declaration, and for a `static` alias of a
-   module file, the prefix of that file. Another alias of the same name
-   at the same depth and level is the same scope's. A semicolon alias at
-   file scope also conflicts with a file-scope declaration of its name,
-   and records its compile-time effect for including files. */
+/* An entry is `(declared depth level expression)`, with the Sym scope
+   count and body level of its declaration, or `(imported frozen)` for a
+   public alias an include delivered, which belongs to file scope. A
+   `static` alias of a module file is keyed by that file's prefix and its
+   name, so each file of the unit keeps its own; any other alias is keyed
+   by its name. Two aliases that one file sees in one scope conflict. A
+   semicolon alias at file scope also conflicts with a file-scope
+   declaration of its name, and records its compile-time effect for
+   including files. */
 static void _declare(Compiler c, AliasHead &head) {
+  if (_same_scope(c, _entry(c, head.name, NULL)))
+    $fail.parse_decl_bound(c, head.start, head.name);
   int depth = c.sym.scope_count(), level = c.alias_level;
-  match (_entry(c, head.name))
-    case %(declared ?(int prior_depth) ?(int prior_level) ?(String owner) *):
-      if (prior_depth == depth && prior_level == level && _seen(c, owner))
-        $fail.parse_decl_bound(c, head.start, head.name);
   int file_scope = !level && c.sym.at_file_scope();
-  if (file_scope && c.sym.get_exact(%(${head.name})))
+  if (file_scope && c.sym.get(%(${head.name})))
     $fail.parse_decl_bound(c, head.start, head.name);
   String file = head.storage ? c.file_prefix() : NULL;
-  if (!file) file = "";
-  _install(c, head.name, %(declared $depth $level $file ${head.expression}));
+  Var key = file ? %($file ${head.name}) : head.name;
+  _install(c, key, %(declared $depth $level ${head.expression}));
   if (file_scope && !head.storage)
     _record_compile_time_effect(
       c, %(compile-time alias ${head.name}
         ${c.freeze_declaration_syntax(head.expression)}), head.start);
 }
 
+static int _same_scope(Compiler c, List entry) {
+  match (entry) {
+    case %(imported ?): return !c.alias_level && c.sym.at_file_scope();
+    case %(declared ?(int depth) ?(int level) ?):
+      return depth == c.sym.scope_count() && level == c.alias_level;
+  }
+  return 0;
+}
+
 /* Entries live in one Map under `<alias>`, which each declaration
    replaces with a copy, so a body restores its outer entries by restoring
    the Map it started with. */
-static void _install(Compiler c, String name, List entry) {
+static void _install(Compiler c, Var key, List entry) {
   Map table = _table(c);
   table = table ? table.copy() : {};
-  table[name] = entry;
+  table[key] = entry;
   c.sym.put(c.macros, <alias>, table);
 }
 
@@ -243,10 +262,19 @@ static Map _table(Compiler c) {
   return c.macros.try_get(<alias>, stored) ? stored : NULL;
 }
 
-static List _entry(Compiler c, String name) {
+/* The entry of `name` where the cursor stands, and its `key`: the current
+   module file's `static` alias, else the alias every file sees. */
+static List _entry(Compiler c, String name, Var &?key) {
   Map table = _table(c);
-  Var entry;
-  return table && table.try_get(name, entry) ? entry : NULL;
+  if (!table) return NULL;
+  String file = c.file_prefix();
+  Var entry, own = file ? %($file $name) : NULL;
+  if (own && table.try_get(own, entry)) {
+    if (key) key = own;
+    return entry;
+  }
+  if (key) key = name;
+  return table.try_get(name, entry) ? entry : NULL;
 }
 
 /** Starts a declaration body whose aliases end at its closing brace, and
@@ -265,9 +293,15 @@ void Compiler.leave_alias_body(Compiler c, Map mark) {
 }
 
 /* An included file's public alias arrives as its frozen expression, which
-   is thawed when the name is first used. */
-module void _install_imported_alias(Compiler c, String name, List frozen) =>
+   is thawed when the name is first used. It conflicts with an alias the
+   including file already has at file scope. The full parse, which alone
+   holds `included_effects`, records that at the include line and
+   continues installing the include's definitions. */
+module void _install_imported_alias(Compiler c, String name, List frozen) {
+  if (c.included_effects != NULL && _same_scope(c, _entry(c, name, NULL)))
+    $problem.macros_alias_included(c, c.token, name);
   _install(c, name, %(imported $frozen));
+}
 
 /** Reports whether the current scope declares an alias named `name`,
     including a file-scope alias an include delivered. A declaration of that
@@ -275,13 +309,7 @@ module void _install_imported_alias(Compiler c, String name, List frozen) =>
 int Compiler.scope_declares_alias(Compiler c, String name) {
   List row = c.sym.current_binding(%($name));
   if (row && c.fact(%(alias $row))) return 1;
-  match (_entry(c, name)) {
-    case %(imported ?): return !c.alias_level && c.sym.at_file_scope();
-    case %(declared ?(int depth) ?(int level) ?(String file) *):
-      return depth == c.sym.scope_count() && level == c.alias_level &&
-             _seen(c, file);
-  }
-  return 0;
+  return _same_scope(c, _entry(c, name, NULL));
 }
 
 // uses
@@ -296,15 +324,14 @@ List Compiler.alias_expression(Compiler c) {
   Map table = _table(c);
   if (!table && !c.sym.has_aliases()) return NULL;
   String name = c.token.text;
-  List key = %($name);
-  int scope = c.sym.declaring_scope(key);
-  Var entry;
-  List expression = NULL;
-  if (table && table.try_get(name, entry))
-    expression = _visible(c, table, name, entry, scope);
+  List symbol = %($name);
+  int scope = c.sym.declaring_scope(symbol);
+  Var key;
+  List entry = _entry(c, name, key), expression = NULL;
+  if (entry) expression = _visible(c, table, key, entry, scope);
   if (!expression && c.sym.has_aliases() &&
       scope >= c.sym.base_scope_count())
-    expression = c.fact(%(alias ${c.sym.lookup(key, NULL)}));
+    expression = c.fact(%(alias ${c.sym.lookup(symbol, NULL)}));
   if (expression && !c.macro_holes) _reveal_bindings(c, expression);
   return expression;
 }
@@ -320,19 +347,14 @@ static void _reveal_bindings(Compiler c, List syntax) {
 }
 
 /* An imported entry's identifiers bind in the unit's global scope. */
-static List _visible(
-  Compiler c, Map table, String name, List entry, int scope) {
+static List _visible(Compiler c, Map table, Var key, List entry, int scope) {
   match (entry) case %(imported ?frozen): {
     List expression = _rebind_globals(c, c.thaw_declaration_syntax(frozen));
-    entry = %(declared ${c.sym.base_scope_count()} 0 "" $expression);
-    table[name] = entry;
+    entry = %(declared ${c.sym.base_scope_count()} 0 $expression);
+    table[key] = entry;
   }
   match (entry)
-    case %(declared ?(int depth) ? ?(String file) ?expression):
-      if (depth > scope && _seen(c, file)) return expression;
+    case %(declared ?(int depth) ? ?expression):
+      if (depth > scope) return expression;
   return NULL;
 }
-
-/* A `static` alias of a module file is seen only in that file. */
-static int _seen(Compiler c, String file) =>
-  !file.len() || file == c.file_prefix();

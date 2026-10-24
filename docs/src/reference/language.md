@@ -4080,12 +4080,15 @@ int main(void) {
 
 A file-scope alias follows the source order of
 [macro definitions](#compile-time-macros): a file that includes it sees it
-from the `#include` line onward. In a [module unit](#module-blocks), a
-member's alias is visible to later members and to the entry text after the
-module block. `static alias expression as name;` keeps the alias in its
-declaring file, or in its member within a module unit. An alias inside a
-macro template belongs to that template: its name does not capture a
-caller's name of the same spelling.
+from the `#include` line onward. That alias belongs to the including file's
+file scope: another alias of its name there conflicts in either order, and
+so does a later declaration of that name. In a
+[module unit](#module-blocks), a member's alias is visible to later members
+and to the entry text after the module block.
+`static alias expression as name;` keeps the alias in its declaring file, or
+in its member within a module unit, including while that member splices a
+nested member. An alias inside a macro template belongs to that template:
+its name does not capture a caller's name of the same spelling.
 
 `alias` is a contextual word. It stays an ordinary name where it continues
 an operand, as in `alias = 3;` or `alias(4)`, and where it names a type

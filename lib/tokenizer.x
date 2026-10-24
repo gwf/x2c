@@ -516,10 +516,10 @@ static int _closes_control_condition(Tokenizer tokenizer, Token token) =>
 
 /* True when `token` is the `}` of a compound statement or declaration body,
    which binary `%` cannot follow. The token before its `{` decides: a
-   statement boundary, an identifier or `]` as in `with value {`, or a `)`
-   after a control keyword, `match`, or an identifier as in a function header
-   or `foreach (...)`. A compound literal or initializer brace follows an
-   operator or a cast's `)` and does not qualify. */
+   statement boundary, an identifier or `]` as in `alias value {`, or a `)`
+   after a control keyword, `match`, or an identifier as in a function header,
+   `foreach (...)`, or `with (...)`. A compound literal or initializer brace
+   follows an operator or a cast's `)` and does not qualify. */
 static int _closes_statement_block(Tokenizer tokenizer, Token token) {
   if (!token || token.type != <"}">) return 0;
   Token before = _before_group(tokenizer, token, <"{">);

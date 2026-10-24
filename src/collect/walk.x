@@ -663,6 +663,7 @@ void Compiler.install_included_effects(Compiler c) {
     Var exports = c.included_effects[canonical];
     if (exports is void) continue;
     c.included_effects.del(canonical);
-    c.install_compile_time_effects(exports);
+    // A conflict among the definitions is reported at their include line.
+    with (c.token = token) { c.install_compile_time_effects(exports); }
   }
 }
