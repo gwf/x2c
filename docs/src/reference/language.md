@@ -3919,6 +3919,13 @@ expansions.
 
 ### With
 
+> Planned migration (not implemented): `$let` will become `with`, with
+> comma-separated temporary assignments. The alias construct below will
+> become `alias`, with both braced and scope-wide declaration forms. Current
+> syntax and behavior remain as documented in this section. The
+> [implementation plan](https://github.com/gwf/x2c/blob/dev/plans/with-and-alias.md)
+> records the agreed design and migration.
+
 `with expression [as name] { ... }` gives an expression a short lexical name.
 The name defaults to `_`:
 
