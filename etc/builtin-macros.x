@@ -53,7 +53,7 @@ macro Decorator $let(Stmt $body, Expr $place, Expr $value) {
 
 macro Decorator $lock(Stmt $body, Expr $mutex) {
   {
-    $(list "Mutex") held = $mutex;
+    Mutex held = $mutex;
     held.lock();
     defer held.unlock();
     $body
