@@ -15,6 +15,7 @@ unit-item = ( directive |
     macro-definition |
     keyword-definition |
     unit-alias |
+    unalias |
     private-interface |
     module-declaration |
     lisp-escape |
@@ -122,6 +123,7 @@ block-item = ( directive |
     static-assert |
     ( declaration-row , ";" ) |
     named-alias |
+    unalias |
     local-macro-definition |
     statement |
     block-extension ) ;
@@ -165,9 +167,10 @@ alias-name = ( "as" , identifier ) ;
 named-alias = ( alias-head , alias-name , ";" ) ;
 alias-wrapper = ( alias-head , [ alias-name ] ) ;
 alias-statement = ( alias-wrapper , raw-block ) ;
+unalias = ( "unalias" , identifier , ";" ) ;
 unit-alias = ( [ "static" ] , ( named-alias | ( alias-wrapper , "{" , { unit-item } , "}" ) ) ) ;
-field-alias = ( named-alias | ( alias-wrapper , "{" , { field } , "}" ) ) ;
-enumerator-alias = ( named-alias | ( alias-wrapper , "{" , enumerator-list , "}" ) ) ;
+field-alias = ( named-alias | unalias | ( alias-wrapper , "{" , { field } , "}" ) ) ;
+enumerator-alias = ( named-alias | unalias | ( alias-wrapper , "{" , enumerator-list , "}" ) ) ;
 match-statement = ( "match" ,
     "(" ,
     expression ,

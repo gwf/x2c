@@ -52,6 +52,8 @@ void Compiler.install_compile_time_effects(Compiler c, List rows) {
     }
     case %(compile-time alias ?(String name) ?expression):
       _install_imported_alias(c, name, expression);
+    case %(compile-time unalias ?(String name)):
+      _remove_imported_alias(c, name);
     case %(compile-time rewrite *): _install_rewrite(c, row);
     case %(compile-time lisp ?form (source ?path ?site)): {
       Token token = c.thaw_declaration_syntax(site);

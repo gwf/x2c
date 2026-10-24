@@ -105,7 +105,7 @@ static List _statement(Compiler c, Symbol position) {
 
 static List _statement_keywords(void) => %(
   "if" "while" "for" "do" "return" "case" "break" "continue" "goto"
-  "try" "raise" "defer" "match" "switch" "default" "with" "alias"
+  "try" "raise" "defer" "match" "switch" "default" "with" "alias" "unalias"
 );
 
 /* A statement-position macro target, or else a macro expression ended by
@@ -670,7 +670,7 @@ static List _block_keywords(void) => %(
   "void" "char" "short" "int" "long" "float" "double"
   "signed" "unsigned" "if" "while" "for" "do" "return"
   "case" "break" "continue" "goto" "try" "raise" "defer"
-  "match" "switch" "default" "with" "alias"
+  "match" "switch" "default" "with" "alias" "unalias"
 );
 
 /* A local macro definition, which only a template keeps as an item. */

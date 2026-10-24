@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/unalias-missing.x:4:3: parse: no alias 'missing' to remove in this scope
+    unalias missing;
+    ^^^^^^^
+  note: an alias of an enclosing scope ends with that scope
+

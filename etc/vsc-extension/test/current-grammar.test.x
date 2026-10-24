@@ -238,6 +238,12 @@ printf("%d\n", alias);
 //             ^^^^^ - keyword.declaration.alias.x2c
 alias(value);
 // <----- - keyword.declaration.alias.x2c
+unalias settings;
+// <------- keyword.declaration.alias.x2c
+int unalias = 1;
+//  ^^^^^^^ - keyword.declaration.alias.x2c
+unalias += 1;
+// <------- - keyword.declaration.alias.x2c
 
   Var (first, second) = values;
 //    ^ punctuation.section.parens.begin.destructuring.x2c

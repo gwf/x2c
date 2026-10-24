@@ -37,7 +37,18 @@ static macro Stmt $problem.macros_alias_included(
   Expr $c, Expr $site, Expr $name) =>
   $c.report_problem(
     <parse>, %"declaration '${$name}' is already bound",
-    $site, %("this include aliases '${$name}' again"));
+    $site, %("this include aliases '${$name}'"));
+
+static macro Stmt $fail.macros_unalias_missing(
+  Expr $c, Expr $site, Expr $name) =>
+  $c.report_error(
+    <parse>, %"no alias '${$name}' to remove in this scope",
+    $site, %("an alias of an enclosing scope ends with that scope"));
+
+static macro Stmt $fail.macros_unalias_governed(Expr $c, Expr $site) =>
+  $c.report_error(
+    <parse>, "unalias cannot be the body of a statement",
+    $site, NULL);
 
 static macro Stmt $fail.macros_alias_governed(Expr $c, Expr $site) =>
   $c.report_error(
@@ -46,13 +57,15 @@ static macro Stmt $fail.macros_alias_governed(Expr $c, Expr $site) =>
 
 // recognition
 
-/** Reports whether the cursor begins an alias: the word `alias`, or at
-    file scope `static alias`, then an expression followed by `as` or a
-    braced body. `alias` stays an ordinary name where it continues an
-    operand, as in `alias = value;`, and where it names a type that no
-    `as` follows. This query does not consume tokens.
+/** Reports whether the cursor begins an alias or its removal. An alias is
+    the word `alias`, or at file scope `static alias`, then an expression
+    followed by `as` or a braced body; a removal is `unalias name;`. Each
+    word stays an ordinary name where it continues an operand, as in
+    `alias = value;`, and where it names a type that no `as` follows. This
+    query does not consume tokens.
 */
 int Compiler.alias_form_starts(Compiler c) {
+  if (c.at_word("unalias")) return _unalias_starts(c);
   Token word = c.token;
   if (word.type == <static> && c.sym.at_file_scope())
     word = Token.skip_trivia(word + 1);
@@ -67,6 +80,13 @@ int Compiler.alias_form_starts(Compiler c) {
     if (token.type == <"}"> || token.type.is_assignment_op()) return 0;
   }
   return 0;
+}
+
+static int _unalias_starts(Compiler c) {
+  Token name = Token.skip_trivia(c.token + 1);
+  Type named = c.sym.get(%("unalias"));
+  return name.type == <ident> && Token.skip_trivia(name + 1).type == <;> &&
+         (!named || !named.is_typedef());
 }
 
 static int _continues_operand(Symbol type) =>
@@ -111,12 +131,13 @@ static String _alias_name(Compiler c) {
   return name;
 }
 
-/** Parses an alias in a function body or a template. The semicolon form
-    defines its name in the current scope and returns `(seq)`; it requires
-    block position, which `block` reports. The braced form returns its
-    block, with the name defined in a scope around it.
+/** Parses an alias or its removal in a function body or a template. The
+    semicolon form and `unalias` change the current scope and return
+    `(seq)`; they require block position, which `block` reports. The braced
+    form returns its block, with the name defined in a scope around it.
 */
 List Compiler.parse_alias_statement(Compiler c, int block) {
+  if (c.at_word("unalias")) return _unalias(c, block);
   AliasHead head = _head(c);
   if (c.test(<;>)) {
     if (!block) $fail.macros_alias_governed(c, head.start);
@@ -136,9 +157,10 @@ static void _define_local(Compiler c, AliasHead &head) {
   c.sym.define_alias(head.name, head.expression);
 }
 
-/** Parses an alias at file scope. A semicolon alias returns NULL; its name
-    stays visible to the rest of the unit and, unless it is `static`, to the
-    files that include this one. A braced alias returns `(seq ...)` of the
+/** Parses an alias or its removal at file scope. A semicolon alias returns
+    NULL; its name stays visible to the rest of the unit and, unless it is
+    `static`, to the files that include this one. `unalias` also returns
+    NULL. A braced alias returns `(seq ...)` of the
     top-level forms it wraps, which keep their file-scope placement while
     the name ends at the closing brace. Collection, with `skip_body`, reads
     the wrapped forms as it reads any other. Inside a template the name is
@@ -146,19 +168,24 @@ static void _define_local(Compiler c, AliasHead &head) {
 */
 List Compiler.parse_alias_declaration(Compiler c, int skip_body) {
   if (!c.sym.at_file_scope()) return _template_declaration(c, skip_body);
+  if (c.at_word("unalias")) {
+    _unalias(c, 1);
+    return NULL;
+  }
   AliasHead head = _head(c);
   if (c.test(<;>)) {
-    _declare(c, head);
+    _declare(c, head, skip_body);
     return NULL;
   }
   Map mark = c.enter_alias_body();
   defer c.leave_alias_body(mark);
-  _declare(c, head);
+  _declare(c, head, skip_body);
   c.next();
   return _wrapped_forms(c, skip_body);
 }
 
 static List _template_declaration(Compiler c, int skip_body) {
+  if (c.at_word("unalias")) return _unalias(c, 1);
   AliasHead head = _head(c);
   if (c.test(<;>)) {
     _define_local(c, head);
@@ -194,18 +221,20 @@ static List _wrapped_forms(Compiler c, int skip_body) {
 /** Parses an alias among the members of an aggregate or enum body, where
     `position` is `<field>` or `<enumerator>` and `context` is the
     aggregate type. Its name ends with the body. A braced alias returns
-    `(seq ...)` of the members it wraps; a semicolon alias returns `(seq)`.
+    `(seq ...)` of the members it wraps; a semicolon alias and `unalias`
+    return `(seq)`.
 */
 List Compiler.parse_alias_member(
   Compiler c, Symbol position, List context) {
+  if (c.at_word("unalias")) return _unalias(c, 1);
   AliasHead head = _head(c);
   if (c.test(<;>)) {
-    _declare(c, head);
+    _declare(c, head, 0);
     return %(seq);
   }
   Map mark = c.enter_alias_body();
   defer c.leave_alias_body(mark);
-  _declare(c, head);
+  _declare(c, head, 0);
   c.next();
   List members = position == <enumerator> ? c.parse_enumerators(context)
                : c.peek(0) == <"}"> ? NULL : c.parse_fields(context);
@@ -216,26 +245,58 @@ List Compiler.parse_alias_member(
 /* An entry is `(declared depth level expression)`, with the Sym scope
    count and body level of its declaration, or `(imported frozen)` for a
    public alias an include delivered, which belongs to file scope. A
-   `static` alias of a module file is keyed by that file's prefix and its
-   name, so each file of the unit keeps its own; any other alias is keyed
-   by its name. Two aliases that one file sees in one scope conflict. A
-   semicolon alias at file scope also conflicts with a file-scope
-   declaration of its name, and records its compile-time effect for
+   `static` alias is keyed by its file's prefix, empty outside a module
+   unit, and its name, so each file of the unit keeps its own; a public
+   alias is keyed by its name alone. Two aliases that one file sees in one
+   scope conflict. A semicolon alias at file scope also conflicts with an
+   earlier file-scope declaration of its name, which collection, reading
+   declarations in source order, reports; a later one reports itself. An
+   included file's walk also sees its includer's names, which its include
+   line checks instead. A public alias records its compile-time effect for
    including files. */
-static void _declare(Compiler c, AliasHead &head) {
+static void _declare(Compiler c, AliasHead &head, int collecting) {
   if (_same_scope(c, _entry(c, head.name, NULL)))
     $fail.parse_decl_bound(c, head.start, head.name);
   int depth = c.sym.scope_count(), level = c.alias_level;
   int file_scope = !level && c.sym.at_file_scope();
-  if (file_scope && c.sym.get(%(${head.name})))
+  if (collecting && file_scope && !c.interface_provider &&
+      c.sym.get(%(${head.name})))
     $fail.parse_decl_bound(c, head.start, head.name);
-  String file = head.storage ? c.file_prefix() : NULL;
-  Var key = file ? %($file ${head.name}) : head.name;
+  Var key = head.storage ? _private_key(c, head.name) : head.name;
   _install(c, key, %(declared $depth $level ${head.expression}));
   if (file_scope && !head.storage)
     _record_compile_time_effect(
       c, %(compile-time alias ${head.name}
         ${c.freeze_declaration_syntax(head.expression)}), head.start);
+}
+
+static List _private_key(Compiler c, String name) {
+  String file = c.file_prefix();
+  return %(${file ? file : ""} $name);
+}
+
+/* `unalias name;` removes the alias the current scope declares, and the
+   name means what it meant before that alias. Removing a public alias at
+   file scope is a compile-time effect for including files. */
+static List _unalias(Compiler c, int block) {
+  Token start = c.token;
+  c.next();
+  String name = c.token.text;
+  c.next();
+  c.expect(<;>);
+  if (!block) $fail.macros_unalias_governed(c, start);
+  List row = c.sym.current_binding(%($name));
+  if (row && c.fact(%(alias $row))) {
+    c.sym.undefine_alias(name);
+    return %(seq);
+  }
+  Var key;
+  if (!_same_scope(c, _entry(c, name, key)))
+    $fail.macros_unalias_missing(c, start, name);
+  _remove(c, key);
+  if (!c.alias_level && c.sym.at_file_scope() && key is <string>)
+    _record_compile_time_effect(c, %(compile-time unalias $name), start);
+  return %(seq);
 }
 
 static int _same_scope(Compiler c, List entry) {
@@ -257,19 +318,24 @@ static void _install(Compiler c, Var key, List entry) {
   c.sym.put(c.macros, <alias>, table);
 }
 
+static void _remove(Compiler c, Var key) {
+  Map table = _table(c).copy();
+  table.del(key);
+  c.sym.put(c.macros, <alias>, table);
+}
+
 static Map _table(Compiler c) {
   Var stored;
   return c.macros.try_get(<alias>, stored) ? stored : NULL;
 }
 
 /* The entry of `name` where the cursor stands, and its `key`: the current
-   module file's `static` alias, else the alias every file sees. */
+   file's `static` alias, else the alias every file sees. */
 static List _entry(Compiler c, String name, Var &?key) {
   Map table = _table(c);
   if (!table) return NULL;
-  String file = c.file_prefix();
-  Var entry, own = file ? %($file $name) : NULL;
-  if (own && table.try_get(own, entry)) {
+  Var entry, own = _private_key(c, name);
+  if (table.try_get(own, entry)) {
     if (key) key = own;
     return entry;
   }
@@ -294,13 +360,22 @@ void Compiler.leave_alias_body(Compiler c, Map mark) {
 
 /* An included file's public alias arrives as its frozen expression, which
    is thawed when the name is first used. It conflicts with an alias the
-   including file already has at file scope. The full parse, which alone
-   holds `included_effects`, records that at the include line and
-   continues installing the include's definitions. */
+   including file already has at file scope, and with a file-scope name the
+   full parse has already bound there. The full parse, which alone holds
+   `included_effects`, records that at the include line and continues
+   installing the include's definitions. */
 module void _install_imported_alias(Compiler c, String name, List frozen) {
-  if (c.included_effects != NULL && _same_scope(c, _entry(c, name, NULL)))
+  if (c.included_effects != NULL &&
+      (_same_scope(c, _entry(c, name, NULL)) ||
+       c.sym.current_binding(%($name))))
     $problem.macros_alias_included(c, c.token, name);
   _install(c, name, %(imported $frozen));
+}
+
+/* An included file's removal of its public alias. */
+module void _remove_imported_alias(Compiler c, String name) {
+  Map table = _table(c);
+  if (table && name in table) _remove(c, name);
 }
 
 /** Reports whether the current scope declares an alias named `name`,

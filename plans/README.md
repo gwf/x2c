@@ -48,7 +48,6 @@ and status; it does not implement the remaining features.
 | Owning plan | Remaining scope | Next action |
 | --- | --- | --- |
 | [Language-reference writing](review-remediation-2026-10-11.md) | Complete the selected source-form, rewrite, and Lisp explanations. | Identify exact missing coverage in the existing book, then fill it. |
-| [Ending an alias with `unalias`](unalias.md) | Approved: remove an alias the current scope declares, including an included one, and make file-scope conflicts source-ordered. | Implement after PR 286 as its own PR. |
 | [Structured lint findings](x2c-lint-and-format.md) | Approved phase 8 List output and compiler consumption. | Add the optional interface; preserve the experimental distribution and conditional editor integration. |
 | [Detached Channel ownership](detached-channel-ownership.md) | Close out evidence for the correction already present on `dev`. | Recover final benchmark, verification, and delivery/hold records; do not repeat implementation. |
 
@@ -98,6 +97,8 @@ Archived 2026-10-24 after checking source and delivery history:
 - [Temporary assignments and aliases](archive/with-and-alias.md):
   `with` assignment lists and both `alias` forms replaced `$let` and the old
   `with` alias; implemented from `ab9645f0c`.
+- [Ending an alias](archive/unalias.md): `unalias name;` and source-ordered
+  file-scope alias conflicts, implemented after PR 286.
 - [Public release workflow](archive/public-release-workflow.md): workflow
   implementation delivered, including staging evidence at `a3084897c`.
   Closure does not claim a production release or current staging health.

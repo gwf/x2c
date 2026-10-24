@@ -50,12 +50,13 @@ List syntax_extensions(void) => %(
       (summary "Name an expression for the rest of a scope or for one body.")
       (grammar unit-alias block-item statement field enumerator-list
                alias-head alias-name named-alias alias-wrapper
-               alias-statement field-alias enumerator-alias)
+               alias-statement field-alias enumerator-alias unalias)
       (lexical c-tokens)
-      (grammar-note "alias expression as name declarations at file, module, block, aggregate, and enumerator positions; braced alias bodies whose omitted name defaults to _; and file-private static alias.")
-      (lexical-note "alias and as are contextual words; an alias needs no comma among enumerators.")
+      (grammar-note "alias expression as name declarations at file, module, block, aggregate, and enumerator positions; braced alias bodies whose omitted name defaults to _; file-private static alias; and unalias name, which removes an alias the current scope declares.")
+      (lexical-note "alias, unalias, and as are contextual words; an alias or unalias needs no comma among enumerators.")
       (spellings "alias e as name;" "alias e as name { ... }"
-                 "alias e { ... _ ... }" "static alias e as name;")
+                 "alias e { ... _ ... }" "static alias e as name;"
+                 "unalias name;")
       (reference "../reference/language.md#statements"))
     (feature protocols
       (title "Protocols")

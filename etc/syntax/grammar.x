@@ -43,6 +43,7 @@ List syntax_grammar(void) => %(grammar
         (ref macro-definition)
         (ref keyword-definition)
         (ref unit-alias)
+        (ref unalias)
         (ref private-interface)
         (ref module-declaration)
         (ref lisp-escape)
@@ -409,6 +410,7 @@ List syntax_grammar(void) => %(grammar
         (ref static-assert)
         (seq (ref declaration-row) (token ";"))
         (ref named-alias)
+        (ref unalias)
         (ref local-macro-definition)
         (ref statement)
         (ref block-extension)))
@@ -495,6 +497,8 @@ List syntax_grammar(void) => %(grammar
 
     (rule alias-statement (seq (ref alias-wrapper) (ref raw-block)))
 
+    (rule unalias (seq (token "unalias") (ref identifier) (token ";")))
+
     (rule unit-alias
       (seq
         (optional (token "static"))
@@ -509,6 +513,7 @@ List syntax_grammar(void) => %(grammar
     (rule field-alias
       (choice
         (ref named-alias)
+        (ref unalias)
         (seq
           (ref alias-wrapper)
           (token "{")
@@ -518,6 +523,7 @@ List syntax_grammar(void) => %(grammar
     (rule enumerator-alias
       (choice
         (ref named-alias)
+        (ref unalias)
         (seq
           (ref alias-wrapper)
           (token "{")

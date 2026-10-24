@@ -35,6 +35,20 @@ List Sym.define_alias(Sym s, String name, List expression) {
   return binding;
 }
 
+/** Removes the alias row `name` of the active scope, with its binding and
+    its `(alias binding)` fact. */
+void Sym.undefine_alias(Sym s, String name) {
+  SymScope *scope = _scope_at(s, -1);
+  List key = %($name);
+  Var binding;
+  if (scope.bindings.try_get(key, binding))
+    s.drop(s.binding_facts, %(alias $binding));
+  s.drop(scope.symbols, key);
+  s.drop(scope.bindings, key);
+  scope.aliases--;
+  s.aliases--;
+}
+
 /* A module file's static type keeps its short name as its tag, which no
    other type of the unit may take. */
 static void _seed_var_tag(Sym s, List key, List type) {

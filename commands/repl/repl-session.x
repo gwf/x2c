@@ -352,7 +352,8 @@ ReplCompletion ReplSession.complete(
       c, <submit>,
       %("void" "char" "short" "int" "long" "float" "double"
         "signed" "unsigned" "if" "while" "for" "do" "return"
-        "try" "raise" "defer" "match" "switch" "with" "alias"));
+        "try" "raise" "defer" "match" "switch" "with" "alias"
+        "unalias"));
     int declaration = c.test_declaration();
     int end = marked.len();
     if (!declaration) {

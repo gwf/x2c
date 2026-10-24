@@ -1,9 +1,12 @@
 # Ending an alias with `unalias`
 
-> Status: active, approved by Gary on 2026-10-24.
-> Depends on the `with` and `alias` implementation (PR 286,
-> [archived plan](archive/with-and-alias.md)). Implementation follows as a
-> separate PR that also depends on PR 286.
+> Status: done, 2026-10-24.
+> Approved by Gary and implemented as designed, depending on PR 286
+> ([with and alias](with-and-alias.md)). The include-time conflict check
+> reports at the include line; it treats a file-scope name the full parse
+> has already bound there as declared before the include. A file's walk as
+> an included file skips the declaration check against its includer's
+> names, which its include line checks instead.
 
 ## Summary
 
