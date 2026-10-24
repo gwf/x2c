@@ -9,6 +9,14 @@
     entry of the unit's macro state: a file-scope entry follows macro
     visibility through includes, and a body's entries end at its closing
     brace.
+
+    Sym scopes cannot hold the second kind. File-scope Sym rows persist
+    from collection into the full parse and every including unit, while an
+    alias must start at its declaration and cross an include as a
+    compile-time effect, as a macro does. An aggregate or enumerator body
+    opens no Sym scope, because its members declare into the enclosing
+    one; the body level tells its aliases from those of the scope around
+    it at the same Sym depth.
 */
 
 /* aliases diagnostics. */

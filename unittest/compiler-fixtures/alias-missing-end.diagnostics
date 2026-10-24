@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/alias-missing-end.x:6:3: parse: expected ';' or '{' after an alias expression
+    return copy;
+    ^^^^^^
+

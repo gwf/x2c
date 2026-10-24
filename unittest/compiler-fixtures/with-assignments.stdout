@@ -1,0 +1,10 @@
+inside 2 6 6
+after 1 5
+repeated 80 places 1
+restored 1 places 1
+returned 9 mode 1
+loops depth 5
+body raise mode 1
+initializer raise 1 5
+governed 2
+final 1

@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/with-assignment-entry.x:5:3: macro: with requires 'destination = expression' entries
+    with (value += 1) {
+    ^^^^
+  note: parenthesize a comma expression inside an entry
+
