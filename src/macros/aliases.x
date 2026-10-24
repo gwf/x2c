@@ -1,8 +1,8 @@
 /*  aliases.x -- lexical expression aliases
 
     `alias expression as name` names a parsed expression until the name's
-    scope ends. Each use of the name in expression position stands for a
-    parenthesized copy of the expression, so an unused alias evaluates
+    scope ends. Each use of the name in expression position stands for the
+    parsed expression as one grouped operand, so an unused alias evaluates
     nothing and every use keeps the bindings the expression had at the
     declaration. Inside a function an alias is a row of its Sym scope. At
     file scope, and in an aggregate, enumerator, or wrapper body, it is an
@@ -220,8 +220,8 @@ static void _declare(Compiler c, AliasHead &head) {
   if (file_scope && c.sym.get_exact(%(${head.name})))
     $fail.parse_decl_bound(c, head.start, head.name);
   String file = head.storage ? c.file_prefix() : NULL;
-  _install(c, head.name,
-    %(declared $depth $level ${file ? file : ""} ${head.expression}));
+  if (!file) file = "";
+  _install(c, head.name, %(declared $depth $level $file ${head.expression}));
   if (file_scope && !head.storage)
     _record_compile_time_effect(
       c, %(compile-time alias ${head.name}
