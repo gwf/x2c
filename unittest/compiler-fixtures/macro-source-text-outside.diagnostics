@@ -1,4 +1,5 @@
-unittest/compiler-fixtures/macro-source-text-outside.x:3:1: macro: Code.source_text used outside macro expansion
-  $(Code.source_text '(expr (int) (literal (int) "1")))
-  ^^
+unittest/compiler-fixtures/macro-source-text-outside.x:3:16: macro: Code.source_text requires complete captured syntax
+  String value = $Code.source_text(1);
+                 ^
+  note: value: 1
 

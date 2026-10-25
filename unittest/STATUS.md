@@ -256,6 +256,22 @@ passed six repeated nested-Make probes, and help output remains byte-identical.
   both siblings. `macro-decorator-public-sibling` now records the current
   header so enforcement changes it visibly; the constructed-List fixture was
   removed because it showed the same gap.
+- Outside an expansion, a `$` call rejects a String literal passed to a `Var`
+  parameter: "explicit meta call cannot be resolved", note "an argument must
+  be a constant, captured syntax, or a meta call". A user `meta String
+  echo(Var s)` called as `$echo("hi")` at file scope fails this way, while
+  the same function with a `String` parameter succeeds. The language
+  reference counts a constant as a valid argument. Because of this, the
+  `_require_expansion("x2c.embed.text")` check in `src/meta-sdk/sources.x`
+  is never reached by `$x2c_embed_text("...")` at file scope.
+  `macro-embed-text-outside` records the current diagnostic.
+- `src/meta-sdk/context.x` rejects an invocation location without an active
+  macro expansion ("x2c invocation location used outside macro expansion").
+  The language reference defines these locations only "while a macro body
+  is expanding". A file-scope `$x2c_invocation_file()` and
+  `$x2c_invocation_line()` nevertheless answer with the call's own file and
+  line, so that rejection is not reached. `macro-invocation-location-outside`
+  records the current output.
 
 ## Outstanding Items
 

@@ -1,3 +1,3 @@
 #include "x2c.x"
 
-$(Code.source_text '(expr (int) (literal (int) "1")))
+String value = $Code.source_text(1);
