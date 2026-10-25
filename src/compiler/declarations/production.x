@@ -4,56 +4,9 @@
    their state. Collection retains the bundle a producer returns with its
    token span, and the full parse replays that bundle. */
 
-/** Queues a source Lisp form until declaration production needs its state.
-    Files without declaration producers keep ordinary full-parse evaluation.
-    A null `after` replays an included effect without an owning source span.
-*/
-void Compiler.queue_declaration_effect(
-  Compiler c, String form, Token first, Token after) {
-  List key = _declaration_source_key(c, first);
-  String context = c.import_stack.len() ? c.import_stack[-1] : c.filename;
-  c.declaration_effects = cons(
-    %($key ${after ? after.pos : -1} $form
-      ${c.freeze_declaration_syntax(first)} $context),
-    c.declaration_effects);
-}
-
 static List _declaration_source_key(Compiler c, Token token) {
   String path = Compiler.portable_path(c.canonical_path(c.filename));
   return %("source-node" (declaration $path ${token.pos}));
-}
-
-/** Runs pending effects for declaration production or CPP macro evaluation. */
-void Compiler.run_declaration_effects(Compiler c) {
-  List effects = c.declaration_effects.reverse();
-  c.declaration_effects = NULL;
-  foreach (List effect in effects) {
-    (List key, int end, String form, Var site, String context) = effect;
-    String file = _effect_file(c, key), text = c.text;
-    Array markers = c.line_markers;
-    if (c.canonical_path(file) != c.canonical_path(c.filename)) {
-      text = NULL;
-      c.read_source(file, text);
-      markers = NULL;
-    }
-    with (c.filename = file, c.text = text, c.line_markers = markers) {
-      c.import_stack.push(context);
-      defer c.import_stack.take_last();
-      Token token = c.thaw_declaration_syntax(site);
-      c.evaluate_declaration_effect(form, token);
-      if (c.collect_protocols && end >= 0)
-        c.sym.set(
-          key, %(declaration-source $end (declaration-bundle (rows))
-            ${c.semantic_binding_facts()}));
-    }
-  }
-}
-
-static String _effect_file(Compiler c, List key) {
-  match (key)
-    case %("source-node" (declaration ?path ?)):
-      return _declaration_path(path, 1);
-  return c.filename;
 }
 
 /** Expands the file-scope unit macro at the cursor for collection and

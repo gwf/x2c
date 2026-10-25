@@ -22,7 +22,7 @@ List Compiler.evaluate_meta_statement(
   Compiler c, List expression, Symbol context, Token site) {
   Var value = c.evaluate_meta_value(expression, site, 0);
   if (_code_result(c, value) && !value.is_nil())
-    return c.bind_macro_lisp_statement(value, context);
+    return c.bind_meta_statement(value, context);
   return %(stmnt ${_meta_result(c, expression, value, site)});
 }
 
@@ -44,9 +44,9 @@ static List _meta_result(
     declared = signature.cdr();
   if (declared === %(void))
     return %(expr (void) (cast (void) (expr (int) (literal (int) "0"))));
-  if (_code_result(c, value)) return c.lift_macro_lisp_expression(value, site);
+  if (_code_result(c, value)) return c.lift_meta_expression(value, site);
   List result = c.meta_value_expression(declared, value, site);
-  return result ? result : c.lift_macro_lisp_expression(value, site);
+  return result ? result : c.lift_meta_expression(value, site);
 }
 
 /* Whether a meta call's result is code. Inside an expansion every List

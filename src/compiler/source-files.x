@@ -105,3 +105,13 @@ void Compiler.merge_translation_dependencies(Compiler c, Map dependencies) {
   foreach ((String path, Var content_hash) in dependencies)
     c.deps.merge_translation_dependency(path, content_hash);
 }
+
+/** Returns the canonical path of the source `file`. A relative name that
+    is not a file resolves against the home. */
+String Compiler.source_path(Compiler c, String file) {
+  if (!file || file.startswith("<")) return file;
+  String rooted = %"${c.root_dir}/$file";
+  if (file[0] != '/' && !c.sources.exists(file) && c.sources.exists(rooted))
+    file = rooted;
+  return c.canonical_path(file);
+}

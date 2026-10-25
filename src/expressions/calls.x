@@ -110,7 +110,7 @@ static List _resolve_call_arguments(
     else if (slot)
       arguments.push(
         c.resolve_expression(
-          c.lift_macro_lisp_expression(value, origin), origin)
+          c.lift_meta_expression(value, origin), origin)
       );
     else if (value is <list>)
       arguments.push(c.resolve_expression(value, origin));

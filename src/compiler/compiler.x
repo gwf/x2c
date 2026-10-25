@@ -25,6 +25,9 @@ static keyword loop $private.loop;
 /** Names the positioned diagnostic store routed by a `Compiler`. */
 typedef struct Diagnostics *Diagnostics;
 
+/** Names a unit's compile-time callables, in `meta-native/bindings.x`. */
+typedef struct MetaBindings *MetaBindings;
+
 /** Describes the `#!` script unit a translation unit was started from: its
     canonical path, its first line as written, and whether it defines `main`
     itself. Every compiler of that unit shares one record, so collection sees
@@ -108,9 +111,10 @@ typedef struct Ancestor {
 
 /** Holds mutable state for one source translation.
 
-    The structure, its state, and its owned compile-time `Lisp` session belong
-    to the current `Scope`. `Compiler.free_lisp` permits early session cleanup;
-    otherwise Scope teardown releases it. All Lisp calls must return first.
+    The structure, its state, and its owned compile-time bindings belong to
+    the current `Scope`. `Compiler.free_bindings` permits early cleanup;
+    otherwise Scope teardown releases them. All their calls must return
+    first.
 */
 typedef struct Compiler {
   String filename, text, root_dir;
@@ -137,8 +141,7 @@ typedef struct Compiler {
   // File paths map to content hashes or 1 when text is not embedded.
   // Include-search candidates map to absence or their resolved identity.
   Map deps;
-  List aggregate_type, macro_stack, declaration_effects, Sym sym;
-  Map evaluated_effects;
+  List aggregate_type, macro_stack, Sym sym;
   /* The last binding identity issued before the outermost active expansion
      began; a later identity was introduced by that expansion. */
   int expansion_floor;
@@ -276,8 +279,7 @@ typedef struct Compiler {
   // The unit's script record, and the same record on the compiler whose own
   // file is that script; both NULL for an ordinary unit.
   ScriptUnit unit_script, script;
-  Lisp macro_lisp, int borrowed_lisp;
-  int inherited_lisp;   // the shared session evaluated this file
+  MetaBindings meta_bindings, int borrowed_bindings;
   GenNames names;
   Array origins, int origin, source_map;
   // The request view outlives the unit; semantic stores die with this unit.

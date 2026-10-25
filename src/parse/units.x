@@ -688,13 +688,10 @@ module List _bind_named_type(Compiler c, String name, Var type) {
   return _construction_error(c);
 }
 
-/* Binds a declaration bundle's rows in order. Collection first runs the
-   pending declaration effects and returns the rows as a bundle. */
+/* Binds a declaration bundle's rows in order. Collection returns the rows
+   as a bundle. */
 module List _bind_bundle(Compiler c, List rows) {
-  if (c.shallow) {
-    c.declaration_produced = 1;
-    c.run_declaration_effects();
-  }
+  if (c.shallow) c.declaration_produced = 1;
   Array projected = [];
   foreach (List row in rows) {
     List bound = c.bind_syntax(row, <unit>, c.return_type);

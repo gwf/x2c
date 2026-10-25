@@ -69,7 +69,6 @@ int Compiler.bind_linked_meta(Compiler c, List fn, Type type) {
   Var function, bound;
   if (!linked.try_get(name, function)) return 0;
   if (!_linked_copy(c, name, linked)) return 0;
-  if (!c.collect_protocols) c.run_declaration_effects();
   c.ensure_macro_lisp();
   if (!c.native_meta_accepts(function, c.func_signature(type))) return 0;
   /* Shared preload keeps private helpers in the native code alone. */

@@ -245,7 +245,7 @@ static List _macro_slot(Resolve &r, List content) {
     case %(!set ?expression (expr ? ?)):
       return r.c.resolve_expression(expression, r.origin);
   return r.c.resolve_expression(
-    r.c.lift_macro_lisp_expression(value, r.origin), r.origin);
+    r.c.lift_meta_expression(value, r.origin), r.origin);
 }
 
 // conversions and predicates

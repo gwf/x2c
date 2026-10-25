@@ -38,23 +38,15 @@ Var Compiler.evaluate_macro_slot(Compiler c, Var value) {
   return _slot_value(c, slot);
 }
 
-/* A Lisp form evaluates with the active expansion's bindings, and a meta
-   call runs. A construction requirement travels with an identifier the
-   slot built, and a splice slot around a Unit target replaces the target
-   among the items it produced. */
+/* A meta call runs with the active expansion's captures. A construction
+   requirement travels with an identifier the slot built, and a splice slot
+   around a Unit target replaces the target among the items it produced. */
 static Var _slot_value(Compiler c, List slot) {
   int splice = slot.cadr();
   Var form = slot.caddr();
-  List active = c.macro_stack.car();
-  (List definition, Var input, List bindings, Token invocation) = active;
-  (void) input;
-  String source_file = _definition_file(definition);
+  Token invocation = c.macro_stack.car().list()[3];
   Var required = slot.assoc(<construct>);
-  Var result = form is <list>
-    ? c.evaluate_meta_value(form, invocation, 1)
-    : _eval_template_form(
-      c, form, bindings, invocation, source_file, required);
-  result = _helper_result(c, result);
+  Var result = _helper_result(c, c.evaluate_meta_value(form, invocation, 1));
   Var construction = slot.assoc(<target>);
   if (required is not void && splice) {
     construction = required;
@@ -95,42 +87,11 @@ List Compiler.evaluate_macro_rows(Compiler c, Var value) {
        ? value.list().cdr() : %($value);
 }
 
-/* Scratch names for one template evaluation. The count is process-wide: a
-   shared parent session holds every name its filling bound, and a child
-   cannot rebind an inherited one, so a count per compiler would refuse the
-   second compiler that expanded the same macro. */
-static unsigned long template_serial = 0;
-
-/* Evaluates a template's Lisp form, which reads each captured binding
-   through a scratch global. */
-static Var _eval_template_form(
-  Compiler c, String form, List bindings, Token invocation,
-  String source_file, Var construction) {
-  c.run_declaration_effects();
-  c.ensure_macro_lisp();
-  unsigned long serial = template_serial++;
-  /* Provenance lookup uses captured Var identity. Structural equality must
-     not let constructed or selected syntax acquire a caller's source text. */
-  Map source_captures = _source_captures(bindings);
-  List references = _bind_references(c, serial, bindings);
-  if (references) form = _rewrite_references(form, references);
-  if (construction is not void)
-    form = _with_construction(c, serial, form, construction);
-  MetaContext *context = MetaContext.current();
-  with (context.has_bindings = !!references,
-        context.captures = source_captures,
-        context.definition_file = source_file,
-        context.expander = c) {
-    return _eval_string(c, form, invocation);
-  }
-}
-
 /** Evaluates the explicit meta call `expression` at `site` with the active
     expansion's captures visible to the SDK. A nonzero `slot` marks a
     template slot, which reports a call the project meta build leaves. */
 Var Compiler.evaluate_meta_value(
   Compiler c, List expression, Token site, int slot) {
-  if (!c.collect_protocols) c.run_declaration_effects();
   List active = c.macro_stack ? c.macro_stack.car() : NULL;
   List bindings = active ? active.caddr() : NULL;
   String source_file = active ? _definition_file(active.car()) : c.filename;
@@ -158,63 +119,6 @@ static Map _source_captures(List bindings) {
   return captures;
 }
 
-/* Binds each captured value to a scratch global and returns the
-   `(spelling global)` rows, newest first. */
-static List _bind_references(
-  Compiler c, unsigned long serial, List bindings) {
-  List references = NULL;
-  foreach (List pair in bindings) {
-    if (!pair) continue;
-    Var (binder, syntax) = pair;
-    String spelling = binder.str()[1:];
-    String temporary = %"_x2c_gensym_meta_${serial}_$spelling";
-    Var unwrapped;
-    if (!_source_capture_parts(syntax, NULL, unwrapped))
-      unwrapped = _source_unwrap(syntax);
-    c.macro_lisp.set_global(temporary, unwrapped);
-    references = cons(%($spelling $temporary), references);
-  }
-  return references;
-}
-
-/* Replaces each `$name` the references bind with its scratch global. */
-static String _rewrite_references(String form, List references) {
-  Tokenizer tokenizer = Tokenizer.new(form, <macro-lisp>);
-  tokenizer.scan();
-  Buffer rewritten = auto Buffer.new(0);
-  int copied = 0;
-  Token token = tokenizer.next();
-  while (token && token.type != <eof>) {
-    if (token.type != <$>) {
-      token = tokenizer.next();
-      continue;
-    }
-    Token name = tokenizer.next();
-    Var replacement = name && name.type == <ident>
-                    ? references.assoc(name.text) : void;
-    String temporary = replacement is <string> ? replacement : NULL;
-    if (temporary) {
-      rewritten.write_len(form + copied, token.pos - copied);
-      rewritten.write(temporary);
-      copied = name.pos + name.len;
-      name = tokenizer.next();
-    }
-    token = name;
-  }
-  rewritten.write_len(form + copied, form.len() - copied);
-  return rewritten;
-}
-
-/* `x2c.ident` in the form builds a name that carries the construction
-   requirement. */
-static String _with_construction(
-  Compiler c, unsigned long serial, String form, Var construction) {
-  String temporary = %"_x2c_gensym_meta_${serial}_construction";
-  c.macro_lisp.set_global(temporary, construction);
-  return %"(let ((x2c.ident (lambda (name)
-      (list $temporary name)))) $form)";
-}
-
 /* The decorator target is a value to find among the produced items, so a
    comparison finds it. Interpolating it into a pattern would read a
    binder-shaped symbol inside it, such as the `*=` operator, as a sequence
@@ -239,14 +143,14 @@ static Var _replace_target(Var produced, Var target, Var required) {
 }
 
 /** Evaluates a declaration recipe after its owning source is collected.
-    The callback is a Lisp name and arguments are retained canonical values.
+    The callback is a built-in target name and arguments are retained
+    canonical values.
 */
 Var Compiler.evaluate_declaration_recipe(
   Compiler c, Atom callback, List arguments) {
   Token invocation = c.token;
   match (c.macro_stack)
     case %((? ? ? ?token) *): invocation = token;
-  c.run_declaration_effects();
   return c.apply_meta_function(callback.str(), arguments, invocation);
 }
 
@@ -313,7 +217,7 @@ static List _hole_row(
    it; other values are already syntax. */
 static Var _lifted(Compiler c, Var value, Token invocation) =>
   value.is_integer() || value.is_floating() || value is <string> ||
-  value is <symbol> ? c.lift_macro_lisp_expression(value, invocation) : value;
+  value is <symbol> ? c.lift_meta_expression(value, invocation) : value;
 
 /* A helper's result with each template call the helper left for the
    compiler replaced by its invocation. */
@@ -549,4 +453,63 @@ static Var _project_hole(Landing &l, List hole, Symbol projection, Var value) {
     %(source value expression splice).index(field)];
   if (projection != <shell> || l.retain) return projected;
   return %(expr (<macro-expr>) $projected);
+}
+
+/* compile-time results */
+
+/** Converts a compile-time value into a bound expression AST.
+    Scalars, immutable values, representable Array/Map roots, compiler-issued
+    identifiers, and nonempty code `List`s are accepted; `invocation` locates
+    an unsupported result.
+*/
+List Compiler.lift_meta_expression(
+  Compiler c, Var value, Token invocation) {
+  List literal = c.meta_value_expression(NULL, value, invocation);
+  if (literal) return literal;
+  Var identifier = _sdk_identifier_result(value);
+  if (identifier is not void)
+    return c.resolve_expression(%(expr () (ident $identifier)), invocation);
+  if (value is <list> && !value.is_nil())
+    return c.bind_syntax(_helper_result(c, value), <expression>, NULL);
+  $fail.macros_meta_expr(c, invocation, value);
+}
+
+/** Binds a compile-time code `value` returned to a statement at
+    `context`. */
+List Compiler.bind_meta_statement(
+  Compiler c, List value, Symbol context) {
+  value = _helper_result(c, value);
+  return _statement_expression(c, value)
+    ? %(stmnt ${c.lift_meta_expression(value, c.token)})
+    : c.bind_syntax(value, context, c.return_type);
+}
+
+/* The root inside a carrier determines whether the statement discards an
+   expression or binds a statement. Ordinary binding consumes the carrier. */
+static int _statement_expression(Compiler c, List value) {
+  loop match (value) {
+    case %((!or "x2c.quoted" src at) ? ?root): value = root;
+    case %("x2c.at" ?root): value = root;
+    case %(code-value ? ?root ?): value = root;
+    case %(macro-invoke ?stored ? ?site):
+      return _result_kind(
+        _stored_definition(
+          c, stored, c.macro_invocation_site(site))) == <expression>;
+    case %(expr *): return 1;
+    default: return _sdk_identifier_result(value) is not void;
+  }
+}
+
+static Var _sdk_identifier_result(Var value) {
+  match (value)
+    case %("x2c.ident" (!is ?spelling type string)): return spelling;
+  return value is <list> &&
+         Ast.try_binding(value, NULL, NULL) ? value : void;
+}
+
+/* An absolute path; the definition keeps the home-portable spelling. */
+module String _definition_file(List definition) {
+  String file = definition.assoc(<file>);
+  return !file || file.startswith("<")
+    ? file : Compiler.absolute_home_path(file);
 }

@@ -78,7 +78,6 @@ void Compiler.install_native_meta_function(
   Compiler c, List declaration, Token marker) {
   Type type = declaration.type_from_ast().canonicalize();
   String name = _native_meta_name(c, declaration, marker);
-  if (!c.collect_protocols) c.run_declaration_effects();
   c.ensure_macro_lisp();
   List signature = c.func_signature(type);
   if (_bind_project_meta(c, name)) return;

@@ -52,6 +52,5 @@ module {
   "invocations/invocations.x",
   "templates.x",
   "values.x",
-  "lisp.x",
   "aliases.x",
 }

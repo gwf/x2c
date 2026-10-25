@@ -279,10 +279,10 @@ static macro Stmt $fail.macros_lisp_unclosed(Expr $c, Expr $origin) =>
     <parse>, "unterminated compile-time Lisp form",
     $origin, NULL);
 
-static macro Stmt $fail.macros_lisp_expr(
+static macro Stmt $fail.macros_meta_expr(
   Expr $c, Expr $origin, Expr $value) =>
   $c.report_error(
-    <macro>, "compile-time Lisp result cannot fill an expression slot",
+    <macro>, "compile-time result cannot fill an expression slot",
     $origin, %( "value:" ${$value.repr()} ));
 
 static macro Stmt $fail.macros_type_name(

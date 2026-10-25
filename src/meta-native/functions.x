@@ -18,7 +18,6 @@
     own storage outlive a call is rejected where the storage leaves.
 */
 void Compiler.install_meta_function(Compiler c, List fn, Token marker) {
-  if (!c.collect_protocols) c.run_declaration_effects();
   c.ensure_macro_lisp();
   c.check_meta_regions(fn);
   match (fn)

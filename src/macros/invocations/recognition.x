@@ -419,3 +419,32 @@ int Compiler.macro_targets_unit(Compiler c) {
   Symbol kind = _result_kind(definition);
   return kind == <unit> || kind == <decl-unit>;
 }
+
+/* Cached templates retain global references across symbol-table resets.
+   Bind those names in the current global scope without replaying imports. */
+module Var _rebind_imported(Compiler c, Var stored) {
+  if (stored is not <list>) return stored;
+  List definition = stored;
+  if (definition.car() != <macrodef>) return definition;
+  return _rebind_globals(c, definition);
+}
+
+/* Binds each identifier of cached syntax in the current global scope. */
+module List _rebind_globals(Compiler c, List syntax) {
+  Map replacements = {};
+  _reference_bindings(c, syntax, replacements);
+  return replacements.len() ? _replace_bindings(syntax, replacements) : syntax;
+}
+
+static void _reference_bindings(
+  Compiler c, List syntax, Map replacements) {
+  match (syntax)
+    case %(expr ? ${$source_identifier_content(%(?binding))}): {
+      String spelling = NULL;
+      if (Ast.try_binding(binding, NULL, spelling))
+        replacements[binding] = c.sym.reference_global(%($spelling));
+      return;
+    }
+  foreach (Var child in syntax)
+    if (child is <list>) _reference_bindings(c, child, replacements);
+}
