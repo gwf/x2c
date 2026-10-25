@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0x0D185262__
-#define __GUARD_0x0D185262__
+#ifndef __GUARD_0xD6DDC402__
+#define __GUARD_0xD6DDC402__
 
 #include "x2c.h"
 #include "cli/cli.h"
@@ -26,4 +26,4 @@ ProjectBuild ProjectBuild_plan(CliRequest request);
 String CliRequest_project_manifest(CliRequest c);
 
 
-#endif /* __GUARD_0x0D185262__ */
+#endif /* __GUARD_0xD6DDC402__ */

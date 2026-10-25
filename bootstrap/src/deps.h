@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0x0F07AB79__
-#define __GUARD_0x0F07AB79__
+#ifndef __GUARD_0x5638FDD9__
+#define __GUARD_0x5638FDD9__
 
 #include "x2c.h"
 #include "cli/cli.h"
@@ -18,4 +18,4 @@ int Compiler_write_depfile(Compiler compiler, CliRequest request, String input, 
 List translation_depfile_parse(String text);
 
 
-#endif /* __GUARD_0x0F07AB79__ */
+#endif /* __GUARD_0x5638FDD9__ */

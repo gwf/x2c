@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0x1E27A9AE__
-#define __GUARD_0x1E27A9AE__
+#ifndef __GUARD_0x6558FC0E__
+#define __GUARD_0x6558FC0E__
 
 #include "x2c.h"
 #include "cli/cli.h"
@@ -21,4 +21,4 @@
 int main(int argc, char * * argv);
 
 
-#endif /* __GUARD_0x1E27A9AE__ */
+#endif /* __GUARD_0x6558FC0E__ */

@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0x5DA47678__
-#define __GUARD_0x5DA47678__
+#ifndef __GUARD_0xE223B818__
+#define __GUARD_0xE223B818__
 
 #include "x2c.h"
 #include "channel.h"
@@ -88,4 +88,4 @@ Map linked_meta_targets(void);
 Map linked_meta_hashes(void);
 
 
-#endif /* __GUARD_0x5DA47678__ */
+#endif /* __GUARD_0xE223B818__ */

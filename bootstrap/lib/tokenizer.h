@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0xF0967937__
-#define __GUARD_0xF0967937__
+#ifndef __GUARD_0x1139A2D7__
+#define __GUARD_0x1139A2D7__
 
 typedef struct Tokenizer * Tokenizer;
 
@@ -84,4 +84,4 @@ Token Tokenizer_next(Tokenizer tokenizer);
 Symbol Tokenizer_status(Tokenizer t);
 
 
-#endif /* __GUARD_0xF0967937__ */
+#endif /* __GUARD_0x1139A2D7__ */

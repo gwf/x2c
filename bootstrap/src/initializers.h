@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0x02D80C4E__
-#define __GUARD_0x02D80C4E__
+#ifndef __GUARD_0x1C33F5EE__
+#define __GUARD_0x1C33F5EE__
 
 #include "x2c.h"
 #include "private-keywords.h"
@@ -27,4 +27,4 @@ List Compiler_convert_compound_literal(Compiler c, List value, Type type, Type n
 List Compiler_initializer_native_types(Compiler c, Type type);
 
 
-#endif /* __GUARD_0x02D80C4E__ */
+#endif /* __GUARD_0x1C33F5EE__ */

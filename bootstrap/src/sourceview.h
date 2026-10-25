@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0x118AEF35__
-#define __GUARD_0x118AEF35__
+#ifndef __GUARD_0x054CF995__
+#define __GUARD_0x054CF995__
 
 #include "x2c.h"
 #include "path.h"
@@ -47,4 +47,4 @@ int SourceView_exists(SourceView sources, String path);
 int SourceView_read(SourceView sources, String path, String volatile * text);
 
 
-#endif /* __GUARD_0x118AEF35__ */
+#endif /* __GUARD_0x054CF995__ */

@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0xBE70CB85__
-#define __GUARD_0xBE70CB85__
+#ifndef __GUARD_0x05A21DE5__
+#define __GUARD_0x05A21DE5__
 
 #include "common.h"
 Atom Atom_promote(Atom atom);
@@ -25,4 +25,4 @@ void Atom_initialize(void);
 Atom Atom_intern(String spelling);
 
 
-#endif /* __GUARD_0xBE70CB85__ */
+#endif /* __GUARD_0x05A21DE5__ */

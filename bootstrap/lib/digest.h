@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0xC932CCB8__
-#define __GUARD_0xC932CCB8__
+#ifndef __GUARD_0x09590718__
+#define __GUARD_0x09590718__
 
 #include "x2c.h"
 #include <errno.h>
@@ -15,4 +15,4 @@ String String_sha256(String text);
 String File_sha256(File file);
 
 
-#endif /* __GUARD_0xC932CCB8__ */
+#endif /* __GUARD_0x09590718__ */

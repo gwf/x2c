@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0x582C3E1B__
-#define __GUARD_0x582C3E1B__
+#ifndef __GUARD_0x4BEE487B__
+#define __GUARD_0x4BEE487B__
 
 #include "common.h"
 typedef struct Error * Error;
@@ -14,4 +14,4 @@ void Error_initialize(void);
 void Error_shutdown(void);
 
 
-#endif /* __GUARD_0x582C3E1B__ */
+#endif /* __GUARD_0x4BEE487B__ */

@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0x6B758801__
-#define __GUARD_0x6B758801__
+#ifndef __GUARD_0x0A6E81A1__
+#define __GUARD_0x0A6E81A1__
 
 #include <stdlib.h>
 #include <string.h>
@@ -26,4 +26,4 @@ int strcmp(const char *, const char *);
 int strncmp(const char *, const char *, size_t);
 
 
-#endif /* __GUARD_0x6B758801__ */
+#endif /* __GUARD_0x0A6E81A1__ */

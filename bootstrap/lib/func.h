@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0x68CE974F__
-#define __GUARD_0x68CE974F__
+#ifndef __GUARD_0x8971C0EF__
+#define __GUARD_0x8971C0EF__
 
 #include "common.h"
 #include "var/var.h"
@@ -97,4 +97,4 @@ Var Func_var(Func function);
 Func Var_func(Var v);
 
 
-#endif /* __GUARD_0x68CE974F__ */
+#endif /* __GUARD_0x8971C0EF__ */

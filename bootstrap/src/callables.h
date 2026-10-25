@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0x6D0C4926__
-#define __GUARD_0x6D0C4926__
+#ifndef __GUARD_0x0D7FEAC6__
+#define __GUARD_0x0D7FEAC6__
 
 #include "x2c.h"
 #include "compiler/compiler.h"
@@ -37,4 +37,4 @@ List Compiler_lower_typed_adapter_expr(Compiler c, List expression);
 List Compiler_adapt_lambda_arg(Compiler c, List argument, List expected_type);
 
 
-#endif /* __GUARD_0x6D0C4926__ */
+#endif /* __GUARD_0x0D7FEAC6__ */

@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0x6CC1E60B__
-#define __GUARD_0x6CC1E60B__
+#ifndef __GUARD_0x0BBADFAB__
+#define __GUARD_0x0BBADFAB__
 
 double acos(double);
 
@@ -234,4 +234,4 @@ long long llrintf(float);
 long long llroundf(float);
 
 
-#endif /* __GUARD_0x6CC1E60B__ */
+#endif /* __GUARD_0x0BBADFAB__ */

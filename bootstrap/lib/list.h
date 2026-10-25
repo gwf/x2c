@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0x479A1F8F__
-#define __GUARD_0x479A1F8F__
+#ifndef __GUARD_0x683D492F__
+#define __GUARD_0x683D492F__
 
 #include "error-macros.h"
 typedef struct List * List;
@@ -191,4 +191,4 @@ String List_repr(List lst);
 Buffer List_write_repr(List lst, Buffer out);
 
 
-#endif /* __GUARD_0x479A1F8F__ */
+#endif /* __GUARD_0x683D492F__ */

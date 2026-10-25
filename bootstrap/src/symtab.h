@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0xE2D097AE__
-#define __GUARD_0xE2D097AE__
+#ifndef __GUARD_0x4485F14E__
+#define __GUARD_0x4485F14E__
 
 #include "x2c.h"
 #include "compiler/compiler.h"
@@ -204,4 +204,4 @@ void SymTxn_commit_transient(SymTxn * s);
 void SymTxn_rollback(SymTxn * s);
 
 
-#endif /* __GUARD_0xE2D097AE__ */
+#endif /* __GUARD_0x4485F14E__ */

@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0xA5BC2A2E__
-#define __GUARD_0xA5BC2A2E__
+#ifndef __GUARD_0x462FCBCE__
+#define __GUARD_0x462FCBCE__
 
 #include "common.h"
 #include "macrovalue/macrovalue.h"
@@ -30,4 +30,4 @@ List _scalar_access_units(Macro access);
 NativeScalarAccess native_scalar_access(List exact_type);
 
 
-#endif /* __GUARD_0xA5BC2A2E__ */
+#endif /* __GUARD_0x462FCBCE__ */

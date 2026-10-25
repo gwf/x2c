@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0x487584EF__
-#define __GUARD_0x487584EF__
+#ifndef __GUARD_0xAA2ADE8F__
+#define __GUARD_0xAA2ADE8F__
 
 #include "common.h"
 typedef char * String;
@@ -127,4 +127,4 @@ Split String_splits(String str, String sep);
 int Split_try_next(Split split, int * cursor, String * out);
 Iter Split_iter(Split split, Iter dest);
 
-#endif /* __GUARD_0x487584EF__ */
+#endif /* __GUARD_0xAA2ADE8F__ */

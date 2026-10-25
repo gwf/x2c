@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0x4088E9A5__
-#define __GUARD_0x4088E9A5__
+#ifndef __GUARD_0xBEB3CB45__
+#define __GUARD_0xBEB3CB45__
 
 #include "x2c.h"
 typedef struct DisjointSet{
@@ -48,4 +48,4 @@ List DisjointSet_sizes(DisjointSet set);
 int DisjointSet_num_components(DisjointSet set);
 
 
-#endif /* __GUARD_0x4088E9A5__ */
+#endif /* __GUARD_0xBEB3CB45__ */

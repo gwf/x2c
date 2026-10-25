@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0xD5A3E693__
-#define __GUARD_0xD5A3E693__
+#ifndef __GUARD_0x37594033__
+#define __GUARD_0x37594033__
 
 #include "meta.h"
 List _x2c_literal_list(List values);
@@ -27,4 +27,4 @@ Map _x2c_prelude_records(void);
 Var _x2c_symbol_set(List symbols);
 
 
-#endif /* __GUARD_0xD5A3E693__ */
+#endif /* __GUARD_0x37594033__ */

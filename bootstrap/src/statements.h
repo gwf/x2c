@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0x670D7DD9__
-#define __GUARD_0x670D7DD9__
+#ifndef __GUARD_0x5ACF8839__
+#define __GUARD_0x5ACF8839__
 
 #include "x2c.h"
 #include "private-keywords.h"
@@ -32,4 +32,4 @@ List Compiler_parse_block_items(Compiler c, int anchor_items);
 List Compiler_parse_callable_body(Compiler c);
 
 
-#endif /* __GUARD_0x670D7DD9__ */
+#endif /* __GUARD_0x5ACF8839__ */

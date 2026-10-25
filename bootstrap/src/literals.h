@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0xBD8B85AE__
-#define __GUARD_0xBD8B85AE__
+#ifndef __GUARD_0x2BBB0F4E__
+#define __GUARD_0x2BBB0F4E__
 
 #include "x2c.h"
 #include "private-keywords.h"
@@ -47,4 +47,4 @@ List Compiler_parse_string_literal(Compiler c);
 List Compiler_parse_atomic_literal(Compiler c);
 
 
-#endif /* __GUARD_0xBD8B85AE__ */
+#endif /* __GUARD_0x2BBB0F4E__ */

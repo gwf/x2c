@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0xDC321DB1__
-#define __GUARD_0xDC321DB1__
+#ifndef __GUARD_0x23637011__
+#define __GUARD_0x23637011__
 
 #include "error-macros.h"
 #include "symbol.h"
@@ -77,4 +77,4 @@ int scan_utf8_length(const unsigned char * s);
 void scan_next_line_col(char * s, int n, int * l, int * c);
 
 
-#endif /* __GUARD_0xDC321DB1__ */
+#endif /* __GUARD_0x23637011__ */

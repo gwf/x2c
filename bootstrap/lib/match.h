@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0xCE191C9B__
-#define __GUARD_0xCE191C9B__
+#ifndef __GUARD_0x52985E3B__
+#define __GUARD_0x52985E3B__
 
 #include "error-macros.h"
 typedef struct MatchCaptureSite MatchCaptureSite;
@@ -454,4 +454,4 @@ int List_try_search(List input, Var pat, Var * out_match, List * out_bindings);
 List List_search_replace(List input, Var pat, Var template);
 
 
-#endif /* __GUARD_0xCE191C9B__ */
+#endif /* __GUARD_0x52985E3B__ */

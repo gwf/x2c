@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0xB1CED777__
-#define __GUARD_0xB1CED777__
+#ifndef __GUARD_0x099081D7__
+#define __GUARD_0x099081D7__
 
 #include "x2c.h"
 #include "compiler/compiler.h"
@@ -49,4 +49,4 @@ void Compiler_stop_meta_helper(void);
 void MetaHelper_restart(MetaHelper helper);
 
 
-#endif /* __GUARD_0xB1CED777__ */
+#endif /* __GUARD_0x099081D7__ */

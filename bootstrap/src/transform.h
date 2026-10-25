@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0xC4D768C8__
-#define __GUARD_0xC4D768C8__
+#ifndef __GUARD_0x654B0A68__
+#define __GUARD_0x654B0A68__
 
 #include "x2c.h"
 #ifndef X2C_TRANSFORM_SOURCE
@@ -38,4 +38,4 @@ List Compiler_call_in_order(Compiler c, List callee, List arguments);
 
 #endif
 
-#endif /* __GUARD_0xC4D768C8__ */
+#endif /* __GUARD_0x654B0A68__ */

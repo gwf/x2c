@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0xD3EB232E__
-#define __GUARD_0xD3EB232E__
+#ifndef __GUARD_0x9DB094CE__
+#define __GUARD_0x9DB094CE__
 
 #include "x2c.h"
 #include "compiler/compiler.h"
@@ -27,4 +27,4 @@ void Compiler_check_meta_regions(Compiler c, List fn);
 Map Compiler_audit_regions(Compiler c, List ast, Map seed, Map effects, Array findings);
 
 
-#endif /* __GUARD_0xD3EB232E__ */
+#endif /* __GUARD_0x9DB094CE__ */

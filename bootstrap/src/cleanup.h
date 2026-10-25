@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0xBAA100F8__
-#define __GUARD_0xBAA100F8__
+#ifndef __GUARD_0x84667298__
+#define __GUARD_0x84667298__
 
 #include "x2c.h"
 #include "compiler/compiler.h"
@@ -25,4 +25,4 @@ List Compiler_rewrite_defer_list(Compiler c, List stmts);
 List Compiler_lower_defer_region(Compiler c, List body, List finalizer);
 
 
-#endif /* __GUARD_0xBAA100F8__ */
+#endif /* __GUARD_0x84667298__ */

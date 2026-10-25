@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0x36E46C2D__
-#define __GUARD_0x36E46C2D__
+#ifndef __GUARD_0xD5DD65CD__
+#define __GUARD_0xD5DD65CD__
 
 #include "error-macros.h"
 #include "cleanup.h"
@@ -120,4 +120,4 @@ void Bytes_free(Bytes a0);
 void Bytes_truncate(Bytes a0, size_t a1);
 
 
-#endif /* __GUARD_0x36E46C2D__ */
+#endif /* __GUARD_0xD5DD65CD__ */

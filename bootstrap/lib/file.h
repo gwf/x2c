@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0xC65C88F0__
-#define __GUARD_0xC65C88F0__
+#ifndef __GUARD_0x0D8DDB50__
+#define __GUARD_0x0D8DDB50__
 
 #include <sys/stat.h>
 #include <stdio.h>
@@ -165,4 +165,4 @@ File File_popen(const char * cmd, const char * mode);
 File File_reopen(File file, const char * path, const char * mode);
 void File_initialize(void);
 
-#endif /* __GUARD_0xC65C88F0__ */
+#endif /* __GUARD_0x0D8DDB50__ */

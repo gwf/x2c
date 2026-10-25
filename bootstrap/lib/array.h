@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0x8B0AA4C3__
-#define __GUARD_0x8B0AA4C3__
+#ifndef __GUARD_0x0F89E663__
+#define __GUARD_0x0F89E663__
 
 #include "error-macros.h"
 #include "private-keywords.h"
@@ -136,4 +136,4 @@ void Array_free(Array a0);
 void Array_truncate(Array a0, size_t a1);
 
 
-#endif /* __GUARD_0x8B0AA4C3__ */
+#endif /* __GUARD_0x0F89E663__ */

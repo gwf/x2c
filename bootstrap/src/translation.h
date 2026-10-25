@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0x89EE71F0__
-#define __GUARD_0x89EE71F0__
+#ifndef __GUARD_0x0E6DB390__
+#define __GUARD_0x0E6DB390__
 
 #include "x2c.h"
 #include "private-keywords.h"
@@ -32,4 +32,4 @@
 int translate_request(CliRequest request, Map unit_dirs, void * context, void(* progress)(void * context, String input, int completed));
 
 
-#endif /* __GUARD_0x89EE71F0__ */
+#endif /* __GUARD_0x0E6DB390__ */

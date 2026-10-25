@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0x12E19616__
-#define __GUARD_0x12E19616__
+#ifndef __GUARD_0x9760D7B6__
+#define __GUARD_0x9760D7B6__
 
 #include "x2c.h"
 #include "private-keywords.h"
@@ -127,4 +127,4 @@ List Compiler_bind_match_arm(Compiler c, List pattern, Var body, Token start, in
 List Compiler_bind_callable_body(Compiler c, List syntax, Type return_type);
 
 
-#endif /* __GUARD_0x12E19616__ */
+#endif /* __GUARD_0x9760D7B6__ */

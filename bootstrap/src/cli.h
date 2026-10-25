@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0x6D011170__
-#define __GUARD_0x6D011170__
+#ifndef __GUARD_0x31A22310__
+#define __GUARD_0x31A22310__
 
 #include "x2c.h"
 #include "sourceview.h"
@@ -78,4 +78,4 @@ List CliRequest_package_roots(CliRequest request);
 void CliRequest_require_input(String input);
 
 
-#endif /* __GUARD_0x6D011170__ */
+#endif /* __GUARD_0x31A22310__ */

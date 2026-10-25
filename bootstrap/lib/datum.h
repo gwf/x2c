@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0x8E3A3F8F__
-#define __GUARD_0x8E3A3F8F__
+#ifndef __GUARD_0x2D33392F__
+#define __GUARD_0x2D33392F__
 
 #include "x2c.h"
 #include "datum-reader.h"
@@ -23,4 +23,4 @@ int datum_unframe(String input, size_t * used, Var * value);
 List datum_result_problem(Var value, Map marks);
 
 
-#endif /* __GUARD_0x8E3A3F8F__ */
+#endif /* __GUARD_0x2D33392F__ */

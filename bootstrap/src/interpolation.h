@@ -2,12 +2,12 @@
 
 #pragma once
 
-#ifndef __GUARD_0x060A9E60__
-#define __GUARD_0x060A9E60__
+#ifndef __GUARD_0x82BB00C0__
+#define __GUARD_0x82BB00C0__
 
 #include "x2c.h"
 #include "rewrite.h"
 Code interpolation_lowering(Code code);
 
 
-#endif /* __GUARD_0x060A9E60__ */
+#endif /* __GUARD_0x82BB00C0__ */

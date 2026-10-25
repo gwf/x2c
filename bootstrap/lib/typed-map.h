@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0xE8B0EF19__
-#define __GUARD_0xE8B0EF19__
+#ifndef __GUARD_0x095418B9__
+#define __GUARD_0x095418B9__
 
 #include "x2c.h"
 #include "error-macros.h"
@@ -353,4 +353,4 @@ Iter MapStringInt_enumerate(MapStringInt _x2c_gensym_macro_map_215, Iter _x2c_ge
 void MapStringInt_cleanup(MapStringInt _x2c_gensym_macro_map_211);
 
 
-#endif /* __GUARD_0xE8B0EF19__ */
+#endif /* __GUARD_0x095418B9__ */

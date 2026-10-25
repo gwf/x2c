@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0x45B76184__
-#define __GUARD_0x45B76184__
+#ifndef __GUARD_0x85DD9BE4__
+#define __GUARD_0x85DD9BE4__
 
 #include "common.h"
 typedef struct Logger * Logger;
@@ -114,4 +114,4 @@ void Logger_initialize(void);
 void Logger_shutdown(void);
 
 
-#endif /* __GUARD_0x45B76184__ */
+#endif /* __GUARD_0x85DD9BE4__ */

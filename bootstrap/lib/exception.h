@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0xA748346F__
-#define __GUARD_0xA748346F__
+#ifndef __GUARD_0xC7EB5E0F__
+#define __GUARD_0xC7EB5E0F__
 
 #include <setjmp.h>
 #include <stdio.h>
@@ -55,4 +55,4 @@ void x2c_exception_mark_handled(ExceptionFrame * frame);
 void x2c_exception_leave(ExceptionFrame * frame);
 
 
-#endif /* __GUARD_0xA748346F__ */
+#endif /* __GUARD_0xC7EB5E0F__ */

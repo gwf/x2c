@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0xDF23AB2E__
-#define __GUARD_0xDF23AB2E__
+#ifndef __GUARD_0x2654FD8E__
+#define __GUARD_0x2654FD8E__
 
 #include "meta.h"
 #include "array/array.h"
@@ -123,4 +123,4 @@ Var Type_numeric_literal_value(Type type, String text);
 int Type_integer_literal_magnitude(Type type, String text, unsigned long long * value);
 
 
-#endif /* __GUARD_0xDF23AB2E__ */
+#endif /* __GUARD_0x2654FD8E__ */

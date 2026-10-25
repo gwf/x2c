@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0x1A2A7247__
-#define __GUARD_0x1A2A7247__
+#ifndef __GUARD_0xE9AB94A7__
+#define __GUARD_0xE9AB94A7__
 
 #include "x2c.h"
 #include "cli/cli.h"
@@ -57,4 +57,4 @@ void Frontend_load_support(CliRequest request);
 Frontend Frontend_new(CliRequest request);
 
 
-#endif /* __GUARD_0x1A2A7247__ */
+#endif /* __GUARD_0xE9AB94A7__ */

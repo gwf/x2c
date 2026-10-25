@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0xE20BB82E__
-#define __GUARD_0xE20BB82E__
+#ifndef __GUARD_0x503B41CE__
+#define __GUARD_0x503B41CE__
 
 #include "x2c.h"
 #include "compiler/compiler.h"
@@ -63,4 +63,4 @@ int Compiler_native_protocol_alias(Compiler c, String name);
 void Compiler_record_source_typedef(Compiler c, String name, List declaration, int private);
 
 
-#endif /* __GUARD_0xE20BB82E__ */
+#endif /* __GUARD_0x503B41CE__ */

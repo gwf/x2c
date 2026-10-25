@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0x83555A03__
-#define __GUARD_0x83555A03__
+#ifndef __GUARD_0x77176463__
+#define __GUARD_0x77176463__
 
 #include "var/var.h"
 #include "meta.h"
@@ -19,4 +19,4 @@ extern const X2CVarNumericInfo x2c_var_numerics[];
 extern const VarDecodeGroup x2c_var_decode_groups[];
 
 
-#endif /* __GUARD_0x83555A03__ */
+#endif /* __GUARD_0x77176463__ */

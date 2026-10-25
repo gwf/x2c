@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0x2CF70D65__
-#define __GUARD_0x2CF70D65__
+#ifndef __GUARD_0xFC782FC5__
+#define __GUARD_0xFC782FC5__
 
 #include "x2c.h"
 #include "meta.h"
@@ -13,4 +13,4 @@
 Map Compiler_builtin_targets(void);
 
 
-#endif /* __GUARD_0x2CF70D65__ */
+#endif /* __GUARD_0xFC782FC5__ */

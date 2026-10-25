@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0x1117B12A__
-#define __GUARD_0x1117B12A__
+#ifndef __GUARD_0x31BADACA__
+#define __GUARD_0x31BADACA__
 
 #include "common.h"
 #include "protocols.h"
@@ -28,4 +28,4 @@ Iter SymbolSet_iter(SymbolSet x, Iter dest);
 Block SymbolSet_encode(Array symbols);
 
 
-#endif /* __GUARD_0x1117B12A__ */
+#endif /* __GUARD_0x31BADACA__ */

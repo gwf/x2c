@@ -2,12 +2,12 @@
 
 #pragma once
 
-#ifndef __GUARD_0x6DA658ED__
-#define __GUARD_0x6DA658ED__
+#ifndef __GUARD_0x9FAE5A8D__
+#define __GUARD_0x9FAE5A8D__
 
 #include "x2c.h"
 #include "rewrite.h"
 #include "grammar.h"
 #include "ast-rewrite.h"
 
-#endif /* __GUARD_0x6DA658ED__ */
+#endif /* __GUARD_0x9FAE5A8D__ */

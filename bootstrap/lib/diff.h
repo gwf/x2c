@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0xC2F02139__
-#define __GUARD_0xC2F02139__
+#ifndef __GUARD_0x0A217399__
+#define __GUARD_0x0A217399__
 
 #include "x2c.h"
 typedef Symbol Diff;
@@ -13,4 +13,4 @@ List Diff_lines(String old, String new);
 String Diff_unified(String old, String new, String old_name, String new_name);
 
 
-#endif /* __GUARD_0xC2F02139__ */
+#endif /* __GUARD_0x0A217399__ */

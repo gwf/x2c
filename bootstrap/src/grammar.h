@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0xF07C83E6__
-#define __GUARD_0xF07C83E6__
+#ifndef __GUARD_0xB51D9586__
+#define __GUARD_0xB51D9586__
 
 #include "x2c.h"
 #include "common.h"
@@ -59,4 +59,4 @@ List source_catch_handle(List node);
 List source_retain_catch_handle(List rebuilt, List handle);
 
 
-#endif /* __GUARD_0xF07C83E6__ */
+#endif /* __GUARD_0xB51D9586__ */

@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0x37D8FF8C__
-#define __GUARD_0x37D8FF8C__
+#ifndef __GUARD_0x77FF39EC__
+#define __GUARD_0x77FF39EC__
 
 #include "common.h"
 #define SYMBOL_MAX_5BIT 10
@@ -39,4 +39,4 @@ char Symbol_last(Symbol symbol);
 Symbol Symbol_parse(char * text);
 
 
-#endif /* __GUARD_0x37D8FF8C__ */
+#endif /* __GUARD_0x77FF39EC__ */

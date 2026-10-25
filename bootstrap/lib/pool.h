@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0xCBF06E4F__
-#define __GUARD_0xCBF06E4F__
+#ifndef __GUARD_0xEC9397EF__
+#define __GUARD_0xEC9397EF__
 
 #include "error-macros.h"
 #include "private-keywords.h"
@@ -101,4 +101,4 @@ int Pool_is_permanent(Var value);
 unsigned long Pool_epoch(void);
 
 
-#endif /* __GUARD_0xCBF06E4F__ */
+#endif /* __GUARD_0xEC9397EF__ */

@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0xDC21180E__
-#define __GUARD_0xDC21180E__
+#ifndef __GUARD_0x4A50A1AE__
+#define __GUARD_0x4A50A1AE__
 
 #include "x2c.h"
 #include "private-keywords.h"
@@ -367,4 +367,4 @@ void Compiler_merge_translation_dependencies(Compiler c, Map dependencies);
 String Compiler_source_path(Compiler c, String file);
 
 
-#endif /* __GUARD_0xDC21180E__ */
+#endif /* __GUARD_0x4A50A1AE__ */

@@ -2,9 +2,9 @@
 
 #pragma once
 
-#ifndef __GUARD_0x0B34B5FB__
-#define __GUARD_0x0B34B5FB__
+#ifndef __GUARD_0x2BD7DF9B__
+#define __GUARD_0x2BD7DF9B__
 
 #include "common.h"
 
-#endif /* __GUARD_0x0B34B5FB__ */
+#endif /* __GUARD_0x2BD7DF9B__ */

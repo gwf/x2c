@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0xD219AB39__
-#define __GUARD_0xD219AB39__
+#ifndef __GUARD_0x194AFD99__
+#define __GUARD_0x194AFD99__
 
 #include "array/array.h"
 #include "atom.h"
@@ -140,4 +140,4 @@ String type_name_error(List type);
 List type_declaration_parts(List type);
 
 
-#endif /* __GUARD_0xD219AB39__ */
+#endif /* __GUARD_0x194AFD99__ */
