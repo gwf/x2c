@@ -15,6 +15,7 @@
 
 #include "ast-rewrite.x"
 #include "buffer.x"
+#include "compiler-meta.x"
 #include "datum.x"
 #include "utils.x"
 

@@ -127,10 +127,10 @@ static macro Expression $source.build.include(Expr $includes, Expr $source) =>
   %"${$includes}#include \"x2c-root${$source}\"\n";
 
 static macro Expression $source.build.entry(
-  Expr $includes, Expr $root, Expr $declared, Expr $exports) =>
-  %"${$includes}\$(import \"${$root}/etc/lisp-bindings.xlisp\")
-macro Expression \$module.targets() =>
-  \$(lisp.native.targets (_x2c.native-meta.declared '${$declared}));
+  Expr $includes, Expr $declared, Expr $exports) =>
+  %"#include \"compiler-meta.x\"
+${$includes}macro Expression \$module.targets() =>
+  \$_x2c_target_map(\$_x2c_declared_rows(%${$declared}));
 ${$exports}";
 
 // artifact paths
@@ -531,13 +531,13 @@ static void _write_entry(Path entry, List units, String exports) {
     includes = $source.build.include(includes, source);
     sources.push(source);
   }
-  String declared = sources.list_free().repr(), root = x2c_get_root();
+  String declared = sources.list_free().repr();
   Path link = entry.dirname().join("x2c-root");
   try {
     entry.dirname().make_dirs();
     if (!Path.exists(link)) link.symlink_to("/");
     entry.write_text(
-      $source.build.entry(includes, root, declared, exports));
+      $source.build.entry(includes, declared, exports));
   }
   catch %(io-fail *detail): Diagnostics.host_error(detail);
 }

@@ -12,6 +12,7 @@
 
 #pragma once
 #include "compiler/compiler.x"
+#include "compiler-meta.x"
 
 #include "compiler-meta.x"
 #include "grammar.x"

@@ -25,9 +25,8 @@ module Scope native_module_scope = NULL;
 /* The compiler supplies the operations `lib/meta.x` declares with a bodyless
    `meta` prototype, the `x2c_` targets, as the native module
    `compiler_supplier`, which every request selects first. */
-static macro Expression $compiler.targets() => $(lisp.native.targets
-  (filter lisp.compiler.target?
-    (_x2c.native-meta.targets)));
+static macro Expression $compiler.targets() =>
+  $_x2c_target_map($_x2c_native_rows(<compiler>, %(), %()));
 
 static String compiler_supplier = "<compiler>";
 

@@ -65,6 +65,7 @@ $cleanup.by(Lisp, destroy);
 
 #include "meta.x"
 #include "datum-reader.x"
+#include "lisp-bindings.x"
 
 /* Lisp form error conditions. Runtime operands retain their original
    detail types, order and source helper ownership. */
@@ -297,8 +298,6 @@ module struct Lisp {
    restore their caller. */
 module Lisp threaded lisp_active;
 #include "var-adapters.x"
-
-static $(import "../../etc/lisp-bindings.xlisp")
 
 module {
   "evaluate.x",

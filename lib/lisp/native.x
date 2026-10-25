@@ -169,15 +169,11 @@ static Var _predicate_iter_find(Iter iter, Var callable) =>
    the evaluator binds, which the implicit prelude must not carry, so this
    C-only declaration reaches its table without entering the x2c interface. */
 
-static macro Unit $lisp.native.declarations() {
-  @(quote ((preproc "extern Map lisp_native_targets(void);")))
-}
-
 $lisp.native.declarations();
 
 $x2c.foreign.alias(lisp_native_targets)
 static Map _library_targets(void);
-static macro Expression $lisp.callback.target.map() => $(lisp.native.targets `(
+static macro Expression $lisp.callback.target.map() => $_x2c_target_map(%(
   (_list_map (as List_map))
   (_list_filter (as List_filter))
   (_list_any (as List_any))

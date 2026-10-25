@@ -14,6 +14,7 @@
 #pragma once
 
 #include "x2c.x"
+#include "compiler-meta.x"
 #include "channel.x"
 #include "common.x"
 #include "lisp-bindings.x"
@@ -2416,7 +2417,7 @@ Map linked_meta_targets(void) {
   return rows;
 }
 
-macro Expression $linked.hashes() => $(_x2c.meta.linked.hashes);
+macro Expression $linked.hashes() => $_x2c_meta_linked_hashes();
 
 /** Returns linked definition hashes and provider source dependencies. */
 Map linked_meta_hashes(void) {

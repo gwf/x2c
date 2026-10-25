@@ -10,6 +10,7 @@
 #pragma once
 #include "x2c.x"
 #include "meta.x"
+#include "compiler-meta.x"
 #include "grammar.x"
 #include "lisp/lisp.x"
 #include "macros/macros.x"
@@ -62,7 +63,7 @@ static List _with_assignment(List assignment, List body) {
 
 /* Preserve the acquired value after its declaration's checks. */
 static macro Stmt $auto_release(Decl $local, Expr $binding) using $acquired {
-  @(auto.release $local $binding $acquired)
+  @_x2c_auto_release($local, $binding, $acquired)
 }
 
 /* `$auto(value)` returns `value` and places the release after the

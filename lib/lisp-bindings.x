@@ -11,7 +11,30 @@
 
 #pragma once
 
-#include "x2c.x"
+#include "meta.x"
+#include "compiler-meta.x"
+
+/** Binds `function` into the session `lisp` as `name` through a fresh
+    `Func` carrying the function's signature. */
+macro Stmt $lisp.bind(Expr $lisp, Expr $name, Expr $function) {
+  Func callable = Func.new(
+    $function, $_x2c_literal_list($Code.native_signature($function)));
+  Lisp.bind($lisp, $name, callable);
+}
+
+/** Records the decorated function as `name` in the binding group `group`,
+    which `$lisp.install` binds into a session. */
+macro Decorator $lisp.binding(
+  Function $function, Name $group, Literal $name
+) {
+  @_x2c_binding_record($group, $name, $function)
+  @Code.body($function)
+}
+
+/** Binds every function recorded in `group` into the session `lisp`. */
+macro Stmt $lisp.install(Expr $lisp, Name $group) {
+  @_x2c_binding_install($lisp, $group)
+}
 
 /* The C-only declaration of the runtime target table, which reaches the
    Lisp unit without entering any x2c interface. */
