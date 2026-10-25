@@ -211,6 +211,9 @@ int translate_request(
   if (request.dry_run) return 0;
   t.frontend = Frontend.new(request);
   t.frontend.preprocessor_errors = _preprocessor_errors;
+  /* Each worker inherits what this process has already built, so the
+     parent collects the preludes once for all of them. */
+  if (!t.frontend.load_prelude()) return 1;
   t.frontend.prepare_meta(request.inputs);
   /* A dump writes one ordered stream to stdout, and inspection modes report
      per unit, so those stay in this process. The rest may run in parallel. */

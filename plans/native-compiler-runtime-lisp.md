@@ -1,10 +1,9 @@
 # Native compiler with runtime Lisp
 
-> Status: active
-> Approved design, 2026-10-25. Compiler implementation has not started.
-> This session publishes the plan only to `dev`.
-> Another executor implements it in a separate isolated local branch and worktree.
-> Implementation publication requires Gary's separate direction.
+> Status: implemented, awaiting publication
+> Approved design, 2026-10-25. Implemented and validated locally on
+> 2026-10-25 in `codex/native-compiler-runtime-lisp`; `agent-pr-check`
+> passed. Publication to `dev` requires Gary's separate direction.
 
 ## Result and compatibility
 

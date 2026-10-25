@@ -842,6 +842,31 @@ static void _share_session(Compiler cpp, Compiler c){
   Compiler_share_meta_group(cpp, c);
 }
 
+int Frontend_load_prelude(Frontend frontend){
+  if(! _init_guard_) _file_init_();
+  struct CliRequest request = * frontend -> request;
+  request.dump = 0;
+  request.no_cpp = request.live_symbols = request.cpp_symbols = 0;
+  struct Frontend session = * frontend;
+  session.request = & request;
+  ParsedUnit unit;
+  int loaded = _start(& session, NULL, &(unit), Context_open_named("prelude"), _16) && ParsedUnit_collect(&(unit), & session);
+  if(! loaded){
+    List entry;
+    List _x2c_gensym_macro_object_5 = Compiler_diagnostics(unit.compiler);
+    List _x2c_gensym_macro_cursor_5 = _x2c_gensym_macro_object_5;
+    Var _x2c_gensym_macro_cursor_output_6;
+    while(List_try_next(_x2c_gensym_macro_object_5, &(_x2c_gensym_macro_cursor_5), &(_x2c_gensym_macro_cursor_output_6))){
+      entry = Var_list_payload(_x2c_gensym_macro_cursor_output_6);
+      Compiler_print_diagnostic(unit.compiler, entry);
+    }
+
+  }
+  ParsedUnit_close(&(unit));
+  Compiler_forget_provisional_entries();
+  return loaded;
+}
+
 void Compiler_select_native_modules(List);
 
 void Frontend_load_support(CliRequest request){

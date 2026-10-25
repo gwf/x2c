@@ -64,7 +64,7 @@ passing tests support that result rather than replace it.
   operations for binding, typing, scope, lifecycle, placement, diagnostics,
   and emission order. For compiler syntax work, read
   `agents/replacing-manual-ast-walks-with-match.md`.
-- Compile-time Lisp may construct any canonical AST List. Ordinary operations
+- Compile-time code may construct any canonical AST List. Ordinary operations
   accept forms by structure and position, without authenticating their origin.
   Preserve this deliberate behavior described under "Macro-visible syntax"
   in `docs/src/reference/language.md`; do not add origin tracking or a second
@@ -186,7 +186,7 @@ commits need not rebuild from their own bootstrap.
   Code).
 - `docs/` - the user-facing book (mdBook); `make doc-build` renders it.
 - `unittest/`, `examples/`, `plans/`; `etc/` holds build tooling, the
-  external Lisp bootstrap, and the compile-time Lisp SDK.
+  external Lisp bootstrap, and the compiler syntax prelude.
 - `packages/` - optional adapters for third-party C libraries; they need
   network-fetched sources and are outside `make check`.
 - `site/` - the public website; `make site-build` renders it with the book

@@ -470,6 +470,31 @@ static void _share_session(Compiler cpp, Compiler c) {
   cpp.share_meta_group(c);
 }
 
+// prelude
+
+/** Collects the preludes once, in a Context that shares the caller's pool,
+    before any unit opens. Units, and the workers a translation forks, then
+    replay them from the process cache. The collection runs as an empty
+    unit, whatever dump or symbol mode the request selects. Returns zero
+    after reporting a failure. */
+int Frontend.load_prelude(Frontend frontend) {
+  struct CliRequest request = *frontend.request;
+  request.dump = 0;
+  request.no_cpp = request.live_symbols = request.cpp_symbols = 0;
+  struct Frontend session = *frontend;
+  session.request = &request;
+  ParsedUnit unit;
+  int loaded = _start(
+    &session, NULL, unit, Context.open_named("prelude"), "") &&
+    unit.collect(&session);
+  if (!loaded)
+    foreach (List entry in unit.compiler.diagnostics())
+      unit.compiler.print_diagnostic(entry);
+  unit.close();
+  Compiler.forget_provisional_entries();
+  return loaded;
+}
+
 // lifecycle
 
 /** Loads process-owned collection support and the native modules `request`
