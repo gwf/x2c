@@ -6,6 +6,7 @@
 #define __GUARD_0xA909022F__
 
 #include "x2c.h"
+#include "compiler-meta.h"
 #include "diff.h"
 #include "digest.h"
 #include "json.h"

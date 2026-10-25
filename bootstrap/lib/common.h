@@ -6,18 +6,12 @@
 #define __GUARD_0xA962EB1F__
 
 #include "error-macros.h"
+#include "common-types.h"
 #include <float.h>
 #include <limits.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <string.h>
-typedef union Var{
-  unsigned long u64;
-  double f64;
-  void * p64;
-}
-Var;
-
 typedef void * Bytes;
 
 typedef struct Block * Block;
@@ -32,8 +26,6 @@ typedef Var Atom;
 
 typedef Block Array;
 
-typedef struct List * List;
-
 typedef struct Scope * Scope;
 
 typedef struct Map * Map;
@@ -41,8 +33,6 @@ typedef struct Map * Map;
 typedef struct Pool * Pool;
 
 typedef struct Context * Context;
-
-typedef struct Mutex * Mutex;
 
 typedef struct Thread * Thread;
 

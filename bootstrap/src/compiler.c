@@ -1471,9 +1471,11 @@ static void f18_parsing_collection____shallow_parse_loop(Compiler c){
   c -> shallow = 0;
 }
 
+void Compiler_install_syntax_prelude(Compiler);
+
 void Compiler_start_collection(Compiler c){
   if(! _init_guard_) _file_init_();
-  Compiler_install_builtin_macros(c);
+  Compiler_install_syntax_prelude(c);
   Compiler_rebuild_protocols(c, NULL);
   c -> import_protocols = 1;
   c -> conforms = Map_new();
@@ -1773,7 +1775,7 @@ static void f13_parsing_parse____reset_macros(Compiler c){
   c -> rewrite_rules = NULL;
   c -> active_rewrites = NULL;
   c -> prepared_rewrites = NULL;
-  Compiler_install_builtin_macros(c);
+  Compiler_install_syntax_prelude(c);
   if(! c -> declaration_produced) c -> imports = Map_new();
   Array_clear(c -> import_stack);
   c -> macro_count = 0;

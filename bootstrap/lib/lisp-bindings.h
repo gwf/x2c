@@ -5,6 +5,7 @@
 #ifndef __GUARD_0xE26B4F01__
 #define __GUARD_0xE26B4F01__
 
-#include "x2c.h"
+#include "meta.h"
+#include "compiler-meta.h"
 
 #endif /* __GUARD_0xE26B4F01__ */

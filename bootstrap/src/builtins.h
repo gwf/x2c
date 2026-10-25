@@ -7,6 +7,7 @@
 
 #include "x2c.h"
 #include "meta.h"
+#include "compiler-meta.h"
 #include "grammar.h"
 #include "lisp/lisp.h"
 #include "macros/macros.h"

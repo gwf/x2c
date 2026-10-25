@@ -5,6 +5,8 @@
 #ifndef __GUARD_0xF0967937__
 #define __GUARD_0xF0967937__
 
+typedef struct Tokenizer * Tokenizer;
+
 #include "x2c.h"
 typedef struct Token{
   String text;

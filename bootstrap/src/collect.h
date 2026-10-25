@@ -9,6 +9,7 @@
 #include "compiler/compiler.h"
 #include "ast-rewrite.h"
 #include "buffer.h"
+#include "compiler-meta.h"
 #include "datum.h"
 #include "utils.h"
 #include <ctype.h>
@@ -29,6 +30,8 @@ Map Compiler_collect_symbols(Compiler c, Map globs);
 List Compiler_prelude_sources(void);
 
 int Compiler_is_prelude_source(String path);
+
+void Compiler_install_syntax_prelude(Compiler c);
 
 void Compiler_configure_package(Compiler c, List roots, String filename);
 
