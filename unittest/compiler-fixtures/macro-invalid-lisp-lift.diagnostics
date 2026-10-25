@@ -1,5 +1,5 @@
-unittest/compiler-fixtures/macro-invalid-lisp-lift.x:3:13: macro: compile-time Lisp result cannot fill an expression slot
+unittest/compiler-fixtures/macro-invalid-lisp-lift.x:3:13: parse: compile-time Lisp forms are not supported
   int value = $(quote unsupported);
               ^^
-  note: value: unsupported
+  note: write the compile-time code as an x2c meta function
 

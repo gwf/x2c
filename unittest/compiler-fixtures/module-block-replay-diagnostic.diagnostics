@@ -1,5 +1,5 @@
-unittest/compiler-fixtures/module-block-replay-diagnostic/library/forms.x:4:3: macro: compile-time Lisp evaluation failed
+unittest/compiler-fixtures/module-block-replay-diagnostic/library/forms.x:4:3: parse: compile-time Lisp forms are not supported
     $((undefined-function 1))
     ^^
-  note: form: ((undefined-function 1)) error: (unbound (name undefined-function))
+  note: write the compile-time code as an x2c meta function
 
