@@ -191,7 +191,7 @@ static HelpPage help_pages[] = {
     $dedent(%"
       The home is X2C_HOME when set; otherwise the nearest directory above
       the executable, then above the current directory, holding include/
-      and etc/compiler-sdk.xlisp. Package roots join with ':'.") },
+      and etc/compiler-prelude.x. Package roots join with ':'.") },
   { <install>,
     $dedent(%"
       Usage:

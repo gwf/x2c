@@ -3,10 +3,10 @@
     Copyright (c) 2026 Gary William Flake.
 
     The built-in macros expand through these functions, which run as native
-    code inside the compiler. `Compiler.builtin_targets` binds each into
-    the shared session under the name its callers use: the prototypes
-    `etc/compiler-prelude.x` declares, and those `etc/lisp-bindings.x`
-    calls.
+    code inside the compiler. `Compiler.builtin_targets` names each as its
+    callers do: the prototypes `etc/compiler-prelude.x` and
+    `lib/compiler-meta.x` declare, and the recipes and quotation slots the
+    compiler writes.
 */
 #pragma once
 #include "x2c.x"
@@ -861,8 +861,8 @@ static List _default(
 
    `$lisp.binding` records `(group name function type)` rows on the
    expanding compiler while a unit parses, and `$lisp.install` seals a
-   group and writes its rows as `Lisp_bind` statements. Each function here
-   is `_x2c.binding_*` in the compile-time Lisp. */
+   group and writes its rows as `Lisp_bind` statements, through the
+   `_x2c_binding_*` prototypes of `lib/compiler-meta.x`. */
 
 static List _binding_record(Var group, Var name, List function) {
   Compiler c = Compiler.expanding();
@@ -960,11 +960,10 @@ static List _binding_target(String bind_name, String name, String maker) {
 static List _binding_name_signature(String name) =>
   Code.native_signature(MetaContext.function_reference(name));
 
-/* the Lisp names
+/* the built-in names
 
-   Each algorithm is bound into the compile-time Lisp session under the
-   name its callers use, as are the slot functions that quotations in
-   `src/cleanup/cleanup.x` call. */
+   Each algorithm is reachable by the name its callers use, as are the slot
+   functions that compiler quotations call. */
 
 static macro Stmt $builtin.row(Expr $rows, Expr $name, Expr $function) {
   $rows[$name] = (Func) $function;
@@ -981,21 +980,11 @@ Map Compiler.builtin_targets(void) {
   $builtin.row(rows, "_x2c_class_expand", _class_expand);
   $builtin.row(rows, "_x2c_foreign_alias", _foreign_alias);
   $builtin.row(rows, "_x2c_callback_adapt", _callback_adapt);
-  // Interfaces the bootstrap compiler wrote call these older names.
-  $builtin.row(rows, "scope.expand", _scope_expand);
-  $builtin.row(rows, "with.expand", _with_expand);
-  $builtin.row(rows, "foreach.expand", _foreach_expand);
-  $builtin.row(rows, "auto.expand", _auto_expand);
-  $builtin.row(rows, "class.expand", _class_expand);
   $builtin.row(rows, "_x2c_func_call_arguments", _x2c_func_call_arguments);
   $builtin.row(rows, "Ast_defer_captures", Ast.defer_captures);
-  $builtin.row(rows, "auto.release", _auto_release);
   $builtin.row(rows, "class.initializer", _class_initializer);
   $builtin.row(rows, "class.write-fields", _class_write_fields);
   $builtin.row(rows, "class.defaults", _class_defaults);
-  $builtin.row(rows, "_x2c.binding_record", _binding_record);
-  $builtin.row(rows, "_x2c.binding_install", _binding_install);
-  $builtin.row(rows, "_x2c.binding_targets", _binding_targets);
   $builtin.row(rows, "_x2c_auto_release", _auto_release);
   $builtin.row(rows, "_x2c_binding_record", _binding_record);
   $builtin.row(rows, "_x2c_binding_install", _binding_install);

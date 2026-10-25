@@ -53,7 +53,7 @@ def git(*args: str) -> str:
 # flags from these inputs; their definitions are already in the file digest.
 # Search/SDK variables also affect native tools without appearing in argv.
 # X2C_HOME belongs here for the same reason: src/utils.x resolves the compiler
-# home from it, which selects etc/compiler-sdk.xlisp and the prelude
+# home from it, which selects etc/compiler-prelude.x and the prelude
 # interfaces, so it changes translation output.
 TOOL_ENV_VARIABLES = (
     "PATH CPATH C_INCLUDE_PATH CPLUS_INCLUDE_PATH LIBRARY_PATH COMPILER_PATH "

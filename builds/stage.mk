@@ -126,17 +126,13 @@ $(LIB_BUILD):
 # runtime.  Translation output is also a function of the compiler binary
 # and the runtime declarations it replays from the library batch, so the
 # compiler and every library source are prerequisites; a missing generated
-# .c/.h/.xi forces the batch to run.  Imported macro and compile-time Lisp
-# sources are inputs to the same translation, so they join the list;
+# .c/.h/.xi forces the batch to run.  The syntax prelude and the text the
+# runtime embeds are inputs to the same translation, so they join the list;
 # without them a macro-only edit leaves every generated file untouched.
 # Each batch writes a .xi interface beside every unit's C; the library batch
 # produces lib/x2c.xi, which later batches and stages replay as the prelude.
 X2C_TRANSLATE_DEPS = $(X2C_COMPILER) $(shell find $(LIB_SOURCE) -name '*.x') \
-	$(wildcard $(ROOT)/etc/init.xlisp $(ROOT)/etc/compiler-sdk.xlisp \
-		$(ROOT)/etc/lisp-bindings.xlisp \
-		$(ROOT)/etc/lisp-values.xlisp) \
-	$(wildcard $(LIB_SOURCE)/*.xlisp) \
-	$(wildcard $(ROOT)/etc/*.x)
+	$(wildcard $(ROOT)/etc/*.x $(ROOT)/etc/*.xlisp)
 LIB_MISSING_GENERATED = $(filter-out \
 	$(wildcard $(LIB_BUILD)/*.c $(LIB_BUILD)/*.h $(LIB_BUILD)/*.xi), \
 	$(LIB_C_FILES) $(LIB_H_FILES) $(LIB_XI_FILES))

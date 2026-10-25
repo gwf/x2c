@@ -68,7 +68,7 @@ static List default_includes = NULL, cpp_includes = NULL;
     The executable is resolved from the host, `argv0`, or `PATH`. The home is
     `X2C_HOME` when it is set and not empty; otherwise discovery walks from
     the executable and then from the current directory to a directory holding
-    `include/` and `etc/compiler-sdk.xlisp`, a source checkout or an
+    `include/` and `etc/compiler-prelude.x`, a source checkout or an
     installed prefix alike. The root is kept absolute with symbolic links
     resolved, the one spelling every path below the home is compared in.
     Without a home the root is the current directory and `Compiler.home_dir`
@@ -154,9 +154,7 @@ static String _locate_home(Path p) {
 }
 
 static int _is_home(Path p) =>
-  p.join("include").is_dir() &&
-  (p.join("etc/compiler-prelude.x").is_file() ||
-   p.join("etc/compiler-sdk.xlisp").is_file());
+  p.join("include").is_dir() && p.join("etc/compiler-prelude.x").is_file();
 
 static void _prepare_include_dirs(void) {
   if (!root_path) return;

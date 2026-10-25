@@ -713,10 +713,7 @@ printf '#include "x2c.x"\nint library_value(void) { return 9; }\n' \
 # runtime beside the invoking compiler.
 mkdir -p "$BUILD/standalone/bin" "$BUILD/standalone/libexec/x2c" \
   "$BUILD/standalone/include" "$BUILD/standalone/etc"
-cp "$ROOT/etc/compiler-sdk.xlisp" "$BUILD/standalone/etc/"
-if [ -f "$ROOT/etc/compiler-prelude.x" ]; then
-  cp "$ROOT/etc/compiler-prelude.x" "$BUILD/standalone/etc/"
-fi
+cp "$ROOT/etc/compiler-prelude.x" "$BUILD/standalone/etc/"
 cp "$X2C" "$BUILD/standalone/bin/x2c"
 cp "$(dirname "$X2C")/libexec/x2c-build" "$BUILD/standalone/libexec/x2c/"
 (
