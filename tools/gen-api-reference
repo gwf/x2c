@@ -783,9 +783,8 @@ static const char *evidence_rows[][2] = {
                   "and `macro-slot-recognition` compiler fixtures)."},
   {"map", "`make verify` (`unittest/test-map.x`) and `make examples` "
           "(`docs-word-count`)."},
-  {"meta", "`make verify` (`meta-comptime-only-call`, "
-           "`meta-builder-compiler-only`, and `meta-literal-arguments` "
-           "compiler fixtures)."},
+  {"meta", "`make verify` (`meta-comptime-only-call` and "
+           "`meta-builder-compiler-only` compiler fixtures)."},
   {"type", "`make verify` (`meta-type-values` compiler fixture)."},
   {"rewrite", "`make verify` (`rewrite-index-entry-points`, "
               "`rewrite-independent-rules`, and `rewrite-typed-operator` "
