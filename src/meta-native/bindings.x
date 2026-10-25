@@ -57,7 +57,7 @@ MetaBindings Compiler.bindings(Compiler c) {
     unit's binding, or else a built-in algorithm or one of the compiler's
     own operations. Returns whether there is one. */
 int Compiler.meta_binding(Compiler c, String name, Var &out) =>
-  c.bindings().try_get(name, out) ||
+  (c.meta_bindings && c.meta_bindings.try_get(name, out)) ||
   Compiler.builtin_module().try_get(name, out) ||
   Compiler.compiler_targets().try_get(name, out);
 

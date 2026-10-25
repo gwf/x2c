@@ -203,7 +203,7 @@ void Compiler.install_project_meta_effect(Compiler c, List row) {
     c.project_meta[name] = %($signature $provider);
     c.native_meta.del(name);
     c.meta_group_bound.del(%"<unbound $name>");
-    if (!c.meta_calls_wait()) _bind_advertised_meta(c, name, 1);
+    _bind_advertised_meta(c, name, 1);
   }
 }
 
@@ -216,18 +216,21 @@ module int _bind_project_meta(Compiler c, String name) {
 }
 
 /* An include installs its provider at that position. Later lookups keep
-   any binding the unit installs after the include. */
+   any binding the unit installs after the include. A linked body needs no
+   helper, so it binds even while calls wait for one. */
 static int _bind_advertised_meta(Compiler c, String name, int install) {
   Var target;
   if (!c.project_meta.try_get(name, target)) return 0;
-  if (c.meta_calls_wait()) return 0;
   Var bound;
   if (!install && c.meta_binding(name, bound)) return 1;
   Var (signature, provider) = target;
   Var function = _linked_target(c, name, signature, provider);
-  if (function is not <func>)
-    _install_stub(c, name, signature, provider, NULL);
-  else if (!c.meta_binding(name, bound) || !bound.equal(function))
-    c.bindings().set(name, function);
+  if (function is <func>) {
+    if (!c.meta_binding(name, bound) || !bound.equal(function))
+      c.bindings().set(name, function);
+    return 1;
+  }
+  if (c.meta_calls_wait()) return 0;
+  _install_stub(c, name, signature, provider, NULL);
   return 1;
 }
