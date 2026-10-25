@@ -1,6 +1,7 @@
 #include "x2c.x"
 
-macro Expression $forged() =>
-  $(begin '(expr () (ident (binding 999 "missing"))));
+meta static List forged_syntax(void) =>
+  %(expr () (ident (binding 999 "missing")));
+macro Expression $forged() => $forged_syntax();
 
 int value = $forged();

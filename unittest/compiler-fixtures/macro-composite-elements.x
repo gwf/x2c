@@ -8,12 +8,16 @@ typedef struct Pair { int a, b; } Pair;
 
 static int twice(int n) { return n + n; }
 
+meta static List pair_syntax(void) {
+  return %(expr () (composite (commas
+    (expr () (call (expr () (ident ${x2c_ident("twice")}))
+      (args (expr (int) (literal (int) "3")))))
+    (expr (int) (literal (int) "2")))));
+}
+
 macro Unit $probe.pair(Name $fn) {
   static Pair $fn(void) {
-    Pair value = $(begin `(expr () (composite (commas
-      (expr () (call (expr () (ident ,(x2c.ident "twice")))
-        (args ,(x2c.literal.int 3))))
-      ,(x2c.literal.int 2)))));
+    Pair value = $pair_syntax();
     return value;
   }
 }
