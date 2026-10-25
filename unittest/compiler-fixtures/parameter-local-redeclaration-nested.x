@@ -2,18 +2,19 @@
 
 macro Expression $made(Param @params) => %!(@params) => 41;
 
-macro Expression $nested() =>
-  $(quote
-    (expr ((func ((int))) "Var")
-      (lambda
-        (params (param (int) (bind ("value") ())))
+meta static List nested_lambda(void) =>
+  %(expr ((func ((int))) "Var")
+    (lambda
+      (params (param (int) (bind ("value") ())))
+      (block
         (block
-          (block
-            (declare (int)
-              (bindings
-                (op = (bind ("value") ())
-                  (expr (int) (literal (int) "2"))))))
-          (return ("Var") (expr () (ident ("value"))))))));
+          (declare (int)
+            (bindings
+              (op = (bind ("value") ())
+                (expr (int) (literal (int) "2"))))))
+        (return ("Var") (expr () (ident ("value")))))));
+
+macro Expression $nested() => $nested_lambda();
 
 static int ordinary(int value) {
   { int value = 2; (void) value; }

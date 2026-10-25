@@ -2,15 +2,20 @@
 
 typedef struct Pair { String first; String second; } Pair;
 
-macro Expression $canonical(Expr $yes, Expr $no) =>
-  $(list 'expr '(int) (list 'initval
-    (list '(expr (int) (literal (int) "1")) '() '(int) $yes)
-    (list '() '() '(int) $no)));
+meta static List canonical_of(List yes, List no) {
+  return %(expr (int) (initval
+    ((expr (int) (literal (int) "1")) () (int) ${yes})
+    (() () (int) ${no})));
+}
 
-macro Expression $chain(Expr $value) =>
-  $(list 'expr '() (list 'composite (list 'commas
-    (list 'indexinit '(expr (int) (literal (int) "0"))
-      (list 'dotinit '("second") $value)))));
+meta static List chain_of(List value) {
+  return %(expr () (composite (commas
+    (indexinit (expr (int) (literal (int) "0"))
+      (dotinit ("second") ${value})))));
+}
+
+macro Expression $canonical(Expr $yes, Expr $no) => $canonical_of($yes, $no);
+macro Expression $chain(Expr $value) => $chain_of($value);
 
 macro Expression $retain(Expr $value) => $value;
 

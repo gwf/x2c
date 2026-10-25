@@ -16,7 +16,8 @@ macro Declaration $text(Name $n) { String $n = "five"; }
 macro Declaration $pair(Name $a, Name $b) { int $a = 6, $b = $a + 1; }
 macro Declaration $table(Name $n) { int $n[] = {7, 8, 9}; }
 macro Declaration $nested(Name $n, Expr $x) { int $n = $twice($x); }
-macro Declaration $lisp(Name $n, Expr $x) { int $n = $(car (list $x)); }
+meta static List same(List x) => x;
+macro Declaration $through_meta(Name $n, Expr $x) { int $n = $same($x); }
 
 $constant(one);
 $computed(forty_two);
@@ -26,7 +27,7 @@ $text(five);
 $pair(six, seven);
 $table(digits);
 $nested(ten, 5);
-$lisp(eleven, 11);
+$through_meta(eleven, 11);
 
 int main(void) {
   printf("%d %d %d %d %s\n", one, forty_two, forty_three, four, five);

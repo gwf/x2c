@@ -1,6 +1,8 @@
 #include "x2c.x"
 
-macro Expression $built() => $(x2c.literal.string "a");
+meta static String built_text(void) => "a";
+
+macro Expression $built() => $built_text();
 macro Expression $joined(Expr $value) => %"${$value}" + "|";
 
 int main(void) {

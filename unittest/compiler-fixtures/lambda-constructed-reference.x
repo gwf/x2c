@@ -1,15 +1,19 @@
 #include "x2c.x"
 
-macro Expression $raw_reference(Expr $value) =>
-  $(let* ((binding (car (cdr (car (cdr (cdr $value))))))
-          (type (cons '& (Code.type $value)))
-          (address (list 'expr type (list 'op '& $value)))
-          (capture (list 'capture binding type address))
-          (alias (list 'expr type (list 'ident binding)))
-          (read (list 'expr (Code.type $value)
-                  (list 'op '* alias))))
-     (list 'expr '("Func")
-       (list 'lambda '(params) (list 'captures capture) read)));
+meta static List raw_reference_of(List value) {
+  match (value) {
+    case %(expr ? (ident ?binding)): {
+      List type = %(& @{Code.type(value)});
+      List capture = %(capture $binding $type (expr $type (op & $value)));
+      List read = %(expr ${Code.type(value)}
+        (op * (expr $type (ident $binding))));
+      return %(expr ("Func") (lambda (params) (captures $capture) $read));
+    }
+  }
+  return %();
+}
+
+macro Expression $raw_reference(Expr $value) => $raw_reference_of($value);
 
 int main(void) {
   int value = 1;
