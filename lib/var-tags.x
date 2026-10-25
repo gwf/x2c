@@ -1,5 +1,5 @@
 #pragma once
-#include "meta.x"
+#include "compiler-meta.x"
 
 /*  var-tags.x -- the Var tag ledger and its projections
 
@@ -380,14 +380,14 @@ meta Map _tag_types(List native) {
 
 macro Expression $var.tag.info() => $_tag_info();
 
-// `_x2c.symbol-set` is a private compiler native with no `x2c_` spelling,
-// so the two tag sets are the only Lisp that reads the ledger.
-macro Expression $var.tag.symbolset() => $(_x2c.symbol-set (_tag_names));
+// `lib/compiler-meta.x` declares the private compiler native that builds
+// the two tag sets.
+macro Expression $var.tag.symbolset() => $_x2c_symbol_set($_tag_names());
 
 macro Expression $var.tag.numeric() => $_tag_numeric_table();
 
 macro Expression $var.tag.numeric.symbolset() =>
-  $(_x2c.symbol-set (_tag_numeric_names));
+  $_x2c_symbol_set($_tag_numeric_names());
 
 macro Expression $var.tag.decode.groups() => $_tag_decode_groups();
 

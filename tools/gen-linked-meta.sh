@@ -177,6 +177,7 @@ END {
   print "#pragma once"
   print ""
   print "#include \"x2c.x\""
+  print "#include \"compiler-meta.x\""
   # Components are already supplied by the compiler prelude.
   for (i = 1; i <= ndef; i++)
     if (files[i] !~ /^src\/components\// && !included[files[i]]++) {
@@ -213,7 +214,7 @@ END {
   print "  return rows;"
   print "}"
   print ""
-  print "macro Expression $linked.hashes() => $(_x2c.meta.linked.hashes);"
+  print "macro Expression $linked.hashes() => $_x2c_meta_linked_hashes();"
   print ""
   print "/** Returns linked definition hashes and provider source dependencies. */"
   print "Map linked_meta_hashes(void) {"

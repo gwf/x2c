@@ -25,9 +25,8 @@ module Scope native_module_scope = NULL;
 /* The compiler supplies the operations `lib/meta.x` declares with a bodyless
    `meta` prototype, the `x2c_` targets, as the native module
    `compiler_supplier`, which every request selects first. */
-static macro Expression $compiler.targets() => $(lisp.native.targets
-  (filter lisp.compiler.target?
-    (_x2c.native-meta.targets)));
+static macro Expression $compiler.targets() =>
+  $_x2c_target_map($_x2c_native_rows(<compiler>, %(), %()));
 
 static String compiler_supplier = "<compiler>";
 
@@ -38,7 +37,24 @@ static Map _compiler_targets(void) => $compiler.targets();
     request selects first. */
 Map Compiler.compiler_targets(void) {
   _load_compiler_module();
-  return _compiler_targets();
+  return native_modules[compiler_supplier];
+}
+
+/* The runtime operations the compiler calls natively: every advertised
+   runtime target, including those that take a `Func`, but not the
+   compiler's own operations. No request selects them as a module. */
+static macro Expression $runtime.targets() =>
+  $_x2c_target_map($_x2c_native_rows(<runtime>, %(), %()));
+
+static String runtime_supplier = "<runtime>";
+
+static Map _runtime_targets(void) => $runtime.targets();
+
+/** Returns the compiler's runtime native targets, built on first use. */
+Map Compiler.native_targets(void) {
+  if (!_native_module_loaded(runtime_supplier))
+    _add_native_module(runtime_supplier, _runtime_targets);
+  return native_modules[runtime_supplier];
 }
 
 static void _load_compiler_module(void) {

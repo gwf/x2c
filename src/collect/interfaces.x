@@ -400,7 +400,7 @@ Map Compiler.linked_prelude_records(Compiler c) {
   return records;
 }
 
-static macro Expression $linked.prelude() => $(_x2c.prelude.linked);
+static macro Expression $linked.prelude() => $_x2c_prelude_records();
 
 /* The record linked for `canonical`, read as its interface would be, or
    NULL. */

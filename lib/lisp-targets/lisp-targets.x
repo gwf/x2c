@@ -14,6 +14,7 @@
 
 #pragma once
 #include "x2c.x"
+#include "compiler-meta.x"
 
 #include "diff.x"
 #include "digest.x"
@@ -31,8 +32,8 @@ module {
 /* The direct targets let the compiler generate their call adapters and
    read each signature from the declared prototype. The `x2c_` operations
    `meta.x` declares exist only inside a compiler, which supplies them. */
-static $(import "../../etc/lisp-bindings.xlisp")
-static $(def lisp.native.target.rows (append '(
+static macro Expression $lisp.native.target.map() =>
+  $_x2c_target_map($_x2c_native_rows(<lisp>, %(
   (Var_is_void)
   (Func_apply)
   (Func_signature)
@@ -181,16 +182,12 @@ static $(def lisp.native.target.rows (append '(
   (lisp_string_strip)
   (Var_is)
   (Symbol_str)
-) (filter (lambda (row) (not (lisp.compiler.target? row)))
-     (_x2c.native-meta.targets)) '(
+), %(
   // Adapters that replace generated direct targets come last to win.
   (_list_job (as List_job))
   (_job_start (as Job_start))
   (_buffer_write_len (as Buffer_write_len))
-)))
-
-static macro Expression $lisp.native.target.map() =>
-  $(lisp.native.targets lisp.native.target.rows);
+)));
 
 static Map native_targets = $lisp.native.target.map();
 
