@@ -7,8 +7,6 @@
 #include "ordinary-interface-meta/unit-provider.h"
 int produced = 17;
 
-int later = 17;
-
 enum{
   retained_enum_value = 17
 }
@@ -17,10 +15,6 @@ enum{
 _Static_assert(retained_enum_value == 17, "retained enum binding");
 int first(void){
   return produced;
-}
-
-int second(void){
-  return later;
 }
 
 int captured_parameter(int value){
