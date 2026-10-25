@@ -28,8 +28,6 @@ int Compiler_defines_main(Compiler c);
 
 int Compiler_script_statement_starts(Compiler c);
 
-int Compiler_auto_region_function_starts(Compiler c);
-
 int Compiler_script_statement_executes(Compiler c);
 
 int Compiler_protocol_form_starts(Compiler c);
@@ -58,6 +56,8 @@ void Compiler_check_reference_placement(Compiler c, Type type);
 
 Type Compiler_parse_type_name(Compiler c);
 
+List Compiler_parse_members(Compiler c, Symbol position, List context);
+
 List Compiler_parse_fields(Compiler c, List context);
 
 List Compiler_parse_field(Compiler c, List context);
@@ -85,6 +85,8 @@ String Compiler_package_alias_spelling(Compiler c);
 List Compiler_parse_basic_identifier(Compiler c);
 
 List Compiler_parse_optional_identifier(Compiler c);
+
+Symbol Compiler_auto_region_form(Compiler c, Symbol position);
 
 List Compiler_parse_function_definition(Compiler c);
 

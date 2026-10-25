@@ -116,8 +116,6 @@ Atom Compiler_parse_keyword_definition(Compiler c);
 
 int Compiler_macro_starts_target_at(Compiler c, Symbol position);
 
-int Compiler_auto_region_statement_starts(Compiler c);
-
 Symbol Compiler_macro_invocation_collection(Compiler c);
 
 void Compiler_skip_macro_invocation(Compiler c);

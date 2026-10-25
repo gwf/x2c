@@ -86,6 +86,8 @@ void Compiler_configure_interfaces(String out_dir, int cold);
 
 String Compiler_prelude_interface(void);
 
+List Compiler_prelude_missing_interfaces(void);
+
 String Compiler_interface_text(Compiler c);
 
 Map Compiler_linked_prelude_records(Compiler c);

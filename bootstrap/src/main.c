@@ -15,9 +15,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-static String _37, _36, _35, _34, _33, _32, _31, _30, _29, _28, _27, _26, _25, _23, _21, _19, _17, _15, _13, _11, _9, _7, _5, _3, _2, _1, _0;
+static String _40, _39, _38, _37, _36, _35, _34, _33, _32, _31, _30, _29, _28, _26, _24, _22, _20, _19, _17, _15, _13, _11, _9, _7, _5, _3, _2, _1, _0;
 
-static Var _24, _22, _20, _18, _16, _14, _12, _10, _8, _6, _4;
+static Var _27, _25, _23, _21, _18, _16, _14, _12, _10, _8, _6, _4;
 
 static int _init_guard_ = 0;
 
@@ -76,27 +76,30 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _14 = String_var(_13);
   _15 = String_new("prelude");
   _16 = String_var(_15);
-  _17 = String_new("package_dirs");
+  _17 = String_new("prelude_missing");
   _18 = String_var(_17);
-  _19 = String_new("cc");
-  _20 = String_var(_19);
-  _21 = String_new("ar");
-  _22 = String_var(_21);
-  _23 = String_new("cache_dir");
-  _24 = String_var(_23);
-  _25 = String_new("cannot run external command \'");
-  _26 = String_new("\': ");
-  _27 = String_new("build");
-  _28 = String_new("new");
-  _29 = String_new("package");
-  _30 = String_new("missing x2c-");
-  _31 = String_new(" command; install the matching x2c commands");
-  _32 = String_new("cannot open diagnostics file \'");
-  _33 = String_new("run");
-  _34 = String_new("script");
-  _35 = String_new("install");
-  _36 = String_new("remove");
-  _37 = String_new("list");
+  _19 = String_new(" ");
+  _20 = String_new("package_dirs");
+  _21 = String_var(_20);
+  _22 = String_new("cc");
+  _23 = String_var(_22);
+  _24 = String_new("ar");
+  _25 = String_var(_24);
+  _26 = String_new("cache_dir");
+  _27 = String_var(_26);
+  _28 = String_new("cannot run external command \'");
+  _29 = String_new("\': ");
+  _30 = String_new("build");
+  _31 = String_new("new");
+  _32 = String_new("package");
+  _33 = String_new("missing x2c-");
+  _34 = String_new(" command; install the matching x2c commands");
+  _35 = String_new("cannot open diagnostics file \'");
+  _36 = String_new("run");
+  _37 = String_new("script");
+  _38 = String_new("install");
+  _39 = String_new("remove");
+  _40 = String_new("list");
 }
 
 static int _run_env(CliRequest request){
@@ -134,13 +137,15 @@ void Compiler_configure_interfaces(String, int);
 
 String Compiler_prelude_interface(void);
 
+List Compiler_prelude_missing_interfaces(void);
+
 static List _env_rows(CliRequest request){
   Toolchain toolchain = Toolchain_new(request);
   String executable = x2c_get_executable();
   String roots = String_join(_2, CliRequest_package_roots(request));
   Compiler_configure_interfaces(request -> out_dir, 0);
   return({
-    Var _x2c_gensym_literal_part_0 = List_var(cons(_4, cons(String_var(x2c_get_root()), NULL)));  Var _x2c_gensym_literal_part_1 = List_var(cons(_6, cons(String_var(executable), NULL)));  Var _x2c_gensym_literal_part_2 = List_var(cons(_8, cons(String_var(Compiler_home_libexec()), NULL)));  Var _x2c_gensym_literal_part_3 = List_var(cons(_10, cons(String_var(Compiler_identity()), NULL)));  Var _x2c_gensym_literal_part_4 = List_var(cons(_12, cons(String_var(toolchain -> include_dir), NULL)));  Var _x2c_gensym_literal_part_5 = List_var(cons(_14, cons(String_var(toolchain -> runtime_lib), NULL)));  Var _x2c_gensym_literal_part_6 = List_var(cons(_16, cons(String_var(Compiler_prelude_interface()), NULL)));  Var _x2c_gensym_literal_part_7 = List_var(cons(_18, cons(String_var(roots), NULL)));  Var _x2c_gensym_literal_part_8 = List_var(cons(_20, cons(String_var(toolchain -> cc), NULL)));  Var _x2c_gensym_literal_part_9 = List_var(cons(_22, cons(String_var(toolchain -> ar), NULL)));  Var _x2c_gensym_literal_part_10 = List_var(cons(_24, cons(String_var(Compiler_cache_root()), NULL)));  cons(_x2c_gensym_literal_part_0, cons(_x2c_gensym_literal_part_1, cons(_x2c_gensym_literal_part_2, cons(_x2c_gensym_literal_part_3, cons(_x2c_gensym_literal_part_4, cons(_x2c_gensym_literal_part_5, cons(_x2c_gensym_literal_part_6, cons(_x2c_gensym_literal_part_7, cons(_x2c_gensym_literal_part_8, cons(_x2c_gensym_literal_part_9, cons(_x2c_gensym_literal_part_10, NULL)))))))))));
+    Var _x2c_gensym_literal_part_0 = List_var(cons(_4, cons(String_var(x2c_get_root()), NULL)));  Var _x2c_gensym_literal_part_1 = List_var(cons(_6, cons(String_var(executable), NULL)));  Var _x2c_gensym_literal_part_2 = List_var(cons(_8, cons(String_var(Compiler_home_libexec()), NULL)));  Var _x2c_gensym_literal_part_3 = List_var(cons(_10, cons(String_var(Compiler_identity()), NULL)));  Var _x2c_gensym_literal_part_4 = List_var(cons(_12, cons(String_var(toolchain -> include_dir), NULL)));  Var _x2c_gensym_literal_part_5 = List_var(cons(_14, cons(String_var(toolchain -> runtime_lib), NULL)));  Var _x2c_gensym_literal_part_6 = List_var(cons(_16, cons(String_var(Compiler_prelude_interface()), NULL)));  Var _x2c_gensym_literal_part_7 = List_var(cons(_18, cons(String_var(String_join(_19, Compiler_prelude_missing_interfaces())), NULL)));  Var _x2c_gensym_literal_part_8 = List_var(cons(_21, cons(String_var(roots), NULL)));  Var _x2c_gensym_literal_part_9 = List_var(cons(_23, cons(String_var(toolchain -> cc), NULL)));  Var _x2c_gensym_literal_part_10 = List_var(cons(_25, cons(String_var(toolchain -> ar), NULL)));  Var _x2c_gensym_literal_part_11 = List_var(cons(_27, cons(String_var(Compiler_cache_root()), NULL)));  cons(_x2c_gensym_literal_part_0, cons(_x2c_gensym_literal_part_1, cons(_x2c_gensym_literal_part_2, cons(_x2c_gensym_literal_part_3, cons(_x2c_gensym_literal_part_4, cons(_x2c_gensym_literal_part_5, cons(_x2c_gensym_literal_part_6, cons(_x2c_gensym_literal_part_7, cons(_x2c_gensym_literal_part_8, cons(_x2c_gensym_literal_part_9, cons(_x2c_gensym_literal_part_10, cons(_x2c_gensym_literal_part_11, NULL))))))))))));
   }
   );
 }
@@ -185,7 +190,7 @@ static void _exec(String path, char * * args){
   args[0] = path;
   execv(path, args);
   Diagnostics_driver_error(({
-    Var _x2c_gensym_literal_part_11 = String_var(path);  Var _x2c_gensym_literal_part_12 = String_var(String_new(strerror(errno)));  String_join(NULL, cons(String_var(_25), cons(_x2c_gensym_literal_part_11, cons(String_var(_26), cons(_x2c_gensym_literal_part_12, NULL)))));
+    Var _x2c_gensym_literal_part_12 = String_var(path);  Var _x2c_gensym_literal_part_13 = String_var(String_new(strerror(errno)));  String_join(NULL, cons(String_var(_28), cons(_x2c_gensym_literal_part_12, cons(String_var(_29), cons(_x2c_gensym_literal_part_13, NULL)))));
   }
   ));
 }
@@ -195,18 +200,18 @@ static void _run_command(Array arguments){
   String operation = Var_as_string(Array_getindex(arguments, 0));
   String command = NULL;
   switch(_x2c_gensym_string_switch_0(operation)){
-    case 1 : case 2 : case 3 : command = _27;
+    case 1 : case 2 : case 3 : command = _30;
     break;
-    case 4 : command = _28;
+    case 4 : command = _31;
     break;
-    case 5 : case 6 : case 7 : command = _29;
+    case 5 : case 6 : case 7 : command = _32;
     break;
     default: return;
   }
   String path = Compiler_command_path(command);
   if(! String_truth(path)){
-    if(! String_equal(command, _27)) CliRequest_parse_arguments(arguments);
-    Diagnostics_driver_error(String_join(NULL, cons(String_var(_30), cons(String_var(command), cons(String_var(_31), NULL)))));
+    if(! String_equal(command, _30)) CliRequest_parse_arguments(arguments);
+    Diagnostics_driver_error(String_join(NULL, cons(String_var(_33), cons(String_var(command), cons(String_var(_34), NULL)))));
   }
   char * * args = xcalloc(Array_len(arguments) + 3, sizeof(char *));
   args[1] = "--driver-arguments";
@@ -243,7 +248,7 @@ int main(int argc, char * * argv){
       _run_command(arguments);
       CliRequest request = CliRequest_parse_arguments(arguments);
       String diagnostics = request -> diagnostics_file;
-      if(String_truth(diagnostics) && ! diagnostics_write_json(diagnostics)) Diagnostics_driver_error(String_join(NULL, cons(String_var(_32), cons(String_var(diagnostics), cons(String_var(_1), NULL)))));
+      if(String_truth(diagnostics) && ! diagnostics_write_json(diagnostics)) Diagnostics_driver_error(String_join(NULL, cons(String_var(_35), cons(String_var(diagnostics), cons(String_var(_1), NULL)))));
       report_configure(request -> quiet, request -> plain, request -> color_mode, request -> verbose || request -> debugging, request -> dry_run, CliRequest_inspects(request));
       if(request -> command == 11180){
         int _x2c_gensym_return_value_0 = _run_env(request);
@@ -287,13 +292,13 @@ static void _configure_logging(int debugging){
 }
 
 static int _x2c_gensym_string_switch_0(String s){
-  if(String_equal(s, _27)) return 1;
-  if(String_equal(s, _33)) return 2;
-  if(String_equal(s, _34)) return 3;
-  if(String_equal(s, _28)) return 4;
-  if(String_equal(s, _35)) return 5;
-  if(String_equal(s, _36)) return 6;
-  if(String_equal(s, _37)) return 7;
+  if(String_equal(s, _30)) return 1;
+  if(String_equal(s, _36)) return 2;
+  if(String_equal(s, _37)) return 3;
+  if(String_equal(s, _31)) return 4;
+  if(String_equal(s, _38)) return 5;
+  if(String_equal(s, _39)) return 6;
+  if(String_equal(s, _40)) return 7;
   return 0;
 }
 
