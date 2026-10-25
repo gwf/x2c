@@ -110,12 +110,12 @@ int Frontend.open_reporting(Frontend f, String filename, ParsedUnit &unit) {
   return 0;
 }
 
-/** Opens an empty submission unit with the ordinary runtime prelude.
-    Preload macro libraries first. The caller must close the unit on either
-    result; submissions and inspection results borrow its Context. */
+/** Opens an empty submission unit with the ordinary runtime prelude. The
+    caller must close the unit on either result; submissions and inspection
+    results borrow its Context. */
 int Frontend.open_session(Frontend frontend, ParsedUnit &unit) =>
   (Compiler.stage_meta_in_process(), 1) && _start(
-    frontend, NULL, unit, _unit_context(), "$(begin)\n"
+    frontend, NULL, unit, _unit_context(),
     "void print(String text);\n"
     "void println(String text);\n"
     "int printf(const char *format, ...);\n"
@@ -234,7 +234,7 @@ static void _tokenize_session(Frontend frontend, Compiler c, String source) {
   c.filename = "<repl>";
   c.prelude = c.runtime_inc = 1;
   c.include_dirs = frontend.include_dirs;
-  c.tokenize(source ? source : "$(begin)");
+  c.tokenize(source ? source : "");
 }
 
 static void _tokenize_input(

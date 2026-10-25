@@ -31,7 +31,7 @@ lib/file.x|api|
 lib/func/func.x|api|
 lib/iter.x|api|
 lib/lib.x|api|
-lib/lisp-bindings.x|internal|Macros that bind native functions into a runtime `Lisp` session; `lisp/lisp.x` includes it.
+lib/lisp-bindings.x|api|
 lib/lisp-targets/lisp-targets.x|internal|The native operations a `Lisp` session can bind, built outside the implicit prelude so the optional modules that supply them stay out of it.
 lib/lisp/lisp.x|api|
 lib/list/list.x|api|

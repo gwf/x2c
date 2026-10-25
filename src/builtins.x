@@ -325,7 +325,7 @@ static List _declare(Type type, Var binding, List initializer) =>
 
 static List _assign(List target, List value) => $!{ $target = $value; };
 
-// $x2c.foreign.alias and $x2c.callback.adapt
+// foreign aliases and callback adapters
 
 static List _foreign_alias(List declaration, List native) =>
   %((falias $declaration $native));
