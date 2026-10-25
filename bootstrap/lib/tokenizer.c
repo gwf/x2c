@@ -58,8 +58,6 @@ static int _preprocessor(Tokenizer t);
 
 static int _number(Tokenizer tokenizer);
 
-static int _embedded_lisp(Tokenizer tokenizer);
-
 static int _named_reference(Tokenizer tokenizer);
 
 static int _percent_tokens(Tokenizer t);
@@ -174,8 +172,6 @@ static int _bare_do(_Layout * l, _LayoutLine line, int j);
 static String _end_statement(_Layout * l, _LayoutLine line);
 
 static void _one_line_body(_Layout * l, _LayoutLine line);
-
-static int _lisp_form(_Layout * l, _LayoutLine line);
 
 static int _hole(_Layout * l, _LayoutLine line);
 
@@ -550,7 +546,7 @@ void Tokenizer_scan(Tokenizer t){
 static int _step(Tokenizer t){
   switch(_scan_mode(t)){
     case 3945159 : case 1059020479160805 : return _language_tokens(t);
-    case 3313778 : case 26720 : case 806120 : case 806112 : case 917238583151840 : return _lisp_tokens(t);
+    case 3313778 : case 26720 : case 806120 : case 806112 : return _lisp_tokens(t);
     case 1392880402798952 : return _common_tokens(t) || _symbol_set_tokens(t);
     case 1318210446 : return _string_tokens(t);
   }
@@ -565,7 +561,7 @@ static int _end_of_file(Tokenizer t){
 }
 
 static int _language_tokens(Tokenizer t){
-  return _common_tokens(t) ||((t -> text[t -> pos] == '$' || t -> text[t -> pos] == '@') &&(_embedded_lisp(t) || _named_reference(t))) || _percent_tokens(t) || _angle_symbol_literal(t) || _c_tokens(t);
+  return _common_tokens(t) ||((t -> text[t -> pos] == '$' || t -> text[t -> pos] == '@') && _named_reference(t)) || _percent_tokens(t) || _angle_symbol_literal(t) || _c_tokens(t);
 }
 
 int Tokenizer_do_scanner(Tokenizer t, int(* scanner)(char *), Symbol type);
@@ -624,12 +620,6 @@ static int _number(Tokenizer tokenizer){
   if(len == 0) return 0;
   type =(type == 19368) ? 26417777576 : 27051797805160;
   return Tokenizer_tokenize(tokenizer, len, type);
-}
-
-static int _embedded_lisp(Tokenizer tokenizer){
-  char * text = tokenizer -> text + tokenizer -> pos;
-  if((text[0] != '$' && text[0] != '@') || text[1] != '(') return 0;
-  return _operator(tokenizer, 2);
 }
 
 static int scan_ascii_alpha(int);
@@ -713,7 +703,7 @@ static int _lisp_prefix(Tokenizer t, int list, int collection){
   if(list && text[0] == '?' && text[1] == '(') return _operator(t, 2);
   if(text[0] == '$' && ! list && ! collection) return _named_reference(t);
   if(list && text[0] == '@' &&(! text[1] || text[1] == '=' || strchr(" \t\n\v\f\r)", text[1]))) return Tokenizer_tokenize(t, text[1] == '=' ? 2 : 1, 845368370138);
-  if((list &&(text[0] == '$' || text[0] == '@')) ||(collection &&(text[0] == '$' || text[0] == '@'))) return text[1] == '{' ? _operator(t, 2) : _named_reference(t);
+  if((list || collection) &&(text[0] == '$' || text[0] == '@')) return text[1] == '{' || text[1] == '(' ? _operator(t, 2) : _named_reference(t);
   return 0;
 }
 
@@ -787,7 +777,7 @@ int scan_string_segment(char *);
 
 static int _string_tokens(Tokenizer t){
   char * text = t -> text + t -> pos;
-  if(text[0] == '$' && text[1] != '$') return text[1] == '{' ? _operator(t, 2) : _named_reference(t);
+  if(text[0] == '$' && text[1] != '$') return text[1] == '{' || text[1] == '(' ? _operator(t, 2) : _named_reference(t);
   if(text[0] == '"') return _operator(t, 1);
   int len = scan_string_segment(text);
   if(len < 0) return Tokenizer_error(t);
@@ -855,8 +845,6 @@ static int _operator(Tokenizer t, int len){
       break;
       case 9655 : push = 3313778;
       break;
-      case 9297 : case 16465 : push = 917238583151840;
-      break;
       case 251 : pop = Array_len(t -> modes) > 1;
       break;
       case 9553 : push = 806120;
@@ -871,6 +859,8 @@ static int _operator(Tokenizer t, int len){
       case 81 : push = 806120;
       break;
       case 9463 : push = 3945159;
+      break;
+      case 9297 : case 16465 : push = 1059020479160805;
       break;
       case 16209 : if(mode == 806120) push = 1059020479160805;
       break;
@@ -898,16 +888,11 @@ static int _operator(Tokenizer t, int len){
     case 1318210446 : switch(op){
       case 9463 : push = 3945159;
       break;
+      case 9297 : push = 1059020479160805;
+      break;
       case 69 : pop = 1;
       token_len = 1;
       token_type = 69;
-      break;
-    }
-    break;
-    case 917238583151840 : switch(op){
-      case 81 : push = 917238583151840;
-      break;
-      case 83 : pop = 1;
       break;
     }
     break;
@@ -1230,7 +1215,7 @@ static String _end_statement(_Layout * l, _LayoutLine line){
     _edit(&((* l)), line.first) -> type = 40896714;
     return NULL;
   }
-  if((* l).sig[line.last] -> type == 119 ||(* l).enums[(* l).top] || _lisp_form(&((* l)), line) || _hole(&((* l)), line)) return NULL;
+  if((* l).sig[line.last] -> type == 119 ||(* l).enums[(* l).top] || _hole(&((* l)), line)) return NULL;
   return _23;
 }
 
@@ -1246,17 +1231,11 @@ static void _one_line_body(_Layout * l, _LayoutLine line){
 
 }
 
-static int _lisp_form(_Layout * l, _LayoutLine line){
-  if((* l).sig[line.first] -> type != 9297 &&(* l).sig[line.first] -> type != 16465) return 0;
-  for(int m = line.first + 1;  m < line.last;  m ++) if((* l).depths[m] <= 0) return 0;
-  return 1;
-}
-
 static int _hole(_Layout * l, _LayoutLine line){
   int last = line.last;
   for(int first = line.first;  first < last;  first ++){
     if(first != line.first &&(* l).sig[first - 1] -> type != 83) continue;
-    if((* l).sig[first] -> type != 129 &&(* l).sig[first] -> type != 16465) continue;
+    if((* l).sig[first] -> type != 129) continue;
     if((* l).sig[last] -> type == 83 ||(* l).sig[last] -> type == 251) return 1;
   }
   return(* l).sig[last] -> type == 19147688 && last > line.first &&((* l).sig[last - 1] -> type == 73 ||(* l).sig[last - 1] -> type == 129) &&(last - 1 == line.first ||(* l).sig[last - 2] -> type == 83);

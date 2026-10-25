@@ -39,8 +39,6 @@
 #include "expressions-reports.h"
 void Compiler_report_meta_failure(Compiler c, Token invocation, List error, String source);
 
-List Compiler_reject_lisp_form(Compiler c);
-
 List Compiler_parse_macro_definition(Compiler c);
 
 List Compiler_macro_introduced_name(Compiler c, String spelling);

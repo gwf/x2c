@@ -960,7 +960,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _375 = String_var(_374);
   _376 = List_var(NULL);
   _377 = Symbol_var(106239471489226);
-  _378 = int_var(2237);
+  _378 = int_var(2236);
   _379 = String_new("");
   _380 = String_var(_379);
   _381 = Atom_intern(String_new("macro-param"));
@@ -2569,14 +2569,14 @@ static int f14_parsing_tokens____ends_operand(Symbol type){
 }
 
 static int f14_parsing_tokens____starts_operand(Symbol type){
-  switch(type) case 19147688 : case 26417777576 : case 27051797805160 : case 845368475748 : case 27051791223990 : case 845368370138 : case 865658429314008 : case 81 : case 9553 : case 9655 : case 9719 : case 9297 : case 9463 : case 73 : case 60 : case 62 : case 54 : case 77 : case 253 : case 1848 : case 2046 : return 1;  return 0;
+  switch(type) case 19147688 : case 26417777576 : case 27051797805160 : case 845368475748 : case 27051791223990 : case 845368370138 : case 865658429314008 : case 81 : case 9553 : case 9655 : case 9719 : case 73 : case 60 : case 62 : case 54 : case 77 : case 253 : case 1848 : case 2046 : return 1;  return 0;
 }
 
 int Compiler_at_completion(Compiler c);
 Symbol Compiler_peek(Compiler c, int steps){
   if(! _init_guard_) _file_init_();  Token token = c -> token;  if(! steps && Compiler_at_completion(c)){
     List rows = Sym_visible_symbols(c -> sym); {
-      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/compiler/parsing/tokens.x",.function = "Compiler_peek",.line = 96};  x2c_error_raise_n(& _x2c_gensym_error_site_0, 1248787135328, 3, Symbol_var(740232), Symbol_var(29452646), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(NULL));
+      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/compiler/parsing/tokens.x",.function = "Compiler_peek",.line = 95};  x2c_error_raise_n(& _x2c_gensym_error_site_0, 1248787135328, 3, Symbol_var(740232), Symbol_var(29452646), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(NULL));
     }
 
   }
@@ -2615,7 +2615,7 @@ static Token f14_parsing_tokens____skip_backward(Token token, Token origin){
 
 void Compiler_require_input(Compiler c){
   if(! _init_guard_) _file_init_();  if(c -> input_boundary && c -> token >= c -> input_boundary){
-    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../src/compiler/parsing/tokens.x",.function = "Compiler_require_input",.line = 141};  x2c_error_raise_n(& _x2c_gensym_error_site_1, 664344300629258, 0);  __builtin_unreachable();
+    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../src/compiler/parsing/tokens.x",.function = "Compiler_require_input",.line = 140};  x2c_error_raise_n(& _x2c_gensym_error_site_1, 664344300629258, 0);  __builtin_unreachable();
   }
 
 }
@@ -2681,7 +2681,7 @@ int Compiler_at_completion(Compiler c){
 
 void _x2c_complete_here(Compiler c, Symbol role, List keywords){
   if(! _init_guard_) _file_init_();  if(! Compiler_at_completion(c)) return;  List rows = Sym_visible_symbols(c -> sym); {
-    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../src/compiler/parsing/tokens.x",.function = "_x2c_complete_here",.line = 264};  x2c_error_raise_n(& _x2c_gensym_error_site_2, 1248787135328, 3, Symbol_var(740232), Symbol_var(role), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(keywords));
+    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../src/compiler/parsing/tokens.x",.function = "_x2c_complete_here",.line = 263};  x2c_error_raise_n(& _x2c_gensym_error_site_2, 1248787135328, 3, Symbol_var(740232), Symbol_var(role), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(keywords));
   }
 
 }

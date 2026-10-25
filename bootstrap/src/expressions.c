@@ -2805,7 +2805,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_4(void)
   _2218 = cons(_2217, NULL);
   _2219 = cons(_253, _2218);
   _2220 = List_var(_2219);
-  _2221 = int_var(91879);
+  _2221 = int_var(91875);
   _2222 = cons(_2221, NULL);
   _2223 = cons(_258, _2222);
   _2224 = List_var(_2223);
@@ -3001,7 +3001,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_4(void)
   _2414 = cons(_2413, NULL);
   _2415 = cons(_245, _2414);
   _2416 = List_var(_2415);
-  _2417 = int_var(92241);
+  _2417 = int_var(92237);
   _2418 = cons(_2417, NULL);
   _2419 = cons(_258, _2418);
   _2420 = List_var(_2419);
@@ -3118,7 +3118,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_4(void)
   _2531 = cons(_2530, NULL);
   _2532 = cons(_245, _2531);
   _2533 = List_var(_2532);
-  _2534 = int_var(92653);
+  _2534 = int_var(92649);
   _2535 = cons(_2534, NULL);
   _2536 = cons(_258, _2535);
   _2537 = List_var(_2536);
@@ -3219,7 +3219,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_5(void)
   _2629 = cons(_2628, NULL);
   _2630 = cons(_245, _2629);
   _2631 = List_var(_2630);
-  _2632 = int_var(92737);
+  _2632 = int_var(92733);
   _2633 = cons(_2632, NULL);
   _2634 = cons(_258, _2633);
   _2635 = List_var(_2634);
@@ -3311,7 +3311,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_5(void)
   _2721 = cons(_2720, NULL);
   _2722 = cons(_245, _2721);
   _2723 = List_var(_2722);
-  _2724 = int_var(92944);
+  _2724 = int_var(92940);
   _2725 = cons(_2724, NULL);
   _2726 = cons(_258, _2725);
   _2727 = List_var(_2726);
@@ -3523,7 +3523,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_5(void)
   _2933 = cons(_2932, NULL);
   _2934 = cons(_245, _2933);
   _2935 = List_var(_2934);
-  _2936 = int_var(94862);
+  _2936 = int_var(94858);
   _2937 = cons(_2936, NULL);
   _2938 = cons(_258, _2937);
   _2939 = List_var(_2938);
@@ -4423,7 +4423,7 @@ List Compiler_parse_variable(Compiler c);
 List Compiler_parse_lambda_literal(Compiler);
 List Compiler_parse_primary(Compiler c){
   if(! _init_guard_) _file_init_();  Compiler_require_input(c);  _x2c_complete_here(c, 377892, NULL);  List slot = Compiler_try_parse_macro_slot(c, 405758822009820);  if(List_truth(slot)) return slot;  switch(Compiler_peek(c, 0)){
-    case 9297 : case 16465 : return Compiler_reject_lisp_form(c);  case 27051791223990 : return f6_syntax____parse_c_string_literals(c);  case 73 : return Compiler_peek(c, 1) == 60 ? Compiler_parse_macro_quotation(c) : Compiler_try_parse_macro_expression(c);  case 19147688 : return f6_syntax____parse_ident_primary(c);  case 604 : return Compiler_parse_variable(c);  case 81 : return f6_syntax____parse_parens(c);  case 247 : return f6_syntax____parse_composite(c);  case 183 : return f6_syntax____parse_bracket_array(c);  case 9553 : return Compiler_parse_list_literal(c);  case 1227897 : return Compiler_parse_symbol_set_literal(c);  case 9655 : return Compiler_parse_array_literal(c);  case 9719 : return Compiler_parse_map_literal(c);  case 9541 : return Compiler_parse_string_literal(c);  case 9539 : return Compiler_parse_lambda_literal(c);
+    case 27051791223990 : return f6_syntax____parse_c_string_literals(c);  case 73 : if(Compiler_peek(c, 1) == 60) return Compiler_parse_macro_quotation(c);  if((c -> token + 1) -> type == 81) return Compiler_parse_evaluated_list(c);  return Compiler_try_parse_macro_expression(c);  case 19147688 : return f6_syntax____parse_ident_primary(c);  case 604 : return Compiler_parse_variable(c);  case 81 : return f6_syntax____parse_parens(c);  case 247 : return f6_syntax____parse_composite(c);  case 183 : return f6_syntax____parse_bracket_array(c);  case 9553 : return Compiler_parse_list_literal(c);  case 1227897 : return Compiler_parse_symbol_set_literal(c);  case 9655 : return Compiler_parse_array_literal(c);  case 9719 : return Compiler_parse_map_literal(c);  case 9541 : return Compiler_parse_string_literal(c);  case 9539 : return Compiler_parse_lambda_literal(c);
   }
   return Compiler_parse_atomic_literal(c);
 }
