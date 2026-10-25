@@ -6,9 +6,9 @@
 
     These are the native C scalar spellings the compiler can carry through a
     Var.  The compiler projects its Type lookup from these rows, and
-    `lib/lisp/lisp.x` invokes `$native.scalar.access.all` to get each row's
-    native size, alignment, load, and store for compile-time code that
-    keeps C objects in bytes.  Var's i48/u48 numeric payload families are
+    `native_scalar_access` returns each row's native size, alignment, load,
+    and store for compile-time code that keeps C objects in bytes and for
+    the compiler's layouts.  Var's i48/u48 numeric payload families are
     deliberately absent: neither is an exact C type.
 
     `native_scalar_types` is the one table. Each key is Type.scalar's
@@ -21,6 +21,22 @@
     `$native_scalar_types()`, and the meta functions below read it during
     expansion.
 */
+
+/* Reads one exact C scalar from `bytes`; a wide result is boxed in
+   `owner`. */
+typedef Var (*NativeScalarLoad)(const void *bytes, Scope *owner);
+/* Writes `value`, converted to one exact C scalar type, to `bytes`. */
+typedef void (*NativeScalarStore)(void *bytes, Var value);
+/* Describes one exact C scalar type in native bytes: its Var tag, size,
+   alignment, load, and store. Compile-time code that keeps C objects in
+   bytes, and the compiler's layouts, select a row with
+   `native_scalar_access`. */
+typedef struct NativeScalarAccess {
+  Symbol tag;
+  size_t size, alignment;
+  NativeScalarLoad load;
+  NativeScalarStore store;
+} *NativeScalarAccess;
 
 meta Map native_scalar_types(void) => {
   %(char): %(i8 "Var_char" "x2c_var_update_i8"),
@@ -62,8 +78,7 @@ meta List _scalar_key(Type type) {
   return key;
 }
 
-/* Native size, alignment, load, and store for one row's type. The
-   importing unit declares NativeScalarAccess first. */
+/* Native size, alignment, load, and store for one row's type. */
 macro Unit $native.scalar.access(Type $type) {
   static Var _load(const void *bytes, Scope *owner) {
     $type native;
@@ -108,3 +123,12 @@ macro Entry $native.scalar.access.entry(Type $type) {
 macro Entry $native.scalar.access.entries() {
   @_scalar_access_units($native.scalar.access.entry)
 }
+
+$native.scalar.access.all();
+
+static Map native_scalars = %{ ${$native.scalar.access.entries()} };
+
+/* Returns the access record for an exact C scalar type such as
+   `(unsigned long)`, or NULL for any other type. */
+NativeScalarAccess native_scalar_access(List exact_type) =>
+  native_scalars.getdefault(exact_type, NULL).pointer();

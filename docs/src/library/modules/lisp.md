@@ -16,7 +16,6 @@ The Lisp runtime: reader, session, and evaluator.
 | [`lisp_string_rstrip`](#lisp_string_rstrip) | Trims trailing bytes, accepting the same charset values as `strip`. |
 | [`lisp_string_strip`](#lisp_string_strip) | Trims the bytes in `chars`, using whitespace for an empty String. |
 | [`lisp_truth`](#lisp_truth) | Returns Lisp true for every value except nil and `void`. |
-| [`native_scalar_access`](#native_scalar_access) | Returns the access record for an exact C scalar type such as `(unsigned long)`, or NULL for any other type. |
 | [`Lisp.adopt`](#Lisp.adopt) | Makes `lisp` read `parent`'s definitions for names it does not bind. |
 | [`Lisp.apply`](#Lisp.apply) | Applies `callable` to already evaluated `values`. |
 | [`Lisp.bind`](#Lisp.bind) | Installs `function` as `name` and transfers its storage to `lisp`. |
@@ -92,15 +91,6 @@ Source: `lib/lisp/primitives.x:230`
 Returns Lisp true for every value except nil and `void`.
 
 Source: `lib/lisp/primitives.x:14`
-
-#### native_scalar_access
-
-`NativeScalarAccess native_scalar_access(List exact_type)`
-
-Returns the access record for an exact C scalar type such as
-`(unsigned long)`, or NULL for any other type.
-
-Source: `lib/lisp/lisp.x:51`
 
 ### `Lisp`
 
@@ -315,7 +305,7 @@ Source: `lib/lisp/sessions.x:189`
 
 Ends the owned lifetime when a managed local leaves its block.
 
-Source: `lib/lisp/lisp.x:64`
+Source: `lib/lisp/lisp.x:40`
 
 <a id="Lisp.destroy"></a>
 #### Lisp.destroy
@@ -719,9 +709,6 @@ Source: `lib/lisp/sessions.x:252`
 | Type | Kind | Summary |
 | --- | --- | --- |
 | [`Lisp`](#Lisp) | struct | Represents one isolated embedded `Lisp` session. |
-| [`NativeScalarAccess`](#NativeScalarAccess) | struct | Describes one exact C scalar type in native bytes: its Var tag, size, alignment, load, and store. |
-| [`NativeScalarLoad`](#NativeScalarLoad) | callback | Reads one exact C scalar from `bytes`; a wide result is boxed in `owner`. |
-| [`NativeScalarStore`](#NativeScalarStore) | callback | Writes `value`, converted to one exact C scalar type, to `bytes`. |
 
 <a id="Lisp"></a>
 ### Lisp
@@ -733,38 +720,7 @@ Create it with `Lisp.new` or `Lisp.kernel` and end it with
 `Lisp.destroy`. The module header describes its owned and borrowed state.
 A session is mutable and requires caller serialization.
 
-Source: `lib/lisp/lisp.x:59`
-
-<a id="NativeScalarAccess"></a>
-### NativeScalarAccess
-
-`typedef struct NativeScalarAccess { Symbol tag; size_t size, alignment; NativeScalarLoad load; NativeScalarStore store; } *NativeScalarAccess`
-
-Describes one exact C scalar type in native bytes: its Var tag, size,
-alignment, load, and store. Compile-time code that keeps C objects in
-bytes, and the compiler's layouts, select a row with
-`native_scalar_access`.
-
-Source: `lib/lisp/lisp.x:37`
-
-<a id="NativeScalarLoad"></a>
-### NativeScalarLoad
-
-`typedef Var (*NativeScalarLoad)(const void *bytes, Scope *owner)`
-
-Reads one exact C scalar from `bytes`; a wide result is boxed in
-`owner`.
-
-Source: `lib/lisp/lisp.x:30`
-
-<a id="NativeScalarStore"></a>
-### NativeScalarStore
-
-`typedef void (*NativeScalarStore)(void *bytes, Var value)`
-
-Writes `value`, converted to one exact C scalar type, to `bytes`.
-
-Source: `lib/lisp/lisp.x:32`
+Source: `lib/lisp/lisp.x:35`
 
 ## Design notes
 
