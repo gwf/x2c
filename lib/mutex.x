@@ -13,12 +13,6 @@
 
 #include "common.x"
 
-/** A native mutex allocated in the active `Scope` without recursive locking.
-    Its `Scope` and handle must outlive every user and waiter. Destroy it only
-    while unlocked, and do not use the handle or its storage after that.
-*/
-typedef struct Mutex *Mutex;
-
 $cleanup.by(Mutex, free);
 
 #include "scope/scope.x"
