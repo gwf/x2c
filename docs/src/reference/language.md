@@ -2580,6 +2580,10 @@ redefine them.
 
 ### Macro-visible syntax
 
+The [AST grammar](../internals/ast-grammar.md) catalogs canonical List forms,
+fields, positions, and stage variants. Internal bound and lowered forms in
+that chapter do not introduce additional source syntax.
+
 Compile-time code sees the canonical parsed, typed `List` AST used by
 `--dump-ast`, with source `(at ID NODE)` wrappers removed. Tags and semantic
 `Type`s remain `List`s. Binding records are visible so syntax can be preserved

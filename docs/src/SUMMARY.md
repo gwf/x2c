@@ -168,6 +168,7 @@
 # Compiler and contributor internals
 
 - [Compiler Architecture](internals/architecture.md)
+- [AST Grammar](internals/ast-grammar.md)
 - [Implementation Map](internals/implementation-map.md)
 - [Building the Compiler](internals/building.md)
 - [A Recursive Lisp in x2c](internals/reference-lisp.md)

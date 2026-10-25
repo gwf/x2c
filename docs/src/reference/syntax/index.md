@@ -26,6 +26,9 @@ program is valid. Names, types, macro signatures, and preprocessor state
 participate in parsing. The grammar marks these dependencies as external
 recognizers.
 
+The [AST grammar](../../internals/ast-grammar.md) separately documents the
+canonical List forms, their fields, and their compiler stages.
+
 ## Catalog of existing material
 
 This catalog lists the existing sources of syntax rules. Paths below are

@@ -3959,6 +3959,10 @@ plan adds no recurring gate or validation target.
 
 ## Canonical grammar appendix
 
+> Historical inventory. The maintained [AST grammar](../../docs/src/internals/ast-grammar.md)
+> reconciles these forms against current producers and consumers. The appendix
+> below preserves the layouts and migration discussion from this plan.
+
 This is a descriptive grammar of the existing canonical List contract, not a
 new language or validator. `S(x)` marks a field supplied by source syntax;
 `D(x)` marks a compiler-derived field. `SD(x)` means the same positional field

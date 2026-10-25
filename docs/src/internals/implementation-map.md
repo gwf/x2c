@@ -14,6 +14,9 @@ What the features *mean* is documented elsewhere:
 - [standard library overview](../library/overview.md): runtime contracts
 - [architecture](architecture.md): the pipeline as a whole
 
+The [AST grammar](ast-grammar.md) defines the literal node forms and their
+stage-specific fields. Use its head index when reading structural patterns.
+
 The [compiler API reference](compiler-api/index.md) and
 [runtime module reference](../library/modules/index.md) describe individual
 functions and types.
