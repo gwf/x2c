@@ -116,9 +116,13 @@ module Array _units(Compiler c) {
 /* The runtime prelude declares more than `x2c.h` includes, and a body can
    name any of it, so the group includes each runtime unit the translation
    read, and the prelude and the compile-time surface when a collection
-   pass has read none. */
+   pass has read none. The group copies the unit's declarations, so it
+   defines the unit's header guard as the unit's source does, and the
+   group headers of runtime providers precede the runtime headers. Each
+   runtime header that would define a copied type is then skipped. */
 static Array _runtime_includes(Compiler c, String lib) {
-  Array ordered = [];
+  Array ordered = [%(preproc ${%"#define ${c.header_guard()}"})];
+  int groups = ordered.len();
   foreach (String header in %("x2c.x" "meta.x"))
     ordered.push(%(preproc ${%"#include \"$header\""}));
   foreach ((String path, Var hash) in c.deps) {
@@ -127,11 +131,13 @@ static Array _runtime_includes(Compiler c, String lib) {
     String dependency = path;
     if (dependency.startswith(lib) && dependency.endswith(".x") &&
         !("/" in dependency[lib.len():])) {
-      String header = Path.basename(dependency);
       Var index;
       if (meta_build_tables.try_get(Path.absolute(dependency), index))
-        header = %"meta_group_$index.h";
-      ordered.push(%(preproc ${%"#include \"$header\""}));
+        ordered.insert(
+          groups++, %(preproc ${%"#include \"meta_group_$index.h\""}));
+      else
+        ordered.push(
+          %(preproc ${%"#include \"${Path.basename(dependency)}\""}));
     }
   }
   return ordered;

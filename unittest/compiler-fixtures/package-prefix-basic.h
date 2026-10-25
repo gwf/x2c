@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0x430933B4__
-#define __GUARD_0x430933B4__
+#ifndef __GUARD_0x18C18B20__
+#define __GUARD_0x18C18B20__
 
 #include "x2c.h"
 typedef struct geo__VecData{
@@ -42,4 +42,4 @@ int geo__ChainLeaf_leaf_len(geo__ChainLeaf values);
 Iter geo__Vec_iter(geo__Vec v, Iter dest);
 
 
-#endif /* __GUARD_0x430933B4__ */
+#endif /* __GUARD_0x18C18B20__ */
