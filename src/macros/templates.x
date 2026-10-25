@@ -117,11 +117,12 @@ static Var _eval_template_form(
   if (construction is not void)
     form = _with_construction(c, serial, form, construction);
   MetaContext *context = MetaContext.current();
-  $let(context.has_bindings, !!references)
-  $let(context.captures, source_captures)
-  $let(context.definition_file, source_file)
-  $let(context.expander, c)
+  with (context.has_bindings = !!references,
+        context.captures = source_captures,
+        context.definition_file = source_file,
+        context.expander = c) {
     return _eval_string(c, form, invocation);
+  }
 }
 
 /** Evaluates the explicit meta call `expression` at `site` with the active
@@ -134,13 +135,14 @@ Var Compiler.evaluate_meta_value(
   List bindings = active ? active.caddr() : NULL;
   String source_file = active ? _definition_file(active.car()) : c.filename;
   MetaContext *context = MetaContext.current();
-  $let(context.has_bindings, !!bindings)
-  $let(context.captures, _source_captures(bindings))
-  $let(context.definition_file, source_file)
-  $let(context.expander, c)
-  $let(context.evaluator, c)
-  $let(context.site, site)
+  with (context.has_bindings = !!bindings,
+        context.captures = _source_captures(bindings),
+        context.definition_file = source_file,
+        context.expander = c,
+        context.evaluator = c,
+        context.site = site) {
     return c.run_meta_call(expression, site, slot);
+  }
 }
 
 /* Both entry forms expose source only for complete captures in the active
@@ -329,10 +331,10 @@ module Var _helper_result(Compiler c, Var value) {
       Token site = c.macro_invocation_site(<m-invoke>);
       if (!site) site = c.token;
       MetaContext *context = MetaContext.current();
-      $let(context.expander, c)
-      $let(context.site, site)
+      with (context.expander = c, context.site = site) {
         return _sdk_template_call(
           stored is <string> ? Atom.intern(stored.str()) : stored, values);
+      }
     }
   }
   List child;
@@ -435,16 +437,16 @@ List Compiler.land_quotation(
   Landing landing = {
     .c = c, .site = site ? site : c.token, .anchored = !!site};
   List bound = NULL;
-  $let(c.macro_application, c.macro_application + 1) {
+  with (c.macro_application = c.macro_application + 1) {
     SymTxn transaction = { 0 };
     if (c.recovery_depth > 0)
       transaction = c.begin_semantic_transaction();
     defer transaction.rollback();
     landing.names = _private_names(c, fresh);
     Var filled = _fill_syntax(landing, c.thaw_declaration_syntax(syntax));
-    $let(c.token, site)
-    $let(c.origin, c.record_origin(site))
+    with (c.token = site, c.origin = c.record_origin(site)) {
       bound = c.bind_syntax(filled, position, return_type);
+    }
     transaction.commit();
   }
   if (position == <block> || position == <statement> ||

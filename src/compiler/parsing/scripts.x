@@ -18,7 +18,7 @@ static typedef struct ScriptParse {
 module void _parse_script(Compiler c, Array nodes) {
   ScriptParse p = {.c = c, .nodes = nodes, .statements = [], .first = -1};
   Token conflict = NULL;
-  $let(c.recovery_depth, c.recovery_depth + 1) {
+  with (c.recovery_depth = c.recovery_depth + 1) {
     _append_preproc(c, nodes);
     while (c.peek(0) != <eof>) if (!_script_form(p)) break;
     if (p.first >= 0) {

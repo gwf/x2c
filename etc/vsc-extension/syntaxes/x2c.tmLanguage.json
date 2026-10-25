@@ -63,7 +63,10 @@
 			"include": "#x2c_destructuring_assignment"
 		},
 		{
-			"include": "#x2c_with_multiline_statement"
+			"include": "#x2c_alias_declaration"
+		},
+		{
+			"include": "#x2c_unalias_declaration"
 		},
 		{
 			"include": "#x2c_with_statement"
@@ -640,6 +643,15 @@
 				},
 				{
 					"include": "#x2c_foreach_statement"
+				},
+				{
+					"include": "#x2c_alias_declaration"
+				},
+				{
+					"include": "#x2c_unalias_declaration"
+				},
+				{
+					"include": "#x2c_with_statement"
 				},
 				{
 					"include": "#x2c_keywords"
@@ -3819,34 +3831,28 @@
 			]
 		},
 		"x2c_with_statement": {
-			"begin": "(?:^[ \\t]*|(?<=\\))[ \\t]*|(?<=[;{}])[ \\t]*|(?<=else)[ \\t]+|(?<=do)[ \\t]+)(with)\\b(?=[^;{]*\\{)",
-			"beginCaptures": {
+			"match": "(?:^[ \\t]*|(?<=\\))[ \\t]*|(?<=[;{}])[ \\t]*|(?<=else)[ \\t]+|(?<=do)[ \\t]+)(with)(?=[ \\t]*\\()",
+			"captures": {
 				"1": { "name": "keyword.control.with.x2c" }
-			},
-			"end": "(?=\\{)",
-			"patterns": [
-				{
-					"match": "\\b(as)\\b(?=\\s+[A-Za-z_][A-Za-z0-9_]*\\s*\\{)",
-					"captures": {
-						"1": { "name": "keyword.control.with.x2c" }
-					}
-				},
-				{
-					"include": "$self"
-				}
-			]
+			}
 		},
-		"x2c_with_multiline_statement": {
-			"begin": "^[ \\t]*(with)\\b(?=[ \\t]*(?://.*)?$)",
+		"x2c_unalias_declaration": {
+			"match": "(?:^[ \\t]*|(?<=[;{}])[ \\t]*)(unalias)\\b(?=[ \\t]+[A-Za-z_][A-Za-z0-9_]*[ \\t]*;)",
+			"captures": {
+				"1": { "name": "keyword.declaration.alias.x2c" }
+			}
+		},
+		"x2c_alias_declaration": {
+			"begin": "(?:^[ \\t]*|(?<=\\))[ \\t]*|(?<=[;{}])[ \\t]*|(?<=else)[ \\t]+|(?<=do)[ \\t]+|(?<=static)[ \\t]+)(alias)\\b(?![ \\t]*(?:[=;,)\\]}?.<>/%|^:]|->|\\+\\+|--|[-+*&!]=|&&))(?=[^;{}]*?(?:\\bas\\b|\\{|:[ \\t]*(?://.*)?$))",
 			"beginCaptures": {
-				"1": { "name": "keyword.control.with.x2c" }
+				"1": { "name": "keyword.declaration.alias.x2c" }
 			},
-			"end": "(?=\\{)",
+			"end": "(?=[;{])|(?=:[ \\t]*(?://.*)?$)|$",
 			"patterns": [
 				{
-					"match": "\\b(as)\\b(?=\\s+[A-Za-z_][A-Za-z0-9_]*\\s*\\{)",
+					"match": "\\b(as)\\b(?=[ \\t]+[A-Za-z_][A-Za-z0-9_]*[ \\t]*(?:[;{]|:?[ \\t]*(?://.*)?$))",
 					"captures": {
-						"1": { "name": "keyword.control.with.x2c" }
+						"1": { "name": "keyword.declaration.alias.x2c" }
 					}
 				},
 				{ "include": "$self" }
@@ -3959,7 +3965,7 @@
 			]
 		},
 		"x2c_builtin_macro_reference": {
-			"match": "(?:(\\$)|(@))(auto|scope|let|lock)(?=[ \\t]*\\()",
+			"match": "(?:(\\$)|(@))(auto|scope|lock)(?=[ \\t]*\\()",
 			"captures": {
 				"1": { "name": "punctuation.definition.macro.sigil.x2c" },
 				"2": { "name": "punctuation.definition.macro.splice.x2c" },

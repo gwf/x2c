@@ -324,17 +324,23 @@ static int _attribute_since(Compiler c, Token first, Array marks) {
 
 /** Parses aggregate fields in source order up to the current closing brace.
     Returns a flat field `List`, publishes delegate-field metadata, and leaves
-    the closing brace unconsumed.
+    the closing brace unconsumed. An alias among the fields ends at the brace.
 */
 List Compiler.parse_fields(Compiler c, List context) {
   Array fields = [];
+  Map aliases = c.enter_alias_body();
+  defer c.leave_alias_body(aliases);
   loop {
-    int delegated = c.test(<delegate>);
-    List field = delegated
-      ? _field(c, context, 1) : c.parse_field(context);
-    _push_items(fields, field);
+    _push_items(fields, _field_item(c, context));
     if (c.peek(0) == <"}">) return fields.list_free();
   }
+}
+
+static List _field_item(Compiler c, List context) {
+  if (c.alias_form_starts())
+    return c.parse_alias_member(<field>, context);
+  if (c.test(<delegate>)) return _field(c, context, 1);
+  return c.parse_field(context);
 }
 
 /** Parses one field for aggregate type `context` and returns its AST.
@@ -354,8 +360,9 @@ List Compiler.parse_field(Compiler c, List context) {
    the aggregate as the current aggregate type. */
 static List _member_macro(Compiler c, List context, Symbol position) {
   if (c.peek(0) != <$> && c.peek(0) != <ident>) return NULL;
-  $let(c.aggregate_type, context)
+  with (c.aggregate_type = context) {
     return c.try_parse_macro_target_at(position);
+  }
 }
 
 static List _field(Compiler c, List context, int delegated) {
@@ -471,10 +478,17 @@ static Type _declare_named_type(
 
 /** Parses comma-separated enumerators up to the current closing brace.
     Returns their flat source-order `List` and leaves the brace unconsumed.
+    An alias among them needs no comma, and its name ends at the brace.
 */
 List Compiler.parse_enumerators(Compiler c, List context) {
   Array enumerators = [];
+  Map aliases = c.enter_alias_body();
+  defer c.leave_alias_body(aliases);
   while (c.peek(0) != <"}">) {
+    if (c.alias_form_starts()) {
+      _push_items(enumerators, c.parse_alias_member(<enumerator>, context));
+      continue;
+    }
     if (c.shallow && c.macro_starts_target_at(<enumerator>))
       c.skip_macro_invocation();
     else _push_items(enumerators, c.parse_enumerator(context));
@@ -680,7 +694,7 @@ static List _finish_aggregate_type(
   List type = %($tag $name);
   Array bound = [];
   Symbol position = tag == <enum> ? <enumerator> : <field>;
-  $let(c.aggregate_type, type) {
+  with (c.aggregate_type = type) {
     foreach (List member in members)
       foreach (Var row in c.evaluate_macro_rows(member))
         _push_items(bound, c.bind_syntax(row, position, c.return_type));

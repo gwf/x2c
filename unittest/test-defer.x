@@ -259,7 +259,7 @@ static void system_scope_restores_destination_and_transfer(void) {
 static void system_let_captures_storage_once(void) {
   int values[2] = { 1, 2 }, index = 0, evaluations = 0, caught = 0;
   try {
-    $let(values[index++], (evaluations++, 7)) {
+    with (values[index++] = (evaluations++, 7)) {
       EXPECT_INT_EQ(values[0], 7);
       EXPECT_INT_EQ(index, 1);
       index = 1;

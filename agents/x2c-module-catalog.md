@@ -244,11 +244,11 @@ x2c statement parsing.
 
 Public functions:
 
-`Compiler.with_binding`, `Compiler.parse_source_clause`,
-`Compiler.finish_return_statement`, `Compiler.parse_match_row_argument`,
-`Compiler.parse_case_body`, `Compiler.parse_governed`,
-`Compiler.parse_block_item`, `Compiler.parse_compound_statement`,
-`Compiler.parse_block_items`, `Compiler.parse_callable_body`
+`Compiler.parse_source_clause`, `Compiler.finish_return_statement`,
+`Compiler.parse_match_row_argument`, `Compiler.parse_case_body`,
+`Compiler.parse_governed`, `Compiler.parse_block_item`,
+`Compiler.parse_compound_statement`, `Compiler.parse_block_items`,
+`Compiler.parse_callable_body`
 
 ### [src/toolchain.x](../src/toolchain.x)
 
@@ -538,14 +538,14 @@ Public functions:
 `Compiler.parse_macro_expression_target`, `Compiler.parse_primary`,
 `Compiler.parse_variable`, `Compiler.resolve_expression`,
 `Compiler.needs_resolution`, `Compiler.var_tag_expression`,
-`Compiler.resolve_map_entry`, `_x2c_nominal_getindex`,
-`Compiler.resolve_postfix_member`, `Compiler.postfix_completions`,
-`_x2c_func_call_arguments`, `Compiler.func_call_parts`,
-`Compiler.complete_iter_chain`, `Compiler.printf_static_format`,
-`_x2c_indexed_builtin_helper`, `Compiler.check_explicit_converter`,
-`Compiler.promote_string_literal`, `Compiler.convert_expression`,
-`Compiler.convert_segment_to_string`, `Compiler.converter_call`,
-`Compiler.is_builtin_converter_call`
+`Compiler.resolve_map_entry`, `Compiler.reveal_binding`,
+`_x2c_nominal_getindex`, `Compiler.resolve_postfix_member`,
+`Compiler.postfix_completions`, `_x2c_func_call_arguments`,
+`Compiler.func_call_parts`, `Compiler.complete_iter_chain`,
+`Compiler.printf_static_format`, `_x2c_indexed_builtin_helper`,
+`Compiler.check_explicit_converter`, `Compiler.promote_string_literal`,
+`Compiler.convert_expression`, `Compiler.convert_segment_to_string`,
+`Compiler.converter_call`, `Compiler.is_builtin_converter_call`
 
 ### [src/generate/generate.x](../src/generate/generate.x)
 
@@ -625,7 +625,11 @@ Public functions:
 `Compiler.inherit_library_comptime`, `Compiler.library_filling`,
 `Compiler.shared_definitions`, `Compiler.shares_meta_definition`,
 `Compiler.install_builtin_macros`, `Compiler.bind_meta_operation`,
-`Compiler.reset_macro_library`
+`Compiler.reset_macro_library`, `Compiler.alias_form_starts`,
+`Compiler.parse_alias_statement`, `Compiler.parse_alias_declaration`,
+`Compiler.parse_alias_member`, `Compiler.enter_alias_body`,
+`Compiler.leave_alias_body`, `Compiler.scope_declares_alias`,
+`Compiler.alias_expression`
 
 ### [src/meta-group/meta-group.x](../src/meta-group/meta-group.x)
 
@@ -768,35 +772,37 @@ the compiler's semantic symbol table.
 Public functions:
 
 `Sym.new`, `Sym.reset`, `Sym.reset_overlay`, `Sym.push_new_scope`,
-`Sym.push_scope`, `Sym.pop_scope`, `Sym.scope_count`, `Sym.at_file_scope`,
+`Sym.push_scope`, `Sym.pop_scope`, `Sym.declaring_scope`, `Sym.scope_count`,
+`Sym.base_scope_count`, `Sym.has_aliases`, `Sym.at_file_scope`,
 `Sym.close_local_scopes`, `Sym.reopen_scopes`, `Sym.global_symbols`,
 `Sym.base_symbols`, `Sym.current_symbols`, `Sym.unit_symbols`,
 `Sym.file_statics`, `Sym.mark_static`, `Sym.visible_symbols`,
 `Sym.define_macro`, `Sym.has_local_macros`, `Sym.lookup_macro`,
 `Compiler.macro_definition_locals`, `Compiler.macro_template_local`, `Sym.set`,
-`Sym.define`, `Sym.seed_var_tags`, `Sym.define_global`, `Sym.undefine_global`,
-`Sym.declare_enumerator`, `Sym.introduced`, `Sym.introduce`,
-`Sym.current_binding`, `Sym.enumerator_owner`, `Sym.binding_is_local`,
-`Sym.binding_is_local_before`, `Compiler.semantic_binding_facts`,
-`Compiler.fact`, `Compiler.set_fact`, `Compiler.drop_fact`, `Sym.get`,
-`Sym.get_exact`, `Sym.has_local`, `Sym.lookup`, `Sym.reference`,
-`Sym.resolve_global`, `Sym.reference_global`, `Sym.declare`,
-`Sym.declare_resolved`, `Sym.declared_key`, `Sym.is_file_static`,
-`Sym.unshadow_visible`, `Sym.bind_identity`, `Compiler.aggregate_name`,
-`Compiler.record_declaration_visibility`, `Compiler.private_prefix`,
-`Compiler.scoped_spelling`, `Compiler.declared_spelling`,
-`Compiler.file_prefixes`, `Compiler.unprefixed`, `Compiler.package_spelling`,
-`Compiler.register_package_alias`, `Compiler.register_package_member`,
-`Compiler.package_member_spelling`, `Compiler.imported_providers`,
-`Compiler.imported_spelling`, `Sym.resolve_key`, `Sym.next_typedef`,
-`Sym.sole_typedef`, `Sym.normalize_declared_type`, `Sym.local_type`,
-`Sym.resolve_numeric_type`, `Sym.var_tag_for_type`, `Sym.is_var_type`,
-`Sym.is_string_type`, `Sym.is_array_type`, `Sym.is_map_type`,
-`Sym.is_named_value_type`, `Sym.lookup_field`, `Sym.declare_field_order`,
-`Sym.field_order`, `Sym.mark_field`, `Sym.marked_fields`, `Sym.aggregate_of`,
-`Sym.put`, `Sym.drop`, `Compiler.begin_semantic_transaction`,
-`SymTxn.local_macros_changed`, `Sym.transacting`, `SymTxn.commit`,
-`SymTxn.commit_transient`, `SymTxn.rollback`
+`Sym.define`, `Sym.define_alias`, `Sym.undefine_alias`, `Sym.seed_var_tags`,
+`Sym.define_global`, `Sym.undefine_global`, `Sym.declare_enumerator`,
+`Sym.introduced`, `Sym.introduce`, `Sym.current_binding`,
+`Sym.enumerator_owner`, `Sym.binding_is_local`, `Sym.binding_is_local_before`,
+`Compiler.semantic_binding_facts`, `Compiler.fact`, `Compiler.set_fact`,
+`Compiler.drop_fact`, `Sym.get`, `Sym.get_exact`, `Sym.has_local`,
+`Sym.lookup`, `Sym.reference`, `Sym.resolve_global`, `Sym.reference_global`,
+`Sym.declare`, `Sym.declare_resolved`, `Sym.declared_key`,
+`Sym.is_file_static`, `Sym.unshadow_visible`, `Sym.bind_identity`,
+`Compiler.aggregate_name`, `Compiler.record_declaration_visibility`,
+`Compiler.private_prefix`, `Compiler.scoped_spelling`,
+`Compiler.declared_spelling`, `Compiler.file_prefixes`, `Compiler.unprefixed`,
+`Compiler.package_spelling`, `Compiler.register_package_alias`,
+`Compiler.register_package_member`, `Compiler.package_member_spelling`,
+`Compiler.imported_providers`, `Compiler.imported_spelling`, `Sym.resolve_key`,
+`Sym.next_typedef`, `Sym.sole_typedef`, `Sym.normalize_declared_type`,
+`Sym.local_type`, `Sym.resolve_numeric_type`, `Sym.var_tag_for_type`,
+`Sym.is_var_type`, `Sym.is_string_type`, `Sym.is_array_type`,
+`Sym.is_map_type`, `Sym.is_named_value_type`, `Sym.lookup_field`,
+`Sym.declare_field_order`, `Sym.field_order`, `Sym.mark_field`,
+`Sym.marked_fields`, `Sym.aggregate_of`, `Sym.put`, `Sym.drop`,
+`Compiler.begin_semantic_transaction`, `SymTxn.local_macros_changed`,
+`Sym.transacting`, `SymTxn.commit`, `SymTxn.commit_transient`,
+`SymTxn.rollback`
 
 ### [src/transform/transform.x](../src/transform/transform.x)
 

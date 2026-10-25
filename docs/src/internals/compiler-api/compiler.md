@@ -264,7 +264,7 @@ reports whether it did. A required expansion reports its errors. A tried
 expansion that fails keeps nothing and leaves the cursor at the
 invocation, so collection skips it and the full parse reports it.
 
-Source: `src/compiler/declarations/production.x:66`
+Source: `src/compiler/declarations/production.x:64`
 
 <a id="Compiler.copy_source_declaration"></a>
 #### Compiler.copy_source_declaration
@@ -638,7 +638,7 @@ Source: `src/compiler/source-locations.x:73`
 Binds a retained declaration production at the cursor, then advances
 past its source. Returns NULL when collection retained no production.
 
-Source: `src/compiler/declarations/production.x:127`
+Source: `src/compiler/declarations/production.x:125`
 
 <a id="Compiler.require_input"></a>
 #### Compiler.require_input
@@ -967,7 +967,7 @@ Source: `src/compiler/lifecycle.x:8`
 | [`ScriptUnit`](#ScriptUnit) | struct | Describes the `#!` script unit a translation unit was started from: its canonical path, its first line as written, and whether it defines `main` itself. |
 | [`SlotWatch`](#SlotWatch) | struct | Names the slots a rewrite's first lowering watches; see "prepared replacements" in macros.x. |
 | [`Sym`](#Sym) | struct | Names the scope-owned semantic table belonging to one compiler. |
-| [`SymScope`](#SymScope) | struct | Holds the three mutable maps that form one lexical semantic scope. |
+| [`SymScope`](#SymScope) | struct | Holds the mutable maps that form one lexical semantic scope, and the number of alias rows it defines. |
 | [`SymTxn`](#SymTxn) | struct | Holds one reversible semantic transaction in caller storage. |
 
 <a id="Ancestor"></a>
@@ -981,12 +981,12 @@ the transform lowers it, a block item with the token or origin it
 starts at, or an initialized declarator with its declaration base in
 `base` and its `(bind ...)` node in `node`.
 
-Source: `src/compiler/compiler.x:99`
+Source: `src/compiler/compiler.x:101`
 
 <a id="Compiler"></a>
 ### Compiler
 
-`typedef struct Compiler { String filename, text, root_dir; String package, List package_dirs, package_source_dirs; Map package_roots, package_aliases, package_members, package_effects; Token token; Token input_boundary; Tokenizer tokenizer; Array line_markers; ModuleSource unit_source; List return_type, include_dirs; Map deps; List aggregate_type, macro_stack, declaration_effects, Sym sym; Map evaluated_effects; int expansion_floor; SymScope params; Map key_ids, macros, kw_aliases; List binding_rows, binding_sealed; Map object_macros; List arms; Map arm_stacks; Array layout_marks, packed_marks; Token directives_taken; Map protocols, conforms, protocol_helpers; Map proto_cache; Map adoptions; Map macro_holes; Map local_macro_captures; int macro_application; List lambda_scopes; Array match_types; Map imports; Map included_effects; Map init_tokens, static_init_deps, fn_defs; Array id_keys; String init_fn, fini_fn; Pending pending, int prelude; Map meta_comptime, meta_regions, meta_hashes, meta_calls; struct MetaHelper *meta_helper; Map native_meta; Map project_meta; Array unit_nodes, meta_group; Map meta_group_bound; int meta_build; int load_source; int runtime_inc, runtime_hdrs, collect_protocols, shallow, source_private; int module_declaration; int replaying_declaration; int public_bodies; int interface_provider, signature_only; int collection_native; Map collection_native_files; Array pending_inline_bodies; int layout; int meta_body; int capture_unit; List active_rewrites; List applying; Map rewrite_rules; Map prepared_rewrites; SlotWatch slot_watch; Token meta_statement; int import_protocols; int in_pattern, match_is, runtime_literals, inline_header; int permanent_literals; int builtin_defs, in_proto, macro_count, recovery_depth; int declaration_produced; int needs_exception; int local_macro_capture_scopes; int open_linkage; String fn_name, Diagnostics diagnostics, Array braces, import_stack; Block ancestors; Array placements; String lines_text, Array line_starts; ScriptUnit unit_script, script; Lisp macro_lisp, int borrowed_lisp; int inherited_lisp; GenNames names; Array origins, int origin, source_map; SourceView sources; int source_facts, source_primary; Array source_occurrences; Map source_definitions, source_declarations, source_texts; } *Compiler`
+`typedef struct Compiler { String filename, text, root_dir; String package, List package_dirs, package_source_dirs; Map package_roots, package_aliases, package_members, package_effects; Token token; Token input_boundary; Tokenizer tokenizer; Array line_markers; ModuleSource unit_source; List return_type, include_dirs; Map deps; List aggregate_type, macro_stack, declaration_effects, Sym sym; Map evaluated_effects; int expansion_floor; SymScope params; Map key_ids, macros, kw_aliases; List binding_rows, binding_sealed; Map object_macros; List arms; Map arm_stacks; Array layout_marks, packed_marks; Token directives_taken; Map protocols, conforms, protocol_helpers; Map proto_cache; Map adoptions; Map macro_holes; int alias_level; Map local_macro_captures; int macro_application; List lambda_scopes; Array match_types; Map imports; Map included_effects; Map init_tokens, static_init_deps, fn_defs; Array id_keys; String init_fn, fini_fn; Pending pending, int prelude; Map meta_comptime, meta_regions, meta_hashes, meta_calls; struct MetaHelper *meta_helper; Map native_meta; Map project_meta; Array unit_nodes, meta_group; Map meta_group_bound; int meta_build; int load_source; int runtime_inc, runtime_hdrs, collect_protocols, shallow, source_private; int module_declaration; int replaying_declaration; int public_bodies; int interface_provider, signature_only; int collection_native; Map collection_native_files; Array pending_inline_bodies; int layout; int meta_body; int capture_unit; List active_rewrites; List applying; Map rewrite_rules; Map prepared_rewrites; SlotWatch slot_watch; Token meta_statement; int import_protocols; int in_pattern, match_is, runtime_literals, inline_header; int permanent_literals; int builtin_defs, in_proto, macro_count, recovery_depth; int declaration_produced; int needs_exception; int local_macro_capture_scopes; int open_linkage; String fn_name, Diagnostics diagnostics, Array braces, import_stack; Block ancestors; Array placements; String lines_text, Array line_starts; ScriptUnit unit_script, script; Lisp macro_lisp, int borrowed_lisp; int inherited_lisp; GenNames names; Array origins, int origin, source_map; SourceView sources; int source_facts, source_primary; Array source_occurrences; Map source_definitions, source_declarations, source_texts; } *Compiler`
 
 Holds mutable state for one source translation.
 
@@ -994,7 +994,7 @@ The structure, its state, and its owned compile-time `Lisp` session belong
 to the current `Scope`. `Compiler.free_lisp` permits early session cleanup;
 otherwise Scope teardown releases it. All Lisp calls must return first.
 
-Source: `src/compiler/compiler.x:113`
+Source: `src/compiler/compiler.x:115`
 
 <a id="Diagnostics"></a>
 ### Diagnostics
@@ -1046,7 +1046,7 @@ Holds generated code awaiting insertion, by `Pending.area` destination:
 unit support declarations, which `Compiler.transform` lowers after the
 unit, then the lowered statements of each file initialization area.
 
-Source: `src/compiler/compiler.x:82`
+Source: `src/compiler/compiler.x:84`
 
 <a id="PendingMark"></a>
 ### PendingMark
@@ -1055,7 +1055,7 @@ Source: `src/compiler/compiler.x:82`
 
 Holds each destination's length for `Pending.restore`.
 
-Source: `src/compiler/compiler.x:85`
+Source: `src/compiler/compiler.x:87`
 
 <a id="ScriptUnit"></a>
 ### ScriptUnit
@@ -1077,7 +1077,7 @@ Source: `src/compiler/compiler.x:33`
 Names the slots a rewrite's first lowering watches; see "prepared
 replacements" in macros.x.
 
-Source: `src/compiler/compiler.x:92`
+Source: `src/compiler/compiler.x:94`
 
 <a id="Sym"></a>
 ### Sym
@@ -1086,19 +1086,20 @@ Source: `src/compiler/compiler.x:92`
 
 Names the scope-owned semantic table belonging to one compiler.
 
-Source: `src/compiler/compiler.x:88`
+Source: `src/compiler/compiler.x:90`
 
 <a id="SymScope"></a>
 ### SymScope
 
-`typedef struct SymScope { Map symbols, bindings, enumerators, macros; } SymScope`
+`typedef struct SymScope { Map symbols, bindings, enumerators, macros; int aliases; } SymScope`
 
-Holds the three mutable maps that form one lexical semantic scope.
+Holds the mutable maps that form one lexical semantic scope, and the
+number of alias rows it defines.
 
 Active scopes have initialized maps. The zero value is only the sentinel
 returned when an empty scope stack is popped.
 
-Source: `src/compiler/compiler.x:72`
+Source: `src/compiler/compiler.x:73`
 
 <a id="SymTxn"></a>
 ### SymTxn
@@ -1111,7 +1112,7 @@ copying it does not coordinate completion. The symbol table's undo log
 holds the rows it may restore from `mark`; the staged generated-name
 counters and other snapshots live in its initial Scope.
 
-Source: `src/compiler/compiler.x:292`
+Source: `src/compiler/compiler.x:296`
 
 ## Design notes
 

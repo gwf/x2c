@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/alias-file-conflict.x:5:11: parse: declaration 'total' is already bound
+  int total = 2;
+            ^
+  note: prior binding: 'total'
+

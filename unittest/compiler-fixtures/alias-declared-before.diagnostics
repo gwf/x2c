@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/alias-declared-before.x:5:1: parse: declaration 'total' is already bound
+  alias value as total;
+  ^^^^^
+  note: prior binding: 'total'
+

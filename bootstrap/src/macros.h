@@ -206,5 +206,21 @@ void Compiler_bind_meta_operation(Lisp lisp, String name, Var function);
 
 void Compiler_reset_macro_library(void);
 
+int Compiler_alias_form_starts(Compiler c);
+
+List Compiler_parse_alias_statement(Compiler c, int block);
+
+List Compiler_parse_alias_declaration(Compiler c, int skip_body);
+
+List Compiler_parse_alias_member(Compiler c, Symbol position, List context);
+
+Map Compiler_enter_alias_body(Compiler c);
+
+void Compiler_leave_alias_body(Compiler c, Map mark);
+
+int Compiler_scope_declares_alias(Compiler c, String name);
+
+List Compiler_alias_expression(Compiler c);
+
 
 #endif /* __GUARD_0x21BF4D8E__ */

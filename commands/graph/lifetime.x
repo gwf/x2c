@@ -333,7 +333,7 @@ static void _lifetime_scan_calls(Lifetime &lifetime, Var value) {
   match (node) {
     case %(function *): return;
     case %(at ?origin ?inner): {
-      $let(lifetime.origin, origin.integer()) {
+      with (lifetime.origin = origin.integer()) {
         _lifetime_scan_calls(lifetime, inner);
       }
       return;
@@ -590,7 +590,7 @@ static void _lifetime_statement(Lifetime &lifetime, Var value, int nested) {
   List node = value;
   match (node) {
     case %(at ?origin ?inner): {
-      $let(lifetime.origin, origin.integer()) {
+      with (lifetime.origin = origin.integer()) {
         _lifetime_statement(lifetime, inner, nested);
       }
       return;

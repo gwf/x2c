@@ -1464,39 +1464,39 @@ static void _clear(String base){
 static void _parse(Helper * h, String path, int index){
   Frontend f =(* h).frontend;
   {
-    List * _x2c_gensym_macro_address_3 = & f -> request -> package_dirs;
-    List _x2c_gensym_macro_previous_3 = * _x2c_gensym_macro_address_3;
+    List * _x2c_gensym_macro_address_2 = & f -> request -> package_dirs;
+    List _x2c_gensym_macro_previous_2 = * _x2c_gensym_macro_address_2;
     {
       _x2c_gensym_defer_env_8 _x2c_gensym_macro_environment_9 ={
         0
       }
       ;
-      _x2c_gensym_macro_environment_9._x2c_gensym_defer_capture_10 =(const void *) & _x2c_gensym_macro_address_3;
-      _x2c_gensym_macro_environment_9._x2c_gensym_defer_capture_11 =(const void *) & _x2c_gensym_macro_previous_3;
+      _x2c_gensym_macro_environment_9._x2c_gensym_defer_capture_10 =(const void *) & _x2c_gensym_macro_address_2;
+      _x2c_gensym_macro_environment_9._x2c_gensym_defer_capture_11 =(const void *) & _x2c_gensym_macro_previous_2;
       X2CCleanup _x2c_gensym_defer_record_8 ={
         .fn = _x2c_gensym_defer_cleanup_8, .env = & _x2c_gensym_macro_environment_9
       }
       ;
       x2c_cleanup_push(& _x2c_gensym_defer_record_8);
       {
-        * _x2c_gensym_macro_address_3 = f -> request -> package_dirs;
+        * _x2c_gensym_macro_address_2 = f -> request -> package_dirs;
         {
-          int * _x2c_gensym_macro_address_2 = & f -> request -> source_map;
-          int _x2c_gensym_macro_previous_2 = * _x2c_gensym_macro_address_2;
+          int * _x2c_gensym_macro_address_3 = & f -> request -> source_map;
+          int _x2c_gensym_macro_previous_3 = * _x2c_gensym_macro_address_3;
           {
             _x2c_gensym_defer_env_9 _x2c_gensym_macro_environment_8 ={
               0
             }
             ;
-            _x2c_gensym_macro_environment_8._x2c_gensym_defer_capture_12 =(const void *) & _x2c_gensym_macro_address_2;
-            _x2c_gensym_macro_environment_8._x2c_gensym_defer_capture_13 =(const void *) & _x2c_gensym_macro_previous_2;
+            _x2c_gensym_macro_environment_8._x2c_gensym_defer_capture_12 =(const void *) & _x2c_gensym_macro_address_3;
+            _x2c_gensym_macro_environment_8._x2c_gensym_defer_capture_13 =(const void *) & _x2c_gensym_macro_previous_3;
             X2CCleanup _x2c_gensym_defer_record_9 ={
               .fn = _x2c_gensym_defer_cleanup_9, .env = & _x2c_gensym_macro_environment_8
             }
             ;
             x2c_cleanup_push(& _x2c_gensym_defer_record_9);
             {
-              * _x2c_gensym_macro_address_2 = f -> request -> source_map || List_truth((* h).entries);
+              * _x2c_gensym_macro_address_3 = f -> request -> source_map || List_truth((* h).entries);
               {
                 {
                   String root;

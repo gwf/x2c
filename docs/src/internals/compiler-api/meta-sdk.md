@@ -50,7 +50,7 @@ The compiler's answers to `lib/meta.x` operations.
 | [`Code.value`](#Code.value) | Reads a constant through the compiler's existing constant decoder. |
 | [`Compiler.bind_sdk_primitives`](#Compiler.bind_sdk_primitives) | Binds the internal primitives the compile-time SDK library wraps into `lisp`, under their `_x2c.` names. |
 | [`Compiler.expanding`](#Compiler.expanding) | Returns the compiler running the current compile-time call. |
-| [`MetaContext.current`](#MetaContext.current) | Returns the context of the running compile-time call, which an evaluation changes with `$let` for its own extent. |
+| [`MetaContext.current`](#MetaContext.current) | Returns the context of the running compile-time call, which an evaluation changes with `with` for its own extent. |
 | [`MetaContext.fresh_binding`](#MetaContext.fresh_binding) | Returns a fresh binding whose spelling starts with `stem`. |
 | [`MetaContext.function_reference`](#MetaContext.function_reference) | Returns the typed expression naming the function `name`, or an empty List when no function of that name is visible. |
 | [`MetaContext.invocation_location`](#MetaContext.invocation_location) | Returns the location of the active macro invocation. |
@@ -432,7 +432,7 @@ Source: `src/meta-sdk/context.x:29`
 `MetaContext *MetaContext.current(void)`
 
 Returns the context of the running compile-time call, which an
-evaluation changes with `$let` for its own extent.
+evaluation changes with `with` for its own extent.
 
 Source: `src/meta-sdk/context.x:25`
 
@@ -705,7 +705,7 @@ its definition, `captures` its complete captured syntax by identity, and
 `has_bindings` whether it bound captured values. `evaluator` is the
 compiler evaluating Lisp and `site` where that evaluation stands, which
 a nested import changes without an expansion. Each evaluation installs
-its part with `$let`, so a captured entry is valid only while its
+its part with `with`, so a captured entry is valid only while its
 expansion is active.
 
 Source: `src/meta-sdk/meta-sdk.x:25`

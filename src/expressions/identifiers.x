@@ -176,11 +176,34 @@ static int _shadow_identifier(
   if (!visible_type || !(%(automatic $visible) in binding_facts) ||
       (type && !c.sym.resolve_global(%($spelling), NULL)))
     return 0;
+  _unshadow_visible(c, visible, spelling);
+  return 0;
+}
+
+static void _unshadow_visible(Compiler c, List visible, String spelling) {
   foreach (List local in c.sym.unshadow_visible(spelling))
     c.respell_captures(local);
-  if (!(%(emitted $visible) in binding_facts))
+  if (!(%(emitted $visible) in c.semantic_binding_facts()))
     c.set_fact(%(emitted $visible), c.fresh_name("binding_shadow"));
-  return 0;
+}
+
+/** Keeps `binding` reachable from the cursor where a later declaration of
+    its spelling hides it. A hidden local takes a fresh emitted spelling;
+    a hidden file-scope name makes the visible automatic locals take one.
+*/
+void Compiler.reveal_binding(Compiler c, List binding) {
+  String spelling = NULL;
+  if (!Ast.try_binding(binding, NULL, spelling)) return;
+  Type visible_type = NULL;
+  List visible = c.sym.lookup(%($spelling), visible_type);
+  if (!visible || visible == binding) return;
+  if (c.sym.binding_is_local(binding)) {
+    if (!(%(emitted $binding) in c.semantic_binding_facts()))
+      c.set_fact(%(emitted $binding), c.fresh_name("binding_shadow"));
+    c.respell_captures(binding);
+  }
+  else if (visible_type && %(automatic $visible) in c.semantic_binding_facts())
+    _unshadow_visible(c, visible, spelling);
 }
 
 /* An active expansion issued `binding` after it began. */

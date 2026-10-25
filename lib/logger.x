@@ -159,7 +159,7 @@ void Logger.log(Logger logger, Symbol level, Symbol category, List fields) {
     .fields = fields
   };
   if (event.elapsed_us < 0) event.elapsed_us = 0;
-  $let(logger.emission_depth, logger.emission_depth + 1) {
+  with (logger.emission_depth = logger.emission_depth + 1) {
     for (LogSink sink = logger.first_sink; sink; sink = sink.next)
       sink.emit(logger, &event, sink.data);
     if (level == <fatal>) logger.flush();
@@ -307,9 +307,10 @@ int Logger.sink_count(Logger logger) {
 synchronized
 void Logger.flush(Logger logger) {
   if (!logger) return;
-  $let(logger.emission_depth, logger.emission_depth + 1)
+  with (logger.emission_depth = logger.emission_depth + 1) {
     for (LogSink sink = logger.first_sink; sink; sink = sink.next)
       if (sink.flush) sink.flush(logger, sink.data);
+  }
 }
 
 static LogSink _new_sink(
@@ -407,7 +408,7 @@ static void _emit_text(Logger logger, const LogEvent *event, Var data) {
     _add_scratch(logger, context);
   Buffer *buffers = context.scratch.bytes;
   Buffer out = buffers[context.depth].clear();
-  $let(context.depth, context.depth + 1) {
+  with (context.depth = context.depth + 1) {
     _render_text(out, event, context.color);
     context.file.write(out.content.bytes, 1, out.content.length);
     if (context.flush_each) fflush(context.file);

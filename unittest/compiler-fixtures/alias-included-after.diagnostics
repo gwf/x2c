@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/alias-included-after.x:11:1: parse: declaration 'level' is already bound
+  #include "alias-included/shared.x"
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  note: this include aliases 'level'
+

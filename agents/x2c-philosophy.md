@@ -965,7 +965,7 @@ Exemplars endorse a property, not every line in a file:
   it is meant to be read: `auto` for lifetimes, `in` and `is`
   for membership and tags, destructuring, `=>` bodies, bare literals, and `.`
   through every pointer the compiler owns.
-- `examples/magic/system-macros.x` - `class`, `$let`, and `$lock` in one
+- `examples/magic/system-macros.x` - `class`, `with`, and `$lock` in one
   runnable program.
 
 Related guides: `agents/x2c-code-standard.md` for mechanical style,

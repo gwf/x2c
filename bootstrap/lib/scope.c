@@ -320,10 +320,10 @@ void Scope_retain(void){
 
 void Scope_release(void){
   if(! _init_guard_) Scope_initialize();  _require_running();  ScopeThreadState state = _thread(); {
-    if(! *(state -> active) || ! f7_regions____forget_retain((*(state -> active)), (state -> active))){
+    if(! * state -> active || ! f7_regions____forget_retain((* state -> active), state -> active)){
       static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../lib/scope/regions.x",.function = "Scope_release",.line = 159,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_11, 4477477457162, 0);  __builtin_unreachable();
     }
-    Scope top = *(state -> active);  if((*(state -> active) = top -> down))(*(state -> active)) -> up = NULL;  top -> down = NULL;  f7_regions____destroy_chain(top);
+    Scope top = * state -> active;  if((* state -> active = top -> down))(* state -> active) -> up = NULL;  top -> down = NULL;  f7_regions____destroy_chain(top);
   }
 
 }

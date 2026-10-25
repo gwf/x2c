@@ -163,7 +163,7 @@ List Compiler.parse_lambda_literal(Compiler c) {
   _parse_using(c, references, prescribed);
   c.expect(<"=">);
   c.expect(<">">);
-  $let(c.lambda_scopes, c.lambda_scopes) {
+  with (c.lambda_scopes = c.lambda_scopes) {
     c.begin_lambda_captures(references.list_free(), NULL);
     c.sym.push_scope(params);
     List body = _parse_lambda_body(c);
@@ -280,7 +280,7 @@ static List _shared_binding(Compiler c) {
 }
 
 static List _parse_lambda_body(Compiler c) {
-  $let(c.return_type, %("Var")) {
+  with (c.return_type = %("Var")) {
     if (!c.test(<"{">)) return c.parse_assignment();
     return c.parse_callable_body();
   }
@@ -339,7 +339,7 @@ List Compiler.bind_lambda_expression(
     (List binding, Type annotation) = alias;
     c.sym.bind_identity(NULL, binding, annotation.declaration_ast(binding));
   }
-  $let(c.lambda_scopes, c.lambda_scopes) {
+  with (c.lambda_scopes = c.lambda_scopes) {
     c.begin_lambda_captures(NULL, prescribed.list_free());
     c.sym.push_new_scope();
     defer c.sym.pop_scope();
@@ -421,7 +421,9 @@ static void _add_param(Compiler c, Array entries, List parameter) {
 static List _bind_body(Compiler c, List body) {
   match (body) case $source_block_content(%(*)):
     return c.bind_callable_body(body, %("Var"));
-  $let(c.return_type, %("Var")) return c.resolve_expression(body, c.token);
+  with (c.return_type = %("Var")) {
+    return c.resolve_expression(body, c.token);
+  }
 }
 
 /* An open type is a Func when rows were supplied, and otherwise the
@@ -582,8 +584,9 @@ static List _add(Capture &k) {
 static List _resolve_outside(Compiler c, List frame, Var value) {
   List outside = c.lambda_scopes;
   while (outside.car() != frame) outside = outside.cdr();
-  $let(c.lambda_scopes, outside.cdr())
+  with (c.lambda_scopes = outside.cdr()) {
     return c.resolve_expression(value, c.token);
+  }
 }
 
 /* The captured copy is a fresh automatic binding: a reference parameter or

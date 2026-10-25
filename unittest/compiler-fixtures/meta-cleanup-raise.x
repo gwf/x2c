@@ -1,6 +1,6 @@
 /*  meta-cleanup-raise.x -- a cleanup runs when an error leaves its block
 
-    The failure in `fails` leaves the `$let` block through a raise. Its
+    The failure in `fails` leaves the `with` block through a raise. Its
     cleanup still restores `depth`, which the next explicit call in the
     same unit observes.
 */
@@ -11,7 +11,7 @@
 meta static int depth = 0;
 
 meta void fails(void) {
-  $let(depth, 5) {
+  with (depth = 5) {
     x2c_diagnostic_fail("failed inside the cleanup block", %());
   }
 }

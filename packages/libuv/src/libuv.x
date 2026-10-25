@@ -1085,7 +1085,7 @@ UvLookup UvLookup.hints(
   if (lookup.started) {
     $error.lookup.hints.started();
   }
-  with lookup.hints {
+  alias lookup.hints {
     memset(&_, 0, sizeof(_));
     _.ai_family = family;
     _.ai_socktype = socket_type;

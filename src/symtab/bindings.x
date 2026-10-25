@@ -22,6 +22,33 @@ List Sym.define(Sym s, List key, List type) {
   return _scope_binding(s, *scope, key);
 }
 
+/** Defines `name` in the active scope as an alias of the parsed
+    `expression` and returns its binding. The row carries the expression's
+    type; the `(alias binding)` fact carries the expression. */
+List Sym.define_alias(Sym s, String name, List expression) {
+  List type = NULL;
+  match (expression) case %(expr ?expression_type ?): type = expression_type;
+  List binding = s.define(%($name), type);
+  s.put(s.binding_facts, %(alias $binding), expression);
+  _scope_at(s, -1).aliases++;
+  s.aliases++;
+  return binding;
+}
+
+/** Removes the alias row `name` of the active scope, with its binding and
+    its `(alias binding)` fact. */
+void Sym.undefine_alias(Sym s, String name) {
+  SymScope *scope = _scope_at(s, -1);
+  List key = %($name);
+  Var binding;
+  if (scope.bindings.try_get(key, binding))
+    s.drop(s.binding_facts, %(alias $binding));
+  s.drop(scope.symbols, key);
+  s.drop(scope.bindings, key);
+  scope.aliases--;
+  s.aliases--;
+}
+
 /* A module file's static type keeps its short name as its tag, which no
    other type of the unit may take. */
 static void _seed_var_tag(Sym s, List key, List type) {

@@ -14,6 +14,8 @@ unit-item = ( directive |
     protocol-form |
     macro-definition |
     keyword-definition |
+    unit-alias |
+    unalias |
     private-interface |
     module-declaration |
     lisp-escape |
@@ -71,11 +73,18 @@ aggregate = ( ( "struct" | "union" ) ,
     { attribute } ,
     [ declaration-name ] ,
     [ ( "{" , field , { field } , "}" , { attribute } ) ] ) ;
-field = ( ( [ "delegate" ] , declaration-row , ";" ) | static-assert | field-extension ) ;
+field = ( ( [ "delegate" ] , declaration-row , ";" ) |
+    static-assert |
+    field-alias |
+    field-extension ) ;
 enumeration = ( "enum" ,
     { attribute } ,
     [ declaration-name ] ,
-    [ ( "{" , [ ( enumerator , { ( "," , enumerator ) } , [ "," ] ) ] , "}" , { attribute } ) ] ) ;
+    [ ( "{" , enumerator-list , "}" , { attribute } ) ] ) ;
+enumerator-list = ( { enumerator-alias } ,
+    [ ( enumerator ,
+    { ( "," , { enumerator-alias } , enumerator ) } ,
+    [ ( "," , { enumerator-alias } ) ] ) ] ) ;
 enumerator = ( ( declaration-name , [ ( "=" , conditional ) ] ) | enumerator-extension ) ;
 named-type = ( ( identifier ,
     ( ";" |
@@ -113,6 +122,8 @@ block = ( ( "{" | "%{" ) , { block-item } , "}" ) ;
 block-item = ( directive |
     static-assert |
     ( declaration-row , ";" ) |
+    named-alias |
+    unalias |
     local-macro-definition |
     statement |
     block-extension ) ;
@@ -142,13 +153,24 @@ statement = ( auto-region-statement |
     ( "goto" , declaration-name , ";" ) |
     ( "defer" , governed ) |
     with-statement |
+    alias-statement |
     match-statement |
     try-statement |
     raise-statement |
     statement-extension ) ;
 for-init = ( type-operand | expression ) ;
 governed = ? one statement, with directive handling G1 ? ;
-with-statement = ( "with" , expression , [ ( "as" , identifier ) ] , raw-block ) ;
+with-statement = ( "with" , "(" , with-entry , { ( "," , with-entry ) } , ")" , raw-block ) ;
+with-entry = ( unary , "=" , assignment ) ;
+alias-head = ( "alias" , expression ) ;
+alias-name = ( "as" , identifier ) ;
+named-alias = ( alias-head , alias-name , ";" ) ;
+alias-wrapper = ( alias-head , [ alias-name ] ) ;
+alias-statement = ( alias-wrapper , raw-block ) ;
+unalias = ( "unalias" , identifier , ";" ) ;
+unit-alias = ( [ "static" ] , ( named-alias | ( alias-wrapper , "{" , { unit-item } , "}" ) ) ) ;
+field-alias = ( named-alias | unalias | ( alias-wrapper , "{" , { field } , "}" ) ) ;
+enumerator-alias = ( named-alias | unalias | ( alias-wrapper , "{" , enumerator-list , "}" ) ) ;
 match-statement = ( "match" ,
     "(" ,
     expression ,

@@ -219,7 +219,7 @@ static String _module_text(Scan &s, String path, String text) {
   Compiler c = s.c;
   ModuleSource module = NULL;
   DiagnosticsHold hold = c.diagnostics.hold();
-  $let(c.recovery_depth, c.recovery_depth + 1) {
+  with (c.recovery_depth = c.recovery_depth + 1) {
     try module = c.module_source(path, text);
     catch %(malformed *): module = NULL;
   }
@@ -483,7 +483,7 @@ static void _drop_imported(Map declarations, Map packaged) {
 
 static List _loaded_provider(Helper &h, String path, int index) {
   Frontend f = h.frontend;
-  $let(f.request.package_dirs, f.request.package_dirs) {
+  with (f.request.package_dirs = f.request.package_dirs) {
     foreach ((String root, int _) in h.packages)
       f.request.package_dirs = f.request.package_dirs.append(
         %(${Path.dirname(root)}));
@@ -543,8 +543,8 @@ static void _clear(String base) {
    decide when it parses again. */
 static void _parse(Helper &h, String path, int index) {
   Frontend f = h.frontend;
-  $let(f.request.package_dirs, f.request.package_dirs)
-  $let(f.request.source_map, f.request.source_map || h.entries) {
+  with (f.request.package_dirs = f.request.package_dirs,
+        f.request.source_map = f.request.source_map || h.entries) {
     foreach ((String root, int _) in h.packages)
       f.request.package_dirs = f.request.package_dirs.append(
         %(${Path.dirname(root)}));

@@ -352,7 +352,8 @@ ReplCompletion ReplSession.complete(
       c, <submit>,
       %("void" "char" "short" "int" "long" "float" "double"
         "signed" "unsigned" "if" "while" "for" "do" "return"
-        "try" "raise" "defer" "match" "switch" "with"));
+        "try" "raise" "defer" "match" "switch" "with" "alias"
+        "unalias"));
     int declaration = c.test_declaration();
     int end = marked.len();
     if (!declaration) {
@@ -735,7 +736,7 @@ static ReplResult _submit(ReplSession session, String source) {
       }
     }
     result.syntax = fn;
-    $let(c.recovery_depth, c.recovery_depth + 1) {
+    with (c.recovery_depth = c.recovery_depth + 1) {
       fn = session.rewrite_globals(fn);
       if (function_name) {
         Func function = session.compile_function(fn);

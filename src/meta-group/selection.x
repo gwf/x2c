@@ -91,7 +91,7 @@ static void _check_runtime_meta_calls(Compiler c, Var root) {
   $ast.walk(root, node) {
     match (node) {
       case %(at ?(int origin) ?inner): {
-        $let(c.origin, origin) _check_runtime_meta_calls(c, inner);
+        with (c.origin = origin) { _check_runtime_meta_calls(c, inner); }
         continue;
       }
       case %(call ?(List callee) ?): c.check_meta_call(callee, NULL);

@@ -2551,7 +2551,10 @@ static void f9_selection____check_runtime_meta_calls(Compiler c, Var root){
                             .fn = _x2c_gensym_defer_cleanup_5, .env = & _x2c_gensym_macro_environment_4
                           }
                           ;  x2c_cleanup_push(& _x2c_gensym_defer_record_5); {
-                            * _x2c_gensym_macro_address_0 = origin;  f9_selection____check_runtime_meta_calls(c, inner);
+                            * _x2c_gensym_macro_address_0 = origin; {
+                              f9_selection____check_runtime_meta_calls(c, inner);
+                            }
+
                           }
                           x2c_cleanup_leave(& _x2c_gensym_defer_record_5);
                         }
@@ -3244,7 +3247,7 @@ static String f8_emission____diagnostic_line(List entry){
 Diagnostics Diagnostics_new(Compiler, int);
 static void f8_emission____isolate(Compiler c, struct Compiler * saved, struct GenNames * names, String stem){
   {
-    (c) -> names -> adapters = Map_copy((* names).adapters); (c) -> names -> file_scope_owners = Map_copy((* names).file_scope_owners); (c) -> id_keys = Array_copy((* saved).id_keys); (c) -> key_ids = Map_copy((* saved).key_ids);  Pending_reset(&((c) -> pending)); (c) -> origins = Array_copy((* saved).origins); (c) -> init_tokens = Map_new(); (c) -> static_init_deps = Map_new(); (c) -> fn_defs = Map_copy((* saved).fn_defs); (c) -> protocol_helpers = Map_copy((* saved).protocol_helpers); (c) -> meta_regions = Map_copy((* saved).meta_regions); (c) -> deps = Map_new(); (c) -> needs_exception = 0; (c) -> macro_stack = NULL; (c) -> macro_holes = NULL; (c) -> meta_body = 0; (c) -> permanent_literals = ! c -> meta_build; (c) -> return_type = NULL; (c) -> lambda_scopes = NULL; (c) -> source_facts = 0; (c) -> recovery_depth =(* saved).recovery_depth + 1; (c) -> filename = String_join(NULL, cons(String_var(stem), cons(String_var(_1058), NULL))); (c) -> diagnostics = Diagnostics_new(NULL, 1);
+    c -> names -> adapters = Map_copy((* names).adapters);  c -> names -> file_scope_owners = Map_copy((* names).file_scope_owners);  c -> id_keys = Array_copy((* saved).id_keys);  c -> key_ids = Map_copy((* saved).key_ids);  Pending_reset(&(c -> pending));  c -> origins = Array_copy((* saved).origins);  c -> init_tokens = Map_new();  c -> static_init_deps = Map_new();  c -> fn_defs = Map_copy((* saved).fn_defs);  c -> protocol_helpers = Map_copy((* saved).protocol_helpers);  c -> meta_regions = Map_copy((* saved).meta_regions);  c -> deps = Map_new();  c -> needs_exception = 0;  c -> macro_stack = NULL;  c -> macro_holes = NULL;  c -> meta_body = 0;  c -> permanent_literals = ! c -> meta_build;  c -> return_type = NULL;  c -> lambda_scopes = NULL;  c -> source_facts = 0;  c -> recovery_depth =(* saved).recovery_depth + 1;  c -> filename = String_join(NULL, cons(String_var(stem), cons(String_var(_1058), NULL)));  c -> diagnostics = Diagnostics_new(NULL, 1);
   }
 
 }

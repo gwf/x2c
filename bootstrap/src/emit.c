@@ -1896,8 +1896,11 @@ static List _block(Emitter * e, List ast){
       }
       ;  x2c_cleanup_push(& _x2c_gensym_defer_record_7); {
         * _x2c_gensym_macro_address_2 =(* e).native_aliases; {
-          List _x2c_gensym_return_value_6 = cons(_122, List_append(_emit(&((* e)), List_cdr(ast)), _125)); {
-            x2c_cleanup_leave(& _x2c_gensym_defer_record_7);  return _x2c_gensym_return_value_6;
+          {
+            List _x2c_gensym_return_value_6 = cons(_122, List_append(_emit(&((* e)), List_cdr(ast)), _125)); {
+              x2c_cleanup_leave(& _x2c_gensym_defer_record_7);  return _x2c_gensym_return_value_6;
+            }
+
           }
 
         }

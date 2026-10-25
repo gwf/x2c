@@ -245,7 +245,7 @@ static Ast _children(Compiler c, Ast ast) {
    gets a generated origin. */
 static Ast _at_node(Compiler c, Ast ast, int occurrence, List inner) {
   List transformed = NULL;
-  $let(c.origin, occurrence) {
+  with (c.origin = occurrence) {
     transformed = _step(c, inner);
   }
   if (transformed == inner) return ast;
@@ -261,7 +261,7 @@ static Ast _at_node(Compiler c, Ast ast, int occurrence, List inner) {
 static List _function_rewrite(
   Compiler c, List function, List return_type, int written) {
   struct SlotWatch shipped = {.shipped = 1};
-  $let(c.slot_watch, written ? &shipped : c.slot_watch) {
+  with (c.slot_watch = written ? &shipped : c.slot_watch) {
     List replaced = c.lower_rewrite(
       <function>, return_type, function, <unit>, NULL, NULL);
     return replaced ? replaced : c.lower_rewrite(
@@ -291,7 +291,7 @@ static Ast _function_node(
   Type function_type = return_type;
   int inline_header = function_type.is_inline() && !function_type.is_static();
   List transformed;
-  $let(c.fn_name, owner) $let(c.inline_header, inline_header) {
+  with (c.fn_name = owner, c.inline_header = inline_header) {
     List new_return = _step(c, return_type);
     List new_decl = _step(c, declarator);
     List declaration = %(declare $return_type (bindings $declarator));
@@ -313,7 +313,7 @@ static List _entered_body(
   Compiler c, List declaration, List body, int callback) {
   int depth = c.enter_function(declaration, callback);
   List lowered, items = NULL;
-  $let(c.return_type, Ast.declared_return(declaration)) {
+  with (c.return_type = Ast.declared_return(declaration)) {
     lowered = _step(c, body);
     for (List entry = c.function_entry(depth); entry;
          entry = c.function_entry(depth))
@@ -348,7 +348,7 @@ static Ast _block_node(
    lowers its parts in source order. All of it builds its literals when it
    runs, never in constructors. */
 static Ast _raise_node(Compiler c, Ast ast) {
-  $let(c.runtime_literals, 1) {
+  with (c.runtime_literals = 1) {
     List rewritten = _statement_rewrite(c, ast, <raise>);
     if (rewritten !== ast) ast = rewritten;
     else {

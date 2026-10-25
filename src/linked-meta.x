@@ -1589,11 +1589,12 @@ static Type _printf_type(String length, int conversion) {
   if (conversion == 'c') return length == "" ? %(int) : NULL;
   if (!strchr("diouxX", conversion)) return NULL;
   int is_signed = conversion == 'd' || conversion == 'i';
-  if (length == "hh" || length == "h") return %(int);
-  if (length == "") return is_signed ? %(int) : %(unsigned);
-  if (length == "l") return is_signed ? %(long) : %(unsigned long);
-  if (length == "ll")
-    return is_signed ? %(long long) : %(unsigned long long);
+  switch (length) {
+    case "hh": case "h": return %(int);
+    case "": return is_signed ? %(int) : %(unsigned);
+    case "l": return is_signed ? %(long) : %(unsigned long);
+    case "ll": return is_signed ? %(long long) : %(unsigned long long);
+  }
   return NULL;
 }
 

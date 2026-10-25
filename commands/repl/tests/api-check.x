@@ -118,8 +118,8 @@ static void _carrier_rollback(Compiler c) {
   String counters = c.names.counters.repr();
   int failed = 0;
   DiagnosticsHold hold = c.diagnostics.hold();
-  $let(c.recovery_depth, c.recovery_depth + 1)
-  $let(c.macro_application, c.macro_application + 1) {
+  with (c.recovery_depth = c.recovery_depth + 1,
+        c.macro_application = c.macro_application + 1) {
     SymTxn transaction = c.begin_semantic_transaction();
     defer transaction.rollback();
     try {

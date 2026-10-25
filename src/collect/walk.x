@@ -81,8 +81,9 @@ static void _add_prelude(Compiler c, Map globs, Map visited) {
     else {
       List entry = _prelude_entry(c, path, canonical);
       // Its compile-time effects install as the compiler's own.
-      $let(c.builtin_defs, 1)
+      with (c.builtin_defs = 1) {
         _replay_cached(c, entry, canonical, globs, visited, NULL);
+      }
     }
   }
 }
@@ -138,9 +139,10 @@ static void _walk_file(
   tokenizer.scan();
   /* Keyword aliases are file-local, and every segment parses in the syntax
      the whole file selected. */
-  $let(c.collection_native, 0)
-  $let(c.declaration_effects, NULL) $let(c.kw_aliases, {})
-  $let(c.layout, tokenizer.layout) {
+  with (c.collection_native = 0,
+        c.declaration_effects = NULL,
+        c.kw_aliases = {},
+        c.layout = tokenizer.layout) {
     FileWalk w = {
       .c = c, .path = path, .text = text, .dir = dir, .module = module,
       .globs = globs, .visited = visited, .parts = [], .definitions = {},
@@ -404,8 +406,9 @@ module List _walk_cold(
 module void _walk_apart(
   Compiler c, String path, String text, Map globs, Map visited) {
   ModuleSource module = c.module_source(path, text);
-  $let(c.names.counters, {})
+  with (c.names.counters = {}) {
     _walk_file(c, path, text, module, Path.dirname(path), globs, visited);
+  }
 }
 
 /* `covered` is 1 when the file is in the runtime's `lib/` or
@@ -602,8 +605,9 @@ Map Compiler.included_compile_time_effects(Compiler c, Map globs) {
       String path = _canonical_path(%"${x2c_get_root()}/$source");
       _replay_included(c, globs, path, visited, effects, NULL);
     }
-    $let(c.builtin_defs, 1)
+    with (c.builtin_defs = 1) {
       c.install_compile_time_effects(effects.list_free());
+    }
   }
   String unit = _canonical_path(c.filename);
   visited[unit] = 1;
@@ -659,6 +663,7 @@ void Compiler.install_included_effects(Compiler c) {
     Var exports = c.included_effects[canonical];
     if (exports is void) continue;
     c.included_effects.del(canonical);
-    c.install_compile_time_effects(exports);
+    // A conflict among the definitions is reported at their include line.
+    with (c.token = token) { c.install_compile_time_effects(exports); }
   }
 }

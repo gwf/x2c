@@ -78,8 +78,9 @@ static List _meta_provider_entry(Compiler c, String canonical) {
   List entry = _entry(c, canonical);
   if (!entry) {
     DiagnosticsHold hold = c.diagnostics.hold();
-    $let(c.meta_build, 1) $let(c.signature_only, 1)
-    $let(c.recovery_depth, c.recovery_depth + 1) {
+    with (c.meta_build = 1,
+          c.signature_only = 1,
+          c.recovery_depth = c.recovery_depth + 1) {
       try entry = _walk_cold(c, canonical, canonical, {}, {});
       catch %(malformed *): entry = NULL;
     }

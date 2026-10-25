@@ -143,7 +143,7 @@ static String _declared(Lint l, int line, Map declarations):
     if t.type == <"{"> || t.text == "=" && l.tokens[at + 1].text == ">":
       return name
     int open = l.next(at)
-    if t.type != <ident> || t.text == "match" || open >= l.count ||
+    if t.type != <ident> || t.text in %("match" "with") || open >= l.count ||
        l.tokens[open].type != <"(">:
       continue
     name = t.text

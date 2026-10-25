@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/unalias-outer.x:7:5: parse: no alias 'copy' to remove in this scope
+      unalias copy;
+      ^^^^^^^
+  note: an alias of an enclosing scope ends with that scope
+

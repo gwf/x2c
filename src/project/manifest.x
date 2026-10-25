@@ -185,11 +185,13 @@ static void _set(Manifest &m) {
 }
 
 static void _set_project_field(Project p, int line, String key, String value) {
-  if (key == "name") (void) _string_value(p, line, value);
-  else if (key == "default-target")
-    p.default_target = _string_value(p, line, value);
-  else if (key == "build-dir") p.build_dir = _string_value(p, line, value);
-  else _error_name(p, line, "unknown project field", key);
+  switch (key) {
+    case "name": (void) _string_value(p, line, value); break;
+    case "default-target":
+      p.default_target = _string_value(p, line, value); break;
+    case "build-dir": p.build_dir = _string_value(p, line, value); break;
+    default: _error_name(p, line, "unknown project field", key);
+  }
 }
 
 /* One `[dependencies]` entry: an index package name and its exact version. */
@@ -212,17 +214,19 @@ static void _set_target_field(
 }
 
 static List *_target_list(ProjectTarget target, String key) {
-  if (key == "sources") return &target.sources;
-  if (key == "exclude") return &target.exclude;
-  if (key == "dependencies") return &target.dependencies;
-  if (key == "native-modules") return &target.native_modules;
-  if (key == "include-dirs") return &target.include_dirs;
-  if (key == "package-dirs") return &target.package_dirs;
-  if (key == "defines") return &target.defines;
-  if (key == "c-flags") return &target.c_flags;
-  if (key == "library-dirs") return &target.library_dirs;
-  if (key == "libraries") return &target.libraries;
-  if (key == "link-flags") return &target.link_flags;
+  switch (key) {
+    case "sources": return &target.sources;
+    case "exclude": return &target.exclude;
+    case "dependencies": return &target.dependencies;
+    case "native-modules": return &target.native_modules;
+    case "include-dirs": return &target.include_dirs;
+    case "package-dirs": return &target.package_dirs;
+    case "defines": return &target.defines;
+    case "c-flags": return &target.c_flags;
+    case "library-dirs": return &target.library_dirs;
+    case "libraries": return &target.libraries;
+    case "link-flags": return &target.link_flags;
+  }
   return NULL;
 }
 
@@ -236,14 +240,16 @@ static void _set_kind(
 
 static void _set_profile_field(
   Project p, ProjectProfile profile, int line, String key, String value) {
-  if (key == "optimization")
-    profile.optimization = _string_value(p, line, value);
-  else if (key == "debug") profile.debug = _bool_value(p, line, value);
-  else if (key == "defines") profile.defines = _string_array(p, line, value);
-  else if (key == "c-flags") profile.c_flags = _string_array(p, line, value);
-  else if (key == "link-flags")
-    profile.link_flags = _string_array(p, line, value);
-  else _error_name(p, line, "unknown profile field", key);
+  switch (key) {
+    case "optimization":
+      profile.optimization = _string_value(p, line, value); break;
+    case "debug": profile.debug = _bool_value(p, line, value); break;
+    case "defines": profile.defines = _string_array(p, line, value); break;
+    case "c-flags": profile.c_flags = _string_array(p, line, value); break;
+    case "link-flags":
+      profile.link_flags = _string_array(p, line, value); break;
+    default: _error_name(p, line, "unknown profile field", key);
+  }
 }
 
 // values

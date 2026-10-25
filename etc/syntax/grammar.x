@@ -42,6 +42,8 @@ List syntax_grammar(void) => %(grammar
         (ref protocol-form)
         (ref macro-definition)
         (ref keyword-definition)
+        (ref unit-alias)
+        (ref unalias)
         (ref private-interface)
         (ref module-declaration)
         (ref lisp-escape)
@@ -286,6 +288,7 @@ List syntax_grammar(void) => %(grammar
           (ref declaration-row)
           (token ";"))
         (ref static-assert)
+        (ref field-alias)
         (ref field-extension)))
 
     (rule enumeration
@@ -296,13 +299,21 @@ List syntax_grammar(void) => %(grammar
         (optional
           (seq
             (token "{")
-            (optional
-              (seq
-                (ref enumerator)
-                (repeat 0 (seq (token ",") (ref enumerator)))
-                (optional (token ","))))
+            (ref enumerator-list)
             (token "}")
             (repeat 0 (ref attribute))))))
+
+    (rule enumerator-list
+      (seq
+        (repeat 0 (ref enumerator-alias))
+        (optional
+          (seq
+            (ref enumerator)
+            (repeat 0
+              (seq (token ",") (repeat 0 (ref enumerator-alias))
+                (ref enumerator)))
+            (optional
+              (seq (token ",") (repeat 0 (ref enumerator-alias))))))))
 
     (rule enumerator
       (choice
@@ -398,6 +409,8 @@ List syntax_grammar(void) => %(grammar
         (ref directive)
         (ref static-assert)
         (seq (ref declaration-row) (token ";"))
+        (ref named-alias)
+        (ref unalias)
         (ref local-macro-definition)
         (ref statement)
         (ref block-extension)))
@@ -453,6 +466,7 @@ List syntax_grammar(void) => %(grammar
         (seq (token "goto") (ref declaration-name) (token ";"))
         (seq (token "defer") (ref governed))
         (ref with-statement)
+        (ref alias-statement)
         (ref match-statement)
         (ref try-statement)
         (ref raise-statement)
@@ -465,9 +479,56 @@ List syntax_grammar(void) => %(grammar
     (rule with-statement
       (seq
         (token "with")
-        (ref expression)
-        (optional (seq (token "as") (ref identifier)))
+        (token "(")
+        (ref with-entry)
+        (repeat 0 (seq (token ",") (ref with-entry)))
+        (token ")")
         (ref raw-block)))
+
+    (rule with-entry (seq (ref unary) (token "=") (ref assignment)))
+
+    (rule alias-head (seq (token "alias") (ref expression)))
+
+    (rule alias-name (seq (token "as") (ref identifier)))
+
+    (rule named-alias (seq (ref alias-head) (ref alias-name) (token ";")))
+
+    (rule alias-wrapper (seq (ref alias-head) (optional (ref alias-name))))
+
+    (rule alias-statement (seq (ref alias-wrapper) (ref raw-block)))
+
+    (rule unalias (seq (token "unalias") (ref identifier) (token ";")))
+
+    (rule unit-alias
+      (seq
+        (optional (token "static"))
+        (choice
+          (ref named-alias)
+          (seq
+            (ref alias-wrapper)
+            (token "{")
+            (repeat 0 (ref unit-item))
+            (token "}")))))
+
+    (rule field-alias
+      (choice
+        (ref named-alias)
+        (ref unalias)
+        (seq
+          (ref alias-wrapper)
+          (token "{")
+          (repeat 0 (ref field))
+          (token "}"))))
+
+    (rule enumerator-alias
+      (choice
+        (ref named-alias)
+        (ref unalias)
+        (seq
+          (ref alias-wrapper)
+          (token "{")
+          (ref enumerator-list)
+          (token "}"))))
 
     (rule match-statement
       (seq

@@ -237,9 +237,9 @@ auto {
 ~}
 ```
 
-`auto` retains an allocation region around a statement, and
-Initializer `auto` releases the acquired value at block exit. `$lock` and `$let` give
-scoped locking and temporary replacement. See
+`auto` retains an allocation region around a statement, and initializer
+`auto` releases the acquired value at block exit. `$lock` and `with` give
+scoped locking and temporary assignment. See
 [classes and system macros](system-macros.md). `defer statement;` runs the
 statement at block exit, in reverse order of registration.
 
@@ -286,8 +286,8 @@ twice: `$twice(f())` calls `f()` twice.
 | Decorator macro | Transform the following expression, statement, field, function, named type, or unit item |
 
 A `meta` function can also be called at runtime; `$f(...)` runs it at
-compile time. `with expression as name { ... }` substitutes the expression
-at each use of `name`. See [macros](macros.md),
+compile time. `alias expression as name;` substitutes the expression at
+each use of `name`. See [macros](macros.md),
 [meta functions](meta-functions.md), and
 [generating code](generating-code.md).
 

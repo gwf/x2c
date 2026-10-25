@@ -51,7 +51,7 @@ int main(void) {
 
   /* `with` gives an expression a short lexical name; each use is a copy of
      the expression, not a hidden temporary. */
-  with station.latest as reading {
+  alias station.latest as reading {
     reading.celsius += 2;
     reading.humidity -= 5;
   }

@@ -87,9 +87,9 @@ static void _produce_rows(Compiler c, List rows, Array selected) {
     match (row)
       case %(declaration-pending ?callback ?arguments
                ?construction ?privacy): {
-        $let(c.macro_stack, construction)
-        $let(c.source_private, privacy)
+        with (c.macro_stack = construction, c.source_private = privacy) {
           _produce_rows(c, _generated_rows(c, callback, arguments), selected);
+        }
         continue;
       }
     selected.push(row);
@@ -127,8 +127,7 @@ static List _select_rows(Defaults &d, List rows) {
   foreach (List row in rows) {
     match (row)
       case %(declaration-default ?function ?construction ?privacy): {
-        $let(c.macro_stack, construction)
-        $let(c.source_private, privacy) {
+        with (c.macro_stack = construction, c.source_private = privacy) {
           Var syntax = _unless_taken(d, function);
           if (syntax is not void) selected.push(_bind_default(c, syntax));
         }
@@ -204,8 +203,9 @@ static List _forward_rows(Defaults &d, List rows, int &remaining) {
     match (row)
       case %(declaration-forward ?child ?parent ?member ?fallback ?privacy): {
         List bound = NULL;
-        $let(d.c.source_private, privacy)
+        with (d.c.source_private = privacy) {
           bound = _forwarded(d, child, parent, member, fallback);
+        }
         if (!bound) {
           remaining++;
           selected.push(row);

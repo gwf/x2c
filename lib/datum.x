@@ -250,17 +250,19 @@ static Var _decode(Var value) {
   if (!_tag_headed(value)) return _decode_list(value);
   List list = value;
   String tag = list.car().str();
-  if (tag == "x2c.void") return void;
-  if (tag == "x2c.null") return Var.null();
-  if (tag == "x2c.symbol0") return (Symbol) 0;
-  if (tag == "x2c.atom") return Atom.intern(list.cadr().str());
-  if (tag == "x2c.symbol") return Symbol.new(list.cadr().str());
-  if (tag == "x2c.number")
-    return _decode_number(list.cadr().str(), list.caddr().str());
-  if (tag == "x2c.token")
-    return Var.new(<token>, (void *) (ulong) list.cadr().integer());
-  if (tag == "x2c.quote") return _decode_list(list.cadr());
-  if (tag == "x2c.array") return _decode_list(list.cdr()).array();
+  switch (tag) {
+    case "x2c.void": return void;
+    case "x2c.null": return Var.null();
+    case "x2c.symbol0": return (Symbol) 0;
+    case "x2c.atom": return Atom.intern(list.cadr().str());
+    case "x2c.symbol": return Symbol.new(list.cadr().str());
+    case "x2c.number":
+      return _decode_number(list.cadr().str(), list.caddr().str());
+    case "x2c.token":
+      return Var.new(<token>, (void *) (ulong) list.cadr().integer());
+    case "x2c.quote": return _decode_list(list.cadr());
+    case "x2c.array": return _decode_list(list.cdr()).array();
+  }
   return _decode_map(list.cdr());
 }
 

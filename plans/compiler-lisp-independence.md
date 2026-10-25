@@ -7,6 +7,8 @@
 > Gary authorized local replay and combined validation on 2026-10-24.
 > The independent source changes are replayed on `5f7274f` in
 > `codex/lisp-independence-pr285`; combined local validation passed.
+> Current dev `a90359210` is integrated locally; reassessment and fresh
+> combined validation passed. Scalar forwarding is the next bounded candidate.
 > Harder cases remain deferred. No push, PR, or publication is authorized.
 
 ## Result and boundaries
@@ -21,7 +23,103 @@ This batch does not promise a compiler that never initializes Lisp. Native
 meta dispatch, early built-ins, and public compile-time Lisp still use the
 shared environment. Do not replace that environment with a second registry.
 
-## Reconciliation with PR #285
+## Reassessment after current dev integration
+
+Gary requested local integration of current `dev` on 2026-10-24. The fetched
+revision is `a90359210b4fd4cf130b1e3138a7c8cf6d38ae12`, 30 commits beyond
+the PR #285 base, changing 305 files. The pre-integration local batch is
+checkpointed at `2eac34b1`; its earlier recovery stash is also retained.
+No push, PR, or shared-branch update is authorized.
+
+The source merge preserved every independent change. Only generated
+bootstrap/API files and the plan index conflicted. Generated files start
+from current dev and are regenerated through repository targets. The index
+keeps this plan and accepts the upstream archival of the with/alias plan.
+
+| Upstream change | Effect on this batch and remaining plan |
+| --- | --- |
+| `with` temporary assignments replace `$let` | Keep the new syntax in all merged callers. The old Lisp `Code.type` slot is gone, but `etc/builtin-macros.x` still invokes `with.expand` through Lisp. Its algorithm is native in `src/builtins.x`; eliminating this call still needs the deferred early-bootstrap design. |
+| Lexical `alias`, file/static alias scope repairs, and `unalias` | Keep these source-binding features and their tests. They store canonical syntax in Sym facts or the existing macro Map and replay include effects. They do not replace the ordinary native/Lisp callable environment. |
+| Native/meta context code migrates to `with` | Retain the upstream save/restore blocks. The independent patch still only moves session initialization from the two entry points to ordinary lookup. |
+| Datum decoding uses a String switch | Keep upstream dispatch and the existing full-reader fallback. The reader/session change still supplies canonical prefix names without constructing a session. |
+| Compiler/command name dispatch uses String switches | Keep upstream algorithms; no conflicting evaluator replacement is present. |
+
+The previous binding precedence decision remains the compatibility premise.
+`_shipped_callee` and `_apply_linked` still own shipped direct calls;
+`_meta_function` still initializes the session before ordinary lookup, and
+`_bind_advertised_meta` still preserves later Lisp definitions. New expression
+aliases additionally follow their documented lexical and include scope rules;
+they are not another callable registry.
+
+Alias installation and removal are now additional source-ordered effects.
+`src/macros/invocations/recognition.x` handles their native branches separately
+from Lisp/import effects. `_rebind_globals` in `src/macros/lisp.x` serves
+imported aliases as well as cached macros; its location does not make that
+AST traversal evaluator work. Preserve those consumers in any future split.
+
+### Next bounded candidate: scalar forwarding
+
+The original hard-case grouping was too broad for `lib/common.x`'s `$scalar`.
+The template has three `Code.arguments` Lisp splice sites, but all nine
+instantiations pass exactly their own type and a parameter named `x`. The
+template can declare and forward its own parameter, avoiding the query.
+This needs no early native declaration or replacement callable registry.
+
+A scratch macro with that simpler input shape compiled and ran against this
+integrated compiler. Its nine scalar cases matched existing boxing kind and
+value, display String, and readable representation. The float case retained
+`Var.new` and `<f32>`. This proves a focused implementation path; it does not
+prove complete scalar edge-case parity or change the repository's macro.
+The prototype and result are recorded in
+`debug/dev-reassessment/scalar-feasibility.log` and `probe-root.txt`.
+
+Select scalar forwarding as the next small follow-up. Preserve generated
+public method signatures and float promotion; decide the existing `$scalar`
+invocation compatibility before changing its inputs. Regenerate API output
+and use the existing scalar/Var tests for boundary values. Do not couple this
+conversion to target/signature generation or expose a new compiler query.
+
+Fresh checks pass on this integrated tree. Earlier PR #285-base checks below
+remain historical. Logs live under `debug/dev-reassessment/`.
+
+| Current integrated-tree check | Result | Log |
+| --- | --- | --- |
+| `make build-safe`; `make doc-generate` | Pass with current dev bootstrap and authoritative generated output. | `build-safe.log`, `doc-generate.log` |
+| Full `make agent-pr-check` | Pass, including all five existing extended steps. | `agent-pr-check.log`, `gate-steps/` |
+| Bootstrap/stage comparisons | Bootstrap == stage 0 == stage 1, all 302 C/H files. | `agent-pr-check.log` |
+| Cold collection | All 430 C/H/.xi files match stage 1. | `gate-steps/proof-cold-collection.log` |
+| Unit suites | 1,045 pass, zero failures/skips, 27,250 assertions; standalone thread suite also passes. | `gate-steps/verify.log` |
+| Compiler fixtures | 1,288 pass, 2,848 checked artifacts, including new with/alias/unalias fixtures. | `gate-steps/verify.log` |
+| Documentation and commands | All checks pass; 119 executable documentation examples match. REPL and graph checks pass. | `gate-steps/` |
+| Autodiff, libcurl, libuv | All 126 package tests pass; autodiff's ten compiler fixtures and both examples also pass. Existing dependency prefixes reused. | `autodiff.log`, `libcurl.log`, `libuv.log` |
+| Focused reader/native/precedence/Mutex/indent probes | Pass; fresh reader works without a session, shipped native dispatch leaves it null, both call syntaxes retain `4 4 99 99` precedence. | `focused-probes.log` |
+| Embedding dependency probe | Edited payload changes generated C and remains in its depfile. | `embedding-dependencies.log` |
+| Scalar forwarding prototype | Nine finite scalar cases pass; candidate only, no production edit. | `scalar-feasibility.log` |
+
+The initial scratch build invocations omitted the compiler C-header search
+directory and the provider source input, respectively. Correcting those
+invocations made the probes pass without source changes. Their initial logs
+remain as `focused-probes-initial.log` and
+`focused-probes-provider-input.log`.
+
+Authored source hashes stayed unchanged during validation. The full Make
+target is local correctness evidence; no publication receipt is claimed.
+Performance measurements and publication remain unattempted. The private
+delivery context remains active. The immediate plan is to retain this
+validated batch locally, then make the scalar forwarding change separately.
+All other deferred cases below remain deferred; no new registry, public
+compiler query, module extraction, or REPL redesign is selected.
+
+The generated review distinguishes the independent patch from upstream
+refresh work. Reader, cache, native-call, and linked hash deltas follow this
+patch. Current dev's authored `unalias` support additionally regenerates
+`macros.c`, `statements.c`, `symtab.c/.h`, the module catalog, and API/llms
+output. For example, current dev's `src/symtab/bindings.x` already defines
+`Sym.undefine_alias`, while its checked-in bootstrap header lacks that
+prototype. The ordinary regeneration emits it; no bootstrap file is edited
+by hand. Both source and generated changes are reviewed against fetched dev.
+
+## Original reconciliation with PR #285
 
 The inspected PR head is `5f7274f978b7749e5d2d9cad1b218ea99277ea2b`,
 one source-only commit based on the same `9e68d6b` as this workspace. At
@@ -128,8 +226,11 @@ exists. `src/meta-native/functions.x` explicitly preserves later definitions;
 
 ## Early bootstrap decision
 
-Accept PR #285's ordinary `Mutex` spelling in `$lock`. Keep the remaining
-early native-call wrappers in `etc/builtin-macros.x` and the low-level
+Accept PR #285's ordinary `Mutex` spelling in `$lock`. Current dev replaces
+`$let` with `with`; its native `_with_assignment` now asks `Code.type`
+directly, while the early decorator still calls it through Lisp
+`with.expand`. Keep that wrapper, the other early native-call wrappers in
+`etc/builtin-macros.x`, and the low-level
 generators in `lib/common.x` and `lib/var-tags.x`. Built-ins load before
 `lib/meta.x` declarations; introducing `$Code.type` there would not preserve
 that ordering. Do not add parser exceptions, synthesized prototypes, another
@@ -185,11 +286,11 @@ owns the residual scope and removes the duplicated step 5 conversions.
 | Case | Concrete remaining work | Why deferred |
 | --- | --- | --- |
 | General native callable dispatch | Separate ordinary native storage/application from the session while preserving the precedence above and native callback context. | This batch only removes initialization before the existing shipped direct path. A second Map would duplicate ownership; extending direct `Func.apply` can lose active-session behavior. |
-| Remaining early built-ins | Make existing native compiler operations available before public meta declarations. PR #285 already removes `$lock`'s type-only Lisp expression. | Native calls need a coherent bootstrap design; plain type syntax does not have that dependency. |
+| Remaining early built-ins | Make existing native compiler operations available before public meta declarations. PR #285 removes `$lock`'s type-only Lisp expression; current dev replaces `$let` with the still-Lisp-backed `with.expand`. | Native calls need a coherent bootstrap design; plain type syntax does not have that dependency. |
 | Native `bind` evaluation | Reuse the runtime's existing native lookup, including callback adapters, directly. | Lookup is private to the Lisp module; a compiler-only duplicate would change target precedence. |
 | Optional iterator destination | Replace `C.iterator.call` with a native adapter preserving explicit and omitted destinations. | Coupled to callable signatures, callback adaptation, and storage lifetime. |
 | Deferred class recipes | Change callable dispatch for defaults, initializers, and field writers. | Native producers already exist; preserve their delayed execution and source visibility. |
-| Native target/signature generation | Migrate generated module entries, linked-meta signatures/hashes, callback tables, private SDK queries, scalar argument splices, and SymbolSet construction together. | Some queries have no x2c declaration or run before declarations are available. |
+| Native target/signature generation | Migrate generated module entries, linked-meta signatures/hashes, callback tables, private SDK queries, and SymbolSet construction under their existing owners. Scalar forwarding is a separate small candidate above. | Some queries have no x2c declaration or run before declarations are available. The native algorithms already exist; access and bootstrap order remain the obstacle. |
 | Generic scalar access | Move `NativeScalarAccess` out of the Lisp module while retaining its existing users and ABI. | Ownership cleanup requires connected header/source work, not an evaluator replacement. |
 | Full reader extraction | Give the shared grammar a module independent of the Lisp implementation. | The selected change removes session construction; it deliberately retains `Lisp.read` and its existing ABI. |
 | Home discovery | Replace the `etc/compiler-sdk.xlisp` installation marker if that file ceases to be mandatory. | The compiler still needs that file after this batch. |

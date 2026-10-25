@@ -193,29 +193,57 @@ import "geo" as g with Vec as V;
 //                ^^^^ keyword.control.import.x2c
 //                         ^^ keyword.control.import.x2c
 
-with point as local {
-// <--- keyword.control.with.x2c
-//         ^^ keyword.control.with.x2c
-  local.x = 1;
+with (point.x = 1, point.y = 2) {
+// <---- keyword.control.with.x2c
+  point.x = 3;
 }
-if (ready) with point {
+if (ready) with (mode = quiet) {
 //         ^^^^ keyword.control.with.x2c
-  _.x = 2;
 }
-with
-// <--- keyword.control.with.x2c
-  point as local {
-//      ^^ keyword.control.with.x2c
-  _.x = 3;
-}
-else with point {
+else with (depth = depth + 1) {
 //   ^^^^ keyword.control.with.x2c
-  _.x = 4;
+}
+$lock(mutex) with (scale = 2) {
+//           ^^^^ keyword.control.with.x2c
 }
 int with = 0;
 //  ^^^^ - keyword.control.with.x2c
 int with(int value) { return value; }
 //  ^^^^ - keyword.control.with.x2c
+value = with(3);
+//      ^^^^ - keyword.control.with.x2c
+alias point.settings as settings;
+// <----- keyword.declaration.alias.x2c
+//                   ^^ keyword.declaration.alias.x2c
+static alias origin as home;
+//     ^^^^^ keyword.declaration.alias.x2c
+//                  ^^ keyword.declaration.alias.x2c
+alias point as local {
+// <----- keyword.declaration.alias.x2c
+//          ^^ keyword.declaration.alias.x2c
+  local.x = 1;
+}
+if (ready) alias point {
+//         ^^^^^ keyword.declaration.alias.x2c
+  _.x = 2;
+}
+alias point.x as px:
+// <----- keyword.declaration.alias.x2c
+//            ^^ keyword.declaration.alias.x2c
+int alias = 3;
+//  ^^^^^ - keyword.declaration.alias.x2c
+alias += 1;
+// <----- - keyword.declaration.alias.x2c
+printf("%d\n", alias);
+//             ^^^^^ - keyword.declaration.alias.x2c
+alias(value);
+// <----- - keyword.declaration.alias.x2c
+unalias settings;
+// <------- keyword.declaration.alias.x2c
+int unalias = 1;
+//  ^^^^^^^ - keyword.declaration.alias.x2c
+unalias += 1;
+// <------- - keyword.declaration.alias.x2c
 
   Var (first, second) = values;
 //    ^ punctuation.section.parens.begin.destructuring.x2c

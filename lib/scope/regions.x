@@ -155,7 +155,7 @@ meta native void Scope.retain(void) {
 meta native void Scope.release(void) {
   _require_running();
   ScopeThreadState state = _thread();
-  with state.active as active {
+  alias state.active as active {
     if (!*active || !_forget_retain((*active), active)) raise %(bad-state);
     Scope top = *active;
     /* Restore and detach the surviving lower region before destruction, so

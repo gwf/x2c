@@ -64,13 +64,15 @@ typedef struct GenNames {
   int next_binding, issued;
 } *GenNames;
 
-/** Holds the three mutable maps that form one lexical semantic scope.
+/** Holds the mutable maps that form one lexical semantic scope, and the
+    number of alias rows it defines.
 
     Active scopes have initialized maps. The zero value is only the sentinel
     returned when an empty scope stack is popped.
 */
 typedef struct SymScope {
   Map symbols, bindings, enumerators, macros;
+  int aliases;
 } SymScope;
 
 /** Counts the destinations `Pending.area` names; area 0 is unit support. */
@@ -171,6 +173,8 @@ typedef struct Compiler {
   // Visible protocol adoptions indexed by base and participant.
   Map adoptions;
   Map macro_holes;
+  // Open declaration bodies whose aliases end at their closing brace.
+  int alias_level;
   Map local_macro_captures;
   // Depth of macro value applications being bound; their transactions
   // also cover effects and code-value carriers are consumed.

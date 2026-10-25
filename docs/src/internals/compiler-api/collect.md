@@ -58,7 +58,7 @@ Source-ordered shallow symbol collection and replay.
 
 Retains source proofs and one definition hash per linked provider.
 
-Source: `src/collect/providers.x:110`
+Source: `src/collect/providers.x:111`
 
 <a id="Compiler.callable_symbols"></a>
 #### Compiler.callable_symbols
@@ -124,7 +124,7 @@ Source: `src/collect/declarations.x:195`
 Completes a linked function's own source hashes before a shallow call.
 A lookahead entry never replaces the file's ordinary contribution.
 
-Source: `src/collect/providers.x:93`
+Source: `src/collect/providers.x:94`
 
 <a id="Compiler.configure_interfaces"></a>
 #### Compiler.configure_interfaces
@@ -148,7 +148,7 @@ Source: `src/collect/interfaces.x:26`
 Selects a source file's own package, as its standalone translation does.
 A cold provider does not register an import in its including unit.
 
-Source: `src/collect/walk.x:361`
+Source: `src/collect/walk.x:363`
 
 <a id="Compiler.declared_adoptions"></a>
 #### Compiler.declared_adoptions
@@ -222,7 +222,7 @@ The ordered cache walk counts each file once and groups effects by the
 canonical path of the unit's direct include. The parser installs those
 effects when it reaches that include.
 
-Source: `src/collect/walk.x:597`
+Source: `src/collect/walk.x:600`
 
 <a id="Compiler.install_included_effects"></a>
 #### Compiler.install_included_effects
@@ -232,7 +232,7 @@ Source: `src/collect/walk.x:597`
 Installs the definitions of each include among the directives before
 the cursor.
 
-Source: `src/collect/walk.x:642`
+Source: `src/collect/walk.x:646`
 
 <a id="Compiler.interface_text"></a>
 #### Compiler.interface_text
@@ -299,7 +299,7 @@ Returns the native calling type of a loaded function. Array parameters
 decay to pointers, and a parameter's outer qualifiers affect only its
 local copy. Keep the declared type for inspection and reload checks.
 
-Source: `src/collect/providers.x:176`
+Source: `src/collect/providers.x:177`
 
 <a id="Compiler.loaded_provider"></a>
 #### Compiler.loaded_provider
@@ -309,7 +309,7 @@ Source: `src/collect/providers.x:176`
 Returns this source's native definitions with their canonical declarations
 and the public type rows needed to check other units' declarations.
 
-Source: `src/collect/providers.x:156`
+Source: `src/collect/providers.x:157`
 
 <a id="Compiler.meta_provider_hashes"></a>
 #### Compiler.meta_provider_hashes
@@ -318,7 +318,7 @@ Source: `src/collect/providers.x:156`
 
 Returns the shared function hashes of an advertised meta provider.
 
-Source: `src/collect/providers.x:106`
+Source: `src/collect/providers.x:107`
 
 <a id="Compiler.module_source"></a>
 #### Compiler.module_source
@@ -342,7 +342,7 @@ Source: `src/collect/splice.x:28`
 Names declared bindings through one loaded provider. Its own source
 declarations remain authoritative; private bindings never link out.
 
-Source: `src/collect/providers.x:208`
+Source: `src/collect/providers.x:209`
 
 <a id="Compiler.name_meta_provider_bindings"></a>
 #### Compiler.name_meta_provider_bindings
@@ -353,7 +353,7 @@ Selects helper C spellings for public definitions owned by `path`.
 Bindings, rather than source tokens, keep unrelated private names and
 fields unchanged. Native supplier declarations retain their C names.
 
-Source: `src/collect/providers.x:141`
+Source: `src/collect/providers.x:142`
 
 <a id="Compiler.prelude_interface"></a>
 #### Compiler.prelude_interface
@@ -460,7 +460,7 @@ Source: `src/collect/declarations.x:184`
 The file the include of `target` from `includer_dir` names, searched as
 collection searches `dirs`, or NULL.
 
-Source: `src/collect/walk.x:452`
+Source: `src/collect/walk.x:455`
 
 ## Design notes
 

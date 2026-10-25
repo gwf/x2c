@@ -574,32 +574,32 @@ static void _x2c_gensym_defer_cleanup_23(void * _x2c_gensym_defer_opaque_23);
 
 typedef struct _x2c_gensym_defer_env_21{
   const void * _x2c_gensym_defer_capture_37;
+  const void * _x2c_gensym_defer_capture_38;
 }
 _x2c_gensym_defer_env_21;
 
 static void _x2c_gensym_defer_cleanup_24(void * _x2c_gensym_defer_opaque_24);
 
 typedef struct _x2c_gensym_defer_env_22{
-  const void * _x2c_gensym_defer_capture_38;
+  const void * _x2c_gensym_defer_capture_39;
 }
 _x2c_gensym_defer_env_22;
 
 static void _x2c_gensym_defer_cleanup_25(void * _x2c_gensym_defer_opaque_25);
 
 typedef struct _x2c_gensym_defer_env_23{
-  const void * _x2c_gensym_defer_capture_39;
+  const void * _x2c_gensym_defer_capture_40;
 }
 _x2c_gensym_defer_env_23;
 
 static void _x2c_gensym_defer_cleanup_26(void * _x2c_gensym_defer_opaque_26);
 
-static void _x2c_gensym_defer_cleanup_27(void * _x2c_gensym_defer_opaque_27);
-
 typedef struct _x2c_gensym_defer_env_24{
-  const void * _x2c_gensym_defer_capture_40;
   const void * _x2c_gensym_defer_capture_41;
 }
 _x2c_gensym_defer_env_24;
+
+static void _x2c_gensym_defer_cleanup_27(void * _x2c_gensym_defer_opaque_27);
 
 static void _x2c_gensym_defer_cleanup_28(void * _x2c_gensym_defer_opaque_28);
 
@@ -613,48 +613,48 @@ static void _x2c_gensym_defer_cleanup_29(void * _x2c_gensym_defer_opaque_29);
 
 typedef struct _x2c_gensym_defer_env_26{
   const void * _x2c_gensym_defer_capture_44;
+  const void * _x2c_gensym_defer_capture_45;
 }
 _x2c_gensym_defer_env_26;
 
 static void _x2c_gensym_defer_cleanup_30(void * _x2c_gensym_defer_opaque_30);
 
 typedef struct _x2c_gensym_defer_env_27{
-  const void * _x2c_gensym_defer_capture_45;
+  const void * _x2c_gensym_defer_capture_46;
 }
 _x2c_gensym_defer_env_27;
 
 static void _x2c_gensym_defer_cleanup_31(void * _x2c_gensym_defer_opaque_31);
 
 typedef struct _x2c_gensym_defer_env_28{
-  const void * _x2c_gensym_defer_capture_46;
+  const void * _x2c_gensym_defer_capture_47;
 }
 _x2c_gensym_defer_env_28;
 
 static void _x2c_gensym_defer_cleanup_32(void * _x2c_gensym_defer_opaque_32);
 
 typedef struct _x2c_gensym_defer_env_29{
-  const void * _x2c_gensym_defer_capture_47;
+  const void * _x2c_gensym_defer_capture_48;
 }
 _x2c_gensym_defer_env_29;
 
 static void _x2c_gensym_defer_cleanup_33(void * _x2c_gensym_defer_opaque_33);
 
 typedef struct _x2c_gensym_defer_env_30{
-  const void * _x2c_gensym_defer_capture_48;
+  const void * _x2c_gensym_defer_capture_49;
 }
 _x2c_gensym_defer_env_30;
 
 static void _x2c_gensym_defer_cleanup_34(void * _x2c_gensym_defer_opaque_34);
 
 typedef struct _x2c_gensym_defer_env_31{
-  const void * _x2c_gensym_defer_capture_49;
+  const void * _x2c_gensym_defer_capture_50;
 }
 _x2c_gensym_defer_env_31;
 
 static void _x2c_gensym_defer_cleanup_35(void * _x2c_gensym_defer_opaque_35);
 
 typedef struct _x2c_gensym_defer_env_32{
-  const void * _x2c_gensym_defer_capture_50;
   const void * _x2c_gensym_defer_capture_51;
 }
 _x2c_gensym_defer_env_32;
@@ -679,27 +679,27 @@ static void _x2c_gensym_defer_cleanup_38(void * _x2c_gensym_defer_opaque_38);
 
 typedef struct _x2c_gensym_defer_env_35{
   const void * _x2c_gensym_defer_capture_56;
+  const void * _x2c_gensym_defer_capture_57;
 }
 _x2c_gensym_defer_env_35;
 
 static void _x2c_gensym_defer_cleanup_39(void * _x2c_gensym_defer_opaque_39);
 
 typedef struct _x2c_gensym_defer_env_36{
-  const void * _x2c_gensym_defer_capture_57;
+  const void * _x2c_gensym_defer_capture_58;
 }
 _x2c_gensym_defer_env_36;
 
 static void _x2c_gensym_defer_cleanup_40(void * _x2c_gensym_defer_opaque_40);
 
 typedef struct _x2c_gensym_defer_env_37{
-  const void * _x2c_gensym_defer_capture_58;
+  const void * _x2c_gensym_defer_capture_59;
 }
 _x2c_gensym_defer_env_37;
 
 static void _x2c_gensym_defer_cleanup_41(void * _x2c_gensym_defer_opaque_41);
 
 typedef struct _x2c_gensym_defer_env_38{
-  const void * _x2c_gensym_defer_capture_59;
   const void * _x2c_gensym_defer_capture_60;
 }
 _x2c_gensym_defer_env_38;
@@ -708,20 +708,20 @@ static void _x2c_gensym_defer_cleanup_42(void * _x2c_gensym_defer_opaque_42);
 
 typedef struct _x2c_gensym_defer_env_39{
   const void * _x2c_gensym_defer_capture_61;
+  const void * _x2c_gensym_defer_capture_62;
 }
 _x2c_gensym_defer_env_39;
 
 static void _x2c_gensym_defer_cleanup_43(void * _x2c_gensym_defer_opaque_43);
 
 typedef struct _x2c_gensym_defer_env_40{
-  const void * _x2c_gensym_defer_capture_62;
+  const void * _x2c_gensym_defer_capture_63;
 }
 _x2c_gensym_defer_env_40;
 
 static void _x2c_gensym_defer_cleanup_44(void * _x2c_gensym_defer_opaque_44);
 
 typedef struct _x2c_gensym_defer_env_41{
-  const void * _x2c_gensym_defer_capture_63;
   const void * _x2c_gensym_defer_capture_64;
 }
 _x2c_gensym_defer_env_41;
@@ -730,27 +730,35 @@ static void _x2c_gensym_defer_cleanup_45(void * _x2c_gensym_defer_opaque_45);
 
 typedef struct _x2c_gensym_defer_env_42{
   const void * _x2c_gensym_defer_capture_65;
+  const void * _x2c_gensym_defer_capture_66;
 }
 _x2c_gensym_defer_env_42;
 
 static void _x2c_gensym_defer_cleanup_46(void * _x2c_gensym_defer_opaque_46);
 
 typedef struct _x2c_gensym_defer_env_43{
-  const void * _x2c_gensym_defer_capture_66;
   const void * _x2c_gensym_defer_capture_67;
 }
 _x2c_gensym_defer_env_43;
 
 static void _x2c_gensym_defer_cleanup_47(void * _x2c_gensym_defer_opaque_47);
 
-static void _x2c_gensym_defer_cleanup_48(void * _x2c_gensym_defer_opaque_48);
-
 typedef struct _x2c_gensym_defer_env_44{
   const void * _x2c_gensym_defer_capture_68;
+  const void * _x2c_gensym_defer_capture_69;
 }
 _x2c_gensym_defer_env_44;
 
+static void _x2c_gensym_defer_cleanup_48(void * _x2c_gensym_defer_opaque_48);
+
 static void _x2c_gensym_defer_cleanup_49(void * _x2c_gensym_defer_opaque_49);
+
+typedef struct _x2c_gensym_defer_env_45{
+  const void * _x2c_gensym_defer_capture_70;
+}
+_x2c_gensym_defer_env_45;
+
+static void _x2c_gensym_defer_cleanup_50(void * _x2c_gensym_defer_opaque_50);
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -1152,7 +1160,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _393 = String_var(_392);
   _394 = String_new("(\"src/components/collection-literals.x\" \"5d65e0a9\" ((((\"source-node\" (meta-hashes \"src/components/collection-literals.x\" 0)) (meta-hashes \"src/components/collection-literals.x\" ((\"array_literal\" \"cfe4f08284d838b5\") (\"map_literal\" \"6e9ef8366bcde8f8\"))))) \"lib/rewrite.x\" \"src/grammar.x\" (((\"array_literal\") ((func ((\"Code\"))) \"Code\")) ((\"map_literal\") ((func ((\"Code\"))) \"Code\")) ((\"source-node\" (compile-time \"src/components/collection-literals.x\" 447)) (compile-time rewrite literal array \"array_literal\" (macrodef (name array_value) (kind expression) (target (declaration-empty-symbol)) (targetp ()) (parameters ((macro-param (binder *items) (kind expr) (sequence 1)))) (fresh ()) (captures ()) (pattern (args (capture (!and (source *items) (source *)) (!and (value *) (value *) (value *__macro_splice_items))))) (template (expr (\"Array\") (array *__macro_splice_items))) (rebuild ((expr (\"Array\") (array *__macro_splice_items)) ((? ? ? *__macro_splice_items ? ?)))) (leaf 1) (origin ((file \"src/grammar.x\") (line 117) (column 1) (length 5) (position 3968))) (file \"src/grammar.x\") (builtin 0) (local 0) (static 0)) (*items))) ((\"source-node\" (compile-time \"src/components/collection-literals.x\" 1028)) (compile-time rewrite literal map \"map_literal\" (macrodef (name map_value) (kind expression) (target (declaration-empty-symbol)) (targetp ()) (parameters ((macro-param (binder *rows) (kind map-entry) (sequence 1)))) (fresh ()) (captures ()) (pattern (args (capture (!and (source *rows) (source *)) (!and (value *) (value *) (value *__macro_splice_rows))))) (template (expr (\"Map\") (map *__macro_splice_rows))) (rebuild ((expr (\"Map\") (map *__macro_splice_rows)) ((? ? ? *__macro_splice_rows ? ?)))) (leaf 1) (origin ((file \"src/grammar.x\") (line 118) (column 1) (length 5) (position 4025))) (file \"src/grammar.x\") (builtin 0) (local 0) (static 0)) (*rows))) ((\"source-node\" (declaration \"src/components/collection-literals.x\" 470)) (project-meta \"array_literal\" ((func ((\"Code\"))) \"Code\") \"src/components/collection-literals.x\")) ((\"source-node\" (declaration \"src/components/collection-literals.x\" 1049)) (project-meta \"map_literal\" ((func ((\"Code\"))) \"Code\") \"src/components/collection-literals.x\"))) (((\"source-node\" (provider-source \"src/components/collection-literals.x\" 0)) (source \"5d65e0a9\" ((\"cwd:./grammar.x\" \"search:absent\") (\"cwd:./rewrite.x\" \"search:absent\") (\"etc/compiler-sdk.xlisp\" 1) (\"etc/init.xlisp\" 1) (\"etc/lisp-values.xlisp\" 1) (\"lib/grammar.x\" \"search:absent\") (\"lib/rewrite.x\" \"f378e68f\") (\"src/components/grammar.x\" \"search:absent\") (\"src/components/rewrite.x\" \"search:absent\") (\"src/grammar.x\" \"48d21fda\")))))) () ((\"cwd:./grammar.x\" \"search:absent\") (\"cwd:./rewrite.x\" \"search:absent\") (\"etc/compiler-sdk.xlisp\" 1) (\"etc/init.xlisp\" 1) (\"etc/lisp-values.xlisp\" 1) (\"lib/grammar.x\" \"search:absent\") (\"lib/rewrite.x\" \"f378e68f\") (\"src/components/grammar.x\" \"search:absent\") (\"src/components/rewrite.x\" \"search:absent\") (\"src/grammar.x\" \"48d21fda\")) ((home \"include/x2c\") (package)))");
   _395 = String_var(_394);
-  _396 = String_new("(\"src/components/printf-format.x\" \"899f6ca0\" ((((\"source-node\" (meta-hashes \"src/components/printf-format.x\" 0)) (meta-hashes \"src/components/printf-format.x\" ((\"_printf_conversion\" \"d48278ce2b7d36b6\") (\"_printf_count\" \"9c15e6fe3f8fb365\") (\"_printf_fail\" \"70cacaa8a64fe33b\") (\"_printf_is_var\" \"f3e062a89c8027a8\") (\"_printf_length\" \"abe4584d6e3de11f\") (\"_printf_library\" \"141a1eba016b9301\") (\"_printf_lowered\" \"c9de721369f41fe1\") (\"_printf_position\" \"de12f3fc2bd08028\") (\"_printf_read\" \"6e1a063722f6d7ce\") (\"_printf_scan\" \"b62d585ea5e43970\") (\"_printf_type\" \"f74fd795783f6ab2\") (\"_printf_valid\" \"611d71a66fb7b0d7\") (\"printf_values\" \"5f923286d7d213df\"))))) \"lib/rewrite.x\" (((\"printf_values\") ((func ((\"Code\"))) \"Code\")) ((\"source-node\" (compile-time \"src/components/printf-format.x\" 1238)) (compile-time macrodef (macrodef (name fail.printf_position) (kind block-item) (target (declaration-empty-symbol)) (targetp ()) (parameters ((macro-param (binder ?site) (kind expr) (sequence 0)))) (fresh ()) (captures ()) (pattern (args (capture (!and (source ?site) (source ?)) (value ?) (expression ?__macro_expression_site) (splice *)))) (template (seq (stmnt (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"_printf_fail\"))) (args (expr (macro-expr) ?__macro_expression_site) (expr (* char) (literal (* char) \"\\\"positional formats cannot infer Var argument types\\\"\")))))))) (rebuild ((seq (stmnt (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"_printf_fail\"))) (args ?__macro_expression_site (expr (* char) (literal (* char) \"\\\"positional formats cannot infer Var argument types\\\"\"))))))) ((? ? ?__macro_expression_site ? ? ?)))) (leaf 1) (origin ((file \"src/components/printf-format.x\") (line 31) (column 1) (length 5) (position 1238))) (file \"src/components/printf-format.x\") (builtin 0) (local 0) (static 0)))) ((\"source-node\" (compile-time \"src/components/printf-format.x\" 1364)) (compile-time macrodef (macrodef (name fail.printf_missing_count) (kind block-item) (target (declaration-empty-symbol)) (targetp ()) (parameters ((macro-param (binder ?site) (kind expr) (sequence 0)))) (fresh ()) (captures ()) (pattern (args (capture (!and (source ?site) (source ?)) (value ?) (expression ?__macro_expression_site) (splice *)))) (template (seq (stmnt (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"_printf_fail\"))) (args (expr (macro-expr) ?__macro_expression_site) (expr (* char) (literal (* char) \"\\\"format consumes a missing \\\'*\\\' argument\\\"\")))))))) (rebuild ((seq (stmnt (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"_printf_fail\"))) (args ?__macro_expression_site (expr (* char) (literal (* char) \"\\\"format consumes a missing \\\'*\\\' argument\\\"\"))))))) ((? ? ?__macro_expression_site ? ? ?)))) (leaf 1) (origin ((file \"src/components/printf-format.x\") (line 34) (column 1) (length 5) (position 1364))) (file \"src/components/printf-format.x\") (builtin 0) (local 0) (static 0)))) ((\"source-node\" (compile-time \"src/components/printf-format.x\" 1483)) (compile-time macrodef (macrodef (name fail.printf_incomplete) (kind block-item) (target (declaration-empty-symbol)) (targetp ()) (parameters ((macro-param (binder ?site) (kind expr) (sequence 0)))) (fresh ()) (captures ()) (pattern (args (capture (!and (source ?site) (source ?)) (value ?) (expression ?__macro_expression_site) (splice *)))) (template (seq (stmnt (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"_printf_fail\"))) (args (expr (macro-expr) ?__macro_expression_site) (expr (* char) (literal (* char) \"\\\"incomplete format conversion\\\"\")))))))) (rebuild ((seq (stmnt (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"_printf_fail\"))) (args ?__macro_expression_site (expr (* char) (literal (* char) \"\\\"incomplete format conversion\\\"\"))))))) ((? ? ?__macro_expression_site ? ? ?)))) (leaf 1) (origin ((file \"src/components/printf-format.x\") (line 37) (column 1) (length 5) (position 1483))) (file \"src/components/printf-format.x\") (builtin 0) (local 0) (static 0)))) ((\"source-node\" (compile-time \"src/components/printf-format.x\" 1589)) (compile-time macrodef (macrodef (name fail.printf_conversion) (kind block-item) (target (declaration-empty-symbol)) (targetp ()) (parameters ((macro-param (binder ?site) (kind expr) (sequence 0)) (macro-param (binder ?spec) (kind expr) (sequence 0)))) (fresh ()) (captures ()) (pattern (args (capture (!and (source ?site) (source ?)) (value ?) (expression ?__macro_expression_site) (splice *)) (capture (!and (source ?spec) (source ?)) (value ?) (expression ?) (splice *)))) (template (seq (stmnt (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"_printf_fail\"))) (args (expr (macro-expr) ?__macro_expression_site) (expr (macro-expr) (segments (declaration-cache (string (expr (\"String\") (literal (\"String\") \"unsupported or malformed format conversion \")))) (segvar (expr (macro-expr) (ident (binding-name \"spec\")))))))))))) (rebuild ((seq (stmnt (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"_printf_fail\"))) (args ?__macro_expression_site (expr (macro-expr) (segments (declaration-cache (string (expr (\"String\") (literal (\"String\") \"unsupported or malformed format conversion \")))) (segvar (expr (macro-expr) (ident (binding-name \"spec\"))))))))))) ((? ? ?__macro_expression_site ? ? ?) (? ? ? ? ? ?)))) (leaf 1) (origin ((file \"src/components/printf-format.x\") (line 40) (column 1) (length 5) (position 1589))) (file \"src/components/printf-format.x\") (builtin 0) (local 0) (static 0)))) ((\"source-node\" (compile-time \"src/components/printf-format.x\" 1728)) (compile-time macrodef (macrodef (name fail.printf_missing_argument) (kind block-item) (target (declaration-empty-symbol)) (targetp ()) (parameters ((macro-param (binder ?site) (kind expr) (sequence 0)) (macro-param (binder ?spec) (kind expr) (sequence 0)))) (fresh ()) (captures ()) (pattern (args (capture (!and (source ?site) (source ?)) (value ?) (expression ?__macro_expression_site) (splice *)) (capture (!and (source ?spec) (source ?)) (value ?) (expression ?) (splice *)))) (template (seq (stmnt (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"_printf_fail\"))) (args (expr (macro-expr) ?__macro_expression_site) (expr (macro-expr) (segments (declaration-cache (string (expr (\"String\") (literal (\"String\") \"format conversion \")))) (segvar (expr (macro-expr) (ident (binding-name \"spec\")))) (declaration-cache (string (expr (\"String\") (literal (\"String\") \" consumes a missing argument\")))))))))))) (rebuild ((seq (stmnt (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"_printf_fail\"))) (args ?__macro_expression_site (expr (macro-expr) (segments (declaration-cache (string (expr (\"String\") (literal (\"String\") \"format conversion \")))) (segvar (expr (macro-expr) (ident (binding-name \"spec\")))) (declaration-cache (string (expr (\"String\") (literal (\"String\") \" consumes a missing argument\"))))))))))) ((? ? ?__macro_expression_site ? ? ?) (? ? ? ? ? ?)))) (leaf 1) (origin ((file \"src/components/printf-format.x\") (line 43) (column 1) (length 5) (position 1728))) (file \"src/components/printf-format.x\") (builtin 0) (local 0) (static 0)))) ((\"source-node\" (compile-time \"src/components/printf-format.x\" 1876)) (compile-time macrodef (macrodef (name fail.printf_native_argument) (kind block-item) (target (declaration-empty-symbol)) (targetp ()) (parameters ((macro-param (binder ?site) (kind expr) (sequence 0)) (macro-param (binder ?spec) (kind expr) (sequence 0)))) (fresh ()) (captures ()) (pattern (args (capture (!and (source ?site) (source ?)) (value ?) (expression ?__macro_expression_site) (splice *)) (capture (!and (source ?spec) (source ?)) (value ?) (expression ?) (splice *)))) (template (seq (stmnt (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"_printf_fail\"))) (args (expr (macro-expr) ?__macro_expression_site) (expr (macro-expr) (op + (expr (macro-expr) (segments (declaration-cache (string (expr (\"String\") (literal (\"String\") \"cannot infer a native argument for Var at \")))) (segvar (expr (macro-expr) (ident (binding-name \"spec\")))) (declaration-cache (string (expr (\"String\") (literal (\"String\") \"; use an \")))))) (expr (* char) (literal (* char) \"\\\"explicit converter for this format conversion\\\"\")))))))))) (rebuild ((seq (stmnt (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"_printf_fail\"))) (args ?__macro_expression_site (expr (macro-expr) (op + (expr (macro-expr) (segments (declaration-cache (string (expr (\"String\") (literal (\"String\") \"cannot infer a native argument for Var at \")))) (segvar (expr (macro-expr) (ident (binding-name \"spec\")))) (declaration-cache (string (expr (\"String\") (literal (\"String\") \"; use an \")))))) (expr (* char) (literal (* char) \"\\\"explicit converter for this format conversion\\\"\"))))))))) ((? ? ?__macro_expression_site ? ? ?) (? ? ? ? ? ?)))) (leaf 1) (origin ((file \"src/components/printf-format.x\") (line 46) (column 1) (length 5) (position 1876))) (file \"src/components/printf-format.x\") (builtin 0) (local 0) (static 0)))) ((\"source-node\" (compile-time \"src/components/printf-format.x\" 2089)) (compile-time macrodef (macrodef (name fail.printf_static_format) (kind block-item) (target (declaration-empty-symbol)) (targetp ()) (parameters ((macro-param (binder ?site) (kind expr) (sequence 0)))) (fresh ()) (captures ()) (pattern (args (capture (!and (source ?site) (source ?)) (value ?) (expression ?__macro_expression_site) (splice *)))) (template (seq (stmnt (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"_printf_fail\"))) (args (expr (macro-expr) ?__macro_expression_site) (expr (* char) (literal (* char) \"\\\"Var arguments require a single static format literal\\\"\")))))))) (rebuild ((seq (stmnt (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"_printf_fail\"))) (args ?__macro_expression_site (expr (* char) (literal (* char) \"\\\"Var arguments require a single static format literal\\\"\"))))))) ((? ? ?__macro_expression_site ? ? ?)))) (leaf 1) (origin ((file \"src/components/printf-format.x\") (line 51) (column 1) (length 5) (position 2089))) (file \"src/components/printf-format.x\") (builtin 0) (local 0) (static 0)))) ((\"source-node\" (compile-time \"src/components/printf-format.x\" 2222)) (compile-time macrodef (macrodef (name fail.printf_unused_argument) (kind block-item) (target (declaration-empty-symbol)) (targetp ()) (parameters ((macro-param (binder ?site) (kind expr) (sequence 0)))) (fresh ()) (captures ()) (pattern (args (capture (!and (source ?site) (source ?)) (value ?) (expression ?__macro_expression_site) (splice *)))) (template (seq (stmnt (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"_printf_fail\"))) (args (expr (macro-expr) ?__macro_expression_site) (expr (* char) (literal (* char) \"\\\"Var argument has no corresponding format conversion\\\"\")))))))) (rebuild ((seq (stmnt (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"_printf_fail\"))) (args ?__macro_expression_site (expr (* char) (literal (* char) \"\\\"Var argument has no corresponding format conversion\\\"\"))))))) ((? ? ?__macro_expression_site ? ? ?)))) (leaf 1) (origin ((file \"src/components/printf-format.x\") (line 54) (column 1) (length 5) (position 2222))) (file \"src/components/printf-format.x\") (builtin 0) (local 0) (static 0)))) ((\"source-node\" (compile-time \"src/components/printf-format.x\" 7479)) (compile-time macrodef (macrodef (name x2c.printf.format) (kind expression) (target (declaration-empty-symbol)) (targetp ()) (parameters ((macro-param (binder ?format) (kind expr) (sequence 0)) (macro-param (binder *values) (kind expr) (sequence 1)))) (fresh ()) (captures ()) (pattern (args (capture (!and (source ?format) (source ?)) (value ?) (expression ?__macro_expression_format) (splice *)) (capture (!and (source *values) (source *)) (!and (value *) (value *) (value *__macro_splice_values))))) (template (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"printf\"))) (args (expr (macro-expr) ?__macro_expression_format) *__macro_splice_values)))) (rebuild ((expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"printf\"))) (args ?__macro_expression_format *__macro_splice_values))) ((? ? ?__macro_expression_format ? ? ?) (? ? ? *__macro_splice_values ? ?)))) (leaf 1) (origin ((file \"src/components/printf-format.x\") (line 197) (column 1) (length 5) (position 7479))) (file \"src/components/printf-format.x\") (builtin 0) (local 0) (static 0)))) ((\"source-node\" (compile-time \"src/components/printf-format.x\" 7574)) (compile-time macrodef (macrodef (name x2c.fprintf.format) (kind expression) (target (declaration-empty-symbol)) (targetp ()) (parameters ((macro-param (binder ?stream) (kind expr) (sequence 0)) (macro-param (binder ?format) (kind expr) (sequence 0)) (macro-param (binder *values) (kind expr) (sequence 1)))) (fresh ()) (captures ()) (pattern (args (capture (!and (source ?stream) (source ?)) (value ?) (expression ?__macro_expression_stream) (splice *)) (capture (!and (source ?format) (source ?)) (value ?) (expression ?__macro_expression_format) (splice *)) (capture (!and (source *values) (source *)) (!and (value *) (value *) (value *__macro_splice_values))))) (template (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"fprintf\"))) (args (expr (macro-expr) ?__macro_expression_stream) (expr (macro-expr) ?__macro_expression_format) *__macro_splice_values)))) (rebuild ((expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"fprintf\"))) (args ?__macro_expression_stream ?__macro_expression_format *__macro_splice_values))) ((? ? ?__macro_expression_stream ? ? ?) (? ? ?__macro_expression_format ? ? ?) (? ? ? *__macro_splice_values ? ?)))) (leaf 1) (origin ((file \"src/components/printf-format.x\") (line 199) (column 1) (length 5) (position 7574))) (file \"src/components/printf-format.x\") (builtin 0) (local 0) (static 0)))) ((\"source-node\" (compile-time \"src/components/printf-format.x\" 7699)) (compile-time macrodef (macrodef (name x2c.sprintf.format) (kind expression) (target (declaration-empty-symbol)) (targetp ()) (parameters ((macro-param (binder ?text) (kind expr) (sequence 0)) (macro-param (binder ?format) (kind expr) (sequence 0)) (macro-param (binder *values) (kind expr) (sequence 1)))) (fresh ()) (captures ()) (pattern (args (capture (!and (source ?text) (source ?)) (value ?) (expression ?__macro_expression_text) (splice *)) (capture (!and (source ?format) (source ?)) (value ?) (expression ?__macro_expression_format) (splice *)) (capture (!and (source *values) (source *)) (!and (value *) (value *) (value *__macro_splice_values))))) (template (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"sprintf\"))) (args (expr (macro-expr) ?__macro_expression_text) (expr (macro-expr) ?__macro_expression_format) *__macro_splice_values)))) (rebuild ((expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"sprintf\"))) (args ?__macro_expression_text ?__macro_expression_format *__macro_splice_values))) ((? ? ?__macro_expression_text ? ? ?) (? ? ?__macro_expression_format ? ? ?) (? ? ? *__macro_splice_values ? ?)))) (leaf 1) (origin ((file \"src/components/printf-format.x\") (line 202) (column 1) (length 5) (position 7699))) (file \"src/components/printf-format.x\") (builtin 0) (local 0) (static 0)))) ((\"source-node\" (compile-time \"src/components/printf-format.x\" 7815)) (compile-time macrodef (macrodef (name x2c.snprintf.format) (kind expression) (target (declaration-empty-symbol)) (targetp ()) (parameters ((macro-param (binder ?text) (kind expr) (sequence 0)) (macro-param (binder ?size) (kind expr) (sequence 0)) (macro-param (binder ?format) (kind expr) (sequence 0)) (macro-param (binder *values) (kind expr) (sequence 1)))) (fresh ()) (captures ()) (pattern (args (capture (!and (source ?text) (source ?)) (value ?) (expression ?__macro_expression_text) (splice *)) (capture (!and (source ?size) (source ?)) (value ?) (expression ?__macro_expression_size) (splice *)) (capture (!and (source ?format) (source ?)) (value ?) (expression ?__macro_expression_format) (splice *)) (capture (!and (source *values) (source *)) (!and (value *) (value *) (value *__macro_splice_values))))) (template (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"snprintf\"))) (args (expr (macro-expr) ?__macro_expression_text) (expr (macro-expr) ?__macro_expression_size) (expr (macro-expr) ?__macro_expression_format) *__macro_splice_values)))) (rebuild ((expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"snprintf\"))) (args ?__macro_expression_text ?__macro_expression_size ?__macro_expression_format *__macro_splice_values))) ((? ? ?__macro_expression_text ? ? ?) (? ? ?__macro_expression_size ? ? ?) (? ? ?__macro_expression_format ? ? ?) (? ? ? *__macro_splice_values ? ?)))) (leaf 1) (origin ((file \"src/components/printf-format.x\") (line 204) (column 1) (length 5) (position 7815))) (file \"src/components/printf-format.x\") (builtin 0) (local 0) (static 0)))) ((\"source-node\" (compile-time \"src/components/printf-format.x\" 7957)) (compile-time macrodef (macrodef (name x2c.string_printf.format) (kind expression) (target (declaration-empty-symbol)) (targetp ()) (parameters ((macro-param (binder ?format) (kind expr) (sequence 0)) (macro-param (binder *values) (kind expr) (sequence 1)))) (fresh ()) (captures ()) (pattern (args (capture (!and (source ?format) (source ?)) (value ?) (expression ?__macro_expression_format) (splice *)) (capture (!and (source *values) (source *)) (!and (value *) (value *) (value *__macro_splice_values))))) (template (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"String_printf\"))) (args (expr (macro-expr) ?__macro_expression_format) *__macro_splice_values)))) (rebuild ((expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"String_printf\"))) (args ?__macro_expression_format *__macro_splice_values))) ((? ? ?__macro_expression_format ? ? ?) (? ? ? *__macro_splice_values ? ?)))) (leaf 1) (origin ((file \"src/components/printf-format.x\") (line 207) (column 1) (length 5) (position 7957))) (file \"src/components/printf-format.x\") (builtin 0) (local 0) (static 0)))) ((\"source-node\" (compile-time \"src/components/printf-format.x\" 8066)) (compile-time macrodef (macrodef (name x2c.file_printf.format) (kind expression) (target (declaration-empty-symbol)) (targetp ()) (parameters ((macro-param (binder ?file) (kind expr) (sequence 0)) (macro-param (binder ?format) (kind expr) (sequence 0)) (macro-param (binder *values) (kind expr) (sequence 1)))) (fresh ()) (captures ()) (pattern (args (capture (!and (source ?file) (source ?)) (value ?) (expression ?__macro_expression_file) (splice *)) (capture (!and (source ?format) (source ?)) (value ?) (expression ?__macro_expression_format) (splice *)) (capture (!and (source *values) (source *)) (!and (value *) (value *) (value *__macro_splice_values))))) (template (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"File_printf\"))) (args (expr (macro-expr) ?__macro_expression_file) (expr (macro-expr) ?__macro_expression_format) *__macro_splice_values)))) (rebuild ((expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"File_printf\"))) (args ?__macro_expression_file ?__macro_expression_format *__macro_splice_values))) ((? ? ?__macro_expression_file ? ? ?) (? ? ?__macro_expression_format ? ? ?) (? ? ? *__macro_splice_values ? ?)))) (leaf 1) (origin ((file \"src/components/printf-format.x\") (line 209) (column 1) (length 5) (position 8066))) (file \"src/components/printf-format.x\") (builtin 0) (local 0) (static 0)))) ((\"source-node\" (compile-time \"src/components/printf-format.x\" 8195)) (compile-time macrodef (macrodef (name x2c.buffer_printf.format) (kind expression) (target (declaration-empty-symbol)) (targetp ()) (parameters ((macro-param (binder ?buffer) (kind expr) (sequence 0)) (macro-param (binder ?format) (kind expr) (sequence 0)) (macro-param (binder *values) (kind expr) (sequence 1)))) (fresh ()) (captures ()) (pattern (args (capture (!and (source ?buffer) (source ?)) (value ?) (expression ?__macro_expression_buffer) (splice *)) (capture (!and (source ?format) (source ?)) (value ?) (expression ?__macro_expression_format) (splice *)) (capture (!and (source *values) (source *)) (!and (value *) (value *) (value *__macro_splice_values))))) (template (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"Buffer_printf\"))) (args (expr (macro-expr) ?__macro_expression_buffer) (expr (macro-expr) ?__macro_expression_format) *__macro_splice_values)))) (rebuild ((expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"Buffer_printf\"))) (args ?__macro_expression_buffer ?__macro_expression_format *__macro_splice_values))) ((? ? ?__macro_expression_buffer ? ? ?) (? ? ?__macro_expression_format ? ? ?) (? ? ? *__macro_splice_values ? ?)))) (leaf 1) (origin ((file \"src/components/printf-format.x\") (line 212) (column 1) (length 5) (position 8195))) (file \"src/components/printf-format.x\") (builtin 0) (local 0) (static 0)))) ((\"source-node\" (compile-time \"src/components/printf-format.x\" 8333)) (compile-time rewrite call \"printf\" \"printf_values\" (macrodef (name x2c.printf.format) (kind expression) (target (declaration-empty-symbol)) (targetp ()) (parameters ((macro-param (binder ?format) (kind expr) (sequence 0)) (macro-param (binder *values) (kind expr) (sequence 1)))) (fresh ()) (captures ()) (pattern (args (capture (!and (source ?format) (source ?)) (value ?) (expression ?__macro_expression_format) (splice *)) (capture (!and (source *values) (source *)) (!and (value *) (value *) (value *__macro_splice_values))))) (template (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"printf\"))) (args (expr (macro-expr) ?__macro_expression_format) *__macro_splice_values)))) (rebuild ((expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"printf\"))) (args ?__macro_expression_format *__macro_splice_values))) ((? ? ?__macro_expression_format ? ? ?) (? ? ? *__macro_splice_values ? ?)))) (leaf 1) (origin ((file \"src/components/printf-format.x\") (line 197) (column 1) (length 5) (position 7479))) (file \"src/components/printf-format.x\") (builtin 0) (local 0) (static 0)) (?format *values))) ((\"source-node\" (compile-time \"src/components/printf-format.x\" 8362)) (compile-time rewrite call \"fprintf\" \"printf_values\" (macrodef (name x2c.fprintf.format) (kind expression) (target (declaration-empty-symbol)) (targetp ()) (parameters ((macro-param (binder ?stream) (kind expr) (sequence 0)) (macro-param (binder ?format) (kind expr) (sequence 0)) (macro-param (binder *values) (kind expr) (sequence 1)))) (fresh ()) (captures ()) (pattern (args (capture (!and (source ?stream) (source ?)) (value ?) (expression ?__macro_expression_stream) (splice *)) (capture (!and (source ?format) (source ?)) (value ?) (expression ?__macro_expression_format) (splice *)) (capture (!and (source *values) (source *)) (!and (value *) (value *) (value *__macro_splice_values))))) (template (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"fprintf\"))) (args (expr (macro-expr) ?__macro_expression_stream) (expr (macro-expr) ?__macro_expression_format) *__macro_splice_values)))) (rebuild ((expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"fprintf\"))) (args ?__macro_expression_stream ?__macro_expression_format *__macro_splice_values))) ((? ? ?__macro_expression_stream ? ? ?) (? ? ?__macro_expression_format ? ? ?) (? ? ? *__macro_splice_values ? ?)))) (leaf 1) (origin ((file \"src/components/printf-format.x\") (line 199) (column 1) (length 5) (position 7574))) (file \"src/components/printf-format.x\") (builtin 0) (local 0) (static 0)) (?stream ?format *values))) ((\"source-node\" (compile-time \"src/components/printf-format.x\" 8392)) (compile-time rewrite call \"sprintf\" \"printf_values\" (macrodef (name x2c.sprintf.format) (kind expression) (target (declaration-empty-symbol)) (targetp ()) (parameters ((macro-param (binder ?text) (kind expr) (sequence 0)) (macro-param (binder ?format) (kind expr) (sequence 0)) (macro-param (binder *values) (kind expr) (sequence 1)))) (fresh ()) (captures ()) (pattern (args (capture (!and (source ?text) (source ?)) (value ?) (expression ?__macro_expression_text) (splice *)) (capture (!and (source ?format) (source ?)) (value ?) (expression ?__macro_expression_format) (splice *)) (capture (!and (source *values) (source *)) (!and (value *) (value *) (value *__macro_splice_values))))) (template (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"sprintf\"))) (args (expr (macro-expr) ?__macro_expression_text) (expr (macro-expr) ?__macro_expression_format) *__macro_splice_values)))) (rebuild ((expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"sprintf\"))) (args ?__macro_expression_text ?__macro_expression_format *__macro_splice_values))) ((? ? ?__macro_expression_text ? ? ?) (? ? ?__macro_expression_format ? ? ?) (? ? ? *__macro_splice_values ? ?)))) (leaf 1) (origin ((file \"src/components/printf-format.x\") (line 202) (column 1) (length 5) (position 7699))) (file \"src/components/printf-format.x\") (builtin 0) (local 0) (static 0)) (?text ?format *values))) ((\"source-node\" (compile-time \"src/components/printf-format.x\" 8422)) (compile-time rewrite call \"snprintf\" \"printf_values\" (macrodef (name x2c.snprintf.format) (kind expression) (target (declaration-empty-symbol)) (targetp ()) (parameters ((macro-param (binder ?text) (kind expr) (sequence 0)) (macro-param (binder ?size) (kind expr) (sequence 0)) (macro-param (binder ?format) (kind expr) (sequence 0)) (macro-param (binder *values) (kind expr) (sequence 1)))) (fresh ()) (captures ()) (pattern (args (capture (!and (source ?text) (source ?)) (value ?) (expression ?__macro_expression_text) (splice *)) (capture (!and (source ?size) (source ?)) (value ?) (expression ?__macro_expression_size) (splice *)) (capture (!and (source ?format) (source ?)) (value ?) (expression ?__macro_expression_format) (splice *)) (capture (!and (source *values) (source *)) (!and (value *) (value *) (value *__macro_splice_values))))) (template (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"snprintf\"))) (args (expr (macro-expr) ?__macro_expression_text) (expr (macro-expr) ?__macro_expression_size) (expr (macro-expr) ?__macro_expression_format) *__macro_splice_values)))) (rebuild ((expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"snprintf\"))) (args ?__macro_expression_text ?__macro_expression_size ?__macro_expression_format *__macro_splice_values))) ((? ? ?__macro_expression_text ? ? ?) (? ? ?__macro_expression_size ? ? ?) (? ? ?__macro_expression_format ? ? ?) (? ? ? *__macro_splice_values ? ?)))) (leaf 1) (origin ((file \"src/components/printf-format.x\") (line 204) (column 1) (length 5) (position 7815))) (file \"src/components/printf-format.x\") (builtin 0) (local 0) (static 0)) (?text ?size ?format *values))) ((\"source-node\" (compile-time \"src/components/printf-format.x\" 8453)) (compile-time rewrite call \"String_printf\" \"printf_values\" (macrodef (name x2c.string_printf.format) (kind expression) (target (declaration-empty-symbol)) (targetp ()) (parameters ((macro-param (binder ?format) (kind expr) (sequence 0)) (macro-param (binder *values) (kind expr) (sequence 1)))) (fresh ()) (captures ()) (pattern (args (capture (!and (source ?format) (source ?)) (value ?) (expression ?__macro_expression_format) (splice *)) (capture (!and (source *values) (source *)) (!and (value *) (value *) (value *__macro_splice_values))))) (template (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"String_printf\"))) (args (expr (macro-expr) ?__macro_expression_format) *__macro_splice_values)))) (rebuild ((expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"String_printf\"))) (args ?__macro_expression_format *__macro_splice_values))) ((? ? ?__macro_expression_format ? ? ?) (? ? ? *__macro_splice_values ? ?)))) (leaf 1) (origin ((file \"src/components/printf-format.x\") (line 207) (column 1) (length 5) (position 7957))) (file \"src/components/printf-format.x\") (builtin 0) (local 0) (static 0)) (?format *values))) ((\"source-node\" (compile-time \"src/components/printf-format.x\" 8489)) (compile-time rewrite call \"File_printf\" \"printf_values\" (macrodef (name x2c.file_printf.format) (kind expression) (target (declaration-empty-symbol)) (targetp ()) (parameters ((macro-param (binder ?file) (kind expr) (sequence 0)) (macro-param (binder ?format) (kind expr) (sequence 0)) (macro-param (binder *values) (kind expr) (sequence 1)))) (fresh ()) (captures ()) (pattern (args (capture (!and (source ?file) (source ?)) (value ?) (expression ?__macro_expression_file) (splice *)) (capture (!and (source ?format) (source ?)) (value ?) (expression ?__macro_expression_format) (splice *)) (capture (!and (source *values) (source *)) (!and (value *) (value *) (value *__macro_splice_values))))) (template (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"File_printf\"))) (args (expr (macro-expr) ?__macro_expression_file) (expr (macro-expr) ?__macro_expression_format) *__macro_splice_values)))) (rebuild ((expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"File_printf\"))) (args ?__macro_expression_file ?__macro_expression_format *__macro_splice_values))) ((? ? ?__macro_expression_file ? ? ?) (? ? ?__macro_expression_format ? ? ?) (? ? ? *__macro_splice_values ? ?)))) (leaf 1) (origin ((file \"src/components/printf-format.x\") (line 209) (column 1) (length 5) (position 8066))) (file \"src/components/printf-format.x\") (builtin 0) (local 0) (static 0)) (?file ?format *values))) ((\"source-node\" (compile-time \"src/components/printf-format.x\" 8523)) (compile-time rewrite call \"Buffer_printf\" \"printf_values\" (macrodef (name x2c.buffer_printf.format) (kind expression) (target (declaration-empty-symbol)) (targetp ()) (parameters ((macro-param (binder ?buffer) (kind expr) (sequence 0)) (macro-param (binder ?format) (kind expr) (sequence 0)) (macro-param (binder *values) (kind expr) (sequence 1)))) (fresh ()) (captures ()) (pattern (args (capture (!and (source ?buffer) (source ?)) (value ?) (expression ?__macro_expression_buffer) (splice *)) (capture (!and (source ?format) (source ?)) (value ?) (expression ?__macro_expression_format) (splice *)) (capture (!and (source *values) (source *)) (!and (value *) (value *) (value *__macro_splice_values))))) (template (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"Buffer_printf\"))) (args (expr (macro-expr) ?__macro_expression_buffer) (expr (macro-expr) ?__macro_expression_format) *__macro_splice_values)))) (rebuild ((expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"Buffer_printf\"))) (args ?__macro_expression_buffer ?__macro_expression_format *__macro_splice_values))) ((? ? ?__macro_expression_buffer ? ? ?) (? ? ?__macro_expression_format ? ? ?) (? ? ? *__macro_splice_values ? ?)))) (leaf 1) (origin ((file \"src/components/printf-format.x\") (line 212) (column 1) (length 5) (position 8195))) (file \"src/components/printf-format.x\") (builtin 0) (local 0) (static 0)) (?buffer ?format *values))) ((\"source-node\" (declaration \"src/components/printf-format.x\" 8634)) (project-meta \"printf_values\" ((func ((\"Code\"))) \"Code\") \"src/components/printf-format.x\")) ((\"unit-static\" \"_printf_conversion\") (\"src/components/printf-format.x\")) ((\"unit-static\" \"_printf_count\") (\"src/components/printf-format.x\")) ((\"unit-static\" \"_printf_fail\") (\"src/components/printf-format.x\")) ((\"unit-static\" \"_printf_is_var\") (\"src/components/printf-format.x\")) ((\"unit-static\" \"_printf_length\") (\"src/components/printf-format.x\")) ((\"unit-static\" \"_printf_library\") (\"src/components/printf-format.x\")) ((\"unit-static\" \"_printf_lowered\") (\"src/components/printf-format.x\")) ((\"unit-static\" \"_printf_position\") (\"src/components/printf-format.x\")) ((\"unit-static\" \"_printf_read\") (\"src/components/printf-format.x\")) ((\"unit-static\" \"_printf_scan\") (\"src/components/printf-format.x\")) ((\"unit-static\" \"_printf_type\") (\"src/components/printf-format.x\")) ((\"unit-static\" \"_printf_valid\") (\"src/components/printf-format.x\"))) (((\"source-node\" (provider-source \"src/components/printf-format.x\" 0)) (source \"899f6ca0\" ((\"cwd:./rewrite.x\" \"search:absent\") (\"etc/compiler-sdk.xlisp\" 1) (\"etc/init.xlisp\" 1) (\"etc/lisp-values.xlisp\" 1) (\"lib/rewrite.x\" \"f378e68f\") (\"src/components/rewrite.x\" \"search:absent\")))))) () ((\"cwd:./rewrite.x\" \"search:absent\") (\"etc/compiler-sdk.xlisp\" 1) (\"etc/init.xlisp\" 1) (\"etc/lisp-values.xlisp\" 1) (\"lib/rewrite.x\" \"f378e68f\") (\"src/components/rewrite.x\" \"search:absent\")) ((home \"include/x2c\") (package)))");
+  _396 = String_new("(\"src/components/printf-format.x\" \"c1c5cca6\" ((((\"source-node\" (meta-hashes \"src/components/printf-format.x\" 0)) (meta-hashes \"src/components/printf-format.x\" ((\"_printf_conversion\" \"d48278ce2b7d36b6\") (\"_printf_count\" \"9c15e6fe3f8fb365\") (\"_printf_fail\" \"70cacaa8a64fe33b\") (\"_printf_is_var\" \"f3e062a89c8027a8\") (\"_printf_length\" \"abe4584d6e3de11f\") (\"_printf_library\" \"141a1eba016b9301\") (\"_printf_lowered\" \"c9de721369f41fe1\") (\"_printf_position\" \"de12f3fc2bd08028\") (\"_printf_read\" \"6e1a063722f6d7ce\") (\"_printf_scan\" \"b62d585ea5e43970\") (\"_printf_type\" \"0e646d401b27aa5d\") (\"_printf_valid\" \"611d71a66fb7b0d7\") (\"printf_values\" \"5f923286d7d213df\"))))) \"lib/rewrite.x\" (((\"printf_values\") ((func ((\"Code\"))) \"Code\")) ((\"source-node\" (compile-time \"src/components/printf-format.x\" 1238)) (compile-time macrodef (macrodef (name fail.printf_position) (kind block-item) (target (declaration-empty-symbol)) (targetp ()) (parameters ((macro-param (binder ?site) (kind expr) (sequence 0)))) (fresh ()) (captures ()) (pattern (args (capture (!and (source ?site) (source ?)) (value ?) (expression ?__macro_expression_site) (splice *)))) (template (seq (stmnt (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"_printf_fail\"))) (args (expr (macro-expr) ?__macro_expression_site) (expr (* char) (literal (* char) \"\\\"positional formats cannot infer Var argument types\\\"\")))))))) (rebuild ((seq (stmnt (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"_printf_fail\"))) (args ?__macro_expression_site (expr (* char) (literal (* char) \"\\\"positional formats cannot infer Var argument types\\\"\"))))))) ((? ? ?__macro_expression_site ? ? ?)))) (leaf 1) (origin ((file \"src/components/printf-format.x\") (line 31) (column 1) (length 5) (position 1238))) (file \"src/components/printf-format.x\") (builtin 0) (local 0) (static 0)))) ((\"source-node\" (compile-time \"src/components/printf-format.x\" 1364)) (compile-time macrodef (macrodef (name fail.printf_missing_count) (kind block-item) (target (declaration-empty-symbol)) (targetp ()) (parameters ((macro-param (binder ?site) (kind expr) (sequence 0)))) (fresh ()) (captures ()) (pattern (args (capture (!and (source ?site) (source ?)) (value ?) (expression ?__macro_expression_site) (splice *)))) (template (seq (stmnt (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"_printf_fail\"))) (args (expr (macro-expr) ?__macro_expression_site) (expr (* char) (literal (* char) \"\\\"format consumes a missing \\\'*\\\' argument\\\"\")))))))) (rebuild ((seq (stmnt (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"_printf_fail\"))) (args ?__macro_expression_site (expr (* char) (literal (* char) \"\\\"format consumes a missing \\\'*\\\' argument\\\"\"))))))) ((? ? ?__macro_expression_site ? ? ?)))) (leaf 1) (origin ((file \"src/components/printf-format.x\") (line 34) (column 1) (length 5) (position 1364))) (file \"src/components/printf-format.x\") (builtin 0) (local 0) (static 0)))) ((\"source-node\" (compile-time \"src/components/printf-format.x\" 1483)) (compile-time macrodef (macrodef (name fail.printf_incomplete) (kind block-item) (target (declaration-empty-symbol)) (targetp ()) (parameters ((macro-param (binder ?site) (kind expr) (sequence 0)))) (fresh ()) (captures ()) (pattern (args (capture (!and (source ?site) (source ?)) (value ?) (expression ?__macro_expression_site) (splice *)))) (template (seq (stmnt (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"_printf_fail\"))) (args (expr (macro-expr) ?__macro_expression_site) (expr (* char) (literal (* char) \"\\\"incomplete format conversion\\\"\")))))))) (rebuild ((seq (stmnt (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"_printf_fail\"))) (args ?__macro_expression_site (expr (* char) (literal (* char) \"\\\"incomplete format conversion\\\"\"))))))) ((? ? ?__macro_expression_site ? ? ?)))) (leaf 1) (origin ((file \"src/components/printf-format.x\") (line 37) (column 1) (length 5) (position 1483))) (file \"src/components/printf-format.x\") (builtin 0) (local 0) (static 0)))) ((\"source-node\" (compile-time \"src/components/printf-format.x\" 1589)) (compile-time macrodef (macrodef (name fail.printf_conversion) (kind block-item) (target (declaration-empty-symbol)) (targetp ()) (parameters ((macro-param (binder ?site) (kind expr) (sequence 0)) (macro-param (binder ?spec) (kind expr) (sequence 0)))) (fresh ()) (captures ()) (pattern (args (capture (!and (source ?site) (source ?)) (value ?) (expression ?__macro_expression_site) (splice *)) (capture (!and (source ?spec) (source ?)) (value ?) (expression ?) (splice *)))) (template (seq (stmnt (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"_printf_fail\"))) (args (expr (macro-expr) ?__macro_expression_site) (expr (macro-expr) (segments (declaration-cache (string (expr (\"String\") (literal (\"String\") \"unsupported or malformed format conversion \")))) (segvar (expr (macro-expr) (ident (binding-name \"spec\")))))))))))) (rebuild ((seq (stmnt (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"_printf_fail\"))) (args ?__macro_expression_site (expr (macro-expr) (segments (declaration-cache (string (expr (\"String\") (literal (\"String\") \"unsupported or malformed format conversion \")))) (segvar (expr (macro-expr) (ident (binding-name \"spec\"))))))))))) ((? ? ?__macro_expression_site ? ? ?) (? ? ? ? ? ?)))) (leaf 1) (origin ((file \"src/components/printf-format.x\") (line 40) (column 1) (length 5) (position 1589))) (file \"src/components/printf-format.x\") (builtin 0) (local 0) (static 0)))) ((\"source-node\" (compile-time \"src/components/printf-format.x\" 1728)) (compile-time macrodef (macrodef (name fail.printf_missing_argument) (kind block-item) (target (declaration-empty-symbol)) (targetp ()) (parameters ((macro-param (binder ?site) (kind expr) (sequence 0)) (macro-param (binder ?spec) (kind expr) (sequence 0)))) (fresh ()) (captures ()) (pattern (args (capture (!and (source ?site) (source ?)) (value ?) (expression ?__macro_expression_site) (splice *)) (capture (!and (source ?spec) (source ?)) (value ?) (expression ?) (splice *)))) (template (seq (stmnt (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"_printf_fail\"))) (args (expr (macro-expr) ?__macro_expression_site) (expr (macro-expr) (segments (declaration-cache (string (expr (\"String\") (literal (\"String\") \"format conversion \")))) (segvar (expr (macro-expr) (ident (binding-name \"spec\")))) (declaration-cache (string (expr (\"String\") (literal (\"String\") \" consumes a missing argument\")))))))))))) (rebuild ((seq (stmnt (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"_printf_fail\"))) (args ?__macro_expression_site (expr (macro-expr) (segments (declaration-cache (string (expr (\"String\") (literal (\"String\") \"format conversion \")))) (segvar (expr (macro-expr) (ident (binding-name \"spec\")))) (declaration-cache (string (expr (\"String\") (literal (\"String\") \" consumes a missing argument\"))))))))))) ((? ? ?__macro_expression_site ? ? ?) (? ? ? ? ? ?)))) (leaf 1) (origin ((file \"src/components/printf-format.x\") (line 43) (column 1) (length 5) (position 1728))) (file \"src/components/printf-format.x\") (builtin 0) (local 0) (static 0)))) ((\"source-node\" (compile-time \"src/components/printf-format.x\" 1876)) (compile-time macrodef (macrodef (name fail.printf_native_argument) (kind block-item) (target (declaration-empty-symbol)) (targetp ()) (parameters ((macro-param (binder ?site) (kind expr) (sequence 0)) (macro-param (binder ?spec) (kind expr) (sequence 0)))) (fresh ()) (captures ()) (pattern (args (capture (!and (source ?site) (source ?)) (value ?) (expression ?__macro_expression_site) (splice *)) (capture (!and (source ?spec) (source ?)) (value ?) (expression ?) (splice *)))) (template (seq (stmnt (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"_printf_fail\"))) (args (expr (macro-expr) ?__macro_expression_site) (expr (macro-expr) (op + (expr (macro-expr) (segments (declaration-cache (string (expr (\"String\") (literal (\"String\") \"cannot infer a native argument for Var at \")))) (segvar (expr (macro-expr) (ident (binding-name \"spec\")))) (declaration-cache (string (expr (\"String\") (literal (\"String\") \"; use an \")))))) (expr (* char) (literal (* char) \"\\\"explicit converter for this format conversion\\\"\")))))))))) (rebuild ((seq (stmnt (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"_printf_fail\"))) (args ?__macro_expression_site (expr (macro-expr) (op + (expr (macro-expr) (segments (declaration-cache (string (expr (\"String\") (literal (\"String\") \"cannot infer a native argument for Var at \")))) (segvar (expr (macro-expr) (ident (binding-name \"spec\")))) (declaration-cache (string (expr (\"String\") (literal (\"String\") \"; use an \")))))) (expr (* char) (literal (* char) \"\\\"explicit converter for this format conversion\\\"\"))))))))) ((? ? ?__macro_expression_site ? ? ?) (? ? ? ? ? ?)))) (leaf 1) (origin ((file \"src/components/printf-format.x\") (line 46) (column 1) (length 5) (position 1876))) (file \"src/components/printf-format.x\") (builtin 0) (local 0) (static 0)))) ((\"source-node\" (compile-time \"src/components/printf-format.x\" 2089)) (compile-time macrodef (macrodef (name fail.printf_static_format) (kind block-item) (target (declaration-empty-symbol)) (targetp ()) (parameters ((macro-param (binder ?site) (kind expr) (sequence 0)))) (fresh ()) (captures ()) (pattern (args (capture (!and (source ?site) (source ?)) (value ?) (expression ?__macro_expression_site) (splice *)))) (template (seq (stmnt (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"_printf_fail\"))) (args (expr (macro-expr) ?__macro_expression_site) (expr (* char) (literal (* char) \"\\\"Var arguments require a single static format literal\\\"\")))))))) (rebuild ((seq (stmnt (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"_printf_fail\"))) (args ?__macro_expression_site (expr (* char) (literal (* char) \"\\\"Var arguments require a single static format literal\\\"\"))))))) ((? ? ?__macro_expression_site ? ? ?)))) (leaf 1) (origin ((file \"src/components/printf-format.x\") (line 51) (column 1) (length 5) (position 2089))) (file \"src/components/printf-format.x\") (builtin 0) (local 0) (static 0)))) ((\"source-node\" (compile-time \"src/components/printf-format.x\" 2222)) (compile-time macrodef (macrodef (name fail.printf_unused_argument) (kind block-item) (target (declaration-empty-symbol)) (targetp ()) (parameters ((macro-param (binder ?site) (kind expr) (sequence 0)))) (fresh ()) (captures ()) (pattern (args (capture (!and (source ?site) (source ?)) (value ?) (expression ?__macro_expression_site) (splice *)))) (template (seq (stmnt (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"_printf_fail\"))) (args (expr (macro-expr) ?__macro_expression_site) (expr (* char) (literal (* char) \"\\\"Var argument has no corresponding format conversion\\\"\")))))))) (rebuild ((seq (stmnt (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"_printf_fail\"))) (args ?__macro_expression_site (expr (* char) (literal (* char) \"\\\"Var argument has no corresponding format conversion\\\"\"))))))) ((? ? ?__macro_expression_site ? ? ?)))) (leaf 1) (origin ((file \"src/components/printf-format.x\") (line 54) (column 1) (length 5) (position 2222))) (file \"src/components/printf-format.x\") (builtin 0) (local 0) (static 0)))) ((\"source-node\" (compile-time \"src/components/printf-format.x\" 7464)) (compile-time macrodef (macrodef (name x2c.printf.format) (kind expression) (target (declaration-empty-symbol)) (targetp ()) (parameters ((macro-param (binder ?format) (kind expr) (sequence 0)) (macro-param (binder *values) (kind expr) (sequence 1)))) (fresh ()) (captures ()) (pattern (args (capture (!and (source ?format) (source ?)) (value ?) (expression ?__macro_expression_format) (splice *)) (capture (!and (source *values) (source *)) (!and (value *) (value *) (value *__macro_splice_values))))) (template (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"printf\"))) (args (expr (macro-expr) ?__macro_expression_format) *__macro_splice_values)))) (rebuild ((expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"printf\"))) (args ?__macro_expression_format *__macro_splice_values))) ((? ? ?__macro_expression_format ? ? ?) (? ? ? *__macro_splice_values ? ?)))) (leaf 1) (origin ((file \"src/components/printf-format.x\") (line 198) (column 1) (length 5) (position 7464))) (file \"src/components/printf-format.x\") (builtin 0) (local 0) (static 0)))) ((\"source-node\" (compile-time \"src/components/printf-format.x\" 7559)) (compile-time macrodef (macrodef (name x2c.fprintf.format) (kind expression) (target (declaration-empty-symbol)) (targetp ()) (parameters ((macro-param (binder ?stream) (kind expr) (sequence 0)) (macro-param (binder ?format) (kind expr) (sequence 0)) (macro-param (binder *values) (kind expr) (sequence 1)))) (fresh ()) (captures ()) (pattern (args (capture (!and (source ?stream) (source ?)) (value ?) (expression ?__macro_expression_stream) (splice *)) (capture (!and (source ?format) (source ?)) (value ?) (expression ?__macro_expression_format) (splice *)) (capture (!and (source *values) (source *)) (!and (value *) (value *) (value *__macro_splice_values))))) (template (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"fprintf\"))) (args (expr (macro-expr) ?__macro_expression_stream) (expr (macro-expr) ?__macro_expression_format) *__macro_splice_values)))) (rebuild ((expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"fprintf\"))) (args ?__macro_expression_stream ?__macro_expression_format *__macro_splice_values))) ((? ? ?__macro_expression_stream ? ? ?) (? ? ?__macro_expression_format ? ? ?) (? ? ? *__macro_splice_values ? ?)))) (leaf 1) (origin ((file \"src/components/printf-format.x\") (line 200) (column 1) (length 5) (position 7559))) (file \"src/components/printf-format.x\") (builtin 0) (local 0) (static 0)))) ((\"source-node\" (compile-time \"src/components/printf-format.x\" 7684)) (compile-time macrodef (macrodef (name x2c.sprintf.format) (kind expression) (target (declaration-empty-symbol)) (targetp ()) (parameters ((macro-param (binder ?text) (kind expr) (sequence 0)) (macro-param (binder ?format) (kind expr) (sequence 0)) (macro-param (binder *values) (kind expr) (sequence 1)))) (fresh ()) (captures ()) (pattern (args (capture (!and (source ?text) (source ?)) (value ?) (expression ?__macro_expression_text) (splice *)) (capture (!and (source ?format) (source ?)) (value ?) (expression ?__macro_expression_format) (splice *)) (capture (!and (source *values) (source *)) (!and (value *) (value *) (value *__macro_splice_values))))) (template (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"sprintf\"))) (args (expr (macro-expr) ?__macro_expression_text) (expr (macro-expr) ?__macro_expression_format) *__macro_splice_values)))) (rebuild ((expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"sprintf\"))) (args ?__macro_expression_text ?__macro_expression_format *__macro_splice_values))) ((? ? ?__macro_expression_text ? ? ?) (? ? ?__macro_expression_format ? ? ?) (? ? ? *__macro_splice_values ? ?)))) (leaf 1) (origin ((file \"src/components/printf-format.x\") (line 203) (column 1) (length 5) (position 7684))) (file \"src/components/printf-format.x\") (builtin 0) (local 0) (static 0)))) ((\"source-node\" (compile-time \"src/components/printf-format.x\" 7800)) (compile-time macrodef (macrodef (name x2c.snprintf.format) (kind expression) (target (declaration-empty-symbol)) (targetp ()) (parameters ((macro-param (binder ?text) (kind expr) (sequence 0)) (macro-param (binder ?size) (kind expr) (sequence 0)) (macro-param (binder ?format) (kind expr) (sequence 0)) (macro-param (binder *values) (kind expr) (sequence 1)))) (fresh ()) (captures ()) (pattern (args (capture (!and (source ?text) (source ?)) (value ?) (expression ?__macro_expression_text) (splice *)) (capture (!and (source ?size) (source ?)) (value ?) (expression ?__macro_expression_size) (splice *)) (capture (!and (source ?format) (source ?)) (value ?) (expression ?__macro_expression_format) (splice *)) (capture (!and (source *values) (source *)) (!and (value *) (value *) (value *__macro_splice_values))))) (template (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"snprintf\"))) (args (expr (macro-expr) ?__macro_expression_text) (expr (macro-expr) ?__macro_expression_size) (expr (macro-expr) ?__macro_expression_format) *__macro_splice_values)))) (rebuild ((expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"snprintf\"))) (args ?__macro_expression_text ?__macro_expression_size ?__macro_expression_format *__macro_splice_values))) ((? ? ?__macro_expression_text ? ? ?) (? ? ?__macro_expression_size ? ? ?) (? ? ?__macro_expression_format ? ? ?) (? ? ? *__macro_splice_values ? ?)))) (leaf 1) (origin ((file \"src/components/printf-format.x\") (line 205) (column 1) (length 5) (position 7800))) (file \"src/components/printf-format.x\") (builtin 0) (local 0) (static 0)))) ((\"source-node\" (compile-time \"src/components/printf-format.x\" 7942)) (compile-time macrodef (macrodef (name x2c.string_printf.format) (kind expression) (target (declaration-empty-symbol)) (targetp ()) (parameters ((macro-param (binder ?format) (kind expr) (sequence 0)) (macro-param (binder *values) (kind expr) (sequence 1)))) (fresh ()) (captures ()) (pattern (args (capture (!and (source ?format) (source ?)) (value ?) (expression ?__macro_expression_format) (splice *)) (capture (!and (source *values) (source *)) (!and (value *) (value *) (value *__macro_splice_values))))) (template (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"String_printf\"))) (args (expr (macro-expr) ?__macro_expression_format) *__macro_splice_values)))) (rebuild ((expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"String_printf\"))) (args ?__macro_expression_format *__macro_splice_values))) ((? ? ?__macro_expression_format ? ? ?) (? ? ? *__macro_splice_values ? ?)))) (leaf 1) (origin ((file \"src/components/printf-format.x\") (line 208) (column 1) (length 5) (position 7942))) (file \"src/components/printf-format.x\") (builtin 0) (local 0) (static 0)))) ((\"source-node\" (compile-time \"src/components/printf-format.x\" 8051)) (compile-time macrodef (macrodef (name x2c.file_printf.format) (kind expression) (target (declaration-empty-symbol)) (targetp ()) (parameters ((macro-param (binder ?file) (kind expr) (sequence 0)) (macro-param (binder ?format) (kind expr) (sequence 0)) (macro-param (binder *values) (kind expr) (sequence 1)))) (fresh ()) (captures ()) (pattern (args (capture (!and (source ?file) (source ?)) (value ?) (expression ?__macro_expression_file) (splice *)) (capture (!and (source ?format) (source ?)) (value ?) (expression ?__macro_expression_format) (splice *)) (capture (!and (source *values) (source *)) (!and (value *) (value *) (value *__macro_splice_values))))) (template (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"File_printf\"))) (args (expr (macro-expr) ?__macro_expression_file) (expr (macro-expr) ?__macro_expression_format) *__macro_splice_values)))) (rebuild ((expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"File_printf\"))) (args ?__macro_expression_file ?__macro_expression_format *__macro_splice_values))) ((? ? ?__macro_expression_file ? ? ?) (? ? ?__macro_expression_format ? ? ?) (? ? ? *__macro_splice_values ? ?)))) (leaf 1) (origin ((file \"src/components/printf-format.x\") (line 210) (column 1) (length 5) (position 8051))) (file \"src/components/printf-format.x\") (builtin 0) (local 0) (static 0)))) ((\"source-node\" (compile-time \"src/components/printf-format.x\" 8180)) (compile-time macrodef (macrodef (name x2c.buffer_printf.format) (kind expression) (target (declaration-empty-symbol)) (targetp ()) (parameters ((macro-param (binder ?buffer) (kind expr) (sequence 0)) (macro-param (binder ?format) (kind expr) (sequence 0)) (macro-param (binder *values) (kind expr) (sequence 1)))) (fresh ()) (captures ()) (pattern (args (capture (!and (source ?buffer) (source ?)) (value ?) (expression ?__macro_expression_buffer) (splice *)) (capture (!and (source ?format) (source ?)) (value ?) (expression ?__macro_expression_format) (splice *)) (capture (!and (source *values) (source *)) (!and (value *) (value *) (value *__macro_splice_values))))) (template (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"Buffer_printf\"))) (args (expr (macro-expr) ?__macro_expression_buffer) (expr (macro-expr) ?__macro_expression_format) *__macro_splice_values)))) (rebuild ((expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"Buffer_printf\"))) (args ?__macro_expression_buffer ?__macro_expression_format *__macro_splice_values))) ((? ? ?__macro_expression_buffer ? ? ?) (? ? ?__macro_expression_format ? ? ?) (? ? ? *__macro_splice_values ? ?)))) (leaf 1) (origin ((file \"src/components/printf-format.x\") (line 213) (column 1) (length 5) (position 8180))) (file \"src/components/printf-format.x\") (builtin 0) (local 0) (static 0)))) ((\"source-node\" (compile-time \"src/components/printf-format.x\" 8318)) (compile-time rewrite call \"printf\" \"printf_values\" (macrodef (name x2c.printf.format) (kind expression) (target (declaration-empty-symbol)) (targetp ()) (parameters ((macro-param (binder ?format) (kind expr) (sequence 0)) (macro-param (binder *values) (kind expr) (sequence 1)))) (fresh ()) (captures ()) (pattern (args (capture (!and (source ?format) (source ?)) (value ?) (expression ?__macro_expression_format) (splice *)) (capture (!and (source *values) (source *)) (!and (value *) (value *) (value *__macro_splice_values))))) (template (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"printf\"))) (args (expr (macro-expr) ?__macro_expression_format) *__macro_splice_values)))) (rebuild ((expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"printf\"))) (args ?__macro_expression_format *__macro_splice_values))) ((? ? ?__macro_expression_format ? ? ?) (? ? ? *__macro_splice_values ? ?)))) (leaf 1) (origin ((file \"src/components/printf-format.x\") (line 198) (column 1) (length 5) (position 7464))) (file \"src/components/printf-format.x\") (builtin 0) (local 0) (static 0)) (?format *values))) ((\"source-node\" (compile-time \"src/components/printf-format.x\" 8347)) (compile-time rewrite call \"fprintf\" \"printf_values\" (macrodef (name x2c.fprintf.format) (kind expression) (target (declaration-empty-symbol)) (targetp ()) (parameters ((macro-param (binder ?stream) (kind expr) (sequence 0)) (macro-param (binder ?format) (kind expr) (sequence 0)) (macro-param (binder *values) (kind expr) (sequence 1)))) (fresh ()) (captures ()) (pattern (args (capture (!and (source ?stream) (source ?)) (value ?) (expression ?__macro_expression_stream) (splice *)) (capture (!and (source ?format) (source ?)) (value ?) (expression ?__macro_expression_format) (splice *)) (capture (!and (source *values) (source *)) (!and (value *) (value *) (value *__macro_splice_values))))) (template (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"fprintf\"))) (args (expr (macro-expr) ?__macro_expression_stream) (expr (macro-expr) ?__macro_expression_format) *__macro_splice_values)))) (rebuild ((expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"fprintf\"))) (args ?__macro_expression_stream ?__macro_expression_format *__macro_splice_values))) ((? ? ?__macro_expression_stream ? ? ?) (? ? ?__macro_expression_format ? ? ?) (? ? ? *__macro_splice_values ? ?)))) (leaf 1) (origin ((file \"src/components/printf-format.x\") (line 200) (column 1) (length 5) (position 7559))) (file \"src/components/printf-format.x\") (builtin 0) (local 0) (static 0)) (?stream ?format *values))) ((\"source-node\" (compile-time \"src/components/printf-format.x\" 8377)) (compile-time rewrite call \"sprintf\" \"printf_values\" (macrodef (name x2c.sprintf.format) (kind expression) (target (declaration-empty-symbol)) (targetp ()) (parameters ((macro-param (binder ?text) (kind expr) (sequence 0)) (macro-param (binder ?format) (kind expr) (sequence 0)) (macro-param (binder *values) (kind expr) (sequence 1)))) (fresh ()) (captures ()) (pattern (args (capture (!and (source ?text) (source ?)) (value ?) (expression ?__macro_expression_text) (splice *)) (capture (!and (source ?format) (source ?)) (value ?) (expression ?__macro_expression_format) (splice *)) (capture (!and (source *values) (source *)) (!and (value *) (value *) (value *__macro_splice_values))))) (template (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"sprintf\"))) (args (expr (macro-expr) ?__macro_expression_text) (expr (macro-expr) ?__macro_expression_format) *__macro_splice_values)))) (rebuild ((expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"sprintf\"))) (args ?__macro_expression_text ?__macro_expression_format *__macro_splice_values))) ((? ? ?__macro_expression_text ? ? ?) (? ? ?__macro_expression_format ? ? ?) (? ? ? *__macro_splice_values ? ?)))) (leaf 1) (origin ((file \"src/components/printf-format.x\") (line 203) (column 1) (length 5) (position 7684))) (file \"src/components/printf-format.x\") (builtin 0) (local 0) (static 0)) (?text ?format *values))) ((\"source-node\" (compile-time \"src/components/printf-format.x\" 8407)) (compile-time rewrite call \"snprintf\" \"printf_values\" (macrodef (name x2c.snprintf.format) (kind expression) (target (declaration-empty-symbol)) (targetp ()) (parameters ((macro-param (binder ?text) (kind expr) (sequence 0)) (macro-param (binder ?size) (kind expr) (sequence 0)) (macro-param (binder ?format) (kind expr) (sequence 0)) (macro-param (binder *values) (kind expr) (sequence 1)))) (fresh ()) (captures ()) (pattern (args (capture (!and (source ?text) (source ?)) (value ?) (expression ?__macro_expression_text) (splice *)) (capture (!and (source ?size) (source ?)) (value ?) (expression ?__macro_expression_size) (splice *)) (capture (!and (source ?format) (source ?)) (value ?) (expression ?__macro_expression_format) (splice *)) (capture (!and (source *values) (source *)) (!and (value *) (value *) (value *__macro_splice_values))))) (template (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"snprintf\"))) (args (expr (macro-expr) ?__macro_expression_text) (expr (macro-expr) ?__macro_expression_size) (expr (macro-expr) ?__macro_expression_format) *__macro_splice_values)))) (rebuild ((expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"snprintf\"))) (args ?__macro_expression_text ?__macro_expression_size ?__macro_expression_format *__macro_splice_values))) ((? ? ?__macro_expression_text ? ? ?) (? ? ?__macro_expression_size ? ? ?) (? ? ?__macro_expression_format ? ? ?) (? ? ? *__macro_splice_values ? ?)))) (leaf 1) (origin ((file \"src/components/printf-format.x\") (line 205) (column 1) (length 5) (position 7800))) (file \"src/components/printf-format.x\") (builtin 0) (local 0) (static 0)) (?text ?size ?format *values))) ((\"source-node\" (compile-time \"src/components/printf-format.x\" 8438)) (compile-time rewrite call \"String_printf\" \"printf_values\" (macrodef (name x2c.string_printf.format) (kind expression) (target (declaration-empty-symbol)) (targetp ()) (parameters ((macro-param (binder ?format) (kind expr) (sequence 0)) (macro-param (binder *values) (kind expr) (sequence 1)))) (fresh ()) (captures ()) (pattern (args (capture (!and (source ?format) (source ?)) (value ?) (expression ?__macro_expression_format) (splice *)) (capture (!and (source *values) (source *)) (!and (value *) (value *) (value *__macro_splice_values))))) (template (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"String_printf\"))) (args (expr (macro-expr) ?__macro_expression_format) *__macro_splice_values)))) (rebuild ((expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"String_printf\"))) (args ?__macro_expression_format *__macro_splice_values))) ((? ? ?__macro_expression_format ? ? ?) (? ? ? *__macro_splice_values ? ?)))) (leaf 1) (origin ((file \"src/components/printf-format.x\") (line 208) (column 1) (length 5) (position 7942))) (file \"src/components/printf-format.x\") (builtin 0) (local 0) (static 0)) (?format *values))) ((\"source-node\" (compile-time \"src/components/printf-format.x\" 8474)) (compile-time rewrite call \"File_printf\" \"printf_values\" (macrodef (name x2c.file_printf.format) (kind expression) (target (declaration-empty-symbol)) (targetp ()) (parameters ((macro-param (binder ?file) (kind expr) (sequence 0)) (macro-param (binder ?format) (kind expr) (sequence 0)) (macro-param (binder *values) (kind expr) (sequence 1)))) (fresh ()) (captures ()) (pattern (args (capture (!and (source ?file) (source ?)) (value ?) (expression ?__macro_expression_file) (splice *)) (capture (!and (source ?format) (source ?)) (value ?) (expression ?__macro_expression_format) (splice *)) (capture (!and (source *values) (source *)) (!and (value *) (value *) (value *__macro_splice_values))))) (template (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"File_printf\"))) (args (expr (macro-expr) ?__macro_expression_file) (expr (macro-expr) ?__macro_expression_format) *__macro_splice_values)))) (rebuild ((expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"File_printf\"))) (args ?__macro_expression_file ?__macro_expression_format *__macro_splice_values))) ((? ? ?__macro_expression_file ? ? ?) (? ? ?__macro_expression_format ? ? ?) (? ? ? *__macro_splice_values ? ?)))) (leaf 1) (origin ((file \"src/components/printf-format.x\") (line 210) (column 1) (length 5) (position 8051))) (file \"src/components/printf-format.x\") (builtin 0) (local 0) (static 0)) (?file ?format *values))) ((\"source-node\" (compile-time \"src/components/printf-format.x\" 8508)) (compile-time rewrite call \"Buffer_printf\" \"printf_values\" (macrodef (name x2c.buffer_printf.format) (kind expression) (target (declaration-empty-symbol)) (targetp ()) (parameters ((macro-param (binder ?buffer) (kind expr) (sequence 0)) (macro-param (binder ?format) (kind expr) (sequence 0)) (macro-param (binder *values) (kind expr) (sequence 1)))) (fresh ()) (captures ()) (pattern (args (capture (!and (source ?buffer) (source ?)) (value ?) (expression ?__macro_expression_buffer) (splice *)) (capture (!and (source ?format) (source ?)) (value ?) (expression ?__macro_expression_format) (splice *)) (capture (!and (source *values) (source *)) (!and (value *) (value *) (value *__macro_splice_values))))) (template (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"Buffer_printf\"))) (args (expr (macro-expr) ?__macro_expression_buffer) (expr (macro-expr) ?__macro_expression_format) *__macro_splice_values)))) (rebuild ((expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"Buffer_printf\"))) (args ?__macro_expression_buffer ?__macro_expression_format *__macro_splice_values))) ((? ? ?__macro_expression_buffer ? ? ?) (? ? ?__macro_expression_format ? ? ?) (? ? ? *__macro_splice_values ? ?)))) (leaf 1) (origin ((file \"src/components/printf-format.x\") (line 213) (column 1) (length 5) (position 8180))) (file \"src/components/printf-format.x\") (builtin 0) (local 0) (static 0)) (?buffer ?format *values))) ((\"source-node\" (declaration \"src/components/printf-format.x\" 8619)) (project-meta \"printf_values\" ((func ((\"Code\"))) \"Code\") \"src/components/printf-format.x\")) ((\"unit-static\" \"_printf_conversion\") (\"src/components/printf-format.x\")) ((\"unit-static\" \"_printf_count\") (\"src/components/printf-format.x\")) ((\"unit-static\" \"_printf_fail\") (\"src/components/printf-format.x\")) ((\"unit-static\" \"_printf_is_var\") (\"src/components/printf-format.x\")) ((\"unit-static\" \"_printf_length\") (\"src/components/printf-format.x\")) ((\"unit-static\" \"_printf_library\") (\"src/components/printf-format.x\")) ((\"unit-static\" \"_printf_lowered\") (\"src/components/printf-format.x\")) ((\"unit-static\" \"_printf_position\") (\"src/components/printf-format.x\")) ((\"unit-static\" \"_printf_read\") (\"src/components/printf-format.x\")) ((\"unit-static\" \"_printf_scan\") (\"src/components/printf-format.x\")) ((\"unit-static\" \"_printf_type\") (\"src/components/printf-format.x\")) ((\"unit-static\" \"_printf_valid\") (\"src/components/printf-format.x\"))) (((\"source-node\" (provider-source \"src/components/printf-format.x\" 0)) (source \"c1c5cca6\" ((\"cwd:./rewrite.x\" \"search:absent\") (\"etc/compiler-sdk.xlisp\" 1) (\"etc/init.xlisp\" 1) (\"etc/lisp-values.xlisp\" 1) (\"lib/rewrite.x\" \"f378e68f\") (\"src/components/rewrite.x\" \"search:absent\")))))) () ((\"cwd:./rewrite.x\" \"search:absent\") (\"etc/compiler-sdk.xlisp\" 1) (\"etc/init.xlisp\" 1) (\"etc/lisp-values.xlisp\" 1) (\"lib/rewrite.x\" \"f378e68f\") (\"src/components/rewrite.x\" \"search:absent\")) ((home \"include/x2c\") (package)))");
   _397 = String_var(_396);
   _398 = String_new("(\"src/components/dynamic-operators.x\" \"2fb0f260\" ((((\"source-node\" (meta-hashes \"src/components/dynamic-operators.x\" 0)) (meta-hashes \"src/components/dynamic-operators.x\" ((\"_dynamic_helper\" \"573110e72503bbe4\") (\"_dynamic_operand\" \"d68641da1a116173\") (\"_dynamic_operation\" \"90c51ca12ad0804e\") (\"_dynamic_update\" \"073b3b8db70d9d53\") (\"dynamic_binary\" \"1cfa5e419f323633\") (\"dynamic_change\" \"42cb2d8e2e839be7\") (\"dynamic_compound\" \"1621bfd56ead0916\") (\"dynamic_unary\" \"dd55569e7078da38\"))))) \"lib/rewrite.x\" (((\"dynamic_binary\") ((func ((\"Code\"))) \"Code\")) ((\"dynamic_change\") ((func ((\"Code\"))) \"Code\")) ((\"dynamic_compound\") ((func ((\"Code\"))) \"Code\")) ((\"dynamic_unary\") ((func ((\"Code\"))) \"Code\")) ((\"source-node\" (compile-time \"src/components/dynamic-operators.x\" 646)) (compile-time macrodef (macrodef (name fail.operators_numeric_operands) (kind block-item) (target (declaration-empty-symbol)) (targetp ()) (parameters ((macro-param (binder ?site) (kind expr) (sequence 0)) (macro-param (binder ?left_type) (kind expr) (sequence 0)) (macro-param (binder ?right_type) (kind expr) (sequence 0)) (macro-param (binder ?op) (kind expr) (sequence 0)))) (fresh ((?__macro_local_0 \"left_name\" 0) (?__macro_local_1 \"right_name\" 0))) (captures ()) (pattern (args (capture (!and (source ?site) (source ?)) (value ?) (expression ?__macro_expression_site) (splice *)) (capture (!and (source ?left_type) (source ?)) (value ?) (expression ?__macro_expression_left_type) (splice *)) (capture (!and (source ?right_type) (source ?)) (value ?) (expression ?__macro_expression_right_type) (splice *)) (capture (!and (source ?op) (source ?)) (value ?) (expression ?) (splice *)))) (template (seq (block (at m-origin (declare (\"String\") (bindings (op = (bind ?__macro_local_0 ()) (expr (macro-expr) (call (expr (macro-expr) (op . (expr (macro-expr) ?__macro_expression_left_type) (\"repr\"))) (args (expr (void) ()))))) (op = (bind ?__macro_local_1 ()) (expr (macro-expr) (call (expr (macro-expr) (op . (expr (macro-expr) ?__macro_expression_right_type) (\"repr\"))) (args (expr (void) ())))))))) (at m-origin (stmnt (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"x2c_diagnostic_fail_at\"))) (args (expr (macro-expr) ?__macro_expression_site) (expr (\"Symbol\") (literal (\"Symbol\") \"<xform>\" xform)) (expr (* char) (literal (* char) \"\\\"dynamic numeric operators require numeric operands\\\"\")) (expr (\"List\") (cons (expr (macro-expr) (call (expr ((func ((\"String\"))) \"Var\") (ident (binding 1 \"String_var\"))) (args (expr (macro-expr) (segments (declaration-cache (string (expr (\"String\") (literal (\"String\") \"operator: \")))) (segvar (expr (macro-expr) (ident (binding-name \"op\")))) (declaration-cache (string (expr (\"String\") (literal (\"String\") \" left type: \")))) (segvar (expr (macro-expr) (ident ?__macro_local_0))) (declaration-cache (string (expr (\"String\") (literal (\"String\") \" right type: \")))) (segvar (expr (macro-expr) (ident ?__macro_local_1)))))))) (nil))))))))))) (rebuild ((seq (block (declare (\"String\") (bindings (op = (bind ?__macro_local_0 ()) (expr (macro-expr) (call (expr (macro-expr) (op . ?__macro_expression_left_type (\"repr\"))) (args (expr (void) ()))))) (op = (bind ?__macro_local_1 ()) (expr (macro-expr) (call (expr (macro-expr) (op . ?__macro_expression_right_type (\"repr\"))) (args (expr (void) ()))))))) (stmnt (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"x2c_diagnostic_fail_at\"))) (args ?__macro_expression_site (expr (\"Symbol\") (literal (\"Symbol\") \"<xform>\" xform)) (expr (* char) (literal (* char) \"\\\"dynamic numeric operators require numeric operands\\\"\")) (expr (\"List\") (cons (expr (macro-expr) (call (expr ((func ((\"String\"))) \"Var\") (ident (binding 1 \"String_var\"))) (args (expr (macro-expr) (segments (declaration-cache (string (expr (\"String\") (literal (\"String\") \"operator: \")))) (segvar (expr (macro-expr) (ident (binding-name \"op\")))) (declaration-cache (string (expr (\"String\") (literal (\"String\") \" left type: \")))) (segvar (expr (macro-expr) (ident ?__macro_local_0))) (declaration-cache (string (expr (\"String\") (literal (\"String\") \" right type: \")))) (segvar (expr (macro-expr) (ident ?__macro_local_1)))))))) (nil))))))))) ((? ? ?__macro_expression_site ? ? ?) (? ? ?__macro_expression_left_type ? ? ?) (? ? ?__macro_expression_right_type ? ? ?) (? ? ? ? ? ?)))) (leaf 1) (origin ((file \"src/components/dynamic-operators.x\") (line 17) (column 1) (length 5) (position 646))) (file \"src/components/dynamic-operators.x\") (builtin 0) (local 0) (static 0)))) ((\"source-node\" (compile-time \"src/components/dynamic-operators.x\" 1015)) (compile-time macrodef (macrodef (name fail.operators_enum_target) (kind block-item) (target (declaration-empty-symbol)) (targetp ()) (parameters ((macro-param (binder ?site) (kind expr) (sequence 0)))) (fresh ()) (captures ()) (pattern (args (capture (!and (source ?site) (source ?)) (value ?) (expression ?__macro_expression_site) (splice *)))) (template (seq (stmnt (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"x2c_diagnostic_fail_at\"))) (args (expr (macro-expr) ?__macro_expression_site) (expr (\"Symbol\") (literal (\"Symbol\") \"<xform>\" xform)) (expr (* char) (literal (* char) \"\\\"dynamic compound assignment cannot target an enum\\\"\")) (expr (macro-expr) (ident (binding-name \"NULL\"))))))))) (rebuild ((seq (stmnt (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"x2c_diagnostic_fail_at\"))) (args ?__macro_expression_site (expr (\"Symbol\") (literal (\"Symbol\") \"<xform>\" xform)) (expr (* char) (literal (* char) \"\\\"dynamic compound assignment cannot target an enum\\\"\")) (expr (macro-expr) (ident (binding-name \"NULL\")))))))) ((? ? ?__macro_expression_site ? ? ?)))) (leaf 1) (origin ((file \"src/components/dynamic-operators.x\") (line 27) (column 1) (length 5) (position 1015))) (file \"src/components/dynamic-operators.x\") (builtin 0) (local 0) (static 0)))) ((\"source-node\" (compile-time \"src/components/dynamic-operators.x\" 1180)) (compile-time macrodef (macrodef (name fail.operators_numeric_target) (kind block-item) (target (declaration-empty-symbol)) (targetp ()) (parameters ((macro-param (binder ?site) (kind expr) (sequence 0)) (macro-param (binder ?type) (kind expr) (sequence 0)))) (fresh ()) (captures ()) (pattern (args (capture (!and (source ?site) (source ?)) (value ?) (expression ?__macro_expression_site) (splice *)) (capture (!and (source ?type) (source ?)) (value ?) (expression ?__macro_expression_type) (splice *)))) (template (seq (stmnt (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"x2c_diagnostic_fail_at\"))) (args (expr (macro-expr) ?__macro_expression_site) (expr (\"Symbol\") (literal (\"Symbol\") \"<xform>\" xform)) (expr (* char) (literal (* char) \"\\\"dynamic compound assignment requires a numeric lvalue\\\"\")) (expr (\"List\") (cons (expr (macro-expr) (call (expr ((func ((\"String\"))) \"Var\") (ident (binding 1 \"String_var\"))) (args (expr (macro-expr) (segments (declaration-cache (string (expr (\"String\") (literal (\"String\") \"left type: \")))) (segexp (expr (macro-expr) (call (expr (macro-expr) (op . (expr (macro-expr) ?__macro_expression_type) (\"repr\"))) (args (expr (void) ())))))))))) (nil))))))))) (rebuild ((seq (stmnt (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"x2c_diagnostic_fail_at\"))) (args ?__macro_expression_site (expr (\"Symbol\") (literal (\"Symbol\") \"<xform>\" xform)) (expr (* char) (literal (* char) \"\\\"dynamic compound assignment requires a numeric lvalue\\\"\")) (expr (\"List\") (cons (expr (macro-expr) (call (expr ((func ((\"String\"))) \"Var\") (ident (binding 1 \"String_var\"))) (args (expr (macro-expr) (segments (declaration-cache (string (expr (\"String\") (literal (\"String\") \"left type: \")))) (segexp (expr (macro-expr) (call (expr (macro-expr) (op . ?__macro_expression_type (\"repr\"))) (args (expr (void) ())))))))))) (nil)))))))) ((? ? ?__macro_expression_site ? ? ?) (? ? ?__macro_expression_type ? ? ?)))) (leaf 1) (origin ((file \"src/components/dynamic-operators.x\") (line 32) (column 1) (length 5) (position 1180))) (file \"src/components/dynamic-operators.x\") (builtin 0) (local 0) (static 0)))) ((\"source-node\" (compile-time \"src/components/dynamic-operators.x\" 1391)) (compile-time macrodef (macrodef (name fail.operators_bitfield_target) (kind block-item) (target (declaration-empty-symbol)) (targetp ()) (parameters ((macro-param (binder ?site) (kind expr) (sequence 0)))) (fresh ()) (captures ()) (pattern (args (capture (!and (source ?site) (source ?)) (value ?) (expression ?__macro_expression_site) (splice *)))) (template (seq (stmnt (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"x2c_diagnostic_fail_at\"))) (args (expr (macro-expr) ?__macro_expression_site) (expr (\"Symbol\") (literal (\"Symbol\") \"<xform>\" xform)) (expr (* char) (literal (* char) \"\\\"dynamic compound assignment cannot target a bitfield\\\"\")) (expr (macro-expr) (ident (binding-name \"NULL\"))))))))) (rebuild ((seq (stmnt (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"x2c_diagnostic_fail_at\"))) (args ?__macro_expression_site (expr (\"Symbol\") (literal (\"Symbol\") \"<xform>\" xform)) (expr (* char) (literal (* char) \"\\\"dynamic compound assignment cannot target a bitfield\\\"\")) (expr (macro-expr) (ident (binding-name \"NULL\")))))))) ((? ? ?__macro_expression_site ? ? ?)))) (leaf 1) (origin ((file \"src/components/dynamic-operators.x\") (line 37) (column 1) (length 5) (position 1391))) (file \"src/components/dynamic-operators.x\") (builtin 0) (local 0) (static 0)))) ((\"source-node\" (compile-time \"src/components/dynamic-operators.x\" 1563)) (compile-time macrodef (macrodef (name fail.operators_operand) (kind block-item) (target (declaration-empty-symbol)) (targetp ()) (parameters ((macro-param (binder ?site) (kind expr) (sequence 0)) (macro-param (binder ?operation) (kind expr) (sequence 0)) (macro-param (binder ?right_type) (kind expr) (sequence 0)))) (fresh ()) (captures ()) (pattern (args (capture (!and (source ?site) (source ?)) (value ?) (expression ?__macro_expression_site) (splice *)) (capture (!and (source ?operation) (source ?)) (value ?) (expression ?__macro_expression_operation) (splice *)) (capture (!and (source ?right_type) (source ?)) (value ?) (expression ?__macro_expression_right_type) (splice *)))) (template (seq (stmnt (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"x2c_diagnostic_fail_at\"))) (args (expr (macro-expr) ?__macro_expression_site) (expr (\"Symbol\") (literal (\"Symbol\") \"<xform>\" xform)) (expr (macro-expr) (op ? (expr (macro-expr) (op == (expr (macro-expr) ?__macro_expression_operation) (expr (\"Symbol\") (literal (\"Symbol\") \"<+>\" +)))) (expr (* char) (literal (* char) \"\\\"dynamic += requires a numeric, Var, or String operand\\\"\")) (expr (* char) (literal (* char) \"\\\"dynamic compound assignment requires a numeric or Var operand\\\"\")))) (expr (\"List\") (cons (expr (macro-expr) (call (expr ((func ((\"String\"))) \"Var\") (ident (binding 1 \"String_var\"))) (args (expr (macro-expr) (segments (declaration-cache (string (expr (\"String\") (literal (\"String\") \"right type: \")))) (segexp (expr (macro-expr) (call (expr (macro-expr) (op . (expr (macro-expr) ?__macro_expression_right_type) (\"repr\"))) (args (expr (void) ())))))))))) (nil))))))))) (rebuild ((seq (stmnt (expr (macro-expr) (call (expr (macro-expr) (ident (binding-name \"x2c_diagnostic_fail_at\"))) (args ?__macro_expression_site (expr (\"Symbol\") (literal (\"Symbol\") \"<xform>\" xform)) (expr (macro-expr) (op ? (expr (macro-expr) (op == ?__macro_expression_operation (expr (\"Symbol\") (literal (\"Symbol\") \"<+>\" +)))) (expr (* char) (literal (* char) \"\\\"dynamic += requires a numeric, Var, or String operand\\\"\")) (expr (* char) (literal (* char) \"\\\"dynamic compound assignment requires a numeric or Var operand\\\"\")))) (expr (\"List\") (cons (expr (macro-expr) (call (expr ((func ((\"String\"))) \"Var\") (ident (binding 1 \"String_var\"))) (args (expr (macro-expr) (segments (declaration-cache (string (expr (\"String\") (literal (\"String\") \"right type: \")))) (segexp (expr (macro-expr) (call (expr (macro-expr) (op . ?__macro_expression_right_type (\"repr\"))) (args (expr (void) ())))))))))) (nil)))))))) ((? ? ?__macro_expression_site ? ? ?) (? ? ?__macro_expression_operation ? ? ?) (? ? ?__macro_expression_right_type ? ? ?)))) (leaf 1) (origin ((file \"src/components/dynamic-operators.x\") (line 42) (column 1) (length 5) (position 1563))) (file \"src/components/dynamic-operators.x\") (builtin 0) (local 0) (static 0)))) ((\"source-node\" (compile-time \"src/components/dynamic-operators.x\" 2125)) (compile-time effects (compile-time effects (compile-time effects (compile-time effects (compile-time effects (compile-time effects (compile-time effects (compile-time effects (compile-time effects (compile-time rewrite binary (+ (\"Var\")) \"dynamic_binary\" (expr (\"Var\") (op (!or + - (!quote *) / % (declaration-atom \"<<\") >> & ^ |) ? ?)) ()) (compile-time rewrite binary (- (\"Var\")) \"dynamic_binary\" (expr (\"Var\") (op (!or + - (!quote *) / % (declaration-atom \"<<\") >> & ^ |) ? ?)) ())) (compile-time rewrite binary (* (\"Var\")) \"dynamic_binary\" (expr (\"Var\") (op (!or + - (!quote *) / % (declaration-atom \"<<\") >> & ^ |) ? ?)) ())) (compile-time rewrite binary (/ (\"Var\")) \"dynamic_binary\" (expr (\"Var\") (op (!or + - (!quote *) / % (declaration-atom \"<<\") >> & ^ |) ? ?)) ())) (compile-time rewrite binary (% (\"Var\")) \"dynamic_binary\" (expr (\"Var\") (op (!or + - (!quote *) / % (declaration-atom \"<<\") >> & ^ |) ? ?)) ())) (compile-time rewrite binary ((declaration-atom \"<<\") (\"Var\")) \"dynamic_binary\" (expr (\"Var\") (op (!or + - (!quote *) / % (declaration-atom \"<<\") >> & ^ |) ? ?)) ())) (compile-time rewrite binary (>> (\"Var\")) \"dynamic_binary\" (expr (\"Var\") (op (!or + - (!quote *) / % (declaration-atom \"<<\") >> & ^ |) ? ?)) ())) (compile-time rewrite binary (& (\"Var\")) \"dynamic_binary\" (expr (\"Var\") (op (!or + - (!quote *) / % (declaration-atom \"<<\") >> & ^ |) ? ?)) ())) (compile-time rewrite binary (^ (\"Var\")) \"dynamic_binary\" (expr (\"Var\") (op (!or + - (!quote *) / % (declaration-atom \"<<\") >> & ^ |) ? ?)) ())) (compile-time rewrite binary (| (\"Var\")) \"dynamic_binary\" (expr (\"Var\") (op (!or + - (!quote *) / % (declaration-atom \"<<\") >> & ^ |) ? ?)) ()))) ((\"source-node\" (compile-time \"src/components/dynamic-operators.x\" 4651)) (compile-time effects (compile-time effects (compile-time effects (compile-time effects (compile-time effects (compile-time effects (compile-time effects (compile-time effects (compile-time effects (compile-time rewrite binary (+= (\"Var\")) \"dynamic_compound\" (expr (\"Var\") (op (!or += -= (!quote *=) /= %= (declaration-atom \"<<=\") >>= &= ^= |=) ? ?)) ()) (compile-time rewrite binary (-= (\"Var\")) \"dynamic_compound\" (expr (\"Var\") (op (!or += -= (!quote *=) /= %= (declaration-atom \"<<=\") >>= &= ^= |=) ? ?)) ())) (compile-time rewrite binary (*= (\"Var\")) \"dynamic_compound\" (expr (\"Var\") (op (!or += -= (!quote *=) /= %= (declaration-atom \"<<=\") >>= &= ^= |=) ? ?)) ())) (compile-time rewrite binary (/= (\"Var\")) \"dynamic_compound\" (expr (\"Var\") (op (!or += -= (!quote *=) /= %= (declaration-atom \"<<=\") >>= &= ^= |=) ? ?)) ())) (compile-time rewrite binary (%= (\"Var\")) \"dynamic_compound\" (expr (\"Var\") (op (!or += -= (!quote *=) /= %= (declaration-atom \"<<=\") >>= &= ^= |=) ? ?)) ())) (compile-time rewrite binary ((declaration-atom \"<<=\") (\"Var\")) \"dynamic_compound\" (expr (\"Var\") (op (!or += -= (!quote *=) /= %= (declaration-atom \"<<=\") >>= &= ^= |=) ? ?)) ())) (compile-time rewrite binary (>>= (\"Var\")) \"dynamic_compound\" (expr (\"Var\") (op (!or += -= (!quote *=) /= %= (declaration-atom \"<<=\") >>= &= ^= |=) ? ?)) ())) (compile-time rewrite binary (&= (\"Var\")) \"dynamic_compound\" (expr (\"Var\") (op (!or += -= (!quote *=) /= %= (declaration-atom \"<<=\") >>= &= ^= |=) ? ?)) ())) (compile-time rewrite binary (^= (\"Var\")) \"dynamic_compound\" (expr (\"Var\") (op (!or += -= (!quote *=) /= %= (declaration-atom \"<<=\") >>= &= ^= |=) ? ?)) ())) (compile-time rewrite binary (|= (\"Var\")) \"dynamic_compound\" (expr (\"Var\") (op (!or += -= (!quote *=) /= %= (declaration-atom \"<<=\") >>= &= ^= |=) ? ?)) ()))) ((\"source-node\" (compile-time \"src/components/dynamic-operators.x\" 5547)) (compile-time effects (compile-time rewrite unary (++ (\"Var\")) \"dynamic_change\" (expr (\"Var\") (op (!or ++ --) ?)) ()) (compile-time rewrite unary (-- (\"Var\")) \"dynamic_change\" (expr (\"Var\") (op (!or ++ --) ?)) ()))) ((\"source-node\" (compile-time \"src/components/dynamic-operators.x\" 5592)) (compile-time effects (compile-time rewrite unary (postfix ++ (\"Var\")) \"dynamic_change\" (expr (\"Var\") (postfix (!or ++ --) ?)) ()) (compile-time rewrite unary (postfix -- (\"Var\")) \"dynamic_change\" (expr (\"Var\") (postfix (!or ++ --) ?)) ()))) ((\"source-node\" (compile-time \"src/components/dynamic-operators.x\" 6232)) (compile-time effects (compile-time effects (compile-time rewrite unary (+ (\"Var\")) \"dynamic_unary\" (expr (\"Var\") (op (!or + - ~) ?)) ()) (compile-time rewrite unary (- (\"Var\")) \"dynamic_unary\" (expr (\"Var\") (op (!or + - ~) ?)) ())) (compile-time rewrite unary (~ (\"Var\")) \"dynamic_unary\" (expr (\"Var\") (op (!or + - ~) ?)) ()))) ((\"source-node\" (declaration \"src/components/dynamic-operators.x\" 2550)) (project-meta \"dynamic_binary\" ((func ((\"Code\"))) \"Code\") \"src/components/dynamic-operators.x\")) ((\"source-node\" (declaration \"src/components/dynamic-operators.x\" 4876)) (project-meta \"dynamic_compound\" ((func ((\"Code\"))) \"Code\") \"src/components/dynamic-operators.x\")) ((\"source-node\" (declaration \"src/components/dynamic-operators.x\" 5763)) (project-meta \"dynamic_change\" ((func ((\"Code\"))) \"Code\") \"src/components/dynamic-operators.x\")) ((\"source-node\" (declaration \"src/components/dynamic-operators.x\" 6329)) (project-meta \"dynamic_unary\" ((func ((\"Code\"))) \"Code\") \"src/components/dynamic-operators.x\")) ((\"unit-static\" \"_dynamic_helper\") (\"src/components/dynamic-operators.x\")) ((\"unit-static\" \"_dynamic_operand\") (\"src/components/dynamic-operators.x\")) ((\"unit-static\" \"_dynamic_operation\") (\"src/components/dynamic-operators.x\")) ((\"unit-static\" \"_dynamic_update\") (\"src/components/dynamic-operators.x\"))) (((\"source-node\" (provider-source \"src/components/dynamic-operators.x\" 0)) (source \"2fb0f260\" ((\"cwd:./rewrite.x\" \"search:absent\") (\"etc/compiler-sdk.xlisp\" 1) (\"etc/init.xlisp\" 1) (\"etc/lisp-values.xlisp\" 1) (\"lib/rewrite.x\" \"f378e68f\") (\"src/components/rewrite.x\" \"search:absent\")))))) () ((\"cwd:./rewrite.x\" \"search:absent\") (\"etc/compiler-sdk.xlisp\" 1) (\"etc/init.xlisp\" 1) (\"etc/lisp-values.xlisp\" 1) (\"lib/rewrite.x\" \"f378e68f\") (\"src/components/rewrite.x\" \"search:absent\")) ((home \"include/x2c\") (package)))");
   _399 = String_var(_398);
@@ -1524,56 +1532,56 @@ static int f6_splice____spells_block(const char * text){
 
 static int f6_splice____file(f6_splice___Splice * s, String path, String text, String prefix, String file_prefix){
   {
-    String * _x2c_gensym_macro_address_6 = &(* s).path;
-    String _x2c_gensym_macro_previous_6 = * _x2c_gensym_macro_address_6;
+    String * _x2c_gensym_macro_address_0 = &(* s).path;
+    String _x2c_gensym_macro_previous_0 = * _x2c_gensym_macro_address_0;
     {
       _x2c_gensym_defer_env_1 _x2c_gensym_macro_environment_7 ={
         0
       }
       ;
-      _x2c_gensym_macro_environment_7._x2c_gensym_defer_capture_1 =(const void *) & _x2c_gensym_macro_address_6;
-      _x2c_gensym_macro_environment_7._x2c_gensym_defer_capture_2 =(const void *) & _x2c_gensym_macro_previous_6;
+      _x2c_gensym_macro_environment_7._x2c_gensym_defer_capture_1 =(const void *) & _x2c_gensym_macro_address_0;
+      _x2c_gensym_macro_environment_7._x2c_gensym_defer_capture_2 =(const void *) & _x2c_gensym_macro_previous_0;
       X2CCleanup _x2c_gensym_defer_record_4 ={
         .fn = _x2c_gensym_defer_cleanup_4, .env = & _x2c_gensym_macro_environment_7
       }
       ;
       x2c_cleanup_push(& _x2c_gensym_defer_record_4);
       {
-        * _x2c_gensym_macro_address_6 = path;
+        * _x2c_gensym_macro_address_0 = path;
         {
-          String * _x2c_gensym_macro_address_5 = &(* s).text;
-          String _x2c_gensym_macro_previous_5 = * _x2c_gensym_macro_address_5;
+          String * _x2c_gensym_macro_address_1 = &(* s).text;
+          String _x2c_gensym_macro_previous_1 = * _x2c_gensym_macro_address_1;
           {
             _x2c_gensym_defer_env_2 _x2c_gensym_macro_environment_6 ={
               0
             }
             ;
-            _x2c_gensym_macro_environment_6._x2c_gensym_defer_capture_3 =(const void *) & _x2c_gensym_macro_address_5;
-            _x2c_gensym_macro_environment_6._x2c_gensym_defer_capture_4 =(const void *) & _x2c_gensym_macro_previous_5;
+            _x2c_gensym_macro_environment_6._x2c_gensym_defer_capture_3 =(const void *) & _x2c_gensym_macro_address_1;
+            _x2c_gensym_macro_environment_6._x2c_gensym_defer_capture_4 =(const void *) & _x2c_gensym_macro_previous_1;
             X2CCleanup _x2c_gensym_defer_record_5 ={
               .fn = _x2c_gensym_defer_cleanup_5, .env = & _x2c_gensym_macro_environment_6
             }
             ;
             x2c_cleanup_push(& _x2c_gensym_defer_record_5);
             {
-              * _x2c_gensym_macro_address_5 = text;
+              * _x2c_gensym_macro_address_1 = text;
               {
-                String * _x2c_gensym_macro_address_4 = &(* s).prefix;
-                String _x2c_gensym_macro_previous_4 = * _x2c_gensym_macro_address_4;
+                String * _x2c_gensym_macro_address_2 = &(* s).prefix;
+                String _x2c_gensym_macro_previous_2 = * _x2c_gensym_macro_address_2;
                 {
                   _x2c_gensym_defer_env_3 _x2c_gensym_macro_environment_5 ={
                     0
                   }
                   ;
-                  _x2c_gensym_macro_environment_5._x2c_gensym_defer_capture_5 =(const void *) & _x2c_gensym_macro_address_4;
-                  _x2c_gensym_macro_environment_5._x2c_gensym_defer_capture_6 =(const void *) & _x2c_gensym_macro_previous_4;
+                  _x2c_gensym_macro_environment_5._x2c_gensym_defer_capture_5 =(const void *) & _x2c_gensym_macro_address_2;
+                  _x2c_gensym_macro_environment_5._x2c_gensym_defer_capture_6 =(const void *) & _x2c_gensym_macro_previous_2;
                   X2CCleanup _x2c_gensym_defer_record_6 ={
                     .fn = _x2c_gensym_defer_cleanup_6, .env = & _x2c_gensym_macro_environment_5
                   }
                   ;
                   x2c_cleanup_push(& _x2c_gensym_defer_record_6);
                   {
-                    * _x2c_gensym_macro_address_4 = prefix;
+                    * _x2c_gensym_macro_address_2 = prefix;
                     {
                       String * _x2c_gensym_macro_address_3 = &(* s).file_prefix;
                       String _x2c_gensym_macro_previous_3 = * _x2c_gensym_macro_address_3;
@@ -1592,56 +1600,56 @@ static int f6_splice____file(f6_splice___Splice * s, String path, String text, S
                         {
                           * _x2c_gensym_macro_address_3 = file_prefix;
                           {
-                            String * _x2c_gensym_macro_address_2 = &(* s).c -> filename;
-                            String _x2c_gensym_macro_previous_2 = * _x2c_gensym_macro_address_2;
+                            String * _x2c_gensym_macro_address_4 = &(* s).c -> filename;
+                            String _x2c_gensym_macro_previous_4 = * _x2c_gensym_macro_address_4;
                             {
                               _x2c_gensym_defer_env_5 _x2c_gensym_macro_environment_3 ={
                                 0
                               }
                               ;
-                              _x2c_gensym_macro_environment_3._x2c_gensym_defer_capture_9 =(const void *) & _x2c_gensym_macro_address_2;
-                              _x2c_gensym_macro_environment_3._x2c_gensym_defer_capture_10 =(const void *) & _x2c_gensym_macro_previous_2;
+                              _x2c_gensym_macro_environment_3._x2c_gensym_defer_capture_9 =(const void *) & _x2c_gensym_macro_address_4;
+                              _x2c_gensym_macro_environment_3._x2c_gensym_defer_capture_10 =(const void *) & _x2c_gensym_macro_previous_4;
                               X2CCleanup _x2c_gensym_defer_record_8 ={
                                 .fn = _x2c_gensym_defer_cleanup_8, .env = & _x2c_gensym_macro_environment_3
                               }
                               ;
                               x2c_cleanup_push(& _x2c_gensym_defer_record_8);
                               {
-                                * _x2c_gensym_macro_address_2 = path;
+                                * _x2c_gensym_macro_address_4 = path;
                                 {
-                                  String * _x2c_gensym_macro_address_1 = &(* s).c -> text;
-                                  String _x2c_gensym_macro_previous_1 = * _x2c_gensym_macro_address_1;
+                                  String * _x2c_gensym_macro_address_5 = &(* s).c -> text;
+                                  String _x2c_gensym_macro_previous_5 = * _x2c_gensym_macro_address_5;
                                   {
                                     _x2c_gensym_defer_env_6 _x2c_gensym_macro_environment_2 ={
                                       0
                                     }
                                     ;
-                                    _x2c_gensym_macro_environment_2._x2c_gensym_defer_capture_11 =(const void *) & _x2c_gensym_macro_address_1;
-                                    _x2c_gensym_macro_environment_2._x2c_gensym_defer_capture_12 =(const void *) & _x2c_gensym_macro_previous_1;
+                                    _x2c_gensym_macro_environment_2._x2c_gensym_defer_capture_11 =(const void *) & _x2c_gensym_macro_address_5;
+                                    _x2c_gensym_macro_environment_2._x2c_gensym_defer_capture_12 =(const void *) & _x2c_gensym_macro_previous_5;
                                     X2CCleanup _x2c_gensym_defer_record_9 ={
                                       .fn = _x2c_gensym_defer_cleanup_9, .env = & _x2c_gensym_macro_environment_2
                                     }
                                     ;
                                     x2c_cleanup_push(& _x2c_gensym_defer_record_9);
                                     {
-                                      * _x2c_gensym_macro_address_1 = text;
+                                      * _x2c_gensym_macro_address_5 = text;
                                       {
-                                        Array * _x2c_gensym_macro_address_0 = &(* s).c -> line_markers;
-                                        Array _x2c_gensym_macro_previous_0 = * _x2c_gensym_macro_address_0;
+                                        Array * _x2c_gensym_macro_address_6 = &(* s).c -> line_markers;
+                                        Array _x2c_gensym_macro_previous_6 = * _x2c_gensym_macro_address_6;
                                         {
                                           _x2c_gensym_defer_env_7 _x2c_gensym_macro_environment_1 ={
                                             0
                                           }
                                           ;
-                                          _x2c_gensym_macro_environment_1._x2c_gensym_defer_capture_13 =(const void *) & _x2c_gensym_macro_address_0;
-                                          _x2c_gensym_macro_environment_1._x2c_gensym_defer_capture_14 =(const void *) & _x2c_gensym_macro_previous_0;
+                                          _x2c_gensym_macro_environment_1._x2c_gensym_defer_capture_13 =(const void *) & _x2c_gensym_macro_address_6;
+                                          _x2c_gensym_macro_environment_1._x2c_gensym_defer_capture_14 =(const void *) & _x2c_gensym_macro_previous_6;
                                           X2CCleanup _x2c_gensym_defer_record_10 ={
                                             .fn = _x2c_gensym_defer_cleanup_10, .env = & _x2c_gensym_macro_environment_1
                                           }
                                           ;
                                           x2c_cleanup_push(& _x2c_gensym_defer_record_10);
                                           {
-                                            * _x2c_gensym_macro_address_0 = NULL;
+                                            * _x2c_gensym_macro_address_6 = NULL;
                                             {
                                               f6_splice____mark(&((* s)), 1, 0);
                                               Token block = f6_splice____block(&((* s))), close = NULL;
@@ -2030,7 +2038,10 @@ static void f4_walk____add_prelude(Compiler c, Map globs, Map visited){
               x2c_cleanup_push(& _x2c_gensym_defer_record_13);
               {
                 * _x2c_gensym_macro_address_7 = 1;
-                _replay_cached(c, entry, canonical, globs, visited, NULL);
+                {
+                  _replay_cached(c, entry, canonical, globs, visited, NULL);
+                }
+
               }
               x2c_cleanup_leave(& _x2c_gensym_defer_record_13);
             }
@@ -2074,73 +2085,73 @@ static void f4_walk____walk_file(Compiler c, String path, String text, ModuleSou
   tokenizer -> layout = Path_is_layout_source(path);
   Tokenizer_scan(tokenizer);
   {
-    int * _x2c_gensym_macro_address_11 = & c -> collection_native;
-    int _x2c_gensym_macro_previous_11 = * _x2c_gensym_macro_address_11;
+    int * _x2c_gensym_macro_address_8 = & c -> collection_native;
+    int _x2c_gensym_macro_previous_8 = * _x2c_gensym_macro_address_8;
     {
       _x2c_gensym_defer_env_11 _x2c_gensym_macro_environment_14 ={
         0
       }
       ;
-      _x2c_gensym_macro_environment_14._x2c_gensym_defer_capture_19 =(const void *) & _x2c_gensym_macro_address_11;
-      _x2c_gensym_macro_environment_14._x2c_gensym_defer_capture_20 =(const void *) & _x2c_gensym_macro_previous_11;
+      _x2c_gensym_macro_environment_14._x2c_gensym_defer_capture_19 =(const void *) & _x2c_gensym_macro_address_8;
+      _x2c_gensym_macro_environment_14._x2c_gensym_defer_capture_20 =(const void *) & _x2c_gensym_macro_previous_8;
       X2CCleanup _x2c_gensym_defer_record_14 ={
         .fn = _x2c_gensym_defer_cleanup_14, .env = & _x2c_gensym_macro_environment_14
       }
       ;
       x2c_cleanup_push(& _x2c_gensym_defer_record_14);
       {
-        * _x2c_gensym_macro_address_11 = 0;
+        * _x2c_gensym_macro_address_8 = 0;
         {
-          List * _x2c_gensym_macro_address_10 = & c -> declaration_effects;
-          List _x2c_gensym_macro_previous_10 = * _x2c_gensym_macro_address_10;
+          List * _x2c_gensym_macro_address_9 = & c -> declaration_effects;
+          List _x2c_gensym_macro_previous_9 = * _x2c_gensym_macro_address_9;
           {
             _x2c_gensym_defer_env_12 _x2c_gensym_macro_environment_13 ={
               0
             }
             ;
-            _x2c_gensym_macro_environment_13._x2c_gensym_defer_capture_21 =(const void *) & _x2c_gensym_macro_address_10;
-            _x2c_gensym_macro_environment_13._x2c_gensym_defer_capture_22 =(const void *) & _x2c_gensym_macro_previous_10;
+            _x2c_gensym_macro_environment_13._x2c_gensym_defer_capture_21 =(const void *) & _x2c_gensym_macro_address_9;
+            _x2c_gensym_macro_environment_13._x2c_gensym_defer_capture_22 =(const void *) & _x2c_gensym_macro_previous_9;
             X2CCleanup _x2c_gensym_defer_record_15 ={
               .fn = _x2c_gensym_defer_cleanup_15, .env = & _x2c_gensym_macro_environment_13
             }
             ;
             x2c_cleanup_push(& _x2c_gensym_defer_record_15);
             {
-              * _x2c_gensym_macro_address_10 = NULL;
+              * _x2c_gensym_macro_address_9 = NULL;
               {
-                Map * _x2c_gensym_macro_address_9 = & c -> kw_aliases;
-                Map _x2c_gensym_macro_previous_9 = * _x2c_gensym_macro_address_9;
+                Map * _x2c_gensym_macro_address_10 = & c -> kw_aliases;
+                Map _x2c_gensym_macro_previous_10 = * _x2c_gensym_macro_address_10;
                 {
                   _x2c_gensym_defer_env_13 _x2c_gensym_macro_environment_12 ={
                     0
                   }
                   ;
-                  _x2c_gensym_macro_environment_12._x2c_gensym_defer_capture_23 =(const void *) & _x2c_gensym_macro_address_9;
-                  _x2c_gensym_macro_environment_12._x2c_gensym_defer_capture_24 =(const void *) & _x2c_gensym_macro_previous_9;
+                  _x2c_gensym_macro_environment_12._x2c_gensym_defer_capture_23 =(const void *) & _x2c_gensym_macro_address_10;
+                  _x2c_gensym_macro_environment_12._x2c_gensym_defer_capture_24 =(const void *) & _x2c_gensym_macro_previous_10;
                   X2CCleanup _x2c_gensym_defer_record_16 ={
                     .fn = _x2c_gensym_defer_cleanup_16, .env = & _x2c_gensym_macro_environment_12
                   }
                   ;
                   x2c_cleanup_push(& _x2c_gensym_defer_record_16);
                   {
-                    * _x2c_gensym_macro_address_9 = Map_new();
+                    * _x2c_gensym_macro_address_10 = Map_new();
                     {
-                      int * _x2c_gensym_macro_address_8 = & c -> layout;
-                      int _x2c_gensym_macro_previous_8 = * _x2c_gensym_macro_address_8;
+                      int * _x2c_gensym_macro_address_11 = & c -> layout;
+                      int _x2c_gensym_macro_previous_11 = * _x2c_gensym_macro_address_11;
                       {
                         _x2c_gensym_defer_env_14 _x2c_gensym_macro_environment_11 ={
                           0
                         }
                         ;
-                        _x2c_gensym_macro_environment_11._x2c_gensym_defer_capture_25 =(const void *) & _x2c_gensym_macro_address_8;
-                        _x2c_gensym_macro_environment_11._x2c_gensym_defer_capture_26 =(const void *) & _x2c_gensym_macro_previous_8;
+                        _x2c_gensym_macro_environment_11._x2c_gensym_defer_capture_25 =(const void *) & _x2c_gensym_macro_address_11;
+                        _x2c_gensym_macro_environment_11._x2c_gensym_defer_capture_26 =(const void *) & _x2c_gensym_macro_previous_11;
                         X2CCleanup _x2c_gensym_defer_record_17 ={
                           .fn = _x2c_gensym_defer_cleanup_17, .env = & _x2c_gensym_macro_environment_11
                         }
                         ;
                         x2c_cleanup_push(& _x2c_gensym_defer_record_17);
                         {
-                          * _x2c_gensym_macro_address_8 = tokenizer -> layout;
+                          * _x2c_gensym_macro_address_11 = tokenizer -> layout;
                           {
                             FileWalk w ={
                               .c = c, .path = path, .text = text, .dir = dir, .module = module, .globs = globs, .visited = visited, .parts = Array_new(), .definitions = Map_new(), .dependencies = _cache_map(), .statics = Map_new(), .hashes = _cache_map(), .unit = Path_is_x2c_source(path), .line = 1
@@ -2479,7 +2490,10 @@ static void _walk_apart(Compiler c, String path, String text, Map globs, Map vis
       x2c_cleanup_push(& _x2c_gensym_defer_record_21);
       {
         * _x2c_gensym_macro_address_12 = Map_new();
-        f4_walk____walk_file(c, path, text, module, Path_dirname(path), globs, visited);
+        {
+          f4_walk____walk_file(c, path, text, module, Path_dirname(path), globs, visited);
+        }
+
       }
       x2c_cleanup_leave(& _x2c_gensym_defer_record_21);
     }
@@ -2836,7 +2850,10 @@ Map Compiler_included_compile_time_effects(Compiler c, Map globs){
         x2c_cleanup_push(& _x2c_gensym_defer_record_23);
         {
           * _x2c_gensym_macro_address_13 = 1;
-          Compiler_install_compile_time_effects(c, Array_list_free(effects));
+          {
+            Compiler_install_compile_time_effects(c, Array_list_free(effects));
+          }
+
         }
         x2c_cleanup_leave(& _x2c_gensym_defer_record_23);
       }
@@ -2916,7 +2933,33 @@ void Compiler_install_included_effects(Compiler c){
     Var exports = Map_getindex(c -> included_effects, String_var(canonical));
     if(Var_is_void(exports)) continue;
     Map_del(c -> included_effects, String_var(canonical));
-    Compiler_install_compile_time_effects(c, Var_list_payload(exports));
+    {
+      Token * _x2c_gensym_macro_address_14 = & c -> token;
+      Token _x2c_gensym_macro_previous_14 = * _x2c_gensym_macro_address_14;
+      {
+        _x2c_gensym_defer_env_21 _x2c_gensym_macro_environment_21 ={
+          0
+        }
+        ;
+        _x2c_gensym_macro_environment_21._x2c_gensym_defer_capture_37 =(const void *) & _x2c_gensym_macro_address_14;
+        _x2c_gensym_macro_environment_21._x2c_gensym_defer_capture_38 =(const void *) & _x2c_gensym_macro_previous_14;
+        X2CCleanup _x2c_gensym_defer_record_24 ={
+          .fn = _x2c_gensym_defer_cleanup_24, .env = & _x2c_gensym_macro_environment_21
+        }
+        ;
+        x2c_cleanup_push(& _x2c_gensym_defer_record_24);
+        {
+          * _x2c_gensym_macro_address_14 = token;
+          {
+            Compiler_install_compile_time_effects(c, Var_list_payload(exports));
+          }
+
+        }
+        x2c_cleanup_leave(& _x2c_gensym_defer_record_24);
+      }
+
+    }
+
   }
 
 }
@@ -2982,13 +3025,13 @@ int Symbol_is_storage_class(Symbol);
 static Type List_type(List);
 static void _needed_types(List syntax, Map rows, Map needed){
   Array pending = Array_update_n(Array_new(), 1, List_var(syntax));  const Array _x2c_gensym_macro_acquired_5 = pending; {
-    _x2c_gensym_defer_env_21 _x2c_gensym_macro_environment_21 ={
+    _x2c_gensym_defer_env_22 _x2c_gensym_macro_environment_22 ={
       0
     }
-    ;  _x2c_gensym_macro_environment_21._x2c_gensym_defer_capture_37 =(const void *) & _x2c_gensym_macro_acquired_5;  X2CCleanup _x2c_gensym_defer_record_24 ={
-      .fn = _x2c_gensym_defer_cleanup_24, .env = & _x2c_gensym_macro_environment_21
+    ;  _x2c_gensym_macro_environment_22._x2c_gensym_defer_capture_39 =(const void *) & _x2c_gensym_macro_acquired_5;  X2CCleanup _x2c_gensym_defer_record_25 ={
+      .fn = _x2c_gensym_defer_cleanup_25, .env = & _x2c_gensym_macro_environment_22
     }
-    ;  x2c_cleanup_push(& _x2c_gensym_defer_record_24); {
+    ;  x2c_cleanup_push(& _x2c_gensym_defer_record_25); {
       while(Array_len(pending)){
         Var item = Array_take_last(pending);  if(! Var_is_row(item, 9, 7, 4)) continue; {
           Var _x2c_gensym_match_var = item; int _x2c_gensym_match_none = !Var_is(_x2c_gensym_match_var, 806120);  List _x2c_gensym_match_expr = Var_list_payload(_x2c_gensym_match_var); Var _x2c_gensym_match_values[1]; MatchCaptureBuffer _x2c_gensym_match_capture = { .values = _x2c_gensym_match_values, .capacity = 1 };
@@ -3071,7 +3114,7 @@ static void _needed_types(List syntax, Map rows, Map needed){
       }
 
     }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_24);
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_25);
   }
 
 }
@@ -3158,16 +3201,16 @@ static void _select_public(FileWalk * w){
         Array dropped = Array_new();
         const Array _x2c_gensym_macro_acquired_6 = dropped;
         {
-          _x2c_gensym_defer_env_22 _x2c_gensym_macro_environment_22 ={
+          _x2c_gensym_defer_env_23 _x2c_gensym_macro_environment_23 ={
             0
           }
           ;
-          _x2c_gensym_macro_environment_22._x2c_gensym_defer_capture_38 =(const void *) & _x2c_gensym_macro_acquired_6;
-          X2CCleanup _x2c_gensym_defer_record_25 ={
-            .fn = _x2c_gensym_defer_cleanup_25, .env = & _x2c_gensym_macro_environment_22
+          _x2c_gensym_macro_environment_23._x2c_gensym_defer_capture_40 =(const void *) & _x2c_gensym_macro_acquired_6;
+          X2CCleanup _x2c_gensym_defer_record_26 ={
+            .fn = _x2c_gensym_defer_cleanup_26, .env = & _x2c_gensym_macro_environment_23
           }
           ;
-          x2c_cleanup_push(& _x2c_gensym_defer_record_25);
+          x2c_cleanup_push(& _x2c_gensym_defer_record_26);
           {
             {
               Var key;
@@ -3195,7 +3238,7 @@ static void _select_public(FileWalk * w){
             }
 
           }
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_25);
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_26);
         }
 
       }
@@ -3311,16 +3354,16 @@ static void f12_declarations____add_type_dependencies(Compiler c, Array types, S
                       Array _x2c_gensym_macro_pending_0 = Array_update_n(Array_new(), 1, value);
                       const Array _x2c_gensym_macro_acquired_7 = _x2c_gensym_macro_pending_0;
                       {
-                        _x2c_gensym_defer_env_23 _x2c_gensym_macro_environment_23 ={
+                        _x2c_gensym_defer_env_24 _x2c_gensym_macro_environment_24 ={
                           0
                         }
                         ;
-                        _x2c_gensym_macro_environment_23._x2c_gensym_defer_capture_39 =(const void *) & _x2c_gensym_macro_acquired_7;
-                        X2CCleanup _x2c_gensym_defer_record_26 ={
-                          .fn = _x2c_gensym_defer_cleanup_26, .env = & _x2c_gensym_macro_environment_23
+                        _x2c_gensym_macro_environment_24._x2c_gensym_defer_capture_41 =(const void *) & _x2c_gensym_macro_acquired_7;
+                        X2CCleanup _x2c_gensym_defer_record_27 ={
+                          .fn = _x2c_gensym_defer_cleanup_27, .env = & _x2c_gensym_macro_environment_24
                         }
                         ;
-                        x2c_cleanup_push(& _x2c_gensym_defer_record_26);
+                        x2c_cleanup_push(& _x2c_gensym_defer_record_27);
                         {
                           while(Array_len(_x2c_gensym_macro_pending_0)){
                             Var _x2c_gensym_macro_current_0 = Array_take_last(_x2c_gensym_macro_pending_0);
@@ -3334,7 +3377,7 @@ static void f12_declarations____add_type_dependencies(Compiler c, Array types, S
                           }
 
                         }
-                        x2c_cleanup_leave(& _x2c_gensym_defer_record_26);
+                        x2c_cleanup_leave(& _x2c_gensym_defer_record_27);
                       }
 
                     }
@@ -3483,11 +3526,11 @@ static Array f12_declarations____declared_functions(List entry){
     Scope_push(& process_cache_scope);
     {
       {
-        X2CCleanup _x2c_gensym_defer_record_27 ={
-          .fn = _x2c_gensym_defer_cleanup_27, .env = 0
+        X2CCleanup _x2c_gensym_defer_record_28 ={
+          .fn = _x2c_gensym_defer_cleanup_28, .env = 0
         }
         ;
-        x2c_cleanup_push(& _x2c_gensym_defer_record_27);
+        x2c_cleanup_push(& _x2c_gensym_defer_record_28);
         {
           {
             Array names = Array_new();
@@ -3550,7 +3593,7 @@ static Array f12_declarations____declared_functions(List entry){
             {
               Array _x2c_gensym_return_value_11 = names;
               {
-                x2c_cleanup_leave(& _x2c_gensym_defer_record_27);
+                x2c_cleanup_leave(& _x2c_gensym_defer_record_28);
                 return _x2c_gensym_return_value_11;
               }
 
@@ -3559,7 +3602,7 @@ static Array f12_declarations____declared_functions(List entry){
           }
 
         }
-        x2c_cleanup_leave(& _x2c_gensym_defer_record_27);
+        x2c_cleanup_leave(& _x2c_gensym_defer_record_28);
       }
 
     }
@@ -3815,17 +3858,17 @@ static void _record_cold_conformances(Compiler c, Map globs, Map visited, String
   }
   ;
   {
-    _x2c_gensym_defer_env_24 _x2c_gensym_macro_environment_24 ={
+    _x2c_gensym_defer_env_25 _x2c_gensym_macro_environment_25 ={
       0
     }
     ;
-    _x2c_gensym_macro_environment_24._x2c_gensym_defer_capture_40 =(const void *) & cold;
-    _x2c_gensym_macro_environment_24._x2c_gensym_defer_capture_41 =(const void *) & c;
-    X2CCleanup _x2c_gensym_defer_record_28 ={
-      .fn = _x2c_gensym_defer_cleanup_28, .env = & _x2c_gensym_macro_environment_24
+    _x2c_gensym_macro_environment_25._x2c_gensym_defer_capture_42 =(const void *) & cold;
+    _x2c_gensym_macro_environment_25._x2c_gensym_defer_capture_43 =(const void *) & c;
+    X2CCleanup _x2c_gensym_defer_record_29 ={
+      .fn = _x2c_gensym_defer_cleanup_29, .env = & _x2c_gensym_macro_environment_25
     }
     ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_28);
+    x2c_cleanup_push(& _x2c_gensym_defer_record_29);
     {
       while(Map_truth(cold_providers)){
         Map pending = cold_providers;
@@ -3852,7 +3895,7 @@ static void _record_cold_conformances(Compiler c, Map globs, Map visited, String
       }
 
     }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_28);
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_29);
   }
 
 }
@@ -3862,29 +3905,29 @@ static Map f12_declarations____record(f12_declarations___ColdConformances * cold
   if(!(Map_contains((* cold).prelude.visited, String_var(path)))){
     Compiler provider = f12_declarations____cold_provider((* cold).c, path, &((* cold).prelude));
     {
-      _x2c_gensym_defer_env_25 _x2c_gensym_macro_environment_25 ={
+      _x2c_gensym_defer_env_26 _x2c_gensym_macro_environment_26 ={
         0
       }
       ;
-      _x2c_gensym_macro_environment_25._x2c_gensym_defer_capture_42 =(const void *) & cold;
-      _x2c_gensym_macro_environment_25._x2c_gensym_defer_capture_43 =(const void *) & provider;
-      X2CCleanup _x2c_gensym_defer_record_29 ={
-        .fn = _x2c_gensym_defer_cleanup_29, .env = & _x2c_gensym_macro_environment_25
+      _x2c_gensym_macro_environment_26._x2c_gensym_defer_capture_44 =(const void *) & cold;
+      _x2c_gensym_macro_environment_26._x2c_gensym_defer_capture_45 =(const void *) & provider;
+      X2CCleanup _x2c_gensym_defer_record_30 ={
+        .fn = _x2c_gensym_defer_cleanup_30, .env = & _x2c_gensym_macro_environment_26
       }
       ;
-      x2c_cleanup_push(& _x2c_gensym_defer_record_29);
+      x2c_cleanup_push(& _x2c_gensym_defer_record_30);
       {
         {
           Map _x2c_gensym_return_value_12 = f12_declarations____record_declared(provider);
           {
-            x2c_cleanup_leave(& _x2c_gensym_defer_record_29);
+            x2c_cleanup_leave(& _x2c_gensym_defer_record_30);
             return _x2c_gensym_return_value_12;
           }
 
         }
 
       }
-      x2c_cleanup_leave(& _x2c_gensym_defer_record_29);
+      x2c_cleanup_leave(& _x2c_gensym_defer_record_30);
     }
 
   }
@@ -4068,16 +4111,16 @@ static Map f12_declarations____inline_type_dependencies(Compiler c, List ast){
   Array _x2c_gensym_macro_pending_2 = Array_update_n(Array_new(), 1, List_var(ast));
   const Array _x2c_gensym_macro_acquired_9 = _x2c_gensym_macro_pending_2;
   {
-    _x2c_gensym_defer_env_26 _x2c_gensym_macro_environment_27 ={
+    _x2c_gensym_defer_env_27 _x2c_gensym_macro_environment_28 ={
       0
     }
     ;
-    _x2c_gensym_macro_environment_27._x2c_gensym_defer_capture_44 =(const void *) & _x2c_gensym_macro_acquired_9;
-    X2CCleanup _x2c_gensym_defer_record_30 ={
-      .fn = _x2c_gensym_defer_cleanup_30, .env = & _x2c_gensym_macro_environment_27
+    _x2c_gensym_macro_environment_28._x2c_gensym_defer_capture_46 =(const void *) & _x2c_gensym_macro_acquired_9;
+    X2CCleanup _x2c_gensym_defer_record_31 ={
+      .fn = _x2c_gensym_defer_cleanup_31, .env = & _x2c_gensym_macro_environment_28
     }
     ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_30);
+    x2c_cleanup_push(& _x2c_gensym_defer_record_31);
     {
       while(Array_len(_x2c_gensym_macro_pending_2)){
         Var _x2c_gensym_macro_current_2 = Array_take_last(_x2c_gensym_macro_pending_2);
@@ -4103,16 +4146,16 @@ static Map f12_declarations____inline_type_dependencies(Compiler c, List ast){
                   Array _x2c_gensym_macro_pending_1 = Array_update_n(Array_new(), 1, body);
                   const Array _x2c_gensym_macro_acquired_8 = _x2c_gensym_macro_pending_1;
                   {
-                    _x2c_gensym_defer_env_27 _x2c_gensym_macro_environment_26 ={
+                    _x2c_gensym_defer_env_28 _x2c_gensym_macro_environment_27 ={
                       0
                     }
                     ;
-                    _x2c_gensym_macro_environment_26._x2c_gensym_defer_capture_45 =(const void *) & _x2c_gensym_macro_acquired_8;
-                    X2CCleanup _x2c_gensym_defer_record_31 ={
-                      .fn = _x2c_gensym_defer_cleanup_31, .env = & _x2c_gensym_macro_environment_26
+                    _x2c_gensym_macro_environment_27._x2c_gensym_defer_capture_47 =(const void *) & _x2c_gensym_macro_acquired_8;
+                    X2CCleanup _x2c_gensym_defer_record_32 ={
+                      .fn = _x2c_gensym_defer_cleanup_32, .env = & _x2c_gensym_macro_environment_27
                     }
                     ;
-                    x2c_cleanup_push(& _x2c_gensym_defer_record_31);
+                    x2c_cleanup_push(& _x2c_gensym_defer_record_32);
                     {
                       while(Array_len(_x2c_gensym_macro_pending_1)){
                         Var _x2c_gensym_macro_current_1 = Array_take_last(_x2c_gensym_macro_pending_1);
@@ -4177,11 +4220,11 @@ static Map f12_declarations____inline_type_dependencies(Compiler c, List ast){
                         Var _x2c_gensym_literal_part_36 = String_var(name);  Var _x2c_gensym_literal_part_37 = List_var(Array_list_free(Array_sort(ordered)));  cons(_186, cons(_x2c_gensym_literal_part_36, cons(_x2c_gensym_literal_part_37, NULL)));
                       }
                       ))); {
-                        x2c_cleanup_leave(& _x2c_gensym_defer_record_31);  continue;
+                        x2c_cleanup_leave(& _x2c_gensym_defer_record_32);  continue;
                       }
 
                     }
-                    x2c_cleanup_leave(& _x2c_gensym_defer_record_31);
+                    x2c_cleanup_leave(& _x2c_gensym_defer_record_32);
                   }
 
                 }
@@ -4203,13 +4246,13 @@ static Map f12_declarations____inline_type_dependencies(Compiler c, List ast){
       }
       {
         Map _x2c_gensym_return_value_13 = rows; {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_30);  return _x2c_gensym_return_value_13;
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_31);  return _x2c_gensym_return_value_13;
         }
 
       }
 
     }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_30);
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_31);
   }
 
 }
@@ -4257,13 +4300,13 @@ static void f12_declarations____publish_inline_dependencies(Compiler c, String p
 
   }
   Array dropped = Array_new();  const Array _x2c_gensym_macro_acquired_10 = dropped; {
-    _x2c_gensym_defer_env_29 _x2c_gensym_macro_environment_29 ={
+    _x2c_gensym_defer_env_30 _x2c_gensym_macro_environment_30 ={
       0
     }
-    ;  _x2c_gensym_macro_environment_29._x2c_gensym_defer_capture_47 =(const void *) & _x2c_gensym_macro_acquired_10;  X2CCleanup _x2c_gensym_defer_record_32 ={
-      .fn = _x2c_gensym_defer_cleanup_33, .env = & _x2c_gensym_macro_environment_29
+    ;  _x2c_gensym_macro_environment_30._x2c_gensym_defer_capture_49 =(const void *) & _x2c_gensym_macro_acquired_10;  X2CCleanup _x2c_gensym_defer_record_33 ={
+      .fn = _x2c_gensym_defer_cleanup_34, .env = & _x2c_gensym_macro_environment_30
     }
-    ;  x2c_cleanup_push(& _x2c_gensym_defer_record_32); {
+    ;  x2c_cleanup_push(& _x2c_gensym_defer_record_33); {
       {
         List key;  Iter _x2c_gensym_macro_iterator_60 = Map_keys(additions, &(struct Iter){
           int_var(0)
@@ -4283,16 +4326,16 @@ static void f12_declarations____publish_inline_dependencies(Compiler c, String p
 
       }
       _cache_dependencies(Var_map_payload(List_getindex(entry, 3)), c -> deps);  if(! Map_len(additions)){
-        x2c_cleanup_leave(& _x2c_gensym_defer_record_32);  return;
+        x2c_cleanup_leave(& _x2c_gensym_defer_record_33);  return;
       }
       Map retained = _cache_copy(additions);  _retain_rows(cons(Map_var(retained), NULL));  Array replaced = Array_new();  const Array _x2c_gensym_macro_acquired_11 = replaced; {
-        _x2c_gensym_defer_env_28 _x2c_gensym_macro_environment_28 ={
+        _x2c_gensym_defer_env_29 _x2c_gensym_macro_environment_29 ={
           0
         }
-        ;  _x2c_gensym_macro_environment_28._x2c_gensym_defer_capture_46 =(const void *) & _x2c_gensym_macro_acquired_11;  X2CCleanup _x2c_gensym_defer_record_33 ={
-          .fn = _x2c_gensym_defer_cleanup_32, .env = & _x2c_gensym_macro_environment_28
+        ;  _x2c_gensym_macro_environment_29._x2c_gensym_defer_capture_48 =(const void *) & _x2c_gensym_macro_acquired_11;  X2CCleanup _x2c_gensym_defer_record_34 ={
+          .fn = _x2c_gensym_defer_cleanup_33, .env = & _x2c_gensym_macro_environment_29
         }
-        ;  x2c_cleanup_push(& _x2c_gensym_defer_record_33); {
+        ;  x2c_cleanup_push(& _x2c_gensym_defer_record_34); {
           {
             List key;  Var value;  Map _x2c_gensym_macro_object_62 = retained;  unsigned _x2c_gensym_macro_cursor_65 = 0;  Var _x2c_gensym_macro_cursor_output_45;  Var _x2c_gensym_macro_cursor_output_46;  while(Map_try_next(_x2c_gensym_macro_object_62, &(_x2c_gensym_macro_cursor_65), &(_x2c_gensym_macro_cursor_output_45), &(_x2c_gensym_macro_cursor_output_46))){
               key = Var_list_payload(_x2c_gensym_macro_cursor_output_45);  value = _x2c_gensym_macro_cursor_output_46; {
@@ -4309,18 +4352,18 @@ static void f12_declarations____publish_inline_dependencies(Compiler c, String p
 
           }
           if(! Map_len(retained)){
-            x2c_cleanup_leave(& _x2c_gensym_defer_record_33);  x2c_cleanup_leave(& _x2c_gensym_defer_record_32);  return;
+            x2c_cleanup_leave(& _x2c_gensym_defer_record_34);  x2c_cleanup_leave(& _x2c_gensym_defer_record_33);  return;
           }
           List parts = List_append(Var_list(List_car(entry)), cons(Map_var(retained), NULL));  List updated =({
             Var _x2c_gensym_literal_part_38 = List_var(parts);  List _x2c_gensym_literal_part_39 = List_cdr(entry);  cons(_x2c_gensym_literal_part_38, List_append(_x2c_gensym_literal_part_39, NULL));
           }
           );  _require_retained(List_try_own(updated));  Map_setindex(_process_cache(), String_var(path), List_var(updated));
         }
-        x2c_cleanup_leave(& _x2c_gensym_defer_record_33);
+        x2c_cleanup_leave(& _x2c_gensym_defer_record_34);
       }
 
     }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_32);
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_33);
   }
 
 }
@@ -4350,13 +4393,13 @@ void Compiler_record_conformance_rows(Compiler c, Map rows){
     );  Var _x2c_gensym_macro_item_67;  while(Iter_try_next(_x2c_gensym_macro_iterator_67, &(_x2c_gensym_macro_item_67))){
       part = _x2c_gensym_macro_item_67; {
         if(! Var_is(part, 26720)) continue;  contribution = Var_map_payload(part);  Array stale = Array_new();  const Array _x2c_gensym_macro_acquired_12 = stale; {
-          _x2c_gensym_defer_env_30 _x2c_gensym_macro_environment_30 ={
+          _x2c_gensym_defer_env_31 _x2c_gensym_macro_environment_31 ={
             0
           }
-          ;  _x2c_gensym_macro_environment_30._x2c_gensym_defer_capture_48 =(const void *) & _x2c_gensym_macro_acquired_12;  X2CCleanup _x2c_gensym_defer_record_34 ={
-            .fn = _x2c_gensym_defer_cleanup_34, .env = & _x2c_gensym_macro_environment_30
+          ;  _x2c_gensym_macro_environment_31._x2c_gensym_defer_capture_50 =(const void *) & _x2c_gensym_macro_acquired_12;  X2CCleanup _x2c_gensym_defer_record_35 ={
+            .fn = _x2c_gensym_defer_cleanup_35, .env = & _x2c_gensym_macro_environment_31
           }
-          ;  x2c_cleanup_push(& _x2c_gensym_defer_record_34); {
+          ;  x2c_cleanup_push(& _x2c_gensym_defer_record_35); {
             {
               Var key, value;  Map _x2c_gensym_macro_object_65 = contribution;  unsigned _x2c_gensym_macro_cursor_68 = 0;  Var _x2c_gensym_macro_cursor_output_48;  Var _x2c_gensym_macro_cursor_output_49;  while(Map_try_next(_x2c_gensym_macro_object_65, &(_x2c_gensym_macro_cursor_68), &(_x2c_gensym_macro_cursor_output_48), &(_x2c_gensym_macro_cursor_output_49))){
                 key = _x2c_gensym_macro_cursor_output_48;  value = _x2c_gensym_macro_cursor_output_49; {
@@ -4377,7 +4420,7 @@ void Compiler_record_conformance_rows(Compiler c, Map rows){
             }
 
           }
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_34);
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_35);
         }
 
       }
@@ -4399,13 +4442,13 @@ void Compiler_record_conformance_rows(Compiler c, Map rows){
 
 List Compiler_declared_adoptions(Compiler c){
   if(! _init_guard_) _file_init_();  Var cached = Map_getindex(_process_cache(), String_var(_canonical_path(c -> filename)));  if(Var_is_void(cached)) return NULL;  Array adoptions = Array_new();  const Array _x2c_gensym_macro_acquired_13 = adoptions; {
-    _x2c_gensym_defer_env_31 _x2c_gensym_macro_environment_31 ={
+    _x2c_gensym_defer_env_32 _x2c_gensym_macro_environment_32 ={
       0
     }
-    ;  _x2c_gensym_macro_environment_31._x2c_gensym_defer_capture_49 =(const void *) & _x2c_gensym_macro_acquired_13;  X2CCleanup _x2c_gensym_defer_record_35 ={
-      .fn = _x2c_gensym_defer_cleanup_35, .env = & _x2c_gensym_macro_environment_31
+    ;  _x2c_gensym_macro_environment_32._x2c_gensym_defer_capture_51 =(const void *) & _x2c_gensym_macro_acquired_13;  X2CCleanup _x2c_gensym_defer_record_36 ={
+      .fn = _x2c_gensym_defer_cleanup_36, .env = & _x2c_gensym_macro_environment_32
     }
-    ;  x2c_cleanup_push(& _x2c_gensym_defer_record_35); {
+    ;  x2c_cleanup_push(& _x2c_gensym_defer_record_36); {
       {
         Var part;  Iter _x2c_gensym_macro_iterator_70 = Var_iter(List_car(Var_list(cached)), &(struct Iter){
           int_var(0)
@@ -4417,7 +4460,7 @@ List Compiler_declared_adoptions(Compiler c){
                 Var _x2c_gensym_match_var = value; int _x2c_gensym_match_none = !Var_is(_x2c_gensym_match_var, 806120);  List _x2c_gensym_match_expr = Var_list_payload(_x2c_gensym_match_var); List _x2c_gensym_match_cursor;  switch(_x2c_gensym_match_expr ? _x2c_gensym_match_expr->car.u64 : 0){
                     case 9224497936764009512ULL: ; if (!_x2c_gensym_match_none) { _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497936764009512ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1)) {Array_push(adoptions, value);  break; } } default: ; if (!_x2c_gensym_match_none) { _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && Var_equal(_x2c_gensym_match_cursor->car, _203 ->car) && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1)) {{
                     List _x2c_gensym_return_value_14 = NULL; {
-                      x2c_cleanup_leave(& _x2c_gensym_defer_record_35);  return _x2c_gensym_return_value_14;
+                      x2c_cleanup_leave(& _x2c_gensym_defer_record_36);  return _x2c_gensym_return_value_14;
                     }
 
                   }
@@ -4435,13 +4478,13 @@ List Compiler_declared_adoptions(Compiler c){
       }
       {
         List _x2c_gensym_return_value_15 = Array_list(adoptions); {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_35);  return _x2c_gensym_return_value_15;
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_36);  return _x2c_gensym_return_value_15;
         }
 
       }
 
     }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_35);
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_36);
   }
 
 }
@@ -4547,33 +4590,33 @@ void Diagnostics_release(Diagnostics, DiagnosticsHold, int);
 static List f9_providers____meta_provider_entry(Compiler c, String canonical){
   List volatile entry = _entry(c, canonical);  if(! List_truth(entry)){
     DiagnosticsHold hold = Diagnostics_hold(c -> diagnostics); {
-      int * _x2c_gensym_macro_address_16 = & c -> meta_build;  int _x2c_gensym_macro_previous_16 = * _x2c_gensym_macro_address_16; {
-        _x2c_gensym_defer_env_32 _x2c_gensym_macro_environment_34 ={
+      int * _x2c_gensym_macro_address_15 = & c -> meta_build;  int _x2c_gensym_macro_previous_15 = * _x2c_gensym_macro_address_15; {
+        _x2c_gensym_defer_env_33 _x2c_gensym_macro_environment_35 ={
           0
         }
-        ;  _x2c_gensym_macro_environment_34._x2c_gensym_defer_capture_50 =(const void *) & _x2c_gensym_macro_address_16;  _x2c_gensym_macro_environment_34._x2c_gensym_defer_capture_51 =(const void *) & _x2c_gensym_macro_previous_16;  X2CCleanup _x2c_gensym_defer_record_36 ={
-          .fn = _x2c_gensym_defer_cleanup_36, .env = & _x2c_gensym_macro_environment_34
+        ;  _x2c_gensym_macro_environment_35._x2c_gensym_defer_capture_52 =(const void *) & _x2c_gensym_macro_address_15;  _x2c_gensym_macro_environment_35._x2c_gensym_defer_capture_53 =(const void *) & _x2c_gensym_macro_previous_15;  X2CCleanup _x2c_gensym_defer_record_37 ={
+          .fn = _x2c_gensym_defer_cleanup_37, .env = & _x2c_gensym_macro_environment_35
         }
-        ;  x2c_cleanup_push(& _x2c_gensym_defer_record_36); {
-          * _x2c_gensym_macro_address_16 = 1; {
-            int * _x2c_gensym_macro_address_15 = & c -> signature_only;  int _x2c_gensym_macro_previous_15 = * _x2c_gensym_macro_address_15; {
-              _x2c_gensym_defer_env_33 _x2c_gensym_macro_environment_33 ={
+        ;  x2c_cleanup_push(& _x2c_gensym_defer_record_37); {
+          * _x2c_gensym_macro_address_15 = 1; {
+            int * _x2c_gensym_macro_address_16 = & c -> signature_only;  int _x2c_gensym_macro_previous_16 = * _x2c_gensym_macro_address_16; {
+              _x2c_gensym_defer_env_34 _x2c_gensym_macro_environment_34 ={
                 0
               }
-              ;  _x2c_gensym_macro_environment_33._x2c_gensym_defer_capture_52 =(const void *) & _x2c_gensym_macro_address_15;  _x2c_gensym_macro_environment_33._x2c_gensym_defer_capture_53 =(const void *) & _x2c_gensym_macro_previous_15;  X2CCleanup _x2c_gensym_defer_record_37 ={
-                .fn = _x2c_gensym_defer_cleanup_37, .env = & _x2c_gensym_macro_environment_33
+              ;  _x2c_gensym_macro_environment_34._x2c_gensym_defer_capture_54 =(const void *) & _x2c_gensym_macro_address_16;  _x2c_gensym_macro_environment_34._x2c_gensym_defer_capture_55 =(const void *) & _x2c_gensym_macro_previous_16;  X2CCleanup _x2c_gensym_defer_record_38 ={
+                .fn = _x2c_gensym_defer_cleanup_38, .env = & _x2c_gensym_macro_environment_34
               }
-              ;  x2c_cleanup_push(& _x2c_gensym_defer_record_37); {
-                * _x2c_gensym_macro_address_15 = 1; {
-                  int * _x2c_gensym_macro_address_14 = & c -> recovery_depth;  int _x2c_gensym_macro_previous_14 = * _x2c_gensym_macro_address_14; {
-                    _x2c_gensym_defer_env_34 _x2c_gensym_macro_environment_32 ={
+              ;  x2c_cleanup_push(& _x2c_gensym_defer_record_38); {
+                * _x2c_gensym_macro_address_16 = 1; {
+                  int * _x2c_gensym_macro_address_17 = & c -> recovery_depth;  int _x2c_gensym_macro_previous_17 = * _x2c_gensym_macro_address_17; {
+                    _x2c_gensym_defer_env_35 _x2c_gensym_macro_environment_33 ={
                       0
                     }
-                    ;  _x2c_gensym_macro_environment_32._x2c_gensym_defer_capture_54 =(const void *) & _x2c_gensym_macro_address_14;  _x2c_gensym_macro_environment_32._x2c_gensym_defer_capture_55 =(const void *) & _x2c_gensym_macro_previous_14;  X2CCleanup _x2c_gensym_defer_record_38 ={
-                      .fn = _x2c_gensym_defer_cleanup_38, .env = & _x2c_gensym_macro_environment_32
+                    ;  _x2c_gensym_macro_environment_33._x2c_gensym_defer_capture_56 =(const void *) & _x2c_gensym_macro_address_17;  _x2c_gensym_macro_environment_33._x2c_gensym_defer_capture_57 =(const void *) & _x2c_gensym_macro_previous_17;  X2CCleanup _x2c_gensym_defer_record_39 ={
+                      .fn = _x2c_gensym_defer_cleanup_39, .env = & _x2c_gensym_macro_environment_33
                     }
-                    ;  x2c_cleanup_push(& _x2c_gensym_defer_record_38); {
-                      * _x2c_gensym_macro_address_14 = c -> recovery_depth + 1; {
+                    ;  x2c_cleanup_push(& _x2c_gensym_defer_record_39); {
+                      * _x2c_gensym_macro_address_17 = c -> recovery_depth + 1; {
                         {
                           ExceptionFrame _x2c_gensym_exception_frame_0;  static MatchCaptureSite _x2c_gensym_macro_arms_0[1];  Var _x2c_gensym_macro_patterns_0[1];  static ErrorCatchSite _x2c_gensym_macro_site_0 ={
                             _x2c_gensym_macro_arms_0, -1, 1, ERROR_CATCH_PENDING, - 1
@@ -4585,13 +4628,7 @@ static List f9_providers____meta_provider_entry(Compiler c, String canonical){
                             x2c_exception_landed(& _x2c_gensym_exception_frame_0);  if(x2c_exception_is_error_target(& _x2c_gensym_exception_frame_0)){
                               int _x2c_gensym_macro_selected_0 = x2c_error_catch_selected(_x2c_gensym_error_handler_0);  x2c_error_catch_detach(_x2c_gensym_error_handler_0);  x2c_exception_mark_handled(& _x2c_gensym_exception_frame_0);  if(_x2c_gensym_macro_selected_0 == 0){
                                 {
-                                  {
-                                    {
-                                      entry = NULL;
-                                    }
-
-                                  }
-
+                                  entry = NULL;
                                 }
 
                               }
@@ -4608,19 +4645,19 @@ static List f9_providers____meta_provider_entry(Compiler c, String canonical){
                       }
 
                     }
-                    x2c_cleanup_leave(& _x2c_gensym_defer_record_38);
+                    x2c_cleanup_leave(& _x2c_gensym_defer_record_39);
                   }
 
                 }
 
               }
-              x2c_cleanup_leave(& _x2c_gensym_defer_record_37);
+              x2c_cleanup_leave(& _x2c_gensym_defer_record_38);
             }
 
           }
 
         }
-        x2c_cleanup_leave(& _x2c_gensym_defer_record_36);
+        x2c_cleanup_leave(& _x2c_gensym_defer_record_37);
       }
 
     }
@@ -4969,16 +5006,16 @@ void Compiler_name_loaded_provider(Compiler c, String path, int index, List prov
   Map visible = Sym_unit_symbols(c -> sym);
   const Map _x2c_gensym_macro_acquired_14 = visible;
   {
-    _x2c_gensym_defer_env_35 _x2c_gensym_macro_environment_35 ={
+    _x2c_gensym_defer_env_36 _x2c_gensym_macro_environment_36 ={
       0
     }
     ;
-    _x2c_gensym_macro_environment_35._x2c_gensym_defer_capture_56 =(const void *) & _x2c_gensym_macro_acquired_14;
-    X2CCleanup _x2c_gensym_defer_record_39 ={
-      .fn = _x2c_gensym_defer_cleanup_39, .env = & _x2c_gensym_macro_environment_35
+    _x2c_gensym_macro_environment_36._x2c_gensym_defer_capture_58 =(const void *) & _x2c_gensym_macro_acquired_14;
+    X2CCleanup _x2c_gensym_defer_record_40 ={
+      .fn = _x2c_gensym_defer_cleanup_40, .env = & _x2c_gensym_macro_environment_36
     }
     ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_39);
+    x2c_cleanup_push(& _x2c_gensym_defer_record_40);
     {
       {
         String name;
@@ -5009,7 +5046,7 @@ void Compiler_name_loaded_provider(Compiler c, String path, int index, List prov
       }
 
     }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_39);
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_40);
   }
 
 }
@@ -5022,29 +5059,29 @@ static int f9_providers____loaded_types_equal(Type declared, Type defined){
 static int f9_providers____loaded_type_rows(Type type, Map visible, Map provider){
   Map needed = Map_new();
   {
-    _x2c_gensym_defer_env_37 _x2c_gensym_macro_environment_37 ={
+    _x2c_gensym_defer_env_38 _x2c_gensym_macro_environment_38 ={
       0
     }
     ;
-    _x2c_gensym_macro_environment_37._x2c_gensym_defer_capture_58 =(const void *) & needed;
-    X2CCleanup _x2c_gensym_defer_record_40 ={
-      .fn = _x2c_gensym_defer_cleanup_41, .env = & _x2c_gensym_macro_environment_37
+    _x2c_gensym_macro_environment_38._x2c_gensym_defer_capture_60 =(const void *) & needed;
+    X2CCleanup _x2c_gensym_defer_record_41 ={
+      .fn = _x2c_gensym_defer_cleanup_42, .env = & _x2c_gensym_macro_environment_38
     }
     ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_40);
+    x2c_cleanup_push(& _x2c_gensym_defer_record_41);
     {
       Map checked = Map_new();
       {
-        _x2c_gensym_defer_env_36 _x2c_gensym_macro_environment_36 ={
+        _x2c_gensym_defer_env_37 _x2c_gensym_macro_environment_37 ={
           0
         }
         ;
-        _x2c_gensym_macro_environment_36._x2c_gensym_defer_capture_57 =(const void *) & checked;
-        X2CCleanup _x2c_gensym_defer_record_41 ={
-          .fn = _x2c_gensym_defer_cleanup_40, .env = & _x2c_gensym_macro_environment_36
+        _x2c_gensym_macro_environment_37._x2c_gensym_defer_capture_59 =(const void *) & checked;
+        X2CCleanup _x2c_gensym_defer_record_42 ={
+          .fn = _x2c_gensym_defer_cleanup_41, .env = & _x2c_gensym_macro_environment_37
         }
         ;
-        x2c_cleanup_push(& _x2c_gensym_defer_record_41);
+        x2c_cleanup_push(& _x2c_gensym_defer_record_42);
         {
           _needed_types(Type_list(type), visible, needed);
           int changed = 1;
@@ -5066,8 +5103,8 @@ static int f9_providers____loaded_type_rows(Type type, Map visible, Map provider
                   if(Map_try_get(provider, key, &(expected)) && ! Var_equal(value, expected)){
                     int _x2c_gensym_return_value_16 = 0;
                     {
+                      x2c_cleanup_leave(& _x2c_gensym_defer_record_42);
                       x2c_cleanup_leave(& _x2c_gensym_defer_record_41);
-                      x2c_cleanup_leave(& _x2c_gensym_defer_record_40);
                       return _x2c_gensym_return_value_16;
                     }
 
@@ -5085,19 +5122,19 @@ static int f9_providers____loaded_type_rows(Type type, Map visible, Map provider
           {
             int _x2c_gensym_return_value_17 = 1;
             {
+              x2c_cleanup_leave(& _x2c_gensym_defer_record_42);
               x2c_cleanup_leave(& _x2c_gensym_defer_record_41);
-              x2c_cleanup_leave(& _x2c_gensym_defer_record_40);
               return _x2c_gensym_return_value_17;
             }
 
           }
 
         }
-        x2c_cleanup_leave(& _x2c_gensym_defer_record_41);
+        x2c_cleanup_leave(& _x2c_gensym_defer_record_42);
       }
 
     }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_40);
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_41);
   }
 
 }
@@ -5126,17 +5163,17 @@ void Compiler_collect_package(Compiler c, String name, Token token){
   Compiler_select_package_module(c, name, root, token);
   Compiler package = Compiler_new_shared(c);
   {
-    _x2c_gensym_defer_env_38 _x2c_gensym_macro_environment_38 ={
+    _x2c_gensym_defer_env_39 _x2c_gensym_macro_environment_39 ={
       0
     }
     ;
-    _x2c_gensym_macro_environment_38._x2c_gensym_defer_capture_59 =(const void *) & c;
-    _x2c_gensym_macro_environment_38._x2c_gensym_defer_capture_60 =(const void *) & package;
-    X2CCleanup _x2c_gensym_defer_record_42 ={
-      .fn = _x2c_gensym_defer_cleanup_42, .env = & _x2c_gensym_macro_environment_38
+    _x2c_gensym_macro_environment_39._x2c_gensym_defer_capture_61 =(const void *) & c;
+    _x2c_gensym_macro_environment_39._x2c_gensym_defer_capture_62 =(const void *) & package;
+    X2CCleanup _x2c_gensym_defer_record_43 ={
+      .fn = _x2c_gensym_defer_cleanup_43, .env = & _x2c_gensym_macro_environment_39
     }
     ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_42);
+    x2c_cleanup_push(& _x2c_gensym_defer_record_43);
     {
       package -> interface_provider = 1;
       package -> package = name;
@@ -5153,7 +5190,7 @@ void Compiler_collect_package(Compiler c, String name, Token token){
       f8_packages____install(&(s));
       Map_setindex(c -> package_effects, String_var(name), List_var(Array_list_free(s.exports)));
     }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_42);
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_43);
   }
 
 }
@@ -5271,16 +5308,16 @@ static void f8_packages____take_exports(f8_packages___Surface * s, Map rows){
   Array found = Array_new();
   const Array _x2c_gensym_macro_acquired_15 = found;
   {
-    _x2c_gensym_defer_env_39 _x2c_gensym_macro_environment_39 ={
+    _x2c_gensym_defer_env_40 _x2c_gensym_macro_environment_40 ={
       0
     }
     ;
-    _x2c_gensym_macro_environment_39._x2c_gensym_defer_capture_61 =(const void *) & _x2c_gensym_macro_acquired_15;
-    X2CCleanup _x2c_gensym_defer_record_43 ={
-      .fn = _x2c_gensym_defer_cleanup_43, .env = & _x2c_gensym_macro_environment_39
+    _x2c_gensym_macro_environment_40._x2c_gensym_defer_capture_63 =(const void *) & _x2c_gensym_macro_acquired_15;
+    X2CCleanup _x2c_gensym_defer_record_44 ={
+      .fn = _x2c_gensym_defer_cleanup_44, .env = & _x2c_gensym_macro_environment_40
     }
     ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_43);
+    x2c_cleanup_push(& _x2c_gensym_defer_record_44);
     {
       {
         Var key, value;
@@ -5314,7 +5351,7 @@ static void f8_packages____take_exports(f8_packages___Surface * s, Map rows){
       }
 
     }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_43);
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_44);
   }
 
 }
@@ -5378,13 +5415,13 @@ static int f8_packages____package_protocol_row(List key, Var value){
 
 static void _replay_package_imports(Compiler c, Map globs, Map rows, Array exports){
   Array imports = NULL; {
-    _x2c_gensym_defer_env_40 _x2c_gensym_macro_environment_40 ={
+    _x2c_gensym_defer_env_41 _x2c_gensym_macro_environment_41 ={
       0
     }
-    ;  _x2c_gensym_macro_environment_40._x2c_gensym_defer_capture_62 =(const void *) & imports;  X2CCleanup _x2c_gensym_defer_record_44 ={
-      .fn = _x2c_gensym_defer_cleanup_44, .env = & _x2c_gensym_macro_environment_40
+    ;  _x2c_gensym_macro_environment_41._x2c_gensym_defer_capture_64 =(const void *) & imports;  X2CCleanup _x2c_gensym_defer_record_45 ={
+      .fn = _x2c_gensym_defer_cleanup_45, .env = & _x2c_gensym_macro_environment_41
     }
-    ;  x2c_cleanup_push(& _x2c_gensym_defer_record_44); {
+    ;  x2c_cleanup_push(& _x2c_gensym_defer_record_45); {
       {
         Var key, value;  Map _x2c_gensym_macro_object_95 = rows;  unsigned _x2c_gensym_macro_cursor_98 = 0;  Var _x2c_gensym_macro_cursor_output_77;  Var _x2c_gensym_macro_cursor_output_78;  while(Map_try_next(_x2c_gensym_macro_object_95, &(_x2c_gensym_macro_cursor_98), &(_x2c_gensym_macro_cursor_output_77), &(_x2c_gensym_macro_cursor_output_78))){
           key = _x2c_gensym_macro_cursor_output_77;  value = _x2c_gensym_macro_cursor_output_78; {
@@ -5414,13 +5451,13 @@ static void _replay_package_imports(Compiler c, Map globs, Map rows, Array expor
 
       }
       if(! Array_len(imports)){
-        x2c_cleanup_leave(& _x2c_gensym_defer_record_44);
+        x2c_cleanup_leave(& _x2c_gensym_defer_record_45);
         return;
       }
       Array_sort(imports);
       f8_packages____import_all(c, globs, imports, exports);
     }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_44);
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_45);
   }
 
 }
@@ -5434,17 +5471,17 @@ void Sym_reset(Sym, Map);
 static void f8_packages____import_all(Compiler c, Map globs, Array imports, Array exports){
   Compiler shadow = Compiler_new_shared(c);
   {
-    _x2c_gensym_defer_env_41 _x2c_gensym_macro_environment_41 ={
+    _x2c_gensym_defer_env_42 _x2c_gensym_macro_environment_42 ={
       0
     }
     ;
-    _x2c_gensym_macro_environment_41._x2c_gensym_defer_capture_63 =(const void *) & c;
-    _x2c_gensym_macro_environment_41._x2c_gensym_defer_capture_64 =(const void *) & shadow;
-    X2CCleanup _x2c_gensym_defer_record_45 ={
-      .fn = _x2c_gensym_defer_cleanup_45, .env = & _x2c_gensym_macro_environment_41
+    _x2c_gensym_macro_environment_42._x2c_gensym_defer_capture_65 =(const void *) & c;
+    _x2c_gensym_macro_environment_42._x2c_gensym_defer_capture_66 =(const void *) & shadow;
+    X2CCleanup _x2c_gensym_defer_record_46 ={
+      .fn = _x2c_gensym_defer_cleanup_46, .env = & _x2c_gensym_macro_environment_42
     }
     ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_45);
+    x2c_cleanup_push(& _x2c_gensym_defer_record_46);
     {
       Compiler_take_unit_state(shadow, c);
       shadow -> builtin_defs = c -> builtin_defs;
@@ -5483,7 +5520,7 @@ static void f8_packages____import_all(Compiler c, Map globs, Array imports, Arra
       }
       Compiler_return_unit_state(shadow, c);  Compiler_merge_translation_dependencies(c, shadow -> deps);
     }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_45);
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_46);
   }
 
 }
@@ -5884,28 +5921,28 @@ String Compiler_interface_text(Compiler c){
   Buffer out = Buffer_new(0);
   const Buffer _x2c_gensym_macro_acquired_16 = out;
   {
-    _x2c_gensym_defer_env_42 _x2c_gensym_macro_environment_42 ={
+    _x2c_gensym_defer_env_43 _x2c_gensym_macro_environment_43 ={
       0
     }
     ;
-    _x2c_gensym_macro_environment_42._x2c_gensym_defer_capture_65 =(const void *) & _x2c_gensym_macro_acquired_16;
-    X2CCleanup _x2c_gensym_defer_record_46 ={
-      .fn = _x2c_gensym_defer_cleanup_46, .env = & _x2c_gensym_macro_environment_42
+    _x2c_gensym_macro_environment_43._x2c_gensym_defer_capture_67 =(const void *) & _x2c_gensym_macro_acquired_16;
+    X2CCleanup _x2c_gensym_defer_record_47 ={
+      .fn = _x2c_gensym_defer_cleanup_47, .env = & _x2c_gensym_macro_environment_43
     }
     ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_46);
+    x2c_cleanup_push(& _x2c_gensym_defer_record_47);
     {
       if(f10_interfaces____write_interface_entry(out, canonical, Var_list_payload(cached))){
         String _x2c_gensym_return_value_22 = Buffer_str(out);
         {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_46);
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_47);
           return _x2c_gensym_return_value_22;
         }
 
       }
       Compiler_report_error(c, 354920, _375, NULL, NULL);
     }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_46);
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_47);
   }
 
 }
@@ -6113,40 +6150,43 @@ Map Compiler_linked_prelude_records(Compiler c){
   walker -> include_dirs = c -> include_dirs;
   walker -> filename = c -> filename;
   {
-    String * _x2c_gensym_macro_address_17 = & f10_interfaces___interface_mirror;
-    String _x2c_gensym_macro_previous_17 = * _x2c_gensym_macro_address_17;
+    String * _x2c_gensym_macro_address_18 = & f10_interfaces___interface_mirror;
+    String _x2c_gensym_macro_previous_18 = * _x2c_gensym_macro_address_18;
     {
-      _x2c_gensym_defer_env_43 _x2c_gensym_macro_environment_43 ={
+      _x2c_gensym_defer_env_44 _x2c_gensym_macro_environment_44 ={
         0
       }
       ;
-      _x2c_gensym_macro_environment_43._x2c_gensym_defer_capture_66 =(const void *) & _x2c_gensym_macro_address_17;
-      _x2c_gensym_macro_environment_43._x2c_gensym_defer_capture_67 =(const void *) & _x2c_gensym_macro_previous_17;
-      X2CCleanup _x2c_gensym_defer_record_47 ={
-        .fn = _x2c_gensym_defer_cleanup_47, .env = & _x2c_gensym_macro_environment_43
+      _x2c_gensym_macro_environment_44._x2c_gensym_defer_capture_68 =(const void *) & _x2c_gensym_macro_address_18;
+      _x2c_gensym_macro_environment_44._x2c_gensym_defer_capture_69 =(const void *) & _x2c_gensym_macro_previous_18;
+      X2CCleanup _x2c_gensym_defer_record_48 ={
+        .fn = _x2c_gensym_defer_cleanup_48, .env = & _x2c_gensym_macro_environment_44
       }
       ;
-      x2c_cleanup_push(& _x2c_gensym_defer_record_47);
+      x2c_cleanup_push(& _x2c_gensym_defer_record_48);
       {
-        * _x2c_gensym_macro_address_17 = NULL;
+        * _x2c_gensym_macro_address_18 = NULL;
         {
-          String source;
-          List _x2c_gensym_macro_object_111 = f10_interfaces____linked_prelude_sources();
-          List _x2c_gensym_macro_cursor_115 = _x2c_gensym_macro_object_111;
-          Var _x2c_gensym_macro_cursor_output_96;
-          while(List_try_next(_x2c_gensym_macro_object_111, &(_x2c_gensym_macro_cursor_115), &(_x2c_gensym_macro_cursor_output_96))){
-            source = Var_as_string(_x2c_gensym_macro_cursor_output_96);
-            {
-              String path =({
-                Var _x2c_gensym_literal_part_59 = String_var(x2c_get_root());  String_join(NULL, cons(_x2c_gensym_literal_part_59, cons(String_var(_34), cons(String_var(source), NULL))));
+          {
+            String source;
+            List _x2c_gensym_macro_object_111 = f10_interfaces____linked_prelude_sources();
+            List _x2c_gensym_macro_cursor_115 = _x2c_gensym_macro_object_111;
+            Var _x2c_gensym_macro_cursor_output_96;
+            while(List_try_next(_x2c_gensym_macro_object_111, &(_x2c_gensym_macro_cursor_115), &(_x2c_gensym_macro_cursor_output_96))){
+              source = Var_as_string(_x2c_gensym_macro_cursor_output_96);
+              {
+                String path =({
+                  Var _x2c_gensym_literal_part_59 = String_var(x2c_get_root());  String_join(NULL, cons(_x2c_gensym_literal_part_59, cons(String_var(_34), cons(String_var(source), NULL))));
+                }
+                );
+                String canonical = _canonical_path(path);
+                Map visited = Map_new();
+                Map_setindex(visited, String_var(canonical), int_var(1));
+                _walk_apart(walker, canonical, _runtime_text(walker, path), Map_new(), visited);
+                String text = f10_interfaces____record_text(f10_interfaces____stored_record(canonical, Var_list_payload(Map_getindex(_process_cache(), String_var(canonical)))));
+                if(String_truth(text)) Map_setindex(records, String_var(Compiler_portable_path(canonical)), String_var(text));
               }
-              );
-              String canonical = _canonical_path(path);
-              Map visited = Map_new();
-              Map_setindex(visited, String_var(canonical), int_var(1));
-              _walk_apart(walker, canonical, _runtime_text(walker, path), Map_new(), visited);
-              String text = f10_interfaces____record_text(f10_interfaces____stored_record(canonical, Var_list_payload(Map_getindex(_process_cache(), String_var(canonical)))));
-              if(String_truth(text)) Map_setindex(records, String_var(Compiler_portable_path(canonical)), String_var(text));
+
             }
 
           }
@@ -6154,7 +6194,7 @@ Map Compiler_linked_prelude_records(Compiler c){
         }
 
       }
-      x2c_cleanup_leave(& _x2c_gensym_defer_record_47);
+      x2c_cleanup_leave(& _x2c_gensym_defer_record_48);
     }
 
   }
@@ -6182,15 +6222,15 @@ static List f10_interfaces____linked_record(String canonical){
       Scope_push(& process_cache_scope);
       {
         {
-          X2CCleanup _x2c_gensym_defer_record_48 ={
-            .fn = _x2c_gensym_defer_cleanup_48, .env = 0
+          X2CCleanup _x2c_gensym_defer_record_49 ={
+            .fn = _x2c_gensym_defer_cleanup_49, .env = 0
           }
           ;
-          x2c_cleanup_push(& _x2c_gensym_defer_record_48);
+          x2c_cleanup_push(& _x2c_gensym_defer_record_49);
           {
             linked_records = Map_update_n(Map_new(), 14, _44, _387, _46, _389, _48, _391, _50, _393, _52, _395, _54, _397, _56, _399, _58, _401, _60, _403, _62, _405, _64, _407, _66, _409, _68, _411, _70, _413);
           }
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_48);
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_49);
         }
 
       }
@@ -6211,21 +6251,21 @@ static String f10_interfaces____record_text(List record){
   Buffer out = Buffer_new(0);
   const Buffer _x2c_gensym_macro_acquired_17 = out;
   {
-    _x2c_gensym_defer_env_44 _x2c_gensym_macro_environment_44 ={
+    _x2c_gensym_defer_env_45 _x2c_gensym_macro_environment_45 ={
       0
     }
     ;
-    _x2c_gensym_macro_environment_44._x2c_gensym_defer_capture_68 =(const void *) & _x2c_gensym_macro_acquired_17;
-    X2CCleanup _x2c_gensym_defer_record_49 ={
-      .fn = _x2c_gensym_defer_cleanup_49, .env = & _x2c_gensym_macro_environment_44
+    _x2c_gensym_macro_environment_45._x2c_gensym_defer_capture_70 =(const void *) & _x2c_gensym_macro_acquired_17;
+    X2CCleanup _x2c_gensym_defer_record_50 ={
+      .fn = _x2c_gensym_defer_cleanup_50, .env = & _x2c_gensym_macro_environment_45
     }
     ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_49);
+    x2c_cleanup_push(& _x2c_gensym_defer_record_50);
     {
       if(datum_write(out, List_var(record), 0)){
         String _x2c_gensym_return_value_23 = Buffer_str(out);
         {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_49);
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_50);
           return _x2c_gensym_return_value_23;
         }
 
@@ -6233,14 +6273,14 @@ static String f10_interfaces____record_text(List record){
       {
         String _x2c_gensym_return_value_24 = NULL;
         {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_49);
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_50);
           return _x2c_gensym_return_value_24;
         }
 
       }
 
     }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_49);
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_50);
   }
 
 }
@@ -6364,66 +6404,66 @@ static void _x2c_gensym_defer_cleanup_23(void * _x2c_gensym_defer_opaque_23){
 
 static void _x2c_gensym_defer_cleanup_24(void * _x2c_gensym_defer_opaque_24){
   _x2c_gensym_defer_env_21 * _x2c_gensym_defer_data_21 =(_x2c_gensym_defer_env_21 *) _x2c_gensym_defer_opaque_24;
-  Array_cleanup((*(const Array *) _x2c_gensym_defer_data_21->_x2c_gensym_defer_capture_37));
+  *(*(Token * *) _x2c_gensym_defer_data_21->_x2c_gensym_defer_capture_37) =(*(Token *) _x2c_gensym_defer_data_21->_x2c_gensym_defer_capture_38);
 }
 
 static void _x2c_gensym_defer_cleanup_25(void * _x2c_gensym_defer_opaque_25){
   _x2c_gensym_defer_env_22 * _x2c_gensym_defer_data_22 =(_x2c_gensym_defer_env_22 *) _x2c_gensym_defer_opaque_25;
-  Array_cleanup((*(const Array *) _x2c_gensym_defer_data_22->_x2c_gensym_defer_capture_38));
+  Array_cleanup((*(const Array *) _x2c_gensym_defer_data_22->_x2c_gensym_defer_capture_39));
 }
 
 static void _x2c_gensym_defer_cleanup_26(void * _x2c_gensym_defer_opaque_26){
   _x2c_gensym_defer_env_23 * _x2c_gensym_defer_data_23 =(_x2c_gensym_defer_env_23 *) _x2c_gensym_defer_opaque_26;
-  Array_cleanup((*(const Array *) _x2c_gensym_defer_data_23->_x2c_gensym_defer_capture_39));
+  Array_cleanup((*(const Array *) _x2c_gensym_defer_data_23->_x2c_gensym_defer_capture_40));
 }
 
 static void _x2c_gensym_defer_cleanup_27(void * _x2c_gensym_defer_opaque_27){
-  Scope_pop();
+  _x2c_gensym_defer_env_24 * _x2c_gensym_defer_data_24 =(_x2c_gensym_defer_env_24 *) _x2c_gensym_defer_opaque_27;
+  Array_cleanup((*(const Array *) _x2c_gensym_defer_data_24->_x2c_gensym_defer_capture_41));
 }
 
 static void _x2c_gensym_defer_cleanup_28(void * _x2c_gensym_defer_opaque_28){
-  _x2c_gensym_defer_env_24 * _x2c_gensym_defer_data_24 =(_x2c_gensym_defer_env_24 *) _x2c_gensym_defer_opaque_28;
-  if((*(f12_declarations___ColdConformances *) _x2c_gensym_defer_data_24->_x2c_gensym_defer_capture_40).prelude_session) Compiler_close_child((*(Compiler *) _x2c_gensym_defer_data_24->_x2c_gensym_defer_capture_41), (*(f12_declarations___ColdConformances *) _x2c_gensym_defer_data_24->_x2c_gensym_defer_capture_40).prelude_session);
+  Scope_pop();
 }
 
 static void _x2c_gensym_defer_cleanup_29(void * _x2c_gensym_defer_opaque_29){
   _x2c_gensym_defer_env_25 * _x2c_gensym_defer_data_25 =(_x2c_gensym_defer_env_25 *) _x2c_gensym_defer_opaque_29;
-  Compiler_close_child((*(*(f12_declarations___ColdConformances * *) _x2c_gensym_defer_data_25->_x2c_gensym_defer_capture_42)).c, (*(Compiler *) _x2c_gensym_defer_data_25->_x2c_gensym_defer_capture_43));
+  if((*(f12_declarations___ColdConformances *) _x2c_gensym_defer_data_25->_x2c_gensym_defer_capture_42).prelude_session) Compiler_close_child((*(Compiler *) _x2c_gensym_defer_data_25->_x2c_gensym_defer_capture_43), (*(f12_declarations___ColdConformances *) _x2c_gensym_defer_data_25->_x2c_gensym_defer_capture_42).prelude_session);
 }
 
 static void _x2c_gensym_defer_cleanup_30(void * _x2c_gensym_defer_opaque_30){
   _x2c_gensym_defer_env_26 * _x2c_gensym_defer_data_26 =(_x2c_gensym_defer_env_26 *) _x2c_gensym_defer_opaque_30;
-  Array_cleanup((*(const Array *) _x2c_gensym_defer_data_26->_x2c_gensym_defer_capture_44));
+  Compiler_close_child((*(*(f12_declarations___ColdConformances * *) _x2c_gensym_defer_data_26->_x2c_gensym_defer_capture_44)).c, (*(Compiler *) _x2c_gensym_defer_data_26->_x2c_gensym_defer_capture_45));
 }
 
 static void _x2c_gensym_defer_cleanup_31(void * _x2c_gensym_defer_opaque_31){
   _x2c_gensym_defer_env_27 * _x2c_gensym_defer_data_27 =(_x2c_gensym_defer_env_27 *) _x2c_gensym_defer_opaque_31;
-  Array_cleanup((*(const Array *) _x2c_gensym_defer_data_27->_x2c_gensym_defer_capture_45));
+  Array_cleanup((*(const Array *) _x2c_gensym_defer_data_27->_x2c_gensym_defer_capture_46));
 }
 
 static void _x2c_gensym_defer_cleanup_32(void * _x2c_gensym_defer_opaque_32){
   _x2c_gensym_defer_env_28 * _x2c_gensym_defer_data_28 =(_x2c_gensym_defer_env_28 *) _x2c_gensym_defer_opaque_32;
-  Array_cleanup((*(const Array *) _x2c_gensym_defer_data_28->_x2c_gensym_defer_capture_46));
+  Array_cleanup((*(const Array *) _x2c_gensym_defer_data_28->_x2c_gensym_defer_capture_47));
 }
 
 static void _x2c_gensym_defer_cleanup_33(void * _x2c_gensym_defer_opaque_33){
   _x2c_gensym_defer_env_29 * _x2c_gensym_defer_data_29 =(_x2c_gensym_defer_env_29 *) _x2c_gensym_defer_opaque_33;
-  Array_cleanup((*(const Array *) _x2c_gensym_defer_data_29->_x2c_gensym_defer_capture_47));
+  Array_cleanup((*(const Array *) _x2c_gensym_defer_data_29->_x2c_gensym_defer_capture_48));
 }
 
 static void _x2c_gensym_defer_cleanup_34(void * _x2c_gensym_defer_opaque_34){
   _x2c_gensym_defer_env_30 * _x2c_gensym_defer_data_30 =(_x2c_gensym_defer_env_30 *) _x2c_gensym_defer_opaque_34;
-  Array_cleanup((*(const Array *) _x2c_gensym_defer_data_30->_x2c_gensym_defer_capture_48));
+  Array_cleanup((*(const Array *) _x2c_gensym_defer_data_30->_x2c_gensym_defer_capture_49));
 }
 
 static void _x2c_gensym_defer_cleanup_35(void * _x2c_gensym_defer_opaque_35){
   _x2c_gensym_defer_env_31 * _x2c_gensym_defer_data_31 =(_x2c_gensym_defer_env_31 *) _x2c_gensym_defer_opaque_35;
-  Array_cleanup((*(const Array *) _x2c_gensym_defer_data_31->_x2c_gensym_defer_capture_49));
+  Array_cleanup((*(const Array *) _x2c_gensym_defer_data_31->_x2c_gensym_defer_capture_50));
 }
 
 static void _x2c_gensym_defer_cleanup_36(void * _x2c_gensym_defer_opaque_36){
   _x2c_gensym_defer_env_32 * _x2c_gensym_defer_data_32 =(_x2c_gensym_defer_env_32 *) _x2c_gensym_defer_opaque_36;
-  *(*(int * *) _x2c_gensym_defer_data_32->_x2c_gensym_defer_capture_50) =(*(int *) _x2c_gensym_defer_data_32->_x2c_gensym_defer_capture_51);
+  Array_cleanup((*(const Array *) _x2c_gensym_defer_data_32->_x2c_gensym_defer_capture_51));
 }
 
 static void _x2c_gensym_defer_cleanup_37(void * _x2c_gensym_defer_opaque_37){
@@ -6438,56 +6478,61 @@ static void _x2c_gensym_defer_cleanup_38(void * _x2c_gensym_defer_opaque_38){
 
 static void _x2c_gensym_defer_cleanup_39(void * _x2c_gensym_defer_opaque_39){
   _x2c_gensym_defer_env_35 * _x2c_gensym_defer_data_35 =(_x2c_gensym_defer_env_35 *) _x2c_gensym_defer_opaque_39;
-  Map_cleanup((*(const Map *) _x2c_gensym_defer_data_35->_x2c_gensym_defer_capture_56));
+  *(*(int * *) _x2c_gensym_defer_data_35->_x2c_gensym_defer_capture_56) =(*(int *) _x2c_gensym_defer_data_35->_x2c_gensym_defer_capture_57);
 }
 
 static void _x2c_gensym_defer_cleanup_40(void * _x2c_gensym_defer_opaque_40){
   _x2c_gensym_defer_env_36 * _x2c_gensym_defer_data_36 =(_x2c_gensym_defer_env_36 *) _x2c_gensym_defer_opaque_40;
-  Map_cleanup((*(Map *) _x2c_gensym_defer_data_36->_x2c_gensym_defer_capture_57));
+  Map_cleanup((*(const Map *) _x2c_gensym_defer_data_36->_x2c_gensym_defer_capture_58));
 }
 
 static void _x2c_gensym_defer_cleanup_41(void * _x2c_gensym_defer_opaque_41){
   _x2c_gensym_defer_env_37 * _x2c_gensym_defer_data_37 =(_x2c_gensym_defer_env_37 *) _x2c_gensym_defer_opaque_41;
-  Map_cleanup((*(Map *) _x2c_gensym_defer_data_37->_x2c_gensym_defer_capture_58));
+  Map_cleanup((*(Map *) _x2c_gensym_defer_data_37->_x2c_gensym_defer_capture_59));
 }
 
 static void _x2c_gensym_defer_cleanup_42(void * _x2c_gensym_defer_opaque_42){
   _x2c_gensym_defer_env_38 * _x2c_gensym_defer_data_38 =(_x2c_gensym_defer_env_38 *) _x2c_gensym_defer_opaque_42;
-  Compiler_close_child((*(Compiler *) _x2c_gensym_defer_data_38->_x2c_gensym_defer_capture_59), (*(Compiler *) _x2c_gensym_defer_data_38->_x2c_gensym_defer_capture_60));
+  Map_cleanup((*(Map *) _x2c_gensym_defer_data_38->_x2c_gensym_defer_capture_60));
 }
 
 static void _x2c_gensym_defer_cleanup_43(void * _x2c_gensym_defer_opaque_43){
   _x2c_gensym_defer_env_39 * _x2c_gensym_defer_data_39 =(_x2c_gensym_defer_env_39 *) _x2c_gensym_defer_opaque_43;
-  Array_cleanup((*(const Array *) _x2c_gensym_defer_data_39->_x2c_gensym_defer_capture_61));
+  Compiler_close_child((*(Compiler *) _x2c_gensym_defer_data_39->_x2c_gensym_defer_capture_61), (*(Compiler *) _x2c_gensym_defer_data_39->_x2c_gensym_defer_capture_62));
 }
 
 static void _x2c_gensym_defer_cleanup_44(void * _x2c_gensym_defer_opaque_44){
   _x2c_gensym_defer_env_40 * _x2c_gensym_defer_data_40 =(_x2c_gensym_defer_env_40 *) _x2c_gensym_defer_opaque_44;
-  if(Array_truth((*(Array *) _x2c_gensym_defer_data_40->_x2c_gensym_defer_capture_62))) Array_free((*(Array *) _x2c_gensym_defer_data_40->_x2c_gensym_defer_capture_62));
+  Array_cleanup((*(const Array *) _x2c_gensym_defer_data_40->_x2c_gensym_defer_capture_63));
 }
 
 static void _x2c_gensym_defer_cleanup_45(void * _x2c_gensym_defer_opaque_45){
   _x2c_gensym_defer_env_41 * _x2c_gensym_defer_data_41 =(_x2c_gensym_defer_env_41 *) _x2c_gensym_defer_opaque_45;
-  Compiler_close_child((*(Compiler *) _x2c_gensym_defer_data_41->_x2c_gensym_defer_capture_63), (*(Compiler *) _x2c_gensym_defer_data_41->_x2c_gensym_defer_capture_64));
+  if(Array_truth((*(Array *) _x2c_gensym_defer_data_41->_x2c_gensym_defer_capture_64))) Array_free((*(Array *) _x2c_gensym_defer_data_41->_x2c_gensym_defer_capture_64));
 }
 
 static void _x2c_gensym_defer_cleanup_46(void * _x2c_gensym_defer_opaque_46){
   _x2c_gensym_defer_env_42 * _x2c_gensym_defer_data_42 =(_x2c_gensym_defer_env_42 *) _x2c_gensym_defer_opaque_46;
-  Buffer_cleanup((*(const Buffer *) _x2c_gensym_defer_data_42->_x2c_gensym_defer_capture_65));
+  Compiler_close_child((*(Compiler *) _x2c_gensym_defer_data_42->_x2c_gensym_defer_capture_65), (*(Compiler *) _x2c_gensym_defer_data_42->_x2c_gensym_defer_capture_66));
 }
 
 static void _x2c_gensym_defer_cleanup_47(void * _x2c_gensym_defer_opaque_47){
   _x2c_gensym_defer_env_43 * _x2c_gensym_defer_data_43 =(_x2c_gensym_defer_env_43 *) _x2c_gensym_defer_opaque_47;
-  *(*(String * *) _x2c_gensym_defer_data_43->_x2c_gensym_defer_capture_66) =(*(String *) _x2c_gensym_defer_data_43->_x2c_gensym_defer_capture_67);
+  Buffer_cleanup((*(const Buffer *) _x2c_gensym_defer_data_43->_x2c_gensym_defer_capture_67));
 }
 
 static void _x2c_gensym_defer_cleanup_48(void * _x2c_gensym_defer_opaque_48){
-  Scope_pop();
+  _x2c_gensym_defer_env_44 * _x2c_gensym_defer_data_44 =(_x2c_gensym_defer_env_44 *) _x2c_gensym_defer_opaque_48;
+  *(*(String * *) _x2c_gensym_defer_data_44->_x2c_gensym_defer_capture_68) =(*(String *) _x2c_gensym_defer_data_44->_x2c_gensym_defer_capture_69);
 }
 
 static void _x2c_gensym_defer_cleanup_49(void * _x2c_gensym_defer_opaque_49){
-  _x2c_gensym_defer_env_44 * _x2c_gensym_defer_data_44 =(_x2c_gensym_defer_env_44 *) _x2c_gensym_defer_opaque_49;
-  Buffer_cleanup((*(const Buffer *) _x2c_gensym_defer_data_44->_x2c_gensym_defer_capture_68));
+  Scope_pop();
+}
+
+static void _x2c_gensym_defer_cleanup_50(void * _x2c_gensym_defer_opaque_50){
+  _x2c_gensym_defer_env_45 * _x2c_gensym_defer_data_45 =(_x2c_gensym_defer_env_45 *) _x2c_gensym_defer_opaque_50;
+  Buffer_cleanup((*(const Buffer *) _x2c_gensym_defer_data_45->_x2c_gensym_defer_capture_70));
 }
 
 #undef _x2c_gensym_initializer_choice_AB859D04_0_expanded

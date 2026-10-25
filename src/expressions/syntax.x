@@ -642,21 +642,21 @@ static List _parse_ident_primary(Compiler c) {
     if (c.macro_holes) return %(expr ("Macro") (macro-value $definition));
     return c.capture_macro_value(definition);
   }
-  List binding = c.with_binding();
-  Var stored;
-  if (binding && c.semantic_binding_facts().try_get(
-    %(with $binding), stored)) {
-    List expression = stored;
+  /* An alias use is its parsed expression, already grouped as one operand,
+     so `(name)` stays the only source spelling of a parenthesized name. */
+  List alias = c.alias_expression();
+  if (alias) {
     c.next();
-    match (expression)
-      case %(expr ?type ?): return %(expr $type (parens $expression));
+    return alias;
   }
   List keyword = c.try_parse_macro_expression();
   if (keyword) return keyword;
-  if (c.token.text == "va_arg") return _parse_va_arg(c);
-  if (c.token.text == "_Generic") return _parse_generic(c);
-  if (c.token.text == "offsetof") return _parse_offsetof(c);
-  if (c.token.text == "_Alignof") return _parse_alignof(c);
+  switch (c.token.text) {
+    case "va_arg": return _parse_va_arg(c);
+    case "_Generic": return _parse_generic(c);
+    case "offsetof": return _parse_offsetof(c);
+    case "_Alignof": return _parse_alignof(c);
+  }
   return c.parse_variable();
 }
 

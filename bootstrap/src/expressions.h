@@ -47,6 +47,8 @@ List Compiler_var_tag_expression(Compiler c, Type target, Token origin);
 
 List Compiler_resolve_map_entry(Compiler c, List input, Token origin);
 
+void Compiler_reveal_binding(Compiler c, List binding);
+
 List _x2c_nominal_getindex(Compiler c, Type type);
 
 List Compiler_resolve_postfix_member(Compiler c, Type receiver_type, List field, Symbol access, int call_context);

@@ -49,7 +49,7 @@ void Compiler.report_meta_error(
   List notes, int fatal) {
   int origin = _syntax_origin(node);
   Token token = origin ? NULL : site;
-  $let(c.origin, origin ? origin : c.origin) {
+  with (c.origin = origin ? origin : c.origin) {
     if (fatal) c.report_error(category, message, token, notes);
     c.report_problem(category, message, token, notes);
   }

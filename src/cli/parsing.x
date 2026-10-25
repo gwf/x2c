@@ -497,9 +497,11 @@ static void _apply(Parse &p, Given given) {
 static Symbol _color_mode(String value) {
   if (!value)
     Diagnostics.driver_error("--color requires auto, always, or never");
-  if (value == "auto") return <auto>;
-  if (value == "always") return <always>;
-  if (value == "never") return <never>;
+  switch (value) {
+    case "auto": return <auto>;
+    case "always": return <always>;
+    case "never": return <never>;
+  }
   $fail.cli_color_invalid(value);
 }
 

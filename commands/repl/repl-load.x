@@ -493,10 +493,11 @@ static Var _helper_run(
   DiagnosticsHold hold = c.diagnostics.hold();
   Var value = void;
   try {
-    $let(c.meta_helper, call.session.helper)
+    with (c.meta_helper = call.session.helper) {
       value = operation == <load-call>
         ? c.loaded_helper_call(call.name, c.token, arguments, call.file.path)
         : c.meta_helper_call(call.name, c.token, arguments, call.file.path);
+    }
   }
   catch %(malformed *): {
     List failure = NULL;

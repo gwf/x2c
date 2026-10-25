@@ -44,7 +44,7 @@ static List _parse_meta_call(Compiler c, Token invocation) {
   /* A meta function is called by its compile-time binding, even from a
      template, whose other free names bind where the expansion lands. */
   List callee = NULL;
-  $let(c.macro_holes, NULL) callee = c.parse_variable();
+  with (c.macro_holes = NULL) { callee = c.parse_variable(); }
   Type signature = callee.cadr();
   if (!signature.is_function()) {
     c.token = invocation;

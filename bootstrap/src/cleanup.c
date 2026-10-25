@@ -898,7 +898,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _525 = cons(_521, _524);
   _526 = List_var(_525);
   _527 = Symbol_var(805770);
-  _528 = int_var(487);
+  _528 = int_var(489);
   _529 = cons(_528, NULL);
   _530 = cons(_527, _529);
   _531 = List_var(_530);
@@ -912,7 +912,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _539 = cons(_537, _538);
   _540 = List_var(_539);
   _541 = Symbol_var(1133019155420);
-  _542 = int_var(20112);
+  _542 = int_var(20132);
   _543 = cons(_542, NULL);
   _544 = cons(_541, _543);
   _545 = List_var(_544);
@@ -1328,7 +1328,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _955 = cons(_1, _814);
   _956 = List_var(_955);
   _957 = Symbol_var(106239471489226);
-  _958 = int_var(1272);
+  _958 = int_var(1274);
   _959 = String_new("");
   _960 = String_var(_959);
   _961 = Symbol_var(13528008);
@@ -1336,7 +1336,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _963 = List_var(_813);
   _964 = cons(_566, _813);
   _965 = List_var(_964);
-  _966 = int_var(1279);
+  _966 = int_var(1281);
 }
 
 static Array f9_transfers____expression_blocks(List expression){
@@ -1498,10 +1498,13 @@ static List f9_transfers____lower_function(Compiler c, List node){
               {
                 * _x2c_gensym_macro_address_0 = Type_list(Ast_declared_return(declaration));
                 {
-                  List _x2c_gensym_return_value_2 = f9_transfers____lowered_function(c, Var_list_payload(type), Var_list_payload(bindings), Var_list_payload(body));
                   {
-                    x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
-                    return _x2c_gensym_return_value_2;
+                    List _x2c_gensym_return_value_2 = f9_transfers____lowered_function(c, Var_list_payload(type), Var_list_payload(bindings), Var_list_payload(body));
+                    {
+                      x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
+                      return _x2c_gensym_return_value_2;
+                    }
+
                   }
 
                 }
@@ -1989,7 +1992,10 @@ static void f9_transfers____report_at(f9_transfers___Walk * w, int origin, Strin
         .fn = _x2c_gensym_defer_cleanup_5, .env = & _x2c_gensym_macro_environment_5
       }
       ;  x2c_cleanup_push(& _x2c_gensym_defer_record_5); {
-        * _x2c_gensym_macro_address_1 = origin;  Compiler_report_error((* w).c, 354920, message, NULL, note);
+        * _x2c_gensym_macro_address_1 = origin; {
+          Compiler_report_error((* w).c, 354920, message, NULL, note);
+        }
+
       }
       x2c_cleanup_leave(& _x2c_gensym_defer_record_5);
     }

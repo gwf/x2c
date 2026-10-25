@@ -23,7 +23,13 @@ void Sym_push_scope(Sym s, SymScope scope);
 
 SymScope Sym_pop_scope(Sym s);
 
+int Sym_declaring_scope(Sym s, List key);
+
 int Sym_scope_count(Sym s);
+
+int Sym_base_scope_count(Sym s);
+
+int Sym_has_aliases(Sym s);
 
 int Sym_at_file_scope(Sym s);
 
@@ -58,6 +64,10 @@ int Compiler_macro_template_local(Compiler c, List binding);
 void Sym_set(Sym s, List key, List type);
 
 List Sym_define(Sym s, List key, List type);
+
+List Sym_define_alias(Sym s, String name, List expression);
+
+void Sym_undefine_alias(Sym s, String name);
 
 void Sym_seed_var_tags(Sym s, Map symbols);
 

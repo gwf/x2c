@@ -1501,7 +1501,10 @@ Buffer List_write_str(List lst, Buffer out){
       x2c_exception_push(& _x2c_gensym_exception_frame_0);
       if(! sigsetjmp(_x2c_gensym_exception_frame_0.env, 0)){
         * _x2c_gensym_macro_address_0 = 1;
-        f9_rendering____value(&(r), List_var(lst));
+        {
+          f9_rendering____value(&(r), List_var(lst));
+        }
+
       }
       else{
         x2c_exception_landed(& _x2c_gensym_exception_frame_0);

@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/alias-governed.x:5:14: parse: alias declaration cannot be the body of a statement
+    if (value) alias value as copy;
+               ^^^^^
+  note: give the alias a braced body
+

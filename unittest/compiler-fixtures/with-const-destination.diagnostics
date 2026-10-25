@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/with-const-destination.x:5:3: type: cannot convert (* const int) to (* int)
+    with (limit = 2) {
+    ^^^^
+  note: the target drops a type qualifier the source declares: spell the qualifier in the target, or copy the value
+
