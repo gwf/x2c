@@ -2,8 +2,6 @@
 #pragma once
 #include "lisp/lisp.x"
 
-macro Expression $repl.values() =>
-  $x2c_embed_text("../../etc/lisp-values.xlisp");
 macro Expression $repl.runtime() =>
   $x2c_embed_text("repl-runtime.xlisp");
 
@@ -266,7 +264,6 @@ void repl_runtime_initialize(Lisp lisp) {
     x2c_func_value_argument);
   $lisp.bind(lisp, "repl.native.x2c_func_pointer_argument",
     x2c_func_pointer_argument);
-  lisp.eval_string($repl.values());
   lisp.eval_string($repl.runtime());
   lisp.eval_string("(def C.globals (Map.new))");
 }

@@ -4602,9 +4602,8 @@ value, as the library documents.
 
 An operation whose parameters or result have no `Var` representation is not
 available, which excludes `Iter` cursors, pointer out-parameters, variadic
-entry points, and `char *` parameters. The REPL loads these names into its
-session; a program embedding its own session loads them from
-`etc/lisp-values.xlisp`.
+entry points, and `char *` parameters. `Lisp.new()` loads these names from
+`etc/init.xlisp` for both the REPL and other embedding programs.
 
 ## Diagnostics
 

@@ -180,10 +180,9 @@ the repository root:
 ```
 
 It loads `etc/init.xlisp` by default; `--init FILE` or `X2C_LISP_INIT` selects
-another environment. `etc/lisp-values.xlisp` names the core
-`List`, `Array`, `Map`, `String`, `Var`, and `Symbol` operations, and
-`etc/lisp-io.xlisp` provides optional file operations and small list
-algorithms.
+another environment. The default includes the core `List`, `Array`, `Map`,
+`String`, `Iter`, `Var`, and `Symbol` operations, file operations, and
+small list algorithms.
 
 [programs/mandelbrot.x](programs/mandelbrot.x) renders a deep zoom on native
 threads. [tours/language.x](tours/language.x) is a broader language tour;

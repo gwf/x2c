@@ -122,7 +122,7 @@ static macro Expression $lisp.native.target.map() =>
 
   // The core value types: their operations are the library's own, so a
   // Lisp session and a compiled program build the same List, String, Map,
-  // and Array. `etc/lisp-values.xlisp` names them.
+  // and Array. `etc/init.xlisp` names them.
   (String_truth)
   (Var_list)
   (Var_array)

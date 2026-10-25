@@ -252,11 +252,10 @@ supplies `defun`, short-circuit control, higher-order `List` operations,
 numeric comparisons, basic `String` operations, and the pattern matching
 described in [the language reference][lisp]. `Lisp.kernel()` creates the
 evaluator primitives alone, for hosts that build their own environment.
-`etc/lisp-values.xlisp` binds the core `List`, `Array`, `Map`, `String`,
-`Var`, and `Symbol` operations; the REPL loads it into its session, and an
-embedding host loads it by name.
-`etc/lisp-io.xlisp` stays optional and must be loaded by name. It adds
-`read-file`, `write-file`, `sort`, `fib`, and `subst`.
+The same standard environment includes the core `List`, `Array`, `Map`,
+`String`, `Iter`, `Var`, and `Symbol` operations, plus `read-file`,
+`write-file`, `sort`, `fib`, and `subst`. The REPL uses this environment
+through `Lisp.new()`; embedding hosts need no additional standard files.
 
 [lisp]: ../reference/language.md#runtime-lisp
 

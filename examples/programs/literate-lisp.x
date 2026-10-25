@@ -685,9 +685,9 @@ static void _install_natives(Interp &self) {
     (_string-append  "lisp_string_append"    ${Func.var(_string_append)})
     (substring       "lisp_substring"        ${Func.var(_substring)})
     (string-downcase "lisp_string_downcase"  ${Func.var(_string_downcase)})
-    (()              "lisp_read_file"        ${Func.var(_read_file)})            // No global name; available via bind.
-    (()              "lisp_write_file"       ${Func.var(_write_file)})
-    (()              "List_sort"             ${Func.var(List.sort)})
+    (read-file       "lisp_read_file"        ${Func.var(_read_file)})            // Available directly and via bind.
+    (write-file      "lisp_write_file"       ${Func.var(_write_file)})
+    (sort            "List_sort"             ${Func.var(List.sort)})
   );
   foreach (List row in natives) {                                                  // Typed List traversal.
     (Var name, String symbol, Func fn) = row;                                    // Convert each positional binding.
@@ -819,6 +819,18 @@ static List _stdlib = %(                                                        
   (def len length)                                                               // Name binding preserves identity.
   (def reduce foldl)                                                             // Higher-order function as a value.
   (def lower string-downcase)                                                    // Alias reuses the native function.
+  (def List_sort sort)                                                          // Alias the standard sort operation.
+
+  (defun fib (value)                                                            // Recursive numeric example.
+    (if (or (= value 0) (= value 1))
+        value
+        (+ (fib (- value 2)) (fib (- value 1)))))
+
+  (defun subst (replacement target tree)                                        // Replace matching atoms recursively.
+    (if (atom? tree)
+        (if (equal? tree target) replacement tree)
+        (cons (subst replacement target (car tree))
+              (subst replacement target (cdr tree)))))
 );
 
 /* Completing a session ------------------------------------------------------------------------------------------------

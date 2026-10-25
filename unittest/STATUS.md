@@ -42,6 +42,16 @@ warning policy is unchanged. See the
 [CLI plan](../plans/archive/build-cli-defaults.md) for the retained verification
 evidence.
 
+## Reference Lisp diagnostic mismatch
+
+On 2026-10-25, the optional `examples/programs/check-reference-lisp --build`
+comparison agrees on 199 of 200 cases. The `lists` case passes `(car nil)`
+to `list`: the runtime reports `(void-op (operation "apply") (index 0))`,
+while the independent reference interpreter reports `(void-op)`.
+The runtime produces the same diagnostic with the original `init.xlisp`
+from `27dd8c6c2`, before standard-environment consolidation. Diagnostic
+parity remains a separate follow-up; the expectations were not weakened.
+
 ## Coverage
 
 - On 2026-10-24, `tools/indent-convert --check` exposed an existing call to
