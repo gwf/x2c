@@ -31,9 +31,10 @@ macro Stmt $inferred(Name $name, Expr $value) { auto $name = $value; }
 macro Stmt $managed_value(Name $name, Expr $value) {
   Ticket $name = auto $value;
 }
+meta static List auto_declaration(String name, List value) =>
+  %((declare (auto) (bindings (op = (bind $name ()) $value))));
 macro Stmt $constructed_auto(Name $name, Expr $value) {
-  @(list (list 'declare '(auto)
-    (list 'bindings (list 'op '= (list 'bind $name nil) $value))))
+  @auto_declaration($name, $value)
 }
 
 static int successor(int value) { return value + 1; }

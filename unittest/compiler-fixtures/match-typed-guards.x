@@ -18,16 +18,19 @@ macro Stmt $typed_size(Type $T, Expr $subject, Name $result) {
     case %(?($T value)): $result = sizeof(value);
 }
 
+meta static List guarded_match(List subject, String result) {
+  return %((match $subject
+    (((*)
+      (guarded
+        (if (expr (int) (literal (int) "1"))
+          (block
+            (stmnt (expr () (op = (expr () (ident $result))
+              (expr (int) (literal (int) "7")))))
+            (break))))))));
+}
+
 macro Stmt $constructed_guard(Expr $subject, Name $result) {
-  @(list
-    `(match ,$subject
-      (((*)
-        (guarded
-          (if (expr (int) (literal (int) "1"))
-            (block
-              (stmnt (expr () (op = (expr () (ident ,$result))
-                (expr (int) (literal (int) "7")))))
-              (break))))))))
+  @guarded_match($subject, $result)
 }
 
 int main(void) {
