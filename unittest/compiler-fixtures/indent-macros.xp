@@ -1,8 +1,9 @@
 // Macros in the indentation syntax, selected by the .xp extension.
-$(defun indent-offset () 2)
+meta int indent_offset(void) => 2
+meta List indent_rows(List row) => %($row)
 
 macro Expression $indent.answer(Expr $base) =>
-  $base + $(indent-offset)
+  $base + $indent_offset()
 
 macro Decorator $indent.range(
   Stmt $body,
@@ -15,7 +16,7 @@ macro Decorator $indent.range(
     for (int $index = begin; $index < end; $index++): $body
 
 macro Stmt $indent.swap(Expr $left, Expr $right):
-  $(Code.type $left) temporary = $left
+  $Code.type($left) temporary = $left
   $left = $right
   $right = temporary
 
@@ -29,4 +30,4 @@ macro Stmt $indent.sequence(Stmt @rows):
 
 macro Stmt $indent.generated(Stmt $row):
   @indent.sequence($row)
-  @(list $row)
+  @indent_rows($row)
