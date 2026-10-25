@@ -24,7 +24,7 @@ The built-in macros' compile-time algorithms.
 Returns a fresh Map of built-in algorithms by their compile-time names.
 The Map borrows shared Func handles that live for the program.
 
-Source: `src/builtins.x:973`
+Source: `src/builtins.x:972`
 
 ## Design notes
 
