@@ -1,20 +1,26 @@
 #include "x2c.x"
 
-macro Expression $sequenced() => $(begin
-  (x2c.diagnostic.warn "sequence warning" (list "sequence note"))
-  (x2c.literal.int 7));
+meta static int sequenced(void) {
+  x2c_diagnostic_warn("sequence warning", %("sequence note"));
+  return 7;
+}
 
-macro Expression $nil_value() => $(x2c.literal.int
-  (if (null? (x2c.diagnostic.warn "nil warning" nil)) 1 0));
+meta static int nil_value(void) {
+  x2c_diagnostic_warn("nil warning", NULL);
+  return 1;
+}
 
-macro Expression $final_warning() => $(let
-  ((value (begin 9 (x2c.diagnostic.warn "final warning" nil))))
-  (x2c.literal.int (if (null? value) 1 0)));
+meta static int final_warning(void) {
+  int value = 9;
+  x2c_diagnostic_warn("final warning", NULL);
+  return value == 9;
+}
 
-macro Expression $two() => $(begin
-  (x2c.diagnostic.warn "first warning" (list "first note"))
-  (x2c.diagnostic.warn "second warning" (list "second note"))
-  (x2c.literal.int 11));
+meta static int two(void) {
+  x2c_diagnostic_warn("first warning", %("first note"));
+  x2c_diagnostic_warn("second warning", %("second note"));
+  return 11;
+}
 
 int main(void) {
   printf("%d %d %d %d\n", $sequenced(), $nil_value(), $final_warning(),

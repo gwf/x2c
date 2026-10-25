@@ -13,10 +13,10 @@ meta static int string_hashes(Map hashes) {
 }
 
 macro Expression $hash_present(Literal $key) =>
-  $(has_hash (x2c.meta.definition.hashes) (Code.value $key));
+  $has_hash($x2c_meta_definition_hashes(), $Code.value($key));
 
 macro Expression $hash_strings() =>
-  $(string_hashes (x2c.meta.definition.hashes));
+  $string_hashes($x2c_meta_definition_hashes());
 
 int main(void) {
   printf("%d %d %d %d %d\n",

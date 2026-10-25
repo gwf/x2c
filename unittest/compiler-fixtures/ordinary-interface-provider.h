@@ -6,5 +6,7 @@
 #define __GUARD_0x4BC6AA0A__
 
 #include "x2c.h"
+int ordinary_public_value(void);
+
 
 #endif /* __GUARD_0x4BC6AA0A__ */

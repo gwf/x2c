@@ -22,8 +22,8 @@ macro Unit $ordinary.install() {
   macro Expression $ordinary.generated_first() => 17;
   macro Expression $ordinary.generated_second() => 19;
 }
-$(def ordinary.public_value (lambda () 23))
-static $(defun ordinary.private_value () 29)
+meta int ordinary_public_value(void) => 23;
+meta static int ordinary_private_value(void) => 29;
 
 static macro Declaration $ordinary.complete_effects() {
   static typedef int OrdinaryEffectCompletion;

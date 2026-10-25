@@ -13,9 +13,11 @@ inline int ordinary_inline_value(int value) {
   return item.value;
 }
 
+meta static int field_count(Code value) =>
+  Type.fields(Code.type(value)).len();
+
 static macro Expression $ordinary.fields(Expr $value) =>
-  $(x2c.literal.int
-    (length (Type.fields (Code.type $value))));
+  $field_count($value);
 
 int main(void) {
   OrdinaryAlias visible = {{13}};
