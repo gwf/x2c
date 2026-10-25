@@ -97,7 +97,7 @@ file. Local and declaration-body aliases do not escape their lexical scope.
 
 ### Existing behavior and owners
 
-- [Built-in macros](../../etc/builtin-macros.x) implement `$let` with a captured
+- Built-in macros (`etc/builtin-macros.x`, since removed) implement `$let` with a captured
   address, saved value, assignment, and `defer`.
 - [Statement parsing](../../src/statements.x) implements current `with` aliases
   with a parsed expression, a lexical binding, and semantic binding facts.

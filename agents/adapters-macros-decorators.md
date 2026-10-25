@@ -534,7 +534,7 @@ machinery without a capability or ownership benefit.
 
 Status: superseded 2026-10-25; the compiler no longer evaluates Lisp
 Checked: 2026-08-02 at `d2a51d85`
-Owner: formerly `etc/compiler-sdk.xlisp`, now removed
+Owner: formerly the compiler-side Lisp SDK, now removed
 
 The Lisp literal builders `x2c.literal.string`, `x2c.literal.int`, and
 `x2c.literal.symbol` existed because compile-time Lisp had no quotation.

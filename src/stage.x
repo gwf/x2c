@@ -356,7 +356,7 @@ static List _map_form(Compiler c, Var value) {
     if (!value_code) return NULL;
     entries.push(%(map-entry $key_code $value_code));
   }
-  return %(expr ("Map") (map @{entries.sort().list()}));
+  return %(expr ("Map") (map @{entries.list()}));
 }
 
 // compile-time-only functions
