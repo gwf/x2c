@@ -62,7 +62,7 @@ meta Map native_scalar_types(void) => {
    `_native_scalar_access_unsigned_long`. */
 meta List _scalar_access_record(Type type) {
   String name = "_native_scalar_access";
-  foreach (Symbol word in (List) type) name = %"${name}_$word";
+  foreach (Symbol word in (List) type) name = %"$(name)_$word";
   return x2c_ident(name);
 }
 
@@ -74,7 +74,7 @@ meta Symbol _scalar_tag(Type type) =>
 meta List _scalar_key(Type type) {
   List key = %(expr ("List") (nil));
   foreach (Symbol word in ((List) type).reverse())
-    key = %(expr ("List") (cons ${$!Symbol{ $word }} $key));
+    key = %(expr ("List") (cons $($!Symbol{ $word }) $key));
   return key;
 }
 
@@ -126,7 +126,7 @@ macro Entry $native.scalar.access.entries() {
 
 $native.scalar.access.all();
 
-static Map native_scalars = %{ ${$native.scalar.access.entries()} };
+static Map native_scalars = %{ $($native.scalar.access.entries()) };
 
 /* Returns the access record for an exact C scalar type such as
    `(unsigned long)`, or NULL for any other type. */
