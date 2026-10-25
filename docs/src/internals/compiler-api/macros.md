@@ -139,7 +139,7 @@ it names a visible alias, or NULL. A declaration in a scope inside the
 alias's scope shadows it. The expression keeps its bindings where a
 later declaration hides one of their names.
 
-Source: `src/macros/aliases.x:411`
+Source: `src/macros/aliases.x:429`
 
 <a id="Compiler.alias_form_starts"></a>
 #### Compiler.alias_form_starts
@@ -237,7 +237,7 @@ Source: `src/macros/lisp.x:13`
 Starts a declaration body whose aliases end at its closing brace, and
 returns the alias state that `Compiler.leave_alias_body` restores.
 
-Source: `src/macros/aliases.x:362`
+Source: `src/macros/aliases.x:380`
 
 <a id="Compiler.evaluate_declaration_effect"></a>
 #### Compiler.evaluate_declaration_effect
@@ -381,7 +381,7 @@ Source: `src/macros/templates.x:434`
 
 Ends a declaration body, restoring the aliases visible before it.
 
-Source: `src/macros/aliases.x:368`
+Source: `src/macros/aliases.x:386`
 
 <a id="Compiler.library_filling"></a>
 #### Compiler.library_filling
@@ -865,7 +865,7 @@ Reports whether the current scope declares an alias named `name`,
 including a file-scope alias an include delivered. A declaration of that
 name in the same scope conflicts with it.
 
-Source: `src/macros/aliases.x:398`
+Source: `src/macros/aliases.x:416`
 
 <a id="Compiler.shared_definitions"></a>
 #### Compiler.shared_definitions
