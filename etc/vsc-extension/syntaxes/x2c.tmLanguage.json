@@ -12,9 +12,6 @@
 			"include": "#x2c_literals"
 		},
 		{
-			"include": "#x2c_embedded_lisp"
-		},
-		{
 			"include": "#x2c_macro_definition"
 		},
 		{
@@ -4375,79 +4372,6 @@
 					"patterns": [
 						{ "match": "[*?]?[A-Za-z_][A-Za-z0-9_]*", "name": "constant.other.symbol.x2c.simple" }
 					]
-				}
-			]
-		},
-		"x2c_embedded_lisp": {
-			"name": "meta.embedded.lisp.x2c",
-			"begin": "(?:\\$|@)\\(",
-			"beginCaptures": {
-				"0": { "name": "punctuation.definition.embedded.lisp.begin.x2c" }
-			},
-			"end": "\\)",
-			"endCaptures": {
-				"0": { "name": "punctuation.definition.embedded.lisp.end.x2c" }
-			},
-			"patterns": [
-				{ "include": "#x2c_lisp_content" }
-			]
-		},
-		"x2c_lisp_content": {
-			"patterns": [
-				{ "include": "#comments" },
-				{ "include": "#x2c_lisp_string" },
-				{ "include": "#x2c_lisp_list" },
-				{ "include": "#x2c_lisp_symbol" },
-				{
-					"match": "(\\$)([A-Za-z_][A-Za-z0-9_]*)",
-					"captures": {
-						"1": { "name": "punctuation.definition.macro.sigil.x2c" },
-						"2": { "name": "variable.other.macro.hole.x2c" }
-					}
-				},
-				{ "include": "#x2c_unquote_sigil" },
-				{ "include": "#x2c_prelude_types" },
-				{ "match": ",@", "name": "punctuation.definition.unquote-splicing.lisp.x2c" },
-				{ "match": ",", "name": "punctuation.definition.unquote.lisp.x2c" },
-				{ "match": "`", "name": "punctuation.definition.quasiquote.lisp.x2c" },
-				{ "match": "'", "name": "punctuation.definition.quote.lisp.x2c" },
-				{ "match": "[-+]?(?:0[xX][0-9A-Fa-f]+|0[bB][01]+|0[oO][0-7]+|[0-9]+(?:\\.[0-9]+)?)", "name": "constant.numeric.lisp.x2c" },
-				{ "match": "[^\\s()'`,\"]+", "name": "variable.other.lisp.x2c" }
-			]
-		},
-		"x2c_lisp_list": {
-			"name": "meta.expression.list.lisp.x2c",
-			"begin": "\\(",
-			"beginCaptures": {
-				"0": { "name": "punctuation.section.list.begin.lisp.x2c" }
-			},
-			"end": "\\)",
-			"endCaptures": {
-				"0": { "name": "punctuation.section.list.end.lisp.x2c" }
-			},
-			"patterns": [
-				{ "include": "#x2c_lisp_content" }
-			]
-		},
-		"x2c_lisp_string": {
-			"name": "string.quoted.double.lisp.x2c",
-			"begin": "\"",
-			"beginCaptures": {
-				"0": { "name": "punctuation.definition.string.begin.lisp.x2c" }
-			},
-			"end": "\"",
-			"endCaptures": {
-				"0": { "name": "punctuation.definition.string.end.lisp.x2c" }
-			},
-			"patterns": [
-				{ "include": "#string_escaped_char" }
-			]
-		},
-		"x2c_lisp_symbol": {
-			"patterns": [
-				{
-					"name": "constant.other.symbol.lisp.x2c",
-					"match": "<\"(?:\\\\.|[^\"\\\\])*\">|<[^<>\\s]+>"
 				}
 			]
 		},

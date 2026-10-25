@@ -1,4 +1,4 @@
-// SYNTAX TEST "source.x2c.lisp" "standalone compile-time Lisp"
+// SYNTAX TEST "source.x2c.lisp" "standalone Lisp"
 
 (define value 42)
 // <- punctuation.section.list.begin.lisp.x2c

@@ -5,6 +5,10 @@ first.
 
 ## Unreleased
 
+- Stop highlighting `$(...)` and `@(...)` as embedded compile-time Lisp in
+  x2c source; the compiler no longer accepts those forms. `.xlisp` files
+  keep the standalone Lisp grammar.
+
 - Highlight `with (place = value, ...)` assignment blocks at statement
   start, including inside function bodies, and leave `with(...)` calls in
   expressions uncolored. Highlight `alias expression as name` declarations

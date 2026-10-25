@@ -465,36 +465,6 @@ void consume(void) {}
 int casted = ((void) value, 0);
 //             ^^^^ storage.type.built-in.primitive.x2c
 
-Var form = $(outer (inner "a ) string" /* ) */
-//         ^^ punctuation.definition.embedded.lisp.begin.x2c
-//                 ^ punctuation.section.list.begin.lisp.x2c
-  '`(template ,value ,@values '$hole <1>)));
-//^ punctuation.definition.quote.lisp.x2c
-// ^ punctuation.definition.quasiquote.lisp.x2c
-//            ^ punctuation.definition.unquote.lisp.x2c
-//                   ^^ punctuation.definition.unquote-splicing.lisp.x2c
-//                            ^ punctuation.definition.quote.lisp.x2c
-//                             ^ punctuation.definition.macro.sigil.x2c
-//                                   ^^^ constant.other.symbol.lisp.x2c
-$(import "helpers.xlisp")
-// <- punctuation.definition.embedded.lisp.begin.x2c
-//^^^^^^ variable.other.lisp.x2c
-//       ^^^^^^^^^^^^^^^ string.quoted.double.lisp.x2c
-$(def lisp.native.target.rows '(
-  (Var_car ((func (("Var"))) "Var"))
-  (Var_cons ((func (("Var") ("List"))) "List"))
-  (List_sort ((func (("List"))) "List"))
-))
-// <- punctuation.section.list.end.lisp.x2c
-// <~- punctuation.definition.embedded.lisp.end.x2c
-macro Expression $after.embedded.lisp() => 0;
-// <---- keyword.declaration.macro.x2c
-//               ^ punctuation.definition.macro.sigil.x2c
-macro Stmt $sequence(Stmt $target) { @(list $target) }
-//                                   ^^ punctuation.definition.embedded.lisp.begin.x2c
-//                                          ^ punctuation.definition.macro.sigil.x2c
-//                                           ^^^^^^ variable.other.macro.hole.x2c
-
 int modulo = left % right;
 //                  ^ - punctuation.definition.literal.list.begin.x2c
 int grouped_modulo = left % (right);
@@ -504,7 +474,7 @@ int shifted = left << right;
 int compared = left < right;
 //                    ^ - punctuation.definition.literal.symbol.begin.x2c
 const char *plain = "$(not_lisp) $name";
-//                   ^ string.quoted.double - punctuation.definition.embedded.lisp.begin.x2c
+//                   ^ string.quoted.double - punctuation.definition.macro.sigil.x2c
 call(value);
 //  ^ - punctuation.definition.literal.list.begin.x2c
 List braced = %(${old} @{values});
@@ -525,13 +495,13 @@ List nested_text = %("value ${old}");
 //                          ^^ punctuation.definition.interpolation.expression.begin.x2c
 String escaped = %"\${old}";
 //                   ^^ - punctuation.definition.interpolation.expression.begin.x2c
-List nested_x2c = %([${$(* 20 2)}] {answer: ${$(* 20 2)}});
+List nested_x2c = %([${$twice(20)}] {answer: ${$twice(20)}});
 //                   ^^ punctuation.definition.interpolation.expression.begin.x2c
-//                     ^^ punctuation.definition.embedded.lisp.begin.x2c
-//                                          ^^ punctuation.definition.interpolation.expression.begin.x2c
-//                                            ^^ punctuation.definition.embedded.lisp.begin.x2c
+//                     ^ punctuation.definition.macro.sigil.x2c
+//                                           ^^ punctuation.definition.interpolation.expression.begin.x2c
+//                                             ^ punctuation.definition.macro.sigil.x2c
 Var ordinary = %{old};
-//             ^ - punctuation.definition.embedded.lisp.begin.x2c
+//             ^^ - punctuation.definition.interpolation.expression.begin.x2c
 Var old_splice = @{old};
 //               ^ - punctuation.definition.interpolation.list.x2c
 
@@ -561,7 +531,7 @@ List array_quotation = $!{ return %[${10}, @items, ${40}]; };
 List list_data = %(head @items @{values} @(values));
 //                      ^^^^^^ meta.interpolation.list.x2c
 //                             ^^ meta.interpolation.list.expression.x2c
-//                                       ^^ - punctuation.definition.embedded.lisp.begin.x2c
+//                                       ^^ - punctuation.definition.interpolation.list.expression.begin.x2c
 void native_variadic(const char *format, ...);
 //                                       ^^^ - punctuation.definition.macro.splice.x2c
 macro Expression $removed_suffix(Expr $items...) => 0;

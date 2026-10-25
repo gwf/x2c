@@ -57,7 +57,7 @@ List syntax_extensions(void) => %(
       (spellings "alias e as name;" "alias e as name { ... }"
                  "alias e { ... _ ... }" "static alias e as name;"
                  "unalias name;")
-      (reference "../reference/language.md#statements"))
+      (reference "../reference/language.md#expression-aliases-with-alias"))
     (feature protocols
       (title "Protocols")
       (summary "Declare a method contract and adopt it for a type.")
@@ -141,17 +141,17 @@ List syntax_extensions(void) => %(
       (grammar macro-definition local-macro-definition anonymous-macro
                keyword-definition macro-signature hole-parameter macro-body
                macro-expression macro-arguments quotation quotation-items
-               decorator lisp-escape lisp-form declaration-definition
+               decorator declaration-definition
                expression-slot argument-slot declarator-row-slot
                named-type-slot type-slot name-slot parameter-slot
                captures-slot catch-slot match-row-slot unit-macro
                block-extension statement-macro field-extension
                enumerator-extension entry-extension)
-      (lexical code-reference named-reference lisp-reference data-prefix)
-      (grammar-note "Typed macro holes/results, @ sequence parameters and splices, aliases, decorators, source quotations, Lisp escapes, and meta/native functions.")
-      (lexical-note "\$ inserts one result; @ splices a sequence. \$( and @( enter compile-time Lisp in code; \$! uses ordinary ! after \$; macro/keyword/meta/native are contextual.")
-      (spellings "macro" "keyword" "\$name(...)" "\$!{...}" "\$(...)"
-                 "@items" "@name(...)" "@(...)" "@{expression}"
+      (lexical code-reference named-reference data-prefix)
+      (grammar-note "Typed macro holes/results, @ sequence parameters and splices, aliases, decorators, source quotations, and meta/native functions.")
+      (lexical-note "\$ inserts one result; @ splices a sequence. \$! uses ordinary ! after \$; macro/keyword/meta/native are contextual.")
+      (spellings "macro" "keyword" "\$name(...)" "\$!{...}"
+                 "@items" "@name(...)" "@{expression}"
                  "meta" "native")
       (reference "../reference/language.md#compile-time-macros")))
   (inherited

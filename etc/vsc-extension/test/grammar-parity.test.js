@@ -127,12 +127,12 @@ test('meta and native modifiers cover static, qualified and pointer return types
     await check(line, 'native', 'storage.modifier.native.x2c', false);
 });
 
-test('quotation and unquote sigils survive code, data, and Lisp contexts', async () => {
+test('quotation and unquote sigils survive code and data contexts', async () => {
   for (const line of ['Code x = $!{ $value; };', 'Code x = $!( $value );',
     'Code x = ${value};', 'Code x = $;', 'consume($);', 'Var x = %( $ );',
-    'Var x = %[ $ ];', 'Var x = $( $ );']) {
+    'Var x = %[ $ ];']) {
     const word = line.includes('$!') ? '$!' : '$';
-    await check(line, word, sigilScope, true, line.includes('$( $') ? line.lastIndexOf('$') : undefined);
+    await check(line, word, sigilScope);
   }
   for (const line of ['// $!', 'char *x = "$!";'])
     await check(line, '$!', sigilScope, false);

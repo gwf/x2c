@@ -46,7 +46,6 @@ List syntax_grammar(void) => %(grammar
         (ref unalias)
         (ref private-interface)
         (ref module-declaration)
-        (ref lisp-escape)
         (ref linkage-group)
         (ref auto-region-function)
         (ref declaration-definition)
@@ -785,7 +784,6 @@ List syntax_grammar(void) => %(grammar
         (ref generic)
         (ref va-arg)
         (ref offsetof)
-        (ref lisp-escape)
         (ref macro-expression)
         (ref quotation)
         (ref expression-slot)))
@@ -1235,28 +1233,6 @@ List syntax_grammar(void) => %(grammar
 
     (rule entry-extension
       (external "map-entry-position macro/slot under M1-M5"))
-
-    (rule lisp-escape
-      (seq (token "\$(") (repeat 0 (ref lisp-form)) (token ")")))
-
-    (rule lisp-form
-      (choice
-        (ref lisp-atom)
-        (seq (token "(") (repeat 0 (ref lisp-form)) (token ")"))
-        (seq (ref reader-prefix) (ref lisp-form))
-        (ref lisp-hole)))
-
-    (rule lisp-atom
-      (choice
-        (ref integer)
-        (ref floating)
-        (ref c-string)
-        (ref symbol)
-        (ref lisp-identifier)))
-
-    (rule lisp-hole (external "template hole in compiler Lisp; M5"))
-
-    (rule lisp-identifier (external "ident token in Lisp mode"))
 
     (rule identifier
       (external "identifier accepted in the current name position; D1"))

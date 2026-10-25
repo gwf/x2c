@@ -26,7 +26,7 @@ reference](../reference/language.md) owns each construct's meaning.
 | [Operators and slices](../reference/language.md#membership-with-in) | === and !==, in, is/is not, and [start:stop:step] extend the C expression ladder. | === and !== are operator tokens; in is contextually retagged; is and not remain contextual words. |
 | [Iteration and matching](../reference/language.md#statements) | foreach binders and match cases with patterns and optional guards; case/default otherwise remain C forms. | match is contextually retagged; foreach is a shipped keyword alias; pattern sigils are data-mode atom spellings. |
 | [Cleanup and errors](../reference/language.md#errors-and-cleanup) | auto regions with optional nonempty destination, with blocks that assign and restore places, defer statements, try/catch/finally, and raise with structured details. | defer, try, catch, finally, and raise are keywords; with is contextual at statement start; error patterns reuse List mode. |
-| [Syntax-producing code](../reference/language.md#compile-time-macros) | Typed macro holes/results, @ sequence parameters and splices, aliases, decorators, source quotations, Lisp escapes, and meta/native functions. | $ inserts one result; @ splices a sequence. $( and @( enter compile-time Lisp in code; $! uses ordinary ! after $; macro/keyword/meta/native are contextual. |
+| [Syntax-producing code](../reference/language.md#compile-time-macros) | Typed macro holes/results, @ sequence parameters and splices, aliases, decorators, source quotations, and meta/native functions. | $ inserts one result; @ splices a sequence. $! uses ordinary ! after $; macro/keyword/meta/native are contextual. |
 
 <!-- syntax-extensions:end -->
 

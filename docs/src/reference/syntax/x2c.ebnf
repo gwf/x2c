@@ -18,7 +18,6 @@ unit-item = ( directive |
     unalias |
     private-interface |
     module-declaration |
-    lisp-escape |
     linkage-group |
     auto-region-function |
     declaration-definition |
@@ -250,7 +249,6 @@ primary = ( atomic |
     generic |
     va-arg |
     offsetof |
-    lisp-escape |
     macro-expression |
     quotation |
     expression-slot ) ;
@@ -383,11 +381,6 @@ statement-macro = ? statement-position macro/slot under M1-M5 ? ;
 field-extension = ? field-position macro/slot under M1-M5 ? ;
 enumerator-extension = ? enumerator-position macro/slot under M1-M5 ? ;
 entry-extension = ? map-entry-position macro/slot under M1-M5 ? ;
-lisp-escape = ( "$(" , { lisp-form } , ")" ) ;
-lisp-form = ( lisp-atom | ( "(" , { lisp-form } , ")" ) | ( reader-prefix , lisp-form ) | lisp-hole ) ;
-lisp-atom = ( integer | floating | c-string | symbol | lisp-identifier ) ;
-lisp-hole = ? template hole in compiler Lisp; M5 ? ;
-lisp-identifier = ? ident token in Lisp mode ? ;
 identifier = ? identifier accepted in the current name position; D1 ? ;
 integer = ? lit-int ? ;
 floating = ? lit-float ? ;

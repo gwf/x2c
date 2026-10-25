@@ -2,19 +2,18 @@
 
 This VS Code extension provides the TextMate grammar and language
 configuration for ordinary x2c source modules (`.x`, `.xc`, `.xh`, `.x2c`,
-and `.xp`) and compile-time Lisp files (`.xlisp`).
+and `.xp`) and Lisp files (`.xlisp`).
 
 It highlights x2c list, array, map, string, Symbol, and SymbolSet literals,
 including data-first Array and Map contents and their runtime unquotes;
 pattern variables; runtime unquote and List splice forms; protocols; macros;
 decorators; `with` assignment blocks; `alias` declarations; List
-destructuring; imports; delegate fields; `Self` method types; embedded and
-standalone compile-time Lisp; and the C-compatible syntax used by the
-language.
+destructuring; imports; delegate fields; `Self` method types; standalone
+Lisp files; and the C-compatible syntax used by the language.
 
 Macro signatures use `$value` for one syntax value and `@items` for a
-sequence. Code templates highlight `@items`, `@producer(args)`, `@(form)`,
-and quotation holes such as `@{expression}`. Singular `$` unquotes and `$!` source quotations use the macro sigil scope,
+sequence. Code templates highlight `@items`, `@producer(args)`, and
+quotation holes such as `@{expression}`. Singular `$` unquotes and `$!` source quotations use the macro sigil scope,
 including a standalone `$`. The color settings below make sigils bold. Quoted Lists retain runtime
 `@items` and `@{expression}` splices; Lisp retains `,@` unquote-splicing.
 Native C variadic `...` remains distinct from macro syntax.
@@ -95,8 +94,7 @@ Dark backgrounds:
         "source.x2c punctuation.definition.literal",
         "source.x2c punctuation.definition.interpolation",
         "punctuation.definition.macro.sigil.x2c",
-        "punctuation.definition.macro.splice.x2c",
-        "source.x2c punctuation.definition.embedded.lisp"
+        "punctuation.definition.macro.splice.x2c"
       ],
       "settings": { "foreground": "#FF4FD8", "fontStyle": "bold" }
     },
@@ -154,8 +152,7 @@ Light backgrounds:
         "source.x2c punctuation.definition.literal",
         "source.x2c punctuation.definition.interpolation",
         "punctuation.definition.macro.sigil.x2c",
-        "punctuation.definition.macro.splice.x2c",
-        "source.x2c punctuation.definition.embedded.lisp"
+        "punctuation.definition.macro.splice.x2c"
       ],
       "settings": { "foreground": "#A626A4", "fontStyle": "bold" }
     },
@@ -240,7 +237,7 @@ The grammar also highlights native `auto` regions, control statements, and
 function definitions, with `auto (destination)` for an explicit Scope.
 Empty `auto()` is rejected by the compiler, not the TextMate highlighter.
 
-`$!`, `$name`, `${expression}`, `$(form)`, and a standalone `$` use pronounced
+`$!`, `$name`, `${expression}`, and a standalone `$` use pronounced
 sigil styling with the settings above. `@` sequence forms share that styling.
 The grammar supplies scopes; the active VS Code theme controls their color
 and weight. Applying the recommended settings is necessary to guarantee bold
@@ -270,7 +267,7 @@ The most useful scopes are:
 - `keyword.declaration.macro.x2c` and `entity.name.function.macro.x2c` for
   macro definitions and applications;
 - `punctuation.definition.macro.splice.x2c` for sequence prefixes in code; and
-- `meta.embedded.lisp.x2c` and `*.lisp.x2c` for compile-time Lisp.
+- `*.lisp.x2c` for standalone Lisp files.
 
 Standard C strings retain the standard `string.quoted.double` and
 `string.quoted.single` scopes for theme compatibility.
