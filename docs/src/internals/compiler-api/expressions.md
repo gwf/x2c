@@ -223,7 +223,7 @@ Source: `src/expressions/syntax.x:607`
 Parses and resolves one complex identifier expression.
 Parsing starts at `c.token` and leaves it after the identifier.
 
-Source: `src/expressions/syntax.x:678`
+Source: `src/expressions/syntax.x:679`
 
 <a id="Compiler.postfix_completions"></a>
 #### Compiler.postfix_completions

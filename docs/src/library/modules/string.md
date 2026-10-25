@@ -1312,7 +1312,7 @@ The receiver is the format `String`, so format-dependent construction reads
 `%"%-12s %.2f".printf(name, score)`. Conversions, promotion rules, and
 argument matching are C's, since the work is done by `vsnprintf`;
 canonical `String`s are NUL-terminated and satisfy `%s` directly. Prefer
-`%"$name has ${name.len()} bytes"` when interpolation already says what
+`%"$name has $(name.len()) bytes"` when interpolation already says what
 you want, and `String.format` when the arguments must be checked.
 
 **Raises:** `<alloc-fail>` when result storage cannot be allocated. An empty

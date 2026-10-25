@@ -575,13 +575,14 @@ x2c literal parsing.
 Public functions:
 
 `Compiler.parse_list_literal`, `Compiler.parse_macro_pattern_arguments`,
-`Compiler.try_parse_macro_pattern_insertion`, `Compiler.literal_cell`,
+`Compiler.try_parse_macro_pattern_insertion`, `Compiler.parse_evaluated_list`,
+`Compiler.literal_cell`, `Compiler.list_expression`,
 `Compiler.typed_match_pattern`, `Compiler.parse_raise_literal`,
 `Compiler.parse_catch_pattern_literal`, `Compiler.parse_symbol_set_literal`,
 `Compiler.symbol_set_expression`, `Compiler.parse_array_literal`,
 `Compiler.parse_map_literal`, `Compiler.parse_map_entries`,
-`Compiler.parse_map_entry`, `Compiler.parse_string_literal`,
-`Compiler.parse_atomic_literal`
+`Compiler.parse_evaluated_map`, `Compiler.parse_map_entry`,
+`Compiler.parse_string_literal`, `Compiler.parse_atomic_literal`
 
 ### [src/macros/macros.x](../src/macros/macros.x)
 
@@ -589,17 +590,17 @@ source macros and the compile-time calls they run.
 
 Public functions:
 
-`Compiler.report_meta_failure`, `Compiler.reject_lisp_form`,
-`Compiler.parse_macro_definition`, `Compiler.macro_introduced_name`,
-`Compiler.macro_tag_name`, `Compiler.parse_macro_quotation`,
-`Compiler.try_parse_macro_slot`, `Compiler.peek_macro_hole`,
-`Compiler.after_hole`, `Compiler.meta_call_starts_declaration`,
-`Compiler.try_parse_macro_member`, `Compiler.expand_macro_invocation_node`,
-`Compiler.macro_invocation_site`, `Compiler.marked_rewrite`,
-`Compiler.has_rewrites`, `Compiler.rewrite`, `Compiler.rewrite_lowered`,
-`Compiler.lower_replacement`, `Compiler.rewrite_written`,
-`Compiler.lower_rewrite`, `Compiler.applying_shipped`, `Compiler.rebound`,
-`Compiler.watched_step`, `Compiler.publish_macro_definition_node`,
+`Compiler.report_meta_failure`, `Compiler.parse_macro_definition`,
+`Compiler.macro_introduced_name`, `Compiler.macro_tag_name`,
+`Compiler.parse_macro_quotation`, `Compiler.try_parse_macro_slot`,
+`Compiler.peek_macro_hole`, `Compiler.after_hole`,
+`Compiler.meta_call_starts_declaration`, `Compiler.try_parse_macro_member`,
+`Compiler.expand_macro_invocation_node`, `Compiler.macro_invocation_site`,
+`Compiler.marked_rewrite`, `Compiler.has_rewrites`, `Compiler.rewrite`,
+`Compiler.rewrite_lowered`, `Compiler.lower_replacement`,
+`Compiler.rewrite_written`, `Compiler.lower_rewrite`,
+`Compiler.applying_shipped`, `Compiler.rebound`, `Compiler.watched_step`,
+`Compiler.publish_macro_definition_node`,
 `Compiler.install_compile_time_effects`, `Compiler.macro_form_is_definition`,
 `Compiler.local_macro_form_is_definition`,
 `Compiler.keyword_form_is_definition`, `Compiler.parse_keyword_definition`,

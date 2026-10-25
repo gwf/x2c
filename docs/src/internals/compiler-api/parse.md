@@ -206,7 +206,7 @@ scope. A script unit that does is an ordinary program: its declarations
 stay at file scope and it may not have top-level statements. Both parse
 passes read the same tokens, so they agree before either parses.
 
-Source: `src/parse/units.x:225`
+Source: `src/parse/units.x:227`
 
 <a id="Compiler.definition_doc"></a>
 #### Compiler.definition_doc
@@ -218,7 +218,7 @@ starting at `start`, or NULL. A doc comment opens with two asterisks and
 ends on the line before `start` or on its line. Macro templates carry the
 text until their selected body binds at the invocation.
 
-Source: `src/parse/units.x:588`
+Source: `src/parse/units.x:590`
 
 <a id="Compiler.enclosing"></a>
 #### Compiler.enclosing
@@ -277,7 +277,7 @@ Constructs a foreign alias from one direct function declaration and target.
 typed, a function. Storage is limited to `static` or `inline`, when
 present, and variadic parameters are rejected.
 
-Source: `src/parse/units.x:756`
+Source: `src/parse/units.x:758`
 
 <a id="Compiler.finish_initializers"></a>
 #### Compiler.finish_initializers
@@ -323,7 +323,7 @@ Source: `src/parse/placement.x:132`
 Reports whether the cursor begins a contextual top-level `meta`
 declaration: a function or an initialized file-static value.
 
-Source: `src/parse/units.x:303`
+Source: `src/parse/units.x:305`
 
 <a id="Compiler.package_alias_spelling"></a>
 #### Compiler.package_alias_spelling
@@ -542,7 +542,7 @@ Missing required syntax raises `<incomplete>`; trailing items are rejected.
 Temporary parser scopes and captured parameters are restored on every exit.
 The caller owns the semantic transaction and commits after execution.
 
-Source: `src/parse/units.x:200`
+Source: `src/parse/units.x:202`
 
 <a id="Compiler.parse_top_level"></a>
 #### Compiler.parse_top_level
@@ -551,7 +551,7 @@ Source: `src/parse/units.x:200`
 
 Parses one full top-level form through the shared classifier.
 
-Source: `src/parse/units.x:192`
+Source: `src/parse/units.x:194`
 
 <a id="Compiler.parse_top_level_mode"></a>
 #### Compiler.parse_top_level_mode
@@ -621,7 +621,7 @@ Reports whether the cursor begins a protocol declaration or adoption,
 including its `meta` and `static` markers. This query does not consume
 tokens.
 
-Source: `src/parse/units.x:295`
+Source: `src/parse/units.x:297`
 
 <a id="Compiler.script_statement_executes"></a>
 #### Compiler.script_statement_executes
@@ -632,7 +632,7 @@ Reports whether the top-level item at the cursor is a script statement
 that runs, rather than a declaration: an expression, control flow, a
 `with` block, or a statement macro. This query does not consume tokens.
 
-Source: `src/parse/units.x:285`
+Source: `src/parse/units.x:287`
 
 <a id="Compiler.script_statement_starts"></a>
 #### Compiler.script_statement_starts
@@ -646,7 +646,7 @@ file-scope macro invocations, `typedef`, `static`, and `extern`
 declarations, linkage braces, type definitions, and function prototypes
 and definitions stay at file scope. This query does not consume tokens.
 
-Source: `src/parse/units.x:246`
+Source: `src/parse/units.x:248`
 
 <a id="Compiler.source_clause"></a>
 #### Compiler.source_clause

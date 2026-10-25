@@ -164,7 +164,7 @@ Source: `src/compiler/source-locations.x:29`
 
 Reports whether the parser is at the private REPL completion marker.
 
-Source: `src/compiler/parsing/tokens.x:257`
+Source: `src/compiler/parsing/tokens.x:256`
 
 <a id="Compiler.at_word"></a>
 #### Compiler.at_word
@@ -175,7 +175,7 @@ Reports whether the current token is the identifier `word`. A contextual
 keyword such as `with` or `as` is an ordinary identifier elsewhere. This
 query does not consume tokens.
 
-Source: `src/compiler/parsing/tokens.x:194`
+Source: `src/compiler/parsing/tokens.x:193`
 
 <a id="Compiler.cache"></a>
 #### Compiler.cache
@@ -304,7 +304,7 @@ Requires and consumes the current token type.
 A mismatch reports a parse diagnostic. An active recovery boundary raises
 `<malformed>`; without one, diagnostic reporting exits.
 
-Source: `src/compiler/parsing/tokens.x:149`
+Source: `src/compiler/parsing/tokens.x:148`
 
 <a id="Compiler.finish_collected_declaration"></a>
 #### Compiler.finish_collected_declaration
@@ -382,7 +382,7 @@ Source: `src/compiler/names.x:21`
 
 Retags the token beginning at `position` as a private completion marker.
 
-Source: `src/compiler/parsing/tokens.x:246`
+Source: `src/compiler/parsing/tokens.x:245`
 
 <a id="Compiler.mark_reference_present"></a>
 #### Compiler.mark_reference_present
@@ -486,7 +486,7 @@ Consumes the current token and advances past following trivia.
 This updates the unmatched-brace stack. An unmatched `}` reports a parse
 diagnostic, which raises `<malformed>` under recovery and otherwise exits.
 
-Source: `src/compiler/parsing/tokens.x:163`
+Source: `src/compiler/parsing/tokens.x:162`
 
 <a id="Compiler.optional_reference_test"></a>
 #### Compiler.optional_reference_test
@@ -541,7 +541,7 @@ Returns the non-trivia token type `steps` from parser position.
 Zero reads the current token; positive and negative steps count forward
 and backward through non-trivia tokens. The parser cursor is unchanged.
 
-Source: `src/compiler/parsing/tokens.x:92`
+Source: `src/compiler/parsing/tokens.x:91`
 
 <a id="Compiler.portable_path"></a>
 #### Compiler.portable_path
@@ -635,7 +635,7 @@ Raises `<incomplete>` when a required grammar item reaches the supplied
 input boundary. The caller sets a token in the current token stream after
 tokenizing; tokenization clears it. Semantic failures do not call this.
 
-Source: `src/compiler/parsing/tokens.x:140`
+Source: `src/compiler/parsing/tokens.x:139`
 
 <a id="Compiler.restore_reference_presence"></a>
 #### Compiler.restore_reference_presence
@@ -762,7 +762,7 @@ Source: `src/compiler/lifecycle.x:43`
 Consumes the identifier `word` when current and reports whether it
 matched.
 
-Source: `src/compiler/parsing/tokens.x:199`
+Source: `src/compiler/parsing/tokens.x:198`
 
 <a id="Compiler.test"></a>
 #### Compiler.test
@@ -771,7 +771,7 @@ Source: `src/compiler/parsing/tokens.x:199`
 
 Consumes `type` when current and reports whether it matched.
 
-Source: `src/compiler/parsing/tokens.x:185`
+Source: `src/compiler/parsing/tokens.x:184`
 
 <a id="Compiler.thaw_declaration_syntax"></a>
 #### Compiler.thaw_declaration_syntax
@@ -895,7 +895,7 @@ Returns 1 for a token type that opens a delimited group, -1 for one that
 closes a group, and 0 otherwise. Every opener spelling ends in the `(`,
 `[`, or `{` that its closer matches.
 
-Source: `src/compiler/parsing/tokens.x:214`
+Source: `src/compiler/parsing/tokens.x:213`
 
 ### `Token`
 
@@ -907,7 +907,7 @@ Source: `src/compiler/parsing/tokens.x:214`
 Returns the first non-trivia token after the group `t` opens, or after
 `t` when it opens no group. A group that never closes yields `eof`.
 
-Source: `src/compiler/parsing/tokens.x:238`
+Source: `src/compiler/parsing/tokens.x:237`
 
 <a id="Token.group_close"></a>
 #### Token.group_close
@@ -917,7 +917,7 @@ Source: `src/compiler/parsing/tokens.x:238`
 Returns the token that closes the group `t` opens, `t` itself when it
 opens no group, or the `eof` token when the group never closes.
 
-Source: `src/compiler/parsing/tokens.x:229`
+Source: `src/compiler/parsing/tokens.x:228`
 
 <a id="Token.skip_trivia"></a>
 #### Token.skip_trivia
@@ -927,7 +927,7 @@ Source: `src/compiler/parsing/tokens.x:229`
 Returns the first token at or after `token` that is not a space,
 comment, or preprocessor line. The stream must end in `eof`.
 
-Source: `src/compiler/parsing/tokens.x:112`
+Source: `src/compiler/parsing/tokens.x:111`
 
 ### `Var`
 

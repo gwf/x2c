@@ -60,7 +60,6 @@ Source macros and the compile-time calls they run.
 | [`Compiler.rebuild_function`](#Compiler.rebuild_function) | Rebuilds a bound function through a Function decorator without binding it again. |
 | [`Compiler.rebuild_statement`](#Compiler.rebuild_statement) | Rebuilds a statement template as a canonical unbraced `seq`. |
 | [`Compiler.rebuild_unit_function`](#Compiler.rebuild_unit_function) | Constructs a fresh function from a Unit template after lowering. |
-| [`Compiler.reject_lisp_form`](#Compiler.reject_lisp_form) | Reports the compile-time Lisp form at the cursor, which x2c no longer evaluates. |
 | [`Compiler.report_meta_failure`](#Compiler.report_meta_failure) | Reports that the meta call `source` failed with `error` at `invocation`. |
 | [`Compiler.rewrite`](#Compiler.rewrite) | Matches registered patterns for one operation, then binds the first replacement. |
 | [`Compiler.rewrite_lowered`](#Compiler.rewrite_lowered) | Matches registered patterns for the statement `source`, which the transform has lowered, then binds the first replacement as `Compiler.rewrite` does. |
@@ -99,7 +98,7 @@ Source: `src/macros/templates.x:166`
 Returns the token after the named or expression hole at the cursor.
 Consumes neither its `$` or `@` prefix nor its optional braces.
 
-Source: `src/macros/definitions/slots.x:94`
+Source: `src/macros/definitions/slots.x:93`
 
 <a id="Compiler.alias_expression"></a>
 #### Compiler.alias_expression
@@ -146,7 +145,7 @@ Binds a code-value carrier that a meta call returned outside a macro
 value application as an application binds it, under a transaction that
 also covers its effects.
 
-Source: `src/macros/values.x:340`
+Source: `src/macros/values.x:341`
 
 <a id="Compiler.bind_meta_statement"></a>
 #### Compiler.bind_meta_statement
@@ -167,7 +166,7 @@ Returns an anonymous macro definition as a `Macro` value. Macro values
 the body applies are captured where the literal is written, so a later
 application applies the same children.
 
-Source: `src/macros/values.x:217`
+Source: `src/macros/values.x:218`
 
 <a id="Compiler.enter_alias_body"></a>
 #### Compiler.enter_alias_body
@@ -369,7 +368,7 @@ named-type decorator, and local `Unit` macro whose template contains
 protocol or adoption rows. `<tried>` covers Unit decorators and other
 local `Unit` macros. Other invocations return zero.
 
-Source: `src/macros/invocations/recognition.x:336`
+Source: `src/macros/invocations/recognition.x:337`
 
 <a id="Compiler.macro_invocation_site"></a>
 #### Compiler.macro_invocation_site
@@ -390,7 +389,7 @@ Source: `src/macros/expansion.x:235`
 Returns the `(` after a visible macro's `$NAME` at `at`, storing its
 spelling and definition, or NULL. The cursor does not move.
 
-Source: `src/macros/values.x:106`
+Source: `src/macros/values.x:107`
 
 <a id="Compiler.macro_starts_target_at"></a>
 #### Compiler.macro_starts_target_at
@@ -425,7 +424,7 @@ Reports whether the macro invocation at the cursor produces file-scope
 syntax, directly or through the target it decorates. A script unit keeps
 such an invocation at file scope. This query does not consume tokens.
 
-Source: `src/macros/invocations/recognition.x:380`
+Source: `src/macros/invocations/recognition.x:381`
 
 <a id="Compiler.macro_value_literal"></a>
 #### Compiler.macro_value_literal
@@ -457,7 +456,7 @@ Returns whether tokens after an explicit meta call continue a
 declaration. The balanced argument group is inspected without moving
 the compiler cursor; a visible source macro retains its own grammar.
 
-Source: `src/macros/definitions/slots.x:166`
+Source: `src/macros/definitions/slots.x:163`
 
 <a id="Compiler.parse_alias_declaration"></a>
 #### Compiler.parse_alias_declaration
@@ -538,10 +537,10 @@ Source: `src/macros/definitions/quotations.x:19`
 `List Compiler.peek_macro_hole(Compiler c)`
 
 Returns the registered hole descriptor for a named or expression hole.
-`$NAME` and `${expression}` insert one value; `@NAME` and `@{expression}`
+`$NAME` and `$(expression)` insert one value; `@NAME` and `@(expression)`
 splice a sequence. Returns NULL without consuming a non-hole spelling.
 
-Source: `src/macros/definitions/slots.x:80`
+Source: `src/macros/definitions/slots.x:79`
 
 <a id="Compiler.place"></a>
 #### Compiler.place
@@ -558,7 +557,7 @@ transform time, in placement order before its first statement;
 with `(unit-support KEY)`; or `(unit-init)` in the unit's file
 initialization, in AREA with `(unit-init AREA)`.
 
-Source: `src/macros/values.x:305`
+Source: `src/macros/values.x:306`
 
 <a id="Compiler.publish_macro_definition_node"></a>
 #### Compiler.publish_macro_definition_node
@@ -626,16 +625,6 @@ run.
 
 Source: `src/macros/templates.x:266`
 
-<a id="Compiler.reject_lisp_form"></a>
-#### Compiler.reject_lisp_form
-
-`List Compiler.reject_lisp_form(Compiler c)`
-
-Reports the compile-time Lisp form at the cursor, which x2c no longer
-evaluates.
-
-Source: `src/macros/diagnostics.x:337`
-
 <a id="Compiler.report_meta_failure"></a>
 #### Compiler.report_meta_failure
 
@@ -644,7 +633,7 @@ Source: `src/macros/diagnostics.x:337`
 Reports that the meta call `source` failed with `error` at
 `invocation`.
 
-Source: `src/macros/diagnostics.x:330`
+Source: `src/macros/diagnostics.x:325`
 
 <a id="Compiler.rewrite"></a>
 #### Compiler.rewrite
@@ -702,7 +691,7 @@ Source: `src/macros/aliases.x:418`
 Consumes a macro invocation name and its balanced argument list.
 The invocation terminator or following decorator target remains current.
 
-Source: `src/macros/invocations/recognition.x:356`
+Source: `src/macros/invocations/recognition.x:357`
 
 <a id="Compiler.skip_named_type_declaration"></a>
 #### Compiler.skip_named_type_declaration
@@ -712,7 +701,7 @@ Source: `src/macros/invocations/recognition.x:356`
 Consumes a NamedType target already projected by owning-source collection.
 CPP scanning does not produce the declaration or parse its fields again.
 
-Source: `src/macros/invocations/recognition.x:367`
+Source: `src/macros/invocations/recognition.x:368`
 
 <a id="Compiler.take_code_value"></a>
 #### Compiler.take_code_value
@@ -727,7 +716,7 @@ transaction, and their tokens are replaced in the code.
 leaves untouched. Lowered code is not searched for a leftover binder.
 Returns 0 for any other value.
 
-Source: `src/macros/values.x:255`
+Source: `src/macros/values.x:256`
 
 <a id="Compiler.try_parse_macro_expression"></a>
 #### Compiler.try_parse_macro_expression
@@ -748,7 +737,7 @@ Source: `src/macros/invocations/expressions.x:15`
 Parses a member name in a template. A singular `Name` hole there
 supplies the spelling it captured, without hygienic renaming.
 
-Source: `src/macros/definitions/slots.x:179`
+Source: `src/macros/definitions/slots.x:176`
 
 <a id="Compiler.try_parse_macro_pattern"></a>
 #### Compiler.try_parse_macro_pattern
@@ -786,7 +775,7 @@ selects the content alone, for a position whose pattern already writes
 the `(expr TYPE ...)` shell. Returns NULL without consuming tokens when
 no macro NAME is visible.
 
-Source: `src/macros/values.x:142`
+Source: `src/macros/values.x:143`
 
 <a id="Compiler.try_parse_macro_target_at"></a>
 #### Compiler.try_parse_macro_target_at

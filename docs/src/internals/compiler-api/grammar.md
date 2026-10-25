@@ -116,7 +116,7 @@ Source: `src/grammar.x:91`
 
 Returns a source form's content pattern without its typed shell.
 Bare-content dispatch arms retain the fixed head the match emitter labels.
-Inside a shell, write `%(expr ? ${$shape(...)})` instead.
+Inside a shell, write `%(expr ? $($shape(...)))` instead.
 
 Source: `src/grammar.x:177`
 

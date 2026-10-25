@@ -12,10 +12,13 @@ X2c literal parsing.
 
 | Function | Summary |
 | --- | --- |
+| [`Compiler.list_expression`](#Compiler.list_expression) | Builds the typed List expression that conses the element expressions `elements`, in order, onto the cells `tail`. |
 | [`Compiler.literal_cell`](#Compiler.literal_cell) | Conses the element expression `head` onto the cells `tail`, or appends the List a `(splice EXPR)` head holds, and folds the cell into the literal cache when both parts are constant. |
 | [`Compiler.parse_array_literal`](#Compiler.parse_array_literal) | Parses a quoted Array literal into a typed, source-ordered `(array ...)` node and consumes its closing `]`. |
 | [`Compiler.parse_atomic_literal`](#Compiler.parse_atomic_literal) | Parses the current atomic token into a typed expression and advances once. |
 | [`Compiler.parse_catch_pattern_literal`](#Compiler.parse_catch_pattern_literal) | Parses a filtered-catch `%()` payload into a typed `List` pattern. |
+| [`Compiler.parse_evaluated_list`](#Compiler.parse_evaluated_list) | Parses an evaluated List `$(a, b, ...)`: each assignment expression is one element, converted to Var, and `@name` or `@(expression)` splices a List's elements, as in a quoted List. |
+| [`Compiler.parse_evaluated_map`](#Compiler.parse_evaluated_map) | Parses an evaluated Map, `${key: value, ...}`, whose bare identifier keys are expressions like any other key, and consumes its `}`. |
 | [`Compiler.parse_list_literal`](#Compiler.parse_list_literal) | Parses a `List` literal beginning at `(` or `%(` and returns its typed expression after consuming `)`. |
 | [`Compiler.parse_macro_pattern_arguments`](#Compiler.parse_macro_pattern_arguments) | Parses a macro pattern's parenthesized arguments and returns the static pattern of each: a binder or wildcard, a nested macro pattern, or a `%(...)` List pattern. |
 | [`Compiler.parse_map_entries`](#Compiler.parse_map_entries) | Parses comma-separated `Map` entries up to but not including `}`. |
@@ -25,10 +28,21 @@ X2c literal parsing.
 | [`Compiler.parse_string_literal`](#Compiler.parse_string_literal) | Parses a percent `String` literal and returns its typed expression after the closing quote. |
 | [`Compiler.parse_symbol_set_literal`](#Compiler.parse_symbol_set_literal) | Parses a `%<<...>>` literal into an immutable ordered `SymbolSet`. |
 | [`Compiler.symbol_set_expression`](#Compiler.symbol_set_expression) | Builds a typed `SymbolSet` expression from source-ordered `Symbol` values. |
-| [`Compiler.try_parse_macro_pattern_insertion`](#Compiler.try_parse_macro_pattern_insertion) | Parses a pattern's `${$NAME(...)}`, where NAME is a macro, into its derived pattern, or returns NULL without consuming tokens. |
+| [`Compiler.try_parse_macro_pattern_insertion`](#Compiler.try_parse_macro_pattern_insertion) | Parses a pattern's `$($NAME(...))`, where NAME is a macro, into its derived pattern, or returns NULL without consuming tokens. |
 | [`Compiler.typed_match_pattern`](#Compiler.typed_match_pattern) | Applies each typed capture's predicate to every unquoted occurrence. |
 
 ### `Compiler`
+
+<a id="Compiler.list_expression"></a>
+#### Compiler.list_expression
+
+`List Compiler.list_expression(Compiler c, Array elements, List tail)`
+
+Builds the typed List expression that conses the element expressions
+`elements`, in order, onto the cells `tail`. A `(splice EXPR)` element
+appends the List that EXPR holds, as `literal_cell` does.
+
+Source: `src/literals/quotation.x:318`
 
 <a id="Compiler.literal_cell"></a>
 #### Compiler.literal_cell
@@ -39,7 +53,7 @@ Conses the element expression `head` onto the cells `tail`, or appends
 the List a `(splice EXPR)` head holds, and folds the cell into the
 literal cache when both parts are constant.
 
-Source: `src/literals/quotation.x:256`
+Source: `src/literals/quotation.x:289`
 
 <a id="Compiler.parse_array_literal"></a>
 #### Compiler.parse_array_literal
@@ -74,6 +88,29 @@ runtime-literal state is restored on every exit.
 
 Source: `src/literals/payloads.x:98`
 
+<a id="Compiler.parse_evaluated_list"></a>
+#### Compiler.parse_evaluated_list
+
+`List Compiler.parse_evaluated_list(Compiler c)`
+
+Parses an evaluated List `$(a, b, ...)`: each assignment expression is
+one element, converted to Var, and `@name` or `@(expression)` splices a
+List's elements, as in a quoted List. A trailing comma is allowed, and
+`$()` is the empty List.
+
+Source: `src/literals/quotation.x:235`
+
+<a id="Compiler.parse_evaluated_map"></a>
+#### Compiler.parse_evaluated_map
+
+`List Compiler.parse_evaluated_map(Compiler c)`
+
+Parses an evaluated Map, `${key: value, ...}`, whose bare identifier
+keys are expressions like any other key, and consumes its `}`. In code
+`$` and `{` are two tokens; quoted data scans `${` as one.
+
+Source: `src/literals/collections.x:209`
+
 <a id="Compiler.parse_list_literal"></a>
 #### Compiler.parse_list_literal
 
@@ -104,7 +141,7 @@ Source: `src/literals/quotation.x:146`
 Parses comma-separated `Map` entries up to but not including `}`.
 `Entry`-position macro sequences are flattened in source order.
 
-Source: `src/literals/collections.x:205`
+Source: `src/literals/collections.x:203`
 
 <a id="Compiler.parse_map_entry"></a>
 #### Compiler.parse_map_entry
@@ -116,7 +153,7 @@ A bare identifier key is an Atom; any other key is an expression.
 A direct row returns a resolved `(map-entry KEY VALUE)` node; an
 entry-position macro may return `(seq ...)` for its caller to splice.
 
-Source: `src/literals/collections.x:220`
+Source: `src/literals/collections.x:234`
 
 <a id="Compiler.parse_map_literal"></a>
 #### Compiler.parse_map_literal
@@ -149,7 +186,7 @@ Parses a percent `String` literal and returns its typed expression after
 the closing quote. Static segments enter the compiler cache unless
 `runtime_literals` is set; interpolated segments remain source ordered.
 
-Source: `src/literals/strings.x:18`
+Source: `src/literals/strings.x:23`
 
 <a id="Compiler.parse_symbol_set_literal"></a>
 #### Compiler.parse_symbol_set_literal
@@ -178,7 +215,7 @@ Source: `src/literals/collections.x:72`
 
 `List Compiler.try_parse_macro_pattern_insertion(Compiler c, int content)`
 
-Parses a pattern's `${$NAME(...)}`, where NAME is a macro, into its
+Parses a pattern's `$($NAME(...))`, where NAME is a macro, into its
 derived pattern, or returns NULL without consuming tokens. `content`
 selects the bare content, for the content position of an
 `(expr TYPE ...)` shell.
@@ -192,7 +229,7 @@ Source: `src/literals/quotation.x:184`
 
 Applies each typed capture's predicate to every unquoted occurrence.
 
-Source: `src/literals/quotation.x:336`
+Source: `src/literals/quotation.x:373`
 
 ## Design notes
 
