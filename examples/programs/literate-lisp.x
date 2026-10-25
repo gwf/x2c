@@ -166,10 +166,7 @@ static Var Interp.special(Interp &self, LispEnv *env, Symbol op, List args) {
     }
     case %(import ?form): {                                                      // Pattern binds the path expression.
       Var path = self.eval(env, form);                                           // Receiver call yields a Var.
-      Atom hook = Atom.intern("_x2c.import-hook");                               // Atom supports longer names.
       _string_argument(path, "import");                                          // C literal promotes to String.
-      if (hook in self.globals)                                                  // Map membership by key.
-        return self.apply(self.globals[hook], %($path));                         // Construct a one-argument List.
       return _import_file(self, path);                                           // Var path converts to String.
     }
   }

@@ -220,15 +220,11 @@ static Var _special_apply(Lisp lisp, List args, LispEnv *env) {
   return _apply_values(lisp, callable, _list_argument(values));
 }
 
-/* `import` hands its path to the `_x2c.import-hook` global when one is
-   bound, and otherwise evaluates the file. */
+/* `import` reads and evaluates the file at its path. */
 static Var _special_import(Lisp lisp, List args, LispEnv *env) {
   _arity(args, 1, "import");
   Var path = _eval(lisp, args.car(), env);
   _string_argument(path, "import");
-  Var hook;
-  if (_global_lookup(lisp, Atom.intern("_x2c.import-hook"), hook))
-    return lisp.apply(hook, %($path));
   File source = auto File.open(path, "r");
   return lisp.eval_file(source);
 }
