@@ -8,17 +8,21 @@ macro Stmt $local_alias(Expr $result) {
   $result = value;
 }
 
+meta static List alias_rows(void) {
+  return %(
+    (typedef ("Var") (bindings (bind ("Value") ())))
+    (declare ("Value")
+      (bindings (op = (bind ("value") ())
+        (expr (int) (literal (int) "8")))))
+    (return (int)
+      (expr () (cast (decl ("Value") (bindings (bind () ())))
+        (expr () (ident ("value"))))))
+  );
+}
+
 macro Unit $constructed_alias() {
-  static int $(x2c.ident "constructed")(void) {
-    @(quote (
-      (typedef ("Var") (bindings (bind ("Value") ())))
-      (declare ("Value")
-        (bindings (op = (bind ("value") ())
-          (expr (int) (literal (int) "8")))))
-      (return (int)
-        (expr () (cast (decl ("Value") (bindings (bind () ())))
-          (expr () (ident ("value"))))))
-    ))
+  static int $x2c_ident("constructed")(void) {
+    @alias_rows()
   }
 }
 
