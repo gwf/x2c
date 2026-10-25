@@ -272,6 +272,19 @@ passed six repeated nested-Make probes, and help output remains byte-identical.
   `$x2c_invocation_line()` nevertheless answer with the call's own file and
   line, so that rejection is not reached. `macro-invocation-location-outside`
   records the current output.
+- A meta group can emit a prototype with no type. Reproduction: a unit
+  defines `meta static List one_item(List target) => %($target);`, a
+  `macro Unit $through_sequence(Unit $target) { @one_item($target) }`, and a
+  `macro Unit $computed(Expr $value)` whose body declares `static
+  $Code.type($value) $x2c_ident("slot_helper")(void) { return $value; }`.
+  Writing `$through_sequence(int retained = 42;);` and then
+  `$computed(retained);` fails at the first call: "this function cannot run
+  at compile time", because the meta group declares `static slot_helper(void);`
+  and the C compiler rejects implicit `int`. The same unit succeeds when
+  `retained` is an ordinary declaration. The former Lisp slots
+  (`$(Code.type $value)`, `@(list $target)`) showed the same failure.
+  `macro-computed-slots` (formerly `macro-lisp-slots`) keeps the computed
+  type, identifier, and splice slots but declares `retained` directly.
 
 ## Outstanding Items
 
