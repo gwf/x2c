@@ -145,7 +145,7 @@ Inspection modes print an intermediate result and stop translation:
 - `--dump-conformance` prints protocol conformance and stops.
 
 `--dump-definitions` prints what the unit defines after translation has
-selected, expanded, and bound it, one Lisp form per line. Documentation
+selected, expanded, and bound it, one `List` form per line. Documentation
 generators and repository tools read it instead of scanning source text.
 Each unit starts with `(unit PATH)`, so one command can inspect several
 files. A file that opens with a block comment, after any directives, then
@@ -696,7 +696,7 @@ x2c env runtime_lib
 
 The home is `X2C_HOME` when set. Otherwise the compiler walks up from its
 executable, then from the current directory, to the nearest directory holding
-`include/` and `etc/compiler-sdk.xlisp`. Either way the home is reported and
+`include/` and `etc/compiler-prelude.x`. Either way the home is reported and
 compared as an absolute path with symbolic links resolved, so a relative or
 symlinked `X2C_HOME` selects the same stage, prelude, and runtime archive as
 its real path. A source checkout and an
@@ -827,7 +827,7 @@ no diagnostics leaves it empty. Each line is one JSON object:
 - `notes` holds the note line that standard error shows, the text notes
   joined with spaces, or nothing when the diagnostic has no notes.
 
-Compile-time Lisp and macros may print to standard output and standard error,
+Macros and `meta` functions may print to standard output and standard error,
 so neither stream contains JSON. Parallel translation workers share the file;
 each diagnostic is one appended write, so lines never interleave. A diagnostic
 is written when it is reported, and the file is complete when the command
@@ -867,7 +867,7 @@ that output, and the inspection modes keep progress out of their stdout data.
 ## Dependencies and external builds
 
 Translation depfiles contain the primary source, transitive quote-includes,
-and the runtime, macro, Lisp, and embedded-text files that unit read. The
+and the runtime, macro, and embedded-text files that unit read. The
 native driver adds `-MMD -MP -MF -MT` per object and rejects conflicting
 dependency flags passed through `-Xcc`.
 

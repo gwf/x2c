@@ -55,7 +55,7 @@ defaults, `SymbolSet`, and non-returning allocation failure can delete code
 without adding machinery. Do not retain a wrapper, forwarding protocol,
 compatibility alias, or post-allocation branch after its only job disappears.
 
-Use a macro, decorator, or compile-time Lisp table only when genuinely uniform
+Use a macro, decorator, or `meta` table only when genuinely uniform
 source remains. The definition, data, helpers, and invocations should be
 shorter or easier to verify than the direct code. Keep policy-bearing names and
 types visible. Good candidates include mechanical function families, test

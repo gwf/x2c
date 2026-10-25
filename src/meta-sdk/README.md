@@ -17,7 +17,7 @@ Read `meta-sdk.x` and `context.x` first. Then choose `syntax.x`, `types.x`, or
 | [syntax.x](syntax.x) | Inspects and constructs bound syntax, converts expressions, creates names, and places generated code. |
 | [rewrites.x](rewrites.x) | Converts rewrite and after-initialization registrations into compiler rule forms. |
 | [sources.x](sources.x) | Recovers captured source text, describes source locations, and reads embedded text. |
-| [primitives.x](primitives.x) | Installs supporting Lisp primitives for symbol sets, linked hashes, and native-target queries. |
+| [primitives.x](primitives.x) | Supplies compiler-private generator primitives: native target rows, linked definition hashes, prelude records, and SymbolSets. |
 
 ## Related code
 

@@ -12,7 +12,7 @@ that order.
 | File | Responsibility |
 | --- | --- |
 | [declarations.x](declarations.x) | Assembles declaration production and declares forwarded-constructor diagnostics. |
-| [production.x](production.x) | Runs source Lisp effects and unit declaration macros during collection, retains their results, and replays them during full parsing. |
+| [production.x](production.x) | Runs unit declaration macros during collection, retains their results, and replays them during full parsing. |
 | [portable-syntax.x](portable-syntax.x) | Freezes tokens, origins, bindings, cached literals, and macro syntax into portable rows, then restores them in another context. |
 | [defaults.x](defaults.x) | Selects offered declarations whose names remain available and constructs forwarded parent constructors. |
 

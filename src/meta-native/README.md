@@ -14,7 +14,7 @@ target, follow `bindings.x` into `modules.x`. For a shipped definition, read
 | --- | --- |
 | [meta-native.x](meta-native.x) | Introduces native meta binding, process state, and diagnostics. |
 | [functions.x](functions.x) | Installs bodied meta functions and helper/session stubs, including collected project advertisements. |
-| [bindings.x](bindings.x) | Records bodyless native declarations, selects suppliers, checks signatures, and derives lifetime summaries. |
+| [bindings.x](bindings.x) | Owns the unit's active binding table, `MetaBindings`, records bodyless native declarations, selects suppliers, checks signatures, and derives lifetime summaries. |
 | [calls.x](calls.x) | Executes explicit meta calls and converts returned values into expressions or statements. |
 | [modules.x](modules.x) | Loads selected native modules and package extensions, checks their stamps, and retains target tables. |
 | [linked.x](linked.x) | Reuses compiler-linked definitions when provider text and signatures agree. |

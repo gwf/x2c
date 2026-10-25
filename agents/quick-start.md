@@ -280,7 +280,7 @@ directory keep their distinct path-derived objects under `<dir>/obj/`.
 - `docs/` - language, library, and compiler book.
 - `agents/` - task routing and implementation references.
 - `plans/` - active plans and archived decisions.
-- `etc/` - shared build rules, Lisp bootstrap, and SDK.
+- `etc/` - shared build rules, the compiler prelude, and runtime Lisp assets.
 - `packages/` - optional third-party adapters, outside `make check`.
 - `site/` - public website; it is not gated. Candidate assembly retains complete destination sites; promotion deploys
   their version file and package index together; see [Releasing](releasing.md).
@@ -293,8 +293,8 @@ directory keep their distinct path-derived objects under `<dir>/obj/`.
 - Percent literals: `src/literals/literals.x`; lambdas: `src/lambdas.x` parses them
   and resolves captures, and `src/components/lambda-functions.x` lowers them.
 - Statements: `src/statements.x`; the built-in `foreach(item, collection)`
-  source macro: `etc/builtin-macros.x` and `src/builtins.x`, loaded by
-  `src/macros/macros.x`.
+  source macro: `etc/compiler-prelude.x`, read before each unit, and
+  `src/builtins.x`.
 - Type initialization: `src/parse/parse.x`, `src/generate/generate.x`, and `src/cache.x`.
 - Type conversion: `src/type.x`, `src/expressions/expressions.x`, `src/transform/transform.x`,
   `lib/var/conversion.x`, and `lib/var/operators.x`.

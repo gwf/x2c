@@ -397,7 +397,7 @@ its own unit.
 
 ### Generated names with `using $name`
 
-Use a leading `using $name;` directive only when compile-time Lisp or a
+Use a leading `using $name;` directive only when a `meta` call or a
 nested macro needs a private `Name` hole before an ordinary declaration can
 introduce it:
 
@@ -424,7 +424,7 @@ The three spellings of `using` do different things:
 ## Put reusable macros in ordinary source modules
 
 An ordinary `.x` file may hold runtime code, macro definitions, keyword
-aliases, meta functions, and top-level compile-time Lisp. Include the module
+aliases, and meta functions. Include the module
 wherever its public definitions are needed:
 
 <!-- ignore: project-macros.x is the external file being illustrated -->
@@ -437,10 +437,6 @@ transitive includes. Use `static macro` or `static keyword` for helpers that
 belong only to the declaring file. Ordinary includes are tracked translation
 dependencies and each canonical file contributes once per unit; include
 cycles terminate without loading a second copy.
-
-`$(import "helpers.xlisp")` remains the loading form for Lisp files. A Lisp
-import executes in the translation-unit Lisp session and rejects import
-cycles.
 
 A package publishes the nonstatic macros and aliases its entry source and
 ordinary includes define. `import "name";` makes that syntax available at the
@@ -628,7 +624,7 @@ int main(void) {
 Include `meta.x` when the calculation needs compiler operations for
 diagnostics, identifiers, types, bindings, source text or function bodies.
 The [meta-function guide](meta-functions.md) introduces these operations;
-the [language reference](../reference/language.md#the-same-operations-from-x2c)
+the [language reference](../reference/language.md#compile-time-calls-and-operations)
 specifies them.
 
 A helper can also receive a captured statement, a description of a type
@@ -637,11 +633,9 @@ A helper can also receive a captured statement, a description of a type
 shows each.
 
 Prefer source templates for generated code and meta functions for the
-calculations that supply their arguments. Use the optional `$(...)` Lisp
-entry when integrating existing Lisp helpers or changing the compiler's Lisp
-session. For example, `$(project_offset)` calls the helper above from Lisp.
-Local macro names are lexical; Lisp definitions instead remain available for
-the rest of the translation unit after the defining block ends.
+calculations that supply their arguments. Compile-time code is always x2c:
+the compiler rejects the former `$(...)` and `@(...)` Lisp forms. Lisp remains
+a runtime library for DSLs and the REPL.
 
 ### Generate several views from one table
 
@@ -656,8 +650,8 @@ working through the generator. Keep unrelated outputs as direct source.
 ## Declare methods and converters before adoption
 
 Shallow collection loads included macro definitions and expands file-scope
-`Unit` macros. It evaluates preceding top-level Lisp contributions when the
-producer needs them. Generated private helpers stay available in their source
+`Unit` macros. It applies preceding top-level definitions when the producer
+needs them. Generated private helpers stay available in their source
 module. Public declarations and protocol rows reach includers. The full parse
 binds the retained result without running its producer again.
 
@@ -690,5 +684,5 @@ Differentiation](autodiff.md): a `Type`-hole family for dual numbers, and
 into its derivative.
 
 For the complete hole grammar, result validation, hygiene rules, limits, and
-compiler Lisp SDK, see [Compile-time macros in the language
+compiler operations, see [Compile-time macros in the language
 reference](../reference/language.md#compile-time-macros).

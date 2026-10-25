@@ -348,17 +348,18 @@ boxed=42
 ```
 
 `${...}` unquotes one x2c expression inside a quoted `List`, `String`, `Array`,
-or `Map`. In ordinary x2c code, `$(...)` enters compile-time Lisp. Nesting
-them inserts a compile-time Lisp result into a quoted collection:
+or `Map`. Inside it, a `meta` call inserts a compile-time result into a quoted
+collection:
 
 ```x2c
-List generated = %(${$(+ 40 2)});
-Array generated_array = %[${$(+ 40 2)}];
+~meta static int answer(void) => 40 + 2;
+List generated = %(${$answer()});
+Array generated_array = %[${$answer()}];
 ```
 
-The outer `${` unquotes from `List` grammar into x2c. The inner `$(` is read
-in x2c and enters compile-time Lisp. `$macro(...)` is a macro invocation in
-x2c. None of these parser meanings change Lisp `quote` or `quasiquote`. `%!`
+The outer `${` unquotes from `List` grammar into x2c. The inner `$answer()` is
+read in x2c as a `meta` call, just as `$macro(...)` is a macro invocation.
+None of these parser meanings change Lisp `quote` or `quasiquote`. `%!`
 is still the lambda-literal prefix, and `%` between two operands is still
 modulo.
 

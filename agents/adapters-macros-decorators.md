@@ -190,9 +190,8 @@ offsets, and copies keep a frozen program's byte layout visible.
 A one-use data-only module adds a file boundary without sharing an
 implementation;
 `lib/lisp-targets/lisp-targets.x` therefore declares its native target rows directly. Its
-local expression macro remains necessary because `x2c.ident` is valid only
-during macro expansion; a direct top-level Lisp splice fails before
-translation.
+local expression macro remains necessary because `x2c_ident` is valid only
+during macro expansion.
 
 Do not create a ledger merely because several cases share a noun. Match's six
 guard operators, for example, have different normalization, capture, layout,
@@ -205,7 +204,7 @@ clearest possible ledger: the enum itself.
 ### Keep important names explicit
 
 Do not make a reader reverse-engineer public function names, C types, or
-failure modes from clever Lisp. The native update macro at
+failure modes from clever generators. The native update macro at
 `lib/var/operators.x` explicitly receives both the native type and public
 function name at each invocation. That repetition is useful documentation at
 the call site.
@@ -264,7 +263,8 @@ Do not use a decorator to:
 - generate a family of sibling functions; use a unit macro or direct code;
 - conceal output-publication, fallback, or ownership policy;
 - replace a normal helper that already names the operation clearly;
-- manufacture arbitrary AST simply because the macro system permits Lisp;
+- manufacture arbitrary AST simply because canonical Lists are accepted by
+  structure;
 - assume every parsed construct is valid as constructed decorator output.
 
 When a natural decorator shape fails, reduce it to a small compiler probe.
@@ -326,7 +326,7 @@ must not use it because shared causes never return to the raise.
 `Path.make_dirs` and `Path.remove_tree` rather than keeping compiler-local
 filesystem helpers. The Lisp evaluator's local target
 rows in `lib/lisp-targets/lisp-targets.x` produce the native-target Map. Use macros,
-compile-time Lisp, or ordinary helpers according to which form leaves the
+`meta` functions, or ordinary helpers according to which form leaves the
 facts easiest to inspect.
 
 ### Whole-test retained Scope
@@ -532,43 +532,16 @@ machinery without a capability or ownership benefit.
 
 ### Shipped expression constructors for generators
 
-Status: proven; revised 2026-10-10, when quotations replaced the x2c
-constructors and only the Lisp literal builders remained
+Status: superseded 2026-10-25; the compiler no longer evaluates Lisp
 Checked: 2026-08-02 at `d2a51d85`
-Owner: `etc/compiler-sdk.xlisp` compile-time Lisp SDK
+Owner: formerly `etc/compiler-sdk.xlisp`, now removed
 
-Problem: a macro that generates code has to build AST nodes, and the SDK
-shipped constructors only for a String literal, a cast, and a call — the last
-two private. Every generator that needed anything else wrote the node shape by
-hand. `lib/var-tags.x` defined its own `var.tag.int-expr` and
-`var.tag.symbol-expr`; `lib/var/operators.x` spelled a three-level index node inline;
-the `(expr () (composite (commas ...)))` initializer wrapper appeared four
-times across two files. The shapes are only discoverable by reading
-`src/emit/emit.x`, and getting one wrong fails as `compile-time Lisp evaluation
-failed` at the invocation, not at the definition.
-
-Direct form:
-
-```text
-$(defun var.tag.symbol-expr (value)
-  `(expr ("Symbol") (literal ("Symbol") ,(str value) ,value)))
-```
-
-Adapter/macro/decorator form: `x2c.literal.string`, `x2c.literal.int`, and
-`x2c.literal.symbol` in `etc/compiler-sdk.xlisp`, which Lisp needs because it
-has no quotation. Other code is a quotation in a `meta` function, or a
-quasiquoted List where the generator manipulates structure. A wrong literal
-argument reports `x2c.literal.int requires a number` instead of failing later
-inside an expansion.
-
-Proof: generated `.h` and `.c` byte-identical for `lib/var/var.x` and
-`lib/var/operators.x` before and after adoption; `make precommit` and `make check`.
-
-Limits or counterexample: the SDK declares no other constructors. A
-`switch`, a `case`, and every other shape are quotations in `meta` code or
-quasiquoted Lists.
-
-Language gap, if any: none; this is an SDK addition, not a compiler change.
+The Lisp literal builders `x2c.literal.string`, `x2c.literal.int`, and
+`x2c.literal.symbol` existed because compile-time Lisp had no quotation.
+With compile-time Lisp removed, a `meta` function builds every literal and
+node with a typed quotation such as `$!String{ $text }`, or with a `%(...)`
+List where the generator manipulates structure. The SDK declares no
+constructors.
 
 ## Measure a candidate
 

@@ -179,8 +179,8 @@ package's public names. Generated names are compiler details; source never
 spells them, and `--dump-definitions` displays the source name. A static type
 adopted as a class keeps its short name as its Var tag and descriptor name, so
 two files of one unit cannot each adopt a class under the same short name.
-Compile-time declarations, `static macro`, `static $(`, `static protocol`, and
-`meta` functions, keep their unit-wide behavior. Macro free names follow
+Compile-time declarations, `static macro`, `static protocol`, and `meta`
+functions, keep their unit-wide behavior. Macro free names follow
 [hygiene](#hygiene-and-generated-names).
 
 Three cases are errors. Two files whose paths give one prefix, such as
@@ -231,9 +231,9 @@ an error.
 In the second form these top-level forms stay at file scope:
 
 - preprocessor lines, `import`, and protocol declarations and adoptions;
-- `macro` and `keyword` definitions, top-level `$(...)` Lisp, and
-  invocations of macros and keyword aliases whose result is file-scope
-  syntax, including decorators of functions and types;
+- `macro` and `keyword` definitions, and invocations of macros and keyword
+  aliases whose result is file-scope syntax, including decorators of functions
+  and types;
 - `typedef`, `static`, `module`, `extern`, and `meta` declarations and static
   assertions;
 - [`alias`](#expression-aliases-with-alias) declarations in either form;
@@ -316,9 +316,9 @@ int main(void):
   header starts with `typedef`, and enumerators keep their commas.
 - **One-line bodies.** `if cond: statement` puts the body after the first
   colon outside brackets that does not belong to a `?:`.
-- **Statements.** Every other line ends with an implied `;`. Directives,
-  enum bodies, a line that is one whole `$(...)` or `@(...)` form, and a statement
-  that is only a macro hole, alone or after a control header, take none.
+- **Statements.** Every other line ends with an implied `;`. Directives, enum
+  bodies, and a statement that is only a macro hole, alone or after a control
+  header, take none.
 - **Bare blocks.** `do:` whose block is not followed by a `while` line at
   the same indentation is a bare `{ ... }` scope. With that trailer it is a
   `do`-`while` loop.
@@ -1234,10 +1234,9 @@ invoked as `name(arguments)`. A source file may also give a visible global
 macro an identifier spelling through a `keyword` declaration, described under
 [Decorators](#decorators). Macro names are separate from C identifiers and
 global names may be qualified, as in `$project.logging.trace`. A part after a
-dot may be a keyword, as in `$error.arg.void`. The `x2c.*` and
-`lisp.*` macro and Lisp namespaces are reserved for compiler-shipped
-facilities; `$lisp.bind`, `$lisp.binding`, and `$lisp.install` are the shipped
-native-binding macros.
+dot may be a keyword, as in `$error.arg.void`. The `x2c.*` and `lisp.*` macro
+namespaces are reserved for compiler-shipped facilities; `$lisp.bind`,
+`$lisp.binding`, and `$lisp.install` are the shipped native-binding macros.
 
 Definitions and includes become visible in source order. A definition must
 precede its first use. A later definition of the same name shadows the earlier
@@ -1282,17 +1281,13 @@ rejected. Their invocation positions are outside that lifetime. A
 macro-generated local definition is published at block position with the same
 visibility and shadowing behavior as a direct one.
 
-Compile-time Lisp remains one translation-unit session. A local definition may
-read or change that session, but Lisp definitions, imports, globals, and other
-effects do not disappear when the local macro name leaves scope.
-
 ### Holes and sequences
 
 A hole binds parsed syntax, not source tokens. Its kind is normally inferred
 from every position where it appears in the body: an operand needs an
 expression, a cast needs a type, and a declarator needs a name. If those uses
-do not imply exactly one kind, including when a hole appears only inside
-compile-time Lisp, the definition must annotate it in the invocation pattern.
+do not imply exactly one kind, the definition must annotate it in the
+invocation pattern.
 
 Hole kinds, result kinds, and decorator targets are one vocabulary of
 syntactic categories. Each name below selects the same category wherever it
@@ -1379,8 +1374,8 @@ or parameterized type spelling such as `Box<T>`. A macro generates named
 concrete families such as `IntValue` and `DoubleValue`.
 
 During shallow symbol collection, every file-scope `Unit` macro must expand.
-Collection evaluates preceding top-level Lisp contributions before expanding
-that producer. Its result is retained for the full parse, which binds the
+Collection applies preceding top-level definitions before expanding that
+producer. Its result is retained for the full parse, which binds the
 retained function bodies without running the producer again. Static generated
 declarations stay in their owner; public declarations and protocol rows reach
 includers. A public function definition can follow its prototype inside the
@@ -1555,8 +1550,9 @@ any number of rows. In a bare `{...}` literal a direct or keyword-alias
 invocation is written as a row. In the quoted `%{...}` literal it must sit
 inside `${...}`, which leaves the quoted Map syntax to parse x2c. Elsewhere in
 an entry macro body, ordinary expression grammar applies, so an expression
-macro may generate a key. `@(form)` inserts a `List` of explicit `(map-entry
-KEY VALUE)` nodes; singular `$(form): value` constructs a generated key.
+macro may generate a key. A `meta` call `@rows(...)` inserts a `List` of
+explicit `(map-entry KEY VALUE)` nodes; singular `$key(...): value` constructs
+a generated key.
 
 A `Stmt`, `Field`, or `Unit` invocation ends with its own `;`.
 `Enumerator` and entry invocations occupy comma-delimited positions and have no
@@ -1869,9 +1865,9 @@ binds nothing, counts no expansion, and opens no transaction. Its holes take
 the values a rebuild gives them:
 
 - Syntax is used unchanged.
-- A binding identity or `x2c.ident` spelling becomes an identifier
+- A binding identity or `x2c_ident` spelling becomes an identifier
   expression.
-- An `x2c.ident` in a member position becomes its spelling. In a declarator,
+- An `x2c_ident` in a member position becomes its spelling. In a declarator,
   it becomes the name the declarator declares.
 - A number becomes a literal of its own type with its exact value.
 - A String or Symbol becomes a literal.
@@ -2102,7 +2098,7 @@ struct Frame frame = {2};
 Most generated declarations need no directive: writing `int temporary` or a
 destructuring `Var (key, value)` in a body makes both that declaration and its
 literal references hygienic. When
-compile-time Lisp needs a private name before an ordinary declaration can
+a `meta` call needs a private name before an ordinary declaration can
 introduce it, place `using $name, $other;` at the start of the braced body.
 Each name is a compiler-allocated singular `Name` hole. Every occurrence
 within one expansion receives the same binding, while different expansions
@@ -2111,9 +2107,8 @@ hole or another generated name and takes no kind annotation or `@` prefix. The
 directives must precede all other body items.
 
 A body marks an exact public spelling with a call such as
-`$x2c_ident("Frame")`, which `meta.x` declares; compile-time Lisp spells it
-`$(x2c.ident "Frame")`. A body that declares a public parameter writes the
-call at the declaration and at each reference, as in
+`$x2c_ident("Frame")`, which `meta.x` declares. A body that declares a public
+parameter writes the call at the declaration and at each reference, as in
 `int $function(int *$x2c_ident("values"))` with
 `$x2c_ident("values")[0]` in its body. In a
 declarator slot that spelling creates a declaration and is normally rejected if
@@ -2125,11 +2120,11 @@ The definition reuses that prototype's binding once; a mismatch, a second
 definition, or a collision with another binding kind is rejected at the
 invocation. A nested scope may still shadow an outer declaration normally. In
 an identifier expression the spelling resolves to the existing declaration,
-with its type, and an unknown one is rejected. A bare Lisp `String`
+with its type, and an unknown one is rejected. A bare `String`
 does not become a name when returned into a name-capable position.
 
 The compiler parses and types arguments before expanding a macro. It then
-matches syntax, evaluates compile-time Lisp, and binds the generated syntax.
+matches syntax, runs its `meta` calls, and binds the generated syntax.
 Generated declarations become visible to following source only if expansion
 succeeds; a failed expansion leaves no provisional symbols or bindings.
 Expansion is limited to 64 nested applications and 10,000 applications per
@@ -2142,118 +2137,90 @@ statements retain their original source locations.
 Operators in a macro expansion use the same protocol dispatch as operators
 written directly, including derived `==`, `!=`, and relational operations.
 
-### Compile-time Lisp and imports
+### Compile-time calls and operations
 
-Use `$helper(...)` to execute an x2c meta function. The `$(...)` form enters
-compile-time Lisp for Lisp interoperability, imports and session setup. At top
-level its result is discarded. Inside a macro body, `$name` refers to the
-hole's exact AST, and the result is inserted according to the recorded body
-position. A syntax `List` inserts syntax, a scalar becomes an expression
-literal, a semantic `Type` `List` fills a type slot, and a syntax sequence
-splices only at a sequence splice point. `String`s are values, never source
-text to be reparsed.
+Use `$helper(...)` to run a `meta` function during translation. Inside a macro
+body, `$name` as an argument passes the hole's exact AST, and the result is
+inserted according to the recorded body position. A syntax `List` inserts
+syntax, a scalar becomes an expression literal, a semantic `Type` `List` fills
+a type slot, and a syntax sequence splices only at a sequence splice point,
+where `@helper(...)` inserts it. `String`s are values, never source text to be
+reparsed. In a percent literal, `${$helper(...)}` reaches compile-time code;
+see [percent literals](#percent-literals-quote-and-unquote).
 
-In a percent literal, `${$helper(...)}` and `${$(...)}` reach compile-time
-code; see [percent literals](#percent-literals-quote-and-unquote).
+```x2c
+#include "meta.x"
+macro Expression $line_here() => $x2c_invocation_line();
 
-```text
-$(import "helpers.xlisp")
-#include "project-macros.x"
-
-macro Expression $computed(Expr $value) => $(car (list $value));
+int main(void) {
+  return $line_here() > 0 ? 0 : 1;
+}
 ```
 
-`.xlisp` files execute in the translation unit's Lisp session. `$(import ...)`
-is for Lisp files; ordinary `.x` modules containing macros and meta functions
-use `#include`. Lisp import paths are relative to the importing file,
-canonicalized, loaded once, and checked for cycles. Direct Lisp file operations
-remain available but are not tracked as compiler dependencies.
+Compile-time code is written in x2c. The compiler does not evaluate Lisp, so
+the earlier `$(...)` and `@(...)` Lisp forms, including
+`$(import "file.xlisp")`, are rejected where they are written with
+`compile-time Lisp forms are not supported`. A `$(` inside a string, a
+comment, or `List` data is not a form and is unaffected. Ordinary `.x` modules
+containing macros and `meta` functions use `#include`, and `.xlisp` files are
+runtime assets that a [Lisp session](#runtime-lisp) loads.
 
-A free name in a Lisp `lambda` or `defmacro` body reads the definitions the
-body was written next to, and then the session's globals. The environment the
-call was written in is not part of that chain, so a caller that binds the same
-name changes nothing about what the body reads. A lambda written inside a
-binding form reads that form's bindings and keeps the values it was made with.
-A macro that needs a value from its caller takes it as an argument.
-
-A `let` binding is not visible inside its own initializer. A lambda a `let`
-binds therefore cannot call itself by that name, and the self-call reports
-`(unbound (name h))`. Write such a helper as a `defun`.
-
-```text
-(let ((h (lambda (n) (h n)))) (h 3))   error: (unbound (name h))
-(defun h (n) (h n))                    reads its own name
-```
-
-The session that translates a unit inherits the compile-time library and
-cannot replace one of its definitions. `def` on an inherited name raises
-`(bad-state (operation "def") (reason "inherited") (name NAME))`, which the
-compiler reports as a failed compile-time evaluation at the defining form.
-This covers `defun` and `defmacro`, which are `def`. The library defines
-many ordinary words, including `filter`, `last`, `map`, `search`, `len` and
-`apply`, so a macro file needs its own names for its own definitions. A
-unit's own definitions live in its own session, so one unit never changes
-what another reads. Lisp definitions treat an inherited binding as final.
-The host API `Lisp.set_global` can shadow an inherited name in the child's
-own bindings without changing the ancestor. Lisp `def` still rejects that
-name, including after a host binding shadows it.
-
-`eval` is an ordinary procedure. The form it is given is evaluated in the
-session's globals, not in the bindings around the call, so
-`(let ((z 7)) (eval (quote (add z 1))))` reports `(unbound (name z))`. Build
-the form with the value in it when a local has to reach `eval`.
-
-Compile-time Lisp is trusted code. It runs with the compiler user's authority,
-including the existing native bindings and file operations; there is no
-sandbox. Lisp may also construct canonical AST `List`s directly; see
+Compile-time code is trusted. A `meta` function runs with the compiler user's
+authority, including file operations; there is no sandbox. It may also
+construct canonical AST `List`s directly; see
 [macro-visible syntax](#macro-visible-syntax).
 
-The compiler supplies these contextual Lisp operations:
+The compiler supplies these operations, declared as bodyless `meta`
+prototypes in the optional module `lib/meta.x`:
 
 ```text
-(Code.type syntax)
-(Code.value literal)
-(Code.source_text syntax)
-(Code.binding_spelling syntax)
-(Code.name function)
-(Code.parameter function name)
-(Code.body function)
-(Code.arguments parameters)
-(Type.fields type)
-(Type.layout type)
-(Type.resolve type)
-(Type.is_value type)
-(Type.parts type)
-(Type.parameters type)
-(Type.return_type type)
-(Type.element type)
-(Type.members type)
-(Type.resolve_member type name call)
-(Type.tag_name name)
-(Type.reverse_name base participant)
-(x2c.ident spelling)
-(x2c.binding.fresh role)
-(x2c.binding.for key role)
-(x2c.literal.string value)
-(x2c.literal.int value)
-(x2c.literal.symbol value)
-(x2c.embed.text path)
-(x2c.invocation.file)
-(x2c.invocation.line)
-(x2c.invocation.column)
-(x2c.enclosing what)
-(x2c.place where code)
-(x2c.diagnostic.fail message notes)
-(x2c.diagnostic.fail.at node category message notes)
-
-(x2c.diagnostic.warn message notes)
+Code.type(syntax)
+Code.value(literal)
+Code.source_text(syntax)
+Code.binding_spelling(syntax)
+Code.name(function)
+Code.native_signature(function)
+Code.parameter(function, name)
+Code.body(function)
+Code.arguments(parameters)
+Type.fields(type)
+Type.layout(type)
+Type.resolve(type)
+Type.is_value(type)
+Type.parts(type)
+Type.parameters(type)
+Type.return_type(type)
+Type.element(type)
+Type.members(type)
+Type.resolve_member(type, name, call)
+Type.tag_name(name)
+Type.reverse_name(base, participant)
+x2c_ident(spelling)
+x2c_binding_fresh(role)
+x2c_binding_for(key, role)
+x2c_embed_text(path)
+x2c_invocation_file()
+x2c_invocation_line()
+x2c_invocation_column()
+x2c_enclosing(what)
+x2c_place(where, code)
+x2c_diagnostic_fail(message, notes)
+x2c_diagnostic_fail_at(node, category, message, notes)
+x2c_diagnostic_error_at(node, category, message, notes)
+x2c_diagnostic_warn(message, notes)
 ```
 
+A macro body calls one with `$`, as in `$Code.type($value)` or
+`@Code.body($function)`; a `meta` body that includes `meta.x` calls it
+directly, because the whole body runs at compile time. A project `meta`
+function's queries ask the compiler while the call waits; see
+[What the compiler answers](../guide/generating-code.md#what-the-compiler-answers).
 An operation on captured code or a semantic type is a method of `Code` or
 `Type`, spelled `Code.member` or `Type.member`. Any other supported operation
-is spelled `x2c.<noun>.<verb>`. A name beginning `_x2c.` is a compiler
-internal with no compatibility promise. Every `Code` and `Type` method in
-`lib/meta.x` has this Lisp form, including those not listed here.
+is spelled `x2c_<noun>_<verb>`. A name beginning `_x2c_` is a compiler
+internal with no compatibility promise. `lib/meta.x` declares further `Code`
+and `Type` methods not listed here, and a predicate method answers `int`, 1
+or 0.
 
 `Code.type` returns the canonical semantic `Type` for supported typed
 syntax. During expansion, syntax a template left untyped is resolved where the
@@ -2270,33 +2237,37 @@ macro argument or decorator target, including its interior whitespace,
 comments, parentheses, newlines, and literal escapes. Imported macros still
 read the caller's source, and syntax forwarded through another macro retains
 where it was written. Constructed syntax, derived subtrees, name values, and
-calls outside expansion are rejected. Standard Lisp `repr` renders a canonical
-AST rather than its source spelling.
+calls outside expansion are rejected.
 
-`x2c.diagnostic.fail` reports a macro diagnostic at its source location with
-`String` notes and does not return.
+`x2c_diagnostic_fail` reports a macro diagnostic at its source location with
+`String` notes and does not return. `x2c_diagnostic_fail_at` reports at
+syntax the macro received, and `x2c_diagnostic_error_at` reports there and
+returns, failing the translation when it finishes.
 
-`x2c.ident` returns the tagged name value described above and accepts a
+`x2c_ident` returns the tagged name value described above and accepts a
 `String` that is a valid identifier spelling.
 
-`x2c.binding.fresh` returns a new binding whose C spelling is built from the
+`x2c_binding_fresh` returns a new binding whose C spelling is built from the
 identifier `role`, as for the compiler's own generated declarations. Code that
 the macro places can declare the binding, and its result can refer to it.
-`x2c.binding.for` returns the binding the unit gave `key`, or the first time a
+`x2c_binding_for` returns the binding the unit gave `key`, or the first time a
 new one named from `role`, so code placed once under `(unit-support KEY)` and
 each result that refers to it name the same binding.
 
-`x2c.invocation.file`, `.line`, and `.column` return the caller's x2c source
-location while a macro body is expanding. Lines and columns are one-based. For
-an included macro, they still give the caller's location. For example,
-`$(x2c.invocation.line)` produces an integer expression for the invocation
-line.
+`x2c_invocation_file`, `x2c_invocation_line`, and `x2c_invocation_column`
+return the caller's x2c source location while a macro body is expanding.
+Lines and columns are one-based. For an included macro, they still give the
+caller's location. For example, `$x2c_invocation_line()` produces an integer
+expression for the invocation line.
 
 `Code.name`, `Code.parameter`, and `Code.body` inspect a decorator's captured
 function. `name` returns its free-function or dotted method name as written
 in source, `parameter` resolves a named parameter to bound identifier syntax,
 and `body` returns the block-item sequence for an explicit `@` splice. Use
 `Code.type` on a resolved parameter when its canonical `Type` is needed.
+`Code.native_signature` returns the `Func` signature of the function a
+definition defines or an expression names, in the form `Func.new` takes, such
+as `((func ("Var")) "Var")`.
 `Code.arguments` accepts either a `(params ...)` node or a `List` of
 parameter nodes and returns their bound identifier expressions. These
 operations do not construct or mutate functions.
@@ -2331,9 +2302,9 @@ type without resolving it.
 `name` of a type, or `nil` when none is available in the current function.
 
 `Code.value` returns a captured constant's value: for a literal, a `String`,
-a number, or a `Symbol`, according to the literal. It is the inverse of
-`x2c.literal.string`, which builds a literal from a value. A literal whose text
-the parser has already consumed, such as a multi-line interpolated `%"..."`, is
+a number, or a `Symbol`, according to the literal. A typed quotation such as
+`$!String{ $text }` builds a literal from a value. A literal whose text the
+parser has already consumed, such as a multi-line interpolated `%"..."`, is
 rejected; read its spelling with `Code.source_text` instead.
 
 `Type.members` returns an enum's members in source order as `(("NAME"
@@ -2345,31 +2316,32 @@ VALUE) ...)`. `VALUE` is one of these:
 - otherwise the initializer's expression node, which a generator can splice
   or walk.
 
-Test it with `string?` when both kinds can occur. A non-enum `Type` is
-rejected.
+Test it with `value is String` when both kinds can occur. A non-enum `Type`
+is rejected.
 
-The Lisp operation `x2c.diagnostic.warn` reports a macro warning at the
-invocation with `String` notes and returns `nil`, so expansion continues.
+`x2c_diagnostic_warn` reports a macro warning at the invocation with `String`
+notes and returns, so expansion continues.
 
-`x2c.enclosing` answers the innermost syntax of one kind around the
+`x2c_enclosing` answers the innermost syntax of one kind around the
 invocation, or `nil` when there is none. `<declarator>` is the initialized
 declarator whose initializer directly holds the invocation, answered as its
 one-declarator declaration `(declare BASE (bindings (bind NAME MODIFIERS)))`;
 `BASE` keeps the storage class, and `Code.type` reads its declared
 type. A block item begun inside that initializer, as in a statement
 expression, hides the declarator. `<statement>` is the enclosing block item,
-answered as its origin anchor `(at N (seq))`, which `x2c.diagnostic.fail.at`
+answered as its origin anchor `(at N (seq))`, which `x2c_diagnostic_fail_at`
 reports at. `<function>` is the enclosing function definition with the empty
-body `(seq)`, which `Code.name`, `Code.parameter`, and `Code.body` read. `<unit>` is a
-`String` expression holding the unit's path. Another kind is rejected.
+body `(seq)`, which `Code.name`, `Code.parameter`, and `Code.body` read.
+`<unit>` is a `String` expression holding the unit's path. Another kind is
+rejected.
 
-`x2c.place` contributes code beyond the expansion's result and returns `nil`.
+`x2c_place` contributes code beyond the expansion's result and returns.
 It applies under the expansion's semantic transaction, as the effects of a
 code-value carrier do. Placed code that declares a name the result uses
-takes it from `x2c.binding.fresh`. `WHERE` is one of these Lists:
+takes it from `x2c_binding_fresh`. `where` is one of these Lists:
 
 - `(after-statement)` places code after the initialized declarator that
-  `x2c.enclosing` answers, or otherwise after the enclosing block item. A
+  `x2c_enclosing` answers, or otherwise after the enclosing block item. A
   declaration split after the declarator keeps the declarators before it in
   their own declaration, its shared inline type, and initialization order.
   The placing expansion's result must be that declarator's complete
@@ -2391,12 +2363,12 @@ takes it from `x2c.binding.fresh`. `WHERE` is one of these Lists:
 - `(unit-support)` adds declarations among the unit's file-scope support
   code; `(unit-support KEY)` adds them only for the first placement under
   `KEY`. Such code takes the names it shares with each result from
-  `x2c.binding.for`.
+  `x2c_binding_for`.
 - `(unit-init)` adds statements to the `finish` area of the unit's
   initialization, and `(unit-init AREA)` to the `protocol`, `prepare`,
   `statics`, or `finish` area, which run in that order.
 
-Any other `WHERE` is rejected as an unknown placement.
+Any other `where` is rejected as an unknown placement.
 
 `Type.is_value` recognizes numeric scalars and enums, Symbol, Var, Atom,
 String, List, and their typedef aliases. Pointer-shaped runtime handles such
@@ -2412,23 +2384,15 @@ for base and participant name Strings, using the protocol registry's package
 naming rules. For example, base `"Var"` and a registered package participant
 `"geometry__Point"` produce `"geometry__Var_point"`.
 
-Lisp has no quotation, so the Lisp library builds the literal a `$(...)` form
-returns for a value. `x2c.literal.string` turns a compile-time `String` into a
-runtime `String` literal expression, and `x2c.literal.int` and
-`x2c.literal.symbol` do the same for a number and a `Symbol`. Other code a
-Lisp form returns is a quasiquoted List.
-
-`x2c.embed.text` reads a regular text file exactly, returns its contents as a
+`x2c_embed_text` reads a regular text file exactly, returns its contents as a
 compile-time `String`, and records its canonical path as a translation
-dependency. It accepts either a Lisp `String` path, resolved relative to the
-file containing the Lisp form, or complete captured `String`-literal syntax,
-resolved relative to the caller file where the literal was written. Absolute
-paths remain absolute. A zero-byte file is valid. Invalid paths, non-regular
-files, read failures, embedded NUL bytes, and `String` size overflow are
-diagnosed. Runtime embedding remains explicit through `x2c.literal.string`.
-
-Names under `x2c.*` or `_x2c.*` with a component beginning `_` are private
-implementation details.
+dependency. It accepts either a `String` path, resolved relative to the file
+containing the call, or complete captured `String`-literal syntax, resolved
+relative to the caller file where the literal was written. Absolute paths
+remain absolute. A zero-byte file is valid. Invalid paths, non-regular files,
+read failures, embedded NUL bytes, and `String` size overflow are diagnosed.
+Written as an expression, `$x2c_embed_text("notes.txt")` embeds the text as a
+`String` literal.
 
 ### Sharing compile-time definitions
 
@@ -2448,13 +2412,11 @@ when an include cycle reaches a file again.
 Public inline bodies can use ordinary function signatures declared later in
 an include cycle. If a declaration producer creates a required signature,
 place that production before the include that needs it. Looking ahead does
-not execute later Lisp forms or declaration producers.
+not execute later declaration producers.
 
 A definition marked `static` stays in its declaring source file. For example,
 `static macro Expression $helper(...)` declares a private macro, and
 `meta static int helper(int value)` declares a private meta function.
-Nonstatic top-level Lisp definitions and Lisp imports also follow the
-ordinary include interface; a `static $(...)` form stays in its file.
 
 Definition order determines which macro or alias later source uses. Macro
 bodies retain their definition-time syntax; free runtime names follow the
@@ -2511,8 +2473,8 @@ Marking a function `meta` has three consequences.
   and links them into one cached helper program. Each `$` call runs in
   that helper; see
   [How a meta function runs](../guide/meta-functions.md#how-a-meta-function-runs).
-  It is callable during translation by `$name(args)` from an x2c body, and
-  Lisp code can call it with `$(name args)`. Inside a `meta` body, `$f(x)`
+  It is callable during translation by `$name(args)` from an x2c body.
+  Inside a `meta` body, `$f(x)`
   is an ordinary call of `f`, because the whole body runs at compile time.
 - The function is also emitted as C and behaves as an ordinary function at run
   time, unless it reaches a compiler query or a source-template constructor,
@@ -2547,16 +2509,14 @@ rejected where the address leaves.
 
 Meta functions may pass and return represented values such as wide integers,
 floating values, Strings and collections during compile-time execution.
-Explicit `$name(args)` insertion, and the optional `$(name args)` Lisp form,
-accept numeric values with their native Var family, computed strings as C
-string literals, Symbols, identifiers
-and nonempty expression-code Lists. Arrays and Maps are reconstructed as
-fresh runtime collections, including nested collections; cycles and shared
-mutable collections are rejected. Callable values and compiler addresses
-cannot be materialized directly. A parameter or result
-with no Var form, such as a struct, a C `bool` or a pointer, cannot cross a
-dollar call. This boundary does not limit internal
-returns to `int`; see
+Explicit `$name(args)` insertion accepts numeric values with their native Var
+family, computed strings as C string literals, Symbols, identifiers and
+nonempty expression-code Lists. Arrays and Maps are reconstructed as fresh
+runtime collections, including nested collections; cycles and shared mutable
+collections are rejected. Callable values and compiler addresses cannot be
+materialized directly. A parameter or result with no Var form, such as a
+struct, a C `bool` or a pointer, cannot cross a dollar call. This boundary does
+not limit internal returns to `int`; see
 [results](../guide/meta-functions.md#results-compute-or-insert).
 
 Compile-time objects belong to the compiler. A file-scope variable that a
@@ -2577,10 +2537,12 @@ A `meta` body runs as native code, with these consequences:
   the compiler while its helper call waits.
 - A raise in a body is a diagnostic at the `$` call. A crash, exit, or
   stack overflow ends the helper and is reported at the call; the
-  compiler continues. The Lisp step and depth budgets do not apply to a
-  native body; a call longer than `X2C_META_TIMEOUT` seconds (60 by
-  default) is stopped instead.
--
+  compiler continues. A call longer than `X2C_META_TIMEOUT` seconds (60 by
+  default) is stopped.
+- A body may use runtime [Lisp](#runtime-lisp) when it runs in the project
+  helper, which links the full runtime, or in the REPL. A native module the
+  compiler loads receives the compiler's core runtime exports, which omit
+  Lisp.
 
 A nonstatic `meta` function in an included `.x` module is callable during
 translation and has an ordinary runtime declaration. Its provider source
@@ -2589,27 +2551,13 @@ declaration once.
 
 See [Meta Functions](../guide/meta-functions.md) for the authoring guide.
 
-### The same operations from x2c
+### Compiler-supplied definitions
 
-Every public operation above is also declared in x2c, in the optional module
-`lib/meta.x`, so a `meta` function that includes it calls the compiler
-directly and a macro's implementation does not have to be written in Lisp. The
-declarations are the signatures; the semantics are the ones described above.
-A project `meta` function's queries, such as `Code.type` and `Type.fields`,
-ask the compiler while the call waits; see
-[What the compiler answers](../guide/generating-code.md#what-the-compiler-answers).
-
-The compiler binds each operation under its x2c name and derives the Lisp
-name from it. A method keeps its spelling: `Code.type` and `Type.is_value`
-are the same names in Lisp, and a predicate method answers `int`, 1 or 0, in
-both. In an `x2c_` helper each `_` becomes `.`: `x2c_invocation_line` is
-`x2c.invocation.line`, and `x2c_ident` is `x2c.ident`. Where the Lisp library
-defines the derived name itself, that definition stands. x2c code builds
-literals with typed quotations, so `x2c.literal.string`, `x2c.literal.int`,
-and `x2c.literal.symbol` have no x2c declaration.
-
-The operations are bodyless `meta` prototypes supplied by the compiler
-itself, which generates its table of them from those declarations.
+The operations in `lib/meta.x` are bodyless `meta` prototypes supplied by the
+compiler itself, which generates its table of them from those declarations.
+The builtin macros, such as `foreach`, `class`, `with`, `$scope`, `$auto`, and
+`$lock`, are ordinary x2c source in the compiler prelude
+`etc/compiler-prelude.x`, which the compiler reads before each unit.
 
 `x2c_meta_definition_hashes()` returns a `Map` with one entry for each function
 or initialized file-static value the unit has defined so far. The key is the
@@ -2627,85 +2575,15 @@ constructor is also compile-time-only. A run-time call to a compile-time-only
 function is diagnosed where it is written. The diagnostic gives the function
 and the reason.
 
-Compiler facilities load before author imports, and macro code cannot redefine
-them.
-
-Standard Lisp exposes the `List` matcher of [Pattern
-Matching](../guide/match.md) as six names. `match` tests a whole subject. It
-returns association-list bindings, `nil` on failure, and truthy `(())` for a
-match with no named binders. A pattern describes a `List` shape, so a subject
-that is not a `List` fails without raising. `bound` reads one binder out of
-that alist. `search` finds the first matching subtree. `match-replace` and
-`search-replace` rewrite the whole subject or the first matching subtree from a
-template. `match-case` tries each clause's pattern in order and evaluates the
-first body whose pattern matched, with that pattern's binders in scope as
-variables; a final `(else body)` clause runs when nothing matched.
-
-```lisp
-(match-case form
-  ((add ?a ?b) (+ ?a ?b))
-  ((neg ?a)    (- 0 ?a))
-  (else        0))
-```
-
-A clause's pattern is quoted implicitly and written as `List` syntax, with the
-same `?binder` and `*binder` spellings. A binder keeps its `?` where the body
-reads it. Without an `else` clause an exhausted `match-case` is `nil`.
-
-Compile-time Lisp also reaches the core value types directly. A Lisp value in
-a session is an x2c `Var`: a Lisp list is a `List`, a Lisp string is a
-`String`, and a quoted name is a `Symbol`. The operations below are the
-library's own, so a macro and the program it generates compute with the same
-`List`, `String`, `Map`, and `Array`.
-
-```text
-List.getindex  List.last     List.index    List.contains
-List.get       List.assoc    List.array    List.sort
-
-Array.new      Array.len     Array.push    Array.getindex  Array.setindex
-Array.take_last Array.shift  Array.unshift Array.insert    Array.remove
-Array.find     Array.contains Array.count  Array.join      Array.list
-
-Map.new        Map.len       Map.get       Map.getindex    Map.setindex
-Map.contains   Map.del       Map.getdefault Map.setdefault Map.list
-
-String.len     String.find   String.rfind  String.count    String.contains
-String.startswith String.endswith String.getindex String.getslice
-String.add     String.lower  String.upper  String.capitalize
-String.repeat  String.replace String.join  String.split    String.split_lines
-String.partition String.rpartition String.find_all
-String.remove_prefix String.remove_suffix String.escape String.unescape
-
-Var.tag        Var.kind      Var.is        Var.parse       Var.convert
-Var.integer    Var.floating  Var.is_null
-
-Symbol.len     Symbol.str    Symbol.compare
-```
-
-Each name takes the arguments its [library](../library/index.md) entry
-documents and behaves identically. `Var.parse` reads a `String` as an `int`,
-`double`, `string`, `symbol`, or `char`, and `Var.convert` changes a value's
-numeric tag, which is how compile-time code narrows a `double` to an integer.
-`Map.list` returns a map's entries as `(key value)` pairs, because a `Map`
-cursor has no Lisp representation.
-
-The Lisp core keeps its own spellings for cons-cell and text work. `car`,
-`cdr`, `cons`, `length`, `reverse`, `string-append`, `substring`, `lower`,
-`str`, and `repr` are unchanged and reach the same code. Note that Lisp's
-`assoc` returns the matching pair while `List.assoc` returns its second
-value, as the library documents.
-
-An operation whose parameters or result have no `Var` representation is not
-available, which excludes `Iter` cursors, pointer out-parameters, variadic
-entry points, and `char *` parameters. A program embedding its own session
-loads the same names from `etc/lisp-values.xlisp`.
+Compiler facilities load before a unit's own source, and macro code cannot
+redefine them.
 
 ### Macro-visible syntax
 
-Lisp sees the canonical parsed, typed `List` AST used by `--dump-ast`, with
-source `(at ID NODE)` wrappers removed. Tags and semantic `Type`s remain
-`List`s. Binding records are visible so syntax can be preserved and compared,
-but their numeric IDs are opaque and must not be forged. Use
+Compile-time code sees the canonical parsed, typed `List` AST used by
+`--dump-ast`, with source `(at ID NODE)` wrappers removed. Tags and semantic
+`Type`s remain `List`s. Binding records are visible so syntax can be preserved
+and compared, but their numeric IDs are opaque and must not be forged. Use
 `Code.binding_spelling` when text is required.
 
 The compiler records where syntax was written separately from its AST value.
@@ -2715,22 +2593,22 @@ returns a new `List`. Returned syntax must be valid for its expression, field,
 enumerator, block-item, or translation-unit position. A `meta` call written as
 a whole expression statement holds that statement's block-item or statement
 position, so it may return a statement as well as an expression. This holds in
-an ordinary function and in an expansion alike, such as the body of `macro
-Stmt $same(Stmt $code) => $same_of($code);`. A `meta` call inside a larger
+an ordinary function and in an expansion alike, such as the body of `macro Stmt
+$same(Stmt $code) => $same_of($code);`. A `meta` call inside a larger
 expression holds an expression position. Inside an expansion every `List`
 result is code. Elsewhere a `List` result is code when it is an expression
 node, a macro application, a quotation, or an identifier; any other `List`
-remains a runtime value. Protocol declarations, macro definitions,
-preprocessor nodes, and other compile-time-only source items are retained at
+remains a runtime value. Protocol declarations, macro definitions, preprocessor
+nodes, and other compile-time-only source items are retained at
 translation-unit position and apply their source-order effect. The compiler
-rejects forms that are malformed or invalid in that position. Lisp may
-construct canonical AST `List`s directly, including static declarations. The
-compiler accepts a valid structure whether it came from the parser, a `Match`
-capture, a template, or handwritten Lisp. It does not verify every type or
-binding annotation in a constructed `List` or reject it because of its origin.
-Like C pointer operations, this metaprogramming is unchecked. Prefer literal
-templates and the contextual `x2c.*` operations when you want the compiler to
-construct syntax for you.
+rejects forms that are malformed or invalid in that position. A `meta` function
+may construct canonical AST `List`s directly, including static declarations.
+The compiler accepts a valid structure whether it came from the parser, a
+`Match` capture, a template, or a handwritten `%(...)` literal. It does not
+verify every type or binding annotation in a constructed `List` or reject it
+because of its origin. Like C pointer operations, this metaprogramming is
+unchecked. Prefer literal templates and the contextual `x2c_*` operations when
+you want the compiler to construct syntax for you.
 
 ### Named types and declaration production
 
@@ -2745,7 +2623,7 @@ require it.
 
 The captured form is `(named-type NAME TYPE)`, where NAME is a String and TYPE
 is the complete canonical type syntax; a forward uses an empty TYPE. This form
-is constructible by any macro or Lisp producer. Binding it publishes the same
+is constructible by any macro or `meta` function. Binding it publishes the same
 ordinary typedef and aggregate declarations as the captured source.
 
 A `Declaration` macro, or a `NamedType` decorator, produces declarations once
@@ -2763,7 +2641,7 @@ include ordinary top-level syntax and these constructible forms:
   of that exact function in the owning source wins, including a later one.
   Only the selected body is bound. A candidate produced by a static type
   declaration has static linkage. Two ordinary definitions still conflict.
-- `(declaration-recipe CALLBACK ARGUMENTS)` defers a Lisp producer until the
+- `(declaration-recipe CALLBACK ARGUMENTS)` defers a `meta` producer until the
   owning source's declarations are available. It is evaluated once, and its
   declarations join the same bundle.
 - `(default-forward CHILD PARENT MEMBER FALLBACK)` selects an ordinary parent
@@ -3138,11 +3016,11 @@ Unescaped comma, colon, `]`, and `}` terminate collection Atoms; backslash
 escaping or angle syntax expresses those bytes as data. `%<<...>>` accepts
 literal `Symbol`s only and permits no interpolation or splicing.
 
-`$(...)` remains compile-time Lisp in ordinary x2c code. Inside a quoted
-collection, `${$(+ 40 2)}` first unquotes into x2c and then enters compile-time
-Lisp.
-`$name(...)` remains a macro invocation in x2c. These parser contexts do not
-change Lisp `quote` or `quasiquote`.
+Inside a quoted collection, `${$helper(...)}` first unquotes into x2c and
+then makes a compile-time call. `$name(...)` remains a macro invocation or
+`meta` call in x2c, and a `$(...)` form there is rejected as unsupported
+compile-time Lisp. These parser contexts do not change Lisp `quote` or
+`quasiquote`.
 
 Percent strings are byte strings: they may span physical lines and their
 `\\x`, `\\u`, and `\\U` escapes consume one or two hexadecimal digits.
@@ -4601,6 +4479,127 @@ A failed host preprocess prints its captured stderr, reports a structured x2c
 driver diagnostic at the first directive, and exits nonzero. Partial host
 stdout is never parsed after failure. `--no-cpp` bypasses this discovery pass;
 `--dump-cpp-text` exposes the successful host output.
+
+## Runtime Lisp
+
+x2c programs can embed Lisp sessions for DSLs, configuration, and interactive
+work; the REPL evaluates Lisp the same way. `Lisp.new()` creates a session
+with the standard environment from `etc/init.xlisp`, and `lisp.eval`,
+`Lisp.eval_string`, and `Lisp.eval_file` evaluate forms and `.xlisp` files at
+run time. [Embed Lisp](../library/overview.md#embed-lisp) shows the host API.
+The compiler itself does not evaluate Lisp; compile-time code is x2c, as
+described under [compile-time calls](#compile-time-calls-and-operations).
+
+`$lisp.bind(lisp, "name", function)`, `$lisp.binding(group, "name")`, and
+`$lisp.install(lisp, group)` bind direct x2c functions into a session. They
+are ordinary macros in `lib/lisp-bindings.x`, which the implicit Lisp
+declarations make visible without an include. A bound function stays an
+ordinary x2c function, callable natively and from Lisp. Each binding macro
+creates a fresh `Func` handle, which the session releases in `Lisp.destroy()`.
+
+A free name in a Lisp `lambda` or `defmacro` body reads the definitions the
+body was written next to, and then the session's globals. The environment the
+call was written in is not part of that chain, so a caller that binds the same
+name changes nothing about what the body reads. A lambda written inside a
+binding form reads that form's bindings and keeps the values it was made with.
+A macro that needs a value from its caller takes it as an argument.
+
+A `let` binding is not visible inside its own initializer. A lambda a `let`
+binds therefore cannot call itself by that name, and the self-call reports
+`(unbound (name h))`. Write such a helper as a `defun`.
+
+```text
+(let ((h (lambda (n) (h n)))) (h 3))   error: (unbound (name h))
+(defun h (n) (h n))                    reads its own name
+```
+
+`Lisp.adopt(child, parent)` makes a session read its parent's definitions for
+names it does not bind. The child cannot replace an inherited definition.
+`def` on an inherited name raises
+`(bad-state (operation "def") (reason "inherited") (name NAME))`. This covers
+`defun` and `defmacro`, which are `def`. The standard environment defines
+many ordinary words, including `filter`, `last`, `map`, `search`, `len` and
+`apply`, so a library adopted by children needs its own names for its own
+definitions. A child's definitions live in its own bindings, so one child
+never changes what another reads. The host API `Lisp.set_global` can shadow an
+inherited name in the child's own bindings without changing the ancestor.
+Lisp `def` still rejects that name, including after a host binding shadows it.
+
+`eval` is an ordinary procedure. The form it is given is evaluated in the
+session's globals, not in the bindings around the call, so
+`(let ((z 7)) (eval (quote (add z 1))))` reports `(unbound (name z))`. Build
+the form with the value in it when a local has to reach `eval`.
+
+Standard Lisp exposes the `List` matcher of [Pattern
+Matching](../guide/match.md) as six names. `match` tests a whole subject. It
+returns association-list bindings, `nil` on failure, and truthy `(())` for a
+match with no named binders. A pattern describes a `List` shape, so a subject
+that is not a `List` fails without raising. `bound` reads one binder out of
+that alist. `search` finds the first matching subtree. `match-replace` and
+`search-replace` rewrite the whole subject or the first matching subtree from a
+template. `match-case` tries each clause's pattern in order and evaluates the
+first body whose pattern matched, with that pattern's binders in scope as
+variables; a final `(else body)` clause runs when nothing matched.
+
+```lisp
+(match-case form
+  ((add ?a ?b) (+ ?a ?b))
+  ((neg ?a)    (- 0 ?a))
+  (else        0))
+```
+
+A clause's pattern is quoted implicitly and written as `List` syntax, with the
+same `?binder` and `*binder` spellings. A binder keeps its `?` where the body
+reads it. Without an `else` clause an exhausted `match-case` is `nil`.
+
+A session can also reach the core value types directly. A Lisp value in
+a session is an x2c `Var`: a Lisp list is a `List`, a Lisp string is a
+`String`, and a quoted name is a `Symbol`. The operations below are the
+library's own, so a Lisp program and its x2c host compute with the same
+`List`, `String`, `Map`, and `Array`.
+
+```text
+List.getindex  List.last     List.index    List.contains
+List.get       List.assoc    List.array    List.sort
+
+Array.new      Array.len     Array.push    Array.getindex  Array.setindex
+Array.take_last Array.shift  Array.unshift Array.insert    Array.remove
+Array.find     Array.contains Array.count  Array.join      Array.list
+
+Map.new        Map.len       Map.get       Map.getindex    Map.setindex
+Map.contains   Map.del       Map.getdefault Map.setdefault Map.list
+
+String.len     String.find   String.rfind  String.count    String.contains
+String.startswith String.endswith String.getindex String.getslice
+String.add     String.lower  String.upper  String.capitalize
+String.repeat  String.replace String.join  String.split    String.split_lines
+String.partition String.rpartition String.find_all
+String.remove_prefix String.remove_suffix String.escape String.unescape
+
+Var.tag        Var.kind      Var.is        Var.parse       Var.convert
+Var.integer    Var.floating  Var.is_null
+
+Symbol.len     Symbol.str    Symbol.compare
+```
+
+Each name takes the arguments its [library](../library/index.md) entry
+documents and behaves identically. `Var.parse` reads a `String` as an `int`,
+`double`, `string`, `symbol`, or `char`, and `Var.convert` changes a value's
+numeric tag, which is how Lisp code narrows a `double` to an integer.
+`Map.list` returns a map's entries as `(key value)` pairs, because a `Map`
+cursor has no Lisp representation.
+
+The Lisp core keeps its own spellings for cons-cell and text work. `car`,
+`cdr`, `cons`, `length`, `reverse`, `string-append`, `substring`, `lower`,
+`str`, and `repr` are unchanged and reach the same code. Note that Lisp's
+`assoc` returns the matching pair while `List.assoc` returns its second
+value, as the library documents.
+
+An operation whose parameters or result have no `Var` representation is not
+available, which excludes `Iter` cursors, pointer out-parameters, variadic
+entry points, and `char *` parameters. The REPL loads these names into its
+session; a program embedding its own session loads them from
+`etc/lisp-values.xlisp`.
 
 ## Diagnostics
 

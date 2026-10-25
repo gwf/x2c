@@ -35,8 +35,8 @@ examples/   curated executable and build-checked programs
 docs/       this book: guide, reference, library, and internals
 agents/     repository-facing documentation, contracts, and project skills
 plans/      active plans-as-logs and archived execution records
-etc/        shared Makefile rules, build configuration, built-in macros,
-            and the compile-time Lisp environment and SDK
+etc/        shared Makefile rules, build configuration, the compiler
+            prelude with the built-in macros, and runtime Lisp assets
 tools/      documentation and stage-comparison checkers
 ```
 
@@ -214,10 +214,10 @@ Imported functions refer to that provider record. The collector checks the
 dependency graph once per translation process, using its existing source
 hashes. A changed provider or dependency requires rebuilding its meta code.
 
-The public `x2c_meta_definition_hashes()` query still returns String hashes
-for definitions parsed so far. The private Lisp query
-`_x2c.meta.definition.calls` reads their existing reference lists for linked
-generation; it adds no public library callable or separate stored inventory.
+The public `x2c_meta_definition_hashes()` query still returns String hashes for
+definitions parsed so far. A compiler-private native query reads their existing
+reference lists for linked generation; it adds no public library callable or
+separate stored inventory.
 
 #### Unit interfaces
 
@@ -225,11 +225,11 @@ A file's contribution is collected once per process. Translating a unit
 also writes it beside the generated C as a unit interface, `<stem>.xi`: the
 identity of the compiler that wrote it, the ordered declaration maps,
 include placeholders, the source content hash, function definitions, and the
-macro, Lisp, and embedded-text files the walk read with their hashes. Each
+macro and embedded-text files the walk read with their hashes. Each
 declaration map holds its public rows: nonstatic declarations and complete
 type families needed by public declarations. Source-position rows also retain
-public macro and keyword definitions, Lisp effects, and provider meta-function
-identities. A translated unit's map also records each ordinary external
+public macro and keyword definitions and provider meta-function identities.
+A translated unit's map also records each ordinary external
 conformance whose adoption it declares, as `(conformance BASE PARTICIPANT
 FORWARD REVERSE (bindings (NAME TYPE)...) (MEMBER STATUS SOURCE)...)`
 keyed by base and participant. It lists each type variable's binding and
@@ -306,8 +306,8 @@ dotted method sugar, `src/statements.x` for control flow, `match`,
 `try`/`catch`, and `defer`, and `src/literals/literals.x` for collection, interpolated
 `String`, and lambda literals. `src/meta-group/meta-group.x` stages a unit's bodied
 `meta` functions as native code, and `src/stage.x` carries values across that
-boundary. The built-in source macro in `src/macros/macros.x`, `etc/builtin-macros.x`,
-and the algorithms in `src/builtins.x` expand `foreach` during this pass.
+boundary. The built-in `foreach` macro in `etc/compiler-prelude.x` and the
+algorithms in `src/builtins.x` expand `foreach` during this pass.
 `src/type.x` owns the `List`-backed `Type` representation those modules
 consult; `src/ast.x` owns sequence placement and binding helpers;
 `src/symtab/symtab.x` owns lexical scopes and symbol lookup from inner to outer;
@@ -317,13 +317,13 @@ holds the filtered recovery boundary that synchronizes after a parse
 diagnostic; `src/diagnostics.x` collects positioned diagnostics in order.
 
 Macro definitions use that same recursive-descent parser in macro mode. Each
-semantic entry point accepts a typed parameter or compile-time Lisp slot and
+semantic entry point accepts a typed parameter or `meta` call slot and
 otherwise follows the ordinary grammar, so the stored template is an ordinary
 AST `List`. An invocation parses its arguments through those entry points,
 matches their canonical capture rows once, replaces the template once, and
 hands the result to the ordinary recursive syntax binder. Nested invocations
-and Lisp slots are expanded when that binder reaches them; there is no second
-macro grammar or post-expansion validation pass.
+and `meta` call slots are evaluated when that binder reaches them; there is no
+second macro grammar or post-expansion validation pass.
 
 ```sh
 ./builds/0/x2c translate --dump-ast greet.x
@@ -572,8 +572,8 @@ module block, so its files share no private scope.
   initialization order;
 - `src/lambdas.x` -- lambda parsing and the capture resolution shared by
   source and constructed lambdas;
-- `src/macros/macros.x` -- compile-time macro definitions, imports, Lisp lifting,
-  hygiene, and expansion;
+- `src/macros/macros.x` -- compile-time macro definitions, imports, hygiene,
+  meta call slots, and expansion;
 - `src/meta-sdk/meta-sdk.x` -- the compiler's answers to `lib/meta.x` operations
   and the context of the running compile-time call;
 - `src/meta-native/meta-native.x` -- meta functions, explicit meta calls, native meta
@@ -623,7 +623,8 @@ compiler, AST, diagnostics, and preprocessor output until explicit close.
 The stages are start/tokenize, collect, and parse. Failed stages return to the
 caller with readable diagnostics. Adapters choose printing and process exit;
 the default frontend collects without printing. Closing a unit releases its
-owned Lisp session, Type unit, and isolated Context before the next unit opens.
+owned meta bindings, Type unit, and isolated Context before the next unit
+opens.
 
 Process type/header caches and generated-name state still require sequential
 units. The frontend is not a concurrent or stable public compiler-library API. A
@@ -666,8 +667,10 @@ divisions:
 - `lib/match/match.x` owns list-pattern matching; its `plan.x` member compiles
   patterns to plans, `cache.x` retains them, and `machine.x` executes them
   over the wordcode and state definitions in `wordcode.x`;
-- `lib/lisp/lisp.x` owns the embedded Lisp reader, session, and evaluator; the
-  compiler uses it to read `.xi` interfaces and to run compile-time macros;
+- `lib/lisp/lisp.x` owns the embedded Lisp session and evaluator for runtime
+  DSLs and the REPL; the compiler does not link it. Lisp and `lib/datum.x`
+  share the reader grammar in `lib/datum-reader.x`, and the compiler reads
+  `.xi` interfaces with `lib/datum.x`;
 - `lib/func/func.x` owns generic native calls through generated adapters;
 - `lib/tokenizer.x` and `lib/scan.x` own tokenization, so the compiler's
   first phase is library code;

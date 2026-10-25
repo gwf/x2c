@@ -89,9 +89,6 @@ The `$` prefix requires the compiler to run the function and insert its
 result. The call uses the same parentheses and commas as an ordinary x2c
 call. Here it inserts the integer 71 before the program is built.
 
-The optional Lisp equivalent is `$(poly 7)`. It calls the same implementation;
-use it when working with Lisp code already in the compiler session.
-
 These are the two forms of a `meta` function: one runs in your program,
 and one runs in the compiler. Both come from the same body. A
 [rewrite rule](generating-code.md#what-the-compiler-answers) in your program changes only the
@@ -700,7 +697,7 @@ backend, compiles them with the host C compiler (`--meta-cc`, default
 one helper program, the project meta module. A group sees the headers its
 unit includes, found from the unit's directory and the `-I` directories.
 The translation then
-sends each `$` call, and each compile-time Lisp call, of one of those
+sends each `$` call of one of those
 functions to the helper and inserts the reply. A project whose inputs
 reach no `meta` function builds nothing extra.
 
@@ -778,11 +775,6 @@ constants, a Symbol, captured macro syntax, or another `$` call. A captured
 literal passed to a parameter that is not syntax, such as a `String`,
 arrives as the literal's value. Anything else, such as a program variable,
 reports `an argument must be a constant, captured syntax, or a meta call`.
-
-Compile-time Lisp calls a `meta` function by its name with Lisp values.
-The native function checks each argument against its declared type, so
-passing `0` where a `List` is declared is an error rather than an empty
-list.
 
 ### Lifetime and state
 
@@ -863,8 +855,7 @@ Meta code manages lifetimes with the same operations as native code, and
 they mean the same thing: a compile-time call runs inside a Scope the
 compiler opens for it, and a returned collection belongs to the compiler,
 not to the eventual program's heap. As in C, a value built inside a region
-must not be kept, in a `meta static` or a Lisp definition, after that
-region is released.
+must not be kept, in a `meta static`, after that region is released.
 
 A file-scope variable a `meta` body reads is the compiled group's own copy,
 initialized as the declaration says; it does not expose future runtime
@@ -977,79 +968,38 @@ owns its runtime definition and including sources receive its declaration.
 Compile and link that provider as you would any other source module. The
 compile-time helper build and the runtime build are separate.
 
-## Lisp interoperability
+## Meta functions and runtime Lisp
 
-Use the x2c calls above for ordinary meta work. The following notes apply
-when importing or calling Lisp helpers, or working with the compiler session.
+Compile-time code is x2c. The compiler does not evaluate Lisp, and it rejects
+the former `$(...)` and `@(...)` forms with
+`compile-time Lisp forms are not supported`. The builtin macros are ordinary
+x2c in `etc/compiler-prelude.x`, and the operations a macro calls are the
+`meta` prototypes in `lib/meta.x`.
 
-The compiler loads Lisp support into an embedded evaluator. The built-in
-macros' algorithms are compiler functions (`src/builtins.x`), bound under
-the names `etc/builtin-macros.x` and `etc/lisp-bindings.x` call.
-
-### One table for compiled code and Lisp
-
-Compile-time Lisp calls a `meta` function by its name. A table kept as a
-`meta` function therefore serves both an inserted value and a Lisp helper
-that reads it during expansion, without a second copy of its rows:
+A `meta` function can still use runtime
+[Lisp](../library/overview.md#embed-lisp) as a library. A project `meta`
+function runs in the project helper, which links the full runtime, so its body
+can create a session and evaluate forms:
 
 ```x2c
-meta static Map widths(void) => { %(char): 1, %(short): 2, %(int): 4 };
-
-macro Expression $sample.width(Type $type) =>
-  $(x2c.literal.int (Map.getindex (widths) $type));
-
-static Map table = $widths();
+meta static int lisp_sum(void) {
+  Lisp lisp = Lisp.new();
+  defer lisp.destroy();
+  return lisp.eval(%(apply + (list 40 2)));
+}
 
 int main(void) {
-  printf("%d %d\n", $sample.width(short), table[%(int)].int());
+  printf("%d\n", $lisp_sum());
   return 0;
 }
 ```
 
 ```text
-2 4
+42
 ```
 
-`lib/native-scalar-types.x` keeps the compiler's exact C scalar table
-this way: `src/type.x` inserts it, and the `lib/lisp/lisp.x` access records read
-their tags from it.
-
-### Names the compile-time library already defines
-
-A unit's compile-time session inherits the compiler's own Lisp library and
-cannot replace one of its definitions. A `meta` function is installed under
-its C name, so `meta int add(int x)` reports that it could not be installed.
-A macro file or a `$(...)` form that defines an inherited name reports:
-
-```text
-sample.x:2:1: macro: compile-time Lisp evaluation failed
-  $(defun filter (a b) 42)
-  ^^
-  note: form: (defun filter (a b) 42) error: (bad-state (operation "def")
-  (reason "inherited") (name filter))
-```
-
-The library holds many ordinary words, so the name to avoid is often one you
-would reach for first: `filter`, `last`, `map`, `search`, `len` and `apply`
-are all defined. Give your own definition a different name, or a prefix of
-your own.
-
-### `eval` reads globals only
-
-A lambda's body reads its captures and then the session's globals. `eval`
-is an ordinary procedure, so the form it is given is evaluated in the
-globals alone and does not see the bindings around the call:
-
-```text
-(let ((z 7)) (eval (quote (add z 1))))   error: (unbound (name z))
-```
-
-Pass the value instead of the name: `(eval (list (quote add) z 1))`.
-
-A `let` binding is not visible inside its own initializer, so a helper that
-calls itself by name must be a `defun`:
-
-```text
-(let ((h (lambda (n) (h n)))) (h 3))   error: (unbound (name h))
-(defun h (n) (h n))                    reads its own name
-```
+The REPL can call such a function too. A [native module](#native-modules)
+the compiler loads receives only the compiler's core runtime exports, which
+omit Lisp, so a function that needs Lisp belongs in the project helper or the
+REPL. Session rules such as inherited names, closures, and `eval` are in the
+[language reference](../reference/language.md#runtime-lisp).

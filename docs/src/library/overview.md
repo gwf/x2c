@@ -253,12 +253,12 @@ numeric comparisons, basic `String` operations, and the pattern matching
 described in [the language reference][lisp]. `Lisp.kernel()` creates the
 evaluator primitives alone, for hosts that build their own environment.
 `etc/lisp-values.xlisp` binds the core `List`, `Array`, `Map`, `String`,
-`Var`, and `Symbol` operations; the compiler loads it into every compile-time
-session, and an embedding host loads it by name.
+`Var`, and `Symbol` operations; the REPL loads it into its session, and an
+embedding host loads it by name.
 `etc/lisp-io.xlisp` stays optional and must be loaded by name. It adds
 `read-file`, `write-file`, `sort`, `fib`, and `subst`.
 
-[lisp]: ../reference/language.md#compile-time-lisp-and-imports
+[lisp]: ../reference/language.md#runtime-lisp
 
 Use `$lisp.binding(group, "name")` on several direct functions and
 `$lisp.install(lisp, group)` when a unit has a reusable set. Functions must
@@ -276,11 +276,10 @@ addresses. Native functions are trusted host code. A package-specific opaque
 object needs its own `Var` adoption.
 
 Load a Lisp program with `Lisp.eval_file`, then evaluate runtime `List` forms
-with `Lisp.eval`. `$` inside `%(...)` inserts live x2c values; it is unrelated
-to compile-time `$(...)` Lisp. Within a `List` literal, `'`, `` ` ``, `,`, and
-`,@` write `quote`, `quasiquote`, `unquote`, and `unquote-splicing` just as
-they do in Lisp source. A flat `List` result destructures through the same
-typed conversions as any other value:
+with `Lisp.eval`. `$` inside `%(...)` inserts live x2c values. Within a `List`
+literal, `'`, `` ` ``, `,`, and `,@` write `quote`, `quasiquote`, `unquote`,
+and `unquote-splicing` just as they do in Lisp source. A flat `List` result
+destructures through the same typed conversions as any other value:
 
 ```x2c
 ~int main(void) {

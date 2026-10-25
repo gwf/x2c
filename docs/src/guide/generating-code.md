@@ -402,8 +402,8 @@ such as `"$ @"`, or `%"\$ @"` for a percent string. Quoted atom escapes
 such as `%(\$ \@)` preserve sigils as data.
 
 `${...}` works only in quotations. A named template has no function to
-evaluate it in; it computes with a `$meta(...)` call or a `$(...)` slot,
-which run where it expands.
+evaluate it in; it computes with a `$meta(...)` call, which runs where it
+expands.
 
 ### Code that knows its type
 
@@ -550,7 +550,7 @@ waits, in the state of the call's site. `TypeInfo` and `Source`
 parameters still deliver a description in one argument. The operations
 are grouped here by the task, not by signature; the
 [module reference](../library/modules/meta.md) lists every declaration, and
-the [language reference](../reference/language.md#the-same-operations-from-x2c)
+the [language reference](../reference/language.md#compile-time-calls-and-operations)
 gives their semantics.
 
 ### Building code
@@ -765,14 +765,6 @@ int main(void) {
 ```text
 2
 ```
-
-The compiler binds each of these under its x2c name and derives the Lisp
-name from it: a method keeps its spelling, so `Code.binding_spelling` is
-`Code.binding_spelling` in Lisp, and in a helper each `_` becomes `.`, so
-`x2c_invocation_line` is `x2c.invocation.line`. A Lisp form has no
-quotation, so the Lisp library also defines `x2c.literal.string`,
-`x2c.literal.int` and `x2c.literal.symbol`, which build the literal a
-`$(...)` form returns for a value.
 
 The compiler's shipped components lower language features with the same
 `$rewrite` decorator. A program definition spelled like a shipped

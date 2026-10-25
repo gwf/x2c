@@ -6,6 +6,23 @@ commands, and packages since the previous release. The
 
 ## Unreleased
 
+- The compiler no longer evaluates Lisp. The compile-time `$(...)` and
+  `@(...)` forms, including `$(import "file.xlisp")`, are removed; each one
+  is reported where it is written as `compile-time Lisp forms are not
+  supported`. Write the computation as a `meta` function and call it with
+  `$helper(...)` or `@helper(...)`, and use the operations in `meta.x` by
+  their x2c names, such as `x2c_ident` and `Code.binding_spelling`, in place
+  of the Lisp names `x2c.ident` and `x2c.literal.string`. See
+  [Compile-time calls and operations](language.md#compile-time-calls-and-operations).
+- Runtime Lisp is unchanged: `Lisp.new`, `lisp.eval`, `.xlisp` files, and
+  the REPL work as before, and `$lisp.bind`, `$lisp.binding`, and
+  `$lisp.install` keep their behavior. A `meta` function that uses Lisp runs
+  in the project helper or the REPL; a native module the compiler loads no
+  longer receives Lisp. See [Runtime Lisp](language.md#runtime-lisp).
+- `Code.native_signature` returns the `Func` signature of a function for
+  compile-time code.
+- The x2c home is now marked by `etc/compiler-prelude.x`, which holds the
+  builtin macros, in place of `etc/compiler-sdk.xlisp`.
 - `x2c repl --package-dir DIR` searches DIR for packages in every `:load`,
   as `x2c build` and `x2c run` do, so loaded files can import packages. An
   unknown option is reported by name.

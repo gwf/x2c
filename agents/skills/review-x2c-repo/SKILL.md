@@ -37,7 +37,7 @@ refuted claims and unresolved questions from findings.
 Apply PR-2, PR-3, PR-4, PR-10, FA-7, and TE-2 in
 [the standard](../../x2c-code-standard.md), and consult the relevant
 [philosophy](../../x2c-philosophy.md). Canonical AST Lists from
-compile-time Lisp are accepted by structure, as documented under
+`meta` functions are accepted by structure, as documented under
 [Macro-visible syntax](../../../docs/src/reference/language.md); their origin
 is not a defect.
 

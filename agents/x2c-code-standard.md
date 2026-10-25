@@ -29,7 +29,7 @@ Retired rules keep their number and are marked retired.
 | `ST` | statements and control flow | `ER` | errors |
 | `EX` | expressions and literals | `DG` | diagnostics and messages |
 | `FN` | functions | `MA` | macros and meta functions |
-| `FA` | function families and records | `LI` | compile-time Lisp |
+| `FA` | function families and records | `LI` | Lisp bindings |
 | `FI` | files | `AR` | compiler architecture |
 | `CM` | comments and prose | `RT` | runtime library |
 | `NM` | names | `PK` | packages and public API |
@@ -441,14 +441,13 @@ declarations in ordinary source, `src/` included. Keep a declaration only
 when a separate implementation unit or a collection/macro/native binding
 boundary requires it; state the producer and the non-obvious boundary
 beside it. In `lib/`, keep a declaration only for true co-recursion,
-for a literal prototype that collection must see before expansion, or for a
-unit macro that reads top-level Lisp from its own file; state a non-obvious
-reason beside it.
+or for a literal prototype that collection must see before expansion; state
+a non-obvious reason beside it.
 
 **FI-7** Delete dead code: uncalled private functions, unreachable branches,
 `return` after a non-returning call, and checks of established facts. Git is
 the archive. Before deleting, search callers across `src lib commands
-packages tools etc unittest examples`, macro templates, compile-time Lisp,
+packages tools etc unittest examples`, macro templates, runtime Lisp,
 protocol hooks, and function-pointer uses.
 
 ### Comments and prose
@@ -862,7 +861,7 @@ PR-4; an unmatched internal shape may fall through to the existing path.
 Stages from 1 onward build with `--fatal-warnings`; never add a
 suppression.
 
-## Macros, meta functions, and compile-time Lisp
+## Macros, meta functions, and Lisp bindings
 
 **MA-1** Choose the smallest tool: a function for runtime computation; a
 `meta` function for compile-time calculation; a protocol for shared typed
@@ -953,21 +952,22 @@ catalog, and the API reference understand any macro that generates public
 declarations. Put protocol-relevant prototypes before the adoption that
 needs them.
 
-**LI-1** Write no new compile-time algorithm in Lisp. Lisp remains for the
-evaluator core, the shared initial environment, the name tables that bind
-Lisp names to x2c operations, and the REPL. Port an algorithm that does not
-need to be Lisp to a `meta` function.
+**LI-1** Write compile-time code in x2c; the compiler does not evaluate
+Lisp and rejects `$(...)` and `@(...)` forms. Lisp remains a runtime
+library: the evaluator core, its initial environment, the binding tables
+that name x2c operations for Lisp, runtime DSLs, and the REPL. A `meta`
+function that needs Lisp runs in the project helper, not in a native module
+the compiler loads.
 
-**LI-2** Include ordinary `.x` modules for shared macros. Use
-`$(import "helpers.xlisp")` to load Lisp and `$(...)` to call existing Lisp
-or change the Lisp session. Prefer `x2c_ident(...)` in meta
-code to `$(x2c.ident ...)`, and `$f(...)` meta calls to Lisp helpers.
+**LI-2** Include ordinary `.x` modules for shared macros and `meta`
+functions. Call compiler operations by their x2c names, such as
+`x2c_ident(...)` and `Code.type(...)`.
 
 **LI-3** Keep Lisp surfaces thin: a binding file names an x2c operation and
 checks arguments only where a Lisp-facing diagnostic needs it. Name a
 supported SDK operation on captured code or a semantic type `Code.member`
-or `Type.member`, any other supported operation `x2c.<noun>.<verb>`, and
-internal primitives with the single reserved `_x2c.` prefix.
+or `Type.member`, any other supported operation `x2c_<noun>_<verb>`, and
+internal primitives with the single reserved `_x2c_` prefix.
 
 **LI-4** Ship a library's Lisp bindings behind one public installer
 (`RegexpLisp.install(Lisp)`) built from `$lisp.binding` groups. Bindings take
@@ -1276,6 +1276,7 @@ guards trustworthy.
 | --- | --- | --- |
 | raw `case %(` on a head with a grammar form | MA-7 | none |
 | new `.xlisp` | LI-1 | none |
+| `$(` or `@(` form in x2c code | LI-1 | compiler diagnostic |
 | literal `report_error(` wording | DG-1 | `literal-report-error` |
 | string-keyed diagnostic dispatch | DG-1 | none |
 | `Var` local with one static type | VT-1 | none |

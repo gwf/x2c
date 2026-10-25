@@ -280,7 +280,6 @@ twice: `$twice(f())` calls `f()` twice.
 | --- | --- |
 | `$name(arguments)` in code | Invoke a macro or visible meta function |
 | `$!(expression)`, `$!{ statements }`, `$!Unit{ ... }` | Quote source as syntax for compile-time construction |
-| `$(...)` | Evaluate compile-time Lisp |
 | `meta` function | Expose a function to compile-time calls; `meta native` declares a callable supplied by the compiler or a loaded native module |
 | `keyword` | Give a macro a source keyword alias; shipped `class` and `foreach` use this mechanism |
 | Decorator macro | Transform the following expression, statement, field, function, named type, or unit item |

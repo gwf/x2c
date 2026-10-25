@@ -40,7 +40,7 @@ change.
 | Expression parser and precedence ledger | `src/expressions/expressions.x`, `src/operator-ledger.x` | Expression productions, ambiguity decisions, complete binary operator precedence rows | Depends on type and macro state |
 | Statement parser | `src/statements.x` | Statements, blocks, match/catch arms, directive-aware governed statements | Macro-produced statements also enter binding |
 | Literal and lambda parsers | `src/literals/literals.x`, `src/lambdas.x` | Quoted data, interpolation, patterns, lambdas and captures | Token modes determine which spellings reach them |
-| Macro parser and built-ins | `src/macros/macros.x`, `etc/builtin-macros.x` | Category table, definitions, invocations, quotations, typed holes, keyword aliases; built-in `class` and `foreach` | Grammar is extended by visible definitions; libraries such as `lib/system-macros.x` add more |
+| Macro parser and built-ins | `src/macros/macros.x`, `etc/compiler-prelude.x` | Category table, definitions, invocations, quotations, typed holes, keyword aliases; built-in `class` and `foreach` | Grammar is extended by visible definitions; libraries such as `lib/system-macros.x` add more |
 | Protocol parser | `src/protocol/protocol.x` | Protocol definitions, associated types, members, adoptions | Witness resolution and type constraints are separate |
 | AST source patterns | `src/grammar.x` | Executable source-shaped macro patterns and AST accessors used by lowering | Despite the filename, not a complete source grammar |
 | Character scanners | `lib/scan.x` | Allocation-free byte recognizers, keywords, longest operator prefix, literal escapes, failure statuses | A scanner in isolation does not specify tokenizer dispatch or context |

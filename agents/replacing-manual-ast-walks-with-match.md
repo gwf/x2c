@@ -1,7 +1,7 @@
 # ASTs as x2c's shared compiler language
 
 ASTs are not merely shared storage. They are the shared language spoken by
-the parser, macros, compile-time Lisp, Match, transforms, and the C backend.
+the parser, macros, `meta` functions, Match, transforms, and the C backend.
 That is stronger than preferring `match` over `car()` and `cdr()`: it means a
 new way of producing syntax should normally construct the same canonical AST
 and enter the same semantic operations as ordinary source.
@@ -10,7 +10,7 @@ Match owns structural recognition and substitution. Literal templates own
 fixed output structure. Ordinary compiler operations own meaning: binding
 names, resolving types, opening scopes, enforcing placement and lifecycle,
 preserving source positions, issuing diagnostics, and ordering emission. A
-macro, Lisp function, or transform should not acquire a second implementation
+macro, `meta` function, or transform should not acquire a second implementation
 of those operations merely because it produced the AST differently.
 
 The macro path in `src/macros/macros.x` is the current vertical example. An invocation
@@ -132,9 +132,9 @@ For example, the emitter does not receive arbitrary Lists. It receives the
 compiler's lowered AST. A transform consumer does not need to rediscover that
 an operator node has the shape selected by the parser and expression resolver.
 Public macro SDK operations still own their argument types and arity. A raw
-canonical AST List returned by compile-time Lisp is different: x2c
-deliberately accepts its structure without authenticating whether the parser,
-a template, a capture, or handwritten Lisp produced it. Do not add origin
+canonical AST List returned by a `meta` function is different: x2c deliberately
+accepts its structure without authenticating whether the parser, a template, a
+capture, or a handwritten `%(...)` literal produced it. Do not add origin
 tracking or a parallel validator to distinguish those producers. The complete
 language rule is in `docs/src/reference/language.md` under "Macro-visible
 syntax".

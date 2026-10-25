@@ -129,15 +129,14 @@ members; `as` and `tag` are mutually exclusive Var-adoption modifiers.
 ### D4. Interface modifiers
 
 `private-interface` is the top-level visibility dispatch before declaration
-parsing. A leading `static` on a typedef, protocol body, class, or top-level
-Lisp form also controls source visibility. `meta native` applies to function
-interfaces. Protocol adoptions permit `meta` followed by optional `static`, or
-`static` alone; protocol bodies reject `meta`. A file-scope
-`module-declaration` is the word `module` followed by an identifier, a type
-keyword, a qualifier, `inline`, or `typedef`. It parses as the same
-declaration with `static` in place of `module`. See the reference for the
-public/private and compile-time rules. A visible binding named `module`
-disables the `module-declaration` form.
+parsing. A leading `static` on a typedef, protocol body, or class also controls
+source visibility. `meta native` applies to function interfaces. Protocol
+adoptions permit `meta` followed by optional `static`, or `static` alone;
+protocol bodies reject `meta`. A file-scope `module-declaration` is the word
+`module` followed by an identifier, a type keyword, a qualifier, `inline`, or
+`typedef`. It parses as the same declaration with `static` in place of
+`module`. See the reference for the public/private and compile-time rules. A
+visible binding named `module` disables the `module-declaration` form.
 
 ## Expression contracts
 
@@ -290,13 +289,11 @@ rather than adding another surrounding list. Quoted Map entries can contain
 A String interpolation uses `$name` or `${expression}`; the latter also
 supports macro sequence handling where the template parser permits it.
 
-`lisp-escape` records the contents inside `$(`, whose outer parentheses also
-form the compile-time Lisp call/list. Templates use `@(form)` to splice a Lisp
-result at a sequence slot. The ordinary Lisp reader supports lists, four
-reader prefixes, and atomic values; it has no special dotted-pair production.
-Compiler templates add hole capture before evaluation. The EBNF covers
-reading; it does not specify Lisp evaluation, imports, or the available
-compile-time operations.
+Code has no compile-time Lisp production. A `$(` or `@(` form in code is
+reported where it is written as `compile-time Lisp forms are not supported`.
+The runtime Lisp reader supports lists, four reader prefixes, and atomic
+values; it has no special dotted-pair production. The EBNF covers reading; it
+does not specify Lisp evaluation.
 
 ## Macro extension contracts
 
@@ -345,7 +342,7 @@ capitalization. `macro_categories` in `src/macros/macros.x` is the complete tabl
 Expression, statement, field, entry, enumerator, unit, declaration, and
 decorator results must be applied in compatible positions. Local macro values
 and keyword aliases use their bound signatures too. `class` and `foreach`
-are built-in aliases, whose definitions live in `etc/builtin-macros.x`.
+are built-in aliases, whose definitions live in `etc/compiler-prelude.x`.
 The remaining built-ins and library macros need no new core productions.
 A bare visible `$name` can also denote a Macro value without invoking it.
 A direct non-decorator invocation consumes `;` in unit, block, statement,
@@ -405,17 +402,16 @@ restrictions described in the reference.
 
 ### M5. Slots and sequences
 
-Inside a template, `$name` inserts a declared
-hole in a category-compatible position, and `@name` splices a sequence.
-`${expression}` and `$(...)` supply computed syntax in the applicable slot;
-meta calls use the same binding operations. `@producer(...)` and `@(form)`
-can supply sequences in positions that accept a sequence slot. Shared
-invocation lookup recognizing `@` does not permit scalar `@` calls or
-`@` definition names. The parser selects the slot's
-role (expression, type, name, parameter, declarator row, field, entry,
-enumerator, match row, catch, captures, block, or unit) and whether a sequence
-is permitted. In a meta call, a whole `$name` hole passes its captured value;
-a whole sequence hole passes one List, rather than splicing call arguments.
+Inside a template, `$name` inserts a declared hole in a category-compatible
+position, and `@name` splices a sequence. `${expression}` and `$producer(...)`
+meta calls supply computed syntax in the applicable slot. `@producer(...)` can
+supply sequences in positions that accept a sequence slot. Shared invocation
+lookup recognizing `@` does not permit scalar `@` calls or `@` definition
+names. The parser selects the slot's role (expression, type, name, parameter,
+declarator row, field, entry, enumerator, match row, catch, captures, block, or
+unit) and whether a sequence is permitted. In a meta call, a whole `$name` hole
+passes its captured value; a whole sequence hole passes one List, rather than
+splicing call arguments.
 
 Lambda templates accept `&$name` capture rows as well as one Captures slot.
 Quoted Arrays accept `${@sequence}` in an argument-sequence position. Quoted
@@ -438,7 +434,7 @@ The following is included directly from the standalone file.
 ## Coverage and validation limits
 
 The inventory covers declarations, types, expressions, statements, literals,
-protocols, macro syntax, embedded Lisp reading, and script entry selection.
+protocols, macro syntax, runtime Lisp reading, and script entry selection.
 External recognizers cover: native annotation contents, dynamic macro
 signatures, context-sensitive names, slots, and pattern recognition. The
 accompanying lexical specification covers raw source and layout spelling.

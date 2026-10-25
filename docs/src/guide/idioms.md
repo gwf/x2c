@@ -141,8 +141,8 @@ macro Stmt $sample.guard(Expr $condition) {
 ```
 
 Prefer a function when the job is runtime computation. Prefer direct source
-when a macro needs substantial compile-time Lisp or AST manipulation to save a
-few tokens. The macro body, imports, and generated declarations are part of the
+when a macro needs substantial `meta` code or AST manipulation to save a few
+tokens. The macro body, imports, and generated declarations are part of the
 maintenance cost.
 
 ## Write generated code as the code it builds

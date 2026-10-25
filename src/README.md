@@ -106,9 +106,9 @@ linked into the compiler itself.
 
 | File or module | Responsibility |
 | --- | --- |
-| [macros/](macros/README.md) | Definitions, invocation captures, expansion, quotations, rewrites, and Lisp sessions. |
+| [macros/](macros/README.md) | Definitions, invocation captures, expansion, quotations, compile-time call slots, and rewrites. |
 | [meta-sdk/](meta-sdk/README.md) | Compiler operations exposed to compile-time code through lib/meta.x. |
-| [meta-native/](meta-native/README.md) | Native meta bindings, calls, loaded modules, and compiler-linked definitions. |
+| [meta-native/](meta-native/README.md) | The unit's native meta binding table, calls, loaded modules, and compiler-linked definitions. |
 | [meta-group/](meta-group/README.md) | Selection, emission, staging, and loading of a unit's compile-time code. |
 | [meta-project.x](meta-project.x) | Builds and caches a project's native meta helper. |
 | [meta-helper-client.x](meta-helper-client.x) | Starts that helper, exchanges calls and queries, and handles failures. |

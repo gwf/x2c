@@ -14,7 +14,7 @@ module.
 | File | Responsibility |
 | --- | --- |
 | [compiler.x](compiler.x) | Defines Compiler, pending declarations, source/module records, shared names, and other translation records. |
-| [lifecycle.x](lifecycle.x) | Creates compiler instances, initializes tables, transfers unit state, routes child diagnostics, and closes Lisp sessions. |
+| [lifecycle.x](lifecycle.x) | Creates compiler instances, initializes tables, transfers unit state, routes child diagnostics, and releases unit meta bindings. |
 | [names.x](names.x) | Allocates private emitted names and semantic identities for anonymous aggregates. |
 | [binding-facts.x](binding-facts.x) | Reads emitted binding names and maintains optional-reference presence facts across paths and branches. |
 | [literal-cache.x](literal-cache.x) | Interns constant values and cons cells into the unit cache, leaving dynamic values for runtime construction. |

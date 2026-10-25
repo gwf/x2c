@@ -24,13 +24,13 @@ x2c build hello.x -o hello
 ./hello
 ```
 
-A source build needs a C compiler, `ar`, GNU Make, and `/bin/bash`;
-see [building the compiler](../internals/building.md). The install command
-builds the compiler and installs its matching runtime, headers, compile-time
-Lisp SDK, unit interfaces written by the installed compiler, runnable
-examples, an empty package directory, and license. With no `PREFIX`,
-`make install` runs `make build-install`: it copies the development compiler
-to `bin/x2c-<branch>`, links `bin/x2c` to that copy, and installs the shipped
+A source build needs a C compiler, `ar`, GNU Make, and `/bin/bash`; see
+[building the compiler](../internals/building.md). The install command builds
+the compiler and installs its matching runtime, headers, compiler prelude,
+runtime Lisp assets, unit interfaces written by the installed compiler,
+runnable examples, an empty package directory, and license. With no `PREFIX`,
+`make install` runs `make build-install`: it copies the development compiler to
+`bin/x2c-<branch>`, links `bin/x2c` to that copy, and installs the shipped
 commands under `libexec/x2c/`.
 
 ### Upgrading from 0.14.0
@@ -59,7 +59,7 @@ An installed prefix and a source checkout share one layout, the x2c home:
 <home>/bin/x2c           the compiler
 <home>/include/x2c/      runtime sources and generated headers
 <home>/lib/              the runtime archive and unit interfaces
-<home>/etc/              compile-time Lisp and macro sources
+<home>/etc/              compiler prelude and runtime Lisp assets
 <home>/packages/         installed packages, one directory each
 <home>/examples/         runnable examples (installed prefix)
 <home>/src/              language component sources (installed prefix);
@@ -68,7 +68,7 @@ An installed prefix and a source checkout share one layout, the x2c home:
 
 The compiler finds its home by walking up from its own executable, then from
 the current directory, to the nearest directory holding `include/` and
-`etc/compiler-sdk.xlisp`. `X2C_HOME` sets the home explicitly and takes
+`etc/compiler-prelude.x`. `X2C_HOME` sets the home explicitly and takes
 precedence.
 `x2c env` prints the resolved home, layout, package roots, and host tools;
 `x2c env home` prints one value. Every `import` searches `<home>/packages`

@@ -59,8 +59,8 @@ Print the AST after lowering:
    (block ...))))
 ```
 
-The built-in source macro in `src/macros/macros.x`, `etc/builtin-macros.x`, and
-`src/builtins.x` has replaced `foreach` with declarations and a
+The built-in `foreach` macro in `etc/compiler-prelude.x` and its algorithm in
+`src/builtins.x` have replaced `foreach` with declarations and a
 `while` loop that calls `List_try_next`. The loop keeps the List, a cursor,
 and the current element in generated locals; `List_try_next` advances the
 cursor and stores the element through its reference arguments. The later
@@ -145,19 +145,17 @@ set of dump flags is listed under [compiler options](../reference/cli.md).
   the `x2c_` helpers: `lib/meta.x`
 - Macro values, their application, and macro-valued `case` recognition:
   `lib/macrovalue/macrovalue.x`
-- Compile-time Lisp boundary adapters: `etc/compiler-sdk.xlisp`
 - `meta` arguments and results: `src/stage.x`; a unit's `meta` group and
   in-process staging: `src/meta-group/meta-group.x`; the project helper:
   `src/meta-project.x` builds it, `src/meta-helper-client.x` calls it, and
   `etc/meta-helper.x` answers, with the compiler queries that
   `tools/gen-meta-queries.sh` generates from `lib/meta.x` into
   `etc/meta-queries.x`
-- Embedded native bindings: `etc/lisp-bindings.x`,
-  `etc/lisp-bindings.xlisp`, `lib/lisp-targets/lisp-targets.x`, `lib/lisp/lisp.x`, and
-  `lib/func/func.x`
-- Tests: macro import, template, decorator, inline-Lisp, and inferred-binding
-  compiler fixtures; Lisp and `Func` suites; compile-time-macros, decorators,
-  and inline-lisp examples
+- Builtin macros and their native prototypes: `etc/compiler-prelude.x`;
+  the unit binding table: `src/meta-native/bindings.x`; declaration macros:
+  `src/compiler/declarations/production.x`
+- Tests: macro import, template, decorator, and unsupported-Lisp-form
+  compiler fixtures; compile-time-macros and decorators examples
 - See also: [compile-time macros](../reference/language.md#compile-time-macros)
 
 ### Package imports and `with` names
@@ -211,7 +209,7 @@ set of dump flags is listed under [compiler options](../reference/cli.md).
 
 - Parse: `_with_statement` in `src/statements.x`
 - Lower: `_with_expand` in `src/builtins.x`, reached through the
-  `$x2c.with` decorator in `etc/builtin-macros.x`
+  `with` macro in `etc/compiler-prelude.x`
 - Tests: the `with-*` compiler fixtures
 - See also: [with](../reference/language.md#temporary-assignments-with-with)
 
@@ -221,8 +219,7 @@ set of dump flags is listed under [compiler options](../reference/cli.md).
   invocation recognition in `src/macros/invocations/recognition.x` and the
   script-statement queries in `src/parse/units.x`
 - Lower: `_scope_expand` in `src/builtins.x`, reached through the
-  `$x2c.auto.region` and `$x2c.auto.destination` decorators in
-  `etc/builtin-macros.x`
+  `$auto` macro in `etc/compiler-prelude.x`, which delegates to `$scope`
 - Tests: the `scope-*` and `auto-*` compiler fixtures
 - See also: [allocation regions](../reference/language.md#allocation-regions)
 
@@ -246,13 +243,14 @@ set of dump flags is listed under [compiler options](../reference/cli.md).
 
 ### Inline Lisp bindings
 
-- Parse and expand `$lisp.bind`, `$lisp.binding`, and `$lisp.install`:
-  `src/macros/macros.x`, `etc/lisp-bindings.x`, and
-  `etc/lisp-bindings.xlisp`
-- Runtime call boundary: `lib/lisp/lisp.x`, `lib/func/func.x`
+- Expand `$lisp.bind`, `$lisp.binding`, and `$lisp.install`: the ordinary
+  macros in `lib/lisp-bindings.x`, which read signatures with
+  `Code.native_signature`
+- Runtime call boundary: `lib/lisp/lisp.x`, `lib/lisp-targets/lisp-targets.x`,
+  `lib/func/func.x`
 - Tests: Lisp binding compiler fixtures, Lisp/`Func` suites, and the
 inline-lisp example
-- See also: [compile-time macros](../reference/language.md#compile-time-macros)
+- See also: [runtime Lisp](../reference/language.md#runtime-lisp)
 
 ### Var boxing, conversion, operations, and dispatch
 
@@ -313,9 +311,8 @@ inline-lisp example
 
 ### Foreach
 
-- Parse and expand: built-in source macro support in `src/macros/macros.x` and
-  `etc/builtin-macros.x`; the expansion algorithm in
-  `src/builtins.x`
+- Parse and expand: the built-in `foreach` macro in `etc/compiler-prelude.x`;
+  the expansion algorithm in `src/builtins.x`
 - Lower/generate the expanded loop: `src/transform/transform.x`, `src/emit/emit.x`
 - Runtime: `lib/iter.x` and collection adapters; `Iter.try_next` returns the
   traversal status
@@ -418,9 +415,9 @@ phase order and the modules in each phase, and
 [module ownership](architecture.md#module-ownership) lists each module's
 responsibility.
 
-## Shared Lisp initialization
+## Lisp initialization and builtin macros
 
-The compiler and `Lisp.new()` load the same `etc/init.xlisp`: the evaluator
+`Lisp.new()` loads `etc/init.xlisp`: the evaluator
 primitives, macros, native bindings, and the standard algorithms (list
 traversal, numeric wrappers, selectors, predicates, and pattern helpers).
 The algorithms without callbacks are x2c functions in `lib/lisp-targets/algorithms.x`,
@@ -429,15 +426,15 @@ Those algorithms use fixed primitive operations internally; their public
 Lisp names remain replaceable. In particular, rebinding `car`, `cdr`, or
 `cons` does not change `filter`.
 
-The compiler's built-in macro algorithms are compiler functions in
-`src/builtins.x`, bound into the shared compile-time session under the
-names the built-in macros call. They are bound at the compiler-only
-boundary; they are not part of `Lisp.new()`. Scope expansion, foreach lowering, and deferred class defaults
-reuse the ordinary compiler queries and syntax builders.
+The compiler does not link Lisp. Its built-in macro algorithms are compiler
+functions in `src/builtins.x`, declared as bodyless `meta` prototypes such as
+`_x2c_scope_expand` in `etc/compiler-prelude.x` and called natively by the
+ordinary macros defined there. Scope expansion, foreach lowering, and deferred
+class defaults reuse the ordinary compiler queries and syntax builders.
 
-Native Lisp signature and binding algorithms are compiler functions in
-`src/builtins.x` under `_x2c.binding_*`, and `etc/lisp-bindings.xlisp`
-defines the Lisp entry points over them. Importing that file loads only
-functions. The compiler initializes binding rows and
-sealed groups when it installs the binding macros for each translation unit,
-so signature preloading cannot put mutable group state in the shared parent.
+`$lisp.bind`, `$lisp.binding`, and `$lisp.install` are ordinary macros in
+`lib/lisp-bindings.x`. They read a function's signature with
+`Code.native_signature`, write it into the generated statement as a literal,
+and create a fresh handle with `Func.new` for each binding. The compiler resets
+binding rows and sealed groups at each parse reset, so a group's state never
+outlives its translation unit.
