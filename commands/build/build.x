@@ -1076,10 +1076,12 @@ void Build.cleanup(Build b, int success) {
     program must translate and link. The script's translation depfile already
     lists every file the translation read, so helpers of helpers appear too.
     Runtime and package sources are excluded; their objects are archived.
+    The compiler's own `etc/` sources, such as its syntax prelude, have
+    none.
 */
 List Build.script_helpers(Build b) {
   String script = b.request.inputs.car(), root = x2c_get_root();
-  List excluded = %("$root/lib/" "$root/include/" "$root/builds/")
+  List excluded = %("$root/lib/" "$root/include/" "$root/builds/" "$root/etc/")
     .append(b.request.package_roots().map(%!(dir) => %"$dir/"));
   List prelude = Compiler.prelude_sources().map(
     %!(String source) => Path.join(root, source));
