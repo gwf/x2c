@@ -16,7 +16,7 @@
  (bind (binding 4 "bump") 
   ((fnmod (params (param (int) (bind (binding 5 "value") (*))))))) 
  (block 
-  (at 41 
+  (at 31 
    (return 
     (expr (int) 
      (op ++ (expr (int) (op * (expr (* int) (ident (binding 5 "value")))))))))))
@@ -27,7 +27,7 @@
     (params (param (int) (bind (binding 7 "a") ())) 
      (param (int) (bind (binding 8 "b") ())))))) 
  (block 
-  (at 42 
+  (at 32 
    (return 
     (expr (int) 
      (op + (expr (int) (ident (binding 7 "a"))) 
@@ -36,7 +36,7 @@
 (function (int) 
  (bind (binding 9 "main") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 43 
+  (at 33 
    (declare (int) 
     (bindings 
      (op = (bind (binding 10 "count") ()) (expr (int) (literal (int) "7"))) 
@@ -46,13 +46,13 @@
        (composite 
         (commas (expr (int) (literal (int) "10")) 
          (expr (int) (literal (int) "11"))))))))) 
-  (at 44 
+  (at 34 
    (declare ("Pair") 
     (bindings 
      (op = (bind (binding 13 "pair") ()) 
       (expr ("Pair") 
        (composite (commas (dotinit ("value") (expr (int) (literal (int) "22")))))))))) 
-  (at 45 
+  (at 35 
    (declare ("List") 
     (bindings 
      (op = (bind (binding 14 "list_nested") ()) 
@@ -113,7 +113,7 @@
               (cons (expr ("Var") 
                      (ident (binding 21 "_x2c_gensym_literal_part_1"))) 
                (nil)))))))))))))) 
-  (at 46 
+  (at 36 
    (declare ("Array") 
     (bindings 
      (op = (bind (binding 25 "values") ()) 
@@ -312,7 +312,7 @@
              (expr ("Var") 
               (call (expr ((func ((int))) "Var") (ident (binding 20 "int_var"))) 
                (args (expr (int) (literal (int) "25")))))))))))))))) 
-  (at 47 
+  (at 37 
    (declare ("Map") 
     (bindings 
      (op = (bind (binding 39 "config") ()) 
@@ -418,7 +418,7 @@
              (expr ("Var") 
               (call (expr ((func ((int))) "Var") (ident (binding 20 "int_var"))) 
                (args (expr (int) (literal (int) "12")))))))))))))))) 
-  (at 48 
+  (at 38 
    (if (expr (int) 
         (op || 
          (expr (int) 
@@ -463,7 +463,7 @@
                         (args (expr ("Symbol") (literal ("Symbol") "<map>" map))))))))))) 
            (expr (int) (literal (int) "7")))))) 
     (return (expr (int) (literal (int) "1"))))) 
-  (at 49 
+  (at 39 
    (if (expr (int) 
         (op ! (expr (int) 
                (call (expr ((func (("String") ("String"))) int) 
@@ -479,7 +479,7 @@
                                  (expr (int) (literal (int) "0")))))))) 
                  (expr ("String") (cache 4))))))) 
     (return (expr (int) (literal (int) "2"))))) 
-  (at 50 
+  (at 40 
    (if (expr (int) 
         (op ! (expr (int) 
                (call (expr ((func (("String") ("String"))) int) 
@@ -495,7 +495,7 @@
                                  (expr (int) (literal (int) "1")))))))) 
                  (expr ("String") (cache 5))))))) 
     (return (expr (int) (literal (int) "3"))))) 
-  (at 51 
+  (at 41 
    (if (expr (int) 
         (op ! (expr (int) 
                (call (expr ((func (("String") ("String"))) int) 
@@ -511,7 +511,7 @@
                                  (expr (int) (literal (int) "2")))))))) 
                  (expr ("String") (cache 0))))))) 
     (return (expr (int) (literal (int) "4"))))) 
-  (at 52 
+  (at 42 
    (if (expr (int) 
         (op != 
          (expr (long) 
@@ -532,7 +532,7 @@
                     (expr (int) (literal (int) "1")))))))) 
          (expr (int) (literal (int) "7")))) 
     (return (expr (int) (literal (int) "5"))))) 
-  (at 53 
+  (at 43 
    (if (expr (int) 
         (op ! (expr (int) 
                (call (expr ((func (("String") ("String"))) int) 
@@ -563,7 +563,7 @@
                                           (literal ("Symbol") "<kind>" kind))))))))))) 
                  (expr ("String") (cache 6))))))) 
     (return (expr (int) (literal (int) "6"))))) 
-  (at 54 
+  (at 44 
    (if (expr (int) 
         (op || 
          (expr (int) 
@@ -589,7 +589,7 @@
                       (expr (int) (literal (int) "6")))))))) 
            (expr (int) (op - (expr (int) (literal (int) "3")))))))) 
     (return (expr (int) (literal (int) "7"))))) 
-  (at 55 
+  (at 45 
    (if (expr (int) 
         (op != 
          (expr (char) 
@@ -601,7 +601,7 @@
                     (expr (int) (literal (int) "7")))))))) 
          (expr (char) (literal (char) "\'q\'")))) 
     (return (expr (int) (literal (int) "8"))))) 
-  (at 56 
+  (at 46 
    (if (expr (int) 
         (op || 
          (expr (int) 
@@ -633,7 +633,7 @@
                                    (expr (int) (literal (int) "9")))))))) 
                    (expr ("String") (cache 8))))))))) 
     (return (expr (int) (literal (int) "9"))))) 
-  (at 57 
+  (at 47 
    (if (expr (int) 
         (op || 
          (expr (int) 
@@ -688,7 +688,7 @@
                       (expr (int) (literal (int) "13")))))))) 
            (expr ("Symbol") (literal ("Symbol") "<+>" +)))))) 
     (return (expr (int) (literal (int) "10"))))) 
-  (at 58 
+  (at 48 
    (if (expr (int) 
         (op || 
          (expr (int) 
@@ -749,7 +749,7 @@
                                    (expr (int) (literal (int) "17")))))))) 
                    (expr ("String") (cache 10))))))))) 
     (return (expr (int) (literal (int) "11"))))) 
-  (at 59 
+  (at 49 
    (if (expr (int) 
         (op || 
          (expr (int) 
@@ -793,7 +793,7 @@
           (op != (expr (int) (ident (binding 11 "evals"))) 
            (expr (int) (literal (int) "1")))))) 
     (return (expr (int) (literal (int) "12"))))) 
-  (at 60 
+  (at 50 
    (if (expr (int) 
         (op || 
          (expr (int) 
@@ -857,7 +857,7 @@
                       (expr (int) (literal (int) "25")))))))) 
            (expr (int) (literal (int) "25")))))) 
     (return (expr (int) (literal (int) "13"))))) 
-  (at 61 
+  (at 51 
    (if (expr (int) 
         (op ! (expr (int) 
                (call (expr ((func (("String") ("String"))) int) 
@@ -877,7 +877,7 @@
                                           (literal ("Symbol") "<name>" name))))))))))) 
                  (expr ("String") (cache 3))))))) 
     (return (expr (int) (literal (int) "14"))))) 
-  (at 62 
+  (at 52 
    (if (expr (int) 
         (op != 
          (expr (long) 
@@ -894,7 +894,7 @@
                              (literal ("Symbol") "<runtime>" runtime))))))))))) 
          (expr (int) (literal (int) "7")))) 
     (return (expr (int) (literal (int) "15"))))) 
-  (at 63 
+  (at 53 
    (if (expr (int) 
         (op != 
          (expr (long) 
@@ -911,7 +911,7 @@
                              (literal ("Symbol") "<computed>" computed))))))))))) 
          (expr (int) (literal (int) "9")))) 
     (return (expr (int) (literal (int) "16"))))) 
-  (at 64 
+  (at 54 
    (if (expr (int) 
         (op != 
          (expr (long) 
@@ -941,7 +941,7 @@
                              (literal ("Symbol") "<depth>" depth))))))))))) 
          (expr (int) (literal (int) "8")))) 
     (return (expr (int) (literal (int) "17"))))) 
-  (at 65 
+  (at 55 
    (if (expr (int) 
         (op != 
          (expr (long) 
@@ -967,7 +967,7 @@
                     (expr (int) (literal (int) "1")))))))) 
          (expr (int) (literal (int) "7")))) 
     (return (expr (int) (literal (int) "18"))))) 
-  (at 66 
+  (at 56 
    (if (expr (int) 
         (op != 
          (expr (long) 
@@ -981,9 +981,9 @@
                      (call "String_var" (args (expr ("String") (cache 12))))))))))) 
          (expr (int) (literal (int) "12")))) 
     (return (expr (int) (literal (int) "19"))))) 
-  (at 39 
+  (at 29 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 57 "printf"))) 
       (args (expr (* char) (literal (* char) "\"quoted collections ok\\n\""))))))) 
-  (at 67 (return (expr (int) (literal (int) "0"))))))
+  (at 57 (return (expr (int) (literal (int) "0"))))))

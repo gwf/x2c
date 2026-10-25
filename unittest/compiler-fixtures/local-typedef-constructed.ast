@@ -7,15 +7,14 @@
  (bind (binding 2 "increment") 
   ((fnmod (params (param (int) (bind (binding 3 "value") ())))))) 
  (block 
-  (at 11 
-   (return (int) 
-    (expr (int) 
-     (op + (expr (int) (ident (binding 3 "value"))) 
-      (expr (int) (literal (int) "1"))))))))
+  (at 1 (return (int) 
+         (expr (int) 
+          (op + (expr (int) (ident (binding 3 "value"))) 
+           (expr (int) (literal (int) "1"))))))))
 
 (function (static "List") 
  (bind (binding 4 "type_rows") ((fnmod (params (param (void) (bind () ())))))) 
- (block (at 12 (return ("List") (expr ("List") (expr ("List") (cache 131)))))))
+ (block (at 2 (return ("List") (expr ("List") (expr ("List") (cache 131)))))))
 
 (macrodef <macro constructed_types>)
 
@@ -43,12 +42,12 @@
 
 (function (int) 
  (bind (binding 12 "main") ((fnmod (params (param (void) (bind () ())))))) 
- (block (at 24 (typedef (int) (bindings (bind (binding 13 "LocalCount") ())))) 
-  (at 25 
+ (block (at 14 (typedef (int) (bindings (bind (binding 13 "LocalCount") ())))) 
+  (at 15 
    (declare (int) 
     (bindings 
      (op = (bind (binding 14 "value") ()) (expr (int) (literal (int) "9")))))) 
-  (at 27 
+  (at 17 
    (declare ("Func") 
     (bindings 
      (op = (bind (binding 15 "captured") ()) 
@@ -58,12 +57,12 @@
          (capture (binding 16 "value") (int) 
           (expr (int) (ident (binding 14 "value"))))) 
         (expr (int) (ident (binding 16 "value"))))))))) 
-  (at 28 
+  (at 18 
    (stmnt 
     (expr (int) 
      (op = (expr (int) (ident (binding 14 "value"))) 
       (expr (int) (literal (int) "10")))))) 
-  (at 30 
+  (at 20 
    (if (expr (int) 
         (op || 
          (expr (int) 
@@ -73,7 +72,7 @@
                    (ident (binding 8 "constructed_types"))) 
              (args (expr (void) ())))) (expr (int) (literal (int) "8")))) 
          (expr (int) 
-          (at 29 
+          (at 19 
            (op != 
             (expr ("Var") 
              (call (expr ((func (("Func") (unsigned) (* const "FuncArg"))) 
@@ -82,19 +81,19 @@
                (expr (int) (literal (int) "0")) (expr (int) (literal (int) "0"))))) 
             (expr (int) (literal (int) "9"))))))) 
     (return (int) (expr (int) (literal (int) "1"))))) 
-  (at 31 (typedef ("Base") (bindings (bind (binding 18 "Alias") ())))) 
-  (at 32 
+  (at 21 (typedef ("Base") (bindings (bind (binding 18 "Alias") ())))) 
+  (at 22 
    (declare ("Base") 
     (bindings 
      (op = (bind (binding 19 "referent") ()) (expr (int) (literal (int) "1")))))) 
-  (at 40 
-   (block (at 33 (typedef (double) (bindings (bind (binding 20 "Base") ())))) 
-    (at 34 
+  (at 30 
+   (block (at 23 (typedef (double) (bindings (bind (binding 20 "Base") ())))) 
+    (at 24 
      (declare (double) 
       (bindings 
        (op = (bind (binding 21 "fraction") ()) 
         (expr (double) (literal (double) "0.5")))))) 
-    (at 36 
+    (at 26 
      (declare ("Func") 
       (bindings 
        (op = (bind (binding 22 "reference") ()) 
@@ -106,16 +105,16 @@
              (op & (expr ("Base") (ident (binding 19 "referent"))))))) 
           (expr ("Base") 
            (op * (expr (& "Base") (ident (binding 23 "referent"))))))))))) 
-    (at 37 
+    (at 27 
      (stmnt 
       (expr ("Base") 
        (op = (expr ("Base") (ident (binding 19 "referent"))) 
         (expr (int) (literal (int) "2")))))) 
-    (at 39 
+    (at 29 
      (if (expr (int) 
           (op || 
            (expr (int) 
-            (at 38 
+            (at 28 
              (op != 
               (expr ("Var") 
                (call (expr ((func (("Func") (unsigned) (* const "FuncArg"))) 
@@ -128,11 +127,11 @@
             (op != (expr (double) (ident (binding 21 "fraction"))) 
              (expr (double) (literal (double) "0.5")))))) 
       (return (int) (expr (int) (literal (int) "2"))))))) 
-  (at 41 
+  (at 31 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 24 "puts"))) 
       (args (expr (* char) 
              (literal (* char) 
               "\"constructed declarations and resolved capture types preserve scope\""))))))) 
-  (at 42 (return (int) (expr (int) (literal (int) "0"))))))
+  (at 32 (return (int) (expr (int) (literal (int) "0"))))))

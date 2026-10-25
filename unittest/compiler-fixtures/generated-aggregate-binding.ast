@@ -3,7 +3,7 @@
 
 (function (static "List") 
  (bind (binding 1 "record_rows") ((fnmod (params (param (void) (bind () ())))))) 
- (block (at 11 (return ("List") (expr ("List") (expr ("List") (cache 53)))))))
+ (block (at 1 (return ("List") (expr ("List") (expr ("List") (cache 53)))))))
 
 (macrodef <macro record>)
 
@@ -15,18 +15,17 @@
 (function (int) 
  (bind (binding 4 "main") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 13 
-   (declare ("GeneratedRecord") 
-    (bindings 
-     (op = (bind (binding 5 "record") ()) 
-      (expr () 
-       (composite (commas (dotinit ("value") (expr (int) (literal (int) "17")))))))))) 
-  (at 14 
-   (stmnt 
-    (expr () 
-     (call (expr () (ident (binding 6 "printf"))) 
-      (args (expr (* char) (literal (* char) "\"%d\\n\"")) 
-       (expr (int) 
-        (op . (expr ("GeneratedRecord") (ident (binding 5 "record"))) 
-         ("value")))))))) 
-  (at 15 (return (int) (expr (int) (literal (int) "0"))))))
+  (at 3 (declare ("GeneratedRecord") 
+         (bindings 
+          (op = (bind (binding 5 "record") ()) 
+           (expr () 
+            (composite 
+             (commas (dotinit ("value") (expr (int) (literal (int) "17")))))))))) 
+  (at 4 (stmnt 
+         (expr () 
+          (call (expr () (ident (binding 6 "printf"))) 
+           (args (expr (* char) (literal (* char) "\"%d\\n\"")) 
+            (expr (int) 
+             (op . (expr ("GeneratedRecord") (ident (binding 5 "record"))) 
+              ("value")))))))) 
+  (at 5 (return (int) (expr (int) (literal (int) "0"))))))
