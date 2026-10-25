@@ -9,7 +9,7 @@ static void acquire(int value) {
 auto static int work(void) { acquire(4); return 7; }
 auto static int arrow(void) => (acquire(8), 9);
 static Scope destination;
-auto(&destination) static void kept(void) { acquire(16); }
+auto (&destination) static void kept(void) { acquire(16); }
 macro Stmt $region(Stmt $body) { auto { $body } }
 macro Unit $regional_function(Name $name) {
   auto int $name(int value) { acquire(value); return value + 4; }
@@ -26,7 +26,7 @@ int main(void) {
   assert(arrow() == 9 && released == 15);
   Scope *previous = Scope.top();
   int evaluations = 0;
-  auto((evaluations++, &destination)) acquire(32);
+  auto ((evaluations++, &destination)) acquire(32);
   kept();
   assert(evaluations == 1 && Scope.top() == previous && released == 15);
   destination.cleanup(); destination = NULL;
@@ -40,7 +40,7 @@ int main(void) {
   try { auto { acquire(1); raise %(invariant); } }
   catch %(invariant): {}
   assert(released == 68);
-  try { auto(&destination) { acquire(1); raise %(invariant); } }
+  try { auto (&destination) { acquire(1); raise %(invariant); } }
   catch %(invariant): {}
   assert(Scope.top() == previous && released == 68);
   destination.cleanup(); destination = NULL;

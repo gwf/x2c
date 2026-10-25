@@ -237,7 +237,7 @@ Managed compound declarations use one leading `auto` when cleanup semantics
 are unchanged: `auto Array left = [], right = [];`. Initializer `auto`
 remains available for bindings that change or mixed ownership groups.
 The grammar also highlights native `auto` regions, control statements, and
-function definitions, with `auto(destination)` for an explicit Scope.
+function definitions, with `auto (destination)` for an explicit Scope.
 Empty `auto()` is rejected by the compiler, not the TextMate highlighter.
 
 `$!`, `$name`, `${expression}`, `$(form)`, and a standalone `$` use pronounced

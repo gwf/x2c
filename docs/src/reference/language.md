@@ -2821,7 +2821,7 @@ or a function definition, such as `auto int f(void) { ... }`. An
 expression-bodied function can use the prefix too. Normal `return`, `break`,
 `continue`, and error transfer retain their meaning.
 
-`auto(pointer)` evaluates the Scope-pointer expression once, selects that
+`auto (pointer)` evaluates the Scope-pointer expression once, selects that
 allocation destination for the following statement or function body, and
 restores the previous destination on exit. It does not release the selected
 Scope. The argument is required: empty `auto()` is not accepted.
@@ -2837,7 +2837,7 @@ Declaration `auto` arranges cleanup of the variable's value at block exit:
 ```x2c
 ~int main(void) {
 auto Scope work = NULL;
-auto(&work) { Array items = []; items.push(1); }
+auto (&work) { Array items = []; items.push(1); }
 ~  return 0;
 ~}
 ```
@@ -3900,7 +3900,7 @@ retains its explicit macro spelling. The compatibility `$scope` decorator
 retains its macro collision policy.
 
 Region `auto` retains one region around its following statement and defers
-release inside an inner block containing that statement. `auto(pointer)`
+release inside an inner block containing that statement. `auto (pointer)`
 evaluates the Scope-pointer expression once, pushes that destination, and
 uses the same inner-block placement for a deferred pop. Pop restores the
 previous destination without destroying the selected Scope. More than one

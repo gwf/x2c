@@ -239,7 +239,7 @@ Pool Pool.retain_named(Pool inner, const char *name) {
   Mutex.recursive_initialize(
     &pool.mutex, "Pool: could not initialize branch mutex");
   mutex_ready = 1;
-  auto(&pool.scope)
+  auto (&pool.scope)
     pool.table = PoolTable.new_table(NULL, capacity);
   finished = 1;
   return pool;

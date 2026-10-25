@@ -300,7 +300,7 @@ static Var _make_lambda(Lisp lisp, List args, LispEnv *env, int macro) {
   (List params, Var body) = args;
   *lambda = (struct Lambda) {.params = params, .body = body, .macro = macro};
   if (env) {
-    auto(&lisp.scope) lambda.captures = {};
+    auto (&lisp.scope) lambda.captures = {};
     _capture(lisp, env, lambda);
   }
   return result = lambda;
@@ -453,7 +453,7 @@ static Var _run_frame(
   LispEnv captured = {.bindings = lambda.captures, .parent = NULL};
   LispEnv local = {.parent = &captured};
   if (Atom.intern(".") in lambda.params) {
-    auto(&frame) { local.bindings = {}; }
+    auto (&frame) { local.bindings = {}; }
     _bind_params(&frame, lambda, _value_list(values, count), local.bindings);
   }
   else _bind_values(&(local), lambda, values, count);

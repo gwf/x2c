@@ -60,7 +60,7 @@ String Path.resolved_absolute(String path) {
 
 static Map _real_paths(void) {
   if (real_paths != NULL) return real_paths;
-  auto(&real_paths_scope) {
+  auto (&real_paths_scope) {
     Scope.shutdown_hook(_real_paths_shutdown);
     real_paths = {};
   }

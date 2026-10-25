@@ -333,7 +333,7 @@ ReplCompletion ReplSession.complete(
   defer c.braces = braces;
   c.directives_taken = NULL;
   SymTxn transaction;
-  auto(&scratch) {
+  auto (&scratch) {
     c.braces = [];
     transaction = c.begin_semantic_transaction();
   }
@@ -414,7 +414,7 @@ int _type_submission_names(List node, Array added) {
 }
 
 static void _tokenize(Compiler c, String source, Scope scratch) {
-  auto(&scratch) { c.tokenize(source); }
+  auto (&scratch) { c.tokenize(source); }
 }
 
 /* Prompt submissions require bound names and session-owned persistent state.
@@ -639,7 +639,7 @@ static ReplResult _submit(ReplSession session, String source) {
   defer c.braces = braces;
   c.directives_taken = NULL;
   SymTxn transaction;
-  auto(&scratch) {
+  auto (&scratch) {
     c.braces = [];
     transaction = c.begin_semantic_transaction();
   }

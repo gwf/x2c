@@ -228,7 +228,7 @@ At statement start, `auto` introduces a cleanup region before a block,
 `if`, `while`, `for`, `do`, `switch`, `match`, `try`, `return`, `raise`,
 `defer`, `break`, `continue`, `goto`, `foreach`, or `with`. Before a typed
 function definition, it wraps the body, including an expression body.
-`auto(destination)` supplies an explicit Scope destination and takes a
+`auto (destination)` supplies an explicit Scope destination and takes a
 statement or function target. The destination is required between the
 parentheses: `auto()` is not a form. These native prefixes use ordinary
 statement-decorator expansion; declaration and initializer `auto` retain

@@ -10,7 +10,7 @@ pointer whose target the compiler cannot identify, including a pointer that
 a called function stores into for the caller.
 
 A region is an `auto` block, a `Scope.retain` and `Scope.release` pair, a
-`auto(&slot)` push, a `Pool.open` bracket, a local with initializer `auto`, the
+`auto (&slot)` push, a `Pool.open` bracket, a local with initializer `auto`, the
 storage of a `Scope` local that `Scope.destroy` ends, or the function's own
 locals and parameters, whose storage ends when the function returns.
 `src/regions/regions.x` analyzes these forms before the transform driver lowers

@@ -318,7 +318,7 @@ variable at exit, such as a `Scope` slot filled later:
 ```x2c
 ~int main(void) {
 auto Scope work = NULL;
-auto(&work) { Array items = []; items.push(1); }
+auto (&work) { Array items = []; items.push(1); }
 ~  return 0;
 ~}
 ```

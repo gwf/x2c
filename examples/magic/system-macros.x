@@ -37,7 +37,7 @@ int main(void) {
     for (int i = 0; i < count; i++) auto {
       Point point = Point.new(i, i * (*step));
       // The copied Points must outlive this iteration's temporary region.
-      auto(&samples) $lock(mutex) with (notebook.scale = 2) {
+      auto (&samples) $lock(mutex) with (notebook.scale = 2) {
         notebook.record(point);
       }
     }

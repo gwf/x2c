@@ -510,7 +510,7 @@ static Var Reader.form(Reader &self, Token token) {
    a definition can save a body for a later call. */
 static Reader Reader.scan(String source, unsigned base, Scope *storage) {
   Reader reader = { .source = source, .base = base };                            // Named struct initializers.
-  auto(storage) {                                                              // Redirect Scope; restore on exit.
+  auto (storage) {                                                             // Redirect Scope; restore on exit.
     reader.tokens = Tokenizer.new(                                               // Ordinary runtime tokenizer.
       source ? source + base : NULL, <lisp>);                                    // C pointer offset; Symbol mode.
     reader.tokens.scan();                                                        // Receiver-style function call.

@@ -139,7 +139,7 @@ module VarCell *_cell(VarDescriptor *descriptor, void *pointer) {
   defer x2c_descriptor_thread_start_end(0);
   Var key = { .p64 = pointer };
   VarCell *cell = NULL;
-  auto(&class_scope) {
+  auto (&class_scope) {
     if (cells == NULL) cells = {};
     Var head = cells[key];
     VarCell *first = head is void ? NULL : head.pointer();
@@ -226,7 +226,7 @@ VarDescriptor *x2c_var_declare(Symbol tag) {
     class_scope = Scope.new_named("Var classes");
     Scope.shutdown_hook(_classes_shutdown);
   }
-  auto(&class_scope) {
+  auto (&class_scope) {
     if (declared == NULL) declared = {};
     descriptor = xcalloc(1, sizeof(VarDescriptor));
     descriptor.tag = tag;

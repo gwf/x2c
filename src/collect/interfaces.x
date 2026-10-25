@@ -407,7 +407,7 @@ static macro Expression $linked.prelude() => $(_x2c.prelude.linked);
 static List _linked_record(String canonical) {
   if (!linked_records) {
     _process_cache();
-    auto(&process_cache_scope) linked_records = $linked.prelude();
+    auto (&process_cache_scope) linked_records = $linked.prelude();
   }
   Var text;
   if (!linked_records.try_get(Compiler.portable_path(canonical), text))

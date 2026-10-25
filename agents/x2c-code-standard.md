@@ -132,7 +132,8 @@ parenthesis. The close and its `{`, `=>`, or `;` stay with the last item
 unless an item spans several lines.
 
 **LY-5** Put spaces around binary operators and after commas. Put no space
-inside parentheses or brackets.
+inside parentheses or brackets. Separate `auto` and `with` from their
+parenthesized arguments with a space: `auto (&scope)`, `with (place = value)`.
 
 **LY-6** One blank line separates peer definitions and follows a section
 label. No blank line separates a `//` or `/**` comment from what it explains;
@@ -716,7 +717,7 @@ return a pointer, a borrowed handle, or a helper-process address.
 
 **LT-1** Name the lifetime at the acquisition. Use initializer `auto` for an owned
 local of a `Cleanup(T)` type, `auto` for a region of temporaries,
-`auto(&slot)` to allocate into a chosen Scope, `with` to replace locations
+`auto (&slot)` to allocate into a chosen Scope, `with` to replace locations
 for a block, and `$lock` to hold a Mutex. Use `defer` directly
 only for a native release the runtime does not own, a conditional
 acquisition or rollback, a consuming parameter, paired state that is not a
@@ -1436,7 +1437,7 @@ These results set the rules above; the evidence is in the adoption plan.
 | --- | --- |
 | owned local of a `Cleanup(T)` type | `T value = auto acquire();` |
 | region of temporaries | `auto` |
-| allocate into a chosen Scope | `auto(&slot)` |
+| allocate into a chosen Scope | `auto (&slot)` |
 | replace locations for a block | `with (place = value) { }` |
 | hold a Mutex | `$lock(m)` |
 | native release, rollback, result-writing cleanup | `defer` |

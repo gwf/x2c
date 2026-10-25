@@ -210,12 +210,12 @@ static Symbol _symbol_new_len(String text, int length) =>
    files, belongs to the session that started it. */
 static Job _list_job(List command) {
   Job job;
-  auto(Lisp.active().storage()) { job = command; }
+  auto (Lisp.active().storage()) { job = command; }
   return job;
 }
 
 static Job _job_start(Job job) {
-  auto(Lisp.active().storage()) { job.start(); }
+  auto (Lisp.active().storage()) { job.start(); }
   return job;
 }
 

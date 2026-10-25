@@ -176,7 +176,7 @@ static Var _export_wide(Context c, Var v) {
   Scope scratch = memo;
   /* Numeric Map equality compares values, so use the encoded box identity
      as the key and keep its temporary key box under the memo's own scope. */
-  auto(&scratch) memo.set(Var.box_ulong(v.u64), v);
+  auto (&scratch) memo.set(Var.box_ulong(v.u64), v);
   return v;
 }
 

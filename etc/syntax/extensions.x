@@ -131,7 +131,7 @@ List syntax_extensions(void) => %(
       (lexical c-tokens percent-forms list-atom)
       (grammar-note "auto regions with optional nonempty destination, with blocks that assign and restore places, defer statements, try/catch/finally, and raise with structured details.")
       (lexical-note "defer, try, catch, finally, and raise are keywords; with is contextual at statement start; error patterns reuse List mode.")
-      (spellings "auto { ... }" "auto(destination)"
+      (spellings "auto { ... }" "auto (destination)"
                  "with (place = value, ...)"
                  "defer" "try" "catch" "finally" "raise")
       (reference "../reference/language.md#errors-and-cleanup"))

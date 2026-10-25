@@ -154,7 +154,7 @@ static Var _lower_new_object(
 /* Only map containers belong here; forms and wide numeric boxes retain the
    caller's lifetime. Map growth follows the scope used at construction. */
 static Map _lower_scratch_map(Scope scratch) {
-  auto(&scratch) { return {}; }
+  auto (&scratch) { return {}; }
 }
 
 /* Generated names are unique throughout one interpreter session. */

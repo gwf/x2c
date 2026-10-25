@@ -121,7 +121,7 @@ module void _install_rewrite(Compiler c, List row) {
    unit or names a translator the compiler does not link. The shared rule
    derives its matcher on first use. */
 static Var _ship_rewrite(Compiler c, List row) {
-  auto(&shipped_scope) {
+  auto (&shipped_scope) {
     if (!shipped_rules) {
       Scope.shutdown_hook(_shipped_shutdown);
       shipped_rules = {};
@@ -163,7 +163,7 @@ static int _unit_bound(Var syntax) {
    process lifetime of the rule. */
 static MacroMatcher *_prepared_matcher(RewriteRule rule) {
   if (!rule.prepared && rule.matcher.shape) {
-    auto(&shipped_scope) {
+    auto (&shipped_scope) {
       MacroMatcher matcher = rule.matcher.shape.matcher(rule.matcher.holes);
       _require_owned(matcher.pattern.try_own());
       rule.matcher = matcher;

@@ -196,8 +196,8 @@ test('managed declarations and acquired initializers highlight auto', async () =
 test('native auto regions retain modifier scope at each target', async () => {
   for (const source of ['auto { work(); }',
     'auto for (int i = 0; i < n; i++) work();',
-    'auto int work(void) => 1;', 'auto(&slot) { work(); }',
-    'auto(&slot) int work(void) { return 1; }']) {
+    'auto int work(void) => 1;', 'auto (&slot) { work(); }',
+    'auto (&slot) int work(void) { return 1; }']) {
     await check(source, 'auto', 'storage.modifier.auto.x2c');
     await check(source, 'auto', 'entity.name.function.call.x2c', false);
   }

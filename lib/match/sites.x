@@ -120,7 +120,7 @@ static void _prepare(MatchCaptureSite *site, Var pattern) {
   }
   _sites_initialize();
   MatchPlan plan = NULL;
-  auto(&match_capture_site_scope) {
+  auto (&match_capture_site_scope) {
     plan = MatchPlan.prepare(pattern);
     match_capture_sites.push(&site);
   }
@@ -133,7 +133,7 @@ static void _prepare(MatchCaptureSite *site, Var pattern) {
 static void _sites_initialize(void) {
   if (match_capture_site_scope) return;
   match_capture_site_scope = Scope.new_named("Match source-site plans");
-  auto(&match_capture_site_scope) {
+  auto (&match_capture_site_scope) {
     match_capture_sites = Block.new(sizeof(MatchCaptureSite *));
   }
   x2c_match_initialize();

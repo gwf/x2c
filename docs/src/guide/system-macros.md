@@ -257,7 +257,7 @@ Tag collisions are errors.
 ## Retain or select a Scope
 
 Region `auto` precedes a block, control statement, or function definition.
-`auto(destination)` selects a Scope destination for a following statement or
+`auto (destination)` selects a Scope destination for a following statement or
 function. Empty `auto()` is not accepted. A variable declaration such as
 `auto Array values = [];` still manages that variable; initializer `auto`
 still manages the acquired value.
@@ -325,7 +325,7 @@ that destination, and restores the previous destination on exit:
 ```x2c
 ~int main(void) {
 Scope destination = auto Scope.new();
-auto(&destination) { xmalloc(8); }
+auto (&destination) { xmalloc(8); }
 ~  return 0;
 ~}
 ```

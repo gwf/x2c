@@ -99,7 +99,7 @@ void *x2c_meta_native_symbol(String path, String name) {
   void *handle;
   if (helper_modules.try_get(path, loaded)) handle = loaded.pointer();
   else {
-    auto(&helper_module_scope) handle = dlopen(path, RTLD_NOW | RTLD_LOCAL);
+    auto (&helper_module_scope) handle = dlopen(path, RTLD_NOW | RTLD_LOCAL);
     if (!handle)
       _fail(
         "cannot load native module in project meta helper",
@@ -374,7 +374,7 @@ auto static void _apply(
 static void _reset(void) {
   helper_unit_scope.destroy();
   helper_unit_scope = NULL;
-  auto(&helper_unit_scope) helper_started = {};
+  auto (&helper_unit_scope) helper_started = {};
 }
 
 /* Runs the `meta static` initializers of table `index` once per unit, in
@@ -409,7 +409,7 @@ void x2c_meta_helper_start(String name) {
 static List _initialize(Map table) {
   Var reset;
   if (!table || !table.try_get("x2c_module_reset", reset)) return NULL;
-  auto(&helper_unit_scope) {
+  auto (&helper_unit_scope) {
     try ((Func) reset.pointer()).apply(0, NULL);
     catch %(?code *detail):
       return %(failure ${Error.snapshot(cons(code, detail))});
