@@ -5404,8 +5404,8 @@ int main(void) {
 A file-scope alias follows the source order of
 [macro definitions](https://x2c-lang.dev/docs/reference/language.html#compile-time-macros): a file that includes it sees it
 from the `#include` line onward. That alias belongs to the including file's
-file scope: another alias of its name there conflicts in either order, and
-so does a later declaration of that name. In a
+file scope: another alias or a declaration of its name there conflicts, in
+either order. In a
 [module unit](https://x2c-lang.dev/docs/reference/language.html#module-blocks), a member's alias is visible to later members
 and to the entry text after the module block.
 `static alias expression as name;` keeps the alias in its declaring file, or
@@ -5413,9 +5413,39 @@ in its member within a module unit, including while that member splices a
 nested member. An alias inside a macro template belongs to that template:
 its name does not capture a caller's name of the same spelling.
 
-`alias` is a contextual word. It stays an ordinary name where it continues
-an operand, as in `alias = 3;` or `alias(4)`, and where it names a type
-that no `as` follows.
+`unalias name;` removes the alias `name` that the current scope declares,
+including a file-scope alias that an include delivered. Afterward the name
+means what it meant before that alias, and the same scope may declare it
+again:
+
+```x2c
+alias 100 as limit;
+static int capacity(void) { return limit; }
+unalias limit;
+static int limit = 3;
+
+int main(void) {
+  printf("%d %d\n", capacity(), limit);
+  return 0;
+}
+```
+
+```text
+100 3
+```
+
+`unalias` works at the positions of the semicolon form, including `struct`,
+`union`, and `enum` bodies, where it needs no comma. It does not reach an
+alias of an enclosing scope, which ends with that scope; naming no alias of
+the current scope is an error, and so is `unalias` as the body of `if` or
+another statement. A file-scope removal of a public alias reaches the files
+that include this one at the include line, so a file that aliases a name
+and then removes it leaves nothing visible to its includers.
+
+`alias` and `unalias` are contextual words. Each stays an ordinary name where
+it continues an operand, as in `alias = 3;` or `alias(4)`. A typedef named
+`unalias` keeps its meaning, and so does a typedef named `alias` where no
+`as` follows.
 
 ### Foreach
 

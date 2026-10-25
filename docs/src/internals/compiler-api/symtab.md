@@ -97,6 +97,7 @@ The compiler's semantic symbol table.
 | [`Sym.set`](#Sym.set) | Sets a semantic type for `key` in the required active scope. |
 | [`Sym.sole_typedef`](#Sym.sole_typedef) | Returns the name of the one file-scope typedef declared directly as `type`, or NULL when no typedef or several typedefs are. |
 | [`Sym.transacting`](#Sym.transacting) | Returns whether a semantic transaction is open. |
+| [`Sym.undefine_alias`](#Sym.undefine_alias) | Removes the alias row `name` of the active scope, with its binding and its `(alias binding)` fact. |
 | [`Sym.undefine_global`](#Sym.undefine_global) | Removes `key`'s definition and binding from the unit's writable base scope. |
 | [`Sym.unit_symbols`](#Sym.unit_symbols) | Returns a fresh map of the base symbols with the current scope's rows merged in. |
 | [`Sym.unshadow_visible`](#Sym.unshadow_visible) | Emits every local object spelled `spelling` that the current scope sees, the enclosing ones too, under one fresh spelling, so a file-scope name a template keeps reaches the global there, and returns them. |
@@ -155,7 +156,7 @@ Source: `src/symtab/namespaces.x:112`
 
 Deletes one semantic binding fact.
 
-Source: `src/symtab/bindings.x:211`
+Source: `src/symtab/bindings.x:225`
 
 <a id="Compiler.fact"></a>
 #### Compiler.fact
@@ -165,7 +166,7 @@ Source: `src/symtab/bindings.x:211`
 Returns the List one semantic binding fact holds, or NULL when it is
 absent.
 
-Source: `src/symtab/bindings.x:201`
+Source: `src/symtab/bindings.x:215`
 
 <a id="Compiler.file_prefixes"></a>
 #### Compiler.file_prefixes
@@ -313,7 +314,7 @@ Returns the borrowed semantic-facts map indexed by binding.
 Write it through `set_fact` and `drop_fact`, which a semantic
 transaction can restore.
 
-Source: `src/symtab/bindings.x:197`
+Source: `src/symtab/bindings.x:211`
 
 <a id="Compiler.set_fact"></a>
 #### Compiler.set_fact
@@ -322,7 +323,7 @@ Source: `src/symtab/bindings.x:197`
 
 Sets one semantic binding fact.
 
-Source: `src/symtab/bindings.x:207`
+Source: `src/symtab/bindings.x:221`
 
 <a id="Compiler.unprefixed"></a>
 #### Compiler.unprefixed
@@ -391,7 +392,7 @@ Source: `src/symtab/declarations.x:254`
 
 Reports whether `binding` belongs to a scope inside the base scopes.
 
-Source: `src/symtab/bindings.x:177`
+Source: `src/symtab/bindings.x:191`
 
 <a id="Sym.binding_is_local_before"></a>
 #### Sym.binding_is_local_before
@@ -402,7 +403,7 @@ Reports whether `binding` belongs to a local scope below `scope_count`.
 
 Counts beyond the current scope depth are clamped to that depth.
 
-Source: `src/symtab/bindings.x:184`
+Source: `src/symtab/bindings.x:198`
 
 <a id="Sym.close_local_scopes"></a>
 #### Sym.close_local_scopes
@@ -421,7 +422,7 @@ Source: `src/symtab/scopes.x:96`
 
 Returns `key`'s binding in the current scope, or `NULL`.
 
-Source: `src/symtab/bindings.x:163`
+Source: `src/symtab/bindings.x:177`
 
 <a id="Sym.current_symbols"></a>
 #### Sym.current_symbols
@@ -453,7 +454,7 @@ Source: `src/symtab/declarations.x:12`
 
 Associates an enumerator key with its owner in the active scope.
 
-Source: `src/symtab/bindings.x:99`
+Source: `src/symtab/bindings.x:113`
 
 <a id="Sym.declare_field_order"></a>
 #### Sym.declare_field_order
@@ -529,7 +530,7 @@ binding is issued at the first reference, as for a row an included file
 contributes, so the unit numbers its bindings the same whether it defined
 the row here or replayed it from an interface.
 
-Source: `src/symtab/bindings.x:83`
+Source: `src/symtab/bindings.x:97`
 
 <a id="Sym.define_macro"></a>
 #### Sym.define_macro
@@ -559,7 +560,7 @@ Source: `src/symtab/transactions.x:12`
 
 Returns the current scope's enum owner for `key`, or zero.
 
-Source: `src/symtab/bindings.x:170`
+Source: `src/symtab/bindings.x:184`
 
 <a id="Sym.field_order"></a>
 #### Sym.field_order
@@ -587,7 +588,7 @@ Source: `src/symtab/scopes.x:141`
 Returns `key`'s type, or `NULL`. A plain key tries the current module
 file's static spelling first and retries a miss in package space.
 
-Source: `src/symtab/bindings.x:218`
+Source: `src/symtab/bindings.x:232`
 
 <a id="Sym.get_exact"></a>
 #### Sym.get_exact
@@ -596,7 +597,7 @@ Source: `src/symtab/bindings.x:218`
 
 Returns `key`'s type without package fallback, or `NULL`.
 
-Source: `src/symtab/bindings.x:226`
+Source: `src/symtab/bindings.x:240`
 
 <a id="Sym.global_symbols"></a>
 #### Sym.global_symbols
@@ -623,7 +624,7 @@ Source: `src/symtab/scopes.x:89`
 
 Reports whether a scope inside the base scopes declares `key`.
 
-Source: `src/symtab/bindings.x:229`
+Source: `src/symtab/bindings.x:243`
 
 <a id="Sym.has_local_macros"></a>
 #### Sym.has_local_macros
@@ -641,7 +642,7 @@ Source: `src/symtab/scopes.x:191`
 
 Allocates a fresh binding identity for a compiler-introduced spelling.
 
-Source: `src/symtab/bindings.x:160`
+Source: `src/symtab/bindings.x:174`
 
 <a id="Sym.introduced"></a>
 #### Sym.introduced
@@ -652,7 +653,7 @@ Returns how many introduced bindings no scope holds: those
 `Sym.introduce` made, as opposed to the ones each scope makes once for
 a name it resolves.
 
-Source: `src/symtab/bindings.x:152`
+Source: `src/symtab/bindings.x:166`
 
 <a id="Sym.is_array_type"></a>
 #### Sym.is_array_type
@@ -730,7 +731,7 @@ Resolves an existing key and optionally stores its semantic type.
 A symbol row without a binding receives a stable binding identity. A total
 miss returns `NULL` and stores `NULL` through `type` when provided.
 
-Source: `src/symtab/bindings.x:276`
+Source: `src/symtab/bindings.x:290`
 
 <a id="Sym.lookup_field"></a>
 #### Sym.lookup_field
@@ -859,7 +860,7 @@ Resolves `key` or creates a forward binding in the current scope.
 
 Stores `NULL` through `type` when no declaration supplies a type.
 
-Source: `src/symtab/bindings.x:283`
+Source: `src/symtab/bindings.x:297`
 
 <a id="Sym.reference_global"></a>
 #### Sym.reference_global
@@ -869,7 +870,7 @@ Source: `src/symtab/bindings.x:283`
 Resolves a global name or creates its forward binding in the base scope.
 Local declarations cannot capture a retained macro's global reference.
 
-Source: `src/symtab/bindings.x:296`
+Source: `src/symtab/bindings.x:310`
 
 <a id="Sym.reopen_scopes"></a>
 #### Sym.reopen_scopes
@@ -911,7 +912,7 @@ Resolves a binding through base scopes and optionally stores its type.
 
 Returns `NULL` when no base scope contains the key.
 
-Source: `src/symtab/bindings.x:290`
+Source: `src/symtab/bindings.x:304`
 
 <a id="Sym.resolve_key"></a>
 #### Sym.resolve_key
@@ -950,7 +951,7 @@ Source: `src/symtab/scopes.x:83`
 
 Registers declared `T_var` converters in the active `Type` unit.
 
-Source: `src/symtab/bindings.x:70`
+Source: `src/symtab/bindings.x:84`
 
 <a id="Sym.set"></a>
 #### Sym.set
@@ -980,6 +981,16 @@ Returns whether a semantic transaction is open.
 
 Source: `src/symtab/transactions.x:121`
 
+<a id="Sym.undefine_alias"></a>
+#### Sym.undefine_alias
+
+`void Sym.undefine_alias(Sym s, String name)`
+
+Removes the alias row `name` of the active scope, with its binding and
+its `(alias binding)` fact.
+
+Source: `src/symtab/bindings.x:40`
+
 <a id="Sym.undefine_global"></a>
 #### Sym.undefine_global
 
@@ -989,7 +1000,7 @@ Removes `key`'s definition and binding from the unit's writable base
 scope. A later reference no longer resolves; a later definition receives
 a fresh binding.
 
-Source: `src/symtab/bindings.x:92`
+Source: `src/symtab/bindings.x:106`
 
 <a id="Sym.unit_symbols"></a>
 #### Sym.unit_symbols

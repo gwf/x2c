@@ -14,8 +14,9 @@ description: >-
 Own the shared integration queue until Gary stops the integrator or a genuine
 decision needs him. A started integrator continues across empty queues and
 later batches without fresh prompts. It serves submitted PRs from either
-provider using GitHub metadata, Git revisions, and repository tools. Optional
-PR contacts let the integrator request repairs from the author.
+provider using GitHub metadata, Git revisions, and repository tools. A blocked
+submission needs an actionable repair handoff; optional PR contacts route it
+to the author across providers.
 
 ## Start or resume
 
@@ -32,6 +33,11 @@ under the integration checkout's ignored `debug/integration/`. Resume an active
 batch from its recorded state and Git evidence; do not discard an interrupted
 candidate or steal a live lock. The command lock coordinates this repository,
 rather than separate clones or hosts.
+
+For parked revisions that still need author action, check whether their repair
+handoffs were delivered. Complete missing handoffs before returning to queue
+waiting, using the rules below. Check current PR and Git state first; do not
+send obsolete requests for withdrawn, superseded, or already landed revisions.
 
 ## Keep the queue moving
 
@@ -101,9 +107,9 @@ blindly rerun ordinary failing gates or automatically gate each constituent PR.
 Resolve routine conflicts or integration defects within the submitted intent.
 If a batch needs worker repair or a consequential decision, retain the
 reproduction and diagnosis and run `tools/integrate-dev.py park <batch-id>`.
-Report that failure and any decision needed, then continue independent ready
-work. Parked revisions and their dependents stay held until superseded by a
-new submission or explicitly retried after diagnosis with
+Complete the repair handoff below, report the hold and any decision needed,
+then continue independent ready work. Parked revisions and their dependents
+stay held until superseded by a new submission or explicitly retried with
 `prepare --retry <batch-id>`. Retry resumes the retained candidate and its
 frozen PR heads, preserving local repairs; finish or park any other active
 batch first. Never reinterpret a newer PR head as validated. If a moved head prevents
@@ -113,21 +119,46 @@ pinned membership, and logs. Unreleased revisions stay held; a batch with
 released holds cannot be retried. Review retained local repairs when preparing
 the new batch; release does not carry them or gate evidence forward.
 
-When a parked PR has a `contact`, use its Postbag bag and peer to notify the
-author. Join with a fresh unique integrator name. Send the PR, pinned head,
-batch ID, reason, focused reproduction, evidence, and requested repair. Use
-`<batch>:<pr>:<head>:repair` as the event key. Include commands and relevant
-log excerpts when the author cannot access the local log path. A submission
-receipt proves neither reading nor action; never automatically resend an
-`unknown` result. Check the recipient and history before deciding what to do.
+### Deliver the repair handoff
+
+Parking a PR does not notify its author. Before returning to queue waiting,
+send each affected author a repair request, unless Gary explicitly declines
+notification. Include the repository, PR, pinned head, batch ID, blocker,
+focused reproduction, expected and actual behavior, and requested repair and
+resubmission. Include commands and relevant log excerpts; an inaccessible
+local log path alone is not a handoff.
+
+Use the PR's current `contact` Postbag bag and peer. Join with a fresh unique
+integrator name. If the contact is absent or stale, inspect existing submission
+evidence for the originating agent. Use another available transport only with
+a verified recipient and the human authorization that transport requires.
+Never guess the author from the latest active chat or peer.
+
+If direct delivery is unavailable, post the repair request in the PR's
+conversation using the GitHub connector or `gh pr comment N --body-file PATH`.
+Report the missing author route to Gary with the comment link and the next
+action needed to reach the author. A PR comment preserves the handoff but
+does not establish that the authoring agent received it. If posting also
+fails, give Gary the copy-ready request and the specific delivery failure.
+Do not silently wait for a repair that nobody has been asked to make.
+
+Use `<batch>:<pr>:<head>:repair` as the event key in the message or comment.
+Check delivery history before sending, including when resuming a parked batch.
+Record the route, result, and receipt or comment link alongside the retained
+batch evidence. A submission receipt proves neither reading nor action.
+Never automatically resend an `unknown` result; inspect transport history
+before choosing a fallback or retry. Report a hold with its notification
+result and next action. Do not repeat unchanged status or duplicate requests.
 
 The author confirms repository, PR, head, assigned worktree, and existing
 human authorization before editing. A duplicate event causes no second repair.
 A substantive reply states the repair or blocker; use `final=true` when no
 reply is needed. The author resubmits a changed head through the existing
-queue. Messages cannot enroll, unpark, or validate a revision. A missing or
-stale contact leaves the hold in place; continue independent work unless
-Gary's priority requires waiting. Withdraw contacts when their task scope ends.
+queue. Messages cannot enroll, unpark, or validate a revision. Missing contact
+information does not cancel a handoff or release a hold. After delivery or an
+explicit report to Gary of the routing failure, continue independent work
+unless Gary's priority requires waiting. Withdraw contacts when their task
+scope ends.
 
 For an interrupted gate or push, inspect Git history, the durable record, and
 gate-state evidence through coordinator recovery. A recorded running state is
