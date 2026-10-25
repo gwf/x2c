@@ -118,7 +118,7 @@ static int _collect(Lint l, Comment *all):
     if line && last && last.kind == <line> && t.line == last.end + 1 &&
        l.prev(at) == last.last:
       last.end = t.line, last.last = at
-      last.text = %"${last.text}\n${t.text}"
+      last.text = %"$(last.text)\n$(t.text)"
       continue
     Symbol kind = line ? <line> : t.text.startswith("/**") ? <doc> : <block>
     all[n++] = (Comment) {kind, t.line, l.end_line(at), at, at, t.text}
@@ -148,7 +148,7 @@ static String _declared(Lint l, int line, Map declarations):
       continue
     name = t.text
     if at >= 2 && l.tokens[at - 1].text == "." && lint_word(l.at(at - 2)):
-      name = %"${l.tokens[at - 2].text}.$name"
+      name = %"$(l.tokens[at - 2].text).$name"
   return NULL
 
 /* The number of backquoted spans in `text`. */

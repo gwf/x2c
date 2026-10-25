@@ -14,7 +14,7 @@ static List section(List record, String key) {
 }
 
 static void fail(String reason) {
-    raise %(syn-error (reason ${reason}));
+    raise %(syn-error (reason $(reason)));
 }
 
 static Map rules(void) {
@@ -199,9 +199,9 @@ static void validate(void) {
 
 static int outputs(int write) {
     List files = %(
-      ("docs/src/reference/syntax/x2c.ebnf" ${grammar_text()})
-      ("docs/src/reference/syntax/lexical-data.md" ${lexical_text()})
-      ("docs/src/guide/x2c-syntax-map.md" ${extension_text()}));
+      ("docs/src/reference/syntax/x2c.ebnf" $(grammar_text()))
+      ("docs/src/reference/syntax/lexical-data.md" $(lexical_text()))
+      ("docs/src/guide/x2c-syntax-map.md" $(extension_text())));
     int changed = 0;
     foreach (List row, files) {
         Path path = root.join(row.car().str());

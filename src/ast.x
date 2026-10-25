@@ -60,9 +60,9 @@ List Ast.append_modifiers(List declarator, List modifiers) {
   if (!modifiers) return declarator;
   match (declarator) {
     case %(bind ?binding ?mods):
-      return %(bind $binding (@{mods} @modifiers));
+      return %(bind $binding (@(mods) @modifiers));
     case %(op = ?binding ?initializer):
-      return %(op = ${Ast.append_modifiers(binding, modifiers)}
+      return %(op = $(Ast.append_modifiers(binding, modifiers))
                $initializer);
   }
   return declarator;
@@ -86,7 +86,7 @@ List Ast.prototype_declarator(List declarator) {
     modifiers.free();
     return declarator;
   }
-  return %(bind ${declarator.cadr()} ${modifiers.list_free()});
+  return %(bind $(declarator.cadr()) $(modifiers.list_free()));
 }
 
 /* The function modifier for `parameters`, each without its outermost
@@ -101,7 +101,7 @@ static List _prototype_params(List parameters, int &changed) {
       }
     rebuilt.push(parameter);
   }
-  return %(fnmod (params @{rebuilt.list_free()}));
+  return %(fnmod (params @(rebuilt.list_free())));
 }
 
 // designated nodes
@@ -116,8 +116,8 @@ static List _designated(Var value) {
     List node = value;
     match (node) {
       case %(expr ? ?inner): value = inner;
-      case ${$grouped(?inner)}: value = inner;
-      case ${$indexed(%(!set ?base (expr ((dim *) *) ?)), ?)}:
+      case $($grouped(?inner)): value = inner;
+      case $($indexed(%(!set ?base (expr ((dim *) *) ?)), ?)):
         value = base;
       case $source_operator_content(%(. ?base *)): value = base;
       default: return node;
@@ -143,9 +143,9 @@ String Ast.addressed_identifier(Var value) {
   List ast = value;
   match (ast) {
     case %(expr ? ?inner): return Ast.addressed_identifier(inner);
-    case ${$grouped(?inner)}:
+    case $($grouped(?inner)):
       return Ast.addressed_identifier(inner);
-    case ${$addressed(?inner)}:
+    case $($addressed(?inner)):
       return Ast.direct_identifier(inner);
   }
   return NULL;
@@ -164,7 +164,7 @@ String Ast.direct_identifier(Var value) {
       return Ast.binding_spelling(binding);
     case $source_operator_content(%((!quote ->) ?base *)):
       return Ast.addressed_identifier(base);
-    case ${$dereferenced(?base)}:
+    case $($dereferenced(?base)):
       return Ast.addressed_identifier(base);
   }
   return NULL;
@@ -178,11 +178,11 @@ String Ast.direct_identifier(Var value) {
 String Ast.indirect_identifier(Var value) {
   List designated = _designated(value);
   match (designated) {
-    case ${$indexed(%(!set ?base (expr ? ?)), ?)}:
+    case $($indexed(%(!set ?base (expr ? ?)), ?)):
       return Ast.direct_identifier(base);
     case $source_operator_content(%((!quote ->) ?base *)):
       return Ast.direct_identifier(base);
-    case ${$dereferenced(?base)}:
+    case $($dereferenced(?base)):
       return Ast.direct_identifier(base);
   }
   return NULL;
@@ -288,7 +288,7 @@ Ast Ast.without_origin(Ast ast) {
 Ast Ast.rewrap_origin(Ast original, Ast replacement) {
   match (original)
     case %(at ?origin ?inner):
-      return %(at $origin ${Ast.rewrap_origin(inner, replacement)});
+      return %(at $origin $(Ast.rewrap_origin(inner, replacement)));
   return replacement;
 }
 
@@ -299,7 +299,7 @@ Ast Ast.rewrap_origin(Ast original, Ast replacement) {
     shipped function rules. */
 List Ast.written_definitions(List decl) {
   match (decl) {
-    case %(function ? (bind ? ?) ?): return %(function @{decl.cdr()} kernel);
+    case %(function ? (bind ? ?) ?): return %(function @(decl.cdr()) kernel);
     case %((!or at seq) *):
       return Ast.rewrite_children(decl, Ast.written_definitions);
   }
@@ -334,10 +334,10 @@ int Ast.reference_guard_exits(List arm) {
 */
 int Ast.never_returns(Ast ast) {
   match (Ast.without_origin(ast)) {
-    case %(raise (expr ("Symbol") ${$source_literal_content(
-              %(("Symbol") ? ?code))}) *):
+    case %(raise (expr ("Symbol") $($source_literal_content(
+              %(("Symbol") ? ?code)))) *):
       return code in nonreturning_error_causes;
-    case %(stmnt (expr ? ${$called(%(expr () (ident ?binding)), %(*))})):
+    case %(stmnt (expr ? $($called(%(expr () (ident ?binding)), %(*))))):
       return Ast.binding_spelling(binding) in terminating_calls;
     case %(block *items):
       return items && !_contains_return(items) &&
@@ -405,7 +405,7 @@ List Ast.initializer_functions(Ast ast, List &source) {
   if (!header || header.cdr().len() != 1) return NULL;
   List input = header.cadr();
   List value = input.cadr();
-  List argument = %(expr ${value.cadr()} ${input.car()});
+  List argument = %(expr $(value.cadr()) $(input.car()));
   Array functions = auto [];
   foreach (List choice in cases) {
     List function = _arm_function(choice, argument);
@@ -421,8 +421,8 @@ List Ast.initializer_functions(Ast ast, List &source) {
 static List _arm_function(List choice, List argument) {
   (List condition, List path, List destination, List expression) = choice;
   match (expression)
-    case %(expr ? ${$called(
-        %(!set ?callee (expr ?callee_type ?)), %(?actual))}): {
+    case %(expr ? $($called(
+        %(!set ?callee (expr ?callee_type ?)), %(?actual)))): {
       if (actual !== argument) return NULL;
       return %($condition $path $callee_type $callee);
     }

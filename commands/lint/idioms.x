@@ -118,7 +118,7 @@ static void _contains_in(Lint l):
     String receiver = l.source(start, at - 2)
     if "\n" in receiver: continue
     l.fix("contains-in", t.line, "write the membership test with `in`",
-          start, close, %"${l.source(first, last)} in $receiver")
+          start, close, %"$(l.source(first, last)) in $receiver")
 
 /* `%"text"` without interpolation or escapes, which a plain literal
    spells when its destination promotes it. */
@@ -162,7 +162,7 @@ static void _expression_bodies(Lint l):
     String value = l.source(l.next(ret), l.prev(semi))
     int indent = l.indent(l.tokens[first].line) + 2
     if "\n" in value || indent + value.len() + 1 > 79: continue
-    String text = %" =>\n${String.new_fill(' ', indent)}$value;"
+    String text = %" =>\n$(String.new_fill(' ', indent))$value;"
     if l.tokens[head].col + 4 + value.len() + 1 <= 79:
       text = %" => $value;"
     l.fix("expression-body", t.line, "write the one returned value with `=>`",

@@ -134,7 +134,7 @@ static void _shape(Lint l, List function):
           "in a record or receiver")
   if name.len() >= 25:
     l.add("long-name", line,
-          %"name has ${name.len()} characters; review at 25")
+          %"name has $(name.len()) characters; review at 25")
 
 /* The id of `word` in `ids`, which numbers words as they first appear. */
 static int _id(Map ids, String word):
@@ -211,8 +211,8 @@ static void _routes(Lint l):
       names.push(name)
     if names.len() < 3: continue
     l.add("repeated-routes", first,
-          %"${names.len()} functions share at least 80% of control and " +
-          %"call tokens: ${names.join(", ")}")
+          %"$(names.len()) functions share at least 80% of control and " +
+          %"call tokens: $(names.join(", "))")
 
 /* Functions of one file named as the two halves of a lifecycle, such as
    `acquire` and `release`. */
@@ -240,7 +240,7 @@ static void _lifecycles(Lint l):
       seen[key] = 1
       int line = l.at(start).line, other_line = l.at(other_start).line
       l.add("lifecycle-pair", line < other_line ? line : other_line,
-            %"paired $left/$right functions ${key.car()} and ${key.cadr()}")
+            %"paired $left/$right functions $(key.car()) and $(key.cadr())")
 
 /* A top-level `struct`, `enum`, or `protocol` definition at `at`, with an
    optional `static` or `typedef` before it. Returns the index of its name,
@@ -270,11 +270,11 @@ static void _tables(Lint l):
     int first = l.first[t.line] == at
     int name = first && depth == 0 ? _type_name(l, at) : -1
     if name >= 0 && l.token_is(l.prev(name), "enum"):
-      enums.push(%($name ${l.next(name)}))
+      enums.push(%($name $(l.next(name))))
     if t.type == <ident> && l.token_is(l.next(at), "[") &&
        l.token_is(l.next(l.partner[l.next(at)]), "=") &&
        l.token_is(l.next(l.next(l.partner[l.next(at)])), "{") && first == 0:
-      tables.push(%($at ${l.next(l.next(l.partner[l.next(at)]))}))
+      tables.push(%($at $(l.next(l.next(l.partner[l.next(at)])))))
     if t.text == "switch" && l.token_is(l.next(at), "("):
       int open = l.next(l.partner[l.next(at)])
       if l.token_is(open, "{"): switches.push(%($at $open))
@@ -297,8 +297,8 @@ static void _tables(Lint l):
         int others = l.tokens[table_name.int()].line
         l.add("enum-table-switch", line < others ? line : others,
               %"$count identifiers recur in enum " +
-              %"${l.tokens[name.int()].text}, table " +
-              %"${l.tokens[table_name.int()].text}, and a switch")
+              %"$(l.tokens[name.int()].text), table " +
+              %"$(l.tokens[table_name.int()].text), and a switch")
 
 /* The identifiers between the bracket at `open` and its partner. */
 static Map _words(Lint l, int open):
@@ -369,7 +369,7 @@ void lint_corpus_rules(Lint *lints, int count):
         members += kind == "enum" ? l.tokens[k].type == <","> :
           l.tokens[k].type == <;>
       l.add("internal-type", l.tokens[at].line,
-            %"$kind ${l.tokens[name].text} has $members members and no " +
+            %"$kind $(l.tokens[name].text) has $members members and no " +
             "use outside its file")
     foreach List function in l.functions:
       (String name, int start, int body, int end) = function
@@ -377,7 +377,7 @@ void lint_corpus_rules(Lint *lints, int count):
       if text.len() < 80 || l.end_line(l.prev(end)) - l.at(start).line + 1 < 5:
         continue
       Array owners = bodies.setdefault(text, [])
-      owners.push(%($index $name ${l.at(start).line}))
+      owners.push(%($index $name $(l.at(start).line)))
   foreach Var (text, owners) in bodies:
     Array entries = owners
     Map files = {}
@@ -387,5 +387,5 @@ void lint_corpus_rules(Lint *lints, int count):
     foreach List entry in entries:
       Var (index, name, line) = entry
       lints[index.int()].add("duplicate-function-body", line.int(),
-        %"${entries.len()} functions in ${files.len()} files have the " +
+        %"$(entries.len()) functions in $(files.len()) files have the " +
         %"same body as $name")

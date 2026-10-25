@@ -44,7 +44,7 @@ static macro Unit $selector.cdr(Name $name) {
 meta static List _selector_double(List steps) {
   if (!steps) return NULL;
   String rest = steps.car(), a = %"a$rest", d = %"d$rest";
-  return %($a $d @{_selector_double(steps.cdr())});
+  return %($a $d @(_selector_double(steps.cdr())));
 }
 
 /* The middle of every selector name two to four steps long, shortest
@@ -66,8 +66,8 @@ meta static List _selector_units(List middles, Macro car, Macro cdr) {
   String middle = middles.car();
   List rest = _selector_units(middles.cdr(), car, cdr);
   if (middle in %("aa" "ad" "dd" "add")) return rest;
-  String name = %"c${middle}r";
-  return %(${middle.startswith("a") ? car(name) : cdr(name)} @rest);
+  String name = %"c$(middle)r";
+  return %($(middle.startswith("a") ? car(name) : cdr(name)) @rest);
 }
 
 meta static List _selector_definitions(Macro car, Macro cdr) =>

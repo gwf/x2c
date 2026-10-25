@@ -14,60 +14,60 @@ static typedef struct StaticRuntime {
 
 static macro Expression $emit.initializer.expanded(
   Expr $name, Expr $formal, Expr $replacement) =>
-  %"#define ${$name}(${$formal}) ${$replacement}";
+  %"#define $($name)($($formal)) $($replacement)";
 
 static macro Expression $emit.initializer.forwarding(
   Expr $name, Expr $formal, Expr $expanded) =>
-  %"#define ${$name}(${$formal}) ${$expanded}(${$formal})";
+  %"#define $($name)($($formal)) $($expanded)($($formal))";
 
 // static objects
 
 static macro Expression $emit.object.inferred_alias(
   Expr $formal, Expr $alias) =>
-  %("typedef __typeof__(" ${$formal} ")" ${$alias} ";");
+  %("typedef __typeof__(" $($formal) ")" $($alias) ";");
 
 static macro Expression $emit.object.fixed_alias(
   Expr $declaration, Expr $alias) =>
   %(
-    "typedef" @{$declaration} ";"
-    "_Static_assert(__builtin_constant_p(sizeof(" ${$alias} ")),"
+    "typedef" @($declaration) ";"
+    "_Static_assert(__builtin_constant_p(sizeof(" $($alias) ")),"
       "\"static object size must be constant\");"
   );
 
 static macro Expression $emit.object.acquire(
   Expr $r, Expr $threaded, Expr $copy) =>
   %(
-    @{$r.prefix}
-    ${$r.storage} "X2CStatic" ${$r.guard} "= {0};"
-    ${$r.alias} "*" ${$r.pointer} ";"
-    "if (x2c_static_acquire(&" ${$r.guard} ", sizeof(" ${$r.alias} "),"
-        "_Alignof(" ${$r.alias} "),"
-        ${$threaded} ")) {"
-      ${$r.slot} "=" ${$r.guard} ".payload;"
-      "X2CCleanup" ${$r.cleanup} "= { .fn = x2c_static_abort,"
-                               ".env = &" ${$r.guard} "};"
-      "x2c_cleanup_push(&" ${$r.cleanup} ");"
-      @{$r.initial_copy}
-      @{$copy}
-      "x2c_static_commit(&" ${$r.guard} ");"
-      "x2c_cleanup_leave(&" ${$r.cleanup} ");"
+    @($r.prefix)
+    $($r.storage) "X2CStatic" $($r.guard) "= {0};"
+    $($r.alias) "*" $($r.pointer) ";"
+    "if (x2c_static_acquire(&" $($r.guard) ", sizeof(" $($r.alias) "),"
+        "_Alignof(" $($r.alias) "),"
+        $($threaded) ")) {"
+      $($r.slot) "=" $($r.guard) ".payload;"
+      "X2CCleanup" $($r.cleanup) "= { .fn = x2c_static_abort,"
+                               ".env = &" $($r.guard) "};"
+      "x2c_cleanup_push(&" $($r.cleanup) ");"
+      @($r.initial_copy)
+      @($copy)
+      "x2c_static_commit(&" $($r.guard) ");"
+      "x2c_cleanup_leave(&" $($r.cleanup) ");"
     "}"
-    "(void)(" ${$r.pointer} "=" ${$r.guard} ".payload);"
+    "(void)(" $($r.pointer) "=" $($r.guard) ".payload);"
   );
 
 static macro Expression $emit.object.copy(
   Expr $alias, Expr $guard, Expr $source, Expr $object,
   Expr $data, Expr $index) =>
   %(
-    "if (_Generic((" ${$alias} "*)0, volatile" ${$alias} "*: 1, default: 0)) {"
-      "const volatile unsigned char *" ${$data} "="
-        "(const volatile unsigned char *)" @{$source} ";"
-      "for (size_t" ${$index} "= 0;" ${$index} "< sizeof(" ${$object} ");"
-           ${$index} "++)"
-        "((unsigned char *)" ${$guard} ".payload)[" ${$index} "] ="
-          ${$data} "[" ${$index} "];"
-    "} else memcpy(" ${$guard} ".payload, (const void *)" @{$source} ","
-                   "sizeof(" ${$object} "));"
+    "if (_Generic((" $($alias) "*)0, volatile" $($alias) "*: 1, default: 0)) {"
+      "const volatile unsigned char *" $($data) "="
+        "(const volatile unsigned char *)" @($source) ";"
+      "for (size_t" $($index) "= 0;" $($index) "< sizeof(" $($object) ");"
+           $($index) "++)"
+        "((unsigned char *)" $($guard) ".payload)[" $($index) "] ="
+          $($data) "[" $($index) "];"
+    "} else memcpy(" $($guard) ".payload, (const void *)" @($source) ","
+                   "sizeof(" $($object) "));"
   );
 
 // diagnostics
@@ -106,7 +106,7 @@ module List _initializer_macro(Emitter &e, List input, List body) {
     String formatted = e.c.code_pretty_string(tokens, NULL);
     replacement = formatted.rstrip("\n").replace("\n", "\\\n");
   }
-  String expanded = %"${name}_expanded";
+  String expanded = %"$(name)_expanded";
   String definition =
     $emit.initializer.expanded(expanded, formal, replacement);
   e.native_macros.push(%($expanded $definition));
@@ -117,7 +117,7 @@ module List _initializer_macro(Emitter &e, List input, List body) {
     List emitted = _emit(e, argument.cadr());
     arguments.push(%("(" @emitted ")"));
   }
-  return %($name "(" @{_commas(arguments.list_free())} ")");
+  return %($name "(" @(_commas(arguments.list_free())) ")");
 }
 
 module List _initializer_value(Emitter &e, List ast) {
@@ -149,13 +149,13 @@ module List _initializer_value(Emitter &e, List ast) {
 module List _index_init(Emitter &e, Var index, List value) {
   String assign = value.car() == <dotinit> ||
                   value.car() == <indexinit> ? "" : " =";
-  return %("[" @{_emit(e, %($index))} "]" $assign @{_emit(e, %($value))});
+  return %("[" @(_emit(e, %($index))) "]" $assign @(_emit(e, %($value))));
 }
 
 module List _dot_init(Emitter &e, Var field, List value) {
   String assign = value.car() == <dotinit> ||
                   value.car() == <indexinit> ? "" : "=";
-  return %("." @{_emit(e, %($field))} $assign @{_emit(e, %($value))});
+  return %("." @(_emit(e, %($field))) $assign @(_emit(e, %($value))));
 }
 
 // local statics
@@ -218,7 +218,7 @@ static void _static_binding(
   if (!initial ||
       !e.c.static_value_is_runtime(initial, e.static_objects)) {
     List native = _semantic_name(e, type, spelling);
-    List value = initial ? %("=" @{_emit(e, initial)}) : NULL;
+    List value = initial ? %("=" @(_emit(e, initial))) : NULL;
     output.push(%($storage @native @value ";"));
     return;
   }
@@ -246,7 +246,7 @@ static void _prepare(StaticRuntime &r) {
     r.output.push(%(@probe_decl ";"));
     r.e.static_objects[r.name] = r.slot;
     r.prefix = $emit.object.inferred_alias(r.formal, r.alias);
-    r.source = %("&" ${r.formal});
+    r.source = %("&" $(r.formal));
     r.object = r.alias;
     return;
   }
@@ -254,8 +254,8 @@ static void _prepare(StaticRuntime &r) {
   r.e.static_objects[r.name] = r.pointer;
   List value = _emit((*r.e), r.initial);
   r.prefix = $emit.object.fixed_alias(alias_decl, r.alias);
-  r.initial_copy = %(${r.alias} ${r.temporary} "=" @value ";");
-  r.source = %("&" ${r.temporary});
+  r.initial_copy = %($(r.alias) $(r.temporary) "=" @value ";");
+  r.source = %("&" $(r.temporary));
 }
 
 static void _static(StaticRuntime &r) {
@@ -263,9 +263,9 @@ static void _static(StaticRuntime &r) {
   List copy = _static_copy((*r.e), r.alias, r.guard, r.source, r.object);
   List acquisition = $emit.object.acquire(r, threaded_flag, copy);
   if (r.inferred) {
-    List operand = %(expr ${r.type} (cast ${r.type} ${r.initial}));
+    List operand = %(expr $(r.type) (cast $(r.type) $(r.initial)));
     acquisition = _initializer_macro(
-      (*r.e), %(input (${r.formal} $operand)), acquisition);
+      (*r.e), %(input ($(r.formal) $operand)), acquisition);
   }
   r.output.push(acquisition);
   r.e.static_objects[r.name] = r.pointer;
@@ -286,9 +286,9 @@ module List _source_initializer(Emitter &e, List function) {
   List (type, binding, body) = function.cdr();
   Array inputs = [], declarations = [];
   body = _capture_source(e, body, inputs, declarations);
-  List emitted = %(@{declarations.list_free()}
+  List emitted = %(@(declarations.list_free())
     (function $type $binding $body));
-  return _initializer_macro(e, %(input @{inputs.list_free()}), emitted);
+  return _initializer_macro(e, %(input @(inputs.list_free())), emitted);
 }
 
 static List _capture_source(

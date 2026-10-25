@@ -219,7 +219,7 @@ static Map _script_locals(List ast) {
   Map locals = {};
   foreach (List node in ast) match (node)
     case %(function ? (bind (binding ? "x2c_script") ?)
-        ${$source_block_content(%(*items))}):
+        $($source_block_content(%(*items)))):
       foreach (List item in items) match (item)
         case %(at ? (declare ? (bindings *bindings))):
           foreach (List binding in bindings) match (binding)
@@ -235,7 +235,7 @@ static void _check_local_uses(Compiler c, List items, Map locals) {
       Var found;
       List bindings;
       int present = statement.list().try_search(
-        %(expr () ${source_identifier_content(%((binding ? $name)))}),
+        %(expr () $(source_identifier_content(%((binding ? $name))))),
         found, bindings);
       if (!present) continue;
       c.origin = origin;

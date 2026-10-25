@@ -180,7 +180,7 @@ static String _file_prefix(String path) {
   String stem = spelling;
   int keep = stem.len();
   while (keep > 1 && stem[keep - 1] == '_') keep--;
-  return %"f${keep}_${stem[:keep]}___";
+  return %"f$(keep)_$(stem[:keep])___";
 }
 
 /* Appends the file's text from byte `start` to `end`, which begins its
@@ -215,9 +215,9 @@ static String _moved_include(
   String target =
     Compiler.preproc_include_target(String.new_len(hash, stop - hash), angle);
   if (!target || angle || target.startswith("/") ||
-      !s.c.sources.exists(%"${Path.dirname(s.path)}/$target")) return NULL;
+      !s.c.sources.exists(%"$(Path.dirname(s.path))/$target")) return NULL;
   return String.new_len(at, stop - at).replace(
-    %"\"$target\"", %"\"${s.prefix}/$target\"");
+    %"\"$target\"", %"\"$(s.prefix)/$target\"");
 }
 
 /* From here on the text comes from this file, at its line `line` and byte
@@ -227,8 +227,8 @@ static void _mark(Splice &s, int line, int offset) {
   while (start > 0 && s.text[start - 1] != '\n') start--;
   String before = s.text[start:offset];
   s.markers.push(
-    %(${(int) s.out.len()} ${s.line} ${s.path} $line $offset $before
-      ${s.file_prefix}));
+    %($((int) s.out.len()) $(s.line) $(s.path) $line $offset $before
+      $(s.file_prefix)));
 }
 
 // Each file's text ends its last line before the next file's begins.

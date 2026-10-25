@@ -37,7 +37,7 @@ List Compiler.enclosing(Compiler c, Symbol what) {
   for (int i = (int) c.ancestors.len() - 1; i >= 0; i--) {
     Ancestor row = rows[i];
     if (row.what == what) return _ancestor_code(c, row);
-    if (row.lowering && what == <statement>) return %(at ${c.origin} (seq));
+    if (row.lowering && what == <statement>) return %(at $(c.origin) (seq));
     if (what == <declarator> || row.what == <function>) return NULL;
   }
   return NULL;
@@ -45,7 +45,7 @@ List Compiler.enclosing(Compiler c, Symbol what) {
 
 static List _ancestor_code(Compiler c, Ancestor row) {
   if (row.what == <declarator>)
-    return %(declare ${row.base} (bindings ${row.node}));
+    return %(declare $(row.base) (bindings $(row.node)));
   if (row.what == <function>)
     match (row.node) case %(declare ?type (bindings ?declarator)):
       return %(function $type $declarator (seq));
@@ -176,7 +176,7 @@ List Compiler.finish_initializers(
     return declaration;
   Array output = [];
   _append_managed(c, declaration, output, origin);
-  return %(seq @{output.list_free()});
+  return %(seq @(output.list_free()));
 }
 
 static void _append_managed(
@@ -213,14 +213,14 @@ static void _append_managed_rows(
     if ((remaining || ordinary.len()) && base.type().base_type().body())
       base = _share_declaration_type(c, base, output);
     if (ordinary.len()) {
-      output.push(%(declare $base (bindings @{ordinary})));
+      output.push(%(declare $base (bindings @(ordinary))));
       ordinary.clear();
     }
     output.push(%(declare $base (bindings $declarator)));
     _push_items(output, after);
   }
   if (ordinary.len())
-    output.push(%(declare $base (bindings @{ordinary})));
+    output.push(%(declare $base (bindings @(ordinary))));
 }
 
 /* The code placed after an initialized `declarator`, which then takes the
@@ -278,7 +278,7 @@ static List _take_placed(
   Array items = [];
   foreach (Var item in code)
     _push_items(items, c.bind_syntax(item, <block>, c.return_type));
-  return %(seq @{items.list_free()});
+  return %(seq @(items.list_free()));
 }
 
 /* Parentheses and typed expression shells preserve the position of a
@@ -307,5 +307,5 @@ static Type _share_declaration_type(
   foreach (Var item in base)
     if (item is <symbol> && item.symbol().is_storage_class())
       storage.push(item);
-  return %(@{storage.list_free()} $name);
+  return %(@(storage.list_free()) $name);
 }

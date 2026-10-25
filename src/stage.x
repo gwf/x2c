@@ -35,7 +35,7 @@ static macro Stmt $fail.stage_function_only(
   Expr $c, Expr $site, Expr $name) {
   $c.report_error(
     <macro>,
-    %"'${$name}' can only be called at compile time",
+    %"'$($name)' can only be called at compile time",
     $site, %("reason: it reaches a compiler operation, so no unit emits a"
     "definition for it; call it from a macro or another meta"
     "function"));
@@ -73,17 +73,17 @@ Var Compiler.meta_argument(
   match (node) {
     case %(expr ? (meta-cap ?captured)):
       value = _captured_value(c, captured, want);
-    case %(expr ? ${$grouped(?inner)}):
+    case %(expr ? $($grouped(?inner))):
       return c.meta_argument(inner, want, site, call);
     case %(expr ? (macro-value ?definition)):
       return c.meta_argument(
         c.capture_macro_value(definition), want, site, call);
     case %(expr ? (meta-call *)): value = call(c, node, site);
     /* Negation multiplies, so a negated zero keeps its sign. */
-    case %(expr ?type ${$source_operator_content(%(- ?operand))}):
+    case %(expr ?type $($source_operator_content(%(- ?operand)))):
       value = c.meta_argument(operand, type, site, call).binary(<*>, -1);
     case %(expr ?type
-        ${$source_operator_content(%(?operator ?left ?right))}):
+        $($source_operator_content(%(?operator ?left ?right)))):
       if (operator in meta_operators) {
         Type common = NULL;
         if (operator in meta_comparisons) {
@@ -115,7 +115,7 @@ static Var _captured_value(Compiler c, Var captured, Type want) {
    its syntax. Anything else is reported at `site`. */
 static Var _name_syntax(Compiler c, List node, Token site) {
   match (node)
-    case %(expr ? ${$source_identifier_content(%(?))}): return node;
+    case %(expr ? $($source_identifier_content(%(?)))): return node;
   $fail.stage_argument_constant(c, site);
 }
 
@@ -159,32 +159,32 @@ static Var _cached_constant(Compiler c, List key) {
    time. */
 static Var _constant_leaf(Compiler c, List expr) {
   match (expr) {
-    case %(expr ? ${$grouped(?inner)}):
+    case %(expr ? $($grouped(?inner))):
       return _constant_leaf(c, inner);
-    case %(expr ?type ${$source_cast_content(%(? ?inner))}):
+    case %(expr ?type $($source_cast_content(%(? ?inner)))):
       return _cast_constant(c, type, inner);
     case %(expr ? (!set ?node (cache ?))): return c.folded_constant(node);
     case %(expr ? (!set ?node (expr ? (cache ?)))):
       return c.folded_constant(node);
     case %(expr ? (nil)):                       return %();
     case %(expr ? (expr ? (nil))):              return %();
-    case %(expr ? ${$source_literal_content(%(? ? ?symbol))}): return symbol;
-    case %(expr ("String") ${$called(
-        %(expr ? ${$source_identifier_content(%((binding ? "String_add")))}),
-        %(?left ?right))}):
+    case %(expr ? $($source_literal_content(%(? ? ?symbol)))): return symbol;
+    case %(expr ("String") $($called(
+        %(expr ? $($source_identifier_content(%((binding ? "String_add"))))),
+        %(?left ?right)))):
       return _joined_constant(c, left, right);
     case %(expr ("String") (call "String_new" (args ?inner))):
       return _constant_leaf(c, inner);
-    case %(expr ("Var") ${$called(
-        %(expr ? ${$source_identifier_content(%((binding ? "int_var")))}),
-        %(?inner))}):
+    case %(expr ("Var") $($called(
+        %(expr ? $($source_identifier_content(%((binding ? "int_var"))))),
+        %(?inner)))):
       return _constant_leaf(c, inner);
-    case %(expr ("String") ${$source_literal_content(%(? ?text))})
+    case %(expr ("String") $($source_literal_content(%(? ?text))))
       if (text is <string>): return text;
-    case %(expr (* char) ${$source_literal_content(%(? ?text))})
+    case %(expr (* char) $($source_literal_content(%(? ?text))))
       if (text is <string>):
       return Compiler.literal_text_value(text);
-    case %(expr ?type ${$source_literal_content(%(? ?text))})
+    case %(expr ?type $($source_literal_content(%(? ?text))))
       if (text is <string>):
       return ((Type) type).numeric_literal_value(text);
   }
@@ -242,7 +242,7 @@ List Compiler.meta_value_expression(
   Type type = declared ? declared : Macro.number_type(value);
   if (value is <list> && c.sym.is_named_value_type(declared, "Macro")) {
     List expression = c.macro_value_literal(value);
-    return %(expr ("Macro") ${expression.caddr()});
+    return %(expr ("Macro") $(expression.caddr()));
   }
   if (c.sym.is_var_type(type)) type = %("Var");
   else c.sym.var_tag_for_type(type, type);
@@ -257,7 +257,7 @@ List Compiler.meta_value_expression(
   if (value is <string>) return _string_literal(c, declared, type, value);
   if (value is <symbol> && (!declared || type === %("Symbol")))
     return %(expr ("Symbol") (literal ("Symbol")
-                  ${value.symbol().str()} ${value.symbol()}));
+                  $(value.symbol().str()) $(value.symbol())));
   return NULL;
 }
 
@@ -270,10 +270,10 @@ static void _refuse(Compiler c, Var value, Token site) {
 
 static List _string_literal(Compiler c, Type declared, Type type, Var value) {
   if (!declared || type === $!Type{ char * })
-    return %(expr (* char) (literal (* char) ${value.repr()}));
+    return %(expr (* char) (literal (* char) $(value.repr())));
   if (type !== %("String")) return NULL;
   List literal = %(expr ("String") (literal ("String") $value));
-  return %(expr $declared ${c.cache(%(string $literal))});
+  return %(expr $declared $(c.cache(%(string $literal))));
 }
 
 // number literals
@@ -307,7 +307,7 @@ static List _data_form(Compiler c, Var value) {
     return %(expr ("Var") (call "Var_null" (args)));
   if (_immutable(value)) {
     if (value is <list>) return c.cache_literal_list(value);
-    return %(expr ("Var") ${c.cache_literal_var(value)});
+    return %(expr ("Var") $(c.cache_literal_var(value)));
   }
   if (value is <list>) return _list_form(c, value);
   if (value is <array>) return _array_form(c, value);
@@ -342,7 +342,7 @@ static List _array_form(Compiler c, Var value) {
     if (!code) return NULL;
     items.push(code);
   }
-  return %(expr ("Array") (array @{items.list()}));
+  return %(expr ("Array") (array @(items.list())));
 }
 
 static List _map_form(Compiler c, Var value) {
@@ -356,7 +356,7 @@ static List _map_form(Compiler c, Var value) {
     if (!value_code) return NULL;
     entries.push(%(map-entry $key_code $value_code));
   }
-  return %(expr ("Map") (map @{entries.list()}));
+  return %(expr ("Map") (map @(entries.list())));
 }
 
 // compile-time-only functions
@@ -374,7 +374,7 @@ static List _map_form(Compiler c, Var value) {
 void Compiler.check_meta_call(Compiler c, List callee, Token origin) {
   if (c.meta_body || !c.meta_comptime.len()) return;
   match (callee)
-    case %(expr ? ${$source_identifier_content(%((binding ? ?name)))})
+    case %(expr ? $($source_identifier_content(%((binding ? ?name)))))
       if (name is <string> && name in c.meta_comptime):
         $fail.stage_function_only(c, origin, name);
 }

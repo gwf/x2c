@@ -55,7 +55,7 @@ List Compiler.cache_literal_var(Compiler c, Var value) {
     return _cache_boxed(c, c.meta_value_expression(NULL, value, NULL));
   if (value is <lsym>)
     return _cache_boxed(
-      c, %(expr ("Atom") (literal ("Atom") ${value.str()} $value)));
+      c, %(expr ("Atom") (literal ("Atom") $(value.str()) $value)));
   if (value is not <symbol>) return NULL;
   String spelling = value.symbol();
   List literal = %(

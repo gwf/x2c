@@ -121,13 +121,13 @@ static void write_interfaces(Path stage) {
           source.stem() != source.dirname().basename()) continue;
       sources.push(source.remove_prefix(%"$stage/"));
     }
-  %(${stage.join("bin/x2c")} "translate" "--out-dir" ".x2c-interfaces"
-    @{sources.list()}).job()
+  %($(stage.join("bin/x2c")) "translate" "--out-dir" ".x2c-interfaces"
+    @(sources.list())).job()
     .options({dir: stage, env: {"X2C_HOME": "."}, stdout: <capture>,
               stderr: <capture>})
     .check();
   foreach (Path source, sources) {
-    String name = %"${source.stem()}.xi";
+    String name = %"$(source.stem()).xi";
     out.join(name).move_to(stage.join(source.dirname()).join(name));
   }
   out.remove_tree();
@@ -176,7 +176,7 @@ static String write_manifest(Path destination, String name, String kind) {
   String body = rows;
   uint64_t digest = fnv64(
     1469598103934665603ULL, (const unsigned char *) body, body.len());
-  String identity = %"fnv64-${hex(digest)}";
+  String identity = %"fnv64-$(hex(digest))";
   destination.join(name).write_text(%"$kind $identity\n$body");
   return identity;
 }
@@ -309,7 +309,7 @@ foreach (List row, commands)
 if (!spec) {
   foreach (List row, commands)
     Stderr.printf(
-      "%s", Args.usage(%"$program ${row.car()}", row.cdr()));
+      "%s", Args.usage(%"$program $(row.car())", row.cdr()));
   return 2;
 }
 

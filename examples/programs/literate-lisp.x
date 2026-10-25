@@ -72,7 +72,7 @@ typedef struct Interp {                                                         
 /* $fail adds the operation name to an error. Its caller supplies the cause
    and any additional key/value details. */
 macro Stmt $fail(Expr $cause, Expr $op, Expr @fields) {                          // Expr captures unevaluated syntax.
-  raise %($cause (operation ${$op}) @fields);                                    // Insert one form; splice @fields.
+  raise %($cause (operation $($op)) @fields);                                    // Insert one form; splice @fields.
 }
 
 /* Evaluation: the language in three rules -----------------------------------------------------------------------------
@@ -102,7 +102,7 @@ static Var Interp.eval(Interp &self, LispEnv *env, Var form) {
     if (closure.macro) return self.eval(env, self.invoke(closure, args));        // Evaluate the form in caller scope.
   }
   else {
-    if (fn is not <func>) raise %(not-call (actual ${fn.kind()}));               // ${...} evaluates an x2c expression.
+    if (fn is not <func>) raise %(not-call (actual $(fn.kind())));               // $(...) evaluates an x2c expression.
     if (fn in self.specials) return self.special(env, self.specials[fn], args);  // Map value converts to Symbol.
   }
   List values = self.eval_args(env, args);                                       // Evaluate arguments left to right.
@@ -193,7 +193,7 @@ static Var Interp.apply(Interp &self, Var fn, List values) {
     if (closure.macro) $fail(<not-call>, "apply", <actual>, fn.kind());          // kind() supplies the error type.
     return self.invoke(closure, values);                                         // Receiver call passes self first.
   }
-  if (fn is not <func>) raise %(not-call (actual ${fn.kind()}));                 // Insert the type into the error List.
+  if (fn is not <func>) raise %(not-call (actual $(fn.kind())));                 // Insert the type into the error List.
   if (fn in self.specials) {                                                     // Map membership by callable value.
     if (self.specials[fn] != <apply>.var())                                      // Box a Symbol for Var comparison.
       $fail(<not-call>, "apply", <actual>, fn.kind());                           // Compile-time macro; runtime error.
@@ -447,9 +447,9 @@ static Var Reader.error(Reader &self, Symbol cause, unsigned at) {
   int line = 1, column = 1;
   scan_next_line_col(self.source, (int) at, &line, &column);                     // C addresses for output parameters.
   if (cause == <incomplete>)                                                     // Symbols compare as integers.
-    raise %(incomplete (source ${self.source})                                   // ${...} interpolates an expression.
+    raise %(incomplete (source $(self.source))                                   // $(...) interpolates an expression.
                        (line $line) (column $column));                           // $line interpolates a named value.
-  raise %(malformed (source ${self.source}) (line $line) (column $column));      // Expression and identifier insertion.
+  raise %(malformed (source $(self.source)) (line $line) (column $column));      // Expression and identifier insertion.
 }
 
 static Var Reader.form(Reader &self, Token token) {
@@ -649,45 +649,45 @@ macro Expression $rest(Expr $fn) =>                                             
 
 static void _install_natives(Interp &self) {
   List natives = %(                                                              // Rows: Lisp name, bind name, Func.
-    (car             "Var_car"               ${Func.var(_car)})                  // Infer the x2c function signature.
-    (cdr             "Var_cdr"               ${Func.var(_cdr)})                  // ${...} evaluates a full expression.
-    (cons            "Var_cons"              ${Func.var(Var.cons)})              // Direct function caches Func wrapper.
-    (atom?           "lisp_atom"             ${Func.var(_atom)})                 // Nested quoted text is x2c String.
-    (pair?           "lisp_pair"             ${Func.var(_pair)})
-    (list?           "lisp_list"             ${Func.var(_list)})
-    (eq?             "lisp_eq"               ${Func.var(_eq)})
-    (type            "lisp_type"             ${Func.var(Var.tag)})
-    (number?         "lisp_number"           ${Func.var(_number)})
-    (string?         "lisp_string"           ${Func.var(_string)})               //          /\_/\     _
-    (symbol?         "lisp_symbol"           ${Func.var(_symbol)})               //         ( -.- )   / )
-    (procedure?      "lisp_procedure"        ${Func.var(_procedure)})            //          > ^ <    /
-    (reverse         "List_reverse"          ${Func.var(List.reverse)})          //          /   \    |
-    (length          "List_len"              ${Func.var(List.len)})              //         /|   |\   |
-    (_match          "List_match"            ${Func.var(List.match)})            //        (_|___|_)_/
-    (match-replace   "lisp_match_replace"    ${Func.var(_match_replace)})        //          Mako
-    (search          "List_search"           ${Func.var(List.search)})
-    (_search-replace "List_search_replace"   ${Func.var(List.search_replace)})
-    (_add            "lisp_add"              ${Func.var(_add)})
-    (_binary         "Var_binary"            ${Func.var(Var.binary)})
-    (_compare        "lisp_compare"          ${Func.var(_compare)})
-    (+               "lisp_plus"             ${$rest(_plus)})                    // Macro supplies the rest signature.
-    (-               "lisp_minus"            ${$rest(_minus)})
-    (*               "lisp_times"            ${$rest(_times)})
-    (/               "lisp_divide"           ${$rest(_divide)})
-    (=               "lisp_eq_chain"         ${$rest(_eq_chain)})                //           /\_/\
-    (<               "lisp_lt_chain"         ${$rest(_lt_chain)})                //          ( o.o )
-    (<=              "lisp_le_chain"         ${$rest(_le_chain)})                //           > ^ <
-    (>               "lisp_gt_chain"         ${$rest(_gt_chain)})                //          /     \
-    (>=              "lisp_ge_chain"         ${$rest(_ge_chain)})                //         /       \
-    (str             "lisp_str"              ${Func.var(_str)})                  //        (  (   )  )    /)
-    (repr            "lisp_repr"             ${Func.var(_repr)})                 //         \__)_(__/____//
-    (string-length   "String_len"            ${Func.var(String.len)})            //            Liko
-    (_string-append  "lisp_string_append"    ${Func.var(_string_append)})
-    (substring       "lisp_substring"        ${Func.var(_substring)})
-    (string-downcase "lisp_string_downcase"  ${Func.var(_string_downcase)})
-    (read-file       "lisp_read_file"        ${Func.var(_read_file)})            // Available directly and via bind.
-    (write-file      "lisp_write_file"       ${Func.var(_write_file)})
-    (sort            "List_sort"             ${Func.var(List.sort)})
+    (car             "Var_car"               $(Func.var(_car)))                  // Infer the x2c function signature.
+    (cdr             "Var_cdr"               $(Func.var(_cdr)))                  // $(...) evaluates a full expression.
+    (cons            "Var_cons"              $(Func.var(Var.cons)))              // Direct function caches Func wrapper.
+    (atom?           "lisp_atom"             $(Func.var(_atom)))                 // Nested quoted text is x2c String.
+    (pair?           "lisp_pair"             $(Func.var(_pair)))
+    (list?           "lisp_list"             $(Func.var(_list)))
+    (eq?             "lisp_eq"               $(Func.var(_eq)))
+    (type            "lisp_type"             $(Func.var(Var.tag)))
+    (number?         "lisp_number"           $(Func.var(_number)))
+    (string?         "lisp_string"           $(Func.var(_string)))               //          /\_/\     _
+    (symbol?         "lisp_symbol"           $(Func.var(_symbol)))               //         ( -.- )   / )
+    (procedure?      "lisp_procedure"        $(Func.var(_procedure)))            //          > ^ <    /
+    (reverse         "List_reverse"          $(Func.var(List.reverse)))          //          /   \    |
+    (length          "List_len"              $(Func.var(List.len)))              //         /|   |\   |
+    (_match          "List_match"            $(Func.var(List.match)))            //        (_|___|_)_/
+    (match-replace   "lisp_match_replace"    $(Func.var(_match_replace)))        //          Mako
+    (search          "List_search"           $(Func.var(List.search)))
+    (_search-replace "List_search_replace"   $(Func.var(List.search_replace)))
+    (_add            "lisp_add"              $(Func.var(_add)))
+    (_binary         "Var_binary"            $(Func.var(Var.binary)))
+    (_compare        "lisp_compare"          $(Func.var(_compare)))
+    (+               "lisp_plus"             $($rest(_plus)))                    // Macro supplies the rest signature.
+    (-               "lisp_minus"            $($rest(_minus)))
+    (*               "lisp_times"            $($rest(_times)))
+    (/               "lisp_divide"           $($rest(_divide)))
+    (=               "lisp_eq_chain"         $($rest(_eq_chain)))                //           /\_/\
+    (<               "lisp_lt_chain"         $($rest(_lt_chain)))                //          ( o.o )
+    (<=              "lisp_le_chain"         $($rest(_le_chain)))                //           > ^ <
+    (>               "lisp_gt_chain"         $($rest(_gt_chain)))                //          /     \
+    (>=              "lisp_ge_chain"         $($rest(_ge_chain)))                //         /       \
+    (str             "lisp_str"              $(Func.var(_str)))                  //        (  (   )  )    /)
+    (repr            "lisp_repr"             $(Func.var(_repr)))                 //         \__)_(__/____//
+    (string-length   "String_len"            $(Func.var(String.len)))            //            Liko
+    (_string-append  "lisp_string_append"    $(Func.var(_string_append)))
+    (substring       "lisp_substring"        $(Func.var(_substring)))
+    (string-downcase "lisp_string_downcase"  $(Func.var(_string_downcase)))
+    (read-file       "lisp_read_file"        $(Func.var(_read_file)))            // Available directly and via bind.
+    (write-file      "lisp_write_file"       $(Func.var(_write_file)))
+    (sort            "List_sort"             $(Func.var(List.sort)))
   );
   foreach (List row in natives) {                                                  // Typed List traversal.
     (Var name, String symbol, Func fn) = row;                                    // Convert each positional binding.

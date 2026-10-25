@@ -70,7 +70,7 @@ static String _build_root(Project p) {
   String dir = p.command.build_dir;
   if (dir) return Path.absolute(".").join(dir);
   if (p.build_dir) return Path.join(p.root, p.build_dir);
-  return %"${p.root}/.x2c-build";
+  return %"$(p.root)/.x2c-build";
 }
 
 /* Every prerequisite names a target, and no target reaches itself. */
@@ -108,7 +108,7 @@ static ProjectProfile _selected_profile(
 static void _resolve_dependencies(Project p) {
   CliRequest request = p.command;
   if (p.sources || request.dry_run) return;
-  String path = %"${p.root}/x2c.lock";
+  String path = %"$(p.root)/x2c.lock";
   struct stat lock;
   if (!p.dependencies && lstat(path, &lock) && errno == ENOENT) return;
   Array args = ["ensure", "--lock", path];
@@ -157,15 +157,15 @@ static CliRequest _target_request(Project p, ProjectTarget target) {
   _set_product(p, target, request);
   request.inputs = _target_inputs(p, target, request.kind);
   request.native_modules =
-    %(@{command.native_modules} @{_target_modules(p, target)});
+    %(@(command.native_modules) @(_target_modules(p, target)));
   request.include_dirs =
-    %(@{command.include_dirs} @{_paths(p.root, target.include_dirs)});
+    %(@(command.include_dirs) @(_paths(p.root, target.include_dirs)));
   request.package_dirs =
-    %(@{command.package_dirs} @{_paths(p.root, target.package_dirs)});
+    %(@(command.package_dirs) @(_paths(p.root, target.package_dirs)));
   _set_flags(p, target, request);
   request.label = target.name;
   request.state_seed =
-    %"${p.path}\ntarget=${target.name}\nprofile=${command.profile}";
+    %"$(p.path)\ntarget=$(target.name)\nprofile=$(command.profile)";
   return request;
 }
 
@@ -181,14 +181,14 @@ static void _set_product(Project p, ProjectTarget target, CliRequest request) {
   request.kind = chosen && command.kind_explicit ? command.kind : target.kind;
   request.output = chosen && command.output ?
     command.output : _target_output(p, target, request.kind);
-  request.build_dir = %"${p.build_root}/.x2c/${target.name}";
+  request.build_dir = %"$(p.build_root)/.x2c/$(target.name)";
   request.save_temps = 0;
 }
 
 static String _target_output(Project p, ProjectTarget target, Symbol kind) {
   if (target.output) return Path.join(p.root, target.output);
   TargetKind *row = TargetKind.of(kind);
-  return %"${p.build_root}/${row.prefix}${target.name}${row.suffix}";
+  return %"$(p.build_root)/$(row.prefix)$(target.name)$(row.suffix)";
 }
 
 /* A target's sources, then the archives of the libraries it links. */
@@ -234,14 +234,14 @@ static void _set_flags(Project p, ProjectTarget target, CliRequest request) {
     compile = _profile_flags(p, profile);
     link = profile.link_flags;
   }
-  request.cpp_args = %(@defines @profile_defines @{command.cpp_args});
+  request.cpp_args = %(@defines @profile_defines @(command.cpp_args));
   request.cc_args = %(
-    @defines @{_c_flags(p, target.c_flags)} @profile_defines @compile
-    @{command.cc_args} @{_path_options(p.root, target.include_dirs, "-I")});
+    @defines @(_c_flags(p, target.c_flags)) @profile_defines @compile
+    @(command.cc_args) @(_path_options(p.root, target.include_dirs, "-I")));
   request.ld_args = %(
-    @{_path_options(p.root, target.library_dirs, "-L")}
-    @{target.libraries.map(%!(library) => %"-l$library")}
-    @{target.link_flags} @link @{command.ld_args});
+    @(_path_options(p.root, target.library_dirs, "-L"))
+    @(target.libraries.map(%!(library) => %"-l$library"))
+    @(target.link_flags) @link @(command.ld_args));
 }
 
 /* A dependency target takes the profile when it defines one; only the
@@ -259,10 +259,10 @@ static List _profile_flags(Project p, ProjectProfile profile) {
   int optimized = cc_args.any(%!(String flag) => flag.startswith("-O"));
   int debug = profile.debug && !("-g" in cc_args);
   return %(
-    @{_c_flags(p, profile.c_flags)}
-    @{profile.optimization && !optimized ?
-      %("-${profile.optimization}") : NULL}
-    @{debug ? %("-g") : NULL});
+    @(_c_flags(p, profile.c_flags))
+    @(profile.optimization && !optimized ?
+      %("-$(profile.optimization)") : NULL)
+    @(debug ? %("-g") : NULL));
 }
 
 static List _c_flags(Project p, List values) {

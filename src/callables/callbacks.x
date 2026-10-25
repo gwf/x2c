@@ -130,7 +130,7 @@ static void _fail(Callback &cb, String message, List details) {
 
 static List _publish_typed(Callback &cb, Type spelling) {
   Compiler c = cb.c;
-  List key = %(tadapt ${cb.source_binding} ${cb.target}), binding = NULL;
+  List key = %(tadapt $(cb.source_binding) $(cb.target)), binding = NULL;
   $adapter.memo(c, key, binding) {
     binding = c.sym.introduce(c.fresh_name("callback_adapt"));
     List function = _function(cb, binding);
@@ -145,13 +145,13 @@ static List _publish_typed(Callback &cb, Type spelling) {
 static List _function(Callback &cb, List binding) {
   Compiler c = cb.c;
   (List declarations, List arguments) = c.forward_parameters(cb.params);
-  List source = $!(${cb.source}){ ${cb.source_binding} };
+  List source = $!($(cb.source)){ $(cb.source_binding) };
   List call = _func_call(
     c, cb.source.apply().canonicalize(), source, arguments);
   List body = cb.result === %(void) ? %((stmnt $call))
-    : %((return ${cb.result} ${c.convert_expression(call, cb.result)}));
+    : %((return $(cb.result) $(c.convert_expression(call, cb.result))));
   return c.wrapper_function(
-    %(static @{cb.result}), binding, declarations, body);
+    %(static @(cb.result)), binding, declarations, body);
 }
 
 /** Adapts a lowered noncapturing lambda helper to a typed callback.
@@ -167,13 +167,13 @@ static List _function(Callback &cb, List binding) {
 List Compiler.adapt_lambda_arg(Compiler c, List argument, List expected_type) {
   Callback cb = {.c = c, .target = expected_type};
   match (argument) {
-    case %(expr ? ${$grouped(?inner)}): {
+    case %(expr ? $($grouped(?inner))): {
       List adapted = c.adapt_lambda_arg(inner, expected_type);
       if (adapted == inner) return argument;
       Macro grouped = $grouped;
       return c.rebuild_expression(expected_type, grouped(adapted));
     }
-    case %(expr ?type ${$source_identifier_content(%(?binding))}): {
+    case %(expr ?type $($source_identifier_content(%(?binding)))): {
       cb.source = type;
       cb.source_binding = binding;
     }

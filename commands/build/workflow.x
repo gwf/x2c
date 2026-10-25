@@ -68,7 +68,7 @@ static int _build_target(CliRequest request, Array commands) {
   b.report_success();
   if (request.command == <run>) status = b.run_program();
   else if (request.command == <script> && !request.dry_run)
-    b.publish_script(%"${request.build_dir}/run");
+    b.publish_script(%"$(request.build_dir)/run");
   b.cleanup(1);
   return status;
 }

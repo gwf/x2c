@@ -74,14 +74,14 @@ before building dynamic Lists or Strings. In pseudo-code:
 
 ```x2c
 if (log_should_log(<debug>, <parser>))
-  log_debug(<parser>, %((node ${expensive_node.repr()})));
+  log_debug(<parser>, %((node $(expensive_node.repr()))));
 ```
 
 A category names an event; it never suppresses one. Level is the only
 filter, and a sink that wants a subset reads `event->category` itself.
 
 Event fields are Lists of two-element `(key value)` Lists. Percent-literal
-interpolation owns boxing: use `$name` or `${expression}` for computed values.
+interpolation owns boxing: use `$name` or `$(expression)` for computed values.
 An unquoted name without interpolation is a literal Symbol, not the value of
 the variable with that name.
 

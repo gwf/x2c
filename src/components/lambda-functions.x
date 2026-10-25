@@ -68,7 +68,7 @@ meta static Code _lambda_cell(List name, Type type, Code value) {
   Code allocated = $!($bytes){ Scope_malloc(sizeof($type)) };
   if (value) {
     if (!type.match(%((dim *) *)) && !value.match(%(expr ? (composite ?)))) {
-      literal = cons(%(dim ${$!int{ 1 }}), type);
+      literal = cons(%(dim $($!int{ 1 })), type);
       value = value.convert(type);
     }
     if (!value.match(%(expr ? (composite ?))))
@@ -123,13 +123,13 @@ meta static List _lambda_kept_items(
   foreach (List item in items) {
     if (item === original.car()) run.push(item);
     else {
-      if (run.len()) out.push(Code.lowered(%(seq @{run.list()}), NULL));
+      if (run.len()) out.push(Code.lowered(%(seq @(run.list())), NULL));
       run.truncate(0);
       out.push(item in declaring ? item : Code.lowered(item, NULL));
     }
     original = original.cdr();
   }
-  if (run.len()) out.push(Code.lowered(%(seq @{run.list()}), NULL));
+  if (run.len()) out.push(Code.lowered(%(seq @(run.list())), NULL));
   return out.list_free();
 }
 
@@ -177,10 +177,10 @@ meta static Var _lambda_declare_cells(List node, Map cells) {
         _lambda_declare_cells(%(declare $base $bindings), cells);
       match (declaration) case %(seq *initial):
         return %(block @initial
-                 ${Code.lowered(%(for () $test $next $body), NULL)});
+                 $(Code.lowered(%(for () $test $next $body), NULL)));
     }
   }
-  return celled ? %(seq @{items.list_free()}) : node;
+  return celled ? %(seq @(items.list_free())) : node;
 }
 
 /* `ast` rebuilt bottom-up with a pending stack, except the body of each
@@ -255,13 +255,13 @@ meta static List _lambda_returning(List items, List none) {
    lowering it later reports there. */
 meta static List _lambda_items(Code body) {
   match (body) case %(block *items):
-    return %(@{_lambda_returning(items, source_return_none())}
-             ${source_return_none()});
+    return %(@(_lambda_returning(items, source_return_none()))
+             $(source_return_none()));
   List items = body.match(%(expr (void) ?))
-    ? %((stmnt $body) ${source_return_none()})
-    : %((stmnt (return ${body.convert(%("Var"))})));
+    ? %((stmnt $body) $(source_return_none()))
+    : %((stmnt (return $(body.convert(%("Var"))))));
   match (x2c_enclosing(<statement>)) case %(at ?origin ?):
-    return %((at $origin ${items.car()}) @{items.cdr()});
+    return %((at $origin $(items.car())) @(items.cdr()));
   return items;
 }
 
@@ -304,7 +304,7 @@ meta static List _lambda_closure_params(
    bound already, so it is not bound again. */
 meta static Code _lambda_function(List name, List params, Code body) {
   if (!params) params = %((param (void) (bind () ())));
-  List lowered = Code.lowered(%(seq @{_lambda_items(body)}), NULL);
+  List lowered = Code.lowered(%(seq @(_lambda_items(body))), NULL);
   return %(function (static "Var") (bind $name ((fnmod (params @params))))
            (block $lowered));
 }
@@ -313,7 +313,7 @@ $rewrite($lambda_expression)
 /** Lifts the noncapturing lambda `node` to a static function, whose name
     is its value. */
 meta Code lambda_lift(Code node) {
-  match (node) case %(expr ?type ${$lambda_expression(?body, *params)}): {
+  match (node) case %(expr ?type $($lambda_expression(?body, *params))): {
     List name = x2c_binding_fresh("lambda");
     x2c_place(
       %(unit-support), _lambda_function(name, _lambda_params(params), body));
@@ -339,7 +339,7 @@ meta static int _lambda_in_public_inline(void) {
 meta static String _lambda_bridge_role(void) {
   match (x2c_enclosing(<unit>))
     case %(expr ? (segments (segexp (expr ? (literal ? ?(String path)))))):
-      return %"func_from_capture_${"%08x".printf(path.hash())}";
+      return %"func_from_capture_$("%08x".printf(path.hash()))";
   return "func_from_capture";
 }
 
@@ -347,7 +347,7 @@ meta static String _lambda_bridge_role(void) {
 meta static List _lambda_field(int index) => x2c_ident(%"c$index");
 
 /* The spelling of record field `index`, which names no binding. */
-meta static List _lambda_member(int index) => %(${%"c$index"});
+meta static List _lambda_member(int index) => %($(%"c$index"));
 
 /* A reference stores its address. Records keep their native bytes because
    Var cannot carry them; other captures use their Var representation. */
@@ -366,7 +366,7 @@ meta static Code _lambda_record(List context, List types) {
     fields.push(%(declare $base (bindings (bind $name $modifiers))));
   }
   return Code.bound(
-    %(typedef (static struct $context (fields @{fields.list_free()}))
+    %(typedef (static struct $context (fields @(fields.list_free())))
        (bindings (bind $context ()))),
     NULL);
 }
@@ -384,14 +384,14 @@ meta static Code _lambda_adapter(
   Array items = [], arguments = [];
   foreach (List read in reads) {
     (Type type, Code value) = read;
-    List name = %(${%"a${items.len()}"});
+    List name = %($(%"a$(items.len())"));
     (List base, List modifiers) = type.parts();
     items.push(
       %(declare $base (bindings (op = (bind $name $modifiers) $value))));
     Code local = %(expr $type (ident $name));
     match (params.car()) {
       case %(param ? (bind ? (& *))):
-        arguments.push(%(expr ${type.cdr()} (op * $local)));
+        arguments.push(%(expr $(type.cdr()) (op * $local)));
       default: arguments.push(local);
     }
     params = params.cdr();
@@ -407,20 +407,20 @@ meta static Code _lambda_adapter(
   foreach (List capture in captures) {
     Type type = capture.caddr(), stored = _lambda_field_type(type);
     Code field = %(expr (const @stored)
-                    (op -> $record ${_lambda_member(index++)}));
+                    (op -> $record $(_lambda_member(index++))));
     arguments.push(
-      type.car() == <&> ? %(expr ${type.cdr()} (op * $field)) : field);
+      type.car() == <&> ? %(expr $(type.cdr()) (op * $field)) : field);
   }
   Code call = %(expr ("Var")
     (call (expr ((func $declared) "Var") (ident $lifted))
-      (args @{arguments.list_free()})));
+      (args @(arguments.list_free()))));
   items.push(%(return $call));
   return Code.bound(
     %(function (static "Var")
        (bind $adapter
          ((fnmod (params (param ("Func") (bind $closure ()))
                          (param (const "FuncArg") (bind $argv (*)))))))
-       (block @{items.list_free()})),
+       (block @(items.list_free()))),
     NULL);
 }
 
@@ -486,7 +486,7 @@ meta static Code _lambda_value(
       (expr (* @type) (op & $record)) (expr ("size_t") (sizeof $record)))));
   }
   return %(expr ("Func")
-           (parens (block @{setup.list_free()} (stmnt $made))));
+           (parens (block @(setup.list_free()) (stmnt $made))));
 }
 
 $rewrite($lambda_captured)
@@ -495,7 +495,7 @@ $rewrite($lambda_captured)
     captured values and addresses. */
 meta Code lambda_closure(Code node) {
   match (node)
-    case %(expr ? ${$lambda_captured(?body, *captures, *params)}): {
+    case %(expr ? $($lambda_captured(?body, *captures, *params))): {
       if (params == %((param (void) (bind () ())))) params = NULL;
       List lifted = x2c_binding_fresh("lambda");
       List adapter = x2c_binding_fresh("lambda");
@@ -601,7 +601,7 @@ meta Code lambda_cells(Code node) {
             ? _lambda_rebuild(item, NULL, cells, declaring) : item);
       List kept = _lambda_kept_items(body, items, declaring);
       return %(function $type $declarator
-               (block @{entry.list_free()} @kept));
+               (block @(entry.list_free()) @kept));
     }
   return node;
 }

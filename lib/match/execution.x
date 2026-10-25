@@ -191,7 +191,7 @@ module List _publish_captures(
   List bindings = NULL;
   for (int i = 0; i < layout.binder_count; i++) {
     if (!_capture_bit(captures.present, i)) continue;
-    List pair = %(${layout.binders[i]} ${captures.values[i]});
+    List pair = %($(layout.binders[i]) $(captures.values[i]));
     bindings = cons(pair, bindings);
   }
   return bindings;

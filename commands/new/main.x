@@ -11,7 +11,7 @@ String x2c_embedded_identity(void);
 // source templates
 
 static macro Expression $source.project.manifest(Expr $name) =>
-  %"[target.${$name}]
+  %"[target.$($name)]
 sources = [\"src/*.x\"]
 ";
 
@@ -36,13 +36,13 @@ static macro Stmt $report.project.created(Expr $directory) {
 
 static macro Stmt $report.project.name_invalid(Expr $name) {
   Diagnostics.driver_error(
-    %"new: '${
-      $name}' is not a target name; use letters, digits, '_', and '-'");
+    %"new: '$(
+      $name)' is not a target name; use letters, digits, '_', and '-'");
 }
 
 static macro Stmt $report.project.directory_occupied(Expr $dir) {
   Diagnostics.driver_error(
-    %"new: ${$dir} exists and is not an empty directory");
+    %"new: $($dir) exists and is not an empty directory");
 }
 
 // new projects

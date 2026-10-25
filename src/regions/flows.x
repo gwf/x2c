@@ -4,13 +4,13 @@ static macro Stmt $warn.region_use_ended(
   Expr $f, Expr $site, Expr $subject, Expr $region) =>
   _warn(
     (*$f.w), <region>, $site,
-    %"${$subject} is used after the region that allocated it ended",
+    %"$($subject) is used after the region that allocated it ended",
     _opened((*$f.w), $region));
 
 static macro Stmt $warn.region_local_escape(
   Expr $f, Expr $site, Expr $subject, Expr $exit) {
   String message =
-    %"${$subject} can outlive the local storage it points into when ${$exit}";
+    %"$($subject) can outlive the local storage it points into when $($exit)";
   _warn(
     (*$f.w), <region>, $site, message,
     %("local storage ends when the function returns"));
@@ -20,7 +20,7 @@ static macro Stmt $warn.region_escape(
   Expr $f, Expr $site, Expr $subject, Expr $exit, Expr $region) =>
   _warn(
     (*$f.w), <region>, $site,
-    %"${$subject} can outlive the region it was allocated in when ${$exit}",
+    %"$($subject) can outlive the region it was allocated in when $($exit)",
     _opened((*$f.w), $region));
 
 static macro Expression $reason.region_returned() => "returned";
@@ -87,12 +87,12 @@ static void _sink_parameter(Walk &w, Fact fact, Symbol sink, Fact target) {
   Var row = sink;
   if (sink == <heap>) {
     if (!target) row = <unknown>;
-    else if (target.param >= 0) row = %(param ${target.param});
+    else if (target.param >= 0) row = %(param $(target.param));
     else row = target.born ? <result>
            : (target.region || target.other) ? void : <return>;
   }
   if (sink != <local> && row is not void)
-    w.sinks[%(${fact.param} $row)] = 1;
+    w.sinks[%($(fact.param) $row)] = 1;
 }
 
 static int _owners(
@@ -173,13 +173,13 @@ static String _exit_reason(Flow &f, Fact target, Region region) {
 module void _warn(
   Walk &w, Symbol code, int origin, String message, List notes) {
   w.warnings.push(
-    w.audit ? %(${w.function} $code $origin $message $notes)
+    w.audit ? %($(w.function) $code $origin $message $notes)
             : %($code $origin $message $notes));
 }
 
 static List _opened(Walk &w, Region region) {
   List location = w.c.origin_location(region.origin);
-  return %("region opened at line ${location.assoc(<line>).int()}");
+  return %("region opened at line $(location.assoc(<line>).int())");
 }
 
 /* How a warning names the value that leaves: a local by its name, and an
@@ -189,7 +189,7 @@ module String _subject(Walk &w, Var value, List named, Fact fact) {
   match (source_expression(value)) case $source_any_lambda():
     return "a closure";
   if (!named) return "a fresh allocation";
-  String name = %"'${Ast.binding_spelling(named)}'";
+  String name = %"'$(Ast.binding_spelling(named))'";
   Var own = w.facts[named];
   if (own is not void && own.pointer() == fact) return name;
   List arguments = NULL;

@@ -32,7 +32,7 @@ macro Stmt $fail.operators_enum_target(Expr $site) =>
 macro Stmt $fail.operators_numeric_target(Expr $site, Expr $type) =>
   x2c_diagnostic_fail_at(
     $site, <xform>, "dynamic compound assignment requires a numeric lvalue",
-    %("left type: ${$type.repr()}"));
+    %("left type: $($type.repr())"));
 
 macro Stmt $fail.operators_bitfield_target(Expr $site) =>
   x2c_diagnostic_fail_at(
@@ -45,7 +45,7 @@ macro Stmt $fail.operators_operand(
     $site, <xform>, $operation == <+>
       ? "dynamic += requires a numeric, Var, or String operand"
       : "dynamic compound assignment requires a numeric or Var operand",
-    %("right type: ${$right_type.repr()}"));
+    %("right type: $($right_type.repr())"));
 
 // dynamic operators
 

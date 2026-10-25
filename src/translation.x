@@ -44,16 +44,16 @@ static macro Stmt $progress.main_workers_started(Expr $jobs, Expr $total) =>
     $jobs, $total);
 
 static macro Stmt $fail.main_input_not_x(Expr $input) =>
-  Diagnostics.driver_error(%"translation input is not an .x file: ${$input}");
+  Diagnostics.driver_error(%"translation input is not an .x file: $($input)");
 
 static macro Stmt $fail.main_directory_unwritable(Expr $out_dir) =>
-  Diagnostics.driver_error(%"output directory is not writable: ${$out_dir}");
+  Diagnostics.driver_error(%"output directory is not writable: $($out_dir)");
 
 static macro Stmt $progress.main_translated(
   Expr $n, Expr $noun, Expr $out_dir, Expr $duration) =>
   report_line(
-    <success>, %"Translated ${$n} x2c ${$noun} to ${$out_dir} in ${
-      $duration}");
+    <success>, %"Translated $($n) x2c $($noun) to $($out_dir) in $(
+      $duration)");
 
 // translating a unit
 
@@ -168,7 +168,7 @@ static List _renumbered_bindings(List ast) {
     match (node.list()) case %(binding ?identity ?spelling): {
       if (!(identity in numbers)) numbers[identity] = (int) numbers.len() + 1;
       replaced[(void *) node.list()] =
-        %(binding ${numbers[identity]} $spelling);
+        %(binding $(numbers[identity]) $spelling);
       continue;
     }
     foreach (Var child in node.list().reverse()) pending.push(child);
@@ -354,7 +354,7 @@ static Map _package_names(Translation &t, List roots) {
   Map names = {};
   foreach (String input in t.request.inputs) {
     foreach (String name in _imported_packages(input)) names[name] = 1;
-    String depfile = %"${_output_dir(t, input)}/${Path.stem(input)}.d";
+    String depfile = %"$(_output_dir(t, input))/$(Path.stem(input)).d";
     String text = NULL;
     try text = Path.read_text(depfile);
     catch %((!or not-found io-fail) *): continue;

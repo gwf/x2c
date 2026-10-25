@@ -202,7 +202,7 @@ static macro Unit $json.reader(
   static Var $reader($node *value, unsigned depth) {
     if (!value) return void;
     if (depth > JSON_MAX_DEPTH) {
-      raise %(size-limit (library "yyjson") (operation ${$operation})
+      raise %(size-limit (library "yyjson") (operation $($operation))
               (reason "JSON nesting exceeds client limit")
               (depth $depth));
     }
@@ -258,7 +258,7 @@ static macro Unit $json.reader(
 
     String kind =
       _json_message($_json_call($prefix, "get_type_desc", value));
-    raise %(bad-types (library "yyjson") (operation ${$operation})
+    raise %(bad-types (library "yyjson") (operation $($operation))
             (type $kind));
   }
 }

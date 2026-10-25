@@ -59,9 +59,9 @@ String Token.str(Token token) => token.text;
    owning pool is released.
    Raises: `<alloc-fail>` or `<size-limit>` while rendering. */
 String Token.repr(Token token) {
-  String head = %"{{text:${token}, type:${token.type}";
-  String location = %"line:${token.line}, col:${token.col}";
-  String extent = %"len:${token.len}, pos:${token.pos}";
+  String head = %"{{text:$(token), type:$(token.type)";
+  String location = %"line:$(token.line), col:$(token.col)";
+  String extent = %"len:$(token.len), pos:$(token.pos)";
   return %"$head, $location, $extent}}";
 }
 
@@ -733,11 +733,11 @@ static void _edit_line(_Layout &l, int i) {
     _open_block(l, line, j, next);
   else suffix = _end_statement(l, line);
   while (l.top && next < l.indents[l.top])
-    suffix = %"${suffix}${l.closers[l.top--]}";
+    suffix = %"$(suffix)$(l.closers[l.top--])";
   if (next != l.indents[l.top] && !l.error_at && j < l.nlines)
     l.error_at = l.sig[l.lines[j].first];
   _LayoutEdit *tail = _edit(l, line.last);
-  if (suffix) tail.after = tail.after ? %"${tail.after}$suffix" : suffix;
+  if (suffix) tail.after = tail.after ? %"$(tail.after)$suffix" : suffix;
 }
 
 static int _next_statement(_Layout &l, int i) {

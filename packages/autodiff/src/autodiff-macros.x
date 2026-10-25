@@ -142,7 +142,7 @@ macro Unit $ad.dual(
 }
 
 meta void ad_fail(String message, Var form) {
-  x2c_diagnostic_fail("ad: " + message, %(${form.repr()}));
+  x2c_diagnostic_fail("ad: " + message, %($(form.repr())));
 }
 
 meta int ad_mutates(Var form) {
@@ -240,7 +240,7 @@ meta Var ad_var_name(List e) {
 }
 
 meta List ad_assign(String name, List value) {
-  return %(stmnt (expr () (op = ${ad_id(name)} $value)));
+  return %(stmnt (expr () (op = $(ad_id(name)) $value)));
 }
 
 /* Math primitive derivatives. */
@@ -331,7 +331,7 @@ meta List ad_partial(String name, int i, List a) {
     case "pow":
       return i == 0
         ? ad_mul(y, ad_call("pow",
-          %($x ${ad_sub(y, ad_lit("1.0"))})))
+          %($x $(ad_sub(y, ad_lit("1.0"))))))
         : ad_mul(ad_call("pow", a), ad_call1("log", x));
   }
   return %();
@@ -364,7 +364,7 @@ meta List ad_call_tangent(
     foreach (List argument, args) {
       List da = ad_tangent(argument, names);
       if (!ad_is_zero(da)) {
-        List term = ad_select(%(expr () (op == $da ${ad_zero()})),
+        List term = ad_select(%(expr () (op == $da $(ad_zero()))),
           ad_zero(), ad_mul(da, ad_partial(name, i, unbound)));
         total = ad_add(total, term);
       }
@@ -430,7 +430,7 @@ meta List ad_step(List e, Var op, List target) {
   Var n = ad_var_name(target);
   if (!n) return %();
   List one = ad_is_double(target) ? ad_lit("1.0") : ad_int("1");
-  return %($n (expr ${e[1]} (op $op $target $one)));
+  return %($n (expr $(e[1]) (op $op $target $one)));
 }
 
 meta List ad_update(List e) {
@@ -468,69 +468,69 @@ meta List ad_fwd_decl(List declarator, List names) {
   match (declarator) {
     case %(op = (bind (binding ? ?name) ()) ?init):
       return %(declare (double)
-                (bindings (op = (bind (${ad_dot(name)}) ())
-                           ${ad_tangent(ad_pure(init), names)})));
+                (bindings (op = (bind ($(ad_dot(name))) ())
+                           $(ad_tangent(ad_pure(init), names)))));
     case %(bind (binding ? ?name) ()):
       return %(declare (double)
-                (bindings (op = (bind (${ad_dot(name)}) ()) ${ad_zero()})));
+                (bindings (op = (bind ($(ad_dot(name))) ()) $(ad_zero()))));
   }
   ad_fail("unsupported declarator", declarator);
 }
 
 meta List ad_fwd_update(List s, List update, List names) {
-  if (!update) return %(${ad_unbind(ad_pure(s))});
+  if (!update) return %($(ad_unbind(ad_pure(s))));
   (Var n, List rhs) = update;
   ad_pure(rhs);
-  if (!(n in names)) return %(${ad_unbind(s)});
+  if (!(n in names)) return %($(ad_unbind(s)));
   List tangent = ad_assign(ad_dot(n), ad_tangent(rhs, names));
-  return %($tangent ${ad_unbind(s)});
+  return %($tangent $(ad_unbind(s)));
 }
 
 /* One source item can contribute several generated statements. */
 meta List ad_fwd_items(List items, List names) {
   List out = %();
-  foreach (List item, items) out = %(@out @{ad_fwd_item(item, names)});
+  foreach (List item, items) out = %(@out @(ad_fwd_item(item, names)));
   return out;
 }
 
 meta List ad_fwd_body(List s, List names) {
   match (s) {
     case %(block *items):
-      return %(block @{ad_fwd_items(items, names)});
+      return %(block @(ad_fwd_items(items, names)));
   }
-  return %(block @{ad_fwd_item(s, names)});
+  return %(block @(ad_fwd_item(s, names)));
 }
 
 meta List ad_fwd_item(List s, List names) {
   match (s) {
     case %(at ? ?node): return ad_fwd_item(node, names);
     case %(declare ?type (bindings *decls)): {
-      List out = %(${ad_unbind(s)});
+      List out = %($(ad_unbind(s)));
       if (!ad_is_double_spec(type)) { ad_pure(s); return out; }
       foreach (List d, decls)
-        out = %(@out ${ad_fwd_decl(d, names)});
+        out = %(@out $(ad_fwd_decl(d, names)));
       return out;
     }
     case %(stmnt ?e): return ad_fwd_update(s, ad_update(e), names);
     case %(if ?c ?then):
-      return %((if ${ad_unbind(ad_pure(c))}
-        ${ad_fwd_body(then, names)}));
+      return %((if $(ad_unbind(ad_pure(c)))
+        $(ad_fwd_body(then, names))));
     case %(if ?c ?then ?alt):
-      return %((if ${ad_unbind(ad_pure(c))}
-        ${ad_fwd_body(then, names)}
-        ${ad_fwd_body(alt, names)}));
+      return %((if $(ad_unbind(ad_pure(c)))
+        $(ad_fwd_body(then, names))
+        $(ad_fwd_body(alt, names))));
     case %(while ?c ?body):
-      return %((while ${ad_unbind(ad_pure(c))}
-        ${ad_fwd_body(body, names)}));
+      return %((while $(ad_unbind(ad_pure(c)))
+        $(ad_fwd_body(body, names))));
     case %(do ?body ?c):
-      return %((do ${ad_fwd_body(body, names)}
-        ${ad_unbind(ad_pure(c))}));
+      return %((do $(ad_fwd_body(body, names))
+        $(ad_unbind(ad_pure(c)))));
     case %(for ?init ?c ?step ?body):
       return ad_fwd_for(init, c, step, body, names);
     case %(block *items):
-      return %((block @{ad_fwd_items(items, names)}));
+      return %((block @(ad_fwd_items(items, names))));
     case %(return (double) ?e):
-      return %((return (double) ${ad_tangent(ad_pure(e), names)}));
+      return %((return (double) $(ad_tangent(ad_pure(e), names))));
     case %(return ? ?): ad_fail("return must produce double", s);
     case %(empty): return %();
     case %(break): return %($s);
@@ -596,8 +596,8 @@ meta List ad_fwd_params(List params) {
   foreach (List param, params) {
     match (param) {
       case %(param (double) (bind (binding ? ?n) ())): {
-        out.push($!Param{ double ${x2c_ident(n)} });
-        out.push($!Param{ double ${x2c_ident(ad_dot(n))} });
+        out.push($!Param{ double $(x2c_ident(n)) });
+        out.push($!Param{ double $(x2c_ident(ad_dot(n))) });
         continue;
       }
     }
@@ -648,11 +648,11 @@ meta String ad_grad(Var name) => name + "_grad";
 meta List ad_stmnt(List e) => %(stmnt $e);
 
 meta List ad_accum(Var name, List value) {
-  return ad_stmnt(%(expr () (op += ${ad_id(name)} $value)));
+  return ad_stmnt(%(expr () (op += $(ad_id(name)) $value)));
 }
 
 meta List ad_set(Var name, List value) {
-  return ad_stmnt(%(expr () (op = ${ad_id(name)} $value)));
+  return ad_stmnt(%(expr () (op = $(ad_id(name)) $value)));
 }
 
 meta List ad_cast(List type, List e) {
@@ -672,18 +672,18 @@ meta Var ad_local(List type, Var name) {
   foreach (List prior, ad_state.locals)
     if (prior[0] == name) ad_fail("duplicate local name", name);
   List entry = %($name $type);
-  ad_state.locals = %($entry @{ad_state.locals});
+  ad_state.locals = %($entry @(ad_state.locals));
   return name;
 }
 
 meta Var ad_fresh(String stem, List type) {
   ad_state.counter += 1;
-  return ad_local(type, %"$stem${ad_state.counter}");
+  return ad_local(type, %"$stem$(ad_state.counter)");
 }
 
 meta String ad_code(void) {
   ad_state.counter += 1;
-  return %"${ad_state.counter}.0";
+  return %"$(ad_state.counter).0";
 }
 
 meta List ad_local_type(Var name) {
@@ -693,11 +693,11 @@ meta List ad_local_type(Var name) {
 }
 
 meta List ad_push(List e) {
-  return ad_stmnt(ad_call("ArrayDbl_push", %(${ad_id(ad_state.tape)} $e)));
+  return ad_stmnt(ad_call("ArrayDbl_push", %($(ad_id(ad_state.tape)) $e)));
 }
 
 meta List ad_pop(void) {
-  return ad_call("ArrayDbl_take_last", %(${ad_id(ad_state.tape)}));
+  return ad_call("ArrayDbl_take_last", %($(ad_id(ad_state.tape))));
 }
 
 meta List ad_restore(Var name, List type) {
@@ -738,7 +738,7 @@ meta List ad_with_pruned(List x, List pruned) {
 meta List ad_move_exits(List exits, List rev) {
   Array out = auto [];
   foreach (List x, exits)
-    out.push(ad_with_pruned(x, %(@{ad_exit_pruned(x)} @rev)));
+    out.push(ad_with_pruned(x, %(@(ad_exit_pruned(x)) @rev)));
   return out;
 }
 
@@ -747,9 +747,9 @@ meta List ad_sequence(List triples) {
   List rev = %();
   List exits = %();
   foreach (List t, triples) {
-    exits = %(@exits @{ad_move_exits(ad_exits_of(t), rev)});
-    fwd = %(@fwd @{ad_fwd_of(t)});
-    rev = %(@{ad_rev_of(t)} @rev);
+    exits = %(@exits @(ad_move_exits(ad_exits_of(t), rev)));
+    fwd = %(@fwd @(ad_fwd_of(t)));
+    rev = %(@(ad_rev_of(t)) @rev);
   }
   return ad_triple(fwd, rev, exits);
 }
@@ -764,8 +764,8 @@ meta List ad_call_adjoint(
     int i = 0;
     foreach (List argument, args) {
       List partial = ad_partial(name, i, unbound);
-      out = %(@out @{ad_adjoint(argument,
-        ad_mul(seed, partial), names)});
+      out = %(@out @(ad_adjoint(argument,
+        ad_mul(seed, partial), names)));
       i++;
     }
     return out;
@@ -776,12 +776,12 @@ meta List ad_call_adjoint(
     Var value = ad_fresh("_ad_call", %(double));
     Array addresses = auto [];
     foreach (List slot, slots)
-      addresses.push(%(expr () (op & ${ad_id(slot[0])})));
-    List out = %(${ad_set(value,
-      ad_call(ad_grad(name), %(@unbound @addresses)))});
+      addresses.push(%(expr () (op & $(ad_id(slot[0])))));
+    List out = %($(ad_set(value,
+      ad_call(ad_grad(name), %(@unbound @addresses)))));
     foreach (List slot, slots)
-      out = %(@out @{ad_adjoint(slot[1],
-        ad_mul(seed, ad_id(slot[0])), names)});
+      out = %(@out @(ad_adjoint(slot[1],
+        ad_mul(seed, ad_id(slot[0])), names)));
     return out;
   }
   ad_fail("call to a function without a gradient", name);
@@ -823,7 +823,7 @@ meta List ad_adjoint(List e, List seed, List names) {
     case %(expr ? (ident ?)): {
       Var n = ad_var_name(e);
       if (n)
-        if (n in names) return %(${ad_accum(ad_bar(n), seed)});
+        if (n in names) return %($(ad_accum(ad_bar(n), seed)));
       return %();
     }
     case %(expr ? (parens ?a)): return ad_adjoint(a, seed, names);
@@ -835,7 +835,7 @@ meta List ad_adjoint(List e, List seed, List names) {
       if (o != <"?">) ad_fail("unsupported expression", e);
       List then = ad_adjoint(a, seed, names);
       List alt = ad_adjoint(b, seed, names);
-      return %((if ${ad_unbind(ad_pure(c))} (block @then) (block @alt)));
+      return %((if $(ad_unbind(ad_pure(c))) (block @then) (block @alt)));
     }
     case %(expr ? (call (expr ?ft (ident (binding ? ?fname))) (args *cargs))):
       return ad_call_adjoint(fname, ft, cargs, seed, names);
@@ -849,17 +849,17 @@ meta List ad_adjoint(List e, List seed, List names) {
 
 meta List ad_rev_assign(Var name, List rhs, List names) {
   List type = ad_local_type(name);
-  List fwd = %(${ad_push(ad_id(name))}
-    ${ad_set(name, ad_unbind(ad_pure(rhs)))});
+  List fwd = %($(ad_push(ad_id(name)))
+    $(ad_set(name, ad_unbind(ad_pure(rhs)))));
   if (ad_is_double_spec(type))
     if (name in names) {
       List back = ad_adjoint(rhs, ad_id(ad_state.seed), names);
       return ad_triple(fwd,
-        %(${ad_restore(name, type)}
-          ${ad_set(ad_state.seed, ad_id(ad_bar(name)))}
-          ${ad_set(ad_bar(name), ad_zero())} @back), %());
+        %($(ad_restore(name, type))
+          $(ad_set(ad_state.seed, ad_id(ad_bar(name))))
+          $(ad_set(ad_bar(name), ad_zero())) @back), %());
     }
-  return ad_triple(fwd, %(${ad_restore(name, type)}), %());
+  return ad_triple(fwd, %($(ad_restore(name, type))), %());
 }
 
 meta List ad_rev_decl(List type, List d, List names) {
@@ -900,25 +900,25 @@ meta List ad_rev_body(List s, List names) {
 meta List ad_rev_if(List c, List then, List alt, List names) {
   List t = ad_rev_body(then, names);
   List e = alt ? ad_rev_body(alt, names) : ad_none();
-  List taken = %(@{ad_fwd_of(t)} ${ad_push(ad_lit("1.0"))});
-  List other = %(@{ad_fwd_of(e)} ${ad_push(ad_lit("0.0"))});
-  List back = %((if (expr () (op != ${ad_pop()} ${ad_lit("0.0")}))
-                    (block @{ad_rev_of(t)}) (block @{ad_rev_of(e)})));
+  List taken = %(@(ad_fwd_of(t)) $(ad_push(ad_lit("1.0"))));
+  List other = %(@(ad_fwd_of(e)) $(ad_push(ad_lit("0.0"))));
+  List back = %((if (expr () (op != $(ad_pop()) $(ad_lit("0.0"))))
+                    (block @(ad_rev_of(t))) (block @(ad_rev_of(e)))));
   return ad_triple(
-    %((if ${ad_unbind(ad_pure(c))} (block @taken) (block @other))), back,
-    %(@{ad_exits_of(t)} @{ad_exits_of(e)}));
+    %((if $(ad_unbind(ad_pure(c))) (block @taken) (block @other))), back,
+    %(@(ad_exits_of(t)) @(ad_exits_of(e))));
 }
 
 meta List ad_code_is(Var code) {
-  return %(expr () (op == ${ad_id(ad_state.code)} ${ad_lit(code)}));
+  return %(expr () (op == $(ad_id(ad_state.code)) $(ad_lit(code))));
 }
 
 /* The dispatch after popping one region's exit code. */
 meta List ad_dispatch(List normal, List exits) {
   List chain = %(block @normal);
   foreach (List x, exits.reverse())
-    chain = %(if ${ad_code_is(ad_exit_code(x))}
-                 (block @{ad_exit_pruned(x)}) $chain);
+    chain = %(if $(ad_code_is(ad_exit_code(x)))
+                 (block @(ad_exit_pruned(x))) $chain);
   return chain;
 }
 
@@ -938,7 +938,7 @@ meta List ad_count(Var n, Var op) {
 }
 
 meta List ad_countdown(Var n, List dispatch) {
-  return %(while (expr () (op > ${ad_id(n)} ${ad_int("0")}))
+  return %(while (expr () (op > $(ad_id(n)) $(ad_int("0"))))
                  (block @dispatch));
 }
 
@@ -946,7 +946,7 @@ meta List ad_countdown(Var n, List dispatch) {
    step's reverse. */
 meta List ad_pruned_exit(List x, List s) {
   if (ad_exit_kind(x) != <continue>) return x;
-  return ad_with_pruned(x, %(@{ad_rev_of(s)} @{ad_exit_pruned(x)}));
+  return ad_with_pruned(x, %(@(ad_rev_of(s)) @(ad_exit_pruned(x))));
 }
 
 /* One iteration: count, body, step, then the exit code. */
@@ -963,20 +963,20 @@ meta List ad_loop_parts(List c, List body, List step, List names) {
   Var n = ad_fresh("_ad_trip", %(int));
   List own = ad_loop_exits(ad_exits_of(b), 1);
   List through = ad_loop_exits(ad_exits_of(b), 0);
-  List iteration = %(${ad_count(n, <+>)} @{ad_fwd_of(b)} @{ad_fwd_of(s)}
-                     ${ad_push(ad_lit("0.0"))});
+  List iteration = %($(ad_count(n, <+>)) @(ad_fwd_of(b)) @(ad_fwd_of(s))
+                     $(ad_push(ad_lit("0.0"))));
   List pruned = ad_pruned_exits(own, s);
-  List normal = %(@{ad_rev_of(s)} @{ad_rev_of(b)});
-  List dispatch = %(${ad_set(ad_state.code, ad_pop())}
-                    ${ad_dispatch(normal, pruned)} ${ad_count(n, <->)});
-  return %($n $iteration $dispatch $through ${ad_unbind(ad_pure(c))});
+  List normal = %(@(ad_rev_of(s)) @(ad_rev_of(b)));
+  List dispatch = %($(ad_set(ad_state.code, ad_pop()))
+                    $(ad_dispatch(normal, pruned)) $(ad_count(n, <->)));
+  return %($n $iteration $dispatch $through $(ad_unbind(ad_pure(c))));
 }
 
 meta List ad_through_exits(List exits, Var n, List dispatch) {
   Array out = auto [];
   foreach (List x, exits)
-    out.push(ad_with_pruned(x, %(@{ad_exit_pruned(x)} ${ad_count(n, <->)}
-                                 ${ad_countdown(n, dispatch)})));
+    out.push(ad_with_pruned(x, %(@(ad_exit_pruned(x)) $(ad_count(n, <->))
+                                 $(ad_countdown(n, dispatch)))));
   return out;
 }
 
@@ -985,9 +985,9 @@ meta List ad_rev_loop(
   List head = init ? ad_rev_item(init, names) : ad_none();
   (Var n, List iteration, List dispatch, List through, List condition) =
     ad_loop_parts(c, body, step, names);
-  List fwd = %(${ad_set(n, ad_int("0"))}
-               (while $condition (block @iteration)) ${ad_push(ad_id(n))});
-  List rev = %(${ad_restore(n, %(int))} ${ad_countdown(n, dispatch)});
+  List fwd = %($(ad_set(n, ad_int("0")))
+               (while $condition (block @iteration)) $(ad_push(ad_id(n))));
+  List rev = %($(ad_restore(n, %(int))) $(ad_countdown(n, dispatch)));
   List exits = ad_through_exits(through, n, dispatch);
   List loop = ad_triple(fwd, rev, exits);
   return ad_sequence(%($head $loop));
@@ -1004,7 +1004,7 @@ meta List ad_rev_item(List s, List names) {
       List update = ad_update(e);
       if (update)
         return ad_rev_assign(update[0], update[1], names);
-      return ad_triple(%(${ad_unbind(ad_pure(s))}), %(), %());
+      return ad_triple(%($(ad_unbind(ad_pure(s)))), %(), %());
     }
     case %(expr ? ?):         return ad_rev_item(%(stmnt $s), names);
     case %(if ?c ?then):      return ad_rev_if(c, then, %(), names);
@@ -1017,23 +1017,23 @@ meta List ad_rev_item(List s, List names) {
     case %(block *items):     return ad_rev_block(items, names);
     case %(break): {
       String code = ad_code();
-      return ad_triple(%(${ad_push(ad_lit(code))} $s), %(),
-                       %(${ad_exit(code, <break>, %())}));
+      return ad_triple(%($(ad_push(ad_lit(code))) $s), %(),
+                       %($(ad_exit(code, <break>, %()))));
     }
     case %(continue): {
       String code = ad_code();
       List step = ad_state.loop_step;
-      return ad_triple(%(@step ${ad_push(ad_lit(code))} $s), %(),
-                       %(${ad_exit(code, <continue>, %())}));
+      return ad_triple(%(@step $(ad_push(ad_lit(code))) $s), %(),
+                       %($(ad_exit(code, <continue>, %()))));
     }
     case %(return (double) ?e): {
       String code = ad_code();
       List back = ad_adjoint(e, ad_lit("1.0"), names);
       return ad_triple(
-        %(${ad_set(ad_state.result, ad_unbind(ad_pure(e)))}
-          ${ad_push(ad_lit(code))}
-          (goto ${ad_state.reverse})), %(),
-        %(${ad_exit(code, <return>, back)}));
+        %($(ad_set(ad_state.result, ad_unbind(ad_pure(e))))
+          $(ad_push(ad_lit(code)))
+          (goto $(ad_state.reverse))), %(),
+        %($(ad_exit(code, <return>, back))));
     }
     case %(return ? ?): ad_fail("return must produce double", s);
     case %(empty): return ad_none();
@@ -1048,7 +1048,7 @@ meta List ad_grad_slots_params(List params) {
   foreach (List param, params) {
     match (param) {
       case %(param (double) (bind (binding ? ?n) ())):
-        slots.push($!Param{ double *${x2c_ident(ad_grad(n))} });
+        slots.push($!Param{ double *$(x2c_ident(ad_grad(n))) });
     }
   }
   return slots;
@@ -1146,12 +1146,12 @@ meta List ad_reverse_prepare(
     ad_hoisted(ad_state.locals.reverse(), ad_param_names(params));
   List decls = ad_declare_locals(hoisted);
   List bars = ad_declare_bars(names);
-  return %(@decls @bars @{ad_fwd_of(sweep)});
+  return %(@decls @bars @(ad_fwd_of(sweep)));
 }
 
 meta List ad_reverse_finish(void) {
   List writes = ad_write_slots(ad_state.inputs);
-  return %(${ad_dispatch(%(), ad_state.returns)} @writes);
+  return %($(ad_dispatch(%(), ad_state.returns)) @writes);
 }
 
 macro Unit $ad.gradient(
@@ -1212,12 +1212,12 @@ meta List ad_fwd_for(
     case %(decl ?type (bindings *decls)): {
       if (ad_is_double_spec(type))
         return %((block
-          @{ad_fwd_item(%(declare $type (bindings @decls)), names)}
+          @(ad_fwd_item(%(declare $type (bindings @decls)), names))
           (for () $condition $tail $inside)));
-      return %((for ${ad_unbind(init)} $condition $tail $inside));
+      return %((for $(ad_unbind(init)) $condition $tail $inside));
     }
   }
-  return %((for ${ad_fwd_clause(init, names)}
+  return %((for $(ad_fwd_clause(init, names))
     $condition $tail $inside));
 }
 
@@ -1227,7 +1227,7 @@ meta List ad_grad_slots(List ptypes, List args) {
   List rest = ad_grad_slots(ptypes.cdr(), args.cdr());
   if (((List) ptypes.car()).equal(%(double))) {
     Var slot = ad_fresh("_ad_partial", %(double));
-    return %(($slot ${args.car()}) @rest);
+    return %(($slot $(args.car())) @rest);
   }
   return rest;
 }
@@ -1239,7 +1239,7 @@ meta List ad_assigned(Var form, List acc) {
     case %(expr ? ?): {
       List update = ad_update(node);
       if (update && !(update.car() in acc))
-        return ad_assigned(node.cdr(), %(${update.car()} @acc));
+        return ad_assigned(node.cdr(), %($(update.car()) @acc));
     }
   }
   foreach (Var child, node) acc = ad_assigned(child, acc);
@@ -1251,9 +1251,9 @@ meta List ad_declared_names(Var form, List acc) {
   List node = form;
   match (node) {
     case %(declare ? (bindings *decls)):
-      return %(@{ad_declarator_names(decls)} @acc);
+      return %(@(ad_declarator_names(decls)) @acc);
     case %(decl ? (bindings *decls)):
-      return %(@{ad_declarator_names(decls)} @acc);
+      return %(@(ad_declarator_names(decls)) @acc);
   }
   foreach (Var child, node) acc = ad_declared_names(child, acc);
   return acc;
@@ -1282,31 +1282,31 @@ meta List ad_rev_checkpoint(
   List recover = %();
   foreach (Var name, changed) {
     snapshot.push(ad_push(ad_id(name)));
-    recover = %(${ad_restore(name, ad_local_type(name))} @recover);
+    recover = %($(ad_restore(name, ad_local_type(name))) @recover);
   }
   if (through) ad_fail("a checkpointed loop cannot contain return", body);
-  List fwd = %(${ad_set(total, ad_int("0"))}
-    ${ad_set(blocks, ad_int("0"))}
-    (for () $condition ${ad_unbind(step)}
+  List fwd = %($(ad_set(total, ad_int("0")))
+    $(ad_set(blocks, ad_int("0")))
+    (for () $condition $(ad_unbind(step))
       (block
-        (if (expr () (op == (expr () (op % ${ad_id(total)} $size))
-                           ${ad_int("0")}))
-          (block @snapshot ${ad_count(blocks, <+>)}))
-        ${ad_count(total, <+>)} @{ad_unbind(ad_items(body))}))
-    ${ad_push(ad_id(total))} ${ad_push(ad_id(blocks))});
-  List rev = %(${ad_restore(blocks, %(int))}
-    ${ad_restore(total, %(int))}
-    (while (expr () (op > ${ad_id(blocks)} ${ad_int("0")}))
+        (if (expr () (op == (expr () (op % $(ad_id(total)) $size))
+                           $(ad_int("0"))))
+          (block @snapshot $(ad_count(blocks, <+>))))
+        $(ad_count(total, <+>)) @(ad_unbind(ad_items(body)))))
+    $(ad_push(ad_id(total))) $(ad_push(ad_id(blocks))));
+  List rev = %($(ad_restore(blocks, %(int)))
+    $(ad_restore(total, %(int)))
+    (while (expr () (op > $(ad_id(blocks)) $(ad_int("0"))))
       (block @recover
-        ${ad_set(remaining, ad_raw(<->, ad_id(total),
-          ad_raw(<*>, ad_raw(<->, ad_id(blocks), ad_int("1")), size)))}
-        ${ad_set(replay, ad_int("0"))} ${ad_set(n, ad_int("0"))}
-        (while (expr () (op < ${ad_id(replay)} ${ad_id(remaining)}))
-          (block ${ad_count(replay, <+>)} @iteration))
-        ${ad_countdown(n, dispatch)}
-        ${ad_set(total, ad_raw(<->, ad_id(total), ad_id(remaining)))}
-        ${ad_count(blocks, <->)})));
-  return ad_sequence(%($head ${ad_triple(fwd, rev, %())}));
+        $(ad_set(remaining, ad_raw(<->, ad_id(total),
+          ad_raw(<*>, ad_raw(<->, ad_id(blocks), ad_int("1")), size))))
+        $(ad_set(replay, ad_int("0"))) $(ad_set(n, ad_int("0")))
+        (while (expr () (op < $(ad_id(replay)) $(ad_id(remaining))))
+          (block $(ad_count(replay, <+>)) @iteration))
+        $(ad_countdown(n, dispatch))
+        $(ad_set(total, ad_raw(<->, ad_id(total), ad_id(remaining))))
+        $(ad_count(blocks, <->)))));
+  return ad_sequence(%($head $(ad_triple(fwd, rev, %()))));
 }
 
 meta List ad_loop(List init, List c, List step, List body, List names) {
@@ -1317,10 +1317,10 @@ meta List ad_loop(List init, List c, List step, List body, List names) {
 
 meta List ad_rev_do(List body, List c, List names) {
   Var first = ad_fresh("_ad_first", %(int));
-  List head = ad_triple(%(${ad_set(first, ad_int("1"))}), %(), %());
+  List head = ad_triple(%($(ad_set(first, ad_int("1")))), %(), %());
   List loop = ad_loop(%(),
     %(expr (int) (op || (expr (int) (ident ($first))) $c)), %(),
-    %(block ${ad_set(first, ad_int("0"))} $body), names);
+    %(block $(ad_set(first, ad_int("0"))) $body), names);
   return ad_sequence(%($head $loop));
 }
 

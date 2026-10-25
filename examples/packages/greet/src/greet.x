@@ -23,7 +23,7 @@ Greeting Greeting.new(String subject) {
 
 String Greeting.line(Greeting greeting) {
   greeting.count++;
-  return %"hello, ${greeting.subject} (${greeting.count})";
+  return %"hello, $(greeting.subject) ($(greeting.count))";
 }
 
 String repeat(String text, int times) {

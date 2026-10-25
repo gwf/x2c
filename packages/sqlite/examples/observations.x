@@ -20,6 +20,6 @@ int main(void) {
   );
   report.bind(%(3000000));
   foreach(List row, report)
-    printf("%s", %"${row[0]}: HTTP ${row[1]}, ${row[2]} us\n");
+    printf("%s", %"$(row[0]): HTTP $(row[1]), $(row[2]) us\n");
   return 0;
 }

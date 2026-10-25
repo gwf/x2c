@@ -64,14 +64,14 @@ static macro Expression $reason.trailing_backslash() => "pattern ends in a backs
 static macro Expression $reason.unknown_escape() => "unknown escape";
 
 static macro Stmt $error.compile(Expr $why, Expr $pattern, Expr $offset) {
-  raise %(malformed (operation "Regex.compile") (reason ${$why})
-          (pattern ${$pattern}) (offset ${$offset}));
+  raise %(malformed (operation "Regex.compile") (reason $($why))
+          (pattern $($pattern)) (offset $($offset)));
 }
 
 static macro Stmt $error.depth(Expr $pattern, Expr $limit) {
-  raise %(size-limit (operation "Regex.match") (pattern ${$pattern})
+  raise %(size-limit (operation "Regex.match") (pattern $($pattern))
           (reason "a group repeated more times than one match allows")
-          (limit ${$limit}));
+          (limit $($limit)));
 }
 
 // nodes

@@ -24,7 +24,7 @@ int main(void) {
   json.JsonArray releases = root["releases"].array();
   Map downloads = {};
 
-  printf("%s", %"service: ${service["name"].string()}\n");
+  printf("%s", %"service: $(service["name"].string())\n");
   foreach(json.JsonValue item, releases) {
     json.JsonObject release = item.object();
     String version = release["version"].string();
@@ -38,8 +38,8 @@ int main(void) {
 
   json.JsonObject labels = root["labels"].object();
   foreach(json.JsonMember member, labels)
-    printf("%s", %"label ${member.key()}=${member.value().string()}\n");
-  printf("%s", %"region entries: ${labels.all("region").len()}\n");
+    printf("%s", %"label $(member.key())=$(member.value().string())\n");
+  printf("%s", %"region entries: $(labels.all("region").len())\n");
 
   Array operations = [
     {
@@ -58,7 +58,7 @@ int main(void) {
   json.JsonObject published_root = published.root().object();
   String name = published_root["service"].object()["name"].string();
   printf("%s", %"published service: $name\n");
-  printf("%s", %"stable downloads: ${downloads["stable"]}\n");
+  printf("%s", %"stable downloads: $(downloads["stable"])\n");
   puts(published.pretty_json());
   return 0;
 }

@@ -168,7 +168,7 @@ ToolAction Toolchain.compile_action(
   Toolchain t, String source, String object, String depfile, List gen_dirs) =>
   _action(
     t, <compile>,
-    %(@{_compile_arguments(t, gen_dirs)} "-MMD" "-MP" "-MF" $depfile
+    %(@(_compile_arguments(t, gen_dirs)) "-MMD" "-MP" "-MF" $depfile
       "-MT" $object "-c" $source "-o" $object));
 
 /** Builds the preprocessor action whose output identifies an object.
@@ -181,12 +181,12 @@ ToolAction Toolchain.preprocess_action(
   Toolchain t, String source, String output, List gen_dirs) =>
   _action(
     t, <preprocess>,
-    %(@{_compile_arguments(t, gen_dirs)} "-E" $source "-o" $output));
+    %(@(_compile_arguments(t, gen_dirs)) "-E" $source "-o" $output));
 
 static List _compile_arguments(Toolchain t, List gen_dirs) => %(
-  ${t.cc} "-fsigned-char"
-  @{gen_dirs.map(%!(directory) => %("-iquote" $directory)).flatten()}
-  "-iquote" ${t.include_dir} @{t.cc_args});
+  $(t.cc) "-fsigned-char"
+  @(gen_dirs.map(%!(directory) => %("-iquote" $directory)).flatten())
+  "-iquote" $(t.include_dir) @(t.cc_args));
 
 /** Builds but does not start an `ar rcs` action in object-list order.
     The action does not remove an existing archive, so callers requiring exact
@@ -196,7 +196,7 @@ static List _compile_arguments(Toolchain t, List gen_dirs) => %(
 */
 ToolAction Toolchain.archive_action(
   Toolchain t, String output, List objects) =>
-  _action(t, <archive>, %(${t.ar} "rcs" $output @objects));
+  _action(t, <archive>, %($(t.ar) "rcs" $output @objects));
 
 /** Builds but does not start a host-compiler link action.
     Input order is preserved; configured linker arguments, the matching x2c
@@ -207,7 +207,7 @@ ToolAction Toolchain.archive_action(
 ToolAction Toolchain.link_action(Toolchain t, String output, List inputs) =>
   _action(
     t, <link>,
-    %(${t.cc} @inputs @{t.ld_args} ${t.runtime_lib} "-lm" "-o" $output));
+    %($(t.cc) @inputs @(t.ld_args) $(t.runtime_lib) "-lm" "-o" $output));
 
 /** Builds but does not start the link of a native module. The module leaves
     the x2c runtime unresolved and uses the loading process's copy. macOS
@@ -222,7 +222,7 @@ ToolAction Toolchain.module_action(
   Toolchain t, String output, List inputs, String loader) =>
   _action(
     t,
-    <link>, %(${t.cc} @inputs @{t.ld_args} @{_module_shape(loader)} "-o" $output));
+    <link>, %($(t.cc) @inputs @(t.ld_args) @(_module_shape(loader)) "-o" $output));
 
 static List _module_shape(String loader) {
 #ifdef __APPLE__
@@ -385,18 +385,18 @@ static int _accepts(String cc, String option) {
 static List _cpp_arguments(
   Toolchain t, List include_dirs, String macros, String depfile,
   String source) => %(
-    ${t.cc} "-E" "-x" "c"
+    $(t.cc) "-E" "-x" "c"
     "-D__asm(x)=" "-D__asm__(x)=" "-D__attribute__(x)="
     "-D__format__(x)=" "-D__printf__(x)=" "-D__inline__="
     "-D__inline=" "-D_Nullable=" "-D_Nonnull=" "-DX2CCPP"
     "-D__restrict=" "-D__extension__=" "-Wno-unicode"
     "-Wno-invalid-pp-token"
-    @{t.keep_system_includes > 0 ? %("-fkeep-system-includes") : NULL}
-    @{t.inline_macro_expansions > 0 ? %("-ftrack-macro-expansion=0") : NULL}
-    "-I" "." @{_includes("-I", Compiler.cpp_include_dirs())}
-    @{_includes("-I", include_dirs)}
-    @{_includes("-idirafter", Compiler.default_include_dirs())}
-    @{t.cpp_args} @{macros ? %("-imacros" $macros) : NULL}
+    @(t.keep_system_includes > 0 ? %("-fkeep-system-includes") : NULL)
+    @(t.inline_macro_expansions > 0 ? %("-ftrack-macro-expansion=0") : NULL)
+    "-I" "." @(_includes("-I", Compiler.cpp_include_dirs()))
+    @(_includes("-I", include_dirs))
+    @(_includes("-idirafter", Compiler.default_include_dirs()))
+    @(t.cpp_args) @(macros ? %("-imacros" $macros) : NULL)
     "-MMD" "-MF" $depfile "-MT" "x2c-dependencies"
     "-include" $source "-");
 
@@ -414,10 +414,10 @@ List Toolchain.search_directories(Toolchain t) {
   Array directories = [];
   List flags = t.cc_args;
   String output = NULL, errors = NULL;
-  List search = %(${t.cc} @flags "-E" "-v" "-x" "c" "/dev/null");
+  List search = %($(t.cc) @flags "-E" "-v" "-x" "c" "/dev/null");
   if (!tool_capture(search, output, errors))
     _add_include_directories(directories, errors);
-  List arguments = %(${t.cc} @flags "-print-search-dirs");
+  List arguments = %($(t.cc) @flags "-print-search-dirs");
   if (!tool_capture(arguments, output, errors))
     _add_library_directories(directories, output);
   return directories.list_free();

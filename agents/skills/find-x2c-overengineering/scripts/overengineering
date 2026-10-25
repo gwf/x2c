@@ -293,7 +293,7 @@ static Map _attempted(Path base):
   foreach Path selection in base.join("runs/*/selection.json").glob():
     Var data = Json.read_file(selection)
     foreach Map item in data.map()["selected"].array():
-      attempted[%"${item["candidate_id"]}:${item["source_digest"]}"] = 1
+      attempted[%"$(item["candidate_id"]):$(item["source_digest"])"] = 1
   return attempted
 
 /* At most `budget` private regions not yet attempted, each more than 80
@@ -301,7 +301,7 @@ static Map _attempted(Path base):
 static Array _select(List regions, Map attempted, int budget):
   Array selected = []
   foreach Map item in regions:
-    String key = %"${item["candidate_id"]}:${item["source_digest"]}"
+    String key = %"$(item["candidate_id"]):$(item["source_digest"])"
     if item["public"].truth() || key in attempted: continue
     int near = 0
     foreach Map prior in selected:
@@ -332,11 +332,11 @@ static int _scan(Path x2c, int budget, Path base):
                            _structure_points(x2c, sources))
   _enrich(regions, texts)
   List ranked = regions.list().sort_by(%!(Map item) =>
-    %(${-item["score"].integer()} ${item["candidate_id"]}))
+    %($(-item["score"].integer()) $(item["candidate_id"])))
   String digests = ""
   foreach String path in sources:
     String text = texts[path]
-    digests += %"$path\0${text.sha256()}"
+    digests += %"$path\0$(text.sha256())"
   String head = _run(%(git rev-parse HEAD)).strip(NULL)
   Map inventory = {"format_version": 1, "head": head,
                    "source_digest": digests.sha256(), "paths": sources,
@@ -344,13 +344,13 @@ static int _scan(Path x2c, int budget, Path base):
   Map attempted = _attempted(base)
   int eligible = 0
   foreach Map item in ranked:
-    String key = %"${item["candidate_id"]}:${item["source_digest"]}"
+    String key = %"$(item["candidate_id"]):$(item["source_digest"])"
     if !item["public"].truth() && !(key in attempted): eligible++
   Array selected = _select(ranked, attempted, budget)
   String stamp = _run(%(date -u +%Y%m%dT%H%M%SZ)).strip(NULL)
-  Path run = base.join(%"runs/$stamp-${head[:12]}")
+  Path run = base.join(%"runs/$stamp-$(head[:12])")
   for (int suffix = 2; run.exists(); suffix++):
-    run = base.join(%"runs/$stamp-${head[:12]}-$suffix")
+    run = base.join(%"runs/$stamp-$(head[:12])-$suffix")
   run.make_dirs()
   run.join("inventory.json").write_text(inventory.var().pretty_json() + "\n")
   Map selection = {"format_version": 1, "budget": budget, "selected": selected,
@@ -361,13 +361,13 @@ static int _scan(Path x2c, int budget, Path base):
     %"agents/skills/find-x2c-overengineering/scripts/overengineering scan " +
     %"--budget $budget --state-root $base\n")
   Array rows = ["# Overengineering forensic run", "", %"Head: `$head`",
-                %"Source digest: `${inventory["source_digest"]}`", "",
+                %"Source digest: `$(inventory["source_digest"])`", "",
                 "## Selected regions", ""]
   foreach Map item in selected:
     String signals = String.join("; ", item["signals"].array())
-    rows.push(%"- `${item["candidate_id"]}` " +
-              %"`${item["path"]}:${item["start"]}-${item["end"]}` " +
-              %"score ${item["score"]}: $signals")
+    rows.push(%"- `$(item["candidate_id"])` " +
+              %"`$(item["path"]):$(item["start"])-$(item["end"])` " +
+              %"score $(item["score"]): $signals")
   rows.push("")
   rows.push("## Reviewed attempts")
   rows.push("")
@@ -471,5 +471,5 @@ if !base:
   Path shared = common.startswith("/") ? common : root.join(common)
   String id = shared.absolute().str().sha256()
   Path home = getenv("HOME")
-  base = home.join(%".codex/x2c-overengineering/${id[:12]}")
+  base = home.join(%".codex/x2c-overengineering/$(id[:12])")
 return _scan(x2c, budget, base)

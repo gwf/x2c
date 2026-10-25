@@ -54,7 +54,7 @@ static macro Stmt $fail.frontend_input_read(
   $c.report_error(
     <driver>,
     "cannot read input file",
-    $site, %("stage: driver" "file: ${$filename}" "reason: cannot open"));
+    $site, %("stage: driver" "file: $($filename)" "reason: cannot open"));
 
 static macro Stmt $fail.frontend_script_symbols(Expr $c, Expr $site) =>
   $c.report_error(
@@ -84,7 +84,7 @@ static macro Stmt $fail.frontend_cpp_failed(
   $c.report_error(
     <driver>,
     "failed to run C preprocessor",
-    $site, %("stage: preprocess" "status: ${$status}"));
+    $site, %("stage: preprocess" "status: $($status)"));
 
 // source units
 
@@ -263,8 +263,8 @@ static void _tokenize_input(
    identity of the prelude's copy and keeps its own name. */
 static String _input_name(Compiler c, String filename) {
   if (!filename.startswith("/")) return filename;
-  String canonical = %"${c.canonical_path(Path.dirname(filename))}/${
-    Path.basename(filename)}";
+  String canonical = %"$(c.canonical_path(Path.dirname(filename)))/$(
+    Path.basename(filename))";
   return Compiler.portable_path(canonical) != canonical ? canonical : filename;
 }
 
@@ -273,7 +273,7 @@ static String _input_name(Compiler c, String filename) {
    resolved path, or NULL. */
 static void _runtime_roles(Compiler c, const char *source) {
   char runtime[PATH_MAX], lib[PATH_MAX];
-  String dir = %"${x2c_get_root()}/lib";
+  String dir = %"$(x2c_get_root())/lib";
   c.prelude =
     !(source && realpath(%"$dir/x2c.x", runtime) && !strcmp(source, runtime));
   c.runtime_inc = !(source && realpath(dir, lib) && _inside(source, lib));
@@ -299,7 +299,7 @@ static String _script(Compiler c, String text, String path) {
   script.path = path;
   script.shebang = end < 0 ? text : text[:end];
   c.unit_script = script;
-  return %"#include \"scripting.x\"${end < 0 ? "" : text[end:]}";
+  return %"#include \"scripting.x\"$(end < 0 ? "" : text[end:])";
 }
 
 static int _source_lines(String text) {
@@ -416,7 +416,7 @@ static Compiler _run_cpp(Frontend frontend, ParsedUnit &unit) {
   unit.preprocessor = cpp;
   cpp.filename = c.filename;
   String text = NULL, errors = NULL, dependency_text = NULL;
-  String runtime = c.prelude ? %"${x2c_get_root()}/lib/x2c.x" : NULL;
+  String runtime = c.prelude ? %"$(x2c_get_root())/lib/x2c.x" : NULL;
   int status = frontend.toolchain.preprocess(
     c.filename, frontend.request.include_dirs, runtime, text, errors,
     dependency_text);

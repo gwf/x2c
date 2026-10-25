@@ -74,7 +74,7 @@ first.
 
 ### Added
 
-- Braced `${expression}` insertion in Lists and Strings and `@{expression}`
+- Braced `$(expression)` insertion in Lists and Strings and `@(expression)`
   splicing in Lists.
 - Current x2c control and error keywords, protocol declarations, associated
   types, macros, decorators, and macro holes.
@@ -100,7 +100,7 @@ first.
 ### Changed
 
 - Arrays and Maps now highlight quoted data, recursively nested collections,
-  and `$name` or `${expression}` insertion according to the data-first literal
+  and `$name` or `$(expression)` insertion according to the data-first literal
   grammar.
 - Capitalized macro result and hole types while retaining highlighting for
   compatible lowercase spellings.

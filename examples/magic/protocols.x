@@ -14,7 +14,7 @@ protocol Meters(T) {
 
 long Meters.magnitude(Meters value) => value.value;
 
-String Meters.describe(Meters value) => %"${value.value} m";
+String Meters.describe(Meters value) => %"$(value.value) m";
 
 /* Total forward views: every Km or Cm is a valid Meters. */
 Meters Km.meters(Km value) => Meters.new(value.value * 1000);
@@ -22,7 +22,7 @@ Meters Km.meters(Km value) => Meters.new(value.value * 1000);
 Meters Cm.meters(Cm value) => Meters.new(value.value / 100);
 
 /* Km overrides describe; magnitude still forwards to the base. */
-String Km.describe(Km value) => %"${value.value} km";
+String Km.describe(Km value) => %"$(value.value) km";
 
 protocol Meters(Km);
 

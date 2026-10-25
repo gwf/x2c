@@ -27,12 +27,12 @@ struct Artifact {
 };
 
 static void _abandon(UvSignal signal, Var value) {
-  printf("%s", %"\nsignal ${signal.number()}: ${value.string()}\n");
+  printf("%s", %"\nsignal $(signal.number()): $(value.string())\n");
   signal.loop().stop();
 }
 
 static void _out_of_budget(UvTimer timer, Var value) {
-  printf("%s", %"the batch ran past its ${value.string()} budget\n");
+  printf("%s", %"the batch ran past its $(value.string()) budget\n");
   timer.loop().stop();
 }
 
@@ -141,7 +141,7 @@ int main(void) {
     loop, work, environment, "slow-scan", "exec sleep 30", 200
   ));
 
-  printf("%s", %"${checks.len()} checks in $work\n");
+  printf("%s", %"$(checks.len()) checks in $work\n");
   while (_report_finished(checks, passed, expired) < checks.len()) {
     if (!loop.run(UV_RUN_ONCE)) break;
   }
@@ -169,7 +169,7 @@ int main(void) {
     artifact.name = name;
     contents.push((void *) artifact);
     loop.read_file(
-      %"$output/${artifact.name}", 1024,
+      %"$output/$(artifact.name)", 1024,
       Var.new(<p48>, artifact), _artifact_read
     );
   }

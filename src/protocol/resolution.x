@@ -41,72 +41,72 @@ module typedef struct ProtocolAdapters {
 
 static macro Expression $reason.protocol_conformance_prefix(
   Expr $participant, Expr $owner) =>
-  %"${$participant} does not satisfy ${$owner}: ";
+  %"$($participant) does not satisfy $($owner): ";
 
 static macro Expression $reason.protocol_native_alias(
   Expr $prefix, Expr $base) =>
-  %"${$prefix}its typedef is not a native alias of ${$base}";
+  %"$($prefix)its typedef is not a native alias of $($base)";
 
 static macro Expression $reason.protocol_forward_conversion(
   Expr $prefix, Expr $forward) =>
-  %"${$prefix}no forward conversion '${$forward}'";
+  %"$($prefix)no forward conversion '$($forward)'";
 
 static macro Expression $reason.protocol_reverse_conversion(
   Expr $prefix, Expr $base, Expr $lowered) =>
-  %"${$prefix}no reverse conversion '${$base}.${$lowered}' " +
-    %"or '${$base}.as_${$lowered}'";
+  %"$($prefix)no reverse conversion '$($base).$($lowered)' " +
+    %"or '$($base).as_$($lowered)'";
 
 static macro Expression $reason.protocol_fallback_nested(
   Expr $prefix, Expr $member, Expr $position) =>
-  %"${$prefix}member '${$member}' uses T inside a compound " +
-    %"${$position} type, which protocol fallback adapters " +
+  %"$($prefix)member '$($member)' uses T inside a compound " +
+    %"$($position) type, which protocol fallback adapters " +
     "do not support";
 
 static macro Expression $reason.protocol_fallback_reverse(
   Expr $prefix, Expr $member, Expr $owner, Expr $base, Expr $lowered) =>
-  %"${$prefix}member '${$member}' returns T, so ${$owner} needs " +
-    %"'${$base}.${$lowered}' or '${$base}.as_${$lowered}'";
+  %"$($prefix)member '$($member)' returns T, so $($owner) needs " +
+    %"'$($base).$($lowered)' or '$($base).as_$($lowered)'";
 
 static macro Expression $reason.protocol_fallback_forward(
   Expr $prefix, Expr $member, Expr $participant, Expr $base) =>
-  %"${$prefix}member '${$member}' fallback requires forward " +
-    %"conversion '${$participant}.${$base.lower()}'";
+  %"$($prefix)member '$($member)' fallback requires forward " +
+    %"conversion '$($participant).$($base.lower())'";
 
 static macro Expression $reason.protocol_thunk_nested(
   Expr $prefix, Expr $member, Expr $position) =>
-  %"${$prefix}member '${$member}' uses T inside a compound " +
-    %"${$position} type, which protocol descriptor thunks " +
+  %"$($prefix)member '$($member)' uses T inside a compound " +
+    %"$($position) type, which protocol descriptor thunks " +
     "do not support";
 
 static macro Expression $reason.protocol_thunk_parameter(
   Expr $prefix, Expr $member, Expr $owner, Expr $base, Expr $lowered) =>
-  %"${$prefix}member '${$member}' has a T parameter, so " +
-    %"${$owner} needs '${$base}.${$lowered}' or '${$base}.as_${$lowered}'";
+  %"$($prefix)member '$($member)' has a T parameter, so " +
+    %"$($owner) needs '$($base).$($lowered)' or '$($base).as_$($lowered)'";
 
 static macro Expression $reason.protocol_thunk_result(
   Expr $prefix, Expr $member, Expr $owner, Expr $participant, Expr $base) =>
-  %"${$prefix}member '${$member}' returns T, so ${$owner} needs " +
-    %"'${$participant}.${$base.lower()}'";
+  %"$($prefix)member '$($member)' returns T, so $($owner) needs " +
+    %"'$($participant).$($base.lower())'";
 
 static macro Expression $reason.protocol_native_parameter(
   Expr $prefix, Expr $member, Expr $base) =>
-  %"${$prefix}native member '${$member}' has a T parameter " +
-    %"that is not implicitly convertible to ${$base}";
+  %"$($prefix)native member '$($member)' has a T parameter " +
+    %"that is not implicitly convertible to $($base)";
 
 static macro Expression $reason.protocol_native_result(
   Expr $prefix, Expr $member, Expr $base) =>
-  %"${$prefix}native member '${$member}' returns T, which is " +
-    %"not implicitly convertible from ${$base}";
+  %"$($prefix)native member '$($member)' returns T, which is " +
+    %"not implicitly convertible from $($base)";
 
 static macro Expression $reason.protocol_native_member_alias(
   Expr $prefix, Expr $member) =>
-  %"${$prefix}native member '${$member}' cannot be aliased";
+  %"$($prefix)native member '$($member)' cannot be aliased";
 
 static macro Stmt $report.protocol_base_missing(
   Expr $c, Expr $site, Expr $base) =>
   $c.diagnostics.report(
     <protocol>,
-    %"adoption base ${_type_spelling($base)} names no visible protocol",
+    %"adoption base $(_type_spelling($base)) names no visible protocol",
     $site, NULL);
 
 static macro Stmt $report.protocol_signature_conflict(
@@ -114,17 +114,17 @@ static macro Stmt $report.protocol_signature_conflict(
   Expr $binding, Expr $actual, Expr $expected) {
   {
     String protocol_note =
-      %"protocol member '${$member}' declared by ${$owner}";
+      %"protocol member '$($member)' declared by $($owner)";
     if ($declaration_site)
-      protocol_note = %"$protocol_note at ${$declaration_site}";
+      protocol_note = %"$protocol_note at $($declaration_site)";
     String actual_repr = $actual.repr();
     String conflict_note =
-      %"conflicting definition '${$binding}': $actual_repr";
-    String expected_note = %"expected: ${$expected.repr()}";
+      %"conflicting definition '$($binding)': $actual_repr";
+    String expected_note = %"expected: $($expected.repr())";
     $c.diagnostics.report(
       <protocol>,
-      %"'${$binding}' has a signature incompatible " +
-        %"with ${$owner} member '${$member}'",
+      %"'$($binding)' has a signature incompatible " +
+        %"with $($owner) member '$($member)'",
       $location,
       %($protocol_note $conflict_note $expected_note));
   }
@@ -201,7 +201,7 @@ static List _recorded_conformance(
       forward = _recorded_spelling(c, forward);
       reverse = _recorded_spelling(c, reverse);
       return %(conformance $base $participant $forward $reverse
-               (bindings @{bound.list_free()}) @{resolved.list_free()});
+               (bindings @(bound.list_free())) @(resolved.list_free()));
     }
   return NULL;
 }
@@ -255,7 +255,7 @@ static List _recorded(Compiler c, Type base, Type participant) {
    this unit does not own. Returns 0 when there is none to reuse. */
 module int _reuse_conformance(
   Compiler c, Type base, Type participant) {
-  match (%(${_record(c, base)} ${_recorded(c, base, participant)}))
+  match (%($(_record(c, base)) $(_recorded(c, base, participant))))
     case %((? ? ? ? (members *templates))
            (conformance ? ? ?forward ?reverse (bindings *bound) *members)): {
       Map variables = {}, bindings = {}, resolved = {};
@@ -273,7 +273,7 @@ module int _reuse_conformance(
       }
       c.conforms[%($base $participant)] = %(
         protocol-conformance $base $participant $forward $reverse
-        $variables $bindings (members @{rows.list_free()})
+        $variables $bindings (members @(rows.list_free()))
       );
       return 1;
     }
@@ -385,7 +385,7 @@ static String _missing_detail(
     ? _declared(c, _member_spelling(participant, base_name.lower())) : NULL;
   if (base_name && !_exact_conversion(forward, participant, base))
     return $reason.protocol_forward_conversion(
-      prefix, %"$participant_repr.${base_name.lower()}");
+      prefix, %"$participant_repr.$(base_name.lower())");
   String lowered = participant.is_bare_typedef_name()
     ? participant.car().str().lower() : participant_repr;
   return $reason.protocol_reverse_conversion(prefix, base_repr, lowered);
@@ -481,7 +481,7 @@ static List _resolve_native(
   }
   List conformance = %(
     protocol-conformance $base $participant "" ""
-    ${resolution.variables} ${resolution.bindings} (members @rows)
+    $(resolution.variables) $(resolution.bindings) (members @rows)
   );
   c.conforms[key] = conformance;
   return conformance;
@@ -613,7 +613,7 @@ static List _resolve_ordinary(
   }
   List conformance = %(
     protocol-conformance $base $participant $forward $reverse
-    ${resolution.variables} ${resolution.bindings} (members @rows)
+    $(resolution.variables) $(resolution.bindings) (members @rows)
   );
   c.conforms[key] = conformance;
   return conformance;
@@ -774,7 +774,7 @@ static List _complete(MemberResolution &r, List row) {
       if (status == <no-member>) {
         String base_name = _base_name(r.base);
         if (base_name && r.base !== %("Var")) {
-          String fallback = %"${base_name}_$member";
+          String fallback = %"$(base_name)_$member";
           Type fallback_type = _declared(r.c, fallback);
           Map base_bindings = r.bindings.copy();
           base_bindings[r.binder] = r.base;
@@ -822,7 +822,7 @@ static List _conversion_requirement(
   ProtocolAdapters &a, String member, Type template, Symbol adapter) {
   int fallback = adapter == <fallback>;
   List parameters = template.car().list().cadr();
-  Type result = template.cdr(), variable = %(${a.binder});
+  Type result = template.cdr(), variable = %($(a.binder));
   Symbol direction = fallback ? <forward> : <reverse>;
   foreach (Var parameter in parameters) {
     if (parameter == variable) {

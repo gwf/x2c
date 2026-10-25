@@ -48,35 +48,35 @@ typedef struct Build {
 /* build command reports. */
 
 static macro Stmt $fail.build_input_unsupported(Expr $input) =>
-  Diagnostics.driver_error(%"unsupported build input: ${$input}");
+  Diagnostics.driver_error(%"unsupported build input: $($input)");
 
 static macro Stmt $fail.build_archive_nested(Expr $input) =>
   Diagnostics.driver_error(
-    %"cannot nest an archive in a static library: ${$input}");
+    %"cannot nest an archive in a static library: $($input)");
 
 static macro Stmt $fail.build_runtime_missing(Expr $runtime) =>
-  Diagnostics.driver_error(%"matching x2c runtime is unavailable: ${$runtime}");
+  Diagnostics.driver_error(%"matching x2c runtime is unavailable: $($runtime)");
 
 static macro Stmt $fail.build_package_missing(Expr $name, Expr $path) =>
-  Diagnostics.driver_error(%"package '${$name}' is not built: ${$path}");
+  Diagnostics.driver_error(%"package '$($name)' is not built: $($path)");
 
 static macro Stmt $progress.build_database_written(Expr $path) =>
-  report_line(<muted>, %"  Compilation database ${$path}");
+  report_line(<muted>, %"  Compilation database $($path)");
 
 static macro Stmt $progress.build_compiler_used(Expr $b, Expr $jobs) =>
-  report_line(<muted>, %"  Compiled with ${$b.toolchain.cc} using ${$jobs}");
+  report_line(<muted>, %"  Compiled with $($b.toolchain.cc) using $($jobs)");
 
 static macro Stmt $progress.build_intermediates(Expr $b) =>
-  report_line(<muted>, %"  Intermediates ${$b.work_dir} (${_retention($b)})");
+  report_line(<muted>, %"  Intermediates $($b.work_dir) ($(_retention($b)))");
 
 static macro Stmt $progress.build_output_size(Expr $b, Expr $size) =>
-  report_line(<muted>, %"  Output ${$b.output} (${$size})");
+  report_line(<muted>, %"  Output $($b.output) ($($size))");
 
 static macro Stmt $progress.build_debug_symbols(Expr $b) =>
-  report_line(<muted>, %"  Debug symbols ${$b.output}.dSYM");
+  report_line(<muted>, %"  Debug symbols $($b.output).dSYM");
 
 static macro Stmt $progress.build_running(Expr $b) =>
-  report_line(<phase>, %"Running ${$b.output}");
+  report_line(<phase>, %"Running $($b.output)");
 
 static macro Stmt $progress.build_translation_cached(Expr $input) =>
   fprintf(stderr, "x2c: up-to-date translate %s\n", $input);
@@ -111,7 +111,7 @@ static macro Stmt $fail.build_output_ambiguous() =>
 // source templates
 
 static macro Expression $source.build.module(Expr $stamp) =>
-  %"const char x2c_module_stamp[] = \"${$stamp}\";
+  %"const char x2c_module_stamp[] = \"$($stamp)\";
 Map x2c_module_targets(void) => \$module.targets();
 ";
 
@@ -119,19 +119,19 @@ static macro Expression $source.build.extension(Expr $name) =>
   %"void x2c_register_extension(const char *, Map (*)(void));
 static Map _targets(void) => \$module.targets();
 __attribute__((constructor)) static void _register(void) {
-  x2c_register_extension(\"${$name}\", _targets);
+  x2c_register_extension(\"$($name)\", _targets);
 }
 ";
 
 static macro Expression $source.build.include(Expr $includes, Expr $source) =>
-  %"${$includes}#include \"x2c-root${$source}\"\n";
+  %"$($includes)#include \"x2c-root$($source)\"\n";
 
 static macro Expression $source.build.entry(
   Expr $includes, Expr $declared, Expr $exports) =>
   %"#include \"compiler-meta.x\"
-${$includes}macro Expression \$module.targets() =>
-  \$_x2c_target_map(\$_x2c_declared_rows(%${$declared}));
-${$exports}";
+$($includes)macro Expression \$module.targets() =>
+  \$_x2c_target_map(\$_x2c_declared_rows(%$($declared)));
+$($exports)";
 
 // artifact paths
 
@@ -145,15 +145,15 @@ static String _key(String path) {
 }
 
 static String _unit_dir(Build b, String unit) =>
-  %"${b.gen_root}/${_key(unit)}";
+  %"$(b.gen_root)/$(_key(unit))";
 
 /* A unit's generated C, header, interface, and depfile share its stem. */
 static String _unit_file(String directory, String unit, String suffix) =>
-  %"$directory/${Path.stem(unit)}$suffix";
+  %"$directory/$(Path.stem(unit))$suffix";
 
 /* The state record of one artifact, keyed like the artifact. */
 static String _state_path(Build b, String kind, String path) =>
-  %"${b.state_root}/$kind-${_key(path)}";
+  %"$(b.state_root)/$kind-$(_key(path))";
 
 /* The suffix of one process's private sibling of a shared artifact path.
    Concurrent builds in one project write through these and publish with
@@ -239,7 +239,7 @@ static void _check_compile_only(Build b) {
   }
 }
 
-static String _object_name(String input) => %"${Path.stem(input)}.o";
+static String _object_name(String input) => %"$(Path.stem(input)).o";
 
 /* The selected compiler and archiver go back to the request. */
 static void _select_tools(Build b) {
@@ -248,7 +248,7 @@ static void _select_tools(Build b) {
   request.cc = b.toolchain.cc; request.ar = b.toolchain.ar;
   // A module's code is placed wherever the loader maps it.
   if (request.kind == <module>)
-    b.toolchain.cc_args = %("-fPIC" @{b.toolchain.cc_args});
+    b.toolchain.cc_args = %("-fPIC" @(b.toolchain.cc_args));
 }
 
 /* An unnamed output is named for the first input and the kind.
@@ -273,11 +273,11 @@ static void _make_work_dirs(Build b) {
   try {
     if (!b.work_dir && request.dry_run) b.work_dir = "/tmp/x2c-build-dry-run";
     if (!b.work_dir) b.work_dir = Path.temp_dir();
-    b.gen_root = %"${b.work_dir}/gen";
-    b.obj_root = %"${b.work_dir}/obj";
-    b.dep_root = %"${b.work_dir}/dep";
-    if (!b.temporary) b.state_root = %"${b.work_dir}/.x2c-state";
-    List roots = %(${b.gen_root} ${b.obj_root} ${b.dep_root} ${b.state_root});
+    b.gen_root = %"$(b.work_dir)/gen";
+    b.obj_root = %"$(b.work_dir)/obj";
+    b.dep_root = %"$(b.work_dir)/dep";
+    if (!b.temporary) b.state_root = %"$(b.work_dir)/.x2c-state";
+    List roots = %($(b.gen_root) $(b.obj_root) $(b.dep_root) $(b.state_root));
     if (!request.dry_run)
       foreach (Path root, roots) if (root) root.make_dirs();
   }
@@ -481,7 +481,7 @@ CliRequest Build.module_entry(Build b) {
   String stamp = Compiler.module_stamp();
   if (!stamp)
     Diagnostics.driver_error("cannot read the running compiler to stamp");
-  Path entry = %"${b.work_dir}/module/x2c_module.x";
+  Path entry = %"$(b.work_dir)/module/x2c_module.x";
   _write_entry(entry, b.units, $source.build.module(stamp));
   return _entry_request(b, %($entry));
 }
@@ -497,7 +497,7 @@ CliRequest Build.extension_entries(Build b) {
   Array entries = [], Map packages = {};
   foreach (String package, b.request.extensions) {
     String root = Path.absolute(package), name = Path.basename(root);
-    Path entry = %"${b.work_dir}/extension/$name/x2c_extension_$name.x";
+    Path entry = %"$(b.work_dir)/extension/$name/x2c_extension_$name.x";
     _write_entry(
       entry, Path.glob(%"$root/src/*.x"),
       $source.build.extension(name));
@@ -560,7 +560,7 @@ int Build.finish(Build b) {
   _place_unit_headers(b);
   if (_compile_sources(b)) return 1;
   if (b.request.compile_only) return 0;
-  if (b.request.command == <run> && !b.output) b.output = %"${b.work_dir}/run";
+  if (b.request.command == <run> && !b.output) b.output = %"$(b.work_dir)/run";
   List inputs = _final_inputs(b);
   ToolAction action = _final_action(b, b.output, inputs);
   Symbol phase = action.phase, int count = inputs.len();
@@ -593,7 +593,7 @@ static void _place_unit_headers(Build b) {
 
 static void _place_includes(Build b, Map headers, String unit) {
   String directory = _unit_dir(b, unit);
-  List searched = %(${Path.dirname(unit)} @{b.request.include_dirs});
+  List searched = %($(Path.dirname(unit)) @(b.request.include_dirs));
   foreach (String suffix, %(".h" ".c")) {
     String text = Path.read_text(_unit_file(directory, unit, suffix));
     foreach (String line, text.split_lines(0)) {
@@ -616,7 +616,7 @@ static String _unit_include(String line) {
    search, to `target` under `directory`. */
 static void _place_header(
   Map headers, List searched, String directory, String target) {
-  String source = %"${target[:target.len() - 2]}.x";
+  String source = %"$(target[:target.len() - 2]).x";
   foreach (String dir, searched) {
     Var header;
     if (!headers.try_get(Path.join(dir, source).absolute(), header)) continue;
@@ -697,11 +697,11 @@ static List _include_dirs(Build b, String source) {
 /* Plans the compile of `source` and records its object and compilation
    database entry. */
 static CcJob _compile_job(Build b, String source, List directories) {
-  String key = _key(source), object = %"${b.obj_root}/$key.o";
+  String key = _key(source), object = %"$(b.obj_root)/$key.o";
   if (b.request.compile_only && !b.request.inputs.cdr()) object = b.output;
   else if (b.request.compile_only && !b.request.build_dir)
     object = _object_name(source);
-  String depfile = %"${b.dep_root}/$key.d";
+  String depfile = %"$(b.dep_root)/$key.d";
   CcJob job = {
     .action = b.toolchain.compile_action(source, object, depfile, directories),
     .source = source, .object = object, .depfile = depfile};
@@ -712,7 +712,7 @@ static CcJob _compile_job(Build b, String source, List directories) {
   job.state_path = _state_path(b, "c", source);
   // Per process: concurrent builds of one project share `dep_root`.
   if (!b.request.dry_run)
-    job.preprocessed = %"${b.dep_root}/$key.${_process_suffix()}.i";
+    job.preprocessed = %"$(b.dep_root)/$key.$(_process_suffix()).i";
   return job;
 }
 
@@ -721,7 +721,7 @@ static String _compile_command(Build b, CcJob job) {
     directory: b.compile_directory, file: job.source, output: job.object,
     arguments: job.action.arguments
   };
-  return %"  ${Var.json(entry)}";
+  return %"  $(Var.json(entry))";
 }
 
 /** Publishes collected native compilation entries as one JSON database.
@@ -730,7 +730,7 @@ static String _compile_command(Build b, CcJob job) {
     existing database, reports a diagnostic, and returns zero.
 */
 int Build.write_commands(String path, Array commands) {
-  String text = %"[\n${",\n".join(commands)}\n]\n";
+  String text = %"[\n$(",\n".join(commands))\n]\n";
   try {
     Path.publish_files(%($path $text));
     $progress.build_database_written(path);
@@ -886,7 +886,7 @@ static String _input_noun(Symbol phase, int count) {
    unchanged. */
 static int _publish(Build b, List inputs) {
   String name = Path.basename(b.output);
-  String staging = %"${Path.dirname(b.output)}/.$name.${_process_suffix()}";
+  String staging = %"$(Path.dirname(b.output))/.$name.$(_process_suffix())";
   Path.make_dirs(staging);
   String staged = %"$staging/$name";
   int status = _replace(b, _final_action(b, staged, inputs), staged);
@@ -957,7 +957,7 @@ static int _mapped_debug(Build b) {
    helper to compile and link against. */
 static int _archive_extensions(Build b) {
   if (!b.request.extensions || b.request.dry_run) return 0;
-  String directory = %"${b.output}.extensions";
+  String directory = %"$(b.output).extensions";
   if (Path.exists(directory)) Path.remove_tree(directory);
   String include = %"$directory/include";
   Path.make_dirs(include);
@@ -978,7 +978,7 @@ static int _archive_extensions(Build b) {
    headers of its x2c units into `include`. */
 static void _extension_sources(
   Build b, String package, String include, Map sources) {
-  String root = %"${Path.absolute(package)}/src/";
+  String root = %"$(Path.absolute(package))/src/";
   foreach (String input, b.request.inputs) {
     if (!input.startswith(root)) continue;
     if (input.endswith(".c")) {
@@ -1017,12 +1017,12 @@ void Build.report_success(Build b) {
 static String _headline(Build b) {
   String duration = report_duration(report_now_us() - b.started_at);
   String cache = _all_cached(b) ? " (up to date)" : "";
-  String label = b.request.label ? %" target '${b.request.label}'" : "";
+  String label = b.request.label ? %" target '$(b.request.label)'" : "";
   String built = %"Built$label", tail = %"in $duration$cache";
   if (!b.request.compile_only)
-    return %"$built ${TargetKind.of(b.request.kind).noun} ${b.output} $tail";
+    return %"$built $(TargetKind.of(b.request.kind).noun) $(b.output) $tail";
   int objects = b.objects.len();
-  if (objects == 1) return %"$built object ${b.output} $tail";
+  if (objects == 1) return %"$built object $(b.output) $tail";
   String directory = b.request.build_dir ? b.obj_root : ".";
   return %"$built $objects object files in $directory $tail";
 }
@@ -1036,7 +1036,7 @@ static int _all_cached(Build b) {
 
 static String _final_tool(Build b) =>
   b.request.kind == <static-lib> ?
-    %"  Archived with ${b.toolchain.ar}" : %"  Linked with ${b.toolchain.cc}";
+    %"  Archived with $(b.toolchain.ar)" : %"  Linked with $(b.toolchain.cc)";
 
 static String _retention(Build b) {
   if (!b.temporary) return "retained";
@@ -1053,7 +1053,7 @@ int Build.run_program(Build b) {
   $progress.build_running(b);
   String executable = Path.absolute(b.output);
   ToolAction action = ToolAction.new(
-    <run>, %($executable @{b.request.run_args}), b.request.verbose,
+    <run>, %($executable @(b.request.run_args)), b.request.verbose,
     b.request.dry_run);
   action.as_program();
   return action.run();
@@ -1131,9 +1131,9 @@ void Build.publish_script(Build b, String executable) {
   if (_mapped_debug(b)) {
     Path symbols = %"$executable.dSYM";
     symbols.remove_tree();
-    Path.move_to(%"${b.output}.dSYM", symbols);
+    Path.move_to(%"$(b.output).dSYM", symbols);
   }
-  unlink(%"${b.state_root}/script");
+  unlink(%"$(b.state_root)/script");
   // Unknown -l selections follow the ordinary retained build's relink policy.
   foreach (String arg, b.toolchain.ld_args)
     foreach (String part, arg.split(","))
@@ -1143,7 +1143,7 @@ void Build.publish_script(Build b, String executable) {
   int ok = 1;
   uint64_t hash = _script_fingerprint(b.request, b.toolchain.cc, paths, ok);
   if (ok && _files_unchanged(b, files))
-    _state_write_lines(%"${b.state_root}/script", hash, paths);
+    _state_write_lines(%"$(b.state_root)/script", hash, paths);
 }
 
 static List _script_files(Build b) {
@@ -1152,7 +1152,7 @@ static List _script_files(Build b) {
   Array files = [];
   foreach (String path, _depfile_inputs(depfile)) files.push(path);
   foreach (String source, b.c_sources)
-    foreach (String path, _depfile_inputs(%"${b.dep_root}/${_key(source)}.d"))
+    foreach (String path, _depfile_inputs(%"$(b.dep_root)/$(_key(source)).d"))
       files.push(path);
   foreach (Var path, b.native_inputs) files.push(path);
   foreach (String arg, b.toolchain.ld_args)
@@ -1370,7 +1370,7 @@ static void _state_write_lines(String path, uint64_t hash, List lines) {
    hash has already moved the modification time this reads. The build's own
    output under the work directory is not one of those files. */
 static int _files_unchanged(Build b, List files) {
-  String work = %"${Path.absolute(b.work_dir)}/";
+  String work = %"$(Path.absolute(b.work_dir))/";
   foreach (String path, files) {
     if (path.startswith("search:")) path = path[7:];
     if (Path.absolute(path).startswith(work)) continue;

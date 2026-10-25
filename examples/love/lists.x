@@ -19,7 +19,7 @@ puts(%(total $sum items $selected).repr());
 puts(%"original: $prices; extended: $extended");
 
 // car gets the first value; cdr gets the rest, spliced with @.
-List parts = %((first ${selected.car()}) (rest @{selected.cdr()}));
+List parts = %((first $(selected.car())) (rest @(selected.cdr())));
 puts(parts.repr());
 return 0;
 }

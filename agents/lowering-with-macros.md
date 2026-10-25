@@ -106,15 +106,15 @@ meta static Code _try_landing(
   if (finalizer) {
     Atom departure = Atom.intern("?__try_departure");
     finished = Atom.intern("?__try_finalizer");
-    rows.push(%(exits $departure ${_try_departure(frame)}));
+    rows.push(%(exits $departure $(_try_departure(frame))));
     rows.push(%(region $finished $finalizer));
   }
-  rows.push(%(exits $exits ${_try_exits(frame, handle, finished)}));
+  rows.push(%(exits $exits $(_try_exits(frame, handle, finished))));
   rows.push(%(region $lowered $body));
   List clause = _try_catch_clause(handle, arms, rows);
   Macro shape = $x2c.try.frame;
   List code = shape(frame, clause, lowered, exits);
-  return Code.lowered(%(landing $code ${rows.list_free()}), NULL);
+  return Code.lowered(%(landing $code $(rows.list_free())), NULL);
 }
 ```
 
@@ -132,11 +132,11 @@ meta static List _try_catch_clause(List handle, List records, Array rows) {
       if (!pattern.is_static_pattern()) state = "ERROR_CATCH_TRANSIENT";
       patterns.push(pattern);
     }
-    Atom arm = Atom.intern(%"?__try_arm_${arms.len()}");
-    rows.push(%(region $arm ${record.cadr()}));
+    Atom arm = Atom.intern(%"?__try_arm_$(arms.len())");
+    rows.push(%(region $arm $(record.cadr())));
     arms.push(arm);
   }
-  return %($handle $state ${arms.list_free()} @{patterns.list_free()});
+  return %($handle $state $(arms.list_free()) @(patterns.list_free()));
 }
 ```
 
@@ -332,8 +332,8 @@ examples are excerpts from current source.
    A name that must not collide with user names is a fresh binding from
    `c.sym.introduce(c.fresh_name(...))`, used the same way.
 
-3. **Expression holes.** `${expr}` inserts a field, an element, or a call
-   result without a local, and `@{expr}` splices a List. The function
+3. **Expression holes.** `$(expr)` inserts a field, an element, or a call
+   result without a local, and `@(expr)` splices a List. The function
    evaluates each hole once, where the quotation is written, in written
    order. Call helpers this way rather than as `$helper(...)` slots. A slot
    makes the quotation apply a template, so it is no longer built where it
@@ -426,7 +426,7 @@ Recognize a source form with its macro inside a pattern: `${$indexed(?r,
 ?s)}` matches the typed expression or its bare content, and inside an
 `(expr TYPE ...)` shell it is the content, so the shell captures the type. A
 hole's argument may itself be a pattern, such as
-`${$indexed(%(!set ?base (expr ?type ?)), ?index)}`; the macro's pattern is
+`$($indexed(%(!set ?base (expr ?type ?)), ?index))`; the macro's pattern is
 derived with a binder in that hole first, so the argument keeps its exact
 constraints. A bare-content dispatch arm keeps `source_content_pattern`,
 whose fixed head lets the match emitter label the arm. Preserve the original

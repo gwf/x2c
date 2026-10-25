@@ -47,8 +47,8 @@ List Sample.fences(String text):
       String text_body = body.len() ?
         String.join("\n", body.list_free()) + "\n" : NULL
       int stop = offsets[end].integer() + line.len()
-      fences.push(%($indent ${found["info"]} $text_body ${at + 1}
-                    ${offsets[at]} $stop))
+      fences.push(%($indent $(found["info"]) $text_body $(at + 1)
+                    $(offsets[at]) $stop))
       at = end
       break
   return fences.list_free()

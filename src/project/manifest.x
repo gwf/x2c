@@ -148,7 +148,7 @@ static void _field(Manifest &m, char *line) {
 
 /* The next line of an open array continues its field's value. */
 static void _extend(Manifest &m, char *line) {
-  m.value = %"${m.value} ${String.new(line)}";
+  m.value = %"$(m.value) $(String.new(line))";
   _settle(m);
 }
 
@@ -373,7 +373,7 @@ static ProjectProfile _new_profile(ProjectTarget target, String name) {
 
 module void _error(Project p, int line, String message) {
   String at = line ? ":%d".printf(line) : NULL;
-  if (p && p.path) message = %"manifest '${p.path}'$at: $message";
+  if (p && p.path) message = %"manifest '$(p.path)'$at: $message";
   fprintf(stderr, "x2c: error: %s\n", message);
   exit(2);
 }

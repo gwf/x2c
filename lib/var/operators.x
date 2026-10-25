@@ -31,7 +31,7 @@ static macro Unit $native.update(Type $type, Name $function, Literal $row) {
     volatile $type *$x2c_ident("lhs"), Symbol $x2c_ident("op"),
     Var $x2c_ident("rhs")) {
     if (!$x2c_ident("lhs"))
-      raise %(bad-arg (operation ${$_update_operation($function)}));
+      raise %(bad-arg (operation $($_update_operation($function))));
     Var $converted = _native_update(
       $_update_box($row, $x2c_ident("lhs")),
       $_update_tag($row), $x2c_ident("op"), $x2c_ident("rhs"));
@@ -368,7 +368,7 @@ static Var _shift_binary(Symbol op, X2CVarNumeric lhs, X2CVarNumeric rhs) {
   if (!rhs.unsigned_value && (long long) count < 0)
     raise %(bad-shift (op $op));
   if (count >= (unsigned long long) lhs.bits)
-    raise %(bad-shift (op $op) (count $count) (width ${lhs.bits}));
+    raise %(bad-shift (op $op) (count $count) (width $(lhs.bits)));
   unsigned long long raw = _integer_raw(
     op, _raw_for_width(lhs, lhs.bits), count, lhs.bits, lhs.unsigned_value);
   return Var.integer_box(lhs.tag, raw);

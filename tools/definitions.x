@@ -70,7 +70,7 @@ Array Unit.load(Path x2c, Path root, List paths):
     int first = batch * pending.len() / batches
     int last = (batch + 1) * pending.len() / batches
     for (int at = first; at < last; at++): share.push(pending[at])
-    jobs.push(%($x2c translate --dump-definitions @{share.list_free()}).job()
+    jobs.push(%($x2c translate --dump-definitions @(share.list_free())).job()
               .options({dir: root, stdout: work.join(%"$batch"),
                         stderr: <capture>}).start())
   Map found = {}
@@ -96,14 +96,14 @@ List Unit.callables(Unit unit):
     String display = row["display"], doc = row["doc"]
     int line = row["line"].integer()
     List source = row["source"]
-    if !source: source = %(${unit["path"]} $line)
+    if !source: source = %($(unit["path"]) $line)
     if row["origin"] == <alias> && !doc: continue
     if row["origin"] == <source>:
-      found.push(%($display ${row["text"]} $line ${Prose.normalize(doc)} $source))
+      found.push(%($display $(row["text"]) $line $(Prose.normalize(doc)) $source))
       continue
     if line == 1 && !doc: continue
-    found.push(%($display ${Unit.signature(display, row["type"], row["params"])}
-                 $line ${Prose.normalize(doc)} $source))
+    found.push(%($display $(Unit.signature(display, row["type"], row["params"]))
+                 $line $(Prose.normalize(doc)) $source))
   return found.sort_by(%!(List item) => item.caddr()).list_free()
 
 // Type rendering follows the canonical Type lists of unit interfaces.
@@ -158,15 +158,15 @@ static String _render(Var node, String declarator):
   if head == <const> || head == <volatile>:
     return _joined(head.str(), _render(_target(rest), declarator))
   if head == <struct> || head == <union> || head == <enum>:
-    return _joined(%"$head ${rest.car()}", declarator)
+    return _joined(%"$head $(rest.car())", declarator)
   List form = head is <list> ? head : NULL
   if !form || (form.car() != <func> && form.car() != <dim>):
-    raise %(api-fatal (reason ${%"unknown type node: ${node.repr()}"}))
+    raise %(api-fatal (reason $(%"unknown type node: $(node.repr())")))
   if form.car() == <func>:
     return _render(_target(rest),
-                   %"$declarator(${_parameters(form.cadr())})")
+                   %"$declarator($(_parameters(form.cadr())))")
   List extent = form.cadr()
-  return _render(_target(rest), %"$declarator[${extent ? extent.car() : ""}]")
+  return _render(_target(rest), %"$declarator[$(extent ? extent.car() : "")]")
 
 /** Spells a function from its canonical `type` and parameter `names`, as
     `RETURN DISPLAY(PARAMETERS)`.
@@ -185,7 +185,7 @@ String Unit.signature(String display, List type, List names):
     name = name ? name.cdr() : NULL
   String text = String.join(", ", spelled.list_free())
   if !text: text = "void"
-  return %"${_render(tail, "")} $display($text)"
+  return %"$(_render(tail, "")) $display($text)"
 
 /** Returns the body of a doc comment with an optional `*` gutter removed
     and its lines dedented, never reflowed. Returns NULL for an empty body.
@@ -253,7 +253,7 @@ List Prose.paragraphs(String comment):
 String Unit.summary(Unit unit):
   List paragraphs = Prose.paragraphs(unit["module"])
   if !paragraphs:
-    return %"Current source module `${Path.new(unit["path"]).basename()}`."
+    return %"Current source module `$(Path.new(unit["path"]).basename())`."
   String first = Regex.compile("\\s+").replace_all(paragraphs.car(), " ")
   first = first.strip(NULL)
   List divided = first.partition(" -- ")

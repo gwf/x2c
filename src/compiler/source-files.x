@@ -27,7 +27,7 @@ int Compiler.owns_package_source(Compiler c, String path) {
   if (!c.package || !Path.is_x2c_source(path)) return 0;
   Var root = c.package_roots[c.package];
   return root is not void &&
-    c.canonical_path(path).startswith(%"${c.canonical_path(root)}/");
+    c.canonical_path(path).startswith(%"$(c.canonical_path(root))/");
 }
 
 /* The real paths this process has resolved, by spelling. The compiler
@@ -79,13 +79,13 @@ static void _real_paths_shutdown(void) {
     not depend on where the home is installed.
 */
 String Compiler.portable_path(String path) {
-  String prefix = %"${x2c_get_root()}/";
+  String prefix = %"$(x2c_get_root())/";
   return path.startswith(prefix) ? path[prefix.len():] : path;
 }
 
 /** Returns the absolute path that a `Compiler.portable_path` spelling names. */
 String Compiler.absolute_home_path(String spelling) =>
-  spelling.startswith("/") ? spelling : %"${x2c_get_root()}/$spelling";
+  spelling.startswith("/") ? spelling : %"$(x2c_get_root())/$spelling";
 
 /** Merges one translation dependency, preserving an existing content hash. */
 void Map.merge_translation_dependency(Map m, String path, Var content_hash) {
@@ -110,7 +110,7 @@ void Compiler.merge_translation_dependencies(Compiler c, Map dependencies) {
     is not a file resolves against the home. */
 String Compiler.source_path(Compiler c, String file) {
   if (!file || file.startswith("<")) return file;
-  String rooted = %"${c.root_dir}/$file";
+  String rooted = %"$(c.root_dir)/$file";
   if (file[0] != '/' && !c.sources.exists(file) && c.sources.exists(rooted))
     file = rooted;
   return c.canonical_path(file);

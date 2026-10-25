@@ -55,7 +55,7 @@ static List _global(ReplSession session, List expression) {
   Var access;
   if (!paths.try_get(path, access))
     raise %(repl (reason "loaded field cannot cross the helper boundary"));
-  return %(@{access.list()} ${arguments.list()});
+  return %(@(access.list()) $(arguments.list()));
 }
 
 static int _snapshot(List entry) {
@@ -68,7 +68,7 @@ static List _read(ReplSession session, List entry, Type type) {
     raise %(repl (reason
       "loaded aggregates support field access and whole-object inspection"));
   List call = session.compiler.resolve_expression(
-    %(expr () (call ${entry.car()} (args @{entry.caddr()}))), NULL);
+    %(expr () (call $(entry.car()) (args @(entry.caddr())))), NULL);
   if (type.is_bitfield()) type = type.base_type();
   return session.compiler.convert_expression(call, type);
 }
@@ -84,7 +84,7 @@ static List _write(
   value = c.convert_expression(value, type);
   List call = c.resolve_expression(
     %(expr () (call $setter
-      (args @{entry.caddr()} $value ${$!int{ $operation }}))), NULL);
+      (args @(entry.caddr()) $value $($!int{ $operation })))), NULL);
   return c.convert_expression(call, type);
 }
 
@@ -98,12 +98,12 @@ static List _indices(ReplSession session, List entry, Array setup) {
       c.rebuild_statement($!{ long long $temporary = $value; }).cadr());
     arguments.push($!(long long){ $temporary });
   }
-  return %(${entry.car()} ${entry.cadr()} ${arguments.list()});
+  return %($(entry.car()) $(entry.cadr()) $(arguments.list()));
 }
 
 static List _with_indices(List value, Array setup) => setup.len()
-  ? %(expr ${value.cadr()}
-      (parens (block @{setup.list()} (stmnt $value)))) : value;
+  ? %(expr $(value.cadr())
+      (parens (block @(setup.list()) (stmnt $value)))) : value;
 
 /** Replaces a whole loaded aggregate only at the prompt's display position.
     Other value uses retain the existing native data-crossing restrictions. */
@@ -176,7 +176,7 @@ static List _object_argument(
   List checked = argument;
   if (!reference && source.is_array()) {
     source = source.dereference().reference();
-    checked = %(expr $source ${argument.caddr()});
+    checked = %(expr $source $(argument.caddr()));
   }
   (void) c.convert_expression(checked, parameter);
   if (record && c.sym.resolve_key(source).canonicalize() !=
@@ -191,9 +191,9 @@ static List _object_argument(
   List selected = _argument_list(c, values);
   Symbol tag = c.sym.var_tag_for_type(parameter, NULL);
   if (!tag) tag = <p48>;
-  List descriptor = _argument_list(c, %(${ $!Symbol{ ${<object>} } }
-    ${$!String{ $path }} $selected ${$!int{ $reference }}
-    ${$!Symbol{ $tag }}));
+  List descriptor = _argument_list(c, %($( $!Symbol{ $(<object>) } )
+    $($!String{ $path }) $selected $($!int{ $reference })
+    $($!Symbol{ $tag })));
   return _with_indices(descriptor, setup);
 }
 
@@ -235,7 +235,7 @@ static List _loaded_call(
     List value = selected[i++];
     if (!value) {
       List converted = c.convert_expression(_rewrite(session, argument), parameters.car());
-      value = _argument_list(c, %(${ $!Symbol{ ${<value>} } } $converted));
+      value = _argument_list(c, %($( $!Symbol{ $(<value>) } ) $converted));
     }
     parameters = parameters.cdr();
     List temporary = c.sym.introduce(c.fresh_name("repl_argument"));
@@ -259,7 +259,7 @@ static List _increment(
   entry = _indices(session, entry, setup);
   Symbol applied = operator == <++> ? <+> : <->;
   List value = session.compiler.resolve_expression(
-    %(expr () (op $applied ${_read(session, entry, type)} ${$!int{ 1 }})),
+    %(expr () (op $applied $(_read(session, entry, type)) $($!int{ 1 }))),
     NULL);
   return _with_indices(_write(session, entry, type, value, 0), setup);
 }
@@ -286,7 +286,7 @@ static Var _rewrite(ReplSession session, Var node) {
       if (binding == c.sym.resolve_global(%("FuncArg_reference"), NULL) &&
           _addressed_global(session, address)):
         return c.resolve_expression(
-          %(expr () (call $callee (args ${$!int{ 0 }} ${$!int{ 0 }}))), NULL);
+          %(expr () (call $callee (args $($!int{ 0 }) $($!int{ 0 })))), NULL);
     case %(expr ? (call (!set ?callee (expr ?(Type type) ?))
                               (args *arguments))): {
       List call = _loaded_call(session, callee, arguments);
@@ -306,7 +306,7 @@ static Var _rewrite(ReplSession session, Var node) {
         if (applied) entry = _indices(session, entry, setup);
         List value = _rewrite(session, rhs);
         if (applied) value = c.resolve_expression(
-          %(expr () (op $applied ${_read(session, entry, type)} $value)),
+          %(expr () (op $applied $(_read(session, entry, type)) $value)),
           NULL);
         return _with_indices(_write(session, entry, type, value, 0), setup);
       }

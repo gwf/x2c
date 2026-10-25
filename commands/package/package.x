@@ -31,63 +31,63 @@ typedef struct PackageOptions {
 
 static macro Stmt $report.install.version_pinned(
   Expr $name, Expr $resolved, Expr $version) =>
-  _error(%"the index has ${$name} ${$resolved}, not the pinned ${$version}");
+  _error(%"the index has $($name) $($resolved), not the pinned $($version)");
 
 static macro Stmt $report.install.spec_unknown(Expr $spec) =>
-  _error(%"unknown package spec '${$spec}'");
+  _error(%"unknown package spec '$($spec)'");
 
 static macro Stmt $report.install.name_invalid(Expr $name) =>
-  _error(%"'${$name}' is not a package name");
+  _error(%"'$($name)' is not a package name");
 
 static macro Stmt $report.install.target_unmanaged(Expr $target) =>
-  _error(%"${$target} exists and is not an installed package");
+  _error(%"$($target) exists and is not an installed package");
 
 static macro Stmt $report.install.bundle_version_missing(Expr $name) =>
-  _error(%"bundle ${$name} has no readable BUNDLE.json version");
+  _error(%"bundle $($name) has no readable BUNDLE.json version");
 
 static macro Stmt $report.install.bundle_version_wrong(
   Expr $name, Expr $built, Expr $current) =>
   _error(
-    %"bundle ${$name} was built for '${$built}', not '${
-      $current}'; use --force");
+    %"bundle $($name) was built for '$($built)', not '$(
+      $current)'; use --force");
 
 static macro Stmt $report.install.bundle_archive_missing(Expr $name) =>
-  _error(%"bundle ${$name} has no builds/lib${$name}.a");
+  _error(%"bundle $($name) has no builds/lib$($name).a");
 
 static macro Stmt $report.install.entry_missing(Expr $spec, Expr $name) =>
-  _error(%"${$spec} has no src/${$name}.x or src/${$name}.xp entry unit");
+  _error(%"$($spec) has no src/$($name).x or src/$($name).xp entry unit");
 
 static macro Stmt $report.install.dependencies_missing(Expr $name) =>
-  _error(%"${$name} needs native dependencies; install its bundle");
+  _error(%"$($name) needs native dependencies; install its bundle");
 
 static macro Stmt $report.install.index_missing(Expr $location) =>
-  _error(%"no package index at ${$location}");
+  _error(%"no package index at $($location)");
 
 static macro Stmt $report.install.package_missing(
   Expr $name, Expr $platform, Expr $location) =>
-  _error(%"no package '${$name}' for ${$platform} in ${$location}");
+  _error(%"no package '$($name)' for $($platform) in $($location)");
 
 static macro Stmt $report.install.home_missing(Expr $command) =>
   Diagnostics.driver_error(
-    %"${$command}: no x2c home: install the compiler or set X2C_HOME");
+    %"$($command): no x2c home: install the compiler or set X2C_HOME");
 
 static macro Stmt $report.install.tool_failed(
   Expr $what, Expr $arguments, Expr $errors) =>
-  _error(%"${$what} failed (${$arguments.car()}): ${$errors.strip(" \n")}");
+  _error(%"$($what) failed ($($arguments.car())): $($errors.strip(" \n"))");
 
 static macro Stmt $report.install.digest_mismatch(
   Expr $p, Expr $expected, Expr $actual) =>
-  _error(%"sha256 mismatch for ${$p}: expected ${$expected}, got ${$actual}");
+  _error(%"sha256 mismatch for $($p): expected $($expected), got $($actual)");
 
 static macro Stmt $report.install.archive_shape(Expr $tarball) =>
-  _error(%"${$tarball} must contain one package directory");
+  _error(%"$($tarball) must contain one package directory");
 
 static macro Stmt $report.install.remove_missing(Expr $name) =>
-  Diagnostics.driver_error(%"remove: no installed package '${$name}'");
+  Diagnostics.driver_error(%"remove: no installed package '$($name)'");
 
 static macro Stmt $report.install.remove_unmanaged(Expr $target) =>
   Diagnostics.driver_error(
-    %"remove: ${$target} is not an installed package; remove it by hand");
+    %"remove: $($target) is not an installed package; remove it by hand");
 
 static macro Stmt $report.install.lock_waiting(Expr $packages) =>
   fprintf(
@@ -101,8 +101,8 @@ static macro Stmt $report.install.removed(Expr $target) =>
 
 static macro Expression $report.install.start_failed(
   Expr $program, Expr $error) =>
-  %"x2c: unable to execute ${$program}: ${
-    String.new(strerror((int) $error))}\n";
+  %"x2c: unable to execute $($program): $(
+    String.new(strerror((int) $error)))\n";
 
 // the packages lock
 
@@ -209,7 +209,7 @@ List PackageOptions.require_package(
   String resolved = row[1];
   if (resolved != version)
     $report.install.version_pinned(name, resolved, version);
-  if (_installed_version(%"${i.packages}/$name") != version) {
+  if (_installed_version(%"$(i.packages)/$name") != version) {
     _resolve(i, row);
     _install_package(i);
   }
@@ -249,7 +249,7 @@ static void _resolve(Install &i, List row) {
 static void _install_package(Install &i) {
   String package = _unpacked(i), name = Path.basename(package);
   if (!name.is_identifier()) $report.install.name_invalid(name);
-  String staged = %"${i.work}/$name";
+  String staged = %"$(i.work)/$name";
   try Path.copy_tree(package, staged);
   catch %(io-fail *detail): _host_error(detail);
   if (Path.exists(%"$staged/BUNDLE.json"))
@@ -281,14 +281,14 @@ static String _unpacked(Install &i) {
    next build back to the index. */
 static void _mark_source(Install &i, String staged, String name) {
   String version = i.version;
-  if (!version) version = _installed_version(%"${i.packages}/$name");
+  if (!version) version = _installed_version(%"$(i.packages)/$name");
   Map record = {
     "package": name, "source": i.url ? i.url : Path.absolute(i.spec),
     "x2c_version": Compiler.version()
   };
   if (version) record["version"] = version;
   if (i.sha256) record["sha256"] = i.sha256;
-  Path.write_text(%"$staged/SOURCE.json", %"${Var.pretty_json(record)}\n");
+  Path.write_text(%"$staged/SOURCE.json", %"$(Var.pretty_json(record))\n");
 }
 
 /* Publishes the staged package with one rename, replacing an installed
@@ -329,20 +329,20 @@ static void _build_source(String package, String name, String spec) {
   _refuse_native(package, name);
   Path builds = _empty_builds(package);
   List paths =
-    %("--x-include-dir" $src "--package-dir" ${Path.dirname(package)});
+    %("--x-include-dir" $src "--package-dir" $(Path.dirname(package)));
   _run(%($x2c "translate" "--out-dir" $builds @paths @units), "translate");
   _run(
-    %($x2c "build" "--kind" ${TargetKind.of(<static-lib>).spelling}
+    %($x2c "build" "--kind" $(TargetKind.of(<static-lib>).spelling)
       "--output" "$builds/lib$name.a"
-      "--build-dir" "$builds/cc" @{_files_with(builds, ".c")}
-      @{_files_with(src, ".c")}),
+      "--build-dir" "$builds/cc" @(_files_with(builds, ".c"))
+      @(_files_with(src, ".c"))),
     "build");
   if (_native_meta(builds, name))
     _run(
-      %($x2c "build" "--kind" ${TargetKind.of(<module>).spelling}
+      %($x2c "build" "--kind" $(TargetKind.of(<module>).spelling)
         "--output" "$builds/$name.module"
         "--build-dir" "$builds/module" @paths @units
-        @{_files_with(src, ".c")}),
+        @(_files_with(src, ".c"))),
       "module build");
   Path.write_text(%"$builds/$name.native.rsp", NULL);
 }
@@ -378,7 +378,7 @@ static Path _empty_builds(String package) {
 /* Whether translation recorded a native `meta` prototype that the package
    owns, so an import loads its module. */
 static int _native_meta(String builds, String name) {
-  String row = %"native-meta \"${name}__";
+  String row = %"native-meta \"$(name)__";
   return _files_with(builds, ".xi").any(
     %!(String path) => row in Path.read_text(path));
 }
@@ -389,13 +389,13 @@ static int _native_meta(String builds, String name) {
     of that name is installed or it records no version. Reaches no network.
 */
 static String install_version(String name) =>
-  _installed_version(%"${_home_packages("install")}/$name");
+  _installed_version(%"$(_home_packages("install"))/$name");
 
 static String _installed_version(String package) {
   String kind = _installed_kind(package);
   if (!kind) return NULL;
   return _marker_string(
-    %"$package/${kind.upper()}.json",
+    %"$package/$(kind.upper()).json",
     kind == "bundle" ? "dependency_version" : "version");
 }
 
@@ -468,7 +468,7 @@ static String _home_packages(String command) {
 static String _platform(void) {
   struct utsname host;
   if (uname(&host)) _error("cannot identify the host platform");
-  return %"${String.new(host.sysname).lower()}-${String.new(host.machine)}";
+  return %"$(String.new(host.sysname).lower())-$(String.new(host.machine))";
 }
 
 /* Runs one host tool, or exits with what it wrote to stderr. */
@@ -509,9 +509,9 @@ static String _unpack(String tarball, String work) {
   extracted.make_dirs();
   _run(%("tar" "-xzf" $tarball "-C" $extracted), "extract");
   List top = _entries(extracted);
-  if (!top || top.cdr() || !Path.is_dir(%"$extracted/${top.car()}"))
+  if (!top || top.cdr() || !Path.is_dir(%"$extracted/$(top.car())"))
     $report.install.archive_shape(tarball);
-  return %"$extracted/${top.car()}";
+  return %"$extracted/$(top.car())";
 }
 
 static List _entries(String directory) =>
@@ -531,7 +531,7 @@ static List _files_with(String directory, String suffix) {
 */
 int PackageOptions.remove_package(PackageOptions request) {
   String name = request.inputs.car();
-  String target = %"${_home_packages("remove")}/$name";
+  String target = %"$(_home_packages("remove"))/$name";
   if (!name.is_identifier())
     $report.install.remove_missing(name);
   // A removal with nothing to remove refuses without taking the lock, and

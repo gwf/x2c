@@ -76,11 +76,11 @@ void Compiler.select_native_modules(List paths) {
   _load_compiler_module();
   Array linked = [];
   for (struct Extension *e = extensions; e; e = e.next) {
-    String key = %"<${String.new(e.name)}>";
+    String key = %"<$(String.new(e.name))>";
     if (!_native_module_loaded(key)) _add_native_module(key, e.targets);
     linked.push(key);
   }
-  paths = %($compiler_supplier @paths @{linked.list_free()});
+  paths = %($compiler_supplier @paths @(linked.list_free()));
   paths.try_own();
   native_module_order = paths;
 }
@@ -274,5 +274,5 @@ int Compiler.links_extension(String name) {
     this compiler kept beside it, named by the compiler's identity, or NULL
     when the compiler links none. Project meta code links it. */
 String Compiler.extension_archive(void) =>
-  extensions ? %"${x2c_get_executable()}.extensions/"
-               + %"${Compiler.identity()}.a" : NULL;
+  extensions ? %"$(x2c_get_executable()).extensions/"
+               + %"$(Compiler.identity()).a" : NULL;

@@ -127,7 +127,7 @@ static int _support_unit(List inputs) {
    process at a time does either, under the directory's lock. */
 static List _manifest(Helper &h) {
   Path.make_dirs(h.directory);
-  int lock = Path.lock_file(%"${h.directory}/lock", 1);
+  int lock = Path.lock_file(%"$(h.directory)/lock", 1);
   defer close(lock);
   List manifest = _current(h.directory);
   if (manifest) return manifest;
@@ -149,7 +149,7 @@ static MetaHelper _use(Helper &h, List manifest) {
   String failure = manifest.assoc(<failure>);
   if (failure.len()) failures[-1] = failure;
   return MetaHelper.new(
-    failure.len() ? NULL : %"${h.directory}/helper", failures, units);
+    failure.len() ? NULL : %"$(h.directory)/helper", failures, units);
 }
 
 // reaching meta code
@@ -318,12 +318,12 @@ static int _compiler_owns(String path) {
    the compiler uses the headers of its build. */
 static List _group_flags(CliRequest request, Map packages) {
   List includes = request.include_dirs.map(%!(dir) => %("-I" $dir)).flatten();
-  List flags = %(@includes @{_host_args(request.cc_args)});
+  List flags = %(@includes @(_host_args(request.cc_args)));
   foreach ((String root, int _) in packages)
-    flags = %(@flags "-iquote" ${%"$root/builds"} "-iquote" ${%"$root/src"});
+    flags = %(@flags "-iquote" $(%"$root/builds") "-iquote" $(%"$root/src"));
   String archive = Compiler.extension_archive();
   if (archive)
-    flags = %("-iquote" ${%"${Path.dirname(archive)}/include"} @flags);
+    flags = %("-iquote" $(%"$(Path.dirname(archive))/include") @flags);
   return flags;
 }
 
@@ -363,12 +363,12 @@ static Array _modules(CliRequest request, Map packages) {
    stamp does not cover it. */
 static String _identify(Helper &h, String stamp, String compiler) {
   String loop = _loop_text();
-  return %"$stamp\n$compiler\n${_cc_flags().repr()}\n"
-    + %"${h.entries.repr()}\n"
-    + %"${h.flags.repr()}\n${h.include}\n${h.toolchain.runtime_lib}\n"
-    + %"${h.modules.list().repr()}\n"
-    + %"${h.frontend.request.package_dirs.repr()}\n"
-    + %"${h.packages.keys().list().sort().repr()}\n"
+  return %"$stamp\n$compiler\n$(_cc_flags().repr())\n"
+    + %"$(h.entries.repr())\n"
+    + %"$(h.flags.repr())\n$(h.include)\n$(h.toolchain.runtime_lib)\n"
+    + %"$(h.modules.list().repr())\n"
+    + %"$(h.frontend.request.package_dirs.repr())\n"
+    + %"$(h.packages.keys().list().sort().repr())\n"
     + (loop ? loop.sha256() : "");
 }
 
@@ -378,8 +378,8 @@ static List _cc_flags(void) => %("-fsigned-char" "-O1");
 /* Every helper links one unit that answers the compiler's calls: its
    protocol loop and the compiler queries generated from `lib/meta.x`. */
 static List _loop_sources(void) => %(
-  ${%"${x2c_get_root()}/etc/meta-helper.x"}
-  ${%"${x2c_get_root()}/etc/meta-queries.x"});
+  $(%"$(x2c_get_root())/etc/meta-helper.x")
+  $(%"$(x2c_get_root())/etc/meta-queries.x"));
 
 /* The text of that unit, or NULL when a source is missing. */
 static String _loop_text(void) {
@@ -398,7 +398,7 @@ static String _directory(
   String root, String identity, Array owners) {
   Array key = [identity];
   foreach (String path in owners) key.push(path);
-  return %"$root/meta/project-${String.sha256("\n".join(key))}";
+  return %"$root/meta/project-$(String.sha256("\n".join(key)))";
 }
 
 // building the helper
@@ -415,7 +415,7 @@ static List _build(Helper &h) {
     h.before[index] = _digest(%"$base.o");
     _clear(base);
   }
-  foreach (String path in %(@{h.owners} @{h.modules} @{_loop_sources()}))
+  foreach (String path in %(@(h.owners) @(h.modules) @(_loop_sources())))
     h.deps[path] = 1;
   if (h.entries) h.meta = _build_meta(h.frontend, h.entries, NULL);
   defer if (h.meta) xfree(h.meta);
@@ -486,7 +486,7 @@ static List _loaded_provider(Helper &h, String path, int index) {
   with (f.request.package_dirs = f.request.package_dirs) {
     foreach ((String root, int _) in h.packages)
       f.request.package_dirs = f.request.package_dirs.append(
-        %(${Path.dirname(root)}));
+        %($(Path.dirname(root))));
     return _collect_provider(h, f, path, index);
   }
 }
@@ -500,7 +500,7 @@ static List _collect_provider(
   _start_parse(h, c, path, index);
   if (!started || !unit.collect(f)) {
     _print_diagnostics(c);
-    return unit.context.export(%(failure ${%"$path: x2c reported errors"}));
+    return unit.context.export(%(failure $(%"$path: x2c reported errors")));
   }
   c.sym.reset(unit.globals);
   return unit.context.export(c.loaded_provider());
@@ -525,7 +525,7 @@ static void _print_diagnostics(Compiler c) {
 
 /* The path of table `index`'s group files, without their suffixes. */
 static String _base(Helper &h, int index) =>
-  %"${h.directory}/group-$index";
+  %"$(h.directory)/group-$index";
 
 /* Removes what a parse left of the group at `base`. */
 static void _clear(String base) {
@@ -547,7 +547,7 @@ static void _parse(Helper &h, String path, int index) {
         f.request.source_map = f.request.source_map || h.entries) {
     foreach ((String root, int _) in h.packages)
       f.request.package_dirs = f.request.package_dirs.append(
-        %(${Path.dirname(root)}));
+        %($(Path.dirname(root))));
     _parse_source(h, f, path, index);
   }
 }
@@ -565,7 +565,7 @@ static void _parse_source(
   unit.compiler.diagnostics.reset();
   if (!unit.parse() && h.entries) {
     _print_diagnostics(unit.compiler);
-    Path.write_text(%"${_base(h, index)}.failure", "x2c reported errors");
+    Path.write_text(%"$(_base(h, index)).failure", "x2c reported errors");
   }
   foreach ((String read, Var _) in unit.compiler.deps) h.deps[read] = 1;
 }
@@ -579,9 +579,9 @@ static String _compile(Helper &h, int index, String unit) {
   if (Path.is_file(%"$base.failure")) return Path.read_text(%"$base.failure");
   Toolchain t = h.toolchain;
   List command =
-    %(${t.cc} @{_cc_flags()} "-iquote" ${h.directory}
-      "-iquote" ${Path.dirname(unit)} "-iquote" ${h.include} @{h.flags}
-      "-MD" "-MF" ${%"$base.d"} "-c" ${%"$base.c"} "-o" ${%"$base.o"});
+    %($(t.cc) @(_cc_flags()) "-iquote" $(h.directory)
+      "-iquote" $(Path.dirname(unit)) "-iquote" $(h.include) @(h.flags)
+      "-MD" "-MF" $(%"$base.d") "-c" $(%"$base.c") "-o" $(%"$base.o"));
   String failure = h.entries ? _compile_loaded(command)
                              : Compiler.meta_cc_run(command, h.directory);
   _add_depfile(%"$base.d", h.deps);
@@ -629,8 +629,8 @@ static String _link(Helper &h, int count) {
   String failure = NULL;
   String support = _support(h, failure);
   if (!support) return failure;
-  String tables = %"${h.directory}/tables.c", table = _tables(h.built, count);
-  String helper = %"${h.directory}/helper";
+  String tables = %"$(h.directory)/tables.c", table = _tables(h.built, count);
+  String helper = %"$(h.directory)/helper";
   if (!h.changed && Path.is_file(tables) && Path.read_text(tables) == table &&
       Path.is_file(helper)) return NULL;
   Path.write_text(tables, table);
@@ -650,8 +650,8 @@ static String _support(Helper &h, String &failure) {
     failure = "cannot read the helper's loop sources";
     return NULL;
   }
-  String key = String.sha256(%"${h.identity}\n${text.sha256()}");
-  String directory = %"${Compiler.cache_root()}/meta/support-$key";
+  String key = String.sha256(%"$(h.identity)\n$(text.sha256())");
+  String directory = %"$(Compiler.cache_root())/meta/support-$key";
   String object = %"$directory/meta-helper.o";
   if (Path.is_file(object)) return object;
   Path.make_dirs(directory);
@@ -674,19 +674,19 @@ static String _compile_support(
   if (tool_capture(
     %($driver "translate" "--out-dir" $directory $source),
     printed, errors))
-    return %"cannot translate $source: ${errors.strip(NULL)}";
+    return %"cannot translate $source: $(errors.strip(NULL))";
   Toolchain t = h.toolchain;
   String include = h.include, output = _temporary(object);
   String failure = Compiler.meta_cc_run(
-    %(${t.cc} @{_cc_flags()} "-iquote" $directory "-iquote" $include
-      "-c" ${%"$directory/meta-helper.c"} "-o" $output), NULL);
+    %($(t.cc) @(_cc_flags()) "-iquote" $directory "-iquote" $include
+      "-c" $(%"$directory/meta-helper.c") "-o" $output), NULL);
   if (!failure) Path.move_to(output, object);
   return failure;
 }
 
 /* The path a process writes before it moves the result to `path`. */
 static String _temporary(String path) =>
-  %"$path.${"%ld".printf((long) getpid())}";
+  %"$path.$("%ld".printf((long) getpid()))";
 
 /* The unit that gives the helper each built table by index. */
 static String _tables(Array built, int count) {
@@ -709,16 +709,16 @@ static List _link_arguments(
   Helper &h, String output, String tables, String support) {
   Toolchain t = h.toolchain;
 #ifdef __APPLE__
-  t.ld_args = %(${%"-Wl,-force_load,${t.runtime_lib}"});
+  t.ld_args = %($(%"-Wl,-force_load,$(t.runtime_lib)"));
 #else
-  t.ld_args = %("-Wl,--export-dynamic,--whole-archive" ${t.runtime_lib}
+  t.ld_args = %("-Wl,--export-dynamic,--whole-archive" $(t.runtime_lib)
                 "-Wl,--no-whole-archive");
 #endif
-  List inputs = %(@{h.objects.list()} $tables $support);
+  List inputs = %(@(h.objects.list()) $tables $support);
   String archive = Compiler.extension_archive();
   if (archive) inputs = inputs.append(%($archive));
   ToolAction link = t.link_action(output, inputs);
-  return %(@{link.arguments} @{_cc_flags()} "-iquote" ${h.include});
+  return %(@(link.arguments) @(_cc_flags()) "-iquote" $(h.include));
 }
 
 // manifests
@@ -730,11 +730,11 @@ static List _link_arguments(
    the build read. */
 static List _write_manifest(Helper &h, String failure) {
   List manifest = %(
-    (groups ${h.groups.list()}) (failures ${h.failures.list()})
-    (failure ${failure ? failure : ""}) (deps ${_digests(h.deps)}));
+    (groups $(h.groups.list())) (failures $(h.failures.list()))
+    (failure $(failure ? failure : "")) (deps $(_digests(h.deps))));
   Buffer out = auto Buffer.new(0);
   datum_write(out, manifest, 0);
-  Path.write_text(%"${h.directory}/manifest", out);
+  Path.write_text(%"$(h.directory)/manifest", out);
   return manifest;
 }
 
@@ -780,5 +780,5 @@ static String _digest(String path) {
   File input = fopen(path, "rb");
   if (!input) return NULL;
   defer input.close();
-  return %"${Path.absolute(path)}:${input.sha256()}";
+  return %"$(Path.absolute(path)):$(input.sha256())";
 }

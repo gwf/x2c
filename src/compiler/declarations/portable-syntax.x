@@ -18,11 +18,11 @@ Var Compiler.freeze_declaration_syntax(Compiler c, Var syntax) {
     return %(declaration-binding $syntax $source);
   match (syntax) {
     case %(cache ?(int id)):
-      return %(declaration-cache ${_freeze_cache_key(c, c.id_keys[id])});
+      return %(declaration-cache $(_freeze_cache_key(c, c.id_keys[id])));
     case %(macrodef *rows): return _declaration_macro(c, rows, 0);
     case %(src (source ?path ?begin ?end) ?node):
-      return %(src (source ${_declaration_path(path, 0)} $begin $end)
-        ${c.freeze_declaration_syntax(node)});
+      return %(src (source $(_declaration_path(path, 0)) $begin $end)
+        $(c.freeze_declaration_syntax(node)));
     case %(at ?(int origin) ?node): return _freeze_origin(c, origin, node);
   }
   return _freeze_rows(c, syntax);
@@ -34,19 +34,19 @@ static Var _freeze_leaf(Var syntax) {
   if (syntax is <symbol> && !syntax.symbol())
     return %(declaration-empty-symbol);
   if (syntax.is_atom() && !Atom.bare_spelling(syntax.str()))
-    return %(declaration-atom ${syntax.str()});
+    return %(declaration-atom $(syntax.str()));
   if (syntax is not <token>) return syntax;
   Token token = syntax;
-  return %(declaration-token ${token.type.str()} ${token.text}
-            ${token.line} ${token.col} ${token.len} ${token.pos});
+  return %(declaration-token $(token.type.str()) $(token.text)
+            $(token.line) $(token.col) $(token.len) $(token.pos));
 }
 
 // An origin index freezes as the location it names in this parse.
 static List _freeze_origin(Compiler c, int origin, Var node) {
   List location = c.origin_location(origin);
-  if (!location) return %(at m-origin ${c.freeze_declaration_syntax(node)});
-  return %(declaration-origin ${_declaration_location(location, 0)}
-            ${c.freeze_declaration_syntax(node)});
+  if (!location) return %(at m-origin $(c.freeze_declaration_syntax(node)));
+  return %(declaration-origin $(_declaration_location(location, 0))
+            $(c.freeze_declaration_syntax(node)));
 }
 
 // A List whose head is a marker is escaped, so thawing keeps its value.
@@ -58,7 +58,7 @@ static List _freeze_rows(Compiler c, List syntax) {
                 declaration-token declaration-origin declaration-list
                 declaration-cache declaration-cache-binding
                 declaration-binding) *):
-      return %(declaration-list @{rows.list_free()});
+      return %(declaration-list @(rows.list_free()));
   return rows.list_free();
 }
 
@@ -77,8 +77,8 @@ Var Compiler.thaw_declaration_syntax(Compiler c, Var syntax) {
     case %(declaration-list *rows): return _thaw_rows(c, rows);
     case %(macrodef *rows): return _declaration_macro(c, rows, 1);
     case %(src (source ?path ?begin ?end) ?node):
-      return %(src (source ${_declaration_path(path, 1)} $begin $end)
-        ${c.thaw_declaration_syntax(node)});
+      return %(src (source $(_declaration_path(path, 1)) $begin $end)
+        $(c.thaw_declaration_syntax(node)));
     case %(declaration-void): return void;
     case %(declaration-empty-symbol): return (Symbol) 0;
     case %(declaration-atom ?spelling): return Atom.intern(spelling);
@@ -139,20 +139,20 @@ static List _thaw_origin(Compiler c, List location, Var node) {
            (position ?position)):
       c.origins.push(%(source $file $line $column $length $position));
   int occurrence = c.origins.len();
-  return %(at $occurrence ${c.thaw_declaration_syntax(node)});
+  return %(at $occurrence $(c.thaw_declaration_syntax(node)));
 }
 
 static List _declaration_macro(Compiler c, List rows, int thaw) {
   Array out = [];
   foreach (List row in rows) out.push(_macro_row(c, row, thaw));
-  return %(macrodef @{out.list_free()});
+  return %(macrodef @(out.list_free()));
 }
 
 static List _macro_row(Compiler c, List row, int thaw) {
   match (row) {
     case %(origin ?location):
-      return %(origin ${_declaration_location(location, 0)});
-    case %(file ?path): return %(file ${Compiler.portable_path(path)});
+      return %(origin $(_declaration_location(location, 0)));
+    case %(file ?path): return %(file $(Compiler.portable_path(path)));
   }
   return thaw ? c.thaw_declaration_syntax(row)
               : c.freeze_declaration_syntax(row);
@@ -163,7 +163,7 @@ static List _declaration_location(List location, int thaw) {
   foreach (List row in location) {
     match (row)
       case %(file ?path):
-        row = %(file ${_declaration_path(path, thaw)});
+        row = %(file $(_declaration_path(path, thaw)));
     rows.push(row);
   }
   return rows.list_free();

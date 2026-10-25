@@ -54,7 +54,7 @@ static typedef struct ReloadTypes {
 } ReloadTypes;
 
 static void _changed(String detail) {
-  raise %(repl (reason ${detail + "; start a new session"}));
+  raise %(repl (reason $(detail + "; start a new session")));
 }
 
 static Var _anonymous_family(List key) {
@@ -117,7 +117,7 @@ static Map _stable_types(Compiler c, Map visible, Map symbols) {
       match (key) case %(?kind ?name *tail): {
         if (name != pair.car()) continue;
         Var replacement;
-        if (symbols.try_get(%($kind ${pair.cadr()} @tail), replacement))
+        if (symbols.try_get(%($kind $(pair.cadr()) @tail), replacement))
           _pair_types(value, replacement, types);
       }
   }
@@ -152,7 +152,7 @@ static void _check_type_rows(Map before, Map after) {
       case %(?name "layout-attribute"): family = %(typedef $name);
     }
     if (family && family in after && !(key in after))
-      raise %(repl (reason ${%"conflicting declaration: ${key.repr()}"}));
+      raise %(repl (reason $(%"conflicting declaration: $(key.repr())")));
   }
 }
 
@@ -175,7 +175,7 @@ static void _check_names(
     if (%($name) in visible || name in session.names ||
         name.startswith("__repl_") ||
         session.evaluator.try_get(name, existing))
-      raise %(repl (reason ${%"name already defined: $name"}));
+      raise %(repl (reason $(%"name already defined: $name")));
   }
   foreach (Var (key, value), symbols) {
     Var existing;
@@ -185,11 +185,11 @@ static void _check_names(
       if (name in names || name.startswith("__repl_") ||
           (entry && entry.car() != <type>) ||
           (!entry && session.evaluator.try_get(name, existing)))
-        raise %(repl (reason ${%"name already defined: $name"}));
+        raise %(repl (reason $(%"name already defined: $name")));
     }
     if (file && key in file.symbols) continue;
     if (visible.try_get(key, existing) && !existing.equal(value))
-      raise %(repl (reason ${%"conflicting declaration: ${key.repr()}"}));
+      raise %(repl (reason $(%"conflicting declaration: $(key.repr())")));
   }
   _check_type_rows(visible, symbols);
   _check_type_rows(symbols, visible);
@@ -217,7 +217,7 @@ static void _check_replacement(
     }
     Var replacement;
     if (symbols.try_get(key, replacement) && !declaration.equal(replacement))
-      _changed(%"declaration changed: ${key.repr()}");
+      _changed(%"declaration changed: $(key.repr())");
   }
 }
 
@@ -261,7 +261,7 @@ static List _check_removed(
     }
     else {
       if (!retiring && family && !family.equal(key) && family in published)
-        _changed(%"declaration changed: ${key.repr()}");
+        _changed(%"declaration changed: $(key.repr())");
       dropped[key] = 1;
     }
     if (name && name in session.names && !(name in names)) {
@@ -317,7 +317,7 @@ static void _check_type_unreferenced(ReplSession session, String name) {
     if (!_mentions_type(declaration, name)) continue;
     Array declared = auto [];
     _type_submission_names(declaration, declared);
-    _referred(%"$name is used by prompt type ${declared[0]}");
+    _referred(%"$name is used by prompt type $(declared[0])");
   }
 }
 
@@ -503,7 +503,7 @@ static Var _helper_run(
     List failure = NULL;
     foreach (List entry, c.diagnostics()) failure = entry;
     c.diagnostics.release(hold, 0);
-    raise %(repl (reason ${_call_failure(c, call.name, result, failure)}));
+    raise %(repl (reason $(_call_failure(c, call.name, result, failure))));
   }
   c.diagnostics.release(hold, 1);
   return value;
@@ -540,8 +540,8 @@ static Var _call(Func function, const FuncArg *argv) {
   List parameter = parameters;
   for (int i = 0; i < count; i++, parameter = parameter.cdr()) {
     if (_is_record(c, parameter.car()))
-      raise %(repl (reason ${call.name + " failed: record values cannot "
-                                             "cross the helper boundary"}));
+      raise %(repl (reason $(call.name + " failed: record values cannot "
+                                             "cross the helper boundary")));
     arguments.push(x2c_func_value_argument(function, argv, i, <var>));
   }
   List problem = datum_result_problem(arguments, {});
@@ -568,7 +568,7 @@ static List _object_adapter(
   Compiler c = session.compiler;
   Type result = signature.apply();
   Type type = %((func (("List"))) @result);
-  String hidden = %"__repl_call_${session.accessors.len()}";
+  String hidden = %"__repl_call_$(session.accessors.len())";
   c.sym.define_global(%($hidden), type);
   List binding = c.sym.resolve_global(%($hidden), NULL);
   LoadedCall call = {.session = session, .file = file, .name = name};
@@ -594,9 +594,9 @@ static List _accessor(
   for (int i = 0; i < dimensions; i++) parameters.push(%(long long));
   if (setter) { parameters.push(bridge); parameters.push(%(int)); }
   if (!parameters.len()) parameters.push(%(void));
-  Type type = %((func ${parameters.list()}) @bridge);
+  Type type = %((func $(parameters.list())) @bridge);
   String request = (setter ? "set global " : "get global ") + name;
-  String hidden = %"__repl_global_${session.accessors.len()}";
+  String hidden = %"__repl_global_$(session.accessors.len())";
   c.sym.define_global(%($hidden), type);
   List binding = c.sym.resolve_global(%($hidden), NULL);
   LoadedCall call = {.session = session, .file = file, .name = request};
@@ -619,7 +619,7 @@ static void _publish_globals(
         ? _accessor(session, file, path, bridge, dimensions, 1) : NULL;
       paths[path] = %($get $set);
     }
-    session.names[name] = %(global (source ${file.path}) $paths);
+    session.names[name] = %(global (source $(file.path)) $paths);
   }
 }
 
@@ -740,8 +740,8 @@ ReplResult ReplSession.load(
       if (gone) removed.push(%($path $gone));
     }
     if (retired)
-      removed.push(%(${retired.path}
-        ${_check_removed(session, retired, published, 1, dropped)}));
+      removed.push(%($(retired.path)
+        $(_check_removed(session, retired, published, 1, dropped))));
     helper.retain_executable();
     // Declaration inspection may have called meta code. Runtime starts fresh.
     helper.restart();
@@ -758,7 +758,7 @@ ReplResult ReplSession.load(
   }
   catch %((!or not-found io-fail) *detail): {
     result.status = <rejected>;
-    result.message = %"cannot retain compiled helper: ${detail.repr()}";
+    result.message = %"cannot retain compiled helper: $(detail.repr())";
     return result;
   }
   List kept = _remove(session, removed, dropped, retired);

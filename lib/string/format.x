@@ -40,7 +40,7 @@ static macro Expression $reason.character_nul() =>
   "%c cannot produce an embedded NUL";
 static macro Expression $reason.string() => "string conversion failed";
 static macro Expression $reason.value() => "value conversion failed";
-static macro Expression $reason.range(Expr $label) => %"${$label} exceeds int range";
+static macro Expression $reason.range(Expr $label) => %"$($label) exceeds int range";
 
 // representation
 
@@ -338,5 +338,5 @@ static void _fail(Format &f, String reason) {
    conversion nested. */
 static void _nested(Format &f, String reason, Var code, List details) {
   List cause = cons(code, details);
-  raise %(format (offset ${f.offset}) (reason $reason) (cause $cause));
+  raise %(format (offset $(f.offset)) (reason $reason) (cause $cause));
 }

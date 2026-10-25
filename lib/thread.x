@@ -574,7 +574,7 @@ void Thread.finish_all(Array pending) {
       pending.len());
     return;
   }
-  raise %(join-fail (errors ${failures.reverse()}));
+  raise %(join-fail (errors $(failures.reverse())));
 }
 
 // synchronous callable batches

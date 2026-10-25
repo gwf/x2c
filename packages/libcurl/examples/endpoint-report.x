@@ -17,7 +17,7 @@ static void summarize(CurlResponse response) {
   long code = response.response_code(), sent = response.upload_size();
   size_t received = response.body_size();
   String timing = response.elapsed_us() < BUDGET_US ? "in budget" : "late";
-  printf("%s", %"  $code ${response.effective_url()}\n");
+  printf("%s", %"  $code $(response.effective_url())\n");
   printf("%s", %"  $received bytes in, $sent out, $timing\n");
 }
 
@@ -28,9 +28,9 @@ static void survey(CurlBatch batch, int index, String path) {
     summarize(response);
     int number = 0;
     foreach(CurlResponseBlock block, response.blocks()) {
-      printf("%s", %"  block $number: ${block.status_line()}\n");
+      printf("%s", %"  block $number: $(block.status_line())\n");
       foreach(CurlHeader header, block.headers())
-        printf("%s", %"    ${header.line()}\n");
+        printf("%s", %"    $(header.line())\n");
       number++;
     }
   }
@@ -74,14 +74,14 @@ int main(int argc, char **argv) {
   CurlResponse accepted = auto easy.body("application/json", job)
     .request("POST", base + "/echo");
   printf("%s", "POST /echo\n");
-  printf("%s", %"  ${accepted.text()}\n");
+  printf("%s", %"  $(accepted.text())\n");
   summarize(accepted);
 
   /*  The signing key needs credentials, which libcurl offers up front. */
   CurlResponse key = auto easy.basic_auth("user", "s3cret")
     .get(base + "/secret");
   printf("%s", "GET /secret\n");
-  printf("%s", %"  ${key.response_code()} ${key.text()}\n");
+  printf("%s", %"  $(key.response_code()) $(key.text())\n");
 
   /*  A search term with a space, an ampersand, and a slash in it only
       survives the round trip percent-encoded.
@@ -91,7 +91,7 @@ int main(int argc, char **argv) {
     base + "/search?q=" + CurlEasy.escape(term)
   );
   printf("%s", "GET /search\n");
-  printf("%s", %"  ${found.text()}\n");
+  printf("%s", %"  $(found.text())\n");
 
   /*  The callback receives copied chunks and ordinary x2c state. It never
       owns a native buffer, and the response still retains status and headers.
@@ -100,7 +100,7 @@ int main(int argc, char **argv) {
   CurlResponse observed = auto easy.max_body(32)
     .stream(base + "/download", streamed, count_chunk);
   printf("%s", "GET /download stream\n");
-  printf("%s", %"  ${streamed[0]} bytes passed to callback\n");
+  printf("%s", %"  $(streamed[0]) bytes passed to callback\n");
 
   /*  The artifact goes straight to disk as it arrives, so the survey's body
       limit does not apply and nothing large is ever held in memory.
@@ -108,6 +108,6 @@ int main(int argc, char **argv) {
   CurlResponse fetched = auto easy.max_body(32)
     .download(base + "/download", artifact);
   printf("%s", "GET /download\n");
-  printf("%s", %"  ${fetched.body_size()} bytes written to $artifact\n");
+  printf("%s", %"  $(fetched.body_size()) bytes written to $artifact\n");
   return 0;
 }

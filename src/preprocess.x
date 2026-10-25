@@ -163,11 +163,11 @@ static void _directive(ArmScan &s, Token token, size_t i) {
   int conditional = kind == <open> || (kind && s.stack.len());
   if (kind == <open>)
     s.stack.push(
-      %(${++s.serial} 0 ${Compiler.preproc_open_state(token.text)}));
+      %($(++s.serial) 0 $(Compiler.preproc_open_state(token.text))));
   else if (kind == <branch> && s.stack.len()) {
     Var (id, arm, state) = s.stack[-1];
     Var branch = Compiler.preproc_branch_state(state);
-    s.stack[-1] = %($id ${arm.integer() + 1} $branch);
+    s.stack[-1] = %($id $(arm.integer() + 1) $branch);
   }
   else if (kind == <close> && s.stack.len()) s.stack.take_last();
   else if (!s.hidden) _note_layout_macro(s, token.text);
@@ -291,7 +291,7 @@ List Compiler.leading_preproc(Compiler c) {
   Token base = c.tokenizer.tokens, token = c.token;
   while (--token >= base) {
     if (token.type == <preproc>)
-      noncode = cons(%( preproc ${token.text} ), noncode);
+      noncode = cons(%( preproc $(token.text) ), noncode);
     else if (token.type != <space> && token.type != <comment>) break;
   }
   return noncode;
@@ -415,7 +415,7 @@ List Compiler.preproc_track_arms(List arms, String text) {
   if (kind == <open>) return cons(%((preproc $text)), arms);
   if (!arms) return arms;
   if (kind == <branch>)
-    return cons(%(@{arms.car()} (preproc $text)), arms.cdr());
+    return cons(%(@(arms.car()) (preproc $text)), arms.cdr());
   return kind == <close> ? arms.cdr() : arms;
 }
 

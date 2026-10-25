@@ -34,7 +34,7 @@ List Compiler.lift_lambda_types(Compiler c, List function) {
           (!bindings || bindings === %((bind () ())));
         if (!anonymous_member &&
             (type.is_aggregate_tag_body() || type.is_enum_tag_body())) {
-          definitions[%(${type.car()} ${type.cadr()})] = type;
+          definitions[%($(type.car()) $(type.cadr()))] = type;
           ordered = cons(type, ordered);
         }
       }
@@ -48,13 +48,13 @@ List Compiler.lift_lambda_types(Compiler c, List function) {
   $ast.walk(function.cadddr(), node) {
     match (node) {
       case %((!or struct union enum) ? ?): {
-        List tag = %(${node.car()} ${node.cadr()});
+        List tag = %($(node.car()) $(node.cadr()));
         if (tag in needed) replaced[(void *) node] = tag;
       }
       case %(declare ?(Type base) (bindings *bindings)): {
         Type type = base.base_type();
         if (!type.is_aggregate() && !type.is_enum()) continue;
-        List tag = %(${type.car()} ${type.cadr()});
+        List tag = %($(type.car()) $(type.cadr()));
         if (tag in needed &&
             (!bindings || bindings === %((bind () ()))))
           replaced[(void *) node] = %(seq);
@@ -65,13 +65,13 @@ List Compiler.lift_lambda_types(Compiler c, List function) {
   int public = signature.is_inline() && !signature.is_static();
   Array declarations = [];
   foreach (Type type in ordered)
-    if (%(${type.car()} ${type.cadr()}) in needed) {
+    if (%($(type.car()) $(type.cadr())) in needed) {
       Type body = (Type) Ast.rewrite_children(
         (Ast) type, %!(List child) => Ast.replace_nodes(child, replaced));
       declarations.push(_lambda_type_declaration(c, body, public));
     }
-  return %(seq @{declarations.list_free()}
-           ${Code.bound(Ast.replace_nodes(function, replaced), NULL)});
+  return %(seq @(declarations.list_free())
+           $(Code.bound(Ast.replace_nodes(function, replaced), NULL)));
 }
 
 /* Finds referenced definitions and their dependencies. Emission retains
@@ -81,7 +81,7 @@ static void _lambda_needed_types(
   List node;
   $ast.walk(syntax, node)
     match (node) case %((!or struct union enum) ?name *): {
-      List tag = %(${node.car()} $name);
+      List tag = %($(node.car()) $name);
       Var definition;
       if (!(tag in needed) && definitions.try_get(tag, definition)) {
         needed[tag] = 1;
@@ -95,9 +95,9 @@ static void _lambda_needed_types(
 static Code _lambda_type_declaration(Compiler c, Type type, int public) {
   List name = type.cadr();
   String role = "lambda_type";
-  if (public) role = %"lambda_type_${Path.identifier_hash(c.filename)}";
+  if (public) role = %"lambda_type_$(Path.identifier_hash(c.filename))";
   List alias = c.sym.introduce(c.fresh_name(role));
-  c.set_fact(%(ntype $alias), %(${type.car()} $name));
+  c.set_fact(%(ntype $alias), %($(type.car()) $name));
   Type base = public ? type : cons(<static>, type);
   Code declaration = %(typedef $base (bindings (bind $alias ())));
   if (name.car() != <gensym>)
@@ -105,7 +105,7 @@ static Code _lambda_type_declaration(Compiler c, Type type, int public) {
   if (type.is_enum())
     foreach (List member in type.caddr()) {
       List binding = member.car() == <op> ? member.caddr() : member;
-      c.set_fact(%(emitted $binding), c.fresh_name(%"${role}_enumerator"));
+      c.set_fact(%(emitted $binding), c.fresh_name(%"$(role)_enumerator"));
     }
   return Code.bound(declaration, NULL);
 }
@@ -121,7 +121,7 @@ static macro Stmt $fail.lambdas_param_ident(Expr $c, Expr $site) {
 static macro Stmt $fail.lambdas_ident_untyped(
   Expr $c, Expr $origin, Expr $spelling) {
   $c.report_error(
-    <type>, %"identifier '${$spelling}' has no semantic type",
+    <type>, %"identifier '$($spelling)' has no semantic type",
     $origin, NULL);
 }
 
@@ -129,14 +129,14 @@ static macro Stmt $fail.lambdas_capture_enclosing(
   Expr $c, Expr $site, Expr $original) {
   $c.report_error(
     <type>, "reference capture requires an enclosing reference capture",
-    $site, %("binding: ${Ast.binding_spelling($original)}"));
+    $site, %("binding: $(Ast.binding_spelling($original))"));
 }
 
 static macro Stmt $fail.lambdas_capture_ref(
   Expr $c, Expr $site, Expr $binding) {
   $c.report_error(
     <type>, "captured value requires 'using &name' for reference access",
-    $site, %("binding: ${Ast.binding_spelling($binding)}"));
+    $site, %("binding: $(Ast.binding_spelling($binding))"));
 }
 
 /* lambda literals
@@ -167,7 +167,7 @@ List Compiler.parse_lambda_literal(Compiler c) {
     c.begin_lambda_captures(references.list_free(), NULL);
     c.sym.push_scope(params);
     List body = _parse_lambda_body(c);
-    List ftype = %((func ${c.lambda_param_types(entries)}) "Var");
+    List ftype = %((func $(c.lambda_param_types(entries))) "Var");
     List captures = c.end_lambda_captures();
     _check_lambda_captures(c, body);
     if (c.macro_holes) captures = prescribed.list_free();
@@ -376,7 +376,7 @@ static void _prescribe(
           else {
             Type global_type = NULL;
             List global = c.sym.resolve_global(
-              %(${Ast.binding_spelling(binding)}), global_type);
+              %($(Ast.binding_spelling(binding))), global_type);
             if (global == binding) source = global_type;
           }
         }
@@ -434,10 +434,10 @@ static List _plain_lambda(
   List node = _lambda_node(body, NULL, params);
   if (type === %(<macro-expr>))
     type = supplied ? %("Func")
-         : %((func ${c.lambda_param_types(params)}) "Var");
+         : %((func $(c.lambda_param_types(params))) "Var");
   if (type !== %("Func") || c.meta_body)
     return c.rebuild_expression(type, node);
-  Type signature = %((func ${c.lambda_param_types(params)}) "Var");
+  Type signature = %((func $(c.lambda_param_types(params))) "Var");
   return c.lift_func_expression(c.rebuild_expression(signature, node));
 }
 
@@ -604,7 +604,7 @@ static List _record(
   _inherit_spelling(c, k.binding, captured);
   if (reference) c.set_fact(%(reference-param $captured), 1);
   else c.set_fact(%(lambda-snapshot $captured), 1);
-  List order = %(lambda-order ${k.scope});
+  List order = %(lambda-order $(k.scope));
   c.set_fact(order, cons(row, k.facts.getdefault(order, %())));
   return row;
 }

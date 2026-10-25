@@ -159,7 +159,7 @@ static List _path(Trace trace, int found, int n, int m) {
    (`to_x`, `to_y`) to (`x`, `y`). */
 static List _diagonal(List path, int x, int y, int to_x, int to_y) {
   for (; x > to_x && y > to_y; x--, y--)
-    path = cons(%(same ${x - 1} ${y - 1}), path);
+    path = cons(%(same $(x - 1) $(y - 1)), path);
   return path;
 }
 

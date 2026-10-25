@@ -34,7 +34,7 @@ static double reverse_user(double x) {
 meta static List ad_twin(List fn) {
   match (fn) {
     case %(function ?spec (bind (binding ?id ?name) ?rest) ?body):
-      return %(function $spec (bind (binding $id ${name + "_ck"}) $rest)
+      return %(function $spec (bind (binding $id $(name + "_ck")) $rest)
                  $body);
   }
   return fn;

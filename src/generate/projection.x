@@ -35,7 +35,7 @@ module List _header_and_source(
     .c = c, .header = [], .pending = [], .open = [], .forwarded = {},
     .included = {}, .statics = {}, .source_groups = {}};
   foreach (Ast node in ast) _add(p, node);
-  return %(${_finish(p)} ${_source_projection(c, ast, inline_bodies)});
+  return %($(_finish(p)) $(_source_projection(c, ast, inline_bodies)));
 }
 
 /* The unit consumes its declarations where they were written, independently
@@ -50,7 +50,7 @@ static List _source_projection(
       case %(preproc ?(String content)):
         if (_is_pragma_once(content)) continue;
       case %(import ?unit *):
-        node = %(preproc "#include \"${unit.string()}.x\"");
+        node = %(preproc "#include \"$(unit.string()).x\"");
       case %(function ?type (!set ?declarator (bind ?binding *)) ?body): {
         type = _with_attributes(c.semantic_binding_facts(), type, binding);
         type = _noreturn(type, declarator, body);
@@ -87,7 +87,7 @@ static void _add(Partition &p, Ast node) {
       _add_alias(p, alias, type);
     /* The public projection exposes the imported package's types. */
     case %(import ?unit *):
-      p.header.push(%(preproc "#include \"${unit.string()}.x\""));
+      p.header.push(%(preproc "#include \"$(unit.string()).x\""));
     case %(preproc ?content): _add_preproc(p, node, content);
     default: _publish_node(p, node);
   }
@@ -171,7 +171,7 @@ static void _add_typedef(Partition &p, List node) {
   Type core = type.base_type();
   int body = 0;
   match (core) case %((!or struct union enum) ?name (*)):
-    body = p.c.publishes_type_family(%(${core.car()} $name));
+    body = p.c.publishes_type_family(%($(core.car()) $name));
   if (type.is_static() && !_publishes_typedefs(p, _typedef_names(node))) {
     _keep(p);
     if (body) _publish_node(p, %(declare $core (bindings (bind () ()))));
@@ -196,10 +196,10 @@ static int _publishes_typedefs(Partition &p, List names) {
 static List _without_static_type(List node) {
   match (node) {
     case %(typedef ?type ?bindings):
-      return %(typedef ${_without_static(type)} $bindings);
+      return %(typedef $(_without_static(type)) $bindings);
     case %(declare ?type (!set ?bindings (bindings *))):
       if (!_declared_bindings(bindings))
-        return %(declare ${_without_static(type)} $bindings);
+        return %(declare $(_without_static(type)) $bindings);
   }
   return node;
 }
@@ -212,7 +212,7 @@ static List _without_static(List type) =>
    groups open around it. A promoted include fills the same groups in the
    header, which then keeps them, so this changes no header placement. */
 static void _hold(Partition &p, List names, List node) {
-  p.header.push(%(pending ${p.pending.len()}));
+  p.header.push(%(pending $(p.pending.len())));
   p.pending.push(%($names $node));
   foreach (Var group in p.open) p.source_groups[group] = 1;
 }
@@ -316,7 +316,7 @@ static void _add_function(
 static List _with_attributes(Map facts, List type, Var binding) {
   Var attributes;
   if (!facts.try_get(%(attributes $binding), attributes)) return type;
-  return %(@{attributes.list()} @type);
+  return %(@(attributes.list()) @type);
 }
 
 /* A static definition stays in the source. A public one publishes its
@@ -354,7 +354,7 @@ static List _header_function(Type type, List declarator, List body) {
 }
 
 module List _prototype(List type, List declarator) =>
-  %(declare $type ${Ast.prototype_declarator(declarator)});
+  %(declare $type $(Ast.prototype_declarator(declarator)));
 
 /* A public prototype that names `struct tag` before the header declares it
    would give the tag prototype scope in C. A forward declaration of each
@@ -397,7 +397,7 @@ static void _add_declaration(
   }
   if (type.is_static() && _body_tag(type)) {
     List core = type.base_type();
-    List family = %(${core.car()} ${core.cadr()});
+    List family = %($(core.car()) $(core.cadr()));
     if (p.c.publishes_type_family(family))
       _publish_node(p, %(declare $core (bindings (bind () ()))));
     else _keep(p);
@@ -446,7 +446,7 @@ static String _body_tag(Type type) {
 
 /* `type` with its tag body `core` replaced by the bare tag `name`. */
 static List _tag_only(Type type, Type core, Var name) =>
-  type.list()[:type.len() - core.len()].append(%(${core.car()} $name));
+  type.list()[:type.len() - core.len()].append(%($(core.car()) $name));
 
 /* A public file-scope object has one definition, in the source, and an
    `extern` declaration in the header. Defining it in the header would give
@@ -482,10 +482,10 @@ static List _runtime_without_const(Compiler c, List bindings) {
     match (declarator)
       case %(op = (bind ?name (!set ?mods (const *))) ?value)
         if (c.static_value_is_runtime(value, NULL)):
-        declarator = %(bind $name ${_without_const(mods)});
+        declarator = %(bind $name $(_without_const(mods)));
     declarators.push(declarator);
   }
-  return %(bindings @{declarators.list_free()});
+  return %(bindings @(declarators.list_free()));
 }
 
 /* Objects and functions have linkage; a bare type declaration does not. */
@@ -524,7 +524,7 @@ static List _header_declaration(List node, Type type, List bindings) {
       match (declarator) case %(op = ?bind ?): declarator = bind;
       declarators.push(declarator);
     }
-    return %(declare $type (bindings @{declarators.list_free()}));
+    return %(declare $type (bindings @(declarators.list_free())));
   }
   if (type.is_enum_tag_body() || type.is_aggregate_tag_body())
     return %(declare $type (bindings (bind () ())));
@@ -550,7 +550,7 @@ static void _add_preproc(Partition &p, List node, String content) {
 }
 
 static void _mark_conditional(Partition &p, List node, Symbol kind) {
-  p.header.push(%(conditional ${p.open[-1]} $kind $node));
+  p.header.push(%(conditional $(p.open[-1]) $kind $node));
   if (kind == <close>) p.open.take_last();
 }
 
@@ -676,7 +676,7 @@ static List _typedef_forward(Type type, List bindings) {
   Type core = type.base_type();
   match (core)
     case %((!or struct union) ?(String name) (fields *)):
-      return %(typedef ${_tag_only(type, core, name)} $bindings);
+      return %(typedef $(_tag_only(type, core, name)) $bindings);
   return NULL;
 }
 

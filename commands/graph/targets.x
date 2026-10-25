@@ -13,7 +13,7 @@ Map project_function_targets(Compiler compiler, List ast, String path) {
              (bind (!set ?binding (binding ? ?)) ?)
              ?):
         definitions[binding] = %(
-          target $path ${compiler.emitted_binding_name(binding)}
+          target $path $(compiler.emitted_binding_name(binding))
         );
   return definitions;
 }
@@ -42,7 +42,7 @@ List project_binding_target(
   Compiler compiler, Map definitions, List binding) {
   Var local;
   if (definitions.try_get(binding, local)) return local;
-  return %(public ${compiler.emitted_binding_name(binding)});
+  return %(public $(compiler.emitted_binding_name(binding)));
 }
 
 /** The node beneath expression, parenthesis, and location shells. */

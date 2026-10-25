@@ -114,7 +114,7 @@ static String _module(
   (String hfile, String header, String cfile, String source) = code;
   String key = String.sha256(
     %"$header\n$source\n$stamp\n" +
-    %"${Compiler.meta_cc_identity(meta_cc)}\n$meta_include_dir");
+    %"$(Compiler.meta_cc_identity(meta_cc))\n$meta_include_dir");
   String directory = %"$root/meta/$key";
   String module = %"$directory/group.module";
   if (Path.is_file(module)) return module;
@@ -127,7 +127,7 @@ static String _module(
    moves into place. */
 static String _build_module(String directory, String module, List code) {
   (String hfile, String header, String cfile, String source) = code;
-  String output = %"$module.${"%ld".printf((long) getpid())}";
+  String output = %"$module.$("%ld".printf((long) getpid()))";
   Path.make_dirs(directory);
   Path.write_text(%"$directory/$hfile", header);
   Path.write_text(%"$directory/$cfile", source);
@@ -135,7 +135,7 @@ static String _build_module(String directory, String module, List code) {
   List arguments = linker.module_action(
     output,
     %("-fsigned-char" "-fPIC" "-O0" "-iquote" $directory
-      "-iquote" $meta_include_dir ${%"$directory/$cfile"}),
+      "-iquote" $meta_include_dir $(%"$directory/$cfile")),
     x2c_get_executable()).arguments;
   String failure = Compiler.meta_cc_run(arguments, directory);
   if (!failure) Path.move_to(output, module);

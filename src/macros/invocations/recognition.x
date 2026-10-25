@@ -16,7 +16,7 @@ List Compiler.publish_macro_definition_node(Compiler c, List node) {
   if (c.shallow && !c.macro_holes &&
       !node.assoc(<static>).equal(1) && !node.assoc(<local>).int())
     _record_compile_time_effect(
-      c, %(compile-time macrodef ${c.freeze_declaration_syntax(node)}),
+      c, %(compile-time macrodef $(c.freeze_declaration_syntax(node))),
       c.token);
   return node;
 }
@@ -26,7 +26,7 @@ module void _record_compile_time_effect(Compiler c, List row, Token start) {
   if (!c.shallow || c.source_private || c.macro_holes ||
       !c.sym.at_file_scope() || !c.filename) return;
   String source = Compiler.portable_path(Path.absolute(c.filename));
-  List key = %("source-node" (compile-time $source ${start.pos}));
+  List key = %("source-node" (compile-time $source $(start.pos)));
   List previous = c.sym.get(key);
   if (previous) row = %(compile-time effects $previous $row);
   c.sym.set(key, row);
@@ -119,7 +119,7 @@ Atom Compiler.parse_keyword_definition(Compiler c) {
   if (!storage)
     _record_compile_time_effect(
       c, %(compile-time keyword $alias
-        ${c.freeze_declaration_syntax(definition)}), declaration);
+        $(c.freeze_declaration_syntax(definition))), declaration);
   return alias;
 }
 
@@ -263,7 +263,7 @@ module Token _scan_name(Compiler c, String &spelling) {
       name = NULL;
       break;
     }
-    name = name ? %"$name.${token.text}" : token.text;
+    name = name ? %"$name.$(token.text)" : token.text;
     token = Token.skip_trivia(token + 1);
   } while (token.type == <.>);
   spelling = name;
@@ -404,7 +404,7 @@ module List _rebind_globals(Compiler c, List syntax) {
 static void _reference_bindings(
   Compiler c, List syntax, Map replacements) {
   match (syntax)
-    case %(expr ? ${$source_identifier_content(%(?binding))}): {
+    case %(expr ? $($source_identifier_content(%(?binding)))): {
       String spelling = NULL;
       if (Ast.try_binding(binding, NULL, spelling))
         replacements[binding] = c.sym.reference_global(%($spelling));

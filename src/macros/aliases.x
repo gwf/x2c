@@ -36,13 +36,13 @@ static macro Stmt $fail.macros_alias_end(Expr $c, Expr $site) =>
 static macro Stmt $problem.macros_alias_included(
   Expr $c, Expr $site, Expr $name) =>
   $c.report_problem(
-    <parse>, %"declaration '${$name}' is already bound",
-    $site, %("this include aliases '${$name}'"));
+    <parse>, %"declaration '$($name)' is already bound",
+    $site, %("this include aliases '$($name)'"));
 
 static macro Stmt $fail.macros_unalias_missing(
   Expr $c, Expr $site, Expr $name) =>
   $c.report_error(
-    <parse>, %"no alias '${$name}' to remove in this scope",
+    <parse>, %"no alias '$($name)' to remove in this scope",
     $site, %("an alias of an enclosing scope ends with that scope"));
 
 static macro Stmt $fail.macros_unalias_governed(Expr $c, Expr $site) =>
@@ -152,7 +152,7 @@ List Compiler.parse_alias_statement(Compiler c, int block) {
 }
 
 static void _define_local(Compiler c, AliasHead &head) {
-  if (%(${head.name}) in c.sym.current_symbols())
+  if (%($(head.name)) in c.sym.current_symbols())
     $fail.parse_decl_bound(c, head.start, head.name);
   c.sym.define_alias(head.name, head.expression);
 }
@@ -212,7 +212,7 @@ static List _wrapped_forms(Compiler c, int skip_body) {
     else if (form) forms.push(form);
   }
   c.expect(<"}">);
-  return %(seq @{forms.list_free()});
+  return %(seq @(forms.list_free()));
 }
 
 /** Parses an alias among the members of an aggregate or enum body, where
@@ -259,19 +259,19 @@ static void _declare(Compiler c, AliasHead &head, int collecting) {
   int depth = c.sym.scope_count(), level = c.alias_level;
   int file_scope = !level && c.sym.at_file_scope();
   if (collecting && file_scope && !c.interface_provider &&
-      c.sym.get(%(${head.name})))
+      c.sym.get(%($(head.name))))
     $fail.parse_decl_bound(c, head.start, head.name);
   Var key = head.storage ? _private_key(c, head.name) : head.name;
-  _install(c, key, %(declared $depth $level ${head.expression}));
+  _install(c, key, %(declared $depth $level $(head.expression)));
   if (file_scope && !head.storage)
     _record_compile_time_effect(
-      c, %(compile-time alias ${head.name}
-        ${c.freeze_declaration_syntax(head.expression)}), head.start);
+      c, %(compile-time alias $(head.name)
+        $(c.freeze_declaration_syntax(head.expression))), head.start);
 }
 
 static List _private_key(Compiler c, String name) {
   String file = c.file_prefix();
-  return %(${file ? file : ""} $name);
+  return %($(file ? file : "") $name);
 }
 
 /* A public alias is keyed by its name alone; a `static` one by its file's
@@ -440,14 +440,14 @@ List Compiler.alias_expression(Compiler c) {
   if (entry) expression = _visible(c, table, key, entry, scope);
   if (!expression && c.sym.has_aliases() &&
       scope >= c.sym.base_scope_count())
-    expression = c.fact(%(alias ${c.sym.lookup(symbol, NULL)}));
+    expression = c.fact(%(alias $(c.sym.lookup(symbol, NULL))));
   if (expression && !c.macro_holes) _reveal_bindings(c, expression);
   return expression;
 }
 
 static void _reveal_bindings(Compiler c, List syntax) {
   match (syntax)
-    case %(expr ? ${$source_identifier_content(%(?binding))}): {
+    case %(expr ? $($source_identifier_content(%(?binding)))): {
       c.reveal_binding(binding);
       return;
     }
@@ -462,7 +462,7 @@ static void _reveal_bindings(Compiler c, List syntax) {
 static List _visible(Compiler c, Map table, Var key, List entry, int scope) {
   match (entry) case %(imported ?frozen *shadowed): {
     List expression = _rebind_globals(c, c.thaw_declaration_syntax(frozen));
-    entry = %(declared ${c.sym.base_scope_count()} 0 $expression @shadowed);
+    entry = %(declared $(c.sym.base_scope_count()) 0 $expression @shadowed);
     table[key] = entry;
   }
   match (entry)

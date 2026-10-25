@@ -14,7 +14,7 @@ static macro Stmt $fail.literals_macro_pattern_static(
 static macro Stmt $fail.literals_insert_name(
   Expr $c, Expr $site, Expr $sigil) {
   {
-    String message = %"expected identifier after '${$sigil}'";
+    String message = %"expected identifier after '$($sigil)'";
     String hint = $sigil == <@>
       ? "use '@{...}' to splice an expression"
       : "use '${...}' to insert an expression";
@@ -47,7 +47,7 @@ List Compiler.parse_list_literal(Compiler c) {
     List head = reader_form ? reader_form : _parse_list_head(c);
     List tail = shell ? _parse_shell_tail(c) : _parse_list_tail(c);
     c.expect(<)>);
-    return %(expr ("List") ${c.literal_cell(head, tail)});
+    return %(expr ("List") $(c.literal_cell(head, tail)));
   }
 }
 
@@ -86,9 +86,9 @@ static List _parse_reader_prefix(Compiler c) {
 static List _atom_element(Compiler c, String spelling) {
   Atom atom = Atom.intern(spelling);
   List literal = atom is <symbol>
-    ? %(literal ("Symbol") $spelling ${atom.symbol()})
+    ? %(literal ("Symbol") $spelling $(atom.symbol()))
     : %(literal ("Atom") $spelling $atom);
-  List expression = %(expr ${literal.cadr()} $literal);
+  List expression = %(expr $(literal.cadr()) $literal);
   if (c.runtime_literals) return expression;
   return c.cache(%(var $expression));
 }
@@ -176,7 +176,7 @@ static Var _macro_pattern_argument(Compiler c) {
   return value;
 }
 
-/** Parses a pattern's `${$NAME(...)}`, where NAME is a macro, into its
+/** Parses a pattern's `$($NAME(...))`, where NAME is a macro, into its
     derived pattern, or returns NULL without consuming tokens. `content`
     selects the bare content, for the content position of an
     `(expr TYPE ...)` shell.
@@ -362,7 +362,7 @@ List Compiler.typed_match_pattern(Compiler c, List pattern, List types) {
   Map tags = {};
   foreach (List row in types) match (row)
     case %(?name ?type):
-      tags[Atom.intern(%"?${name}")] = c.var_tag_expression(type, c.token);
+      tags[Atom.intern(%"?$(name)")] = c.var_tag_expression(type, c.token);
   return _typed_pattern(c, pattern, tags);
 }
 

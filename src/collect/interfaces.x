@@ -158,7 +158,7 @@ static List _interface_entry(
   foreach (Var definition in definitions)
     if (definition is not <string>) return NULL;
   List entry = %(
-    ${parts.list_free()} $hash $definitions $dependencies $include_dirs);
+    $(parts.list_free()) $hash $definitions $dependencies $include_dirs);
   _retain(canonical);
   _require_retained(entry.try_own());
   _process_cache()[canonical] = entry;
@@ -226,7 +226,7 @@ module Map _read_dependencies(Compiler c, List stored) {
     source hashes are not checked.
 */
 String Compiler.prelude_interface(void) =>
-  _written_interface(_canonical_path(%"${x2c_get_root()}/lib/x2c.x"));
+  _written_interface(_canonical_path(%"$(x2c_get_root())/lib/x2c.x"));
 
 /** Returns the home-relative paths of the runtime units the prelude
     interface includes whose own interface this compiler did not write, or
@@ -282,7 +282,7 @@ String Compiler.interface_text(Compiler c) {
 static int _write_interface_entry(
   Buffer out, String canonical, List entry) {
   List record = %(
-    interface 6 ${Compiler.identity()} @{_stored_record(canonical, entry)});
+    interface 6 $(Compiler.identity()) @(_stored_record(canonical, entry)));
   /* An interface is plain data, which a loader never evaluates. */
   if (!datum_write(out, record, 0)) return 0;
   out.write_char('\n');
@@ -297,8 +297,8 @@ static List _stored_record(String canonical, List entry) {
   foreach (Var part in cached_parts)
     parts.push(_stored_part(part, identities));
   return %(
-    ${Compiler.portable_path(canonical)} $hash ${parts.list_free()}
-    $definitions ${_stored_dependencies(dependencies)} $include_dirs);
+    $(Compiler.portable_path(canonical)) $hash $(parts.list_free())
+    $definitions $(_stored_dependencies(dependencies)) $include_dirs);
 }
 
 /* Search roots and the file's package mode must match before replay. */
@@ -334,7 +334,7 @@ static Var _stored_part(Var part, Map identities) {
 module List _stored_dependencies(Map dependencies) {
   Array rows = [];
   foreach ((String path, Var hash) in dependencies)
-    rows.push(%(${Compiler.portable_path(path)} $hash));
+    rows.push(%($(Compiler.portable_path(path)) $hash));
   rows.sort();
   return rows.list_free();
 }
@@ -352,7 +352,7 @@ module List _stored_meta_hashes(Map hashes) {
 static List _renumber_bindings(List node, Map identities) {
   match (node) {
     case %(meta-hashes ?provider ?(Map hashes)):
-      return %(meta-hashes $provider ${_stored_meta_hashes(hashes)});
+      return %(meta-hashes $provider $(_stored_meta_hashes(hashes)));
   }
   String spelling = NULL;
   if (Ast.try_binding(node, NULL, spelling)) {
@@ -375,7 +375,7 @@ static List _renumber_bindings(List node, Map identities) {
 Map Compiler.linked_prelude_records(Compiler c) {
   Map records = {}, saved = {};
   foreach (String source in _linked_prelude_sources()) {
-    String canonical = _canonical_path(%"${x2c_get_root()}/$source");
+    String canonical = _canonical_path(%"$(x2c_get_root())/$source");
     saved[canonical] = _process_cache()[canonical];
     (void) _process_cache().del(canonical);
   }
@@ -385,7 +385,7 @@ Map Compiler.linked_prelude_records(Compiler c) {
   walker.filename = c.filename;
   with (interface_mirror = NULL) {
     foreach (String source in _linked_prelude_sources()) {
-      String path = %"${x2c_get_root()}/$source";
+      String path = %"$(x2c_get_root())/$source";
       String canonical = _canonical_path(path);
       Map visited = {};
       visited[canonical] = 1;

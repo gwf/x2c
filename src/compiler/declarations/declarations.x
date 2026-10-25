@@ -10,7 +10,7 @@ static macro Stmt $fail.compiler_ctor_variadic(
   Expr $c, Expr $site, Expr $name) =>
   $c.report_error(
     <type>,
-    %"'${$name}' requires an explicit variadic constructor",
+    %"'$($name)' requires an explicit variadic constructor",
     $site, NULL);
 
 module {

@@ -28,14 +28,14 @@ static Array _summary_sections(void):
   Array sections = []
   foreach String line in summary.read_text().lines():
     if line.startswith("# ") && line != "# Summary":
-      sections.push(%(${line[2:].strip(NULL)} ${[]}))
+      sections.push(%($(line[2:].strip(NULL)) $([])))
     else:
       RegexMatch found = entry.match(line)
       if found && sections.len():
         List section = sections[-1]
         section.cadr().array().push(
-          %(${found["indent"].len() / 2} ${found["title"]}
-            ${found["path"]}))
+          %($(found["indent"].len() / 2) $(found["title"])
+            $(found["path"])))
   return sections
 
 static String _page_url(String path):
@@ -89,7 +89,7 @@ static String _publish_page(String page):
     else: lines.push(line_text)
   if language:
     raise %(llms-fatal
-            (reason ${%"docs/src/$page: unterminated code fence"}))
+            (reason $(%"docs/src/$page: unterminated code fence")))
   return String.join("\n", lines.list_free()).strip(NULL) + "\n"
 
 static List _book_summary(void):
@@ -98,7 +98,7 @@ static List _book_summary(void):
   String title = divided.car(), rest = divided.caddr()
   String paragraph = rest.strip(NULL).partition("\n\n").car()
   paragraph = whitespace.replace_all(paragraph, " ").strip(NULL)
-  return %(${title.remove_prefix("# ").strip(NULL)} $paragraph)
+  return %($(title.remove_prefix("# ").strip(NULL)) $paragraph)
 
 /* Return `((path text) ...)` in the stable order used for writing and
    checking the two generated files. */
@@ -117,8 +117,8 @@ static List _render(void):
     if !entries.contains(page): missing.push(page)
   if missing.len():
     raise %(llms-fatal
-            (reason ${%"docs/src/SUMMARY.md has no entry for " +
-                    String.join(", ", missing.list_free())}))
+            (reason $(%"docs/src/SUMMARY.md has no entry for " +
+                    String.join(", ", missing.list_free()))))
 
   Array chapters = []
   foreach String page in ordered:
@@ -138,7 +138,7 @@ static List _render(void):
     Array listed = []
     foreach List row in section.cadr().array():
       (int depth, String name, String path) = row
-      String item = %"- [$name](${_page_url(path)})"
+      String item = %"- [$name]($(_page_url(path)))"
       if _optional_section(heading) || depth >= 2: optional.push(item)
       else: listed.push(item)
     if listed.len():
@@ -158,7 +158,7 @@ static List _render(void):
     "include the lines the book hides behind an expander."]
   foreach String page in chapters:
     full_lines.push("")
-    full_lines.push(%"<!-- ${_page_url(page)} -->")
+    full_lines.push(%"<!-- $(_page_url(page)) -->")
     full_lines.push("")
     full_lines.push(_publish_page(page).rstrip(NULL))
   String index_text = String.join("\n", index_lines.list_free()).rstrip(NULL)
@@ -206,7 +206,7 @@ _link = Regex.compile("(\\]\\(|^\\[[^]]+\\]:\\s*)(?<target>[^)\\s]+)")
 scheme = Regex.compile("(?i)^[a-z][a-z0-9+.-]*:")
 whitespace = Regex.compile("\\s+")
 
-String usage = %"usage: ${self.basename()} [-h] [--write | --check]\n"
+String usage = %"usage: $(self.basename()) [-h] [--write | --check]\n"
 if args.contains("-h") || args.contains("--help"):
   printf("%s\noptions:\n"
          "  -h, --help  show this help message and exit\n"

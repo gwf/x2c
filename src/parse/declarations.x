@@ -43,7 +43,7 @@ List Compiler.parse_type_operand(Compiler c, Type *type) {
   if (!c.macro_holes && _auto_storage(declaration))
     $fail.parse_auto_storage(c, c.token);
   if (type) *type = declaration.type_from_ast();
-  return %(decl @{declaration.cdr()});
+  return %(decl @(declaration.cdr()));
 }
 
 static List _declaration_group(Compiler c, int row) {
@@ -101,14 +101,14 @@ module List _declaration_types(Compiler c, List storage) {
     }
     if (!_prefix_macro_words(c, 0, trailing)) break;
   }
-  if (trailing.len()) storage = %( @{trailing.list_free()} @storage );
+  if (trailing.len()) storage = %( @(trailing.list_free()) @storage );
   List words = storage.filter(%!(item) => item is <symbol>);
   Type binding_type = c.sym.local_type(%( @words @quals @spec ));
   if (spec.is_aggregate_tag_body()) {
     Var (aggregate, tag, body) = spec;
     binding_type = %( @words @quals $aggregate $tag );
   }
-  return %( ${c.sym.local_type(%( @storage @quals @spec ))} $binding_type );
+  return %( $(c.sym.local_type(%( @storage @quals @spec ))) $binding_type );
 }
 
 /** Parses a non-function, non-typedef `Decl` macro argument.
@@ -120,7 +120,7 @@ List Compiler.parse_declaration_argument(Compiler c) {
     Array declarations = [];
     do declarations.push(c.parse_declaration_argument()); while (c.test(<,>));
     c.expect(<)>);
-    return %(seq @{declarations.list_free()});
+    return %(seq @(declarations.list_free()));
   }
   List storage = _storage_class(c);
   if (storage === %(typedef))
@@ -206,7 +206,7 @@ static int _type_name_starts(Compiler c, int require_declarator) {
   String alias = c.package_alias_spelling();
   String name = alias ? alias
               : c.package_member_spelling(c.token.text);
-  Type lookup = c.sym.get(%(${name ? name : c.token.text}));
+  Type lookup = c.sym.get(%($(name ? name : c.token.text)));
   if (lookup && !lookup.is_typedef()) return 0;
   c.next();
   if (alias) { c.next(); c.next(); }
@@ -258,7 +258,7 @@ static List _destructure_declaration(
      multi-binding declaration a `for` header already knows how to
      carry across `in`. */
   if (allow_uninitialized || c.peek(0) == <in>)
-    return %(declare $type (bindings @{_destructure_binds(bindings)}));
+    return %(declare $type (bindings @(_destructure_binds(bindings))));
   if (!c.test(<=>))
     $fail.parse_destructure_init(c, c.token);
   List source = c.parse_assignment();
@@ -321,7 +321,7 @@ static List _linked_static_base(Compiler c, List base, List declarators) {
     if (!declared.is_function() || !c.sym.is_file_static(bound.cadr()))
       return base;
   }
-  return %(static @{base.filter(%!(item) => item != <extern>)});
+  return %(static @(base.filter(%!(item) => item != <extern>)));
 }
 
 module List _finish_declaration(
@@ -388,7 +388,7 @@ static Type _self_owner_type(Compiler c, List method) {
   String source = method.car();
   Type declared = c.sym.get(%($source));
   if (declared.is_typedef())
-    return %(${_type_reference(c, 0, source)});
+    return %($(_type_reference(c, 0, source)));
   Symbol builtin = Atom.intern(source);
   return builtin.is_builtin_type() ? %($builtin) : NULL;
 }
@@ -449,7 +449,7 @@ module List _bind_declaration(
     c, tag, base, output.list_free(), preserved_self);
   if (context == <unit>) c.record_declaration_visibility(decl);
   if (c.shallow && context == <unit> && initializes)
-    return %(declaration-initialized $decl ${c.macro_stack});
+    return %(declaration-initialized $decl $(c.macro_stack));
   if (context == <block> && tag == <declare>)
     return c.finish_initializers(decl, c.token);
   return decl;
@@ -482,7 +482,7 @@ module List _bind_targets(
   foreach (Var target in targets) declarators.push(%(bind $target ()));
   List declaration = c.bind_syntax(
     %(declare $base
-        (bindings @{declarators.list_free()})),
+        (bindings @(declarators.list_free()))),
     <block>, c.return_type
   );
   match (declaration)
@@ -492,8 +492,8 @@ module List _bind_targets(
         match (binding)
           case %(bind ?name ?): bound_targets.push(name);
       return %(dstrdecl $bound_base
-               (targets @{bound_targets.list_free()})
-               ${_resolve(c, source)});
+               (targets @(bound_targets.list_free()))
+               $(_resolve(c, source)));
     }
   return _construction_error(c);
 }
@@ -511,6 +511,6 @@ module List _bind_typed_targets(
           case %(declare ?bound_base (bindings ?binding)):
             bound_parameters.push(%( param $bound_base $binding ));
       }
-  return %(dstrdecl (params @{bound_parameters.list_free()})
-           ${_resolve(c, source)});
+  return %(dstrdecl (params @(bound_parameters.list_free()))
+           $(_resolve(c, source)));
 }

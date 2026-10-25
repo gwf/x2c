@@ -5,22 +5,22 @@ static keyword loop $private.loop;
 
 module int _is_addressable(Compiler c, List expression) {
   match (expression) {
-    case %(expr ? ${$source_identifier_content(%(?binding))}): {
+    case %(expr ? $($source_identifier_content(%(?binding)))): {
       Map facts = c.semantic_binding_facts();
       Type declared = facts[%(type $binding)];
       return !(%(lambda-snapshot $binding) in facts) &&
              !declared.match(%(* register *));
     }
-    case %(expr ? ${$indexed(?receiver, ?selector)}):
+    case %(expr ? $($indexed(?receiver, ?selector))):
       return !c.sym.normalize_declared_type(receiver.cadr()).is_array() ||
              _is_addressable(c, receiver);
-    case %(expr ? ${$source_operator_content(
-        %((!quote *) ?operand))}): return 1;
-    case %(expr ? ${$source_operator_content(
-        %((!quote ->) ?receiver ?field))}): return 1;
-    case %(expr ? ${$grouped(?base)}):
+    case %(expr ? $($source_operator_content(
+        %((!quote *) ?operand)))): return 1;
+    case %(expr ? $($source_operator_content(
+        %((!quote ->) ?receiver ?field)))): return 1;
+    case %(expr ? $($grouped(?base))):
       return _is_addressable(c, base);
-    case %(expr ? ${$source_operator_content(%(. ?base ?))}):
+    case %(expr ? $($source_operator_content(%(. ?base ?)))):
       return _is_addressable(c, base);
   }
   return 0;
@@ -32,7 +32,7 @@ module void _check_dynamic_target(
   Compiler c, List target, Token origin) {
   match (target) {
     case %(expr ? (getindex ? ?)): return;
-    case %(expr ? ${$grouped(?inner)}):
+    case %(expr ? $($grouped(?inner))):
       return _check_dynamic_target(c, inner, origin);
   }
   Type type = c.sym.normalize_declared_type(target.cadr());
@@ -61,7 +61,7 @@ module List _resolve_indexed(
   // A field of a foreign struct has no x2c type; C indexes it alone.
   if (!receiver_type &&
       List.match(
-        receiver, %(expr () ${$source_operator_content(%((!or . ->) * *))})))
+        receiver, %(expr () $($source_operator_content(%((!or . ->) * *))))))
     return %(expr () (index $receiver $selector));
   $fail.expressions_index_unsupported(c, origin, receiver_type);
 }
@@ -100,12 +100,12 @@ List _x2c_nominal_getindex(Compiler c, Type type) {
   if (!type.is_typedef_name()) return NULL;
   match (type)
     case %(?(String nominal)): {
-      String source = %"${nominal}_getindex";
+      String source = %"$(nominal)_getindex";
       if (source == c.fn_name && _collection_index_type(c, type)) return NULL;
       Type signature = c.sym.get(%($source));
       match (signature)
         case %((func ($type ?)) ?):
-          return %(${c.sym.reference(%($source), NULL)} $signature);
+          return %($(c.sym.reference(%($source), NULL)) $signature);
     }
   return NULL;
 }
@@ -130,7 +130,7 @@ static List _native_index(
   // its aliases keep their protocol reading.
   if (shape.is_array() ||
       (shape.is_pointer() && !c.sym.is_string_type(type)))
-    return %(expr ${native.dereference()} (index $expr $index));
+    return %(expr $(native.dereference()) (index $expr $index));
   return NULL;
 }
 
@@ -148,9 +148,9 @@ static Type _index_native_type(Compiler c, Type native) {
 }
 
 module List _getindex(Resolve &r, List receiver, List selector) {
-  return %(expr ${r.type}
-           (getindex ${r.c.resolve_expression(receiver, r.origin)}
-                     ${r.c.resolve_expression(selector, r.origin)}));
+  return %(expr $(r.type)
+           (getindex $(r.c.resolve_expression(receiver, r.origin))
+                     $(r.c.resolve_expression(selector, r.origin))));
 }
 
 module List _slice(Resolve &r, List slice) {
@@ -162,7 +162,7 @@ module List _slice(Resolve &r, List slice) {
   List operation = source_slice_content(%($receiver $start $stop $step));
   if (r.type === %(<macro-expr>))
     operation = r.c.anchor_origin(operation, r.origin);
-  return %(expr ${receiver.cadr()} $operation);
+  return %(expr $(receiver.cadr()) $operation);
 }
 
 // member lookup
@@ -233,12 +233,12 @@ module Type _tag_typedef(Compiler c, Type aggregate) {
 
 static List _method_member(
   Compiler c, Type receiver_type, Type type, List field) {
-  String method = %"${type.base_type().car()}_${field.car()}";
+  String method = %"$(type.base_type().car())_$(field.car())";
   Type signature = c.sym.get(%($method));
   int rejected =
     c.protocol_rejects_direct_member(type, field.car().str());
   if (signature && rejected == 2) {
-    String name = %"${type.base_type().car()}.${field.car()}";
+    String name = %"$(type.base_type().car()).$(field.car())";
     String hidden = %"method '$name' is hidden by an inherited protocol";
     c.report_error(<type>,
       hidden + " conformance; adopt the protocol for this type to use it",
@@ -271,7 +271,7 @@ static List _imported_method(
   if (!packages) return NULL;
   if (packages.cdr()) return cons(<ambiguous>, packages);
 
-  String spelling = %"${packages.car()}__$method";
+  String spelling = %"$(packages.car())__$method";
   Type signature = c.sym.get_exact(%($spelling));
   List binding = c.sym.reference(%($spelling), NULL);
   signature = _receiver_relative_signature(c, binding, signature, receiver);
@@ -362,7 +362,7 @@ static void _completion_methods(
   while (type) {
     if (_method_owner(type)) {
       String owner = type.base_type().car();
-      _completion_owner_methods(c, %"${owner}_", seen, names);
+      _completion_owner_methods(c, %"$(owner)_", seen, names);
       foreach (String name in c.protocol_member_names(type))
         _completion_add(seen, names, name);
     }
@@ -381,7 +381,7 @@ static void _completion_owner_methods(
     if (signature.is_function() && spelling.startswith(prefix))
       _completion_add(seen, names, spelling.remove_prefix(prefix));
     foreach (String (package, _) in c.package_roots) {
-      String imported = %"${package}__$prefix";
+      String imported = %"$(package)__$prefix";
       if (signature.is_function() && spelling.startswith(imported))
         _completion_add(seen, names, spelling.remove_prefix(imported));
     }

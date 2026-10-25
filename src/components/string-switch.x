@@ -46,7 +46,7 @@ meta static int _string_case_text(Type type) =>
    label. */
 meta static String _string_case_key(List label) {
   match (label) {
-    case %(expr ? ${$grouped(?inner)}): return _string_case_key(inner);
+    case %(expr ? $($grouped(?inner))): return _string_case_key(inner);
     case %(expr ? (literal ?type ?text)): {
       String spelling = text;
       if (_string_case_text(type))
@@ -84,10 +84,10 @@ meta static Var _string_cases(
   match (node) {
     case %((!or expr switch match) *): return node;
     case %(at ? ?inner):
-      return %(at ${node.cadr()}
-               ${_string_cases(inner, indices, labels, node)});
+      return %(at $(node.cadr())
+               $(_string_cases(inner, indices, labels, node)));
     case %(case ?label):
-      return %(case ${_string_case_index(label, indices, labels, site)});
+      return %(case $(_string_case_index(label, indices, labels, site)));
   }
   Var child;
   $ast.rewrite_children(
@@ -101,7 +101,7 @@ meta static Code _string_switch_helper(Type type, List labels) {
   Array tests = [];
   int index = 0;
   foreach (List label in labels) {
-    List value = $!int{ ${++index} };
+    List value = $!int{ $(++index) };
     tests.push($!{ if ($s == $label) return $value; });
   }
   List body = tests.list_free();
@@ -124,7 +124,7 @@ meta Code string_switch_lowering(Code node) {
     List numbered = _string_cases(body, indices, labels, NULL);
     Code helper = _string_switch_helper(type, labels.list_free());
     return Code.lowered(
-      %(switch ${$!int{ $helper($selector) }} $numbered), NULL);
+      %(switch $($!int{ $helper($selector) }) $numbered), NULL);
   }
   return node;
 }

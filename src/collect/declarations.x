@@ -104,7 +104,7 @@ module void _select_public(FileWalk &w) {
    paths. Only `.x` units publish markers; a C header's static inline
    functions belong to every file that includes it. */
 module void _publish_unit_statics(Map statics, Map overlay, String path) {
-  List owner = %(${Compiler.portable_path(path)});
+  List owner = %($(Compiler.portable_path(path)));
   foreach (List key in statics.keys())
     match (%($key)) case %((function ?(String name))): {
       overlay.del(%($name));
@@ -182,7 +182,7 @@ void Compiler.include_function_declarations(
 /** The runtime umbrella includes each listed module's generated header.
     Compiler components in the semantic prelude supply no runtime header. */
 void Compiler.runtime_function_declarations(Compiler c, Map available) {
-  String path = _canonical_path(%"${x2c_get_root()}/lib/x2c.x");
+  String path = _canonical_path(%"$(x2c_get_root())/lib/x2c.x");
   Var entry = _process_cache()[path];
   if (entry is not <list>) return;
   foreach (Var part in entry.list().car())
@@ -370,7 +370,7 @@ static Map _record(ColdConformances &cold, String path) {
 static Gathered _gather_prelude(Compiler c) {
   Gathered prelude = {.symbols = {}, .definitions = {}, .visited = {}};
   foreach (String source in Compiler.prelude_sources())
-    _gather_declarations(c, _canonical_path(%"${x2c_get_root()}/$source"), prelude);
+    _gather_declarations(c, _canonical_path(%"$(x2c_get_root())/$source"), prelude);
   return prelude;
 }
 
@@ -480,8 +480,8 @@ static Map _inline_type_dependencies(Compiler c, List ast) {
         foreach (Type type in types.keys()) ordered.push(type);
         String path = Compiler.portable_path(Path.absolute(c.filename));
         String name = Ast.binding_spelling(binding);
-        rows[%("source-node" (interface-types $path ${-1} $name))] =
-          %(interface-types $name ${ordered.sort().list_free()});
+        rows[%("source-node" (interface-types $path $(-1) $name))] =
+          %(interface-types $name $(ordered.sort().list_free()));
         continue;
       }
     match (function) {
@@ -546,7 +546,7 @@ static void _publish_inline_dependencies(
   foreach (List key in replaced) retained.del(key);
   if (!retained.len()) return;
   List parts = entry.car().list().append(%($retained));
-  List updated = %($parts @{entry.cdr()});
+  List updated = %($parts @(entry.cdr()));
   _require_retained(updated.try_own());
   _process_cache()[path] = updated;
 }

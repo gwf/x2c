@@ -97,9 +97,9 @@ static void _include_surface(Surface &s, String path) {
    escaped the declare-time rewrite and its bare names would merge into the
    consumer's one flat namespace. */
 static void _merge_surface(Surface &s, String path, Map rows) {
-  String prefix = %"${s.name}__";
+  String prefix = %"$(s.name)__";
   int keeps = _keeps_spellings(path);
-  int foreign = !path.startswith(%"${s.root}/");
+  int foreign = !path.startswith(%"$(s.root)/");
   _take_exports(s, rows);
   foreach (Var (key, value) in rows) {
     if (key is not <list> || key.is_nil()) continue;
@@ -147,8 +147,8 @@ static int _keeps_spellings(String path) =>
   !Path.is_x2c_source(path) || _in_runtime(path);
 
 module int _in_runtime(String path) =>
-  path.startswith(%"${_canonical_lib()}/") ||
-  path.startswith(%"${_canonical_include()}/");
+  path.startswith(%"$(_canonical_lib())/") ||
+  path.startswith(%"$(_canonical_include())/");
 
 /* A declaration key is a plain name, or a typedef or aggregate name that a
    member row may extend; the tag covers the whole family, so a member of a

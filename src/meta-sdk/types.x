@@ -218,7 +218,7 @@ List MetaContext.type_description(Var value) {
     match (c.resolve_postfix_member(type, %($member), <.>, 1))
       case %(method * *): methods.push(member);
   return %((name $name) (kind $kind) (type $type) (fields $fields)
-           (methods ${methods.list_free()}));
+           (methods $(methods.list_free())));
 }
 
 /* Whether the type `type` is spelled by keywords alone, such as `(int)`. */

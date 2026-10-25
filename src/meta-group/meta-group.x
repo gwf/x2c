@@ -40,7 +40,7 @@ static macro Stmt $fail.meta_group_function_unavailable(
   $c.report_error(
     <macro>,
     "this function cannot run at compile time",
-    $site, %("function: ${$name}" "reason: ${$why}"));
+    $site, %("function: $($name)" "reason: $($why)"));
 }
 
 // the meta toolchain

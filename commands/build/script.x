@@ -19,11 +19,11 @@
 // command reports
 
 static macro Stmt $fail.script_source_missing(Expr $script) =>
-  Diagnostics.driver_error(%"script does not exist: ${$script}");
+  Diagnostics.driver_error(%"script does not exist: $($script)");
 
 static macro Stmt $fail.script_execute_failed(Expr $executable) =>
   Diagnostics.driver_error(
-    %"cannot run ${$executable}: ${String.new(strerror(errno))}");
+    %"cannot run $($executable): $(String.new(strerror(errno)))");
 
 /* cache entries
 
@@ -55,12 +55,12 @@ int CliRequest.prepare_script(CliRequest c) {
   try Path.make_dirs(c.build_dir);
   catch %(io-fail *detail): Diagnostics.host_error(detail);
   // This process holds the lock until it ends or executes the script.
-  Path.lock_file(%"${c.build_dir}/lock", 1);
+  Path.lock_file(%"$(c.build_dir)/lock", 1);
   // A build of the same script may have finished while this one waited.
   _exec_current(c);
-  Path.write_text(%"${c.build_dir}/source", script);
+  Path.write_text(%"$(c.build_dir)/source", script);
   _prune(%"$root/scripts");
-  c.output = %"${c.output}.${"%ld".printf((long) getpid())}";
+  c.output = %"$(c.output).$("%ld".printf((long) getpid()))";
   return 0;
 }
 
@@ -88,7 +88,7 @@ static void _configure(CliRequest c, String script) {
   c.output = _executable(c);
 }
 
-static String _executable(CliRequest c) => %"${c.build_dir}/run";
+static String _executable(CliRequest c) => %"$(c.build_dir)/run";
 
 /* Unless the request rebuilds, a current entry's executable runs in place
    of this process. */
@@ -141,5 +141,5 @@ static void _exec(CliRequest c) {
 
 /* Prints the command that executes the script, without running it. */
 static void _print_run(CliRequest c) {
-  ToolAction.new(<run>, %(${_executable(c)} @{c.run_args}), 0, 1).start();
+  ToolAction.new(<run>, %($(_executable(c)) @(c.run_args)), 0, 1).start();
 }

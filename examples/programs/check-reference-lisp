@@ -164,8 +164,8 @@ static void _cases(void) {
              ("match-replace" "1 nil nil") ("search" "1 nil")
              ("_search-replace" "1 nil nil") ("string-length" "1")
              ("substring" "\"abc\" \"x\" 1")))
-    _case(%"native-types-${types.car()}",
-          %"(${types.car()} ${types.cdr().car()})");
+    _case(%"native-types-$(types.car())",
+          %"($(types.car()) $(types.cdr().car()))");
   int index = 0;
   foreach (String source in
            %("missing" "(1 2)" "(quote)" "(quote a b)" "(def)" "(def 1 2)"
@@ -179,7 +179,7 @@ static void _cases(void) {
              "(car 1)" "(cons 1 2)" "(substring 1 0 1)" "(" ")" "'"
              "\"unterminated" "\"\\z\"" "(def x 1) )" "(def x 1) ("
              "(unquote 1)"))
-    _case(%"error-${index++}", source);
+    _case(%"error-$(index++)", source);
 }
 
 /* Python's repr of a bytes value, which shows the output of a failed case. */
@@ -216,14 +216,14 @@ static List _run(List command, String input) {
   }
   String output = NULL;
   try output = job.output();
-  catch %(cmd-fail *failure): output = %"${failure.assoc(<output>)}";
+  catch %(cmd-fail *failure): output = %"$(failure.assoc(<output>))";
   String errors = job.errors();
-  return %(${job.status()} $output $errors);
+  return %($(job.status()) $output $errors);
 }
 
 static String _repr(List result) {
   (int status, String output, String errors) = result;
-  return %"($status, ${_repr_bytes(output)}, ${_repr_bytes(errors)})";
+  return %"($status, $(_repr_bytes(output)), $(_repr_bytes(errors)))";
 }
 
 /* Runs a case against both programs and reports whether they agree. */

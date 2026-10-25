@@ -59,7 +59,7 @@ static List _parse_meta_call(Compiler c, Token invocation) {
   Symbol head = c.meta_body && !c.macro_holes && !c.in_pattern
     ? <call> : <meta-call>;
   List call = %(expr $result ($head $callee
-    (args @{arguments.list_free()})));
+    (args @(arguments.list_free()))));
   return c.resolve_expression(call, invocation);
 }
 
@@ -88,11 +88,11 @@ static List _meta_argument(Compiler c) {
   if (direct && hole.assoc(<sequence>).int()) {
     c.expect(<$>);
     c.next();
-    return %(expr ("List") (meta-cap (${_hole_key(hole, "value")})));
+    return %(expr ("List") (meta-cap ($(_hole_key(hole, "value")))));
   }
   Symbol kind = hole ? hole.assoc(<kind>) : 0;
   List argument = direct
-    ? %(expr (<macro-expr>) ${_parse_hole(c, kind ? kind : <argument>)})
+    ? %(expr (<macro-expr>) $(_parse_hole(c, kind ? kind : <argument>)))
     : c.parse_assignment();
   if (hole && argument.match(%(expr ? (macro-bind ?)))) {
     Atom projection = Macro.binder(hole.assoc(<binder>), "value", 0);
@@ -127,7 +127,7 @@ static List _template_call(Compiler c, List definition) {
   Var stored = definition.assoc(<local>).int()
     ? definition : definition.assoc(<name>);
   return %(expr ("List") (tpl-call $stored
-    (args @{arguments.list_free()})));
+    (args @(arguments.list_free()))));
 }
 
 static void _not_expression(
@@ -149,7 +149,7 @@ static List _expression_decorator(
   List target = c.parse_macro_expression_target();
   List input = %(
     target $arguments
-    ${_capture_row_project(c, definition.assoc(<targetp>), %($target), 0)}
+    $(_capture_row_project(c, definition.assoc(<targetp>), %($target), 0))
   );
   List node = _invocation_node(c, definition, input, invocation);
   return %(expr (<macro-expr>) $node);

@@ -65,7 +65,7 @@ List Compiler.lower_cleanup(Compiler c, List node) {
   match (node) {
     case %(function *): return _lower_function(c, node);
     case %(at ?origin ?inner):
-      return %(at $origin ${c.lower_cleanup(inner)});
+      return %(at $origin $(c.lower_cleanup(inner)));
   }
   return node;
 }
@@ -199,13 +199,13 @@ static Var _rewrite(Walk &w, Var value) {
     case %(break): return _transfer(w, w.break_stop, node);
     case %(continue): return _transfer(w, w.continue_stop, node);
     case %(goto ?label): return _transfer(w, _goto_stop(w, label), node);
-    case ${$while_loop(?condition, ?body)}:
+    case $($while_loop(?condition, ?body)):
       return _rewrite_while(w, condition, body);
-    case ${$do_loop(?body, ?condition)}:
+    case $($do_loop(?body, ?condition)):
       return _rewrite_do(w, body, condition);
-    case ${$for_loop(?initial, ?condition, ?increment, ?body)}:
+    case $($for_loop(?initial, ?condition, ?increment, ?body)):
       return _rewrite_for(w, initial, condition, increment, body);
-    case ${$switched(?subject, ?body)}:
+    case $($switched(?subject, ?body)):
       return _rewrite_switch(w, subject, body);
     case %((!or case default) *): return _case_label(w, node);
     case %(function *): return _lower_function(w.c, node);
@@ -256,28 +256,28 @@ static List _return_value(Walk &w, List expression, List cleanup) {
    although no exit runs its record. */
 static List _rewrite_localinit(
   Walk &w, List node, List guard, List body) =>
-  %(localinit ${_rewrite(w, guard)} ${_inside(w, NULL, node, body)});
+  %(localinit $(_rewrite(w, guard)) $(_inside(w, NULL, node, body)));
 
 static List _rewrite_staticinit(
   Walk &w, List node, List record, List initial) =>
   %(staticinit $record
-    ${_inside(w, _defer_cleanup(w.c, record), node, initial)});
+    $(_inside(w, _defer_cleanup(w.c, record), node, initial)));
 
 static List _rewrite_while(Walk &w, List condition, List body) =>
-  %(while ${_rewrite(w, condition)} ${_bounded(w, body, 1)});
+  %(while $(_rewrite(w, condition)) $(_bounded(w, body, 1)));
 
 static List _rewrite_do(Walk &w, List body, List condition) =>
-  %(do ${_bounded(w, body, 1)} ${_rewrite(w, condition)});
+  %(do $(_bounded(w, body, 1)) $(_rewrite(w, condition)));
 
 static List _rewrite_for(
   Walk &w, List initial, List condition, List increment, List body) =>
-  %(for ${_rewrite(w, initial)} ${_rewrite(w, condition)}
-        ${_rewrite(w, increment)} ${_bounded(w, body, 1)});
+  %(for $(_rewrite(w, initial)) $(_rewrite(w, condition))
+        $(_rewrite(w, increment)) $(_bounded(w, body, 1)));
 
 static List _rewrite_switch(Walk &w, List subject, List body) {
   int saved = w.switch_stop;
   w.switch_stop = (int) w.regions.len();
-  List result = %(switch ${_rewrite(w, subject)} ${_bounded(w, body, 0)});
+  List result = %(switch $(_rewrite(w, subject)) $(_bounded(w, body, 0)));
   w.switch_stop = saved;
   return result;
 }
@@ -310,7 +310,7 @@ static Var _bounded(Walk &w, Var body, int is_loop) {
 
 /* Rewrite a region's body and its handlers with the region open. */
 static Var _inside(Walk &w, List cleanup, List marker, Var body) {
-  w.regions.push(%(${_statements(cleanup)} $marker));
+  w.regions.push(%($(_statements(cleanup)) $marker));
   Var result = _rewrite(w, body);
   w.regions.take_last();
   return result;
@@ -384,7 +384,7 @@ module List _region_binding(Compiler c, String role) =>
 
 static List _address_of(String spelling, List binding) {
   Type type = %(($spelling));
-  return %(expr ${type.reference()} (op & (expr $type (ident $binding))));
+  return %(expr $(type.reference()) (op & (expr $type (ident $binding))));
 }
 
 /* landings
@@ -413,7 +413,7 @@ static List _lower_landing(Walk &w, Var code, List rows) {
       case %(new-name ?token ?(String role)):
         parts[token] = _region_binding(c, role);
       case %(outer ?token ?node):
-        parts[token] = Code.lowered(%(seq ${_rewrite(w, node)}), NULL);
+        parts[token] = Code.lowered(%(seq $(_rewrite(w, node))), NULL);
       case %(exits ?token ?statements):
         parts[token] = exits =
           Code.lowered(_bind_parts(c, statements, parts), NULL);
@@ -463,9 +463,9 @@ static List _lower_defer(
   List cleanup = _defer_cleanup(c, record);
   return c.bind_syntax(
     $!{ {
-      ${_defer_record(record, callback, env, records)}
+      $(_defer_record(record, callback, env, records))
       x2c_cleanup_push(&$record);
-      ${_region(w, cleanup, body)}
+      $(_region(w, cleanup, body))
       $cleanup
     }
   }, <block>, c.return_type);
@@ -474,7 +474,7 @@ static List _lower_defer(
 /* The runtime unlinks this record and calls its thunk. */
 static List _defer_cleanup(Compiler c, List record) {
   List call = c.bind_syntax(
-    $!{ x2c_cleanup_leave(${_address_of(_record_type, record)}); },
+    $!{ x2c_cleanup_leave($(_address_of(_record_type, record))); },
     <block>, c.return_type);
   return Code.lowered(%(seq $call), NULL);
 }
@@ -485,7 +485,7 @@ static List _defer_record(
   List record, List callback, List environment, List records) {
   if (!environment)
     return $!{ X2CCleanup $record = {.fn = $callback, .env = 0}; };
-  Type type = %(${Ast.binding_spelling(environment)});
+  Type type = %($(Ast.binding_spelling(environment)));
   return $!{
     $type environment = {0};
     @Ast.defer_captures(environment, $records)

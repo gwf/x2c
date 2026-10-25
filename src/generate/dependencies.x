@@ -69,7 +69,7 @@ static List _inline_prototype(Compiler c, List node) {
 }
 
 static int _inline_binding(Compiler c, List binding) =>
-  c.sym.get(%("function-inline" ${Ast.binding_spelling(binding)}))
+  c.sym.get(%("function-inline" $(Ast.binding_spelling(binding))))
     != NULL;
 
 /* Native directives and initializer inputs keep their source order.
@@ -142,7 +142,7 @@ static void _place_bodies(Array out, Array bodies, List arms) {
       continue;
     }
     List reopened = written.head(written.len() - open);
-    List statement = %(${pending.car()});
+    List statement = %($(pending.car()));
     foreach (List item in Compiler.preproc_within_arms(reopened, statement))
       out.push(item);
   }
@@ -177,7 +177,7 @@ static void _collect_declared(Var value, Map available) {
 /* A function is found by its binding and by its native spelling. */
 static void _set_function(Map names, Var binding, Var value) {
   names[binding] = value;
-  names[%(native ${Ast.binding_spelling(binding)})] = value;
+  names[%(native $(Ast.binding_spelling(binding)))] = value;
 }
 
 /* A typedef is found by its binding and by its spelling. */

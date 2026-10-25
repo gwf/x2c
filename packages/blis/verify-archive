@@ -31,7 +31,7 @@ if (actual != expected) _fail(%"blis.h is $actual, not $expected");
 Map recorded = profile["archive"];
 long members = %(ar -t $archive).job().lines().len();
 if (members != recorded["members"].integer())
-  _fail(%"$members members, not ${recorded["members"]}");
+  _fail(%"$members members, not $(recorded["members"])");
 
 Array symbols = [];
 foreach (String symbol, recorded["external_undefined_symbols"])

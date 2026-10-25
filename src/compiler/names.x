@@ -7,7 +7,7 @@ String Compiler.fresh_name(Compiler c, String stem) {
   String key = stem;
   Var stored;
   int count = c.names.counters.try_get(key, stored) ? stored : 0;
-  String name = %"_x2c_gensym_${key}_${count++}";
+  String name = %"_x2c_gensym_$(key)_$(count++)";
   c.names.counters[key] = count;
   c.names.issued++;
   return name;

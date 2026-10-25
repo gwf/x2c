@@ -50,7 +50,7 @@ macro Expression $decline.case.unfolded(Expr $l) =>
 
 macro Expression $decline.conversion.missing(
   Expr $l, Expr $from, Expr $to) =>
-  _lower_decline($l, %"a conversion from ${$from} to ${$to}");
+  _lower_decline($l, %"a conversion from $($from) to $($to)");
 
 macro Expression $decline.constant.unfolded(Expr $l) =>
   _lower_decline($l, "a constant did not fold");
@@ -180,7 +180,7 @@ macro Expression $decline.update.storage(Expr $l) =>
 macro Expression $reason.scan.binding(Expr $name) => "no binding for " + $name;
 
 macro Expression $reason.scan.conversion(Expr $from, Expr $to) =>
-  %"a conversion from ${$from} to ${$to}";
+  %"a conversion from $($from) to $($to)";
 
 macro Expression $reason.scan.callee() =>
   "a call of a value that is not a function name";

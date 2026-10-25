@@ -31,7 +31,7 @@ module List _invocation_arguments(
     $fail.macros_macro_extra_args(c, c.token);
   }
   c.expect(<)>);
-  return %(args @{arguments.list_free()});
+  return %(args @(arguments.list_free()));
 }
 
 /* The arguments one hole captures: one, or a comma-separated sequence. A
@@ -124,7 +124,7 @@ module Var _capture_source(
   if (!last || last < first) return syntax;
   int end = last.pos + last.len;
   String file = c.source_path(c.filename ? c.filename : "<stdin>");
-  List source = %(source $file ${first.pos} $end);
+  List source = %(source $file $(first.pos) $end);
   return %(src $source $syntax);
 }
 
@@ -170,8 +170,8 @@ static List _sequence_row(Compiler c, List sources, int retain) {
     values.push(retain ? captured : _source_unwrap(captured));
   }
   return _capture_layout(
-    1, %(source @{captured_sources.list_free()}),
-    %(value @{values.list_free()}), NULL, NULL, construction.list_free());
+    1, %(source @(captured_sources.list_free())),
+    %(value @(values.list_free())), NULL, NULL, construction.list_free());
 }
 
 /* One source may be a forwarded projection. Any other number of sources
@@ -213,12 +213,12 @@ static List _forwarded_capture(Compiler c, Var captured) {
   if (kind == <unit>)
     return _capture_layout(
       0, %(source $source), %(value $source), %(expression $source),
-      %(splice), %(${_hole_key(hole, "construction")}));
+      %(splice), %($(_hole_key(hole, "construction"))));
   if (kind != <expr> && kind != <name>) return NULL;
   return _capture_layout(
-    0, %(source $source), %(value ${_hole_key(hole, "value")}),
-    %(expression ${_hole_key(hole, "expression")}),
-    %(splice ${_hole_key(hole, "splice")}), NULL);
+    0, %(source $source), %(value $(_hole_key(hole, "value"))),
+    %(expression $(_hole_key(hole, "expression"))),
+    %(splice $(_hole_key(hole, "splice"))), NULL);
 }
 
 /* The hole whose projection binder `captured` is, when a template passes

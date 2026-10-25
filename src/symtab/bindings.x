@@ -54,14 +54,14 @@ void Sym.undefine_alias(Sym s, String name) {
 static void _seed_var_tag(Sym s, List key, List type) {
   String owner = _var_converter_owner(key, type);
   if (!owner) return;
-  String converter = %"${owner}_var", Type declared = %($owner);
+  String converter = %"$(owner)_var", Type declared = %($owner);
   String name = s.c.unprefixed(owner);
   if (s.c.file_prefixes()) _claim_class_tag(s, name, owner);
   declared.register_var_tag(name, converter);
 }
 
 static void _claim_class_tag(Sym s, String name, String owner) {
-  List fact = %(class-tag ${name.lower()});
+  List fact = %(class-tag $(name.lower()));
   Var claimed;
   if (s.binding_facts.try_get(fact, claimed) && claimed != owner)
     $fail.symbols_module_tag(s.c, s.c.token, name);
@@ -76,7 +76,7 @@ module String _var_converter_owner(List key, List type) {
     case %((func ((?(String named)))) "Var"):
       match (key)
         case %(?(String spelling)):
-          return spelling == %"${named}_var" ? named : NULL;
+          return spelling == %"$(named)_var" ? named : NULL;
   return NULL;
 }
 
@@ -144,7 +144,7 @@ static List _scope_binding(Sym s, SymScope &scope, List key) {
 static void _note_source_key(
   Sym s, SymScope &scope, List key, List binding) {
   Compiler c = s.c;
-  List source_key = %(${scope.symbols} $key);
+  List source_key = %($(scope.symbols) $key);
   s.put(s.binding_facts, %(src-key $binding), source_key);
   Var declaration;
   if (c.source_primary && !c.shallow &&
@@ -268,7 +268,7 @@ module List _file_key(Sym s, List key) {
       key.car() is not <string>)
     return NULL;
   String prefix = s.c.file_prefix();
-  return prefix ? %("$prefix${key.car()}") : NULL;
+  return prefix ? %("$prefix$(key.car())") : NULL;
 }
 
 /* Package files may reference their own file-scope names bare. A plain-key

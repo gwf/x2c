@@ -16,8 +16,8 @@ int main(int argc, char **argv) {
   List summary = lisp.eval(%(
     `(,(string-length (http-get $guide))
       ,(substring (http-get $guide) 13 31)
-      ,(+ 1000 (http-status ${base + "/ok"}))
-      ,(length (http-headers ${base + "/ok"})))
+      ,(+ 1000 (http-status $(base + "/ok")))
+      ,(length (http-headers $(base + "/ok"))))
   ));
   int bytes, status, headers;
   String title;
@@ -33,7 +33,7 @@ int main(int argc, char **argv) {
       (let ((page (http-get url)))
         (substring page 13 (- (string-length page) 15)))
   ));
-  List pages = %(${base + "/guide"} ${base + "/reference"});
+  List pages = %($(base + "/guide") $(base + "/reference"));
   foreach(String found, lisp.eval(%( map title '$pages )).list())
     printf("%s", %"title: $found\n");
 
@@ -41,14 +41,14 @@ int main(int argc, char **argv) {
       404 stays an ordinary value a conditional can test.
   */
   puts(lisp.eval(%(
-    http-get (string-append ${base + "/search?q="} (url-escape "a & b"))
+    http-get (string-append $(base + "/search?q=") (url-escape "a & b"))
   )).string());
   puts(lisp.eval(%(
-    if (= (http-status ${base + "/missing"}) 404) "absent" "present"
+    if (= (http-status $(base + "/missing")) 404) "absent" "present"
   )).string());
   puts(lisp.eval(%(
     string-append "echoed: "
-      (substring (http-post ${base + "/echo"} "text/plain" "ping") 10 14)
+      (substring (http-post $(base + "/echo") "text/plain" "ping") 10 14)
   )).string());
   return 0;
 }

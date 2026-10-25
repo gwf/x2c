@@ -48,16 +48,16 @@ void Compiler.restore_reference_presence(Compiler c, List before) {
 List Compiler.optional_reference_test(
   Compiler c, List condition, int &truth) {
   match (condition) {
-    case %(expr ? ${$grouped(?inner)}):
+    case %(expr ? $($grouped(?inner))):
       return c.optional_reference_test(inner, truth);
-    case %(expr ? ${$source_operator_content(%(! ?operand))}): {
+    case %(expr ? $($source_operator_content(%(! ?operand)))): {
       truth = !truth;
       return c.optional_reference_test(operand, truth);
     }
-    case %(expr ? ${$source_operator_content(
-        %((!or ?op == !=) ?left ?right))}):
+    case %(expr ? $($source_operator_content(
+        %((!or ?op == !=) ?left ?right)))):
       return _null_comparison(c, op, left, right, truth);
-    case %(expr (opt-ref *) ${$source_identifier_content(%(?binding))}):
+    case %(expr (opt-ref *) $($source_identifier_content(%(?binding)))):
       if (%(optional-reference-param $binding) in
           c.semantic_binding_facts()) return binding;
   }
@@ -79,11 +79,11 @@ static List _null_comparison(
 
 static int _null_literal(List expr) {
   match (expr) {
-    case %(expr ? ${$grouped(?inner)}):
+    case %(expr ? $($grouped(?inner))):
       return _null_literal(inner);
-    case %(expr ? ${$source_identifier_content(
-        %((binding ? "NULL")))}): return 1;
-    case %(expr ? ${$source_literal_content(%(? "0"))}): return 1;
+    case %(expr ? $($source_identifier_content(
+        %((binding ? "NULL"))))): return 1;
+    case %(expr ? $($source_literal_content(%(? "0")))): return 1;
   }
   return 0;
 }

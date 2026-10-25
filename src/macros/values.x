@@ -30,7 +30,7 @@ module List _macro_value(Compiler c, Atom name) {
   if (c.macro_holes && _hole_record(c, name)) return NULL;
   if (!_try_macro(c, c.macros, name, stored)) return NULL;
   List cached = c.macro_value_literal(stored);
-  return %(expr ("Macro") ${cached.caddr()});
+  return %(expr ("Macro") $(cached.caddr()));
 }
 
 /** Parses `case NAME(?a, *b)` where NAME selects a macro, as `$name` or as
@@ -77,7 +77,7 @@ static List _pattern_macro(Compiler c) {
   if (c.peek(0) == <$>) return _macro_value(c, _name(c));
   if (c.peek(0) != <ident>) return NULL;
   Type type = NULL;
-  List binding = c.sym.lookup(%(${c.token.text}), type);
+  List binding = c.sym.lookup(%($(c.token.text)), type);
   if (!binding || !c.sym.is_named_value_type(type, "Macro")) return NULL;
   List expression = c.resolve_expression(
     %(expr $type (ident $binding)), c.token);
@@ -94,7 +94,7 @@ static List _pattern_labels(Compiler c) {
     c.expect(sequence ? <*> : <?>);
     String name = c.token.text;
     c.expect(<ident>);
-    names.push(Atom.intern(%"${sequence ? "*" : "?"}$name"));
+    names.push(Atom.intern(%"$(sequence ? "*" : "?")$name"));
     if (!c.test(<,>)) break;
   }
   c.expect(<)>);
@@ -187,7 +187,7 @@ static List _macro_subpattern(Macro shape, List patterns, int content) {
 /* A private binder that no argument pattern spells with either sigil. */
 static Atom _unused_binder(String sigil, List spelled, int &index) {
   loop {
-    String name = %"__pattern_${index++}";
+    String name = %"__pattern_$(index++)";
     if (!(Atom.intern("?" + name) in spelled) &&
         !(Atom.intern("*" + name) in spelled))
       return Atom.intern(sigil + name);
@@ -217,7 +217,7 @@ static Var _substitute_binders(Var value, Map replacements) {
 */
 List Compiler.capture_macro_value(Compiler c, List definition) {
   List cached = c.macro_value_literal(definition);
-  List literal = %(expr ("Macro") ${cached.caddr()});
+  List literal = %(expr ("Macro") $(cached.caddr()));
   List rows = %(expr ("List") (nil));
   int captured = 0;
   foreach (List binding in definition.assoc(<captures>).list()) {
@@ -225,7 +225,7 @@ List Compiler.capture_macro_value(Compiler c, List definition) {
     if (!c.sym.is_named_value_type(type, "Macro")) continue;
     List pair = _captured_pair(c, binding, type);
     rows = %(expr ("List")
-      (cons ${c.convert_expression(pair, %("Var"))} $rows));
+      (cons $(c.convert_expression(pair, %("Var"))) $rows));
     captured = 1;
   }
   if (!captured) return literal;
@@ -240,8 +240,8 @@ static List _captured_pair(Compiler c, List binding, Type type) {
   List identity = c.macro_value_literal(binding);
   List value = c.resolve_expression(%(expr $type (ident $binding)), c.token);
   return %(expr ("List")
-    (cons ${c.convert_expression(identity, %("Var"))}
-      (expr ("List") (cons ${c.convert_expression(value, %("Var"))}
+    (cons $(c.convert_expression(identity, %("Var")))
+      (expr ("List") (cons $(c.convert_expression(value, %("Var")))
         (expr ("List") (nil))))));
 }
 
@@ -278,9 +278,9 @@ static Map _code_effects(Compiler c, Var effects) {
         _register_rewrite(
           c, _rewrite_rule(point, kind, name, shape, holes, 0, 1));
         _record_compile_time_effect(
-          c, %(compile-time rewrite $point ${c.freeze_declaration_syntax(kind)}
-            $name ${c.freeze_declaration_syntax(shape)}
-            ${c.freeze_declaration_syntax(holes)}), c.token);
+          c, %(compile-time rewrite $point $(c.freeze_declaration_syntax(kind))
+            $name $(c.freeze_declaration_syntax(shape))
+            $(c.freeze_declaration_syntax(holes))), c.token);
       }
       case %(new-name ?token ?(String role)):
         replacements[token] = c.sym.introduce(c.fresh_name(role));

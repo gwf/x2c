@@ -63,10 +63,10 @@ static List _landing_form(Compiler c, List node, Map runtime) {
     foreach (List row in rows)
       match (row) {
         case %((!or ?kind outer region) ?token ?part):
-          parts.push(%($kind $token ${_static_regions(c, part, runtime)}));
+          parts.push(%($kind $token $(_static_regions(c, part, runtime))));
         default: parts.push(row);
       }
-    return %(landing $code ${parts.list_free()});
+    return %(landing $code $(parts.list_free()));
   }
   if (!form) return node;
   return _static_regions(c, c.lower_replacement(form, node), runtime);
@@ -91,7 +91,7 @@ static List _static_initializers(
       }
     output.push(_static_regions(c, binding, runtime));
   }
-  return %(declare $type (bindings @{output.list_free()}));
+  return %(declare $type (bindings @(output.list_free())));
 }
 
 static int _runtime_static_declaration(
@@ -147,18 +147,18 @@ static int _value(RuntimeScan &s, List node) {
   match (node) {
     case %((!or cache call var array map varray vmap initval cons append) *):
       return 1;
-    case %(expr ?type ${$source_identifier_content(%(?binding))}):
+    case %(expr ?type $($source_identifier_content(%(?binding)))):
       return _identifier(s, type, binding);
-    case %(expr ? ${$source_operator_content(%(& ?inner))}):
+    case %(expr ? $($source_operator_content(%(& ?inner)))):
       return _push(s, inner, 1);
     case %(expr ?type (!set ?content
-        ${$indexed(?receiver, ?selector)})): {
+        $($indexed(?receiver, ?selector)))): {
       Type native = type;
       if (native.is_array()) return _push(s, content, 1);
       if (native.is_pointer() || !(<const> in native)) return 1;
       break;
     }
-    case %(expr ? ${$sizeof_expression(?operand)}):
+    case %(expr ? $($sizeof_expression(?operand))):
       return _sizeof_dimensions(s, operand);
   }
   return -1;
@@ -176,11 +176,11 @@ static int _identifier(RuntimeScan &s, Type type, List binding) {
 static int _address(RuntimeScan &s, List node) {
   match (node) {
     case %(!or (expr ? ?inner)
-        ${$grouped(?inner)}
-        ${$source_operator_content(%(. ?inner ?))}):
+        $($grouped(?inner))
+        $($source_operator_content(%(. ?inner ?)))):
       return _push(s, inner, 1);
     case $source_identifier_content(%(?binding)): return _input(s, binding);
-    case ${$indexed(%(!set ?base (expr ?type ?)), ?index)}: {
+    case $($indexed(%(!set ?base (expr ?type ?)), ?index)): {
       _push(s, index, 0);
       return _push(s, base, type.list().type().is_array());
     }

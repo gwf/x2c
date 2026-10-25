@@ -9,49 +9,49 @@ macro Stmt $error.apply.args() {
 }
 
 macro Stmt $error.apply.arity(Expr $sig, Expr $expected, Expr $actual) {
-  raise %(bad-arity (sig ${$sig}) (expected ${$expected}) (actual ${$actual}));
+  raise %(bad-arity (sig $($sig)) (expected $($expected)) (actual $($actual)));
 }
 
 macro Stmt $error.arg.value(Expr $sig, Expr $index) {
-  raise %(bad-types (sig ${$sig}) (index ${$index}) (want value));
+  raise %(bad-types (sig $($sig)) (index $($index)) (want value));
 }
 
 macro Stmt $error.arg.void(Expr $sig, Expr $index) {
-  raise %(void-op (sig ${$sig}) (index ${$index}));
+  raise %(void-op (sig $($sig)) (index $($index)));
 }
 
 macro Stmt $error.apply.index(Expr $index) {
-  raise %(bad-arg (operation "Func.apply") (index ${$index}));
+  raise %(bad-arg (operation "Func.apply") (index $($index)));
 }
 
 macro Stmt $error.arg.convert(
   Expr $code, Expr $sig, Expr $index, Expr $want, Expr $lower) {
-  raise %(${$code} (sig ${$sig}) (index ${$index}) (want ${$want})
-          (cause ${$lower}));
+  raise %($($code) (sig $($sig)) (index $($index)) (want $($want))
+          (cause $($lower)));
 }
 
 macro Stmt $error.arg.type(Expr $sig, Expr $index, Expr $actual, Expr $want) {
-  raise %(bad-types (sig ${$sig}) (index ${$index}) (actual ${$actual})
-          (want ${$want}));
+  raise %(bad-types (sig $($sig)) (index $($index)) (actual $($actual))
+          (want $($want)));
 }
 
 macro Stmt $error.arg.pointer(Expr $sig, Expr $index, Expr $actual) {
-  raise %(bad-types (sig ${$sig}) (index ${$index}) (actual ${$actual})
+  raise %(bad-types (sig $($sig)) (index $($index)) (actual $($actual))
           (want pointer));
 }
 
 macro Stmt $error.arg.unboxed(Expr $sig, Expr $index, Expr $source) {
-  raise %(bad-types (sig ${$sig}) (index ${$index}) (source ${$source})
+  raise %(bad-types (sig $($sig)) (index $($index)) (source $($source))
           (want value));
 }
 
 macro Stmt $error.arg.ref(Expr $sig, Expr $index, Expr $source, Expr $want) {
-  raise %(bad-types (sig ${$sig}) (index ${$index}) (source ${$source})
-          (want ${$want}));
+  raise %(bad-types (sig $($sig)) (index $($index)) (source $($source))
+          (want $($want)));
 }
 
 macro Stmt $error.bind.sig(Expr $sig) {
-  raise %(bad-sig (sig ${$sig}));
+  raise %(bad-sig (sig $($sig)));
 }
 
 macro Stmt $error.context.source() {
@@ -59,7 +59,7 @@ macro Stmt $error.context.source() {
 }
 
 macro Stmt $error.context.size(Expr $size) {
-  raise %(size-limit (operation "Func.new_context") (size ${$size}));
+  raise %(size-limit (operation "Func.new_context") (size $($size)));
 }
 
 macro Stmt $error.signature.null() {
@@ -71,5 +71,5 @@ macro Stmt $error.context.null() {
 }
 
 macro Stmt $error.box.type(Expr $actual) {
-  raise %(bad-types (want func) (actual ${$actual}));
+  raise %(bad-types (want func) (actual $($actual)));
 }

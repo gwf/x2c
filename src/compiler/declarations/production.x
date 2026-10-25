@@ -6,7 +6,7 @@
 
 static List _declaration_source_key(Compiler c, Token token) {
   String path = Compiler.portable_path(c.canonical_path(c.filename));
-  return %("source-node" (declaration $path ${token.pos}));
+  return %("source-node" (declaration $path $(token.pos)));
 }
 
 /** Expands the file-scope unit macro at the cursor for collection and
@@ -65,8 +65,8 @@ static int _retain_bundle(
     case %(declaration-bundle (rows *)): {
       c.sym.set(
         _declaration_source_key(c, first),
-        %(declaration-source ${after.pos} $syntax
-          ${c.semantic_binding_facts()}));
+        %(declaration-source $(after.pos) $syntax
+          $(c.semantic_binding_facts())));
       return 1;
     }
   }

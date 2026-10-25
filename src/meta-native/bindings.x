@@ -80,8 +80,8 @@ void Compiler.record_native_meta_effect(
   String name = _native_meta_name(c, declaration, marker);
   if (%(function $name) in c.sym.file_statics()) return;
   c.sym.set(
-    %("source-node" (declaration $path ${marker.pos})),
-    %(native-meta $name ${c.func_signature(type)}));
+    %("source-node" (declaration $path $(marker.pos))),
+    %(native-meta $name $(c.func_signature(type))));
 }
 
 module String _native_meta_name(
@@ -98,7 +98,7 @@ module String _native_meta_name(
 /** Records the native advertisements retained by included interfaces. Each
     binds on first use, so a unit with no compile-time code pays nothing. */
 void Compiler.install_native_meta_effects(Compiler c, Map globs) {
-  List unit = %(${Path.resolved_absolute(c.filename)});
+  List unit = %($(Path.resolved_absolute(c.filename)));
   foreach (Var (key, value) in globs) {
     if (_declared_in(key, unit)) continue;
     if (value is <list>) c.install_project_meta_effect(value);
@@ -157,7 +157,7 @@ static void _bind_native_meta(
   Compiler c, String name, List signature, Token marker) {
   _certify_native_meta(c, name, signature, marker);
   int iterator = Compiler.iterator_arity(signature) >= 0;
-  String target = iterator ? %"${name}_into" : name;
+  String target = iterator ? %"$(name)_into" : name;
   NativeBinding n = {
     .c = c, .name = name, .target = target, .signature = signature,
     .suppliers = _native_module_suppliers(target), .marker = marker};
@@ -203,8 +203,8 @@ static void _meta_native_warn_duplicate(
   Compiler c, Token site, NativeBinding &n, List suppliers) {
   c.report_warning(
     <native>, "more than one native module defines this function",
-    site, %("name: ${n.name}" "supplied by: ${suppliers.car()}"
-            "also defined by: ${", ".join(suppliers.cdr())}"));
+    site, %("name: $(n.name)" "supplied by: $(suppliers.car())"
+            "also defined by: $(", ".join(suppliers.cdr()))"));
 }
 
 /** Answers whether the native target `function` matches the declared
@@ -233,7 +233,7 @@ static List _native_signature_type(Compiler c, List signature) {
       foreach (Type parameter in parameters)
         resolved.push(_native_parameter(c, parameter));
       Type native = c.sym.normalize_declared_type(result);
-      return %((func ${resolved.list_free()}) @native);
+      return %((func $(resolved.list_free())) @native);
     }
   return signature;
 }
@@ -348,7 +348,7 @@ List Compiler.native_meta_targets(List paths, int callbacks) {
     foreach (List row in _native_meta_rows(c, value)) {
       (String name, List signature) = row;
       if (!callbacks && _takes_callback(signature)) continue;
-      String into = %"${name}_into";
+      String into = %"$(name)_into";
       selected[name] = Compiler.iterator_arity(signature) >= 0
         ? %($name (as $into)) : %($name);
     }
@@ -390,10 +390,10 @@ static List _witness_rows(Compiler c, Type base, Type participant) {
   foreach (List member in conformance.last().list().cdr())
     match (member) {
       case %(? implmntd ?(String name) ?(Type type) *):
-        rows = cons(%($name ${c.func_signature(type)}), rows);
+        rows = cons(%($name $(c.func_signature(type))), rows);
       case %(?(String name) base-dflt ? ?(Type type) ordinary ?): {
-        String forward = %"${participant.car()}_$name";
-        rows = cons(%($forward ${c.func_signature(type)}), rows);
+        String forward = %"$(participant.car())_$name";
+        rows = cons(%($forward $(c.func_signature(type))), rows);
       }
     }
   return rows;

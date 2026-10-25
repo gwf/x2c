@@ -8,7 +8,7 @@ static const SymbolSet quoted_roles = %<<statement block name param>>;
    macros applied where they are written. A `$name` in the body names the
    visible local `name`: its first use declares a hole, and the quotation
    applies to that local's value. An `@name` splices the local's sequence.
-   `${expression}` and `@{expression}` declare hidden locals before building
+   `$(expression)` and `@(expression)` declare hidden locals before building
    the code, for singular and sequence insertion. A typed
    quotation, `$!T{ expression }` or `$!(T){ expression }`, builds its code
    where it is written (see "typed quotations"), and so do
@@ -64,9 +64,9 @@ static int _typed_quotation(Compiler c) {
   return c.peek(0) == <(> && c.token.after_group().type == <"{">;
 }
 
-/* Declares a hidden local for each `${expression}` or `@{expression}` in
+/* Declares a hidden local for each `$(expression)` or `@(expression)` in
    the body, in source order, and records its name under the sigil's position.
-   A nested quotation's holes are its own, and `case ${$name(...)}` is
+   A nested quotation's holes are its own, and `case $($name(...))` is
    a macro pattern. */
 static List _expression_holes(Compiler c, Map holes) {
   Token saved = c.token, close = c.token.group_close();
@@ -112,8 +112,8 @@ static List _hole_local(Compiler c, Map holes, int position) {
   if (constant is void) holes[%(dynamic)] = 1;
   else holes[%(constant $name)] = constant;
   return c.bind_syntax(
-    %(declare ${value.cadr()}
-      (bindings (op = (bind ${c.sym.introduce(name)} ()) $value))),
+    %(declare $(value.cadr())
+      (bindings (op = (bind $(c.sym.introduce(name)) ()) $value))),
     <block>, c.return_type);
 }
 
@@ -121,7 +121,7 @@ static List _hole_local(Compiler c, Map holes, int position) {
 module List _expression_hole(Compiler c, Token prefix) {
   Var name;
   if (!c.macro_holes ||
-      !c.macro_holes.try_get(%(expression ${prefix.pos}), name))
+      !c.macro_holes.try_get(%(expression $(prefix.pos)), name))
     return NULL;
   List hole = _hole_record(c, Atom.intern(name));
   return hole ? hole : _quoted_hole(c, name, prefix);
@@ -129,7 +129,7 @@ module List _expression_hole(Compiler c, Token prefix) {
 
 /* The expression that computes a typed quotation's type: the identifier at
    the cursor, or the group there, which holds a type or a `$name` local or
-   `${expression}` hole whose value is the type. */
+   `$(expression)` hole whose value is the type. */
 static List _quoted_type(Compiler c, Map holes) {
   if (c.peek(0) != <(>) return _quoted_type_name(c);
   c.expect(<(>);
@@ -137,12 +137,12 @@ static List _quoted_type(Compiler c, Map holes) {
   List type = NULL;
   if (c.peek(0) == <$>) {
     Var name = c.peek(1) == <"{"> || c.peek(1) == <(>
-             ? holes[%(expression ${c.token.pos})]
+             ? holes[%(expression $(c.token.pos))]
              : Token.skip_trivia(c.token + 1).text;
     c.token = c.after_hole();
     type = _checked_type(
       c,
-      c.resolve_expression(%(expr () (ident ${name.str()})), origin), origin);
+      c.resolve_expression(%(expr () (ident $(name.str()))), origin), origin);
   }
   else type = _quoted_type_name(c);
   c.expect(<)>);
@@ -159,7 +159,7 @@ static List _checked_type(Compiler c, List type, Token origin) {
     c, "x2c_diagnostic_fail", %($error (expr ("List") (nil))), origin);
   return c.resolve_expression(
     %(expr () (op ? $error
-      (expr ("Type") ${source_commas_content(%($fail $type))}) $type)),
+      (expr ("Type") $(source_commas_content(%($fail $type)))) $type)),
     origin);
 }
 
@@ -194,11 +194,11 @@ static List _quotation(
   List values = %(expr ("List") (nil));
   foreach (List hole in d.parameters.reverse())
     values = _quoted_cons(
-      c, %(expr () (ident ${_hole_name(hole).str()})), values, start);
+      c, %(expr () (ident $(_hole_name(hole).str()))), values, start);
   List definition = c.capture_macro_value(_publish(d));
   List empty = %(expr ("List") (nil));
   return _quoted_cons(
-    c, $!String{ ${"x2c.template"} }, _quoted_cons(
+    c, $!String{ $("x2c.template") }, _quoted_cons(
       c, definition, _quoted_cons(c, values, empty, start), start), start);
 }
 
@@ -221,20 +221,20 @@ static List _construction(Definition &d, Map holes) {
   if (!d.rebuild || d.nested || d.kind == <decl-unit> || c.runtime_literals)
     return NULL;
   Map keys = {}, file_locals = {};
-  _file_scope_locals(%(${d.template}), file_locals);
+  _file_scope_locals(%($(d.template)), file_locals);
   Array fresh = [];
   foreach (List row in d.fresh) {
     Var binder = row.car();
     keys[binder] = 1;
-    fresh.push(%($binder ${row.cadr()} ${binder in file_locals ? 1 : 0}));
+    fresh.push(%($binder $(row.cadr()) $(binder in file_locals ? 1 : 0)));
   }
   foreach (List hole in d.parameters)
     foreach (Symbol projection in %(source value expression splice member))
       keys[_hole_key(hole, projection)] = %($hole $projection);
   /* Cached pattern literals retain their values across producer sessions. */
   List quoted = %(
-    "x2c.quoted" ${fresh.list_free()}
-    ${c.freeze_declaration_syntax(_macro_value_names(d.template))}
+    "x2c.quoted" $(fresh.list_free())
+    $(c.freeze_declaration_syntax(_macro_value_names(d.template)))
   );
   List cells = _built_cells(c, quoted, keys, d.start);
   return cells ? %(expr ("List") $cells) : NULL;
@@ -279,13 +279,13 @@ static List _built_hole(
   (List hole, Symbol projection) = row;
   List local = c.convert_expression(
     c.resolve_expression(
-      %(expr () (ident ${_hole_name(hole).str()})), start), %("Var"));
+      %(expr () (ident $(_hole_name(hole).str()))), start), %("Var"));
   List cells = c.literal_cell(local, %(nil));
   Symbol selected = shell ? <shell> : projection;
   List shape = %(
     macro-param
-    (kind ${hole.assoc(<kind>)})
-    (sequence ${hole.assoc(<sequence>)})
+    (kind $(hole.assoc(<kind>)))
+    (sequence $(hole.assoc(<sequence>)))
   );
   foreach (Var constant in %($selected $shape "x2c.hole"))
     cells = c.literal_cell(c.cache_literal_var(constant), cells);
@@ -314,13 +314,13 @@ static List _typed_construction(Definition &d, Map holes) {
   // Constant interpolation uses the same constructor without a runtime local.
   Var type = c.folded_constant(d.type), constant;
   if (type is <list> &&
-      holes.try_get(%(constant ${_hole_name(hole).str()}), constant))
+      holes.try_get(%(constant $(_hole_name(hole).str())), constant))
     return c.cache_literal_list(Macro.typed(type, constant));
   List callee = c.resolve_expression(
     %(expr () (ident "Macro_typed")), d.start);
   List value = _hole_value(c, hole, d.start);
   return c.resolve_expression(
-    %(expr ("List") (call $callee (args ${d.type} $value))), d.start);
+    %(expr ("List") (call $callee (args $(d.type) $value))), d.start);
 }
 
 /* `$!Type{ type-name }` and `$!Param{ parameter }` build their List where
@@ -329,7 +329,7 @@ static List _part_construction(Definition &d) {
   Map keys = _written_keys(d);
   match (d.rebuild.car()) case %(macro-bind ?binder):
     return _typed_hole(d.c, keys[binder], d.start);
-  return %(expr ("List") ${_typed_cells(d.c, d.rebuild.car(), keys, d.start)});
+  return %(expr ("List") $(_typed_cells(d.c, d.rebuild.car(), keys, d.start)));
 }
 
 /* The hole projections a quotation built where it is written fills. Such a
@@ -353,7 +353,7 @@ static List _typed_cells(
   Var item = items.car(), row;
   if (item is <list> && !item.is_nil())
     return c.literal_cell(
-      %(expr ("List") ${_typed_cells(c, item, keys, start)}), tail);
+      %(expr ("List") $(_typed_cells(c, item, keys, start))), tail);
   if (!item.is_binder() || !item.str()[1:].startswith("__macro_"))
     return c.literal_cell(c.cache_literal_var(item), tail);
   if (!keys.try_get(item, row)) $fail.macros_typed_quotation(c, start);
@@ -385,7 +385,7 @@ static List _typed_hole(Compiler c, List row, Token start) {
   if (!lifts && !expression && kind != <name>) return local;
   return _runtime_call(
     c, "Macro_inserted",
-    %($local ${$!int{ $lifts }} ${$!int{ $expression }}), start);
+    %($local $($!int{ $lifts }) $($!int{ $expression })), start);
 }
 
 static List _runtime_call(
@@ -396,7 +396,7 @@ static List _runtime_call(
 }
 
 static List _hole_value(Compiler c, List hole, Token start) =>
-  c.resolve_expression(%(expr () (ident ${_hole_name(hole).str()})), start);
+  c.resolve_expression(%(expr () (ident $(_hole_name(hole).str()))), start);
 
 /* A quotation's hole takes its kind from a name position, or from a
    parameter or statement position where it stands alone, which no

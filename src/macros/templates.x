@@ -73,7 +73,7 @@ static Var _slot_rows(Var result) {
       return %(seq $result);
     case %(seq *): return result;
   }
-  return %(seq @{result});
+  return %(seq @(result));
 }
 
 /** Evaluates a macro slot and returns its syntax as a row sequence.
@@ -172,7 +172,7 @@ static List _sdk_template_call(Var stored, List values) {
   Token site = MetaContext.current().site;
   List definition = stored.is_atom() ? _lookup(c, stored, site) : stored;
   return %(macro-invoke $stored
-    ${_template_arguments(c, definition, values, site, 0)}
+    $(_template_arguments(c, definition, values, site, 0))
     m-invoke);
 }
 
@@ -186,7 +186,7 @@ static List _template_arguments(
   for (; holes; holes = holes.cdr(), values = values.cdr())
     rows.push(
       _hole_row(c, holes.car(), values.car(), invocation, retain_syntax));
-  return %(args @{rows.list_free()});
+  return %(args @(rows.list_free()));
 }
 
 /* One hole's capture row of `value`. Each scalar value an Expr hole or
@@ -202,7 +202,7 @@ static List _hole_row(
   if (!hole.assoc(<sequence>).int())
     return _capture_row_project(
       c,
-      hole, %(${lifts ? _lifted(c, value, invocation) : value}),
+      hole, %($(lifts ? _lifted(c, value, invocation) : value)),
       retain_syntax);
   List sources = value;
   if (lifts) {
@@ -251,7 +251,7 @@ module Var _helper_result(Compiler c, Var value) {
     expression's template-origin wrappers are omitted. */
 List Compiler.rebuild_expression(Compiler c, Type type, List application) {
   List rebuilt = _rebuild(c, application, NULL);
-  return %(expr $type @{rebuilt.cddr()});
+  return %(expr $type @(rebuilt.cddr()));
 }
 
 /** Rebuilds a statement template as a canonical unbraced `seq`. Bound
@@ -293,8 +293,8 @@ static List _rebuild(
   if (target)
     rows = rows.append(
       %(
-        ${_capture_row_project(
-          c, definition.assoc(<targetp>), %($target), 1)}));
+        $(_capture_row_project(
+          c, definition.assoc(<targetp>), %($target), 1))));
   List bindings = NULL;
   foreach (List row in rows) {
     bindings = _row_bindings(keys.car(), row, bindings);
@@ -306,7 +306,7 @@ static List _rebuild(
 static List _row_bindings(List keys, List row, List bindings) {
   List fields = _row_fields(row);
   foreach (Atom binder in keys) {
-    if (binder != <?>) bindings = %(($binder ${fields.car()}) @bindings);
+    if (binder != <?>) bindings = %(($binder $(fields.car())) @bindings);
     fields = fields.cdr();
   }
   return bindings;
@@ -423,7 +423,7 @@ static Var _retained_declaration(List declaration) {
     Array moved = [];
     foreach (List row in rows)
       moved.push(Ast.append_modifiers(row, modifiers));
-    return %(declare $base (bindings @{moved.list_free()}));
+    return %(declare $base (bindings @(moved.list_free())));
   }
   return declaration;
 }
@@ -480,7 +480,7 @@ List Compiler.bind_meta_statement(
   Compiler c, List value, Symbol context) {
   value = _helper_result(c, value);
   return _statement_expression(c, value)
-    ? %(stmnt ${c.lift_meta_expression(value, c.token)})
+    ? %(stmnt $(c.lift_meta_expression(value, c.token)))
     : c.bind_syntax(value, context, c.return_type);
 }
 

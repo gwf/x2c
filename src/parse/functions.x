@@ -172,7 +172,7 @@ static List _expression_body(Compiler c) {
       result = _.return_type === %(void)
              ? %(stmnt $expression) : _.finish_return_statement(expression);
     }
-    return %(block ${_.anchor_origin(result, origin)});
+    return %(block $(_.anchor_origin(result, origin)));
   }
 }
 
@@ -262,5 +262,5 @@ static List _collected_function(
           declaration = %(declare $type (bindings (bind $name $modifiers)));
       }
     }
-  return %(declaration-function $declaration $body ${c.macro_stack});
+  return %(declaration-function $declaration $body $(c.macro_stack));
 }

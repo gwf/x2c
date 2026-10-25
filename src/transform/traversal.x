@@ -163,11 +163,11 @@ module Ast _default_node(Compiler c, Ast ast) {
 module Ast _finish(Compiler c, Ast ast) {
   match (ast) {
     case %(seq *items):
-      return %(seq @{_sequence(c, items, 0)});
+      return %(seq @(_sequence(c, items, 0)));
     case %(parens (at ?origin ?inner)):
       return _step(c, %(at $origin (parens $inner)));
     case %(parens (block *body)):
-      return %(parens ${_block_node(c, body, 1)});
+      return %(parens $(_block_node(c, body, 1)));
     case $source_block_content(%(*body)): return _block_node(c, body, 0);
   }
   return _children(c, ast);
@@ -201,7 +201,7 @@ static Ast _sequence_item(Compiler c, Ast value, int value_tail) {
 
 static Ast _statement_value(Compiler c, Ast value, Var expression) {
   Ast result = _step(c, Ast.rewrap_origin(value, expression));
-  return Ast.rewrap_origin(result, %(stmnt ${Ast.without_origin(result)}));
+  return Ast.rewrap_origin(result, %(stmnt $(Ast.without_origin(result))));
 }
 
 static Ast _sequence_tail(Compiler c, Ast node, Ast tail) {

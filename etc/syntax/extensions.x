@@ -98,7 +98,7 @@ List syntax_extensions(void) => %(
       (grammar-note "List/data readers, interpolation, splicing, reader prefixes, typed pattern captures, Symbols, and SymbolSets.")
       (lexical-note "Percent openers select reader modes; braced interpolation/splicing re-enters code; angle Symbols, atom boundaries, byte escapes, signed data numbers, and explicit 0o octal extend scanning.")
       (spellings "%(...)" "%[...]" "%{...}" "%\"...\"" "%<<...>>"
-                 "<name>" "\$name" "\${expr}" "@items" "@{expr}"
+                 "<name>" "\$name" "\$(expr)" "@items" "@(expr)"
                  "?(Type name)" "'" "`" ",@" "0o17")
       (reference "../reference/language.md#percent-literals-quote-and-unquote"))
     (feature operators
@@ -151,7 +151,7 @@ List syntax_extensions(void) => %(
       (grammar-note "Typed macro holes/results, @ sequence parameters and splices, aliases, decorators, source quotations, and meta/native functions.")
       (lexical-note "\$ inserts one result; @ splices a sequence. \$! uses ordinary ! after \$; macro/keyword/meta/native are contextual.")
       (spellings "macro" "keyword" "\$name(...)" "\$!{...}"
-                 "@items" "@name(...)" "@{expression}"
+                 "@items" "@name(...)" "@(expression)"
                  "meta" "native")
       (reference "../reference/language.md#compile-time-macros")))
   (inherited

@@ -32,7 +32,7 @@ meta static Code _destructure_list(Code source) {
 /* The declaration of the List local `values` that reads `source`. */
 meta static List _destructure_read(Atom values, Code source) =>
   %(declare ("List")
-     (bindings (op = (bind $values ()) ${_destructure_list(source)})));
+     (bindings (op = (bind $values ()) $(_destructure_list(source)))));
 
 /* The element at `index` of the List local `values`. */
 meta static Code _destructure_element(Atom values, int index) {
@@ -49,7 +49,7 @@ meta static List _destructure_writes(List targets, Atom values) {
   foreach (Code target in targets) {
     Type type = target.cadr();
     Code element = _destructure_element(values, index++);
-    writes.push(%(stmnt ${$!($type){ $target = $element }}));
+    writes.push(%(stmnt $($!($type){ $target = $element })));
   }
   return writes.list_free();
 }
@@ -77,7 +77,7 @@ meta Code destructure_declaration(Code node) {
           Code element = _destructure_element(values, index++);
           items.push(%(declare $base (bindings (op = $declarator $element))));
         }
-      return _destructure_bound(%(seq @{items.list_free()}), values, NULL);
+      return _destructure_bound(%(seq @(items.list_free())), values, NULL);
     }
     case %(dstrdecl ?(Type type) (targets *names) ?source): {
       Array declarators = [], targets = [];
@@ -86,9 +86,9 @@ meta Code destructure_declaration(Code node) {
         targets.push(%(expr $type (ident $name)));
       }
       return _destructure_bound(
-        %(seq (declare $type (bindings @{declarators.list_free()}))
-              ${_destructure_read(values, source)}
-              @{_destructure_writes(targets.list_free(), values)}),
+        %(seq (declare $type (bindings @(declarators.list_free())))
+              $(_destructure_read(values, source))
+              @(_destructure_writes(targets.list_free(), values))),
         values, NULL);
     }
   }
@@ -102,8 +102,8 @@ meta Code destructure_statement(Code node) {
     case %(stmnt (expr ? (dstrasgn (targets *targets) ?source))): {
       Atom values = Atom.intern("?__destructure");
       return _destructure_bound(
-        %(block ${_destructure_read(values, source)}
-                @{_destructure_writes(targets, values)}),
+        %(block $(_destructure_read(values, source))
+                @(_destructure_writes(targets, values))),
         values, NULL);
     }
   return node;
@@ -121,8 +121,8 @@ meta Code destructure_value(Code node) {
       Code kept = %(expr $type (ident $result));
       List block = %(block
         (declare $base (bindings (op = (bind $result $modifiers) $source)))
-        ${_destructure_read(values, kept)}
-        @{_destructure_writes(targets, values)}
+        $(_destructure_read(values, kept))
+        @(_destructure_writes(targets, values))
         (stmnt $kept));
       return _destructure_bound(
         %(expr $type (parens $block)), values, result);

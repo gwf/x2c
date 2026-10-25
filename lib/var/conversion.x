@@ -15,7 +15,7 @@
    Reports expand at their existing owners. */
 
 static macro Stmt $error.encoding.bad(Expr $bits) {
-  raise %(bad-enc (value ${$bits}));
+  raise %(bad-enc (value $($bits)));
 }
 
 static macro Stmt $error.convert.void() {
@@ -23,19 +23,19 @@ static macro Stmt $error.convert.void() {
 }
 
 static macro Stmt $error.target.invalid(Expr $target) {
-  raise %(bad-target (target ${$target}));
+  raise %(bad-target (target $($target)));
 }
 
 static macro Stmt $error.source.numeric(Expr $source_tag, Expr $target) {
   using $lower;
   {
-    List $lower = %(bad-types (source ${$source_tag}));
-    raise %(no-convert (target ${$target}) (cause ${$lower}));
+    List $lower = %(bad-types (source $($source_tag)));
+    raise %(no-convert (target $($target)) (cause $($lower)));
   }
 }
 
 static macro Stmt $error.no_convert(Expr $source_tag, Expr $target) {
-  raise %(no-convert (source ${$source_tag}) (target ${$target}));
+  raise %(no-convert (source $($source_tag)) (target $($target)));
 }
 
 /** Extracts the `String` payload of `value`.
@@ -79,11 +79,11 @@ static macro Stmt $error.decode.void() {
 }
 
 static macro Stmt $error.decode.type(Expr $tag) {
-  raise %(bad-types (source ${$tag}));
+  raise %(bad-types (source $($tag)));
 }
 
 static macro Stmt $error.convert.range(Expr $source_tag, Expr $target) {
-  raise %(conv-range (source ${$source_tag}) (target ${$target}));
+  raise %(conv-range (source $($source_tag)) (target $($target)));
 }
 
 #include "error/error.x"

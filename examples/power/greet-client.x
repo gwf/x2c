@@ -10,7 +10,7 @@ import "greet" as g;
 
 int main(void) {
   g.Greeting greeting = g.Greeting.new(%"x2c");
-  for (int line = 0; line < 3; line++) printf("%s", %"${greeting.line()}\n");
-  printf("%s", %"${g.repeat(%"ping", 3)}\n");
+  for (int line = 0; line < 3; line++) printf("%s", %"$(greeting.line())\n");
+  printf("%s", %"$(g.repeat(%"ping", 3))\n");
   return 0;
 }

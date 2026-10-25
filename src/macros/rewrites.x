@@ -131,9 +131,9 @@ static Var _ship_rewrite(Compiler c, List row) {
     match (row)
       case %(compile-time rewrite ?point ?kind ?name ?shape ?holes): {
         if (_unit_bound(row) || !Compiler.links_meta_function(name)) break;
-        List thawed = %(${c.thaw_declaration_syntax(kind)}
-          ${c.thaw_declaration_syntax(shape)}
-          ${c.thaw_declaration_syntax(holes)});
+        List thawed = %($(c.thaw_declaration_syntax(kind))
+          $(c.thaw_declaration_syntax(shape))
+          $(c.thaw_declaration_syntax(holes)));
         _require_owned(thawed.try_own());
         Var (own_kind, own_shape, own_holes) = thawed;
         shared = _rewrite_rule(
@@ -502,7 +502,7 @@ static List _prepared(
   Var shape = _template(c, result, sources, values, refused);
   if (refused) return _watched(c, result, sources, position, expected, site);
   RewriteRule rule = c.active_rewrites.car();
-  List key = %(${(int) position} ${rule.builtin} $expected $shape);
+  List key = %($((int) position) $(rule.builtin) $expected $shape);
   if (!c.prepared_rewrites) c.prepared_rewrites = {};
   Var stored;
   if (c.prepared_rewrites.try_get(key, stored))
@@ -531,7 +531,7 @@ static List _prepared(
     !preparation.repeated && preparation.order.len() == values.len()
     ? _skeleton(lowered, preparation.outputs) : NULL;
   c.prepared_rewrites[key] =
-    skeleton ? %($skeleton ${preparation.order.list()}) : 0;
+    skeleton ? %($skeleton $(preparation.order.list())) : 0;
   return lowered;
 }
 

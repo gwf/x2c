@@ -115,7 +115,7 @@ macro Expression $called(Expr $callee, Expr @arguments) =>
 
 /* Complete, source-ordered collection members before semantic resolution. */
 macro Expression $array_value(Expr @items) => %[@items];
-macro Expression $map_value(Entry @rows) => %{${@rows}};
+macro Expression $map_value(Entry @rows) => %{$(@rows)};
 
 /* Assignment syntax, before receiver-specific lowering. */
 macro Expression $assigned(Expr $target, Expr $stored) => $target = $stored;
@@ -150,7 +150,7 @@ meta List source_commas_content(List rows) => cons(<commas>, rows);
 meta List source_slice_content(List parts) => cons(<slice>, parts);
 /** Builds braced initializer content from its ordered comma rows. */
 meta List source_composite_content(List rows) =>
-  %(composite ${source_commas_content(rows)});
+  %(composite $(source_commas_content(rows)));
 
 /** Builds string content from its ordered text, expression, and cache rows.
     The parser and resolver share this shape. */
@@ -162,18 +162,18 @@ meta List source_operator_content(List parts) => cons(<op>, parts);
 
 /** Builds a typed operator expression from its content children. */
 meta List source_operator_expression(List type, List parts) =>
-  %(expr $type ${source_operator_content(parts)});
+  %(expr $type $(source_operator_content(parts)));
 
 /** Builds postfix update content with its token and operand. */
 meta List source_postfix_content(List parts) => cons(<postfix>, parts);
 
 /** Builds a typed postfix update expression from its content children. */
 meta List source_postfix_expression(List type, List parts) =>
-  %(expr $type ${source_postfix_content(parts)});
+  %(expr $type $(source_postfix_content(parts)));
 
 /** Returns a source form's content pattern without its typed shell.
     Bare-content dispatch arms retain the fixed head the match emitter labels.
-    Inside a shell, write `%(expr ? ${$shape(...)})` instead. */
+    Inside a shell, write `%(expr ? $($shape(...)))` instead. */
 meta List source_content_pattern(Macro shape, List names) =>
   shape.pattern(names).caddr();
 

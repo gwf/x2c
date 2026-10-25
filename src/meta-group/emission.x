@@ -78,7 +78,7 @@ static void _name_provider_bindings(
          (c.load_source && name == "main"))) {
       List binding = item.caddr().cadr();
       c.set_fact(
-        %(emitted $binding), %"_x2c_gensym_meta_group_${index}_$name");
+        %(emitted $binding), %"_x2c_gensym_meta_group_$(index)_$name");
     }
 }
 
@@ -188,11 +188,11 @@ static Var _template_calls(Compiler c, Var node, List callee) {
     case %(expr ?type (tpl-call ?stored (args *arguments))): {
       List values = %(nil);
       foreach (List argument in arguments.reverse())
-        values = %(expr ("List") (cons ${c.convert_expression(
-          _template_calls(c, argument, callee), %("Var"))} $values));
+        values = %(expr ("List") (cons $(c.convert_expression(
+          _template_calls(c, argument, callee), %("Var"))) $values));
       List template = stored is <list>
         ? c.convert_expression(c.cache_literal_list(stored), %("Var"))
-        : %(expr ("Var") ${c.cache_literal_var(stored.str())});
+        : %(expr ("Var") $(c.cache_literal_var(stored.str())));
       return %(expr $type (call $callee (args $template $values)));
     }
   List child;
@@ -205,17 +205,17 @@ static Var _template_calls(Compiler c, Var node, List callee) {
 static Var _native_targets(Compiler c, Var node, List lookup) {
   if (node is not <list>) return node;
   match (node) {
-    case %(expr ?(Type result) ${$called(
+    case %(expr ?(Type result) $($called(
         %(!set ?callee
-          (expr ? ${$source_identifier_content(%((binding ? ?name)))})),
-        %(*arguments))}): {
+          (expr ? $($source_identifier_content(%((binding ? ?name)))))),
+        %(*arguments)))): {
       if (name is not <string>) break;
       String spelling = name;
       List call = _native_call(c, callee, spelling, arguments, lookup);
       if (call) return c.convert_expression(call, result);
     }
-    case %(expr ?(Type type) ${$source_identifier_content(
-        %((binding ? ?name)))}): {
+    case %(expr ?(Type type) $($source_identifier_content(
+        %((binding ? ?name))))): {
       if (name is not <string>) break;
       String spelling = name;
       List symbol = _native_symbol(c, type, spelling, lookup);
@@ -249,7 +249,7 @@ static List _native_call(
   }
   List target = _native_targets(c, callee, lookup);
   return c.resolve_expression(
-    %(expr () (call $target (args @{values.list_free()}))), NULL);
+    %(expr () (call $target (args @(values.list_free())))), NULL);
 }
 
 /* Whether the compiler declares a parameter `Func` that the native module
@@ -271,8 +271,8 @@ static List _native_symbol(
   c.add_translation_dependency(module);
   Type pointer = type.reference();
   List target = %(expr (* void) (call $lookup
-    (args ${$!String{ $module }}
-          ${$!String{ $name }})));
+    (args $($!String{ $module })
+          $($!String{ $name }))));
   return %(expr $pointer (cast $pointer $target));
 }
 
@@ -307,7 +307,7 @@ static Map _initial_copies(Compiler c, Array units) {
         if (!c.meta_build && !copied) continue;
         List copy = copied
           ? c.sym.introduce(
-            %"_x2c_gensym_meta_initial_${binding.list().last()}") : NULL;
+            %"_x2c_gensym_meta_initial_$(binding.list().last())") : NULL;
         for (int i = 0; i < (int) units.len(); i++)
           if (units[i] == declaration) {
             List original = c.meta_build ? bound : %(op = $bound $initializer);
@@ -347,9 +347,9 @@ static List _entry(
       (bindings (op = (bind $stamp_binding ((dim)))
                      (expr (* char) (literal (* char) $literal)))))
     $reset
-    ${c.initializer_function(
+    $(c.initializer_function(
       %("Map"), c.sym.introduce(%"x2c_module_targets$suffix"),
-      %((return ("Map") $table)))});
+      %((return ("Map") $table)))));
 }
 
 /* Public native calls enter their own provider before the body runs. The
@@ -401,7 +401,7 @@ static List _resets(Compiler c, Map initials) {
             initializer = %(expr () (composite (commas $initializer)));
           Type native = %("__typeof__" (parens $target));
           initializer = %(expr $type (cast $native
-            ${c.convert_initializer(initializer, type, target)}));
+            $(c.convert_initializer(initializer, type, target))));
           resets.push(
             c.rebuild_statement(
               $!{ memcpy($target, $initializer, sizeof($target)); }).cadr());
@@ -414,11 +414,11 @@ static List _resets(Compiler c, Map initials) {
 
 /* The reset entry and each group function as `(name binding type)`. */
 static List _named(Compiler c, List reset) {
-  List named = %(("x2c_module_reset" ${reset.caddr().cadr()}
+  List named = %(("x2c_module_reset" $(reset.caddr().cadr())
                   ((func ((void))) void)));
   foreach (List entry in c.meta_group)
     match (entry) case %(function ?fn ?(String name) ?(Type type) *):
-      named = named.append(%(($name ${fn.caddr().cadr()} $type)));
+      named = named.append(%(($name $(fn.caddr().cadr()) $type)));
   return named;
 }
 
@@ -428,8 +428,8 @@ static List _targets(Compiler c, List named, List functions) {
   Array entries = [];
   if (c.meta_build)
     entries.push(
-      %(map-entry ${$!Symbol{ ${<functions>} }}
-        ${c.cache_literal_list(functions)}));
+      %(map-entry $($!Symbol{ $(<functions>) })
+        $(c.cache_literal_list(functions))));
   foreach (List row in named) {
     (String name, List binding, Type type) = row;
     if (c.load_source) type = c.loaded_call_type(type);
@@ -437,7 +437,7 @@ static List _targets(Compiler c, List named, List functions) {
     try function = c.convert_expression(
       %(expr $type (ident $binding)), %("Func"));
     catch %(malformed *): continue;
-    entries.push(%(map-entry ${$!String{ $name }} $function));
+    entries.push(%(map-entry $($!String{ $name }) $function));
   }
   Macro shape = $map_value;
   return c.rebuild_expression(%("Map"), shape(entries.list_free()));

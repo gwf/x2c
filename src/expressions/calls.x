@@ -26,8 +26,8 @@ module List _call(Resolve &r, List function, List supplied) {
     .c = r.c, .result_type = r.type, .supplied = supplied,
     .origin = r.origin};
   match (function)
-    case %(expr ? ${$source_operator_content(
-        %(. ?receiver (!set ?field (?name))))}):
+    case %(expr ? $($source_operator_content(
+        %(. ?receiver (!set ?field (?name)))))):
       return _method(site, receiver, field);
   return _function(site, function);
 }
@@ -124,10 +124,10 @@ static List _resolve_call_arguments(
 static List _discarding_callee(
   Compiler c, List callee, Type callee_type, List arguments) {
   List binding = NULL;
-  match (callee) case %(expr ? ${$source_identifier_content(
-      %((!set ?bound (*))))}): binding = bound;
+  match (callee) case %(expr ? $($source_identifier_content(
+      %((!set ?bound (*)))))): binding = bound;
   if (!binding || !callee_type.match(%((func *) *)) ||
-      %"discard-helper ${(long) binding}" in c.protocol_helpers)
+      %"discard-helper $((long) binding)" in c.protocol_helpers)
     return callee;
   int which = 0, index = 0;
   foreach (Var argument in arguments) {
@@ -151,13 +151,13 @@ static List _method(CallSite &k, List receiver, List field) {
   k.field = field;
   List resolution = _lookup(k);
   if (!resolution && _deferred_receiver(k.receiver)) {
-    List callee = %(expr (<macro-expr>) (op . ${k.receiver} ${k.field}));
+    List callee = %(expr (<macro-expr>) (op . $(k.receiver) $(k.field)));
     return _finish(k, k.result_type, callee, NULL, NULL);
   }
   /* A template's free owner can name a type only where it lands, and
      `T.member` there calls `T_member`, as the parser folds it. */
   if (!resolution) match (k.type) case %(typedef ?(String owner)):
-    return _function(k, %(expr () (ident (${%"${owner}_${k.method}"}))));
+    return _function(k, %(expr () (ident ($(%"$(owner)_$(k.method)")))));
   if (!resolution && !k.c.macro_holes && k.c.rewrite_rules) {
     List rewritten = _member_rewrite(k);
     if (rewritten) return rewritten;
@@ -177,7 +177,7 @@ static List _method(CallSite &k, List receiver, List field) {
       return _bound(k, binding, signature, declared, parameters, returns);
     case %(field ?access ?field_type): {
       List callee = %(expr $field_type
-        (op $access ${k.receiver} ${k.field}));
+        (op $access $(k.receiver) $(k.field)));
       return _finish(k, k.result_type, callee, field_type, NULL);
     }
   }
@@ -188,7 +188,7 @@ static List _method(CallSite &k, List receiver, List field) {
    aggregate it reaches through typedefs or one pointer declares. */
 static List _member_rewrite(CallSite &k) {
   List source = %(expr () (call
-    (expr () (op . ${k.receiver} ${k.field})) (args @{k.supplied})));
+    (expr () (op . $(k.receiver) $(k.field))) (args @(k.supplied))));
   List rewritten = k.c.rewrite(
     <member>, k.type.canonicalize(), source, <expression>, NULL, k.origin);
   Type aggregate = rewritten ? NULL : k.c.sym.aggregate_of(k.type);
@@ -225,7 +225,7 @@ static List _method_bind(
   if (named) {
     type = named.qualify(type);
     source = named;
-    receiver = %(expr $type ${receiver.caddr()});
+    receiver = %(expr $type $(receiver.caddr()));
   }
   if (_receiver_points_to(source, target))
     $fail.expressions_receiver_pointer(c, origin, type, declared);
@@ -233,7 +233,7 @@ static List _method_bind(
     return receiver;
   if (!_is_addressable(c, receiver))
     $fail.expressions_receiver_address(c, origin);
-  List address = %(expr ${type.reference()} (op & (parens $receiver)));
+  List address = %(expr $(type.reference()) (op & (parens $receiver)));
   return c.convert_expression(address, declared);
 }
 
@@ -292,11 +292,11 @@ List _x2c_func_call_arguments(List function, List storage, List arguments) {
   Compiler c = Compiler.expanding();
   Macro prepare = $func_argument, absent = $func_null_argument,
         boxed = $func_value, opaque = $func_opaque;
-  List count = $!int{ ${arguments.len()} };
+  List count = $!int{ $(arguments.len()) };
   Array prepared = [];
   int position = 0;
   foreach (List argument in arguments) {
-    List index = $!int{ ${position++} };
+    List index = $!int{ $(position++) };
     Type type = argument.cadr();
     int forwarded = type.car() == <opt-ref>;
     List source = c.cache_literal_list(
@@ -312,7 +312,7 @@ List _x2c_func_call_arguments(List function, List storage, List arguments) {
     }
     int addressable = _is_addressable(c, argument);
     List address = forwarded ? argument
-      : addressable ? %(expr ${type.reference()} (op & (parens $argument)))
+      : addressable ? %(expr $(type.reference()) (op & (parens $argument)))
       : $!int{ 0 };
     List carrier = forwarded || addressable ? source : $!int{ 0 };
     prepared.push(
@@ -455,7 +455,7 @@ static List _complete_iter_call(
   }
   List values = completed.list_free();
   if (supplied + 1 == expected) {
-    values = values.append(%(${_iter_destination()}));
+    values = values.append(%($(_iter_destination())));
     changed = 1;
   }
   if (!changed) return expression;
@@ -487,7 +487,7 @@ static const PrintfFn printf_family_info[] = {
    user function that happens to use a libc spelling is not one. */
 module const PrintfFn *_printf_family(List l) {
   match (l)
-    case %(expr ?type ${$source_identifier_content(%(?binding))}): {
+    case %(expr ?type $($source_identifier_content(%(?binding)))): {
       String name = Ast.binding_spelling(binding);
       int count = sizeof(printf_family_info) / sizeof(printf_family_info[0]);
       for (int i = 0; i < count; i++) {
@@ -508,8 +508,8 @@ module const PrintfFn *_printf_family(List l) {
 */
 String Compiler.printf_static_format(Compiler c, Var format) {
   match (format) {
-    case %(expr (* char) ${$source_literal_content(
-        %((* char) ?spelled))}): {
+    case %(expr (* char) $($source_literal_content(
+        %((* char) ?spelled)))): {
       String spelling = spelled;
       int length = spelling ? spelling.len() : 0;
       if (length < 2 || spelling[0] != '"' || spelling[length - 1] != '"')
@@ -519,8 +519,8 @@ String Compiler.printf_static_format(Compiler c, Var format) {
     case %(expr ("String") (cache ?id)): {
       List key = c.id_keys[id];
       match (key)
-        case %(string (expr ("String") ${$source_literal_content(
-            %(("String") ?text))})): {
+        case %(string (expr ("String") $($source_literal_content(
+            %(("String") ?text))))): {
           String spelling = text;
           return spelling.repr();
         }

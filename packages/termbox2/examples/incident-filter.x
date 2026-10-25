@@ -31,7 +31,7 @@ static List _read_incidents(String path) {
 
 static int _matches(List incident, String filter) {
   if (!filter) return 1;
-  String searchable = %"${incident[1]} ${incident[2]} ${incident[3]}".lower();
+  String searchable = %"$(incident[1]) $(incident[2]) $(incident[3])".lower();
   return searchable.contains(filter.lower());
 }
 
@@ -97,7 +97,7 @@ static void _draw(Termbox terminal, List matched, String filter, int chosen) {
   terminal.fill(0, height - 1, width, 1, " ", TB_BLACK, TB_WHITE);
   terminal.print(
     0, height - 1,
-    %"$prompt$shown | ${matched.len()} matches | click selects | " +
+    %"$prompt$shown | $(matched.len()) matches | click selects | " +
     "Backspace edits | Esc quits",
     TB_BLACK, TB_WHITE
   );
@@ -162,7 +162,7 @@ static List _run(String path) {
   filter = typed.join(NULL);
   String service = chosen < 0 ? "<none>" :
     matched[chosen].list()[2].string();
-  return %($filter ${matched.len()} $service);
+  return %($filter $(matched.len()) $service);
 }
 
 static int _report_failure(Symbol cause, List detail) {

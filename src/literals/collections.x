@@ -4,7 +4,7 @@ static macro Stmt $fail.literals_symbol_duplicate(
   Expr $c, Expr $origin, Expr $symbol) =>
   $c.report_error(
     <parse>, "duplicate Symbol in symbol set",
-    $origin, %("symbol:" ${$symbol.repr()}));
+    $origin, %("symbol:" $($symbol.repr())));
 
 static macro Stmt $fail.literals_symbol_literal(Expr $c, Expr $origin) =>
   $c.report_error(
@@ -230,7 +230,7 @@ List Compiler.parse_map_entry(Compiler c) {
   if (c.peek(0) == <ident> && c.peek(1) == <:>) {
     List literal = _atom_literal(c, c.token.text);
     c.next();
-    key = %(expr ${literal.cadr()} $literal);
+    key = %(expr $(literal.cadr()) $literal);
   }
   else key = c.parse_assignment();
   c.expect(<:>);

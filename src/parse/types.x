@@ -33,7 +33,7 @@ module List _storage_class(Compiler c) {
     }
     else if (!_prefix_macro_words(c, 0, storage)) break;
   }
-  return %( @{storage.list()} @{text.list()} );
+  return %( @(storage.list()) @(text.list()) );
 }
 
 module String _attribute(Compiler c) {
@@ -263,8 +263,8 @@ static List _scoped_aggregate_name(Compiler c, Symbol tag, List name) {
   if (name.car() is not <string>) return name;
   String spelling = name.car();
   if (c.peek(0) == <"{">)
-    return %(${c.declared_spelling(c.private_prefix(NULL), spelling)});
-  return %(${_type_reference(c, tag, spelling)});
+    return %($(c.declared_spelling(c.private_prefix(NULL), spelling)));
+  return %($(_type_reference(c, tag, spelling)));
 }
 
 /* Publishes an aggregate whose tokens start at `first`. A constructed
@@ -533,7 +533,7 @@ List Compiler.parse_enumerator(Compiler c, Type context) {
 static List _template_enumerator(Compiler c, Type context) {
   List name = _enumerator_name(c, context);
   List target = %(bind $name ());
-  if (c.test(<=>)) return %(op = $target ${c.parse_conditional()});
+  if (c.test(<=>)) return %(op = $target $(c.parse_conditional()));
   return target;
 }
 
@@ -639,7 +639,7 @@ module List _finish_type(Compiler c, List type) {
       (base.car() == <struct> || base.car() == <union> ||
        base.car() == <enum>))
     return c.sym.local_type(
-      %(@{storage.list_free()} @{_finish_type(c, base)}));
+      %(@(storage.list_free()) @(_finish_type(c, base))));
   storage.free();
   Var whole = _finish_type_spec(c, type);
   // Binding an already constructed aggregate can preserve its whole form.
@@ -673,11 +673,11 @@ static Var _finish_type_spec(Compiler c, Var spec) {
   if (spec is not <list>) return spec;
   match (spec) {
     case %((!or ?tag struct union) ?name):
-      return %($tag ${_finish_tag_name(c, name)});
+      return %($tag $(_finish_tag_name(c, name)));
     case %((!or ?tag struct union) ?name (fields *members)):
       return _finish_aggregate_type(c, tag, name, members);
     case %(enum ?name):
-      return %(enum ${_finish_tag_name(c, name)});
+      return %(enum $(_finish_tag_name(c, name)));
     case %(enum ?name (*members)):
       return _finish_aggregate_type(c, <enum>, name, members);
     // Semantic types name an expanded template typedef by its spelling.

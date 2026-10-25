@@ -518,7 +518,7 @@ static void _copy_tree(Path source, Path target) {
 void Path.copy_tree(Path source, Path target) {
   struct stat info;
   if (!lstat(source, &info) && S_ISDIR(info.st_mode) &&
-      %"${target.absolute()}/".startswith(%"${source.absolute()}/"))
+      %"$(target.absolute())/".startswith(%"$(source.absolute())/"))
     File.path_error("Path.copy_tree", target, EINVAL);
   _copy_tree(source, target);
 }

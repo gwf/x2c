@@ -15,7 +15,7 @@ static macro Stmt $fail.generate_file_write(
     String reason = String.new(strerror((int) $failure.assoc(<"errno">)));
     $c.report_error(
       <emit>, "failed to write generated file",
-      $site, %("file: ${$failure.assoc(<path>)}" "reason: $reason"));
+      $site, %("file: $($failure.assoc(<path>))" "reason: $reason"));
   }
 }
 
@@ -34,7 +34,7 @@ static macro Stmt $fail.generate_file_write(
 */
 void Compiler.generate_code(Compiler c, List ast, String dir) {
   ast = _without_trivia(ast);
-  String basename = %"${dir.rstrip("/")}/${Path.stem(c.filename)}";
+  String basename = %"$(dir.rstrip("/"))/$(Path.stem(c.filename))";
   List outputs = _generated_code(c, ast, basename);
   String interface = c.source_facts ? NULL : c.interface_text();
   if (interface) outputs = outputs.append(%("$basename.xi" $interface));
@@ -58,7 +58,7 @@ static List _generated_code(Compiler c, List ast, String basename) {
   String hash = Path.identifier_hash(c.filename);
   Map bindings;
   (header, source, bindings) = c.setup_cache_init(
-    header, source, %"_x2c_gensym_hcache_${hash}_",
+    header, source, %"_x2c_gensym_hcache_$(hash)_",
     %"_x2c_gensym_hcache_guard_$hash",
     %"_x2c_gensym_hcache_init_$hash");
   defer bindings.cleanup();
@@ -66,8 +66,8 @@ static List _generated_code(Compiler c, List ast, String basename) {
   List ccode = _emit_source(c, source, bindings, inline_bodies);
   String hfile = %"$basename.h", cfile = %"$basename.c";
   return %(
-    $hfile ${c.code_pretty_string(hcode, hfile)}
-    $cfile ${c.code_pretty_string(ccode, cfile)}
+    $hfile $(c.code_pretty_string(hcode, hfile))
+    $cfile $(c.code_pretty_string(ccode, cfile))
   );
 }
 
@@ -170,7 +170,7 @@ static List _include_guard(Compiler c, List content) {
   if (c.runtime_inc && !_has_runtime_include(content))
     content = cons(%(preproc "#include \"x2c.x\""), content);
   String guard = Path.identifier_hash(c.filename);
-  return %(@{_banner()} @{_header_guard(content, guard)});
+  return %(@(_banner()) @(_header_guard(content, guard)));
 }
 
 static int _has_runtime_include(List content) {
@@ -190,13 +190,13 @@ static List _banner(void) => %(
 static List _header_guard(List content, String guard) => %(
     (preproc "#pragma once")
     (space "\n\n")
-    (preproc "#ifndef __GUARD_0x${guard}__")
+    (preproc "#ifndef __GUARD_0x$(guard)__")
     (space "\n")
-    (preproc "#define __GUARD_0x${guard}__")
+    (preproc "#define __GUARD_0x$(guard)__")
     (space "\n\n")
     @content
     (space "\n")
-    (preproc "#endif /* __GUARD_0x${guard}__ */")
+    (preproc "#endif /* __GUARD_0x$(guard)__ */")
     (space "\n")
   );
 
@@ -219,8 +219,8 @@ static List _source_unit(Compiler c, List content) {
       foreach (List include in exception) _push_line(lines, include);
     _push_line(lines, _runtime_entry(c, node));
   }
-  return %(@{_banner()} (preproc "#define __GUARD_0x${guard}__") @runtime
-           @{lines.list_free()});
+  return %(@(_banner()) (preproc "#define __GUARD_0x$(guard)__") @runtime
+           @(lines.list_free()));
 }
 
 /* `main` initializes the runtime before anything else, including its file

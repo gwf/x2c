@@ -20,7 +20,7 @@ static Var add(const void *input, size_t input_size) {
     raise %(bad-arg (operation "thread-notify worker"));
   }
   const NotifyWork *work = input;
-  String result = %"${work.left} + ${work.right} = ${work.left + work.right}";
+  String result = %"$(work.left) + $(work.right) = $(work.left + work.right)";
   work.async.send();
   return result;
 }

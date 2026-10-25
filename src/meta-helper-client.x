@@ -30,7 +30,7 @@ static macro Stmt $fail.meta_helper_client_helper_timeout(
   $c.report_error(
     <macro>,
     "%s%g s".printf("this meta call ran longer than ", $limit),
-    $site, %("function: ${$name}" "set X2C_META_TIMEOUT to a larger limit in seconds, or 0 for none"));
+    $site, %("function: $($name)" "set X2C_META_TIMEOUT to a larger limit in seconds, or 0 for none"));
 }
 
 static macro Stmt $fail.meta_helper_client_helper_stopped(
@@ -38,7 +38,7 @@ static macro Stmt $fail.meta_helper_client_helper_stopped(
   $c.report_error(
     <macro>,
     "this meta call stopped the compile-time helper",
-    $site, %("function: ${$name}" "reason: ${$reason}"));
+    $site, %("function: $($name)" "reason: $($reason)"));
 }
 
 /** Reports a meta function's error `message` with `notes` under
@@ -192,7 +192,7 @@ static void _send(Call &c, List arguments) {
   }
   Var subject = Macro.subject();
   if (subject is void) subject = %();
-  _send_frame(c, %(${c.operation} ${c.table} ${c.name} $arguments $subject));
+  _send_frame(c, %($(c.operation) $(c.table) $(c.name) $arguments $subject));
 }
 
 static void _send_frame(Call &call, List message) {
@@ -463,7 +463,7 @@ MetaHelper MetaHelper.new(String path, Map failures, Map units) {
     The copy lasts until close, including across helper restarts. */
 void MetaHelper.retain_executable(MetaHelper helper) {
   helper.snapshot = Path.temp_dir();
-  String path = %"${helper.snapshot}/helper";
+  String path = %"$(helper.snapshot)/helper";
   Path.copy_file(helper.path, path);
   helper.path = path;
 }
@@ -537,7 +537,7 @@ static void _close(MetaHelper helper) {
   defer active = previous;
   _stop(0);
   if (helper.snapshot) {
-    unlink(%"${helper.snapshot}/helper");
+    unlink(%"$(helper.snapshot)/helper");
     rmdir(helper.snapshot);
     helper.snapshot = NULL;
   }

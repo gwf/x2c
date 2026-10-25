@@ -334,7 +334,7 @@ static void _interpreter_ownership(ReplSession s) {
   _expect(s, "struct ReplPoint returned=make_point(23);", <executed>, void);
   _expect(s,
     "int storage_failure(void) { struct ReplPoint p={9}; "
-    "int *q=&p.x; raise %(probe (value ${*q})); }", <defined>, void);
+    "int *q=&p.x; raise %(probe (value $(*q))); }", <defined>, void);
   for (int i = 0; i < 20; i++) {
     _expect(s, "storage_failure();", <failed>, void);
     _expect(s, "make_point(99).x;", <value>, 99);
@@ -736,7 +736,7 @@ static void _truth_values(ReplSession s) {
   foreach (String declaration, %(
     "String value=\"\";" "String value=%\"\";"
     "Symbol value=0;" "List value=%();" "String value=\"yes\";")) {
-    String name = %"truth_case_${i}";
+    String name = %"truth_case_$(i)";
     String body = "if (value) hits+=1; if (!value) hits+=2; "
       "int a=value && ++hits; int b=value || ++hits; "
       "return hits*100+a*10+b+(value ? 1000 : 0);";
@@ -752,7 +752,7 @@ static void _pointer_updates(ReplSession s) {
   foreach (String operation, %(
     "p++;" "++p;" "p+=1;" "p=p+1;"
     "p--;" "--p;" "p-=1;")) {
-    String name = %"pointer_case_${i}";
+    String name = %"pointer_case_$(i)";
     String body = %"int *p=data+1; $operation return *p;";
     _expect(s, %"int $name(void) { int data[3]={10,20,30}; $body }",
             <defined>, void);

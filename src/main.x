@@ -19,14 +19,14 @@
 #include <unistd.h>
 
 static macro Stmt $fail.main_env_unknown(Expr $wanted) =>
-  Diagnostics.driver_error(%"unknown env name '${$wanted}'");
+  Diagnostics.driver_error(%"unknown env name '$($wanted)'");
 
 static macro Stmt $fail.main_external_failed(Expr $path) =>
   Diagnostics.driver_error(
-    %"cannot run external command '${$path}': ${String.new(strerror(errno))}");
+    %"cannot run external command '$($path)': $(String.new(strerror(errno)))");
 
 static macro Stmt $fail.main_diagnostics_unwritable(Expr $diagnostics) =>
-  Diagnostics.driver_error(%"cannot open diagnostics file '${$diagnostics}'");
+  Diagnostics.driver_error(%"cannot open diagnostics file '$($diagnostics)'");
 
 // environment
 
@@ -55,18 +55,18 @@ static List _env_rows(CliRequest request) {
   String roots = ":".join(request.package_roots());
   Compiler.configure_interfaces(request.out_dir, 0);
   return %(
-    ("home" ${x2c_get_root()})
+    ("home" $(x2c_get_root()))
     ("executable" $executable)
-    ("libexec" ${Compiler.home_libexec()})
-    ("identity" ${Compiler.identity()})
-    ("include_dir" ${toolchain.include_dir})
-    ("runtime_lib" ${toolchain.runtime_lib})
-    ("prelude" ${Compiler.prelude_interface()})
-    ("prelude_missing" ${" ".join(Compiler.prelude_missing_interfaces())})
+    ("libexec" $(Compiler.home_libexec()))
+    ("identity" $(Compiler.identity()))
+    ("include_dir" $(toolchain.include_dir))
+    ("runtime_lib" $(toolchain.runtime_lib))
+    ("prelude" $(Compiler.prelude_interface()))
+    ("prelude_missing" $(" ".join(Compiler.prelude_missing_interfaces())))
     ("package_dirs" $roots)
-    ("cc" ${toolchain.cc})
-    ("ar" ${toolchain.ar})
-    ("cache_dir" ${Compiler.cache_root()}));
+    ("cc" $(toolchain.cc))
+    ("ar" $(toolchain.ar))
+    ("cache_dir" $(Compiler.cache_root())));
 }
 
 // external commands

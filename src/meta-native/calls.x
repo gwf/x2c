@@ -23,7 +23,7 @@ List Compiler.evaluate_meta_statement(
   Var value = c.evaluate_meta_value(expression, site, 0);
   if (_code_result(c, value) && !value.is_nil())
     return c.bind_meta_statement(value, context);
-  return %(stmnt ${_meta_result(c, expression, value, site)});
+  return %(stmnt $(_meta_result(c, expression, value, site)));
 }
 
 /* The expression a meta call's `value` becomes at its call. */
@@ -119,9 +119,9 @@ static List meta_call_form = NULL;
 static Var _meta_call_value(Compiler c, List expression, Token site) {
   match (expression)
     case %(expr ? (meta-call
-        (expr ?callee ${$source_identifier_content(
+        (expr ?callee $($source_identifier_content(
           %((!or (binding ? ?name)
-                 ((!or binding-name binding-global) ?name))))})
+                 ((!or binding-name binding-global) ?name))))))
         (args *arguments))): {
       if (name is not <string>) break;
       Array values = _meta_values(c, callee, arguments, site);
@@ -154,7 +154,7 @@ Var Compiler.apply_meta_binding(
   Var signature;
   if (c.native_meta.try_get(name, signature) &&
       arguments.len() == Compiler.iterator_arity(signature))
-    arguments = arguments.append(%(${Iter.new()}));
+    arguments = arguments.append(%($(Iter.new())));
   return _apply_linked(function.pointer(), arguments);
 }
 

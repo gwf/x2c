@@ -33,7 +33,7 @@ static macro Stmt $fail.collect_runtime_read(
   $c.report_error(
     <driver>,
     "cannot read runtime source",
-    $site, %("path: ${$runtime}"));
+    $site, %("path: $($runtime)"));
 }
 
 static macro Stmt $fail.collect_include_read(
@@ -41,31 +41,31 @@ static macro Stmt $fail.collect_include_read(
   $c.report_error(
     <driver>,
     "cannot read include",
-    $site, %("stage: collect" "include: ${$target}" "path: ${$path}"));
+    $site, %("stage: collect" "include: $($target)" "path: $($path)"));
 }
 
 static macro Stmt $fail.collect_package_unknown(
   Expr $c, Expr $site, Expr $name) {
   $c.report_error(
     <driver>,
-    %"unknown package '${$name}'",
-    $site, %( "searched: <root>/${$name}/src/${$name}.{x,xp}, <root>/${$name}/${$name}.{x,xp}" ));
+    %"unknown package '$($name)'",
+    $site, %( "searched: <root>/$($name)/src/$($name).{x,xp}, <root>/$($name)/$($name).{x,xp}" ));
 }
 
 static macro Stmt $fail.collect_package_read(
   Expr $c, Expr $site, Expr $package, Expr $entry) {
   $c.report_error(
     <driver>,
-    %"cannot read package '${$package.package}'",
-    $site, %( "path: ${$entry}" ));
+    %"cannot read package '$($package.package)'",
+    $site, %( "path: $($entry)" ));
 }
 
 static macro Stmt $fail.collect_package_prefix(
   Expr $c, Expr $site, Expr $name, Expr $spelling, Expr $unit, Expr $fix) {
   $c.report_error(
     <driver>,
-    %"package '${$name}' exposes unprefixed top-level declaration '${$spelling}'",
-    $site, %( "'${$unit}' is x2c source outside the package; include it ${$fix}" ));
+    %"package '$($name)' exposes unprefixed top-level declaration '$($spelling)'",
+    $site, %( "'$($unit)' is x2c source outside the package; include it $($fix)" ));
 }
 
 static macro Stmt $fail.collect_module_block(Expr $c, Expr $site) {
@@ -87,7 +87,7 @@ static macro Stmt $fail.collect_module_prefix(
   Expr $c, Expr $site, Expr $member, Expr $other) {
   $c.report_error(
     <driver>,
-    %"module member '${$member}' takes the static prefix of '${$other}'",
+    %"module member '$($member)' takes the static prefix of '$($other)'",
     $site, %("a file's statics take its path with each non-identifier"
     "character made '_' and trailing '_' dropped, then '___'; rename one of"
     "the files"));
@@ -98,15 +98,15 @@ static macro Stmt $fail.collect_module_read(
   $c.report_error(
     <driver>,
     "cannot read module member",
-    $site, %("path: ${$path}"));
+    $site, %("path: $($path)"));
 }
 
 static macro Stmt $fail.collect_module_cycle(
   Expr $c, Expr $site, Expr $member, Expr $path) {
   $c.report_error(
     <driver>,
-    %"module member '${$member}' is already being spliced",
-    $site, %("path: ${$path}"));
+    %"module member '$($member)' is already being spliced",
+    $site, %("path: $($path)"));
 }
 
 static macro Stmt $fail.collect_interface_write(Expr $c, Expr $site) {
@@ -119,8 +119,8 @@ static macro Stmt $fail.collect_interface_write(Expr $c, Expr $site) {
 static macro Stmt $report.collect_loaded_declaration(
   Expr $c, Expr $site, Expr $name, Expr $path) {
   $c.report_error(
-    <type>, %"conflicting native declaration: ${$name}", $site,
-    %("provider: ${$path}"));
+    <type>, %"conflicting native declaration: $($name)", $site,
+    %("provider: $($path)"));
 }
 
 module Scope process_cache_scope = NULL;

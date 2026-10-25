@@ -221,7 +221,7 @@ List Compiler.resolve_protocol_member(
   if (!resolved) return NULL;
   (String spelling, Type signature) = resolved;
   if (spelling == c.fn_name) return NULL;
-  return %(${c.sym.reference(%($spelling), NULL)} $signature);
+  return %($(c.sym.reference(%($spelling), NULL)) $signature);
 }
 
 /* Cache the selected declaration, not a transaction-owned binding identity. */
@@ -264,7 +264,7 @@ static List _base_alias(
     List record = occurrence.car();
     List declared = record.last().list().cdr();
     if (!_declares_member(declared, member)) continue;
-    String source = %"${base_name}_$member";
+    String source = %"$(base_name)_$member";
     Type signature = c.sym.get(%($source));
     if (!signature || !signature.is_function()) continue;
     return %($source $signature);
@@ -286,7 +286,7 @@ static List _adopted_member(
       case %(? ?(Symbol status) ?(String source) ?(Type signature) ? ?): {
         if (status == <implmntd>) return %($source $signature);
         if (status == <native>)
-          return %(${_member_spelling(current, member)} $signature);
+          return %($(_member_spelling(current, member)) $signature);
       }
     return %();
   }
@@ -334,7 +334,7 @@ static int _consider(
         g.first_storage = storage;
       }
       else if (g.first_storage != storage) {
-        g.result = %(linkage ${g.first_linkage} $owner);
+        g.result = %(linkage $(g.first_linkage) $owner);
         return 1;
       }
     }

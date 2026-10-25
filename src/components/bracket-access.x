@@ -9,7 +9,7 @@
 /* The linked meta copies include these diagnostics from this owner. */
 macro Stmt $fail.access_read(Expr $site, Expr $type) =>
   x2c_diagnostic_fail_at(
-    $site, <xform>, %"type ${$type.repr()} does not support bracket indexing",
+    $site, <xform>, %"type $($type.repr()) does not support bracket indexing",
     NULL);
 
 macro Stmt $fail.access_string_store(Expr $site) {
@@ -26,7 +26,7 @@ macro Stmt $fail.access_string_store(Expr $site) {
 macro Stmt $fail.access_store(Expr $site, Expr $type) =>
   x2c_diagnostic_fail_at(
     $site, <xform>,
-    %"type ${$type.repr()} does not support bracket assignment",
+    %"type $($type.repr()) does not support bracket assignment",
     %("use an explicit copy-producing method where available"));
 
 macro Stmt $fail.access_update(Expr $site, Expr $type, Expr $value) {
@@ -34,7 +34,7 @@ macro Stmt $fail.access_update(Expr $site, Expr $type, Expr $value) {
     String what = $value ? "compound assignment" : "increment or decrement";
     x2c_diagnostic_fail_at(
       $site, <xform>,
-      %"type ${$type.repr()} does not support indexed $what", NULL);
+      %"type $($type.repr()) does not support indexed $what", NULL);
   }
 }
 
@@ -44,7 +44,7 @@ macro Stmt $fail.access_operand(Expr $site, Expr $op, Expr $type) {
       ? "indexed += requires a numeric, Var, or String operand"
       : "indexed compound assignment requires a numeric or Var operand";
     x2c_diagnostic_fail_at(
-      $site, <xform>, message, %("right type: ${$type.repr()}"));
+      $site, <xform>, message, %("right type: $($type.repr())"));
   }
 }
 

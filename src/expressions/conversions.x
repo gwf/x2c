@@ -6,7 +6,7 @@ static keyword loop $private.loop;
 module int _null_literal(List expr) =>
   _integer_literal_kind(expr, NULL) == <zero> ||
   expr.match(
-    %(expr ? ${$source_identifier_content(%((binding ? "NULL")))}));
+    %(expr ? $($source_identifier_content(%((binding ? "NULL"))))));
 
 /* explicit converter calls
 
@@ -33,7 +33,7 @@ module void _note_explicit_converter(
     if (method != spelled && (method != "str" || result !== %("String")))
       return;
     c.protocol_helpers["explicit-converter"] =
-      %($call $method ${c.token_location(origin)});
+      %($call $method $(c.token_location(origin)));
   }
 }
 
@@ -96,7 +96,7 @@ static void _check_noted_converter(
       c.sym.resolve_key(call.cadr()) != c.sym.resolve_key(target))
     return;
   List receiver = NULL;
-  match (call) case %(expr ? ${$called(?, %(?first *))}): receiver = first;
+  match (call) case %(expr ? $($called(?, %(?first *)))): receiver = first;
   Type source = receiver ? receiver.cadr() : NULL;
   if (!source) return;
   int source_is_var = c.sym.is_var_type(source);
@@ -141,20 +141,20 @@ static int _implicit_converter(
 static int _defines_crossing(Compiler c, Type source, Type target) {
   if (!c.fn_name || !source.match(%(?)) || !target.match(%(?))) return 0;
   String from = source.car().str(), to = target.car().str();
-  return c.fn_name == %"${from}_${to.lower()}" ||
-    c.fn_name == %"${from}_str" || c.fn_name == %"${from}_var";
+  return c.fn_name == %"$(from)_$(to.lower())" ||
+    c.fn_name == %"$(from)_str" || c.fn_name == %"$(from)_var";
 }
 
 // C string literals
 
 module int _is_raw_string_literal(List expr) {
   match (expr) {
-    case %(expr ? ${$grouped(?inner)}):
+    case %(expr ? $($grouped(?inner))):
       return _is_raw_string_literal(inner);
-    case %(expr ? ${$source_literal_content(%(?type ?))}):
+    case %(expr ? $($source_literal_content(%(?type ?)))):
       return Type.is_char_pointer_like(type);
-    case %(expr ? ${$source_operator_content(
-        %(? ? ?ontrue ?onfalse))}):
+    case %(expr ? $($source_operator_content(
+        %(? ? ?ontrue ?onfalse)))):
       return _is_raw_string_literal(ontrue) &&
              _is_raw_string_literal(onfalse);
   }
@@ -183,22 +183,22 @@ List Compiler.promote_string_literal(Compiler c, List expr) =>
 static List _raw_string_to_string(Compiler c, List expr) {
   match (expr) {
     case %(expr (!or (* char) ((dim *) char))
-        ${$source_literal_content(
-          %((!or (* char) ((dim *) char)) ?))}): {
+        $($source_literal_content(
+          %((!or (* char) ((dim *) char)) ?)))): {
       List value = %(expr ("String") (call "String_new" (args $expr)));
       if (c.runtime_literals) return value;
-      return %(expr ("String") ${c.cache(%(string $value))});
+      return %(expr ("String") $(c.cache(%(string $value))));
     }
     case %(expr (!or (* char) ((dim *) char))
-        ${$grouped(?inner)}):
+        $($grouped(?inner))):
       // A statement expression's block converts as one dynamic value.
       match (inner) case %(expr *): {
         List converted = _raw_string_to_string(c, inner);
         return %(expr ("String") (parens $converted));
       }
     case %(expr (!or (* char) ((dim *) char))
-        ${$source_operator_content(
-          %(? ?condition ?ontrue ?onfalse))}): {
+        $($source_operator_content(
+          %(? ?condition ?ontrue ?onfalse)))): {
       List converted_true = _raw_string_to_string(c, ontrue);
       List converted_false = _raw_string_to_string(c, onfalse);
       return %(expr ("String")
@@ -304,8 +304,8 @@ static List _compound_literal(
    the result as a whole. */
 static List _convert_conditional_arms(
   Compiler c, List expr, Type declared_target) {
-  match (expr) case %(expr ? ${$source_operator_content(
-      %(?operator ?condition ?ontrue ?onfalse))}): {
+  match (expr) case %(expr ? $($source_operator_content(
+      %(?operator ?condition ?ontrue ?onfalse)))): {
     Type true_type = ontrue.cadr(), false_type = onfalse.cadr();
     if (ontrue.list().match(%(expr ? (composite *))) ||
         onfalse.list().match(%(expr ? (composite *))) ||
@@ -326,8 +326,8 @@ static List _convert_conditional_arms(
    destination conversion because only one association runs. */
 static List _convert_generic_arms(
   Compiler c, List expr, Type declared_target) {
-  match (expr) case %(expr () ${$source_generic_content(
-      %(?control *associations))}): {
+  match (expr) case %(expr () $($source_generic_content(
+      %(?control *associations)))): {
     Array converted = [];
     int changed = 0;
     foreach (List association in associations) match (association)
@@ -337,8 +337,8 @@ static List _convert_generic_arms(
         converted.push(%(association $selector $result));
       }
     if (changed)
-      return %(expr $declared_target ${source_generic_content(
-        %($control @{converted.list_free()}))});
+      return %(expr $declared_target $(source_generic_content(
+        %($control @(converted.list_free())))));
     converted.free();
   }
   return NULL;
@@ -350,9 +350,9 @@ static List _convert_untyped(
   if (generic) return generic;
   if (target_is_var)
     match (expr) {
-      case %(expr () ${$source_identifier_content(%((binding ? "NULL")))}):
+      case %(expr () $($source_identifier_content(%((binding ? "NULL"))))):
         return %(expr ("Var") (call "Var_null" (args)));
-      case %(expr () ${$source_identifier_content(%((binding ? ?)))}):
+      case %(expr () $($source_identifier_content(%((binding ? ?))))):
         $fail.expressions_var_unresolved(c, NULL);
     }
   return expr;
@@ -366,7 +366,7 @@ static List _convert_known_value(
   if (type.match(%((!or (dim *) (!quote *)) char))) {
     List string = _raw_string_to_string(c, expr);
     if (c.sym.is_string_type(target))
-      return %(expr $target ${string.caddr()});
+      return %(expr $target $(string.caddr()));
     if (target_is_var)
       return %(expr ("Var") (call "String_var" (args $string)));
   }
@@ -438,7 +438,7 @@ static List _read_var(
     if (!tag && scalar_target.is_enum()) tag = <i32>;
     String extractor = scalar_target.var_numeric_extractor();
     if (extractor) {
-      String tagsym = %"${(unsigned long) tag}";
+      String tagsym = %"$((unsigned long) tag)";
       List converted = %(expr ("Var") (call "Var_convert" (args
         $expr (expr ("Symbol") $tagsym))));
       return %(expr $target (call $extractor (args $converted)));
@@ -475,7 +475,7 @@ static List _var_checked_reader(
     List reader = _var_exact_reader(c, expr, owner);
     if (!reader) reader = c.converter_call(expr, type, owner);
     if (reader)
-      return owner == target ? reader : %(expr $target ${reader.caddr()});
+      return owner == target ? reader : %(expr $target $(reader.caddr()));
   }
   return NULL;
 }
@@ -505,7 +505,7 @@ static List _var_exact_reader(Compiler c, List expr, Type target) {
    tag, when the runtime declares one, as a callee; or NULL. */
 static List _payload_reader(Compiler c, Type target) =>
   target.match(%(?))
-    ? _var_reader(c, %"Var_${target.car().str().lower()}_payload", target)
+    ? _var_reader(c, %"Var_$(target.car().str().lower())_payload", target)
     : NULL;
 
 /* The global function `reader` from one `Var` to `target`, as a callee, or
@@ -559,7 +559,7 @@ static List _box_var(Compiler c, List expr, Type type) {
       case <ldouble>: box = "Var_box_long_double"; break;
     }
     if (box) return %(expr ("Var") (call $box (args $expr)));
-    String tagsymnumstr = %"${(unsigned long) tag}";
+    String tagsymnumstr = %"$((unsigned long) tag)";
     return %(expr ("Var") (call "Var_new" (args
                 (expr ("Symbol") $tagsymnumstr) $expr)));
   }
@@ -619,8 +619,8 @@ static String _converter_name(Type owner, Type target) {
     targetedname = targetedname[split + 2:];
   }
   return targetedname == "String"
-    ? %"$prefix${typename}_str"
-    : %"$prefix${typename}_${targetedname.lower()}";
+    ? %"$prefix$(typename)_str"
+    : %"$prefix$(typename)_$(targetedname.lower())";
 }
 
 /** The global builtin boxers and scalar formatters only observe their
@@ -638,7 +638,7 @@ int Compiler.is_builtin_converter_call(Compiler c, List expr) {
       String spelling = NULL;
       if (callee is <string>) spelling = callee;
       else match (callee)
-        case %(expr ? ${$source_identifier_content(%(?bound))}): {
+        case %(expr ? $($source_identifier_content(%(?bound)))): {
           binding = bound;
           spelling = Ast.binding_spelling(binding);
         }
@@ -658,8 +658,8 @@ static List _converted_temporary(
   if (c.sym.resolve_numeric_type(owner) &&
       c.resolve_protocol_member(target, "discard")) {
     match (call)
-      case $called(%(expr ? ${$source_identifier_content(
-          %((!set ?binding (*))))}), *arguments):
+      case $called(%(expr ? $($source_identifier_content(
+          %((!set ?binding (*)))))), *arguments):
         _note_fresh_callee(c, binding);
   }
   return call;
@@ -671,7 +671,7 @@ static void _check_null_reference(
   Compiler c, List expr, Type target) {
   if (target.car() != <&>) return;
   if (_integer_literal_kind(expr, NULL) == <zero> || expr.match(
-    %(expr () ${$source_identifier_content(%((binding ? "NULL")))})))
+    %(expr () $($source_identifier_content(%((binding ? "NULL")))))))
     $fail.expressions_ref_null(c, NULL, target);
 }
 
@@ -768,18 +768,18 @@ static int _known_pointee(Type type) {
    only syntactically decidable forms. A wrong guess would reject legal C. */
 static String _not_null_pointer_constant(Compiler c, List expr) {
   match (expr) {
-    case %(expr ? ${$grouped(?inner)}):
+    case %(expr ? $($grouped(?inner))):
       return _not_null_pointer_constant(c, inner);
     // sizeof is an integer constant expression, but never a zero-valued
     // one: no type in C has size zero.
-    case %(expr ? ${$sizeof_grouped(?operand)}):
+    case %(expr ? $($sizeof_grouped(?operand))):
       return "sizeof";
-    case %(expr ? ${$sizeof_expression(?operand)}):
+    case %(expr ? $($sizeof_expression(?operand))):
       return "sizeof";
     // Unary minus or plus over a nonzero literal is still nonzero.  The
     // pattern has a fixed length, so a binary use of the same operator,
     // which would need folding, does not match it.
-    case %(expr ? ${$source_operator_content(%(?oper ?operand))}): {
+    case %(expr ? $($source_operator_content(%(?oper ?operand)))): {
       Symbol op = oper;
       if (op != <-> && op != <+>) return NULL;
       String inner = NULL;
@@ -792,8 +792,8 @@ static String _not_null_pointer_constant(Compiler c, List expr) {
     // because an enum constant and a variable of enum type are spelled
     // identically here, and a zero-valued enum constant *is* a null pointer
     // constant.
-    case %(expr ?type ${$source_identifier_content(
-        %((binding ? ?name)))}): {
+    case %(expr ?type $($source_identifier_content(
+        %((binding ? ?name))))): {
       Type vartype = c.sym.resolve_numeric_type(type);
       if (!vartype || vartype.is_enum() || !vartype.is_integral()) return NULL;
       return name;
@@ -816,9 +816,9 @@ static String _not_null_pointer_constant(Compiler c, List expr) {
    when it cannot decide. */
 static Symbol _integer_literal_kind(List expr, String &?out_text) {
   match (expr) {
-    case %(expr ? ${$grouped(?inner)}):
+    case %(expr ? $($grouped(?inner))):
       return _integer_literal_kind(inner, out_text);
-    case %(expr ? ${$source_literal_content(%(?ltype ?text))}): {
+    case %(expr ? $($source_literal_content(%(?ltype ?text)))): {
       String spelling = text, Type type = ltype;
       unsigned long long value;
       // A character constant is integral too, but it is not spelled in

@@ -30,11 +30,11 @@ List Compiler.forward_parameters(Compiler c, List types) {
   Array declarations = [], arguments = [];
   int index = 0;
   foreach (Type type in types) {
-    List binding = c.sym.introduce(%"a${index++}");
+    List binding = c.sym.introduce(%"a$(index++)");
     declarations.push(type.parameter_ast(binding));
     arguments.push($!($type){ $binding });
   }
-  return %(${declarations.list_free()} ${arguments.list_free()});
+  return %($(declarations.list_free()) $(arguments.list_free()));
 }
 
 /* Binds `syntax`, a template that defines the function `binding`. The
@@ -73,7 +73,7 @@ String Compiler.protocol_update_helper(
 
   String suffix = postfix ? "postfix" : "update";
   String name =
-    %"_x2c_gensym_proto_${participant.car().str().lower()}_${member}_$suffix";
+    %"_x2c_gensym_proto_$(participant.car().str().lower())_$(member)_$suffix";
   List helper = c.sym.introduce(name);
   List callee = $!($source_type){ $source_binding };
   /* A direct update stores the member's result through `lhs`; the `op`
@@ -114,7 +114,7 @@ static void _publish_update(Compiler c, List helper, List syntax) {
   match (function)
     case %(function ?result ?declarator (block *body)):
       function = %(function $result $declarator
-                    (block (at ${c.origin} (seq @body))));
+                    (block (at $(c.origin) (seq @body))));
   c.add_early(function);
 }
 
@@ -159,7 +159,7 @@ List Compiler.protocol_discard_helper(
   List resolved = c.resolve_protocol_member(participant, member);
   if (!resolved) return NULL;
   List (binding, signature) = resolved;
-  String stem = %"${participant.car().str().lower()}_$member";
+  String stem = %"$(participant.car().str().lower())_$member";
   return c.discard_helper(binding, signature, stem, which);
 }
 
@@ -168,26 +168,26 @@ static void _collect(DiscardCall &d) {
   foreach (List argument in d.arguments) {
     if (d.which & (1 << index++)) {
       List drop = d.c.resolve_protocol_member(argument.cadr(), "discard");
-      if (drop) d.discards.push($!{ ${drop.car()}($argument); });
+      if (drop) d.discards.push($!{ $(drop.car())($argument); });
     }
   }
 }
 
 static List _emit(DiscardCall &d) {
-  String name = %"_x2c_gensym_discard_${d.stem}_${d.which}";
+  String name = %"_x2c_gensym_discard_$(d.stem)_$(d.which)";
   List helper_binding = d.c.sym.introduce(name);
   List value = d.c.sym.introduce("value");
   List call = d.c.bind_syntax(
-    $!( ${d.binding}(@{d.arguments}) ), <expression>, d.result);
+    $!( $(d.binding)(@(d.arguments)) ), <expression>, d.result);
   List drops = d.discards.list_free();
   List shape = d.result == %(void)
     ? $!{ $call; @drops return; }
-    : $!{ ${d.result} $value = $call; @drops return $value; };
+    : $!{ $(d.result) $value = $call; @drops return $value; };
   List body = d.c.bind_syntax(shape, <block>, d.result);
   List helper = d.c.wrapper_function(
-    %(static @{d.result}), helper_binding, d.declarations, body.cdr());
+    %(static @(d.result)), helper_binding, d.declarations, body.cdr());
   d.c.add_early(helper);
-  List entry = %($helper_binding ${d.signature});
+  List entry = %($helper_binding $(d.signature));
   d.c.protocol_helpers[d.key] = entry;
   /* Wrapping a call preserves its return ownership. Discarding an argument
      does not make an arbitrary method's borrowed result fresh. */

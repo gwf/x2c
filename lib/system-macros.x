@@ -18,9 +18,9 @@ meta List _dedent_expand(Source text) {
     open = 1;
   if (open == 0 || !source.endswith("\"") || "\\" in source ||
       "$" in source)
-    return $!( ${text.assoc(<syntax>)}.dedent() );
+    return $!( $(text.assoc(<syntax>)).dedent() );
   String body = source.getslice(open, length - 1, 1);
-  return $!String{ ${body.dedent()} };
+  return $!String{ $(body.dedent()) };
 }
 
 /* Normalizes the indentation a block of text was written with. The literal
@@ -49,10 +49,10 @@ macro Decorator $time(Stmt $target, Literal $label) {
 }
 
 meta List _macros_location(void) =>
-  $!String{ ${x2c_invocation_file() + ":" + x2c_invocation_line().str()} };
+  $!String{ $(x2c_invocation_file() + ":" + x2c_invocation_line().str()) };
 
 meta List _macros_source(Source code) =>
-  $!String{ ${Code.source_text(code)} };
+  $!String{ $(Code.source_text(code)) };
 
 /* Checks an invariant and reports the failing expression as it was written.
    Unlike C `assert` this transfers to a catch and is not compiled out. */
@@ -60,8 +60,8 @@ macro Stmt $assert(Expr $check) {
   {
     if (!($check)) {
       raise %(invariant
-        (check ${$_macros_source($check)})
-        (at ${$_macros_location()}));
+        (check $($_macros_source($check)))
+        (at $($_macros_location())));
     }
   }
 }

@@ -480,7 +480,7 @@ int scan_c_character(char *s) {
    - embedded newlines are literal bytes;
    - backslash-newline and backslash-CRLF continue the source line;
    - `$` must be escaped or doubled unless it starts interpolation;
-   - `$name` and `${expression}` begin interpolation.
+   - `$name` and `$(expression)` begin interpolation.
 
    The caller has consumed the opening `%"`; `s[0]` is neither `$` nor the
    closing quote. Returns the bytes before the next interpolation or closing

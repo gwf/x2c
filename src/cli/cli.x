@@ -63,40 +63,40 @@ typedef struct TargetKind {
 /* cli command reports. */
 
 static macro Stmt $fail.cli_command_unknown(Expr $first) =>
-  Diagnostics.driver_error(%"unknown command or global option '${$first}'");
+  Diagnostics.driver_error(%"unknown command or global option '$($first)'");
 
 static macro Stmt $fail.cli_operand_required(Expr $name) =>
-  Diagnostics.driver_error(%"${$name} requires exactly one operand");
+  Diagnostics.driver_error(%"$($name) requires exactly one operand");
 
 static macro Stmt $fail.cli_operands_forbidden(Expr $name) =>
-  Diagnostics.driver_error(%"${$name} accepts no operands");
+  Diagnostics.driver_error(%"$($name) accepts no operands");
 
 static macro Stmt $fail.cli_help_unknown(Expr $name) =>
-  Diagnostics.driver_error(%"unknown help command '${$name}'");
+  Diagnostics.driver_error(%"unknown help command '$($name)'");
 
 static macro Stmt $fail.cli_option_value_forbidden(Expr $arg) =>
-  Diagnostics.driver_error(%"option takes no value '${$arg}'");
+  Diagnostics.driver_error(%"option takes no value '$($arg)'");
 
 static macro Stmt $fail.cli_option_value_required(Expr $arg) =>
-  Diagnostics.driver_error(%"option requires a value '${$arg}'");
+  Diagnostics.driver_error(%"option requires a value '$($arg)'");
 
 static macro Stmt $fail.cli_color_invalid(Expr $value) =>
-  Diagnostics.driver_error(%"invalid color mode '${$value}'");
+  Diagnostics.driver_error(%"invalid color mode '$($value)'");
 
 static macro Stmt $fail.cli_target_unknown(Expr $value) =>
-  Diagnostics.driver_error(%"unknown target kind '${$value}'");
+  Diagnostics.driver_error(%"unknown target kind '$($value)'");
 
 static macro Stmt $fail.cli_value_invalid(Expr $noun, Expr $value) =>
-  Diagnostics.driver_error(%"invalid ${$noun} '${$value}'");
+  Diagnostics.driver_error(%"invalid $($noun) '$($value)'");
 
 static macro Stmt $fail.cli_dependency_owned(Expr $value) =>
-  Diagnostics.driver_error(%"C dependency option is driver-owned '${$value}'");
+  Diagnostics.driver_error(%"C dependency option is driver-owned '$($value)'");
 
 static macro Stmt $fail.cli_native_unsupported(Expr $arg) =>
-  Diagnostics.driver_error(%"unsupported package native argument '${$arg}'");
+  Diagnostics.driver_error(%"unsupported package native argument '$($arg)'");
 
 static macro Stmt $fail.cli_option_unknown(Expr $arg) =>
-  Diagnostics.driver_error(%"unknown option '${$arg}'");
+  Diagnostics.driver_error(%"unknown option '$($arg)'");
 
 module {
   "parsing.x",

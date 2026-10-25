@@ -51,8 +51,8 @@ void run(int ready, int outer, int inner) {
     if (inner) value = 1;
   }
   else value = 2;
-  List quoted = %(bad-arg (operation ${
+  List quoted = %(bad-arg (operation $(
     %(x2c-literal (spelling value))
-  }));
+  )));
   if (ready) value = 3;
 }

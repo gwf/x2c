@@ -835,7 +835,7 @@ static void _uv_stream_shutdown_callback(uv_shutdown_t *request, int status) {
 
 static void _uv_stream_bad_state(
   UvStream stream, String operation, String state) {
-  String reason = %"the ${stream.kind} $state";
+  String reason = %"the $(stream.kind) $state";
   $error.stream.state(operation, reason);
 }
 

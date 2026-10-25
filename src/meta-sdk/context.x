@@ -8,13 +8,13 @@ static macro Stmt $fail.meta_sdk_invocation_missing() =>
     "x2c invocation location used outside macro expansion", NULL);
 
 static macro Stmt $fail.meta_sdk_notes_string(Expr $operation, Expr $note) =>
-  _reject_value(%"${$operation} notes must be Strings", $note);
+  _reject_value(%"$($operation) notes must be Strings", $note);
 
 static macro Stmt $fail.meta_sdk_expansion_required(Expr $operation) =>
-  MetaContext.reject(%"${$operation} used outside macro expansion", NULL);
+  MetaContext.reject(%"$($operation) used outside macro expansion", NULL);
 
 static macro Expression $note.meta_sdk_value_notes(Expr $value) =>
-  %("value: ${$value.repr()}");
+  %("value: $($value.repr())");
 
 // the running call
 

@@ -40,7 +40,7 @@ static macro Stmt $fail.parse_body_expected(
   Expr $c, Expr $site, Expr $unexpected) =>
   $c.report_error(
     <parse>, "expected ';', '{', or '=>'",
-    $site, %("token:" ${$c.token.text} "symbol:" ${$unexpected.str()}));
+    $site, %("token:" $($c.token.text) "symbol:" $($unexpected.str())));
 
 static macro Stmt $fail.parse_meta_function(Expr $c, Expr $origin) =>
   $c.report_error(
@@ -80,7 +80,7 @@ static macro Stmt $fail.parse_function_row(Expr $c, Expr $site) =>
 static macro Stmt $fail.parse_meta_constructed(
   Expr $c, Expr $origin, Expr $name) =>
   $c.report_error(
-    <parse>, %"meta function '${$name}' cannot be produced by a macro",
+    <parse>, %"meta function '$($name)' cannot be produced by a macro",
     $origin, %( "move it to a source file and call it from the macro" ));
 
 static macro Stmt $fail.parse_decl_function(Expr $c, Expr $site) =>
@@ -106,7 +106,7 @@ static macro Stmt $fail.parse_destructure_name(Expr $c, Expr $site) =>
 static macro Stmt $fail.parse_scalar_invalid(
   Expr $c, Expr $origin, Expr $source) =>
   $c.report_error(
-    <type>, $source ? %"invalid scalar type ${$source}"
+    <type>, $source ? %"invalid scalar type $($source)"
                  : "expected scalar type",
     $origin, NULL);
 
@@ -133,8 +133,8 @@ static macro Stmt $fail.parse_enum_name(Expr $c, Expr $site) =>
 static macro Stmt $fail.parse_enum_bound(
   Expr $c, Expr $origin, Expr $spelling) =>
   $c.report_error(
-    <parse>, %"enumerator '${$spelling}' is already bound in this scope",
-    $origin, %("prior binding: '${$spelling}'"));
+    <parse>, %"enumerator '$($spelling)' is already bound in this scope",
+    $origin, %("prior binding: '$($spelling)'"));
 
 static macro Stmt $fail.parse_syntax_position(Expr $c, Expr $origin) =>
   $c.report_error(
@@ -148,14 +148,14 @@ static macro Stmt $fail.parse_paren_unclosed(Expr $c, Expr $site) =>
 
 static macro Stmt $fail.parse_type_unknown(Expr $c, Expr $first) =>
   $c.report_error(
-    <parse>, %"unknown type name '${$first.text}'",
+    <parse>, %"unknown type name '$($first.text)'",
     $first, %("name an imported package type through its alias"));
 
 static macro Stmt $fail.parse_dimension_close(
   Expr $c, Expr $site, Expr $expr, Expr $unexpected) =>
   $c.report_error(
     <parse>, "expected ']'",
-    $site, %("dimension:" ${$expr.str()} "symbol:" ${$unexpected.str()}));
+    $site, %("dimension:" $($expr.str()) "symbol:" $($unexpected.str())));
 
 static macro Stmt $fail.parse_macro_member(Expr $c, Expr $site) =>
   $c.report_error(
@@ -171,8 +171,8 @@ static macro Stmt $fail.parse_params_close(
   Expr $c, Expr $site, Expr $params, Expr $unexpected) =>
   $c.report_error(
     <parse>, "expected ')'",
-    $site, %("parameters:" ${$params.str()}
-      "symbol:" ${$unexpected.str()}));
+    $site, %("parameters:" $($params.str())
+      "symbol:" $($unexpected.str())));
 
 static macro Stmt $fail.parse_params_empty(Expr $c, Expr $site) =>
   $c.report_error(
@@ -183,7 +183,7 @@ static macro Stmt $fail.parse_method_member(
   Expr $c, Expr $site, Expr $owner) =>
   $c.report_error(
     <parse>, "expected method name after dot",
-    $site, %( "typedef:" ${$owner} "token:" ${$c.token.text}  ));
+    $site, %( "typedef:" $($owner) "token:" $($c.token.text)  ));
 
 static macro Stmt $fail.parse_function_body(Expr $c, Expr $site) =>
   $c.report_error(
@@ -194,13 +194,13 @@ static macro Stmt $fail.parse_shutdown_duplicate(
   Expr $c, Expr $site, Expr $name) =>
   $c.report_error(
     <parse>, "translation unit has more than one type shutdown",
-    $site, %( "shutdown:" ${$name} ));
+    $site, %( "shutdown:" $($name) ));
 
 static macro Stmt $fail.parse_init_duplicate(
   Expr $c, Expr $site, Expr $name) =>
   $c.report_error(
     <parse>, "translation unit has more than one type initializer",
-    $site, %( "initializer:" ${$name} ));
+    $site, %( "initializer:" $($name) ));
 
 static macro Stmt $fail.parse_lifecycle_signature(
   Expr $c, Expr $site, Expr $role, Expr $name) {
@@ -208,7 +208,7 @@ static macro Stmt $fail.parse_lifecycle_signature(
     String message = $role == "initializer"
       ? "type initializer must have signature void TYPE.initialize(void)"
       : "type shutdown must have signature void TYPE.shutdown(void)";
-    $c.report_error(<parse>, message, $site, %("${$role}: ${$name}"));
+    $c.report_error(<parse>, message, $site, %("$($role): $($name)"));
   }
 }
 
@@ -299,7 +299,7 @@ static macro Stmt $fail.parse_alias_function(
   Expr $c, Expr $site, Expr $native_type) =>
   $c.report_error(
     <type>, "foreign alias native target is not a function",
-    $site, %("type: ${$native_type.repr()}"));
+    $site, %("type: $($native_type.repr())"));
 
 static macro Stmt $fail.parse_reference_placement(Expr $c, Expr $site) =>
   $c.report_error(
@@ -309,14 +309,14 @@ static macro Stmt $fail.parse_reference_placement(Expr $c, Expr $site) =>
 static macro Stmt $fail.parse_binder_conflict(
   Expr $c, Expr $origin, Expr $role, Expr $name) =>
   $c.report_error(
-    <type>, %"${$role} binder has conflicting capture kinds",
-    $origin, %( "binder:" ${$name} "use either '?' or '*' consistently"));
+    <type>, %"$($role) binder has conflicting capture kinds",
+    $origin, %( "binder:" $($name) "use either '?' or '*' consistently"));
 
 static macro Stmt $fail.parse_binder_unassigned(
   Expr $c, Expr $origin, Expr $role, Expr $binder) =>
   $c.report_error(
-    <type>, %"${$role} binder is not definitely assigned",
-    $origin, %( "binder:" ${$binder.str()}
+    <type>, %"$($role) binder is not definitely assigned",
+    $origin, %( "binder:" $($binder.str())
                 "bind it in every alternative and never under !not"));
 
 module {

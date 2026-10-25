@@ -17,7 +17,7 @@ int Compiler.record_origin(Compiler c, Token token) {
   if (!file) file = "<stdin>";
   if (!c.source_map) file = c.display_path(file);
   c.origins.push(
-    %(source $file $line ${c.token_column(token)} ${token.len} ${token.pos}));
+    %(source $file $line $(c.token_column(token)) $(token.len) $(token.pos)));
   return c.origins.len();
 }
 
@@ -64,7 +64,7 @@ static List _source_range(Compiler c, Token first, Token after) {
   String path = Path.resolved_absolute(c.text_source(first.pos, start));
   if (!c.line_markers && !(path in c.source_texts))
     c.source_texts[path] = c.text;
-  return %($path $start ${start + last.pos + last.len - first.pos});
+  return %($path $start $(start + last.pos + last.len - first.pos));
 }
 
 /** Records a resolved reference without inventing spans for constructed

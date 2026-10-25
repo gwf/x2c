@@ -3,17 +3,17 @@
 // native aliases
 
 static macro Expression $emit.alias.definition(Expr $target, Expr $native) =>
-  %"#define ${$target} ${$native}";
+  %"#define $($target) $($native)";
 
 static macro Expression $emit.alias.checked(
   Expr $native, Expr $pointer, Expr $message, Expr $definition) =>
   %(
     "#ifndef X2CCPP"
     "_Static_assert("
-    "_Generic(&" @{$native} ", " @{$pointer} ": 1, default: 0), "
-    "\"${$message}\");"
+    "_Generic(&" @($native) ", " @($pointer) ": 1, default: 0), "
+    "\"$($message)\");"
     "#endif"
-    ${$definition}
+    $($definition)
   );
 
 module List _parameters(Emitter &e, Var parameters) {
@@ -24,7 +24,7 @@ module List _parameters(Emitter &e, Var parameters) {
 // declarations
 
 module List _declare_stmt(Emitter &e, List ast) =>
-  %( @{_declare(e, ast)} ";");
+  %( @(_declare(e, ast)) ";");
 
 module List _decl_stmt(Emitter &e, List ast) {
   match (ast)
@@ -89,7 +89,7 @@ module List _foreign_alias(
 }
 
 module List _typedef(Emitter &e, List ast) {
-  List code = %("typedef" @{_emit(e, ast.cdr())} ";");
+  List code = %("typedef" @(_emit(e, ast.cdr())) ";");
   match (ast) case %(typedef ? (bindings *declarators)):
     foreach (List declarator in declarators) {
       List binding = declarator.cadr();
@@ -102,12 +102,12 @@ module List _typedef(Emitter &e, List ast) {
 
 module List _block(Emitter &e, List ast) {
   with (e.native_aliases = e.native_aliases) {
-    return %("{" @{_emit(e, ast.cdr())} "}");
+    return %("{" @(_emit(e, ast.cdr())) "}");
   }
 }
 
 module List _binding(Emitter &e, List ast) =>
-  %(${e.emitted_binding_name(ast)});
+  %($(e.emitted_binding_name(ast)));
 
 // declarators
 
@@ -140,7 +140,7 @@ static List _list_declarator(Emitter &e, List decl, Type mod) {
   if (mod.car() == <fnmod>) return _function_declarator(e, decl, mod.cadr());
   if (mod.car() is <string>) return %(@decl @mod);
   if (mod.is_array()) return _array_declarator(e, decl, mod.cadr());
-  return %(@decl ":" @{_emit(e, mod.cadr())});
+  return %(@decl ":" @(_emit(e, mod.cadr())));
 }
 
 static List _bitfield_declarator(Emitter &e, List &mods) {
@@ -164,7 +164,7 @@ static List _array_declarator(Emitter &e, List decl, List dimension) {
 static List _function_declarator(
   Emitter &e, List decl, List parameters) {
   if (decl.type().is_pointer()) decl = _parens(decl);
-  return %(@decl "(" @{_emit(e, parameters)} ")");
+  return %(@decl "(" @(_emit(e, parameters)) ")");
 }
 
 module List _semantic_type(Emitter &e, Type type) {
@@ -175,7 +175,7 @@ module List _semantic_type(Emitter &e, Type type) {
 module List _semantic_name(Emitter &e, Type type, String name) {
   List (base, mods) = type.parts();
   List declarator = _declarator(e, %($name), mods);
-  return %(${_emit(e, base)} @declarator);
+  return %($(_emit(e, base)) @declarator);
 }
 
 // tagged types
@@ -201,7 +201,7 @@ module List _aggregate(Emitter &e, List ast) {
   List tag = ast.type().tag();
   if (_is_gensym_tag(tag) && !ast.type().is_aggregate_tag()) tag = NULL;
   if (tag) tag = _emit(e, tag);
-  if (ast.type().is_aggregate_tag()) return %( ${ast.car()} @tag );
+  if (ast.type().is_aggregate_tag()) return %( $(ast.car()) @tag );
   List body = ast.type().body();
   body = _emit(e, body);
   body = body.flatten_all();
@@ -209,9 +209,9 @@ module List _aggregate(Emitter &e, List ast) {
 }
 
 static List _tagged(List ast, List tag, List body) {
-  if (tag && body) return %( ${ast.car()} @tag "{" @body "}");
-  if (tag) return %( ${ast.car()} @tag );
-  return %( ${ast.car()} "{" @body "}");
+  if (tag && body) return %( $(ast.car()) @tag "{" @body "}");
+  if (tag) return %( $(ast.car()) @tag );
+  return %( $(ast.car()) "{" @body "}");
 }
 
 /* The tag slot of an anonymous aggregate holds the compiler-internal

@@ -112,19 +112,19 @@ static String _cached_canonical(char *cache, String dir) {
 module String _canonical_lib(void) {
   static char cache[PATH_MAX];
   if (*cache) return cache;
-  return _cached_canonical(cache, %"${x2c_get_root()}/lib");
+  return _cached_canonical(cache, %"$(x2c_get_root())/lib");
 }
 
 module String _canonical_include(void) {
   static char cache[PATH_MAX];
   if (*cache) return cache;
-  return _cached_canonical(cache, %"${x2c_get_root()}/include/x2c");
+  return _cached_canonical(cache, %"$(x2c_get_root())/include/x2c");
 }
 
 module String _canonical_src(void) {
   static char cache[PATH_MAX];
   if (*cache) return cache;
-  return _cached_canonical(cache, %"${x2c_get_root()}/src");
+  return _cached_canonical(cache, %"$(x2c_get_root())/src");
 }
 
 module String _canonical_cwd(void) {

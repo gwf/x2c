@@ -3,7 +3,7 @@
 /* Session refusals keep their existing raise and transaction boundary. */
 
 macro Stmt $refusal.binding.unresolved(Expr $name) =>
-  _refuse(%"unresolved identifier: ${$name}");
+  _refuse(%"unresolved identifier: $($name)");
 
 macro Stmt $refusal.storage.native() =>
   _refuse(
@@ -34,7 +34,7 @@ macro Stmt $refusal.function.redefined() =>
   _refuse("function redeclaration is disabled");
 
 macro Stmt $refusal.function.missing(Expr $name) =>
-  _refuse(%"no native function is available for ${$name}");
+  _refuse(%"no native function is available for $($name)");
 
 macro Stmt $refusal.type.redefined() =>
   _refuse("a type cannot be redefined; the session keeps its layout");

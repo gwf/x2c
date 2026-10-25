@@ -56,6 +56,6 @@ int main(int argc, char **argv) {
     : "examples/data/power-channel-word-count/words";
   Map counts = auto directory_count(root);
   Array words = auto counts.keys().array().sort();
-  foreach (String word in words) puts(%"$word ${counts[word]}");
+  foreach (String word in words) puts(%"$word $(counts[word])");
   return 0;
 }

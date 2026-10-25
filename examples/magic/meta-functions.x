@@ -18,7 +18,7 @@ meta static List fields_of(TypeInfo type) => type.assoc(<fields>);
 meta static List field_names(TypeInfo type) {
   Array names = [];
   foreach (List field in fields_of(type)) names.push(field.car());
-  return $!String{ ${String.join(", ", names)} };
+  return $!String{ $(String.join(", ", names)) };
 }
 
 // `{ r.code, r.label }`, built from the fields rather than written out.

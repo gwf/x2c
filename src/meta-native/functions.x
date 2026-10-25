@@ -60,15 +60,15 @@ static int _install_included_meta(
   if (type.is_static() || file == c.canonical_path(c.filename)) return 0;
   String name = _native_meta_name(c, declaration, marker);
   c.install_project_meta_effect(
-    %(project-meta $name ${c.func_signature(type)}
-      ${Compiler.portable_path(file)}));
+    %(project-meta $name $(c.func_signature(type))
+      $(Compiler.portable_path(file))));
   return 1;
 }
 
 /* The stub belongs to the unit's bindings. */
 static void _install_stub(
   Compiler c, String name, Type type, String provider) {
-  String context = %"$name\n${provider ? provider : ""}";
+  String context = %"$name\n$(provider ? provider : "")";
   c.bindings().bind(
     name,
     Func.new_context(
@@ -191,8 +191,8 @@ void Compiler.record_project_meta_effect(
   String name = _native_meta_name(c, declaration, marker);
   if (%(function $name) in c.sym.file_statics()) return;
   c.sym.set(
-    %("source-node" (declaration $path ${marker.pos})),
-    %(project-meta $name ${c.func_signature(type)} $path));
+    %("source-node" (declaration $path $(marker.pos))),
+    %(project-meta $name $(c.func_signature(type)) $path));
 }
 
 /** Installs an included meta function's evaluator advertisement. */

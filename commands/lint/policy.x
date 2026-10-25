@@ -97,7 +97,7 @@ static void _section(Lint l, int start, int end):
 
 static void _metrics(Lint l):
   if l.lines > 1500:
-    l.add("long-file", 1, %"file spans ${l.lines} lines; review above 1500")
+    l.add("long-file", 1, %"file spans $(l.lines) lines; review above 1500")
   int start = 0
   for (int at = 0; at < l.count; at++):
     Token t = l.at(at)

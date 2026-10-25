@@ -113,7 +113,7 @@ static List _bind_form(
     case %(declaration-recipe ?callback ?args) if (unit):
       return _bind_decl_recipe(c, callback, args);
     case %(default-forward ?own ?base ?name *form) if (unit):
-      return %(declaration-forward $own $base $name $form ${c.source_private});
+      return %(declaration-forward $own $base $name $form $(c.source_private));
     case %(default ?function) if (unit): return _bind_default(c, function);
     case %(declaration-function
              (declare ?type (bindings ?decl)) ?body ?source) if (unit):
@@ -152,13 +152,13 @@ static List _bind_form(
     case $return_value(?expr) if (statement):
       return c.finish_return_statement(expr);
     case %((!or break continue default empty)) if (statement): return input;
-    case %(case ?expr) if (statement): return %(case ${_resolve(c, expr)});
+    case %(case ?expr) if (statement): return %(case $(_resolve(c, expr)));
     case %((!or ?tag goto label) ?name) if (statement):
       return %($tag $name);
     case $expression_statement(?expr) if (statement):
       return _bind_expression_statement(c, expr, context);
     case $deferred(?body) if (statement):
-      return %(defer ${_bind_statement(c, body)});
+      return %(defer $(_bind_statement(c, body)));
     case $do_loop(?body, ?test) if (statement): return _bind_do(c, body, test);
     case $while_loop(?test, ?body) if (statement):
       return _bind_while(c, test, body);
@@ -199,7 +199,7 @@ static List _bind_expression_statement(
   match (expression) case %(expr ? (meta-call *)):
     if (!c.meta_body && !c.macro_holes)
       return c.evaluate_meta_statement(expression, context, c.token);
-  return %(stmnt ${_resolve(c, expression)});
+  return %(stmnt $(_resolve(c, expression)));
 }
 
 module List _resolve(Compiler c, List expr) =>
@@ -277,17 +277,17 @@ static List _bind_items(Compiler c, List items, Symbol context) {
   Array bound = [];
   foreach (Var item in items)
     _push_items(bound, c.bind_syntax(item, context, c.return_type));
-  return %(seq @{bound.list_free()});
+  return %(seq @(bound.list_free()));
 }
 
 static List _bind_args(Compiler c, List arguments) {
   Array bound = [];
   foreach (List argument in arguments) bound.push(_resolve(c, argument));
-  return %(args @{bound.list_free()});
+  return %(args @(bound.list_free()));
 }
 
 static List _bind_assert(Compiler c, Var condition, Var message) =>
-  %(c-assert ${_resolve(c, condition)} ${_resolve(c, message)});
+  %(c-assert $(_resolve(c, condition)) $(_resolve(c, message)));
 
 // constructed statements
 
@@ -352,16 +352,16 @@ List Compiler.bind_source_statement(Compiler c) {
 
 static List _bind_do(Compiler c, Var body, Var condition) {
   List bound = _bind_statement(c, body);
-  return %(do $bound ${_bind_clause(c, condition)});
+  return %(do $bound $(_bind_clause(c, condition)));
 }
 
 static List _bind_while(Compiler c, Var condition, Var body) {
   List test = _bind_clause(c, condition);
-  return %(while $test ${_bind_statement(c, body)});
+  return %(while $test $(_bind_statement(c, body)));
 }
 
 static List _bind_switch(Compiler c, Var expr, Var body) =>
-  %(switch ${_resolve(c, expr)} ${_bind_statement(c, body)});
+  %(switch $(_resolve(c, expr)) $(_bind_statement(c, body)));
 
 /* Binds the arm where an optional-reference test holds with the reference
    present, and marks it present after the `if` when the other arm cannot
@@ -404,7 +404,7 @@ static List _bind_for(
   init = _bind_header(c, init);
   condition = _bind_header(c, condition);
   increment = _bind_header(c, increment);
-  return %(for $init $condition $increment ${_bind_statement(c, body)});
+  return %(for $init $condition $increment $(_bind_statement(c, body)));
 }
 
 /* A header clause may be absent. The resolver binds a declaring
@@ -418,7 +418,7 @@ static Var _bind_header(Compiler c, Var clause) {
 static List _bind_raise(Compiler c, Var code, List details) {
   Array bound = [];
   foreach (List detail in details) bound.push(_resolve(c, detail));
-  return %(raise ${_resolve(c, code)} (args @{bound.list_free()}));
+  return %(raise $(_resolve(c, code)) (args @(bound.list_free())));
 }
 
 /* Binds each catch arm's pattern names in a scope of its own. */
@@ -435,7 +435,7 @@ static List _bind_catchcases(Compiler c, Var arms, List handler) {
       if (pattern) pattern = _resolve(c, pattern);
       bound.push(c.bind_catch_arm(pattern, arm.cadr(), c.token, handle));
     }
-  return %(catchcases ${bound.list_free()} $handle);
+  return %(catchcases $(bound.list_free()) $handle);
 }
 
 /** Binds one catch arm's `body` in a scope of its own, with declarations of
@@ -457,7 +457,7 @@ List Compiler.bind_catch_arm(
   if (_declares_binders(body, bindings))
     return %($pattern $statement);
   return %($pattern (block
-    @{c.pattern_binder_declarations(bindings, handle)} $statement));
+    @(c.pattern_binder_declarations(bindings, handle)) $statement));
 }
 
 /* Rejects the two ways a match or catch pattern can name a binder it does
@@ -493,9 +493,9 @@ static int _declares_binders(List body, List bindings) {
   }
   int index = 0;
   foreach (List binding in bindings) {
-    String n = %"${index++}";
-    String slot = %"_x2c_gensym_match_${
-      binding.car().is_list_binder() ? "list" : "value"}_$n";
+    String n = %"$(index++)";
+    String slot = %"_x2c_gensym_match_$(
+      binding.car().is_list_binder() ? "list" : "value")_$n";
     if (!(slot in read || %(catch $n) in read)) return 0;
   }
   return 1;
@@ -521,7 +521,7 @@ static List _bind_match(Compiler c, Var subject, Var cases) {
   if (kind) subject = c.parse_source_clause(kind);
   kind = _source_clause_kind(cases);
   List rows = kind ? c.parse_source_clause(kind) : _bind_rows(c, cases);
-  return %(match ${_resolve(c, subject)} $rows);
+  return %(match $(_resolve(c, subject)) $rows);
 }
 
 static List _bind_rows(Compiler c, List cases) {
@@ -567,7 +567,7 @@ List Compiler.bind_match_arm(
 static List _bind_arm_body(Compiler c, Var body, List types) {
   if (_source_clause_kind(body)) return c.parse_case_body(types);
   match (body) case %(guarded ?statements):
-    return %(guarded ${_bind_statement(c, statements)});
+    return %(guarded $(_bind_statement(c, statements)));
   return _bind_statement(c, body);
 }
 
@@ -583,7 +583,7 @@ static List _bind_group(Compiler c, List children) {
   Array items = [];
   foreach (Var child in children)
     items.push(c.bind_syntax(child, <block>, c.return_type));
-  return %(group @{items.list_free()});
+  return %(group @(items.list_free()));
 }
 
 /** Binds a callable's outer block in its active parameter scope. Ordinary
@@ -599,7 +599,7 @@ List Compiler.bind_callable_body(Compiler c, List syntax, Type return_type) {
       defer c.restore_reference_presence(present_before);
       foreach (Var child in children)
         _push_items(stmts, c.bind_syntax(child, <block>, return_type));
-      return %(block @{stmts.list_free()});
+      return %(block @(stmts.list_free()));
     }
   }
   return c.bind_syntax(syntax, <block>, return_type);

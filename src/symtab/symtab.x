@@ -20,7 +20,7 @@ static macro Stmt $fail.symbols_name_package(
   Expr $c, Expr $site, Expr $spelling, Expr $owner) {
   $c.report_error(
     <parse>,
-    %"'${$spelling}' is reserved for imported package '${$owner}'",
+    %"'$($spelling)' is reserved for imported package '$($owner)'",
     $site, NULL);
 }
 
@@ -28,7 +28,7 @@ static macro Stmt $fail.symbols_module_shadow(
   Expr $c, Expr $site, Expr $name) {
   $c.report_error(
     <parse>,
-    %"'${$name}' is a module name and a static of one file in this unit",
+    %"'$($name)' is a module name and a static of one file in this unit",
     $site, %("a module declaration's name means one thing in every file"
     "of the unit; rename one of them"));
 }
@@ -36,7 +36,7 @@ static macro Stmt $fail.symbols_module_shadow(
 static macro Stmt $fail.symbols_module_tag(Expr $c, Expr $site, Expr $name) {
   $c.report_error(
     <parse>,
-    %"two files of this module unit give a type named '${$name}' a Var tag",
+    %"two files of this module unit give a type named '$($name)' a Var tag",
     $site, %("a type's Var tag comes from its name without the file prefix,"
     "so it must be unique in the unit; rename one of the types"));
 }
@@ -45,7 +45,7 @@ static macro Stmt $fail.symbols_name_reserved(
   Expr $c, Expr $site, Expr $spelling) {
   $c.report_error(
     <parse>,
-    %"'${$spelling}' is reserved for compiler-generated names",
+    %"'$($spelling)' is reserved for compiler-generated names",
     $site, NULL);
 }
 
@@ -53,7 +53,7 @@ static macro Stmt $fail.symbols_package_collision(
   Expr $c, Expr $site, Expr $kind, Expr $local) {
   $c.report_error(
     <parse>,
-    %"package ${$kind} '${$local}' collides with a declared name",
+    %"package $($kind) '$($local)' collides with a declared name",
     $site, NULL);
 }
 
@@ -61,15 +61,15 @@ static macro Stmt $fail.symbols_package_bound(
   Expr $c, Expr $site, Expr $kind, Expr $local, Expr $bound) {
   $c.report_error(
     <parse>,
-    %"package ${$kind} '${$local}' is already bound",
-    $site, %( "bound to: ${$bound}" ));
+    %"package $($kind) '$($local)' is already bound",
+    $site, %( "bound to: $($bound)" ));
 }
 
 static macro Stmt $fail.symbols_typedef_depth(
   Expr $c, Expr $site, Expr $origin) {
   $c.report_error(
     <type>,
-    %"typedef chain too deep (possible cycle) resolving ${$origin.repr()}",
+    %"typedef chain too deep (possible cycle) resolving $($origin.repr())",
     $site, NULL);
 }
 

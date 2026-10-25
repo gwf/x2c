@@ -68,8 +68,8 @@ int main(int argc, char **argv) {
     .quiet = parsed["quiet"].integer(), .force = parsed["force"].integer()
   };
   switch (operation) {
-    case "install": request.inputs = %(${parsed["package"]}); break;
-    case "remove": request.inputs = %(${parsed["name"]}); break;
+    case "install": request.inputs = %($(parsed["package"])); break;
+    case "remove": request.inputs = %($(parsed["name"])); break;
     case "ensure":
       request.lock = parsed["lock"];
       request.inputs = parsed["pins"];

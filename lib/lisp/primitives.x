@@ -25,7 +25,7 @@ Var lisp_atom(Var value) => _bool(value is not <list> || value.is_nil());
 */
 Var lisp_car(Var value) {
   if (value is not <list>)
-    raise %(bad-types (operation "car") (kind ${value.kind()}));
+    raise %(bad-types (operation "car") (kind $(value.kind())));
   return value.car();
 }
 
@@ -34,7 +34,7 @@ Var lisp_car(Var value) {
 */
 Var lisp_cdr(Var value) {
   if (value is not <list>)
-    raise %(bad-types (operation "cdr") (kind ${value.kind()}));
+    raise %(bad-types (operation "cdr") (kind $(value.kind())));
   return value.cdr();
 }
 
@@ -104,8 +104,8 @@ static int _number_compare(Var a, Var b) {
 */
 Var lisp_compare(Var a, Var b) {
   if (!_is_lisp_number(a) || !_is_lisp_number(b))
-    raise %(bad-types (operation "lisp_compare") (left-kind ${a.kind()})
-                       (right-kind ${b.kind()}));
+    raise %(bad-types (operation "lisp_compare") (left-kind $(a.kind()))
+                       (right-kind $(b.kind())));
   return _number_compare(a, b);
 }
 

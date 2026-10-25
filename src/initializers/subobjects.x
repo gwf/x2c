@@ -99,7 +99,7 @@ static List _designated_path(
         List selected = _named_field_path(c, type, field.car(), path);
         type = c.sym.lookup_field(type, field);
         path = selected ? selected
-          : cons(%($owner field ${field.car()} $type ()), path);
+          : cons(%($owner field $(field.car()) $type ()), path);
         node = inner;
         continue;
       }
@@ -151,9 +151,9 @@ List Compiler.initializer_field_path(
 static List _capture_index(
   Compiler c, List index, List &reference) {
   match (index)
-    case %(expr ? ${$source_cast_content(
+    case %(expr ? $($source_cast_content(
         %((enum ((op = ?binding ?original)))
-          (!set ?value (expr ? (ident ?binding)))))}): {
+          (!set ?value (expr ? (ident ?binding))))))): {
       reference = value;
       return index;
     }
@@ -203,7 +203,7 @@ static int _fills_whole(Compiler c, Type type, List value) {
 static int _fills_char_array(
   Compiler c, Type type, List value) {
   if (!value.match(
-    %(expr (* char) ${$source_literal_content(%((* char) ?))}))) return 0;
+    %(expr (* char) $($source_literal_content(%((* char) ?)))))) return 0;
   Type array = _resolve_shape(c, type);
   if (!array.is_array()) return 0;
   Type element = c.sym.resolve_key(array.cdr()).scalar();
@@ -229,7 +229,7 @@ static List _first_path(
   Type owner = _resolve_shape(c, type);
   if (owner.is_array()) {
     List zero = $!int{ 0 };
-    return cons(%($owner index $zero ${owner.cdr()} ()), parent);
+    return cons(%($owner index $zero $(owner.cdr()) ()), parent);
   }
   if (owner.is_aggregate())
     return _field_path(owner, c.sym.field_order(owner).cdr(), parent);
@@ -242,7 +242,7 @@ static List _field_path(
   if (!fields) return NULL;
   List row = fields.car();
   return cons(
-    %($owner field ${row.car()} ${row.cadr()} ${fields.cdr()}), parent);
+    %($owner field $(row.car()) $(row.cadr()) $(fields.cdr())), parent);
 }
 
 /* C positional initialization skips unnamed bit-fields, not anonymous
@@ -299,7 +299,7 @@ static int _next_index(
     return 0;
   }
   List inside = _index_inside(c, target, parent, type, index);
-  states.push(%(${_condition_and(condition, inside)} $next 1));
+  states.push(%($(_condition_and(condition, inside)) $next 1));
   condition = _condition_and(
     condition, %(expr (int) (op ! (expr (int) (parens $inside)))));
   return 0;
@@ -308,7 +308,7 @@ static int _next_index(
 static List _index_inside(
   Compiler c, List target, List parent, Type type, List index) {
   List array = c.initializer_slot(target, parent);
-  List element = %(expr $type (index $array ${$!int{ 0 }}));
+  List element = %(expr $type (index $array $($!int{ 0 })));
   List length = %(expr (unsigned)
     (op / (expr (unsigned) (sizeof (parens $array)))
           (expr (unsigned) (sizeof (parens $element)))));
@@ -354,7 +354,7 @@ static List _scalar_rows(
     Array cases = [];
     _ordinal_cases(layout, ordinal, NULL, condition, value, cases);
     cases.push(%(() () () $value));
-    rows.push(%($value ${cases.list_free()}));
+    rows.push(%($value $(cases.list_free())));
   }
   return rows.list_free();
 }
@@ -372,7 +372,7 @@ static int _scalar_inputs(Compiler c, List items, List &string) {
     }
     if (value.match(
       %(expr (* char)
-        ${$source_literal_content(%((* char) ?))}))) string = value;
+        $($source_literal_content(%((* char) ?)))))) string = value;
   }
   return 1;
 }
@@ -382,7 +382,7 @@ static List _scalar_layout(
   Type owner = _resolve_shape(c, type);
   if (c.sym.is_var_type(type) ||
       (!owner.is_array() && !owner.is_aggregate()))
-    return %($type ${_ull_literal(1)} ());
+    return %($type $(_ull_literal(1)) ());
   if (owner.is_array())
     return _array_layout(c, type, owner, target, string, symbolic);
   if (owner.car() == <union>) return NULL;
@@ -410,7 +410,7 @@ static List _array_layout(
           (expr (unsigned long long) (parens $divisor))));
   List units = child.cadr();
   if (units !== one) count = _ull_op(<*>, count, units);
-  return %($type $count ((${path.car()} $child)));
+  return %($type $count (($(path.car()) $child)));
 }
 
 static List _record_layout(
@@ -428,11 +428,11 @@ static List _record_layout(
     if (!child) return NULL;
     List units = child.cadr();
     count = count ? _ull_op(<+>, count, units) : units;
-    children.push(%(${path.car()} $child));
+    children.push(%($(path.car()) $child));
     fields = rest;
   }
   if (!count) return NULL;
-  return %($type $count ${children.list()});
+  return %($type $count $(children.list()));
 }
 
 static void _ordinal_cases(
@@ -486,7 +486,7 @@ static void _ordinal_field(
   }
   List test = units === one
     ? %(expr (int) (op == (expr (unsigned long long) (parens $position))
-                         ${$!int{ 0 }}))
+                         $($!int{ 0 })))
     : %(expr (int)
         (op < (expr (unsigned long long) (parens $position))
               (expr (unsigned long long) (parens $units))));
@@ -508,9 +508,9 @@ module List _condition_and(List first, List second) {
   if (!first) return second;
   if (!second) return first;
   match (second)
-    case %(expr ? ${$source_operator_content(
-        %(< (expr ? ${$grouped(?index)})
-            (expr ? ${$grouped(?bound)})))}): {
+    case %(expr ? $($source_operator_content(
+        %(< (expr ? $($grouped(?index)))
+            (expr ? $($grouped(?bound))))))): {
       unsigned long long at;
       List base;
       _index_position(index, base, at);
@@ -523,15 +523,15 @@ module List _condition_and(List first, List second) {
 static List _drop_bound(
   List condition, List bound, List base, unsigned long long minimum) {
   match (condition) {
-    case %(expr ? ${$source_operator_content(
-        %(&& (expr ? ${$grouped(?left)})
-             (expr ? ${$grouped(?right)})))}):
+    case %(expr ? $($source_operator_content(
+        %(&& (expr ? $($grouped(?left)))
+             (expr ? $($grouped(?right))))))):
       return _condition_and(
         _drop_bound(left, bound, base, minimum),
         _drop_bound(right, bound, base, minimum));
-    case %(expr ? ${$source_operator_content(
-        %(< (expr ? ${$grouped(?index)})
-            (expr ? ${$grouped(?length)})))}): {
+    case %(expr ? $($source_operator_content(
+        %(< (expr ? $($grouped(?index)))
+            (expr ? $($grouped(?length))))))): {
       unsigned long long at;
       List origin;
       _index_position(index, origin, at);
@@ -549,8 +549,8 @@ static void _index_position(
   base = NULL;
   if (_literal_integer(index, offset)) return;
   match (index)
-    case %(expr ? ${$source_operator_content(
-        %(+ (expr ? ${$grouped(?origin)}) ?amount))}):
+    case %(expr ? $($source_operator_content(
+        %(+ (expr ? $($grouped(?origin))) ?amount)))):
       if (_literal_integer(amount, offset)) {
         base = origin;
         return;
@@ -563,7 +563,7 @@ static void _index_position(
    A bare spelling is the int bound a canonical array type keeps. */
 module int _literal_integer(List expression, unsigned long long &value) {
   match (expression) {
-    case %(expr ? ${$source_literal_content(%(?type ?spelling))}):
+    case %(expr ? $($source_literal_content(%(?type ?spelling)))):
       return ((Type) type).integer_literal_magnitude(spelling, value);
     case %(?(String spelling)):
       return Type.integer_literal_magnitude(%(int), spelling, value);
@@ -572,7 +572,7 @@ module int _literal_integer(List expression, unsigned long long &value) {
 }
 
 static List _ull_literal(unsigned long long value) {
-  String spelling = %"${value}ULL";
+  String spelling = %"$(value)ULL";
   return %(expr (unsigned long long)
     (literal (unsigned long long) $spelling));
 }

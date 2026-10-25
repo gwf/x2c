@@ -7,8 +7,8 @@
 meta List _x2c_field_copies(List to, List from, List fields) {
   if (!fields) return NULL;
   Var field = fields.car();
-  return %(${$!{ $to.$field = $from.$field; }}
-           @{_x2c_field_copies(to, from, fields.cdr())});
+  return %($($!{ $to.$field = $from.$field; })
+           @(_x2c_field_copies(to, from, fields.cdr())));
 }
 
 /* Returns `to.field = value;` for each of `fields`, evaluating `value`
@@ -16,8 +16,8 @@ meta List _x2c_field_copies(List to, List from, List fields) {
 meta List _x2c_field_sets(List to, List value, List fields) {
   if (!fields) return NULL;
   Var field = fields.car();
-  return %(${$!{ $to.$field = $value; }}
-           @{_x2c_field_sets(to, value, fields.cdr())});
+  return %($($!{ $to.$field = $value; })
+           @(_x2c_field_sets(to, value, fields.cdr())));
 }
 
 macro Stmt $copy_fields(Expr $to, Expr $from, Name @fields) {

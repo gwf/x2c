@@ -235,7 +235,7 @@ parity remains a separate follow-up; the expectations were not weakened.
   `push` on a null array classified as the family
   `bad-arg` diagnostic; `test-symbolset.x` and `test-protocols.x` suites
   own SymbolSet runtime behavior and the base-default/descriptor-dispatch
-  seams behind protocol adoption. A fixture locks `@{...}` inside `%""` as
+  seams behind protocol adoption. A fixture locks `@(...)` inside `%""` as
   literal segment text; List-context rejection has its own fixture.
 
 The 2026-10-05 publication probes found that exporting the Make help script
@@ -252,7 +252,7 @@ passed six repeated nested-Make probes, and help output remains byte-identical.
   $constructed_syntax();` expands inside each meta body to an ordinary call,
   as the language reference documents for `$f(x)` in a `meta` body. The meta
   helper then rejects the call: "cannot convert ("List") to ("Func")". No
-  macro template form was found that spells that canonical AST; a `${...}`
+  macro template form was found that spells that canonical AST; a `$(...)`
   body is rejected with "expected macro name after '$'". The five `built-*`
   rows were therefore removed. Ordinary lambda destinations remain covered.
 - Outside an expansion, a `$` call rejects a String literal passed to a `Var`

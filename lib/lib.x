@@ -85,7 +85,7 @@ void DisjointSet.union(DisjointSet set, int a, int b) {
 List DisjointSet.sizes(DisjointSet set) {
   Array sizes = [];
   for (int i = 0, n = set.length; i < n; i++)
-    if (set.parent[i] == i) sizes.push(%(${set.size[i]} $i));
+    if (set.parent[i] == i) sizes.push(%($(set.size[i]) $i));
   return sizes.sort().list_free();
 }
 

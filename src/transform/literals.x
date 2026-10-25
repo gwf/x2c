@@ -9,7 +9,7 @@ module List _ordered_raise(
   }
   List declarations = _ordered_parts(c, values, orders);
   List parts = values.list_free();
-  List raised = %(raise ${parts.car()} (args @{parts.cdr()}));
+  List raised = %(raise $(parts.car()) (args @(parts.cdr())));
   return declarations ? %(block @declarations $raised) : raised;
 }
 
@@ -24,8 +24,8 @@ module Ast _collection_literal(Compiler c, Ast ast, Symbol tag) {
   Type type = map ? %("Map") : %("Array");
   Symbol head = map ? <map> : <array>;
   List lowered = _shipped_lowering(
-    c, <literal>, head, %(expr $type ($head @{ast.cdr()})), <expression>,
-    type, %"${type.repr()} literal");
+    c, <literal>, head, %(expr $type ($head @(ast.cdr()))), <expression>,
+    type, %"$(type.repr()) literal");
   match (lowered) case %(expr ? (call ?callee (args *arguments))): {
     auto Array values = [], orders = [];
     foreach (List argument in arguments) {
@@ -35,7 +35,7 @@ module Ast _collection_literal(Compiler c, Ast ast, Symbol tag) {
     }
     List declarations = _ordered_parts(c, values, orders);
     if (declarations) {
-      List call = %(call $callee (args @{values.list()}));
+      List call = %(call $callee (args @(values.list())));
       return _step(c, _ordered(declarations, type, call));
     }
   }
@@ -72,7 +72,7 @@ static int _part_order(Compiler c, Var part) {
     case %(expr ? (call ? (args ?argument))):
       return c.is_builtin_converter_call(node)
         ? _part_order(c, argument) : 2;
-    case %(!or (expr ? ?inner) (cast ? ?inner) ${$grouped(?inner)}):
+    case %(!or (expr ? ?inner) (cast ? ?inner) $($grouped(?inner))):
       return _part_order(c, inner);
     case $source_operator_content(%((!or . (!quote ->)) ?inner ?)): {
       int order = _part_order(c, inner);
@@ -138,18 +138,18 @@ module List _ordered_list(Compiler c, List chain) {
   if (counted && values.len() > 128)
     return _ordered(declarations, %("List"), _list_n(c, values));
   for (int i = (int) values.len() - 1; i >= 0; i--)
-    rebuilt = %(expr ("List") (${kinds[i]} ${values[i]} $rebuilt));
+    rebuilt = %(expr ("List") ($(kinds[i]) $(values[i]) $rebuilt));
   return _ordered(declarations, %("List"), rebuilt.caddr());
 }
 
 /* A chain of more than 128 cons cells is one `List.list_n` call, which keeps
    nested cons calls below host-C bracket-depth limits. */
 static List _list_n(Compiler c, Array values) {
-  String count = %"${values.len()}U";
+  String count = %"$(values.len())U";
   Type signature = NULL;
   List binding = c.sym.reference(%("List_list_n"), signature);
   return %(call (expr $signature (ident $binding))
-    (args (expr (unsigned) (literal (unsigned) $count)) @{values.list()}));
+    (args (expr (unsigned) (literal (unsigned) $count)) @(values.list())));
 }
 
 static List _list_cell(List node) {
@@ -179,7 +179,7 @@ module Ast _interpolation(Compiler c, Ast ast) {
   Array rows = [];
   foreach (List row in ast.cdr()) match (row) {
     case %((!or ?tag segvar segexp) ?value):
-      rows.push(%($tag ${c.convert_segment_to_string(value)}));
+      rows.push(%($tag $(c.convert_segment_to_string(value))));
     default: rows.push(row);
   }
   List source = source_string_content(rows.list_free());

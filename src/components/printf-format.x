@@ -24,7 +24,7 @@ meta static void _printf_fail(Code call, String message) {
   match (call) case %(expr ? (call ?callee *)):
     x2c_diagnostic_fail_at(
       call, <xform>, message,
-      %("printf-family call: ${Code.binding_spelling(callee)}"));
+      %("printf-family call: $(Code.binding_spelling(callee))"));
 }
 
 /* The linked meta copies include these diagnostics from this owner. */
@@ -181,7 +181,7 @@ meta static Code _printf_lowered(Code code, Code format, List values) {
     for (; next < arguments.len(); next++)
       if (_printf_is_var(arguments[next]))
         $fail.printf_unused_argument(code);
-    return %(expr $type (call $callee (args @{arguments.list_free()})));
+    return %(expr $type (call $callee (args @(arguments.list_free()))));
   }
   return code;
 }

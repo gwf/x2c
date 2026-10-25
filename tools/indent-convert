@@ -229,7 +229,7 @@ static String _convert(String path, String source, String *why) {
     block[i] = block[partner[i]] = removed[partner[i]] = 1;
     _open_block(i, removed);
     if (!_close_block(source, partner[i])) {
-      *why = %"line ${tokens[partner[i]].line}: code follows a closing brace";
+      *why = %"line $(tokens[partner[i]].line): code follows a closing brace";
       return NULL;
     }
   }
@@ -321,7 +321,7 @@ static String _convert(String path, String source, String *why) {
   int from = 0;
   for (int k = 0; k < nedits; k++) {
     if (edits[k].start < from) {
-      *why = %"overlapping edits at byte ${edits[k].start}";
+      *why = %"overlapping edits at byte $(edits[k].start)";
       return NULL;
     }
     pieces.push(source[from:edits[k].start]);
@@ -334,7 +334,7 @@ static String _convert(String path, String source, String *why) {
   /* The proof translates a copy beside the original, so its includes
      resolve the same way. */
   Path copy = Path.new(path).dirname().join(
-    %".indent-convert-${Path.new(path).basename()}");
+    %".indent-convert-$(Path.new(path).basename())");
   copy.write_text(output);
   List expected = _ast(path), actual = NULL;
   try actual = _ast(copy);

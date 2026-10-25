@@ -43,17 +43,17 @@ static Type _enum_definition(PromptTypes &p, Type family) {
   List body = c.sym.get(%(@family "enumerators")).caddr();
   foreach (List member, body) {
     List name = member.car() == <op> ? member.caddr() : member;
-    p.enumerators[%($family ${name.car()})] =
+    p.enumerators[%($family $(name.car()))] =
       c.sym.introduce(c.fresh_name("repl_enumerator"));
   }
   Array members = [];
   foreach (List member, body) {
     List name = member.car() == <op> ? member.caddr() : member;
-    List binding = p.enumerators[%($family ${name.car()})];
+    List binding = p.enumerators[%($family $(name.car()))];
     members.push(member.car() == <op>
-      ? %(op = $binding ${_enum_expression(p, member.cadddr())}) : binding);
+      ? %(op = $binding $(_enum_expression(p, member.cadddr()))) : binding);
   }
-  return %(@family ${members.list_free()});
+  return %(@family $(members.list_free()));
 }
 
 /* Collected types carry ordered fields and enum definitions. The same
@@ -70,12 +70,12 @@ static void _require_type(PromptTypes &p, Type type) {
   if (family.car() == <typedef>) {
     Type target = c.sym.get(family);
     Type base = target.base_type();
-    if (c.sym.get(%(${family.cadr()} "layout-attribute")))
-      raise %(repl (reason ${%"unsupported native layout: ${family.repr()}"}));
+    if (c.sym.get(%($(family.cadr()) "layout-attribute")))
+      raise %(repl (reason $(%"unsupported native layout: $(family.repr())")));
     if (base.car() == <enum> && base.len() == 3)
       target = (Type) Ast.replace_nodes(target,
-        {(void *) base: %(${base.car()} ${base.cadr()})});
-    List binding = c.sym.reference_global(%(${family.cadr()}));
+        {(void *) base: %($(base.car()) $(base.cadr()))});
+    List binding = c.sym.reference_global(%($(family.cadr())));
     List declaration = target.declaration_ast(binding);
     declaration = cons(<typedef>, declaration.cdr());
     int named_record = base.is_aggregate_tag() && base.cadr() is <string>;
@@ -89,7 +89,7 @@ static void _require_type(PromptTypes &p, Type type) {
       p.declarations.push(family.declaration_ast(NULL));
       return;
     }
-    raise %(repl (reason ${%"unsupported native layout: ${family.repr()}"}));
+    raise %(repl (reason $(%"unsupported native layout: $(family.repr())")));
   }
   if (family.car() == <enum>) {
     p.declarations.push(_enum_definition(p, family).declaration_ast(NULL));
@@ -103,7 +103,7 @@ static void _require_type(PromptTypes &p, Type type) {
     _require_type(p, member);
     fields.push(member.declaration_ast(%($name)));
   }
-  Type definition = %(@family (fields @{fields.list_free()}));
+  Type definition = %(@family (fields @(fields.list_free())));
   if (!anonymous) p.declarations.push(definition.declaration_ast(NULL));
   else {
     List alias = c.sym.introduce(c.fresh_name("repl_type"));

@@ -52,7 +52,7 @@ static List _selected_gradient(AutogradContext context, Tensor gradient) {
   EXPECT_TRUE(context.needs_input_grad(1));
   Tensor input = context.saved_tensors()[0].tensor();
   Tensor result = gradient * input;
-  return %( ${Var.null()} $result );
+  return %( $(Var.null()) $result );
 }
 
 static void *_other_thread(void *tensor) {
@@ -84,7 +84,7 @@ static void _device(String device) {
   catch %(bad-state (library "torch") *): caught++;
   EXPECT_INT_EQ(caught, 5);
   Tensor selected = Tensor.custom(_product, _selected_gradient,
-                                   %( ${x.detach()} $y ));
+                                   %( $(x.detach()) $y ));
   selected.sum().backward_callbacks();
   Tensor remote = Tensor.custom(_product, _product_gradient, %($x $y));
   Tensor total = remote.sum();

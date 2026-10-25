@@ -171,7 +171,7 @@ static uint64_t _index_value(CloneIndex &index, Var value, int origin) {
         file_static |= index.parsed.compiler.sym.file_statics().contains(
           source_key);
       List key = file_static
-               ? %(global ${index.path} $name) : %(global $name);
+               ? %(global $(index.path) $name) : %(global $name);
       return _intern_atom(index, key);
     }
   }
@@ -182,12 +182,12 @@ static uint64_t _index_value(CloneIndex &index, Var value, int origin) {
     if (!origin) { index.unlocated++; return id; }
     Array stream = [];
     _collect_bindings(index, node, {}, stream);
-    List key = %(${(int) id} @{stream.list_free()});
+    List key = %($((int) id) @(stream.list_free()));
     List site = %(
-      site ${index.function}
-      ${project_location(index.parsed.compiler, index.path, origin)}
-      (kind ${node.car()}) (span $start ${index.sequence})
-      (unit ${index.path})
+      site $(index.function)
+      $(project_location(index.parsed.compiler, index.path, origin))
+      (kind $(node.car())) (span $start $(index.sequence))
+      (unit $(index.path))
     );
     key = index.parsed.context.export(key);
     site = index.parsed.context.export(site);
@@ -260,9 +260,9 @@ List graph_clones(Frontend frontend, Array inputs, int minimum) {
     uint64_t size = index.sizes[id];
     sites = sites.sort();
     ranked.push(
-      %(${-(int64_t) (size * (count - 1))}
-        ${-(int64_t) size} $count
-        ${ (int64_t) index.cells[id].occurrences} (sites @sites)));
+      %($(-(int64_t) (size * (count - 1)))
+        $(-(int64_t) size) $count
+        $( (int64_t) index.cells[id].occurrences) (sites @sites)));
   }
   ranked.sort();
   Array candidates = [], retained = [];
@@ -276,9 +276,9 @@ List graph_clones(Frontend frontend, Array inputs, int minimum) {
       if (covered) { suppressed++; continue; }
       retained.push(sites);
       candidates.push(
-        %(candidate (score ${-score.integer()})
-          (size ${-size.integer()}) (verified-occurrences $count)
-          (structural-occurrences $occurrences) (sites @{sites[:8]})));
+        %(candidate (score $(-score.integer()))
+          (size $(-size.integer())) (verified-occurrences $count)
+          (structural-occurrences $occurrences) (sites @(sites[:8]))));
     }
   }
   uint64_t unique[64] = {0}, visits[64] = {0}, repeated[64] = {0};
@@ -293,24 +293,24 @@ List graph_clones(Frontend frontend, Array inputs, int minimum) {
   for (int i = 0; i < 64; i++)
     if (unique[i]) distribution.push(
       %(bucket
-        (minimum-size ${(int64_t) (1ULL << i)})
-        (unique-cells ${(int64_t) unique[i]})
-        (repeated-cells ${(int64_t) repeated[i]})
-        (occurrences ${(int64_t) visits[i]})));
+        (minimum-size $((int64_t) (1ULL << i)))
+        (unique-cells $((int64_t) unique[i]))
+        (repeated-cells $((int64_t) repeated[i]))
+        (occurrences $((int64_t) visits[i]))));
   List result = %(clones
     (policy local-binding-bijection literals-preserved globals-preserved)
-    (summary (units ${inputs.len()}) (cons-visits ${(int64_t) index.visits})
-      (unique-cells ${(int64_t) index.count})
-      (cell-bytes ${(int64_t) (index.count * sizeof(CloneCell))})
-      (cell-capacity-bytes ${(int64_t) (index.capacity * sizeof(CloneCell))})
-      (index-bytes ${(int64_t) (index.slot_count * sizeof(uint64_t))})
-      (size-capacity-bytes ${(int64_t) (index.capacity * sizeof(uint64_t))})
-      (atoms ${index.atoms.len()}) (verification-groups ${index.sites.len()})
-      (unlocated-root-occurrences ${index.unlocated})
+    (summary (units $(inputs.len())) (cons-visits $((int64_t) index.visits))
+      (unique-cells $((int64_t) index.count))
+      (cell-bytes $((int64_t) (index.count * sizeof(CloneCell))))
+      (cell-capacity-bytes $((int64_t) (index.capacity * sizeof(CloneCell))))
+      (index-bytes $((int64_t) (index.slot_count * sizeof(uint64_t))))
+      (size-capacity-bytes $((int64_t) (index.capacity * sizeof(uint64_t))))
+      (atoms $(index.atoms.len())) (verification-groups $(index.sites.len()))
+      (unlocated-root-occurrences $(index.unlocated))
       (candidate-groups $total) (suppressed-before-limit $suppressed)
       (minimum-size $minimum) (limit 25) (site-limit 8)
       (parse-cpu-seconds $parse_seconds) (index-cpu-seconds $index_seconds))
-    (size-distribution @{distribution.list_free()})
-    (candidates @{candidates.list_free()}));
+    (size-distribution @(distribution.list_free()))
+    (candidates @(candidates.list_free())));
   return result;
 }

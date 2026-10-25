@@ -16,7 +16,7 @@ static Var count(const void *input, size_t input_size) {
     raise %(bad-arg (operation "count worker"));
 
   for (int i = 0; i < work.iterations; i++) {
-    String scratch = %"${work.name}-$i";
+    String scratch = %"$(work.name)-$i";
     List garbage = %(iteration $i scratch $scratch);
     (void) garbage;
 
@@ -25,7 +25,7 @@ static Var count(const void *input, size_t input_size) {
     work.mutex.unlock();
   }
 
-  String message = %"${work.name} complete";
+  String message = %"$(work.name) complete";
   log_info(<worker>, %((message $message)));
   Map result = {
     name: work.name,

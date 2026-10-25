@@ -27,7 +27,7 @@ foreach (List command in queue) {
     results.push(describe(names[done], done));
   }
   Job job = command.job().options({stderr: <capture>}).start();
-  names[job] = %"job ${++started}";
+  names[job] = %"job $(++started)";
   running.push(job);
   if (running.len() > peak) peak = running.len();
 }

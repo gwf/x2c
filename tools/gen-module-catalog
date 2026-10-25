@@ -16,7 +16,7 @@ static void _names(Array lines, List callables):
     lines.push("None. This module has no non-static function definitions.")
     return
   Array names = []
-  foreach List definition in callables: names.push(%"`${definition.car()}`")
+  foreach List definition in callables: names.push(%"`$(definition.car())`")
   foreach String line in Prose.wrap(String.join(", ", names.list_free()), 79):
     lines.push(line)
 
@@ -33,7 +33,7 @@ static String _render(Array units):
     "not claim that partial runtime contracts are complete; consult",
     "`agents/x2c-philosophy.md` for contract status.", "",
     %"- Compiler modules: $compiler",
-    %"- Runtime modules: ${units.len() - compiler}",
+    %"- Runtime modules: $(units.len() - compiler)",
     "- Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)",
     ""]
   String group = NULL
@@ -62,7 +62,7 @@ Path x2c = root.join("builds/0/x2c")
 if !x2c.exists():
   Stderr.printf("builds/0/x2c is missing; run 'make build' first\n")
   return 1
-String usage = %"usage: ${self.basename()} [-h] [--write | --check]\n"
+String usage = %"usage: $(self.basename()) [-h] [--write | --check]\n"
 if args.contains("-h") || args.contains("--help"):
   printf("%s\noptions:\n  -h, --help  show this help message and exit\n"
          "  --write\n  --check\n", usage)

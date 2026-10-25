@@ -80,7 +80,7 @@ static void _check_manifest(Array entries, Array errors):
 
 Path self = String.new(argv[0])
 root = self.absolute().dirname().dirname()
-String usage = %"usage: ${self.basename()} [-h] [--update]\n"
+String usage = %"usage: $(self.basename()) [-h] [--update]\n"
 if args.contains("-h") || args.contains("--help"):
   printf("%s\noptions:\n"
          "  -h, --help  show this help message and exit\n"

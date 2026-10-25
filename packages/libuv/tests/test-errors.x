@@ -30,9 +30,9 @@ static String _operand(int mark, String value) {
 
 static int _direct(void) {
   int status = -1;
-  raise %(io-fail (library "libuv") (operation ${_operand(1, "write")})
-          (status $status) (name ${_operand(2, "UV_EPERM")})
-          (message ${_operand(3, "not permitted")}));
+  raise %(io-fail (library "libuv") (operation $(_operand(1, "write")))
+          (status $status) (name $(_operand(2, "UV_EPERM")))
+          (message $(_operand(3, "not permitted"))));
 }
 
 static int _catalogue(void) {

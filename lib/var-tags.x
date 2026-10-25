@@ -165,8 +165,8 @@ meta int _tag_unsigned(List row) => row[0].str().startswith("u");
 /* --- the tag table and tag sets ----------------------------------------- */
 
 meta List _tag_info_row(List row) => $!( {
-  ${row[0]}, ${_tag_kind(row)}, ${_tag_top(row)}, ${_tag_middle(row)},
-  ${_tag_bottom(row)}
+  $(row[0]), $(_tag_kind(row)), $(_tag_top(row)), $(_tag_middle(row)),
+  $(_tag_bottom(row))
 } );
 
 /* The table ends in a void row, so a decoded index past the ledger reads a
@@ -177,7 +177,7 @@ meta List _tag_info_sentinel(void) =>
 meta List _tag_info(void) {
   Array cells = [];
   foreach (List row in _tag_rows()) cells.push(_tag_info_row(row));
-  return $!( { @{cells.list_free()}, ${_tag_info_sentinel()} } );
+  return $!( { @(cells.list_free()), $(_tag_info_sentinel()) } );
 }
 
 meta int _tag_descriptor(List row) =>
@@ -219,14 +219,14 @@ meta List _tag_bits_expr(List row) {
 }
 
 meta List _tag_numeric_row(List row) => $!( {
-  ${row[0]}, ${_tag_floating(row)}, ${_tag_unsigned(row)},
-  ${_tag_bits_expr(row)}, ${_tag_rank(row)}
+  $(row[0]), $(_tag_floating(row)), $(_tag_unsigned(row)),
+  $(_tag_bits_expr(row)), $(_tag_rank(row))
 } );
 
 meta List _tag_numeric_table(void) {
   Array cells = [];
   foreach (List row in _tag_numeric_rows()) cells.push(_tag_numeric_row(row));
-  return $!( { @{cells.list_free()} } );
+  return $!( { @(cells.list_free()) } );
 }
 
 /* --- the built-in decoder ------------------------------------------------ */
@@ -270,7 +270,7 @@ meta int _tag_constant_row(List row) {
 meta List _tag_list(List items) {
   List built = $!List{ 0 };
   for (int i = items.len() - 1; i >= 0; i--)
-    built = $!(cons(${items[i]}, $built));
+    built = $!(cons($(items[i]), $built));
   return built;
 }
 
@@ -290,8 +290,8 @@ meta List _tag_row_entry(List row, Map counts) {
   Symbol tag = row[0];
   int top = _tag_top(row), mask = _tag_group_mask(counts[top]),
       bottom = _tag_bottom(row);
-  return %(map-entry ${$!Symbol{ $tag }}
-    ${_tag_list([$!int{ $top }, $!int{ $mask }, $!int{ $bottom }])});
+  return %(map-entry $($!Symbol{ $tag })
+    $(_tag_list([$!int{ $top }, $!int{ $mask }, $!int{ $bottom }])));
 }
 
 meta List _tag_constant_rows(void) {
@@ -323,9 +323,9 @@ meta List _tag_decode_group(List rows, Map counts, int top) {
   foreach (List row in rows) {
     if (_tag_top(row) != top) continue;
     int selector = immediate ? _tag_middle(row) : _tag_bottom(row) & mask;
-    ids[selector] = %(expr () (ident ${x2c_ident(_tag_id(row))}));
+    ids[selector] = %(expr () (ident $(x2c_ident(_tag_id(row)))));
   }
-  return $!( { $mask, $immediate, { @{ids.list_free()} } } );
+  return $!( { $mask, $immediate, { @(ids.list_free()) } } );
 }
 
 meta List _tag_decode_groups(void) {
@@ -334,7 +334,7 @@ meta List _tag_decode_groups(void) {
   Array groups = [];
   for (int group = 0; group < 32; group++)
     groups.push(_tag_decode_group(rows, counts, _tag_group_top(group)));
-  return $!( { @{groups.list_free()} } );
+  return $!( { @(groups.list_free()) } );
 }
 
 /* --- the enum check ----------------------------------------------------- */
@@ -348,7 +348,7 @@ meta List _tag_id_checks(void) {
     checks.push(
       $!Unit{
         _Static_assert(
-          ${x2c_ident(_tag_id(row))} == $index,
+          $(x2c_ident(_tag_id(row))) == $index,
           "TagId matches the var tag ledger");
       });
     index++;

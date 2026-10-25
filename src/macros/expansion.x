@@ -115,7 +115,7 @@ static List _bind_expansion(Expansion &x, Symbol position) {
   List author_bindings = _author_bindings(
     replacement_bindings, template_bindings);
   c.macro_stack = %(
-    (${x.definition} ${x.input} $author_bindings ${x.invocation}) @old_stack
+    ($(x.definition) $(x.input) $author_bindings $(x.invocation)) @old_stack
   );
   int expansion_origin = c.record_origin(x.invocation);
   int placed = c.placements.len();
@@ -138,7 +138,7 @@ static List _fresh_names(Expansion &x, List old_stack) {
   Map file_locals = {};
   // The outermost active row's fourth field is its invocation token.
   Token root = old_stack ? old_stack.last().list()[3] : x.invocation;
-  if (c.sym.at_file_scope()) _file_scope_locals(%(${x.template}), file_locals);
+  if (c.sym.at_file_scope()) _file_scope_locals(%($(x.template)), file_locals);
   Array fresh_values = [];
   foreach (List fresh in x.definition.assoc(<fresh>).list()) {
     Var (binder, spelling, exposed) = fresh;
@@ -150,7 +150,7 @@ static List _fresh_names(Expansion &x, List old_stack) {
     }
     else
       x.direct = cons(
-        %($binder ${_private_name(c, spelling.str(), owner)}), x.direct);
+        %($binder $(_private_name(c, spelling.str(), owner))), x.direct);
   }
   List members = _member_bindings(
     c, x.definition.assoc(<parameters>), x.input);
@@ -175,7 +175,7 @@ static List _member_bindings(
       continue;
     Var member = _hole_key(parameter, "member");
     bindings = cons(
-      %($member ${_member_spelling(c, capture.assoc(<value>))}), bindings);
+      %($member $(_member_spelling(c, capture.assoc(<value>)))), bindings);
   }
   return bindings;
 }
@@ -265,19 +265,19 @@ module List _private_name(Compiler c, String source, Token root) {
    counts repeats of the same name there. */
 static String _file_scope_name(
   Compiler c, Token root, String source) {
-  String key = %"macro:${_scope_owner(c)}:${root.pos}:$source";
+  String key = %"macro:$(_scope_owner(c)):$(root.pos):$source";
   Var stored;
   int count = c.names.counters.try_get(key, stored) ? stored : 0;
   c.names.counters[key] = count + 1;
   c.names.issued++;
   String digest = "%08x".printf(%"$key:$count".hash());
-  return %"_x2c_gensym_macro_${source}_$digest";
+  return %"_x2c_gensym_macro_$(source)_$digest";
 }
 
 /* The unit's owner spelling, cached per file and package. */
 static String _scope_owner(Compiler c) {
   String owner = NULL;
-  $memo(c.names.file_scope_owners, %(${c.filename} ${c.package}), owner) {
+  $memo(c.names.file_scope_owners, %($(c.filename) $(c.package)), owner) {
     owner = c.filename ? _owner_spelling(c) : "";
   }
   return owner;
@@ -290,9 +290,9 @@ static String _owner_spelling(Compiler c) {
   String owner = Compiler.portable_path(path);
   Var package_root = c.package ? c.package_roots[c.package] : void;
   if (package_root is not <string>) return owner;
-  String prefix = %"${c.canonical_path(Path.absolute(package_root))}/";
+  String prefix = %"$(c.canonical_path(Path.absolute(package_root)))/";
   if (!path.startswith(prefix)) return owner;
-  return %"package:${c.package}/${path[prefix.len():]}";
+  return %"package:$(c.package)/$(path[prefix.len():])";
 }
 
 /* Collects the template locals that a file-scope row declares with external
@@ -306,7 +306,7 @@ module void _file_scope_locals(List rows, Map locals) {
     case %(macro-invoke ((!quote !quote) ?(List definition))
            ?(List input) ?): {
       Map declared = {};
-      _file_scope_locals(%(${definition.assoc(<template>)}), declared);
+      _file_scope_locals(%($(definition.assoc(<template>))), declared);
       List bindings = NULL;
       input.try_match(definition.assoc(<pattern>), bindings);
       foreach (List pair in bindings)

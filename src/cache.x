@@ -129,7 +129,7 @@ static void _collect_ids(
         if (!marked[id].is_null()) continue;
         marked[id] = 1;
         pending.push(id);
-        pending.push(%(${c.id_keys[id]}));
+        pending.push(%($(c.id_keys[id])));
         continue;
       }
     pending.push(node);
@@ -166,7 +166,7 @@ static List _rewrite_statics(Compiler c, List code, StaticQueue &q) {
     for (int i = first; i < q.initializers.len(); i++) {
       List initializer = q.initializers[i];
       List function = c.initializer_function(
-        %(static void), initializer.caddr(), %(${initializer.cadr()}));
+        %(static void), initializer.caddr(), %($(initializer.cadr())));
       output.push(%(sourceinit $function));
     }
   }
@@ -198,7 +198,7 @@ static List _defer_bindings(
   Array values = [];
   foreach (Ast bound in bound_list)
     values.push(_defer_binding(c, decltype, bound, q));
-  return %(declare $decltype (bindings @{values.list_free()}));
+  return %(declare $decltype (bindings @(values.list_free())));
 }
 
 static List _defer_binding(
@@ -242,7 +242,7 @@ static List _defer_binding(
 static List _record(
   StaticQueue &q, List name, List mods, List assign) {
   List helper = q.c.sym.introduce(q.c.fresh_name("static_initialize"));
-  List initializer = %($name $assign $helper ${q.arms});
+  List initializer = %($name $assign $helper $(q.arms));
   q.initializers.push(initializer);
   q.pending.setdefault(name, []).array().push(initializer);
   return %(bind $name $mods);
@@ -291,10 +291,10 @@ List Compiler.zero_initializer(Compiler c, List value) {
             zero = _initializer_rhs(type, NULL, NULL, type, body);
         zeroed.push(%($condition $path $destination $zero));
       }
-      return %(expr $type (initval @{zeroed.list_free()}));
+      return %(expr $type (initval @(zeroed.list_free())));
     }
     case %(expr ?type (!set ?inner (composite *))):
-      return %(expr $type ${c.zero_initializer(inner)});
+      return %(expr $type $(c.zero_initializer(inner)));
     case %(expr ?type ?): {
       Type resolved = c.sym.resolve_key(type);
       return resolved.is_aggregate()
@@ -304,10 +304,10 @@ List Compiler.zero_initializer(Compiler c, List value) {
       Array zeroed = [];
       foreach (List item in items)
         zeroed.push(c.zero_initializer(item));
-      return %(composite (commas @{zeroed.list_free()}));
+      return %(composite (commas @(zeroed.list_free())));
     }
     case %((!or ?tag dotinit indexinit) ?key ?inner):
-      return %($tag $key ${c.zero_initializer(inner)});
+      return %($tag $key $(c.zero_initializer(inner)));
   }
   return zero;
 }
@@ -321,7 +321,7 @@ static List _array_block(
     (List original, List cases) = row;
     statements.push(_array_row(c, target, original, cases));
   }
-  return %(block @{statements.list_free()});
+  return %(block @(statements.list_free()));
 }
 
 static List _array_row(
@@ -418,7 +418,7 @@ static List _array_input(
   List binding = c.sym.introduce(c.fresh_name("initializer_value"));
   List local = %(expr $type (ident $binding));
   List input = header.cadr();
-  List formal = %(expr $type ${input.car()});
+  List formal = %(expr $type $(input.car()));
   code = code.search_replace(%(!quote $formal), local);
   List initial = source;
   if (!unconditional) {
@@ -561,7 +561,7 @@ static List _cache_batches(
   int limit = 512, count = statements.len();
   if (count <= limit) return statements.list_free();
   Array calls = [];
-  String stem = prefix ? %"${prefix}initialize" : "cache_initialize";
+  String stem = prefix ? %"$(prefix)initialize" : "cache_initialize";
   List type = %(("__attribute__((noinline, cold))") static void);
   for (int first = 0; first < count; first += limit) {
     Array batch = [];

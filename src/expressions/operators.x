@@ -129,7 +129,7 @@ module List _binary_expression(
   List lowered = _protocol_operator_expression(c, operator, lhs, rhs);
   if (lowered) {
     if (!constant_string || c.runtime_literals) return lowered;
-    List cached = c.cache(%(string ${c.normalize(lowered)}));
+    List cached = c.cache(%(string $(c.normalize(lowered))));
     return %(expr ("String") $cached);
   }
   if (operator == <in>)
@@ -196,7 +196,7 @@ static void _check_untyped_operand(
   if (!member || operator == <==> || operator == <!=>) return;
   if (_converts_operands(c, participant) &&
       c.resolve_protocol_member(participant, member) &&
-      other.match(%(expr ? ${$source_identifier_content(%(?))})))
+      other.match(%(expr ? $($source_identifier_content(%(?))))))
     $fail.expressions_operand_untyped(c, origin);
 }
 
@@ -457,12 +457,12 @@ module void _note_fresh_callee(Compiler c, List binding) {
 
 module int _is_operator_temporary(Compiler c, List expression) {
   match (expression) {
-    case %(expr ? ${$grouped(?inner)}):
+    case %(expr ? $($grouped(?inner))):
       return _is_operator_temporary(c, inner);
   }
   match (expression)
-    case $called(%(expr ? ${$source_identifier_content(
-        %((!set ?binding (*))))}), *arguments):
-      return %"fresh-callee ${(long) binding.list()}" in c.protocol_helpers;
+    case $called(%(expr ? $($source_identifier_content(
+        %((!set ?binding (*)))))), *arguments):
+      return %"fresh-callee $((long) binding.list())" in c.protocol_helpers;
   return 0;
 }

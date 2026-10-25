@@ -47,7 +47,7 @@ static List _polygon(Vector2 center, int sides, float radius) {
       roundf(cosf(angle) * radius), roundf(sinf(angle) * radius)
     };
     Vector2 point = center + spoke;
-    points = cons(%(${point.x} ${point.y}), points);
+    points = cons(%($(point.x) $(point.y)), points);
   }
   return points.reverse();
 }
@@ -123,11 +123,11 @@ int main(void) {
 
   sheet.draw_text("Sheet report", 300, 336, 24, ink);
   sheet.draw_text(
-    %"${captions.len()} tiles at $tile_size square, read from PNG",
+    %"$(captions.len()) tiles at $tile_size square, read from PNG",
     300, 378, 18, Color.rgb(94, 102, 120)
   );
   sheet.draw_text(
-    %"$cleared of ${pixels.len()} noise pixels made transparent",
+    %"$cleared of $(pixels.len()) noise pixels made transparent",
     300, 406, 18, Color.rgb(94, 102, 120)
   );
 
@@ -149,12 +149,12 @@ int main(void) {
     absent.free();
   }
   catch %(io-fail *detail): {
-    printf("%s\n", %"${detail.assoc(<operation>).string()} refused $missing");
+    printf("%s\n", %"$(detail.assoc(<operation>).string()) refused $missing");
   }
 
   printf(
     "%s\n",
-    %"wrote $output from ${captions.len()} tiles, $cleared cleared"
+    %"wrote $output from $(captions.len()) tiles, $cleared cleared"
   );
   return 0;
 }

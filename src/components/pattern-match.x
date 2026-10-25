@@ -401,7 +401,7 @@ meta static String _match_label(Symbol head, Array heads, int &labelling) {
   if (head in heads) return NULL;
   heads.push(head);
   Var literal = head;
-  return %" case ${(unsigned long long) literal.u64}ULL: ;";
+  return %" case $((unsigned long long) literal.u64)ULL: ;";
 }
 
 // the lowering
@@ -476,7 +476,7 @@ meta static Code _match_lowered(Code subject, List rows) {
   String locals = _match_locals(depths, values);
   List prologue = dynamic
     ? _match_dynamic_read(subject, locals)
-    : %("List _x2c_gensym_match_expr =" ${subject.convert(%("List"))} $locals);
+    : %("List _x2c_gensym_match_expr =" $(subject.convert(%("List"))) $locals);
   return Code.lowered(
     %(block $prologue
             (switch (expr ("uint64_t") ($selector)) (block @items))), NULL);

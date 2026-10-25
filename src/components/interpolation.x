@@ -18,14 +18,14 @@ meta Code interpolation_lowering(Code code) {
       case %((!or segexp segvar) ?value): parts.push(value);
       case %(segraw ?text): {
         String raw = text;
-        Code literal = %(expr (* char) (literal (* char) ${raw.repr()}));
+        Code literal = %(expr (* char) (literal (* char) $(raw.repr())));
         parts.push($!String{ String.new($literal) });
       }
       default: parts.push(%(expr ("String") $segment));
     }
     Var chain = %(nil);
     while (parts.len())
-      chain = %(expr ("List") (cons ${parts.take_last()} $chain));
+      chain = %(expr ("List") (cons $(parts.take_last()) $chain));
     return $!String{ String.join(NULL, $chain) };
   }
   return code;

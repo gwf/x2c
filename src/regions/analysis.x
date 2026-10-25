@@ -50,7 +50,7 @@ static void _collect_functions(Var node, Array found) {
       foreach (List row in rows)
         match (row) case %(param ? (bind ?parameter ?)):
           parameters.push(parameter);
-      found.push(%($name ${parameters.list_free()} $body));
+      found.push(%($name $(parameters.list_free()) $body));
     }
     case %(*children):
       foreach (Var child in children) _collect_functions(child, found);
@@ -75,7 +75,7 @@ static void _analyze(Walk &w, List function) {
   _walk(w, body);
   Array rows = [];
   foreach (List row in w.sinks.keys()) rows.push(row);
-  List summary = %(${w.fresh} ${rows.sort().list_free()}),
+  List summary = %($(w.fresh) $(rows.sort().list_free())),
        previous = w.summaries[name];
   if (summary == previous) return;
   w.summaries[name] = summary;

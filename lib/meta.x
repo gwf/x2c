@@ -451,7 +451,7 @@ String type_name_error(List type) {
     fixed.push(rest.car());
   fixed.push(name.str());
   String wanted = fixed.list_free().repr();
-  return %"type name '${name}' must be a String: write %${wanted}";
+  return %"type name '$(name)' must be a String: write %$(wanted)";
 }
 
 /** Returns `(base modifiers)` for reconstructing a declaration of `type`.
@@ -470,7 +470,7 @@ List type_declaration_parts(List type) {
   }
   Array syntax = [];
   foreach (Var item in reversed.reverse()) syntax.push(_modifier_syntax(item));
-  return %(${qualifiers.append(base)} (@{syntax.list_free()}));
+  return %($(qualifiers.append(base)) (@(syntax.list_free())));
 }
 
 /* A function modifier's parameter types become parameter declarations. */
@@ -482,7 +482,7 @@ static Var _modifier_syntax(Var modifier) {
         List (base, modifiers) = type_declaration_parts(parameter);
         params.push(%(param $base (bind () $modifiers)));
       }
-      return %(fnmod (params @{params.list_free()}));
+      return %(fnmod (params @(params.list_free())));
     }
   return modifier;
 }

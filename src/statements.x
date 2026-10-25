@@ -42,13 +42,13 @@ static macro Stmt $fail.statements_match_default(Expr $c, Expr $site) =>
 static macro Stmt $fail.statements_match_arm(Expr $c, Expr $site) =>
   $c.report_error(
     <parse>, "expected 'case' or 'default' in match statement",
-    $site, %( "token:" ${$c.token.text} ));
+    $site, %( "token:" $($c.token.text) ));
 
 static macro Stmt $fail.statements_match_pattern(
   Expr $c, Expr $origin, Expr $pattern) =>
   $c.report_error(
     <parse>, "match case pattern must be a %() list literal",
-    $origin, %( "pattern:" ${$pattern.repr()} ));
+    $origin, %( "pattern:" $($pattern.repr()) ));
 
 static macro Stmt $fail.statements_try_handler(Expr $c, Expr $site) =>
   $c.report_error(
@@ -256,7 +256,7 @@ List Compiler.finish_return_statement(Compiler c, List expr) {
   if (!expr) return %(return);
   List resolved = c.resolve_expression(expr, c.token);
   c.check_explicit_converter(resolved, c.return_type, 0);
-  return %(return ${c.return_type} $resolved);
+  return %(return $(c.return_type) $resolved);
 }
 
 static List _case_statement(Compiler c) {
@@ -296,7 +296,7 @@ static List _raise_statement(Compiler c) {
 
 static List _defer_statement(Compiler c) {
   c.expect(<defer>);
-  return %(defer ${c.parse_governed(<statement>)});
+  return %(defer $(c.parse_governed(<statement>)));
 }
 
 static List _switch_statement(Compiler c) {
@@ -524,7 +524,7 @@ static List _catch_cases(Compiler c) {
     if (saw_default)
       $fail.statements_catch_default(c, c.token);
   }
-  return %(catchcases ${arms.list_free()} $handle);
+  return %(catchcases $(arms.list_free()) $handle);
 }
 
 /* A template's handler is its own local, like any it declares. */
@@ -585,7 +585,7 @@ List Compiler.parse_governed(Compiler c, Symbol position) {
         c.peek(0) == <eof>)
       break;
   }
-  return items.len() == 1 ? items[0] : %(group @{items.list()});
+  return items.len() == 1 ? items[0] : %(group @(items.list()));
 }
 
 /* Adds the directives before the cursor to `items` and returns how many

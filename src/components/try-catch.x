@@ -23,8 +23,8 @@
 macro Stmt $fail.try_finalizer_label(Expr $site, Expr $label) =>
   x2c_diagnostic_fail_at(
     $site, <emit>, "a finally body cannot define a label",
-    %("a finalizer runs on every path that leaves its region, so '${
-      Code.binding_spelling($label)}' would be defined once for each"));
+    %("a finalizer runs on every path that leaves its region, so '$(
+      Code.binding_spelling($label))' would be defined once for each"));
 
 // catch sites
 
@@ -251,11 +251,11 @@ meta static List _try_catch_clause(List handle, List records, Array rows) {
       if (!pattern.is_static_pattern()) state = "ERROR_CATCH_TRANSIENT";
       patterns.push(pattern);
     }
-    Atom arm = Atom.intern(%"?__try_arm_${arms.len()}");
-    rows.push(%(region $arm ${record.cadr()}));
+    Atom arm = Atom.intern(%"?__try_arm_$(arms.len())");
+    rows.push(%(region $arm $(record.cadr())));
     arms.push(arm);
   }
-  return %($handle $state ${arms.list_free()} @{patterns.list_free()});
+  return %($handle $state $(arms.list_free()) @(patterns.list_free()));
 }
 
 /* The landing form of the try `node`: its frame, its finalizer in a
@@ -273,15 +273,15 @@ meta static Code _try_landing(
   if (finalizer) {
     Atom departure = Atom.intern("?__try_departure");
     finished = Atom.intern("?__try_finalizer");
-    rows.push(%(exits $departure ${_try_departure(frame)}));
+    rows.push(%(exits $departure $(_try_departure(frame))));
     rows.push(%(region $finished $finalizer));
   }
-  rows.push(%(exits $exits ${_try_exits(frame, handle, finished)}));
+  rows.push(%(exits $exits $(_try_exits(frame, handle, finished))));
   rows.push(%(region $lowered $body));
   List clause = _try_catch_clause(handle, arms, rows);
   Macro shape = $x2c.try.frame;
   List code = shape(frame, clause, lowered, exits);
-  return Code.lowered(%(landing $code ${rows.list_free()}), NULL);
+  return Code.lowered(%(landing $code $(rows.list_free())), NULL);
 }
 
 $rewrite($caught)

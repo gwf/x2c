@@ -56,7 +56,7 @@ static List _change(
 static List _dynamic(
   Compiler c, Symbol point, Type type, List operation) {
   List kind = operation.car() == <postfix>
-    ? %(postfix ${operation.cadr()} ("Var")) : %(${operation.cadr()} ("Var"));
+    ? %(postfix $(operation.cadr()) ("Var")) : %($(operation.cadr()) ("Var"));
   List rewritten = c.rewrite(
     point, kind, %(expr ("Var") $operation), <expression>, type, NULL);
   return rewritten ? rewritten.caddr() : operation;
@@ -94,7 +94,7 @@ module List _truthy(Compiler c, List ast) {
       return source_operator_content(%(? $test $ontrue $onfalse));
     }
     case $source_operator_content(%(! ?condition)):
-      return source_operator_content(%(! ${_truthy_expression(c, condition)}));
+      return source_operator_content(%(! $(_truthy_expression(c, condition))));
   }
   return ast;
 }
@@ -109,7 +109,7 @@ static List _truthy_expression(Compiler c, List expr) {
 }
 
 static List _symbol_expression(Symbol value) =>
-  %(expr ("Symbol") "${(unsigned long) value}");
+  %(expr ("Symbol") "$((unsigned long) value)");
 
 // Inject conversions so assignment RHS matches the annotated LHS type.
 static List _assignment(Compiler c, Symbol op, List lhs, List rhs) {
@@ -187,7 +187,7 @@ static List _compound(
   }
   if (!lhs_is_var && !c.sym.is_var_type(rhs_type)) return ast;
   List operation = source_operator_content(
-    %(${op.compound_assignment()} $lhs $rhs));
+    %($(op.compound_assignment()) $lhs $rhs));
   return _dynamic(c, <binary>, lhs_type, operation);
 }
 
@@ -227,7 +227,7 @@ static List _protocol_update(
 static List _update_call(
   List target, List operator, List value, String helper) {
   Type type = target.cadr();
-  List address = %(expr ${type.reference()} (op & (parens $target)));
+  List address = %(expr $(type.reference()) (op & (parens $target)));
   return value ? %(call $helper (args $address $operator $value))
                : %(call $helper (args $address $operator));
 }

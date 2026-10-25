@@ -34,9 +34,9 @@ macro Stmt $fail.expressions_slice_zero(Expr $c, Expr $site) =>
 macro Stmt $fail.expressions_member_ident(
   Expr $c, Expr $site, Expr $op, Expr $lhs) {
   {
-    List notes = %("token:" ${$c.token.text});
-    if ($lhs) notes = cons(%("lhs expr:" ${$lhs.str()}), notes);
-    String msg = %"expected identifier after '${$op}'";
+    List notes = %("token:" $($c.token.text));
+    if ($lhs) notes = cons(%("lhs expr:" $($lhs.str())), notes);
+    String msg = %"expected identifier after '$($op)'";
     $c.report_error(<parse>, msg, $site, notes);
   }
 }
@@ -44,28 +44,28 @@ macro Stmt $fail.expressions_member_ident(
 macro Stmt $fail.expressions_ident_semantic(
   Expr $c, Expr $origin, Expr $value) =>
   $c.report_error(
-    <type>, %"identifier ${$value.repr()} has no semantic type",
+    <type>, %"identifier $($value.repr()) has no semantic type",
     $origin, NULL);
 
 macro Stmt $fail.expressions_binding_unknown(
   Expr $c, Expr $origin, Expr $name) =>
   $c.report_error(
     <type>, "identifier has an unknown binding identity",
-    $origin, %("binding: ${$name.repr()}"));
+    $origin, %("binding: $($name.repr())"));
 
 macro Stmt $fail.expressions_function_private(
   Expr $c, Expr $origin, Expr $spelling, Expr $file) =>
   $c.report_error(
-    <type>, %"'${$spelling}' is a static function private to its unit",
-    $origin, %("it is defined in '${$file}';"
+    <type>, %"'$($spelling)' is a static function private to its unit",
+    $origin, %("it is defined in '$($file)';"
     "remove 'static' so other units can call it"));
 
 macro Stmt $fail.expressions_index_unsupported(
   Expr $c, Expr $origin, Expr $receiver_type) =>
   $c.report_error(
     <parse>, $receiver_type.is_typedef_name()
-    ? %"type ${$receiver_type} does not support getindex"
-    : %"type ${$receiver_type} does not support indexing",
+    ? %"type $($receiver_type) does not support getindex"
+    : %"type $($receiver_type) does not support indexing",
     $origin, %());
 
 macro Stmt $fail.expressions_optional_ref_index(Expr $c, Expr $origin) =>
@@ -74,7 +74,7 @@ macro Stmt $fail.expressions_optional_ref_index(Expr $c, Expr $origin) =>
     $origin, NULL);
 
 macro Stmt $fail.expressions_index_missing(Expr $c, Expr $site, Expr $type) =>
-  $c.report_error(<type>, %"${$type.car()} has no getindex", $site, NULL);
+  $c.report_error(<type>, %"$($type.car()) has no getindex", $site, NULL);
 
 macro Stmt $fail.expressions_index_symbol(Expr $c, Expr $site) =>
   $c.report_error(
@@ -84,20 +84,20 @@ macro Stmt $fail.expressions_index_symbol(Expr $c, Expr $site) =>
 macro Stmt $fail.expressions_method_arity(
   Expr $c, Expr $origin, Expr $parameters, Expr $arguments) =>
   $c.report_error(
-    <type>, %"method takes ${List.len($parameters) - 1} argument${
-            List.len($parameters) == 2 ? "" : "s"}, not ${
-            $arguments.len() - 1}",
+    <type>, %"method takes $(List.len($parameters) - 1) argument$(
+            List.len($parameters) == 2 ? "" : "s"), not $(
+            $arguments.len() - 1)",
     $origin, NULL);
 
 macro Stmt $fail.expressions_method_missing(
   Expr $c, Expr $origin, Expr $type, Expr $name) =>
   $c.report_error(
-    <type>, %"type ${$type.repr()} has no method ${$name}",
+    <type>, %"type $($type.repr()) has no method $($name)",
     $origin, NULL);
 
 macro Stmt $fail.expressions_receiver_unresolved(
   Expr $c, Expr $origin, Expr $name) =>
-  $c.report_error(<type>, %"unresolved identifier: ${$name}", $origin, NULL);
+  $c.report_error(<type>, %"unresolved identifier: $($name)", $origin, NULL);
 
 macro Stmt $fail.expressions_receiver_address(Expr $c, Expr $origin) =>
   $c.report_error(
@@ -108,7 +108,7 @@ macro Stmt $fail.expressions_receiver_pointer(
   Expr $c, Expr $origin, Expr $type, Expr $declared) =>
   $c.report_error(
     <type>,
-    %"method receiver ${$type.repr()} is a pointer to ${$declared.repr()}",
+    %"method receiver $($type.repr()) is a pointer to $($declared.repr())",
     $origin, %("'.' reaches one pointer level; write (*receiver).method()"));
 
 macro Stmt $fail.expressions_optional_ref_access(Expr $c, Expr $site) =>
@@ -120,14 +120,14 @@ macro Stmt $fail.expressions_method_packages(
   Expr $c, Expr $origin, Expr $type, Expr $member, Expr $notes) =>
   $c.report_error(
     <type>,
-    %"method '${$type}.${$member}' is provided by multiple imported packages",
+    %"method '$($type).$($member)' is provided by multiple imported packages",
     $origin, $notes);
 
 macro Stmt $fail.expressions_neg_unsupported(
   Expr $c, Expr $origin, Expr $type) =>
   $c.report_error(
     <type>, "unary '-' requires a numeric type or implemented neg",
-    $origin, %("operand type: ${$type.repr()}"));
+    $origin, %("operand type: $($type.repr())"));
 
 macro Stmt $fail.expressions_optional_ref_unchecked(Expr $c, Expr $origin) =>
   $c.report_error(
@@ -138,7 +138,7 @@ macro Stmt $fail.expressions_contains_missing(
   Expr $c, Expr $origin, Expr $type) =>
   $c.report_error(
     <type>, "operator 'in' requires an implemented contains member",
-    $origin, %("receiver type: ${$type.repr()}"));
+    $origin, %("receiver type: $($type.repr())"));
 
 macro Stmt $fail.expressions_operand_untyped(Expr $c, Expr $origin) =>
   $c.report_error(
@@ -149,17 +149,17 @@ macro Stmt $fail.expressions_operand_untyped(Expr $c, Expr $origin) =>
 macro Stmt $fail.expressions_is_var(Expr $c, Expr $origin, Expr $type) =>
   $c.report_error(
     <type>, "operator 'is' requires Var on the left",
-    $origin, %("operand type: ${$type.repr()}"));
+    $origin, %("operand type: $($type.repr())"));
 
 macro Stmt $fail.expressions_is_selector(Expr $c, Expr $origin, Expr $type) =>
   $c.report_error(
     <type>, "operator 'is' requires a type or Symbol on the right",
-    $origin, %("operand type: ${$type.repr()}"));
+    $origin, %("operand type: $($type.repr())"));
 
 macro Stmt $fail.expressions_is_tag(Expr $c, Expr $origin, Expr $target) =>
   $c.report_error(
     <type>,
-    %"type ${$target.repr()} has no supported Var tag for operator 'is'",
+    %"type $($target.repr()) has no supported Var tag for operator 'is'",
     $origin, NULL);
 
 macro Stmt $fail.expressions_is_enum(Expr $c, Expr $origin, Expr $target) {
@@ -167,7 +167,7 @@ macro Stmt $fail.expressions_is_enum(Expr $c, Expr $origin, Expr $target) {
     String note =
       "enum values box as the shared i32 family and retain no enum identity";
     $c.report_error(
-      <type>, %"enum type ${$target.repr()} cannot be tested with 'is'",
+      <type>, %"enum type $($target.repr()) cannot be tested with 'is'",
       $origin, %($note));
   }
 }
@@ -181,7 +181,7 @@ macro Stmt $fail.expressions_adapter_pointer(
   Expr $c, Expr $origin, Expr $type) =>
   $c.report_error(
     <macro>, "typed callback adapter target must name a function pointer",
-    $origin, $type ? %("target type: ${$type.repr()}") : NULL);
+    $origin, $type ? %("target type: $($type.repr())") : NULL);
 
 macro Stmt $fail.expressions_map_entry(Expr $c, Expr $origin) =>
   $c.report_error(<parse>, "expected one Map entry", $origin, NULL);
@@ -217,20 +217,20 @@ macro Stmt $fail.expressions_ref_address(Expr $c, Expr $site) =>
 
 macro Stmt $fail.expressions_var_convert(Expr $c, Expr $site, Expr $target) {
   {
-    String message = %"cannot convert Var to type ${$target.repr()}";
+    String message = %"cannot convert Var to type $($target.repr())";
     $c.report_error(<type>, message, $site, NULL);
   }
 }
 
 macro Stmt $fail.expressions_var_address(Expr $c, Expr $site, Expr $target) =>
   $c.report_error(
-    <type>, %"cannot convert Var to ${$target.repr()}",
+    <type>, %"cannot convert Var to $($target.repr())",
     $site,
     %("write &value for its address, or value.pointer() to unbox a stored pointer"));
 
 macro Stmt $fail.expressions_var_loss(Expr $c, Expr $site, Expr $type) {
   {
-    String message = %"cannot convert ${$type.repr()} to Var without loss";
+    String message = %"cannot convert $($type.repr()) to Var without loss";
     $c.report_error(<type>, message, $site, NULL);
   }
 }
@@ -238,14 +238,14 @@ macro Stmt $fail.expressions_var_loss(Expr $c, Expr $site, Expr $type) {
 macro Stmt $fail.expressions_ref_null(Expr $c, Expr $site, Expr $target) =>
   $c.report_error(
     <type>,
-    %"cannot pass a null pointer where ${$target.repr()} is expected",
+    %"cannot pass a null pointer where $($target.repr()) is expected",
     $site, %("a reference argument must name an object"));
 
 macro Stmt $fail.expressions_qualifier_dropped(
   Expr $c, Expr $site, Expr $source, Expr $destination) {
   {
     String message =
-      %"cannot convert ${$source.repr()} to ${$destination.repr()}";
+      %"cannot convert $($source.repr()) to $($destination.repr())";
     $c.report_error(
       <type>, message,
       $site,
@@ -257,7 +257,7 @@ macro Stmt $fail.expressions_ref_lvalue(
   Expr $c, Expr $site, Expr $type, Expr $target) =>
   $c.report_error(
     <type>,
-    %"cannot pass ${$type.repr()} where ${$target.repr()} is expected",
+    %"cannot pass $($type.repr()) where $($target.repr()) is expected",
     $site,
     %("pass an lvalue of the referenced type; write *p for a pointer"));
 
@@ -265,18 +265,18 @@ macro Stmt $fail.expressions_pointer_address(
   Expr $c, Expr $site, Expr $type, Expr $target) =>
   $c.report_error(
     <type>,
-    %"cannot pass ${$type.repr()} where ${$target.repr()} is expected",
+    %"cannot pass $($type.repr()) where $($target.repr()) is expected",
     $site, %("write &value to pass its address"));
 
 macro Stmt $fail.expressions_typedef_crossing(
   Expr $c, Expr $site, Expr $source, Expr $target) {
   {
     String message =
-      %"cannot convert ${$source.repr()} to ${$target.repr()}";
+      %"cannot convert $($source.repr()) to $($target.repr())";
     $c.report_error(
       <type>, message,
       $site,
-      %("the names share one C type but not one meaning: declare the converter ${$source.car()}_${$target.car().str().lower()}, or cast the expression to say so on purpose"));
+      %("the names share one C type but not one meaning: declare the converter $($source.car())_$($target.car().str().lower()), or cast the expression to say so on purpose"));
   }
 }
 
@@ -284,7 +284,7 @@ macro Stmt $fail.expressions_pointer_unrelated(
   Expr $c, Expr $site, Expr $source, Expr $target) {
   {
     String message =
-      %"cannot convert ${$source.repr()} to ${$target.repr()}";
+      %"cannot convert $($source.repr()) to $($target.repr())";
     $c.report_error(
       <type>, message,
       $site,
@@ -296,7 +296,7 @@ macro Stmt $fail.expressions_pointer_integer(
   Expr $c, Expr $site, Expr $integer, Expr $target) {
   {
     String message =
-      %"cannot convert the integer ${$integer} to pointer type ${$target.repr()}";
+      %"cannot convert the integer $($integer) to pointer type $($target.repr())";
     List hint =
       %( "only a zero integer constant expression converts to a pointer" );
     $c.report_error(<type>, message, $site, hint);
@@ -307,7 +307,7 @@ macro Stmt $warn.expressions_cast_redundant(
   Expr $c, Expr $origin, Expr $target) =>
   $c.report_warning(
     <conversion>,
-    %"unnecessary conversion: the operand already has type ${$target.repr()}",
+    %"unnecessary conversion: the operand already has type $($target.repr())",
     $origin, %("remove the cast"));
 
 macro Stmt $fail.expressions_statement_defer(Expr $c, Expr $origin) =>
@@ -325,7 +325,7 @@ macro Stmt $warn.expressions_call_redundant(
       "remove the call; the destination converts the value";
     $c.report_warning_at(
       <conversion>,
-      %"unnecessary conversion: .${$method}() where ${$target.repr()} is expected",
+      %"unnecessary conversion: .$($method)() where $($target.repr()) is expected",
       $location, %($hint));
   }
 }

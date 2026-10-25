@@ -129,7 +129,7 @@ void Compiler.add_linked_meta_provider_hashes(Compiler c, Map rows) {
     foreach (String name in hashes.keys()) {
       if (!(name in c.project_meta) && !(name in c.meta_calls)) continue;
       proof = proof.append(
-        %(${_content_hash(_stored_meta_hashes(hashes))}));
+        %($(_content_hash(_stored_meta_hashes(hashes)))));
       break;
     }
     rows[provider] = proof;
@@ -187,7 +187,7 @@ Type Compiler.loaded_call_type(Compiler c, Type type) {
       parameter = parameter.cdr();
     adjusted.push(parameter);
   }
-  return %((func ${adjusted.list_free()}) @result);
+  return %((func $(adjusted.list_free())) @result);
 }
 
 static Type _loaded_declaration(Compiler c, Type type) {
@@ -201,7 +201,7 @@ static Type _loaded_declaration(Compiler c, Type type) {
     declared.push(c.sym.normalize_declared_type(parameter));
   List args = parameters ? declared.list_free() : %((void));
   return c.loaded_call_type(
-    %((func $args) @{c.sym.normalize_declared_type(result)}));
+    %((func $args) @(c.sym.normalize_declared_type(result))));
 }
 
 /** Names declared bindings through one loaded provider. Its own source
@@ -259,5 +259,5 @@ static void _name_meta_provider(
   if (name in c.native_meta && c.bind_native_meta(name)) return;
   List binding = c.sym.lookup(%($name), NULL);
   if (binding)
-    c.set_fact(%(emitted $binding), %"_x2c_gensym_meta_group_${index}_$name");
+    c.set_fact(%(emitted $binding), %"_x2c_gensym_meta_group_$(index)_$name");
 }

@@ -114,7 +114,7 @@ static List _direct_func_handle(
     handle = c.sym.introduce(c.fresh_name("func_handle"));
     List value = _func_call(
       c, %("Func"), _func_bound(constructor_type, constructor),
-      %(${_func_bound(%("FuncAdapter"), adapter)} $signature));
+      %($(_func_bound(%("FuncAdapter"), adapter)) $signature));
     c.add_early(
       c.rebuild_statement($!{ static Func $handle = $value; }).cadr());
   }
@@ -123,7 +123,7 @@ static List _direct_func_handle(
 
 static List _func_bridge_binding(Compiler c, String stem) {
   String hash = "%08x".printf(c.filename.hash());
-  return c.sym.introduce(c.fresh_name(%"${stem}_$hash"));
+  return c.sym.introduce(c.fresh_name(%"$(stem)_$hash"));
 }
 
 static List _func_bridge_call(
@@ -133,7 +133,7 @@ static List _func_bridge_call(
     c, %("Func"), _func_bound(function_type, bridge), arguments);
   /* A call through a bridge function the unit declares where it calls. */
   return $!Func{ ({
-    extern Func $bridge(@{parameters.cdr()});
+    extern Func $bridge(@(parameters.cdr()));
     $call;
   }) };
 }
@@ -164,7 +164,7 @@ static List _indirect_func_lift(
     bridge = _func_bridge_binding(c, "func_from_pointer");
     List parameter = c.sym.introduce(c.fresh_name("func_pointer"));
     List parameters = %(
-      params ${pointer_type.parameter_ast(parameter)}
+      params $(pointer_type.parameter_ast(parameter))
     );
     List value = _indirect_func_value(
       c, _func_bound(pointer_type, parameter), pointer_type);
@@ -174,7 +174,7 @@ static List _indirect_func_lift(
         _func_return_body(c, value)));
   }
   List parameters = %(
-    params ${pointer_type.parameter_ast(NULL)}
+    params $(pointer_type.parameter_ast(NULL))
   );
   Type factory_type = %((func ($pointer_type)) "Func");
   return _func_bridge_call(
@@ -199,12 +199,12 @@ static List _indirect_func_value(
   String field_name = Ast.binding_spelling(context_field);
   List pointer = %(
     expr $pointer_type
-      (op . ${_func_bound(context_type, context)} ($field_name)));
+      (op . $(_func_bound(context_type, context)) ($field_name)));
   List constructed = _func_context_call(
     c, context_type, context, _func_bound(%("FuncAdapter"), adapter),
     signature, _func_bound(constructor_type, constructor));
   return $!Func{ ({
-    $declaration ${_func_present_statement(c, pointer, constructed)}
+    $declaration $(_func_present_statement(c, pointer, constructed))
   }) };
 }
 
@@ -254,7 +254,7 @@ static List _context_local(
   List helper = _adapter_helper(c, "Func_context", helper_type);
   List call = _func_call(
     c, $!Type{ const void * }, _func_bound(helper_type, helper),
-    %(${_func_bound(%("Func"), fn)}));
+    %($(_func_bound(%("Func"), fn))));
   List cast = %(expr $pointer (cast $pointer $call));
   return c.rebuild_statement($!{ $pointer $local = $cast; }).cadr();
 }
@@ -292,7 +292,7 @@ static List _func_present_statement(
   Compiler c, List pointer, List constructed) {
   List null_binding = c.sym.reference(%("NULL"), NULL);
   List result = $!Func{
-    $pointer ? $constructed : ${_func_bound(%("Func"), null_binding)} };
+    $pointer ? $constructed : $(_func_bound(%("Func"), null_binding)) };
   return c.rebuild_statement($!{ $result; }).cadr();
 }
 

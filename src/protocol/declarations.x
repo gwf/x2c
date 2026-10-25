@@ -64,7 +64,7 @@ static macro Stmt $fail.protocol_assoc_order(Expr $c, Expr $site) =>
 static macro Stmt $fail.protocol_type_duplicate(
   Expr $c, Expr $site, Expr $name) =>
   $c.report_error(
-    <protocol>, %"duplicate protocol type variable '${$name}'",
+    <protocol>, %"duplicate protocol type variable '$($name)'",
     $site, NULL);
 
 static macro Stmt $fail.protocol_assoc_expected(Expr $c, Expr $site) =>
@@ -75,20 +75,20 @@ static macro Stmt $fail.protocol_assoc_expected(Expr $c, Expr $site) =>
 static macro Stmt $fail.protocol_member_duplicate(
   Expr $c, Expr $site, Expr $name) =>
   $c.report_error(
-    <protocol>, %"duplicate protocol member '${$name}'",
+    <protocol>, %"duplicate protocol member '$($name)'",
     $site, NULL);
 
 static macro Stmt $fail.protocol_member_function(
   Expr $c, Expr $site, Expr $name) =>
   $c.report_error(
     <protocol>, "protocol member must be a function",
-    $site, %("member:" ${$name}));
+    $site, %("member:" $($name)));
 
 static macro Stmt $fail.protocol_member_owner(
   Expr $c, Expr $site, Expr $participant) =>
   $c.report_error(
     <protocol>, "protocol member must be owned by its participant",
-    $site, %("expected receiver:" ${$participant}));
+    $site, %("expected receiver:" $($participant)));
 
 static macro Stmt $fail.protocol_member_single(Expr $c, Expr $site) =>
   $c.report_error(
@@ -103,11 +103,11 @@ static macro Stmt $fail.protocol_native_ident(Expr $c, Expr $site) =>
 static macro Stmt $warn.protocol_protocol_binder(
   Expr $c, Expr $token, Expr $participant) {
   {
-    String hint = %"hint: a bodyless `protocol BASE(${$participant});` " +
+    String hint = %"hint: a bodyless `protocol BASE($($participant));` " +
       "declares an adoption; a body introduces a fresh type variable";
     $c.report_warning(
       <shadow>,
-      %"protocol binder '${$participant}' shadows a visible type name",
+      %"protocol binder '$($participant)' shadows a visible type name",
       $token, %($hint));
   }
 }
@@ -229,13 +229,13 @@ static List _body(ProtocolSyntax &p) {
   c.sym.pop_scope();
 
   List record = %(
-    "protocol-record" ${p.base} $participant
-    (associated @{associations.list_free()})
-    (members @{members.list_free()})
+    "protocol-record" $(p.base) $participant
+    (associated @(associations.list_free()))
+    (members @(members.list_free()))
   );
   List location = c.token_location(p.start);
   if (c.macro_holes || (c.shallow && !c.collect_protocols))
-    return %(protocol $record ${p.storage} $location);
+    return %(protocol $record $(p.storage) $location);
   return _publish_record(c, record, p.base, location);
 }
 
@@ -292,7 +292,7 @@ static String _member_name(List identity, String participant) {
       if (owner == participant) name = member;
   if (name) return name;
   String full_name = Ast.binding_spelling(identity);
-  String prefix = %"${participant}_";
+  String prefix = %"$(participant)_";
   return full_name && full_name.startswith(prefix)
     ? full_name[prefix.len():] : NULL;
 }

@@ -46,11 +46,11 @@ static macro Stmt $fail.callable_parameter(
     $target, $source, NULL);
 
 static macro Expression $note.callable_target(Expr $target) =>
-  $target ? %"target signature: ${$target.repr()}"
+  $target ? %"target signature: $($target.repr())"
           : "target signature: unresolved";
 
 static macro Expression $note.callable_source(Expr $source) =>
-  $source ? %"source signature: ${$source.repr()}"
+  $source ? %"source signature: $($source.repr())"
           : "source signature: unresolved";
 
 /* Helper syntax shared by every lowering below. */
@@ -67,10 +67,10 @@ static macro Expression $func_size(Expr $value) => sizeof $value;
 static List _helper_body(Compiler c, List body) {
   match (body) {
     case $source_block_content(%(*items)):
-      return source_block_content(%(@items ${source_return_none()}));
+      return source_block_content(%(@items $(source_return_none())));
     case %(expr (void) ?):
       return source_block_content(
-        %((stmnt $body) ${source_return_none()}));
+        %((stmnt $body) $(source_return_none())));
   }
   List result = c.convert_expression(body, %("Var"));
   return source_block_content(%((stmnt (return $result))));
@@ -216,7 +216,7 @@ List Compiler.context_func_adapter(Compiler c, Type type, List target) {
   List self = c.sym.introduce(c.fresh_name("func_binding"));
   return _build_func_adapter(
     c, %("Func"), type, target, self, NULL,
-    %(${_func_bound(%("Func"), self)}));
+    %($(_func_bound(%("Func"), self))));
 }
 
 static void _require_func_readers(
@@ -305,7 +305,7 @@ static List _reference(
   Type target = parameter_type.cdr(), pointer = target.reference();
   List picked = _call(
     r, $!Type{ void * }, r.reference, index,
-    %(${c.cache_literal_list(target)} ${_type_literal(c, target)}));
+    %($(c.cache_literal_list(target)) $(_type_literal(c, target))));
   storage_type = pointer;
   return c.convert_expression(picked, pointer);
 }
@@ -336,7 +336,7 @@ static List _value(
   if (!tag)
     $fail.callable_parameter(r.c, r.diagnostic_type, parameter_type);
   List picked = _call(
-    r, %("Var"), r.value, index, %(${_adapter_symbol_literal(tag)}));
+    r, %("Var"), r.value, index, %($(_adapter_symbol_literal(tag))));
   storage_type = parameter_type;
   return r.c.convert_expression(picked, parameter_type);
 }
@@ -345,7 +345,7 @@ static List _value(
 static List _call(
   FuncReaders &r, Type result_type, List target, int index,
   List details) {
-  List arguments = %(${r.fn} ${r.argv} ${$!int{ $index }} @details);
+  List arguments = %($(r.fn) $(r.argv) $($!int{ $index }) @details);
   return _func_call(r.c, result_type, target, arguments);
 }
 
@@ -399,7 +399,7 @@ static List _type_literal(Compiler c, Type type) =>
   c.cache_literal_list(c.sym.normalize_declared_type(type));
 
 static List _adapter_symbol_literal(Symbol value) =>
-  %(expr ("Symbol") "${(unsigned long) value}");
+  %(expr ("Symbol") "$((unsigned long) value)");
 
 module List _adapter_helper(Compiler c, String name, Type &type) =>
   c.sym.resolve_global(%($name), type);

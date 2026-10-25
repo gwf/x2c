@@ -4,26 +4,26 @@ static macro Stmt $fail.literals_atom_expected(
   Expr $c, Expr $site, Expr $kind) =>
   $c.report_error(
     <parse>, "expected atomic expression",
-    $site, %( "token:" ${$c.token.text} "kind:" ${$kind.str()} ));
+    $site, %( "token:" $($c.token.text) "kind:" $($kind.str()) ));
 
 static macro Stmt $fail.literals_number_range(
   Expr $c, Expr $site, Expr $text) =>
   $c.report_error(
     <type>, "numeric literal is outside the supported scalar range",
-    $site, %( "literal:" ${$text} ));
+    $site, %( "literal:" $($text) ));
 
 static macro Stmt $fail.literals_binder_name(
   Expr $c, Expr $site, Expr $atom) =>
   $c.report_error(
     <parse>, "invalid match binder name",
-    $site, %( "binder-name:" ${$atom.str()} ));
+    $site, %( "binder-name:" $($atom.str()) ));
 
 static macro Stmt $fail.literals_symbol_truncated(
   Expr $c, Expr $origin, Expr $spelling, Expr $lossy) =>
   $c.report_error(
     <parse>, "Symbol literal does not round-trip",
-    $origin, %("source spelling: ${$spelling}"
-      "encoded spelling: ${$lossy}"));
+    $origin, %("source spelling: $($spelling)"
+      "encoded spelling: $($lossy)"));
 
 // atoms and Symbols
 
@@ -50,7 +50,7 @@ List Compiler.parse_atomic_literal(Compiler c) {
   }
   if (literal) {
     c.next();
-    return %(expr ${literal.cadr()} $literal);
+    return %(expr $(literal.cadr()) $literal);
   }
   Symbol kind = c.peek(0);
   $fail.literals_atom_expected(c, c.token, kind);
@@ -71,7 +71,7 @@ module List _atom_literal(Compiler c, String text) {
   String spelling = text.unescape(), Atom atom = Atom.intern(spelling);
   _check_binder(c, atom);
   if (spelling in c.object_macros) _warn_macro_name(c, spelling);
-  if (atom is <symbol>) return %(literal ("Symbol") $text ${atom.symbol()});
+  if (atom is <symbol>) return %(literal ("Symbol") $text $(atom.symbol()));
   Var value = c.macro_holes && atom.is_binder() ? %(!quote $atom) : atom;
   return %(literal ("Atom") $spelling $value);
 }
@@ -90,7 +90,7 @@ static void _check_binder(Compiler c, Atom atom) {
 /* The preprocessor never sees a literal, so a macro's name here is data.
    The author who wanted its value must unquote it. */
 static void _warn_macro_name(Compiler c, String spelling) {
-  String unquoted = "${(long) " + spelling + "}";
+  String unquoted = "$((long) " + spelling + ")";
   c.report_warning(
     <literal>,
     %"'$spelling' is a Symbol here; unquote a typed value such as "

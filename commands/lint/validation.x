@@ -80,7 +80,7 @@ static Map _macro_diagnostics(Lint l, Compiler c, List ast):
     if _raise_terminal(statement) && statement.never_returns():
       diagnostics[at] = <raise>
     match (statement.without_origin()):
-      case %(stmnt (expr ? ${$called(%(expr ? (ident ?binding)), %(*))}))
+      case %(stmnt (expr ? $($called(%(expr ? (ident ?binding)), %(*)))))
           if (report && List.equal(binding, report)):
         diagnostics[at] = <report>
       case %(block ?first (!is ?last type list))
@@ -244,7 +244,7 @@ static int _fresh_null_guard(Lint l, int from, int to):
     int close = l.partner[open]
     if close < 0 || l.next(open) != close || !l.token_is(l.next(close), ";"):
       continue
-    String guard = %"if((void*)${t.text}==NULL)"
+    String guard = %"if((void*)$(t.text)==NULL)"
     for (int k = close; k < to; k = l.next(k)):
       if _if_header(l, k) && _compact(l, k, l.partner[l.next(k)]) == guard:
         return 1
@@ -361,7 +361,7 @@ static void _frameworks(Lint l, Map reasons):
       group.push(name)
     if !validator || lines < 40 || group.len() < 2 && !recursive: continue
     l.add("validation-framework", first,
-          %"$lines lines of connected validators: ${group.join(", ")}")
+          %"$lines lines of connected validators: $(group.join(", "))")
 
 /* The action a silent guard's consequence takes, or NULL. */
 static String _action(Lint l, int from, int to, Map diagnostics):
@@ -383,7 +383,7 @@ static String _action(Lint l, int from, int to, Map diagnostics):
       reports |= _report(l, k, diagnostics)
     if reports: continue
     if l.next(value) == semi && lint_word(l.at(value)):
-      return %"return ${l.tokens[value].text}"
+      return %"return $(l.tokens[value].text)"
     return "return fallback"
   for (int at = from; at < to; at = l.next(at)):
     int next = l.next(at)

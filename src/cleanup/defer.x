@@ -19,7 +19,7 @@ List Ast.defer_captures(List environment, List records) {
   foreach (List row in records) {
     /* The capture's storage type keeps a reference parameter's own
        address; the bare binding would read through the reference. */
-    List captured = $!(${row.cadr()}){ ${row.car()} };
+    List captured = $!($(row.cadr())){ $(row.car()) };
     String field = Ast.binding_spelling(row.caddr());
     assignments.push($!{ $environment.$field = (const void *)&$captured; });
   }
@@ -53,7 +53,7 @@ List Compiler.rewrite_defer_list(Compiler c, List stmts) {
     unsupported capture types keep the landing-frame path.
 */
 List Compiler.lower_defer_region(Compiler c, List body, List finalizer) {
-  if (c.source_map && c.origin) finalizer = %(at ${c.origin} $finalizer);
+  if (c.source_map && c.origin) finalizer = %(at $(c.origin) $finalizer);
   if (_defer_needs_landing(finalizer)) return _landing_region(body, finalizer);
   return _callable_defer(c, body, finalizer);
 }
@@ -100,7 +100,7 @@ static List _callable_defer(Compiler c, List body, List finalizer) {
     _defer_callback(c, callback, opaque, env_binding, env_local, rewritten));
   if (c.fn_name)
     c.set_fact(%(defer-ownr $callback), c.fn_name);
-  return %(defer $body $env_binding $callback $records ${d.written});
+  return %(defer $body $env_binding $callback $records $(d.written));
 }
 
 static void _collect_captures(DeferCaptures &d, List ast) {
@@ -111,7 +111,7 @@ static void _collect_captures(DeferCaptures &d, List ast) {
       if (!(binding in known)) d.declared = cons(binding, known);
     }
   match (ast)
-    case %(expr ? ${$source_identifier_content(%(?bound))}): {
+    case %(expr ? $($source_identifier_content(%(?bound)))): {
       _capture(d, bound);
       return;
     }
@@ -161,7 +161,7 @@ static List _rewrite_captures(
   if (!ast) return ast;
   match (ast)
     case %(expr ?captured_type
-        ${$source_identifier_content(%(?bound))}): {
+        $($source_identifier_content(%(?bound)))): {
       List binding = bound;
       Var field_var;
       if (!d.captures.try_get(binding, field_var)) return ast;
@@ -189,7 +189,7 @@ static List _defer_environment(
   Array fields = [];
   foreach (List record in records)
     fields.push(
-      c.rebuild_statement($!{ const void *${record.caddr()}; }).cadr());
+      c.rebuild_statement($!{ const void *$(record.caddr()); }).cadr());
   return c.capture_environment(env_binding, fields.list_free());
 }
 
@@ -200,7 +200,7 @@ static List _defer_callback(
   List env_local, List rewritten) {
   List body = Code.lowered(%(seq $rewritten), NULL);
   if (env_binding) {
-    Type type = %(${Ast.binding_spelling(env_binding)});
+    Type type = %($(Ast.binding_spelling(env_binding)));
     return c.bind_syntax(
       $!Unit{ static void $callback(void *$opaque) {
         $type *$env_local = ($type *)$opaque;

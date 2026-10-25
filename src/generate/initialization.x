@@ -27,7 +27,7 @@ module List _file_init(Compiler c, List source) {
   foreach (List item in source)
     entries.push(init.enter(item, _patches(init, item)));
   List guard = c.initialization_guard(init.guard);
-  List prelude = init.synthetic ? %($guard ${init.synthetic}) : %($guard);
+  List prelude = init.synthetic ? %($guard $(init.synthetic)) : %($guard);
   return c.place_source_prelude(entries.list_free(), prelude);
 }
 
@@ -39,7 +39,7 @@ static void _prepare(Init &i, List source) {
   i.shutdown = _shutdown_registration(c, source);
   List arms = i.initializer ? _definition_arms(source, i.initializer) : NULL;
   if (!i.initializer || arms) i.synthetic = _synthesize(i, arms);
-  else i.entry = c.sym.reference(%(${i.initializer}), NULL);
+  else i.entry = c.sym.reference(%($(i.initializer)), NULL);
   if (_cache_only(c)) i.reachable = _cache_reachable(source);
 }
 
@@ -130,7 +130,7 @@ static List _statements(Init &i, List entry, List body) {
 static List _guarded(Init &i, List function, List body) {
   Macro shape = $initialized_entry;
   List guard = i.guard, condition = $!int{ $guard };
-  List callee = %(expr ((func ((void))) void) (ident ${i.entry}));
+  List callee = %(expr ((func ((void))) void) (ident $(i.entry)));
   return i.c.rebuild_function(function, shape(condition, callee, body));
 }
 

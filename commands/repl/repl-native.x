@@ -35,7 +35,7 @@ static List _capture(
     p.values.push(pointer);
   }
   List slot = %(expr (* void)
-    (index ${_local(p.session.compiler, p.context)} ${$!int{ $index }}));
+    (index $(_local(p.session.compiler, p.context)) $($!int{ $index })));
   return %(expr $type (cast $type $slot));
 }
 
@@ -53,7 +53,7 @@ static List _session_value(PromptFunction &p, Type type, List binding) {
         name != "print" && name != "println") return NULL;
     Var callable;
     if (!p.session.evaluator.try_get(name, callable) || callable is not <func>)
-      raise %(repl (reason ${%"function has no native binding: $name"}));
+      raise %(repl (reason $(%"function has no native binding: $name")));
     return _capture(p, binding, callable.pointer(), %("Func"));
   }
   if (!entry || entry.car() != <value>) return NULL;
@@ -72,9 +72,9 @@ static List _rewrite_call(
   Array rewritten = auto [];
   foreach (Var argument, arguments) rewritten.push(_rewrite(p, argument));
   match (target)
-    case %(expr ? (ident ${p.original})):
-      return %(expr $result (call (expr ${p.body_type} (ident ${p.body}))
-        (args ${_local(c, p.self)} @{rewritten.list()})));
+    case %(expr ? (ident $(p.original))):
+      return %(expr $result (call (expr $(p.body_type) (ident $(p.body)))
+        (args $(_local(c, p.self)) @(rewritten.list()))));
   Var callee = _rewrite(p, target);
   match (callee) case %(expr ("Func") ?): {
     /* A Func boxes each value argument by its own type, so give it the type
@@ -88,10 +88,10 @@ static List _rewrite_call(
           rewritten[i] = c.convert_expression(rewritten[i], param);
       }
     List call = c.resolve_expression(
-      %(expr () (call $callee (args @{rewritten.list()}))), NULL);
+      %(expr () (call $callee (args @(rewritten.list())))), NULL);
     return c.convert_expression(call, result);
   }
-  return %(expr $result (call $callee (args @{rewritten.list()})));
+  return %(expr $result (call $callee (args @(rewritten.list()))));
 }
 
 static Var _rewrite(PromptFunction &p, Var node) {
@@ -106,7 +106,7 @@ static Var _rewrite(PromptFunction &p, Var node) {
       return _rewrite_call(p, result, target, arguments);
     case %(expr ? (parens (!set ?inner (expr ? ?)))): {
       List rewritten = _rewrite(p, inner);
-      return %(expr ${rewritten.cadr()} (parens $rewritten));
+      return %(expr $(rewritten.cadr()) (parens $rewritten));
     }
     case %(expr ?type (op & (expr ?(Type source) ?payload))): {
       List operand = _rewrite(p, %(expr $source $payload));
@@ -155,7 +155,7 @@ static List _rewrite_lambda(
     c.sym.push_new_scope();
     defer c.sym.pop_scope();
     body = _rewrite(p, body);
-    captures = %(@captures @{c.end_lambda_captures()});
+    captures = %(@captures @(c.end_lambda_captures()));
   }
   return captures
     ? %(expr ("Func") (lambda $params (captures @captures) $body))
@@ -178,7 +178,7 @@ static List _prepare(Compiler c, PromptFunction &p) {
       p.context = %(expr (* * void) (ident $context));
       if (params.match(%((param (void) (bind () ()))))) params = NULL;
       List declared = %((param ("Func") (bind $self ())) @params);
-      List declarator = %(bind ${p.body} ((fnmod (params @declared)) @mods));
+      List declarator = %(bind $(p.body) ((fnmod (params @declared)) @mods));
       p.body_type = %(declare $spec (bindings $declarator)).type_from_ast();
       List rewritten, setup;
       {
@@ -186,20 +186,20 @@ static List _prepare(Compiler c, PromptFunction &p) {
         defer c.sym.pop_scope();
         c.sym.bind_identity(NULL, self, %("Func"));
         setup = c.bind_syntax(
-          $!{ void **$context = (void **) Func.context(${p.self}); },
+          $!{ void **$context = (void **) Func.context($(p.self)); },
           <block>, NULL);
         rewritten = _rewrite(p, body);
       }
       c.add_early(%(function (static @spec) $declarator
-        ${c.prepend_setup(rewritten, %($setup))}));
-      List target = %(expr ${p.body_type} (ident ${p.body}));
+        $(c.prepend_setup(rewritten, %($setup)))));
+      List target = %(expr $(p.body_type) (ident $(p.body)));
       List adapter = c.context_func_adapter(p.type, target);
       List signature = c.cache_literal_list(c.func_signature(p.type));
       List factory = c.sym.introduce("__repl_factory");
       List captures = c.sym.introduce("__repl_captures");
       List pointer = %(expr (* void) (ident $captures));
       List made = %(expr ("FuncAdapter") (ident $adapter));
-      List size = $!size_t{ ${p.values.len() * sizeof(void *)} };
+      List size = $!size_t{ $(p.values.len() * sizeof(void *)) };
       return c.bind_syntax($!Unit{
         Func $factory(void *$captures) {
           return Func.new_context($made, $signature, $pointer, $size);

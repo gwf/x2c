@@ -32,20 +32,20 @@ protocol Var(JsonBool);
    Reports expand at their existing owners. */
 
 static macro Stmt $error.boolean.type(Expr $tag) {
-  raise %(bad-types (operation "Json.boolean") (tag ${$tag}));
+  raise %(bad-types (operation "Json.boolean") (tag $($tag)));
 }
 
 static macro Stmt $error.read.file(
   Expr $path, Expr $why, Expr $offset, Expr $line, Expr $column) {
-  raise %(malformed (operation "Json.read_file") (path ${$path})
-          (reason ${$why}) (offset ${$offset})
-          (line ${$line}) (column ${$column}));
+  raise %(malformed (operation "Json.read_file") (path $($path))
+          (reason $($why)) (offset $($offset))
+          (line $($line)) (column $($column)));
 }
 
 static macro Stmt $error.read.text(
   Expr $why, Expr $offset, Expr $line, Expr $column) {
-  raise %(malformed (operation "Json.parse") (reason ${$why})
-          (offset ${$offset}) (line ${$line}) (column ${$column}));
+  raise %(malformed (operation "Json.parse") (reason $($why))
+          (offset $($offset)) (line $($line)) (column $($column)));
 }
 
 static macro Stmt $error.write.depth() {
@@ -54,17 +54,17 @@ static macro Stmt $error.write.depth() {
 }
 
 static macro Stmt $error.write.type(Expr $tag) {
-  raise %(bad-types (operation "Var.json") (tag ${$tag}));
+  raise %(bad-types (operation "Var.json") (tag $($tag)));
 }
 
 static macro Stmt $error.write.key(Expr $tag) {
   raise %(bad-types (operation "Var.json") (want "String object key")
-          (tag ${$tag}));
+          (tag $($tag)));
 }
 
 static macro Stmt $error.write.duplicate(Expr $text) {
   raise %(bad-arg (operation "Var.json") (reason "duplicate object name")
-          (name ${$text}));
+          (name $($text)));
 }
 
 static macro Stmt $error.write.nonfinite() {

@@ -221,7 +221,7 @@ inline Rectangle Image.alpha_border(Image image, float threshold);
 Color Image.color_at(Image image, int x, int y) {
   if (x < 0 || y < 0 || x >= image.width || y >= image.height) {
     raise %(bad-arg (library "raylib") (operation "image color")
-            (x $x) (y $y) (width ${image.width}) (height ${image.height}));
+            (x $x) (y $y) (width $(image.width)) (height $(image.height)));
   }
   return GetImageColor(image, x, y);
 }
@@ -572,7 +572,7 @@ static int _raylib_pixel_offset(
   _raylib_pixels_live(pixels, operation);
   if (index < 0 || index >= pixels.width * pixels.height) {
     raise %(bad-arg (library "raylib") (operation $operation) (index $index)
-            (count ${pixels.width * pixels.height}));
+            (count $(pixels.width * pixels.height)));
   }
   return index;
 }
@@ -582,8 +582,8 @@ static int _raylib_pixel_xy(
   _raylib_pixels_live(pixels, operation);
   if (x < 0 || y < 0 || x >= pixels.width || y >= pixels.height) {
     raise %(bad-arg (library "raylib") (operation $operation)
-            (x $x) (y $y) (width ${pixels.width})
-            (height ${pixels.height}));
+            (x $x) (y $y) (width $(pixels.width))
+            (height $(pixels.height)));
   }
   return y * pixels.width + x;
 }
@@ -726,7 +726,7 @@ ImagePixels Image.pixels(Image image) {
   Color *data = LoadImageColors(image);
   if (!data) {
     raise %(alloc-fail (library "raylib") (operation "LoadImageColors")
-            (width ${image.width}) (height ${image.height}));
+            (width $(image.width)) (height $(image.height)));
   }
 
   ImagePixels pixels = xcalloc(1, sizeof(struct ImagePixels));

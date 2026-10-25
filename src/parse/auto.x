@@ -78,7 +78,7 @@ module List _auto_declaration(
       while (shape.car() is <symbol> &&
              shape.car().symbol().is_type_qualifier()) shape = shape.cdr();
       if (shape == %(void)) $fail.parse_auto_inference(c, c.token);
-      if (shape.is_array()) type = %(* @{resolved.dereference()});
+      if (shape.is_array()) type = %(* @(resolved.dereference()));
       else if (shape.is_function()) type = %(* @type);
       else {
         while (type.car() is <symbol> &&
@@ -94,7 +94,7 @@ module List _auto_declaration(
     if (type.is_function())
       $fail.parse_auto_storage(c, c.token);
     c.sym.bind_identity(NULL, binding,
-      %(declare ${base.declared()} (bindings (bind $binding $mods))));
+      %(declare $(base.declared()) (bindings (bind $binding $mods))));
     c.set_fact(%(managed $binding), 1);
   }
   return base;

@@ -319,7 +319,7 @@ static CurlHeader _curl_header(String line) {
 }
 
 static CurlResponseBlock _curl_block(String status, List headers) =>
-  %($status ${headers.reverse()});
+  %($status $(headers.reverse()));
 
 static int _curl_status_line(String line) =>
   line.len() >= 5 && !memcmp(line, "HTTP/", 5);

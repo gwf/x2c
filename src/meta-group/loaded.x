@@ -60,14 +60,14 @@ void Compiler.prepare_loaded_main(Compiler c, Array nodes) {
         Type type = %(declare $spec (bindings $declarator)).type_from_ast();
         List entry = _loaded_entry(c, binding, type);
         nodes[i] = %(function $spec $declarator
-          (block @body (return (int) ${$!int{ 0 }})));
+          (block @body (return (int) $($!int{ 0 }))));
         for (int j = c.meta_group.len() - 1; j >= 0; j--)
           if (List.match(c.meta_group[j], %(function ? "main" ?)))
             c.meta_group.remove(j);
-        Type adapted = %(declare ${entry.cadr()}
-          (bindings ${entry.caddr()})).type_from_ast();
+        Type adapted = %(declare $(entry.cadr())
+          (bindings $(entry.caddr()))).type_from_ast();
         c.meta_group.push(
-          %(function $entry "main" ${c.func_signature(adapted)}));
+          %(function $entry "main" $(c.func_signature(adapted))));
         return;
       }
 }
@@ -141,16 +141,16 @@ static List _loaded_snapshot(
     List index = c.sym.introduce(c.fresh_name("index"));
     Type element = c.sym.normalize_declared_type(type).dereference();
     List selected = %(expr $element
-      (index $target ${$!(unsigned long long){ $index }}));
+      (index $target $($!(unsigned long long){ $index })));
     Array items = auto [];
     List item = _loaded_snapshot(c, element, selected, budget, 0, items);
     body = $!{
       Array $value = [];
       unsigned long long $index = 0;
-      for (; $index < ${_loaded_length(target)}; $index++) {
+      for (; $index < $(_loaded_length(target)); $index++) {
         if ($budget <= 0) { $value.push("..."); break; }
         $budget--;
-        @{items.list()}
+        @(items.list())
         $value.push($item);
       }
     };
@@ -158,7 +158,7 @@ static List _loaded_snapshot(
   else {
     Array fields = auto [];
     _loaded_snapshot_fields(c, type, target, value, budget, fields);
-    body = $!{ Map $value = {}; @{fields.list()} };
+    body = $!{ Map $value = {}; @(fields.list()) };
   }
   statements.push(body);
   return shape.is_array() ? $!Array{ $value } : $!Map{ $value };
@@ -181,7 +181,7 @@ static void _loaded_snapshot_fields(
       $!{
         if ($budget > 0) {
           $budget--;
-          @{items.list()}
+          @(items.list())
           $value[$name] = $item;
         }
         else $value["..."] = "...";
@@ -195,16 +195,16 @@ static void _loaded_accessor(
   List name = c.sym.introduce(c.fresh_name("loaded_access"));
   List parameters = path.parameters;
   if (setter) parameters = %(@parameters
-    (param $bridge (bind ${c.sym.introduce("value")} ()))
-    (param (int) (bind ${c.sym.introduce("operation")} ())));
+    (param $bridge (bind $(c.sym.introduce("value")) ()))
+    (param (int) (bind $(c.sym.introduce("operation")) ())));
   List function = c.bind_syntax(
     %(function (static @bridge)
       (bind $name ((fnmod (params @parameters))))
-      (block @{path.checks} $body)), <unit>, NULL);
-  Type type = %(declare ${function.cadr()}
-    (bindings ${function.caddr()})).type_from_ast();
+      (block @(path.checks) $body)), <unit>, NULL);
+  Type type = %(declare $(function.cadr())
+    (bindings $(function.caddr()))).type_from_ast();
   String request = (setter ? "set global " : "get global ") + path.name;
-  c.meta_group.push(%(function $function $request ${c.func_signature(type)}));
+  c.meta_group.push(%(function $function $request $(c.func_signature(type))));
 }
 
 /* The selector is called only inside the helper. Its pointer-bearing List
@@ -217,15 +217,15 @@ static void _loaded_address(LoadedPath path, Type type, List target) {
     c.sym.normalize_declared_type(type).declared());
   List function = c.bind_syntax(
     %(function (static "List")
-      (bind $name ((fnmod (params @{path.parameters}))))
-      (block @{path.checks} ${$!{
+      (bind $name ((fnmod (params @(path.parameters)))))
+      (block @(path.checks) $($!{
         return cons($native_type, cons((void *) &$target, NULL));
-      }})), <unit>, NULL);
-  Type signature = %(declare ${function.cadr()}
-    (bindings ${function.caddr()})).type_from_ast();
+      }))), <unit>, NULL);
+  Type signature = %(declare $(function.cadr())
+    (bindings $(function.caddr()))).type_from_ast();
   c.meta_group.push(
-    %(function $function ${"address global " + path.name}
-      ${c.func_signature(signature)}));
+    %(function $function $("address global " + path.name)
+      $(c.func_signature(signature))));
 }
 
 static void _loaded_path(LoadedPath path, Type type, List target, int root) {
@@ -248,21 +248,21 @@ static void _loaded_path(LoadedPath path, Type type, List target, int root) {
       c, type, target, budget, root, statements);
     _loaded_accessor(
       path, bridge,
-      $!{ int $budget = 100; @{statements.list()} return $snapshot; }, 0);
+      $!{ int $budget = 100; @(statements.list()) return $snapshot; }, 0);
   }
   path.descriptions.push(
-    %(${path.name} $bridge $writable ${path.parameters.len()}));
+    %($(path.name) $bridge $writable $(path.parameters.len())));
   Type shape = _loaded_shape(c, type);
   if (shape.is_array()) {
     List index = c.sym.introduce(c.fresh_name("index"));
     List argument = $!(long long){ $index };
-    path.parameters = %(@{path.parameters}
+    path.parameters = %(@(path.parameters)
       (param (long long) (bind $index ())));
-    path.checks = %(@{path.checks} ${$!{
+    path.checks = %(@(path.checks) $($!{
       if ($argument < 0 || (unsigned long long) $argument >=
-          ${_loaded_length(target)})
+          $(_loaded_length(target)))
         raise %(repl (reason "loaded array index out of bounds"));
-    }});
+    }));
     path.name += "[]";
     Type element = c.sym.normalize_declared_type(type).dereference();
     _loaded_path(
@@ -302,8 +302,8 @@ static void _loaded_global(Compiler c, Type spec, List row, Map present) {
     LoadedPath path = {.compiler = c, .descriptions = [], .name = name};
     _loaded_path(
       path, type,
-      %(expr ${type.declared()} (ident $binding)), initialized);
-    c.meta_group.push(%(global $name ${path.descriptions.list_free()}));
+      %(expr $(type.declared()) (ident $binding)), initialized);
+    c.meta_group.push(%(global $name $(path.descriptions.list_free())));
     present[name] = 1;
   }
 }

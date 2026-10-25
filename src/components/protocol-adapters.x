@@ -50,16 +50,16 @@ meta static List _protocol_forward(
   Array params = [], arguments = [];
   int index = 0;
   foreach (Type type in target.car().list().cadr()) {
-    List name = x2c_ident(%"a${index++}");
+    List name = x2c_ident(%"a$(index++)");
     params.push($!Param{ $type $name });
     Code argument = $!( $name );
     if (templates.car() == %($binder))
-      argument = $!( ${x2c_ident(convert)}($argument) );
+      argument = $!( $(x2c_ident(convert))($argument) );
     arguments.push(argument);
     templates = templates.cdr();
   }
-  return %(${params.list_free()} ${x2c_ident(source)}
-           ${arguments.list_free()});
+  return %($(params.list_free()) $(x2c_ident(source))
+           $(arguments.list_free()));
 }
 
 /* The function `name`, declared `declared`, that returns the call
@@ -88,7 +88,7 @@ meta static Code _protocol_guarded(
   Code value = x2c_ident("a0");
   Code fallback = member == "str" || member == "repr"
     ? $!( Var_pointer_string($value) )
-    : $!( Var_write_pointer_repr($value, ${x2c_ident("a1")}) );
+    : $!( Var_write_pointer_repr($value, $(x2c_ident("a1"))) );
   return $!Unit{
     static inline $result $name(@params) {
       RenderPath render_path;
@@ -125,9 +125,9 @@ meta static void _protocol_descriptor(List descriptor, List slots) {
          initializer that C accepts only from C23 on. */
       if (slots) x2c_place(init, $!{ $table = (VarMethods){ @slots }; });
       Code text = %(expr ("String") (call "String_new" (args
-        (expr (* char) (literal (* char) ${%"\"$name\""})))));
+        (expr (* char) (literal (* char) $(%"\"$name\""))))));
       if (explicit) {
-        Code tag = $!Symbol{ ${explicit.car()} };
+        Code tag = $!Symbol{ $(explicit.car()) };
         x2c_place(
           init, $!{ x2c_register_tagged_descriptor($tag, $text, $table); });
         return;
@@ -160,7 +160,7 @@ meta Code protocol_conformance(Code node) {
           foreach (List part in parts) match (part) {
             case %(default ?(List name) ?(Symbol storage)): {
               List declared = storage == <static>
-                ? %(static inline @{expected.cdr()})
+                ? %(static inline @(expected.cdr()))
                 : expected.cdr();
               List forwarded = _protocol_forward(
                 expected, source, template, binder, forward);

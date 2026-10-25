@@ -6,7 +6,7 @@
 static macro Stmt $fail.meta_sdk_source_capture(Expr $value) =>
   MetaContext.reject(
     "Code.source_text requires complete captured syntax",
-    active.has_bindings ? NULL : %("value: ${$value.repr()}"));
+    active.has_bindings ? NULL : %("value: $($value.repr())"));
 
 static macro Stmt $fail.meta_sdk_embed_path_empty() =>
   MetaContext.reject("x2c_embed_text requires a non-empty path", NULL);
@@ -32,7 +32,7 @@ static macro Stmt $fail.meta_sdk_embed_open(Expr $c, Expr $path) =>
   _embed_reject($c, "cannot open embedded text", $path);
 
 static macro Expression $note.meta_sdk_path_notes(Expr $c, Expr $path) =>
-  %("path: ${$c.display_path($path)}");
+  %("path: $($c.display_path($path))");
 
 // source and literals
 
@@ -132,7 +132,7 @@ static void _embed_reject(Compiler c, String message, String path) {
 
 static int _literal_string(Var syntax, String &value) {
   match (syntax)
-    case %(expr ? ${$source_literal_content(%(? ?source))}): {
+    case %(expr ? $($source_literal_content(%(? ?source)))): {
       if (source is not <string>) break;
       String text = source;
       int quoted = text.len() >= 2 && text[0] == '"' &&
@@ -153,5 +153,5 @@ static int _literal_string(Var syntax, String &value) {
 List MetaContext.source_description(Var value) {
   String text = Code.source_text(value);
   List source = active.captures[((ulong) value.u64)];
-  return %((text $text) (file ${source.cadr()}) (syntax $value));
+  return %((text $text) (file $(source.cadr())) (syntax $value));
 }

@@ -275,9 +275,9 @@ static int _in_group(CliOption &option, Symbol command, Symbol group) =>
 
 static void _print_option(const CliOption &option) {
   String spelled = option.label ? option.label :
-                   option.alias ? %"${option.spelling}, ${option.alias}" :
+                   option.alias ? %"$(option.spelling), $(option.alias)" :
                    option.spelling;
-  String label = option.value ? %"$spelled ${option.value}" : spelled;
+  String label = option.value ? %"$spelled $(option.value)" : spelled;
   _print_help_row(label, option.description, label.startswith("--") ? 6 : 2);
 }
 

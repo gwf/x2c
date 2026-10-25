@@ -3,11 +3,11 @@
 /*  hello-world: hello machine  */
 macro Expression $loud(Expr $s) => $s.upper();                  // typed macro
 
-static Var bang(Var s) { return %"${s.string()}!"; }            // Var -> Var
+static Var bang(Var s) { return %"$(s.string())!"; }            // Var -> Var
 meta static String lower(String s) => s.lower();                // meta
 
 static void _hello_machine(void) {
-  String hi = %"He${$lower("LL")}o";                            // meta call
+  String hi = %"He$($lower("LL"))o";                            // meta call
   List tail = %("World"), words = %($hi @tail);                 // List + $/@
   Array back = [words[1], words[0]];                            // Array
   Map machine = {parts: back};                                  // Map + Symbol
@@ -43,7 +43,7 @@ static void _partitioned(void) {
   (String hello, String slash, String world) =
     "hello/world".partition("/");
   String comma = slash.replace("/", ", ");
-  puts(%"${hello.capitalize()}$comma${world.capitalize()}!");
+  puts(%"$(hello.capitalize())$comma$(world.capitalize())!");
 }
 
 /*  hello-world: list DSL  */
@@ -125,7 +125,7 @@ static void _compile_time_meta(void) {
 }
 
 /*  hello-world: greeting macro  */
-macro Expression $greet(Literal $who) => %"Hello, ${$who}!";    // literal hole
+macro Expression $greet(Literal $who) => %"Hello, $($who)!";    // literal hole
 
 static void _greeting_macro(void) {
   puts($greet("World"));

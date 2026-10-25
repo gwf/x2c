@@ -63,7 +63,7 @@ module void _record_span(Compiler c, List node, int start, int end) {
   }
   if (key)
     c.set_fact(
-      %(definition-span $key), %($start $end ${c.source_private > 0}));
+      %(definition-span $key), %($start $end $(c.source_private > 0)));
 }
 
 /* function completion
@@ -165,8 +165,8 @@ static List _completion_contract(
   Symbol linkage = type.is_static() ? <static> : <extern>;
   List contract = %(
     function-contract
-    ${_contract_type(type, 0)}
-    ${_contract_type(type, 1)}
+    $(_contract_type(type, 0))
+    $(_contract_type(type, 1))
     $linkage
     $method_identity
   );
@@ -230,8 +230,8 @@ static void _collect_references(Var value, Map references, Array ordered) {
       return;
     }
   match (node)
-    case %(expr (!set ?type (*)) ${$source_identifier_content(
-        %((!set ?binding (binding ? ?))))}): {
+    case %(expr (!set ?type (*)) $($source_identifier_content(
+        %((!set ?binding (binding ? ?)))))): {
       if (!type.type().is_function()) {
         if (!(binding in references)) ordered.push(binding);
         references[binding] = 1;

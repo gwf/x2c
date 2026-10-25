@@ -19,7 +19,7 @@ module Fact _base(Walk &w, Var place, int &through) {
       return _base(w, base, through);
     case $source_operator_content(%((!quote *) ?base)):
       return _fact_of(w, base, NULL);
-    case ${$indexed(%(!set ?base (expr ?type ?)), ?)}:
+    case $($indexed(%(!set ?base (expr ?type ?)), ?)):
       return _indexed_base(w, base, type, through);
     case %(getindex (!set ?base (expr ?type ?)) ?):
       return _indexed_base(w, base, type, through);
@@ -76,7 +76,7 @@ module List _root(Var place) {
       case $source_identifier_content(
           %((!set ?binding (binding ? ?)))): return binding;
       case $source_operator_content(%(? ?base *)): place = base;
-      case ${$indexed(?base, ?selector)}: place = base;
+      case $($indexed(?base, ?selector)): place = base;
       case %(getindex ?base ?): place = base;
       default: return NULL;
     }
@@ -125,9 +125,9 @@ module Region _birth(
   }
   match (_unwrap(value)) {
     case %(cons *): return _pooled(w, born);
-    case ${$array_value(*items)}:
+    case $($array_value(*items)):
       return _active(w);
-    case ${$map_value(*rows)}:
+    case $($map_value(*rows)):
       return _active(w);
     case %(composite *)
       if (_value_class(w, type ? type : _expression_type(value)) ==
@@ -354,7 +354,7 @@ static Region _active(Walk &w) {
 /* The parser's empty argument marker represents no arguments. */
 module List _source_call(Var value) {
   match (value)
-    case ${$called(?callee, *rows)}: {
+    case $($called(?callee, *rows)): {
       match (rows) case %((expr ? ())): rows = NULL;
       return %($callee $rows);
     }
@@ -364,8 +364,8 @@ module List _source_call(Var value) {
 /* A declarator initializer shares the operator but is not an assignment. */
 module List _source_assignment(Var value) {
   match (value) {
-    case ${$assigned(%(bind *), ?)}: return NULL;
-    case ${$assigned(?target, ?stored)}: return %($target $stored);
+    case $($assigned(%(bind *), ?)): return NULL;
+    case $($assigned(?target, ?stored)): return %($target $stored);
   }
   return NULL;
 }

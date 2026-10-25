@@ -71,7 +71,7 @@ static List _selector_chain(String spelling, List value) {
 static List _selector_double(List steps) {
   if (!steps) return NULL;
   String rest = steps.car(), a = %"a$rest", d = %"d$rest";
-  return %($a $d @{_selector_double(steps.cdr())});
+  return %($a $d @(_selector_double(steps.cdr())));
 }
 
 static List _selector_middles(void) {
@@ -88,8 +88,8 @@ static List _selector_units(List middles, Macro car, Macro cdr) {
   String middle = middles.car();
   List rest = _selector_units(middles.cdr(), car, cdr);
   if (middle in %("aa" "ad" "dd" "add")) return rest;
-  String name = %"c${middle}r";
-  return %(${middle.startswith("a") ? car(name) : cdr(name)} @rest);
+  String name = %"c$(middle)r";
+  return %($(middle.startswith("a") ? car(name) : cdr(name)) @rest);
 }
 
 static List _selector_definitions(Macro car, Macro cdr) =>
@@ -124,16 +124,16 @@ List _dedent_expand(Source text) {
     open = 1;
   if (open == 0 || !source.endswith("\"") || "\\" in source ||
       "$" in source)
-    return $!( ${text.assoc(<syntax>)}.dedent() );
+    return $!( $(text.assoc(<syntax>)).dedent() );
   String body = source.getslice(open, length - 1, 1);
-  return $!String{ ${body.dedent()} };
+  return $!String{ $(body.dedent()) };
 }
 
 List _macros_location(void) =>
-  $!String{ ${x2c_invocation_file() + ":" + x2c_invocation_line().str()} };
+  $!String{ $(x2c_invocation_file() + ":" + x2c_invocation_line().str()) };
 
 List _macros_source(Source code) =>
-  $!String{ ${Code.source_text(code)} };
+  $!String{ $(Code.source_text(code)) };
 
 /* --- lib/thread.x -------------------------------------------------------- */
 
@@ -154,9 +154,9 @@ List _tag_decode_group(List rows, Map counts, int top) {
   foreach (List row in rows) {
     if (_tag_top(row) != top) continue;
     int selector = immediate ? _tag_middle(row) : _tag_bottom(row) & mask;
-    ids[selector] = %(expr () (ident ${x2c_ident(_tag_id(row))}));
+    ids[selector] = %(expr () (ident $(x2c_ident(_tag_id(row)))));
   }
-  return $!( { $mask, $immediate, { @{ids.list_free()} } } );
+  return $!( { $mask, $immediate, { @(ids.list_free()) } } );
 }
 
 List _tag_decode_groups(void) {
@@ -165,7 +165,7 @@ List _tag_decode_groups(void) {
   Array groups = [];
   for (int group = 0; group < 32; group++)
     groups.push(_tag_decode_group(rows, counts, _tag_group_top(group)));
-  return $!( { @{groups.list_free()} } );
+  return $!( { @(groups.list_free()) } );
 }
 
 List _tag_id_checks(void) {
@@ -175,7 +175,7 @@ List _tag_id_checks(void) {
     checks.push(
       $!Unit{
         _Static_assert(
-          ${x2c_ident(_tag_id(row))} == $index,
+          $(x2c_ident(_tag_id(row))) == $index,
           "TagId matches the var tag ledger");
       });
     index++;
@@ -222,11 +222,11 @@ static List _update_box(List id, List lhs) {
   List value = $!( $lhs[0] );
   Type into = _update_cast_in(id);
   if (into) value = $!( ($into)$value );
-  return $!( ${x2c_ident(_update_boxer(id))}($value) );
+  return $!( $(x2c_ident(_update_boxer(id)))($value) );
 }
 
 static List _update_decode(List id, List value) {
-  List decoded = $!( ${x2c_ident(_update_decoder(id))}($value) );
+  List decoded = $!( $(x2c_ident(_update_decoder(id)))($value) );
   Type back = _update_cast_out(id);
   if (back) return $!( ($back)$decoded );
   return decoded;
@@ -389,9 +389,9 @@ static String _delegate_path(Type type, List fields, String member) {
 
 static void _delegate_fail_packages(
   Type outer, Type type, String member, List fields, List packages) {
-  Array notes = [%"delegate path: ${_delegate_path(outer, fields, NULL)}"];
+  Array notes = [%"delegate path: $(_delegate_path(outer, fields, NULL))"];
   foreach (String package in packages) notes.push(%"package: '$package'");
-  String method = %"${_delegate_type_name(type)}.$member";
+  String method = %"$(_delegate_type_name(type)).$member";
   x2c_diagnostic_fail_at(
     NULL, <type>,
     %"method '$method' is provided by multiple imported packages",
@@ -415,7 +415,7 @@ static void _delegate_search(
     List resolution = type.resolve_member(member, 1);
     match (resolution) {
       case %(method ?binding ?):
-        found.push(%(${path.reverse()} $binding));
+        found.push(%($(path.reverse()) $binding));
       case %(ambiguous *packages):
         _delegate_fail_packages(outer, type, member, path.reverse(), packages);
     }
@@ -432,17 +432,17 @@ static void _delegate_fail_ambiguous(
     String description = _delegate_path(outer, path.car(), member);
     notes.push(%"delegate path: $description -> $spelling");
   }
-  String method = %"${_delegate_type_name(outer)}.$member";
+  String method = %"$(_delegate_type_name(outer)).$member";
   x2c_diagnostic_fail_at(
     NULL, <type>, %"method '$method' has multiple delegate paths",
     notes.list_free());
 }
 
 static void _delegate_fail_cycle(Type outer, String member, List fields) {
-  String method = %"${_delegate_type_name(outer)}.$member";
+  String method = %"$(_delegate_type_name(outer)).$member";
   x2c_diagnostic_fail_at(
     NULL, <type>, %"delegation cycle resolving $method",
-    %("delegate path: ${_delegate_path(outer, fields, NULL)}"));
+    %("delegate path: $(_delegate_path(outer, fields, NULL))"));
 }
 
 static List _delegate_fields(Type outer, String member) {
@@ -482,7 +482,7 @@ static Code _destructure_list(Code source) {
 
 static List _destructure_read(Atom values, Code source) =>
   %(declare ("List")
-     (bindings (op = (bind $values ()) ${_destructure_list(source)})));
+     (bindings (op = (bind $values ()) $(_destructure_list(source)))));
 
 static Code _destructure_element(Atom values, int index) {
   String position = %"$index";
@@ -497,7 +497,7 @@ static List _destructure_writes(List targets, Atom values) {
   foreach (Code target in targets) {
     Type type = target.cadr();
     Code element = _destructure_element(values, index++);
-    writes.push(%(stmnt ${$!($type){ $target = $element }}));
+    writes.push(%(stmnt $($!($type){ $target = $element })));
   }
   return writes.list_free();
 }
@@ -522,7 +522,7 @@ Code destructure_declaration(Code node) {
           Code element = _destructure_element(values, index++);
           items.push(%(declare $base (bindings (op = $declarator $element))));
         }
-      return _destructure_bound(%(seq @{items.list_free()}), values, NULL);
+      return _destructure_bound(%(seq @(items.list_free())), values, NULL);
     }
     case %(dstrdecl ?(Type type) (targets *names) ?source): {
       Array declarators = [], targets = [];
@@ -531,9 +531,9 @@ Code destructure_declaration(Code node) {
         targets.push(%(expr $type (ident $name)));
       }
       return _destructure_bound(
-        %(seq (declare $type (bindings @{declarators.list_free()}))
-              ${_destructure_read(values, source)}
-              @{_destructure_writes(targets.list_free(), values)}),
+        %(seq (declare $type (bindings @(declarators.list_free())))
+              $(_destructure_read(values, source))
+              @(_destructure_writes(targets.list_free(), values))),
         values, NULL);
     }
   }
@@ -546,8 +546,8 @@ Code destructure_statement(Code node) {
     case %(stmnt (expr ? (dstrasgn (targets *targets) ?source))): {
       Atom values = Atom.intern("?__destructure");
       return _destructure_bound(
-        %(block ${_destructure_read(values, source)}
-                @{_destructure_writes(targets, values)}),
+        %(block $(_destructure_read(values, source))
+                @(_destructure_writes(targets, values))),
         values, NULL);
     }
   return node;
@@ -564,8 +564,8 @@ Code destructure_value(Code node) {
       Code kept = %(expr $type (ident $result));
       List block = %(block
         (declare $base (bindings (op = (bind $result $modifiers) $source)))
-        ${_destructure_read(values, kept)}
-        @{_destructure_writes(targets, values)}
+        $(_destructure_read(values, kept))
+        @(_destructure_writes(targets, values))
         (stmnt $kept));
       return _destructure_bound(
         %(expr $type (parens $block)), values, result);
@@ -704,7 +704,7 @@ static Code _lambda_cell(List name, Type type, Code value) {
   Code allocated = $!($bytes){ Scope_malloc(sizeof($type)) };
   if (value) {
     if (!type.match(%((dim *) *)) && !value.match(%(expr ? (composite ?)))) {
-      literal = cons(%(dim ${$!int{ 1 }}), type);
+      literal = cons(%(dim $($!int{ 1 })), type);
       value = value.convert(type);
     }
     if (!value.match(%(expr ? (composite ?))))
@@ -750,13 +750,13 @@ static List _lambda_kept_items(
   foreach (List item in items) {
     if (item === original.car()) run.push(item);
     else {
-      if (run.len()) out.push(Code.lowered(%(seq @{run.list()}), NULL));
+      if (run.len()) out.push(Code.lowered(%(seq @(run.list())), NULL));
       run.truncate(0);
       out.push(item in declaring ? item : Code.lowered(item, NULL));
     }
     original = original.cdr();
   }
-  if (run.len()) out.push(Code.lowered(%(seq @{run.list()}), NULL));
+  if (run.len()) out.push(Code.lowered(%(seq @(run.list())), NULL));
   return out.list_free();
 }
 
@@ -797,10 +797,10 @@ static Var _lambda_declare_cells(List node, Map cells) {
         _lambda_declare_cells(%(declare $base $bindings), cells);
       match (declaration) case %(seq *initial):
         return %(block @initial
-                 ${Code.lowered(%(for () $test $next $body), NULL)});
+                 $(Code.lowered(%(for () $test $next $body), NULL)));
     }
   }
-  return celled ? %(seq @{items.list_free()}) : node;
+  return celled ? %(seq @(items.list_free())) : node;
 }
 
 static Var _lambda_rebuild(
@@ -864,13 +864,13 @@ static List _lambda_returning(List items, List none) {
 
 static List _lambda_items(Code body) {
   match (body) case %(block *items):
-    return %(@{_lambda_returning(items, source_return_none())}
-             ${source_return_none()});
+    return %(@(_lambda_returning(items, source_return_none()))
+             $(source_return_none()));
   List items = body.match(%(expr (void) ?))
-    ? %((stmnt $body) ${source_return_none()})
-    : %((stmnt (return ${body.convert(%("Var"))})));
+    ? %((stmnt $body) $(source_return_none()))
+    : %((stmnt (return $(body.convert(%("Var"))))));
   match (x2c_enclosing(<statement>)) case %(at ?origin ?):
-    return %((at $origin ${items.car()}) @{items.cdr()});
+    return %((at $origin $(items.car())) @(items.cdr()));
   return items;
 }
 
@@ -907,7 +907,7 @@ static List _lambda_closure_params(
 
 static Code _lambda_function(List name, List params, Code body) {
   if (!params) params = %((param (void) (bind () ())));
-  List lowered = Code.lowered(%(seq @{_lambda_items(body)}), NULL);
+  List lowered = Code.lowered(%(seq @(_lambda_items(body))), NULL);
   return %(function (static "Var") (bind $name ((fnmod (params @params))))
            (block $lowered));
 }
@@ -915,7 +915,7 @@ static Code _lambda_function(List name, List params, Code body) {
 /** Lifts the noncapturing lambda `node` to a static function, whose name
     is its value. */
 Code lambda_lift(Code node) {
-  match (node) case %(expr ?type ${$lambda_expression(?body, *params)}): {
+  match (node) case %(expr ?type $($lambda_expression(?body, *params))): {
     List name = x2c_binding_fresh("lambda");
     x2c_place(
       %(unit-support), _lambda_function(name, _lambda_params(params), body));
@@ -933,13 +933,13 @@ static int _lambda_in_public_inline(void) {
 static String _lambda_bridge_role(void) {
   match (x2c_enclosing(<unit>))
     case %(expr ? (segments (segexp (expr ? (literal ? ?(String path)))))):
-      return %"func_from_capture_${"%08x".printf(path.hash())}";
+      return %"func_from_capture_$("%08x".printf(path.hash()))";
   return "func_from_capture";
 }
 
 static List _lambda_field(int index) => x2c_ident(%"c$index");
 
-static List _lambda_member(int index) => %(${%"c$index"});
+static List _lambda_member(int index) => %($(%"c$index"));
 
 static Type _lambda_field_type(Type type) {
   if (type.car() == <&>) return cons(<*>, type.cdr());
@@ -954,7 +954,7 @@ static Code _lambda_record(List context, List types) {
     fields.push(%(declare $base (bindings (bind $name $modifiers))));
   }
   return Code.bound(
-    %(typedef (static struct $context (fields @{fields.list_free()}))
+    %(typedef (static struct $context (fields @(fields.list_free())))
        (bindings (bind $context ()))),
     NULL);
 }
@@ -967,14 +967,14 @@ static Code _lambda_adapter(
   Array items = [], arguments = [];
   foreach (List read in reads) {
     (Type type, Code value) = read;
-    List name = %(${%"a${items.len()}"});
+    List name = %($(%"a$(items.len())"));
     (List base, List modifiers) = type.parts();
     items.push(
       %(declare $base (bindings (op = (bind $name $modifiers) $value))));
     Code local = %(expr $type (ident $name));
     match (params.car()) {
       case %(param ? (bind ? (& *))):
-        arguments.push(%(expr ${type.cdr()} (op * $local)));
+        arguments.push(%(expr $(type.cdr()) (op * $local)));
       default: arguments.push(local);
     }
     params = params.cdr();
@@ -990,20 +990,20 @@ static Code _lambda_adapter(
   foreach (List capture in captures) {
     Type type = capture.caddr(), stored = _lambda_field_type(type);
     Code field = %(expr (const @stored)
-                    (op -> $record ${_lambda_member(index++)}));
+                    (op -> $record $(_lambda_member(index++))));
     arguments.push(
-      type.car() == <&> ? %(expr ${type.cdr()} (op * $field)) : field);
+      type.car() == <&> ? %(expr $(type.cdr()) (op * $field)) : field);
   }
   Code call = %(expr ("Var")
     (call (expr ((func $declared) "Var") (ident $lifted))
-      (args @{arguments.list_free()})));
+      (args @(arguments.list_free()))));
   items.push(%(return $call));
   return Code.bound(
     %(function (static "Var")
        (bind $adapter
          ((fnmod (params (param ("Func") (bind $closure ()))
                          (param (const "FuncArg") (bind $argv (*)))))))
-       (block @{items.list_free()})),
+       (block @(items.list_free()))),
     NULL);
 }
 
@@ -1063,7 +1063,7 @@ static Code _lambda_value(
       (expr (* @type) (op & $record)) (expr ("size_t") (sizeof $record)))));
   }
   return %(expr ("Func")
-           (parens (block @{setup.list_free()} (stmnt $made))));
+           (parens (block @(setup.list_free()) (stmnt $made))));
 }
 
 /** Lifts the capturing lambda `node` to a static function of its
@@ -1071,7 +1071,7 @@ static Code _lambda_value(
     captured values and addresses. */
 Code lambda_closure(Code node) {
   match (node)
-    case %(expr ? ${$lambda_captured(?body, *captures, *params)}): {
+    case %(expr ? $($lambda_captured(?body, *captures, *params))): {
       if (params == %((param (void) (bind () ())))) params = NULL;
       List lifted = x2c_binding_fresh("lambda");
       List adapter = x2c_binding_fresh("lambda");
@@ -1168,7 +1168,7 @@ Code lambda_cells(Code node) {
             ? _lambda_rebuild(item, NULL, cells, declaring) : item);
       List kept = _lambda_kept_items(body, items, declaring);
       return %(function $type $declarator
-               (block @{entry.list_free()} @kept));
+               (block @(entry.list_free()) @kept));
     }
   return node;
 }
@@ -1484,7 +1484,7 @@ static String _match_label(Symbol head, Array heads, int &labelling) {
   if (head in heads) return NULL;
   heads.push(head);
   Var literal = head;
-  return %" case ${(unsigned long long) literal.u64}ULL: ;";
+  return %" case $((unsigned long long) literal.u64)ULL: ;";
 }
 
 static String _match_locals(int depths, int values) {
@@ -1546,7 +1546,7 @@ static Code _match_lowered(Code subject, List rows) {
   String locals = _match_locals(depths, values);
   List prologue = dynamic
     ? _match_dynamic_read(subject, locals)
-    : %("List _x2c_gensym_match_expr =" ${subject.convert(%("List"))} $locals);
+    : %("List _x2c_gensym_match_expr =" $(subject.convert(%("List"))) $locals);
   return Code.lowered(
     %(block $prologue
             (switch (expr ("uint64_t") ($selector)) (block @items))), NULL);
@@ -1577,7 +1577,7 @@ static void _printf_fail(Code call, String message) {
   match (call) case %(expr ? (call ?callee *)):
     x2c_diagnostic_fail_at(
       call, <xform>, message,
-      %("printf-family call: ${Code.binding_spelling(callee)}"));
+      %("printf-family call: $(Code.binding_spelling(callee))"));
 }
 
 static int _printf_valid(String length, int conversion) {
@@ -1688,7 +1688,7 @@ static Code _printf_lowered(Code code, Code format, List values) {
     for (; next < arguments.len(); next++)
       if (_printf_is_var(arguments[next]))
         $fail.printf_unused_argument(code);
-    return %(expr $type (call $callee (args @{arguments.list_free()})));
+    return %(expr $type (call $callee (args @(arguments.list_free()))));
   }
   return code;
 }
@@ -1724,16 +1724,16 @@ static List _protocol_forward(
   Array params = [], arguments = [];
   int index = 0;
   foreach (Type type in target.car().list().cadr()) {
-    List name = x2c_ident(%"a${index++}");
+    List name = x2c_ident(%"a$(index++)");
     params.push($!Param{ $type $name });
     Code argument = $!( $name );
     if (templates.car() == %($binder))
-      argument = $!( ${x2c_ident(convert)}($argument) );
+      argument = $!( $(x2c_ident(convert))($argument) );
     arguments.push(argument);
     templates = templates.cdr();
   }
-  return %(${params.list_free()} ${x2c_ident(source)}
-           ${arguments.list_free()});
+  return %($(params.list_free()) $(x2c_ident(source))
+           $(arguments.list_free()));
 }
 
 static Code _protocol_function(List declared, List name, List forward) {
@@ -1755,7 +1755,7 @@ static Code _protocol_guarded(
   Code value = x2c_ident("a0");
   Code fallback = member == "str" || member == "repr"
     ? $!( Var_pointer_string($value) )
-    : $!( Var_write_pointer_repr($value, ${x2c_ident("a1")}) );
+    : $!( Var_write_pointer_repr($value, $(x2c_ident("a1"))) );
   return $!Unit{
     static inline $result $name(@params) {
       RenderPath render_path;
@@ -1789,9 +1789,9 @@ static void _protocol_descriptor(List descriptor, List slots) {
          initializer that C accepts only from C23 on. */
       if (slots) x2c_place(init, $!{ $table = (VarMethods){ @slots }; });
       Code text = %(expr ("String") (call "String_new" (args
-        (expr (* char) (literal (* char) ${%"\"$name\""})))));
+        (expr (* char) (literal (* char) $(%"\"$name\""))))));
       if (explicit) {
-        Code tag = $!Symbol{ ${explicit.car()} };
+        Code tag = $!Symbol{ $(explicit.car()) };
         x2c_place(
           init, $!{ x2c_register_tagged_descriptor($tag, $text, $table); });
         return;
@@ -1823,7 +1823,7 @@ Code protocol_conformance(Code node) {
           foreach (List part in parts) match (part) {
             case %(default ?(List name) ?(Symbol storage)): {
               List declared = storage == <static>
-                ? %(static inline @{expected.cdr()})
+                ? %(static inline @(expected.cdr()))
                 : expected.cdr();
               List forwarded = _protocol_forward(
                 expected, source, template, binder, forward);
@@ -1888,7 +1888,7 @@ Code raise_lowering(Code node) {
     }
     if (changed)
       return Code.lowered(
-        %(raise $symbol (args @{converted.list_free()})), NULL);
+        %(raise $symbol (args @(converted.list_free()))), NULL);
   }
   return node;
 }
@@ -1913,7 +1913,7 @@ static int _string_case_text(Type type) =>
 
 static String _string_case_key(List label) {
   match (label) {
-    case %(expr ? ${$grouped(?inner)}): return _string_case_key(inner);
+    case %(expr ? $($grouped(?inner))): return _string_case_key(inner);
     case %(expr ? (literal ?type ?text)): {
       String spelling = text;
       if (_string_case_text(type))
@@ -1944,10 +1944,10 @@ static Var _string_cases(
   match (node) {
     case %((!or expr switch match) *): return node;
     case %(at ? ?inner):
-      return %(at ${node.cadr()}
-               ${_string_cases(inner, indices, labels, node)});
+      return %(at $(node.cadr())
+               $(_string_cases(inner, indices, labels, node)));
     case %(case ?label):
-      return %(case ${_string_case_index(label, indices, labels, site)});
+      return %(case $(_string_case_index(label, indices, labels, site)));
   }
   Var child;
   $ast.rewrite_children(
@@ -1960,7 +1960,7 @@ static Code _string_switch_helper(Type type, List labels) {
   Array tests = [];
   int index = 0;
   foreach (List label in labels) {
-    List value = $!int{ ${++index} };
+    List value = $!int{ $(++index) };
     tests.push($!{ if ($s == $label) return $value; });
   }
   List body = tests.list_free();
@@ -1982,7 +1982,7 @@ Code string_switch_lowering(Code node) {
     List numbered = _string_cases(body, indices, labels, NULL);
     Code helper = _string_switch_helper(type, labels.list_free());
     return Code.lowered(
-      %(switch ${$!int{ $helper($selector) }} $numbered), NULL);
+      %(switch $($!int{ $helper($selector) }) $numbered), NULL);
   }
   return node;
 }
@@ -2097,11 +2097,11 @@ static List _try_catch_clause(List handle, List records, Array rows) {
       if (!pattern.is_static_pattern()) state = "ERROR_CATCH_TRANSIENT";
       patterns.push(pattern);
     }
-    Atom arm = Atom.intern(%"?__try_arm_${arms.len()}");
-    rows.push(%(region $arm ${record.cadr()}));
+    Atom arm = Atom.intern(%"?__try_arm_$(arms.len())");
+    rows.push(%(region $arm $(record.cadr())));
     arms.push(arm);
   }
-  return %($handle $state ${arms.list_free()} @{patterns.list_free()});
+  return %($handle $state $(arms.list_free()) @(patterns.list_free()));
 }
 
 static Code _try_landing(
@@ -2116,15 +2116,15 @@ static Code _try_landing(
   if (finalizer) {
     Atom departure = Atom.intern("?__try_departure");
     finished = Atom.intern("?__try_finalizer");
-    rows.push(%(exits $departure ${_try_departure(frame)}));
+    rows.push(%(exits $departure $(_try_departure(frame))));
     rows.push(%(region $finished $finalizer));
   }
-  rows.push(%(exits $exits ${_try_exits(frame, handle, finished)}));
+  rows.push(%(exits $exits $(_try_exits(frame, handle, finished))));
   rows.push(%(region $lowered $body));
   List clause = _try_catch_clause(handle, arms, rows);
   Macro shape = $x2c.try.frame;
   List code = shape(frame, clause, lowered, exits);
-  return Code.lowered(%(landing $code ${rows.list_free()}), NULL);
+  return Code.lowered(%(landing $code $(rows.list_free())), NULL);
 }
 
 /** Lowers the parsed try `node` to its landing form. */

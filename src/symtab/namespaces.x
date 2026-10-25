@@ -51,7 +51,7 @@ static void _record_native_objects(
       String name = Ast.binding_spelling(binding);
       if (!name || !name.len()) continue;
       c.sym.set(
-        %("source-node" (native-object $path ${c.token.pos} $name)),
+        %("source-node" (native-object $path $(c.token.pos) $name)),
         %(native-object $name));
     }
   }
@@ -154,7 +154,7 @@ String Compiler.unprefixed(Compiler c, String name) {
 */
 String Compiler.package_spelling(Compiler c, String name) {
   if (!c.package || !name) return name;
-  String prefix = %"${c.package}__";
+  String prefix = %"$(c.package)__";
   return name.startswith(prefix) ? name : %"$prefix$name";
 }
 
@@ -185,7 +185,7 @@ void Compiler.register_package_member(
   List binding = %($name $member);
   Var bound = c.package_members[local];
   if (bound is not void && bound.list() === binding) return;
-  String spelling = %"${name}__$member";
+  String spelling = %"$(name)__$member";
   if (!c.sym.get_exact(%($spelling)))
     $fail.parse_package_member(c, member_token, name, member);
   _check_package_binding(c, "name", local, local_token);
@@ -221,7 +221,7 @@ String Compiler.package_member_spelling(Compiler c, String name) {
   if (bound is void || c.sym.get_exact(%($name))) return NULL;
   List pair = bound;
   (String package, String member_name) = pair;
-  return %"${package}__$member_name";
+  return %"$(package)__$member_name";
 }
 
 /** Returns sorted imported packages that publish `name`.
@@ -234,7 +234,7 @@ List Compiler.imported_providers(Compiler c, String name) {
   if (!name || !c.package_roots.len()) return NULL;
   List packages = %();
   foreach (String (package, root) in c.package_roots) {
-    if (c.sym.get_exact(%("${package}__$name")))
+    if (c.sym.get_exact(%("$(package)__$name")))
       packages = cons(package, packages);
   }
   return packages.sort();
@@ -244,5 +244,5 @@ List Compiler.imported_providers(Compiler c, String name) {
 String Compiler.imported_spelling(Compiler c, String name) {
   List packages = c.imported_providers(name);
   if (!packages || packages.cdr()) return NULL;
-  return %"${packages.car()}__$name";
+  return %"$(packages.car())__$name";
 }

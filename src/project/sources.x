@@ -55,14 +55,14 @@ static int _has_glob(String pattern) => pattern && strpbrk(pattern, "*?[");
    its glob names below the project root, outside the build root, and the
    overlay files there too. */
 static Array _glob(Project p, String pattern) {
-  String prefix = p.root == "/" ? "/" : %"${p.root}/";
+  String prefix = p.root == "/" ? "/" : %"$(p.root)/";
   List found = Path.glob(Path.join(_glob_literal(p.root), pattern));
   if (p.sources) found = found.append(p.sources.overlays.keys());
   Array matches = [];
   foreach (String path in found)
     if (path.startswith(prefix) &&
         Path.glob_match(pattern, path.remove_prefix(prefix)) &&
-        !(p.build_root && path.startswith(%"${p.build_root}/")) &&
+        !(p.build_root && path.startswith(%"$(p.build_root)/")) &&
         p.sources.exists(path) && !(path in matches))
       matches.push(path);
   return matches;

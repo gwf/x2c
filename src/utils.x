@@ -36,20 +36,20 @@ typedef struct Diagnostics *Diagnostics;
 // command reports
 
 static macro Stmt $fail.utils_identity_mismatch(Expr $detail) =>
-  Diagnostics.driver_error(%"compiler identity mismatch: ${$detail}");
+  Diagnostics.driver_error(%"compiler identity mismatch: $($detail)");
 
 static macro Stmt $fail.utils_lock_failed(Expr $p) =>
-  Diagnostics.driver_error(%"cannot lock ${$p}");
+  Diagnostics.driver_error(%"cannot lock $($p)");
 
 static macro Stmt $fail.utils_host_failed(
   Expr $detail, Expr $subject, Expr $error) =>
   Diagnostics.driver_error(
-    %"${$detail.assoc(<operation>)} ${$subject}: ${
-      String.new(strerror($error))}");
+    %"$($detail.assoc(<operation>)) $($subject): $(
+      String.new(strerror($error)))");
 
 static macro Stmt $fail.utils_command_missing(Expr $name) =>
   Diagnostics.driver_error(
-    %"missing x2c-${$name} command; install the matching x2c commands");
+    %"missing x2c-$($name) command; install the matching x2c commands");
 
 // environment state
 
@@ -322,7 +322,7 @@ int Path.is_layout_source(String path) =>
 String Compiler.package_directory(List roots, String path) {
   String source = Path.absolute(path);
   foreach (String root in roots) {
-    String prefix = %"${Path.absolute(root)}/";
+    String prefix = %"$(Path.absolute(root))/";
     if (!source.startswith(prefix)) continue;
     String name = source.remove_prefix(prefix).split("/").car();
     if (name.is_identifier() && source != %"$prefix$name")
@@ -338,7 +338,7 @@ String Compiler.package_directory(List roots, String path) {
 String SourceView.package_entry(
   SourceView sources, List roots, String name, String &directory) {
   foreach (String package_dir in roots) {
-    String root = %"${Path.absolute(package_dir)}/$name";
+    String root = %"$(Path.absolute(package_dir))/$name";
     foreach (String suffix in %(".x" ".xp")) {
       String nested = %"$root/src/$name$suffix";
       String entry = sources.exists(nested) ? nested : %"$root/$name$suffix";
@@ -450,9 +450,9 @@ int Path.lock_file(Path p, int wait) {
 void Path.publish_files(List outputs) {
   String suffix = ".tmp.%ld".printf((long) getpid());
   defer for (List rest = outputs; rest; rest = rest.cddr())
-    Path.remove_file(%"${rest.car()}$suffix");
+    Path.remove_file(%"$(rest.car())$suffix");
   for (List rest = outputs; rest; rest = rest.cddr())
-    Path.write_text(%"${rest.car()}$suffix", rest.cadr());
+    Path.write_text(%"$(rest.car())$suffix", rest.cadr());
   for (List rest = outputs; rest; rest = rest.cddr()) {
     String target = rest.car();
     if (rename(%"$target$suffix", target))

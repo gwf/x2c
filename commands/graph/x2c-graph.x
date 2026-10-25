@@ -29,10 +29,10 @@ static void _record_call(
   if (kind == <direct>)
     project_count(
       calls,
-      %(direct ${project_binding_target(compiler, definitions, binding)}),
+      %(direct $(project_binding_target(compiler, definitions, binding))),
       1);
   else if (kind == <automatic>)
-    project_count(calls, %(indirect ${Ast.binding_spelling(binding)}), 1);
+    project_count(calls, %(indirect $(Ast.binding_spelling(binding))), 1);
   else project_count(calls, %(indirect "computed"), 1);
 }
 
@@ -52,9 +52,9 @@ static List _call_records(Map calls) {
     List call = key;
     match (call) {
       case %(direct ?target):
-        records.push(%(call direct $target ${count.int()}));
+        records.push(%(call direct $target $(count.int())));
       case %(indirect ?name):
-        records.push(%(call indirect $name ${count.int()}));
+        records.push(%(call indirect $name $(count.int())));
     }
   }
   records.sort();
@@ -94,8 +94,8 @@ static List _analyze_unit(Compiler compiler, List ast, String path) {
         functions.push(
           %(function $identity $name $visibility
             (source $source_name $source_order $file
-                    ${project_origin(compiler, binding)})
-            (calls @{_call_records(calls)})));
+                    $(project_origin(compiler, binding)))
+            (calls @(_call_records(calls)))));
         continue;
       }
     }
@@ -105,7 +105,7 @@ static List _analyze_unit(Compiler compiler, List ast, String path) {
     functions.push(
       %(function 0 "<top-level>" static
         (source "<top-level>" 0 $path source)
-        (calls @{_call_records(top_level_calls)})));
+        (calls @(_call_records(top_level_calls)))));
   functions.sort();
   return functions.list_free();
 }
@@ -221,7 +221,7 @@ static void _collect_tail_calls(
         project_count(walk.counts, %(kind $kind), 1);
         walk.sites.push(
           %(site $kind
-            ${project_location(walk.compiler, walk.path, origin)}));
+            $(project_location(walk.compiler, walk.path, origin))));
       }
     }
   }
@@ -249,11 +249,11 @@ static List _analyze_tail_unit(Compiler compiler, List ast, String path) {
         blocker_rows.sort();
         walk.sites.sort();
         functions.push(
-          %(function ${compiler.emitted_binding_name(binding)}
-            ${project_visibility(compiler, type, binding)}
+          %(function $(compiler.emitted_binding_name(binding))
+            $(project_visibility(compiler, type, binding))
             (calls (tail $tail) (non-tail $non_tail))
-            (blockers @{blocker_rows.list_free()})
-            (sites @{walk.sites.list_free()})));
+            (blockers @(blocker_rows.list_free()))
+            (sites @(walk.sites.list_free()))));
       }
   functions.sort();
   return functions.list_free();
@@ -265,7 +265,7 @@ static List _walk_argument_root(Var argument) {
     case %(root (binding ?identity ?spelling) ?type (path *path)):
       return %(
         root $identity $spelling $type (path @path)
-        ${_walk_root_spelling(spelling.str(), path)}
+        $(_walk_root_spelling(spelling.str(), path))
       );
   return NULL;
 }
@@ -297,9 +297,9 @@ static void _collect_walk_calls(
       }
       List target = project_binding_target(compiler, definitions, callee);
       calls.push(
-        %(call $target ${compiler.emitted_binding_name(callee)}
-          ${project_location(compiler, path, origin)}
-          (arguments @{direct_arguments.list_free()})));
+        %(call $target $(compiler.emitted_binding_name(callee))
+          $(project_location(compiler, path, origin))
+          (arguments @(direct_arguments.list_free()))));
     }
     /* foreach over a List copies the collection into this local before its
        cursor loop, so the copy's initializer is the walked value. */
@@ -307,7 +307,7 @@ static void _collect_walk_calls(
       List root = _walk_argument_root(collection);
       if (root && spelling.str().startswith("_x2c_gensym_macro_object_"))
         calls.push(
-          %(foreach ${project_location(compiler, path, origin)} $root));
+          %(foreach $(project_location(compiler, path, origin)) $root));
     }
   }
   foreach (Var child, node)
@@ -428,12 +428,12 @@ static List _analyze_walk_unit(Compiler compiler, List ast, String path) {
         List call_list = calls.list_free();
         Symbol visibility = project_visibility(compiler, type, binding);
         functions.push(
-          %(function $target ${compiler.emitted_binding_name(binding)}
+          %(function $target $(compiler.emitted_binding_name(binding))
             $visibility (parameters @parameter_list) (calls @call_list)
             (direct
-              @{_walk_direct_parameters(
+              @(_walk_direct_parameters(
                 body, target, parameter_list, call_list
-              )})));
+              )))));
       }
   functions.sort();
   return functions.list_free();
@@ -638,8 +638,8 @@ static List _walk_candidates(List functions) {
         by_unit[path] = cons(
           %(candidate $caller_name $visibility
             (argument $type $display)
-            (walkers @{sorted_walkers.list_free()})
-            (sites @{sorted_sites.list_free()})),
+            (walkers @(sorted_walkers.list_free()))
+            (sites @(sorted_sites.list_free()))),
           by_unit.getdefault(path, NULL));
       }
   }
@@ -649,10 +649,10 @@ static List _walk_candidates(List functions) {
     foreach (List candidate, values.list()) candidates.push(candidate);
     candidates.sort();
     units.push(
-      %(unit $path (candidates @{candidates.list_free()})));
+      %(unit $path (candidates @(candidates.list_free()))));
   }
   units.sort();
-  return %(walks (units @{units.list_free()}));
+  return %(walks (units @(units.list_free())));
 }
 
 static String _site_direct_callee(Compiler compiler, List callee) {
@@ -676,11 +676,11 @@ static List _site_value_summary(
           writes.push(write);
         writes.sort();
         return %(
-          local $spelling (prior-writes @{writes.list_free()})
+          local $spelling (prior-writes @(writes.list_free()))
         );
       }
       if (project_automatic(compiler, binding)) return %(local $spelling);
-      return %(global ${compiler.emitted_binding_name(binding)});
+      return %(global $(compiler.emitted_binding_name(binding)));
     }
     case %(op (!or (!quote .) (!quote ->)) (expr ?type ?) (?member)):
       return %(field $type $member);
@@ -690,8 +690,8 @@ static List _site_value_summary(
     }
     case %((!or index getindex) ?target ?):
       return %(
-        index ${_site_value_summary(
-          compiler, target, parameters, prior_writes)}
+        index $(_site_value_summary(
+          compiler, target, parameters, prior_writes))
       );
     case %(literal ? ?spelling *): return %(literal $spelling);
     case %(cons *): return %(list);
@@ -699,14 +699,14 @@ static List _site_value_summary(
     case %(array *): return %(array);
     case %(cast ? ?inner):
       return %(
-        cast ${_site_value_summary(
-          compiler, inner, parameters, prior_writes)}
+        cast $(_site_value_summary(
+          compiler, inner, parameters, prior_writes))
       );
     case %(op ?operator *): return %(operator $operator);
     case %(cache ?): return %(constant);
   }
   Var tag = node.car();
-  return tag is <symbol> ? %(form ${tag.symbol()}) : %(form);
+  return tag is <symbol> ? %(form $(tag.symbol())) : %(form);
 }
 
 static List _site_argument_summary(
@@ -724,7 +724,7 @@ static List _site_argument_summary(
     }
   return %(
     argument ()
-    ${_site_value_summary(compiler, argument, parameters, prior_writes)}
+    $(_site_value_summary(compiler, argument, parameters, prior_writes))
   );
 }
 
@@ -791,8 +791,8 @@ static void _collect_sites(SiteWalk &walk, Var value) {
         project_count(
           walk.sites,
           %(
-            call ${walk.path} ${walk.caller} ${walk.visibility}
-            (args @{summaries.list_free()})
+            call $(walk.path) $(walk.caller) $(walk.visibility)
+            (args @(summaries.list_free()))
           ),
           1
         );
@@ -809,7 +809,7 @@ static List _site_records(Map sites) {
     match (call)
       case %(call ?path ?caller ?visibility (args *arguments)):
         records.push(
-          %(call $path $caller $visibility ${count.int()}
+          %(call $path $caller $visibility $(count.int())
             (args @arguments)));
   }
   records.sort();
@@ -873,8 +873,8 @@ static void _collect_field_sites(
     project_count(
       walk.sites,
       %(
-        site ${walk.path} ${walk.caller} ${walk.visibility}
-        ${project_location(walk.compiler, walk.path, origin)}
+        site $(walk.path) $(walk.caller) $(walk.visibility)
+        $(project_location(walk.compiler, walk.path, origin))
         $detail
       ),
       1
@@ -940,7 +940,7 @@ static List _field_site_records(Map sites) {
       case %(site ?path ?caller ?visibility ?location ?access):
         records.push(
           %(site $path $caller $visibility $location $access
-            (count ${count.int()})));
+            (count $(count.int()))));
   }
   records.sort();
   return records.list_free();
@@ -1050,8 +1050,8 @@ static List _parse_units(Frontend frontend, Array inputs, Map subtrees) {
     %!(ParsedUnit *parsed, String input, String path) using &subtrees => {
       Symbol subtree = subtrees ? subtrees[input].symbol() : <none>;
       return %((
-        unit $path $subtree ${parsed.source_lines}
-        (functions @{_analyze_unit(parsed.compiler, parsed.ast, path)})
+        unit $path $subtree $(parsed.source_lines)
+        (functions @(_analyze_unit(parsed.compiler, parsed.ast, path)))
       ));
     },
     units)) return NULL;
@@ -1134,7 +1134,7 @@ static List _parse_loop_allocation_units(
   if (!_analyze_inputs(
     frontend, inputs,
     %!(ParsedUnit *parsed, String input, String path) =>
-      %(${LoopAllocations.analyze_unit(parsed.compiler, parsed.ast, path)}),
+      %($(LoopAllocations.analyze_unit(parsed.compiler, parsed.ast, path))),
     units)) return NULL;
   return LoopAllocations.finish(units, limit);
 }
@@ -1144,11 +1144,11 @@ static List _parse_lifetime_units(
   List units;
   if (!_analyze_inputs(
     frontend, inputs,
-    %!(ParsedUnit *parsed, String input, String path) => %(${
+    %!(ParsedUnit *parsed, String input, String path) => %($(
       Lifetime.analyze_unit(
         parsed.compiler, parsed.ast, path,
         project_function_targets(parsed.compiler, parsed.ast, path))
-    }),
+    )),
     units)) return NULL;
   return allocation_returns
        ? Lifetime.allocation_returns(units, allocation_returns)
@@ -1172,8 +1172,8 @@ static void _resolve_call(List raw, Map publics, Map resolved) {
       project_count(resolved, %(indirect $name), count);
     case %(call direct ?callee ?count): {
       List target = resolve_project_target(callee, publics);
-      if (target) project_count(resolved, %(direct @{target.cdr()}), count);
-      else project_count(resolved, %(external ${callee.list().cadr()}), count);
+      if (target) project_count(resolved, %(direct @(target.cdr())), count);
+      else project_count(resolved, %(external $(callee.list().cadr())), count);
     }
   }
 }
@@ -1184,11 +1184,11 @@ static List _resolved_calls(Map calls) {
     List call = key;
     match (call) {
       case %(direct ?path ?name):
-        rows.push(%(call direct $path $name ${count.int()}));
+        rows.push(%(call direct $path $name $(count.int())));
       case %(external ?name):
-        rows.push(%(call external $name ${count.int()}));
+        rows.push(%(call external $name $(count.int())));
       case %(indirect ?name):
-        rows.push(%(call indirect $name ${count.int()}));
+        rows.push(%(call indirect $name $(count.int())));
     }
   }
   rows.sort();
@@ -1236,15 +1236,15 @@ static List _resolve_graph(List units, Map attributes) {
               }
               output_functions.push(
                 %(function $name $visibility
-                  (calls @{_resolved_calls(resolved)})));
+                  (calls @(_resolved_calls(resolved)))));
             }
         output_functions.sort();
         output_units.push(
-          %(unit $path (functions @{output_functions.list_free()})));
+          %(unit $path (functions @(output_functions.list_free()))));
       }
   }
   output_units.sort();
-  return %(graph @{output_units.list_free()});
+  return %(graph @(output_units.list_free()));
 }
 
 static int _reachable(String from, String target, Map adjacency, Map seen) {
@@ -1345,7 +1345,7 @@ static List _digest(List graph) {
             foreach (Var (key, count), dependencies) {
               match ((List) key)
                 case %(unit ?target): {
-                  dependency_rows.push(%(unit $target ${count.int()}));
+                  dependency_rows.push(%(unit $target $(count.int())));
                   adjacent = cons(target, adjacent);
                 }
             }
@@ -1356,7 +1356,7 @@ static List _digest(List graph) {
                 (functions (public $public_count) (module $module_count)
                            (static $static_count))
                 (internal $internal_count)
-                (dependencies @{dependency_rows.list_free()})
+                (dependencies @(dependency_rows.list_free()))
                 (external $unit_external)
                 (indirect $unit_indirect)));
           }
@@ -1368,8 +1368,8 @@ static List _digest(List graph) {
     (totals (units $unit_count) (functions $function_count)
             (direct $direct_count) (external $external_count)
             (indirect $indirect_count))
-    (units @{units.list_free()})
-    (cycles @{_dependency_cycles(paths, adjacency)})
+    (units @(units.list_free()))
+    (cycles @(_dependency_cycles(paths, adjacency)))
   );
 }
 
@@ -1447,7 +1447,7 @@ static List _architecture_choke_points(List graph) {
         case %(function ?path ?name ?
                (callers (cross-units ?cross) (units ?) (functions ?count))
                (calls ?calls)):
-          return %(${-cross.int()} ${-count.int()} ${-calls.int()}
+          return %($(-cross.int()) $(-count.int()) $(-calls.int())
                    $path $name);
       return nil;
     }, ARCHITECTURE_LIMIT);
@@ -1486,7 +1486,7 @@ static List _architecture_reciprocal(List graph) {
       match (record)
         case %(units ?left ?right (calls (? ? ?forward) (? ? ?reverse))): {
           int a = forward.int(), b = reverse.int();
-          return %(${a < b ? -a : -b} ${-(a + b)} $left $right);
+          return %($(a < b ? -a : -b) $(-(a + b)) $left $right);
         }
       return nil;
     }, ARCHITECTURE_LIMIT);
@@ -1514,10 +1514,10 @@ static List _boundary_direction(
   return %(
     direction $from $to
     (functions
-      (callers ${callers.getdefault(direction, 0).int()})
-      (callees ${callees.getdefault(direction, 0).int()}))
-    (edges ${edges.getdefault(direction, 0).int()})
-    (calls ${calls.getdefault(direction, 0).int()})
+      (callers $(callers.getdefault(direction, 0).int()))
+      (callees $(callees.getdefault(direction, 0).int())))
+    (edges $(edges.getdefault(direction, 0).int()))
+    (calls $(calls.getdefault(direction, 0).int()))
   );
 }
 
@@ -1582,9 +1582,9 @@ static List _architecture_dependency_width(List graph) {
                                             (calls ?reverse_calls)))): {
           int a = left_width.int(), b = right_width.int();
           return %(
-            ${a < b ? -a : -b} ${-(a + b)}
-            ${-(forward_edges.int() + reverse_edges.int())}
-            ${-(forward_calls.int() + reverse_calls.int())}
+            $(a < b ? -a : -b) $(-(a + b))
+            $(-(forward_edges.int() + reverse_edges.int()))
+            $(-(forward_calls.int() + reverse_calls.int()))
             $left $right
           );
         }
@@ -1640,10 +1640,10 @@ static List _components(List names, Map adjacency, String excluded) {
     _collect_component(
       name, excluded, allowed, adjacency, seen, members);
     members.sort();
-    groups.push(%(group @{members.list_free()}));
+    groups.push(%(group @(members.list_free())));
   }
   groups.sort_by(
-    %!(List group) => %(${1 - group.len()} ${group.cadr()}));
+    %!(List group) => %($(1 - group.len()) $(group.cadr())));
   return groups.list_free();
 }
 
@@ -1709,7 +1709,7 @@ static List _architecture_local_components(List graph) {
             rows.push(
               %(unit $path (functions $function_count)
                 (isolated $isolated_count)
-                (components @{_component_sizes(components)})));
+                (components @(_component_sizes(components)))));
           }
   rows.sort();
   return rows.list_free();
@@ -1734,7 +1734,7 @@ static List _architecture_bridges(List graph) {
         case %(function ?path ?name (groups ? *rest)): {
           int outside = 0;
           foreach (Var size, rest) outside += size.int();
-          return %(${-rest.car().int()} ${-outside} $path $name);
+          return %($(-rest.car().int()) $(-outside) $path $name);
         }
       return nil;
     }, ARCHITECTURE_LIMIT);
@@ -1750,11 +1750,11 @@ static List _architecture(List graph) {
       (reciprocal-calls $ARCHITECTURE_RECIPROCAL_CALLS)
       (boundary-functions $ARCHITECTURE_BOUNDARY_FUNCTIONS)
       (bridge-second-group $ARCHITECTURE_BRIDGE_SECOND_GROUP))
-    (choke-points @{_architecture_choke_points(graph)})
-    (reciprocal @{_architecture_reciprocal(graph)})
-    (dependency-width @{_architecture_dependency_width(graph)})
-    (local-components @{_architecture_local_components(graph)})
-    (bridges @{_architecture_bridges(graph)})
+    (choke-points @(_architecture_choke_points(graph)))
+    (reciprocal @(_architecture_reciprocal(graph)))
+    (dependency-width @(_architecture_dependency_width(graph)))
+    (local-components @(_architecture_local_components(graph)))
+    (bridges @(_architecture_bridges(graph)))
   );
 }
 
@@ -1839,17 +1839,17 @@ static List _structure_files(
         if (need >= 0 && _storage_rank(storage) > need &&
             !_generated(attributes, target))
           wider.push(
-            %(function $name $file $storage (needs ${_storage_tier(need)})));
+            %(function $name $file $storage (needs $(_storage_tier(need)))));
       }
   Array calls = [];
   foreach (List key, between.keys())
-    calls.push(%(calls @key ${between[key].int()}));
+    calls.push(%(calls @key $(between[key].int())));
   calls.sort();
   wider.sort();
   return %(
-    (members @{_member_rows(tallies, internal, interface)})
-    (member-calls @{calls.list_free()})
-    (wider @{wider.list_free()})
+    (members @(_member_rows(tallies, internal, interface)))
+    (member-calls @(calls.list_free()))
+    (wider @(wider.list_free()))
   );
 }
 
@@ -1859,12 +1859,12 @@ static List _member_rows(Map tallies, Map internal, Map interface) {
     String file = key.car();
     members.push(
       %(member $file
-        (functions (public ${tallies.getdefault(%($file public), 0).int()})
-                   (module ${tallies.getdefault(%($file module), 0).int()})
-                   (static ${tallies.getdefault(%($file static), 0).int()}))
-        (internal ${internal[key].int()})
+        (functions (public $(tallies.getdefault(%($file public), 0).int()))
+                   (module $(tallies.getdefault(%($file module), 0).int()))
+                   (static $(tallies.getdefault(%($file static), 0).int())))
+        (internal $(internal[key].int()))
         (interface
-          @{List.sort(interface.getdefault(file, NULL))})));
+          @(List.sort(interface.getdefault(file, NULL))))));
   }
   members.sort();
   return members.list_free();
@@ -1895,8 +1895,8 @@ static List _structure(List graph, Map attributes, String wanted) {
                       int outside = 0;
                       foreach (List group, rest)
                         outside += group.len() - 1;
-                      return %(${1 - rest.car().list().len()}
-                               ${-outside} $name);
+                      return %($(1 - rest.car().list().len())
+                               $(-outside) $name);
                     }
                   return nil;
                 },
@@ -1906,13 +1906,13 @@ static List _structure(List graph, Map attributes, String wanted) {
               int function_count = functions.len();
               matches.push(
                 %(unit $path (functions $function_count)
-                  (internal ${_unit_internal_calls(path, functions)})
-                  (isolated @{isolated.list_free()})
+                  (internal $(_unit_internal_calls(path, functions)))
+                  (isolated @(isolated.list_free()))
                   (components @components)
                   (bridges @bridges)
-                  @{_structure_files(attributes, needed, path, functions)}));
+                  @(_structure_files(attributes, needed, path, functions))));
             }
-  return %(structure $wanted (matches @{matches.list_free()}));
+  return %(structure $wanted (matches @(matches.list_free())));
 }
 
 static List _between_direction(List graph, String from, String to) {
@@ -1928,7 +1928,7 @@ static List _between_direction(List graph, String from, String to) {
   edges.sort();
   return %(
     direction $from $to (count $total)
-    (calls @{edges.list_free()})
+    (calls @(edges.list_free()))
   );
 }
 
@@ -1936,8 +1936,8 @@ static List _between(List graph, String left, String right) {
   return %(
     between $left $right
     (directions
-      ${_between_direction(graph, left, right)}
-      ${_between_direction(graph, right, left)})
+      $(_between_direction(graph, left, right))
+      $(_between_direction(graph, right, left)))
   );
 }
 
@@ -1965,10 +1965,10 @@ static List _focus(List graph, String wanted) {
                   if (name == wanted)
                     matches.push(
                       %(function $path $name $visibility
-                        (callers @{_callers(graph, path, name)})
+                        (callers @(_callers(graph, path, name)))
                         (calls @calls)));
   matches.sort();
-  return %(focus $wanted (matches @{matches.list_free()}));
+  return %(focus $wanted (matches @(matches.list_free())));
 }
 
 static void _compare_indexes(List graph, Map by_target, Map by_name) {
@@ -1997,7 +1997,7 @@ static List _compare_definition(Map by_target, Map by_name, String name) {
         return %(function $path $function_name $visibility);
   }
   return %(
-    unproved ${by_name.contains(name) ? "ambiguous" : "missing"}
+    unproved $(by_name.contains(name) ? "ambiguous" : "missing")
   );
 }
 
@@ -2009,7 +2009,7 @@ static List _compare_present_path(List targets, Map by_target) {
       case %(function ?path ?name ?visibility (calls *)):
         rows.push(%(function $path $name $visibility));
   }
-  return %(path @{rows.list_free()});
+  return %(path @(rows.list_free()));
 }
 
 static List _compare_shortest(List start, List destination, Map by_target) {
@@ -2070,16 +2070,16 @@ static List _compare_result(
                   : right_proved ? <right-only> : <neither>;
     rows.push(
       %(operation $operation $status
-        (target ${_compare_definition(by_target, by_name, operation)})
+        (target $(_compare_definition(by_target, by_name, operation)))
         (left $left_path) (right $right_path)));
   }
   rows.sort();
   return %(
     compare $left_name $right_name
     (entries
-      (left ${_compare_definition(by_target, by_name, left_name)})
-      (right ${_compare_definition(by_target, by_name, right_name)}))
-    (operations @{rows.list_free()})
+      (left $(_compare_definition(by_target, by_name, left_name)))
+      (right $(_compare_definition(by_target, by_name, right_name))))
+    (operations @(rows.list_free()))
   );
 }
 
@@ -2217,7 +2217,7 @@ static List _certify_parse_units(Frontend frontend, Array inputs) {
       functions = extended.sort().list_free();
     }
     List record = %(
-      unit $path <none> ${parsed.source_lines}
+      unit $path <none> $(parsed.source_lines)
       (functions @functions)
     );
     record = parsed.context.export(record);
@@ -2305,7 +2305,7 @@ static void _certify_reach(List graph, Array roots, Map nodes,
         found = target;
       }
     if (!found || found == %(ambiguous)) {
-      missing.push(%(root $root ${found ? <ambiguous> : <missing>}));
+      missing.push(%(root $root $(found ? <ambiguous> : <missing>)));
       continue;
     }
     if (!reached.contains(found)) {
@@ -2626,7 +2626,7 @@ static int _certify_coverage(Frontend frontend, Array inputs, List graph,
       match (node) case %(function ?
           (bind (!set ?binding (binding ? ?)) ?) ?body): {
         List target = %(
-          target $path ${compiler.emitted_binding_name(binding)});
+          target $path $(compiler.emitted_binding_name(binding)));
         if (!reached.contains(target)) continue;
         scan.caller = target;
         scan.scope_counts = {};
@@ -2714,14 +2714,14 @@ List certify_result(Frontend frontend, Array inputs, Array roots,
             "region finding requires review with incomplete coverage"
             $message));
         else
-          violations.push(%(violation ${_certify_path(target, parent)}
+          violations.push(%(violation $(_certify_path(target, parent))
                             $code $location $message $notes));
       }
   Array reported_obstacles = [];
   foreach (List obstacle, obstacles)
     match (obstacle) case %(obstacle ?target ?location ?reason *rest):
       reported_obstacles.push(%(obstacle
-        ${_certify_path(target, parent)} $location $reason @rest));
+        $(_certify_path(target, parent)) $location $reason @rest));
   foreach (List target, reached.keys())
     match (target) case %(target ? ?name) if (name in roots &&
         summaries.contains(target)): {
@@ -2736,18 +2736,18 @@ List certify_result(Frontend frontend, Array inputs, Array roots,
     }
   Array used = [];
   foreach (String name, assumptions.keys())
-    used.push(%(native $name ${assumptions[name]}));
+    used.push(%(native $name $(assumptions[name])));
   Symbol result = violations.len() ? <violation>
                 : reported_obstacles.len() ? <incomplete> : <proved>;
   status = result == <proved> ? 0 : result == <violation> ? 1 : 3;
   return %(
     certify (status $result)
-    (roots @{roots.sort().list_free()})
-    (inputs @{inputs.list()})
-    (obligations @{obligations.sort().list_free()})
-    (assumptions @{used.sort().list_free()})
-    (violations @{violations.sort().list_free()})
-    (obstacles @{reported_obstacles.sort().list_free()})
+    (roots @(roots.sort().list_free()))
+    (inputs @(inputs.list()))
+    (obligations @(obligations.sort().list_free()))
+    (assumptions @(used.sort().list_free()))
+    (violations @(violations.sort().list_free()))
+    (obstacles @(reported_obstacles.sort().list_free()))
   );
 }
 
@@ -2830,7 +2830,7 @@ int main(int argc, char **argv) {
   Map subtrees = {};
   try {
     if (!rows || ((datasets || compare) && !after)) raise %(bad-arg);
-    options = Args.parse(words, %(@{rows.cdr()} @{compare ? common : files}));
+    options = Args.parse(words, %(@(rows.cdr()) @(compare ? common : files)));
     if (after) libraries = Args.parse(after, files);
     if (commands) command_files = Args.parse(commands, files);
     if (verb == "clones" && options["min-size"])
@@ -2858,10 +2858,10 @@ int main(int argc, char **argv) {
   request.include_dirs = options["I"];
   if (libraries)
     request.include_dirs =
-      %(@{request.include_dirs} @{libraries["I"].list()});
+      %(@(request.include_dirs) @(libraries["I"].list()));
   if (command_files)
     request.include_dirs =
-      %(@{request.include_dirs} @{command_files["I"].list()});
+      %(@(request.include_dirs) @(command_files["I"].list()));
   Frontend frontend = Frontend.new(request);
   frontend.preprocessor_errors = _preprocessor_errors;
   frontend.prepare_meta(inputs);

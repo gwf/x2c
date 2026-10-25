@@ -33,7 +33,7 @@ static Map typetags = $_tag_types(%(
 /* The encoding rows a statically known tag can be tested against without a
    runtime decode, projected from the same ledger the runtime decoder uses.
    Its keys are tag Symbols, so it outlives a translation unit. */
-static Map varrows = %{ ${$var.tag.constant.rows()} };
+static Map varrows = %{ $($var.tag.constant.rows()) };
 
 /** Returns the process-lifetime `Var` tag of each builtin type. */
 Map Type.builtin_var_tags(void) => typetags;

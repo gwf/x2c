@@ -27,7 +27,7 @@ module List _declarator_init(
   List slot = c.peek_macro_hole() || c.peek(0) == <@>
     ? c.try_parse_macro_slot(<decl-row>) : NULL;
   if (slot) {
-    if (c.test(<=>)) return %(op = $slot ${c.parse_assignment()});
+    if (c.test(<=>)) return %(op = $slot $(c.parse_assignment()));
     return slot;
   }
   Token origin = c.token;
@@ -138,7 +138,7 @@ module int _parameters_follow(Compiler c) {
   Token head = c.token;
   c.next();
   Symbol next = c.peek(0);
-  Type lookup = c.sym.get(%(${c.token.text}));
+  Type lookup = c.sym.get(%($(c.token.text)));
   int named = next == <ident> && !lookup.is_typedef() &&
               !(c.signature_only && c.test_declaration());
   int parameters = next == <)> || (!named && c.test_declaration());
@@ -176,7 +176,7 @@ static List _declarator_suffix(Compiler c, int loaded_main) {
     if (attribute)
       type = %( @type ($attribute) );
     else if (c.peek(0) == <[>)
-      type = %( @type  @{_array_suffix(c)} );
+      type = %( @type  @(_array_suffix(c)) );
     else if (c.peek(0) == <:>) {
       c.next();
       List expr = c.parse_primary();
@@ -216,7 +216,7 @@ List Compiler.parse_declarator_argument(Compiler c) {
   List method = NULL;
   Token first = NULL, after = NULL;
   List bind = _declarator(c, NULL, NULL, method, first, after);
-  if (c.test(<=>)) return %(op = $bind ${c.parse_assignment()});
+  if (c.test(<=>)) return %(op = $bind $(c.parse_assignment()));
   return bind;
 }
 
@@ -233,15 +233,15 @@ static List _template_declarator(Compiler c, int member) {
   if (method) return method;
   switch (c.peek(0)) {
     case <$>:
-      return %(bind ${member ? c.try_parse_macro_member()
-                             : c.try_parse_macro_slot(<name>)} ());
+      return %(bind $(member ? c.try_parse_macro_member()
+                             : c.try_parse_macro_slot(<name>)) ());
     case <ident>: {
       String spelling = c.token.text;
       int shadows_alias = !!c.alias_expression();
       c.next();
       if (member) return %(bind ($spelling) ());
       if (shadows_alias) c.sym.define(%($spelling), NULL);
-      return %(bind ${c.macro_introduced_name(spelling)} ());
+      return %(bind $(c.macro_introduced_name(spelling)) ());
     }
   }
   return NULL;
@@ -261,7 +261,7 @@ static List _literal_method(Compiler c) {
       (c.peek(2) != <$> && c.peek(2) != <ident>))
     return NULL;
   c.next();
-  return %(bind (($owner_spelling) ${_method_member(c)}) ());
+  return %(bind (($owner_spelling) $(_method_member(c))) ());
 }
 
 // `$T.member`, where `$T` is a type hole.
@@ -271,7 +271,7 @@ static List _hole_method(Compiler c) {
       c.after_hole().type != <.>)
     return NULL;
   List owner = c.try_parse_macro_slot(<type>);
-  return %(bind (($owner) ${_method_member(c)}) ());
+  return %(bind (($owner) $(_method_member(c))) ());
 }
 
 // The member after a method owner's `.`: a Name hole or an identifier.
@@ -342,7 +342,7 @@ module List _install_declarator(
     String path = Compiler.portable_path(Path.absolute(c.filename));
     String owner = c.package_spelling(method.car());
     c.sym.set(
-      %("source-node" (interface-types $path ${c.token.pos} $exact)),
+      %("source-node" (interface-types $path $(c.token.pos) $exact)),
       %(interface-types $exact (($owner))));
   }
   List bound = %(bind $binding $mods);
@@ -375,9 +375,9 @@ static Var _method_spelling(
            ?(String member)): {
       String owner_name =
         owner is <symbol> ? owner.symbol() : owner.str();
-      name = %"${owner_name}_$member";
+      name = %"$(owner_name)_$member";
       if (c.package) {
-        String prefix = %"${c.package}__";
+        String prefix = %"$(c.package)__";
         if (owner_name.startswith(prefix))
           owner_name = owner_name[prefix.len():];
       }
@@ -580,7 +580,7 @@ static List _member_name(
   // a weaker test that accepts anything that looks like an identifier
   if (!c.token.text.is_identifier())
     $fail.parse_method_member(c, c.token, owner);
-  String member = c.token.text, ident = %"${owner}_$member";
+  String member = c.token.text, ident = %"$(owner)_$member";
   if (method_identity) method_identity = %($owner $member);
   if (!method_identity && !c.sym.get_exact(%($ident))) {
     String imported = c.imported_spelling(ident);
@@ -615,7 +615,7 @@ String Compiler.package_alias_spelling(Compiler c) {
   if (package is void || c.sym.get_exact(%($alias))) return NULL;
   Token member = Token.skip_trivia(Token.skip_trivia(c.token + 1) + 1);
   return member.text.is_identifier()
-       ? %"${package}__${member.text}" : NULL;
+       ? %"$(package)__$(member.text)" : NULL;
 }
 
 /** Consumes one `ident` token and returns its spelling as a one-item `List`.
@@ -645,12 +645,12 @@ module String _syntax_exact_name(Var value) {
 module List _finish_fnmods(Compiler c, List declarator) {
   match (declarator) {
     case %(op = ?binding ?value):
-      return %(op = ${_finish_fnmods(c, binding)} $value);
+      return %(op = $(_finish_fnmods(c, binding)) $value);
     case %(bind ?binding ?modifiers): {
       Array output = [];
       foreach (Var modifier in modifiers.list())
         output.push(_finish_fnmod(c, modifier));
-      return %(bind $binding (@{output.list_free()}));
+      return %(bind $binding (@(output.list_free())));
     }
   }
   return declarator;
@@ -659,7 +659,7 @@ module List _finish_fnmods(Compiler c, List declarator) {
 static Var _finish_fnmod(Compiler c, Var modifier) {
   match (modifier)
     case %(fnmod (params *parameters)):
-      return %(fnmod (params @{_finish_prototype(c, parameters)}));
+      return %(fnmod (params @(_finish_prototype(c, parameters))));
   return modifier;
 }
 

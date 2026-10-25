@@ -23,14 +23,14 @@ static Var _truth(int x) {
 
 static String _string(Var value, String operation) {
   if (value is not <string>)
-    raise %(bad-types (operation $operation) (actual ${value.tag()})
+    raise %(bad-types (operation $operation) (actual $(value.tag()))
                        (want string));
   return value;
 }
 
 static List _list(Var value, String operation) {
   if (value is not <list>)
-    raise %(bad-types (operation $operation) (actual ${value.tag()})
+    raise %(bad-types (operation $operation) (actual $(value.tag()))
                        (want list));
   return value;
 }

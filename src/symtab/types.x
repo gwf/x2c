@@ -139,7 +139,7 @@ static Type _local_tag(Sym s, Type type, Type base) {
     SymScope *scope = _scope_at(s, i);
     Var binding;
     if (scope.bindings.try_get(base, binding))
-      return _replace_type_base(type, base, %(${base.car()} $binding));
+      return _replace_type_base(type, base, %($(base.car()) $binding));
   }
   return type;
 }
@@ -291,14 +291,14 @@ void Sym.declare_field_order(Sym s, Type type, List fields) {
     foreach (List declarator in bindings.cdr())
       rows.push(_field_row(s, type, declaration, declarator));
   }
-  s.set(%(@type "field-order"), %(fields @{rows.list_free()}));
+  s.set(%(@type "field-order"), %(fields @(rows.list_free())));
 }
 
 static List _field_row(
   Sym s, Type type, List declaration, List declarator) {
   String name = Ast.binding_spelling(declarator.cadr());
   Type declared = name ? s.get(%(@type $name))
-    : %(declare ${declaration.cadr()} (bindings $declarator))
+    : %(declare $(declaration.cadr()) (bindings $declarator))
       .type_from_ast().declared();
   return %($name $declared);
 }

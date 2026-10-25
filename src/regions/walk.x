@@ -6,19 +6,19 @@ static macro Stmt $warn.region_bad_free(
   Expr $w, Expr $site, Expr $op, Expr $subject) =>
   _warn(
     $w, <bad-free>, $site,
-    %"${$op} is given ${$subject}, which no Scope allocator returned",
+    %"$($op) is given $($subject), which no Scope allocator returned",
     %("only Scope.malloc, calloc, memdup, and realloc storage can be"
       "freed or reallocated"));
 
 static macro Stmt $warn.region_read_ended(Expr $w, Expr $site, Expr $name) =>
   _warn(
     $w, <region>, $site,
-    %"'${$name}' is read after its owning region ended", NULL);
+    %"'$($name)' is read after its owning region ended", NULL);
 
 static macro Stmt $warn.region_after_free(
   Expr $w, Expr $site, Expr $name, Expr $ended) =>
   _warn(
-    $w, <after-free>, $site, %"'${$name}' is used after ${$ended}", NULL);
+    $w, <after-free>, $site, %"'$($name)' is used after $($ended)", NULL);
 
 static macro Expression $reason.region_moved() => "Scope.realloc moved it";
 static macro Expression $reason.region_freed() => "it was freed";

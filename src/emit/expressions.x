@@ -106,9 +106,9 @@ module List _generic(Emitter &e, Var control, List associations) {
   Array rows = [];
   foreach (List association in associations) match (association) {
     case %(association default ?value):
-      rows.push(%("default" ":" @{_emit(e, %($value))}));
+      rows.push(%("default" ":" @(_emit(e, %($value)))));
     case %(association ?type ?value):
-      rows.push(%(@{_semantic_type(e, type)} ":" @{_emit(e, %($value))}));
+      rows.push(%(@(_semantic_type(e, type)) ":" @(_emit(e, %($value)))));
   }
   List c_rows = _commas(rows.list_free());
   return %("_Generic(" @c_control ", " @c_rows ")");
@@ -124,8 +124,8 @@ module List _binary(
   match (left)
     case %(expr ? (op *)): return _op_spine(e, operator, left, right);
   Symbol binary = operator;
-  return %(@{_operand(e, left, _left_operand_level(binary))} $operator
-           @{_operand(e, right, _right_operand_level(binary))});
+  return %(@(_operand(e, left, _left_operand_level(binary))) $operator
+           @(_operand(e, right, _right_operand_level(binary))));
 }
 
 module List _ident(Emitter &e, Var binding) {
@@ -145,8 +145,8 @@ module List _ident(Emitter &e, Var binding) {
 module List _call(Emitter &e, Var function, Var arguments) {
   List site_call = _match_site_call(e, function, arguments);
   if (site_call) return site_call;
-  return %(@{_operand(e, function, EMIT_POSTFIX)} "("
-           @{_emit(e, %($arguments))} ")");
+  return %(@(_operand(e, function, EMIT_POSTFIX)) "("
+           @(_emit(e, %($arguments))) ")");
 }
 
 /* A source-literal pattern is the same value on every call, so the call gets
@@ -201,7 +201,7 @@ module List _literal(Emitter &e, List ast) {
   }
   if (type === %("Symbol")) {
     Symbol symbol = value;
-    text = %"${(long) symbol}";
+    text = %"$((long) symbol)";
   }
   if (type === %("Atom")) return _atom_intern(text);
   Type numeric = type;
@@ -230,7 +230,7 @@ module List _literal(Emitter &e, List ast) {
 }
 
 static List _atom_intern(String spelling) {
-  String qq = "\"", text = %"$qq${spelling.escape()}$qq";
+  String qq = "\"", text = %"$qq$(spelling.escape())$qq";
   Atom atom = Atom.intern(spelling);
   if (atom is <symbol>) return %( "Symbol_var(Symbol_new($text))" );
   return %( "Atom_intern(String_new($text))" );

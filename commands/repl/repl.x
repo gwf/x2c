@@ -64,7 +64,7 @@ static List _command_candidates(String prefix) {
   Array candidates = [];
   for (size_t i = 0; i < sizeof(_commands) / sizeof(*_commands); i++)
     if (_commands[i].spelling.startswith(prefix))
-      candidates.push(%(<command> ${_commands[i].spelling}));
+      candidates.push(%(<command> $(_commands[i].spelling)));
   return candidates.list_free();
 }
 

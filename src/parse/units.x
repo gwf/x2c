@@ -348,7 +348,7 @@ static List _parse_import_declaration(Compiler c) {
   if (c.shallow)
     c.sym.set(
       %("source-node" (package-import
-        ${Compiler.portable_path(Path.absolute(c.filename))} ${start.pos})),
+        $(Compiler.portable_path(Path.absolute(c.filename))) $(start.pos))),
       %(package-import $name $alias $members));
   return %(import $name $alias);
 }
@@ -446,7 +446,7 @@ static List _defined(
   if (!c.capture_unit && staged && c.meta_is_comptime_only(function))
     return NULL;
   if (c.macro_holes)
-    return %(api-source ${first.line} ${c.definition_doc(first)} $function);
+    return %(api-source $(first.line) $(c.definition_doc(first)) $function);
   _definition_source(c, function, first.line, NULL, %($start $body));
   return function;
 }
@@ -712,14 +712,14 @@ module List _bind_decl_recipe(
   Compiler c, Var callback, Var arguments) {
   if (c.shallow)
     return %(declaration-pending $callback $arguments
-              ${c.macro_stack} ${c.source_private});
+              $(c.macro_stack) $(c.source_private));
   return _bind_recipe(c, callback, arguments, <unit>);
 }
 
 module List _bind_default(Compiler c, Var function) {
   if (c.shallow)
-    return %(declaration-default $function ${c.macro_stack}
-              ${c.source_private});
+    return %(declaration-default $function $(c.macro_stack)
+              $(c.source_private));
   return c.bind_syntax(function, <unit>, c.return_type);
 }
 
@@ -793,8 +793,8 @@ static List _alias_target(
   Compiler c, List declaration, Var binding, List native_syntax) {
   List native = c.resolve_expression(native_syntax, c.token);
   match (native)
-    case %(expr (!set ?native_type (*)) ${$source_identifier_content(
-        %(?native_binding))}): {
+    case %(expr (!set ?native_type (*)) $($source_identifier_content(
+        %(?native_binding)))): {
       if (native_type && !native_type.type().is_function())
         $fail.parse_alias_function(c, c.token, native_type);
       if (List.equal(binding, native_binding))

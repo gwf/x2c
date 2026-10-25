@@ -32,9 +32,9 @@ static void _loop_collect(
       walk.compiler, node, operation);
     if (direct_kind)
       walk.direct.push(
-        %(direct $direct_kind ${walk.path} ${walk.function}
-          ${walk.visibility} $operation $use
-          ${project_location(walk.compiler, walk.path, origin)} $loop_depth));
+        %(direct $direct_kind $(walk.path) $(walk.function)
+          $(walk.visibility) $operation $use
+          $(project_location(walk.compiler, walk.path, origin)) $loop_depth));
   }
   match (node) {
     case %(function *): return;
@@ -92,9 +92,9 @@ static void _loop_collect(
           walk.compiler, walk.definitions, node, name, NULL);
         if (target && !List.equal(target, %(computed)))
           walk.pending.push(
-            %(allocation-return $target ${walk.path} ${walk.function}
-              ${walk.visibility} $name $use
-              ${project_location(walk.compiler, walk.path, origin)}
+            %(allocation-return $target $(walk.path) $(walk.function)
+              $(walk.visibility) $name $use
+              $(project_location(walk.compiler, walk.path, origin))
               $loop_depth));
       }
       _loop_collect(walk, callee, origin, loop_depth, <nested>);
@@ -126,10 +126,10 @@ List LoopAllocations.analyze_unit(Compiler compiler, List ast, String path) {
   walk.pending.sort();
   return %(
     loop-allocation-unit
-    (lifetime ${
-      Lifetime.analyze_unit(compiler, ast, path, walk.definitions)})
-    (direct @{walk.direct.list_free()})
-    (pending @{walk.pending.list_free()})
+    (lifetime $(
+      Lifetime.analyze_unit(compiler, ast, path, walk.definitions)))
+    (direct @(walk.direct.list_free()))
+    (pending @(walk.pending.list_free()))
   );
 }
 
@@ -182,9 +182,9 @@ static List _loop_candidate(List key, List events) {
     List operation = raw_operation;
     match (operation) {
       case %(operation direct ?name ?):
-        operations.push(%(direct $name ${raw_count.int()}));
+        operations.push(%(direct $name $(raw_count.int())));
       case %(operation helper ?name ?kind):
-        operations.push(%(helper $name $kind ${raw_count.int()}));
+        operations.push(%(helper $name $kind $(raw_count.int())));
     }
   }
   operations.sort();
@@ -196,7 +196,7 @@ static List _loop_candidate(List key, List events) {
     (uses (returned $returned) (assigned $assigned)
           (argument $argument) (discarded $discarded)
           (condition $condition) (nested $nested))
-    (operations @{operations.list_free()})
+    (operations @(operations.list_free()))
     (loop-depth $loop_depth)
   );
 }
@@ -215,8 +215,8 @@ static List _loop_candidate_rank(List candidate) {
       int helpers = helper_pooled.int() + helper_scoped.int();
       int direct = direct_pooled.int() + scoped.int();
       return %(
-        ${-(scoped.int() + helper_scoped.int())} ${-discarded.int()}
-        ${-helpers} ${-(direct + helpers)} ${-depth.int()}
+        $(-(scoped.int() + helper_scoped.int())) $(-discarded.int())
+        $(-helpers) $(-(direct + helpers)) $(-depth.int())
         $unit $function $source $line $column
       );
     }

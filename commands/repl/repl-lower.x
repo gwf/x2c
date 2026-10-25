@@ -134,7 +134,7 @@ static Symbol _lower_pointer_tag(Lowering &l, List layout) {
 static Var _lower_new_storage(Lowering &l, List layout) {
   (Var size) = layout.cddr();
   l.automatic = 1;
-  return %(C.at (C.bytes $size) 0 (quote ${_lower_pointer_tag(l, layout)}));
+  return %(C.at (C.bytes $size) 0 (quote $(_lower_pointer_tag(l, layout))));
 }
 
 /* A fresh object of `layout` holding `value`, in the running function's
@@ -163,7 +163,7 @@ static Var _lower_name(Lowering &l, String stem) {
   if (stem != "loop" && stem != "after" && stem != "static" &&
       stem != "body" && stem != "undo")
     return Atom.intern(%"$stem-$count");
-  return Atom.intern(%"$stem$count-${l.own}");
+  return Atom.intern(%"$stem$count-$(l.own)");
 }
 
 /* --- the single scan --------------------------------------------------- */
@@ -330,7 +330,7 @@ int repl_native_binding(Compiler c, Lisp lisp, String name, Var &out) {
   if (!c.native_meta.try_get(name, signature))
     return c.meta_binding(name, out);
   int arity = Compiler.iterator_arity(signature);
-  String target = arity >= 0 ? %"${name}_into" : name;
+  String target = arity >= 0 ? %"$(name)_into" : name;
   try out = lisp.eval(%(bind $target ()));
   catch %(no-symbol *): if (!c.meta_binding(name, out)) return 0;
   if (arity >= 0) out = lisp.eval(%(C.iterator.call (quote $out) $arity));
@@ -501,7 +501,7 @@ static Var _lower_address(Lowering &l, int id) {
 static Var _lower_typed_address(Lowering &l, List type, int id) {
   Symbol tag = l.compiler.sym.var_tag_for_type(type, NULL);
   if (!(id in l.locals) && !(id in l.env))
-    return %(C.address (C.gaddress $id) (quote ${tag ? tag : <p48>}));
+    return %(C.address (C.gaddress $id) (quote $(tag ? tag : <p48>)));
   List layout = _lower_storage_layout(l, id);
   if (id in l.arrays) return _lower_value(l, id);
   Var slot = _lower_address(l, id);
@@ -766,14 +766,14 @@ static Var _lower_native_call(
     p = p.cdr();
     prepare.push(
       parameter.is_reference()
-      ? %(C.func.reference $argv $index $value (quote ${parameter.cdr()}))
+      ? %(C.func.reference $argv $index $value (quote $(parameter.cdr())))
       : %(C.func.value $argv $index $value));
     index++;
   }
   l.automatic = 1;
   Var callable = Atom.intern(name), native = <func>;
   return %(if (eq? (type $callable) (quote $native))
-             ((lambda ($argv) (begin @{prepare.list()}
+             ((lambda ($argv) (begin @(prepare.list())
                                      (C.func.apply $callable $index $argv)))
               (C.func.arguments $index))
              ($callable @values));
@@ -838,7 +838,7 @@ static Var _lower_application(Lowering &l, Var content) {
   Var apply = %(C.func.apply $fn $count $argv);
   if (prepare.len()) {
     Var ready = _lower_name(l, "ready");
-    apply = %((lambda ($ready) $apply) (begin @{prepare.list()}));
+    apply = %((lambda ($ready) $apply) (begin @(prepare.list())));
   }
   return %((lambda ($fn)
     ((lambda ($argv) $apply) (C.func.arguments $count))) $callee);
@@ -973,7 +973,7 @@ static Var _lower_pointer_move(
   (Var size) = layout.cddr();
   Var offset = %(_binary $right (quote <*>) $size);
   if (operator == <->) offset = %(_binary 0 (quote <->) $offset);
-  return %(C.at $left $offset (quote ${_lower_pointer_tag(l, layout)}));
+  return %(C.at $left $offset (quote $(_lower_pointer_tag(l, layout))));
 }
 
 static Var _lower_operands(
@@ -1100,13 +1100,13 @@ static Var _lower_lambda(Lowering &l, List params, List held, Var body) {
   }
   if (_lower_failed(l, lowered)) return void;
   if (boxes.len())
-    lowered = %((lambda ${boxes.list()} $lowered) @{values.list()});
-  Type signature = %((func ${types.list()}) "Var");
-  Var callable = %(lambda ${names.list()} $lowered);
+    lowered = %((lambda $(boxes.list()) $lowered) @(values.list()));
+  Type signature = %((func $(types.list())) "Var");
+  Var callable = %(lambda $(names.list()) $lowered);
   if (l.automatic) callable = %(C.source-function $callable);
   Var function = callable;
   if (captures.len())
-    function = %((lambda ${captures.list()} $function) @{captured.list()});
+    function = %((lambda $(captures.list()) $function) @(captured.list()));
   l.lambda_signatures[function] = signature;
   return function;
 }
@@ -1183,7 +1183,7 @@ static Var _lower_map(Lowering &l, List entries) {
     flat.free();
     return $decline.map.entry(l);
   }
-  return %(Map_of ${cons(<list>, flat.list_free())});
+  return %(Map_of $(cons(<list>, flat.list_free())));
 }
 
 /* Library brackets use their container operation. C indexes use the native
@@ -1215,7 +1215,7 @@ static Var _lower_getindex(
   List layout = is_c_array ? _lower_pointee_layout(l, receiver) : NULL;
   match (layout) case %(? ? ?size *):
     return %(C.index $target $index $size (quote $layout));
-  return %(${Atom.intern(container + "_getindex")} $target $index);
+  return %($(Atom.intern(container + "_getindex")) $target $index);
 }
 
 /* `sizeof` reads the size from the native layout of its operand's type; the
@@ -1244,7 +1244,7 @@ static Var _lower_expr(Lowering &l, Var form) {
     /* A tag the compiler supplies to a `Var` conversion, such as the one a
        typed `foreach` output reads through, is the Symbol's code. */
     case %(expr ("Symbol") ?(String code)):
-      return %(quote ${(Symbol) strtoul(code, NULL, 10)});
+      return %(quote $((Symbol) strtoul(code, NULL, 10)));
     case %(expr ?type ?content):
       return _lower_content(l, type, content);
     case %(!or (cons ? ?) (append ? ?) (nil) (cache ?)):
@@ -1285,7 +1285,7 @@ static Var _lower_content(Lowering &l, List type, Var content) {
           case %(first):        return 0;
           case %(value ?value): return _lower_expr(l, value);
           case %(next ?previous):
-            return %(+ ${_lower_expr(l, %(expr $type (ident $previous)))} 1);
+            return %(+ $(_lower_expr(l, %(expr $type (ident $previous)))) 1);
         }
         return $decline.enum.value(l);
       }
@@ -1389,9 +1389,9 @@ static Var _lower_content(Lowering &l, List type, Var content) {
     /* A literal template builds its List with `cons`, and folding replaced
        only its constant parts, so each part is lowered as an expression. */
     case %(cons ?head ?tail):
-      return %(cons ${_lower_expr(l, head)} ${_lower_expr(l, tail)});
+      return %(cons $(_lower_expr(l, head)) $(_lower_expr(l, tail)));
     case %(append ?head ?tail):
-      return %(append ${_lower_expr(l, head)} ${_lower_expr(l, tail)});
+      return %(append $(_lower_expr(l, head)) $(_lower_expr(l, tail)));
     case %(nil):     return %(quote ());
     case %(cache ?): return _lower_quoted(l, content);
   }
@@ -1429,7 +1429,7 @@ static int _lower_depth(Lowering &l) => l.pending ? l.pending.depth : 0;
 /* A continuation that must run with the wrappers its point of creation
    had, however many cleanups hold the point that reaches it. */
 static List _lower_here(Lowering &l, List k) =>
-  %(at-depth ${_lower_depth(l)} $k);
+  %(at-depth $(_lower_depth(l)) $k);
 
 /* Leaves the innermost cleanup's body for a continuation outside it. The
    body answers the exit's tag, and the exit's code runs after the cleanup,
@@ -1571,7 +1571,7 @@ static Var _lower_arms(
   }
   Var taken;
   with (l.match_values = captures) {
-    taken = _lower_block_apart(l, %(${arm.cadr()} @rest), k);
+    taken = _lower_block_apart(l, %($(arm.cadr()) @rest), k);
   }
   if (_lower_failed(l, taken)) return void;
   Map saved = _lower_env_copy(l, l.env);
@@ -1703,10 +1703,10 @@ static Var _lower_loop(
   List breaking = NULL;
   if (_lower_breaks(body) || _lower_breaks(step)) {
     exit = _lower_name(l, "after");
-    breaking = %(again $exit ${ids.list()});
+    breaking = %(again $exit $(ids.list()));
   }
-  List turn = %(again $name ${ids.list()});
-  if (step) turn = %(then ${step} ${turn} ${breaking});
+  List turn = %(again $name $(ids.list()));
+  if (step) turn = %(then $(step) $(turn) $(breaking));
   List saved_break = l.on_break, saved_continue = l.on_continue;
   l.on_break = breaking ? _lower_here(l, breaking) : NULL;
   l.on_continue = _lower_here(l, turn);
@@ -1741,7 +1741,7 @@ static Var _lower_loop(
     List layout = _lower_storage_layout(l, id);
     storage.push(layout ? _lower_new_storage(l, layout) : %(C.cell 0));
   }
-  return %((lambda ${names.list()} $call) @{storage.list()});
+  return %((lambda $(names.list()) $call) @(storage.list()));
 }
 
 /* --- switch ------------------------------------------------------------- */
@@ -1769,9 +1769,9 @@ static int _lower_terminated(List body) {
    both arrays over. A `default` selects on no value, so it carries none
    even where a `case` label shares the arm with it. */
 static Var _lower_arm(Array tests, Array body, int fallback) {
-  if (!fallback) return %(${tests.list_free()} ${body.list_free()});
+  if (!fallback) return %($(tests.list_free()) $(body.list_free()));
   tests.free();
-  return %(() ${body.list_free()});
+  return %(() $(body.list_free()));
 }
 
 /* A `switch` is a `cond` over the subject, which the labels compare against
@@ -1820,7 +1820,7 @@ static Var _lower_switch(
     tests.free();
     body.free();
   }
-  List exit = %(then ${rest} ${k} ${l.on_break});
+  List exit = %(then $(rest) $(k) $(l.on_break));
   List saved_break = l.on_break;
   l.on_break = _lower_here(l, exit);
   Array clauses = auto [];
@@ -1935,7 +1935,7 @@ static Var _lower_record_braced(
     if (_lower_failed(l, value)) return void;
     stores.push(%(C.poke $slot $offset (quote $layout) $value));
   }
-  return %((lambda ($slot) (begin @{stores.list()} $slot)) $fresh);
+  return %((lambda ($slot) (begin @(stores.list()) $slot)) $fresh);
 }
 
 /* A braced initializer carries no type of its own, so the declared type
@@ -1970,7 +1970,7 @@ static Var _lower_braced(Lowering &l, List type, int id, List items) {
     l.automatic = 1;
     Symbol tag = _lower_pointer_tag(l, layout);
     return %(C.address
-      (C.array (quote $layout) ${cons(<list>, values.list_free())})
+      (C.array (quote $layout) $(cons(<list>, values.list_free())))
       (quote $tag));
   }
   if (type.equal(%("Map")) || l.compiler.sym.is_var_type(type)) {
@@ -2008,7 +2008,7 @@ static Var _lower_coerce(Lowering &l, List want, Var node, Var value) {
       if (target_record || source_record) {
         if (!target_record || !source_record ||
             !target_record.equal(source_record)) {
-          String types = %"${want.repr()} from ${from.repr()}";
+          String types = %"$(want.repr()) from $(from.repr())";
           return $decline.struct.types(l, types);
         }
         return value;
@@ -2059,7 +2059,7 @@ static Var _lower_coerce(Lowering &l, List want, Var node, Var value) {
         if (l.uncallable)
           return $decline.conversion.missing(
             l, _lower_type_text(from), _lower_type_text(want));
-        return %(${Atom.intern(name)} $value);
+        return %($(Atom.intern(name)) $value);
       }
     }
   return value;
@@ -2227,7 +2227,7 @@ static Var _lower_global_destructure(
       stores.push(%(C.ginit $id (quote $layout) $element));
       index++;
     }
-  Var store = %((lambda ($held) (begin @{stores.list()})) $source);
+  Var store = %((lambda ($held) (begin @(stores.list()))) $source);
   return _lower_effect(l, store, rest, k);
 }
 
@@ -2252,7 +2252,7 @@ static Var _lower_setindex_value(
   if (_lower_failed(l, target) || _lower_failed(l, index) ||
       _lower_failed(l, value))
     return void;
-  Var store = %(${Atom.intern(container + "_setindex")} $target $index $value);
+  Var store = %($(Atom.intern(container + "_setindex")) $target $index $value);
   List layout = is_c_array ? _lower_pointee_layout(l, receiver) : NULL;
   match (layout) case %(? ? ?size *):
     store = %(C.index.set $target $index $size (quote $layout) $value);
@@ -2310,9 +2310,9 @@ static Var _lower_element_update(
   if (_lower_failed(l, object) || _lower_failed(l, index)) return void;
   Var held = _lower_name(l, "held"), at = _lower_name(l, "at");
   Var value = _lower_name(l, "new");
-  Var old = %(${Atom.intern(container + "_getindex")} $held $at);
+  Var old = %($(Atom.intern(container + "_getindex")) $held $at);
   Var combined = _lower_update_value(l, target, operator, old, right);
-  Var store = %(${Atom.intern(container + "_setindex")} $held $at $value);
+  Var store = %($(Atom.intern(container + "_setindex")) $held $at $value);
   return %((lambda ($held $at) ((lambda ($value) (begin $store $value))
     $combined)) $object $index);
 }
@@ -2372,7 +2372,7 @@ static Var _lower_update(
     Var loaded = _lower_load(l, want, slot);
     Var combined = _lower_update_value(l, target, operator, loaded, right);
     return _lower_effect(
-      l, %((lambda ($slot) ${_lower_poke(l, want, slot, combined)}) $place),
+      l, %((lambda ($slot) $(_lower_poke(l, want, slot, combined))) $place),
       rest, k);
   }
   if (id < 0) return $decline.update.computed(l);
@@ -2542,7 +2542,7 @@ static Var _lower_defer(Lowering &l, Var cleanup, List rest, List k) {
   }
   with (l.pending = &frame) {
     l.env = inside;
-    body = _lower_block(l, rest, %(at-depth ${frame.depth - 1} $k));
+    body = _lower_block(l, rest, %(at-depth $(frame.depth - 1) $k));
   }
   l.env = outer;
   if (_lower_failed(l, undo) || _lower_failed(l, body)) {
@@ -2562,9 +2562,9 @@ static Var _lower_defer(Lowering &l, Var cleanup, List rest, List k) {
     else clauses.push(%((eq? $packet $i) $code));
   }
   if (frame.returns)
-    clauses.push(%(true ${frame.outer ? packet : %(C.load $packet)}));
-  return %((lambda ($packet) (cond @{clauses.list()}))
-           (C.unwind $body_name $undo_name (list @{entry.list_free()})));
+    clauses.push(%(true $(frame.outer ? packet : %(C.load $packet))));
+  return %((lambda ($packet) (cond @(clauses.list())))
+           (C.unwind $body_name $undo_name (list @(entry.list_free()))));
 }
 
 static Var _lower_stmnt(Lowering &l, Var form, List rest, List k) {
@@ -2574,7 +2574,7 @@ static Var _lower_stmnt(Lowering &l, Var form, List rest, List k) {
     case %(empty):         return _lower_block(l, rest, k);
     /* A block keeps its boundary, so a `defer` inside it ends there. */
     case %(block *items):
-      return _lower_block(l, items, %(then $rest $k ${l.on_break}));
+      return _lower_block(l, items, %(then $rest $k $(l.on_break)));
     case %(seq *items):    return _lower_block(l, %(@items @rest), k);
     case %(defer ?cleanup): return _lower_defer(l, cleanup, rest, k);
     case %(return ?want ?value): {
@@ -2612,7 +2612,7 @@ static Var _lower_stmnt(Lowering &l, Var form, List rest, List k) {
       Array expanded = auto [];
       foreach (List declarator, declarators)
         expanded.push(%(declare $type (bindings $declarator)));
-      return _lower_block(l, %(@{expanded.list()} @rest), k);
+      return _lower_block(l, %(@(expanded.list()) @rest), k);
     }
     case %(stmnt ?e):      return _lower_expression_stmnt(l, e, rest, k);
     case %(if ?test ?then):
@@ -2647,7 +2647,7 @@ static Var _lower_stmnt(Lowering &l, Var form, List rest, List k) {
     case %(for ?init ?test ?step ?body): {
       if (init)
         return _lower_block(
-          l, %(${_lower_for_init(init)} (for () $test $step $body) @rest), k);
+          l, %($(_lower_for_init(init)) (for () $test $step $body) @rest), k);
       List guard = test ? test : %(expr (int) (literal (int) "1"));
       return _lower_loop(
         l, guard, %($body), step ? %((stmnt $step)) : %(), rest, k);
@@ -2729,9 +2729,9 @@ List ReplLower.lower(ReplLower self, List fn) {
       Var body = _lower_block(l, items, %(end));
       if (_lower_failed(l, body)) return NULL;
       if (boxes.len())
-        body = %((lambda ${boxes.list()} $body) @{boxed_values.list()});
-      Var definition = %(def ${Atom.intern(name)}
-                             (lambda ${slots.list()} $body));
+        body = %((lambda $(boxes.list()) $body) @(boxed_values.list()));
+      Var definition = %(def $(Atom.intern(name))
+                             (lambda $(slots.list()) $body));
       l.definitions.push(
         l.automatic ? %(C.source-function $definition) : definition);
       return l.definitions;
@@ -2757,7 +2757,7 @@ static List _repl_scalar_layout(
   Type tagged) {
   if (tag != scalar.tag && (!tag || tag != tagged.fixed_var_tag()))
     return NULL;
-  return %(scalar $declared ${scalar.size} ${scalar.alignment} $exact $tag);
+  return %(scalar $declared $(scalar.size) $(scalar.alignment) $exact $tag);
 }
 
 /* C's bool is one byte holding 0 or 1, and an enum whose enumerators fit in
@@ -2766,7 +2766,7 @@ static List _repl_scalar_layout(
    that record has no layout. */
 static List _repl_int_layout(Type declared, Type exact) {
   NativeScalarAccess scalar = native_scalar_access(exact);
-  return %(scalar $declared ${scalar.size} ${scalar.alignment} $exact i32);
+  return %(scalar $declared $(scalar.size) $(scalar.alignment) $exact i32);
 }
 
 /* POSIX gives function and object pointers one representation, whose
@@ -2797,7 +2797,7 @@ static List _repl_record_layout(Sym sym, Type record, Map cache) {
   }
   size_t record_size = _repl_align_up(offset, record_alignment);
   List result = %(
-    record $record $record_size $record_alignment @{fields.list()});
+    record $record $record_size $record_alignment @(fields.list()));
   cache[record] = result;
   return result;
 }

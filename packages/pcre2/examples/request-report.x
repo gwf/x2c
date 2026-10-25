@@ -37,13 +37,13 @@ int main(void) {
     methods[method] = old + 1;
     if (api_path.match(path)) api_requests++;
 
-    printf("%s", %"$method ${parsed[2]} -> ${parsed[<status>]}\n");
+    printf("%s", %"$method $(parsed[2]) -> $(parsed[<status>])\n");
     foreach(RegexpCapture capture, parsed) {
       if (capture.matched() && capture.name())
-        printf("%s", %"  ${capture.name()}=${capture.text()}\n");
+        printf("%s", %"  $(capture.name())=$(capture.text())\n");
     }
     foreach(RegexpMatch field, parameter.find_all(path))
-      printf("%s", %"  query ${field[<name>]}=${field[2]}\n");
+      printf("%s", %"  query $(field[<name>])=$(field[2])\n");
 
     String safe = token.replace_all(line, "token=[redacted]");
     printf("%s", %"  safe $safe\n");

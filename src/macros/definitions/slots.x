@@ -124,7 +124,7 @@ module List _parse_hole(Compiler c, Symbol role) {
       c, token, spelling, _kind_spelling(kind), _kind_spelling(inferred));
   }
   String projection = _hole_projection(c, hole, role, sequence);
-  return %(macro-bind ${_hole_key(hole, projection)});
+  return %(macro-bind $(_hole_key(hole, projection)));
 }
 
 static void _cardinality_error(
@@ -186,5 +186,5 @@ List Compiler.try_parse_macro_member(Compiler c) {
   if (!slot || !hole || hole.assoc(<kind>) != <name> ||
       hole.assoc(<sequence>).int())
     return slot;
-  return %(macro-bind ${_hole_key(hole, "member")});
+  return %(macro-bind $(_hole_key(hole, "member")));
 }

@@ -20,7 +20,7 @@ module void _finish(Definition &d) {
   d.pattern = _invocation_pattern(d);
   Map uses = _binder_uses(d.template);
   if (!(void *) uses) return;
-  d.rebuild = %(${_rebuild_template(d)} ${_rebuild_keys(d, uses)});
+  d.rebuild = %($(_rebuild_template(d)) $(_rebuild_keys(d, uses)));
   d.leaf = !d.nested && _uses_holes_once(d, uses);
 }
 
@@ -103,7 +103,7 @@ static void _check_kinds(Definition &d) {
 static List _fresh_rows(Definition &d, Array locals) {
   Array fresh = [];
   foreach (Atom binder in d.using.list_free())
-    fresh.push(%($binder ${binder.str()[1:]} 1));
+    fresh.push(%($binder $(binder.str()[1:]) 1));
   foreach (List identity in locals) {
     Var spelling = d.locals[identity];
     Atom binder = _local_binder(
@@ -160,7 +160,7 @@ static Var _rebuild_syntax(Var syntax, Map expressions) {
    splice, then a Function value's return type and declarator. `?` marks a
    projection the template does not use. */
 static List _rebuild_keys(Definition &d, Map uses) {
-  List holes = d.target ? d.parameters.append(%(${d.target})) : d.parameters;
+  List holes = d.target ? d.parameters.append(%($(d.target))) : d.parameters;
   Array keys = [];
   foreach (List hole in holes) {
     Array used = [];
@@ -208,22 +208,22 @@ module List _definition_node(Definition &d) {
   Compiler c = d.c;
   List definition = %(
     macrodef
-    (name ${d.name})
-    (kind ${d.kind})
-    (target ${_target_kind(d)})
-    (targetp ${d.target})
-    (parameters ${d.parameters})
-    (fresh ${d.fresh})
-    (captures ${d.captures})
-    (pattern ${d.pattern})
-    (template ${d.template})
-    (rebuild ${d.rebuild})
-    (leaf ${d.leaf})
-    (origin ${d.origin})
-    (file ${d.file})
-    (builtin ${c.builtin_defs})
-    (local ${d.local})
-    (static ${d.storage})
+    (name $(d.name))
+    (kind $(d.kind))
+    (target $(_target_kind(d)))
+    (targetp $(d.target))
+    (parameters $(d.parameters))
+    (fresh $(d.fresh))
+    (captures $(d.captures))
+    (pattern $(d.pattern))
+    (template $(d.template))
+    (rebuild $(d.rebuild))
+    (leaf $(d.leaf))
+    (origin $(d.origin))
+    (file $(d.file))
+    (builtin $(c.builtin_defs))
+    (local $(d.local))
+    (static $(d.storage))
   );
   return definition;
 }
@@ -243,7 +243,7 @@ static Atom _local_binder(Var identity, int tag) {
   int number = 0;
   (void) Ast.try_binding(identity, number, NULL);
   int ordinal = INT_MAX - number;
-  return Atom.intern(%"?__macro_${tag ? "tag" : "local"}_${ordinal}");
+  return Atom.intern(%"?__macro_$(tag ? "tag" : "local")_$(ordinal)");
 }
 
 /* Introduces one declaration in the current lexical scope. */
@@ -338,9 +338,9 @@ static List _invocation_pattern(Definition &d) {
     arguments.push(_capture_pattern(parameter, binders));
   List invocation = d.kind == <decorator>
     ? %(
-      target (args @{arguments.list_free()})
-      ${_capture_pattern(d.target, binders)}
-    ) : %(args @{arguments.list_free()});
+      target (args @(arguments.list_free()))
+      $(_capture_pattern(d.target, binders))
+    ) : %(args @(arguments.list_free()));
   List captures = _fresh_patterns(d.fresh, binders);
   return captures ? invocation.append(%((fresh @captures))) : invocation;
 }
@@ -382,8 +382,8 @@ static List _capture_pattern(List hole, Map binders) {
     value = %(
       !and $value
       (function
-        ${_used(binders, hole, "return", <?>)}
-        ${_used(binders, hole, "declarator", <?>)}
+        $(_used(binders, hole, "return", <?>))
+        $(_used(binders, hole, "declarator", <?>))
         ?)
     );
   List trailing = NULL;

@@ -75,14 +75,14 @@ static List _binder_rows(Macro t, List names, int case_pattern) {
     if (!sequence && selected is <list> && selected.list().car() == <expr>)
       projected = %(!and $selected);
     if (case_pattern && kind == <name>)
-      projected = %(!and $given ${_name_identity(hole)});
+      projected = %(!and $given $(_name_identity(hole)));
     Var expression = !sequence && kind == <name>
                    ? %(expr ? (ident $projected)).var() : projected;
-    rows = cons(%(${_key(hole, "expression")} $expression), rows);
-    rows = cons(%(${_key(hole, "value")} $projected), rows);
-    rows = cons(%(${_key(hole, "source")} $projected), rows);
-    rows = cons(%(${_key(hole, "member")} $selected), rows);
-    rows = cons(%(${_key(hole, "splice")} ($selected)), rows);
+    rows = cons(%($(_key(hole, "expression")) $expression), rows);
+    rows = cons(%($(_key(hole, "value")) $projected), rows);
+    rows = cons(%($(_key(hole, "source")) $projected), rows);
+    rows = cons(%($(_key(hole, "member")) $selected), rows);
+    rows = cons(%($(_key(hole, "splice")) ($selected)), rows);
   }
   return rows;
 }
@@ -111,7 +111,7 @@ Atom Macro.binder(Var binder, String projection, int sequence) {
   else if (projection == "return" || projection == "declarator" ||
            projection == "member") sequence = 0;
   String prefix = sequence ? "*" : "?", name = binder.str();
-  return Atom.intern(%"${prefix}__macro_${projection}_${name[1:]}");
+  return Atom.intern(%"$(prefix)__macro_$(projection)_$(name[1:])");
 }
 
 static Atom _key(List hole, String projection) =>
@@ -120,7 +120,7 @@ static Atom _key(List hole, String projection) =>
 /* The second slot of a Name's declaration and reference projection keeps
    exact binding identity when a member label reaches the first slot first. */
 module Atom _name_identity(List hole) =>
-  Atom.intern(%"?__macro_identity_${hole.assoc(<binder>).str()[1:]}");
+  Atom.intern(%"?__macro_identity_$(hole.assoc(<binder>).str()[1:])");
 
 static List _instantiate(Macro t, List values);
 
@@ -169,12 +169,12 @@ static List _value_rows(Macro t, List values) {
                        : _expr_value(value);
     Var expression = !sequence && kind == <name>
                    ? %(expr () (ident $value)).var() : value;
-    rows = cons(%(${_key(hole, "expression")} $expression), rows);
-    rows = cons(%(${_key(hole, "value")} $value), rows);
-    rows = cons(%(${_key(hole, "source")} $value), rows);
+    rows = cons(%($(_key(hole, "expression")) $expression), rows);
+    rows = cons(%($(_key(hole, "value")) $value), rows);
+    rows = cons(%($(_key(hole, "source")) $value), rows);
     if (kind == <name>)
-      rows = cons(%(${_key(hole, "member")} $value), rows);
-    rows = cons(%(${_key(hole, "splice")} $value), rows);
+      rows = cons(%($(_key(hole, "member")) $value), rows);
+    rows = cons(%($(_key(hole, "splice")) $value), rows);
     values = sequence ? NULL : values.cdr();
   }
   return rows;
@@ -199,11 +199,11 @@ static Var _pattern_view(Var value) {
     case %(binding-name ?(String name)): return %(binding ? $name);
     case %(binding-global ?(String name)): return _free_reference(name);
     case %(op ?operator *operands):
-      return %(op (!quote $operator) @{_pattern_views(operands)});
+      return %(op (!quote $operator) @(_pattern_views(operands)));
     case %(seq ?one): return _pattern_view(one);
     case %(macro-slot ?(int splice) ?form):
       return _slot_view(splice, form);
-    case %(return ? ?body): return %(return ? ${_pattern_view(body)});
+    case %(return ? ?body): return %(return ? $(_pattern_view(body)));
   }
   return _pattern_views(node);
 }
@@ -217,7 +217,7 @@ static Var _expr_view(Var type, Var body) {
     return body;
   if (shell && body is <list> && body.list().car() == <expr>)
     return _pattern_view(body);
-  return %(expr ? ${_pattern_view(body)});
+  return %(expr ? $(_pattern_view(body)));
 }
 
 static List _pattern_views(List items) {

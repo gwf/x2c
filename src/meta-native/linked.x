@@ -105,7 +105,7 @@ List Compiler.linked_meta_provider_source(String provider) {
 module int _linked_copy(Compiler c, String name, Map linked) {
   if (name in linked_hashes) return _linked_texts_match(c, name, linked, {});
   return c.filename &&
-    Path.absolute(c.filename) == %"${x2c_get_root()}/lib/meta.x";
+    Path.absolute(c.filename) == %"$(x2c_get_root())/lib/meta.x";
 }
 
 /* Whether the unit's definition `name` and every definition of the unit it
@@ -116,7 +116,7 @@ static int _linked_texts_match(
   Compiler c, String name, Map linked, Map reached) {
   Var hash, own, names = void;
   String file = c.canonical_path(c.filename);
-  String key = %"${Compiler.portable_path(file)}:$name";
+  String key = %"$(Compiler.portable_path(file)):$name";
   if (!c.meta_hashes.try_get(name, own)) {
     Var advertisement;
     if (c.project_meta.try_get(name, advertisement)) {

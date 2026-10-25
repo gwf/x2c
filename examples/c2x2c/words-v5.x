@@ -25,7 +25,7 @@ static void print_top_ten(MapSubInt counts) {
   Array ranked = [];
   foreach ((Substr word, int count) in counts) {
     if (ranked.len() == 10 && count < ranked[0][0]) continue;
-    ranked.heap_push(%($count ${word.str()}));
+    ranked.heap_push(%($count $(word.str())));
     if (ranked.len() > 10) ranked.heap_pop();
   }
   foreach ((int count, String word) in ranked.sort())

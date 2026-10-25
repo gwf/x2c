@@ -257,7 +257,7 @@ Type type = result.cadr();
 Example:
 
 ```x2c
-return %(!set $binder ($op @{args.cdr()}));
+return %(!set $binder ($op @(args.cdr())));
 ```
 
 ## ST-13 - Switches and compact tables
@@ -301,7 +301,7 @@ Map index = Map.new();
 Example:
 
 ```x2c
-String path = %"${root.rstrip("/")}/$name";
+String path = %"$(root.rstrip("/"))/$name";
 ```
 
 Example:
@@ -485,7 +485,7 @@ List Compiler.parse_conditional(Compiler c) {
   List ontrue = c.parse_expression();
   c.expect(<:>);
   return c.resolve_expression(
-    %(expr () (op ? $condition $ontrue ${c.parse_conditional()})), origin);
+    %(expr () (op ? $condition $ontrue $(c.parse_conditional()))), origin);
 }
 ```
 

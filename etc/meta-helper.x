@@ -103,7 +103,7 @@ void *x2c_meta_native_symbol(String path, String name) {
     if (!handle)
       _fail(
         "cannot load native module in project meta helper",
-        %("module: $path" "reason: ${String.new(dlerror())}"));
+        %("module: $path" "reason: $(String.new(dlerror()))"));
     helper_modules[path] = handle;
   }
   void *target = dlsym(handle, name);
@@ -117,7 +117,7 @@ void *x2c_meta_native_symbol(String path, String name) {
 static void _check_notes(String operation, List notes) {
   foreach (Var note, notes)
     if (note is not <string>)
-      _fail(%"$operation notes must be Strings", %("value: ${note.repr()}"));
+      _fail(%"$operation notes must be Strings", %("value: $(note.repr())"));
 }
 
 /* --- the operations a body may call ------------------------------------- */
@@ -126,7 +126,7 @@ List x2c_ident(String spelling) {
   if (!spelling.is_identifier())
     _fail(
       "x2c_ident requires an identifier spelling",
-      %("value: ${spelling.repr()}"));
+      %("value: $(spelling.repr())"));
   return %("x2c.ident" $spelling);
 }
 
@@ -162,7 +162,7 @@ String Code.binding_spelling(Var syntax) {
   }
   _fail(
     "Code.binding_spelling requires an identifier or binding",
-    %("value: ${syntax.repr()}"));
+    %("value: $(syntax.repr())"));
 }
 
 String Code.name(Code function) {
@@ -207,16 +207,16 @@ String x2c_embed_text(Var path) {
   if (!spelling)
     _fail(
       "x2c_embed_text requires a captured String literal or an "
-      "absolute path", %("value: ${path.repr()}"));
+      "absolute path", %("value: $(path.repr())"));
   if (!spelling.len())
     _fail("x2c_embed_text requires a non-empty path", NULL);
   if (file && !spelling.startswith("/"))
-    spelling = %"${Path.dirname(file)}/$spelling";
+    spelling = %"$(Path.dirname(file))/$spelling";
   String target = Path.absolute(spelling), text = NULL;
   try text = Path.read_text(target);
   catch %((!or not-found io-fail) *):
     _fail("cannot read embedded text", %("path: $target"));
-  helper_notices.push(%(dependency $target ${"%08x".printf(text.hash())}));
+  helper_notices.push(%(dependency $target $("%08x".printf(text.hash()))));
   return text;
 }
 
@@ -259,7 +259,7 @@ static Var _ask(String operation, List arguments) {
   if (!_reply(%(query $operation $arguments)))
     _fail(
       %"$operation requires arguments the compiler can read",
-      %("value: ${arguments.repr()}"));
+      %("value: $(arguments.repr())"));
   for (;;) {
     Var request = _request(3, helper_input);
     match (request) case %(answer ?answer): return answer;
@@ -346,7 +346,7 @@ auto static void _apply(
     failure = Error.snapshot(%(error $message $notes (at $node $category)));
   /* A catch binding is borrowed by the arm; the reply is written after. */
   catch %(?code *detail):
-    failure = %(failure ${Error.snapshot(cons(code, detail))});
+    failure = %(failure $(Error.snapshot(cons(code, detail))));
   fflush(stdout);
   fflush(stderr);
   foreach (List notice, helper_notices) _reply(notice);
@@ -412,7 +412,7 @@ static List _initialize(Map table) {
   auto (&helper_unit_scope) {
     try ((Func) reset.pointer()).apply(0, NULL);
     catch %(?code *detail):
-      return %(failure ${Error.snapshot(cons(code, detail))});
+      return %(failure $(Error.snapshot(cons(code, detail))));
   }
   return NULL;
 }

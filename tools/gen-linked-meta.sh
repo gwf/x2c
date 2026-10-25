@@ -88,7 +88,7 @@ function refers(text, name, value) {
 function push(mode, depth) { modes[++sp] = mode; depths[sp] = depth }
 # The text a definition evaluates: comments, strings, and the data in its
 # `%(...)` lists and `$!` quotations become spaces, except the code of a
-# `${...}` or `@{...}` hole and the name a `$name` or `@name` hole inserts.
+# `$(...)` or `@(...)` hole and the name a `$name` or `@name` hole inserts.
 # A quotation keeps a `(` right after a hole, where a slot calls a
 # definition.
 function code_of(text,    out, i, j, n, ch, two, mode, hole) {
@@ -96,9 +96,9 @@ function code_of(text,    out, i, j, n, ch, two, mode, hole) {
   for (i = 1; i <= n; i++) {
     ch = substr(text, i, 1); two = substr(text, i, 2); mode = modes[sp]
     if (mode == "s") {
-      if (ch == "\\") i++
+      if (ch == "\\" || two == "$$") i++
       else if (ch == "\"") sp--
-      else if (two == "${") { push("c", 1); i++ }
+      else if (two == "$(" || two == "${") { push("c", 1); i++ }
       out = out " "; continue
     }
     if (two == "/*") {
@@ -115,7 +115,8 @@ function code_of(text,    out, i, j, n, ch, two, mode, hole) {
         if (substr(text, j, 1) == "\\") j++
       i = j; out = out " "; continue
     }
-    if (mode != "c" && (two == "${" || two == "@{")) {
+    if (mode != "c" && (two == "$(" || two == "@(" ||
+                        two == "${" || two == "@{")) {
       push("c", 1); i++; out = out " "; continue
     }
     if (mode != "c" && (ch == "$" || ch == "@") &&

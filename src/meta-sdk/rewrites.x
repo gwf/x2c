@@ -28,7 +28,7 @@ static Code _rewrite_registration(
   Array rows = [];
   foreach (Var kind in kinds)
     rows.push(%(rewrite $point $kind $name $shape $holes));
-  return %(${Code.bound(function, rows.list_free())});
+  return %($(Code.bound(function, rows.list_free())));
 }
 
 /* A function pattern is keyed by the return type it spells, or by `<any>`
@@ -158,7 +158,7 @@ Code Code.register_rewrite(Code function, List pattern, List holes) {
       { point = <node>; kinds = %($head); }
     case %(stmnt (expr ? (dstrasgn *))): { point = <node>; kinds = %(stmnt); }
     case %(!or (api-source ? ? (function ?type *)) (function ?type *)):
-      { point = <function>; kinds = %(${_function_rule_key(type)}); }
+      { point = <function>; kinds = %($(_function_rule_key(type))); }
   }
   if (!point) $fail.meta_sdk_rewrite_pattern();
   return _rewrite_registration(

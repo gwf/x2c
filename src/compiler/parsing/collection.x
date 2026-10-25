@@ -108,7 +108,7 @@ void Compiler.finish_collected_declaration(
   match (declaration)
     case %(declare ?type (bindings (bind ?binding ((fnmod *) *)))):
       if (type.type().is_static())
-        c.sym.mark_static(%(function ${Ast.binding_spelling(binding)}));
+        c.sym.mark_static(%(function $(Ast.binding_spelling(binding))));
   if (c.peek(0) == <"{"> || c.peek(0) == <"%{"> || _x2c_at_function_arrow(c))
     _skip_body(c, declaration, meta, native);
   else if (c.peek(0) == <;>) {

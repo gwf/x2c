@@ -74,8 +74,8 @@ static List _declared_key(Sym s, List context, List key, List ast) {
     if (own in s.statics) return own;
   }
   if (!prefix && (!c.package || ast.type().is_static())) return key;
-  if (plain) return %(${c.declared_spelling(prefix, head)});
-  if (tagged) return %($head ${c.declared_spelling(prefix, tag)});
+  if (plain) return %($(c.declared_spelling(prefix, head)));
+  if (tagged) return %($head $(c.declared_spelling(prefix, tag)));
   return key;
 }
 
@@ -101,7 +101,7 @@ static void _link_local(Sym s, List key) =>
 int Sym.is_file_static(Sym s, Var binding) {
   if (binding is not <list> || !Ast.try_binding(binding, NULL, NULL))
     return 0;
-  return %(${Ast.binding_spelling(binding)}) in s.statics;
+  return %($(Ast.binding_spelling(binding))) in s.statics;
 }
 
 static int _global_key(Sym s, List key) {
@@ -168,7 +168,7 @@ static String _package_reserved_owner(Compiler c, String spelling) {
   if (!spelling || !c.package_aliases.len()) return NULL;
   foreach (String (alias, name) in c.package_aliases) {
     if (name == c.package) continue;
-    if (spelling.startswith(%"${name}__")) return name;
+    if (spelling.startswith(%"$(name)__")) return name;
   }
   return NULL;
 }

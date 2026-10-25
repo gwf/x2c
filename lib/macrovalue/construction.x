@@ -10,7 +10,7 @@ Macro Macro_close(Macro value, List captures) =>
 /** Applies a macro value to code values. The result is a pending
    invocation; inserting it into a program expands and binds it there. */
 List Macro_apply(Macro t, List values) =>
-  %("x2c.template" $t ${_group(t, values)});
+  %("x2c.template" $t $(_group(t, values)));
 
 /* Groups positional arguments by the definition's parameters: a sequence
    parameter takes every remaining argument as one List. */
@@ -83,7 +83,7 @@ List Macro.typed(List type, Var value) {
     value = %(expr ("String") (segments
       (segexp (expr ("String") (literal ("String") $value)))));
   List expression = Macro.inserted(value, 1, 1);
-  return %(expr $type @{expression.cddr()});
+  return %(expr $type @(expression.cddr()));
 }
 
 /* An expression parameter takes code, so a number, String, or Symbol
@@ -91,9 +91,9 @@ List Macro.typed(List type, Var value) {
    lifts a compile-time value. */
 module Var _expr_value(Var value) {
   if (value is <string>)
-    return %(expr (* char) (literal (* char) ${value.repr()}));
+    return %(expr (* char) (literal (* char) $(value.repr())));
   if (value is <symbol>)
-    return %(expr ("Symbol") (literal ("Symbol") ${value.str()} $value));
+    return %(expr ("Symbol") (literal ("Symbol") $(value.str()) $value));
   Type type = Macro.number_type(value);
   return type ? Macro.number_literal(type, type, value) : value;
 }
@@ -144,7 +144,7 @@ List Macro.number_literal(List result, List type, Var value) {
    INT_MIN's magnitude does not fit an int, so its literal is cast back. */
 static List _int_literal(Type result, Var value) {
   long n = value.integer();
-  List literal = %(expr $result (literal (int) ${value.str()}));
+  List literal = %(expr $result (literal (int) $(value.str())));
   if (n == INT_MIN)
     return %(expr $result (parens (expr $result (cast (int) $literal))));
   return n < 0 ? %(expr $result (parens $literal)) : literal;

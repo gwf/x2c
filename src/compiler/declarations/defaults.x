@@ -75,7 +75,7 @@ static void _produce_defaults(Defaults &d, Map declarations) {
         _restore_declaration_bindings(d.c, rows, facts, {});
         Array produced = [];
         _produce_rows(d.c, rows, produced);
-        d.sources.push(%($declarations $key $end ${produced.list_free()}));
+        d.sources.push(%($declarations $key $end $(produced.list_free())));
       }
   }
 }
@@ -228,7 +228,7 @@ static List _forward_rows(Defaults &d, List rows, int &remaining) {
 static List _forwarded(
   Defaults &d, Type child, Type parent, String member, List fallback) {
   Compiler c = d.c;
-  String name = %"${child.car()}_$member";
+  String name = %"$(child.car())_$member";
   if (c.sym.get(%($name))) return %(seq);
   List method = c.resolve_postfix_member(parent, %($member), <.>, 1);
   if (!method) {
@@ -273,7 +273,7 @@ static void _store(Defaults &d, Map symbols) {
     (Map declarations, Var key, Var end, List rows) = source;
     declarations[key] =
       %(declaration-source $end (declaration-bundle (rows @rows))
-        ${d.c.semantic_binding_facts()});
+        $(d.c.semantic_binding_facts()));
     symbols[key] = declarations[key];
   }
 }

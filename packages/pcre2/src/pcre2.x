@@ -340,7 +340,7 @@ RegexpMatch Regexp.match_from(
   _regexp_live(regexp, "match_from");
   if (offset > (ulong) subject.len()) {
     raise %(bad-arg (library "PCRE2") (operation "match_from")
-            (offset $offset) (length ${subject.len()}));
+            (offset $offset) (length $(subject.len())));
   }
   int result = 0;
   return _regexp_match_at(
@@ -357,7 +357,7 @@ List Regexp.find_all_from(
   _regexp_live(regexp, "find_all_from");
   if (start > (ulong) subject.len()) {
     raise %(bad-arg (library "PCRE2") (operation "find_all_from")
-            (offset $start) (length ${subject.len()}));
+            (offset $start) (length $(subject.len())));
   }
 
   List found = NULL;

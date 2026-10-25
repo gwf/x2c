@@ -236,7 +236,7 @@ static String _json_path(Compiler compiler, String path) {
   if (!path.startswith("/") && !Path.exists(path))
     path = Path.join(compiler.root_dir, path);
   path = Path.absolute(path);
-  String directory = %"${Path.absolute(".")}/";
+  String directory = %"$(Path.absolute("."))/";
   return path.startswith(directory) ? path.remove_prefix(directory) : path;
 }
 
@@ -244,11 +244,11 @@ static void _write_json(
   Compiler c, Symbol code, Symbol severity, String message, List location,
   String note) {
   Buffer out = auto Buffer.new(0);
-  out.write(%"{\"code\":${Var.json(code)}");
-  out.write(%",\"message\":${Var.json(message)}");
-  out.write(%",\"severity\":${Var.json(severity)}");
+  out.write(%"{\"code\":$(Var.json(code))");
+  out.write(%",\"message\":$(Var.json(message))");
+  out.write(%",\"severity\":$(Var.json(severity))");
   _write_json_location(c, out, location);
-  out.write(%",\"notes\":${Var.json(note ? [note] : [])}}\n");
+  out.write(%",\"notes\":$(Var.json(note ? [note] : []))}\n");
   while (write(diagnostics_json, out.content.bytes, out.content.length) < 0 &&
          errno == EINTR) {}
 }
@@ -259,7 +259,7 @@ static void _write_json_location(
   match (location)
     case %((file ?file) (line ?line) (column ?column) (length ?length)
            (position ?position)): {
-      out.write(%",\"file\":${Var.json(_json_path(c, file))}");
+      out.write(%",\"file\":$(Var.json(_json_path(c, file)))");
       out.write(%",\"line\":$line,\"column\":$column");
       out.write(%",\"length\":$length,\"position\":$position");
       return;
@@ -365,8 +365,8 @@ List Compiler.token_location(Compiler compiler, Token token) {
   if (compiler.line_markers) file = compiler.token_source(token, line);
   file = compiler.display_path(file);
   return %( (file $file) (line $line)
-            (column $column) (length ${token.len})
-            (position ${token.pos})
+            (column $column) (length $(token.len))
+            (position $(token.pos))
           );
 }
 
@@ -553,7 +553,7 @@ static void _show_source_context(
     case %(? ?(int text_line) ? ? ? ?(String before) ?):
       if (line == text_line && before.len()) {
         String shown =
-          %"$before${String.new_len(line_start, line_end - line_start)}";
+          %"$before$(String.new_len(line_start, line_end - line_start))";
         line_start = shown;
         line_end = line_start + shown.len();
       }

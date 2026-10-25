@@ -105,7 +105,7 @@ static void _check_runtime_meta_calls(Compiler c, Var root) {
    directives, declarations, included providers, reached functions, and
    compile-time-only functions that the unit itself never emits. */
 module Array _units(Compiler c) {
-  String lib = %"${x2c_get_root()}/lib/";
+  String lib = %"$(x2c_get_root())/lib/";
   Array ordered = _runtime_includes(c, lib);
   _source_order(c, ordered, lib);
   Map reached = _roots(c, ordered);
@@ -120,7 +120,7 @@ module Array _units(Compiler c) {
 static Array _runtime_includes(Compiler c, String lib) {
   Array ordered = [];
   foreach (String header in %("x2c.x" "meta.x"))
-    ordered.push(%(preproc ${%"#include \"$header\""}));
+    ordered.push(%(preproc $(%"#include \"$header\"")));
   foreach ((String path, Var hash) in c.deps) {
     if (hash is <string> && String.startswith(hash, "search:")) continue;
     if (c.canonical_path(path) == c.canonical_path(c.filename)) continue;
@@ -131,7 +131,7 @@ static Array _runtime_includes(Compiler c, String lib) {
       Var index;
       if (meta_build_tables.try_get(Path.absolute(dependency), index))
         header = %"meta_group_$index.h";
-      ordered.push(%(preproc ${%"#include \"$header\""}));
+      ordered.push(%(preproc $(%"#include \"$header\"")));
     }
   }
   return ordered;
@@ -151,7 +151,7 @@ static Map _placeholders(Compiler c) {
   Map placeholders = {};
   foreach (List entry in c.meta_group)
     match (entry) case %(later ?(List placeholder)):
-      placeholders[%"${(long) (void *) placeholder}"] = 1;
+      placeholders[%"$((long) (void *) placeholder)"] = 1;
   return placeholders;
 }
 
@@ -166,7 +166,7 @@ static Var _group_include(Compiler c, Var node, String lib) {
       c.include_dirs, Path.dirname(c.filename), target, angle);
     Var index;
     if (path && meta_build_tables.try_get(Path.absolute(path), index))
-      return %(preproc ${%"#include \"meta_group_$index.h\""});
+      return %(preproc $(%"#include \"meta_group_$index.h\""));
     if (Path.is_file(%"$lib$target")) break;
     return void;
   }
@@ -185,7 +185,7 @@ static Var _uninitialized(Var node, Map placeholders) {
         match (binding) case %(op = ?bound ?): binding = bound;
         bare.push(binding);
       }
-      return %(declare $spec (bindings @{bare.list_free()}));
+      return %(declare $spec (bindings @(bare.list_free())));
     }
   return node;
 }
@@ -194,7 +194,7 @@ static Var _uninitialized(Var node, Map placeholders) {
    within it. */
 static int _holds(Var node, Map placeholders) {
   if (node is not <list>) return 0;
-  if (%"${(long) (void *) (List) node}" in placeholders) return 1;
+  if (%"$((long) (void *) (List) node)" in placeholders) return 1;
   foreach (Var child in (List) node) if (_holds(child, placeholders)) return 1;
   return 0;
 }
@@ -274,7 +274,7 @@ module int _function_identity(List fn, Var &identity, String &name) {
 int Compiler.public_native_function(
   Compiler c, List function, String name) =>
   name != "main" && !(%(function $name) in c.sym.file_statics()) &&
-  !%(declare ${function.cadr()} (bindings ${function.caddr()}))
+  !%(declare $(function.cadr()) (bindings $(function.caddr())))
      .type_from_ast().is_static();
 
 // refusing a call

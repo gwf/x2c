@@ -482,24 +482,24 @@ static void curl_lisp_bindings_return_values_lisp_consumes(void) {
   CurlLisp.install(lisp);
 
   EXPECT_INT_EQ(
-    lisp.eval(%( string-length (http-get ${fixture_url + "/ok"}) )).integer(),
+    lisp.eval(%( string-length (http-get $(fixture_url + "/ok")) )).integer(),
     5
   );
   EXPECT_STR_EQ(
-    lisp.eval(%( substring (http-get ${fixture_url + "/ok"}) 0 4 )).string(),
+    lisp.eval(%( substring (http-get $(fixture_url + "/ok")) 0 4 )).string(),
     "hell"
   );
   EXPECT_INT_EQ(
-    lisp.eval(%( + 1 (http-status ${fixture_url + "/missing"}) )).integer(),
+    lisp.eval(%( + 1 (http-status $(fixture_url + "/missing")) )).integer(),
     405
   );
   EXPECT_INT_EQ(
-    lisp.eval(%( length (http-headers ${fixture_url + "/ok"}) )).integer(), 5
+    lisp.eval(%( length (http-headers $(fixture_url + "/ok")) )).integer(), 5
   );
   EXPECT_STR_EQ(lisp.eval(%( url-escape "a b" )).string(), "a%20b");
   EXPECT_STR_EQ(
     lisp.eval(%(
-      substring (http-post ${fixture_url + "/echo"} "text/plain" "ping")
+      substring (http-post $(fixture_url + "/echo") "text/plain" "ping")
                 9 15
     )).string(),
     "\"ping\""

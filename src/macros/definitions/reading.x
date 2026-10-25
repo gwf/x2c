@@ -114,7 +114,7 @@ static void _take_target(Definition &d, List hole) {
     $fail.macros_decorator_singular(c, d.start);
   d.target = hole;
   if (hole.assoc(<kind>) != <unit>) return;
-  c.macro_holes[%(source ${hole.assoc(<binder>)})] = 1;
+  c.macro_holes[%(source $(hole.assoc(<binder>)))] = 1;
   c.macro_holes[%(target)] = hole;
 }
 
@@ -452,7 +452,7 @@ static void _using_names(Compiler c) {
     c.expect(<ident>);
     /* A name no x2c declaration supplies is a native name left to C. */
     List binding = c.sym.reference_global(%($spelling));
-    c.macro_holes[%(using ${Ast.binding_spelling(binding)})] = binding;
+    c.macro_holes[%(using $(Ast.binding_spelling(binding)))] = binding;
   } while (c.test(<,>));
 }
 

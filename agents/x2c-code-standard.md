@@ -224,8 +224,8 @@ values included: `""`, `[]`, `{}`, `[a, b]`, `{name: value}`. A bare `[]` or
 are content: AST shapes, patterns, configuration trees. Write Symbol names
 bare inside `%(...)`; type syntax uses Strings for non-keyword names, as
 in `%("String")` and `%(* "Point")`. Do not repeat `%` on nested values,
-since a nested `"text $name"` already interpolates; write `${f(x)}` for a
-computed insertion. Keep `%{ ${...} }` for a constructed entry row.
+since a nested `"text $name"` already interpolates; write `$(f(x))` for a
+computed insertion. Keep `%{ $(...) }` for a constructed entry row.
 
 **EX-3** Write a plain `"..."` wherever a String or `Var` destination
 requests it. Keep `%"..."` for interpolation, multiline text, or escape
@@ -898,8 +898,8 @@ a body produces exactly one statement.
 
 **MA-5** Build code as the code it builds. In order of preference: a named
 macro applied from a meta function when one shape repeats at several sites;
-a quotation `$!( )`, `$!{ }`, or `$!Unit{ }`; holes from locals; `${expr}`
-holes for computed parts (call helpers as `${f(x)}`, never as `$f(x)` slots
+a quotation `$!( )`, `$!{ }`, or `$!Unit{ }`; holes from locals; `$(expr)`
+holes for computed parts (call helpers as `$(f(x))`, never as `$f(x)` slots
 unless a template application is intended); `x2c_ident` locals for a name
 shared across quotations; a typed quotation `$!T{ }` when an operation reads
 the type before the code lands; a retained rebuild around bound children.
@@ -1471,7 +1471,7 @@ These results set the rules above; the evidence is in the adoption plan.
 | --- | --- |
 | one shape at several sites | named macro applied from a meta function |
 | code one function builds | `$!( )`, `$!{ }`, `$!Unit{ }` |
-| a computed part | `${expr}` hole |
+| a computed part | `$(expr)` hole |
 | a name shared by quotations | `x2c_ident` local |
 | a type needed before landing | `$!T{ }` |
 | code inspected before it is returned | `$!T{ }`, built where it is written |

@@ -29,8 +29,8 @@ List Compiler.definition_rows(Compiler c, List ast) {
       foreach (List declarator in declarators) match (declarator)
         case %(bind ?binding ?modifiers):
           rows.push(
-            %(typedef ${Ast.binding_spelling(binding)} $base $modifiers
-              ${_span(c, node)}));
+            %(typedef $(Ast.binding_spelling(binding)) $base $modifiers
+              $(_span(c, node))));
   }
   return rows.list_free();
 }
@@ -61,9 +61,9 @@ static List _function_row(
     }
   Symbol origin = declarator ? <source> : <macro>;
   if (alias) origin = <alias>;
-  return %(function $name ${_display(c, binding, name)} $signature
-           ${_parameter_names(c, modifiers)} $line $doc
-           ${type.type().is_static()} $origin $declarator $span);
+  return %(function $name $(_display(c, binding, name)) $signature
+           $(_parameter_names(c, modifiers)) $line $doc
+           $(type.type().is_static()) $origin $declarator $span);
 }
 
 /* A method displays as `Owner.member`. */
@@ -106,10 +106,10 @@ static String _parameter_name(Compiler c, List binding) {
     command-line reference in the book describes the fields.
 */
 void Compiler.dump_definitions(Compiler c, List ast) {
-  printf("%s\n", %(unit ${c.filename}).repr());
+  printf("%s\n", %(unit $(c.filename)).repr());
   Token tokens = c.tokenizer.tokens, first = tokens;
   while (first.type == <space> || first.type == <preproc>) first++;
-  if (first.type == <comment>) printf("%s\n", %(module ${first.text}).repr());
+  if (first.type == <comment>) printf("%s\n", %(module $(first.text)).repr());
   foreach (List row in c.definition_rows(ast)) match (row) {
     case %(function *): _print_function(c, tokens, row);
     case %(typedef *): _print_type(c, tokens, row);
@@ -128,9 +128,9 @@ static void _print_function(Compiler c, Token tokens, List row) {
       printf(
         "%s\n",
         %(function (name $name) (display $display) (line $line)
-          ${_definition_source(
-            c, tokens, declarator ? declarator : span, line.integer())}
-          ${location.cadr()} (static $is_static) (origin $origin)
+          $(_definition_source(
+            c, tokens, declarator ? declarator : span, line.integer()))
+          $(location.cadr()) (static $is_static) (origin $origin)
           (doc $doc) (text $text) (type $type) (params $names)).repr());
     }
 }
@@ -150,12 +150,12 @@ static void _print_type(Compiler c, Token tokens, List row) {
           kind = _type_kind(tokens + start, base, modifiers);
           String written = c.definition_doc(tokens + start);
           if (written) doc = written;
-          privacy = %((private ${!c.publishes_typedef(name)}));
+          privacy = %((private $(!c.publishes_typedef(name))));
         }
       printf(
         "%s\n",
         %(type (name $name) (kind $kind) @location
-          ${_definition_source(c, tokens, span, 0)} @privacy (doc $doc)
+          $(_definition_source(c, tokens, span, 0)) @privacy (doc $doc)
           (text $text)).repr());
     }
 }
@@ -195,8 +195,8 @@ static List _location(Token tokens, List range) {
   match (range)
     case %(?(int start) ?(int end) *): {
       Token first = tokens + start, last = tokens + end - 1;
-      return %((line ${first.line})
-               (span ${first.pos} ${last.pos + last.len}));
+      return %((line $(first.line))
+               (span $(first.pos) $(last.pos + last.len)));
     }
   return %((line 0) (span));
 }

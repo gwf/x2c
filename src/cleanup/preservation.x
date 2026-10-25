@@ -143,7 +143,7 @@ module Var _preserve_locals(Preserve &p, Var value) {
       : node;
   match (node) {
     case %(param ?type ?bind):
-      return %(param $type ${_binding(p, bind, p.escaped)});
+      return %(param $type $(_binding(p, bind, p.escaped)));
     case $source_block_content(%(*statements)): return _block(p, statements);
     case %(!set ?declaration ((!or declare decl) ? (bindings *))):
       return _declaration(p, declaration, NULL);
@@ -217,10 +217,10 @@ static List _declaration(Preserve &p, List declaration, Map escaped) {
     match (binding) {
       case %(op = ?bind ?value):
         preserved.push(
-          %(op = ${_binding(p, bind, escaped)} ${_preserve_locals(p, value)}));
+          %(op = $(_binding(p, bind, escaped)) $(_preserve_locals(p, value))));
       case %(bind * ): preserved.push(_binding(p, binding, escaped));
     }
-  return %($head $type (bindings @{preserved.list_free()}));
+  return %($head $type (bindings @(preserved.list_free())));
 }
 
 /* Qualify one binding that a transfer may leave stale, unless `escaped`
@@ -231,7 +231,7 @@ static List _binding(Preserve &p, List bind, Map escaped) {
       String spelling = Ast.binding_spelling(name);
       if (spelling && spelling in p.names &&
           !(escaped && spelling in escaped) && !(<volatile> in mods))
-        return %(bind $name ${cons(<volatile>, mods)});
+        return %(bind $name $(cons(<volatile>, mods)));
     }
   return bind;
 }

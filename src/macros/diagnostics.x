@@ -6,7 +6,7 @@ static macro Stmt $fail.macros_result_type(
   Expr $c, Expr $site, Expr $expected, Expr $actual) =>
   $c.report_error(
     <type>, "indexed rewrite must preserve the getter result type", $site,
-    %("expected: ${$expected.repr()}" "actual: ${$actual.repr()}"
+    %("expected: $($expected.repr())" "actual: $($actual.repr())"
       "return an explicitly converted expression"));
 
 static macro Stmt $fail.macros_expansion_count(Expr $c, Expr $origin) =>
@@ -17,16 +17,16 @@ static macro Stmt $fail.macros_expansion_count(Expr $c, Expr $origin) =>
 static macro Stmt $fail.macros_expansion_recursive(
   Expr $c, Expr $origin, Expr $spelling, Expr $definition_note, Expr $shown) =>
   $c.report_error(
-    <macro>, %"identical recursive expansion of '${$spelling}'",
-    $origin, %(${$definition_note} "input: ${$shown.repr()}"));
+    <macro>, %"identical recursive expansion of '$($spelling)'",
+    $origin, %($($definition_note) "input: $($shown.repr())"));
 
 static macro Stmt $fail.macros_expansion_depth(
   Expr $c, Expr $origin, Expr $definition_note, Expr $first_note) {
   {
-    String first_note = %"first expansion: ${$first_note}";
+    String first_note = %"first expansion: $($first_note)";
     $c.report_error(
       <macro>, "macro expansion depth exceeds 64", $origin,
-      %(${$definition_note} $first_note));
+      %($($definition_note) $first_note));
   }
 }
 
@@ -43,13 +43,13 @@ static macro Stmt $fail.macros_macro_result(Expr $c, Expr $site) =>
 static macro Stmt $fail.macros_macro_unknown_kind(
   Expr $c, Expr $origin, Expr $spelling) =>
   $c.report_error(
-    <parse>, %"unknown macro result kind '${$spelling}'",
+    <parse>, %"unknown macro result kind '$($spelling)'",
     $origin, NULL);
 
 static macro Stmt $fail.macros_macro_reserved(
   Expr $c, Expr $origin, Expr $spelling) =>
   $c.report_error(
-    <parse>, %"macro name '${$spelling}' is reserved",
+    <parse>, %"macro name '$($spelling)' is reserved",
     $origin, %("x2c.* is reserved for compiler facilities"));
 
 static macro Stmt $fail.macros_name_with(Expr $c, Expr $origin) =>
@@ -81,13 +81,13 @@ static macro Stmt $fail.macros_decorator_kind(Expr $c, Expr $origin) =>
 static macro Stmt $fail.macros_local_target(
   Expr $c, Expr $origin, Expr $target) =>
   $c.report_error(
-    <macro>, %"local decorators cannot target ${$target} syntax",
+    <macro>, %"local decorators cannot target $($target) syntax",
     $origin, NULL);
 
 static macro Stmt $fail.macros_local_result(
   Expr $c, Expr $origin, Expr $result_spelling) =>
   $c.report_error(
-    <macro>, %"local macros cannot have ${$result_spelling} results",
+    <macro>, %"local macros cannot have $($result_spelling) results",
     $origin, NULL);
 
 static macro Stmt $fail.macros_decorator_target_kind(Expr $c, Expr $origin) =>
@@ -103,18 +103,18 @@ static macro Stmt $fail.macros_macro_paren_body(Expr $c, Expr $site) =>
 static macro Stmt $fail.macros_macro_body(
   Expr $c, Expr $site, Expr $kind, Expr $form) =>
   $c.report_error(
-    <parse>, %"${$kind} macro body requires ${$form}", $site, NULL);
+    <parse>, %"$($kind) macro body requires $($form)", $site, NULL);
 
 static macro Stmt $fail.macros_hole_untyped(
   Expr $c, Expr $origin, Expr $hole_spelling) =>
   $c.report_error(
-    <parse>, %"macro hole '${$hole_spelling}' has no inferred kind",
+    <parse>, %"macro hole '$($hole_spelling)' has no inferred kind",
     $origin, %("annotate holes the template does not use"));
 
 static macro Stmt $fail.macros_hole_unknown_kind(
   Expr $c, Expr $site, Expr $spelling) =>
   $c.report_error(
-    <parse>, %"unknown macro hole kind '${$spelling}'",
+    <parse>, %"unknown macro hole kind '$($spelling)'",
     $site, NULL);
 
 static macro Stmt $fail.macros_hole_name(Expr $c, Expr $site) =>
@@ -125,7 +125,7 @@ static macro Stmt $fail.macros_hole_name(Expr $c, Expr $site) =>
 static macro Stmt $fail.macros_hole_duplicate(
   Expr $c, Expr $origin, Expr $spelling) =>
   $c.report_error(
-    <parse>, %"duplicate macro hole '${$spelling}'",
+    <parse>, %"duplicate macro hole '$($spelling)'",
     $origin, NULL);
 
 static macro Stmt $fail.macros_splice_expr(Expr $c, Expr $site) =>
@@ -147,7 +147,7 @@ static macro Stmt $fail.macros_typed_quotation(Expr $c, Expr $origin) =>
 static macro Stmt $fail.macros_typed_quotation_nested(
   Expr $c, Expr $origin) {
   {
-    String note = "write ${$!T{ ... }} to insert the code it builds";
+    String note = "write $($!T{ ... }) to insert the code it builds";
     $c.report_error(
       <parse>, "typed quotation inside a quotation must be written as a hole",
       $origin, %($note));
@@ -157,16 +157,16 @@ static macro Stmt $fail.macros_typed_quotation_nested(
 static macro Stmt $fail.macros_hole_ambiguous(
   Expr $c, Expr $origin, Expr $spelling, Expr $first, Expr $also) =>
   $c.report_error(
-    <parse>, %"macro hole '${$spelling}' has ambiguous kind",
-    $origin, %("first: ${$first}"
-      "also: ${$also}"));
+    <parse>, %"macro hole '$($spelling)' has ambiguous kind",
+    $origin, %("first: $($first)"
+      "also: $($also)"));
 
 static macro Stmt $fail.macros_hole_cardinality(
   Expr $c, Expr $origin, Expr $sequence, Expr $spelling) {
   {
     String message = $sequence
-      ? %"singular macro hole '${$spelling}' cannot be spliced"
-      : %"sequence macro hole '${$spelling}' requires '@'";
+      ? %"singular macro hole '$($spelling)' cannot be spliced"
+      : %"sequence macro hole '$($spelling)' requires '@'";
     $c.report_error(<parse>, message, $origin, NULL);
   }
 }
@@ -174,8 +174,8 @@ static macro Stmt $fail.macros_hole_cardinality(
 static macro Stmt $fail.macros_keyword_internal(
   Expr $c, Expr $origin, Expr $spelling, Expr $definition_note) =>
   $c.report_error(
-    <macro>, %"keyword alias cannot name internal macro kind '${$spelling}'",
-    $origin, %(${$definition_note}));
+    <macro>, %"keyword alias cannot name internal macro kind '$($spelling)'",
+    $origin, %($($definition_note)));
 
 static macro Stmt $fail.macros_keyword_builtin(Expr $c, Expr $origin) =>
   $c.report_error(
@@ -197,7 +197,7 @@ static macro Stmt $fail.macros_macro_name(Expr $c, Expr $origin) =>
 static macro Stmt $fail.macros_macro_unbound(
   Expr $c, Expr $origin, Expr $spelling) =>
   $c.report_error(
-    <parse>, %"unknown or forward-referenced macro '${$spelling}'",
+    <parse>, %"unknown or forward-referenced macro '$($spelling)'",
     $origin, NULL);
 
 static macro Stmt $fail.macros_macro_extra_args(Expr $c, Expr $site) =>
@@ -224,8 +224,8 @@ static macro Stmt $fail.macros_result_position(
   Expr $c, Expr $origin, Expr $spelling, Expr $result, Expr $description) {
   {
     String message =
-      %"macro '${$spelling}' has result kind ${$result} and cannot be " +
-      %"invoked at ${$description}";
+      %"macro '$($spelling)' has result kind $($result) and cannot be " +
+      %"invoked at $($description)";
     $c.report_error(<macro>, message, $origin, NULL);
   }
 }
@@ -234,51 +234,51 @@ static macro Stmt $fail.macros_decorator_position(
   Expr $c, Expr $origin, Expr $name, Expr $kind) =>
   $c.report_error(
     <macro>,
-    %"decorator '${$name}' targets ${$kind} syntax and cannot be used here",
+    %"decorator '$($name)' targets $($kind) syntax and cannot be used here",
     $origin, NULL);
 
 static macro Stmt $fail.macros_decorator_target(
   Expr $c, Expr $origin, Expr $spelling, Expr $definition_note) =>
   $c.report_error(
-    <macro>, %"decorator '${$spelling}' requires a following target",
-    $origin, %(${$definition_note}));
+    <macro>, %"decorator '$($spelling)' requires a following target",
+    $origin, %($($definition_note)));
 
 static macro Stmt $fail.macros_decorator_semicolon(
   Expr $c, Expr $origin, Expr $definition_note) =>
   $c.report_error(
     <macro>, "decorator application must not end with ';'",
-    $origin, %(${$definition_note}));
+    $origin, %($($definition_note)));
 
 static macro Stmt $fail.macros_result_expr(
   Expr $c, Expr $origin, Expr $kind, Expr $spelling, Expr $definition_note) {
   {
     String subject = $kind == <decorator>
-      ? %"decorator '${$spelling}'"
-      : %"macro '${$spelling}'";
+      ? %"decorator '$($spelling)'"
+      : %"macro '$($spelling)'";
     $c.report_error(
       <macro>, %"$subject cannot be invoked in an expression", $origin,
-      $kind == <decorator> ? %(${$definition_note}) : NULL);
+      $kind == <decorator> ? %($($definition_note)) : NULL);
   }
 }
 
 static macro Stmt $fail.macros_decorator_expr(
   Expr $c, Expr $origin, Expr $spelling, Expr $definition_note) =>
   $c.report_error(
-    <macro>, %"decorator '${$spelling}' requires a following expression",
-    $origin, %(${$definition_note}));
+    <macro>, %"decorator '$($spelling)' requires a following expression",
+    $origin, %($($definition_note)));
 
 static macro Stmt $fail.macros_macro_pattern_arity(
   Expr $c, Expr $origin, Expr $name, Expr $expected) =>
   $c.report_error(
     <parse>,
-    %"macro pattern '${$name}' takes ${$expected} argument patterns",
+    %"macro pattern '$($name)' takes $($expected) argument patterns",
     $origin, NULL);
 
 static macro Stmt $fail.macros_meta_expr(
   Expr $c, Expr $origin, Expr $value) =>
   $c.report_error(
     <macro>, "compile-time result cannot fill an expression slot",
-    $origin, %( "value:" ${$value.repr()} ));
+    $origin, %( "value:" $($value.repr()) ));
 
 static macro Stmt $fail.macros_type_name(
   Expr $c, Expr $origin, Expr $message) =>
@@ -286,13 +286,13 @@ static macro Stmt $fail.macros_type_name(
 
 static macro Stmt $fail.macros_placement(Expr $c, Expr $site, Expr $where) =>
   $c.report_error(
-    <macro>, "unknown placement", $site, %("where: ${$where.repr()}"));
+    <macro>, "unknown placement", $site, %("where: $($where.repr())"));
 
 static macro Stmt $fail.macros_meta_failed(
   Expr $c, Expr $origin, Expr $source, Expr $error) {
   {
-    String form_note = %"form: ${$source}",
-      error_note = %"error: ${$error.repr()}";
+    String form_note = %"form: $($source)",
+      error_note = %"error: $($error.repr())";
     $c.report_error(
       <macro>, "meta call failed", $origin, %($form_note $error_note));
   }
@@ -302,12 +302,12 @@ static macro Stmt $fail.macros_code_effect(
   Expr $c, Expr $site, Expr $effect) =>
   $c.report_error(
     <macro>, "a meta call returned an unknown code effect", $site,
-    %("effect: ${$effect.repr()}"));
+    %("effect: $($effect.repr())"));
 
 static macro Stmt $fail.macros_variable_unbound(
   Expr $c, Expr $origin, Expr $spelling) =>
   $c.report_error(
-    <parse>, %"unbound replacement variable '${$spelling}'",
+    <parse>, %"unbound replacement variable '$($spelling)'",
     $origin, NULL);
 
 // diagnostics

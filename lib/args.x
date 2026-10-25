@@ -149,7 +149,7 @@ static void _read_row(Option &o, List row, Map index, int position) {
           (text.startswith("--") && !o.spelling.startswith("--")))
         o.spelling = text;
       o.spellings =
-        o.spellings ? %"${o.spellings}, $text" : text;
+        o.spellings ? %"$(o.spellings), $text" : text;
       index[text] = position;
     }
     else if (text == "required") o.required = 1;
@@ -212,7 +212,7 @@ static void _parse_long(Spec &s, Map result, List &rest, String word) {
    takes a value consumes the rest of the word, or else the next word. */
 static void _parse_short(Spec &s, Map result, List &rest, String word) {
   for (int at = 1; at < word.len(); at++) {
-    String spelling = %"-${word[at:at + 1]}";
+    String spelling = %"-$(word[at:at + 1])";
     Option *option = _find(s, spelling);
     if (!option.value) {
       _store((*option), result, 1);
@@ -316,12 +316,12 @@ String Args.usage(String program, List spec) {
 
 static String _label(Option &o) {
   if (o.operand) {
-    String label = %"<${o.name}>";
+    String label = %"<$(o.name)>";
     if (o.repeated) label = %"$label...";
     return o.required ? label : %"[$label]";
   }
   String label = o.spellings;
-  if (o.value) label = %"$label <${o.value}>";
+  if (o.value) label = %"$label <$(o.value)>";
   return label.startswith("--") ? %"    $label" : label;
 }
 
@@ -337,6 +337,6 @@ static void _write_row(Buffer out, String label, String help) {
 List Args.from_argv(int argc, char **argv) {
   List result = NULL;
   for (int i = argc - 1; i > 0; i--)
-    result = %(${String.new(argv[i])} @result);
+    result = %($(String.new(argv[i])) @result);
   return result;
 }

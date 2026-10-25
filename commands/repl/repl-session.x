@@ -154,7 +154,7 @@ List ReplSession.symbols(ReplSession session) {
   foreach (Var (name, entry), session.names) names.push(name);
   foreach (String name, names.sort()) {
     List entry = session.names[name];
-    entries.push(%(${entry.car()} $name));
+    entries.push(%($(entry.car()) $name));
   }
   return entries.list_free();
 }
@@ -467,7 +467,7 @@ static Var _assert_calls(Var node, Array texts, int &index) {
       if (index < texts.len()): {
         String text = texts[index++];
         return %(expr (void)
-          (repl-assert ${_assert_calls(test, texts, index)} $text));
+          (repl-assert $(_assert_calls(test, texts, index)) $text));
       }
   List child;
   $ast.rewrite_children(node, child, _assert_calls(child, texts, index));
@@ -532,7 +532,7 @@ static List _result_body(ReplSession session, List fn, int &prints) {
             }
             if (!effect) {
               List shown = session.inspect_global(%(expr $spec $value));
-              items[items.len() - 1] = %(return ${shown.cadr()} $shown);
+              items[items.len() - 1] = %(return $(shown.cadr()) $shown);
               prints = 1;
             }
           }
@@ -590,7 +590,7 @@ static List _submission_entry(List entry, String filename, String source) {
         if (source[i] == '\n') { line++; start = i + 1; }
       return %($code $severity $message
                (location ((file $file) (line $line)
-                          (column ${at - start + 1}) (length $length)
+                          (column $(at - start + 1)) (length $length)
                           (position $at)))
                $notes);
     }
@@ -618,9 +618,9 @@ static List _arity_cause(ReplSession session, List syntax, List cause) {
             String declaration = declared == expected && count == actual
               ? _function_declaration(session, name, source) : NULL;
             if (declaration)
-              return %(repl (reason ${
+              return %(repl (reason $(
                 %"$name takes $expected argument$plural, not $actual: "
-                + declaration}));
+                + declaration)));
           }
       }
     }
@@ -740,7 +740,7 @@ static ReplResult _submit(ReplSession session, String source) {
         transaction.commit_transient();
         session.evaluator.set_global(function_name, function);
         names[function_name] =
-          %(function (typed ${result.syntax}) (execution native));
+          %(function (typed $(result.syntax)) (execution native));
         result.name = function_name;
         result.status = <defined>;
         return result;

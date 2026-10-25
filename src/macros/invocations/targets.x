@@ -230,7 +230,7 @@ static List _capture(Decoration &d, List target) {
     _capture_row_project(c, d.definition.assoc(<targetp>), captured, 0);
   if (d.kind == <unit> && !_private_target(c, target) &&
       captured && !captured.cdr())
-    target_capture = target_capture.append(%((construct ${captured.car()})));
+    target_capture = target_capture.append(%((construct $(captured.car()))));
   return target_capture;
 }
 

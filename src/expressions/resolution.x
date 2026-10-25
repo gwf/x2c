@@ -7,7 +7,7 @@ module List _cast_expression(
   Compiler c, List decl, Type type, List operand) {
   if (c.sym.is_string_type(type) && _is_raw_string_literal(operand))
     return c.convert_expression(operand, type);
-  return %(expr $type ${source_cast_content(%($decl $operand))});
+  return %(expr $type $(source_cast_content(%($decl $operand))));
 }
 
 /* A statement expression has the value and type of its final expression
@@ -219,7 +219,7 @@ static List _lambda(
 static List _source(Resolve &r, List content) {
   match (content) case %(at m-origin ?inner): {
     if (!r.c.source_map || r.c.macro_holes) return r.input;
-    return %(expr ${r.type} (at ${r.c.origin} $inner));
+    return %(expr $(r.type) (at $(r.c.origin) $inner));
   }
   return r.input;
 }
@@ -242,7 +242,7 @@ static List _invocation(Resolve &r, List content) {
     return r.c.bind_syntax(content, <expression>, r.c.return_type);
   match (content) case %(macro-invoke ?(List stored) ?input ?site):
     if (stored.car() == <macrodef>)
-      return %(expr ${r.input.cadr()}
+      return %(expr $(r.input.cadr())
         (macro-invoke (!quote $stored) $input $site));
   return r.input;
 }
@@ -276,7 +276,7 @@ static List _is_type(Resolve &r, List operand, Type target) {
   Symbol vartag = _require_var_tag(r.c, target, r.origin);
   List direct = _constant_row_test(r.c, lhs, vartag, r.origin);
   if (direct) return direct;
-  String tagsym = %"${(unsigned long) vartag}";
+  String tagsym = %"$((unsigned long) vartag)";
   List callee = _resolve_identifier(r.c, "Var_is", NULL, r.origin);
   return r.c.rebuild_expression(
     %(int), called(callee, %($lhs (expr ("Symbol") $tagsym))));
@@ -296,8 +296,8 @@ static List _is_symbol(Resolve &r, List operand, List selector) {
   if (!r.c.sym.is_named_value_type(selector_type, "Symbol"))
     $fail.expressions_is_selector(r.c, r.origin, selector_type);
   match (selector)
-    case %(expr ("Symbol") ${$source_literal_content(
-        %(("Symbol") ? ?tag_value))}): {
+    case %(expr ("Symbol") $($source_literal_content(
+        %(("Symbol") ? ?tag_value)))): {
       if (tag_value is <symbol>) {
         Symbol tag = tag_value;
         List direct = _constant_row_test(r.c, lhs, tag, r.origin);
@@ -346,7 +346,7 @@ List Compiler.var_tag_expression(Compiler c, Type target, Token origin) {
   if (_deferred_type_test(target))
     return %(expr (<macro-expr>) (type-tag $target));
   Symbol tag = _require_var_tag(c, target, origin);
-  return %(expr ("Symbol") (literal ("Symbol") ${tag.str()} $tag));
+  return %(expr ("Symbol") (literal ("Symbol") $(tag.str()) $tag));
 }
 
 static int _deferred_type_test(Type target) {
@@ -359,7 +359,7 @@ static int _deferred_type_test(Type target) {
 static List _cast(Resolve &r, List declaration, List operand) {
   operand = r.c.resolve_expression(operand, r.origin);
   declaration = r.c.bind_syntax(declaration, <block>, r.c.return_type);
-  List typed = %(declare @{declaration.cdr()});
+  List typed = %(declare @(declaration.cdr()));
   Type type = operand.cadr() === %(<macro-expr>) ||
               _casts_to_template_typedef(r.c, declaration)
             ? %(<macro-expr>) : typed.type_from_ast();
@@ -375,7 +375,7 @@ static List _tadapt(Resolve &r, List target, List source) {
       if (!type || !type.is_pointer() ||
           !type.dereference().is_function())
         $fail.expressions_adapter_pointer(r.c, r.origin, type);
-      return %(expr ($target_type) (tadapt ${r.c.origin} $source));
+      return %(expr ($target_type) (tadapt $(r.c.origin) $source));
     }
   $fail.expressions_adapter_typedef(r.c, r.origin);
 }
@@ -393,12 +393,12 @@ static List _segments(Resolve &r, List items) {
         resolved.push(%($tag $expression));
         continue;
       }
-      resolved.push(%($tag ${r.c.convert_segment_to_string(expression)}));
+      resolved.push(%($tag $(r.c.convert_segment_to_string(expression))));
       continue;
     }
     default: resolved.push(item);
   }
-  return %(expr $type ${source_string_content(resolved.list_free())});
+  return %(expr $type $(source_string_content(resolved.list_free())));
 }
 
 static List _cons(Resolve &r, List head, List tail) {
@@ -419,12 +419,12 @@ static List _append(Resolve &r, List head, List tail) {
   head = r.c.sym.is_var_type(head.cadr())
        ? %(expr ("List") (call "Var_list_payload" (args $head)))
        : r.c.convert_expression(head, %("List"));
-  return %(expr ${r.type ? r.type : %("List")}
+  return %(expr $(r.type ? r.type : %("List"))
            (append $head $tail));
 }
 
 static List _splice(Resolve &r, List expression) =>
-  %(expr ${r.type} (splice ${r.c.resolve_expression(expression, r.origin)}));
+  %(expr $(r.type) (splice $(r.c.resolve_expression(expression, r.origin))));
 
 static List _array_value(Resolve &r) {
   Macro array_value = $array_value;
@@ -459,8 +459,8 @@ List Compiler.resolve_map_entry(Compiler c, List input, Token origin) {
   match (input)
     case %(map-entry ?key ?value):
       return %(map-entry
-        ${c.resolve_expression(key, origin)}
-        ${c.resolve_expression(value, origin)});
+        $(c.resolve_expression(key, origin))
+        $(c.resolve_expression(value, origin)));
   $fail.expressions_map_entry(c, origin);
 }
 
@@ -472,9 +472,9 @@ static List _initval(Resolve &r, List content) {
     Array inputs = [];
     foreach (List argument in header.cdr()) {
       List value = r.c.resolve_expression(argument.cadr(), r.origin);
-      inputs.push(%(${argument.car()} $value));
+      inputs.push(%($(argument.car()) $value));
     }
-    resolved.push(%(input @{inputs.list_free()}));
+    resolved.push(%(input @(inputs.list_free())));
   }
   foreach (List choice in cases) {
     (List condition, List path, Type destination, List value) = choice;
@@ -482,7 +482,7 @@ static List _initval(Resolve &r, List content) {
     value = r.c.resolve_expression(value, r.origin);
     resolved.push(%($condition $path $destination $value));
   }
-  return %(expr ${r.type} (initval @{resolved.list_free()}));
+  return %(expr $(r.type) (initval @(resolved.list_free())));
 }
 
 static List _composite(Resolve &r, List elements) {
@@ -490,18 +490,18 @@ static List _composite(Resolve &r, List elements) {
   foreach (Var element in elements)
     foreach (List row in r.c.evaluate_macro_rows(element))
       values.push(_resolve_initializer(r.c, row, r.origin));
-  return %(expr ${r.type} ${source_composite_content(
-    values.list_free())});
+  return %(expr $(r.type) $(source_composite_content(
+    values.list_free())));
 }
 
 static List _resolve_initializer(
   Compiler c, List node, Token origin) {
   match (node) {
     case %(dotinit ?field ?value):
-      return %(dotinit $field ${_resolve_initializer(c, value, origin)});
+      return %(dotinit $field $(_resolve_initializer(c, value, origin)));
     case %(indexinit ?index ?value):
-      return %(indexinit ${c.resolve_expression(index, origin)}
-               ${_resolve_initializer(c, value, origin)});
+      return %(indexinit $(c.resolve_expression(index, origin))
+               $(_resolve_initializer(c, value, origin)));
   }
   return c.resolve_expression(node, origin);
 }
@@ -524,7 +524,7 @@ static List _commas(Resolve &r, List expressions) {
   List values = resolved.list_free();
   Type type = r.type;
   if (values) type = values.last().cadr();
-  return %(expr $type ${source_commas_content(values)});
+  return %(expr $type $(source_commas_content(values)));
 }
 
 static List _destructure(Resolve &r, List targets, List source) {
@@ -532,8 +532,8 @@ static List _destructure(Resolve &r, List targets, List source) {
   foreach (List target in targets)
     resolved.push(r.c.resolve_expression(target, r.origin));
   source = r.c.resolve_expression(source, r.origin);
-  return %(expr ${source.cadr()}
-           (dstrasgn (targets @{resolved.list_free()}) $source));
+  return %(expr $(source.cadr())
+           (dstrasgn (targets @(resolved.list_free())) $source));
 }
 
 static List _generic(Resolve &r, List control, List associations) {
@@ -542,10 +542,10 @@ static List _generic(Resolve &r, List control, List associations) {
   foreach (List association in associations) match (association)
     case %(association ?selector ?value):
       resolved.push(
-        %(association $selector ${r.c.resolve_expression(value, r.origin)}));
+        %(association $selector $(r.c.resolve_expression(value, r.origin))));
   Type type = control.cadr() === %(<macro-expr>) ? %(<macro-expr>) : NULL;
-  return %(expr $type ${source_generic_content(
-    %($control @{resolved.list_free()}))});
+  return %(expr $type $(source_generic_content(
+    %($control @(resolved.list_free())))));
 }
 
 /* A `sizeof` keeps its grouped or bare form around the resolved operand;
@@ -562,8 +562,8 @@ static List _sizeof(Resolve &r, Macro form, Var argument) {
 }
 
 static List _va_arg(Resolve &r, List argument, List declaration) {
-  return %(expr ${r.type}
-           ${source_va_arg_content(
-             %(${r.c.resolve_expression(argument, r.origin)}
-               ${r.c.resolve_expression(declaration, r.origin)}))});
+  return %(expr $(r.type)
+           $(source_va_arg_content(
+             %($(r.c.resolve_expression(argument, r.origin))
+               $(r.c.resolve_expression(declaration, r.origin))))));
 }

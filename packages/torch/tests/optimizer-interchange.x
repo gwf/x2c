@@ -15,8 +15,8 @@ int main(int argc, char **argv) {
   String model_path = argv[1], state_path = argv[2], prefix = argv[3];
   if (model_path != "-") model.load(model_path);
   if (state_path != "-") optimizer.load_python(state_path);
-  model.save(%"${prefix}-before-model.pt");
-  optimizer.save_python(%"${prefix}-before-optim.pt");
+  model.save(%"$(prefix)-before-model.pt");
+  optimizer.save_python(%"$(prefix)-before-optim.pt");
   if (argc == 6) {
     int caught = 0;
     try optimizer.load_python(argv[5]);
@@ -33,8 +33,8 @@ int main(int argc, char **argv) {
       optimizer.step();
     }
   }
-  model.save(%"${prefix}-model.pt");
-  optimizer.save_python(%"${prefix}-optim.pt");
+  model.save(%"$(prefix)-model.pt");
+  optimizer.save_python(%"$(prefix)-optim.pt");
   printf("optimizer state saved\n");
   return 0;
 }

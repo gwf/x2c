@@ -39,7 +39,7 @@ int Compiler.write_depfile(
   Compiler compiler, CliRequest request, String input, String output_dir) {
   if (request.no_deps || request.inspects()) return 1;
   String path = request.dep_file ? request.dep_file :
-    %"${output_dir.rstrip("/")}/${Path.stem(input)}.d";
+    %"$(output_dir.rstrip("/"))/$(Path.stem(input)).d";
   long error = 0;
   try {
     String text = _contents(request, compiler, input, output_dir);
@@ -90,7 +90,7 @@ static String _contents(
 
 static void _write_targets(
   Buffer out, CliRequest request, String input, String output_dir) {
-  String base = %"${output_dir.rstrip("/")}/${Path.stem(input)}";
+  String base = %"$(output_dir.rstrip("/"))/$(Path.stem(input))";
   _write_word(out, request.dep_target ? request.dep_target : %"$base.c");
   if (request.dep_target) return;
   out.write_char(' ');

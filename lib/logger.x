@@ -735,13 +735,13 @@ static int _plain_report(Logger logger) =>
   !getenv("X2C_DEBUG");
 
 static void _report_uncaught(List entry) {
-  String line = %"x2c: uncaught <${entry.assoc(<code>)}>";
+  String line = %"x2c: uncaught <$(entry.assoc(<code>))>";
   List location = entry.assoc(<location>);
   if (location && location.assoc(<runtime>) is <void>)
-    line = %"$line in ${location.assoc(<function>)} (${
-      location.assoc(<file>)}:${location.assoc(<line>)})";
+    line = %"$line in $(location.assoc(<function>)) ($(
+      location.assoc(<file>)):$(location.assoc(<line>)))";
   List detail = entry.assoc(<detail>);
-  if (detail) line = %"$line: ${_detail_text(detail)}";
+  if (detail) line = %"$line: $(_detail_text(detail))";
   fprintf(stderr, "%s\n", line);
   fflush(stderr);
 }
@@ -753,7 +753,7 @@ static String _detail_text(List detail) {
     Var value = pair.cadr();
     String text = value is <string> || value is <symbol>
                 ? value.str() : value.repr();
-    parts = %(@parts ${%"${pair.car} $text"});
+    parts = %(@parts $(%"$(pair.car) $text"));
   }
   return String.join(", ", parts);
 }

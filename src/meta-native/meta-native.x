@@ -49,7 +49,7 @@ static macro Stmt $fail.meta_native_meta_storage(
   $c.report_error(
     <parse>,
     "a meta value must have file-static storage",
-    $site, %("declaration: '${$name}'"));
+    $site, %("declaration: '$($name)'"));
 
 static macro Stmt $fail.meta_native_call_deferred(Expr $c, Expr $site) =>
   $c.report_error(
@@ -68,7 +68,7 @@ static macro Stmt $fail.meta_native_call_binding(
   $c.report_error(
     <macro>,
     "explicit meta call cannot be resolved",
-    $site, %("no binding for ${$name}"));
+    $site, %("no binding for $($name)"));
 
 static macro Stmt $fail.meta_native_meta_name(Expr $c, Expr $site) =>
   $c.report_error(
@@ -81,14 +81,14 @@ static macro Stmt $fail.meta_native_meta_signature(
   $c.report_error(
     <type>,
     "native meta function declaration does not match its target",
-    $site, %("name: ${$n.name}" "signature: ${$n.signature.repr()}"));
+    $site, %("name: $($n.name)" "signature: $($n.signature.repr())"));
 
 static macro Stmt $fail.meta_native_meta_lifetime(
   Expr $c, Expr $site, Expr $name, Expr $signature) =>
   $c.report_error(
     <type>,
     "unproved native meta lifetime",
-    $site, %("name: ${$name}" "signature: ${$signature.repr()}"
+    $site, %("name: $($name)" "signature: $($signature.repr())"
     "it might return or keep its argument; ownership cannot be inferred"));
 
 static macro Stmt $fail.meta_native_package_platform(
@@ -96,43 +96,43 @@ static macro Stmt $fail.meta_native_package_platform(
   $c.report_error(
     <driver>,
     "native modules are not supported on this platform",
-    $site, %("package: ${$name}" "module: ${$module}"));
+    $site, %("package: $($name)" "module: $($module)"));
 
 static macro Stmt $fail.meta_native_package_compiler(
   Expr $c, Expr $site, Expr $name, Expr $module) =>
   $c.report_error(
     <driver>,
-    %"package '${$name}' was built by another compiler; rebuild it",
-    $site, %("module: ${$module}"));
+    %"package '$($name)' was built by another compiler; rebuild it",
+    $site, %("module: $($module)"));
 
 static macro Stmt $fail.meta_native_outside_compilation(Expr $name) =>
-  MetaContext.reject(%"${$name} used outside compilation", NULL);
+  MetaContext.reject(%"$($name) used outside compilation", NULL);
 
 static macro Stmt $warn.meta_native_function_hidden(
   Expr $c, Expr $site, Expr $binding) =>
   $c.report_warning(
     <native>, "the compiler's own function hides a native module's",
-    $site, %("name: ${$binding.name}"));
+    $site, %("name: $($binding.name)"));
 
 static macro Stmt $fail.meta_native_module_platform() =>
   Diagnostics.driver_error("native modules are not supported on this platform");
 
 static macro Stmt $fail.meta_native_module_invalid(Expr $path) =>
-  Diagnostics.driver_error(%"not an x2c native module: ${$path}");
+  Diagnostics.driver_error(%"not an x2c native module: $($path)");
 
 static macro Stmt $fail.meta_native_module_compiler(Expr $path) =>
   Diagnostics.driver_error(
-    %"native module '${$path}' was built by another compiler; rebuild it");
+    %"native module '$($path)' was built by another compiler; rebuild it");
 
 static macro Stmt $fail.meta_native_compiler_read(Expr $path) =>
   Diagnostics.driver_error(
-    %"cannot read the running compiler to check native module '${$path}'");
+    %"cannot read the running compiler to check native module '$($path)'");
 
 static macro Stmt $fail.meta_native_module_read(Expr $path, Expr $cause) =>
-  Diagnostics.driver_error(%"cannot read native module '${$path}': ${$cause}");
+  Diagnostics.driver_error(%"cannot read native module '$($path)': $($cause)");
 
 static macro Stmt $fail.meta_native_module_load(Expr $path, Expr $cause) =>
-  Diagnostics.driver_error(%"cannot load native module '${$path}': ${$cause}");
+  Diagnostics.driver_error(%"cannot load native module '$($path)': $($cause)");
 
 module {
   "modules.x",

@@ -27,7 +27,7 @@ int main(int argc, char **argv) {
     Map channels = {};
     int assets = 0;
 
-    printf("%s", %"${releases.len()} releases\n");
+    printf("%s", %"$(releases.len()) releases\n");
     foreach(Map release in releases) {
       String channel = Json.boolean(release["prerelease"])
         ? "preview" : "stable";
@@ -38,7 +38,7 @@ int main(int argc, char **argv) {
       Array files = release["assets"];
       assets += files.len();
       String tag = release["tag_name"];
-      printf("%s", %"  $tag  $channel  ${files.len()} assets\n");
+      printf("%s", %"  $tag  $channel  $(files.len()) assets\n");
     }
 
     Var stable = 0, preview = 0;
@@ -56,7 +56,7 @@ int main(int argc, char **argv) {
       .request("POST", url + "/summary");
     defer posted.free();
     Map echoed = Json.parse(posted.text());
-    printf("%s", %"posted ${echoed["length"]} bytes as ${echoed["type"]}\n");
+    printf("%s", %"posted $(echoed["length"]) bytes as $(echoed["type"])\n");
     return 0;
   }
 }

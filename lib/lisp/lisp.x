@@ -51,28 +51,28 @@ static macro Stmt $error.eval.void() {
 }
 
 static macro Stmt $error.eval.unbound(Expr $expr) {
-  raise %(unbound (name ${$expr}));
+  raise %(unbound (name $($expr)));
 }
 
 static macro Stmt $error.call.type(Expr $callable) {
-  raise %(not-call (actual ${$callable.kind()}));
+  raise %(not-call (actual $($callable.kind())));
 }
 
 static macro Stmt $error.def.arity(Expr $actual, Expr $args) {
-  raise %(bad-arity (operation "def") (expected 2) (actual ${$actual})
-          (value ${$args}));
+  raise %(bad-arity (operation "def") (expected 2) (actual $($actual))
+          (value $($args)));
 }
 
 static macro Stmt $error.def.protected(Expr $name) {
-  raise %(bad-state (operation "def") (name ${$name}));
+  raise %(bad-state (operation "def") (name $($name)));
 }
 
 static macro Stmt $error.def.inherited(Expr $name) {
-  raise %(bad-state (operation "def") (reason "inherited") (name ${$name}));
+  raise %(bad-state (operation "def") (reason "inherited") (name $($name)));
 }
 
 static macro Stmt $error.def.frozen(Expr $name) {
-  raise %(bad-state (operation "def") (reason "frozen") (name ${$name}));
+  raise %(bad-state (operation "def") (reason "frozen") (name $($name)));
 }
 
 static macro Stmt $error.cond.empty() {
@@ -80,45 +80,45 @@ static macro Stmt $error.cond.empty() {
 }
 
 static macro Stmt $error.cond.type(Expr $clause) {
-  raise %(bad-types (operation "cond") (value ${$clause}) (want "List"));
+  raise %(bad-types (operation "cond") (value $($clause)) (want "List"));
 }
 
 static macro Stmt $error.cond.arity(Expr $actual, Expr $clause) {
   raise %(bad-arity (operation "cond-clause") (expected 2)
-          (actual ${$actual}) (value ${$clause}));
+          (actual $($actual)) (value $($clause)));
 }
 
 static macro Stmt $error.bind.signature(Expr $signature) {
-  raise %(bad-sig (operation "bind") (value ${$signature}));
+  raise %(bad-sig (operation "bind") (value $($signature)));
 }
 
 static macro Stmt $error.bind.missing(Expr $name, Expr $sig) {
-  raise %(no-symbol (name ${$name}) (sig ${$sig}));
+  raise %(no-symbol (name $($name)) (sig $($sig)));
 }
 
 static macro Stmt $error.quote.shape(Expr $expr) {
-  raise %(bad-arity (operation "quasiquote") (value ${$expr}));
+  raise %(bad-arity (operation "quasiquote") (value $($expr)));
 }
 
 static macro Stmt $error.splice.type(Expr $value) {
   raise %(bad-types (operation "quasiquote-splice")
-          (actual ${$value.kind()}));
+          (actual $($value.kind())));
 }
 
 static macro Stmt $error.lambda.signature(Expr $operation, Expr $args) {
-  raise %(bad-sig (operation ${$operation}) (value ${$args}));
+  raise %(bad-sig (operation $($operation)) (value $($args)));
 }
 
 static macro Stmt $error.apply.void(Expr $index) {
-  raise %(void-op (operation "apply") (index ${$index}));
+  raise %(void-op (operation "apply") (index $($index)));
 }
 
 static macro Stmt $error.apply.rest(Expr $body) {
-  raise %(bad-sig (operation "apply") (value ${$body}));
+  raise %(bad-sig (operation "apply") (value $($body)));
 }
 
 static macro Stmt $error.apply.arity(Expr $body) {
-  raise %(bad-arity (operation "apply") (value ${$body}));
+  raise %(bad-arity (operation "apply") (value $($body)));
 }
 
 static macro Stmt $error.apply.interrupted() {
@@ -130,42 +130,42 @@ static macro Stmt $error.apply.steps() {
 }
 
 static macro Stmt $error.apply.stack(Expr $body) {
-  raise %(call-stack (operation "apply") (value ${$body}));
+  raise %(call-stack (operation "apply") (value $($body)));
 }
 
 static macro Stmt $error.form.arity(
   Expr $operation, Expr $expected, Expr $actual) {
-  raise %(bad-arity (operation ${$operation}) (expected ${$expected})
-          (actual ${$actual}));
+  raise %(bad-arity (operation $($operation)) (expected $($expected))
+          (actual $($actual)));
 }
 
 static macro Stmt $error.form.string(Expr $operation, Expr $value) {
-  raise %(bad-types (operation ${$operation}) (actual ${$value.kind()})
+  raise %(bad-types (operation $($operation)) (actual $($value.kind()))
           (want "String"));
 }
 
 static macro Stmt $error.apply.list(Expr $values) {
-  raise %(bad-types (operation "apply") (actual ${$values.kind()})
+  raise %(bad-types (operation "apply") (actual $($values.kind()))
           (want "List"));
 }
 
 static macro Stmt $error.apply.procedure(Expr $callable) {
-  raise %(not-call (operation "apply") (actual ${$callable.kind()}));
+  raise %(not-call (operation "apply") (actual $($callable.kind())));
 }
 
 /* Lisp session error conditions. Runtime operands retain their original
    detail types, order and source helper ownership. */
 
 static macro Stmt $error.callback.absent(Expr $operation) {
-  raise %(bad-state (operation ${$operation}) (reason "no session"));
+  raise %(bad-state (operation $($operation)) (reason "no session"));
 }
 
 static macro Stmt $error.callback.wrong(Expr $operation) {
-  raise %(bad-state (operation ${$operation}) (reason "wrong session"));
+  raise %(bad-state (operation $($operation)) (reason "wrong session"));
 }
 
 static macro Stmt $error.entry.null(Expr $operation) {
-  raise %(bad-arg (operation ${$operation}));
+  raise %(bad-arg (operation $($operation)));
 }
 
 static macro Stmt $error.global.args() {
@@ -173,7 +173,7 @@ static macro Stmt $error.global.args() {
 }
 
 static macro Stmt $error.global.frozen(Expr $operation) {
-  raise %(bad-state (operation ${$operation}) (reason "frozen"));
+  raise %(bad-state (operation $($operation)) (reason "frozen"));
 }
 
 static macro Stmt $error.bind.args() {
@@ -182,7 +182,7 @@ static macro Stmt $error.bind.args() {
 
 static macro Stmt $error.source.callable(Expr $callable) {
   raise %(bad-types (operation "lisp_source_function") (want "Lambda")
-          (actual ${$callable.kind()}));
+          (actual $($callable.kind())));
 }
 
 #include <signal.h>

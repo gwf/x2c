@@ -92,7 +92,7 @@ int Type.is_enum_tag_body(Type type) => !!type.match(%(enum ? (*)));
 List Type.tag(Type type) {
   if (type.is_enum_tag() || type.is_enum_tag_body() ||
       type.is_aggregate_tag() || type.is_aggregate_tag_body())
-    return %( ${type.cadr()} );
+    return %( $(type.cadr()) );
   return NULL;
 }
 

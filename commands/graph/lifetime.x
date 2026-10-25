@@ -175,9 +175,9 @@ static void _lifetime_end_region(Lifetime &lifetime, int id, int deferred) {
     case %(region ?identity ?kind ?isolated ?alive ? ?owner ?):
       if (alive.integer())
         lifetime.facts.regions[id] = %(
-          region $identity $kind $isolated ${deferred ? 1 : 0}
-          $deferred $owner ${project_location(
-            lifetime.compiler, lifetime.path, lifetime.origin)}
+          region $identity $kind $isolated $(deferred ? 1 : 0)
+          $deferred $owner $(project_location(
+            lifetime.compiler, lifetime.path, lifetime.origin))
         );
 }
 
@@ -348,9 +348,9 @@ static void _lifetime_scan_calls(Lifetime &lifetime, Var value) {
       foreach (Var argument, cdr(arguments)) {
         int id = _lifetime_wrapped_allocation(lifetime, argument);
         List cause = %(
-          call ${lifetime.path} ${lifetime.function}
-          $name ${project_location(
-            lifetime.compiler, lifetime.path, lifetime.origin)}
+          call $(lifetime.path) $(lifetime.function)
+          $name $(project_location(
+            lifetime.compiler, lifetime.path, lifetime.origin))
         );
         if (id) _lifetime_unresolve(lifetime, id, cause);
         _lifetime_replace_return_fact(lifetime, argument, %(unresolved));
@@ -376,7 +376,7 @@ static int _lifetime_expression(Lifetime &lifetime, Var value) {
     lifetime.direct_allocations++;
     lifetime.facts.allocations[id] = %(
       allocation $id $region $operation known
-      ${project_location(lifetime.compiler, lifetime.path, lifetime.origin)}
+      $(project_location(lifetime.compiler, lifetime.path, lifetime.origin))
     );
     return id;
   }
@@ -395,8 +395,8 @@ static int _lifetime_expression(Lifetime &lifetime, Var value) {
       id = ++lifetime.next_allocation;
       lifetime.facts.allocations[id] = %(
         pending-allocation $id $target $name
-        $scope_region $pool_region known ${project_location(
-          lifetime.compiler, lifetime.path, lifetime.origin)}
+        $scope_region $pool_region known $(project_location(
+          lifetime.compiler, lifetime.path, lifetime.origin))
       );
       lifetime.pending_allocations.push(
         %(pending-allocation $target $scope_region $pool_region));
@@ -478,8 +478,8 @@ static void _lifetime_return(Lifetime &lifetime, Type target, Var expression) {
     lifetime, expression, operation);
   if (direct) {
     List row = %(
-      return ${lifetime.path} ${lifetime.function} $direct $operation
-      ${project_location(lifetime.compiler, lifetime.path, lifetime.origin)}
+      return $(lifetime.path) $(lifetime.function) $direct $operation
+      $(project_location(lifetime.compiler, lifetime.path, lifetime.origin))
     );
     lifetime.allocation_returns.push(row);
   }
@@ -500,11 +500,11 @@ static void _lifetime_return(Lifetime &lifetime, Type target, Var expression) {
             return;
           }
           List finding = %(
-            finding dangling-return ${lifetime.path}
-            ${lifetime.function} $kind $operation
+            finding dangling-return $(lifetime.path)
+            $(lifetime.function) $kind $operation
             (allocated $allocated) (ended $ended)
-            (returned ${project_location(
-              lifetime.compiler, lifetime.path, lifetime.origin)})
+            (returned $(project_location(
+              lifetime.compiler, lifetime.path, lifetime.origin)))
           );
           lifetime.findings.push(finding);
         }
@@ -525,13 +525,13 @@ static void _lifetime_return(Lifetime &lifetime, Type target, Var expression) {
       Symbol final_status = lifetime.uncertain_allocations.contains(id)
                           ? <unresolved> : status.symbol();
       List pending = %(
-        pending-return ${lifetime.path} ${lifetime.function}
+        pending-return $(lifetime.path) $(lifetime.function)
         $target $name $final_status
-        (scope ${_lifetime_owner(lifetime, scope.integer())})
-        (pool ${_lifetime_owner(lifetime, pool.integer())})
+        (scope $(_lifetime_owner(lifetime, scope.integer())))
+        (pool $(_lifetime_owner(lifetime, pool.integer())))
         (allocated $allocated)
-        (returned ${project_location(
-          lifetime.compiler, lifetime.path, lifetime.origin)})
+        (returned $(project_location(
+          lifetime.compiler, lifetime.path, lifetime.origin)))
         (causes @causes)
       );
       lifetime.pending_returns.push(pending);
@@ -717,8 +717,8 @@ List Lifetime.analyze_unit(
           return_facts.push(%(unresolved));
         Symbol visibility = project_visibility(compiler, type, binding);
         List summary = %(
-          function ${state.target} ${state.function} $visibility
-          (returns @{return_facts.list_free()})
+          function $(state.target) $(state.function) $visibility
+          (returns @(return_facts.list_free()))
         );
         functions.push(summary);
         regions += state.next_region;
@@ -733,12 +733,12 @@ List Lifetime.analyze_unit(
     lifetime-unit
     (summary (regions $regions) (allocations $allocations)
              (transfers $transfers))
-    (functions @{functions.list_free()})
-    (pending-allocations @{pending_allocations.list_free()})
-    (pending-returns @{pending_returns.list_free()})
-    (allocation-returns @{allocation_returns.list_free()})
-    (findings @{findings.list_free()})
-    (unresolved @{unresolved.list_free()})
+    (functions @(functions.list_free()))
+    (pending-allocations @(pending_allocations.list_free()))
+    (pending-returns @(pending_returns.list_free()))
+    (allocation-returns @(allocation_returns.list_free()))
+    (findings @(findings.list_free()))
+    (unresolved @(unresolved.list_free()))
   );
 }
 
@@ -834,7 +834,7 @@ List Lifetime.allocation_returns(List units, String wanted) {
   int count = returns.len();
   return %(
     allocation-returns $wanted (summary (returns $count))
-    (returns @{returns.list_free()})
+    (returns @(returns.list_free()))
   );
 }
 
@@ -941,7 +941,7 @@ List Lifetime.finish(List units) {
     (summary (regions $region_count) (allocations $allocation_count)
              (transfers $transfer_count) (unresolved $unresolved_count)
              (findings $finding_count))
-    (findings @{findings.list_free()})
-    (unresolved @{unresolved.list_free()})
+    (findings @(findings.list_free()))
+    (unresolved @(unresolved.list_free()))
   );
 }

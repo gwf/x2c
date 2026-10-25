@@ -244,7 +244,7 @@ static List _case_shape(Macro t, List names) {
   foreach (List fresh in t.assoc(<fresh>).list()) {
     Atom identity = _fixed(ordinal++);
     replacements = cons(
-      %(${fresh.car()} (binding (!and $identity $identity) ?)),
+      %($(fresh.car()) (binding (!and $identity $identity) ?)),
       replacements);
   }
   pattern = pattern.replace(replacements);

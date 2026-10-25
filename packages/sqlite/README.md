@@ -29,7 +29,7 @@ int main(void) {
   defer report.free();
   report.bind(%(3000000));
   foreach (List row in report)
-    printf("%s", %"${row[0]}: HTTP ${row[1]}, ${row[2]} us\n");
+    printf("%s", %"$(row[0]): HTTP $(row[1]), $(row[2]) us\n");
   return 0;
 }
 ```

@@ -194,7 +194,7 @@ static List _convert_homogeneous_row(
 static List _replace_value(List original, List value) {
   match (original)
     case %((!or ?tag dotinit indexinit) ?key ?inner):
-      return %($tag $key ${_replace_value(inner, value)});
+      return %($tag $key $(_replace_value(inner, value)));
   return value;
 }
 
@@ -262,14 +262,14 @@ static List _zero_value(Type type, List target) {
   Type native = type.is_bitfield() ? type.base_type()
     : target ? %("__typeof__" (parens $target)) : type;
   return %(expr $type (cast $native (expr $type
-    (composite (commas ${$!int{ 0 }})))));
+    (composite (commas $($!int{ 0 }))))));
 }
 
 static List _rejected_initializer(
   Type type, List condition, List zero) {
   List size = %(expr (int) (op ? $condition
     (expr (int) (literal (int) "-1"))
-    ${$!int{ 1 }}));
+    $($!int{ 1 })));
   List check = %(expr (unsigned)
     (sizeof ("(" "char[" $size "]" ")")));
   Symbol comma = <,>;
@@ -321,20 +321,20 @@ static List _capture_leaves(
   Compiler c, List value, Array inputs) {
   match (value) {
     case %((!or ?kind dotinit indexinit) ?key ?inner):
-      return %($kind $key ${_capture_leaves(c, inner, inputs)});
-    case %(expr ?type ${$source_composite_content(%(*items))}): {
+      return %($kind $key $(_capture_leaves(c, inner, inputs)));
+    case %(expr ?type $($source_composite_content(%(*items)))): {
       Array captured = [];
       foreach (List item in items)
         captured.push(_capture_leaves(c, item, inputs));
-      return %(expr $type ${source_composite_content(
-        captured.list_free())});
+      return %(expr $type $(source_composite_content(
+        captured.list_free())));
     }
     /* A value leaf; an internally constructed native call may have a bare
        string callee. */
-    case %(expr ?type (!or ${$source_identifier_content(%(*))}
-                           ${$source_operator_content(%(*))}
-                           ${$source_cast_content(%(*))}
-                           ${$grouped(?)}
+    case %(expr ?type (!or $($source_identifier_content(%(*)))
+                           $($source_operator_content(%(*)))
+                           $($source_cast_content(%(*)))
+                           $($grouped(?))
                            (call *))):
       return _capture_value(c, value, type, inputs);
   }
@@ -354,10 +354,10 @@ static List _capture_value(
 // Capturing native leaves must preserve construction and cache facts.
 static int _is_literal(List value) {
   match (value) {
-    case %(expr ? ${$source_literal_content(%(*))}): return 1;
-    case %(expr ? ${$grouped(?inner)}):
+    case %(expr ? $($source_literal_content(%(*)))): return 1;
+    case %(expr ? $($grouped(?inner))):
       return _is_literal(inner);
-    case %(expr ? ${$source_cast_content(%(? ?inner))}):
+    case %(expr ? $($source_cast_content(%(? ?inner)))):
       return _is_literal(inner);
   }
   return 0;
@@ -367,7 +367,7 @@ static List _materialize_mixed_row(
   Compiler c, List original, List source,
   Array converted, Array captured) {
   String formal = c.fresh_name("initializer_value");
-  List placeholder = %(expr ${source.cadr()} $formal);
+  List placeholder = %(expr $(source.cadr()) $formal);
   List values = converted.list_free();
   List adapted = _adapt_choices(c, source, values, placeholder);
   if (adapted) values = adapted;
@@ -424,17 +424,17 @@ static List _value_adapter(
   Compiler c, List source, List converted) {
   Type from = _adapter_type(c, source.cadr());
   Type result = _adapter_type(c, converted.cadr());
-  List formal = %(expr ${source.cadr()} "_x2c_gensym_initializer_argument");
+  List formal = %(expr $(source.cadr()) "_x2c_gensym_initializer_argument");
   List body = converted.search_replace(%(!quote $source), formal);
   List key = %(iadapt $from $result $body), adapter = NULL;
   $adapter.memo(c, key, adapter) {
     List parameter = c.sym.introduce(c.fresh_name("initializer_arg"));
-    List input = $!(${source.cadr()}){ $parameter };
+    List input = $!($(source.cadr())){ $parameter };
     body = body.search_replace(%(!quote $formal), input);
     List binding = c.sym.introduce(c.fresh_name("initializer_adapt"));
     c.add_early(
       c.wrapper_function(
-        %(static @result), binding, %(${from.parameter_ast(parameter)}),
+        %(static @result), binding, %($(from.parameter_ast(parameter))),
         %((return $result $body))));
     Type callable = %((func ($from)) @result);
     adapter = $!($callable){ $binding };
@@ -497,8 +497,8 @@ static Var _native_modifier(Compiler c, Var modifier, Var &reused) {
       unsigned long long count;
       if (!bound || _literal_integer(bound, count)) return modifier;
       match (bound)
-        case %(expr ? ${$sizeof_grouped(%(struct ?tag (fields
-            (declare (char) (bindings (bind ? ((dim ?))))))))}): {
+        case %(expr ? $($sizeof_grouped(%(struct ?tag (fields
+            (declare (char) (bindings (bind ? ((dim ?)))))))))): {
           reused = %(dim (expr (unsigned long)
             (sizeof (parens (struct $tag)))));
           return modifier;

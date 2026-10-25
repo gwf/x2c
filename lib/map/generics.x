@@ -49,12 +49,12 @@ macro Unit $map.scaffold(
   Literal $reinsert_owner, Literal $insert_owner
 ) {
   static void $reinsert_error(unsigned capacity, int probe) {
-    raise %(invariant (operation ${$reinsert_owner}) (capacity $capacity)
+    raise %(invariant (operation $($reinsert_owner)) (capacity $capacity)
             (probe $probe));
   }
 
   static void $insert_error(unsigned capacity) {
-    raise %(invariant (operation ${$insert_owner}) (capacity $capacity));
+    raise %(invariant (operation $($insert_owner)) (capacity $capacity));
   }
 
   static $key *$key_at($map map, unsigned index) {

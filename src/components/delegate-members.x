@@ -38,9 +38,9 @@ meta static String _delegate_path(Type type, List fields, String member) {
    field's type. */
 meta static void _delegate_fail_packages(
   Type outer, Type type, String member, List fields, List packages) {
-  Array notes = [%"delegate path: ${_delegate_path(outer, fields, NULL)}"];
+  Array notes = [%"delegate path: $(_delegate_path(outer, fields, NULL))"];
   foreach (String package in packages) notes.push(%"package: '$package'");
-  String method = %"${_delegate_type_name(type)}.$member";
+  String method = %"$(_delegate_type_name(type)).$member";
   x2c_diagnostic_fail_at(
     NULL, <type>,
     %"method '$method' is provided by multiple imported packages",
@@ -68,7 +68,7 @@ meta static void _delegate_search(
     List resolution = type.resolve_member(member, 1);
     match (resolution) {
       case %(method ?binding ?):
-        found.push(%(${path.reverse()} $binding));
+        found.push(%($(path.reverse()) $binding));
       case %(ambiguous *packages):
         _delegate_fail_packages(outer, type, member, path.reverse(), packages);
     }
@@ -86,7 +86,7 @@ meta static void _delegate_fail_ambiguous(
     String description = _delegate_path(outer, path.car(), member);
     notes.push(%"delegate path: $description -> $spelling");
   }
-  String method = %"${_delegate_type_name(outer)}.$member";
+  String method = %"$(_delegate_type_name(outer)).$member";
   x2c_diagnostic_fail_at(
     NULL, <type>, %"method '$method' has multiple delegate paths",
     notes.list_free());
@@ -95,10 +95,10 @@ meta static void _delegate_fail_ambiguous(
 /* Reports a search that found no path and returned to an aggregate it
    passed through `fields`. */
 meta static void _delegate_fail_cycle(Type outer, String member, List fields) {
-  String method = %"${_delegate_type_name(outer)}.$member";
+  String method = %"$(_delegate_type_name(outer)).$member";
   x2c_diagnostic_fail_at(
     NULL, <type>, %"delegation cycle resolving $method",
-    %("delegate path: ${_delegate_path(outer, fields, NULL)}"));
+    %("delegate path: $(_delegate_path(outer, fields, NULL))"));
 }
 
 /* The fields of the one delegate path from an `outer` receiver that finds

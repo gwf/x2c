@@ -23,7 +23,7 @@ void Notebook.free(Notebook notebook) {
 
 String Notebook.repr(Notebook notebook) {
   size_t count = notebook.readings.len();
-  return %"Notebook($count readings, scale=${notebook.scale})";
+  return %"Notebook($count readings, scale=$(notebook.scale))";
 }
 
 int main(void) {

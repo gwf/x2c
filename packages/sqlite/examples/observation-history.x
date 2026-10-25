@@ -35,7 +35,7 @@ int main(int argc, char **argv) {
     "FROM observation GROUP BY url ORDER BY url"
   );
   foreach(List row, report)
-    printf("%s", %"${row[0]}: ${row[1]} readings, ${row[2]} failures, " +
-                  %"${row[3]} us average, ${row[4]} us maximum\n");
+    printf("%s", %"$(row[0]): $(row[1]) readings, $(row[2]) failures, " +
+                  %"$(row[3]) us average, $(row[4]) us maximum\n");
   return 0;
 }

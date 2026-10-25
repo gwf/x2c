@@ -302,7 +302,7 @@ static Map _decode_map(List entries) {
 int datum_frame(Buffer out, Var value) {
   Buffer body = auto Buffer.new(0);
   if (!datum_write(body, value, 1)) return 0;
-  out.write(%"${body.len()}\n$body");
+  out.write(%"$(body.len())\n$body");
   return 1;
 }
 
@@ -338,9 +338,9 @@ List datum_result_problem(Var value, Map marks) {
   if (value is not <array> && value is not <map>) return NULL;
   ulong address = (ulong) value.u64;
   if (address in marks)
-    return %(${marks[address] == 1
+    return %($(marks[address] == 1
                  ? "compile-time result contains itself"
-                 : "compile-time result holds one collection twice"}
+                 : "compile-time result holds one collection twice")
              ("each Array and Map in a result is built separately"));
   marks[address] = 1;
   List problem = _items_problem(value, marks);

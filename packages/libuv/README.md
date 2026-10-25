@@ -20,7 +20,7 @@ int main(void) {
   counted.write("alpha\nbeta\ngamma\n").close_stdin();
   loop.run(UV_RUN_DEFAULT);
 
-  printf("%s", %"lines: ${counted.stdout()}");
+  printf("%s", %"lines: $(counted.stdout())");
   return 0;
 }
 ```

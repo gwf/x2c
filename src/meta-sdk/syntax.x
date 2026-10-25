@@ -14,7 +14,7 @@ static macro Stmt $fail.meta_sdk_binding_syntax(Expr $syntax) =>
 static macro Stmt $fail.meta_sdk_binding_known(Expr $value) =>
   MetaContext.reject(
     "Code.binding_spelling requires a known binding",
-    %("binding: ${$value.repr()}"));
+    %("binding: $($value.repr())"));
 
 static macro Stmt $fail.meta_sdk_binding_identifier(Expr $syntax) =>
   _reject_value(
@@ -34,8 +34,8 @@ static macro Stmt $fail.meta_sdk_unique_stem(Expr $stem) =>
 static macro Stmt $fail.meta_sdk_parameter_missing(
   Expr $function, Expr $wanted) =>
   MetaContext.reject(
-    %"Code.parameter cannot find '${$wanted}'",
-    %("function: ${Code.name($function).repr()}"));
+    %"Code.parameter cannot find '$($wanted)'",
+    %("function: $(Code.name($function).repr())"));
 
 static macro Stmt $fail.meta_sdk_constant() =>
   MetaContext.reject("captured code is not a compile-time constant", NULL);
@@ -166,10 +166,10 @@ List Code.declared_bindings(List declaration) {
           }
           case %(bind ?name ?mods): {
             List row = %(
-              declare ${declaration.cadr()}
+              declare $(declaration.cadr())
                 (bindings (bind $name $mods))
             );
-            result.push(%(expr ${row.type_from_ast()} (ident $name)));
+            result.push(%(expr $(row.type_from_ast()) (ident $name)));
           }
         }
       }

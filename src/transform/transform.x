@@ -42,13 +42,13 @@
 static macro Stmt $fail.transform_slice_unsupported(
   Expr $c, Expr $site, Expr $type, Expr $notes) =>
   $c.report_error(
-    <xform>, %"type ${$type} does not support slicing",
+    <xform>, %"type $($type) does not support slicing",
     $site, $notes);
 
 static macro Stmt $fail.transform_no_shipped_rule(
   Expr $c, Expr $site, Expr $form) =>
   $c.report_error(
-    <xform>, %"no rule lowers this ${$form}",
+    <xform>, %"no rule lowers this $($form)",
     $site, %("the shipped component that owns it is not linked or failed to "
             "collect; rebuild the compiler from the current prelude sources"));
 

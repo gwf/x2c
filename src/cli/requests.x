@@ -77,7 +77,7 @@ List CliRequest.package_roots(CliRequest request) {
 }
 
 static macro Stmt $fail.cli_input_not_file(Expr $input) =>
-  Diagnostics.driver_error(%"input is not a regular file: ${$input}");
+  Diagnostics.driver_error(%"input is not a regular file: $($input)");
 
 static macro Stmt $report.cli_input_directory(Expr $input) {
   fprintf(stderr, "x2c: error: input is a directory: %s\n", $input);

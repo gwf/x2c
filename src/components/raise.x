@@ -19,7 +19,7 @@
 /* The linked meta copies include these diagnostics from this owner. */
 macro Stmt $report.raise_mutable_detail(Expr $site, Expr $type) =>
   x2c_diagnostic_error_at(
-    $site, <type>, %"raise detail type ${$type.repr()} is not immutable",
+    $site, <type>, %"raise detail type $($type.repr()) is not immutable",
     %("use a numeric value, enum, Symbol, Atom, String, List, or Var"));
 
 /* Whether a detail of type `type` holds no identity a caught Error could
@@ -60,7 +60,7 @@ meta Code raise_lowering(Code node) {
     }
     if (changed)
       return Code.lowered(
-        %(raise $symbol (args @{converted.list_free()})), NULL);
+        %(raise $symbol (args @(converted.list_free()))), NULL);
   }
   return node;
 }

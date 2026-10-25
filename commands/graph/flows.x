@@ -35,7 +35,7 @@ static List _flow_summary(FlowUnit &unit, Var value, Map locals) {
       Var position;
       if (unit.parameters.try_get(binding, position)) return position;
       if (locals.contains(binding)) return %(local $spelling);
-      return %(identifier ${unit.compiler.emitted_binding_name(binding)});
+      return %(identifier $(unit.compiler.emitted_binding_name(binding)));
     }
     case %(call ?callee (args *)): {
       String name;
@@ -58,8 +58,8 @@ static List _flow_arguments(
   int position = 0;
   foreach (Var value, values) {
     arguments.push(
-      %(argument $position ${_flow_summary(unit, value, locals)}
-        ${_flow_source(unit, value, origin, locals)}));
+      %(argument $position $(_flow_summary(unit, value, locals))
+        $(_flow_source(unit, value, origin, locals))));
     position++;
   }
   return arguments.list_free();
@@ -67,7 +67,7 @@ static List _flow_arguments(
 
 static List _flow_source(FlowUnit &unit, Var value, int origin, Map locals) {
   if (value is not <list>)
-    return %(unknown "value" ${_flow_location(unit, origin)});
+    return %(unknown "value" $(_flow_location(unit, origin)));
   List node = value;
   match (node) {
     case %(at ?next_origin ?inner):
@@ -80,7 +80,7 @@ static List _flow_source(FlowUnit &unit, Var value, int origin, Map locals) {
       Var position;
       if (unit.parameters.try_get(binding, position)) return position;
       if (locals.contains(binding)) return locals[binding];
-      return %(value ${_flow_summary(unit, node, locals)});
+      return %(value $(_flow_summary(unit, node, locals)));
     }
     case %(call ? (args *arguments)): {
       String name = NULL;
@@ -88,24 +88,24 @@ static List _flow_source(FlowUnit &unit, Var value, int origin, Map locals) {
         unit.compiler, unit.definitions, node, name, NULL);
       if (name == "List_var" && arguments && !arguments.cdr())
         return %(
-          wrapper $name ${_flow_location(unit, origin)}
-          ${_flow_source(unit, arguments.car(), origin, locals)}
+          wrapper $name $(_flow_location(unit, origin))
+          $(_flow_source(unit, arguments.car(), origin, locals))
         );
       return %(
-        call $target $name ${_flow_location(unit, origin)}
-        (arguments @{_flow_arguments(unit, arguments, origin, locals)})
+        call $target $name $(_flow_location(unit, origin))
+        (arguments @(_flow_arguments(unit, arguments, origin, locals)))
       );
     }
     case %(op ? ? ?ontrue ?onfalse):
       return %(
-        choice ${_flow_location(unit, origin)}
-        ${_flow_source(unit, ontrue, origin, locals)}
-        ${_flow_source(unit, onfalse, origin, locals)}
+        choice $(_flow_location(unit, origin))
+        $(_flow_source(unit, ontrue, origin, locals))
+        $(_flow_source(unit, onfalse, origin, locals))
       );
     case %(op (!or (!quote .) (!quote ->)) ? (?)):
-      return %(unknown "field-read" ${_flow_location(unit, origin)});
+      return %(unknown "field-read" $(_flow_location(unit, origin)));
   }
-  return %(value ${_flow_summary(unit, node, locals)});
+  return %(value $(_flow_summary(unit, node, locals)));
 }
 
 static void _flow_collect_calls(
@@ -152,7 +152,7 @@ static void _flow_invalidate_addressed(
       if (binding && locals.contains(binding)) {
         List prior = locals[binding];
         locals[binding] = %(
-          unknown "address-mutation" ${_flow_location(unit, origin)} $prior
+          unknown "address-mutation" $(_flow_location(unit, origin)) $prior
         );
       }
       return;
@@ -179,7 +179,7 @@ static void _flow_merge_locals(
       continue;
     }
     locals[binding] = %(
-      unknown "alias-merge" ${_flow_location(unit, origin)}
+      unknown "alias-merge" $(_flow_location(unit, origin))
       $first_source $second_source
     );
   }
@@ -189,8 +189,8 @@ static void _flow_set_local(
   FlowUnit &unit, List binding, Var value, Symbol kind, int origin,
   Map locals) {
   locals[binding] = %(
-    $kind ${Ast.binding_spelling(binding)} ${_flow_location(unit, origin)}
-    ${_flow_source(unit, value, origin, locals)}
+    $kind $(Ast.binding_spelling(binding)) $(_flow_location(unit, origin))
+    $(_flow_source(unit, value, origin, locals))
   );
 }
 
@@ -225,7 +225,7 @@ static void _flow_statement(
             _flow_set_local(unit, binding, initial, <local>, origin, locals);
           default:
             locals[binding] = %(
-              unknown "uninitialized" ${_flow_location(unit, origin)}
+              unknown "uninitialized" $(_flow_location(unit, origin))
             );
         }
       }
@@ -238,8 +238,8 @@ static void _flow_statement(
         _flow_set_local(unit, binding, right, <assignment>, origin, locals);
       else
         unit.unresolved.push(
-          %(unresolved "field-storage" ${_flow_location(unit, origin)}
-            ${_flow_source(unit, right, origin, locals)}));
+          %(unresolved "field-storage" $(_flow_location(unit, origin))
+            $(_flow_source(unit, right, origin, locals))));
       _flow_collect_effects(unit, right, origin, locals);
       return;
     }
@@ -248,9 +248,9 @@ static void _flow_statement(
       if (binding && operator != <=>) {
         List prior = locals.contains(binding)
                    ? locals[binding].list()
-                   : %(unknown "prior" ${_flow_location(unit, origin)});
+                   : %(unknown "prior" $(_flow_location(unit, origin)));
         locals[binding] = %(
-          unknown "mutation" ${_flow_location(unit, origin)} $prior
+          unknown "mutation" $(_flow_location(unit, origin)) $prior
         );
       }
       _flow_collect_effects(unit, node, origin, locals);
@@ -258,8 +258,8 @@ static void _flow_statement(
     }
     case %(return ? ?expression): {
       unit.returns.push(
-        %(return ${_flow_location(unit, origin)}
-          ${_flow_source(unit, expression, origin, locals)}));
+        %(return $(_flow_location(unit, origin))
+          $(_flow_source(unit, expression, origin, locals))));
       _flow_collect_effects(unit, expression, origin, locals);
       return;
     }
@@ -361,13 +361,13 @@ List _x2c_flow_analyze_unit(Compiler compiler, List ast, String path) {
         unit.calls.sort();
         unit.unresolved.sort();
         functions.push(
-          %(function ${definitions[binding]}
-            ${compiler.emitted_binding_name(binding)}
-            ${project_visibility(compiler, type, binding)}
-            (parameters @{parameter_records.list_free()})
-            (returns @{unit.returns.list_free()})
-            (calls @{unit.calls.list_free()})
-            (unresolved @{unit.unresolved.list_free()})));
+          %(function $(definitions[binding])
+            $(compiler.emitted_binding_name(binding))
+            $(project_visibility(compiler, type, binding))
+            (parameters @(parameter_records.list_free()))
+            (returns @(unit.returns.list_free()))
+            (calls @(unit.calls.list_free()))
+            (unresolved @(unit.unresolved.list_free()))));
       }
   functions.sort();
   return functions.list_free();
@@ -543,7 +543,7 @@ static void _flow_trace(
     case %((!or local assignment) ?spelling ?location ?inner):
       _flow_trace(
         trace, inner, current, environment,
-        cons(%(step ${source.car()} $spelling $location), suffix), blocked);
+        cons(%(step $(source.car()) $spelling $location), suffix), blocked);
     case %(return ?location ?inner):
       _flow_trace(
         trace, inner, current, environment,
@@ -685,13 +685,13 @@ List _x2c_flow_finish(
   if (!producer)
     trace.unresolved.push(
       %(unresolved
-        ${by_name.contains(producer_name)
-          ? "ambiguous-producer" : "missing-producer"}));
+        $(by_name.contains(producer_name)
+          ? "ambiguous-producer" : "missing-producer")));
   if (!consumer)
     trace.unresolved.push(
       %(unresolved
-        ${by_name.contains(consumer_name)
-          ? "ambiguous-consumer" : "missing-consumer"}));
+        $(by_name.contains(consumer_name)
+          ? "ambiguous-consumer" : "missing-consumer")));
   if (producer && consumer) {
     _flow_build_taint(trace);
     foreach (List function, functions)
@@ -718,7 +718,7 @@ List _x2c_flow_finish(
                         %((consumer $consumer $location
                            (argument $position)
                            (other-arguments
-                             @{_flow_other_arguments(arguments, position)}))),
+                             @(_flow_other_arguments(arguments, position))))),
                         NULL);
                     position++;
                   }
@@ -746,9 +746,9 @@ List _x2c_flow_finish(
   return %(
     flows $producer_name $consumer_name
     (definitions
-      (producer ${_flow_definition(by_target, producer)})
-      (consumer ${_flow_definition(by_target, consumer)}))
-    (paths @{_flow_sorted_unique(trace.paths)})
-    (unresolved @{_flow_sorted_unique(trace.unresolved)})
+      (producer $(_flow_definition(by_target, producer)))
+      (consumer $(_flow_definition(by_target, consumer))))
+    (paths @(_flow_sorted_unique(trace.paths)))
+    (unresolved @(_flow_sorted_unique(trace.unresolved)))
   );
 }

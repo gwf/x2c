@@ -367,7 +367,7 @@ static void _unused_statics(Lint l, Compiler c, List ast, List rows):
             continue
           struct Token *tokens = c.tokenizer.tokens
           int first = tokens[start].line, last = tokens[end - 1].line
-          l.unused.push(%($name $display ${absent[name]} $line $first $last))
+          l.unused.push(%($name $display $(absent[name]) $line $first $last))
 
 /** Runs the rules that read the compiler's parse of the unit: `ast`, its
     `Compiler.definition_rows` `rows`, and the facts `c` recorded while

@@ -109,8 +109,8 @@ String nest_four_deep(int value) {
   if (value > 0) {
     for (int at = 0; at < value; at++) {
       if (at % 2) {
-        List form = %(item @{%(value $at)});
-        text = %"${text}{${form.len()}}";
+        List form = %(item @(%(value $at)));
+        text = %"$(text){$(form.len())}";
       }
       text = text + ";";
     }

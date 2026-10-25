@@ -15,10 +15,10 @@ static macro Stmt $fail.protocol_decl_conflict(
   Expr $c, Expr $site, Expr $base, Expr $first_location,
   Expr $second_location) {
   {
-    String first = %"first: ${$first_location}";
-    String second = %"second: ${$second_location}";
+    String first = %"first: $($first_location)";
+    String second = %"second: $($second_location)";
     $c.report_error(
-      <protocol>, %"conflicting protocol declarations for ${$base.repr()}",
+      <protocol>, %"conflicting protocol declarations for $($base.repr())",
       $site, %($first $second));
   }
 }
@@ -27,14 +27,14 @@ static macro Stmt $fail.protocol_type_undeclared(
   Expr $c, Expr $origin, Expr $spelling) =>
   $c.report_error(
     <protocol>,
-    %"adoption participant '${$spelling}' does not name a declared type",
+    %"adoption participant '$($spelling)' does not name a declared type",
     $origin, NULL);
 
 static macro Stmt $fail.protocol_adoption_conflict(
   Expr $c, Expr $site, Expr $adoption, Expr $first_location) {
   {
-    String first = %"first: ${_location_string($first_location)}";
-    String second = %"second: ${_location_string($adoption.location)}";
+    String first = %"first: $(_location_string($first_location))";
+    String second = %"second: $(_location_string($adoption.location))";
     String spelling =
       _adoption_spelling($adoption.base, $adoption.participant);
     $c.report_error(
@@ -46,8 +46,8 @@ static macro Stmt $fail.protocol_adoption_conflict(
 static macro Stmt $report.protocol_adoption_conflict(
   Expr $c, Expr $site, Expr $adoption, Expr $previous) {
   {
-    String first = %"first: ${_location_string(_adoption_location($previous))}";
-    String second = %"second: ${_location_string($adoption.location)}";
+    String first = %"first: $(_location_string(_adoption_location($previous)))";
+    String second = %"second: $(_location_string($adoption.location))";
     String spelling =
       _adoption_spelling($adoption.base, $adoption.participant);
     $c.diagnostics.report(
@@ -189,8 +189,8 @@ module String _location_string(List location) {
   String file = _location_file(location);
   Var line = location ? location.assoc(<line>) : void;
   Var column = location ? location.assoc(<column>) : void;
-  return %"$file:${line.is_integer() ? line.integer() : 1}:${
-    column.is_integer() ? column.integer() : 1}";
+  return %"$file:$(line.is_integer() ? line.integer() : 1):$(
+    column.is_integer() ? column.integer() : 1)";
 }
 
 module int _is_private(Compiler c, String name) =>
@@ -206,10 +206,10 @@ module String _type_spelling(Type type) =>
   type.is_bare_typedef_name() ? type.car() : type.repr();
 
 module String _member_spelling(Type participant, String member) =>
-  %"${participant.car()}_$member";
+  %"$(participant.car())_$member";
 
 module String _adoption_spelling(Type base, Type participant) =>
-  %"${_type_spelling(base)}(${_type_spelling(participant)})";
+  %"$(_type_spelling(base))($(_type_spelling(participant)))";
 
 static String _representation_error(Type representation) {
   String spelling = _type_spelling(representation);
@@ -230,8 +230,8 @@ String Compiler.reverse_converter_spelling(
      participant[:split] in c.package_roots)
       ? participant[:split] : NULL;
   String bare = package ? participant[split + 2:] : participant;
-  String binding = %"${base_name}_$infix${bare.lower()}";
-  return package ? %"${package}__$binding" : binding;
+  String binding = %"$(base_name)_$infix$(bare.lower())";
+  return package ? %"$(package)__$binding" : binding;
 }
 
 /* publication
@@ -302,7 +302,7 @@ static void _retain_meta_protocol(Compiler c, List adoption) {
   Type (base, participant) = adoption.cdr();
   _retain_source_node(
     c, %(meta-protocol $base $participant), _adoption_storage(adoption),
-    %(meta-protocol @{_adoption_location(adoption)}));
+    %(meta-protocol @(_adoption_location(adoption))));
 }
 
 static void _retain_source_node(
@@ -368,7 +368,7 @@ static List _publish(AdoptionDraft &a) {
   _check_previous(a);
   _install(a);
   // An adoption resolved when the parse began has reported its failures.
-  List pair = %(${a.base} ${a.participant});
+  List pair = %($(a.base) $(a.participant));
   int resolved = pair in c.conforms;
   c.conforms.del(pair);
   c.proto_cache = {};
@@ -377,7 +377,7 @@ static List _publish(AdoptionDraft &a) {
   List published = _node(a);
   // A generated class declares several adoptions at one location.
   _retain_source_node(
-    c, published, a.storage, %(adopt ${a.base} @{a.location}));
+    c, published, a.storage, %(adopt $(a.base) @(a.location)));
   return published;
 }
 
@@ -416,7 +416,7 @@ static void _report_modifier(AdoptionDraft &a, String message) {
 
 module Symbol _tag_value(List expression) {
   match (expression)
-    case %(expr ("Symbol") ${$source_literal_content(%(("Symbol") ? ?tag))}):
+    case %(expr ("Symbol") $($source_literal_content(%(("Symbol") ? ?tag)))):
       if (tag is <symbol>) return tag;
   return 0;
 }
@@ -461,7 +461,7 @@ static void _check_previous(AdoptionDraft &a) {
   Compiler c = a.c;
   if (c.shallow) return;
   String path = _canonical_file(c, a.location);
-  List key = %("parsed-protocol-adoption" ${a.base} ${a.participant} $path);
+  List key = %("parsed-protocol-adoption" $(a.base) $(a.participant) $path);
   Var previous;
   if (!c.protocol_helpers.try_get(key, previous)) {
     c.protocol_helpers[key] = _node(a);
@@ -479,8 +479,8 @@ static void _install(AdoptionDraft &a) {
   if (a.storage == <static> && path != _path(c)) return;
   a.participant.register_var_adoption(a.representation, a.tag);
   List key = a.storage == <static>
-           ? %(${a.base} ${a.participant} $path)
-           : %(${a.base} ${a.participant});
+           ? %($(a.base) $(a.participant) $path)
+           : %($(a.base) $(a.participant));
   List row = _node(a);
   Var stored;
   if (!c.adoptions.try_get(key, stored)) {
@@ -534,7 +534,7 @@ static void _install_stored(Compiler c, List value) {
     }
     case %(adopt ?base ?participant ?storage
              (tag (!set ?tag_expression (expr ("Symbol")
-               ${$source_literal_content(%(("Symbol") ? ?candidate))})))
+               $($source_literal_content(%(("Symbol") ? ?candidate))))))
              ?location) if (candidate is <symbol>): {
       Symbol tag = candidate;
       AdoptionDraft draft = {

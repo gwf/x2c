@@ -12,14 +12,14 @@ List Compiler.lower_lambda_expr(Compiler c, List expression) {
       expression, %!(List child) => c.lower_lambda_expr(child));
   Macro lambda = $lambda_expression;
   match (expression) {
-    case %(expr ?type ${$grouped(?inner)}): {
+    case %(expr ?type $($grouped(?inner))): {
       List lowered = c.lower_lambda_expr(inner);
       if (lowered == inner) return expression;
       Macro grouped = $grouped;
       return c.rebuild_expression(type, grouped(lowered));
     }
-    case %(expr ("Func") ${$lambda_expression(?body, *params)}): {
-      Type signature = %((func ${c.lambda_param_types(params)}) "Var");
+    case %(expr ("Func") $($lambda_expression(?body, *params))): {
+      Type signature = %((func $(c.lambda_param_types(params))) "Var");
       return c.lift_func_expression(
         c.rebuild_expression(signature, lambda(body, params)));
     }
@@ -38,7 +38,7 @@ module Ast _slice_node(
     case %(?(String name)): nominal = name;
   if (!nominal)
     $fail.transform_slice_unsupported(c, NULL, type, NULL);
-  String fnname = %"${nominal}_getslice";
+  String fnname = %"$(nominal)_getslice";
   if (!c.sym.get(%($fnname)))
     $fail.transform_slice_unsupported(c, NULL, type, %());
   start = _slice_bound(start);
@@ -63,7 +63,7 @@ static List _access_source(List expression) {
     case %(expr ?type (getindex ?base ?key)):
       return %(expr $type (index $base $key));
     case %(expr ?type (parens ?inner)):
-      return %(expr $type (parens ${_access_source(inner)}));
+      return %(expr $type (parens $(_access_source(inner))));
   }
   return expression;
 }
@@ -157,7 +157,7 @@ static Ast _op_chain(Compiler c, Ast ast) {
     List opnode = ast.caddr();
     List rewritten = _operator(c, opnode);
     if (rewritten != opnode) {
-      rebuilt = %(expr $type ${_step(c, rewritten)});
+      rebuilt = %(expr $type $(_step(c, rewritten)));
       break;
     }
     types.push(type);
@@ -202,7 +202,7 @@ module List _cast(Compiler c, List ast) {
       int target_var = c.sym.is_var_type(type);
       int unresolved = 0;
       match (expression)
-        case %(expr () ${$source_identifier_content(%(?name))}):
+        case %(expr () $($source_identifier_content(%(?name)))):
           unresolved = 1;
       int target_func = source_type &&
         c.sym.resolve_key(type) === c.sym.resolve_key(%("Func"));
@@ -222,7 +222,7 @@ module List _cast(Compiler c, List ast) {
 module List _index(Compiler c, List ast) {
   Macro indexed = $indexed;
   match (ast)
-    case ${$indexed(?base, %(!set ?selector (expr ?type ?)))}
+    case $($indexed(?base, %(!set ?selector (expr ?type ?))))
         if (c.sym.is_var_type(type)): {
       List converted = c.convert_expression(selector, %(long));
       return c.rebuild_expression(NULL, indexed(base, converted)).caddr();
@@ -275,7 +275,7 @@ module List _return(Compiler c, List ast) {
 
 module List _call(Compiler c, List ast) {
   match (ast)
-    case ${$called(?callee, *arguments)}:
+    case $($called(?callee, *arguments)):
       match (callee.cadr()) {
         case %((func ?parameters) *):
           return _typed_call(c, callee, parameters, arguments);
@@ -289,7 +289,7 @@ static List _typed_call(
   Compiler c, List callee, List params, List args) {
   String callee_name = NULL;
   match (callee) {
-    case %(expr ? ${$source_identifier_content(%(?binding))}):
+    case %(expr ? $($source_identifier_content(%(?binding)))):
       callee_name = Ast.binding_spelling(binding);
   }
   int list_varargs = callee_name == "List_list_n";

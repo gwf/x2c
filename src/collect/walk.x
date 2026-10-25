@@ -71,7 +71,7 @@ int Compiler.is_prelude_source(String path) =>
 
 static void _add_prelude(Compiler c, Map globs, Map visited) {
   foreach (String source in Compiler.prelude_sources()) {
-    String path = %"${x2c_get_root()}/$source";
+    String path = %"$(x2c_get_root())/$source";
     String canonical = _canonical_path(path);
     visited[canonical] = 1;
     c.add_translation_dependency(canonical);
@@ -99,7 +99,7 @@ static void _add_prelude(Compiler c, Map globs, Map visited) {
 static int syntax_walking = 0;
 
 static String _syntax_path(void) =>
-  _canonical_path(%"${x2c_get_root()}/etc/compiler-prelude.x");
+  _canonical_path(%"$(x2c_get_root())/etc/compiler-prelude.x");
 
 static void _add_syntax_prelude(Compiler c, Map globs, Map visited) {
   String canonical = _syntax_path();
@@ -232,7 +232,7 @@ static void _walk_file(
       Map metadata = _cache_map();
       // Advertisements share this table while later segments fill it.
       metadata[%("source-node" (meta-hashes $provider 0))] =
-        %(meta-hashes $provider ${w.hashes});
+        %(meta-hashes $provider $(w.hashes));
       w.parts.push(metadata);
       globs.merge(metadata);
     }
@@ -414,7 +414,7 @@ static void _include_search_dependency(
 module String _include_search_hash(Compiler c, String path) {
   if (path.startswith("cwd:")) path = path[4:];
   return c.sources.exists(path) ?
-    %"search:${Compiler.portable_path(Path.absolute(path))}" : "search:absent";
+    %"search:$(Compiler.portable_path(Path.absolute(path)))" : "search:absent";
 }
 
 /* A file still being walked, as in an include cycle, has no entry yet. */
@@ -560,8 +560,8 @@ static void _queue_public_bodies(FileWalk &w) {
   foreach (Var part in w.parts) if (part is <map>) own.merge(part);
   w.c.public_bodies = 1;
   w.c.pending_inline_bodies.push(
-    %(${w.c} ${w.path} ${w.text} ${w.globs} $own
-      ${w.statics} ${w.hashes} @{w.module ? %(${w.module.markers}) : NULL}));
+    %($(w.c) $(w.path) $(w.text) $(w.globs) $own
+      $(w.statics) $(w.hashes) @(w.module ? %($(w.module.markers)) : NULL)));
 }
 
 static int _produces(FileWalk &w) {
@@ -588,7 +588,7 @@ static void _publish(FileWalk &w) {
     }
     // Keep the walk's proof before inline typing enriches entry dependencies.
     metadata[%("source-node" (provider-source $provider 0))] =
-      %(source $hash ${_stored_dependencies(w.dependencies)});
+      %(source $hash $(_stored_dependencies(w.dependencies)));
     w.parts.push(metadata);
   }
   List parts = w.parts.list_free();
@@ -600,7 +600,7 @@ static void _publish(FileWalk &w) {
   }
   List definitions = _sorted_names(w.definitions);
   List roots = _interface_include_dirs(w.c, w.path);
-  List entry = %($parts $hash $definitions ${w.dependencies} $roots);
+  List entry = %($parts $hash $definitions $(w.dependencies) $roots);
   _require_retained(entry.try_own());
   Var prior = _process_cache()[w.path];
   if (prior is <list> && List.equal(prior.list()[4], roots)) return;
@@ -666,7 +666,7 @@ Map Compiler.included_compile_time_effects(Compiler c, Map globs) {
   if (c.prelude) {
     Array effects = [];
     foreach (String source in Compiler.prelude_sources()) {
-      String path = _canonical_path(%"${x2c_get_root()}/$source");
+      String path = _canonical_path(%"$(x2c_get_root())/$source");
       _replay_included(c, globs, path, visited, effects, NULL);
     }
     with (c.builtin_defs = 1) {
