@@ -579,6 +579,8 @@ auto { Array temporary = []; }
 // <- storage.modifier.auto.x2c
 auto for (int i = 0; i < 2; i++) {}
 // <- storage.modifier.auto.x2c
+auto(&destination) { work(); }
+// <- storage.modifier.auto.x2c
 auto((choose(), &destination)) { work(); }
 // <- storage.modifier.auto.x2c
 auto static int regional(void) { return 1; }
