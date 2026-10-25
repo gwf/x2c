@@ -777,74 +777,78 @@ grep -q "warm_name" "$embed_root/warm/main.c" ||
   fail "changed embedded text did not invalidate the header interface"
 
 # Declaration bundles retain one production across source segments and the
-# full parse. Nested producers and body-only Lisp keep their captured values;
-# late ordinary methods suppress only the matching default candidate.
+# full parse. Nested producers keep their captured values; late ordinary
+# methods and late recipes suppress only the matching default candidate.
+# Native producers append to an effects file, and meta static counters
+# observe how often each unit ran them.
 declarations="$BUILD/declaration-bundles"
 mkdir -p "$declarations/src"
-cat >"$declarations/src/effects.xlisp" <<EOF2
-(def read-file
-  (bind "lisp_read_file" '((func (("String"))) "Var")))
-(def write-file
-  (bind "lisp_write_file" '((func (("String") ("String"))) "Var")))
-(def projection-effect-path "$declarations/effects")
-(write-file "$declarations/effects"
-  (string-append (read-file "$declarations/effects") "i"))
-(def projection-count 0)
-(defun projection-name ()
-  (begin
-    (def projection-count (+ projection-count 1))
-    (write-file "$declarations/effects"
-      (string-append (read-file "$declarations/effects") "x"))
-    (x2c.ident "projected_answer")))
-(defun projection-field ()
-  (begin
-    (write-file "$declarations/effects"
-      (string-append (read-file "$declarations/effects") "f"))
-    (x2c.ident "value")))
+cat >"$declarations/src/effects.x" <<EOF2
+#include "path.x"
+meta int projection_effect(String mark) {
+  String path = "$declarations/effects";
+  Path.write_text(path, %"\${Path.read_text(path)}\$mark");
+  return 0;
+}
 EOF2
 cat >"$declarations/src/producer.x" <<'EOF2'
-$(import "effects.xlisp")
-$(write-file projection-effect-path
-  (string-append (read-file projection-effect-path) "m"))
-macro Field $projection.field() { int $(projection-field); }
+#include "effects.x"
+meta static int projection_runs = 0;
+meta List projection_name(void) {
+  projection_runs += 1;
+  projection_effect("x");
+  return x2c_ident("projected_answer");
+}
+meta int projection_count(void) => projection_runs;
+meta List projection_field(void) {
+  projection_effect("f");
+  return x2c_ident("value");
+}
+meta List projection_defaults(void) => %(
+  (default (function (int) (bind ("selected_answer") ((fnmod (params))))
+    (block (return () (expr (int) (literal (int) "7"))))))
+  (default (function (int) (bind ("default_answer") ((fnmod (params))))
+    (block (return () (expr (int) (literal (int) "9")))))));
+macro Field $projection.field() { int $projection_field(); }
 macro Declaration $projection.inner(Expr $value) {
-  int $(projection-name)(void) { return $(car (list $value)); }
-  @(quote (
-    (default (function (int) (bind ("selected_answer") ((fnmod (params))))
-      (block (return () (expr (int) (literal (int) "7"))))))
-    (default (function (int) (bind ("default_answer") ((fnmod (params))))
-      (block (return () (expr (int) (literal (int) "9"))))))
-  ))
+  int $projection_name()(void) { return $value; }
+  @projection_defaults()
 }
 macro Declaration $projection.outer(Expr $value) {
   $projection.inner($value);
 }
 EOF2
+cat >"$declarations/src/local-meta.x" <<'EOF2'
+meta static int projection_local_runs = 0;
+meta List projection_local_name(void) {
+  projection_local_runs += 1;
+  return x2c_ident("local_answer");
+}
+meta int projection_local_count(void) => projection_local_runs;
+meta List projection_late(void) =>
+  %(function (int) (bind ("default_answer") ((fnmod (params))))
+    (block (return () (expr (int) (literal (int) "29")))));
+meta List projection_late_rows(void) =>
+  %((declaration-recipe projection_late ()));
+EOF2
 cat >"$declarations/src/provider.x" <<'EOF2'
 #include "producer.x"
-$(def projection-local-count 0)
-$(defun projection-local-name ()
-  (begin
-    (def projection-local-count (+ projection-local-count 1))
-    (x2c.ident "local_answer")))
-$(defun projection-late ()
-  '(function (int) (bind ("default_answer") ((fnmod (params))))
-    (block (return () (expr (int) (literal (int) "29"))))))
+#include "local-meta.x"
 $projection.outer(42);
 class ProjectedField { $projection.field(); };
 int field_value(ProjectedField value) { return value.value; }
 #include "boundary.x"
 macro Declaration $projection.local() {
-  int $(projection-local-name)(void) { return 23; }
+  int $projection_local_name()(void) { return 23; }
 }
 $projection.local();
 macro Declaration $projection.late() {
-  @(quote ((declaration-recipe projection-late ())))
+  @projection_late_rows()
 }
 $projection.late();
 int selected_answer(void) { return 11; }
-int imported_count(void) { return $(x2c.literal.int projection-count); }
-int local_count(void) { return $(x2c.literal.int projection-local-count); }
+int imported_count(void) { return $projection_count(); }
+int local_count(void) { return $projection_local_count(); }
 EOF2
 : >"$declarations/src/boundary.x"
 cat >"$declarations/src/consumer.x" <<'EOF2'
@@ -861,17 +865,23 @@ for mode in default live cpp; do
     live) options+=(--live-symbols) ;;
     cpp) options+=(--cpp-symbols) ;;
   esac
-  # Each unit evaluates public imports and Lisp in its own session.
-  # Declaration and field production remain retained across both units.
+  # A provider whose collection ran native code is walked cold by each unit
+  # that includes it (src/collect/cache.x), so each unit produces once:
+  # its collection and full parse share that one production.
   "$X2C" translate -j 1 ${options[@]+"${options[@]}"} --out-dir "$declarations/$mode" \
     "$declarations/src/provider.x" "$declarations/src/consumer.x"
-  [ "$(cat "$declarations/effects")" = imxfim ] ||
-    fail "declaration import, producer, or field ran twice in $mode mode"
+  [ "$(cat "$declarations/effects")" = xfxf ] ||
+    fail "declaration producer or field ran other than once per unit in $mode mode"
   for file in provider.c provider.h consumer.c consumer.h; do
     cmp -s "$declarations/default/$file" "$declarations/$mode/$file" ||
       fail "declaration projection differs in $mode mode: $file"
   done
 done
+: >"$declarations/effects"
+mkdir -p "$declarations/solo"
+"$X2C" translate --out-dir "$declarations/solo" "$declarations/src/provider.x"
+[ "$(cat "$declarations/effects")" = xf ] ||
+  fail "collection and the full parse did not share one declaration production"
 grep -q 'return 11;' "$declarations/default/provider.c" ||
   fail "late ordinary method did not replace its default"
 ! grep -q 'return 7;' "$declarations/default/provider.c" ||
@@ -885,7 +895,7 @@ grep -q 'return 42;' "$declarations/default/provider.c" ||
 for counter in imported_count local_count; do
   grep -A2 "^int $counter(void)" "$declarations/default/provider.c" |
     grep -q 'return 1;' ||
-    fail "declaration replay reset or repeated compile-time source effects"
+    fail "declaration replay reset or repeated compile-time state"
 done
 
 # Private default methods retain internal linkage, and arbitrary recipe data
@@ -923,31 +933,22 @@ grep -q 'return 17;' "$declarations/default/private.c" ||
   fail "retained recipe data collided with a serialization marker"
 
 # Persisted projection retains the mutable signature overlay in the header
-# cache owner. A warm consumer must see default functions without rerunning
-# the producer; changing its macro dependency invalidates that surface.
+# cache owner. A provider whose collection ran native code records that in
+# its interface, so a warm consumer walks it cold and produces once more
+# (src/collect/cache.x); changing its macro dependency changes that surface.
 declaration_root="$BUILD/declaration-artifact"
-mkdir -p "$declaration_root/src" "$declaration_root/etc" \
-  "$declaration_root/include" "$declaration_root/lib" \
-  "$declaration_root/builds/0" "$declaration_root/out"
-cp "$X2C" "$declaration_root/builds/0/x2c"
-cp "$ROOT/etc/"*.xlisp "$ROOT/etc/"*.x "$declaration_root/etc/"
-copy_runtime_sources "$declaration_root/lib/"
-mkdir -p "$declaration_root/src"
-mkdir -p "$declaration_root/src/components"
-cp "$ROOT"/src/components/*.x "$declaration_root/src/components"/
-cp "$ROOT"/src/grammar.x "$declaration_root/src/"
+mkdir -p "$declaration_root/src" "$declaration_root/out"
 cat >"$declaration_root/src/producer.x" <<'EOF2'
-$(def read-file (bind "lisp_read_file" '((func (("String"))) "Var")))
-$(def write-file
-  (bind "lisp_write_file" '((func (("String") ("String"))) "Var")))
-$(write-file "effects" (string-append (read-file "effects") "x"))
+#include "path.x"
+meta List projection_persisted(void) {
+  String path = "effects";
+  Path.write_text(path, %"${Path.read_text(path)}p");
+  return %((default
+    (function (int) (bind ("persisted_answer") ((fnmod (params))))
+      (block (return () (expr (int) (literal (int) "13")))))));
+}
 macro Declaration $projection.persist() {
-  @(begin
-    (write-file "effects" (string-append (read-file "effects") "p"))
-    (quote (
-      (default (function (int) (bind ("persisted_answer") ((fnmod (params))))
-        (block (return () (expr (int) (literal (int) "13"))))))
-    )))
+  @projection_persisted()
 }
 EOF2
 cat >"$declaration_root/src/provider.x" <<'EOF2'
@@ -959,14 +960,18 @@ cat >"$declaration_root/src/consumer.x" <<'EOF2'
 int consume(void) { return persisted_answer(); }
 EOF2
 : >"$declaration_root/effects"
-(cd "$declaration_root" && ./builds/0/x2c translate --out-dir out \
+(cd "$declaration_root" && "$X2C" translate --out-dir out \
   src/provider.x)
-[ "$(cat "$declaration_root/effects")" = xp ] ||
+[ "$(cat "$declaration_root/effects")" = p ] ||
   fail "persisted declaration producer did not run exactly once"
+grep -q 'collection-native' "$declaration_root/out/provider.xi" ||
+  fail "interface did not record its native declaration collection"
 : >"$declaration_root/effects"
-(cd "$declaration_root" && ./builds/0/x2c translate --out-dir out src/consumer.x)
-[ "$(cat "$declaration_root/effects")" = x ] ||
-  fail "warm declaration interface reran its producer or public Lisp"
+(cd "$declaration_root" && "$X2C" translate --out-dir out src/consumer.x)
+[ "$(cat "$declaration_root/effects")" = p ] ||
+  fail "warm consumer did not walk its native producer exactly once"
+grep -q 'persisted_answer()' "$declaration_root/out/consumer.c" ||
+  fail "warm consumer lost the persisted declaration signature"
 sed 's/persisted_answer/changed_answer/g' \
   "$declaration_root/src/producer.x" >"$declaration_root/src/changed"
 mv "$declaration_root/src/changed" "$declaration_root/src/producer.x"
@@ -974,9 +979,9 @@ sed 's/persisted_answer/changed_answer/g' \
   "$declaration_root/src/consumer.x" >"$declaration_root/src/changed"
 mv "$declaration_root/src/changed" "$declaration_root/src/consumer.x"
 : >"$declaration_root/effects"
-(cd "$declaration_root" && ./builds/0/x2c translate --out-dir out src/consumer.x)
-[ "$(cat "$declaration_root/effects")" = xpx ] ||
-  fail "changed declaration macro did not invalidate its interface"
+(cd "$declaration_root" && "$X2C" translate --out-dir out src/consumer.x)
+[ "$(cat "$declaration_root/effects")" = p ] ||
+  fail "changed declaration macro did not produce its declarations once"
 grep -q 'changed_answer' "$declaration_root/out/consumer.c" ||
   fail "consumer retained a stale declaration signature"
 
