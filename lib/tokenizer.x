@@ -224,8 +224,8 @@ static int _lisp_tokens(Tokenizer t) {
 /* A token its first characters decide: `void` in a collection, a list's
    `?(` capture and bare `@` atoms, and the `$` and `@` escapes into x2c.
    Lisp source escapes only `$name`. In quoted data, `$(` and `@(` open one
-   x2c expression; Array/Map @ references reach template slots, without
-   adding runtime splicing. */
+   x2c expression and `${` an evaluated Map; Array/Map @ references reach
+   template slots, without adding runtime splicing. */
 static int _lisp_prefix(Tokenizer t, int list, int collection) {
   char *text = t.text + t.pos;
   if (collection && !strncmp(text, "void", 4) && scan_identifier(text) == 4)
@@ -237,8 +237,8 @@ static int _lisp_prefix(Tokenizer t, int list, int collection) {
       (!text[1] || text[1] == '=' || strchr(" \t\n\v\f\r)", text[1])))
     return t.tokenize(text[1] == '=' ? 2 : 1, <lit-atom>);
   if ((list || collection) && (text[0] == '$' || text[0] == '@'))
-    return text[1] == '{' || text[1] == '(' ? _operator(t, 2)
-                                            : _named_reference(t);
+    return text[1] == '(' || (text[0] == '$' && text[1] == '{')
+         ? _operator(t, 2) : _named_reference(t);
   return 0;
 }
 
@@ -407,7 +407,6 @@ static int _operator(Tokenizer t, int len) {
         case <"${">: push = <x2c>; break;
         case <"$(">: case <"@(">: push = <x2c-par>; break;
         case <"?(">: if (mode == <list>) push = <x2c-par>; break;
-        case <"@{">: push = <x2c>; break;
         case <"{">: push = <map>; token_type = <"%{">; break;
         case <"[">: push = <array>; token_type = <"%[">; break;
         case <"\"">: push = <string>; token_type = <"%\"">; break;
@@ -543,7 +542,7 @@ static Token _before_group(Tokenizer tokenizer, Token close, Symbol opener) {
         depth++;
         break;
       case <"(">: case <"%(">: case <"$(">: case <"@(">: case <"?(">:
-      case <"{">: case <"%{">: case <"${">: case <"@{">:
+      case <"{">: case <"%{">: case <"${">:
         if (--depth) break;
         return scan.type == opener ? _significant_before(tokenizer, scan)
                                    : NULL;

@@ -235,7 +235,7 @@ static int _file_scope(Scan &s, Tokenizer tokens, String directory) {
        token = tokens.next()) {
     String word = token.text;
     switch (token.type) {
-      case <"{">: case <"%{">: case <"${">: case <"@{">:
+      case <"{">: case <"%{">: case <"${">:
         depth++;
         continue;
       case <"}">: depth--; continue;

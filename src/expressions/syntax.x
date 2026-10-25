@@ -614,6 +614,7 @@ List Compiler.parse_primary(Compiler c) {
     case <$>:
       if (c.peek(1) == <!>) return c.parse_macro_quotation();
       if ((c.token + 1).type == <(>) return c.parse_evaluated_list();
+      if ((c.token + 1).type == <"{">) return c.parse_evaluated_map();
       return c.try_parse_macro_expression();
     case <ident>:      return _parse_ident_primary(c);
     /* The keyword pass keeps `in` between tokens that can end and begin

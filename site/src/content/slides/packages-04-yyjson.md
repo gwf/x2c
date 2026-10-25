@@ -21,7 +21,7 @@ auto {
 
   foreach(Map service in services) {
     String mark = service["healthy"].truth() ? "ok" : "DOWN";
-    printf("%s", %"  ${service["name"]}:${service["port"]} $mark\n");
+    printf("%s", %"  $(service["name"]):$(service["port"]) $mark\n");
     if (!service["healthy"].truth())
       unhealthy.push(service["name"]);
   }

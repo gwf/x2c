@@ -5,6 +5,11 @@ static macro Stmt $fail.literals_string_segment(Expr $c, Expr $site) =>
     <parse>, "expected string segment",
     $site, NULL);
 
+static macro Stmt $fail.literals_string_brace(Expr $c, Expr $site) =>
+  $c.report_error(
+    <parse>, "'${' no longer inserts into a String",
+    $site, %("use '$$(expression)' to insert an expression"));
+
 /* strings
 
    `%"..."` reads text segments and `$` insertions in source order. A text
@@ -35,7 +40,8 @@ static List _parse_string_segment(Compiler c) {
   switch (c.peek(0)) {
     case <segment>: return _parse_text_segment(c);
     case <$>:       return _parse_named_segment(c);
-    case <"${">: case <"$(">: return _parse_grouped_segment(c);
+    case <"$(">:    return _parse_grouped_segment(c);
+    case <"${">:    $fail.literals_string_brace(c, c.token);
     default:
       $fail.literals_string_segment(c, c.token);
   }
@@ -60,12 +66,11 @@ static List _parse_named_segment(Compiler c) {
 }
 
 static List _parse_grouped_segment(Compiler c) {
-  Symbol close = c.peek(0) == <"$("> ? <)> : <"}">;
   c.next();
   List expr = c.parse_expression();
   c.check_explicit_converter(expr, %("String"), 1);
   expr = c.convert_segment_to_string(expr);
-  c.expect(close);
+  c.expect(<)>);
   return %(segexp $expr);
 }
 

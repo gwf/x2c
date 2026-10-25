@@ -169,7 +169,7 @@ void Compiler.next(Compiler c) {
 static void _update_brace_stack(Compiler c, Token consumed) {
   if (!consumed) return;
   switch (consumed.type) {
-    case <"{">: case <"%{">: case <"${">: case <"@{">:
+    case <"{">: case <"%{">: case <"${">:
       c.braces.push(consumed);
       break;
     case <"}">:
@@ -214,7 +214,7 @@ int Symbol.group_step(Symbol s) {
   switch (s) {
     case <"(">: case <"[">: case <"{">: case <"?(">: case <"$(">:
     case <"@(">:
-    case <"${">: case <"%(">: case <"%[">: case <"%{">: case <"@{">:
+    case <"${">: case <"%(">: case <"%[">: case <"%{">:
       return 1;
     case <")">: case <"]">: case <"}">:
       return -1;

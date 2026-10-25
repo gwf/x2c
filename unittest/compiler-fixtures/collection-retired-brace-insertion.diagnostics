@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/collection-retired-brace-insertion.x:6:21: parse: '${' no longer inserts into a String
+    String text = %"n=${n}";
+                      ^^
+  note: use '$(expression)' to insert an expression
+

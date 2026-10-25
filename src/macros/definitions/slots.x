@@ -53,8 +53,7 @@ static List _hole_slot(Compiler c, Symbol role) {
     $fail.macros_splice_expr(c, c.token);
   if (!(role in untyped_roles)) {
     Symbol kind = hole.assoc(<kind>);
-    if (!kind && c.peek(0) != <@> && c.peek(0) != <"@{"> &&
-        c.peek(0) != <"@("> &&
+    if (!kind && c.peek(0) != <@> && c.peek(0) != <"@("> &&
         !_quoted_role(c, role))
       return NULL;
     if (kind && !_kind_accepts_role(kind, role)) return NULL;
@@ -79,10 +78,9 @@ static const SymbolSet untyped_roles = %<<expression argument type>>;
 */
 List Compiler.peek_macro_hole(Compiler c) {
   Symbol prefix = c.peek(0);
-  if (prefix == <"@{"> || prefix == <"@(">) return _expression_hole(c, c.token);
+  if (prefix == <"@(">) return _expression_hole(c, c.token);
   if (prefix != <$> && prefix != <@>) return NULL;
-  if (c.peek(1) == <"{"> || c.peek(1) == <(>)
-    return _expression_hole(c, c.token);
+  if (c.peek(1) == <(>) return _expression_hole(c, c.token);
   if (c.peek(1) != <ident>) return NULL;
   Token name = Token.skip_trivia(c.token + 1);
   List hole = _hole_record(c, Atom.intern(name.text));
@@ -93,11 +91,9 @@ List Compiler.peek_macro_hole(Compiler c) {
     Consumes neither its `$` or `@` prefix nor its optional braces.
 */
 Token Compiler.after_hole(Compiler c) {
-  if (c.peek(0) == <"@{"> || c.peek(0) == <"@(">)
-    return c.token.after_group();
+  if (c.peek(0) == <"@(">) return c.token.after_group();
   Token next = Token.skip_trivia(c.token + 1);
-  return next.type == <"{"> || next.type == <(> ? next.after_group()
-                                                : Token.skip_trivia(next + 1);
+  return next.type == <(> ? next.after_group() : Token.skip_trivia(next + 1);
 }
 
 /* Consumes a hole filling `role` and returns its projection. */
@@ -107,8 +103,7 @@ module List _parse_hole(Compiler c, Symbol role) {
   if (!hole) _unbound(c, _hole_name_token(c, token.type).text, token);
   c.token = c.after_hole();
   Atom name = _hole_name(hole);
-  int sequence = token.type == <@> || token.type == <"@{"> ||
-                 token.type == <"@(">;
+  int sequence = token.type == <@> || token.type == <"@(">;
   if (sequence != hole.assoc(<sequence>).int())
     _cardinality_error(c, name.str(), sequence, token);
   if (sequence && !(role in sequence_roles))

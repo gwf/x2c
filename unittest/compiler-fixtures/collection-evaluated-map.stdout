@@ -1,0 +1,18 @@
+{ <key>: 42 }
+{ <key>: <n> }
+{ "answer": 42 }
+{ <key>: 42 }
+{  }
+note a
+note b
+note c
+note d
+{ "c": "d", "a": "b" }
+{ "answer": 2 }
+{ "answer": { <key>: 42 }, 42: { "answer": 42 } }
+(row { "answer": 42 } { <key>: <n> })
+[ { "answer": 42 }, { <key>: <n> } ]
+({ "answer": 42 } { <key>: 42 })
+map: { answer: 42 }
+{ "answer": "v", "v": "answer" }
+fresh 1 equal 1

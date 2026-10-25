@@ -129,12 +129,10 @@ List Compiler.parse_array_literal(Compiler c) {
 static List _parse_array_element(Compiler c) {
   List slot = c.try_parse_macro_slot(<argument>);
   if (slot) return slot;
-  if (((c.peek(0) == <"${"> && c.token.len == 2) || c.peek(0) == <"$(">) &&
-      c.peek(1) == <@>) {
-    Symbol close = c.peek(0) == <"$("> ? <)> : <"}">;
+  if (c.peek(0) == <"$("> && c.peek(1) == <@>) {
     c.next();
     slot = c.try_parse_macro_slot(<argument>);
-    c.expect(close);
+    c.expect(<)>);
     return slot;
   }
   return _parse_element(c);
@@ -176,23 +174,20 @@ static void _push_entry(Array entries, Ast entry) {
   else if (entry) entries.push(entry);
 }
 
-/* `${...}` holds a macro-produced entry or an expression key. */
+/* `$(...)` holds a macro-produced entry or an expression key. */
 static List _parse_quoted_entry(Compiler c) {
   Token origin = c.token;
   List slot = c.try_parse_macro_slot(<map-entry>);
   if (slot) return slot;
-  if (c.peek(0) != <"$("> && (c.peek(0) != <"${"> || c.token.len != 2))
-    return _entry_value(c, _parse_element(c), origin);
-  Symbol close = c.peek(0) == <"$("> ? <)> : <"}">;
-  c.next();
+  if (!c.test(<"$(">)) return _entry_value(c, _parse_element(c), origin);
   List entry = c.try_parse_macro_slot(<map-entry>);
   if (!entry) entry = c.try_parse_macro_target_at(<map-entry>);
   if (entry) {
-    c.expect(close);
+    c.expect(<)>);
     return entry;
   }
   List key = c.parse_expression();
-  c.expect(close);
+  c.expect(<)>);
   return _entry_value(c, key, origin);
 }
 
@@ -205,10 +200,26 @@ static List _entry_value(Compiler c, List key, Token origin) {
 /** Parses comma-separated `Map` entries up to but not including `}`.
     `Entry`-position macro sequences are flattened in source order.
 */
-List Compiler.parse_map_entries(Compiler c) {
+List Compiler.parse_map_entries(Compiler c) => _parse_map_entries(c, 0);
+
+/** Parses an evaluated Map, `${key: value, ...}`, whose bare identifier
+    keys are expressions like any other key, and consumes its `}`. In code
+    `$` and `{` are two tokens; quoted data scans `${` as one.
+*/
+List Compiler.parse_evaluated_map(Compiler c) {
+  if (!c.test(<"${">)) {
+    c.expect(<$>);
+    c.expect(<"{">);
+  }
+  List entries = _parse_map_entries(c, 1);
+  c.expect(<"}">);
+  return %(expr ("Map") (map @entries));
+}
+
+static List _parse_map_entries(Compiler c, int evaluated) {
   Array entries = [];
   while (c.peek(0) != <"}">) {
-    _push_entry(entries, c.parse_map_entry());
+    _push_entry(entries, _parse_map_entry(c, evaluated));
     if (c.peek(0) == <"}">) break;
     c.expect(<,>);
   }
@@ -220,14 +231,16 @@ List Compiler.parse_map_entries(Compiler c) {
     A direct row returns a resolved `(map-entry KEY VALUE)` node; an
     entry-position macro may return `(seq ...)` for its caller to splice.
 */
-List Compiler.parse_map_entry(Compiler c) {
+List Compiler.parse_map_entry(Compiler c) => _parse_map_entry(c, 0);
+
+static List _parse_map_entry(Compiler c, int evaluated) {
   List slot = c.try_parse_macro_slot(<map-entry>);
   if (slot) return slot;
   List macro = c.try_parse_macro_target_at(<map-entry>);
   if (macro) return macro;
   Token origin = c.token;
   List key = NULL;
-  if (c.peek(0) == <ident> && c.peek(1) == <:>) {
+  if (!evaluated && c.peek(0) == <ident> && c.peek(1) == <:>) {
     List literal = _atom_literal(c, c.token.text);
     c.next();
     key = %(expr $(literal.cadr()) $literal);

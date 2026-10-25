@@ -98,7 +98,7 @@ function code_of(text,    out, i, j, n, ch, two, mode, hole) {
     if (mode == "s") {
       if (ch == "\\" || two == "$$") i++
       else if (ch == "\"") sp--
-      else if (two == "$(" || two == "${") { push("c", 1); i++ }
+      else if (two == "$(") { push("c", 1); i++ }
       out = out " "; continue
     }
     if (two == "/*") {
@@ -115,8 +115,8 @@ function code_of(text,    out, i, j, n, ch, two, mode, hole) {
         if (substr(text, j, 1) == "\\") j++
       i = j; out = out " "; continue
     }
-    if (mode != "c" && (two == "$(" || two == "@(" ||
-                        two == "${" || two == "@{")) {
+    if ((mode != "c" && (two == "$(" || two == "@(")) ||
+        (mode == "l" && two == "${")) {
       push("c", 1); i++; out = out " "; continue
     }
     if (mode != "c" && (ch == "$" || ch == "@") &&

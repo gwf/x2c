@@ -16,8 +16,8 @@ static macro Stmt $fail.literals_insert_name(
   {
     String message = %"expected identifier after '$($sigil)'";
     String hint = $sigil == <@>
-      ? "use '@{...}' to splice an expression"
-      : "use '${...}' to insert an expression";
+      ? "use '@(...)' to splice an expression"
+      : "use '$(...)' to insert an expression";
     $c.report_error(<parse>, message, $site, %($hint));
   }
 }
@@ -183,12 +183,8 @@ static Var _macro_pattern_argument(Compiler c) {
 */
 List Compiler.try_parse_macro_pattern_insertion(Compiler c, int content) {
   /* `%(...)` scans `$(` as one token; a whole `case` pattern has two. */
-  int joined = (c.peek(0) == <"${"> && c.token.len == 2) ||
-               c.peek(0) == <"$(">;
-  Symbol opener = joined ? c.peek(0) : c.peek(1);
-  if (!c.in_pattern ||
-      (!joined && (c.peek(0) != <$> ||
-                   (opener != <"{"> && opener != <(>))))
+  int joined = c.peek(0) == <"$(">;
+  if (!c.in_pattern || (!joined && (c.peek(0) != <$> || c.peek(1) != <(>)))
     return NULL;
   Token name = Token.skip_trivia(c.token + 1);
   if (!joined) name = Token.skip_trivia(name + 1);
@@ -198,24 +194,24 @@ List Compiler.try_parse_macro_pattern_insertion(Compiler c, int content) {
   c.next();
   if (!joined) c.next();
   List derived = c.try_parse_macro_subpattern(content);
-  c.expect(opener == <"${"> || opener == <"{"> ? <"}"> : <)>);
+  c.expect(<)>);
   return derived;
 }
 
 /* list elements
 
    `$` inserts one value and `@` splices a List, each followed by a name or
-   a braced expression. Any other element is a nested literal. */
+   a parenthesized expression. `${` opens an evaluated Map, and any other
+   element is a nested literal. */
 
 static List _parse_splice(Compiler c) {
   if (c.peek(0) == <@>) {
     List expr = _parse_named_reference(c, <@>);
     return %(splice $expr);
   }
-  Symbol close = c.peek(0) == <"@("> ? <)> : <"}">;
-  if (!c.test(<"@{">) && !c.test(<"@(">)) return NULL;
+  if (!c.test(<"@(">)) return NULL;
   List expr = c.parse_expression();
-  c.expect(close);
+  c.expect(<)>);
   return %(splice $expr);
 }
 
@@ -224,13 +220,10 @@ module List _parse_insertion(Compiler c) {
     return _parse_named_reference(c, <$>);
   List derived = c.try_parse_macro_pattern_insertion(0);
   if (derived) return derived;
-  Symbol close = c.peek(0) == <"$("> ? <)> : <"}">;
-  if (c.peek(0) != <"$("> && (c.peek(0) != <"${"> || c.token.len != 2))
-    return NULL;
-  c.next();
+  if (!c.test(<"$(">)) return NULL;
   List expr = c.parse_expression();
   c.check_explicit_converter(expr, %("Var"), 0);
-  c.expect(close);
+  c.expect(<)>);
   return expr;
 }
 
@@ -266,6 +259,7 @@ module List _parse_literal_element(Compiler c) {
     case <"%\"">: return c.parse_string_literal();
     case <"%[">:  return c.parse_array_literal();
     case <"%{">:  return c.parse_map_literal();
+    case <"${">:  return c.parse_evaluated_map();
     default:      return c.parse_atomic_literal();
   }
 }

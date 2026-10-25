@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/collection-brace-insertion-is-map.x:7:23: parse: expected ':'
+    List xs = %(head ${n} foot);
+                        ^
+

@@ -29,7 +29,7 @@ foreach (String line in text.lines()) {
   rx.RegexpMatch found = request.match(line);
   if (found)
 ~  {
-    puts(%"${found[<method>]} requests ${found[<path>]}");
+    puts(%"$(found[<method>]) requests $(found[<path>])");
 ~    matches++;
 ~  }
 }

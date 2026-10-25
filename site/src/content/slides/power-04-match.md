@@ -14,10 +14,10 @@ List simplify(List node) {
     case %(if true ?yes ?): return simplify(yes);
     case %(if false ? ?no): return simplify(no);
     case %(if ?condition ?yes ?no):
-      return %(if $condition ${simplify(yes)} ${simplify(no)});
+      return %(if $condition $(simplify(yes)) $(simplify(no)));
     // Capture a whole block, transform it, splice it back in.
     case %(block *body):
-      return %(block @{body.map(%!(List item) => simplify(item))});
+      return %(block @(body.map(%!(List item) => simplify(item))));
     default: return node;
   }
 }

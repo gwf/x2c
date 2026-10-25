@@ -36,7 +36,7 @@ Array Index.find(Index index, String word)
 ~int words = index.words.len();
 ~assert(index.find("blue").len() == 0 && index.words.len() == words);
 ~Array matches = index.find("roses");
-~puts(%"roses: ${index.documents[matches[0]]}");
+~puts(%"roses: $(index.documents[matches[0]])");
 ~return 0;
 ~}
 ```

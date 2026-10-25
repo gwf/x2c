@@ -74,7 +74,7 @@ static List _expression_holes(Compiler c, Map holes) {
   Symbol last = 0;
   for (Token t = Token.skip_trivia(saved + 1); t < close;
        t = Token.skip_trivia(t + 1)) {
-    Token brace = t + 1, next = Token.skip_trivia(brace);
+    Token group = t + 1, next = Token.skip_trivia(group);
     if (t.type == <$> && next.type == <!>) {
       next = Token.skip_trivia(next + 1);
       if (next.text.is_identifier()) next = Token.skip_trivia(next + 1);
@@ -82,12 +82,11 @@ static List _expression_holes(Compiler c, Map holes) {
       Token typed = next.after_group();
       if (next.type == <(> && typed.type == <"{">) t = typed.group_close();
     }
-    else if ((t.type == <@> || t.type == <$>) &&
-             (brace.type == <"{"> || brace.type == <(>) &&
-             (last != <case> || Token.skip_trivia(brace + 1).type != <$>)) {
-      c.token = brace;
+    else if ((t.type == <@> || t.type == <$>) && group.type == <(> &&
+             (last != <case> || Token.skip_trivia(group + 1).type != <$>)) {
+      c.token = group;
       locals.push(_hole_local(c, holes, t.pos));
-      t = brace.group_close();
+      t = group.group_close();
     }
     last = t.type;
   }
@@ -95,17 +94,16 @@ static List _expression_holes(Compiler c, Map holes) {
   return locals.list_free();
 }
 
-/* The declaration of the hidden local that `{expression}` at the cursor
+/* The declaration of the hidden local that `(expression)` at the cursor
    initializes. The local takes the expression's type, and the quotation
    boxes its value, so an expression without an x2c type reports where it
    is written. */
 static List _hole_local(Compiler c, Map holes, int position) {
-  Symbol close = c.peek(0) == <(> ? <)> : <"}">;
-  c.next();
+  c.expect(<(>);
   Token origin = c.token;
   List value = c.parse_expression();
   if (!value.cadr()) $fail.expressions_var_unresolved(c, origin);
-  c.expect(close);
+  c.expect(<)>);
   String name = c.fresh_name("hole");
   holes[%(expression $position)] = name;
   Var constant = c.folded_constant(value);
@@ -136,7 +134,7 @@ static List _quoted_type(Compiler c, Map holes) {
   Token origin = c.token;
   List type = NULL;
   if (c.peek(0) == <$>) {
-    Var name = c.peek(1) == <"{"> || c.peek(1) == <(>
+    Var name = c.peek(1) == <(>
              ? holes[%(expression $(c.token.pos))]
              : Token.skip_trivia(c.token + 1).text;
     c.token = c.after_hole();
@@ -422,8 +420,7 @@ module List _quoted_hole(
   List local = c.sym.lookup(%($spelling), type);
   if (!local || !c.sym.binding_is_local(local)) return NULL;
   Symbol kind = c.sym.is_named_value_type(type, "Type") ? <type> : 0;
-  int sequence = prefix.type == <@> || prefix.type == <"@{"> ||
-                 prefix.type == <"@(">;
+  int sequence = prefix.type == <@> || prefix.type == <"@(">;
   List hole = _record_hole(c, spelling, kind, sequence);
   Var quoted = c.macro_holes[%(quoted)];
   c.macro_holes[%(quoted)] =

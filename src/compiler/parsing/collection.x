@@ -175,7 +175,7 @@ static void _shallow_block(Compiler c) {
   for (Symbol peek = c.peek(0); peek != <"}">; peek = c.peek(0)) {
     if (peek == <eof>)
       $fail.compiler_token_eof(c, c.token);
-    if (peek == <"{"> || peek == <"%{"> || peek == <"${"> || peek == <"@{">)
+    if (peek == <"{"> || peek == <"%{"> || peek == <"${">)
       _shallow_block(c);
     else c.next();
   }
