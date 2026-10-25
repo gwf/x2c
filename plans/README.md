@@ -47,7 +47,8 @@ and status; it does not implement the remaining features.
 
 | Owning plan | Remaining scope | Next action |
 | --- | --- | --- |
-| [Compiler Lisp independence](compiler-lisp-independence.md) | Reader/session, scalar, and compiler-owned Func inventory changes validated locally; draft PR preparation integrates dev `c70fe7b14`. | Submit the completed batch as a draft PR; stop cleanup here and keep harder cases and further exploration local. |
+| [Native compiler with runtime Lisp](native-compiler-runtime-lisp.md) | Native-only compiler; retain optional runtime Lisp, DSL binding decorators, and the REPL. | Approved plan; implement in another isolated local worktree. Require at least 200 fewer production-code lines and a final complexity review; hold implementation publication. |
+| [Compiler Lisp independence](compiler-lisp-independence.md) | Earlier cleanup batch, integrated as PR #294. | Historical scope and evidence; the native-compiler plan owns the new goal. |
 | [Language-reference writing](review-remediation-2026-10-11.md) | Complete the selected source-form, rewrite, and Lisp explanations. | Identify exact missing coverage in the existing book, then fill it. |
 | [Structured lint findings](x2c-lint-and-format.md) | Approved phase 8 List output and compiler consumption. | Add the optional interface; preserve the experimental distribution and conditional editor integration. |
 | [Detached Channel ownership](detached-channel-ownership.md) | Close out evidence for the correction already present on `dev`. | Recover final benchmark, verification, and delivery/hold records; do not repeat implementation. |
