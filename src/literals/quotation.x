@@ -228,21 +228,35 @@ module List _parse_insertion(Compiler c) {
 }
 
 /** Parses an evaluated List `$(a, b, ...)`: each assignment expression is
-    one element, converted to Var and consed in source order. A trailing
-    comma is allowed, and `$()` is the empty List.
+    one element, converted to Var, and `@name` or `@(expression)` splices a
+    List's elements, as in a quoted List. A trailing comma is allowed, and
+    `$()` is the empty List.
 */
 List Compiler.parse_evaluated_list(Compiler c) {
   c.expect(<$>);
   c.expect(<(>);
   Array elements = auto [];
   while (c.peek(0) != <)>) {
-    List element = c.parse_assignment();
-    c.check_explicit_converter(element, %("Var"), 0);
-    elements.push(element);
+    elements.push(_evaluated_element(c));
     if (!c.test(<,>)) break;
   }
   c.expect(<)>);
-  return _cons_list(c, elements, %(nil));
+  return c.list_expression(elements, %(nil));
+}
+
+/* In code `@(` is two tokens. */
+static List _evaluated_element(Compiler c) {
+  if (c.peek(0) == <@> && (c.token + 1).type == <(>) {
+    c.next();
+    c.next();
+    List expr = c.parse_expression();
+    c.expect(<)>);
+    return %(splice $expr);
+  }
+  if (c.peek(0) == <@>) return %(splice $(_parse_named_reference(c, <@>)));
+  List element = c.parse_assignment();
+  c.check_explicit_converter(element, %("Var"), 0);
+  return element;
 }
 
 module List _parse_named_reference(Compiler c, Symbol sigil) {
@@ -297,7 +311,11 @@ static List _append_splice(Compiler c, List head, List tail) {
   return %(expr ("List") (append $head $tail));
 }
 
-module List _cons_list(Compiler c, Array elements, List tail) {
+/** Builds the typed List expression that conses the element expressions
+    `elements`, in order, onto the cells `tail`. A `(splice EXPR)` element
+    appends the List that EXPR holds, as `literal_cell` does.
+*/
+List Compiler.list_expression(Compiler c, Array elements, List tail) {
   for (int i = (int) elements.len() - 1; i >= 0; i--)
     tail = c.literal_cell(elements[i], tail);
   return %(expr ("List") $tail);
@@ -405,7 +423,7 @@ static List _typed_list(
   if (operator != <!is>)
     for (int i = first; i < elements.len(); i++)
       elements[i] = _typed_pattern(c, elements[i], tags);
-  List pattern = _cons_list(c, elements, tail);
+  List pattern = c.list_expression(elements, tail);
   return capture_tag ? _and_tag_test(c, pattern, capture_tag) : pattern;
 }
 

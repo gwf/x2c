@@ -103,7 +103,7 @@ List Compiler.parse_catch_pattern_literal(Compiler c) {
     elements.push(code);
     while (c.peek(0) != <)>) _parse_catch_detail(c, elements);
     c.expect(<)>);
-    List pattern = _cons_list(c, elements, %(nil));
+    List pattern = c.list_expression(elements, %(nil));
     elements.free();
     return pattern;
   }
@@ -130,6 +130,6 @@ static void _parse_catch_detail(Compiler c, Array elements) {
     "catch filter detail pattern cannot splice",
     %("write one match pattern"));
   Array pair = [key, value];
-  elements.push(_cons_list(c, pair, %(nil)));
+  elements.push(c.list_expression(pair, %(nil)));
   pair.free();
 }

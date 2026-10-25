@@ -869,10 +869,16 @@ List syntax_grammar(void) => %(grammar
         (token "(")
         (optional
           (seq
-            (ref assignment)
-            (repeat 0 (seq (token ",") (ref assignment)))
+            (ref evaluated-item)
+            (repeat 0 (seq (token ",") (ref evaluated-item)))
             (optional (token ","))))
         (token ")")))
+
+    (rule evaluated-item
+      (choice
+        (ref assignment)
+        (seq (token "@") (ref identifier))
+        (seq (token "@") (token "(") (ref expression) (token ")"))))
 
     (rule evaluated-map
       (seq

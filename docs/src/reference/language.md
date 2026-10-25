@@ -2888,8 +2888,8 @@ keys.
 In an expression position, `$(` begins an evaluated `List`:
 
 ```text
-evaluated-list := '$(' [ assignment-expression
-                         { ',' assignment-expression } [ ',' ] ] ')'
+evaluated-list := '$(' [ evaluated-item { ',' evaluated-item } [ ',' ] ] ')'
+evaluated-item := assignment-expression | '@' identifier | '@(' expression ')'
 ```
 
 Each assignment expression is one element, converted to `Var` and consed in
@@ -2898,7 +2898,8 @@ as in `$((prepare(), value), other)`. `$()` is the existing empty `List`, and a
 trailing comma is accepted. Existing `Var` conversion, `List` canonicalization,
 caching, and lifetime rules apply, and a value that `List` construction
 rejects, such as a `void` call, is rejected here too. A `List`-valued element
-stays one element; there is no flattening or splicing. Ordinary parentheses
+stays one element. An `@name` or `@(expression)` item splices a `List`'s
+elements, with the conversion rules of a quoted `List` splice. Ordinary parentheses
 keep C grouping and call syntax whatever the destination type, so `(a, b)` is
 never a `List`.
 

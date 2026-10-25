@@ -264,7 +264,8 @@ designator = ( ( "." , identifier ) | ( "[" , assignment , "]" ) ) ;
 array = ( "[" , [ ( assignment , { ( "," , assignment ) } , [ "," ] ) ] , "]" ) ;
 map = ( "{" , [ ( map-entry , { ( "," , map-entry ) } , [ "," ] ) ] , "}" ) ;
 map-entry = ( ( ( identifier | assignment ) , ":" , assignment ) | entry-extension ) ;
-evaluated-list = ( "$" , "(" , [ ( assignment , { ( "," , assignment ) } , [ "," ] ) ] , ")" ) ;
+evaluated-list = ( "$" , "(" , [ ( evaluated-item , { ( "," , evaluated-item ) } , [ "," ] ) ] , ")" ) ;
+evaluated-item = ( assignment | ( "@" , identifier ) | ( "@" , "(" , expression , ")" ) ) ;
 evaluated-map = ( ( ( "$" , "{" ) | "${" ) ,
     [ ( evaluated-entry , { ( "," , evaluated-entry ) } , [ "," ] ) ] ,
     "}" ) ;

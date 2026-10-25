@@ -102,8 +102,8 @@ Retain the existing List conversion rules for a splice operand.
 In an ordinary Ecstasy expression position, the grammar is:
 
 ```text
-evaluated-list := '$(' [ assignment-expression
-                         { ',' assignment-expression } [ ',' ] ] ')'
+evaluated-list := '$(' [ evaluated-item { ',' evaluated-item } [ ',' ] ] ')'
+evaluated-item := assignment-expression | '@' identifier | '@(' expression ')'
 ```
 
 Each assignment-expression is one element. Use parentheses to make a comma
@@ -115,8 +115,11 @@ Evaluate elements once each, left to right. Apply existing Var conversion,
 List canonicalization, caching, lifetime, and destination-directed typed List
 rules. Reject values that existing List construction rejects, including
 `void`; do not invent a new validation layer. A List-valued element remains
-one element. There is no implicit flattening or general argument-splice form
-inside this constructor.
+one element; there is no implicit flattening. An explicit `@name` or
+`@(expression)` item splices a List's elements, with the same meaning and
+conversion rules as in a quoted List and in a List-rest call. Gary selected
+this on 2026-10-25. One public compiler operation, `Compiler.list_expression`,
+builds a List from element expressions, splice items included.
 
 ### Evaluated Map constructor
 

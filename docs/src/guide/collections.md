@@ -77,7 +77,9 @@ printf("%s %s %s\n", row.repr(), natural.repr(), evaluated.repr());
 ```
 
 Each element, key, and value is evaluated once, in source order. An element
-that is itself a `List` stays one element; there is no flattening. Use
+that is itself a `List` stays one element; there is no implicit flattening.
+Write `@name` or `@(expression)` to splice a `List`'s elements, as in a quoted
+`List`: with `xs` equal to `%(1 2)`, `$(0, @xs, xs)` is `(0 1 2 (1 2))`. Use
 parentheses to make a comma expression one element:
 `$((prepare(), value), other)`. `${}` is always an empty `Map`, while `{}`
 depends on its destination. Inside `${...}`, a nested bare `{...}` keeps the
