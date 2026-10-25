@@ -277,7 +277,7 @@ static macro Stmt $fail.macros_macro_pattern_arity(
 static macro Stmt $fail.macros_lisp_removed(Expr $c, Expr $origin) =>
   $c.report_error(
     <parse>, "compile-time Lisp forms are not supported", $origin,
-    %("call a meta function as $name(...) or splice one as @name(...)"));
+    %("write the compile-time code as an x2c meta function"));
 
 static macro Stmt $fail.macros_meta_expr(
   Expr $c, Expr $origin, Expr $value) =>

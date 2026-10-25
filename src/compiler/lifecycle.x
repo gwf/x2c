@@ -94,7 +94,7 @@ static Compiler _new(Compiler owner) {
 static void _init_tables(Compiler c) {
   c.id_keys = [];
   $set_fields(c, {}, key_ids, deps, macros, kw_aliases,
-              object_macros, proto_cache, imports, init_tokens,
+              object_macros, proto_cache, init_tokens,
               static_init_deps, fn_defs, meta_comptime, meta_regions,
               meta_hashes, meta_calls, native_meta, project_meta,
               meta_group_bound);
