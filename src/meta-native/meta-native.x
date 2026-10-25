@@ -14,7 +14,16 @@
 #include "compiler/compiler.x"
 #include "compiler-meta.x"
 
-#include "compiler-meta.x"
+// The optional modules whose `meta` targets the runtime inventory binds.
+#include "diff.x"
+#include "digest.x"
+#include "json.x"
+#include "list-selectors.x"
+#include "process.x"
+#include "regex.x"
+#include "typed-array.x"
+#include "typed-list.x"
+#include "typed-map.x"
 #include "grammar.x"
 #include "macros/macros.x"
 #include "meta-group/meta-group.x"
