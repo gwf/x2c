@@ -236,6 +236,10 @@ List Compiler.parse_alias_member(
   defer c.leave_alias_body(mark);
   _declare(c, head, 0);
   c.next();
+  /* The member list opens a body level of its own; it opens this one, so
+     its aliases and removals belong to the wrapper's scope. */
+  c.alias_level--;
+  defer c.alias_level++;
   List members = position == <enumerator> ? c.parse_enumerators(context)
                : c.peek(0) == <"}"> ? NULL : c.parse_fields(context);
   c.expect(<"}">);
@@ -244,7 +248,8 @@ List Compiler.parse_alias_member(
 
 /* An entry is `(declared depth level expression)`, with the Sym scope
    count and body level of its declaration, or `(imported frozen)` for a
-   public alias an include delivered, which belongs to file scope. A
+   public alias an include delivered, which belongs to file scope. An
+   entry that shadows an outer entry of its key ends with that entry. A
    `static` alias is keyed by its file's prefix, empty outside a module
    unit, and its name, so each file of the unit keeps its own; a public
    alias is keyed by its name alone. Two aliases that one file sees in one
@@ -301,8 +306,8 @@ static List _unalias(Compiler c, int block) {
 
 static int _same_scope(Compiler c, List entry) {
   match (entry) {
-    case %(imported ?): return !c.alias_level && c.sym.at_file_scope();
-    case %(declared ?(int depth) ?(int level) ?):
+    case %(imported *): return !c.alias_level && c.sym.at_file_scope();
+    case %(declared ?(int depth) ?(int level) *):
       return depth == c.sym.scope_count() && level == c.alias_level;
   }
   return 0;
@@ -310,18 +315,31 @@ static int _same_scope(Compiler c, List entry) {
 
 /* Entries live in one Map under `<alias>`, which each declaration
    replaces with a copy, so a body restores its outer entries by restoring
-   the Map it started with. */
+   the Map it started with. An entry keeps the entry it shadows, so its
+   removal reveals the enclosing meaning before the body ends. */
 static void _install(Compiler c, Var key, List entry) {
   Map table = _table(c);
   table = table ? table.copy() : {};
+  Var shadowed;
+  if (table.try_get(key, shadowed)) entry = entry.append(%($shadowed));
   table[key] = entry;
   c.sym.put(c.macros, <alias>, table);
 }
 
 static void _remove(Compiler c, Var key) {
   Map table = _table(c).copy();
-  table.del(key);
+  List shadowed = _shadowed(table[key]);
+  if (shadowed) table[key] = shadowed;
+  else table.del(key);
   c.sym.put(c.macros, <alias>, table);
+}
+
+static List _shadowed(List entry) {
+  match (entry) {
+    case %(declared ? ? ? ?outer): return outer;
+    case %(imported ? ?outer): return outer;
+  }
+  return NULL;
 }
 
 static Map _table(Compiler c) {
@@ -350,8 +368,8 @@ static List _entry(Compiler c, String name, Var &?key) {
 }
 
 static int _inner_entry(List inner, List outer) {
-  match (inner) case %(declared ?(int depth) ?(int level) ?):
-    match (outer) case %(declared ?(int prior_depth) ?(int prior_level) ?):
+  match (inner) case %(declared ?(int depth) ?(int level) *):
+    match (outer) case %(declared ?(int prior_depth) ?(int prior_level) *):
       return depth > prior_depth ||
              (depth == prior_depth && level > prior_level);
   return 0;
@@ -437,13 +455,13 @@ static void _reveal_bindings(Compiler c, List syntax) {
 
 /* An imported entry's identifiers bind in the unit's global scope. */
 static List _visible(Compiler c, Map table, Var key, List entry, int scope) {
-  match (entry) case %(imported ?frozen): {
+  match (entry) case %(imported ?frozen *shadowed): {
     List expression = _rebind_globals(c, c.thaw_declaration_syntax(frozen));
-    entry = %(declared ${c.sym.base_scope_count()} 0 $expression);
+    entry = %(declared ${c.sym.base_scope_count()} 0 $expression @shadowed);
     table[key] = entry;
   }
   match (entry)
-    case %(declared ?(int depth) ? ?expression):
+    case %(declared ?(int depth) ? ?expression *):
       if (depth > scope) return expression;
   return NULL;
 }
