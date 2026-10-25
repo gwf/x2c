@@ -8,9 +8,14 @@ static int sdk_sum(int left, int right) {
   return left + right;
 }
 
+meta static String repr_of(List value) => value.repr();
+
+meta static String joined(String first, String second, String third) =>
+  first + second + third;
+
 macro Unit $sdk_functions(Expr $value) {
-  static $(Code.type $value)
-  $(x2c.ident "sdk_exact")(void) {
+  static $Code.type($value)
+  $x2c_ident("sdk_exact")(void) {
     return $value;
   }
 
@@ -18,22 +23,20 @@ macro Unit $sdk_functions(Expr $value) {
     return 0;
   }
 
-  static char *$(x2c.ident "sdk_rendered")(void) {
-    return $(repr $value);
+  static char *$x2c_ident("sdk_rendered")(void) {
+    return $repr_of($value);
   }
 
-  static char *$(x2c.ident "sdk_composed")(void) {
-    return $(string-append "macro" "-" "sdk");
+  static char *$x2c_ident("sdk_composed")(void) {
+    return $joined("macro", "-", "sdk");
   }
 
-  static String $(x2c.ident "sdk_literal")(void) {
-    return $(x2c.literal.string(
-      string-append "runtime" "-" "string"
-    ));
+  static String $x2c_ident("sdk_literal")(void) {
+    return $joined("runtime", "-", "string");
   }
 }
 
-macro Expression $call_existing() => $(x2c.ident "sdk_existing")();
+macro Expression $call_existing() => $x2c_ident("sdk_existing")();
 
 macro Stmt $print_value(Expr $value) {
   printf("%d\n", $value);
@@ -42,7 +45,7 @@ macro Stmt $print_value(Expr $value) {
 macro Unit $project_parameters(Name $name, Param @parameters) {
   static int $name(@parameters) {
     return sdk_sum(
-      @(Code.arguments $parameters)
+      @Code.arguments($parameters)
     );
   }
 }

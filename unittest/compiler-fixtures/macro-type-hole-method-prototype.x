@@ -2,12 +2,15 @@
 
 typedef int Box;
 
+meta static List arguments_of(List parameter) =>
+  Code.arguments(%($parameter));
+
 macro Unit $box(
   Type $type, Literal $tag, Param $parameter
 ) {
   inline Var $type.var($parameter) {
     return Var.new(
-      $tag, @(Code.arguments (list $parameter))
+      $tag, @arguments_of($parameter)
     );
   }
 }

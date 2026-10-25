@@ -7,29 +7,29 @@
 
 (declare ("Var") 
  (bindings 
-  (bind (binding 2 "Box_var") ((fnmod (params (param ("Box") (bind () ()))))))))
+  (bind (binding 3 "Box_var") ((fnmod (params (param ("Box") (bind () ()))))))))
 
 (function (inline "Var") 
- (bind (binding 2 "Box_var") 
-  ((fnmod (params (param ("Box") (bind (binding 3 "value") ())))))) 
+ (bind (binding 3 "Box_var") 
+  ((fnmod (params (param ("Box") (bind (binding 4 "value") ())))))) 
  (block 
-  (at 12 
+  (at 13 
    (return ("Var") 
     (expr ("Var") 
      (call (expr ((func (("Symbol") (...))) "Var") 
-            (ident (binding 4 "Var_new"))) 
+            (ident (binding 5 "Var_new"))) 
       (args (expr ("Symbol") (literal ("Symbol") "<i32>" i32)) 
-       (expr ("Box") (ident (binding 3 "value"))))))))))
+       (expr ("Box") (ident (binding 4 "value"))))))))))
 
 (function (int) 
- (bind (binding 5 "main") ((fnmod (params (param (void) (bind () ())))))) 
+ (bind (binding 6 "main") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 13 
+  (at 14 
    (stmnt 
     (expr () 
-     (call (expr () (ident (binding 6 "printf"))) 
+     (call (expr () (ident (binding 7 "printf"))) 
       (args (expr (* char) (literal (* char) "\"%d\\n\"")) 
        (expr ("Var") 
-        (call (expr ((func (("Box"))) "Var") (ident (binding 2 "Box_var"))) 
+        (call (expr ((func (("Box"))) "Var") (ident (binding 3 "Box_var"))) 
          (args (expr (int) (literal (int) "42")))))))))) 
-  (at 14 (return (int) (expr (int) (literal (int) "0"))))))
+  (at 15 (return (int) (expr (int) (literal (int) "0"))))))

@@ -3,14 +3,18 @@
 #include "macro-source-text-import.x"
 
 macro Expression $source(Expr $syntax) =>
-  $(x2c.literal.string (Code.source_text $syntax));
+  $Code.source_text($syntax);
 
 macro Expression $forward(Expr $syntax) =>
   $source($syntax);
 
+meta static String saved_source(Source syntax) {
+  Source saved = syntax;
+  return Code.source_text(saved);
+}
+
 macro Expression $source_local(Expr $syntax) =>
-  $(let ((saved $syntax))
-    (x2c.literal.string (Code.source_text saved)));
+  $saved_source($syntax);
 
 keyword source_alias $imported.source;
 

@@ -4,36 +4,34 @@
 $imported_record(ReflectedImported);
 
 macro Field $generated_field() {
-  long $(x2c.ident "generated");
+  long $x2c_ident("generated");
+}
+
+meta static List same_fields(Type type, List expected, String message) {
+  List actual = Type.fields(type);
+  if (!actual.equal(expected))
+    x2c_diagnostic_fail(message, %(${actual.repr()}));
+  return %();
 }
 
 macro Unit $check_record(Type $type) {
-  @(let ((actual (Type.fields $type)))
-     (if (equal? actual
-           `(("first" (int))
-             ("second" (int))
-             ("counts" ((dim ("3")) const unsigned long))
-             ("name" (* const char))
-             ("flags" ((bitfield ("3")) unsigned))
-             ("generated" (long))))
-         nil
-         (x2c.diagnostic.fail "record fields differ" (list (repr actual)))))
+  @same_fields($type,
+    %(("first" (int))
+      ("second" (int))
+      ("counts" ((dim ("3")) const unsigned long))
+      ("name" (* const char))
+      ("flags" ((bitfield ("3")) unsigned))
+      ("generated" (long))),
+    "record fields differ")
 }
 
 macro Unit $check_union(Type $type) {
-  @(let ((actual (Type.fields $type)))
-     (if (equal? actual
-           `(("integer" (int)) ("floating" (float))))
-         nil
-         (x2c.diagnostic.fail "union fields differ" (list (repr actual)))))
+  @same_fields($type, %(("integer" (int)) ("floating" (float))),
+    "union fields differ")
 }
 
 macro Unit $check_included(Type $type) {
-  @(let ((actual (Type.fields $type)))
-     (if (equal? actual `(("included" (short))))
-         nil
-         (x2c.diagnostic.fail "included fields differ"
-                              (list (repr actual)))))
+  @same_fields($type, %(("included" (short))), "included fields differ")
 }
 
 macro Expression $first(Expr $receiver) => $receiver.first;
