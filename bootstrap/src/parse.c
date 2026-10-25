@@ -1441,7 +1441,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _590 = List_var(_589);
   _591 = cons(_511, _508);
   _592 = List_var(_591);
-  _593 = int_var(90027);
+  _593 = int_var(90038);
   _594 = cons(_593, NULL);
   _595 = cons(_516, _594);
   _596 = List_var(_595);
@@ -3252,7 +3252,7 @@ List Compiler_parse_top_level_mode(Compiler c, int skip_body){
       return NULL;
     }
     return f5_units____parse_import_declaration(c);
-    case 9297 : return Compiler_reject_lisp_form(c);
+    case 9297 : case 16465 : return Compiler_reject_lisp_form(c);
     case 129 : return f5_units____top_level_decorator(c);
   }
   if(Compiler_macro_form_is_definition(c)) return Compiler_parse_macro_definition(c);

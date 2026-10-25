@@ -50,7 +50,6 @@
 #include "compiler/compiler.h"
 #include "ast-rewrite.h"
 #include "buffer.h"
-#include "compiler-meta.h"
 #include "datum.h"
 #include "utils.h"
 #include <ctype.h>

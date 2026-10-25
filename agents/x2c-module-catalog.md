@@ -660,7 +660,8 @@ Public functions:
 `Compiler.meta_binding`, `Compiler.record_native_meta_effect`,
 `Compiler.install_native_meta_effects`, `Compiler.bind_native_meta`,
 `Compiler.install_native_meta_function`, `Compiler.native_meta_accepts`,
-`Compiler.native_meta_module`, `Compiler.native_meta_targets`
+`Compiler.native_meta_module`, `Compiler.native_meta_targets`,
+`Compiler.iterator_arity`
 
 ### [src/meta-sdk/meta-sdk.x](../src/meta-sdk/meta-sdk.x)
 

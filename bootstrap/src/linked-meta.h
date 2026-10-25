@@ -6,7 +6,6 @@
 #define __GUARD_0x5DA47678__
 
 #include "x2c.h"
-#include "compiler-meta.h"
 #include "channel.h"
 #include "common.h"
 #include "lisp-bindings.h"

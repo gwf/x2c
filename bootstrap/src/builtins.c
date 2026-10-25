@@ -89,7 +89,6 @@
 
 #include "x2c.h"
 #include "meta.h"
-#include "compiler-meta.h"
 #include "grammar.h"
 #include "lisp/lisp.h"
 #include "macros/macros.h"
@@ -880,7 +879,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _447 = cons(_443, _446);
   _448 = List_var(_447);
   _449 = Symbol_var(805770);
-  _450 = int_var(66);
+  _450 = int_var(65);
   _451 = cons(_450, NULL);
   _452 = cons(_449, _451);
   _453 = List_var(_452);
@@ -893,7 +892,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _460 = cons(_457, _459);
   _461 = List_var(_460);
   _462 = Symbol_var(1133019155420);
-  _463 = int_var(2189);
+  _463 = int_var(2162);
   _464 = cons(_463, NULL);
   _465 = cons(_462, _464);
   _466 = List_var(_465);

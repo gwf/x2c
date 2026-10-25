@@ -6,7 +6,6 @@
 
 #define __GUARD_0xA909022F__
 #include "x2c.h"
-#include "compiler-meta.h"
 #include "diff.h"
 #include "digest.h"
 #include "json.h"
@@ -4614,7 +4613,7 @@ Buffer Buffer_write_len(Buffer, const char *, size_t);
 
 static Buffer f12_lisp_targets____buffer_write_len(Buffer buf, const char * text, size_t length){
   if(text && strnlen(text, length) < length){
-    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "f12_lisp_targets____buffer_write_len",.line = 223,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "f12_lisp_targets____buffer_write_len",.line = 222,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_2, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Buffer.write_len")), NULL))));
     __builtin_unreachable();
   }

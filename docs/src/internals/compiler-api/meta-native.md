@@ -29,6 +29,7 @@ Meta functions and the native code they call.
 | [`Compiler.install_native_meta_effects`](#Compiler.install_native_meta_effects) | Records the native advertisements retained by included interfaces. |
 | [`Compiler.install_native_meta_function`](#Compiler.install_native_meta_function) | Installs a prototype-only `meta` function from the compiler's trusted native target registry. |
 | [`Compiler.install_project_meta_effect`](#Compiler.install_project_meta_effect) | Installs an included meta function's evaluator advertisement. |
+| [`Compiler.iterator_arity`](#Compiler.iterator_arity) | Returns how many arguments a call of the iterator operation `signature` passes when it omits its destination, or -1 for another signature. |
 | [`Compiler.linked_meta_provider_source`](#Compiler.linked_meta_provider_source) | Returns a linked provider's source and dependency hashes. |
 | [`Compiler.links_extension`](#Compiler.links_extension) | Reports whether package `name`'s compile-time part is linked into the compiler, so its import loads no module. |
 | [`Compiler.links_meta_function`](#Compiler.links_meta_function) | Reports whether the compiler links the `meta` function `name`. |
@@ -200,7 +201,7 @@ Applies a contextual `meta` marker to one initialized file-static value.
 The unit's staged `meta` group holds the compile-time instance, which
 its module initializes for each unit.
 
-Source: `src/meta-native/functions.x:170`
+Source: `src/meta-native/functions.x:168`
 
 <a id="Compiler.install_meta_function"></a>
 #### Compiler.install_meta_function
@@ -244,7 +245,19 @@ Source: `src/meta-native/bindings.x:135`
 
 Installs an included meta function's evaluator advertisement.
 
-Source: `src/meta-native/functions.x:201`
+Source: `src/meta-native/functions.x:199`
+
+<a id="Compiler.iterator_arity"></a>
+#### Compiler.iterator_arity
+
+`int Compiler.iterator_arity(List signature)`
+
+Returns how many arguments a call of the iterator operation `signature`
+passes when it omits its destination, or -1 for another signature. An
+iterator operation takes its destination last, and its native target is
+`NAME_into`.
+
+Source: `src/meta-native/bindings.x:414`
 
 <a id="Compiler.linked_meta_provider_source"></a>
 #### Compiler.linked_meta_provider_source
@@ -294,7 +307,7 @@ Source: `src/meta-native/modules.x:122`
 Tests a registered macro with the candidate's global and source
 bindings. A pattern derived without them reads none.
 
-Source: `src/meta-native/functions.x:127`
+Source: `src/meta-native/functions.x:125`
 
 <a id="Compiler.meta_binding"></a>
 #### Compiler.meta_binding
@@ -317,7 +330,7 @@ Answers whether the native target `function` matches the declared
 parameter, which takes the compile-time callable and adapts it. Aliases
 of one native type match each other.
 
-Source: `src/meta-native/bindings.x:213`
+Source: `src/meta-native/bindings.x:214`
 
 <a id="Compiler.native_meta_module"></a>
 #### Compiler.native_meta_module
@@ -327,7 +340,7 @@ Source: `src/meta-native/bindings.x:213`
 Returns the selected file-backed native module that supplies `name`,
 with its native `type`, or NULL for a linked or absent target.
 
-Source: `src/meta-native/bindings.x:249`
+Source: `src/meta-native/bindings.x:250`
 
 <a id="Compiler.native_meta_targets"></a>
 #### Compiler.native_meta_targets
@@ -340,7 +353,7 @@ inventory, or only those declared in the files `paths` names when it is
 not empty. A target that takes a `Func` is left out unless `callbacks`
 is nonzero. Sorting makes that inventory independent of Map order.
 
-Source: `src/meta-native/bindings.x:341`
+Source: `src/meta-native/bindings.x:342`
 
 <a id="Compiler.native_module_targets"></a>
 #### Compiler.native_module_targets
@@ -394,7 +407,7 @@ Source: `src/meta-native/bindings.x:73`
 Records the provider of a public bodied meta function in its interface.
 The provider owns both its native body and its compile-time state.
 
-Source: `src/meta-native/functions.x:187`
+Source: `src/meta-native/functions.x:185`
 
 <a id="Compiler.run_meta_call"></a>
 #### Compiler.run_meta_call

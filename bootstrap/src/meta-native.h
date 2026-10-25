@@ -7,7 +7,6 @@
 
 #include "x2c.h"
 #include "compiler/compiler.h"
-#include "compiler-meta.h"
 #include "diff.h"
 #include "digest.h"
 #include "json.h"
@@ -114,6 +113,8 @@ int Compiler_native_meta_accepts(Compiler c, Var function, List signature);
 String Compiler_native_meta_module(Compiler c, String name, Type * type);
 
 List Compiler_native_meta_targets(List paths, int callbacks);
+
+int Compiler_iterator_arity(List signature);
 
 
 #endif /* __GUARD_0x65953FEE__ */

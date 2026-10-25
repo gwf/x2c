@@ -48,7 +48,6 @@
 #include "x2c.h"
 
 #include "compiler/compiler.h"
-#include "compiler-meta.h"
 #include "diff.h"
 #include "digest.h"
 #include "json.h"
@@ -160,7 +159,7 @@ static int f6_linked____linked_texts_match(Compiler c, String name, Map linked, 
 
 static int f9_functions____install_included_meta(Compiler c, List declaration, Token marker);
 
-static void f9_functions____install_stub(Compiler c, String name, Type type, String provider, Token marker);
+static void f9_functions____install_stub(Compiler c, String name, Type type, String provider);
 
 static Var f9_functions____meta_stub(Func function, const FuncArg * argv);
 
@@ -242,10 +241,6 @@ static List f8_bindings____native_meta_rows(Compiler c, Var row);
 static List f8_bindings____witness_rows(Compiler c, Type base, Type participant);
 
 static int f8_bindings____takes_callback(List signature);
-
-static int _iterator_operation(List signature);
-
-static int _parameter_count(List signature);
 
 typedef struct _x2c_gensym_lambda_context_0{
   Var c0;
@@ -3973,7 +3968,7 @@ void Compiler_install_meta_function(Compiler c, List fn, Token marker){
               if(Map_truth(c -> macro_holes)) return;
               Compiler_group_meta_function(c, fn);
               if(Compiler_meta_calls_wait(c)) return;
-              f9_functions____install_stub(c, name, Var_type(List_last((Var_list_payload(Array_getindex(c -> meta_group, - 1))))), NULL, marker);
+              f9_functions____install_stub(c, name, Var_type(List_last((Var_list_payload(Array_getindex(c -> meta_group, - 1))))), NULL);
             }
 
           }
@@ -3999,7 +3994,7 @@ void Compiler_install_collected_meta_function(Compiler c, List declaration, Toke
   String name = _native_meta_name(c, declaration, marker);
   Map linked = _linked_module();
   if(Compiler_groups_meta(c) && !(Map_contains(linked, String_var(name)))) return;
-  f9_functions____install_stub(c, name, Type_canonicalize(List_type_from_ast(declaration)), NULL, marker);
+  f9_functions____install_stub(c, name, Type_canonicalize(List_type_from_ast(declaration)), NULL);
 }
 
 String Compiler_token_source(Compiler, Token, int *);
@@ -4022,8 +4017,7 @@ static int f9_functions____install_included_meta(Compiler c, List declaration, T
 
 void MetaBindings_bind(MetaBindings b, String name, Func function);
 
-static void f9_functions____install_stub(Compiler c, String name, Type type, String provider, Token marker){
-  (void) marker;
+static void f9_functions____install_stub(Compiler c, String name, Type type, String provider){
   String context =({
     Var _x2c_gensym_literal_part_13 = String_var(name);  Var _x2c_gensym_literal_part_14 = String_var(String_truth(provider) ? provider : _1701);  String_join(NULL, cons(_x2c_gensym_literal_part_13, cons(String_var(_1702), cons(_x2c_gensym_literal_part_14, NULL))));
   }
@@ -4060,7 +4054,7 @@ static Var f9_functions____meta_stub(Func function, const FuncArg * argv){
 
   }
   if(Compiler_meta_calls_wait(c)){
-    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/meta-native/functions.x",.function = "f9_functions____meta_stub",.line = 103};
+    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/meta-native/functions.x",.function = "f9_functions____meta_stub",.line = 101};
     x2c_error_raise_n(& _x2c_gensym_error_site_0, 927167433253220, 1, Symbol_var(920394), String_var(name));
   }
   List rows = f9_functions____subject_rows(c, values);
@@ -4358,7 +4352,7 @@ static int f9_functions____bind_advertised_meta(Compiler c, String name, int ins
     return 1;
   }
   if(Compiler_meta_calls_wait(c)) return 0;
-  f9_functions____install_stub(c, name, Var_type(signature), Var_as_string(provider), NULL);
+  f9_functions____install_stub(c, name, Var_type(signature), Var_as_string(provider));
   return 1;
 }
 
@@ -4634,13 +4628,14 @@ static Var f5_calls____meta_named_value(Compiler c, String name, List arguments,
   Var function = f5_calls____shipped_callee(c, name);  if(Var_is_void(function)) function = f5_calls____meta_function(c, name, site);  f5_calls___meta_call_form = cons(Atom_intern(name), arguments);  if(x2c_var_identical(function, Map_getindex(_linked_module(), String_var(name)))) return f5_calls____apply_linked(Var_pointer(function), arguments);  return Compiler_apply_meta_binding(c, name, function, arguments);
 }
 
+int Compiler_iterator_arity(List signature);
 Var Compiler_apply_meta_binding(Compiler c, String name, Var function, List arguments){
   if(! _init_guard_) _file_init_();  Scope_push(& Compiler_bindings(c) -> values); {
     X2CCleanup _x2c_gensym_defer_record_22 ={
       .fn = _x2c_gensym_defer_cleanup_22, .env = 0
     }
     ;  x2c_cleanup_push(& _x2c_gensym_defer_record_22); {
-      Var signature;  if(Map_try_get(c -> native_meta, String_var(name), &(signature)) && _iterator_operation(Var_list_payload(signature)) && List_len(arguments) == _parameter_count(Var_list_payload(signature)) - 1) arguments = List_append(arguments, cons(Iter_var(Iter_new()), NULL)); {
+      Var signature;  if(Map_try_get(c -> native_meta, String_var(name), &(signature)) && List_len(arguments) == Compiler_iterator_arity(Var_list_payload(signature))) arguments = List_append(arguments, cons(Iter_var(Iter_new()), NULL)); {
         Var _x2c_gensym_return_value_6 = f5_calls____apply_linked(Var_pointer(function), arguments); {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_22);  return _x2c_gensym_return_value_6;
         }
@@ -4751,7 +4746,7 @@ static Var f5_calls____meta_function(Compiler c, String name, Token site){
   if(! Compiler_meta_binding(c, name, &(function)) && _bind_project_meta(c, name)) Compiler_meta_binding(c, name, &(function));
   if(! Compiler_meta_binding(c, name, &(function)) && Compiler_bind_native_meta(c, name)) Compiler_meta_binding(c, name, &(function));
   if(Var_is_void(function) && c -> meta_build){
-    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../src/meta-native/calls.x",.function = "f5_calls____meta_function",.line = 213};
+    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../src/meta-native/calls.x",.function = "f5_calls____meta_function",.line = 212};
     x2c_error_raise_n(& _x2c_gensym_error_site_2, 927167433253220, 1, Symbol_var(920394), String_var(name));
   }
   if(Var_is_void(function)) Compiler_report_error(c, 27335838, _1802, site, cons(String_var(String_join(NULL, cons(String_var(_1807), cons(String_var(name), NULL)))), NULL));
@@ -4962,7 +4957,8 @@ void Compiler_install_native_meta_function(Compiler c, List declaration, Token m
 
 static void f8_bindings____bind_native_meta(Compiler c, String name, List signature, Token marker){
   f8_bindings____certify_native_meta(c, name, signature, marker);
-  String target = _iterator_operation(signature) ? String_join(NULL, cons(String_var(name), cons(String_var(_1810), NULL))) : name;
+  int iterator = Compiler_iterator_arity(signature) >= 0;
+  String target = iterator ? String_join(NULL, cons(String_var(name), cons(String_var(_1810), NULL))) : name;
   f8_bindings___NativeBinding n ={
     .c = c, .name = name, .target = target, .signature = signature, .suppliers = _native_module_suppliers(target), .marker = marker
   }
@@ -5238,7 +5234,7 @@ List Compiler_native_meta_targets(List paths, int callbacks){
         if(List_truth(paths) && ! f8_bindings____declared_in(key, paths)) continue; {
           List row;  List _x2c_gensym_macro_object_14 = f8_bindings____native_meta_rows(c, value);  List _x2c_gensym_macro_cursor_15 = _x2c_gensym_macro_object_14;  Var _x2c_gensym_macro_cursor_output_20;  while(List_try_next(_x2c_gensym_macro_object_14, &(_x2c_gensym_macro_cursor_15), &(_x2c_gensym_macro_cursor_output_20))){
             row = Var_list_payload(_x2c_gensym_macro_cursor_output_20); {
-              List _x2c_gensym_destructure_3 = row;  String name = Var_as_string(List_getindex(_x2c_gensym_destructure_3, 0));  List signature = Var_list_payload(List_getindex(_x2c_gensym_destructure_3, 1));  if(! callbacks && f8_bindings____takes_callback(signature)) continue;  String into = String_join(NULL, cons(String_var(name), cons(String_var(_1810), NULL)));  Map_setindex(selected, String_var(name), List_var(_iterator_operation(signature) ?({
+              List _x2c_gensym_destructure_3 = row;  String name = Var_as_string(List_getindex(_x2c_gensym_destructure_3, 0));  List signature = Var_list_payload(List_getindex(_x2c_gensym_destructure_3, 1));  if(! callbacks && f8_bindings____takes_callback(signature)) continue;  String into = String_join(NULL, cons(String_var(name), cons(String_var(_1810), NULL)));  Map_setindex(selected, String_var(name), List_var(Compiler_iterator_arity(signature) >= 0 ?({
                 Var _x2c_gensym_literal_part_31 = String_var(name);  Var _x2c_gensym_literal_part_32 = List_var(cons(_1842, cons(String_var(into), NULL)));  cons(_x2c_gensym_literal_part_31, cons(_x2c_gensym_literal_part_32, NULL));
               }
               ) : cons(String_var(name), NULL)));
@@ -5418,7 +5414,8 @@ static int f8_bindings____takes_callback(List signature){
   return 0;
 }
 
-static int _iterator_operation(List signature){
+int Compiler_iterator_arity(List signature){
+  if(! _init_guard_) _file_init_();
   {
     List _x2c_gensym_match_expr = signature; List _x2c_gensym_match_cursor, _x2c_gensym_match_cursor1;
     switch(0){
@@ -5430,7 +5427,7 @@ static int _iterator_operation(List signature){
           Var _x2c_gensym_match_value_16 = parameters;
           {
             List parameters = Var_list_payload(_x2c_gensym_match_value_16);
-            return List_truth(parameters) && x2c_var_equal(List_last(parameters), List_var(_404));
+            if(List_truth(parameters) && x2c_var_equal(List_last(parameters), List_var(_404))) return List_len(parameters) - 1;
           }
 
         }
@@ -5440,11 +5437,7 @@ static int _iterator_operation(List signature){
     }
 
   }
-  return 0;
-}
-
-static int _parameter_count(List signature){
-  return List_len(Var_list(List_cadr(Var_list(List_car(signature)))));
+  return - 1;
 }
 
 static Var _x2c_gensym_lambda_0(String path, String name){

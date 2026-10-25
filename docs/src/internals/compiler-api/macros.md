@@ -255,7 +255,7 @@ Installs included compile-time definitions in their source order.
 Keyword aliases retain the definition visible when their source declared
 them, even if a later macro definition uses the same name.
 
-Source: `src/macros/invocations/recognition.x:40`
+Source: `src/macros/invocations/recognition.x:39`
 
 <a id="Compiler.keyword_form_is_definition"></a>
 #### Compiler.keyword_form_is_definition
@@ -265,7 +265,7 @@ Source: `src/macros/invocations/recognition.x:40`
 Returns whether the current tokens begin a `keyword NAME $macro` alias.
 This query does not consume tokens.
 
-Source: `src/macros/invocations/recognition.x:88`
+Source: `src/macros/invocations/recognition.x:87`
 
 <a id="Compiler.land_quotation"></a>
 #### Compiler.land_quotation
@@ -306,7 +306,7 @@ Source: `src/macros/templates.x:465`
 Returns whether the current tokens begin a local macro definition.
 This query does not consume tokens.
 
-Source: `src/macros/invocations/recognition.x:78`
+Source: `src/macros/invocations/recognition.x:77`
 
 <a id="Compiler.lower_replacement"></a>
 #### Compiler.lower_replacement
@@ -346,7 +346,7 @@ Source: `src/macros/rewrites.x:287`
 Returns whether the current tokens have macro-definition introducer form.
 This query does not consume tokens.
 
-Source: `src/macros/invocations/recognition.x:64`
+Source: `src/macros/invocations/recognition.x:63`
 
 <a id="Compiler.macro_introduced_name"></a>
 #### Compiler.macro_introduced_name
@@ -369,7 +369,7 @@ named-type decorator, and local `Unit` macro whose template contains
 protocol or adoption rows. `<tried>` covers Unit decorators and other
 local `Unit` macros. Other invocations return zero.
 
-Source: `src/macros/invocations/recognition.x:337`
+Source: `src/macros/invocations/recognition.x:336`
 
 <a id="Compiler.macro_invocation_site"></a>
 #### Compiler.macro_invocation_site
@@ -401,7 +401,7 @@ Returns whether the parser claims the macro invocation at the cursor for
 `position`. A bare keyword alias is claimed only where its result fits.
 This query does not consume tokens.
 
-Source: `src/macros/invocations/recognition.x:149`
+Source: `src/macros/invocations/recognition.x:148`
 
 <a id="Compiler.macro_tag_name"></a>
 #### Compiler.macro_tag_name
@@ -425,7 +425,7 @@ Reports whether the macro invocation at the cursor produces file-scope
 syntax, directly or through the target it decorates. A script unit keeps
 such an invocation at file scope. This query does not consume tokens.
 
-Source: `src/macros/invocations/recognition.x:381`
+Source: `src/macros/invocations/recognition.x:380`
 
 <a id="Compiler.macro_value_literal"></a>
 #### Compiler.macro_value_literal
@@ -509,7 +509,7 @@ Parses and installs one source-local `keyword` alias.
 The named macro must already be visible; the alias captures that definition
 and consumes its terminating semicolon. Returns the alias.
 
-Source: `src/macros/invocations/recognition.x:100`
+Source: `src/macros/invocations/recognition.x:99`
 
 <a id="Compiler.parse_macro_definition"></a>
 #### Compiler.parse_macro_definition
@@ -702,7 +702,7 @@ Source: `src/macros/aliases.x:418`
 Consumes a macro invocation name and its balanced argument list.
 The invocation terminator or following decorator target remains current.
 
-Source: `src/macros/invocations/recognition.x:357`
+Source: `src/macros/invocations/recognition.x:356`
 
 <a id="Compiler.skip_named_type_declaration"></a>
 #### Compiler.skip_named_type_declaration
@@ -712,7 +712,7 @@ Source: `src/macros/invocations/recognition.x:357`
 Consumes a NamedType target already projected by owning-source collection.
 CPP scanning does not produce the declaration or parse its fields again.
 
-Source: `src/macros/invocations/recognition.x:368`
+Source: `src/macros/invocations/recognition.x:367`
 
 <a id="Compiler.take_code_value"></a>
 #### Compiler.take_code_value
