@@ -1,8 +1,7 @@
 #include "x2c.x"
 
-/* `retained` is declared directly: when the spliced declaration supplies it,
-   the meta group emits `macro_slot_helper` without a type, as
-   unittest/STATUS.md records. */
+/* The spliced declaration supplies `retained`, so the project meta build,
+   which leaves `one_item` for the translation, never sees its type. */
 meta static List one_item(List target) => %($target);
 
 macro Unit $computed(Expr $value, Name $public) {
@@ -19,13 +18,11 @@ macro Unit $through_sequence(Unit $target) {
   @one_item($target)
 }
 
-$through_sequence(int spliced = 1;);
-
-int retained = 41;
+$through_sequence(int retained = 42;);
 
 $computed(retained, answer);
 
 int main(void) {
-  printf("%d\n", answer() + spliced);
+  printf("%d\n", answer());
   return 0;
 }

@@ -271,19 +271,36 @@ passed six repeated nested-Make probes, and help output remains byte-identical.
   `$x2c_invocation_line()` nevertheless answer with the call's own file and
   line, so that rejection is not reached. `macro-invocation-location-outside`
   records the current output.
-- A meta group can emit a prototype with no type. Reproduction: a unit
-  defines `meta static List one_item(List target) => %($target);`, a
-  `macro Unit $through_sequence(Unit $target) { @one_item($target) }`, and a
-  `macro Unit $computed(Expr $value)` whose body declares `static
-  $Code.type($value) $x2c_ident("slot_helper")(void) { return $value; }`.
-  Writing `$through_sequence(int retained = 42;);` and then
-  `$computed(retained);` fails at the first call: "this function cannot run
-  at compile time", because the meta group declares `static slot_helper(void);`
-  and the C compiler rejects implicit `int`. The same unit succeeds when
-  `retained` is an ordinary declaration. An earlier migration attempt
-  reported the same failure with the former Lisp slots; that was not
-  re-checked here. `macro-computed-slots` (formerly `macro-lisp-slots`) keeps the computed
-  type, identifier, and splice slots but declares `retained` directly.
+- The project meta build writes a unit's meta group from an incomplete
+  parse. A template slot that calls a project meta function, such as
+  `@one_item($target)` in `macro Unit $through_sequence(Unit $target)`, is
+  left for the translation. The meta build's parse reports "this meta call
+  is left for the translation", skips the whole form, and continues.
+  `write_meta_build` then writes the group anyway, and nobody sees that error.
+  Later definitions that read what the skipped form declares reach the group
+  without those declarations. An unreached function whose result type came
+  from such a name, as in `static $Code.type(retained) helper(void)`, now
+  gets no prototype; `macro-computed-slots` covers it. These shapes still
+  stop the group from compiling, so the translation reports "this function
+  cannot run at compile time":
+  - `static $Code.type(retained) $x2c_ident("slot_copy");` becomes
+    `static slot_copy;`, which has no type.
+  - `int copy = retained;` names an undeclared identifier.
+  - A public function whose body reads `retained` keeps that body, because
+    the meta build reaches every public function.
+
+  An untyped reference cannot identify these names: C library names such as
+  `fprintf`, `stdout`, `EOF`, `errno`, and `INT_MAX` also parse with an empty
+  type. Two repairs at the cause remain open:
+  - C1: after the meta build skips a form because a slot was left for the
+    translation, the group keeps only earlier definitions, plus meta
+    functions and what they reach. Reachability follows identifier bindings
+    but not type names, so a later type that a later meta function uses
+    would be lost.
+  - C2: the meta build runs a same-unit `meta static` function by staging
+    the group so far in process, as `bind_meta_group` does for a session.
+    Nothing is deferred and the parse is complete. This depends on
+    `X2C_NATIVE_MODULES` and changes the project meta build's design.
 
 - `import-package-export-order` and its `packages/ordered/` sources were
   removed. They checked that package packs install in include-walk order by
