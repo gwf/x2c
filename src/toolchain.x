@@ -107,20 +107,23 @@ static String _recorded_tool(String name) {
   return NULL;
 }
 
-/* A staged compiler links its stage-local runtime. A compiler with a home
-   uses `<home>/lib/libx2c.a`, or in a checkout the stage 0 archive built
-   with the headers `<home>/include/x2c` names. Without a home, the layout is
+/* A staged compiler links its stage-local runtime, and the bootstrap
+   compiler the checked-in bootstrap's. A compiler with a home uses
+   `<home>/lib/libx2c.a`, or in a checkout the stage 0 archive built with
+   the headers `<home>/include/x2c` names. Without a home, the layout is
    read from the executable's own prefix. No compiler links an unrelated
    runtime.
 */
 static void _layout(Toolchain t) {
   String home = Compiler.home_dir(), stage = Compiler.stage_dir();
+  String bootstrap = Compiler.bootstrap_runtime_dir();
   String executable = Compiler.driver_executable(), prefix = home;
   if (!prefix)
     prefix = Path.dirname(executable ? Path.dirname(executable) : ".");
   t.include_dir = %"$prefix/include/x2c";
   t.runtime_lib = %"$prefix/lib/libx2c.a";
   if (stage) t.runtime_lib = %"$stage/libx2c.a";
+  else if (bootstrap) t.runtime_lib = %"$bootstrap/libx2c.a";
   else if (home && !Path.is_file(t.runtime_lib))
     t.runtime_lib = %"$home/builds/0/libx2c.a";
 }

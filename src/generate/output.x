@@ -169,8 +169,7 @@ static void _push_line(Array out, Var node) {
 static List _include_guard(Compiler c, List content) {
   if (c.runtime_inc && !_has_runtime_include(content))
     content = cons(%(preproc "#include \"x2c.x\""), content);
-  String guard = Path.identifier_hash(c.filename);
-  return %(@(_banner()) @(_header_guard(content, guard)));
+  return %(@(_banner()) @(_header_guard(content, c.header_guard())));
 }
 
 static int _has_runtime_include(List content) {
@@ -190,21 +189,30 @@ static List _banner(void) => %(
 static List _header_guard(List content, String guard) => %(
     (preproc "#pragma once")
     (space "\n\n")
-    (preproc "#ifndef __GUARD_0x$(guard)__")
+    (preproc "#ifndef $guard")
     (space "\n")
-    (preproc "#define __GUARD_0x$(guard)__")
+    (preproc "#define $guard")
     (space "\n\n")
     @content
     (space "\n")
-    (preproc "#endif /* __GUARD_0x$(guard)__ */")
+    (preproc "#endif /* $guard */")
     (space "\n")
   );
+
+/** Returns the guard macro of the header generated for this unit, named
+    from its path below the home when it has one there, else as spelled, so
+    a meta group that copies the unit names the same guard. */
+String Compiler.header_guard(Compiler c) {
+  String home = Compiler.home_dir(), name = c.filename;
+  String path = home ? Path.absolute(name) : NULL;
+  if (path && path.startswith(%"$home/")) name = path[home.len() + 1:];
+  return %"__GUARD_0x$(Path.identifier_hash(name))__";
+}
 
 /* The source defines its own header's guard, so a cyclic include of that
    header adds nothing; its own declarations follow in order. The runtime
    headers that lowering needs precede their first uses. */
 static List _source_unit(Compiler c, List content) {
-  String guard = Path.identifier_hash(c.filename);
   List runtime = c.runtime_inc ? _include_directive("x2c.x") : NULL;
   Anchors at = _anchors(content, 1);
   List error = at.error >= 0 ? _include_directive("error.h") : NULL;
@@ -219,7 +227,7 @@ static List _source_unit(Compiler c, List content) {
       foreach (List include in exception) _push_line(lines, include);
     _push_line(lines, _runtime_entry(c, node));
   }
-  return %(@(_banner()) (preproc "#define __GUARD_0x$(guard)__") @runtime
+  return %(@(_banner()) (preproc "#define $(c.header_guard())") @runtime
            @(lines.list_free()));
 }
 

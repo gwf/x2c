@@ -300,7 +300,8 @@ Public functions:
 `x2c_initialize_environment`, `x2c_initialize_command_environment`,
 `x2c_set_root`, `x2c_get_root`, `x2c_get_executable`,
 `Compiler.driver_executable`, `Compiler.home_dir`, `Compiler.stage_dir`,
-`Compiler.home_packages`, `Compiler.home_libexec`, `Compiler.command_path`,
+`Compiler.bootstrap_runtime_dir`, `Compiler.home_packages`,
+`Compiler.home_libexec`, `Compiler.command_path`,
 `Compiler.command_environment`, `Compiler.run_command`,
 `Compiler.default_include_dirs`, `Compiler.cpp_include_dirs`,
 `Env.find_program`, `Path.is_x2c_source`, `Path.is_layout_source`,
@@ -552,9 +553,10 @@ the generated header and source of one unit.
 Public functions:
 
 `Compiler.generate_code`, `Compiler.generate_code_text`,
-`Compiler.place_source_prelude`, `Compiler.initializer_function`,
-`Compiler.run_once_body`, `Init.enter`, `Compiler.init_statements`,
-`Compiler.definition_rows`, `Compiler.dump_definitions`
+`Compiler.place_source_prelude`, `Compiler.header_guard`,
+`Compiler.initializer_function`, `Compiler.run_once_body`, `Init.enter`,
+`Compiler.init_statements`, `Compiler.definition_rows`,
+`Compiler.dump_definitions`
 
 ### [src/initializers/initializers.x](../src/initializers/initializers.x)
 

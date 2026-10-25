@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0xAA82BA19__
-#define __GUARD_0xAA82BA19__
+#ifndef __GUARD_0xB828ACF2__
+#define __GUARD_0xB828ACF2__
 
 #include "x2c.h"
 #include "cleanup.h"
@@ -19,4 +19,4 @@ void tidy__Handle_cleanup(tidy__Handle _x2c_gensym_macro_value_0);
 int tidy__exercise(void);
 
 
-#endif /* __GUARD_0xAA82BA19__ */
+#endif /* __GUARD_0xB828ACF2__ */

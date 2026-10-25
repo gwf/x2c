@@ -2,12 +2,12 @@
 
 #pragma once
 
-#ifndef __GUARD_0x6D84C48C__
-#define __GUARD_0x6D84C48C__
+#ifndef __GUARD_0xE6CAFA9B__
+#define __GUARD_0xE6CAFA9B__
 
 #include "x2c.h"
 #include "geo.h"
 double geo__roundtrip_norm(double x, double y);
 
 
-#endif /* __GUARD_0x6D84C48C__ */
+#endif /* __GUARD_0xE6CAFA9B__ */

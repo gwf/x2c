@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0x28B18B14__
-#define __GUARD_0x28B18B14__
+#ifndef __GUARD_0xCD78F612__
+#define __GUARD_0xCD78F612__
 
 #include "x2c.h"
 #include "vendorlib-1.h"
@@ -20,4 +20,4 @@ vendored__Reading vendored__Reading_new(Span span);
 Span vendored__Reading_span(vendored__Reading reading);
 
 
-#endif /* __GUARD_0x28B18B14__ */
+#endif /* __GUARD_0xCD78F612__ */

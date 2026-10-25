@@ -16,6 +16,7 @@ The generated header and source of one unit.
 | [`Compiler.dump_definitions`](#Compiler.dump_definitions) | Prints the `--dump-definitions` projection of the lowered unit `ast`: `(unit PATH)`, the module comment as `(module TEXT)` when the file opens with one, then one row per `Compiler.definition_rows` entry. |
 | [`Compiler.generate_code`](#Compiler.generate_code) | Writes the generated C header and source for one lowered translation unit. |
 | [`Compiler.generate_code_text`](#Compiler.generate_code_text) | Returns the generated header and source of the lowered `ast` as `(hfile htext cfile ctext)`, named from `basename`, without writing them. |
+| [`Compiler.header_guard`](#Compiler.header_guard) | Returns the guard macro of the header generated for this unit, named from its path below the home when it has one there, else as spelled, so a meta group that copies the unit names the same guard. |
 | [`Compiler.init_statements`](#Compiler.init_statements) | Returns the statements queued for `phase`, in the order they were added. |
 | [`Compiler.initializer_function`](#Compiler.initializer_function) | Returns the function `type name(void)` running `body`. |
 | [`Compiler.place_source_prelude`](#Compiler.place_source_prelude) | Places generated `declarations` after source types and includes, before the first function or captured initializer that can use them. |
@@ -81,6 +82,17 @@ htext cfile ctext)`, named from `basename`, without writing them. It
 affects the compiler as `Compiler.generate_code` does.
 
 Source: `src/generate/output.x:47`
+
+<a id="Compiler.header_guard"></a>
+#### Compiler.header_guard
+
+`String Compiler.header_guard(Compiler c)`
+
+Returns the guard macro of the header generated for this unit, named
+from its path below the home when it has one there, else as spelled, so
+a meta group that copies the unit names the same guard.
+
+Source: `src/generate/output.x:205`
 
 <a id="Compiler.init_statements"></a>
 #### Compiler.init_statements

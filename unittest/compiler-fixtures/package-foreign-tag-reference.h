@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0x81D8D692__
-#define __GUARD_0x81D8D692__
+#ifndef __GUARD_0x9B1CB687__
+#define __GUARD_0x9B1CB687__
 
 #include "x2c.h"
 #include "vendorlib-1.h"
@@ -23,4 +23,4 @@ struct vendored__Later{
 int vendored__Holder_total(vendored__Holder holder);
 
 
-#endif /* __GUARD_0x81D8D692__ */
+#endif /* __GUARD_0x9B1CB687__ */
