@@ -10266,13 +10266,10 @@ static List f7_aliases____template_declaration(Compiler c, int skip_body){
 
 }
 
-void Compiler_install_included_effects(Compiler);
-
 static List f7_aliases____wrapped_forms(Compiler c, int skip_body){
   Array forms = Array_new();
   while(1){
     List directives = Compiler_leading_preproc(c);
-    if(! skip_body && c -> included_effects != NULL) Compiler_install_included_effects(c);
     {
       List directive;
       List _x2c_gensym_macro_object_80 = directives;
