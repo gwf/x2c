@@ -255,22 +255,6 @@ passed six repeated nested-Make probes, and help output remains byte-identical.
   macro template form was found that spells that canonical AST; a `${...}`
   body is rejected with "expected macro name after '$'". The five `built-*`
   rows were therefore removed. Ordinary lambda destinations remain covered.
-- Outside an expansion, a `$` call rejects a String literal passed to a `Var`
-  parameter: "explicit meta call cannot be resolved", note "an argument must
-  be a constant, captured syntax, or a meta call". A user `meta String
-  echo(Var s)` called as `$echo("hi")` at file scope fails this way, while
-  the same function with a `String` parameter succeeds. The language
-  reference counts a constant as a valid argument. Because of this, the
-  `_require_expansion("x2c_embed_text")` check in `src/meta-sdk/sources.x`
-  is never reached by `$x2c_embed_text("...")` at file scope.
-  `macro-embed-text-outside` records the current diagnostic.
-- `src/meta-sdk/context.x` rejects an invocation location without an active
-  macro expansion ("x2c invocation location used outside macro expansion").
-  The language reference defines these locations only "while a macro body
-  is expanding". A file-scope `$x2c_invocation_file()` and
-  `$x2c_invocation_line()` nevertheless answer with the call's own file and
-  line, so that rejection is not reached. `macro-invocation-location-outside`
-  records the current output.
 - The project meta build writes a unit's meta group from an incomplete
   parse. A template slot that calls a project meta function, such as
   `@one_item($target)` in `macro Unit $through_sequence(Unit $target)`, is
