@@ -179,8 +179,8 @@ List Code.declared_bindings(List declaration) {
 
 /** Returns the typed expression naming the function `name`, or an empty
     List when no function of that name is visible. This reads the symbol
-    table only, so any compile-time Lisp evaluation may call it, including
-    one outside a macro expansion. */
+    table only, so any compile-time call may use it, including one outside
+    a macro expansion. */
 List MetaContext.function_reference(String name) {
   Compiler c = active.evaluator;
   if (!c) raise %(bad-state (operation "_x2c.function.reference"));
@@ -230,7 +230,7 @@ static String _binding_spelling(List value, Var syntax) {
   return spelling;
 }
 
-/** Answers `x2c.ident`, declared in `lib/meta.x`. */
+/** Answers `x2c_ident`, declared in `lib/meta.x`. */
 List x2c_ident(String spelling) {
   _require_expansion("x2c.ident");
   if (!spelling.is_identifier())
@@ -238,7 +238,7 @@ List x2c_ident(String spelling) {
   return %("x2c.ident" $spelling);
 }
 
-/** Answers `x2c.binding.fresh`, declared in `lib/meta.x`. */
+/** Answers `x2c_binding_fresh`, declared in `lib/meta.x`. */
 List x2c_binding_fresh(String role) {
   _require_expansion("x2c.binding.fresh");
   if (!role.is_identifier()) $fail.meta_sdk_binding_role(role);
@@ -246,7 +246,7 @@ List x2c_binding_fresh(String role) {
   return c.sym.introduce(c.fresh_name(role));
 }
 
-/** Answers `x2c.binding.for`, declared in `lib/meta.x`. */
+/** Answers `x2c_binding_for`, declared in `lib/meta.x`. */
 List x2c_binding_for(Var key, String role) {
   _require_expansion("x2c.binding.for");
   if (!role.is_identifier()) $fail.meta_sdk_binding_role(role);
@@ -319,7 +319,7 @@ List Code.native_signature(List syntax) {
 
 // ancestry and placement
 
-/** Answers `x2c.enclosing`, declared in `lib/meta.x`. */
+/** Answers `x2c_enclosing`, declared in `lib/meta.x`. */
 Code x2c_enclosing(Symbol what) {
   _require_expansion("x2c.enclosing");
   if (!(what in %<<declarator statement function unit>>))
@@ -327,7 +327,7 @@ Code x2c_enclosing(Symbol what) {
   return active.expander.enclosing(what);
 }
 
-/** Answers `x2c.place`, declared in `lib/meta.x`. */
+/** Answers `x2c_place`, declared in `lib/meta.x`. */
 void x2c_place(List where, Code code) {
   _require_expansion("x2c.place");
   active.expander.place(where, code);

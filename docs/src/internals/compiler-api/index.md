@@ -62,7 +62,7 @@ Functions and types exposed by each compiler module.
 | [`src/generate/generate.x`](generate.md) | the generated header and source of one unit. |
 | [`src/initializers/initializers.x`](initializers.md) | brace initializer conversion. |
 | [`src/literals/literals.x`](literals.md) | x2c literal parsing. |
-| [`src/macros/macros.x`](macros.md) | source macros and the compile-time Lisp they run. |
+| [`src/macros/macros.x`](macros.md) | source macros and the compile-time calls they run. |
 | [`src/meta-group/meta-group.x`](meta-group.md) | a unit's meta group, emitted as C. |
 | [`src/meta-native/meta-native.x`](meta-native.md) | meta functions and the native code they call. |
 | [`src/meta-sdk/meta-sdk.x`](meta-sdk.md) | the compiler's answers to `lib/meta.x` operations. |

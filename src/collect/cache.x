@@ -8,8 +8,7 @@
 /* Process cache: canonical path ->
    `(ordered-parts hash definitions dependencies include-roots)`.
    A part is a declaration Map or an included source path. Dependencies
-   map macro, Lisp, and embedded-text paths to a
-   content hash or 1. Entries
+   map macro and embedded-text paths to a content hash or 1. Entries
    outlive per-unit scopes, so every retained key and value belongs to
    process_cache_scope. */
 static Map process_cache = NULL;
@@ -163,9 +162,9 @@ static void _reset_cache(Map &cache) {
   cache = _cache_map();
 }
 
-/** Drops the entries collected without declaration defaults while the shared
-    compile-time session was filled, or by a project meta build. Call once
-    that session is published, and after the meta build's parses. */
+/** Drops the entries a meta build collected without declaration defaults
+    or with placeholders for its meta calls. Call after the meta build's
+    parses. */
 void Compiler.forget_provisional_entries(void) {
   if (!provisional_entries) return;
   foreach (String path in provisional_entries.keys())

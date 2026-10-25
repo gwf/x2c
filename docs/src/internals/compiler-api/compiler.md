@@ -25,7 +25,7 @@ One x2c unit's translation state and its two parses.
 | [`Compiler.cache_literal_list`](#Compiler.cache_literal_list) | Returns a runtime `List` expression for cached compiler-owned syntax. |
 | [`Compiler.cache_literal_var`](#Compiler.cache_literal_var) | Interns an immutable value and returns its `(cache id)` reference. |
 | [`Compiler.canonical_path`](#Compiler.canonical_path) | Returns the spelling that identifies the file at `path`. |
-| [`Compiler.close_child`](#Compiler.close_child) | Retains a child's final diagnostics and closes its owned Lisp session. |
+| [`Compiler.close_child`](#Compiler.close_child) | Retains a child's final diagnostics and frees its owned meta bindings. |
 | [`Compiler.collect_compile_time_definition`](#Compiler.collect_compile_time_definition) | Collects macro definitions or keyword aliases before the full source parse. |
 | [`Compiler.collect_unit_macro`](#Compiler.collect_unit_macro) | Expands the file-scope unit macro at the cursor for collection and reports whether it did. |
 | [`Compiler.copy_source_declaration`](#Compiler.copy_source_declaration) | Carries declaration metadata with one actual symbol contribution. |
@@ -33,7 +33,7 @@ One x2c unit's translation state and its two parses.
 | [`Compiler.emitted_binding_name`](#Compiler.emitted_binding_name) | Returns a binding's selected emitted spelling. |
 | [`Compiler.expect`](#Compiler.expect) | Requires and consumes the current token type. |
 | [`Compiler.finish_collected_declaration`](#Compiler.finish_collected_declaration) | Records declaration visibility and meta facts, then skips its body. |
-| [`Compiler.free_lisp`](#Compiler.free_lisp) | Destroys a compiler's owned `Lisp` session, if any. |
+| [`Compiler.free_bindings`](#Compiler.free_bindings) | Destroys a compiler's owned bindings, if any. |
 | [`Compiler.freeze_declaration_syntax`](#Compiler.freeze_declaration_syntax) | Retains exported syntax across translation units and cached interfaces. |
 | [`Compiler.fresh_name`](#Compiler.fresh_name) | Allocates the next compiler-private C spelling for `stem`. |
 | [`Compiler.full_parse`](#Compiler.full_parse) | Parses and types the positioned source against `globs`. |
@@ -57,7 +57,6 @@ One x2c unit's translation state and its two parses.
 | [`Compiler.peek`](#Compiler.peek) | Returns the non-trivia token type `steps` from parser position. |
 | [`Compiler.portable_path`](#Compiler.portable_path) | Returns `path` relative to the canonical x2c home when it lies below the home, otherwise `path`. |
 | [`Compiler.present_references`](#Compiler.present_references) | Returns the optional references proven present in this lexical path. |
-| [`Compiler.queue_declaration_effect`](#Compiler.queue_declaration_effect) | Queues a source Lisp form until declaration production needs its state. |
 | [`Compiler.read_source`](#Compiler.read_source) | Reads a source through the request view and retains exact response bytes. |
 | [`Compiler.record_inline_function`](#Compiler.record_inline_function) | Records the header linkage of a public inline definition. |
 | [`Compiler.record_origin`](#Compiler.record_origin) | Records a token's location and returns its one-based occurrence. |
@@ -66,16 +65,16 @@ One x2c unit's translation state and its two parses.
 | [`Compiler.replay_declaration_source`](#Compiler.replay_declaration_source) | Binds a retained declaration production at the cursor, then advances past its source. |
 | [`Compiler.require_input`](#Compiler.require_input) | Raises `<incomplete>` when a required grammar item reaches the supplied input boundary. |
 | [`Compiler.restore_reference_presence`](#Compiler.restore_reference_presence) | Restores the optional-reference facts saved before a lexical path. |
-| [`Compiler.return_unit_state`](#Compiler.return_unit_state) | Returns that state to `owner`, so the next segment starts where this one finished and any Lisp environment this segment created stays alive after the shadow is released. |
-| [`Compiler.run_declaration_effects`](#Compiler.run_declaration_effects) | Runs pending effects for declaration production or CPP macro evaluation. |
+| [`Compiler.return_unit_state`](#Compiler.return_unit_state) | Returns that state to `owner`, so the next segment starts where this one finished and any bindings this segment created stay alive after the shadow is released. |
 | [`Compiler.select_declaration_defaults`](#Compiler.select_declaration_defaults) | Selects the owning file's declaration defaults after all its segments. |
 | [`Compiler.settle_reference`](#Compiler.settle_reference) | Marks the optional reference `binding` present after an `if` when the arm that runs without it cannot fall through: `no` when the true arm proves presence, `yes` otherwise. |
 | [`Compiler.shallow_parse`](#Compiler.shallow_parse) | Collects file-scope declarations into `globals` without parsing bodies. |
 | [`Compiler.shallow_parse_overlay`](#Compiler.shallow_parse_overlay) | Collects declarations with reads over `base` then `overlay`. |
-| [`Compiler.share_meta_group`](#Compiler.share_meta_group) | Shares `owner`'s pending `meta` group and the definitions it reads, which belong with the Lisp session that holds the group's stubs. |
+| [`Compiler.share_meta_group`](#Compiler.share_meta_group) | Shares `owner`'s pending `meta` group and the definitions it reads, which belong with the bindings that hold the group's stubs. |
 | [`Compiler.skip_collected_script_statement`](#Compiler.skip_collected_script_statement) | Skips a collected script statement, or diagnoses one beside `main`. |
+| [`Compiler.source_path`](#Compiler.source_path) | Returns the canonical path of the source `file`. |
 | [`Compiler.start_collection`](#Compiler.start_collection) | Starts a collection pass with the syntax prelude. |
-| [`Compiler.take_unit_state`](#Compiler.take_unit_state) | Takes over `owner`'s macro, object-like `#define`, include, keyword, literal cache, and Lisp state for one segment of a collected file. |
+| [`Compiler.take_unit_state`](#Compiler.take_unit_state) | Takes over `owner`'s macro, object-like `#define`, keyword, literal cache, and binding state for one segment of a collected file. |
 | [`Compiler.take_word`](#Compiler.take_word) | Consumes the identifier `word` when current and reports whether it matched. |
 | [`Compiler.test`](#Compiler.test) | Consumes `type` when current and reports whether it matched. |
 | [`Compiler.thaw_declaration_syntax`](#Compiler.thaw_declaration_syntax) | Restores exported syntax in the importing unit's parsing lifetime. |
@@ -239,7 +238,7 @@ Source: `src/compiler/source-files.x:17`
 
 `void Compiler.close_child(Compiler c, Compiler child)`
 
-Retains a child's final diagnostics and closes its owned Lisp session.
+Retains a child's final diagnostics and frees its owned meta bindings.
 
 Source: `src/compiler/lifecycle.x:25`
 
@@ -264,7 +263,7 @@ reports whether it did. A required expansion reports its errors. A tried
 expansion that fails keeps nothing and leaves the cursor at the
 invocation, so collection skips it and the full parse reports it.
 
-Source: `src/compiler/declarations/production.x:64`
+Source: `src/compiler/declarations/production.x:17`
 
 <a id="Compiler.copy_source_declaration"></a>
 #### Compiler.copy_source_declaration
@@ -317,20 +316,18 @@ The declaration is already bound by the shared top-level parser.
 
 Source: `src/compiler/parsing/collection.x:99`
 
-<a id="Compiler.free_lisp"></a>
-#### Compiler.free_lisp
+<a id="Compiler.free_bindings"></a>
+#### Compiler.free_bindings
 
-`void Compiler.free_lisp(Compiler c)`
+`void Compiler.free_bindings(Compiler c)`
 
-Destroys a compiler's owned `Lisp` session, if any.
+Destroys a compiler's owned bindings, if any.
 
-A borrowed session is left alive. Owned sessions not freed here are
+Borrowed bindings are left alive. Owned bindings not freed here are
 destroyed when the compiler's Scope ends. This is final compiler cleanup:
 it clears the diagnostic store and the compiler must not be reused.
-At process exit, root Scope cleanup follows shutdown hooks and canonical
-pool cleanup. Close explicitly while any native session dependencies live.
 
-Source: `src/compiler/lifecycle.x:138`
+Source: `src/compiler/lifecycle.x:133`
 
 <a id="Compiler.freeze_declaration_syntax"></a>
 #### Compiler.freeze_declaration_syntax
@@ -567,17 +564,6 @@ Returns the optional references proven present in this lexical path.
 
 Source: `src/compiler/binding-facts.x:18`
 
-<a id="Compiler.queue_declaration_effect"></a>
-#### Compiler.queue_declaration_effect
-
-`void Compiler.queue_declaration_effect( Compiler c, String form, Token first, Token after)`
-
-Queues a source Lisp form until declaration production needs its state.
-Files without declaration producers keep ordinary full-parse evaluation.
-A null `after` replays an included effect without an owning source span.
-
-Source: `src/compiler/declarations/production.x:11`
-
 <a id="Compiler.read_source"></a>
 #### Compiler.read_source
 
@@ -638,7 +624,7 @@ Source: `src/compiler/source-locations.x:73`
 Binds a retained declaration production at the cursor, then advances
 past its source. Returns NULL when collection retained no production.
 
-Source: `src/compiler/declarations/production.x:125`
+Source: `src/compiler/declarations/production.x:78`
 
 <a id="Compiler.require_input"></a>
 #### Compiler.require_input
@@ -666,19 +652,10 @@ Source: `src/compiler/binding-facts.x:38`
 `void Compiler.return_unit_state(Compiler c, Compiler owner)`
 
 Returns that state to `owner`, so the next segment starts where this one
-finished and any Lisp environment this segment created stays alive after
-the shadow is released.
+finished and any bindings this segment created stay alive after the
+shadow is released.
 
 Source: `src/compiler/lifecycle.x:54`
-
-<a id="Compiler.run_declaration_effects"></a>
-#### Compiler.run_declaration_effects
-
-`void Compiler.run_declaration_effects(Compiler c)`
-
-Runs pending effects for declaration production or CPP macro evaluation.
-
-Source: `src/compiler/declarations/production.x:27`
 
 <a id="Compiler.select_declaration_defaults"></a>
 #### Compiler.select_declaration_defaults
@@ -730,7 +707,7 @@ Source: `src/compiler/parsing/collection.x:18`
 `void Compiler.share_meta_group(Compiler c, Compiler owner)`
 
 Shares `owner`'s pending `meta` group and the definitions it reads, which
-belong with the Lisp session that holds the group's stubs.
+belong with the bindings that hold the group's stubs.
 
 Source: `src/compiler/lifecycle.x:34`
 
@@ -743,6 +720,16 @@ Skips a collected script statement, or diagnoses one beside `main`.
 Called after top-level directives establish source visibility.
 
 Source: `src/compiler/parsing/scripts.x:83`
+
+<a id="Compiler.source_path"></a>
+#### Compiler.source_path
+
+`String Compiler.source_path(Compiler c, String file)`
+
+Returns the canonical path of the source `file`. A relative name that
+is not a file resolves against the home.
+
+Source: `src/compiler/source-files.x:111`
 
 <a id="Compiler.start_collection"></a>
 #### Compiler.start_collection
@@ -760,10 +747,10 @@ Source: `src/compiler/parsing/collection.x:58`
 
 `void Compiler.take_unit_state(Compiler c, Compiler owner)`
 
-Takes over `owner`'s macro, object-like `#define`, include, keyword,
-literal cache, and Lisp state for one segment of a collected file.
+Takes over `owner`'s macro, object-like `#define`, keyword, literal
+cache, and binding state for one segment of a collected file.
 Segments are one translation unit, so retained macro bodies index the
-unit's literal cache and use its Lisp environment.
+unit's literal cache and use its bindings.
 
 Source: `src/compiler/lifecycle.x:43`
 
@@ -961,6 +948,7 @@ Source: `src/compiler/lifecycle.x:8`
 | [`Compiler`](#Compiler) | struct | Holds mutable state for one source translation. |
 | [`Diagnostics`](#Diagnostics) | struct | Names the positioned diagnostic store routed by a `Compiler`. |
 | [`GenNames`](#GenNames) | struct | Holds scope-owned generated-name state shared by related compilers. |
+| [`MetaBindings`](#MetaBindings) | struct | Names a unit's compile-time callables, in `meta-native/bindings.x`. |
 | [`ModuleSource`](#ModuleSource) | struct | Describes an x2c source whose `module` block names member files: `text` holds the file's own text, `own`, with each member's text in place of the block. |
 | [`Pending`](#Pending) | struct | Holds generated code awaiting insertion, by `Pending.area` destination: unit support declarations, which `Compiler.transform` lowers after the unit, then the lowered statements of each file initialization area. |
 | [`PendingMark`](#PendingMark) | struct | Holds each destination's length for `Pending.restore`. |
@@ -981,20 +969,21 @@ the transform lowers it, a block item with the token or origin it
 starts at, or an initialized declarator with its declaration base in
 `base` and its `(bind ...)` node in `node`.
 
-Source: `src/compiler/compiler.x:101`
+Source: `src/compiler/compiler.x:104`
 
 <a id="Compiler"></a>
 ### Compiler
 
-`typedef struct Compiler { String filename, text, root_dir; String package, List package_dirs, package_source_dirs; Map package_roots, package_aliases, package_members, package_effects; Token token; Token input_boundary; Tokenizer tokenizer; Array line_markers; ModuleSource unit_source; List return_type, include_dirs; Map deps; List aggregate_type, macro_stack, declaration_effects, Sym sym; Map evaluated_effects; int expansion_floor; SymScope params; Map key_ids, macros, kw_aliases; List binding_rows, binding_sealed; Map object_macros; List arms; Map arm_stacks; Array layout_marks, packed_marks; Token directives_taken; Map protocols, conforms, protocol_helpers; Map proto_cache; Map adoptions; Map macro_holes; int alias_level; Map local_macro_captures; int macro_application; List lambda_scopes; Array match_types; Map imports; Map included_effects; Map init_tokens, static_init_deps, fn_defs; Array id_keys; String init_fn, fini_fn; Pending pending, int prelude; Map meta_comptime, meta_regions, meta_hashes, meta_calls; struct MetaHelper *meta_helper; Map native_meta; Map project_meta; Array unit_nodes, meta_group; Map meta_group_bound; int meta_build; int load_source; int runtime_inc, runtime_hdrs, collect_protocols, shallow, source_private; int module_declaration; int replaying_declaration; int public_bodies; int interface_provider, signature_only; int collection_native; Map collection_native_files; Array pending_inline_bodies; int layout; int meta_body; int capture_unit; List active_rewrites; List applying; Map rewrite_rules; Map prepared_rewrites; SlotWatch slot_watch; Token meta_statement; int import_protocols; int in_pattern, match_is, runtime_literals, inline_header; int permanent_literals; int builtin_defs, in_proto, macro_count, recovery_depth; int declaration_produced; int needs_exception; int local_macro_capture_scopes; int open_linkage; String fn_name, Diagnostics diagnostics, Array braces, import_stack; Block ancestors; Array placements; String lines_text, Array line_starts; ScriptUnit unit_script, script; Lisp macro_lisp, int borrowed_lisp; int inherited_lisp; GenNames names; Array origins, int origin, source_map; SourceView sources; int source_facts, source_primary; Array source_occurrences; Map source_definitions, source_declarations, source_texts; } *Compiler`
+`typedef struct Compiler { String filename, text, root_dir; String package, List package_dirs, package_source_dirs; Map package_roots, package_aliases, package_members, package_effects; Token token; Token input_boundary; Tokenizer tokenizer; Array line_markers; ModuleSource unit_source; List return_type, include_dirs; Map deps; List aggregate_type, macro_stack, Sym sym; int expansion_floor; SymScope params; Map key_ids, macros, kw_aliases; List binding_rows, binding_sealed; Map object_macros; List arms; Map arm_stacks; Array layout_marks, packed_marks; Token directives_taken; Map protocols, conforms, protocol_helpers; Map proto_cache; Map adoptions; Map macro_holes; int alias_level; Map local_macro_captures; int macro_application; List lambda_scopes; Array match_types; Map included_effects; Map init_tokens, static_init_deps, fn_defs; Array id_keys; String init_fn, fini_fn; Pending pending, int prelude; Map meta_comptime, meta_regions, meta_hashes, meta_calls; struct MetaHelper *meta_helper; Map native_meta; Map project_meta; Array unit_nodes, meta_group; Map meta_group_bound; int meta_build; int load_source; int runtime_inc, runtime_hdrs, collect_protocols, shallow, source_private; int module_declaration; int replaying_declaration; int public_bodies; int interface_provider, signature_only; int collection_native; Map collection_native_files; Array pending_inline_bodies; int layout; int meta_body; int capture_unit; List active_rewrites; List applying; Map rewrite_rules; Map prepared_rewrites; SlotWatch slot_watch; Token meta_statement; int import_protocols; int in_pattern, match_is, runtime_literals, inline_header; int permanent_literals; int builtin_defs, in_proto, macro_count, recovery_depth; int declaration_produced; int needs_exception; int local_macro_capture_scopes; int open_linkage; String fn_name, Diagnostics diagnostics, Array braces; Block ancestors; Array placements; String lines_text, Array line_starts; ScriptUnit unit_script, script; MetaBindings meta_bindings, int borrowed_bindings; GenNames names; Array origins, int origin, source_map; SourceView sources; int source_facts, source_primary; Array source_occurrences; Map source_definitions, source_declarations, source_texts; } *Compiler`
 
 Holds mutable state for one source translation.
 
-The structure, its state, and its owned compile-time `Lisp` session belong
-to the current `Scope`. `Compiler.free_lisp` permits early session cleanup;
-otherwise Scope teardown releases it. All Lisp calls must return first.
+The structure, its state, and its owned compile-time bindings belong to
+the current `Scope`. `Compiler.free_bindings` permits early cleanup;
+otherwise Scope teardown releases them. All their calls must return
+first.
 
-Source: `src/compiler/compiler.x:115`
+Source: `src/compiler/compiler.x:119`
 
 <a id="Diagnostics"></a>
 ### Diagnostics
@@ -1020,7 +1009,16 @@ number names one live declaration across every symbol table in the unit.
 Exported rows use their interface's own numbering, which starts at 1;
 imported templates rebind those references in the consuming unit.
 
-Source: `src/compiler/compiler.x:62`
+Source: `src/compiler/compiler.x:65`
+
+<a id="MetaBindings"></a>
+### MetaBindings
+
+`typedef struct MetaBindings *MetaBindings`
+
+Names a unit's compile-time callables, in `meta-native/bindings.x`.
+
+Source: `src/compiler/compiler.x:29`
 
 <a id="ModuleSource"></a>
 ### ModuleSource
@@ -1035,7 +1033,7 @@ precedes that offset on its line and the prefix that file's statics
 take. The first row marks the start of `text`. `members` maps each member's
 canonical path to its content hash.
 
-Source: `src/compiler/compiler.x:46`
+Source: `src/compiler/compiler.x:49`
 
 <a id="Pending"></a>
 ### Pending
@@ -1046,7 +1044,7 @@ Holds generated code awaiting insertion, by `Pending.area` destination:
 unit support declarations, which `Compiler.transform` lowers after the
 unit, then the lowered statements of each file initialization area.
 
-Source: `src/compiler/compiler.x:84`
+Source: `src/compiler/compiler.x:87`
 
 <a id="PendingMark"></a>
 ### PendingMark
@@ -1055,7 +1053,7 @@ Source: `src/compiler/compiler.x:84`
 
 Holds each destination's length for `Pending.restore`.
 
-Source: `src/compiler/compiler.x:87`
+Source: `src/compiler/compiler.x:90`
 
 <a id="ScriptUnit"></a>
 ### ScriptUnit
@@ -1067,7 +1065,7 @@ canonical path, its first line as written, and whether it defines `main`
 itself. Every compiler of that unit shares one record, so collection sees
 the same script settings the full parse does.
 
-Source: `src/compiler/compiler.x:33`
+Source: `src/compiler/compiler.x:36`
 
 <a id="SlotWatch"></a>
 ### SlotWatch
@@ -1077,7 +1075,7 @@ Source: `src/compiler/compiler.x:33`
 Names the slots a rewrite's first lowering watches; see "prepared
 replacements" in macros.x.
 
-Source: `src/compiler/compiler.x:94`
+Source: `src/compiler/compiler.x:97`
 
 <a id="Sym"></a>
 ### Sym
@@ -1086,7 +1084,7 @@ Source: `src/compiler/compiler.x:94`
 
 Names the scope-owned semantic table belonging to one compiler.
 
-Source: `src/compiler/compiler.x:90`
+Source: `src/compiler/compiler.x:93`
 
 <a id="SymScope"></a>
 ### SymScope
@@ -1099,7 +1097,7 @@ number of alias rows it defines.
 Active scopes have initialized maps. The zero value is only the sentinel
 returned when an empty scope stack is popped.
 
-Source: `src/compiler/compiler.x:73`
+Source: `src/compiler/compiler.x:76`
 
 <a id="SymTxn"></a>
 ### SymTxn

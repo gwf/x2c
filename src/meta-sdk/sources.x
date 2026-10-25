@@ -49,7 +49,7 @@ String Code.source_text(Var value) {
   return String.new_len(active.expander.text + begin, end - begin);
 }
 
-/** Answers `x2c.embed.text`, declared in `lib/meta.x`. */
+/** Answers `x2c_embed_text`, declared in `lib/meta.x`. */
 String x2c_embed_text(Var requested) {
   _require_expansion("x2c.embed.text");
   Compiler c = active.expander;

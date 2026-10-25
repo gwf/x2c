@@ -248,7 +248,7 @@ static void _skip_attributes(Compiler c) {
   }
 }
 
-/* A template may spell a tag through a Name hole or compile-time Lisp,
+/* A template may spell a tag through a Name hole or a meta-call slot,
    which publishes it; a literal tag there is a template local. */
 static List _tag_name(Compiler c) {
   List slot = c.try_parse_macro_slot(<name>);
@@ -528,8 +528,8 @@ List Compiler.parse_enumerator(Compiler c, Type context) {
   return _publish_enumerator(c, syntax, context, origin);
 }
 
-/* A template's enumerator is named by a hole, a Lisp slot, or a name each
-   expansion introduces. */
+/* A template's enumerator is named by a hole, a meta-call slot, or a name
+   each expansion introduces. */
 static List _template_enumerator(Compiler c, Type context) {
   List name = _enumerator_name(c, context);
   List target = %(bind $name ());

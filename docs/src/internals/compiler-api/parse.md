@@ -138,7 +138,7 @@ Source: `src/parse/binding.x:548`
 Binds one constructed parameter in the current scope, including nested
 function modifiers and reference parameter facts.
 
-Source: `src/parse/declarators.x:511`
+Source: `src/parse/declarators.x:507`
 
 <a id="Compiler.bind_source_statement"></a>
 #### Compiler.bind_source_statement
@@ -174,7 +174,7 @@ Installs a definition-local template binding or typedef provisionally.
 Later template types name a local typedef by its identity, so each
 expansion refers to that expansion's private typedef.
 
-Source: `src/parse/declarators.x:295`
+Source: `src/parse/declarators.x:291`
 
 <a id="Compiler.check_reference_placement"></a>
 #### Compiler.check_reference_placement
@@ -184,7 +184,7 @@ Source: `src/parse/declarators.x:295`
 Rejects transparent references in object and function-result types.
 References inside a function's parameter list remain supported.
 
-Source: `src/parse/declarations.x:305`
+Source: `src/parse/declarations.x:302`
 
 <a id="Compiler.close_placements"></a>
 #### Compiler.close_placements
@@ -206,7 +206,7 @@ scope. A script unit that does is an ordinary program: its declarations
 stay at file scope and it may not have top-level statements. Both parse
 passes read the same tokens, so they agree before either parses.
 
-Source: `src/parse/units.x:238`
+Source: `src/parse/units.x:225`
 
 <a id="Compiler.definition_doc"></a>
 #### Compiler.definition_doc
@@ -218,7 +218,7 @@ starting at `start`, or NULL. A doc comment opens with two asterisks and
 ends on the line before `start` or on its line. Macro templates carry the
 text until their selected body binds at the invocation.
 
-Source: `src/parse/units.x:601`
+Source: `src/parse/units.x:588`
 
 <a id="Compiler.enclosing"></a>
 #### Compiler.enclosing
@@ -277,7 +277,7 @@ Constructs a foreign alias from one direct function declaration and target.
 typed, a function. Storage is limited to `static` or `inline`, when
 present, and variadic parameters are rejected.
 
-Source: `src/parse/units.x:772`
+Source: `src/parse/units.x:756`
 
 <a id="Compiler.finish_initializers"></a>
 #### Compiler.finish_initializers
@@ -323,7 +323,7 @@ Source: `src/parse/placement.x:132`
 Reports whether the cursor begins a contextual top-level `meta`
 declaration: a function or an initialized file-static value.
 
-Source: `src/parse/units.x:316`
+Source: `src/parse/units.x:303`
 
 <a id="Compiler.package_alias_spelling"></a>
 #### Compiler.package_alias_spelling
@@ -334,7 +334,7 @@ Returns the folded package-member spelling at the current token, or NULL.
 The token must be an unshadowed imported alias followed by `.` and an
 identifier. This lookahead does not consume tokens.
 
-Source: `src/parse/declarators.x:614`
+Source: `src/parse/declarators.x:610`
 
 <a id="Compiler.parse_basic_identifier"></a>
 #### Compiler.parse_basic_identifier
@@ -343,7 +343,7 @@ Source: `src/parse/declarators.x:614`
 
 Consumes one `ident` token and returns its spelling as a one-item `List`.
 
-Source: `src/parse/declarators.x:627`
+Source: `src/parse/declarators.x:623`
 
 <a id="Compiler.parse_complex_identifier"></a>
 #### Compiler.parse_complex_identifier
@@ -354,7 +354,7 @@ Parses the current identifier or dotted owner/member as a one-item name.
 Package aliases and imported method spellings are folded through the
 current `Sym`, and all accepted tokens are consumed.
 
-Source: `src/parse/declarators.x:552`
+Source: `src/parse/declarators.x:548`
 
 <a id="Compiler.parse_declaration_argument"></a>
 #### Compiler.parse_declaration_argument
@@ -486,7 +486,7 @@ Source: `src/parse/types.x:430`
 
 Consumes and returns the current identifier, or NULL without consuming.
 
-Source: `src/parse/declarators.x:634`
+Source: `src/parse/declarators.x:630`
 
 <a id="Compiler.parse_parameter"></a>
 #### Compiler.parse_parameter
@@ -497,7 +497,7 @@ Parses one parameter and returns `(param TYPE DECLARATOR)` or `(...)`.
 Outside macro-template parsing, a named parameter is installed in the
 current `Sym` scope. The following delimiter remains current.
 
-Source: `src/parse/declarators.x:499`
+Source: `src/parse/declarators.x:495`
 
 <a id="Compiler.parse_parameter_list"></a>
 #### Compiler.parse_parameter_list
@@ -508,7 +508,7 @@ Parses a nonempty comma-separated parameter `List` in source order.
 The caller owns the parameter scope; the first non-comma delimiter remains
 current.
 
-Source: `src/parse/declarators.x:482`
+Source: `src/parse/declarators.x:478`
 
 <a id="Compiler.parse_simple_declaration"></a>
 #### Compiler.parse_simple_declaration
@@ -542,7 +542,7 @@ Missing required syntax raises `<incomplete>`; trailing items are rejected.
 Temporary parser scopes and captured parameters are restored on every exit.
 The caller owns the semantic transaction and commits after execution.
 
-Source: `src/parse/units.x:213`
+Source: `src/parse/units.x:200`
 
 <a id="Compiler.parse_top_level"></a>
 #### Compiler.parse_top_level
@@ -551,7 +551,7 @@ Source: `src/parse/units.x:213`
 
 Parses one full top-level form through the shared classifier.
 
-Source: `src/parse/units.x:205`
+Source: `src/parse/units.x:192`
 
 <a id="Compiler.parse_top_level_mode"></a>
 #### Compiler.parse_top_level_mode
@@ -559,14 +559,13 @@ Source: `src/parse/units.x:205`
 `List Compiler.parse_top_level_mode(Compiler c, int skip_body)`
 
 Parses one top-level form and applies its source-ordered compiler effects.
-Returns its AST, or NULL when a keyword definition, top-level Lisp form,
-linkage brace, or compile-time-only `meta` function only updates compiler
-state, with the first following token current. With `skip_body`,
-collection uses the same classifier and bound declarations but skips
-runtime bodies.
+Returns its AST, or NULL when a keyword definition, linkage brace, or
+compile-time-only `meta` function only updates compiler state, with the
+first following token current. With `skip_body`, collection uses the
+same classifier and bound declarations but skips runtime bodies.
 This continuation is independent of the compiler's shallow-parse state.
 
-Source: `src/parse/units.x:16`
+Source: `src/parse/units.x:15`
 
 <a id="Compiler.parse_type_name"></a>
 #### Compiler.parse_type_name
@@ -622,7 +621,7 @@ Reports whether the cursor begins a protocol declaration or adoption,
 including its `meta` and `static` markers. This query does not consume
 tokens.
 
-Source: `src/parse/units.x:308`
+Source: `src/parse/units.x:295`
 
 <a id="Compiler.script_statement_executes"></a>
 #### Compiler.script_statement_executes
@@ -633,7 +632,7 @@ Reports whether the top-level item at the cursor is a script statement
 that runs, rather than a declaration: an expression, control flow, a
 `with` block, or a statement macro. This query does not consume tokens.
 
-Source: `src/parse/units.x:298`
+Source: `src/parse/units.x:285`
 
 <a id="Compiler.script_statement_starts"></a>
 #### Compiler.script_statement_starts
@@ -642,12 +641,12 @@ Source: `src/parse/units.x:298`
 
 Reports whether the top-level item at the cursor is one of a script
 unit's statements, which become `main`'s body.
-Preprocessor lines, imports, protocols, compile-time definitions and
-Lisp, file-scope macro invocations, `typedef`, `static`, and `extern`
+Preprocessor lines, imports, protocols, compile-time definitions,
+file-scope macro invocations, `typedef`, `static`, and `extern`
 declarations, linkage braces, type definitions, and function prototypes
 and definitions stay at file scope. This query does not consume tokens.
 
-Source: `src/parse/units.x:259`
+Source: `src/parse/units.x:246`
 
 <a id="Compiler.source_clause"></a>
 #### Compiler.source_clause
@@ -683,6 +682,6 @@ Source: `src/parse/declarations.x:139`
 This module owns declarations and the top-level forms that hold them.
 One classifier reads each top-level form in collection and in the full
 parse. Each declarator installs its name in the current Sym before its
-initializer resolves, and syntax that macros and compile-time Lisp
+initializer resolves, and syntax that macros and meta functions
 construct binds through the same declaration operations. Expressions,
 statements, and literals parse in their own modules.

@@ -13,9 +13,12 @@ Meta functions and the native code they call.
 | Function | Summary |
 | --- | --- |
 | [`x2c_register_extension`](#x2c_register_extension) | Registers package `name`'s compile-time part, linked into the compiler, whose `targets` returns its name-to-`Func` Map. |
+| [`Compiler.apply_meta_binding`](#Compiler.apply_meta_binding) | Calls `function`, the binding of `name`, with `arguments`; what it allocates belongs to the unit's values Scope. |
 | [`Compiler.apply_meta_function`](#Compiler.apply_meta_function) | Applies the meta function spelled `name` to the evaluated `arguments` at `site`, outside any expansion. |
 | [`Compiler.bind_linked_meta`](#Compiler.bind_linked_meta) | Binds the bodied `meta` definition `fn`, of function type `type`, to the compiler's linked copy of it when the two definition texts hash the same, or always for a prelude component's, instead of staging it. |
 | [`Compiler.bind_native_meta`](#Compiler.bind_native_meta) | Binds an included native `meta` function the first time compile-time code calls `name`. |
+| [`Compiler.bindings`](#Compiler.bindings) | Returns the unit's binding table, creating it on first use. |
+| [`Compiler.builtin_module`](#Compiler.builtin_module) | Returns the built-in algorithms by the names compile-time code calls. |
 | [`Compiler.compiler_targets`](#Compiler.compiler_targets) | Returns the compiler's own targets, the operations `lib/meta.x` declares with a bodyless `meta` prototype, loaded as the native module every request selects first. |
 | [`Compiler.evaluate_meta_expression`](#Compiler.evaluate_meta_expression) | Executes an explicit meta call and inserts its result at a code boundary. |
 | [`Compiler.evaluate_meta_statement`](#Compiler.evaluate_meta_statement) | Executes an explicit meta call written as a whole statement at `context`. |
@@ -31,10 +34,12 @@ Meta functions and the native code they call.
 | [`Compiler.links_meta_function`](#Compiler.links_meta_function) | Reports whether the compiler links the `meta` function `name`. |
 | [`Compiler.load_native_module`](#Compiler.load_native_module) | Loads the native module at `path` once per process and returns its absolute path. |
 | [`Compiler.matches_macro`](#Compiler.matches_macro) | Tests a registered macro with the candidate's global and source bindings. |
+| [`Compiler.meta_binding`](#Compiler.meta_binding) | Writes the callable compile-time code reaches as `name` to `out`: the unit's binding, or else a built-in algorithm or one of the compiler's own operations. |
 | [`Compiler.native_meta_accepts`](#Compiler.native_meta_accepts) | Answers whether the native target `function` matches the declared `signature`. |
 | [`Compiler.native_meta_module`](#Compiler.native_meta_module) | Returns the selected file-backed native module that supplies `name`, with its native `type`, or NULL for a linked or absent target. |
 | [`Compiler.native_meta_targets`](#Compiler.native_meta_targets) | Returns the declared native targets advertised by `meta` interface rows, in the row form `lib/lisp-targets/lisp-targets.x` uses for its inventory, or only those declared in the files `paths` names when it is not empty. |
 | [`Compiler.native_module_targets`](#Compiler.native_module_targets) | Returns the name-to-`Func` Map of the loaded native module at absolute `path`. |
+| [`Compiler.native_targets`](#Compiler.native_targets) | Returns the runtime functions the compiler links that `meta` prototypes advertise, by target name, including those that take a callback. |
 | [`Compiler.preload_native_module`](#Compiler.preload_native_module) | Loads the native module at absolute `path` when this compiler built it and the platform loads modules. |
 | [`Compiler.record_native_meta_effect`](#Compiler.record_native_meta_effect) | The shallow interface retains the advertisement separately from the C declaration. |
 | [`Compiler.record_project_meta_effect`](#Compiler.record_project_meta_effect) | Records the provider of a public bodied meta function in its interface. |
@@ -42,6 +47,11 @@ Meta functions and the native code they call.
 | [`Compiler.select_native_modules`](#Compiler.select_native_modules) | Selects the loaded native modules, by absolute path, that bodyless `meta` prototypes bind in the current request. |
 | [`Compiler.select_package_module`](#Compiler.select_package_module) | Selects package `name`'s native module, when it has one, after the modules already selected, and records it as a prerequisite of the unit. |
 | [`Compiler.supplies_native_meta`](#Compiler.supplies_native_meta) | Reports whether the compiler itself supplies the native function `name`. |
+| [`MetaBindings.bind`](#MetaBindings.bind) | Binds `name` to `function` and moves its storage into the table. |
+| [`MetaBindings.destroy`](#MetaBindings.destroy) | Destroys the table's values, then the table. |
+| [`MetaBindings.new`](#MetaBindings.new) | Creates an empty table in Scopes of its own, so creating it under a narrower Context leaves nothing there. |
+| [`MetaBindings.set`](#MetaBindings.set) | Binds `name` to `function`, which the table borrows. |
+| [`MetaBindings.try_get`](#MetaBindings.try_get) | Writes the binding of `name` to `out` and returns 1, or returns 0. |
 
 ### Functions
 
@@ -53,9 +63,21 @@ Registers package `name`'s compile-time part, linked into the compiler,
 whose `targets` returns its name-to-`Func` Map. The registration unit
 `x2c build --extension` generates calls it from a constructor.
 
-Source: `src/meta-native/modules.x:236`
+Source: `src/meta-native/modules.x:258`
 
 ### `Compiler`
+
+<a id="Compiler.apply_meta_binding"></a>
+#### Compiler.apply_meta_binding
+
+`Var Compiler.apply_meta_binding( Compiler c, String name, Var function, List arguments)`
+
+Calls `function`, the binding of `name`, with `arguments`; what it
+allocates belongs to the unit's values Scope. A declared native
+iterator operation called without its destination gets a new Iter
+there.
+
+Source: `src/meta-native/calls.x:150`
 
 <a id="Compiler.apply_meta_function"></a>
 #### Compiler.apply_meta_function
@@ -87,12 +109,30 @@ Source: `src/meta-native/linked.x:62`
 `int Compiler.bind_native_meta(Compiler c, String name)`
 
 Binds an included native `meta` function the first time compile-time
-code calls `name`. Returns whether the macro session now binds it. A
+code calls `name`. Returns whether the unit now binds it. A
 declaration-producing macro can call one during collection, before
 the parse installs the advertisements, so the first lookup there
 installs the ones visible so far.
 
-Source: `src/meta-native/bindings.x:64`
+Source: `src/meta-native/bindings.x:122`
+
+<a id="Compiler.bindings"></a>
+#### Compiler.bindings
+
+`MetaBindings Compiler.bindings(Compiler c)`
+
+Returns the unit's binding table, creating it on first use.
+
+Source: `src/meta-native/bindings.x:51`
+
+<a id="Compiler.builtin_module"></a>
+#### Compiler.builtin_module
+
+`Map Compiler.builtin_module(void)`
+
+Returns the built-in algorithms by the names compile-time code calls.
+
+Source: `src/meta-native/modules.x:51`
 
 <a id="Compiler.compiler_targets"></a>
 #### Compiler.compiler_targets
@@ -103,7 +143,7 @@ Returns the compiler's own targets, the operations `lib/meta.x` declares
 with a bodyless `meta` prototype, loaded as the native module every
 request selects first.
 
-Source: `src/meta-native/modules.x:39`
+Source: `src/meta-native/modules.x:38`
 
 <a id="Compiler.evaluate_meta_expression"></a>
 #### Compiler.evaluate_meta_expression
@@ -135,7 +175,7 @@ Returns the archive of the linked packages' objects that the build of
 this compiler kept beside it, named by the compiler's identity, or NULL
 when the compiler links none. Project meta code links it.
 
-Source: `src/meta-native/modules.x:254`
+Source: `src/meta-native/modules.x:276`
 
 <a id="Compiler.install_collected_meta_function"></a>
 #### Compiler.install_collected_meta_function
@@ -149,7 +189,7 @@ compiler's linked copy answers while its source hashes agree; otherwise
 the definition replaces an earlier binding with a helper stub. A group
 that stages in process waits for the full parse.
 
-Source: `src/meta-native/functions.x:43`
+Source: `src/meta-native/functions.x:40`
 
 <a id="Compiler.install_meta_declaration"></a>
 #### Compiler.install_meta_declaration
@@ -160,7 +200,7 @@ Applies a contextual `meta` marker to one initialized file-static value.
 The unit's staged `meta` group holds the compile-time instance, which
 its module initializes for each unit.
 
-Source: `src/meta-native/functions.x:185`
+Source: `src/meta-native/functions.x:170`
 
 <a id="Compiler.install_meta_function"></a>
 #### Compiler.install_meta_function
@@ -168,8 +208,8 @@ Source: `src/meta-native/functions.x:185`
 `void Compiler.install_meta_function(Compiler c, List fn, Token marker)`
 
 Installs a bodied `meta` function. The project meta build compiled it
-into the project's helper, so the session holds a stub that calls it
-there; the REPL's stub stages the session's group at the first call
+into the project's helper, so the unit binds a stub that calls it
+there; the REPL's stub stages the unit's group at the first call
 instead, and the project meta build's own parse only groups it. A
 function whose body reaches a compiler operation, a template, or a
 compile-time-only function has no runtime form. A body that lets its
@@ -185,7 +225,7 @@ Source: `src/meta-native/functions.x:20`
 Records the native advertisements retained by included interfaces. Each
 binds on first use, so a unit with no compile-time code pays nothing.
 
-Source: `src/meta-native/bindings.x:42`
+Source: `src/meta-native/bindings.x:100`
 
 <a id="Compiler.install_native_meta_function"></a>
 #### Compiler.install_native_meta_function
@@ -195,7 +235,7 @@ Source: `src/meta-native/bindings.x:42`
 Installs a prototype-only `meta` function from the compiler's trusted
 native target registry. The declaration keeps its ordinary runtime form.
 
-Source: `src/meta-native/bindings.x:77`
+Source: `src/meta-native/bindings.x:135`
 
 <a id="Compiler.install_project_meta_effect"></a>
 #### Compiler.install_project_meta_effect
@@ -204,7 +244,7 @@ Source: `src/meta-native/bindings.x:77`
 
 Installs an included meta function's evaluator advertisement.
 
-Source: `src/meta-native/functions.x:216`
+Source: `src/meta-native/functions.x:201`
 
 <a id="Compiler.linked_meta_provider_source"></a>
 #### Compiler.linked_meta_provider_source
@@ -213,7 +253,7 @@ Source: `src/meta-native/functions.x:216`
 
 Returns a linked provider's source and dependency hashes.
 
-Source: `src/meta-native/linked.x:101`
+Source: `src/meta-native/linked.x:97`
 
 <a id="Compiler.links_extension"></a>
 #### Compiler.links_extension
@@ -223,7 +263,7 @@ Source: `src/meta-native/linked.x:101`
 Reports whether package `name`'s compile-time part is linked into the
 compiler, so its import loads no module.
 
-Source: `src/meta-native/modules.x:245`
+Source: `src/meta-native/modules.x:267`
 
 <a id="Compiler.links_meta_function"></a>
 #### Compiler.links_meta_function
@@ -232,7 +272,7 @@ Source: `src/meta-native/modules.x:245`
 
 Reports whether the compiler links the `meta` function `name`.
 
-Source: `src/meta-native/linked.x:98`
+Source: `src/meta-native/linked.x:94`
 
 <a id="Compiler.load_native_module"></a>
 #### Compiler.load_native_module
@@ -244,7 +284,7 @@ absolute path. Loading runs the module's code inside the compiler, so it
 happens only on request. A module from another compiler, a file that is
 not a module, or an unsupported platform prints a diagnostic and exits.
 
-Source: `src/meta-native/modules.x:100`
+Source: `src/meta-native/modules.x:122`
 
 <a id="Compiler.matches_macro"></a>
 #### Compiler.matches_macro
@@ -254,7 +294,18 @@ Source: `src/meta-native/modules.x:100`
 Tests a registered macro with the candidate's global and source
 bindings. A pattern derived without them reads none.
 
-Source: `src/meta-native/functions.x:142`
+Source: `src/meta-native/functions.x:127`
+
+<a id="Compiler.meta_binding"></a>
+#### Compiler.meta_binding
+
+`int Compiler.meta_binding(Compiler c, String name, Var &out)`
+
+Writes the callable compile-time code reaches as `name` to `out`: the
+unit's binding, or else a built-in algorithm or one of the compiler's
+own operations. Returns whether there is one.
+
+Source: `src/meta-native/bindings.x:59`
 
 <a id="Compiler.native_meta_accepts"></a>
 #### Compiler.native_meta_accepts
@@ -266,7 +317,7 @@ Answers whether the native target `function` matches the declared
 parameter, which takes the compile-time callable and adapts it. Aliases
 of one native type match each other.
 
-Source: `src/meta-native/bindings.x:178`
+Source: `src/meta-native/bindings.x:213`
 
 <a id="Compiler.native_meta_module"></a>
 #### Compiler.native_meta_module
@@ -276,7 +327,7 @@ Source: `src/meta-native/bindings.x:178`
 Returns the selected file-backed native module that supplies `name`,
 with its native `type`, or NULL for a linked or absent target.
 
-Source: `src/meta-native/bindings.x:214`
+Source: `src/meta-native/bindings.x:249`
 
 <a id="Compiler.native_meta_targets"></a>
 #### Compiler.native_meta_targets
@@ -289,7 +340,7 @@ inventory, or only those declared in the files `paths` names when it is
 not empty. A target that takes a `Func` is left out unless `callbacks`
 is nonzero. Sorting makes that inventory independent of Map order.
 
-Source: `src/meta-native/bindings.x:306`
+Source: `src/meta-native/bindings.x:341`
 
 <a id="Compiler.native_module_targets"></a>
 #### Compiler.native_module_targets
@@ -299,7 +350,18 @@ Source: `src/meta-native/bindings.x:306`
 Returns the name-to-`Func` Map of the loaded native module at absolute
 `path`.
 
-Source: `src/meta-native/modules.x:207`
+Source: `src/meta-native/modules.x:229`
+
+<a id="Compiler.native_targets"></a>
+#### Compiler.native_targets
+
+`Map Compiler.native_targets(void)`
+
+Returns the runtime functions the compiler links that `meta`
+prototypes advertise, by target name, including those that take a
+callback.
+
+Source: `src/meta-native/modules.x:60`
 
 <a id="Compiler.preload_native_module"></a>
 #### Compiler.preload_native_module
@@ -311,7 +373,7 @@ and the platform loads modules. A process that loads a module before it
 forks translation workers lets them inherit it; anything else is left
 for the import to report.
 
-Source: `src/meta-native/modules.x:118`
+Source: `src/meta-native/modules.x:140`
 
 <a id="Compiler.record_native_meta_effect"></a>
 #### Compiler.record_native_meta_effect
@@ -322,7 +384,7 @@ The shallow interface retains the advertisement separately from the C
 declaration. That lets a client install the trusted evaluator binding
 without repeating the marker in every translation unit.
 
-Source: `src/meta-native/bindings.x:15`
+Source: `src/meta-native/bindings.x:73`
 
 <a id="Compiler.record_project_meta_effect"></a>
 #### Compiler.record_project_meta_effect
@@ -332,7 +394,7 @@ Source: `src/meta-native/bindings.x:15`
 Records the provider of a public bodied meta function in its interface.
 The provider owns both its native body and its compile-time state.
 
-Source: `src/meta-native/functions.x:202`
+Source: `src/meta-native/functions.x:187`
 
 <a id="Compiler.run_meta_call"></a>
 #### Compiler.run_meta_call
@@ -355,7 +417,7 @@ Selects the loaded native modules, by absolute path, that bodyless `meta`
 prototypes bind in the current request. The first module in `paths`
 that defines a name supplies it.
 
-Source: `src/meta-native/modules.x:53`
+Source: `src/meta-native/modules.x:75`
 
 <a id="Compiler.select_package_module"></a>
 #### Compiler.select_package_module
@@ -368,7 +430,7 @@ The module is `<root>/builds/<name>.module`; a worker loads it itself
 when the process has not. A module from another compiler, or one on a
 platform that loads none, is reported at the import `token`.
 
-Source: `src/meta-native/modules.x:72`
+Source: `src/meta-native/modules.x:94`
 
 <a id="Compiler.supplies_native_meta"></a>
 #### Compiler.supplies_native_meta
@@ -379,7 +441,55 @@ Reports whether the compiler itself supplies the native function `name`.
 Such a function exists only inside a compiler, so a `meta` function that
 reaches it has no runtime form.
 
-Source: `src/meta-native/modules.x:213`
+Source: `src/meta-native/modules.x:235`
+
+### `MetaBindings`
+
+<a id="MetaBindings.bind"></a>
+#### MetaBindings.bind
+
+`void MetaBindings.bind(MetaBindings b, String name, Func function)`
+
+Binds `name` to `function` and moves its storage into the table.
+
+Source: `src/meta-native/bindings.x:45`
+
+<a id="MetaBindings.destroy"></a>
+#### MetaBindings.destroy
+
+`void MetaBindings.destroy(MetaBindings b)`
+
+Destroys the table's values, then the table.
+
+Source: `src/meta-native/bindings.x:29`
+
+<a id="MetaBindings.new"></a>
+#### MetaBindings.new
+
+`MetaBindings MetaBindings.new(void)`
+
+Creates an empty table in Scopes of its own, so creating it under a
+narrower Context leaves nothing there.
+
+Source: `src/meta-native/bindings.x:19`
+
+<a id="MetaBindings.set"></a>
+#### MetaBindings.set
+
+`void MetaBindings.set(MetaBindings b, String name, Var function)`
+
+Binds `name` to `function`, which the table borrows.
+
+Source: `src/meta-native/bindings.x:40`
+
+<a id="MetaBindings.try_get"></a>
+#### MetaBindings.try_get
+
+`int MetaBindings.try_get(MetaBindings b, String name, Var &out)`
+
+Writes the binding of `name` to `out` and returns 1, or returns 0.
+
+Source: `src/meta-native/bindings.x:36`
 
 ## Design notes
 

@@ -18,10 +18,9 @@
     compiler of the active macro expansion, `definition_file` the source of
     its definition, `captures` its complete captured syntax by identity, and
     `has_bindings` whether it bound captured values. `evaluator` is the
-    compiler evaluating Lisp and `site` where that evaluation stands, which
-    a nested import changes without an expansion. Each evaluation installs
-    its part with `with`, so a captured entry is valid only while its
-    expansion is active. */
+    compiler running the call and `site` where the call stands. Each
+    evaluation installs its part with `with`, so a captured entry is valid
+    only while its expansion is active. */
 typedef struct MetaContext {
   Compiler expander, evaluator;
   String definition_file;

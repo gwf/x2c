@@ -6,11 +6,10 @@
 // top-level forms
 
 /** Parses one top-level form and applies its source-ordered compiler effects.
-    Returns its AST, or NULL when a keyword definition, top-level Lisp form,
-    linkage brace, or compile-time-only `meta` function only updates compiler
-    state, with the first following token current. With `skip_body`,
-    collection uses the same classifier and bound declarations but skips
-    runtime bodies.
+    Returns its AST, or NULL when a keyword definition, linkage brace, or
+    compile-time-only `meta` function only updates compiler state, with the
+    first following token current. With `skip_body`, collection uses the
+    same classifier and bound declarations but skips runtime bodies.
     This continuation is independent of the compiler's shallow-parse state.
 */
 List Compiler.parse_top_level_mode(Compiler c, int skip_body) {
@@ -239,8 +238,8 @@ int Compiler.defines_main(Compiler c) {
 
 /** Reports whether the top-level item at the cursor is one of a script
     unit's statements, which become `main`'s body.
-    Preprocessor lines, imports, protocols, compile-time definitions and
-    Lisp, file-scope macro invocations, `typedef`, `static`, and `extern`
+    Preprocessor lines, imports, protocols, compile-time definitions,
+    file-scope macro invocations, `typedef`, `static`, and `extern`
     declarations, linkage braces, type definitions, and function prototypes
     and definitions stay at file scope. This query does not consume tokens.
 */

@@ -3,10 +3,10 @@
     Copyright (c) 2026 Gary William Flake
 
     `etc/init.xlisp` binds these operations by name through the `Lisp`
-    native target table, so a compile-time session and a runtime `Lisp.new`
-    session share them. Each follows the Lisp definition it replaced: nil is
-    the empty `List`, truth is any other value, and a list walk reads through
-    `lisp_car` and `lisp_cdr` so a nonlist operand raises `<bad-types>`. A
+    native target table, so every `Lisp.new` session shares them. Each
+    follows the Lisp definition it replaced: nil is the empty `List`, truth
+    is any other value, and a list walk reads through `lisp_car` and
+    `lisp_cdr` so a nonlist operand raises `<bad-types>`. A
     `String` or `List` operand reads through `_string` or `_list`, which
     raise `<bad-types>` for another tag as the Func adapter does.
 */

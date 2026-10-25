@@ -80,7 +80,7 @@ static List _bind_enumerator(Compiler c, List input) {
   return NULL;
 }
 
-/* Parsed templates and compile-time Lisp are the intended producers. There
+/* Parsed templates and meta functions are the intended producers. There
    is no separate validation pass before or after expansion. The structural
    match below enforces the position: a form that no arm admits there leaves
    the match for `_construction_error`. Existing expression types and
@@ -294,7 +294,7 @@ static List _bind_assert(Compiler c, Var condition, Var message) =>
 /* A source `if`, `while`, `do`, `for`, `match`, or `try` binds here with a
    Token Var into this table for each clause, which the binder parses when it
    reaches it, so its scopes and optional-reference facts govern that parse.
-   Syntax from a template or compile-time Lisp cannot hold these addresses.
+   Syntax from a template or a meta function cannot hold these addresses.
    Each entry's type names its clause. */
 static struct Token source_clauses[] = {
   { .type = <test> }, { .type = <then> }, { .type = <else> },

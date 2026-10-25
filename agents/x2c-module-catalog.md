@@ -9,7 +9,7 @@ not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
 - Compiler modules: 61
-- Runtime modules: 66
+- Runtime modules: 69
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
 ## Compiler modules
@@ -120,7 +120,7 @@ Public functions:
 
 `Frontend.open`, `Frontend.open_reporting`, `Frontend.open_session`,
 `Frontend.start`, `ParsedUnit.collect`, `ParsedUnit.parse`, `ParsedUnit.close`,
-`Frontend.preload_macro_libraries`, `Frontend.load_support`, `Frontend.new`
+`Frontend.load_support`, `Frontend.new`
 
 ### [src/grammar.x](../src/grammar.x)
 
@@ -380,7 +380,7 @@ Public functions:
 `Compiler.var`, `Var.compiler`, `Compiler.own_diagnostics`,
 `Compiler.close_child`, `Compiler.share_meta_group`,
 `Compiler.take_unit_state`, `Compiler.return_unit_state`, `Compiler.new`,
-`Compiler.new_shared`, `Compiler.free_lisp`, `Compiler.shallow_parse`,
+`Compiler.new_shared`, `Compiler.free_bindings`, `Compiler.shallow_parse`,
 `Compiler.shallow_parse_overlay`, `Compiler.start_collection`,
 `Compiler.collect_compile_time_definition`,
 `Compiler.finish_collected_declaration`, `Compiler.record_inline_function`,
@@ -390,21 +390,19 @@ Public functions:
 `Compiler.require_input`, `Compiler.expect`, `Compiler.next`, `Compiler.test`,
 `Compiler.at_word`, `Compiler.take_word`, `Symbol.group_step`,
 `Token.group_close`, `Token.after_group`, `Compiler.mark_completion`,
-`Compiler.at_completion`, `_x2c_complete_here`,
-`Compiler.queue_declaration_effect`, `Compiler.run_declaration_effects`,
-`Compiler.collect_unit_macro`, `Compiler.replay_declaration_source`,
-`Compiler.freeze_declaration_syntax`, `Compiler.thaw_declaration_syntax`,
-`Compiler.select_declaration_defaults`, `Compiler.record_origin`,
-`Compiler.anchor_origin`, `Compiler.record_source_declaration`,
-`Compiler.record_source_reference`, `Compiler.copy_source_declaration`,
-`Compiler.merge_source_declarations`, `Compiler.fresh_name`, `Compiler.gensym`,
-`Compiler.add_early`, `Compiler.add_support`, `Compiler.add_init`,
-`Pending.reset`, `Pending.area`, `Pending.initializes`, `Pending.checkpoint`,
-`Pending.restore`, `Compiler.emitted_binding_name`,
-`Compiler.present_references`, `Compiler.mark_reference_present`,
-`Compiler.settle_reference`, `Compiler.restore_reference_presence`,
-`Compiler.optional_reference_test`, `Compiler.cache`,
-`Compiler.cache_cons_cell`, `Compiler.cache_literal_var`,
+`Compiler.at_completion`, `_x2c_complete_here`, `Compiler.collect_unit_macro`,
+`Compiler.replay_declaration_source`, `Compiler.freeze_declaration_syntax`,
+`Compiler.thaw_declaration_syntax`, `Compiler.select_declaration_defaults`,
+`Compiler.record_origin`, `Compiler.anchor_origin`,
+`Compiler.record_source_declaration`, `Compiler.record_source_reference`,
+`Compiler.copy_source_declaration`, `Compiler.merge_source_declarations`,
+`Compiler.fresh_name`, `Compiler.gensym`, `Compiler.add_early`,
+`Compiler.add_support`, `Compiler.add_init`, `Pending.reset`, `Pending.area`,
+`Pending.initializes`, `Pending.checkpoint`, `Pending.restore`,
+`Compiler.emitted_binding_name`, `Compiler.present_references`,
+`Compiler.mark_reference_present`, `Compiler.settle_reference`,
+`Compiler.restore_reference_presence`, `Compiler.optional_reference_test`,
+`Compiler.cache`, `Compiler.cache_cons_cell`, `Compiler.cache_literal_var`,
 `Compiler.cache_literal_list`, `Compiler.match_pattern_value`,
 `Compiler.match_value_is_static`, `Compiler.match_pattern_is_static`,
 `Compiler.match_pattern_binders`, `Compiler.define_pattern_binders`,
@@ -413,7 +411,7 @@ Public functions:
 `Compiler.owns_package_source`, `Path.real`, `Path.resolved_absolute`,
 `Compiler.portable_path`, `Compiler.absolute_home_path`,
 `Map.merge_translation_dependency`, `Compiler.add_translation_dependency`,
-`Compiler.merge_translation_dependencies`
+`Compiler.merge_translation_dependencies`, `Compiler.source_path`
 
 ### [src/components/bracket-access.x](../src/components/bracket-access.x)
 
@@ -585,21 +583,21 @@ Public functions:
 
 ### [src/macros/macros.x](../src/macros/macros.x)
 
-source macros and the compile-time Lisp they run.
+source macros and the compile-time calls they run.
 
 Public functions:
 
-`Compiler.report_lisp_failure`, `Compiler.parse_macro_definition`,
-`Compiler.macro_introduced_name`, `Compiler.macro_tag_name`,
-`Compiler.parse_macro_quotation`, `Compiler.try_parse_macro_slot`,
-`Compiler.peek_macro_hole`, `Compiler.after_hole`,
-`Compiler.macro_lisp_starts_declaration`, `Compiler.try_parse_macro_member`,
-`Compiler.expand_macro_invocation_node`, `Compiler.macro_invocation_site`,
-`Compiler.marked_rewrite`, `Compiler.has_rewrites`, `Compiler.rewrite`,
-`Compiler.rewrite_lowered`, `Compiler.lower_replacement`,
-`Compiler.rewrite_written`, `Compiler.lower_rewrite`,
-`Compiler.applying_shipped`, `Compiler.rebound`, `Compiler.watched_step`,
-`Compiler.publish_macro_definition_node`,
+`Compiler.report_meta_failure`, `Compiler.reject_lisp_form`,
+`Compiler.parse_macro_definition`, `Compiler.macro_introduced_name`,
+`Compiler.macro_tag_name`, `Compiler.parse_macro_quotation`,
+`Compiler.try_parse_macro_slot`, `Compiler.peek_macro_hole`,
+`Compiler.after_hole`, `Compiler.meta_call_starts_declaration`,
+`Compiler.try_parse_macro_member`, `Compiler.expand_macro_invocation_node`,
+`Compiler.macro_invocation_site`, `Compiler.marked_rewrite`,
+`Compiler.has_rewrites`, `Compiler.rewrite`, `Compiler.rewrite_lowered`,
+`Compiler.lower_replacement`, `Compiler.rewrite_written`,
+`Compiler.lower_rewrite`, `Compiler.applying_shipped`, `Compiler.rebound`,
+`Compiler.watched_step`, `Compiler.publish_macro_definition_node`,
 `Compiler.install_compile_time_effects`, `Compiler.macro_form_is_definition`,
 `Compiler.local_macro_form_is_definition`,
 `Compiler.keyword_form_is_definition`, `Compiler.parse_keyword_definition`,
@@ -611,24 +609,15 @@ Public functions:
 `Compiler.evaluate_declaration_recipe`, `x2c_template_call`,
 `Compiler.rebuild_expression`, `Compiler.rebuild_statement`,
 `Compiler.rebuild_unit_function`, `Compiler.rebuild_function`,
-`Compiler.land_quotation`, `Compiler.macro_value_literal`,
+`Compiler.land_quotation`, `Compiler.lift_meta_expression`,
+`Compiler.bind_meta_statement`, `Compiler.macro_value_literal`,
 `Compiler.try_parse_macro_pattern`, `Compiler.macro_pattern_at`,
 `Compiler.try_parse_macro_subpattern`, `Compiler.capture_macro_value`,
 `Compiler.take_code_value`, `Compiler.place`, `Compiler.bind_code_value`,
-`Compiler.ensure_macro_lisp`, `Compiler.parse_macro_lisp_top_level`,
-`Compiler.parse_macro_lisp_shallow`, `Compiler.evaluate_declaration_effect`,
-`Compiler.parse_macro_lisp_expression`, `Compiler.lift_macro_lisp_expression`,
-`Compiler.bind_macro_lisp_statement`, `Compiler.source_path`,
-`Compiler.open_macro_library`, `Compiler.add_library_dependencies`,
-`Compiler.publish_macro_library`, `Compiler.inherits_import`,
-`Compiler.record_comptime`, `Compiler.inherit_library_comptime`,
-`Compiler.library_filling`, `Compiler.shared_definitions`,
-`Compiler.shares_meta_definition`, `Compiler.bind_meta_operation`,
-`Compiler.reset_macro_library`, `Compiler.alias_form_starts`,
-`Compiler.parse_alias_statement`, `Compiler.parse_alias_declaration`,
-`Compiler.parse_alias_member`, `Compiler.enter_alias_body`,
-`Compiler.leave_alias_body`, `Compiler.scope_declares_alias`,
-`Compiler.alias_expression`
+`Compiler.alias_form_starts`, `Compiler.parse_alias_statement`,
+`Compiler.parse_alias_declaration`, `Compiler.parse_alias_member`,
+`Compiler.enter_alias_body`, `Compiler.leave_alias_body`,
+`Compiler.scope_declares_alias`, `Compiler.alias_expression`
 
 ### [src/meta-group/meta-group.x](../src/meta-group/meta-group.x)
 
@@ -653,7 +642,8 @@ meta functions and the native code they call.
 
 Public functions:
 
-`Compiler.compiler_targets`, `Compiler.select_native_modules`,
+`Compiler.compiler_targets`, `Compiler.builtin_module`,
+`Compiler.native_targets`, `Compiler.select_native_modules`,
 `Compiler.select_package_module`, `Compiler.load_native_module`,
 `Compiler.preload_native_module`, `Compiler.native_module_targets`,
 `Compiler.supplies_native_meta`, `x2c_register_extension`,
@@ -664,7 +654,10 @@ Public functions:
 `Compiler.install_meta_declaration`, `Compiler.record_project_meta_effect`,
 `Compiler.install_project_meta_effect`, `Compiler.evaluate_meta_expression`,
 `Compiler.evaluate_meta_statement`, `Compiler.run_meta_call`,
-`Compiler.apply_meta_function`, `Compiler.record_native_meta_effect`,
+`Compiler.apply_meta_function`, `Compiler.apply_meta_binding`,
+`MetaBindings.new`, `MetaBindings.destroy`, `MetaBindings.try_get`,
+`MetaBindings.set`, `MetaBindings.bind`, `Compiler.bindings`,
+`Compiler.meta_binding`, `Compiler.record_native_meta_effect`,
 `Compiler.install_native_meta_effects`, `Compiler.bind_native_meta`,
 `Compiler.install_native_meta_function`, `Compiler.native_meta_accepts`,
 `Compiler.native_meta_module`, `Compiler.native_meta_targets`
@@ -694,8 +687,7 @@ Public functions:
 `_x2c_complete_iterator`, `Code.register_rewrite`,
 `Code.register_after_initialization`, `Code.source_text`, `x2c_embed_text`,
 `MetaContext.source_description`, `x2c_meta_definition_hashes`,
-`MetaContext.literal_list`, `Compiler.add_sdk_targets`,
-`Compiler.bind_sdk_primitives`
+`MetaContext.literal_list`, `Compiler.add_sdk_targets`
 
 ### [src/parse/parse.x](../src/parse/parse.x)
 
@@ -1155,7 +1147,8 @@ exact C scalar ledger.
 
 Public functions:
 
-`native_scalar_types`, `_scalar_tag`, `_scalar_key`, `_scalar_access_units`
+`native_scalar_types`, `_scalar_tag`, `_scalar_key`, `_scalar_access_units`,
+`native_scalar_access`
 
 ### [lib/path.x](../lib/path.x)
 
@@ -1617,20 +1610,20 @@ the Lisp runtime: reader, session, and evaluator.
 
 Public functions:
 
-`native_scalar_access`, `Lisp.cleanup`, `Lisp.call_budget`,
-`Lisp.set_interrupted`, `Lisp.eval`, `Lisp.apply`, `Lisp.read`,
-`Lisp.eval_string`, `Lisp.eval_file`, `lisp_source_function`, `Lisp.kernel`,
-`Lisp.new`, `Lisp.destroy`, `Lisp.adopt`, `Lisp.freeze`, `Lisp.try_get`,
-`Lisp.set_global`, `Lisp.remove_global`, `Lisp.bind`, `Lisp.active`,
-`Lisp.storage`, `Lisp.automatic_storage`, `Lisp.result_storage`, `lisp_truth`,
-`lisp_atom`, `lisp_car`, `lisp_cdr`, `lisp_eq`, `lisp_pair`, `lisp_list`,
-`lisp_number`, `lisp_string`, `lisp_symbol`, `lisp_procedure`, `lisp_type`,
-`lisp_compare`, `lisp_add`, `lisp_plus`, `lisp_minus`, `lisp_times`,
-`lisp_divide`, `lisp_eq_chain`, `lisp_lt_chain`, `lisp_le_chain`,
-`lisp_gt_chain`, `lisp_ge_chain`, `lisp_str`, `lisp_repr`,
-`lisp_string_append`, `lisp_substring`, `lisp_string_downcase`,
-`lisp_string_strip`, `lisp_string_lstrip`, `lisp_string_rstrip`,
-`lisp_match_replace`, `lisp_read_file`, `lisp_write_file`
+`Lisp.cleanup`, `Lisp.call_budget`, `Lisp.set_interrupted`, `Lisp.eval`,
+`Lisp.apply`, `Lisp.read`, `Lisp.eval_string`, `Lisp.eval_file`,
+`lisp_source_function`, `Lisp.kernel`, `Lisp.new`, `Lisp.destroy`,
+`Lisp.adopt`, `Lisp.freeze`, `Lisp.try_get`, `Lisp.set_global`,
+`Lisp.remove_global`, `Lisp.bind`, `Lisp.active`, `Lisp.storage`,
+`Lisp.automatic_storage`, `Lisp.result_storage`, `lisp_truth`, `lisp_atom`,
+`lisp_car`, `lisp_cdr`, `lisp_eq`, `lisp_pair`, `lisp_list`, `lisp_number`,
+`lisp_string`, `lisp_symbol`, `lisp_procedure`, `lisp_type`, `lisp_compare`,
+`lisp_add`, `lisp_plus`, `lisp_minus`, `lisp_times`, `lisp_divide`,
+`lisp_eq_chain`, `lisp_lt_chain`, `lisp_le_chain`, `lisp_gt_chain`,
+`lisp_ge_chain`, `lisp_str`, `lisp_repr`, `lisp_string_append`,
+`lisp_substring`, `lisp_string_downcase`, `lisp_string_strip`,
+`lisp_string_lstrip`, `lisp_string_rstrip`, `lisp_match_replace`,
+`lisp_read_file`, `lisp_write_file`
 
 ### [lib/list/list.x](../lib/list/list.x)
 

@@ -21,8 +21,8 @@ static typedef struct Landing {
 
 /* template slots
 
-   A slot in a template, `$(...)` or a meta call, runs while its expansion
-   binds. Its value fills the slot, and a splice slot's List becomes rows. */
+   A meta-call slot in a template runs while its expansion binds. Its
+   value fills the slot, and a splice slot's List becomes rows. */
 
 /** Evaluates an active template's `(macro-slot ...)` value, or a pending
     Macro value application into the invocation that expands it.
@@ -176,8 +176,8 @@ static List _sdk_template_call(Var stored, List values) {
     m-invoke);
 }
 
-/* The capture rows of a template call's values. A scalar Lisp value in an
-   Expr hole lifts to an expression first. */
+/* The capture rows of a template call's values. A scalar value in an Expr
+   hole lifts to an expression first. */
 static List _template_arguments(
   Compiler c, List definition, List values, Token invocation,
   int retain_syntax) {
@@ -189,8 +189,8 @@ static List _template_arguments(
   return %(args @{rows.list_free()});
 }
 
-/* One hole's capture row of `value`. Each scalar Lisp value an Expr hole
-   or sequence holds lifts to an expression first. A Type hole's type names
+/* One hole's capture row of `value`. Each scalar value an Expr hole or
+   sequence holds lifts to an expression first. A Type hole's type names
    its type with a String. */
 static List _hole_row(
   Compiler c, List hole, Var value, Token invocation, int retain_syntax) {

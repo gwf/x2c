@@ -222,9 +222,9 @@ List Compiler.parse_declarator_argument(Compiler c) {
 
 /* template declarators
 
-   In a macro template a declarator may name its binding through a Lisp
-   slot, a Name hole, a member hole, or a name each expansion introduces. A
-   method's owner may be a literal type or a type hole. */
+   In a macro template a declarator may name its binding through a
+   meta-call slot, a Name hole, a member hole, or a name each expansion
+   introduces. A method's owner may be a literal type or a type hole. */
 
 // Returns NULL for another token, which takes the ordinary identifier path.
 static List _template_declarator(Compiler c, int member) {

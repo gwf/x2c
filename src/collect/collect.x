@@ -126,10 +126,9 @@ static macro Stmt $report.collect_loaded_declaration(
 
 module Scope process_cache_scope = NULL;
 
-/* Paths whose entries a later unit collects again: those collected without
-   their declaration defaults while the shared compile-time session was
-   being filled, and those a project meta build collected with placeholders
-   for its meta calls. */
+/* Paths whose entries a later unit collects again: those a meta build
+   collected without their declaration defaults or with placeholders for
+   its meta calls. */
 module Map provisional_entries = NULL;
 
 /* Files collected cold in this process whose entries declare adoptions and

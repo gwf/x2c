@@ -104,8 +104,8 @@ static void _parameter(Definition &d, Array params, List hole) {
     $fail.macros_hole_final(c, c.token);
 }
 
-/* A Unit target's source stays visible to compile-time Lisp, whose
-   template slots find the target hole under `(target)`. */
+/* A Unit target hole projects its captured source, and the definition
+   records the hole under `(target)`. */
 static void _take_target(Definition &d, List hole) {
   Compiler c = d.c;
   if (!_decorator_target(hole.assoc(<kind>)))
@@ -276,8 +276,8 @@ module List _recorded(Map m) {
 /* signature holes
 
    A signature declares each hole's binder, its optional kind, and whether
-   it takes a sequence. A `using` hole is a Name that compile-time Lisp
-   fills with a fresh identifier. */
+   it takes a sequence. A `using` hole is a Name that each expansion fills
+   with a fresh identifier. */
 
 /* A parameter: an optional kind, `$NAME` or sequence `@NAME`. */
 static List _signature_hole(Compiler c) {

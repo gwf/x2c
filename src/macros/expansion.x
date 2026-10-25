@@ -15,7 +15,7 @@ static typedef struct Expansion {
 
 /** Expands canonical macro capture rows and binds the result at `position`.
     `stored` is a `macrodef` or visible macro name. The active expansion stack
-    supplies Lisp bindings, source location, and recursion checks; the
+    supplies author bindings, source location, and recursion checks; the
     definition's fresh rows allocate invocation-local names. This method does
     not begin a semantic transaction.
 */
@@ -112,10 +112,10 @@ static List _bind_expansion(Expansion &x, Symbol position) {
   int matched = !!replacement_bindings;
   replacement_bindings = replacement_bindings.append(x.direct);
   List template_bindings = NULL;
-  List lisp_bindings = _lisp_bindings(
+  List author_bindings = _author_bindings(
     replacement_bindings, template_bindings);
   c.macro_stack = %(
-    (${x.definition} ${x.input} $lisp_bindings ${x.invocation}) @old_stack
+    (${x.definition} ${x.input} $author_bindings ${x.invocation}) @old_stack
   );
   int expansion_origin = c.record_origin(x.invocation);
   int placed = c.placements.len();
@@ -130,8 +130,8 @@ static List _bind_expansion(Expansion &x, Symbol position) {
   return result;
 }
 
-/* Allocates each fresh name of the definition. A name compile-time Lisp
-   reads joins the match input as a Name capture row; the others, with the
+/* Allocates each fresh name of the definition. A name meta calls read
+   joins the match input as a Name capture row; the others, with the
    member holes, bind directly. Returns the Name rows. */
 static List _fresh_names(Expansion &x, List old_stack) {
   Compiler c = x.c;
@@ -141,9 +141,9 @@ static List _fresh_names(Expansion &x, List old_stack) {
   if (c.sym.at_file_scope()) _file_scope_locals(%(${x.template}), file_locals);
   Array fresh_values = [];
   foreach (List fresh in x.definition.assoc(<fresh>).list()) {
-    Var (binder, spelling, lisp) = fresh;
+    Var (binder, spelling, exposed) = fresh;
     Token owner = binder in file_locals ? root : NULL;
-    if (lisp.int()) {
+    if (exposed.int()) {
       List binding = _introduced_binding(c, spelling.str(), owner);
       List hole = _hole(binder, <name>, 0);
       fresh_values.push(_capture_row_project(c, hole, %($binding), 0));
@@ -193,23 +193,23 @@ module Var _member_spelling(Compiler c, Var value) {
   return name ? name : value;
 }
 
-/* The bindings compile-time Lisp sees: the author's binders. The template
+/* The bindings meta calls see: the author's binders. The template
    receives the `__macro_` binders the compiler makes, so an author binder
    spelled in a template literal, such as a catch pattern's `?cause`, stays
    literal. */
-static List _lisp_bindings(List bindings, List &template_bindings) {
-  Array lisp = [], compiler = [];
+static List _author_bindings(List bindings, List &template_bindings) {
+  Array author = [], compiler = [];
   foreach (List pair in bindings) {
     Var binder = pair.car();
     if (binder.is_binder() &&
         !binder.str().startswith("?__macro_") &&
         !binder.str().startswith("*__macro_"))
-      lisp.push(pair);
+      author.push(pair);
     else
       compiler.push(pair);
   }
   template_bindings = compiler.list_free();
-  return lisp.list_free();
+  return author.list_free();
 }
 
 /* Declaration results and collected Unit results retain their declarations

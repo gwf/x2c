@@ -17,7 +17,6 @@ Configured compiler sessions and source units.
 | [`Frontend.open`](#Frontend.open) | Runs the source stages. |
 | [`Frontend.open_reporting`](#Frontend.open_reporting) | Runs the source stages for a command that reports to stderr. |
 | [`Frontend.open_session`](#Frontend.open_session) | Opens an empty submission unit with the ordinary runtime prelude. |
-| [`Frontend.preload_macro_libraries`](#Frontend.preload_macro_libraries) | Evaluates the compile-time libraries and installs the compiler surface's own definitions, once for the active build or translation target. |
 | [`Frontend.start`](#Frontend.start) | Tokenizes one input into a fresh unit with its own isolated `Context`. |
 | [`ParsedUnit.close`](#ParsedUnit.close) | Releases the unit after its caller has inspected or exported its results. |
 | [`ParsedUnit.collect`](#ParsedUnit.collect) | Collects symbols and retains preprocessor outputs for adapter inspection. |
@@ -34,7 +33,7 @@ Loads process-owned collection support and the native modules `request`
 names before units, and selects those modules, in order, for its
 compile-time calls.
 
-Source: `src/frontend.x:535`
+Source: `src/frontend.x:479`
 
 <a id="Frontend.new"></a>
 #### Frontend.new
@@ -45,7 +44,7 @@ Borrows a configured request for sequential units. The request and this
 session must outlive its units. Initialize process support above any
 temporary command Context before creating a session inside that Context.
 
-Source: `src/frontend.x:546`
+Source: `src/frontend.x:490`
 
 <a id="Frontend.open"></a>
 #### Frontend.open
@@ -79,18 +78,6 @@ Preload macro libraries first. The caller must close the unit on either
 result; submissions and inspection results borrow its Context.
 
 Source: `src/frontend.x:116`
-
-<a id="Frontend.preload_macro_libraries"></a>
-#### Frontend.preload_macro_libraries
-
-`int Frontend.preload_macro_libraries(Frontend frontend)`
-
-Evaluates the compile-time libraries and installs the compiler surface's
-own definitions, once for the active build or translation target. Returns
-zero after reporting a failed preload, without publishing a partial
-session.
-
-Source: `src/frontend.x:482`
 
 <a id="Frontend.start"></a>
 #### Frontend.start

@@ -5,7 +5,7 @@
     This module owns declarations and the top-level forms that hold them.
     One classifier reads each top-level form in collection and in the full
     parse. Each declarator installs its name in the current Sym before its
-    initializer resolves, and syntax that macros and compile-time Lisp
+    initializer resolves, and syntax that macros and meta functions
     construct binds through the same declaration operations. Expressions,
     statements, and literals parse in their own modules.
 */

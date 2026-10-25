@@ -1,12 +1,12 @@
-/*  macros.x -- source macros and the compile-time Lisp they run
+/*  macros.x -- source macros and the compile-time calls they run
 
     This module owns macro expansion. Expansion fills a definition's
     template from an invocation's captures and binds the result through the
     operations that bind parsed source. A definition is a compiler-only
     `macrodef` List: its holes, a Match pattern over an invocation's
     capture rows, and a template of the binders that pattern captures.
-    Template slots and `$(...)` forms run in the unit's compile-time Lisp
-    session, a child of the shared library session filled once per target.
+    A template's meta-call slots, `$name(...)` and `@name(...)`, run native
+    `meta` functions through the unit's `MetaBindings`.
 */
 
 #pragma once

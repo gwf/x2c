@@ -12,20 +12,20 @@ The compiler's answers to `lib/meta.x` operations.
 
 | Function | Summary |
 | --- | --- |
-| [`x2c_binding_for`](#x2c_binding_for) | Answers `x2c.binding.for`, declared in `lib/meta.x`. |
-| [`x2c_binding_fresh`](#x2c_binding_fresh) | Answers `x2c.binding.fresh`, declared in `lib/meta.x`. |
-| [`x2c_diagnostic_error_at`](#x2c_diagnostic_error_at) | Answers `x2c.diagnostic.error.at`, declared in `lib/meta.x`. |
-| [`x2c_diagnostic_fail`](#x2c_diagnostic_fail) | Answers `x2c.diagnostic.fail`, declared in `lib/meta.x`. |
-| [`x2c_diagnostic_fail_at`](#x2c_diagnostic_fail_at) | Answers `x2c.diagnostic.fail.at`, declared in `lib/meta.x`. |
+| [`x2c_binding_for`](#x2c_binding_for) | Answers `x2c_binding_for`, declared in `lib/meta.x`. |
+| [`x2c_binding_fresh`](#x2c_binding_fresh) | Answers `x2c_binding_fresh`, declared in `lib/meta.x`. |
+| [`x2c_diagnostic_error_at`](#x2c_diagnostic_error_at) | Answers `x2c_diagnostic_error_at`, declared in `lib/meta.x`. |
+| [`x2c_diagnostic_fail`](#x2c_diagnostic_fail) | Answers `x2c_diagnostic_fail`, declared in `lib/meta.x`. |
+| [`x2c_diagnostic_fail_at`](#x2c_diagnostic_fail_at) | Answers `x2c_diagnostic_fail_at`, declared in `lib/meta.x`. |
 | [`x2c_diagnostic_warn`](#x2c_diagnostic_warn) | A warning reports where it is raised and returns, so a macro can keep expanding. |
-| [`x2c_embed_text`](#x2c_embed_text) | Answers `x2c.embed.text`, declared in `lib/meta.x`. |
-| [`x2c_enclosing`](#x2c_enclosing) | Answers `x2c.enclosing`, declared in `lib/meta.x`. |
-| [`x2c_ident`](#x2c_ident) | Answers `x2c.ident`, declared in `lib/meta.x`. |
-| [`x2c_invocation_column`](#x2c_invocation_column) | Answers `x2c.invocation.column`, declared in `lib/meta.x`. |
-| [`x2c_invocation_file`](#x2c_invocation_file) | Answers `x2c.invocation.file`, declared in `lib/meta.x`. |
-| [`x2c_invocation_line`](#x2c_invocation_line) | Answers `x2c.invocation.line`, declared in `lib/meta.x`. |
-| [`x2c_meta_definition_hashes`](#x2c_meta_definition_hashes) | Answers `x2c.meta.definition.hashes`, declared in `lib/meta.x`. |
-| [`x2c_place`](#x2c_place) | Answers `x2c.place`, declared in `lib/meta.x`. |
+| [`x2c_embed_text`](#x2c_embed_text) | Answers `x2c_embed_text`, declared in `lib/meta.x`. |
+| [`x2c_enclosing`](#x2c_enclosing) | Answers `x2c_enclosing`, declared in `lib/meta.x`. |
+| [`x2c_ident`](#x2c_ident) | Answers `x2c_ident`, declared in `lib/meta.x`. |
+| [`x2c_invocation_column`](#x2c_invocation_column) | Answers `x2c_invocation_column`, declared in `lib/meta.x`. |
+| [`x2c_invocation_file`](#x2c_invocation_file) | Answers `x2c_invocation_file`, declared in `lib/meta.x`. |
+| [`x2c_invocation_line`](#x2c_invocation_line) | Answers `x2c_invocation_line`, declared in `lib/meta.x`. |
+| [`x2c_meta_definition_hashes`](#x2c_meta_definition_hashes) | Answers `x2c_meta_definition_hashes`, declared in `lib/meta.x`. |
+| [`x2c_place`](#x2c_place) | Answers `x2c_place`, declared in `lib/meta.x`. |
 | [`Code.arguments`](#Code.arguments) | Answers `Code.arguments`, declared in `lib/meta.x`. |
 | [`Code.binding_spelling`](#Code.binding_spelling) | Answers `Code.binding_spelling`, declared in `lib/meta.x`. |
 | [`Code.body`](#Code.body) | Answers `Code.body`, declared in `lib/meta.x`. |
@@ -49,13 +49,12 @@ The compiler's answers to `lib/meta.x` operations.
 | [`Code.type`](#Code.type) | Answers the compiler-backed captured-code type query. |
 | [`Code.value`](#Code.value) | Reads a constant through the compiler's existing constant decoder. |
 | [`Compiler.add_sdk_targets`](#Compiler.add_sdk_targets) | Adds the SDK primitives the compiler's shipped sources call through `lib/compiler-meta.x` to the built-in targets `rows`. |
-| [`Compiler.bind_sdk_primitives`](#Compiler.bind_sdk_primitives) | Binds the internal primitives the compile-time SDK library wraps into `lisp`, under their `_x2c.` names. |
 | [`Compiler.expanding`](#Compiler.expanding) | Returns the compiler running the current compile-time call. |
 | [`MetaContext.current`](#MetaContext.current) | Returns the context of the running compile-time call, which an evaluation changes with `with` for its own extent. |
 | [`MetaContext.fresh_binding`](#MetaContext.fresh_binding) | Returns a fresh binding whose spelling starts with `stem`. |
 | [`MetaContext.function_reference`](#MetaContext.function_reference) | Returns the typed expression naming the function `name`, or an empty List when no function of that name is visible. |
 | [`MetaContext.invocation_location`](#MetaContext.invocation_location) | Returns the location of the active macro invocation. |
-| [`MetaContext.literal_list`](#MetaContext.literal_list) | Returns `values`, such as a Lisp-built signature, as a cached literal of the expanding unit. |
+| [`MetaContext.literal_list`](#MetaContext.literal_list) | Returns `values`, such as a signature, as a cached literal of the expanding unit. |
 | [`MetaContext.reject`](#MetaContext.reject) | Reports `message` and `notes` at the active invocation and never returns, so the rejected operation's caller cannot continue with a missing answer. |
 | [`MetaContext.source_description`](#MetaContext.source_description) | Returns what a `meta` parameter declared `Source` receives for the captured syntax `value`: `((text T) (file F) (syntax value))`, where `T` is the text the developer wrote and `F` the file it is in. |
 | [`MetaContext.type_description`](#MetaContext.type_description) | Returns what a `meta` parameter declared `TypeInfo` receives for the captured syntax `value`: `((name N) (kind K) (type T) (fields F) (methods M))`. |
@@ -85,7 +84,7 @@ The compiler's answers to `lib/meta.x` operations.
 
 `List x2c_binding_for(Var key, String role)`
 
-Answers `x2c.binding.for`, declared in `lib/meta.x`.
+Answers `x2c_binding_for`, declared in `lib/meta.x`.
 
 Source: `src/meta-sdk/syntax.x:250`
 
@@ -93,7 +92,7 @@ Source: `src/meta-sdk/syntax.x:250`
 
 `List x2c_binding_fresh(String role)`
 
-Answers `x2c.binding.fresh`, declared in `lib/meta.x`.
+Answers `x2c_binding_fresh`, declared in `lib/meta.x`.
 
 Source: `src/meta-sdk/syntax.x:242`
 
@@ -101,7 +100,7 @@ Source: `src/meta-sdk/syntax.x:242`
 
 `void x2c_diagnostic_error_at( Var node, Symbol category, String message, List notes)`
 
-Answers `x2c.diagnostic.error.at`, declared in `lib/meta.x`.
+Answers `x2c_diagnostic_error_at`, declared in `lib/meta.x`.
 
 Source: `src/meta-sdk/context.x:68`
 
@@ -109,7 +108,7 @@ Source: `src/meta-sdk/context.x:68`
 
 `void x2c_diagnostic_fail(String message, List notes)`
 
-Answers `x2c.diagnostic.fail`, declared in `lib/meta.x`.
+Answers `x2c_diagnostic_fail`, declared in `lib/meta.x`.
 
 Source: `src/meta-sdk/context.x:54`
 
@@ -117,7 +116,7 @@ Source: `src/meta-sdk/context.x:54`
 
 `void x2c_diagnostic_fail_at( Var node, Symbol category, String message, List notes)`
 
-Answers `x2c.diagnostic.fail.at`, declared in `lib/meta.x`.
+Answers `x2c_diagnostic_fail_at`, declared in `lib/meta.x`.
 
 Source: `src/meta-sdk/context.x:60`
 
@@ -134,7 +133,7 @@ Source: `src/meta-sdk/context.x:77`
 
 `String x2c_embed_text(Var requested)`
 
-Answers `x2c.embed.text`, declared in `lib/meta.x`.
+Answers `x2c_embed_text`, declared in `lib/meta.x`.
 
 Source: `src/meta-sdk/sources.x:53`
 
@@ -142,7 +141,7 @@ Source: `src/meta-sdk/sources.x:53`
 
 `Code x2c_enclosing(Symbol what)`
 
-Answers `x2c.enclosing`, declared in `lib/meta.x`.
+Answers `x2c_enclosing`, declared in `lib/meta.x`.
 
 Source: `src/meta-sdk/syntax.x:323`
 
@@ -150,7 +149,7 @@ Source: `src/meta-sdk/syntax.x:323`
 
 `List x2c_ident(String spelling)`
 
-Answers `x2c.ident`, declared in `lib/meta.x`.
+Answers `x2c_ident`, declared in `lib/meta.x`.
 
 Source: `src/meta-sdk/syntax.x:234`
 
@@ -158,7 +157,7 @@ Source: `src/meta-sdk/syntax.x:234`
 
 `int x2c_invocation_column(void)`
 
-Answers `x2c.invocation.column`, declared in `lib/meta.x`.
+Answers `x2c_invocation_column`, declared in `lib/meta.x`.
 
 Source: `src/meta-sdk/context.x:50`
 
@@ -166,7 +165,7 @@ Source: `src/meta-sdk/context.x:50`
 
 `String x2c_invocation_file(void)`
 
-Answers `x2c.invocation.file`, declared in `lib/meta.x`.
+Answers `x2c_invocation_file`, declared in `lib/meta.x`.
 
 Source: `src/meta-sdk/context.x:42`
 
@@ -174,7 +173,7 @@ Source: `src/meta-sdk/context.x:42`
 
 `int x2c_invocation_line(void)`
 
-Answers `x2c.invocation.line`, declared in `lib/meta.x`.
+Answers `x2c_invocation_line`, declared in `lib/meta.x`.
 
 Source: `src/meta-sdk/context.x:46`
 
@@ -182,7 +181,7 @@ Source: `src/meta-sdk/context.x:46`
 
 `Map x2c_meta_definition_hashes(void)`
 
-Answers `x2c.meta.definition.hashes`, declared in `lib/meta.x`.
+Answers `x2c_meta_definition_hashes`, declared in `lib/meta.x`.
 
 Source: `src/meta-sdk/primitives.x:22`
 
@@ -190,7 +189,7 @@ Source: `src/meta-sdk/primitives.x:22`
 
 `void x2c_place(List where, Code code)`
 
-Answers `x2c.place`, declared in `lib/meta.x`.
+Answers `x2c_place`, declared in `lib/meta.x`.
 
 Source: `src/meta-sdk/syntax.x:331`
 
@@ -413,17 +412,7 @@ Source: `src/meta-sdk/syntax.x:75`
 Adds the SDK primitives the compiler's shipped sources call through
 `lib/compiler-meta.x` to the built-in targets `rows`.
 
-Source: `src/meta-sdk/primitives.x:112`
-
-<a id="Compiler.bind_sdk_primitives"></a>
-#### Compiler.bind_sdk_primitives
-
-`void Compiler.bind_sdk_primitives(Lisp lisp)`
-
-Binds the internal primitives the compile-time SDK library wraps into
-`lisp`, under their `_x2c.` names.
-
-Source: `src/meta-sdk/primitives.x:125`
+Source: `src/meta-sdk/primitives.x:102`
 
 <a id="Compiler.expanding"></a>
 #### Compiler.expanding
@@ -463,8 +452,8 @@ Source: `src/meta-sdk/syntax.x:261`
 
 Returns the typed expression naming the function `name`, or an empty
 List when no function of that name is visible. This reads the symbol
-table only, so any compile-time Lisp evaluation may call it, including
-one outside a macro expansion.
+table only, so any compile-time call may use it, including one outside
+a macro expansion.
 
 Source: `src/meta-sdk/syntax.x:184`
 
@@ -482,7 +471,7 @@ Source: `src/meta-sdk/context.x:35`
 
 `List MetaContext.literal_list(List values)`
 
-Returns `values`, such as a Lisp-built signature, as a cached literal
+Returns `values`, such as a signature, as a cached literal
 of the expanding unit.
 
 Source: `src/meta-sdk/primitives.x:57`
@@ -714,12 +703,11 @@ What the running compile-time call answers from. `expander` is the
 compiler of the active macro expansion, `definition_file` the source of
 its definition, `captures` its complete captured syntax by identity, and
 `has_bindings` whether it bound captured values. `evaluator` is the
-compiler evaluating Lisp and `site` where that evaluation stands, which
-a nested import changes without an expansion. Each evaluation installs
-its part with `with`, so a captured entry is valid only while its
-expansion is active.
+compiler running the call and `site` where the call stands. Each
+evaluation installs its part with `with`, so a captured entry is valid
+only while its expansion is active.
 
-Source: `src/meta-sdk/meta-sdk.x:25`
+Source: `src/meta-sdk/meta-sdk.x:24`
 
 ## Design notes
 

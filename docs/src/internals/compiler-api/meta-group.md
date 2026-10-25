@@ -43,7 +43,7 @@ A unit's meta group, emitted as C.
 Binds the session's group function `name` when it is not bound yet, by
 staging the group, and reports at `site` a function that cannot run.
 
-Source: `src/meta-group/staging.x:54`
+Source: `src/meta-group/staging.x:53`
 
 <a id="Compiler.finish_meta_functions"></a>
 #### Compiler.finish_meta_functions
@@ -148,7 +148,7 @@ Adds a loaded unit's public functions and object accessors to its targets.
 Meta closure must finish first so these entries retain runtime semantics.
 Existing meta entries and the adapted main keep their original targets.
 
-Source: `src/meta-group/loaded.x:79`
+Source: `src/meta-group/loaded.x:78`
 
 <a id="Compiler.prepare_loaded_main"></a>
 #### Compiler.prepare_loaded_main
@@ -160,7 +160,7 @@ Native calls retain its declared signature; the public argc/argv entry
 takes an Array of Strings. A renamed main still returns zero on falling
 through its closing brace. Source text and tokens are unchanged.
 
-Source: `src/meta-group/loaded.x:56`
+Source: `src/meta-group/loaded.x:55`
 
 <a id="Compiler.public_native_function"></a>
 #### Compiler.public_native_function
@@ -213,7 +213,7 @@ can place supporting functions through the ordinary compiler APIs.
 `declarations` supplies session types. Returns the loaded module's
 targets, or NULL with `failure` set. Publishes no evaluator bindings.
 
-Source: `src/meta-group/staging.x:92`
+Source: `src/meta-group/staging.x:91`
 
 <a id="Compiler.use_meta_build_directory"></a>
 #### Compiler.use_meta_build_directory

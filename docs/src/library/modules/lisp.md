@@ -724,8 +724,8 @@ Source: `lib/lisp/lisp.x:35`
 
 ## Design notes
 
-Lisp owns embedded compile-time Lisp sessions: the reader, the evaluator,
-and each session's global environment. Lambdas and natives receive their
+Lisp owns the sessions a program embeds: the reader, the evaluator, and
+each session's global environment. Lambdas and natives receive their
 arguments evaluated left to right, macros and special forms receive them
 raw, nil and void are false, and a Lambda captures by value the free
 locals its body reads. Names are canonical Atoms, and `bind` reaches

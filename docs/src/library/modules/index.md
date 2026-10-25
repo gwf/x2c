@@ -93,6 +93,7 @@ These modules implement the runtime and are not public APIs.
 - `lib/cleanup.x` - Cleanup adoption templates used by runtime owners.
 - `lib/clibc.x` - C library prototypes for integer and string conversions, and string comparison, marked `meta` so compile-time code calls the native functions; it includes the C headers it declares from.
 - `lib/cmath.x` - C99 `<math.h>` prototypes, declared so a `Var` argument unboxes at a math call; the unit still includes `<math.h>`.
+- `lib/compiler-meta.x` - Compiler-private `meta` prototypes for the native operations the compiler supplies to its own shipped sources.
 - `lib/datum-reader.x` - The one Lisp reader grammar, shared by `Lisp.read` and the datum reader.
 - `lib/datum.x` - Values spelled as Lisp reader text, for interface files and the project meta helper's messages.
 - `lib/error-macros.x` - Structured Error causes shared by runtime modules.

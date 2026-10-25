@@ -13,10 +13,9 @@
     captured code, and `Type`, a semantic type. The rest are `x2c_` helpers
     that have no captured receiver: the identifier check, the invocation
     site, embedded text, ancestry and placement, diagnostics, and the
-    definition hashes. Compile-time Lisp names a method `Owner.member`,
-    as in `Code.binding_spelling`, and a helper with each `_` of its name
-    as `.`, as in `x2c.invocation.line`. The semantics are specified under
-    "Compile-time Lisp and imports" in the language reference.
+    definition hashes. Compile-time code calls each by its declared name,
+    as in `x2c_invocation_line()`. The semantics are specified under
+    "Compile-time calls and operations" in the language reference.
 
     Each operation is a bodyless `meta` prototype the compiler supplies. A
     `meta` function that reaches one, directly or through another `meta`
@@ -307,8 +306,8 @@ meta String Type.reverse_name(String base, String participant);
 /* names
 
    A quotation's `$name` fills a name with a String, but a name that a
-   typed quotation reads, or that Lisp builds, is the checked identifier
-   value this returns. */
+   typed quotation reads, or that a meta function builds, is the checked
+   identifier value this returns. */
 
 /** Returns the checked identifier syntax for `spelling`, which the compiler
     resolves where the returned expression is bound. Fails the expansion

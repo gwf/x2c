@@ -29,7 +29,7 @@ Source: `src/builtins.x:974`
 ## Design notes
 
 The built-in macros expand through these functions, which run as native
-code inside the compiler. `Compiler.builtin_targets` binds each into
-the shared session under the name its callers use: the prototypes
-`etc/compiler-prelude.x` declares, and those `etc/lisp-bindings.x`
-calls.
+code inside the compiler. `Compiler.builtin_targets` names each as its
+callers do: the prototypes `etc/compiler-prelude.x` and
+`lib/compiler-meta.x` declare, and the recipes and quotation slots the
+compiler writes.

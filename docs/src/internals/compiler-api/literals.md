@@ -104,7 +104,7 @@ Source: `src/literals/quotation.x:146`
 Parses comma-separated `Map` entries up to but not including `}`.
 `Entry`-position macro sequences are flattened in source order.
 
-Source: `src/literals/collections.x:206`
+Source: `src/literals/collections.x:205`
 
 <a id="Compiler.parse_map_entry"></a>
 #### Compiler.parse_map_entry
@@ -116,7 +116,7 @@ A bare identifier key is an Atom; any other key is an expression.
 A direct row returns a resolved `(map-entry KEY VALUE)` node; an
 entry-position macro may return `(seq ...)` for its caller to splice.
 
-Source: `src/literals/collections.x:221`
+Source: `src/literals/collections.x:220`
 
 <a id="Compiler.parse_map_literal"></a>
 #### Compiler.parse_map_literal
@@ -126,7 +126,7 @@ Source: `src/literals/collections.x:221`
 Parses a quoted Map literal into a typed, source-ordered `(map ...)` node
 and consumes its closing `}`.
 
-Source: `src/literals/collections.x:155`
+Source: `src/literals/collections.x:154`
 
 <a id="Compiler.parse_raise_literal"></a>
 #### Compiler.parse_raise_literal

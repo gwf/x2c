@@ -308,8 +308,9 @@ static void _flush(FileWalk &w, String segment) {
 /* A segment resolves names through cumulative globs but writes declarations
    only to overlay. shallow_parse_overlay expands applicable unit macros under
    semantic transactions, so their committed declarations and protocol rows
-   are recorded at this segment's source position. Macro, Lisp, and keyword
-   state then returns to the enclosing compiler for the next segment. */
+   are recorded at this segment's source position. Macro, keyword, and
+   binding state then returns to the enclosing compiler for the next
+   segment. */
 static void _parse(FileWalk &w, String segment, Map overlay) {
   Compiler shadow = Compiler.new_shared(w.c);
   defer w.c.close_child(shadow);
@@ -447,7 +448,7 @@ void Compiler.configure_package(Compiler c, List roots, String filename) {
 /* Walk one included file cold and return its entry. The walk reads the
    includer's names through copies, so its private rows and includes stay
    there. It runs in a compiler of its own, with the macro, import, keyword,
-   and Lisp state the file's own translation starts with. The includer
+   and binding state the file's own translation starts with. The includer
    replays the selected public definitions as any later unit would. */
 module List _walk_cold(
   Compiler c, String target, String canonical, Map globs, Map visited) {
@@ -628,7 +629,7 @@ module void _replay_cached(
   Array prefix = effects != NULL ? NULL : [];
   if (prefix != NULL) visited[path] = prefix;
   foreach (String name in entry.caddr()) c.fn_defs[name] = 1;
-  /* Parsing this file read these macro and Lisp files. They are
+  /* Parsing this file read these macro and embedded-text files. They are
      prerequisites of every unit that reaches it, not only of the one that
      parsed it. */
   c.merge_translation_dependencies(entry[3]);

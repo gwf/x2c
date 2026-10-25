@@ -22,7 +22,7 @@ The compiler surface a `meta` function calls.
 Returns the suffix of `type` that begins at its typedef name or base
 keyword, sharing `type`, or `NULL` when it has none.
 
-Source: `lib/meta.x:431`
+Source: `lib/meta.x:430`
 
 #### type_declaration_parts
 
@@ -32,7 +32,7 @@ Returns `(base modifiers)` for reconstructing a declaration of `type`.
 Function modifiers hold parameter syntax, and modifier order retains C
 declarator precedence.
 
-Source: `lib/meta.x:461`
+Source: `lib/meta.x:460`
 
 #### type_name_error
 
@@ -43,7 +43,7 @@ other than a C type keyword, as `%(String)` and `%(* Point)` do, or
 `NULL`. A type name is a String, as in `%("String")` and `%(* "Point")`;
 neither a short Symbol nor a long Atom supplies that representation.
 
-Source: `lib/meta.x:444`
+Source: `lib/meta.x:443`
 
 ## Public types
 
@@ -62,7 +62,7 @@ Source: `lib/meta.x:444`
 
 Captured code parsed from source or produced by a quotation.
 
-Source: `lib/meta.x:60`
+Source: `lib/meta.x:59`
 
 <a id="Macro"></a>
 ### Macro
@@ -72,7 +72,7 @@ Source: `lib/meta.x:60`
 A macro as a value: called to build code, or used in a Match `case` to
 recognize code and capture its parameters.
 
-Source: `lib/meta.x:54`
+Source: `lib/meta.x:53`
 
 <a id="Source"></a>
 ### Source
@@ -83,7 +83,7 @@ A `meta` parameter declared `Source` receives, at a `$` call, captured
 syntax with the source text it came from: `((text T) (file F) (syntax
 S))`. `Code.source_text` and `x2c_embed_text` read it directly.
 
-Source: `lib/meta.x:72`
+Source: `lib/meta.x:71`
 
 <a id="Type"></a>
 ### Type
@@ -92,7 +92,7 @@ Source: `lib/meta.x:72`
 
 Semantic type syntax with canonical List-pool lifetime.
 
-Source: `lib/meta.x:57`
+Source: `lib/meta.x:56`
 
 <a id="TypeInfo"></a>
 ### TypeInfo
@@ -103,7 +103,7 @@ A `meta` parameter declared `TypeInfo` receives, at a `$` call, the
 description of its argument's type: `((name N) (kind K) (type T)
 (fields F) (methods M))`. Read a part with `List.assoc`.
 
-Source: `lib/meta.x:67`
+Source: `lib/meta.x:66`
 
 ## Design notes
 
@@ -118,10 +118,9 @@ The operations on a value are methods of the value's type: `Code`,
 captured code, and `Type`, a semantic type. The rest are `x2c_` helpers
 that have no captured receiver: the identifier check, the invocation
 site, embedded text, ancestry and placement, diagnostics, and the
-definition hashes. Compile-time Lisp names a method `Owner.member`,
-as in `Code.binding_spelling`, and a helper with each `_` of its name
-as `.`, as in `x2c.invocation.line`. The semantics are specified under
-"Compile-time Lisp and imports" in the language reference.
+definition hashes. Compile-time code calls each by its declared name,
+as in `x2c_invocation_line()`. The semantics are specified under
+"Compile-time calls and operations" in the language reference.
 
 Each operation is a bodyless `meta` prototype the compiler supplies. A
 `meta` function that reaches one, directly or through another `meta`
@@ -144,4 +143,4 @@ Shared compile-time definitions use ordinary source includes.
 
 ## Tests and examples
 
-`make verify` (`meta-comptime-only-call`, `meta-builder-compiler-only`, and `meta-literal-arguments` compiler fixtures).
+`make verify` (`meta-comptime-only-call` and `meta-builder-compiler-only` compiler fixtures).

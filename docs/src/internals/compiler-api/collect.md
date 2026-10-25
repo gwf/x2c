@@ -21,7 +21,7 @@ Source-ordered shallow symbol collection and replay.
 | [`Compiler.configure_interfaces`](#Compiler.configure_interfaces) | Creates the process cache and names the directories searched for `.xi` interfaces. |
 | [`Compiler.configure_package`](#Compiler.configure_package) | Selects a source file's own package, as its standalone translation does. |
 | [`Compiler.declared_adoptions`](#Compiler.declared_adoptions) | Returns the `(adopt ...)` rows that the current file's collected entry declares, in no particular order. |
-| [`Compiler.forget_provisional_entries`](#Compiler.forget_provisional_entries) | Drops the entries collected without declaration defaults while the shared compile-time session was filled, or by a project meta build. |
+| [`Compiler.forget_provisional_entries`](#Compiler.forget_provisional_entries) | Drops the entries a meta build collected without declaration defaults or with placeholders for its meta calls. |
 | [`Compiler.include_function_declarations`](#Compiler.include_function_declarations) | Adds the public functions an included unit itself declares. |
 | [`Compiler.include_type_dependencies`](#Compiler.include_type_dependencies) | The semantic type rows reached by an ordinary source include. |
 | [`Compiler.include_typedef_names`](#Compiler.include_typedef_names) | The typedef names published by the files that the current unit's include of `target` reaches, including its transitive includes. |
@@ -169,11 +169,11 @@ Source: `src/collect/declarations.x:614`
 
 `void Compiler.forget_provisional_entries(void)`
 
-Drops the entries collected without declaration defaults while the shared
-compile-time session was filled, or by a project meta build. Call once
-that session is published, and after the meta build's parses.
+Drops the entries a meta build collected without declaration defaults
+or with placeholders for its meta calls. Call after the meta build's
+parses.
 
-Source: `src/collect/cache.x:169`
+Source: `src/collect/cache.x:168`
 
 <a id="Compiler.include_function_declarations"></a>
 #### Compiler.include_function_declarations
@@ -224,7 +224,7 @@ The ordered cache walk counts each file once and groups effects by the
 canonical path of the unit's direct include. The parser installs those
 effects when it reaches that include.
 
-Source: `src/collect/walk.x:675`
+Source: `src/collect/walk.x:664`
 
 <a id="Compiler.install_included_effects"></a>
 #### Compiler.install_included_effects
@@ -234,7 +234,7 @@ Source: `src/collect/walk.x:675`
 Installs the definitions of each include among the directives before
 the cursor.
 
-Source: `src/collect/walk.x:721`
+Source: `src/collect/walk.x:710`
 
 <a id="Compiler.install_syntax_prelude"></a>
 #### Compiler.install_syntax_prelude
@@ -464,7 +464,7 @@ Makes the next collection recheck source files and interfaces after an
 interactive edit. Drops cache indexes, retaining their backing rows:
 already-open units may still use those declarations.
 
-Source: `src/collect/cache.x:151`
+Source: `src/collect/cache.x:150`
 
 <a id="Compiler.runtime_function_declarations"></a>
 #### Compiler.runtime_function_declarations
@@ -486,7 +486,7 @@ Source: `src/collect/declarations.x:184`
 The file the include of `target` from `includer_dir` names, searched as
 collection searches `dirs`, or NULL.
 
-Source: `src/collect/walk.x:530`
+Source: `src/collect/walk.x:524`
 
 ## Design notes
 

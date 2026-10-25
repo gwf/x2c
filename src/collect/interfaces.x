@@ -72,7 +72,7 @@ static List _interface_candidates(String canonical) {
 }
 
 /* Materialize one interface file only after its compiler identity, source
-   path and hash, and the content hashes of the includes, macros, Lisp, and
+   path and hash, and the content hashes of the includes, macros, and
    embedded text it depends on, validate. The entry uses process_cache_scope
    ownership and the same ordered parts representation as a cold walk. */
 static List _interface_load(

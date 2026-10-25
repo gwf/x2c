@@ -398,8 +398,8 @@ static List _witness_rows(Compiler c, Type base, Type participant) {
   return rows;
 }
 
-/* A Lisp callable reaches native code as a `Var`, so a native function that
-   takes a `Func` binds through an adapter row in `lib/lisp/lisp.x`. */
+/* Runtime Lisp passes a callable as a `Var`, so it binds a native function
+   that takes a `Func` through an adapter in `lib/lisp/native.x`. */
 static int _takes_callback(List signature) {
   match (signature)
     case %((func ?(List parameters)) *): return %("Func") in parameters;

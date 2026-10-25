@@ -21,7 +21,7 @@ void Compiler.own_diagnostics(Compiler c) {
   c.diagnostics.printer = c;
 }
 
-/** Retains a child's final diagnostics and closes its owned Lisp session. */
+/** Retains a child's final diagnostics and frees its owned meta bindings. */
 void Compiler.close_child(Compiler c, Compiler child) {
   c.take_diagnostics(child);
   if (!child.public_bodies) child.free_bindings();

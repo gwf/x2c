@@ -152,7 +152,7 @@ static int _number(Tokenizer tokenizer) {
   return tokenizer.tokenize(len, type);
 }
 
-/* Enter file-scoped compile-time Lisp until its closing parenthesis. */
+/* Scan a `$(` or `@(` form as Lisp text until its closing parenthesis. */
 static int _embedded_lisp(Tokenizer tokenizer) {
   char *text = tokenizer.text + tokenizer.pos;
   if ((text[0] != '$' && text[0] != '@') || text[1] != '(') return 0;

@@ -23,7 +23,7 @@ module List _emit_prepared(
   String provider = c.filename;
   /* The backend reads more of the unit's compiler than a child from
      `Compiler.new_shared` inherits, such as its tokenizer, runtime header
-     and literal policy, init names, origin, and Lisp session, so the
+     and literal policy, init names, origin, and meta bindings, so the
      emission runs on the unit's own compiler and restores it after. */
   struct Compiler saved = *c;
   struct GenNames names = *c.names;

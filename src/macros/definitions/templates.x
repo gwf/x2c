@@ -99,7 +99,7 @@ static void _check_kinds(Definition &d) {
 }
 
 /* Each `using` hole and each template local gets a fresh name per
-   expansion; the last field marks the names compile-time Lisp reads. */
+   expansion; the last field marks the names meta calls read. */
 static List _fresh_rows(Definition &d, Array locals) {
   Array fresh = [];
   foreach (Atom binder in d.using.list_free())
@@ -327,7 +327,7 @@ module Var _replace_bindings(Var value, Map bindings) {
 
    An invocation's capture rows match the definition's pattern: an `args`
    row per parameter, a decorator's target row, and a Name row for each
-   fresh name compile-time Lisp reads. Each row binds only the projections
+   fresh name meta calls read. Each row binds only the projections
    the template uses. */
 
 static List _invocation_pattern(Definition &d) {
@@ -357,9 +357,9 @@ static void _template_binders(Var value, Map binders) {
 static List _fresh_patterns(List fresh, Map binders) {
   Array fresh_patterns = [];
   foreach (List row in fresh) {
-    Var (binder, spelling, lisp) = row;
+    Var (binder, spelling, exposed) = row;
     (void) spelling;
-    if (lisp.int())
+    if (exposed.int())
       fresh_patterns.push(_capture_pattern(_hole(binder, <name>, 0), binders));
   }
   return fresh_patterns.list_free();
@@ -369,7 +369,7 @@ static List _fresh_patterns(List fresh, Map binders) {
    Function hole also has return and declarator projections, while a Unit hole
    may carry construction requirements. The stored Match pattern binds only
    projections used by the template; the author binder exposes the captured
-   value to compile-time Lisp. */
+   value to meta calls. */
 static List _capture_pattern(List hole, Map binders) {
   Var author = hole.assoc(<binder>);
   int sequence = hole.assoc(<sequence>);
