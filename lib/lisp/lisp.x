@@ -64,6 +64,7 @@ macro Expression $lisp._standard.source() =>
 $cleanup.by(Lisp, destroy);
 
 #include "meta.x"
+#include "datum-reader.x"
 
 /* Lisp form error conditions. Runtime operands retain their original
    detail types, order and source helper ownership. */

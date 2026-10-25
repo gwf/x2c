@@ -786,12 +786,12 @@ Var Lisp.eval_string(Lisp lisp, String source) {
   if (!source) return %();
   _open_call_budget(lisp);
   Scope tokens_scope = auto Scope.new_named("Lisp tokens");
-  Tokenizer tokenizer = _scan_lisp_tokens(source, &tokens_scope);
+  Tokenizer tokenizer = datum_scan_tokens(source, &tokens_scope);
   unsigned cursor = 0;
   Var result = %();
   loop {
     Var form = void;
-    if (_read_form(tokenizer, source, 0, cursor, form) == <eof>) break;
+    if (datum_read_token_form(tokenizer, source, 0, cursor, form) == <eof>) break;
     result = _eval(lisp, form, NULL);
   }
   return result;
