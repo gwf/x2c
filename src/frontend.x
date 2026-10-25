@@ -169,7 +169,7 @@ void ParsedUnit.close(ParsedUnit &unit) {
   if (!unit.context) return;
   Compiler c = unit.compiler;
   if (unit.preprocessor) c.close_child(unit.preprocessor);
-  c.free_lisp();
+  c.free_bindings();
   Type.end_unit(unit.enclosing_var_tags);
   unit.context.close();
   unit = (ParsedUnit) { 0 };
@@ -192,7 +192,6 @@ static int _start(
       c.package_dirs = frontend.request.package_roots();
       c.configure_package(c.package_source_dirs, filename);
       _tokenize_input(frontend, unit, filename);
-      c.inherited_lisp = Compiler.inherits_import(Path.absolute(filename));
       c.begin_meta_unit(c.filename);
     }
   }
@@ -463,67 +462,12 @@ static void _tokenize_cpp(Compiler cpp, String text) {
   cpp.collect_protocols = 0;
 }
 
-// The child parses in the unit's compile-time session.
+// The child parses with the unit's compile-time bindings.
 static void _share_session(Compiler cpp, Compiler c) {
   cpp.load_source = c.load_source;
-  cpp.imports = c.imports;
-  cpp.macro_lisp = c.macro_lisp;
-  cpp.borrowed_lisp = cpp.macro_lisp != NULL;
+  cpp.meta_bindings = c.meta_bindings;
+  cpp.borrowed_bindings = cpp.meta_bindings != NULL;
   cpp.share_meta_group(c);
-}
-
-// compile-time libraries
-
-/** Evaluates the compile-time libraries and installs the compiler surface's
-    own definitions, once for the active build or translation target. Returns
-    zero after reporting a failed preload, without publishing a partial
-    session.
-*/
-int Frontend.preload_macro_libraries(Frontend frontend) {
-  Compiler c = Compiler.new();
-  Lisp shared = c.open_macro_library();
-  if (shared && !_preload_meta_surface(frontend, shared)) {
-    shared.destroy();
-    c.publish_macro_library(NULL);
-    Compiler.forget_provisional_entries();
-    return 0;
-  }
-  c.publish_macro_library(shared);
-  Compiler.forget_provisional_entries();
-  return 1;
-}
-
-/* Installs the compile-time forms `lib/meta.x` defines into the shared
-   session, each also under its Lisp name. Its values belong to the build
-   target's shared library scope because they outlive every unit that calls
-   them. The surface parses as an ordinary unit, whatever dump or symbol
-   mode the request selects. */
-static int _preload_meta_surface(Frontend frontend, Lisp shared) {
-  struct CliRequest request = *frontend.request;
-  request.dump = 0;
-  request.no_cpp = request.live_symbols = request.cpp_symbols = 0;
-  struct Frontend session = *frontend;
-  session.request = &request;
-  ParsedUnit unit;
-  String path = %"${x2c_get_root()}/lib/meta.x";
-  Context context = Context.open_named("shared translation unit");
-  int started = _start(&session, path, unit, context, NULL);
-  Compiler c = unit.compiler;
-  c.macro_lisp = shared;
-  c.borrowed_lisp = 1;
-  defer unit.close();
-  /* As in `Frontend.open_reporting`, the compiler that reports a diagnostic
-     prints it, so an imported file's location shows that file's line. */
-  if (started) c.own_diagnostics();
-  else foreach (List entry in c.diagnostics()) c.print_diagnostic(entry);
-  if (!started || !unit.collect(&session) || !unit.parse()) return 0;
-  foreach (String name in c.meta_hashes.keys()) {
-    Var function;
-    if ((name.startswith("x2c_") || name.startswith("Code_") ||
-         name.startswith("Type_")) && shared.try_get(name, function))
-      Compiler.bind_meta_operation(shared, name, function);
-  }
-  return 1;
 }
 
 // lifecycle

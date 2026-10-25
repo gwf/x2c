@@ -13,8 +13,8 @@
 #pragma once
 #include "compiler/compiler.x"
 
+#include "compiler-meta.x"
 #include "grammar.x"
-static $(import "../../etc/lisp-bindings.xlisp")
 #include "macros/macros.x"
 #include "meta-group/meta-group.x"
 #include "meta-sdk/meta-sdk.x"

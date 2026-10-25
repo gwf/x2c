@@ -313,9 +313,33 @@ static int _lower_known(Lowering &l, String name) {
   Var value;
   if (l.own && l.own.equal(name)) return 1;
   if (l.owner.lisp.try_get(name, value)) return 1;
-  if (!l.compiler.bind_native_meta(name) ||
-      !l.compiler.macro_lisp.try_get(name, value)) return 0;
+  if (!repl_native_binding(l.compiler, l.owner.lisp, name, value)) return 0;
   l.owner.lisp.set_global(name, value);
+  return 1;
+}
+
+/** Writes what the session `lisp` binds for the compiler's callable `name`
+    to `out`. A declared native function binds the runtime native or
+    callback adapter the session's `bind` selects, and an iterator
+    operation binds through `C.iterator.call`, which supplies an omitted
+    destination; a program or module function binds the compiler's own.
+    Returns whether there is one. */
+int repl_native_binding(Compiler c, Lisp lisp, String name, Var &out) {
+  Var signature;
+  if (!c.bind_native_meta(name)) return 0;
+  if (!c.native_meta.try_get(name, signature))
+    return c.meta_binding(name, out);
+  int iterator = 0, arity = 0;
+  match (signature)
+    case %((func ?(List parameters)) "Iter"):
+      if (parameters && parameters.last() == %("Iter")) {
+        iterator = 1;
+        arity = parameters.len() - 1;
+      }
+  String target = iterator ? %"${name}_into" : name;
+  try out = lisp.eval(%(bind $target ()));
+  catch %(no-symbol *): return c.meta_binding(name, out);
+  if (iterator) out = lisp.eval(%(C.iterator.call (quote $out) $arity));
   return 1;
 }
 

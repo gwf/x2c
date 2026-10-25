@@ -97,10 +97,6 @@ int Compiler.skip_collected_script_statement(Compiler c) {
 static void _skip_script_statement(Compiler c) {
   for (int depth = 0; c.peek(0) != <eof>;) {
     Symbol type = c.peek(0);
-    if (type == <"$(">) {
-      c.token = c.token.after_group();
-      continue;
-    }
     depth += type.group_step();
     c.next();
     if (depth <= 0 && (type == <;> || type == <"}">)) return;

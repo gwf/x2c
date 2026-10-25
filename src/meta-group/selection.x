@@ -67,7 +67,7 @@ void Compiler.finish_meta_functions(Compiler c, Array nodes) {
     foreach (List entry in c.meta_group)
       match (entry) case %(function ?fn ?(String name) ?):
         if (!(name in c.meta_comptime) && c.meta_reaches_compile_time(fn)) {
-          c.record_comptime(name);
+          c.meta_comptime[name] = 1;
           grew = 1;
         }
   }
@@ -335,7 +335,7 @@ static String _unbound_callee(Compiler c, Var node) {
     String unbound = %"<unbound $spelling>";
     return unbound in c.meta_group_bound ||
            (spelling in c.native_meta &&
-            !c.macro_lisp.try_get(spelling, bound) &&
+            !c.meta_binding(spelling, bound) &&
             !c.bind_native_meta(spelling)) ? spelling : NULL;
   }
   foreach (Var child in (List) node) {

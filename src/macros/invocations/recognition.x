@@ -55,23 +55,6 @@ void Compiler.install_compile_time_effects(Compiler c, List rows) {
     case %(compile-time unalias ?(String name)):
       _remove_imported_alias(c, name);
     case %(compile-time rewrite *): _install_rewrite(c, row);
-    case %(compile-time lisp ?form (source ?path ?site)): {
-      Token token = c.thaw_declaration_syntax(site);
-      String file = Compiler.absolute_home_path(path), text = NULL;
-      c.read_source(file, text);
-      with (c.filename = file, c.text = text, c.line_markers = NULL) {
-        if (c.shallow) c.queue_declaration_effect(form, token, NULL);
-        else c.evaluate_declaration_effect(form, token);
-      }
-    }
-    case %(compile-time import ?path (source ?source ?site)): {
-      Token token = c.thaw_declaration_syntax(site);
-      String file = Compiler.absolute_home_path(source), text = NULL;
-      c.read_source(file, text);
-      with (c.filename = file, c.text = text, c.line_markers = NULL) {
-        _import(c, Compiler.absolute_home_path(path), token);
-      }
-    }
     case %(project-meta *): c.install_project_meta_effect(row);
   }
 }
@@ -153,12 +136,6 @@ static int _fixed_alias(Compiler c, Atom alias) {
 
 static const SymbolSet alias_kinds =
   %<<expression block-item field enumerator map-entry unit decorator>>;
-
-/* Parses one keyword alias of `c`'s source into `aliases`. */
-module void _record_alias(Compiler c, Map aliases) {
-  Atom alias = c.parse_keyword_definition();
-  aliases[alias] = c.kw_aliases[alias];
-}
 
 /* invocation recognition
 
@@ -260,7 +237,7 @@ module List _peek_invocation(Compiler c, Symbol position) {
     String spelling;
     _scan_name(c, spelling);
     if (!spelling ||
-        !_try_definition(c, Atom.intern(spelling), !c.shallow, stored))
+        !_try_macro(c, c.macros, Atom.intern(spelling), stored))
       return NULL;
     return stored;
   }
@@ -316,7 +293,7 @@ module List _take_invocation(Compiler c, Symbol position) {
   Atom name = _name(c);
   Var existing;
   if (c.macro_holes && c.peek(0) != <(> &&
-      !_try_definition(c, name, 1, existing))
+      !_try_macro(c, c.macros, name, existing))
     _unbound(c, name.str(), invocation);
   return _lookup(c, name, invocation);
 }
@@ -333,25 +310,14 @@ module Atom _name(Compiler c) {
 module List _lookup(Compiler c, Atom name, Token invocation) {
   Var stored;
   String spelling = name.str();
-  if (!_try_definition(c, name, 1, stored))
+  if (!_try_macro(c, c.macros, name, stored))
     $fail.macros_macro_unbound(c, invocation, spelling);
   return stored;
 }
 
-/* With `install_lisp`, a `lisp.` name records the Lisp binding macros as a
-   dependency and installs them when the name is not yet defined. */
-module int _try_definition(
-  Compiler c, Atom name, int install_lisp, Var &stored) {
-  int found = _try_macro(c, c.macros, name, stored);
-  String spelling = name.str();
-  if (!install_lisp || !spelling.startswith("lisp.")) return found;
-  _use_lisp_bindings(c, !found);
-  return found || _try_macro(c, c.macros, name, stored);
-}
-
 /* Includes publish names immediately. Decode a template into this unit's
    bindings only when it is used, keeping the result in the same name map. */
-static int _try_macro(
+module int _try_macro(
   Compiler c, Map definitions, Atom name, Var &stored) {
   if (!definitions.try_get(name, stored)) return 0;
   match (stored) case %(imported-macro ?definition): {

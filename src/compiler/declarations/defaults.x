@@ -45,12 +45,12 @@ Map Compiler.select_declaration_defaults(
 }
 
 /* The shadow binds over the file's collected symbols in an overlay,
-   without parsing, in the unit's Lisp session and meta group. */
+   without parsing, with the unit's bindings and meta group. */
 static void _prepare_shadow(
   Compiler c, Compiler owner, String path, Map symbols) {
   c.filename = path;
-  c.macro_lisp = owner.macro_lisp;
-  c.borrowed_lisp = c.macro_lisp != NULL;
+  c.meta_bindings = owner.meta_bindings;
+  c.borrowed_bindings = c.meta_bindings != NULL;
   c.share_meta_group(owner);
   c.sym.reset_overlay(symbols, {});
   c.rebuild_protocols(symbols);

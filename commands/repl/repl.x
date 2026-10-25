@@ -321,7 +321,6 @@ static String _cause_text(List cause) {
     errors leave the session usable; SIGINT stops a running submission. */
 int repl_run(CliRequest request, ReplOptions options) {
   Frontend frontend = Frontend.new(request);
-  if (!frontend.preload_macro_libraries()) return 1;
   ParsedUnit unit;
   int opened = frontend.open_session(unit);
   defer unit.close();

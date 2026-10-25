@@ -9,7 +9,6 @@ int main(int argc, char **argv) {
   CliRequest request = xcalloc(1, sizeof(struct CliRequest));
   request.command = <translate>;
   Frontend frontend = Frontend.new(request);
-  if (!frontend.preload_macro_libraries()) return 1;
   frontend.prepare_meta(%(${String.new(argv[1])}));
   Context command = Context.open_isolated_named("AST parity command");
   ParsedUnit parsed;

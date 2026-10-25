@@ -50,20 +50,19 @@ List Compiler.parse_top_level_mode(Compiler c, int skip_body) {
         return NULL;
       }
       return _parse_import_declaration(c);
-    case <"$(">:   return _top_level_lisp(c, skip_body);
+    case <"$(">:   return c.reject_lisp_form();
     case <@>:      return _top_level_decorator(c);
   }
   if (c.macro_form_is_definition()) return c.parse_macro_definition();
   return _declaration_form(c, skip_body);
 }
 
-/* Static storage also applies to source types and compile-time effects. */
+/* Static storage also applies to source types and protocols. */
 static int _static_interface_form(Compiler c) {
   if (c.peek(0) != <static>) return 0;
   Token next = Token.skip_trivia(c.token + 1);
-  return c.peek(1) == <typedef> ||
-         (c.peek(1) == <"$("> && !c.macro_holes) ||
-         c.peek(1) == <protocol> || next.text == "class";
+  return c.peek(1) == <typedef> || c.peek(1) == <protocol> ||
+         next.text == "class";
 }
 
 /* `module` before a file-scope declaration declares a static name for
@@ -151,17 +150,6 @@ static int _skip_collected_form(Compiler c) {
     if (c.test(<;>)) return 1;
   } while (c.macro_starts_target_at(<unit>));
   return 0;
-}
-
-/* Top-level Lisp updates compiler state without emitting a runtime form. */
-static List _top_level_lisp(Compiler c, int skip_body) {
-  if (c.signature_only && !c.macro_holes) {
-    c.token = c.token.group_close().after_group();
-    return NULL;
-  }
-  if (skip_body) c.parse_macro_lisp_shallow();
-  else c.parse_macro_lisp_top_level();
-  return NULL;
 }
 
 static List _top_level_decorator(Compiler c) {
@@ -258,7 +246,7 @@ int Compiler.defines_main(Compiler c) {
 */
 int Compiler.script_statement_starts(Compiler c) {
   switch (c.peek(0)) {
-    case <eof>: case <import>: case <protocol>: case <"$(">:
+    case <eof>: case <import>: case <protocol>:
     case <typedef>: case <static>: case <extern>: case <"}">:
       return 0;
   }

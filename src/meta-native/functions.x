@@ -5,31 +5,29 @@
 
 /* meta functions
 
-   A bodied `meta` function runs at compile time through a stub in the
-   unit's session. The stub calls the function's compiled copy in the
+   A bodied `meta` function runs at compile time through a stub among the
+   unit's bindings. The stub calls the function's compiled copy in the
    project's helper, or in the REPL the group's native code. */
 
 /** Installs a bodied `meta` function. The project meta build compiled it
-    into the project's helper, so the session holds a stub that calls it
-    there; the REPL's stub stages the session's group at the first call
+    into the project's helper, so the unit binds a stub that calls it
+    there; the REPL's stub stages the unit's group at the first call
     instead, and the project meta build's own parse only groups it. A
     function whose body reaches a compiler operation, a template, or a
     compile-time-only function has no runtime form. A body that lets its
     own storage outlive a call is rejected where the storage leaves.
 */
 void Compiler.install_meta_function(Compiler c, List fn, Token marker) {
-  c.ensure_macro_lisp();
   c.check_meta_regions(fn);
   match (fn)
     case %(function ? (bind (binding ? ?(String name)) *) ?): {
       c.native_meta.del(name);
       c.meta_group_bound.del(%"<unbound $name>");
-      if (c.meta_reaches_compile_time(fn)) c.record_comptime(name);
+      if (c.meta_reaches_compile_time(fn)) c.meta_comptime[name] = 1;
       if (c.macro_holes) return;
       c.group_meta_function(fn);
       if (c.meta_calls_wait()) return;
-      if (!Compiler.library_filling() && !c.shares_meta_definition(name))
-        _install_stub(c, name, ((List) c.meta_group[-1]).last(), NULL, marker);
+      _install_stub(c, name, ((List) c.meta_group[-1]).last(), NULL, marker);
     }
 }
 
@@ -44,15 +42,7 @@ void Compiler.install_collected_meta_function(
   if (c.signature_only || c.macro_holes) return;
   if (c.source_private < 0 && _install_included_meta(c, declaration, marker))
     return;
-  /* The definition depends on the compile-time libraries even while the
-     shared session that will answer it is being filled. */
-  if (Compiler.library_filling()) {
-    c.add_library_dependencies();
-    return;
-  }
   String name = _native_meta_name(c, declaration, marker);
-  if (c.shares_meta_definition(name)) return;
-  c.ensure_macro_lisp();
   Map linked = _linked_module();
   if (c.groups_meta() && !(name in linked)) return;
   _install_stub(
@@ -76,23 +66,19 @@ static int _install_included_meta(
   return 1;
 }
 
-/* A host binding remains in this session; installation failures report at
-   the declaration marker. */
+/* The stub belongs to the unit's bindings. */
 static void _install_stub(
   Compiler c, String name, Type type, String provider, Token marker) {
+  (void) marker;
   String context = %"$name\n${provider ? provider : ""}";
-  try c.macro_lisp.bind(
+  c.bindings().bind(
     name,
     Func.new_context(
       _meta_stub, c.func_signature(type),
       (char *) context, context.len() + 1));
-  catch %(?code *detail): {
-    List cause = cons(code, detail);
-    $fail.meta_native_function_install(c, marker, cause);
-  }
 }
 
-/* Adapts a call of a bodied `meta` function's session binding, whose
+/* Adapts a call of a bodied `meta` function's binding, whose
    context holds the function's name, to a call in the project's helper,
    or in the REPL to a call of the group's native code, which the first
    call stages and binds under the name. */
@@ -111,7 +97,7 @@ static Var _meta_stub(Func function, const FuncArg *argv) {
       if (c.shallow && !_linked_copy(c, name, linked))
         c.complete_meta_hashes();
       if (_linked_copy(c, name, linked))
-        return c.macro_lisp.apply(linked[name], values.list_free());
+        return c.apply_meta_binding(name, linked[name], values.list_free());
     }
   }
   if (c.meta_calls_wait()) raise %(meta-later (name $name));
@@ -123,8 +109,8 @@ static Var _meta_stub(Func function, const FuncArg *argv) {
     return c.meta_helper_call(name, site, values.list_free(), provider);
   c.bind_meta_group(name, site);
   Var bound;
-  c.macro_lisp.try_get(name, bound);
-  return c.macro_lisp.apply(bound, values.list_free());
+  c.meta_binding(name, bound);
+  return c.apply_meta_binding(name, bound, values.list_free());
 }
 
 static Array _stub_arguments(Func function, const FuncArg *argv) {
@@ -217,10 +203,7 @@ void Compiler.install_project_meta_effect(Compiler c, List row) {
     c.project_meta[name] = %($signature $provider);
     c.native_meta.del(name);
     c.meta_group_bound.del(%"<unbound $name>");
-    if (!c.meta_calls_wait()) {
-      c.ensure_macro_lisp();
-      _bind_advertised_meta(c, name, 1);
-    }
+    if (!c.meta_calls_wait()) _bind_advertised_meta(c, name, 1);
   }
 }
 
@@ -233,18 +216,18 @@ module int _bind_project_meta(Compiler c, String name) {
 }
 
 /* An include installs its provider at that position. Later lookups keep
-   any Lisp definition the unit installs after the include. */
+   any binding the unit installs after the include. */
 static int _bind_advertised_meta(Compiler c, String name, int install) {
   Var target;
   if (!c.project_meta.try_get(name, target)) return 0;
   if (c.meta_calls_wait()) return 0;
   Var bound;
-  if (!install && c.macro_lisp.try_get(name, bound)) return 1;
+  if (!install && c.meta_binding(name, bound)) return 1;
   Var (signature, provider) = target;
   Var function = _linked_target(c, name, signature, provider);
   if (function is not <func>)
     _install_stub(c, name, signature, provider, NULL);
-  else if (!c.macro_lisp.try_get(name, bound) || !bound.equal(function))
-    c.macro_lisp.set_global(name, function);
+  else if (!c.meta_binding(name, bound) || !bound.equal(function))
+    c.bindings().set(name, function);
   return 1;
 }

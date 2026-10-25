@@ -5,12 +5,12 @@
 
 static macro Stmt $fail.meta_sdk_symbol_set_value(Expr $value) =>
   MetaContext.reject(
-    "_x2c.symbol-set requires Symbols", %("value:" ${$value.repr()}));
+    "_x2c_symbol_set requires Symbols", %("value:" ${$value.repr()}));
 
 static macro Stmt $fail.meta_sdk_symbol_set_duplicate(
   Expr $values, Expr $duplicate) =>
   MetaContext.reject(
-    "_x2c.symbol-set requires distinct Symbols",
+    "_x2c_symbol_set requires distinct Symbols",
     %("symbol:" ${$values[$duplicate].repr()}));
 
 static macro Stmt $fail.meta_sdk_native_declarations() =>
@@ -20,7 +20,7 @@ static macro Stmt $fail.meta_sdk_native_declarations() =>
 
 /** Answers `x2c.meta.definition.hashes`, declared in `lib/meta.x`. */
 Map x2c_meta_definition_hashes(void) {
-  _require_expansion("x2c.meta.definition.hashes");
+  _require_expansion("x2c_meta_definition_hashes");
   Compiler c = active.expander;
   Map hashes = {};
   foreach (String name in c.meta_calls.keys())
@@ -31,7 +31,7 @@ Map x2c_meta_definition_hashes(void) {
 /* Imported functions refer to their provider's shared definition hash.
    Fully parsed copies retain their own hashes and precise references. */
 static Map _linked_hashes(void) {
-  _require_expansion("_x2c.meta.linked.hashes");
+  _require_expansion("_x2c_meta_linked_hashes");
   Compiler c = active.expander;
   Map rows = {};
   c.add_linked_meta_provider_hashes(rows);
@@ -48,17 +48,17 @@ static Map _linked_hashes(void) {
 /* The prelude components' interface records, which `src/collect/collect.x` links
    into the compiler it is translated into. */
 static Map _linked_prelude(void) {
-  _require_expansion("_x2c.prelude.linked");
+  _require_expansion("_x2c_prelude_records");
   return active.expander.linked_prelude_records();
 }
 
-/** Returns `values`, such as a Lisp-built signature, as a cached literal
+/** Returns `values`, such as a signature, as a cached literal
     of the expanding unit. */
 List MetaContext.literal_list(List values) =>
   active.expander.cache_literal_list(values);
 
 static Var _symbol_set(List values) {
-  _require_expansion("_x2c.symbol-set");
+  _require_expansion("_x2c_symbol_set");
   foreach (Var value in values)
     if (value is not <symbol>)
       $fail.meta_sdk_symbol_set_value(value);
@@ -68,8 +68,6 @@ static Var _symbol_set(List values) {
     $fail.meta_sdk_symbol_set_duplicate(values, duplicate);
   return expression;
 }
-
-static List _native_targets(void) => Compiler.native_meta_targets(NULL, 0);
 
 /* `leading`, the rows of one target inventory, then `trailing`. The
    compiler's own operations are its `x2c_`, `Code_`, and `Type_` targets;
@@ -108,19 +106,4 @@ void Compiler.add_sdk_targets(Map rows) {
   rows["_x2c_meta_linked_hashes"] = (Func) _linked_hashes;
   rows["_x2c_prelude_records"] = (Func) _linked_prelude;
   rows["_x2c_symbol_set"] = (Func) _symbol_set;
-}
-
-// lisp primitives
-
-/** Binds the internal primitives the compile-time SDK library wraps into
-    `lisp`, under their `_x2c.` names. */
-void Compiler.bind_sdk_primitives(Lisp lisp) {
-  $lisp.bind(lisp, "_x2c.meta.linked.hashes", _linked_hashes);
-  $lisp.bind(lisp, "_x2c.prelude.linked", _linked_prelude);
-  $lisp.bind(lisp, "_x2c.function.reference", MetaContext.function_reference);
-  $lisp.bind(lisp, "_x2c.function.native-type", Code.native_signature);
-  $lisp.bind(lisp, "_x2c.literal.list", MetaContext.literal_list);
-  $lisp.bind(lisp, "_x2c.native-meta.targets", _native_targets);
-  $lisp.bind(lisp, "_x2c.native-meta.declared", _declared_targets);
-  $lisp.bind(lisp, "_x2c.symbol-set", _symbol_set);
 }

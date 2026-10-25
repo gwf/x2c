@@ -27,7 +27,6 @@ void Compiler.use_meta_build_directory(
 void Compiler.write_meta_build(Compiler c) {
   int index = c.meta_build - 1;
   if (!meta_build_directory) return;
-  c.ensure_macro_lisp();
   String base = %"$meta_build_directory/group-$index";
   String failure = _unbound(c);
   List code = failure ? NULL : _emit(
@@ -59,8 +58,8 @@ void Compiler.bind_meta_group(Compiler c, String name, Token site) {
     c.refuse_meta_call(name, site, c.meta_call_missing(name));
 }
 
-/* Builds and loads the session's `meta` group, then binds each
-   group function in the session not yet bound. Returns the loaded module,
+/* Builds and loads the unit's `meta` group, then binds each group
+   function not yet bound. Returns the loaded module,
    or NULL with `failure` set when the group does not stage. */
 static String _stage(Compiler c, String &failure) {
   failure = c.groups_meta() ? _unbound(c) : "native modules are unavailable";
@@ -78,7 +77,7 @@ static String _stage(Compiler c, String &failure) {
       if (target in c.meta_group_bound || !(target in targets)) continue;
       Var bound = targets[target];
       if (!c.native_meta_accepts(bound, c.func_signature(type))) continue;
-      c.macro_lisp.set_global(target, bound);
+      c.bindings().set(target, bound);
       c.meta_group_bound[target] = 1;
     }
   return module;

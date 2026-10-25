@@ -610,7 +610,7 @@ List Compiler.parse_primary(Compiler c) {
   List slot = c.try_parse_macro_slot(<expression>);
   if (slot) return slot;
   switch (c.peek(0)) {
-    case <"$(">: return c.parse_macro_lisp_expression();
+    case <"$(">: case <"@(">: return c.reject_lisp_form();
     case <lit-char*>:  return _parse_c_string_literals(c);
     case <$>:
       return c.peek(1) == <!> ? c.parse_macro_quotation()
@@ -763,7 +763,7 @@ static int _statement_expression_follows(Compiler c) {
     if (type == <;>) return 1;
     if (type == <eof> || type == <"}">) return hole && !comma;
     if (type == <,>) comma = 1;
-    if (c.macro_holes && (type == <$> || type == <@> || type == <"@(">))
+    if (c.macro_holes && (type == <$> || type == <@>))
       hole = 1;
   }
 }
@@ -799,12 +799,12 @@ static int _brace_starts_map(Compiler c) {
 }
 
 /* A sequence hole splices initializer elements, as it splices call
-   arguments; a Lisp slot or meta call stays one element. */
+   arguments; a meta call stays one element. */
 static List _parse_composite_elements(Compiler c) {
   Array elements = [];
   while (c.peek(0) != <"}">) {
     List hole = c.peek_macro_hole();
-    int sequence = c.peek(0) == <@> || c.peek(0) == <"@("> ||
+    int sequence = c.peek(0) == <@> ||
                    (hole && hole.assoc(<sequence>).int());
     List element = sequence ? c.try_parse_macro_slot(<argument>) : NULL;
     if (!element)

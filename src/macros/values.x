@@ -28,7 +28,7 @@ module Var _macro_value_names(Var value) {
 module List _macro_value(Compiler c, Atom name) {
   Var stored;
   if (c.macro_holes && _hole_record(c, name)) return NULL;
-  if (!_try_definition(c, name, 1, stored)) return NULL;
+  if (!_try_macro(c, c.macros, name, stored)) return NULL;
   List cached = c.macro_value_literal(stored);
   return %(expr ("Macro") ${cached.caddr()});
 }
@@ -111,7 +111,7 @@ Token Compiler.macro_pattern_at(
   Token end = _scan_name(c, spelling);
   c.token = saved;
   if (!spelling || end.type != <(> ||
-      !_try_definition(c, Atom.intern(spelling), 1, stored) ||
+      !_try_macro(c, c.macros, Atom.intern(spelling), stored) ||
       stored is not <list> || stored.list().car() != <macrodef>)
     return NULL;
   return end;

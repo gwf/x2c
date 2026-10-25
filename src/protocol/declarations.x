@@ -136,8 +136,7 @@ static void _head(ProtocolSyntax &p) {
   }
   if (c.test(<static>)) p.storage = <static>;
   c.expect(<protocol>);
-  p.generated_base = c.macro_holes &&
-    (c.peek(0) == <$> || c.peek(0) == <"$(">);
+  p.generated_base = c.macro_holes && c.peek(0) == <$>;
   p.base = c.parse_type_name();
   c.expect(<(>);
   p.participant_token = c.token;

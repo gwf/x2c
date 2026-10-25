@@ -23,8 +23,8 @@ module List _declarator_list(
    declarators and source-order dependency analysis share the same identity. */
 module List _declarator_init(
   Compiler c, List type, List context) {
-  // A Lisp-produced declarator name still needs ordinary binding.
-  List slot = c.peek_macro_hole() || c.peek(0) == <@> || c.peek(0) == <"@(">
+  // A computed declarator name still needs ordinary binding.
+  List slot = c.peek_macro_hole() || c.peek(0) == <@>
     ? c.try_parse_macro_slot(<decl-row>) : NULL;
   if (slot) {
     if (c.test(<=>)) return %(op = $slot ${c.parse_assignment()});
@@ -232,10 +232,6 @@ static List _template_declarator(Compiler c, int member) {
   if (!method) method = _hole_method(c);
   if (method) return method;
   switch (c.peek(0)) {
-    case <"$(">: {
-      List slot = c.try_parse_macro_slot(<name>);
-      return %(bind $slot ());
-    }
     case <$>:
       return %(bind ${member ? c.try_parse_macro_member()
                              : c.try_parse_macro_slot(<name>)} ());

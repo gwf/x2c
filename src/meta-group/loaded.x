@@ -27,7 +27,6 @@ static List _loaded_entry(Compiler c, List binding, Type type) {
   int arity = _main_arity(c, type);
   if (arity < 0)
     $fail.meta_group_main_signature(c, NULL);
-  c.ensure_macro_lisp();
   List entry = c.sym.introduce(c.fresh_name("loaded_entry"));
   List target = %(expr $type (ident $binding));
   if (!arity)
@@ -300,7 +299,6 @@ static void _loaded_global(Compiler c, Type spec, List row, Map present) {
     Type type = %(declare $spec (bindings $row)).type_from_ast();
     if (!_loaded_scalar(c, type) &&
         !_loaded_aggregate(c, type, initialized)) return;
-    c.ensure_macro_lisp();
     LoadedPath path = {.compiler = c, .descriptions = [], .name = name};
     _loaded_path(
       path, type,

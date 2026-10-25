@@ -185,7 +185,7 @@ static List _parse_params(Compiler c) =>
    a template's `$` type hole or `@` parameter sequence. */
 static int _params_look_typed(Compiler c) {
   Symbol head = c.peek(0);
-  if (c.macro_holes && (head == <$> || head == <@> || head == <"@(">))
+  if (c.macro_holes && (head == <$> || head == <@>))
     return 1;
   if (head.is_builtin_type() || head.is_type_qualifier() ||
       head == <struct> || head == <union> || head == <enum> || head == <void>)

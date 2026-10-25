@@ -54,7 +54,6 @@ static int _build_target(CliRequest request, Array commands) {
      its Scope allocations and canonical values so a manifest dependency is
      reclaimed before the next target starts. */
   Context target = auto Context.open_isolated_named("build target");
-  defer Compiler.reset_macro_library();
   Build b = request.prepare();
   request.cc = target.export(request.cc);
   request.meta_cc = target.export(request.meta_cc);

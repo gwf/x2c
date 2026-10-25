@@ -105,10 +105,8 @@ static Var _run_meta(
   }
   catch %(malformed (category ?category)):
     raise %(malformed (category $category));
-  catch %(call-stack *):
-    $fail.meta_native_call_depth(c, site);
   catch %(?code *detail):
-    c.report_lisp_failure(site, cons(code, detail), meta_call_form.repr());
+    c.report_meta_failure(site, cons(code, detail), meta_call_form.repr());
   return value;
 }
 
@@ -132,9 +130,9 @@ static Var _meta_call_value(Compiler c, List expression, Token site) {
   $fail.meta_native_call_target(c, site);
 }
 
-/* Applies the session's `name` to `arguments`, recorded as the call a
-   failure renders. A compiled function the compiler links is called
-   through its Func. */
+/* Applies the binding of `name` to `arguments`, recorded as the call a
+   failure renders. A compiled function the compiler links runs in the
+   caller's Context. */
 static Var _meta_named_value(
   Compiler c, String name, List arguments, Token site) {
   Var function = _shipped_callee(c, name);
@@ -142,7 +140,23 @@ static Var _meta_named_value(
   meta_call_form = cons(Atom.intern(name), arguments);
   if (function === _linked_module()[name])
     return _apply_linked(function.pointer(), arguments);
-  return c.macro_lisp.apply(function, arguments);
+  return c.apply_meta_binding(name, function, arguments);
+}
+
+/** Calls `function`, the binding of `name`, with `arguments`; what it
+    allocates belongs to the unit's values Scope. A declared native
+    iterator operation called without its destination gets a new Iter
+    there. */
+Var Compiler.apply_meta_binding(
+  Compiler c, String name, Var function, List arguments) {
+  Scope.push(&c.bindings().values);
+  defer Scope.pop();
+  Var signature;
+  if (c.native_meta.try_get(name, signature) &&
+      _iterator_operation(signature) &&
+      arguments.len() == _parameter_count(signature) - 1)
+    arguments = arguments.append(%(${Iter.new()}));
+  return _apply_linked(function.pointer(), arguments);
 }
 
 /* The compiler's linked copy of `name` when shipped code calls it, or
@@ -187,16 +201,15 @@ static Array _meta_values(
   return values;
 }
 
-/* The session's binding of `name`, binding an included native function on
-   first use. The project meta build's own parse has no helper yet, so a
-   call to a project function there is left for the translation. */
+/* The binding of `name`, binding an included native function on first
+   use. The project meta build's own parse has no helper yet, so a call to
+   a project function there is left for the translation. */
 static Var _meta_function(Compiler c, String name, Token site) {
-  c.ensure_macro_lisp();
   Var function = void;
-  if (!c.macro_lisp.try_get(name, function) && _bind_project_meta(c, name))
-    c.macro_lisp.try_get(name, function);
-  if (!c.macro_lisp.try_get(name, function) && c.bind_native_meta(name))
-    c.macro_lisp.try_get(name, function);
+  if (!c.meta_binding(name, function) && _bind_project_meta(c, name))
+    c.meta_binding(name, function);
+  if (!c.meta_binding(name, function) && c.bind_native_meta(name))
+    c.meta_binding(name, function);
   if (function is void && c.meta_build) raise %(meta-later (name $name));
   if (function is void)
     $fail.meta_native_call_binding(c, site, name);

@@ -69,13 +69,10 @@ int Compiler.bind_linked_meta(Compiler c, List fn, Type type) {
   Var function, bound;
   if (!linked.try_get(name, function)) return 0;
   if (!_linked_copy(c, name, linked)) return 0;
-  c.ensure_macro_lisp();
   if (!c.native_meta_accepts(function, c.func_signature(type))) return 0;
-  /* Shared preload keeps private helpers in the native code alone. */
-  if (!(Compiler.library_filling() && fn.cadr().type().is_static()) &&
-      (!c.macro_lisp.try_get(name, bound) || bound != function))
-    c.macro_lisp.set_global(name, function);
-  if (c.meta_reaches_compile_time(fn)) c.record_comptime(name);
+  if (!c.meta_binding(name, bound) || bound != function)
+    c.bindings().set(name, function);
+  if (c.meta_reaches_compile_time(fn)) c.meta_comptime[name] = 1;
   return 1;
 }
 

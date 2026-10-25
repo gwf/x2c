@@ -140,7 +140,6 @@ static void _walk_file(
   /* Keyword aliases are file-local, and every segment parses in the syntax
      the whole file selected. */
   with (c.collection_native = 0,
-        c.declaration_effects = NULL,
         c.kw_aliases = {},
         c.layout = tokenizer.layout) {
     FileWalk w = {
@@ -384,12 +383,6 @@ module List _walk_cold(
   file.configure_package(c.package_source_dirs, canonical);
   file.signature_only = c.signature_only;
   file.filename = c.filename;
-  // Every file the shared session preloads defines its Lisp there.
-  if (Compiler.library_filling()) {
-    file.macro_lisp = c.macro_lisp;
-    file.borrowed_lisp = 1;
-  }
-  else file.evaluated_effects = {};
   /* A fresh file installs its own includes in its own macro state. Only
      active walks cross into that state, to preserve a cycle's prefix. */
   Map own_visited = {};
@@ -461,14 +454,9 @@ String SourceView.resolve_include(
 
 // entries
 
-/* Declaration producers run the syntax builders, which the shared session
-   lacks while `lib/meta.x` is preloading. That walk's entry for a producing
-   file is dropped afterwards, so a later unit walks the file again with the
-   builders. */
+/* Declaration producers select defaults for the file's declarations. */
 static void _add_defaults(FileWalk &w) {
   if (w.c.signature_only || !_produces(w)) return;
-  w.deferred = Compiler.library_filling();
-  if (w.deferred) return;
   Map generated = w.c.select_declaration_defaults(
     w.path, w.globs, w.parts, w.definitions, w.statics);
   if (w.unit && generated) _publish_unit_statics(w.statics, generated, w.path);
@@ -488,7 +476,7 @@ static void _queue_public_bodies(FileWalk &w) {
     foreach (Var key in part.map().keys())
       match (key) case %("function-inline" ?): exposed = 1;
   if (!exposed) return;
-  if (Compiler.library_filling() || w.c.meta_build) {
+  if (w.c.meta_build) {
     w.deferred = 1;
     return;
   }

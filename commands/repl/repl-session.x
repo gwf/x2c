@@ -690,7 +690,7 @@ static ReplResult _submit(ReplSession session, String source) {
           Var bound;
           if (name in names)
             $refusal.function.redefined();
-          if (!c.macro_lisp.try_get(name, bound))
+          if (!repl_native_binding(c, session.evaluator, name, bound))
             $refusal.function.missing(name);
           session.evaluator.set_global(name, bound);
           transaction.commit_transient();

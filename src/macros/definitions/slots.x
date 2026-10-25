@@ -2,11 +2,12 @@
 
 /* template holes
 
-   A named hole, Lisp slot, or computed call fills a syntax role. `$` inserts
+   A named hole or computed call fills a syntax role. `$` inserts
    one value and `@` splices a sequence. The first role an untyped hole fills
    gives it its kind. */
 
-/** Parses a macro hole or Lisp slot for `role` while reading a template.
+/** Parses a macro hole or meta call slot for `role` while reading a
+    template.
     Returns role-shaped syntax containing `(macro-bind ...)` or
     `(macro-slot ...)`, or NULL when ordinary grammar owns the current tokens;
     successful parsing advances the cursor.
@@ -20,8 +21,7 @@ List Compiler.try_parse_macro_slot(Compiler c, Symbol role) {
       c.peek(0) == <$> && _scan_name(c, name).type == <(> &&
       !c.peek_macro_hole() && !_peek_invocation(c, _slot_position(role)))
     return _meta_call_slot(c, role);
-  if (c.peek(0) == <"$("> || c.peek(0) == <"@(">)
-    return _lisp_slot(c, role);
+  if (c.peek(0) == <"$("> || c.peek(0) == <"@(">) return c.reject_lisp_form();
   return _hole_slot(c, role);
 }
 
@@ -42,21 +42,6 @@ static List _meta_call_slot(Compiler c, Symbol role) {
 /* A result macro keeps the ordinary position's kind and decorator rules. */
 static Symbol _slot_position(Symbol role) =>
   role in %<<unit block field enumerator map-entry>> ? role : <expression>;
-
-/* A Lisp slot fills a declaration slot only when @ splices it. A block
-   item that continues into a declaration, and a statement, keep the
-   ordinary grammar. */
-static List _lisp_slot(Compiler c, Symbol role) {
-  int splice = c.peek(0) == <"@(">;
-  if (splice && !(role in sequence_roles))
-    $fail.macros_splice_position(c, c.token);
-  if (role in declaration_roles && !splice) return NULL;
-  if (!splice && role == <block> && c.macro_lisp_starts_declaration())
-    return NULL;
-  if (role == <statement>) return NULL;
-  if (role == <expression>) return c.parse_macro_lisp_expression();
-  return _parse_lisp_slot(c, role);
-}
 
 /* A hole fills a slot whose role its kind accepts. A sequence hole of no
    kind takes the slot's kind. */
@@ -174,18 +159,15 @@ static int _kind_accepts_role(Symbol kind, Symbol role) {
      (kind == <decl> || kind == <function> || kind == <named-type>));
 }
 
-/** Returns whether tokens after a Lisp form or explicit meta call continue
-    a declaration. The balanced argument group is inspected without moving
+/** Returns whether tokens after an explicit meta call continue a
+    declaration. The balanced argument group is inspected without moving
     the compiler cursor; a visible source macro retains its own grammar.
 */
-int Compiler.macro_lisp_starts_declaration(Compiler c) {
-  Token opening = c.token;
-  if (opening.type == <$>) {
-    if (_peek_invocation(c, <expression>)) return 0;
-    String name;
-    opening = _scan_name(c, name);
-    if (opening.type != <(>) return 0;
-  }
+int Compiler.meta_call_starts_declaration(Compiler c) {
+  if (c.peek(0) != <$> || _peek_invocation(c, <expression>)) return 0;
+  String name;
+  Token opening = _scan_name(c, name);
+  if (opening.type != <(>) return 0;
   Token token = opening.after_group();
   return token.type == <$> || token.type == <ident> ||
          token.type == <*> || token.type == <(>;
@@ -203,52 +185,4 @@ List Compiler.try_parse_macro_member(Compiler c) {
       hole.assoc(<sequence>).int())
     return slot;
   return %(macro-bind ${_hole_key(hole, "member")});
-}
-
-/* A Lisp slot carries its form and the construction binders its Unit holes
-   need. A slot inside a Unit decorator also carries the target's. */
-static List _parse_lisp_slot(Compiler c, Symbol role) {
-  int sequence = c.peek(0) == <"@(">;
-  String form = _lisp_form(c);
-  Var target = c.macro_holes[%(target)];
-  List construction = _lisp_construction(c, form);
-  if (target is <list>) {
-    Var required = _hole_key(target, "construction");
-    if (role == <name>)
-      construction = construction.append(%((target $required)));
-    else if (role == <unit>) construction = construction.append(%($required));
-  }
-  return %(
-    macro-slot $sequence $form
-    @construction
-  );
-}
-
-/* The construction binder of each Unit hole the form names, once each. */
-static List _lisp_construction(Compiler c, String form) {
-  Tokenizer tokenizer = Tokenizer.new(form, <macro-lisp>);
-  tokenizer.scan();
-  Array construction = [];
-  Map seen = {};
-  Token token = tokenizer.next();
-  while (token && token.type != <eof>) {
-    if (token.type == <$>) {
-      Token name = tokenizer.next();
-      if (name && name.type == <ident>)
-        _unit_construction(c, name, construction, seen);
-      token = name;
-    }
-    token = tokenizer.next();
-  }
-  return construction.list_free();
-}
-
-static void _unit_construction(
-  Compiler c, Token name, Array construction, Map seen) {
-  List hole = _hole_record(c, Atom.intern(name.text));
-  if (!hole || hole.assoc(<kind>) != <unit>) return;
-  Var binder = _hole_key(hole, "construction");
-  if (binder in seen) return;
-  seen[binder] = 1;
-  construction.push(binder);
 }

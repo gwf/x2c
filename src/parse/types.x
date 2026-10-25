@@ -539,7 +539,7 @@ static List _template_enumerator(Compiler c, Type context) {
 
 static List _enumerator_name(Compiler c, Type context) {
   switch (c.peek(0)) {
-    case <"$(">: case <$>: return c.try_parse_macro_slot(<name>);
+    case <$>: return c.try_parse_macro_slot(<name>);
     case <ident>: {
       String spelling = c.token.text;
       c.next();

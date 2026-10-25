@@ -4,7 +4,7 @@
 void Compiler.shallow_parse(Compiler c, Map globals) {
   c.macros = {};
   c.kw_aliases = {};
-  c.import_stack.clear();
+  c.binding_rows = c.binding_sealed = NULL;
   c.sym.reset(globals);
   _shallow_parse_loop(c);
   _check_unmatched_braces(c);
@@ -23,12 +23,12 @@ void Compiler.shallow_parse_overlay(Compiler c, Map base, Map overlay) {
   c.open_linkage += c.braces.len();
 }
 
-// A unit with no macros yet starts its macro, keyword, and import state.
+/* A unit with no macros yet starts its macro and keyword state, and the
+   Lisp binding groups that state records. */
 static void _start_macros(Compiler c) {
   c.macros = {};
   if (c.kw_aliases == NULL) c.kw_aliases = {};
-  c.imports = {};
-  c.import_stack.clear();
+  c.binding_rows = c.binding_sealed = NULL;
 }
 
 static void _shallow_parse_loop(Compiler c) {

@@ -184,8 +184,6 @@ typedef struct Compiler {
   int macro_application;
   List lambda_scopes;
   Array match_types;
-  // Import path -> declared alias map, or 1 when no aliases need replay.
-  Map imports;
   /* While the full parse runs, the effects each file the unit includes
      delivers at its include line, by the file's canonical path. */
   Map included_effects;
@@ -267,7 +265,7 @@ typedef struct Compiler {
   int local_macro_capture_scopes;
   // Linkage groups that earlier segments of the collected file left open.
   int open_linkage;
-  String fn_name, Diagnostics diagnostics, Array braces, import_stack;
+  String fn_name, Diagnostics diagnostics, Array braces;
   /* The `Ancestor` rows of the syntax being parsed, innermost last, and
      the code placed after a block item or initialized declarator, each
      `(depth binding result code)`: the item's row index, the declarator's

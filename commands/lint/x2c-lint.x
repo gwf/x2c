@@ -148,7 +148,6 @@ int main(int argc, char **argv):
   request.include_dirs = options["I"]
   Frontend frontend = Frontend.new(request)
   frontend.preprocessor_errors = _preprocessor_errors
-  if !frontend.preload_macro_libraries(): return 1
   try frontend.prepare_meta(inputs)
   catch %((!or not-found io-fail) *detail):
     _input_error(detail)

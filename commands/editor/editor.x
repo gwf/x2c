@@ -132,7 +132,6 @@ static int _native_cpp(CliRequest request) =>
    read is unsaved. */
 static int _serve(Query &q, CliRequest request) {
   Frontend frontend = Frontend.new(request);
-  if (!frontend.preload_macro_libraries()) return 2;
   frontend.prepare_meta(%(${q.source}));
   Context command = Context.open_isolated_named("editor request");
   defer command.close();

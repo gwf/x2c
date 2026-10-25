@@ -28,9 +28,8 @@ macro Stmt $set_fields(Expr $to, Expr $value, Name @fields) {
   @_x2c_field_sets($to, $value, $fields)
 }
 
-/* The macro, import, keyword, and Lisp state a segment takes from its
-   owner and returns to it. */
+/* The macro, keyword, and binding state a segment takes from its owner
+   and returns to it. */
 macro Stmt $segment_state(Expr $to, Expr $from) {
-  $copy_fields($to, $from, macros, object_macros, imports, kw_aliases,
-               macro_lisp, declaration_effects, evaluated_effects);
+  $copy_fields($to, $from, macros, object_macros, kw_aliases, meta_bindings);
 }

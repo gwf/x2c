@@ -173,8 +173,6 @@ int Compiler.test_declaration(Compiler c) => _test_declaration_start(c, 0);
 static int _test_declaration_start(
   Compiler c, int require_declarator) {
   Symbol sym = c.peek(0);
-  if (c.macro_holes && sym == <"$(">)
-    return c.macro_lisp_starts_declaration();
   if (c.macro_holes && sym == <$>) return _hole_starts(c);
   if (sym.is_storage_class() || sym.is_type_qualifier() ||
       sym.is_builtin_type() || sym == <inline>) return 1;
@@ -194,12 +192,11 @@ static int _test_declaration_start(
    that a name follows. */
 static int _hole_starts(Compiler c) {
   List hole = c.peek_macro_hole();
-  if (!hole) return c.macro_lisp_starts_declaration();
+  if (!hole) return c.meta_call_starts_declaration();
   Symbol kind = hole.assoc(<kind>);
   if (kind) return kind == <type>;
   Symbol next = c.after_hole().type;
-  return next == <ident> || next == <$> || next == <@> ||
-         next == <"$("> || next == <"@(">;
+  return next == <ident> || next == <$> || next == <@>;
 }
 
 /* An identifier that names no object starts a declaration when the token

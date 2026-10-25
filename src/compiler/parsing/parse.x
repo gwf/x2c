@@ -35,7 +35,6 @@ static void _reset_parse(Compiler c, Map globs, int generated) {
   c.meta_regions = {};
   c.native_meta = {};
   c.project_meta = {};
-  c.inherit_library_comptime();
   c.init_tokens = {};
   c.static_init_deps = {};
   c.origin = 0;
@@ -53,12 +52,11 @@ static void _reset_parse(Compiler c, Map globs, int generated) {
 static void _reset_macros(Compiler c) {
   c.macros = {};
   c.kw_aliases = {};
+  c.binding_rows = c.binding_sealed = NULL;
   c.rewrite_rules = NULL;
   c.active_rewrites = NULL;
   c.prepared_rewrites = NULL;
   c.install_builtin_macros();
-  if (!c.declaration_produced) c.imports = {};
-  c.import_stack.clear();
   c.macro_count = 0;
   c.macro_stack = NULL;
   c.source_private = 0;

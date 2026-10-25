@@ -3,6 +3,64 @@
     Copyright (c) 2026 Gary William Flake.
 */
 
+/* the binding table
+
+   A unit's compile-time callables by name: stubs, staged group functions,
+   and the targets bound on first use. The record, its Map, and moved stubs
+   live in `scope`; what their calls allocate lives in `values`, which goes
+   first. */
+struct MetaBindings {
+  Scope scope, values;
+  Map functions;
+};
+
+/** Creates an empty table in Scopes of its own, so creating it under a
+    narrower Context leaves nothing there. */
+MetaBindings MetaBindings.new(void) {
+  Scope scope = Scope.new_named("meta bindings");
+  MetaBindings b = Scope.calloc_in(&scope, 1, sizeof(struct MetaBindings));
+  b.scope = scope;
+  b.values = Scope.new_named("meta values");
+  auto (&b.scope) b.functions = {};
+  return b;
+}
+
+/** Destroys the table's values, then the table. */
+void MetaBindings.destroy(MetaBindings b) {
+  if (!b) return;
+  Scope.destroy(b.values);
+  Scope.destroy(b.scope);
+}
+
+/** Writes the binding of `name` to `out` and returns 1, or returns 0. */
+int MetaBindings.try_get(MetaBindings b, String name, Var &out) =>
+  b.functions.try_get(Atom.intern(name), out);
+
+/** Binds `name` to `function`, which the table borrows. */
+void MetaBindings.set(MetaBindings b, String name, Var function) {
+  auto (&b.scope) b.functions[Atom.intern(name)] = function;
+}
+
+/** Binds `name` to `function` and moves its storage into the table. */
+void MetaBindings.bind(MetaBindings b, String name, Func function) {
+  function.move(&b.scope);
+  b.set(name, function);
+}
+
+/** Returns the unit's binding table, creating it on first use. */
+MetaBindings Compiler.bindings(Compiler c) {
+  if (!c.meta_bindings) c.meta_bindings = MetaBindings.new();
+  return c.meta_bindings;
+}
+
+/** Writes the callable compile-time code reaches as `name` to `out`: the
+    unit's binding, or else a built-in algorithm or one of the compiler's
+    own operations. Returns whether there is one. */
+int Compiler.meta_binding(Compiler c, String name, Var &out) =>
+  c.bindings().try_get(name, out) ||
+  Compiler.builtin_module().try_get(name, out) ||
+  Compiler.compiler_targets().try_get(name, out);
+
 /* native meta functions
 
    A bodyless `meta` prototype declares a native function compile-time code
@@ -57,7 +115,7 @@ void Compiler.install_native_meta_effects(Compiler c, Map globs) {
 }
 
 /** Binds an included native `meta` function the first time compile-time
-    code calls `name`. Returns whether the macro session now binds it. A
+    code calls `name`. Returns whether the unit now binds it. A
     declaration-producing macro can call one during collection, before
     the parse installs the advertisements, so the first lookup there
     installs the ones visible so far. */
@@ -68,7 +126,7 @@ int Compiler.bind_native_meta(Compiler c, String name) {
     c.install_native_meta_effects(c.sym.unit_symbols());
   if (!c.native_meta.try_get(name, signature)) return 0;
   _bind_native_meta(c, name, signature, NULL);
-  return c.macro_lisp.try_get(name, bound);
+  return c.meta_binding(name, bound);
 }
 
 /** Installs a prototype-only `meta` function from the compiler's trusted
@@ -78,7 +136,6 @@ void Compiler.install_native_meta_function(
   Compiler c, List declaration, Token marker) {
   Type type = declaration.type_from_ast().canonicalize();
   String name = _native_meta_name(c, declaration, marker);
-  c.ensure_macro_lisp();
   List signature = c.func_signature(type);
   if (_bind_project_meta(c, name)) return;
   c.native_meta[name] = signature;
@@ -90,7 +147,6 @@ void Compiler.install_native_meta_function(
    define the target. */
 static typedef struct NativeBinding {
   Compiler c, String name, target, List signature, suppliers, Token marker;
-  int iterator;
 } NativeBinding;
 
 /* Binds a declared native function to the compiler's own linked target of
@@ -100,38 +156,30 @@ static typedef struct NativeBinding {
 static void _bind_native_meta(
   Compiler c, String name, List signature, Token marker) {
   _certify_native_meta(c, name, signature, marker);
-  int iterator = _iterator_operation(signature);
-  String target = iterator ? %"${name}_into" : name;
+  String target = _iterator_operation(signature) ? %"${name}_into" : name;
   NativeBinding n = {
     .c = c, .name = name, .target = target, .signature = signature,
-    .suppliers = _native_module_suppliers(target), .marker = marker,
-    .iterator = iterator};
-  Var bound, function;
-  int present = c.macro_lisp.try_get(name, bound);
-  if (present && !iterator) function = bound;
-  else {
-    try function = _linked(n);
-    catch %(no-symbol *): {
-      /* Staged code that calls it cannot link; the call reports why. */
-      if (!n.suppliers) {
-        c.meta_group_bound[%"<unbound $name>"] = 1;
-        return;
-      }
-      function = _module_target(n);
+    .suppliers = _native_module_suppliers(target), .marker = marker};
+  Var function;
+  int present = c.meta_binding(name, function);
+  if (!present && !_linked(n, function)) {
+    /* Staged code that calls it cannot link; the call reports why. */
+    if (!n.suppliers) {
+      c.meta_group_bound[%"<unbound $name>"] = 1;
+      return;
     }
+    function = _module_target(n);
   }
   _check(n, function);
-  if (!present) _install(n, function);
+  if (!present) c.bindings().set(name, function);
 }
 
-/* The compiler's built-in target takes precedence over loaded modules. */
-static Var _linked(NativeBinding &n) {
-  Compiler c = n.c;
-  Var function = c.macro_lisp.eval(
-    %(bind ${n.target} (quote ${n.signature})));
+/* The compiler's own runtime target takes precedence over loaded modules. */
+static int _linked(NativeBinding &n, Var &function) {
+  if (!Compiler.native_targets().try_get(n.target, function)) return 0;
   if (n.suppliers)
-    $warn.meta_native_function_hidden(c, n.marker, n);
-  return function;
+    $warn.meta_native_function_hidden(n.c, n.marker, n);
+  return 1;
 }
 
 static Var _module_target(NativeBinding &n) {
@@ -156,18 +204,6 @@ static void _meta_native_warn_duplicate(
     <native>, "more than one native module defines this function",
     site, %("name: ${n.name}" "supplied by: ${suppliers.car()}"
             "also defined by: ${", ".join(suppliers.cdr())}"));
-}
-
-/* An iterator operation binds through a call that allocates the
-   destination a call omits. */
-static void _install(NativeBinding &n, Var function) {
-  Compiler c = n.c;
-  if (n.iterator) {
-    int arity = n.signature.car().list().cadr().list().len() - 1;
-    function = c.macro_lisp.eval(
-      %(C.iterator.call (quote $function) $arity));
-  }
-  c.macro_lisp.set_global(n.name, function);
 }
 
 /** Answers whether the native target `function` matches the declared
@@ -218,7 +254,7 @@ String Compiler.native_meta_module(Compiler c, String name, Type &type) {
   if (!path.startswith("/")) return NULL;
   Var target = ((Map) native_modules[path])[name];
   Var bound;
-  if (!c.macro_lisp.try_get(name, bound) || bound != target) return NULL;
+  if (!c.meta_binding(name, bound) || bound != target) return NULL;
   type = ((Func) target.pointer()).signature();
   return path;
 }
@@ -371,11 +407,15 @@ static int _takes_callback(List signature) {
 }
 
 /* An iterator operation takes its destination last. Its native target is
-   `NAME_into`, and compile-time code calls it through `NAME`, which
-   allocates the destination when a call omits it. */
-static int _iterator_operation(List signature) {
+   `NAME_into`, and a compile-time call of `NAME` that omits the
+   destination gets one at the call. */
+module int _iterator_operation(List signature) {
   match (signature)
     case %((func ?(List parameters)) "Iter"):
       return parameters && parameters.last() == %("Iter");
   return 0;
 }
+
+/* The number of parameters a signature declares. */
+module int _parameter_count(List signature) =>
+  signature.car().list().cadr().list().len();

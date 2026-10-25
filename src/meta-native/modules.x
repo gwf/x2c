@@ -38,7 +38,30 @@ static Map _compiler_targets(void) => $compiler.targets();
     request selects first. */
 Map Compiler.compiler_targets(void) {
   _load_compiler_module();
-  return _compiler_targets();
+  return native_modules[compiler_supplier];
+}
+
+/* The built-in algorithms and the runtime targets the compiler links are
+   native modules no request selects, loaded on first use. */
+static String builtin_supplier = "<builtin>", runtime_supplier = "<runtime>";
+
+static Map _runtime_targets(void) =>
+  $_x2c_target_map($_x2c_native_rows(<runtime>, %(), %()));
+
+/** Returns the built-in algorithms by the names compile-time code calls. */
+Map Compiler.builtin_module(void) {
+  if (!_native_module_loaded(builtin_supplier))
+    _add_native_module(builtin_supplier, Compiler.builtin_targets);
+  return native_modules[builtin_supplier];
+}
+
+/** Returns the runtime functions the compiler links that `meta`
+    prototypes advertise, by target name, including those that take a
+    callback. */
+Map Compiler.native_targets(void) {
+  if (!_native_module_loaded(runtime_supplier))
+    _add_native_module(runtime_supplier, _runtime_targets);
+  return native_modules[runtime_supplier];
 }
 
 static void _load_compiler_module(void) {

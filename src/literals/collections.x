@@ -129,8 +129,7 @@ List Compiler.parse_array_literal(Compiler c) {
 static List _parse_array_element(Compiler c) {
   List slot = c.try_parse_macro_slot(<argument>);
   if (slot) return slot;
-  if (c.peek(0) == <"${"> && c.token.len == 2 &&
-      (c.peek(1) == <@> || c.peek(1) == <"@(">)) {
+  if (c.peek(0) == <"${"> && c.token.len == 2 && c.peek(1) == <@>) {
     c.next();
     slot = c.try_parse_macro_slot(<argument>);
     c.expect(<"}">);

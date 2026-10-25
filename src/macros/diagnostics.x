@@ -109,7 +109,7 @@ static macro Stmt $fail.macros_hole_untyped(
   Expr $c, Expr $origin, Expr $hole_spelling) =>
   $c.report_error(
     <parse>, %"macro hole '${$hole_spelling}' has no inferred kind",
-    $origin, %("annotate holes used only by compile-time Lisp"));
+    $origin, %("annotate holes the template does not use"));
 
 static macro Stmt $fail.macros_hole_unknown_kind(
   Expr $c, Expr $site, Expr $spelling) =>
@@ -274,10 +274,10 @@ static macro Stmt $fail.macros_macro_pattern_arity(
     %"macro pattern '${$name}' takes ${$expected} argument patterns",
     $origin, NULL);
 
-static macro Stmt $fail.macros_lisp_unclosed(Expr $c, Expr $origin) =>
+static macro Stmt $fail.macros_lisp_removed(Expr $c, Expr $origin) =>
   $c.report_error(
-    <parse>, "unterminated compile-time Lisp form",
-    $origin, NULL);
+    <parse>, "compile-time Lisp forms are not supported", $origin,
+    %("call a meta function as $name(...) or splice one as @name(...)"));
 
 static macro Stmt $fail.macros_meta_expr(
   Expr $c, Expr $origin, Expr $value) =>
@@ -289,44 +289,17 @@ static macro Stmt $fail.macros_type_name(
   Expr $c, Expr $origin, Expr $message) =>
   $c.report_error(<macro>, $message, $origin, NULL);
 
-static macro Stmt $fail.macros_import_cycle(
-  Expr $c, Expr $origin, Expr $path) {
-  {
-    String display = $c.display_path($path);
-    Array notes = [ %"import: $display" ];
-    Array parents = $c.import_stack;
-    for (int i = 0; i < parents.len(); i++) {
-      Var parent = parents[i];
-      notes.push(%"from: ${$c.display_path(parent)}");
-    }
-    $c.report_error(
-      <macro>, "compile-time import cycle", $origin, notes.list_free());
-  }
-}
-
-static macro Stmt $fail.macros_import_extension(
-  Expr $c, Expr $origin, Expr $path_note) =>
-  $c.report_error(
-    <macro>, "compile-time import requires .xlisp",
-    $origin, $path_note);
-
 static macro Stmt $fail.macros_placement(Expr $c, Expr $site, Expr $where) =>
   $c.report_error(
     <macro>, "unknown placement", $site, %("where: ${$where.repr()}"));
 
-static macro Stmt $fail.macros_builtin_form(Expr $c, Expr $site) =>
-  $c.report_error(
-    <macro>, "unexpected form in built-in macro source",
-    $site, NULL);
-
-static macro Stmt $fail.macros_lisp_failed(
+static macro Stmt $fail.macros_meta_failed(
   Expr $c, Expr $origin, Expr $source, Expr $error) {
   {
     String form_note = %"form: ${$source}",
       error_note = %"error: ${$error.repr()}";
     $c.report_error(
-      <macro>, "compile-time Lisp evaluation failed", $origin,
-      %($form_note $error_note));
+      <macro>, "meta call failed", $origin, %($form_note $error_note));
   }
 }
 
@@ -352,15 +325,18 @@ module String _definition_note(List definition) {
   return %"definition: $file:$line:$column";
 }
 
-/** Reports that the compile-time Lisp `source` failed with `error` at
+/** Reports that the meta call `source` failed with `error` at
     `invocation`. */
-void Compiler.report_lisp_failure(
+void Compiler.report_meta_failure(
   Compiler c, Token invocation, List error, String source) {
-  $fail.macros_lisp_failed(c, invocation, source, error);
+  $fail.macros_meta_failed(c, invocation, source, error);
 }
 
-module List _path_note(Compiler c, String path) =>
-  %("path: ${c.display_path(path)}");
+/** Reports the compile-time Lisp form at the cursor, which x2c no longer
+    evaluates. */
+List Compiler.reject_lisp_form(Compiler c) {
+  $fail.macros_lisp_removed(c, c.token);
+}
 
 /* A template names a hole, projection, or replacement variable that it
    does not bind. */

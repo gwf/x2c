@@ -221,7 +221,7 @@ static void _retained_results(ReplSession s) {
     fputs("named inspection lost typed AST or native execution\n", stderr);
     failures++;
   }
-  $lisp.bind(s.compiler.macro_lisp, "inspection_native", _inspection_native);
+  s.compiler.bindings().set("inspection_native", (Func) _inspection_native);
   _expect(s, "meta int inspection_native(int n);", <defined>, void);
   if (s.function_info("wide") !=
       "long wide(void);\nsource: prompt\nexecution: native" ||
@@ -320,16 +320,12 @@ static void _interpreter_ownership(ReplSession s) {
     <defined>, void);
   _expect(s, "trouble();", <value>, 3);
   Var value;
-  if (s.compiler.macro_lisp.try_get("C.globals", value) ||
-      s.compiler.macro_lisp.try_get("wide", value)) {
-    fputs("interpreter definitions leaked into compiler Lisp\n", stderr);
-    failures++;
-  }
-  s.compiler.macro_lisp.set_global("__isolation", 41);
   s.evaluator.set_global("__isolation", 7);
-  if (s.compiler.macro_lisp.eval_string("__isolation") != 41 ||
+  if (s.compiler.meta_binding("C.globals", value) ||
+      s.compiler.meta_binding("wide", value) ||
+      s.compiler.meta_binding("__isolation", value) ||
       s.evaluator.eval_string("__isolation") != 7) {
-    fputs("interpreter and compiler globals are shared\n", stderr);
+    fputs("interpreter definitions leaked into compiler bindings\n", stderr);
     failures++;
   }
   _expect(s,
@@ -821,14 +817,6 @@ int main(int argc, char **argv) {
   CliRequest request = xcalloc(1, sizeof(struct CliRequest));
   request.command = <translate>;
   Frontend frontend = Frontend.new(request);
-  if (!frontend.preload_macro_libraries()) return 1;
-  Compiler compiler = Compiler.new();
-  Map definitions = compiler.shared_definitions();
-  if (!frontend.preload_macro_libraries() || definitions == NULL ||
-      (void *) definitions != (void *) compiler.shared_definitions()) {
-    fputs("second preload discarded shared definitions\n", stderr);
-    return 1;
-  }
   size_t baseline = 0, growth = 0;
   size_t scopes = Scope.stats().live_scopes, scope_growth = 0;
   for (int phase = 0; phase < 2; phase++) {
