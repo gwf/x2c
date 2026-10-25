@@ -1,7 +1,9 @@
 #include "x2c.x"
 
+meta static List protocol_rows(void) => %((protocol bogus));
+
 macro Stmt $bad() {
-  @(quote ((protocol bogus)))
+  @protocol_rows()
 }
 
 static void use_bad(void) {

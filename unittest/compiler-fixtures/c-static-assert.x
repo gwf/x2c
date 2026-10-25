@@ -6,9 +6,13 @@ macro Unit $check_width(Expr $condition) {
   _Static_assert($condition, "macro width");
 }
 
+meta static List constructed_assert(List condition) {
+  return %((c-assert ${condition}
+    (expr (* char) (literal (* char) "\"constructed width\""))));
+}
+
 macro Unit $constructed_check(Expr $condition) {
-  @(list (list 'c-assert $condition
-     '(expr (* char) (literal (* char) "\"constructed width\""))))
+  @constructed_assert($condition)
 }
 
 $check_width(sizeof(long) >= sizeof(int));

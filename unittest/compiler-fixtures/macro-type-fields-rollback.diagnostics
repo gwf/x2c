@@ -1,4 +1,4 @@
-unittest/compiler-fixtures/macro-type-fields-rollback.x:10:1: parse: expected syntax
+unittest/compiler-fixtures/macro-type-fields-rollback.x:12:1: parse: expected syntax
   $broken_fields();
   ^
 

@@ -1,7 +1,9 @@
 #include "x2c.x"
 
+meta static List bogus_rows(void) => %((bogus 42));
+
 macro Unit $malformed() {
-  @(quote ((bogus 42)))
+  @bogus_rows()
 }
 
 $malformed();

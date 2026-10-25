@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/macro-map-entry-invalid-syntax.x:9:19: parse: expected syntax
+  Map values = %{ ${$invalid_rows()} };
+                    ^
+

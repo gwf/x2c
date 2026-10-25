@@ -1,4 +1,4 @@
-unittest/compiler-fixtures/macro-unit-malformed-node.x:7:1: parse: syntax cannot be constructed at this position
+unittest/compiler-fixtures/macro-unit-malformed-node.x:9:1: parse: syntax cannot be constructed at this position
   $malformed();
   ^
 

@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/macro-enumerator-invalid-syntax.x:10:3: parse: expected syntax
+    $invalid_enumerator_rows()
+    ^
+
