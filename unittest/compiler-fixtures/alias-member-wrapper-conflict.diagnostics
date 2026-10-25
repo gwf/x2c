@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/alias-member-wrapper-conflict.x:7:5: parse: declaration 'size' is already bound
+      alias 6 as size;
+      ^^^^^
+  note: prior binding: 'size'
+

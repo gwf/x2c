@@ -2,7 +2,7 @@
 
 > Status: active
 > Local work authorized by Gary on 2026-10-24, starting at `9e68d6b`.
-> Preserve canonical Lists, the REPL, and runtime Lisp. No pushes or PRs.
+> Preserve canonical Lists, the REPL, and runtime Lisp.
 > Reconciled with predecessor PR #285 at `5f7274f978b7749e5d2d9cad1b218ea99277ea2b`.
 > Gary authorized local replay and combined validation on 2026-10-24.
 > The independent source changes are replayed on `5f7274f` in
@@ -12,9 +12,26 @@
 > locally. All selected changes remain unpublished.
 > The two compiler-owned Func inventory wrappers are implemented locally;
 > signature, identity, lifetime, initialization, and full local checks pass.
-> Harder cases remain deferred. No push, PR, or publication is authorized.
+> Gary now authorizes a draft GitHub PR for the completed batch. Push only
+> its work branch; keep further exploration local. No dev/main push or merge
+> is authorized. Harder cases remain deferred.
 
 ## Result and boundaries
+
+PR preparation integrates current dev `c70fe7b14` locally. Its additional
+alias-scope repair merges cleanly and introduces no further Lisp use.
+Regenerate and validate the combined tree before publishing the draft work
+branch. The prior local validation tables retain their recorded revisions;
+the PR records final validation and the advisory performance comparison.
+
+Stop this cleanup batch here. Remaining active dependencies are the shared
+compile-time environment, ordinary callable binding/application, early
+built-in dispatch, delayed class recipes, native bind/iterator adaptation,
+private target/hash/SymbolSet generation, and the retained runtime/REPL.
+The reader is already session-free. Public `$lisp.bind`, the C-only forward
+declaration boundary, and module extraction stay unchanged. No further small
+behavior-preserving conversion is selected. Earlier local-only restrictions
+below record the authorization in effect for those completed stages.
 
 Follow [PR #285](https://github.com/gwf/x2c/pull/285), which owns the
 straightforward source conversions, with the independent reader and linked
