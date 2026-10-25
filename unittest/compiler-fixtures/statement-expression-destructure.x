@@ -3,10 +3,10 @@
 typedef List Values;
 static int calls, cleanups;
 
-macro Expression $wrapped(Expr $value) =>
-  $(list 'expr '() (list 'parens
-    (list 'at 'm-origin (list 'at 'm-origin
-      (list 'block (list 'stmnt $value))))));
+meta static List wrapped_of(List value) =>
+  %(expr () (parens (at m-origin (at m-origin (block (stmnt $value))))));
+
+macro Expression $wrapped(Expr $value) => $wrapped_of($value);
 
 static Values once(Values values) {
   calls++;

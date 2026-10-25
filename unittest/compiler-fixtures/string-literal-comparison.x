@@ -8,8 +8,9 @@ static String counted(void) {
   return "hello, world";
 }
 
-macro Expression $raw_hello() =>
-  $(quote (expr (* char) (literal (* char) "\"hello, world\"")));
+meta static List raw_hello_syntax(void) =>
+  %(expr (* char) (literal (* char) "\"hello, world\""));
+macro Expression $raw_hello() => $raw_hello_syntax();
 
 int main(void) {
   String built = %"hello" + %", world", empty = "";

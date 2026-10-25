@@ -4,9 +4,10 @@
 /* A statement expression in a template: its local is renamed. */
 macro Expression $plus_one(Expr $value) => ({ int t = $value; t + 1; });
 
-/* Lisp-built syntax binds and takes its final statement's type. */
-macro Expression $wrapped(Expr $value) =>
-  $(list 'expr '() (list 'parens (list 'block (list 'stmnt $value))));
+/* Constructed syntax binds and takes its final statement's type. */
+meta static List wrapped_of(List value) =>
+  %(expr () (parens (block (stmnt $value))));
+macro Expression $wrapped(Expr $value) => $wrapped_of($value);
 
 /* A return leaving a statement expression runs the cleanup it leaves. */
 static int early(int bad) {
@@ -54,13 +55,13 @@ int main(void) {
   Var boxed = ({ Var v = 4; v; });
   Var converted = ({ 5; });
   int nested = ({ int y = ({ int z = 5; z + 1; }); y * 2; });
-  Var lisp = $wrapped(7);
+  Var built = $wrapped(7);
   Map map = ({a: 1});
   int brace = ({1});
   ({ printf("statement %d\n", area); });
   printf("%d %s %s %s %s %d\n", area, name, raw, boxed.repr(),
          converted.repr(), nested);
-  printf("%d %d %s %d %d\n", $plus_one(41), t, lisp.repr(), map.len(),
+  printf("%d %d %s %d %d\n", $plus_one(41), t, built.repr(), map.len(),
          brace);
   int kept = early(0), left = early(1);
   int initialized = caught_initializer();

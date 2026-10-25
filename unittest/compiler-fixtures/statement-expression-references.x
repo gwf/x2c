@@ -1,7 +1,9 @@
 #include "x2c.x"
 
-macro Expression $wrapped(Expr $value) =>
-  $(list 'expr '() (list 'parens (list 'block (list 'stmnt $value))));
+meta static List wrapped_of(List value) =>
+  %(expr () (parens (block (stmnt $value))));
+
+macro Expression $wrapped(Expr $value) => $wrapped_of($value);
 
 static int required(int &value) => ({ value; });
 
