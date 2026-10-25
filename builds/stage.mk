@@ -218,8 +218,12 @@ $(BIN_BUILD)/%.o: $(BIN_BUILD)/%.c | $(LIB_H_FILES) $(LIB_BUILD)/.module-headers
 	$(CC) $(CFLAGS) -iquote $(LIB_BUILD) -iquote $(BIN_BUILD) \
 		-MMD -MP -MF $(BIN_BUILD)/$*.c.d -MT $@ -c $< -o $@
 # link binary executable
+# The compiler links every runtime object but the Lisp interpreter and its
+# target table, keeping the export flags; commands link the whole archive.
+COMPILER_RUNTIME = $(filter-out $(LIB_BUILD)/lisp.o $(LIB_BUILD)/lisp-targets.o,$(LIB_OBJECTS))
 $(BINARY): $(BIN_OBJECTS) $(LIBRARY)
-	$(CC) $(BIN_OBJECTS) -L. $(LDFLAGS) -lm -o $(BINARY)
+	$(CC) $(BIN_OBJECTS) $(COMPILER_RUNTIME) \
+	  $(filter-out $(RUNTIME_LINK),$(LDFLAGS)) -lm -o $(BINARY)
 ###############################################################################
 # The build command cannot build itself. Translate it with this stage's newly
 # linked compiler, then use the same native flags and archives as the driver.
