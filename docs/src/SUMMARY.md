@@ -65,6 +65,7 @@
     - [lib/iter.x](library/modules/iter.md)
     - [lib/json.x](library/modules/json.md)
     - [lib/lib.x](library/modules/lib.md)
+    - [lib/lisp-bindings.x](library/modules/lisp-bindings.md)
     - [lib/lisp/lisp.x](library/modules/lisp.md)
     - [lib/list-selectors.x](library/modules/list-selectors.md)
     - [lib/list/list.x](library/modules/list.md)

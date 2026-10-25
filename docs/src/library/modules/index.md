@@ -33,6 +33,7 @@ points used by generated code, native callers, and compiler setup.
 | [`lib/iter.x`](iter.md) | single-pass pull iterators. |
 | [`lib/json.x`](json.md) | JSON text to and from ordinary x2c values. |
 | [`lib/lib.x`](lib.md) | disjoint sets with union-find. |
+| [`lib/lisp-bindings.x`](lisp-bindings.md) | native functions a Lisp session can call. |
 | [`lib/lisp/lisp.x`](lisp.md) | the Lisp runtime: reader, session, and evaluator. |
 | [`lib/list-selectors.x`](list-selectors.md) | optional compound `List` selectors. |
 | [`lib/list/list.x`](list.md) | linked list with `Var` elements. |
@@ -100,7 +101,6 @@ These modules implement the runtime and are not public APIs.
 - `lib/error-private.x` - Error transfer templates used by the exception machinery.
 - `lib/error_init.x` - Type-owned initialization shim that preserves `Error`'s pre-initialization boundary.
 - `lib/integer-ops.x` - Integer conversion and arithmetic templates shared by runtime owners.
-- `lib/lisp-bindings.x` - Macros that bind native functions into a runtime `Lisp` session; `lisp/lisp.x` includes it.
 - `lib/lisp-targets/lisp-targets.x` - The native operations a `Lisp` session can bind, built outside the implicit prelude so the optional modules that supply them stay out of it.
 - `lib/native-scalar-types.x` - The exact C scalar ledger and its compile-time projections.
 - `lib/private-keywords.x` - Keyword aliases used by runtime implementation code.

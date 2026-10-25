@@ -73,9 +73,9 @@ Source: `src/frontend.x:102`
 
 `int Frontend.open_session(Frontend frontend, ParsedUnit &unit)`
 
-Opens an empty submission unit with the ordinary runtime prelude.
-Preload macro libraries first. The caller must close the unit on either
-result; submissions and inspection results borrow its Context.
+Opens an empty submission unit with the ordinary runtime prelude. The
+caller must close the unit on either result; submissions and inspection
+results borrow its Context.
 
 Source: `src/frontend.x:116`
 
