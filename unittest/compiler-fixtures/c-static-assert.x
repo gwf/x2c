@@ -7,7 +7,7 @@ macro Unit $check_width(Expr $condition) {
 }
 
 meta static List constructed_assert(List condition) {
-  return %((c-assert ${condition}
+  return %((c-assert $(condition)
     (expr (* char) (literal (* char) "\"constructed width\""))));
 }
 

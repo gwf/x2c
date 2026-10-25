@@ -2012,11 +2012,11 @@ static void lisp_rebound_specials_take_effect(void) {
     String name = String.new(names[special]);
     String form = String.new(forms[special]);
     _ev(lisp, "(def replacement (macro (x) 99))");
-    _ev(lisp, %"(def f (lambda (x) ${form}))");
+    _ev(lisp, %"(def f (lambda (x) $(form)))");
     _ev(lisp, "(f 0)");
     order_log[0] = 0;
     EXPECT_INT_EQ(Var.integer(_ev(lisp, "(f (cond ((log! 1) " +
-                                  %"(def ${name} replacement))))")), 99);
+                                  %"(def $(name) replacement))))")), 99);
     EXPECT_STR_EQ(String.new(order_log), "1");
     lisp.destroy();
   }

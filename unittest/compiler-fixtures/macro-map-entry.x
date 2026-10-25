@@ -34,7 +34,7 @@ meta static List entry(String key, String value) {
 }
 
 meta static List built_entries(void) =>
-  %(${entry("built-a", "7")} ${entry("built-b", "8")});
+  %($(entry("built-a", "7")) $(entry("built-b", "8")));
 
 meta static String generated_key(void) => "generated-key";
 
@@ -48,19 +48,19 @@ keyword pair $two;
 
 int main(void) {
   int open = 1, close = 2;
-  Map nested = %{ ${$nested_rows()} };
+  Map nested = %{ $($nested_rows()) };
   Map handlers = %{
-    ${$handler(open)},
-    ${$handler(close)},
-    ${$none()},
-    ${pair()},
-    ${$forward("forward-a": 5, "forward-b": 6)},
-    ${$forward_one("forward-one": 12)},
-    ${$built_rows()},
-    ${$generated_key()}: 10,
-    ${$expression_key()}: 11,
+    $($handler(open)),
+    $($handler(close)),
+    $($none()),
+    $(pair()),
+    $($forward("forward-a": 5, "forward-b": 6)),
+    $($forward_one("forward-one": 12)),
+    $($built_rows()),
+    $($generated_key()): 10,
+    $($expression_key()): 11,
     "nested": $nested,
-    ${$imported.row()},
+    $($imported.row()),
   };
   printf(
     "%ld %ld %ld %ld %ld %ld %ld %ld %ld %ld %ld %ld %ld\n",

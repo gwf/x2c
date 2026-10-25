@@ -37,8 +37,8 @@ static void built(void) {
   show($!(char *){ g($label, $op) });
   /* A binding is a reference to it. */
   show($!($type){ $binding });
-  /* `${...}` holes compute the type and the code. */
-  show($!(${d.result}){ ${d.callee}(@items) });
+  /* `$(...)` holes compute the type and the code. */
+  show($!($(d.result)){ $(d.callee)(@items) });
 }
 
 /* In a `meta` function the typed code returns to the compiler, which
@@ -48,7 +48,7 @@ meta static List doubled(List value) {
   return twice;
 }
 meta static List type_of(List value) =>
-  $!String{ ${$!double{ $value * 2 }.cadr().repr()} };
+  $!String{ $($!double{ $value * 2 }.cadr().repr()) };
 meta static List plus_total(List value) {
   List total = x2c_ident("total");
   return $!int{ $total + $value };

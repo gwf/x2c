@@ -14,7 +14,7 @@ static void fixed(void) {
 
 static void dynamic(int value) {
   try { raise %(probe (value $value)); }
-  catch %(probe (value ${pattern_value(value)})): dynamic_hits++;
+  catch %(probe (value $(pattern_value(value)))): dynamic_hits++;
 }
 
 int main(void) {

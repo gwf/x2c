@@ -108,7 +108,7 @@ static void recursive_emit(Logger logger, const LogEvent *event, Var data) {
 static void guarded_dynamic_event(Logger logger, int value) {
   if (!logger.should_log(<debug>, <hot>)) return;
   logger.debug(<hot>, %(
-    (message ${String.printf("value=%d", value)})
+    (message $(String.printf("value=%d", value)))
     (value $value)
   ));
 }

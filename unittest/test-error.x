@@ -10,7 +10,7 @@ static const SymbolSet nonreturning_error_causes =
 /* A plain C string literal is an immutable raise detail. */
 static void error_plain_literal_detail(void) {
   String detail = NULL;
-  try raise %(bad-arg (reason ${"plain"}));
+  try raise %(bad-arg (reason $("plain")));
   catch %(bad-arg (reason ?why)): detail = why;
   EXPECT_STR_EQ(detail, "plain");
 }

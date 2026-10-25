@@ -1,5 +1,0 @@
-unittest/compiler-fixtures/macro-lisp-error.x:3:1: parse: compile-time Lisp forms are not supported
-  $(missing.compile.time.function 1)
-  ^^
-  note: write the compile-time code as an x2c meta function
-

@@ -7,12 +7,12 @@
 meta static List row = %(ledger-tag ROW_LEDGER object 7);
 
 meta static List int_expr(Var value) =>
-  %(expr (int) (literal (int) ${value.str()}));
+  %(expr (int) (literal (int) $(value.str())));
 
 meta List enum_rows(void) {
   match (row) {
     case %(? ?id ? ?value):
-      return %((op = (bind ${x2c_ident(id.str())} ()) ${int_expr(value)}));
+      return %((op = (bind $(x2c_ident(id.str())) ()) $(int_expr(value))));
   }
   return %();
 }
@@ -20,7 +20,7 @@ meta List enum_rows(void) {
 meta List row_initializer(void) {
   match (row) {
     case %(? ? ? ?value):
-      return %(expr () (composite (commas ${int_expr(value)})));
+      return %(expr () (composite (commas $(int_expr(value)))));
   }
   return %();
 }
@@ -28,8 +28,8 @@ meta List row_initializer(void) {
 meta List case_rows(void) {
   match (row) {
     case %(?tag ? ? ?value):
-      return %((case (expr ("Symbol") (literal ("Symbol") ${tag.str()} $tag)))
-               (return (int) ${int_expr(value)}));
+      return %((case (expr ("Symbol") (literal ("Symbol") $(tag.str()) $tag)))
+               (return (int) $(int_expr(value))));
   }
   return %();
 }

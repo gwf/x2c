@@ -39,7 +39,7 @@ static long _text_length(String text) => text.len();
 
 static void path_values_act_as_strings(void) {
   $test.scoped();
-  Path path = "src/parse.x", same = %"src/${"parse"}.x";
+  Path path = "src/parse.x", same = %"src/$("parse").x";
   Var boxed = path;
   EXPECT_TRUE(boxed is String);
   EXPECT_STR_EQ(boxed.str(), "src/parse.x");
@@ -112,17 +112,17 @@ static void path_tree_operations(void) {
   List walked = root.walk().map(%!(path) => path.str()[root.len():]);
   EXPECT_LIST_EQ(walked, %("/one" "/one/g.x" "/one/two" "/one/two/f.x"));
   EXPECT_LIST_EQ(Path.glob(%"$root/**/*.x"),
-                 %(${%"$root/one/g.x"} ${%"$root/one/two/f.x"}));
-  EXPECT_LIST_EQ(Path.glob(%"$root/one/*.x"), %(${%"$root/one/g.x"}));
-  EXPECT_LIST_EQ(root.join("one").glob(), %(${root.join("one")}));
+                 %($(%"$root/one/g.x") $(%"$root/one/two/f.x")));
+  EXPECT_LIST_EQ(Path.glob(%"$root/one/*.x"), %($(%"$root/one/g.x")));
+  EXPECT_LIST_EQ(root.join("one").glob(), %($(root.join("one"))));
   EXPECT_NULL(Path.glob(%"$root/*.none"));
   root.join(".hidden").make_dirs();
   root.join(".hidden/h.x").write_text("h\n");
   EXPECT_LIST_EQ(Path.glob(%"$root/**/*.x"),
-                 %(${%"$root/one/g.x"} ${%"$root/one/two/f.x"}));
-  EXPECT_LIST_EQ(Path.glob(%"$root/.*/*.x"), %(${%"$root/.hidden/h.x"}));
+                 %($(%"$root/one/g.x") $(%"$root/one/two/f.x")));
+  EXPECT_LIST_EQ(Path.glob(%"$root/.*/*.x"), %($(%"$root/.hidden/h.x")));
   EXPECT_LIST_EQ(Path.glob(%"$root/**/.hidden/*.x"),
-                 %(${%"$root/.hidden/h.x"}));
+                 %($(%"$root/.hidden/h.x")));
   char *cwd = getcwd(NULL, 0);
   chdir(root);
   EXPECT_LIST_EQ(Path.glob(".*/*.x"), %(".hidden/h.x"));

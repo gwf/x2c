@@ -151,8 +151,8 @@ int Compiler.macro_starts_target_at(Compiler c, Symbol position) =>
 /* An invocation is claimed where its result fits. A statement or map entry
    that does not fit parses as an expression. Elsewhere a `$` name, or an
    identifier with arguments, is claimed so that its target parser reports
-   the position diagnostic; a local expression macro at block scope remains
-   an expression statement. */
+   the position diagnostic; a local expression macro at block scope and an
+   evaluated `$(...)` or `${...}` collection remain expressions. */
 static int _claims(Compiler c, List definition, Symbol position) {
   Symbol kind = definition ? _result_kind(definition) : 0;
   if (kind == _position(position).kind) return 1;
@@ -162,7 +162,8 @@ static int _claims(Compiler c, List definition, Symbol position) {
     if (c.peek(0) == <$> && (position == <block> || c.macro_holes) &&
         _meta_callee(c).is_function())
       return 0;
-    return c.peek(0) == <$>;
+    Symbol next = (c.token + 1).type;
+    return c.peek(0) == <$> && next != <(> && next != <"{">;
   }
   return !_bare(c.token, definition) &&
     (position != <block> || kind != <expression> ||

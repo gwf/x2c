@@ -13,7 +13,7 @@ static String indexed[2] = {
 typedef struct Pair { String value; } Pair;
 meta static List canonical_of(List value) {
   return %(expr ("Pair") (cast ("Pair")
-    (expr ("Pair") (composite (commas ${value})))));
+    (expr ("Pair") (composite (commas $(value))))));
 }
 
 macro Expression $canonical(Expr $value) => $canonical_of($value);

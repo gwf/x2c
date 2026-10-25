@@ -34,7 +34,7 @@ static PrivateBox Var.privatebox(Var value) {
 }
 
 static String PrivateBox.str(PrivateBox value) {
-  return %"private:${value.value}";
+  return %"private:$(value.value)";
 }
 
 static protocol Var(PrivateBox);

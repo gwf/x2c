@@ -92,7 +92,7 @@ static void test_mixed_declarations_and_destructuring(void) {
               destructuring_global_x < 2.6);
   EXPECT_INT_EQ(destructuring_global_c, 'g');
 
-  (int first, float second, char third) = %(10 20.5 ${'z'});
+  (int first, float second, char third) = %(10 20.5 $('z'));
   EXPECT_INT_EQ(first, 10);
   EXPECT_TRUE(second > 20.4 && second < 20.6);
   EXPECT_INT_EQ(third, 'z');

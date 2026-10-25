@@ -3,7 +3,7 @@
 /* A catch pattern binder in a template keeps its spelling when a hole of
    the macro has the same name. */
 macro Stmt $caught(Expr $cause, Expr $value, Expr $result) {
-  try raise %($cause (value ${$value}));
+  try raise %($cause (value $($value)));
   catch %(?cause (value ?value) *rest):
     $result = cause == $cause && value == $value && !rest ? value : -1;
 }

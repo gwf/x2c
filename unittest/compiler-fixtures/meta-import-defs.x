@@ -25,7 +25,7 @@ meta String mi_flatten(String path, String sep) =>
 meta String mi_constant(String path) => mi_flatten(path, "_").upper();
 
 meta String mi_accessor(String path) =>
-  %"get_${mi_flatten(path, "_").lower()}";
+  %"get_$(mi_flatten(path, "_").lower())";
 
 meta int mi_depth(String path) => path.split(".").len();
 
@@ -53,7 +53,7 @@ meta int mi_next(void) {
 
 /* Only `$probe.tag` calls this one, and a macro call is a compile-time use,
    so no unit emits a runtime definition for it. */
-meta String mi_tag(String path) => %"<${path.replace(".", "/")}>";
+meta String mi_tag(String path) => %"<$(path.replace(".", "/"))>";
 
 macro Expression $probe.constant(Expr $path) =>
   $mi_constant($Code.source_text($path));

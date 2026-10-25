@@ -9,12 +9,12 @@ unittest/compiler-fixtures/explicit-converter-warning.x:25:24: conversion: unnec
   note: remove the call; the destination converts the value
 
 unittest/compiler-fixtures/explicit-converter-warning.x:29:32: conversion: unnecessary conversion: .str() where ("String") is expected
-    String hole = %"value ${v.str()}";
+    String hole = %"value $(v.str())";
                                  ^
   note: remove the call; the hole renders the value
 
 unittest/compiler-fixtures/explicit-converter-warning.x:30:25: conversion: unnecessary conversion: .var() where ("Var") is expected
-    List holes = %(${s.var()});
+    List holes = %($(s.var()));
                           ^
   note: remove the call; the destination converts the value
 

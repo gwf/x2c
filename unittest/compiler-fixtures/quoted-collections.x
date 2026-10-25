@@ -25,7 +25,7 @@ int main(void) {
     "text",
     [nested, $count],
     {kind: widget},
-    ${count * 2},
+    $(count * 2),
     -3,
     'q',
     colon\:name,
@@ -38,23 +38,23 @@ int main(void) {
     "line one
 line two",
     "\$count",
-    ${"c text"},
-    ${pair.value},
-    ${indexed[1]},
-    ${bump(&evals)},
-    ${NULL},
-    ${chosen},
-    ${((Pair) { .value = 24 }).value},
-    ${(count, count + 3)},
-    ${$sum(20, 5)}
+    $("c text"),
+    $(pair.value),
+    $(indexed[1]),
+    $(bump(&evals)),
+    $(NULL),
+    $(chosen),
+    $(((Pair) { .value = 24 }).value),
+    $((count, count + 3)),
+    $($sum(20, 5))
   ];
   Map config = %{
     name: "x2c",
     runtime: $count,
-    computed: ${count + 2},
+    computed: $(count + 2),
     nested: {depth: 8},
     values: [1, $count],
-    ${$fixture.row()}
+    $($fixture.row())
   };
 
   if (list_nested[0].array()[1].integer() != 7 ||

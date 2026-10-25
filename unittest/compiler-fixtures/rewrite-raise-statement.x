@@ -20,7 +20,7 @@ meta Code count_raise(Code node) {
 }
 
 static void report(int n) {
-  raise %(trace (count $n) (twice ${n * 2}));
+  raise %(trace (count $n) (twice $(n * 2)));
   if (n) raise %(counted (n $n) (text "raised"));
 }
 

@@ -22,10 +22,10 @@ meta Code counted_default(Code node) {
 
 static int pick(Var v) {
   defer printf("left pick\n");
-  match (%(seen ${v + 1})) {
+  match (%(seen $(v + 1))) {
     default: {
       defer printf("left default\n");
-      String text = %"default for ${v}";
+      String text = %"default for $(v)";
       printf("%s\n", text);
       return 2;
     }

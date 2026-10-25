@@ -26,7 +26,7 @@ static void _relabel_nested_pattern(void) {
     );
     raise %(old-error (detail $detail));
   }
-  catch %(old-error (detail (nested ${%"marker"}))):
+  catch %(old-error (detail (nested $(%"marker")))):
     raise %(new-error);
 }
 

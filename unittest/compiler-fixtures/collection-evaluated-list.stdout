@@ -1,0 +1,14 @@
+()
+(1)
+(1 "two" 3.5 sym (q r))
+((1) () (("two")))
+next 1
+next 2
+next 3
+(1 2 3)
+next 4
+next 5
+(5 9 "big")
+((a b) [ 1, 2 ])
+equal 1
+empty 1

@@ -53,7 +53,7 @@ meta static List applied_sum(List unused) {
 
 meta static List applied_show(void) {
   Macro show = $show;
-  return %(${show(%("label"))});
+  return %($(show(%("label"))));
 }
 
 macro Expression $call_of(Expr $v) => $call($v);

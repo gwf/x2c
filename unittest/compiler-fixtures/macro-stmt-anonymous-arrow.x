@@ -24,13 +24,13 @@ meta static List built(List value) {
     macro Stmt(Expr $v) => $again() $hit($v + 50)
   };
   return $!{
-    ${direct(value)}
-    ${decorated(value)}
-    ${decorated_expression(value)}
-    ${expression(value)}
-    ${doubled($!{ puts("doubled"); })}
-    ${listed[0](value)}
-    ${listed[1](value)}
+    $(direct(value))
+    $(decorated(value))
+    $(decorated_expression(value))
+    $(expression(value))
+    $(doubled($!{ puts("doubled"); }))
+    $(listed[0](value))
+    $(listed[1](value))
   };
 }
 

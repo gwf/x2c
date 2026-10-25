@@ -6,4 +6,4 @@ macro Entry $invalid_row() {
   @short_entry_rows()
 }
 
-Map values = %{ ${$invalid_row()} };
+Map values = %{ $($invalid_row()) };

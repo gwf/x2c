@@ -15,7 +15,7 @@ meta static List shape_of(List code) {
   Macro caught = $caught, tried = $tried;
   match (code) {
     case caught(?body, ?finalizer, *arms):
-      return $!int{ ${10 + arms.len()} };
+      return $!int{ $(10 + arms.len()) };
     case tried(?body, ?finalizer): return $!int{ 1 };
   }
   return $!int{ 0 };

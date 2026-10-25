@@ -1,5 +1,4 @@
-unittest/compiler-fixtures/module-block-replay-diagnostic/library/forms.x:4:3: parse: compile-time Lisp forms are not supported
+unittest/compiler-fixtures/module-block-replay-diagnostic/library/forms.x:4:3: parse: an evaluated collection is an expression, not a top-level form
     $((undefined-function 1))
-    ^^
-  note: write the compile-time code as an x2c meta function
+    ^
 

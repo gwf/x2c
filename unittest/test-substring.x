@@ -98,12 +98,12 @@ static void substring_string_map_updates_only_materialize_misses(void) {
   EXPECT_INT_EQ(counts.add_substr(second.substring(second.len(), 0), -2), 5);
   EXPECT_INT_EQ(counts[""], 5);
   for (int i = 0; i < 100; ++i) {
-    String text = %"__key${i}__";
+    String text = %"__key$(i)__";
     Substr word = text.substring(2, text.len() - 4);
     counts.add_substr(word, i);
     counts.add_substr(word, 1);
   }
-  for (int i = 0; i < 100; ++i) EXPECT_INT_EQ(counts[%"key${i}"], i + 1);
+  for (int i = 0; i < 100; ++i) EXPECT_INT_EQ(counts[%"key$(i)"], i + 1);
   EXPECT_INT_EQ(counts.len(), 102);
   MapStringInt expected = MapStringInt.new();
   expected["alpha"] += INT_MAX;

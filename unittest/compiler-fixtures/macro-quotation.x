@@ -57,7 +57,7 @@ macro Expression $boxed(Expr $value) => ((Boxed){ $value });
 static void report(int value) { printf("%d\n", value); }
 meta static List reported(List v) {
   List bumped = $!( $v + 1 );
-  List callee = %(expr () (ident ${x2c_ident("report")}));
+  List callee = %(expr () (ident $(x2c_ident("report"))));
   return %(expr () (call $callee (args $bumped)));
 }
 macro Expression $report_next(Expr $v) => $reported($v);
@@ -85,7 +85,7 @@ macro Stmt $print_all(Expr @values) { @bracketed($values) }
    elements, in templates and quotations alike. */
 meta static List array_of(List items) => $!( %[@items] );
 macro Expression $quoted_array(Expr @items) => $array_of($items);
-meta static List map_of(List rows) => $!( %{${@rows}} );
+meta static List map_of(List rows) => $!( %{$(@rows)} );
 macro Expression $quoted_map(Entry @rows) => $map_of($rows);
 typedef struct { int a, b, c; } Triple;
 macro Expression $triple(Expr $first, Expr @rest) => (Triple){ $first, @rest };

@@ -3,9 +3,9 @@
 meta static List raw_reference_of(List value) {
   match (value) {
     case %(expr ? (ident ?binding)): {
-      List type = %(& @{Code.type(value)});
+      List type = %(& @(Code.type(value)));
       List capture = %(capture $binding $type (expr $type (op & $value)));
-      List read = %(expr ${Code.type(value)}
+      List read = %(expr $(Code.type(value))
         (op * (expr $type (ident $binding))));
       return %(expr ("Func") (lambda (params) (captures $capture) $read));
     }

@@ -436,7 +436,7 @@ meta String ct_suffix(String name) => name + "_dot";
 
 meta int ct_same(List a, List b) => a.equal(b);
 
-meta String ct_label(String stem, int n) => %"$stem-${n}";
+meta String ct_label(String stem, int n) => %"$stem-$(n)";
 
 meta List ct_doubled(List items) => items.map(%!(Var part) => %($part $part));
 
@@ -621,7 +621,7 @@ meta static int mt_hex_upper(void) => 0X00FE + 0XE1;
 
 /* The floating spellings the same test still has to accept. */
 meta static String mt_floats(void) =>
-  %"${1e3} ${2.5E-1} ${0.75}";
+  %"$(1e3) $(2.5E-1) $(0.75)";
 
 /* --- callable values ----------------------------------------------------- */
 

@@ -10,7 +10,7 @@ static int twice(int n) { return n + n; }
 
 meta static List pair_syntax(void) {
   return %(expr () (composite (commas
-    (expr () (call (expr () (ident ${x2c_ident("twice")}))
+    (expr () (call (expr () (ident $(x2c_ident("twice"))))
       (args (expr (int) (literal (int) "3")))))
     (expr (int) (literal (int) "2")))));
 }

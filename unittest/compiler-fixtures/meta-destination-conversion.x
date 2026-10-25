@@ -48,7 +48,7 @@ meta int file_round_trip(Var boxed) {
 
 /* A declared converter applies wherever the compiled code converts. */
 typedef String Label;
-meta Label List.label(List items) => %"n${items.len()}";
+meta Label List.label(List items) => %"n$(items.len())";
 meta int label_len(Label value) => value.len();
 meta int label_init(List items) {
   Label value = items;

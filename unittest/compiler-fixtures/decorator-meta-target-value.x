@@ -4,7 +4,7 @@
    operator inside the target that is spelled like a pattern binder, such
    as `*=`, must not be read as one. */
 
-meta static List keep(List fn) => %(${fn});
+meta static List keep(List fn) => %($(fn));
 
 macro Decorator $keep.target(Unit $fn) { @keep($fn) }
 

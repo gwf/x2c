@@ -1,18 +1,18 @@
 #include "x2c.x"
 
 macro Expression $values(Expr @items) =>
-  %[${10}, @items, ${40}];
+  %[$(10), @items, $(40)];
 
 macro Entry $named_value(Expr $value) {
   result: $value
 }
 
-macro Expression $description(Expr $value) => %"result=${$value}";
+macro Expression $description(Expr $value) => %"result=$($value)";
 
 int main(void) {
   Array full = $values(20, 30);
   Array empty = $values();
-  Map row = %{${$named_value(42)}};
+  Map row = %{$($named_value(42))};
   String text = $description(42);
   if (full.len() != 4 || full[0].integer() != 10 ||
       full[1].integer() != 20 || full[2].integer() != 30 ||

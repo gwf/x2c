@@ -14,7 +14,7 @@ Vec Var.vec(Var v) {
 }
 
 String Vec.str(Vec v) {
-  return %"Vec(${v.x},${v.y})";
+  return %"Vec($(v.x),$(v.y))";
 }
 
 protocol Var(Vec);

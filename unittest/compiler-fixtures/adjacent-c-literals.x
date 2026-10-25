@@ -14,7 +14,7 @@ int main(void) {
                  "ld";
   int same = local == "wo" "rld";
   int length = width("one" "two");
-  String percent = %"left${2}right";
+  String percent = %"left$(2)right";
   // A macro defined to a string literal, and a header's macro this unit
   // cannot resolve, are words of the adjacent literal, as in C.
   String joined = PREFIX "post";

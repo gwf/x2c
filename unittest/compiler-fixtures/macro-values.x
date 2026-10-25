@@ -26,7 +26,7 @@ meta static List stages(Macro sum, Macro product, List left, List right,
   }
   if (!pending_hit || !body_hit || wrong_hit)
     x2c_diagnostic_fail("macro value cases failed",
-      %(${%"hits: $pending_hit $body_hit $wrong_hit"}));
+      %($(%"hits: $pending_hit $body_hit $wrong_hit")));
   return pending;
 }
 macro Expression $stage_cases(Expr $left, Expr $right, Expr $expanded) =>

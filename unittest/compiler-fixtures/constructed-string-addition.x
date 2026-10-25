@@ -3,7 +3,7 @@
 meta static String built_text(void) => "a";
 
 macro Expression $built() => $built_text();
-macro Expression $joined(Expr $value) => %"${$value}" + "|";
+macro Expression $joined(Expr $value) => %"$($value)" + "|";
 
 int main(void) {
   if ($built() + "|" != %"a|" || "|" + $built() != %"|a") return 1;

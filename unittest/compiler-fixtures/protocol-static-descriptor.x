@@ -13,7 +13,7 @@ static StaticDescriptor Var.staticdescriptor(Var value) {
 }
 
 String StaticDescriptor.str(StaticDescriptor value) {
-  return %"private:${value.value}";
+  return %"private:$(value.value)";
 }
 
 static protocol Var(StaticDescriptor);

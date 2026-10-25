@@ -8,7 +8,7 @@ meta static List literal_shape(List fields) => cons(<literal>, fields);
 
 meta static List spelling(List label) {
   match (label) {
-    case %(expr ? ${$source_literal_content(%(? ?text))}): {
+    case %(expr ? $($source_literal_content(%(? ?text)))): {
       String written = text;
       return $!String{ $written };
     }
@@ -17,7 +17,7 @@ meta static List spelling(List label) {
 }
 
 meta static int is_hi(List label) {
-  match (label) case %(expr ? ${$literal_shape(%(? "\"hi\""))}): return 1;
+  match (label) case %(expr ? $($literal_shape(%(? "\"hi\"")))): return 1;
   return 0;
 }
 

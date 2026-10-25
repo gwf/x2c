@@ -4,7 +4,7 @@ static int total = 0;
 
 macro Stmt $add(Expr $n) => total += $n;
 macro Stmt $say(Expr $label, Expr $n) =>
-  printf("%s\n", %"${$label} ${$n}");
+  printf("%s\n", %"$($label) $($n)");
 macro Stmt $discard(Expr $value) => (void) $value;
 
 int main(void) {

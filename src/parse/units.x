@@ -50,6 +50,9 @@ List Compiler.parse_top_level_mode(Compiler c, int skip_body) {
       }
       return _parse_import_declaration(c);
     case <@>:      return _top_level_decorator(c);
+    case <$>:
+      if ((c.token + 1).type == <(> || (c.token + 1).type == <"{">)
+        $fail.parse_collection_top(c, c.token);
   }
   if (c.macro_form_is_definition()) return c.parse_macro_definition();
   return _declaration_form(c, skip_body);

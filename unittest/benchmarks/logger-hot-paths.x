@@ -22,7 +22,7 @@ static void discard_emit(Logger logger, const LogEvent *event, Var data) {
 
 static void rejected_dynamic(Logger logger, int value) {
   if (!logger.should_log(<debug>, <bench>)) return;
-  logger.debug(<bench>, %((value $value) (guard ${value + 1})));
+  logger.debug(<bench>, %((value $value) (guard $(value + 1))));
 }
 
 int main(void) {

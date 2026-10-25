@@ -26,7 +26,7 @@ macro Stmt $celled(Expr $caller) {
         c = c + 1;
       };
       g();
-      String text = %"$n ${c} ${$caller}";
+      String text = %"$n $(c) $($caller)";
       printf("%s\n", text);
     }
   }

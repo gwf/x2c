@@ -13,7 +13,7 @@ Vec Var.vec(Var value) {
 }
 
 String Vec.str(Vec value) {
-  return %"${value.x}";
+  return %"$(value.x)";
 }
 
 int main(void) {

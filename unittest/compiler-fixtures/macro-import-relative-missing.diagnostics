@@ -1,5 +1,4 @@
-./unittest/compiler-fixtures/macro-import-relative/missing.x:4:1: parse: compile-time Lisp forms are not supported
+./unittest/compiler-fixtures/macro-import-relative/missing.x:4:1: parse: an evaluated collection is an expression, not a top-level form
   $(import "missing.xlisp")
-  ^^
-  note: write the compile-time code as an x2c meta function
+  ^
 

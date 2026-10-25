@@ -9,10 +9,10 @@ meta List describe(TypeInfo type) {
   foreach (List part, type) {
     List methods = part.cadr();
     parts.push(part.car() == <methods>
-                 ? %"(methods len ${methods.contains("len")})"
+                 ? %"(methods len $(methods.contains("len")))"
                  : part.repr());
   }
-  return $!String{ ${String.join("\n  ", parts)} };
+  return $!String{ $(String.join("\n  ", parts)) };
 }
 
 macro Expression $type.describe(Expr $value) => $describe($value);

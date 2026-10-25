@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/grouped-unquote-mismatched.x:5:1: parse: unexpected '}'
+  }
+  ^
+  note: encountered '}' without matching '{'
+

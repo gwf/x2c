@@ -22,7 +22,7 @@ meta Code bar_join(Code code) {
 int main(void) {
   int n = 7;
   String name = "x";
-  String two = %"$name$n", three = %"a${n}b";
+  String two = %"$name$n", three = %"a$(n)b";
   printf("%s %s\n", (char *) two, (char *) three);
   return 0;
 }

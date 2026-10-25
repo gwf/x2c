@@ -174,10 +174,7 @@ List syntax_lexical(void) => %(lexical
       (seq (one-of-bytes "\$@") (optional (ref identifier)))
       (emit-sigil) (emit-identifier ident) (keyword-lookup false))
     (rule code-reference
-      (ordered
-        (seq (bytes "\$(") (transition embedded-lisp))
-        (seq (bytes "@(") (transition embedded-lisp-splice))
-        (when-prefix (one-of-bytes "\$@") (ref named-reference))))
+      (when-prefix (one-of-bytes "\$@") (ref named-reference)))
     (rule percent-forms
       (ordered
         (seq (bytes "%\"") (transition percent-string))
@@ -210,11 +207,12 @@ List syntax_lexical(void) => %(lexical
             (seq (byte 64) (optional (byte 61)) (emit lit-atom))))
         (when-mode list array map
           (when-prefix (byte 36)
-            (ordered (seq (bytes "\${") (transition data-code))
+            (ordered (seq (bytes "\$(") (transition data-code))
+              (seq (bytes "\${") (transition data-map))
               (ref named-reference))))
         (when-mode list array map
           (when-prefix (byte 64)
-            (ordered (seq (bytes "@{") (transition list-splice))
+            (ordered (seq (bytes "@(") (transition list-splice))
               (ref named-reference))))))
     (rule lisp-reference
       (when-prefix (byte 36) (ref named-reference)))
@@ -227,11 +225,11 @@ List syntax_lexical(void) => %(lexical
         (seq (one-of-bytes "()") (emit-spelling) (apply-transitions))
         (when-mode list array map
           (seq (one-of-bytes "\"{[") (apply-transitions)))
-        (when-mode lisp macro-lisp (ref c-string))
+        (when-mode lisp (ref c-string))
         (when-mode array map
           (seq (one-of-bytes "]}:,") (emit-spelling) (apply-transitions)))
         (seq (one-of-bytes "'`") (emit-spelling))
-        (when-mode list lisp macro-lisp
+        (when-mode list lisp
           (seq (byte 44) (optional (byte 64)) (emit-spelling)))
         (ref lisp-symbol) (ref signed-number)))
     (rule list-atom (ref atom) (emit lit-atom))
@@ -244,7 +242,8 @@ List syntax_lexical(void) => %(lexical
       (failure malformed))
     (rule string-tokens
       (ordered
-        (seq (bytes "\${") (transition string-code))
+        (seq (bytes "\$(") (transition string-code))
+        (seq (bytes "\${") (transition string-brace))
         (when-prefix (byte 36) (ref named-reference))
         (seq (byte 34) (transition close-string))
         (ref string-segment))))
@@ -257,8 +256,6 @@ List syntax_lexical(void) => %(lexical
     (mode map (ordered common data-prefix data-punctuation collection-atom))
     (mode list (ordered data-prefix data-punctuation common list-atom))
     (mode lisp (ordered lisp-reference data-punctuation common lisp-atom))
-    (mode macro-lisp
-      (ordered lisp-reference data-punctuation common lisp-atom))
     (mode symbol-set (ordered common symbol-set-tokens))
     (mode string (ordered string-tokens)))
   (transitions
@@ -271,10 +268,6 @@ List syntax_lexical(void) => %(lexical
     (transition percent-map (from x2c x2c-par) (on "%{") (push map))
     (transition percent-set (from x2c x2c-par) (on "%<<") (push symbol-set))
     (transition percent-string (from x2c x2c-par) (on "%\"") (push string))
-    (transition embedded-lisp (from x2c x2c-par) (on "\$(")
-      (push macro-lisp))
-    (transition embedded-lisp-splice (from x2c x2c-par) (on "@(")
-      (push macro-lisp))
     (transition code-parenthesis (from x2c-par) (on "(") (push x2c-par))
     (transition close-code-parenthesis (from x2c-par) (on ")") (pop))
     (transition nested-list (from list array map) (on "(") (push list))
@@ -284,17 +277,17 @@ List syntax_lexical(void) => %(lexical
       (emit "%{") (push map))
     (transition nested-string (from list array map) (on "\"")
       (emit "%\"") (push string))
-    (transition data-code (from list array map) (on "\${") (push x2c))
-    (transition list-splice (from list array map) (on "@{") (push x2c))
+    (transition data-code (from list array map) (on "\$(") (push x2c-par))
+    (transition data-map (from list array map) (on "\${") (push x2c))
+    (transition list-splice (from list array map) (on "@(") (push x2c-par))
     (transition capture (from list) (on "?(") (push x2c-par))
     (transition close-list (from list) (on ")") (pop))
     (transition close-array (from array) (on "]") (pop))
     (transition close-map (from map) (on "}") (pop))
     (transition close-set (from symbol-set) (on ">>") (pop))
-    (transition string-code (from string) (on "\${") (push x2c))
-    (transition close-string (from string) (on "\"") (pop))
-    (transition nested-lisp (from macro-lisp) (on "(") (push macro-lisp))
-    (transition close-lisp (from macro-lisp) (on ")") (pop)))
+    (transition string-code (from string) (on "\$(") (push x2c-par))
+    (transition string-brace (from string) (on "\${") (push x2c))
+    (transition close-string (from string) (on "\"") (pop)))
   (predicates
     (predicate percent-is-operator
       (and (not (predicate layout-statement-start))
@@ -334,7 +327,7 @@ List syntax_lexical(void) => %(lexical
       ident lit-int lit-float lit-char* lit-char lit-atom lit-symbol ")" "]")
     (token-set compiler-operand-start
       ident lit-int lit-float lit-char* lit-char lit-atom lit-symbol
-      "(" "%(" "%[" "%{" "\$(" "\${" "\$" "!" "-" "*" "&" "~" "++" "--"))
+      "(" "%(" "%[" "%{" "\$" "!" "-" "*" "&" "~" "++" "--"))
   (passes
     (pass module-collection
       (external "src/collect/collect.x; active file-scope module blocks before tokenizing")
@@ -381,7 +374,7 @@ List syntax_lexical(void) => %(lexical
           (unless next-same-or-lower-line-is-same-indent-while-trailer)
           (remove "do"))
         (append-semicolon
-          (unless directive final-semicolon enum-body whole-embedded-lisp
+          (unless directive final-semicolon enum-body
             whole-syntax-hole syntax-hole-after-close-paren decorator))
         (decorator (leading "@" "\$") (retag-first space))
         (indent-directive (retag comment))

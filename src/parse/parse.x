@@ -31,6 +31,11 @@ static macro Stmt $fail.parse_decorator_top(Expr $c, Expr $site) =>
     <parse>, "top-level decorators are not supported",
     $site, %( "module initialization: void TYPE.initialize(void)" ));
 
+static macro Stmt $fail.parse_collection_top(Expr $c, Expr $site) =>
+  $c.report_error(
+    <parse>, "an evaluated collection is an expression, not a top-level form",
+    $site, NULL);
+
 static macro Stmt $fail.parse_body_expected(
   Expr $c, Expr $site, Expr $unexpected) =>
   $c.report_error(

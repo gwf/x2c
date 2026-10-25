@@ -431,7 +431,7 @@ static void list_assoc_hash_equal(void) {
   Var fetched = assoc.assoc(<beta>);
   List empty = NULL;
   List assoc_copy = %( $pair1 $pair2 );
-  List different = %( $pair1 ${%(beta $nine)} );
+  List different = %( $pair1 $(%(beta $nine)) );
   EXPECT_INT_EQ(fetched.integer(), 2);
   EXPECT_TRUE(assoc.assoc(<missing>) is void);
   EXPECT_INT_EQ(assoc.get(<alpha>).integer(), 1);

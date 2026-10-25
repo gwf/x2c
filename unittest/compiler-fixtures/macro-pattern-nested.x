@@ -2,7 +2,7 @@
 #include "meta.x"
 
 /* A macro pattern takes patterns in its holes, including another macro
-   pattern. Inside a List pattern, `${$macro(...)}` is the macro's pattern;
+   pattern. Inside a List pattern, `$($macro(...))` is the macro's pattern;
    in the content of an `(expr TYPE ...)` shell it is the content, so the
    shell captures the expression's type. */
 macro Expression $neg(Expr $v) => -$v;
@@ -11,9 +11,9 @@ macro Expression $add(Expr $a, Expr $b) => $a + $b;
 meta static List classify(List e) {
   match (e) {
     case $add(?a, $neg(?b)): return $!int{ 1 };
-    case %(expr ?type ${$add(?a, ?b)}):
-      return $!int{ ${type.repr() == "(int)" ? 2 : 3} };
-    case %(!or ${$neg(%(expr ? (literal *)))}): return $!int{ 4 };
+    case %(expr ?type $($add(?a, ?b))):
+      return $!int{ $(type.repr() == "(int)" ? 2 : 3) };
+    case %(!or $($neg(%(expr ? (literal *))))): return $!int{ 4 };
   }
   return $!int{ 0 };
 }

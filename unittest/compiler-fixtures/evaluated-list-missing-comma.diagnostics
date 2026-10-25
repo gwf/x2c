@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/evaluated-list-missing-comma.x:4:21: parse: expected ')'
+  int value = $(quote unsupported);
+                      ^^^^^^^^^^^
+

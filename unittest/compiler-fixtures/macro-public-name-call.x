@@ -7,7 +7,7 @@
 macro Unit $first.public(Name $function) {
   int $function(int *$x2c_ident("values"), int $x2c_ident("count")) {
     if (!$x2c_ident("values"))
-      raise %(bad-arg (operation ${$Code.binding_spelling($function)}));
+      raise %(bad-arg (operation $($Code.binding_spelling($function))));
     return $x2c_ident("values")[$x2c_ident("count") - 1];
   }
 }

@@ -1,5 +1,0 @@
-unittest/compiler-fixtures/macro-import-open.x:3:1: parse: compile-time Lisp forms are not supported
-  $(import "missing-macro-helper.xlisp")
-  ^^
-  note: write the compile-time code as an x2c meta function
-

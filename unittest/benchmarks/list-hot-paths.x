@@ -85,7 +85,7 @@ int main(void) {
   Array keys = [];
   int key_count = 2048;
   for (int i = 0; i < key_count; i++) {
-    List key = %( $i ${base.nth_cdr(i & 1023)} );
+    List key = %( $i $(base.nth_cdr(i & 1023)) );
     keys.push(key);
     map[key] = i + 1;
   }

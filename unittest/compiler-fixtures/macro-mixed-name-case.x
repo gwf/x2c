@@ -63,8 +63,8 @@ meta static List pending_hit(Var name, List record) {
   Macro shape = $mixed;
   List pending = shape(name, record);
   match (pending) case shape(?same, ?receiver):
-    return $!int{ ${same == name &&
-                           List.compare(receiver, record) == 0} };
+    return $!int{ $(same == name &&
+                           List.compare(receiver, record) == 0) };
   return $!int{ 0 };
 }
 macro Expression $is_pending(Name $name, Expr $record) =>
@@ -76,7 +76,7 @@ meta static List single_role_hits(List reference, List member) {
   match (reference) case read_name(?name): binding_hit = name is <list>;
   match (member) case read_member(?record, ?name):
     member_hit = name == "subtotal";
-  return $!int{ ${binding_hit + member_hit} };
+  return $!int{ $(binding_hit + member_hit) };
 }
 macro Expression $single_roles(Expr $reference, Expr $member) =>
   $single_role_hits($reference, $member);

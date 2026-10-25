@@ -149,10 +149,10 @@ static void json_rejects_malformed_text_with_position(void) {
 
 static void json_nesting_is_limited_to_512_levels(void) {
   $test.scoped();
-  String deepest = %"${"[".repeat(512)}${"]".repeat(512)}";
+  String deepest = %"$("[".repeat(512))$("]".repeat(512))";
   Var value = Json.parse(deepest);
   EXPECT_STR_EQ(value.json(), deepest);
-  String deeper = %"${"{\"a\":".repeat(513)}1${"}".repeat(513)}";
+  String deeper = %"$("{\"a\":".repeat(513))1$("}".repeat(513))";
   _expect_rejected(deeper, "nesting exceeds 512 levels");
   _expect_rejected("[".repeat(100000), "nesting exceeds 512 levels");
 

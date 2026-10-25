@@ -10,7 +10,7 @@ macro Field $generated_field() {
 meta static List same_fields(Type type, List expected, String message) {
   List actual = Type.fields(type);
   if (!actual.equal(expected))
-    x2c_diagnostic_fail(message, %(${actual.repr()}));
+    x2c_diagnostic_fail(message, %($(actual.repr())));
   return %();
 }
 

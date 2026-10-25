@@ -58,7 +58,7 @@ meta Code count_postfix(Code code) {
 
 int main(void) {
   String who = "world";
-  String hello = %"hello ${who} ${String.join("-", %("a" "b"))}";
+  String hello = %"hello $(who) $(String.join("-", %("a" "b")))";
   Map m = {"k": String.join("+", %("p" "q"))}, empty = {};
   Array a = [1, String.join("*", %("u" "v"))];
   m["n"] = 1;

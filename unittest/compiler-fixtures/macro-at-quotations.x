@@ -29,16 +29,16 @@ static void check_typed(List code) {
 
 int main(void) {
   Array log = [];
-  List plain = $!( f(@{many(log, 1)}, ${one(log, 2)}) );
-  List typed = $!int{ f(${one(log, 3)}, @{many(log, 4)}) };
+  List plain = $!( f(@(many(log, 1)), $(one(log, 2))) );
+  List typed = $!int{ f($(one(log, 3)), @(many(log, 4))) };
   check_plain(plain);
   check_typed(typed);
   if (log.len() != 4 || log[0].int() != 1 || log[1].int() != 2 ||
       log[2].int() != 3 || log[3].int() != 4) return 1;
-  List runtime = $!List{ %(@{many(log, 5)}) };
+  List runtime = $!List{ %(@(many(log, 5))) };
   (void) runtime;
   if (log.len() != 4) return 2;
-  List array = $!Array{ %[${@{many(log, 6)}}, ${${one(log, 7)}}] };
+  List array = $!Array{ %[$(@(many(log, 6))), $($(one(log, 7)))] };
   (void) array;
   if (log.len() != 6 || log[4].int() != 6 || log[5].int() != 7) return 3;
   List sigils = $!String{ %"\$ @" };

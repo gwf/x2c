@@ -9,7 +9,7 @@ meta String packed_ints(int n) {
   Var boxed = values;
   ArrayInt back = boxed;
   Var again = back;
-  return %"${boxed.repr()} ${again.repr()}";
+  return %"$(boxed.repr()) $(again.repr())";
 }
 
 meta String packed_map(int n) {
@@ -17,7 +17,7 @@ meta String packed_map(int n) {
   Var boxed = counts;
   MapStringInt back = boxed;
   Var again = back;
-  return %"${boxed.repr()} ${again.repr()}";
+  return %"$(boxed.repr()) $(again.repr())";
 }
 
 int main(int argc, char **argv) {

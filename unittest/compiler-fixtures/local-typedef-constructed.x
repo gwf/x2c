@@ -24,7 +24,7 @@ meta static List capture_of(List value) {
     case %(expr ? (ident ?binding)):
       return %(expr ("Func")
         (lambda (params)
-          (captures (capture $binding ${Code.type(value)} $value))
+          (captures (capture $binding $(Code.type(value)) $value))
           $value));
   }
   return %();

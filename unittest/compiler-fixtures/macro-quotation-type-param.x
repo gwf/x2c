@@ -4,7 +4,7 @@
 /* `$!Type{ type-name }` builds a type written as a cast writes it, and
    `$!Param{ parameter }` builds one parameter. `Type` and `Param` after
    `$!` name these kinds, not typed quotations. A `Type` local or a
-   `${...}` hole of type `Type` stands for a type or for the base a
+   `$(...)` hole of type `Type` stands for a type or for the base a
    declarator modifies, and a parameter takes its name from a hole. */
 
 typedef struct Point { int x; int y; } Point;
@@ -15,17 +15,17 @@ meta static String types(void) {
   Type point = $!Type{ Point };
   List x = x2c_ident("x");
   List shown = %(
-    ${$!Type{ unsigned long * }}
-    ${$!Type{ const $point * }}
-    ${$!Type{ int (*)($point *) }}
-    ${$!Type{ $point }}
-    ${$!Type{ ${point_type()} ** }}
-    ${$!Type{ int (int) }}
-    ${$!Type{ String }}
-    ${$!Param{ double $x }}
-    ${$!Param{ $point *$x }}
-    ${$!Param{ double *${x2c_ident("grad")} }}
-    ${$!Param{ int (*$x)(int) }}
+    $($!Type{ unsigned long * })
+    $($!Type{ const $point * })
+    $($!Type{ int (*)($point *) })
+    $($!Type{ $point })
+    $($!Type{ $(point_type()) ** })
+    $($!Type{ int (int) })
+    $($!Type{ String })
+    $($!Param{ double $x })
+    $($!Param{ $point *$x })
+    $($!Param{ double *$(x2c_ident("grad")) })
+    $($!Param{ int (*$x)(int) })
   );
   Array lines = [];
   foreach (List item, shown) lines.push(item.repr());

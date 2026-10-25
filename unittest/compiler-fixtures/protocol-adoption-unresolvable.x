@@ -9,7 +9,7 @@ Var Widget.var(Widget w) {
 }
 
 String Widget.str(Widget w) {
-  return %"Widget(${w.x})";
+  return %"Widget($(w.x))";
 }
 
 /* No reverse conversion 'Var.widget' or 'Var.as_widget': the declared

@@ -7,49 +7,49 @@
 
 meta int optional_List_listchar(int unused) {
   (void) unused;
-  List xs = %(${(char) 65});
+  List xs = %($((char) 65));
   ListChar view = xs.listchar(), empty = %().listchar();
   return view === xs
     && empty.len() == 0;
 }
 meta int optional_List_listshort(int unused) {
   (void) unused;
-  List xs = %(${(short) 65});
+  List xs = %($((short) 65));
   ListShort view = xs.listshort(), empty = %().listshort();
   return view === xs
     && empty.len() == 0;
 }
 meta int optional_List_listint(int unused) {
   (void) unused;
-  List xs = %(${65});
+  List xs = %($(65));
   ListInt view = xs.listint(), empty = %().listint();
   return view === xs
     && empty.len() == 0;
 }
 meta int optional_List_listfloat(int unused) {
   (void) unused;
-  List xs = %(${(float) 1.5});
+  List xs = %($((float) 1.5));
   ListFloat view = xs.listfloat(), empty = %().listfloat();
   return view === xs
     && empty.len() == 0;
 }
 meta int optional_List_listdbl(int unused) {
   (void) unused;
-  List xs = %(${1.5});
+  List xs = %($(1.5));
   ListDbl view = xs.listdbl(), empty = %().listdbl();
   return view === xs
     && empty.len() == 0;
 }
 meta int optional_List_liststring(int unused) {
   (void) unused;
-  List xs = %(${"abc"});
+  List xs = %($("abc"));
   ListString view = xs.liststring(), empty = %().liststring();
   return view === xs
     && empty.len() == 0;
 }
 meta int optional_List_listsymbol(int unused) {
   (void) unused;
-  List xs = %(${<abc>});
+  List xs = %($(<abc>));
   ListSymbol view = xs.listsymbol(), empty = %().listsymbol();
   return view === xs
     && empty.len() == 0;
@@ -68,7 +68,7 @@ meta int optional_List_cddddr(int unused) {
 }
 meta int optional_Var_listchar(int unused) {
   (void) unused;
-  List xs = %(${(char) 65});
+  List xs = %($((char) 65));
   Var value = xs, other = 7;
   ListChar view = value.listchar(), empty = other.listchar();
   return view === xs
@@ -76,7 +76,7 @@ meta int optional_Var_listchar(int unused) {
 }
 meta int optional_Var_listshort(int unused) {
   (void) unused;
-  List xs = %(${(short) 65});
+  List xs = %($((short) 65));
   Var value = xs, other = 7;
   ListShort view = value.listshort(), empty = other.listshort();
   return view === xs
@@ -84,7 +84,7 @@ meta int optional_Var_listshort(int unused) {
 }
 meta int optional_Var_listint(int unused) {
   (void) unused;
-  List xs = %(${65});
+  List xs = %($(65));
   Var value = xs, other = 7;
   ListInt view = value.listint(), empty = other.listint();
   return view === xs
@@ -92,7 +92,7 @@ meta int optional_Var_listint(int unused) {
 }
 meta int optional_Var_listfloat(int unused) {
   (void) unused;
-  List xs = %(${(float) 1.5});
+  List xs = %($((float) 1.5));
   Var value = xs, other = 7;
   ListFloat view = value.listfloat(), empty = other.listfloat();
   return view === xs
@@ -100,7 +100,7 @@ meta int optional_Var_listfloat(int unused) {
 }
 meta int optional_Var_listdbl(int unused) {
   (void) unused;
-  List xs = %(${1.5});
+  List xs = %($(1.5));
   Var value = xs, other = 7;
   ListDbl view = value.listdbl(), empty = other.listdbl();
   return view === xs
@@ -108,7 +108,7 @@ meta int optional_Var_listdbl(int unused) {
 }
 meta int optional_Var_liststring(int unused) {
   (void) unused;
-  List xs = %(${"abc"});
+  List xs = %($("abc"));
   Var value = xs, other = 7;
   ListString view = value.liststring(), empty = other.liststring();
   return view === xs
@@ -116,7 +116,7 @@ meta int optional_Var_liststring(int unused) {
 }
 meta int optional_Var_listsymbol(int unused) {
   (void) unused;
-  List xs = %(${<abc>});
+  List xs = %($(<abc>));
   Var value = xs, other = 7;
   ListSymbol view = value.listsymbol(), empty = other.listsymbol();
   return view === xs

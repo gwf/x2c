@@ -16,7 +16,7 @@ $rewrite($lambda_expression)
    lifts to a function of its own. */
 meta Code share_answer(Code node) {
   match (node)
-    case %(expr ? ${$lambda_expression(%(expr ? (literal ? "42")), %())}):
+    case %(expr ? $($lambda_expression(%(expr ? (literal ? "42")), %()))):
       return $!( answer );
   return node;
 }

@@ -7,7 +7,7 @@ int main(void) {
   Error.policy_set(<runtime-in>, <collect>);
   int mark = Error.mark();
   raise %(runtime-in
-          (detail (nested ${%"marker"})));
+          (detail (nested $(%"marker"))));
   List entry = Error.since(mark).car();
   List detail = entry.assoc(<detail>);
   List nested = detail.car().list().cadr();

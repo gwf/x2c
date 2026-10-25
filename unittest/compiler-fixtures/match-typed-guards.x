@@ -101,7 +101,7 @@ int main(void) {
 
   void *raw = "raw";
   int pointer = 0;
-  match (%(${raw})) {
+  match (%($(raw))) {
     case %(?(String value)): pointer = -1;
     case %(?(void *value)): pointer = value == raw;
   }
@@ -116,12 +116,12 @@ int main(void) {
 
   int evaluations = 0, dynamic = 0;
   match (%("value" 5))
-    case %(?(String value) ${++evaluations + 4}): dynamic = value.len();
+    case %(?(String value) $(++evaluations + 4)): dynamic = value.len();
   printf("dynamic %d %d\n", dynamic, evaluations);
 
   int cleanup = 0, final = 0, visited = 0, continued = 0, caught = 0;
   for (int i = 0; i < 3; i++) {
-    match (%(tick ${i})) {
+    match (%(tick $(i))) {
       case %(tick ?(int value)) if (value < 2): {
         defer cleanup++;
         try {

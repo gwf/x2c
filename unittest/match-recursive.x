@@ -222,7 +222,7 @@ static List _bindings(RecursiveMatchState &state) {
       int length = state.span_length[i];
       value = length ? state.span_begin[i][:length] : (List) NULL;
     }
-    result = cons(%(${state.layout.binders[i]} $value), result);
+    result = cons(%($(state.layout.binders[i]) $value), result);
   }
   return result;
 }

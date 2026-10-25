@@ -11,7 +11,7 @@ static inline Row Var.row(Var value) {
 }
 
 String Row.summary(Row value) {
-  return %"row:${value.len()}";
+  return %"row:$(value.len())";
 }
 
 protocol Var(Row) as List;

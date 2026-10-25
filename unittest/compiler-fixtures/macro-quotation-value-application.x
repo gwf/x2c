@@ -7,7 +7,7 @@ macro Expression $sum(Expr $a, Expr $b) => $a + $b;
 
 meta static List scaled(void) {
   Macro s = $sum;
-  return $!( ${s(1, 2)} * 10 );
+  return $!( $(s(1, 2)) * 10 );
 }
 
 meta static List held(void) {

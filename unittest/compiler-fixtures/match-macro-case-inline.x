@@ -16,27 +16,27 @@ macro Stmt $tried2(Stmt $body, Stmt $finalizer) {
 
 static String inline_raise(List node) {
   match (node) case $raised2(?code, *details):
-    return %"${code.repr()} ${details.var().repr()}";
+    return %"$(code.repr()) $(details.var().repr())";
   return "none";
 }
 
 static String generic_raise(List node) {
   Macro raised = $raised2;
   match (node) case raised(?code, *details):
-    return %"${code.repr()} ${details.var().repr()}";
+    return %"$(code.repr()) $(details.var().repr())";
   return "none";
 }
 
 static String inline_index(List node) {
   match (node) case $indexed2(?receiver, ?selector):
-    return %"${receiver.repr()} ${selector.repr()}";
+    return %"$(receiver.repr()) $(selector.repr())";
   return "none";
 }
 
 static String generic_index(List node) {
   Macro indexed = $indexed2;
   match (node) case indexed(?receiver, ?selector):
-    return %"${receiver.repr()} ${selector.repr()}";
+    return %"$(receiver.repr()) $(selector.repr())";
   return "none";
 }
 
@@ -53,14 +53,14 @@ static String generic_return(List node) {
 
 static String inline_try(List node) {
   match (node) case $tried2(?body, ?finalizer):
-    return %"${body.repr()} ${finalizer.repr()}";
+    return %"$(body.repr()) $(finalizer.repr())";
   return "none";
 }
 
 static String generic_try(List node) {
   Macro tried = $tried2;
   match (node) case tried(?body, ?finalizer):
-    return %"${body.repr()} ${finalizer.repr()}";
+    return %"$(body.repr()) $(finalizer.repr())";
   return "none";
 }
 

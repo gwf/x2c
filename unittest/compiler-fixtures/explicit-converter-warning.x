@@ -26,8 +26,8 @@ int main(void) {
   int count = _count(none.list());
   int pair = _pair(none.list(), none.list());
   s = v.str();
-  String hole = %"value ${v.str()}";
-  List holes = %(${s.var()});
+  String hole = %"value $(v.str())";
+  List holes = %($(s.var()));
   int chained = none.list().len();
   _write(v.string());
   printf("%s %s %s %d %d %s\n", _label(v), name, hole, count, chained,

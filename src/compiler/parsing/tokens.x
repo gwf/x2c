@@ -75,9 +75,8 @@ static int _starts_operand(Symbol type) {
   switch (type)
     case <ident>: case <lit-int>: case <lit-float>: case <lit-char>:
     case <lit-char*>: case <lit-atom>: case <lit-symbol>: case <(>:
-    case <"%(">: case <"%[">: case <"%{">: case <"$(">: case <"${">:
-    case <$>: case <!>: case <->: case <*>: case <&>: case <~>: case <++>:
-    case <-->:
+    case <"%(">: case <"%[">: case <"%{">: case <$>: case <!>: case <->:
+    case <*>: case <&>: case <~>: case <++>: case <-->:
       return 1;
   return 0;
 }

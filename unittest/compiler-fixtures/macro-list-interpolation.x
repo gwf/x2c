@@ -14,26 +14,26 @@ meta static List make_list(List value) {
 }
 
 meta static Macro anonymous_list(void) =>
-  macro Expression(Expr $value) => %("path: ${$value}");
+  macro Expression(Expr $value) => %("path: $($value)");
 meta static List apply_anonymous(List value) {
   Macro template = anonymous_list();
   return template(value);
 }
 
 macro Stmt $show(Expr $value) {
-  List notes = %("path: ${$value}");
+  List notes = %("path: $($value)");
   printf("%s\n", (char *) notes.repr());
 }
 
-macro Expression $notes(Expr $value) => %("path: ${$value}");
-macro Expression $nested(Expr $value) => %(("path: ${$value}"));
-macro Expression $percent(Expr $value) => %(%"path: ${$value}");
-macro Expression $wrapped(Expr $value) => %(${%"path: ${$value}"});
-macro Expression $text(Expr $value) => %"path: ${$value}";
+macro Expression $notes(Expr $value) => %("path: $($value)");
+macro Expression $nested(Expr $value) => %(("path: $($value)"));
+macro Expression $percent(Expr $value) => %(%"path: $($value)");
+macro Expression $wrapped(Expr $value) => %($(%"path: $($value)"));
+macro Expression $text(Expr $value) => %"path: $($value)";
 macro Expression $constant() => %(fixed ("path: constant"));
 macro Expression $fresh() => %([0] ({key: 0}));
 macro Expression $ordered(Expr $a, Expr $b, Expr $c) =>
-  %("a ${$a}" ("b ${$b}") "c ${$c}");
+  %("a $($a)" ("b $($b)") "c $($c)");
 
 macro Expression $constructed(Expr $value) => $make_list($value);
 macro Expression $anonymous(Expr $value) => $apply_anonymous($value);

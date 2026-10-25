@@ -503,7 +503,7 @@ static void cache_invocation_releases_on_transfer(void) {
   });
   long first = 1, second = 2;
   Var pattern = Var.new(<cacheobj>, &first);
-  List input = %(${Var.new(<cacheobj>, &second)});
+  List input = %($(Var.new(<cacheobj>, &second)));
   MatchCache cache = MatchCache.new(2);
   List bindings = %(unchanged);
   int caught = 0;

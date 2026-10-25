@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/grouped-unquote-missing.x:5:1: parse: expected ')'
+  }
+  ^
+

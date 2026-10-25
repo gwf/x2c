@@ -2,7 +2,7 @@
 
 meta List string_len_call(List value) {
   List method = Type.resolve_member(Code.type(value), "len", 1);
-  return %(expr () (call (expr ${method[2]} (ident ${method[1]}))
+  return %(expr () (call (expr $(method[2]) (ident $(method[1])))
     (args $value)));
 }
 

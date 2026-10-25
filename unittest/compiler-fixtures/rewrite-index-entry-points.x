@@ -15,19 +15,19 @@ int Indexed.setindex(Indexed value, int key, int next) {
   (void) value; (void) key; return next;
 }
 
-$rewrite($at, $!Indexed{${%(!and ?base)}}, <?key>)
+$rewrite($at, $!Indexed{$(%(!and ?base))}, <?key>)
 meta Code probe_read(Code code) { (void) code; return $!int{101}; }
-$rewrite($put, $!Indexed{${%(!and ?base)}}, <?key>, <?value>)
+$rewrite($put, $!Indexed{$(%(!and ?base))}, <?key>, <?value>)
 meta Code probe_store(Code code) { (void) code; return $!int{102}; }
-$rewrite($add_at, $!Indexed{${%(!and ?base)}}, <?key>, <?value>)
+$rewrite($add_at, $!Indexed{$(%(!and ?base))}, <?key>, <?value>)
 meta Code probe_update(Code code) { (void) code; return $!int{103}; }
-$rewrite($before_at, $!Indexed{${%(!and ?base)}}, <?key>)
+$rewrite($before_at, $!Indexed{$(%(!and ?base))}, <?key>)
 meta Code probe_prefix(Code code) { (void) code; return $!int{104}; }
-$rewrite($after_at, $!Indexed{${%(!and ?base)}}, <?key>)
+$rewrite($after_at, $!Indexed{$(%(!and ?base))}, <?key>)
 meta Code probe_postfix(Code code) { (void) code; return $!int{105}; }
 
 /* Later matching rules must not replace the first accepted rule. */
-$rewrite($at, $!Indexed{${%(!and ?base)}}, <?key>)
+$rewrite($at, $!Indexed{$(%(!and ?base))}, <?key>)
 meta Code later_read(Code code) { (void) code; return $!int{999}; }
 
 int main(void) {

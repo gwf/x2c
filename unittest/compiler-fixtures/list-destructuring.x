@@ -11,7 +11,7 @@ int main(void) {
   int user_destructure_0 = 9;
   Var (a, b, c) = values();
   int (x, y) = values();
-  (int mixed_i, float mixed_x, char mixed_c) = %(5 6.5 ${'m'});
+  (int mixed_i, float mixed_x, char mixed_c) = %(5 6.5 $('m'));
   Var first, missing;
   (first, missing) = %(7);
   (c) = values();

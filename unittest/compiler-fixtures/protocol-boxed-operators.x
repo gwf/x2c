@@ -19,7 +19,7 @@ Vec Vec.new(int value) {
 }
 
 String Vec.str(Vec value) {
-  return %"Vec(${value.value})";
+  return %"Vec($(value.value))";
 }
 
 int Vec.truth(Vec value) {

@@ -94,7 +94,7 @@ static int local_macros(int base) {
     enum LocalState {
       states()
     } state = LOCAL_DONE;
-    Map entries = %{ ${pair("answer", 42)} };
+    Map entries = %{ $(pair("answer", 42)) };
 
     field_value = local.value;
     enum_value = state;

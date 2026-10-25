@@ -8,7 +8,7 @@ static List simplify(List node):
       return simplify(%(if $condition $no $yes))
     case %(if true ?yes ?): return simplify(yes)
     case %(block *body):
-      return %(block @{body.map(%!(List item) => simplify(item))})
+      return %(block @(body.map(%!(List item) => simplify(item))))
     default: return node
 
 int positive(int x):

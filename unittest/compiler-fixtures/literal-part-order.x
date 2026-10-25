@@ -17,17 +17,17 @@ static List items(String name) {
 
 int main(void) {
   trail = "";
-  List inserted = %(${note("a")} ${note("b")});
-  List spliced = %("w" @{items("c")} "e" @{items("d")});
-  String joined = %"${note("e")}-${note("f")}";
-  Array quoted = %[${note("g")}, ${note("h")}];
+  List inserted = %($(note("a")) $(note("b")));
+  List spliced = %("w" @(items("c")) "e" @(items("d")));
+  String joined = %"$(note("e"))-$(note("f"))";
+  Array quoted = %[$(note("g")), $(note("h"))];
   Array bare = [note("i"), note("j")];
-  Map keyed = %{${note("k")}: ${note("l")}};
+  Map keyed = %{$(note("k")): $(note("l"))};
   Map braced = {note("m"): note("n")};
-  List nested = %((${note("o")}) ${note("p")});
+  List nested = %(($(note("o"))) $(note("p")));
   String name = "q";
   List stable = %($name $trail);
-  List leading = %(${note("r")} $name);
+  List leading = %($(note("r")) $name);
   Array native = [BOXED(note("s")), note("t")];
   printf("%s %ld %ld %ld %ld %ld %ld %ld %ld %ld %ld %ld\n", (char *) trail,
          (long) inserted.len(), (long) spliced.len(), (long) joined.len(),

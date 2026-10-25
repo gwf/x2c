@@ -1,5 +1,0 @@
-unittest/compiler-fixtures/macro-at-reject-lisp.x:4:21: parse: compile-time Lisp forms are not supported
-  macro Stmt $old() { $(list)... }
-                      ^^
-  note: write the compile-time code as an x2c meta function
-

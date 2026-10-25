@@ -1,8 +1,8 @@
 macro Stmt $fail(Expr $cause, Expr $op, Expr @fields) {
-  raise %($cause (operation ${$op}) @fields);
+  raise %($cause (operation $($op)) @fields);
 }
 macro Stmt $keyed(Expr $cause, Expr $key, Expr $value) {
-  raise %($cause ($key ${$value}));
+  raise %($cause ($key $($value)));
 }
 int main(void) {
   Error.policy_set(<probe>, <collect>);

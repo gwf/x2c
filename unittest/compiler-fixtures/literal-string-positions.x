@@ -24,9 +24,9 @@ int main(void) {
   foreach (Var ch, ("ab")) printf("%s,", ch.repr());
   foreach (Var ch, x ? "cd" : "e") printf("%s,", ch.repr());
   printf("\n");
-  try raise %(boom (msg ${("text")}));
+  try raise %(boom (msg $(("text"))));
   catch %(boom (msg ?m)): printf("%s\n", m.repr());
-  try raise %(boom (msg ${x ? "yes" : "no"}));
+  try raise %(boom (msg $(x ? "yes" : "no")));
   catch %(boom (msg ?m)): printf("%s\n", m.repr());
   String s = GREETING, b = "b";
   printf("%d %d %d %d\n", size(GREETING), s.len(), GREETING.len(),

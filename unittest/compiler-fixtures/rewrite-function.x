@@ -18,7 +18,7 @@ meta Code count_entries(Code function) {
   if (!Code.name(function).startswith("counted_")) return function;
   match (function) case %(function ?type ?declarator ?):
     return %(function $type $declarator
-      (block ${$!{ entries++; }} @{Code.body(function)}));
+      (block $($!{ entries++; }) @(Code.body(function))));
   return function;
 }
 

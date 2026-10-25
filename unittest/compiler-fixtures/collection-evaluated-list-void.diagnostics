@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/collection-evaluated-list-void.x:7:28: type: cannot convert (void) to Var without loss
+    List xs = $(1, nothing());
+                             ^
+

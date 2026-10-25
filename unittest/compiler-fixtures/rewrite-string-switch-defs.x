@@ -26,7 +26,7 @@ meta static Var _tswitch_rewrite(Var node, Array labels, Array others) {
   match (list) {
     case %(switch *): return list;
     case %(case ?label) if (_tswitch_literal(label)):
-      return %(case ${$!int{ ${_tswitch_index(label, labels)} }});
+      return %(case $($!int{ $(_tswitch_index(label, labels)) }));
     case %(at ? (case ?label)) if (!_tswitch_literal(label)):
       others.push(list);
   }
@@ -38,7 +38,7 @@ meta static Var _tswitch_rewrite(Var node, Array labels, Array others) {
 /* `selected == label1 ? 1 : selected == label2 ? 2 : ... : 0`. */
 meta static List _tswitch_dispatch(Code selected, Array labels, int i) {
   if (i == labels.len()) return $!int{ 0 };
-  List label = labels[i], index = $!int{ ${i + 1} };
+  List label = labels[i], index = $!int{ $(i + 1) };
   List rest = _tswitch_dispatch(selected, labels, i + 1);
   return $!( $selected == $label ? $index : $rest );
 }

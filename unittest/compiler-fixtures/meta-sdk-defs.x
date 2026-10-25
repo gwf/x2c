@@ -23,32 +23,32 @@ meta List ms_fields(TypeInfo type) => type.assoc(<fields>);
 meta List ms_field_reads(List receiver, TypeInfo type) {
   Array reads = [];
   foreach (List field, ms_fields(type))
-    reads.push($!( $receiver.${field.car()} ));
+    reads.push($!( $receiver.$(field.car()) ));
   return reads;
 }
 
 /* `{ p.x, p.y, p.z }`, built from the fields rather than written out. */
 meta List ms_reads(List receiver, TypeInfo type) =>
-  $!( { @{ms_field_reads(receiver, type)} } );
+  $!( { @(ms_field_reads(receiver, type)) } );
 
 /* `ms_total(p.x, p.y, p.z)`, a call the unit defines the callee for. */
 meta List ms_total_call(List receiver, TypeInfo type) =>
-  $!( ms_total(@{ms_field_reads(receiver, type)}) );
+  $!( ms_total(@(ms_field_reads(receiver, type))) );
 
 /* The field names as one comma-joined String literal. */
 meta List ms_names(TypeInfo type) {
   Array names = [];
   foreach (List field, ms_fields(type)) names.push(field.car());
-  return $!String{ ${String.join(", ", names)} };
+  return $!String{ $(String.join(", ", names)) };
 }
 
 meta List ms_count(TypeInfo type) =>
-  $!int{ ${ms_fields(type).len()} };
+  $!int{ $(ms_fields(type).len()) };
 
 /* The spelling the developer wrote, which only the source text answers.
    A `Source` argument carries that text with the captured syntax. */
 meta List ms_spelling(Source node) =>
-  $!String{ ${Code.source_text(node)} };
+  $!String{ $(Code.source_text(node)) };
 
 /* A `meta` function that reaches no `Meta` operation, so it keeps both of
    its forms the way M1 and M2 left it. */

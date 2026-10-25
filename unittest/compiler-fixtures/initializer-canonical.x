@@ -4,14 +4,14 @@ typedef struct Pair { String first; String second; } Pair;
 
 meta static List canonical_of(List yes, List no) {
   return %(expr (int) (initval
-    ((expr (int) (literal (int) "1")) () (int) ${yes})
-    (() () (int) ${no})));
+    ((expr (int) (literal (int) "1")) () (int) $(yes))
+    (() () (int) $(no))));
 }
 
 meta static List chain_of(List value) {
   return %(expr () (composite (commas
     (indexinit (expr (int) (literal (int) "0"))
-      (dotinit ("second") ${value})))));
+      (dotinit ("second") $(value))))));
 }
 
 macro Expression $canonical(Expr $yes, Expr $no) => $canonical_of($yes, $no);

@@ -7,11 +7,11 @@ static int note(int value) {
   return value;
 }
 
-static List items(int value) => %(${note(value)} ${note(value + 1)});
+static List items(int value) => %($(note(value)) $(note(value + 1)));
 
 int main(void) {
-  List chain = %(fixed ${note(1)} @{items(2)} (${note(4)})
-                 ${note(5)} @{items(6)});
+  List chain = %(fixed $(note(1)) @(items(2)) ($(note(4)))
+                 $(note(5)) @(items(6)));
   if (trail != 1234567 || chain.len() != 8) return 1;
   if (chain[0].symbol() != <fixed> || chain[1].integer() != 1 ||
       chain[2].integer() != 2 || chain[3].integer() != 3 ||

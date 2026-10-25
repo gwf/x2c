@@ -30,7 +30,7 @@ static void interp_list_value(void) {
 
 static void interp_list_expr(void) {
   int x = 41;
-  List lst = %( a ${x + 1} b );
+  List lst = %( a $(x + 1) b );
   EXPECT_LIST_EQ(lst, %( a 42 b ));
 }
 
@@ -38,9 +38,9 @@ static void interp_list_expr(void) {
 static void interp_context_boundaries(void) {
   int value = 7;
   List list = %($value(tail));
-  List braced_list = %(${value}(tail));
+  List braced_list = %($(value)(tail));
   String text = %"$value()";
-  String braced_text = %"${value}()";
+  String braced_text = %"$(value)()";
   Array array = [$meta_support_sum(1, 2)];
   Map map = {answer: $meta_support_sum(2, 3)};
 
@@ -55,7 +55,7 @@ static void interp_context_boundaries(void) {
 
 static void interp_braced_nested_meta(void) {
   int direct = $meta_support_sum(1, 2);
-  List braced = %(${$meta_support_sum(1, 2)});
+  List braced = %($($meta_support_sum(1, 2)));
   EXPECT_INT_EQ(direct, 3);
   EXPECT_LIST_EQ(braced, %(3));
 }
@@ -63,7 +63,7 @@ static void interp_braced_nested_meta(void) {
 
 static void interp_braced_complete_expression(void) {
   int value = 0;
-  List list = %(${value = 1, (value + 1)});
+  List list = %($(value = 1, (value + 1)));
   EXPECT_INT_EQ(value, 1);
   EXPECT_LIST_EQ(list, %(2));
 }
@@ -101,8 +101,8 @@ static Var _interp_splice_call(int list_value) {
 }
 
 static void interp_splice_var_call(void) {
-  List braced = %( a @{_interp_splice_call(1)} b );
-  List braced_wrong = %( a @{_interp_splice_call(0)} b );
+  List braced = %( a @(_interp_splice_call(1)) b );
+  List braced_wrong = %( a @(_interp_splice_call(0)) b );
   EXPECT_LIST_EQ(braced, %( a x y b ));
   EXPECT_LIST_EQ(braced_wrong, %( a b ));
 }
@@ -113,7 +113,7 @@ static void interp_string_value(void) {
 }
 
 static void interp_string_expr(void) {
-  String x = "42", s = %"Value: ${x}";
+  String x = "42", s = %"Value: $(x)";
   EXPECT_STR_EQ(s, "Value: 42");
 }
 
@@ -125,7 +125,7 @@ static void interp_string_numeric_value(void) {
 
 static void interp_string_numeric_expr(void) {
   int x = 41;
-  String s = %"Value: ${x + 1}";
+  String s = %"Value: $(x + 1)";
   EXPECT_STR_EQ(s, "Value: 42");
 }
 
@@ -161,7 +161,7 @@ static void interp_string_symbol_value(void) {
 
 static void interp_string_symbol_expr(void) {
   Symbol symbol = <foo>;
-  String s = %"sym: ${symbol}";
+  String s = %"sym: $(symbol)";
   EXPECT_STR_EQ(s, "sym: foo");
 }
 
@@ -173,7 +173,7 @@ static void interp_string_converter_value(void) {
 
 static void interp_string_converter_expr(void) {
   Celsius temp = 21;
-  String s = %"temp: ${temp}";
+  String s = %"temp: $(temp)";
   EXPECT_STR_EQ(s, "temp: C21");
 }
 
@@ -194,9 +194,9 @@ static void interp_string_var_value(void) {
 static void interp_string_var_expr(void) {
   Var integer = 5, floating = 3.14, string = "text";
 
-  EXPECT_STR_EQ(%"v = ${integer}", "v = 5");
-  EXPECT_STR_EQ(%"v = ${floating}", "v = 3.140000");
-  EXPECT_STR_EQ(%"v = ${string}", "v = text");
+  EXPECT_STR_EQ(%"v = $(integer)", "v = 5");
+  EXPECT_STR_EQ(%"v = $(floating)", "v = 3.140000");
+  EXPECT_STR_EQ(%"v = $(string)", "v = text");
 }
 
 static void interp_string_var_alias_value(void) {
@@ -210,9 +210,9 @@ static void interp_string_var_alias_value(void) {
 static void interp_string_var_alias_expr(void) {
   Reading integer = 5, floating = 3.14, string = "text";
 
-  EXPECT_STR_EQ(%"v = ${integer}", "v = 5");
-  EXPECT_STR_EQ(%"v = ${floating}", "v = 3.140000");
-  EXPECT_STR_EQ(%"v = ${string}", "v = text");
+  EXPECT_STR_EQ(%"v = $(integer)", "v = 5");
+  EXPECT_STR_EQ(%"v = $(floating)", "v = 3.140000");
+  EXPECT_STR_EQ(%"v = $(string)", "v = text");
 }
 
 #include "test-macros.x"

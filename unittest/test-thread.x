@@ -78,16 +78,16 @@ static Var _thread_test_worker(const void *input, size_t input_size) {
   try raise %(worker-loc);
   catch %(worker-loc): caught = 1;
   int matched = 0;
-  List match_input = %(worker ${data.value});
+  List match_input = %(worker $(data.value));
   match (match_input) {
     case %(worker ?number): matched = number.int() == data.value;
   }
   if (data.mutex)
-    log_info(<thread-tes>, %((value ${data.value})));
+    log_info(<thread-tes>, %((value $(data.value))));
 
   for (int i = 0; i < data.iterations; i++) {
     String garbage = String.printf("worker-%d-%d", data.value, i);
-    List cells = %(garbage $garbage value ${data.value});
+    List cells = %(garbage $garbage value $(data.value));
     (void) cells;
     data.mutex.lock();
     (*data.counter)++;

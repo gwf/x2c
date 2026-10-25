@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/grouped-unquote-string-empty.x:4:20: parse: expected atomic expression
+    return %"prefix$()suffix";
+                     ^
+  note: token: ) kind: )
+

@@ -151,15 +151,15 @@ meta String text_plain(String text) {
   return t;
 }
 meta String text_numbers(int x, int y) {
-  String t = %"${x} and ${y}";
+  String t = %"$(x) and $(y)";
   return t;
 }
 meta String text_expressions(String who) {
-  return %"hi $who, ${who.upper()} ${who.len() + 1}";
+  return %"hi $who, $(who.upper()) $(who.len() + 1)";
 }
 meta String text_nested(String who) {
   String e = "";
-  return %"[${e}]${%"<$who>"}$e";
+  return %"[$(e)]$(%"<$who>")$e";
 }
 meta String text_empty(int unused) {
   (void) unused;

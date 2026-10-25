@@ -10,7 +10,7 @@ meta static List binding_of(List value) {
   return %();
 }
 
-meta static List bind_of(List value) => %(bind ${binding_of(value)} ());
+meta static List bind_of(List value) => %(bind $(binding_of(value)) ());
 
 macro Expression $expr_spelling(Expr $value) =>
   $Code.binding_spelling($value);

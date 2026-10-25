@@ -12,7 +12,7 @@ static int statement_result;
 meta static List private_int(String spelling, String value) {
   return %(declare (static int)
     (bindings
-      (op = (bind ${x2c_ident(spelling)} ())
+      (op = (bind $(x2c_ident(spelling)) ())
             (expr (int) (literal (int) $value)))));
 }
 
@@ -21,13 +21,13 @@ meta static List same_rows(List rows) => rows;
 meta static List return_rows(void) => %((return));
 
 meta static List with_private_sibling(List target) =>
-  %($target ${private_int("private_meta_sibling", "11")});
+  %($target $(private_int("private_meta_sibling", "11")));
 
 meta static List with_generated_sibling(List target) =>
-  %($target ${private_int("private_generated_meta_sibling", "12")});
+  %($target $(private_int("private_generated_meta_sibling", "12")));
 
 meta static List with_before_sibling(List target) =>
-  %(${private_int("private_before_meta_sibling", "13")} $target);
+  %($(private_int("private_before_meta_sibling", "13")) $target);
 
 macro Expression $call(Expr $callee, Expr @arguments) =>
   $callee(@arguments);
@@ -37,8 +37,8 @@ macro Expression $outer(Expr $value) => $type_size(int) + $value;
 macro Expression $increment(Expr $value) => ($value) + 1;
 macro Expression $nested_comma(Expr $value) => (0, $increment($value));
 macro Expression $nested_size(Expr $value) => sizeof($increment($value));
-macro Expression $list_value(Expr $value) => %(${$value});
-macro Expression $array_value(Expr $value) => %[${$increment($value)}, 2];
+macro Expression $list_value(Expr $value) => %($($value));
+macro Expression $array_value(Expr $value) => %[$($increment($value)), 2];
 macro Expression $lambda_value(Expr $value) => %!() => $increment($value);
 macro Expression $parenthesized($value) => ($value);
 macro Expression $absolute(Expr $value) using abs => abs($value);

@@ -1,5 +1,0 @@
-unittest/compiler-fixtures/braced-list-splice-empty.x:4:21: parse: expected atomic expression
-    return %(prefix @{} suffix);
-                      ^
-  note: token: } kind: }
-

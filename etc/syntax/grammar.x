@@ -775,6 +775,8 @@ List syntax_grammar(void) => %(grammar
         (ref initializer)
         (ref array)
         (ref map)
+        (ref evaluated-list)
+        (ref evaluated-map)
         (ref quoted-list)
         (ref quoted-array)
         (ref quoted-map)
@@ -861,6 +863,32 @@ List syntax_grammar(void) => %(grammar
           (ref assignment))
         (ref entry-extension)))
 
+    (rule evaluated-list
+      (seq
+        (token "\$")
+        (token "(")
+        (optional
+          (seq
+            (ref assignment)
+            (repeat 0 (seq (token ",") (ref assignment)))
+            (optional (token ","))))
+        (token ")")))
+
+    (rule evaluated-map
+      (seq
+        (choice (seq (token "\$") (token "{")) (token "\${"))
+        (optional
+          (seq
+            (ref evaluated-entry)
+            (repeat 0 (seq (token ",") (ref evaluated-entry)))
+            (optional (token ","))))
+        (token "}")))
+
+    (rule evaluated-entry
+      (choice
+        (seq (ref assignment) (token ":") (ref assignment))
+        (ref entry-extension)))
+
     (rule generic
       (seq
         (token "_Generic")
@@ -931,6 +959,7 @@ List syntax_grammar(void) => %(grammar
         (ref literal-element)
         (ref insertion)
         (ref splice)
+        (ref evaluated-map)
         (seq (ref reader-prefix) (ref list-element))))
 
     (rule literal-element
@@ -945,12 +974,12 @@ List syntax_grammar(void) => %(grammar
     (rule insertion
       (choice
         (seq (token "\$") (ref identifier))
-        (seq (token "\${") (ref expression) (token "}"))))
+        (seq (token "\$(") (ref expression) (token ")"))))
 
     (rule splice
       (choice
         (seq (token "@") (ref identifier))
-        (seq (token "@{") (ref expression) (token "}"))))
+        (seq (token "@(") (ref expression) (token ")"))))
 
     (rule reader-prefix
       (choice (token "'") (token "`") (token ",") (token ",@")))
@@ -970,9 +999,10 @@ List syntax_grammar(void) => %(grammar
 
     (rule quoted-array-item
       (choice (ref data-element) (ref argument-slot)
-        (seq (token "\${") (ref argument-slot) (token "}"))))
+        (seq (token "\$(") (ref argument-slot) (token ")"))))
 
-    (rule data-element (choice (ref literal-element) (ref insertion)))
+    (rule data-element
+      (choice (ref literal-element) (ref insertion) (ref evaluated-map)))
 
     (rule quoted-map
       (seq
@@ -991,7 +1021,7 @@ List syntax_grammar(void) => %(grammar
         (ref quoted-entry-extension)))
 
     (rule quoted-entry-extension
-      (seq (token "\${") (ref entry-extension) (token "}")))
+      (seq (token "\$(") (ref entry-extension) (token ")")))
 
     (rule percent-string
       (seq
@@ -1161,7 +1191,7 @@ List syntax_grammar(void) => %(grammar
       (external "type operand or computed type under M4"))
 
     (rule quotation-items
-      (external "contents selected by quotation kind, with \${expr} and @{expr} holes; M4"))
+      (external "contents selected by quotation kind, with \$(expr) and @(expr) holes; M4"))
 
     (rule result-kind
       (choice

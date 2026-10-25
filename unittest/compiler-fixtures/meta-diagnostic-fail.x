@@ -21,7 +21,7 @@ meta static void fail_inner(String text) {
 
 meta static List fail_outer(Source node) {
   fail_inner(Code.source_text(node));
-  return $!String{ ${"unreached"} };
+  return $!String{ $("unreached") };
 }
 
 macro Expression $probe.word(Expr $value) => $one_word($value);

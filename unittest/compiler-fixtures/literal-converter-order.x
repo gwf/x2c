@@ -26,7 +26,7 @@ static Var shadowed(List value) {
 
 int main(void) {
   Score first = 1, second = 2;
-  List explicit = %(${first.var()} ${second.var()});
+  List explicit = %($(first.var()) $(second.var()));
   printf("explicit %d %ld\n", observed, (long) explicit.len());
   observed = 0;
   List implicit = %($first $second);
@@ -38,7 +38,7 @@ int main(void) {
   Array values = [first, second];
   printf("array %d %ld\n", observed, (long) values.len());
   observed = 0;
-  Map entry = %{${first}: ${second}};
+  Map entry = %{$(first): $(second)};
   printf("map %d %ld\n", observed, (long) entry.len());
   observed = 0;
   String text = %"$first$second";
@@ -46,10 +46,10 @@ int main(void) {
   observed = 0;
   List empty = NULL;
   Var (*List_var)(List) = shadowed;
-  List calls = %(${List_var(empty)} $second);
+  List calls = %($(List_var(empty)) $second);
   printf("shadow %d %ld\n", observed, (long) calls.len());
   observed = 0;
-  List aliases = %(${((int) first).packed()} ${((int) second).packed()});
+  List aliases = %($(((int) first).packed()) $(((int) second).packed()));
   printf("alias %d %ld\n", observed, (long) aliases.len());
   return 0;
 }

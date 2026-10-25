@@ -3,8 +3,8 @@
 
 meta static List identity(List rows) => rows;
 macro Expression $call(Expr $callee, Expr @args) => $callee(@identity($args));
-macro Expression $array(Expr @args) => %[${@identity($args)}];
-macro Expression $map(Entry @rows) => %{${@identity($rows)}};
+macro Expression $array(Expr @args) => %[$(@identity($args))];
+macro Expression $map(Entry @rows) => %{$(@identity($rows))};
 macro Expression $lambda(Expr $body, Param @params) =>
   %!(@identity($params)) => $body;
 macro Unit $fields(Name $name, Field @rows) {

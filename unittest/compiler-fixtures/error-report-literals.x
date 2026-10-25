@@ -33,13 +33,13 @@ macro Stmt $report.macro_helper_timeout(
   $c.report_error(
     <macro>,
     "%s%g s".printf("this meta call ran longer than ", $limit),
-    $site, %("function: ${$name}" "set X2C_META_TIMEOUT to a larger limit in seconds, or 0 for none"));
+    $site, %("function: $($name)" "set X2C_META_TIMEOUT to a larger limit in seconds, or 0 for none"));
 }
 
 macro Stmt $report.type_destructure_list(Expr $c, Expr $source_type) {
   $c.report_error(
     <type>, "destructuring requires a List source",
-    NULL, %(("source type" ${$source_type})));
+    NULL, %(("source type" $($source_type))));
 }
 
 macro Stmt $report.protocol_meta_adoption(Expr $c, Expr $origin) {
@@ -51,7 +51,7 @@ macro Stmt $report.protocol_meta_adoption(Expr $c, Expr $origin) {
 macro Stmt $report.type_ident_untyped(
   Expr $c, Expr $spelling, Expr $origin) {
   $c.report_error(
-    <type>, %"identifier '${$spelling}' has no semantic type",
+    <type>, %"identifier '$($spelling)' has no semantic type",
     $origin, NULL);
 }
 

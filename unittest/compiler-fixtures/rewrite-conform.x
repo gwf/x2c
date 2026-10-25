@@ -36,7 +36,7 @@ meta Code ring_members(Code node) {
 typedef struct Badge { long id; } *Badge;
 Var Badge.var(Badge b) => Var.new(<badge>, b);
 Badge Var.badge(Var v) => (Badge) v.pointer();
-String Badge.str(Badge b) => %"badge ${b.id}";
+String Badge.str(Badge b) => %"badge $(b.id)";
 protocol Var(Badge);
 
 int main(void) {

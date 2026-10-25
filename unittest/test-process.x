@@ -41,7 +41,7 @@ static void process_status_reports_exit_and_signal(void) {
   $test.scoped();
   EXPECT_INT_EQ(%(true).job().status(), 0);
   EXPECT_INT_EQ(%(sh -c "exit 7").job().status(), 7);
-  EXPECT_INT_EQ(%(sh -c ${"kill -TERM $$"}).job().status(), 128 + SIGTERM);
+  EXPECT_INT_EQ(%(sh -c $("kill -TERM $$")).job().status(), 128 + SIGTERM);
 }
 
 static void process_status_and_errors_never_raise(void) {
@@ -452,7 +452,7 @@ static void process_jobs_wait_kill_and_clean_up(void) {
   $test.scoped();
   Array jobs = [];
   for (int i = 3; i >= 1; i--)
-    jobs.push(%(sh -c ${%"sleep 0.$i; exit $i"}).job().start());
+    jobs.push(%(sh -c $(%"sleep 0.$i; exit $i")).job().start());
   Array order = [];
   while (jobs.len()) order.push(Job.wait_any(jobs).status());
   EXPECT_TRUE(order.equal([1, 2, 3]));
