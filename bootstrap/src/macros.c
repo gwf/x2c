@@ -3552,7 +3552,7 @@ static List f22_definitions_quotations____expression_holes(Compiler c, Map holes
   Array locals = Array_new();
   Symbol last = 0;
   for(Token t = Token_skip_trivia(saved + 1);  t < close;  t = Token_skip_trivia(t + 1)){
-    Token brace = t + 1, next = Token_skip_trivia(brace);
+    Token group = t + 1, next = Token_skip_trivia(group);
     if(t -> type == 73 && next -> type == 60){
       next = Token_skip_trivia(next + 1);
       if(String_is_identifier(next -> text)) next = Token_skip_trivia(next + 1);
@@ -3560,10 +3560,10 @@ static List f22_definitions_quotations____expression_holes(Compiler c, Map holes
       Token typed = Token_after_group(next);
       if(next -> type == 81 && typed -> type == 247) t = Token_group_close(typed);
     }
-    else if((t -> type == 129 || t -> type == 73) &&(brace -> type == 247 || brace -> type == 81) &&(last != 199882 || Token_skip_trivia(brace + 1) -> type != 73)){
-      c -> token = brace;
+    else if((t -> type == 129 || t -> type == 73) && group -> type == 81 &&(last != 199882 || Token_skip_trivia(group + 1) -> type != 73)){
+      c -> token = group;
       Array_push(locals, List_var(f22_definitions_quotations____hole_local(c, holes, t -> pos)));
-      t = Token_group_close(brace);
+      t = Token_group_close(group);
     }
     last = t -> type;
   }
@@ -3576,15 +3576,14 @@ List Sym_introduce(Sym, String);
 static Type List_type(List);
 
 static List f22_definitions_quotations____hole_local(Compiler c, Map holes, int position){
-  Symbol close = Compiler_peek(c, 0) == 81 ? 83 : 251;
-  Compiler_next(c);
+  Compiler_expect(c, 81);
   Token origin = c -> token;
   List value = Compiler_parse_expression(c);
   if(! Var_truth(List_cadr(value))){
     String _x2c_gensym_macro_message_0 = _207;
     Compiler_report_error(c, 1362954, _x2c_gensym_macro_message_0, origin, _210);
   }
-  Compiler_expect(c, close);
+  Compiler_expect(c, 83);
   String name = Compiler_fresh_name(c, _211);
   Map_setindex(holes, List_var(cons(_187, cons(int_var(position), NULL))), String_var(name));
   Var constant = Compiler_folded_constant(c, List_var(value));
@@ -3614,7 +3613,7 @@ static List f22_definitions_quotations____quoted_type(Compiler c, Map holes){
   Token origin = c -> token;
   List type = NULL;
   if(Compiler_peek(c, 0) == 73){
-    Var name = Compiler_peek(c, 1) == 247 || Compiler_peek(c, 1) == 81 ? Map_getindex(holes, List_var(cons(_187, cons(int_var(c -> token -> pos), NULL)))) : String_var(Token_skip_trivia(c -> token + 1) -> text);
+    Var name = Compiler_peek(c, 1) == 81 ? Map_getindex(holes, List_var(cons(_187, cons(int_var(c -> token -> pos), NULL)))) : String_var(Token_skip_trivia(c -> token + 1) -> text);
     c -> token = Compiler_after_hole(c);
     type = f22_definitions_quotations____checked_type(c, Compiler_resolve_expression(c, cons(_69, cons(_61, cons(List_var(cons(_218, cons(String_var(Var_str(name)), NULL))), NULL))), origin), origin);
   }
@@ -3958,7 +3957,7 @@ static List _quoted_hole(Compiler c, String spelling, Token prefix){
   List local = Sym_lookup(c -> sym, cons(String_var(spelling), NULL), &(type));
   if(! List_truth(local) || ! Sym_binding_is_local(c -> sym, local)) return NULL;
   Symbol kind = Sym_is_named_value_type(c -> sym, type, _298) ? 1362954 : 0;
-  int sequence = prefix -> type == 129 || prefix -> type == 16631 || prefix -> type == 16465;
+  int sequence = prefix -> type == 129 || prefix -> type == 16465;
   List hole = _record_hole(c, spelling, kind, sequence);
   Var quoted = Map_getindex(c -> macro_holes, List_var(_300));
   Map_setindex(c -> macro_holes, List_var(_300), List_var(cons(List_var(hole), Var_is_row(quoted, 9, 7, 4) ? Var_list(quoted) : NULL)));
@@ -4003,7 +4002,7 @@ static List f17_definitions_slots____hole_slot(Compiler c, Symbol role){
   if(role == 405758822009820 && Var_int(List_assoc(hole, Symbol_var(1317592723658)))) Compiler_report_error(c, 33658058, _302, c -> token, NULL);
   if(!(SymbolSet_contains(f17_definitions_slots___untyped_roles, role))){
     Symbol kind = Var_symbol(List_assoc(hole, Symbol_var(740232)));
-    if(! kind && Compiler_peek(c, 0) != 129 && Compiler_peek(c, 0) != 16631 && Compiler_peek(c, 0) != 16465 && ! _quoted_role(c, role)) return NULL;
+    if(! kind && Compiler_peek(c, 0) != 129 && Compiler_peek(c, 0) != 16465 && ! _quoted_role(c, role)) return NULL;
     if(kind && ! f17_definitions_slots____kind_accepts_role(kind, role)) return NULL;
   }
   List syntax = _parse_hole(c, role);
@@ -4013,9 +4012,9 @@ static List f17_definitions_slots____hole_slot(Compiler c, Symbol role){
 List Compiler_peek_macro_hole(Compiler c){
   if(! _init_guard_) _file_init_();
   Symbol prefix = Compiler_peek(c, 0);
-  if(prefix == 16631 || prefix == 16465) return _expression_hole(c, c -> token);
+  if(prefix == 16465) return _expression_hole(c, c -> token);
   if(prefix != 73 && prefix != 129) return NULL;
-  if(Compiler_peek(c, 1) == 247 || Compiler_peek(c, 1) == 81) return _expression_hole(c, c -> token);
+  if(Compiler_peek(c, 1) == 81) return _expression_hole(c, c -> token);
   if(Compiler_peek(c, 1) != 19147688) return NULL;
   Token name = Token_skip_trivia(c -> token + 1);
   List hole = _hole_record(c, Atom_intern(name -> text));
@@ -4024,9 +4023,9 @@ List Compiler_peek_macro_hole(Compiler c){
 
 Token Compiler_after_hole(Compiler c){
   if(! _init_guard_) _file_init_();
-  if(Compiler_peek(c, 0) == 16631 || Compiler_peek(c, 0) == 16465) return Token_after_group(c -> token);
+  if(Compiler_peek(c, 0) == 16465) return Token_after_group(c -> token);
   Token next = Token_skip_trivia(c -> token + 1);
-  return next -> type == 247 || next -> type == 81 ? Token_after_group(next) : Token_skip_trivia(next + 1);
+  return next -> type == 81 ? Token_after_group(next) : Token_skip_trivia(next + 1);
 }
 
 static List _parse_hole(Compiler c, Symbol role){
@@ -4035,7 +4034,7 @@ static List _parse_hole(Compiler c, Symbol role){
   if(! List_truth(hole)) _unbound(c, _hole_name_token(c, token -> type) -> text, token);
   c -> token = Compiler_after_hole(c);
   Atom name = _hole_name(hole);
-  int sequence = token -> type == 129 || token -> type == 16631 || token -> type == 16465;
+  int sequence = token -> type == 129 || token -> type == 16465;
   if(sequence != Var_int(List_assoc(hole, Symbol_var(1317592723658)))) f17_definitions_slots____cardinality_error(c, Atom_str(name), sequence, token);
   if(sequence && !(SymbolSet_contains(f17_definitions_slots___sequence_roles, role))) Compiler_report_error(c, 33658058, _301, c -> token, NULL);
   Symbol inferred = f17_definitions_slots____role_kind(role), kind = Var_symbol(List_assoc(hole, Symbol_var(740232)));

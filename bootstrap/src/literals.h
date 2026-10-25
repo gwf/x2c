@@ -44,6 +44,8 @@ List Compiler_parse_map_literal(Compiler c);
 
 List Compiler_parse_map_entries(Compiler c);
 
+List Compiler_parse_evaluated_map(Compiler c);
+
 List Compiler_parse_map_entry(Compiler c);
 
 List Compiler_parse_string_literal(Compiler c);

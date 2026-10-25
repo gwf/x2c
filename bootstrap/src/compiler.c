@@ -1639,7 +1639,7 @@ static void f18_parsing_collection____shallow_block(Compiler c){
   Compiler_next(c);
   for(Symbol peek = Compiler_peek(c, 0);  peek != 251;  peek = Compiler_peek(c, 0)){
     if(peek == 11212) Compiler_report_error(c, 33658058, _15, c -> token, NULL);
-    if(peek == 247 || peek == 9719 || peek == 9463 || peek == 16631) f18_parsing_collection____shallow_block(c);
+    if(peek == 247 || peek == 9719 || peek == 9463) f18_parsing_collection____shallow_block(c);
     else Compiler_next(c);
   }
   Compiler_expect(c, 251);
@@ -2633,7 +2633,7 @@ void Compiler_next(Compiler c){
 
 static void f14_parsing_tokens____update_brace_stack(Compiler c, Token consumed){
   if(! consumed) return;  switch(consumed -> type){
-    case 247 : case 9719 : case 9463 : case 16631 : Array_push(c -> braces, Token_var(consumed));  break;  case 251 : if(Array_len(c -> braces)) Array_take_last(c -> braces);  else Compiler_report_error(c, 33658058, _194, consumed, _197);  break;
+    case 247 : case 9719 : case 9463 : Array_push(c -> braces, Token_var(consumed));  break;  case 251 : if(Array_len(c -> braces)) Array_take_last(c -> braces);  else Compiler_report_error(c, 33658058, _194, consumed, _197);  break;
   }
 
 }
@@ -2652,7 +2652,7 @@ static void _check_unmatched_braces(Compiler c){
 
 int Symbol_group_step(Symbol s){
   if(! _init_guard_) _file_init_();  switch(s){
-    case 81 : case 183 : case 247 : case 16209 : case 9297 : case 16465 : case 9463 : case 9553 : case 9655 : case 9719 : case 16631 : return 1;  case 83 : case 187 : case 251 : return - 1;
+    case 81 : case 183 : case 247 : case 16209 : case 9297 : case 16465 : case 9463 : case 9553 : case 9655 : case 9719 : return 1;  case 83 : case 187 : case 251 : return - 1;
   }
   return 0;
 }

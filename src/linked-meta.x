@@ -99,7 +99,7 @@ static List _selector_definitions(Macro car, Macro cdr) =>
 
 List _scalar_access_record(Type type) {
   String name = "_native_scalar_access";
-  foreach (Symbol word in (List) type) name = %"${name}_$word";
+  foreach (Symbol word in (List) type) name = %"$(name)_$word";
   return x2c_ident(name);
 }
 

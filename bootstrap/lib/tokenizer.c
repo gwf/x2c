@@ -703,7 +703,7 @@ static int _lisp_prefix(Tokenizer t, int list, int collection){
   if(list && text[0] == '?' && text[1] == '(') return _operator(t, 2);
   if(text[0] == '$' && ! list && ! collection) return _named_reference(t);
   if(list && text[0] == '@' &&(! text[1] || text[1] == '=' || strchr(" \t\n\v\f\r)", text[1]))) return Tokenizer_tokenize(t, text[1] == '=' ? 2 : 1, 845368370138);
-  if((list || collection) &&(text[0] == '$' || text[0] == '@')) return text[1] == '{' || text[1] == '(' ? _operator(t, 2) : _named_reference(t);
+  if((list || collection) &&(text[0] == '$' || text[0] == '@')) return text[1] == '(' ||(text[0] == '$' && text[1] == '{') ? _operator(t, 2) : _named_reference(t);
   return 0;
 }
 
@@ -864,8 +864,6 @@ static int _operator(Tokenizer t, int len){
       break;
       case 16209 : if(mode == 806120) push = 1059020479160805;
       break;
-      case 16631 : push = 3945159;
-      break;
       case 247 : push = 26720;
       token_type = 9719;
       break;
@@ -1015,7 +1013,7 @@ static Token _before_group(Tokenizer tokenizer, Token close, Symbol opener){
     switch((-- scan) -> type){
       case 83 : case 251 : depth ++;
       break;
-      case 81 : case 9553 : case 9297 : case 16465 : case 16209 : case 247 : case 9719 : case 9463 : case 16631 : if(-- depth) break;
+      case 81 : case 9553 : case 9297 : case 16465 : case 16209 : case 247 : case 9719 : case 9463 : if(-- depth) break;
       return scan -> type == opener ? _significant_before(tokenizer, scan) : NULL;
     }
 

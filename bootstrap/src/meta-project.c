@@ -764,7 +764,7 @@ static int _file_scope(Scan * s, Tokenizer tokens, String directory){
   for(Token token = Tokenizer_next(tokens);  token -> type != 11212;  token = Tokenizer_next(tokens)){
     String word = token -> text;
     switch(token -> type){
-      case 247 : case 9719 : case 9463 : case 16631 : depth ++;
+      case 247 : case 9719 : case 9463 : depth ++;
       continue;
       case 251 : depth --;
       continue;
