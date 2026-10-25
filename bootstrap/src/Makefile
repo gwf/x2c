@@ -1,18 +1,16 @@
 ###############################################################################
 
 CFLAGS   =	-iquote . -iquote ../lib $(FLAGS)
-LDFLAGS  =	-L../lib -lx2c -lm
+LDFLAGS  =	-lm
 SRCS     =  $(wildcard *.c)
 OBJS     =  $(SRCS:%.c=%.o)
 # A native module binds to the compiler's own runtime, so the compiler links
-# the whole runtime archive, and a Linux executable exports its functions
-# only when asked.
+# every runtime object but the Lisp interpreter and its target table, and a
+# Linux executable exports its functions only when asked.
+RUNTIME  =  $(filter-out ../lib/lisp.o ../lib/lisp-targets.o, \
+	      $(patsubst %.c,%.o,$(wildcard ../lib/*.c)))
 UNAME_S  := $(shell uname -s)
-ifeq ($(UNAME_S),Darwin)
-LDFLAGS  =	-Wl,-force_load,../lib/libx2c.a -lm
-endif
 ifeq ($(UNAME_S),Linux)
-LDFLAGS  =	-L../lib -Wl,--whole-archive -lx2c -Wl,--no-whole-archive -lm
 LDFLAGS  +=	-rdynamic
 endif
 
@@ -21,7 +19,7 @@ endif
 ../../bin/x2c: x2c install
 
 x2c: $(OBJS) ../lib/libx2c.a
-	$(CC) -o $@ $(OBJS) $(LDFLAGS)
+	$(CC) -o $@ $(OBJS) $(RUNTIME) $(LDFLAGS)
 	rm -f ../../bin/x2c-bootstrap
 	cp x2c ../../bin/x2c-bootstrap
 
