@@ -603,7 +603,7 @@ List Compiler_token_location(Compiler, Token);
 
 List MetaContext_invocation_location(void){
   if(! _init_guard_) _file_init_();
-  if(! active.expander || ! active.site) MetaContext_reject(_0, NULL);
+  if(! active.expander || ! List_truth(active.expander -> macro_stack) || ! active.site) MetaContext_reject(_0, NULL);
   return Compiler_token_location(active.expander, active.site);
 }
 

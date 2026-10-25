@@ -683,7 +683,7 @@ static List f23_invocations_expressions____named_macro_value(Compiler c, Token i
 
 static List f23_invocations_expressions____parse_meta_call(Compiler c, Token invocation);
 
-static Array f23_invocations_expressions____meta_arguments(Compiler c, List parameters);
+static Array f23_invocations_expressions____meta_arguments(Compiler c, List parameters, Symbol head);
 
 static List f23_invocations_expressions____meta_argument(Compiler c);
 
@@ -7075,7 +7075,7 @@ static List f23_invocations_expressions____parse_meta_call(Compiler c, Token inv
   Type signature = Var_type(List_cadr(callee));  if(! Type_is_function(signature)){
     c -> token = invocation;  Atom name = _name(c); (void) _lookup(c, name, invocation);
   }
-  Array arguments = f23_invocations_expressions____meta_arguments(c, Var_list_payload(List_cadr(Var_list(List_car(Type_list(signature))))));  Type result = Map_truth(c -> macro_holes) ? List_type(_71) : List_cdr(signature);  Symbol head = c -> meta_body && ! Map_truth(c -> macro_holes) && ! c -> in_pattern ? 199448 : 28973981698840;  List call =({
+  Symbol head = c -> meta_body && ! Map_truth(c -> macro_holes) && ! c -> in_pattern ? 199448 : 28973981698840;  Array arguments = f23_invocations_expressions____meta_arguments(c, Var_list_payload(List_cadr(Var_list(List_car(Type_list(signature))))), head);  Type result = Map_truth(c -> macro_holes) ? List_type(_71) : List_cdr(signature);  List call =({
     Var _x2c_gensym_literal_part_99 = List_var(result);  Var _x2c_gensym_literal_part_100 = List_var(({
       Var _x2c_gensym_literal_part_96 = Symbol_var(head);  Var _x2c_gensym_literal_part_97 = List_var(callee);  Var _x2c_gensym_literal_part_98 = List_var(cons(_180, List_append(Array_list_free(arguments), NULL)));  cons(_x2c_gensym_literal_part_96, cons(_x2c_gensym_literal_part_97, cons(_x2c_gensym_literal_part_98, NULL)));
     }
@@ -7084,9 +7084,10 @@ static List f23_invocations_expressions____parse_meta_call(Compiler c, Token inv
   );  return Compiler_resolve_expression(c, call, invocation);
 }
 
-static Array f23_invocations_expressions____meta_arguments(Compiler c, List parameters){
+int Sym_is_var_type(Sym, Type);
+static Array f23_invocations_expressions____meta_arguments(Compiler c, List parameters, Symbol head){
   Array arguments = Array_new();  Compiler_expect(c, 81);  if(Compiler_peek(c, 0) != 83) while(1){
-    List argument = f23_invocations_expressions____meta_argument(c);  if(List_truth(parameters) && ! Map_truth(c -> macro_holes)) argument = Compiler_convert_expression(c, argument, Var_type(List_car(parameters)));  parameters = List_cdr(parameters);  Array_push(arguments, List_var(argument));  if(! Compiler_test(c, 89)) break;
+    List argument = f23_invocations_expressions____meta_argument(c);  if(List_truth(parameters) && ! Map_truth(c -> macro_holes) && !(head == 28973981698840 && Sym_is_var_type(c -> sym, Var_type(List_car(parameters))))) argument = Compiler_convert_expression(c, argument, Var_type(List_car(parameters)));  parameters = List_cdr(parameters);  Array_push(arguments, List_var(argument));  if(! Compiler_test(c, 89)) break;
   }
   Compiler_expect(c, 83);  return arguments;
 }

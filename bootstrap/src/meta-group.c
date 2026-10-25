@@ -2870,10 +2870,14 @@ static Array f9_selection____reachable(Compiler c, Array ordered, Map reached){
               spec = _x2c_gensym_match_value_0;
               Var declarator;
               declarator = _x2c_gensym_match_value_1;
-              Array_push(units, List_var(({
-                Var _x2c_gensym_literal_part_129 = spec;  Var _x2c_gensym_literal_part_130 = List_var(cons(_166, cons(declarator, NULL)));  cons(_165, cons(_x2c_gensym_literal_part_129, cons(_x2c_gensym_literal_part_130, NULL)));
+              {
+                List prototype =({
+                  Var _x2c_gensym_literal_part_129 = spec;  Var _x2c_gensym_literal_part_130 = List_var(cons(_166, cons(declarator, NULL)));  cons(_165, cons(_x2c_gensym_literal_part_129, cons(_x2c_gensym_literal_part_130, NULL)));
+                }
+                );
+                if(List_truth(Type_list(Type_base_type(Type_apply(List_type_from_ast(prototype)))))) Array_push(units, List_var(prototype));
               }
-              )));
+
             }
              break; } } } default: break;
           }
