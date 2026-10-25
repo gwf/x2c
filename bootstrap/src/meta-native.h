@@ -8,6 +8,15 @@
 #include "x2c.h"
 #include "compiler/compiler.h"
 #include "compiler-meta.h"
+#include "diff.h"
+#include "digest.h"
+#include "json.h"
+#include "list-selectors.h"
+#include "process.h"
+#include "regex.h"
+#include "typed-array.h"
+#include "typed-list.h"
+#include "typed-map.h"
 #include "grammar.h"
 #include "macros/macros.h"
 #include "meta-group/meta-group.h"
@@ -21,6 +30,8 @@
 #include <stdlib.h>
 #include <string.h>
 Map Compiler_compiler_targets(void);
+
+Map Compiler_builtin_module(void);
 
 Map Compiler_native_targets(void);
 
@@ -67,6 +78,28 @@ List Compiler_evaluate_meta_statement(Compiler c, List expression, Symbol contex
 Var Compiler_run_meta_call(Compiler c, List expression, Token site, int slot);
 
 Var Compiler_apply_meta_function(Compiler c, String name, List arguments, Token site);
+
+Var Compiler_apply_meta_binding(Compiler c, String name, Var function, List arguments);
+
+struct MetaBindings{
+  Scope scope, values;
+  Map functions;
+}
+;
+
+MetaBindings MetaBindings_new(void);
+
+void MetaBindings_destroy(MetaBindings b);
+
+int MetaBindings_try_get(MetaBindings b, String name, Var * out);
+
+void MetaBindings_set(MetaBindings b, String name, Var function);
+
+void MetaBindings_bind(MetaBindings b, String name, Func function);
+
+MetaBindings Compiler_bindings(Compiler c);
+
+int Compiler_meta_binding(Compiler c, String name, Var * out);
 
 void Compiler_record_native_meta_effect(Compiler c, List declaration, Token marker);
 

@@ -37,11 +37,11 @@ ParsedUnit;
 #include "collect/collect.h"
 #include "deps.h"
 #include "utils.h"
-static List _74, _73, _69, _68, _66, _64, _49, _48, _47, _39, _38, _32, _31, _30, _21, _20, _13;
+static List _70, _69, _65, _64, _62, _60, _49, _48, _47, _39, _38, _32, _31, _30, _21, _20, _13;
 
-static String _71, _62, _60, _59, _58, _57, _56, _55, _54, _52, _51, _50, _45, _43, _41, _40, _36, _34, _33, _28, _26, _24, _23, _17, _16, _15, _14, _11, _10, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _67, _58, _56, _55, _54, _52, _51, _50, _45, _43, _41, _40, _36, _34, _33, _28, _26, _24, _23, _17, _16, _15, _14, _11, _10, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
-static Var _72, _70, _67, _65, _63, _61, _53, _46, _44, _42, _37, _35, _29, _27, _25, _22, _19, _18, _12, _9;
+static Var _68, _66, _63, _61, _59, _57, _53, _46, _44, _42, _37, _35, _29, _27, _25, _22, _19, _18, _12, _9;
 
 static int _init_guard_ = 0;
 
@@ -93,8 +93,6 @@ static void _tokenize_cpp(Compiler cpp, String text);
 
 static void _share_session(Compiler cpp, Compiler c);
 
-static int _preload_meta_surface(Frontend frontend, Lisp shared);
-
 typedef struct _x2c_gensym_defer_env_0{
   const void * _x2c_gensym_defer_capture_1;
   const void * _x2c_gensym_defer_capture_2;
@@ -111,13 +109,6 @@ _x2c_gensym_defer_env_1;
 
 static void _x2c_gensym_defer_cleanup_1(void * _x2c_gensym_defer_opaque_1);
 
-typedef struct _x2c_gensym_defer_env_2{
-  const void * _x2c_gensym_defer_capture_5;
-}
-_x2c_gensym_defer_env_2;
-
-static void _x2c_gensym_defer_cleanup_2(void * _x2c_gensym_defer_opaque_2);
-
 static Var _x2c_gensym_lambda_0(String path);
 
 static Var _x2c_gensym_func_adapt_0(Func _x2c_gensym_func_binding_0, const FuncArg * _x2c_gensym_func_argv_0);
@@ -129,12 +120,12 @@ static Func _x2c_gensym_func_handle_0;
 
 
 
-_x2c_gensym_initializer_choice_1A2A7247_0((_x2c_gensym_func_handle_0 = x2c_func_shared(_x2c_gensym_func_adapt_0, _74)))
+_x2c_gensym_initializer_choice_1A2A7247_0((_x2c_gensym_func_handle_0 = x2c_func_shared(_x2c_gensym_func_adapt_0, _70)))
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
-  _0 = String_new("$(begin)\n" "void print(String text);\n" "void println(String text);\n" "int printf(const char *format, ...);\n" "int puts(const char *text);\n");
+  _0 = String_new("void print(String text);\n" "void println(String text);\n" "int printf(const char *format, ...);\n" "int puts(const char *text);\n");
   _1 = String_new("<repl>");
   _2 = String_new("#!");
   _3 = String_new("/");
@@ -191,24 +182,20 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _54 = String_new("status: ");
   _55 = String_new("#");
   _56 = String_new("<");
-  _57 = String_new("/lib/meta.x");
-  _58 = String_new("x2c_");
-  _59 = String_new("Code_");
-  _60 = String_new("Type_");
-  _61 = Symbol_var(437126);
-  _62 = String_new("String");
-  _63 = String_var(_62);
+  _57 = Symbol_var(437126);
+  _58 = String_new("String");
+  _59 = String_var(_58);
+  _60 = cons(_59, NULL);
+  _61 = List_var(_60);
+  _62 = cons(_61, NULL);
+  _63 = List_var(_62);
   _64 = cons(_63, NULL);
-  _65 = List_var(_64);
-  _66 = cons(_65, NULL);
-  _67 = List_var(_66);
-  _68 = cons(_67, NULL);
-  _69 = cons(_61, _68);
-  _70 = List_var(_69);
-  _71 = String_new("Var");
-  _72 = String_var(_71);
-  _73 = cons(_72, NULL);
-  _74 = cons(_70, _73);
+  _65 = cons(_57, _64);
+  _66 = List_var(_65);
+  _67 = String_new("Var");
+  _68 = String_var(_67);
+  _69 = cons(_68, NULL);
+  _70 = cons(_66, _69);
   _x2c_gensym_static_initialize_0();
 }
 
@@ -434,7 +421,7 @@ void ParsedUnit_close(ParsedUnit * unit){
   if(!(* unit).context) return;
   Compiler c =(* unit).compiler;
   if((* unit).preprocessor) Compiler_close_child(c, (* unit).preprocessor);
-  Compiler_free_lisp(c);
+  Compiler_free_bindings(c);
   Type_end_unit((* unit).enclosing_var_tags);
   Context_close((* unit).context);
   (* unit) =(ParsedUnit){
@@ -442,10 +429,6 @@ void ParsedUnit_close(ParsedUnit * unit){
   }
   ;
 }
-
-int Compiler_inherits_import(String);
-
-Path Path_absolute(Path);
 
 void Compiler_begin_meta_unit(Compiler, String);
 
@@ -470,7 +453,6 @@ static int _start(Frontend frontend, String filename, ParsedUnit * unit, Context
         c -> package_dirs = CliRequest_package_roots(frontend -> request);
         Compiler_configure_package(c, c -> package_source_dirs, filename);
         _tokenize_input(frontend, &((* unit)), filename);
-        c -> inherited_lisp = Compiler_inherits_import(Path_absolute(filename));
         Compiler_begin_meta_unit(c, c -> filename);
       }
 
@@ -548,7 +530,7 @@ static void _tokenize_session(Frontend frontend, Compiler c, String source){
   c -> filename = _1;
   c -> prelude = c -> runtime_inc = 1;
   c -> include_dirs = frontend -> include_dirs;
-  Compiler_tokenize(c, String_truth(source) ? source : "$(begin)");
+  Compiler_tokenize(c, String_truth(source) ? source : "");
 }
 
 int Compiler_defines_main(Compiler);
@@ -769,6 +751,8 @@ static Map _collect_input(Frontend frontend, ParsedUnit * unit){
 
 }
 
+Path Path_absolute(Path);
+
 static void _enter_package(Frontend frontend, Compiler c){
   Map packages = frontend -> request -> collection_packages;
   if(packages == NULL) return;
@@ -853,108 +837,9 @@ static void _tokenize_cpp(Compiler cpp, String text){
 
 static void _share_session(Compiler cpp, Compiler c){
   cpp -> load_source = c -> load_source;
-  cpp -> imports = c -> imports;
-  cpp -> macro_lisp = c -> macro_lisp;
-  cpp -> borrowed_lisp = cpp -> macro_lisp != NULL;
+  cpp -> meta_bindings = c -> meta_bindings;
+  cpp -> borrowed_bindings = cpp -> meta_bindings != NULL;
   Compiler_share_meta_group(cpp, c);
-}
-
-Lisp Compiler_open_macro_library(Compiler);
-
-void Compiler_publish_macro_library(Compiler, Lisp);
-
-int Frontend_preload_macro_libraries(Frontend frontend){
-  if(! _init_guard_) _file_init_();
-  Compiler c = Compiler_new();
-  Lisp shared = Compiler_open_macro_library(c);
-  if(shared && ! _preload_meta_surface(frontend, shared)){
-    Lisp_destroy(shared);
-    Compiler_publish_macro_library(c, NULL);
-    Compiler_forget_provisional_entries();
-    return 0;
-  }
-  Compiler_publish_macro_library(c, shared);
-  Compiler_forget_provisional_entries();
-  return 1;
-}
-
-void Compiler_bind_meta_operation(Lisp, String, Var);
-
-static int _preload_meta_surface(Frontend frontend, Lisp shared){
-  struct CliRequest request = * frontend -> request;
-  request.dump = 0;
-  request.no_cpp = request.live_symbols = request.cpp_symbols = 0;
-  struct Frontend session = * frontend;
-  session.request = & request;
-  ParsedUnit unit;
-  String path = String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_57), NULL)));
-  Context context = Context_open_named("shared translation unit");
-  int started = _start(& session, path, &(unit), context, NULL);
-  Compiler c = unit.compiler;
-  c -> macro_lisp = shared;
-  c -> borrowed_lisp = 1;
-  {
-    _x2c_gensym_defer_env_2 _x2c_gensym_macro_environment_2 ={
-      0
-    }
-    ;
-    _x2c_gensym_macro_environment_2._x2c_gensym_defer_capture_5 =(const void *) & unit;
-    X2CCleanup _x2c_gensym_defer_record_2 ={
-      .fn = _x2c_gensym_defer_cleanup_2, .env = & _x2c_gensym_macro_environment_2
-    }
-    ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_2);
-    {
-      if(started) Compiler_own_diagnostics(c);
-      else{
-        List entry;
-        List _x2c_gensym_macro_object_5 = Compiler_diagnostics(c);
-        List _x2c_gensym_macro_cursor_5 = _x2c_gensym_macro_object_5;
-        Var _x2c_gensym_macro_cursor_output_6;
-        while(List_try_next(_x2c_gensym_macro_object_5, &(_x2c_gensym_macro_cursor_5), &(_x2c_gensym_macro_cursor_output_6))){
-          entry = Var_list_payload(_x2c_gensym_macro_cursor_output_6);
-          Compiler_print_diagnostic(c, entry);
-        }
-
-      }
-      if(! started || ! ParsedUnit_collect(&(unit), & session) || ! ParsedUnit_parse(&(unit))){
-        int _x2c_gensym_return_value_5 = 0;
-        {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_2);
-          return _x2c_gensym_return_value_5;
-        }
-
-      }
-      {
-        String name;
-        Iter _x2c_gensym_macro_iterator_6 = Map_keys(c -> meta_hashes, &(struct Iter){
-          int_var(0)
-        }
-        );
-        Var _x2c_gensym_macro_item_6;
-        while(Iter_try_next(_x2c_gensym_macro_iterator_6, &(_x2c_gensym_macro_item_6))){
-          name = Var_as_string(_x2c_gensym_macro_item_6);
-          {
-            Var function;
-            if((String_startswith(name, _58) || String_startswith(name, _59) || String_startswith(name, _60)) && Lisp_try_get(shared, name, &(function))) Compiler_bind_meta_operation(shared, name, function);
-          }
-
-        }
-
-      }
-      {
-        int _x2c_gensym_return_value_6 = 1;
-        {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_2);
-          return _x2c_gensym_return_value_6;
-        }
-
-      }
-
-    }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_2);
-  }
-
 }
 
 void Compiler_select_native_modules(List);
@@ -986,11 +871,6 @@ static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0){
 static void _x2c_gensym_defer_cleanup_1(void * _x2c_gensym_defer_opaque_1){
   _x2c_gensym_defer_env_1 * _x2c_gensym_defer_data_1 =(_x2c_gensym_defer_env_1 *) _x2c_gensym_defer_opaque_1;
   *(*(String * *) _x2c_gensym_defer_data_1->_x2c_gensym_defer_capture_3) =(*(String *) _x2c_gensym_defer_data_1->_x2c_gensym_defer_capture_4);
-}
-
-static void _x2c_gensym_defer_cleanup_2(void * _x2c_gensym_defer_opaque_2){
-  _x2c_gensym_defer_env_2 * _x2c_gensym_defer_data_2 =(_x2c_gensym_defer_env_2 *) _x2c_gensym_defer_opaque_2;
-  ParsedUnit_close(&((*(ParsedUnit *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_5)));
 }
 
 String Compiler_load_native_module(String);

@@ -50,8 +50,6 @@ int ParsedUnit_parse(ParsedUnit * p);
 
 void ParsedUnit_close(ParsedUnit * unit);
 
-int Frontend_preload_macro_libraries(Frontend frontend);
-
 void Frontend_load_support(CliRequest request);
 
 Frontend Frontend_new(CliRequest request);

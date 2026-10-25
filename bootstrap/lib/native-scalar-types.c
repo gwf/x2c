@@ -1,8 +1,80 @@
+#define _x2c_gensym_initializer_choice_A5BC2A2E_0_expanded(_x2c_gensym_static_input_0) static void _x2c_gensym_static_initialize_0(void){\
+  _x2c_gensym_static_input_0;\
+}
+#define _x2c_gensym_initializer_choice_A5BC2A2E_0(_x2c_gensym_static_input_0) _x2c_gensym_initializer_choice_A5BC2A2E_0_expanded(_x2c_gensym_static_input_0)
+#define _x2c_gensym_initializer_choice_A5BC2A2E_1_expanded(_x2c_gensym_static_input_1) static void _x2c_gensym_static_initialize_1(void){\
+  _x2c_gensym_static_input_1;\
+}
+#define _x2c_gensym_initializer_choice_A5BC2A2E_1(_x2c_gensym_static_input_1) _x2c_gensym_initializer_choice_A5BC2A2E_1_expanded(_x2c_gensym_static_input_1)
+#define _x2c_gensym_initializer_choice_A5BC2A2E_2_expanded(_x2c_gensym_static_input_2) static void _x2c_gensym_static_initialize_2(void){\
+  _x2c_gensym_static_input_2;\
+}
+#define _x2c_gensym_initializer_choice_A5BC2A2E_2(_x2c_gensym_static_input_2) _x2c_gensym_initializer_choice_A5BC2A2E_2_expanded(_x2c_gensym_static_input_2)
+#define _x2c_gensym_initializer_choice_A5BC2A2E_3_expanded(_x2c_gensym_static_input_3) static void _x2c_gensym_static_initialize_3(void){\
+  _x2c_gensym_static_input_3;\
+}
+#define _x2c_gensym_initializer_choice_A5BC2A2E_3(_x2c_gensym_static_input_3) _x2c_gensym_initializer_choice_A5BC2A2E_3_expanded(_x2c_gensym_static_input_3)
+#define _x2c_gensym_initializer_choice_A5BC2A2E_4_expanded(_x2c_gensym_static_input_4) static void _x2c_gensym_static_initialize_4(void){\
+  _x2c_gensym_static_input_4;\
+}
+#define _x2c_gensym_initializer_choice_A5BC2A2E_4(_x2c_gensym_static_input_4) _x2c_gensym_initializer_choice_A5BC2A2E_4_expanded(_x2c_gensym_static_input_4)
+#define _x2c_gensym_initializer_choice_A5BC2A2E_5_expanded(_x2c_gensym_static_input_5) static void _x2c_gensym_static_initialize_5(void){\
+  _x2c_gensym_static_input_5;\
+}
+#define _x2c_gensym_initializer_choice_A5BC2A2E_5(_x2c_gensym_static_input_5) _x2c_gensym_initializer_choice_A5BC2A2E_5_expanded(_x2c_gensym_static_input_5)
+#define _x2c_gensym_initializer_choice_A5BC2A2E_6_expanded(_x2c_gensym_static_input_6) static void _x2c_gensym_static_initialize_6(void){\
+  _x2c_gensym_static_input_6;\
+}
+#define _x2c_gensym_initializer_choice_A5BC2A2E_6(_x2c_gensym_static_input_6) _x2c_gensym_initializer_choice_A5BC2A2E_6_expanded(_x2c_gensym_static_input_6)
+#define _x2c_gensym_initializer_choice_A5BC2A2E_7_expanded(_x2c_gensym_static_input_7) static void _x2c_gensym_static_initialize_7(void){\
+  _x2c_gensym_static_input_7;\
+}
+#define _x2c_gensym_initializer_choice_A5BC2A2E_7(_x2c_gensym_static_input_7) _x2c_gensym_initializer_choice_A5BC2A2E_7_expanded(_x2c_gensym_static_input_7)
+#define _x2c_gensym_initializer_choice_A5BC2A2E_8_expanded(_x2c_gensym_static_input_8) static void _x2c_gensym_static_initialize_8(void){\
+  _x2c_gensym_static_input_8;\
+}
+#define _x2c_gensym_initializer_choice_A5BC2A2E_8(_x2c_gensym_static_input_8) _x2c_gensym_initializer_choice_A5BC2A2E_8_expanded(_x2c_gensym_static_input_8)
+#define _x2c_gensym_initializer_choice_A5BC2A2E_9_expanded(_x2c_gensym_static_input_9) static void _x2c_gensym_static_initialize_9(void){\
+  _x2c_gensym_static_input_9;\
+}
+#define _x2c_gensym_initializer_choice_A5BC2A2E_9(_x2c_gensym_static_input_9) _x2c_gensym_initializer_choice_A5BC2A2E_9_expanded(_x2c_gensym_static_input_9)
+#define _x2c_gensym_initializer_choice_A5BC2A2E_10_expanded(_x2c_gensym_static_input_10) static void _x2c_gensym_static_initialize_10(void){\
+  _x2c_gensym_static_input_10;\
+}
+#define _x2c_gensym_initializer_choice_A5BC2A2E_10(_x2c_gensym_static_input_10) _x2c_gensym_initializer_choice_A5BC2A2E_10_expanded(_x2c_gensym_static_input_10)
+#define _x2c_gensym_initializer_choice_A5BC2A2E_11_expanded(_x2c_gensym_static_input_11) static void _x2c_gensym_static_initialize_11(void){\
+  _x2c_gensym_static_input_11;\
+}
+#define _x2c_gensym_initializer_choice_A5BC2A2E_11(_x2c_gensym_static_input_11) _x2c_gensym_initializer_choice_A5BC2A2E_11_expanded(_x2c_gensym_static_input_11)
+#define _x2c_gensym_initializer_choice_A5BC2A2E_12_expanded(_x2c_gensym_static_input_12) static void _x2c_gensym_static_initialize_12(void){\
+  _x2c_gensym_static_input_12;\
+}
+#define _x2c_gensym_initializer_choice_A5BC2A2E_12(_x2c_gensym_static_input_12) _x2c_gensym_initializer_choice_A5BC2A2E_12_expanded(_x2c_gensym_static_input_12)
+#define _x2c_gensym_initializer_choice_A5BC2A2E_13_expanded(_x2c_gensym_static_input_13) static void _x2c_gensym_static_initialize_13(void){\
+  _x2c_gensym_static_input_13;\
+}
+#define _x2c_gensym_initializer_choice_A5BC2A2E_13(_x2c_gensym_static_input_13) _x2c_gensym_initializer_choice_A5BC2A2E_13_expanded(_x2c_gensym_static_input_13)
+#define _x2c_gensym_initializer_choice_A5BC2A2E_14_expanded(_x2c_gensym_static_input_14) static void _x2c_gensym_static_initialize_14(void){\
+  _x2c_gensym_static_input_14;\
+}
+#define _x2c_gensym_initializer_choice_A5BC2A2E_14(_x2c_gensym_static_input_14) _x2c_gensym_initializer_choice_A5BC2A2E_14_expanded(_x2c_gensym_static_input_14)
 /* auto-generated by x2c.  Do not edit! */
 
 #define __GUARD_0xA5BC2A2E__
 #include "common.h"
 #include "macrovalue/macrovalue.h"
+typedef Var(* NativeScalarLoad)(const void * bytes, Scope * owner);
+
+typedef void(* NativeScalarStore)(void * bytes, Var value);
+
+typedef struct NativeScalarAccess{
+  Symbol tag;
+  size_t size, alignment;
+  NativeScalarLoad load;
+  NativeScalarStore store;
+}
+* NativeScalarAccess;
+
 static List _143, _140, _139, _138, _136, _133, _129, _128, _127, _121, _120, _119, _118, _112, _110, _109, _108, _102, _100, _99, _98, _92, _91, _90, _89, _83, _82, _81, _80, _74, _73, _72, _71, _66, _64, _63, _62, _56, _55, _54, _53, _47, _45, _44, _43, _37, _36, _35, _34, _28, _26, _25, _24, _18, _16, _15, _14, _11, _9, _8, _7, _1;
 
 static String _141, _131, _125, _123, _116, _114, _106, _104, _96, _94, _87, _85, _78, _76, _69, _67, _60, _58, _51, _49, _41, _39, _32, _30, _22, _20, _12, _5, _3;
@@ -13,6 +85,156 @@ static int _init_guard_ = 0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
+static Var _x2c_gensym_macro__load_0(const void * _x2c_gensym_macro_bytes_0, Scope * _x2c_gensym_macro_owner_0);
+
+static void _x2c_gensym_macro__store_0(void * _x2c_gensym_macro_bytes_1, Var _x2c_gensym_macro_value_1);
+
+static struct NativeScalarAccess _native_scalar_access_char;
+
+_x2c_gensym_initializer_choice_A5BC2A2E_0((_native_scalar_access_char =(struct NativeScalarAccess){
+  26993, sizeof(char), _Alignof(char), _x2c_gensym_macro__load_0, _x2c_gensym_macro__store_0
+}
+))
+static Var _x2c_gensym_macro__load_1(const void * _x2c_gensym_macro_bytes_2, Scope * _x2c_gensym_macro_owner_1);
+
+static void _x2c_gensym_macro__store_1(void * _x2c_gensym_macro_bytes_3, Var _x2c_gensym_macro_value_3);
+
+static struct NativeScalarAccess _native_scalar_access_double;
+
+_x2c_gensym_initializer_choice_A5BC2A2E_1((_native_scalar_access_double =(struct NativeScalarAccess){
+  3356265, sizeof(double), _Alignof(double), _x2c_gensym_macro__load_1, _x2c_gensym_macro__store_1
+}
+))
+static Var _x2c_gensym_macro__load_2(const void * _x2c_gensym_macro_bytes_4, Scope * _x2c_gensym_macro_owner_2);
+
+static void _x2c_gensym_macro__store_2(void * _x2c_gensym_macro_bytes_5, Var _x2c_gensym_macro_value_5);
+
+static struct NativeScalarAccess _native_scalar_access_float;
+
+_x2c_gensym_initializer_choice_A5BC2A2E_2((_native_scalar_access_float =(struct NativeScalarAccess){
+  3355493, sizeof(float), _Alignof(float), _x2c_gensym_macro__load_2, _x2c_gensym_macro__store_2
+}
+))
+static Var _x2c_gensym_macro__load_3(const void * _x2c_gensym_macro_bytes_6, Scope * _x2c_gensym_macro_owner_3);
+
+static void _x2c_gensym_macro__store_3(void * _x2c_gensym_macro_bytes_7, Var _x2c_gensym_macro_value_7);
+
+static struct NativeScalarAccess _native_scalar_access_int;
+
+_x2c_gensym_initializer_choice_A5BC2A2E_3((_native_scalar_access_int =(struct NativeScalarAccess){
+  3453797, sizeof(int), _Alignof(int), _x2c_gensym_macro__load_3, _x2c_gensym_macro__store_3
+}
+))
+static Var _x2c_gensym_macro__load_4(const void * _x2c_gensym_macro_bytes_8, Scope * _x2c_gensym_macro_owner_4);
+
+static void _x2c_gensym_macro__store_4(void * _x2c_gensym_macro_bytes_9, Var _x2c_gensym_macro_value_9);
+
+static struct NativeScalarAccess _native_scalar_access_long;
+
+_x2c_gensym_initializer_choice_A5BC2A2E_4((_native_scalar_access_long =(struct NativeScalarAccess){
+  818062, sizeof(long), _Alignof(long), _x2c_gensym_macro__load_4, _x2c_gensym_macro__store_4
+}
+))
+static Var _x2c_gensym_macro__load_5(const void * _x2c_gensym_macro_bytes_10, Scope * _x2c_gensym_macro_owner_5);
+
+static void _x2c_gensym_macro__store_5(void * _x2c_gensym_macro_bytes_11, Var _x2c_gensym_macro_value_11);
+
+static struct NativeScalarAccess _native_scalar_access_long_double;
+
+_x2c_gensym_initializer_choice_A5BC2A2E_5((_native_scalar_access_long_double =(struct NativeScalarAccess){
+  26071077642, sizeof(long double), _Alignof(long double), _x2c_gensym_macro__load_5, _x2c_gensym_macro__store_5
+}
+))
+static Var _x2c_gensym_macro__load_6(const void * _x2c_gensym_macro_bytes_12, Scope * _x2c_gensym_macro_owner_6);
+
+static void _x2c_gensym_macro__store_6(void * _x2c_gensym_macro_bytes_13, Var _x2c_gensym_macro_value_13);
+
+static struct NativeScalarAccess _native_scalar_access_long_long;
+
+_x2c_gensym_initializer_choice_A5BC2A2E_6((_native_scalar_access_long_long =(struct NativeScalarAccess){
+  25983886, sizeof(long long), _Alignof(long long), _x2c_gensym_macro__load_6, _x2c_gensym_macro__store_6
+}
+))
+static Var _x2c_gensym_macro__load_7(const void * _x2c_gensym_macro_bytes_14, Scope * _x2c_gensym_macro_owner_7);
+
+static void _x2c_gensym_macro__store_7(void * _x2c_gensym_macro_bytes_15, Var _x2c_gensym_macro_value_15);
+
+static struct NativeScalarAccess _native_scalar_access_short;
+
+_x2c_gensym_initializer_choice_A5BC2A2E_7((_native_scalar_access_short =(struct NativeScalarAccess){
+  3453293, sizeof(short), _Alignof(short), _x2c_gensym_macro__load_7, _x2c_gensym_macro__store_7
+}
+))
+static Var _x2c_gensym_macro__load_8(const void * _x2c_gensym_macro_bytes_16, Scope * _x2c_gensym_macro_owner_8);
+
+static void _x2c_gensym_macro__store_8(void * _x2c_gensym_macro_bytes_17, Var _x2c_gensym_macro_value_17);
+
+static struct NativeScalarAccess _native_scalar_access_signed_char;
+
+_x2c_gensym_initializer_choice_A5BC2A2E_8((_native_scalar_access_signed_char =(struct NativeScalarAccess){
+  26993, sizeof(signed char), _Alignof(signed char), _x2c_gensym_macro__load_8, _x2c_gensym_macro__store_8
+}
+))
+static Var _x2c_gensym_macro__load_9(const void * _x2c_gensym_macro_bytes_18, Scope * _x2c_gensym_macro_owner_9);
+
+static void _x2c_gensym_macro__store_9(void * _x2c_gensym_macro_bytes_19, Var _x2c_gensym_macro_value_19);
+
+static struct NativeScalarAccess _native_scalar_access_unsigned;
+
+_x2c_gensym_initializer_choice_A5BC2A2E_9((_native_scalar_access_unsigned =(struct NativeScalarAccess){
+  3847013, sizeof(unsigned), _Alignof(unsigned), _x2c_gensym_macro__load_9, _x2c_gensym_macro__store_9
+}
+))
+static Var _x2c_gensym_macro__load_10(const void * _x2c_gensym_macro_bytes_20, Scope * _x2c_gensym_macro_owner_10);
+
+static void _x2c_gensym_macro__store_10(void * _x2c_gensym_macro_bytes_21, Var _x2c_gensym_macro_value_21);
+
+static struct NativeScalarAccess _native_scalar_access_unsigned_char;
+
+_x2c_gensym_initializer_choice_A5BC2A2E_10((_native_scalar_access_unsigned_char =(struct NativeScalarAccess){
+  30065, sizeof(unsigned char), _Alignof(unsigned char), _x2c_gensym_macro__load_10, _x2c_gensym_macro__store_10
+}
+))
+static Var _x2c_gensym_macro__load_11(const void * _x2c_gensym_macro_bytes_22, Scope * _x2c_gensym_macro_owner_11);
+
+static void _x2c_gensym_macro__store_11(void * _x2c_gensym_macro_bytes_23, Var _x2c_gensym_macro_value_23);
+
+static struct NativeScalarAccess _native_scalar_access_unsigned_long;
+
+_x2c_gensym_initializer_choice_A5BC2A2E_11((_native_scalar_access_unsigned_long =(struct NativeScalarAccess){
+  44858254, sizeof(unsigned long), _Alignof(unsigned long), _x2c_gensym_macro__load_11, _x2c_gensym_macro__store_11
+}
+))
+static Var _x2c_gensym_macro__load_12(const void * _x2c_gensym_macro_bytes_24, Scope * _x2c_gensym_macro_owner_12);
+
+static void _x2c_gensym_macro__store_12(void * _x2c_gensym_macro_bytes_25, Var _x2c_gensym_macro_value_25);
+
+static struct NativeScalarAccess _native_scalar_access_unsigned_long_long;
+
+_x2c_gensym_initializer_choice_A5BC2A2E_12((_native_scalar_access_unsigned_long_long =(struct NativeScalarAccess){
+  1435270030, sizeof(unsigned long long), _Alignof(unsigned long long), _x2c_gensym_macro__load_12, _x2c_gensym_macro__store_12
+}
+))
+static Var _x2c_gensym_macro__load_13(const void * _x2c_gensym_macro_bytes_26, Scope * _x2c_gensym_macro_owner_13);
+
+static void _x2c_gensym_macro__store_13(void * _x2c_gensym_macro_bytes_27, Var _x2c_gensym_macro_value_27);
+
+static struct NativeScalarAccess _native_scalar_access_unsigned_short;
+
+_x2c_gensym_initializer_choice_A5BC2A2E_13((_native_scalar_access_unsigned_short =(struct NativeScalarAccess){
+  3846509, sizeof(unsigned short), _Alignof(unsigned short), _x2c_gensym_macro__load_13, _x2c_gensym_macro__store_13
+}
+))
+static Map native_scalars;
+
+Map Map_update_n(Map, unsigned, ...);
+
+Map Map_new(void);
+
+_x2c_gensym_initializer_choice_A5BC2A2E_14((native_scalars =({
+  Var _x2c_gensym_literal_part_1 = Var_new(3683441, (void *) & _native_scalar_access_char);  Var _x2c_gensym_literal_part_2 = Var_new(3683441, (void *) & _native_scalar_access_double);  Var _x2c_gensym_literal_part_3 = Var_new(3683441, (void *) & _native_scalar_access_float);  Var _x2c_gensym_literal_part_4 = Var_new(3683441, (void *) & _native_scalar_access_int);  Var _x2c_gensym_literal_part_5 = Var_new(3683441, (void *) & _native_scalar_access_long);  Var _x2c_gensym_literal_part_6 = Var_new(3683441, (void *) & _native_scalar_access_long_double);  Var _x2c_gensym_literal_part_7 = Var_new(3683441, (void *) & _native_scalar_access_long_long);  Var _x2c_gensym_literal_part_8 = Var_new(3683441, (void *) & _native_scalar_access_short);  Var _x2c_gensym_literal_part_9 = Var_new(3683441, (void *) & _native_scalar_access_signed_char);  Var _x2c_gensym_literal_part_10 = Var_new(3683441, (void *) & _native_scalar_access_unsigned);  Var _x2c_gensym_literal_part_11 = Var_new(3683441, (void *) & _native_scalar_access_unsigned_char);  Var _x2c_gensym_literal_part_12 = Var_new(3683441, (void *) & _native_scalar_access_unsigned_long);  Var _x2c_gensym_literal_part_13 = Var_new(3683441, (void *) & _native_scalar_access_unsigned_long_long);  Var _x2c_gensym_literal_part_14 = Var_new(3683441, (void *) & _native_scalar_access_unsigned_short);  Map_update_n(Map_new(), 14, List_var(cons(Symbol_var(213092), NULL)), _x2c_gensym_literal_part_1, List_var(cons(Symbol_var(301273866), NULL)), _x2c_gensym_literal_part_2, List_var(cons(Symbol_var(13400168), NULL)), _x2c_gensym_literal_part_3, List_var(cons(Symbol_var(19368), NULL)), _x2c_gensym_literal_part_4, List_var(cons(Symbol_var(818062), NULL)), _x2c_gensym_literal_part_5, List_var(cons(Symbol_var(818062), cons(Symbol_var(301273866), NULL))), _x2c_gensym_literal_part_6, List_var(cons(Symbol_var(818062), cons(Symbol_var(818062), NULL))), _x2c_gensym_literal_part_7, List_var(cons(Symbol_var(40402088), NULL)), _x2c_gensym_literal_part_8, List_var(cons(Symbol_var(1294430536), cons(Symbol_var(213092), NULL))), _x2c_gensym_literal_part_9, List_var(cons(Symbol_var(1474468213064), NULL)), _x2c_gensym_literal_part_10, List_var(cons(Symbol_var(1474468213064), cons(Symbol_var(213092), NULL))), _x2c_gensym_literal_part_11, List_var(cons(Symbol_var(1474468213064), cons(Symbol_var(818062), NULL))), _x2c_gensym_literal_part_12, List_var(cons(Symbol_var(1474468213064), cons(Symbol_var(818062), cons(Symbol_var(818062), NULL)))), _x2c_gensym_literal_part_13, List_var(cons(Symbol_var(1474468213064), cons(Symbol_var(40402088), NULL))), _x2c_gensym_literal_part_14);
+}
+)))
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -162,11 +384,22 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _142 = String_var(_141);
   _143 = cons(_142, NULL);
   _144 = Symbol_var(228262);
+  _x2c_gensym_static_initialize_0();
+  _x2c_gensym_static_initialize_1();
+  _x2c_gensym_static_initialize_2();
+  _x2c_gensym_static_initialize_3();
+  _x2c_gensym_static_initialize_4();
+  _x2c_gensym_static_initialize_5();
+  _x2c_gensym_static_initialize_6();
+  _x2c_gensym_static_initialize_7();
+  _x2c_gensym_static_initialize_8();
+  _x2c_gensym_static_initialize_9();
+  _x2c_gensym_static_initialize_10();
+  _x2c_gensym_static_initialize_11();
+  _x2c_gensym_static_initialize_12();
+  _x2c_gensym_static_initialize_13();
+  _x2c_gensym_static_initialize_14();
 }
-
-Map Map_update_n(Map, unsigned, ...);
-
-Map Map_new(void);
 
 Map native_scalar_types(void){
   if(! _init_guard_) _file_init_();
@@ -238,3 +471,210 @@ List _scalar_access_units(Macro access){
   return Array_list_free(units);
 }
 
+Var Var_move_wide_to(Var, Scope *);
+
+static Var _x2c_gensym_macro__load_0(const void * _x2c_gensym_macro_bytes_0, Scope * _x2c_gensym_macro_owner_0){
+  char _x2c_gensym_macro_native_0;
+  memcpy(& _x2c_gensym_macro_native_0, _x2c_gensym_macro_bytes_0, sizeof _x2c_gensym_macro_native_0);
+  Var _x2c_gensym_macro_value_0 = char_var(_x2c_gensym_macro_native_0);
+  return Var_move_wide_to(_x2c_gensym_macro_value_0, _x2c_gensym_macro_owner_0);
+}
+
+static void _x2c_gensym_macro__store_0(void * _x2c_gensym_macro_bytes_1, Var _x2c_gensym_macro_value_1){
+  char _x2c_gensym_macro_native_1 = Var_char(Var_convert(_x2c_gensym_macro_value_1, 26993));
+  memcpy(_x2c_gensym_macro_bytes_1, & _x2c_gensym_macro_native_1, sizeof _x2c_gensym_macro_native_1);
+}
+
+static Var _x2c_gensym_macro__load_1(const void * _x2c_gensym_macro_bytes_2, Scope * _x2c_gensym_macro_owner_1){
+  double _x2c_gensym_macro_native_2;
+  memcpy(& _x2c_gensym_macro_native_2, _x2c_gensym_macro_bytes_2, sizeof _x2c_gensym_macro_native_2);
+  Var _x2c_gensym_macro_value_2 = double_var(_x2c_gensym_macro_native_2);
+  return Var_move_wide_to(_x2c_gensym_macro_value_2, _x2c_gensym_macro_owner_1);
+}
+
+static void _x2c_gensym_macro__store_1(void * _x2c_gensym_macro_bytes_3, Var _x2c_gensym_macro_value_3){
+  double _x2c_gensym_macro_native_3 = Var_floating(Var_convert(_x2c_gensym_macro_value_3, 3356265));
+  memcpy(_x2c_gensym_macro_bytes_3, & _x2c_gensym_macro_native_3, sizeof _x2c_gensym_macro_native_3);
+}
+
+static Var _x2c_gensym_macro__load_2(const void * _x2c_gensym_macro_bytes_4, Scope * _x2c_gensym_macro_owner_2){
+  float _x2c_gensym_macro_native_4;
+  memcpy(& _x2c_gensym_macro_native_4, _x2c_gensym_macro_bytes_4, sizeof _x2c_gensym_macro_native_4);
+  Var _x2c_gensym_macro_value_4 = float_var(_x2c_gensym_macro_native_4);
+  return Var_move_wide_to(_x2c_gensym_macro_value_4, _x2c_gensym_macro_owner_2);
+}
+
+static void _x2c_gensym_macro__store_2(void * _x2c_gensym_macro_bytes_5, Var _x2c_gensym_macro_value_5){
+  float _x2c_gensym_macro_native_5 = Var_float(Var_convert(_x2c_gensym_macro_value_5, 3355493));
+  memcpy(_x2c_gensym_macro_bytes_5, & _x2c_gensym_macro_native_5, sizeof _x2c_gensym_macro_native_5);
+}
+
+static Var _x2c_gensym_macro__load_3(const void * _x2c_gensym_macro_bytes_6, Scope * _x2c_gensym_macro_owner_3){
+  int _x2c_gensym_macro_native_6;
+  memcpy(& _x2c_gensym_macro_native_6, _x2c_gensym_macro_bytes_6, sizeof _x2c_gensym_macro_native_6);
+  Var _x2c_gensym_macro_value_6 = int_var(_x2c_gensym_macro_native_6);
+  return Var_move_wide_to(_x2c_gensym_macro_value_6, _x2c_gensym_macro_owner_3);
+}
+
+static void _x2c_gensym_macro__store_3(void * _x2c_gensym_macro_bytes_7, Var _x2c_gensym_macro_value_7){
+  int _x2c_gensym_macro_native_7 = Var_int(Var_convert(_x2c_gensym_macro_value_7, 3453797));
+  memcpy(_x2c_gensym_macro_bytes_7, & _x2c_gensym_macro_native_7, sizeof _x2c_gensym_macro_native_7);
+}
+
+static Var _x2c_gensym_macro__load_4(const void * _x2c_gensym_macro_bytes_8, Scope * _x2c_gensym_macro_owner_4){
+  long _x2c_gensym_macro_native_8;
+  memcpy(& _x2c_gensym_macro_native_8, _x2c_gensym_macro_bytes_8, sizeof _x2c_gensym_macro_native_8);
+  Var _x2c_gensym_macro_value_8 = long_var(_x2c_gensym_macro_native_8);
+  return Var_move_wide_to(_x2c_gensym_macro_value_8, _x2c_gensym_macro_owner_4);
+}
+
+static void _x2c_gensym_macro__store_4(void * _x2c_gensym_macro_bytes_9, Var _x2c_gensym_macro_value_9){
+  long _x2c_gensym_macro_native_9 = Var_long(Var_convert(_x2c_gensym_macro_value_9, 818062));
+  memcpy(_x2c_gensym_macro_bytes_9, & _x2c_gensym_macro_native_9, sizeof _x2c_gensym_macro_native_9);
+}
+
+static Var _x2c_gensym_macro__load_5(const void * _x2c_gensym_macro_bytes_10, Scope * _x2c_gensym_macro_owner_5){
+  long double _x2c_gensym_macro_native_10;
+  memcpy(& _x2c_gensym_macro_native_10, _x2c_gensym_macro_bytes_10, sizeof _x2c_gensym_macro_native_10);
+  Var _x2c_gensym_macro_value_10 = Var_box_long_double(_x2c_gensym_macro_native_10);
+  return Var_move_wide_to(_x2c_gensym_macro_value_10, _x2c_gensym_macro_owner_5);
+}
+
+static void _x2c_gensym_macro__store_5(void * _x2c_gensym_macro_bytes_11, Var _x2c_gensym_macro_value_11){
+  long double _x2c_gensym_macro_native_11 = Var_long_double(Var_convert(_x2c_gensym_macro_value_11, 26071077642));
+  memcpy(_x2c_gensym_macro_bytes_11, & _x2c_gensym_macro_native_11, sizeof _x2c_gensym_macro_native_11);
+}
+
+static Var _x2c_gensym_macro__load_6(const void * _x2c_gensym_macro_bytes_12, Scope * _x2c_gensym_macro_owner_6){
+  long long _x2c_gensym_macro_native_12;
+  memcpy(& _x2c_gensym_macro_native_12, _x2c_gensym_macro_bytes_12, sizeof _x2c_gensym_macro_native_12);
+  Var _x2c_gensym_macro_value_12 = Var_box_long_long(_x2c_gensym_macro_native_12);
+  return Var_move_wide_to(_x2c_gensym_macro_value_12, _x2c_gensym_macro_owner_6);
+}
+
+static void _x2c_gensym_macro__store_6(void * _x2c_gensym_macro_bytes_13, Var _x2c_gensym_macro_value_13){
+  long long _x2c_gensym_macro_native_13 = Var_long_long(Var_convert(_x2c_gensym_macro_value_13, 25983886));
+  memcpy(_x2c_gensym_macro_bytes_13, & _x2c_gensym_macro_native_13, sizeof _x2c_gensym_macro_native_13);
+}
+
+static Var _x2c_gensym_macro__load_7(const void * _x2c_gensym_macro_bytes_14, Scope * _x2c_gensym_macro_owner_7){
+  short _x2c_gensym_macro_native_14;
+  memcpy(& _x2c_gensym_macro_native_14, _x2c_gensym_macro_bytes_14, sizeof _x2c_gensym_macro_native_14);
+  Var _x2c_gensym_macro_value_14 = short_var(_x2c_gensym_macro_native_14);
+  return Var_move_wide_to(_x2c_gensym_macro_value_14, _x2c_gensym_macro_owner_7);
+}
+
+static void _x2c_gensym_macro__store_7(void * _x2c_gensym_macro_bytes_15, Var _x2c_gensym_macro_value_15){
+  short _x2c_gensym_macro_native_15 = Var_short(Var_convert(_x2c_gensym_macro_value_15, 3453293));
+  memcpy(_x2c_gensym_macro_bytes_15, & _x2c_gensym_macro_native_15, sizeof _x2c_gensym_macro_native_15);
+}
+
+static Var _x2c_gensym_macro__load_8(const void * _x2c_gensym_macro_bytes_16, Scope * _x2c_gensym_macro_owner_8){
+  signed char _x2c_gensym_macro_native_16;
+  memcpy(& _x2c_gensym_macro_native_16, _x2c_gensym_macro_bytes_16, sizeof _x2c_gensym_macro_native_16);
+  Var _x2c_gensym_macro_value_16 = Var_new(26993, _x2c_gensym_macro_native_16);
+  return Var_move_wide_to(_x2c_gensym_macro_value_16, _x2c_gensym_macro_owner_8);
+}
+
+static void _x2c_gensym_macro__store_8(void * _x2c_gensym_macro_bytes_17, Var _x2c_gensym_macro_value_17){
+  signed char _x2c_gensym_macro_native_17 = Var_char(Var_convert(_x2c_gensym_macro_value_17, 26993));
+  memcpy(_x2c_gensym_macro_bytes_17, & _x2c_gensym_macro_native_17, sizeof _x2c_gensym_macro_native_17);
+}
+
+static Var _x2c_gensym_macro__load_9(const void * _x2c_gensym_macro_bytes_18, Scope * _x2c_gensym_macro_owner_9){
+  unsigned _x2c_gensym_macro_native_18;
+  memcpy(& _x2c_gensym_macro_native_18, _x2c_gensym_macro_bytes_18, sizeof _x2c_gensym_macro_native_18);
+  Var _x2c_gensym_macro_value_18 = unsigned_var(_x2c_gensym_macro_native_18);
+  return Var_move_wide_to(_x2c_gensym_macro_value_18, _x2c_gensym_macro_owner_9);
+}
+
+static void _x2c_gensym_macro__store_9(void * _x2c_gensym_macro_bytes_19, Var _x2c_gensym_macro_value_19){
+  unsigned _x2c_gensym_macro_native_19 = Var_uint(Var_convert(_x2c_gensym_macro_value_19, 3847013));
+  memcpy(_x2c_gensym_macro_bytes_19, & _x2c_gensym_macro_native_19, sizeof _x2c_gensym_macro_native_19);
+}
+
+static Var _x2c_gensym_macro__load_10(const void * _x2c_gensym_macro_bytes_20, Scope * _x2c_gensym_macro_owner_10){
+  unsigned char _x2c_gensym_macro_native_20;
+  memcpy(& _x2c_gensym_macro_native_20, _x2c_gensym_macro_bytes_20, sizeof _x2c_gensym_macro_native_20);
+  Var _x2c_gensym_macro_value_20 = Var_new(30065, _x2c_gensym_macro_native_20);
+  return Var_move_wide_to(_x2c_gensym_macro_value_20, _x2c_gensym_macro_owner_10);
+}
+
+static void _x2c_gensym_macro__store_10(void * _x2c_gensym_macro_bytes_21, Var _x2c_gensym_macro_value_21){
+  unsigned char _x2c_gensym_macro_native_21 = Var_uchar(Var_convert(_x2c_gensym_macro_value_21, 30065));
+  memcpy(_x2c_gensym_macro_bytes_21, & _x2c_gensym_macro_native_21, sizeof _x2c_gensym_macro_native_21);
+}
+
+static Var _x2c_gensym_macro__load_11(const void * _x2c_gensym_macro_bytes_22, Scope * _x2c_gensym_macro_owner_11){
+  unsigned long _x2c_gensym_macro_native_22;
+  memcpy(& _x2c_gensym_macro_native_22, _x2c_gensym_macro_bytes_22, sizeof _x2c_gensym_macro_native_22);
+  Var _x2c_gensym_macro_value_22 = Var_box_ulong(_x2c_gensym_macro_native_22);
+  return Var_move_wide_to(_x2c_gensym_macro_value_22, _x2c_gensym_macro_owner_11);
+}
+
+static void _x2c_gensym_macro__store_11(void * _x2c_gensym_macro_bytes_23, Var _x2c_gensym_macro_value_23){
+  unsigned long _x2c_gensym_macro_native_23 = Var_ulong(Var_convert(_x2c_gensym_macro_value_23, 44858254));
+  memcpy(_x2c_gensym_macro_bytes_23, & _x2c_gensym_macro_native_23, sizeof _x2c_gensym_macro_native_23);
+}
+
+static Var _x2c_gensym_macro__load_12(const void * _x2c_gensym_macro_bytes_24, Scope * _x2c_gensym_macro_owner_12){
+  unsigned long long _x2c_gensym_macro_native_24;
+  memcpy(& _x2c_gensym_macro_native_24, _x2c_gensym_macro_bytes_24, sizeof _x2c_gensym_macro_native_24);
+  Var _x2c_gensym_macro_value_24 = Var_box_ulong_long(_x2c_gensym_macro_native_24);
+  return Var_move_wide_to(_x2c_gensym_macro_value_24, _x2c_gensym_macro_owner_12);
+}
+
+static void _x2c_gensym_macro__store_12(void * _x2c_gensym_macro_bytes_25, Var _x2c_gensym_macro_value_25){
+  unsigned long long _x2c_gensym_macro_native_25 = Var_ulong_long(Var_convert(_x2c_gensym_macro_value_25, 1435270030));
+  memcpy(_x2c_gensym_macro_bytes_25, & _x2c_gensym_macro_native_25, sizeof _x2c_gensym_macro_native_25);
+}
+
+static Var _x2c_gensym_macro__load_13(const void * _x2c_gensym_macro_bytes_26, Scope * _x2c_gensym_macro_owner_13){
+  unsigned short _x2c_gensym_macro_native_26;
+  memcpy(& _x2c_gensym_macro_native_26, _x2c_gensym_macro_bytes_26, sizeof _x2c_gensym_macro_native_26);
+  Var _x2c_gensym_macro_value_26 = Var_new(3846509, _x2c_gensym_macro_native_26);
+  return Var_move_wide_to(_x2c_gensym_macro_value_26, _x2c_gensym_macro_owner_13);
+}
+
+static void _x2c_gensym_macro__store_13(void * _x2c_gensym_macro_bytes_27, Var _x2c_gensym_macro_value_27){
+  unsigned short _x2c_gensym_macro_native_27 = Var_ushort(Var_convert(_x2c_gensym_macro_value_27, 3846509));
+  memcpy(_x2c_gensym_macro_bytes_27, & _x2c_gensym_macro_native_27, sizeof _x2c_gensym_macro_native_27);
+}
+
+Var Map_getdefault(Map, Var, Var);
+
+NativeScalarAccess native_scalar_access(List exact_type){
+  if(! _init_guard_) _file_init_();
+  return Var_pointer(Map_getdefault(native_scalars, List_var(exact_type), Var_null()));
+}
+
+#undef _x2c_gensym_initializer_choice_A5BC2A2E_0_expanded
+#undef _x2c_gensym_initializer_choice_A5BC2A2E_0
+#undef _x2c_gensym_initializer_choice_A5BC2A2E_1_expanded
+#undef _x2c_gensym_initializer_choice_A5BC2A2E_1
+#undef _x2c_gensym_initializer_choice_A5BC2A2E_2_expanded
+#undef _x2c_gensym_initializer_choice_A5BC2A2E_2
+#undef _x2c_gensym_initializer_choice_A5BC2A2E_3_expanded
+#undef _x2c_gensym_initializer_choice_A5BC2A2E_3
+#undef _x2c_gensym_initializer_choice_A5BC2A2E_4_expanded
+#undef _x2c_gensym_initializer_choice_A5BC2A2E_4
+#undef _x2c_gensym_initializer_choice_A5BC2A2E_5_expanded
+#undef _x2c_gensym_initializer_choice_A5BC2A2E_5
+#undef _x2c_gensym_initializer_choice_A5BC2A2E_6_expanded
+#undef _x2c_gensym_initializer_choice_A5BC2A2E_6
+#undef _x2c_gensym_initializer_choice_A5BC2A2E_7_expanded
+#undef _x2c_gensym_initializer_choice_A5BC2A2E_7
+#undef _x2c_gensym_initializer_choice_A5BC2A2E_8_expanded
+#undef _x2c_gensym_initializer_choice_A5BC2A2E_8
+#undef _x2c_gensym_initializer_choice_A5BC2A2E_9_expanded
+#undef _x2c_gensym_initializer_choice_A5BC2A2E_9
+#undef _x2c_gensym_initializer_choice_A5BC2A2E_10_expanded
+#undef _x2c_gensym_initializer_choice_A5BC2A2E_10
+#undef _x2c_gensym_initializer_choice_A5BC2A2E_11_expanded
+#undef _x2c_gensym_initializer_choice_A5BC2A2E_11
+#undef _x2c_gensym_initializer_choice_A5BC2A2E_12_expanded
+#undef _x2c_gensym_initializer_choice_A5BC2A2E_12
+#undef _x2c_gensym_initializer_choice_A5BC2A2E_13_expanded
+#undef _x2c_gensym_initializer_choice_A5BC2A2E_13
+#undef _x2c_gensym_initializer_choice_A5BC2A2E_14_expanded
+#undef _x2c_gensym_initializer_choice_A5BC2A2E_14

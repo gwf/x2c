@@ -7,6 +7,18 @@
 
 #include "common.h"
 #include "macrovalue/macrovalue.h"
+typedef Var(* NativeScalarLoad)(const void * bytes, Scope * owner);
+
+typedef void(* NativeScalarStore)(void * bytes, Var value);
+
+typedef struct NativeScalarAccess{
+  Symbol tag;
+  size_t size, alignment;
+  NativeScalarLoad load;
+  NativeScalarStore store;
+}
+* NativeScalarAccess;
+
 Map native_scalar_types(void);
 
 Symbol _scalar_tag(Type type);
@@ -14,6 +26,8 @@ Symbol _scalar_tag(Type type);
 List _scalar_key(Type type);
 
 List _scalar_access_units(Macro access);
+
+NativeScalarAccess native_scalar_access(List exact_type);
 
 
 #endif /* __GUARD_0xA5BC2A2E__ */

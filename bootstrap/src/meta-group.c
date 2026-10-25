@@ -295,7 +295,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _28 = List_var(NULL);
   _29 = Symbol_var(39266);
   _30 = Symbol_var(106239471489226);
-  _31 = int_var(160);
+  _31 = int_var(159);
   _32 = String_new("");
   _33 = String_var(_32);
   _34 = Symbol_var(150408);
@@ -411,7 +411,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _144 = cons(_115, _143);
   _145 = cons(_109, _144);
   _146 = List_var(_145);
-  _147 = int_var(163);
+  _147 = int_var(162);
   _148 = String_new("Array");
   _149 = String_var(_148);
   _150 = cons(_149, NULL);
@@ -1798,7 +1798,6 @@ List Compiler_bind_syntax(Compiler, Var, Symbol, Type);
 static List f6_loaded____loaded_entry(Compiler c, List binding, Type type){
   int arity = f6_loaded____main_arity(c, type);
   if(arity < 0) Compiler_report_error(c, 1362954, _22, NULL, NULL);
-  Compiler_ensure_macro_lisp(c);
   List entry = Sym_introduce(c -> sym, Compiler_fresh_name(c, _23));
   List target =({
     Var _x2c_gensym_literal_part_0 = List_var(type);  Var _x2c_gensym_literal_part_1 = List_var(cons(_24, cons(List_var(binding), NULL)));  cons(_25, cons(_x2c_gensym_literal_part_0, cons(_x2c_gensym_literal_part_1, NULL)));
@@ -2352,7 +2351,6 @@ static void f6_loaded____loaded_global(Compiler c, Type spec, List row, Map pres
           }
           ));
           if(! List_truth(Type_list(f6_loaded____loaded_scalar(c, type))) && ! f6_loaded____loaded_aggregate(c, type, initialized)) return;
-          Compiler_ensure_macro_lisp(c);
           f6_loaded___LoadedPath path ={
             .compiler = c, .descriptions = Array_new(), .name = name
           }
@@ -2473,7 +2471,7 @@ void Compiler_finish_meta_functions(Compiler c, Array nodes){
               Var fn;  fn = _x2c_gensym_match_value_0;  Var name;  name = _x2c_gensym_match_value_1; {
                 Var _x2c_gensym_match_value_1 = name; {
                   String name = Var_as_string(_x2c_gensym_match_value_1);  if(!(Map_contains(c -> meta_comptime, String_var(name))) && Compiler_meta_reaches_compile_time(c, fn)){
-                    Compiler_record_comptime(c, name);  grew = 1;
+                    Map_setindex(c -> meta_comptime, String_var(name), int_var(1));  grew = 1;
                   }
 
                 }
@@ -3030,6 +3028,8 @@ static String _unbound(Compiler c){
   return NULL;
 }
 
+int Compiler_meta_binding(Compiler, String, Var *);
+
 static String f9_selection____unbound_callee(Compiler c, Var node){
   if(! Var_is_row(node, 9, 7, 4)) return NULL;
   Var bound;
@@ -3044,7 +3044,7 @@ static String f9_selection____unbound_callee(Compiler c, Var node){
           if(! Var_is_row(name, 11, 7, 1)) break;
           String spelling = Var_as_string(name);
           String unbound = String_join(NULL, cons(String_var(_993), cons(String_var(spelling), cons(String_var(_994), NULL))));
-          return Map_contains(c -> meta_group_bound, String_var(unbound)) ||(Map_contains(c -> native_meta, String_var(spelling)) && ! Lisp_try_get(c -> macro_lisp, spelling, &(bound)) && ! Compiler_bind_native_meta(c, spelling)) ? spelling : NULL;
+          return Map_contains(c -> meta_group_bound, String_var(unbound)) ||(Map_contains(c -> native_meta, String_var(spelling)) && ! Compiler_meta_binding(c, spelling, &(bound)) && ! Compiler_bind_native_meta(c, spelling)) ? spelling : NULL;
         }
 
       }
@@ -3654,7 +3654,7 @@ void Compiler_use_meta_build_directory(String directory, Array owners, Map provi
 
 void Path_write_text(Path, String);
 void Compiler_write_meta_build(Compiler c){
-  if(! _init_guard_) _file_init_();  int index = c -> meta_build - 1;  if(! String_truth(f7_staging___meta_build_directory)) return;  Compiler_ensure_macro_lisp(c);  String base = String_join(NULL, cons(String_var(f7_staging___meta_build_directory), cons(String_var(_1407), cons(String_var(int_str(index)), NULL))));  String failure = _unbound(c);  List code = String_truth(failure) ? NULL : _emit(c, Compiler_module_stamp(), String_join(NULL, cons(String_var(_980), cons(String_var(int_str(index)), NULL))), String_join(NULL, cons(String_var(_1002), cons(String_var(int_str(index)), NULL))), &(failure));  Array sources = Array_new(); {
+  if(! _init_guard_) _file_init_();  int index = c -> meta_build - 1;  if(! String_truth(f7_staging___meta_build_directory)) return;  String base = String_join(NULL, cons(String_var(f7_staging___meta_build_directory), cons(String_var(_1407), cons(String_var(int_str(index)), NULL))));  String failure = _unbound(c);  List code = String_truth(failure) ? NULL : _emit(c, Compiler_module_stamp(), String_join(NULL, cons(String_var(_980), cons(String_var(int_str(index)), NULL))), String_join(NULL, cons(String_var(_1002), cons(String_var(int_str(index)), NULL))), &(failure));  Array sources = Array_new(); {
     String path;  Var _;  Map _x2c_gensym_macro_object_38 = c -> deps;  unsigned _x2c_gensym_macro_cursor_41 = 0;  Var _x2c_gensym_macro_cursor_output_40;  Var _x2c_gensym_macro_cursor_output_41;  while(Map_try_next(_x2c_gensym_macro_object_38, &(_x2c_gensym_macro_cursor_41), &(_x2c_gensym_macro_cursor_output_40), &(_x2c_gensym_macro_cursor_output_41))){
       path = Var_as_string(_x2c_gensym_macro_cursor_output_40);  _ = _x2c_gensym_macro_cursor_output_41;  Array_push(sources, String_var(path));
     }
@@ -3673,6 +3673,8 @@ void Compiler_bind_meta_group(Compiler c, String name, Token site){
 String Compiler_load_native_module(String);
 Map Compiler_native_module_targets(String);
 int Compiler_native_meta_accepts(Compiler, Var, List);
+void MetaBindings_set(MetaBindings, String, Var);
+MetaBindings Compiler_bindings(Compiler);
 static String f7_staging____stage(Compiler c, String * failure){
   (* failure) = Compiler_groups_meta(c) ? _unbound(c) : _1412;  String module = String_truth((* failure)) ? NULL : f7_staging____module(c, NULL, NULL, &((* failure)));  if(! String_truth(module)) return NULL;  module = Compiler_load_native_module(module);  Map targets = Compiler_native_module_targets(module);  if(!(Map_contains(c -> meta_group_bound, String_var(module)))){
     Map_setindex(c -> meta_group_bound, String_var(module), int_var(1)); {
@@ -3700,7 +3702,7 @@ static String f7_staging____stage(Compiler c, String * failure){
             Var target;  target = _x2c_gensym_match_value_0;  Var type;  type = _x2c_gensym_match_value_1; {
               Var _x2c_gensym_match_value_16 = target;  Var _x2c_gensym_match_value_17 = type; {
                 String target = Var_as_string(_x2c_gensym_match_value_16);  Type type = Var_type(_x2c_gensym_match_value_17); {
-                  if(Map_contains(c -> meta_group_bound, String_var(target)) || !(Map_contains(targets, String_var(target)))) continue;  Var bound = Map_getindex(targets, String_var(target));  if(! Compiler_native_meta_accepts(c, bound, Compiler_func_signature(c, type))) continue;  Lisp_set_global(c -> macro_lisp, target, bound);  Map_setindex(c -> meta_group_bound, String_var(target), int_var(1));
+                  if(Map_contains(c -> meta_group_bound, String_var(target)) || !(Map_contains(targets, String_var(target)))) continue;  Var bound = Map_getindex(targets, String_var(target));  if(! Compiler_native_meta_accepts(c, bound, Compiler_func_signature(c, type))) continue;  MetaBindings_set(Compiler_bindings(c), target, bound);  Map_setindex(c -> meta_group_bound, String_var(target), int_var(1));
                 }
 
               }

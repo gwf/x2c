@@ -15,6 +15,8 @@
 #include "meta.h"
 typedef struct Diagnostics * Diagnostics;
 
+typedef struct MetaBindings * MetaBindings;
+
 typedef struct ScriptUnit{
   String path, shebang;
   int defines_main;
@@ -79,9 +81,8 @@ typedef struct Compiler{
   ModuleSource unit_source;
   List return_type, include_dirs;
   Map deps;
-  List aggregate_type, macro_stack, declaration_effects;
+  List aggregate_type, macro_stack;
   Sym sym;
-  Map evaluated_effects;
   int expansion_floor;
   SymScope params;
   Map key_ids, macros, kw_aliases;
@@ -100,7 +101,6 @@ typedef struct Compiler{
   int macro_application;
   List lambda_scopes;
   Array match_types;
-  Map imports;
   Map included_effects;
   Map init_tokens, static_init_deps, fn_defs;
   Array id_keys;
@@ -142,15 +142,14 @@ typedef struct Compiler{
   int open_linkage;
   String fn_name;
   Diagnostics diagnostics;
-  Array braces, import_stack;
+  Array braces;
   Block ancestors;
   Array placements;
   String lines_text;
   Array line_starts;
   ScriptUnit unit_script, script;
-  Lisp macro_lisp;
-  int borrowed_lisp;
-  int inherited_lisp;
+  MetaBindings meta_bindings;
+  int borrowed_bindings;
   GenNames names;
   Array origins;
   int origin, source_map;
@@ -213,7 +212,7 @@ Compiler Compiler_new(void);
 
 Compiler Compiler_new_shared(Compiler owner);
 
-void Compiler_free_lisp(Compiler c);
+void Compiler_free_bindings(Compiler c);
 
 void Compiler_shallow_parse(Compiler c, Map globals);
 
@@ -268,10 +267,6 @@ void Compiler_mark_completion(Compiler c, int position);
 int Compiler_at_completion(Compiler c);
 
 void _x2c_complete_here(Compiler c, Symbol role, List keywords);
-
-void Compiler_queue_declaration_effect(Compiler c, String form, Token first, Token after);
-
-void Compiler_run_declaration_effects(Compiler c);
 
 int Compiler_collect_unit_macro(Compiler c);
 
@@ -368,6 +363,8 @@ void Map_merge_translation_dependency(Map m, String path, Var content_hash);
 void Compiler_add_translation_dependency(Compiler c, String path);
 
 void Compiler_merge_translation_dependencies(Compiler c, Map dependencies);
+
+String Compiler_source_path(Compiler c, String file);
 
 
 #endif /* __GUARD_0xDC21180E__ */

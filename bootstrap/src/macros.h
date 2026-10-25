@@ -37,7 +37,9 @@
 #include <string.h>
 #include <sys/stat.h>
 #include "expressions-reports.h"
-void Compiler_report_lisp_failure(Compiler c, Token invocation, List error, String source);
+void Compiler_report_meta_failure(Compiler c, Token invocation, List error, String source);
+
+List Compiler_reject_lisp_form(Compiler c);
 
 List Compiler_parse_macro_definition(Compiler c);
 
@@ -53,7 +55,7 @@ List Compiler_peek_macro_hole(Compiler c);
 
 Token Compiler_after_hole(Compiler c);
 
-int Compiler_macro_lisp_starts_declaration(Compiler c);
+int Compiler_meta_call_starts_declaration(Compiler c);
 
 List Compiler_try_parse_macro_member(Compiler c);
 
@@ -148,6 +150,10 @@ List Compiler_rebuild_function(Compiler c, List target, List application);
 
 List Compiler_land_quotation(Compiler c, List fresh, Var syntax, Symbol position, Type return_type);
 
+List Compiler_lift_meta_expression(Compiler c, Var value, Token invocation);
+
+List Compiler_bind_meta_statement(Compiler c, List value, Symbol context);
+
 List Compiler_macro_value_literal(Compiler c, List value);
 
 List Compiler_try_parse_macro_pattern(Compiler c);
@@ -163,44 +169,6 @@ int Compiler_take_code_value(Compiler c, Var input, Var * value, int * retained)
 void Compiler_place(Compiler c, List where, Var code);
 
 List Compiler_bind_code_value(Compiler c, List carrier, Symbol position, Type return_type);
-
-void Compiler_ensure_macro_lisp(Compiler c);
-
-List Compiler_parse_macro_lisp_top_level(Compiler c);
-
-void Compiler_parse_macro_lisp_shallow(Compiler c);
-
-void Compiler_evaluate_declaration_effect(Compiler c, String form, Token invocation);
-
-List Compiler_parse_macro_lisp_expression(Compiler c);
-
-List Compiler_lift_macro_lisp_expression(Compiler c, Var value, Token invocation);
-
-List Compiler_bind_macro_lisp_statement(Compiler c, List value, Symbol context);
-
-String Compiler_source_path(Compiler c, String file);
-
-Lisp Compiler_open_macro_library(Compiler c);
-
-void Compiler_add_library_dependencies(Compiler c);
-
-void Compiler_publish_macro_library(Compiler c, Lisp shared);
-
-int Compiler_inherits_import(String path);
-
-void Compiler_record_comptime(Compiler c, String name);
-
-void Compiler_inherit_library_comptime(Compiler c);
-
-int Compiler_library_filling(void);
-
-Map Compiler_shared_definitions(Compiler c);
-
-int Compiler_shares_meta_definition(Compiler c, String name);
-
-void Compiler_bind_meta_operation(Lisp lisp, String name, Var function);
-
-void Compiler_reset_macro_library(void);
 
 int Compiler_alias_form_starts(Compiler c);
 

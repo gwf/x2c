@@ -1176,7 +1176,7 @@ List Compiler_parse_array_literal(Compiler c){
 static List f11_collections____parse_array_element(Compiler c){
   List slot = Compiler_try_parse_macro_slot(c, 107888847784);
   if(List_truth(slot)) return slot;
-  if(Compiler_peek(c, 0) == 9463 && c -> token -> len == 2 &&(Compiler_peek(c, 1) == 129 || Compiler_peek(c, 1) == 16465)){
+  if(Compiler_peek(c, 0) == 9463 && c -> token -> len == 2 && Compiler_peek(c, 1) == 129){
     Compiler_next(c);
     slot = Compiler_try_parse_macro_slot(c, 107888847784);
     Compiler_expect(c, 251);

@@ -458,7 +458,6 @@ int translate_request(CliRequest request, Map unit_dirs, void * context, void(* 
   if(request -> dry_run) return 0;
   t.frontend = Frontend_new(request);
   t.frontend -> preprocessor_errors = _preprocessor_errors;
-  if(! Frontend_preload_macro_libraries(t.frontend)) return 1;
   Frontend_prepare_meta(t.frontend, request -> inputs);
   if(request -> jobs > 1 && t.total > 1 && ! CliRequest_inspects(request)){
     if(_translate_parallel(&(t))) return 1;

@@ -814,7 +814,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _391 = String_var(_390);
   _392 = List_var(NULL);
   _393 = Symbol_var(106239471489226);
-  _394 = int_var(2192);
+  _394 = int_var(2191);
   _395 = String_new("");
   _396 = String_var(_395);
   _397 = String_new("x2c.hole");
@@ -892,7 +892,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _469 = cons(_461, _468);
   _470 = cons(_455, _469);
   _471 = List_var(_470);
-  _472 = int_var(2253);
+  _472 = int_var(2252);
   _473 = Symbol_var(1544849476362);
   _474 = List_var(_44);
   _475 = cons(_474, NULL);
@@ -1004,7 +1004,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _578 = cons(_461, _577);
   _579 = cons(_455, _578);
   _580 = List_var(_579);
-  _581 = int_var(2260);
+  _581 = int_var(2259);
   _582 = cons(_495, NULL);
   _583 = cons(_528, _571);
   _584 = cons(_547, _583);
@@ -1660,7 +1660,7 @@ static void f12_declarations____head(f12_declarations___ProtocolSyntax * p){
   Compiler c =(* p).c;  if(Compiler_at_word(c, _158)){
     (* p).meta = c -> token;  Compiler_next(c);
   }
-  if(Compiler_test(c, 1317118534))(* p).storage = 1317118534;  Compiler_expect(c, 1139215899608); (* p).generated_base = Map_truth(c -> macro_holes) &&(Compiler_peek(c, 0) == 73 || Compiler_peek(c, 0) == 9297); (* p).base = Compiler_parse_type_name(c);  Compiler_expect(c, 81); (* p).participant_token = c -> token; (* p).participant_type = Compiler_parse_type_name(c);  Type participant =(* p).participant_type; (* p).participant = List_len(Type_list(participant)) == 1 && Var_is_row(List_car(Type_list(participant)), 11, 7, 1) ? Var_as_string(List_car(Type_list(participant))) : NULL;  Compiler_expect(c, 83);  f12_declarations____modifiers(&((* p)));
+  if(Compiler_test(c, 1317118534))(* p).storage = 1317118534;  Compiler_expect(c, 1139215899608); (* p).generated_base = Map_truth(c -> macro_holes) && Compiler_peek(c, 0) == 73; (* p).base = Compiler_parse_type_name(c);  Compiler_expect(c, 81); (* p).participant_token = c -> token; (* p).participant_type = Compiler_parse_type_name(c);  Type participant =(* p).participant_type; (* p).participant = List_len(Type_list(participant)) == 1 && Var_is_row(List_car(Type_list(participant)), 11, 7, 1) ? Var_as_string(List_car(Type_list(participant))) : NULL;  Compiler_expect(c, 83);  f12_declarations____modifiers(&((* p)));
 }
 
 Type Type_canonicalize(Type);

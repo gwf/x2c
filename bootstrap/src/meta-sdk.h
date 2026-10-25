@@ -154,7 +154,5 @@ List MetaContext_literal_list(List values);
 
 void Compiler_add_sdk_targets(Map rows);
 
-void Compiler_bind_sdk_primitives(Lisp lisp);
-
 
 #endif /* __GUARD_0x45505D6E__ */

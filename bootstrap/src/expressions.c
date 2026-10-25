@@ -2805,7 +2805,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_4(void)
   _2218 = cons(_2217, NULL);
   _2219 = cons(_253, _2218);
   _2220 = List_var(_2219);
-  _2221 = int_var(91943);
+  _2221 = int_var(91879);
   _2222 = cons(_2221, NULL);
   _2223 = cons(_258, _2222);
   _2224 = List_var(_2223);
@@ -3001,7 +3001,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_4(void)
   _2414 = cons(_2413, NULL);
   _2415 = cons(_245, _2414);
   _2416 = List_var(_2415);
-  _2417 = int_var(92305);
+  _2417 = int_var(92241);
   _2418 = cons(_2417, NULL);
   _2419 = cons(_258, _2418);
   _2420 = List_var(_2419);
@@ -3118,7 +3118,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_4(void)
   _2531 = cons(_2530, NULL);
   _2532 = cons(_245, _2531);
   _2533 = List_var(_2532);
-  _2534 = int_var(92717);
+  _2534 = int_var(92653);
   _2535 = cons(_2534, NULL);
   _2536 = cons(_258, _2535);
   _2537 = List_var(_2536);
@@ -3219,7 +3219,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_5(void)
   _2629 = cons(_2628, NULL);
   _2630 = cons(_245, _2629);
   _2631 = List_var(_2630);
-  _2632 = int_var(92801);
+  _2632 = int_var(92737);
   _2633 = cons(_2632, NULL);
   _2634 = cons(_258, _2633);
   _2635 = List_var(_2634);
@@ -3311,7 +3311,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_5(void)
   _2721 = cons(_2720, NULL);
   _2722 = cons(_245, _2721);
   _2723 = List_var(_2722);
-  _2724 = int_var(93008);
+  _2724 = int_var(92944);
   _2725 = cons(_2724, NULL);
   _2726 = cons(_258, _2725);
   _2727 = List_var(_2726);
@@ -3523,7 +3523,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_5(void)
   _2933 = cons(_2932, NULL);
   _2934 = cons(_245, _2933);
   _2935 = List_var(_2934);
-  _2936 = int_var(94926);
+  _2936 = int_var(94862);
   _2937 = cons(_2936, NULL);
   _2938 = cons(_258, _2937);
   _2939 = List_var(_2938);
@@ -4423,7 +4423,7 @@ List Compiler_parse_variable(Compiler c);
 List Compiler_parse_lambda_literal(Compiler);
 List Compiler_parse_primary(Compiler c){
   if(! _init_guard_) _file_init_();  Compiler_require_input(c);  _x2c_complete_here(c, 377892, NULL);  List slot = Compiler_try_parse_macro_slot(c, 405758822009820);  if(List_truth(slot)) return slot;  switch(Compiler_peek(c, 0)){
-    case 9297 : return Compiler_parse_macro_lisp_expression(c);  case 27051791223990 : return f6_syntax____parse_c_string_literals(c);  case 73 : return Compiler_peek(c, 1) == 60 ? Compiler_parse_macro_quotation(c) : Compiler_try_parse_macro_expression(c);  case 19147688 : return f6_syntax____parse_ident_primary(c);  case 604 : return Compiler_parse_variable(c);  case 81 : return f6_syntax____parse_parens(c);  case 247 : return f6_syntax____parse_composite(c);  case 183 : return f6_syntax____parse_bracket_array(c);  case 9553 : return Compiler_parse_list_literal(c);  case 1227897 : return Compiler_parse_symbol_set_literal(c);  case 9655 : return Compiler_parse_array_literal(c);  case 9719 : return Compiler_parse_map_literal(c);  case 9541 : return Compiler_parse_string_literal(c);  case 9539 : return Compiler_parse_lambda_literal(c);
+    case 9297 : case 16465 : return Compiler_reject_lisp_form(c);  case 27051791223990 : return f6_syntax____parse_c_string_literals(c);  case 73 : return Compiler_peek(c, 1) == 60 ? Compiler_parse_macro_quotation(c) : Compiler_try_parse_macro_expression(c);  case 19147688 : return f6_syntax____parse_ident_primary(c);  case 604 : return Compiler_parse_variable(c);  case 81 : return f6_syntax____parse_parens(c);  case 247 : return f6_syntax____parse_composite(c);  case 183 : return f6_syntax____parse_bracket_array(c);  case 9553 : return Compiler_parse_list_literal(c);  case 1227897 : return Compiler_parse_symbol_set_literal(c);  case 9655 : return Compiler_parse_array_literal(c);  case 9719 : return Compiler_parse_map_literal(c);  case 9541 : return Compiler_parse_string_literal(c);  case 9539 : return Compiler_parse_lambda_literal(c);
   }
   return Compiler_parse_atomic_literal(c);
 }
@@ -4514,7 +4514,7 @@ static List f6_syntax____parse_group_rest(Compiler c){
 
 static int f6_syntax____statement_expression_follows(Compiler c){
   if(Compiler_peek(c, 0) != 247) return 0;  int hole = 0, comma = 0;  for(Token token = Token_skip_trivia(c -> token + 1); ;  token = Token_after_group(token)){
-    Symbol type = token -> type;  if(type == 119) return 1;  if(type == 11212 || type == 251) return hole && ! comma;  if(type == 89) comma = 1;  if(Map_truth(c -> macro_holes) &&(type == 73 || type == 129 || type == 16465)) hole = 1;
+    Symbol type = token -> type;  if(type == 119) return 1;  if(type == 11212 || type == 251) return hole && ! comma;  if(type == 89) comma = 1;  if(Map_truth(c -> macro_holes) &&(type == 73 || type == 129)) hole = 1;
   }
 
 }
@@ -4539,7 +4539,7 @@ static int f6_syntax____brace_starts_map(Compiler c){
 
 static List f6_syntax____parse_composite_elements(Compiler c){
   Array elements = Array_new();  while(Compiler_peek(c, 0) != 251){
-    List hole = Compiler_peek_macro_hole(c);  int sequence = Compiler_peek(c, 0) == 129 || Compiler_peek(c, 0) == 16465 ||(List_truth(hole) && Var_int(List_assoc(hole, Symbol_var(1317592723658))));  List element = sequence ? Compiler_try_parse_macro_slot(c, 107888847784) : NULL;  if(! List_truth(element)) element = f6_syntax____test_dot_init(c) ||(Compiler_peek(c, 0) == 183 && f6_syntax____bracket_designates(c)) ? f6_syntax____parse_designated_init(c) : Compiler_parse_assignment(c);  Array_push(elements, List_var(element));  if(! Compiler_test(c, 89)) break;
+    List hole = Compiler_peek_macro_hole(c);  int sequence = Compiler_peek(c, 0) == 129 ||(List_truth(hole) && Var_int(List_assoc(hole, Symbol_var(1317592723658))));  List element = sequence ? Compiler_try_parse_macro_slot(c, 107888847784) : NULL;  if(! List_truth(element)) element = f6_syntax____test_dot_init(c) ||(Compiler_peek(c, 0) == 183 && f6_syntax____bracket_designates(c)) ? f6_syntax____parse_designated_init(c) : Compiler_parse_assignment(c);  Array_push(elements, List_var(element));  if(! Compiler_test(c, 89)) break;
   }
   return Array_list_free(elements);
 }
@@ -5046,7 +5046,7 @@ static List f10_resolution____macro_slot(Resolve * r, List content){
     }
 
   }
-  return Compiler_resolve_expression((* r).c, Compiler_lift_macro_lisp_expression((* r).c, value, (* r).origin), (* r).origin);
+  return Compiler_resolve_expression((* r).c, Compiler_lift_meta_expression((* r).c, value, (* r).origin), (* r).origin);
 }
 
 int Sym_is_var_type(Sym, Type);
@@ -6043,7 +6043,7 @@ static List f5_calls____resolve_call_arguments(Compiler c, List receiver, List s
           }
 
         }
-        else if(slot) Array_push(arguments, List_var(Compiler_resolve_expression(c, Compiler_lift_macro_lisp_expression(c, value, origin), origin)));  else if(Var_is_row(value, 9, 7, 4)) Array_push(arguments, List_var(Compiler_resolve_expression(c, Var_list_payload(value), origin)));  else Array_push(arguments, value);
+        else if(slot) Array_push(arguments, List_var(Compiler_resolve_expression(c, Compiler_lift_meta_expression(c, value, origin), origin)));  else if(Var_is_row(value, 9, 7, 4)) Array_push(arguments, List_var(Compiler_resolve_expression(c, Var_list_payload(value), origin)));  else Array_push(arguments, value);
       }
 
     }
