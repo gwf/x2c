@@ -50,17 +50,22 @@ module List _interface_read(Compiler c, String canonical) {
 
 /* Candidate interface paths for one canonical source path: the output
    directory by stem, its sibling that mirrors a home file's directory, the
-   home mirror, and a package's `builds/` beside or above the source. */
+   home mirror, and a package's `builds/` beside or above the source. A
+   stage batch keeps its artifacts flat under its area, so a home file in a
+   subdirectory, such as a runtime module unit, is also sought at the
+   mirror of each enclosing home directory. */
 static List _interface_candidates(String canonical) {
   String stem = Path.stem(canonical);
   String relative = Compiler.portable_path(canonical);
   String dir = Path.dirname(canonical), Array paths = [];
   if (interface_out_dir) paths.push(%"$interface_out_dir/$stem.xi");
-  if (relative != canonical) {
-    String mirror = %"${Path.dirname(relative)}/$stem.xi";
-    if (interface_out_dir) paths.push(%"$interface_out_dir/../$mirror");
-    paths.push(%"$interface_mirror/$mirror");
-  }
+  if (relative != canonical)
+    for (String home = Path.dirname(relative); home != ".";
+         home = Path.dirname(home)) {
+      String mirror = %"$home/$stem.xi";
+      if (interface_out_dir) paths.push(%"$interface_out_dir/../$mirror");
+      paths.push(%"$interface_mirror/$mirror");
+    }
   paths.push(%"$dir/builds/$stem.xi");
   paths.push(%"$dir/../builds/$stem.xi");
   return paths.list_free();

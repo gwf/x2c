@@ -250,6 +250,41 @@ printf '(header-symbols 1 11 (\n))\n' >"$FAKE/v1/hdr.xi"
 cmp -s "$FAKE/cold/unit.c" "$FAKE/v1/unit.c" ||
   fail "foreign interface form was not ignored"
 
+# Case 3b: a stage batch keeps its artifacts flat, so a home unit in a
+# subdirectory, like a runtime module unit, leaves its interface beside the
+# batch's other units.  A later unit including it must replay from there:
+# the warm bytes match the cold ones, and tampered receiver metadata, which
+# only the interface supplies, reaches them.
+mkdir -p "$FAKE/src/nested" "$FAKE/builds/0/src" "$FAKE/nestedcold" \
+  "$FAKE/nestedwarm" "$FAKE/nestedtampered"
+cat >"$FAKE/src/nested/deep.x" <<'EOF'
+typedef List DeepBase;
+typedef DeepBase DeepLeaf;
+Self DeepBase.rest(Self value);
+EOF
+cat >"$FAKE/src/uses-deep.x" <<'EOF'
+#include "nested/deep.x"
+String DeepLeaf.only(DeepLeaf value) { return value.car().str(); }
+String probe_deep(DeepLeaf value) { return value.rest().only(); }
+EOF
+(cd "$FAKE" && ./builds/0/x2c translate --out-dir nestedcold src/uses-deep.x)
+grep -q "DeepLeaf_only(DeepBase_rest(value))" "$FAKE/nestedcold/uses-deep.c" ||
+  fail "nested unit's cold compile lost the receiver typedef"
+(cd "$FAKE" && ./builds/0/x2c translate --out-dir builds/0/src \
+  src/nested/deep.x)
+[[ -f "$FAKE/builds/0/src/deep.xi" ]] ||
+  fail "flat stage batch wrote no interface for the nested unit"
+(cd "$FAKE" && ./builds/0/x2c translate --out-dir nestedwarm src/uses-deep.x)
+cmp -s "$FAKE/nestedcold/uses-deep.c" "$FAKE/nestedwarm/uses-deep.c" ||
+  fail "flat stage interface replay diverged from cold compile"
+sed 's/"DeepBase"/"DeepBose"/g' "$FAKE/builds/0/src/deep.xi" >"$FAKE/deep.xi"
+mv "$FAKE/deep.xi" "$FAKE/builds/0/src/deep.xi"
+(cd "$FAKE" && ./builds/0/x2c translate --out-dir nestedtampered \
+  src/uses-deep.x) >/dev/null 2>&1 || true
+cmp -s "$FAKE/nestedcold/uses-deep.c" "$FAKE/nestedtampered/uses-deep.c" &&
+  fail "nested unit's flat stage interface was not read"
+rm -f "$FAKE/builds/0/src/deep.xi"
+
 # Case 4: an include outside the home is recorded by its absolute path and
 # replays from an interface like any other.
 mkdir -p "$BUILD/outside" "$FAKE/extout" "$FAKE/extwarm"
