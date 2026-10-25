@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/unalias-governed.x:6:14: parse: unalias cannot be the body of a statement
+    if (value) unalias copy;
+               ^^^^^^^
+

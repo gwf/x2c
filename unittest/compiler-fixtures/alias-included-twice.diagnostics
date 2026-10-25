@@ -1,5 +1,5 @@
 unittest/compiler-fixtures/alias-included-twice.x:9:1: parse: declaration 'doubled' is already bound
   #include "alias-included/other.x"
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  note: this include aliases 'doubled' again
+  note: this include aliases 'doubled'
 

@@ -10,7 +10,7 @@ first.
   expressions uncolored. Highlight `alias expression as name` declarations
   and braced `alias` bodies, with `static alias` at file scope. `import`
   clauses keep their `with` and `as` scopes. Stop highlighting `$let` and
-  the former expression-alias `with` form.
+  the former expression-alias `with` form. Highlight `unalias name;`.
 
 - Give `meta` and `native` standard keyword colors. Recognize declarations
   after another declaration, across line breaks, and through comments.

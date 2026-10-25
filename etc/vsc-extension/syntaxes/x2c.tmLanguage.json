@@ -66,6 +66,9 @@
 			"include": "#x2c_alias_declaration"
 		},
 		{
+			"include": "#x2c_unalias_declaration"
+		},
+		{
 			"include": "#x2c_with_statement"
 		},
 		{
@@ -643,6 +646,9 @@
 				},
 				{
 					"include": "#x2c_alias_declaration"
+				},
+				{
+					"include": "#x2c_unalias_declaration"
 				},
 				{
 					"include": "#x2c_with_statement"
@@ -3828,6 +3834,12 @@
 			"match": "(?:^[ \\t]*|(?<=\\))[ \\t]*|(?<=[;{}])[ \\t]*|(?<=else)[ \\t]+|(?<=do)[ \\t]+)(with)(?=[ \\t]*\\()",
 			"captures": {
 				"1": { "name": "keyword.control.with.x2c" }
+			}
+		},
+		"x2c_unalias_declaration": {
+			"match": "(?:^[ \\t]*|(?<=[;{}])[ \\t]*)(unalias)\\b(?=[ \\t]+[A-Za-z_][A-Za-z0-9_]*[ \\t]*;)",
+			"captures": {
+				"1": { "name": "keyword.declaration.alias.x2c" }
 			}
 		},
 		"x2c_alias_declaration": {
