@@ -17,13 +17,10 @@ void Compiler.use_meta_toolchain(String cc, String include_dir) {
    because it calls the compiler's own runtime: a built checkout stage's
    `lib`, the checked-in bootstrap's, or else `include_dir`. */
 static String _runtime_headers(String include_dir) {
-  String stage = Compiler.stage_dir();
+  String stage = Compiler.stage_dir(), bootstrap = NULL;
   if (stage && Path.is_file(%"$stage/lib/x2c.h")) return %"$stage/lib";
-  String executable = x2c_get_executable(), root = x2c_get_root();
-  if (executable && root && Path.basename(executable) == "x2c-bootstrap" &&
-      Path.dirname(executable) == %"$root/bin")
-    return %"$root/bootstrap/lib";
-  return include_dir;
+  bootstrap = Compiler.bootstrap_runtime_dir();
+  return bootstrap ? bootstrap : include_dir;
 }
 
 /** Returns the C compiler and the runtime header directory that build

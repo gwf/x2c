@@ -219,6 +219,17 @@ String Compiler.stage_dir(void) {
   return Path.dirname(stage) == %"$root_path/builds" ? stage : NULL;
 }
 
+/** Returns the checked-in bootstrap's runtime directory when this process
+    is the bootstrap compiler, or NULL. Its headers and archive match the
+    runtime the bootstrap compiler was built with. */
+String Compiler.bootstrap_runtime_dir(void) {
+  String executable = x2c_get_executable();
+  if (!executable || !root_path) return NULL;
+  return Path.basename(executable) == "x2c-bootstrap" &&
+         Path.dirname(executable) == %"$root_path/bin"
+       ? %"$root_path/bootstrap/lib" : NULL;
+}
+
 /** Returns `<home>/packages`, which may not exist, or NULL without a home. */
 String Compiler.home_packages(void) {
   String home = Compiler.home_dir();
