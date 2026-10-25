@@ -534,7 +534,7 @@ A function that returns one expression may use `=>`:
 static int twice(int value) => value * 2;
 
 String Pair.describe(Pair pair) =>
-  %"${pair.left}, ${pair.right}";
+  %"$(pair.left), $(pair.right)";
 ```
 
 This is shorthand for a compound body containing one `return` statement. The
@@ -1129,7 +1129,7 @@ a `List` into flat identifier targets:
 ~
 Var (a, b, c) = values;
 int (start, stop, step) = numeric_values;
-(int index, float weight, char code) = %(1 2.5 ${'x'});
+(int index, float weight, char code) = %(1 2.5 $('x'));
 
 Var first, second;
 (first, second) = values;
@@ -1141,8 +1141,8 @@ The leading declaration specifier in `int (start, stop, step)` applies to
 every name. The parenthesized typed form gives each target a type, written as
 it would be in a parameter declaration. Both forms declare their names in the
 enclosing block. Storage classes and per-target initializers are not accepted
-inside the parentheses. Inside a `%()` `List` literal, use `${}` to insert a C
-character expression because the `List` reader reads a bare single quote as
+inside the parentheses. Inside a `%()` `List` literal, use `$(...)` to insert a
+C character expression because the `List` reader reads a bare single quote as
 `quote`.
 
 The singleton assignment destructures. It assigns element zero; the left side
@@ -1422,7 +1422,7 @@ position and inserts its captured expressions in order. It may be empty:
 ```x2c
 ~#include "x2c.x"
 macro Expression $values(Expr @items) =>
-  %[${10}, @items, ${40}];
+  %[$(10), @items, $(40)];
 
 int main(void) {
   Array values = $values(20, 30);
@@ -1431,7 +1431,7 @@ int main(void) {
 }
 ```
 
-The `@items` position is part of the macro template; `${expression}`
+The `@items` position is part of the macro template; `$(expression)`
 inside an ordinary quoted `Array` still inserts one value.
 
 `Entry` holes capture one `key: value` row; `Entry @rows` captures and
@@ -1548,7 +1548,7 @@ int main(void) {
 An entry invocation occupies one comma-delimited row position but may expand to
 any number of rows. In a bare `{...}` literal a direct or keyword-alias
 invocation is written as a row. In the quoted `%{...}` literal it must sit
-inside `${...}`, which leaves the quoted Map syntax to parse x2c. Elsewhere in
+inside `$(...)`, which leaves the quoted Map syntax to parse x2c. Elsewhere in
 an entry macro body, ordinary expression grammar applies, so an expression
 macro may generate a key. A `meta` call `@rows(...)` inserts a `List` of
 explicit `(map-entry KEY VALUE)` nodes; singular `$key(...): value` constructs
@@ -1818,28 +1818,30 @@ where it fills a type. A `String` local fills an expression hole as a string
 literal and an `int` local as an integer literal. A `$name` that matches no
 local is a macro invocation or a `meta` call, as in a template, so
 `@rows($items)` splices a `meta` function's result where the quotation
-expands. A `${expression}`, with `{` directly after `$`, is a hole whose value
+expands. A `$(expression)`, with `(` directly after `$`, is a hole whose value
 is an expression of the function that contains the quotation. It means the
 same as a local declared just before the quotation and named with `$`. The
 function evaluates each such expression once, where the quotation is written,
 in the order the holes are written, before the quotation builds its code.
-Names in the braces resolve at the quotation; names the body declares are not
-visible there. The expression's declared type gives the hole its kind, as a
+Names in the parentheses resolve at the quotation; names the body declares are
+not visible there. The expression's declared type gives the hole its kind, as a
 local's type does: a `Type` fills a type, a `String`, `int`, or `Symbol`
-inserts a literal, and a `List` inserts its syntax. `@{expression}` splices a
-`List`. Each `${...}` or `@{...}` is a separate hole and belongs to the
-innermost quotation, so `${$!( ... )}` inserts a quotation built first. Inside
-a `%(...)`, `%[...]`, `%{...}`, or `%"..."` literal in the body, `${...}`
+inserts a literal, and a `List` inserts its syntax. `@(expression)` splices a
+`List`. Each `$(...)` or `@(...)` is a separate hole and belongs to the
+innermost quotation, so `$($!( ... ))` inserts a quotation built first. Inside
+a `%(...)`, `%[...]`, `%{...}`, or `%"..."` literal in the body, `$(...)`
 keeps its literal meaning and inserts when the built code runs;
-`${${expression}}` there inserts a value computed at the quotation. For a
-template Array, `%[${@{items}}]` splices a sequence computed while the
+`$($(expression))` there inserts a value computed at the quotation. For a
+template Array, `%[$(@(items))]` splices a sequence computed while the
 quotation is built. It does not add runtime Array splicing. In a List,
-`@{expression}` retains runtime splicing and does not evaluate during template
+`@(expression)` retains runtime splicing and does not evaluate during template
 construction. Literal strings such as `"$ @"`, percent strings such as `%"\$
 @"` or `%"$$ @"`, and quoted atom escapes such as `%(\$ \@)` preserve sigils
-as data. After `case`, `${$name(...)}` is still a macro pattern. These holes
-exist only in quotations; in a named template's code, `${` still reports a
-missing macro name. See [Quoting
+as data. After `case`, `$($name(...))` is still a macro pattern. These holes
+exist only in quotations; in a named template's code, `$(a, b)` is an
+evaluated List in the generated code. In a quotation's code, `${key: value}`
+is an evaluated Map in the generated code, not a hole, and a generated List of
+runtime values is written `%( $(a) $(b) )`. See [Quoting
 code](../guide/generating-code.md#quoting-code-with-) for an example.
 
 An inferred `Type` can contain `%(unqual "T")`, an unqualified-value
@@ -1857,7 +1859,7 @@ template operand resolves where the expansion lands, as with `sizeof`.
 
 A typed quotation is written `$!T{ expression }`, where `T` is one identifier
 that names a type, or `$!(T){ expression }`, where `T` is any type, a `Type`
-local, or a `${...}` hole of type `Type`. An identifier after `$!` that spells
+local, or a `$(...)` hole of type `Type`. An identifier after `$!` that spells
 a macro kind in any case, such as `Unit` or `Type`, always names that kind, so
 a type with that spelling uses the parenthesized form. A `$!( ... )` group
 followed directly by `{` is a typed quotation; otherwise it is an expression
@@ -1879,14 +1881,14 @@ the hole and `T` is `String`; elsewhere it is a C string literal. Inner nodes
 keep the placeholder type of unbound syntax. Free names bind where the code is
 bound. A typed quotation may not declare a name that its own code spells or
 apply a template, and inside another quotation it is written as a hole,
-`${$!T{ ... }}`. The compiler accepts `T` as the expression's type without
+`$($!T{ ... })`. The compiler accepts `T` as the expression's type without
 checking it. A typed quotation states the type the code has; it converts
 nothing, so write a cast inside the braces when the code needs one. See [Code
 that knows its type](../guide/generating-code.md#code-that-knows-its-type).
 
 `$!Type{ T }` builds the type `T`, written as a cast writes a type name.
 `$!Param{ P }` builds one parameter declaration. A `Type` local or a
-`${...}` hole of type `Type` may stand for a type or for the base a
+`$(...)` hole of type `Type` may stand for a type or for the base a
 declarator modifies. Both build where they are written: they bind nothing,
 declare no name the braces spell, and apply no template. `Type` and `Param`
 after `$!` always name these kinds. `Decl` names a hole kind only. See
@@ -1911,7 +1913,7 @@ Each element can then be recognized with a `case` on the macro that built it.
 The pattern a literal macro value derives is prepared once per process.
 
 A macro's pattern is also a pattern wherever patterns go. In a `case`,
-`${$name(P, ...)}` is the pattern of code `$name` builds with each argument
+`$($name(P, ...))` is the pattern of code `$name` builds with each argument
 pattern in its hole, derived while the compiler reads the `case`. Each
 argument is a binder or wildcard, another `$name(...)` pattern, or a
 `%(...)` List pattern; a sequence or `Type` hole splices its List pattern's
@@ -1928,8 +1930,8 @@ macro Expression $add(Expr $left, Expr $right) => $left + $right;
 meta static List classify(List code) {
   match (code) {
     case $add(?left, $neg(?right)): return $!int{ 1 };
-    case %(expr ?type ${$add(?left, ?right)}):
-      return $!int{ ${type.repr() == "(int)" ? 2 : 3} };
+    case %(expr ?type $($add(?left, ?right))):
+      return $!int{ $(type.repr() == "(int)" ? 2 : 3) };
   }
   return $!int{ 0 };
 }
@@ -2146,7 +2148,7 @@ inserted according to the recorded body position. A syntax `List` inserts
 syntax, a scalar becomes an expression literal, a semantic `Type` `List` fills
 a type slot, and a syntax sequence splices only at a sequence splice point,
 where `@helper(...)` inserts it. `String`s are values, never source text to be
-reparsed. In a percent literal, `${$helper(...)}` reaches compile-time code;
+reparsed. In a percent literal, `$($helper(...))` reaches compile-time code;
 see [percent literals](#percent-literals-quote-and-unquote).
 
 ```x2c
@@ -2158,11 +2160,11 @@ int main(void) {
 }
 ```
 
-Compile-time code is written in x2c. The compiler does not evaluate Lisp, so
-the earlier `$(...)` and `@(...)` Lisp forms, including
-`$(import "file.xlisp")`, are rejected where they are written with
-`compile-time Lisp forms are not supported`. A `$(` inside a string, a
-comment, or `List` data is not a form and is unaffected. Ordinary `.x` modules
+Compile-time code is written in x2c, and the compiler does not evaluate Lisp.
+In code, `$(...)` is an [evaluated List](#evaluated-lists-and-maps), which is
+an expression, so a former Lisp form such as `$(import "file.xlisp")` at file
+scope reports `an evaluated collection is an expression, not a top-level
+form`. Ordinary `.x` modules
 containing macros and `meta` functions use `#include`, and `.xlisp` files are
 runtime assets that a [Lisp session](#runtime-lisp) loads.
 
@@ -2881,6 +2883,54 @@ The percent forms `%[...]` and `%{...}` below keep their quoted grammar. The
 bare forms differ only in evaluating elements, values, and non-identifier
 keys.
 
+### Evaluated Lists and Maps
+
+In an expression position, `$(` begins an evaluated `List`:
+
+```text
+evaluated-list := '$(' [ assignment-expression
+                         { ',' assignment-expression } [ ',' ] ] ')'
+```
+
+Each assignment expression is one element, converted to `Var` and consed in
+source order. A comma expression needs its own parentheses to be one element,
+as in `$((prepare(), value), other)`. `$()` is the existing empty `List`, and a
+trailing comma is accepted. Existing `Var` conversion, `List` canonicalization,
+caching, and lifetime rules apply, and a value that `List` construction
+rejects, such as a `void` call, is rejected here too. A `List`-valued element
+stays one element; there is no flattening or splicing. Ordinary parentheses
+keep C grouping and call syntax whatever the destination type, so `(a, b)` is
+never a `List`.
+
+`${` begins an evaluated `Map`, in an expression position or as an element of
+quoted collection data:
+
+```text
+evaluated-map   := '${' [ evaluated-entry { ',' evaluated-entry } [ ',' ] ] '}'
+evaluated-entry := assignment-expression ':' assignment-expression
+```
+
+The only difference from a bare `{...}` Map is that a bare identifier key is
+evaluated. Entry macro rows, duplicate keys, typed destinations, and fresh
+identity follow the bare Map's rules. Each key is evaluated before its value,
+and entries are evaluated in source order. `${}` is always a fresh empty
+`Map`, whatever its destination. A nested bare `{...}` inside keeps the natural
+key rule.
+
+```x2c
+String key = "answer";
+int n = 42;
+Map natural = {key: n};       // key is the Atom key
+Map quoted = %{key: n};       // key and n are Atoms
+Map evaluated = ${key: n};    // key is the String "answer", value 42
+Map symbol = ${<key>: n};     // an explicit Symbol key
+List row = $(key, n, ${key: n});
+```
+
+In a quotation's code, `$(` is a computed hole instead; see
+[holes that name an expression](../guide/generating-code.md#holes-that-name-an-expression).
+`${key: value}` there is an evaluated `Map` in the generated code.
+
 ### Percent literals, quote, and unquote
 
 In operand position, `%` followed by a literal delimiter is the quoting sigil.
@@ -2958,14 +3008,16 @@ type C would choose and its modular negation, so `%(-1u)` is the `unsigned`
 value 4294967295.
 
 `$name` inserts one identifier expression into a quoted collection.
-`${expression}` inserts one arbitrary x2c expression, including calls, member
+`$(expression)` inserts one arbitrary x2c expression, including calls, member
 and index expressions, operators, casts, compound literals, `NULL`, enum
-constants, and comma expressions. `@name` and `@{expression}` splice a `List`
+constants, and comma expressions. `@name` and `@(expression)` splice a `List`
 into a surrounding `List`; Arrays and Maps have no splice form. The inserted
 and spliced expressions of one `%()`, `%[]`, `%{}`, or `%""` literal are
 evaluated once each, left to right in source order. The arguments of an
 ordinary function call keep C's unspecified order. The identifier forms are
-the short versions of the braced expression forms. The
+the short versions of the parenthesized expression forms. A `${` inside
+quoted collection data begins an evaluated Map, not an insertion, and an
+unescaped `${` in String text is an error. The
 [collections](../guide/collections.md) chapter walks through building and
 using each one.
 
@@ -3004,27 +3056,27 @@ registers on the literal's `segments` head. A program's rule for `String.join`
 receives only the calls that the program writes, including one inside a `$`
 insertion. It does not receive the call that the shipped rule writes.
 
-The braces are part of the unquote and contain one complete x2c expression,
+The parentheses are part of the unquote and contain one complete x2c expression,
 including nested calls, indexing, casts, assignments, conditionals, comma
 expressions, and nested literals. In a collection, `$name(...)` instead inserts
 `$name` and then reads `(...)` as a nested symbolic `List`. In `%""`, the
 parentheses after `$name` are text. A runtime call in any quoted form is
-therefore `${name(...)}`. In `%""` and in a quoted `"..."` element, `$$` and
+therefore `$(name(...))`. In `%""` and in a quoted `"..."` element, `$$` and
 `\$` each produce one literal `$`: `%"a$$"` is `a$`.
 
 Nested `(...)`, `[...]`, and `{...}` remain quoted `List`, `Array`, and `Map`
 data, and nested `"..."` selects the x2c `String` grammar with its interpolation
 and escape rules. None repeats the `%` sigil, because a bare `%` inside quoted
 collection data is an `Atom`: `%(k %"txt")` reads as the three elements `k`,
-`%`, and `"txt"`. `${"text"}` instead inserts an ordinary C string expression.
+`%`, and `"txt"`. `$("text")` instead inserts an ordinary C string expression.
 Unescaped comma, colon, `]`, and `}` terminate collection Atoms; backslash
 escaping or angle syntax expresses those bytes as data. `%<<...>>` accepts
 literal `Symbol`s only and permits no interpolation or splicing.
 
-Inside a quoted collection, `${$helper(...)}` first unquotes into x2c and
+Inside a quoted collection, `$($helper(...))` first unquotes into x2c and
 then makes a compile-time call. `$name(...)` remains a macro invocation or
-`meta` call in x2c, and a `$(...)` form there is rejected as unsupported
-compile-time Lisp. These parser contexts do not change Lisp `quote` or
+`meta` call in x2c, and a `$(...)` there is an evaluated List. These parser
+contexts do not change Lisp `quote` or
 `quasiquote`.
 
 Percent strings are byte strings: they may span physical lines and their

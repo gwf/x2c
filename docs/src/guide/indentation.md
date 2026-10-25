@@ -81,7 +81,7 @@ int main(void):
   int letters = 0
   foreach String word in words:
     letters += word.len()
-  String report = %"${words.len()} words, " +
+  String report = %"$(words.len()) words, " +
     %"$letters letters"
   List lengths = words
     .map(%!(Var word) => word.str().len())

@@ -22,7 +22,7 @@ for text and location queries; constructed subtrees do not acquire it.
 typedef struct Point { int x, y, z; } Point;
 
 meta static List field_count(TypeInfo type) =>
-  $!int{ ${((List) type.assoc(<fields>)).len()} };
+  $!int{ $(((List) type.assoc(<fields>)).len()) };
 
 macro Expression $probe.count(Expr $value) => $field_count($value);
 
@@ -262,7 +262,8 @@ A template that a `meta` function uses once can be written where it is used.
 builds that kind of code. A `$name` inside refers to the function's local
 `name` and inserts its value: syntax where the position takes syntax, and a
 number, String, or Symbol as a literal. `@name` splices a `List` local.
-`${expression}` inserts any value; see below. Each local's first position determines what it fills.
+`$(expression)` inserts any value; see below. Each local's first position
+determines what it fills.
 
 ```x2c
 #include "x2c.x"
@@ -303,7 +304,7 @@ inserts a value, so bind a quotation to a local first and insert the local.
 quotations. Runtime List literals use the same prefixes. Native C varargs
 retain their `...` spelling. An `@name` sequence splices into call arguments
 and braced initializers such as `$!( { @items } )` or `(T){ $first, @rest }`,
-and `%[@items]` Array literals; Map entries splice as `%{${@rows}}`.
+and `%[@items]` Array literals; Map entries splice as `%{$(@rows)}`.
 A quotation expands where code is bound, spliced, or resolved: return it,
 pass it to a slot, or use it as another quotation's hole. A quotation inside
 hand-built expression syntax, such as a call's argument list or a declaration
@@ -329,7 +330,7 @@ of a pointer, as Symbols. It spells every other type name as a String:
 ### Holes that name an expression
 
 A `$name` hole needs a local. When the value is a field, an element, or the
-result of a call, `${expression}` inserts it without one:
+result of a call, `$(expression)` inserts it without one:
 
 ```x2c
 #include "x2c.x"
@@ -340,8 +341,8 @@ typedef struct Call { List callee; List arguments; Type result; } Call;
 meta static List scaled_call(List callee, List a, List b) {
   Call d = {.callee = callee, .arguments = %($a $b), .result = %(int)};
   return $!( ({
-    ${d.result} value = ${d.callee}(@{d.arguments});
-    value * ${d.arguments.len()};
+    $(d.result) value = $(d.callee)(@(d.arguments));
+    value * $(d.arguments.len());
   }) );
 }
 
@@ -360,17 +361,18 @@ int main(void) {
 14
 ```
 
-The braces hold ordinary code of the function that contains the quotation.
-The function evaluates each `${...}` once, when it evaluates the quotation,
+The parentheses hold ordinary code of the function that contains the
+quotation.
+The function evaluates each `$(...)` once, when it evaluates the quotation,
 before the quotation builds its code. Holes are evaluated in the order they
-are written. Names in the braces resolve where the quotation is written. A
-name that the quotation's body declares is not visible in the braces,
-because the body is code for another place. A `${...}` hole therefore means
+are written. Names in the parentheses resolve where the quotation is written.
+A name that the quotation's body declares is not visible there,
+because the body is code for another place. A `$(...)` hole therefore means
 the same as a local declared just before the quotation and named with `$`:
 
 <!-- ignore: a meta function fragment without its includes -->
 ```x2c,ignore
-return $!( ${d.callee}(@{d.arguments}) );
+return $!( $(d.callee)(@(d.arguments)) );
 // means
 List callee = d.callee;
 List arguments = d.arguments;
@@ -378,32 +380,47 @@ return $!( $callee(@arguments) );
 ```
 
 The expression's declared type gives the hole its kind, as a local's type
-does. A `Type` expression fills a type position, as `${d.result}` does
+does. A `Type` expression fills a type position, as `$(d.result)` does
 above. A `String`, `int`, or `Symbol` expression inserts a literal, so
-`${d.arguments.len()}` inserts `2`. A `List` expression inserts the syntax it
-holds. `@{expression}` splices a `List`, like `@name`. Each `${...}` or `@{...}` is
-a separate hole, even when two are spelled alike.
+`$(d.arguments.len())` inserts `2`. A `List` expression inserts the syntax it
+holds. `@(expression)` splices a `List`, like `@name`. Each `$(...)` or
+`@(...)` is a separate hole, even when two are spelled alike.
 
-A `${...}` belongs to the innermost quotation that contains it. To put one
+Because `$(` is a hole in a quotation's code, a quotation cannot spell the
+evaluated List constructor there. Build that List from a percent literal
+with runtime insertions instead: `$!( %( $(a) $(b) ) )` generates a List of
+the runtime `a` and `b`. A `${key: value}` in a quotation's code is an
+evaluated Map in the generated code, not a hole; its names resolve where the
+code lands.
+
+A `$(...)` belongs to the innermost quotation that contains it. To put one
 quotation's code inside another, write the inner quotation as a hole:
-`$!( $inner * ${$!( $a - $one )} )` builds the inner code first and inserts
+`$!( $inner * $($!( $a - $one )) )` builds the inner code first and inserts
 it.
 
 Inside a `%(...)`, `%[...]`, `%{...}`, or `%"..."` literal in a quotation's
-body, `${...}` keeps its literal meaning: it inserts a value when the built
-code runs. Write `${${expression}}` there to insert a value that the function
-computes. A template Array splices a computed sequence through the same
-code boundary: `%[${@{items}}]`. This constructs template slots; ordinary
-Arrays and Maps do not support runtime splicing. A List's `@{expression}`
+body, `$(...)` keeps its literal meaning: it inserts a value when the built
+code runs. Inside that insertion the code position returns, so
+`$($(expression))` there inserts a value that the function computes:
+
+<!-- ignore: a meta function fragment without its includes -->
+```x2c,ignore
+$!( %(answer $(calculate())) )      // calculate() runs in the built code
+$!( %(answer $($(amount + 1))) )    // amount + 1 runs while building
+```
+ A template Array splices a computed sequence through the same
+code boundary: `%[$(@(items))]`. This constructs template slots; ordinary
+Arrays and Maps do not support runtime splicing. A List's `@(expression)`
 still runs when the generated program constructs that List.
 
 Literal characters need no new staging operator. Write an ordinary string
 such as `"$ @"`, or `%"\$ @"` for a percent string. Quoted atom escapes
 such as `%(\$ \@)` preserve sigils as data.
 
-`${...}` works only in quotations. A named template has no function to
-evaluate it in; it computes with a `$meta(...)` call, which runs where it
-expands.
+A computed `$(...)` hole works only in quotations. A named template has no
+function to evaluate it in; it computes with a `$meta(...)` call, which runs
+where it expands. In a named template's code, `$(a, b)` is an evaluated
+List in the generated code.
 
 ### Code that knows its type
 
@@ -426,7 +443,7 @@ meta static List doubled(List value) {
 the type `T`. `T` is one identifier that names a type, such as `int` or
 `String`. Put any other type in parentheses: a type of several words, as in
 `$!(unsigned long){ ... }` or `$!(char *){ ... }`, or a `Type` local or
-`${...}` hole whose value is the type, as in
+`$(...)` hole whose value is the type, as in
 `$!($result){ $callee(@arguments) }`. A kind name such as `Unit` or
 `Type` after `$!` always names a kind, so a type spelled like one also takes
 parentheses: `$!(Type){ ... }`.
@@ -449,7 +466,7 @@ differences:
   names private to, so a name it needs comes from a hole, such as a local
   that holds `x2c_ident("total")`. For the same reason it applies no
   template; build that code first and insert it. Inside another quotation,
-  write a typed quotation as a hole: `${$!int{ $b }}`.
+  write a typed quotation as a hole: `$($!int{ $b })`.
 
 Only the outermost expression receives `T`. Inner expressions carry no type
 until something binds them. Write `T` exactly: the compiler trusts it as it
@@ -487,7 +504,7 @@ meta static String point_types(void) {
 ("Point") (* const "Point") (* (func ((* "Point"))) int)
 ```
 
-A `Type` local or a `${...}` hole of type `Type` stands for a type in the
+A `Type` local or a `$(...)` hole of type `Type` stands for a type in the
 braces. The declarator around it builds a new type from it, so
 `$!Type{ const $point * }` is a pointer to a constant `Point`. A type name
 keeps its spelling: `$!Type{ String }` is `%("String")`.
@@ -748,7 +765,7 @@ meta Code count_entries(Code function) {
   if (!Code.name(function).startswith("counted_")) return function;
   match (function) case %(function ?type ?declarator ?):
     return %(function $type $declarator
-      (block ${$!{ entries++; }} @{Code.body(function)}));
+      (block $($!{ entries++; }) @(Code.body(function))));
   return function;
 }
 
@@ -813,7 +830,7 @@ meta static List shape_fields(TypeInfo type) => type.assoc(<fields>);
 meta List shape_names(TypeInfo type) {
   Array names = [];
   foreach (List field in shape_fields(type)) names.push(field.car());
-  return $!String{ ${String.join(", ", names)} };
+  return $!String{ $(String.join(", ", names)) };
 }
 
 /* `{ p.x, p.y, p.z }`, built from the fields rather than written out. */

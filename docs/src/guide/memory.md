@@ -176,7 +176,7 @@ static int evaluate(int input) {
   Pool.open();
   defer Pool.close();
 
-  List temporary = %($input ${build_left(input)} ${build_right(input)});
+  List temporary = %($input $(build_left(input)) $(build_right(input)));
   return temporary_score(temporary);
 }
 ```

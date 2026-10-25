@@ -324,7 +324,7 @@ examples are excerpts from current source.
    Array body = [$!{ unsigned $hash = 0; }];
    foreach (List field, fields)
      body.push($!{
-       $hash = x2c_hash_word($hash ^ Var_hash((Var)${_field_value(field)}));
+       $hash = x2c_hash_word($hash ^ Var_hash((Var)$(_field_value(field))));
      });
    body.push($!{ return $hash; });
    ```
@@ -340,7 +340,7 @@ examples are excerpts from current source.
    is written (PR #135). `_loop` in `src/builtins.x`:
 
    ```x2c
-   return $!{ { ${f.declaration} @setup while ($condition) $body } };
+   return $!{ { $(f.declaration) @setup while ($condition) $body } };
    ```
 
 4. **A typed quotation.** `$!T{ expr }` builds `(expr T ...)` at once.
@@ -422,8 +422,8 @@ owns the `segments` envelope while preserving cache, `segvar`, `segexp`, and
 constructed `segraw` rows. Its callers retain conversion and resolution
 order. This needs no new Segment parameter kind.
 
-Recognize a source form with its macro inside a pattern: `${$indexed(?r,
-?s)}` matches the typed expression or its bare content, and inside an
+Recognize a source form with its macro inside a pattern: `$($indexed(?r,
+?s))` matches the typed expression or its bare content, and inside an
 `(expr TYPE ...)` shell it is the content, so the shell captures the type. A
 hole's argument may itself be a pattern, such as
 `$($indexed(%(!set ?base (expr ?type ?)), ?index))`; the macro's pattern is

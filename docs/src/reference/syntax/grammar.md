@@ -255,7 +255,7 @@ lexical mode, so it is not a general substitute for a code-mode `{`.
 A match pattern yields a List pattern, which can be static or supplied at
 runtime. Besides a List expression, a visible macro can supply a derived
 pattern. Its arguments are `?`/`*` binders with optional identifiers, nested
-macro patterns, or List patterns. `${$macro(...)}` embeds a derived pattern
+macro patterns, or List patterns. `$($macro(...))` embeds a derived pattern
 inside a List; in an `(expr TYPE CONTENT)` pattern its position can request
 only the content. Typed captures use `?(Type name)` and the type's Var tag.
 `src/literals/literals.x` and `src/macros/macros.x` implement these rules. `lib/match/match.x`
@@ -280,18 +280,24 @@ In data mode, bare `[`, `{`, and `"` emit the same opener kinds as code `%[`,
 remains the nested-list opener. List elements are separated by token
 boundaries. A comma there is a reader prefix. Array/Map entries use commas.
 Arrays and Maps accept value insertion, while List `@` additionally splices.
-An inserted value expression uses code mode. Literal meaning, caching, Symbol
+A `$(` or `@(` insertion holds one parenthesized expression in code mode. A
+`${` in data mode opens an evaluated Map whose keys and values use code mode;
+it is never an insertion. Literal meaning, caching, Symbol
 limits, and pattern binders remain subject to the reference's rules.
 
 A percent List containing just one reader-prefixed form returns that form
 rather than adding another surrounding list. Quoted Map entries can contain
-`${...}` with either a computed key followed by `:` or an Entry macro/slot.
-A String interpolation uses `$name` or `${expression}`; the latter also
-supports macro sequence handling where the template parser permits it.
+`$(...)` with either a computed key followed by `:` or an Entry macro/slot.
+A String interpolation uses `$name` or `$(expression)`; the latter also
+supports macro sequence handling where the template parser permits it. An
+unescaped `${` in String text is the retired insertion spelling and is
+reported as an error.
 
-Code has no compile-time Lisp production. A `$(` or `@(` form in code is
-reported where it is written as `compile-time Lisp forms are not supported`.
-The runtime Lisp reader supports lists, four reader prefixes, and atomic
+In code, `$` followed directly by `(` is two tokens. In an expression position
+they begin an evaluated List; in a quotation's code they begin a computed
+hole, and after `case` they begin a macro-pattern insertion. `$` followed
+directly by `{` begins an evaluated Map. Neither is a top-level form. Code has
+no compile-time Lisp production. The runtime Lisp reader supports lists, four reader prefixes, and atomic
 values; it has no special dotted-pair production. The EBNF covers reading; it
 does not specify Lisp evaluation.
 
@@ -394,16 +400,16 @@ file-scope `@` is rejected. Target placement and alias shadowing follow
 `$!(expression)` quotes an expression; `$!{...}` quotes
 block items. `$!Kind{...}` selects a result kind, Type, or Param. A typed
 quotation `$!T{expression}` or `$!(type){expression}` uses a type operand;
-the parenthesized form also accepts `$name` or `${expression}` carrying a
+the parenthesized form also accepts `$name` or `$(expression)` carrying a
 type. Category names take priority over an ordinary type spelling. The
-quotation captures local `$name` references and braced value holes according
-to `parse_macro_quotation`. Typed quotations have context and nesting
+quotation captures local `$name` references and parenthesized value holes
+according to `parse_macro_quotation`. Typed quotations have context and nesting
 restrictions described in the reference.
 
 ### M5. Slots and sequences
 
 Inside a template, `$name` inserts a declared hole in a category-compatible
-position, and `@name` splices a sequence. `${expression}` and `$producer(...)`
+position, and `@name` splices a sequence. `$(expression)` and `$producer(...)`
 meta calls supply computed syntax in the applicable slot. `@producer(...)` can
 supply sequences in positions that accept a sequence slot. Shared invocation
 lookup recognizing `@` does not permit scalar `@` calls or `@` definition
@@ -414,8 +420,8 @@ passes its captured value; a whole sequence hole passes one List, rather than
 splicing call arguments.
 
 Lambda templates accept `&$name` capture rows as well as one Captures slot.
-Quoted Arrays accept `${@sequence}` in an argument-sequence position. Quoted
-Maps accept a bare Entry slot or a slot inside `${...}`. These slots require a
+Quoted Arrays accept `$(@sequence)` in an argument-sequence position. Quoted
+Maps accept a bare Entry slot or a slot inside `$(...)`. These slots require a
 compatible template context. Call arguments, initializer elements, quoted
 Array elements, and raise details also have argument-sequence positions. A
 sequence slot cannot supply several statements where one statement is

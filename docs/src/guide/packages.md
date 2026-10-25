@@ -42,7 +42,7 @@ Greeting Greeting.new(String subject) {
 
 String Greeting.line(Greeting greeting) {
   greeting.count++;
-  return %"hello, ${greeting.subject} (${greeting.count})";
+  return %"hello, $(greeting.subject) ($(greeting.count))";
 }
 ```
 
@@ -95,7 +95,7 @@ import "greet" as g;
 
 int main(void) {
   g.Greeting greeting = g.Greeting.new("x2c");
-  printf("%s", %"${greeting.line()}\n");
+  printf("%s", %"$(greeting.line())\n");
   return 0;
 }
 ```
@@ -130,7 +130,7 @@ import "greet" as g with Greeting;        // g.Greeting and Greeting
 
 int main(void) {
   Greeting greeting = Greeting.new("x2c");
-  printf("%s", %"${greeting.line()}\n");
+  printf("%s", %"$(greeting.line())\n");
   return 0;
 }
 ```
@@ -388,7 +388,7 @@ void show_readings(String filename) {
   defer query.free();
   query.bind(%(400));
   foreach (List row in query)
-    printf("%s", %"${row[0]}: HTTP ${row[1]}\n");
+    printf("%s", %"$(row[0]): HTTP $(row[1])\n");
 }
 ```
 

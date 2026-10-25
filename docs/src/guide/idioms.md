@@ -156,7 +156,7 @@ explains each form with examples.
 | --- | --- |
 | Code with one shape at several sites | a named macro, applied from the function as in [source templates](generating-code.md#source-templates-from-meta-functions) |
 | Code that one function builds | a quotation: `$!( expression )`, `$!{ statements }`, or `$!Unit{ ... }` |
-| Code that uses a field, an element, or a call result | a [`${expression}` hole](generating-code.md#holes-that-name-an-expression), evaluated once where the quotation is written |
+| Code that uses a field, an element, or a call result | a [`$(expression)` hole](generating-code.md#holes-that-name-an-expression), evaluated once where the quotation is written |
 | Code in which separate quotations share one name | `List name = x2c_ident("total");`, then `$name` in each quotation |
 | An expression whose type is read before it lands | a [typed quotation](generating-code.md#code-that-knows-its-type), such as `$!double{ $value * 2 }` |
 | Code the function inspects before it returns | a typed quotation, which builds the code where it is written |

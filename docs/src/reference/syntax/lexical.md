@@ -99,7 +99,7 @@ The C operator scanner chooses the longest supported prefix from this set:
 - , ; : ! ? . ( ) [ ] { } * / & % ^ + < = > | ~ @
 ```
 
-`=>` is two tokens: `=` then `>`. `$`, `$(`, `@(`, `${`, `@{`, `?(`,
+`=>` is two tokens: `=` then `>`. `$`, `$(`, `@(`, `${`, `?(`,
 `%(`, `%[`, `%{`, `%<<`, `%"`, and `%!` are handled by mode dispatch,
 not by this operator scanner. The same bytes can therefore have different
 roles in different modes.
@@ -217,16 +217,19 @@ a digit, and numbers at `.` followed by a digit.
 
 | Mode | Ordered recognition |
 | --- | --- |
-| `x2c`, `x2c-par` | Common rules; `$(`/`@(` or `$`/`@` reference; percent forms; eligible angle Symbol; C string; identifier/keyword; C operator |
+| `x2c`, `x2c-par` | Common rules; `$`/`@` reference; percent forms; eligible angle Symbol; C string; identifier/keyword; C operator |
 | `array`, `map` | Common rules; data prefixes; data punctuation; collection atom as `lit-atom` |
 | `list` | Data prefixes; data punctuation; common rules; atom as `lit-atom` |
-| `lisp`, `macro-lisp` | Lisp `$` reference; reader punctuation/signed number/Symbol; common rules; atom as `ident` |
+| `lisp` | Lisp `$` reference; reader punctuation/signed number/Symbol; common rules; atom as `ident` |
 | `symbol-set` | Common rules; `>>`; `$`/`@`; angle Symbol; set atom as `lit-atom` |
-| `string` | `${` or `$` reference; closing `"`; segment scanner as `segment` |
+| `string` | `$(`, `${`, or `$` reference; closing `"`; segment scanner as `segment` |
 
 Data-prefix rules recognize `void` as a keyword only in quoted Array/Map
-mode, `?(` only in List mode, and `$` interpolation in all data modes.
-Array/Map modes recognize `@` prefixes for template sequence slots.
+mode, `?(` only in List mode, and `$` interpolation in all data modes. In
+data modes `$(` and `@(` are single tokens that open one x2c expression, and
+`${` opens an evaluated Map. In code, a `(` or `{` after `$` or `@` is its own
+token, as in C. Array/Map modes recognize `@` prefixes for template sequence
+slots.
 List mode also recognizes runtime `@` splicing. A List `@` immediately
 followed by EOF, whitespace, `)`, or `=` instead emits the data atom `@` or `@=`.
 
@@ -241,7 +244,7 @@ accepted by every data parser.
 In Lisp-shaped modes, `<` stays an atom prefix when its next byte is EOF,
 `=`, whitespace, or one of `()'`, backtick, or comma. Otherwise it attempts
 a Symbol literal. Standalone Lisp `$` scanning does not provide the data-mode
-`${expression}` escape; its reader rejects unsupported token kinds.
+`$(expression)` escape; its reader rejects unsupported token kinds.
 
 In String mode a segment stops before a closing quote or a single unescaped
 `$`. Inside a segment, `$$` is consumed as literal content. Dispatch handles
@@ -257,17 +260,17 @@ Other recognized tokens leave the mode unchanged.
 | --- | --- | --- |
 | Code | `{` | Push `x2c` |
 | Code | `}` | Pop if stack depth exceeds one |
-| Code | `%(`, `%[`, `%{`, `%<<`, `%"`, `$(`/`@(` | Push `list`, `array`, `map`, `symbol-set`, `string`, `macro-lisp`, respectively |
+| Code | `%(`, `%[`, `%{`, `%<<`, `%"` | Push `list`, `array`, `map`, `symbol-set`, `string`, respectively |
 | Code | `%!` | Emit lambda prefix; remain in code |
 | `x2c-par` | `(` / `)` | Push `x2c-par` / pop |
 | Data (`list`, `array`, `map`) | `(` | Push `list` |
 | Data | `[`, `{`, `"` | Push `array`, `map`, `string`; emit `%[`, `%{`, `%"` kind, retaining original text/width |
-| Data | `${`, `@{` | Push `x2c` |
+| Data | `$(`, `@(` | Push `x2c-par` |
+| Data | `${` | Push `x2c` |
 | `list` | `?(` | Push `x2c-par` |
 | `list`, `array`, `map` | Matching `)`, `]`, `}` | Pop corresponding mode |
 | `symbol-set` | `>>` | Pop |
-| `string` | `${` / `"` | Push `x2c` / pop |
-| `macro-lisp` | `(` / `)` | Push `macro-lisp` / pop |
+| `string` | `$(` / `${` / `"` | Push `x2c-par` / push `x2c` / pop |
 
 Root `lisp` does not pop on `)`. The reader checks list structure.
 Normal code parentheses do not change lexical mode. Nested quoted data uses
@@ -339,7 +342,7 @@ Apply the following transformation in order:
    non-directive line at the same or lower indentation is not a same-indent
    `while` trailer without a final colon. Otherwise retain `do`.
 7. Append `;` to an ordinary statement line unless it already ends with `;`,
-   is in an enum body, or is one whole `$(...)` or `@(form)` form. A whole-line
+   is in an enum body. A whole-line
    `$name`, `@name`, or computed `@producer(...)` hole also takes no semicolon,
    including a hole after a control header's `)`. The leading `@` in
    `@$decorator(...)` becomes trivia and suppresses the semicolon.
@@ -364,7 +367,7 @@ from the raw tokenizer's operand-context predicate.
 - An `in` token retains that type only if the preceding significant kind is
   one of `ident`, the six atomic literal kinds, `)`, or `]`, and the next
   kind can begin an operand. That beginning set is `ident`, the six atomic
-  literal kinds, `(`, `%(`, `%[`, `%{`, `$(`, `${`, `$`, `!`, `-`, `*`, `&`,
+  literal kinds, `(`, `%(`, `%[`, `%{`, `$`, `!`, `-`, `*`, `&`,
   `~`, `++`, or `--`. Otherwise it becomes `ident`. The parser can still
   recognize the spelling in the relevant position.
 - For `match`, inspect the next significant token, skipping a parenthesized

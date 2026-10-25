@@ -141,9 +141,9 @@ operation, so an empty `Array` is false. See [values and Var](values.md).
 ```x2c
 int n = 4;
 Array evaluated = [n, n + 1];
-List quoted = %(n $n ${n + 1});
+List quoted = %(n $n $(n + 1));
 Map settings = {mode: "fast", count: n};
-String message = %"count=$n next=${n + 1}";
+String message = %"count=$n next=$(n + 1)";
 ```
 
 The Array contains `4, 5`. The List contains the Atom `n`, then `4, 5`.
@@ -154,10 +154,10 @@ The Map's bare keys are Atoms; `{(name): value}` uses a variable as its key.
 | `[expressions]`, `{key: expression}` | Evaluate expressions; nested bare collections do likewise |
 | `%(items)` | Whitespace-separated List data; bare names are Atoms |
 | `%[items]`, `%{key: value}` | Array/Map with quoted contents; commas separate entries |
-| `%"text $name ${expression}"` | Interpolated String |
+| `%"text $name $(expression)"` | Interpolated String |
 | `%<<ready busy done>>` | Immutable ordered SymbolSet; literal members only |
-| `$name`, `${expression}` inside quoted data | Insert one evaluated value |
-| `@name`, `@{expression}` inside a quoted List | Splice a List's elements; Arrays/Maps do not support this splice |
+| `$name`, `$(expression)` inside quoted data | Insert one evaluated value |
+| `@name`, `@(expression)` inside a quoted List | Splice a List's elements; Arrays/Maps do not support this splice |
 
 Bare `{}` depends on its destination: it builds a `Map` or `Array`, or zero
 initializes a native object. Inside `%()`, commas and apostrophes are Lisp

@@ -8,11 +8,12 @@ Four rules apply throughout this chapter:
 
 - Brackets and braces evaluate. `[a, b]` builds an `Array` and
   `{key: value}` builds a `Map` from ordinary x2c expressions. Only a bare
-  identifier key is quoted, as an `Atom`.
+  identifier key is quoted, as an `Atom`. `$(a, b)` builds a `List` of
+  evaluated elements, and `${key: value}` evaluates every key.
 - Percent quotes. The delimiter after `%` selects the literal grammar for
   the contents: `%"..."`, `%(...)`, `%[...]`, `%{...}`, or `%<<...>>`.
 - Dollar unquotes. Inside quoted `List`, `String`, `Array`, or `Map`
-  content, `$name` or `${expression}` inserts one ordinary x2c value.
+  content, `$name` or `$(expression)` inserts one ordinary x2c value.
 - `String` and `List` are immutable and canonical: equal values share
   storage. `Array` and `Map` are mutable: each object has its own identity,
   even when its contents equal another's.
@@ -49,6 +50,52 @@ when its destination is an `Array`. For a struct or scalar destination, `{}`
 is the C zero initializer. A plain string literal is a `String` wherever one
 is expected, and `String` methods apply to it directly: `"x2c".len()` is `3`.
 
+### Evaluated Lists and Maps
+
+Parentheses in C group and call, so a plain `(a, b)` is a comma expression,
+whatever its destination. `$(a, b, ...)` builds a `List` instead: each
+element is one ordinary x2c expression, and its value is converted to one
+`Var` element. `$()` is the empty `List`. A trailing comma is allowed, as in
+an Array literal.
+
+A natural Map reads a bare identifier key as an `Atom`. `${key: value}` reads
+every key as an expression, so a variable key supplies its value:
+
+```x2c
+String key = "answer";
+int n = 42;
+
+List row = $(key, n + 1, [n]);
+Map natural = {key: n};
+Map evaluated = ${key: n};
+
+printf("%s %s %s\n", row.repr(), natural.repr(), evaluated.repr());
+```
+
+```text
+("answer" 43 [ 42 ]) { <key>: 42 } { "answer": 42 }
+```
+
+Each element, key, and value is evaluated once, in source order. An element
+that is itself a `List` stays one element; there is no flattening. Use
+parentheses to make a comma expression one element:
+`$((prepare(), value), other)`. `${}` is always an empty `Map`, while `{}`
+depends on its destination. Inside `${...}`, a nested bare `{...}` keeps the
+natural key rule; write another `${...}` to evaluate its keys too.
+
+Each collection has a natural reading and an explicit prefix that selects
+the other one:
+
+| Source form | Result | Reading rule |
+| --- | --- | --- |
+| `%(a b)` | `List` | Quoted data; bare names are `Atom`s. |
+| `$(a, b)` | `List` | x2c expressions, converted to `Var` elements. |
+| `[a, b]` | `Array` | x2c expressions. |
+| `%[a, b]` | `Array` | Quoted data with comma separators. |
+| `{a: b}` | `Map` | A bare identifier key is an `Atom`; the value is an expression. |
+| `%{a: b}` | `Map` | Quoted keys and values. |
+| `${a: b}` | `Map` | Keys and values are x2c expressions. |
+
 The percent forms below quote their contents. Use them for symbolic data
 such as ASTs, patterns, and configuration trees, where the names are the
 content.
@@ -62,7 +109,7 @@ not mean every percent form holds unevaluated symbolic data.
 
 | Form | Builds | Element syntax |
 | --- | --- | --- |
-| `%"text"` | `String` | quoted text, with `$name` / `${expr}` unquote |
+| `%"text"` | `String` | quoted text, with `$name` / `$(expr)` unquote |
 | `%(a b c)` | `List` | quoted symbolic content; bare names are `Atom`s |
 | `%<<a b c>>` | `SymbolSet` | quoted literal `Symbol`s only |
 | `%[a, b, c]` | `Array` | quoted comma-separated values |
@@ -99,7 +146,7 @@ not for the reader.
 
 Inside `%(...)`, `%[...]`, and `%{...}`, a bare spelling is an `Atom`,
 an exact, case-sensitive name. Use `$name` to insert one identifier expression
-or `${expression}` to insert any other x2c expression.
+or `$(expression)` to insert any other x2c expression.
 
 ```x2c
 int radius = 3;
@@ -121,30 +168,37 @@ These forms quote symbolic data such as ASTs, patterns, and configuration
 trees, where the names are the content. A short `Atom` uses the compact
 `Symbol` representation; a longer one retains its exact spelling in an
 `<lsym>`. To put an x2c value in that quoted content, unquote it with `$name`
-or `${expression}`.
+or `$(expression)`.
 
 Bare `(...)`, `[...]`, and `{...}` nest `List`, `Array`, and `Map` data inside
 any of these collection forms. Bare `"..."` is an x2c `String`, with the same
-interpolation and escape rules as `%"..."`. `${"..."}` instead inserts an
+interpolation and escape rules as `%"..."`. `$("...")` instead inserts an
 ordinary C string expression. Arrays and Maps have no splice form.
+
+A quoted context applies to nested bare delimiters, so
+`%(record (name ada) [red, green] {state: ready})` holds quoted data at every
+level. Once an insertion enters x2c, the natural forms apply again:
+`%(record $([red, green]))` holds an `Array` of two variable values. A
+`${key: value}` element in quoted data is an evaluated `Map`, not an
+insertion.
 
 ### Inserting and splicing into List literals
 
 `%()` supports four insertion forms:
 
 - `$name` inserts one value named by an identifier.
-- `${expression}` inserts one value from an arbitrary expression.
+- `$(expression)` inserts one value from an arbitrary expression.
 - `@name` splices a `List`'s elements into the surrounding `List`.
-- `@{expression}` splices the `List` an expression produces.
+- `@(expression)` splices the `List` an expression produces.
 
 ```x2c
 String name = "quartz";
 List tail = %(3 4);
 
 List one = %(mineral $name);
-List computed = %(len ${name.len()});
+List computed = %(len $(name.len()));
 List spliced = %(1 2 @tail);
-List reversed = %(1 2 @{tail.reverse()});
+List reversed = %(1 2 @(tail.reverse()));
 
 printf("%s\n%s\n%s\n%s\n",
        one.repr(), computed.repr(), spliced.repr(), reversed.repr());
@@ -160,8 +214,23 @@ printf("%s\n%s\n%s\n%s\n",
 `$` leaves `List` grammar, parses and evaluates one x2c expression, converts
 the result to one `List` value, and returns to `List` grammar. `@` makes the
 same crossing and splices the evaluated `List`'s elements instead of inserting
-one value. The identifier forms are the short versions of the braced
+one value. The identifier forms are the short versions of the parenthesized
 expression forms.
+
+The parentheses after `$` hold one expression, so a comma there is C's comma
+operator: `%(head $(prepare(), value))` inserts only `value`, after calling
+`prepare`. Inside that expression, `$(...)` is again an evaluated `List`. With
+`x` equal to `7`:
+
+| Source | Value |
+| --- | --- |
+| `%(head $x)` | `(head 7)` |
+| `%(head $(x))` | `(head 7)` |
+| `%(head ($x))` | `(head (7))` |
+| `%(head $($(x)))` | `(head (7))` |
+
+With `xs` equal to `%(7 8)`, `%(head $(xs))` holds a nested `List`, while
+`%(head @(xs))` is `(head 7 8)`.
 
 ### Lisp reader prefixes in List literals
 
@@ -185,7 +254,7 @@ to `%(1 2 3 4)`. `'` is `quote` the same way, so `%('foo)` is
 evaluation gives each form its meaning. `$` and `@` are x2c interpolation
 and splicing, performed while constructing the `List`.
 
-Braces delimit the x2c expression being unquoted. Nested calls, indexing,
+Parentheses delimit the x2c expression being unquoted. Nested calls, indexing,
 assignments, conditional expressions, and other parentheses stay part of
 that expression:
 
@@ -193,14 +262,14 @@ that expression:
 String name = "quartz";
 String source = "feldspar";
 int count = 0;
-List called = %(result ${name.upper().len()});
-List assigned = %(result ${count = source.len()});
+List called = %(result $(name.upper().len()));
+List assigned = %(result $(count = source.len()));
 ```
 
 Inside `%()`, `$name(...)` reads differently. `$name` inserts one value, and
-the following `(...)` is a nested symbolic `List`. Write `${name(...)}` when
+the following `(...)` is a nested symbolic `List`. Write `$(name(...))` when
 the unquoted expression is a runtime call. Inside `%""`, parentheses after
-`$name` are text, so the same runtime call is again `${name(...)}`.
+`$name` are text, so the same runtime call is again `$(name(...))`.
 
 Nested `(...)` in `%()` stays quoted `List` data. Bare `"..."`, `[...]`, and
 `{...}` switch to `String`, `Array`, and `Map` literals. All four retain quoted
@@ -210,10 +279,10 @@ data syntax, and `String` takes `$` unquote the way `%"..."` does:
 String source = "quartz";
 List shapes = %(
   (nested symbolic list)
-  "len=${source.len()}"
-  [${source.len()}, 2]
+  "len=$(source.len())"
+  [$(source.len()), 2]
   {name: $source}
-  ${source.upper()}
+  $(source.upper())
 );
 ```
 
@@ -232,7 +301,7 @@ its full spelling.
 A C preprocessor macro name is a bare name too. The preprocessor does not
 expand names inside a literal, so after `#define ROWS 64` the List `%(ROWS 4)`
 is `(ROWS 4)`, and reading its first element as a number yields the `Symbol`'s
-numeric value rather than 64. Unquote a typed value, `%(${(long) ROWS} 4)`, to
+numeric value rather than 64. Unquote a typed value, `%($((long) ROWS) 4)`, to
 insert the macro's value; the bare `$ROWS` has no x2c type either, because the
 preprocessor's text never reaches the type checker. The compiler warns when a
 bare name in a literal matches an object-like `#define` it has already passed
@@ -307,13 +376,16 @@ file-static declarations and public inline code.
 
 ### String interpolation
 
-`%"..."` quotes text. `$name` and `${expression}` unquote one value when its
-type converts to `String`.
+`%"..."` quotes text. `$name` and `$(expression)` unquote one value when its
+type converts to `String`. Text after `$name` stays text, so a call needs the
+parenthesized form, as in `%"answer: $(calculate(x))"`. `@` is ordinary text
+in a `String`, and an unescaped `${` there is an error: write
+`$(${key: value})` to insert an evaluated `Map`.
 
 ```x2c
 String who = "world";
 String greeting = %"hello, $who";
-String shouted = %"${who.upper()}!";
+String shouted = %"$(who.upper())!";
 printf("%s %s\n", greeting, shouted);
 ```
 
@@ -325,7 +397,7 @@ Supported native numeric expressions interpolate directly:
 
 ```x2c
 String who = "world";
-printf("%s\n", %"$who has ${who.len()} bytes");
+printf("%s\n", %"$who has $(who.len()) bytes");
 ```
 
 ```text
@@ -338,8 +410,8 @@ instead:
 
 ```x2c
 Var answer = 42;
-printf("%s\n", %"answer=${answer.integer()}");
-printf("%s\n", %"boxed=${answer}");
+printf("%s\n", %"answer=$(answer.integer())");
+printf("%s\n", %"boxed=$(answer)");
 ```
 
 ```text
@@ -347,17 +419,17 @@ answer=42
 boxed=42
 ```
 
-`${...}` unquotes one x2c expression inside a quoted `List`, `String`, `Array`,
+`$(...)` unquotes one x2c expression inside a quoted `List`, `String`, `Array`,
 or `Map`. Inside it, a `meta` call inserts a compile-time result into a quoted
 collection:
 
 ```x2c
 ~meta static int answer(void) => 40 + 2;
-List generated = %(${$answer()});
-Array generated_array = %[${$answer()}];
+List generated = %($($answer()));
+Array generated_array = %[$($answer())];
 ```
 
-The outer `${` unquotes from `List` grammar into x2c. The inner `$answer()` is
+The outer `$(` unquotes from `List` grammar into x2c. The inner `$answer()` is
 read in x2c as a `meta` call, just as `$macro(...)` is a macro invocation.
 None of these parser meanings change Lisp `quote` or `quasiquote`. `%!`
 is still the lambda-literal prefix, and `%` between two operands is still

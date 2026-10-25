@@ -85,7 +85,7 @@ set of dump flags is listed under [compiler options](../reference/cli.md).
 
 ### String interpolation
 
-- Parse: `src/literals/literals.x` for `$name` and `${expr}`, which are separate sites
+- Parse: `src/literals/literals.x` for `$name` and `$(expr)`, which are separate sites
 - Type/convert: `Compiler.convert_segment_to_string` in `src/expressions/conversions.x`
   selects the conversion for each segment. A segment that is already a `Var`,
   canonical or aliased, renders through `Var_str` whatever its run-time tag; a

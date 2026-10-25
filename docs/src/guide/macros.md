@@ -169,11 +169,11 @@ value expressions, in source order:
 
 ```x2c
 macro Stmt $fail(Expr $cause, Expr $op, Expr @fields) {
-  raise %($cause (operation ${$op}) @fields);
+  raise %($cause (operation $($op)) @fields);
 }
 ```
 
-Here `${$op}` inserts the captured x2c expression into the literal payload.
+Here `$($op)` inserts the captured x2c expression into the literal payload.
 The holes are substituted before the ordinary raise expression binding and
 lowering; they do not evaluate Lisp code.
 
@@ -232,7 +232,7 @@ The declared result kind determines where an invocation may appear:
 
 An `Entry` macro can produce zero, one, or several comma-separated `Map` rows.
 `Entry` holes capture complete rows, and `@rows` captures or inserts
-a row sequence. A `Map` literal reads quoted data, so `${...}` crosses into
+a row sequence. A `Map` literal reads quoted data, so `$(...)` crosses into
 x2c before invoking either a `$handler(...)` or a keyword alias:
 
 ```x2c
@@ -243,8 +243,8 @@ macro Entry $project.handler(Literal $key, Expr $value) {
 int main(void) {
   int open = 1, close = 2;
   Map handlers = %{
-    ${$project.handler("open", open)},
-    ${$project.handler("close", close)}
+    $($project.handler("open", open)),
+    $($project.handler("close", close))
   };
   return handlers.len() == 2 ? 0 : 1;
 }
@@ -270,7 +270,7 @@ another `Stmt` macro, can write it after `=>`, like an expression macro:
 ```x2c
 ~
 macro Stmt $project.note(Expr $value) =>
-  printf("%s\n", %"value ${$value}");
+  printf("%s\n", %"value $($value)");
 ~
 ~int main(void) {
 ~  $project.note(42);
@@ -633,9 +633,8 @@ A helper can also receive a captured statement, a description of a type
 shows each.
 
 Prefer source templates for generated code and meta functions for the
-calculations that supply their arguments. Compile-time code is always x2c:
-the compiler rejects the former `$(...)` and `@(...)` Lisp forms. Lisp remains
-a runtime library for DSLs and the REPL.
+calculations that supply their arguments. Compile-time code is always x2c.
+Lisp remains a runtime library for DSLs and the REPL.
 
 ### Generate several views from one table
 

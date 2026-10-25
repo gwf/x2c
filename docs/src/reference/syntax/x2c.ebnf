@@ -240,6 +240,8 @@ primary = ( atomic |
     initializer |
     array |
     map |
+    evaluated-list |
+    evaluated-map |
     quoted-list |
     quoted-array |
     quoted-map |
@@ -262,6 +264,11 @@ designator = ( ( "." , identifier ) | ( "[" , assignment , "]" ) ) ;
 array = ( "[" , [ ( assignment , { ( "," , assignment ) } , [ "," ] ) ] , "]" ) ;
 map = ( "{" , [ ( map-entry , { ( "," , map-entry ) } , [ "," ] ) ] , "}" ) ;
 map-entry = ( ( ( identifier | assignment ) , ":" , assignment ) | entry-extension ) ;
+evaluated-list = ( "$" , "(" , [ ( assignment , { ( "," , assignment ) } , [ "," ] ) ] , ")" ) ;
+evaluated-map = ( ( ( "$" , "{" ) | "${" ) ,
+    [ ( evaluated-entry , { ( "," , evaluated-entry ) } , [ "," ] ) ] ,
+    "}" ) ;
+evaluated-entry = ( ( assignment , ":" , assignment ) | entry-extension ) ;
 generic = ( "_Generic" ,
     "(" ,
     assignment ,
@@ -288,18 +295,18 @@ capture-list = ( ( "&" , capture-name , { ( "," , "&" , capture-name ) } ) | cap
 capture-name = ( identifier | name-slot ) ;
 quoted-list = ( "%(" , { list-element } , ")" ) ;
 nested-list = ( "(" , { list-element } , ")" ) ;
-list-element = ( literal-element | insertion | splice | ( reader-prefix , list-element ) ) ;
+list-element = ( literal-element | insertion | splice | evaluated-map | ( reader-prefix , list-element ) ) ;
 literal-element = ( atomic | nested-list | quoted-array | quoted-map | percent-string | typed-capture ) ;
-insertion = ( ( "$" , identifier ) | ( "${" , expression , "}" ) ) ;
-splice = ( ( "@" , identifier ) | ( "@{" , expression , "}" ) ) ;
+insertion = ( ( "$" , identifier ) | ( "$(" , expression , ")" ) ) ;
+splice = ( ( "@" , identifier ) | ( "@(" , expression , ")" ) ) ;
 reader-prefix = ( "\'" | "`" | "," | ",@" ) ;
 typed-capture = ( "?(" , type-name , identifier , ")" ) ;
 quoted-array = ( "%[" , [ ( quoted-array-item , { ( "," , quoted-array-item ) } , [ "," ] ) ] , "]" ) ;
-quoted-array-item = ( data-element | argument-slot | ( "${" , argument-slot , "}" ) ) ;
-data-element = ( literal-element | insertion ) ;
+quoted-array-item = ( data-element | argument-slot | ( "$(" , argument-slot , ")" ) ) ;
+data-element = ( literal-element | insertion | evaluated-map ) ;
 quoted-map = ( "%{" , [ ( quoted-entry , { ( "," , quoted-entry ) } , [ "," ] ) ] , "}" ) ;
 quoted-entry = ( ( data-element , ":" , data-element ) | entry-extension | quoted-entry-extension ) ;
-quoted-entry-extension = ( "${" , entry-extension , "}" ) ;
+quoted-entry-extension = ( "$(" , entry-extension , ")" ) ;
 percent-string = ( "%\"" , { ( string-segment | insertion ) } , "\"" ) ;
 symbol-set = ( "%<<" , { symbol-set-member } , ">>" ) ;
 symbol-set-member = ? symbol-set-mode lit-atom or lit-symbol ? ;
@@ -337,7 +344,7 @@ quotation = ( "$" ,
     ( quotation-type , "{" , expression , "}" ) ) ) ;
 quotation-kind = ( result-kind | "Type" | "Param" ) ;
 quotation-type = ? type operand or computed type under M4 ? ;
-quotation-items = ? contents selected by quotation kind, with ${expr} and @{expr} holes; M4 ? ;
+quotation-items = ? contents selected by quotation kind, with $(expr) and @(expr) holes; M4 ? ;
 result-kind = ( "Expr" |
     "Expression" |
     "Stmt" |

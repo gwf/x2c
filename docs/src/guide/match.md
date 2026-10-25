@@ -102,7 +102,7 @@ A bare spelling in a pattern is an exact `Atom` that must appear in that
 position. Strings compare by value. A number matches only a number of the
 same type and value, so `%(3)` matches `3` but not `3L`, `3.0`, or `3u`, and
 `%(?x ?x)` does not match `%(3 3L)`. This differs from `==` on two numbers,
-which follows C and calls `3` and `3L` equal. `$name` or `${expression}`
+which follows C and calls `3` and `3L` equal. `$name` or `$(expression)`
 unquotes a value to compare against by the same rule. A pattern can require
 a `match` with something computed at run time.
 
