@@ -1,6 +1,6 @@
 #include "x2c.x"
 
-$(defun local-bias () 1)
+meta static int local_bias(void) => 1;
 
 static int fixture_select(int value) {
   return 1000 + value;
@@ -20,7 +20,7 @@ static int local_macros(int base) {
     int offset = 2;
 
     macro Expression fixture_select(Expr $value) =>
-      base + offset + $value + $(local-bias);
+      base + offset + $value + $local_bias();
 
     macro Expression mixed(Expr $value) => offset + $value;
 
@@ -47,7 +47,7 @@ static int local_macros(int base) {
     macro Decorator nonzero(Expr $target) => $target != 0;
 
     macro Field field() {
-      int $(x2c.ident "value");
+      int $x2c_ident("value");
     }
 
     macro Decorator keep_field(Field $target) {
@@ -55,8 +55,8 @@ static int local_macros(int base) {
     }
 
     macro Enumerator states() {
-      $(x2c.ident "LOCAL_READY") = 3,
-      $(x2c.ident "LOCAL_DONE")
+      $x2c_ident("LOCAL_READY") = 3,
+      $x2c_ident("LOCAL_DONE")
     }
 
     macro Entry pair(Expr $key, Expr $value) {

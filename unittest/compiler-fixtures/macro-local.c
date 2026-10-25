@@ -10,6 +10,8 @@ static int _init_guard_ = 0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
+static int local_bias(void);
+
 static int fixture_select(int value);
 
 static int local_macros(int base);
@@ -20,6 +22,10 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _init_guard_ = 1;
   _0 = String_new("answer");
   _1 = String_new("answer");
+}
+
+static int local_bias(void){
+  return 1;
 }
 
 static int fixture_select(int value){

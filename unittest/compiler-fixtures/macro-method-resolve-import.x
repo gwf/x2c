@@ -1,9 +1,15 @@
 #pragma once
 
-macro Expression $string_len(Expr $value) =>
-  $(let ((method (Type.resolve_member (Code.type $value) "len" 1)))
-    `(expr () (call (expr ,(caddr method) (ident ,(cadr method)))
-      (args ,$value))));
+meta List string_len_call(List value) {
+  List method = Type.resolve_member(Code.type(value), "len", 1);
+  return %(expr () (call (expr ${method[2]} (ident ${method[1]}))
+    (args $value)));
+}
+
+meta int has_member(Type type, String name) =>
+  Type.resolve_member(type, name, 1) != NULL;
+
+macro Expression $string_len(Expr $value) => $string_len_call($value);
 
 macro Expression $has_method(Type $type, Name $name) =>
-  $(if (Type.resolve_member $type (Code.binding_spelling $name) 1) 1 0);
+  $has_member($type, $name);

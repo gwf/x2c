@@ -3,7 +3,7 @@
 #include "macro-map-entry-import.x"
 
 macro Entry $handler(Name $name) {
-  $(x2c.literal.string (Code.binding_spelling $name)): $name
+  $Code.binding_spelling($name): $name
 }
 
 macro Entry $two() {
@@ -26,12 +26,20 @@ macro Entry $nested_rows() {
   $two()
 }
 
-macro Entry $lisp_rows() {
-  @(list
-    (list 'map-entry (x2c.literal.string "lisp-a")
-                     (x2c.literal.int 7))
-    (list 'map-entry (x2c.literal.string "lisp-b")
-                     (x2c.literal.int 8)))
+meta static List entry(String key, String value) {
+  return %(map-entry
+    (expr ("String")
+      (segments (segexp (expr ("String") (literal ("String") $key)))))
+    (expr (int) (literal (int) $value)));
+}
+
+meta static List built_entries(void) =>
+  %(${entry("built-a", "7")} ${entry("built-b", "8")});
+
+meta static String generated_key(void) => "generated-key";
+
+macro Entry $built_rows() {
+  @built_entries()
 }
 
 macro Expression $expression_key() => "expression";
@@ -48,8 +56,8 @@ int main(void) {
     ${pair()},
     ${$forward("forward-a": 5, "forward-b": 6)},
     ${$forward_one("forward-one": 12)},
-    ${$lisp_rows()},
-    ${$(x2c.literal.string "generated-key")}: 10,
+    ${$built_rows()},
+    ${$generated_key()}: 10,
     ${$expression_key()}: 11,
     "nested": $nested,
     ${$imported.row()},
@@ -60,7 +68,7 @@ int main(void) {
     handlers["left"].integer(), handlers["right"].integer(),
     handlers["forward-a"].integer(), handlers["forward-b"].integer(),
     handlers["forward-one"].integer(),
-    handlers["lisp-a"].integer(), handlers["lisp-b"].integer(),
+    handlers["built-a"].integer(), handlers["built-b"].integer(),
     handlers["generated-key"].integer(),
     handlers["expression"].integer(),
     handlers["imported"].integer(),
