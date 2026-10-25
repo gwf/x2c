@@ -25,31 +25,7 @@ static keyword loop $private.loop;
 #include "x2c.x"
 #include "macrovalue/macrovalue.x"
 
-/** Reads one exact C scalar from `bytes`; a wide result is boxed in
-    `owner`. */
-typedef Var (*NativeScalarLoad)(const void *bytes, Scope *owner);
-/** Writes `value`, converted to one exact C scalar type, to `bytes`. */
-typedef void (*NativeScalarStore)(void *bytes, Var value);
-/** Describes one exact C scalar type in native bytes: its Var tag, size,
-    alignment, load, and store. Compile-time code that keeps C objects in
-    bytes, and the compiler's layouts, select a row with
-    `native_scalar_access`. */
-typedef struct NativeScalarAccess {
-  Symbol tag;
-  size_t size, alignment;
-  NativeScalarLoad load;
-  NativeScalarStore store;
-} *NativeScalarAccess;
-
 #include "native-scalar-types.x"
-$native.scalar.access.all();
-
-static Map native_scalars = %{ ${$native.scalar.access.entries()} };
-
-/** Returns the access record for an exact C scalar type such as
-    `(unsigned long)`, or NULL for any other type. */
-NativeScalarAccess native_scalar_access(List exact_type) =>
-  native_scalars.getdefault(exact_type, NULL).pointer();
 
 /** Represents one isolated embedded `Lisp` session.
     Create it with `Lisp.new` or `Lisp.kernel` and end it with
