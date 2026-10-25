@@ -122,12 +122,10 @@ static List _ast(String path) {
   Job job = %($x2c translate --dump-ast $path);
   try dump = job.options({stderr: <capture>}).output();
   catch %(cmd-fail *): return NULL;
-  Lisp lisp = Lisp.new();
-  defer Lisp.destroy(lisp);
   Array forms = [];
   unsigned cursor = 0;
   Var form = void;
-  while (Lisp.read(lisp, dump, cursor, form) == <value>)
+  while (Lisp.read(NULL, dump, cursor, form) == <value>)
     forms.push(_plain(form));
   return forms.list_free();
 }
@@ -194,7 +192,7 @@ static int _close_block(String source, int i) {
 
 /* Returns the converted text of `source`, or NULL with `*why` set. */
 static String _convert(String path, String source, String *why) {
-  Tokenizer t = Tokenizer.new(source);
+  Tokenizer t = Tokenizer.new(source, <x2c>);
   t.scan();
   if (t.status() != <ok>) {
     *why = "the file does not scan";

@@ -50,10 +50,10 @@ static Var _parse_form(LispReader &r, Token token, int depth) {
       return _malformed_token(r, token);
     case <")">:  return _malformed_token(r, token);
     case <"(">:  return _list(r, depth + 1);
-    case <"'">:  prefix = lsym_quote;      break;
-    case <"`">:  prefix = lsym_quasiquote; break;
-    case <",">:  prefix = lsym_unquote;    break;
-    case <",@">: prefix = lsym_splicing;   break;
+    case <"'">:  prefix = Atom.intern("quote");            break;
+    case <"`">:  prefix = Atom.intern("quasiquote");       break;
+    case <",">:  prefix = Atom.intern("unquote");          break;
+    case <",@">: prefix = Atom.intern("unquote-splicing"); break;
   }
   if (prefix is not void) return _prefixed(r, prefix, depth);
   r.end = token.pos + token.len;
@@ -163,9 +163,9 @@ module Tokenizer _scan_lisp_tokens(String source, Scope *scope) {
     form, at EOF it becomes the source length, and on a reader error it
     identifies the failing form's first token. A null source or cursor
     returns `<eof>` without raising. A nonnull cursor must initially hold a
-    byte offset no greater than the source length. A successful session
-    construction must first initialize the shared reader names; afterward
-    `lisp` is not consulted and may be null.
+    byte offset no greater than the source length. Reading needs no session:
+    `lisp` is not consulted and may be null, including before any session has
+    been constructed.
     Raises: `<incomplete>` for a truncated form, `<malformed>` for invalid
     reader syntax, or `<alloc-fail>`, `<size-limit>`, or `<bad-enc>` while
     tokenizing, constructing, interning, or boxing the form.

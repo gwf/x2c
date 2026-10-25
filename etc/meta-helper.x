@@ -427,7 +427,6 @@ static void *_watch(void *parent) {
 }
 
 int main(void) {
-  Lisp.kernel();
   helper_out = fdopen(4, "wb");
   if (!helper_out) _exit(2);
   /* A process that a body starts inherits neither end of the protocol, so

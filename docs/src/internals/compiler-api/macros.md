@@ -97,7 +97,7 @@ Returns the syntax that invokes the template `stored`, a macro name
 spelled as a String or a local definition, with `values`: what a template
 call in a staged `meta` body evaluates to.
 
-Source: `src/macros/templates.x:261`
+Source: `src/macros/templates.x:260`
 
 ### `Compiler`
 
@@ -212,7 +212,7 @@ Source: `src/macros/lisp.x:104`
 Evaluates a declaration recipe after its owning source is collected.
 The callback is a Lisp name and arguments are retained canonical values.
 
-Source: `src/macros/templates.x:243`
+Source: `src/macros/templates.x:242`
 
 <a id="Compiler.evaluate_macro_rows"></a>
 #### Compiler.evaluate_macro_rows
@@ -328,7 +328,7 @@ Source: `src/macros/invocations/recognition.x:105`
 Binds quoted `syntax` with its `fresh` rows at `position`, as the
 expansion of its quotation would.
 
-Source: `src/macros/templates.x:433`
+Source: `src/macros/templates.x:432`
 
 <a id="Compiler.library_filling"></a>
 #### Compiler.library_filling
@@ -661,7 +661,7 @@ its established root `type`, child stage, and source wrappers. Binding,
 capture collection, hygiene, and effects do not run, and a statement
 expression's template-origin wrappers are omitted.
 
-Source: `src/macros/templates.x:347`
+Source: `src/macros/templates.x:346`
 
 <a id="Compiler.rebuild_function"></a>
 #### Compiler.rebuild_function
@@ -671,7 +671,7 @@ Source: `src/macros/templates.x:347`
 Rebuilds a bound function through a Function decorator without binding it
 again. The template keeps the target's return type and declarator.
 
-Source: `src/macros/templates.x:369`
+Source: `src/macros/templates.x:368`
 
 <a id="Compiler.rebuild_statement"></a>
 #### Compiler.rebuild_statement
@@ -682,7 +682,7 @@ Rebuilds a statement template as a canonical unbraced `seq`. Bound
 children keep their identities and origins; template-origin wrappers
 are omitted because this path does not open an invocation.
 
-Source: `src/macros/templates.x:355`
+Source: `src/macros/templates.x:354`
 
 <a id="Compiler.rebuild_unit_function"></a>
 #### Compiler.rebuild_unit_function
@@ -693,7 +693,7 @@ Constructs a fresh function from a Unit template after lowering. The
 caller supplies its bound name and lowered children; binding does not
 run.
 
-Source: `src/macros/templates.x:361`
+Source: `src/macros/templates.x:360`
 
 <a id="Compiler.record_comptime"></a>
 #### Compiler.record_comptime

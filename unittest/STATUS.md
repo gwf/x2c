@@ -44,6 +44,13 @@ evidence.
 
 ## Coverage
 
+- On 2026-10-24, `tools/indent-convert --check` exposed an existing call to
+  `Tokenizer.new` without its required mode. The unchanged `9e68d6b` script
+  reproduces the C arity error. The local Lisp-independence work supplies
+  `<x2c>` while removing its reader-only evaluator session; conversion parity
+  verification is recorded in the
+  [local plan](../plans/compiler-lisp-independence.md#local-result-and-evidence).
+
 - Retired component experiments leave focused compiler fixtures for indexed
   rewrite entry points and rule order, independent rule composition, local
   binding recognition, runtime/meta Type operations, and Array alias adoption.

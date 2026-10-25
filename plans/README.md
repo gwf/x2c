@@ -47,6 +47,7 @@ and status; it does not implement the remaining features.
 
 | Owning plan | Remaining scope | Next action |
 | --- | --- | --- |
+| [Compiler Lisp independence](compiler-lisp-independence.md) | Independent reader/session changes replayed on PR #285; full combined local checks and changed-package checks pass. | Review the local changes; tougher cases remain deferred. No push or PR authorized. |
 | [Temporary assignments and lexical aliases](with-and-alias.md) | Implement `with` temporary assignments and both `alias` forms; migrate old spellings. | Follow the agreed design and staged bootstrap transition. |
 | [Language-reference writing](review-remediation-2026-10-11.md) | Complete the selected source-form, rewrite, and Lisp explanations. | Identify exact missing coverage in the existing book, then fill it. |
 | [Structured lint findings](x2c-lint-and-format.md) | Approved phase 8 List output and compiler consumption. | Add the optional interface; preserve the experimental distribution and conditional editor integration. |

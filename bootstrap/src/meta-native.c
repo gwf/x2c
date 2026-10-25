@@ -2118,7 +2118,7 @@ Var Compiler_run_meta_call(Compiler c, List expression, Token site, int slot){
 }
 
 Var Compiler_apply_meta_function(Compiler c, String name, List arguments, Token site){
-  if(! _init_guard_) _file_init_();  Compiler_ensure_macro_lisp(c);  MetaContext * context = MetaContext_current(); {
+  if(! _init_guard_) _file_init_();  MetaContext * context = MetaContext_current(); {
     int * _x2c_gensym_macro_address_12 = & context -> has_bindings;  int _x2c_gensym_macro_previous_12 = * _x2c_gensym_macro_address_12; {
       _x2c_gensym_defer_env_10 _x2c_gensym_macro_environment_16 ={
         0
@@ -2253,7 +2253,7 @@ static Var f5_calls____run_meta(Compiler c, List expression, String name, List a
           Var volatile category;
           category = x2c_error_catch_capture(_x2c_gensym_error_handler_1, 0);
           {
-            static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../src/meta-native/calls.x",.function = "f5_calls____run_meta",.line = 99};
+            static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../src/meta-native/calls.x",.function = "f5_calls____run_meta",.line = 98};
             x2c_error_raise_n(& _x2c_gensym_error_site_1, 28682226919752, 1, Symbol_var(209659067570), category);
             __builtin_unreachable();
           }
@@ -2402,6 +2402,7 @@ static Array f5_calls____meta_values(Compiler c, Var callee, List arguments, Tok
 int Compiler_bind_native_meta(Compiler c, String name);
 
 static Var f5_calls____meta_function(Compiler c, String name, Token site){
+  Compiler_ensure_macro_lisp(c);
   Var function =((void) 0, Void);
   if(! Lisp_try_get(c -> macro_lisp, name, &(function)) && _bind_project_meta(c, name)) Lisp_try_get(c -> macro_lisp, name, &(function));
   if(! Lisp_try_get(c -> macro_lisp, name, &(function)) && Compiler_bind_native_meta(c, name)) Lisp_try_get(c -> macro_lisp, name, &(function));

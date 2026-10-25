@@ -343,9 +343,9 @@ until those owners are released. On success `cursor` advances past the
 form, at EOF it becomes the source length, and on a reader error it
 identifies the failing form's first token. A null source or cursor
 returns `<eof>` without raising. A nonnull cursor must initially hold a
-byte offset no greater than the source length. A successful session
-construction must first initialize the shared reader names; afterward
-`lisp` is not consulted and may be null.
+byte offset no greater than the source length. Reading needs no session:
+`lisp` is not consulted and may be null, including before any session has
+been constructed.
 
 **Raises:** `<incomplete>` for a truncated form, `<malformed>` for invalid
 reader syntax, or `<alloc-fail>`, `<size-limit>`, or `<bad-enc>` while
