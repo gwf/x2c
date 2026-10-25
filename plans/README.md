@@ -47,6 +47,7 @@ and status; it does not implement the remaining features.
 
 | Owning plan | Remaining scope | Next action |
 | --- | --- | --- |
+| [Collection reading and parenthesized unquote](collection-reading-and-unquote.md) | Specify evaluated Lists/Maps and replace grouped literal and quotation holes with parentheses. | Wait for compiler Lisp syntax removal, then execute the implementation plan. |
 | [Native compiler with runtime Lisp](native-compiler-runtime-lisp.md) | Native-only compiler; retain optional runtime Lisp, DSL binding decorators, and the REPL. | Approved plan; implement in another isolated local worktree. Require at least 200 fewer production-code lines and a final complexity review; hold implementation publication. |
 | [Compiler Lisp independence](compiler-lisp-independence.md) | Earlier cleanup batch, integrated as PR #294. | Historical scope and evidence; the native-compiler plan owns the new goal. |
 | [Language-reference writing](review-remediation-2026-10-11.md) | Complete the selected source-form, rewrite, and Lisp explanations. | Identify exact missing coverage in the existing book, then fill it. |
