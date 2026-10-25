@@ -172,7 +172,7 @@ done
 # Fake home: interface paths are home-relative, so the probe gets its own
 # home with the real compiler, runtime sources, and compile-time Lisp copied
 # in.  Home discovery climbs from the binary looking for include/ and
-# etc/compiler-sdk.xlisp; the stage directory holds no interfaces, so every
+# etc/compiler-prelude.x; the stage directory holds no interfaces, so every
 # prelude here is walked cold from lib/x2c.x.
 FAKE="$BUILD/fake-root"
 mkdir -p "$FAKE/src" "$FAKE/include" "$FAKE/lib" "$FAKE/etc" \
