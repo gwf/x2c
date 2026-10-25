@@ -13,21 +13,13 @@
 #pragma once
 
 #include "error-macros.x"
+#include "common-types.x"
 
 #include <float.h>
 #include <limits.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <string.h>
-
-/** Eight-byte tagged runtime value for immediate scalars and encoded handles.
-    Pointer-bearing values follow the ownership rules of their concrete type;
-    raw `Null` is all zero bits and `void` is all one bits.
-*/
-typedef union Var {
-  unsigned long u64;
-  double f64, void *p64;
-} Var;
 
 _Static_assert(CHAR_BIT == 8, "char is 8 bits");
 _Static_assert(CHAR_MIN == -128 && CHAR_MAX == 127, "char is signed");
@@ -78,10 +70,6 @@ typedef unsigned char *SymbolSet;
 typedef Var Atom;
 /** `Scope`-owned mutable `Block` view whose elements are `Var`s. */
 typedef Block Array;
-/** Immutable canonical cons chain; NULL is `nil`.
-    Its lifetime follows its owning `List` pool, which may be an ancestor.
-*/
-typedef struct List *List;
 /** Region owner for individually tracked runtime allocations. */
 typedef struct Scope *Scope;
 /** `Scope`-owned mutable table mapping `Var` keys to `Var` values. */
@@ -90,8 +78,6 @@ typedef struct Map *Map;
 typedef struct Pool *Pool;
 /** Bounded `Scope`, `Error`, `Match`, and optional canonical-pool state. */
 typedef struct Context *Context;
-/** `Scope`-owned opaque mutex that must outlive every accessing thread. */
-typedef struct Mutex *Mutex;
 /** Caller-owned handle to a `Context`-backed worker.
     Join the worker before freeing the handle.
 */

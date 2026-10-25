@@ -6,6 +6,7 @@
 #include "channel.x"
 #include "clibc.x"
 #include "cmath.x"
+#include "common-types.x"
 #include "common.x"
 #include "context.x"
 #include "dispatch.x"
