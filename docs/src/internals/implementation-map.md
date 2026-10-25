@@ -59,7 +59,7 @@ Print the AST after lowering:
    (block ...))))
 ```
 
-The built-in source macro in `src/macros/macros.x`, `etc/builtin-macros.x`, and
+The built-in source macro in `src/macros/macros.x`, `etc/compiler-prelude.x`, and
 `src/builtins.x` has replaced `foreach` with declarations and a
 `while` loop that calls `List_try_next`. The loop keeps the List, a cursor,
 and the current element in generated locals; `List_try_next` advances the
@@ -211,7 +211,7 @@ set of dump flags is listed under [compiler options](../reference/cli.md).
 
 - Parse: `_with_statement` in `src/statements.x`
 - Lower: `_with_expand` in `src/builtins.x`, reached through the
-  `$x2c.with` decorator in `etc/builtin-macros.x`
+  `$x2c.with` decorator in `etc/compiler-prelude.x`
 - Tests: the `with-*` compiler fixtures
 - See also: [with](../reference/language.md#temporary-assignments-with-with)
 
@@ -222,7 +222,7 @@ set of dump flags is listed under [compiler options](../reference/cli.md).
   script-statement queries in `src/parse/units.x`
 - Lower: `_scope_expand` in `src/builtins.x`, reached through the
   `$x2c.auto.region` and `$x2c.auto.destination` decorators in
-  `etc/builtin-macros.x`
+  `etc/compiler-prelude.x`
 - Tests: the `scope-*` and `auto-*` compiler fixtures
 - See also: [allocation regions](../reference/language.md#allocation-regions)
 
@@ -314,7 +314,7 @@ inline-lisp example
 ### Foreach
 
 - Parse and expand: built-in source macro support in `src/macros/macros.x` and
-  `etc/builtin-macros.x`; the expansion algorithm in
+  `etc/compiler-prelude.x`; the expansion algorithm in
   `src/builtins.x`
 - Lower/generate the expanded loop: `src/transform/transform.x`, `src/emit/emit.x`
 - Runtime: `lib/iter.x` and collection adapters; `Iter.try_next` returns the

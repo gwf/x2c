@@ -56,7 +56,7 @@ static void _reset_macros(Compiler c) {
   c.rewrite_rules = NULL;
   c.active_rewrites = NULL;
   c.prepared_rewrites = NULL;
-  c.install_builtin_macros();
+  c.install_syntax_prelude();
   if (!c.declaration_produced) c.imports = {};
   c.import_stack.clear();
   c.macro_count = 0;

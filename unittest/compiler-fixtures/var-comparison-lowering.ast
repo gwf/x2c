@@ -9,77 +9,72 @@
  (bind (binding 3 "mark_left") 
   ((fnmod (params (param ("Var") (bind (binding 4 "value") ())))))) 
  (block 
-  (at 11 
-   (stmnt 
-    (expr (int) (postfix ++ (expr (int) (ident (binding 1 "left_calls"))))))) 
-  (at 12 (return ("Var") (expr ("Var") (ident (binding 4 "value")))))))
+  (at 1 (stmnt 
+         (expr (int) (postfix ++ (expr (int) (ident (binding 1 "left_calls"))))))) 
+  (at 2 (return ("Var") (expr ("Var") (ident (binding 4 "value")))))))
 
 (function (static "Var") 
  (bind (binding 5 "mark_right") 
   ((fnmod (params (param ("Var") (bind (binding 6 "value") ())))))) 
  (block 
-  (at 13 
-   (stmnt 
-    (expr (int) (postfix ++ (expr (int) (ident (binding 2 "right_calls"))))))) 
-  (at 14 (return ("Var") (expr ("Var") (ident (binding 6 "value")))))))
+  (at 3 (stmnt 
+         (expr (int) (postfix ++ (expr (int) (ident (binding 2 "right_calls"))))))) 
+  (at 4 (return ("Var") (expr ("Var") (ident (binding 6 "value")))))))
 
 (function (int) 
  (bind (binding 7 "main") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 15 
-   (declare (int) 
-    (bindings 
-     (op = (bind (binding 8 "native_eq") ()) 
-      (expr (int) 
-       (op == (expr (int) (literal (int) "3")) (expr (int) (literal (int) "3")))))))) 
-  (at 16 
-   (declare (int) 
-    (bindings 
-     (op = (bind (binding 9 "native_ne") ()) 
-      (expr (int) 
-       (op != (expr (int) (literal (int) "3")) (expr (int) (literal (int) "4")))))))) 
-  (at 17 
-   (declare (int) 
-    (bindings 
-     (op = (bind (binding 10 "native_same") ()) 
-      (expr (int) 
-       (op === (expr (int) (literal (int) "3")) 
-        (expr (int) (literal (int) "3")))))))) 
-  (at 18 
-   (declare (int) 
-    (bindings 
-     (op = (bind (binding 11 "native_different") ()) 
-      (expr (int) 
-       (op !== (expr (int) (literal (int) "3")) 
-        (expr (int) (literal (int) "4")))))))) 
-  (at 19 
-   (declare (int) 
-    (bindings 
-     (op = (bind (binding 12 "native_order") ()) 
-      (expr (int) 
-       (op && 
-        (expr (int) 
-         (op && 
-          (expr (int) 
-           (op && 
-            (expr (int) 
-             (op < (expr (int) (literal (int) "2")) 
-              (expr (int) (literal (int) "3")))) 
-            (expr (int) 
-             (op <= (expr (int) (literal (int) "3")) 
-              (expr (int) (literal (int) "3")))))) 
-          (expr (int) 
-           (op > (expr (int) (literal (int) "4")) 
-            (expr (int) (literal (int) "3")))))) 
-        (expr (int) 
-         (op >= (expr (int) (literal (int) "4")) 
-          (expr (int) (literal (int) "4")))))))))) 
-  (at 20 
+  (at 5 (declare (int) 
+         (bindings 
+          (op = (bind (binding 8 "native_eq") ()) 
+           (expr (int) 
+            (op == (expr (int) (literal (int) "3")) 
+             (expr (int) (literal (int) "3")))))))) 
+  (at 6 (declare (int) 
+         (bindings 
+          (op = (bind (binding 9 "native_ne") ()) 
+           (expr (int) 
+            (op != (expr (int) (literal (int) "3")) 
+             (expr (int) (literal (int) "4")))))))) 
+  (at 7 (declare (int) 
+         (bindings 
+          (op = (bind (binding 10 "native_same") ()) 
+           (expr (int) 
+            (op === (expr (int) (literal (int) "3")) 
+             (expr (int) (literal (int) "3")))))))) 
+  (at 8 (declare (int) 
+         (bindings 
+          (op = (bind (binding 11 "native_different") ()) 
+           (expr (int) 
+            (op !== (expr (int) (literal (int) "3")) 
+             (expr (int) (literal (int) "4")))))))) 
+  (at 9 (declare (int) 
+         (bindings 
+          (op = (bind (binding 12 "native_order") ()) 
+           (expr (int) 
+            (op && 
+             (expr (int) 
+              (op && 
+               (expr (int) 
+                (op && 
+                 (expr (int) 
+                  (op < (expr (int) (literal (int) "2")) 
+                   (expr (int) (literal (int) "3")))) 
+                 (expr (int) 
+                  (op <= (expr (int) (literal (int) "3")) 
+                   (expr (int) (literal (int) "3")))))) 
+               (expr (int) 
+                (op > (expr (int) (literal (int) "4")) 
+                 (expr (int) (literal (int) "3")))))) 
+             (expr (int) 
+              (op >= (expr (int) (literal (int) "4")) 
+               (expr (int) (literal (int) "4")))))))))) 
+  (at 10 
    (declare (long) 
     (bindings 
      (op = (bind (binding 13 "precise") ()) 
       (expr (long) (literal (long) "9007199254740993L")))))) 
-  (at 21 
+  (at 11 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 14 "first") ()) 
@@ -90,142 +85,142 @@
       (expr (long) 
        (op + (expr (long) (ident (binding 13 "precise"))) 
         (expr (int) (literal (int) "1")))))))) 
-  (at 23 
+  (at 13 
    (declare (int) 
     (bindings 
      (op = (bind (binding 17 "value_eq") ()) 
       (expr (int) 
-       (at 22 
+       (at 12 
         (op == (expr ("Var") (ident (binding 14 "first"))) 
          (expr ("Var") (ident (binding 15 "equal_value")))))))))) 
-  (at 25 
+  (at 15 
    (declare (int) 
     (bindings 
      (op = (bind (binding 18 "value_ne") ()) 
       (expr (int) 
-       (at 24 
+       (at 14 
         (op != (expr ("Var") (ident (binding 14 "first"))) 
          (expr ("Var") (ident (binding 16 "adjacent")))))))))) 
-  (at 27 
+  (at 17 
    (declare (int) 
     (bindings 
      (op = (bind (binding 19 "identity_eq") ()) 
       (expr (int) 
-       (at 26 
+       (at 16 
         (op === (expr ("Var") (ident (binding 14 "first"))) 
          (expr ("Var") (ident (binding 15 "equal_value")))))))))) 
-  (at 29 
+  (at 19 
    (declare (int) 
     (bindings 
      (op = (bind (binding 20 "identity_ne") ()) 
       (expr (int) 
-       (at 28 
+       (at 18 
         (op !== (expr ("Var") (ident (binding 14 "first"))) 
          (expr ("Var") (ident (binding 15 "equal_value")))))))))) 
-  (at 31 
+  (at 21 
    (declare (int) 
     (bindings 
      (op = (bind (binding 21 "self_identity") ()) 
       (expr (int) 
-       (at 30 
+       (at 20 
         (op === (expr ("Var") (ident (binding 14 "first"))) 
          (expr ("Var") (ident (binding 14 "first")))))))))) 
-  (at 33 
+  (at 23 
    (declare (int) 
     (bindings 
      (op = (bind (binding 22 "mixed_eq_left") ()) 
       (expr (int) 
-       (at 32 
+       (at 22 
         (op == (expr ("Var") (ident (binding 14 "first"))) 
          (expr (long) (ident (binding 13 "precise")))))))))) 
-  (at 35 
+  (at 25 
    (declare (int) 
     (bindings 
      (op = (bind (binding 23 "mixed_eq_right") ()) 
       (expr (int) 
-       (at 34 
+       (at 24 
         (op == (expr (long) (ident (binding 13 "precise"))) 
          (expr ("Var") (ident (binding 14 "first")))))))))) 
-  (at 37 
+  (at 27 
    (declare (int) 
     (bindings 
      (op = (bind (binding 24 "mixed_identity") ()) 
       (expr (int) 
-       (at 36 
+       (at 26 
         (op === (expr ("Var") (ident (binding 14 "first"))) 
          (expr (long) (ident (binding 13 "precise")))))))))) 
-  (at 39 
+  (at 29 
    (declare (int) 
     (bindings 
      (op = (bind (binding 25 "mixed_identity_ne") ()) 
       (expr (int) 
-       (at 38 
+       (at 28 
         (op !== (expr (long) (ident (binding 13 "precise"))) 
          (expr ("Var") (ident (binding 14 "first")))))))))) 
-  (at 41 
+  (at 31 
    (declare (int) 
     (bindings 
      (op = (bind (binding 26 "order_lt") ()) 
       (expr (int) 
-       (at 40 
+       (at 30 
         (op < (expr ("Var") (ident (binding 14 "first"))) 
          (expr ("Var") (ident (binding 16 "adjacent")))))))))) 
-  (at 43 
+  (at 33 
    (declare (int) 
     (bindings 
      (op = (bind (binding 27 "order_le") ()) 
       (expr (int) 
-       (at 42 
+       (at 32 
         (op <= (expr ("Var") (ident (binding 14 "first"))) 
          (expr ("Var") (ident (binding 15 "equal_value")))))))))) 
-  (at 45 
+  (at 35 
    (declare (int) 
     (bindings 
      (op = (bind (binding 28 "order_gt") ()) 
       (expr (int) 
-       (at 44 
+       (at 34 
         (op > (expr ("Var") (ident (binding 16 "adjacent"))) 
          (expr ("Var") (ident (binding 14 "first")))))))))) 
-  (at 47 
+  (at 37 
    (declare (int) 
     (bindings 
      (op = (bind (binding 29 "order_ge") ()) 
       (expr (int) 
-       (at 46 
+       (at 36 
         (op >= (expr ("Var") (ident (binding 15 "equal_value"))) 
          (expr ("Var") (ident (binding 14 "first")))))))))) 
-  (at 49 
+  (at 39 
    (declare (int) 
     (bindings 
      (op = (bind (binding 30 "mixed_order_left") ()) 
       (expr (int) 
-       (at 48 
+       (at 38 
         (op < (expr ("Var") (ident (binding 14 "first"))) 
          (expr (long) 
           (op + (expr (long) (ident (binding 13 "precise"))) 
            (expr (int) (literal (int) "1"))))))))))) 
-  (at 51 
+  (at 41 
    (declare (int) 
     (bindings 
      (op = (bind (binding 31 "mixed_order_right") ()) 
       (expr (int) 
-       (at 50 
+       (at 40 
         (op < (expr (long) (ident (binding 13 "precise"))) 
          (expr ("Var") (ident (binding 16 "adjacent")))))))))) 
-  (at 52 
+  (at 42 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 32 "string_a") ()) (expr ("String") (cache 0))) 
      (op = (bind (binding 33 "string_b") ()) (expr ("String") (cache 1)))))) 
-  (at 54 
+  (at 44 
    (declare (int) 
     (bindings 
      (op = (bind (binding 34 "string_order") ()) 
       (expr (int) 
-       (at 53 
+       (at 43 
         (op < (expr ("Var") (ident (binding 32 "string_a"))) 
          (expr ("Var") (ident (binding 33 "string_b")))))))))) 
-  (at 55 
+  (at 45 
    (declare ("Array") 
     (bindings 
      (op = (bind (binding 35 "array") ()) 
@@ -236,59 +231,59 @@
        (call (expr ((func (("Array"))) ("Array")) 
               (ident (binding 37 "Array_copy"))) 
         (args (expr ("Array") (ident (binding 35 "array")))))))))) 
-  (at 56 
+  (at 46 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 38 "array_value") ()) 
       (expr ("Array") (ident (binding 35 "array")))) 
      (op = (bind (binding 39 "copy_value") ()) 
       (expr ("Array") (ident (binding 36 "copy"))))))) 
-  (at 58 
+  (at 48 
    (declare (int) 
     (bindings 
      (op = (bind (binding 40 "object_equal") ()) 
       (expr (int) 
-       (at 57 
+       (at 47 
         (op == (expr ("Var") (ident (binding 38 "array_value"))) 
          (expr ("Var") (ident (binding 39 "copy_value")))))))))) 
-  (at 60 
+  (at 50 
    (declare (int) 
     (bindings 
      (op = (bind (binding 41 "object_same") ()) 
       (expr (int) 
-       (at 59 
+       (at 49 
         (op === (expr ("Var") (ident (binding 38 "array_value"))) 
          (expr ("Var") (ident (binding 39 "copy_value")))))))))) 
-  (at 62 
+  (at 52 
    (declare (int) 
     (bindings 
      (op = (bind (binding 42 "object_mixed_same") ()) 
       (expr (int) 
-       (at 61 
+       (at 51 
         (op === (expr ("Var") (ident (binding 38 "array_value"))) 
          (expr ("Array") (ident (binding 35 "array")))))))))) 
-  (at 64 
+  (at 54 
    (declare (int) 
     (bindings 
      (op = (bind (binding 43 "object_order_le") ()) 
       (expr (int) 
-       (at 63 
+       (at 53 
         (op <= (expr ("Var") (ident (binding 38 "array_value"))) 
          (expr ("Var") (ident (binding 39 "copy_value")))))))))) 
-  (at 66 
+  (at 56 
    (declare (int) 
     (bindings 
      (op = (bind (binding 44 "object_order_ge") ()) 
       (expr (int) 
-       (at 65 
+       (at 55 
         (op >= (expr ("Var") (ident (binding 38 "array_value"))) 
          (expr ("Var") (ident (binding 39 "copy_value")))))))))) 
-  (at 68 
+  (at 58 
    (declare (int) 
     (bindings 
      (op = (bind (binding 45 "marked_equal") ()) 
       (expr (int) 
-       (at 67 
+       (at 57 
         (op == 
          (expr ("Var") 
           (call (expr ((func (("Var"))) "Var") (ident (binding 3 "mark_left"))) 
@@ -296,7 +291,7 @@
          (expr ("Var") 
           (call (expr ((func (("Var"))) "Var") (ident (binding 5 "mark_right"))) 
            (args (expr ("Var") (ident (binding 15 "equal_value"))))))))))))) 
-  (at 69 
+  (at 59 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 46 "printf"))) 
@@ -306,7 +301,7 @@
        (expr (int) (ident (binding 10 "native_same"))) 
        (expr (int) (ident (binding 11 "native_different"))) 
        (expr (int) (ident (binding 12 "native_order")))))))) 
-  (at 70 
+  (at 60 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 46 "printf"))) 
@@ -321,7 +316,7 @@
        (expr (int) (ident (binding 23 "mixed_eq_right"))) 
        (expr (int) (ident (binding 24 "mixed_identity"))) 
        (expr (int) (ident (binding 25 "mixed_identity_ne")))))))) 
-  (at 71 
+  (at 61 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 46 "printf"))) 
@@ -334,7 +329,7 @@
        (expr (int) (ident (binding 30 "mixed_order_left"))) 
        (expr (int) (ident (binding 31 "mixed_order_right"))) 
        (expr (int) (ident (binding 34 "string_order")))))))) 
-  (at 72 
+  (at 62 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 46 "printf"))) 
@@ -348,4 +343,4 @@
        (expr (int) (ident (binding 45 "marked_equal"))) 
        (expr (int) (ident (binding 1 "left_calls"))) 
        (expr (int) (ident (binding 2 "right_calls")))))))) 
-  (at 73 (return (int) (expr (int) (literal (int) "0"))))))
+  (at 63 (return (int) (expr (int) (literal (int) "0"))))))

@@ -493,37 +493,21 @@ int Compiler.shares_meta_definition(Compiler c, String name) {
   return key in library_definitions;
 }
 
-/* built-in macros
+/* Lisp binding macros
 
-   The compiler carries two macro sources in its own image: the built-in
-   macros, and the Lisp binding macros that a `lisp.` name installs on
-   first use. A unit parses each source once and keeps its aliases under a
-   marker. */
+   The compiler carries the Lisp binding macros that a `lisp.` name
+   installs on first use in its own image. A unit parses that source once
+   and keeps its aliases under a marker. */
 
 static macro Expression $_embed_lisp_binding_macros() =>
   $x2c_embed_text("../../etc/lisp-bindings.x");
-
-static macro Expression $_embed_builtin_macros() =>
-  $x2c_embed_text("../../etc/builtin-macros.x");
 
 static String lisp_binding_macros = $_embed_lisp_binding_macros();
 
 static String lisp_bindings_marker = NULL;
 
-static String builtin_macros = $_embed_builtin_macros();
-
-static String builtin_macros_marker = NULL;
-
-/** Installs the compiler-shipped source macros into `c` once. */
-void Compiler.install_builtin_macros(Compiler c) {
-  if (!builtin_macros_marker) builtin_macros_marker = "_x2c.builtin.macros";
-  _install_source(
-    c, builtin_macros, "<builtin:macros>", builtin_macros_marker, 1);
-}
-
 static void _install_source(
-  Compiler c, String text, String filename, String marker,
-  int builtin) {
+  Compiler c, String text, String filename, String marker) {
   (void) marker.try_own();
   Var installed;
   if (c.macros.try_get(marker, installed)) {
@@ -537,7 +521,6 @@ static void _install_source(
   child.fn_defs = c.fn_defs;
   child.macros = c.macros;
   child.kw_aliases = c.kw_aliases;
-  child.builtin_defs = builtin;
   child.tokenize(text);
   Map aliases = _read_definitions(child);
   c.macros[marker] = aliases;
@@ -570,7 +553,7 @@ module void _use_lisp_bindings(Compiler c, int install) {
   c.binding_rows = c.binding_sealed = NULL;
   _install_source(
     c,
-    lisp_binding_macros, "<builtin:lisp-bindings>", lisp_bindings_marker, 0);
+    lisp_binding_macros, "<builtin:lisp-bindings>", lisp_bindings_marker);
 }
 
 /* native operations

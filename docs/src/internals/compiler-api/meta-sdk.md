@@ -48,6 +48,7 @@ The compiler's answers to `lib/meta.x` operations.
 | [`Code.source_text`](#Code.source_text) | Answers `Code.source_text`, declared in `lib/meta.x`. |
 | [`Code.type`](#Code.type) | Answers the compiler-backed captured-code type query. |
 | [`Code.value`](#Code.value) | Reads a constant through the compiler's existing constant decoder. |
+| [`Compiler.add_sdk_targets`](#Compiler.add_sdk_targets) | Adds the SDK primitives the compiler's shipped sources call through `lib/compiler-meta.x` to the built-in targets `rows`. |
 | [`Compiler.bind_sdk_primitives`](#Compiler.bind_sdk_primitives) | Binds the internal primitives the compile-time SDK library wraps into `lisp`, under their `_x2c.` names. |
 | [`Compiler.expanding`](#Compiler.expanding) | Returns the compiler running the current compile-time call. |
 | [`MetaContext.current`](#MetaContext.current) | Returns the context of the running compile-time call, which an evaluation changes with `with` for its own extent. |
@@ -404,6 +405,16 @@ Source: `src/meta-sdk/syntax.x:75`
 
 ### `Compiler`
 
+<a id="Compiler.add_sdk_targets"></a>
+#### Compiler.add_sdk_targets
+
+`void Compiler.add_sdk_targets(Map rows)`
+
+Adds the SDK primitives the compiler's shipped sources call through
+`lib/compiler-meta.x` to the built-in targets `rows`.
+
+Source: `src/meta-sdk/primitives.x:112`
+
 <a id="Compiler.bind_sdk_primitives"></a>
 #### Compiler.bind_sdk_primitives
 
@@ -412,7 +423,7 @@ Source: `src/meta-sdk/syntax.x:75`
 Binds the internal primitives the compile-time SDK library wraps into
 `lisp`, under their `_x2c.` names.
 
-Source: `src/meta-sdk/primitives.x:87`
+Source: `src/meta-sdk/primitives.x:125`
 
 <a id="Compiler.expanding"></a>
 #### Compiler.expanding

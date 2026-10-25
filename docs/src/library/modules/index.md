@@ -20,6 +20,7 @@ points used by generated code, native callers, and compiler setup.
 | [`lib/block.x`](block.md) | checked dynamic storage for fixed-width elements. |
 | [`lib/buffer.x`](buffer.md) | growable text buffer with indentation support. |
 | [`lib/channel.x`](channel.md) | Var transport and explicit storage handoff. |
+| [`lib/common-types.x`](common-types.md) | the types the compiler prelude declares first. |
 | [`lib/common.x`](common.md) | the `Var` encoding every runtime module shares. |
 | [`lib/context.x`](context.md) | bounded runtime state and value export. |
 | [`lib/diff.x`](diff.md) | line differences between two texts. |
@@ -92,12 +93,13 @@ These modules implement the runtime and are not public APIs.
 - `lib/cleanup.x` - Cleanup adoption templates used by runtime owners.
 - `lib/clibc.x` - C library prototypes for integer and string conversions, and string comparison, marked `meta` so compile-time code calls the native functions; it includes the C headers it declares from.
 - `lib/cmath.x` - C99 `<math.h>` prototypes, declared so a `Var` argument unboxes at a math call; the unit still includes `<math.h>`.
-- `lib/datum-reader.x` - The one Lisp reader grammar, shared by `Lisp.read` and the datum reader.
+- `lib/compiler-meta.x` - Compiler-private `meta` prototypes for the native operations the compiler supplies to its own shipped sources.
 - `lib/datum.x` - Values spelled as Lisp reader text, for interface files and the project meta helper's messages.
 - `lib/error-macros.x` - Structured Error causes shared by runtime modules.
 - `lib/error-private.x` - Error transfer templates used by the exception machinery.
 - `lib/error_init.x` - Type-owned initialization shim that preserves `Error`'s pre-initialization boundary.
 - `lib/integer-ops.x` - Integer conversion and arithmetic templates shared by runtime owners.
+- `lib/lisp-bindings.x` - Macros that bind native functions into a runtime `Lisp` session; `lisp/lisp.x` includes it.
 - `lib/lisp-targets/lisp-targets.x` - The native operations a `Lisp` session can bind, built outside the implicit prelude so the optional modules that supply them stay out of it.
 - `lib/native-scalar-types.x` - The exact C scalar ledger and its compile-time projections.
 - `lib/private-keywords.x` - Keyword aliases used by runtime implementation code.

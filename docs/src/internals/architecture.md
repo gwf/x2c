@@ -306,7 +306,7 @@ dotted method sugar, `src/statements.x` for control flow, `match`,
 `try`/`catch`, and `defer`, and `src/literals/literals.x` for collection, interpolated
 `String`, and lambda literals. `src/meta-group/meta-group.x` stages a unit's bodied
 `meta` functions as native code, and `src/stage.x` carries values across that
-boundary. The built-in source macro in `src/macros/macros.x`, `etc/builtin-macros.x`,
+boundary. The built-in source macro in `src/macros/macros.x`, `etc/compiler-prelude.x`,
 and the algorithms in `src/builtins.x` expand `foreach` during this pass.
 `src/type.x` owns the `List`-backed `Type` representation those modules
 consult; `src/ast.x` owns sequence placement and binding helpers;

@@ -293,7 +293,7 @@ directory keep their distinct path-derived objects under `<dir>/obj/`.
 - Percent literals: `src/literals/literals.x`; lambdas: `src/lambdas.x` parses them
   and resolves captures, and `src/components/lambda-functions.x` lowers them.
 - Statements: `src/statements.x`; the built-in `foreach(item, collection)`
-  source macro: `etc/builtin-macros.x` and `src/builtins.x`, loaded by
+  source macro: `etc/compiler-prelude.x` and `src/builtins.x`, loaded by
   `src/macros/macros.x`.
 - Type initialization: `src/parse/parse.x`, `src/generate/generate.x`, and `src/cache.x`.
 - Type conversion: `src/type.x`, `src/expressions/expressions.x`, `src/transform/transform.x`,

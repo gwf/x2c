@@ -345,7 +345,7 @@ capitalization. `macro_categories` in `src/macros/macros.x` is the complete tabl
 Expression, statement, field, entry, enumerator, unit, declaration, and
 decorator results must be applied in compatible positions. Local macro values
 and keyword aliases use their bound signatures too. `class` and `foreach`
-are built-in aliases, whose definitions live in `etc/builtin-macros.x`.
+are built-in aliases, whose definitions live in `etc/compiler-prelude.x`.
 The remaining built-ins and library macros need no new core productions.
 A bare visible `$name` can also denote a Macro value without invoking it.
 A direct non-decorator invocation consumes `;` in unit, block, statement,

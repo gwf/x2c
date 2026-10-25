@@ -6,11 +6,10 @@
 (function (static int) 
  (bind (binding 2 "local_latest") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
+  (at 1 (declare (int) 
+         (bindings 
+          (op = (bind (binding 3 "value") ()) (expr (int) (literal (int) "7")))))) 
   (at 11 
-   (declare (int) 
-    (bindings 
-     (op = (bind (binding 3 "value") ()) (expr (int) (literal (int) "7")))))) 
-  (at 21 
    (block 
     (declare ("_x2c_gensym_defer_env_0") 
      (bindings 
@@ -46,12 +45,11 @@
               (op & (expr ("X2CCleanup") 
                      (ident (binding 5 "_x2c_gensym_defer_record_0"))))))))) 
     (block 
-     (at 13 
-      (stmnt 
-       (expr (int) 
-        (op = (expr (int) (ident (binding 3 "value"))) 
-         (expr (int) (literal (int) "42")))))) 
-     (at 20 
+     (at 3 (stmnt 
+            (expr (int) 
+             (op = (expr (int) (ident (binding 3 "value"))) 
+              (expr (int) (literal (int) "42")))))) 
+     (at 10 
       (block 
        (declare (int) 
         (bindings 
@@ -77,7 +75,7 @@
 (function (static int) 
  (bind (binding 10 "global_only") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 23 
+  (at 13 
    (block 
     (declare ("X2CCleanup") 
      (bindings 
@@ -97,7 +95,7 @@
               (op & (expr ("X2CCleanup") 
                      (ident (binding 11 "_x2c_gensym_defer_record_1"))))))))) 
     (block 
-     (at 22 
+     (at 12 
       (block 
        (declare (int) 
         (bindings 
@@ -123,26 +121,24 @@
 (function (int) 
  (bind (binding 14 "main") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 17 
-   (declare (int) 
-    (bindings 
-     (op = (bind (binding 15 "result") ()) 
-      (expr (int) 
-       (call (expr ((func ((void))) int) (ident (binding 2 "local_latest"))) 
-        (args (expr (void) ()))))) 
-     (op = (bind (binding 16 "before") ()) 
-      (expr (int) 
-       (call (expr ((func ((void))) int) (ident (binding 10 "global_only"))) 
-        (args (expr (void) ())))))))) 
-  (at 18 
-   (stmnt 
-    (expr () 
-     (call (expr () (ident (binding 17 "printf"))) 
-      (args (expr (* char) (literal (* char) "\"%d %d %d\\n\"")) 
-       (expr (int) (ident (binding 15 "result"))) 
-       (expr (int) (ident (binding 16 "before"))) 
-       (expr (int) (ident (binding 1 "observed")))))))) 
-  (at 24 
+  (at 7 (declare (int) 
+         (bindings 
+          (op = (bind (binding 15 "result") ()) 
+           (expr (int) 
+            (call (expr ((func ((void))) int) (ident (binding 2 "local_latest"))) 
+             (args (expr (void) ()))))) 
+          (op = (bind (binding 16 "before") ()) 
+           (expr (int) 
+            (call (expr ((func ((void))) int) (ident (binding 10 "global_only"))) 
+             (args (expr (void) ())))))))) 
+  (at 8 (stmnt 
+         (expr () 
+          (call (expr () (ident (binding 17 "printf"))) 
+           (args (expr (* char) (literal (* char) "\"%d %d %d\\n\"")) 
+            (expr (int) (ident (binding 15 "result"))) 
+            (expr (int) (ident (binding 16 "before"))) 
+            (expr (int) (ident (binding 1 "observed")))))))) 
+  (at 14 
    (return 
     (expr (int) 
      (op ? (expr (int) 

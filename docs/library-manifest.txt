@@ -19,7 +19,9 @@ lib/buffer.x|api|
 lib/channel.x|api|
 lib/clibc.x|internal|C library prototypes for integer and string conversions, and string comparison, marked `meta` so compile-time code calls the native functions; it includes the C headers it declares from.
 lib/cmath.x|internal|C99 `<math.h>` prototypes, declared so a `Var` argument unboxes at a math call; the unit still includes `<math.h>`.
+lib/common-types.x|api|
 lib/common.x|api|
+lib/compiler-meta.x|internal|Compiler-private `meta` prototypes for the native operations the compiler supplies to its own shipped sources.
 lib/context.x|api|
 lib/dispatch.x|api|
 lib/error/error.x|api|
@@ -29,6 +31,7 @@ lib/file.x|api|
 lib/func/func.x|api|
 lib/iter.x|api|
 lib/lib.x|api|
+lib/lisp-bindings.x|internal|Macros that bind native functions into a runtime `Lisp` session; `lisp/lisp.x` includes it.
 lib/lisp-targets/lisp-targets.x|internal|The native operations a `Lisp` session can bind, built outside the implicit prelude so the optional modules that supply them stay out of it.
 lib/lisp/lisp.x|api|
 lib/list/list.x|api|

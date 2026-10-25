@@ -281,14 +281,15 @@ Source: `src/meta-native/bindings.x:214`
 <a id="Compiler.native_meta_targets"></a>
 #### Compiler.native_meta_targets
 
-`List Compiler.native_meta_targets(List paths)`
+`List Compiler.native_meta_targets(List paths, int callbacks)`
 
 Returns the declared native targets advertised by `meta` interface
 rows, in the row form `lib/lisp-targets/lisp-targets.x` uses for its
 inventory, or only those declared in the files `paths` names when it is
-not empty. Sorting makes that inventory independent of Map order.
+not empty. A target that takes a `Func` is left out unless `callbacks`
+is nonzero. Sorting makes that inventory independent of Map order.
 
-Source: `src/meta-native/bindings.x:305`
+Source: `src/meta-native/bindings.x:306`
 
 <a id="Compiler.native_module_targets"></a>
 #### Compiler.native_module_targets

@@ -984,7 +984,7 @@ when importing or calling Lisp helpers, or working with the compiler session.
 
 The compiler loads Lisp support into an embedded evaluator. The built-in
 macros' algorithms are compiler functions (`src/builtins.x`), bound under
-the names `etc/builtin-macros.x` and `etc/lisp-bindings.x` call.
+the names `etc/compiler-prelude.x` and `etc/lisp-bindings.x` call.
 
 ### One table for compiled code and Lisp
 

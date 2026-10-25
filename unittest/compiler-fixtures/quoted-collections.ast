@@ -16,167 +16,170 @@
  (bind (binding 4 "bump") 
   ((fnmod (params (param (int) (bind (binding 5 "value") (*))))))) 
  (block 
-  (at 12 
-   (return (int) 
-    (expr (int) 
-     (op ++ (expr (int) (op * (expr (* int) (ident (binding 5 "value")))))))))))
+  (at 2 (return (int) 
+         (expr (int) 
+          (op ++ (expr (int) (op * (expr (* int) (ident (binding 5 "value")))))))))))
 
 (function (int) 
  (bind (binding 6 "main") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 13 
-   (declare (int) 
-    (bindings 
-     (op = (bind (binding 7 "count") ()) (expr (int) (literal (int) "7"))) 
-     (op = (bind (binding 8 "evals") ()) (expr (int) (literal (int) "0"))) 
-     (op = (bind (binding 9 "indexed") ((dim))) 
-      (expr () 
-       (composite 
-        (commas (expr (int) (literal (int) "10")) 
-         (expr (int) (literal (int) "11"))))))))) 
-  (at 14 
-   (declare ("Pair") 
-    (bindings 
-     (op = (bind (binding 10 "pair") ()) 
-      (expr () 
-       (composite (commas (dotinit ("value") (expr (int) (literal (int) "22")))))))))) 
-  (at 15 
-   (declare ("List") 
-    (bindings 
-     (op = (bind (binding 11 "list_nested") ()) 
-      (expr ("List") 
-       (expr ("List") 
-        (cons (expr ("Var") 
-               (call (expr ((func (("Array"))) "Var") 
-                      (ident (binding 12 "Array_var"))) 
-                (args (expr ("Array") 
-                       (array 
-                        (expr ("Symbol") (literal ("Symbol") "array" array)) 
-                        (expr (int) (ident (binding 7 "count")))))))) 
-         (expr ("List") 
-          (cons (expr ("Var") 
-                 (call (expr ((func (("Map"))) "Var") 
-                        (ident (binding 13 "Map_var"))) 
-                  (args (expr ("Map") 
-                         (map (map-entry 
-                               (expr ("Symbol") (literal ("Symbol") "map" map)) 
-                               (expr (int) (ident (binding 7 "count"))))))))) 
-           (nil)))))))))) 
-  (at 16 
-   (declare ("Array") 
-    (bindings 
-     (op = (bind (binding 14 "values") ()) 
-      (expr ("Array") 
-       (array (expr ("Symbol") (literal ("Symbol") "ready" ready)) 
-        (expr ("Atom") 
-         (literal ("Atom") "VeryLongIdentifierName" 
-          VeryLongIdentifierName)) (expr ("String") (cache 0)) 
-        (expr ("Array") 
-         (array (expr ("Symbol") (literal ("Symbol") "nested" nested)) 
-          (expr (int) (ident (binding 7 "count"))))) 
-        (expr ("Map") 
-         (map (map-entry (expr ("Symbol") (literal ("Symbol") "kind" kind)) 
-               (expr ("Symbol") (literal ("Symbol") "widget" widget))))) 
-        (expr (int) 
-         (op * (expr (int) (ident (binding 7 "count"))) 
-          (expr (int) (literal (int) "2")))) (expr (int) (literal (int) "-3")) 
-        (expr (char) (literal (char) "\'q\'")) 
-        (expr ("Atom") (literal ("Atom") "colon:name" colon:name)) 
-        (expr ("Symbol") (literal ("Symbol") "right\\]" right\x5D)) 
-        (expr ("Symbol") (literal ("Symbol") "right\\}" right\x7D)) 
-        (expr ("Symbol") (literal ("Symbol") "<\"\">" )) 
-        (expr ("Symbol") (literal ("Symbol") "<1>" \x31)) 
-        (expr ("Symbol") (literal ("Symbol") "<+>" +)) 
-        (expr (double) (literal (double) "1.5")) 
-        (expr ("String") (cache 1)) (expr ("String") (cache 2)) 
-        (expr (* char) (literal (* char) "\"c text\"")) 
-        (expr (int) (op . (expr ("Pair") (ident (binding 10 "pair"))) ("value"))) 
-        (expr (int) 
-         (index (expr ((dim) int) (ident (binding 9 "indexed"))) 
-          (expr (int) (literal (int) "1")))) 
-        (expr (int) 
-         (call (expr ((func ((* int))) int) (ident (binding 4 "bump"))) 
-          (args (expr (* int) (op & (expr (int) (ident (binding 8 "evals")))))))) 
-        (expr () (ident (binding 15 "NULL"))) 
-        (expr (enum "Choice") (ident (binding 3 "chosen"))) 
-        (expr (int) 
-         (op . (expr ("Pair") 
-                (parens 
-                 (expr ("Pair") 
-                  (cast (decl ("Pair") (bindings (bind () ()))) 
-                   (expr () 
-                    (composite 
-                     (commas 
-                      (dotinit ("value") (expr (int) (literal (int) "24")))))))))) 
-          ("value"))) 
-        (expr (int) 
-         (parens 
-          (expr (int) 
-           (commas (expr (int) (ident (binding 7 "count"))) 
-            (expr (int) 
-             (op + (expr (int) (ident (binding 7 "count"))) 
-              (expr (int) (literal (int) "3")))))))) 
-        (expr (int) (literal (int) "25")))))))) 
-  (at 18 
-   (declare ("Map") 
-    (bindings 
-     (op = (bind (binding 16 "config") ()) 
-      (expr ("Map") 
-       (map (map-entry (expr ("Symbol") (literal ("Symbol") "name" name)) 
-             (expr ("String") (cache 3))) 
-        (map-entry (expr ("Symbol") (literal ("Symbol") "runtime" runtime)) 
-         (expr (int) (ident (binding 7 "count")))) 
-        (map-entry (expr ("Symbol") (literal ("Symbol") "computed" computed)) 
-         (expr (int) 
-          (op + (expr (int) (ident (binding 7 "count"))) 
-           (expr (int) (literal (int) "2"))))) 
-        (map-entry (expr ("Symbol") (literal ("Symbol") "nested" nested)) 
-         (expr ("Map") 
-          (map (map-entry (expr ("Symbol") (literal ("Symbol") "depth" depth)) 
-                (expr (int) (literal (int) "8")))))) 
-        (map-entry (expr ("Symbol") (literal ("Symbol") "values" values)) 
-         (expr ("Array") 
-          (array (expr (int) (literal (int) "1")) 
-           (expr (int) (ident (binding 7 "count")))))) 
-        (map-entry (expr (* char) (literal (* char) "\"macro\"")) 
-         (expr (int) (literal (int) "12"))))))))) 
-  (at 19 
-   (if (expr (int) 
-        (op || 
-         (expr (int) 
-          (op != 
-           (expr (long) 
-            (call (expr ((func (("Var"))) (long)) 
-                   (ident (binding 17 "Var_integer"))) 
-             (args (expr ("Var") 
-                    (getindex 
-                     (expr ("Array") 
-                      (call (expr ((func (("Var"))) ("Array")) 
-                             (ident (binding 18 "Var_array"))) 
-                       (args (expr ("Var") 
-                              (getindex 
-                               (expr ("List") (ident (binding 11 "list_nested"))) 
-                               (expr (int) (literal (int) "0"))))))) 
-                     (expr (int) (literal (int) "1"))))))) 
-           (expr (int) (literal (int) "7")))) 
-         (expr (int) 
-          (op != 
-           (expr (long) 
-            (call (expr ((func (("Var"))) (long)) 
-                   (ident (binding 17 "Var_integer"))) 
-             (args (expr ("Var") 
-                    (getindex 
-                     (expr ("Map") 
-                      (call (expr ((func (("Var"))) ("Map")) 
-                             (ident (binding 19 "Var_map"))) 
-                       (args (expr ("Var") 
-                              (getindex 
-                               (expr ("List") (ident (binding 11 "list_nested"))) 
-                               (expr (int) (literal (int) "1"))))))) 
-                     (expr ("Symbol") (literal ("Symbol") "<map>" map))))))) 
-           (expr (int) (literal (int) "7")))))) 
-    (return (int) (expr (int) (literal (int) "1"))))) 
-  (at 20 
+  (at 3 (declare (int) 
+         (bindings 
+          (op = (bind (binding 7 "count") ()) (expr (int) (literal (int) "7"))) 
+          (op = (bind (binding 8 "evals") ()) (expr (int) (literal (int) "0"))) 
+          (op = (bind (binding 9 "indexed") ((dim))) 
+           (expr () 
+            (composite 
+             (commas (expr (int) (literal (int) "10")) 
+              (expr (int) (literal (int) "11"))))))))) 
+  (at 4 (declare ("Pair") 
+         (bindings 
+          (op = (bind (binding 10 "pair") ()) 
+           (expr () 
+            (composite 
+             (commas (dotinit ("value") (expr (int) (literal (int) "22")))))))))) 
+  (at 5 (declare ("List") 
+         (bindings 
+          (op = (bind (binding 11 "list_nested") ()) 
+           (expr ("List") 
+            (expr ("List") 
+             (cons (expr ("Var") 
+                    (call (expr ((func (("Array"))) "Var") 
+                           (ident (binding 12 "Array_var"))) 
+                     (args (expr ("Array") 
+                            (array 
+                             (expr ("Symbol") (literal ("Symbol") "array" array)) 
+                             (expr (int) (ident (binding 7 "count")))))))) 
+              (expr ("List") 
+               (cons (expr ("Var") 
+                      (call (expr ((func (("Map"))) "Var") 
+                             (ident (binding 13 "Map_var"))) 
+                       (args (expr ("Map") 
+                              (map (map-entry 
+                                    (expr ("Symbol") 
+                                     (literal ("Symbol") "map" map)) 
+                                    (expr (int) (ident (binding 7 "count"))))))))) 
+                (nil)))))))))) 
+  (at 6 (declare ("Array") 
+         (bindings 
+          (op = (bind (binding 14 "values") ()) 
+           (expr ("Array") 
+            (array (expr ("Symbol") (literal ("Symbol") "ready" ready)) 
+             (expr ("Atom") 
+              (literal ("Atom") "VeryLongIdentifierName" 
+               VeryLongIdentifierName)) (expr ("String") (cache 0)) 
+             (expr ("Array") 
+              (array (expr ("Symbol") (literal ("Symbol") "nested" nested)) 
+               (expr (int) (ident (binding 7 "count"))))) 
+             (expr ("Map") 
+              (map (map-entry (expr ("Symbol") (literal ("Symbol") "kind" kind)) 
+                    (expr ("Symbol") (literal ("Symbol") "widget" widget))))) 
+             (expr (int) 
+              (op * (expr (int) (ident (binding 7 "count"))) 
+               (expr (int) (literal (int) "2")))) 
+             (expr (int) (literal (int) "-3")) 
+             (expr (char) (literal (char) "\'q\'")) 
+             (expr ("Atom") (literal ("Atom") "colon:name" colon:name)) 
+             (expr ("Symbol") (literal ("Symbol") "right\\]" right\x5D)) 
+             (expr ("Symbol") (literal ("Symbol") "right\\}" right\x7D)) 
+             (expr ("Symbol") (literal ("Symbol") "<\"\">" )) 
+             (expr ("Symbol") (literal ("Symbol") "<1>" \x31)) 
+             (expr ("Symbol") (literal ("Symbol") "<+>" +)) 
+             (expr (double) (literal (double) "1.5")) 
+             (expr ("String") (cache 1)) (expr ("String") (cache 2)) 
+             (expr (* char) (literal (* char) "\"c text\"")) 
+             (expr (int) 
+              (op . (expr ("Pair") (ident (binding 10 "pair"))) 
+               ("value"))) 
+             (expr (int) 
+              (index (expr ((dim) int) (ident (binding 9 "indexed"))) 
+               (expr (int) (literal (int) "1")))) 
+             (expr (int) 
+              (call (expr ((func ((* int))) int) (ident (binding 4 "bump"))) 
+               (args (expr (* int) 
+                      (op & (expr (int) (ident (binding 8 "evals")))))))) 
+             (expr () (ident (binding 15 "NULL"))) 
+             (expr (enum "Choice") (ident (binding 3 "chosen"))) 
+             (expr (int) 
+              (op . (expr ("Pair") 
+                     (parens 
+                      (expr ("Pair") 
+                       (cast (decl ("Pair") (bindings (bind () ()))) 
+                        (expr () 
+                         (composite 
+                          (commas 
+                           (dotinit ("value") (expr (int) (literal (int) "24")))))))))) 
+               ("value"))) 
+             (expr (int) 
+              (parens 
+               (expr (int) 
+                (commas (expr (int) (ident (binding 7 "count"))) 
+                 (expr (int) 
+                  (op + (expr (int) (ident (binding 7 "count"))) 
+                   (expr (int) (literal (int) "3")))))))) 
+             (expr (int) (literal (int) "25")))))))) 
+  (at 8 (declare ("Map") 
+         (bindings 
+          (op = (bind (binding 16 "config") ()) 
+           (expr ("Map") 
+            (map (map-entry (expr ("Symbol") (literal ("Symbol") "name" name)) 
+                  (expr ("String") (cache 3))) 
+             (map-entry (expr ("Symbol") (literal ("Symbol") "runtime" runtime)) 
+              (expr (int) (ident (binding 7 "count")))) 
+             (map-entry 
+              (expr ("Symbol") (literal ("Symbol") "computed" computed)) 
+              (expr (int) 
+               (op + (expr (int) (ident (binding 7 "count"))) 
+                (expr (int) (literal (int) "2"))))) 
+             (map-entry (expr ("Symbol") (literal ("Symbol") "nested" nested)) 
+              (expr ("Map") 
+               (map (map-entry 
+                     (expr ("Symbol") (literal ("Symbol") "depth" depth)) 
+                     (expr (int) (literal (int) "8")))))) 
+             (map-entry (expr ("Symbol") (literal ("Symbol") "values" values)) 
+              (expr ("Array") 
+               (array (expr (int) (literal (int) "1")) 
+                (expr (int) (ident (binding 7 "count")))))) 
+             (map-entry (expr (* char) (literal (* char) "\"macro\"")) 
+              (expr (int) (literal (int) "12"))))))))) 
+  (at 9 (if (expr (int) 
+             (op || 
+              (expr (int) 
+               (op != 
+                (expr (long) 
+                 (call (expr ((func (("Var"))) (long)) 
+                        (ident (binding 17 "Var_integer"))) 
+                  (args (expr ("Var") 
+                         (getindex 
+                          (expr ("Array") 
+                           (call (expr ((func (("Var"))) ("Array")) 
+                                  (ident (binding 18 "Var_array"))) 
+                            (args (expr ("Var") 
+                                   (getindex 
+                                    (expr ("List") 
+                                     (ident (binding 11 "list_nested"))) 
+                                    (expr (int) (literal (int) "0"))))))) 
+                          (expr (int) (literal (int) "1"))))))) 
+                (expr (int) (literal (int) "7")))) 
+              (expr (int) 
+               (op != 
+                (expr (long) 
+                 (call (expr ((func (("Var"))) (long)) 
+                        (ident (binding 17 "Var_integer"))) 
+                  (args (expr ("Var") 
+                         (getindex 
+                          (expr ("Map") 
+                           (call (expr ((func (("Var"))) ("Map")) 
+                                  (ident (binding 19 "Var_map"))) 
+                            (args (expr ("Var") 
+                                   (getindex 
+                                    (expr ("List") 
+                                     (ident (binding 11 "list_nested"))) 
+                                    (expr (int) (literal (int) "1"))))))) 
+                          (expr ("Symbol") (literal ("Symbol") "<map>" map))))))) 
+                (expr (int) (literal (int) "7")))))) 
+         (return (int) (expr (int) (literal (int) "1"))))) 
+  (at 10 
    (if (expr (int) 
         (op ! (expr (int) 
                (call (expr ((func (("String") ("String"))) int) 
@@ -190,7 +193,7 @@
                                 (expr (int) (literal (int) "0"))))))) 
                  (expr ("String") (cache 4))))))) 
     (return (int) (expr (int) (literal (int) "2"))))) 
-  (at 21 
+  (at 11 
    (if (expr (int) 
         (op ! (expr (int) 
                (call (expr ((func (("String") ("String"))) int) 
@@ -204,7 +207,7 @@
                                 (expr (int) (literal (int) "1"))))))) 
                  (expr ("String") (cache 5))))))) 
     (return (int) (expr (int) (literal (int) "3"))))) 
-  (at 22 
+  (at 12 
    (if (expr (int) 
         (op ! (expr (int) 
                (call (expr ((func (("String") ("String"))) int) 
@@ -218,7 +221,7 @@
                                 (expr (int) (literal (int) "2"))))))) 
                  (expr ("String") (cache 0))))))) 
     (return (int) (expr (int) (literal (int) "4"))))) 
-  (at 23 
+  (at 13 
    (if (expr (int) 
         (op != 
          (expr (long) 
@@ -236,7 +239,7 @@
                    (expr (int) (literal (int) "1"))))))) 
          (expr (int) (literal (int) "7")))) 
     (return (int) (expr (int) (literal (int) "5"))))) 
-  (at 24 
+  (at 14 
    (if (expr (int) 
         (op ! (expr (int) 
                (call (expr ((func (("String") ("String"))) int) 
@@ -258,7 +261,7 @@
                                  (literal ("Symbol") "<kind>" kind))))))) 
                  (expr ("String") (cache 6))))))) 
     (return (int) (expr (int) (literal (int) "6"))))) 
-  (at 25 
+  (at 15 
    (if (expr (int) 
         (op || 
          (expr (int) 
@@ -280,7 +283,7 @@
                      (expr (int) (literal (int) "6"))))))) 
            (expr (int) (op - (expr (int) (literal (int) "3")))))))) 
     (return (int) (expr (int) (literal (int) "7"))))) 
-  (at 26 
+  (at 16 
    (if (expr (int) 
         (op != 
          (expr (char) 
@@ -290,7 +293,7 @@
                    (expr (int) (literal (int) "7"))))))) 
          (expr (char) (literal (char) "\'q\'")))) 
     (return (int) (expr (int) (literal (int) "8"))))) 
-  (at 27 
+  (at 17 
    (if (expr (int) 
         (op || 
          (expr (int) 
@@ -318,7 +321,7 @@
                                   (expr (int) (literal (int) "9"))))))) 
                    (expr ("String") (cache 8))))))))) 
     (return (int) (expr (int) (literal (int) "9"))))) 
-  (at 28 
+  (at 18 
    (if (expr (int) 
         (op || 
          (expr (int) 
@@ -366,7 +369,7 @@
                      (expr (int) (literal (int) "13"))))))) 
            (expr ("Symbol") (literal ("Symbol") "<+>" +)))))) 
     (return (int) (expr (int) (literal (int) "10"))))) 
-  (at 29 
+  (at 19 
    (if (expr (int) 
         (op || 
          (expr (int) 
@@ -421,7 +424,7 @@
                                   (expr (int) (literal (int) "17"))))))) 
                    (expr ("String") (cache 10))))))))) 
     (return (int) (expr (int) (literal (int) "11"))))) 
-  (at 30 
+  (at 20 
    (if (expr (int) 
         (op || 
          (expr (int) 
@@ -459,7 +462,7 @@
           (op != (expr (int) (ident (binding 8 "evals"))) 
            (expr (int) (literal (int) "1")))))) 
     (return (int) (expr (int) (literal (int) "12"))))) 
-  (at 31 
+  (at 21 
    (if (expr (int) 
         (op || 
          (expr (int) 
@@ -514,7 +517,7 @@
                      (expr (int) (literal (int) "25"))))))) 
            (expr (int) (literal (int) "25")))))) 
     (return (int) (expr (int) (literal (int) "13"))))) 
-  (at 32 
+  (at 22 
    (if (expr (int) 
         (op ! (expr (int) 
                (call (expr ((func (("String") ("String"))) int) 
@@ -529,7 +532,7 @@
                                  (literal ("Symbol") "<name>" name))))))) 
                  (expr ("String") (cache 3))))))) 
     (return (int) (expr (int) (literal (int) "14"))))) 
-  (at 33 
+  (at 23 
    (if (expr (int) 
         (op != 
          (expr (long) 
@@ -540,7 +543,7 @@
                    (expr ("Symbol") (literal ("Symbol") "<runtime>" runtime))))))) 
          (expr (int) (literal (int) "7")))) 
     (return (int) (expr (int) (literal (int) "15"))))) 
-  (at 34 
+  (at 24 
    (if (expr (int) 
         (op != 
          (expr (long) 
@@ -551,7 +554,7 @@
                    (expr ("Symbol") (literal ("Symbol") "<computed>" computed))))))) 
          (expr (int) (literal (int) "9")))) 
     (return (int) (expr (int) (literal (int) "16"))))) 
-  (at 35 
+  (at 25 
    (if (expr (int) 
         (op != 
          (expr (long) 
@@ -570,7 +573,7 @@
                    (expr ("Symbol") (literal ("Symbol") "<depth>" depth))))))) 
          (expr (int) (literal (int) "8")))) 
     (return (int) (expr (int) (literal (int) "17"))))) 
-  (at 36 
+  (at 26 
    (if (expr (int) 
         (op != 
          (expr (long) 
@@ -589,7 +592,7 @@
                    (expr (int) (literal (int) "1"))))))) 
          (expr (int) (literal (int) "7")))) 
     (return (int) (expr (int) (literal (int) "18"))))) 
-  (at 37 
+  (at 27 
    (if (expr (int) 
         (op != 
          (expr (long) 
@@ -600,9 +603,9 @@
                    (expr (* char) (literal (* char) "\"macro\""))))))) 
          (expr (int) (literal (int) "12")))) 
     (return (int) (expr (int) (literal (int) "19"))))) 
-  (at 38 
+  (at 28 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 27 "printf"))) 
       (args (expr (* char) (literal (* char) "\"quoted collections ok\\n\""))))))) 
-  (at 39 (return (int) (expr (int) (literal (int) "0"))))))
+  (at 29 (return (int) (expr (int) (literal (int) "0"))))))

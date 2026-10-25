@@ -9,7 +9,7 @@ not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
 - Compiler modules: 61
-- Runtime modules: 66
+- Runtime modules: 68
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
 ## Compiler modules
@@ -354,10 +354,10 @@ Public functions:
 `Compiler.refresh_source_collections`, `Compiler.forget_provisional_entries`,
 `Compiler.module_source`, `Compiler.collect_symbols`,
 `Compiler.prelude_sources`, `Compiler.is_prelude_source`,
-`Compiler.configure_package`, `SourceView.resolve_include`,
-`Compiler.included_compile_time_effects`, `Compiler.install_included_effects`,
-`Compiler.include_typedef_names`, `Compiler.include_type_dependencies`,
-`Compiler.include_function_declarations`,
+`Compiler.install_syntax_prelude`, `Compiler.configure_package`,
+`SourceView.resolve_include`, `Compiler.included_compile_time_effects`,
+`Compiler.install_included_effects`, `Compiler.include_typedef_names`,
+`Compiler.include_type_dependencies`, `Compiler.include_function_declarations`,
 `Compiler.runtime_function_declarations`, `Compiler.collected_names`,
 `Compiler.publishes_typedef`, `Compiler.publishes_type_family`,
 `Compiler.callable_symbols`, `Compiler.publish_inline_types`,
@@ -623,12 +623,12 @@ Public functions:
 `Compiler.publish_macro_library`, `Compiler.inherits_import`,
 `Compiler.record_comptime`, `Compiler.inherit_library_comptime`,
 `Compiler.library_filling`, `Compiler.shared_definitions`,
-`Compiler.shares_meta_definition`, `Compiler.install_builtin_macros`,
-`Compiler.bind_meta_operation`, `Compiler.reset_macro_library`,
-`Compiler.alias_form_starts`, `Compiler.parse_alias_statement`,
-`Compiler.parse_alias_declaration`, `Compiler.parse_alias_member`,
-`Compiler.enter_alias_body`, `Compiler.leave_alias_body`,
-`Compiler.scope_declares_alias`, `Compiler.alias_expression`
+`Compiler.shares_meta_definition`, `Compiler.bind_meta_operation`,
+`Compiler.reset_macro_library`, `Compiler.alias_form_starts`,
+`Compiler.parse_alias_statement`, `Compiler.parse_alias_declaration`,
+`Compiler.parse_alias_member`, `Compiler.enter_alias_body`,
+`Compiler.leave_alias_body`, `Compiler.scope_declares_alias`,
+`Compiler.alias_expression`
 
 ### [src/meta-group/meta-group.x](../src/meta-group/meta-group.x)
 
@@ -694,7 +694,8 @@ Public functions:
 `_x2c_complete_iterator`, `Code.register_rewrite`,
 `Code.register_after_initialization`, `Code.source_text`, `x2c_embed_text`,
 `MetaContext.source_description`, `x2c_meta_definition_hashes`,
-`MetaContext.literal_list`, `Compiler.bind_sdk_primitives`
+`MetaContext.literal_list`, `Compiler.add_sdk_targets`,
+`Compiler.bind_sdk_primitives`
 
 ### [src/parse/parse.x](../src/parse/parse.x)
 
@@ -892,6 +893,14 @@ Public functions:
 
 None. This module has no non-static function definitions.
 
+### [lib/common-types.x](../lib/common-types.x)
+
+the types the compiler prelude declares first.
+
+Public functions:
+
+None. This module has no non-static function definitions.
+
 ### [lib/common.x](../lib/common.x)
 
 the `Var` encoding every runtime module shares.
@@ -918,6 +927,14 @@ Public functions:
 `x2c_initialize`, `x2c_normalize_index`, `x2c_slice_bound`,
 `x2c_normalize_slice`
 
+### [lib/compiler-meta.x](../lib/compiler-meta.x)
+
+compiler-private meta operations.
+
+Public functions:
+
+None. This module has no non-static function definitions.
+
 ### [lib/context.x](../lib/context.x)
 
 bounded runtime state and value export.
@@ -929,14 +946,6 @@ Public functions:
 `Context.move_scope`, `Context.move_block`, `Context.open`,
 `Context.open_named`, `Context.open_isolated`, `Context.open_isolated_named`,
 `Context.current`, `Context.close`, `Context.cleanup`, `Context.initialize`
-
-### [lib/datum-reader.x](../lib/datum-reader.x)
-
-the Lisp reader grammar.
-
-Public functions:
-
-`datum_read_token_form`, `datum_scan_tokens`, `datum_read_form`
 
 ### [lib/datum.x](../lib/datum.x)
 
@@ -1072,6 +1081,14 @@ Public functions:
 
 `DisjointSet.init`, `DisjointSet.drop`, `DisjointSet.find`,
 `DisjointSet.union`, `DisjointSet.sizes`, `DisjointSet.num_components`
+
+### [lib/lisp-bindings.x](../lib/lisp-bindings.x)
+
+native functions a Lisp session can call.
+
+Public functions:
+
+None. This module has no non-static function definitions.
 
 ### [lib/list-selectors.x](../lib/list-selectors.x)
 
@@ -1593,11 +1610,11 @@ the Lisp runtime: reader, session, and evaluator.
 Public functions:
 
 `native_scalar_access`, `Lisp.cleanup`, `Lisp.call_budget`,
-`Lisp.set_interrupted`, `Lisp.eval`, `Lisp.apply`, `Lisp.read`,
-`Lisp.eval_string`, `Lisp.eval_file`, `lisp_source_function`, `Lisp.kernel`,
-`Lisp.new`, `Lisp.destroy`, `Lisp.adopt`, `Lisp.freeze`, `Lisp.try_get`,
-`Lisp.set_global`, `Lisp.remove_global`, `Lisp.bind`, `Lisp.active`,
-`Lisp.storage`, `Lisp.automatic_storage`, `Lisp.result_storage`, `lisp_truth`,
+`Lisp.set_interrupted`, `Lisp.eval`, `Lisp.apply`, `Lisp.eval_string`,
+`Lisp.eval_file`, `lisp_source_function`, `Lisp.kernel`, `Lisp.new`,
+`Lisp.destroy`, `Lisp.adopt`, `Lisp.freeze`, `Lisp.try_get`, `Lisp.set_global`,
+`Lisp.remove_global`, `Lisp.bind`, `Lisp.active`, `Lisp.storage`,
+`Lisp.automatic_storage`, `Lisp.result_storage`, `Lisp.read`, `lisp_truth`,
 `lisp_atom`, `lisp_car`, `lisp_cdr`, `lisp_eq`, `lisp_pair`, `lisp_list`,
 `lisp_number`, `lisp_string`, `lisp_symbol`, `lisp_procedure`, `lisp_type`,
 `lisp_compare`, `lisp_add`, `lisp_plus`, `lisp_minus`, `lisp_times`,

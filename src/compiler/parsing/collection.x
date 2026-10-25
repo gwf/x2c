@@ -52,11 +52,11 @@ static void _shallow_parse_loop(Compiler c) {
   c.shallow = 0;
 }
 
-/** Starts a collection pass with the built-in macros. It parses no bodies,
+/** Starts a collection pass with the syntax prelude. It parses no bodies,
     and an import it reads installs the protocols visible to it when a
     template or `meta` body first asks for one. */
 void Compiler.start_collection(Compiler c) {
-  c.install_builtin_macros();
+  c.install_syntax_prelude();
   c.rebuild_protocols(NULL);
   c.import_protocols = 1;
   c.conforms = {};

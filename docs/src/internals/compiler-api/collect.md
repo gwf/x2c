@@ -27,6 +27,7 @@ Source-ordered shallow symbol collection and replay.
 | [`Compiler.include_typedef_names`](#Compiler.include_typedef_names) | The typedef names published by the files that the current unit's include of `target` reaches, including its transitive includes. |
 | [`Compiler.included_compile_time_effects`](#Compiler.included_compile_time_effects) | Prepares included compile-time effects after full parsing resets macros. |
 | [`Compiler.install_included_effects`](#Compiler.install_included_effects) | Installs the definitions of each include among the directives before the cursor. |
+| [`Compiler.install_syntax_prelude`](#Compiler.install_syntax_prelude) | Installs the syntax prelude's macros and keyword aliases into `c`'s macro state once. |
 | [`Compiler.interface_text`](#Compiler.interface_text) | Returns the compiler's own collected contribution as interface text, or NULL when the unit has not collected its symbols or the compiler's identity is unknown, since no compiler could replay that interface. |
 | [`Compiler.is_prelude_source`](#Compiler.is_prelude_source) | Reports whether the canonical `path` is a compiler prelude source. |
 | [`Compiler.linked_meta_definitions_current`](#Compiler.linked_meta_definitions_current) | Reports whether a provider's linked definition hashes still match. |
@@ -149,7 +150,7 @@ Source: `src/collect/interfaces.x:26`
 Selects a source file's own package, as its standalone translation does.
 A cold provider does not register an import in its including unit.
 
-Source: `src/collect/walk.x:363`
+Source: `src/collect/walk.x:438`
 
 <a id="Compiler.declared_adoptions"></a>
 #### Compiler.declared_adoptions
@@ -223,7 +224,7 @@ The ordered cache walk counts each file once and groups effects by the
 canonical path of the unit's direct include. The parser installs those
 effects when it reaches that include.
 
-Source: `src/collect/walk.x:600`
+Source: `src/collect/walk.x:675`
 
 <a id="Compiler.install_included_effects"></a>
 #### Compiler.install_included_effects
@@ -233,7 +234,18 @@ Source: `src/collect/walk.x:600`
 Installs the definitions of each include among the directives before
 the cursor.
 
-Source: `src/collect/walk.x:646`
+Source: `src/collect/walk.x:721`
+
+<a id="Compiler.install_syntax_prelude"></a>
+#### Compiler.install_syntax_prelude
+
+`void Compiler.install_syntax_prelude(Compiler c)`
+
+Installs the syntax prelude's macros and keyword aliases into `c`'s
+macro state once. A later file walk with the same macros, whose keyword
+aliases start empty, merges the aliases again.
+
+Source: `src/collect/walk.x:135`
 
 <a id="Compiler.interface_text"></a>
 #### Compiler.interface_text
@@ -255,7 +267,7 @@ Source: `src/collect/interfaces.x:272`
 
 Reports whether the canonical `path` is a compiler prelude source.
 
-Source: `src/collect/walk.x:68`
+Source: `src/collect/walk.x:69`
 
 <a id="Compiler.linked_meta_definitions_current"></a>
 #### Compiler.linked_meta_definitions_current
@@ -388,7 +400,7 @@ Source: `src/collect/interfaces.x:237`
 Returns the compiler-owned prelude sources relative to its home. Their
 runtime implementations are already linked into the shipped binaries.
 
-Source: `src/collect/walk.x:51`
+Source: `src/collect/walk.x:52`
 
 <a id="Compiler.publish_inline_types"></a>
 #### Compiler.publish_inline_types
@@ -474,7 +486,7 @@ Source: `src/collect/declarations.x:184`
 The file the include of `target` from `includer_dir` names, searched as
 collection searches `dirs`, or NULL.
 
-Source: `src/collect/walk.x:455`
+Source: `src/collect/walk.x:530`
 
 ## Design notes
 

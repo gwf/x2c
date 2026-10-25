@@ -69,13 +69,21 @@ static Var _symbol_set(List values) {
   return expression;
 }
 
-static List _native_targets(void) => Compiler.native_meta_targets(NULL, 0);
+static List _native_targets(void) {
+  Array rows = [];
+  foreach (List row in Compiler.native_meta_targets(NULL, 0))
+    if (!_builtin_algorithm(row.car())) rows.push(row);
+  return rows.list_free();
+}
+
+/* An `_x2c_` name is a built-in algorithm, which no C function of that
+   name implements. */
+static int _builtin_algorithm(String name) => name.startswith("_x2c_");
 
 /* `leading`, the rows of one target inventory, then `trailing`. The
    compiler's own operations are its `x2c_`, `Code_`, and `Type_` targets;
    runtime Lisp binds the others directly, and the compiler also binds
-   those that take a callback. An `_x2c_` name is a built-in algorithm,
-   which no C function of that name implements. */
+   those that take a callback. */
 static List _native_rows(Symbol inventory, List leading, List trailing) {
   Array rows = auto leading;
   foreach (List row in Compiler.native_meta_targets(
@@ -83,7 +91,7 @@ static List _native_rows(Symbol inventory, List leading, List trailing) {
     String name = row.car();
     int own = name.startswith("x2c_") || name.startswith("Code_") ||
               name.startswith("Type_");
-    if (!name.startswith("_x2c_") && own == (inventory == <compiler>))
+    if (!_builtin_algorithm(name) && own == (inventory == <compiler>))
       rows.push(row);
   }
   foreach (Var row in trailing) rows.push(row);
