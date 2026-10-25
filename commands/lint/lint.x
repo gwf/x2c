@@ -27,8 +27,8 @@ Rule
 
 /** One file under lint. `partner` maps each bracket or interpolated-string
     token to its match, or -1; `quoted` is 1 for a token inside a quoted
-    Lisp form and 2 inside an interpolated string, where `${...}` and
-    `@{...}` return to code, 0; and `first` maps each line to its first
+    List and 2 inside an interpolated string, where `$(...)`, `@(...)`,
+    and `${...}` return to code, 0; and `first` maps each line to its first
     non-space token, or -1. `layout` is set for a unit in the indentation
     syntax, where rules about braces, semicolons, and wrapped statements do
     not apply. `edits` holds the replacements that fixable findings
@@ -210,10 +210,8 @@ int lint_closes(Token t) =>
    `outer` for a bracket that keeps the enclosing state. */
 static int _quoting(Lint l, int at, int outer):
   String text = l.tokens[at].text
-  int after_at = at && l.tokens[at - 1].text == "@"
-  if text == "%(" || text == "$(" || text == "@(" ||
-      text == "(" && after_at: return 1
-  if text == "${" || text == "{" && after_at: return 0
+  if text == "%(": return 1
+  if text == "$(" || text == "@(" || text == "${": return 0
   return outer
 
 /* Invalid directives remain visible even when another rule is selected. */

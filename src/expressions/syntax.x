@@ -610,11 +610,11 @@ List Compiler.parse_primary(Compiler c) {
   List slot = c.try_parse_macro_slot(<expression>);
   if (slot) return slot;
   switch (c.peek(0)) {
-    case <"$(">: case <"@(">: return c.reject_lisp_form();
     case <lit-char*>:  return _parse_c_string_literals(c);
     case <$>:
-      return c.peek(1) == <!> ? c.parse_macro_quotation()
-                              : c.try_parse_macro_expression();
+      if (c.peek(1) == <!>) return c.parse_macro_quotation();
+      if ((c.token + 1).type == <(>) return c.parse_evaluated_list();
+      return c.try_parse_macro_expression();
     case <ident>:      return _parse_ident_primary(c);
     /* The keyword pass keeps `in` between tokens that can end and begin
        operands, as after a cast or a condition. An operand never begins

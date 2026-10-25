@@ -151,27 +151,12 @@ static void tokenizer_list_mode_bare_at_is_an_atom(void) {
   EXPECT_INT_EQ(tokenizer.status(), <ok>);
 }
 
-static void tokenizer_parenthesized_forms_stay_in_literal_modes(void) {
-  Tokenizer tokenizer = Tokenizer.new(
-    "%(a $(call(1)) @(tail()) c); %\"x$(call())y\"", <x2c>);
-  tokenizer.scan();
-  Symbol expected[] = {
-    <"%(">, <lit-atom>, <$>, <(>, <lit-atom>, <(>, <lit-int>, <)>,
-    <)>, <@>, <(>, <lit-atom>, <(>, <)>, <)>, <lit-atom>, <)>, <;>,
-    <"%\"">, <segment>, <$>, <segment>, <"\"">, <eof>
-  };
-  for (int i = 0; i < 24; i++)
-    EXPECT_INT_EQ(tokenizer.next().type, expected[i]);
-  EXPECT_INT_EQ(tokenizer.status(), <ok>);
-}
-
-
 static void tokenizer_prefix_splices_keep_mode_and_positions(void) {
   Tokenizer tokenizer = Tokenizer.new(
-    "@rows; @(list $rows); %[@rows]; %{@rows}; @=", <x2c>);
+    "@rows; %(@(list) $rows); %[@rows]; %{@rows}; @=", <x2c>);
   tokenizer.scan();
   Symbol expected[] = {
-    <@>, <ident>, <;>, <"@(">, <ident>, <$>, <ident>, <)>, <;>,
+    <@>, <ident>, <;>, <"%(">, <"@(">, <ident>, <)>, <$>, <ident>, <)>, <;>,
     <"%[">, <@>, <ident>, <]>, <;>,
     <"%{">, <@>, <ident>, <}>, <;>, <@>, <=>, <eof>
   };
@@ -183,8 +168,8 @@ static void tokenizer_prefix_splices_keep_mode_and_positions(void) {
       EXPECT_INT_EQ(token.len, 1);
       EXPECT_STR_EQ(token.text, "@");
     }
-    if (i == 3) {
-      EXPECT_INT_EQ(token.pos, 7);
+    if (i == 4) {
+      EXPECT_INT_EQ(token.pos, 9);
       EXPECT_INT_EQ(token.len, 2);
       EXPECT_STR_EQ(token.text, "@(");
     }
@@ -193,18 +178,18 @@ static void tokenizer_prefix_splices_keep_mode_and_positions(void) {
 }
 
 
-static void tokenizer_braced_literal_unquote_modes(void) {
+static void tokenizer_grouped_literal_unquote_modes(void) {
   Tokenizer tokenizer = Tokenizer.new(
-    "%(a ${call(1, %(b))} @{t()} \"x${call()}y\" c); %\"x${call()}y @{t}\"",
+    "%(a $(call(1, %(b))) @(t()) \"x$(call())y\" c); %\"x$(call())y @(t)\"",
     <x2c>);
   tokenizer.scan();
   Symbol expected[] = {
-    <"%(">, <lit-atom>, <"${">, <ident>, <(>, <lit-int>, <,>,
-    <"%(">, <lit-atom>, <)>, <)>, <"}">,
-    <"@{">, <ident>, <(>, <)>, <"}">,
-    <"%\"">, <segment>, <"${">, <ident>, <(>, <)>, <"}">,
+    <"%(">, <lit-atom>, <"$(">, <ident>, <(>, <lit-int>, <,>,
+    <"%(">, <lit-atom>, <)>, <)>, <)>,
+    <"@(">, <ident>, <(>, <)>, <)>,
+    <"%\"">, <segment>, <"$(">, <ident>, <(>, <)>, <)>,
     <segment>, <"\"">, <lit-atom>, <)>, <;>,
-    <"%\"">, <segment>, <"${">, <ident>, <(>, <)>, <"}">,
+    <"%\"">, <segment>, <"$(">, <ident>, <(>, <)>, <)>,
     <segment>, <"\"">, <eof>
   };
   for (int i = 0; i < 39; i++)
@@ -213,17 +198,35 @@ static void tokenizer_braced_literal_unquote_modes(void) {
 }
 
 
+/* In code, `$(` and `${` are two tokens, as in C; in quoted data `${`
+   opens an evaluated Map whose keys and values are code. */
+static void tokenizer_evaluated_collections(void) {
+  Tokenizer tokenizer = Tokenizer.new(
+    "$(a, (b)); ${k: v}; %(x ${k: %(y)} z)", <x2c>);
+  tokenizer.scan();
+  Symbol expected[] = {
+    <$>, <(>, <ident>, <,>, <(>, <ident>, <)>, <)>, <;>,
+    <$>, <"{">, <ident>, <:>, <ident>, <"}">, <;>,
+    <"%(">, <lit-atom>, <"${">, <ident>, <:>, <"%(">, <lit-atom>, <)>,
+    <"}">, <lit-atom>, <)>, <eof>
+  };
+  for (int i = 0; i < sizeof(expected) / sizeof(*expected); i++)
+    EXPECT_INT_EQ(tokenizer.next().type, expected[i]);
+  EXPECT_INT_EQ(tokenizer.status(), <ok>);
+}
+
+
 static void tokenizer_typed_capture_parentheses(void) {
   Tokenizer tokenizer = Tokenizer.new(
     "%(?($T value) ?(int (*)(String) fn) ? (String text) "
-    "${call()} @{tail()}); int after;", <x2c>);
+    "$(call()) @(tail())); int after;", <x2c>);
   tokenizer.scan();
   Symbol expected[] = {
     <"%(">, <"?(">, <$>, <ident>, <ident>, <)>,
     <"?(">, <int>, <(>, <*>, <)>, <(>, <ident>, <)>, <ident>, <)>,
     <lit-atom>, <(>, <lit-atom>, <lit-atom>, <)>,
-    <"${">, <ident>, <(>, <)>, <"}">,
-    <"@{">, <ident>, <(>, <)>, <"}">, <)>, <;>, <int>, <ident>, <;>,
+    <"$(">, <ident>, <(>, <)>, <)>,
+    <"@(">, <ident>, <(>, <)>, <)>, <)>, <;>, <int>, <ident>, <;>,
     <eof>
   };
   for (int i = 0; i < sizeof(expected) / sizeof(*expected); i++)
@@ -326,9 +329,9 @@ void tokenizer_suite(void) {
   $test.run(tokenizer_postfix_update_ends_operand);
   $test.run(tokenizer_percent_after_closing_delimiter);
   $test.run(tokenizer_list_mode_bare_at_is_an_atom);
-  $test.run(tokenizer_parenthesized_forms_stay_in_literal_modes);
   $test.run(tokenizer_prefix_splices_keep_mode_and_positions);
-  $test.run(tokenizer_braced_literal_unquote_modes);
+  $test.run(tokenizer_grouped_literal_unquote_modes);
+  $test.run(tokenizer_evaluated_collections);
   $test.run(tokenizer_typed_capture_parentheses);
   $test.run(tokenizer_list_reader_prefixes);
   $test.run(tokenizer_symbol_set_quotes_hold_the_terminator);

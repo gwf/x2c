@@ -85,7 +85,7 @@ void Tokenizer.scan(Tokenizer t) {
 static int _step(Tokenizer t) {
   switch (_scan_mode(t)) {
     case <x2c>: case <x2c-par>: return _language_tokens(t);
-    case <array>: case <map>: case <list>: case <lisp>: case <macro-lisp>:
+    case <array>: case <map>: case <list>: case <lisp>:
       return _lisp_tokens(t);
     case <symbol-set>: return _common_tokens(t) || _symbol_set_tokens(t);
     case <string>: return _string_tokens(t);
@@ -101,11 +101,11 @@ static int _end_of_file(Tokenizer t) {
 }
 
 /* x2c code tries C trivia and numbers, `$`/`@` forms, and `%`/`<` literals
-   before C strings, identifiers, and operators. */
+   before C strings, identifiers, and operators. In code, a `(` or `{` after
+   `$` or `@` is its own token, as it is in C. */
 static int _language_tokens(Tokenizer t) =>
   _common_tokens(t) ||
-  ((t.text[t.pos] == '$' || t.text[t.pos] == '@') &&
-   (_embedded_lisp(t) || _named_reference(t))) ||
+  ((t.text[t.pos] == '$' || t.text[t.pos] == '@') && _named_reference(t)) ||
   _percent_tokens(t) || _angle_symbol_literal(t) || _c_tokens(t);
 
 static int _common_tokens(Tokenizer t) {
@@ -150,13 +150,6 @@ static int _number(Tokenizer tokenizer) {
   if (len == 0) return 0;
   type = (type == <int>) ? <lit-int> : <lit-float>;
   return tokenizer.tokenize(len, type);
-}
-
-/* Scan a `$(` or `@(` form as Lisp text until its closing parenthesis. */
-static int _embedded_lisp(Tokenizer tokenizer) {
-  char *text = tokenizer.text + tokenizer.pos;
-  if ((text[0] != '$' && text[0] != '@') || text[1] != '(') return 0;
-  return _operator(tokenizer, 2);
 }
 
 /* Consume the sigil before calling scan_identifier, whose input must begin
@@ -230,21 +223,22 @@ static int _lisp_tokens(Tokenizer t) {
 
 /* A token its first characters decide: `void` in a collection, a list's
    `?(` capture and bare `@` atoms, and the `$` and `@` escapes into x2c.
-   Lisp source escapes only `$name`; Array/Map @ references reach template
-   slots, without adding runtime splicing. */
+   Lisp source escapes only `$name`. In quoted data, `$(` and `@(` open one
+   x2c expression; Array/Map @ references reach template slots, without
+   adding runtime splicing. */
 static int _lisp_prefix(Tokenizer t, int list, int collection) {
   char *text = t.text + t.pos;
   if (collection && !strncmp(text, "void", 4) && scan_identifier(text) == 4)
     return t.tokenize(4, <void>);
   if (list && text[0] == '?' && text[1] == '(') return _operator(t, 2);
   if (text[0] == '$' && !list && !collection) return _named_reference(t);
-  /* Bare @ and @= are atom data; @name and @{ splice a runtime List. */
+  /* Bare @ and @= are atom data; @name and @( splice a runtime List. */
   if (list && text[0] == '@' &&
       (!text[1] || text[1] == '=' || strchr(" \t\n\v\f\r)", text[1])))
     return t.tokenize(text[1] == '=' ? 2 : 1, <lit-atom>);
-  if ((list && (text[0] == '$' || text[0] == '@')) ||
-      (collection && (text[0] == '$' || text[0] == '@')))
-    return text[1] == '{' ? _operator(t, 2) : _named_reference(t);
+  if ((list || collection) && (text[0] == '$' || text[0] == '@'))
+    return text[1] == '{' || text[1] == '(' ? _operator(t, 2)
+                                            : _named_reference(t);
   return 0;
 }
 
@@ -321,7 +315,7 @@ static int _symbol_set_tokens(Tokenizer t) {
 static int _string_tokens(Tokenizer t) {
   char *text = t.text + t.pos;
   if (text[0] == '$' && text[1] != '$')
-    return text[1] == '{'
+    return text[1] == '{' || text[1] == '('
          ? _operator(t, 2)
          : _named_reference(t);
   if (text[0] == '"')  return _operator(t, 1);
@@ -400,7 +394,6 @@ static int _operator(Tokenizer t, int len) {
         case <"{">:     push = <x2c>; break;
         case <"%{">:    push = <map>; break;
         case <"%[">:    push = <array>; break;
-        case <"$(">: case <"@(">: push = <macro-lisp>; break;
         // A stray `}` at file scope is the parser's to diagnose or skip.
         case <"}">:      pop = t.modes.len() > 1; break;
         case <"%(">:    push = <list>; break;
@@ -412,6 +405,7 @@ static int _operator(Tokenizer t, int len) {
       switch (op) {
         case <"(">: push = <list>; break;
         case <"${">: push = <x2c>; break;
+        case <"$(">: case <"@(">: push = <x2c-par>; break;
         case <"?(">: if (mode == <list>) push = <x2c-par>; break;
         case <"@{">: push = <x2c>; break;
         case <"{">: push = <map>; token_type = <"%{">; break;
@@ -427,13 +421,8 @@ static int _operator(Tokenizer t, int len) {
     case <string>:
       switch (op) {
         case <"${">: push = <x2c>; break;
+        case <"$(">: push = <x2c-par>; break;
         case <"\"">: pop = 1; token_len = 1; token_type = <"\"">; break;
-      }
-      break;
-    case <macro-lisp>:
-      switch (op) {
-        case <"(">: push = <macro-lisp>; break;
-        case <")">: pop = 1; break;
       }
       break;
   }
@@ -799,7 +788,7 @@ static int _bare_do(_Layout &l, _LayoutLine line, int j) {
 }
 
 /* A statement line ends with `;` unless it already does or it is an enum
-   member, one whole Lisp form, or a bare macro hole. The leading `@$` marks
+   member or a bare macro hole. The leading `@$` marks
    a decorator line, which takes none. */
 static String _end_statement(_Layout &l, _LayoutLine line) {
   _one_line_body(l, line);
@@ -808,8 +797,7 @@ static String _end_statement(_Layout &l, _LayoutLine line) {
     _edit(l, line.first).type = <space>;
     return NULL;
   }
-  if (l.sig[line.last].type == <;> || l.enums[l.top] || _lisp_form(l, line) ||
-      _hole(l, line))
+  if (l.sig[line.last].type == <;> || l.enums[l.top] || _hole(l, line))
     return NULL;
   return ";";
 }
@@ -828,19 +816,11 @@ static void _one_line_body(_Layout &l, _LayoutLine line) {
   }
 }
 
-static int _lisp_form(_Layout &l, _LayoutLine line) {
-  if (l.sig[line.first].type != <"$("> &&
-      l.sig[line.first].type != <"@(">) return 0;
-  for (int m = line.first + 1; m < line.last; m++)
-    if (l.depths[m] <= 0) return 0;
-  return 1;
-}
-
 static int _hole(_Layout &l, _LayoutLine line) {
   int last = line.last;
   for (int first = line.first; first < last; first++) {
     if (first != line.first && l.sig[first - 1].type != <")">) continue;
-    if (l.sig[first].type != <@> && l.sig[first].type != <"@(">) continue;
+    if (l.sig[first].type != <@>) continue;
     if (l.sig[last].type == <")"> || l.sig[last].type == <"}">) return 1;
   }
   return l.sig[last].type == <ident> && last > line.first &&

@@ -274,11 +274,6 @@ static macro Stmt $fail.macros_macro_pattern_arity(
     %"macro pattern '${$name}' takes ${$expected} argument patterns",
     $origin, NULL);
 
-static macro Stmt $fail.macros_lisp_removed(Expr $c, Expr $origin) =>
-  $c.report_error(
-    <parse>, "compile-time Lisp forms are not supported", $origin,
-    %("write the compile-time code as an x2c meta function"));
-
 static macro Stmt $fail.macros_meta_expr(
   Expr $c, Expr $origin, Expr $value) =>
   $c.report_error(
@@ -330,12 +325,6 @@ module String _definition_note(List definition) {
 void Compiler.report_meta_failure(
   Compiler c, Token invocation, List error, String source) {
   $fail.macros_meta_failed(c, invocation, source, error);
-}
-
-/** Reports the compile-time Lisp form at the cursor, which x2c no longer
-    evaluates. */
-List Compiler.reject_lisp_form(Compiler c) {
-  $fail.macros_lisp_removed(c, c.token);
 }
 
 /* A template names a hole, projection, or replacement variable that it

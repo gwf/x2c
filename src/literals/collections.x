@@ -129,10 +129,12 @@ List Compiler.parse_array_literal(Compiler c) {
 static List _parse_array_element(Compiler c) {
   List slot = c.try_parse_macro_slot(<argument>);
   if (slot) return slot;
-  if (c.peek(0) == <"${"> && c.token.len == 2 && c.peek(1) == <@>) {
+  if (((c.peek(0) == <"${"> && c.token.len == 2) || c.peek(0) == <"$(">) &&
+      c.peek(1) == <@>) {
+    Symbol close = c.peek(0) == <"$("> ? <)> : <"}">;
     c.next();
     slot = c.try_parse_macro_slot(<argument>);
-    c.expect(<"}">);
+    c.expect(close);
     return slot;
   }
   return _parse_element(c);
@@ -179,17 +181,18 @@ static List _parse_quoted_entry(Compiler c) {
   Token origin = c.token;
   List slot = c.try_parse_macro_slot(<map-entry>);
   if (slot) return slot;
-  if (c.peek(0) != <"${"> || c.token.len != 2)
+  if (c.peek(0) != <"$("> && (c.peek(0) != <"${"> || c.token.len != 2))
     return _entry_value(c, _parse_element(c), origin);
+  Symbol close = c.peek(0) == <"$("> ? <)> : <"}">;
   c.next();
   List entry = c.try_parse_macro_slot(<map-entry>);
   if (!entry) entry = c.try_parse_macro_target_at(<map-entry>);
   if (entry) {
-    c.expect(<"}">);
+    c.expect(close);
     return entry;
   }
   List key = c.parse_expression();
-  c.expect(<"}">);
+  c.expect(close);
   return _entry_value(c, key, origin);
 }
 

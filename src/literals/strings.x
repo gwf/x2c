@@ -35,7 +35,7 @@ static List _parse_string_segment(Compiler c) {
   switch (c.peek(0)) {
     case <segment>: return _parse_text_segment(c);
     case <$>:       return _parse_named_segment(c);
-    case <"${">:    return _parse_braced_segment(c);
+    case <"${">: case <"$(">: return _parse_grouped_segment(c);
     default:
       $fail.literals_string_segment(c, c.token);
   }
@@ -59,12 +59,13 @@ static List _parse_named_segment(Compiler c) {
   return %(segvar $expr);
 }
 
-static List _parse_braced_segment(Compiler c) {
+static List _parse_grouped_segment(Compiler c) {
+  Symbol close = c.peek(0) == <"$("> ? <)> : <"}">;
   c.next();
   List expr = c.parse_expression();
   c.check_explicit_converter(expr, %("String"), 1);
   expr = c.convert_segment_to_string(expr);
-  c.expect(<"}">);
+  c.expect(close);
   return %(segexp $expr);
 }
 

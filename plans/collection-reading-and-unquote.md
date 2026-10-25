@@ -1,12 +1,10 @@
 # Collection reading and parenthesized unquote
 
-> Status: blocked
+> Status: in progress
 > Specification and implementation plan approved in discussion, 2026-10-25.
-> Implementation waits for the compiler Lisp syntax removal in
-> [Native compiler with runtime Lisp](native-compiler-runtime-lisp.md).
-> Assume that change has removed compiler `$(...)` and `@(...)` evaluation
-> and migrated their consumers before beginning this implementation.
-> This delivery records the plan only. No language changes are implemented.
+> Its prerequisite, [Native compiler with runtime Lisp](native-compiler-runtime-lisp.md),
+> landed on dev in `ff3aba2aa` with cleanup `735e72f73`. Compiler `$(...)`
+> and `@(...)` evaluation is gone; implementation starts from `735e72f73`.
 
 ## Result and scope
 

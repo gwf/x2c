@@ -18,10 +18,9 @@ List Compiler.try_parse_macro_slot(Compiler c, Symbol role) {
     return _meta_call_slot(c, role);
   String name;
   if (role != <expression> && role != <statement> &&
-      c.peek(0) == <$> && _scan_name(c, name).type == <(> &&
+      c.peek(0) == <$> && _scan_name(c, name).type == <(> && name &&
       !c.peek_macro_hole() && !_peek_invocation(c, _slot_position(role)))
     return _meta_call_slot(c, role);
-  if (c.peek(0) == <"$("> || c.peek(0) == <"@(">) return c.reject_lisp_form();
   return _hole_slot(c, role);
 }
 
@@ -55,6 +54,7 @@ static List _hole_slot(Compiler c, Symbol role) {
   if (!(role in untyped_roles)) {
     Symbol kind = hole.assoc(<kind>);
     if (!kind && c.peek(0) != <@> && c.peek(0) != <"@{"> &&
+        c.peek(0) != <"@("> &&
         !_quoted_role(c, role))
       return NULL;
     if (kind && !_kind_accepts_role(kind, role)) return NULL;
@@ -74,14 +74,15 @@ static const SymbolSet sequence_roles =
 static const SymbolSet untyped_roles = %<<expression argument type>>;
 
 /** Returns the registered hole descriptor for a named or expression hole.
-    `$NAME` and `${expression}` insert one value; `@NAME` and `@{expression}`
+    `$NAME` and `$(expression)` insert one value; `@NAME` and `@(expression)`
     splice a sequence. Returns NULL without consuming a non-hole spelling.
 */
 List Compiler.peek_macro_hole(Compiler c) {
   Symbol prefix = c.peek(0);
-  if (prefix == <"@{">) return _expression_hole(c, c.token);
+  if (prefix == <"@{"> || prefix == <"@(">) return _expression_hole(c, c.token);
   if (prefix != <$> && prefix != <@>) return NULL;
-  if (c.peek(1) == <"{">) return _expression_hole(c, c.token);
+  if (c.peek(1) == <"{"> || c.peek(1) == <(>)
+    return _expression_hole(c, c.token);
   if (c.peek(1) != <ident>) return NULL;
   Token name = Token.skip_trivia(c.token + 1);
   List hole = _hole_record(c, Atom.intern(name.text));
@@ -92,10 +93,11 @@ List Compiler.peek_macro_hole(Compiler c) {
     Consumes neither its `$` or `@` prefix nor its optional braces.
 */
 Token Compiler.after_hole(Compiler c) {
-  if (c.peek(0) == <"@{">) return c.token.after_group();
+  if (c.peek(0) == <"@{"> || c.peek(0) == <"@(">)
+    return c.token.after_group();
   Token next = Token.skip_trivia(c.token + 1);
-  return next.type == <"{"> ? next.after_group()
-                           : Token.skip_trivia(next + 1);
+  return next.type == <"{"> || next.type == <(> ? next.after_group()
+                                                : Token.skip_trivia(next + 1);
 }
 
 /* Consumes a hole filling `role` and returns its projection. */
@@ -105,8 +107,8 @@ module List _parse_hole(Compiler c, Symbol role) {
   if (!hole) _unbound(c, _hole_name_token(c, token.type).text, token);
   c.token = c.after_hole();
   Atom name = _hole_name(hole);
-  int sequence = token.type == <@> ||
-                 token.type == <"@{">;
+  int sequence = token.type == <@> || token.type == <"@{"> ||
+                 token.type == <"@(">;
   if (sequence != hole.assoc(<sequence>).int())
     _cardinality_error(c, name.str(), sequence, token);
   if (sequence && !(role in sequence_roles))
@@ -167,7 +169,7 @@ int Compiler.meta_call_starts_declaration(Compiler c) {
   if (c.peek(0) != <$> || _peek_invocation(c, <expression>)) return 0;
   String name;
   Token opening = _scan_name(c, name);
-  if (opening.type != <(>) return 0;
+  if (opening.type != <(> || !name) return 0;
   Token token = opening.after_group();
   return token.type == <$> || token.type == <ident> ||
          token.type == <*> || token.type == <(>;

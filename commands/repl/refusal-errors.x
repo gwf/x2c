@@ -19,7 +19,7 @@ macro Stmt $refusal.form.unsupported() =>
   _refuse("this top-level form is outside the REPL subset");
 
 macro Stmt $refusal.input.unsupported() =>
-  _refuse("preprocessor and direct Lisp input are unsupported");
+  _refuse("preprocessor input is unsupported");
 
 macro Stmt $refusal.qualifier.native() =>
   _refuse("const and volatile need native checks outside the REPL");

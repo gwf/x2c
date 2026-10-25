@@ -182,9 +182,13 @@ static Var _macro_pattern_argument(Compiler c) {
     `(expr TYPE ...)` shell.
 */
 List Compiler.try_parse_macro_pattern_insertion(Compiler c, int content) {
-  /* `%(...)` scans `${` as one token; a whole `case` pattern has two. */
-  int joined = c.peek(0) == <"${"> && c.token.len == 2;
-  if (!c.in_pattern || (!joined && (c.peek(0) != <$> || c.peek(1) != <"{">)))
+  /* `%(...)` scans `$(` as one token; a whole `case` pattern has two. */
+  int joined = (c.peek(0) == <"${"> && c.token.len == 2) ||
+               c.peek(0) == <"$(">;
+  Symbol opener = joined ? c.peek(0) : c.peek(1);
+  if (!c.in_pattern ||
+      (!joined && (c.peek(0) != <$> ||
+                   (opener != <"{"> && opener != <(>))))
     return NULL;
   Token name = Token.skip_trivia(c.token + 1);
   if (!joined) name = Token.skip_trivia(name + 1);
@@ -194,7 +198,7 @@ List Compiler.try_parse_macro_pattern_insertion(Compiler c, int content) {
   c.next();
   if (!joined) c.next();
   List derived = c.try_parse_macro_subpattern(content);
-  c.expect(<"}">);
+  c.expect(opener == <"${"> || opener == <"{"> ? <"}"> : <)>);
   return derived;
 }
 
@@ -208,9 +212,10 @@ static List _parse_splice(Compiler c) {
     List expr = _parse_named_reference(c, <@>);
     return %(splice $expr);
   }
-  if (!c.test(<"@{">)) return NULL;
+  Symbol close = c.peek(0) == <"@("> ? <)> : <"}">;
+  if (!c.test(<"@{">) && !c.test(<"@(">)) return NULL;
   List expr = c.parse_expression();
-  c.expect(<"}">);
+  c.expect(close);
   return %(splice $expr);
 }
 
@@ -219,12 +224,32 @@ module List _parse_insertion(Compiler c) {
     return _parse_named_reference(c, <$>);
   List derived = c.try_parse_macro_pattern_insertion(0);
   if (derived) return derived;
-  if (c.peek(0) != <"${"> || c.token.len != 2) return NULL;
+  Symbol close = c.peek(0) == <"$("> ? <)> : <"}">;
+  if (c.peek(0) != <"$("> && (c.peek(0) != <"${"> || c.token.len != 2))
+    return NULL;
   c.next();
   List expr = c.parse_expression();
   c.check_explicit_converter(expr, %("Var"), 0);
-  c.expect(<"}">);
+  c.expect(close);
   return expr;
+}
+
+/** Parses an evaluated List `$(a, b, ...)`: each assignment expression is
+    one element, converted to Var and consed in source order. A trailing
+    comma is allowed, and `$()` is the empty List.
+*/
+List Compiler.parse_evaluated_list(Compiler c) {
+  c.expect(<$>);
+  c.expect(<(>);
+  Array elements = auto [];
+  while (c.peek(0) != <)>) {
+    List element = c.parse_assignment();
+    c.check_explicit_converter(element, %("Var"), 0);
+    elements.push(element);
+    if (!c.test(<,>)) break;
+  }
+  c.expect(<)>);
+  return _cons_list(c, elements, %(nil));
 }
 
 module List _parse_named_reference(Compiler c, Symbol sigil) {
