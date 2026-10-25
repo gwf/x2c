@@ -19251,7 +19251,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_32(void
   _16466 = List_var(_16465);
   _16467 = String_new("src/meta-sdk/primitives.x");
   _16468 = String_var(_16467);
-  _16469 = String_new("2adecf28");
+  _16469 = String_new("cd3c6d1a");
   _16470 = String_var(_16469);
   _16471 = cons(_16470, NULL);
   _16472 = cons(_16468, _16471);
