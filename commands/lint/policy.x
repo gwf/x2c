@@ -50,11 +50,6 @@ static void _spellings(Lint l):
     if t.type != <ident>: continue
     if !l.quoted[at] && _empty_constructor(l, at):
       l.add("empty-constructor", t.line, "use the empty value literal")
-    if t.text == "x2c.ident" && l.token_is(l.prev(at), "$("):
-      l.add("x2c-ident", t.line, "review compile-time name construction")
-    if t.text == "defun" && l.token_is(l.prev(at), "$(") &&
-       (lint_under(l.path, "src") || lint_under(l.path, "lib")):
-      l.add("lisp-defun", t.line, "review Lisp work in compiler or runtime")
     if t.text == "report_error" && !l.quoted[at] && at > report_end &&
        !l.path.endswith("-reports.x") && l.token_is(next, "("):
       int stop = l.partner[next]

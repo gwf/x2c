@@ -54,8 +54,6 @@ static const Rule rules[] = {
   {"same-line-else", <style>, <violation>, "ST-1"},
   {"empty-constructor", <style>, <candidate>, "EX-1"},
   {"saved-local", <style>, <candidate>, "NM-4"},
-  {"x2c-ident", <style>, <candidate>, "LI-2"},
-  {"lisp-defun", <style>, <candidate>, "LI-1"},
   {"literal-report-error", <style>, <candidate>, "DG-1"},
   {"assignment-condition", <style>, <candidate>, "ST-4"},
   {"long-file", <style>, <candidate>, "FI-1"},

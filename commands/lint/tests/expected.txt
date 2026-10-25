@@ -182,10 +182,6 @@ commands/lint/tests/src/standard-tokens.x:26: candidate literal-report-error DG-
 commands/lint/tests/src/standard-tokens.x:27: candidate assignment-condition ST-4: review assignment in a condition outside a read loop
 commands/lint/tests/src/standard-tokens.x:28: candidate assignment-condition ST-4: review assignment in a condition outside a read loop
 commands/lint/tests/src/standard-tokens.x:29: candidate assignment-condition ST-4: review assignment in a condition outside a read loop
-commands/lint/tests/src/standard-tokens.x:35: candidate x2c-ident LI-2: review compile-time name construction
-commands/lint/tests/src/standard-tokens.x:36: candidate lisp-defun LI-1: review Lisp work in compiler or runtime
-exit 0
-# Lisp outside compiler and runtime
 exit 0
 # diagnostic wording owned by report macros
 exit 0
@@ -207,7 +203,6 @@ exit 0
 section-401.x:1: candidate long-section FI-5: labeled section spans 401 lines
 exit 0
 # malformed trailing identifiers
-exit 1
 exit 1
 exit 1
 exit 1

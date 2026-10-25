@@ -32,9 +32,6 @@ int standard_tokens(int ready, State &state) {
   return count;
 }
 
-macro Expression $fixture.ident() => $(x2c.ident "standard_tokens");
-$(defun chosen_lisp (n) (+ n 1))
-
 int standard_refs(int old_parameter, State &state) {
   String text = "$(x2c.ident), $(defun), Array.new(), } else";
   return old_parameter + state.saved_field + state.previous_field + text.len();

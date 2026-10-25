@@ -16,8 +16,8 @@ typedef int Reading;
 static int Reading.amount(Reading n) => n;
 protocol Metric(Reading);
 
-$(def held_function (quote _quoted_signal))
-macro Expression $fixture.reference() => $(x2c.ident "_ident_signal");
+macro Expression $fixture.held() => %(_quoted_signal);
+macro Expression $fixture.reference() => $x2c_ident("_ident_signal");
 
 int static_refs(void) {
   int (*operation)(int) = _value_signal;

@@ -31,7 +31,6 @@ for lines in 400 401; do
     for (i = 3; i < lines; i++) print "// filler"
   }' >"$work/section-$lines.x"
 done
-cp "$tests/src/standard-tokens.x" "$work/outside.x"
 cp "$tests/src/standard-report.x" "$work/fixture-reports.x"
 
 run() {
@@ -95,10 +94,8 @@ run() {
   (cd "$work" && run --rule contains-in --fix contains-indent.x)
   echo "# standard adoption token and declaration signals"
   run --rule same-line-else --rule empty-constructor --rule saved-local \
-    --rule x2c-ident --rule lisp-defun --rule literal-report-error \
-    --rule assignment-condition "$tests/src/standard-tokens.x"
-  echo "# Lisp outside compiler and runtime"
-  (cd "$work" && run --rule lisp-defun outside.x)
+    --rule literal-report-error --rule assignment-condition \
+    "$tests/src/standard-tokens.x"
   echo "# diagnostic wording owned by report macros"
   run --rule literal-report-error "$tests/src/standard-report.x"
   (cd "$work" && run --rule literal-report-error fixture-reports.x)
@@ -114,9 +111,9 @@ run() {
   (cd "$work" && run --rule long-file file-1500.x file-1501.x)
   (cd "$work" && run --rule long-section section-400.x section-401.x)
   echo "# malformed trailing identifiers"
-  for word in String Array Map x2c report_error; do
+  for word in String Array Map report_error; do
     printf '%s\n' "$word" >"$work/trailing.x"
-    (cd "$work" && run --rule empty-constructor --rule x2c-ident \
+    (cd "$work" && run --rule empty-constructor \
       --rule literal-report-error trailing.x)
   done
   echo "# compound managed declarations"

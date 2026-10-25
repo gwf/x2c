@@ -1276,8 +1276,6 @@ guards trustworthy.
 | --- | --- | --- |
 | raw `case %(` on a head with a grammar form | MA-7 | none |
 | new `.xlisp` | LI-1 | none |
-| `$(defun` in `src/` or `lib/` | LI-1 | `lisp-defun` |
-| `$(x2c.ident` in meta code | LI-2 | `x2c-ident` |
 | literal `report_error(` wording | DG-1 | `literal-report-error` |
 | string-keyed diagnostic dispatch | DG-1 | none |
 | `Var` local with one static type | VT-1 | none |
