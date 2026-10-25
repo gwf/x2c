@@ -12,6 +12,7 @@
 
 #pragma once
 #include "x2c.x"
+#include "datum-reader.x"
 
 #include <limits.h>
 #include <stdio.h>
