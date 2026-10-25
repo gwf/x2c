@@ -2,10 +2,12 @@
 #include "x2c.x"
 
 /* A Map from alternating keys and values. */
-$(defun cursor_map (flat)
-  (if (null? flat) (Map.new)
-    (let ((map (cursor_map (cddr flat))))
-      (begin (Map.setindex map (car flat) (cadr flat)) map))))
+meta static Map cursor_map(List flat) {
+  Array items = flat;
+  Map map = {};
+  for (int i = 0; i + 1 < items.len(); i += 2) map[items[i]] = items[i + 1];
+  return map;
+}
 
 meta int cursor_array(Array values) {
   int total = 0;
@@ -83,27 +85,32 @@ meta int cursor_address(Array values) {
   return total;
 }
 
+/* A `$` call passes Lists; these build the Array or Map each walk reads. */
+meta static int array_walk(List items) => cursor_array(items);
+meta static int nested_walk(List items, List flat) =>
+  cursor_nested(items, cursor_map(flat));
+meta static int mutate_walk(List items) => cursor_mutate(items);
+meta static int snapshot_walk(List flat) => cursor_snapshot(cursor_map(flat));
+meta static int after_array_walk(List items) => cursor_after_array(items);
+meta static int after_map_walk(List flat) => cursor_after_map(cursor_map(flat));
+meta static int address_walk(List items) => cursor_address(items);
+
 int main(void) {
   Array values = [1, 2, 3, 4, 5], empty = [];
   Map weights = {1: 2, 3: 4};
   Array changing = [1, 2];
-  printf("array %d %d\n", $(cursor_array (List.array '(1 2 3 4 5))),
-         cursor_array(values));
-  printf("empty %d %d\n", $(cursor_array (List.array '())),
-         cursor_array(empty));
-  printf("nested %d %d\n",
-         $(cursor_nested (List.array '(1 2 3 4 5)) (cursor_map '(1 2 3 4))),
+  printf("array %d %d\n", $array_walk(%(1 2 3 4 5)), cursor_array(values));
+  printf("empty %d %d\n", $array_walk(%()), cursor_array(empty));
+  printf("nested %d %d\n", $nested_walk(%(1 2 3 4 5), %(1 2 3 4)),
          cursor_nested(values, weights));
-  printf("mutate %d %d\n", $(cursor_mutate (List.array '(1 2))),
-         cursor_mutate(changing));
-  printf("snapshot %d\n", $(cursor_snapshot (cursor_map '(1 2 3 4))));
-  printf("after-array %d %d\n",
-         $(cursor_after_array (List.array '(1 2 3 4 5))),
+  printf("mutate %d %d\n", $mutate_walk(%(1 2)), cursor_mutate(changing));
+  printf("snapshot %d\n", $snapshot_walk(%(1 2 3 4)));
+  printf("after-array %d %d\n", $after_array_walk(%(1 2 3 4 5)),
          cursor_after_array(values));
-  printf("after-map %d\n", $(cursor_after_map (cursor_map '(1 2 3 2))));
-  printf("after-list %d %d\n", $(cursor_after_list '(1 2 3)),
+  printf("after-map %d\n", $after_map_walk(%(1 2 3 2)));
+  printf("after-list %d %d\n", $cursor_after_list(%(1 2 3)),
          cursor_after_list(%(1 2 3)));
-  printf("address %d %d\n", $(cursor_address (List.array '(1 2 3 4 5))),
+  printf("address %d %d\n", $address_walk(%(1 2 3 4 5)),
          cursor_address(values));
   values.free();
   empty.free();
