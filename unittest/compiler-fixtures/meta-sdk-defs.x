@@ -4,9 +4,7 @@
 
     Each macro body below does nothing but call a `meta` function, and the
     `meta` functions do the work through `Meta`, the compiler surface
-    `lib/meta.x` declares. Before that surface existed the same bodies had to
-    be written in compile-time Lisp, because `Type.fields`
-    and the rest were reachable only from there.
+    `lib/meta.x` declares.
 
     A parameter declared `TypeInfo` receives the description of its argument's
     type, which the compiler computes at the `$` call, so reading the fields

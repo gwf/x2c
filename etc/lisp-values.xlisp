@@ -1,6 +1,6 @@
 // x2c value operations for Lisp.
-// Load etc/init.xlisp first. The compiler loads this layer into every
-// compile-time Lisp session; an embedding program loads it by name.
+// Load etc/init.xlisp first. An embedding program, such as the REPL,
+// loads this layer by name.
 //
 // A Lisp value is an x2c Var: a Lisp list is a List, a Lisp string is a
 // String, a quoted name is a Symbol. These names are the library's own
