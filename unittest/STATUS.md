@@ -233,6 +233,18 @@ to unrelated child processes caused `var-chain-stack` to fail at its 256 KiB
 stack limit. The export now belongs only to `help`. The unchanged fixture
 passed six repeated nested-Make probes, and help output remains byte-identical.
 
+## Native gaps after compile-time Lisp removal
+
+- `meta-func-calls` no longer checks a lambda written as constructed
+  `(expr ("Func") (lambda ...))` syntax reaching meta-body destinations.
+  The removed `$constructed()` macro returned that syntax from a `$(quote
+  ...)` form. The native form `macro Expression $constructed() =>
+  $constructed_syntax();` expands inside each meta body to an ordinary call,
+  as the language reference documents for `$f(x)` in a `meta` body. The meta
+  helper then rejects the call: "cannot convert ("List") to ("Func")". A macro
+  template cannot spell that canonical AST directly, so the five `built-*`
+  rows have no native form. Ordinary lambda destinations remain covered.
+
 ## Outstanding Items
 
 Adding `List cached = %("stack-check"); (void) cached;` at the start of
