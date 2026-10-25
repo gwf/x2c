@@ -49,7 +49,6 @@ const darkTheme = {
         "punctuation.definition.interpolation",
         "punctuation.definition.macro.sigil",
         "punctuation.definition.macro.splice",
-        "punctuation.definition.embedded.lisp",
         "entity.name.function.macro",
         "entity.name.function.macro-alias"
       ],
@@ -120,8 +119,7 @@ function withDistinctColors(theme, name, colors) {
           "source.x2c punctuation.definition.literal",
           "source.x2c punctuation.definition.interpolation",
           "punctuation.definition.macro.sigil.x2c",
-          "punctuation.definition.macro.splice.x2c",
-          "source.x2c punctuation.definition.embedded.lisp"
+          "punctuation.definition.macro.splice.x2c"
         ],
         settings: {
           foreground: colors.keyword,

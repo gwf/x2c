@@ -486,6 +486,6 @@ only one entry, or neither entry has a resolved call path, together with the
 shortest path from each side or an explicit unresolved result.
 
 This is a parsed source graph for trusted x2c programs. Parsing executes their
-compile-time Lisp and macros. Calls introduced only by later transforms,
+meta functions and macros. Calls introduced only by later transforms,
 generated protocol adapters, C-only code, and speculative callback targets
 are outside this tool's analysis.

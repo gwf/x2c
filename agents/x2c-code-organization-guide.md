@@ -88,10 +88,11 @@ diff, digest, regex           line differences, SHA-256 digests, and
 context, thread, thread-state bounded runtime state, native workers, and
 mutex                         their coordination primitive
 scan, tokenizer               lexical scanners and the shared tokenizer
-func, lisp, lisp-targets,     native callable binding, embedded Lisp,
-lisp-init, meta, type,        its environment, the compile-time SDK,
-rewrite                       structural Type operations, and rewrite
-                              registration
+func, lisp, lisp-targets,     native callable binding, runtime Lisp and
+lisp-bindings                 the native operations its sessions bind
+meta, compiler-meta, type,    the meta function surface, compiler-private
+rewrite                       meta operations, structural Type
+                              operations, and rewrite registration
 clibc, cmath                  C prototypes declared for compile-time calls
                               and Var unboxing
 lib                           DisjointSet utility

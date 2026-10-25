@@ -4,7 +4,7 @@ navTitle: Differentiate a function
 order: 4
 slide: autodiff
 title: Differentiate a function.
-description: Generate derivatives with a compile-time Lisp decorator, then use them to fit a growth curve.
+description: Generate derivatives with a decorator written in x2c meta functions, then use them to fit a growth curve.
 source: packages/autodiff/examples/autodiff-fit.x
 output: packages/autodiff/examples/expected/autodiff-fit.stdout
 run: make -C packages/autodiff run

@@ -72,7 +72,7 @@ the generic templates that own published definitions:
 - A source-shaped `Unit` macro may own public definitions. Put each callable's
   doc comment directly above its function template; the reference scanner
   substitutes captured invocation arguments and reports the invocation line.
-  It does not evaluate compile-time Lisp or computed declaration names, and
+  It does not run meta functions or compute declaration names, and
   every expanded signature is still checked against the compiler artifact.
 - Published callables and types default to the primary tier. The compact
   `docs/library-api-tiers.txt` file owns advanced, compatibility, and

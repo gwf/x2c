@@ -11,6 +11,6 @@ run: |
   # Strings, slicing, and interpolation
   ./x2c run examples/love/strings.x
 
-  # Generate C arrays with compile-time Lisp
+  # Build C array initializers with meta functions
   ./x2c run examples/magic/compile-time.x
 ---

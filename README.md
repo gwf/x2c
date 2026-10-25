@@ -3,9 +3,9 @@
 C with batteries, without bullshit.
 
 x2c extends C with collections, dynamic values, pattern matching, scoped
-allocation, exceptions, threads, and compile-time Lisp. It compiles to C and
-uses ordinary C compilers and libraries. You can use the added features where
-they help and keep ordinary C elsewhere.
+allocation, exceptions, threads, and compile-time macros written in x2c. It
+compiles to C and uses ordinary C compilers and libraries. You can use the
+added features where they help and keep ordinary C elsewhere.
 
 The compiler and runtime are written in x2c. You can read their source, change
 it, and rebuild the language itself.
