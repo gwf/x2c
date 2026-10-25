@@ -41,11 +41,9 @@ static Unit _unit(String path):
 static List _units(String dump):
   Array units = []
   Unit unit = NULL
-  Lisp lisp = Lisp.new()
-  defer Lisp.destroy(lisp)
   unsigned cursor = 0
   Var rows = void
-  Lisp.read(lisp, %"($dump)", cursor, rows)
+  Lisp.read(NULL, %"($dump)", cursor, rows)
   foreach List row in rows.list():
     Symbol kind = row.car()
     if kind == <unit>:

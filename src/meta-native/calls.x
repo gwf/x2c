@@ -77,7 +77,6 @@ Var Compiler.run_meta_call(
     for the translation returns void. */
 Var Compiler.apply_meta_function(
   Compiler c, String name, List arguments, Token site) {
-  c.ensure_macro_lisp();
   MetaContext *context = MetaContext.current();
   with (context.has_bindings = 0,
         context.captures = NULL,
@@ -192,6 +191,7 @@ static Array _meta_values(
    first use. The project meta build's own parse has no helper yet, so a
    call to a project function there is left for the translation. */
 static Var _meta_function(Compiler c, String name, Token site) {
+  c.ensure_macro_lisp();
   Var function = void;
   if (!c.macro_lisp.try_get(name, function) && _bind_project_meta(c, name))
     c.macro_lisp.try_get(name, function);

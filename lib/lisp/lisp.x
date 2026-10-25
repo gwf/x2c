@@ -211,9 +211,10 @@ static macro Stmt $error.source.callable(Expr $callable) {
 
 /* canonical names
 
-   The reader and evaluator share one canonical value per special-form and
-   reader-prefix name, interned once per process. A long name is promoted to
-   the outermost String pool, so it outlives the pool that interned it. */
+   The evaluator retains one canonical value per special-form and reader
+   prefix name. A long name is promoted to the outermost String pool, so it
+   outlives the pool that interned it. The reader interns its own prefixes
+   without constructing a session. */
 
 module Var lsym_quote, lsym_quasiquote, lsym_unquote, lsym_splicing;
 static Var lsym_cond, lsym_def, lsym_bind, lsym_eval, lsym_lambda;

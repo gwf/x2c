@@ -734,6 +734,20 @@ List Sym_define_alias(Sym s, String name, List expression){
   return binding;
 }
 
+void Sym_drop(Sym s, Map map, Var key);
+
+void Sym_undefine_alias(Sym s, String name){
+  if(! _init_guard_) _file_init_();
+  SymScope * scope = _scope_at(s, - 1);
+  List key = cons(String_var(name), NULL);
+  Var binding;
+  if(Map_try_get(scope -> bindings, List_var(key), &(binding))) Sym_drop(s, s -> binding_facts, List_var(cons(_38, cons(binding, NULL))));
+  Sym_drop(s, scope -> symbols, List_var(key));
+  Sym_drop(s, scope -> bindings, List_var(key));
+  scope -> aliases --;
+  s -> aliases --;
+}
+
 static Type List_type(List);
 
 String Compiler_unprefixed(Compiler c, String name);
@@ -832,8 +846,6 @@ void Sym_define_global(Sym s, List key, List type){
   Sym_put(s, scope -> symbols, List_var(key), List_var(type));
   f8_bindings____seed_var_tag(s, key, type);
 }
-
-void Sym_drop(Sym s, Map map, Var key);
 
 void Sym_undefine_global(Sym s, List key){
   if(! _init_guard_) _file_init_();

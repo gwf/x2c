@@ -131,7 +131,6 @@ static Var _eval_template_form(
 Var Compiler.evaluate_meta_value(
   Compiler c, List expression, Token site, int slot) {
   if (!c.collect_protocols) c.run_declaration_effects();
-  c.ensure_macro_lisp();
   List active = c.macro_stack ? c.macro_stack.car() : NULL;
   List bindings = active ? active.caddr() : NULL;
   String source_file = active ? _definition_file(active.car()) : c.filename;

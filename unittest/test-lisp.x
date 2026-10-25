@@ -6,6 +6,24 @@
 
 // reader - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+static void lisp_read_prefixes_without_session(void) {
+  const char *sources[] = {"'x", "`x", ",x", ",@x"};
+  const char *names[] = {"quote", "quasiquote", "unquote", "unquote-splicing"};
+  for (int i = 0; i < 4; i++) {
+    Context inner = Context.open_isolated_named("reader without session");
+    unsigned cursor = 0;
+    Var value = void;
+    EXPECT_INT_EQ(Lisp.read(NULL, String.new(sources[i]), cursor, value),
+                  <value>);
+    EXPECT_INT_EQ(cursor, strlen(sources[i]));
+    List form = value;
+    EXPECT_TRUE(form.try_own());
+    inner.close();
+    EXPECT_TRUE(form.car() == Atom.intern(names[i]));
+    EXPECT_STR_EQ(form.cadr().str(), "x");
+  }
+}
+
 static Var _read1(Lisp lisp, const char *text, Symbol *status) {
   unsigned cursor = 0;
   Var out = void;
@@ -2038,6 +2056,7 @@ static void lisp_tail_calls_stay_flat(void) {
 
 
 void lisp_suite(void) {
+  $test.run(lisp_read_prefixes_without_session);
   $test.run(lisp_canonical_names_outlive_initial_context);
   $test.run(lisp_read_integer_value);
   $test.run(lisp_read_float_value);

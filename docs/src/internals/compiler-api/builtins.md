@@ -12,7 +12,7 @@ The built-in macros' compile-time algorithms.
 
 | Function | Summary |
 | --- | --- |
-| [`Compiler.builtin_targets`](#Compiler.builtin_targets) | Returns each built-in algorithm by the name compile-time code calls it with. |
+| [`Compiler.builtin_targets`](#Compiler.builtin_targets) | Returns a fresh Map of built-in algorithms by their compile-time names. |
 
 ### `Compiler`
 
@@ -21,10 +21,10 @@ The built-in macros' compile-time algorithms.
 
 `Map Compiler.builtin_targets(void)`
 
-Returns each built-in algorithm by the name compile-time code calls it
-with.
+Returns a fresh Map of built-in algorithms by their compile-time names.
+The Map borrows shared Func handles that live for the program.
 
-Source: `src/builtins.x:966`
+Source: `src/builtins.x:965`
 
 ## Design notes
 

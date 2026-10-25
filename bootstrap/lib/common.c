@@ -528,112 +528,112 @@ static inline Var Iter_var(Iter x){
   return Var_new(631140, x);
 }
 
-static inline Var char_var(char x){
-  return Var_box_i8(x);
+static inline Var char_var(char _x2c_gensym_macro_x_0){
+  return Var_box_i8(_x2c_gensym_macro_x_0);
 }
 
-static inline String char_str(char x){
-  return Var_str(Var_box_i8(x));
+static inline String char_str(char _x2c_gensym_macro_x_1){
+  return Var_str(Var_box_i8(_x2c_gensym_macro_x_1));
 }
 
-static inline String char_repr(char x){
-  return Var_repr(Var_box_i8(x));
+static inline String char_repr(char _x2c_gensym_macro_x_2){
+  return Var_repr(Var_box_i8(_x2c_gensym_macro_x_2));
 }
 
-static inline Var uchar_var(uchar x){
-  return Var_box_u8(x);
+static inline Var uchar_var(uchar _x2c_gensym_macro_x_3){
+  return Var_box_u8(_x2c_gensym_macro_x_3);
 }
 
-static inline String uchar_str(uchar x){
-  return Var_str(Var_box_u8(x));
+static inline String uchar_str(uchar _x2c_gensym_macro_x_4){
+  return Var_str(Var_box_u8(_x2c_gensym_macro_x_4));
 }
 
-static inline String uchar_repr(uchar x){
-  return Var_repr(Var_box_u8(x));
+static inline String uchar_repr(uchar _x2c_gensym_macro_x_5){
+  return Var_repr(Var_box_u8(_x2c_gensym_macro_x_5));
 }
 
-static inline Var short_var(short x){
-  return Var_box_i16(x);
+static inline Var short_var(short _x2c_gensym_macro_x_6){
+  return Var_box_i16(_x2c_gensym_macro_x_6);
 }
 
-static inline String short_str(short x){
-  return Var_str(Var_box_i16(x));
+static inline String short_str(short _x2c_gensym_macro_x_7){
+  return Var_str(Var_box_i16(_x2c_gensym_macro_x_7));
 }
 
-static inline String short_repr(short x){
-  return Var_repr(Var_box_i16(x));
+static inline String short_repr(short _x2c_gensym_macro_x_8){
+  return Var_repr(Var_box_i16(_x2c_gensym_macro_x_8));
 }
 
-static inline Var ushort_var(ushort x){
-  return Var_box_u16(x);
+static inline Var ushort_var(ushort _x2c_gensym_macro_x_9){
+  return Var_box_u16(_x2c_gensym_macro_x_9);
 }
 
-static inline String ushort_str(ushort x){
-  return Var_str(Var_box_u16(x));
+static inline String ushort_str(ushort _x2c_gensym_macro_x_10){
+  return Var_str(Var_box_u16(_x2c_gensym_macro_x_10));
 }
 
-static inline String ushort_repr(ushort x){
-  return Var_repr(Var_box_u16(x));
+static inline String ushort_repr(ushort _x2c_gensym_macro_x_11){
+  return Var_repr(Var_box_u16(_x2c_gensym_macro_x_11));
 }
 
-static inline Var int_var(int x){
-  return Var_box_i32_bits(x);
+static inline Var int_var(int _x2c_gensym_macro_x_12){
+  return Var_box_i32_bits(_x2c_gensym_macro_x_12);
 }
 
-static inline String int_str(int x){
-  return Var_str(Var_box_i32_bits(x));
+static inline String int_str(int _x2c_gensym_macro_x_13){
+  return Var_str(Var_box_i32_bits(_x2c_gensym_macro_x_13));
 }
 
-static inline String int_repr(int x){
-  return Var_repr(Var_box_i32_bits(x));
+static inline String int_repr(int _x2c_gensym_macro_x_14){
+  return Var_repr(Var_box_i32_bits(_x2c_gensym_macro_x_14));
 }
 
-static inline Var uint_var(uint x){
-  return Var_box_u32(x);
+static inline Var uint_var(uint _x2c_gensym_macro_x_15){
+  return Var_box_u32(_x2c_gensym_macro_x_15);
 }
 
-static inline String uint_str(uint x){
-  return Var_str(Var_box_u32(x));
+static inline String uint_str(uint _x2c_gensym_macro_x_16){
+  return Var_str(Var_box_u32(_x2c_gensym_macro_x_16));
 }
 
-static inline String uint_repr(uint x){
-  return Var_repr(Var_box_u32(x));
+static inline String uint_repr(uint _x2c_gensym_macro_x_17){
+  return Var_repr(Var_box_u32(_x2c_gensym_macro_x_17));
 }
 
-static inline Var unsigned_var(unsigned x){
-  return Var_box_u32(x);
+static inline Var unsigned_var(unsigned _x2c_gensym_macro_x_18){
+  return Var_box_u32(_x2c_gensym_macro_x_18);
 }
 
-static inline String unsigned_str(unsigned x){
-  return Var_str(Var_box_u32(x));
+static inline String unsigned_str(unsigned _x2c_gensym_macro_x_19){
+  return Var_str(Var_box_u32(_x2c_gensym_macro_x_19));
 }
 
-static inline String unsigned_repr(unsigned x){
-  return Var_repr(Var_box_u32(x));
+static inline String unsigned_repr(unsigned _x2c_gensym_macro_x_20){
+  return Var_repr(Var_box_u32(_x2c_gensym_macro_x_20));
 }
 
-static inline Var float_var(float x){
-  return Var_new(3355493, x);
+static inline Var float_var(float _x2c_gensym_macro_x_21){
+  return Var_new(3355493, _x2c_gensym_macro_x_21);
 }
 
-static inline String float_str(float x){
-  return Var_str(Var_new(3355493, x));
+static inline String float_str(float _x2c_gensym_macro_x_22){
+  return Var_str(Var_new(3355493, _x2c_gensym_macro_x_22));
 }
 
-static inline String float_repr(float x){
-  return Var_repr(Var_new(3355493, x));
+static inline String float_repr(float _x2c_gensym_macro_x_23){
+  return Var_repr(Var_new(3355493, _x2c_gensym_macro_x_23));
 }
 
-static inline Var double_var(double x){
-  return Var_box_f64(x);
+static inline Var double_var(double _x2c_gensym_macro_x_24){
+  return Var_box_f64(_x2c_gensym_macro_x_24);
 }
 
-static inline String double_str(double x){
-  return Var_str(Var_box_f64(x));
+static inline String double_str(double _x2c_gensym_macro_x_25){
+  return Var_str(Var_box_f64(_x2c_gensym_macro_x_25));
 }
 
-static inline String double_repr(double x){
-  return Var_repr(Var_box_f64(x));
+static inline String double_repr(double _x2c_gensym_macro_x_26){
+  return Var_repr(Var_box_f64(_x2c_gensym_macro_x_26));
 }
 
 static inline Var long_var(long x){
@@ -924,7 +924,7 @@ void x2c_initialize(void){
 int x2c_normalize_index(int index, int length){
   if(! _init_guard_) _file_init_();  if(length < 0){
     Var _x2c_gensym_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("x2c_normalize_index")), NULL))); {
-      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/common.x",.function = "x2c_normalize_index",.line = 878,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_0, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(816725264), int_var(length));  __builtin_unreachable();
+      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/common.x",.function = "x2c_normalize_index",.line = 870,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_0, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(816725264), int_var(length));  __builtin_unreachable();
     }
 
   }
@@ -937,7 +937,7 @@ int x2c_slice_bound(int bound){
 
 int x2c_normalize_slice(int * start, int * stop, int step, int length){
   if(! _init_guard_) _file_init_();  if(! start || ! stop || ! step || length < 0){
-    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/common.x",.function = "x2c_normalize_slice",.line = 903,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_1, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("x2c_normalize_slice")), NULL))));  __builtin_unreachable();
+    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/common.x",.function = "x2c_normalize_slice",.line = 895,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_1, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("x2c_normalize_slice")), NULL))));  __builtin_unreachable();
   }
   int orig_stop = * stop;  if(* start == INT_MIN) * start =(step > 0) ? 0 : length - 1;  if(* stop == INT_MIN) * stop = - 1;  if(* start < 0){
     * start += length;  if(* start < 0) * start =(step < 0) ? - 1 : 0;

@@ -19,6 +19,8 @@ module Map _process_cache(void) {
   auto(&process_cache_scope) {
     Scope.shutdown_hook(_cache_shutdown);
     process_cache = {};
+    source_hashes = {};
+    linked_providers = {};
   }
   return process_cache;
 }
@@ -31,6 +33,8 @@ static void _cache_shutdown(void) {
   cold_providers = NULL;
   declared_functions = NULL;
   linked_records = NULL;
+  source_hashes = NULL;
+  linked_providers = NULL;
 }
 
 module Map _cache_map(void) {

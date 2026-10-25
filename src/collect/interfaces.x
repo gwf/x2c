@@ -15,7 +15,6 @@
 static String interface_out_dir = NULL;
 
 static String interface_mirror = NULL;
-static Lisp interface_reader = NULL;
 
 /** Creates the process cache and names the directories searched for `.xi`
     interfaces. `out_dir` is the current translation output directory, or
@@ -110,7 +109,6 @@ static List _interface_record(String path) {
 
 /* The one List form `source` spells, or NULL. */
 static List _read_record(String source) {
-  _interface_lisp();  // a reader session, for text the plain read leaves
   unsigned cursor = 0;
   Var record = void;
   int read = 0;
@@ -118,25 +116,6 @@ static List _read_record(String source) {
   catch %((!or incomplete malformed) *): return NULL;
   if (!read || record is not <list>) return NULL;
   return record;
-}
-
-module Lisp _interface_lisp(void) {
-  if (interface_reader) return interface_reader;
-  _process_cache();
-  auto(&process_cache_scope) {
-    interface_reader = Lisp.kernel();
-    source_hashes = {};
-    linked_providers = {};
-    Scope.shutdown_hook(_interface_shutdown);
-  }
-  return interface_reader;
-}
-
-static void _interface_shutdown(void) {
-  Lisp.destroy(interface_reader);
-  interface_reader = NULL;
-  source_hashes = NULL;
-  linked_providers = NULL;
 }
 
 module int _hash_matches(Compiler c, String path, Var expected) {

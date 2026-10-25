@@ -25,11 +25,9 @@ static List _forms(String path):
   Regex macrodef = Regex.compile("\\(macrodef <macro ([^>]*)>\\)")
   String dump = macrodef.replace_fn(Path.new(path).read_text(),
     %!(RegexMatch found) => %"(macrodef \"${found[1]}\")")
-  Lisp lisp = Lisp.new()
-  defer Lisp.destroy(lisp)
   unsigned cursor = 0
   Var forms = void
-  Lisp.read(lisp, %"($dump)", cursor, forms)
+  Lisp.read(NULL, %"($dump)", cursor, forms)
   return forms
 
 origins = 0

@@ -105,7 +105,7 @@ Returns the syntax that invokes the template `stored`, a macro name
 spelled as a String or a local definition, with `values`: what a template
 call in a staged `meta` body evaluates to.
 
-Source: `src/macros/templates.x:263`
+Source: `src/macros/templates.x:262`
 
 ### `Compiler`
 
@@ -139,7 +139,7 @@ it names a visible alias, or NULL. A declaration in a scope inside the
 alias's scope shadows it. The expression keeps its bindings where a
 later declaration hides one of their names.
 
-Source: `src/macros/aliases.x:411`
+Source: `src/macros/aliases.x:429`
 
 <a id="Compiler.alias_form_starts"></a>
 #### Compiler.alias_form_starts
@@ -237,7 +237,7 @@ Source: `src/macros/lisp.x:13`
 Starts a declaration body whose aliases end at its closing brace, and
 returns the alias state that `Compiler.leave_alias_body` restores.
 
-Source: `src/macros/aliases.x:362`
+Source: `src/macros/aliases.x:380`
 
 <a id="Compiler.evaluate_declaration_effect"></a>
 #### Compiler.evaluate_declaration_effect
@@ -256,7 +256,7 @@ Source: `src/macros/lisp.x:103`
 Evaluates a declaration recipe after its owning source is collected.
 The callback is a Lisp name and arguments are retained canonical values.
 
-Source: `src/macros/templates.x:245`
+Source: `src/macros/templates.x:244`
 
 <a id="Compiler.evaluate_macro_rows"></a>
 #### Compiler.evaluate_macro_rows
@@ -372,7 +372,7 @@ Source: `src/macros/invocations/recognition.x:106`
 Binds quoted `syntax` with its `fresh` rows at `position`, as the
 expansion of its quotation would.
 
-Source: `src/macros/templates.x:435`
+Source: `src/macros/templates.x:434`
 
 <a id="Compiler.leave_alias_body"></a>
 #### Compiler.leave_alias_body
@@ -381,7 +381,7 @@ Source: `src/macros/templates.x:435`
 
 Ends a declaration body, restoring the aliases visible before it.
 
-Source: `src/macros/aliases.x:368`
+Source: `src/macros/aliases.x:386`
 
 <a id="Compiler.library_filling"></a>
 #### Compiler.library_filling
@@ -755,7 +755,7 @@ its established root `type`, child stage, and source wrappers. Binding,
 capture collection, hygiene, and effects do not run, and a statement
 expression's template-origin wrappers are omitted.
 
-Source: `src/macros/templates.x:349`
+Source: `src/macros/templates.x:348`
 
 <a id="Compiler.rebuild_function"></a>
 #### Compiler.rebuild_function
@@ -765,7 +765,7 @@ Source: `src/macros/templates.x:349`
 Rebuilds a bound function through a Function decorator without binding it
 again. The template keeps the target's return type and declarator.
 
-Source: `src/macros/templates.x:371`
+Source: `src/macros/templates.x:370`
 
 <a id="Compiler.rebuild_statement"></a>
 #### Compiler.rebuild_statement
@@ -776,7 +776,7 @@ Rebuilds a statement template as a canonical unbraced `seq`. Bound
 children keep their identities and origins; template-origin wrappers
 are omitted because this path does not open an invocation.
 
-Source: `src/macros/templates.x:357`
+Source: `src/macros/templates.x:356`
 
 <a id="Compiler.rebuild_unit_function"></a>
 #### Compiler.rebuild_unit_function
@@ -787,7 +787,7 @@ Constructs a fresh function from a Unit template after lowering. The
 caller supplies its bound name and lowered children; binding does not
 run.
 
-Source: `src/macros/templates.x:363`
+Source: `src/macros/templates.x:362`
 
 <a id="Compiler.record_comptime"></a>
 #### Compiler.record_comptime
@@ -865,7 +865,7 @@ Reports whether the current scope declares an alias named `name`,
 including a file-scope alias an include delivered. A declaration of that
 name in the same scope conflicts with it.
 
-Source: `src/macros/aliases.x:398`
+Source: `src/macros/aliases.x:416`
 
 <a id="Compiler.shared_definitions"></a>
 #### Compiler.shared_definitions

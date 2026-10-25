@@ -7,7 +7,7 @@
     The linked inventory retains the ordinary collector's dependency proof. */
 int Compiler.linked_meta_provider_current(Compiler c, String path) {
   String canonical = _canonical_path(path);
-  _interface_lisp();
+  _process_cache();
   Var current;
   if (linked_providers.try_get(canonical, current)) return current;
   Map seen = {};

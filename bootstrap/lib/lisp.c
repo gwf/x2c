@@ -92,7 +92,7 @@ typedef struct NativeScalarAccess{
 #include "native-scalar-types.h"
 static List _180, _178, _177, _175, _173, _167, _160, _158, _156, _155, _153, _150, _148, _147, _145, _143, _141, _140, _138, _137, _134, _132, _131, _129, _126, _124, _123, _121, _120, _119, _117, _115, _114, _112, _111, _109, _104, _102, _101, _99, _97, _93, _91, _90, _88, _84, _82, _81, _79, _77, _75, _74, _72, _70, _66, _64, _62, _61, _59, _54, _52, _51, _49, _46, _45, _41, _39, _38, _36, _34, _29, _27, _26, _24, _23, _21, _20, _18, _16;
 
-static String _185, _184, _183, _182, _181, _171, _170, _169, _168, _166, _165, _164, _163, _162, _161, _159, _152, _151, _144, _136, _135, _128, _127, _118, _107, _106, _105, _95, _94, _87, _86, _85, _78, _68, _67, _65, _58, _57, _56, _55, _48, _47, _43, _42, _32, _31, _30, _14, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _187, _186, _185, _184, _183, _182, _181, _171, _170, _169, _168, _166, _165, _164, _163, _162, _161, _159, _152, _151, _144, _136, _135, _128, _127, _118, _107, _106, _105, _95, _94, _87, _86, _85, _78, _68, _67, _65, _58, _57, _56, _55, _48, _47, _43, _42, _32, _31, _30, _14, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
 static Var _179, _176, _174, _172, _157, _154, _149, _146, _142, _139, _133, _130, _125, _122, _116, _113, _110, _108, _103, _100, _98, _96, _92, _89, _83, _80, _76, _73, _71, _69, _63, _60, _53, _50, _44, _40, _37, _35, _33, _28, _25, _22, _19, _17, _15, _13;
 
@@ -1007,11 +1007,13 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _178 = cons(_13, _177);
   _179 = List_var(_178);
   _180 = cons(_179, _16);
-  _181 = String_new("=");
-  _182 = String_new("<");
-  _183 = String_new("<=");
-  _184 = String_new(">");
-  _185 = String_new(">=");
+  _181 = String_new("unquote");
+  _182 = String_new("unquote-splicing");
+  _183 = String_new("=");
+  _184 = String_new("<");
+  _185 = String_new("<=");
+  _186 = String_new(">");
+  _187 = String_new(">=");
   _x2c_gensym_static_initialize_0();
   _x2c_gensym_static_initialize_1();
   _x2c_gensym_static_initialize_2();
@@ -3466,13 +3468,13 @@ static Var f6_reader____parse_form(f6_reader___LispReader * r, Token token, int 
     return f6_reader____malformed_token(&((* r)), token);
     case 83 : return f6_reader____malformed_token(&((* r)), token);
     case 81 : return f6_reader____list(&((* r)), depth + 1);
-    case 79 : prefix = lsym_quote;
+    case 79 : prefix = Atom_intern(_1);
     break;
-    case 193 : prefix = lsym_quasiquote;
+    case 193 : prefix = Atom_intern(_3);
     break;
-    case 89 : prefix = lsym_unquote;
+    case 89 : prefix = Atom_intern(_181);
     break;
-    case 11393 : prefix = lsym_splicing;
+    case 11393 : prefix = Atom_intern(_182);
     break;
   }
   if(! Var_is_void(prefix)) return f6_reader____prefixed(&((* r)), prefix, depth);
@@ -3937,27 +3939,27 @@ static Var f10_primitives____chain(List values, String operation, int want, int 
 
 Var lisp_eq_chain(List values){
   if(! _init_guard_) _file_init_();
-  return f10_primitives____chain(values, _181, 0, 1);
+  return f10_primitives____chain(values, _183, 0, 1);
 }
 
 Var lisp_lt_chain(List values){
   if(! _init_guard_) _file_init_();
-  return f10_primitives____chain(values, _182, - 1, 1);
+  return f10_primitives____chain(values, _184, - 1, 1);
 }
 
 Var lisp_le_chain(List values){
   if(! _init_guard_) _file_init_();
-  return f10_primitives____chain(values, _183, 1, 0);
+  return f10_primitives____chain(values, _185, 1, 0);
 }
 
 Var lisp_gt_chain(List values){
   if(! _init_guard_) _file_init_();
-  return f10_primitives____chain(values, _184, 1, 1);
+  return f10_primitives____chain(values, _186, 1, 1);
 }
 
 Var lisp_ge_chain(List values){
   if(! _init_guard_) _file_init_();
-  return f10_primitives____chain(values, _185, - 1, 0);
+  return f10_primitives____chain(values, _187, - 1, 0);
 }
 
 Var lisp_str(Var value){

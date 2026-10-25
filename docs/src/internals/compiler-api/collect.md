@@ -138,7 +138,7 @@ stage directory when it runs from `<home>/builds/`, otherwise under the
 home. A `cold` process reads no interface and still writes its own. Call
 it before opening any translation unit's Context.
 
-Source: `src/collect/interfaces.x:27`
+Source: `src/collect/interfaces.x:26`
 
 <a id="Compiler.configure_package"></a>
 #### Compiler.configure_package
@@ -171,7 +171,7 @@ Drops the entries collected without declaration defaults while the shared
 compile-time session was filled, or by a project meta build. Call once
 that session is published, and after the meta build's parses.
 
-Source: `src/collect/cache.x:165`
+Source: `src/collect/cache.x:169`
 
 <a id="Compiler.include_function_declarations"></a>
 #### Compiler.include_function_declarations
@@ -245,7 +245,7 @@ identity is unknown, since no compiler could replay that interface. A
 contribution that the interface grammar cannot spell is reported as an
 `emit` diagnostic.
 
-Source: `src/collect/interfaces.x:266`
+Source: `src/collect/interfaces.x:245`
 
 <a id="Compiler.is_prelude_source"></a>
 #### Compiler.is_prelude_source
@@ -288,7 +288,7 @@ the records hold this compiler's collection rather than a table linked
 into it; the unit's own entries for them are restored afterwards. A
 record the interface grammar cannot spell is left out.
 
-Source: `src/collect/interfaces.x:369`
+Source: `src/collect/interfaces.x:348`
 
 <a id="Compiler.loaded_call_type"></a>
 #### Compiler.loaded_call_type
@@ -364,7 +364,7 @@ Returns the path of the first prelude interface this compiler wrote, or
 NULL when there is none or the compiler's identity is unknown. Its
 source hashes are not checked.
 
-Source: `src/collect/interfaces.x:244`
+Source: `src/collect/interfaces.x:223`
 
 <a id="Compiler.prelude_sources"></a>
 #### Compiler.prelude_sources
@@ -438,7 +438,7 @@ Makes the next collection recheck source files and interfaces after an
 interactive edit. Drops cache indexes, retaining their backing rows:
 already-open units may still use those declarations.
 
-Source: `src/collect/cache.x:147`
+Source: `src/collect/cache.x:151`
 
 <a id="Compiler.runtime_function_declarations"></a>
 #### Compiler.runtime_function_declarations

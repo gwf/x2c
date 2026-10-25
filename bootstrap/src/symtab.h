@@ -67,6 +67,8 @@ List Sym_define(Sym s, List key, List type);
 
 List Sym_define_alias(Sym s, String name, List expression);
 
+void Sym_undefine_alias(Sym s, String name);
+
 void Sym_seed_var_tags(Sym s, Map symbols);
 
 void Sym_define_global(Sym s, List key, List type);
