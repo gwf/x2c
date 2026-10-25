@@ -78,3 +78,5 @@ lib/system-macros.x|optional|Compile-time convenience macros; explicitly include
 lib/var-adapters.x|internal|Pointer converter templates shared by runtime owners.
 lib/var-tags.x|internal|The Var tag ledger shared by runtime and compiler projections.
 lib/rewrite.x|optional|Register macro-pattern translators with the $rewrite decorator; include `rewrite.x`.
+lib/compiler-meta.x|internal|The compiler-private `meta` operations its shipped sources call: built-in algorithms, Lisp binding groups, and generated target tables, hashes, records, and SymbolSets.
+lib/lisp-bindings.x|internal|The `$lisp.bind`, `$lisp.binding`, and `$lisp.install` macros, which every unit sees through `lisp/lisp.x`.
