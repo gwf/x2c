@@ -33,6 +33,8 @@ String Code_binding_spelling(Var syntax);
 
 String Code_name(Code function);
 
+List Code_native_signature(Code value);
+
 Code Code_parameter(Code function, String name);
 
 List Code_body(Code function);

@@ -69,15 +69,43 @@ static Var _symbol_set(List values) {
   return expression;
 }
 
-static List _native_targets(void) => Compiler.native_meta_targets(NULL);
+static List _native_targets(void) => Compiler.native_meta_targets(NULL, 0);
+
+/* `leading`, the rows of one target inventory, then `trailing`. The
+   compiler's own operations are its `x2c_`, `Code_`, and `Type_` targets;
+   runtime Lisp binds the others directly, and the compiler also binds
+   those that take a callback. */
+static List _native_rows(Symbol inventory, List leading, List trailing) {
+  Array rows = auto leading;
+  foreach (List row in Compiler.native_meta_targets(
+             NULL, inventory == <runtime>)) {
+    String name = row.car();
+    int own = name.startswith("x2c_") || name.startswith("Code_") ||
+              name.startswith("Type_");
+    if (own == (inventory == <compiler>)) rows.push(row);
+  }
+  foreach (Var row in trailing) rows.push(row);
+  return rows;
+}
 
 /* A native module's entry exports the prototypes its own sources declare,
    and a module that declares none is a mistake. */
 static List _declared_targets(List paths) {
-  List rows = Compiler.native_meta_targets(paths);
+  List rows = Compiler.native_meta_targets(paths, 0);
   if (!rows)
     $fail.meta_sdk_native_declarations();
   return rows;
+}
+
+/** Adds the SDK primitives the compiler's shipped sources call through
+    `lib/compiler-meta.x` to the built-in targets `rows`. */
+void Compiler.add_sdk_targets(Map rows) {
+  rows["_x2c_literal_list"] = (Func) MetaContext.literal_list;
+  rows["_x2c_native_rows"] = (Func) _native_rows;
+  rows["_x2c_declared_rows"] = (Func) _declared_targets;
+  rows["_x2c_meta_linked_hashes"] = (Func) _linked_hashes;
+  rows["_x2c_prelude_records"] = (Func) _linked_prelude;
+  rows["_x2c_symbol_set"] = (Func) _symbol_set;
 }
 
 // lisp primitives

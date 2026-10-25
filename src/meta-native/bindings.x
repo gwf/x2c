@@ -300,9 +300,10 @@ static int _native_owned(Compiler c, List type) {
 /** Returns the declared native targets advertised by `meta` interface
     rows, in the row form `lib/lisp-targets/lisp-targets.x` uses for its
     inventory, or only those declared in the files `paths` names when it is
-    not empty. Sorting makes that inventory independent of Map order.
+    not empty. A target that takes a `Func` is left out unless `callbacks`
+    is nonzero. Sorting makes that inventory independent of Map order.
 */
-List Compiler.native_meta_targets(List paths) {
+List Compiler.native_meta_targets(List paths, int callbacks) {
   Compiler c = Compiler.expanding();
   if (!c) return %();
   Map selected = {};
@@ -310,7 +311,7 @@ List Compiler.native_meta_targets(List paths) {
     if (paths && !_declared_in(key, paths)) continue;
     foreach (List row in _native_meta_rows(c, value)) {
       (String name, List signature) = row;
-      if (_takes_callback(signature)) continue;
+      if (!callbacks && _takes_callback(signature)) continue;
       String into = %"${name}_into";
       selected[name] = _iterator_operation(signature)
         ? %($name (as $into)) : %($name);

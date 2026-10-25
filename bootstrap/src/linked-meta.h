@@ -8,6 +8,7 @@
 #include "x2c.h"
 #include "channel.h"
 #include "common.h"
+#include "lisp-bindings.h"
 #include "list-selectors.h"
 #include "native-scalar-types.h"
 #include "rewrite.h"

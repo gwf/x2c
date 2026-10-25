@@ -9,6 +9,8 @@
 
 Type Code.type(Code value) => _ask("Code_type", %($value));
 Var Code.value(Code code) => _ask("Code_value", %($code));
+List Code.native_signature(Code value) =>
+  _ask("Code_native_signature", %($value));
 Code Code.parameter(Code function, String name) =>
   _ask("Code_parameter", %($function $name));
 List Code.body(Code function) => _ask("Code_body", %($function));

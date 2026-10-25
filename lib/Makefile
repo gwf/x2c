@@ -8,7 +8,8 @@ OPTIONAL_SOURCES := args.x datum.x diff.x digest.x json.x list-selectors.x \
                     meta.x type.x path.x process.x regex.x \
                     rewrite.x scripting.x substring.x substring-map.x \
                     typed-array.x typed-list.x typed-map.x \
-                    var-ledger.x lisp-targets/lisp-targets.x \
+                    var-ledger.x lisp-targets/lisp-targets.x compiler-meta.x \
+                    lisp-bindings.x \
                     cleanup.x error-macros.x error-private.x integer-ops.x \
                     native-scalar-types.x private-keywords.x system-macros.x \
                     var-adapters.x var-tags.x

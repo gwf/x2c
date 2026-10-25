@@ -978,5 +978,10 @@ Map Compiler.builtin_targets(void) {
   $builtin.row(rows, "_x2c.binding_record", _binding_record);
   $builtin.row(rows, "_x2c.binding_install", _binding_install);
   $builtin.row(rows, "_x2c.binding_targets", _binding_targets);
+  $builtin.row(rows, "_x2c_auto_release", _auto_release);
+  $builtin.row(rows, "_x2c_binding_record", _binding_record);
+  $builtin.row(rows, "_x2c_binding_install", _binding_install);
+  $builtin.row(rows, "_x2c_target_map", _binding_targets);
+  Compiler.add_sdk_targets(rows);
   return rows;
 }

@@ -99,6 +99,10 @@ meta String Code.binding_spelling(Var syntax);
 /** Returns the spelling of the function `function` defines. */
 meta String Code.name(Code function);
 
+/** Returns the `Func` signature of the function `value` defines or names,
+    the form `Func.new` takes, as `((func ("Var")) "Var")`. */
+meta List Code.native_signature(Code value);
+
 /** Returns the expression reading the parameter of `function` spelled
     `name`. Fails the expansion when `function` has no such parameter. */
 meta Code Code.parameter(Code function, String name);

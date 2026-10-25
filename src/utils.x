@@ -154,7 +154,9 @@ static String _locate_home(Path p) {
 }
 
 static int _is_home(Path p) =>
-  p.join("include").is_dir() && p.join("etc/compiler-sdk.xlisp").is_file();
+  p.join("include").is_dir() &&
+  (p.join("etc/compiler-prelude.x").is_file() ||
+   p.join("etc/compiler-sdk.xlisp").is_file());
 
 static void _prepare_include_dirs(void) {
   if (!root_path) return;

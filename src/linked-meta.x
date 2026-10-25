@@ -16,6 +16,7 @@
 #include "x2c.x"
 #include "channel.x"
 #include "common.x"
+#include "lisp-bindings.x"
 #include "list-selectors.x"
 #include "native-scalar-types.x"
 #include "rewrite.x"
@@ -53,6 +54,11 @@ static int _var_tag_top(List tag) => (int) Var_tag_top(_literal_tag(tag));
 
 static int _var_tag_bottom(List tag) =>
   (int) Var_tag_bottom(_literal_tag(tag));
+
+/* --- lib/lisp-bindings.x ------------------------------------------------- */
+
+static List _lisp_native_declarations(void) =>
+  %((preproc "extern Map lisp_native_targets(void);"));
 
 /* --- lib/list-selectors.x ------------------------------------------------ */
 
@@ -2185,6 +2191,7 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_literal_tag", _literal_tag);
   $linked.row(rows, "_var_tag_top", _var_tag_top);
   $linked.row(rows, "_var_tag_bottom", _var_tag_bottom);
+  $linked.row(rows, "_lisp_native_declarations", _lisp_native_declarations);
   $linked.row(rows, "_selector_chain", _selector_chain);
   $linked.row(rows, "_selector_double", _selector_double);
   $linked.row(rows, "_selector_middles", _selector_middles);

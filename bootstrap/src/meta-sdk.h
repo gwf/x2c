@@ -152,6 +152,8 @@ Map x2c_meta_definition_hashes(void);
 
 List MetaContext_literal_list(List values);
 
+void Compiler_add_sdk_targets(Map rows);
+
 void Compiler_bind_sdk_primitives(Lisp lisp);
 
 
