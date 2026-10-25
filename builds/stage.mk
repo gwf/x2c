@@ -104,8 +104,13 @@ BIN_OBJECTS  = $(patsubst %.x,$(BIN_BUILD)/%.o,$(BIN_X_NAMES))
 BIN_X_DEPS   = $(patsubst %.x,$(BIN_BUILD)/%.d,$(BIN_X_NAMES))
 BIN_C_DEPS   = $(patsubst %.x,$(BIN_BUILD)/%.c.d,$(BIN_X_NAMES))
 ###############################################################################
-# Default action
+# Default action. The build command embeds the compiler identity it was
+# generated from; a stale embedding would surface only when the driver first
+# runs the command, so the stage proves the pair agrees here, keeping both
+# executables on disk if it does not.
 target: $(LIBRARY) $(BINARY) $(BUILD_COMMAND)
+	@X2C_IDENTITY=`./$(BINARY) env identity` ./$(BUILD_COMMAND) --help \
+	  >/dev/null
 
 # Generate all headers first
 headers: $(LIB_H_FILES) $(BIN_H_FILES)

@@ -87,7 +87,11 @@ void x2c_initialize_command_environment(
   const char *argv0, String embedded_identity) {
   String supplied = Env.get("X2C_IDENTITY");
   if (supplied && supplied != embedded_identity) {
-    String detail = %"command $embedded_identity, driver $supplied";
+    String command = _executable(argv0), driver = Env.get("X2C");
+    if (!command) command = String.new(argv0);
+    if (!driver) driver = "(unnamed)";
+    String detail = %"command $command has $embedded_identity, " +
+      %"driver $driver has $supplied";
     $fail.utils_identity_mismatch(detail);
   }
   _initialize_environment(argv0, embedded_identity);

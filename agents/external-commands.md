@@ -34,6 +34,9 @@ its current owner before moving a tool or adding rules to a command.
 `build` is the bootstrap exception: numeric stage Make rules translate and
 natively link `x2c-build` after that stage's compiler and runtime. Those rules
 also own the shared compiler archive and embedded identity used by all commands.
+The stage ends by running its `x2c-build` once with the compiler's identity
+in `X2C_IDENTITY`, so a command whose embedding disagrees fails the build
+there, with both executables still on disk, rather than at its first use.
 The ordinary command loop excludes `build`, so constructing a stage never needs
 an existing build command. Its driver entry points retain the shared CLI parser.
 
