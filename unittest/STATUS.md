@@ -244,6 +244,18 @@ passed six repeated nested-Make probes, and help output remains byte-identical.
   helper then rejects the call: "cannot convert ("List") to ("Func")". A macro
   template cannot spell that canonical AST directly, so the five `built-*`
   rows have no native form. Ordinary lambda destinations remain covered.
+- The "Decorators" section of `docs/src/reference/language.md` says a
+  public `Unit` target "cannot gain new public siblings". The compiler does
+  not enforce this. The former `macro-decorator-public-sibling` and
+  `macro-decorator-public-lisp-siblings` fixtures failed only because the
+  Lisp spelling `x2c.ident` reached the method-name check ("method name has
+  no concrete owner"). With native `$x2c_ident("unexpected_public")` in the
+  template, translation succeeds and the header declares `extern int
+  unexpected_public;`. A meta function that returns the target followed by
+  two constructed `(declare (int) ...)` Lists also succeeds and exports
+  both siblings. `macro-decorator-public-sibling` now records the current
+  header so enforcement changes it visibly; the constructed-List fixture was
+  removed because it showed the same gap.
 
 ## Outstanding Items
 
