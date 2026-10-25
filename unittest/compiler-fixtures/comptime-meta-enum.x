@@ -2,7 +2,7 @@
 
     An enumerator of an enum that fits in int has its C value at compile
     time: its initializer, or the previous enumerator plus one. `main`
-    prints each value the lowered Lisp produced during translation.
+    prints each value the meta calls produced during translation.
 */
 
 #include "x2c.x"
@@ -23,8 +23,8 @@ meta int me_color(int which) {
 }
 
 int main(void) {
-  printf("K      %d\n", $(me_k));
-  printf("colors %d %d %d %d %d\n", $(me_color 0), $(me_color 1),
-         $(me_color 2), $(me_color 3), $(me_color 4));
+  printf("K      %d\n", $me_k());
+  printf("colors %d %d %d %d %d\n", $me_color(0), $me_color(1),
+         $me_color(2), $me_color(3), $me_color(4));
   return 0;
 }

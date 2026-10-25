@@ -25,7 +25,7 @@ meta double mg_pointer_pi(void) {
 
 int main(void) {
   printf("%.2f %d %d %d %.2f %d %d\n",
-    $(mg_read_pi), $(mg_next), $(mg_next), $(mg_pointer_next),
-    $(mg_pointer_pi), mg_next(), ordinary_meta);
+    $mg_read_pi(), $mg_next(), $mg_next(), $mg_pointer_next(),
+    $mg_pointer_pi(), mg_next(), ordinary_meta);
   return 0;
 }

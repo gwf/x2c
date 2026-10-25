@@ -2,7 +2,7 @@
 #include "meta.x"
 
 /* A Macro value applied in a quotation's hole expands where a top-level
-   `$(...)` slot lands the quotation, in an argument or an initializer. */
+   meta call slot lands the quotation, in an argument or an initializer. */
 macro Expression $sum(Expr $a, Expr $b) => $a + $b;
 
 meta static List scaled(void) {
@@ -17,7 +17,7 @@ meta static List held(void) {
 }
 
 int main(void) {
-  int v = $(scaled);
-  printf("%d %d %d\n", $(scaled), v, $(held));
+  int v = $scaled();
+  printf("%d %d %d\n", $scaled(), v, $held());
   return 0;
 }

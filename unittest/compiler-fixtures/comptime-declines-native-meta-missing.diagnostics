@@ -1,5 +1,5 @@
 unittest/compiler-fixtures/comptime-declines-native-meta-missing.x:4:25: macro: this function cannot run at compile time
-  int main(void) { return $(calls_missing_target) == 1.0; }
-                          ^^
+  int main(void) { return $calls_missing_target() == 1.0; }
+                          ^
   note: function: calls_missing_target reason: no binding for not_compiler_target
 

@@ -31,9 +31,9 @@ meta int absent_selectors(int unused) {
     && value.cadr() == void && value.cddr().len() == 0;
 }
 int main(void) {
-  printf("%d %d\n", $(selectors 0), selectors(0));
-  printf("%d %d\n", $(inspect 0), inspect(0));
-  printf("%s\n%s\n", $(rendered "a"), rendered("a"));
-  printf("%d\n", $(absent_selectors 0));
+  printf("%d %d\n", $selectors(0), selectors(0));
+  printf("%d %d\n", $inspect(0), inspect(0));
+  printf("%s\n%s\n", $rendered("a"), rendered("a"));
+  printf("%d\n", $absent_selectors(0));
   return 0;
 }

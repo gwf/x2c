@@ -16,5 +16,3 @@ int scaled = 15;
 
 int from_xmacro = 11;
 
-int from_xlisp = 13;
-

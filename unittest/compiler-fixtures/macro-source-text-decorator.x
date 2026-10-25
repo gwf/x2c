@@ -1,8 +1,8 @@
 #include "x2c.x"
 
 macro Decorator $show_source(Function $target) {
-  printf("[%s]\n", $(x2c.literal.string (Code.source_text $target)));
-  @(Code.body $target)
+  printf("[%s]\n", $Code.source_text($target));
+  @Code.body($target)
 }
 
 $show_source()

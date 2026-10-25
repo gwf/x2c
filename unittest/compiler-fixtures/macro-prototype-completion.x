@@ -1,12 +1,12 @@
 #include "x2c.x"
 
 macro Unit $define_increment() {
-  int $(x2c.ident "generated_increment")(
-    int $(x2c.ident "value")
+  int $x2c_ident("generated_increment")(
+    int $x2c_ident("value")
   ) {
-    if ($(x2c.ident "value") < 0)
+    if ($x2c_ident("value") < 0)
       raise %(bad-arg (operation "generated_increment"));
-    return $(x2c.ident "value") + 1;
+    return $x2c_ident("value") + 1;
   }
 }
 

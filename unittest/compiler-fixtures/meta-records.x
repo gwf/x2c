@@ -29,6 +29,6 @@ meta int mr_probe(int seed) {
 
 int main(int argc, char **argv) {
   (void) argv;
-  printf("%d %d\n", $(mr_probe 3), mr_probe(argc + 2));
+  printf("%d %d\n", $mr_probe(3), mr_probe(argc + 2));
   return 0;
 }

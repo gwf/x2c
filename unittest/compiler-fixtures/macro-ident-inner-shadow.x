@@ -7,8 +7,8 @@ static int outer_value(void) {
 }
 
 macro Stmt $shadow(Expr $output, Expr $value) {
-  int $(x2c.ident "generated_shadow") = $value;
-  $output = $(x2c.ident "generated_shadow");
+  int $x2c_ident("generated_shadow") = $value;
+  $output = $x2c_ident("generated_shadow");
 }
 
 int main(void) {

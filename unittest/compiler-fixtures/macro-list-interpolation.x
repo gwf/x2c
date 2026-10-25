@@ -37,11 +37,6 @@ macro Expression $ordered(Expr $a, Expr $b, Expr $c) =>
 
 macro Expression $constructed(Expr $value) => $make_list($value);
 macro Expression $anonymous(Expr $value) => $apply_anonymous($value);
-macro Expression $lisp(Expr $value) =>
-  $(list 'expr '("List")
-    (list 'cons
-      (list 'expr '("String") (list 'segments (list 'segexp $value)))
-      '(nil)));
 
 int main(void) {
   $show("one");
@@ -70,8 +65,6 @@ int main(void) {
   List built = $constructed(note(4));
   if (order != 1234 || built != %("4")) return 9;
   if ($anonymous("ten") != %("path: ten")) return 10;
-  List lisp = $lisp(note(5));
-  if (order != 12345 || lisp != %("5")) return 11;
   printf("macro List interpolation ok\n");
   return 0;
 }

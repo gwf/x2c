@@ -3,8 +3,8 @@
 /*  meta-import-defs.x -- macros whose implementation is x2c
 
     A `meta` declaration in a macro import installs its compile-time form in
-    every consuming unit's macro session, so the macro bodies below call x2c
-    rather than Lisp. The runtime form is separate: a unit emits only the
+    every consuming unit's macro session, so the macro bodies below call it
+    directly. The runtime form is separate: a unit emits only the
     definitions it reaches, and the storage class written here says what it
     emits. `static` gives that unit its own copy; public names the one copy
     the program links, which the reaching unit's header exports. See
@@ -14,7 +14,7 @@
 #include "meta-import-nested.x"
 
 /* A dotted path spelled as one identifier. This is the string and list work
-   a shipped macro family writes in Lisp today. Public, and no unit calls it
+   a shipped macro family performs. Public, and no unit calls it
    directly, so it is emitted by the unit that reaches it through the two
    below. */
 meta String mi_flatten(String path, String sep) =>
@@ -56,23 +56,23 @@ meta int mi_next(void) {
 meta String mi_tag(String path) => %"<${path.replace(".", "/")}>";
 
 macro Expression $probe.constant(Expr $path) =>
-  $(x2c.literal.string (mi_constant (Code.source_text $path)));
+  $mi_constant($Code.source_text($path));
 
 macro Expression $probe.accessor(Expr $path) =>
-  $(x2c.literal.string (mi_accessor (Code.source_text $path)));
+  $mi_accessor($Code.source_text($path));
 
 macro Expression $probe.depth(Expr $path) =>
-  $(x2c.literal.int (mi_depth (Code.source_text $path)));
+  $mi_depth($Code.source_text($path));
 
 macro Expression $probe.score(Expr $path) =>
-  $(x2c.literal.int (mi_score (Code.source_text $path)));
+  $mi_score($Code.source_text($path));
 
 macro Expression $probe.tag(Expr $path) =>
-  $(x2c.literal.string (mi_tag (Code.source_text $path)));
+  $mi_tag($Code.source_text($path));
 
 macro Expression $probe.next() => $mi_next();
 
 /* `mi_dashed` arrives through this file's own import, so the nested
    definition has to reach the consuming unit too. */
 macro Expression $probe.dashed(Expr $path) =>
-  $(x2c.literal.string (mi_dashed (Code.source_text $path)));
+  $mi_dashed($Code.source_text($path));

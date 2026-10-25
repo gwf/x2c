@@ -7,6 +7,6 @@ module {
 }
 
 int main(void) {
-  printf("%d %d\n", $twice(21), $(table_size));
+  printf("%d %d\n", $twice(21), $table_size());
   return 0;
 }

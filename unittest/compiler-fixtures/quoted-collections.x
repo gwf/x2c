@@ -13,6 +13,7 @@ enum Choice {
 };
 
 static int bump(int *value) => ++*value;
+meta static int sum(int a, int b) => a + b;
 
 int main(void) {
   int count = 7, evals = 0, indexed[] = {10, 11};
@@ -45,7 +46,7 @@ line two",
     ${chosen},
     ${((Pair) { .value = 24 }).value},
     ${(count, count + 3)},
-    ${$(+ 20 5)}
+    ${$sum(20, 5)}
   ];
   Map config = %{
     name: "x2c",

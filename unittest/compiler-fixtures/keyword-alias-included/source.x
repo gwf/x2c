@@ -1,5 +1,5 @@
 macro Decorator $fixture.identity(Function $target) {
-  @(Code.body $target)
+  @Code.body($target)
 }
 
 keyword identity $fixture.identity;

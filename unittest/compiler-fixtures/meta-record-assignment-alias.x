@@ -33,7 +33,7 @@ meta int pointer_identity(void) {
 int main(void) {
   int runtime = 1;
   printf("%d %d %d %d\n",
-         $(assignment_alias), native_assignment_alias(),
-         $(pointer_identity), runtime ? pointer_identity() : 0);
+         $assignment_alias(), native_assignment_alias(),
+         $pointer_identity(), runtime ? pointer_identity() : 0);
   return 0;
 }

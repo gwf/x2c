@@ -5,11 +5,11 @@ static int increment(int value) {
 }
 
 macro Unit $define_body_callers(Expr $callable) {
-  static int $(x2c.ident "macro_body_parens")(int parens_value) {
+  static int $x2c_ident("macro_body_parens")(int parens_value) {
     return ($callable)(parens_value);
   }
 
-  static int $(x2c.ident "macro_body_direct")(int direct_value) {
+  static int $x2c_ident("macro_body_direct")(int direct_value) {
     return $callable(direct_value);
   }
 }

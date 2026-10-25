@@ -16,6 +16,8 @@ static int _init_guard_ = 0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
+static int sum(int a, int b);
+
 static int answer(int value);
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
@@ -54,6 +56,10 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _29 = String_new("40()");
   _30 = int_var(2);
   _31 = cons(_30, NULL);
+}
+
+static int sum(int a, int b){
+  return a + b;
 }
 
 static int answer(int value){

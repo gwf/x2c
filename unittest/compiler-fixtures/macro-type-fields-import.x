@@ -2,6 +2,6 @@
 
 macro Unit $imported_record(name $tag) {
   struct $tag {
-    short $(x2c.ident "included");
+    short $x2c_ident("included");
   };
 }

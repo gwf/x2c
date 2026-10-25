@@ -48,28 +48,28 @@ macro Unit $generated_protocol() {
 macro Unit $generated_units() {
   #define GENERATED_SOURCE_FLAG 1
 
-  typedef enum $(x2c.ident "GeneratedKind") {
-    $(x2c.ident "GENERATED_KIND") = 3
-  } $(x2c.ident "GeneratedKind");
+  typedef enum $x2c_ident("GeneratedKind") {
+    $x2c_ident("GENERATED_KIND") = 3
+  } $x2c_ident("GeneratedKind");
 
-  typedef struct $(x2c.ident "GeneratedRecord") {
-    int $(x2c.ident "value");
-  } $(x2c.ident "GeneratedRecord");
+  typedef struct $x2c_ident("GeneratedRecord") {
+    int $x2c_ident("value");
+  } $x2c_ident("GeneratedRecord");
 
-  typedef union $(x2c.ident "GeneratedUnion") {
-    int $(x2c.ident "integer");
-    float $(x2c.ident "floating");
-  } $(x2c.ident "GeneratedUnion");
+  typedef union $x2c_ident("GeneratedUnion") {
+    int $x2c_ident("integer");
+    float $x2c_ident("floating");
+  } $x2c_ident("GeneratedUnion");
 
-  static int $(x2c.ident "generated_global") = 4;
+  static int $x2c_ident("generated_global") = 4;
 
-  int $(x2c.ident "generated_function")(int value);
+  int $x2c_ident("generated_function")(int value);
 
-  inline int $(x2c.ident "generated_inline")(int value) {
+  inline int $x2c_ident("generated_inline")(int value) {
     return value + 1;
   }
 
-  int $(x2c.ident "generated_function")(int value) {
+  int $x2c_ident("generated_function")(int value) {
     return value + 3;
   }
 }

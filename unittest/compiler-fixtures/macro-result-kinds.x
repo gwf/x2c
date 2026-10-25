@@ -11,7 +11,7 @@ macro Field $field_result() {
 }
 
 macro Unit $unit_result() {
-  static int $(x2c.ident "unit_value") = 12;
+  static int $x2c_ident("unit_value") = 12;
 }
 
 $unit_result();

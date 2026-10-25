@@ -12,7 +12,7 @@ macro Expression $nested() => 4;
 int third = $definition_site();
 
 macro Unit $increment(Expr $value) {
-  static int $(x2c.ident "answer")(void) {
+  static int $x2c_ident("answer")(void) {
     return $value + 1;
   }
 }

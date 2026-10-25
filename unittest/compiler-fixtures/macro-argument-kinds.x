@@ -3,7 +3,7 @@
 macro expression $expression_arg(expr $value) => $value;
 
 macro Unit $type_arg(Type $type) {
-  static $type $(x2c.ident "typed_value") = 1;
+  static $type $x2c_ident("typed_value") = 1;
 }
 
 macro Unit $declaration_arg(Decl $declaration) {
@@ -28,7 +28,7 @@ macro Unit $name_expression(Name $name, Name $reader) {
 macro Expression $literal_arg(Literal $value) => $value;
 
 macro Unit $parameter_arg(Param $parameter) {
-  static int $(x2c.ident "parameter_value")($parameter) {
+  static int $x2c_ident("parameter_value")($parameter) {
     return 6;
   }
 }

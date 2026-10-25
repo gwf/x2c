@@ -3,5 +3,5 @@
 macro Decorator $project.imported(
   Function $function
 ) {
-  @(Code.body $function)
+  @Code.body($function)
 }

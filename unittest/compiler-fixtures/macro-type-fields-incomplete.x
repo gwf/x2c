@@ -3,7 +3,7 @@
 struct IncompleteRecord;
 
 macro Unit $inspect(Type $type) {
-  @(Type.fields $type)
+  @Type.fields($type)
 }
 
 $inspect(struct IncompleteRecord);

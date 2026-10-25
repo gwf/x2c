@@ -9,7 +9,3 @@ int included(void){
   return 4;
 }
 
-int later(void){
-  return 99;
-}
-

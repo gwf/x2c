@@ -8,13 +8,13 @@ macro Expression $call(Expr $callee, Expr @arguments) =>
   $callee(@arguments);
 
 macro Unit $same_use(Expr @values) {
-  static int $(x2c.ident "answer")(void) {
+  static int $x2c_ident("answer")(void) {
     return sum(@values);
   }
 }
 
 macro Stmt $swap(Expr $left, Expr $right) {
-  $(Code.type $left) temporary = $left;
+  $Code.type($left) temporary = $left;
   $left = $right;
   $right = temporary;
 }

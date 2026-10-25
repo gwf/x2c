@@ -22,6 +22,8 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static int bump(int * value);
 
+static int sum(int a, int b);
+
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -43,6 +45,10 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
 
 static int bump(int * value){
   return ++ * value;
+}
+
+static int sum(int a, int b){
+  return a + b;
 }
 
 int main(void){

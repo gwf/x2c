@@ -1,11 +1,11 @@
 #include "x2c.x"
 
 macro Unit $declare_generated() {
-  int $(x2c.ident "generated_function")(int);
+  int $x2c_ident("generated_function")(int);
 }
 
 macro Unit $define_generated() {
-  int $(x2c.ident "generated_function")(int value) {
+  int $x2c_ident("generated_function")(int value) {
     return value;
   }
 }

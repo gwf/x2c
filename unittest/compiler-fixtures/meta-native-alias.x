@@ -16,6 +16,6 @@ meta static Size resized(Size size) {
 }
 
 int main(void) {
-  printf("%.1f %d\n", $(sqrt 9.0), (int) $(resized 3));
+  printf("%.1f %d\n", $sqrt(9.0), (int) $resized(3));
   return 0;
 }

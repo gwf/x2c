@@ -3,7 +3,7 @@
 macro Expression $identity_lambda() => %!(value) => value;
 
 macro Unit $build_control(Expr $amount) {
-  static int $(x2c.ident "generated")(void) {
+  static int $x2c_ident("generated")(void) {
     int result = 0;
     for (int index = 0; index < 1; index++)
       result += $amount;

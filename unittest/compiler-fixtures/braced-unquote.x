@@ -2,6 +2,8 @@
 
 static int calls;
 
+meta static int sum(int a, int b) => a + b;
+
 static int answer(int value) {
   calls++;
   return value;
@@ -19,11 +21,11 @@ int main(void) {
   List nested = %(outer (inner ${base + 2}));
   List nested_string = %("answer=${base + 2}");
   List short_then_list = %($base(tail));
-  int compile_time = $(+ 40 2);
-  List nested_compile_time = %(${$(+ 40 2)});
+  int compile_time = $sum(40, 2);
+  List nested_compile_time = %(${$sum(40, 2)});
   String text = %"answer=${base + 2}", short_then_text = %"$base()";
-  Array array = %[${$(+ 40 2)}];
-  Map map = %{answer: ${$(+ 40 2)}};
+  Array array = %[${$sum(40, 2)}];
+  Map map = %{answer: ${$sum(40, 2)}};
   int macro_value = $fixture.identity(base + 2), comma = 0;
   List comma_value = %(${comma = 1, (int) (comma + 1)});
   List index = %(${array[0].int()});

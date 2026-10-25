@@ -69,8 +69,6 @@ int main(void) {
   Var boxed = $meta_boxed();
   Array boxed_array = boxed;
   printf("boxed %s %d\n", boxed.tag().str(), (int) boxed_array[0]);
-  Array lisp = $(meta_empty_array);
-  printf("lisp %d\n", (int) lisp.len());
   Map t = $meta_nested(), u = $meta_nested();
   printf("nested %s %s %d\n", t["rows"].repr(),
     t["index"][<even>].repr(), ((List) t["scalars"][2]).len());

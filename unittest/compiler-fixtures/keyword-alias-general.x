@@ -18,7 +18,7 @@ macro Expression $fixture.call(Expr $callee, Expr @arguments) =>
   $callee(@arguments);
 
 macro Stmt $fixture.swap(Expr $left, Expr $right) {
-  $(Code.type $left) temporary = $left;
+  $Code.type($left) temporary = $left;
   $left = $right;
   $right = temporary;
 }

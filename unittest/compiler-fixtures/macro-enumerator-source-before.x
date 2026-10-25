@@ -5,7 +5,7 @@ typedef enum ExistingRows {
 } ExistingRows;
 
 macro Enumerator $colliding_enumerator() {
-  $(x2c.ident "SOURCE_ENUM")
+  $x2c_ident("SOURCE_ENUM")
 }
 
 typedef enum GeneratedRows {

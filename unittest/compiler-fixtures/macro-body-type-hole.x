@@ -4,7 +4,7 @@ macro Stmt $keep_body_target() {
 }
 
 macro Unit $define_body_local(Type $T) {
-  static $T $(x2c.ident "macro_body_local")($T value) {
+  static $T $x2c_ident("macro_body_local")($T value) {
     $T local = value;
     $keep_body_target();
     return local;
@@ -12,14 +12,14 @@ macro Unit $define_body_local(Type $T) {
 }
 
 macro Unit $define_inferred_body_local($T) {
-  static long $(x2c.ident "macro_body_inferred_local")(void) {
+  static long $x2c_ident("macro_body_inferred_local")(void) {
     $T local = 43;
     return local;
   }
 }
 
 macro Unit $define_inferred_cast($T) {
-  static long $(x2c.ident "macro_body_inferred_cast")(long value) {
+  static long $x2c_ident("macro_body_inferred_cast")(long value) {
     return ($T)value;
   }
 }
@@ -31,7 +31,7 @@ macro Expression $first($items) => ($items)[0];
 macro Expression $literal_of(Type $T) => ($T)[1, 2];
 
 macro Unit $define_annotated_pointer(Type $T) {
-  static $T $(x2c.ident "macro_body_annotated_pointer")($T *value) {
+  static $T $x2c_ident("macro_body_annotated_pointer")($T *value) {
     $T *local = value;
     return *local;
   }

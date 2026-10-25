@@ -11,6 +11,6 @@ meta static int class_value(MetaCount value) => value + 1;
 int main(int argc, char **argv) {
   (void) argv;
   printf("%.1f %.1f %d\n",
-    $(native_total 0.0), native_total(argc - 1), $(class_value 6));
+    $native_total(0.0), native_total(argc - 1), $class_value(6));
   return 0;
 }

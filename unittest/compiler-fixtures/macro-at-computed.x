@@ -3,7 +3,6 @@
 
 meta static List identity(List rows) => rows;
 macro Expression $call(Expr $callee, Expr @args) => $callee(@identity($args));
-macro Expression $lisp_call(Expr $callee, Expr @args) => $callee(@(identity $args));
 macro Expression $array(Expr @args) => %[${@identity($args)}];
 macro Expression $map(Entry @rows) => %{${@identity($rows)}};
 macro Expression $lambda(Expr $body, Param @params) =>
@@ -12,9 +11,9 @@ macro Unit $fields(Name $name, Field @rows) {
   typedef struct $name { @identity($rows) } $name;
 }
 macro Unit $enums(Enumerator @rows) {
-  enum GeneratedEnum { @(identity $rows) };
+  enum GeneratedEnum { @identity($rows) };
 }
-macro Unit $global_locals(DeclaratorRow @rows) { int @(identity $rows); }
+macro Unit $global_locals(DeclaratorRow @rows) { int @identity($rows); }
 macro Stmt $locals(DeclaratorRow @rows) { int @identity($rows); }
 macro Stmt $block(Stmt @rows) { @identity($rows) }
 meta static List catch_rows(void) {
@@ -23,8 +22,7 @@ meta static List catch_rows(void) {
   return %(($pattern $body));
 }
 macro Stmt $caught(Stmt $body) { try $body catch @catch_rows() }
-macro Stmt $caught_lisp(Stmt $body) { try $body catch @(catch_rows) }
-macro Stmt $matched(Expr $value, MatchRow @rows) { match ($value) { @(identity $rows) } }
+macro Stmt $matched(Expr $value, MatchRow @rows) { match ($value) { @identity($rows) } }
 macro Unit $units(Unit @rows) { @identity($rows) }
 macro Stmt $fixture.for(Stmt @rows) { @rows }
 macro Stmt $qualified(Stmt $row) { @fixture.for($row) }
@@ -44,10 +42,9 @@ int main(void) {
   Func fn = $lambda(42, int unused);
   (void) fn;
   $caught(raise %(probe (value 43)););
-  $caught_lisp(raise %(probe (value 44)););
   $matched(%(ready), case %(ready): total++;);
   $qualified(total++;);
-  if (total != 46 || global_left + global_right != 42 || $lisp_call(sum, left, right) != 42 ||
+  if (total != 45 || global_left + global_right != 42 ||
       full.len() != 2 || empty.len() || full[0].int() != 20 ||
       full[1].int() != 22 || map["a"].int() != 20 ||
       map["b"].int() != 22 || no_rows.len() || record.value != 5)

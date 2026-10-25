@@ -1,7 +1,7 @@
 #include "x2c.x"
 
 macro Enumerator $published_enumerator() {
-  $(x2c.ident "LATER_SOURCE_ENUM")
+  $x2c_ident("LATER_SOURCE_ENUM")
 }
 
 typedef enum GeneratedRows {

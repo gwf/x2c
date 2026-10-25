@@ -1,4 +1,4 @@
-/* Native and Var comparisons use C conversions; Lisp compares exactly. */
+/* Native and Var comparisons use C conversions. */
 #include "x2c.x"
 
 meta static int identity(int value) => value;
@@ -18,6 +18,5 @@ int main(void) {
   printf("rounded %d %d\n",
     $identity(9007199254740993LL == 9007199254740992.0),
     precise == 9007199254740992.0);
-  printf("dynamic %d %d\n", $(if (< -1 1) 1 0), (Var) -1 < (Var) 1U);
   return 0;
 }
