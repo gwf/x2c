@@ -93,7 +93,7 @@ sum of squares: 91
 - [Macros](magic/macros.x): swap integers or strings with one typed macro.
 - [Decorators](magic/decorators.x): trace a function's entry and exit.
 - [Keywords](magic/keywords.x): release a mutex when an exception leaves a block.
-- [Compile-time Lisp](magic/compile-time.x): generate two arrays from one table.
+- [Compile-time tables](magic/compile-time.x): generate two arrays from one table.
 - [Runtime Lisp](magic/runtime.x): evaluate two policies using a native binding.
 - [Agreement](magic/ways-to-agree.x): build the same List four different ways.
 - [Self-hosting](magic/selfhost.md): rebuild the compiler and inspect its syntax.

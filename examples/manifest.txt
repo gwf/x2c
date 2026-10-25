@@ -27,8 +27,8 @@ love/values|showcase|run||expected/love-values.stdout|Standalone love var galler
 magic/compile-time|showcase|run||expected/magic-compile-time.stdout|Standalone magic compile-time gallery example.
 magic/decorators|showcase|run||expected/magic-decorators.stdout|Standalone magic decorators gallery example.
 magic/file-policy|showcase|run|../../../examples/magic/policy.xlisp|expected/inline-lisp.stdout|Inline Lisp policy with inferred native bindings and typed results.
-magic/imported-macros|showcase|run||expected/compile-time-macros.stdout|Imported X2C macros with a compile-time Lisp helper.
-magic/support/answer|probe|none||-|Compile-time provider for imported-macros.
+magic/imported-macros|showcase|run||expected/compile-time-macros.stdout|Imported X2C macros with a shared meta function helper.
+magic/support/answer|probe|none||-|Meta function and macro provider for imported-macros.
 magic/keywords|showcase|run||expected/magic-keywords.stdout|Standalone magic keywords gallery example.
 magic/lambdas|showcase|run||expected/lambdas.stdout|Expression lambdas, captured values, and inferred Var results.
 magic/macros|showcase|run||expected/magic-macros.stdout|Standalone magic macros gallery example.
@@ -40,7 +40,7 @@ magic/runtime|showcase|run||expected/magic-runtime.stdout|Standalone magic runti
 magic/stacked-decorators|showcase|run||expected/decorators.stdout|Function decorators with target inspection, stacking, and defer.
 magic/tic-tac-toe|external-input|build||-|Interactive game whose Lisp opponent is editable without recompiling; play it as README.md describes.
 magic/system-macros|showcase|run||expected/system-macros.stdout|Classes, copied value keys, explicit allocation destinations, and block cleanup.
-magic/ways-to-agree|showcase|run||expected/magic-ways-to-agree.stdout|Four paths to the same List, including compile-time and runtime Lisp.
+magic/ways-to-agree|showcase|run||expected/magic-ways-to-agree.stdout|Four paths to the same List, including a meta function and runtime Lisp.
 power/bindings|showcase|run||expected/power-bindings.stdout|Delegate fields, Self results, reference parameters, destructuring assignment, and alias.
 power/channel-service|showcase|run||expected/channel-service.stdout|A supervised service and clients with explicit request completion.
 power/channel-word-count|showcase|run|words|expected/channel-word-count.stdout|Bounded channels and a supervised word-count batch using shared canonical Strings.

@@ -1,9 +1,13 @@
 #include <assert.h>
+// A meta function computes the List during translation.
+meta static List squares(int n) {
+  Array items = [];
+  for (int i = 1; i <= n; i++) items.push(i * i);
+  return items.list_free();
+}
+
 int main(void) {
-// Compile-time Lisp can return an actual AST node.
-List comptime = $(let ((cons-expr (lambda (n tail)
-  `(expr ("List") (cons ,(x2c.literal.int n) ,tail)))))
-  (cons-expr 1 (cons-expr 4 (cons-expr 9 '(nil)))));
+List comptime = $squares(3);
 
 // A literal compiles to a form similar to the cons cells below.
 List literal = %(1 4 9);

@@ -7,15 +7,21 @@ tab: codegen
 ```x2c
 ~#include <assert.h>
 // One table supplies both wire codes and readable labels.
-$(defun responses ()
-  '((200 "OK") (404 "Not Found") (503 "Unavailable")))
+meta static List responses(void) =>
+  %((200 "OK") (404 "Not Found") (503 "Unavailable"));
 
-static const int codes[] = $(begin `(expr () (composite (commas
-  ,@(map (lambda (row) (x2c.literal.int (car row))) (responses))))));
+// The compiler runs `column` and inserts a C initializer built from the table.
+meta static List column(int n) {
+  Array cells = [];
+  foreach (List row in responses()) cells.push(row[n]);
+  List items = cells.list_free();
+  return $!( { @items } );
+}
+
+static const int codes[] = $column(0);
 
 ~int main(void) {
-String labels[] = $(begin `(expr () (composite (commas
-  ,@(map (lambda (row) (x2c.literal.string (cadr row))) (responses))))));
+String labels[] = $column(1);
 
 // The generated program uses ordinary C arrays.
 for (size_t i = 0; i < sizeof(codes) / sizeof(*codes); i++)
@@ -25,7 +31,7 @@ for (size_t i = 0; i < sizeof(codes) / sizeof(*codes); i++)
 ~}
 ```
 
-A Lisp interpreter runs inside the compiler. `$()` can compute values
-or generate code; here a quasiquoted `composite` form builds two C array
-initializers from one response table. The generated program contains the codes and
-string literals, and changing the table updates both arrays.
+A `meta` function runs inside the compiler. `$column(...)` computes during
+translation; here a quotation splices one table column into a C array
+initializer. The generated program contains the codes and string literals,
+and changing the table updates both arrays.

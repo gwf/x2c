@@ -4,11 +4,12 @@
 macro Expression $loud(Expr $s) => $s.upper();                  // typed macro
 
 static Var bang(Var s) { return %"${s.string()}!"; }            // Var -> Var
+meta static String lower(String s) => s.lower();                // meta
 
 static void _hello_machine(void) {
-  String hi = %"He${$(lower "LL")}o";                           // CT Lisp
+  String hi = %"He${$lower("LL")}o";                            // meta call
   List tail = %("World"), words = %($hi @tail);                 // List + $/@
-  Array back = [words[$(+ 1 0)], words[$(- 1 1)]];              // Array
+  Array back = [words[1], words[0]];                            // Array
   Map machine = {parts: back};                                  // Map + Symbol
   Lisp lisp = Lisp.new(); defer lisp.destroy();                 // RT Lisp
   List parts = machine[<parts>].array();                        // methods
@@ -115,9 +116,12 @@ static void _runtime_lisp(void) {
   puts(greeting);
 }
 
-/*  hello-world: compile-time Lisp  */
-static void _compile_time_lisp(void) {
-  puts($(string-append "Hel" "lo, " "Wor" "ld!"));
+/*  hello-world: compile-time meta  */
+meta static String joined(String a, String b, String c, String d) =>
+  a + b + c + d;
+
+static void _compile_time_meta(void) {
+  puts($joined("Hel", "lo, ", "Wor", "ld!"));
 }
 
 /*  hello-world: greeting macro  */
@@ -138,7 +142,7 @@ int main(void) {
   _closure_pipeline();
   _iterator_deltas();
   _runtime_lisp();
-  _compile_time_lisp();
+  _compile_time_meta();
   _greeting_macro();
   return 0;
 }

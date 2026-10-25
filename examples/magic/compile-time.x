@@ -1,14 +1,20 @@
 #include <assert.h>
 // One table supplies both wire codes and readable labels.
-$(defun responses ()
-  '((200 "OK") (404 "Not Found") (503 "Unavailable")))
+meta static List responses(void) =>
+  %((200 "OK") (404 "Not Found") (503 "Unavailable"));
 
-static const int codes[] = $(begin `(expr () (composite (commas
-  ,@(map (lambda (row) (x2c.literal.int (car row))) (responses))))));
+// The compiler runs `column` and inserts a C initializer built from the table.
+meta static List column(int n) {
+  Array cells = [];
+  foreach (List row in responses()) cells.push(row[n]);
+  List items = cells.list_free();
+  return $!( { @items } );
+}
+
+static const int codes[] = $column(0);
 
 int main(void) {
-String labels[] = $(begin `(expr () (composite (commas
-  ,@(map (lambda (row) (x2c.literal.string (cadr row))) (responses))))));
+String labels[] = $column(1);
 
 // The generated program uses ordinary C arrays.
 for (size_t i = 0; i < sizeof(codes) / sizeof(*codes); i++)

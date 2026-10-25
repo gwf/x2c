@@ -1,6 +1,6 @@
 #pragma once
 
-$(defun example-answer-offset () 2)
+meta int example_answer_offset(void) => 2;
 
 macro Expression $example.answer(Expr $base) =>
-  $base + $(example-answer-offset);
+  $base + $example_answer_offset();

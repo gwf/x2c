@@ -1,8 +1,8 @@
 #include "meta.x"
 #include <assert.h>
-// A macro implemented in x2c rather than in compile-time Lisp. `meta` marks
-// a function the compiler runs during translation, and the `x2c_*` functions
-// `meta.x` declares are the compiler surface those functions call.
+// A macro implemented in x2c. `meta` marks a function the compiler runs
+// during translation, and the `x2c_*` functions `meta.x` declares are the
+// compiler surface those functions call.
 
 typedef struct Response {
   int code;
