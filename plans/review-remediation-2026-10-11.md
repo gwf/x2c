@@ -10,7 +10,7 @@ Finish the three accepted explanations by extending their existing owners:
 
 | Explanation | Reuse | Remaining action |
 | --- | --- | --- |
-| Canonical source forms and their legal positions | The source construction and position contract in [the language reference](../docs/src/reference/language.md) | Identify missing forms and examples; add a compact catalog where useful without duplicating semantic owners. |
+| Canonical source forms and their legal positions | The [AST grammar](../docs/src/internals/ast-grammar.md) catalogs current List layouts and positions; the [language reference](../docs/src/reference/language.md) owns semantics. | AST catalog delivered. Keep source-position contracts linked to that reference; this closes only the catalog writing, not the unrelated explanations below. |
 | Rewrite order, decline, and visibility | [Generating code](../docs/src/guide/generating-code.md) and the rule selection/decline contract in `lib/meta.x` | Check the accepted examples against the existing explanation and fill only missing ordering or visibility cases. |
 | Compile-time Lisp truthiness, binding, and host limits | The Lisp binding, inherited-name, `set_global`, and `eval` sections in [the language reference](../docs/src/reference/language.md) | Identify missing truthiness and implementation-limit explanations; do not rewrite already documented binding behavior. |
 

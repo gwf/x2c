@@ -46,6 +46,10 @@ The code fragments below are illustrative excerpts, not standalone programs.
 
 ## Read the node as syntax
 
+The [AST grammar](../docs/src/internals/ast-grammar.md) is the maintained
+reference for List layouts, field meanings, legal positions, and stage
+variants. Use its head index to interpret a literal pattern.
+
 An x2c AST is an instance of a grammar production stored as a `List`.
 Describe that production directly:
 

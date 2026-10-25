@@ -296,6 +296,9 @@ implicit runtime contributes a few thousand rows, so grep the output.
 
 ### Full parse and type annotation
 
+The [AST grammar](ast-grammar.md) defines the List layouts, binding records,
+legal positions, and stage-specific variants used throughout this pipeline.
+
 The full parse reads tokens and the global environment and produces the parsed
 AST: immutable `List`s, tagged by node kind, annotated with resolved types.
 `Compiler.full_parse` in `src/compiler/parsing/parse.x` drives a
