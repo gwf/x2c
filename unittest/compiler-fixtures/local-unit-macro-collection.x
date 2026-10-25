@@ -1,7 +1,7 @@
 // Collection tries a Unit macro defined in the same file, so a caller
 // before the invocation sees the generated method and its return type. A
-// macro whose signature reads top-level Lisp fails that attempt, keeps
-// nothing, and still expands in the full parse.
+// macro whose signature names its function through a meta call still
+// expands in the full parse.
 #include "x2c.x"
 
 macro Unit $scale(Type $type, Name $method, Name $label, Expr $factor) {
@@ -16,10 +16,10 @@ static int early(void) {
 
 $scale(int, twice, twice_label, 2);
 
-$(def local_name "thrice")
+meta static String local_name(void) => "thrice";
 
 macro Unit $named(Type $type) {
-  $type $(x2c.ident local_name)($type value) { return value * 3; }
+  $type $x2c_ident($local_name())($type value) { return value * 3; }
 }
 
 $named(int);

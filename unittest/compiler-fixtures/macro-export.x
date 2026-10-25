@@ -9,4 +9,4 @@ meta int m_sum(int n) {
   foreach (int i, [1, 2, 3]) total += i * n;
   return total;
 }
-$(defun m_lisp () 11)
+meta int m_lisp(void) => 11;
