@@ -120,7 +120,7 @@ Public functions:
 
 `Frontend.open`, `Frontend.open_reporting`, `Frontend.open_session`,
 `Frontend.start`, `ParsedUnit.collect`, `ParsedUnit.parse`, `ParsedUnit.close`,
-`Frontend.load_support`, `Frontend.new`
+`Frontend.load_prelude`, `Frontend.load_support`, `Frontend.new`
 
 ### [src/grammar.x](../src/grammar.x)
 

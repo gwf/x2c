@@ -12,6 +12,7 @@ Configured compiler sessions and source units.
 
 | Function | Summary |
 | --- | --- |
+| [`Frontend.load_prelude`](#Frontend.load_prelude) | Collects the preludes once, in a Context that shares the caller's pool, before any unit opens. |
 | [`Frontend.load_support`](#Frontend.load_support) | Loads process-owned collection support and the native modules `request` names before units, and selects those modules, in order, for its compile-time calls. |
 | [`Frontend.new`](#Frontend.new) | Borrows a configured request for sequential units. |
 | [`Frontend.open`](#Frontend.open) | Runs the source stages. |
@@ -24,6 +25,19 @@ Configured compiler sessions and source units.
 
 ### `Frontend`
 
+<a id="Frontend.load_prelude"></a>
+#### Frontend.load_prelude
+
+`int Frontend.load_prelude(Frontend frontend)`
+
+Collects the preludes once, in a Context that shares the caller's pool,
+before any unit opens. Units, and the workers a translation forks, then
+replay them from the process cache. The collection runs as an empty
+unit, whatever dump or symbol mode the request selects. Returns zero
+after reporting a failure.
+
+Source: `src/frontend.x:480`
+
 <a id="Frontend.load_support"></a>
 #### Frontend.load_support
 
@@ -33,7 +47,7 @@ Loads process-owned collection support and the native modules `request`
 names before units, and selects those modules, in order, for its
 compile-time calls.
 
-Source: `src/frontend.x:479`
+Source: `src/frontend.x:504`
 
 <a id="Frontend.new"></a>
 #### Frontend.new
@@ -44,7 +58,7 @@ Borrows a configured request for sequential units. The request and this
 session must outlive its units. Initialize process support above any
 temporary command Context before creating a session inside that Context.
 
-Source: `src/frontend.x:490`
+Source: `src/frontend.x:515`
 
 <a id="Frontend.open"></a>
 #### Frontend.open

@@ -1,9 +1,9 @@
 # Native compiler with runtime Lisp
 
-> Status: implemented, awaiting publication
-> Approved design, 2026-10-25. Implemented and validated locally on
-> 2026-10-25 in `codex/native-compiler-runtime-lisp`; `agent-pr-check`
-> passed. Publication to `dev` requires Gary's separate direction.
+> Status: landed
+> Approved design, 2026-10-25. Implemented, validated with
+> `agent-pr-check`, and published to `dev` on 2026-10-25 with Gary's
+> approval.
 
 ## Result and compatibility
 
