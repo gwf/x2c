@@ -158,7 +158,7 @@ int datum_read_plain(String text, unsigned &cursor, Var &out) {
   Array items = auto [];
   if (text && text[at] && _plain_form(text, at, value, items, 1))
     cursor = at;
-  else if (Lisp.read(NULL, text, cursor, value) != <value>) return 0;
+  else if (datum_read_form(text, cursor, value) != <value>) return 0;
   out = value;
   return 1;
 }
@@ -168,9 +168,9 @@ int datum_read_plain(String text, unsigned &cursor, Var &out) {
    The forms `datum_write` spells as plain data, Lists, Strings, decimal
    integers, and bare Atoms, are read here without the Lisp tokenizer,
    which costs most of an interface read. Each reader returns 0 for any
-   other spelling, and `Lisp.read` then reads the form from its start, so
-   every value is the reader's. `items` holds the elements of the Lists
-   being read. */
+   other spelling, and `datum_read_form` then reads the form from its
+   start, so every value is the reader's. `items` holds the elements of
+   the Lists being read. */
 
 static int _plain_form(
   char *s, unsigned &at, Var &out, Array items, int depth) {

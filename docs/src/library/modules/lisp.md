@@ -208,7 +208,7 @@ the stream has been consumed.
 `<size-limit>`, or `<alloc-fail>` while reading, or any cause from
 `Lisp.eval_string`.
 
-Source: `lib/lisp/evaluate.x:810`
+Source: `lib/lisp/evaluate.x:831`
 
 <a id="Lisp.eval_string"></a>
 #### Lisp.eval_string
@@ -226,7 +226,7 @@ session; borrowed referents keep their original lifetimes.
 **Raises:** `<bad-arg>` for a null session, `<incomplete>` or `<malformed>`
 while reading, or any cause from `Lisp.eval`.
 
-Source: `lib/lisp/evaluate.x:785`
+Source: `lib/lisp/evaluate.x:805`
 
 <a id="Lisp.freeze"></a>
 #### Lisp.freeze
@@ -351,7 +351,7 @@ been constructed.
 reader syntax, or `<alloc-fail>`, `<size-limit>`, or `<bad-enc>` while
 tokenizing, constructing, interning, or boxing the form.
 
-Source: `lib/lisp/reader.x:173`
+Source: `lib/lisp/evaluate.x:789`
 
 <a id="Lisp.remove_global"></a>
 #### Lisp.remove_global
@@ -598,7 +598,7 @@ Source: `lib/lisp/primitives.x:213`
 
 Marks the actual Lambda installed for one lowered source function.
 
-Source: `lib/lisp/evaluate.x:826`
+Source: `lib/lisp/evaluate.x:847`
 
 #### lisp_str
 

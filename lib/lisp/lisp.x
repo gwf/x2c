@@ -304,6 +304,5 @@ module {
   "evaluate.x",
   "native.x",
   "sessions.x",
-  "reader.x",
   "primitives.x",
 }

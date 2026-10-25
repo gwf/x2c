@@ -154,6 +154,7 @@ static Var _incomplete(String source, unsigned at) {
   raise %(incomplete (source $source) (line $line) (column $column));
 }
 
+/* Scans all of `source` into Lisp tokens whose storage `scope` owns. */
 Tokenizer datum_scan_tokens(String source, Scope *scope) {
   Tokenizer tokenizer = NULL;
   auto (scope) {
@@ -161,4 +162,15 @@ Tokenizer datum_scan_tokens(String source, Scope *scope) {
     tokenizer.scan();
   }
   return tokenizer;
+}
+
+/* Reads the form at `cursor` in `source` into `out` as `Lisp.read`
+   describes, with the tokens in a temporary Scope. */
+Symbol datum_read_form(String source, unsigned &?cursor, Var &?out) {
+  if (!source) return <eof>;
+  if (!cursor) return <eof>;
+  unsigned base = cursor;
+  Scope tokens_scope = auto Scope.new_named("Lisp tokens");
+  Tokenizer tokenizer = datum_scan_tokens(source + base, &tokens_scope);
+  return datum_read_token_form(tokenizer, source, base, cursor, out);
 }
