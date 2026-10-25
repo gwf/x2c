@@ -1753,7 +1753,8 @@ A `Function` decorator preserves the original name, storage, qualifiers, return
 type, parameters, binding, and method identity. It may splice the old body,
 replace it, or produce an empty body. A general `Unit` decorator can transform
 a complete function or declaration, but a public target must retain the same
-public binding and contract and cannot gain new public siblings. Private
+public binding and contract. The decorator may also add siblings; a public
+sibling joins the unit's interface like any other public declaration. Private
 targets and hygienically private siblings may be rewritten freely.
 
 `Decorator` adjacency still collects the unchanged source target. A public

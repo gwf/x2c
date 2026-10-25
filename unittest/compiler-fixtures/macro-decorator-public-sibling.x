@@ -1,11 +1,10 @@
 #include "x2c.x"
 
-/* The language reference says a public target cannot gain new public
-   siblings. The compiler does not enforce that rule yet, so this records the
-   current interface; unittest/STATUS.md tracks the gap. */
+/* A Unit decorator may add a public sibling beside its public target; the
+   header declares both. */
 macro Decorator $add_public(Unit $target) {
   $target
-  int $x2c_ident("unexpected_public");
+  int $x2c_ident("added_public");
 }
 
 $add_public()

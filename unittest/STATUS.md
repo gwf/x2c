@@ -245,18 +245,6 @@ passed six repeated nested-Make probes, and help output remains byte-identical.
   macro template form was found that spells that canonical AST; a `${...}`
   body is rejected with "expected macro name after '$'". The five `built-*`
   rows were therefore removed. Ordinary lambda destinations remain covered.
-- The "Decorators" section of `docs/src/reference/language.md` says a
-  public `Unit` target "cannot gain new public siblings". The compiler does
-  not enforce this. The former `macro-decorator-public-sibling` and
-  `macro-decorator-public-lisp-siblings` fixtures failed only because the
-  Lisp spelling `x2c.ident` reached the method-name check ("method name has
-  no concrete owner"). With native `$x2c_ident("unexpected_public")` in the
-  template, translation succeeds and the header declares `extern int
-  unexpected_public;`. A meta function that returns the target followed by
-  two constructed `(declare (int) ...)` Lists also succeeds and exports
-  both siblings. `macro-decorator-public-sibling` now records the current
-  header so enforcement changes it visibly; the constructed-List fixture was
-  removed because it showed the same gap.
 - Outside an expansion, a `$` call rejects a String literal passed to a `Var`
   parameter: "explicit meta call cannot be resolved", note "an argument must
   be a constant, captured syntax, or a meta call". A user `meta String
