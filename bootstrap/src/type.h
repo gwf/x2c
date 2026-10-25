@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0x2B6ED6EF__
-#define __GUARD_0x2B6ED6EF__
+#ifndef __GUARD_0x72A0294F__
+#define __GUARD_0x72A0294F__
 
 #include "x2c.h"
 #include "ast.h"
@@ -42,4 +42,4 @@ Map Type_begin_unit(void);
 void Type_end_unit(Map enclosing);
 
 
-#endif /* __GUARD_0x2B6ED6EF__ */
+#endif /* __GUARD_0x72A0294F__ */

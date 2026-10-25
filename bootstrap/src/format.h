@@ -2,12 +2,12 @@
 
 #pragma once
 
-#ifndef __GUARD_0x4FB7A5AC__
-#define __GUARD_0x4FB7A5AC__
+#ifndef __GUARD_0x8FDDE00C__
+#define __GUARD_0x8FDDE00C__
 
 #include "x2c.h"
 #include "compiler/compiler.h"
 char * Compiler_code_pretty_string(Compiler c, List code, String output_file);
 
 
-#endif /* __GUARD_0x4FB7A5AC__ */
+#endif /* __GUARD_0x8FDDE00C__ */

@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0x41190709__
-#define __GUARD_0x41190709__
+#ifndef __GUARD_0xBF43E8A9__
+#define __GUARD_0xBF43E8A9__
 
 #include "array/array.h"
 #include "atom.h"
@@ -43,4 +43,4 @@
 #include "tokenizer.h"
 #include "var/var.h"
 
-#endif /* __GUARD_0x41190709__ */
+#endif /* __GUARD_0xBF43E8A9__ */

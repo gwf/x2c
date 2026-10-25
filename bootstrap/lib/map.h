@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0xD41B6D49__
-#define __GUARD_0xD41B6D49__
+#ifndef __GUARD_0x98BC7EE9__
+#define __GUARD_0x98BC7EE9__
 
 #include "error-macros.h"
 typedef struct Map * Map;
@@ -98,4 +98,4 @@ Iter Map_enumerate(Map _x2c_gensym_macro_map_47, Iter _x2c_gensym_macro_dest_2);
 void Map_cleanup(Map value);
 
 
-#endif /* __GUARD_0xD41B6D49__ */
+#endif /* __GUARD_0x98BC7EE9__ */

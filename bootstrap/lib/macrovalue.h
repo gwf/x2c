@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0xD484EB6F__
-#define __GUARD_0xD484EB6F__
+#ifndef __GUARD_0x2696A50F__
+#define __GUARD_0x2696A50F__
 
 #include "common.h"
 #include "match/match.h"
@@ -126,4 +126,4 @@ int MacroMatcher_matches(MacroMatcher * m, List code);
 int Macro_matches(Macro t, List code, List holes);
 
 
-#endif /* __GUARD_0xD484EB6F__ */
+#endif /* __GUARD_0x2696A50F__ */

@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0x5295F561__
-#define __GUARD_0x5295F561__
+#ifndef __GUARD_0x4657FFC1__
+#define __GUARD_0x4657FFC1__
 
 #include "x2c.h"
 #include "compiler/compiler.h"
@@ -33,4 +33,4 @@ List Compiler_preproc_track_arms(List arms, String text);
 List Compiler_preproc_within_arms(List arms, List items);
 
 
-#endif /* __GUARD_0x5295F561__ */
+#endif /* __GUARD_0x4657FFC1__ */

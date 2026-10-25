@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0xB7CBE8B3__
-#define __GUARD_0xB7CBE8B3__
+#ifndef __GUARD_0x874D0B13__
+#define __GUARD_0x874D0B13__
 
 #include "compiler-meta.h"
 List _tag_groups(void);
@@ -73,4 +73,4 @@ int _tag_group_top(int slot);
 Map _tag_types(List native);
 
 
-#endif /* __GUARD_0xB7CBE8B3__ */
+#endif /* __GUARD_0x874D0B13__ */

@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0x78E69167__
-#define __GUARD_0x78E69167__
+#ifndef __GUARD_0x17DF8B07__
+#define __GUARD_0x17DF8B07__
 
 #include "x2c.h"
 typedef struct _RegexNode * _RegexNode;
@@ -90,4 +90,4 @@ RegexCapture Var_regexcapture(Var v);
 RegexMatch Var_regexmatch(Var value);
 
 
-#endif /* __GUARD_0x78E69167__ */
+#endif /* __GUARD_0x17DF8B07__ */

@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0x100FD3DB__
-#define __GUARD_0x100FD3DB__
+#ifndef __GUARD_0x948F157B__
+#define __GUARD_0x948F157B__
 
 #include "x2c.h"
 #include "type.h"
@@ -13,4 +13,4 @@ Map Type_builtin_var_tags(void);
 Map Type_var_tag_rows(void);
 
 
-#endif /* __GUARD_0x100FD3DB__ */
+#endif /* __GUARD_0x948F157B__ */

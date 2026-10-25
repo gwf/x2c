@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0xA509A3AF__
-#define __GUARD_0xA509A3AF__
+#ifndef __GUARD_0x2988E54F__
+#define __GUARD_0x2988E54F__
 
 #include "common.h"
 #include "exception.h"
@@ -22,4 +22,4 @@ void x2c_static_thread_release(void);
 void x2c_static_shutdown(void);
 
 
-#endif /* __GUARD_0xA509A3AF__ */
+#endif /* __GUARD_0x2988E54F__ */

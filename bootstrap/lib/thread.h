@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0x251C437E__
-#define __GUARD_0x251C437E__
+#ifndef __GUARD_0x65427DDE__
+#define __GUARD_0x65427DDE__
 
 #include "common.h"
 typedef Var(* ThreadFn)(const void * input, size_t input_size);
@@ -72,4 +72,4 @@ ParallelMap Iter_parallel_map_in(Iter i, Pool pool, ThreadValueFn function, int 
 Var ParallelMap_foldl(ParallelMap map, Var seed, Func accumulate);
 
 
-#endif /* __GUARD_0x251C437E__ */
+#endif /* __GUARD_0x65427DDE__ */

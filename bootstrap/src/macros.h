@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0x21BF4D8E__
-#define __GUARD_0x21BF4D8E__
+#ifndef __GUARD_0x8374A72E__
+#define __GUARD_0x8374A72E__
 
 #include "x2c.h"
 #include "private-keywords.h"
@@ -185,4 +185,4 @@ int Compiler_scope_declares_alias(Compiler c, String name);
 List Compiler_alias_expression(Compiler c);
 
 
-#endif /* __GUARD_0x21BF4D8E__ */
+#endif /* __GUARD_0x8374A72E__ */

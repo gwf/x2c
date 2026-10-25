@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0xEE4F6300__
-#define __GUARD_0xEE4F6300__
+#ifndef __GUARD_0xF9B85560__
+#define __GUARD_0xF9B85560__
 
 
-#endif /* __GUARD_0xEE4F6300__ */
+#endif /* __GUARD_0xF9B85560__ */

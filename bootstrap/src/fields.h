@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0xFC1683EE__
-#define __GUARD_0xFC1683EE__
+#ifndef __GUARD_0x3C3CBE4E__
+#define __GUARD_0x3C3CBE4E__
 
 #include "x2c.h"
 #include "common.h"
@@ -12,4 +12,4 @@ List _x2c_field_copies(List to, List from, List fields);
 List _x2c_field_sets(List to, List value, List fields);
 
 
-#endif /* __GUARD_0xFC1683EE__ */
+#endif /* __GUARD_0x3C3CBE4E__ */

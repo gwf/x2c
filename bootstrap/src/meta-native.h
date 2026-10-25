@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0x65953FEE__
-#define __GUARD_0x65953FEE__
+#ifndef __GUARD_0x7A1F118E__
+#define __GUARD_0x7A1F118E__
 
 #include "x2c.h"
 #include "compiler/compiler.h"
@@ -117,4 +117,4 @@ List Compiler_native_meta_targets(List paths, int callbacks);
 int Compiler_iterator_arity(List signature);
 
 
-#endif /* __GUARD_0x65953FEE__ */
+#endif /* __GUARD_0x7A1F118E__ */

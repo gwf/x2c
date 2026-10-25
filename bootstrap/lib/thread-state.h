@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0x860E2402__
-#define __GUARD_0x860E2402__
+#ifndef __GUARD_0x91771662__
+#define __GUARD_0x91771662__
 
 #include "common.h"
 extern _Thread_local int x2c_error_runtime_ready;
@@ -11,4 +11,4 @@ extern _Thread_local int x2c_error_runtime_ready;
 void x2c_thread_state_release(void);
 
 
-#endif /* __GUARD_0x860E2402__ */
+#endif /* __GUARD_0x91771662__ */

@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0x74CEA5DF__
-#define __GUARD_0x74CEA5DF__
+#ifndef __GUARD_0x396FB77F__
+#define __GUARD_0x396FB77F__
 
 #include "error-macros.h"
 #include "common.h"
@@ -256,4 +256,4 @@ Var Var_postfix(Var * lhs, Symbol op);
 Var x2c_var_postfix_volatile(volatile Var * lhs, Symbol op);
 
 
-#endif /* __GUARD_0x74CEA5DF__ */
+#endif /* __GUARD_0x396FB77F__ */

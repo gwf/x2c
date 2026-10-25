@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0x57655C8B__
-#define __GUARD_0x57655C8B__
+#ifndef __GUARD_0x1C066E2B__
+#define __GUARD_0x1C066E2B__
 
 #include "x2c.h"
 #include "compiler/compiler.h"
@@ -31,4 +31,4 @@ List Compiler_capture_lambda_identifier(Compiler c, List binding, Type type);
 void Compiler_respell_captures(Compiler c, List binding);
 
 
-#endif /* __GUARD_0x57655C8B__ */
+#endif /* __GUARD_0x1C066E2B__ */

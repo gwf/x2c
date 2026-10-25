@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0xAB859D04__
-#define __GUARD_0xAB859D04__
+#ifndef __GUARD_0x754B0EA4__
+#define __GUARD_0x754B0EA4__
 
 #include "x2c.h"
 #include "compiler/compiler.h"
@@ -95,4 +95,4 @@ String Compiler_interface_text(Compiler c);
 Map Compiler_linked_prelude_records(Compiler c);
 
 
-#endif /* __GUARD_0xAB859D04__ */
+#endif /* __GUARD_0x754B0EA4__ */

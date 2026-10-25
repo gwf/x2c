@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0x9578BA41__
-#define __GUARD_0x9578BA41__
+#ifndef __GUARD_0x3471B3E1__
+#define __GUARD_0x3471B3E1__
 
 #include "x2c.h"
 #include "compiler/compiler.h"
@@ -26,4 +26,4 @@ List Compiler_zero_initializer(Compiler c, List value);
 List Compiler_initialization_guard(Compiler c, List guard);
 
 
-#endif /* __GUARD_0x9578BA41__ */
+#endif /* __GUARD_0x3471B3E1__ */

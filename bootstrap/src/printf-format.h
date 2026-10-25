@@ -2,10 +2,10 @@
 
 #pragma once
 
-#ifndef __GUARD_0xDF7E27E7__
-#define __GUARD_0xDF7E27E7__
+#ifndef __GUARD_0x5C2E8A47__
+#define __GUARD_0x5C2E8A47__
 
 #include "x2c.h"
 #include "rewrite.h"
 
-#endif /* __GUARD_0xDF7E27E7__ */
+#endif /* __GUARD_0x5C2E8A47__ */

@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0x242786A8__
-#define __GUARD_0x242786A8__
+#ifndef __GUARD_0x44CAB048__
+#define __GUARD_0x44CAB048__
 
 #include "x2c.h"
 #include "cli/cli.h"
@@ -73,4 +73,4 @@ int Toolchain_preprocess(Toolchain t, const char * fname, List include_dirs, con
 List Toolchain_search_directories(Toolchain t);
 
 
-#endif /* __GUARD_0x242786A8__ */
+#endif /* __GUARD_0x44CAB048__ */

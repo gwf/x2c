@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0xD6FFF159__
-#define __GUARD_0xD6FFF159__
+#ifndef __GUARD_0x1E3143B9__
+#define __GUARD_0x1E3143B9__
 
 #include "x2c.h"
 typedef String Path;
@@ -63,4 +63,4 @@ void Path_write_text(Path path, String text);
 Path Path_temp_dir(void);
 
 
-#endif /* __GUARD_0xD6FFF159__ */
+#endif /* __GUARD_0x1E3143B9__ */

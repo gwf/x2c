@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0xB8F5462B__
-#define __GUARD_0xB8F5462B__
+#ifndef __GUARD_0x3D7487CB__
+#define __GUARD_0x3D7487CB__
 
 #include "x2c.h"
 #include "common.h"
@@ -86,4 +86,4 @@ void Compiler_dump_symbol_table(Compiler compiler, Map map);
 void Compiler_dump_cache(Compiler compiler);
 
 
-#endif /* __GUARD_0xB8F5462B__ */
+#endif /* __GUARD_0x3D7487CB__ */

@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0x508635A4__
-#define __GUARD_0x508635A4__
+#ifndef __GUARD_0xB23B8F44__
+#define __GUARD_0xB23B8F44__
 
 #include "x2c.h"
-#endif /* __GUARD_0x508635A4__ */
+#endif /* __GUARD_0xB23B8F44__ */

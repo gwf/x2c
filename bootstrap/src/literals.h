@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0xBD8B85AE__
-#define __GUARD_0xBD8B85AE__
+#ifndef __GUARD_0x2BBB0F4E__
+#define __GUARD_0x2BBB0F4E__
 
 #include "x2c.h"
 #include "private-keywords.h"
@@ -25,6 +25,8 @@ List Compiler_try_parse_macro_pattern_insertion(Compiler c, int content);
 List Compiler_parse_evaluated_list(Compiler c);
 
 List Compiler_literal_cell(Compiler c, List head, List tail);
+
+List Compiler_list_expression(Compiler c, Array elements, List tail);
 
 List Compiler_typed_match_pattern(Compiler c, List pattern, List types);
 
@@ -49,4 +51,4 @@ List Compiler_parse_string_literal(Compiler c);
 List Compiler_parse_atomic_literal(Compiler c);
 
 
-#endif /* __GUARD_0xBD8B85AE__ */
+#endif /* __GUARD_0x2BBB0F4E__ */

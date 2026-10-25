@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0x4D85CB6E__
-#define __GUARD_0x4D85CB6E__
+#ifndef __GUARD_0x1D06EDCE__
+#define __GUARD_0x1D06EDCE__
 
 #include "error-macros.h"
 #include "common.h"
@@ -117,4 +117,4 @@ void x2c_descriptor_thread_start_end(int success);
 int x2c_descriptor_registration_frozen(void);
 
 
-#endif /* __GUARD_0x4D85CB6E__ */
+#endif /* __GUARD_0x1D06EDCE__ */

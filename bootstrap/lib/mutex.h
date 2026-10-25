@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0x8C6C249F__
-#define __GUARD_0x8C6C249F__
+#ifndef __GUARD_0x2B651E3F__
+#define __GUARD_0x2B651E3F__
 
 #include "error-macros.h"
 #include "cleanup.h"
@@ -27,4 +27,4 @@ void Mutex_unlock(Mutex mutex);
 void Mutex_free(Mutex mutex);
 
 
-#endif /* __GUARD_0x8C6C249F__ */
+#endif /* __GUARD_0x2B651E3F__ */

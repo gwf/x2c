@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0xC34B3F4F__
-#define __GUARD_0xC34B3F4F__
+#ifndef __GUARD_0x87EC50EF__
+#define __GUARD_0x87EC50EF__
 
 #include "error-macros.h"
 #include "common.h"
@@ -55,4 +55,4 @@ void Context_cleanup(Context value);
 void Context_initialize(void);
 
 
-#endif /* __GUARD_0xC34B3F4F__ */
+#endif /* __GUARD_0x87EC50EF__ */

@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0xCC13178C__
-#define __GUARD_0xCC13178C__
+#ifndef __GUARD_0x134469EC__
+#define __GUARD_0x134469EC__
 
 #include "error-macros.h"
 #include "private-keywords.h"
@@ -104,4 +104,4 @@ Var Iter_max(Iter iter);
 Var Iter_min(Iter iter);
 
 
-#endif /* __GUARD_0xCC13178C__ */
+#endif /* __GUARD_0x134469EC__ */

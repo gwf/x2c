@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0xBE511011__
-#define __GUARD_0xBE511011__
+#ifndef __GUARD_0x05826271__
+#define __GUARD_0x05826271__
 
 #include "x2c.h"
 typedef Symbol Args;
@@ -15,4 +15,4 @@ String Args_usage(String program, List spec);
 List Args_from_argv(int argc, char * * argv);
 
 
-#endif /* __GUARD_0xBE511011__ */
+#endif /* __GUARD_0x05826271__ */

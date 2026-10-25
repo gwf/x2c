@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0xFCD96F31__
-#define __GUARD_0xFCD96F31__
+#ifndef __GUARD_0xC69EE0D1__
+#define __GUARD_0xC69EE0D1__
 
 #include "x2c.h"
 #include "compiler/compiler.h"
@@ -18,4 +18,4 @@ Symbol Compiler_operator_member(Compiler c, Symbol op);
 Symbol Compiler_derived_member(Compiler c, Symbol op);
 
 
-#endif /* __GUARD_0xFCD96F31__ */
+#endif /* __GUARD_0xC69EE0D1__ */

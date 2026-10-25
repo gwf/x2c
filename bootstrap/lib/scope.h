@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0x7792FEF9__
-#define __GUARD_0x7792FEF9__
+#ifndef __GUARD_0xFC124099__
+#define __GUARD_0xFC124099__
 
 #include "error-macros.h"
 #include <stddef.h>
@@ -120,4 +120,4 @@ _Static_assert(_Generic(& Scope_memdup, void *(*)(const void *, size_t) : 1, def
 #endif
 #define xmemdup Scope_memdup
 
-#endif /* __GUARD_0x7792FEF9__ */
+#endif /* __GUARD_0xFC124099__ */

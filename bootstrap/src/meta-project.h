@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0xD04FB246__
-#define __GUARD_0xD04FB246__
+#ifndef __GUARD_0xDBB8A4A6__
+#define __GUARD_0xDBB8A4A6__
 
 #include "x2c.h"
 #include "frontend.h"
@@ -19,4 +19,4 @@ void Frontend_prepare_meta(Frontend f, List inputs);
 MetaHelper Frontend_build_loaded(Frontend f, List filenames);
 
 
-#endif /* __GUARD_0xD04FB246__ */
+#endif /* __GUARD_0xDBB8A4A6__ */

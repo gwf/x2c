@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0x459178CE__
-#define __GUARD_0x459178CE__
+#ifndef __GUARD_0xB3C1026E__
+#define __GUARD_0xB3C1026E__
 
 #include "x2c.h"
 #include "compiler/compiler.h"
@@ -31,6 +31,8 @@ List Compiler_generate_code_text(Compiler c, List ast, String basename);
 
 List Compiler_place_source_prelude(Compiler c, List source, List declarations);
 
+String Compiler_header_guard(Compiler c);
+
 List Compiler_initializer_function(Compiler c, Type type, List name, List body);
 
 List Compiler_run_once_body(Compiler c, List before, List guard, List after);
@@ -44,4 +46,4 @@ List Compiler_definition_rows(Compiler c, List ast);
 void Compiler_dump_definitions(Compiler c, List ast);
 
 
-#endif /* __GUARD_0x459178CE__ */
+#endif /* __GUARD_0xB3C1026E__ */

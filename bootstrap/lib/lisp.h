@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0xA8155D0F__
-#define __GUARD_0xA8155D0F__
+#ifndef __GUARD_0xC8B886AF__
+#define __GUARD_0xC8B886AF__
 
 #include "private-keywords.h"
 #include "cleanup.h"
@@ -134,4 +134,4 @@ Var lisp_read_file(String path);
 Var lisp_write_file(String path, String text);
 
 
-#endif /* __GUARD_0xA8155D0F__ */
+#endif /* __GUARD_0xC8B886AF__ */

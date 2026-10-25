@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0xD3D9B415__
-#define __GUARD_0xD3D9B415__
+#ifndef __GUARD_0xDF42A675__
+#define __GUARD_0xDF42A675__
 
 #include "private-keywords.h"
 #include "tokenizer.h"
@@ -16,4 +16,4 @@ Tokenizer datum_scan_tokens(String source, Scope * scope);
 Symbol datum_read_form(String source, unsigned * cursor, Var * out);
 
 
-#endif /* __GUARD_0xD3D9B415__ */
+#endif /* __GUARD_0xDF42A675__ */

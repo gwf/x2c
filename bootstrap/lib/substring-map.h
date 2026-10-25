@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0xF675E0C0__
-#define __GUARD_0xF675E0C0__
+#ifndef __GUARD_0x582B3A60__
+#define __GUARD_0x582B3A60__
 
 #include "substring.h"
 #include "map/map.h"
@@ -46,4 +46,4 @@ Iter MapSubInt_enumerate(MapSubInt _x2c_gensym_macro_map_25, Iter _x2c_gensym_ma
 void MapSubInt_cleanup(MapSubInt _x2c_gensym_macro_map_21);
 
 
-#endif /* __GUARD_0xF675E0C0__ */
+#endif /* __GUARD_0x582B3A60__ */

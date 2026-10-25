@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0xA909022F__
-#define __GUARD_0xA909022F__
+#ifndef __GUARD_0xC264EBCF__
+#define __GUARD_0xC264EBCF__
 
 #include "x2c.h"
 #include "diff.h"
@@ -74,4 +74,4 @@ Var lisp_string_append_all(List strings);
 Map lisp_native_targets(void);
 
 
-#endif /* __GUARD_0xA909022F__ */
+#endif /* __GUARD_0xC264EBCF__ */

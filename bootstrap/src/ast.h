@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0x29A28E81__
-#define __GUARD_0x29A28E81__
+#ifndef __GUARD_0xA7CD7021__
+#define __GUARD_0xA7CD7021__
 
 #include "x2c.h"
 typedef List Ast;
@@ -67,4 +67,4 @@ List Ast_initializer_cases(Ast ast, List * input);
 List Ast_initializer_functions(Ast ast, List * source);
 
 
-#endif /* __GUARD_0x29A28E81__ */
+#endif /* __GUARD_0xA7CD7021__ */

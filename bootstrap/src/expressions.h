@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0xEA8B7FE6__
-#define __GUARD_0xEA8B7FE6__
+#ifndef __GUARD_0xFF155186__
+#define __GUARD_0xFF155186__
 
 #include "x2c.h"
 #include "private-keywords.h"
@@ -78,4 +78,4 @@ List Compiler_converter_call(Compiler c, List expr, Type type, Type target);
 int Compiler_is_builtin_converter_call(Compiler c, List expr);
 
 
-#endif /* __GUARD_0xEA8B7FE6__ */
+#endif /* __GUARD_0xFF155186__ */

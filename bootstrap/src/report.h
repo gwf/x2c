@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0x1A01A7A9__
-#define __GUARD_0x1A01A7A9__
+#ifndef __GUARD_0x5A27E209__
+#define __GUARD_0x5A27E209__
 
 #include "x2c.h"
 #include <errno.h>
@@ -42,4 +42,4 @@ String report_duration(unsigned long microseconds);
 String report_size(unsigned long long bytes);
 
 
-#endif /* __GUARD_0x1A01A7A9__ */
+#endif /* __GUARD_0x5A27E209__ */

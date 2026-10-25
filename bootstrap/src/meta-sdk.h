@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0x45505D6E__
-#define __GUARD_0x45505D6E__
+#ifndef __GUARD_0xB37FE70E__
+#define __GUARD_0xB37FE70E__
 
 #include "x2c.h"
 #include "compiler/compiler.h"
@@ -155,4 +155,4 @@ List MetaContext_literal_list(List values);
 void Compiler_add_sdk_targets(Map rows);
 
 
-#endif /* __GUARD_0x45505D6E__ */
+#endif /* __GUARD_0xB37FE70E__ */

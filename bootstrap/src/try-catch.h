@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0x8CC24CA5__
-#define __GUARD_0x8CC24CA5__
+#ifndef __GUARD_0xFAC2DF05__
+#define __GUARD_0xFAC2DF05__
 
 #include "x2c.h"
 #include "rewrite.h"
@@ -15,4 +15,4 @@ List _x2c_try_catch_site(List frame, List clause);
 List _x2c_try_landing(List frame, List clause, List exits);
 
 
-#endif /* __GUARD_0x8CC24CA5__ */
+#endif /* __GUARD_0xFAC2DF05__ */

@@ -2,10 +2,10 @@
 
 #pragma once
 
-#ifndef __GUARD_0xE26B4F01__
-#define __GUARD_0xE26B4F01__
+#ifndef __GUARD_0x4420A8A1__
+#define __GUARD_0x4420A8A1__
 
 #include "meta.h"
 #include "compiler-meta.h"
 
-#endif /* __GUARD_0xE26B4F01__ */
+#endif /* __GUARD_0x4420A8A1__ */

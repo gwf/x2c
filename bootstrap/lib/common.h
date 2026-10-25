@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0xA962EB1F__
-#define __GUARD_0xA962EB1F__
+#ifndef __GUARD_0xE989257F__
+#define __GUARD_0xE989257F__
 
 #include "error-macros.h"
 #include "common-types.h"
@@ -924,4 +924,4 @@ extern List nil;
 int Array_truth(Array);
 int Bytes_truth(Bytes);
 
-#endif /* __GUARD_0xA962EB1F__ */
+#endif /* __GUARD_0xE989257F__ */

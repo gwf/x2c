@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0x042BDEBD__
-#define __GUARD_0x042BDEBD__
+#ifndef __GUARD_0xA324D85D__
+#define __GUARD_0xA324D85D__
 
 #include "x2c.h"
 #include "compiler/compiler.h"
@@ -31,4 +31,4 @@ void Compiler_check_meta_call(Compiler c, List callee, Token origin);
 int Compiler_meta_is_comptime_only(Compiler c, List fn);
 
 
-#endif /* __GUARD_0x042BDEBD__ */
+#endif /* __GUARD_0xA324D85D__ */

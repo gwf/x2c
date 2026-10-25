@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0xD92859F1__
-#define __GUARD_0xD92859F1__
+#ifndef __GUARD_0xF9CB8391__
+#define __GUARD_0xF9CB8391__
 
 #include "string/string.h"
 typedef struct Substring{
@@ -45,4 +45,4 @@ String Substring_string(Substring view);
 int Substring_try_next(String source, int * cursor, Substring * out);
 
 
-#endif /* __GUARD_0xD92859F1__ */
+#endif /* __GUARD_0xF9CB8391__ */

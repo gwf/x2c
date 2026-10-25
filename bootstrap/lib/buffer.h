@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0x728E1434__
-#define __GUARD_0x728E1434__
+#ifndef __GUARD_0xB2B44E94__
+#define __GUARD_0xB2B44E94__
 
 #include "error-macros.h"
 #include "cleanup.h"
@@ -73,4 +73,4 @@ void Buffer_move_to(Buffer buf, Scope * scope);
 void Buffer_free(Buffer buf);
 
 
-#endif /* __GUARD_0x728E1434__ */
+#endif /* __GUARD_0xB2B44E94__ */

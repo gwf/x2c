@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0x229C9016__
-#define __GUARD_0x229C9016__
+#ifndef __GUARD_0xA71BD1B6__
+#define __GUARD_0xA71BD1B6__
 
 #include "x2c.h"
 #include "array/array.h"
@@ -1124,4 +1124,4 @@ int ArrayShort_truth(ArrayShort);
 int ArrayString_truth(ArrayString);
 
 
-#endif /* __GUARD_0x229C9016__ */
+#endif /* __GUARD_0xA71BD1B6__ */

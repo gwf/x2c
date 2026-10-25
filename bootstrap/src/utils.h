@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0x6E6B8BB0__
-#define __GUARD_0x6E6B8BB0__
+#ifndef __GUARD_0x0D648550__
+#define __GUARD_0x0D648550__
 
 #include "x2c.h"
 #include "path.h"
@@ -38,6 +38,8 @@ String Compiler_driver_executable(void);
 String Compiler_home_dir(void);
 
 String Compiler_stage_dir(void);
+
+String Compiler_bootstrap_runtime_dir(void);
 
 String Compiler_home_packages(void);
 
@@ -90,4 +92,4 @@ void Diagnostics_host_error(List detail);
 String Compiler_cache_root(void);
 
 
-#endif /* __GUARD_0x6E6B8BB0__ */
+#endif /* __GUARD_0x0D648550__ */

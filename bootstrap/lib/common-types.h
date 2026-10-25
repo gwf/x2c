@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0xF18208CB__
-#define __GUARD_0xF18208CB__
+#ifndef __GUARD_0xFCEAFB2B__
+#define __GUARD_0xFCEAFB2B__
 
 typedef union Var{
   unsigned long u64;
@@ -17,4 +17,4 @@ typedef struct List * List;
 typedef struct Mutex * Mutex;
 
 
-#endif /* __GUARD_0xF18208CB__ */
+#endif /* __GUARD_0xFCEAFB2B__ */

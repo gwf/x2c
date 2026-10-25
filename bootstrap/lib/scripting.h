@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0x114A5957__
-#define __GUARD_0x114A5957__
+#ifndef __GUARD_0x31ED82F7__
+#define __GUARD_0x31ED82F7__
 
 #include "args.h"
 #include "diff.h"
@@ -12,4 +12,4 @@
 #include "process.h"
 #include "regex.h"
 
-#endif /* __GUARD_0x114A5957__ */
+#endif /* __GUARD_0x31ED82F7__ */

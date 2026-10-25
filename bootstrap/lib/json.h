@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0xCDBE555C__
-#define __GUARD_0xCDBE555C__
+#ifndef __GUARD_0x14EFA7BC__
+#define __GUARD_0x14EFA7BC__
 
 #include "private-keywords.h"
 #include "x2c.h"
@@ -47,4 +47,4 @@ String Var_pretty_json(Var value);
 void Json_write_file(Var value, Path path);
 
 
-#endif /* __GUARD_0xCDBE555C__ */
+#endif /* __GUARD_0x14EFA7BC__ */

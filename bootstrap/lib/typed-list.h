@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0x2C2B32D5__
-#define __GUARD_0x2C2B32D5__
+#ifndef __GUARD_0x1FED3D35__
+#define __GUARD_0x1FED3D35__
 
 #include "x2c.h"
 #include <string.h>
@@ -218,4 +218,4 @@ ListSymbol List_listsymbol(List _x2c_gensym_macro_xs_33);
 ListSymbol Var_listsymbol(Var _x2c_gensym_macro_value_20);
 
 
-#endif /* __GUARD_0x2C2B32D5__ */
+#endif /* __GUARD_0x1FED3D35__ */

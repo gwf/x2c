@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0x32AB01A3__
-#define __GUARD_0x32AB01A3__
+#ifndef __GUARD_0xF74C1343__
+#define __GUARD_0xF74C1343__
 
 #include "common.h"
 #include "cleanup.h"
@@ -40,4 +40,4 @@ Channel Var_channel(Var value);
 Iter Channel_iter(Channel c, Iter dest);
 
 
-#endif /* __GUARD_0x32AB01A3__ */
+#endif /* __GUARD_0xF74C1343__ */

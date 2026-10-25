@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0x8463958E__
-#define __GUARD_0x8463958E__
+#ifndef __GUARD_0xA506BF2E__
+#define __GUARD_0xA506BF2E__
 
 #include "x2c.h"
 #include "compiler/compiler.h"
@@ -17,4 +17,4 @@
 List Compiler_emit(Compiler c, List ast, Map cache_bindings);
 
 
-#endif /* __GUARD_0x8463958E__ */
+#endif /* __GUARD_0xA506BF2E__ */

@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0xA2A5DA8E__
-#define __GUARD_0xA2A5DA8E__
+#ifndef __GUARD_0xF4B7942E__
+#define __GUARD_0xF4B7942E__
 
 #include "x2c.h"
 #include "compiler/compiler.h"
@@ -62,4 +62,4 @@ void Compiler_bind_meta_group(Compiler c, String name, Token site);
 Map Compiler_stage_session_function(Compiler c, List declarations, Func prepare, String * failure);
 
 
-#endif /* __GUARD_0xA2A5DA8E__ */
+#endif /* __GUARD_0xF4B7942E__ */

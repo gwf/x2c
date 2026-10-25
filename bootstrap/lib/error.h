@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0x66DB1561__
-#define __GUARD_0x66DB1561__
+#ifndef __GUARD_0xEB5A5701__
+#define __GUARD_0xEB5A5701__
 
 #include "common.h"
 #include "match/match.h"
@@ -122,4 +122,4 @@ void Error_shutdown_raw(void);
 int Error_ready(void);
 
 
-#endif /* __GUARD_0x66DB1561__ */
+#endif /* __GUARD_0xEB5A5701__ */
