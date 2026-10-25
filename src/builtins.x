@@ -4,8 +4,9 @@
 
     The built-in macros expand through these functions, which run as native
     code inside the compiler. `Compiler.builtin_targets` binds each into
-    the shared session under the name its callers use, such as
-    `etc/builtin-macros.x` and `etc/lisp-bindings.x`.
+    the shared session under the name its callers use: the prototypes
+    `etc/compiler-prelude.x` declares, and those `etc/lisp-bindings.x`
+    calls.
 */
 #pragma once
 #include "x2c.x"
@@ -323,6 +324,14 @@ static List _declare(Type type, Var binding, List initializer) =>
   initializer ? $!{ $type $binding = $initializer; } : $!{ $type $binding; };
 
 static List _assign(List target, List value) => $!{ $target = $value; };
+
+// $x2c.foreign.alias and $x2c.callback.adapt
+
+static List _foreign_alias(List declaration, List native) =>
+  %((falias $declaration $native));
+
+static List _callback_adapt(List target, List source) =>
+  %(expr () (tadapt $target $source));
 
 /* class declarations
 
@@ -965,16 +974,24 @@ static macro Stmt $builtin.row(Expr $rows, Expr $name, Expr $function) {
     The Map borrows shared Func handles that live for the program. */
 Map Compiler.builtin_targets(void) {
   Map rows = {};
+  $builtin.row(rows, "_x2c_scope_expand", _scope_expand);
+  $builtin.row(rows, "_x2c_with_expand", _with_expand);
+  $builtin.row(rows, "_x2c_foreach_expand", _foreach_expand);
+  $builtin.row(rows, "_x2c_auto_expand", _auto_expand);
+  $builtin.row(rows, "_x2c_class_expand", _class_expand);
+  $builtin.row(rows, "_x2c_foreign_alias", _foreign_alias);
+  $builtin.row(rows, "_x2c_callback_adapt", _callback_adapt);
+  // Interfaces the bootstrap compiler wrote call these older names.
   $builtin.row(rows, "scope.expand", _scope_expand);
-  $builtin.row(rows, "_x2c_func_call_arguments", _x2c_func_call_arguments);
-  $builtin.row(rows, "Ast_defer_captures", Ast.defer_captures);
+  $builtin.row(rows, "with.expand", _with_expand);
   $builtin.row(rows, "foreach.expand", _foreach_expand);
   $builtin.row(rows, "auto.expand", _auto_expand);
-  $builtin.row(rows, "with.expand", _with_expand);
+  $builtin.row(rows, "class.expand", _class_expand);
+  $builtin.row(rows, "_x2c_func_call_arguments", _x2c_func_call_arguments);
+  $builtin.row(rows, "Ast_defer_captures", Ast.defer_captures);
   $builtin.row(rows, "auto.release", _auto_release);
   $builtin.row(rows, "class.initializer", _class_initializer);
   $builtin.row(rows, "class.write-fields", _class_write_fields);
-  $builtin.row(rows, "class.expand", _class_expand);
   $builtin.row(rows, "class.defaults", _class_defaults);
   $builtin.row(rows, "_x2c.binding_record", _binding_record);
   $builtin.row(rows, "_x2c.binding_install", _binding_install);

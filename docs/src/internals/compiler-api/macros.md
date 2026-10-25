@@ -33,7 +33,6 @@ Source macros and the compile-time Lisp they run.
 | [`Compiler.has_rewrites`](#Compiler.has_rewrites) | Tests one operation's registry without invoking a translator. |
 | [`Compiler.inherit_library_comptime`](#Compiler.inherit_library_comptime) | Marks the shared session's compile-time-only definitions in a fresh compiler pass, which reads them without defining them. |
 | [`Compiler.inherits_import`](#Compiler.inherits_import) | Whether the shared session evaluated the file at `path`. |
-| [`Compiler.install_builtin_macros`](#Compiler.install_builtin_macros) | Installs the compiler-shipped source macros into `c` once. |
 | [`Compiler.install_compile_time_effects`](#Compiler.install_compile_time_effects) | Installs included compile-time definitions in their source order. |
 | [`Compiler.keyword_form_is_definition`](#Compiler.keyword_form_is_definition) | Returns whether the current tokens begin a `keyword NAME $macro` alias. |
 | [`Compiler.land_quotation`](#Compiler.land_quotation) | Binds quoted `syntax` with its `fresh` rows at `position`, as the expansion of its quotation would. |
@@ -194,7 +193,7 @@ Binds `function`, the operation `lib/meta.x` declares as `name`, under
 its Lisp name in `lisp`. A definition the compile-time libraries
 already give that name wins, because it adapts the arguments.
 
-Source: `src/macros/lisp.x:607`
+Source: `src/macros/lisp.x:590`
 
 <a id="Compiler.capture_macro_value"></a>
 #### Compiler.capture_macro_value
@@ -323,15 +322,6 @@ that file, as when a library is linted, inherits its Lisp forms.
 
 Source: `src/macros/lisp.x:453`
 
-<a id="Compiler.install_builtin_macros"></a>
-#### Compiler.install_builtin_macros
-
-`void Compiler.install_builtin_macros(Compiler c)`
-
-Installs the compiler-shipped source macros into `c` once.
-
-Source: `src/macros/lisp.x:518`
-
 <a id="Compiler.install_compile_time_effects"></a>
 #### Compiler.install_compile_time_effects
 
@@ -341,7 +331,7 @@ Installs included compile-time definitions in their source order.
 Keyword aliases retain the definition visible when their source declared
 them, even if a later macro definition uses the same name.
 
-Source: `src/macros/invocations/recognition.x:41`
+Source: `src/macros/invocations/recognition.x:40`
 
 <a id="Compiler.keyword_form_is_definition"></a>
 #### Compiler.keyword_form_is_definition
@@ -351,7 +341,7 @@ Source: `src/macros/invocations/recognition.x:41`
 Returns whether the current tokens begin a `keyword NAME $macro` alias.
 This query does not consume tokens.
 
-Source: `src/macros/invocations/recognition.x:106`
+Source: `src/macros/invocations/recognition.x:105`
 
 <a id="Compiler.land_quotation"></a>
 #### Compiler.land_quotation
@@ -402,7 +392,7 @@ Source: `src/macros/lisp.x:139`
 Returns whether the current tokens begin a local macro definition.
 This query does not consume tokens.
 
-Source: `src/macros/invocations/recognition.x:96`
+Source: `src/macros/invocations/recognition.x:95`
 
 <a id="Compiler.lower_replacement"></a>
 #### Compiler.lower_replacement
@@ -442,7 +432,7 @@ Source: `src/macros/rewrites.x:287`
 Returns whether the current tokens have macro-definition introducer form.
 This query does not consume tokens.
 
-Source: `src/macros/invocations/recognition.x:82`
+Source: `src/macros/invocations/recognition.x:81`
 
 <a id="Compiler.macro_introduced_name"></a>
 #### Compiler.macro_introduced_name
@@ -465,7 +455,7 @@ named-type decorator, and local `Unit` macro whose template contains
 protocol or adoption rows. `<tried>` covers Unit decorators and other
 local `Unit` macros. Other invocations return zero.
 
-Source: `src/macros/invocations/recognition.x:372`
+Source: `src/macros/invocations/recognition.x:371`
 
 <a id="Compiler.macro_invocation_site"></a>
 #### Compiler.macro_invocation_site
@@ -508,7 +498,7 @@ Returns whether the parser claims the macro invocation at the cursor for
 `position`. A bare keyword alias is claimed only where its result fits.
 This query does not consume tokens.
 
-Source: `src/macros/invocations/recognition.x:173`
+Source: `src/macros/invocations/recognition.x:172`
 
 <a id="Compiler.macro_tag_name"></a>
 #### Compiler.macro_tag_name
@@ -532,7 +522,7 @@ Reports whether the macro invocation at the cursor produces file-scope
 syntax, directly or through the target it decorates. A script unit keeps
 such an invocation at file scope. This query does not consume tokens.
 
-Source: `src/macros/invocations/recognition.x:416`
+Source: `src/macros/invocations/recognition.x:415`
 
 <a id="Compiler.macro_value_literal"></a>
 #### Compiler.macro_value_literal
@@ -620,7 +610,7 @@ Parses and installs one source-local `keyword` alias.
 The named macro must already be visible; the alias captures that definition
 and consumes its terminating semicolon. Returns the alias.
 
-Source: `src/macros/invocations/recognition.x:118`
+Source: `src/macros/invocations/recognition.x:117`
 
 <a id="Compiler.parse_macro_definition"></a>
 #### Compiler.parse_macro_definition
@@ -806,7 +796,7 @@ Source: `src/macros/diagnostics.x:357`
 Ends the shared compile-time library before its build-target Context is
 reclaimed. A later target creates a fresh session in its own Context.
 
-Source: `src/macros/lisp.x:634`
+Source: `src/macros/lisp.x:617`
 
 <a id="Compiler.rewrite"></a>
 #### Compiler.rewrite
@@ -885,7 +875,7 @@ Source: `src/macros/lisp.x:490`
 Consumes a macro invocation name and its balanced argument list.
 The invocation terminator or following decorator target remains current.
 
-Source: `src/macros/invocations/recognition.x:392`
+Source: `src/macros/invocations/recognition.x:391`
 
 <a id="Compiler.skip_named_type_declaration"></a>
 #### Compiler.skip_named_type_declaration
@@ -895,7 +885,7 @@ Source: `src/macros/invocations/recognition.x:392`
 Consumes a NamedType target already projected by owning-source collection.
 CPP scanning does not produce the declaration or parse its fields again.
 
-Source: `src/macros/invocations/recognition.x:403`
+Source: `src/macros/invocations/recognition.x:402`
 
 <a id="Compiler.source_path"></a>
 #### Compiler.source_path

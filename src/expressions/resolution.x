@@ -224,18 +224,27 @@ static List _source(Resolve &r, List content) {
   return r.input;
 }
 
+/* A meta body's own `$` calls parse as ordinary calls, so a meta call there
+   came from a template and runs where the template expands. */
 static List _meta_call(Resolve &r) {
-  if ((r.c.meta_body && !r.c.in_pattern) || r.c.macro_holes)
+  if (r.c.macro_holes) return r.input;
+  if (r.origin && r.origin == r.c.meta_statement && r.c.peek(0) == <;>)
     return r.input;
-  if (r.origin == r.c.meta_statement && r.c.peek(0) == <;>) return r.input;
   return r.c.evaluate_meta_expression(r.input, r.origin);
 }
 
 /* An invocation expands where it is resolved, as the binder expands one,
-   except in a template, whose expansion expands it. */
+   except in a template, whose expansion expands it. There a definition a
+   quotation carries by value is quoted, as a template's own invocation
+   quotes one, so filling the template leaves the definition's binders. */
 static List _invocation(Resolve &r, List content) {
-  if (r.c.macro_holes) return r.input;
-  return r.c.bind_syntax(content, <expression>, r.c.return_type);
+  if (!r.c.macro_holes)
+    return r.c.bind_syntax(content, <expression>, r.c.return_type);
+  match (content) case %(macro-invoke ?(List stored) ?input ?site):
+    if (stored.car() == <macrodef>)
+      return %(expr ${r.input.cadr()}
+        (macro-invoke (!quote $stored) $input $site));
+  return r.input;
 }
 
 static List _macro_slot(Resolve &r, List content) {

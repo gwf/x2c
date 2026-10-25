@@ -282,7 +282,7 @@ Source: `src/expressions/resolution.x:55`
 Resolves the key and value of one `(map-entry key value)` AST row.
 Any other shape is reported at `origin` as a parse error.
 
-Source: `src/expressions/resolution.x:449`
+Source: `src/expressions/resolution.x:458`
 
 <a id="Compiler.resolve_postfix_member"></a>
 #### Compiler.resolve_postfix_member
@@ -317,7 +317,7 @@ Source: `src/expressions/identifiers.x:194`
 Builds an exact tag expression, deferring macro type slots until
 binding.
 
-Source: `src/expressions/resolution.x:336`
+Source: `src/expressions/resolution.x:345`
 
 ## Public types
 

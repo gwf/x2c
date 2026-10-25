@@ -74,7 +74,7 @@ One x2c unit's translation state and its two parses.
 | [`Compiler.shallow_parse_overlay`](#Compiler.shallow_parse_overlay) | Collects declarations with reads over `base` then `overlay`. |
 | [`Compiler.share_meta_group`](#Compiler.share_meta_group) | Shares `owner`'s pending `meta` group and the definitions it reads, which belong with the Lisp session that holds the group's stubs. |
 | [`Compiler.skip_collected_script_statement`](#Compiler.skip_collected_script_statement) | Skips a collected script statement, or diagnoses one beside `main`. |
-| [`Compiler.start_collection`](#Compiler.start_collection) | Starts a collection pass with the built-in macros. |
+| [`Compiler.start_collection`](#Compiler.start_collection) | Starts a collection pass with the syntax prelude. |
 | [`Compiler.take_unit_state`](#Compiler.take_unit_state) | Takes over `owner`'s macro, object-like `#define`, include, keyword, literal cache, and Lisp state for one segment of a collected file. |
 | [`Compiler.take_word`](#Compiler.take_word) | Consumes the identifier `word` when current and reports whether it matched. |
 | [`Compiler.test`](#Compiler.test) | Consumes `type` when current and reports whether it matched. |
@@ -749,7 +749,7 @@ Source: `src/compiler/parsing/scripts.x:83`
 
 `void Compiler.start_collection(Compiler c)`
 
-Starts a collection pass with the built-in macros. It parses no bodies,
+Starts a collection pass with the syntax prelude. It parses no bodies,
 and an import it reads installs the protocols visible to it when a
 template or `meta` body first asks for one.
 

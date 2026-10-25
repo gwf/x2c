@@ -52,6 +52,7 @@
     - [lib/block.x](library/modules/block.md)
     - [lib/buffer.x](library/modules/buffer.md)
     - [lib/channel.x](library/modules/channel.md)
+    - [lib/common-types.x](library/modules/common-types.md)
     - [lib/common.x](library/modules/common.md)
     - [lib/context.x](library/modules/context.md)
     - [lib/diff.x](library/modules/diff.md)

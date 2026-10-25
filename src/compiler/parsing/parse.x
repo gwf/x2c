@@ -56,7 +56,7 @@ static void _reset_macros(Compiler c) {
   c.rewrite_rules = NULL;
   c.active_rewrites = NULL;
   c.prepared_rewrites = NULL;
-  c.install_builtin_macros();
+  c.install_syntax_prelude();
   c.macro_count = 0;
   c.macro_stack = NULL;
   c.source_private = 0;

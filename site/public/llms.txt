@@ -65,6 +65,7 @@
 - [lib/block.x](https://x2c-lang.dev/docs/library/modules/block.html)
 - [lib/buffer.x](https://x2c-lang.dev/docs/library/modules/buffer.html)
 - [lib/channel.x](https://x2c-lang.dev/docs/library/modules/channel.html)
+- [lib/common-types.x](https://x2c-lang.dev/docs/library/modules/common-types.html)
 - [lib/common.x](https://x2c-lang.dev/docs/library/modules/common.html)
 - [lib/context.x](https://x2c-lang.dev/docs/library/modules/context.html)
 - [lib/diff.x](https://x2c-lang.dev/docs/library/modules/diff.html)

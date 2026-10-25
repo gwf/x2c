@@ -21,6 +21,7 @@ Map Compiler.collect_symbols(Compiler c, Map globs) {
   Map visited = {}, String canonical = _canonical_path(c.filename);
   c.deps = {};
   c.add_translation_dependency(canonical);
+  _add_syntax_prelude(c, globs, visited);
   if (c.prelude) _add_prelude(c, globs, visited);
   /* The prelude needs this file's signatures to close include cycles.
      Its own definitions must not suppress fresh declaration defaults.
@@ -86,6 +87,79 @@ static void _add_prelude(Compiler c, Map globs, Map visited) {
       }
     }
   }
+}
+
+// the syntax prelude
+
+/* `etc/compiler-prelude.x` declares the foundation types, the built-in
+   macros' native prototypes, and the built-in macros and keyword aliases.
+   Every unit collects it first, even one compiled without the runtime
+   prelude. A compiler of its own walks it once per process as the
+   compiler's own source; installing it during that walk installs nothing. */
+static int syntax_walking = 0;
+
+static String _syntax_path(void) =>
+  _canonical_path(%"${x2c_get_root()}/etc/compiler-prelude.x");
+
+static void _add_syntax_prelude(Compiler c, Map globs, Map visited) {
+  String canonical = _syntax_path();
+  visited[canonical] = 1;
+  c.add_translation_dependency(canonical);
+  List entry = _syntax_entry(c, canonical);
+  with (c.builtin_defs = 1) {
+    _replay_cached(c, entry, canonical, globs, visited, NULL);
+  }
+}
+
+static List _syntax_entry(Compiler c, String canonical) {
+  List entry = _entry(c, canonical);
+  if (entry || syntax_walking) return entry;
+  Compiler file = Compiler.new_shared(c);
+  defer c.close_child(file);
+  file.interface_provider = 1;
+  file.builtin_defs = 1;
+  file.filename = canonical;
+  Map visited = {};
+  visited[canonical] = 1;
+  with (syntax_walking = 1) {
+    _walk_apart(file, canonical, _runtime_text(file, canonical), {}, visited);
+  }
+  return _process_cache()[canonical];
+}
+
+static const char syntax_marker[] = "_x2c.syntax.prelude";
+
+/** Installs the syntax prelude's macros and keyword aliases into `c`'s
+    macro state once. A later file walk with the same macros, whose keyword
+    aliases start empty, merges the aliases again. */
+void Compiler.install_syntax_prelude(Compiler c) {
+  Var installed;
+  if (c.macros.try_get(syntax_marker, installed)) {
+    c.kw_aliases.merge(installed);
+    return;
+  }
+  List entry = _syntax_entry(c, _syntax_path());
+  if (!entry) return;
+  List effects = _syntax_effects(entry);
+  c.install_compile_time_effects(effects);
+  Map aliases = {};
+  foreach (List row in effects)
+    match (row) case %(compile-time keyword ?alias ?):
+      aliases[alias] = c.kw_aliases[alias];
+  c.macros[syntax_marker] = aliases;
+}
+
+/* The compile-time rows of the syntax prelude's entry in source order. */
+static List _syntax_effects(List entry) {
+  Array rows = [];
+  foreach (Var part in entry.car()) if (part is <map>)
+    foreach (Var (key, value) in part.map())
+      match (key) case %("source-node" (compile-time ? ?position)):
+        rows.push(%($position $value));
+  rows.sort();
+  Array effects = [];
+  foreach (List row in rows) effects.push(row.cadr());
+  return effects.list_free();
 }
 
 /* A prelude source's entry: cached in this process, linked into the
@@ -260,6 +334,7 @@ static void _prepare(FileWalk &w, Compiler shadow, String segment) {
   shadow.source_private = 0;
   shadow.signature_only = w.c.signature_only;
   shadow.interface_provider = w.c.interface_provider;
+  shadow.builtin_defs = w.c.builtin_defs;
   shadow.open_linkage = w.linkage;
   shadow.take_unit_state(w.c);
   shadow.tokenize(segment);
