@@ -2,6 +2,7 @@
 
 #include "x2c.x"
 #include "test-support.x"
+#include "meta-support.x"
 #include <time.h>
 #include <unistd.h>
 #include "test-macros.x"
@@ -126,14 +127,7 @@ typedef enum Span {
 
 // A literal initializer reads as its spelling; any other initializer reads
 // as its expression node, which this table renders as a placeholder.
-macro Expression $member_table(Type $T) =>
-  $(x2c.literal.string (foldl
-     (lambda (text row)
-       (string-append text (car row) "="
-         (let ((value (cadr row)))
-           (if (not value) "-" (if (string? value) value "<expr>")))
-         ","))
-     "" (Type.members $T)));
+macro Expression $member_table(Type $T) => $meta_support_members($T);
 
 static void system_macro_type_members_reads_an_enum(void) {
   String table = $member_table(Shade);

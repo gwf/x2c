@@ -1,6 +1,7 @@
 /*  test-interpolation.x -- unit tests for interpolation features */
 
 #include "test-support.x"
+#include "meta-support.x"
 
 // A user typedef of a numeric together with its converter.  Interpolating
 // one takes the T_str lookup, which is the path a bare builtin cannot
@@ -40,8 +41,8 @@ static void interp_context_boundaries(void) {
   List braced_list = %(${value}(tail));
   String text = %"$value()";
   String braced_text = %"${value}()";
-  Array array = [$(+ 1 2)];
-  Map map = {answer: $(+ 2 3)};
+  Array array = [$meta_support_sum(1, 2)];
+  Map map = {answer: $meta_support_sum(2, 3)};
 
   EXPECT_LIST_EQ(list, %(7 (tail)));
   EXPECT_LIST_EQ(braced_list, list);
@@ -52,9 +53,9 @@ static void interp_context_boundaries(void) {
 }
 
 
-static void interp_braced_nested_lisp(void) {
-  int direct = $(+ 1 2);
-  List braced = %(${$(+ 1 2)});
+static void interp_braced_nested_meta(void) {
+  int direct = $meta_support_sum(1, 2);
+  List braced = %(${$meta_support_sum(1, 2)});
   EXPECT_INT_EQ(direct, 3);
   EXPECT_LIST_EQ(braced, %(3));
 }
@@ -220,7 +221,7 @@ void interpolation_suite(void) {
   $test.run(interp_list_value);
   $test.run(interp_list_expr);
   $test.run(interp_context_boundaries);
-  $test.run(interp_braced_nested_lisp);
+  $test.run(interp_braced_nested_meta);
   $test.run(interp_braced_complete_expression);
   $test.run(interp_typed_values_without_var_aliases);
   $test.run(interp_splice_list);

@@ -19,7 +19,7 @@ macro Unit $forward(Function $definition) {
 }
 
 macro Decorator $identity(Function $function) {
-  @(Code.body $function)
+  @Code.body($function)
 }
 
 static int twice(int value) {
