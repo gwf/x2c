@@ -1,56 +1,28 @@
 #include "x2c.x"
-
-$(def fixture.row '(ledger-tag ROW_LEDGER object 7))
-
-$(defun fixture.row.id (row)
-  (car (cdr row)))
-
-$(defun fixture.row.value (row)
-  (car (cdr (cdr (cdr row)))))
-
-$(defun fixture.int-expr (value)
-  `(expr (int) (literal (int) ,(str value))))
-
-$(defun fixture.enum-row (row)
-  `(op =
-    (bind ,(x2c.ident (str (fixture.row.id row))) ())
-    ,(fixture.int-expr (fixture.row.value row))))
-
-$(defun fixture.initializer (row)
-  `(expr ()
-    (composite
-      (commas ,(fixture.int-expr (fixture.row.value row))))))
-
-$(defun fixture.case-row (row)
-  (list
-    `(case
-      (expr ("Symbol")
-        (literal ("Symbol") ,(str (car row)) ,(car row))))
-    `(return (int) ,(fixture.int-expr (fixture.row.value row)))))
+#include "macro-enumerator-projections-defs.x"
 
 macro Enumerator $fixture.empty() {
-  @(list)
+  @no_rows()
 }
 
 macro Enumerator $fixture.one() {
-  $(x2c.ident "ROW_ONE") = 2
+  $x2c_ident("ROW_ONE") = 2
 }
 
 macro Enumerator $fixture.enumerators() {
   private_row = 3,
-  @(list (fixture.enum-row fixture.row)),
-  $(x2c.ident "ROW_AUTO") = private_row + 5
+  @enum_rows(),
+  $x2c_ident("ROW_AUTO") = private_row + 5
 }
 
 macro Enumerator $fixture.forward(Enumerator $row) {
   $row
 }
 
-macro Expression $fixture.initializer() =>
-  $(fixture.initializer fixture.row);
+macro Expression $fixture.initializer() => $row_initializer();
 
 macro Stmt $fixture.cases() {
-  @(fixture.case-row fixture.row)
+  @case_rows()
 }
 
 typedef enum GeneratedRows {

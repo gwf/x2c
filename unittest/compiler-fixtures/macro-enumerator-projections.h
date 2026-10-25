@@ -6,6 +6,7 @@
 #define __GUARD_0xAE1DD676__
 
 #include "x2c.h"
+#include "macro-enumerator-projections-defs.h"
 typedef enum GeneratedRows{
   ROW_START, ROW_ONE = 2, _x2c_gensym_macro_private_row_0 = 3, ROW_LEDGER = 7, ROW_AUTO = _x2c_gensym_macro_private_row_0 + 5, ROW_FORWARDED = 11, ROW_FOLLOWING
 }
