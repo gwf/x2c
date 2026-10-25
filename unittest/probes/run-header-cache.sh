@@ -519,13 +519,13 @@ cmp -s "$BUILD/macro-stability/before.names" \
   "$BUILD/macro-stability/after.names" ||
   fail "unrelated earlier edit renumbered a later macro name"
 
-# Case 9: the macro and Lisp files a header reads are prerequisites of every
-# unit that includes it, not only of the first unit to parse it.  A batch
+# Case 9: the macro files a header reads are prerequisites of every unit
+# that includes it, not only of the first unit to parse it.  A batch
 # replays the second unit's copy of the header out of the cache and must
 # include the header's own imports in the depfile.
 mkdir -p "$BUILD/imports/src" "$BUILD/imports/out"
 cat >"$BUILD/imports/src/probe.x" <<'EOF'
-$(def probe.step 3)
+macro Expression $probe.step() => 3;
 EOF
 cat >"$BUILD/imports/src/hdr.x" <<'EOF'
 #include "probe.x"
@@ -545,16 +545,13 @@ grep -q "probe.x" "$BUILD/imports/out/first.d" ||
 grep -q "probe.x" "$BUILD/imports/out/second.d" ||
   fail "a replayed header's macro import is missing from the depfile"
 
-# A package's own compile-time imports belong to every importing unit. The
-# package entry is replayed from its collection cache when the consumer's
-# import is resolved, so both dependencies must survive that replay.
+# A package's own macro includes belong to every importing unit. The package
+# entry is replayed from its collection cache when the consumer's import is
+# resolved, so its dependencies must survive that replay.
 mkdir -p "$BUILD/package-import/packages/depcache/src" \
   "$BUILD/package-import/src" "$BUILD/package-import/out"
 cat >"$BUILD/package-import/packages/depcache/src/helper.x" <<'EOF'
 macro Expression $depcache.answer() => 7;
-EOF
-cat >"$BUILD/package-import/packages/depcache/src/helper.xlisp" <<'EOF'
-(def depcache-helper 1)
 EOF
 cat >"$BUILD/package-import/packages/depcache/src/native.h" <<'EOF'
 typedef struct CachePoint { int x; } CachePoint;
@@ -562,7 +559,6 @@ EOF
 cat >"$BUILD/package-import/packages/depcache/src/depcache.x" <<'EOF'
 #include "helper.x"
 #include "native.h"
-$(import "helper.xlisp")
 typedef int Value;
 class CachedValue { int value; };
 static class HiddenValue { int value; };
@@ -587,8 +583,6 @@ EOF
   packages/depcache/src/depcache.x)
 grep -q "helper.x" "$BUILD/package-import/out/consumer.d" ||
   fail "a package's macro import is missing from the consumer depfile"
-grep -q "helper.xlisp" "$BUILD/package-import/out/consumer.d" ||
-  fail "a package's Lisp import is missing from the consumer depfile"
 grep -q 'depcache__Var_cachedvalue' \
   "$BUILD/package-import/out/depcache.h" ||
   fail "package class lost its canonical reverse converter"
@@ -614,10 +608,10 @@ mkdir -p "$BUILD/keyword/src" "$BUILD/keyword/alias-first" \
   "$BUILD/keyword/main-first"
 cat >"$BUILD/keyword/src/private-keywords.x" <<'EOF'
 macro Decorator $cache.identity(Function $target) {
-  @(Code.body $target)
+  @Code.body($target)
 }
 macro Decorator $cache.outer(Function $target) {
-  @(Code.body $target)
+  @Code.body($target)
 }
 keyword identity $cache.identity;
 keyword outer $cache.outer;
@@ -697,8 +691,7 @@ grep -Fq "macro-embed-text-data.txt" "$embed_dep" ||
 
 mkdir -p "$BUILD/embed-invalid/src" "$BUILD/embed-invalid/out"
 cat >"$BUILD/embed-invalid/src/embed.x" <<'EOF'
-macro Expression $probe.embed(Literal $path) =>
-  $(x2c.literal.string (x2c.embed.text $path));
+macro Expression $probe.embed(Literal $path) => $x2c_embed_text($path);
 EOF
 printf 'plain text' >"$BUILD/embed-invalid/src/plain.txt"
 printf 'bad\0text' >"$BUILD/embed-invalid/src/nul.txt"
@@ -755,7 +748,7 @@ cp "$ROOT"/src/components/*.x "$embed_root/src/components"/
 cp "$ROOT"/src/grammar.x "$embed_root/src/"
 cat >"$embed_root/src/embed.x" <<'EOF'
 macro Unit $cache.declare() {
-  int $(x2c.ident (x2c.embed.text "name.txt"))(void);
+  int $x2c_ident($x2c_embed_text("name.txt"))(void);
 }
 EOF
 cat >"$embed_root/src/hdr.x" <<'EOF'
@@ -897,13 +890,20 @@ done
 
 # Private default methods retain internal linkage, and arbitrary recipe data
 # round-trips even when its List head matches a serialization marker.
+cat >"$declarations/src/private-meta.x" <<'EOF2'
+meta List projection_data(List data) {
+  String value = data.equal(%(declaration-void)) ? "17" : "19";
+  return %(return () (expr (int) (literal (int) $value)));
+}
+meta List projection_data_rows(void) {
+  return %((function (int) (bind ("data_answer") ((fnmod (params))))
+    (block (syntax-recipe projection_data ((declaration-void))))));
+}
+EOF2
 cat >"$declarations/src/private.x" <<'EOF2'
-$(defun projection-data (data)
-  `(return () ,(x2c.literal.int
-    (if (equal? data '(declaration-void)) 17 19))))
+#include "private-meta.x"
 macro Declaration $projection.data() {
-  @(quote ((function (int) (bind ("data_answer") ((fnmod (params))))
-    (block (syntax-recipe projection-data ((declaration-void)))))))
+  @projection_data_rows()
 }
 $projection.data();
 static class Hidden { int value; };
@@ -1178,14 +1178,14 @@ int sum(int n) => n + 1;
 #include "first-defs.x"
 SRC
 cat > "$root/packages/first/src/first-defs.x" <<'SRC'
-$(def package-order 1)
+macro Expression $package.order() => 1;
 SRC
 cat > "$root/packages/last/src/last.x" <<'SRC'
 #include "last-defs.x"
 SRC
 cat > "$root/packages/last/src/last-defs.x" <<'SRC'
-$(def package-order 2)
-macro Expression $last.order() => $(x2c.literal.int package-order);
+macro Expression $package.order() => 2;
+macro Expression $last.order() => $package.order();
 SRC
 cat > "$root/src/z-first.x" <<'SRC'
 import "first" as f with sum as local_sum;
