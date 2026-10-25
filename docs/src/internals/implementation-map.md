@@ -195,6 +195,37 @@ set of dump flags is listed under [compiler options](../reference/cli.md).
 - Tests: the `module-block` and `module-storage-class` compiler fixtures
 - See also: [module blocks](../reference/language.md#module-blocks)
 
+### Expression aliases
+
+- Parse and expand: `src/macros/aliases.x` reads `alias` and `unalias` at file,
+  module, block, aggregate, and enumerator positions and wraps braced bodies
+- Scope entries: `Sym.define_alias` and `Sym.undefine_alias` in
+  `src/symtab/bindings.x`
+- Hooks: `src/statements.x` (block position), `src/parse/units.x` (file and
+  module position), and `src/parse/types.x` (aggregate and enumerator bodies)
+- Tests: the `alias-*` and `unalias-*` compiler fixtures
+- See also: [expression
+  aliases](../reference/language.md#expression-aliases-with-alias)
+
+### The `with` statement
+
+- Parse: `_with_statement` in `src/statements.x`
+- Lower: `_with_expand` in `src/builtins.x`, reached through the
+  `$x2c.with` decorator in `etc/builtin-macros.x`
+- Tests: the `with-*` compiler fixtures
+- See also: [with](../reference/language.md#temporary-assignments-with-with)
+
+### `auto` allocation regions
+
+- Recognize: `auto_region_statement_starts` in
+  `src/macros/invocations/recognition.x` and `auto_region_function_starts` in
+  `src/parse/units.x`
+- Lower: `_scope_expand` in `src/builtins.x`, reached through the
+  `$x2c.auto.region` and `$x2c.auto.destination` decorators in
+  `etc/builtin-macros.x`
+- Tests: the `scope-*` and `auto-*` compiler fixtures
+- See also: [allocation regions](../reference/language.md#allocation-regions)
+
 ### Exact Var-tag tests with `is` and `is not`
 
 - Parse, type, and lower: `src/expressions/expressions.x` types each test as a

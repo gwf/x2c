@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/unalias-body-name.x:6:5: parse: no alias 't' to remove in this scope
+      unalias t;
+      ^^^^^^^
+  note: an alias of an enclosing scope ends with that scope
+

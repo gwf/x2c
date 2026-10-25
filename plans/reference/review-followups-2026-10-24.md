@@ -3,6 +3,7 @@
 > Status: reference, 2026-10-24.
 > Source and history checked at `7e9fd0178`. These are candidates and
 > coverage gaps, not newly reproduced defects or selected implementation.
+> Note, 2026-10-25: `with-lexical.x` has since been renamed and `$let` removed.
 
 ## Component boundaries
 

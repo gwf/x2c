@@ -198,14 +198,11 @@ static List _template_declaration(Compiler c, int skip_body) {
   return _wrapped_forms(c, skip_body);
 }
 
-/* Directives between the forms stay among them, and an include among them
-   delivers its definitions there. */
+/* Directives between the forms stay among them. */
 static List _wrapped_forms(Compiler c, int skip_body) {
   Array forms = [];
   loop {
     List directives = c.leading_preproc();
-    if (!skip_body && c.included_effects != NULL)
-      c.install_included_effects();
     foreach (List directive in directives) forms.push(directive);
     if (c.peek(0) == <"}"> || c.peek(0) == <eof>) break;
     List form = skip_body ? NULL : c.replay_declaration_source();

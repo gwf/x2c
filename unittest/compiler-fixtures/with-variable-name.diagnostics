@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/with-variable-name.x:5:3: parse: with requires '(destination = expression, ...)'
+    with = 2;
+    ^^^^
+  note: name an expression with alias
+

@@ -1,5 +1,5 @@
 /*  bindings.x -- five ways x2c names a value: a delegate field, a Self
-    result, a reference parameter, destructuring assignment, and `with`.
+    result, a reference parameter, destructuring assignment, and `alias`.
 */
 
 typedef struct Reading {
@@ -49,7 +49,7 @@ int main(void) {
   printf("morning %s evening %s from %s\n",
          morning.repr(), evening.repr(), samples.repr());
 
-  /* `with` gives an expression a short lexical name; each use is a copy of
+  /* `alias` gives an expression a short lexical name; each use is a copy of
      the expression, not a hidden temporary. */
   alias station.latest as reading {
     reading.celsius += 2;

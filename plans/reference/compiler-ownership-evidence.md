@@ -1,6 +1,7 @@
 > Status: reference
 > Static ownership inventory at 548b381f18653089b0285082881f27d65df3bf94,
 > investigated 2026-10-09. No compiler change or runtime defect is asserted.
+> Note, 2026-10-25: `$let` has since been removed; this record keeps the 2026-10-09 wording.
 
 # Compiler ownership evidence
 

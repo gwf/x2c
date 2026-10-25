@@ -444,8 +444,8 @@ int answer(void) { return 42; }
 int truth = $nonzero() value + 1;
 int managed = $auto(make_value());
 //             ^^^^ support.function.macro.builtin.x2c
-int scoped = $scope(make_value());
-//             ^ support.function.macro.builtin.x2c
+$scope(&arena) { int scoped = make_value(); }
+//^ support.function.macro.builtin.x2c
 
 Var missing = void;
 //            ^^^^ constant.language.void.x2c
