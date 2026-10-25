@@ -13,7 +13,7 @@ X2c declarations, parsed from source or constructed.
 | Function | Summary |
 | --- | --- |
 | [`Ast.declared_return`](#Ast.declared_return) | The declared result type of the function `declaration`, which its `return` statements convert to, or NULL. |
-| [`Compiler.auto_region_function_starts`](#Compiler.auto_region_function_starts) | Reports whether an `auto` prefix targets file-scope declaration syntax. |
+| [`Compiler.auto_region_form`](#Compiler.auto_region_form) | Reports what the `auto` at the cursor wraps as an allocation region: `<statement>` for a statement, a block, `foreach`, or `with`, each with or without a destination; `<function>` at `position` `<unit>` for file-scope declaration syntax whose body follows, which the ordinary function parser then requires; or 0 for a managed declaration or any other use of the word. |
 | [`Compiler.bind_callable_body`](#Compiler.bind_callable_body) | Binds a callable's outer block in its active parameter scope. |
 | [`Compiler.bind_catch_arm`](#Compiler.bind_catch_arm) | Binds one catch arm's `body` in a scope of its own, with declarations of the definite binders of `pattern`, read through `handle`, before it. |
 | [`Compiler.bind_match_arm`](#Compiler.bind_match_arm) | Binds one match arm's `body` in a scope of its own, which defines the definite binders of `pattern` when the arm `binds`. |
@@ -46,6 +46,7 @@ X2c declarations, parsed from source or constructed.
 | [`Compiler.parse_fields`](#Compiler.parse_fields) | Parses aggregate fields in source order up to the current closing brace. |
 | [`Compiler.parse_function_definition`](#Compiler.parse_function_definition) | Parses one function declaration and its required compound body. |
 | [`Compiler.parse_function_target`](#Compiler.parse_function_target) | Parses one function decorator target and returns its resulting AST. |
+| [`Compiler.parse_members`](#Compiler.parse_members) | Parses the members of an aggregate or enum body whose opening brace the caller consumed, up to its closing brace, which stays unconsumed. |
 | [`Compiler.parse_named_type`](#Compiler.parse_named_type) | Captures a name followed by an ordinary complete type and semicolon. |
 | [`Compiler.parse_optional_identifier`](#Compiler.parse_optional_identifier) | Consumes and returns the current identifier, or NULL without consuming. |
 | [`Compiler.parse_parameter`](#Compiler.parse_parameter) | Parses one parameter and returns `(param TYPE DECLARATOR)` or `(...)`. |
@@ -80,15 +81,19 @@ Source: `src/parse/functions.x:102`
 
 ### `Compiler`
 
-<a id="Compiler.auto_region_function_starts"></a>
-#### Compiler.auto_region_function_starts
+<a id="Compiler.auto_region_form"></a>
+#### Compiler.auto_region_form
 
-`int Compiler.auto_region_function_starts(Compiler c)`
+`Symbol Compiler.auto_region_form(Compiler c, Symbol position)`
 
-Reports whether an `auto` prefix targets file-scope declaration syntax.
-The ordinary function parser then requires a function body.
+Reports what the `auto` at the cursor wraps as an allocation region:
+`<statement>` for a statement, a block, `foreach`, or `with`, each with
+or without a destination; `<function>` at `position` `<unit>` for
+file-scope declaration syntax whose body follows, which the ordinary
+function parser then requires; or 0 for a managed declaration or any
+other use of the word. This query does not consume tokens.
 
-Source: `src/parse/units.x:279`
+Source: `src/parse/auto.x:16`
 
 <a id="Compiler.bind_callable_body"></a>
 #### Compiler.bind_callable_body
@@ -213,7 +218,7 @@ starting at `start`, or NULL. A doc comment opens with two asterisks and
 ends on the line before `start` or on its line. Macro templates carry the
 text until their selected body binds at the invocation.
 
-Source: `src/parse/units.x:612`
+Source: `src/parse/units.x:601`
 
 <a id="Compiler.enclosing"></a>
 #### Compiler.enclosing
@@ -272,7 +277,7 @@ Constructs a foreign alias from one direct function declaration and target.
 typed, a function. Storage is limited to `static` or `inline`, when
 present, and variadic parameters are rejected.
 
-Source: `src/parse/units.x:783`
+Source: `src/parse/units.x:772`
 
 <a id="Compiler.finish_initializers"></a>
 #### Compiler.finish_initializers
@@ -318,7 +323,7 @@ Source: `src/parse/placement.x:132`
 Reports whether the cursor begins a contextual top-level `meta`
 declaration: a function or an initialized file-static value.
 
-Source: `src/parse/units.x:327`
+Source: `src/parse/units.x:316`
 
 <a id="Compiler.package_alias_spelling"></a>
 #### Compiler.package_alias_spelling
@@ -392,7 +397,7 @@ Parses one enumerator for enum type `context` and returns its AST.
 Outside macro-template parsing, its binding is published immediately so
 later initializers and enumerators can resolve it.
 
-Source: `src/parse/types.x:505`
+Source: `src/parse/types.x:512`
 
 <a id="Compiler.parse_enumerators"></a>
 #### Compiler.parse_enumerators
@@ -401,9 +406,10 @@ Source: `src/parse/types.x:505`
 
 Parses comma-separated enumerators up to the current closing brace.
 Returns their flat source-order `List` and leaves the brace unconsumed.
-An alias among them needs no comma, and its name ends at the brace.
+An alias among them needs no comma; the owner of the brace holds the
+alias body they declare into.
 
-Source: `src/parse/types.x:483`
+Source: `src/parse/types.x:492`
 
 <a id="Compiler.parse_field"></a>
 #### Compiler.parse_field
@@ -414,7 +420,7 @@ Parses one field for aggregate type `context` and returns its AST.
 Ordinary fields publish their binding in the aggregate's field scope and
 consume their terminating semicolon; macro forms follow their own syntax.
 
-Source: `src/parse/types.x:350`
+Source: `src/parse/types.x:359`
 
 <a id="Compiler.parse_fields"></a>
 #### Compiler.parse_fields
@@ -423,9 +429,10 @@ Source: `src/parse/types.x:350`
 
 Parses aggregate fields in source order up to the current closing brace.
 Returns a flat field `List`, publishes delegate-field metadata, and leaves
-the closing brace unconsumed. An alias among the fields ends at the brace.
+the closing brace unconsumed. The owner of the brace holds the alias
+body the fields declare into.
 
-Source: `src/parse/types.x:329`
+Source: `src/parse/types.x:342`
 
 <a id="Compiler.parse_function_definition"></a>
 #### Compiler.parse_function_definition
@@ -449,6 +456,18 @@ an ordinary function definition is required.
 
 Source: `src/parse/functions.x:28`
 
+<a id="Compiler.parse_members"></a>
+#### Compiler.parse_members
+
+`List Compiler.parse_members(Compiler c, Symbol position, List context)`
+
+Parses the members of an aggregate or enum body whose opening brace the
+caller consumed, up to its closing brace, which stays unconsumed.
+`position` is `<field>` or `<enumerator>` and `context` is the type.
+An alias among the members ends at the brace.
+
+Source: `src/parse/types.x:330`
+
 <a id="Compiler.parse_named_type"></a>
 #### Compiler.parse_named_type
 
@@ -458,7 +477,7 @@ Captures a name followed by an ordinary complete type and semicolon.
 The reserved typedef identity permits fields to refer to their enclosing
 named type before its pointer or value representation is complete.
 
-Source: `src/parse/types.x:421`
+Source: `src/parse/types.x:430`
 
 <a id="Compiler.parse_optional_identifier"></a>
 #### Compiler.parse_optional_identifier
@@ -603,7 +622,7 @@ Reports whether the cursor begins a protocol declaration or adoption,
 including its `meta` and `static` markers. This query does not consume
 tokens.
 
-Source: `src/parse/units.x:319`
+Source: `src/parse/units.x:308`
 
 <a id="Compiler.script_statement_executes"></a>
 #### Compiler.script_statement_executes
@@ -614,7 +633,7 @@ Reports whether the top-level item at the cursor is a script statement
 that runs, rather than a declaration: an expression, control flow, a
 `with` block, or a statement macro. This query does not consume tokens.
 
-Source: `src/parse/units.x:309`
+Source: `src/parse/units.x:298`
 
 <a id="Compiler.script_statement_starts"></a>
 #### Compiler.script_statement_starts

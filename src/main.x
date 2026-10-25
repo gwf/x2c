@@ -62,6 +62,7 @@ static List _env_rows(CliRequest request) {
     ("include_dir" ${toolchain.include_dir})
     ("runtime_lib" ${toolchain.runtime_lib})
     ("prelude" ${Compiler.prelude_interface()})
+    ("prelude_missing" ${" ".join(Compiler.prelude_missing_interfaces())})
     ("package_dirs" $roots)
     ("cc" ${toolchain.cc})
     ("ar" ${toolchain.ar})

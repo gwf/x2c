@@ -420,10 +420,9 @@ static List _parse_body(Compiler c, Symbol result_kind, Array using) {
   if (result_kind == <block-item>)
     return cons(<seq>, c.parse_block_items(0).cdr());
   if (result_kind == <field>)
-    return _closed_seq(
-      c, c.peek(0) == <"}"> ? NULL : c.parse_fields(%(struct ())));
+    return _closed_seq(c, c.parse_members(<field>, %(struct ())));
   if (result_kind == <enumerator>)
-    return _closed_seq(c, c.parse_enumerators(%(enum ())));
+    return _closed_seq(c, c.parse_members(<enumerator>, %(enum ())));
   if (result_kind == <map-entry>) return _closed_seq(c, c.parse_map_entries());
   return _closed_seq(c, _unit_items(c));
 }

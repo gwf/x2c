@@ -217,9 +217,9 @@ set of dump flags is listed under [compiler options](../reference/cli.md).
 
 ### `auto` allocation regions
 
-- Recognize: `auto_region_statement_starts` in
-  `src/macros/invocations/recognition.x` and `auto_region_function_starts` in
-  `src/parse/units.x`
+- Recognize: `Compiler.auto_region_form` in `src/parse/auto.x`, asked by
+  invocation recognition in `src/macros/invocations/recognition.x` and the
+  script-statement queries in `src/parse/units.x`
 - Lower: `_scope_expand` in `src/builtins.x`, reached through the
   `$x2c.auto.region` and `$x2c.auto.destination` decorators in
   `etc/builtin-macros.x`

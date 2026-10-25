@@ -1,7 +1,43 @@
-/*  auto.x -- managed declarations and local type inference
+/*  auto.x -- managed declarations, local type inference, and the forms
+    `auto` begins
 
     Copyright (c) 2026 Gary William Flake.
 */
+
+// recognition
+
+/** Reports what the `auto` at the cursor wraps as an allocation region:
+    `<statement>` for a statement, a block, `foreach`, or `with`, each with
+    or without a destination; `<function>` at `position` `<unit>` for
+    file-scope declaration syntax whose body follows, which the ordinary
+    function parser then requires; or 0 for a managed declaration or any
+    other use of the word. This query does not consume tokens.
+*/
+Symbol Compiler.auto_region_form(Compiler c, Symbol position) {
+  if (c.peek(0) != <auto>) return 0;
+  Token next = Token.skip_trivia(c.token + 1);
+  if (next.type == <(>) {
+    Token after = Token.skip_trivia(next.after_group());
+    return position == <unit> && _function_follows(c, after)
+         ? <function> : <statement>;
+  }
+  if (next.text == "foreach" || next.text == "with" ||
+      next.type in _region_statements)
+    return <statement>;
+  return position == <unit> && _function_follows(c, next) ? <function> : 0;
+}
+
+static const SymbolSet _region_statements =
+  %<<"{" "%{" if while for do switch match try return raise defer break
+     continue goto>>;
+
+/* Whether `token` begins a declaration that stays at file scope. */
+static int _function_follows(Compiler c, Token token) {
+  Token start = c.token;
+  defer c.token = start;
+  c.token = token;
+  return c.test_declaration() && _declaration_stays(c);
+}
 
 module int _auto_storage(List declaration) {
   match (declaration) {

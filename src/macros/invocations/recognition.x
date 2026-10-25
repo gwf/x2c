@@ -245,13 +245,14 @@ module Symbol _result_kind(List definition) {
 module List _peek_invocation(Compiler c, Symbol position) {
   Var stored;
   if (c.peek(0) == <auto>) {
-    if (c.peek(1) == <(>)
-      return _lookup(c, Atom.intern("x2c.auto.destination"), c.token);
-    if (c.auto_region_statement_starts() ||
-        (position == <unit> && c.auto_region_function_starts()))
-      return _lookup(c, Atom.intern("x2c.auto.region"), c.token);
-    return NULL;
+    if (!c.auto_region_form(position)) return NULL;
+    String region = c.peek(1) == <(> ? "x2c.auto.destination"
+                                     : "x2c.auto.region";
+    return _lookup(c, Atom.intern(region), c.token);
   }
+  /* `with` is not a keyword alias: one would claim `with(41)` in an
+     expression, where the book keeps `with` an ordinary name. Only a
+     statement begins the built-in decorator. */
   if (c.at_word("with") && c.peek(1) == <(> &&
       (position == <statement> || position == <block>))
     return _lookup(c, Atom.intern("x2c.with"), c.token);
@@ -271,16 +272,6 @@ module List _peek_invocation(Compiler c, Symbol position) {
     definition = stored;
   return definition && (c.peek(1) == <(> || _bare(c.token, definition))
        ? definition : NULL;
-}
-
-/** Reports whether `auto` introduces a region statement, rather than a
-    managed declaration. Does not consume tokens. */
-int Compiler.auto_region_statement_starts(Compiler c) {
-  if (c.peek(0) != <auto>) return 0;
-  Token next = Token.skip_trivia(c.token + 1);
-  return next.type == <(> || next.text == "foreach" || next.text == "with" ||
-    next.type in %<<"{" "%{" if while for do switch match try return raise
-      defer break continue goto>>;
 }
 
 /* Scans the dotted name after the current `$` without consuming tokens.

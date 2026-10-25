@@ -39,6 +39,7 @@ Source-ordered shallow symbol collection and replay.
 | [`Compiler.name_loaded_provider`](#Compiler.name_loaded_provider) | Names declared bindings through one loaded provider. |
 | [`Compiler.name_meta_provider_bindings`](#Compiler.name_meta_provider_bindings) | Selects helper C spellings for public definitions owned by `path`. |
 | [`Compiler.prelude_interface`](#Compiler.prelude_interface) | Returns the path of the first prelude interface this compiler wrote, or NULL when there is none or the compiler's identity is unknown. |
+| [`Compiler.prelude_missing_interfaces`](#Compiler.prelude_missing_interfaces) | Returns the home-relative paths of the runtime units the prelude interface includes whose own interface this compiler did not write, or NULL when every one is present or there is no prelude interface. |
 | [`Compiler.prelude_sources`](#Compiler.prelude_sources) | Returns the compiler-owned prelude sources relative to its home. |
 | [`Compiler.publish_inline_types`](#Compiler.publish_inline_types) | Promotes the selected type families after the owning ordinary full parse. |
 | [`Compiler.publishes_type_family`](#Compiler.publishes_type_family) | Reports whether this unit's interface publishes the type `family`. |
@@ -245,7 +246,7 @@ identity is unknown, since no compiler could replay that interface. A
 contribution that the interface grammar cannot spell is reported as an
 `emit` diagnostic.
 
-Source: `src/collect/interfaces.x:250`
+Source: `src/collect/interfaces.x:272`
 
 <a id="Compiler.is_prelude_source"></a>
 #### Compiler.is_prelude_source
@@ -288,7 +289,7 @@ the records hold this compiler's collection rather than a table linked
 into it; the unit's own entries for them are restored afterwards. A
 record the interface grammar cannot spell is left out.
 
-Source: `src/collect/interfaces.x:353`
+Source: `src/collect/interfaces.x:375`
 
 <a id="Compiler.loaded_call_type"></a>
 #### Compiler.loaded_call_type
@@ -365,6 +366,19 @@ NULL when there is none or the compiler's identity is unknown. Its
 source hashes are not checked.
 
 Source: `src/collect/interfaces.x:228`
+
+<a id="Compiler.prelude_missing_interfaces"></a>
+#### Compiler.prelude_missing_interfaces
+
+`List Compiler.prelude_missing_interfaces(void)`
+
+Returns the home-relative paths of the runtime units the prelude
+interface includes whose own interface this compiler did not write, or
+NULL when every one is present or there is no prelude interface. A
+missing interface walks that unit cold in every process, so a converged
+stage build reports none.
+
+Source: `src/collect/interfaces.x:237`
 
 <a id="Compiler.prelude_sources"></a>
 #### Compiler.prelude_sources

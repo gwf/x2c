@@ -221,7 +221,7 @@ static List _tagged_type(Compiler c) {
   Var used = c.aggregate_name(tag, (name ? name : c.gensym()).car(), defines);
   List type = %($tag $used), members = NULL;
   if (c.test(<"{">)) {
-    members = tag == <enum> ? c.parse_enumerators(type) : c.parse_fields(type);
+    members = c.parse_members(tag == <enum> ? <enumerator> : <field>, type);
     c.expect(<"}">);
     _skip_attributes(c);
     if (!c.macro_holes)
@@ -322,18 +322,27 @@ static int _attribute_since(Compiler c, Token first, Array marks) {
 
 // fields
 
+/** Parses the members of an aggregate or enum body whose opening brace the
+    caller consumed, up to its closing brace, which stays unconsumed.
+    `position` is `<field>` or `<enumerator>` and `context` is the type.
+    An alias among the members ends at the brace.
+*/
+List Compiler.parse_members(Compiler c, Symbol position, List context) {
+  Map aliases = c.enter_alias_body();
+  defer c.leave_alias_body(aliases);
+  return position == <enumerator> ? c.parse_enumerators(context)
+                                  : c.parse_fields(context);
+}
+
 /** Parses aggregate fields in source order up to the current closing brace.
     Returns a flat field `List`, publishes delegate-field metadata, and leaves
-    the closing brace unconsumed. An alias among the fields ends at the brace.
+    the closing brace unconsumed. The owner of the brace holds the alias
+    body the fields declare into.
 */
 List Compiler.parse_fields(Compiler c, List context) {
   Array fields = [];
-  Map aliases = c.enter_alias_body();
-  defer c.leave_alias_body(aliases);
-  loop {
-    _push_items(fields, _field_item(c, context));
-    if (c.peek(0) == <"}">) return fields.list_free();
-  }
+  while (c.peek(0) != <"}">) _push_items(fields, _field_item(c, context));
+  return fields.list_free();
 }
 
 static List _field_item(Compiler c, List context) {
@@ -444,8 +453,7 @@ static List _record_body(Compiler c, String name, Token start) {
   Symbol tag = c.peek(0) == <union> ? <union> : <struct>;
   if (c.peek(0) != <"{">) c.next();
   c.expect(<"{">);
-  List fields = c.peek(0) == <"}">
-              ? NULL : c.parse_fields(%($tag $name));
+  List fields = c.parse_members(<field>, %($tag $name));
   c.expect(<"}">);
   return c.macro_holes ? %($tag $name (fields @fields))
                        : _publish_aggregate_type(c, tag, name, fields, start);
@@ -478,12 +486,11 @@ static Type _declare_named_type(
 
 /** Parses comma-separated enumerators up to the current closing brace.
     Returns their flat source-order `List` and leaves the brace unconsumed.
-    An alias among them needs no comma, and its name ends at the brace.
+    An alias among them needs no comma; the owner of the brace holds the
+    alias body they declare into.
 */
 List Compiler.parse_enumerators(Compiler c, List context) {
   Array enumerators = [];
-  Map aliases = c.enter_alias_body();
-  defer c.leave_alias_body(aliases);
   while (c.peek(0) != <"}">) {
     if (c.alias_form_starts()) {
       _push_items(enumerators, c.parse_alias_member(<enumerator>, context));

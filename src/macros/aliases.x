@@ -233,12 +233,9 @@ List Compiler.parse_alias_member(
   defer c.leave_alias_body(mark);
   _declare(c, head, 0);
   c.next();
-  /* The member list opens a body level of its own; it opens this one, so
-     its aliases and removals belong to the wrapper's scope. */
-  c.alias_level--;
-  defer c.alias_level++;
+  // The wrapper owns the brace, so the members declare into its body.
   List members = position == <enumerator> ? c.parse_enumerators(context)
-               : c.peek(0) == <"}"> ? NULL : c.parse_fields(context);
+                                          : c.parse_fields(context);
   c.expect(<"}">);
   return %(seq @members);
 }
@@ -277,6 +274,10 @@ static List _private_key(Compiler c, String name) {
   return %(${file ? file : ""} $name);
 }
 
+/* A public alias is keyed by its name alone; a `static` one by its file's
+   prefix and its name. */
+static int _public_key(Var key) => key is <string>;
+
 /* `unalias name;` removes the alias the current scope declares, and the
    name means what it meant before that alias. Removing a public alias at
    file scope is a compile-time effect for including files. */
@@ -296,7 +297,7 @@ static List _unalias(Compiler c, int block) {
   if (!_same_scope(c, _entry(c, name, key)))
     $fail.macros_unalias_missing(c, start, name);
   _remove(c, key);
-  if (!c.alias_level && c.sym.at_file_scope() && key is <string>)
+  if (!c.alias_level && c.sym.at_file_scope() && _public_key(key))
     _record_compile_time_effect(c, %(compile-time unalias $name), start);
   return %(seq);
 }
@@ -390,16 +391,20 @@ void Compiler.leave_alias_body(Compiler c, Map mark) {
 /* An included file's public alias arrives as its frozen expression, which
    is thawed when the name is first used. It conflicts with an alias the
    including file already has at file scope, and with a file-scope name the
-   full parse has already bound there. The full parse, which alone holds
-   `included_effects`, records that at the include line and continues
-   installing the include's definitions. */
+   full parse has already bound there. The full parse records that at the
+   include line and continues installing the include's definitions. */
 module void _install_imported_alias(Compiler c, String name, List frozen) {
-  if (c.included_effects != NULL &&
+  if (_full_parse(c) &&
       (_same_scope(c, _entry(c, name, NULL)) ||
        c.sym.current_binding(%($name))))
     $problem.macros_alias_included(c, c.token, name);
   _install(c, name, %(imported $frozen));
 }
+
+/* Whether `c` is parsing its unit in full. The full parse alone holds the
+   include effects it installs at include lines; collection, prelude
+   installation, and a cold walk of an included file leave them unset. */
+static int _full_parse(Compiler c) => c.included_effects != NULL;
 
 /* An included file's removal of its public alias. */
 module void _remove_imported_alias(Compiler c, String name) {
@@ -450,7 +455,10 @@ static void _reveal_bindings(Compiler c, List syntax) {
     if (child is <list>) _reveal_bindings(c, child);
 }
 
-/* An imported entry's identifiers bind in the unit's global scope. */
+/* An imported entry's identifiers bind in the unit's global scope. The
+   thawed entry replaces the frozen one in the current table without a
+   copy: thawing changes no meaning, so a body that restores an outer table
+   holding the frozen entry only thaws it again. */
 static List _visible(Compiler c, Map table, Var key, List entry, int scope) {
   match (entry) case %(imported ?frozen *shadowed): {
     List expression = _rebind_globals(c, c.thaw_declaration_syntax(frozen));

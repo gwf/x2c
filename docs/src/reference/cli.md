@@ -682,7 +682,10 @@ for external commands, and `identity`, the compiler executable's identity.
 The prelude is the runtime `x2c.xi`
 interface the compiler replays for the runtime declarations. Only an
 interface the same compiler wrote qualifies; an empty value means the
-compiler reads `lib/x2c.x` from source once per process.
+compiler reads `lib/x2c.x` from source once per process. `prelude_missing`
+lists the runtime units that prelude includes whose own interface the
+compiler cannot find; each one is read from source once per process, so a
+converged stage build leaves it empty.
 `x2c env <name>` prints one value; `--package-dir`, `--cc`, and `--ar` show
 their effect on the report.
 

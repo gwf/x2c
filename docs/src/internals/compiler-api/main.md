@@ -27,4 +27,4 @@ failure, and the executed program's status for `run`. Help and version exit
 with zero, while invalid CLI and preflight input exit with status two.
 An external command replaces this process and returns its own status.
 
-Source: `src/main.x:140`
+Source: `src/main.x:141`

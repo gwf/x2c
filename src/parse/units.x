@@ -267,22 +267,11 @@ int Compiler.script_statement_starts(Compiler c) {
       c.macro_form_is_definition() || c.meta_form_is_declaration() ||
       c.protocol_form_starts())
     return 0;
-  if (c.peek(0) == <auto>) return !c.auto_region_function_starts();
+  if (c.peek(0) == <auto>) return c.auto_region_form(<unit>) != <function>;
   if (c.alias_form_starts()) return 0;
   if (c.at_word("with")) return 1;
   if (c.macro_starts_target_at(<unit>)) return !c.macro_targets_unit();
   return !c.test_declaration() || !_declaration_stays(c);
-}
-
-/** Reports whether an `auto` prefix targets file-scope declaration syntax.
-    The ordinary function parser then requires a function body. */
-int Compiler.auto_region_function_starts(Compiler c) {
-  if (c.peek(0) != <auto>) return 0;
-  Token start = c.token;
-  defer c.token = start;
-  c.next();
-  if (c.peek(0) == <(>) c.token = c.token.after_group();
-  return c.test_declaration() && _declaration_stays(c);
 }
 
 /* A declaration in a script unit stays at file scope when a body follows
@@ -290,7 +279,7 @@ int Compiler.auto_region_function_starts(Compiler c) {
    expression-bodied function, or when it ends right after a parameter list
    as a prototype does. An initialized or plain object declaration belongs
    to `main`. */
-static int _declaration_stays(Compiler c) {
+module int _declaration_stays(Compiler c) {
   Symbol previous = 0;
   for (Token token = c.token; token.type != <eof>;
        previous = token.type, token = token.after_group()) {
@@ -309,7 +298,7 @@ static int _declaration_stays(Compiler c) {
 int Compiler.script_statement_executes(Compiler c) =>
   c.script_statement_starts() &&
   (c.peek(0) == <$> || c.at_word("with") || !c.test_declaration() ||
-   c.auto_region_statement_starts());
+   c.auto_region_form(<unit>) == <statement>);
 
 // markers
 

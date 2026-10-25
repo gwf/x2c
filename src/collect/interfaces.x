@@ -225,12 +225,34 @@ module Map _read_dependencies(Compiler c, List stored) {
     NULL when there is none or the compiler's identity is unknown. Its
     source hashes are not checked.
 */
-String Compiler.prelude_interface(void) {
+String Compiler.prelude_interface(void) =>
+  _written_interface(_canonical_path(%"${x2c_get_root()}/lib/x2c.x"));
+
+/** Returns the home-relative paths of the runtime units the prelude
+    interface includes whose own interface this compiler did not write, or
+    NULL when every one is present or there is no prelude interface. A
+    missing interface walks that unit cold in every process, so a converged
+    stage build reports none.
+*/
+List Compiler.prelude_missing_interfaces(void) {
+  String prelude = Compiler.prelude_interface();
+  List record = prelude ? _interface_record(prelude) : NULL;
+  Array missing = [];
+  match (record) case %(interface 6 ? ? ? ?(List parts) *):
+    foreach (Var part in parts)
+      if (part is <string> &&
+          !_written_interface(Compiler.absolute_home_path(part)))
+        missing.push(part);
+  return missing.list_free();
+}
+
+/* The first candidate interface of `canonical` that this compiler wrote,
+   or NULL. Only the identity header is checked. */
+static String _written_interface(String canonical) {
   String identity = Compiler.identity();
   if (!identity) return NULL;
-  String runtime = _canonical_path(%"${x2c_get_root()}/lib/x2c.x");
   String header = %"(interface 6 \"$identity\" ";
-  foreach (String path in _interface_candidates(runtime)) {
+  foreach (String path in _interface_candidates(canonical)) {
     String text = NULL;
     try text = Path.read_text(path);
     catch %((!or not-found io-fail) *): continue;

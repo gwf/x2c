@@ -18,7 +18,6 @@ Source macros and the compile-time Lisp they run.
 | [`Compiler.alias_expression`](#Compiler.alias_expression) | Returns the expression that the identifier at the cursor stands for when it names a visible alias, or NULL. |
 | [`Compiler.alias_form_starts`](#Compiler.alias_form_starts) | Reports whether the cursor begins an alias or its removal. |
 | [`Compiler.applying_shipped`](#Compiler.applying_shipped) | Whether the rule whose meta function now runs is shipped, so that the names it calls resolve to the copies the compiler links. |
-| [`Compiler.auto_region_statement_starts`](#Compiler.auto_region_statement_starts) | Reports whether `auto` introduces a region statement, rather than a managed declaration. |
 | [`Compiler.bind_code_value`](#Compiler.bind_code_value) | Binds a code-value carrier that a meta call returned outside a macro value application as an application binds it, under a transaction that also covers its effects. |
 | [`Compiler.bind_macro_lisp_statement`](#Compiler.bind_macro_lisp_statement) | Binds a compile-time Lisp code `value` returned to a statement at `context`. |
 | [`Compiler.bind_meta_operation`](#Compiler.bind_meta_operation) | Binds `function`, the operation `lib/meta.x` declares as `name`, under its Lisp name in `lisp`. |
@@ -139,7 +138,7 @@ it names a visible alias, or NULL. A declaration in a scope inside the
 alias's scope shadows it. The expression keeps its bindings where a
 later declaration hides one of their names.
 
-Source: `src/macros/aliases.x:426`
+Source: `src/macros/aliases.x:431`
 
 <a id="Compiler.alias_form_starts"></a>
 #### Compiler.alias_form_starts
@@ -164,16 +163,6 @@ Whether the rule whose meta function now runs is shipped, so that the
 names it calls resolve to the copies the compiler links.
 
 Source: `src/macros/rewrites.x:448`
-
-<a id="Compiler.auto_region_statement_starts"></a>
-#### Compiler.auto_region_statement_starts
-
-`int Compiler.auto_region_statement_starts(Compiler c)`
-
-Reports whether `auto` introduces a region statement, rather than a
-managed declaration. Does not consume tokens.
-
-Source: `src/macros/invocations/recognition.x:278`
 
 <a id="Compiler.bind_code_value"></a>
 #### Compiler.bind_code_value
@@ -237,7 +226,7 @@ Source: `src/macros/lisp.x:13`
 Starts a declaration body whose aliases end at its closing brace, and
 returns the alias state that `Compiler.leave_alias_body` restores.
 
-Source: `src/macros/aliases.x:377`
+Source: `src/macros/aliases.x:378`
 
 <a id="Compiler.evaluate_declaration_effect"></a>
 #### Compiler.evaluate_declaration_effect
@@ -381,7 +370,7 @@ Source: `src/macros/templates.x:434`
 
 Ends a declaration body, restoring the aliases visible before it.
 
-Source: `src/macros/aliases.x:383`
+Source: `src/macros/aliases.x:384`
 
 <a id="Compiler.library_filling"></a>
 #### Compiler.library_filling
@@ -476,7 +465,7 @@ named-type decorator, and local `Unit` macro whose template contains
 protocol or adoption rows. `<tried>` covers Unit decorators and other
 local `Unit` macros. Other invocations return zero.
 
-Source: `src/macros/invocations/recognition.x:381`
+Source: `src/macros/invocations/recognition.x:372`
 
 <a id="Compiler.macro_invocation_site"></a>
 #### Compiler.macro_invocation_site
@@ -543,7 +532,7 @@ Reports whether the macro invocation at the cursor produces file-scope
 syntax, directly or through the target it decorates. A script unit keeps
 such an invocation at file scope. This query does not consume tokens.
 
-Source: `src/macros/invocations/recognition.x:425`
+Source: `src/macros/invocations/recognition.x:416`
 
 <a id="Compiler.macro_value_literal"></a>
 #### Compiler.macro_value_literal
@@ -865,7 +854,7 @@ Reports whether the current scope declares an alias named `name`,
 including a file-scope alias an include delivered. A declaration of that
 name in the same scope conflicts with it.
 
-Source: `src/macros/aliases.x:413`
+Source: `src/macros/aliases.x:418`
 
 <a id="Compiler.shared_definitions"></a>
 #### Compiler.shared_definitions
@@ -896,7 +885,7 @@ Source: `src/macros/lisp.x:490`
 Consumes a macro invocation name and its balanced argument list.
 The invocation terminator or following decorator target remains current.
 
-Source: `src/macros/invocations/recognition.x:401`
+Source: `src/macros/invocations/recognition.x:392`
 
 <a id="Compiler.skip_named_type_declaration"></a>
 #### Compiler.skip_named_type_declaration
@@ -906,7 +895,7 @@ Source: `src/macros/invocations/recognition.x:401`
 Consumes a NamedType target already projected by owning-source collection.
 CPP scanning does not produce the declaration or parse its fields again.
 
-Source: `src/macros/invocations/recognition.x:412`
+Source: `src/macros/invocations/recognition.x:403`
 
 <a id="Compiler.source_path"></a>
 #### Compiler.source_path
