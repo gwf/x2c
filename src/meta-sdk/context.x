@@ -33,7 +33,7 @@ Compiler Compiler.expanding(void) =>
 
 /** Returns the location of the active macro invocation. */
 List MetaContext.invocation_location(void) {
-  if (!active.expander || !active.site)
+  if (!active.expander || !active.expander.macro_stack || !active.site)
     $fail.meta_sdk_invocation_missing();
   return active.expander.token_location(active.site);
 }

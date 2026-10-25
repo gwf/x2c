@@ -1,0 +1,8 @@
+unittest/compiler-fixtures/macro-invocation-location-outside.x:4:21: macro: x2c invocation location used outside macro expansion
+  static char *file = $x2c_invocation_file();
+                      ^
+
+unittest/compiler-fixtures/macro-invocation-location-outside.x:5:19: macro: x2c invocation location used outside macro expansion
+  static int line = $x2c_invocation_line();
+                    ^
+

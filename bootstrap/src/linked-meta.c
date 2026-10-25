@@ -17920,7 +17920,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_29(void
   _15144 = List_var(_15143);
   _15145 = String_new("src/macros/invocations/expressions.x");
   _15146 = String_var(_15145);
-  _15147 = String_new("edaeacb0");
+  _15147 = String_new("f5b1e063");
   _15148 = String_var(_15147);
   _15149 = cons(_15148, NULL);
   _15150 = cons(_15146, _15149);
@@ -18594,7 +18594,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_30(void
   _15815 = List_var(_15814);
   _15816 = String_new("src/meta-sdk/context.x");
   _15817 = String_var(_15816);
-  _15818 = String_new("d51ffe7b");
+  _15818 = String_new("4820b63f");
   _15819 = String_var(_15818);
   _15820 = cons(_15819, NULL);
   _15821 = cons(_15817, _15820);

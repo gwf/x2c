@@ -1,5 +1,0 @@
-unittest/compiler-fixtures/macro-embed-text-outside.x:5:16: macro: explicit meta call cannot be resolved
-  String value = $x2c_embed_text("macro-embed-text-data.txt");
-                 ^
-  note: an argument must be a constant, captured syntax, or a meta call
-
