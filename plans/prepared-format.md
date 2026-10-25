@@ -100,7 +100,8 @@ for these known native values, not replacements for the checked contract.
 The shared ordinary scanner changes this whole workload by only 0.171 ms;
 that result does not justify a separate optimization campaign.
 
-The Lisp export uses the actual interpreter, init.xlisp and lisp-values.xlisp.
+The Lisp export used the actual interpreter and the then-separate
+`init.xlisp` and `lisp-values.xlisp` environments.
 It maps a lambda over 20,000 integer records, constructs each argument List,
 calls a bound formatter, and joins the returned Strings into 468,889 bytes.
 The parsed expression and initialized interpreter are reused. Timing includes

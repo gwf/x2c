@@ -272,8 +272,7 @@ corpus = [];
 _cases();
 _case("showcase",
       root.join("examples/data/reference-lisp/showcase.xlisp").read_text());
-Path io = root.join("etc/lisp-io.xlisp");
-_case("algorithms", %"(import \"$io\") (list (sort '(3 1 2)) " +
+_case("algorithms", "(list (sort '(3 1 2)) " +
                     "(fib 8) (subst 'x 'a '(a (b a))))");
 Path temp = Path.temp_dir();
 Path imported = temp.join("module.xlisp");
@@ -286,7 +285,7 @@ fwrite("(def x 1)\0(+ x 1)", 1, 17, nul);
 nul.close();
 _case("nul-import", %"(import \"$nul_path\")");
 Path data = temp.join("data.txt");
-_case("io", %"(import \"$io\") (list (write-file \"$data\" \"hello\") " +
+_case("io", %"(list (write-file \"$data\" \"hello\") " +
             %"(read-file \"$data\"))");
 
 int failures = 0;

@@ -53,7 +53,7 @@ Two arguments, one from cost and one from fit.
 The cost is visible in the tree: about 1,000 lines of Lisp under `etc/`
 plus roughly 700 more inside `lib/autodiff-macros.x`, most of it
 re-deriving in Lisp what x2c already does. The
-[compile-time value surface](../../etc/lisp-values.xlisp) shipped on
+[value surface, now in the standard environment](../../etc/init.xlisp) shipped on
 2026-09-17 is the clearest evidence: 69 names whose only purpose is to let
 Lisp stop reimplementing the x2c library.
 

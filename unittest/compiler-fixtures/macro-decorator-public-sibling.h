@@ -8,7 +8,7 @@
 #include "x2c.h"
 extern int preserved_public;
 
-extern int unexpected_public;
+extern int added_public;
 
 
 #endif /* __GUARD_0x6E438CAB__ */

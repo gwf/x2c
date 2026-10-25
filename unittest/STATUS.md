@@ -42,6 +42,16 @@ warning policy is unchanged. See the
 [CLI plan](../plans/archive/build-cli-defaults.md) for the retained verification
 evidence.
 
+## Reference Lisp diagnostic mismatch
+
+On 2026-10-25, the optional `examples/programs/check-reference-lisp --build`
+comparison agrees on 199 of 200 cases. The `lists` case passes `(car nil)`
+to `list`: the runtime reports `(void-op (operation "apply") (index 0))`,
+while the independent reference interpreter reports `(void-op)`.
+The runtime produces the same diagnostic with the original `init.xlisp`
+from `27dd8c6c2`, before standard-environment consolidation. Diagnostic
+parity remains a separate follow-up; the expectations were not weakened.
+
 ## Coverage
 
 - On 2026-10-24, `tools/indent-convert --check` exposed an existing call to
@@ -245,18 +255,6 @@ passed six repeated nested-Make probes, and help output remains byte-identical.
   macro template form was found that spells that canonical AST; a `${...}`
   body is rejected with "expected macro name after '$'". The five `built-*`
   rows were therefore removed. Ordinary lambda destinations remain covered.
-- The "Decorators" section of `docs/src/reference/language.md` says a
-  public `Unit` target "cannot gain new public siblings". The compiler does
-  not enforce this. The former `macro-decorator-public-sibling` and
-  `macro-decorator-public-lisp-siblings` fixtures failed only because the
-  Lisp spelling `x2c.ident` reached the method-name check ("method name has
-  no concrete owner"). With native `$x2c_ident("unexpected_public")` in the
-  template, translation succeeds and the header declares `extern int
-  unexpected_public;`. A meta function that returns the target followed by
-  two constructed `(declare (int) ...)` Lists also succeeds and exports
-  both siblings. `macro-decorator-public-sibling` now records the current
-  header so enforcement changes it visibly; the constructed-List fixture was
-  removed because it showed the same gap.
 - Outside an expansion, a `$` call rejects a String literal passed to a `Var`
   parameter: "explicit meta call cannot be resolved", note "an argument must
   be a constant, captured syntax, or a meta call". A user `meta String

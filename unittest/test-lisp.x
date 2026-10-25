@@ -354,16 +354,12 @@ static Lisp _boot_session(void) {
   return lisp;
 }
 
-static int _load_lisp_layer(Lisp lisp, String path) {
-  File source = File.open(path, "r");
-  if (!EXPECT_NOT_NULL(source)) return 0;
-  lisp.eval_file(source);
-  source.close();
-  return 1;
-}
-
 static void lisp_eval_self_and_quote(void) {
   Lisp lisp = Lisp.kernel();
+  Var absent = void;
+  EXPECT_FALSE(lisp.try_get("read-file", absent));
+  EXPECT_FALSE(lisp.try_get("Map.new", absent));
+  EXPECT_FALSE(lisp.try_get("defun", absent));
   EXPECT_INT_EQ(Var.integer(_ev(lisp, "42")), 42);
   EXPECT_TRUE(_ev(lisp, "\"s\"") is <string>);
   EXPECT_TRUE(_ev(lisp, "()").is_nil());
@@ -416,10 +412,6 @@ static void lisp_transports_void_outside_collections(void) {
            %((func (("Var"))) "Var"));
   _install(lisp, "no-value", _native_void,
            %((func ((void))) "Var"));
-  if (!_load_lisp_layer(lisp, "../etc/lisp-values.xlisp")) {
-    lisp.destroy();
-    return;
-  }
 
   lisp.set_global("global-void", void);
   Var stored = 7;
@@ -1656,13 +1648,9 @@ static void lisp_bootstrap_predicates_are_exact(void) {
   lisp.destroy();
 }
 
-static void lisp_optional_layers_are_explicit(void) {
-  Lisp lisp = _boot_session();
-  Var value = void;
-  EXPECT_FALSE(lisp.try_get("fib", value));
-  EXPECT_FALSE(lisp.try_get("read-file", value));
-
-  if (_load_lisp_layer(lisp, "../etc/lisp-io.xlisp")) {
+static void lisp_standard_environment_includes_io(void) {
+  for (int embedded = 0; embedded < 2; embedded++) {
+    Lisp lisp = embedded ? Lisp.new() : _boot_session();
     EXPECT_INT_EQ(Var.integer(_ev(lisp, "(fib 8)")), 21);
     EXPECT_VAR_EQ(_ev(lisp, "(sort '(3 1 2))"), _ev(lisp, "'(1 2 3)"));
     EXPECT_VAR_EQ(_ev(lisp, "(subst 'x 'a '(a (b a)))"),
@@ -1677,17 +1665,17 @@ static void lisp_optional_layers_are_explicit(void) {
     Var empty = _ev(lisp, "(read-file \"/tmp/x2c-lisp-io.txt\")");
     EXPECT_TRUE(empty is <string>);
     EXPECT_NULL(empty.string());
+    remove("/tmp/x2c-lisp-io.txt");
+    lisp.destroy();
   }
-  lisp.destroy();
 }
 
-static void lisp_value_layer_uses_library_operations(void) {
-  Lisp lisp = _boot_session();
+static void lisp_standard_environment_uses_library_operations(void) {
+  Lisp lisp = Lisp.new();
   _install(lisp, "no-value", _native_void,
            %((func ((void))) "Var"));
   Var value = void;
-  EXPECT_FALSE(lisp.try_get("Map.new", value));
-  if (!_load_lisp_layer(lisp, "../etc/lisp-values.xlisp")) return;
+  EXPECT_TRUE(lisp.try_get("Map.new", value));
 
   EXPECT_VAR_EQ(_ev(lisp, "(List.getindex '(a b c) 1)"), _ev(lisp, "'b"));
   EXPECT_INT_EQ(Var.integer(_ev(lisp, "(List.index '(a b c) 'c)")), 2);
@@ -1763,7 +1751,6 @@ static void lisp_value_layer_uses_library_operations(void) {
 
 static void lisp_iterator_callbacks_share_the_entry_budget(void) {
   Lisp lisp = _boot_session();
-  if (!_load_lisp_layer(lisp, "../etc/lisp-values.xlisp")) return;
   lisp.call_budget(40);
   EXPECT_INT_EQ(
     _raised_code(
@@ -1775,9 +1762,6 @@ static void lisp_iterator_callbacks_share_the_entry_budget(void) {
 
 static void lisp_iterator_callbacks_stay_with_their_session(void) {
   Lisp first = _boot_session(), second = _boot_session();
-  if (!_load_lisp_layer(first, "../etc/lisp-values.xlisp") ||
-      !_load_lisp_layer(second, "../etc/lisp-values.xlisp"))
-    return;
   Var iter = _ev(first,
     "(Iter.map (range 1 3 1) (lambda (x) (+ x 1)))");
   second.set_global("foreign-iter", iter);
@@ -1790,7 +1774,6 @@ static void lisp_iterator_callbacks_stay_with_their_session(void) {
 static void lisp_callback_arguments_precede_session_checks(void) {
   Lisp lisp = _boot_session();
   defer lisp.destroy();
-  if (!_load_lisp_layer(lisp, "../etc/lisp-values.xlisp")) return;
   Iter mapped = _ev(lisp,
     "(Iter.map (range 1 3 1) (lambda (x) (+ x 1)))");
   Func unary = mapped.aux;
@@ -1823,14 +1806,12 @@ static void lisp_callback_arguments_precede_session_checks(void) {
 
 static void lisp_iterator_storage_leaves_with_the_session(void) {
   Lisp warm = _boot_session();
-  if (!_load_lisp_layer(warm, "../etc/lisp-values.xlisp")) return;
   _ev(warm, "(Iter.list (Iter.map (range 1 3 1) (lambda (x) x)))");
   warm.destroy();
 
   ScopeStats before = Scope.stats();
   for (int i = 0; i < 3; i++) {
     Lisp lisp = _boot_session();
-    if (!_load_lisp_layer(lisp, "../etc/lisp-values.xlisp")) return;
     _ev(lisp, "(Iter.list (Iter.map (range 1 3 1) (lambda (x) x)))");
     lisp.destroy();
   }
@@ -2134,8 +2115,8 @@ void lisp_suite(void) {
   $test.run(lisp_generated_algorithms);
   $test.run(lisp_bootstrap_collections_and_macros);
   $test.run(lisp_bootstrap_predicates_are_exact);
-  $test.run(lisp_optional_layers_are_explicit);
-  $test.run(lisp_value_layer_uses_library_operations);
+  $test.run(lisp_standard_environment_includes_io);
+  $test.run(lisp_standard_environment_uses_library_operations);
   $test.run(lisp_iterator_callbacks_share_the_entry_budget);
   $test.run(lisp_iterator_callbacks_stay_with_their_session);
   $test.run(lisp_callback_arguments_precede_session_checks);
