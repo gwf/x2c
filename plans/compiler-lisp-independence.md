@@ -8,7 +8,8 @@
 > The independent source changes are replayed on `5f7274f` in
 > `codex/lisp-independence-pr285`; combined local validation passed.
 > Current dev `a90359210` is integrated locally; reassessment and fresh
-> combined validation passed. Scalar forwarding is the next bounded candidate.
+> combined validation passed. Scalar forwarding is implemented and validated
+> locally. All selected changes remain unpublished.
 > Harder cases remain deferred. No push, PR, or publication is authorized.
 
 ## Result and boundaries
@@ -57,27 +58,72 @@ from Lisp/import effects. `_rebind_globals` in `src/macros/lisp.x` serves
 imported aliases as well as cached macros; its location does not make that
 AST traversal evaluator work. Preserve those consumers in any future split.
 
-### Next bounded candidate: scalar forwarding
+### Scalar forwarding follow-up
 
 The original hard-case grouping was too broad for `lib/common.x`'s `$scalar`.
-The template has three `Code.arguments` Lisp splice sites, but all nine
-instantiations pass exactly their own type and a parameter named `x`. The
-template can declare and forward its own parameter, avoiding the query.
-This needs no early native declaration or replacement callable registry.
+Before this follow-up, the template had three `Code.arguments` Lisp splice
+sites, but all nine instantiations passed exactly their own type and a
+parameter named `x`. Declaring and forwarding the parameter inside the
+template needs no early native declaration or replacement callable registry.
 
-A scratch macro with that simpler input shape compiled and ran against this
-integrated compiler. Its nine scalar cases matched existing boxing kind and
+A scratch macro with that simpler input shape compiled and ran at the dev
+reassessment. Its nine scalar cases matched existing boxing kind and
 value, display String, and readable representation. The float case retained
-`Var.new` and `<f32>`. This proves a focused implementation path; it does not
-prove complete scalar edge-case parity or change the repository's macro.
+`Var.new` and `<f32>`. That prototype established a focused implementation
+path; it did not establish complete scalar edge-case parity or change the
+repository's macro itself.
 The prototype and result are recorded in
 `debug/dev-reassessment/scalar-feasibility.log` and `probe-root.txt`.
 
-Select scalar forwarding as the next small follow-up. Preserve generated
-public method signatures and float promotion; decide the existing `$scalar`
-invocation compatibility before changing its inputs. Regenerate API output
-and use the existing scalar/Var tests for boundary values. Do not couple this
-conversion to target/signature generation or expose a new compiler query.
+Gary authorized this follow-up on 2026-10-24. The nine repository calls now
+pass only their type, boxer, and optional prefix. The macro declares its
+own `$type x` and directly forwards `x` in all three generated methods.
+The old captured parameter and three `Code.arguments` Lisp slots are gone.
+The only book mention of `$scalar` uses it as a documentation-generation
+example; no caller outside these nine generator invocations was found.
+No compatibility wrapper or new compiler query is needed for these callers.
+
+The public methods keep their signatures, source parameter names, and
+documentation. A before/after compiler projection comparison passes for all
+183 common functions, including the 27 scalar methods with parameter `x`.
+Generated C uses private parameter names; a comparison scoped to each
+parameter binding confirms the 27 method bodies are otherwise identical in
+both `common.c` and `common.h`. Float still calls `Var.new` with `<f32>`,
+including its existing promotion of signaling NaNs. The existing Var tests
+exercise that behavior. No scalar algorithm or runtime signature changes.
+
+Local validation passes, with logs under `debug/scalar-forwarding/`:
+
+| Scalar follow-up check | Result | Log |
+| --- | --- | --- |
+| `make build`; `make doc-generate` | Pass; existing bootstrap accepts the change. | `build.log`, `doc-generate.log` |
+| Compiler projection comparison | All 183 common function signatures and documentation match; all 27 scalar methods retain source parameter name `x`. | `signatures.log` |
+| Generated forwarding comparison | All 27 method bodies match after bound parameter renaming in both C and header output. | `generated-forwarding.log` |
+| Full `make agent-pr-check` | Pass, including all existing extended steps. | `agent-pr-check.log`, `gate-steps/` |
+| Bootstrap and cold comparisons | All 302 C/H files match across bootstrap/stages 0/1; all 430 cold C/H/.xi files match stage 1. | `agent-pr-check.log`, `gate-steps/proof-cold-collection.log` |
+| Unit suites | 1,045 pass, zero failures/skips, 27,250 assertions. This includes the existing signaling-NaN promotion test and scalar/Var boundary coverage. | `gate-steps/verify.log` |
+| Compiler fixtures | 1,288 pass, 2,848 checked artifacts. | `gate-steps/verify.log` |
+| Documentation and commands | 119 executable examples match; all command checks pass, including REPL loading, inspection, and reload. | `gate-steps/` |
+
+The generated review accounts for four bootstrap files: private scalar
+parameter names and two diagnostic source-line updates in `common.c`, the
+same parameter names in `common.h`, and the common source hash in `collect.c`
+and `linked-meta.c`. The generated API page changes only source-line
+references. No generated file was edited by hand. No new test requirement,
+compiler operation, registry, or compatibility wrapper was added.
+
+The signature-comparison scratch script initially tried to put absent
+optional metadata into a List. Selecting only present metadata fixed that
+probe; `signatures-initial.log` retains its failure. A preliminary whole-C
+comparison also exposed the expected diagnostic line-number changes; the
+final comparison accounts for them separately from the scalar methods.
+Neither result required a production correction.
+
+The source hash stayed unchanged during validation. Package suites were not
+repeated for this scalar-only follow-up; their pre-scalar results are below.
+Performance remains unmeasured. Retain this result locally and keep
+target/signature generation and all other harder cases deferred. No push,
+PR, or integration enrollment is authorized.
 
 Fresh checks pass on this integrated tree. Earlier PR #285-base checks below
 remain historical. Logs live under `debug/dev-reassessment/`.
@@ -105,8 +151,8 @@ remain as `focused-probes-initial.log` and
 Authored source hashes stayed unchanged during validation. The full Make
 target is local correctness evidence; no publication receipt is claimed.
 Performance measurements and publication remain unattempted. The private
-delivery context remains active. The immediate plan is to retain this
-validated batch locally, then make the scalar forwarding change separately.
+delivery context remains active. This table records the pre-scalar tree;
+the follow-up's validation is recorded separately above.
 All other deferred cases below remain deferred; no new registry, public
 compiler query, module extraction, or REPL redesign is selected.
 
@@ -230,9 +276,10 @@ Accept PR #285's ordinary `Mutex` spelling in `$lock`. Current dev replaces
 `$let` with `with`; its native `_with_assignment` now asks `Code.type`
 directly, while the early decorator still calls it through Lisp
 `with.expand`. Keep that wrapper, the other early native-call wrappers in
-`etc/builtin-macros.x`, and the low-level
-generators in `lib/common.x` and `lib/var-tags.x`. Built-ins load before
-`lib/meta.x` declarations; introducing `$Code.type` there would not preserve
+`etc/builtin-macros.x`, and the low-level SymbolSet generators in
+`lib/var-tags.x`. Scalar forwarding in `lib/common.x` now uses ordinary
+macro code with no Lisp escapes. Built-ins load before `lib/meta.x`
+declarations; introducing `$Code.type` there would not preserve
 that ordering. Do not add parser exceptions, synthesized prototypes, another
 macro execution engine, or new public compiler queries to force this change.
 
@@ -290,7 +337,7 @@ owns the residual scope and removes the duplicated step 5 conversions.
 | Native `bind` evaluation | Reuse the runtime's existing native lookup, including callback adapters, directly. | Lookup is private to the Lisp module; a compiler-only duplicate would change target precedence. |
 | Optional iterator destination | Replace `C.iterator.call` with a native adapter preserving explicit and omitted destinations. | Coupled to callable signatures, callback adaptation, and storage lifetime. |
 | Deferred class recipes | Change callable dispatch for defaults, initializers, and field writers. | Native producers already exist; preserve their delayed execution and source visibility. |
-| Native target/signature generation | Migrate generated module entries, linked-meta signatures/hashes, callback tables, private SDK queries, and SymbolSet construction under their existing owners. Scalar forwarding is a separate small candidate above. | Some queries have no x2c declaration or run before declarations are available. The native algorithms already exist; access and bootstrap order remain the obstacle. |
+| Native target/signature generation | Migrate generated module entries, linked-meta signatures/hashes, callback tables, private SDK queries, and SymbolSet construction under their existing owners. Scalar forwarding is completed separately above. | Some queries have no x2c declaration or run before declarations are available. The native algorithms already exist; access and bootstrap order remain the obstacle. |
 | Generic scalar access | Move `NativeScalarAccess` out of the Lisp module while retaining its existing users and ABI. | Ownership cleanup requires connected header/source work, not an evaluator replacement. |
 | Full reader extraction | Give the shared grammar a module independent of the Lisp implementation. | The selected change removes session construction; it deliberately retains `Lisp.read` and its existing ABI. |
 | Home discovery | Replace the `etc/compiler-sdk.xlisp` installation marker if that file ceases to be mandatory. | The compiler still needs that file after this batch. |

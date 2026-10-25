@@ -6292,7 +6292,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_10(void
   _5394 = List_var(_5393);
   _5395 = String_new("lib/common.x");
   _5396 = String_var(_5395);
-  _5397 = String_new("c3651c65");
+  _5397 = String_new("16c74e9b");
   _5398 = String_var(_5397);
   _5399 = cons(_5398, NULL);
   _5400 = cons(_5396, _5399);
