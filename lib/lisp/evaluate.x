@@ -771,6 +771,26 @@ Var Lisp.apply(Lisp lisp, Var callable, List values) {
   return _apply_values(lisp, callable, values);
 }
 
+/** Reads one Lisp form and returns `<value>` or `<eof>`.
+    A nonnull `out` receives the form only for `<value>`; it is otherwise
+    unchanged. New result storage uses the caller's active `Scope` and
+    canonical pools, not the temporary token `Scope`, and remains valid
+    until those owners are released. On success `cursor` advances past the
+    form, at EOF it becomes the source length, and on a reader error it
+    identifies the failing form's first token. A null source or cursor
+    returns `<eof>` without raising. A nonnull cursor must initially hold a
+    byte offset no greater than the source length. Reading needs no session:
+    `lisp` is not consulted and may be null, including before any session has
+    been constructed.
+    Raises: `<incomplete>` for a truncated form, `<malformed>` for invalid
+    reader syntax, or `<alloc-fail>`, `<size-limit>`, or `<bad-enc>` while
+    tokenizing, constructing, interning, or boxing the form.
+*/
+Symbol Lisp.read(Lisp lisp, String source, unsigned &?cursor, Var &?out) {
+  (void) lisp;
+  return datum_read_form(source, cursor, out);
+}
+
 /** Reads and evaluates every form in `source`.
     Forms run in source order and the return value is the last result, or Lisp
     `nil` for a null, empty, or comment-only source. Globals and other effects
@@ -791,7 +811,8 @@ Var Lisp.eval_string(Lisp lisp, String source) {
   Var result = %();
   loop {
     Var form = void;
-    if (datum_read_token_form(tokenizer, source, 0, cursor, form) == <eof>) break;
+    if (datum_read_token_form(tokenizer, source, 0, cursor, form) == <eof>)
+      break;
     result = _eval(lisp, form, NULL);
   }
   return result;

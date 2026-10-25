@@ -9,7 +9,7 @@ not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
 - Compiler modules: 61
-- Runtime modules: 65
+- Runtime modules: 66
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
 ## Compiler modules
@@ -930,6 +930,14 @@ Public functions:
 `Context.open_named`, `Context.open_isolated`, `Context.open_isolated_named`,
 `Context.current`, `Context.close`, `Context.cleanup`, `Context.initialize`
 
+### [lib/datum-reader.x](../lib/datum-reader.x)
+
+the Lisp reader grammar.
+
+Public functions:
+
+`datum_read_token_form`, `datum_scan_tokens`, `datum_read_form`
+
 ### [lib/datum.x](../lib/datum.x)
 
 values as Lisp reader text.
@@ -1585,11 +1593,11 @@ the Lisp runtime: reader, session, and evaluator.
 Public functions:
 
 `native_scalar_access`, `Lisp.cleanup`, `Lisp.call_budget`,
-`Lisp.set_interrupted`, `Lisp.eval`, `Lisp.apply`, `Lisp.eval_string`,
-`Lisp.eval_file`, `lisp_source_function`, `Lisp.kernel`, `Lisp.new`,
-`Lisp.destroy`, `Lisp.adopt`, `Lisp.freeze`, `Lisp.try_get`, `Lisp.set_global`,
-`Lisp.remove_global`, `Lisp.bind`, `Lisp.active`, `Lisp.storage`,
-`Lisp.automatic_storage`, `Lisp.result_storage`, `Lisp.read`, `lisp_truth`,
+`Lisp.set_interrupted`, `Lisp.eval`, `Lisp.apply`, `Lisp.read`,
+`Lisp.eval_string`, `Lisp.eval_file`, `lisp_source_function`, `Lisp.kernel`,
+`Lisp.new`, `Lisp.destroy`, `Lisp.adopt`, `Lisp.freeze`, `Lisp.try_get`,
+`Lisp.set_global`, `Lisp.remove_global`, `Lisp.bind`, `Lisp.active`,
+`Lisp.storage`, `Lisp.automatic_storage`, `Lisp.result_storage`, `lisp_truth`,
 `lisp_atom`, `lisp_car`, `lisp_cdr`, `lisp_eq`, `lisp_pair`, `lisp_list`,
 `lisp_number`, `lisp_string`, `lisp_symbol`, `lisp_procedure`, `lisp_type`,
 `lisp_compare`, `lisp_add`, `lisp_plus`, `lisp_minus`, `lisp_times`,
