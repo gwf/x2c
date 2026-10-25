@@ -3,16 +3,16 @@
 typedef struct Point { int x; int y; } Point;
 
 // An Expression macro's result is one operand at its call site, whether the
-// body was written in the definition or built by compile-time Lisp. Neither
+// body was written in the definition or built by a meta function. Neither
 // producer records grouping: emission parenthesizes from C precedence.
 macro Expression $twice($value) => $value + $value;
 
 macro Expression $wider(Expr $value) => $value + 1;
 
-$(defun sum-expr (a b) `(expr () (op + ,a ,b)))
+meta static List sum_expr(List a, List b) => %(expr () (op + $a $b));
 
-macro Expression $lispsum(Expr $a, Expr $b) =>
-  $(sum-expr $a $b);
+macro Expression $metasum(Expr $a, Expr $b) =>
+  $sum_expr($a, $b);
 
 macro Expression $origin() => (Point) { 3, 4 };
 
@@ -23,7 +23,7 @@ int main(void) {
   int total = 0;
   // Operand positions that regroup: binary, unary, cast, index, and the
   // conditional's condition and false arm.
-  printf("%d %d\n", $twice(21) * 2, $lispsum(21, 21) * 2);
+  printf("%d %d\n", $twice(21) * 2, $metasum(21, 21) * 2);
   printf("%d %ld\n", -$twice(3), (long) $twice(3) % 5);
   printf("%d %d\n", values[$twice(1)], $origin().x);
   printf("%d\n", $wider(0) ? 1 : 2);

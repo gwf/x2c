@@ -10,7 +10,29 @@ typedef struct Point{
 }
 Point;
 
+static Var _3, _2, _1, _0;
+
+static int _init_guard_ = 0;
+
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
+
+static List sum_expr(List a, List b);
+
 static int doubled(int value);
+
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
+  x2c_initialize_protocols();
+  if(_init_guard_) return;
+  _init_guard_ = 1;
+  _0 = Symbol_var(377892);
+  _1 = List_var(NULL);
+  _2 = Symbol_var(992);
+  _3 = Symbol_var(56);
+}
+
+static List sum_expr(List a, List b){
+  return cons(_0, cons(_1, cons(List_var(cons(_2, cons(_3, cons(List_var(a), cons(List_var(b), NULL))))), NULL)));
+}
 
 static int doubled(int value){
   return value * 2;

@@ -7,8 +7,10 @@ macro Decorator $scale(
   Expr $factor
 ) => $target * $factor;
 
-macro Decorator $through_lisp(Expr $target) =>
-  $(car (list $target));
+meta static List same(List target) => target;
+
+macro Decorator $through_meta(Expr $target) =>
+  $same($target);
 
 macro Expression $wrapped(Expr $target) =>
   $increment() $target;
@@ -26,7 +28,7 @@ int main(void) {
     $scale(2) $increment() 3,
     $wrapped(4),
     $increment() next(),
-    $through_lisp() 6
+    $through_meta() 6
   );
   return 0;
 }

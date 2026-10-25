@@ -9,17 +9,25 @@ typedef int MyInt;
 
 static int statement_result;
 
-$(defun fixture.private-sibling ()
-  `(declare (static int)
+meta static List private_int(String spelling, String value) {
+  return %(declare (static int)
     (bindings
-      (op = (bind ,(x2c.ident "private_generated_lisp_sibling") ())
-            (expr (int) (literal (int) "12"))))))
+      (op = (bind ${x2c_ident(spelling)} ())
+            (expr (int) (literal (int) $value)))));
+}
 
-$(defun fixture.private-before-sibling ()
-  `(declare (static int)
-    (bindings
-      (op = (bind ,(x2c.ident "private_before_lisp_sibling") ())
-            (expr (int) (literal (int) "13"))))))
+meta static List rows_of(List target) => %($target);
+meta static List same_rows(List rows) => rows;
+meta static List return_rows(void) => %((return));
+
+meta static List with_private_sibling(List target) =>
+  %($target ${private_int("private_meta_sibling", "11")});
+
+meta static List with_generated_sibling(List target) =>
+  %($target ${private_int("private_generated_meta_sibling", "12")});
+
+meta static List with_before_sibling(List target) =>
+  %(${private_int("private_before_meta_sibling", "13")} $target);
 
 macro Expression $call(Expr $callee, Expr @arguments) =>
   $callee(@arguments);
@@ -44,7 +52,7 @@ macro Decorator $keep(Unit $target) {
 
 macro Decorator $private_exact(Unit $target) {
   $target
-  static int $(x2c.ident "private_exact_helper") = 7;
+  static int $x2c_ident("private_exact_helper") = 7;
 }
 
 macro Unit $nested_decorator_declarations() {
@@ -52,50 +60,46 @@ macro Unit $nested_decorator_declarations() {
   $keep()
   static int nested_after = 2;
 
-  static int $(x2c.ident "nested_declaration_sum")(void) {
+  static int $x2c_ident("nested_declaration_sum")(void) {
     return nested_before + nested_after;
   }
 }
 
-macro Decorator $preserve_lisp(Unit $target) {
-  @(list $target)
+macro Decorator $preserve_meta(Unit $target) {
+  @rows_of($target)
 }
 
-macro Unit $preserve_nested_lisp_target(Unit $target) {
-  @(list $target)
+macro Unit $preserve_nested_meta_target(Unit $target) {
+  @rows_of($target)
 }
 
-macro Unit $preserve_nested_lisp_targets(Unit @targets) {
-  @(append $targets (list))
+macro Unit $preserve_nested_meta_targets(Unit @targets) {
+  @same_rows($targets)
 }
 
-macro Decorator $preserve_nested_lisp(Unit $target) {
-  $preserve_nested_lisp_target($target);
+macro Decorator $preserve_nested_meta(Unit $target) {
+  $preserve_nested_meta_target($target);
 }
 
-macro Decorator $preserve_nested_lisp_variadic(Unit $target) {
-  $preserve_nested_lisp_targets($target);
+macro Decorator $preserve_nested_meta_variadic(Unit $target) {
+  $preserve_nested_meta_targets($target);
 }
 
 macro Decorator $private_name_sibling(Unit $target) {
   $target
-  static int $(x2c.ident "private_name_sibling") = 10;
+  static int $x2c_ident("private_name_sibling") = 10;
 }
 
-macro Decorator $private_lisp_sibling(Unit $target) {
-  @(list $target
-    `(declare (static int)
-      (bindings
-        (op = (bind ,(x2c.ident "private_lisp_sibling") ())
-              (expr (int) (literal (int) "11"))))))
+macro Decorator $private_meta_sibling(Unit $target) {
+  @with_private_sibling($target)
 }
 
-macro Decorator $private_generated_lisp_sibling(Unit $target) {
-  @(list $target (fixture.private-sibling))
+macro Decorator $private_generated_meta_sibling(Unit $target) {
+  @with_generated_sibling($target)
 }
 
-macro Decorator $private_before_lisp_sibling(Unit $target) {
-  @(list (fixture.private-before-sibling) $target)
+macro Decorator $private_before_meta_sibling(Unit $target) {
+  @with_before_sibling($target)
 }
 
 macro Unit $preserve_target(Unit $target) {
@@ -129,26 +133,26 @@ macro Decorator $preserve_variadic_direct(Unit $target) {
   $preserve_targets($target);
 }
 
-$preserve_lisp()
+$preserve_meta()
 int preserved_public = 3;
 
-$preserve_nested_lisp()
-int preserved_nested_lisp_public = 7;
+$preserve_nested_meta()
+int preserved_nested_meta_public = 7;
 
-$preserve_nested_lisp_variadic()
-int preserved_nested_lisp_variadic_public = 8;
+$preserve_nested_meta_variadic()
+int preserved_nested_meta_variadic_public = 8;
 
 $private_name_sibling()
 int private_name_sibling_target = 9;
 
-$private_lisp_sibling()
-int private_lisp_sibling_target = 10;
+$private_meta_sibling()
+int private_meta_sibling_target = 10;
 
-$private_generated_lisp_sibling()
-int private_generated_lisp_sibling_target = 11;
+$private_generated_meta_sibling()
+int private_generated_meta_sibling_target = 11;
 
-$private_before_lisp_sibling()
-int private_before_lisp_sibling_target = 12;
+$private_before_meta_sibling()
+int private_before_meta_sibling_target = 12;
 
 $preserve_nested()
 int preserved_nested_public = 4;
@@ -177,7 +181,7 @@ $drop()
 static int discarded_private = 2;
 
 macro Stmt $bare_return() {
-  @(quote ((return)))
+  @return_rows()
 }
 
 macro Stmt $statement_item(Expr $value) {
@@ -213,16 +217,16 @@ int main(void) {
          preserved_nested_public == 4 &&
          preserved_variadic_public == 5 &&
          preserved_direct_variadic_public == 6 &&
-         preserved_nested_lisp_public == 7 &&
-         preserved_nested_lisp_variadic_public == 8 &&
+         preserved_nested_meta_public == 7 &&
+         preserved_nested_meta_variadic_public == 8 &&
          private_name_sibling_target == 9 &&
          private_name_sibling == 10 &&
-         private_lisp_sibling_target == 10 &&
-         private_lisp_sibling == 11 &&
-         private_generated_lisp_sibling_target == 11 &&
-         private_generated_lisp_sibling == 12 &&
-         private_before_lisp_sibling_target == 12 &&
-         private_before_lisp_sibling == 13 &&
+         private_meta_sibling_target == 10 &&
+         private_meta_sibling == 11 &&
+         private_generated_meta_sibling_target == 11 &&
+         private_generated_meta_sibling == 12 &&
+         private_before_meta_sibling_target == 12 &&
+         private_before_meta_sibling == 13 &&
          statement_result == 13 &&
          $call(forty_two) == 42 &&
          $outer(1) == sizeof(int) + 1 &&
