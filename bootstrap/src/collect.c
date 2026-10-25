@@ -5567,11 +5567,8 @@ static List _interface_read(Compiler c, String canonical){
 }
 
 static List f10_interfaces____interface_candidates(String canonical){
-  String stem = Path_stem(canonical);  String relative = Compiler_portable_path(canonical);  String dir = Path_dirname(canonical);  Array paths = Array_new();  if(String_truth(f10_interfaces___interface_out_dir)) Array_push(paths, String_var(String_join(NULL, cons(String_var(f10_interfaces___interface_out_dir), cons(String_var(_34), cons(String_var(stem), cons(String_var(_347), NULL)))))));  if(! String_equal(relative, canonical)){
-    String mirror =({
-      Var _x2c_gensym_literal_part_46 = String_var(Path_dirname(relative));  String_join(NULL, cons(_x2c_gensym_literal_part_46, cons(String_var(_34), cons(String_var(stem), cons(String_var(_347), NULL)))));
-    }
-    );  if(String_truth(f10_interfaces___interface_out_dir)) Array_push(paths, String_var(String_join(NULL, cons(String_var(f10_interfaces___interface_out_dir), cons(String_var(_348), cons(String_var(mirror), NULL))))));  Array_push(paths, String_var(String_join(NULL, cons(String_var(f10_interfaces___interface_mirror), cons(String_var(_34), cons(String_var(mirror), NULL))))));
+  String stem = Path_stem(canonical);  String relative = Compiler_portable_path(canonical);  String dir = Path_dirname(canonical);  Array paths = Array_new();  if(String_truth(f10_interfaces___interface_out_dir)) Array_push(paths, String_var(String_join(NULL, cons(String_var(f10_interfaces___interface_out_dir), cons(String_var(_34), cons(String_var(stem), cons(String_var(_347), NULL)))))));  if(! String_equal(relative, canonical)) for(String home = Path_dirname(relative);  ! String_equal(home, _7);  home = Path_dirname(home)){
+    String mirror = String_join(NULL, cons(String_var(home), cons(String_var(_34), cons(String_var(stem), cons(String_var(_347), NULL)))));  if(String_truth(f10_interfaces___interface_out_dir)) Array_push(paths, String_var(String_join(NULL, cons(String_var(f10_interfaces___interface_out_dir), cons(String_var(_348), cons(String_var(mirror), NULL))))));  Array_push(paths, String_var(String_join(NULL, cons(String_var(f10_interfaces___interface_mirror), cons(String_var(_34), cons(String_var(mirror), NULL))))));
   }
   Array_push(paths, String_var(String_join(NULL, cons(String_var(dir), cons(String_var(_349), cons(String_var(stem), cons(String_var(_347), NULL)))))));  Array_push(paths, String_var(String_join(NULL, cons(String_var(dir), cons(String_var(_350), cons(String_var(stem), cons(String_var(_347), NULL)))))));  return Array_list_free(paths);
 }
@@ -5728,7 +5725,7 @@ static List f10_interfaces____interface_entry(Compiler c, String canonical, Stri
 
   }
   List entry =({
-    Var _x2c_gensym_literal_part_47 = List_var(Array_list_free(parts));  cons(_x2c_gensym_literal_part_47, cons(String_var(hash), cons(List_var(definitions), cons(Map_var(dependencies), cons(List_var(include_dirs), NULL)))));
+    Var _x2c_gensym_literal_part_46 = List_var(Array_list_free(parts));  cons(_x2c_gensym_literal_part_46, cons(String_var(hash), cons(List_var(definitions), cons(Map_var(dependencies), cons(List_var(include_dirs), NULL)))));
   }
   );  _retain(String_var(canonical));  _require_retained(List_try_own(entry));  Map_setindex(_process_cache(), String_var(canonical), List_var(entry));  return entry;
 }
@@ -5949,7 +5946,7 @@ String Compiler_interface_text(Compiler c){
 
 static int f10_interfaces____write_interface_entry(Buffer out, String canonical, List entry){
   List record =({
-    Var _x2c_gensym_literal_part_48 = String_var(Compiler_identity());  List _x2c_gensym_literal_part_49 = f10_interfaces____stored_record(canonical, entry);  cons(_351, cons(_352, cons(_x2c_gensym_literal_part_48, List_append(_x2c_gensym_literal_part_49, NULL))));
+    Var _x2c_gensym_literal_part_47 = String_var(Compiler_identity());  List _x2c_gensym_literal_part_48 = f10_interfaces____stored_record(canonical, entry);  cons(_351, cons(_352, cons(_x2c_gensym_literal_part_47, List_append(_x2c_gensym_literal_part_48, NULL))));
   }
   );
   if(! datum_write(out, List_var(record), 0)) return 0;
@@ -5978,7 +5975,7 @@ static List f10_interfaces____stored_record(String canonical, List entry){
 
   }
   return({
-    Var _x2c_gensym_literal_part_50 = String_var(Compiler_portable_path(canonical));  Var _x2c_gensym_literal_part_51 = hash;  Var _x2c_gensym_literal_part_52 = List_var(Array_list_free(parts));  Var _x2c_gensym_literal_part_53 = List_var(definitions);  Var _x2c_gensym_literal_part_54 = List_var(_stored_dependencies(dependencies));  cons(_x2c_gensym_literal_part_50, cons(_x2c_gensym_literal_part_51, cons(_x2c_gensym_literal_part_52, cons(_x2c_gensym_literal_part_53, cons(_x2c_gensym_literal_part_54, cons(List_var(include_dirs), NULL))))));
+    Var _x2c_gensym_literal_part_49 = String_var(Compiler_portable_path(canonical));  Var _x2c_gensym_literal_part_50 = hash;  Var _x2c_gensym_literal_part_51 = List_var(Array_list_free(parts));  Var _x2c_gensym_literal_part_52 = List_var(definitions);  Var _x2c_gensym_literal_part_53 = List_var(_stored_dependencies(dependencies));  cons(_x2c_gensym_literal_part_49, cons(_x2c_gensym_literal_part_50, cons(_x2c_gensym_literal_part_51, cons(_x2c_gensym_literal_part_52, cons(_x2c_gensym_literal_part_53, cons(List_var(include_dirs), NULL))))));
   }
   );
 }
@@ -6040,7 +6037,7 @@ static List _stored_dependencies(Map dependencies){
       path = Var_as_string(_x2c_gensym_macro_cursor_output_91);
       hash = _x2c_gensym_macro_cursor_output_92;
       Array_push(rows, List_var(({
-        Var _x2c_gensym_literal_part_55 = String_var(Compiler_portable_path(path));  cons(_x2c_gensym_literal_part_55, cons(hash, NULL));
+        Var _x2c_gensym_literal_part_54 = String_var(Compiler_portable_path(path));  cons(_x2c_gensym_literal_part_54, cons(hash, NULL));
       }
       )));
     }
@@ -6088,7 +6085,7 @@ static List f10_interfaces____renumber_bindings(List node, Map identities){
           {
             Map hashes = Var_map_payload(_x2c_gensym_match_value_30);
             return({
-              Var _x2c_gensym_literal_part_56 = provider;  Var _x2c_gensym_literal_part_57 = List_var(_stored_meta_hashes(hashes));  cons(_89, cons(_x2c_gensym_literal_part_56, cons(_x2c_gensym_literal_part_57, NULL)));
+              Var _x2c_gensym_literal_part_55 = provider;  Var _x2c_gensym_literal_part_56 = List_var(_stored_meta_hashes(hashes));  cons(_89, cons(_x2c_gensym_literal_part_55, cons(_x2c_gensym_literal_part_56, NULL)));
             }
             );
           }
@@ -6135,7 +6132,7 @@ Map Compiler_linked_prelude_records(Compiler c){
       source = Var_as_string(_x2c_gensym_macro_cursor_output_95);
       {
         String canonical = _canonical_path(({
-          Var _x2c_gensym_literal_part_58 = String_var(x2c_get_root());  String_join(NULL, cons(_x2c_gensym_literal_part_58, cons(String_var(_34), cons(String_var(source), NULL))));
+          Var _x2c_gensym_literal_part_57 = String_var(x2c_get_root());  String_join(NULL, cons(_x2c_gensym_literal_part_57, cons(String_var(_34), cons(String_var(source), NULL))));
         }
         ));
         Map_setindex(saved, String_var(canonical), Map_getindex(_process_cache(), String_var(canonical)));
@@ -6176,7 +6173,7 @@ Map Compiler_linked_prelude_records(Compiler c){
               source = Var_as_string(_x2c_gensym_macro_cursor_output_96);
               {
                 String path =({
-                  Var _x2c_gensym_literal_part_59 = String_var(x2c_get_root());  String_join(NULL, cons(_x2c_gensym_literal_part_59, cons(String_var(_34), cons(String_var(source), NULL))));
+                  Var _x2c_gensym_literal_part_58 = String_var(x2c_get_root());  String_join(NULL, cons(_x2c_gensym_literal_part_58, cons(String_var(_34), cons(String_var(source), NULL))));
                 }
                 );
                 String canonical = _canonical_path(path);

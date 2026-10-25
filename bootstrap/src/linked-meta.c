@@ -18179,7 +18179,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_30(void
   _15413 = List_var(_15412);
   _15414 = String_new("src/collect/interfaces.x");
   _15415 = String_var(_15414);
-  _15416 = String_new("c4a5294a");
+  _15416 = String_new("60c70acb");
   _15417 = String_var(_15416);
   _15418 = cons(_15417, NULL);
   _15419 = cons(_15415, _15418);
