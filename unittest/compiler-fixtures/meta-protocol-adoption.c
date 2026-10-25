@@ -8,16 +8,17 @@
 #include "x2c.h"
 
 #include "x2c.h"
+#include "compiler-meta.h"
 typedef struct Bag{
   List items;
 }
 * Bag;
 
-static List _10, _8, _7, _5, _3;
+static List _17, _15, _14, _12, _10;
 
-static String _1;
+static String _8, _6, _5, _4, _3, _2, _1, _0;
 
-static Var _9, _6, _4, _2, _0;
+static Var _16, _13, _11, _9, _7;
 
 static int _init_guard_ = 0;
 
@@ -28,26 +29,35 @@ typedef struct Box{
 }
 * Box;
 
+static String probe_row(String name, List rows);
+
 static Var _x2c_gensym_func_adapt_0(Func _x2c_gensym_func_binding_0, const FuncArg * _x2c_gensym_func_argv_0);
 
 static Func _x2c_gensym_func_handle_0;
 
-_x2c_gensym_initializer_choice_BA788DBF_0((_x2c_gensym_func_handle_0 = x2c_func_shared(_x2c_gensym_func_adapt_0, _10)))
+_x2c_gensym_initializer_choice_BA788DBF_0((_x2c_gensym_func_handle_0 = x2c_func_shared(_x2c_gensym_func_adapt_0, _17)))
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
-  _0 = Symbol_var(437126);
-  _1 = String_new("Var");
-  _2 = String_var(_1);
-  _3 = cons(_2, NULL);
-  _4 = List_var(_3);
-  _5 = cons(_4, NULL);
-  _6 = List_var(_5);
-  _7 = cons(_6, NULL);
-  _8 = cons(_0, _7);
-  _9 = List_var(_8);
-  _10 = cons(_9, _3);
+  _0 = String_new("()");
+  _1 = String_new("(\"Bag_iter\" (as \"Bag_iter_into\"))");
+  _2 = String_new("(\"Box_iter\" (as \"Box_iter_into\"))");
+  _3 = String_new("(\"List_iter\" (as \"List_iter_into\"))");
+  _4 = String_new("()");
+  _5 = String_new("(\"Iter_head\" (as \"Iter_head_into\"))");
+  _6 = String_new("(\"fabs\")");
+  _7 = Symbol_var(437126);
+  _8 = String_new("Var");
+  _9 = String_var(_8);
+  _10 = cons(_9, NULL);
+  _11 = List_var(_10);
+  _12 = cons(_11, NULL);
+  _13 = List_var(_12);
+  _14 = cons(_13, NULL);
+  _15 = cons(_7, _14);
+  _16 = List_var(_15);
+  _17 = cons(_16, _10);
   _x2c_gensym_static_initialize_0();
 }
 
@@ -59,6 +69,21 @@ Iter Bag_iter(Bag bag, Iter dest){
 Iter Box_iter(Box box, Iter dest){
   if(! _init_guard_) _file_init_();
   return List_iter(box -> items, dest);
+}
+
+static String probe_row(String name, List rows){
+  {
+    List row;
+    List _x2c_gensym_macro_object_0 = rows;
+    List _x2c_gensym_macro_cursor_0 = _x2c_gensym_macro_object_0;
+    Var _x2c_gensym_macro_cursor_output_0;
+    while(List_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_0), &(_x2c_gensym_macro_cursor_output_0))){
+      row = Var_list_payload(_x2c_gensym_macro_cursor_output_0);
+      if(Var_equal(List_car(row), String_var(name))) return List_repr(row);
+    }
+
+  }
+  return _0;
 }
 
 Var twice(Var value){
@@ -85,7 +110,7 @@ int main(int argc, char * * argv){
   x2c_initialize();
   if(! _init_guard_) _file_init_();
   (void) argv;
-  printf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n", "(\"Bag_iter\" (as \"Bag_iter_into\"))", "(\"Box_iter\" (as \"Box_iter_into\"))", "(\"List_iter\" (as \"List_iter_into\"))", "()", "(\"Iter_head\" (as \"Iter_head_into\"))", "()", "(\"fabs\")");
+  printf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n", _1, _2, _3, _4, _5, _4, _6);
   printf("%d %d\n", 63, heads(argc - 1));
   return 0;
 }

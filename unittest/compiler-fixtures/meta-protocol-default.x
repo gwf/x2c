@@ -1,4 +1,5 @@
 #include "x2c.x"
+#include "compiler-meta.x"
 
 /* A `meta` adoption that relies on a base default exposes the forwarding
    function the conformance generates for its participant. */
@@ -12,13 +13,13 @@ typedef struct Crate { struct Sized sized; } *Crate;
 Sized Crate.sized(Crate crate) => &crate.sized;
 meta protocol Sized(Crate);
 
-$(defun probe.row (name rows)
-   (cond ((null? rows) nil)
-         ((equal? (car (car rows)) name) (car rows))
-         (true (probe.row name (cdr rows)))))
+meta static String probe_row(String name, List rows) {
+  foreach (List row, rows)
+    if (row.car().equal(name)) return row.repr();
+  return "()";
+}
 macro Expression $target(Expr $name) =>
-  $(repr (probe.row (Code.value $name)
-                          (_x2c.native-meta.targets)));
+  $probe_row($Code.value($name), $_x2c_native_rows(<lisp>, %(), %()));
 
 int main(void) {
   struct Crate storage = {{3}};
