@@ -12,7 +12,7 @@ int main(void) {
   String text = $ordinary.string();
   printf("%d %d %d %d %d %d %d %s %s %s %s\n", before_value(), first_value(),
     $ordinary.value(), $ordinary.nested(), $ordinary.generated_first(),
-    $ordinary.generated_second(), $(ordinary.public_value),
+    $ordinary.generated_second(), $ordinary_public_value(),
     first.repr().str(), other.repr().str(),
     nested.repr().str(), text.str());
   return (void *) first != (void *) second ||

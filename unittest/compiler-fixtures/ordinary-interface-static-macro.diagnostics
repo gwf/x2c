@@ -2,8 +2,8 @@ unittest/compiler-fixtures/ordinary-interface-static-macro.x:2:14: parse: unknow
   int answer = $ordinary.private_step(41);
                ^
 
-unittest/compiler-fixtures/ordinary-interface-static-macro.x:3:14: macro: compile-time Lisp evaluation failed
-  int hidden = $(ordinary.private_value);
-               ^^
-  note: form: (ordinary.private_value) error: (unbound (name ordinary.private_value))
+unittest/compiler-fixtures/ordinary-interface-static-macro.x:3:15: type: 'ordinary_private_value' is a static function private to its unit
+  int hidden = $ordinary_private_value();
+                ^^^^^^^^^^^^^^^^^^^^^^
+  note: it is defined in 'unittest/compiler-fixtures/ordinary-interface-provider.x'; remove 'static' so other units can call it
 
