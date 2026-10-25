@@ -16125,7 +16125,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_26(void
   _13358 = List_var(_13357);
   _13359 = String_new("src/utils.x");
   _13360 = String_var(_13359);
-  _13361 = String_new("86a95c58");
+  _13361 = String_new("8cbeedaf");
   _13362 = String_var(_13361);
   _13363 = cons(_13362, NULL);
   _13364 = cons(_13360, _13363);
@@ -18057,7 +18057,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_29(void
   _15281 = List_var(_15280);
   _15282 = String_new("src/toolchain.x");
   _15283 = String_var(_15282);
-  _15284 = String_new("55d432fd");
+  _15284 = String_new("7ca627ac");
   _15285 = String_var(_15284);
   _15286 = cons(_15285, NULL);
   _15287 = cons(_15283, _15286);
@@ -18255,7 +18255,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_30(void
   _15476 = List_var(_15475);
   _15477 = String_new("src/meta-group/toolchain.x");
   _15478 = String_var(_15477);
-  _15479 = String_new("5edbd7b8");
+  _15479 = String_new("ad2cff7a");
   _15480 = String_var(_15479);
   _15481 = cons(_15480, NULL);
   _15482 = cons(_15478, _15481);

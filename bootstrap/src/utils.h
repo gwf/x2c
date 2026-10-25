@@ -39,6 +39,8 @@ String Compiler_home_dir(void);
 
 String Compiler_stage_dir(void);
 
+String Compiler_bootstrap_runtime_dir(void);
+
 String Compiler_home_packages(void);
 
 String Compiler_home_libexec(void);
