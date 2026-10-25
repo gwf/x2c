@@ -696,7 +696,7 @@ static List _map_form(Compiler c, Var value){
 
           }
           {
-            List _x2c_gensym_return_value_3 = cons(_2, cons(_192, cons(List_var(cons(_193, List_append(Array_list(Array_sort(entries)), NULL))), NULL))); {
+            List _x2c_gensym_return_value_3 = cons(_2, cons(_192, cons(List_var(cons(_193, List_append(Array_list(entries), NULL))), NULL))); {
               x2c_cleanup_leave(& _x2c_gensym_defer_record_3);  x2c_cleanup_leave(& _x2c_gensym_defer_record_2);  return _x2c_gensym_return_value_3;
             }
 
