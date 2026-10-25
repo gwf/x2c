@@ -94,3 +94,4 @@ func-named   11 11
 func-higher  10 10
 func-thunk   1 2 1 2
 meta-ident   3 3
+var-constant "hi" 2.5 5l

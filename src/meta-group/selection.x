@@ -250,7 +250,9 @@ static void _close(Array ordered, Map reached) {
 
 /* An unreached function keeps its prototype, which code generated for
    the unit's types, such as a protocol adapter, may name; the optimizer
-   drops what nothing calls. */
+   drops what nothing calls. A result with no base type came from a name
+   the parse never declared, such as one a skipped form supplies, and has
+   no C prototype. */
 static Array _reachable(Compiler c, Array ordered, Map reached) {
   Array units = [];
   Var identity, String name;
@@ -259,8 +261,11 @@ static Array _reachable(Compiler c, Array ordered, Map reached) {
         (identity in reached && (name != "main" || c.load_source)))
       units.push(item);
     else if (name != "main")
-      match (item) case %(function ?spec ?declarator ?):
-        units.push(%(declare $spec (bindings $declarator)));
+      match (item) case %(function ?spec ?declarator ?): {
+        List prototype = %(declare $spec (bindings $declarator));
+        if (prototype.type_from_ast().apply().base_type())
+          units.push(prototype);
+      }
   }
   return units;
 }

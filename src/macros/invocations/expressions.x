@@ -51,25 +51,29 @@ static List _parse_meta_call(Compiler c, Token invocation) {
     Atom name = _name(c);
     (void) _lookup(c, name, invocation);
   }
-  Array arguments = _meta_arguments(c, signature.car().list().cadr());
-  Type result = c.macro_holes ? %(<macro-expr>) : signature.cdr();
   /* Inside a `meta` body the whole body runs at compile time, so a `$`
      call there is an ordinary call, except in a pattern, whose binders
      come from its value. */
   Symbol head = c.meta_body && !c.macro_holes && !c.in_pattern
     ? <call> : <meta-call>;
+  Array arguments =
+    _meta_arguments(c, signature.car().list().cadr(), head);
+  Type result = c.macro_holes ? %(<macro-expr>) : signature.cdr();
   List call = %(expr $result ($head $callee
     (args @(arguments.list_free()))));
   return c.resolve_expression(call, invocation);
 }
 
-/* Each argument converts to its parameter's type, except in a template. */
-static Array _meta_arguments(Compiler c, List parameters) {
+/* Each argument converts to its parameter's type, except in a template.
+   A compile-time call passes its argument's own value to a `Var`
+   parameter. */
+static Array _meta_arguments(Compiler c, List parameters, Symbol head) {
   Array arguments = [];
   c.expect(<(>);
   if (c.peek(0) != <)>) loop {
     List argument = _meta_argument(c);
-    if (parameters && !c.macro_holes)
+    if (parameters && !c.macro_holes &&
+        !(head == <meta-call> && c.sym.is_var_type(parameters.car())))
       argument = c.convert_expression(argument, parameters.car());
     parameters = parameters.cdr();
     arguments.push(argument);

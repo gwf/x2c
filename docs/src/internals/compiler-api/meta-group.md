@@ -84,7 +84,7 @@ Source: `src/meta-group/selection.x:18`
 Returns why the group function `name` has no compile-time entry, from
 its type.
 
-Source: `src/meta-group/selection.x:290`
+Source: `src/meta-group/selection.x:289`
 
 <a id="Compiler.meta_calls_wait"></a>
 #### Compiler.meta_calls_wait
@@ -105,7 +105,7 @@ Source: `src/meta-group/selection.x:25`
 Returns the C compiler and the runtime header directory that build
 `meta` code, or NULL before `Compiler.use_meta_toolchain`.
 
-Source: `src/meta-group/toolchain.x:28`
+Source: `src/meta-group/toolchain.x:31`
 
 <a id="Compiler.meta_cc_identity"></a>
 #### Compiler.meta_cc_identity
@@ -115,7 +115,7 @@ Source: `src/meta-group/toolchain.x:28`
 Returns the identity of the C compiler at `cc`: its path and content
 hash.
 
-Source: `src/meta-group/toolchain.x:35`
+Source: `src/meta-group/toolchain.x:38`
 
 <a id="Compiler.meta_cc_run"></a>
 #### Compiler.meta_cc_run
@@ -126,7 +126,7 @@ Runs `arguments`, a C compiler command building the group C in
 `directory`, and returns NULL, or else its first error, which names
 `directory` when a group's C is the cause.
 
-Source: `src/meta-group/toolchain.x:44`
+Source: `src/meta-group/toolchain.x:47`
 
 <a id="Compiler.meta_reaches_compile_time"></a>
 #### Compiler.meta_reaches_compile_time
@@ -170,7 +170,7 @@ Source: `src/meta-group/loaded.x:55`
 Answers whether a definition has public native linkage.
 Main is excluded because its process entry needs a separate adapter.
 
-Source: `src/meta-group/selection.x:280`
+Source: `src/meta-group/selection.x:279`
 
 <a id="Compiler.refuse_meta_call"></a>
 #### Compiler.refuse_meta_call
@@ -180,7 +180,7 @@ Source: `src/meta-group/selection.x:280`
 Reports at `site` that the `meta` function `name` cannot run at compile
 time, and `why`.
 
-Source: `src/meta-group/selection.x:309`
+Source: `src/meta-group/selection.x:308`
 
 <a id="Compiler.refuse_record_meta_call"></a>
 #### Compiler.refuse_record_meta_call
@@ -191,7 +191,7 @@ Reports at `site` that the group function `name` cannot run at compile
 time when its result is a struct or union, which its type alone
 decides.
 
-Source: `src/meta-group/selection.x:317`
+Source: `src/meta-group/selection.x:316`
 
 <a id="Compiler.stage_meta_in_process"></a>
 #### Compiler.stage_meta_in_process

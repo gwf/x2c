@@ -719,6 +719,9 @@ meta int ct_walk_map_pairs_of(List flat) =>
 meta int ct_walk_empty_of(List flat, List xs) =>
   ct_walk_empty(ct_map_of(flat), xs);
 
+/* A constant reaches a `Var` parameter as its own value. */
+meta String ct_var_repr(Var value) => value.repr();
+
 /* --- the program reports what the pass produced -------------------------- */
 
 int main(void) {
@@ -849,5 +852,7 @@ int main(void) {
   meta = %(a b c);
   struct MetaHolder holder = { .meta = 3 };
   printf("meta-ident   %d %d\n", meta.len(), holder.meta);
+  printf("var-constant %s %s %s\n",
+         $ct_var_repr("hi"), $ct_var_repr(2.5), $ct_var_repr(5L));
   return 0;
 }
