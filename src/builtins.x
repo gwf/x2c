@@ -957,12 +957,11 @@ static List _binding_name_signature(String name) =>
    `src/cleanup/cleanup.x` call. */
 
 static macro Stmt $builtin.row(Expr $rows, Expr $name, Expr $function) {
-  $rows[$name] = Func.new(
-    $function, $(_x2c.literal.list (_x2c.function.native-type $function)));
+  $rows[$name] = (Func) $function;
 }
 
-/** Returns each built-in algorithm by the name compile-time code calls it
-    with. */
+/** Returns a fresh Map of built-in algorithms by their compile-time names.
+    The Map borrows shared Func handles that live for the program. */
 Map Compiler.builtin_targets(void) {
   Map rows = {};
   $builtin.row(rows, "scope.expand", _scope_expand);

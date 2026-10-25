@@ -29,7 +29,7 @@ Shipped `meta` code compiled into the compiler.
 | [`lambda_closure`](#lambda_closure) | Lifts the capturing lambda `node` to a static function of its parameters and captures, and answers a `Func` of a record of the captured values and addresses. |
 | [`lambda_lift`](#lambda_lift) | Lifts the noncapturing lambda `node` to a static function, whose name is its value. |
 | [`linked_meta_hashes`](#linked_meta_hashes) | Returns linked definition hashes and provider source dependencies. |
-| [`linked_meta_targets`](#linked_meta_targets) | Returns the linked copies, and the runtime builders, by name. |
+| [`linked_meta_targets`](#linked_meta_targets) | Returns a fresh Map of linked copies and runtime builders by name. |
 | [`match_lowering`](#match_lowering) | Lowers the bound match `node` to C text around its subject, patterns, and bodies. |
 | [`printf_values`](#printf_values) | Reads the Var values a printf-family call's static format consumes. |
 | [`protocol_conformance`](#protocol_conformance) | Places the forwarding members, descriptor thunks, method table, and descriptor registration of one conformance. |
@@ -201,7 +201,8 @@ Source: `src/linked-meta.x:2415`
 
 `Map linked_meta_targets(void)`
 
-Returns the linked copies, and the runtime builders, by name.
+Returns a fresh Map of linked copies and runtime builders by name.
+The Map borrows shared Func handles that live for the program.
 
 Source: `src/linked-meta.x:2181`
 

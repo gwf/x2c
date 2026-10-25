@@ -2173,11 +2173,11 @@ static List _operator_cases(int key, int value, int derived) {
 /* --- the linked inventory ------------------------------------------------ */
 
 macro Stmt $linked.row(Expr $rows, Expr $name, Expr $function) {
-  $rows[$name] = Func.new(
-    $function, $(_x2c.literal.list (_x2c.function.native-type $function)));
+  $rows[$name] = (Func) $function;
 }
 
-/** Returns the linked copies, and the runtime builders, by name. */
+/** Returns a fresh Map of linked copies and runtime builders by name.
+    The Map borrows shared Func handles that live for the program. */
 Map linked_meta_targets(void) {
   Map rows = {};
   $linked.row(rows, "_new_empty", _new_empty);

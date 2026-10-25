@@ -10,6 +10,8 @@
 > Current dev `a90359210` is integrated locally; reassessment and fresh
 > combined validation passed. Scalar forwarding is implemented and validated
 > locally. All selected changes remain unpublished.
+> The two compiler-owned Func inventory wrappers are implemented locally;
+> signature, identity, lifetime, initialization, and full local checks pass.
 > Harder cases remain deferred. No push, PR, or publication is authorized.
 
 ## Result and boundaries
@@ -23,6 +25,104 @@ compatible. Do not deliver the same embedding conversions twice.
 This batch does not promise a compiler that never initializes Lisp. Native
 meta dispatch, early built-ins, and public compile-time Lisp still use the
 shared environment. Do not replace that environment with a second registry.
+
+## Compiler-owned Func inventories
+
+Gary authorized this follow-up on 2026-10-24, based on local `3a36f3885`.
+Replace only `$builtin.row` in `src/builtins.x` and the generated
+`$linked.row` in `tools/gen-linked-meta.sh` with ordinary `(Func)` conversion.
+Regenerate `src/linked-meta.x` through its generator. Leave `$lisp.bind` in
+`etc/lisp-bindings.x` byte-for-byte unchanged. Do not extend this change to
+native target generation, binding precedence, callbacks, or early queries.
+
+The two inventories still return fresh Maps with the same names and native
+signatures. Their 14 built-in and 226 linked Func handles now use the
+existing direct-conversion owner: a shared handle per target, with program
+lifetime. Repeated inventory calls reuse those handles. Unit initialization
+creates them before main instead of constructing them with each Map. This
+identity and initialization change is intentional and local to these two
+compiler-owned inventories; public binding macros retain fresh handles.
+
+Design review: both paths use the existing `Compiler.func_signature` and
+native adapter owner. Current identity consumers compare against the stored
+inventory entry; none require a new Func from a repeated inventory call.
+Literal preparation precedes shared handle initialization. No new registry,
+allocator, lock, public query, or lazy initialization layer is selected.
+
+The paired probe links the same probe object and runtime archive against
+the baseline and candidate compiler archives. The baseline archive is saved
+from the converged stage 1, whose inventory C/H matches the saved pre-edit
+stage 0. A separate pre-edit run also records the original behavior.
+The probe checks all 240
+signatures, repeated-call identity, representative invocations, handle
+survival after the creating Scope closes, and public `$lisp.bind` freshness
+and session independence. Startup and first/second inventory-call Scope
+allocation counts locate the initialization phase. Fresh Maps now compare
+equal by content because their values share identity; their storage remains
+distinct. These are allocation
+observations, not elapsed-time performance results. Logs and probe paths
+are retained under `debug/func-inventory/`.
+
+The paired probe passes all 240 name/signature comparisons, identity and
+Scope-lifetime checks, and representative calls. Public `$lisp.bind` still
+produces distinct handles in successive sessions, and destroying one session
+does not invalidate the other. Its source hash is unchanged.
+
+| Paired probe observation | Baseline | Candidate |
+| --- | ---: | ---: |
+| Scope allocation calls before main's first statement | 1,060 | 1,300 |
+| Live Scope allocations there | 747 | 987 |
+| Live requested payload bytes there | 673,063 | 684,583 |
+| Allocations in each built-in inventory call | 35 | 21 |
+| Allocations in each linked inventory call | 263 | 37 |
+| Handles reused by the second inventory call | 0 | 240 |
+
+The startup difference is exactly 240 handles and 11,520 requested payload
+bytes. The first calls to both inventories allocate exactly 240 fewer
+handles, so this moves those allocations before main. Repeated calls reuse
+the handles. Counts exclude allocator metadata and Pool backing storage.
+An additional paired probe initializes both inventories from another unit's
+pre-main initializers, then checks all names/signatures and representative
+invocations in main. Both baseline and candidate pass. The generated public
+headers remain byte-identical; shared-handle declarations increase by 14 in
+builtins and 226 in linked meta, using the existing initializer mechanism.
+
+The first candidate probe incorrectly used Map content inequality to check
+distinct Map storage. Correcting the probe to compare addresses made both
+versions pass; the final probe also explicitly checks their changed content
+equality. `probe-map-equality-initial.log` retains that initial failure.
+
+The controlled comparison uses one link command for both variants. A
+separate driver-linked final candidate also passes all signature, identity,
+lifetime, and early-initialization checks. Its aggregate startup counters
+are recorded separately in `evidence.json`; inventory-call allocation counts
+match the controlled pair. These observations locate initialization, without
+claiming an elapsed-time improvement.
+
+| Inventory follow-up check | Result | Local evidence |
+| --- | --- | --- |
+| Baseline/candidate signatures, identity, lifetime, and public binding | All 240 signatures match; Maps remain distinct; candidate handles survive Scope closure; public `$lisp.bind` remains fresh. | `baseline-paired.log`, `candidate-paired.log`, `comparison.log` |
+| Pre-main initialization from another unit | Both variants initialize and invoke successfully. | `early-initialization.log` |
+| Exact final-stage archives | All focused checks pass. | `final-candidate-probes.log` |
+| `make build`; `make doc-generate` | Pass. | `build.log`, `doc-generate.log` |
+| Full `make agent-pr-check` | Pass, including all five existing extended steps. | `agent-pr-check.log`, `gate-steps/` |
+| Bootstrap and cold comparisons | All 302 C/H files match across bootstrap/stages 0/1; all 430 cold C/H/.xi files match stage 1. | `agent-pr-check.log`, `gate-steps/proof-cold-collection.log` |
+| Unit suites | 1,045 pass, zero failures/skips, 27,250 assertions. | `gate-steps/verify.log` |
+| Compiler fixtures | 1,288 pass, 2,848 checked artifacts. | `gate-steps/verify.log` |
+| Documentation and commands | All 119 executable examples match; all command checks pass, including REPL inspection, reload, and source loading. | `gate-steps/` |
+
+The authored diff is limited to the two wrappers and their ownership
+comments. Generated `src/linked-meta.x` comes from its generator. The two
+bootstrap C deltas add standard shared-handle initialization, replace row
+construction, and renumber literal-cache references. The generated API pages
+state Map ownership and shared handle lifetime. Public headers remain
+unchanged. No generated file was edited by hand.
+
+Source hashes stayed unchanged during validation. No recurring check or
+process step was added. Package suites and elapsed-time performance were not
+rerun for this compiler-only follow-up. The local Make result is correctness
+evidence, not a publication receipt. All harder cases remain deferred; no
+push, PR, or integration enrollment is authorized.
 
 ## Reassessment after current dev integration
 
@@ -337,7 +437,7 @@ owns the residual scope and removes the duplicated step 5 conversions.
 | Native `bind` evaluation | Reuse the runtime's existing native lookup, including callback adapters, directly. | Lookup is private to the Lisp module; a compiler-only duplicate would change target precedence. |
 | Optional iterator destination | Replace `C.iterator.call` with a native adapter preserving explicit and omitted destinations. | Coupled to callable signatures, callback adaptation, and storage lifetime. |
 | Deferred class recipes | Change callable dispatch for defaults, initializers, and field writers. | Native producers already exist; preserve their delayed execution and source visibility. |
-| Native target/signature generation | Migrate generated module entries, linked-meta signatures/hashes, callback tables, private SDK queries, and SymbolSet construction under their existing owners. Scalar forwarding is completed separately above. | Some queries have no x2c declaration or run before declarations are available. The native algorithms already exist; access and bootstrap order remain the obstacle. |
+| Native target/signature generation | Migrate generated module entries, linked-meta hashes, callback tables, private SDK queries, and SymbolSet construction under their existing owners. Scalar forwarding and the two compiler-owned inventory signature wrappers are completed separately above. Leave public `$lisp.bind` unchanged. | Some queries have no x2c declaration or run before declarations are available. The native algorithms already exist; access and bootstrap order remain the obstacle. |
 | Generic scalar access | Move `NativeScalarAccess` out of the Lisp module while retaining its existing users and ABI. | Ownership cleanup requires connected header/source work, not an evaluator replacement. |
 | Full reader extraction | Give the shared grammar a module independent of the Lisp implementation. | The selected change removes session construction; it deliberately retains `Lisp.read` and its existing ABI. |
 | Home discovery | Replace the `etc/compiler-sdk.xlisp` installation marker if that file ceases to be mandatory. | The compiler still needs that file after this batch. |
