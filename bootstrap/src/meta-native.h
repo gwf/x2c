@@ -7,6 +7,7 @@
 
 #include "x2c.h"
 #include "compiler/compiler.h"
+#include "compiler-meta.h"
 #include "grammar.h"
 #include "macros/macros.h"
 #include "meta-group/meta-group.h"
@@ -20,6 +21,8 @@
 #include <stdlib.h>
 #include <string.h>
 Map Compiler_compiler_targets(void);
+
+Map Compiler_native_targets(void);
 
 void Compiler_select_native_modules(List paths);
 

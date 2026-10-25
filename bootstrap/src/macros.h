@@ -198,8 +198,6 @@ Map Compiler_shared_definitions(Compiler c);
 
 int Compiler_shares_meta_definition(Compiler c, String name);
 
-void Compiler_install_builtin_macros(Compiler c);
-
 void Compiler_bind_meta_operation(Lisp lisp, String name, Var function);
 
 void Compiler_reset_macro_library(void);

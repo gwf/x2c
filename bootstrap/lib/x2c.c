@@ -8,6 +8,7 @@
 #include "channel.h"
 #include "clibc.h"
 #include "cmath.h"
+#include "common-types.h"
 #include "common.h"
 #include "context.h"
 #include "dispatch.h"

@@ -2,6 +2,7 @@
 
 #define __GUARD_0x8E3A3F8F__
 #include "x2c.h"
+#include "datum-reader.h"
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -341,8 +342,6 @@ Array Array_new(void);
 
 void x2c_cleanup_push(X2CCleanup *);
 
-Symbol Lisp_read(Lisp, String, unsigned *, Var *);
-
 void x2c_cleanup_leave(X2CCleanup *);
 
 int datum_read_plain(String text, unsigned * cursor, Var * out){
@@ -364,7 +363,7 @@ int datum_read_plain(String text, unsigned * cursor, Var * out){
     x2c_cleanup_push(& _x2c_gensym_defer_record_0);
     {
       if(String_truth(text) && String_getindex(text, at) && _plain_form(text, &(at), &(value), items, 1))(* cursor) = at;
-      else if(Lisp_read(NULL, text, &((* cursor)), &(value)) != 46228810){
+      else if(datum_read_form(text, &((* cursor)), &(value)) != 46228810){
         int _x2c_gensym_return_value_0 = 0;
         {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
@@ -640,7 +639,7 @@ int datum_unframe(String input, size_t * used, Var * value){
   unsigned cursor = 0;
   (* value) =((void) 0, Void);
   if(! datum_read(frame, &(cursor), &((* value)))){
-    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/datum.x",.function = "datum_unframe",.line = 321,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/datum.x",.function = "datum_unframe",.line = 322,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_0, 28682226919752, 1, Symbol_var(13765450), String_var(frame));
     __builtin_unreachable();
   }

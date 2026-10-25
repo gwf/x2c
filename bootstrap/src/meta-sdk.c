@@ -111,6 +111,8 @@ static Var f10_primitives____symbol_set(List values);
 
 static List f10_primitives____native_targets(void);
 
+static int f10_primitives____builtin_algorithm(String name);
+
 static List f10_primitives____native_rows(Symbol inventory, List leading, List trailing);
 
 static List f10_primitives____declared_targets(List paths);
@@ -550,10 +552,10 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _380 = String_new("_x2c.symbol-set requires distinct Symbols");
   _381 = String_new("symbol:");
   _382 = String_var(_381);
-  _383 = String_new("x2c_");
-  _384 = String_new("Code_");
-  _385 = String_new("Type_");
-  _386 = String_new("_x2c_");
+  _383 = String_new("_x2c_");
+  _384 = String_new("x2c_");
+  _385 = String_new("Code_");
+  _386 = String_new("Type_");
   _387 = String_new("native module sources declare no meta function");
   _388 = String_new("declare each exported function with a bodyless meta prototype");
   _389 = String_var(_388);
@@ -1920,7 +1922,17 @@ static Var f10_primitives____symbol_set(List values){
 
 List Compiler_native_meta_targets(List, int);
 static List f10_primitives____native_targets(void){
-  return Compiler_native_meta_targets(NULL, 0);
+  Array rows = Array_new(); {
+    List row;  List _x2c_gensym_macro_object_23 = Compiler_native_meta_targets(NULL, 0);  List _x2c_gensym_macro_cursor_23 = _x2c_gensym_macro_object_23;  Var _x2c_gensym_macro_cursor_output_19;  while(List_try_next(_x2c_gensym_macro_object_23, &(_x2c_gensym_macro_cursor_23), &(_x2c_gensym_macro_cursor_output_19))){
+      row = Var_list_payload(_x2c_gensym_macro_cursor_output_19);  if(! f10_primitives____builtin_algorithm(Var_as_string(List_car(row)))) Array_push(rows, List_var(row));
+    }
+
+  }
+  return Array_list_free(rows);
+}
+
+static int f10_primitives____builtin_algorithm(String name){
+  return String_startswith(name, _383);
 }
 
 static List f10_primitives____native_rows(Symbol inventory, List leading, List trailing){
@@ -1933,17 +1945,17 @@ static List f10_primitives____native_rows(Symbol inventory, List leading, List t
     }
     ;  x2c_cleanup_push(& _x2c_gensym_defer_record_0); {
       {
-        List row;  List _x2c_gensym_macro_object_23 = Compiler_native_meta_targets(NULL, inventory == 40094681930);  List _x2c_gensym_macro_cursor_23 = _x2c_gensym_macro_object_23;  Var _x2c_gensym_macro_cursor_output_19;  while(List_try_next(_x2c_gensym_macro_object_23, &(_x2c_gensym_macro_cursor_23), &(_x2c_gensym_macro_cursor_output_19))){
-          row = Var_list_payload(_x2c_gensym_macro_cursor_output_19); {
-            String name = Var_as_string(List_car(row));  int own = String_startswith(name, _383) || String_startswith(name, _384) || String_startswith(name, _385);  if(! String_startswith(name, _386) && own ==(inventory == 239277269348)) Array_push(rows, List_var(row));
+        List row;  List _x2c_gensym_macro_object_24 = Compiler_native_meta_targets(NULL, inventory == 40094681930);  List _x2c_gensym_macro_cursor_24 = _x2c_gensym_macro_object_24;  Var _x2c_gensym_macro_cursor_output_20;  while(List_try_next(_x2c_gensym_macro_object_24, &(_x2c_gensym_macro_cursor_24), &(_x2c_gensym_macro_cursor_output_20))){
+          row = Var_list_payload(_x2c_gensym_macro_cursor_output_20); {
+            String name = Var_as_string(List_car(row));  int own = String_startswith(name, _384) || String_startswith(name, _385) || String_startswith(name, _386);  if(! f10_primitives____builtin_algorithm(name) && own ==(inventory == 239277269348)) Array_push(rows, List_var(row));
           }
 
         }
 
       }
       {
-        Var row;  List _x2c_gensym_macro_object_24 = trailing;  List _x2c_gensym_macro_cursor_24 = _x2c_gensym_macro_object_24;  Var _x2c_gensym_macro_cursor_output_20;  while(List_try_next(_x2c_gensym_macro_object_24, &(_x2c_gensym_macro_cursor_24), &(_x2c_gensym_macro_cursor_output_20))){
-          row = _x2c_gensym_macro_cursor_output_20;  Array_push(rows, row);
+        Var row;  List _x2c_gensym_macro_object_25 = trailing;  List _x2c_gensym_macro_cursor_25 = _x2c_gensym_macro_object_25;  Var _x2c_gensym_macro_cursor_output_21;  while(List_try_next(_x2c_gensym_macro_object_25, &(_x2c_gensym_macro_cursor_25), &(_x2c_gensym_macro_cursor_output_21))){
+          row = _x2c_gensym_macro_cursor_output_21;  Array_push(rows, row);
         }
 
       }

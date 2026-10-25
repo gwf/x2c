@@ -9,24 +9,10 @@
 #include "cleanup.h"
 #include "x2c.h"
 #include "macrovalue/macrovalue.h"
-typedef Var(* NativeScalarLoad)(const void * bytes, Scope * owner);
-
-typedef void(* NativeScalarStore)(void * bytes, Var value);
-
-typedef struct NativeScalarAccess{
-  Symbol tag;
-  size_t size, alignment;
-  NativeScalarLoad load;
-  NativeScalarStore store;
-}
-* NativeScalarAccess;
-
 #include "native-scalar-types.h"
-NativeScalarAccess native_scalar_access(List exact_type);
-
 typedef struct Lisp * Lisp;
 
-void Lisp_cleanup(Lisp _x2c_gensym_macro_value_28);
+void Lisp_cleanup(Lisp _x2c_gensym_macro_value_0);
 
 #define LISP_NATIVE_ARG_MAX  8
 #define LISP_STACK_BYTES_MAX (6L << 20)
@@ -42,6 +28,8 @@ void Lisp_set_interrupted(Lisp lisp, int interrupted);
 Var Lisp_eval(Lisp lisp, Var expression);
 
 Var Lisp_apply(Lisp lisp, Var callable, List values);
+
+Symbol Lisp_read(Lisp lisp, String source, unsigned * cursor, Var * out);
 
 Var Lisp_eval_string(Lisp lisp, String source);
 
@@ -76,9 +64,6 @@ Scope * Lisp_storage(Lisp lisp);
 Scope * Lisp_automatic_storage(Lisp lisp);
 
 Scope * Lisp_result_storage(Lisp lisp);
-
-#define LISP_READ_DEPTH_MAX 1024
-Symbol Lisp_read(Lisp lisp, String source, unsigned * cursor, Var * out);
 
 Var lisp_truth(Var value);
 
