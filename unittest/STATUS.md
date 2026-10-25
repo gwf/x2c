@@ -241,9 +241,10 @@ passed six repeated nested-Make probes, and help output remains byte-identical.
   ...)` form. The native form `macro Expression $constructed() =>
   $constructed_syntax();` expands inside each meta body to an ordinary call,
   as the language reference documents for `$f(x)` in a `meta` body. The meta
-  helper then rejects the call: "cannot convert ("List") to ("Func")". A macro
-  template cannot spell that canonical AST directly, so the five `built-*`
-  rows have no native form. Ordinary lambda destinations remain covered.
+  helper then rejects the call: "cannot convert ("List") to ("Func")". No
+  macro template form was found that spells that canonical AST; a `${...}`
+  body is rejected with "expected macro name after '$'". The five `built-*`
+  rows were therefore removed. Ordinary lambda destinations remain covered.
 - The "Decorators" section of `docs/src/reference/language.md` says a
   public `Unit` target "cannot gain new public siblings". The compiler does
   not enforce this. The former `macro-decorator-public-sibling` and
@@ -281,9 +282,9 @@ passed six repeated nested-Make probes, and help output remains byte-identical.
   `$computed(retained);` fails at the first call: "this function cannot run
   at compile time", because the meta group declares `static slot_helper(void);`
   and the C compiler rejects implicit `int`. The same unit succeeds when
-  `retained` is an ordinary declaration. The former Lisp slots
-  (`$(Code.type $value)`, `@(list $target)`) showed the same failure.
-  `macro-computed-slots` (formerly `macro-lisp-slots`) keeps the computed
+  `retained` is an ordinary declaration. An earlier migration attempt
+  reported the same failure with the former Lisp slots; that was not
+  re-checked here. `macro-computed-slots` (formerly `macro-lisp-slots`) keeps the computed
   type, identifier, and splice slots but declares `retained` directly.
 
 ## Outstanding Items
