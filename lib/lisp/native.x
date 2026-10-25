@@ -105,8 +105,8 @@ static String _string_map(String value, Var callable) =>
 static String _string_filter(String value, Var callable) =>
   value.filter(_unary_callback(callable));
 
-/* A compile-time call gets fresh Iter storage from `C.iterator.call`. Only
-   a callable argument needs this session's Func bridge. */
+/* A Lisp call gets fresh Iter storage from `C.iterator.call`. Only a
+   callable argument needs this session's Func bridge. */
 static Iter _iter_init(
   Iter destination, Var object, Var callable, Var state) {
   if (!destination) return NULL;

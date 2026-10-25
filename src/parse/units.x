@@ -49,7 +49,7 @@ List Compiler.parse_top_level_mode(Compiler c, int skip_body) {
         return NULL;
       }
       return _parse_import_declaration(c);
-    case <"$(">:   return c.reject_lisp_form();
+    case <"$(">: case <"@(">: return c.reject_lisp_form();
     case <@>:      return _top_level_decorator(c);
   }
   if (c.macro_form_is_definition()) return c.parse_macro_definition();

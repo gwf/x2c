@@ -22,10 +22,10 @@ static macro Stmt $fail.meta_sdk_binding_identifier(Expr $syntax) =>
 
 static macro Stmt $fail.meta_sdk_identifier(Expr $spelling) =>
   _reject_value(
-    "x2c.ident requires an identifier spelling", $spelling);
+    "x2c_ident requires an identifier spelling", $spelling);
 
 static macro Stmt $fail.meta_sdk_binding_role(Expr $role) =>
-  _reject_value("x2c.binding.fresh requires an identifier role", $role);
+  _reject_value("x2c_binding_fresh requires an identifier role", $role);
 
 static macro Stmt $fail.meta_sdk_unique_stem(Expr $stem) =>
   _reject_value(
@@ -41,7 +41,7 @@ static macro Stmt $fail.meta_sdk_constant() =>
   MetaContext.reject("captured code is not a compile-time constant", NULL);
 
 static macro Stmt $fail.meta_sdk_enclosing_role(Expr $value) =>
-  _reject_value("x2c.enclosing names declarator, statement, function, or unit", $value);
+  _reject_value("x2c_enclosing names declarator, statement, function, or unit", $value);
 
 // syntax queries
 
@@ -232,7 +232,7 @@ static String _binding_spelling(List value, Var syntax) {
 
 /** Answers `x2c_ident`, declared in `lib/meta.x`. */
 List x2c_ident(String spelling) {
-  _require_expansion("x2c.ident");
+  _require_expansion("x2c_ident");
   if (!spelling.is_identifier())
     $fail.meta_sdk_identifier(spelling);
   return %("x2c.ident" $spelling);
@@ -240,7 +240,7 @@ List x2c_ident(String spelling) {
 
 /** Answers `x2c_binding_fresh`, declared in `lib/meta.x`. */
 List x2c_binding_fresh(String role) {
-  _require_expansion("x2c.binding.fresh");
+  _require_expansion("x2c_binding_fresh");
   if (!role.is_identifier()) $fail.meta_sdk_binding_role(role);
   Compiler c = active.expander;
   return c.sym.introduce(c.fresh_name(role));
@@ -248,7 +248,7 @@ List x2c_binding_fresh(String role) {
 
 /** Answers `x2c_binding_for`, declared in `lib/meta.x`. */
 List x2c_binding_for(Var key, String role) {
-  _require_expansion("x2c.binding.for");
+  _require_expansion("x2c_binding_for");
   if (!role.is_identifier()) $fail.meta_sdk_binding_role(role);
   Compiler c = active.expander;
   List binding = NULL;
@@ -321,7 +321,7 @@ List Code.native_signature(List syntax) {
 
 /** Answers `x2c_enclosing`, declared in `lib/meta.x`. */
 Code x2c_enclosing(Symbol what) {
-  _require_expansion("x2c.enclosing");
+  _require_expansion("x2c_enclosing");
   if (!(what in %<<declarator statement function unit>>))
     $fail.meta_sdk_enclosing_role(what);
   return active.expander.enclosing(what);
@@ -329,7 +329,7 @@ Code x2c_enclosing(Symbol what) {
 
 /** Answers `x2c_place`, declared in `lib/meta.x`. */
 void x2c_place(List where, Code code) {
-  _require_expansion("x2c.place");
+  _require_expansion("x2c_place");
   active.expander.place(where, code);
 }
 

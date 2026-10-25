@@ -27,7 +27,7 @@ void Compiler.install_meta_function(Compiler c, List fn, Token marker) {
       if (c.macro_holes) return;
       c.group_meta_function(fn);
       if (c.meta_calls_wait()) return;
-      _install_stub(c, name, ((List) c.meta_group[-1]).last(), NULL, marker);
+      _install_stub(c, name, ((List) c.meta_group[-1]).last(), NULL);
     }
 }
 
@@ -45,8 +45,7 @@ void Compiler.install_collected_meta_function(
   String name = _native_meta_name(c, declaration, marker);
   Map linked = _linked_module();
   if (c.groups_meta() && !(name in linked)) return;
-  _install_stub(
-    c, name, declaration.type_from_ast().canonicalize(), NULL, marker);
+  _install_stub(c, name, declaration.type_from_ast().canonicalize(), NULL);
 }
 
 /* Host-preprocessed text holds each included file's definitions where the
@@ -68,8 +67,7 @@ static int _install_included_meta(
 
 /* The stub belongs to the unit's bindings. */
 static void _install_stub(
-  Compiler c, String name, Type type, String provider, Token marker) {
-  (void) marker;
+  Compiler c, String name, Type type, String provider) {
   String context = %"$name\n${provider ? provider : ""}";
   c.bindings().bind(
     name,
@@ -231,6 +229,6 @@ static int _bind_advertised_meta(Compiler c, String name, int install) {
     return 1;
   }
   if (c.meta_calls_wait()) return 0;
-  _install_stub(c, name, signature, provider, NULL);
+  _install_stub(c, name, signature, provider);
   return 1;
 }

@@ -9,11 +9,11 @@ static macro Stmt $fail.meta_sdk_source_capture(Expr $value) =>
     active.has_bindings ? NULL : %("value: ${$value.repr()}"));
 
 static macro Stmt $fail.meta_sdk_embed_path_empty() =>
-  MetaContext.reject("x2c.embed.text requires a non-empty path", NULL);
+  MetaContext.reject("x2c_embed_text requires a non-empty path", NULL);
 
 static macro Stmt $fail.meta_sdk_embed_literal(Expr $requested) =>
   _reject_value(
-    "x2c.embed.text requires a String or captured String literal",
+    "x2c_embed_text requires a String or captured String literal",
     $requested);
 
 static macro Stmt $fail.meta_sdk_embed_read(Expr $c, Expr $path) =>
@@ -51,7 +51,7 @@ String Code.source_text(Var value) {
 
 /** Answers `x2c_embed_text`, declared in `lib/meta.x`. */
 String x2c_embed_text(Var requested) {
-  _require_expansion("x2c.embed.text");
+  _require_expansion("x2c_embed_text");
   Compiler c = active.expander;
   String source_file = active.definition_file, requested_path = NULL;
   if (requested is <string>) requested_path = requested;

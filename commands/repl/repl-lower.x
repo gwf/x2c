@@ -329,17 +329,11 @@ int repl_native_binding(Compiler c, Lisp lisp, String name, Var &out) {
   if (!c.bind_native_meta(name)) return 0;
   if (!c.native_meta.try_get(name, signature))
     return c.meta_binding(name, out);
-  int iterator = 0, arity = 0;
-  match (signature)
-    case %((func ?(List parameters)) "Iter"):
-      if (parameters && parameters.last() == %("Iter")) {
-        iterator = 1;
-        arity = parameters.len() - 1;
-      }
-  String target = iterator ? %"${name}_into" : name;
+  int arity = Compiler.iterator_arity(signature);
+  String target = arity >= 0 ? %"${name}_into" : name;
   try out = lisp.eval(%(bind $target ()));
-  catch %(no-symbol *): return c.meta_binding(name, out);
-  if (iterator) out = lisp.eval(%(C.iterator.call (quote $out) $arity));
+  catch %(no-symbol *): if (!c.meta_binding(name, out)) return 0;
+  if (arity >= 0) out = lisp.eval(%(C.iterator.call (quote $out) $arity));
   return 1;
 }
 

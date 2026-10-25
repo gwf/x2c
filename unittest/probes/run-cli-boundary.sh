@@ -786,7 +786,7 @@ build_archive -v >"$archived/last.stdout" 2>"$archived/last.stderr"
   -o "$archived/consumer"
 [[ $("$archived/consumer") == 2 ]] || exit 1
 
-# Binding groups belong to a translation unit, not the shared Lisp parent.
+# Binding groups belong to a translation unit.
 bindings="$BUILD/binding-units"
 mkdir -p "$bindings"
 for unit in first second; do

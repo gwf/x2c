@@ -263,7 +263,7 @@ passed six repeated nested-Make probes, and help output remains byte-identical.
   echo(Var s)` called as `$echo("hi")` at file scope fails this way, while
   the same function with a `String` parameter succeeds. The language
   reference counts a constant as a valid argument. Because of this, the
-  `_require_expansion("x2c.embed.text")` check in `src/meta-sdk/sources.x`
+  `_require_expansion("x2c_embed_text")` check in `src/meta-sdk/sources.x`
   is never reached by `$x2c_embed_text("...")` at file scope.
   `macro-embed-text-outside` records the current diagnostic.
 - `src/meta-sdk/context.x` rejects an invocation location without an active
@@ -286,6 +286,15 @@ passed six repeated nested-Make probes, and help output remains byte-identical.
   reported the same failure with the former Lisp slots; that was not
   re-checked here. `macro-computed-slots` (formerly `macro-lisp-slots`) keeps the computed
   type, identifier, and splice slots but declares `retained` directly.
+
+- `import-package-export-order` and its `packages/ordered/` sources were
+  removed. They checked that package packs install in include-walk order by
+  calling compile-time Lisp functions one package defined from another
+  package's source, which relied on the shared Lisp session. A native meta
+  function in one package does not see another package's meta functions
+  from its own meta group ("call to undeclared function 'ordered_z'"), so
+  the same ordering cannot be observed that way. Pack ordering itself is
+  unchanged.
 
 ## Outstanding Items
 

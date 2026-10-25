@@ -24,8 +24,7 @@ List Compiler.publish_macro_definition_node(Compiler c, List node) {
 /* Records a public source effect where its completed definition stands. */
 module void _record_compile_time_effect(Compiler c, List row, Token start) {
   if (!c.shallow || c.source_private || c.macro_holes ||
-      !c.sym.at_file_scope() || !c.filename ||
-      c.filename.startswith("<builtin:")) return;
+      !c.sym.at_file_scope() || !c.filename) return;
   String source = Compiler.portable_path(Path.absolute(c.filename));
   List key = %("source-node" (compile-time $source ${start.pos}));
   List previous = c.sym.get(key);

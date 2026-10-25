@@ -170,7 +170,7 @@ do
 done
 
 # Fake home: interface paths are home-relative, so the probe gets its own
-# home with the real compiler, runtime sources, and compile-time Lisp copied
+# home with the real compiler, runtime sources, and syntax prelude copied
 # in.  Home discovery climbs from the binary looking for include/ and
 # etc/compiler-prelude.x; the stage directory holds no interfaces, so every
 # prelude here is walked cold from lib/x2c.x.

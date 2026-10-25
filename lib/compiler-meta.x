@@ -5,8 +5,9 @@
     These bodyless `meta` prototypes name native operations the compiler
     supplies for its own shipped sources: the built-in macros' algorithms
     that need the full meta surface, Lisp binding groups, and the generated
-    target tables, hashes, interface records, and SymbolSets. They are not
-    part of the public meta surface; `lib/meta.x` owns that.
+    target tables, hashes, interface records, and SymbolSets. The implicit
+    prelude reaches them through `lisp-bindings.x`, but they are not part
+    of the documented meta surface, which `lib/meta.x` owns.
 */
 
 #pragma once

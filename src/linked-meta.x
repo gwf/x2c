@@ -14,7 +14,6 @@
 #pragma once
 
 #include "x2c.x"
-#include "compiler-meta.x"
 #include "channel.x"
 #include "common.x"
 #include "lisp-bindings.x"

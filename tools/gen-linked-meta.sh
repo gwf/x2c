@@ -177,7 +177,6 @@ END {
   print "#pragma once"
   print ""
   print "#include \"x2c.x\""
-  print "#include \"compiler-meta.x\""
   # Components are already supplied by the compiler prelude.
   for (i = 1; i <= ndef; i++)
     if (files[i] !~ /^src\/components\// && !included[files[i]]++) {

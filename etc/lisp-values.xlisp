@@ -26,8 +26,7 @@
 
 // An iterator operation takes its destination last. A call that omits it
 // gets a fresh Iter, allocated in the current Scope; a call with explicit
-// storage passes it. The compile-time runtime binds lowered iterator calls
-// the same way.
+// storage passes it. The REPL binds lowered iterator calls the same way.
 (defun C.iterator.call (explicit arity)
   (let ((fresh (bind "Iter_new" nil)))
     (lambda (. arguments)

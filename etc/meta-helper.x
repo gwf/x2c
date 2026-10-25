@@ -125,26 +125,26 @@ static void _check_notes(String operation, List notes) {
 List x2c_ident(String spelling) {
   if (!spelling.is_identifier())
     _fail(
-      "x2c.ident requires an identifier spelling",
+      "x2c_ident requires an identifier spelling",
       %("value: ${spelling.repr()}"));
   return %("x2c.ident" $spelling);
 }
 
 void x2c_diagnostic_fail(String message, List notes) {
-  _check_notes("x2c.diagnostic.fail", notes);
+  _check_notes("x2c_diagnostic_fail", notes);
   _fail(message, notes);
 }
 
 /* The failure carries the node, whose position the compiler reports. */
 void x2c_diagnostic_fail_at(
   Var node, Symbol category, String message, List notes) {
-  _check_notes("x2c.diagnostic.fail.at", notes);
+  _check_notes("x2c_diagnostic_fail_at", notes);
   raise %(meta-fail
     (message $message) (notes $notes) (at $node) (category $category));
 }
 
 void x2c_diagnostic_warn(String message, List notes) {
-  _check_notes("x2c.diagnostic.warn", notes);
+  _check_notes("x2c_diagnostic_warn", notes);
   helper_notices.push(%(warning $message $notes));
 }
 
@@ -206,10 +206,10 @@ String x2c_embed_text(Var path) {
         }
   if (!spelling)
     _fail(
-      "x2c.embed.text requires a captured String literal or an "
+      "x2c_embed_text requires a captured String literal or an "
       "absolute path", %("value: ${path.repr()}"));
   if (!spelling.len())
-    _fail("x2c.embed.text requires a non-empty path", NULL);
+    _fail("x2c_embed_text requires a non-empty path", NULL);
   if (file && !spelling.startswith("/"))
     spelling = %"${Path.dirname(file)}/$spelling";
   String target = Path.absolute(spelling), text = NULL;

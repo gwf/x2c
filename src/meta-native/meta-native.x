@@ -12,7 +12,6 @@
 
 #pragma once
 #include "compiler/compiler.x"
-#include "compiler-meta.x"
 
 // The optional modules whose `meta` targets the runtime inventory binds.
 #include "diff.x"
@@ -39,13 +38,6 @@
 
 /* meta-native diagnostics. */
 
-static macro Stmt $fail.meta_native_function_install(
-  Expr $c, Expr $site, Expr $cause) =>
-  $c.report_error(
-    <macro>,
-    "this meta function could not be installed",
-    $site, %("reason: ${$cause.repr()}"));
-
 static macro Stmt $fail.meta_native_meta_decl(Expr $c, Expr $site) =>
   $c.report_error(
     <parse>,
@@ -58,12 +50,6 @@ static macro Stmt $fail.meta_native_meta_storage(
     <parse>,
     "a meta value must have file-static storage",
     $site, %("declaration: '${$name}'"));
-
-static macro Stmt $fail.meta_native_call_depth(Expr $c, Expr $site) =>
-  $c.report_error(
-    <macro>,
-    "explicit meta call was stopped",
-    $site, %("reason: its compile-time form nested too deep"));
 
 static macro Stmt $fail.meta_native_call_deferred(Expr $c, Expr $site) =>
   $c.report_error(

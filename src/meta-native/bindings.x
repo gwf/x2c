@@ -156,7 +156,8 @@ static typedef struct NativeBinding {
 static void _bind_native_meta(
   Compiler c, String name, List signature, Token marker) {
   _certify_native_meta(c, name, signature, marker);
-  String target = _iterator_operation(signature) ? %"${name}_into" : name;
+  int iterator = Compiler.iterator_arity(signature) >= 0;
+  String target = iterator ? %"${name}_into" : name;
   NativeBinding n = {
     .c = c, .name = name, .target = target, .signature = signature,
     .suppliers = _native_module_suppliers(target), .marker = marker};
@@ -348,7 +349,7 @@ List Compiler.native_meta_targets(List paths, int callbacks) {
       (String name, List signature) = row;
       if (!callbacks && _takes_callback(signature)) continue;
       String into = %"${name}_into";
-      selected[name] = _iterator_operation(signature)
+      selected[name] = Compiler.iterator_arity(signature) >= 0
         ? %($name (as $into)) : %($name);
     }
   }
@@ -406,16 +407,14 @@ static int _takes_callback(List signature) {
   return 0;
 }
 
-/* An iterator operation takes its destination last. Its native target is
-   `NAME_into`, and a compile-time call of `NAME` that omits the
-   destination gets one at the call. */
-module int _iterator_operation(List signature) {
+/** Returns how many arguments a call of the iterator operation `signature`
+    passes when it omits its destination, or -1 for another signature. An
+    iterator operation takes its destination last, and its native target is
+    `NAME_into`. */
+int Compiler.iterator_arity(List signature) {
   match (signature)
     case %((func ?(List parameters)) "Iter"):
-      return parameters && parameters.last() == %("Iter");
-  return 0;
+      if (parameters && parameters.last() == %("Iter"))
+        return parameters.len() - 1;
+  return -1;
 }
-
-/* The number of parameters a signature declares. */
-module int _parameter_count(List signature) =>
-  signature.car().list().cadr().list().len();

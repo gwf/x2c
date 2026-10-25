@@ -52,14 +52,14 @@ int x2c_invocation_column(void) =>
 
 /** Answers `x2c_diagnostic_fail`, declared in `lib/meta.x`. */
 void x2c_diagnostic_fail(String message, List notes) {
-  _check_notes("x2c.diagnostic.fail", notes);
+  _check_notes("x2c_diagnostic_fail", notes);
   MetaContext.reject(message, notes);
 }
 
 /** Answers `x2c_diagnostic_fail_at`, declared in `lib/meta.x`. */
 void x2c_diagnostic_fail_at(
   Var node, Symbol category, String message, List notes) {
-  _check_notes("x2c.diagnostic.fail.at", notes);
+  _check_notes("x2c_diagnostic_fail_at", notes);
   active.expander.report_meta_error(
     node, category, message, active.site, notes, 1);
 }
@@ -67,7 +67,7 @@ void x2c_diagnostic_fail_at(
 /** Answers `x2c_diagnostic_error_at`, declared in `lib/meta.x`. */
 void x2c_diagnostic_error_at(
   Var node, Symbol category, String message, List notes) {
-  _check_notes("x2c.diagnostic.error.at", notes);
+  _check_notes("x2c_diagnostic_error_at", notes);
   active.expander.report_meta_error(
     node, category, message, active.site, notes, 0);
 }
@@ -75,7 +75,7 @@ void x2c_diagnostic_error_at(
 /** A warning reports where it is raised and returns, so a macro can keep
    expanding. Failure stays separate because it never returns. */
 void x2c_diagnostic_warn(String message, List notes) {
-  _check_notes("x2c.diagnostic.warn", notes);
+  _check_notes("x2c_diagnostic_warn", notes);
   active.expander.report_warning(
     <macro>, message, active.expander.token, notes);
 }

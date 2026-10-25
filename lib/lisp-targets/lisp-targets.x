@@ -14,7 +14,6 @@
 
 #pragma once
 #include "x2c.x"
-#include "compiler-meta.x"
 
 #include "diff.x"
 #include "digest.x"
@@ -203,8 +202,8 @@ static Symbol _symbol_parse(String text) => Symbol.parse(text);
 static Symbol _symbol_new_len(String text, int length) =>
   Symbol.new_len(text, length);
 
-/* A Job started in compile-time Lisp, with its finalizer and capture
-   files, belongs to the session that started it. */
+/* A Job started in a Lisp session, with its finalizer and capture files,
+   belongs to the session that started it. */
 static Job _list_job(List command) {
   Job job;
   auto (Lisp.active().storage()) { job = command; }

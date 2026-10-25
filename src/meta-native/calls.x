@@ -153,8 +153,7 @@ Var Compiler.apply_meta_binding(
   defer Scope.pop();
   Var signature;
   if (c.native_meta.try_get(name, signature) &&
-      _iterator_operation(signature) &&
-      arguments.len() == _parameter_count(signature) - 1)
+      arguments.len() == Compiler.iterator_arity(signature))
     arguments = arguments.append(%(${Iter.new()}));
   return _apply_linked(function.pointer(), arguments);
 }
