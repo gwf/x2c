@@ -26,8 +26,7 @@ List Compiler.definition_rows(Compiler c, List ast) {
       if (row) rows.push(row);
     }
     case %(typedef ?base (bindings *declarators)):
-      foreach (List declarator in declarators) match (declarator)
-        case %(bind ?binding ?modifiers):
+      foreach (List declarator in declarators) if (declarator ~= %(bind ?binding ?modifiers))
           rows.push(
             %(typedef $(Ast.binding_spelling(binding)) $base $modifiers
               $(_span(c, node))));
@@ -44,21 +43,19 @@ static List _function_row(
   Type signature =
     %(declare $type (bindings (bind $binding $modifiers))).type_from_ast();
   int line = 1, Var doc = "", List declarator = NULL, span = _span(c, binding);
-  match (c.semantic_binding_facts()[%(api-definition $binding)])
-    case %(?(int recorded) ?text ?range): {
-      line = recorded;
-      if (text is <string>) doc = text;
-      declarator = range;
-    }
+  if (c.semantic_binding_facts()[%(api-definition $binding)] ~= %(?(int recorded) ?text ?range)) {
+    line = recorded;
+    if (text is <string>) doc = text;
+    declarator = range;
+  }
   /* Authored prose precedes the whole form, before any decorator. */
-  match (span)
-    case %(?(int start) *): if (declarator || alias) {
-      Token first = c.tokenizer.tokens;
-      first += start;
-      if (alias) line = first.line;
-      String written = c.definition_doc(first);
-      doc = written ? written : "";
-    }
+  if (span ~= %(?(int start) *)) if (declarator || alias) {
+    Token first = c.tokenizer.tokens;
+    first += start;
+    if (alias) line = first.line;
+    String written = c.definition_doc(first);
+    doc = written ? written : "";
+  }
   Symbol origin = declarator ? <source> : <macro>;
   if (alias) origin = <alias>;
   return %(function $name $(_display(c, binding, name)) $signature
@@ -68,8 +65,7 @@ static List _function_row(
 
 /* A method displays as `Owner.member`. */
 static String _display(Compiler c, List binding, String name) {
-  match (c.semantic_binding_facts()[%(method $binding)])
-    case %(?(String owner) ?(String member)): return %"$owner.$member";
+  if (c.semantic_binding_facts()[%(method $binding)] ~= %(?(String owner) ?(String member))) return %"$owner.$member";
   return c.unprefixed(name);
 }
 
@@ -78,11 +74,9 @@ static List _span(Compiler c, List key) =>
 
 static List _parameter_names(Compiler c, List modifiers) {
   Array names = [];
-  match (modifiers)
-    case %((fnmod (params *parameters)) *):
-      foreach (List parameter in parameters) match (parameter)
-        case %(param ? (bind ?binding ?)):
-          names.push(_parameter_name(c, binding));
+  if (modifiers ~= %((fnmod (params *parameters)) *))
+    foreach (List parameter in parameters) if (parameter ~= %(param ? (bind ?binding ?)))
+        names.push(_parameter_name(c, binding));
   return names.list_free();
 }
 
@@ -114,47 +108,43 @@ void Compiler.dump_definitions(Compiler c, List ast) {
 }
 
 static void _print_function(Compiler c, Token tokens, List row) {
-  match (row)
-    case %(function ?name ?display ?type ?names ?line ?doc ?is_static
-           ?origin ?declarator ?span): {
-      String text = "";
-      match (declarator)
-        case %(?(int start) ?(int body)):
-          text = _source_text(tokens + start, tokens + body);
-      List location = _location(tokens, span);
-      printf(
-        "%s\n",
-        %(function (name $name) (display $display) (line $line)
-          $(_definition_source(
-            c, tokens, declarator ? declarator : span, line.integer()))
-          $(location.cadr()) (static $is_static) (origin $origin)
-          (doc $doc) (text $text) (type $type) (params $names)).repr());
-    }
+  if (row ~= %(function ?name ?display ?type ?names ?line ?doc ?is_static
+           ?origin ?declarator ?span)) {
+    String text = "";
+    if (declarator ~= %(?(int start) ?(int body)))
+      text = _source_text(tokens + start, tokens + body);
+    List location = _location(tokens, span);
+    printf(
+      "%s\n",
+      %(function (name $name) (display $display) (line $line)
+        $(_definition_source(
+          c, tokens, declarator ? declarator : span, line.integer()))
+        $(location.cadr()) (static $is_static) (origin $origin)
+        (doc $doc) (text $text) (type $type) (params $names)).repr());
+  }
 }
 
 /* A typedef with a source span prints its text without the closing `;`,
    its kind, its doc, and its privacy. */
 static void _print_type(Compiler c, Token tokens, List row) {
-  match (row)
-    case %(typedef ?name ?base ?modifiers ?span): {
-      Var doc = "", text = "", kind = <alias>;
-      List location = _location(tokens, span), privacy = NULL;
-      match (span)
-        case %(?(int start) ?(int end) ?private): {
-          Token last = tokens + end, final = last - 1;
-          if (final.type == <;>) last = final;
-          text = _source_text(tokens + start, last);
-          kind = _type_kind(tokens + start, base, modifiers);
-          String written = c.definition_doc(tokens + start);
-          if (written) doc = written;
-          privacy = %((private $(!c.publishes_typedef(name))));
-        }
-      printf(
-        "%s\n",
-        %(type (name $name) (kind $kind) @location
-          $(_definition_source(c, tokens, span, 0)) @privacy (doc $doc)
-          (text $text)).repr());
+  if (row ~= %(typedef ?name ?base ?modifiers ?span)) {
+    Var doc = "", text = "", kind = <alias>;
+    List location = _location(tokens, span), privacy = NULL;
+    if (span ~= %(?(int start) ?(int end) ?private)) {
+      Token last = tokens + end, final = last - 1;
+      if (final.type == <;>) last = final;
+      text = _source_text(tokens + start, last);
+      kind = _type_kind(tokens + start, base, modifiers);
+      String written = c.definition_doc(tokens + start);
+      if (written) doc = written;
+      privacy = %((private $(!c.publishes_typedef(name))));
     }
+    printf(
+      "%s\n",
+      %(type (name $name) (kind $kind) @location
+        $(_definition_source(c, tokens, span, 0)) @privacy (doc $doc)
+        (text $text)).repr());
+  }
 }
 
 /* Resolve an authored range or invocation line through source markers. */
@@ -189,21 +179,18 @@ static String _source_text(Token first, Token last) {
 
 /* The one-based line and byte range of a token range. */
 static List _location(Token tokens, List range) {
-  match (range)
-    case %(?(int start) ?(int end) *): {
-      Token first = tokens + start, last = tokens + end - 1;
-      return %((line $(first.line))
-               (span $(first.pos) $(last.pos + last.len)));
-    }
+  if (range ~= %(?(int start) ?(int end) *)) {
+    Token first = tokens + start, last = tokens + end - 1;
+    return %((line $(first.line))
+             (span $(first.pos) $(last.pos + last.len)));
+  }
   return %((line 0) (span));
 }
 
 static Symbol _type_kind(Token first, List base, List modifiers) {
   if (first.text == "class") return <class>;
-  match (modifiers)
-    case %(?pointer (fnmod *) *):
-      if (pointer == <*>) return <callback>;
-  match (base)
-    case %((!or ?kind struct union enum) *): return kind;
+  if (modifiers ~= %(?pointer (fnmod *) *))
+    if (pointer == <*>) return <callback>;
+  if (base ~= %((!or ?kind struct union enum) *)) return kind;
   return <alias>;
 }
