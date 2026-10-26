@@ -179,6 +179,7 @@ static String _sx_type(SnapshotExtract &s, Type type) {
   }
   String id = %"$(s.domain)::$owner_file::type::$key";
   Map entity = _sx_entity(s, id, "type", name, s.unit_id);
+  entity["namespace"] = base.is_aggregate_tag() ? base.car().str() : "ordinary";
   entity["origin"] = "external";
   entity["file"] = scalar ? "" : owner_file;
   if (scalar) {

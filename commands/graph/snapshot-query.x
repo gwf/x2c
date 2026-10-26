@@ -680,12 +680,13 @@ static String _sq_declaration_key(Map entity, Map entities) {
   while (owner && entities.contains(owner)) {
     Map parent = entities[owner];
     owners.push([parent["kind"], parent["name"],
+                 parent.getdefault("namespace", NULL),
                  parent.getdefault("file", NULL)]);
     owner = parent.getdefault("owner", NULL);
   }
   return Var.json([entity.getdefault("domain", NULL),
     entity.getdefault("unit", NULL), entity.getdefault("file", NULL),
-    entity["kind"], entity["name"], owners]);
+    entity["kind"], entity["name"], entity.getdefault("namespace", NULL), owners]);
 }
 
 static Map _sq_declarations(Array entities, Map by_id) {
