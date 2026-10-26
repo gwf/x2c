@@ -27,7 +27,8 @@ void Compiler.configure_interfaces(String out_dir, int cold) {
   _process_cache();
   interface_out_dir = out_dir;
   String stage = Compiler.stage_dir();
-  interface_mirror = cold ? NULL : stage ? stage : x2c_get_root();
+  if (cold) interface_mirror = NULL;
+  else interface_mirror = stage ? stage : x2c_get_root();
 }
 
 /* Find and validate the interface of one canonical source path: the
@@ -113,9 +114,7 @@ static List _interface_record(String path) {
 
 /* The one List form `source` spells, or NULL. */
 static List _read_record(String source) {
-  unsigned cursor = 0;
-  Var record = void;
-  int read = 0;
+  unsigned cursor = 0, Var record = void, int read = 0;
   try read = datum_read_plain(source, cursor, record);
   catch %((!or incomplete malformed) *): return NULL;
   if (!read || record is not <list>) return NULL;
@@ -207,9 +206,12 @@ module Map _read_dependencies(Compiler c, List stored) {
     if (dependency is not <list>) return NULL;
     match (dependency.list())
       case %(?(String name) ?hash): {
-        String path = hash is <string> && String.startswith(hash, "search:") ?
-          (name.startswith("cwd:") ? name : Compiler.absolute_home_path(name)) :
-          _canonical_path(Compiler.absolute_home_path(name));
+        String path = name;
+        if (hash is <string> && String.startswith(hash, "search:")) {
+          if (!name.startswith("cwd:"))
+            path = Compiler.absolute_home_path(name);
+        }
+        else path = _canonical_path(Compiler.absolute_home_path(name));
         int unhashed = hash.is_integer() && hash.integer() == 1;
         if (!unhashed && !_hash_matches(c, path, hash)) return NULL;
         _cache_dependency(dependencies, path, hash);
@@ -303,16 +305,17 @@ static List _stored_record(String canonical, List entry) {
 module List _interface_include_dirs(Compiler c, String canonical) {
   Array dirs = [];
   foreach (String dir in c.include_dirs) {
-    String portable = Compiler.portable_path(dir);
-    dirs.push(
-      dir == x2c_get_root() ? %(home "") :
-      portable != dir ? %(home $portable) :
-      dir.startswith("/") ? %(absolute $dir) : %(relative $dir));
+    String portable = Compiler.portable_path(dir), List row = NULL;
+    if (dir == x2c_get_root()) row = %(home "");
+    else if (portable != dir) row = %(home $portable);
+    else row = dir.startswith("/") ? %(absolute $dir) : %(relative $dir);
+    dirs.push(row);
   }
   String root = Compiler.package_directory(c.package_source_dirs, canonical);
-  String package = root && Compiler.is_package_source(root, canonical)
-                 ? Path.basename(root)
-                 : c.owns_package_source(canonical) ? c.package : NULL;
+  String package = NULL;
+  if (root && Compiler.is_package_source(root, canonical))
+    package = Path.basename(root);
+  else if (c.owns_package_source(canonical)) package = c.package;
   int source = Path.is_x2c_source(canonical);
   dirs.push(source && package ? %(package $package) : %(package));
   return dirs.list_free();
@@ -357,8 +360,7 @@ static List _renumber_bindings(List node, Map identities) {
     return Ast.binding(identity, spelling);
   }
   Var child;
-  $ast.rewrite_children(
-    node, child, _renumber_bindings(child, identities));
+  $ast.rewrite_children(node, child, _renumber_bindings(child, identities));
 }
 
 // linked prelude
