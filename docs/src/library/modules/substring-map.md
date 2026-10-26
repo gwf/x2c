@@ -47,8 +47,7 @@ cell belongs to the pool owning its canonical match, which may be an
 ancestor pool, or to the current pool when newly allocated. Structural
 mutation invalidates the iterator. Each MapLongDouble pull allocates its
 long key as a `Var` in the current `Scope`; the yielded `List` and
-anything
-retaining it must not outlive that `Scope`.
+anything retaining it must not outlive that `Scope`.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while interning the `List`, and
 for MapLongDouble, `<alloc-fail>` or `<bad-enc>` while boxing its key.
@@ -91,9 +90,8 @@ order, a null map is exhausted, and structural mutation invalidates the
 iterator. MapIntInt and both String-keyed families box keys without
 allocation.
 Each MapLongDouble pull allocates its long key as a `Var` in the current
-`Scope`; the yielded `Var` and anything retaining it must
-not outlive that
-`Scope`.
+`Scope`; the yielded `Var` and anything retaining it must not outlive
+that `Scope`.
 
 **Raises:** MapLongDouble iteration may raise `<alloc-fail>` or `<bad-enc>`
 while boxing a key.

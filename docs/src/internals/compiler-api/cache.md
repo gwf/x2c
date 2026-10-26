@@ -26,7 +26,7 @@ Cached literal slots and deferred file-static initializers.
 Returns the declaration of the file's initialization `guard`, which
 starts at zero.
 
-Source: `src/cache.x:516`
+Source: `src/cache.x:505`
 
 <a id="Compiler.setup_cache_init"></a>
 #### Compiler.setup_cache_init
@@ -44,7 +44,7 @@ to the `<prepare>`, `<statics>`, and `<finish>` initialization areas; the
 operation is not idempotent. Header cache storage remains private to each
 C translation unit that includes it.
 
-Source: `src/cache.x:64`
+Source: `src/cache.x:63`
 
 <a id="Compiler.zero_initializer"></a>
 #### Compiler.zero_initializer
@@ -54,7 +54,7 @@ Source: `src/cache.x:64`
 Preserves native initializer shape so C infers dimensions and checks
 designators before cached values are assigned during initialization.
 
-Source: `src/cache.x:279`
+Source: `src/cache.x:274`
 
 ## Design notes
 
