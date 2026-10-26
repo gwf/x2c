@@ -60,6 +60,16 @@ static SnapshotQuery _sq_open(Map snapshot) {
   return q;
 }
 
+/* Resolved declaration placeholders keep local source evidence while
+   semantic selection and traversal use their one known definition. */
+static Map _sq_canonical(Map entity, Map by_id) {
+  String canonical = entity.getdefault("canonical", NULL);
+  return canonical ? by_id[canonical] : entity;
+}
+
+static String _sq_canonical_id(String id, Map by_id) =>
+  id && by_id.contains(id) ? _sq_canonical(by_id[id], by_id)["id"] : id;
+
 /* Build indexes only for queries which follow relationships. */
 static void _sq_index_edges(SnapshotQuery &q) {
   if ((void *) q.outgoing) return;
@@ -68,8 +78,15 @@ static void _sq_index_edges(SnapshotQuery &q) {
   foreach (Map edge, _sq_sorted(q.edges)) {
     String from = edge.getdefault("from", NULL);
     String to = edge.getdefault("to", NULL);
-    if (from) _sq_append(q.outgoing, from, edge);
-    if (to) _sq_append(q.incoming, to, edge);
+    String canonical_from = _sq_canonical_id(from, q.entities_by_id);
+    String canonical_to = _sq_canonical_id(to, q.entities_by_id);
+    if (canonical_from != from || canonical_to != to) {
+      edge = edge.copy();
+      edge["from"] = canonical_from;
+      edge["to"] = canonical_to;
+    }
+    if (canonical_from) _sq_append(q.outgoing, canonical_from, edge);
+    if (canonical_to) _sq_append(q.incoming, canonical_to, edge);
   }
 }
 
@@ -102,8 +119,15 @@ static int _sq_filter(SnapshotQuery &q, Map entity, Map filter);
 
 static Array _sq_select(SnapshotQuery &q, Map selector) {
   Array selected = [];
-  foreach (Map entity, q.entities)
+  Map seen = {};
+  foreach (Map original, q.entities) {
+    Map entity = selector.contains("id") ? original
+      : _sq_canonical(original, q.entities_by_id);
+    String id = entity["id"];
+    if (seen.contains(id)) continue;
+    seen[id] = 1;
     if (_sq_filter(q, entity, selector)) selected.push(entity);
+  }
   return selected.sort_by(%!(Map entity) => entity["id"]);
 }
 
@@ -113,7 +137,7 @@ static Map _sq_walk(
   Array pending = [];
   Map distances = {};
   foreach (Map start, starts) {
-    String id = start["id"];
+    String id = _sq_canonical(start, q.entities_by_id)["id"];
     distances[id] = 0;
     pending.push(id);
   }
@@ -147,7 +171,8 @@ static int _sq_reachable(SnapshotQuery &q, Map entity, Map request) {
     Map selector = _sq_object(request["select"], "reachable_from.select");
     q.reachable[key] = _sq_walk(q, _sq_select(q, selector), request, NULL);
   }
-  return q.reachable[key].map().contains(entity["id"]);
+  return q.reachable[key].map().contains(
+    _sq_canonical(entity, q.entities_by_id)["id"]);
 }
 
 static int _sq_filter(SnapshotQuery &q, Map entity, Map filter) {
@@ -281,7 +306,7 @@ static Map _sq_path(SnapshotQuery &q, Map request) {
   }
   Map predecessors = {};
   Map distances = _sq_walk(q, starts, request, predecessors);
-  String target = targets[0].map()["id"];
+  String target = _sq_canonical(targets[0], q.entities_by_id)["id"];
   Array rows = [];
   if (distances.contains(target)) {
     List nodes = NULL, edges = NULL;
@@ -335,9 +360,12 @@ static int _sq_binding(
     case %(binding ? ?name): {
       String key = _sq_binding_key(entity, snapshot_text(current));
       if (!q.bindings.contains(key)) continue;
-      foreach (Map candidate, q.bindings[key].array())
-        if (candidate["id"] == wanted || candidate["name"] == wanted)
+      foreach (Map candidate, q.bindings[key].array()) {
+        Map canonical = _sq_canonical(candidate, q.entities_by_id);
+        if (candidate["id"] == wanted || candidate["name"] == wanted ||
+            canonical["id"] == wanted || canonical["name"] == wanted)
           return 1;
+      }
     }
   }
   return 0;
@@ -571,6 +599,7 @@ static String _sq_declaration_key(Map entity, Map entities) {
 static Map _sq_declarations(Array entities, Map by_id) {
   Map indexed = {};
   foreach (Map entity, entities) {
+    if (entity.contains("canonical")) continue;
     String key = _sq_declaration_key(entity, by_id);
     if (indexed.contains(key)) indexed[key] = NULL;
     else indexed[key] = entity;
@@ -586,7 +615,8 @@ static Map _sq_signature(Map entity) =>
 static Map _sq_edge_set(Map snapshot, Map by_id) {
   Map entities = {}, result = {};
   foreach (Map entity, snapshot["entities"].array())
-    entities[entity["id"]] = _sq_declaration_key(entity, by_id);
+    entities[entity["id"]] =
+      _sq_declaration_key(_sq_canonical(entity, by_id), by_id);
   foreach (Map edge, snapshot["edges"].array()) {
     Map relation = edge.copy();
     Var from = edge.getdefault("from", NULL);
@@ -612,6 +642,7 @@ Map graph_snapshot_diff(Map before, Map after) {
   Array added = [], removed = [], changed = [];
   Array added_edges = [], removed_edges = [];
   foreach (Map entity, before["entities"].array()) {
+    if (entity.contains("canonical")) continue;
     String key = _sq_declaration_key(entity, old_ids);
     if (!old.getdefault(key, NULL) || !current.getdefault(key, NULL))
       removed.push(_sq_summary(entity));
@@ -623,6 +654,7 @@ Map graph_snapshot_diff(Map before, Map after) {
     }
   }
   foreach (Map entity, after["entities"].array()) {
+    if (entity.contains("canonical")) continue;
     String key = _sq_declaration_key(entity, new_ids);
     if (!old.getdefault(key, NULL) || !current.getdefault(key, NULL))
       added.push(_sq_summary(entity));
