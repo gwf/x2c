@@ -756,7 +756,7 @@ static JsonMember _json_member(JsonDocument document, yyjson_val *key) {
   );
   if (!name && yyjson_get_len(key)) return NULL;
   JsonValue value = _json_value_new(document, yyjson_obj_iter_get_val(key));
-  return value ? %($name $value) : NULL;
+  return value ? $(name, value) : NULL;
 }
 
 static int _json_object_next(Iter iter, Var *out) {

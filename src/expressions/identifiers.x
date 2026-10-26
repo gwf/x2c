@@ -15,7 +15,7 @@ module int _identifier_needs_resolution(
       type.list() !== %(<macro-expr>))
     return <auto> in type.list() && !type.list().type().base_type();
   return !spelling ||
-    (c.sym.lookup(%($spelling), NULL) != binding &&
+    (c.sym.lookup($(spelling), NULL) != binding &&
      !retained_parameter && !retained_capture);
 }
 
@@ -84,7 +84,7 @@ static List _capture_lambda_value(
 static List _identifier_binding(
   Compiler c, Var value, Type &type, Token origin, int &require_type) {
   require_type = value is <string>;
-  if (value is <string>) return c.sym.reference(%($value), type);
+  if (value is <string>) return c.sym.reference($(value), type);
   if (value is not <list>) return NULL;
   List name = value;
   int identity = 0;
@@ -101,20 +101,20 @@ static List _identifier_binding(
        that declared it. */
     if (facts.try_get(%(source-spelling $name), source) &&
         !(%(type $name) in facts) &&
-        c.sym.lookup(%($spelling), NULL) != name)
+        c.sym.lookup($(spelling), NULL) != name)
       return _landed_name(c, source, type);
     return name;
   }
   match (name) {
     case %("x2c.ident" ?(String spelling)): {
       require_type = 1;
-      return c.sym.reference(%($spelling), type);
+      return c.sym.reference($(spelling), type);
     }
     case %(binding-name ?(String spelling)):
       return _landed_name(c, spelling, type);
     case %(binding-global ?(String spelling)): {
-      List global = c.sym.resolve_global(%($spelling), type);
-      return global ? global : c.sym.reference_global(%($spelling));
+      List global = c.sym.resolve_global($(spelling), type);
+      return global ? global : c.sym.reference_global($(spelling));
     }
     case %((!is ? type string)):
       return c.sym.reference(name, type);
@@ -136,8 +136,8 @@ static int _template_free_name(Compiler c, List binding) {
    for a name nothing declares, one file-scope forward binding that C
    resolves. */
 static List _landed_name(Compiler c, String spelling, Type &type) {
-  List visible = c.sym.lookup(%($spelling), type);
-  return visible ? visible : c.sym.reference_global(%($spelling));
+  List visible = c.sym.lookup($(spelling), type);
+  return visible ? visible : c.sym.reference_global($(spelling));
 }
 
 static void _capture_identifier(Compiler c, List binding) {
@@ -165,7 +165,7 @@ static int _shadow_identifier(
   int kept) {
   if (!spelling) return 0;
   Type visible_type = NULL;
-  List visible = c.sym.lookup(%($spelling), visible_type);
+  List visible = c.sym.lookup($(spelling), visible_type);
   if (!visible || visible == binding) return 0;
   if ((c.sym.binding_is_local(binding) &&
        !(%(lambda-depth $binding) in binding_facts)) ||
@@ -174,7 +174,7 @@ static int _shadow_identifier(
     return 1;
   }
   if (!visible_type || !(%(automatic $visible) in binding_facts) ||
-      (type && !c.sym.resolve_global(%($spelling), NULL)))
+      (type && !c.sym.resolve_global($(spelling), NULL)))
     return 0;
   _unshadow_visible(c, visible, spelling);
   return 0;
@@ -195,7 +195,7 @@ void Compiler.reveal_binding(Compiler c, List binding) {
   String spelling = NULL;
   if (!Ast.try_binding(binding, NULL, spelling)) return;
   Type visible_type = NULL;
-  List visible = c.sym.lookup(%($spelling), visible_type);
+  List visible = c.sym.lookup($(spelling), visible_type);
   if (!visible || visible == binding) return;
   if (c.sym.binding_is_local(binding)) {
     if (!(%(emitted $binding) in c.semantic_binding_facts()))
@@ -220,7 +220,7 @@ static Type _identifier_type(
   if (facts.try_get(%(type $binding), stored) && stored is <list>)
     return stored;
   if (!spelling) return NULL;
-  Type type = c.sym.get(%($spelling));
+  Type type = c.sym.get($(spelling));
   if (!type) _check_unit_static(c, spelling, origin);
   return type;
 }
@@ -234,7 +234,7 @@ static Type _identifier_type(
 static void _check_unit_static(
   Compiler c, String spelling, Token origin) {
   if (!Path.is_x2c_source(c.filename)) return;
-  List owner = c.sym.get(%("unit-static" $spelling));
+  List owner = c.sym.get($("unit-static", spelling));
   if (!owner) return;
   String file = c.display_path(Compiler.absolute_home_path(owner.car()));
   $fail.expressions_function_private(c, origin, spelling, file);

@@ -371,7 +371,7 @@ static List _resolve_func_call(
 List Compiler.func_call_parts(Compiler c, Var content) {
   Macro call = $func_call, apply = $func_apply;
   match (%(expr () $content)) {
-    case apply(?callee): return %($callee);
+    case apply(?callee): return $(callee);
     case call(?callee, ?count, *arguments): {
       Array parts = auto [callee];
       foreach (List argument in _slot_statements(arguments)) {
@@ -469,7 +469,7 @@ static List _complete_iter_call(
   }
   List values = completed.list_free();
   if (supplied + 1 == expected) {
-    values = values.append(%($(_iter_destination())));
+    values = values.append($(_iter_destination()));
     changed = 1;
   }
   if (!changed) return expression;
@@ -478,7 +478,7 @@ static List _complete_iter_call(
 }
 
 static int _exact_iter_type(Var value) {
-  Type type = value is <list> ? value : %($value);
+  Type type = value is <list> ? value : $(value);
   return type.canonicalize() == %("Iter");
 }
 

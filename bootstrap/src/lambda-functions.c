@@ -10,7 +10,7 @@ static List _53, _52, _50, _49, _48, _46, _45, _42, _41, _39, _38, _37, _35, _34
 
 static String _8, _1;
 
-static Var _54, _51, _47, _44, _43, _40, _36, _33, _32, _31, _28, _24, _20, _19, _17, _14, _13, _12, _11, _10, _9, _6, _5, _4, _2, _0;
+static Var _51, _47, _44, _43, _40, _36, _33, _32, _31, _28, _24, _20, _19, _17, _14, _13, _12, _11, _10, _9, _6, _5, _4, _2, _0;
 
 static int _init_guard_ = 0;
 
@@ -105,7 +105,6 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _51 = List_var(_50);
   _52 = cons(_51, _15);
   _53 = cons(_43, _52);
-  _54 = int_var(0);
 }
 
 static List _lambda_targets(List node){
@@ -351,7 +350,7 @@ static Map _lambda_shared(List params, List items){
       }
       {
         List binding;  Type type;  Map _x2c_gensym_macro_object_19 = shared;  unsigned _x2c_gensym_macro_cursor_22 = 0;  Var _x2c_gensym_macro_cursor_output_19;  Var _x2c_gensym_macro_cursor_output_20;  while(Map_try_next(_x2c_gensym_macro_object_19, &(_x2c_gensym_macro_cursor_22), &(_x2c_gensym_macro_cursor_output_19), &(_x2c_gensym_macro_cursor_output_20))){
-          binding = Var_list_payload(_x2c_gensym_macro_cursor_output_19);  type = Var_list_payload(_x2c_gensym_macro_cursor_output_20);  if(Map_contains(declared, List_var(binding))) Map_setindex(cells, List_var(binding), List_var(cons(_54, cons(List_var(type), NULL))));
+          binding = Var_list_payload(_x2c_gensym_macro_cursor_output_19);  type = Var_list_payload(_x2c_gensym_macro_cursor_output_20);  if(Map_contains(declared, List_var(binding))) Map_setindex(cells, List_var(binding), List_var(cons(int_var(0), cons(List_var(type), NULL))));
         }
 
       }

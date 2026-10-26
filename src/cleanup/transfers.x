@@ -235,7 +235,7 @@ static Var _lower_at(Walk &w, int origin, Var inner) {
    so a static-local region alone leaves the return as it is. */
 static List _lower_return(Walk &w, List node, List expression) {
   List value = _rewrite(w, expression);
-  if (value != expression) node = source_return_content(%($value));
+  if (value != expression) node = source_return_content($(value));
   List cleanup = _unwind(w, 0);
   return cleanup ? _return_value(w, value, cleanup) : node;
 }
@@ -248,8 +248,8 @@ static List _return_value(Walk &w, List expression, List cleanup) {
   List declaration =
     w.c.rebuild_statement($!{ $type $binding = $expression; }).cadr();
   List returned = source_return_content(%((expr $type (ident $binding))));
-  List statement = source_block_content(%(@cleanup $returned));
-  return source_block_content(%($declaration $statement));
+  List statement = source_block_content($(@cleanup, returned));
+  return source_block_content($(declaration, statement));
 }
 
 /* A function-static initializer remains in ancestry for label checks,
@@ -310,7 +310,7 @@ static Var _bounded(Walk &w, Var body, int is_loop) {
 
 /* Rewrite a region's body and its handlers with the region open. */
 static Var _inside(Walk &w, List cleanup, List marker, Var body) {
-  w.regions.push(%($(_statements(cleanup)) $marker));
+  w.regions.push($(_statements(cleanup), marker));
   Var result = _rewrite(w, body);
   w.regions.take_last();
   return result;
@@ -325,7 +325,7 @@ static List _statements(List code) {
    region keeps its own shape. */
 static List _transfer(Walk &w, int stop, List statement) {
   List cleanup = _unwind(w, stop);
-  return cleanup ? source_block_content(%(@cleanup $statement)) : statement;
+  return cleanup ? source_block_content($(@cleanup, statement)) : statement;
 }
 
 /* The statements that leave every region down to `stop`, innermost first.
@@ -432,7 +432,7 @@ static List _bind_parts(Compiler c, Var code, Map parts) {
   match (code) case %("x2c.template" ?definition ?values): {
     Var replaced = _replaced(values, parts);
     if (replaced != values)
-      code = %("x2c.template" $definition $replaced);
+      code = $("x2c.template", definition, replaced);
     return c.bind_syntax(code, <block>, c.return_type);
   }
   return c.bind_syntax(_replaced(code, parts), <block>, c.return_type);
@@ -485,7 +485,7 @@ static List _defer_record(
   List record, List callback, List environment, List records) {
   if (!environment)
     return $!{ X2CCleanup $record = {.fn = $callback, .env = 0}; };
-  Type type = %($(Ast.binding_spelling(environment)));
+  Type type = $(Ast.binding_spelling(environment));
   return $!{
     $type environment = {0};
     @Ast.defer_captures(environment, $records)

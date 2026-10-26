@@ -28,14 +28,13 @@ static Array _summary_sections(void):
   Array sections = []
   foreach String line in summary.read_text().lines():
     if line.startswith("# ") && line != "# Summary":
-      sections.push(%($(line[2:].strip(NULL)) $([])))
+      sections.push($(line[2:].strip(NULL), []))
     else:
       RegexMatch found = entry.match(line)
       if found && sections.len():
         List section = sections[-1]
         section.cadr().array().push(
-          %($(found["indent"].len() / 2) $(found["title"])
-            $(found["path"])))
+          $(found["indent"].len() / 2, found["title"], found["path"]))
   return sections
 
 static String _page_url(String path):
@@ -98,7 +97,7 @@ static List _book_summary(void):
   String title = divided.car(), rest = divided.caddr()
   String paragraph = rest.strip(NULL).partition("\n\n").car()
   paragraph = whitespace.replace_all(paragraph, " ").strip(NULL)
-  return %($(title.remove_prefix("# ").strip(NULL)) $paragraph)
+  return $(title.remove_prefix("# ").strip(NULL), paragraph)
 
 /* Return `((path text) ...)` in the stable order used for writing and
    checking the two generated files. */

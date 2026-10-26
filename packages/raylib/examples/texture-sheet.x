@@ -47,7 +47,7 @@ static List _polygon(Vector2 center, int sides, float radius) {
       roundf(cosf(angle) * radius), roundf(sinf(angle) * radius)
     };
     Vector2 point = center + spoke;
-    points = cons(%($(point.x) $(point.y)), points);
+    points = cons($(point.x, point.y), points);
   }
   return points.reverse();
 }

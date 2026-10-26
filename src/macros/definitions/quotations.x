@@ -152,12 +152,12 @@ static List _quoted_type(Compiler c, Map holes) {
    `type_name_error(type) ? (x2c_diagnostic_fail(...), type) : type`. */
 static List _checked_type(Compiler c, List type, Token origin) {
   if (!c.meta_body) return type;
-  List error = _runtime_call(c, "type_name_error", %($type), origin);
+  List error = _runtime_call(c, "type_name_error", $(type), origin);
   List fail = _runtime_call(
     c, "x2c_diagnostic_fail", %($error (expr ("List") (nil))), origin);
   return c.resolve_expression(
     %(expr () (op ? $error
-      (expr ("Type") $(source_commas_content(%($fail $type)))) $type)),
+      (expr ("Type") $(source_commas_content($(fail, type)))) $type)),
     origin);
 }
 
@@ -219,21 +219,20 @@ static List _construction(Definition &d, Map holes) {
   if (!d.rebuild || d.nested || d.kind == <decl-unit> || c.runtime_literals)
     return NULL;
   Map keys = {}, file_locals = {};
-  _file_scope_locals(%($(d.template)), file_locals);
+  _file_scope_locals($(d.template), file_locals);
   Array fresh = [];
   foreach (List row in d.fresh) {
     Var binder = row.car();
     keys[binder] = 1;
-    fresh.push(%($binder $(row.cadr()) $(binder in file_locals ? 1 : 0)));
+    fresh.push($(binder, row.cadr(), binder in file_locals ? 1 : 0));
   }
   foreach (List hole in d.parameters)
     foreach (Symbol projection in %(source value expression splice member))
-      keys[_hole_key(hole, projection)] = %($hole $projection);
+      keys[_hole_key(hole, projection)] = $(hole, projection);
   /* Cached pattern literals retain their values across producer sessions. */
-  List quoted = %(
-    "x2c.quoted" $(fresh.list_free())
-    $(c.freeze_declaration_syntax(_macro_value_names(d.template)))
-  );
+  List quoted = $(
+    "x2c.quoted", fresh.list_free(),
+    c.freeze_declaration_syntax(_macro_value_names(d.template)));
   List cells = _built_cells(c, quoted, keys, d.start);
   return cells ? %(expr ("List") $cells) : NULL;
 }
@@ -260,7 +259,7 @@ static List _built_item(
   if (item.is_binder() && item.str()[1:].startswith("__macro_")) return NULL;
   if (item is not <list> || item.is_nil()) return c.cache_literal_var(item);
   match (item) {
-    case %(at m-origin ?node): item = %("x2c.at" $node);
+    case %(at m-origin ?node): item = $("x2c.at", node);
     case %(expr (<macro-expr>) ?binder):
       if (keys.try_get(binder, row) && row is <list>)
         match (row) case %((macro-param ? (kind expr) ?) expression):
@@ -338,7 +337,7 @@ static Map _written_keys(Definition &d) {
   Map keys = {};
   foreach (List hole in d.parameters)
     foreach (Symbol projection in %(source value expression splice member))
-      keys[_hole_key(hole, projection)] = %($hole $projection);
+      keys[_hole_key(hole, projection)] = $(hole, projection);
   return keys;
 }
 
@@ -376,14 +375,14 @@ static List _typed_hole(Compiler c, List row, Token start) {
   int expression = projection == <expression>;
   if (kind == <type>) return _checked_type(c, local, start);
   if (hole.assoc(<sequence>).int())
-    return lifts ? _runtime_call(c, "Macro_inserted_items", %($local), start)
+    return lifts ? _runtime_call(c, "Macro_inserted_items", $(local), start)
                  : local;
   if (kind == <name> && projection == <value>)
-    return _runtime_call(c, "Macro_declared", %($local), start);
+    return _runtime_call(c, "Macro_declared", $(local), start);
   if (!lifts && !expression && kind != <name>) return local;
   return _runtime_call(
     c, "Macro_inserted",
-    %($local $($!int{ $lifts }) $($!int{ $expression })), start);
+    $(local, $!int{ $lifts }, $!int{ $expression }), start);
 }
 
 static List _runtime_call(
@@ -417,7 +416,7 @@ module List _quoted_hole(
   Compiler c, String spelling, Token prefix) {
   if (!c.macro_holes || !(%(quotation) in c.macro_holes)) return NULL;
   Type type = NULL;
-  List local = c.sym.lookup(%($spelling), type);
+  List local = c.sym.lookup($(spelling), type);
   if (!local || !c.sym.binding_is_local(local)) return NULL;
   Symbol kind = c.sym.is_named_value_type(type, "Type") ? <type> : 0;
   int sequence = prefix.type == <@> || prefix.type == <"@(">;

@@ -379,7 +379,7 @@ static String _name(Parser &p) {
 /* Numbers a new capture and records its name, which may be NULL. */
 static int _add_capture(Parser &p, String name) {
   int index = ++p.regex.capture_count;
-  p.regex.capture_names = p.regex.capture_names.append(%($name));
+  p.regex.capture_names = p.regex.capture_names.append($(name));
   return index;
 }
 
@@ -491,7 +491,7 @@ static RegexCapture _capture(Matcher &m, String subject, int i) {
   int start = m.starts[i], end = m.ends[i], matched = start >= 0;
   String name = i ? m.regex.capture_names[i - 1] : NULL;
   String text = matched ? subject[start:end] : NULL;
-  return %($i $name $matched $text $start $end);
+  return $(i, name, matched, text, start, end);
 }
 
 static RegexCapture _whole(RegexMatch found) => found.car();

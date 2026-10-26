@@ -615,7 +615,7 @@ static void error_snapshot_survives_catch_and_caller_owners(void) {
   String text = String.new("snapshot survives");
   Atom atom = Atom.intern(String.new("long snapshot atom survives"));
   long number = 0x123456789L;
-  List payload = %($text $number $atom);
+  List payload = $(text, number, atom);
   try {
     raise %(invariant (value $payload));
   }
@@ -637,7 +637,7 @@ static void error_regions_do_not_capture_application_pools(void) {
   Pool strings = Pool.open_named("application-error-source");
   Pool lists = strings;
   String text = String.new("application owned");
-  List value = %($text 42);
+  List value = $(text, 42);
   EXPECT_TRUE(strings.owns(text));
   EXPECT_TRUE(lists.owns(value));
   try {

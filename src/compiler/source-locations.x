@@ -45,11 +45,11 @@ void Compiler.record_source_declaration(
   Map symbols = source_key.car();
   List key = source_key.cadr();
   Type type = symbols[key];
-  List declaration = %(@range $type);
+  List declaration = $(@range, type);
   c.sym.put(c.source_declarations, source_key, declaration);
   if (c.source_primary && !c.shallow) {
     c.source_definitions[binding] = declaration;
-    c.source_occurrences.push(%(@range $binding $type));
+    c.source_occurrences.push($(@range, binding, type));
   }
 }
 
@@ -64,7 +64,7 @@ static List _source_range(Compiler c, Token first, Token after) {
   String path = Path.resolved_absolute(c.text_source(first.pos, start));
   if (!c.line_markers && !(path in c.source_texts))
     c.source_texts[path] = c.text;
-  return %($path $start $(start + last.pos + last.len - first.pos));
+  return $(path, start, start + last.pos + last.len - first.pos);
 }
 
 /** Records a resolved reference without inventing spans for constructed
@@ -75,7 +75,7 @@ void Compiler.record_source_reference(
   if (!c.source_facts || !c.source_primary || c.shallow || c.macro_holes ||
       !Ast.try_binding(binding, NULL, NULL)) return;
   List range = _source_range(c, first, after);
-  if (range) c.source_occurrences.push(%(@range $binding $type));
+  if (range) c.source_occurrences.push($(@range, binding, type));
 }
 
 /** Carries declaration metadata with one actual symbol contribution. */
@@ -83,8 +83,8 @@ void Compiler.copy_source_declaration(
   Compiler c, Map target, Map source, List key) {
   if (!c.source_facts) return;
   Var declaration;
-  List target_key = %($target $key);
-  if (c.source_declarations.try_get(%($source $key), declaration))
+  List target_key = $(target, key);
+  if (c.source_declarations.try_get($(source, key), declaration))
     c.sym.put(c.source_declarations, target_key, declaration);
   else c.sym.drop(c.source_declarations, target_key);
 }

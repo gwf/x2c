@@ -115,7 +115,7 @@ foreach (Map item, distribution.getdefault("copies", [])) {
 }
 List objects = NULL;
 foreach (String item, distribution.getdefault("archive_objects", []))
-  objects = objects.append(%($(expand(item, variables))));
+  objects = objects.append($(expand(item, variables)));
 if (objects) {
   String ar = Env.get("AR");
   %($(ar ? ar : "ar") rs $(stage.join("builds").join(archive)) @objects)
@@ -125,12 +125,12 @@ String platform = %(uname -s).job().output().strip("\n").lower();
 String machine = %(uname -m).job().output().strip("\n");
 List native_args = NULL;
 foreach (String argument, distribution.getdefault("native_args", []))
-  native_args = native_args.append(%($argument));
+  native_args = native_args.append($(argument));
 Map none = {};
 foreach (Var (host, arguments), distribution.getdefault("platform_args", none))
   if (host.str() == platform)
     foreach (String argument, arguments)
-      native_args = native_args.append(%($argument));
+      native_args = native_args.append($(argument));
 Buffer response = Buffer.new(0);
 foreach (String argument, native_args)
   response.printf("%s\n", quoted(argument));

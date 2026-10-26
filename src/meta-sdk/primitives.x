@@ -5,13 +5,13 @@
 
 static macro Stmt $fail.meta_sdk_symbol_set_value(Expr $value) =>
   MetaContext.reject(
-    "_x2c_symbol_set requires Symbols", %("value:" $($value.repr())));
+    "_x2c_symbol_set requires Symbols", $("value:", $value.repr()));
 
 static macro Stmt $fail.meta_sdk_symbol_set_duplicate(
   Expr $values, Expr $duplicate) =>
   MetaContext.reject(
     "_x2c_symbol_set requires distinct Symbols",
-    %("symbol:" $($values[$duplicate].repr())));
+    $("symbol:", $values[$duplicate].repr()));
 
 static macro Stmt $fail.meta_sdk_native_declarations() =>
   MetaContext.reject(
@@ -38,10 +38,10 @@ static Map _linked_hashes(void) {
   foreach ((String name, List source) in c.project_meta)
     match (source) case %(? ?provider): {
       Map hashes = c.meta_provider_hashes(provider);
-      rows[name] = %($(hashes[name]) $provider);
+      rows[name] = $(hashes[name], provider);
     }
   foreach (String name in c.meta_calls.keys())
-    rows[name] = %($(c.meta_hashes[name]) $(c.meta_calls[name]));
+    rows[name] = $(c.meta_hashes[name], c.meta_calls[name]);
   return rows;
 }
 

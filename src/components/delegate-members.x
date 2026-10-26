@@ -68,7 +68,7 @@ meta static void _delegate_search(
     List resolution = type.resolve_member(member, 1);
     match (resolution) {
       case %(method ?binding ?):
-        found.push(%($(path.reverse()) $binding));
+        found.push($(path.reverse(), binding));
       case %(ambiguous *packages):
         _delegate_fail_packages(outer, type, member, path.reverse(), packages);
     }
@@ -127,7 +127,7 @@ meta Code delegate_member(Code code) {
     List fields = _delegate_fields(receiver.cadr(), name);
     if (!fields) return code;
     Code callee = receiver;
-    foreach (String step in fields.append(%($name)))
+    foreach (String step in fields.append($(name)))
       callee = %(expr () (op . $callee ($step)));
     return %(expr () (call $callee (args @arguments)));
   }

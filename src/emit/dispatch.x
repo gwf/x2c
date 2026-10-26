@@ -3,16 +3,16 @@
 // form templates
 
 static macro Expression $emit.cons(Expr $e, Expr $item, Expr $tail) =>
-  %("cons(" @(_emit($e, %($($item)))) ", " @(_emit($e, %($($tail)))) ")");
+  %("cons(" @(_emit($e, $($item))) ", " @(_emit($e, $($tail))) ")");
 
 static macro Expression $emit.append(Expr $e, Expr $head_list, Expr $tail) =>
-  %("List_append(" @(_emit($e, %($($head_list)))) ", "
-    @(_emit($e, %($($tail)))) ")");
+  %("List_append(" @(_emit($e, $($head_list))) ", "
+    @(_emit($e, $($tail))) ")");
 
 static macro Expression $emit.c_assert(
   Expr $e, Expr $condition, Expr $message) =>
-  %("_Static_assert(" @(_emit($e, %($($condition)))) ","
-    @(_emit($e, %($($message)))) ");");
+  %("_Static_assert(" @(_emit($e, $($condition))) ","
+    @(_emit($e, $($message))) ");");
 
 static macro Expression $emit.initcode(Expr $e, Expr $input, Expr $body) =>
   %(@(_initializer_macro($e, $input, $body)) ";");
@@ -27,15 +27,15 @@ static macro Expression $emit.cache(Expr $e, Expr $id) =>
 
 static macro Expression $emit.vararg(
   Expr $e, Expr $expression, Expr $declaration) =>
-  %("va_arg(" @(_emit($e, %($($expression)))) ", "
-    @(_emit($e, %($($declaration)))) ")");
+  %("va_arg(" @(_emit($e, $($expression))) ", "
+    @(_emit($e, $($declaration))) ")");
 
 static macro Expression $emit.offset(Expr $e, Expr $type, Expr $member) =>
   %("offsetof(" @(_semantic_type($e, $type)) ", " @(_emit($e, $member))
     ")");
 
 static macro Expression $emit.index(Expr $e, Expr $array, Expr $index) =>
-  %(@(_operand($e, $array, EMIT_POSTFIX)) "[" @(_emit($e, %($($index))))
+  %(@(_operand($e, $array, EMIT_POSTFIX)) "[" @(_emit($e, $($index)))
     "]");
 
 /* Between `?` and `:` C accepts a complete expression, so only the
@@ -43,38 +43,38 @@ static macro Expression $emit.index(Expr $e, Expr $array, Expr $index) =>
 static macro Expression $emit.conditional(
   Expr $e, Expr $condition, Expr $ontrue, Expr $onfalse) =>
   %(@(_operand($e, $condition, EMIT_CONDITIONAL + 1)) "?"
-    @(_emit($e, %($($ontrue)))) ":"
+    @(_emit($e, $($ontrue))) ":"
     @(_operand($e, $onfalse, EMIT_CONDITIONAL)));
 
 static macro Expression $emit.if(Expr $e, Expr $condition, Expr $ontrue) =>
-  %("if" "(" @(_emit($e, %($($condition)))) ")" @(_emit($e, %($($ontrue)))));
+  %("if" "(" @(_emit($e, $($condition))) ")" @(_emit($e, $($ontrue))));
 
 static macro Expression $emit.if_else(
   Expr $e, Expr $condition, Expr $ontrue, Expr $onfalse) =>
-  %("if" "(" @(_emit($e, %($($condition)))) ")" @(_emit($e, %($($ontrue))))
-    "else" @(_emit($e, %($($onfalse)))));
+  %("if" "(" @(_emit($e, $($condition))) ")" @(_emit($e, $($ontrue)))
+    "else" @(_emit($e, $($onfalse))));
 
 static macro Expression $emit.while(Expr $e, Expr $condition, Expr $body) =>
-  %("while" "(" @(_emit($e, %($($condition)))) ")"
-    @(_emit($e, %($($body)))));
+  %("while" "(" @(_emit($e, $($condition))) ")"
+    @(_emit($e, $($body))));
 
 static macro Expression $emit.do(Expr $e, Expr $body, Expr $condition) =>
-  %("do" @(_emit($e, %($($body)))) "while"
-    "(" @(_emit($e, %($($condition)))) ")" ";");
+  %("do" @(_emit($e, $($body))) "while"
+    "(" @(_emit($e, $($condition))) ")" ";");
 
 static macro Expression $emit.for(Expr $e, Expr $ast) => ({
   Var (initial, condition, increment, body) = $ast.cdr();
-  %("for" "(" @(_emit($e, %($initial))) ";"
-    @(_emit($e, %($condition))) ";" @(_emit($e, %($increment))) ")"
-    @(_emit($e, %($body))));
+  %("for" "(" @(_emit($e, $(initial))) ";"
+    @(_emit($e, $(condition))) ";" @(_emit($e, $(increment))) ")"
+    @(_emit($e, $(body))));
 });
 
 static macro Expression $emit.switch(Expr $e, Expr $expression, Expr $body) =>
-  %("switch" "(" @(_emit($e, %($($expression)))) ")"
-    @(_emit($e, %($($body)))));
+  %("switch" "(" @(_emit($e, $($expression))) ")"
+    @(_emit($e, $($body))));
 
 static macro Expression $emit.goto(Expr $e, Expr $label) =>
-  %("goto" @(_emit($e, %($($label)))) ";");
+  %("goto" @(_emit($e, $($label))) ";");
 
 /** Emits a bound, typed, transform-normalized AST sequence as flat C tokens.
     Source mapping adds `src-at`/ID pairs consumed by the formatter.
@@ -140,7 +140,7 @@ module List _emit(Emitter &e, List ast) {
     case %(dotinit ?field ?value): return _dot_init(e, field, value);
     case %(cast ?type ?expr): return $emit.cast(e, type, expr);
     case %(cache ?id): return $emit.cache(e, id);
-    case %(expr ? ?content): return _emit(e, %($content));
+    case %(expr ? ?content): return _emit(e, $(content));
     case %(postfix ?op ?argument): return _postfix(e, op, argument);
     case %(generic ?control *rows): return _generic(e, control, rows);
     case %(va-arg ?expr ?decl): return $emit.vararg(e, expr, decl);
@@ -236,7 +236,7 @@ static List _leaf(Emitter &e, List ast) {
     case <nil>:        return %("NULL");
     case <space>:      return ast.cdr();
   }
-  return %($head @(_emit(e, ast.cdr())));
+  return $(head, @(_emit(e, ast.cdr())));
 }
 
 static List _at(Emitter &e, int origin, List inner) {
@@ -252,12 +252,12 @@ static List _at(Emitter &e, int origin, List inner) {
 // statements
 
 static List _return(Emitter &e, Var expression) {
-  List value = _emit(e, %($expression));
+  List value = _emit(e, $(expression));
   return %("return" @value ";");
 }
 
 static List _label(Emitter &e, Var name) {
-  List c_name = _emit(e, %($name));
+  List c_name = _emit(e, $(name));
   return %(@c_name ":");
 }
 
@@ -299,7 +299,7 @@ static List _preproc(Emitter &e, List ast) {
   if (!target || !Path.is_x2c_source(target)) return ast.cdr();
   String stem = target[:target.rfind(".")];
   String out = %"#include \"$stem.h\"";
-  return %( $out );
+  return $(out);
 }
 
 // Wrap declarators in parentheses when pointer precedence requires it.

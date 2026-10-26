@@ -313,7 +313,7 @@ static Map _initial_copies(Compiler c, Array units) {
             List original = c.meta_build ? bound : %(op = $bound $initializer);
             List bindings = copied
               ? %($original (op = (bind $copy $mods) $initializer))
-              : %($original);
+              : $(original);
             units[i] = %(declare $spec (bindings @bindings));
           }
         if (copied) copies[binding] = %(expr $type (ident $copy));

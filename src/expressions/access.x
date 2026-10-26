@@ -102,10 +102,10 @@ List _x2c_nominal_getindex(Compiler c, Type type) {
     case %(?(String nominal)): {
       String source = %"$(nominal)_getindex";
       if (source == c.fn_name && _collection_index_type(c, type)) return NULL;
-      Type signature = c.sym.get(%($source));
+      Type signature = c.sym.get($(source));
       match (signature)
         case %((func ($type ?)) ?):
-          return %($(c.sym.reference(%($source), NULL)) $signature);
+          return $(c.sym.reference($(source), NULL), signature);
     }
   return NULL;
 }
@@ -159,7 +159,7 @@ module List _slice(Resolve &r, List slice) {
   if (start) start = r.c.resolve_expression(start, r.origin);
   if (stop) stop = r.c.resolve_expression(stop, r.origin);
   if (step) step = r.c.resolve_expression(step, r.origin);
-  List operation = source_slice_content(%($receiver $start $stop $step));
+  List operation = source_slice_content($(receiver, start, stop, step));
   if (r.type === %(<macro-expr>))
     operation = r.c.anchor_origin(operation, r.origin);
   return %(expr $(receiver.cadr()) $operation);
@@ -225,7 +225,7 @@ static List _field_member(
    directly as that aggregate. */
 module Type _tag_typedef(Compiler c, Type aggregate) {
   match (aggregate) case %(? ?(String tag)): {
-    Type name = %($tag), declared = c.sym.get(%(typedef $tag));
+    Type name = $(tag), declared = c.sym.get(%(typedef $tag));
     if (declared && c.sym.resolve_key(declared) == aggregate) return name;
   }
   return c.sym.sole_typedef(aggregate);
@@ -234,7 +234,7 @@ module Type _tag_typedef(Compiler c, Type aggregate) {
 static List _method_member(
   Compiler c, Type receiver_type, Type type, List field) {
   String method = %"$(type.base_type().car())_$(field.car())";
-  Type signature = c.sym.get(%($method));
+  Type signature = c.sym.get($(method));
   int rejected =
     c.protocol_rejects_direct_member(type, field.car().str());
   if (signature && rejected == 2) {
@@ -246,7 +246,7 @@ static List _method_member(
   }
   if (signature && rejected) signature = NULL;
   List binding = NULL;
-  if (signature) binding = c.sym.reference(%($method), NULL);
+  if (signature) binding = c.sym.reference($(method), NULL);
   else {
     List imported = rejected
       ? NULL : _imported_method(c, method, receiver_type);
@@ -272,8 +272,8 @@ static List _imported_method(
   if (packages.cdr()) return cons(<ambiguous>, packages);
 
   String spelling = %"$(packages.car())__$method";
-  Type signature = c.sym.get_exact(%($spelling));
-  List binding = c.sym.reference(%($spelling), NULL);
+  Type signature = c.sym.get_exact($(spelling));
+  List binding = c.sym.reference($(spelling), NULL);
   signature = _receiver_relative_signature(c, binding, signature, receiver);
   return %(method $binding $signature);
 }
@@ -298,9 +298,9 @@ module List _member(
   match (resolution)
     case %(field ?access ?field_type):
       return source_operator_expression(
-        field_type, %($access $receiver $field));
+        field_type, $(access, receiver, field));
   Type type = _deferred_receiver(receiver) ? %(<macro-expr>) : NULL;
-  return source_operator_expression(type, %($operator $receiver $field));
+  return source_operator_expression(type, $(operator, receiver, field));
 }
 
 module void _report_method_ambiguity(
@@ -334,7 +334,7 @@ List Compiler.postfix_completions(
   if (access == <.>) _completion_methods(c, receiver, seen, names);
   names.sort();
   foreach (String name in names) {
-    List resolution = c.resolve_postfix_member(receiver, %($name), access, 1);
+    List resolution = c.resolve_postfix_member(receiver, $(name), access, 1);
     match (resolution) {
       case %((!or field method) ? ?): accepted.push(name);
     }

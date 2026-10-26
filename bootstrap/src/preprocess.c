@@ -5,11 +5,11 @@
 
 #include "compiler/compiler.h"
 #include <ctype.h>
-static List _42, _41, _38, _37, _36;
+static List _41, _40, _37, _36, _35;
 
-static String _39, _33, _31, _30, _29, _28, _27, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _38, _32, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
-static Var _40, _35, _34, _32, _26;
+static Var _39, _34, _33, _31;
 
 static int _init_guard_ = 0;
 
@@ -106,23 +106,22 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _23 = String_new("\"");
   _24 = String_new("undef");
   _25 = String_new("define");
-  _26 = int_var(0);
-  _27 = String_new("__attribute__");
-  _28 = String_new("packed");
-  _29 = String_new("aligned");
-  _30 = String_new("mode");
-  _31 = String_new("vector_size");
-  _32 = Symbol_var(35579270086);
-  _33 = String_new("__declspec");
-  _34 = Symbol_var(54);
-  _35 = Symbol_var(1317118534);
-  _36 = cons(_34, NULL);
-  _37 = cons(_35, _36);
-  _38 = cons(_34, _37);
-  _39 = String_new("#endif");
-  _40 = String_var(_39);
-  _41 = cons(_40, NULL);
-  _42 = cons(_32, _41);
+  _26 = String_new("__attribute__");
+  _27 = String_new("packed");
+  _28 = String_new("aligned");
+  _29 = String_new("mode");
+  _30 = String_new("vector_size");
+  _31 = Symbol_var(35579270086);
+  _32 = String_new("__declspec");
+  _33 = Symbol_var(54);
+  _34 = Symbol_var(1317118534);
+  _35 = cons(_33, NULL);
+  _36 = cons(_34, _35);
+  _37 = cons(_33, _36);
+  _38 = String_new("#endif");
+  _39 = String_var(_38);
+  _40 = cons(_39, NULL);
+  _41 = cons(_31, _40);
 }
 
 String Compiler_preproc_directive(String text){
@@ -262,7 +261,7 @@ static void _directive(ArmScan * s, Token token, size_t i){
   Symbol kind = Compiler_preproc_conditional_kind(token -> text);
   int conditional = kind == 1016156 ||(kind && Array_len((* s).stack));
   if(kind == 1016156) Array_push((* s).stack, List_var(({
-    Var _x2c_gensym_literal_part_0 = int_var(++(* s).serial);  Var _x2c_gensym_literal_part_1 = int_var(Compiler_preproc_open_state(token -> text));  cons(_x2c_gensym_literal_part_0, cons(_26, cons(_x2c_gensym_literal_part_1, NULL)));
+    Var _x2c_gensym_literal_part_0 = int_var(++(* s).serial);  Var _x2c_gensym_literal_part_1 = int_var(Compiler_preproc_open_state(token -> text));  cons(_x2c_gensym_literal_part_0, cons(int_var(0), cons(_x2c_gensym_literal_part_1, NULL)));
   }
   )));
   else if(kind == 172060880 && Array_len((* s).stack)){
@@ -301,7 +300,7 @@ static int _hidden_group(Array stack){
 
 static size_t _code(ArmScan * s, Token token, size_t i){
   if((* s).hidden && token -> type != 40896714 && token -> type != 11703268) token -> type = 7477210024;
-  else if(token -> type == 19147688 && String_equal(token -> text, _27)) return _note_attribute(&((* s)), i);
+  else if(token -> type == 19147688 && String_equal(token -> text, _26)) return _note_attribute(&((* s)), i);
   else if(token -> type == 19147688 && Map_contains((* s).layout, String_var(token -> text))) _mark_layout(&((* s)), i, x2c_var_equal(Map_getindex((* s).layout, String_var(token -> text)), int_var(2)));
   return i;
 }
@@ -333,11 +332,11 @@ static int _layout_attribute(Token open, int * packed){
     depth += Symbol_group_step(t -> type);
     if(depth != 1 || t -> type != 19147688) continue;
     String word = String_strip(t -> text, "_");
-    if(String_equal(word, _28)){
+    if(String_equal(word, _27)){
       layout = 1;
       (* packed) = 1;
     }
-    else if(String_equal(word, _29) || String_equal(word, _30) || String_equal(word, _31)) layout = 1;
+    else if(String_equal(word, _28) || String_equal(word, _29) || String_equal(word, _30)) layout = 1;
   }
   return layout;
 }
@@ -354,7 +353,7 @@ static void _note_layout_macro(ArmScan * s, String content){
   int value = 0;
   for(;  token -> type != 11212;  token = Token_skip_trivia(token + 1)){
     if(token -> type != 19147688) continue;
-    int level = Var_int(Var_convert(String_equal(token -> text, _27) ? int_var(_attribute_layout(token)) : Map_contains(layout, String_var(token -> text)) ? Map_getindex(layout, String_var(token -> text)) : int_var(0), 3453797));
+    int level = Var_int(Var_convert(String_equal(token -> text, _26) ? int_var(_attribute_layout(token)) : Map_contains(layout, String_var(token -> text)) ? Map_getindex(layout, String_var(token -> text)) : int_var(0), 3453797));
     if(level > value) value = level;
   }
   if(value &&(!(Map_contains(layout, String_var(name -> text))) || x2c_var_order(Map_getindex(layout, String_var(name -> text)), int_var(value)) < 0)) Map_setindex(layout, String_var(name -> text), int_var(value));
@@ -373,7 +372,7 @@ List Compiler_leading_preproc(Compiler c){
   List noncode = NULL;
   Token base = c -> tokenizer -> tokens, token = c -> token;
   while(-- token >= base){
-    if(token -> type == 35579270086) noncode = cons(List_var(cons(_32, cons(String_var(token -> text), NULL))), noncode);
+    if(token -> type == 35579270086) noncode = cons(List_var(cons(_31, cons(String_var(token -> text), NULL))), noncode);
     else if(token -> type != 40896714 && token -> type != 7477210024) break;
   }
   return noncode;
@@ -474,12 +473,12 @@ static int _is_specifier(Symbol type){
 
 static int _is_annotation(Compiler c, String word){
   Var definition;
-  return String_equal(word, _27) || String_equal(word, _33) ||(Map_try_get(c -> object_macros, String_var(word), &(definition)) && x2c_var_equal(definition, Symbol_var(102150700288988)));
+  return String_equal(word, _26) || String_equal(word, _32) ||(Map_try_get(c -> object_macros, String_var(word), &(definition)) && x2c_var_equal(definition, Symbol_var(102150700288988)));
 }
 
 static int _prefix_rank(Var v){
   if(! Var_is_row(v, 9, 7, 4)) return 0;
-  if(List_truth(({ static MatchCaptureSite _x2c_gensym_match_site_0;  x2c_match_site_match(& _x2c_gensym_match_site_0, Var_list_payload(v), List_var(_38)); }))) return 4;
+  if(List_truth(({ static MatchCaptureSite _x2c_gensym_match_site_0;  x2c_match_site_match(& _x2c_gensym_match_site_0, Var_list_payload(v), List_var(_37)); }))) return 4;
   {
     Symbol word;
     Iter _x2c_gensym_macro_iterator_3 = Var_iter(v, &(struct Iter){
@@ -499,10 +498,10 @@ static int _prefix_rank(Var v){
 List Compiler_preproc_track_arms(List arms, String text){
   if(! _init_guard_) _file_init_();
   Symbol kind = Compiler_preproc_conditional_kind(text);
-  if(kind == 1016156) return cons(List_var(cons(List_var(cons(_32, cons(String_var(text), NULL))), NULL)), arms);
+  if(kind == 1016156) return cons(List_var(cons(List_var(cons(_31, cons(String_var(text), NULL))), NULL)), arms);
   if(! List_truth(arms)) return arms;
   if(kind == 172060880) return cons(List_var(({
-    List _x2c_gensym_literal_part_4 = Var_list_payload(List_car(arms));  Var _x2c_gensym_literal_part_5 = List_var(cons(_32, cons(String_var(text), NULL)));  List_append(_x2c_gensym_literal_part_4, cons(_x2c_gensym_literal_part_5, NULL));
+    List _x2c_gensym_literal_part_4 = Var_list_payload(List_car(arms));  Var _x2c_gensym_literal_part_5 = List_var(cons(_31, cons(String_var(text), NULL)));  List_append(_x2c_gensym_literal_part_4, cons(_x2c_gensym_literal_part_5, NULL));
   }
   )), List_cdr(arms));
   return kind == 7109834 ? List_cdr(arms) : arms;
@@ -544,7 +543,7 @@ List Compiler_preproc_within_arms(List arms, List items){
     }
 
   }
-  for(unsigned i = List_len(arms);  i;  i --) Array_push(out, List_var(_42));
+  for(unsigned i = List_len(arms);  i;  i --) Array_push(out, List_var(_41));
   return Array_list_free(out);
 }
 

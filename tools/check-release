@@ -47,7 +47,7 @@ Path installer = work.join("install.sh")
 %(curl -fsSL -o $installer "$site/install.sh").job().check()
 Path prefix = work.join("x2c")
 foreach String requested in ["latest", version]:
-  List options = requested == "latest" ? nil : %("--version" $version)
+  List options = requested == "latest" ? nil : $("--version", version)
   %(sh $installer @options).job()
     .options({env: {X2C_PREFIX: prefix, X2C_VERSION: "latest",
                    X2C_RELEASES: releases,

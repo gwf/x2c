@@ -55,7 +55,7 @@ List Frequencies.top(Frequencies self, int k) {
   Array ranked = auto [];
   foreach ((String word, int count) in counts) {
     if (ranked.len() == k && count < ranked[0][0]) continue;
-    ranked.heap_push(%($count $word));
+    ranked.heap_push($(count, word));
     if (ranked.len() > k) ranked.heap_pop();
   }
   return ranked.sort();

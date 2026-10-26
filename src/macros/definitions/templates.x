@@ -20,7 +20,7 @@ module void _finish(Definition &d) {
   d.pattern = _invocation_pattern(d);
   Map uses = _binder_uses(d.template);
   if (!(void *) uses) return;
-  d.rebuild = %($(_rebuild_template(d)) $(_rebuild_keys(d, uses)));
+  d.rebuild = $(_rebuild_template(d), _rebuild_keys(d, uses));
   d.leaf = !d.nested && _uses_holes_once(d, uses);
 }
 
@@ -69,7 +69,7 @@ static void _constructed_names(Definition &d, Map bindings) {
   foreach (List parameter in d.parameters)
     if (parameter.assoc(<kind>) == <name>) {
       Var name = Macro.binder(parameter.assoc(<binder>), "value", 0);
-      bindings[name] = %($required $name);
+      bindings[name] = $(required, name);
     }
 }
 
@@ -160,7 +160,7 @@ static Var _rebuild_syntax(Var syntax, Map expressions) {
    splice, then a Function value's return type and declarator. `?` marks a
    projection the template does not use. */
 static List _rebuild_keys(Definition &d, Map uses) {
-  List holes = d.target ? d.parameters.append(%($(d.target))) : d.parameters;
+  List holes = d.target ? d.parameters.append($(d.target)) : d.parameters;
   Array keys = [];
   foreach (List hole in holes) {
     Array used = [];
@@ -263,7 +263,7 @@ static List _definition_local(Compiler c, String spelling, int tag) {
     macro-definition locals map is required. */
 List Compiler.macro_introduced_name(Compiler c, String spelling) {
   Map locals = c.macro_definition_locals();
-  List current = c.sym.current_binding(%($spelling));
+  List current = c.sym.current_binding($(spelling));
   if (current && current in locals) return current;
   return _definition_local(c, spelling, 0);
 }
@@ -290,10 +290,10 @@ List Compiler.macro_tag_name(
        own in every namespace, including the tag that macro declares. */
     Var named = locals[%(name-argument $name)];
     if (named is <list>) return named;
-    if (c.sym.get_exact(%($kind $name))) return NULL;
+    if (c.sym.get_exact($(kind, name))) return NULL;
   }
   List local = _definition_local(c, name, 1);
-  c.sym.bind_identity(%(tag), local, %($kind $local));
+  c.sym.bind_identity(%(tag), local, $(kind, local));
   if (!definition) locals[%(provisional $local)] = 1;
   return local;
 }
@@ -410,7 +410,7 @@ static List _unit_trailing(List hole, Map binders) {
   int used = author in binders || construction in binders;
   foreach (String role in %("source" "value" "splice"))
     used |= _hole_key(hole, role) in binders;
-  return used ? %($construction) : NULL;
+  return used ? $(construction) : NULL;
 }
 
 /* A scalar capture has source, value, expression, and splice fields; a

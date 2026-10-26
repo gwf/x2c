@@ -10,7 +10,7 @@
 static Path program, preinit;
 
 static Job _run(String name) {
-  List command = name == "preinit" ? %($preinit) : %($program $name);
+  List command = name == "preinit" ? $(preinit) : $(program, name);
   Job job = command.job().options({stderr: <capture>});
   String output = NULL;
   try output = job.output();

@@ -7,71 +7,70 @@
     etc/meta-helper.x, as one unit.
 */
 
-Type Code.type(Code value) => _ask("Code_type", %($value));
-Var Code.value(Code code) => _ask("Code_value", %($code));
+Type Code.type(Code value) => _ask("Code_type", $(value));
+Var Code.value(Code code) => _ask("Code_value", $(code));
 List Code.native_signature(Code value) =>
-  _ask("Code_native_signature", %($value));
+  _ask("Code_native_signature", $(value));
 Code Code.parameter(Code function, String name) =>
-  _ask("Code_parameter", %($function $name));
-List Code.body(Code function) => _ask("Code_body", %($function));
-List Code.arguments(Code parameters) => _ask("Code_arguments", %($parameters));
-int Code.exits(Code statement) => _ask("Code_exits", %($statement));
-String Code.format(Code value) => _ask("Code_format", %($value));
+  _ask("Code_parameter", $(function, name));
+List Code.body(Code function) => _ask("Code_body", $(function));
+List Code.arguments(Code parameters) => _ask("Code_arguments", $(parameters));
+int Code.exits(Code statement) => _ask("Code_exits", $(statement));
+String Code.format(Code value) => _ask("Code_format", $(value));
 int Code.is_static_pattern(Code pattern) =>
-  _ask("Code_is_static_pattern", %($pattern));
-Var Code.pattern_value(Code pattern) =>
-  _ask("Code_pattern_value", %($pattern));
+  _ask("Code_is_static_pattern", $(pattern));
+Var Code.pattern_value(Code pattern) => _ask("Code_pattern_value", $(pattern));
 Code Code.convert(Code value, Type target) =>
-  _ask("Code_convert", %($value $target));
-Code Code.promoted(Code value) => _ask("Code_promoted", %($value));
+  _ask("Code_convert", $(value, target));
+Code Code.promoted(Code value) => _ask("Code_promoted", $(value));
 Code Code.call_in_order(Code member, List arguments, Type type) =>
-  _ask("Code_call_in_order", %($member $arguments $type));
+  _ask("Code_call_in_order", $(member, arguments, type));
 Code Code.lowered(Code code, List effects) =>
-  _ask("Code_lowered", %($code $effects));
+  _ask("Code_lowered", $(code, effects));
 Code Code.bound(Code code, List effects) =>
-  _ask("Code_bound", %($code $effects));
+  _ask("Code_bound", $(code, effects));
 List Code.func_parameters(Code parameters, Code fn, Code argv) =>
-  _ask("Code_func_parameters", %($parameters $fn $argv));
+  _ask("Code_func_parameters", $(parameters, fn, argv));
 Code Code.register_rewrite(Code function, List pattern, List holes) =>
-  _ask("Code_register_rewrite", %($function $pattern $holes));
+  _ask("Code_register_rewrite", $(function, pattern, holes));
 Code Code.register_after_initialization(
   Code function, Macro shape, List holes) =>
-  _ask("Code_register_after_initialization", %($function $shape $holes));
+  _ask("Code_register_after_initialization", $(function, shape, holes));
 int Type.is_named(Type type, String name) =>
-  _ask("Type_is_named", %($type $name));
-Type Type.numeric(Type type) => _ask("Type_numeric", %($type));
-int Type.is_text(Type type) => _ask("Type_is_text", %($type));
-int Type.is_value(Type type) => _ask("Type_is_value", %($type));
-Type Type.resolve(Type type) => _ask("Type_resolve", %($type));
-Type Type.element(Type type) => _ask("Type_element", %($type));
-List Type.parameters(Type type) => _ask("Type_parameters", %($type));
-Type Type.return_type(Type type) => _ask("Type_return_type", %($type));
-Type Type.aggregate(Type type) => _ask("Type_aggregate", %($type));
-List Type.fields(Type type) => _ask("Type_fields", %($type));
-List Type.layout(Type type) => _ask("Type_layout", %($type));
+  _ask("Type_is_named", $(type, name));
+Type Type.numeric(Type type) => _ask("Type_numeric", $(type));
+int Type.is_text(Type type) => _ask("Type_is_text", $(type));
+int Type.is_value(Type type) => _ask("Type_is_value", $(type));
+Type Type.resolve(Type type) => _ask("Type_resolve", $(type));
+Type Type.element(Type type) => _ask("Type_element", $(type));
+List Type.parameters(Type type) => _ask("Type_parameters", $(type));
+Type Type.return_type(Type type) => _ask("Type_return_type", $(type));
+Type Type.aggregate(Type type) => _ask("Type_aggregate", $(type));
+List Type.fields(Type type) => _ask("Type_fields", $(type));
+List Type.layout(Type type) => _ask("Type_layout", $(type));
 List Type.marked_fields(Type aggregate, Symbol mark) =>
-  _ask("Type_marked_fields", %($aggregate $mark));
-List Type.members(Type type) => _ask("Type_members", %($type));
+  _ask("Type_marked_fields", $(aggregate, mark));
+List Type.members(Type type) => _ask("Type_members", $(type));
 List Type.resolve_member(Type type, String name, int call) =>
-  _ask("Type_resolve_member", %($type $name $call));
+  _ask("Type_resolve_member", $(type, name, call));
 Code Type.protocol_member(Type type, String name) =>
-  _ask("Type_protocol_member", %($type $name));
-Code Type.getter(Type type) => _ask("Type_getter", %($type));
-String Type.update_helper(Type type) => _ask("Type_update_helper", %($type));
-Symbol Type.tag_name(String name) => _ask("Type_tag_name", %($name));
+  _ask("Type_protocol_member", $(type, name));
+Code Type.getter(Type type) => _ask("Type_getter", $(type));
+String Type.update_helper(Type type) => _ask("Type_update_helper", $(type));
+Symbol Type.tag_name(String name) => _ask("Type_tag_name", $(name));
 String Type.reverse_name(String base, String participant) =>
-  _ask("Type_reverse_name", %($base $participant));
-List x2c_binding_fresh(String role) => _ask("x2c_binding_fresh", %($role));
+  _ask("Type_reverse_name", $(base, participant));
+List x2c_binding_fresh(String role) => _ask("x2c_binding_fresh", $(role));
 List x2c_binding_for(Var key, String role) =>
-  _ask("x2c_binding_for", %($key $role));
-String x2c_invocation_file(void) => _ask("x2c_invocation_file", %());
-int x2c_invocation_line(void) => _ask("x2c_invocation_line", %());
-int x2c_invocation_column(void) => _ask("x2c_invocation_column", %());
-Code x2c_enclosing(Symbol what) => _ask("x2c_enclosing", %($what));
-void x2c_place(List where, Code code) { _ask("x2c_place", %($where $code)); }
+  _ask("x2c_binding_for", $(key, role));
+String x2c_invocation_file(void) => _ask("x2c_invocation_file", $());
+int x2c_invocation_line(void) => _ask("x2c_invocation_line", $());
+int x2c_invocation_column(void) => _ask("x2c_invocation_column", $());
+Code x2c_enclosing(Symbol what) => _ask("x2c_enclosing", $(what));
+void x2c_place(List where, Code code) { _ask("x2c_place", $(where, code)); }
 void x2c_diagnostic_error_at(
   Var node, Symbol category, String message, List notes) {
-  _ask("x2c_diagnostic_error_at", %($node $category $message $notes));
+  _ask("x2c_diagnostic_error_at", $(node, category, message, notes));
 }
 Map x2c_meta_definition_hashes(void) =>
-  _ask("x2c_meta_definition_hashes", %());
+  _ask("x2c_meta_definition_hashes", $());

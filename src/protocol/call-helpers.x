@@ -39,7 +39,7 @@ List Compiler.forward_parameters(Compiler c, List types) {
     }
     else arguments.push($!($type){ $binding });
   }
-  return %($(declarations.list_free()) $(arguments.list_free()));
+  return $(declarations.list_free(), arguments.list_free());
 }
 
 /* Binds `syntax`, a template that defines the function `binding`. The
@@ -66,7 +66,7 @@ static List _generated_function(
 */
 String Compiler.protocol_update_helper(
   Compiler c, Type participant, String member, int postfix) {
-  List key = %("protocol-update-helper" $participant $member $postfix);
+  List key = $("protocol-update-helper", participant, member, postfix);
   Var stored;
   if (c.protocol_helpers.try_get(key, stored)) return stored;
 
@@ -135,7 +135,7 @@ static void _publish_update(Compiler c, List helper, List syntax) {
 */
 List Compiler.discard_helper(
   Compiler c, List binding, Type signature, String stem, int which) {
-  List key = %("discard-helper" $stem $which);
+  List key = $("discard-helper", stem, which);
   Var stored;
   if (c.protocol_helpers.try_get(key, stored)) return stored;
 
@@ -192,7 +192,7 @@ static List _emit(DiscardCall &d) {
   List helper = d.c.wrapper_function(
     %(static @(d.result)), helper_binding, d.declarations, body.cdr());
   d.c.add_early(helper);
-  List entry = %($helper_binding $(d.signature));
+  List entry = $(helper_binding, d.signature);
   d.c.protocol_helpers[d.key] = entry;
   /* Wrapping a call preserves its return ownership. Discarding an argument
      does not make an arbitrary method's borrowed result fresh. */

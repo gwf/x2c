@@ -63,7 +63,7 @@ module void _record_span(Compiler c, List node, int start, int end) {
   }
   if (key)
     c.set_fact(
-      %(definition-span $key), %($start $end $(c.source_private > 0)));
+      %(definition-span $key), $(start, end, c.source_private > 0));
 }
 
 /* function completion
@@ -109,7 +109,7 @@ static void _record_attributes(
   List attributes = NULL;
   foreach (Var item in modifiers)
     if (item is <list> && car(item) is <string>)
-      attributes = attributes ? %( @attributes $item ) : %($item);
+      attributes = attributes ? $(@attributes, item) : $(item);
   if (attributes)
     c.set_fact(%(attributes $binding), attributes);
 }
@@ -170,7 +170,7 @@ static List _completion_contract(
     $linkage
     $method_identity
   );
-  return self_signature ? contract.append(%($self_signature)) : contract;
+  return self_signature ? contract.append($(self_signature)) : contract;
 }
 
 static Type _contract_type(Type type, int keep_qualifiers) {
@@ -246,7 +246,7 @@ module void _check_static_inits(Compiler c) {
   foreach (List (binding, dependencies) in c.static_init_deps) {
     foreach (List reference in dependencies) {
       String name = Ast.binding_spelling(reference);
-      if (!name || %($name) in statics) continue;
+      if (!name || $(name) in statics) continue;
       String target = Ast.binding_spelling(binding);
       $fail.compiler_static_dependency(
         c, _init_token(c, binding), name, target);

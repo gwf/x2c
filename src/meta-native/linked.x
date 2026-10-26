@@ -13,7 +13,7 @@ static Map shipped_targets = NULL;
    agree, or 0. */
 module Var _linked_target(
   Compiler c, String name, List signature, String provider) {
-  List key = %($name $signature $provider);
+  List key = $(name, signature, provider);
   Var function = 0;
   if (shipped_targets && shipped_targets.try_get(key, function))
     return function;

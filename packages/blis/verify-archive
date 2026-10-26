@@ -41,7 +41,7 @@ foreach (String symbol, symbols.list_free().unique().sort())
   undefined += symbol + "\n";
 Path script = Path.new(argv[0]).absolute().dirname()
   .join("external-symbols.sh");
-String report = Diff.unified(undefined, %($script $archive).job().output(),
+String report = Diff.unified(undefined, $(script, archive).job().output(),
                              profile_path, "external-symbols.sh");
 if (report) {
   printf("%s", report);

@@ -17,7 +17,7 @@ static String _stdout(Job job) {
 /* Runs a mode that must exit zero with `output` on standard output, and
    returns its standard error. */
 static String _passes(Path program, String mode, String output) {
-  Job job = %($program $mode).job().options({stderr: <capture>});
+  Job job = $(program, mode).job().options({stderr: <capture>});
   if (job.status())
     probe_fail(%"$mode: exited with status $(job.status())");
   if (_stdout(job).rstrip("\n") != output)
@@ -29,7 +29,7 @@ static String _passes(Path program, String mode, String output) {
    output, reporting `message` when it succeeds, and returns the first line
    of its standard error. */
 static String _fails(Path program, String mode, String message) {
-  Job job = %($program $mode).job().options({stderr: <capture>});
+  Job job = $(program, mode).job().options({stderr: <capture>});
   if (!job.status()) probe_fail(message);
   if (_stdout(job)) probe_fail(%"$mode: unexpected standard output");
   List lines = job.errors().split_lines(0);

@@ -156,7 +156,7 @@ static List _expression_decorator(
   List target = c.parse_macro_expression_target();
   List input = %(
     target $arguments
-    $(_capture_row_project(c, definition.assoc(<targetp>), %($target), 0))
+    $(_capture_row_project(c, definition.assoc(<targetp>), $(target), 0))
   );
   List node = _invocation_node(c, definition, input, invocation);
   return %(expr (<macro-expr>) $node);

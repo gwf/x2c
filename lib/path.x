@@ -387,7 +387,7 @@ static void _glob(Glob &g, Path directory, int depth) {
 List Path.glob(Path pattern) {
   String text = pattern;
   const char *wildcard = strpbrk(text, "*?[\\");
-  if (!wildcard) return pattern.exists() ? %($pattern) : NULL;
+  if (!wildcard) return pattern.exists() ? $(pattern) : NULL;
   int cut = wildcard - (const char *) text;
   while (cut && text[cut - 1] != '/') cut--;
   Path base = cut ? text[:cut] : NULL, root = base ? base : ".";

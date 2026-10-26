@@ -445,7 +445,7 @@ static void _drop_job(void *ptr) {
 
 // A command whose first element is a List is a pipeline of those commands.
 static List _stages(List command) =>
-  command && command.car() is List ? command : %($command);
+  command && command.car() is List ? command : $(command);
 
 /** Adds `command` after the last stage of `job`, reading that stage's
     output, and returns the job. A pipeline `command` adds each of its

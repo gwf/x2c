@@ -188,10 +188,9 @@ static void _flow_merge_locals(
 static void _flow_set_local(
   FlowUnit &unit, List binding, Var value, Symbol kind, int origin,
   Map locals) {
-  locals[binding] = %(
-    $kind $(Ast.binding_spelling(binding)) $(_flow_location(unit, origin))
-    $(_flow_source(unit, value, origin, locals))
-  );
+  locals[binding] = $(
+    kind, Ast.binding_spelling(binding), _flow_location(unit, origin),
+    _flow_source(unit, value, origin, locals));
 }
 
 /* Walks `branch` from a copy of `locals` and merges the result back. */

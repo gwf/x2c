@@ -310,7 +310,7 @@ static List _reasons(Lint l, List function, Map diagnostics):
   if reports && shapes >= 3 && branches >= 2:
     String why = "diagnostics are built around manual List or AST shape "
       "checks"
-    rows.push(%(4 "shape-diagnostics" $why))
+    rows.push($(4, "shape-diagnostics", why))
   else if shapes >= 3 && branches >= 2:
     rows.push(%(2 "manual-shape-checks"
                 "manual List or AST shape checks may be one static match"))

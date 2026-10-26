@@ -146,7 +146,7 @@ static List _subject_rows(Compiler c, Array values) {
     _subject_globals(c, value, globals, source_names);
   Array rows = [];
   foreach ((String spelling, List binding) in globals)
-    rows.push(%($spelling $binding));
+    rows.push($(spelling, binding));
   foreach ((List binding, String spelling) in source_names)
     rows.push(%(source-spelling $binding $spelling));
   return rows.list_free();
@@ -162,7 +162,7 @@ static void _subject_globals(
       Var source;
       if (c.semantic_binding_facts().try_get(%(source-spelling $node), source))
         source_names[node] = source;
-      List global = c.sym.resolve_global(%($spelling), NULL);
+      List global = c.sym.resolve_global($(spelling), NULL);
       if (global && List.compare(global, node) == 0) globals[spelling] = node;
       continue;
     }
@@ -205,7 +205,7 @@ void Compiler.record_project_meta_effect(
 /** Installs an included meta function's evaluator advertisement. */
 void Compiler.install_project_meta_effect(Compiler c, List row) {
   match (row) case %(project-meta ?name ?signature ?provider): {
-    c.project_meta[name] = %($signature $provider);
+    c.project_meta[name] = $(signature, provider);
     c.native_meta.del(name);
     c.meta_group_bound.del(%"<unbound $name>");
     _bind_advertised_meta(c, name, 1);

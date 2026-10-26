@@ -35,7 +35,7 @@ meta static List _lambda_cell_name(List binding, Map cells) {
   (Var name, Type type) = cells[binding];
   if (name is <list>) return name;
   List fresh = x2c_binding_fresh("lambda_cell");
-  cells[binding] = %($fresh $type);
+  cells[binding] = $(fresh, type);
   return fresh;
 }
 
@@ -255,8 +255,8 @@ meta static List _lambda_returning(List items, List none) {
    lowering it later reports there. */
 meta static List _lambda_items(Code body) {
   match (body) case %(block *items):
-    return %(@(_lambda_returning(items, source_return_none()))
-             $(source_return_none()));
+    return $(
+      @(_lambda_returning(items, source_return_none())), source_return_none());
   List items = body.match(%(expr (void) ?))
     ? %((stmnt $body) $(source_return_none()))
     : %((stmnt (return $(body.convert(%("Var"))))));
@@ -347,7 +347,7 @@ meta static String _lambda_bridge_role(void) {
 meta static List _lambda_field(int index) => x2c_ident(%"c$index");
 
 /* The spelling of record field `index`, which names no binding. */
-meta static List _lambda_member(int index) => %($(%"c$index"));
+meta static List _lambda_member(int index) => $(%"c$index");
 
 /* A reference stores its address. Records keep their native bytes because
    Var cannot carry them; other captures use their Var representation. */
@@ -384,7 +384,7 @@ meta static Code _lambda_adapter(
   Array items = [], arguments = [];
   foreach (List read in reads) {
     (Type type, Code value) = read;
-    List name = %($(%"a$(items.len())"));
+    List name = $(%"a$(items.len())");
     (List base, List modifiers) = type.parts();
     items.push(
       %(declare $base (bindings (op = (bind $name $modifiers) $value))));
@@ -568,7 +568,7 @@ meta static Map _lambda_shared(List params, List items) {
     }
   }
   foreach ((List binding, Type type) in shared)
-    if (declared.contains(binding)) cells[binding] = %(0 $type);
+    if (declared.contains(binding)) cells[binding] = $(0, type);
   return cells;
 }
 

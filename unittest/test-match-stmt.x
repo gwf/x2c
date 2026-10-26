@@ -469,7 +469,7 @@ static void match_binder_head_arm_keeps_priority(void) {
 
 static int _dynamic_head_first(List input, Var head) {
   match (input) {
-    case %($head 1): return 1;
+    case $(head, 1): return 1;
     case %(beta 2): return 2;
   }
   return 0;

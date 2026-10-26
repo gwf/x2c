@@ -129,7 +129,7 @@ void Compiler.add_linked_meta_provider_hashes(Compiler c, Map rows) {
     foreach (String name in hashes.keys()) {
       if (!(name in c.project_meta) && !(name in c.meta_calls)) continue;
       proof = proof.append(
-        %($(_content_hash(_stored_meta_hashes(hashes)))));
+        $(_content_hash(_stored_meta_hashes(hashes))));
       break;
     }
     rows[provider] = proof;
@@ -167,8 +167,8 @@ List Compiler.loaded_provider(Compiler c) {
   List owned = names.list_free();
   Map symbols = c.callable_symbols(owned), declarations = {};
   foreach (String name in owned)
-    declarations[name] = _loaded_declaration(c, symbols[%($name)]);
-  return %($declarations $symbols);
+    declarations[name] = _loaded_declaration(c, symbols[$(name)]);
+  return $(declarations, symbols);
 }
 
 /** Returns the native calling type of a loaded function. Array parameters
@@ -211,10 +211,10 @@ void Compiler.name_loaded_provider(
   (Map declarations, Map symbols) = provider;
   Map visible = auto c.sym.unit_symbols();
   foreach ((String name, Type expected) in declarations) {
-    if (%($name) in c.sym.file_statics() ||
+    if ($(name) in c.sym.file_statics() ||
         %(function $name) in c.sym.file_statics()) continue;
     Type type = NULL;
-    List binding = c.sym.resolve_global(%($name), type);
+    List binding = c.sym.resolve_global($(name), type);
     if (!binding) continue;
     if (!_loaded_types_equal(_loaded_declaration(c, type), expected) ||
         !_loaded_type_rows(type, visible, symbols))
@@ -255,9 +255,9 @@ static int _loaded_type_rows(Type type, Map visible, Map provider) {
 
 static void _name_meta_provider(
   Compiler c, String name, int index) {
-  if (%($name) in c.sym.file_statics()) return;
+  if ($(name) in c.sym.file_statics()) return;
   if (name in c.native_meta && c.bind_native_meta(name)) return;
-  List binding = c.sym.lookup(%($name), NULL);
+  List binding = c.sym.lookup($(name), NULL);
   if (binding)
     c.set_fact(%(emitted $binding), %"_x2c_gensym_meta_group_$(index)_$name");
 }

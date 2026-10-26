@@ -34,8 +34,8 @@ macro Stmt $fail.expressions_slice_zero(Expr $c, Expr $site) =>
 macro Stmt $fail.expressions_member_ident(
   Expr $c, Expr $site, Expr $op, Expr $lhs) {
   {
-    List notes = %("token:" $($c.token.text));
-    if ($lhs) notes = cons(%("lhs expr:" $($lhs.str())), notes);
+    List notes = $("token:", $c.token.text);
+    if ($lhs) notes = cons($("lhs expr:", $lhs.str()), notes);
     String msg = %"expected identifier after '$($op)'";
     $c.report_error(<parse>, msg, $site, notes);
   }
@@ -168,7 +168,7 @@ macro Stmt $fail.expressions_is_enum(Expr $c, Expr $origin, Expr $target) {
       "enum values box as the shared i32 family and retain no enum identity";
     $c.report_error(
       <type>, %"enum type $($target.repr()) cannot be tested with 'is'",
-      $origin, %($note));
+      $origin, $(note));
   }
 }
 
@@ -326,6 +326,6 @@ macro Stmt $warn.expressions_call_redundant(
     $c.report_warning_at(
       <conversion>,
       %"unnecessary conversion: .$($method)() where $($target.repr()) is expected",
-      $location, %($hint));
+      $location, $(hint));
   }
 }

@@ -127,7 +127,7 @@ List x2c_ident(String spelling) {
     _fail(
       "x2c_ident requires an identifier spelling",
       %("value: $(spelling.repr())"));
-  return %("x2c.ident" $spelling);
+  return $("x2c.ident", spelling);
 }
 
 void x2c_diagnostic_fail(String message, List notes) {
@@ -172,7 +172,7 @@ String Code.name(Code function) {
 }
 
 List x2c_template_call(Var stored, List values) =>
-  %("x2c.template" $stored $values);
+  $("x2c.template", stored, values);
 
 /* A type's declaration parts are read from the type alone. */
 List Type.parts(Type type) => type_declaration_parts(type);

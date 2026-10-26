@@ -251,18 +251,18 @@ static void _loaded_path(LoadedPath path, Type type, List target, int root) {
       $!{ int $budget = 100; @(statements.list()) return $snapshot; }, 0);
   }
   path.descriptions.push(
-    %($(path.name) $bridge $writable $(path.parameters.len())));
+    $(path.name, bridge, writable, path.parameters.len()));
   Type shape = _loaded_shape(c, type);
   if (shape.is_array()) {
     List index = c.sym.introduce(c.fresh_name("index"));
     List argument = $!(long long){ $index };
     path.parameters = %(@(path.parameters)
       (param (long long) (bind $index ())));
-    path.checks = %(@(path.checks) $($!{
+    path.checks = $(@(path.checks), $!{
       if ($argument < 0 || (unsigned long long) $argument >=
           $(_loaded_length(target)))
         raise %(repl (reason "loaded array index out of bounds"));
-    }));
+    });
     path.name += "[]";
     Type element = c.sym.normalize_declared_type(type).dereference();
     _loaded_path(
@@ -295,7 +295,7 @@ static void _loaded_global(Compiler c, Type spec, List row, Map present) {
   if (spec.is_static() || (spec.is_extern() && !initialized)) return;
   match (row) case %(bind ?binding ?): {
     String name = Ast.binding_spelling(binding);
-    if (!name || name in present || %($name) in c.sym.file_statics()) return;
+    if (!name || name in present || $(name) in c.sym.file_statics()) return;
     Type type = %(declare $spec (bindings $row)).type_from_ast();
     if (!_loaded_scalar(c, type) &&
         !_loaded_aggregate(c, type, initialized)) return;

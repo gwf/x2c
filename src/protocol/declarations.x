@@ -82,13 +82,13 @@ static macro Stmt $fail.protocol_member_function(
   Expr $c, Expr $site, Expr $name) =>
   $c.report_error(
     <protocol>, "protocol member must be a function",
-    $site, %("member:" $($name)));
+    $site, $("member:", $name));
 
 static macro Stmt $fail.protocol_member_owner(
   Expr $c, Expr $site, Expr $participant) =>
   $c.report_error(
     <protocol>, "protocol member must be owned by its participant",
-    $site, %("expected receiver:" $($participant)));
+    $site, $("expected receiver:", $participant));
 
 static macro Stmt $fail.protocol_member_single(Expr $c, Expr $site) =>
   $c.report_error(
@@ -108,7 +108,7 @@ static macro Stmt $warn.protocol_protocol_binder(
     $c.report_warning(
       <shadow>,
       %"protocol binder '$($participant)' shadows a visible type name",
-      $token, %($hint));
+      $token, $(hint));
   }
 }
 
@@ -201,7 +201,7 @@ static void _warn_shadowed(ProtocolSyntax &p) {
   Compiler c = p.c;
   if (c.shallow) return;
   String participant = p.participant;
-  List shadowed = c.sym.get(%($participant));
+  List shadowed = c.sym.get($(participant));
   if (!shadowed || !shadowed.type().is_typedef()) return;
   $warn.protocol_protocol_binder(c, p.participant_token, participant);
 }
@@ -212,7 +212,7 @@ static List _body(ProtocolSyntax &p) {
   Array associations = [], members = [];
   Map type_names = {}, member_names = {};
   c.sym.push_new_scope();
-  c.sym.define(%($participant), %(typedef $participant));
+  c.sym.define($(participant), %(typedef $participant));
   type_names[participant] = 1;
   int saw_member = 0;
   while (c.peek(0) != <"}"> && c.peek(0) != <eof>) {
@@ -251,8 +251,8 @@ static List _parse_associated(Compiler c, Map names) {
   Type type = c.parse_type_name().canonicalize();
   c.expect(<;>);
   names[name] = 1;
-  c.sym.define(%($name), %(typedef $name));
-  return %($name $type);
+  c.sym.define($(name), %(typedef $name));
+  return $(name, type);
 }
 
 static List _parse_member(
@@ -280,7 +280,7 @@ static List _parse_member(
   String native = _native_member(c);
   c.expect(<;>);
   members[name] = 1;
-  return %($name $signature $native);
+  return $(name, signature, native);
 }
 
 static String _member_name(List identity, String participant) {

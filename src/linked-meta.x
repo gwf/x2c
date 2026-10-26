@@ -71,7 +71,7 @@ static List _selector_chain(String spelling, List value) {
 static List _selector_double(List steps) {
   if (!steps) return NULL;
   String rest = steps.car(), a = %"a$rest", d = %"d$rest";
-  return %($a $d @(_selector_double(steps.cdr())));
+  return $(a, d, @(_selector_double(steps.cdr())));
 }
 
 static List _selector_middles(void) {
@@ -89,7 +89,7 @@ static List _selector_units(List middles, Macro car, Macro cdr) {
   List rest = _selector_units(middles.cdr(), car, cdr);
   if (middle in %("aa" "ad" "dd" "add")) return rest;
   String name = %"c$(middle)r";
-  return %($(middle.startswith("a") ? car(name) : cdr(name)) @rest);
+  return $(middle.startswith("a") ? car(name) : cdr(name), @rest);
 }
 
 static List _selector_definitions(Macro car, Macro cdr) =>
@@ -264,7 +264,7 @@ static Code _participant_store(
   Code setter = type.protocol_member("setindex");
   if (!setter)
     $fail.access_store(NULL, type);
-  return setter.call_in_order(%($base $key $value), code.cadr());
+  return setter.call_in_order($(base, key, value), code.cadr());
 }
 
 static Code _participant_update(
@@ -275,7 +275,7 @@ static Code _participant_update(
     $fail.access_update(NULL, type, value);
   List operation = $!Symbol{ $op };
   List arguments = value
-    ? %($base $key $operation $value) : %($base $key $operation);
+    ? $(base, key, operation, value) : $(base, key, operation);
   return member.call_in_order(arguments, code.cadr());
 }
 
@@ -415,7 +415,7 @@ static void _delegate_search(
     List resolution = type.resolve_member(member, 1);
     match (resolution) {
       case %(method ?binding ?):
-        found.push(%($(path.reverse()) $binding));
+        found.push($(path.reverse(), binding));
       case %(ambiguous *packages):
         _delegate_fail_packages(outer, type, member, path.reverse(), packages);
     }
@@ -463,7 +463,7 @@ Code delegate_member(Code code) {
     List fields = _delegate_fields(receiver.cadr(), name);
     if (!fields) return code;
     Code callee = receiver;
-    foreach (String step in fields.append(%($name)))
+    foreach (String step in fields.append($(name)))
       callee = %(expr () (op . $callee ($step)));
     return %(expr () (call $callee (args @arguments)));
   }
@@ -681,7 +681,7 @@ static List _lambda_cell_name(List binding, Map cells) {
   (Var name, Type type) = cells[binding];
   if (name is <list>) return name;
   List fresh = x2c_binding_fresh("lambda_cell");
-  cells[binding] = %($fresh $type);
+  cells[binding] = $(fresh, type);
   return fresh;
 }
 
@@ -864,8 +864,8 @@ static List _lambda_returning(List items, List none) {
 
 static List _lambda_items(Code body) {
   match (body) case %(block *items):
-    return %(@(_lambda_returning(items, source_return_none()))
-             $(source_return_none()));
+    return $(
+      @(_lambda_returning(items, source_return_none())), source_return_none());
   List items = body.match(%(expr (void) ?))
     ? %((stmnt $body) $(source_return_none()))
     : %((stmnt (return $(body.convert(%("Var"))))));
@@ -939,7 +939,7 @@ static String _lambda_bridge_role(void) {
 
 static List _lambda_field(int index) => x2c_ident(%"c$index");
 
-static List _lambda_member(int index) => %($(%"c$index"));
+static List _lambda_member(int index) => $(%"c$index");
 
 static Type _lambda_field_type(Type type) {
   if (type.car() == <&>) return cons(<*>, type.cdr());
@@ -967,7 +967,7 @@ static Code _lambda_adapter(
   Array items = [], arguments = [];
   foreach (List read in reads) {
     (Type type, Code value) = read;
-    List name = %($(%"a$(items.len())"));
+    List name = $(%"a$(items.len())");
     (List base, List modifiers) = type.parts();
     items.push(
       %(declare $base (bindings (op = (bind $name $modifiers) $value))));
@@ -1136,7 +1136,7 @@ static Map _lambda_shared(List params, List items) {
     }
   }
   foreach ((List binding, Type type) in shared)
-    if (declared.contains(binding)) cells[binding] = %(0 $type);
+    if (declared.contains(binding)) cells[binding] = $(0, type);
   return cells;
 }
 
@@ -1546,7 +1546,7 @@ static Code _match_lowered(Code subject, List rows) {
   String locals = _match_locals(depths, values);
   List prologue = dynamic
     ? _match_dynamic_read(subject, locals)
-    : %("List _x2c_gensym_match_expr =" $(subject.convert(%("List"))) $locals);
+    : $("List _x2c_gensym_match_expr =", subject.convert(%("List")), locals);
   return Code.lowered(
     %(block $prologue
             (switch (expr ("uint64_t") ($selector)) (block @items))), NULL);
@@ -1557,8 +1557,10 @@ static List _match_dynamic_read(Code subject, String locals) {
   String tested = "; int _x2c_gensym_match_none = "
     "!Var_is(_x2c_gensym_match_var, %lu);"
     .printf((unsigned long) list);
-  return %("Var _x2c_gensym_match_var =" $subject $tested
-           "List _x2c_gensym_match_expr = Var_list_payload(_x2c_gensym_match_var)" $locals);
+  return $(
+    "Var _x2c_gensym_match_var =", subject, tested,
+    "List _x2c_gensym_match_expr = Var_list_payload(_x2c_gensym_match_var)",
+    locals);
 }
 
 /** Lowers the bound match `node` to C text around its subject, patterns,
@@ -1727,15 +1729,14 @@ static List _protocol_forward(
     List name = x2c_ident(%"a$(index++)");
     params.push($!Param{ $type $name });
     Code argument = $!( $name );
-    if (templates.car() == %($binder))
+    if (templates.car() == $(binder))
       argument = $!( $(x2c_ident(convert))($argument) );
     if (type == %(....))
       argument = %(expr ("List") (splice $argument));
     arguments.push(argument);
     templates = templates.cdr();
   }
-  return %($(params.list_free()) $(x2c_ident(source))
-           $(arguments.list_free()));
+  return $(params.list_free(), x2c_ident(source), arguments.list_free());
 }
 
 static Code _protocol_function(List declared, List name, List forward) {
@@ -2075,7 +2076,7 @@ static List _try_exits(Atom frame, List handle, Atom finalizer) {
   if (handle) {
     List handler = %(expr (("ErrorHandler")) (ident $handle));
     List close = $!{ x2c_error_catch_close($handler); $handler = NULL; };
-    before = %($close);
+    before = $(close);
   }
   List address = _try_frame_address(frame);
   if (finalizer)
@@ -2103,7 +2104,7 @@ static List _try_catch_clause(List handle, List records, Array rows) {
     rows.push(%(region $arm $(record.cadr())));
     arms.push(arm);
   }
-  return %($handle $state $(arms.list_free()) @(patterns.list_free()));
+  return $(handle, state, arms.list_free(), @(patterns.list_free()));
 }
 
 static Code _try_landing(

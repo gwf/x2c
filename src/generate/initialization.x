@@ -27,7 +27,7 @@ module List _file_init(Compiler c, List source) {
   foreach (List item in source)
     entries.push(init.enter(item, _patches(init, item)));
   List guard = c.initialization_guard(init.guard);
-  List prelude = init.synthetic ? %($guard $(init.synthetic)) : %($guard);
+  List prelude = init.synthetic ? $(guard, init.synthetic) : $(guard);
   return c.place_source_prelude(entries.list_free(), prelude);
 }
 
@@ -39,7 +39,7 @@ static void _prepare(Init &i, List source) {
   i.shutdown = _shutdown_registration(c, source);
   List arms = i.initializer ? _definition_arms(source, i.initializer) : NULL;
   if (!i.initializer || arms) i.synthetic = _synthesize(i, arms);
-  else i.entry = c.sym.reference(%($(i.initializer)), NULL);
+  else i.entry = c.sym.reference($(i.initializer), NULL);
   if (_cache_only(c)) i.reachable = _cache_reachable(source);
 }
 
@@ -148,7 +148,7 @@ static List _protocol_initializer(
   List declaration = c.initialization_guard(guard);
   List queued = c.init_statements(<protocol>).append(body);
   return _replace_body(
-    c, function, c.run_once_body(%($declaration), guard, queued));
+    c, function, c.run_once_body($(declaration), guard, queued));
 }
 
 /* The registration of the unit's shutdown function, under the arms that
@@ -156,7 +156,7 @@ static List _protocol_initializer(
 static List _shutdown_registration(Compiler c, List source) {
   String shutdown = c.fini_fn;
   if (!shutdown) return NULL;
-  List binding = c.sym.reference(%($shutdown), NULL);
+  List binding = c.sym.reference($(shutdown), NULL);
   return _within_definitions(
     _definition_arms(source, shutdown), %((
     stmnt

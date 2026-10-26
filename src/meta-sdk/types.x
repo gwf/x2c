@@ -51,7 +51,7 @@ List Type.marked_fields(Type aggregate, Symbol mark) {
 /** Answers `Type.resolve_member`, declared in `lib/meta.x`. */
 List Type.resolve_member(Type type, String name, int call) {
   _require_expansion("Type.resolve_member");
-  return active.expander.resolve_postfix_member(type, %($name), <.>, call);
+  return active.expander.resolve_postfix_member(type, $(name), <.>, call);
 }
 
 /** Selects a callable protocol member in the current compilation context.
@@ -157,9 +157,9 @@ List Type.members(Type type) {
    or the initializer's expression. */
 static List _enum_member(List member) {
   match (member) {
-    case %(op = (?name) (expr ? (literal ? ?text))): return %($name $text);
-    case %(op = (?name) (?text)): return %($name $text);
-    case %(op = (?name) ?value): return %($name $value);
+    case %(op = (?name) (expr ? (literal ? ?text))): return $(name, text);
+    case %(op = (?name) (?text)): return $(name, text);
+    case %(op = (?name) ?value): return $(name, value);
     case %(?name): return %($name ());
   }
   $fail.meta_sdk_members_entry(member);
@@ -215,7 +215,7 @@ List MetaContext.type_description(Var value) {
   Compiler c = active.expander;
   Array methods = [];
   foreach (String member in c.postfix_completions(type, <.>))
-    match (c.resolve_postfix_member(type, %($member), <.>, 1))
+    match (c.resolve_postfix_member(type, $(member), <.>, 1))
       case %(method * *): methods.push(member);
   return %((name $name) (kind $kind) (type $type) (fields $fields)
            (methods $(methods.list_free())));

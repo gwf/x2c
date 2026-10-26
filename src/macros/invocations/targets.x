@@ -27,11 +27,11 @@ static void _bind_name_arguments(
     if (parameter.assoc(<kind>) == <name>) {
       Var names = captures.car().list().assoc(<value>);
       List values = parameter.assoc(<sequence>).int()
-                  ? names : %($names);
+                  ? names : $(names);
       foreach (Var value in values) {
         String name = value is <list>
           ? Ast.binding_spelling(value) : value;
-        c.sym.reference(%($name), NULL);
+        c.sym.reference($(name), NULL);
       }
     }
     parameters = parameters.cdr();
@@ -221,7 +221,7 @@ static List _positional_target(Compiler c, Symbol position) {
    that item as the construction the template requires. */
 static List _capture(Decoration &d, List target) {
   Compiler c = d.c;
-  List targets = target.car() == <seq> ? target.cdr() : %($target);
+  List targets = target.car() == <seq> ? target.cdr() : $(target);
   Array captured_targets = [];
   foreach (List item in targets)
     captured_targets.push(_capture_source(c, item, d.start, c.token));
@@ -264,7 +264,7 @@ static List _bind_body(Compiler c, List node, List decorated) {
   with (c.return_type = declared) {
     result = c.bind_syntax(node, <block>, c.return_type);
   }
-  List items = result.car() == <seq> ? result.cdr() : %($result);
+  List items = result.car() == <seq> ? result.cdr() : $(result);
   match (decorated) case %(function ?rtype ?declarator ?):
     result = %(seq (function $rtype $declarator (block @items)));
   return result;

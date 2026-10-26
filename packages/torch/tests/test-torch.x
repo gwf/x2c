@@ -46,7 +46,7 @@ static void torch_creation_and_queries(void) {
 static void torch_integers_are_exact(void) {
   $test.scoped();
   long huge = 9007199254740993;
-  Tensor whole = Tensor.of(%($huge), %(1), XT_INT64);
+  Tensor whole = Tensor.of($(huge), %(1), XT_INT64);
   EXPECT_INT_EQ(whole.item().integer(), huge);
   EXPECT_INT_EQ(whole.to_values()[0].integer(), huge);
   EXPECT_INT_EQ(Tensor.scalar_integer(huge, XT_INT64).item().integer(), huge);
@@ -113,8 +113,8 @@ static void torch_indexing(void) {
   EXPECT_INT_EQ(m.argmax(1, 0).to_values()[0].integer(), 1);
   EXPECT_NEAR(m.max().item().double(), 4.0, 1e-12);
   EXPECT_NEAR(m.min().item().double(), 1.0, 1e-12);
-  EXPECT_NEAR(Tensor.cat(%($m $m), 0).sum().item().double(), 20.0, 1e-12);
-  EXPECT_INT_EQ(Tensor.stack(%($m $m), 0).rank(), 3);
+  EXPECT_NEAR(Tensor.cat($(m, m), 0).sum().item().double(), 20.0, 1e-12);
+  EXPECT_INT_EQ(Tensor.stack($(m, m), 0).rank(), 3);
   EXPECT_NEAR(m.softmax(1).sum().item().double(), 2.0, 1e-12);
   EXPECT_INT_EQ(m.eq(m).sum().item().integer(), 4);
   Tensor order = Torch.randperm(6);
@@ -192,7 +192,7 @@ static void torch_modules(void) {
   List names = %();
   foreach (List pair, model.named_parameters()) {
     String name = pair[0].str();
-    names = names.append(%($name));
+    names = names.append($(name));
   }
   EXPECT_INT_EQ(model.parameters().len(), 4);
   EXPECT_STR_EQ(names.str(), "( l1.weight l1.bias l2.weight l2.bias )");

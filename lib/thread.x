@@ -559,7 +559,7 @@ void Thread.finish_all(Array pending) {
         worker.join();
     }
     catch %(?code *detail):
-      failures = cons(Error.snapshot(%($code @detail)), failures);
+      failures = cons(Error.snapshot($(code, @detail)), failures);
     if (worker &&
         __atomic_load_n(&worker.state, __ATOMIC_SEQ_CST) == <joined>) {
       pending.remove(i);
