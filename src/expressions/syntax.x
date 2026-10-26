@@ -335,7 +335,7 @@ module int _casts_to_template_typedef(Compiler c, List declaration) {
    `enum`. */
 static int _casts_to_typedef_name(Compiler c, List declaration) {
   List base = declaration.cadr();
-  if (!c.macro_holes || !(base ~= %(* ?(String name)))) return 0;
+  if (!c.macro_holes || !(base ~= %(* (!is ? type string)))) return 0;
   foreach (Var word in base)
     if (word == <struct> || word == <union> || word == <enum>) return 0;
   return 1;
