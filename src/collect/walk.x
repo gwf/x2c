@@ -165,8 +165,7 @@ static List _syntax_effects(List entry) {
 /* A prelude source's entry: cached in this process, linked into the
    compiler, read from its interface beside a stage build, or walked cold
    once. */
-static List _prelude_entry(
-  Compiler c, String runtime, String canonical) {
+static List _prelude_entry(Compiler c, String runtime, String canonical) {
   List entry = _entry(c, canonical);
   if (entry) return entry;
   Map scratch = {}, visited = {};
@@ -385,14 +384,15 @@ static void _include_file(FileWalk &w, String target, int angle) {
   if (!path || (covered && !Path.is_x2c_source(path))) return;
   String canonical = _canonical_path(path);
   w.c.add_translation_dependency(canonical);
-  if (!(canonical in w.visited)) {
+  Var state;
+  if (!w.visited.try_get(canonical, state)) {
     w.visited[canonical] = 1;
     List entry = _collection_entry(w.c, canonical);
     if (!entry) entry = _walk_cold(w.c, target, canonical, w.globs, w.visited);
     _replay_cached(
       w.c, entry, canonical, w.globs, w.visited, NULL);
   }
-  else if (w.visited[canonical] is <array>)
+  else if (state is <array>)
     _replay_included(w.c, w.globs, canonical, {}, NULL, w.visited);
   _cache_dependency(
     w.dependencies, canonical, _walked_hash(w.c, target, canonical));
@@ -401,8 +401,7 @@ static void _include_file(FileWalk &w, String target, int angle) {
 
 /* Preserve absent candidates and alias identity, not directory timestamps.
    Canonical selected files already carry their ordinary content hashes. */
-static void _include_search_dependency(
-  FileWalk &w, String candidate) {
+static void _include_search_dependency(FileWalk &w, String candidate) {
   if (!candidate.startswith("/")) candidate = %"cwd:$candidate";
   if (!candidate.startswith("cwd:") && w.c.sources.exists(candidate) &&
       candidate == _canonical_path(candidate)) return;
@@ -418,8 +417,7 @@ module String _include_search_hash(Compiler c, String path) {
 }
 
 /* A file still being walked, as in an include cycle, has no entry yet. */
-static String _walked_hash(
-  Compiler c, String target, String canonical) {
+static String _walked_hash(Compiler c, String target, String canonical) {
   Var walked = _process_cache()[canonical];
   if (walked is void)
     return _content_hash(_include_text(c, target, canonical));
