@@ -96,6 +96,18 @@ def saved_queries(p, snapshot):
     writes = p.query(snapshot, op="traverse", select={"name": "snapshot_entry"},
                      relations=["calls", "writes"], where={"kind": "field"})
     assert writes["total"] >= 1, writes
+    value_types = p.find(snapshot, kind="type", name="SnapshotValue")["results"]
+    value_type = next(row for row in value_types
+                      if row.get("namespace") == "struct" and
+                      Path(row["file"]).name == "snapshot-a.x")
+    value_fields = p.query(snapshot, op="traverse", select={"id": value_type["id"]},
+                            relations=["contains"], depth=1, where={"kind": "field"})
+    writers = p.query(snapshot, op="traverse",
+                       select={"any": [{"id": row["id"]} for row in value_fields["results"]]},
+                       relations=["writes", "mutates"], direction="in", depth=1,
+                       where={"all": [{"kind": "function"}, {"reachable_from": {
+                           "select": {"name": "snapshot_entry"}, "relations": ["calls"]}}]})
+    assert names(writers) == {"snapshot_leaf"}, writers
     representation = p.query(snapshot, op="traverse", select={"name": "snapshot_layout"},
                              relations=["representation"], depth=1)
     assert representation["total"] > 1, representation

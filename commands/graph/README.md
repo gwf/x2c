@@ -629,7 +629,14 @@ Find reachable direct field writes by following calls and writes together:
 ```
 
 To restrict that answer to one type, first find its fields through `contains`
-and use their IDs in an `any` filter. To find functions requiring a type's
+and use their IDs in an `any` filter. To return the reachable functions that
+directly write those fields, reverse the write edges and intersect callers:
+
+```json
+{"op":"traverse","select":{"any":[{"id":"FIELD_ID"}]},"relations":["writes","mutates"],"direction":"in","depth":1,"where":{"all":[{"kind":"function"},{"reachable_from":{"select":{"name":"snapshot_entry"},"relations":["calls"]}}]}}
+```
+
+To find functions requiring a type's
 representation, traverse `representation` in reverse from the type. Inspect
 the `via` evidence before concluding that making the type opaque is safe.
 
