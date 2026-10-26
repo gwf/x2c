@@ -416,10 +416,10 @@ static List _declared(Compiler c, List decl, Token meta, Token first) {
   c.record_declaration_visibility(decl);
   if (meta)
     _definition_source(c, decl, meta.line, c.definition_doc(meta), NULL);
-  else
-    match (decl)
-      case %(declare ? (bindings (bind (binding ? ?(String name)) *))):
-        if (decl.type_from_ast().is_function()) c.meta_comptime.del(name);
+  else if (decl ~= %(declare ? (bindings
+                  (bind (binding ? ?(String name)) *))) &&
+           decl.type_from_ast().is_function())
+    c.meta_comptime.del(name);
   return decl;
 }
 
@@ -428,7 +428,7 @@ static List _declared(Compiler c, List decl, Token meta, Token first) {
    operation exists only inside the compiler, with no runtime form. */
 static List _defined(
   Compiler c, List decl, Token meta, int native, Token first) {
-  match (decl) case %(seq *):
+  if (decl ~= %(seq *))
     $fail.parse_function_row(c, c.token);
   List function;
   Token tokens = c.tokenizer.tokens;
@@ -457,9 +457,8 @@ static List _defined(
 static void _reject_expanded_meta(Compiler c, List decl, Token meta) {
   if (!c.macro_holes) return;
   String name = "";
-  match (decl)
-    case %(declare ? (bindings (bind (binding ? ?(String own)) *))):
-      name = own;
+  if (decl ~= %(declare ? (bindings (bind (binding ? ?(String own)) *))))
+    name = own;
   $fail.parse_meta_constructed(c, meta, name);
 }
 
@@ -562,10 +561,9 @@ static void _publish_definition(
     function, decl.type_from_ast().canonicalize()))
     c.install_meta_function(function, staged);
   c.record_declaration_visibility(function);
-  if (!meta)
-    match (function)
-      case %(function ? (bind (binding ? ?(String name)) *) ?):
-        c.meta_comptime.del(name);
+  if (!meta && function ~= %(
+        function ? (bind (binding ? ?(String name)) *) ?))
+    c.meta_comptime.del(name);
 }
 
 /* A generated default that completes a documented `meta` prototype
@@ -645,20 +643,19 @@ static Map _hole_spellings(Compiler c) {
   String file = Path.resolved_absolute(c.filename);
   foreach (List frame in c.macro_stack)
     foreach (List binding in frame[2])
-      match (binding)
-        case %(? (src (source ?(String path) ?(int begin) ?(int end))
-                      ?syntax)):
-          if (c.text && path == file)
-            written[syntax] = String.new_len(c.text + begin, end - begin);
+      if (binding ~= %(? (src (source ?(String path) ?(int begin)
+                                  ?(int end)) ?syntax)) &&
+          c.text && path == file)
+        written[syntax] = String.new_len(c.text + begin, end - begin);
   foreach (List binding in c.macro_stack.car().list()[2]) {
     (Var binder, Var value) = binding;
     Var syntax = value;
-    match (value) case %(src ? ?captured): syntax = captured;
+    if (value ~= %(src ? ?captured)) syntax = captured;
     Var spelling = syntax is <string> ? syntax : void;
-    match (value)
-      case %(src (source ?(String path) ?(int begin) ?(int end)) ?):
-        if (spelling is void && c.text && path == file)
-          spelling = String.new_len(c.text + begin, end - begin);
+    if (value ~= %(src (source ?(String path) ?(int begin)
+                         ?(int end)) ?) &&
+        spelling is void && c.text && path == file)
+      spelling = String.new_len(c.text + begin, end - begin);
     if (spelling is void) spelling = written[syntax];
     if (spelling is not void) spellings[binder.str()[1:]] = spelling;
   }
@@ -670,9 +667,8 @@ module List _bind_named_type(Compiler c, String name, Var type) {
   if (!c.sym.get_exact(key)) c.sym.define(key, %(typedef $name));
   if (!type.list_payload()) return %(seq);
   List declaration = type.type().declaration_ast(key);
-  match (declaration)
-    case %(declare ?base ?bindings):
-      return c.bind_syntax(%(typedef $base $bindings), <unit>, NULL);
+  if (declaration ~= %(declare ?base ?bindings))
+    return c.bind_syntax(%(typedef $base $bindings), <unit>, NULL);
   return _construction_error(c);
 }
 
@@ -782,21 +778,19 @@ static void _alias_storage(Compiler c, Var base) {
 
 static void _alias_parameters(Compiler c, List parameters) {
   foreach (Var parameter in parameters)
-    match (parameter) case %(...):
-      $fail.parse_alias_variadic(c, c.token);
+    if (parameter ~= %(...)) $fail.parse_alias_variadic(c, c.token);
 }
 
 static List _alias_target(
   Compiler c, List declaration, Var binding, List native_syntax) {
   List native = c.resolve_expression(native_syntax, c.token);
-  match (native)
-    case %(expr (!set ?native_type (*)) $($source_identifier_content(
-        %(?native_binding)))): {
-      if (native_type && !native_type.type().is_function())
-        $fail.parse_alias_function(c, c.token, native_type);
-      if (List.equal(binding, native_binding))
-        $fail.parse_alias_self(c, c.token);
-      return %(falias $declaration $native_binding);
-    }
+  if (native ~= %(expr (!set ?native_type (*))
+                  $($source_identifier_content(%(?native_binding))))) {
+    if (native_type && !native_type.type().is_function())
+      $fail.parse_alias_function(c, c.token, native_type);
+    if (List.equal(binding, native_binding))
+      $fail.parse_alias_self(c, c.token);
+    return %(falias $declaration $native_binding);
+  }
   $fail.parse_alias_identifier(c, c.token);
 }
