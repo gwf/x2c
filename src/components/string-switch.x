@@ -114,7 +114,8 @@ meta static Code _string_switch_helper(Type type, List labels) {
 
 $rewrite($switched)
 /** Lowers a switch on a String to an integer switch on its selector's
-    index among the labels it owns, or declines another switch. */
+    index among the labels it owns, or declines another switch.
+*/
 meta Code string_switch_lowering(Code node) {
   match (node) case $switched(?selector, ?body): {
     Type type = selector.cadr();
