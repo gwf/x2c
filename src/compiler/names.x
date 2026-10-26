@@ -1,4 +1,8 @@
-// generated names
+/*  names.x -- compiler-generated names
+
+    Allocates private C spellings per stem and anonymous aggregate identities
+    per source file; identities are never emitted.
+*/
 
 /** Allocates the next compiler-private C spelling for `stem`.
     Related compilers increment the same per-stem counter.
