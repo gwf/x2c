@@ -15,7 +15,8 @@ struct MetaBindings {
 };
 
 /** Creates an empty table in Scopes of its own, so creating it under a
-    narrower Context leaves nothing there. */
+    narrower Context leaves nothing there.
+*/
 MetaBindings MetaBindings.new(void) {
   Scope scope = Scope.new_named("meta bindings");
   MetaBindings b = Scope.calloc_in(&scope, 1, sizeof(struct MetaBindings));
@@ -55,7 +56,8 @@ MetaBindings Compiler.bindings(Compiler c) {
 
 /** Writes the callable compile-time code reaches as `name` to `out`: the
     unit's binding, or else a built-in algorithm or one of the compiler's
-    own operations. Returns whether there is one. */
+    own operations. Returns whether there is one.
+*/
 int Compiler.meta_binding(Compiler c, String name, Var &out) =>
   (c.meta_bindings && c.meta_bindings.try_get(name, out)) ||
   Compiler.builtin_module().try_get(name, out) ||
@@ -69,7 +71,8 @@ int Compiler.meta_binding(Compiler c, String name, Var &out) =>
 
 /** The shallow interface retains the advertisement separately from the C
     declaration. That lets a client install the trusted evaluator binding
-    without repeating the marker in every translation unit. */
+    without repeating the marker in every translation unit.
+*/
 void Compiler.record_native_meta_effect(
   Compiler c, List declaration, Token marker) {
   if (c.source_private < 0) return;
@@ -97,7 +100,8 @@ module String _native_meta_name(
 }
 
 /** Records the native advertisements retained by included interfaces. Each
-    binds on first use, so a unit with no compile-time code pays nothing. */
+    binds on first use, so a unit with no compile-time code pays nothing.
+*/
 void Compiler.install_native_meta_effects(Compiler c, Map globs) {
   List unit = $(Path.resolved_absolute(c.filename));
   foreach (Var (key, value) in globs) {
@@ -119,7 +123,8 @@ void Compiler.install_native_meta_effects(Compiler c, Map globs) {
     code calls `name`. Returns whether the unit now binds it. A
     declaration-producing macro can call one during collection, before
     the parse installs the advertisements, so the first lookup there
-    installs the ones visible so far. */
+    installs the ones visible so far.
+*/
 int Compiler.bind_native_meta(Compiler c, String name) {
   if (_bind_project_meta(c, name)) return 1;
   Var signature, bound;
@@ -211,7 +216,8 @@ static void _meta_native_warn_duplicate(
 /** Answers whether the native target `function` matches the declared
     `signature`. A declared `Func` parameter matches a target's `Var`
     parameter, which takes the compile-time callable and adapts it. Aliases
-    of one native type match each other. */
+    of one native type match each other.
+*/
 int Compiler.native_meta_accepts(Compiler c, Var function, List signature) {
   if (function is not <func>) return 0;
   List target =
@@ -247,7 +253,8 @@ static List _native_parameter(Compiler c, Type parameter) {
 }
 
 /** Returns the selected file-backed native module that supplies `name`,
-    with its native `type`, or NULL for a linked or absent target. */
+    with its native `type`, or NULL for a linked or absent target.
+*/
 String Compiler.native_meta_module(Compiler c, String name, Type &type) {
   if (!c.bind_native_meta(name)) return NULL;
   List suppliers = _native_module_suppliers(name);
@@ -411,7 +418,8 @@ static int _takes_callback(List signature) {
 /** Returns how many arguments a call of the iterator operation `signature`
     passes when it omits its destination, or -1 for another signature. An
     iterator operation takes its destination last, and its native target is
-    `NAME_into`. */
+    `NAME_into`.
+*/
 int Compiler.iterator_arity(List signature) {
   match (signature)
     case %((func ?(List parameters)) "Iter"):
