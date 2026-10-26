@@ -219,7 +219,8 @@ module List _build_func_adapter(
 
 /** Builds an adapter with `type`'s public signature that passes its own
     Func as the first argument of `target`, before the declared arguments.
-    The target can read per-instance bindings with `Func.context`. */
+    The target can read per-instance bindings with `Func.context`.
+*/
 List Compiler.context_func_adapter(Compiler c, Type type, List target) {
   List self = c.sym.introduce(c.fresh_name("func_binding"));
   return _build_func_adapter(
@@ -286,7 +287,8 @@ static List _func_reads(
 /** Returns `(SIGNATURE (STORAGE READ)...)` for an adapter of a `Var`
     function taking the lambda parameter rows `entries`: its Func
     signature as a cached `List`, and each argument as `_func_reads`
-    reads it from `argv` of the Func `fn`. */
+    reads it from `argv` of the Func `fn`.
+*/
 List Compiler.func_parameters(Compiler c, List entries, List fn, List argv) {
   List types = c.lambda_param_types(entries);
   Type adapter = c.sym.resolve_key(%("FuncAdapter"));
