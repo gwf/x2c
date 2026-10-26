@@ -43,7 +43,8 @@ static macro Stmt $fail.meta_helper_client_helper_stopped(
 
 /** Reports a meta function's error `message` with `notes` under
     `category` at the position recorded first in or around `node`, or at
-    `site` when it has none. A `fatal` report does not return. */
+    `site` when it has none. A `fatal` report does not return.
+*/
 void Compiler.report_meta_error(
   Compiler c, Var node, Symbol category, String message, Token site,
   List notes, int fatal) {
@@ -67,7 +68,8 @@ static int _syntax_origin(Var node) {
 }
 
 /** Owns one compiled helper's configuration and process. Callers close it
-    after its last call; closing again is harmless. */
+    after its last call; closing again is harmless.
+*/
 typedef struct MetaHelper {
   String path, snapshot;
   Map failures, units;
@@ -99,13 +101,15 @@ static typedef struct Call {
     the helper, which is reported at `site` and started again for the next
     call. The call runs in the table of the file that wrote it: an included
     file's own, which runs the constants it computes as its own translation
-    does, or else the unit's. */
+    does, or else the unit's.
+*/
 Var Compiler.meta_helper_call(
   Compiler c, String name, Token site, List arguments, String provider) =>
   _call_helper(c, name, site, arguments, provider, <call>);
 
 /** Calls a loaded function with data values and helper-owned selections.
-    Selectors resolve inside the helper. No address crosses its pipes. */
+    Selectors resolve inside the helper. No address crosses its pipes.
+*/
 Var Compiler.loaded_helper_call(
   Compiler c, String name, Token site, List arguments, String provider) =>
   _call_helper(c, name, site, arguments, provider, <load-call>);
@@ -446,7 +450,8 @@ static void _stopped(Call &call, String reason) {
 
 /** Creates an independent helper at `path`, with failures by table index
     and source paths mapped to their table indices. No process starts until
-    a call needs it. The caller keeps the canonical configuration values. */
+    a call needs it. The caller keeps the canonical configuration values.
+*/
 MetaHelper MetaHelper.new(String path, Map failures, Map units) {
   MetaHelper helper = Scope.malloc_finalized(sizeof(struct MetaHelper), _drop);
   *helper = (struct MetaHelper) {
@@ -460,7 +465,8 @@ MetaHelper MetaHelper.new(String path, Map failures, Map units) {
 }
 
 /** Retains this helper's executable independently of later cache rebuilds.
-    The copy lasts until close, including across helper restarts. */
+    The copy lasts until close, including across helper restarts.
+*/
 void MetaHelper.retain_executable(MetaHelper helper) {
   helper.snapshot = Path.temp_dir();
   String path = %"$(helper.snapshot)/helper";
@@ -469,7 +475,8 @@ void MetaHelper.retain_executable(MetaHelper helper) {
 }
 
 /** Uses `helper` for ordinary translation, retaining its configuration
-    through process shutdown. Replaces and closes the preceding helper. */
+    through process shutdown. Replaces and closes the preceding helper.
+*/
 void Compiler.use_meta_helper(MetaHelper helper) {
   if (primary) _close(primary);
   if (!primary_scope) Scope.shutdown_hook(_shutdown);
@@ -483,7 +490,8 @@ void Compiler.use_meta_helper(MetaHelper helper) {
 
 /** Returns why this helper cannot call the functions of `provider`: the
     helper or the provider's table did not build. Returns NULL when it can.
-    Does not invoke a function or reset native state. */
+    Does not invoke a function or reset native state.
+*/
 String MetaHelper.failure(MetaHelper m, String provider) {
   MetaHelper previous = active;
   active = m;
@@ -492,7 +500,8 @@ String MetaHelper.failure(MetaHelper m, String provider) {
 }
 
 /** Selects the table of the unit at `filename` for the calls that follow,
-    and resets the unit's `meta static` values before the first one. */
+    and resets the unit's `meta static` values before the first one.
+*/
 void Compiler.begin_meta_unit(Compiler c, String filename) {
   MetaHelper previous = active;
   active = c.meta_helper ? c.meta_helper : primary;
@@ -510,7 +519,8 @@ static int _table_of(String path, int otherwise) {
 }
 
 /** Stops the helper this process runs, which a translation worker does
-    when its units are done and every process does as it ends. */
+    when its units are done and every process does as it ends.
+*/
 void Compiler.stop_meta_helper(void) {
   if (!primary) return;
   MetaHelper previous = active;
@@ -520,7 +530,8 @@ void Compiler.stop_meta_helper(void) {
 }
 
 /** Stops the process while retaining its executable and configuration.
-    Its next call starts with fresh native state. */
+    Its next call starts with fresh native state.
+*/
 void MetaHelper.restart(MetaHelper helper) {
   MetaHelper previous = active;
   active = helper;
