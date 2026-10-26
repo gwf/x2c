@@ -36,7 +36,7 @@ meta static int _raise_immutable(Type type) {
    is checked when the raise runs. */
 meta static Code _raise_value(Code value) {
   value = value.promoted();
-  match (value) case %(expr ?matched ?): {
+  if (value ~= %(expr ?matched ?)) {
     Type type = matched;
     if (_raise_immutable(type)) return value;
     $report.raise_mutable_detail(NULL, type);
@@ -49,7 +49,7 @@ $rewrite($raised)
     already have their types.
 */
 meta Code raise_lowering(Code node) {
-  match (node) case $raised(?code, *details): {
+  if (node ~= $raised(?code, *details)) {
     Code symbol = ((Code) code).convert(%("Symbol"));
     int changed = symbol != code, index = 0;
     Array converted = [];
