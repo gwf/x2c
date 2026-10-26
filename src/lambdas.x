@@ -31,7 +31,7 @@ List Compiler.lift_lambda_types(Compiler c, List function) {
       case %((!or declare typedef) ?(Type base) (bindings *bindings)): {
         Type type = base.base_type();
         int anonymous_member =
-          type.match(%((!or struct union) (gensym ? ?) ?)) &&
+          type ~= %((!or struct union) (gensym ? ?) ?) &&
           (!bindings || bindings === %((bind () ())));
         if (!anonymous_member &&
             (type.is_aggregate_tag_body() || type.is_enum_tag_body())) {
