@@ -1647,9 +1647,9 @@ Public functions:
 `List.contains`, `List.nth_cdr`, `List.getindex`, `List.get`, `List.assoc`,
 `List.head`, `List.tail`, `List.subseq`, `List.getslice`, `List.unpack_n`,
 `List.unpack_vars_n`, `Array.list`, `Array.list_free`, `List.array`,
-`Map.list`, `Iter.list`, `List.append`, `List.concat_n`, `List.list_n`,
-`List.reverse`, `List.map`, `List.filter`, `List.foldl`, `List.find`,
-`List.any`, `List.all`, `List.zip_with`, `List.map2`, `List.sort`,
+`Map.list`, `Iter.list`, `List.append`, `List.concat`, `List.concat_n`,
+`List.list_n`, `List.reverse`, `List.map`, `List.filter`, `List.foldl`,
+`List.find`, `List.any`, `List.all`, `List.zip_with`, `List.map2`, `List.sort`,
 `List.sort_with`, `List.sort_by`, `List.unique`, `List.flatten`,
 `List.flatten_all`, `List.sublis`, `List.str`, `List.write_str`, `List.repr`,
 `List.write_repr`

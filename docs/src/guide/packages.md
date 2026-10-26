@@ -386,7 +386,7 @@ void show_readings(String filename) {
     "SELECT url, status FROM observation WHERE status >= ? ORDER BY url"
   );
   defer query.free();
-  query.bind(%(400));
+  query.bind(400);
   foreach (List row in query)
     printf("%s", %"$(row[0]): HTTP $(row[1])\n");
 }

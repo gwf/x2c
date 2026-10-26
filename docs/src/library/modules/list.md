@@ -19,6 +19,7 @@ Linked list with `Var` elements.
 | [`List.any`](#List.any) | True when at least one element satisfies `pred` by ordinary `Var` truthiness. |
 | [`List.append`](#List.append) | Returns the concatenation of `a` and `b`. |
 | [`List.array`](#List.array) | Returns a new `Array` holding the elements of `lst` in order. |
+| [`List.concat`](#List.concat) | Returns the concatenation of the List arguments in order. |
 | [`List.concat_n`](#List.concat_n) | Returns the concatenation of exactly `list_count` `List` arguments. |
 | [`List.contains`](#List.contains) | Reports whether `lst` contains `key` by `Var` equality. |
 | [`List.filter`](#List.filter) | Returns the elements `pred` accepts by ordinary `Var` truthiness. |
@@ -190,6 +191,20 @@ The partial result is freed.
 
 Source: `lib/list/building.x:38`
 
+<a id="List.concat"></a>
+#### List.concat
+
+`List List.concat(.... lists)`
+
+Returns the concatenation of the List arguments in order.
+Each argument is one List; `@lists` splices a List of Lists. No arguments
+returns nil. The final nonempty List becomes the shared tail, and only
+preceding cells are rebuilt. Inputs are not modified.
+
+**Raises:** `<alloc-fail>` or `<size-limit>` while constructing the result.
+
+Source: `lib/list/building.x:92`
+
 <a id="List.concat_n"></a>
 #### List.concat_n
 
@@ -202,7 +217,7 @@ becomes the shared tail of the result.
 **Raises:** `<size-limit>` when `list_count` exceeds the supported index
 range, or `<alloc-fail>` while constructing the result.
 
-Source: `lib/list/building.x:92`
+Source: `lib/list/building.x:103`
 
 <a id="List.contains"></a>
 #### List.contains
@@ -361,7 +376,7 @@ terminator. A zero count returns `nil`.
 **Raises:** `<void-op>` when an argument is `void`, or `<alloc-fail>` or
 `<size-limit>` while constructing the result.
 
-Source: `lib/list/building.x:123`
+Source: `lib/list/building.x:134`
 
 <a id="List.map"></a>
 #### List.map
@@ -412,7 +427,7 @@ is untouched. Reversing `nil` gives `nil`.
 
 **Raises:** `<alloc-fail>` while constructing the result.
 
-Source: `lib/list/building.x:146`
+Source: `lib/list/building.x:157`
 
 <a id="List.sort"></a>
 #### List.sort

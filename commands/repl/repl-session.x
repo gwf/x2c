@@ -88,7 +88,7 @@ static int _repl_puts(String text) {
 
 /* Interpreted printf: the REPL's fixed-signature format, written out. */
 static int _repl_printf(String format, List values) {
-  String text = format.format(values);
+  String text = format.format(@values);
   _write_stdout(text, 0, <printf>);
   return text.len();
 }

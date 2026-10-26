@@ -25,7 +25,7 @@ owns a private `Scope` for sink state. An invalid level returns NULL.
 **Raises:** `<alloc-fail>` when the `Logger` or its private `Scope` cannot be
 allocated.
 
-Source: `lib/logger.x:808`
+Source: `lib/logger.x:820`
 
 ## Advanced and interop API
 
@@ -68,40 +68,43 @@ Source: `lib/logger.x:808`
 
 #### log_debug
 
-`void log_debug(Symbol category, List fields)`
+`void log_debug(Symbol category, .... fields)`
 
 Logs borrowed `fields` globally at debug level under `category`.
+Pass separate `(key value)` Lists or splice an existing `@fields` List.
 Delivery and failure behavior follow `log_event`.
 
-Source: `lib/logger.x:793`
+Source: `lib/logger.x:805`
 
 #### log_error
 
-`void log_error(Symbol category, List fields)`
+`void log_error(Symbol category, .... fields)`
 
 Logs borrowed `fields` globally at error level under `category`.
+Pass separate `(key value)` Lists or splice an existing `@fields` List.
 Delivery and failure behavior follow `log_event`.
 
-Source: `lib/logger.x:796`
+Source: `lib/logger.x:808`
 
 #### log_event
 
-`void log_event(Symbol level, Symbol category, List fields)`
+`void log_event(Symbol level, Symbol category, .... fields)`
 
 Delivers one event synchronously through the current global `Logger`.
 With no global `Logger` this is a no-op; otherwise delivery and failures
 are those of `Logger.log`.
 
-Source: `lib/logger.x:697`
+Source: `lib/logger.x:702`
 
 #### log_fatal
 
-`void log_fatal(Symbol category, List fields)`
+`void log_fatal(Symbol category, .... fields)`
 
 Logs borrowed `fields` globally at fatal level under `category`.
+Pass separate `(key value)` Lists or splice an existing `@fields` List.
 Delivery and failure behavior follow `log_event`.
 
-Source: `lib/logger.x:797`
+Source: `lib/logger.x:809`
 
 #### log_get_global_logger
 
@@ -109,16 +112,17 @@ Source: `lib/logger.x:797`
 
 Returns the borrowed current global `Logger`, or NULL when none is set.
 
-Source: `lib/logger.x:690`
+Source: `lib/logger.x:696`
 
 #### log_info
 
-`void log_info(Symbol category, List fields)`
+`void log_info(Symbol category, .... fields)`
 
 Logs borrowed `fields` globally at info level under `category`.
+Pass separate `(key value)` Lists or splice an existing `@fields` List.
 Delivery and failure behavior follow `log_event`.
 
-Source: `lib/logger.x:794`
+Source: `lib/logger.x:806`
 
 #### log_set_global_logger
 
@@ -129,7 +133,7 @@ value. Neither `Logger` is flushed, freed, or otherwise retained by this
 call; the installed `Logger` must remain live until it is replaced or
 shutdown runs.
 
-Source: `lib/logger.x:682`
+Source: `lib/logger.x:688`
 
 #### log_should_log
 
@@ -137,25 +141,27 @@ Source: `lib/logger.x:682`
 
 Reports whether the current global `Logger` would deliver this event.
 
-Source: `lib/logger.x:197`
+Source: `lib/logger.x:203`
 
 #### log_trace
 
-`void log_trace(Symbol category, List fields)`
+`void log_trace(Symbol category, .... fields)`
 
 Logs borrowed `fields` globally at trace level under `category`.
+Pass separate `(key value)` Lists or splice an existing `@fields` List.
 Delivery and failure behavior follow `log_event`.
 
-Source: `lib/logger.x:792`
+Source: `lib/logger.x:804`
 
 #### log_warn
 
-`void log_warn(Symbol category, List fields)`
+`void log_warn(Symbol category, .... fields)`
 
 Logs borrowed `fields` globally at warn level under `category`.
+Pass separate `(key value)` Lists or splice an existing `@fields` List.
 Delivery and failure behavior follow `log_event`.
 
-Source: `lib/logger.x:795`
+Source: `lib/logger.x:807`
 
 ### `Logger`
 
@@ -172,7 +178,7 @@ argument returns NULL.
 **Raises:** `<alloc-fail>` or `<bad-enc>` when sink state cannot be
 represented.
 
-Source: `lib/logger.x:383`
+Source: `lib/logger.x:389`
 
 <a id="Logger.add_memory_sink"></a>
 #### Logger.add_memory_sink
@@ -191,7 +197,7 @@ Registration may raise `<alloc-fail>` or `<bad-enc>` while constructing
 sink state. Later event delivery may raise `<alloc-fail>`, `<size-limit>`,
 or `<bad-enc>` while retaining values.
 
-Source: `lib/logger.x:581`
+Source: `lib/logger.x:587`
 
 <a id="Logger.add_sink"></a>
 #### Logger.add_sink
@@ -208,7 +214,7 @@ order.
 **Raises:** `<bad-state>` during active sink delivery, or `<alloc-fail>` when
 the sink cannot be allocated.
 
-Source: `lib/logger.x:256`
+Source: `lib/logger.x:262`
 
 <a id="Logger.add_stderr_sink"></a>
 #### Logger.add_stderr_sink
@@ -222,7 +228,7 @@ flushes after every event. A NULL `Logger` returns NULL.
 **Raises:** `<alloc-fail>` or `<bad-enc>` when sink state cannot be
 represented.
 
-Source: `lib/logger.x:372`
+Source: `lib/logger.x:378`
 
 <a id="Logger.clear_sinks"></a>
 #### Logger.clear_sinks
@@ -234,37 +240,40 @@ A NULL `Logger` does nothing.
 
 **Raises:** `<bad-state>` during active sink delivery.
 
-Source: `lib/logger.x:281`
+Source: `lib/logger.x:287`
 
 <a id="Logger.debug"></a>
 #### Logger.debug
 
-`void Logger.debug(Logger logger, Symbol category, List fields)`
+`void Logger.debug(Logger logger, Symbol category, .... fields)`
 
 Logs borrowed `fields` synchronously at debug level under `category`.
+Pass separate `(key value)` Lists or splice an existing `@fields` List.
 Delivery and failure behavior follow `Logger.log`.
 
-Source: `lib/logger.x:776`
+Source: `lib/logger.x:786`
 
 <a id="Logger.error"></a>
 #### Logger.error
 
-`void Logger.error(Logger logger, Symbol category, List fields)`
+`void Logger.error(Logger logger, Symbol category, .... fields)`
 
 Logs borrowed `fields` synchronously at error level under `category`.
+Pass separate `(key value)` Lists or splice an existing `@fields` List.
 Delivery and failure behavior follow `Logger.log`.
 
-Source: `lib/logger.x:779`
+Source: `lib/logger.x:789`
 
 <a id="Logger.fatal"></a>
 #### Logger.fatal
 
-`void Logger.fatal(Logger logger, Symbol category, List fields)`
+`void Logger.fatal(Logger logger, Symbol category, .... fields)`
 
 Logs borrowed `fields` synchronously at fatal level under `category`.
+Pass separate `(key value)` Lists or splice an existing `@fields` List.
 Delivery and failure behavior follow `Logger.log`.
 
-Source: `lib/logger.x:780`
+Source: `lib/logger.x:790`
 
 <a id="Logger.flush"></a>
 #### Logger.flush
@@ -276,7 +285,7 @@ A NULL `Logger` does nothing. A cause raised by a flusher transfers
 immediately, so later sinks are not flushed. A flusher must not mutate the
 sink list or free its `Logger`.
 
-Source: `lib/logger.x:308`
+Source: `lib/logger.x:314`
 
 <a id="Logger.free"></a>
 #### Logger.free
@@ -292,17 +301,18 @@ nothing.
 Either failure leaves the `Logger` and all sinks live; earlier flushers may
 already have run.
 
-Source: `lib/logger.x:826`
+Source: `lib/logger.x:838`
 
 <a id="Logger.info"></a>
 #### Logger.info
 
-`void Logger.info(Logger logger, Symbol category, List fields)`
+`void Logger.info(Logger logger, Symbol category, .... fields)`
 
 Logs borrowed `fields` synchronously at info level under `category`.
+Pass separate `(key value)` Lists or splice an existing `@fields` List.
 Delivery and failure behavior follow `Logger.log`.
 
-Source: `lib/logger.x:777`
+Source: `lib/logger.x:787`
 
 <a id="Logger.initialize"></a>
 #### Logger.initialize
@@ -317,7 +327,7 @@ shuts down.
 
 **Raises:** any cause from `Error` or `Logger` initialization.
 
-Source: `lib/logger.x:846`
+Source: `lib/logger.x:858`
 
 <a id="Logger.level_priority"></a>
 #### Logger.level_priority
@@ -327,14 +337,16 @@ Source: `lib/logger.x:846`
 Returns the ordering priority of a built-in level, or -1 when invalid.
 Priorities run from `<trace>` at zero through `<off>` at six.
 
-Source: `lib/logger.x:223`
+Source: `lib/logger.x:229`
 
 <a id="Logger.log"></a>
 #### Logger.log
 
-`void Logger.log(Logger logger, Symbol level, Symbol category, List fields)`
+`void Logger.log(Logger logger, Symbol level, Symbol category, .... fields)`
 
 Delivers one event synchronously to eligible sinks in registration order.
+Pass each field as a `(key value)` List, or splice a field List with
+`@fields`. With no fields the event's field List is empty.
 `fields` is borrowed for the call. All sinks observe one immutable event,
 sequence numbers increase per `Logger`, and elapsed time starts with its
 first delivered event. NULL, filtered, invalid, sinkless, or category-less
@@ -343,7 +355,7 @@ events do nothing. Fatal delivery flushes all sinks afterward.
 **Raises:** any cause from an emitter or fatal-event flusher; later callbacks
 are then skipped.
 
-Source: `lib/logger.x:148`
+Source: `lib/logger.x:149`
 
 <a id="Logger.min_level"></a>
 #### Logger.min_level
@@ -352,7 +364,7 @@ Source: `lib/logger.x:148`
 
 Returns `logger`'s minimum enabled level, or the null `Symbol` for NULL.
 
-Source: `lib/logger.x:227`
+Source: `lib/logger.x:233`
 
 <a id="Logger.remove_sink"></a>
 #### Logger.remove_sink
@@ -365,7 +377,7 @@ returns zero.
 
 **Raises:** `<bad-state>` during active sink delivery.
 
-Source: `lib/logger.x:268`
+Source: `lib/logger.x:274`
 
 <a id="Logger.set_min_level"></a>
 #### Logger.set_min_level
@@ -375,7 +387,7 @@ Source: `lib/logger.x:268`
 Sets the minimum enabled level and returns one.
 A NULL `Logger` or invalid level returns zero without changing anything.
 
-Source: `lib/logger.x:233`
+Source: `lib/logger.x:239`
 
 <a id="Logger.should_log"></a>
 #### Logger.should_log
@@ -387,7 +399,7 @@ A category names an event rather than filtering it. A NULL `Logger` or
 category, no sinks, `<off>`, an invalid level, or a filtered level returns
 zero.
 
-Source: `lib/logger.x:192`
+Source: `lib/logger.x:198`
 
 <a id="Logger.shutdown"></a>
 #### Logger.shutdown
@@ -406,7 +418,7 @@ a no-op.
 event delivery or a sink flusher. The failure may interrupt the remaining
 cleanup.
 
-Source: `lib/logger.x:867`
+Source: `lib/logger.x:879`
 
 <a id="Logger.sink_count"></a>
 #### Logger.sink_count
@@ -415,27 +427,29 @@ Source: `lib/logger.x:867`
 
 Returns the number of configured sinks, or zero for a NULL `Logger`.
 
-Source: `lib/logger.x:295`
+Source: `lib/logger.x:301`
 
 <a id="Logger.trace"></a>
 #### Logger.trace
 
-`void Logger.trace(Logger logger, Symbol category, List fields)`
+`void Logger.trace(Logger logger, Symbol category, .... fields)`
 
 Logs borrowed `fields` synchronously at trace level under `category`.
+Pass separate `(key value)` Lists or splice an existing `@fields` List.
 Delivery and failure behavior follow `Logger.log`.
 
-Source: `lib/logger.x:775`
+Source: `lib/logger.x:785`
 
 <a id="Logger.warn"></a>
 #### Logger.warn
 
-`void Logger.warn(Logger logger, Symbol category, List fields)`
+`void Logger.warn(Logger logger, Symbol category, .... fields)`
 
 Logs borrowed `fields` synchronously at warn level under `category`.
+Pass separate `(key value)` Lists or splice an existing `@fields` List.
 Delivery and failure behavior follow `Logger.log`.
 
-Source: `lib/logger.x:778`
+Source: `lib/logger.x:788`
 
 ## Runtime-internal callables
 
@@ -466,7 +480,7 @@ handler.
 
 **Raises:** any cause from `Logger` delivery.
 
-Source: `lib/logger.x:714`
+Source: `lib/logger.x:723`
 
 ## Public types
 

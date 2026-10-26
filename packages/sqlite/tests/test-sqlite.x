@@ -22,29 +22,33 @@ static void positional_parameters_reset_and_reuse(void) {
   Database db = auto Database.open(":memory:");
   db.execute("CREATE TABLE item(id INTEGER PRIMARY KEY, name TEXT)");
   Prepared insert = auto db.prepare("INSERT INTO item(name) VALUES (?)");
-  insert.bind(%("first")).execute();
+  insert.bind("first").execute();
   EXPECT_INT_EQ(db.changes(), 1);
   EXPECT_INT_EQ(db.last_insert_rowid(), 1);
-  insert.bind(%("second")).execute();
+  insert.bind("second").execute();
   EXPECT_INT_EQ(db.last_insert_rowid(), 2);
   EXPECT_INT_EQ(count_rows(db), 2);
 
   Prepared query = auto db.prepare("SELECT name FROM item WHERE id = ?");
-  query.bind(%(1));
+  query.bind(1);
   EXPECT_STR_EQ(query.next()[0].string(), "first");
   EXPECT_TRUE(query.next() == NULL);
   query.reset();
   EXPECT_STR_EQ(query.next()[0].string(), "first");
-  query.bind(%(2));
+  List parameters = %(2);
+  query.bind(@parameters);
   EXPECT_STR_EQ(query.next()[0].string(), "second");
   int caught = 0;
-  try { query.bind(%()); }
+  try { query.bind(); }
   catch %(bad-arg *_): { caught = 1; }
   EXPECT_TRUE(caught);
   caught = 0;
-  try { query.bind(%(1 2)); }
+  try { query.bind(1, 2); }
   catch %(bad-arg *_): { caught = 1; }
   EXPECT_TRUE(caught);
+  Prepared constant = auto db.prepare("SELECT 7");
+  constant.bind();
+  EXPECT_INT_EQ(constant.next()[0].long_long_value(), 7);
 }
 
 static void named_parameters_replace_all_values(void) {
@@ -116,7 +120,7 @@ static void bound_values_copy_binary_and_preserve_numeric_edges(void) {
   Var absent = NULL;
   long long minimum = LLONG_MIN;
   unsigned long long maximum = LLONG_MAX;
-  query.bind(%($absent $minimum $maximum 1.25 "text" $bytes));
+  query.bind(absent, minimum, maximum, 1.25, "text", bytes);
   memset(block.bytes, 'x', 3);
   List row = query.next();
   EXPECT_TRUE(row[0].is_null());
@@ -131,7 +135,7 @@ static void bound_values_copy_binary_and_preserve_numeric_edges(void) {
     "SELECT typeof(?), length(?), typeof(?), length(?)"
   );
   Bytes empty_blob = Bytes.new(1);
-  empty.bind(%($empty_blob $empty_blob "" ""));
+  empty.bind(empty_blob, empty_blob, "", "");
   List kinds = empty.next();
   EXPECT_STR_EQ(kinds[0].string(), "blob");
   EXPECT_INT_EQ(kinds[1].integer(), 0);
@@ -141,28 +145,28 @@ static void bound_values_copy_binary_and_preserve_numeric_edges(void) {
   Prepared integer = auto db.prepare("SELECT ?");
   unsigned long long outside = (unsigned long long) LLONG_MAX + 1;
   int caught = 0;
-  try { integer.bind(%($outside)); }
+  try { integer.bind(outside); }
   catch %(conv-range *_): { caught = 1; }
   EXPECT_TRUE(caught);
   outside = ULLONG_MAX;
   caught = 0;
-  try { integer.bind(%($outside)); }
+  try { integer.bind(outside); }
   catch %(conv-range *_): { caught = 1; }
   EXPECT_TRUE(caught);
   double nan = NAN;
   caught = 0;
-  try { integer.bind(%($nan)); }
+  try { integer.bind(nan); }
   catch %(conv-range *_): { caught = 1; }
   EXPECT_TRUE(caught);
 #if LDBL_MAX_EXP > DBL_MAX_EXP
   long double wide = LDBL_MAX;
   caught = 0;
-  try { integer.bind(%($wide)); }
+  try { integer.bind(wide); }
   catch %(conv-range *_): { caught = 1; }
   EXPECT_TRUE(caught);
 #endif
   double infinity = INFINITY;
-  integer.bind(%($infinity));
+  integer.bind(infinity);
   EXPECT_TRUE(isinf(integer.next()[0].floating()));
 }
 
@@ -172,7 +176,7 @@ static void native_failures_preserve_operation_code_and_message(void) {
              "INSERT INTO item VALUES(1)");
   Prepared insert = auto db.prepare("INSERT INTO item VALUES(?)");
   int caught = 0;
-  try { insert.bind(%(1)).execute(); }
+  try { insert.bind(1).execute(); }
   catch %(?code *detail): {
     caught = 1;
     EXPECT_STR_EQ(detail.assoc(<library>).string(), "SQLite");

@@ -90,15 +90,26 @@ static void list_append_concat_reverse(void) {
   List appended = left.append(mid);
   const int append_vals[] = { 1, 2, 3 };
   expect_list_ints("left.append(mid)", appended, append_vals, 3);
-  List combined = List.concat_n(3, left, mid, right);
+  List combined = List.concat(left, mid, right);
   const int combined_vals[] = { 1, 2, 3, 4, 5 };
-  if (!expect_list_ints("left.concat(mid, right)", combined, combined_vals, 5))
+  if (!expect_list_ints("List.concat(left, mid, right)", combined,
+                       combined_vals, 5))
     return;
   List reversed = combined.reverse();
   const int reversed_vals[] = { 5, 4, 3, 2, 1 };
   expect_list_ints("combined.reverse()", reversed, reversed_vals, 5);
   EXPECT_NULL(((List)NULL).reverse());
-  EXPECT_TRUE(List.concat_n(0) == NULL);
+  EXPECT_TRUE(List.concat() == NULL);
+  EXPECT_PTR_EQ(List.concat_n(3, left, mid, right), combined);
+  EXPECT_PTR_EQ(List.concat_n(0), NULL);
+  List lists = %($left $mid), empty = NULL;
+  EXPECT_PTR_EQ(List.concat(@empty), NULL);
+  EXPECT_PTR_EQ(List.concat(left), left);
+  EXPECT_PTR_EQ(List.concat(@lists, right, empty), combined);
+  EXPECT_PTR_EQ(combined.cdddr(), right);
+  Func concat = List.concat;
+  List called = concat(left, @(lists.cdr()), right);
+  EXPECT_PTR_EQ(called, combined);
 }
 
 static void list_head_tail_and_slicing(void) {

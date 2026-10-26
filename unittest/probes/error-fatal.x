@@ -147,7 +147,7 @@ int main(int argc, char **argv) {
   if (!strcmp(argv[1], "exit-in-sink")) {
     Logger.initialize();
     log_get_global_logger().add_sink(_exit_from_sink, NULL, void);
-    log_fatal(<exit-probe>, %((text "from a sink")));
+    log_fatal(<exit-probe>, %(text "from a sink"));
     return 1;
   }
   if (!strcmp(argv[1], "nested-shutdown-hook")) {

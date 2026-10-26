@@ -72,13 +72,9 @@ static macro Stmt $fail.compiler_brace_missing(Expr $c, Expr $site) =>
 
 static macro Stmt $debug.compiler_token(Expr $token) =>
   log_debug(
-    <tokenizer>, %(
-    (func "tokenize")
-    (type $($token.type))
-    (text $($token.text))
-    (line $($token.line))
-    (col  $($token.col))
-  ));
+    <tokenizer>, %(func "tokenize"),
+    %(type $($token.type)), %(text $($token.text)),
+    %(line $($token.line)), %(col $($token.col)));
 
 module {
   "collection.x",

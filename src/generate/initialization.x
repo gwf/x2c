@@ -12,7 +12,7 @@ List Compiler.initializer_function(
 List Compiler.run_once_body(Compiler c, List before, List guard, List after) {
   List flag = $!int{ $guard };
   List test = c.rebuild_statement($!{ if ($flag) return; $flag = 1; }).cdr();
-  return List.concat_n(3, before, test, after);
+  return List.concat(before, test, after);
 }
 
 /* Consume the initialization state completed by cache setup. `source`
@@ -120,8 +120,8 @@ static List _synthesize(Init &i, List arms) {
    setup keeps its pre-body order. */
 static List _statements(Init &i, List entry, List body) {
   Compiler c = i.c;
-  List queued = List.concat_n(
-    5, c.init_statements(<prepare>), c.init_statements(<statics>), body,
+  List queued = List.concat(
+    c.init_statements(<prepare>), c.init_statements(<statics>), body,
     c.init_statements(<finish>), i.shutdown);
   return c.run_once_body(entry, i.guard, queued);
 }

@@ -83,7 +83,7 @@ static Var _thread_test_worker(const void *input, size_t input_size) {
     case %(worker ?number): matched = number.int() == data.value;
   }
   if (data.mutex)
-    log_info(<thread-tes>, %((value $(data.value))));
+    log_info(<thread-tes>, %(value $(data.value)));
 
   for (int i = 0; i < data.iterations; i++) {
     String garbage = String.printf("worker-%d-%d", data.value, i);
@@ -120,7 +120,7 @@ static Var _thread_memory_log_worker(const void *input, size_t input_size) {
   (void) input;
   (void) input_size;
   String text = String.new("worker-private log value");
-  log_info(<thread-mem>, %((text $text)));
+  log_info(<thread-mem>, %(text $text));
   return 73;
 }
 

@@ -252,8 +252,11 @@ static void _statement_clear(Prepared statement) {
     sqlite3_clear_bindings(statement.handle));
 }
 
-/** Resets and replaces all bindings in SQLite's one-based parameter order. */
-Prepared Prepared.bind(Prepared statement, List values) {
+/** Resets and replaces all bindings in SQLite's one-based parameter order.
+    Pass separate values or splice an existing List with
+    `statement.bind(@values)`.
+*/
+Prepared Prepared.bind(Prepared statement, .... values) {
   _statement_live(statement, "bind");
   int count = sqlite3_bind_parameter_count(statement.handle);
   if (values.len() != count)
@@ -400,7 +403,7 @@ $lisp.binding(sqlite_lisp, "sqlite-query")
 static List _lisp_sqlite_query(String path, String sql, List parameters) {
   Database db = auto Database.open(path);
   Prepared statement = auto db.prepare(sql);
-  statement.bind(parameters);
+  statement.bind(@parameters);
   List rows = NULL;
   foreach (List row, statement) rows = cons(row, rows);
   return rows.reverse();
@@ -411,7 +414,7 @@ static long long _lisp_sqlite_execute(
   String path, String sql, List parameters) {
   Database db = auto Database.open(path);
   Prepared statement = auto db.prepare(sql);
-  statement.bind(parameters);
+  statement.bind(@parameters);
   statement.execute();
   return db.changes();
 }

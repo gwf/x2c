@@ -1684,7 +1684,7 @@ static void lisp_standard_environment_uses_library_operations(void) {
   EXPECT_STR_EQ(Var.string(_ev(lisp, "(String.join \"-\" '(\"a\" \"b\"))")),
                 "a-b");
   EXPECT_STR_EQ(Var.string(_ev(
-    lisp, "(String.format \"%s=%04d\" '(\"answer\" 42))")),
+    lisp, "(String.format \"%s=%04d\" \"answer\" 42)")),
     "answer=0042");
   EXPECT_VAR_EQ(_ev(lisp, "(String.split \"a b\" \" \")"),
                 _ev(lisp, "'(\"a\" \"b\")"));

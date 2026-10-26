@@ -83,6 +83,17 @@ Self List.append(Self a, Self b) {
   return _prepend_array(values, b);
 }
 
+/** Returns the concatenation of the List arguments in order.
+    Each argument is one List; `@lists` splices a List of Lists. No arguments
+    returns nil. The final nonempty List becomes the shared tail, and only
+    preceding cells are rebuilt. Inputs are not modified.
+    Raises: `<alloc-fail>` or `<size-limit>` while constructing the result.
+*/
+List List.concat(.... lists) {
+  Array values = auto lists;
+  return _concat_lists(values);
+}
+
 /** Returns the concatenation of exactly `list_count` `List` arguments.
     Nil is a valid argument, no sentinel is read, and the final nonempty `List`
     becomes the shared tail of the result.

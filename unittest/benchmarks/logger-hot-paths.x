@@ -22,7 +22,7 @@ static void discard_emit(Logger logger, const LogEvent *event, Var data) {
 
 static void rejected_dynamic(Logger logger, int value) {
   if (!logger.should_log(<debug>, <bench>)) return;
-  logger.debug(<bench>, %((value $value) (guard $(value + 1))));
+  logger.debug(<bench>, %(value $value), %(guard $(value + 1)));
 }
 
 int main(void) {
@@ -45,7 +45,7 @@ int main(void) {
   int direct_count = 200000;
   start = now_ns();
   for (int i = 0; i < direct_count; i++) {
-    direct.info(<bench>, fields);
+    direct.info(<bench>, @fields);
     guard += i & 1;
   }
   result("noop-sink", now_ns() - start, direct_count);
@@ -54,7 +54,7 @@ int main(void) {
   int fanout_count = 100000;
   start = now_ns();
   for (int i = 0; i < fanout_count; i++) {
-    direct.info(<bench>, fields);
+    direct.info(<bench>, @fields);
     guard += i & 1;
   }
   result("two-sink-fanout", now_ns() - start, fanout_count);
@@ -62,11 +62,11 @@ int main(void) {
   File file = tmpfile();
   Logger text = Logger.new(<trace>);
   text.add_file_sink(file);
-  text.info(<bench>, fields);
+  text.info(<bench>, @fields);
   int text_count = 2000;
   start = now_ns();
   for (int i = 0; i < text_count; i++) {
-    text.info(<bench>, fields);
+    text.info(<bench>, @fields);
     guard += i & 1;
   }
   result("file-text", now_ns() - start, text_count);

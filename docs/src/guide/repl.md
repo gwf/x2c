@@ -513,12 +513,13 @@ nested();  // 3
 A returned noncapturing lambda or named function needs a `(Func)` cast,
 as in native code.
 
-The REPL provides the fixed-signature `String.format(String fmt, List values)`
-operation. Call it as `fmt.format(values)`:
+The REPL provides `String.format(String fmt, .... values)`. Pass separate
+arguments, or splice an existing List with `@values`:
 
 ```x2c
-~List values = %("answer" 42);
-String text = "%s=%04d".format(values);
+String text = "%s=%04d".format("answer", 42);
+List values = %("answer" 42);
+String same = "%s=%04d".format(@values);
 ```
 
 It supports `%%`, flags `-+ #0`, numeric and `*` width and precision, integer

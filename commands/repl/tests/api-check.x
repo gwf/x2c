@@ -396,6 +396,12 @@ static void _rest_arguments(ReplSession s) {
   _expect(s, "int rest_forward(void) { return rest_count(10, 1, 2); }",
           <defined>, void);
   _expect(s, "rest_forward();", <value>, 12);
+  _expect(s, "\"%s=%04d\".format(\"answer\", 42);",
+          <value>, "answer=0042");
+  _expect(s, "\"%d:%d\".format(@rest_pair);", <value>, "2:3");
+  _expect(s, "\"plain %%\".format();", <value>, "plain %");
+  _expect(s, "List.concat(%(1), rest_pair, %(4));",
+          <value>, %(1 2 3 4));
 }
 
 static void _lambda_results(ReplSession s) {

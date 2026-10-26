@@ -74,7 +74,7 @@ before building dynamic Lists or Strings. In pseudo-code:
 
 ```x2c
 if (log_should_log(<debug>, <parser>))
-  log_debug(<parser>, %((node $(expensive_node.repr()))));
+  log_debug(<parser>, %(node $(expensive_node.repr())));
 ```
 
 A category names an event; it never suppresses one. Level is the only

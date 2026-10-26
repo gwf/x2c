@@ -6,7 +6,7 @@
 void Sym.set(Sym s, List key, List type) {
   Map scope = _scope_at(s, -1).symbols;
   if (log_should_log(<debug>, <symtab>))
-    log_debug(<symtab>, %( (func "Sym.set") (key $key) (val $type) ));
+    log_debug(<symtab>, %(func "Sym.set"), %(key $key), %(val $type));
   s.put(scope, key, type);
   if (_retained_member(key)) s.put(s.binding_facts, %(aggfact $key), type);
 }

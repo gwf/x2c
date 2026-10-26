@@ -71,8 +71,9 @@ static typedef struct Format {
 // formatting
 
 /** Formats `values` through a checked, C-style subset of `fmt`.
-    The receiver is decoded runtime text, so this fixed-signature operation is
-    safe to call through the interpreter as `fmt.format(values)`. It supports
+    The receiver is decoded runtime text. Pass separate arguments as
+    `fmt.format(value, next)` or splice an existing List with
+    `fmt.format(@values)`, including through the interpreter. It supports
     `%%`, flags `-+ #0`, numeric or `*` width and precision, integer
     conversions `d i o u x X` with `hh h l ll`, floating conversions
     `f F e E g G a A` with default, `l`, or `L`, and `%c` and `%s`.
@@ -88,7 +89,7 @@ static typedef struct Format {
     conversion failures are nested as `cause`. Allocation failures may also
     transfer while staging or canonicalizing the result.
 */
-String String.format(String fmt, List values) {
+String String.format(String fmt, .... values) {
   Buffer out = auto Buffer.new(0);
   Format f = {.fmt = fmt, .length = fmt.len(), .args = values, .out = out};
   while (f.cursor < f.length)

@@ -137,6 +137,8 @@ static keyword synchronized $logger.synchronized;
 // delivery
 
 /** Delivers one event synchronously to eligible sinks in registration order.
+    Pass each field as a `(key value)` List, or splice a field List with
+    `@fields`. With no fields the event's field List is empty.
     `fields` is borrowed for the call. All sinks observe one immutable event,
     sequence numbers increase per `Logger`, and elapsed time starts with its
     first delivered event. NULL, filtered, invalid, sinkless, or category-less
@@ -144,8 +146,12 @@ static keyword synchronized $logger.synchronized;
     Raises: any cause from an emitter or fatal-event flusher; later callbacks
     are then skipped.
 */
+void Logger.log(Logger logger, Symbol level, Symbol category, .... fields) =>
+  _log_fields(logger, level, category, fields);
+
 synchronized
-void Logger.log(Logger logger, Symbol level, Symbol category, List fields) {
+static void _log_fields(
+  Logger logger, Symbol level, Symbol category, List fields) {
   if (!_should_log(logger, level, category)) return;
   long long wall_time, monotonic;
   _capture_time(wall_time, monotonic);
@@ -693,9 +699,12 @@ Logger log_get_global_logger(void) => global_logger;
     With no global `Logger` this is a no-op; otherwise delivery and failures
     are those of `Logger.log`.
 */
+void log_event(Symbol level, Symbol category, .... fields) =>
+  _log_global_fields(level, category, fields);
+
 synchronized
-void log_event(Symbol level, Symbol category, List fields) {
-  global_logger.log(level, category, fields);
+static void _log_global_fields(Symbol level, Symbol category, List fields) {
+  _log_fields(global_logger, level, category, fields);
 }
 
 /** Offers the newest `Error` to the current global `Logger`.
@@ -723,7 +732,7 @@ Symbol Logger.error_handler(List errors, Var data) {
   Symbol policy = Error.policy_get(code);
   if (policy != <abort> && policy != <log>) return <declined>;
   if (policy == <abort> && _plain_report(logger)) _report_uncaught(entry);
-  else logger.log(<error>, <err-report>, entry);
+  else logger.log(<error>, <err-report>, @entry);
   Error.note_rendered();
   return <declined>;
 }
@@ -762,12 +771,13 @@ static String _detail_text(List detail) {
 
 static macro Unit $logger.method(Name $method, Literal $level) {
   /** Logs borrowed `fields` synchronously at $method level under `category`.
+      Pass separate `(key value)` Lists or splice an existing `@fields` List.
       Delivery and failure behavior follow `Logger.log`.
   */
   void Logger.$method(
     Logger $x2c_ident("logger"), Symbol $x2c_ident("category"),
-    List $x2c_ident("fields")) {
-    $x2c_ident("logger").log(
+    .... $x2c_ident("fields")) {
+    _log_fields($x2c_ident("logger"),
       $level, $x2c_ident("category"), $x2c_ident("fields"));
   }
 }
@@ -782,10 +792,12 @@ $logger.method(fatal, <fatal>);
 static macro Unit $logger.global(
   Name $method, Name $function, Literal $level) {
   /** Logs borrowed `fields` globally at $method level under `category`.
+      Pass separate `(key value)` Lists or splice an existing `@fields` List.
       Delivery and failure behavior follow `log_event`.
   */
-  void $function(Symbol $x2c_ident("category"), List $x2c_ident("fields")) {
-    log_event($level, $x2c_ident("category"), $x2c_ident("fields"));
+  void $function(Symbol $x2c_ident("category"), .... $x2c_ident("fields")) {
+    _log_global_fields(
+      $level, $x2c_ident("category"), $x2c_ident("fields"));
   }
 }
 
@@ -887,6 +899,6 @@ void Logger.shutdown(void) {
 static void _log_pending(Logger active) {
   Pool.open_named("Logger shutdown errors");
   List pending = Error.since(logger_error_mark);
-  foreach (List entry in pending) active.log(<error>, <err-report>, entry);
+  foreach (List entry in pending) active.log(<error>, <err-report>, @entry);
   Pool.close();
 }

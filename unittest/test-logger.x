@@ -52,7 +52,7 @@ static void logger_free_stops_during_emission(void) {
   Logger logger = Logger.new(<trace>);
   logger.add_sink(free_during_emit, NULL, void);
   int caught = 0;
-  try logger.info(<free-test>, nil);
+  try logger.info(<free-test>);
   catch %(bad-state *): caught = 1;
   EXPECT_TRUE(caught);
   logger.free();
@@ -102,15 +102,13 @@ static void recursive_emit(Logger logger, const LogEvent *event, Var data) {
   if (mutation.action == <add>)
     logger.add_sink(order_emit, NULL, Var.new(<p48>, &mutation.added));
   else if (mutation.action == <clear>) logger.clear_sinks();
-  else logger.info(<recursive>, nil);
+  else logger.info(<recursive>);
 }
 
 static void guarded_dynamic_event(Logger logger, int value) {
   if (!logger.should_log(<debug>, <hot>)) return;
-  logger.debug(<hot>, %(
-    (message $(String.printf("value=%d", value)))
-    (value $value)
-  ));
+  logger.debug(<hot>,
+    %(message $(String.printf("value=%d", value))), %(value $value));
 }
 
 static void logger_creation_levels_and_queries(void) {
@@ -147,11 +145,11 @@ static void logger_threshold_and_metadata(void) {
   List fields = %((message "same event"));
   logger.add_sink(capture_emit, NULL, Var.new(<p48>, &first));
   logger.add_sink(capture_emit, NULL, Var.new(<p48>, &second));
-  logger.log(<info>, <test>, fields);
-  logger.log(<unknown>, <test>, fields);
-  logger.log(<off>, <test>, fields);
-  logger.log(<warn>, <test>, fields);
-  logger.log(<error>, <test>, fields);
+  logger.log(<info>, <test>, @fields);
+  logger.log(<unknown>, <test>, @fields);
+  logger.log(<off>, <test>, @fields);
+  logger.log(<warn>, <test>, @fields);
+  logger.log(<error>, <test>, @fields);
   EXPECT_INT_EQ(first.count, 2);
   EXPECT_INT_EQ(second.count, 2);
   EXPECT_INT_EQ(first.events[0].sequence, 0);
@@ -180,14 +178,14 @@ static void logger_fifo_removal_and_clear(void) {
   LogSink last = logger.add_sink(order_emit, NULL, Var.new(<p48>, &three));
   EXPECT_NOT_NULL(first);
   EXPECT_NOT_NULL(last);
-  logger.info(<test>, nil);
+  logger.info(<test>);
   EXPECT_INT_EQ(count, 3);
   EXPECT_INT_EQ(order[0], 1);
   EXPECT_INT_EQ(order[1], 2);
   EXPECT_INT_EQ(order[2], 3);
   EXPECT_TRUE(logger.remove_sink(middle));
   EXPECT_FALSE(logger.remove_sink(middle));
-  logger.info(<test>, nil);
+  logger.info(<test>);
   EXPECT_INT_EQ(count, 5);
   EXPECT_INT_EQ(order[3], 1);
   EXPECT_INT_EQ(order[4], 3);
@@ -209,7 +207,7 @@ static void logger_recursion_and_locked_sink_list(void) {
   logger.add_sink(order_emit, NULL, Var.new(<p48>, &two));
 
   // An emitter may log again; the inner event finishes inside the outer one.
-  logger.info(<outer>, nil);
+  logger.info(<outer>);
   EXPECT_INT_EQ(count, 4);
   EXPECT_INT_EQ(order[0], 1);
   EXPECT_INT_EQ(order[1], 1);
@@ -220,14 +218,14 @@ static void logger_recursion_and_locked_sink_list(void) {
   mutation.mutated = 0;
   mutation.action = <add>;
   int caught = 0;
-  try logger.info(<add-test>, nil);
+  try logger.info(<add-test>);
   catch %(bad-state *): caught = 1;
   EXPECT_TRUE(caught);
 
   mutation.mutated = 0;
   mutation.action = <clear>;
   caught = 0;
-  try logger.info(<clear-test>, nil);
+  try logger.info(<clear-test>);
   catch %(bad-state *): caught = 1;
   EXPECT_TRUE(caught);
 
@@ -240,12 +238,12 @@ static void logger_flush_and_borrowed_file(void) {
   Logger logger = Logger.new(<trace>);
   FlushState state = { 0 };
   logger.add_sink(flush_emit, flush_sink, Var.new(<p48>, &state));
-  logger.info(<test>, nil);
+  logger.info(<test>);
   EXPECT_INT_EQ(state.emits, 1);
   EXPECT_INT_EQ(state.flushes, 0);
   logger.flush();
   EXPECT_INT_EQ(state.flushes, 1);
-  logger.fatal(<test>, nil);
+  logger.fatal(<test>);
   EXPECT_INT_EQ(state.emits, 2);
   EXPECT_INT_EQ(state.flushes, 2);
   logger.free();
@@ -257,13 +255,13 @@ static void logger_flush_and_borrowed_file(void) {
   file.setvbuf(file_buffer, _IOFBF, sizeof file_buffer);
   Logger text = Logger.new(<trace>);
   text.add_file_sink(file);
-  text.info(<test>, %((value 7)));
+  text.info(<test>, %(value 7));
   file.stat(&before);
   EXPECT_TRUE(before.st_size == 0);
   text.flush();
   file.stat(&explicit);
   EXPECT_TRUE(explicit.st_size > before.st_size);
-  text.fatal(<test>, %((value 8)));
+  text.fatal(<test>, %(value 8));
   file.stat(&fatal);
   EXPECT_TRUE(fatal.st_size > explicit.st_size);
   text.free();
@@ -277,9 +275,9 @@ static void logger_plain_text_and_per_logger_origin(void) {
   Logger first = Logger.new(<trace>), second = Logger.new(<trace>);
   first.add_file_sink(first_file);
   second.add_file_sink(second_file);
-  first.info(<test>, %((message "hello") (answer 42)));
-  first.warn(<test>, %((message "again")));
-  second.info(<other>, nil);
+  first.info(<test>, %(message "hello"), %(answer 42));
+  first.warn(<test>, %(message "again"));
+  second.info(<other>);
   first.flush();
   second.flush();
   first_file.rewind();
@@ -316,7 +314,7 @@ static void logger_stderr_uses_color_on_a_tty(void) {
   if (saved >= 0 && dup2(slave, STDERR_FILENO) >= 0) {
     Logger logger = Logger.new(<trace>);
     logger.add_stderr_sink();
-    logger.info(<color>, %((value 7)));
+    logger.info(<color>, %(value 7));
     logger.free();
     fflush(stderr);
     dup2(saved, STDERR_FILENO);
@@ -345,8 +343,8 @@ static void logger_memory_sink_shape(void) {
   List second_fields = %((value 2));
   Logger logger = Logger.new(<trace>);
   logger.add_memory_sink(&entries);
-  logger.info(<memory>, first_fields);
-  logger.warn(<memory>, second_fields);
+  logger.info(<memory>, @first_fields);
+  logger.warn(<memory>, @second_fields);
   EXPECT_INT_EQ(entries.len(), 2);
   List (newest, oldest) = entries;
   EXPECT_INT_EQ(newest.len(), 6);
@@ -372,7 +370,7 @@ static void logger_memory_sink_outlives_registration_context(void) {
   logger.add_memory_sink(&entries);
   context.close();
 
-  logger.info(<memory>, %((message "after Context close")));
+  logger.info(<memory>, %(message "after Context close"));
   EXPECT_INT_EQ(entries.len(), 1);
   List entry = entries.car();
   EXPECT_STR_EQ(
@@ -393,7 +391,7 @@ static void logger_memory_sink_retains_long_flat_list(void) {
   Context context = Context.open_isolated_named("long list");
   List fields = shared;
   for (long i = 0; i < CELLS; i++) fields = List.cons(i, fields);
-  logger.info(<memory>, fields);
+  logger.info(<memory>, @fields);
   context.close();
 
   List cell = entries.car()[5];
@@ -450,7 +448,7 @@ static void logger_global_replacement_and_shutdown(void) {
   EXPECT_PTR_EQ(log_get_global_logger(), custom);
   EXPECT_PTR_EQ(log_set_global_logger(previous), custom);
   EXPECT_PTR_EQ(log_set_global_logger(custom), previous);
-  log_info(<global>, nil);
+  log_info(<global>);
   EXPECT_INT_EQ(state.emits, 1);
   Logger.shutdown();
   EXPECT_NULL(log_get_global_logger());
@@ -458,7 +456,7 @@ static void logger_global_replacement_and_shutdown(void) {
   EXPECT_INT_EQ(custom.sink_count(), 1);
   int after_shutdown = state.emits;
   EXPECT_TRUE(after_shutdown >= 1);
-  custom.info(<direct>, nil);
+  custom.info(<direct>);
   EXPECT_INT_EQ(state.emits, after_shutdown + 1);
   custom.free();
 }
@@ -481,9 +479,9 @@ static void logger_rejected_and_warmed_paths_allocate_nothing(void) {
   Logger text = Logger.new(<trace>);
   List fields = %((message "fixed") (value 17));
   text.add_file_sink(file);
-  text.info(<warm>, fields);
+  text.info(<warm>, @fields);
   ScopeStats before_warm = Scope.stats();
-  for (int i = 0; i < 1000; i++) text.info(<warm>, fields);
+  for (int i = 0; i < 1000; i++) text.info(<warm>, @fields);
   ScopeStats after_warm = Scope.stats();
   EXPECT_TRUE(after_warm.allocation_calls == before_warm.allocation_calls);
   EXPECT_TRUE(after_warm.reallocation_calls == before_warm.reallocation_calls);
