@@ -3,8 +3,9 @@
     Copyright (c) 2026 Gary William Flake.
 
     The one reader grammar for Lisp source and datum text: Lists, reader
-    prefixes, Strings, numbers, Symbols, and Atoms, read from the shared
-    Tokenizer's Lisp tokens. `Lisp` and `datum.x` both read through it.
+    prefixes, Strings, numbers, Symbols, and Atoms. Plain data uses the fast
+    path; other forms use the shared Tokenizer's Lisp tokens. `Lisp` and
+    `datum.x` both read through it.
 */
 
 #pragma once
@@ -12,6 +13,7 @@
 static keyword loop $private.loop;
 #include "tokenizer.x"
 #include "scan.x"
+#include <limits.h>
 
 /* reader
 
@@ -23,7 +25,7 @@ static keyword loop $private.loop;
    when no token remains. `cursor` ends past the form, or at the length of
    `source` at EOF; a failure raises with `cursor` at the form's first
    token. */
-Symbol datum_read_token_form(
+Symbol Tokenizer.read_lisp_form(
   Tokenizer tokenizer, String source, unsigned base, unsigned &cursor,
   Var &?out) {
   Token token = tokenizer.next();
@@ -151,8 +153,88 @@ static Var _incomplete(String source, unsigned at) {
   raise %(incomplete (source $source) (line $line) (column $column));
 }
 
+/* plain spellings
+
+   Lists, Strings, decimal integers, and bare Atoms are read here without
+   the Lisp tokenizer, which costs most of an interface read. Each reader
+   returns 0 for any other spelling, and the token reader then reads the
+   form from its start. `items` holds the elements of the Lists being read. */
+
+static int _plain_form(
+  char *s, unsigned &at, Var &out, Array items, int depth) {
+  char c = s[at];
+  if (c == '(') return _plain_list(s, at, out, items, depth);
+  if (c == '"') return _plain_string(s, at, out);
+  if (_digit(c) || (c == '-' && _digit(s[at + 1])))
+    return _plain_integer(s, at, out);
+  return _plain_atom(s, at, out);
+}
+
+static int _plain_list(
+  char *s, unsigned &at, Var &out, Array items, int depth) {
+  if (depth >= LISP_READ_DEPTH_MAX) return 0;
+  int first = items.len();
+  for (at++; ; ) {
+    while (_blank(s[at])) at++;
+    if (s[at] == ')') break;
+    Var item = void;
+    if (!_plain_form(s, at, item, items, depth + 1)) return 0;
+    items.push(item);
+  }
+  at++;
+  List list = NULL;
+  for (int i = items.len() - 1; i >= first; i--) list = cons(items[i], list);
+  items.truncate(first);
+  out = list;
+  return 1;
+}
+
+/* Use the same string scanner as the Lisp tokenizer. */
+static int _plain_string(char *s, unsigned &at, Var &out) {
+  int length = scan_c_string(s + at);
+  if (length < 0 || !_token_end(s[at + length])) return 0;
+  out = String.new_len(s + at + 1, length - 2).unescape();
+  at += length;
+  return 1;
+}
+
+/* A decimal integer whose magnitude fits a positive `long`. */
+static int _plain_integer(char *s, unsigned &at, Var &out) {
+  unsigned end = at + (s[at] == '-');
+  if (s[end] == '0' && _digit(s[end + 1])) return 0;
+  long value = 0;
+  for (; _digit(s[end]); end++) {
+    int digit = s[end] - '0';
+    if (value > (LONG_MAX - digit) / 10) return 0;
+    value = value * 10 + digit;
+  }
+  if (!_token_end(s[end])) return 0;
+  if (s[at] == '-') value = -value;
+  if (value == (int) value) out = (int) value;
+  else out = value;
+  at = end;
+  return 1;
+}
+
+static int _plain_atom(char *s, unsigned &at, Var &out) {
+  int length = 0;
+  while (!_token_end(s[at + length])) length++;
+  String spelling = String.new_len(s + at, length);
+  if (!Atom.bare_spelling(spelling)) return 0;
+  out = Atom.intern(spelling);
+  at += length;
+  return 1;
+}
+
+static int _digit(char c) => c >= '0' && c <= '9';
+
+static int _blank(char c) => c == ' ' || c == '\n' || c == '\t' || c == '\r';
+
+/* Whether the reader's token ends before `c`. */
+static int _token_end(char c) => !c || c == ')' || _blank(c);
+
 /* Scans all of `source` into Lisp tokens whose storage `scope` owns. */
-Tokenizer datum_scan_tokens(String source, Scope *scope) {
+Tokenizer Tokenizer.from_lisp(String source, Scope *scope) {
   Tokenizer tokenizer = NULL;
   auto (scope) {
     tokenizer = Tokenizer.new(source, <lisp>);
@@ -161,13 +243,27 @@ Tokenizer datum_scan_tokens(String source, Scope *scope) {
   return tokenizer;
 }
 
-/* Reads the form at `cursor` in `source` into `out` as `Lisp.read`
-   describes, with the tokens in a temporary Scope. */
-Symbol datum_read_form(String source, unsigned &?cursor, Var &?out) {
+/* Reads one Lisp form, returning `<value>` or `<eof>`. A null source or
+   cursor returns `<eof>`. On success, a nonnull `out` receives the form and
+   `cursor` advances past it; at EOF, `cursor` reaches the source length.
+   Plain spellings use the fast path; other forms use temporary Lisp tokens.
+   Result storage follows the caller's Scope and canonical pools.
+   Raises: `<incomplete>` or `<malformed>`, with `cursor` at the failing
+   form's first token and `out` unchanged, or allocation and depth failures. */
+Symbol String.read_lisp_form(String source, unsigned &?cursor, Var &?out) {
   if (!source) return <eof>;
   if (!cursor) return <eof>;
   unsigned base = cursor;
+  unsigned at = base;
+  while (_blank(source[at])) at++;
+  Array items = auto [];
+  Var value = void;
+  if (source[at] && _plain_form(source, at, value, items, 1)) {
+    cursor = at;
+    if (out) out = value;
+    return <value>;
+  }
   Scope tokens_scope = auto Scope.new_named("Lisp tokens");
-  Tokenizer tokenizer = datum_scan_tokens(source + base, &tokens_scope);
-  return datum_read_token_form(tokenizer, source, base, cursor, out);
+  Tokenizer tokenizer = Tokenizer.from_lisp(source + base, &tokens_scope);
+  return tokenizer.read_lisp_form(source, base, cursor, out);
 }

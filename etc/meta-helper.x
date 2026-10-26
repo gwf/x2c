@@ -229,7 +229,7 @@ static Var _request(int in, Buffer input) {
     String text = input;
     size_t used = 0;
     Var request = void;
-    if (datum_unframe(text, used, request)) {
+    if (text.read_datum_frame(used, request)) {
       String rest = text[used:];
       input.clear();
       if (rest) input.write(rest);
@@ -246,7 +246,7 @@ static Var _request(int in, Buffer input) {
 /* Writes one reply frame, or returns 0 for a message with no datum. */
 static int _reply(List message) {
   Buffer out = Buffer.new(0);
-  if (!datum_frame(out, message)) return 0;
+  if (!out.write_datum_frame(message)) return 0;
   String frame = %"$out";
   fwrite((char *) frame, 1, frame.len(), helper_out);
   fflush(helper_out);
@@ -355,7 +355,7 @@ auto static void _apply(
     _reply(failure);
     return;
   }
-  List problem = datum_result_problem(result, {});
+  List problem = Var.independent_data_problem(result, {});
   if (problem) {
     _reply(cons(<error>, problem));
     return;

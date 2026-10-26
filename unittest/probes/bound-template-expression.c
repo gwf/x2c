@@ -21,7 +21,7 @@ static void require(int condition, const char *message) {
 static List read_list(const char *text) {
   unsigned cursor = 0;
   Var result;
-  datum_read_form(String_new(text), &cursor, &result);
+  String_read_lisp_form(String_new(text), &cursor, &result);
   return Var_list(result);
 }
 

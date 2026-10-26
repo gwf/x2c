@@ -946,7 +946,7 @@ the Lisp reader grammar.
 
 Public functions:
 
-`datum_read_token_form`, `datum_scan_tokens`, `datum_read_form`
+`Tokenizer.read_lisp_form`, `Tokenizer.from_lisp`, `String.read_lisp_form`
 
 ### [lib/datum.x](../lib/datum.x)
 
@@ -954,8 +954,8 @@ values as Lisp reader text.
 
 Public functions:
 
-`datum_write`, `datum_read`, `datum_read_plain`, `datum_frame`,
-`datum_unframe`, `datum_result_problem`
+`Buffer.write_datum`, `String.read_datum`, `Buffer.write_datum_frame`,
+`String.read_datum_frame`, `Var.independent_data_problem`
 
 ### [lib/diff.x](../lib/diff.x)
 

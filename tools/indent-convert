@@ -127,8 +127,8 @@ static List _ast(String path) {
   unsigned cursor = 0;
   Var form = void;
   Scope tokens_scope = auto Scope.new_named("AST tokens");
-  Tokenizer tokenizer = datum_scan_tokens(dump, &tokens_scope);
-  while (datum_read_token_form(tokenizer, dump, 0, cursor, form) == <value>)
+  Tokenizer tokenizer = Tokenizer.from_lisp(dump, &tokens_scope);
+  while (tokenizer.read_lisp_form(dump, 0, cursor, form) == <value>)
     forms.push(_plain(form));
   return forms.list_free();
 }

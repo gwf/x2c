@@ -461,7 +461,7 @@ static void _sx_function_types(SnapshotExtract &s, Map entity) {
   String text = entity["declared_type"];
   Var value;
   unsigned cursor = 0;
-  if (!text || text == "" || !datum_read(text, cursor, value)) return;
+  if (!text || text == "" || !text.read_datum(cursor, value)) return;
   Type type = value;
   List params;
   Type result;

@@ -10,7 +10,7 @@
 /** Writes an owned analysis value using the existing tagged datum grammar. */
 String snapshot_text(Var value) {
   Buffer out = auto Buffer.new(0);
-  if (!datum_write(out, value, 1))
+  if (!out.write_datum(value, 1))
     raise %(bad-types (operation "graph snapshot") (value $value));
   return out;
 }
@@ -19,7 +19,7 @@ String snapshot_text(Var value) {
 Var snapshot_value(String text) {
   unsigned cursor = 0;
   Var value = void, extra = void;
-  if (!datum_read(text, cursor, value) || datum_read(text, cursor, extra))
+  if (!text.read_datum(cursor, value) || text.read_datum(cursor, extra))
     raise %(malformed (operation "graph snapshot datum"));
   return value;
 }

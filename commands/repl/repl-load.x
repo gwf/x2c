@@ -547,7 +547,7 @@ static Var _call(Func function, const FuncArg *argv) {
       foreach (Var item, value.list()) arguments.push(item);
     else arguments.push(value);
   }
-  List problem = datum_result_problem(arguments, {});
+  List problem = Var.independent_data_problem(arguments, {});
   if (problem)
     raise %(repl (reason "loaded function arguments must be independent data values")
                  (detail $problem));
@@ -559,7 +559,7 @@ static Var _call(Func function, const FuncArg *argv) {
 static Var _call_objects(Func function, const FuncArg *argv) {
   const LoadedCall *call = Func.context(function);
   List arguments = x2c_func_value_argument(function, argv, 0, <list>);
-  List problem = datum_result_problem(arguments, {});
+  List problem = Var.independent_data_problem(arguments, {});
   if (problem)
     raise %(repl (reason "loaded function arguments must be independent data values")
                  (detail $problem));

@@ -710,7 +710,7 @@ static List _write_manifest(Helper &h, String failure) {
     (groups $(h.groups.list())) (failures $(h.failures.list()))
     (failure $(failure ? failure : "")) (deps $(_digests(h.deps))));
   Buffer out = auto Buffer.new(0);
-  datum_write(out, manifest, 0);
+  out.write_datum(manifest, 0);
   Path.write_text(%"$(h.directory)/manifest", out);
   return manifest;
 }
@@ -733,7 +733,7 @@ static List _current(String directory) {
   String text = Path.read_text(path);
   unsigned cursor = 0;
   Var datum = void;
-  try datum_read(text, cursor, datum);
+  try text.read_datum(cursor, datum);
   catch %((!or incomplete malformed) *): return NULL;
   if (datum is not <list>) return NULL;
   List manifest = datum;

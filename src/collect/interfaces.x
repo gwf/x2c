@@ -113,7 +113,7 @@ static List _interface_record(String path) {
 /* The one List form `source` spells, or NULL. */
 static List _read_record(String source) {
   unsigned cursor = 0, Var record = void, int read = 0;
-  try read = datum_read_plain(source, cursor, record);
+  try read = (source.read_lisp_form(cursor, record) == <value>);
   catch %((!or incomplete malformed) *): return NULL;
   if (!read || record is not <list>) return NULL;
   return record;
@@ -280,7 +280,7 @@ static int _write_interface_entry(Buffer out, String canonical, List entry) {
   List record = %(
     interface 6 $(Compiler.identity()) @(_stored_record(canonical, entry)));
   /* An interface is plain data, which a loader never evaluates. */
-  if (!datum_write(out, record, 0)) return 0;
+  if (!out.write_datum(record, 0)) return 0;
   out.write_char('\n');
   return 1;
 }
@@ -415,6 +415,6 @@ static List _linked_prelude_sources(void) => Compiler.prelude_sources().cdr();
 /* `record` as an interface spells it, or NULL when it cannot be spelled. */
 static String _record_text(List record) {
   Buffer out = auto Buffer.new(0);
-  if (datum_write(out, record, 0)) return out;
+  if (out.write_datum(record, 0)) return out;
   return NULL;
 }

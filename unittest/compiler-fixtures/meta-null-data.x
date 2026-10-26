@@ -22,15 +22,15 @@ int main(void) {
          list.car().is_null());
   Buffer frame = Buffer.new(0);
   Array data = [Var.null(), %(), %(x2c.null)];
-  datum_frame(frame, data);
+  frame.write_datum_frame(data);
   size_t used = 0;
   Var decoded = void;
-  datum_unframe(frame.str(), used, decoded);
+  String.read_datum_frame(frame.str(), used, decoded);
   Array values = decoded;
   printf("%d %d %d %d\n", values[0].is_null(), values[1].is_nil(),
          values[2].list() === %(x2c.null), used == frame.len());
   int pointed = 7;
-  printf("pointer %d\n", datum_frame(frame, Var.new(<u32*>, &pointed)));
+  printf("pointer %d\n", frame.write_datum_frame(Var.new(<u32*>, &pointed)));
   frame.free();
   return 0;
 }

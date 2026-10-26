@@ -782,7 +782,7 @@ Var Lisp.apply(Lisp lisp, Var callable, List values) {
 */
 Symbol Lisp.read(Lisp lisp, String source, unsigned &?cursor, Var &?out) {
   (void) lisp;
-  return datum_read_form(source, cursor, out);
+  return source.read_lisp_form(cursor, out);
 }
 
 /** Reads and evaluates every form in `source`.
@@ -800,12 +800,12 @@ Var Lisp.eval_string(Lisp lisp, String source) {
   if (!source) return %();
   _open_call_budget(lisp);
   Scope tokens_scope = auto Scope.new_named("Lisp tokens");
-  Tokenizer tokenizer = datum_scan_tokens(source, &tokens_scope);
+  Tokenizer tokenizer = Tokenizer.from_lisp(source, &tokens_scope);
   unsigned cursor = 0;
   Var result = %();
   loop {
     Var form = void;
-    if (datum_read_token_form(tokenizer, source, 0, cursor, form) == <eof>)
+    if (tokenizer.read_lisp_form(source, 0, cursor, form) == <eof>)
       break;
     result = _eval(lisp, form, NULL);
   }

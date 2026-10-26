@@ -2259,9 +2259,9 @@ Map certify_contracts(String path, int &valid) {
   Var form = void;
   Symbol status;
   Scope tokens_scope = auto Scope.new_named("contract tokens");
-  Tokenizer tokenizer = datum_scan_tokens(source, &tokens_scope);
-  while ((status = datum_read_token_form(
-      tokenizer, source, 0, cursor, form)) == <value>) {
+  Tokenizer tokenizer = Tokenizer.from_lisp(source, &tokens_scope);
+  while ((status = tokenizer.read_lisp_form(
+      source, 0, cursor, form)) == <value>) {
     match (form) case %(native ?(String name) ?effect)
       if (_certify_effect(effect) && !contracts.contains(name) &&
           !Compiler.has_region_row(name)): {

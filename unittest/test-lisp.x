@@ -193,6 +193,19 @@ static void lisp_read_eof_cases(void) {
   EXPECT_INT_EQ(status, <eof>);
   _read1(lisp, "   // only a comment", &status);
   EXPECT_INT_EQ(status, <eof>);
+  unsigned cursor = 2;
+  Var untouched = 73;
+  EXPECT_INT_EQ(Lisp.read(NULL, NULL, cursor, untouched), <eof>);
+  EXPECT_INT_EQ(cursor, 2);
+  EXPECT_INT_EQ(Lisp.read(NULL, "42", NULL, untouched), <eof>);
+  EXPECT_VAR_EQ(untouched, (Var) 73);
+  foreach (String source, %("42" "'x")) {
+    cursor = 0;
+    EXPECT_INT_EQ(Lisp.read(NULL, source, cursor, NULL), <value>);
+    EXPECT_INT_EQ(cursor, source.len());
+    EXPECT_INT_EQ(Lisp.read(NULL, source, cursor, untouched), <eof>);
+    EXPECT_VAR_EQ(untouched, (Var) 73);
+  }
   lisp.destroy();
 }
 
@@ -968,26 +981,30 @@ static void lisp_read_fences_nesting_depth(void) {
 }
 
 /* Each read's status, cursor, and value as one comparable text. */
-static String _read_outcome(Lisp lisp, String source, int plain) {
+static String _read_outcome(Lisp lisp, String source, int tokenized) {
   unsigned cursor = 0;
   Var value = void;
   Symbol status = <eof>;
   try {
-    if (!plain) status = lisp.read(source, cursor, value);
-    else if (datum_read_plain(source, cursor, value)) status = <value>;
+    if (!tokenized) status = lisp.read(source, cursor, value);
+    else {
+      Scope tokens_scope = auto Scope.new_named("reader comparison tokens");
+      Tokenizer tokenizer = Tokenizer.from_lisp(source, &tokens_scope);
+      status = tokenizer.read_lisp_form(source, 0, cursor, value);
+    }
   }
   catch %(incomplete *): status = <incomplete>;
   catch %(malformed *): status = <malformed>;
   catch %(size-limit *): status = <size-limit>;
   Buffer out = auto Buffer.new(0);
   out.printf("%s %u ", (char *) status.str(), cursor);
-  if (value is not void) datum_write(out, value, 1);
+  if (value is not void) out.write_datum(value, 1);
   return out;
 }
 
-/* The plain datum reader agrees with the Lisp reader, including on the
-   spellings it leaves to that reader. */
-static void lisp_plain_datum_read_matches_reader(void) {
+/* The consolidated reader agrees with the token reader, including on
+   spellings its fast path leaves to that reader. */
+static void lisp_read_fast_path_matches_token_reader(void) {
   Lisp lisp = Lisp.kernel();
   foreach (String source, %(
       "(head \"a\\\"b\" \"x\\\\y\" -5 -0 2147483648 tail)"
@@ -997,7 +1014,8 @@ static void lisp_plain_datum_read_matches_reader(void) {
       "-9223372036854775808" "-9223372036854775809"
       "9999999999999999999" "10000000000000000000"
       "//b" "/*b*/" "a//b" "<sym>" "'q" "1.5" "0x10" "foo\\ bar"
-      "\"\\x41\"" "(a . b)" "(a" "" "x\"y\""))
+      "\"\\x41\"" "(a . b)" "(a" "" "x\"y\""
+      "  \"\\q\"" "  (a" "  \"\\400\"" "  1e+" "  // only a comment"))
     EXPECT_STR_EQ(_read_outcome(lisp, source, 1),
                   _read_outcome(lisp, source, 0));
   for (int depth = LISP_READ_DEPTH_MAX - 1;
@@ -1022,8 +1040,8 @@ static void lisp_datum_rejects_malformed_string_escapes(void) {
         Var value = 73;
         Symbol status = 0;
         try {
-          if (tagged) datum_read(source, cursor, value);
-          else datum_read_plain(source, cursor, value);
+          if (tagged) source.read_datum(cursor, value);
+          else source.read_lisp_form(cursor, value);
         }
         catch %(malformed *): status = <malformed>;
         EXPECT_INT_EQ(status, <malformed>);
@@ -1041,8 +1059,8 @@ static void lisp_datum_reads_valid_string_escapes(void) {
       String source = pair.car();
       unsigned cursor = 0;
       Var value = void;
-      int read = tagged ? datum_read(source, cursor, value)
-                       : datum_read_plain(source, cursor, value);
+      int read = tagged ? source.read_datum(cursor, value)
+                       : (source.read_lisp_form(cursor, value) == <value>);
       EXPECT_TRUE(read);
       EXPECT_INT_EQ(cursor, source.len());
       EXPECT_VAR_EQ(value, pair.cadr());
@@ -1054,10 +1072,10 @@ static void lisp_datum_reads_valid_string_escapes(void) {
 static void lisp_datum_atom_round_trips(void) {
   foreach (String spelling, %("/" "/=" "//b" "/*b" "//" "/*")) {
     Buffer out = auto Buffer.new(0);
-    EXPECT_TRUE(datum_write(out, Atom.intern(spelling), 1));
+    EXPECT_TRUE(out.write_datum(Atom.intern(spelling), 1));
     unsigned cursor = 0;
     Var back = void;
-    EXPECT_TRUE(datum_read(out.str(), cursor, back));
+    EXPECT_TRUE(String.read_datum(out.str(), cursor, back));
     EXPECT_TRUE(back.is_atom());
     EXPECT_STR_EQ(back.str(), spelling);
   }
@@ -1070,10 +1088,10 @@ static void lisp_datum_symbol_round_trips(void) {
     for (int tagged = 0; tagged < 2; tagged++) {
       Symbol symbol = Symbol.new(spelling);
       Buffer out = auto Buffer.new(0);
-      EXPECT_TRUE(datum_write(out, symbol, tagged));
+      EXPECT_TRUE(out.write_datum(symbol, tagged));
       unsigned cursor = 0;
       Var back = void;
-      EXPECT_TRUE(datum_read(out.str(), cursor, back));
+      EXPECT_TRUE(String.read_datum(out.str(), cursor, back));
       EXPECT_VAR_EQ(back, Symbol.var(symbol));
       if (tagged) continue;
       cursor = 0;
@@ -1081,7 +1099,7 @@ static void lisp_datum_symbol_round_trips(void) {
       EXPECT_VAR_EQ(back, Symbol.var(symbol));
     }
   Buffer out = auto Buffer.new(0);
-  EXPECT_FALSE(datum_write(out, (Symbol) 0, 0));
+  EXPECT_FALSE(out.write_datum((Symbol) 0, 0));
 }
 
 
@@ -2087,7 +2105,7 @@ void lisp_suite(void) {
   $test.run(lisp_standard_operations_check_object_operands);
   $test.run(lisp_numeric_comparison_reads_the_value);
   $test.run(lisp_read_fences_nesting_depth);
-  $test.run(lisp_plain_datum_read_matches_reader);
+  $test.run(lisp_read_fast_path_matches_token_reader);
   $test.run(lisp_datum_rejects_malformed_string_escapes);
   $test.run(lisp_datum_reads_valid_string_escapes);
   $test.run(lisp_datum_atom_round_trips);

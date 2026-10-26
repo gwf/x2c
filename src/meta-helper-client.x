@@ -347,7 +347,7 @@ static String _exit_reason(void) {
    with SIGPIPE; a helper not reading must not block its deadline. */
 static int _write_frame(List message, double deadline) {
   Buffer out = auto Buffer.new(0);
-  if (!datum_frame(out, message)) return 0;
+  if (!out.write_datum_frame(message)) return 0;
   String frame = %"$out";
   void (*previous)(int) = signal(SIGPIPE, SIG_IGN);
   size_t done = 0, size = frame.len();
@@ -397,7 +397,7 @@ static int _read_reply(double deadline, Var &reply) {
 static int _take_frame(Var &reply) {
   String input = active.input;
   size_t used = 0;
-  if (!datum_unframe(input, used, reply)) return 0;
+  if (!input.read_datum_frame(used, reply)) return 0;
   String rest = input[used:];
   active.input.clear();
   if (rest) active.input.write(rest);

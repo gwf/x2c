@@ -266,7 +266,7 @@ List Compiler.meta_value_expression(
 /* Reports at `site` a result that cannot become data in the program. */
 static void _refuse(Compiler c, Var value, Token site) {
   Map marks = auto {};
-  List problem = datum_result_problem(value, marks);
+  List problem = Var.independent_data_problem(value, marks);
   if (problem) c.report_error(<macro>, problem.car(), site, problem.cadr());
 }
 
@@ -301,8 +301,8 @@ static List _data_literal(Compiler c, Type declared, Var value, Token site) {
 }
 
 /* Builds the parser's form of one data value, which
-   `datum_result_problem` accepted. Immutable values come from the literal
-   cache; each Array or Map becomes a literal that builds a fresh
+   `Var.independent_data_problem` accepted. Immutable values come from the
+   literal cache; each Array or Map becomes a literal that builds a fresh
    collection every time it runs. */
 static List _data_form(Compiler c, Var value) {
   if (value.is_null())

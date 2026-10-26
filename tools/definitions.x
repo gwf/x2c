@@ -44,7 +44,7 @@ static List _units(String dump):
   Unit unit = NULL
   unsigned cursor = 0
   Var rows = void
-  datum_read_form(%"($dump)", cursor, rows)
+  String.read_lisp_form(%"($dump)", cursor, rows)
   foreach List row in rows.list():
     Symbol kind = row.car()
     if kind == <unit>:
