@@ -721,7 +721,7 @@ Var ParallelMap.foldl(ParallelMap map, Var seed, Func accumulate) {
   int active = workers.len();
   while (active) {
     Thread worker = _parallel_wait(run);
-    Var item = _parallel_result(worker);
+    Var item = _read_result(worker);
     active--;
     if (item is void) raise %(void-op (operation "ParallelMap.foldl"));
     if (seeded) acc = accumulate.apply_values(acc, item);
@@ -772,11 +772,6 @@ static Thread _parallel_wait(struct ParallelRun *run) {
   x2c_thread_wait_unlock();
   if (!ready) x2c_thread_cancel();
   return ready;
-}
-
-static Var _parallel_result(Thread worker) {
-  if (worker.errors is not void) return _read_result(worker);
-  return worker.result;
 }
 
 static void _parallel_assign(Thread worker, Var input) {
