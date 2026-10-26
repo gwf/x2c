@@ -12,9 +12,8 @@
 #include "compiler/compiler.x"
 #include "type.x"
 
-/** A printf-family function: its name, the indexes of its format and first
-    value arguments, and whether only a spelling no declaration resolves
-    names it.
+/** A printf-family function: its spelling, format and first-value argument
+    indexes, and whether recognition requires an unresolved callee.
 */
 typedef struct PrintfFn {
   const char *name, int fmt_arg, first_arg, unresolved;
@@ -31,10 +30,12 @@ typedef struct PrintfFn {
 #include "macros/macros.x"
 
 static macro Stmt $fail.expressions_dynamic_const(Expr $c, Expr $site) =>
-  $c.report_error(<type>, "dynamic update cannot target a const object", $site, NULL);
+  $c.report_error(
+    <type>, "dynamic update cannot target a const object", $site, NULL);
 
 static macro Stmt $fail.expressions_dynamic_address(Expr $c, Expr $site) =>
-  $c.report_error(<type>, "dynamic update requires an addressable object", $site, NULL);
+  $c.report_error(
+    <type>, "dynamic update requires an addressable object", $site, NULL);
 
 #include "expressions-reports.x"
 
