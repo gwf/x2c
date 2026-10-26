@@ -23,8 +23,7 @@ module List _declare_stmt(Emitter &e, List ast) =>
   %( @(_declare(e, ast)) ";");
 
 module List _decl_stmt(Emitter &e, List ast) {
-  match (ast)
-    case %(decl *declaration): ast = %(declare @declaration);
+  if (ast ~= %(decl *declaration)) ast = %(declare @declaration);
   return _declare(e, ast);
 }
 
@@ -86,7 +85,7 @@ module List _foreign_alias(
 
 module List _typedef(Emitter &e, List ast) {
   List code = %("typedef" @(_emit(e, ast.cdr())) ";");
-  match (ast) case %(typedef ? (bindings *declarators)):
+  if (ast ~= %(typedef ? (bindings *declarators)))
     foreach (List declarator in declarators) {
       List binding = declarator.cadr();
       Var type;
@@ -216,6 +215,6 @@ static List _tagged(List ast, List tag, List body) {
    is what the source wrote, and tagless typedefs are compatible across
    translation units (C11 6.2.7). */
 static int _is_gensym_tag(List tag) {
-  match (tag) case %((gensym *) *): return 1;
+  if (tag ~= %((gensym *) *)) return 1;
   return 0;
 }
