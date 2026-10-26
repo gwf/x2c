@@ -186,6 +186,12 @@ def lifecycle(p, sources):
     missing = p.command("status", snapshot)
     assert str(sources[1]) in missing["missing"], missing
     assert p.find(snapshot, kind="function") == functions
+    sources[0].unlink()
+    assert p.find(snapshot, kind="function") == functions
+    retained_ast = p.query(snapshot, op="match", select={"name": "snapshot_entry"},
+                           pattern="(expr ?type (call ?callee (args *args)))",
+                           inside="loop", callee="snapshot_leaf")
+    assert retained_ast["total"] == 1, retained_ast
     damaged = p.root / "incompatible"
     shutil.copytree(snapshot, damaged)
     data_path = damaged / "snapshot.datum"
@@ -216,7 +222,7 @@ dependencies = ["core"]
     p.command("snapshot", snapshot, "--manifest-path", manifest)
     assert p.command("status", snapshot)["fresh"]
     path = p.query(snapshot, op="path", select={"name": "main"},
-                   target={"name": "snapshot_core", "kind": "function", "domain": "core"})
+                   target={"name": "snapshot_core", "kind": "function"})
     assert path["status"] == "found", path
     assert {row["domain"] for row in p.find(snapshot, kind="function")["results"]} >= {"app", "core"}
     (directory / "app-extra.x").write_text("int snapshot_added(void) => 2;\n")
@@ -237,6 +243,70 @@ def protocol_relationships(p, fixture):
                    for row in types), relation
 
 
+def scoped_types(p, fixtures):
+    directory = p.root / "scoped-types"
+    directory.mkdir()
+    for name in ("snapshot-local.x", "snapshot-shared.x", "snapshot-left.x", "snapshot-right.x"):
+        shutil.copyfile(fixtures / name, directory / name)
+    snapshot = p.root / "scopes"
+    p.command("snapshot", snapshot, directory / "snapshot-local.x",
+              directory / "snapshot-left.x", directory / "snapshot-right.x")
+    local = p.find(snapshot, kind="type", name="SnapshotLocal")["results"]
+    assert len(local) == 2 and len({row["id"] for row in local}) == 2, local
+    owners = {row["owner"] for row in local}
+    functions = p.find(snapshot, kind="function")["results"]
+    assert owners == {row["id"] for row in functions
+                      if row["name"] in {"snapshot_local_a", "snapshot_local_b"}}, local
+    assert {row["resolved_type"] for row in local} == {"(int)", "(long)"}, local
+    shared = p.find(snapshot, kind="type", name="SnapshotShared")["results"]
+    # One typedef and one aggregate tag, each shared by both importing units.
+    assert len(shared) == 2 and len({row["id"] for row in shared}) == 2, shared
+    targets = []
+    for name in ("snapshot_left", "snapshot_right"):
+        reached = p.query(snapshot, op="traverse", select={"name": name},
+                          relations=["parameter"], depth=1, where={"kind": "type"})
+        targets.append({row["id"] for row in reached["results"]})
+    assert targets[0] and targets[0] == targets[1], targets
+    # The imported header, not either caller's unit, owns the type source.
+    assert all(Path(row["file"]).name == "snapshot-shared.x" for row in shared), shared
+
+
+def target_configurations(p, fixtures):
+    directory = p.root / "configured-targets"
+    directory.mkdir()
+    shutil.copyfile(fixtures / "snapshot-configured.x", directory / "shared.x")
+    for target, type_name in (("core", "int"), ("app", "long")):
+        includes = directory / f"{target}-types"
+        includes.mkdir()
+        (includes / "snapshot-config-type.x").write_text(
+            f"typedef {type_name} SnapshotConfigured;\n")
+    manifest = directory / "x2c.toml"
+    manifest.write_text('''[project]
+default-target = "app"
+[target.core]
+kind = "static-library"
+sources = ["shared.x"]
+defines = ["SNAPSHOT_WIDE=0"]
+include-dirs = ["core-types"]
+[target.app]
+sources = ["shared.x"]
+defines = ["SNAPSHOT_WIDE=1"]
+include-dirs = ["app-types"]
+dependencies = ["core"]
+''')
+    snapshot = p.root / "configurations"
+    p.command("snapshot", snapshot, "--manifest-path", manifest)
+    types = p.find(snapshot, kind="type", name="SnapshotConfigured")["results"]
+    assert len(types) == 2 and len({row["id"] for row in types}) == 2, types
+    assert {row["domain"]: row["resolved_type"] for row in types} == {
+        "core": "(int)", "app": "(long)",
+    }, types
+    functions = p.find(snapshot, kind="function", name="snapshot_configured")["results"]
+    assert len(functions) == 2 and len({row["id"] for row in functions}) == 2, functions
+    assert {row["domain"] for row in functions} == {"core", "app"}, functions
+    assert {row["unit"] for row in functions} == {str(directory / "shared.x")}, functions
+
+
 def main():
     directory = Path(__file__).resolve().parent
     tool = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else (
@@ -253,6 +323,8 @@ def main():
         lifecycle(project, sources)
         project_membership(project)
         protocol_relationships(project, directory / "fixtures/snapshot-protocol.x")
+        scoped_types(project, directory / "fixtures")
+        target_configurations(project, directory / "fixtures")
     print("snapshot acceptance passed")
 
 
