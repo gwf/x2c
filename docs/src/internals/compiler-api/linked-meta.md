@@ -169,7 +169,7 @@ lambda's function moves its own. The function binds again only its
 cells and the statements that hold them; its other statements are kept
 as they are bound.
 
-Source: `src/linked-meta.x:1158`
+Source: `src/linked-meta.x:1159`
 
 #### lambda_closure
 
@@ -179,7 +179,7 @@ Lifts the capturing lambda `node` to a static function of its
 parameters and captures, and answers a `Func` of a record of the
 captured values and addresses.
 
-Source: `src/linked-meta.x:1079`
+Source: `src/linked-meta.x:1080`
 
 #### lambda_lift
 
@@ -188,7 +188,7 @@ Source: `src/linked-meta.x:1079`
 Lifts the noncapturing lambda `node` to a static function, whose name
 is its value.
 
-Source: `src/linked-meta.x:923`
+Source: `src/linked-meta.x:924`
 
 #### linked_meta_hashes
 
@@ -196,7 +196,7 @@ Source: `src/linked-meta.x:923`
 
 Returns linked definition hashes and provider source dependencies.
 
-Source: `src/linked-meta.x:2471`
+Source: `src/linked-meta.x:2472`
 
 #### linked_meta_targets
 
@@ -205,7 +205,7 @@ Source: `src/linked-meta.x:2471`
 Returns a fresh Map of linked copies and runtime builders by name.
 The Map borrows shared Func handles that live for the program.
 
-Source: `src/linked-meta.x:2234`
+Source: `src/linked-meta.x:2235`
 
 #### match_condition_lowering
 
@@ -213,7 +213,7 @@ Source: `src/linked-meta.x:2234`
 
 Lowers a pattern condition through the ordinary match tests.
 
-Source: `src/linked-meta.x:1608`
+Source: `src/linked-meta.x:1609`
 
 #### match_lowering
 
@@ -222,7 +222,7 @@ Source: `src/linked-meta.x:1608`
 Lowers the bound match `node` to C text around its subject, patterns,
 and bodies.
 
-Source: `src/linked-meta.x:1577`
+Source: `src/linked-meta.x:1578`
 
 #### printf_values
 
@@ -230,7 +230,7 @@ Source: `src/linked-meta.x:1577`
 
 Reads the Var values a printf-family call's static format consumes.
 
-Source: `src/linked-meta.x:1745`
+Source: `src/linked-meta.x:1746`
 
 #### protocol_conformance
 
@@ -239,7 +239,7 @@ Source: `src/linked-meta.x:1745`
 Places the forwarding members, descriptor thunks, method table, and
 descriptor registration of one conformance.
 
-Source: `src/linked-meta.x:1859`
+Source: `src/linked-meta.x:1860`
 
 #### raise_lowering
 
@@ -248,7 +248,7 @@ Source: `src/linked-meta.x:1859`
 Converts a raise's code and details, or declines a raise whose parts
 already have their types.
 
-Source: `src/linked-meta.x:1923`
+Source: `src/linked-meta.x:1924`
 
 #### register_rewrite
 
@@ -265,7 +265,7 @@ Source: `src/linked-meta.x:109`
 Lowers a switch on a String to an integer switch on its selector's
 index among the labels it owns, or declines another switch.
 
-Source: `src/linked-meta.x:2022`
+Source: `src/linked-meta.x:2023`
 
 #### try_lowering
 
@@ -273,7 +273,7 @@ Source: `src/linked-meta.x:2022`
 
 Lowers the parsed try `node` to its landing form.
 
-Source: `src/linked-meta.x:2177`
+Source: `src/linked-meta.x:2178`
 
 ## Design notes
 

@@ -141,7 +141,7 @@ Returns the suffix of `type` beginning at its builtin or typedef base.
 The result shares the original `List` and is `NULL` when no base is
 present.
 
-Source: `lib/type.x:229`
+Source: `lib/type.x:227`
 
 <a id="Type.body"></a>
 #### Type.body
@@ -161,7 +161,7 @@ Source: `lib/type.x:102`
 Removes non-typedef storage classes, `inline`, type qualifiers, and
 unqualified-value projections from `type`, retaining typedef identity.
 
-Source: `lib/type.x:234`
+Source: `lib/type.x:232`
 
 <a id="Type.declared"></a>
 #### Type.declared
@@ -172,7 +172,7 @@ Returns the stored declaration `Type` after removing non-typedef storage
 classes and `inline`. Those specifiers describe declaration placement;
 `const`, `restrict`, and `volatile` describe the stored value and remain.
 
-Source: `lib/type.x:240`
+Source: `lib/type.x:238`
 
 <a id="Type.dereference"></a>
 #### Type.dereference
@@ -196,7 +196,7 @@ two types are otherwise the same, or where one points at `void`, which
 has no deeper levels to compare; a conversion through a converter
 function copies instead of aliasing.
 
-Source: `lib/type.x:269`
+Source: `lib/type.x:267`
 
 <a id="Type.function_parts"></a>
 #### Type.function_parts
@@ -217,7 +217,7 @@ Source: `lib/type.x:177`
 Reads an integer literal of `type` spelled in digits, with any suffix,
 into `value`. Returns 0 for any other literal.
 
-Source: `lib/type.x:560`
+Source: `lib/type.x:558`
 
 <a id="Type.is_aggregate"></a>
 #### Type.is_aggregate
@@ -263,7 +263,7 @@ Source: `lib/type.x:118`
 Returns whether `type` is one bare typedef-name `String`.
 Unlike `is_typedef_name`, this rejects pointer and array wrappers.
 
-Source: `lib/type.x:332`
+Source: `lib/type.x:330`
 
 <a id="Type.is_bitfield"></a>
 #### Type.is_bitfield
@@ -282,7 +282,7 @@ Source: `lib/type.x:129`
 
 Returns whether `type` is a builtin scalar, struct, union, or enum.
 
-Source: `lib/type.x:314`
+Source: `lib/type.x:312`
 
 <a id="Type.is_char_pointer_like"></a>
 #### Type.is_char_pointer_like
@@ -292,7 +292,7 @@ Source: `lib/type.x:314`
 Returns whether `type` is exactly a pointer or array of `char` or
 `const char`, without resolving typedefs or removing qualifiers.
 
-Source: `lib/type.x:307`
+Source: `lib/type.x:305`
 
 <a id="Type.is_enum"></a>
 #### Type.is_enum
@@ -328,7 +328,7 @@ Source: `lib/type.x:86`
 
 Returns whether `type` carries the `extern` storage class.
 
-Source: `lib/type.x:215`
+Source: `lib/type.x:213`
 
 <a id="Type.is_function"></a>
 #### Type.is_function
@@ -346,7 +346,7 @@ Source: `lib/type.x:121`
 
 Returns whether `type` carries the `inline` function specifier.
 
-Source: `lib/type.x:212`
+Source: `lib/type.x:210`
 
 <a id="Type.is_integral"></a>
 #### Type.is_integral
@@ -355,7 +355,7 @@ Source: `lib/type.x:212`
 
 Returns whether `type` is a fixed integral scalar or an enum.
 
-Source: `lib/type.x:339`
+Source: `lib/type.x:337`
 
 <a id="Type.is_list_rest"></a>
 #### Type.is_list_rest
@@ -364,7 +364,7 @@ Source: `lib/type.x:339`
 
 Returns whether this parameter is the List rest calling convention.
 
-Source: `lib/type.x:195`
+Source: `lib/type.x:193`
 
 <a id="Type.is_number"></a>
 #### Type.is_number
@@ -373,7 +373,7 @@ Source: `lib/type.x:195`
 
 Returns whether `type` is a fixed numeric scalar or an enum.
 
-Source: `lib/type.x:336`
+Source: `lib/type.x:334`
 
 <a id="Type.is_pointer"></a>
 #### Type.is_pointer
@@ -400,7 +400,7 @@ Source: `lib/type.x:115`
 
 Returns whether `type` carries the `static` storage class.
 
-Source: `lib/type.x:209`
+Source: `lib/type.x:207`
 
 <a id="Type.is_threaded"></a>
 #### Type.is_threaded
@@ -409,7 +409,7 @@ Source: `lib/type.x:209`
 
 Returns whether `type` carries the `threaded` storage class.
 
-Source: `lib/type.x:218`
+Source: `lib/type.x:216`
 
 <a id="Type.is_typedef"></a>
 #### Type.is_typedef
@@ -418,7 +418,7 @@ Source: `lib/type.x:218`
 
 Returns whether `type` begins with the `typedef` storage class.
 
-Source: `lib/type.x:221`
+Source: `lib/type.x:219`
 
 <a id="Type.is_typedef_name"></a>
 #### Type.is_typedef_name
@@ -427,7 +427,7 @@ Source: `lib/type.x:221`
 
 Returns whether the base of `type` is exactly one typedef-name `String`.
 
-Source: `lib/type.x:324`
+Source: `lib/type.x:322`
 
 <a id="Type.list"></a>
 #### Type.list
@@ -445,7 +445,7 @@ Source: `lib/type.x:25`
 
 Returns the fixed prefix length, or -1 for a callable without List rest.
 
-Source: `lib/type.x:199`
+Source: `lib/type.x:197`
 
 <a id="Type.numeric_literal"></a>
 #### Type.numeric_literal
@@ -457,7 +457,7 @@ Returns the native type selected by a validated numeric token.
 native families returns `NULL`. A signed data token includes its sign
 when selecting a family, so a signed minimum fits that family.
 
-Source: `lib/type.x:511`
+Source: `lib/type.x:509`
 
 <a id="Type.numeric_literal_value"></a>
 #### Type.numeric_literal_value
@@ -467,7 +467,7 @@ Source: `lib/type.x:511`
 Reads a validated numeric literal at its semantic type's precision.
 Returns `void` when its magnitude exceeds the integer representation.
 
-Source: `lib/type.x:539`
+Source: `lib/type.x:537`
 
 <a id="Type.promote"></a>
 #### Type.promote
@@ -478,7 +478,7 @@ Applies integer promotion to `type`.
 Enums and narrow integers become `int`; other scalars retain their
 canonical spelling, and a non-scalar returns `NULL`.
 
-Source: `lib/type.x:459`
+Source: `lib/type.x:457`
 
 <a id="Type.qualify"></a>
 #### Type.qualify
@@ -507,7 +507,7 @@ Returns the normalized builtin scalar spelling, or `NULL` when `t` is not
 one valid scalar combination. Storage classes and qualifiers do not
 affect the result.
 
-Source: `lib/type.x:357`
+Source: `lib/type.x:355`
 
 <a id="Type.scalar_tag"></a>
 #### Type.scalar_tag
@@ -516,7 +516,7 @@ Source: `lib/type.x:357`
 
 Returns the fixed `Var` numeric tag for `type`, or zero when none exists.
 
-Source: `lib/type.x:431`
+Source: `lib/type.x:429`
 
 <a id="Type.tag"></a>
 #### Type.tag
@@ -537,7 +537,7 @@ Source: `lib/type.x:92`
 Returns the numeric `Var` reader for `type`, or `NULL` when unsupported.
 Enums use `Var_int` after conversion to their shared integer tag.
 
-Source: `lib/type.x:439`
+Source: `lib/type.x:437`
 
 <a id="Type.var_numeric_update_helper"></a>
 #### Type.var_numeric_update_helper
@@ -547,7 +547,7 @@ Source: `lib/type.x:439`
 Returns the native numeric update helper for `type`, or `NULL` when the
 scalar has no registered update helper.
 
-Source: `lib/type.x:448`
+Source: `lib/type.x:446`
 
 <a id="Type.widest"></a>
 #### Type.widest
@@ -557,7 +557,7 @@ Source: `lib/type.x:448`
 Returns the usual arithmetic result `Type` for two scalar operands.
 A missing or non-scalar operand produces `NULL`.
 
-Source: `lib/type.x:472`
+Source: `lib/type.x:470`
 
 ### `Var`
 

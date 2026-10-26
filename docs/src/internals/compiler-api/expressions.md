@@ -162,7 +162,7 @@ Source: `src/expressions/syntax.x:37`
 Parses an explicit List splice argument, or returns NULL without consuming
 an ordinary argument. Parentheses delimit a complete splice expression.
 
-Source: `src/expressions/syntax.x:514`
+Source: `src/expressions/syntax.x:513`
 
 <a id="Compiler.parse_conditional"></a>
 #### Compiler.parse_conditional
@@ -231,7 +231,7 @@ Parses one primary expression or expression-valued macro slot.
 Dispatch starts at `c.token` to the selected literal, identifier,
 grouping, or macro parser and leaves the token after that primary form.
 
-Source: `src/expressions/syntax.x:631`
+Source: `src/expressions/syntax.x:630`
 
 <a id="Compiler.parse_variable"></a>
 #### Compiler.parse_variable
@@ -241,7 +241,7 @@ Source: `src/expressions/syntax.x:631`
 Parses and resolves one complex identifier expression.
 Parsing starts at `c.token` and leaves it after the identifier.
 
-Source: `src/expressions/syntax.x:703`
+Source: `src/expressions/syntax.x:702`
 
 <a id="Compiler.postfix_completions"></a>
 #### Compiler.postfix_completions
@@ -251,7 +251,7 @@ Source: `src/expressions/syntax.x:703`
 Returns sorted visible field and method names that resolve on `receiver`
 through `access`.
 
-Source: `src/expressions/access.x:318`
+Source: `src/expressions/access.x:317`
 
 <a id="Compiler.printf_static_format"></a>
 #### Compiler.printf_static_format
@@ -313,7 +313,7 @@ a `(field access type)`, `(method binding signature)`, or `(ambiguous ...)`
 row, or NULL when no member is visible. Method lookup is enabled only by
 `call_context` and records the selected binding in `c.sym`.
 
-Source: `src/expressions/access.x:170`
+Source: `src/expressions/access.x:169`
 
 <a id="Compiler.reveal_binding"></a>
 #### Compiler.reveal_binding
