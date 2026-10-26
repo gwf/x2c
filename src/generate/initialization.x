@@ -8,7 +8,8 @@ List Compiler.initializer_function(
   c.rebuild_unit_function($!Unit{ $type $name(void) { @body } });
 
 /** Returns a run-once initializer body: `before`, then a return when
-   `guard` is set that sets it otherwise, then `after`. */
+   `guard` is set that sets it otherwise, then `after`.
+*/
 List Compiler.run_once_body(Compiler c, List before, List guard, List after) {
   List flag = $!int{ $guard };
   List test = c.rebuild_statement($!{ if ($flag) return; $flag = 1; }).cdr();
@@ -45,7 +46,8 @@ static void _prepare(Init &i, List source) {
 
 /** Returns `function` with its entry setup: the protocol initializer and
     the type initializer run once, and a `guarded` entry calls the region's
-    initializer unless its guard is set. */
+    initializer unless its guard is set.
+*/
 List Init.enter(Init &i, List function, int guarded) {
   match (function)
     case %(function ? (bind (binding ? ?(String name)) ?) (block *body)): {
@@ -241,7 +243,7 @@ static int _record_calls(Var value, Var caller, Map callers) {
   match (node) {
     case %(cache ?): return 1;
     case %(ident (binding ? ?callee)): {
-      List found = callee in callers ? callers[callee] : NULL;
+      List found = callers.getdefault(callee, %());
       callers[callee] = cons(caller, found);
       return 0;
     }
