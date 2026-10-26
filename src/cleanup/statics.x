@@ -101,11 +101,11 @@ static int _runtime_static_declaration(
     case %(declare (!set ?type (*)) (bindings *bindings)):
       if (type.list().type().is_static())
         foreach (List binding in bindings)
-          if (binding ~= %(op = (bind ?name ?) ?value))
-            if (c.static_value_is_runtime(value, runtime)) {
-              runtime[name] = 1;
-              found = 1;
-            }
+          if (binding ~= %(op = (bind ?name ?) ?value) &&
+              c.static_value_is_runtime(value, runtime)) {
+            runtime[name] = 1;
+            found = 1;
+          }
   }
   return found;
 }
