@@ -49,7 +49,7 @@ def main():
             for _ in range(3):
                 for query, answer in zip(queries, expected):
                     assert send(query) == answer, query
-                for invalid in ('{', '[]', '', {'op': 'unknown'},
+                for invalid in ('{', '[]', '', '\x00', {'op': 'unknown'},
                                 {'op': 'match', 'pattern': '('}):
                     assert 'error' in send(invalid), invalid
             for index in range(200):

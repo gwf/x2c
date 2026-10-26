@@ -675,13 +675,14 @@ Map graph_snapshot_query(Map snapshot, Map request) =>
 static int _sq_serve_request(SnapshotQuery session) {
   Context request = Context.open_isolated_named("graph query");
   defer request.close();
-  String line = Stdin.readline();
-  if (!line) return 0;
   Map response;
   try {
+    String line = Stdin.readline();
+    if (!line) return 0;
     Map query = _sq_object(Json.parse(line), "query");
     response = _sq_execute(session, query);
   }
+  catch %(io-fail *detail): Error.raise(<io-fail>, detail);
   catch %(*failure): response = {"snapshot": session.snapshot["identity"],
     "coverage": session.snapshot["coverage"], "error": failure.repr()};
   Stdout.printf("%s\n", Var.json(response));
@@ -693,7 +694,7 @@ static int _sq_serve_request(SnapshotQuery session) {
 void graph_snapshot_serve(Map snapshot) {
   SnapshotQuery session = _sq_open(snapshot);
   _sq_index_edges(session);
-  Stderr.printf("x2c graph serve: ready %s\n", snapshot["identity"].str());
+  Stderr.printf("x2c graph serve: ready %s\n", snapshot["identity"]);
   while (_sq_serve_request(session)) {}
 }
 
