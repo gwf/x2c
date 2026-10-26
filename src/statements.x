@@ -454,7 +454,8 @@ List Compiler.parse_case_body(Compiler c, List types) {
    new scope then declares the capture's name with its type, read from the
    temporary; the caller closes that scope. */
 /** Declares typed pattern captures in a new scope, returning their native
-    declarations and the preceding Var temporaries. The caller closes it. */
+    declarations and the preceding Var temporaries. The caller closes it.
+*/
 List Compiler.typed_capture_declarations(
   Compiler c, List types, List &temporaries) {
   Array locals = [];

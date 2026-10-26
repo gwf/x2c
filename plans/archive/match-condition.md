@@ -1,7 +1,9 @@
 # Pattern conditions
 
-> Status: active
-> Implementing `~=` with existing match lowering choices.
+> Status: done
+> Implemented 2026-10-26 in 94942111d, with subsequent integration fixes.
+> Behavioral fixtures and generated C verified. Publication uses the
+> delivering tree's standard gate and performance evidence.
 
 `subject ~= pattern` tests once and returns an int. It has equality
 precedence. The right operand uses the existing match pattern grammar,

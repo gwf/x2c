@@ -555,6 +555,7 @@ static void _x2c_gensym_defer_cleanup_3(void * _x2c_gensym_defer_opaque_3);
 
 typedef struct _x2c_gensym_defer_env_4{
   const void * _x2c_gensym_defer_capture_4;
+  const void * _x2c_gensym_defer_capture_5;
 }
 _x2c_gensym_defer_env_4;
 
@@ -2809,7 +2810,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_4(void)
   _2215 = cons(_2214, NULL);
   _2216 = cons(_253, _2215);
   _2217 = List_var(_2216);
-  _2218 = int_var(92905);
+  _2218 = int_var(92868);
   _2219 = cons(_2218, NULL);
   _2220 = cons(_258, _2219);
   _2221 = List_var(_2220);
@@ -3005,7 +3006,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_4(void)
   _2411 = cons(_2410, NULL);
   _2412 = cons(_245, _2411);
   _2413 = List_var(_2412);
-  _2414 = int_var(93267);
+  _2414 = int_var(93230);
   _2415 = cons(_2414, NULL);
   _2416 = cons(_258, _2415);
   _2417 = List_var(_2416);
@@ -3122,7 +3123,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_4(void)
   _2528 = cons(_2527, NULL);
   _2529 = cons(_245, _2528);
   _2530 = List_var(_2529);
-  _2531 = int_var(93850);
+  _2531 = int_var(93813);
   _2532 = cons(_2531, NULL);
   _2533 = cons(_258, _2532);
   _2534 = List_var(_2533);
@@ -3223,7 +3224,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_5(void)
   _2626 = cons(_2625, NULL);
   _2627 = cons(_245, _2626);
   _2628 = List_var(_2627);
-  _2629 = int_var(93934);
+  _2629 = int_var(93897);
   _2630 = cons(_2629, NULL);
   _2631 = cons(_258, _2630);
   _2632 = List_var(_2631);
@@ -3348,7 +3349,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_5(void)
   _2751 = cons(_2750, NULL);
   _2752 = cons(_245, _2751);
   _2753 = List_var(_2752);
-  _2754 = int_var(93679);
+  _2754 = int_var(93642);
   _2755 = cons(_2754, NULL);
   _2756 = cons(_258, _2755);
   _2757 = List_var(_2756);
@@ -3440,7 +3441,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_5(void)
   _2843 = cons(_2842, NULL);
   _2844 = cons(_245, _2843);
   _2845 = List_var(_2844);
-  _2846 = int_var(94141);
+  _2846 = int_var(94104);
   _2847 = cons(_2846, NULL);
   _2848 = cons(_258, _2847);
   _2849 = List_var(_2848);
@@ -3652,7 +3653,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_5(void)
   _3055 = cons(_3054, NULL);
   _3056 = cons(_245, _3055);
   _3057 = List_var(_3056);
-  _3058 = int_var(96274);
+  _3058 = int_var(96237);
   _3059 = cons(_3058, NULL);
   _3060 = cons(_258, _3059);
   _3061 = List_var(_3060);
@@ -4216,7 +4217,6 @@ static List f6_syntax____parse_binary_level(Compiler c, int level){
 
 int Symbol_binary_precedence(Symbol);
 List Compiler_parse_match_condition(Compiler, List, Token);
-void Sym_push_new_scope(Sym);
 SymScope Sym_pop_scope(Sym);
 static List f6_syntax____parse_binary_level_tail(Compiler c, int level, List lhs){
   int first = 1;  while(Symbol_binary_precedence(f6_syntax____binary_operator(c)) == level ||(level == 7 && f6_syntax____is_type_operator(c))){
@@ -4227,7 +4227,7 @@ static List f6_syntax____parse_binary_level_tail(Compiler c, int level, List lhs
       lhs = Compiler_parse_match_condition(c, Compiler_resolve_expression(c, lhs, origin), origin);  continue;
     }
     List rhs;  if(op == 9805){
-      Sym_push_new_scope(c -> sym);  Compiler_expose_condition_bindings(c, lhs);  rhs = f6_syntax____parse_binary_level(c, level + 1);  Sym_pop_scope(c -> sym);
+      int scoped = Compiler_open_condition_scope(c, lhs);  rhs = f6_syntax____parse_binary_level(c, level + 1);  if(scoped) Sym_pop_scope(c -> sym);
     }
     else rhs = f6_syntax____parse_binary_level(c, level + 1);  if(first){
       lhs = Compiler_resolve_expression(c, lhs, origin);  first = 0;
@@ -4546,7 +4546,7 @@ List Compiler_postfix_completions(Compiler c, Type receiver, Symbol access);
 static List f6_syntax____parse_postfix_arrow(Compiler c, List expr){
   Token origin = c -> token;  Compiler_expect(c, 11645);  if(Compiler_at_completion(c)){
     List rows = Compiler_postfix_completions(c, Var_type(List_cadr(expr)), 11645); {
-      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/expressions/syntax.x",.function = "f6_syntax____parse_postfix_arrow",.line = 581};  x2c_error_raise_n(& _x2c_gensym_error_site_0, 1248787135328, 3, Symbol_var(740232), Symbol_var(28280237222), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(NULL));
+      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/expressions/syntax.x",.function = "f6_syntax____parse_postfix_arrow",.line = 580};  x2c_error_raise_n(& _x2c_gensym_error_site_0, 1248787135328, 3, Symbol_var(740232), Symbol_var(28280237222), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(NULL));
     }
 
   }
@@ -4557,7 +4557,7 @@ List Compiler_resolve_postfix_member(Compiler c, Type receiver_type, List field,
 static List f6_syntax____parse_postfix_dot(Compiler c, List expr){
   Token origin = c -> token;  Compiler_expect(c, 93);  if(Compiler_at_completion(c)){
     Type receiver = Var_type(_is_raw_string_literal(expr) ? List_var(_742) : List_cadr(expr));  List rows = Compiler_postfix_completions(c, receiver, 93); {
-      static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../src/expressions/syntax.x",.function = "f6_syntax____parse_postfix_dot",.line = 595};  x2c_error_raise_n(& _x2c_gensym_error_site_1, 1248787135328, 3, Symbol_var(740232), Symbol_var(28280237222), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(NULL));
+      static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../src/expressions/syntax.x",.function = "f6_syntax____parse_postfix_dot",.line = 594};  x2c_error_raise_n(& _x2c_gensym_error_site_1, 1248787135328, 3, Symbol_var(740232), Symbol_var(28280237222), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(NULL));
     }
 
   }
@@ -6682,15 +6682,15 @@ static int f9_operators____conditional_joins(Compiler c, Type type, Type other){
 
 static List _binary(Resolve * r, Var operator, List left, List right){
   List lhs = Compiler_resolve_expression((* r).c, left, (* r).origin);  List rhs;  if(x2c_var_equal(operator, Symbol_var(9805))){
-    Sym_push_new_scope((* r).c -> sym); {
+    int scoped = Compiler_open_condition_scope((* r).c, lhs); {
       _x2c_gensym_defer_env_4 _x2c_gensym_macro_environment_4 ={
         0
       }
-      ;  _x2c_gensym_macro_environment_4._x2c_gensym_defer_capture_4 =(const void *) & r;  X2CCleanup _x2c_gensym_defer_record_4 ={
+      ;  _x2c_gensym_macro_environment_4._x2c_gensym_defer_capture_4 =(const void *) & scoped;  _x2c_gensym_macro_environment_4._x2c_gensym_defer_capture_5 =(const void *) & r;  X2CCleanup _x2c_gensym_defer_record_4 ={
         .fn = _x2c_gensym_defer_cleanup_4, .env = & _x2c_gensym_macro_environment_4
       }
       ;  x2c_cleanup_push(& _x2c_gensym_defer_record_4); {
-        Compiler_expose_condition_bindings((* r).c, lhs);  rhs = Compiler_resolve_expression((* r).c, right, (* r).origin);
+        rhs = Compiler_resolve_expression((* r).c, right, (* r).origin);
       }
       x2c_cleanup_leave(& _x2c_gensym_defer_record_4);
     }
@@ -7515,6 +7515,9 @@ static void _x2c_gensym_defer_cleanup_3(void * _x2c_gensym_defer_opaque_3){
 }
 
 static void _x2c_gensym_defer_cleanup_4(void * _x2c_gensym_defer_opaque_4){
-  _x2c_gensym_defer_env_4 * _x2c_gensym_defer_data_4 =(_x2c_gensym_defer_env_4 *) _x2c_gensym_defer_opaque_4;  Sym_pop_scope((*(*(Resolve * *) _x2c_gensym_defer_data_4->_x2c_gensym_defer_capture_4)).c -> sym);
+  _x2c_gensym_defer_env_4 * _x2c_gensym_defer_data_4 =(_x2c_gensym_defer_env_4 *) _x2c_gensym_defer_opaque_4; {
+    if((*(int *) _x2c_gensym_defer_data_4->_x2c_gensym_defer_capture_4)) Sym_pop_scope((*(*(Resolve * *) _x2c_gensym_defer_data_4->_x2c_gensym_defer_capture_5)).c -> sym);
+  }
+
 }
 

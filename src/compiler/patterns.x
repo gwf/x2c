@@ -134,7 +134,8 @@ List Compiler.pattern_binder_declarations(
 }
 
 /** Returns captures established by a true condition. Other operations do
-    not establish names, including negation and disjunction. */
+    not establish names, including negation and disjunction.
+*/
 List Compiler.condition_bindings(List expression) {
   match (expression) {
     case %(expr ? (matches ? ? ? ?bindings)): return bindings;
@@ -148,7 +149,8 @@ List Compiler.condition_bindings(List expression) {
 }
 
 /** Opens a scope for the captures established by a true condition. Returns
-    whether a scope was opened; the caller closes it after its continuation. */
+    whether a scope was opened; the caller closes it after its continuation.
+*/
 int Compiler.open_condition_scope(Compiler c, List expression) {
   List bindings = Compiler.condition_bindings(expression);
   if (!bindings) return 0;

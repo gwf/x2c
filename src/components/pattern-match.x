@@ -497,7 +497,6 @@ meta Code match_lowering(Code node) {
   return node;
 }
 
-
 /* A pattern condition uses the same cursor tests and fallback as an arm,
    without the switch and implicit break of a match statement. */
 meta static Code _match_condition(Code subject, List pattern, List body) {

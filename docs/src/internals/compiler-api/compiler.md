@@ -28,6 +28,7 @@ One x2c unit's translation state and its two parses.
 | [`Compiler.close_child`](#Compiler.close_child) | Retains a child's final diagnostics and frees its owned meta bindings. |
 | [`Compiler.collect_compile_time_definition`](#Compiler.collect_compile_time_definition) | Collects macro definitions or keyword aliases before the full source parse. |
 | [`Compiler.collect_unit_macro`](#Compiler.collect_unit_macro) | Expands the file-scope unit macro at the cursor for collection and reports whether it did. |
+| [`Compiler.condition_bindings`](#Compiler.condition_bindings) | Returns captures established by a true condition. |
 | [`Compiler.copy_source_declaration`](#Compiler.copy_source_declaration) | Carries declaration metadata with one actual symbol contribution. |
 | [`Compiler.define_pattern_binders`](#Compiler.define_pattern_binders) | Declares pattern locals and returns their capture-token/binding pairs. |
 | [`Compiler.emitted_binding_name`](#Compiler.emitted_binding_name) | Returns a binding's selected emitted spelling. |
@@ -50,6 +51,7 @@ One x2c unit's translation state and its two parses.
 | [`Compiler.new`](#Compiler.new) | Creates a compiler with independent package and generated-name state. |
 | [`Compiler.new_shared`](#Compiler.new_shared) | Creates a compiler sharing its owner's package and generated-name state. |
 | [`Compiler.next`](#Compiler.next) | Consumes the current token and advances past following trivia. |
+| [`Compiler.open_condition_scope`](#Compiler.open_condition_scope) | Opens a scope for the captures established by a true condition. |
 | [`Compiler.optional_reference_test`](#Compiler.optional_reference_test) | Returns the optional-reference parameter tested by `condition`, or NULL. |
 | [`Compiler.own_diagnostics`](#Compiler.own_diagnostics) | Routes this compiler's diagnostic store through its own printer. |
 | [`Compiler.owns_package_source`](#Compiler.owns_package_source) | Reports whether an x2c source belongs to the current package root. |
@@ -264,6 +266,16 @@ expansion that fails keeps nothing and leaves the cursor at the
 invocation, so collection skips it and the full parse reports it.
 
 Source: `src/compiler/declarations/production.x:17`
+
+<a id="Compiler.condition_bindings"></a>
+#### Compiler.condition_bindings
+
+`List Compiler.condition_bindings(List expression)`
+
+Returns captures established by a true condition. Other operations do
+not establish names, including negation and disjunction.
+
+Source: `src/compiler/patterns.x:139`
 
 <a id="Compiler.copy_source_declaration"></a>
 #### Compiler.copy_source_declaration
@@ -487,6 +499,16 @@ This updates the unmatched-brace stack. An unmatched `}` reports a parse
 diagnostic, which raises `<malformed>` under recovery and otherwise exits.
 
 Source: `src/compiler/parsing/tokens.x:162`
+
+<a id="Compiler.open_condition_scope"></a>
+#### Compiler.open_condition_scope
+
+`int Compiler.open_condition_scope(Compiler c, List expression)`
+
+Opens a scope for the captures established by a true condition. Returns
+whether a scope was opened; the caller closes it after its continuation.
+
+Source: `src/compiler/patterns.x:154`
 
 <a id="Compiler.optional_reference_test"></a>
 #### Compiler.optional_reference_test

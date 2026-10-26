@@ -54,8 +54,8 @@ static macro Stmt $operator.derived() { @_operator_cases(0, 3, 1) }
 
 /** Returns a binary operator's precedence level, or zero for any other
     `Symbol`. Levels run from 1 for `||` to 10 for the multiplicative
-    operators, so a larger level binds more tightly. `===`, `!==`, and `~=` share
-    the equality level, and `in` the relational level.
+    operators, so a larger level binds more tightly. `===`, `!==`, and `~=`
+    share the equality level, and `in` the relational level.
 */
 int Symbol.binary_precedence(Symbol op) {
   switch (op) { $operator.precedence(); }

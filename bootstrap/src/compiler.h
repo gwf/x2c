@@ -347,7 +347,7 @@ List Compiler_pattern_binder_declarations(Compiler c, List bindings, List handle
 
 List Compiler_condition_bindings(List expression);
 
-void Compiler_expose_condition_bindings(Compiler c, List expression);
+int Compiler_open_condition_scope(Compiler c, List expression);
 
 int Compiler_read_source(Compiler c, String path, String volatile * text);
 

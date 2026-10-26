@@ -614,7 +614,8 @@ List Compiler.bind_callable_body(Compiler c, List syntax, Type return_type) {
 
 /** Binds a pattern condition without publishing its captures to the caller.
     Its declarations belong to the successful path; visible rows retain the
-    identities that `&&` and `if` expose in their own scopes. */
+    identities that `&&` and `if` expose in their own scopes.
+*/
 List Compiler.bind_match_condition(
   Compiler c, List subject, List pattern, List types, Token origin) {
   subject = _resolve(c, subject);

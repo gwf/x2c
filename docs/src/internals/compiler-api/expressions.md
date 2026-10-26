@@ -26,6 +26,7 @@ Expression syntax and its resolution.
 | [`Compiler.parse_expression`](#Compiler.parse_expression) | Parses an assignment expression and any following comma expressions. |
 | [`Compiler.parse_macro_expression_target`](#Compiler.parse_macro_expression_target) | Parses one macro target through the cast-expression grammar. |
 | [`Compiler.parse_parenthesized_statement`](#Compiler.parse_parenthesized_statement) | Parses a statement beginning with `(`. |
+| [`Compiler.parse_pattern_operand`](#Compiler.parse_pattern_operand) | Parses the right operand of a pattern test at relational precedence. |
 | [`Compiler.parse_primary`](#Compiler.parse_primary) | Parses one primary expression or expression-valued macro slot. |
 | [`Compiler.parse_variable`](#Compiler.parse_variable) | Parses and resolves one complex identifier expression. |
 | [`Compiler.postfix_completions`](#Compiler.postfix_completions) | Returns sorted visible field and method names that resolve on `receiver` through `access`. |
@@ -161,7 +162,7 @@ Source: `src/expressions/syntax.x:38`
 Parses an explicit List splice argument, or returns NULL without consuming
 an ordinary argument. Parentheses delimit a complete splice expression.
 
-Source: `src/expressions/syntax.x:500`
+Source: `src/expressions/syntax.x:514`
 
 <a id="Compiler.parse_conditional"></a>
 #### Compiler.parse_conditional
@@ -194,7 +195,7 @@ Parses one macro target through the cast-expression grammar.
 Parsing starts at `c.token` and leaves it at the first token after
 the target.
 
-Source: `src/expressions/syntax.x:277`
+Source: `src/expressions/syntax.x:291`
 
 <a id="Compiler.parse_parenthesized_statement"></a>
 #### Compiler.parse_parenthesized_statement
@@ -210,7 +211,16 @@ resumes at the postfix tail it had already reached. This entry consumes
 the terminating `;` and returns `(stmnt expression)` or an origin-anchored
 `(dstrdecl ...)`.
 
-Source: `src/expressions/syntax.x:208`
+Source: `src/expressions/syntax.x:222`
+
+<a id="Compiler.parse_pattern_operand"></a>
+#### Compiler.parse_pattern_operand
+
+`List Compiler.parse_pattern_operand(Compiler c)`
+
+Parses the right operand of a pattern test at relational precedence.
+
+Source: `src/expressions/syntax.x:101`
 
 <a id="Compiler.parse_primary"></a>
 #### Compiler.parse_primary
@@ -221,7 +231,7 @@ Parses one primary expression or expression-valued macro slot.
 Dispatch starts at `c.token` to the selected literal, identifier,
 grouping, or macro parser and leaves the token after that primary form.
 
-Source: `src/expressions/syntax.x:617`
+Source: `src/expressions/syntax.x:631`
 
 <a id="Compiler.parse_variable"></a>
 #### Compiler.parse_variable
@@ -231,7 +241,7 @@ Source: `src/expressions/syntax.x:617`
 Parses and resolves one complex identifier expression.
 Parsing starts at `c.token` and leaves it after the identifier.
 
-Source: `src/expressions/syntax.x:689`
+Source: `src/expressions/syntax.x:703`
 
 <a id="Compiler.postfix_completions"></a>
 #### Compiler.postfix_completions
@@ -290,7 +300,7 @@ Source: `src/expressions/resolution.x:55`
 Resolves the key and value of one `(map-entry key value)` AST row.
 Any other shape is reported at `origin` as a parse error.
 
-Source: `src/expressions/resolution.x:458`
+Source: `src/expressions/resolution.x:460`
 
 <a id="Compiler.resolve_postfix_member"></a>
 #### Compiler.resolve_postfix_member
@@ -324,7 +334,7 @@ Source: `src/expressions/identifiers.x:194`
 Builds an exact tag expression, deferring macro type slots until
 binding.
 
-Source: `src/expressions/resolution.x:345`
+Source: `src/expressions/resolution.x:347`
 
 ## Public types
 

@@ -243,6 +243,7 @@ int Symbol_binary_precedence(Symbol op){
     case 249 : return 3;
     case 189 : return 4;
     case 77 : return 5;
+    case 32379 : return 6;
     case 15739 : return 6;
     case 8571 : return 6;
     case 2014587 : return 6;

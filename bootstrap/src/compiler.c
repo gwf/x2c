@@ -3880,14 +3880,17 @@ List Compiler_condition_bindings(List expression){
 }
 
 List Type_declaration_ast(Type, List);
-void Compiler_expose_condition_bindings(Compiler c, List expression){
-  if(! _init_guard_) _file_init_(); {
-    List row;  List _x2c_gensym_macro_object_40 = Compiler_condition_bindings(expression);  List _x2c_gensym_macro_cursor_40 = _x2c_gensym_macro_object_40;  Var _x2c_gensym_macro_cursor_output_38;  while(List_try_next(_x2c_gensym_macro_object_40, &(_x2c_gensym_macro_cursor_40), &(_x2c_gensym_macro_cursor_output_38))){
-      row = Var_list_payload(_x2c_gensym_macro_cursor_output_38);  Sym_bind_identity(c -> sym, NULL, Var_list_payload(List_car(row)), Type_declaration_ast(Var_type(List_cadr(row)), Var_list_payload(List_car(row))));
+int Compiler_open_condition_scope(Compiler c, List expression){
+  if(! _init_guard_) _file_init_();  List bindings = Compiler_condition_bindings(expression);  if(! List_truth(bindings)) return 0;  Sym_push_new_scope(c -> sym); {
+    List row;  List _x2c_gensym_macro_object_40 = bindings;  List _x2c_gensym_macro_cursor_40 = _x2c_gensym_macro_object_40;  Var _x2c_gensym_macro_cursor_output_38;  while(List_try_next(_x2c_gensym_macro_object_40, &(_x2c_gensym_macro_cursor_40), &(_x2c_gensym_macro_cursor_output_38))){
+      row = Var_list_payload(_x2c_gensym_macro_cursor_output_38); {
+        Type type = Var_type(List_cadr(row));  Sym_bind_identity(c -> sym, NULL, Var_list_payload(List_car(row)), Type_declaration_ast(type, Var_list_payload(List_car(row))));
+      }
+
     }
 
   }
-
+  return 1;
 }
 
 Path Path_absolute(Path);

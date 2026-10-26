@@ -17,6 +17,7 @@ X2c declarations, parsed from source or constructed.
 | [`Compiler.bind_callable_body`](#Compiler.bind_callable_body) | Binds a callable's outer block in its active parameter scope. |
 | [`Compiler.bind_catch_arm`](#Compiler.bind_catch_arm) | Binds one catch arm's `body` in a scope of its own, with declarations of the definite binders of `pattern`, read through `handle`, before it. |
 | [`Compiler.bind_match_arm`](#Compiler.bind_match_arm) | Binds one match arm's `body` in a scope of its own, which defines the definite binders of `pattern` when the arm `binds`. |
+| [`Compiler.bind_match_condition`](#Compiler.bind_match_condition) | Binds a pattern condition without publishing its captures to the caller. |
 | [`Compiler.bind_parameter`](#Compiler.bind_parameter) | Binds one constructed parameter in the current scope, including nested function modifiers and reference parameter facts. |
 | [`Compiler.bind_source_statement`](#Compiler.bind_source_statement) | Binds the source `if`, `while`, `do`, `for`, `match`, or `try` at the cursor through the same binders as constructed syntax. |
 | [`Compiler.bind_syntax`](#Compiler.bind_syntax) | Binds parser-shaped `syntax` at `context` into current compiler state. |
@@ -103,7 +104,7 @@ Source: `src/parse/auto.x:16`
 Binds a callable's outer block in its active parameter scope. Ordinary
 constructed blocks open their own scope before using this operation.
 
-Source: `src/parse/binding.x:592`
+Source: `src/parse/binding.x:599`
 
 <a id="Compiler.bind_catch_arm"></a>
 #### Compiler.bind_catch_arm
@@ -116,7 +117,7 @@ Binder diagnostics use `start`. A source arm's body parses here, and a
 template's declares its binders where its expansion binds it. A parsed
 arm's body already begins with them, so it binds unchanged.
 
-Source: `src/parse/binding.x:447`
+Source: `src/parse/binding.x:454`
 
 <a id="Compiler.bind_match_arm"></a>
 #### Compiler.bind_match_arm
@@ -128,7 +129,18 @@ definite binders of `pattern` when the arm `binds`. Binder diagnostics
 use `start`. A source arm's body parses here with the typed captures
 `types` that its pattern recorded.
 
-Source: `src/parse/binding.x:548`
+Source: `src/parse/binding.x:555`
+
+<a id="Compiler.bind_match_condition"></a>
+#### Compiler.bind_match_condition
+
+`List Compiler.bind_match_condition( Compiler c, List subject, List pattern, List types, Token origin)`
+
+Binds a pattern condition without publishing its captures to the caller.
+Its declarations belong to the successful path; visible rows retain the
+identities that `&&` and `if` expose in their own scopes.
+
+Source: `src/parse/binding.x:619`
 
 <a id="Compiler.bind_parameter"></a>
 #### Compiler.bind_parameter
