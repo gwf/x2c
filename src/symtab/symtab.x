@@ -109,8 +109,6 @@ static macro Stmt $fail.symbols_typedef_depth(
 
     Notes:
     - Struct fields can have (BIT N) mods as well.
-    - "long", "long long", and "double double" are all omitted to keep
-      sizeof(Var) to 8 bytes.
     - A declaration like "struct { int a, b; } x;" will generate two
       symbol table entries: one for an anonymous struct definition, and the
       other for x, which references the named anonymous struct definition.
