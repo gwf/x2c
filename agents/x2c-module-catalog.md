@@ -82,11 +82,10 @@ Public functions:
 `Diagnostics.report`, `diagnostics_write_json`, `Compiler.print_diagnostic`,
 `Compiler.origin_location`, `Compiler.display_path`, `Compiler.token_location`,
 `Compiler.token_source`, `Compiler.file_prefix`, `Compiler.token_column`,
-`Compiler.text_source`, `Compiler.source_token`, `Compiler.report_error`,
-`Compiler.report_problem`, `Compiler.report_warning`,
-`Compiler.report_warning_at`, `Compiler.take_diagnostics`,
-`Compiler.error_count`, `Compiler.diagnostics`, `Compiler.dump_tokens`,
-`Compiler.dump_symbol_table`, `Compiler.dump_cache`
+`Compiler.text_source`, `Compiler.report_error`, `Compiler.report_problem`,
+`Compiler.report_warning`, `Compiler.report_warning_at`,
+`Compiler.take_diagnostics`, `Compiler.error_count`, `Compiler.diagnostics`,
+`Compiler.dump_tokens`, `Compiler.dump_symbol_table`, `Compiler.dump_cache`
 
 ### [src/expressions-reports.x](../src/expressions-reports.x)
 
