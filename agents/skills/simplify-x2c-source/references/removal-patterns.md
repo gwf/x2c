@@ -201,6 +201,67 @@ shorter spelling may add traversal, allocation, conversion, or lost reuse.
 Keep comment, layout, and nested-ternary cleanup under Clean; those changes
 alone do not demonstrate removed machinery.
 
+## Extend the search to repeated and discarded work
+
+The following examples were submitted for integration on 2026-10-26 and were
+still open when recorded. They are provisional examples, not claims of
+publication or measured speedup. Inspect the linked revision and current
+source before applying them. They extend PR-3 and PR-4 in
+[the standard](../../../x2c-code-standard.md).
+
+### Reuse a result within one operation
+
+[PR #313](https://github.com/gwf/x2c/pull/313), revision `86cf2f87e`, reuses
+`_binding_of(target)` in `src/regions/walk.x`.
+[PR #315](https://github.com/gwf/x2c/pull/315), revision `3ef9c2b2e`, resolves
+an overlay path once in `SourceView.set`.
+[PR #330](https://github.com/gwf/x2c/pull/330), revision `de4cd2ebf`, reads
+the next Token already fetched instead of calling `peek` to repeat its
+trivia walk.
+
+Search within a function for repeated calls with identical inputs. Include
+different helpers that repeat the same traversal. Retain the result only
+where intervening operations cannot invalidate it and repeated calls have
+no required effects. Reuse the existing owner rather than adding a cache or
+extending the value's lifetime.
+
+### Construct a value only on paths that consume it
+
+[PR #322](https://github.com/gwf/x2c/pull/322), revision `ac3040c28`, moves
+String-conversion AST construction behind the destination test in
+`src/expressions/conversions.x`. Other destinations discarded that work.
+Actual String and Var conversions retain their conversion owner and cache
+behavior. The native-pointer probe reported identical emitted C; this is
+unused compiler construction, not removal of an emitted runtime conversion.
+
+Look for values constructed before a branch and used only in selected arms.
+Trace construction effects, diagnostics, and cache registration before
+moving the operation. Do not defer work whose effects are independently
+required.
+
+### Construct small fixed outputs directly
+
+[PR #325](https://github.com/gwf/x2c/pull/325), revision `510501026`, builds
+two adapter parameters directly in `src/callables/adapters.x`. It replaces
+parallel type/name lists, `zip_with`, a callback, and a temporary `params`
+wrapper whose caller immediately took its tail.
+
+Look for general collection pipelines whose only caller supplies a small
+fixed number of elements. Direct construction can remove intermediate
+representations and callback work. Keep general machinery where callers
+need variable-length inputs, and retain the existing element constructors.
+
+### Remove retries after guaranteed completion
+
+[PR #337](https://github.com/gwf/x2c/pull/337), revision `e89d72698`, replaces
+an unzip-buffer refill loop with one pull. The backlog check remains first;
+a successful buffer push supplies both columns and satisfies the request.
+
+Inspect loops whose successful body necessarily satisfies their exit
+condition. Trace the producer's guarantee, failure, and partial-progress
+behavior before replacing repetition. Keep loops that may receive empty
+chunks, short reads, or other successful results that leave work outstanding.
+
 ## Keep pulling after the first deletion
 
 Calibration for PR-3 in [the standard](../../../x2c-code-standard.md).
