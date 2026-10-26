@@ -34,7 +34,8 @@ static Map _compiler_targets(void) => $compiler.targets();
 
 /** Returns the compiler's own targets, the operations `lib/meta.x` declares
     with a bodyless `meta` prototype, loaded as the native module every
-    request selects first. */
+    request selects first.
+*/
 Map Compiler.compiler_targets(void) {
   _load_compiler_module();
   return native_modules[compiler_supplier];
@@ -56,7 +57,8 @@ Map Compiler.builtin_module(void) {
 
 /** Returns the runtime functions the compiler links that `meta`
     prototypes advertise, by target name, including those that take a
-    callback. */
+    callback.
+*/
 Map Compiler.native_targets(void) {
   if (!_native_module_loaded(runtime_supplier))
     _add_native_module(runtime_supplier, _runtime_targets);
@@ -225,7 +227,8 @@ module int _native_module_loaded(String path) =>
   (void *) native_modules && path in native_modules;
 
 /** Returns the name-to-`Func` Map of the loaded native module at absolute
-    `path`. */
+    `path`.
+*/
 Map Compiler.native_module_targets(String path) => native_modules[path];
 
 /** Reports whether the compiler itself supplies the native function `name`.
@@ -263,7 +266,8 @@ void x2c_register_extension(const char *name, Map (*targets)(void)) {
 }
 
 /** Reports whether package `name`'s compile-time part is linked into the
-    compiler, so its import loads no module. */
+    compiler, so its import loads no module.
+*/
 int Compiler.links_extension(String name) {
   for (struct Extension *e = extensions; e; e = e.next)
     if (!strcmp(name, e.name)) return 1;
@@ -272,7 +276,8 @@ int Compiler.links_extension(String name) {
 
 /** Returns the archive of the linked packages' objects that the build of
     this compiler kept beside it, named by the compiler's identity, or NULL
-    when the compiler links none. Project meta code links it. */
+    when the compiler links none. Project meta code links it.
+*/
 String Compiler.extension_archive(void) =>
   extensions ? %"$(x2c_get_executable()).extensions/"
                + %"$(Compiler.identity()).a" : NULL;
