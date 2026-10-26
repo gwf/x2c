@@ -49,7 +49,8 @@ long double X2CVarNumeric.ldouble(X2CVarNumeric &value);
 
 /** Names the built-in `Var` tags in `var-tags.x` ledger order, which
     is the order of `x2c_var_taginfo`; `lib/var-ledger.x` checks the two
-    agree. */
+    agree.
+*/
 typedef enum TagId {
   _invalid_ = -1,
   _u8_, _i8_, _u16_, _i16_, _u32_, _i32_, _f32_, _u48_, _i48_, _p48_, _f64_,
@@ -77,7 +78,8 @@ typedef struct VarTagInfo {
 
 /** Resolves one encoding top: the selector is the middle field when
     `by_middle` is set and the bottom field under `mask` otherwise, and
-    `ids` maps it to a `TagId`, or `_invalid_` where no tag has it. */
+    `ids` maps it to a `TagId`, or `_invalid_` where no tag has it.
+*/
 typedef struct VarDecodeGroup {
   unsigned char mask, by_middle;
   signed char ids[8];
