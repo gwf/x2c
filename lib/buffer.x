@@ -243,8 +243,8 @@ int Buffer.try_get(Buffer buf, ptrdiff_t index, char &?out) {
 }
 
 /** Returns the byte at `index`, or NUL when `index` is out of range.
-    Stored bytes are never NUL. `Buffer.try_get` also reports whether the
-    index is present.
+    Stored bytes are never NUL. Prefer `Buffer.try_get` to also report
+    whether the index is present.
 */
 char Buffer.get(Buffer buf, ptrdiff_t index) {
   char out;
