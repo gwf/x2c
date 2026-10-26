@@ -24,12 +24,14 @@ static macro Stmt $warn.region_escape(
     _opened((*$f.w), $region));
 
 static macro Expression $reason.region_returned() => "returned";
-static macro Expression $reason.region_static_store() => "stored into a static";
+static macro Expression $reason.region_static_store() =>
+  "stored into a static";
 static macro Expression $reason.region_local() =>
   "assigned to a local declared outside the region";
 static macro Expression $reason.region_pointer() =>
   "stored through an unknown pointer";
-static macro Expression $reason.region_parameter() => "stored through a parameter";
+static macro Expression $reason.region_parameter() =>
+  "stored through a parameter";
 static macro Expression $reason.region_other() =>
   "stored into an object of another region";
 static macro Expression $reason.region_outer() =>
@@ -88,8 +90,8 @@ static void _sink_parameter(Walk &w, Fact fact, Symbol sink, Fact target) {
   if (sink == <heap>) {
     if (!target) row = <unknown>;
     else if (target.param >= 0) row = %(param $(target.param));
-    else row = target.born ? <result>
-           : (target.region || target.other) ? void : <return>;
+    else if (target.born) row = <result>;
+    else row = target.region || target.other ? void : <return>;
   }
   if (sink != <local> && row is not void)
     w.sinks[$(fact.param, row)] = 1;
@@ -115,8 +117,7 @@ static int _owners(
   return reported;
 }
 
-static int _check(
-  Flow &f, Fact target, Region region, int born, int report) {
+static int _check(Flow &f, Fact target, Region region, int born, int report) {
   if (_copies((*f.w), f.type, f.value) && !(born & 2) &&
       (!region || region.kind != <pool>))
     return 0;
@@ -126,16 +127,18 @@ static int _check(
   }
   Region cleanup = _cleanup(region.acquired);
   if (cleanup && _check(f, target, cleanup, 1, report)) return 1;
-  String subject = _subject((*f.w), f.value, f.named, f.fact);
   if (region.closed) {
-    if (report)
+    if (report) {
+      String subject = _subject((*f.w), f.value, f.named, f.fact);
       $warn.region_use_ended(f, f.w.origin, subject, region);
+    }
     return 1;
   }
   if (region.kind == <local>) return 0;
   String exit = _exit_reason(f, target, region);
   if (!exit) return 0;
   if (report) {
+    String subject = _subject((*f.w), f.value, f.named, f.fact);
     // lint: allow one-statement-braces ST-1: macro emits declaration and call
     if (region == f.w.frame) {
       $warn.region_local_escape(f, f.w.origin, subject, exit);
@@ -160,10 +163,9 @@ static String _exit_reason(Flow &f, Fact target, Region region) {
       if (_cleanup(target.acquired) == region ||
           (target.region && _cleanup(target.region.acquired) == region))
         return NULL;
-      /* Every region a function opens ends before its own storage. */
+      // Every region a function opens ends before its own storage.
       if (target.region)
-        return region == f.w.frame ? NULL
-          : $reason.region_other();
+        return region == f.w.frame ? NULL : $reason.region_other();
       return $reason.region_outer();
   }
 }
@@ -196,6 +198,6 @@ module String _subject(Walk &w, Var value, List named, Fact fact) {
   if (_callee_of(value, arguments)) return %"an address from $name";
   match (fact ? fact.place : NULL)
     case $source_identifier_content(%(*fields)):
-    return %"the address of $name";
+      return %"the address of $name";
   return %"an address inside $name";
 }
