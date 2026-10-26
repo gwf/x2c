@@ -367,7 +367,8 @@ static List _resolve_func_call(
     argument is `(func-arg value address source)`: the argument boxed as a
     Var, or `(no-value)` when it has no Var form; its address, or 0; and its
     type, which is `(expr ("List") (ident reference))` for a null argument
-    that takes the callee's own type. */
+    that takes the callee's own type.
+*/
 List Compiler.func_call_parts(Compiler c, Var content) {
   Macro call = $func_call, apply = $func_apply;
   match (%(expr () $content)) {
