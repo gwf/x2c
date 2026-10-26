@@ -281,7 +281,9 @@ module List _call(Compiler c, List ast) {
       case %((!or (!quote *) & ^) (func ?parameters) *):
         return _typed_call(c, callee, parameters, arguments);
     }
-    Type resolved = c.sym.resolve_key(callee.cadr());
+    Type type = callee.cadr();
+    if (!type) return ast;
+    Type resolved = c.sym.resolve_key(type);
     List parameters = NULL;
     if (resolved.list_rest_index() >= 0 &&
         resolved.function_parts(parameters, NULL)) {
@@ -294,16 +296,8 @@ module List _call(Compiler c, List ast) {
 
 module List _typed_call(
   Compiler c, List callee, List params, List args) {
-  if (params && params.last().type().is_list_rest()) {
-    args = c.pack_rest_arguments(params, args);
-    params = params[0:-1].append(%(("List")));
-    Type signature = callee.cadr();
-    if (signature.is_pointer())
-      signature = cons(signature.car(),
-        cons(%(func $params), signature.cdr().cdr()));
-    else signature = cons(%(func $params), signature.cdr());
-    callee = %(expr $signature $(callee.caddr()));
-  }
+  List supplied = args;
+  if (args === %((expr (void) ()))) args = NULL;
   String callee_name = NULL;
   match (callee) {
     case %(expr ? $($source_identifier_content(%(?binding)))):
@@ -312,10 +306,26 @@ module List _typed_call(
   int list_varargs = callee_name == "List_list_n";
   if (c.fn_name && _iter_immediate_consumer(callee_name) && args)
     args = cons(c.complete_iter_chain(args.car()), args.cdr());
-  Array values = [], int arg_index = 0;
-  for (List p = params, a = args; a;
+  Array values = [], int arg_index = 0, missing = 0;
+  for (List p = params, a = args; p || a;
        p = p.cdr(), a = a.cdr(), arg_index++) {
-    List param = (p ? p.car().list() : NULL), arg = a.car();
+    List param = p ? p.car().list() : NULL;
+    if (param === %(....)) {
+      if (missing)
+        c.report_error(<xform>, "too few arguments for List rest function",
+          NULL, NULL);
+      a = c.pack_rest_arguments(p, a);
+      param = %("List"), p = %($param);
+      List native = params[0:arg_index].append(%($param));
+      Type signature = callee.cadr();
+      if (signature.is_pointer())
+        signature = cons(signature.car(),
+          cons(%(func $native), signature.cdr().cdr()));
+      else signature = cons(%(func $native), signature.cdr());
+      callee = %(expr $signature $(callee.caddr()));
+    }
+    if (!a) { missing = 1; continue; }
+    List arg = a.car();
     match (arg) case %(expr ? (splice ?)):
       c.report_error(<xform>, "List splice requires a rest argument",
         NULL, NULL);
@@ -329,6 +339,7 @@ module List _typed_call(
     values.push(converted);
   }
   List newargs = values.list_free();
+  if (!newargs) newargs = supplied;
   Macro called = $called;
   return c.rebuild_expression(NULL, called(callee, newargs)).caddr();
 }

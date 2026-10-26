@@ -1,6 +1,7 @@
 #include "lib.x"
 #include "type.x"
 #include <stdarg.h>
+#include <assert.h>
 
 typedef int (*GlobalRest)(....);
 int through_alias(GlobalRest callback) => callback(%(1 2));
@@ -32,6 +33,8 @@ int main(void) {
   int (*pointer)(int, .... items) = plus;
   typedef int (*Rest)(....);
   Rest alias_pointer = count;
+  assert(plus(10) == 10);
+  assert(pointer(10) == 10);
   printf("%d %d %d %d %d\n", count(), count(1, 2), count(values),
     count(type, type), count(@empty));
   printf("%d %d %d %d\n", count(0, @values, 3, @empty, 4),
