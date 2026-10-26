@@ -2,7 +2,6 @@
 
 static keyword loop $private.loop;
 
-
 module int _is_addressable(Compiler c, List expression) {
   match (expression) {
     case %(expr ? $($source_identifier_content(%(?binding)))): {
@@ -147,11 +146,10 @@ static Type _index_native_type(Compiler c, Type native) {
   return native;
 }
 
-module List _getindex(Resolve &r, List receiver, List selector) {
-  return %(expr $(r.type)
-           (getindex $(r.c.resolve_expression(receiver, r.origin))
-                     $(r.c.resolve_expression(selector, r.origin))));
-}
+module List _getindex(Resolve &r, List receiver, List selector) =>
+  %(expr $(r.type)
+    (getindex $(r.c.resolve_expression(receiver, r.origin))
+              $(r.c.resolve_expression(selector, r.origin))));
 
 module List _slice(Resolve &r, List slice) {
   (List receiver, List start, List stop, List step) = slice.cdr();
@@ -168,8 +166,7 @@ module List _slice(Resolve &r, List slice) {
 // member lookup
 
 /** Resolves one field or method selection without consuming parser tokens.
-    `field` is a single-name `List` and `access` is `.` or
-    `->`. The result is a
+    `field` is a single-name `List` and `access` is `.` or `->`. The result is a
     `(field access type)`, `(method binding signature)`, or `(ambiguous ...)`
     row, or NULL when no member is visible. Method lookup is enabled only by
     `call_context` and records the selected binding in `c.sym`.
@@ -323,7 +320,8 @@ static String _member_type_name(Type type) {
 // member completion
 
 /** Returns sorted visible field and method names that resolve on `receiver`
-    through `access`. */
+    through `access`.
+*/
 List Compiler.postfix_completions(
   Compiler c, Type receiver, Symbol access) {
   Map seen = {};

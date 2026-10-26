@@ -35,7 +35,7 @@ Destroys this thread's `Scope` chain and its push and retain stacks.
 It runs last in `x2c_thread_state_release` and repeats harmlessly; a
 thread that never created a `Scope` has nothing to destroy.
 
-Source: `lib/scope/regions.x:362`
+Source: `lib/scope/regions.x:361`
 
 #### xcalloc
 
@@ -122,7 +122,7 @@ Reports whether `scope` owns `candidate` through lifetime parent links.
 A scope contains itself. Both handles must remain live during the query.
 This walks scope parents, never object references.
 
-Source: `lib/scope/regions.x:280`
+Source: `lib/scope/regions.x:279`
 
 <a id="Scope.malloc_finalized"></a>
 #### Scope.malloc_finalized
@@ -192,7 +192,7 @@ Source: `lib/scope/regions.x:222`
 Returns this scope's lifetime parent, or NULL for a detached scope.
 This is independent of the active allocation stack and retained regions.
 
-Source: `lib/scope/regions.x:244`
+Source: `lib/scope/regions.x:243`
 
 <a id="Scope.pop"></a>
 #### Scope.pop
@@ -260,7 +260,7 @@ not be the source or one of its descendants. Callers provide exclusive
 access to the affected ownership lists and coordinate payload access.
 Transfer does not follow payload references or revoke aliases.
 
-Source: `lib/scope/regions.x:256`
+Source: `lib/scope/regions.x:255`
 
 ## Advanced and interop API
 
@@ -340,7 +340,7 @@ Source: `lib/scope/allocation.x:156`
 
 Ends the owned lifetime when a managed local leaves its block.
 
-Source: `lib/scope/regions.x:340`
+Source: `lib/scope/regions.x:339`
 
 <a id="Scope.destroy"></a>
 #### Scope.destroy
@@ -365,7 +365,7 @@ the destroyed scope, so destroying it again is undefined behavior.
 lower scope. The failure leaves the scope intact. A NULL `scope` does
 nothing. Before `Error` initialization it terminates at the error floor.
 
-Source: `lib/scope/regions.x:327`
+Source: `lib/scope/regions.x:326`
 
 <a id="Scope.free"></a>
 #### Scope.free
@@ -532,7 +532,7 @@ Scope.destroy(work);
 or `<size-limit>` when the name is too large. Before `Error`
 initialization these failures terminate the process.
 
-Source: `lib/scope/regions.x:305`
+Source: `lib/scope/regions.x:304`
 
 <a id="Scope.realloc"></a>
 #### Scope.realloc

@@ -4461,8 +4461,15 @@ static List f9_expansion____author_bindings(List bindings, List * template_bindi
       pair = Var_list_payload(_x2c_gensym_macro_cursor_output_27);
       {
         Var binder = List_car(pair);
-        if(Var_is_binder(binder) && ! String_startswith(Var_str(binder), _349) && ! String_startswith(Var_str(binder), _350)) Array_push(author, List_var(pair));
-        else Array_push(compiler, List_var(pair));
+        if(Var_is_binder(binder)){
+          String spelling = Var_str(binder);
+          if(! String_startswith(spelling, _349) && ! String_startswith(spelling, _350)){
+            Array_push(author, List_var(pair));
+            continue;
+          }
+
+        }
+        Array_push(compiler, List_var(pair));
       }
 
     }

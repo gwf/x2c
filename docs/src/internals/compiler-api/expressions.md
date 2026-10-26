@@ -241,7 +241,7 @@ Source: `src/expressions/syntax.x:689`
 Returns sorted visible field and method names that resolve on `receiver`
 through `access`.
 
-Source: `src/expressions/access.x:327`
+Source: `src/expressions/access.x:325`
 
 <a id="Compiler.printf_static_format"></a>
 #### Compiler.printf_static_format
@@ -298,13 +298,12 @@ Source: `src/expressions/resolution.x:458`
 `List Compiler.resolve_postfix_member( Compiler c, Type receiver_type, List field, Symbol access, int call_context)`
 
 Resolves one field or method selection without consuming parser tokens.
-`field` is a single-name `List` and `access` is `.` or
-`->`. The result is a
+`field` is a single-name `List` and `access` is `.` or `->`. The result is a
 `(field access type)`, `(method binding signature)`, or `(ambiguous ...)`
 row, or NULL when no member is visible. Method lookup is enabled only by
 `call_context` and records the selected binding in `c.sym`.
 
-Source: `src/expressions/access.x:177`
+Source: `src/expressions/access.x:174`
 
 <a id="Compiler.reveal_binding"></a>
 #### Compiler.reveal_binding

@@ -958,7 +958,8 @@ static macro Stmt $builtin.row(Expr $rows, Expr $name, Expr $function) {
 }
 
 /** Returns a fresh Map of built-in algorithms by their compile-time names.
-    The Map borrows shared Func handles that live for the program. */
+    The Map borrows shared Func handles that live for the program.
+*/
 Map Compiler.builtin_targets(void) {
   Map rows = {};
   $builtin.row(rows, "_x2c_scope_expand", _scope_expand);

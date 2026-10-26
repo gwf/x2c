@@ -358,7 +358,7 @@ Scope Scope_new(void){
 
 void Scope_transfer(Scope scope, Scope destination);
 Scope Scope_child(void){
-  if(! _init_guard_) Scope_initialize();  _require_running();  Scope * active = Scope_top();  if(! * active) * active = _new_scope(NULL);  Scope child = _new_scope(NULL);  Scope_transfer(child, * active);  return child;
+  if(! _init_guard_) Scope_initialize();  Scope * active = Scope_top();  if(! * active) * active = _new_scope(NULL);  Scope child = _new_scope(NULL);  Scope_transfer(child, * active);  return child;
 }
 
 Scope Scope_parent(Scope scope){
@@ -389,13 +389,13 @@ Scope Scope_new_named(const char * name){
 
 void Scope_destroy(Scope scope){
   if(! _init_guard_) Scope_initialize();  if(! scope) return;  _require_running();  ScopeThreadState state = _thread();  if(scope == state -> root){
-    static const X2CErrorSite _x2c_gensym_error_site_12 = {.file = "../../lib/scope/regions.x",.function = "Scope_destroy",.line = 331,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_12, 4477477457162, 0);  __builtin_unreachable();
+    static const X2CErrorSite _x2c_gensym_error_site_12 = {.file = "../../lib/scope/regions.x",.function = "Scope_destroy",.line = 330,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_12, 4477477457162, 0);  __builtin_unreachable();
   }
   for(int i = 0;  i < state -> stack_size;  i ++) if(scope == * state -> stack[i]){
-    static const X2CErrorSite _x2c_gensym_error_site_13 = {.file = "../../lib/scope/regions.x",.function = "Scope_destroy",.line = 332,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_13, 4477477457162, 0);  __builtin_unreachable();
+    static const X2CErrorSite _x2c_gensym_error_site_13 = {.file = "../../lib/scope/regions.x",.function = "Scope_destroy",.line = 331,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_13, 4477477457162, 0);  __builtin_unreachable();
   }
   if(scope -> up){
-    static const X2CErrorSite _x2c_gensym_error_site_14 = {.file = "../../lib/scope/regions.x",.function = "Scope_destroy",.line = 334,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_14, 4477477457162, 0);  __builtin_unreachable();
+    static const X2CErrorSite _x2c_gensym_error_site_14 = {.file = "../../lib/scope/regions.x",.function = "Scope_destroy",.line = 333,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_14, 4477477457162, 0);  __builtin_unreachable();
   }
   f7_regions____forget_retains(scope);  f7_regions____destroy_chain(scope);
 }

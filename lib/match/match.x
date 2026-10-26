@@ -35,7 +35,8 @@
 
     One allocation holds this header followed by aligned code, constant, and
     binder sections. The copied Var and Atom bits do not own their pointees.
-    The program contains no execution state and never changes after freeze. */
+    The program contains no execution state and never changes after freeze.
+*/
 class MachineProgram struct {
   int length, const_count, binder_count, root;
 } *;

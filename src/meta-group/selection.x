@@ -14,14 +14,16 @@ void Compiler.stage_meta_in_process(void) { meta_in_process = 1; }
 
 /** Answers whether a `meta` function or value belongs to the unit's group:
     a parse meets it outside a macro definition while the project meta build
-    parses the unit or a session stages it. */
+    parses the unit or a session stages it.
+*/
 int Compiler.groups_meta(Compiler c) =>
   meta_cc && !c.macro_holes && (void *) c.meta_group &&
   (c.meta_build || (!c.meta_helper && X2C_NATIVE_MODULES && meta_in_process));
 
 /** Answers whether a call of a project `meta` function waits for the
     translation: the project meta build's own parse has no helper yet. A
-    loaded helper's parse calls the ordinary helper of its sources. */
+    loaded helper's parse calls the ordinary helper of its sources.
+*/
 int Compiler.meta_calls_wait(Compiler c) => c.meta_build && !c.meta_helper;
 
 /** Records a native callable body `fn` in the unit's helper group. */
@@ -37,7 +39,8 @@ void Compiler.group_meta_function(Compiler c, List fn) {
 
 /** Answers whether a `meta` body reaches the compiler itself: it names a
     compile-time-only function or a compiler operation, or constructs a
-    template. Such a function has no runtime form. */
+    template. Such a function has no runtime form.
+*/
 int Compiler.meta_reaches_compile_time(Compiler c, Var node) {
   if (node is not <list>) return 0;
   List syntax = node;
@@ -46,7 +49,7 @@ int Compiler.meta_reaches_compile_time(Compiler c, Var node) {
     case $source_identifier_content(%((binding ? ?name))): {
       if (name is not <string>) break;
       String spelling = name;
-      /* Expansion can insert a call typed by its macro definition. */
+      // Expansion can insert a call typed by its macro definition.
       if (spelling in c.native_meta) c.bind_native_meta(spelling);
       return spelling in c.meta_comptime ||
              Compiler.supplies_native_meta(spelling);
@@ -59,7 +62,8 @@ int Compiler.meta_reaches_compile_time(Compiler c, Var node) {
 
 /** Closes compile-time-only calls across later meta definitions.
     Retained group bodies hold the bound calls, including literal insertions.
-    Select runtime definitions only after that relation is complete. */
+    Select runtime definitions only after that relation is complete.
+*/
 void Compiler.finish_meta_functions(Compiler c, Array nodes) {
   int grew = 1;
   while (grew) {
@@ -155,24 +159,22 @@ static Map _source_order(Compiler c, Array ordered, String lib) {
     Var node = _group_include(c, c.unit_nodes[i], lib);
     if (node is void) continue;
     List copy = _uninitialized(node, placeholders);
-    if (skipped >= 0 && i >= skipped) later[_address(copy)] = 1;
+    if (skipped >= 0 && i >= skipped) later[(void *) copy] = 1;
     ordered.push(copy);
   }
   return later;
 }
 
-static String _address(List node) => %"$((long) (void *) node)";
-
 /* A later variable declaration, kept only when a meta function reaches
    one of its names. Types and directives stay. */
 static int _optional(List item, Map later) {
-  if (!(_address(item) in later)) return 0;
+  if (!((void *) item in later)) return 0;
   match (item) case %(declare ?(Type spec) (bindings ? *)):
     return !spec.is_typedef();
   return 0;
 }
 
-/* Whether `item` declares a name in `reached`. */
+// Whether `item` declares a name in `reached`.
 static int _declares_reached(List item, Map reached) {
   match (item) case %(declare ? (bindings *rows)):
     foreach (List row in rows) {
@@ -189,7 +191,7 @@ static Map _placeholders(Compiler c) {
   Map placeholders = {};
   foreach (List entry in c.meta_group)
     match (entry) case %(later ?(List placeholder)):
-      placeholders[_address(placeholder)] = 1;
+      placeholders[(void *) placeholder] = 1;
   return placeholders;
 }
 
@@ -232,8 +234,9 @@ static Var _uninitialized(Var node, Map placeholders) {
    within it. */
 static int _holds(Var node, Map placeholders) {
   if (node is not <list>) return 0;
-  if (_address(node) in placeholders) return 1;
-  foreach (Var child in (List) node) if (_holds(child, placeholders)) return 1;
+  List syntax = node;
+  if ((void *) syntax in placeholders) return 1;
+  foreach (Var child in syntax) if (_holds(child, placeholders)) return 1;
   return 0;
 }
 
@@ -246,7 +249,7 @@ static Map _roots(Compiler c, Array ordered, Map later) {
   foreach (List item in ordered)
     if (_function_identity(item, identity, name)) {
       present[identity] = 1;
-      if (c.meta_build && !(_address(item) in later) &&
+      if (c.meta_build && !((void *) item in later) &&
           c.public_native_function(item, name))
         reached[identity] = 1;
     }
@@ -272,7 +275,7 @@ static void _close(Array ordered, Map reached, Map later) {
   while (grew) {
     grew = 0;
     foreach (List item in ordered) {
-      String key = _address(item);
+      Var key = (void *) item;
       if (key in expanded) continue;
       if (_function_identity(item, identity, name)
             ? !(identity in reached)
@@ -319,7 +322,8 @@ module int _function_identity(List fn, Var &identity, String &name) {
 }
 
 /** Answers whether a definition has public native linkage.
-    Main is excluded because its process entry needs a separate adapter. */
+    Main is excluded because its process entry needs a separate adapter.
+*/
 int Compiler.public_native_function(
   Compiler c, List function, String name) =>
   name != "main" && !(%(function $name) in c.sym.file_statics()) &&
@@ -329,7 +333,8 @@ int Compiler.public_native_function(
 // refusing a call
 
 /** Returns why the group function `name` has no compile-time entry, from
-    its type. */
+    its type.
+*/
 String Compiler.meta_call_missing(Compiler c, String name) {
   Type type = NULL;
   foreach (List entry in c.meta_group)
@@ -348,7 +353,8 @@ String Compiler.meta_call_missing(Compiler c, String name) {
 }
 
 /** Reports at `site` that the `meta` function `name` cannot run at compile
-    time, and `why`. */
+    time, and `why`.
+*/
 void Compiler.refuse_meta_call(
   Compiler c, String name, Token site, String why) {
   $fail.meta_group_function_unavailable(c, site, name, why);
@@ -356,7 +362,8 @@ void Compiler.refuse_meta_call(
 
 /** Reports at `site` that the group function `name` cannot run at compile
     time when its result is a struct or union, which its type alone
-    decides. */
+    decides.
+*/
 void Compiler.refuse_record_meta_call(Compiler c, String name, Token site) {
   String missing = c.meta_call_missing(name);
   if (missing.startswith("a struct")) c.refuse_meta_call(name, site, missing);
