@@ -329,7 +329,11 @@ static String _sx_reference(
   SnapshotExtract &s, List binding, Type type, String owner) {
   if (s.bindings.contains(binding)) return s.bindings[binding];
   if (project_automatic(s.c, binding)) return "";
-  if (!type) {
+  /* A call or protocol adapter may substitute its receiver type. The
+     declaration entity keeps the binding's own signature instead. */
+  List declaration = _sx_declaration(s, binding);
+  if (declaration) type = declaration.last();
+  else {
     Var key = s.c.semantic_binding_facts()[%(src-key $binding)];
     match (key) case %(?symbols ?name): type = symbols.map()[name];
   }
