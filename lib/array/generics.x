@@ -141,8 +141,7 @@ macro Unit $array.typed.update.string(Type $array) {
   }
 
   /** Raises `<bad-op>` because String elements have no postfix operation. */
-  inline String $array.postfixindex(
-    $array array, int index, Symbol op) {
+  inline String $array.postfixindex($array array, int index, Symbol op) {
     (void) array; (void) index;
     raise %(bad-op (op $op));
   }
@@ -155,7 +154,7 @@ macro Unit $array.typed.update.string(Type $array) {
 
 macro Unit $array.core.family(Type $array, Type $element) {
   static int $array.shift_element($array array, $element *out) {
-    if (array == NULL || !array.length || !out) return 0;
+    if (!array.length) return 0;
     size_t n = array.length;
     $element *data = ($element *) array.bytes;
     *out = data[0];
@@ -177,7 +176,6 @@ macro Unit $array.core.family(Type $array, Type $element) {
   }
 
   static int $array.remove_element($array array, int index, $element *out) {
-    if (array == NULL || !out) return 0;
     int n = (int) array.length;
     index = x2c_normalize_index(index, n);
     if (index < 0) return 0;
@@ -192,7 +190,6 @@ macro Unit $array.core.family(Type $array, Type $element) {
   }
 
   static $array $array.copy_elements($array array) {
-    if (array == NULL) return NULL;
     $array copy = ($array) Block_new(sizeof($element));
     Block_append((Block) copy, array.bytes, array.length);
     return copy;
@@ -200,7 +197,6 @@ macro Unit $array.core.family(Type $array, Type $element) {
 
   static $array $array.slice_elements(
     $array array, int start, int end, int step) {
-    if (array == NULL || !step) return NULL;
     $array slice = ($array) Block_new(sizeof($element));
     int newlen = x2c_normalize_slice(&start, &end, step, (int) array.length);
     if (newlen <= 0) return slice;
@@ -236,8 +232,7 @@ macro Unit $array.core.family(Type $array, Type $element) {
   /* One shared call decides both bounds, so `array[start:end]` and
      `setslice(start, end, ...)` select the same region. A reversed pair is
      swapped. */
-  static inline void _normalize_span(
-    $array array, int *begin, int *finish) {
+  static inline void _normalize_span($array array, int *begin, int *finish) {
     x2c_normalize_slice(begin, finish, 1, (int) array.length);
     if (*finish < *begin) {
       int tmp = *begin;
@@ -256,7 +251,7 @@ macro Unit $array.core.family(Type $array, Type $element) {
     int delta = insert - remove;
     $array source = values;
     int copied = 0;
-    if (insert > 0 && values && values.bytes == array.bytes) {
+    if (insert > 0 && values.bytes == array.bytes) {
       source = values.copy_elements();
       copied = 1;
     }
@@ -272,7 +267,7 @@ macro Unit $array.core.family(Type $array, Type $element) {
     int tail = n - finish;
     if (tail > 0 && delta != 0)
       memmove(data + begin + insert, data + finish, tail * sizeof($element));
-    if (insert > 0 && source)
+    if (insert > 0)
       memcpy(data + begin, source.bytes, insert * sizeof($element));
     if (delta < 0) array.length = n + delta;
   }
