@@ -351,8 +351,7 @@ static List _resolve_func_call(
     Macro called = $called;
     return c.rebuild_expression(%(<macro-expr>), called(callee, arguments));
   }
-  match (arguments)
-    case %((expr (void) ())): arguments = NULL;
+  if (arguments ~= %((expr (void) ()))) arguments = NULL;
   if (!arguments) {
     Macro apply = $func_apply;
     return c.bind_syntax(apply(callee), <expression>, NULL);
