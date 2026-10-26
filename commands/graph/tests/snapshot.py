@@ -22,9 +22,9 @@ class Project:
             capture_output=True, text=True,
         )
         if success:
-            assert run.returncode == 0, (args, run.stdout, run.stderr)
+            assert run.returncode == 0, (run.returncode, args, run.stdout, run.stderr)
             return json.loads(run.stdout)
-        assert run.returncode != 0, (args, run.stdout, run.stderr)
+        assert run.returncode != 0, (run.returncode, args, run.stdout, run.stderr)
         return run
 
     def query(self, snapshot, **query):
@@ -123,6 +123,18 @@ def saved_queries(p, snapshot):
                     pattern=pattern, inside="loop", callee="snapshot_leaf",
                     argument_type='(* struct "SnapshotValue")')
     assert typed["total"] == 1, typed
+    node_filters = {"all": [
+        {"inside": "loop"},
+        {"any": [{"callee": "snapshot_leaf"}, {"callee": "snapshot_middle"}]},
+        {"not": {"argument_type": "(double)"}},
+    ]}
+    filtered = p.query(snapshot, op="match", select={"name": "snapshot_entry"},
+                       pattern=pattern, node_where=node_filters)
+    assert filtered["total"] == 1, filtered
+    node_filters["all"][-1] = {"not": {"argument_type": '(* struct "SnapshotValue")'}}
+    excluded = p.query(snapshot, op="match", select={"name": "snapshot_entry"},
+                       pattern=pattern, node_where=node_filters)
+    assert excluded["total"] == 0, excluded
     page = p.query(snapshot, op="find", where={"kind": "function"}, limit=1)
     assert len(page["results"]) == 1 and page["truncated"], page
     next_page = p.query(snapshot, op="find", where={"kind": "function"}, limit=1, offset=1)
@@ -193,7 +205,7 @@ dependencies = ["core"]
     p.command("snapshot", snapshot, "--manifest-path", manifest)
     assert p.command("status", snapshot)["fresh"]
     path = p.query(snapshot, op="path", select={"name": "main"},
-                   target={"name": "snapshot_core", "kind": "function"})
+                   target={"name": "snapshot_core", "kind": "function", "domain": "core"})
     assert path["status"] == "found", path
     assert {row["domain"] for row in p.find(snapshot, kind="function")["results"]} >= {"app", "core"}
     (directory / "app-extra.x").write_text("int snapshot_added(void) => 2;\n")
@@ -220,7 +232,7 @@ def main():
         directory.parents[2] / "builds/0/libexec/x2c-graph"
     )
     with tempfile.TemporaryDirectory(prefix="x2c-snapshot-test-") as temporary:
-        root = Path(temporary)
+        root = Path(temporary).resolve()
         sources = []
         for name in ("snapshot-a.x", "snapshot-b.x"):
             target = root / name

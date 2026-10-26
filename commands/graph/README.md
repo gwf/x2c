@@ -633,6 +633,17 @@ ASTs. Provenance wrappers do not obstruct ordinary matching. `inside` accepts
 filter to a call target, while `binding` considers the matched subtree.
 Type filters use canonical datum text.
 
+`node_where` composes structural filters with `all`, `any`, and `not`.
+For example, this selects loop calls to either named function while excluding
+calls with a double argument:
+
+```json
+{"op":"match","pattern":"(expr ?type (call ?callee (args *args)))","node_where":{"all":[{"inside":"loop"},{"any":[{"callee":"snapshot_leaf"},{"callee":"snapshot_middle"}]},{"not":{"argument_type":"(double)"}}]}}
+```
+
+Top-level structural filters remain conjunctions. Entity `where` filters the
+enclosing entity; `node_where` filters each matched AST node.
+
 ```json
 {"op":"match","select":{"name":"snapshot_entry"},"pattern":"(expr ?type (call ?callee (args *args)))","inside":"loop","callee":"snapshot_leaf","argument_type":"(* struct \"SnapshotValue\")"}
 ```
