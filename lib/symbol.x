@@ -26,7 +26,7 @@
 // encoding
 
 static const char _symbol_alphabet[] =
-    "\0abcdefghijklmnopqrstuvwxyz*+?!-";
+  "\0abcdefghijklmnopqrstuvwxyz*+?!-";
 
 /* The maximum-capacity encodings within the 64-bit Symbol value, numbered
    from bit 63 on the left to bit 0 on the right:
@@ -61,7 +61,6 @@ static int _char_to_5bit(int c) {
 }
 
 static int _bytes_fit_5bit(const char *str, int len) {
-  if (!str) return 0;
   for (int i = 0; i < len; i++) if (!_char_to_5bit(str[i])) return 0;
   return 1;
 }
@@ -172,7 +171,7 @@ String Symbol.str(Symbol symbol) {
 */
 meta native int Symbol.compare(Symbol a, Symbol b) {
   if (a == b) return 0;
-  if (!a) return b ? -1 : 0;
+  if (!a) return -1;
   if (!b) return 1;
   char a_text[SYMBOL_MAX_5BIT + 1], b_text[SYMBOL_MAX_5BIT + 1];
   a.decode(a_text);
@@ -203,7 +202,7 @@ String Symbol.repr(Symbol symbol) {
 */
 Buffer Symbol.write_str(Symbol symbol, Buffer out) {
   if (!symbol) return out;
-  char text[SYMBOL_MAX_5BIT + 1] = { 0 };
+  char text[SYMBOL_MAX_5BIT + 1];
   symbol.decode(text);
   return out.write(text);
 }
@@ -215,7 +214,7 @@ Buffer Symbol.write_str(Symbol symbol, Buffer out) {
 */
 Buffer Symbol.write_repr(Symbol symbol, Buffer out) {
   if (!symbol) return out.write("<>");
-  char text[SYMBOL_MAX_5BIT + 1] = { 0 };
+  char text[SYMBOL_MAX_5BIT + 1];
   symbol.decode(text);
   out.write_char('<');
   if (!(symbol & 1)) out.write(text);
