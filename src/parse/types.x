@@ -5,7 +5,6 @@
 
 static keyword loop $private.loop;
 
-
 // declaration specifiers
 
 /* Declaration specifiers before the qualifiers and type: storage classes
@@ -91,11 +90,11 @@ module int _prefix_macro_words(Compiler c, int rank, Array words) {
    before a declaration keyword cannot be a type, so it expands to storage,
    visibility, or attributes and contributes nothing to the collected type. */
 static int _unseen_prefix(Compiler c) {
+  if (!c.shallow || !c.filename.endswith(".h")) return 0;
   Symbol next = c.peek(1);
-  return c.shallow && c.filename.endswith(".h") &&
-         (next.is_builtin_type() || next.is_type_modifier() ||
-          next.is_type_qualifier() || next.is_storage_class() ||
-          next.is_inline());
+  return next.is_builtin_type() || next.is_type_modifier() ||
+         next.is_type_qualifier() || next.is_storage_class() ||
+         next.is_inline();
 }
 
 module List _type_qualifiers(Compiler c) {
@@ -461,8 +460,7 @@ static List _record_body(Compiler c, String name, Token start) {
 
 /* Completes a named type from the abstract declarator after its base. The
    type keeps an aggregate's body in place of its tag. */
-static Type _declare_named_type(
-  Compiler c, List key, List base, Token start) {
+static Type _declare_named_type(Compiler c, List key, List base, Token start) {
   List method = NULL;
   Token first = NULL, after = NULL;
   List declarator = _declarator(c, base, NULL, method, first, after);
@@ -566,7 +564,7 @@ module List _publish_enumerator(
   match (target) case %(bind ?binding_name ?): name = binding_name;
   name = c.evaluate_macro_slot(name);
   String exact = _syntax_exact_name(name);
-  List binding = exact ? NULL : name is <list> ? name.list() : NULL;
+  List binding = !exact && name is <list> ? name.list() : NULL;
   String spelling = exact ? exact : Ast.binding_spelling(binding);
   if (!spelling)
     $fail.parse_syntax_position(c, origin);
