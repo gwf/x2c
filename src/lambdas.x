@@ -20,7 +20,8 @@
 
 /** Moves a function's local type definitions reached by a lambda before
     that function, before cells and functions lower. Their semantic tags
-    stay the same; emitted names keep lexical scopes distinct. */
+    stay the same; emitted names keep lexical scopes distinct.
+*/
 List Compiler.lift_lambda_types(Compiler c, List function) {
   if (!Ast.contains_head(function, <lambda>)) return function;
   Map definitions = {}, needed = {};
@@ -76,8 +77,7 @@ List Compiler.lift_lambda_types(Compiler c, List function) {
 
 /* Finds referenced definitions and their dependencies. Emission retains
    declaration order, which already satisfies complete-type requirements. */
-static void _lambda_needed_types(
-  List syntax, Map definitions, Map needed) {
+static void _lambda_needed_types(List syntax, Map definitions, Map needed) {
   List node;
   $ast.walk(syntax, node)
     match (node) case %((!or struct union enum) ?name *): {
@@ -184,13 +184,11 @@ static List _parse_params(Compiler c) =>
 /* Typed parameters begin with a type: a type keyword, a typedef name, or
    a template's `$` type hole or `@` parameter sequence. */
 static int _params_look_typed(Compiler c) {
-  if (c.peek(0) == <...>) return 1;
   Symbol head = c.peek(0);
+  if (head == <...>) return 1;
   if (c.macro_holes && (head == <$> || head == <@>))
     return 1;
-  if (head.is_builtin_type() || head.is_type_qualifier() ||
-      head == <struct> || head == <union> || head == <enum> || head == <void>)
-    return 1;
+  if (head.is_builtin_type() || head.is_type_qualifier()) return 1;
   if (head != <ident>) return 0;
   String folded = c.package_alias_spelling();
   if (!folded) folded = c.package_member_spelling(c.token.text);
@@ -230,8 +228,7 @@ static List _parse_bare_param(Compiler c) {
 
 /* `using` shares source bindings by reference. A template instead lists
    reference rows, or one captures hole, for expansion to complete. */
-static void _parse_using(
-  Compiler c, Array references, Array prescribed) {
+static void _parse_using(Compiler c, Array references, Array prescribed) {
   if (c.peek(0) != <ident> || c.token.text != "using") return;
   c.next();
   List hole = c.try_parse_macro_slot(<captures>);
@@ -288,7 +285,8 @@ static List _parse_lambda_body(Compiler c) {
 }
 
 /** The parameter types of a lambda's function signature, keeping typed
-    declarators; a bare parameter is a `Var`. */
+    declarators; a bare parameter is a `Var`.
+*/
 List Compiler.lambda_param_types(Compiler c, List entries) {
   if (!entries) return %((void));
   Array types = [];
@@ -362,8 +360,7 @@ List Compiler.bind_lambda_expression(
    becomes a reference to the target's type, and a target without a
    binding identity gets a fresh binding that the lambda binds as an
    alias. */
-static void _prescribe(
-  Compiler c, List row, Array prescribed, Array aliases) {
+static void _prescribe(Compiler c, List row, Array prescribed, Array aliases) {
   match (row)
     case %(capture ?target ?captured_type ?expression): {
       Type source = NULL, target_type = captured_type;
@@ -621,7 +618,8 @@ static void _inherit_spelling(Compiler c, List source, List captured) {
 }
 
 /** Gives the captures of `binding` that the enclosing lambdas already
-    recorded the C spelling `binding` emits under. */
+    recorded the C spelling `binding` emits under.
+*/
 void Compiler.respell_captures(Compiler c, List binding) {
   Map facts = c.semantic_binding_facts();
   foreach (List frame in c.lambda_scopes.reverse())
