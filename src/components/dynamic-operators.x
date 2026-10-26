@@ -61,7 +61,7 @@ $rewrite(%(expr ("Var") (op (!or + - (!quote *) / % <"<<"> <">>"> & ^ |) ? ?)))
     search the whole remaining chain each time.
 */
 meta Code dynamic_binary(Code code) {
-  match (code) case %(expr ? (op ?(Symbol op) ?left ?right)): {
+  if (code ~= %(expr ? (op ?(Symbol op) ?left ?right))) {
     Code lhs = left, rhs = right;
     Type left_type = lhs.cadr(), right_type = rhs.cadr();
     int text = op == <+> && _dynamic_operand(left_type, 1) &&
@@ -105,7 +105,7 @@ meta static Code _dynamic_update(
 meta static String _dynamic_helper(Type type) {
   if (type.is_named("Var")) return "x2c_var_update_volatile";
   Type scalar = type.numeric();
-  match (scalar) case %(enum *): $fail.operators_enum_target(NULL);
+  if (scalar ~= %(enum *)) $fail.operators_enum_target(NULL);
   String helper = type.update_helper();
   if (!helper) $fail.operators_numeric_target(NULL, type);
   return helper;
@@ -117,13 +117,12 @@ $rewrite(%(expr ("Var") (op (!or <+=> <-=> (!quote *=) </=> <%=> <"<<=">
     through the update helper of its storage.
 */
 meta Code dynamic_compound(Code code) {
-  match (code) case %(expr ? (op ?(Symbol op) ?left ?right)): {
+  if (code ~= %(expr ? (op ?(Symbol op) ?left ?right))) {
     Code target = left, rhs = right;
     Type type = target.cadr(), right_type = rhs.cadr();
     Symbol operation = _dynamic_operation(op);
-    match (type)
-      case %((bitfield *) *):
-        $fail.operators_bitfield_target(NULL);
+    if (type ~= %((bitfield *) *))
+      $fail.operators_bitfield_target(NULL);
     if (!right_type.is_named("Var") && !right_type.numeric() &&
         !(operation == <+> && right_type.is_text()))
       $fail.operators_operand(NULL, operation, right_type);
