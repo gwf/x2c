@@ -1,5 +1,4 @@
-/*  expressions-reports.x -- expression typing diagnostics
-*/
+/*  expressions-reports.x -- expression typing diagnostics */
 
 #pragma once
 
@@ -186,41 +185,29 @@ macro Stmt $fail.expressions_adapter_pointer(
 macro Stmt $fail.expressions_map_entry(Expr $c, Expr $origin) =>
   $c.report_error(<parse>, "expected one Map entry", $origin, NULL);
 
-macro Stmt $fail.expressions_func_callback(Expr $c, Expr $site) {
-  {
-    String message = "cannot convert Func to a context-free callback";
-    List hint = %(
-      "call Func directly, or use a noncapturing lambda as the C callback"
-    );
-    $c.report_error(<type>, message, $site, hint);
-  }
-}
+macro Stmt $fail.expressions_func_callback(Expr $c, Expr $site) =>
+  $c.report_error(
+    <type>, "cannot convert Func to a context-free callback", $site,
+    %("call Func directly, or use a noncapturing lambda as the C callback"));
 
 macro Stmt $fail.expressions_brace_anonymous(Expr $c, Expr $site) =>
   $c.report_error(
     <type>, "a brace outside an initializer needs a named destination type",
     $site, %("declare the destination with a struct tag or typedef"));
 
-macro Stmt $fail.expressions_var_unresolved(Expr $c, Expr $origin) {
-  {
-    String message = "cannot convert an unresolved expression to Var";
-    $c.report_error(
-      <type>, message,
-      $origin, %("give the expression a declared x2c type before boxing it"));
-  }
-}
+macro Stmt $fail.expressions_var_unresolved(Expr $c, Expr $origin) =>
+  $c.report_error(
+    <type>, "cannot convert an unresolved expression to Var",
+    $origin, %("give the expression a declared x2c type before boxing it"));
 
 macro Stmt $fail.expressions_ref_address(Expr $c, Expr $site) =>
   $c.report_error(
     <type>, "reference argument must name an addressable object",
     $site, NULL);
 
-macro Stmt $fail.expressions_var_convert(Expr $c, Expr $site, Expr $target) {
-  {
-    String message = %"cannot convert Var to type $($target.repr())";
-    $c.report_error(<type>, message, $site, NULL);
-  }
-}
+macro Stmt $fail.expressions_var_convert(Expr $c, Expr $site, Expr $target) =>
+  $c.report_error(
+    <type>, %"cannot convert Var to type $($target.repr())", $site, NULL);
 
 macro Stmt $fail.expressions_var_address(Expr $c, Expr $site, Expr $target) =>
   $c.report_error(
@@ -228,12 +215,9 @@ macro Stmt $fail.expressions_var_address(Expr $c, Expr $site, Expr $target) =>
     $site,
     %("write &value for its address, or value.pointer() to unbox a stored pointer"));
 
-macro Stmt $fail.expressions_var_loss(Expr $c, Expr $site, Expr $type) {
-  {
-    String message = %"cannot convert $($type.repr()) to Var without loss";
-    $c.report_error(<type>, message, $site, NULL);
-  }
-}
+macro Stmt $fail.expressions_var_loss(Expr $c, Expr $site, Expr $type) =>
+  $c.report_error(
+    <type>, %"cannot convert $($type.repr()) to Var without loss", $site, NULL);
 
 macro Stmt $fail.expressions_ref_null(Expr $c, Expr $site, Expr $target) =>
   $c.report_error(
@@ -242,16 +226,11 @@ macro Stmt $fail.expressions_ref_null(Expr $c, Expr $site, Expr $target) =>
     $site, %("a reference argument must name an object"));
 
 macro Stmt $fail.expressions_qualifier_dropped(
-  Expr $c, Expr $site, Expr $source, Expr $destination) {
-  {
-    String message =
-      %"cannot convert $($source.repr()) to $($destination.repr())";
-    $c.report_error(
-      <type>, message,
-      $site,
-      %("the target drops a type qualifier the source declares: spell the qualifier in the target, or copy the value"));
-  }
-}
+  Expr $c, Expr $site, Expr $source, Expr $destination) =>
+  $c.report_error(
+    <type>, %"cannot convert $($source.repr()) to $($destination.repr())",
+    $site,
+    %("the target drops a type qualifier the source declares: spell the qualifier in the target, or copy the value"));
 
 macro Stmt $fail.expressions_ref_lvalue(
   Expr $c, Expr $site, Expr $type, Expr $target) =>
@@ -281,27 +260,18 @@ macro Stmt $fail.expressions_typedef_crossing(
 }
 
 macro Stmt $fail.expressions_pointer_unrelated(
-  Expr $c, Expr $site, Expr $source, Expr $target) {
-  {
-    String message =
-      %"cannot convert $($source.repr()) to $($target.repr())";
-    $c.report_error(
-      <type>, message,
-      $site,
-      %("the pointer types are unrelated: cast the expression to say so on purpose"));
-  }
-}
+  Expr $c, Expr $site, Expr $source, Expr $target) =>
+  $c.report_error(
+    <type>, %"cannot convert $($source.repr()) to $($target.repr())",
+    $site,
+    %("the pointer types are unrelated: cast the expression to say so on purpose"));
 
 macro Stmt $fail.expressions_pointer_integer(
-  Expr $c, Expr $site, Expr $integer, Expr $target) {
-  {
-    String message =
-      %"cannot convert the integer $($integer) to pointer type $($target.repr())";
-    List hint =
-      %( "only a zero integer constant expression converts to a pointer" );
-    $c.report_error(<type>, message, $site, hint);
-  }
-}
+  Expr $c, Expr $site, Expr $integer, Expr $target) =>
+  $c.report_error(
+    <type>,
+    %"cannot convert the integer $($integer) to pointer type $($target.repr())",
+    $site, %("only a zero integer constant expression converts to a pointer"));
 
 macro Stmt $warn.expressions_cast_redundant(
   Expr $c, Expr $origin, Expr $target) =>
@@ -319,10 +289,11 @@ macro Stmt $fail.expressions_statement_defer(Expr $c, Expr $origin) =>
 macro Stmt $warn.expressions_call_redundant(
   Expr $c, Expr $location, Expr $method, Expr $target, Expr $context) {
   {
-    String hint = $context == 1 ?
-      "remove the call; the hole renders the value" : $context == 2 ?
-      "remove the call; the format converts the value" :
-      "remove the call; the destination converts the value";
+    String hint = "remove the call; the destination converts the value";
+    if ($context == 1)
+      hint = "remove the call; the hole renders the value";
+    else if ($context == 2)
+      hint = "remove the call; the format converts the value";
     $c.report_warning_at(
       <conversion>,
       %"unnecessary conversion: .$($method)() where $($target.repr()) is expected",
