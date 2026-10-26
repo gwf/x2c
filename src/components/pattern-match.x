@@ -490,7 +490,8 @@ meta static List _match_dynamic_read(Code subject, String locals) {
 
 $rewrite($matched)
 /** Lowers the bound match `node` to C text around its subject, patterns,
-    and bodies. */
+    and bodies.
+*/
 meta Code match_lowering(Code node) {
   match (node) case $matched(?subject, *rows):
     return _match_lowered(subject, rows);
