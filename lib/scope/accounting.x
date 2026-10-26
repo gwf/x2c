@@ -30,7 +30,6 @@ static pthread_mutex_t scope_metadata_mutex =
 module void _register_name(Scope scope, const char *name) {
   if (!name) return;
   size_t length = strlen(name);
-  if (length == SIZE_MAX) raise %(size-limit);
   ScopeName node = _raw_malloc(sizeof(struct ScopeName));
   char *copy = _raw_malloc(length + 1);
   memcpy(copy, name, length + 1);
