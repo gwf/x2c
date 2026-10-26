@@ -53,11 +53,11 @@ static int _project_meta_uses_linked(
 static String linked_supplier = "<linked>";
 static Map linked_hashes = NULL;
 
-/** Binds the bodied `meta` definition `fn`, of function type `type`, to the
-    compiler's linked copy of it when the two definition texts hash the
-    same, or always for a prelude component's, instead of staging it.
-    Returns whether it did; another edited definition is staged as user
-    code.
+/** Binds a bodied `meta` definition to its compiler-linked body when its
+    source and reachable callees match the shipped copies and the target
+    accepts its function type. Prelude definitions skip source comparison
+    but still require type acceptance. Returns whether it bound the linked
+    body; the caller stages the definition as user code otherwise.
 */
 int Compiler.bind_linked_meta(Compiler c, List fn, Type type) {
   if (c.meta_build) return 0;
