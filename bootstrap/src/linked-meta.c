@@ -12451,7 +12451,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_18(void
   _9708 = String_var(_9707);
   _9709 = String_new("lib/tokenizer.x");
   _9710 = String_var(_9709);
-  _9711 = String_new("7a2950d5");
+  _9711 = String_new("cd67d456");
   _9712 = String_var(_9711);
   _9713 = cons(_9712, NULL);
   _9714 = cons(_9710, _9713);
@@ -13635,7 +13635,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_21(void
   _10883 = List_var(_10882);
   _10884 = String_new("lib/map/generics.x");
   _10885 = String_var(_10884);
-  _10886 = String_new("9d8ae781");
+  _10886 = String_new("49d95382");
   _10887 = String_var(_10886);
   _10888 = cons(_10887, NULL);
   _10889 = cons(_10885, _10888);
@@ -15592,7 +15592,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_25(void
   _12828 = cons(_223, _12827);
   _12829 = String_new("src/cache.x");
   _12830 = String_var(_12829);
-  _12831 = String_new("c8645f3d");
+  _12831 = String_new("090d76c1");
   _12832 = String_var(_12831);
   _12833 = String_new("cwd:./logger.x");
   _12834 = String_var(_12833);

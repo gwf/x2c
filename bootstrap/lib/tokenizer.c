@@ -88,10 +88,6 @@ static int _operator(Tokenizer t, int len);
 
 static inline Symbol _scan_mode(Tokenizer t);
 
-static inline void _push_mode(Tokenizer tokenizer, Symbol mode);
-
-static inline void _pop_mode(Tokenizer tokenizer);
-
 static inline int _percent_is_operator(Tokenizer tokenizer);
 
 static inline int _can_start_symbol_literal(Tokenizer tokenizer);
@@ -828,10 +824,16 @@ static int _error(Tokenizer tokenizer, Symbol status){
   return 0;
 }
 
+Var Array_push(Array, Var);
+
+static Var Symbol_var(Symbol);
+
+Var Array_take_last(Array);
+
 static int _operator(Tokenizer t, int len){
   Symbol op = Symbol_new_len(t -> text + t -> pos, len), push = 0;
   Symbol mode = _scan_mode(t);
-  int pop = 0, token_len = len;
+  int pop = 0;
   Symbol token_type = op;
   switch(mode){
     case 3945159 : case 1059020479160805 : switch(op){
@@ -889,13 +891,11 @@ static int _operator(Tokenizer t, int len){
       case 9297 : push = 1059020479160805;
       break;
       case 69 : pop = 1;
-      token_len = 1;
-      token_type = 69;
       break;
     }
     break;
   }
-  if(push) _push_mode(t, push);
+  if(push) Array_push(t -> modes, Symbol_var(push));
   int mode_committed = ! push;
   {
     _x2c_gensym_defer_env_3 _x2c_gensym_macro_environment_3 ={
@@ -910,9 +910,9 @@ static int _operator(Tokenizer t, int len){
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_3);
     {
-      Tokenizer_tokenize(t, token_len, token_type);
+      Tokenizer_tokenize(t, len, token_type);
       mode_committed = 1;
-      if(pop) _pop_mode(t);
+      if(pop) Array_take_last(t -> modes);
       {
         int _x2c_gensym_return_value_3 = 1;
         {
@@ -932,20 +932,6 @@ Var Array_getindex(Array, int);
 
 static inline Symbol _scan_mode(Tokenizer t){
   return Var_symbol(Array_getindex(t -> modes, - 1));
-}
-
-Var Array_push(Array, Var);
-
-static Var Symbol_var(Symbol);
-
-static inline void _push_mode(Tokenizer tokenizer, Symbol mode){
-  Array_push(tokenizer -> modes, Symbol_var(mode));
-}
-
-Var Array_take_last(Array);
-
-static inline void _pop_mode(Tokenizer tokenizer){
-  if(Array_len(tokenizer -> modes)) Array_take_last(tokenizer -> modes);
 }
 
 static inline int _percent_is_operator(Tokenizer tokenizer){
@@ -1416,7 +1402,7 @@ static void _x2c_gensym_defer_cleanup_2(void * _x2c_gensym_defer_opaque_2){
 
 static void _x2c_gensym_defer_cleanup_3(void * _x2c_gensym_defer_opaque_3){
   _x2c_gensym_defer_env_3 * _x2c_gensym_defer_data_3 =(_x2c_gensym_defer_env_3 *) _x2c_gensym_defer_opaque_3;
-  if(!(*(int *) _x2c_gensym_defer_data_3->_x2c_gensym_defer_capture_3)) _pop_mode((*(Tokenizer *) _x2c_gensym_defer_data_3->_x2c_gensym_defer_capture_4));
+  if(!(*(int *) _x2c_gensym_defer_data_3->_x2c_gensym_defer_capture_3)) Array_take_last((*(Tokenizer *) _x2c_gensym_defer_data_3->_x2c_gensym_defer_capture_4) -> modes);
 }
 
 static void _x2c_gensym_defer_cleanup_4(void * _x2c_gensym_defer_opaque_4){
