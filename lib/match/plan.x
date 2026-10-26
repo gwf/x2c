@@ -8,7 +8,6 @@
     has no program and raises for none of them; `match.x` runs the plan.
 */
 
-
 #include <assert.h>
 #include "scope/scope.x"
 #include "list/list.x"
@@ -66,7 +65,7 @@ static void _lower(MatchPlan plan, Var pattern) {
   plan.status = l.b.status;
   plan.reason = l.b.reason;
   if (plan.status == <prepared>) plan.program = l.b.freeze();
-  if (l.sites) xfree(l.sites);
+  xfree(l.sites);
 }
 
 /** Releases resources owned by `plan`.
@@ -211,8 +210,7 @@ static int _compile_child(MatchLower &l, Var pattern) {
 /* Emits the branch word with an unresolved target and records its patch
    site on the shared site stack. This is the only place a failure site is
    created. Every lowering path stops immediately on emission failure. */
-static int _fail_site(
-  MatchLower &l, int op, int a, int b, int c, int d) {
+static int _fail_site(MatchLower &l, int op, int a, int b, int c, int d) {
   int site = l.b.emit(op, a, b, c, d, -1);
   if (site < 0) return 0;
   if (l.site_count >= l.site_capacity) {
@@ -287,8 +285,7 @@ static int _compile_guard(MatchLower &l, Var op, List args) {
 }
 
 /* Compiles each operand that is not an atom as a child block. */
-static int _guard_parts(
-  MatchLower &l, List args, MatchParts &parts) {
+static int _guard_parts(MatchLower &l, List args, MatchParts &parts) {
   int n = 0;
   foreach (Var part in args) {
     if (n >= MATCH_SEGMENT_MAX) return _fail(l, "guard-width") + 1;
@@ -393,21 +390,15 @@ static int _compile_quote(MatchLower &l, List args) {
    at execution. */
 
 static int _compile_is(MatchLower &l, List args) {
-  int kind = _match_kind(args);
-  if (kind >= 0) return _is_kind(l, kind);
-  if (args == %(atom)) return _is_atom(l);
-  if (args && args.car() == <type> && args.cdr() && !args.cddr())
-    return _is_type(l, args.cadr());
+  match (args) {
+    case %(var binder): return _is_kind(l, MACHINE_KIND_ATOM_BINDER);
+    case %(list binder): return _is_kind(l, MACHINE_KIND_LIST_BINDER);
+    case %(binder): return _is_kind(l, MACHINE_KIND_BINDER);
+    case %(op): return _is_kind(l, MACHINE_KIND_MATCH_OP);
+    case %(atom): return _is_atom(l);
+    case %(type ?tag): return _is_type(l, tag);
+  }
   return _never(l);
-}
-
-/* The binder or operator test an `!is` shape names, or -1. */
-static int _match_kind(List args) {
-  if (args == %(var binder)) return MACHINE_KIND_ATOM_BINDER;
-  if (args == %(list binder)) return MACHINE_KIND_LIST_BINDER;
-  if (args == %(binder)) return MACHINE_KIND_BINDER;
-  if (args == %(op)) return MACHINE_KIND_MATCH_OP;
-  return -1;
 }
 
 static int _is_kind(MatchLower &l, int kind) {
@@ -501,8 +492,7 @@ static int _compile_segment(MatchLower &l, List pattern) {
    sublist descends inline through the next register; guards, quoted forms,
    literal lists, and starred or deep sublists keep a call frame with an
    independent register bank. */
-static int _segment_prefix(
-  MatchLower &l, MatchSegment &s, List pattern) {
+static int _segment_prefix(MatchLower &l, MatchSegment &s, List pattern) {
   int n = 0, List at = pattern;
   while (at && !at.car().is_list_binder()) {
     if (n >= MATCH_SEGMENT_MAX) return _fail(l, "segment-width") + 1;
