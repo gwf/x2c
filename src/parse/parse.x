@@ -24,12 +24,12 @@
 #include "protocol/protocol.x"
 #include "utils.x"
 
-/* parse diagnostics. */
+// parse diagnostics
 
 static macro Stmt $fail.parse_decorator_top(Expr $c, Expr $site) =>
   $c.report_error(
     <parse>, "top-level decorators are not supported",
-    $site, %( "module initialization: void TYPE.initialize(void)" ));
+    $site, %("module initialization: void TYPE.initialize(void)"));
 
 static macro Stmt $fail.parse_collection_top(Expr $c, Expr $site) =>
   $c.report_error(
@@ -81,7 +81,7 @@ static macro Stmt $fail.parse_meta_constructed(
   Expr $c, Expr $origin, Expr $name) =>
   $c.report_error(
     <parse>, %"meta function '$($name)' cannot be produced by a macro",
-    $origin, %( "move it to a source file and call it from the macro" ));
+    $origin, %("move it to a source file and call it from the macro"));
 
 static macro Stmt $fail.parse_decl_function(Expr $c, Expr $site) =>
   $c.report_error(
@@ -247,7 +247,7 @@ static macro Stmt $fail.parse_placement_function(Expr $c, Expr $site) =>
     <macro>, "code placed at function entry needs an enclosing function",
     $site, NULL);
 
-/* Reported at the lowering origin when one is set. */
+// Reported at the lowering origin when one is set.
 static macro Stmt $fail.parse_placement_finalizer(Expr $c, Expr $site) =>
   $c.report_error(
     <macro>, "code placed at function entry cannot land in a defer finalizer",
@@ -309,14 +309,14 @@ static macro Stmt $fail.parse_binder_conflict(
   Expr $c, Expr $origin, Expr $role, Expr $name) =>
   $c.report_error(
     <type>, %"$($role) binder has conflicting capture kinds",
-    $origin, %( "binder:" $($name) "use either '?' or '*' consistently"));
+    $origin, %("binder:" $($name) "use either '?' or '*' consistently"));
 
 static macro Stmt $fail.parse_binder_unassigned(
   Expr $c, Expr $origin, Expr $role, Expr $binder) =>
   $c.report_error(
     <type>, %"$($role) binder is not definitely assigned",
-    $origin, %( "binder:" $($binder.str())
-                "bind it in every alternative and never under !not"));
+    $origin, %("binder:" $($binder.str())
+      "bind it in every alternative and never under !not"));
 
 module {
   "units.x",
