@@ -1,7 +1,5 @@
 /*  walk.x -- statement and expression lifetime effects */
 
-/* Findings from statement and expression traversal. */
-
 static macro Stmt $warn.region_bad_free(
   Expr $w, Expr $site, Expr $op, Expr $subject) =>
   _warn(
@@ -28,11 +26,10 @@ static macro Expression $reason.region_freed() => "it was freed";
 module void _walk(Walk &w, Var node) {
   match (node) {
     case %(at ?origin ?inner): _walk_at(w, origin, inner);
-    case $source_block_content(%(*statements)):
-      _walk_block(w, statements);
+    case $source_block_content(%(*statements)): _walk_block(w, statements);
     case %(seq *statements): _walk_sequence(w, statements);
     case $deferred(?body): _walk_defer(w, body);
-    /* A lowered defer keeps its environment and capture records. */
+    // A lowered defer keeps its environment and capture records.
     case %(defer ?body ?environment ?callback ?records ?written):
       _walk_defer(w, body);
     case %((!or declare decl) ?specifiers (bindings *bindings)):
@@ -46,13 +43,12 @@ module void _walk(Walk &w, Var node) {
     case $expression_statement(?expression): _walk_expression(w, expression);
     /* A control construct's children run conditionally, so they count as a
        nested block: what they free does not end the fall-through. */
-    case $source_conditional_statement():
-      _walk_conditional(w, node.cdr());
+    case $source_conditional_statement(): _walk_conditional(w, node.cdr());
     case %(catchcases ?rows): _walk(w, rows);
     case %((!or expr case) *): _scan(w, node, 0);
     case $source_content_pattern($grouped, %(?inner)):
       _scan(w, node, 0);
-    /* Match and catch arms are bare `(PATTERN STATEMENT ...)` rows. */
+    // Match and catch arms are bare `(PATTERN STATEMENT ...)` rows.
     case %((*) *): _walk_rows(w, node);
   }
 }
@@ -69,16 +65,16 @@ static void _walk_block(Walk &w, List statements) {
   Map restored = w.restored;
   w.depth += 1;
   foreach (List statement in statements) _walk(w, statement);
-  _close_to(w, w.open, outer);
+  _close_to(w.open, outer);
   w.open = outer;
   w.restored = restored;
   w.depth -= 1;
 }
 
-/* Closes oldest first. */
-static void _close_to(Walk &w, Region region, Region outer) {
+// Closes oldest first.
+static void _close_to(Region region, Region outer) {
   if (region == outer) return;
-  _close_to(w, region.outer, outer);
+  _close_to(region.outer, outer);
   region.closed = 1;
 }
 
@@ -280,7 +276,7 @@ static void _end(Walk &w, Var argument, String op, Symbol how) {
   w.freed.push(fact);
 }
 
-/* A call sinks each argument where the callee's summary says. */
+// A call sinks each argument where the callee's summary says.
 static void _scan_call(Walk &w, Var call, String callee, List arguments) {
   int count = arguments.len();
   List types = _parameter_types(call);
@@ -341,10 +337,10 @@ static void _scan_node(Walk &w, Var node) {
     case $source_identifier_content(
         %((!set ?binding (binding ? ?)))):
       _scan_ident(w, binding);
-    /* A statement expression declares locals of its own. */
+    // A statement expression declares locals of its own.
     case %((!or declare decl) ?specifiers (bindings *bindings)):
       _declare(w, specifiers, bindings);
-    /* A List literal retains its values in the active Pool. */
+    // A List literal retains its values in the active Pool.
     case %(cons ?head ?tail): _scan_cons(w, node, head, tail);
     case %(*children): _scan_children(w, children);
   }
@@ -394,14 +390,14 @@ static void _scan_children(Walk &w, List children) {
 // stores and declarations
 
 static void _store(Walk &w, Var target, Var value) {
-  /* A store through a pointer reads the pointer. */
-  if (!_binding_of(target)) _scan(w, target, 0);
+  List named = _binding_of(target);
+  // A store through a pointer reads the pointer.
+  if (!named) _scan(w, target, 0);
   if (_target_place(w, target) in w.restored) {
     _scan(w, value, 0);
     return;
   }
   Type type = _expression_type(target);
-  List named = _binding_of(target);
   Var found = named ? w.facts[named] : void;
   if (found is not void) {
     _assign(w, found, value, type, 1);
@@ -414,7 +410,7 @@ static void _store(Walk &w, Var target, Var value) {
   }
   int through = 0;
   Fact object = NULL, base = _base(w, target, through);
-  /* A field or element of file-scope storage is that storage. */
+  // A field or element of file-scope storage is that storage.
   if (!base && !through && _root(target)) {
     _flow(w, value, type, <static>, NULL);
     return;
@@ -465,7 +461,7 @@ static void _assign(Walk &w, Fact fact, Var value, Type type, int store) {
   if (kept && source && !copies && !source.empty)
     acquired = _acquired(source);
   if (copies || (source && !kept)) acquired = NULL;
-  /* A nested store runs on some paths; the others keep the earlier value. */
+  // A nested store runs on some paths; the others keep the earlier value.
   if (!acquired && store && fact.depth < w.depth) acquired = fact.acquired;
   fact.acquired = acquired;
   fact.empty = source ? source.empty : _empty(value);
