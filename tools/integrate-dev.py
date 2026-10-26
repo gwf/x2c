@@ -269,8 +269,11 @@ class Queue:
                        root or self.root, check=False,
                        deadline=self.deadline).returncode == 0
 
+    def open_pulls(self):
+        return self.api("pulls?state=open&base=dev&per_page=100", pages=True)
+
     def ready(self):
-        pulls = self.api("pulls?state=open&base=dev&per_page=100", pages=True)
+        pulls = self.open_pulls()
         held = {(pr["number"], pr["head"]) for record in self.records()
                 if record["state"] == "parked"
                 for pr in record["prs"]
@@ -555,10 +558,6 @@ class Queue:
             raise ValueError("candidate must be committed and clean")
         if not all(self.ancestor(e["head"], "HEAD", tree) for e in record["prs"]):
             raise ValueError("not all pinned heads are incorporated")
-        for entry in record["prs"]:
-            current = self.entry(self.pull(entry["number"]))
-            if current["head"] != entry["head"]:
-                raise ValueError("PR revision changed; park and select a new batch")
         if upstream != record["base"]:
             git(tree, "merge", "--no-edit", upstream)
             record.update(base=upstream, state="review",
@@ -568,6 +567,16 @@ class Queue:
             self.save(record)
             output(record)
             return
+        # One paginated snapshot replaces one request per frozen PR. A missing
+        # entry is closed or no longer targets dev, and cannot be published.
+        pulls = {pull["number"]: pull for pull in self.open_pulls()}
+        for entry in record["prs"]:
+            pull = pulls.get(entry["number"])
+            if pull is None:
+                raise ValueError(f"PR #{entry['number']} is no longer open on dev")
+            current = self.entry(pull)
+            if current["head"] != entry["head"]:
+                raise ValueError("PR revision changed; park and select a new batch")
         head = git(tree, "rev-parse", "HEAD")
         gate = self.gate_for(tree, upstream)
         args_land = [str(tree / "tools" / "land-dev"),
