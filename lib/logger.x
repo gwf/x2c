@@ -357,7 +357,6 @@ static void _unlink_sink(Logger logger, LogSink sink) {
 }
 
 static void _retire_sink(LogSink sink) {
-  if (!sink) return;
   if (sink.destroy) sink.destroy(sink.data);
   sink.prev = sink.next = NULL;
   sink.emit = NULL;
@@ -409,7 +408,6 @@ static LogSink _add_text_sink(
 
 static void _emit_text(Logger logger, const LogEvent *event, Var data) {
   LogTextSink context = data;
-  if (!logger || !context || !context.file || context.depth < 0) return;
   if (context.depth == (int) context.scratch.length)
     _add_scratch(logger, context);
   Buffer *buffers = context.scratch.bytes;
@@ -509,7 +507,6 @@ static void _write_start_time(Buffer out, long long wall_time_us, int color) {
 }
 
 static void _write_field(Buffer out, List field, int color) {
-  if (!field) return;
   Var (key, value) = field;
   if (color) out.write(_color_key);
   _write_field_key(out, key);
@@ -610,8 +607,7 @@ static void _emit_memory(Logger logger, const LogEvent *event, Var data) {
   *l.destination = List.cons_in(l.pool, entry, *l.destination);
 }
 
-static List _cons_retained(
-  LogMemorySink l, Var value, List tail) =>
+static List _cons_retained(LogMemorySink l, Var value, List tail) =>
   List.cons_in(l.pool, _retain(l, value), tail);
 
 static void _destroy_memory(Var data) {
@@ -896,7 +892,6 @@ void Logger.shutdown(void) {
   default_logger = NULL;
 }
 
-/* Offers the root Errors recorded since initialization to `active`. */
 static void _log_pending(Logger active) {
   Pool.open_named("Logger shutdown errors");
   List pending = Error.since(logger_error_mark);
