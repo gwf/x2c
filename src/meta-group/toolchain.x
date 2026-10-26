@@ -5,7 +5,8 @@
 
 /** Selects the C compiler `cc` that builds the `meta` code of the units
     this process translates, with the runtime headers this compiler was
-    built with, found from its installed headers in `include_dir`. */
+    built with, found from its installed headers in `include_dir`.
+*/
 void Compiler.use_meta_toolchain(String cc, String include_dir) {
   meta_cc = cc;
   meta_include_dir = _runtime_headers(include_dir);
@@ -24,14 +25,16 @@ static String _runtime_headers(String include_dir) {
 }
 
 /** Returns the C compiler and the runtime header directory that build
-    `meta` code, or NULL before `Compiler.use_meta_toolchain`. */
+    `meta` code, or NULL before `Compiler.use_meta_toolchain`.
+*/
 String Compiler.meta_cc(String &include_dir) {
   include_dir = meta_include_dir;
   return meta_cc;
 }
 
 /** Returns the identity of the C compiler at `cc`: its path and content
-    hash. */
+    hash.
+*/
 String Compiler.meta_cc_identity(String cc) {
   String path = "/" in cc ? cc : Env.find_program(cc);
   String hash = Path.content_identity(path);
@@ -40,7 +43,8 @@ String Compiler.meta_cc_identity(String cc) {
 
 /** Runs `arguments`, a C compiler command building the group C in
     `directory`, and returns NULL, or else its first error, which names
-    `directory` when a group's C is the cause. */
+    `directory` when a group's C is the cause.
+*/
 String Compiler.meta_cc_run(List arguments, String directory) {
   String printed = NULL, errors = NULL;
   if (!tool_capture(arguments, printed, errors)) return NULL;
