@@ -234,8 +234,7 @@ static Var _export_map(Context c, Var value) {
 }
 
 /* `Map.export_to` takes the value-first C signature of a custom exporter. */
-static Var _export_callback(Var value, Context c) =>
-  _export_value(c, value);
+static Var _export_callback(Var value, Context c) => _export_value(c, value);
 
 /* Block, Bytes, and Buffer storage moves and keeps its identity. */
 static Var _export_storage(Context c, Var v) {
