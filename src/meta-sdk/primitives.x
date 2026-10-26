@@ -36,7 +36,7 @@ static Map _linked_hashes(void) {
   Map rows = {};
   c.add_linked_meta_provider_hashes(rows);
   foreach ((String name, List source) in c.project_meta)
-    match (source) case %(? ?provider): {
+    if (source ~= %(? ?provider)) {
       Map hashes = c.meta_provider_hashes(provider);
       rows[name] = $(hashes[name], provider);
     }
