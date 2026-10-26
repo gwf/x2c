@@ -185,12 +185,10 @@ static void _close_streams(Job job, Stdio stdio) {
    reaches `stdio` as it opens, so the launch closes it on every exit. */
 static void _open_streams(Job j, Stdio &stdio) {
   if (j.launch.has_input) stdio.input = _input(j.launch.input);
-  stdio.output =
-    _stream(
-      j.output_file, j.launch.capture_output, j.launch.stdout_path);
-  stdio.errors =
-    _stream(
-      j.errors_file, j.launch.capture_errors, j.launch.stderr_path);
+  stdio.output = _stream(
+    j.output_file, j.launch.capture_output, j.launch.stdout_path);
+  stdio.errors = _stream(
+    j.errors_file, j.launch.capture_errors, j.launch.stderr_path);
 }
 
 /* The first stage reads a copy of the descriptor of a capture file that
@@ -459,8 +457,7 @@ Job Job.pipe(Job job, List command) {
 }
 
 static Job _unstarted(Job job, String operation) {
-  if (job.started)
-    $error.job.started(operation);
+  if (job.started) $error.job.started(operation);
   return job;
 }
 
@@ -487,8 +484,7 @@ static Job _unstarted(Job job, String operation) {
 Job Job.options(Job job, Map options) {
   _unstarted(job, "Job.options");
   foreach (Var (key, value) in options) {
-    if (key is not Symbol)
-      $error.options.key();
+    if (key is not Symbol) $error.options.key();
     _set(job.launch, key, value);
   }
   return job;
@@ -524,7 +520,10 @@ static int _is(Var value, Symbol name) =>
     same as `options({stdout: <inherit>})`, and returns it.
     Raises: `<bad-arg>` for a job that has started.
 */
-Job Job.live(Job job) => job.options({stdout: <inherit>});
+Job Job.live(Job job) {
+  _route_output(_unstarted(job, "Job.options").launch, <inherit>);
+  return job;
+}
 
 // running jobs
 
