@@ -148,6 +148,12 @@ def lifecycle(p, sources):
     assert p.command("status", snapshot)["fresh"]
     functions = saved_queries(p, snapshot)
     assert p.find(snapshot, kind="function") == functions, "reload changed results"
+    repeated = p.root / "repeated"
+    p.command("snapshot", repeated, *sources)
+    unchanged = p.command("diff", snapshot, repeated)
+    for field in ("added", "removed", "changed", "added_relations",
+                  "removed_relations"):
+        assert not unchanged[field], (field, unchanged[field])
     original = sources[0].read_text()
     source_view = p.query(snapshot, op="inspect", select={"name": "snapshot_leaf"},
                           view="source")

@@ -522,6 +522,8 @@ prepare missing dependencies through the project's ordinary workflow.
 
 `status` checks saved dependency fingerprints and source membership. Its JSON
 contains `fresh`, `changed`, `missing`, `added_inputs`, and `removed_inputs`.
+If an edited manifest cannot be planned, `membership_checked` is false and
+`membership_error` explains why; recorded dependency changes are still shown.
 Queries continue to read the named snapshot after source edits. Rebuild
 explicitly when a current-tree answer is required. A failed rebuild preserves
 the preceding snapshot. Inspection returns the saved source, not the current
@@ -555,7 +557,8 @@ Traversal includes selected roots at distance zero.
 
 Relationship kinds include `calls`, `references`, `contains`, `aliases`,
 `field-value`, `field-pointer`, `parameter`, `result`, `callback`, `body-type`,
-`reads`, `writes`, `mutates`, `representation`, `conforms`, and `delegates`.
+`reads`, `writes`, `mutates`, `representation`, `conforms`, `implements`,
+and `delegates`.
 Fields have their own identities: field-to-type edges distinguish value
 storage from pointers, and function-to-field edges record accesses. A pointer
 edge does not establish ownership. A field write does not include arbitrary
@@ -578,7 +581,7 @@ Replace selectors with the names or IDs returned for your own project.
 Find the entry point, then inspect its saved definition:
 
 ```json
-{"op":"find","where":{"kind":"function","name":"main"}}
+{"op":"find","where":{"kind":"function","name":"snapshot_entry"}}
 ```
 
 ```json
