@@ -27,17 +27,15 @@ List Compiler.lift_lambda_types(Compiler c, List function) {
   Map definitions = {}, needed = {};
   List node, ordered = NULL;
   $ast.walk(function.cadddr(), node)
-    match (node) {
-      case %((!or declare typedef) ?(Type base) (bindings *bindings)): {
-        Type type = base.base_type();
-        int anonymous_member =
-          type ~= %((!or struct union) (gensym ? ?) ?) &&
-          (!bindings || bindings === %((bind () ())));
-        if (!anonymous_member &&
-            (type.is_aggregate_tag_body() || type.is_enum_tag_body())) {
-          definitions[$(type.car(), type.cadr())] = type;
-          ordered = cons(type, ordered);
-        }
+    if (node ~= %((!or declare typedef) ?(Type base) (bindings *bindings))) {
+      Type type = base.base_type();
+      int anonymous_member =
+        type ~= %((!or struct union) (gensym ? ?) ?) &&
+        (!bindings || bindings === %((bind () ())));
+      if (!anonymous_member &&
+          (type.is_aggregate_tag_body() || type.is_enum_tag_body())) {
+        definitions[$(type.car(), type.cadr())] = type;
+        ordered = cons(type, ordered);
       }
     }
   if (!definitions.len()) return function;
@@ -80,7 +78,7 @@ List Compiler.lift_lambda_types(Compiler c, List function) {
 static void _lambda_needed_types(List syntax, Map definitions, Map needed) {
   List node;
   $ast.walk(syntax, node)
-    match (node) case %((!or struct union enum) ?name *): {
+    if (node ~= %((!or struct union enum) ?name *)) {
       List tag = $(node.car(), name);
       Var definition;
       if (!(tag in needed) && definitions.try_get(tag, definition)) {
@@ -199,9 +197,8 @@ static int _params_look_typed(Compiler c) {
 static List _parse_typed_params(Compiler c) {
   List params = c.parse_parameter_list();
   foreach (List param in params)
-    match (param)
-      case %(param ? (bind ?binding ?)):
-        c.set_fact(%(lambda-param $binding), 1);
+    if (param ~= %(param ? (bind ?binding ?)))
+      c.set_fact(%(lambda-param $binding), 1);
   return params;
 }
 
@@ -256,10 +253,9 @@ static List _template_capture(Compiler c) {
     value = c.resolve_expression(%(expr () (ident $name)), origin);
     /* A free name is captured where the expansion lands, like the body
        that reads it. */
-    match (value)
-      case %(expr ? (ident (binding-name ?(String spelling)))):
-        return %(capture $spelling $reference
-                  (expr $reference (op & $value)));
+    if (value ~= %(expr ? (ident (binding-name ?(String spelling)))))
+      return %(capture $spelling $reference
+                (expr $reference (op & $value)));
     name = c.sym.lookup(name, NULL);
     reference = cons(<&>, value.cadr());
   }
@@ -361,31 +357,30 @@ List Compiler.bind_lambda_expression(
    binding identity gets a fresh binding that the lambda binds as an
    alias. */
 static void _prescribe(Compiler c, List row, Array prescribed, Array aliases) {
-  match (row)
-    case %(capture ?target ?captured_type ?expression): {
-      Type source = NULL, target_type = captured_type;
-      List binding = target is <string>
-                   ? c.sym.lookup($(target), source) : target;
-      if (<macro-expr> in target_type) {
-        Var stored;
-        if (!source) {
-          if (c.semantic_binding_facts().try_get(%(type $binding), stored))
-            source = stored;
-          else {
-            Type global_type = NULL;
-            List global = c.sym.resolve_global(
-              $(Ast.binding_spelling(binding)), global_type);
-            if (global == binding) source = global_type;
-          }
+  if (row ~= %(capture ?target ?captured_type ?expression)) {
+    Type source = NULL, target_type = captured_type;
+    List binding = target is <string>
+                 ? c.sym.lookup($(target), source) : target;
+    if (<macro-expr> in target_type) {
+      Var stored;
+      if (!source) {
+        if (c.semantic_binding_facts().try_get(%(type $binding), stored))
+          source = stored;
+        else {
+          Type global_type = NULL;
+          List global = c.sym.resolve_global(
+            $(Ast.binding_spelling(binding)), global_type);
+          if (global == binding) source = global_type;
         }
-        target_type = source.car() == <&> ? source : cons(<&>, source);
       }
-      if (!Ast.binding_spelling(binding)) {
-        binding = c.sym.introduce(_alias_spelling(target, binding));
-        aliases.push($(binding, target_type));
-      }
-      prescribed.push(%(capture $binding $target_type $expression));
+      target_type = source.car() == <&> ? source : cons(<&>, source);
     }
+    if (!Ast.binding_spelling(binding)) {
+      binding = c.sym.introduce(_alias_spelling(target, binding));
+      aliases.push($(binding, target_type));
+    }
+    prescribed.push(%(capture $binding $target_type $expression));
+  }
 }
 
 static String _alias_spelling(Var target, List binding) {
@@ -409,15 +404,14 @@ static List _declare_param(Compiler c, List entry) {
 }
 
 static void _add_param(Compiler c, Array entries, List parameter) {
-  match (parameter)
-    case %(param ? (bind ?binding ?)): {
-      c.set_fact(%(lambda-param $binding), 1);
-      entries.push(parameter);
-    }
+  if (parameter ~= %(param ? (bind ?binding ?))) {
+    c.set_fact(%(lambda-param $binding), 1);
+    entries.push(parameter);
+  }
 }
 
 static List _bind_body(Compiler c, List body) {
-  match (body) case $source_block_content(%(*)):
+  if (body ~= $source_block_content(%(*)))
     return c.bind_callable_body(body, %("Var"));
   with (c.return_type = %("Var")) {
     return c.resolve_expression(body, c.token);
@@ -470,10 +464,9 @@ List Compiler.end_lambda_captures(Compiler c) {
 
 /** Reports whether the active lambda still needs to capture a binding. */
 int Compiler.lambda_capture_required(Compiler c, List binding) {
-  match (c.lambda_scopes)
-    case %((lambda-scope ? ?depth ? ?supplied) *):
-      return _prescribed_row(supplied, binding, binding) ||
-             _declared_outside(c, binding, depth);
+  if (c.lambda_scopes ~= %((lambda-scope ? ?depth ? ?supplied) *))
+    return _prescribed_row(supplied, binding, binding) ||
+           _declared_outside(c, binding, depth);
   return 0;
 }
 
@@ -485,11 +478,11 @@ int Compiler.lambda_capture_required(Compiler c, List binding) {
 List Compiler.capture_lambda_identifier(Compiler c, List binding, Type type) {
   List original = binding;
   foreach (List frame in c.lambda_scopes.reverse())
-    match (_frame_capture(c, frame, binding, original, type))
-      case %(capture ?captured ?captured_type ?): {
-        binding = captured;
-        type = captured_type;
-      }
+    if (_frame_capture(c, frame, binding, original, type) ~=
+          %(capture ?captured ?captured_type ?)) {
+      binding = captured;
+      type = captured_type;
+    }
   return $!($type){ $binding };
 }
 
@@ -508,22 +501,21 @@ static typedef struct Capture {
    the frame's own or static. */
 static List _frame_capture(
   Compiler c, List frame, List binding, List original, Type type) {
-  match (frame)
-    case %(lambda-scope ?scope ?depth ?references ?supplied): {
-      List prescribed = _prescribed_row(supplied, binding, original);
-      if (!prescribed && !_declared_outside(c, binding, depth)) return NULL;
-      if (type.is_static()) return NULL;
-      Map facts = c.semantic_binding_facts();
-      List key = %(lambda-capture $scope $binding);
-      Var stored;
-      if (facts.try_get(key, stored)) return stored;
-      Capture k = {
-        .c = c, .facts = facts, .frame = frame, .key = key,
-        .prescribed = prescribed, .binding = binding, .original = original,
-        .type = type, .scope = scope, .depth = depth,
-        .references = references};
-      return _add(k);
-    }
+  if (frame ~= %(lambda-scope ?scope ?depth ?references ?supplied)) {
+    List prescribed = _prescribed_row(supplied, binding, original);
+    if (!prescribed && !_declared_outside(c, binding, depth)) return NULL;
+    if (type.is_static()) return NULL;
+    Map facts = c.semantic_binding_facts();
+    List key = %(lambda-capture $scope $binding);
+    Var stored;
+    if (facts.try_get(key, stored)) return stored;
+    Capture k = {
+      .c = c, .facts = facts, .frame = frame, .key = key,
+      .prescribed = prescribed, .binding = binding, .original = original,
+      .type = type, .scope = scope, .depth = depth,
+      .references = references};
+    return _add(k);
+  }
   return NULL;
 }
 
@@ -532,10 +524,9 @@ static List _frame_capture(
 static List _prescribed_row(Var supplied, List binding, List original) {
   List prescribed = NULL;
   foreach (List row in supplied.list())
-    match (row)
-      case %(capture ?target ? ?)
-        if (target == binding || target == original):
-          prescribed = row;
+    if (row ~= %(capture ?target ? ?) &&
+        (target == binding || target == original))
+      prescribed = row;
   return prescribed;
 }
 
@@ -559,12 +550,11 @@ static List _add(Capture &k) {
   List binding = k.binding, expression = $!($type){ $binding };
   int reference = k.original in k.references.list();
   if (k.prescribed) {
-    match (k.prescribed)
-      case %(capture ? ?target_type ?value): {
-        captured_type = target_type;
-        expression = _resolve_outside(k.c, k.frame, value);
-        reference = captured_type.car() == <&>;
-      }
+    if (k.prescribed ~= %(capture ? ?target_type ?value)) {
+      captured_type = target_type;
+      expression = _resolve_outside(k.c, k.frame, value);
+      reference = captured_type.car() == <&>;
+    }
   }
   else if (reference) {
     captured_type = cons(<&>, captured_type);
@@ -623,13 +613,12 @@ static void _inherit_spelling(Compiler c, List source, List captured) {
 void Compiler.respell_captures(Compiler c, List binding) {
   Map facts = c.semantic_binding_facts();
   foreach (List frame in c.lambda_scopes.reverse())
-    match (frame)
-      case %(lambda-scope ?scope * *):
-        match (facts.getdefault(%(lambda-capture $scope $binding), NULL))
-          case %(capture ?captured * *): {
-            _inherit_spelling(c, binding, captured);
-            binding = captured;
-          }
+    if (frame ~= %(lambda-scope ?scope * *))
+      match (facts.getdefault(%(lambda-capture $scope $binding), NULL))
+        case %(capture ?captured * *): {
+          _inherit_spelling(c, binding, captured);
+          binding = captured;
+        }
 }
 
 // capture checks

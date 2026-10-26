@@ -621,8 +621,7 @@ meta unsigned long Var_tag_bottom(Symbol tag);
 /* A `Literal` tag argument arrives as its resolved Symbol expression,
    `(expr TYPE (literal TYPE TEXT SYMBOL))`; the tables read the Symbol. */
 meta static Symbol _literal_tag(List tag) {
-  match (tag)
-    case %(expr ? (literal ? ? ?key)): return key;
+  if (tag ~= %(expr ? (literal ? ? ?key))) return key;
   return 0;
 }
 

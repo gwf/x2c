@@ -12,8 +12,8 @@ module int _expression_holds_landing(List body) {
     }
     case %(landing ? ?rows): {
       foreach (List row in rows)
-        match (row) case %((!or outer region) ? ?part):
-          if (_expression_holds_landing(part)) return 1;
+        if (row ~= %((!or outer region) ? ?part) &&
+            _expression_holds_landing(part)) return 1;
       continue;
     }
   }
@@ -50,7 +50,7 @@ module void _collect_writes(Preserve &p, List body) {
       }
       case %(landing ? ?rows): {
         foreach (List row in rows)
-          match (row) case %((!or outer region) ? ?part): {
+          if (row ~= %((!or outer region) ? ?part)) {
             pending.push(part);
             flags.push(1);
           }
@@ -74,7 +74,7 @@ module void _collect_writes(Preserve &p, List body) {
 static void _write(Preserve &p, List node) {
   Var operand = _changed_operand(p.c, node);
   if (!operand) {
-    match (node) case %(call ? (args *arguments)):
+    if (node ~= %(call ? (args *arguments)))
       foreach (Var argument in arguments) {
         String addressed = Ast.addressed_identifier(argument);
         if (addressed) p.escaped[addressed] = 1;
@@ -94,20 +94,17 @@ static void _write(Preserve &p, List node) {
 static Var _changed_operand(Compiler c, List node) {
   List written = Ast.written_operand(node);
   if (written) return written;
-  match (node) {
-    case %(call ?(String helper)
-                (args (expr ? (op & (parens ?target))) *)): {
-      if (helper == "x2c_var_update_volatile"
-          || helper == "x2c_var_postfix_volatile"
-          || helper == "Var_update" || helper == "Var_postfix") return target;
-      Type native = c.sym.resolve_numeric_type(target.list().cadr());
-      if (native && helper == native.var_numeric_update_helper())
+  if (node ~= %(call ?(String helper)
+                 (args (expr ? (op & (parens ?target))) *))) {
+    if (helper == "x2c_var_update_volatile"
+        || helper == "x2c_var_postfix_volatile"
+        || helper == "Var_update" || helper == "Var_postfix") return target;
+    Type native = c.sym.resolve_numeric_type(target.list().cadr());
+    if (native && helper == native.var_numeric_update_helper())
+      return target;
+    foreach (Var (key, value) in c.protocol_helpers)
+      if (key ~= %("protocol-update-helper" *) && value == helper)
         return target;
-      foreach (Var (key, value) in c.protocol_helpers)
-        match (key)
-          case %("protocol-update-helper" *):
-            if (value == helper) return target;
-    }
   }
   return NULL;
 }
@@ -118,9 +115,9 @@ static Var _changed_operand(Compiler c, List node) {
    that resolved, because their pointee type has to carry the qualifier too. */
 static void _aliased(Preserve &p, List body) {
   List node;
-  $ast.walk(body, node) match (node) case %(op = ?target ?source): {
+  $ast.walk(body, node) if (node ~= %(op = ?target ?source)) {
     String addressed = Ast.addressed_identifier(source), holder = NULL;
-    match (target) case %(bind ?binding ?):
+    if (target ~= %(bind ?binding ?))
       holder = Ast.binding_spelling(binding);
     if (!holder) holder = Ast.direct_identifier(target);
     if (addressed && holder && holder in p.holders) {
@@ -136,7 +133,7 @@ module Var _preserve_locals(Preserve &p, Var value) {
   // Only declarations and parameters carry a qualifier. A statement
   // expression's own locals follow any landing around it, so they need one
   // only when a statement expression in the function holds a landing.
-  match (node) case %(expr *):
+  if (node ~= %(expr *))
     return p.expression_landings
       ? _rewrite_expression(
         node, %!(List block) using &p => _preserve_locals(p, block))
@@ -161,17 +158,16 @@ static List _block(Preserve &p, List statements) {
   Array output = [];
   foreach (List statement in statements) {
     int origin = 0, Var inner = statement;
-    match (inner) case %(at ?(int anchor) ?wrapped): {
+    if (inner ~= %(at ?(int anchor) ?wrapped)) {
       origin = anchor;
       inner = wrapped;
     }
-    match (inner)
-      case %(!set ?declaration
-             ((!or declare decl) ?type (!set ?bindings (bindings *)))):
-        if (_is_automatic(declaration)) {
-          _split(p, output, origin, declaration, type, bindings);
-          continue;
-        }
+    if (inner ~= %(!set ?declaration
+                   ((!or declare decl) ?type (!set ?bindings (bindings *)))) &&
+        _is_automatic(declaration)) {
+      _split(p, output, origin, declaration, type, bindings);
+      continue;
+    }
     List loop = _escape_loop(p, inner);
     if (loop) {
       output.push(origin ? %(at $origin $loop) : loop);
@@ -226,23 +222,21 @@ static List _declaration(Preserve &p, List declaration, Map escaped) {
 /* Qualify one binding that a transfer may leave stale, unless `escaped`
    names it: its address escapes instead. */
 static List _binding(Preserve &p, List bind, Map escaped) {
-  match (bind)
-    case %(bind ?name ?mods): {
-      String spelling = Ast.binding_spelling(name);
-      if (spelling && spelling in p.names &&
-          !(escaped && spelling in escaped) && !(<volatile> in mods))
-        return %(bind $name $(cons(<volatile>, mods)));
-    }
+  if (bind ~= %(bind ?name ?mods)) {
+    String spelling = Ast.binding_spelling(name);
+    if (spelling && spelling in p.names &&
+        !(escaped && spelling in escaped) && !(<volatile> in mods))
+      return %(bind $name $(cons(<volatile>, mods)));
+  }
   return bind;
 }
 
 static int _declares_name(Preserve &p, List bindings) {
   foreach (List binding in bindings.cdr())
-    match (binding)
-      case $source_declarator_row(%(?name ?)): {
-        String spelling = Ast.binding_spelling(name);
-        if (spelling && spelling in p.names) return 1;
-      }
+    if (binding ~= $source_declarator_row(%(?name ?))) {
+      String spelling = Ast.binding_spelling(name);
+      if (spelling && spelling in p.names) return 1;
+    }
   return 0;
 }
 
@@ -254,12 +248,12 @@ static int _declares_name(Preserve &p, List bindings) {
 static int _declares_pointee(Preserve &p, List bindings) {
   foreach (List binding in bindings.cdr()) {
     List declarator = binding;
-    match (binding) case %(op = ?bind ?value): {
+    if (binding ~= %(op = ?bind ?value)) {
       String addressed = Ast.addressed_identifier(value);
       if (addressed && addressed in p.names) return 1;
       declarator = bind;
     }
-    match (declarator) case %(bind ?name ?): {
+    if (declarator ~= %(bind ?name ?)) {
       String spelling = Ast.binding_spelling(name);
       if (spelling && spelling in p.pointers) return 1;
     }
@@ -298,24 +292,23 @@ static List _escape_loop(Preserve &p, List loop) {
 static void _escape_declared(Preserve &p, Array output, List binds) {
   Compiler c = p.c;
   foreach (List bind in binds)
-    match (bind)
-      case $source_declarator_row(%(?name ?)): {
-        String spelling = Ast.binding_spelling(name);
-        if (spelling && spelling in p.escaped) {
-          output.push(
-            c.bind_syntax(
-              $!{ x2c_exception_escaped = &$name; }, <block>,
-              c.return_type));
-        }
+    if (bind ~= $source_declarator_row(%(?name ?))) {
+      String spelling = Ast.binding_spelling(name);
+      if (spelling && spelling in p.escaped) {
+        output.push(
+          c.bind_syntax(
+            $!{ x2c_exception_escaped = &$name; }, <block>,
+            c.return_type));
       }
+    }
 }
 
 /* A parameter in `escaped` escapes before the function body runs. */
 module List _escape_parameters(Preserve &p, List body, List bindings) {
   Array output = [];
-  match (bindings) case %(bind ? ((fnmod (params *parameters)) *)):
+  if (bindings ~= %(bind ? ((fnmod (params *parameters)) *)))
     foreach (List parameter in parameters)
-      match (parameter) case %(param ? ?bind):
+      if (parameter ~= %(param ? ?bind))
         _escape_declared(p, output, $(bind));
   return p.c.prepend_setup(body, output.list_free());
 }

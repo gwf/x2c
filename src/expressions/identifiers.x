@@ -41,7 +41,7 @@ module List _resolve_identifier(
   String spelling = Ast.binding_spelling(binding);
   _capture_identifier(c, binding);
   int kept = 0;
-  match (value) case %(binding-global *): kept = 1;
+  if (value ~= %(binding-global *)) kept = 1;
   if (_shadow_identifier(c, binding, type, spelling, binding_facts, kept))
     type = NULL;
   if (!type) type = _identifier_type(
@@ -60,14 +60,13 @@ static List _capture_lambda_value(
   Compiler c, List result, List &binding, Type &type, int &read_reference) {
   if (!c.lambda_scopes || c.macro_holes) return result;
   result = c.capture_lambda_identifier(binding, type);
-  match (result)
-    case %(expr ?captured_type $($source_identifier_content(
-        %(?captured)))): {
-      if (type.car() != <&> && captured_type.car() == <&>)
-        read_reference = 1;
-      type = captured_type;
-      binding = captured;
-    }
+  if (result ~= %(expr ?captured_type $($source_identifier_content(
+      %(?captured))))) {
+    if (type.car() != <&> && captured_type.car() == <&>)
+      read_reference = 1;
+    type = captured_type;
+    binding = captured;
+  }
   return result;
 }
 

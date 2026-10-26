@@ -140,7 +140,7 @@ static List _decorate(
   if (deferred) {
     transaction.commit();
     if (_on_body(d))
-      match (d.function) case %(function ?rtype ?declarator ?):
+      if (d.function ~= %(function ?rtype ?declarator ?))
         return %(seq (function $rtype $declarator (block $node)));
     return %(seq $node);
   }
@@ -194,7 +194,7 @@ static List _target(Decoration &d) {
   Compiler c = d.c;
   if (_on_body(d)) {
     d.function = c.parse_function_definition();
-    match (d.function) case %(function ? ? ?body): return body;
+    if (d.function ~= %(function ? ? ?body)) return body;
     return NULL;
   }
   if (d.kind == <function>) return c.parse_function_target();
@@ -238,13 +238,11 @@ static List _capture(Decoration &d, List target) {
 static int _private_target(Compiler c, List target) {
   int private_target = c.source_private > 0;
   List visibility_target = target;
-  match (visibility_target)
-    case %(seq ?only): visibility_target = only;
-  match (visibility_target)
-    case %(falias ?declaration ?): visibility_target = declaration;
-  match (visibility_target)
-    case %((!or function declare typedef) ?type *):
-      private_target |= type.type().is_static();
+  if (visibility_target ~= %(seq ?only)) visibility_target = only;
+  if (visibility_target ~= %(falias ?declaration ?))
+    visibility_target = declaration;
+  if (visibility_target ~= %((!or function declare typedef) ?type *))
+    private_target |= type.type().is_static();
   return private_target;
 }
 
@@ -264,18 +262,17 @@ static List _bind_body(Compiler c, List node, List decorated) {
     result = c.bind_syntax(node, <block>, c.return_type);
   }
   List items = result.car() == <seq> ? result.cdr() : $(result);
-  match (decorated) case %(function ?rtype ?declarator ?):
+  if (decorated ~= %(function ?rtype ?declarator ?))
     result = %(seq (function $rtype $declarator (block @items)));
   return result;
 }
 
 static Type _declared_result(List decorated) {
   Type declared = NULL;
-  match (decorated) case %(function ?rtype ?declarator ?): {
+  if (decorated ~= %(function ?rtype ?declarator ?)) {
     List declaration = %(declare $rtype (bindings $declarator));
-    match (declaration.type_from_ast())
-      case %((func *) *result_type):
-        declared = result_type.type().declared();
+    if (declaration.type_from_ast() ~= %((func *) *result_type))
+      declared = result_type.type().declared();
   }
   return declared;
 }

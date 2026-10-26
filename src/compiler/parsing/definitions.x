@@ -74,12 +74,11 @@ module void _record_span(Compiler c, List node, int start, int end) {
 // Record only prototypes reached in positioned full-parse source order.
 static void _record_prototypes(Compiler c, Type declared_type, List items) {
   foreach (List target in items)
-    match (target)
-      case %(bind ?binding ?modifiers): {
-        List single = %(declare $declared_type (bindings $target));
-        Type type = single.type_from_ast();
-        if (type.is_function()) _record_prototype(c, binding, type, modifiers);
-      }
+    if (target ~= %(bind ?binding ?modifiers)) {
+      List single = %(declare $declared_type (bindings $target));
+      Type type = single.type_from_ast();
+      if (type.is_function()) _record_prototype(c, binding, type, modifiers);
+    }
 }
 
 static void _record_prototype(
@@ -146,10 +145,9 @@ static void _complete_prototype(
 }
 
 static List _inherited_contract(List prior, List current) {
-  match (prior)
-    case %(function-contract ?a ?b static ?d)
-      if (current == %(function-contract $a $b extern $d)):
-        return prior;
+  if (prior ~= %(function-contract ?a ?b static ?d) &&
+      current == %(function-contract $a $b extern $d))
+    return prior;
   return current;
 }
 
@@ -214,17 +212,15 @@ static int _initializable_type(Compiler c, Type type) =>
 static void _collect_references(Var value, Map references, Array ordered) {
   if (value is not <list> || value.is_nil()) return;
   List node = value;
-  match (node)
-    case %(input *arguments): {
-      foreach (List argument in arguments)
-        _collect_references(argument.cadr(), references, ordered);
-      return;
-    }
-  match (node)
-    case %(indexinit ? ?initializer): {
-      _collect_references(initializer, references, ordered);
-      return;
-    }
+  if (node ~= %(input *arguments)) {
+    foreach (List argument in arguments)
+      _collect_references(argument.cadr(), references, ordered);
+    return;
+  }
+  if (node ~= %(indexinit ? ?initializer)) {
+    _collect_references(initializer, references, ordered);
+    return;
+  }
   match (node)
     case %(expr (!set ?type (*)) $($source_identifier_content(
         %((!set ?binding (binding ? ?)))))): {

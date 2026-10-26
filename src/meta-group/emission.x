@@ -85,14 +85,13 @@ static void _name_provider_bindings(
    the `meta` body: `FILE:LINE:COLUMN: CODE: MESSAGE`, then its notes. */
 static String _diagnostic_line(List entry) {
   String line = entry.repr();
-  match (entry)
-    case %((code ?code) * (message ?(String message))
-           (location ((file ?file) (line ?row) (column ?column) *))
-           (notes ?(List notes))): {
-      line = %"$file:$row:$column: $code: $message";
-      foreach (Var note in notes)
-        if (note is <string>) line = %"$line; $note";
-    }
+  if (entry ~= %((code ?code) * (message ?(String message))
+        (location ((file ?file) (line ?row) (column ?column) *))
+        (notes ?(List notes)))) {
+    line = %"$file:$row:$column: $code: $message";
+    foreach (Var note in notes)
+      if (note is <string>) line = %"$line; $note";
+  }
   return line;
 }
 
@@ -182,17 +181,16 @@ static int _after_directives(Array units) {
    named by `callee`, on its template and its arguments as Vars. */
 static Var _template_calls(Compiler c, Var node, List callee) {
   if (node is not <list>) return node;
-  match (node)
-    case %(expr ?type (tpl-call ?stored (args *arguments))): {
-      List values = %(nil);
-      foreach (List argument in arguments.reverse())
-        values = %(expr ("List") (cons $(c.convert_expression(
-          _template_calls(c, argument, callee), %("Var"))) $values));
-      List template = stored is <list>
-        ? c.convert_expression(c.cache_literal_list(stored), %("Var"))
-        : %(expr ("Var") $(c.cache_literal_var(stored.str())));
-      return %(expr $type (call $callee (args $template $values)));
-    }
+  if (node ~= %(expr ?type (tpl-call ?stored (args *arguments)))) {
+    List values = %(nil);
+    foreach (List argument in arguments.reverse())
+      values = %(expr ("List") (cons $(c.convert_expression(
+        _template_calls(c, argument, callee), %("Var"))) $values));
+    List template = stored is <list>
+      ? c.convert_expression(c.cache_literal_list(stored), %("Var"))
+      : %(expr ("Var") $(c.cache_literal_var(stored.str())));
+    return %(expr $type (call $callee (args $template $values)));
+  }
   List child;
   $ast.rewrite_children(node, child, _template_calls(c, child, callee));
 }
@@ -358,7 +356,7 @@ static void _native_entries(Compiler c, Array units, List start) {
     List item = units[i];
     if (!_function_identity(item, identity, name) ||
         !c.public_native_function(item, name)) continue;
-    match (item) case %(function ?type ?declarator (block *body)): {
+    if (item ~= %(function ?type ?declarator (block *body))) {
       List argument = $!String{ $name };
       List enter = c.rebuild_statement($!{ $start($argument); }).cadr();
       units[i] = %(function $type $declarator (block $enter @body));
@@ -414,7 +412,7 @@ static List _named(Compiler c, List reset) {
   List named = %(("x2c_module_reset" $(reset.caddr().cadr())
                   ((func ((void))) void)));
   foreach (List entry in c.meta_group)
-    match (entry) case %(function ?fn ?(String name) ?(Type type) *):
+    if (entry ~= %(function ?fn ?(String name) ?(Type type) *))
       named = named.append(%(($name $(fn.caddr().cadr()) $type)));
   return named;
 }

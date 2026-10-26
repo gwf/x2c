@@ -128,8 +128,7 @@ module List _ordered_list(Compiler c, List chain) {
     orders.push(_part_order(c, value));
     node = rest;
   }
-  int counted = 0;
-  if (!spliced) match (node) case %(nil): counted = 1;
+  int counted = !spliced && (node ~= %(nil));
   node = _step(c, _passed_as(_to_list(c, node), %("List")));
   kinds.push(<nil>);
   values.push(node);

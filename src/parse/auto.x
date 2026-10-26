@@ -105,7 +105,7 @@ module List _auto_declaration(
    semantic identity while emission uses this private typedef. */
 static List _auto_native_type(Compiler c, Type type, List value) {
   Type base = type.base_type();
-  match (base) case %((!or struct union enum) (gensym *)): {
+  if (base ~= %((!or struct union enum) (gensym *))) {
     while (type.is_pointer() || type.is_array()) {
       type = type.dereference();
       value = %(expr $type (op * $value));

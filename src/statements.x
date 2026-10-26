@@ -132,9 +132,8 @@ static List _expression_statement(Compiler c, Symbol position) {
   List expr;
   with (c.meta_statement = start) { expr = c.parse_expression(); }
   c.expect(<;>);
-  if (!c.macro_holes)
-    match (expr) case %(expr ? (meta-call *)):
-      return c.evaluate_meta_statement(expr, position, start);
+  if (!c.macro_holes && expr ~= %(expr ? (meta-call *)))
+    return c.evaluate_meta_statement(expr, position, start);
   return %(stmnt $expr);
 }
 
@@ -426,9 +425,8 @@ List Compiler.parse_match_condition(Compiler c, List subject, Token origin) {
 }
 
 static void _require_list_literal(Compiler c, List pattern, Token start) {
-  match (pattern)
-    case %(!not (expr ("List") *)):
-      $fail.statements_match_pattern(c, start, pattern);
+  if (pattern ~= %(!not (expr ("List") *)))
+    $fail.statements_match_pattern(c, start, pattern);
 }
 
 /** Parses a source match arm's guard and body, declaring its typed
@@ -468,8 +466,8 @@ List Compiler.typed_capture_declarations(
 
 static List _capture_temporaries(Compiler c, List types, Array locals) {
   Array declarations = [];
-  foreach (List row in types) match (row)
-    case %(?name ?type): {
+  foreach (List row in types)
+    if (row ~= %(?name ?type)) {
       String temporary = c.fresh_name("match_value");
       declarations.push(
         _capture_declaration(
@@ -496,8 +494,8 @@ static List _capture_declaration(
 
 static List _capture_locals(Compiler c, Array locals) {
   Array declarations = [];
-  foreach (List row in locals) match (row)
-    case %(?name ?type ?temporary):
+  foreach (List row in locals)
+    if (row ~= %(?name ?type ?temporary))
       declarations.push(
         _capture_declaration(
           c, type, name, %(expr () (ident ($temporary))), 0));

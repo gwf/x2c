@@ -123,7 +123,7 @@ List Type.layout(Type type) {
 int Type.is_value(Type type) {
   _require_expansion("Type.is_value");
   type = type.canonicalize();
-  match (type) case %((bitfield ?) *rest): type = rest;
+  if (type ~= %((bitfield ?) *rest)) type = rest;
   foreach (String name in %("Symbol" "Var" "Atom" "String" "List"))
     if (active.expander.sym.is_named_value_type(type, name)) return 1;
   return active.expander.sym.resolve_key(type).is_number();

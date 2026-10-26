@@ -53,19 +53,18 @@ static typedef struct Callback {
     expressions pass through unchanged.
 */
 List Compiler.lower_typed_adapter_expr(Compiler c, List expression) {
-  match (expression)
-    case %(expr ?spelling (tadapt ?at (expr ?source ?payload))): {
-      Callback cb = {.c = c};
-      cb.source = source;
-      match (payload) case %(ident ?binding): cb.source_binding = binding;
-      with (c.origin = at) {
-        cb.target = c.sym.resolve_key(spelling);
-        _split(cb);
-        _check_signature(cb);
-        _check_params(cb);
-        return _publish_typed(cb, spelling);
-      }
+  if (expression ~= %(expr ?spelling (tadapt ?at (expr ?source ?payload)))) {
+    Callback cb = {.c = c};
+    cb.source = source;
+    if (payload ~= %(ident ?binding)) cb.source_binding = binding;
+    with (c.origin = at) {
+      cb.target = c.sym.resolve_key(spelling);
+      _split(cb);
+      _check_signature(cb);
+      _check_params(cb);
+      return _publish_typed(cb, spelling);
     }
+  }
   return expression;
 }
 
@@ -204,13 +203,12 @@ static int _lambda_adapter_signature(
   List expected_type, List &raw_params, Var &return_type) {
   Type expected = expected_type;
   List signature = expected.canonicalize();
-  match (signature) case %((!or (!quote *) & ^) *rest): signature = rest;
-  match (signature)
-    case %((func (*parameters)) ?return_head *): {
-      raw_params = parameters;
-      return_type = return_head;
-      return 1;
-    }
+  if (signature ~= %((!or (!quote *) & ^) *rest)) signature = rest;
+  if (signature ~= %((func (*parameters)) ?return_head *)) {
+    raw_params = parameters;
+    return_type = return_head;
+    return 1;
+  }
   return 0;
 }
 
@@ -218,8 +216,7 @@ static int _collect_param_types(List raw_params, List &out_types) {
   Array types = [], int all_var = 1;
   foreach (Var entry in raw_params) {
     Var ptype = entry;
-    match (entry)
-      case %(param ? ?): ptype = entry.list().type_from_ast();
+    if (entry ~= %(param ? ?)) ptype = entry.list().type_from_ast();
     List ptype_list = ptype is <list> ? ptype : $(ptype);
     types.push(ptype_list);
     if (all_var && ptype_list != %("Var")) all_var = 0;

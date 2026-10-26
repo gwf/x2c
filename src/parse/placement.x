@@ -48,9 +48,9 @@ List Compiler.enclosing(Compiler c, Symbol what) {
 static List _ancestor_code(Compiler c, Ancestor row) {
   if (row.what == <declarator>)
     return %(declare $(row.base) (bindings $(row.node)));
-  if (row.what == <function>)
-    match (row.node) case %(declare ?type (bindings ?declarator)):
-      return %(function $type $declarator (seq));
+  if (row.what == <function> &&
+      row.node ~= %(declare ?type (bindings ?declarator)))
+    return %(function $type $declarator (seq));
   int origin = row.origin ? row.origin : c.record_origin(row.token);
   return %(at $origin (seq));
 }
@@ -236,28 +236,27 @@ static void _append_managed_rows(
    after-initialization rewrite adds, or NULL. */
 static List _after_declarator(
   Compiler c, List base, List &declarator, Token origin) {
-  match (declarator)
-    case %(op = (bind ?name ?mods) ?value): {
-      List result = NULL;
-      List placed = _take_placed(c, name, value, result, origin);
-      if (placed) {
-        declarator = %(op = (bind $name $mods) $result);
-        return placed;
-      }
-      List ordinary = <auto> in base
-        ? base.filter(%!(item) => item != <auto>) : base;
-      List rewritten = c.rewrite(
-        <decl>, <init>, %(declare $ordinary (bindings $declarator)), <block>,
-        c.return_type, origin);
-      if (<auto> in base) {
-        Type type = %(declare $base (bindings (bind $name $mods))).type_from_ast();
-        List release = c.resolve_protocol_member(type, "cleanup")
-          ? c.bind_syntax($!{ defer $name.cleanup(); }, <block>, c.return_type)
-          : NULL;
-        if (release) return rewritten ? %(seq $release $rewritten) : release;
-      }
-      return rewritten;
+  if (declarator ~= %(op = (bind ?name ?mods) ?value)) {
+    List result = NULL;
+    List placed = _take_placed(c, name, value, result, origin);
+    if (placed) {
+      declarator = %(op = (bind $name $mods) $result);
+      return placed;
     }
+    List ordinary = <auto> in base
+      ? base.filter(%!(item) => item != <auto>) : base;
+    List rewritten = c.rewrite(
+      <decl>, <init>, %(declare $ordinary (bindings $declarator)), <block>,
+      c.return_type, origin);
+    if (<auto> in base) {
+      Type type = %(declare $base (bindings (bind $name $mods))).type_from_ast();
+      List release = c.resolve_protocol_member(type, "cleanup")
+        ? c.bind_syntax($!{ defer $name.cleanup(); }, <block>, c.return_type)
+        : NULL;
+      if (release) return rewritten ? %(seq $release $rewritten) : release;
+    }
+    return rewritten;
+  }
   return NULL;
 }
 

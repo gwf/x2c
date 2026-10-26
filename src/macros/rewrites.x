@@ -113,7 +113,7 @@ module void _install_rewrite(Compiler c, List row) {
     _register_rewrite(c, shared.rewrite_rule());
     return;
   }
-  match (row) case %(compile-time rewrite ?point ?kind ?name ?shape ?holes): {
+  if (row ~= %(compile-time rewrite ?point ?kind ?name ?shape ?holes)) {
     if (c.builtin_defs && !Compiler.links_meta_function(name)) return;
     RewriteRule rule = _rewrite_rule(
       point, c.thaw_declaration_syntax(kind), name,
@@ -158,9 +158,9 @@ module void _require_owned(int owned) {
 
 static int _unit_bound(Var syntax) {
   if (syntax is not <list>) return 0;
-  match (syntax)
-    case %((!or declaration-cache declaration-binding declaration-origin) *):
-      return 1;
+  if (syntax ~= %((!or declaration-cache declaration-binding
+                       declaration-origin) *))
+    return 1;
   foreach (Var child in syntax.list()) if (_unit_bound(child)) return 1;
   return 0;
 }
@@ -334,7 +334,7 @@ static List _rewrite(
           c, point, kind, source, result, position, expected, site, lower);
       if (position == <unit>) return _lowered_definition(c, result);
       int held = point == <node>;
-      match (result) case %(code-value "lowered" *): held = 1;
+      if (result ~= %(code-value "lowered" *)) held = 1;
       if (held) {
         Array parts = auto [];
         _held_parts(source, point, parts);
@@ -408,7 +408,7 @@ static List _bind_replacement(
    lowered code, which binding keeps as it is. A lowered carrier binds as it
    is already. */
 static Var _kept_lowered(Var result, List source, Array parts) {
-  match (result) case %(code-value "lowered" *): return result;
+  if (result ~= %(code-value "lowered" *)) return result;
   Map kept = auto {};
   kept[(void *) source] = Code.lowered(source, NULL);
   foreach (List part in parts) kept[(void *) part] = Code.lowered(part, NULL);
@@ -436,8 +436,8 @@ static Var _bound_held(
    its rule, as any definition does, and a shipped rule's is written. */
 static List _lowered_definition(Compiler c, Var result) {
   List bound = c.bind_syntax(result, <unit>, NULL);
-  match (bound) case %(seq ?only): bound = only;
-  match (result) case %(code-value "lowered" *): return bound;
+  if (bound ~= %(seq ?only)) bound = only;
+  if (result ~= %(code-value "lowered" *)) return bound;
   with (c.slot_watch = NULL) {
     return c.normalize(_written_support(c, bound));
   }
@@ -509,7 +509,7 @@ static List _prepared(
   Token site) {
   auto Array sources = [], values = [];
   _expression_nodes(source, sources);
-  match (result) case %(code-value *):
+  if (result ~= %(code-value *))
     return _watched(c, result, sources, position, expected, site);
   int refused = 0;
   Var shape = _template(c, result, sources, values, refused);
@@ -581,7 +581,7 @@ static Var _template(
   Compiler c, Var node, Array sources, Array values, int &refused) {
   if (node is not <list> || node.is_nil()) return node;
   List syntax = node;
-  match (syntax) case %(expr ?type ?content):
+  if (syntax ~= %(expr ?type ?content))
     foreach (List value in sources)
       if (value === syntax)
         return _capture_slot(c, syntax, type, content, values, refused);
@@ -593,7 +593,7 @@ static Var _template(
 static Var _capture_slot(
   Compiler c, List value, Var type, Var content, Array values,
   int &refused) {
-  match (content) case %(literal *): return value;
+  if (content ~= %(literal *)) return value;
   Var shape = _slot_shape(c, content);
   foreach (List prior in values) if (prior === value) shape = void;
   if (shape is void) {
@@ -637,9 +637,9 @@ static Var _nested_shape(Compiler c, Var prefix, Var content) {
    with its slot values. */
 static int _carries(Var shape) {
   if (shape is not <list>) return 0;
-  match (shape)
-    case %((!or code-value macro-invoke "x2c.template" "x2c.quoted") *):
-      return 1;
+  if (shape ~= %((!or code-value macro-invoke "x2c.template"
+                      "x2c.quoted") *))
+    return 1;
   foreach (Var child in shape.list()) if (_carries(child)) return 1;
   return 0;
 }
@@ -665,8 +665,7 @@ static Var _marked(Var node, Array outputs, Array found, int &refused) {
       found[i] = found[i].int() + 1;
       return $("x2c.slot", i);
     }
-  match (syntax)
-    case %((!or at block seq stmnt decl declare) *): refused = 1;
+  if (syntax ~= %((!or at block seq stmnt decl declare) *)) refused = 1;
   List child;
   $ast.rewrite_children(
     syntax, child, _marked(child, outputs, found, refused));

@@ -255,14 +255,14 @@ static void _write_json(
 
 /* An entry without a location writes null for each location key. */
 static void _write_json_location(Compiler c, Buffer out, List location) {
-  match (location)
-    case %((file ?file) (line ?line) (column ?column) (length ?length)
-           (position ?position)): {
-      out.write(%",\"file\":$(Var.json(_json_path(c, file)))");
-      out.write(%",\"line\":$line,\"column\":$column");
-      out.write(%",\"length\":$length,\"position\":$position");
-      return;
-    }
+  if (location ~=
+      %((file ?file) (line ?line) (column ?column) (length ?length)
+        (position ?position))) {
+    out.write(%",\"file\":$(Var.json(_json_path(c, file)))");
+    out.write(%",\"line\":$line,\"column\":$column");
+    out.write(%",\"length\":$length,\"position\":$position");
+    return;
+  }
   out.write(",\"file\":null,\"line\":null,\"column\":null");
   out.write(",\"length\":null,\"position\":null");
 }
@@ -273,32 +273,31 @@ static void _write_json_location(Compiler c, Buffer out, List location) {
     `column`, and token `length`; `String` notes are joined into one note line.
 */
 void Compiler.print_diagnostic(Compiler compiler, List entry) {
-  match (entry)
-    case %((code ?code) (severity ?severity) (message ?message)
-           (location ?location) (notes ?notes)): {
-      String note = _note_line(notes);
-      if (diagnostics_json >= 0) {
-        _write_json(compiler, code, severity, message, location, note);
-        return;
-      }
-      _write_heading(compiler, code, message, location);
-      if (note) fprintf(stderr, "  note: %s\n", note);
-      fprintf(stderr, "\n");
-      fflush(stderr);
+  if (entry ~= %((code ?code) (severity ?severity) (message ?message)
+                (location ?location) (notes ?notes))) {
+    String note = _note_line(notes);
+    if (diagnostics_json >= 0) {
+      _write_json(compiler, code, severity, message, location, note);
+      return;
     }
+    _write_heading(compiler, code, message, location);
+    if (note) fprintf(stderr, "  note: %s\n", note);
+    fprintf(stderr, "\n");
+    fflush(stderr);
+  }
 }
 
 /* A located heading names its source position and shows that line. */
 static void _write_heading(
   Compiler c, Symbol code, String message, List location) {
-  match (location)
-    case %((file ?file) (line ?line) (column ?column) (length ?length)
-           (position ?position)): {
-      String place = %"$file:$line:$column";
-      fprintf(stderr, "%s: %s: %s\n", place, code.str(), message);
-      _show_source_context(c, line, column, length, position);
-      return;
-    }
+  if (location ~=
+      %((file ?file) (line ?line) (column ?column) (length ?length)
+        (position ?position))) {
+    String place = %"$file:$line:$column";
+    fprintf(stderr, "%s: %s: %s\n", place, code.str(), message);
+    _show_source_context(c, line, column, length, position);
+    return;
+  }
   fprintf(stderr, "%s: %s\n", code.str(), message);
 }
 
@@ -390,10 +389,9 @@ String Compiler.file_prefix(Compiler c) {
   Array markers = c.line_markers;
   Token token = _unit_token(c);
   if (!markers || !token) return NULL;
-  match (markers[0]) case %(? ? ? ? ? ? ?): {
-    match (_token_region(c, token))
-      case %(? ? ? ? ? ? ?(String prefix)): return prefix;
-  }
+  if (markers[0] ~= %(? ? ? ? ? ? ?) &&
+      _token_region(c, token) ~= %(? ? ? ? ? ? ?(String prefix)))
+    return prefix;
   return NULL;
 }
 
@@ -423,9 +421,9 @@ static int _in_unit(Compiler c, Token token) {
     that begins inside a line of its file continues that line's columns.
 */
 int Compiler.token_column(Compiler c, Token token) {
-  match (_token_region(c, token))
-    case %(? ?(int text_line) ? ? ? ?(String before) ?):
-      if (token.line == text_line) return before.len() + token.col;
+  if (_token_region(c, token) ~=
+      %(? ?(int text_line) ? ? ? ?(String before) ?) &&
+      token.line == text_line) return before.len() + token.col;
   return token.col;
 }
 
@@ -436,11 +434,11 @@ int Compiler.token_column(Compiler c, Token token) {
 */
 String Compiler.text_source(Compiler c, int position, int &offset) {
   offset = position;
-  match (_region(c, position))
-    case %(?(int start) ? ?(String file) ? ?(int origin) ? ?): {
-      offset = origin + position - start;
-      return file;
-    }
+  if (_region(c, position) ~=
+      %(?(int start) ? ?(String file) ? ?(int origin) ? ?)) {
+    offset = origin + position - start;
+    return file;
+  }
   return c.filename;
 }
 
@@ -449,7 +447,7 @@ String Compiler.text_source(Compiler c, int position, int &offset) {
    the spliced text, including the thawed copy of a queued effect's site. */
 static List _token_region(Compiler c, Token token) {
   List region = _region(c, token.pos);
-  match (region) case %(? ? ? ? ? ? ?): return region;
+  if (region ~= %(? ? ? ? ? ? ?)) return region;
   if (!region) return NULL;
   Token first = c.tokenizer.tokens;
   return token >= first && token < first + c.tokenizer.tokens.len()
@@ -539,14 +537,14 @@ static void _show_source_context(
   if (compiler.line_markers) line = _text_line(compiler, position);
   char *line_start, *line_end;
   if (!_context_line(compiler, line, line_start, line_end)) return;
-  match (_region(compiler, position))
-    case %(? ?(int text_line) ? ? ? ?(String before) ?):
-      if (line == text_line && before.len()) {
-        String shown =
-          %"$before$(String.new_len(line_start, line_end - line_start))";
-        line_start = shown;
-        line_end = line_start + shown.len();
-      }
+  if (_region(compiler, position) ~=
+      %(? ?(int text_line) ? ? ? ?(String before) ?) &&
+      line == text_line && before.len()) {
+    String shown =
+      %"$before$(String.new_len(line_start, line_end - line_start))";
+    line_start = shown;
+    line_end = line_start + shown.len();
+  }
   _context_caret(line_start, line_end, column, length);
 }
 

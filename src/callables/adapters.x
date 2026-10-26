@@ -428,8 +428,7 @@ static List _auto_names(Compiler c, int count) {
 
 module int _typed_params_variadic(List params) {
   foreach (Var value in params) {
-    if (value == <...>) return 1;
-    match (value) case %(...): return 1;
+    if (value == <...> || (value ~= %(...))) return 1;
   }
   return 0;
 }

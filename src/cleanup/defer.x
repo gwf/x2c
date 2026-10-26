@@ -33,7 +33,7 @@ List Compiler.rewrite_defer_list(Compiler c, List stmts) {
   for (List suffix = stmts; suffix; suffix = suffix.cdr()) {
     List anchored = suffix.car();
     List head = Ast.without_origin(anchored);
-    match (head) case $deferred(?final_stmt): {
+    if (head ~= $deferred(?final_stmt)) {
       List rest = c.rewrite_defer_list(suffix.cdr());
       List finalizer = final_stmt;
       if (c.source_map) finalizer = Ast.rewrap_origin(anchored, finalizer);
@@ -66,8 +66,8 @@ static List _landing_region(List body, List finalizer) =>
 
 static int _defer_needs_landing(List ast) {
   List node;
-  $ast.walk(ast, node) match (node)
-    case %((!or return break continue goto try catchcases match) *):
+  $ast.walk(ast, node)
+    if (node ~= %((!or return break continue goto try catchcases match) *))
       return 1;
   return 0;
 }
@@ -106,16 +106,14 @@ static List _callable_defer(Compiler c, List body, List finalizer) {
 
 static void _collect_captures(DeferCaptures &d, List ast) {
   if (!ast || d.unsupported) return;
-  match (ast)
-    case %(bind ?bound *): {
-      List binding = bound, known = d.declared;
-      if (!(binding in known)) d.declared = cons(binding, known);
-    }
-  match (ast)
-    case %(expr ? $($source_identifier_content(%(?bound)))): {
-      _capture(d, bound);
-      return;
-    }
+  if (ast ~= %(bind ?bound *)) {
+    List binding = bound, known = d.declared;
+    if (!(binding in known)) d.declared = cons(binding, known);
+  }
+  if (ast ~= %(expr ? $($source_identifier_content(%(?bound))))) {
+    _capture(d, bound);
+    return;
+  }
   List modified = Ast.lvalue_binding(Ast.written_operand(ast));
   foreach (Var child in ast) if (child is <list>) _collect_captures(d, child);
   Var field;
@@ -160,24 +158,23 @@ static int _defer_type_hoistable(Compiler c, Type type) {
 static List _rewrite_captures(
   DeferCaptures &d, List ast, String env_name) {
   if (!ast) return ast;
-  match (ast)
-    case %(expr ?captured_type
-        $($source_identifier_content(%(?bound)))): {
-      List binding = bound;
-      Var field_var;
-      if (!d.captures.try_get(binding, field_var)) return ast;
-      String field_name = Ast.binding_spelling(field_var);
-      Type type = captured_type, target = type;
-      if (binding in d.written &&
-          !(<volatile> in type.flatten_all()))
-        target = cons(<volatile>, type);
-      Type pointer = cons(<*>, target);
-      String reference = %"$env_name->$field_name";
-      List source = %(expr (* const void) $reference);
-      List cast = %(expr $pointer (cast $pointer $source));
-      List dereference = %(expr $type (op * $cast));
-      return %(expr $type (parens $dereference));
-    }
+  if (ast ~= %(expr ?captured_type
+      $($source_identifier_content(%(?bound))))) {
+    List binding = bound;
+    Var field_var;
+    if (!d.captures.try_get(binding, field_var)) return ast;
+    String field_name = Ast.binding_spelling(field_var);
+    Type type = captured_type, target = type;
+    if (binding in d.written &&
+        !(<volatile> in type.flatten_all()))
+      target = cons(<volatile>, type);
+    Type pointer = cons(<*>, target);
+    String reference = %"$env_name->$field_name";
+    List source = %(expr (* const void) $reference);
+    List cast = %(expr $pointer (cast $pointer $source));
+    List dereference = %(expr $type (op * $cast));
+    return %(expr $type (parens $dereference));
+  }
   List child;
   $ast.rewrite_children(ast, child, _rewrite_captures(d, child, env_name));
 }

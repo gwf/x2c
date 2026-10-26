@@ -442,9 +442,8 @@ static Func _new(
   const void *context, size_t context_size) {
   if (!adapter) $error.bind.sig(signature);
   List params = NULL;
-  match (signature)
-    case %((func (!is ?captured type list)) ? *):
-      params = captured;
+  if (signature ~= %((func (!is ?captured type list)) ? *))
+    params = captured;
   if (!params) $error.bind.sig(signature);
   if (context_size && !context)
     $error.context.source();

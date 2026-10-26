@@ -78,16 +78,15 @@ static int _retain_bundle(
 */
 List Compiler.replay_declaration_source(Compiler c) {
   List source = c.sym.get(_declaration_source_key(c, c.token));
-  match (source)
-    case %(declaration-source ?(int end) ?syntax ?facts): {
-      List bound;
-      with (c.replaying_declaration = 1) {
-        _restore_declaration_bindings(c, syntax, facts, {});
-        bound = c.bind_syntax(syntax, <unit>, NULL);
-      }
-      while (c.peek(0) != <eof> && c.token.pos < end) c.next();
-      return bound;
+  if (source ~= %(declaration-source ?(int end) ?syntax ?facts)) {
+    List bound;
+    with (c.replaying_declaration = 1) {
+      _restore_declaration_bindings(c, syntax, facts, {});
+      bound = c.bind_syntax(syntax, <unit>, NULL);
     }
+    while (c.peek(0) != <eof> && c.token.pos < end) c.next();
+    return bound;
+  }
   return NULL;
 }
 

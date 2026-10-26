@@ -768,7 +768,7 @@ static List _parse_group_rest(Compiler c) {
   List expr = c.parse_expression();
   c.expect(<)>);
   // C has no parenthesized brace; the brace converts at its destination.
-  match (expr) case %(expr ? (composite ?)): return expr;
+  if (expr ~= %(expr ? (composite ?))) return expr;
   List type = expr.cadr();
   return %(expr $type (parens $expr));
 }

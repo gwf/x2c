@@ -49,7 +49,7 @@ static int _function_hole(Macro shape) {
   if (parameters.len() != 1 ||
       parameters.car().list().assoc(<kind>) != <function>)
     return 0;
-  match (shape.assoc(<template>)) case %(seq ?only): return only.is_binder();
+  if (shape.assoc(<template>) ~= %(seq ?only)) return only.is_binder();
   return 0;
 }
 
@@ -57,10 +57,10 @@ static int _function_hole(Macro shape) {
    `(!or OP...)`, any of them quoted. */
 static List _rule_operators(Var position) {
   List operators = $(position);
-  match (position) case %((!quote !or) *choices): operators = choices;
+  if (position ~= %((!quote !or) *choices)) operators = choices;
   Array found = [];
   foreach (Var operator in operators) {
-    match (operator) case %((!quote !quote) ?quoted): operator = quoted;
+    if (operator ~= %((!quote !quote) ?quoted)) operator = quoted;
     found.push(operator);
   }
   return found.list_free();
@@ -72,9 +72,9 @@ static List _rule_operators(Var position) {
 static int _rule_dynamic(Var type, List operands) {
   if (_rule_var(type)) return 1;
   foreach (Var operand in operands) {
-    match (operand) case %((!quote !and) ?inner): operand = inner;
-    match (operand) case %(expr ?operand_type *):
-      if (_rule_var(operand_type)) return 1;
+    if (operand ~= %((!quote !and) ?inner)) operand = inner;
+    if (operand ~= %(expr ?operand_type *) && _rule_var(operand_type))
+      return 1;
   }
   return 0;
 }
@@ -107,7 +107,7 @@ static List _unmarked(List holes, Symbol mark) {
 Code Code.register_rewrite(Code function, List pattern, List holes) {
   _require_expansion("Code.register_rewrite");
   Macro shape = NULL;
-  match (pattern) case %(macrodef *): {
+  if (pattern ~= %(macrodef *)) {
     shape = pattern;
     if (!holes && _function_hole(shape))
       return _rewrite_registration(
@@ -124,8 +124,8 @@ Code Code.register_rewrite(Code function, List pattern, List holes) {
       kinds = _rule_operators(position);
       Symbol operator = kinds.car();
       point = operator.is_assignment_op() ? 0 : <binary>;
-      match (left) case %(expr ? (index ? ?)):
-        if (operator.is_assignment_op()) point = <access>;
+      if (left ~= %(expr ? (index ? ?)) && operator.is_assignment_op())
+        point = <access>;
       if (_rule_dynamic(type, $(left, right))) {
         point = <binary>;
         kinds = _rule_dynamic_kinds(kinds, <op>);
@@ -173,7 +173,7 @@ Code Code.register_after_initialization(Code c, Macro shape, List holes) {
   _require_expansion("Code.register_after_initialization");
   holes = _rewrite_holes(shape, holes);
   List pattern = shape.pattern(holes);
-  match (pattern) case %(declare *):
+  if (pattern ~= %(declare *))
     return _rewrite_registration(c, shape, holes, <decl>, %(init));
   $fail.meta_sdk_initialization_pattern();
 }

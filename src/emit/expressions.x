@@ -68,14 +68,13 @@ static List _op_spine(Emitter &e, Var operator, Var left, Var right) {
     rights.push(right_item);
     level = _left_operand_level(op_item);
     int deeper = 0;
-    if (_emitted_precedence(left_item) >= level)
-      match (left_item)
-        case %(expr ? (op ?next_operator ?next_left ?next_right)): {
-          op_item = next_operator;
-          left_item = next_left;
-          right_item = next_right;
-          deeper = 1;
-        }
+    if (_emitted_precedence(left_item) >= level &&
+        left_item ~= %(expr ? (op ?next_operator ?next_left ?next_right))) {
+      op_item = next_operator;
+      left_item = next_left;
+      right_item = next_right;
+      deeper = 1;
+    }
     if (!deeper) break;
   }
   List result = _operand(e, left_item, level);
@@ -121,8 +120,7 @@ module List _unary(Emitter &e, Symbol operator, Var argument) {
 
 module List _binary(
   Emitter &e, Symbol operator, Var left, Var right) {
-  match (left)
-    case %(expr ? (op *)): return _op_spine(e, operator, left, right);
+  if (left ~= %(expr ? (op *))) return _op_spine(e, operator, left, right);
   Symbol binary = operator;
   return $(
     @(_operand(e, left, _left_operand_level(binary))), operator,
@@ -132,9 +130,8 @@ module List _binary(
 module List _ident(Emitter &e, Var binding) {
   /* A template's free name in a declared type, such as an array size,
      keeps the spelling it lands with. */
-  match (binding)
-    case %((!or binding-name binding-global) ?(String spelling)):
-      return $(spelling);
+  if (binding ~= %((!or binding-name binding-global) ?(String spelling)))
+    return $(spelling);
   Var pointer;
   if (e.static_objects && e.static_objects.try_get(binding, pointer))
     return %("(*" $pointer ")");
@@ -171,16 +168,13 @@ static List _match_site_call(Emitter &e, Var function, Var arguments) {
   if (!global || global != binding || !type.is_function())
     return NULL;
   List args = arguments;
-  match (args)
-    case %(args ? ?pattern *): {
-      if (pattern is not <list> ||
-          !e.match_pattern_is_static(pattern))
-        return NULL;
-      String site = e.fresh_name("match_site");
-      List c_args = _emit(e, $(arguments));
-      return %("({ static MatchCaptureSite " $site ";"
-               $entry "(&" $site "," @c_args "); })");
-    }
+  if (args ~= %(args ? ?pattern *) && pattern is <list> &&
+      e.match_pattern_is_static(pattern)) {
+    String site = e.fresh_name("match_site");
+    List c_args = _emit(e, $(arguments));
+    return %("({ static MatchCaptureSite " $site ";"
+             $entry "(&" $site "," @c_args "); })");
+  }
   return NULL;
 }
 
@@ -242,7 +236,7 @@ module List _args(Emitter &e, List ast) {
   int first = 1;
   foreach (List argument in ast.cdr()) {
     List emitted = _emit(e, argument);
-    match (argument) case %(expr ? (commas *)): emitted = _parens(emitted);
+    if (argument ~= %(expr ? (commas *))) emitted = _parens(emitted);
     if (!first) result.push(", ");
     result.push(emitted);
     first = 0;

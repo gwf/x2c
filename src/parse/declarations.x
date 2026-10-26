@@ -14,7 +14,7 @@ static keyword loop $private.loop;
 */
 List Compiler.parse_declaration_row(Compiler c) {
   List rows = _declaration_rows(c);
-  match (rows) case %(?only): return only;
+  if (rows ~= %(?only)) return only;
   return %(seq @rows);
 }
 
@@ -319,7 +319,7 @@ static List _linked_static_base(Compiler c, List base, List declarators) {
   foreach (List declarator in declarators) {
     Type declared = %(declare $base (bindings $declarator)).type_from_ast();
     List bound = declarator;
-    match (declarator) case %(op = ?target ?): bound = target;
+    if (declarator ~= %(op = ?target ?)) bound = target;
     if (!declared.is_function() || !c.sym.is_file_static(bound.cadr()))
       return base;
   }
@@ -467,12 +467,11 @@ static int _declaration_legal(Var tag, Symbol context) {
 
 static int _has_bitfield(List declarator) {
   List syntax = declarator;
-  match (syntax) case %(op = ?binding ?): syntax = binding;
-  match (syntax)
-    case %(bind ? ?modifiers): {
-      Type mods = modifiers;
-      return mods.is_bitfield();
-    }
+  if (syntax ~= %(op = ?binding ?)) syntax = binding;
+  if (syntax ~= %(bind ? ?modifiers)) {
+    Type mods = modifiers;
+    return mods.is_bitfield();
+  }
   return 0;
 }
 
@@ -487,16 +486,14 @@ module List _bind_targets(
         (bindings @(declarators.list_free()))),
     <block>, c.return_type
   );
-  match (declaration)
-    case %(declare ?bound_base (bindings *bindings)): {
-      Array bound_targets = [];
-      foreach (List binding in bindings)
-        match (binding)
-          case %(bind ?name ?): bound_targets.push(name);
-      return %(dstrdecl $bound_base
-               (targets @(bound_targets.list_free()))
-               $(_resolve(c, source)));
-    }
+  if (declaration ~= %(declare ?bound_base (bindings *bindings))) {
+    Array bound_targets = [];
+    foreach (List binding in bindings)
+      if (binding ~= %(bind ?name ?)) bound_targets.push(name);
+    return %(dstrdecl $bound_base
+             (targets @(bound_targets.list_free()))
+             $(_resolve(c, source)));
+  }
   return _construction_error(c);
 }
 
@@ -509,9 +506,8 @@ module List _bind_typed_targets(
       case %(param ?base (!set ?declarator (bind ? ?))): {
         List declaration = c.bind_syntax(
           %(declare $base (bindings $declarator)), <block>, c.return_type);
-        match (declaration)
-          case %(declare ?bound_base (bindings ?binding)):
-            bound_parameters.push(%( param $bound_base $binding ));
+        if (declaration ~= %(declare ?bound_base (bindings ?binding)))
+          bound_parameters.push(%( param $bound_base $binding ));
       }
   return %(dstrdecl (params @(bound_parameters.list_free()))
            $(_resolve(c, source)));

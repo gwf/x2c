@@ -74,11 +74,10 @@ Type Sym.sole_typedef(Sym s, Type type) {
   String found = NULL;
   for (int i = 0; i < s.base_scopes; i++)
     foreach (Var (key, target) in _scope_at(s, i).symbols)
-      match (key) case %(typedef ?(String name)):
-        if (target == type) {
-          if (found && found != name) return NULL;
-          found = name;
-        }
+      if ((key ~= %(typedef ?(String name))) && target == type) {
+        if (found && found != name) return NULL;
+        found = name;
+      }
   return found ? $(found) : NULL;
 }
 

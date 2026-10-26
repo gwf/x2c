@@ -194,9 +194,9 @@ module List _construction_error(Compiler c) {
 /* A meta call written as a whole statement may return a statement. */
 static List _bind_expression_statement(
   Compiler c, List expression, Symbol context) {
-  match (expression) case %(expr ? (meta-call *)):
-    if (!c.meta_body && !c.macro_holes)
-      return c.evaluate_meta_statement(expression, context, c.token);
+  if ((expression ~= %(expr ? (meta-call *))) &&
+      !c.meta_body && !c.macro_holes)
+    return c.evaluate_meta_statement(expression, context, c.token);
   return %(stmnt $(_resolve(c, expression)));
 }
 

@@ -106,10 +106,10 @@ void Compiler.finish_collected_declaration(
   /* Lexical privacy also marks a name in Sym.statics, so a static function
      is marked again as `(function name)`. File collection reads that key to
      keep the function out of an ordinary include's interface. */
-  match (declaration)
-    case %(declare ?type (bindings (bind ?binding ((fnmod *) *)))):
-      if (type.type().is_static())
-        c.sym.mark_static(%(function $(Ast.binding_spelling(binding))));
+  if (declaration ~=
+      %(declare ?type (bindings (bind ?binding ((fnmod *) *)))) &&
+      type.type().is_static())
+    c.sym.mark_static(%(function $(Ast.binding_spelling(binding))));
   if (c.peek(0) == <"{"> || c.peek(0) == <"%{"> || _x2c_at_function_arrow(c))
     _skip_body(c, declaration, meta, native);
   else if (c.peek(0) == <;>) {
@@ -122,9 +122,8 @@ void Compiler.finish_collected_declaration(
 static void _skip_body(Compiler c, List declaration, Token meta, int native) {
   if (native) c.record_native_meta_effect(declaration, meta);
   else if (meta) c.record_project_meta_effect(declaration, meta);
-  match (declaration)
-    case %(declare ? (bindings (bind ?binding ?))):
-      _note_function_body(c, declaration.type_from_ast(), binding);
+  if (declaration ~= %(declare ? (bindings (bind ?binding ?))))
+    _note_function_body(c, declaration.type_from_ast(), binding);
   c.record_inline_function(declaration);
   if (_x2c_at_function_arrow(c)) {
     c.next();
@@ -141,11 +140,10 @@ static void _skip_body(Compiler c, List declaration, Token meta, int native) {
 void Compiler.record_inline_function(Compiler c, List declaration) {
   Type type = declaration.type_from_ast();
   if (!type.is_inline() || type.is_static() || c.source_private) return;
-  match (declaration)
-    case %(declare ? (bindings (bind ?binding ?))): {
-      String name = Ast.binding_spelling(binding);
-      c.sym.set($("function-inline", name), %(inline));
-    }
+  if (declaration ~= %(declare ? (bindings (bind ?binding ?)))) {
+    String name = Ast.binding_spelling(binding);
+    c.sym.set($("function-inline", name), %(inline));
+  }
 }
 
 // `fn_defs` holds each non-static function the unit defines.

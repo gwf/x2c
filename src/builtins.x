@@ -42,8 +42,8 @@ static List _with_expand(List body, List assignments) {
 
 static List _with_assignment(List assignment, List body) {
   List place = NULL, value = NULL;
-  match (assignment)
-    case %(expr ? (op = ?target ?source)): place = target, value = source;
+  if (assignment ~=
+      %(expr ? (op = ?target ?source))) place = target, value = source;
   if (!place)
     x2c_diagnostic_fail(
       "with requires 'destination = expression' entries",
@@ -76,7 +76,7 @@ static List _auto_expand(List value) {
       <parse>,
       "managed initializer requires a complete block-local initializer", %());
   _auto_reject_managed(value);
-  match (local) case %(declare ? (bindings (bind ?binding ?))): {
+  if (local ~= %(declare ? (bindings (bind ?binding ?)))) {
     Compiler c = Compiler.expanding();
     c.sym.put(c.semantic_binding_facts(), %(managed $binding), 1);
     Macro release = $auto_release;
@@ -748,8 +748,7 @@ static List _class_write_fields(String owner, List fields) {
 static List _field_write(List field) {
   List value = _field_value(field);
   Type type = field[1];
-  int array = 0;
-  match (type) case %((dim *) *): array = 1;
+  int array = type ~= %((dim *) *);
   List writer = %();
   if (!array && !type.canonicalize().is_pointer())
     writer = _method(type, "write_repr");
@@ -811,7 +810,7 @@ static List _value_type(List type) {
   Array kept = [];
   foreach (Var item in type) {
     if (item == <const> || item == <volatile> || item == <restrict>) continue;
-    match (item) case %(bitfield *): continue;
+    if (item ~= %(bitfield *)) continue;
     kept.push(item);
   }
   return kept.list_free();
@@ -820,7 +819,7 @@ static List _value_type(List type) {
 /* The field of `receiver`, cast to its value type when it is a bitfield. */
 static List _field_on(List field, List receiver) {
   String name = field[0];
-  match (field[1]) case %((bitfield *) *): {
+  if (field[1] ~= %((bitfield *) *)) {
     Type type = _value_type(field[1]);
     return $!( ($type)$receiver.$name );
   }

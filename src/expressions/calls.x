@@ -163,7 +163,7 @@ static List _method(CallSite &k, List receiver, List field) {
     if (rewritten) return rewritten;
   }
   if (!resolution) {
-    match (k.receiver) case %(expr () (ident ?binding)):
+    if (k.receiver ~= %(expr () (ident ?binding)))
       $fail.expressions_receiver_unresolved(
         k.c, k.origin, Ast.binding_spelling(binding));
     Var name = k.field.car();
@@ -351,8 +351,7 @@ static List _resolve_func_call(
     Macro called = $called;
     return c.rebuild_expression(%(<macro-expr>), called(callee, arguments));
   }
-  match (arguments)
-    case %((expr (void) ())): arguments = NULL;
+  if (arguments ~= %((expr (void) ()))) arguments = NULL;
   if (!arguments) {
     Macro apply = $func_apply;
     return c.bind_syntax(apply(callee), <expression>, NULL);

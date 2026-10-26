@@ -36,7 +36,7 @@ meta static void _match_place(Buffer b, Array out, Var node) {
 meta static List _match_items(Array out) {
   Array items = [], run = [];
   foreach (Var piece in out) {
-    match (piece) case %(preproc ?): {
+    if (piece ~= %(preproc ?)) {
       if (run.len()) items.push(cons(" ", run));
       run.clear();
       items.push(piece);
@@ -85,12 +85,11 @@ meta static List _match_binders(Var value) {
    binder in `binder`, or 0. The runtime canonicalizes `varray` and
    `vmap`, so those keep the Match call. */
 meta static Symbol _match_capture_tag(Var element, Var &binder) {
-  match (element)
-    case %((!quote !is) ?name type ?(Symbol tag)):
-      if (tag != <x2c-dyn> && tag != <varray> && tag != <vmap>) {
-        binder = name;
-        return tag;
-      }
+  if ((element ~= %((!quote !is) ?name type ?(Symbol tag))) &&
+      tag != <x2c-dyn> && tag != <varray> && tag != <vmap>) {
+    binder = name;
+    return tag;
+  }
   return 0;
 }
 
@@ -436,7 +435,7 @@ meta static Code _match_lowered(Code subject, List rows) {
   int depths = -1, values = -1;
   int dynamic = subject.type().is_named("Var");
   foreach (List row in rows) {
-    match (row) case %(preproc ?(String text)): {
+    if (row ~= %(preproc ?(String text))) {
       int nesting = _match_nesting(text);
       _match_place(b, out, row);
       if (nesting > 0 && !depth) opening = out.len() - 1;

@@ -196,7 +196,7 @@ static List _scalar_row(Compiler c, List sources, int retain) {
 
 static Var _identifier_expression(Var value) {
   if (value is <string>) return %(expr () (ident $value));
-  match (value) case %("x2c.ident" ?): return %(expr () (ident $value));
+  if (value ~= %("x2c.ident" ?)) return %(expr () (ident $value));
   if (value is <list> && !value.is_nil() &&
       Ast.try_binding(value, NULL, NULL))
     return %(expr () (ident $value));
@@ -267,12 +267,11 @@ static List forwarded_prefixes = _forwarded_prefix_list();
    source access trusts only captured syntax identities registered for the
    active expansion. Forwarding preserves the registered capture. */
 module int _source_capture_parts(Var value, List &?source, Var &?syntax) {
-  match (value)
-    case %(src ?record ?captured): {
-      if (source) source = record;
-      if (syntax) syntax = captured;
-      return 1;
-    }
+  if (value ~= %(src ?record ?captured)) {
+    if (source) source = record;
+    if (syntax) syntax = captured;
+    return 1;
+  }
   return 0;
 }
 

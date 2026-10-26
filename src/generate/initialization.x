@@ -49,14 +49,14 @@ static void _prepare(Init &i, List source) {
     initializer unless its guard is set.
 */
 List Init.enter(Init &i, List function, int guarded) {
-  match (function)
-    case %(function ? (bind (binding ? ?(String name)) ?) (block *body)): {
-      if (name == "x2c_initialize_protocols")
-        return _protocol_initializer(i.c, function, body);
-      if (i.initializer && name == i.initializer)
-        return _replace_body(i.c, function, _statements(i, NULL, body));
-      if (guarded) return _guarded(i, function, body);
-    }
+  if (function ~=
+      %(function ? (bind (binding ? ?(String name)) ?) (block *body))) {
+    if (name == "x2c_initialize_protocols")
+      return _protocol_initializer(i.c, function, body);
+    if (i.initializer && name == i.initializer)
+      return _replace_body(i.c, function, _statements(i, NULL, body));
+    if (guarded) return _guarded(i, function, body);
+  }
   return function;
 }
 
@@ -214,10 +214,9 @@ static int _cache_only(Compiler c) =>
 static Map _cache_reachable(List source) {
   Map callers = {}, reachable = {}, Array queue = [];
   foreach (List node in source)
-    match (node)
-      case %(!set ?definition
-             (function ? (bind (binding ? ?spelling) ?) ?)):
-        if (_record_calls(definition, spelling, callers)) queue.push(spelling);
+    if (node ~= %(!set ?definition
+                   (function ? (bind (binding ? ?spelling) ?) ?)) &&
+        _record_calls(definition, spelling, callers)) queue.push(spelling);
   for (int i = 0; i < queue.len(); i++) {
     Var key = queue[i];
     if (key in reachable) continue;

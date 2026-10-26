@@ -304,9 +304,7 @@ static List _capture_source(
       return %(expr $type $captured);
     }
     case %(expr ?type ?content): {
-      int opaque = 0;
-      match (content)
-        case %(call (expr ?callable ?) ?): opaque = !callable;
+      int opaque = (content ~= %(call (expr ?callable ?) ?)) && !callable;
       if (opaque || !_source_type_definition(content)) {
         String formal = e.fresh_name("static_input");
         inputs.push($(formal, node));

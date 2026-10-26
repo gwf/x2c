@@ -42,9 +42,9 @@ static void _record_native_objects(Compiler c, Type spec, List rows) {
   String path = Compiler.portable_path(c.canonical_path(c.filename));
   foreach (List row in rows) {
     List declarator = row;
-    match (row) case %(op = ?bound ?): declarator = bound;
+    if (row ~= %(op = ?bound ?)) declarator = bound;
     if (spec.is_extern() && declarator == row) continue;
-    match (declarator) case %(bind ?binding ?): {
+    if (declarator ~= %(bind ?binding ?)) {
       List declaration = %(declare $spec (bindings $declarator));
       if (declaration.type_from_ast().is_function()) continue;
       String name = Ast.binding_spelling(binding);
@@ -138,8 +138,9 @@ List Compiler.file_prefixes(Compiler c) {
   Array prefixes = [];
   if (c.line_markers)
     foreach (List row in c.line_markers)
-      match (row) case %(? ? ? ? ? ? ?(String prefix)):
-        if (!(prefix in prefixes)) prefixes.push(prefix);
+      if (row ~= %(? ? ? ? ? ? ?(String prefix)) &&
+          !(prefix in prefixes))
+        prefixes.push(prefix);
   return prefixes.list_free();
 }
 

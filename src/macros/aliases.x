@@ -366,10 +366,10 @@ static List _entry(Compiler c, String name, Var &?key) {
 }
 
 static int _inner_entry(List inner, List outer) {
-  match (inner) case %(declared ?(int depth) ?(int level) *):
-    match (outer) case %(declared ?(int prior_depth) ?(int prior_level) *):
-      return depth > prior_depth ||
-             (depth == prior_depth && level > prior_level);
+  if (inner ~= %(declared ?(int depth) ?(int level) *) &&
+      outer ~= %(declared ?(int prior_depth) ?(int prior_level) *))
+    return depth > prior_depth ||
+           (depth == prior_depth && level > prior_level);
   return 0;
 }
 
@@ -448,11 +448,10 @@ List Compiler.alias_expression(Compiler c) {
 }
 
 static void _reveal_bindings(Compiler c, List syntax) {
-  match (syntax)
-    case %(expr ? $($source_identifier_content(%(?binding)))): {
-      c.reveal_binding(binding);
-      return;
-    }
+  if (syntax ~= %(expr ? $($source_identifier_content(%(?binding))))) {
+    c.reveal_binding(binding);
+    return;
+  }
   foreach (Var child in syntax)
     if (child is <list>) _reveal_bindings(c, child);
 }
@@ -462,13 +461,12 @@ static void _reveal_bindings(Compiler c, List syntax) {
    copy: thawing changes no meaning, so a body that restores an outer table
    holding the frozen entry only thaws it again. */
 static List _visible(Compiler c, Map table, Var key, List entry, int scope) {
-  match (entry) case %(imported ?frozen *shadowed): {
+  if (entry ~= %(imported ?frozen *shadowed)) {
     List expression = _rebind_globals(c, c.thaw_declaration_syntax(frozen));
     entry = %(declared $(c.sym.base_scope_count()) 0 $expression @shadowed);
     table[key] = entry;
   }
-  match (entry)
-    case %(declared ?(int depth) ? ?expression *):
-      if (depth > scope) return expression;
+  if (entry ~= %(declared ?(int depth) ? ?expression *) && depth > scope)
+    return expression;
   return NULL;
 }

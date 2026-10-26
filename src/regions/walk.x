@@ -98,10 +98,9 @@ static void _walk_expression(Walk &w, Var expression) {
   List arguments = NULL;
   String callee = _callee_of(expression, arguments);
   if (callee && _region_call(w, callee, arguments)) return;
-  match (_source_assignment(_unwrap(expression))) {
-    case %(?target ?value): _store(w, target, value);
-    default: _scan(w, expression, 0);
-  }
+  if (_source_assignment(_unwrap(expression)) ~= %(?target ?value))
+    _store(w, target, value);
+  else _scan(w, expression, 0);
 }
 
 /* A region-opening or region-ending call in statement position. Reports
@@ -153,7 +152,7 @@ static void _walk_rows(Walk &w, List rows) {
 static void _walk_defer(Walk &w, Var body) {
   List arguments = NULL;
   String callee = NULL;
-  match (body) case $expression_statement(?expression):
+  if (body ~= $expression_statement(?expression))
     callee = _callee_of(expression, arguments);
   Fact fact = _fact_of(w, arguments.car(), NULL);
   match (callee ? _effect(w, callee) : void) {
@@ -187,25 +186,25 @@ static void _walk_defer(Walk &w, Var body) {
    defer. A store into a place this block restores is undone before the
    block ends, so it is not an escape. */
 static int _note_restored(Walk &w, Var body) {
-  match (body) case $expression_statement(?expression):
-    match (_source_assignment(_unwrap(expression))) case %(?target ?): {
-      Var place = _target_place(w, target);
-      if (place == _unwrap(target)) return 0;
-      w.restored = w.restored.copy();
-      w.restored[place] = 1;
-      return 1;
-    }
+  if (body ~= $expression_statement(?expression) &&
+      _source_assignment(_unwrap(expression)) ~= %(?target ?)) {
+    Var place = _target_place(w, target);
+    if (place == _unwrap(target)) return 0;
+    w.restored = w.restored.copy();
+    w.restored[place] = 1;
+    return 1;
+  }
   return 0;
 }
 
 /* A place a `defer` writes is put back when its block ends, so a store
    into it after the `defer` is not an escape. */
 static void _note_deferred_stores(Walk &w, Var node) {
-  match (_source_assignment(node)) case %(?target ?): {
+  if (_source_assignment(node) ~= %(?target ?)) {
     w.restored[_unwrap(target)] = 1;
     return;
   }
-  match (node) case %(*children):
+  if (node ~= %(*children))
     foreach (Var child in children) _note_deferred_stores(w, child);
 }
 
@@ -262,7 +261,7 @@ static void _end(Walk &w, Var argument, String op, Symbol how) {
   List named = NULL;
   Fact storage = _value_fact(w, argument, named);
   int literal = 0;
-  match (_unwrap(argument)) case $source_literal_content(%(*fields)):
+  if (_unwrap(argument) ~= $source_literal_content(%(*fields)))
     literal = 1;
   if (op && (literal || (storage &&
       (storage.region == w.frame || storage.born == 2)))) {
@@ -297,7 +296,7 @@ static void _scan_call(Walk &w, Var call, String callee, List arguments) {
         .acquired = acquired};
       _flow(w, argument, type, <heap>, &result);
     }
-    else match (target) case %(param ?other): {
+    else if (target ~= %(param ?other)) {
       if (other.int() >= count) continue;
       Var holder = _passed(types, arguments, other.int(), holder_type);
       int through = 1;
@@ -424,11 +423,10 @@ static void _store(Walk &w, Var target, Var value) {
    storage. */
 static Var _target_place(Walk &w, Var target) {
   Var inner = _unwrap(target);
-  match (inner)
-    case $source_operator_content(%((!quote *) ?pointer)): {
-      Fact fact = _fact_of(w, pointer, NULL);
-      if (fact && fact.place) return fact.place;
-    }
+  if (inner ~= $source_operator_content(%((!quote *) ?pointer))) {
+    Fact fact = _fact_of(w, pointer, NULL);
+    if (fact && fact.place) return fact.place;
+  }
   return inner;
 }
 
@@ -484,7 +482,7 @@ static void _declare(Walk &w, Var specifiers, List bindings) {
   Map types = w.c.semantic_binding_facts();
   if (<static> in specifiers || <extern> in specifiers) {
     foreach (List item in bindings)
-      match (item) case %(op = (bind ?name ?) ?value): {
+      if (item ~= %(op = (bind ?name ?) ?value)) {
         _scan(w, value, 0);
         _flow(w, value, types[%(type $name)], <static>, NULL);
       }

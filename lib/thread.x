@@ -650,7 +650,7 @@ macro Expression $thread.run.jobs(Expr $jobs) => Thread.run($jobs);
 
 $rewrite($thread.run.jobs)
 meta static Code _batch_without_callback(Code code) {
-  match (code) case $thread.run.jobs(?jobs):
+  if (code ~= $thread.run.jobs(?jobs))
     return $!void{ Thread.run($jobs, NULL) };
   return code;
 }

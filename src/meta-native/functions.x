@@ -19,16 +19,15 @@
 */
 void Compiler.install_meta_function(Compiler c, List fn, Token marker) {
   c.check_meta_regions(fn);
-  match (fn)
-    case %(function ? (bind (binding ? ?(String name)) *) ?): {
-      c.native_meta.del(name);
-      c.meta_group_bound.del(%"<unbound $name>");
-      if (c.meta_reaches_compile_time(fn)) c.meta_comptime[name] = 1;
-      if (c.macro_holes) return;
-      c.group_meta_function(fn);
-      if (c.meta_calls_wait()) return;
-      _install_stub(c, name, ((List) c.meta_group[-1]).last(), NULL);
-    }
+  if (fn ~= %(function ? (bind (binding ? ?(String name)) *) ?)) {
+    c.native_meta.del(name);
+    c.meta_group_bound.del(%"<unbound $name>");
+    if (c.meta_reaches_compile_time(fn)) c.meta_comptime[name] = 1;
+    if (c.macro_holes) return;
+    c.group_meta_function(fn);
+    if (c.meta_calls_wait()) return;
+    _install_stub(c, name, ((List) c.meta_group[-1]).last(), NULL);
+  }
 }
 
 /** Installs the stub of the bodied `meta` definition `declaration` whose
@@ -177,15 +176,12 @@ static void _subject_globals(
 */
 void Compiler.install_meta_declaration(
   Compiler c, List declaration, Token marker) {
-  match (declaration) {
-    case %(declare ?spec
-           (bindings
-             (op = (bind (binding ? ?(String name)) *) ?))): {
-      if (!spec.type().is_static())
-        $fail.meta_native_meta_storage(c, marker, name);
-      if (c.groups_meta()) c.meta_group.push(%(static $declaration));
-      return;
-    }
+  if (declaration ~= %(declare ?spec
+        (bindings (op = (bind (binding ? ?(String name)) *) ?)))) {
+    if (!spec.type().is_static())
+      $fail.meta_native_meta_storage(c, marker, name);
+    if (c.groups_meta()) c.meta_group.push(%(static $declaration));
+    return;
   }
   $fail.meta_native_meta_decl(c, marker);
 }
@@ -208,7 +204,7 @@ void Compiler.record_project_meta_effect(
 
 /** Installs an included meta function's evaluator advertisement. */
 void Compiler.install_project_meta_effect(Compiler c, List row) {
-  match (row) case %(project-meta ?name ?signature ?provider): {
+  if (row ~= %(project-meta ?name ?signature ?provider)) {
     c.project_meta[name] = $(signature, provider);
     c.native_meta.del(name);
     c.meta_group_bound.del(%"<unbound $name>");

@@ -62,8 +62,7 @@ static Map linked_hashes = NULL;
 int Compiler.bind_linked_meta(Compiler c, List fn, Type type) {
   if (c.meta_build) return 0;
   String name = NULL;
-  match (fn)
-    case %(function ? (bind (binding ? ?(String own)) *) ?): name = own;
+  if (fn ~= %(function ? (bind (binding ? ?(String own)) *) ?)) name = own;
   if (!name) return 0;
   Map linked = _linked_module();
   Var function, bound;

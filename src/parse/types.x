@@ -694,7 +694,7 @@ static List _finish_aggregate_type(
   Compiler c, Symbol tag, Var name, List members) {
   name = _finish_tag_name(c, name);
   // Each constructed anonymous body defines a distinct type.
-  match (name) case %(gensym ? ?): name = c.gensym().car();
+  if (name ~= %(gensym ? ?)) name = c.gensym().car();
   if (tag != <enum>) name = c.aggregate_name(tag, name, 1);
   List type = $(tag, name);
   Array bound = [];

@@ -150,9 +150,8 @@ module List _binary_expression(
 
 // Built-in indexed mutation returns Var, independently of a read override.
 static int _builtin_index_lvalue(Compiler c, List expression) {
-  match (expression)
-    case %(expr ? (getindex (expr ?receiver_type ?) ?)):
-      return !!_x2c_indexed_builtin_helper(c, receiver_type);
+  if (expression ~= %(expr ? (getindex (expr ?receiver_type ?) ?)))
+    return !!_x2c_indexed_builtin_helper(c, receiver_type);
   return 0;
 }
 
@@ -463,9 +462,8 @@ module int _is_operator_temporary(Compiler c, List expression) {
     case %(expr ? $($grouped(?inner))):
       return _is_operator_temporary(c, inner);
   }
-  match (expression)
-    case $called(%(expr ? $($source_identifier_content(
-        %((!set ?binding (*)))))), *arguments):
-      return %"fresh-callee $((long) binding.list())" in c.protocol_helpers;
+  if (expression ~= $called(%(expr ? $($source_identifier_content(
+        %((!set ?binding (*)))))), *arguments))
+    return %"fresh-callee $((long) binding.list())" in c.protocol_helpers;
   return 0;
 }

@@ -91,9 +91,9 @@ void Compiler.record_native_meta_effect(
 module String _native_meta_name(
   Compiler c, List declaration, Token marker) {
   String name = NULL;
-  match (declaration)
-    case %(declare ? (bindings (bind (binding ? ?(String spelling)) *))):
-      name = spelling;
+  if (declaration ~= %(
+        declare ? (bindings (bind (binding ? ?(String spelling)) *))))
+    name = spelling;
   if (!name)
     $fail.meta_native_meta_name(c, marker);
   return name;
@@ -222,26 +222,24 @@ int Compiler.native_meta_accepts(Compiler c, Var function, List signature) {
   if (function is not <func>) return 0;
   List target =
     _native_signature_type(c, ((Func) function.pointer()).signature());
-  match (signature)
-    case %((func ?(List parameters)) *result): {
-      if (target == _native_signature_type(c, signature)) return 1;
-      List boxed = parameters.search_replace(%("Func"), %("Var"));
-      return target == _native_signature_type(c, %((func $boxed) @result));
-    }
+  if (signature ~= %((func ?(List parameters)) *result)) {
+    if (target == _native_signature_type(c, signature)) return 1;
+    List boxed = parameters.search_replace(%("Func"), %("Var"));
+    return target == _native_signature_type(c, %((func $boxed) @result));
+  }
   return 0;
 }
 
 /* The native type a signature names: each parameter, reference target,
    and result with its aliases resolved. */
 static List _native_signature_type(Compiler c, List signature) {
-  match (signature)
-    case %((func ?(List parameters)) *result): {
-      Array resolved = [];
-      foreach (Type parameter in parameters)
-        resolved.push(_native_parameter(c, parameter));
-      Type native = c.sym.normalize_declared_type(result);
-      return %((func $(resolved.list_free())) @native);
-    }
+  if (signature ~= %((func ?(List parameters)) *result)) {
+    Array resolved = [];
+    foreach (Type parameter in parameters)
+      resolved.push(_native_parameter(c, parameter));
+    Type native = c.sym.normalize_declared_type(result);
+    return %((func $(resolved.list_free())) @native);
+  }
   return signature;
 }
 
@@ -294,7 +292,7 @@ static void _certify_native_meta(
    handle and returns one, neither owned by its cleanup, might return or
    keep its argument, so it has none. */
 static List _native_meta_summary(Compiler c, List signature) {
-  match (signature) case %((func ?(List parameters)) *result): {
+  if (signature ~= %((func ?(List parameters)) *result)) {
     int takes = 0, gives = _native_handle(c, result, 0);
     foreach (List parameter in parameters)
       takes = takes ||
@@ -330,7 +328,7 @@ static int _native_handle(Compiler c, List type, int parameter) {
    adopts `Var` or `Cleanup`. A signature spells a `typedef struct X *X`
    handle as its pointer, so the adoption is read from the typedef `X`. */
 static int _native_owned(Compiler c, List type) {
-  match (type) case %((!quote *) struct ?(String tag)): type = $(tag);
+  if (type ~= %((!quote *) struct ?(String tag))) type = $(tag);
   return c.sym.var_tag_for_type(type, NULL) ||
          c.protocol_members_for(type, %("Var")) ||
          c.protocol_members_for(type, %("Cleanup"));
@@ -370,9 +368,8 @@ List Compiler.native_meta_targets(List paths, int callbacks) {
 /* Whether the symbol row under `key` was declared in one of the absolute
    source `paths`. */
 static int _declared_in(Var key, List paths) {
-  match (key)
-    case %("source-node" (declaration ?(String path) ?)):
-      return Compiler.absolute_home_path(path) in paths;
+  if (key ~= %("source-node" (declaration ?(String path) ?)))
+    return Compiler.absolute_home_path(path) in paths;
   return 0;
 }
 
@@ -410,8 +407,8 @@ static List _witness_rows(Compiler c, Type base, Type participant) {
 /* Runtime Lisp passes a callable as a `Var`, so it binds a native function
    that takes a `Func` through an adapter in `lib/lisp/native.x`. */
 static int _takes_callback(List signature) {
-  match (signature)
-    case %((func ?(List parameters)) *): return %("Func") in parameters;
+  if (signature ~= %((func ?(List parameters)) *))
+    return %("Func") in parameters;
   return 0;
 }
 
@@ -421,9 +418,8 @@ static int _takes_callback(List signature) {
     `NAME_into`.
 */
 int Compiler.iterator_arity(List signature) {
-  match (signature)
-    case %((func ?(List parameters)) "Iter"):
-      if (parameters && parameters.last() == %("Iter"))
-        return parameters.len() - 1;
+  if (signature ~= %((func ?(List parameters)) "Iter") &&
+      parameters && parameters.last() == %("Iter"))
+    return parameters.len() - 1;
   return -1;
 }

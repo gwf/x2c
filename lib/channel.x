@@ -137,14 +137,14 @@ macro Expression $channel.new.one(Expr $value) => Channel.new($value);
 
 $rewrite($channel.new.empty)
 meta static Code _new_empty(Code code) {
-  match (code) case $channel.new.empty():
+  if (code ~= $channel.new.empty())
     return $!Channel{ Channel.new(<var>, 0) };
   return code;
 }
 
 $rewrite($channel.new.one)
 meta static Code _new_one(Code code) {
-  match (code) case $channel.new.one(?value):
+  if (code ~= $channel.new.one(?value))
     return $!Channel{ Channel.new($value, void) };
   return code;
 }

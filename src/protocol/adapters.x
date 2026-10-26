@@ -155,28 +155,24 @@ void Compiler.install_generated_protocol_symbols(Compiler c) {
   Array conformances = [];
   foreach (Var value in c.conforms) conformances.push(value);
   foreach (Var value in conformances)
-    match (value)
-      case %(protocol-conformance ?(Type base) ?(Type participant)
-             ?(String forward) ? ? ? (members *rows)): {
-        if (_native_rows(rows)) {
-          if (_visibility(c, base, participant) != <external>) continue;
-          foreach (List row in rows)
-            match (row)
-              case %(?(String member) ? ? ? ? ?(Type signature)):
-                _install_generated(c, participant, member, signature);
-          continue;
-        }
-        if (!(forward in c.fn_defs)) continue;
-        if (_numeric_participant(c, participant)) continue;
+    if (value ~= %(protocol-conformance ?(Type base) ?(Type participant)
+                    ?(String forward) ? ? ? (members *rows))) {
+      if (_native_rows(rows)) {
+        if (_visibility(c, base, participant) != <external>) continue;
         foreach (List row in rows)
-          match (row)
-            case %(?(String member) base-dflt ? ? ordinary ?): {
-              List decision = _generated_owner(c, participant, member);
-              match (decision)
-                case %(owner ? ? ?signature external):
-                  _install_generated(c, participant, member, signature);
-            }
+          if (row ~= %(?(String member) ? ? ? ? ?(Type signature)))
+            _install_generated(c, participant, member, signature);
+        continue;
       }
+      if (!(forward in c.fn_defs)) continue;
+      if (_numeric_participant(c, participant)) continue;
+      foreach (List row in rows)
+        if (row ~= %(?(String member) base-dflt ? ? ordinary ?)) {
+          List decision = _generated_owner(c, participant, member);
+          if (decision ~= %(owner ? ? ?signature external))
+            _install_generated(c, participant, member, signature);
+        }
+    }
   conformances.free();
 }
 
@@ -193,12 +189,10 @@ static void _install_generated(
 */
 int Compiler.native_protocol_alias(Compiler c, String name) {
   foreach (Var conformance in c.conforms)
-    match (conformance)
-      case %(protocol-conformance ? ?(Type participant) ? ? ? ?
-             (members *rows)):
-        if (_native_rows(rows))
-          foreach (List row in rows)
-            if (_member_spelling(participant, row.car()) == name) return 1;
+    if (conformance ~= %(protocol-conformance ? ?(Type participant) ? ? ? ?
+                         (members *rows)) && _native_rows(rows))
+      foreach (List row in rows)
+        if (_member_spelling(participant, row.car()) == name) return 1;
   return 0;
 }
 
@@ -222,29 +216,27 @@ static int _defines_function(Compiler c, String name) {
    names are settled here; the rule writes the code. */
 static void _present_conformance(
   Compiler c, List conformance, int central_initializer) {
-  match (conformance)
-    case %(protocol-conformance ?(Type base) ?(Type participant)
-           ?(String forward) ?(String reverse) ?(Map variables)
-           ?(Map bindings) (members *rows)):
-      match (_record(c, base))
-        case %(? ? ?(String binder) ? ?): {
-          List adoption = _visible_adoption(c, base, participant);
-          ProtocolAdapters adapters = {
-            .c = c, .base = base, .participant = participant,
-            .forward = forward, .reverse = reverse, .binder = binder,
-            .variables = variables, .bindings = bindings,
-            .adoption = adoption,
-            .central_initializer = central_initializer,
-            .shares_var_tag = base === %("Var") &&
-              _adoption_representation(adoption)};
-          Array presented = [];
-          foreach (List row in rows) presented.push(_present(adapters, row));
-          List members = presented.list_free();
-          List form = %(
-            conform $base $participant $forward $reverse $binder
-              $(_descriptor(adapters)) $members);
-          _generated_support(c, members, form);
-        }
+  if (conformance ~= %(protocol-conformance ?(Type base) ?(Type participant)
+                        ?(String forward) ?(String reverse) ?(Map variables)
+                        ?(Map bindings) (members *rows)) &&
+      _record(c, base) ~= %(? ? ?(String binder) ? ?)) {
+    List adoption = _visible_adoption(c, base, participant);
+    ProtocolAdapters adapters = {
+      .c = c, .base = base, .participant = participant,
+      .forward = forward, .reverse = reverse, .binder = binder,
+      .variables = variables, .bindings = bindings,
+      .adoption = adoption,
+      .central_initializer = central_initializer,
+      .shares_var_tag = base === %("Var") &&
+        _adoption_representation(adoption)};
+    Array presented = [];
+    foreach (List row in rows) presented.push(_present(adapters, row));
+    List members = presented.list_free();
+    List form = %(
+      conform $base $participant $forward $reverse $binder
+        $(_descriptor(adapters)) $members);
+    _generated_support(c, members, form);
+  }
 }
 
 /* The rule's functions are generated: one that completes a documented
@@ -252,8 +244,9 @@ static void _present_conformance(
 static void _generated_support(Compiler c, List members, List form) {
   Map facts = c.semantic_binding_facts(), authored = {};
   Array keys = [];
-  foreach (List row in members) match (row) case %(? ? ? ? ? *parts):
-    foreach (List part in parts) keys.push(%(api-definition $(part.cadr())));
+  foreach (List row in members)
+    if (row ~= %(? ? ? ? ? *parts))
+      foreach (List part in parts) keys.push(%(api-definition $(part.cadr())));
   foreach (List key in keys) {
     Var fact;
     if (facts.try_get(key, fact)) authored[key] = fact;
@@ -271,20 +264,19 @@ static void _generated_support(Compiler c, List members, List form) {
    member another conformance generates, and fills the slot of each
    implemented or declared member that `VarMethods` has. */
 static List _present(ProtocolAdapters &a, List row) {
-  match (row)
-    case %(?(String member) ?(Symbol status) ?(String source)
-           ?(Type expected) ? ?(Type template)): {
-      List parts = NULL;
-      if (status == <base-dflt>) parts = _default_part(a, member, expected);
-      else if (_has_descriptor(a)) {
-        if (status == <no-member>)
-          parts = _inherited_part(a, member, template);
-        if ((status == <implmntd> || parts) &&
-            a.c.sym.lookup_field(%(struct "VarMethods"), $(member)))
-          parts = parts.append($(_thunk(a, member, template)));
-      }
-      return $(member, status, source, expected, template, @parts);
+  if (row ~= %(?(String member) ?(Symbol status) ?(String source)
+               ?(Type expected) ? ?(Type template))) {
+    List parts = NULL;
+    if (status == <base-dflt>) parts = _default_part(a, member, expected);
+    else if (_has_descriptor(a)) {
+      if (status == <no-member>)
+        parts = _inherited_part(a, member, template);
+      if ((status == <implmntd> || parts) &&
+          a.c.sym.lookup_field(%(struct "VarMethods"), $(member)))
+        parts = parts.append($(_thunk(a, member, template)));
     }
+    return $(member, status, source, expected, template, @parts);
+  }
   return NULL;
 }
 
@@ -386,13 +378,12 @@ static List _native_aliases(
   int make_static = _visibility(c, base, participant) == <static>;
   Array aliases = [];
   foreach (List row in rows)
-    match (row)
-      case %(?(String member) ? ?(String binding) ? ?
-             ?(Type signature)): {
-        List alias = _native_alias(
-          c, participant, member, binding, signature, make_static);
-        aliases.push(alias);
-      }
+    if (row ~= %(?(String member) ? ?(String binding) ? ?
+                  ?(Type signature))) {
+      List alias = _native_alias(
+        c, participant, member, binding, signature, make_static);
+      aliases.push(alias);
+    }
   return _insert_at_boundary(
     ast, source, private, aliases.list_free(), make_static);
 }

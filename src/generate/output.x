@@ -129,7 +129,7 @@ static Anchors _anchors(List source, int errors) {
     if (at.function < 0 && _is_function(item)) at.function = here;
     if (errors && at.error < 0 && _needs_errors(item)) at.error = here;
     if (at.function >= 0 && (!errors || at.error >= 0)) break;
-    match (item) case %(preproc ?(String content)): {
+    if (item ~= %(preproc ?(String content))) {
       Symbol kind = Compiler.preproc_conditional_kind(content);
       if (kind == <open> && !depth) opening = position;
       if (kind == <open>) depth++;
@@ -142,8 +142,8 @@ static Anchors _anchors(List source, int errors) {
 
 static int _is_function(List item) {
   List function = item.car() == <sourceinit> ? item.cadr() : item;
-  match (function)
-    case %(function (*) (bind (binding ? ?) ?) (block *)): return 1;
+  if (function ~= %(function (*) (bind (binding ? ?) ?) (block *)))
+    return 1;
   return 0;
 }
 
@@ -179,10 +179,11 @@ static List _include_guard(Compiler c, List content) {
 }
 
 static int _has_runtime_include(List content) {
-  foreach (List node in content) match (node) case %(preproc ?(String text)): {
-    int angle = 0;
-    if (Compiler.preproc_include_target(text, angle) == "x2c.x") return 1;
-  }
+  foreach (List node in content)
+    if (node ~= %(preproc ?(String text))) {
+      int angle = 0;
+      if (Compiler.preproc_include_target(text, angle) == "x2c.x") return 1;
+    }
   return 0;
 }
 
@@ -241,14 +242,13 @@ static List _source_unit(Compiler c, List content) {
    initialization guard. Its prototype comes from the runtime header, so
    the call is added after forward declarations. */
 static List _runtime_entry(Compiler c, List node) {
-  match (node)
-    case %(function ? (bind (binding ? "main") ?) (block *body)): {
-      List initializer = c.sym.reference(%("x2c_initialize"), NULL);
-      List setup = %((stmnt (expr (void) (call
-        (expr ((func ((void))) void) (ident $initializer))
-        (args (expr (void) ()))))));
-      return _replace_body(c, node, setup.append(body));
-    }
+  if (node ~= %(function ? (bind (binding ? "main") ?) (block *body))) {
+    List initializer = c.sym.reference(%("x2c_initialize"), NULL);
+    List setup = %((stmnt (expr (void) (call
+      (expr ((func ((void))) void) (ident $initializer))
+      (args (expr (void) ()))))));
+    return _replace_body(c, node, setup.append(body));
+  }
   return node;
 }
 

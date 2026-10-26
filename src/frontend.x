@@ -355,7 +355,7 @@ static List _unit_private_rows(Compiler c, Map globs) {
   Array rows = [];
   String unit = c.canonical_path(c.filename);
   foreach (Var (key, owner) in globs)
-    match (key) case %("unit-static" ?name): {
+    if (key ~= %("unit-static" ?name)) {
       String path = Compiler.absolute_home_path(owner.list().car());
       if (c.canonical_path(path) == unit) continue;
       rows.push(_unit_private_row(globs, $(name)));

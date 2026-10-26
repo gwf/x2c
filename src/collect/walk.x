@@ -552,7 +552,7 @@ static void _queue_public_bodies(FileWalk &w) {
   int exposed = 0;
   foreach (Var part in w.parts) if (part is <map>)
     foreach (Var key in part.map().keys())
-      match (key) case %("function-inline" ?): exposed = 1;
+      if (key ~= %("function-inline" ?)) exposed = 1;
   if (!exposed) return;
   if (w.c.meta_build) {
     w.deferred = 1;
@@ -571,7 +571,7 @@ static int _produces(FileWalk &w) {
   foreach (Var part in w.parts) {
     if (part is not <map>) continue;
     foreach (Var value in part.map())
-      match (value) case %(declaration-source *): return 1;
+      if (value ~= %(declaration-source *)) return 1;
   }
   return 0;
 }

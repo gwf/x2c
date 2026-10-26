@@ -36,8 +36,7 @@ static List _group(Macro t, List values) {
    code's tag. A Symbol leads one syntax node. */
 static int _items(List items) {
   if (!items) return 1;
-  match (items)
-    case %((!or "x2c.ident" "x2c.quoted" "x2c.template") *): return 0;
+  if (items ~= %((!or "x2c.ident" "x2c.quoted" "x2c.template") *)) return 0;
   Var first = items.car();
   return first is <list> || first is <string> || first.is_integer() ||
          first.is_floating();
@@ -56,10 +55,10 @@ static int _items(List items) {
 Var Macro.inserted(Var value, int lifts, int expression) {
   if (lifts) value = _expr_value(value);
   Var spelling = value;
-  match (value) case %("x2c.ident" ?(String name)): spelling = name;
+  if (value ~= %("x2c.ident" ?(String name))) spelling = name;
   if (!expression) return lifts ? value : spelling;
   if (spelling is <string>) return %(expr () (ident $spelling));
-  match (value) case %(binding ? ?): return %(expr () (ident $value));
+  if (value ~= %(binding ? ?)) return %(expr () (ident $value));
   return value;
 }
 

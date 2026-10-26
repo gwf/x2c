@@ -186,15 +186,14 @@ static List _opened(Walk &w, Region region) {
    address by the local it borrows from. A callee may hand back the address
    it was given or one inside it. */
 module String _subject(Walk &w, Var value, List named, Fact fact) {
-  match (source_expression(value)) case $source_any_lambda():
+  if (source_expression(value) ~= $source_any_lambda())
     return "a closure";
   if (!named) return "a fresh allocation";
   String name = %"'$(Ast.binding_spelling(named))'", Var own = w.facts[named];
   if (own is not void && own.pointer() == fact) return name;
   List arguments = NULL;
   if (_callee_of(value, arguments)) return %"an address from $name";
-  match (fact ? fact.place : NULL)
-    case $source_identifier_content(%(*fields)):
-      return %"the address of $name";
+  if ((fact ? fact.place : NULL) ~= $source_identifier_content(%(*)))
+    return %"the address of $name";
   return %"an address inside $name";
 }

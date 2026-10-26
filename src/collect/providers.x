@@ -33,20 +33,19 @@ static int _linked_provider_current(
   seen[path] = 1;
   List source =
     Compiler.linked_meta_provider_source(Compiler.portable_path(path));
-  match (source)
-    case %(source ?hash ?(List dependencies) *): {
-      if (!_hash_matches(c, path, hash)) return 0;
-      Map found = _read_dependencies(c, dependencies);
-      if (found == NULL) return 0;
-      // Member content was hashed above; only included units own proofs.
-      foreach ((String dependency, Var expected) in found)
-        if (Path.is_x2c_source(dependency) && expected is <string> &&
-            !String.startswith(expected, "search:") &&
-            Compiler.linked_meta_provider_source(
-              Compiler.portable_path(dependency)) &&
-            !_linked_provider_current(c, dependency, seen)) return 0;
-      return 1;
-    }
+  if (source ~= %(source ?hash ?(List dependencies) *)) {
+    if (!_hash_matches(c, path, hash)) return 0;
+    Map found = _read_dependencies(c, dependencies);
+    if (found == NULL) return 0;
+    // Member content was hashed above; only included units own proofs.
+    foreach ((String dependency, Var expected) in found)
+      if (Path.is_x2c_source(dependency) && expected is <string> &&
+          !String.startswith(expected, "search:") &&
+          Compiler.linked_meta_provider_source(
+            Compiler.portable_path(dependency)) &&
+          !_linked_provider_current(c, dependency, seen)) return 0;
+    return 1;
+  }
   return 0;
 }
 
@@ -58,9 +57,9 @@ int Compiler.linked_meta_definitions_current(Compiler c, String path) {
   String canonical = _canonical_path(path);
   String provider = Compiler.portable_path(canonical);
   List source = Compiler.linked_meta_provider_source(provider);
-  match (source) case %(source ?hash *):
-    if (_hash_matches(c, canonical, hash)) return 1;
-  match (source) case %(source ? ? ?(String definitions)): {
+  if (source ~= %(source ?hash *) && _hash_matches(c, canonical, hash))
+    return 1;
+  if (source ~= %(source ? ? ?(String definitions))) {
     List entry = _meta_provider_entry(c, canonical);
     if (!entry) return 0;
     foreach (Var part in entry.car()) {
@@ -100,7 +99,7 @@ void Compiler.complete_meta_hashes(Compiler c) {
     foreach (Var part in entry.car()) {
       if (part is not <map>) continue;
       foreach (Var value in part.map())
-        match (value) case %(meta-hashes ? ?(Map hashes)):
+        if (value ~= %(meta-hashes ? ?(Map hashes)))
           c.meta_hashes.merge(hashes);
     }
   Compiler.forget_provisional_entries();
@@ -151,7 +150,7 @@ void Compiler.name_meta_provider_bindings(
   foreach (Var part in entry.car()) {
     if (part is not <map>) continue;
     foreach (Var value in part.map())
-      match (value) case %(native-object ?(String name)):
+      if (value ~= %(native-object ?(String name)))
         _name_meta_provider(c, name, index);
   }
 }
@@ -167,7 +166,7 @@ List Compiler.loaded_provider(Compiler c) {
   foreach (Var part in entry.car())
     if (part is <map>)
       foreach (Var value in part.map())
-        match (value) case %(native-object ?(String name)):
+        if (value ~= %(native-object ?(String name)))
           names.push(name);
   List owned = names.list_free();
   Map symbols = c.callable_symbols(owned), declarations = {};

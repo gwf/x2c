@@ -99,7 +99,7 @@ meta static int _collection_family(Code base) {
 $rewrite($indexed)
 /** Calls the getter bracket admission selected. */
 meta Code access_read(Code code) {
-  match (code) case $indexed(?base, ?key): {
+  if (code ~= $indexed(?base, ?key)) {
     Type type = base.cadr(), result = code.cadr();
     Code getter = type.getter();
     if (!getter)
@@ -144,7 +144,7 @@ $rewrite($x2c.collection.store)
     participant's `setindex` member.
 */
 meta Code access_store(Code code) {
-  match (code) case $x2c.collection.store(?base, ?key, ?value): {
+  if (code ~= $x2c.collection.store(?base, ?key, ?value)) {
     Code receiver = base;
     Code setter = _collection_family(base)
       ? receiver.type().protocol_member("setindex") : NULL;

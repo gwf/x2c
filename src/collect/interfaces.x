@@ -78,24 +78,22 @@ static List _interface_candidates(String canonical) {
    ownership and the same ordered parts representation as a cold walk. */
 static List _interface_load(Compiler c, String canonical, String path) {
   String identity = Compiler.identity();
-  match (_interface_record(path))
-    case %(interface 6 ?(String compiler) *stored):
-      if (identity && compiler == identity)
-        return _stored_entry(c, canonical, stored);
+  if (_interface_record(path) ~= %(interface 6 ?(String compiler) *stored) &&
+      identity && compiler == identity)
+    return _stored_entry(c, canonical, stored);
   return NULL;
 }
 
 /* The entry of a stored record whose source, hash, and include roots still
    match `canonical`, or NULL. */
 static List _stored_entry(Compiler c, String canonical, List stored) {
-  match (stored)
-    case %(?(String owner) ?(String hash) ?(List parts) ?(List definitions)
-           ?(List dependencies) ?(List include_dirs)):
-      if (Compiler.absolute_home_path(owner) == canonical &&
-          _hash_matches(c, canonical, hash) &&
-          _interface_include_dirs(c, canonical) == include_dirs)
-        return _interface_entry(
-          c, canonical, hash, parts, definitions, dependencies, include_dirs);
+  if (stored ~= %(?(String owner) ?(String hash) ?(List parts)
+      ?(List definitions) ?(List dependencies) ?(List include_dirs)) &&
+      Compiler.absolute_home_path(owner) == canonical &&
+      _hash_matches(c, canonical, hash) &&
+      _interface_include_dirs(c, canonical) == include_dirs)
+    return _interface_entry(
+      c, canonical, hash, parts, definitions, dependencies, include_dirs);
   return NULL;
 }
 
@@ -186,13 +184,12 @@ static Map _read_rows(List stored) {
     List pair = row;
     _require_retained(pair.try_own());
     Var (key, value) = pair;
-    if (value is <list>) match (value)
-      case %(meta-hashes ?provider ?(List stored)): {
-        Map hashes = _read_rows(stored);
-        if (hashes == NULL) return NULL;
-        value = %(meta-hashes $provider $hashes);
-        _retain(value);
-      }
+    if (value is <list> && value ~= %(meta-hashes ?provider ?(List stored))) {
+      Map hashes = _read_rows(stored);
+      if (hashes == NULL) return NULL;
+      value = %(meta-hashes $provider $hashes);
+      _retain(value);
+    }
     rows[key] = value;
   }
   return rows;
@@ -204,19 +201,18 @@ module Map _read_dependencies(Compiler c, List stored) {
   Map dependencies = _cache_map();
   foreach (Var dependency in stored) {
     if (dependency is not <list>) return NULL;
-    match (dependency.list())
-      case %(?(String name) ?hash): {
-        String path = name;
-        if (hash is <string> && String.startswith(hash, "search:")) {
-          if (!name.startswith("cwd:"))
-            path = Compiler.absolute_home_path(name);
-        }
-        else path = _canonical_path(Compiler.absolute_home_path(name));
-        int unhashed = hash.is_integer() && hash.integer() == 1;
-        if (!unhashed && !_hash_matches(c, path, hash)) return NULL;
-        _cache_dependency(dependencies, path, hash);
-        continue;
+    if (dependency.list() ~= %(?(String name) ?hash)) {
+      String path = name;
+      if (hash is <string> && String.startswith(hash, "search:")) {
+        if (!name.startswith("cwd:"))
+          path = Compiler.absolute_home_path(name);
       }
+      else path = _canonical_path(Compiler.absolute_home_path(name));
+      int unhashed = hash.is_integer() && hash.integer() == 1;
+      if (!unhashed && !_hash_matches(c, path, hash)) return NULL;
+      _cache_dependency(dependencies, path, hash);
+      continue;
+    }
     return NULL;
   }
   return dependencies;
@@ -239,7 +235,7 @@ List Compiler.prelude_missing_interfaces(void) {
   String prelude = Compiler.prelude_interface();
   List record = prelude ? _interface_record(prelude) : NULL;
   Array missing = [];
-  match (record) case %(interface 6 ? ? ? ?(List parts) *):
+  if (record ~= %(interface 6 ? ? ? ?(List parts) *))
     foreach (Var part in parts)
       if (part is <string> &&
           !_written_interface(Compiler.absolute_home_path(part)))
@@ -350,10 +346,8 @@ module List _stored_meta_hashes(Map hashes) {
    depends on the files walked before it. An interface renumbers them in order
    of first appearance, keeping equal bindings equal. */
 static List _renumber_bindings(List node, Map identities) {
-  match (node) {
-    case %(meta-hashes ?provider ?(Map hashes)):
-      return %(meta-hashes $provider $(_stored_meta_hashes(hashes)));
-  }
+  if (node ~= %(meta-hashes ?provider ?(Map hashes)))
+    return %(meta-hashes $provider $(_stored_meta_hashes(hashes)));
   String spelling = NULL;
   if (Ast.try_binding(node, NULL, spelling)) {
     Var identity = identities.setdefault(node, identities.len() + 1);

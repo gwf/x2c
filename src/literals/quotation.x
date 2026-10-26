@@ -288,9 +288,8 @@ module List _parse_literal_element(Compiler c) {
     literal cache when both parts are constant.
 */
 List Compiler.literal_cell(Compiler c, List head, List tail) {
-  match (head)
-    case %(!or (splice ?sexpr) (expr ("List") (splice ?sexpr))):
-      return _append_splice(c, sexpr, tail);
+  if (head ~= %(!or (splice ?sexpr) (expr ("List") (splice ?sexpr))))
+    return _append_splice(c, sexpr, tail);
   if (head ~= %(expr (<macro-expr>) ?))
     return %(expr ("List") (cons $head $tail));
   /* A nested `List` that already folded enters the cache as its own key, the
@@ -349,20 +348,19 @@ static List _parse_typed_capture(Compiler c) {
 /* An arm records a binder once for each Var tag and declared type. */
 static int _recorded(
   Compiler c, String name, Type type, List tag, Token origin) {
-  foreach (List previous in c.match_types) match (previous)
-    case %(?previous_name ?previous_type):
-      if (previous_name == name &&
-          c.var_tag_expression(previous_type, origin) == tag &&
-          c.sym.normalize_declared_type(previous_type) ==
-          c.sym.normalize_declared_type(type)) return 1;
+  foreach (List previous in c.match_types)
+    if (previous ~= %(?previous_name ?previous_type) &&
+        previous_name == name &&
+        c.var_tag_expression(previous_type, origin) == tag &&
+        c.sym.normalize_declared_type(previous_type) ==
+        c.sym.normalize_declared_type(type)) return 1;
   return 0;
 }
 
 /* `(!is ?binder type TAG)`, or `(!is type TAG)` without a binder. */
 static List _tag_test(Compiler c, Atom binder, List tag) {
   List elements = binder.is_atom_binder() ? %(!is $binder type) : %(!is type);
-  match (tag)
-    case %(expr ("Symbol") ?): tag = c.cache(%(var $tag));
+  if (tag ~= %(expr ("Symbol") ?)) tag = c.cache(%(var $tag));
   List tail = c.literal_cell(tag, %(nil));
   foreach (Var element in elements.reverse())
     tail = c.literal_cell(_atom_element(c, element.str()), tail);
@@ -372,8 +370,8 @@ static List _tag_test(Compiler c, Atom binder, List tag) {
 /** Applies each typed capture's predicate to every unquoted occurrence. */
 List Compiler.typed_match_pattern(Compiler c, List pattern, List types) {
   Map tags = {};
-  foreach (List row in types) match (row)
-    case %(?name ?type):
+  foreach (List row in types)
+    if (row ~= %(?name ?type))
       tags[Atom.intern(%"?$(name)")] = c.var_tag_expression(type, c.token);
   return _typed_pattern(c, pattern, tags);
 }
@@ -383,8 +381,7 @@ static List _typed_pattern(Compiler c, List node, Map tags) {
   if (value.is_atom_binder() && tags.try_get(value, tag))
     return _tag_test(c, value, tag);
   List content = _pattern_content(c, node);
-  match (content)
-    case %(cons ? ?): return _typed_list(c, node, content, tags);
+  if (content ~= %(cons ? ?)) return _typed_list(c, node, content, tags);
   return node;
 }
 
@@ -430,7 +427,7 @@ static List _typed_list(
 /* Pushes the heads of a cons chain and returns what ends it. */
 static List _pattern_elements(Compiler c, List tail, Array elements) {
   loop {
-    match (tail) case %(cons ?head ?rest): {
+    if (tail ~= %(cons ?head ?rest)) {
       elements.push(head);
       tail = _pattern_content(c, rest);
       continue;

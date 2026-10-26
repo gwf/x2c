@@ -12,7 +12,7 @@
 /** Joins an interpolated String's parts. */
 $rewrite(%(expr ("String") (segments *)))
 meta Code interpolation_lowering(Code code) {
-  match (code) case %(expr ? (segments *segments)): {
+  if (code ~= %(expr ? (segments *segments))) {
     Array parts = [];
     foreach (List segment in segments) match (segment) {
       case %((!or segexp segvar) ?value): parts.push(value);

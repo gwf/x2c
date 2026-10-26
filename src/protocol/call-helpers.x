@@ -108,19 +108,17 @@ String Compiler.protocol_update_helper(
 static Type _update_rhs(Type participant, Type signature) {
   List parameters = signature.car().list().cadr();
   Type result = signature.cdr();
-  match (parameters)
-    case %(?receiver ?rhs):
-      if (List.equal(receiver, participant) && result == participant)
-        return rhs;
+  if (parameters ~= %(?receiver ?rhs) &&
+      List.equal(receiver, participant) && result == participant)
+    return rhs;
   return NULL;
 }
 
 static void _publish_update(Compiler c, List helper, List syntax) {
   List function = _generated_function(c, helper, syntax);
-  match (function)
-    case %(function ?result ?declarator (block *body)):
-      function = %(function $result $declarator
-                    (block (at $(c.origin) (seq @body))));
+  if (function ~= %(function ?result ?declarator (block *body)))
+    function = %(function $result $declarator
+                  (block (at $(c.origin) (seq @body))));
   c.add_early(function);
 }
 

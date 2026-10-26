@@ -35,8 +35,7 @@ List Compiler.lower_lambda_expr(Compiler c, List expression) {
 module Ast _slice_node(
   Compiler c, List expression, Type type, List start, List stop, List step) {
   String nominal = NULL;
-  match (type)
-    case %(?(String name)): nominal = name;
+  if (type ~= %(?(String name))) nominal = name;
   if (!nominal)
     $fail.transform_slice_unsupported(c, NULL, type, NULL);
   String fnname = %"$(nominal)_getslice";
@@ -129,18 +128,14 @@ module Ast _expression_node(Compiler c, Ast ast) {
    transform the deepest term, and rebuild upward. Entered only for chain
    heads, with expression rewrites already applied. */
 static List _op_chain_first(List ast) {
-  match (ast)
-    case %(expr ? ?content):
-      match (content)
-        case $source_operator_content(%(? ?first *rest)):
-          if (first is <list>) {
-            List operand = first;
-            match (operand)
-              case %(expr ? ?inner):
-                match (inner)
-                  case $source_operator_content(%(*parts)):
-                    return operand;
-          }
+  if (ast ~= %(expr ? ?content) &&
+      content ~= $source_operator_content(%(? ?first *rest)) &&
+      first is <list>) {
+    List operand = first;
+    if (operand ~= %(expr ? ?inner) &&
+        inner ~= $source_operator_content(%(*parts)))
+      return operand;
+  }
   return NULL;
 }
 
@@ -168,18 +163,17 @@ static Ast _op_chain(Compiler c, Ast ast) {
     ast = c.lower_lambda_expr(ast);
   }
   for (int i = (int) levels.len() - 1; i >= 0; i--)
-    match (levels[i].caddr())
-      case $source_operator_content(%(?operator ? *rest)): {
-        Array parts = [];
-        if (operator is <list>) parts.push(_step(c, operator));
-        else parts.push(operator);
-        parts.push(rebuilt);
-        foreach (Var operand in rest) {
-          if (operand is <list>) parts.push(_step(c, operand));
-          else parts.push(operand);
-        }
-        rebuilt = source_operator_expression(types[i], parts.list_free());
+    if (levels[i].caddr() ~= $source_operator_content(%(?operator ? *rest))) {
+      Array parts = [];
+      if (operator is <list>) parts.push(_step(c, operator));
+      else parts.push(operator);
+      parts.push(rebuilt);
+      foreach (Var operand in rest) {
+        if (operand is <list>) parts.push(_step(c, operand));
+        else parts.push(operand);
       }
+      rebuilt = source_operator_expression(types[i], parts.list_free());
+    }
   return rebuilt;
 }
 
@@ -195,17 +189,15 @@ module List _cast(Compiler c, List ast) {
       List operand = expression;
       if (operand ~= %(expr ? (composite *))) {
         Type native = type;
-        match (declaration)
-          case %(declare ?base (bindings (bind ? ?mods))):
-            native = mods.list().append(base);
+        if (declaration ~= %(declare ?base (bindings (bind ? ?mods))))
+          native = mods.list().append(base);
         return c.convert_compound_literal(operand, type, native);
       }
       int source_var = c.sym.is_var_type(source_type);
       int target_var = c.sym.is_var_type(type);
       int unresolved = 0;
-      match (expression)
-        case %(expr () $($source_identifier_content(%(?name)))):
-          unresolved = 1;
+      if (expression ~= %(expr () $($source_identifier_content(%(?name)))))
+        unresolved = 1;
       int target_func = source_type &&
         c.sym.resolve_key(type) === c.sym.resolve_key(%("Func"));
       if (type !== %(void) &&
@@ -223,60 +215,55 @@ module List _cast(Compiler c, List ast) {
 // A `Var` subscript of a native pointer or array reads as an integer.
 module List _index(Compiler c, List ast) {
   Macro indexed = $indexed;
-  match (ast)
-    case $($indexed(?base, %(!set ?selector (expr ?type ?))))
-        if (c.sym.is_var_type(type)): {
-      List converted = c.convert_expression(selector, %(long));
-      return c.rebuild_expression(NULL, indexed(base, converted)).caddr();
-    }
+  if (ast ~= $($indexed(?base, %(!set ?selector (expr ?type ?)))) &&
+      c.sym.is_var_type(type)) {
+    List converted = c.convert_expression(selector, %(long));
+    return c.rebuild_expression(NULL, indexed(base, converted)).caddr();
+  }
   return ast;
 }
 
 // declarations and statements
 
 module List _declaration(Compiler c, List ast) {
-  match (ast) {
-    case %((!or ?head declare decl) ?target
-           (bindings *bound_list)): {
-      Array values = [];
-      foreach (Ast binding in bound_list) {
-        Ast new_bind = binding;
-        match (binding)
-          case %(op = (bind ?var ?mods) ?rhs): {
-            Type target_type = %(declare $target
-              (bindings (bind $var $mods))).type_from_ast();
-            List native_target = $!($target_type){ $var };
-            List converted = c.convert_initializer(
-              rhs, target_type, native_target);
-            new_bind = %(op = (bind $var $mods) $converted);
-            if (target_type.type().is_static())
-              match (converted)
-                case %(expr ("Func")
-                       (ident (!set ?dependency (binding ? ?)))):
-                  c.static_init_deps[var] = $(dependency);
-          }
-        values.push(new_bind);
+  if (ast ~= %((!or ?head declare decl) ?target
+      (bindings *bound_list))) {
+    Array values = [];
+    foreach (Ast binding in bound_list) {
+      Ast new_bind = binding;
+      if (binding ~= %(op = (bind ?var ?mods) ?rhs)) {
+        Type target_type = %(declare $target
+          (bindings (bind $var $mods))).type_from_ast();
+        List native_target = $!($target_type){ $var };
+        List converted = c.convert_initializer(
+          rhs, target_type, native_target);
+        new_bind = %(op = (bind $var $mods) $converted);
+        if (target_type.type().is_static())
+          match (converted)
+            case %(expr ("Func")
+                   (ident (!set ?dependency (binding ? ?)))):
+              c.static_init_deps[var] = $(dependency);
       }
-      List new_bindings = values.list_free();
-      return %($head $target (bindings @new_bindings));
+      values.push(new_bind);
     }
+    List new_bindings = values.list_free();
+    return %($head $target (bindings @new_bindings));
   }
   return ast;
 }
 
 module List _return(Compiler c, List ast) {
-  match (ast)
-    case $return_value(?expression): {
-      List value = c.convert_expression(expression, source_return_type(ast));
-      return source_return_content($(value));
-    }
+  if (ast ~= $return_value(?expression)) {
+    List value = c.convert_expression(expression, source_return_type(ast));
+    return source_return_content($(value));
+  }
   return ast;
 }
 
 // calls
 
 module List _call(Compiler c, List ast) {
-  match (ast) case $($called(?callee, *arguments)): {
+  if (ast ~= $($called(?callee, *arguments))) {
     match (callee.cadr()) {
       case %((func ?parameters) *):
         return _typed_call(c, callee, parameters, arguments);
@@ -301,10 +288,8 @@ module List _typed_call(
   List supplied = args;
   if (args === %((expr (void) ()))) args = NULL;
   String callee_name = NULL;
-  match (callee) {
-    case %(expr ? $($source_identifier_content(%(?binding)))):
-      callee_name = Ast.binding_spelling(binding);
-  }
+  if (callee ~= %(expr ? $($source_identifier_content(%(?binding)))))
+    callee_name = Ast.binding_spelling(binding);
   int list_varargs = callee_name == "List_list_n";
   if (c.fn_name && _iter_immediate_consumer(callee_name) && args)
     args = cons(c.complete_iter_chain(args.car()), args.cdr());
@@ -314,7 +299,7 @@ module List _typed_call(
     List param = p ? p.car().list() : NULL;
     if (param === %(....)) break;
     List arg = a.car();
-    match (arg) case %(expr ? (splice ?)):
+    if (arg ~= %(expr ? (splice ?)))
       c.report_error(<xform>, "List splice requires a rest argument",
         NULL, NULL);
     List expected = param;
@@ -352,14 +337,14 @@ module List _typed_call(
     the callee's final parameter to List before issuing this packed call.
 */
 List Compiler.pack_rest_arguments(Compiler c, List params, List args) {
-  match (args) case %((expr (void) ())): args = NULL;
+  if (args ~= %((expr (void) ()))) args = NULL;
   int fixed = params.len() - 1;
   if (args.len() < fixed)
     c.report_error(<xform>, "too few arguments for List rest function",
       NULL, NULL);
   Array prefix = [];
   for (int i = 0; i < fixed; i++, args = args.cdr()) {
-    match (args.car()) case %(expr ? (splice ?)):
+    if (args.car() ~= %(expr ? (splice ?)))
       c.report_error(<xform>, "List splice requires a rest argument",
         NULL, NULL);
     prefix.push(args.car());

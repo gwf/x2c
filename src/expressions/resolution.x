@@ -36,8 +36,7 @@ static int _defers_directly(List items) {
 /* Reference reads retain their resolved type through the last expression. */
 static Type _final_value_type(List items) {
   List last = items ? Ast.without_origin(items.last()) : NULL;
-  match (last)
-    case %(stmnt (expr ?(Type type) ?)): return type;
+  if (last ~= %(stmnt (expr ?(Type type) ?))) return type;
   return %(void);
 }
 
@@ -55,7 +54,7 @@ List Compiler.resolve_expression(Compiler c, List input, Token origin) {
     Var staged;
     int retained;
     Var carrier = input;
-    match (input) case %(expr (<macro-expr>) ?inside): carrier = inside;
+    if (input ~= %(expr (<macro-expr>) ?inside)) carrier = inside;
     if (c.take_code_value(carrier, staged, retained))
       return retained ? staged : c.resolve_expression(staged, origin);
   }
@@ -84,9 +83,9 @@ int Compiler.needs_resolution(Compiler c, Var value) {
       case %(expr ? (parens (block *))): continue;
       case $lambda_captured(?body, *captures, *params): {
         foreach (List row in captures)
-          match (row) case %(capture ?binding ? ?):
-            if (!(%(lambda-depth $binding) in c.semantic_binding_facts()))
-              return 1;
+          if (row ~= %(capture ?binding ? ?) &&
+              !(%(lambda-depth $binding) in c.semantic_binding_facts()))
+            return 1;
         continue;
       }
       case $lambda_expression(?body, *params): return 1;
@@ -110,7 +109,7 @@ int Compiler.needs_resolution(Compiler c, Var value) {
 
 // True when a receiver's type must wait for macro substitution.
 module int _deferred_receiver(List expr) {
-  match (expr) case %(expr (<macro-expr>) ?): return 1;
+  if (expr ~= %(expr (<macro-expr>) ?)) return 1;
   return 0;
 }
 
@@ -211,7 +210,7 @@ static List _lambda(Resolve &r, List body, List captures, List params) {
 }
 
 static List _source(Resolve &r, List content) {
-  match (content) case %(at m-origin ?inner): {
+  if (content ~= %(at m-origin ?inner)) {
     if (!r.c.source_map || r.c.macro_holes) return r.input;
     return %(expr $(r.type) (at $(r.c.origin) $inner));
   }
@@ -451,11 +450,10 @@ static List _map_value(Resolve &r) {
     Any other shape is reported at `origin` as a parse error.
 */
 List Compiler.resolve_map_entry(Compiler c, List input, Token origin) {
-  match (input)
-    case %(map-entry ?key ?value):
-      return %(map-entry
-        $(c.resolve_expression(key, origin))
-        $(c.resolve_expression(value, origin)));
+  if (input ~= %(map-entry ?key ?value))
+    return %(map-entry
+      $(c.resolve_expression(key, origin))
+      $(c.resolve_expression(value, origin)));
   $fail.expressions_map_entry(c, origin);
 }
 
@@ -533,8 +531,8 @@ static List _destructure(Resolve &r, List targets, List source) {
 static List _generic(Resolve &r, List control, List associations) {
   control = r.c.resolve_expression(control, r.origin);
   Array resolved = [];
-  foreach (List association in associations) match (association)
-    case %(association ?selector ?value):
+  foreach (List association in associations)
+    if (association ~= %(association ?selector ?value))
       resolved.push(
         %(association $selector $(r.c.resolve_expression(value, r.origin))));
   Type type = control.cadr() === %(<macro-expr>) ? %(<macro-expr>) : NULL;

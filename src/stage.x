@@ -63,14 +63,12 @@ static const SymbolSet meta_comparisons = %<<"<" ">" "<=" ">=" "==" "!=">>;
 Var Compiler.meta_argument(
   Compiler c, List node, Type want, Token site, MetaCall call) {
   Var value = void;
-  if (want)
-    match (node)
-      case %(expr ? (meta-cap ?captured)): {
-        if (c.sym.is_named_value_type(want, "TypeInfo"))
-          return MetaContext.type_description(captured);
-        if (c.sym.is_named_value_type(want, "Source"))
-          return MetaContext.source_description(captured);
-      }
+  if (want && node ~= %(expr ? (meta-cap ?captured))) {
+    if (c.sym.is_named_value_type(want, "TypeInfo"))
+      return MetaContext.type_description(captured);
+    if (c.sym.is_named_value_type(want, "Source"))
+      return MetaContext.source_description(captured);
+  }
   match (node) {
     case %(expr ? (meta-cap ?captured)):
       value = _captured_value(c, captured, want);
@@ -115,8 +113,7 @@ static Var _captured_value(Compiler c, Var captured, Type want) {
 /* A name that is not a constant, such as a template's own local, passes as
    its syntax. Anything else is reported at `site`. */
 static Var _name_syntax(Compiler c, List node, Token site) {
-  match (node)
-    case %(expr ? $($source_identifier_content(%(?)))): return node;
+  if (node ~= %(expr ? $($source_identifier_content(%(?))))) return node;
   $fail.stage_argument_constant(c, site);
 }
 
@@ -378,18 +375,17 @@ static List _map_form(Compiler c, Var value) {
 */
 void Compiler.check_meta_call(Compiler c, List callee, Token origin) {
   if (c.meta_body || !c.meta_comptime.len()) return;
-  match (callee)
-    case %(expr ? $($source_identifier_content(%((binding ? ?name)))))
-      if (name is <string> && name in c.meta_comptime):
-        $fail.stage_function_only(c, origin, name);
+  if (callee ~= %(
+        expr ? $($source_identifier_content(%((binding ? ?name))))) &&
+      name is <string> && name in c.meta_comptime)
+    $fail.stage_function_only(c, origin, name);
 }
 
 /** Returns whether `fn` is a `meta` function this compiler recorded as
     compile-time only, whose runtime form the unit does not emit.
 */
 int Compiler.meta_is_comptime_only(Compiler c, List fn) {
-  match (fn)
-    case %(function ? (bind (binding ? ?(String name)) *) ?):
-      return name in c.meta_comptime;
+  if (fn ~= %(function ? (bind (binding ? ?(String name)) *) ?))
+    return name in c.meta_comptime;
   return 0;
 }
