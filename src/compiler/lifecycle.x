@@ -1,7 +1,7 @@
-/* Lambda captures store non-reference values as Var, so traversal callbacks
-   that carry the compiler need this raw pointer crossing. The pointee and its
-   lifetime stay with the caller. */
-/** Boxes the compiler's pointer; the caller keeps the compiler. */
+/** Boxes a compiler pointer for lambda capture traversal.
+    Captures store non-reference values as `Var`, so the caller keeps the
+    compiler alive while code uses the boxed pointer.
+*/
 Var Compiler.var(Compiler c) => (Var) { .p64 = c };
 
 /** Recovers the compiler pointer boxed by `Compiler.var`. */
