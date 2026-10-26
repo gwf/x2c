@@ -1,12 +1,17 @@
-/* Bracket access policy: Array and Map mutation through their typed
-   helpers, and any other participant's read, store, and update through
-   its indexing members, with each operand evaluated once, in order.
-   Getter resolution remains with admission. */
+/*  bracket-access.x -- bracket access policy
+
+    Array and Map mutation uses typed helpers. Other participants' reads,
+    stores, and updates use indexing members. Each operand is evaluated once,
+    in order. Getter resolution remains with admission.
+*/
+
 #pragma once
 #include "rewrite.x"
 #include "grammar.x"
 
-/* The linked meta copies include these diagnostics from this owner. */
+/* diagnostics
+
+   The linked meta copies include these diagnostics from this owner. */
 macro Stmt $fail.access_read(Expr $site, Expr $type) =>
   x2c_diagnostic_fail_at(
     $site, <xform>, %"type $($type.repr()) does not support bracket indexing",
@@ -47,6 +52,8 @@ macro Stmt $fail.access_operand(Expr $site, Expr $op, Expr $type) {
       $site, <xform>, message, %("right type: $($type.repr())"));
   }
 }
+
+// collection forms
 
 macro Expression $x2c.collection.store(Expr $base, Expr $key, Expr $value) =>
   $base[$key] = $value;
@@ -134,7 +141,8 @@ meta static Code _participant_update(
 
 $rewrite($x2c.collection.store)
 /** Selects the adopted collection setter for indexed assignment, or a
-    participant's `setindex` member. */
+    participant's `setindex` member.
+*/
 meta Code access_store(Code code) {
   match (code) case $x2c.collection.store(?base, ?key, ?value): {
     Code receiver = base;
@@ -173,7 +181,8 @@ $rewrite($x2c.collection.xor)
 $rewrite($x2c.collection.left)
 $rewrite($x2c.collection.right)
 /** Selects collection compound updates and checks accepted operands, or a
-    participant's `updateindex` member. */
+    participant's `updateindex` member.
+*/
 meta Code access_update(Code code) {
   match (code) {
     case $x2c.collection.add(?base, ?key, ?value):
