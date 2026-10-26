@@ -22,7 +22,7 @@ List Compiler.lift_func_expression(Compiler c, List expression) {
   Type func_type = c.sym.resolve_key(%("Func"));
   if (c.sym.resolve_key(type) == func_type) return expression;
 
-  if (expression ~= $lambda_expression(?, *)) {
+  if (expression ~= $lambda_expression(?body, *params)) {
     expression = c.lower_lambda_expr(expression);
     match (expression)
       case %(expr ?lowered_type ?lowered_payload): {
