@@ -1,4 +1,4 @@
-// pending support declarations and file initialization
+/*  pending.x -- pending support declarations and file initialization */
 
 /** Appends a declaration the kernel generated to the unit's pending
     support. It is implementation, so its definitions are written.
