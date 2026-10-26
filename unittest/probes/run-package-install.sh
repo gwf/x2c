@@ -12,39 +12,38 @@ X2C=${X2C:-"$ROOT/builds/0/x2c"}
 
 fail() { echo "package install: $*" >&2; exit 1; }
 
-copy_runtime_sources() {
-  local destination=$1 source
-  cp "$ROOT"/lib/*.x "$destination"
-  for source in "$ROOT"/lib/*; do
-    [[ -d "$source" ]] && cp -R "$source" "$destination"
-  done
-  for source in "$ROOT"/lib/*.xlisp; do
-    [[ -e "$source" ]] && cp "$source" "$destination"
-  done
-  return 0
-}
-
-mkdir -p "$BUILD/home/include/x2c" "$BUILD/home/etc" "$BUILD/home/lib" \
-  "$BUILD/home/packages" "$BUILD/home/bin" "$BUILD/src"
-cp "$ROOT/etc/"*.xlisp "$ROOT/etc/"*.x "$BUILD/home/etc/"
-copy_runtime_sources "$BUILD/home/include/x2c/"
-cp "$ROOT/builds/0/lib/"*.h "$BUILD/home/include/x2c/"
-for header in "$ROOT/builds/0/lib"/*/*.h; do
-  directory=$(basename "$(dirname "$header")")
-  mkdir -p "$BUILD/home/include/x2c/$directory"
-  cp -L "$header" "$BUILD/home/include/x2c/$directory/"
-done
-copy_runtime_sources "$BUILD/home/lib/"
-mkdir -p "$BUILD/home/src"
-mkdir -p "$BUILD/home/src/components"
-cp "$ROOT"/src/components/*.x "$BUILD/home/src/components"/
-cp "$ROOT"/src/grammar.x "$BUILD/home/src/"
-cp "$ROOT/builds/0/libx2c.a" "$ROOT/builds/0/lib/"*.xi "$BUILD/home/lib/"
-cp "$X2C" "$BUILD/home/bin/x2c"
-mkdir -p "$BUILD/home/libexec/x2c"
-cp "$ROOT/builds/0/libexec/"x2c-{build,editor,new,package} "$BUILD/home/libexec/x2c/"
+mkdir -p "$BUILD/src"
+"$X2C" script "$ROOT/etc/x2c-payload.x" install --prefix "$BUILD/home" \
+  >"$BUILD/prefix-install.log" 2>&1 || {
+    cat "$BUILD/prefix-install.log" >&2
+    fail "native prefix installation"
+  }
 x2c="$BUILD/home/bin/x2c"
 [[ "$("$x2c" env home)" == "$BUILD/home" ]] || fail "home not resolved"
+[[ -z "$("$x2c" env prelude_missing)" ]] || fail "installed prelude is incomplete"
+
+# A project helper and cold collection need the installed module sources.
+mkdir -p "$BUILD/meta"
+cat >"$BUILD/meta/main.x" <<'SOURCE'
+#include "typed-array.x"
+meta int selected(void) {
+  Array values = [10, 20, 30];
+  return values.find(%!(int value) => value > 10).int() + values.index(30);
+}
+int main(void) {
+  Map values = {answer: $selected()};
+  ArrayInt typed = %[1, 2, 3];
+  int number = 8; Var two = 2; number += two;
+  printf("%d %d %d\n", values[<answer>].int(),
+         typed.find(%!(int value) => value > 1).int(), number);
+}
+SOURCE
+(cd "$BUILD/meta" && "$x2c" run -q main.x >output.txt &&
+  "$x2c" translate -q --out-dir warm main.x &&
+  "$x2c" translate -q --no-interfaces --out-dir cold main.x)
+[[ "$(cat "$BUILD/meta/output.txt")" == "22 2 10" ]] || fail "installed meta helper"
+cmp "$BUILD/meta/warm/main.c" "$BUILD/meta/cold/main.c" || fail "cold installed C"
+cmp "$BUILD/meta/warm/main.h" "$BUILD/meta/cold/main.h" || fail "cold installed header"
 
 # The command is shipped once, and both forms reach it. Legacy help does
 # not need the executable; package state does.
