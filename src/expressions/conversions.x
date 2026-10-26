@@ -195,7 +195,7 @@ static List _raw_string_to_string(Compiler c, List expr) {
     case %(expr (!or (* char) ((dim *) char))
         $($grouped(?inner))):
       // A statement expression's block converts as one dynamic value.
-      match (inner) case %(expr *): {
+      if (inner ~= %(expr *)) {
         List converted = _raw_string_to_string(c, inner);
         return %(expr ("String") (parens $converted));
       }
