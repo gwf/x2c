@@ -156,7 +156,7 @@ List Compiler.discard_helper(
     .result = result, .stem = stem, .which = which, .fresh = fresh,
     .declarations = declarations, .arguments = arguments, .discards = []};
   _collect(call);
-  return call.discards.len() ? _emit(call) : NULL;
+  return call.discards ? _emit(call) : NULL;
 }
 
 /** The `discard_helper` for `participant`'s protocol `member`. */
