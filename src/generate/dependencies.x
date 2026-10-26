@@ -108,8 +108,7 @@ module List _move_bodies(List source, Map inline_bodies) {
    each conditional group that contains one. */
 static Map _undef_positions(List source) {
   Map positions = {};
-  Array open = auto [];
-  int position = 0;
+  Array open = auto [], int position = 0;
   foreach (List node in source) {
     match (node) case %(preproc ?(String content)): {
       Symbol kind = Compiler.preproc_conditional_kind(content);
@@ -132,8 +131,7 @@ static void _mark_undef(Map positions, Array open, int position) {
    reopening the groups it was written in beyond those. A body from another
    arm stays pending. */
 static void _place_bodies(Array out, Array bodies, List arms) {
-  size_t kept = 0;
-  unsigned open = arms.len();
+  size_t kept = 0, unsigned open = arms.len();
   foreach (List pending in bodies) {
     List written = pending.cdr();
     if (written.tail(open) != arms) {
@@ -269,8 +267,7 @@ static void _binding(Forward &f, Var binding) {
    ordinary adapters its typed bodies call. Native aliases still come from
    their defining headers; a host function-like macro cannot be prototyped. */
 static void _global(Forward &f, Var binding, String spelling) {
-  Compiler c = f.c;
-  Type type = NULL;
+  Compiler c = f.c, Type type = NULL;
   List global = spelling ? c.sym.resolve_global($(spelling), type) : NULL;
   if (!global || !global.equal(binding) || !type.is_function()) return;
   if (global in f.available || %(native $spelling) in f.available ||
