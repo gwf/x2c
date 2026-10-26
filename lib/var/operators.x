@@ -5,7 +5,7 @@
     operations through registered protocols. Comparisons of two numbers use
     the same promotion. Compound updates compute and convert completely before
     changing their destination.
- */
+*/
 
 #include "error-macros.x"
 #include "integer-ops.x"
@@ -315,7 +315,7 @@ static Var _general_numeric_binary(Symbol op, Var lhs, Var rhs) {
 static Var _integer_binary(Symbol op, X2CVarNumeric lhs, X2CVarNumeric rhs) {
   Symbol tag = _integer_result_tag(lhs, rhs);
   X2CVarNumericInfo info;
-  if (!Var.numeric_info(tag, info)) raise %(bad-types (op $op));
+  Var.numeric_info(tag, info);
   unsigned long long raw = _integer_raw(
     op, _raw_for_width(lhs, info.bits), _raw_for_width(rhs, info.bits),
     info.bits, info.unsigned_value);
