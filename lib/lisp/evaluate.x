@@ -1,4 +1,4 @@
-/*  evaluate.x -- Lisp evaluate
+/*  evaluate.x -- Lisp evaluation, closure capture, and tail calls
 
     Copyright (c) 2026 Gary William Flake.
 */
@@ -452,7 +452,7 @@ static Var _run_frame(
     auto (&frame) { local.bindings = {}; }
     _bind_params(&frame, lambda, _value_list(values, count), local.bindings);
   }
-  else _bind_values(&(local), lambda, values, count);
+  else _bind_values(&local, lambda, values, count);
   if (lambda.source_function)
     return _run_source(lisp, lambda.body, &local, &frame);
   return _eval_tail(lisp, lambda.body, &local);
@@ -470,8 +470,7 @@ static List _value_list(const Var *values, int count) {
 
 /* Binds each name before `.` to one value and the name after it to the
    rest. */
-static void _bind_params(
-  Scope *frame, Lambda lambda, List args, Map bindings) {
+static void _bind_params(Scope *frame, Lambda lambda, List args, Map bindings) {
   Var body = lambda.body;
   for (List p = lambda.params; p; p = p.cdr()) {
     Var name = p.car();
@@ -573,13 +572,10 @@ static int _env_lookup(LispEnv *env, Var name, Var &out) {
   return 0;
 }
 
-/* A parameter name and the name a form reads are both produced by the
-   reader through `Atom.intern`, which gives one canonical value per
-   spelling: a short name packs into the `Symbol` bits and a long one is
-   interned. Identity therefore answers what `Var.equal` answers here, and
-   without the descriptor lookup and tag decode that the general comparison
-   pays on both sides. Verified over a `lib/` and a `src/` translate: 89,898
-   matches, no case where the two disagreed. */
+/* The reader interns parameter and read names through `Atom.intern`:
+   short names pack into Symbol bits and long names are interned. Identity
+   therefore agrees with `Var.equal` here and avoids its descriptor lookup
+   and tag decoding on both operands. */
 static int _local_lookup(LispEnv *env, Var name, Var &out) {
   int found = 0, at = 0;
   for (List p = env.params; p; p = p.cdr(), at++)
