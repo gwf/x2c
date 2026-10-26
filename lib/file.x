@@ -205,7 +205,6 @@ static void _append_text(Block content, const void *bytes, size_t count) {
 
 static String _text(const void *bytes, size_t length) {
   if (!length) return NULL;
-  if (!bytes) raise %(bad-arg (operation "File.text") (reason "null bytes"));
   int allocation = _string_allocation(length);
   _validate_text(bytes, length);
   return x2c_string_from_bytes(bytes, allocation - 1);
@@ -220,9 +219,9 @@ static String _finish_text(String text, size_t length) {
   return text.intern_free();
 }
 
+/* Callers supply live byte storage whenever length is nonzero. */
 static void _validate_text(const void *bytes, size_t length) {
   if (!length) return;
-  if (!bytes) raise %(bad-arg (operation "File.text") (reason "null bytes"));
   if (memchr(bytes, '\0', length))
     raise %(bad-arg (operation "File.text") (reason "embedded NUL"));
 }
