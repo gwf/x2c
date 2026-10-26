@@ -171,7 +171,8 @@ module Var _effect(Walk &w, String name) {
 /** The owner of the storage the runtime operation `name` returns: `<scope>`
     for the active Scope, `<slot>` for the Scope its first argument names,
     `<pool>` for the canonical-value pool, or 0 when nothing is known. What
-    the operation does to its arguments is a separate fact. */
+    the operation does to its arguments is a separate fact.
+*/
 Symbol Compiler.region_result(String name) {
   match (runtime[name]) {
     case %(alloc slot): return <slot>;
@@ -183,13 +184,16 @@ Symbol Compiler.region_result(String name) {
 }
 
 /** Reports whether the runtime operation `name` returns its argument's
-    storage unchanged, as a `Var` box or its unboxing does. */
+    storage unchanged, as a `Var` box or its unboxing does.
+*/
 int Compiler.region_wrapper(String name) => runtime[name] == %(wrap);
 
 /** Reports whether the runtime table proves the lifetime effects of the
-    native function `name`. */
+    native function `name`.
+*/
 int Compiler.has_region_row(String name) => name in runtime;
 
 /** The runtime table's effect row for the operation `name`, such as
-    `(open scope)` or `(exit)`, or void when the table has no row. */
+    `(open scope)` or `(exit)`, or void when the table has no row.
+*/
 Var Compiler.region_effect(String name) => runtime[name];
