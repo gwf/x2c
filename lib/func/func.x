@@ -104,7 +104,8 @@ static void *_context(Func f) => (unsigned char *) f + _context_offset();
     argument, `<alloc-fail>` or `<size-limit>` while packing rest arguments,
     or any cause raised by the adapter or native target. A `void` adapter
     result remains no-value. Other results have the ownership of the value the
-    adapter returned. */
+    adapter returned.
+*/
 Var Func.apply(Func f, unsigned argc, const FuncArg *argv) {
   if (!f || (argc && !argv)) $error.apply.args();
   if (!f.rest) {
@@ -209,7 +210,8 @@ inline Var Func.apply_values(Func fn, Var left, Var right) {
     read.
 
     Raises: `<bad-arg>` for a null `Func` or an index outside `argc`, or
-    `<bad-arity>` when `argc` disagrees with a fixed signature. */
+    `<bad-arity>` when `argc` disagrees with a fixed signature.
+*/
 List x2c_func_reference_type(Func fn, unsigned argc, unsigned index) {
   if (!fn || index >= argc)
     $error.apply.index(index);
@@ -304,21 +306,24 @@ FuncArg x2c_func_unrepresentable_argument(Func fn, unsigned i, List source) {
 }
 
 /** Boxes a record result as a `<p48>` to a copy of its `size` bytes in the
-    active `Scope`. */
+    active `Scope`.
+*/
 Var x2c_func_record_result(const void *bytes, size_t size) =>
   Var.new(<p48>, xmemdup(bytes, size));
 
 // reference arguments
 
 /** Checks a reference argument whose stored pointee matches `want` exactly.
-    Raises: `<bad-types>` on the same mismatches as the shared checker. */
+    Raises: `<bad-types>` on the same mismatches as the shared checker.
+*/
 void *x2c_func_reference_argument(
   Func fn, const FuncArg *argv, unsigned i, List want) =>
   _reference_argument(fn, argv, i, want, want);
 
 /** Checks a generated adapter's declared pointee against the stored signature
     and its resolved `want` against the source address before casting.
-    Raises: `<bad-types>` on either mismatch. */
+    Raises: `<bad-types>` on either mismatch.
+*/
 void *x2c_func_declared_reference_argument(
   Func fn, const FuncArg *argv, unsigned i, List declared_target, List want) =>
   _reference_argument(fn, argv, i, declared_target, want);
@@ -468,7 +473,8 @@ static Func _new(
 
 /** Returns a native binding's borrowed canonical signature.
     The result has the `((func (PARAMETERS...)) RESULT...)` shape supplied to
-    the constructor and remains valid for the binding's lifetime. */
+    the constructor and remains valid for the binding's lifetime.
+*/
 List Func.signature(Func function) {
   if (!function) $error.signature.null();
   return function.sig;
@@ -501,7 +507,8 @@ void Func.move(Func function, Scope *slot) {
 Var Func.var(Func function) => Var.new(<func>, function);
 
 /** Returns the borrowed native callable carried by `v`.
-    Raises: `<bad-types>` when the value is not a `Func`. */
+    Raises: `<bad-types>` when the value is not a `Func`.
+*/
 Func Var.func(Var v) {
   if (v is not <func>) $error.box.type(v.tag());
   return v.pointer();
