@@ -201,12 +201,15 @@ static List _author_bindings(List bindings, List &template_bindings) {
   Array author = [], compiler = [];
   foreach (List pair in bindings) {
     Var binder = pair.car();
-    if (binder.is_binder() &&
-        !binder.str().startswith("?__macro_") &&
-        !binder.str().startswith("*__macro_"))
-      author.push(pair);
-    else
-      compiler.push(pair);
+    if (binder.is_binder()) {
+      String spelling = binder.str();
+      if (!spelling.startswith("?__macro_") &&
+          !spelling.startswith("*__macro_")) {
+        author.push(pair);
+        continue;
+      }
+    }
+    compiler.push(pair);
   }
   template_bindings = compiler.list_free();
   return author.list_free();
