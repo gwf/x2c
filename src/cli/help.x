@@ -274,9 +274,10 @@ static int _in_group(CliOption &option, Symbol command, Symbol group) =>
   _listed(option, command) && option.group == group;
 
 static void _print_option(const CliOption &option) {
-  String spelled = option.label ? option.label :
-                   option.alias ? %"$(option.spelling), $(option.alias)" :
-                   option.spelling;
+  String spelled;
+  if (option.label) spelled = option.label;
+  else if (option.alias) spelled = %"$(option.spelling), $(option.alias)";
+  else spelled = option.spelling;
   String label = option.value ? %"$spelled $(option.value)" : spelled;
   _print_help_row(label, option.description, label.startswith("--") ? 6 : 2);
 }
