@@ -325,7 +325,7 @@ static int _cast_operand_follows(Symbol s) =>
    a binding. */
 module int _casts_to_template_typedef(Compiler c, List declaration) {
   List base = declaration.cadr();
-  return c.macro_holes && !!base.match(%(* (binding ? ?)));
+  return c.macro_holes && (base ~= %(* (binding ? ?)));
 }
 
 /* A template body binds any other typedef name where it expands too, so
@@ -335,7 +335,7 @@ module int _casts_to_template_typedef(Compiler c, List declaration) {
    `enum`. */
 static int _casts_to_typedef_name(Compiler c, List declaration) {
   List base = declaration.cadr();
-  if (!c.macro_holes || !base.match(%(* ?(String name)))) return 0;
+  if (!c.macro_holes || !(base ~= %(* ?(String name)))) return 0;
   foreach (Var word in base)
     if (word == <struct> || word == <union> || word == <enum>) return 0;
   return 1;
@@ -500,8 +500,7 @@ static List _parse_slice(Compiler c, List expr, List start) {
     stop = c.parse_expression();
     if (c.test(<:>) && c.peek(0) != <]>) step = c.parse_expression();
   }
-  if (step && step.match(
-    %(expr ? $($source_literal_content(%(? "0"))))))
+  if (step && (step ~= %(expr ? $($source_literal_content(%(? "0"))))))
     $fail.expressions_slice_zero(c, c.token);
   c.expect(<]>);
   return %(expr $type $(source_slice_content(
@@ -541,8 +540,8 @@ static List _parse_postfix_apply(Compiler c, List expr) {
   Macro called = $called;
   List result = c.resolve_expression(
     c.rebuild_expression(NULL, called(expr, supplied)), origin);
-  int method = !!expr.match(
-    %(expr () $($source_operator_content(%(. ? (?))))));
+  int method = expr ~=
+    %(expr () $($source_operator_content(%(. ? (?)))));
   _check_converter_args(c, result, method, notes.list_free());
   if (method && supplied === %((expr (void) ())))
     match (expr) case %(expr () $($source_operator_content(
