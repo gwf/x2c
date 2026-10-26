@@ -17053,7 +17053,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_27(void
   _14258 = List_var(_14257);
   _14259 = String_new("src/emit/expressions.x");
   _14260 = String_var(_14259);
-  _14261 = String_new("323c4304");
+  _14261 = String_new("9f01c629");
   _14262 = String_var(_14261);
   _14263 = cons(_14262, NULL);
   _14264 = cons(_14260, _14263);
