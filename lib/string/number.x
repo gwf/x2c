@@ -4,7 +4,6 @@
     failure. Parsing allocates no storage.
 */
 
-
 #include <ctype.h>
 #include <errno.h>
 #include <limits.h>
@@ -50,12 +49,13 @@ meta native int String.try_long(String str, long *out) {
     if (number[0] < '0' || number[0] >= '0' + base) return 0;
     errno = 0;
     unsigned long magnitude = strtoul(number, &stop, base);
-    if (stop == number || errno == ERANGE || !_only_space(stop)) return 0;
+    if (errno == ERANGE || !_only_space(stop)) return 0;
     unsigned long limit =
       negative ? (unsigned long) LONG_MAX + 1ul : (unsigned long) LONG_MAX;
     if (magnitude > limit) return 0;
-    *out = negative ? (magnitude == limit ? LONG_MIN : -(long) magnitude)
-                    : (long) magnitude;
+    if (!negative) *out = (long) magnitude;
+    else if (magnitude == limit) *out = LONG_MIN;
+    else *out = -(long) magnitude;
     return 1;
   }
   char *stop = NULL;
@@ -77,9 +77,8 @@ meta native int String.try_long(String str, long *out) {
 
     It accepts what C's `strtod` accepts, including hex-float literals such
     as `0x1p4` and the `inf` and `nan` spellings. A value that overflows or
-    underflows `double` fails. It does not know the `0o` and `0b` prefixes
-    that the integer parser adds, so `0b101` fails instead of yielding the
-    leading zero.
+    underflows `double` fails. The integer parser's `0o` and `0b` prefixes
+    leave unconsumed text, so `0b101` fails the complete-parse check.
 */
 meta native int String.try_double(String str, double *out) {
   if (!str || !out) return 0;
