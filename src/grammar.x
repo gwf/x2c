@@ -76,7 +76,7 @@ macro Stmt $return_value(Expr $value) { return $value; }
     The binder supplies the type; the source form does not write it.
 */
 meta List source_return_type(List node) {
-  match (node) case %(return ?type ?): return type;
+  if (node ~= %(return ?type ?)) return type;
   return NULL;
 }
 
@@ -230,7 +230,7 @@ meta Var source_expression(Var value) {
     their captures through it, and no source form writes it.
 */
 meta List source_catch_handle(List node) {
-  match (node) case %(try ? (catchcases ? ?handle) ?): return handle;
+  if (node ~= %(try ? (catchcases ? ?handle) ?)) return handle;
   return NULL;
 }
 
