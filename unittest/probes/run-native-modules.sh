@@ -170,6 +170,20 @@ grep -Fq "return 4;" out/shadow-native-main.c || fail "compiler precedence"
 grep -Fq "the compiler's own function hides a native module's" \
   shadow-native.out || fail "compiler precedence warning"
 
+# Module exports include direct Func parameters, without Lisp adapters.
+cat >callback.x <<'EOF'
+meta native int invoke_callback(Func callback) { return callback(41); }
+EOF
+cat >callback-main.x <<'EOF'
+meta int invoke_callback(Func);
+meta static int callback_result(void) =>
+  invoke_callback(%!(int value) => value + 1);
+int main(void) { return $callback_result(); }
+EOF
+"$X2C" build -q --kind meta-module callback.x --output callback.so
+"$X2C" translate -q --native-module callback.so --out-dir out callback-main.x
+grep -Fq "return 42;" out/callback-main.c || fail "module Func callback"
+
 # `meta native` exports the C target. References and native handles keep
 # that target's ABI; a declared Func accepted by a Var target is boxed.
 cat >abi.x <<'EOF'
