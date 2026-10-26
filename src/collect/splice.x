@@ -207,8 +207,7 @@ static void _own(Splice &s, int start, int end, int line) {
 
 /* The line from `at` to `stop` with its quoted include of a file beside
    this one spelled under the prefix, or NULL for any other line. */
-static String _moved_include(
-  Splice &s, const char *at, const char *stop) {
+static String _moved_include(Splice &s, const char *at, const char *stop) {
   const char *hash = at + strspn(at, " \t");
   if (hash >= stop || *hash != '#') return NULL;
   int angle = 0;
