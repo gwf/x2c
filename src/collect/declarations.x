@@ -7,17 +7,15 @@
    order, or a typedef and its ordinary-name row. A public declaration can
    require an otherwise static family, including through an alias chain. */
 module List _type_family(List key) {
-  match (key) {
-    case %((!or ?kind typedef struct union enum) ?name *):
-      return $(kind, name);
-  }
+  if (key ~= %((!or ?kind typedef struct union enum) ?name *))
+    return $(kind, name);
   return NULL;
 }
 
 static List _row_type_family(Map rows, Map statics, List key, Var value) {
   List family = _type_family(key);
   if (family) return family;
-  match (key) case %(?(String name)):
+  if (key ~= %(?(String name)))
     if (%(typedef $name) in rows) return %(typedef $name);
   if (!(key in statics) && value is <list>) {
     Type type = value;
@@ -28,7 +26,7 @@ static List _row_type_family(Map rows, Map statics, List key, Var value) {
 
 static int _private_row(Map statics, List key, List family) {
   if (family && family in statics) return 1;
-  match (key) case %(self ?name): return %(function $name) in statics;
+  if (key ~= %(self ?name)) return %(function $name) in statics;
   return key in statics;
 }
 
@@ -39,11 +37,10 @@ module void _needed_types(List syntax, Map rows, Map needed) {
   while (pending.len()) {
     Var item = pending.take_last();
     if (item is not <list>) continue;
-    match (item)
-      case %((!or declare typedef function) ?base *)
-        if (base.type().is_static()): continue;
-    match (item) case %(adopt ? ? static *): continue;
-    match (item) case %(declaration-function ?declaration *): {
+    if (item ~=
+        %((!or declare typedef function) ?base *) && (base.type().is_static())) continue;
+    if (item ~= %(adopt ? ? static *)) continue;
+    if (item ~= %(declaration-function ?declaration *)) {
       if (!declaration.list().type_from_ast().is_static())
         pending.push(declaration);
       continue;
@@ -57,7 +54,7 @@ module void _needed_types(List syntax, Map rows, Map needed) {
     /* A typedef spelling is needed through any declarator. Aggregate
        completeness remains attached to the direct tag demand above. */
     Type base = type.type().base_type();
-    match (base) case %(?(String name)):
+    if (base ~= %(?(String name)))
       if (%(typedef $name) in rows) needed[%(typedef $name)] = 1;
     foreach (Var part in item) pending.push(part);
   }
@@ -69,7 +66,7 @@ module void _select_public(FileWalk &w) {
   foreach (Var part in w.parts) if (part is <map>) rows.merge(part);
   foreach (Var (key, value) in rows) {
     // The owning unit replays its recipes before its Context closes.
-    match (value) case %(declaration-source *): continue;
+    if (value ~= %(declaration-source *)) continue;
     List family = _row_type_family(rows, w.statics, key, value);
     if (_private_row(w.statics, key, family)) continue;
     selected[key] = 1;
@@ -106,7 +103,7 @@ module void _select_public(FileWalk &w) {
 module void _publish_unit_statics(Map statics, Map overlay, String path) {
   List owner = $(Compiler.portable_path(path));
   foreach (List key in statics.keys())
-    match ($(key)) case %((function ?(String name))): {
+    if ($(key) ~= %((function ?(String name)))) {
       overlay.del($(name));
       overlay.del(%(self $name));
       overlay[$("unit-static", name)] = owner;
@@ -205,7 +202,7 @@ List Compiler.collected_names(String path) {
   foreach (Var part in entry.list().car())
     if (part is <map>)
       foreach (Var key in part.map().keys())
-        match (key) case %(?(String name)): names.push(name);
+        if (key ~= %(?(String name))) names.push(name);
   return names.list_free();
 }
 
@@ -229,8 +226,8 @@ static Array _declared_functions(List entry) {
     foreach (Var part in entry.car()) {
       if (part is not <map>) continue;
       foreach (Var (key, value) in part.map())
-        match (key) case %(?(String name))
-          if (value is <list> && value.list().type().is_function()):
+        if (key ~=
+            %(?(String name)) && (value is <list> && value.list().type().is_function()))
             names.push(name);
     }
     declared_functions[entry] = names;
@@ -262,7 +259,7 @@ static void _add_typedef_names(
       match ($(part)) {
         case %(?(Map rows)):
           foreach (Var key in rows.keys())
-            match ($(key)) case %((typedef ?(String name))):
+            if ($(key) ~= %((typedef ?(String name))))
               names.push(name);
         case %(?(String include)):
           _add_typedef_names(c, names, include, seen);
@@ -313,14 +310,14 @@ static void _forget_own_statics(Map globs, List entry) {
   foreach (Var part in entry.car())
     if (part is <map>)
       foreach (Var key in part.map().keys())
-        match (key) case %("unit-static" ?): globs.del(key);
+        if (key ~= %("unit-static" ?)) globs.del(key);
 }
 
 module int _declares_adoption(List parts) {
   foreach (Var part in parts)
     if (part is <map>)
       foreach (Var value in part.map())
-        match (value) case %(adopt ? ? external *): return 1;
+        if (value ~= %(adopt ? ? external *)) return 1;
   return 0;
 }
 
@@ -458,36 +455,35 @@ static Map _inline_type_dependencies(Compiler c, List ast) {
   Map rows = {};
   List function;
   $ast.walk(ast, function) {
-    match (function)
-      case %(function ?base (bind ?binding ?) ?body): {
-        Type type = base;
-        if (!type.is_inline() || type.is_static()) continue;
-        Map types = {}, List node;
-        $ast.walk(body, node) {
-          match (node) {
-            case %(expr ?type ?): if (type) types[type] = 1;
-            case %((!or ?tag declare decl typedef) ?base
-                     (bindings *bindings)):
-              foreach (List binding in bindings) {
-                Type type = %(declare $base (bindings $binding))
-                  .type_from_ast();
-                if (type) types[type] = 1;
-              }
-            case %(offsetof ?type ?): types[type] = 1;
-            case %(op (!or . (!quote ->)) (expr ?receiver ?) ?): {
-              Type aggregate = c.sym.aggregate_of(receiver);
-              if (aggregate) types[aggregate] = 1;
+    if (function ~= %(function ?base (bind ?binding ?) ?body)) {
+      Type type = base;
+      if (!type.is_inline() || type.is_static()) continue;
+      Map types = {}, List node;
+      $ast.walk(body, node) {
+        match (node) {
+          case %(expr ?type ?): if (type) types[type] = 1;
+          case %((!or ?tag declare decl typedef) ?base
+                   (bindings *bindings)):
+            foreach (List binding in bindings) {
+              Type type = %(declare $base (bindings $binding))
+                .type_from_ast();
+              if (type) types[type] = 1;
             }
+          case %(offsetof ?type ?): types[type] = 1;
+          case %(op (!or . (!quote ->)) (expr ?receiver ?) ?): {
+            Type aggregate = c.sym.aggregate_of(receiver);
+            if (aggregate) types[aggregate] = 1;
           }
         }
-        Array ordered = [];
-        foreach (Type type in types.keys()) ordered.push(type);
-        String path = Compiler.portable_path(Path.absolute(c.filename));
-        String name = Ast.binding_spelling(binding);
-        rows[%("source-node" (interface-types $path $(-1) $name))] =
-          %(interface-types $name $(ordered.sort().list_free()));
-        continue;
       }
+      Array ordered = [];
+      foreach (Type type in types.keys()) ordered.push(type);
+      String path = Compiler.portable_path(Path.absolute(c.filename));
+      String name = Ast.binding_spelling(binding);
+      rows[%("source-node" (interface-types $path $(-1) $name))] =
+        %(interface-types $name $(ordered.sort().list_free()));
+      continue;
+    }
     match (function) {
       case %((!or seq at api-source) *): ;
       default: if (function.car() is <symbol>) continue;
@@ -601,7 +597,7 @@ void Compiler.record_conformance_rows(Compiler c, Map rows) {
     contribution = part;
     Array stale = auto [];
     foreach (Var (key, value) in contribution)
-      match (value) case %(conformance *): stale.push(key);
+      if (value ~= %(conformance *)) stale.push(key);
     foreach (Var key in stale) contribution.del(key);
   }
   if (contribution == NULL) return;
