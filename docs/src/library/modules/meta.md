@@ -22,7 +22,7 @@ The compiler surface a `meta` function calls.
 Returns the suffix of `type` that begins at its typedef name or base
 keyword, sharing `type`, or `NULL` when it has none.
 
-Source: `lib/meta.x:430`
+Source: `lib/meta.x:413`
 
 #### type_declaration_parts
 
@@ -32,7 +32,7 @@ Returns `(base modifiers)` for reconstructing a declaration of `type`.
 Function modifiers hold parameter syntax, and modifier order retains C
 declarator precedence.
 
-Source: `lib/meta.x:460`
+Source: `lib/meta.x:443`
 
 #### type_name_error
 
@@ -43,7 +43,7 @@ other than a C type keyword, as `%(String)` and `%(* Point)` do, or
 `NULL`. A type name is a String, as in `%("String")` and `%(* "Point")`;
 neither a short Symbol nor a long Atom supplies that representation.
 
-Source: `lib/meta.x:443`
+Source: `lib/meta.x:426`
 
 ## Public types
 
@@ -62,7 +62,7 @@ Source: `lib/meta.x:443`
 
 Captured code parsed from source or produced by a quotation.
 
-Source: `lib/meta.x:59`
+Source: `lib/meta.x:42`
 
 <a id="Macro"></a>
 ### Macro
@@ -72,7 +72,7 @@ Source: `lib/meta.x:59`
 A macro as a value: called to build code, or used in a Match `case` to
 recognize code and capture its parameters.
 
-Source: `lib/meta.x:53`
+Source: `lib/meta.x:36`
 
 <a id="Source"></a>
 ### Source
@@ -83,7 +83,7 @@ A `meta` parameter declared `Source` receives, at a `$` call, captured
 syntax with the source text it came from: `((text T) (file F) (syntax
 S))`. `Code.source_text` and `x2c_embed_text` read it directly.
 
-Source: `lib/meta.x:71`
+Source: `lib/meta.x:54`
 
 <a id="Type"></a>
 ### Type
@@ -92,7 +92,7 @@ Source: `lib/meta.x:71`
 
 Semantic type syntax with canonical List-pool lifetime.
 
-Source: `lib/meta.x:56`
+Source: `lib/meta.x:39`
 
 <a id="TypeInfo"></a>
 ### TypeInfo
@@ -103,38 +103,21 @@ A `meta` parameter declared `TypeInfo` receives, at a `$` call, the
 description of its argument's type: `((name N) (kind K) (type T)
 (fields F) (methods M))`. Read a part with `List.assoc`.
 
-Source: `lib/meta.x:66`
+Source: `lib/meta.x:49`
 
 ## Design notes
 
-A `meta` function runs inside the compiler, so it can ask the compiler
-questions and build syntax for it to bind. This module declares those
-operations in x2c; the macro values a `meta` function applies and
-recognizes are in `macrovalue/macrovalue.x`. Code builds code with
-quotations (`$!( ... )`, `$!{ ... }`, `$!T{ ... }`) and `%(...)` Lists,
-so the surface declares no constructors.
+Declares compiler-supplied operations on captured `Code` and semantic
+`Type` values, and the `x2c_` helpers without a captured receiver. Code
+construction uses quotations and canonical Lists; macro values live in
+`macrovalue/macrovalue.x`. The shared declaration-part helpers serve
+both the compiler and a project's meta helper. The language reference
+specifies "Compile-time calls and operations".
 
-The operations on a value are methods of the value's type: `Code`,
-captured code, and `Type`, a semantic type. The rest are `x2c_` helpers
-that have no captured receiver: the identifier check, the invocation
-site, embedded text, ancestry and placement, diagnostics, and the
-definition hashes. Compile-time code calls each by its declared name,
-as in `x2c_invocation_line()`. The semantics are specified under
-"Compile-time calls and operations" in the language reference.
-
-Each operation is a bodyless `meta` prototype the compiler supplies. A
+Each compiler operation is a bodyless `meta` prototype. A
 `meta` function that reaches one, directly or through another `meta`
 function, is compile-time only: the compiler emits no run-time form for
 it and diagnoses a run-time call where it is written.
-
-Three operations let a macro contribute code beyond its result.
-`x2c_enclosing` answers the initialized declarator, block item,
-function, or unit around the invocation, and `x2c_place` puts code
-after that declarator or block item, on the exits of its block, at the
-entry of its function, among the unit's support declarations, or in its
-initialization, under the expansion's transaction. `x2c_binding_fresh`
-returns a new binding, so placed code can declare a name that the
-result also refers to. `$auto` is built on them.
 
 The library builds it as an optional module, but the prelude's
 `var/var.x` includes it for its own `meta` rows, so every unit sees its

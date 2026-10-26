@@ -164,7 +164,7 @@ Source: `src/expressions/syntax.x:38`
 Parses an explicit List splice argument, or returns NULL without consuming
 an ordinary argument. Parentheses delimit a complete splice expression.
 
-Source: `src/expressions/syntax.x:503`
+Source: `src/expressions/syntax.x:500`
 
 <a id="Compiler.parse_conditional"></a>
 #### Compiler.parse_conditional
@@ -197,7 +197,7 @@ Parses one macro target through the cast-expression grammar.
 Parsing starts at `c.token` and leaves it at the first token after
 the target.
 
-Source: `src/expressions/syntax.x:279`
+Source: `src/expressions/syntax.x:277`
 
 <a id="Compiler.parse_parenthesized_statement"></a>
 #### Compiler.parse_parenthesized_statement
@@ -213,7 +213,7 @@ resumes at the postfix tail it had already reached. This entry consumes
 the terminating `;` and returns `(stmnt expression)` or an origin-anchored
 `(dstrdecl ...)`.
 
-Source: `src/expressions/syntax.x:209`
+Source: `src/expressions/syntax.x:208`
 
 <a id="Compiler.parse_primary"></a>
 #### Compiler.parse_primary
@@ -224,7 +224,7 @@ Parses one primary expression or expression-valued macro slot.
 Dispatch starts at `c.token` to the selected literal, identifier,
 grouping, or macro parser and leaves the token after that primary form.
 
-Source: `src/expressions/syntax.x:621`
+Source: `src/expressions/syntax.x:617`
 
 <a id="Compiler.parse_variable"></a>
 #### Compiler.parse_variable
@@ -234,7 +234,7 @@ Source: `src/expressions/syntax.x:621`
 Parses and resolves one complex identifier expression.
 Parsing starts at `c.token` and leaves it after the identifier.
 
-Source: `src/expressions/syntax.x:693`
+Source: `src/expressions/syntax.x:689`
 
 <a id="Compiler.postfix_completions"></a>
 #### Compiler.postfix_completions
