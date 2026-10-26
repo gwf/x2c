@@ -40,7 +40,7 @@ must not mutate or recycle an outstanding input's storage.
 **Raises:** `<bad-arg>` for a nonpositive worker count, or `<alloc-fail>` for
 descriptor storage.
 
-Source: `lib/thread.x:668`
+Source: `lib/thread.x:664`
 
 <a id="Iter.parallel_map_in"></a>
 #### Iter.parallel_map_in
@@ -54,7 +54,7 @@ the borrowed pool. Source traversal and accumulation use the caller's pool.
 
 **Raises:** bad-arg for a null pool or nonpositive worker count, or alloc-fail.
 
-Source: `lib/thread.x:678`
+Source: `lib/thread.x:674`
 
 ### `ParallelMap`
 
@@ -86,7 +86,7 @@ the primary Error. Native join failure leaving a worker live aborts.
 **Raises:** source, start, worker, allocation, accumulator, or stop causes,
 including <void-op> for a void worker result.
 
-Source: `lib/thread.x:717`
+Source: `lib/thread.x:713`
 
 ### `Thread`
 
@@ -110,7 +110,7 @@ cleanup failure instead; the original Error continues unchanged.
 `<bad-arg>` for a null entry or `<bad-state>` for a joining entry.
 Error snapshot failures use the existing raw Error floor.
 
-Source: `lib/thread.x:560`
+Source: `lib/thread.x:556`
 
 <a id="Thread.finish_any"></a>
 #### Thread.finish_any
@@ -128,7 +128,7 @@ retained selected handle moves to the end.
 
 **Raises:** the same causes as `Thread.wait_any` and `Thread.join`.
 
-Source: `lib/thread.x:534`
+Source: `lib/thread.x:530`
 
 <a id="Thread.free"></a>
 #### Thread.free
@@ -139,7 +139,7 @@ Frees a `Thread` handle after its consuming join has completed.
 
 **Raises:** `<bad-state>` for NULL, running, or joining handles.
 
-Source: `lib/thread.x:518`
+Source: `lib/thread.x:514`
 
 <a id="Thread.join"></a>
 #### Thread.join
@@ -183,7 +183,7 @@ failure aborts if cleanup cannot establish that borrowed storage is idle.
 
 **Raises:** startup, callback, captured-error, stop, or worker join causes.
 
-Source: `lib/thread.x:633`
+Source: `lib/thread.x:629`
 
 <a id="Thread.start"></a>
 #### Thread.start

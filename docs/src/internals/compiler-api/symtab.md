@@ -121,7 +121,7 @@ A reference reuses the nearest visible tag; a definition or standalone
 forward declaration introduces the tag in the current lexical scope. A
 macro template names its tags as template locals.
 
-Source: `src/symtab/declarations.x:280`
+Source: `src/symtab/declarations.x:275`
 
 <a id="Compiler.begin_semantic_transaction"></a>
 #### Compiler.begin_semantic_transaction
@@ -148,7 +148,7 @@ it are known to hold their prefix already. A replayed collected
 declaration was spelled when it was collected, so its names are final
 and are recorded as they are.
 
-Source: `src/symtab/namespaces.x:114`
+Source: `src/symtab/namespaces.x:107`
 
 <a id="Compiler.drop_fact"></a>
 #### Compiler.drop_fact
@@ -176,7 +176,7 @@ Source: `src/symtab/bindings.x:227`
 
 Returns the static prefix of each file of the module unit.
 
-Source: `src/symtab/namespaces.x:137`
+Source: `src/symtab/namespaces.x:130`
 
 <a id="Compiler.imported_providers"></a>
 #### Compiler.imported_providers
@@ -189,7 +189,7 @@ Package-owned methods use `<package>__<Type>_<member>` internally while
 consumers retain the spelling from the package header. Sorting keeps
 ambiguity diagnostics deterministic.
 
-Source: `src/symtab/namespaces.x:237`
+Source: `src/symtab/namespaces.x:230`
 
 <a id="Compiler.imported_spelling"></a>
 #### Compiler.imported_spelling
@@ -198,7 +198,7 @@ Source: `src/symtab/namespaces.x:237`
 
 Returns an unambiguous imported spelling for `name`, or `NULL`.
 
-Source: `src/symtab/namespaces.x:248`
+Source: `src/symtab/namespaces.x:241`
 
 <a id="Compiler.macro_definition_locals"></a>
 #### Compiler.macro_definition_locals
@@ -229,7 +229,7 @@ Returns a visible `with` name's package-prefixed spelling, or `NULL`.
 
 An ordinary declaration of the local spelling shadows the `with` name.
 
-Source: `src/symtab/namespaces.x:222`
+Source: `src/symtab/namespaces.x:215`
 
 <a id="Compiler.package_spelling"></a>
 #### Compiler.package_spelling
@@ -240,7 +240,7 @@ Returns a name in the current package namespace, preserving prefixes.
 
 Idempotence lets parsing and declaration rewrites share this operation.
 
-Source: `src/symtab/namespaces.x:159`
+Source: `src/symtab/namespaces.x:152`
 
 <a id="Compiler.private_prefix"></a>
 #### Compiler.private_prefix
@@ -252,7 +252,7 @@ current module file, or NULL. A static takes it, and so does each
 declaration of a `static typedef` or `static class`; a `module`
 declaration and every declaration outside a module unit do not.
 
-Source: `src/symtab/namespaces.x:86`
+Source: `src/symtab/namespaces.x:79`
 
 <a id="Compiler.record_declaration_visibility"></a>
 #### Compiler.record_declaration_visibility
@@ -276,7 +276,7 @@ Shallow collection and full parsing both see an import, so repeating the
 same package and alias is a no-op. Another binding of the local spelling
 is a parse error.
 
-Source: `src/symtab/namespaces.x:171`
+Source: `src/symtab/namespaces.x:164`
 
 <a id="Compiler.register_package_member"></a>
 #### Compiler.register_package_member
@@ -288,7 +288,7 @@ Registers one package member under a bare local spelling.
 The package member must already exist in the symbol table. Repeating the
 same binding is a no-op; any conflicting local binding is an error.
 
-Source: `src/symtab/namespaces.x:184`
+Source: `src/symtab/namespaces.x:177`
 
 <a id="Compiler.scoped_spelling"></a>
 #### Compiler.scoped_spelling
@@ -303,7 +303,7 @@ unchanged; it is unique in the unit, so code generated outside the file
 still reaches it. Ordinary source spellings always take their file's
 prefix, even when they resemble another generated spelling.
 
-Source: `src/symtab/namespaces.x:101`
+Source: `src/symtab/namespaces.x:94`
 
 <a id="Compiler.semantic_binding_facts"></a>
 #### Compiler.semantic_binding_facts
@@ -334,7 +334,7 @@ Source: `src/symtab/bindings.x:233`
 Returns the source name of a spelling this unit gave a file prefix, or
 `name`. Var tags and descriptor names use that short name.
 
-Source: `src/symtab/namespaces.x:150`
+Source: `src/symtab/namespaces.x:143`
 
 ### `Sym`
 
@@ -384,7 +384,7 @@ Source: `src/symtab/scopes.x:122`
 
 Installs an existing binding with `ast`'s qualifier-preserving type.
 
-Source: `src/symtab/declarations.x:259`
+Source: `src/symtab/declarations.x:254`
 
 <a id="Sym.binding_is_local"></a>
 #### Sym.binding_is_local
@@ -487,7 +487,14 @@ Returns the key a declaration of `key` with type `ast` takes in this
 unit: its file-private or package spelling at file scope, else `key`.
 Retained declarations keep their already resolved spelling.
 
-Source: `src/symtab/declarations.x:49`
+A module file's statics take its prefix; package mode puts other
+declarations in the package's `name__` space. Binding spellings,
+aggregate tags, and derived Var converters carry that prefix. A later
+declaration without `static` names the prior static, as C links it.
+Other statics keep their spellings; anonymous aggregate gensyms stay in
+the compiler's space.
+
+Source: `src/symtab/declarations.x:56`
 
 <a id="Sym.declaring_scope"></a>
 #### Sym.declaring_scope
@@ -672,7 +679,7 @@ Source: `src/symtab/types.x:237`
 
 Reports whether `binding` names a file-scope static of this unit.
 
-Source: `src/symtab/declarations.x:105`
+Source: `src/symtab/declarations.x:100`
 
 <a id="Sym.is_map_type"></a>
 #### Sym.is_map_type
@@ -1035,7 +1042,7 @@ name a template keeps reaches the global there, and returns them.
 Locals of other scopes keep their spellings for the native macros that
 name them.
 
-Source: `src/symtab/declarations.x:238`
+Source: `src/symtab/declarations.x:233`
 
 <a id="Sym.var_tag_for_type"></a>
 #### Sym.var_tag_for_type
@@ -1071,7 +1078,7 @@ Its writes are already in the scope maps, so code holding a borrowed
 map observes a committed expansion. An absent or inactive transaction
 has no effect.
 
-Source: `src/symtab/transactions.x:135`
+Source: `src/symtab/transactions.x:130`
 
 <a id="SymTxn.commit_transient"></a>
 #### SymTxn.commit_transient
@@ -1082,7 +1089,7 @@ Commits an active transaction, retaining the original counters map.
 The caller may then release the transaction's construction scope.
 Parsing and evaluation must allocate outside that temporary scope.
 
-Source: `src/symtab/transactions.x:157`
+Source: `src/symtab/transactions.x:153`
 
 <a id="SymTxn.local_macros_changed"></a>
 #### SymTxn.local_macros_changed
@@ -1101,7 +1108,7 @@ Source: `src/symtab/transactions.x:104`
 Restores every semantic value captured by an active transaction.
 An absent or inactive transaction has no effect.
 
-Source: `src/symtab/transactions.x:176`
+Source: `src/symtab/transactions.x:164`
 
 ## Public types
 

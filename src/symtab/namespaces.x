@@ -27,7 +27,7 @@ void Compiler.record_declaration_visibility(Compiler c, List declaration) {
             if (name && (body || !rows || rows === %((bind () ()))))
               c.sym.mark_static($(tag, name));
       }
-      _record_rows_visibility(c, declaration, kind, private, mark, rows);
+      _record_rows_visibility(c, declaration, kind, mark, rows);
       if (kind == <declare> && !mark)
         _record_native_objects(c, type, rows);
     }
@@ -57,23 +57,16 @@ static void _record_native_objects(Compiler c, Type spec, List rows) {
 }
 
 static void _record_rows_visibility(
-  Compiler c, List declaration, Symbol kind, int private, int mark,
-  List rows) {
+  Compiler c, List declaration, Symbol kind, int mark, List rows) {
   foreach (List row in rows)
-    match (row) case $Ast.declarator_pattern(%(?identity *)):
-      _record_binding_visibility(
-        c, declaration, kind, private, mark, identity);
-}
-
-static void _record_binding_visibility(
-  Compiler c, List declaration, Symbol kind, int private, int mark,
-  List identity) {
-  String name = Ast.binding_spelling(identity);
-  if (kind == <typedef> && name) {
-    c.record_source_typedef(name, declaration, mark);
-    if (mark) c.sym.mark_static(%(typedef $name));
-  }
-  if (mark && name) c.sym.mark_static($(name));
+    match (row) case $Ast.declarator_pattern(%(?identity *)): {
+      String name = Ast.binding_spelling(identity);
+      if (kind == <typedef> && name) {
+        c.record_source_typedef(name, declaration, mark);
+        if (mark) c.sym.mark_static(%(typedef $name));
+      }
+      if (mark && name) c.sym.mark_static($(name));
+    }
 }
 
 // module and package names

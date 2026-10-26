@@ -62,7 +62,8 @@ static List _finish_function_parts(
   String name = _prepare_lifecycle(
     c, declaration, binding, initializer_owner, shutdown_owner);
   List body = _function_body(c, declaration, name, syntax);
-  _publish_lifecycle(c, name, initializer_owner, shutdown_owner);
+  if (initializer_owner) c.init_fn = name;
+  if (shutdown_owner) c.fini_fn = name;
   return %(function $rtype $declarator $body);
 }
 
@@ -147,13 +148,6 @@ static void _require_signature(
                     ((fnmod (params (param (void) (bind () ())))))))))
     return;
   $fail.parse_lifecycle_signature(c, c.token, role, name);
-}
-
-static void _publish_lifecycle(
-  Compiler c, String name, String initializer_owner,
-  String shutdown_owner) {
-  if (initializer_owner) c.init_fn = name;
-  if (shutdown_owner) c.fini_fn = name;
 }
 
 static List _expression_body(Compiler c) {

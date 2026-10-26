@@ -36,7 +36,7 @@ Returns source-ordered preprocessor nodes in the preceding trivia.
 
 Spaces and comments remain trivia rather than becoming AST nodes.
 
-Source: `src/preprocess.x:293`
+Source: `src/preprocess.x:286`
 
 <a id="Compiler.note_object_macro"></a>
 #### Compiler.note_object_macro
@@ -49,7 +49,7 @@ can be read. The directive after `#define` is scanned as x2c tokens. An
 `#undef` drops the name, so later source reads it as an ordinary
 identifier.
 
-Source: `src/preprocess.x:317`
+Source: `src/preprocess.x:310`
 
 <a id="Compiler.note_preprocessor_macros"></a>
 #### Compiler.note_preprocessor_macros
@@ -59,7 +59,7 @@ Source: `src/preprocess.x:317`
 Records object-like `#define` names and removes names after `#undef`.
 Source storage determines visibility independently of directives.
 
-Source: `src/preprocess.x:307`
+Source: `src/preprocess.x:300`
 
 <a id="Compiler.preproc_branch_state"></a>
 #### Compiler.preproc_branch_state
@@ -136,7 +136,7 @@ Follows the conditional groups open after the preprocessor line `text`.
 `arms` holds one entry per open group, innermost first, listing the
 `preproc` nodes that select that group's current arm.
 
-Source: `src/preprocess.x:418`
+Source: `src/preprocess.x:411`
 
 <a id="Compiler.preproc_within_arms"></a>
 #### Compiler.preproc_within_arms
@@ -147,7 +147,7 @@ Returns `items` inside the conditional arms `arms` tracked by
 `Compiler.preproc_track_arms`: the directives that reopen each group,
 outermost first, then `items`, then one `#endif` per group.
 
-Source: `src/preprocess.x:431`
+Source: `src/preprocess.x:424`
 
 <a id="Compiler.scan_conditionals"></a>
 #### Compiler.scan_conditionals

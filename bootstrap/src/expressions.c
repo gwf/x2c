@@ -56,8 +56,6 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_6(void)
 
 static List f6_syntax____parse_expression_tail(Compiler c, List expr);
 
-static List f6_syntax____parse_comma_list(Compiler c);
-
 static List f6_syntax____parse_assignment_tail(Compiler c, List lhs);
 
 static List f6_syntax____destructure_targets(Compiler c, List lhs);
@@ -2812,7 +2810,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_4(void)
   _2219 = cons(_2218, NULL);
   _2220 = cons(_255, _2219);
   _2221 = List_var(_2220);
-  _2222 = int_var(91252);
+  _2222 = int_var(91184);
   _2223 = cons(_2222, NULL);
   _2224 = cons(_260, _2223);
   _2225 = List_var(_2224);
@@ -3008,7 +3006,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_4(void)
   _2415 = cons(_2414, NULL);
   _2416 = cons(_247, _2415);
   _2417 = List_var(_2416);
-  _2418 = int_var(91614);
+  _2418 = int_var(91546);
   _2419 = cons(_2418, NULL);
   _2420 = cons(_260, _2419);
   _2421 = List_var(_2420);
@@ -3125,7 +3123,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_4(void)
   _2532 = cons(_2531, NULL);
   _2533 = cons(_247, _2532);
   _2534 = List_var(_2533);
-  _2535 = int_var(92197);
+  _2535 = int_var(92129);
   _2536 = cons(_2535, NULL);
   _2537 = cons(_260, _2536);
   _2538 = List_var(_2537);
@@ -3226,7 +3224,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_5(void)
   _2630 = cons(_2629, NULL);
   _2631 = cons(_247, _2630);
   _2632 = List_var(_2631);
-  _2633 = int_var(92281);
+  _2633 = int_var(92213);
   _2634 = cons(_2633, NULL);
   _2635 = cons(_260, _2634);
   _2636 = List_var(_2635);
@@ -3351,7 +3349,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_5(void)
   _2755 = cons(_2754, NULL);
   _2756 = cons(_247, _2755);
   _2757 = List_var(_2756);
-  _2758 = int_var(92026);
+  _2758 = int_var(91958);
   _2759 = cons(_2758, NULL);
   _2760 = cons(_260, _2759);
   _2761 = List_var(_2760);
@@ -3443,7 +3441,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_5(void)
   _2847 = cons(_2846, NULL);
   _2848 = cons(_247, _2847);
   _2849 = List_var(_2848);
-  _2850 = int_var(92488);
+  _2850 = int_var(92420);
   _2851 = cons(_2850, NULL);
   _2852 = cons(_260, _2851);
   _2853 = List_var(_2852);
@@ -3655,7 +3653,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_5(void)
   _3059 = cons(_3058, NULL);
   _3060 = cons(_247, _3059);
   _3061 = List_var(_3060);
-  _3062 = int_var(94621);
+  _3062 = int_var(94553);
   _3063 = cons(_3062, NULL);
   _3064 = cons(_260, _3063);
   _3065 = List_var(_3064);
@@ -4046,7 +4044,14 @@ List Compiler_parse_expression(Compiler c){
 
 static List f6_syntax____parse_expression_tail(Compiler c, List expr){
   if(Compiler_peek(c, 0) == 89){
-    expr = cons(List_var(expr), f6_syntax____parse_comma_list(c));
+    Array expressions = Array_new();
+    do{
+      Compiler_expect(c, 89);
+      Array_push(expressions, List_var(Compiler_parse_assignment(c)));
+    }
+    while(Compiler_peek(c, 0) == 89);
+    ;
+    expr = cons(List_var(expr), Array_list_free(expressions));
     List last = Var_list_payload(List_last(expr)), type = Var_list_payload(List_cadr(last));
     return({
       Var _x2c_gensym_literal_part_0 = List_var(type);  Var _x2c_gensym_literal_part_1 = List_var(cons(_0, List_append(expr, NULL)));  cons(_1, cons(_x2c_gensym_literal_part_0, cons(_x2c_gensym_literal_part_1, NULL)));
@@ -4054,17 +4059,6 @@ static List f6_syntax____parse_expression_tail(Compiler c, List expr){
     );
   }
   return expr;
-}
-
-static List f6_syntax____parse_comma_list(Compiler c){
-  Array expressions = Array_new();
-  do{
-    Compiler_expect(c, 89);
-    Array_push(expressions, List_var(Compiler_parse_assignment(c)));
-  }
-  while(Compiler_peek(c, 0) == 89);
-  ;
-  return Array_list_free(expressions);
 }
 
 List Compiler_parse_conditional(Compiler c);
@@ -4544,7 +4538,7 @@ List Compiler_postfix_completions(Compiler c, Type receiver, Symbol access);
 static List f6_syntax____parse_postfix_arrow(Compiler c, List expr){
   Token origin = c -> token;  Compiler_expect(c, 11645);  if(Compiler_at_completion(c)){
     List rows = Compiler_postfix_completions(c, Var_type(List_cadr(expr)), 11645); {
-      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/expressions/syntax.x",.function = "f6_syntax____parse_postfix_arrow",.line = 575};  x2c_error_raise_n(& _x2c_gensym_error_site_0, 1248787135328, 3, Symbol_var(740232), Symbol_var(28280237222), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(NULL));
+      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/expressions/syntax.x",.function = "f6_syntax____parse_postfix_arrow",.line = 571};  x2c_error_raise_n(& _x2c_gensym_error_site_0, 1248787135328, 3, Symbol_var(740232), Symbol_var(28280237222), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(NULL));
     }
 
   }
@@ -4555,7 +4549,7 @@ List Compiler_resolve_postfix_member(Compiler c, Type receiver_type, List field,
 static List f6_syntax____parse_postfix_dot(Compiler c, List expr){
   Token origin = c -> token;  Compiler_expect(c, 93);  if(Compiler_at_completion(c)){
     Type receiver = Var_type(_is_raw_string_literal(expr) ? List_var(_744) : List_cadr(expr));  List rows = Compiler_postfix_completions(c, receiver, 93); {
-      static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../src/expressions/syntax.x",.function = "f6_syntax____parse_postfix_dot",.line = 589};  x2c_error_raise_n(& _x2c_gensym_error_site_1, 1248787135328, 3, Symbol_var(740232), Symbol_var(28280237222), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(NULL));
+      static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../src/expressions/syntax.x",.function = "f6_syntax____parse_postfix_dot",.line = 585};  x2c_error_raise_n(& _x2c_gensym_error_site_1, 1248787135328, 3, Symbol_var(740232), Symbol_var(28280237222), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(NULL));
     }
 
   }

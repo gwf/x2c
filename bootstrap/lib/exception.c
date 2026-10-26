@@ -51,8 +51,6 @@ _Noreturn static void _fatal(const char * message);
 
 static void _cleanup_drain(X2CCleanup * watermark);
 
-static int _is_error_unwind(ExceptionFrame * frame);
-
 static ExceptionThreadState _thread(void){
   return & exception_thread;
 }
@@ -119,7 +117,7 @@ int x2c_exception_unwinding(void){
 }
 
 int x2c_exception_is_error_target(ExceptionFrame * frame){
-  return _is_error_unwind(frame) && frame -> unwind_target == frame;
+  return frame && frame -> state == 392731102235528 && frame -> unwind_target == frame;
 }
 
 int x2c_exception_claim(ExceptionFrame * frame){
@@ -180,9 +178,5 @@ static void _cleanup_drain(X2CCleanup * watermark){
     if(x2c_error_runtime_ready) Error_restore(handler_depth, stack_height);
   }
 
-}
-
-static int _is_error_unwind(ExceptionFrame * frame){
-  return frame && frame -> state == 392731102235528;
 }
 

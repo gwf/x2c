@@ -153,7 +153,7 @@ causes may transfer to a filtered catch but never return here. Invalid
 detail or unavailable, reentrant, or failed `Error` machinery reaches the
 raw error floor.
 
-Source: `lib/error/dispatch.x:41`
+Source: `lib/error/dispatch.x:45`
 
 #### x2c_error_raise_n
 
@@ -167,7 +167,7 @@ non-returning causes may transfer to a filtered catch but never return
 here. Invalid detail or unavailable, reentrant, or failed `Error`
 machinery reaches the raw error floor.
 
-Source: `lib/error/dispatch.x:53`
+Source: `lib/error/dispatch.x:57`
 
 ### `Error`
 
@@ -209,7 +209,7 @@ Returns the current nested error-dispatch depth.
 This is the nesting depth of error dispatch. `Error.count` returns the
 number of accumulated errors.
 
-Source: `lib/error/dispatch.x:98`
+Source: `lib/error/dispatch.x:91`
 
 <a id="Error.handler_depth"></a>
 #### Error.handler_depth
@@ -263,7 +263,7 @@ Marks the current nested error dispatch as already rendered by `Logger`.
 This suppresses only `Error`'s fallback report for a `<log>` policy.
 Calling outside dispatch has no effect.
 
-Source: `lib/error/dispatch.x:204`
+Source: `lib/error/dispatch.x:197`
 
 <a id="Error.policy_adopt"></a>
 #### Error.policy_adopt

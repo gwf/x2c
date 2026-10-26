@@ -95,8 +95,6 @@ static List f11_collections____parse_array_element(Compiler c);
 
 static List f11_collections____parse_array_elements(Compiler c);
 
-static List f11_collections____parse_quoted_entries(Compiler c);
-
 static void f11_collections____push_entry(Array entries, Ast entry);
 
 static List f11_collections____parse_quoted_entry(Compiler c);
@@ -106,8 +104,6 @@ static List f11_collections____entry_value(Compiler c, List key, Token origin);
 static List f11_collections____parse_map_entries(Compiler c, int evaluated);
 
 static List f11_collections____parse_map_entry(Compiler c, int evaluated);
-
-static List f7_strings____parse_string_segments(Compiler c);
 
 static List f7_strings____parse_string_segment(Compiler c);
 
@@ -1074,14 +1070,10 @@ static List f11_collections____parse_array_elements(Compiler c){
 }
 
 List Compiler_parse_map_literal(Compiler c){
-  if(! _init_guard_) _file_init_();  Compiler_expect(c, 9719);  List elems = f11_collections____parse_quoted_entries(c);  Compiler_expect(c, 251);  return cons(_0, cons(_40, cons(List_var(cons(_172, List_append(elems, NULL))), NULL)));
-}
-
-static List f11_collections____parse_quoted_entries(Compiler c){
-  Array entries = Array_new();  while(Compiler_peek(c, 0) != 251){
+  if(! _init_guard_) _file_init_();  Compiler_expect(c, 9719);  Array entries = Array_new();  while(Compiler_peek(c, 0) != 251){
     f11_collections____push_entry(entries, f11_collections____parse_quoted_entry(c));  if(Compiler_peek(c, 0) == 251) break;  Compiler_expect(c, 89);
   }
-  return Array_list_free(entries);
+  List elems = Array_list_free(entries);  Compiler_expect(c, 251);  return cons(_0, cons(_40, cons(List_var(cons(_172, List_append(elems, NULL))), NULL)));
 }
 
 static void f11_collections____push_entry(Array entries, Ast entry){
@@ -1142,17 +1134,13 @@ static List f11_collections____parse_map_entry(Compiler c, int evaluated){
 }
 
 List Compiler_parse_string_literal(Compiler c){
-  if(! _init_guard_) _file_init_();  Compiler_expect(c, 9541);  if(Compiler_test(c, 69)) return _183;  List segments = f7_strings____parse_string_segments(c);  Compiler_expect(c, 69); {
+  if(! _init_guard_) _file_init_();  Compiler_expect(c, 9541);  if(Compiler_test(c, 69)) return _183;  Array items = Array_new();  while(Compiler_peek(c, 0) != 69) Array_push(items, List_var(f7_strings____parse_string_segment(c)));  List segments = Array_list_free(items);  Compiler_expect(c, 69); {
     List _x2c_gensym_match_expr = segments; List _x2c_gensym_match_cursor, _x2c_gensym_match_cursor1;   _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && Var_is(_x2c_gensym_match_cursor->car, 806120) && (_x2c_gensym_match_cursor1 = Var_list_payload(_x2c_gensym_match_cursor->car), 1) && _x2c_gensym_match_cursor1 && _x2c_gensym_match_cursor1->car.u64 == 9224497936767982090ULL && (_x2c_gensym_match_cursor1 = _x2c_gensym_match_cursor1->cdr, 1) && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {{
       return cons(_0, cons(_177, cons(List_car(segments), NULL)));
     }
      }
   }
   return cons(_0, cons(_177, cons(List_var(cons(_184, List_append(segments, NULL))), NULL)));
-}
-
-static List f7_strings____parse_string_segments(Compiler c){
-  Array segments = Array_new();  while(Compiler_peek(c, 0) != 69) Array_push(segments, List_var(f7_strings____parse_string_segment(c)));  return Array_list_free(segments);
 }
 
 static List f7_strings____parse_string_segment(Compiler c){

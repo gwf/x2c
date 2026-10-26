@@ -23,17 +23,13 @@ static macro Stmt $fail.literals_string_brace(Expr $c, Expr $site) =>
 List Compiler.parse_string_literal(Compiler c) {
   c.expect(<"%\"">);
   if (c.test(<"\"">)) return %(expr ("String") (0));
-  List segments = _parse_string_segments(c);
+  Array items = [];
+  while (c.peek(0) != <"\"">) items.push(_parse_string_segment(c));
+  List segments = items.list_free();
   c.expect(<"\"">);
   if (segments ~= %((cache *)))
     return %(expr ("String") $(segments.car()));
   return %(expr ("String") (segments @segments));
-}
-
-static List _parse_string_segments(Compiler c) {
-  Array segments = [];
-  while (c.peek(0) != <"\"">) segments.push(_parse_string_segment(c));
-  return segments.list_free();
 }
 
 static List _parse_string_segment(Compiler c) {

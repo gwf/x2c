@@ -236,7 +236,7 @@ creation and removal failures raise. This operation does not consult
 **Raises:** `<io-fail>`, `<bad-arg>`, `<size-limit>`, or `<alloc-fail>` while
 reading text, constructing arguments, or managing the temporary directory.
 
-Source: `src/toolchain.x:352`
+Source: `src/toolchain.x:349`
 
 <a id="Toolchain.preprocess_action"></a>
 #### Toolchain.preprocess_action
@@ -261,7 +261,7 @@ without explicit options, as it reports them, plus the `lib` directory
 beside each reported `include` directory. A compiler that reports none
 contributes none.
 
-Source: `src/toolchain.x:416`
+Source: `src/toolchain.x:413`
 
 ## Public types
 

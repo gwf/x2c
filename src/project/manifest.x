@@ -166,11 +166,6 @@ static Map _keys(Manifest &m) {
    it; any other field is set now. */
 static void _settle(Manifest &m) {
   if (_array_open(m.value)) return;
-  _set(m);
-  m.key = NULL;
-}
-
-static void _set(Manifest &m) {
   Project p = m.project;
   int line = m.start;
   String key = m.key, value = m.value;
@@ -179,6 +174,7 @@ static void _set(Manifest &m) {
   else if (m.section == <target>)
     _set_target_field(p, m.target, line, key, value);
   else _set_profile_field(p, m.profile, line, key, value);
+  m.key = NULL;
 }
 
 static void _set_project_field(Project p, int line, String key, String value) {

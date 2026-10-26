@@ -66,8 +66,6 @@ static void _forget(Diagnostics diag, int from);
 
 static void _publish_limit_notice(Diagnostics diag);
 
-static void _warn(Diagnostics diag, Symbol code, String message, List location, List notes);
-
 static String _note_line(List l);
 
 static String _json_path(Compiler compiler, String path);
@@ -303,10 +301,6 @@ void Diagnostics_report(Diagnostics diag, Symbol code, String message, List loca
     _publish_limit_notice(diag);
   }
 
-}
-
-static void _warn(Diagnostics diag, Symbol code, String message, List location, List notes){
-  _publish(diag, _build_entry(code, 49497918350, message, location, notes));
 }
 
 static String _note_line(List l){
@@ -700,7 +694,7 @@ _Noreturn void Compiler_report_error(Compiler compiler, Symbol code, String mess
   Compiler_report_problem(compiler, code, message, token, notes);
   Diagnostics diag = compiler -> diagnostics;
   if(compiler -> recovery_depth > 0){
-    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/diagnostics.x",.function = "Compiler_report_error",.line = 489};
+    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/diagnostics.x",.function = "Compiler_report_error",.line = 482};
     x2c_error_raise_n(& _x2c_gensym_error_site_0, 28682226919752, 1, Symbol_var(209659067570), Symbol_var(code));
     __builtin_unreachable();
   }
@@ -736,7 +730,8 @@ void Compiler_report_warning_at(Compiler compiler, Symbol code, String message, 
   report_suspend();
   Diagnostics diag = compiler -> diagnostics;
   message = String_truth(message) ? message : _57;
-  _warn(diag, code ? code : 49497918350, message, location, notes);
+  List entry = _build_entry(code ? code : 49497918350, 49497918350, message, location, notes);
+  _publish(diag, entry);
 }
 
 static void _show_source_context(Compiler compiler, int line, int column, int length, int position){

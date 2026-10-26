@@ -69,8 +69,6 @@ static Job _captured(List arguments);
 
 static Job _start_tool(Job command, String program, String * failure);
 
-static String _start_failure(String program, List detail);
-
 static int _accepts(String cc, String option);
 
 static List _cpp_arguments(Toolchain t, List include_dirs, String macros, String depfile, String source);
@@ -519,7 +517,12 @@ static Job _start_tool(Job command, String program, String * failure){
         if(_x2c_gensym_macro_selected_1 == 0){
           List volatile detail;
           detail = Var_list_payload(x2c_error_catch_capture(_x2c_gensym_error_handler_1, 0));
-          (* failure) = _start_failure(program, detail);
+          {
+            long error = Var_long(Var_convert(List_assoc(detail, Symbol_var(11703198)), 818062));
+            String reason = String_new(strerror((int) error));
+            (* failure) = String_join(NULL, cons(String_var(_37), cons(String_var(program), cons(String_var(_38), cons(String_var(reason), cons(String_var(_39), NULL))))));
+          }
+
         }
 
       }
@@ -536,12 +539,6 @@ static Job _start_tool(Job command, String program, String * failure){
     x2c_exception_leave(& _x2c_gensym_exception_frame_1);
   }
   return job;
-}
-
-static String _start_failure(String program, List detail){
-  long error = Var_long(Var_convert(List_assoc(detail, Symbol_var(11703198)), 818062));
-  String reason = String_new(strerror((int) error));
-  return String_join(NULL, cons(String_var(_37), cons(String_var(program), cons(String_var(_38), cons(String_var(reason), cons(String_var(_39), NULL))))));
 }
 
 int Toolchain_preprocess(Toolchain t, const char * fname, List include_dirs, const char * imacros, String * output, String * errors, String * dependencies){

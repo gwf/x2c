@@ -173,7 +173,7 @@ invalid. Children must already be released, and no caller may use `inner`
 afterward. Use `Pool.close` instead to end a bracket opened with
 `Pool.open`.
 
-Source: `lib/pool/interning.x:272`
+Source: `lib/pool/interning.x:267`
 
 <a id="Pool.retain"></a>
 #### Pool.retain
@@ -184,7 +184,7 @@ Returns an unnamed child of `inner`, without making it thread-active.
 Ownership, failures, and the comparison with `Pool.open` follow
 `Pool.retain_named`.
 
-Source: `lib/pool/interning.x:263`
+Source: `lib/pool/interning.x:258`
 
 <a id="Pool.retain_named"></a>
 #### Pool.retain_named
@@ -200,7 +200,7 @@ canonical `String` and `List` operations allocate into.
 partial child resources and leaves `inner` unchanged; native mutex
 initialization failure aborts.
 
-Source: `lib/pool/interning.x:229`
+Source: `lib/pool/interning.x:224`
 
 ## Runtime-internal callables
 
@@ -364,7 +364,7 @@ Source: `lib/pool/storage.x:390`
 Reports whether this exact level stores `key` as its canonical identity.
 Ancestors are not searched, and a null pool reports zero.
 
-Source: `lib/pool/interning.x:207`
+Source: `lib/pool/interning.x:202`
 
 <a id="Pool.promote"></a>
 #### Pool.promote

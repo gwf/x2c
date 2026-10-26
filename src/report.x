@@ -49,7 +49,7 @@ void report_configure(
   int quiet, int plain, Symbol color_mode, int verbose, int dry_run,
   int inspecting) {
   report = (struct ReportState) {.terminal = -1, .pid = getpid()};
-  int terminal = _terminal();
+  int terminal = isatty(fileno(stderr)) && Env.get("TERM") != "dumb";
   int diagnostic = verbose || dry_run || inspecting;
   report.receipts = !quiet && !diagnostic;
   report.transient = report.receipts && terminal && !plain;
@@ -57,9 +57,6 @@ void report_configure(
   report.start = report_now_us();
   report.color = _use_color(plain, color_mode, terminal);
 }
-
-static int _terminal(void) =>
-  isatty(fileno(stderr)) && Env.get("TERM") != "dumb";
 
 static int _columns(void) {
   struct winsize size;

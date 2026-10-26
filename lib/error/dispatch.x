@@ -29,7 +29,11 @@ static typedef struct ErrorRaise {
     Prefer the `raise` statement in source so generated location detail is
     retained.
 */
-Symbol Error.raise(Symbol code, List detail) => _raise(NULL, code, detail);
+Symbol Error.raise(Symbol code, List detail) {
+  ErrorRaise r = _raise_enter(code);
+  _record(NULL, r.code, detail);
+  return _dispatch(r);
+}
 
 /** Raises one compiler-generated error from a prepared detail `List`.
     The runtime copies admissible detail before synchronous handler dispatch.
@@ -60,19 +64,15 @@ void x2c_error_raise_n(
   _dispatch(r);
 }
 
-static Symbol _raise(const X2CErrorSite *site, Symbol code, List detail) {
-  ErrorRaise r = _raise_enter(code);
-  _record(site, r.code, detail);
-  return _dispatch(r);
-}
-
 /* A raise reaches the floor while error state is being built, when dispatch
    is nested too deeply or shut down, and before initialization. */
 static ErrorRaise _raise_enter(Symbol code) {
   Symbol effective = code ? code : <invariant>;
   ErrorThreadState state = _thread();
   if (state.floor_only) _floor(effective, "raise while building error state");
-  if (!_enter()) _floor(effective, "raise re-entered or after shutdown");
+  if (state.shutdown_done || state.depth >= ERROR_MAX_DEPTH)
+    _floor(effective, "raise re-entered or after shutdown");
+  state.depth++;
   if (!Error.ready()) {
     _leave();
     _floor(effective, "raise before initialization");
@@ -80,13 +80,6 @@ static ErrorRaise _raise_enter(Symbol code) {
   ErrorRaise r = {effective, Error.count(), state.depth};
   state.rendered[r.depth] = 0;
   return r;
-}
-
-static int _enter(void) {
-  ErrorThreadState state = _thread();
-  if (state.shutdown_done || state.depth >= ERROR_MAX_DEPTH) return 0;
-  state.depth++;
-  return 1;
 }
 
 static void _leave(void) => _thread().depth--;

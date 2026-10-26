@@ -262,19 +262,6 @@ static List _forwarded_prefix_list(void) {
 
 static List forwarded_prefixes = _forwarded_prefix_list();
 
-/* `(src (source FILE BEGIN END) SYNTAX)` records one complete caller argument
-   or decorator target. Constructed syntax can reproduce that List shape, so
-   source access trusts only captured syntax identities registered for the
-   active expansion. Forwarding preserves the registered capture. */
-module int _source_capture_parts(Var value, List &?source, Var &?syntax) {
-  if (value ~= %(src ?record ?captured)) {
-    if (source) source = record;
-    if (syntax) syntax = captured;
-    return 1;
-  }
-  return 0;
-}
-
 /* `value` without its source wrappers. A pending invocation or quotation
    inside it keeps its own capture rows or holes, so nested applications
    unwrap each argument once. */

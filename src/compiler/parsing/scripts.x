@@ -73,10 +73,6 @@ static void _hoist(ScriptParse &p, int begin, Token tokens) {
   if (p.first < 0) p.first = begin;
 }
 
-module void _finish_script(Compiler c, List ast) {
-  if (!c.script.defines_main && !c.error_count()) _check_script_locals(c, ast);
-}
-
 /** Skips a collected script statement, or diagnoses one beside `main`.
     Called after top-level directives establish source visibility.
 */
@@ -201,7 +197,8 @@ static Bytes _append_placed(Bytes stream, Token token, Token first) {
    statements, which are locals of `x2c_script`. C would report such a name
    as undeclared; this names the cause and the `static` spelling that
    shares it. */
-static void _check_script_locals(Compiler c, List ast) {
+module void _finish_script(Compiler c, List ast) {
+  if (c.script.defines_main || c.error_count()) return;
   Map locals = _script_locals(ast);
   if (!locals.len()) return;
   foreach (List node in ast)

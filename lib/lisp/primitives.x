@@ -81,11 +81,15 @@ static int _number_class(Var value, long double magnitude) {
   return 1;
 }
 
-/* `Var.compare` is a total order over every value, so it separates two
-   encodings of the same number by rank to give each one its own place in a
-   sort. Lisp `=`, `<`, and `<=` answer about numbers, so 1 and 1.0 are one
-   number here and comparison stops at the value. */
-static int _number_compare(Var a, Var b) {
+/** Compares Lisp numbers by value and returns a boxed negative, zero, or
+    positive. Integer and floating encodings of one number compare equal.
+    Unlike `Var.compare`, numeric comparison does not use representation
+    rank to distinguish equal values. A nonnumeric operand raises `<bad-types>`.
+*/
+Var lisp_compare(Var a, Var b) {
+  if (!_is_lisp_number(a) || !_is_lisp_number(b))
+    raise %(bad-types (operation "lisp_compare") (left-kind $(a.kind()))
+                       (right-kind $(b.kind())));
   Symbol ak = a.kind(), bk = b.kind();
   long double da = ak == <floating> ? a.long_double() : 0.0L;
   long double db = bk == <floating> ? b.long_double() : 0.0L;
@@ -96,17 +100,6 @@ static int _number_compare(Var a, Var b) {
   if (ak == <integer>) return a.integer_floating_compare(b);
   if (bk == <integer>) return -b.integer_floating_compare(a);
   return da < db ? -1 : da > db;
-}
-
-/** Compares Lisp numbers by value and returns a boxed negative, zero, or
-    positive. Integer and floating encodings of one number compare equal.
-    A nonnumeric operand raises `<bad-types>`.
-*/
-Var lisp_compare(Var a, Var b) {
-  if (!_is_lisp_number(a) || !_is_lisp_number(b))
-    raise %(bad-types (operation "lisp_compare") (left-kind $(a.kind()))
-                       (right-kind $(b.kind())));
-  return _number_compare(a, b);
 }
 
 /** Concatenates when either operand is `String`, otherwise adds dynamically.

@@ -306,12 +306,6 @@ module void _spelled_types(List node, Map names) {
 
 // functions
 
-static void _add_function(Partition &p, List type, List declarator, Ast body) {
-  match (declarator) case %(bind ?binding *):
-    type = _with_attributes(p.c.semantic_binding_facts(), type, binding);
-  _place_function(p, type, declarator, body);
-}
-
 static List _with_attributes(Map facts, List type, Var binding) {
   Var attributes;
   if (!facts.try_get(%(attributes $binding), attributes)) return type;
@@ -321,8 +315,10 @@ static List _with_attributes(Map facts, List type, Var binding) {
 /* A static definition stays in the source. A public one publishes its
    prototype, or its whole body when inline, after forward declarations of
    the tags the prototype spells. */
-static void _place_function(
+static void _add_function(
   Partition &p, Type type, List declarator, Ast body) {
+  match (declarator) case %(bind ?binding *):
+    type = _with_attributes(p.c.semantic_binding_facts(), type, binding);
   type = _noreturn(type, declarator, body);
   if (type.is_static()) {
     _add_statics(p, $(declarator));
@@ -538,13 +534,11 @@ static void _add_alias(Partition &p, List alias, Type type) {
 static void _add_preproc(Partition &p, List node, String content) {
   Symbol kind = Compiler.preproc_conditional_kind(content);
   if (kind == <open>) p.open.push(p.header.len());
-  if (kind && p.open.len()) _mark_conditional(p, node, kind);
+  if (kind && p.open.len()) {
+    p.header.push(%(conditional $(p.open[-1]) $kind $node));
+    if (kind == <close>) p.open.take_last();
+  }
   else _place_directive(p, node, content);
-}
-
-static void _mark_conditional(Partition &p, List node, Symbol kind) {
-  p.header.push(%(conditional $(p.open[-1]) $kind $node));
-  if (kind == <close>) p.open.take_last();
 }
 
 /* The generator writes the header guard. Includes follow their source

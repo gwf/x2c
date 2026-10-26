@@ -272,17 +272,12 @@ String Compiler.interface_text(Compiler c) {
   Var cached = _process_cache()[canonical];
   if (cached is void) return NULL;
   Buffer out = auto Buffer.new(0);
-  if (_write_interface_entry(out, canonical, cached)) return out;
-  $fail.collect_interface_write(c, NULL);
-}
-
-static int _write_interface_entry(Buffer out, String canonical, List entry) {
   List record = %(
-    interface 6 $(Compiler.identity()) @(_stored_record(canonical, entry)));
+    interface 6 $(Compiler.identity()) @(_stored_record(canonical, cached)));
   /* An interface is plain data, which a loader never evaluates. */
-  if (!out.write_datum(record, 0)) return 0;
+  if (!out.write_datum(record, 0)) $fail.collect_interface_write(c, NULL);
   out.write_char('\n');
-  return 1;
+  return out;
 }
 
 /* An entry as an interface stores it after the compiler identity. */

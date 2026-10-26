@@ -105,11 +105,7 @@ static int _init_guard_ = 0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
-static Symbol f8_dispatch____raise(const X2CErrorSite * site, Symbol code, List detail);
-
 static f8_dispatch___ErrorRaise f8_dispatch____raise_enter(Symbol code);
-
-static int f8_dispatch____enter(void);
 
 static void f8_dispatch____leave(void);
 
@@ -272,7 +268,9 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
 
 Symbol Error_raise(Symbol code, List detail){
   if(! _init_guard_) _file_init_();
-  return f8_dispatch____raise(NULL, code, detail);
+  f8_dispatch___ErrorRaise r = f8_dispatch____raise_enter(code);
+  _record(NULL, r.code, detail);
+  return f8_dispatch____dispatch(r);
 }
 
 void x2c_error_raise(Symbol code, List detail){
@@ -290,12 +288,6 @@ void x2c_error_raise_n(const X2CErrorSite * site, Symbol code, unsigned pair_cou
   f8_dispatch____dispatch(r);
 }
 
-static Symbol f8_dispatch____raise(const X2CErrorSite * site, Symbol code, List detail){
-  f8_dispatch___ErrorRaise r = f8_dispatch____raise_enter(code);
-  _record(site, r.code, detail);
-  return f8_dispatch____dispatch(r);
-}
-
 int Error_ready(void);
 
 int Error_count(void);
@@ -304,7 +296,8 @@ static f8_dispatch___ErrorRaise f8_dispatch____raise_enter(Symbol code){
   Symbol effective = code ? code : 20800632064936;
   ErrorThreadState state = _thread();
   if(state -> floor_only) _floor(effective, "raise while building error state");
-  if(! f8_dispatch____enter()) _floor(effective, "raise re-entered or after shutdown");
+  if(state -> shutdown_done || state -> depth >= ERROR_MAX_DEPTH) _floor(effective, "raise re-entered or after shutdown");
+  state -> depth ++;
   if(! Error_ready()){
     f8_dispatch____leave();
     _floor(effective, "raise before initialization");
@@ -315,13 +308,6 @@ static f8_dispatch___ErrorRaise f8_dispatch____raise_enter(Symbol code){
   ;
   state -> rendered[r.depth] = 0;
   return r;
-}
-
-static int f8_dispatch____enter(void){
-  ErrorThreadState state = _thread();
-  if(state -> shutdown_done || state -> depth >= ERROR_MAX_DEPTH) return 0;
-  state -> depth ++;
-  return 1;
 }
 
 static void f8_dispatch____leave(void){

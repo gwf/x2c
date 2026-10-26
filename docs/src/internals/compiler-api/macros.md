@@ -86,7 +86,7 @@ Returns the syntax that invokes the template `stored`, a macro name
 spelled as a String or a local definition, with `values`: what a template
 call in a staged `meta` body evaluates to.
 
-Source: `src/macros/templates.x:164`
+Source: `src/macros/templates.x:168`
 
 ### `Compiler`
 
@@ -155,7 +155,7 @@ Source: `src/macros/values.x:344`
 Binds a compile-time code `value` returned to a statement at
 `context`.
 
-Source: `src/macros/templates.x:479`
+Source: `src/macros/templates.x:483`
 
 <a id="Compiler.capture_macro_value"></a>
 #### Compiler.capture_macro_value
@@ -187,7 +187,7 @@ Evaluates a declaration recipe after its owning source is collected.
 The callback is a built-in target name and arguments are retained
 canonical values.
 
-Source: `src/macros/templates.x:147`
+Source: `src/macros/templates.x:151`
 
 <a id="Compiler.evaluate_macro_rows"></a>
 #### Compiler.evaluate_macro_rows
@@ -274,7 +274,7 @@ Source: `src/macros/invocations/recognition.x:85`
 Binds quoted `syntax` with its `fresh` rows at `position`, as the
 expansion of its quotation would.
 
-Source: `src/macros/templates.x:338`
+Source: `src/macros/templates.x:342`
 
 <a id="Compiler.leave_alias_body"></a>
 #### Compiler.leave_alias_body
@@ -295,7 +295,7 @@ Scalars, immutable values, representable Array/Map roots, compiler-issued
 identifiers, and nonempty code `List`s are accepted; `invocation` locates
 an unsupported result.
 
-Source: `src/macros/templates.x:464`
+Source: `src/macros/templates.x:468`
 
 <a id="Compiler.local_macro_form_is_definition"></a>
 #### Compiler.local_macro_form_is_definition
@@ -424,7 +424,7 @@ Reports whether the macro invocation at the cursor produces file-scope
 syntax, directly or through the target it decorates. A script unit keeps
 such an invocation at file scope. This query does not consume tokens.
 
-Source: `src/macros/invocations/recognition.x:378`
+Source: `src/macros/invocations/recognition.x:376`
 
 <a id="Compiler.macro_value_literal"></a>
 #### Compiler.macro_value_literal
@@ -591,7 +591,7 @@ its established root `type`, child stage, and source wrappers. Binding,
 capture collection, hygiene, and effects do not run, and a statement
 expression's template-origin wrappers are omitted.
 
-Source: `src/macros/templates.x:249`
+Source: `src/macros/templates.x:253`
 
 <a id="Compiler.rebuild_function"></a>
 #### Compiler.rebuild_function
@@ -601,7 +601,7 @@ Source: `src/macros/templates.x:249`
 Rebuilds a bound function through a Function decorator without binding it
 again. The template keeps the target's return type and declarator.
 
-Source: `src/macros/templates.x:274`
+Source: `src/macros/templates.x:278`
 
 <a id="Compiler.rebuild_statement"></a>
 #### Compiler.rebuild_statement
@@ -612,7 +612,7 @@ Rebuilds a statement template as a canonical unbraced `seq`. Bound
 children keep their identities and origins; template-origin wrappers
 are omitted because this path does not open an invocation.
 
-Source: `src/macros/templates.x:258`
+Source: `src/macros/templates.x:262`
 
 <a id="Compiler.rebuild_unit_function"></a>
 #### Compiler.rebuild_unit_function
@@ -623,7 +623,7 @@ Constructs a fresh function from a Unit template after lowering. The
 caller supplies its bound name and lowered children; binding does not
 run.
 
-Source: `src/macros/templates.x:265`
+Source: `src/macros/templates.x:269`
 
 <a id="Compiler.report_meta_failure"></a>
 #### Compiler.report_meta_failure
@@ -691,7 +691,7 @@ Source: `src/macros/aliases.x:420`
 Consumes a macro invocation name and its balanced argument list.
 The invocation terminator or following decorator target remains current.
 
-Source: `src/macros/invocations/recognition.x:354`
+Source: `src/macros/invocations/recognition.x:352`
 
 <a id="Compiler.skip_named_type_declaration"></a>
 #### Compiler.skip_named_type_declaration
@@ -701,7 +701,7 @@ Source: `src/macros/invocations/recognition.x:354`
 Consumes a NamedType target already projected by owning-source collection.
 CPP scanning does not produce the declaration or parse its fields again.
 
-Source: `src/macros/invocations/recognition.x:365`
+Source: `src/macros/invocations/recognition.x:363`
 
 <a id="Compiler.take_code_value"></a>
 #### Compiler.take_code_value

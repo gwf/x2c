@@ -199,13 +199,6 @@ void Diagnostics.report(
   }
 }
 
-/* Warnings share publication order, streaming, and the repeat rule with
-   reports, but never change `count` or publish the limit notice. */
-static void _warn(
-  Diagnostics diag, Symbol code, String message, List location, List notes) {
-  _publish(diag, _build_entry(code, <warning>, message, location, notes));
-}
-
 // diagnostics & error reporting
 
 /* A diagnostic's text notes form one line, such as `token: ; kind: ;`. */
@@ -524,7 +517,10 @@ void Compiler.report_warning_at(
   report_suspend();
   Diagnostics diag = compiler.diagnostics;
   message = message ? message : "compiler warning";
-  _warn(diag, code ? code : <warning>, message, location, notes);
+  /* Warnings share publication and repeat handling without error counts. */
+  List entry = _build_entry(
+    code ? code : <warning>, <warning>, message, location, notes);
+  _publish(diag, entry);
 }
 
 /* Locations use one-based coordinates while source indexing is zero-based.

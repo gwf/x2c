@@ -223,27 +223,6 @@ static void _mark_layout(ArmScan &s, size_t index, int packed) {
   c.packed_marks.push((long) index + 1);
 }
 
-/* Reports whether the attribute list the group `open` holds names an
-   attribute that can change a struct's layout, spelled with or without its
-   surrounding underscores. Identifiers inside an attribute's own arguments
-   are not names. */
-static int _layout_attribute(Token open, int &packed) {
-  Token close = open.group_close();
-  int depth = 0, layout = 0;
-  for (Token t = open; t < close; t++) {
-    depth += t.type.group_step();
-    if (depth != 1 || t.type != <ident>) continue;
-    String word = t.text.strip("_");
-    if (word == "packed") {
-      layout = 1;
-      packed = 1;
-    }
-    else if (word == "aligned" || word == "mode" ||
-             word == "vector_size") layout = 1;
-  }
-  return layout;
-}
-
 /* Tracks in `layout` the macros whose body holds an attribute that can
    change a struct's layout, written out or through another such macro. A
    use of one is marked as the attribute it expands to would be. As with
@@ -276,8 +255,22 @@ static void _note_layout_macro(ArmScan &s, String content) {
 static int _attribute_layout(Token token) {
   Token open = Token.skip_trivia(token + 1);
   Token inner = open.type == <(> ? Token.skip_trivia(open + 1) : open;
-  int packed = 0;
-  if (inner.type != <(> || !_layout_attribute(inner, packed)) return 0;
+  if (inner.type != <(>) return 0;
+  Token close = inner.group_close();
+  int depth = 0, layout = 0, packed = 0;
+  // Only depth-one names are attributes; their arguments are not.
+  for (Token t = inner; t < close; t++) {
+    depth += t.type.group_step();
+    if (depth != 1 || t.type != <ident>) continue;
+    String word = t.text.strip("_");
+    if (word == "packed") {
+      layout = 1;
+      packed = 1;
+    }
+    else if (word == "aligned" || word == "mode" ||
+             word == "vector_size") layout = 1;
+  }
+  if (!layout) return 0;
   return packed ? 2 : 1;
 }
 

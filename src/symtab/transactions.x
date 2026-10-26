@@ -120,11 +120,6 @@ int SymTxn.local_macros_changed(SymTxn &s) {
 /** Returns whether a semantic transaction is open. */
 int Sym.transacting(Sym s) => s.transactions > 0;
 
-/* Stops one transaction's semantic write log. */
-static void _end_log(Sym s) {
-  if (!--s.transactions) s.undo.clear();
-}
-
 // commit and rollback
 
 /** Publishes an active semantic transaction and makes rollback a no-op.
@@ -147,7 +142,8 @@ void SymTxn.commit(SymTxn &?s) {
 /* Completing the outermost transaction empties the undo log. */
 static void _finish(SymTxn &s) {
   s.active = 0;
-  _end_log(s.c.sym);
+  Sym sym = s.c.sym;
+  if (!--sym.transactions) sym.undo.clear();
 }
 
 /** Commits an active transaction, retaining the original counters map.
@@ -160,14 +156,6 @@ void SymTxn.commit_transient(SymTxn &s) {
   s.commit();
   c.names.counters = s.counters;
   s.counters.merge(counters);
-}
-
-/* Gives `original` exactly the rows of `staged` and keeps its identity.
-   Source-definition rollback also removes rows added by the transaction. */
-static void _replace_map(Map original, Map staged) {
-  Array keys = auto original.keys();
-  foreach (Var key in keys) if (!(key in staged)) original.del(key);
-  original.merge(staged);
 }
 
 /** Restores every semantic value captured by an active transaction.
@@ -226,8 +214,12 @@ static void _restore_effects(SymTxn &s) {
   c.needs_exception = s.needs_exception;
 }
 
+/* Restore source definitions in place, removing rows the transaction added. */
 static void _restore_sources(SymTxn &s) {
   Compiler c = s.c;
   c.source_occurrences.resize(s.source_occurrences);
-  _replace_map(c.source_definitions, s.source_definitions);
+  Map original = c.source_definitions, staged = s.source_definitions;
+  Array keys = auto original.keys();
+  foreach (Var key in keys) if (!(key in staged)) original.del(key);
+  original.merge(staged);
 }

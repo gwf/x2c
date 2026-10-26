@@ -45,21 +45,16 @@ static List _declare(Sym s, List context, List key, List ast, List declared) {
 /** Returns the key a declaration of `key` with type `ast` takes in this
     unit: its file-private or package spelling at file scope, else `key`.
     Retained declarations keep their already resolved spelling.
+
+    A module file's statics take its prefix; package mode puts other
+    declarations in the package's `name__` space. Binding spellings,
+    aggregate tags, and derived Var converters carry that prefix. A later
+    declaration without `static` names the prior static, as C links it.
+    Other statics keep their spellings; anonymous aggregate gensyms stay in
+    the compiler's space.
 */
 List Sym.declared_key(Sym s, List context, List key, List ast) {
   if (!s.c.package && !s.c.line_markers) return key;
-  return _declared_key(s, context, key, ast);
-}
-
-/* A file-scope declaration's key takes its scope's spelling. A static of
-   a module file takes the file's prefix, so each file's statics have their
-   own keys; package mode puts other declarations in the package's `name__`
-   space. Binding spellings, aggregate tags, and derived Var converters then
-   carry the prefix everywhere they are read. A later declaration of a
-   static without `static` names that static, as C links it. Other statics
-   keep their spellings; anonymous aggregate gensyms are not source
-   spellings and stay in the compiler's space. */
-static List _declared_key(Sym s, List context, List key, List ast) {
   Compiler c = s.c;
   if (!s.at_file_scope())
     return context || _names_local_object(ast.type_from_ast())

@@ -319,15 +319,12 @@ static Job _captured(List arguments) =>
 static Job _start_tool(Job command, String program, String &failure) {
   Job job = NULL;
   try job = command.start();
-  catch %((!or not-found io-fail) *detail):
-    failure = _start_failure(program, detail);
+  catch %((!or not-found io-fail) *detail): {
+    long error = detail.assoc(<"errno">);
+    String reason = String.new(strerror((int) error));
+    failure = %"x2c: unable to execute $program: $reason\n";
+  }
   return job;
-}
-
-static String _start_failure(String program, List detail) {
-  long error = detail.assoc(<"errno">);
-  String reason = String.new(strerror((int) error));
-  return %"x2c: unable to execute $program: $reason\n";
 }
 
 // host preprocessing

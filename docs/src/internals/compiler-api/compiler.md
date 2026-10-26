@@ -198,7 +198,7 @@ Caches a cons cell when both parts have immutable cache forms.
 Returns `NULL` when runtime literals are required or either part cannot
 be represented by the immutable cache graph.
 
-Source: `src/compiler/literal-cache.x:31`
+Source: `src/compiler/literal-cache.x:25`
 
 <a id="Compiler.cache_literal_list"></a>
 #### Compiler.cache_literal_list
@@ -210,7 +210,7 @@ Returns a runtime `List` expression for cached compiler-owned syntax.
 `values` may contain nested `List`s, `String`s, integer `Var`s, and
 `Symbol`s.
 
-Source: `src/compiler/literal-cache.x:93`
+Source: `src/compiler/literal-cache.x:87`
 
 <a id="Compiler.cache_literal_var"></a>
 #### Compiler.cache_literal_var
@@ -221,7 +221,7 @@ Interns an immutable value and returns its `(cache id)` reference.
 `value` is a `List` of such values, a `String`, a number with its tag, or
 a `Symbol`; any other value returns NULL.
 
-Source: `src/compiler/literal-cache.x:48`
+Source: `src/compiler/literal-cache.x:42`
 
 <a id="Compiler.canonical_path"></a>
 #### Compiler.canonical_path
@@ -253,7 +253,7 @@ Collects macro definitions or keyword aliases before the full source parse.
 The owning source reports malformed definitions during its full parse,
 which can recover at later forms. Included providers reject them here.
 
-Source: `src/compiler/parsing/collection.x:78`
+Source: `src/compiler/parsing/collection.x:74`
 
 <a id="Compiler.collect_unit_macro"></a>
 #### Compiler.collect_unit_macro
@@ -326,7 +326,7 @@ Source: `src/compiler/parsing/tokens.x:151`
 Records declaration visibility and meta facts, then skips its body.
 The declaration is already bound by the shared top-level parser.
 
-Source: `src/compiler/parsing/collection.x:100`
+Source: `src/compiler/parsing/collection.x:96`
 
 <a id="Compiler.free_bindings"></a>
 #### Compiler.free_bindings
@@ -604,7 +604,7 @@ Source: `src/compiler/source-files.x:6`
 Records the header linkage of a public inline definition. Semantic
 function types discard storage, so this declaration fact survives there.
 
-Source: `src/compiler/parsing/collection.x:140`
+Source: `src/compiler/parsing/collection.x:136`
 
 <a id="Compiler.record_origin"></a>
 #### Compiler.record_origin
@@ -741,7 +741,7 @@ Source: `src/compiler/lifecycle.x:42`
 Skips a collected script statement, or diagnoses one beside `main`.
 Called after top-level directives establish source visibility.
 
-Source: `src/compiler/parsing/scripts.x:83`
+Source: `src/compiler/parsing/scripts.x:79`
 
 <a id="Compiler.source_path"></a>
 #### Compiler.source_path
@@ -762,7 +762,7 @@ Starts a collection pass with the syntax prelude. It parses no bodies,
 and an import it reads installs the protocols visible to it when a
 template or `meta` body first asks for one.
 
-Source: `src/compiler/parsing/collection.x:59`
+Source: `src/compiler/parsing/collection.x:55`
 
 <a id="Compiler.take_unit_state"></a>
 #### Compiler.take_unit_state

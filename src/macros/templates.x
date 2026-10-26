@@ -105,15 +105,19 @@ Var Compiler.evaluate_meta_value(
   }
 }
 
-/* Both entry forms expose source only for complete captures in the active
-   expansion. The keys are the same unwrapped values passed to the helper. */
+/* `(src (source FILE BEGIN END) SYNTAX)` records one complete caller argument
+   or decorator target. Constructed syntax can reproduce that List shape, so
+   source access trusts only captured syntax identities registered for the
+   active expansion. Forwarding preserves the registered capture; the keys
+   are the same unwrapped values passed to the helper. */
 static Map _source_captures(List bindings) {
   Map captures = {};
   foreach (List pair in bindings) {
-    List source;
-    Var syntax;
-    if (pair && _source_capture_parts(pair.cadr(), source, syntax))
+    if (!pair) continue;
+    if (pair.cadr() ~= %(src ?record ?syntax)) {
+      List source = record;
       captures[((ulong) syntax.u64)] = source;
+    }
   }
   return captures;
 }

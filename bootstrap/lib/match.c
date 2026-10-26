@@ -709,8 +709,6 @@ static int _run_capture(MachineView view, MatchMachine * m, Var input, MatchCapt
 
 static int f9_execution____commit(MachineView view, MatchMachine * m, MatchCaptureBuffer * captures);
 
-static int f9_execution____run(MatchPlan mm, MatchMachine * m, Var input, List * out);
-
 static List _publish_captures(MatchCaptureLayout layout, MatchCaptureBuffer * captures);
 
 typedef struct ReplacementSource{
@@ -725,8 +723,6 @@ typedef struct f9_templates___ReplacementCell{
   int splice;
 }
 f9_templates___ReplacementCell;
-
-static int f9_templates____replace_match(MatchPlan plan, List input, Var template, Var * out);
 
 static Var f9_templates____value(ReplacementSource * source, Var binder);
 
@@ -745,12 +741,6 @@ typedef struct f9_traversal___MatchWalk{
   int error;
 }
 f9_traversal___MatchWalk;
-
-static int f9_traversal____first(MatchPlan plan, List input, Var * out_match, List * out_bindings);
-
-static int f9_traversal____all(MatchPlan plan, List input, List * out_results);
-
-static int f9_traversal____replace_all(MatchPlan plan, List input, Var template, List * out);
 
 static int f9_traversal____test(f9_traversal___MatchWalk * m, Var node);
 
@@ -3601,8 +3591,14 @@ int MatchPlan_execute(MatchPlan plan, Var input, List * out_bindings, MachineSta
   if(! out_bindings) return - 1;
   if(! MatchPlan_admits(plan, input, NULL)) return 0;
   MatchMachine * machine = MatchMachine_acquire(stats);
+  Var values[MACHINE_BINDER_MAX];
+  MatchCaptureBuffer captures ={
+    values, 0, MACHINE_BINDER_MAX
+  }
+  ;
+  int result = _run_capture(MachineProgram_view(plan -> program), &(* machine), input, & captures);
   List bindings;
-  int result = f9_execution____run(plan, &(* machine), input, &(bindings));
+  if(result == 1) bindings = _publish_captures(plan -> layout, & captures);
   MatchMachine_release(machine);
   if(result == 1)(* out_bindings) = bindings;
   return result;
@@ -3611,17 +3607,6 @@ int MatchPlan_execute(MatchPlan plan, Var input, List * out_bindings, MachineSta
 int MatchPlan_try_match(MatchPlan plan, List input, List * out_bindings){
   if(! _init_guard_) _file_init_();
   return MatchPlan_execute(plan, List_var(input), out_bindings, NULL);
-}
-
-static int f9_execution____run(MatchPlan mm, MatchMachine * m, Var input, List * out){
-  Var values[MACHINE_BINDER_MAX];
-  MatchCaptureBuffer captures ={
-    values, 0, MACHINE_BINDER_MAX
-  }
-  ;
-  int result = _run_capture(MachineProgram_view(mm -> program), &((* m)), input, & captures);
-  if(result == 1)(* out) = _publish_captures(mm -> layout, & captures);
-  return result;
 }
 
 static List _publish_captures(MatchCaptureLayout layout, MatchCaptureBuffer * captures){
@@ -3639,11 +3624,8 @@ static List _publish_captures(MatchCaptureLayout layout, MatchCaptureBuffer * ca
 
 int MatchPlan_try_match_replace(MatchPlan plan, List input, Var template, Var * out){
   if(! _init_guard_) _file_init_();
-  if(! _prepared(plan, "MatchPlan.try_match_replace") || ! out) return - 1;
-  return f9_templates____replace_match(plan, input, template, out);
-}
-
-static int f9_templates____replace_match(MatchPlan plan, List input, Var template, Var * out){
+  if(! _prepared(plan, "MatchPlan.try_match_replace")) return - 1;
+  if(! out) return - 1;
   Var values[MACHINE_BINDER_MAX];
   MatchCaptureBuffer captures ={
     values, 0, MACHINE_BINDER_MAX
@@ -3744,11 +3726,9 @@ static Var _replace(Var input, ReplacementSource * source){
 
 int MatchPlan_try_search(MatchPlan plan, List input, Var * out_match, List * out_bindings){
   if(! _init_guard_) _file_init_();
-  if(! _prepared(plan, "MatchPlan.try_search") || ! out_match || ! out_bindings) return - 1;
-  return f9_traversal____first(plan, input, out_match, out_bindings);
-}
-
-static int f9_traversal____first(MatchPlan plan, List input, Var * out_match, List * out_bindings){
+  if(! _prepared(plan, "MatchPlan.try_search")) return - 1;
+  if(! out_match) return - 1;
+  if(! out_bindings) return - 1;
   MatchMachine * machine = MatchMachine_acquire(NULL);
   Var _x2c_gensym_macro_values_0[MACHINE_BINDER_MAX];
   MatchCaptureBuffer _x2c_gensym_macro_captures_0 ={
@@ -3771,11 +3751,8 @@ static int f9_traversal____first(MatchPlan plan, List input, Var * out_match, Li
 
 int MatchPlan_search(MatchPlan plan, List input, List * out_results){
   if(! _init_guard_) _file_init_();
-  if(! _prepared(plan, "MatchPlan.search") || ! out_results) return - 1;
-  return f9_traversal____all(plan, input, out_results);
-}
-
-static int f9_traversal____all(MatchPlan plan, List input, List * out_results){
+  if(! _prepared(plan, "MatchPlan.search")) return - 1;
+  if(! out_results) return - 1;
   MatchMachine * machine = MatchMachine_acquire(NULL);
   Var _x2c_gensym_macro_values_1[MACHINE_BINDER_MAX];
   MatchCaptureBuffer _x2c_gensym_macro_captures_1 ={
@@ -3796,11 +3773,8 @@ static int f9_traversal____all(MatchPlan plan, List input, List * out_results){
 
 int MatchPlan_search_replace(MatchPlan plan, List input, Var template, List * out){
   if(! _init_guard_) _file_init_();
-  if(! _prepared(plan, "MatchPlan.search_replace") || ! out) return - 1;
-  return f9_traversal____replace_all(plan, input, template, out);
-}
-
-static int f9_traversal____replace_all(MatchPlan plan, List input, Var template, List * out){
+  if(! _prepared(plan, "MatchPlan.search_replace")) return - 1;
+  if(! out) return - 1;
   MatchMachine * machine = MatchMachine_acquire(NULL);
   Var _x2c_gensym_macro_values_2[MACHINE_BINDER_MAX];
   MatchCaptureBuffer _x2c_gensym_macro_captures_2 ={

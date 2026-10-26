@@ -156,8 +156,6 @@ static Var f9_interning____lookup_locked(Pool inner, Var key, unsigned key_hash)
 
 static Var f9_interning____intern_locked(Pool inner, Var object, int * discard);
 
-static void f9_interning____insert_locked(Pool inner, Var object);
-
 static int _owns_locked(Pool pool, Var key);
 
 static unsigned f9_interning____child_capacity(Pool inner);
@@ -894,16 +892,12 @@ void Pool_insert(Pool inner, Var object){
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_7);
     {
-      f9_interning____insert_locked(inner, object);
+      f9_interning___PoolTable_set_entry(inner -> table, & object, & object);
+      inner -> interned ++;
     }
     x2c_cleanup_leave(& _x2c_gensym_defer_record_7);
   }
 
-}
-
-static void f9_interning____insert_locked(Pool inner, Var object){
-  f9_interning___PoolTable_set_entry(inner -> table, & object, & object);
-  inner -> interned ++;
 }
 
 int Pool_owns(Pool pool, Var key){

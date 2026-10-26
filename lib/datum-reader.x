@@ -139,10 +139,9 @@ static Var _symbol(LispReader &r, Token token) {
   return Symbol.new(inner);
 }
 
-static Var _malformed_token(LispReader &r, Token token) =>
-  _malformed(r.source, r.base + token.pos);
-
-static Var _malformed(String source, unsigned at) {
+static Var _malformed_token(LispReader &r, Token token) {
+  String source = r.source;
+  unsigned at = r.base + token.pos;
   int line = 1, column = 1;
   scan_next_line_col(source, (int) at, &line, &column);
   raise %(malformed (source $source) (line $line) (column $column));

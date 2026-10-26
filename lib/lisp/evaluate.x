@@ -297,14 +297,10 @@ static Var _make_lambda(Lisp lisp, List args, LispEnv *env, int macro) {
   *lambda = (struct Lambda) {.params = params, .body = body, .macro = macro};
   if (env) {
     auto (&lisp.scope) lambda.captures = {};
-    _capture(lisp, env, lambda);
+    FreeNames walk = {lisp, env, lambda.captures};
+    _free_form(walk, lambda.body, lambda.params, 0);
   }
   return result = lambda;
-}
-
-static void _capture(Lisp lisp, LispEnv *env, Lambda lambda) {
-  FreeNames walk = {lisp, env, lambda.captures};
-  _free_form(walk, lambda.body, lambda.params, 0);
 }
 
 /* One capture analysis: the session and environment that resolve call

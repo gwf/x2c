@@ -39,8 +39,6 @@ static size_t _note_attribute(ArmScan * s, size_t index);
 
 static void _mark_layout(ArmScan * s, size_t index, int packed);
 
-static int _layout_attribute(Token open, int * packed);
-
 static void _note_layout_macro(ArmScan * s, String content);
 
 static int _attribute_layout(Token token);
@@ -320,22 +318,6 @@ static void _mark_layout(ArmScan * s, size_t index, int packed){
   Array_push(c -> packed_marks, long_var((long) index + 1));
 }
 
-static int _layout_attribute(Token open, int * packed){
-  Token close = Token_group_close(open);
-  int depth = 0, layout = 0;
-  for(Token t = open;  t < close;  t ++){
-    depth += Symbol_group_step(t -> type);
-    if(depth != 1 || t -> type != 19147688) continue;
-    String word = String_strip(t -> text, "_");
-    if(String_equal(word, _27)){
-      layout = 1;
-      (* packed) = 1;
-    }
-    else if(String_equal(word, _28) || String_equal(word, _29) || String_equal(word, _30)) layout = 1;
-  }
-  return layout;
-}
-
 static void _note_layout_macro(ArmScan * s, String content){
   int undefined;
   Token name = _macro_directive(content, &(undefined));
@@ -359,8 +341,20 @@ static void _note_layout_macro(ArmScan * s, String content){
 static int _attribute_layout(Token token){
   Token open = Token_skip_trivia(token + 1);
   Token inner = open -> type == 81 ? Token_skip_trivia(open + 1) : open;
-  int packed = 0;
-  if(inner -> type != 81 || ! _layout_attribute(inner, &(packed))) return 0;
+  if(inner -> type != 81) return 0;
+  Token close = Token_group_close(inner);
+  int depth = 0, layout = 0, packed = 0;
+  for(Token t = inner;  t < close;  t ++){
+    depth += Symbol_group_step(t -> type);
+    if(depth != 1 || t -> type != 19147688) continue;
+    String word = String_strip(t -> text, "_");
+    if(String_equal(word, _27)){
+      layout = 1;
+      packed = 1;
+    }
+    else if(String_equal(word, _28) || String_equal(word, _29) || String_equal(word, _30)) layout = 1;
+  }
+  if(! layout) return 0;
   return packed ? 2 : 1;
 }
 

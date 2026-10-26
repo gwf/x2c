@@ -74,8 +74,6 @@ static List f8_bindings____scope_find(Sym s, SymScope * scope, List key, Type * 
 
 static List f12_declarations____declare(Sym s, List context, List key, List ast, List declared);
 
-static List f12_declarations____declared_key(Sym s, List context, List key, List ast);
-
 static List f12_declarations____linked_key(Sym s, List key);
 
 static void f12_declarations____link_local(Sym s, List key);
@@ -108,9 +106,7 @@ static void f12_declarations____unshadow_local(Sym s, List binding, String alias
 
 static void f10_namespaces____record_native_objects(Compiler c, Type spec, List rows);
 
-static void f10_namespaces____record_rows_visibility(Compiler c, List declaration, Symbol kind, int private, int mark, List rows);
-
-static void f10_namespaces____record_binding_visibility(Compiler c, List declaration, Symbol kind, int private, int mark, List identity);
+static void f10_namespaces____record_rows_visibility(Compiler c, List declaration, Symbol kind, int mark, List rows);
 
 static int f10_namespaces____derived_spelling(Sym s, String name);
 
@@ -163,11 +159,7 @@ static int f12_transactions____tracks(SymTxn * s, Map map);
 
 static int f12_transactions____same(Map a, Map b);
 
-static void f12_transactions____end_log(Sym s);
-
 static void f12_transactions____finish(SymTxn * s);
-
-static void f12_transactions____replace_map(Map original, Map staged);
 
 static void f12_transactions____undo(SymTxn * s);
 
@@ -1121,19 +1113,15 @@ static List f12_declarations____declare(Sym s, List context, List key, List ast,
   return binding;
 }
 
-List Sym_declared_key(Sym s, List context, List key, List ast){
-  if(! _init_guard_) _file_init_();
-  if(! String_truth(s -> c -> package) && ! Array_truth(s -> c -> line_markers)) return key;
-  return f12_declarations____declared_key(s, context, key, ast);
-}
-
 String Compiler_private_prefix(Compiler c, Type type);
 
 int Type_is_static(Type);
 
 String Compiler_declared_spelling(Compiler c, String prefix, String name);
 
-static List f12_declarations____declared_key(Sym s, List context, List key, List ast){
+List Sym_declared_key(Sym s, List context, List key, List ast){
+  if(! _init_guard_) _file_init_();
+  if(! String_truth(s -> c -> package) && ! Array_truth(s -> c -> line_markers)) return key;
   Compiler c = s -> c;
   if(! Sym_at_file_scope(s)) return List_truth(context) || f12_declarations____names_local_object(List_type_from_ast(ast)) ? key : f12_declarations____linked_key(s, key);
   if(List_truth(context) && !(context == _49)) return key;
@@ -1458,7 +1446,7 @@ void Compiler_record_declaration_visibility(Compiler c, List declaration){
             }
 
           }
-          f10_namespaces____record_rows_visibility(c, declaration, Var_symbol(kind), private, mark, rows);  if(x2c_var_equal(kind, Symbol_var(8932560010)) && ! mark) f10_namespaces____record_native_objects(c, Var_type(type), rows);
+          f10_namespaces____record_rows_visibility(c, declaration, Var_symbol(kind), mark, rows);  if(x2c_var_equal(kind, Symbol_var(8932560010)) && ! mark) f10_namespaces____record_native_objects(c, Var_type(type), rows);
         }
 
       }
@@ -1501,13 +1489,20 @@ static void f10_namespaces____record_native_objects(Compiler c, Type spec, List 
 
 }
 
-static void f10_namespaces____record_rows_visibility(Compiler c, List declaration, Symbol kind, int private, int mark, List rows){
+void Compiler_record_source_typedef(Compiler, String, List, int);
+static void f10_namespaces____record_rows_visibility(Compiler c, List declaration, Symbol kind, int mark, List rows){
   {
     List row;  List _x2c_gensym_macro_object_9 = rows;  List _x2c_gensym_macro_cursor_9 = _x2c_gensym_macro_object_9;  Var _x2c_gensym_macro_cursor_output_14;  while(List_try_next(_x2c_gensym_macro_object_9, &(_x2c_gensym_macro_cursor_9), &(_x2c_gensym_macro_cursor_output_14))){
       row = Var_list_payload(_x2c_gensym_macro_cursor_output_14); {
         List _x2c_gensym_match_expr = row; Var _x2c_gensym_match_values[1]; MatchCaptureBuffer _x2c_gensym_match_capture = { .values = _x2c_gensym_match_values, .capacity = 1 };  switch(0){
             default: ;  static MatchCaptureSite _x2c_gensym_match_site_0; if (x2c_match_site_try_capture(&_x2c_gensym_match_site_0, _x2c_gensym_match_expr, List_var(_132), &_x2c_gensym_match_capture)) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_values[0]; {
-            Var identity;  identity = _x2c_gensym_match_value_0;  f10_namespaces____record_binding_visibility(c, declaration, kind, private, mark, Var_list_payload(identity));
+            Var identity;  identity = _x2c_gensym_match_value_0; {
+              String name = Ast_binding_spelling(Var_list_payload(identity));  if(kind == 44661285196 && String_truth(name)){
+                Compiler_record_source_typedef(c, name, declaration, mark);  if(mark) Sym_mark_static(c -> sym, cons(_48, cons(String_var(name), NULL)));
+              }
+              if(mark && String_truth(name)) Sym_mark_static(c -> sym, cons(String_var(name), NULL));
+            }
+
           }
            break; }
         }
@@ -1518,14 +1513,6 @@ static void f10_namespaces____record_rows_visibility(Compiler c, List declaratio
 
   }
 
-}
-
-void Compiler_record_source_typedef(Compiler, String, List, int);
-static void f10_namespaces____record_binding_visibility(Compiler c, List declaration, Symbol kind, int private, int mark, List identity){
-  String name = Ast_binding_spelling(identity);  if(kind == 44661285196 && String_truth(name)){
-    Compiler_record_source_typedef(c, name, declaration, mark);  if(mark) Sym_mark_static(c -> sym, cons(_48, cons(String_var(name), NULL)));
-  }
-  if(mark && String_truth(name)) Sym_mark_static(c -> sym, cons(String_var(name), NULL));
 }
 
 String Compiler_private_prefix(Compiler c, Type type){
@@ -2155,10 +2142,6 @@ int Sym_transacting(Sym s){
   return s -> transactions > 0;
 }
 
-static void f12_transactions____end_log(Sym s){
-  if(! -- s -> transactions) Block_clear(s -> undo);
-}
-
 void SymTxn_commit(SymTxn * s){
   if(! _init_guard_) _file_init_();
   if(! s) return;
@@ -2174,7 +2157,8 @@ void SymTxn_commit(SymTxn * s){
 
 static void f12_transactions____finish(SymTxn * s){
   (* s).active = 0;
-  f12_transactions____end_log((* s).c -> sym);
+  Sym sym =(* s).c -> sym;
+  if(! -- sym -> transactions) Block_clear(sym -> undo);
 }
 
 void SymTxn_commit_transient(SymTxn * s){
@@ -2184,42 +2168,6 @@ void SymTxn_commit_transient(SymTxn * s){
   SymTxn_commit(&((* s)));
   c -> names -> counters =(* s).counters;
   Map_merge((* s).counters, counters);
-}
-
-static void f12_transactions____replace_map(Map original, Map staged){
-  Array keys = Iter_array(Map_keys(original, &(struct Iter){
-    int_var(0)
-  }
-  ));
-  const Array _x2c_gensym_macro_acquired_0 = keys;
-  {
-    _x2c_gensym_defer_env_0 _x2c_gensym_macro_environment_0 ={
-      0
-    }
-    ;
-    _x2c_gensym_macro_environment_0._x2c_gensym_defer_capture_0 =(const void *) & _x2c_gensym_macro_acquired_0;
-    X2CCleanup _x2c_gensym_defer_record_0 ={
-      .fn = _x2c_gensym_defer_cleanup_0, .env = & _x2c_gensym_macro_environment_0
-    }
-    ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_0);
-    {
-      {
-        Var key;
-        Array _x2c_gensym_macro_object_17 = keys;
-        int _x2c_gensym_macro_cursor_17 = 0;
-        Var _x2c_gensym_macro_cursor_output_24;
-        while(Array_try_next(_x2c_gensym_macro_object_17, &(_x2c_gensym_macro_cursor_17), &(_x2c_gensym_macro_cursor_output_24))){
-          key = _x2c_gensym_macro_cursor_output_24;
-          if(!(Map_contains(staged, key))) Map_del(original, key);
-        }
-
-      }
-      Map_merge(original, staged);
-    }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
-  }
-
 }
 
 void SymTxn_rollback(SymTxn * s){
@@ -2276,7 +2224,40 @@ static void f12_transactions____restore_effects(SymTxn * s){
 static void f12_transactions____restore_sources(SymTxn * s){
   Compiler c =(* s).c;
   Array_resize(c -> source_occurrences, (* s).source_occurrences);
-  f12_transactions____replace_map(c -> source_definitions, (* s).source_definitions);
+  Map original = c -> source_definitions, staged =(* s).source_definitions;
+  Array keys = Iter_array(Map_keys(original, &(struct Iter){
+    int_var(0)
+  }
+  ));
+  const Array _x2c_gensym_macro_acquired_0 = keys;
+  {
+    _x2c_gensym_defer_env_0 _x2c_gensym_macro_environment_0 ={
+      0
+    }
+    ;
+    _x2c_gensym_macro_environment_0._x2c_gensym_defer_capture_0 =(const void *) & _x2c_gensym_macro_acquired_0;
+    X2CCleanup _x2c_gensym_defer_record_0 ={
+      .fn = _x2c_gensym_defer_cleanup_0, .env = & _x2c_gensym_macro_environment_0
+    }
+    ;
+    x2c_cleanup_push(& _x2c_gensym_defer_record_0);
+    {
+      {
+        Var key;
+        Array _x2c_gensym_macro_object_17 = keys;
+        int _x2c_gensym_macro_cursor_17 = 0;
+        Var _x2c_gensym_macro_cursor_output_24;
+        while(Array_try_next(_x2c_gensym_macro_object_17, &(_x2c_gensym_macro_cursor_17), &(_x2c_gensym_macro_cursor_output_24))){
+          key = _x2c_gensym_macro_cursor_output_24;
+          if(!(Map_contains(staged, key))) Map_del(original, key);
+        }
+
+      }
+      Map_merge(original, staged);
+    }
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
+  }
+
 }
 
 static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0){

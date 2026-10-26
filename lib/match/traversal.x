@@ -44,14 +44,9 @@ static macro Stmt $match.walk(
 */
 int MatchPlan.try_search(
   MatchPlan plan, List input, Var &?out_match, List &?out_bindings) {
-  if (!_prepared(plan, "MatchPlan.try_search") || !out_match ||
-      !out_bindings)
-    return -1;
-  return _first(plan, input, out_match, out_bindings);
-}
-
-static int _first(
-  MatchPlan plan, List input, Var &out_match, List &out_bindings) {
+  if (!_prepared(plan, "MatchPlan.try_search")) return -1;
+  if (!out_match) return -1;
+  if (!out_bindings) return -1;
   $match.machine(machine, NULL);
   $match.walk(MatchWalk, plan, machine, walk);
   int result = _walk_first(walk, input, 1);
@@ -74,11 +69,8 @@ static int _first(
     constructing results.
 */
 int MatchPlan.search(MatchPlan plan, List input, List &?out_results) {
-  if (!_prepared(plan, "MatchPlan.search") || !out_results) return -1;
-  return _all(plan, input, out_results);
-}
-
-static int _all(MatchPlan plan, List input, List &out_results) {
+  if (!_prepared(plan, "MatchPlan.search")) return -1;
+  if (!out_results) return -1;
   $match.machine(machine, NULL);
   $match.walk(MatchWalk, plan, machine, walk);
   int status = _walk_all(walk, input, 1);
@@ -99,12 +91,8 @@ static int _all(MatchPlan plan, List input, List &out_results) {
 */
 int MatchPlan.search_replace(
   MatchPlan plan, List input, Var template, List &?out) {
-  if (!_prepared(plan, "MatchPlan.search_replace") || !out) return -1;
-  return _replace_all(plan, input, template, out);
-}
-
-static int _replace_all(
-  MatchPlan plan, List input, Var template, List &out) {
+  if (!_prepared(plan, "MatchPlan.search_replace")) return -1;
+  if (!out) return -1;
   $match.machine(machine, NULL);
   $match.walk(MatchWalk, plan, machine, walk);
   walk.template = template;

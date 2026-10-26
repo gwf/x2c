@@ -13,19 +13,15 @@ static keyword loop $private.loop;
     a single declaration returns directly.
 */
 List Compiler.parse_declaration_row(Compiler c) {
-  List rows = _declaration_rows(c);
-  if (rows ~= %(?only)) return only;
-  return %(seq @rows);
-}
-
-static List _declaration_rows(Compiler c) {
   Array declarations = [];
   loop {
     declarations.push(_declaration_group(c, 1));
     if (!_group_comma(c)) break;
     c.next();
   }
-  return declarations.list_free();
+  List rows = declarations.list_free();
+  if (rows ~= %(?only)) return only;
+  return %(seq @rows);
 }
 
 /** Parses one declaration group and leaves its terminating token current.

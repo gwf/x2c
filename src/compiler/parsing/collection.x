@@ -16,19 +16,15 @@ void Compiler.shallow_parse(Compiler c, Map globals) {
     contributes above `base`.
 */
 void Compiler.shallow_parse_overlay(Compiler c, Map base, Map overlay) {
-  if (c.macros == NULL || !c.macros.len()) _start_macros(c);
+  if (c.macros == NULL || !c.macros.len()) {
+    c.macros = {};
+    if (c.kw_aliases == NULL) c.kw_aliases = {};
+    c.binding_rows = c.binding_sealed = NULL;
+  }
   c.sym.reset_overlay(base, overlay);
   _shallow_parse_loop(c);
   // Only linkage groups remain open; a later segment of the file closes them.
   c.open_linkage += c.braces.len();
-}
-
-/* A unit with no macros yet starts its macro and keyword state, and the
-   Lisp binding groups that state records. */
-static void _start_macros(Compiler c) {
-  c.macros = {};
-  if (c.kw_aliases == NULL) c.kw_aliases = {};
-  c.binding_rows = c.binding_sealed = NULL;
 }
 
 static void _shallow_parse_loop(Compiler c) {

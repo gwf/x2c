@@ -153,19 +153,15 @@ static List _parse_array_elements(Compiler c) {
 */
 List Compiler.parse_map_literal(Compiler c) {
   c.expect(<"%{">);
-  List elems = _parse_quoted_entries(c);
-  c.expect(<"}">);
-  return %(expr ("Map") (map @elems));
-}
-
-static List _parse_quoted_entries(Compiler c) {
   Array entries = [];
   while (c.peek(0) != <"}">) {
     _push_entry(entries, _parse_quoted_entry(c));
     if (c.peek(0) == <"}">) break;
     c.expect(<,>);
   }
-  return entries.list_free();
+  List elems = entries.list_free();
+  c.expect(<"}">);
+  return %(expr ("Map") (map @elems));
 }
 
 static void _push_entry(Array entries, Ast entry) {

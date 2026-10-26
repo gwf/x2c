@@ -137,7 +137,7 @@ above.
 
 **Raises:** `<alloc-fail>` while constructing replacement `List`s.
 
-Source: `lib/match/templates.x:72`
+Source: `lib/match/templates.x:68`
 
 <a id="List.search"></a>
 #### List.search
@@ -1127,7 +1127,7 @@ error.
 **Raises:** `<size-limit>` for an ineligible plan, or `<alloc-fail>` while
 constructing results.
 
-Source: `lib/match/traversal.x:76`
+Source: `lib/match/traversal.x:71`
 
 <a id="MatchPlan.search_replace"></a>
 #### MatchPlan.search_replace
@@ -1143,7 +1143,7 @@ tested.
 **Raises:** `<size-limit>` for an ineligible plan, or `<alloc-fail>` while
 traversing or replacing.
 
-Source: `lib/match/traversal.x:100`
+Source: `lib/match/traversal.x:92`
 
 <a id="MatchPlan.try_capture"></a>
 #### MatchPlan.try_capture
@@ -1165,7 +1165,7 @@ Executes prepared `plan` against `input`, writing bindings on success.
 This is `MatchPlan.execute` without statistics and has the same status,
 output atomicity, ordering, and failures.
 
-Source: `lib/match/execution.x:174`
+Source: `lib/match/execution.x:179`
 
 <a id="MatchPlan.try_match_replace"></a>
 #### MatchPlan.try_match_replace

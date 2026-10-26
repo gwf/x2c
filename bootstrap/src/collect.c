@@ -402,8 +402,6 @@ static Map _read_dependencies(Compiler c, List stored);
 
 static String f10_interfaces____written_interface(String canonical);
 
-static int f10_interfaces____write_interface_entry(Buffer out, String canonical, List entry);
-
 static List f10_interfaces____stored_record(String canonical, List entry);
 
 static List _interface_include_dirs(Compiler c, String canonical);
@@ -5987,7 +5985,13 @@ String Compiler_interface_text(Compiler c){
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_49);
     {
-      if(f10_interfaces____write_interface_entry(out, canonical, Var_list_payload(cached))){
+      List record =({
+        Var _x2c_gensym_literal_part_47 = String_var(Compiler_identity());  List _x2c_gensym_literal_part_48 = f10_interfaces____stored_record(canonical, Var_list_payload(cached));  cons(_360, cons(_361, cons(_x2c_gensym_literal_part_47, List_append(_x2c_gensym_literal_part_48, NULL))));
+      }
+      );
+      if(! Buffer_write_datum(out, List_var(record), 0)) Compiler_report_error(c, 354920, _394, NULL, NULL);
+      Buffer_write_char(out, '\n');
+      {
         String _x2c_gensym_return_value_23 = Buffer_str(out);
         {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_49);
@@ -5995,21 +5999,11 @@ String Compiler_interface_text(Compiler c){
         }
 
       }
-      Compiler_report_error(c, 354920, _394, NULL, NULL);
+
     }
     x2c_cleanup_leave(& _x2c_gensym_defer_record_49);
   }
 
-}
-
-static int f10_interfaces____write_interface_entry(Buffer out, String canonical, List entry){
-  List record =({
-    Var _x2c_gensym_literal_part_47 = String_var(Compiler_identity());  List _x2c_gensym_literal_part_48 = f10_interfaces____stored_record(canonical, entry);  cons(_360, cons(_361, cons(_x2c_gensym_literal_part_47, List_append(_x2c_gensym_literal_part_48, NULL))));
-  }
-  );
-  if(! Buffer_write_datum(out, List_var(record), 0)) return 0;
-  Buffer_write_char(out, '\n');
-  return 1;
 }
 
 static List f10_interfaces____stored_record(String canonical, List entry){

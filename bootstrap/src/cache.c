@@ -59,8 +59,6 @@ static List _unqualify_const(List specifiers);
 
 static List _initializer_rhs(List decltype, List binding, List mods, List type, List value);
 
-static inline int _is_composite(List value);
-
 static List _assignment(List binding, List type, List rhs);
 
 static List _array_block(Compiler c, List target, Type array, List items);
@@ -742,14 +740,7 @@ static List _unqualify_const(List specifiers){
 }
 
 static List _initializer_rhs(List decltype, List binding, List mods, List type, List value){
-  if(! _is_composite(value)) return cons(_0, cons(List_var(type), cons(List_var(value), NULL)));  List bound = cons(_91, cons(List_var(binding), cons(List_var(mods), NULL)));  List decl_ast =({
-    Var _x2c_gensym_literal_part_10 = List_var(decltype);  Var _x2c_gensym_literal_part_11 = List_var(cons(_78, cons(List_var(bound), NULL)));  cons(_50, cons(_x2c_gensym_literal_part_10, cons(_x2c_gensym_literal_part_11, NULL)));
-  }
-  );  Type cast_type = List_type_from_ast(decl_ast);  if(List_truth(Type_list(cast_type))) cast_type = Type_canonicalize(cast_type);  List decl = cons(_95, cons(List_var(cast_type), _104));  List literal = cons(_0, cons(_96, cons(List_var(value), NULL))), rhs_value = cons(_105, cons(List_var(decl), cons(List_var(literal), NULL)));  return cons(_0, cons(List_var(cast_type), cons(List_var(rhs_value), NULL)));
-}
-
-static inline int _is_composite(List value){
-  return({
+  if(!({
     int _x2c_gensym_condition_1 = 0; {
       List _x2c_gensym_match_expr = value; List _x2c_gensym_match_cursor;   _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224505593647287562ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1)) {{
         _x2c_gensym_condition_1 = 1;
@@ -758,7 +749,10 @@ static inline int _is_composite(List value){
     }
     _x2c_gensym_condition_1;
   }
-  );
+  )) return cons(_0, cons(List_var(type), cons(List_var(value), NULL)));  List bound = cons(_91, cons(List_var(binding), cons(List_var(mods), NULL)));  List decl_ast =({
+    Var _x2c_gensym_literal_part_10 = List_var(decltype);  Var _x2c_gensym_literal_part_11 = List_var(cons(_78, cons(List_var(bound), NULL)));  cons(_50, cons(_x2c_gensym_literal_part_10, cons(_x2c_gensym_literal_part_11, NULL)));
+  }
+  );  Type cast_type = List_type_from_ast(decl_ast);  if(List_truth(Type_list(cast_type))) cast_type = Type_canonicalize(cast_type);  List decl = cons(_95, cons(List_var(cast_type), _104));  List literal = cons(_0, cons(_96, cons(List_var(value), NULL))), rhs_value = cons(_105, cons(List_var(decl), cons(List_var(literal), NULL)));  return cons(_0, cons(List_var(cast_type), cons(List_var(rhs_value), NULL)));
 }
 
 static List _assignment(List binding, List type, List rhs){

@@ -304,15 +304,12 @@ static Var _bounded(Walk &w, Var body, int is_loop) {
 }
 
 static Var _inside(Walk &w, List cleanup, List marker, Var body) {
-  w.regions.push($(_statements(cleanup), marker));
+  if (cleanup ~= %(code-value ? (seq *statements) ?))
+    cleanup = statements;
+  w.regions.push($(cleanup, marker));
   Var result = _rewrite(w, body);
   w.regions.take_last();
   return result;
-}
-
-static List _statements(List code) {
-  if (code ~= %(code-value ? (seq *statements) ?)) return statements;
-  return code;
 }
 
 /* Wrap a transfer in the cleanup it runs first. A transfer that leaves no
@@ -371,11 +368,6 @@ static void _report_at(Walk &w, int origin, String message, List note) {
    one name by construction. */
 module List _region_binding(Compiler c, String role) =>
   c.sym.introduce(c.fresh_name(role));
-
-static List _address_of(String spelling, List binding) {
-  Type type = %(($spelling));
-  return %(expr $(type.reference()) (op & (expr $type (ident $binding))));
-}
 
 /* landings
 
@@ -462,8 +454,11 @@ static List _lower_defer(
 
 /* The runtime unlinks this record and calls its thunk. */
 static List _defer_cleanup(Compiler c, List record) {
+  Type type = %(($_record_type));
+  List address =
+    %(expr $(type.reference()) (op & (expr $type (ident $record))));
   List call = c.bind_syntax(
-    $!{ x2c_cleanup_leave($(_address_of(_record_type, record))); },
+    $!{ x2c_cleanup_leave($address); },
     <block>, c.return_type);
   return Code.lowered(%(seq $call), NULL);
 }

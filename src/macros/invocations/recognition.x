@@ -331,10 +331,8 @@ module int _try_macro(Compiler c, Map definitions, Atom name, Var &stored) {
     protocol or adoption rows. `<tried>` covers Unit decorators and other
     local `Unit` macros. Other invocations return zero.
 */
-Symbol Compiler.macro_invocation_collection(Compiler c) =>
-  _collection(_peek_invocation(c, <unit>));
-
-static Symbol _collection(List definition) {
+Symbol Compiler.macro_invocation_collection(Compiler c) {
+  List definition = _peek_invocation(c, <unit>);
   if (!definition) return 0;
   if (definition.assoc(<kind>) == <decl-unit> ||
       definition.assoc(<target>) == <named-type>) return <required>;

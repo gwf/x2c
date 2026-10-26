@@ -109,7 +109,7 @@ Parses an evaluated Map, `${key: value, ...}`, whose bare identifier
 keys are expressions like any other key, and consumes its `}`. In code
 `$` and `{` are two tokens; quoted data scans `${` as one.
 
-Source: `src/literals/collections.x:209`
+Source: `src/literals/collections.x:205`
 
 <a id="Compiler.parse_list_literal"></a>
 #### Compiler.parse_list_literal
@@ -141,7 +141,7 @@ Source: `src/literals/quotation.x:146`
 Parses comma-separated `Map` entries up to but not including `}`.
 `Entry`-position macro sequences are flattened in source order.
 
-Source: `src/literals/collections.x:203`
+Source: `src/literals/collections.x:199`
 
 <a id="Compiler.parse_map_entry"></a>
 #### Compiler.parse_map_entry
@@ -153,7 +153,7 @@ A bare identifier key is an Atom; any other key is an expression.
 A direct row returns a resolved `(map-entry KEY VALUE)` node; an
 entry-position macro may return `(seq ...)` for its caller to splice.
 
-Source: `src/literals/collections.x:234`
+Source: `src/literals/collections.x:230`
 
 <a id="Compiler.parse_map_literal"></a>
 #### Compiler.parse_map_literal

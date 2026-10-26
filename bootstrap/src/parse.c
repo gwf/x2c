@@ -135,8 +135,6 @@ static void f5_units____alias_parameters(Compiler c, List parameters);
 
 static List f5_units____alias_target(Compiler c, List declaration, Var binding, List native_syntax);
 
-static List f12_declarations____declaration_rows(Compiler c);
-
 static List f12_declarations____declaration_group(Compiler c, int row);
 
 static List f12_declarations____typedef(Compiler c, List context, int row);
@@ -228,8 +226,6 @@ static List f5_types____field(Compiler c, List context, int delegated);
 static void f5_types____declare_delegates(Compiler c, List context, List rows);
 
 static void f5_types____declare_delegate(Compiler c, List context, Var binding);
-
-static List f5_types____field_row(Compiler c, List context);
 
 static List f5_types____field_group(Compiler c, List context);
 
@@ -340,8 +336,6 @@ static String f9_functions____prepare_lifecycle(Compiler c, List declaration, Li
 static String f9_functions____lifecycle_owner(Compiler c, List binding, String member);
 
 static void f9_functions____require_signature(Compiler c, List decl, String name, String role);
-
-static void f9_functions____publish_lifecycle(Compiler c, String name, String initializer_owner, String shutdown_owner);
 
 static List f9_functions____expression_body(Compiler c);
 
@@ -1459,7 +1453,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _589 = List_var(_588);
   _590 = cons(_510, _507);
   _591 = List_var(_590);
-  _592 = int_var(89947);
+  _592 = int_var(89782);
   _593 = cons(_592, NULL);
   _594 = cons(_515, _593);
   _595 = List_var(_594);
@@ -4332,20 +4326,16 @@ static List f5_units____alias_target(Compiler c, List declaration, Var binding, 
 }
 
 List Compiler_parse_declaration_row(Compiler c){
-  if(! _init_guard_) _file_init_();  List rows = f12_declarations____declaration_rows(c); {
+  if(! _init_guard_) _file_init_();  Array declarations = Array_new();  while(1){
+    Array_push(declarations, List_var(f12_declarations____declaration_group(c, 1)));  if(! _group_comma(c)) break;  Compiler_next(c);
+  }
+  List rows = Array_list_free(declarations); {
     List _x2c_gensym_match_expr = rows; List _x2c_gensym_match_cursor;   _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {{
       Var only;  only = _x2c_gensym_match_value_0;  return Var_list_payload(only);
     }
      } }
   }
   return cons(_78, List_append(rows, NULL));
-}
-
-static List f12_declarations____declaration_rows(Compiler c){
-  Array declarations = Array_new();  while(1){
-    Array_push(declarations, List_var(f12_declarations____declaration_group(c, 1)));  if(! _group_comma(c)) break;  Compiler_next(c);
-  }
-  return Array_list_free(declarations);
 }
 
 List Compiler_parse_simple_declaration(Compiler c){
@@ -5103,7 +5093,10 @@ static List f5_types____member_macro(Compiler c, List context, Symbol position){
 }
 
 static List f5_types____field(Compiler c, List context, int delegated){
-  List rows = f5_types____field_row(c, context);  if(delegated) f5_types____declare_delegates(c, context, rows);  Compiler_expect(c, 119); {
+  Array declarations = Array_new();  while(1){
+    Array_push(declarations, List_var(f5_types____field_group(c, context)));  if(! _group_comma(c)) break;  Compiler_next(c);
+  }
+  List rows = Array_list_free(declarations);  if(delegated) f5_types____declare_delegates(c, context, rows);  Compiler_expect(c, 119); {
     List _x2c_gensym_match_expr = rows; List _x2c_gensym_match_cursor;  switch(0){
         default: ;  _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {{
         Var only;  only = _x2c_gensym_match_value_0;  return Var_list_payload(only);
@@ -5155,13 +5148,6 @@ static void f5_types____declare_delegates(Compiler c, List context, List rows){
 void Sym_mark_field(Sym, Type, Symbol, String);
 static void f5_types____declare_delegate(Compiler c, List context, Var binding){
   String name = Ast_binding_spelling(Var_list_payload(binding));  if(! String_truth(name)) Compiler_report_error(c, 33658058, _260, c -> token, NULL);  if(! Map_truth(c -> macro_holes)) Sym_mark_field(c -> sym, List_type(context), 286431579402, name);
-}
-
-static List f5_types____field_row(Compiler c, List context){
-  Array declarations = Array_new();  while(1){
-    Array_push(declarations, List_var(f5_types____field_group(c, context)));  if(! _group_comma(c)) break;  Compiler_next(c);
-  }
-  return Array_list_free(declarations);
 }
 
 static List f5_types____field_group(Compiler c, List context){
@@ -6395,7 +6381,7 @@ static List f9_functions____finish_function_parts(Compiler c, List declaration, 
       .fn = _x2c_gensym_defer_cleanup_22, .env = & _x2c_gensym_macro_environment_22
     }
     ;  x2c_cleanup_push(& _x2c_gensym_defer_record_22); {
-      String initializer_owner = NULL, shutdown_owner = NULL;  String name = f9_functions____prepare_lifecycle(c, declaration, binding, &(initializer_owner), &(shutdown_owner));  List body = f9_functions____function_body(c, declaration, name, syntax);  f9_functions____publish_lifecycle(c, name, initializer_owner, shutdown_owner); {
+      String initializer_owner = NULL, shutdown_owner = NULL;  String name = f9_functions____prepare_lifecycle(c, declaration, binding, &(initializer_owner), &(shutdown_owner));  List body = f9_functions____function_body(c, declaration, name, syntax);  if(String_truth(initializer_owner)) c -> init_fn = name;  if(String_truth(shutdown_owner)) c -> fini_fn = name; {
         List _x2c_gensym_return_value_18 = cons(_780, cons(List_var(rtype), cons(List_var(declarator), cons(List_var(body), NULL)))); {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_22);  return _x2c_gensym_return_value_18;
         }
@@ -6484,10 +6470,6 @@ static void f9_functions____require_signature(Compiler c, List decl, String name
     String _x2c_gensym_macro_message_0 = String_equal(role, _783) ? _805 : _806;  Compiler_report_error(c, 33658058, _x2c_gensym_macro_message_0, c -> token, cons(String_var(String_join(NULL, cons(String_var(role), cons(String_var(_807), cons(String_var(name), NULL))))), NULL));
   }
 
-}
-
-static void f9_functions____publish_lifecycle(Compiler c, String name, String initializer_owner, String shutdown_owner){
-  if(String_truth(initializer_owner)) c -> init_fn = name;  if(String_truth(shutdown_owner)) c -> fini_fn = name;
 }
 
 static List f9_functions____expression_body(Compiler c){

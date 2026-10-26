@@ -165,7 +165,7 @@ int x2c_exception_unwinding(void) {
     A null, inactive, handled, or intervening frame returns false.
 */
 int x2c_exception_is_error_target(ExceptionFrame *frame) =>
-  _is_error_unwind(frame) && frame.unwind_target == frame;
+  frame && frame.state == <err-unwind> && frame.unwind_target == frame;
 
 /** Claims a frame's cleanup for the calling exit path, once per frame.
     Compiler-generated code tests this on every path that reaches a finalizer
@@ -263,6 +263,3 @@ static void _cleanup_drain(X2CCleanup *watermark) {
     if (x2c_error_runtime_ready) Error.restore(handler_depth, stack_height);
   }
 }
-
-static int _is_error_unwind(ExceptionFrame *frame) =>
-  frame && frame.state == <err-unwind>;

@@ -325,13 +325,6 @@ module List _record_hole(
   return hole;
 }
 
-static void _using_holes(Compiler c, Array binders) {
-  do binders.push(_using_hole(c).assoc(<binder>)); while (c.test(<,>));
-}
-
-static List _using_hole(Compiler c) =>
-  _declare_hole(c, _hole_name_token(c, <$>), <name>, 0);
-
 module List _hole(Atom binder, Symbol kind, int sequence) => %(
     macro-param
     (binder $binder)
@@ -441,7 +434,12 @@ static void _parse_body_using(Compiler c, Array binders) {
 /* One `using` list: fresh names, or file-scope names. An Expression
    macro, which has no braced body, writes it after its signature. */
 static void _using_clause(Compiler c, Array binders) {
-  if (c.peek(0) == <$>) _using_holes(c, binders);
+  if (c.peek(0) == <$>) {
+    do {
+      List hole = _declare_hole(c, _hole_name_token(c, <$>), <name>, 0);
+      binders.push(hole.assoc(<binder>));
+    } while (c.test(<,>));
+  }
   else _using_names(c);
 }
 

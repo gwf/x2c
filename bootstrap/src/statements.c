@@ -20,8 +20,6 @@ static int _init_guard_ = 0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
-static List _parse_statement(Compiler c);
-
 static List _statement(Compiler c, Symbol position);
 
 static List _statement_keywords(void);
@@ -371,10 +369,6 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _166 = cons(_141, _165);
   _167 = Symbol_var(39266);
   _168 = cons(_167, NULL);
-}
-
-static List _parse_statement(Compiler c){
-  return _statement(c, 43159332400040);
 }
 
 static List _statement(Compiler c, Symbol position){
@@ -963,7 +957,7 @@ List Compiler_parse_governed(Compiler c, Symbol position){
     }
     ;  x2c_cleanup_push(& _x2c_gensym_defer_record_5); {
       int depth = _take_directives(c, items);  while(1){
-        Token start = c -> token;  Array_push(items, List_var(position == 5011670 ? Compiler_parse_block_item(c) : _parse_statement(c)));  depth = _depth_after(c, start, depth);  if(depth <= 0) break;  Symbol end = _arm_end(Compiler_leading_preproc(c));  if(! end) break;  depth += _take_directives(c, items);  c -> directives_taken = c -> token;  if(depth <= 0 || end == 7109834 || Compiler_peek(c, 0) == 251 || Compiler_peek(c, 0) == 11212) break;
+        Token start = c -> token;  Array_push(items, List_var(position == 5011670 ? Compiler_parse_block_item(c) : _statement(c, 43159332400040)));  depth = _depth_after(c, start, depth);  if(depth <= 0) break;  Symbol end = _arm_end(Compiler_leading_preproc(c));  if(! end) break;  depth += _take_directives(c, items);  c -> directives_taken = c -> token;  if(depth <= 0 || end == 7109834 || Compiler_peek(c, 0) == 251 || Compiler_peek(c, 0) == 11212) break;
       }
       {
         List _x2c_gensym_return_value_2 = Var_list_payload(Array_len(items) == 1 ? Array_getindex(items, 0) : List_var(cons(_139, List_append(Array_list(items), NULL)))); {

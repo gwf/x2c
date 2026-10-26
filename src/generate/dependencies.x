@@ -114,17 +114,14 @@ static Map _undef_positions(List source) {
       Symbol kind = Compiler.preproc_conditional_kind(content);
       if (kind == <open>) open.push(position);
       else if (kind == <close> && open.len()) open.take_last();
-      else if (Compiler.preproc_directive(content).startswith("undef"))
-        _mark_undef(positions, open, position);
+      else if (Compiler.preproc_directive(content).startswith("undef")) {
+        positions[position] = 1;
+        foreach (int group in open) positions[group] = 1;
+      }
     }
     position++;
   }
   return positions;
-}
-
-static void _mark_undef(Map positions, Array open, int position) {
-  positions[position] = 1;
-  foreach (int group in open) positions[group] = 1;
 }
 
 /* Moves to `out` each pending body written under the open `arms`,

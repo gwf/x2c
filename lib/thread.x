@@ -500,16 +500,12 @@ static Var _read_result(Thread t) {
 /* Join releases only the separately captured Error storage. Successful
    result ownership remains exactly where the developer placed it. */
 static void _finish_join(Thread thread) {
-  _release_result(thread);
-  __atomic_store_n(&thread.state, <joined>, __ATOMIC_SEQ_CST);
-}
-
-static void _release_result(Thread thread) {
   thread.error_pool = NULL;
   if (thread.error_scope) Scope.destroy(thread.error_scope);
   thread.error_scope = NULL;
   thread.result = void;
   thread.errors = void;
+  __atomic_store_n(&thread.state, <joined>, __ATOMIC_SEQ_CST);
 }
 
 /** Frees a `Thread` handle after its consuming join has completed.

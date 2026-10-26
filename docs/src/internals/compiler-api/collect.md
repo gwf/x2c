@@ -301,7 +301,7 @@ the records hold this compiler's collection rather than a table linked
 into it; the unit's own entries for them are restored afterwards. A
 record the interface grammar cannot spell is left out.
 
-Source: `src/collect/interfaces.x:369`
+Source: `src/collect/interfaces.x:364`
 
 <a id="Compiler.loaded_call_type"></a>
 #### Compiler.loaded_call_type

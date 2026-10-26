@@ -134,10 +134,6 @@ static List f19_definitions_reading____declare_hole(Compiler c, Token token, Sym
 
 static List _record_hole(Compiler c, String spelling, Symbol kind, int sequence);
 
-static void f19_definitions_reading____using_holes(Compiler c, Array binders);
-
-static List f19_definitions_reading____using_hole(Compiler c);
-
 static List _hole(Atom binder, Symbol kind, int sequence);
 
 static List _hole_record(Compiler c, Atom name);
@@ -582,8 +578,6 @@ static List _lookup(Compiler c, Atom name, Token invocation);
 
 static int _try_macro(Compiler c, Map definitions, Atom name, Var * stored);
 
-static Symbol f23_invocations_recognition____collection(List definition);
-
 static Var _rebind_imported(Compiler c, Var stored);
 
 static List _rebind_globals(Compiler c, List syntax);
@@ -627,8 +621,6 @@ static List f20_invocations_captures____forwarded_prefix_list(void);
 static List f20_invocations_captures___forwarded_prefixes;
 
 _x2c_gensym_initializer_choice_21BF4D8E_2((f20_invocations_captures___forwarded_prefixes = f20_invocations_captures____forwarded_prefix_list()))
-static int _source_capture_parts(Var value, List * source, Var * syntax);
-
 static Var _source_unwrap(Var value);
 
 typedef struct f19_invocations_targets___Decoration{
@@ -2734,16 +2726,6 @@ static List _record_hole(Compiler c, String spelling, Symbol kind, int sequence)
   return hole;
 }
 
-static void f19_definitions_reading____using_holes(Compiler c, Array binders){
-  do Array_push(binders, List_assoc(f19_definitions_reading____using_hole(c), Symbol_var(154018148)));
-  while(Compiler_test(c, 89));
-  ;
-}
-
-static List f19_definitions_reading____using_hole(Compiler c){
-  return f19_definitions_reading____declare_hole(c, _hole_name_token(c, 73), 920394, 0);
-}
-
 static List _hole(Atom binder, Symbol kind, int sequence){
   return({
     Var _x2c_gensym_literal_part_1 = List_var(cons(_56, cons(binder, NULL)));  Var _x2c_gensym_literal_part_2 = List_var(cons(_57, cons(Symbol_var(kind), NULL)));  Var _x2c_gensym_literal_part_3 = List_var(cons(_58, cons(int_var(sequence), NULL)));  cons(_59, cons(_x2c_gensym_literal_part_1, cons(_x2c_gensym_literal_part_2, cons(_x2c_gensym_literal_part_3, NULL))));
@@ -2817,7 +2799,14 @@ static void f19_definitions_reading____parse_body_using(Compiler c, Array binder
 }
 
 static void f19_definitions_reading____using_clause(Compiler c, Array binders){
-  if(Compiler_peek(c, 0) == 73) f19_definitions_reading____using_holes(c, binders);
+  if(Compiler_peek(c, 0) == 73){
+    do{
+      List hole = f19_definitions_reading____declare_hole(c, _hole_name_token(c, 73), 920394, 0);
+      Array_push(binders, List_assoc(hole, Symbol_var(154018148)));
+    }
+    while(Compiler_test(c, 89));
+    ;
+  }
   else f19_definitions_reading____using_names(c);
 }
 
@@ -6073,11 +6062,7 @@ static int _try_macro(Compiler c, Map definitions, Atom name, Var * stored){
 }
 
 Symbol Compiler_macro_invocation_collection(Compiler c){
-  if(! _init_guard_) _file_init_();  return f23_invocations_recognition____collection(_peek_invocation(c, 1405544));
-}
-
-static Symbol f23_invocations_recognition____collection(List definition){
-  if(! List_truth(definition)) return 0;  if(x2c_var_equal(List_assoc(definition, Symbol_var(740232)), Symbol_var(9147004580456)) || x2c_var_equal(List_assoc(definition, Symbol_var(1345468776)), Symbol_var(988265867168778))) return 1248873517384;  if(x2c_var_equal(List_assoc(definition, Symbol_var(1345468776)), Symbol_var(1405544))) return 43141448;  if(! x2c_var_equal(List_assoc(definition, Symbol_var(740232)), Symbol_var(1405544))) return 0;  if(! Var_int(List_assoc(definition, Symbol_var(26155096)))) return 1248873517384;  List template = Var_list_payload(List_assoc(definition, Symbol_var(1386033712394))), bindings;  Var matched;  if(({ static MatchCaptureSite _x2c_gensym_match_site_5;  x2c_match_site_try_search(& _x2c_gensym_match_site_5, template, List_var(_559), &(matched), &(bindings)); })) return 1248873517384;
+  if(! _init_guard_) _file_init_();  List definition = _peek_invocation(c, 1405544);  if(! List_truth(definition)) return 0;  if(x2c_var_equal(List_assoc(definition, Symbol_var(740232)), Symbol_var(9147004580456)) || x2c_var_equal(List_assoc(definition, Symbol_var(1345468776)), Symbol_var(988265867168778))) return 1248873517384;  if(x2c_var_equal(List_assoc(definition, Symbol_var(1345468776)), Symbol_var(1405544))) return 43141448;  if(! x2c_var_equal(List_assoc(definition, Symbol_var(740232)), Symbol_var(1405544))) return 0;  if(! Var_int(List_assoc(definition, Symbol_var(26155096)))) return 1248873517384;  List template = Var_list_payload(List_assoc(definition, Symbol_var(1386033712394))), bindings;  Var matched;  if(({ static MatchCaptureSite _x2c_gensym_match_site_5;  x2c_match_site_try_search(& _x2c_gensym_match_site_5, template, List_var(_559), &(matched), &(bindings)); })) return 1248873517384;
   return 43141448;
 }
 
@@ -6609,27 +6594,6 @@ static List f20_invocations_captures____forwarded_prefix_list(void){
 
   }
   return Array_list_free(prefixes);
-}
-
-static int _source_capture_parts(Var value, List * source, Var * syntax){
-  {
-    Var _x2c_gensym_match_var = value; int _x2c_gensym_match_none = !Var_is(_x2c_gensym_match_var, 806120);
-    List _x2c_gensym_match_expr = Var_list_payload(_x2c_gensym_match_var); List _x2c_gensym_match_cursor;
-      if (!_x2c_gensym_match_none) { _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497936761658502ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor) { Var _x2c_gensym_match_value_1 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {{
-      Var record;
-      record = _x2c_gensym_match_value_0;
-      Var captured;
-      captured = _x2c_gensym_match_value_1;
-      {
-        if(source)(* source) = Var_list_payload(record);
-        if(syntax)(* syntax) = captured;
-        return 1;
-      }
-
-    }
-     } } } }
-  }
-  return 0;
 }
 
 static Var _source_unwrap(Var value){
@@ -7217,7 +7181,22 @@ static Map f9_templates____source_captures(List bindings){
   Map captures = Map_new(); {
     List pair;  List _x2c_gensym_macro_object_57 = bindings;  List _x2c_gensym_macro_cursor_66 = _x2c_gensym_macro_object_57;  Var _x2c_gensym_macro_cursor_output_58;  while(List_try_next(_x2c_gensym_macro_object_57, &(_x2c_gensym_macro_cursor_66), &(_x2c_gensym_macro_cursor_output_58))){
       pair = Var_list_payload(_x2c_gensym_macro_cursor_output_58); {
-        List source;  Var syntax;  if(List_truth(pair) && _source_capture_parts(List_cadr(pair), &(source), &(syntax))) Map_setindex(captures, ulong_var(((ulong) syntax.u64)), List_var(source));
+        if(! List_truth(pair)) continue; {
+          Var _x2c_gensym_match_var = List_cadr(pair); int _x2c_gensym_match_none = !Var_is(_x2c_gensym_match_var, 806120);  List _x2c_gensym_match_expr = Var_list_payload(_x2c_gensym_match_var); List _x2c_gensym_match_cursor;
+            if (!_x2c_gensym_match_none) { _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497936761658502ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor) { Var _x2c_gensym_match_value_1 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {{
+            Var record;
+            record = _x2c_gensym_match_value_0;
+            Var syntax;
+            syntax = _x2c_gensym_match_value_1;
+            {
+              List source = Var_list_payload(record);
+              Map_setindex(captures, ulong_var(((ulong) syntax.u64)), List_var(source));
+            }
+
+          }
+           } } } }
+        }
+
       }
 
     }

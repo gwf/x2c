@@ -29,12 +29,8 @@ static typedef struct ReplacementCell {
 */
 int MatchPlan.try_match_replace(
   MatchPlan plan, List input, Var template, Var &?out) {
-  if (!_prepared(plan, "MatchPlan.try_match_replace") || !out) return -1;
-  return _replace_match(plan, input, template, out);
-}
-
-static int _replace_match(
-  MatchPlan plan, List input, Var template, Var &out) {
+  if (!_prepared(plan, "MatchPlan.try_match_replace")) return -1;
+  if (!out) return -1;
   Var values[MACHINE_BINDER_MAX];
   MatchCaptureBuffer captures = { values, 0, MACHINE_BINDER_MAX };
   int result = _capture(plan, input, &captures, NULL);

@@ -52,7 +52,7 @@ Source: `src/project/planning.x:12`
 Returns whether a target, profile, or manifest field name contains only
 letters, digits, underscores, and hyphens, and is not empty.
 
-Source: `src/project/manifest.x:325`
+Source: `src/project/manifest.x:321`
 
 ## Public types
 

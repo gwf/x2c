@@ -42,8 +42,6 @@ static List _without_leading_text(List items);
 
 static int _is_source_text(Var item);
 
-static Type _modify(Type type, List mods);
-
 Map Type_builtin_var_tags(void);
 
 Map Type_var_tag_rows(void);
@@ -198,7 +196,7 @@ static List _from_bind(List mods, List context){
     }
 
   }
-  return Type_list(_modify(List_type(context), _from_ast(Array_list_free(typed), context)));
+  List modifiers = _from_ast(Array_list_free(typed), context);  return List_append(modifiers, List_append(context, NULL));
 }
 
 static List _from_fields(List fields, List context){
@@ -236,13 +234,6 @@ static List _without_leading_text(List items){
 
 static int _is_source_text(Var item){
   return Var_is_row(item, 9, 7, 4) && Var_is_row(car(Var_list_payload(item)), 11, 7, 1);
-}
-
-static Type _modify(Type type, List mods){
-  return List_type(({
-    List _x2c_gensym_literal_part_2 = mods;  List _x2c_gensym_literal_part_3 = Type_list(type);  List_append(_x2c_gensym_literal_part_2, List_append(_x2c_gensym_literal_part_3, NULL));
-  }
-  ));
 }
 
 List Type_parts(Type type){
@@ -284,7 +275,7 @@ List Type_declaration_base(Type t, List * modifiers){
       }
       {
         List _x2c_gensym_return_value_1 =({
-          List _x2c_gensym_literal_part_4 = Array_list(storage);  List _x2c_gensym_literal_part_5 = Array_list(text);  List_append(_x2c_gensym_literal_part_4, List_append(_x2c_gensym_literal_part_5, List_append(base, NULL)));
+          List _x2c_gensym_literal_part_2 = Array_list(storage);  List _x2c_gensym_literal_part_3 = Array_list(text);  List_append(_x2c_gensym_literal_part_2, List_append(_x2c_gensym_literal_part_3, List_append(base, NULL)));
         }
         ); {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_0);  return _x2c_gensym_return_value_1;
@@ -300,14 +291,14 @@ List Type_declaration_base(Type t, List * modifiers){
 
 List Type_declaration_ast(Type type, List binding){
   if(! _init_guard_) _file_init_();  List base, mods;  List _x2c_gensym_destructure_1 = Type_parts(type);  base = Var_list_payload(List_getindex(_x2c_gensym_destructure_1, 0));  mods = Var_list_payload(List_getindex(_x2c_gensym_destructure_1, 1));  return({
-    Var _x2c_gensym_literal_part_6 = List_var(base);  Var _x2c_gensym_literal_part_7 = List_var(cons(_19, cons(List_var(cons(_4, cons(List_var(binding), cons(List_var(mods), NULL)))), NULL)));  cons(_20, cons(_x2c_gensym_literal_part_6, cons(_x2c_gensym_literal_part_7, NULL)));
+    Var _x2c_gensym_literal_part_4 = List_var(base);  Var _x2c_gensym_literal_part_5 = List_var(cons(_19, cons(List_var(cons(_4, cons(List_var(binding), cons(List_var(mods), NULL)))), NULL)));  cons(_20, cons(_x2c_gensym_literal_part_4, cons(_x2c_gensym_literal_part_5, NULL)));
   }
   );
 }
 
 List Type_parameter_ast(Type type, List binding){
   if(! _init_guard_) _file_init_();  List base, mods;  List _x2c_gensym_destructure_2 = Type_parts(type);  base = Var_list_payload(List_getindex(_x2c_gensym_destructure_2, 0));  mods = Var_list_payload(List_getindex(_x2c_gensym_destructure_2, 1));  return({
-    Var _x2c_gensym_literal_part_8 = List_var(base);  Var _x2c_gensym_literal_part_9 = List_var(cons(_4, cons(List_var(binding), cons(List_var(mods), NULL))));  cons(_21, cons(_x2c_gensym_literal_part_8, cons(_x2c_gensym_literal_part_9, NULL)));
+    Var _x2c_gensym_literal_part_6 = List_var(base);  Var _x2c_gensym_literal_part_7 = List_var(cons(_4, cons(List_var(binding), cons(List_var(mods), NULL))));  cons(_21, cons(_x2c_gensym_literal_part_6, cons(_x2c_gensym_literal_part_7, NULL)));
   }
   );
 }
@@ -334,14 +325,14 @@ int Type_var_tag_row(Symbol tag, unsigned long * top, unsigned long * mask, unsi
 
 void Type_register_var_tag(Type t, String name, String converter){
   if(! _init_guard_) _file_init_();  if(declared_typetags == NULL || ! List_truth(Type_list(t)) || ! String_truth(name) || ! String_truth(converter)) return;  Type key = Type_canonicalize(t);  Var row = Map_getindex(declared_typetags, List_var(key));  if(Var_is_void(row)) Map_setindex(declared_typetags, List_var(key), List_var(({
-    Var _x2c_gensym_literal_part_10 = Symbol_var(String_symbol(String_lower(name)));  cons(_x2c_gensym_literal_part_10, cons(String_var(converter), NULL));
+    Var _x2c_gensym_literal_part_8 = Symbol_var(String_symbol(String_lower(name)));  cons(_x2c_gensym_literal_part_8, cons(String_var(converter), NULL));
   }
   )));
 }
 
 void Type_register_var_adoption(Type type, Type representation, Symbol tag){
   if(! _init_guard_) _file_init_();  if(declared_typetags == NULL || ! List_truth(Type_list(type))) return;  Type key = Type_canonicalize(type);  Var row = Map_getindex(declared_typetags, List_var(key));  if(! tag && List_truth(Type_list(representation))) tag = Type_fixed_var_tag(representation);  if(Var_is_void(row) || ! tag) return;  Map_setindex(declared_typetags, List_var(key), List_var(({
-    Var _x2c_gensym_literal_part_11 = Symbol_var(tag);  Var _x2c_gensym_literal_part_12 = List_cadr(Var_list(row));  cons(_x2c_gensym_literal_part_11, cons(_x2c_gensym_literal_part_12, NULL));
+    Var _x2c_gensym_literal_part_9 = Symbol_var(tag);  Var _x2c_gensym_literal_part_10 = List_cadr(Var_list(row));  cons(_x2c_gensym_literal_part_9, cons(_x2c_gensym_literal_part_10, NULL));
   }
   )));
 }

@@ -123,8 +123,6 @@ static Map f8_manifest____keys(f8_manifest___Manifest * m);
 
 static void f8_manifest____settle(f8_manifest___Manifest * m);
 
-static void f8_manifest____set(f8_manifest___Manifest * m);
-
 static void f8_manifest____set_project_field(Project p, int line, String key, String value);
 
 static void f8_manifest____set_dependency(Project p, int line, String key, String value);
@@ -550,11 +548,6 @@ static Map f8_manifest____keys(f8_manifest___Manifest * m){
 
 static void f8_manifest____settle(f8_manifest___Manifest * m){
   if(f8_manifest____array_open((* m).value)) return;
-  f8_manifest____set(&((* m)));
-  (* m).key = NULL;
-}
-
-static void f8_manifest____set(f8_manifest___Manifest * m){
   Project p =(* m).project;
   int line =(* m).start;
   String key =(* m).key, value =(* m).value;
@@ -562,6 +555,7 @@ static void f8_manifest____set(f8_manifest___Manifest * m){
   else if((* m).section == 273446) f8_manifest____set_dependency(p, line, key, value);
   else if((* m).section == 1345468776) f8_manifest____set_target_field(p, (* m).target, line, key, value);
   else f8_manifest____set_profile_field(p, (* m).profile, line, key, value);
+  (* m).key = NULL;
 }
 
 static void f8_manifest____set_project_field(Project p, int line, String key, String value){

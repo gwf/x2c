@@ -374,7 +374,13 @@ static List _member_macro(Compiler c, List context, Symbol position) {
 }
 
 static List _field(Compiler c, List context, int delegated) {
-  List rows = _field_row(c, context);
+  Array declarations = [];
+  loop {
+    declarations.push(_field_group(c, context));
+    if (!_group_comma(c)) break;
+    c.next();
+  }
+  List rows = declarations.list_free();
   if (delegated) _declare_delegates(c, context, rows);
   c.expect(<;>);
   match (rows) case %(?only): return only;
@@ -399,16 +405,6 @@ static void _declare_delegate(Compiler c, List context, Var binding) {
   if (!name)
     $fail.parse_delegate_name(c, c.token);
   if (!c.macro_holes) c.sym.mark_field(context, <delegate>, name);
-}
-
-static List _field_row(Compiler c, List context) {
-  Array declarations = [];
-  loop {
-    declarations.push(_field_group(c, context));
-    if (!_group_comma(c)) break;
-    c.next();
-  }
-  return declarations.list_free();
 }
 
 static List _field_group(Compiler c, List context) {

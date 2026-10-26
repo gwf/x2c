@@ -228,8 +228,6 @@ static void f9_lifecycle____own_unit(Compiler c);
 
 static void f9_lifecycle____drop_compiler(void * ptr);
 
-static void f18_parsing_collection____start_macros(Compiler c);
-
 static void f18_parsing_collection____shallow_parse_loop(Compiler c);
 
 static void _debug_tokens(Token start, Token end);
@@ -273,8 +271,6 @@ static int f15_parsing_scripts____script_form(f15_parsing_scripts___ScriptParse 
 
 static void f15_parsing_scripts____hoist(f15_parsing_scripts___ScriptParse * p, int begin, Token tokens);
 
-static void _finish_script(Compiler c, List ast);
-
 static void f15_parsing_scripts____skip_script_statement(Compiler c);
 
 static void f15_parsing_scripts____reject_statement(Compiler c);
@@ -295,7 +291,7 @@ static Bytes f15_parsing_scripts____append_runs(Bytes stream, Token tokens, Arra
 
 static Bytes f15_parsing_scripts____append_placed(Bytes stream, Token token, Token first);
 
-static void f15_parsing_scripts____check_script_locals(Compiler c, List ast);
+static void _finish_script(Compiler c, List ast);
 
 static Map f15_parsing_scripts____script_locals(List ast);
 
@@ -322,8 +318,6 @@ static void f19_parsing_definitions____complete_prototype(Compiler c, List bindi
 static List f19_parsing_definitions____inherited_contract(List prior, List current);
 
 static List f19_parsing_definitions____contract(Compiler c, Type type, List binding);
-
-static List f19_parsing_definitions____completion_contract(Type type, List method_identity, List self_signature);
 
 static Type f19_parsing_definitions____contract_type(Type type, int keep_qualifiers);
 
@@ -439,8 +433,6 @@ static List f16_source_locations____source_range(Compiler c, Token first, Token 
 static List f13_binding_facts____null_comparison(Compiler c, Var op, Var left, Var right, int * truth);
 
 static int f13_binding_facts____null_literal(List expr);
-
-static List f13_literal_cache____cache_alias(List key);
 
 static List f13_literal_cache____cache_boxed(Compiler c, List literal);
 
@@ -958,7 +950,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _374 = String_var(_373);
   _375 = List_var(NULL);
   _376 = Symbol_var(106239471489226);
-  _377 = int_var(2227);
+  _377 = int_var(2217);
   _378 = String_new("");
   _379 = String_var(_378);
   _380 = Atom_intern(String_new("macro-param"));
@@ -1343,16 +1335,14 @@ void Compiler_shallow_parse(Compiler c, Map globals){
 
 void Compiler_shallow_parse_overlay(Compiler c, Map base, Map overlay){
   if(! _init_guard_) _file_init_();
-  if(c -> macros == NULL || ! Map_len(c -> macros)) f18_parsing_collection____start_macros(c);
+  if(c -> macros == NULL || ! Map_len(c -> macros)){
+    c -> macros = Map_new();
+    if(c -> kw_aliases == NULL) c -> kw_aliases = Map_new();
+    c -> binding_rows = c -> binding_sealed = NULL;
+  }
   Sym_reset_overlay(c -> sym, base, overlay);
   f18_parsing_collection____shallow_parse_loop(c);
   c -> open_linkage += Array_len(c -> braces);
-}
-
-static void f18_parsing_collection____start_macros(Compiler c){
-  c -> macros = Map_new();
-  if(c -> kw_aliases == NULL) c -> kw_aliases = Map_new();
-  c -> binding_rows = c -> binding_sealed = NULL;
 }
 
 void Compiler_start_collection(Compiler c);
@@ -2018,10 +2008,6 @@ static void f15_parsing_scripts____hoist(f15_parsing_scripts___ScriptParse * p, 
   if((* p).first < 0)(* p).first = begin;
 }
 
-static void _finish_script(Compiler c, List ast){
-  if(! c -> script -> defines_main && ! Compiler_error_count(c)) f15_parsing_scripts____check_script_locals(c, ast);
-}
-
 int Compiler_skip_collected_script_statement(Compiler c){
   if(! _init_guard_) _file_init_();
   if(! c -> script) return 0;
@@ -2095,7 +2081,8 @@ static Bytes f15_parsing_scripts____append_placed(Bytes stream, Token token, Tok
   return Bytes_append(stream, & placed, 1);
 }
 
-static void f15_parsing_scripts____check_script_locals(Compiler c, List ast){
+static void _finish_script(Compiler c, List ast){
+  if(c -> script -> defines_main || Compiler_error_count(c)) return;
   Map locals = f15_parsing_scripts____script_locals(ast);
   if(! Map_len(locals)) return;
   {
@@ -2353,11 +2340,7 @@ static List f19_parsing_definitions____inherited_contract(List prior, List curre
 }
 
 static List f19_parsing_definitions____contract(Compiler c, Type type, List binding){
-  return f19_parsing_definitions____completion_contract(type, Compiler_fact(c, List_var(cons(_161, cons(List_var(binding), NULL)))), Compiler_fact(c, List_var(cons(_162, cons(List_var(binding), NULL)))));
-}
-
-static List f19_parsing_definitions____completion_contract(Type type, List method_identity, List self_signature){
-  Symbol linkage = Type_is_static(type) ? 1317118534 : 387198108;  List contract =({
+  List method_identity = Compiler_fact(c, List_var(cons(_161, cons(List_var(binding), NULL))));  List self_signature = Compiler_fact(c, List_var(cons(_162, cons(List_var(binding), NULL))));  Symbol linkage = Type_is_static(type) ? 1317118534 : 387198108;  List contract =({
     Var _x2c_gensym_literal_part_13 = List_var(f19_parsing_definitions____contract_type(type, 0));  Var _x2c_gensym_literal_part_14 = List_var(f19_parsing_definitions____contract_type(type, 1));  cons(_150, cons(_x2c_gensym_literal_part_13, cons(_x2c_gensym_literal_part_14, cons(Symbol_var(linkage), cons(List_var(method_identity), NULL)))));
   }
   );  return List_truth(self_signature) ? List_append(contract, cons(List_var(self_signature), NULL)) : contract;
@@ -3557,11 +3540,7 @@ static int f13_binding_facts____null_literal(List expr){
 }
 
 List Compiler_cache(Compiler c, List key){
-  if(! _init_guard_) _file_init_();  List alias = f13_literal_cache____cache_alias(key);  if(List_truth(alias)) return alias;  int nextid = Array_len(c -> id_keys), id = Var_int(Var_convert(Map_setdefault(c -> key_ids, List_var(key), int_var(nextid)), 3453797));  if(id == nextid) Array_push(c -> id_keys, List_var(key));  return cons(_509, cons(int_var(id), NULL));
-}
-
-static List f13_literal_cache____cache_alias(List key){
-  {
+  if(! _init_guard_) _file_init_(); {
     List _x2c_gensym_match_expr = key; List _x2c_gensym_match_cursor, _x2c_gensym_match_cursor1, _x2c_gensym_match_cursor2;  switch(_x2c_gensym_match_expr ? _x2c_gensym_match_expr->car.u64 : 0){
         case 9224497936767982090ULL: ;  _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497936767982090ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {return key;  break; } case 9224497936761663588ULL: ;  _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497936761663588ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && Var_is(_x2c_gensym_match_cursor->car, 806120) && (_x2c_gensym_match_cursor1 = Var_list_payload(_x2c_gensym_match_cursor->car), 1) && _x2c_gensym_match_cursor1 && _x2c_gensym_match_cursor1->car.u64 == 9224497936767982090ULL && (_x2c_gensym_match_cursor1 = _x2c_gensym_match_cursor1->cdr, 1) && _x2c_gensym_match_cursor1) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_cursor1->car; if ((_x2c_gensym_match_cursor1 = _x2c_gensym_match_cursor1->cdr, 1) && !_x2c_gensym_match_cursor1 && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {{
         Var id;  id = _x2c_gensym_match_value_0;  return cons(_509, cons(id, NULL));
@@ -3576,7 +3555,7 @@ static List f13_literal_cache____cache_alias(List key){
     }
 
   }
-  return NULL;
+  int nextid = Array_len(c -> id_keys), id = Var_int(Var_convert(Map_setdefault(c -> key_ids, List_var(key), int_var(nextid)), 3453797));  if(id == nextid) Array_push(c -> id_keys, List_var(key));  return cons(_509, cons(int_var(id), NULL));
 }
 
 List Compiler_cache_cons_cell(Compiler c, List head, List tail){

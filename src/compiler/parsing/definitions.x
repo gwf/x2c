@@ -151,12 +151,9 @@ static List _inherited_contract(List prior, List current) {
   return current;
 }
 
-static List _contract(Compiler c, Type type, List binding) =>
-  _completion_contract(
-    type, c.fact(%(method $binding)), c.fact(%(self $binding)));
-
-static List _completion_contract(
-  Type type, List method_identity, List self_signature) {
+static List _contract(Compiler c, Type type, List binding) {
+  List method_identity = c.fact(%(method $binding));
+  List self_signature = c.fact(%(self $binding));
   Symbol linkage = type.is_static() ? <static> : <extern>;
   List contract = %(
     function-contract

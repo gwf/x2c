@@ -51,7 +51,7 @@ forked translation workers sharing the descriptor never interleave lines,
 and a line is complete before any exit. Returns zero when `path` cannot be
 opened.
 
-Source: `src/diagnostics.x:223`
+Source: `src/diagnostics.x:216`
 
 ### `Compiler`
 
@@ -64,7 +64,7 @@ Returns a report-order snapshot of all collected diagnostics.
 Snapshot cells are canonicalized through the active pool hierarchy and
 share entry values; each retains its actual producing-pool lifetime.
 
-Source: `src/diagnostics.x:635`
+Source: `src/diagnostics.x:631`
 
 <a id="Compiler.display_path"></a>
 #### Compiler.display_path
@@ -74,7 +74,7 @@ Source: `src/diagnostics.x:635`
 Returns a physical source path for semantic facts, otherwise a path
 relative to the compiler root. Pseudo paths and NULL stay unchanged.
 
-Source: `src/diagnostics.x:336`
+Source: `src/diagnostics.x:329`
 
 <a id="Compiler.dump_cache"></a>
 #### Compiler.dump_cache
@@ -83,7 +83,7 @@ Source: `src/diagnostics.x:336`
 
 Prints each cached numeric identifier and its key to stdout.
 
-Source: `src/diagnostics.x:671`
+Source: `src/diagnostics.x:667`
 
 <a id="Compiler.dump_symbol_table"></a>
 #### Compiler.dump_symbol_table
@@ -92,7 +92,7 @@ Source: `src/diagnostics.x:671`
 
 Prints every entry in `map` to stdout in `Map` iteration order.
 
-Source: `src/diagnostics.x:666`
+Source: `src/diagnostics.x:662`
 
 <a id="Compiler.dump_tokens"></a>
 #### Compiler.dump_tokens
@@ -102,7 +102,7 @@ Source: `src/diagnostics.x:666`
 Prints every non-EOF token with its position and visible content.
 `Compiler.tokenize` must have populated the compiler's tokenizer.
 
-Source: `src/diagnostics.x:656`
+Source: `src/diagnostics.x:652`
 
 <a id="Compiler.error_count"></a>
 #### Compiler.error_count
@@ -112,7 +112,7 @@ Source: `src/diagnostics.x:656`
 Returns the number of counted diagnostics accepted since the last reset.
 Warnings and the generated limit notice are excluded.
 
-Source: `src/diagnostics.x:629`
+Source: `src/diagnostics.x:625`
 
 <a id="Compiler.file_prefix"></a>
 #### Compiler.file_prefix
@@ -123,7 +123,7 @@ Returns the prefix that the statics of the module file holding the
 current token take, or NULL outside a module unit. A module's first row
 marks the start of its text, so other units return before any scan.
 
-Source: `src/diagnostics.x:388`
+Source: `src/diagnostics.x:381`
 
 <a id="Compiler.origin_location"></a>
 #### Compiler.origin_location
@@ -137,7 +137,7 @@ location cells are canonicalized through the active pool hierarchy and
 retain their actual producing-pool lifetime. They share the recorded
 filename, which retains its own producing-pool lifetime.
 
-Source: `src/diagnostics.x:311`
+Source: `src/diagnostics.x:304`
 
 <a id="Compiler.print_diagnostic"></a>
 #### Compiler.print_diagnostic
@@ -149,7 +149,7 @@ one JSON line after `diagnostics_write_json`.
 NULL is ignored. A present location supplies `file`, one-based `line` and
 `column`, and token `length`; `String` notes are joined into one note line.
 
-Source: `src/diagnostics.x:275`
+Source: `src/diagnostics.x:268`
 
 <a id="Compiler.report_error"></a>
 #### Compiler.report_error
@@ -163,7 +163,7 @@ before the current token. NULL message defaults to `"compiler error"`.
 **Raises:** `<malformed>` with the supplied category while a recovery boundary
 is active. Without one, exits the process with status 1.
 
-Source: `src/diagnostics.x:484`
+Source: `src/diagnostics.x:477`
 
 <a id="Compiler.report_problem"></a>
 #### Compiler.report_problem
@@ -174,7 +174,7 @@ Records and emits a located compiler error, then returns so the
 translation continues; it fails when it finishes. Location and the
 message default match `Compiler.report_error`.
 
-Source: `src/diagnostics.x:501`
+Source: `src/diagnostics.x:494`
 
 <a id="Compiler.report_warning"></a>
 #### Compiler.report_warning
@@ -186,7 +186,7 @@ Location selection matches `Compiler.report_error`; NULL code becomes
 `<warning>` and NULL message becomes `"compiler warning"`. This operation
 returns without raising or changing the process exit status.
 
-Source: `src/diagnostics.x:512`
+Source: `src/diagnostics.x:505`
 
 <a id="Compiler.report_warning_at"></a>
 #### Compiler.report_warning_at
@@ -197,7 +197,7 @@ Records and emits a warning at a location built earlier by
 `Compiler.token_location`, for a report raised after its token has been
 consumed. Defaults match `Compiler.report_warning`.
 
-Source: `src/diagnostics.x:521`
+Source: `src/diagnostics.x:514`
 
 <a id="Compiler.take_diagnostics"></a>
 #### Compiler.take_diagnostics
@@ -208,7 +208,7 @@ Moves collected child reports into the caller's store without re-emitting.
 Shared stores already contain their entries. The child's separate store
 remains configured and empty after its reports have been transferred.
 
-Source: `src/diagnostics.x:617`
+Source: `src/diagnostics.x:613`
 
 <a id="Compiler.text_source"></a>
 #### Compiler.text_source
@@ -220,7 +220,7 @@ the compiler's text, and sets `offset` to that byte's offset in the file.
 Without such a marker, the file is the compiler's own and `offset` is
 `position`.
 
-Source: `src/diagnostics.x:435`
+Source: `src/diagnostics.x:428`
 
 <a id="Compiler.token_column"></a>
 #### Compiler.token_column
@@ -230,7 +230,7 @@ Source: `src/diagnostics.x:435`
 Returns `token`'s column in the file that holds it. A module region
 that begins inside a line of its file continues that line's columns.
 
-Source: `src/diagnostics.x:423`
+Source: `src/diagnostics.x:416`
 
 <a id="Compiler.token_location"></a>
 #### Compiler.token_location
@@ -246,7 +246,7 @@ pool hierarchy and retain their actual producing-pool lifetimes; an
 unchanged filename retains the compiler's
 producing-pool lifetime.
 
-Source: `src/diagnostics.x:355`
+Source: `src/diagnostics.x:348`
 
 <a id="Compiler.token_source"></a>
 #### Compiler.token_source
@@ -257,7 +257,7 @@ Returns the file that the line markers of a merged text give `token`,
 and sets `line` to the token's line in that file. A token outside the
 marked regions keeps the compiler's own file and its line.
 
-Source: `src/diagnostics.x:375`
+Source: `src/diagnostics.x:368`
 
 ### `Diagnostics`
 

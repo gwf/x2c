@@ -14,20 +14,16 @@ List Compiler.parse_expression(Compiler c) =>
 
 static List _parse_expression_tail(Compiler c, List expr) {
   if (c.peek(0) == <,>) {
-    expr = cons(expr, _parse_comma_list(c));
+    Array expressions = [];
+    do {
+      c.expect(<,>);
+      expressions.push(c.parse_assignment());
+    } while (c.peek(0) == <,>);
+    expr = cons(expr, expressions.list_free());
     List last = expr.last(), type = last.cadr();
     return %(expr $type (commas @expr));
   }
   return expr;
-}
-
-static List _parse_comma_list(Compiler c) {
-  Array expressions = [];
-  do {
-    c.expect(<,>);
-    expressions.push(c.parse_assignment());
-  } while (c.peek(0) == <,>);
-  return expressions.list_free();
 }
 
 /** Parses one right-associative assignment expression.

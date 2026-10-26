@@ -6,21 +6,15 @@
 
 /** Interns a constant key and returns its stable `(cache id)` reference. */
 List Compiler.cache(Compiler c, List key) {
-  List alias = _cache_alias(key);
-  if (alias) return alias;
-  int nextid = c.id_keys.len(), id = c.key_ids.setdefault(key, nextid);
-  if (id == nextid) c.id_keys.push(key);
-  return %(cache $id);
-}
-
-static List _cache_alias(List key) {
   match (key) {
     case %(cache ?):                          return key;
     case %(var (cache ?id)):                  return %(cache $id);
     case %(expr ? (cache ?id)):               return %(cache $id);
     case %(var (expr ("Var") (cache ?id))):   return %(cache $id);
   }
-  return NULL;
+  int nextid = c.id_keys.len(), id = c.key_ids.setdefault(key, nextid);
+  if (id == nextid) c.id_keys.push(key);
+  return %(cache $id);
 }
 
 /** Caches a cons cell when both parts have immutable cache forms.

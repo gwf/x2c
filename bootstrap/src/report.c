@@ -29,8 +29,6 @@ static int _init_guard_ = 0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
-static int _terminal(void);
-
 static int _columns(void);
 
 static int _use_color(int plain, Symbol mode, int terminal);
@@ -99,17 +97,13 @@ void report_configure(int quiet, int plain, Symbol color_mode, int verbose, int 
     .terminal = - 1, .pid = getpid()
   }
   ;
-  int terminal = _terminal();
+  int terminal = isatty(fileno(stderr)) && ! String_equal(Env_get(_0), _1);
   int diagnostic = verbose || dry_run || inspecting;
   report.receipts = ! quiet && ! diagnostic;
   report.transient = report.receipts && terminal && ! plain;
   report.columns = _columns();
   report.start = report_now_us();
   report.color = _use_color(plain, color_mode, terminal);
-}
-
-static int _terminal(void){
-  return isatty(fileno(stderr)) && ! String_equal(Env_get(_0), _1);
 }
 
 static int _columns(void){

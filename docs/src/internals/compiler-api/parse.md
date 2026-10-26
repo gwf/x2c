@@ -78,7 +78,7 @@ X2c declarations, parsed from source or constructed.
 The declared result type of the function `declaration`, which its
 `return` statements convert to, or NULL.
 
-Source: `src/parse/functions.x:103`
+Source: `src/parse/functions.x:104`
 
 ### `Compiler`
 
@@ -196,7 +196,7 @@ Source: `src/parse/declarators.x:286`
 Rejects transparent references in object and function-result types.
 References inside a function's parameter list remain supported.
 
-Source: `src/parse/declarations.x:304`
+Source: `src/parse/declarations.x:300`
 
 <a id="Compiler.close_placements"></a>
 #### Compiler.close_placements
@@ -377,7 +377,7 @@ Parses a non-function, non-typedef `Decl` macro argument.
 Parentheses group declarations with independent types. The invocation
 delimiter remains current; flat destructuring may omit its initializer.
 
-Source: `src/parse/declarations.x:118`
+Source: `src/parse/declarations.x:114`
 
 <a id="Compiler.parse_declaration_row"></a>
 #### Compiler.parse_declaration_row
@@ -409,7 +409,7 @@ Parses one enumerator for enum type `context` and returns its AST.
 Outside macro-template parsing, its binding is published immediately so
 later initializers and enumerators can resolve it.
 
-Source: `src/parse/types.x:510`
+Source: `src/parse/types.x:506`
 
 <a id="Compiler.parse_enumerators"></a>
 #### Compiler.parse_enumerators
@@ -421,7 +421,7 @@ Returns their flat source-order `List` and leaves the brace unconsumed.
 An alias among them needs no comma; the owner of the brace holds the
 alias body they declare into.
 
-Source: `src/parse/types.x:490`
+Source: `src/parse/types.x:486`
 
 <a id="Compiler.parse_field"></a>
 #### Compiler.parse_field
@@ -489,7 +489,7 @@ Captures a name followed by an ordinary complete type and semicolon.
 The reserved typedef identity permits fields to refer to their enclosing
 named type before its pointer or value representation is complete.
 
-Source: `src/parse/types.x:429`
+Source: `src/parse/types.x:425`
 
 <a id="Compiler.parse_optional_identifier"></a>
 #### Compiler.parse_optional_identifier
@@ -531,7 +531,7 @@ Parses one declaration group and leaves its terminating token current.
 Declared names are installed in `Sym` as their declarators are completed;
 the result is one `declare`, `typedef`, or initialized `dstrdecl` AST.
 
-Source: `src/parse/declarations.x:35`
+Source: `src/parse/declarations.x:31`
 
 <a id="Compiler.parse_static_assert"></a>
 #### Compiler.parse_static_assert
@@ -541,7 +541,7 @@ Source: `src/parse/declarations.x:35`
 Parses a C assertion declaration; native C owns constant-expression
 checks.
 
-Source: `src/parse/declarations.x:145`
+Source: `src/parse/declarations.x:141`
 
 <a id="Compiler.parse_submission"></a>
 #### Compiler.parse_submission
@@ -598,7 +598,7 @@ Parses a declaration that sits inside an expression or a `for` header,
 such as a cast's type name, and returns it as one `(decl ...)` node.
 When `type` is not null, it receives the declared `Type`.
 
-Source: `src/parse/declarations.x:41`
+Source: `src/parse/declarations.x:37`
 
 <a id="Compiler.place_after"></a>
 #### Compiler.place_after
@@ -678,7 +678,7 @@ Tests whether the current token can begin a declaration without consuming.
 Typedefs, package aliases, and macro-hole kinds are resolved through the
 current compiler state.
 
-Source: `src/parse/declarations.x:172`
+Source: `src/parse/declarations.x:168`
 
 <a id="Compiler.test_static_assert"></a>
 #### Compiler.test_static_assert
@@ -687,7 +687,7 @@ Source: `src/parse/declarations.x:172`
 
 Reports whether the current identifier starts a C static assertion.
 
-Source: `src/parse/declarations.x:139`
+Source: `src/parse/declarations.x:135`
 
 ## Design notes
 

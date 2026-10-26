@@ -251,7 +251,7 @@ static List _unqualify_const(List specifiers) =>
 
 static List _initializer_rhs(
   List decltype, List binding, List mods, List type, List value) {
-  if (!_is_composite(value)) return %(expr $type $value);
+  if (!(value ~= %(composite *))) return %(expr $type $value);
   List bound = %(bind $binding $mods);
   List decl_ast = %(declare $decltype (bindings $bound));
   Type cast_type = decl_ast.type_from_ast();
@@ -260,8 +260,6 @@ static List _initializer_rhs(
   List literal = %(expr () $value), rhs_value = %(cast $decl $literal);
   return %(expr $cast_type $rhs_value);
 }
-
-static inline int _is_composite(List value) => value ~= %(composite *);
 
 static List _assignment(List binding, List type, List rhs) =>
   %(stmnt (expr $type (op = (expr $type (ident $binding)) $rhs)));

@@ -55,14 +55,6 @@ static Func _predicate_callback(Var callable) {
   };
 }
 
-/* A lazy pull callback outlives the region that creates it. Other callbacks
-   keep their current Scope lifetime. Iter retains the Func in its aux field. */
-static Func _iter_callback(Var callable) {
-  Func fn = _binary_callback_for(callable, "Lisp iterator callback");
-  if (fn) fn.move(&lisp_active.scope);
-  return fn;
-}
-
 static int _iter_next(Iter iter, Var *out) =>
   iter.aux.apply_values(iter, Var.new(<var*>, out)).int();
 
@@ -112,7 +104,9 @@ static String _string_filter(String value, Var callable) =>
 static Iter _iter_init(
   Iter destination, Var object, Var callable, Var state) {
   if (!destination) return NULL;
-  Func callback = _iter_callback(callable);
+  /* A lazy pull callback outlives this region; Iter retains it in aux. */
+  Func callback = _binary_callback_for(callable, "Lisp iterator callback");
+  if (callback) callback.move(&lisp_active.scope);
   destination.init(object, callback ? _iter_next : NULL, state);
   destination.aux = callback;
   return destination;

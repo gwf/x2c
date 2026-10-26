@@ -192,11 +192,6 @@ void Pool.insert(Pool inner, Var object) {
   if (!inner) raise %(bad-arg (operation "Pool.insert"));
   _lock(inner);
   defer _unlock(inner);
-  _insert_locked(inner, object);
-}
-
-/* Table insertion causes propagate and leave the object unregistered. */
-static void _insert_locked(Pool inner, Var object) {
   inner.table.set_entry(&object, &object);
   inner.interned++;
 }

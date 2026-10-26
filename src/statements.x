@@ -70,11 +70,8 @@ static macro Stmt $fail.statements_catch_pattern(Expr $c, Expr $site) =>
 /* Parses and binds one statement or statement-position macro at the current
    token. On return, the cursor follows the complete statement and any
    temporary `Sym` scopes opened by the statement have been closed.
+   A meta call written as the whole statement binds its result at `position`.
 */
-static List _parse_statement(Compiler c) => _statement(c, <statement>);
-
-/* A meta call written as the whole statement binds its result at
-   `position`. */
 static List _statement(Compiler c, Symbol position) {
   _x2c_complete_here(c, <statement>, _statement_keywords());
   List slot = c.try_parse_macro_slot(<statement>);
@@ -586,7 +583,7 @@ List Compiler.parse_governed(Compiler c, Symbol position) {
   loop {
     Token start = c.token;
     items.push(
-      position == <block> ? c.parse_block_item() : _parse_statement(c));
+      position == <block> ? c.parse_block_item() : _statement(c, <statement>));
     depth = _depth_after(c, start, depth);
     if (depth <= 0) break;
     Symbol end = _arm_end(c.leading_preproc());

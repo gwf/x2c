@@ -161,7 +161,12 @@ int MatchPlan.execute(
   if (!out_bindings) return -1;
   if (!plan.admits(input, NULL)) return 0;
   $match.machine(machine, stats);
-  List bindings, int result = _run(plan, *machine, input, bindings);
+  Var values[MACHINE_BINDER_MAX];
+  MatchCaptureBuffer captures = { values, 0, MACHINE_BINDER_MAX };
+  int result = _run_capture(plan.program.view(), *machine, input, &captures);
+  /* Publication reads committed captures, never speculative matcher state. */
+  List bindings;
+  if (result == 1) bindings = _publish_captures(plan.layout, &captures);
   machine.release();
   if (result == 1) out_bindings = bindings;
   return result;
@@ -173,17 +178,6 @@ int MatchPlan.execute(
 */
 int MatchPlan.try_match(MatchPlan plan, List input, List &?out_bindings) =>
   plan.execute(input, out_bindings, NULL);
-
-/* Publication reads committed positional state, never speculative matcher
-   state. */
-static int _run(
-  MatchPlan mm, MatchMachine &m, Var input, List &out) {
-  Var values[MACHINE_BINDER_MAX];
-  MatchCaptureBuffer captures = { values, 0, MACHINE_BINDER_MAX };
-  int result = _run_capture(mm.program.view(), m, input, &captures);
-  if (result == 1) out = _publish_captures(mm.layout, &captures);
-  return result;
-}
 
 /* The committed captures as an association List in reverse slot order. */
 module List _publish_captures(
