@@ -375,7 +375,7 @@ static List _materialize_mixed_row(
   foreach (List choice in values) {
     (List condition, List path, Type destination, List result) = choice;
     List substituted =
-      !destination && source.match(%(expr ? (composite *)))
+      !destination && source ~= %(expr ? (composite *))
         ? result : result.search_replace(%(!quote $source), placeholder);
     if (substituted !== result) uses_input = 1;
     replaced.push($(condition, path, destination, substituted));
