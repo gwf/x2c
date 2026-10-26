@@ -169,7 +169,7 @@ static List _renumbered_bindings(List ast) {
   while (pending.len()) {
     Var node = pending.take_last();
     if (node is not <list> || node.is_nil()) continue;
-    match (node.list()) case %(binding ?identity ?spelling): {
+    if (node.list() ~= %(binding ?identity ?spelling)) {
       Var number;
       if (!numbers.try_get(identity, number)) {
         number = (int) numbers.len() + 1;
@@ -185,8 +185,8 @@ static List _renumbered_bindings(List ast) {
 }
 
 static String _node_repr(List node) {
-  match (node)
-    case %(macrodef (name ?name) *): return %"(macrodef <macro $name>)";
+  if (node ~= %(macrodef (name ?name) *))
+    return %"(macrodef <macro $name>)";
   return node.repr();
 }
 
