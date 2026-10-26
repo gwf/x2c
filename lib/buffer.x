@@ -56,8 +56,8 @@ meta native Self Buffer.write_len(Self buf, const char *text, size_t length) {
   if (!text) raise %(bad-arg);
   if (length == 1) return _write_char(buf, *text);
   if (memchr(text, '\0', length)) raise %(bad-arg (value 0));
-  // The line state is read before the append, which may relocate `text`,
-  // and stored after it, so a failed append changes nothing.
+  /* The line state is read before the append, which may relocate `text`,
+     and stored after it, so a failed append changes nothing. */
   _LineState next = _state_after(buf, text, length);
   buf.content.append(text, length);
   buf.pos = next.pos;
@@ -211,7 +211,7 @@ meta native Self Buffer.push(Self buf) {
 
 /** Pops one indentation depth from `buf`'s stack when present. */
 meta native Self Buffer.pop(Self buf) {
-  if (buf.indents) buf.indents.try_pop(NULL);
+  buf.indents.try_pop(NULL);
   return buf;
 }
 
@@ -243,8 +243,8 @@ int Buffer.try_get(Buffer buf, ptrdiff_t index, char &?out) {
 }
 
 /** Returns the byte at `index`, or NUL when `index` is out of range.
-    Prefer `Buffer.try_get` to distinguish an out-of-range index from a NUL
-    byte.
+    Stored bytes are never NUL. Prefer `Buffer.try_get` to also report
+    whether the index is present.
 */
 char Buffer.get(Buffer buf, ptrdiff_t index) {
   char out;
@@ -347,7 +347,7 @@ void Buffer.move_to(Buffer buf, Scope *scope) {
 /** Releases `buf` and both backing `Block`s, invalidating every alias. */
 void Buffer.free(Buffer buf) {
   if (buf == NULL) return;
-  if (buf.content != NULL) buf.content.free();
-  if (buf.indents != NULL) buf.indents.free();
+  buf.content.free();
+  buf.indents.free();
   xfree(buf);
 }

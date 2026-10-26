@@ -24,4 +24,10 @@ Translates a request synchronously. Optional per-input directories and a
 parent-process progress callback let a caller own build state. Without a
 callback, translation reports its own progress and receipt.
 
-Source: `src/translation.x:200`
+Source: `src/translation.x:206`
+
+## Design notes
+
+One request's units share a frontend. `unit_dirs` maps each input to its
+own output directory on the build path, where the caller reports progress;
+`x2c translate` has neither.

@@ -311,8 +311,7 @@ void Sym.mark_field(Sym s, Type aggregate, Symbol mark, String name) {
     `mark`, in declaration order.
 */
 List Sym.marked_fields(Sym s, Type aggregate, Symbol mark) {
-  List order = s.field_order(aggregate);
-  Array rows = [];
+  List order = s.field_order(aggregate), Array rows = [];
   foreach (List row in order ? order.cdr() : NULL) {
     String name = row.car();
     if (name && s.get($(@aggregate, mark, name))) rows.push(row);
@@ -343,8 +342,7 @@ int Sym.same_list_rest_convention(Sym s, Type source, Type target) {
   source = s.resolve_key(source);
   target = s.resolve_key(target);
   if (source == target) return 1;
-  List left = NULL, right = NULL;
-  Type left_result = NULL, right_result = NULL;
+  List left = NULL, right = NULL, Type left_result = NULL, right_result = NULL;
   if (source.function_parts(left, left_result) &&
       target.function_parts(right, right_result)) {
     if (source.list_rest_index() != target.list_rest_index()) return 0;

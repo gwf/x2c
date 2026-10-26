@@ -58,7 +58,8 @@ module CliOption cli_options[] = {
     CLI_FIELD(<flag>, quiet) },
   { <plain>, %<<translate build run script>>,
     <general>, "--plain", NULL,
-    "Use stable output without terminal rendering", 0, CLI_FIELD(<flag>, plain) },
+    "Use stable output without terminal rendering", 0,
+    CLI_FIELD(<flag>, plain) },
   { <color>, %<<translate build run script>>,
     <general>, "--color", "<auto|always|never>", "Control terminal color", 0 },
   { <debug>, %<<translate build run script>>,
@@ -71,7 +72,8 @@ module CliOption cli_options[] = {
     "Write compiler diagnostics to <file> as JSON Lines", 0,
     CLI_FIELD(<text>, diagnostics_file) },
   { <fatal-warn>, %<<translate>>, <general>, "--fatal-warnings", NULL,
-    "Fail a unit that reports a warning", 1, CLI_FIELD(<flag>, fatal_warnings) },
+    "Fail a unit that reports a warning", 1,
+    CLI_FIELD(<flag>, fatal_warnings) },
   { <no-iface>, %<<translate>>, <source>, "--no-interfaces", NULL,
     "Collect every unit cold without reading .xi interfaces", 1,
     CLI_FIELD(<flag>, no_interfaces) },
@@ -273,7 +275,8 @@ CliRequest CliRequest.parse_arguments(Array args) {
   if (first == "help") _help_command(args);
   if (first == "-o") _cli_fail_output_command();
   String spelling = _two_dash(first);
-  if (spelling) _cli_fail_one_dash_removed(first, %"x2c translate $spelling ...");
+  if (spelling)
+    _cli_fail_one_dash_removed(first, %"x2c translate $spelling ...");
   if (first[0] != '-') _cli_fail_expected_command(first);
   $fail.cli_command_unknown(first);
 }
@@ -394,7 +397,8 @@ static typedef struct Given {
 static void _option(Parse &p, String arg, int &i) {
   if (arg == "-o" && p.request.command == <translate>)
     _cli_fail_output_command();
-  if ((p.request.command in %<<build run>>) && arg.startswith("--save-temps=")) {
+  if ((p.request.command in %<<build run>>) &&
+      arg.startswith("--save-temps=")) {
     _save_temps_dir(p.request, arg);
     return;
   }
@@ -445,16 +449,18 @@ static Given _take_option(Array args, int &i, Symbol command) {
 static CliOption *_find_option(
   String spelling, Symbol command, String &attached) {
   attached = NULL;
+  int length = spelling.len();
   for (CliOption *option = cli_options; option.spelling; option++) {
     if (!(command in option.commands)) continue;
     String form = option.spelling;
-    int longer = spelling.len() > form.len() && spelling.startswith(form);
+    int form_length = form.len();
+    int longer = length > form_length && spelling.startswith(form);
     if (option.prefix) {
       if (longer) return option;
       continue;
     }
     if (spelling == form || spelling == option.alias) return option;
-    if (option.value && form.len() == 2 && longer) {
+    if (option.value && form_length == 2 && longer) {
       attached = spelling[2:];
       return option;
     }
@@ -488,7 +494,8 @@ static void _apply(Parse &p, Given given) {
     case <lib-dir>: case <library>: _forward(p.ld_args, given); break;
     case <rpath>: p.ld_args.push(%"-Wl,-rpath,$value"); break;
     case <pthread>: p.cc_args.push(spelling); p.ld_args.push(spelling); break;
-    case <framework>: case <xlinker>: _push_pair(p.ld_args, spelling, value); break;
+    case <framework>: case <xlinker>:
+      _push_pair(p.ld_args, spelling, value); break;
     case <wl>: p.ld_args.push(spelling); break;
     default: _set_field(r, *given.option, value); break;
   }
@@ -559,8 +566,7 @@ int CliRequest.dependency_option(String s) {
   );
 }
 
-static void _set_field(
-  CliRequest r, CliOption &option, String value) {
+static void _set_field(CliRequest r, CliOption &option, String value) {
   char *field = (char *) r + option.offset;
   switch (option.apply) {
     case <flag>: *(int *) field = 1; break;

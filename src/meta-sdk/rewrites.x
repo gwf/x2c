@@ -102,7 +102,8 @@ static List _unmarked(List holes, Symbol mark) {
 /** Answers `Code.register_rewrite`, declared in `lib/meta.x`: the
     pattern's form selects the family and its keys. A function rule is
     keyed by return type, which `Compiler.normalize` dispatches once per
-    definition before its body lowers. */
+    definition before its body lowers.
+*/
 Code Code.register_rewrite(Code function, List pattern, List holes) {
   _require_expansion("Code.register_rewrite");
   Macro shape = NULL;
@@ -166,7 +167,8 @@ Code Code.register_rewrite(Code function, List pattern, List holes) {
 }
 
 /** Adds post-initialization block items while the declaration owner retains
-    the original declarators, their type identity, and initialization order. */
+    the original declarators, their type identity, and initialization order.
+*/
 Code Code.register_after_initialization(Code c, Macro shape, List holes) {
   _require_expansion("Code.register_after_initialization");
   holes = _rewrite_holes(shape, holes);

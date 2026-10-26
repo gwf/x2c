@@ -89,8 +89,7 @@ static List _bind_enumerator(Compiler c, List input) {
    Binding mutates the current `Sym` in visitation order. Macro invocation
    opens the surrounding `SymTxn`, allowing earlier siblings to be visible to
    later ones while preserving whole-expansion rollback on failure. */
-static List _bind_form(
-  Compiler c, List input, Symbol context, int pending) {
+static List _bind_form(Compiler c, List input, Symbol context, int pending) {
   Macro caught = $caught;
   int unit = context == <unit>, block = context == <block>;
   int statement = block || context == <statement>;
@@ -153,8 +152,7 @@ static List _bind_form(
       return c.finish_return_statement(expr);
     case %((!or break continue default empty)) if (statement): return input;
     case %(case ?expr) if (statement): return %(case $(_resolve(c, expr)));
-    case %((!or ?tag goto label) ?name) if (statement):
-      return $(tag, name);
+    case %((!or goto label) ?) if (statement): return input;
     case $expression_statement(?expr) if (statement):
       return _bind_expression_statement(c, expr, context);
     case $deferred(?body) if (statement):
@@ -375,8 +373,7 @@ static List _bind_if(Compiler c, Var condition, Var ontrue) {
   return %(if $test $yes);
 }
 
-static List _bind_if_else(
-  Compiler c, Var condition, Var ontrue, Var onfalse) {
+static List _bind_if_else(Compiler c, Var condition, Var ontrue, Var onfalse) {
   List test = _bind_clause(c, condition);
   int true_is_present = 1;
   List binding = c.optional_reference_test(test, true_is_present);
@@ -394,8 +391,7 @@ static List _bind_condition_branch(
   return _bind_branch(c, arm, binding, present);
 }
 
-static List _bind_branch(
-  Compiler c, Var arm, List binding, int present) {
+static List _bind_branch(Compiler c, Var arm, List binding, int present) {
   if (!binding) return _bind_statement(c, arm);
   List before = c.present_references();
   if (present) c.mark_reference_present(binding);
@@ -509,8 +505,7 @@ static int _declares_binders(List body, List bindings) {
 }
 
 // Source clauses parse here, so body, arms, and finalizer go in token order.
-static List _bind_try(
-  Compiler c, Var body, Var catches, Var cleanup) {
+static List _bind_try(Compiler c, Var body, Var catches, Var cleanup) {
   List bound = _bind_statement(c, body);
   List arms = catches ? _bind_statement(c, catches) : NULL;
   List finalizer = cleanup ? _bind_statement(c, cleanup) : NULL;

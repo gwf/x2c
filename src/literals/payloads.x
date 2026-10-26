@@ -83,7 +83,7 @@ static List _parse_detail_value(
   Compiler c, Token origin, String arity, String spliced, List note) {
   if (c.peek(0) == <)>) c.report_error(<parse>, arity, origin, NULL);
   List value = _parse_list_head(c);
-  if (value.match(%(expr ("List") (splice *))) || value.match(%(splice *)))
+  if ((value ~= %(expr ("List") (splice *))) || (value ~= %(splice *)))
     c.report_error(<parse>, spliced, origin, note);
   if (c.peek(0) != <)>) c.report_error(<parse>, arity, origin, NULL);
   c.expect(<)>);

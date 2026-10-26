@@ -128,7 +128,8 @@ module List _ordered_list(Compiler c, List chain) {
     orders.push(_part_order(c, value));
     node = rest;
   }
-  int counted = !spliced && node.match(%(nil));
+  int counted = 0;
+  if (!spliced) match (node) case %(nil): counted = 1;
   node = _step(c, _passed_as(_to_list(c, node), %("List")));
   kinds.push(<nil>);
   values.push(node);
@@ -221,7 +222,8 @@ static List _statement_expression(List declarations, List expression) =>
 
 /** Calls the typed callable `callee` with `arguments`, each converted to
     its parameter and evaluated once, in source order, as a statement
-    expression. */
+    expression.
+*/
 List Compiler.call_in_order(Compiler c, List callee, List arguments) {
   Type signature = callee.cadr();
   List parameters = signature.car().list().cadr();

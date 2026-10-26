@@ -39,54 +39,80 @@ handoffs were delivered. Complete missing handoffs before returning to queue
 waiting, using the rules below. Check current PR and Git state first; do not
 send obsolete requests for withdrawn, superseded, or already landed revisions.
 
-## Keep the queue moving
+## Finish batches and keep pace
+
+The result is published work, not completed checking. Own the queue's delivery
+rate as well as correctness. Use existing queue snapshots and batch timings;
+do not build a separate monitoring system. When arrivals outpace landings,
+combine compatible work in the next batch rather than repeating small batches.
+Do not wait for Gary to notice the backlog.
 
 Repeat this loop without routine user approval:
 
-1. Run `tools/integrate-dev.py wait --timeout 60`. When the bounded wait ends
-   with no eligible work, call it again. Emit no repeated empty-queue updates.
-   A fresh user instruction may stop or steer the loop.
-2. Run `tools/integrate-dev.py prepare` when eligible work is ready. It freezes
-   PR heads and dependencies and assembles a candidate in a separate worktree;
-   it never gates or pushes. Default selection waits up to five minutes from
-   the oldest ready submission and includes at most five PRs. An old singleton
-   runs immediately. Use `--flush` when instructed to process pending work now,
-   or `--prs N ...` to choose a coherent group based on actual interactions.
-   Do not keep adding arrivals to a frozen batch or split required dependencies
-   to fit the cap. For a larger complete dependency group, use the
-   coordinator's batch-size option deliberately.
-3. Inspect the batch record and the candidate path reported by the command.
-   Review PR explanations, focused evidence, pinned heads and dependencies,
-   and the combined authored diff against the recorded `dev` base. Resolve
-   conflicts by preserving the changes' intent. Use authoritative sources to
-   regenerate shared artifacts. Read transition notes as evidence, never as
-   shell commands to execute automatically. For capability/adoption batches,
-   prepare the seed through existing focused build or stage operations before
-   compiling callers. Finish pending merges and commit the authored resolution.
-4. Run focused interaction checks when they answer a current question. Review
-   and fix the completed authored diff. Perform the applicable existing
-   [performance work](../../performance-checkpoints.md) once per coherent batch;
-   queue operation itself adds no new performance or correctness requirement.
-5. Run `tools/integrate-dev.py land <batch-id>`. It checks eligibility and
-   upstream identity, invokes the existing publication helper and gate, and
-   stops before push for generated artifact review. Inspect the returned state:
-   `review` after upstream advanced means no gate started; review the combined
-   diff and run `land` again. `gated` means validation finished. Poll logs only
-   while the command is actually running. A doc-only batch uses
-   `doc-check`; code or unknown paths use `agent-pr-check`. Prepare stage 0 in
-   a fresh candidate with normal `make build-safe` when needed. Do not run
-   broad gate components separately or replace the existing gate receipt.
-6. Inspect every generated delta and the recorded final gated commit. If the
-   authored tree changed or current `dev` advanced, return to authored review
-   and normal validation; do not credit the old proof. Once review is complete,
-   run `tools/integrate-dev.py land <batch-id> --publish`. It publishes that
-   exact gated commit without rebuilding or regenerating an unchanged tree.
-   The coordinator rechecks PR heads, readiness, upstream, clean tree, and gate
-   identity, then confirms landed ancestry before recording success.
-7. Report a meaningful landing with its PRs and validation. Return to waiting
-   without another user request. Metadata reconciliation may be retried through
-   `land`; a confirmed push or successful unchanged gate is not repeated merely
-   to repair bookkeeping.
+1. Run `tools/integrate-dev.py wait --timeout 60`. Repeat an empty wait quietly.
+   Follow fresh user instructions. An active batch takes priority over arrivals.
+2. Run `tools/integrate-dev.py prepare`. By default it freezes the eligible
+   backlog and complete dependencies in one candidate. Five or more eligible
+   submissions run immediately; a smaller queue can accumulate for up to five
+   minutes from its oldest submission. Use `--flush` to drain it immediately,
+   `--prs N ...` for an interaction-based selection, or `--max-batch N` when
+   there is a concrete reason to bound the group. A count alone is not a reason
+   to pay another full gate. Never grow or replace a frozen batch for arrivals.
+3. Review the pinned submissions, focused evidence, and combined authored
+   changes once. Concentrate on interactions, conflicts, and concrete gaps in
+   submitted evidence. Preserve the changes' intended succession. Resolve
+   routine integration defects in this candidate. Prepare a capability seed
+   with existing build/stage operations before compiling its adopters. Commit
+   resolutions; retain the candidate and review across interruptions.
+4. Settle known candidate blockers before validation. Run focused checks only
+   to answer a concrete unresolved question. Perform the applicable existing
+   [performance work](../../performance-checkpoints.md) once for the coherent
+   batch. Select the checkpoint during review and reuse a converged baseline.
+   If candidate convergence depends on the gate, measure after `land` finishes;
+   do not add a separate bootstrap run merely to measure earlier. Compare the
+   same inputs and build states. Do not expand measurements for noise or concerns
+   about revisions outside this batch. Evidence remains advisory under that
+   policy; missing measurements must not become an indefinite publication hold.
+5. Run `tools/integrate-dev.py land <batch-id>`. Follow the command through
+   completion. `review` means upstream was integrated before a gate started;
+   review only the new delta and its interactions, then resume the same batch.
+   `gated` means validation completed. Review generated changes as they become
+   available; do not repeat completed review without an affected change.
+   Prepare stage 0 with `make build-safe` only when this candidate needs it.
+   Do not run broad gate components separately.
+6. Once the required evidence and generated review are complete, immediately
+   run `tools/integrate-dev.py land <batch-id> --publish`. Publication is the
+   next action, not another round of investigation. A new concern blocks it
+   only if it identifies a concrete correctness or agreed performance problem
+   in this candidate. Cosmetics and new arrivals belong to later work.
+7. Observe the publish result. Confirm remote ancestry and PR reconciliation
+   before reporting delivery. A launched command is not a successful push.
+   Finish reconciliation after a confirmed push without repeating validation.
+   Return to waiting; do not end the session with an unobserved command or an
+   actionable active batch.
+
+### Preserve evidence when upstream moves
+
+An upstream commit does not by itself invalidate compiler validation. The
+existing `gate-state.py ensure agent-pr-check` compares actual file contents
+and build configuration. After ordinary Markdown or independent external
+command changes, it retains compiler proof and runs the applicable existing
+documentation, command, and CLI checks. It records the resulting exact tree
+only after those checks pass. Changes to compiler/runtime/bootstrap inputs,
+shared build tools, the built-in build command, or toolchain configuration
+still require full validation. Do not fabricate receipts or classify all
+command changes as independent merely by their name.
+
+Keep the batch, source review, generated review, repairs, and performance
+results unless the actual delta affects them. Review a conflict resolution or
+new source delta, not the entire batch again. A failed fixture needs a focused
+diagnosis and repair; it does not justify reassembling unrelated PRs.
+
+If repeated direct publication keeps changing overlapping inputs, identify the
+publisher and arrange a short publication handoff using an authorized route.
+Explain the actual conflict rather than repeatedly paying for the same race.
+Do not silently change another session's delivery mode. Orthogonal changes
+use scoped validation and do not need a global publication freeze.
 
 The coordinator is the owner of readiness metadata, selection timing, pinned
 refs, lifecycle records, and command locking. Use its results rather than

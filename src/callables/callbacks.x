@@ -216,7 +216,7 @@ static int _lambda_adapter_signature(
 
 static int _collect_param_types(List raw_params, List &out_types) {
   Array types = [], int all_var = 1;
-  foreach(Var entry in raw_params) {
+  foreach (Var entry in raw_params) {
     Var ptype = entry;
     match (entry)
       case %(param ? ?): ptype = entry.list().type_from_ast();

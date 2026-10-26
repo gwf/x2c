@@ -6,4 +6,10 @@
 
 # `src/components/bracket-access.x`
 
-Bracket access policy: Array and Map mutation through their typed helpers, and any other participant's read, store, and update through its indexing members, with each operand evaluated once, in order. Getter resolution remains with admission.
+Bracket access policy.
+
+## Design notes
+
+Array and Map mutation uses typed helpers. Other participants' reads,
+stores, and updates use indexing members. Each operand is evaluated once,
+in order. Getter resolution remains with admission.

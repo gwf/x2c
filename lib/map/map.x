@@ -82,6 +82,7 @@ $map.core.family(
   _reinsert_error, _insert_error);
 
 static int _capacity_valid(unsigned n) => n >= 2 && !(n & (n - 1));
+
 static void _bad_arg(String owner) {
   (void) owner;
   raise %(bad-arg);
@@ -209,7 +210,8 @@ Self Map.update_n(Self map, unsigned pair_count, ...) {
     replaced the original. A null `Map`, callback, or `Scope` pointer does
     nothing. Raises: `<alloc-fail>`, `<size-limit>`, or `<invariant>` while
     rebuilding, or any cause from export, key hashing, or moving the rebuilt
-    `Block`s. */
+    `Block`s.
+*/
 void Map.export_to(
   Map map, Context source, VarExportContextFn export_value, Scope *scope) {
   if (map == NULL || !export_value || !scope) return;
@@ -248,6 +250,7 @@ void Map.export_to(
 }
 
 static Var _box_var(Var value) => value;
+
 static int _compare_var(Var a, Var b) => a.compare(b);
 $map.core.observe(Map, Var, Var, struct MapRecord,
   _box_var, _box_var, _compare_var, _compare_var);

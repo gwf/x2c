@@ -1261,7 +1261,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _888 = cons(_887, NULL);
   _889 = cons(_522, _888);
   _890 = List_var(_889);
-  _891 = int_var(35);
+  _891 = int_var(36);
   _892 = cons(_891, NULL);
   _893 = cons(_528, _892);
   _894 = List_var(_893);
@@ -1271,7 +1271,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _898 = cons(_897, NULL);
   _899 = cons(_538, _898);
   _900 = List_var(_899);
-  _901 = int_var(1153);
+  _901 = int_var(1154);
   _902 = cons(_901, NULL);
   _903 = cons(_542, _902);
   _904 = List_var(_903);
@@ -1329,7 +1329,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _956 = cons(_1, _815);
   _957 = List_var(_956);
   _958 = Symbol_var(106239471489226);
-  _959 = int_var(1264);
+  _959 = int_var(1265);
   _960 = String_new("");
   _961 = String_var(_960);
   _962 = Symbol_var(13528008);
@@ -1337,7 +1337,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _964 = List_var(_814);
   _965 = cons(_567, _814);
   _966 = List_var(_965);
-  _967 = int_var(1271);
+  _967 = int_var(1272);
 }
 
 static Array f9_transfers____expression_blocks(List expression){

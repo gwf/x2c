@@ -72,7 +72,8 @@ SymScope Sym.pop_scope(Sym s) {
 }
 
 /** Returns the index of the innermost scope whose symbols hold `key`, or
-    -1 when none does. */
+    -1 when none does.
+*/
 int Sym.declaring_scope(Sym s, List key) {
   for (int i = (int) s.scopes.len() - 1; i >= 0; i--)
     if (key in _scope_at(s, i).symbols) return i;
@@ -92,7 +93,8 @@ int Sym.has_aliases(Sym s) => s.aliases != 0;
 int Sym.at_file_scope(Sym s) => (int) s.scopes.len() <= s.base_scopes;
 
 /** Sets aside the local scopes now open, so declarations bind at file
-    scope until `Sym.reopen_scopes` restores the returned scopes. */
+    scope until `Sym.reopen_scopes` restores the returned scopes.
+*/
 Block Sym.close_local_scopes(Sym s) {
   Block local = Block.new(sizeof(SymScope));
   if (s.at_file_scope()) return local;
@@ -130,7 +132,8 @@ Map Sym.current_symbols(Sym s) {
 }
 
 /** Returns a fresh map of the base symbols with the current scope's rows
-    merged in. */
+    merged in.
+*/
 Map Sym.unit_symbols(Sym s) {
   Map symbols = s.base_symbols();
   if (!s.at_file_scope()) symbols.merge(s.current_symbols());
@@ -144,7 +147,8 @@ Map Sym.file_statics(Sym s) => s.statics;
 void Sym.mark_static(Sym s, List key) => s.put(s.statics, key, 1);
 
 /** Returns the visible one-part source names and their semantic types.
-    Inner scopes win. The result is a fresh List; types remain borrowed. */
+    Inner scopes win. The result is a fresh List; types remain borrowed.
+*/
 List Sym.visible_symbols(Sym s) {
   Map seen = {};
   Array rows = [];
@@ -209,7 +213,8 @@ Map Compiler.macro_definition_locals(Compiler c) {
 
 /** Reports whether `binding` is a local of the active macro definition or
     of a template that encloses it; a nested definition's literal names
-    share the enclosing template's names. */
+    share the enclosing template's names.
+*/
 int Compiler.macro_template_local(Compiler c, List binding) {
   Var holes = c.macro_holes;
   while (holes is <map>) {

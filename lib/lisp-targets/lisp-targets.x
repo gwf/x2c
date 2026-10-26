@@ -121,9 +121,9 @@ static macro Expression $lisp.native.target.map() =>
   (lisp_binder_lets)
   (lisp_string_append_all rest)
 
-  // The core value types: their operations are the library's own, so a
-  // Lisp session and a compiled program build the same List, String, Map,
-  // and Array. `etc/init.xlisp` names them.
+  /* The core value types: their operations are the library's own, so a
+     Lisp session and a compiled program build the same List, String, Map,
+     and Array. `etc/init.xlisp` names them. */
   (String_truth)
   (Var_list)
   (Var_array)
@@ -199,7 +199,9 @@ Map lisp_native_targets(void) => native_targets;
 /* Native const-char pointers use represented String storage here. */
 static String _string_new_len(String text, int length) =>
   String.new_len(text, length);
+
 static Symbol _symbol_parse(String text) => Symbol.parse(text);
+
 static Symbol _symbol_new_len(String text, int length) =>
   Symbol.new_len(text, length);
 
@@ -218,8 +220,7 @@ static Job _job_start(Job job) {
 
 /* Meta text is a NUL-terminated String, so a count past its end would read
    beyond it. */
-static Buffer _buffer_write_len(
-  Buffer buf, const char *text, size_t length) {
+static Buffer _buffer_write_len(Buffer buf, const char *text, size_t length) {
   if (text && strnlen(text, length) < length)
     raise %(bad-arg (operation "Buffer.write_len"));
   return buf.write_len(text, length);

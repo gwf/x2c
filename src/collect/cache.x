@@ -146,7 +146,8 @@ module void _retain_rows(List parts) {
 
 /** Makes the next collection recheck source files and interfaces after an
     interactive edit. Drops cache indexes, retaining their backing rows:
-    already-open units may still use those declarations. */
+    already-open units may still use those declarations.
+*/
 void Compiler.refresh_source_collections(void) {
   _reset_cache(process_cache);
   _reset_cache(provisional_entries);
@@ -164,7 +165,8 @@ static void _reset_cache(Map &cache) {
 
 /** Drops the entries a meta build collected without declaration defaults
     or with placeholders for its meta calls. Call after the meta build's
-    parses. */
+    parses.
+*/
 void Compiler.forget_provisional_entries(void) {
   if (!provisional_entries) return;
   foreach (String path in provisional_entries.keys())

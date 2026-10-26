@@ -55,7 +55,7 @@ int MatchPlan.borrowable(Var pattern, int permanent_lists) =>
    one immutable plan in `Match`-owned process storage until shutdown. Only
    the first call takes a lock, to prepare that plan; `plan` is published
    last and read with acquire ordering, so a site that already holds a plan
-   needs no synchronization. */
+   takes no lock. */
 
 static Scope match_capture_site_scope;
 

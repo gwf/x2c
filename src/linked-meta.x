@@ -280,7 +280,8 @@ static Code _participant_update(
 }
 
 /** Selects the adopted collection setter for indexed assignment, or a
-    participant's `setindex` member. */
+    participant's `setindex` member.
+*/
 Code access_store(Code code) {
   match (code) case $x2c.collection.store(?base, ?key, ?value): {
     Code receiver = base;
@@ -307,7 +308,8 @@ static Code _access_update(
 }
 
 /** Selects collection compound updates and checks accepted operands, or a
-    participant's `updateindex` member. */
+    participant's `updateindex` member.
+*/
 Code access_update(Code code) {
   match (code) {
     case $x2c.collection.add(?base, ?key, ?value):
@@ -456,7 +458,8 @@ static List _delegate_fields(Type outer, String member) {
 }
 
 /** Rebuilds a call that finds no member on its receiver through the one
-    delegate field path that provides the method. */
+    delegate field path that provides the method.
+*/
 Code delegate_member(Code code) {
   match (code) case $x2c.delegate.call(?receiver, ?member, *arguments): {
     String name = Code.binding_spelling(member);
@@ -510,7 +513,8 @@ static Code _destructure_bound(List code, Atom values, Atom result) {
 
 /** Declares the names of `T (a, b) = source;` and then reads the source
     into them, or declares each target of `(T1 a, T2 b) = source;`
-    initialized from its element. */
+    initialized from its element.
+*/
 Code destructure_declaration(Code node) {
   Atom values = Atom.intern("?__destructure");
   match (node) {
@@ -554,7 +558,8 @@ Code destructure_statement(Code node) {
 }
 
 /** Reads the source of `(a, b) = source` into its targets, and keeps the
-    source in a result local as the expression's value. */
+    source in a result local as the expression's value.
+*/
 Code destructure_value(Code node) {
   match (node)
     case %(expr ?(Type type) (dstrasgn (targets *targets) ?source)): {
@@ -703,11 +708,12 @@ static Code _lambda_cell(List name, Type type, Code value) {
   Type bytes = %(* void), pointer = cons(<*>, type), literal = type;
   Code allocated = $!($bytes){ Scope_malloc(sizeof($type)) };
   if (value) {
-    if (!type.match(%((dim *) *)) && !value.match(%(expr ? (composite ?)))) {
+    if (!(type ~= %((dim *) *)) &&
+        !(value ~= %(expr ? (composite ?)))) {
       literal = cons(%(dim $($!int{ 1 })), type);
       value = value.convert(type);
     }
-    if (!value.match(%(expr ? (composite ?))))
+    if (!(value ~= %(expr ? (composite ?))))
       value = %(expr $literal (composite (commas $value)));
     allocated = $!($bytes){
       Scope_memdup((const void *)&($literal)$value, sizeof($type))
@@ -729,8 +735,9 @@ static Code _lambda_copied_cell(List binding, Map cells) {
   Var cell;
   if (!cells.try_get(binding, cell)) return NULL;
   Type type = cell.list().cadr();
-  return _lambda_declared_cell(
-    binding, %(expr $type (ident $binding)), cells);
+  Code value = %(expr $type (ident $binding));
+  return _lambda_cell(
+    _lambda_cell_name(binding, cells), type, value);
 }
 
 static List _lambda_targets(List node) {
@@ -803,8 +810,7 @@ static Var _lambda_declare_cells(List node, Map cells) {
   return celled ? %(seq @(items.list_free())) : node;
 }
 
-static Var _lambda_rebuild(
-  Var ast, List none, Map cells, Map declaring) {
+static Var _lambda_rebuild(Var ast, List none, Map cells, Map declaring) {
   Array pending = [ast], modes = [0], done = [];
   while (pending.len()) {
     Var node = pending.take_last();
@@ -866,7 +872,7 @@ static List _lambda_items(Code body) {
   match (body) case %(block *items):
     return $(
       @(_lambda_returning(items, source_return_none())), source_return_none());
-  List items = body.match(%(expr (void) ?))
+  List items = body ~= %(expr (void) ?)
     ? %((stmnt $body) $(source_return_none()))
     : %((stmnt (return $(body.convert(%("Var"))))));
   match (x2c_enclosing(<statement>)) case %(at ?origin ?):
@@ -913,7 +919,8 @@ static Code _lambda_function(List name, List params, Code body) {
 }
 
 /** Lifts the noncapturing lambda `node` to a static function, whose name
-    is its value. */
+    is its value.
+*/
 Code lambda_lift(Code node) {
   match (node) case %(expr ?type $($lambda_expression(?body, *params))): {
     List name = x2c_binding_fresh("lambda");
@@ -926,7 +933,7 @@ Code lambda_lift(Code node) {
 
 static int _lambda_in_public_inline(void) {
   match (x2c_enclosing(<function>)) case %(function ?(Type type) *):
-    return type.match(%(* inline *)) && !type.match(%(* static *));
+    return type ~= %(* inline *) && !(type ~= %(* static *));
   return 0;
 }
 
@@ -1068,7 +1075,8 @@ static Code _lambda_value(
 
 /** Lifts the capturing lambda `node` to a static function of its
     parameters and captures, and answers a `Func` of a record of the
-    captured values and addresses. */
+    captured values and addresses.
+*/
 Code lambda_closure(Code node) {
   match (node)
     case %(expr ? $($lambda_captured(?body, *captures, *params))): {
@@ -1146,7 +1154,8 @@ static Map _lambda_shared(List params, List items) {
     declared as its cell, and every read goes through the cell. A lifted
     lambda's function moves its own. The function binds again only its
     cells and the statements that hold them; its other statements are kept
-    as they are bound. */
+    as they are bound.
+*/
 Code lambda_cells(Code node) {
   match (node)
     case %(function ?type
@@ -1305,7 +1314,7 @@ static int _match_nested(
   Buffer b, Array out, List pattern, Var value, Array binders, int &depths) {
   int viewed = binders != NULL;
   if ((!viewed &&
-       !pattern.match(%(expr ? (!or (cache ?) (expr ? (cache ?)))))) ||
+       !(pattern ~= %(expr ? (!or (cache ?) (expr ? (cache ?)))))) ||
       value is not <list>)
     return -1;
   _match_flush(b, out);
@@ -1564,7 +1573,8 @@ static List _match_dynamic_read(Code subject, String locals) {
 }
 
 /** Lowers the bound match `node` to C text around its subject, patterns,
-    and bodies. */
+    and bodies.
+*/
 Code match_lowering(Code node) {
   match (node) case $matched(?subject, *rows):
     return _match_lowered(subject, rows);
@@ -1845,7 +1855,8 @@ static void _protocol_descriptor(List descriptor, List slots) {
 }
 
 /** Places the forwarding members, descriptor thunks, method table, and
-    descriptor registration of one conformance. */
+    descriptor registration of one conformance.
+*/
 Code protocol_conformance(Code node) {
   match (node)
     case %(conform ? ?(Type participant) ?(String forward)
@@ -1908,7 +1919,8 @@ static Code _raise_value(Code value) {
 }
 
 /** Converts a raise's code and details, or declines a raise whose parts
-    already have their types. */
+    already have their types.
+*/
 Code raise_lowering(Code node) {
   match (node) case $raised(?code, *details): {
     Code symbol = ((Code) code).convert(%("Symbol"));
@@ -1942,8 +1954,8 @@ static String _string_case_bytes(String spelling) {
 }
 
 static int _string_case_text(Type type) =>
-  type.match(%((!or (dim *) (!quote *)) char)) ||
-  type.match(%((!or (dim *) (!quote *)) const char));
+  type ~= %((!or (dim *) (!quote *)) char) ||
+  type ~= %((!or (dim *) (!quote *)) const char);
 
 static String _string_case_key(List label) {
   match (label) {
@@ -2006,7 +2018,8 @@ static Code _string_switch_helper(Type type, List labels) {
 }
 
 /** Lowers a switch on a String to an integer switch on its selector's
-    index among the labels it owns, or declines another switch. */
+    index among the labels it owns, or declines another switch.
+*/
 Code string_switch_lowering(Code node) {
   match (node) case $switched(?selector, ?body): {
     Type type = selector.cadr();

@@ -192,7 +192,7 @@ meta static int _match_nested(
   Buffer b, Array out, List pattern, Var value, Array binders, int &depths) {
   int viewed = binders != NULL;
   if ((!viewed &&
-       !pattern.match(%(expr ? (!or (cache ?) (expr ? (cache ?)))))) ||
+       !(pattern ~= %(expr ? (!or (cache ?) (expr ? (cache ?)))))) ||
       value is not <list>)
     return -1;
   _match_flush(b, out);
@@ -490,7 +490,8 @@ meta static List _match_dynamic_read(Code subject, String locals) {
 
 $rewrite($matched)
 /** Lowers the bound match `node` to C text around its subject, patterns,
-    and bodies. */
+    and bodies.
+*/
 meta Code match_lowering(Code node) {
   match (node) case $matched(?subject, *rows):
     return _match_lowered(subject, rows);

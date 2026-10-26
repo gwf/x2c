@@ -102,7 +102,7 @@ static List _meta_argument(Compiler c) {
   List argument = direct
     ? %(expr (<macro-expr>) $(_parse_hole(c, kind ? kind : <argument>)))
     : c.parse_assignment();
-  if (hole && argument.match(%(expr ? (macro-bind ?)))) {
+  if (hole && (argument ~= %(expr ? (macro-bind ?)))) {
     Atom projection = Macro.binder(hole.assoc(<binder>), "value", 0);
     argument = %(expr ("List") (meta-cap $projection));
   }

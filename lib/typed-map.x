@@ -46,14 +46,12 @@ typedef struct MapLongDouble {
 } *MapLongDouble;
 
 /** A mutable, `Scope`-owned map from canonical `String`s to canonical
-    `String`s.
-    The native entry fields borrow the supplied `String` pointers. Exporting a
-    map owned by a `Context` recanonicalizes only `String`s owned by that
-    `Context`
-    in the destination pool before moving the map. Borrowed or outer-owned
-    `String`s retain their existing pool lifetime, which must outlive the map.
-    Compound indexed update supports only concatenation; postfix update is
-    unsupported.
+    `String`s. The native entry fields borrow the supplied `String` pointers.
+    Exporting a map owned by a `Context` recanonicalizes only `String`s owned
+    by that `Context` in the destination pool before moving the map. Borrowed
+    or outer-owned `String`s retain their existing pool lifetime, which must
+    outlive the map. Compound indexed update supports only concatenation;
+    postfix update is unsupported.
 */
 typedef struct MapStringString {
   Scope scope, Bytes hashes, entries;
@@ -118,8 +116,7 @@ static MapIntInt _prepare_int_export(MapIntInt map, Context source) {
   return NULL;
 }
 
-static MapLongDouble _prepare_long_export(
-  MapLongDouble map, Context source) {
+static MapLongDouble _prepare_long_export(MapLongDouble map, Context source) {
   (void) map; (void) source;
   return NULL;
 }
@@ -143,7 +140,7 @@ static int _equal_long(long *a, long *b) => a[0] == b[0];
 
 static int _equal_double(double *a, double *b) => a[0] == b[0];
 
-/* Canonicalization makes identity the content test, as it does for a Var. */
+// Canonicalization makes identity the content test, as it does for a Var.
 static int _equal_string(String *a, String *b) => a[0] == b[0];
 
 static int _compare_int(int a, int b) => (a > b) - (a < b);
@@ -161,7 +158,7 @@ static void _valid_double(double *value) {
   (void) value;
 }
 
-/* NULL is the empty String, not a missing one, so every String is storable. */
+// NULL is the empty String, not a missing one, so every String is storable.
 static void _valid_string(String *value) {
   (void) value;
 }
@@ -197,8 +194,7 @@ static int _update_int(volatile int *slot, Symbol op, int rhs) {
   return result;
 }
 
-static double _update_double(
-  volatile double *slot, Symbol op, double rhs) {
+static double _update_double(volatile double *slot, Symbol op, double rhs) {
   double current = slot[0], result;
   switch (op) {
     case <+>: result = current + rhs; break;
@@ -213,8 +209,7 @@ static double _update_double(
 
 /* Concatenation is the only update a String value has. The family supplies
    no increment value, so both postfix operators report a bad operator. */
-static String _update_string(
-  volatile String *slot, Symbol op, String rhs) {
+static String _update_string(volatile String *slot, Symbol op, String rhs) {
   if (op != <+>) _bad_op(op);
   String current = slot[0], result = current + rhs;
   slot[0] = result;
@@ -280,7 +275,7 @@ $map.core.observe(
   MapStringString, String, String, struct MapStringStringRecord,
   _box_string, _box_string, _compare_string, _compare_string);
 $map.typed.observe(
- MapStringString, String, String, _box_string, _box_string);
+  MapStringString, String, String, _box_string, _box_string);
 
 static MapStringString _prepare_string_export(
   MapStringString map, Context source) {
@@ -321,7 +316,8 @@ $map.typed.observe(MapStringInt, String, int, _box_string, _box_int);
 
 /** Adds count using borrowed bytes for lookup. Only a missing key is
     converted to a canonical String; the map never retains the view.
-    Integer addition and insertion follow updateindex. */
+    Integer addition and insertion follow updateindex.
+*/
 int MapStringInt.add_substr(MapStringInt map, Substr key, int count) {
   if ((void *) map == NULL) _bad_arg("MapStringInt");
   unsigned hash = key.hash();

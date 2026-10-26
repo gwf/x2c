@@ -120,7 +120,7 @@ static List _convert_composite_row(
   List value = original;
   while (value.car() == <dotinit> || value.car() == <indexinit>)
     value = value.caddr();
-  if (value.match(%(expr ? (initval *))))
+  if (value ~= %(expr ? (initval *)))
     return row_condition === parent_condition ? original
       : _convert_initval_row(
         c, row, value, native_target, row_condition, native_used);
@@ -260,14 +260,14 @@ static List _speculate(
 }
 
 static List _zero_value(Type type, List target) {
-  Type native = type.is_bitfield() ? type.base_type()
-    : target ? %("__typeof__" (parens $target)) : type;
+  Type native = type;
+  if (type.is_bitfield()) native = type.base_type();
+  else if (target) native = %("__typeof__" (parens $target));
   return %(expr $type (cast $native (expr $type
     (composite (commas $($!int{ 0 }))))));
 }
 
-static List _rejected_initializer(
-  Type type, List condition, List zero) {
+static List _rejected_initializer(Type type, List condition, List zero) {
   List size = %(expr (int) (op ? $condition
     (expr (int) (literal (int) "-1"))
     $($!int{ 1 })));
@@ -280,7 +280,7 @@ static List _rejected_initializer(
 
 static List _accepted_initializer(
   List result, Type type, List target, List condition, List zero) {
-  if (result.match(%(expr ? (composite *)))) {
+  if (result ~= %(expr ? (composite *))) {
     Type native = target ? %("__typeof__" (parens $target)) : type;
     return %(expr $type (cast $native $result));
   }
@@ -296,7 +296,7 @@ static List _convert_mixed_row(
   (List original, List cases) = row;
   Array converted = [], captured = [];
   List prepared = source;
-  if (source.match(%(expr ? (composite *))))
+  if (source ~= %(expr ? (composite *)))
     prepared = _capture_leaves(c, source, captured);
   int native_identity = !parent_condition;
   foreach (List choice in cases) {
@@ -318,8 +318,7 @@ static List _convert_mixed_row(
   return _materialize_mixed_row(c, original, source, converted, captured);
 }
 
-static List _capture_leaves(
-  Compiler c, List value, Array inputs) {
+static List _capture_leaves(Compiler c, List value, Array inputs) {
   match (value) {
     case %((!or ?kind dotinit indexinit) ?key ?inner):
       return $(kind, key, _capture_leaves(c, inner, inputs));
@@ -327,8 +326,7 @@ static List _capture_leaves(
       Array captured = [];
       foreach (List item in items)
         captured.push(_capture_leaves(c, item, inputs));
-      return %(expr $type $(source_composite_content(
-        captured.list_free())));
+      return %(expr $type $(source_composite_content(captured.list_free())));
     }
     /* A value leaf; an internally constructed native call may have a bare
        string callee. */
@@ -342,8 +340,7 @@ static List _capture_leaves(
   return value;
 }
 
-static List _capture_value(
-  Compiler c, List value, Type type, Array inputs) {
+static List _capture_value(Compiler c, List value, Type type, Array inputs) {
   if (!c.sym.is_var_type(type) && !c.sym.resolve_key(type).scalar())
     return value;
   if (_is_literal(value)) return value;
@@ -378,7 +375,7 @@ static List _materialize_mixed_row(
   foreach (List choice in values) {
     (List condition, List path, Type destination, List result) = choice;
     List substituted =
-      !destination && source.match(%(expr ? (composite *)))
+      !destination && source ~= %(expr ? (composite *))
         ? result : result.search_replace(%(!quote $source), placeholder);
     if (substituted !== result) uses_input = 1;
     replaced.push($(condition, path, destination, substituted));
@@ -414,15 +411,13 @@ static List _adapt_choices(
     List adapter = _value_adapter(c, source, value);
     Type callable = adapter.cadr(), result = callable.apply();
     Macro called = $called;
-    value = c.rebuild_expression(
-      result, called(adapter, $(placeholder)));
+    value = c.rebuild_expression(result, called(adapter, $(placeholder)));
     adapted.push($(condition, path, destination, value));
   }
   return adapted.list_free();
 }
 
-static List _value_adapter(
-  Compiler c, List source, List converted) {
+static List _value_adapter(Compiler c, List source, List converted) {
   Type from = _adapter_type(c, source.cadr());
   Type result = _adapter_type(c, converted.cadr());
   List formal = %(expr $(source.cadr()) "_x2c_gensym_initializer_argument");

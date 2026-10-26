@@ -65,7 +65,8 @@ meta static Code _destructure_bound(List code, Atom values, Atom result) {
 $rewrite(%(dstrdecl *))
 /** Declares the names of `T (a, b) = source;` and then reads the source
     into them, or declares each target of `(T1 a, T2 b) = source;`
-    initialized from its element. */
+    initialized from its element.
+*/
 meta Code destructure_declaration(Code node) {
   Atom values = Atom.intern("?__destructure");
   match (node) {
@@ -111,7 +112,8 @@ meta Code destructure_statement(Code node) {
 
 $rewrite(%(expr ? (dstrasgn *)))
 /** Reads the source of `(a, b) = source` into its targets, and keeps the
-    source in a result local as the expression's value. */
+    source in a result local as the expression's value.
+*/
 meta Code destructure_value(Code node) {
   match (node)
     case %(expr ?(Type type) (dstrasgn (targets *targets) ?source)): {

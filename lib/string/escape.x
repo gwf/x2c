@@ -10,7 +10,6 @@
     `string.x`.
 */
 
-
 #include <limits.h>
 
 #include "buffer.x"
@@ -85,7 +84,7 @@ static inline char _escape_letter(unsigned char ch) {
     Raises: `<alloc-fail>` while escaping or formatting a nonempty `String`.
 */
 String String.repr(String str) {
-  if (!str || !*str) return "\"\"";
+  if (!str) return "\"\"";
   return "\"%s\"".printf(str.escape());
 }
 
@@ -206,7 +205,7 @@ static inline int _named_escape(int esc) {
     `\377`, which does not fit a byte.
 */
 meta native int String.parse_char(String str) {
-  if (!str || !*str) return -1;
+  if (!str) return -1;
   const char *at = str;
   if (*at++ != '\'' || !*at) return -1;
   int byte = *at++;
@@ -225,7 +224,7 @@ meta native int String.parse_char(String str) {
     Raises: `<alloc-fail>` while copying or decoding.
 */
 meta native String String.parse(String str) {
-  if (!str || !*str) return NULL;
+  if (!str) return NULL;
   int n = str.len();
   if (str[0] == '%' && str[1] == '"' && str[n - 1] == '"')
     return String.new_len(str + 2, n - 3).unescape();

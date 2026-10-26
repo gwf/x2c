@@ -54,7 +54,8 @@ String Ast.binding_spelling(List binding) {
 // declarators
 
 /** Returns `declarator` with `modifiers` after its own, as a declaration
-    whose base contributes modifiers declares each name. */
+    whose base contributes modifiers declares each name.
+*/
 List Ast.append_modifiers(List declarator, List modifiers) {
   if (!modifiers) return declarator;
   match (declarator) {
@@ -299,7 +300,8 @@ Ast Ast.rewrap_origin(Ast original, Ast replacement) {
 
 /** Returns `decl` with each function definition marked `kernel` as written.
     The transform strips the marker before it offers the definition only to
-    shipped function rules. */
+    shipped function rules.
+*/
 List Ast.written_definitions(List decl) {
   match (decl) {
     case %(function ? (bind ? ?) ?): return %(function @(decl.cdr()) kernel);

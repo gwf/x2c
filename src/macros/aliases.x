@@ -374,7 +374,8 @@ static int _inner_entry(List inner, List outer) {
 }
 
 /** Starts a declaration body whose aliases end at its closing brace, and
-    returns the alias state that `Compiler.leave_alias_body` restores. */
+    returns the alias state that `Compiler.leave_alias_body` restores.
+*/
 Map Compiler.enter_alias_body(Compiler c) {
   c.alias_level++;
   return _table(c);
@@ -414,7 +415,8 @@ module void _remove_imported_alias(Compiler c, String name) {
 
 /** Reports whether the current scope declares an alias named `name`,
     including a file-scope alias an include delivered. A declaration of that
-    name in the same scope conflicts with it. */
+    name in the same scope conflicts with it.
+*/
 int Compiler.scope_declares_alias(Compiler c, String name) {
   List row = c.sym.current_binding($(name));
   if (row && c.fact(%(alias $row))) return 1;

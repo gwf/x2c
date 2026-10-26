@@ -798,7 +798,7 @@ void Pool_free(Pool inner, void * alloc);
 Var Pool_intern(Pool inner, Var object, void * alloc){
   if(! _init_guard_) Pool_initialize();
   if(! inner || ! alloc){
-    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/pool/interning.x",.function = "Pool_intern",.line = 130,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/pool/interning.x",.function = "Pool_intern",.line = 131,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_4, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Pool.intern")), NULL))));
     __builtin_unreachable();
   }
@@ -844,7 +844,7 @@ static Var f9_interning____intern_locked(Pool inner, Var object, int * discard){
 Var Pool_intern_new(Pool inner, Var object, void * alloc){
   if(! _init_guard_) Pool_initialize();
   if(! inner || ! alloc){
-    static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/pool/interning.x",.function = "Pool_intern_new",.line = 169,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/pool/interning.x",.function = "Pool_intern_new",.line = 170,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_5, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Pool.intern_new")), NULL))));
     __builtin_unreachable();
   }
@@ -877,7 +877,7 @@ Var Pool_intern_new(Pool inner, Var object, void * alloc){
 void Pool_insert(Pool inner, Var object){
   if(! _init_guard_) Pool_initialize();
   if(! inner){
-    static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/pool/interning.x",.function = "Pool_insert",.line = 191,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/pool/interning.x",.function = "Pool_insert",.line = 192,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_6, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Pool.insert")), NULL))));
     __builtin_unreachable();
   }
@@ -1283,7 +1283,7 @@ static inline unsigned f7_storage____slot_index(f7_storage___PoolBlock block, vo
 }
 
 static int f7_storage____contains(f7_storage___PoolBlock block, const void * ptr){
-  if(! block || ! ptr || ! block -> owner) return 0;
+  if(! block -> owner) return 0;
   const char * data = f7_storage____data(block), * candidate = ptr;
   unsigned size = f7_storage___pool_class_sizes[block -> class_index];
   if(candidate < data || candidate >= data + block -> used) return 0;

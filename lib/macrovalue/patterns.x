@@ -18,7 +18,8 @@ Var Macro.subject(void) => macro_subject;
     a compile-time call's syntax arguments. A macro value's free reference
     recognizes only the recorded global binding; with void it recognizes
     any binding of its spelling. The compiler sets these rows for each
-    `meta` call and carries them through the helper. */
+    `meta` call and carries them through the helper.
+*/
 void Macro.use_subject(Var rows) { macro_subject = rows; }
 
 /* The pattern for a `using` reference to `spelling`: any binding of it, or
@@ -40,7 +41,8 @@ static Var _free_reference(String spelling) {
    the replacement binders the compiler writes into a template. */
 
 /** Derives the Match pattern that recognizes code this macro builds,
-   capturing each parameter under the given binder. */
+    capturing each parameter under the given binder.
+*/
 List Macro_pattern(Macro t, List names) {
   return _pattern(t, names, 0);
 }
@@ -105,7 +107,8 @@ static Var _shown(Var value) {
 /** Returns the binder that captures one projection of the template hole
     whose binder is `binder`. Splice and construction projections are
     always sequences; return, declarator, and member projections never
-    are; source, value, and expression follow the hole's `sequence`. */
+    are; source, value, and expression follow the hole's `sequence`.
+*/
 Atom Macro.binder(Var binder, String projection, int sequence) {
   if (projection == "splice" || projection == "construction") sequence = 1;
   else if (projection == "return" || projection == "declarator" ||

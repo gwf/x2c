@@ -473,8 +473,7 @@ void *Error.unwind_head(void) {
     bookkeeping is cleared.
 */
 void Error.restore_landing(void *saved_head, int saved_depth) {
-  ErrorHandler saved = saved_head;
-  ErrorThreadState state = _thread();
+  ErrorHandler saved = saved_head, ErrorThreadState state = _thread();
   if (_chain_contains(saved, state.handler_top)) state.handler_top = saved;
   state.dispatch_saved = state.dispatch_running = NULL;
   state.depth = saved_depth;
@@ -486,8 +485,7 @@ void Error.restore_landing(void *saved_head, int saved_depth) {
     exit to preserve collected errors.
 */
 void Error.trim(void *saved_head, int stack_height) {
-  ErrorHandler saved = saved_head;
-  ErrorThreadState state = _thread();
+  ErrorHandler saved = saved_head, ErrorThreadState state = _thread();
   if (_chain_contains(state.handler_top, saved)) _unwind_to(state, saved, 1);
   _truncate(stack_height);
 }

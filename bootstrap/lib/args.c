@@ -508,7 +508,7 @@ _Noreturn static void _bad_option(String why, String option){
   {
     Var _x2c_gensym_literal_part_1 = String_var(String_join(NULL, cons(String_var(String_new("Args.parse")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/args.x",.function = "_bad_option",.line = 275,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/args.x",.function = "_bad_option",.line = 274,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_0, 4372499598, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_1, Symbol_var(1218550748), String_var(why), Symbol_var(1041517532), String_var(option));
       __builtin_unreachable();
     }
@@ -521,7 +521,7 @@ _Noreturn static void _bad_operand(String why, String operand){
   {
     Var _x2c_gensym_literal_part_2 = String_var(String_join(NULL, cons(String_var(String_new("Args.parse")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/args.x",.function = "_bad_operand",.line = 279,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/args.x",.function = "_bad_operand",.line = 278,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_1, 4372499598, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_2, Symbol_var(1218550748), String_var(why), Symbol_var(33297664904), String_var(operand));
       __builtin_unreachable();
     }
@@ -534,7 +534,7 @@ _Noreturn static void _bad_spec(String why, Var entry){
   {
     Var _x2c_gensym_literal_part_3 = String_var(String_join(NULL, cons(String_var(String_new("Args.parse")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/args.x",.function = "_bad_spec",.line = 284,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/args.x",.function = "_bad_spec",.line = 283,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_2, 4372499598, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_3, Symbol_var(1218550748), String_var(why), Symbol_var(1278278), entry);
       __builtin_unreachable();
     }

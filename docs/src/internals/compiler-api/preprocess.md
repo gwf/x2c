@@ -136,7 +136,7 @@ Follows the conditional groups open after the preprocessor line `text`.
 `arms` holds one entry per open group, innermost first, listing the
 `preproc` nodes that select that group's current arm.
 
-Source: `src/preprocess.x:419`
+Source: `src/preprocess.x:418`
 
 <a id="Compiler.preproc_within_arms"></a>
 #### Compiler.preproc_within_arms
@@ -147,7 +147,7 @@ Returns `items` inside the conditional arms `arms` tracked by
 `Compiler.preproc_track_arms`: the directives that reopen each group,
 outermost first, then `items`, then one `#endif` per group.
 
-Source: `src/preprocess.x:432`
+Source: `src/preprocess.x:431`
 
 <a id="Compiler.scan_conditionals"></a>
 #### Compiler.scan_conditionals

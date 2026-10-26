@@ -47,7 +47,7 @@ points used by generated code, native callers, and compiler setup.
 | [`lib/pool/pool.x`](pool.md) | nested interning pools with region-backed object storage. |
 | [`lib/process.x`](process.md) | run commands and pipelines without a shell. |
 | [`lib/regex.x`](regex.md) | regular expressions over the bytes of a String. |
-| [`lib/rewrite.x`](rewrite.md) | Pattern registration for compiler rewrites. |
+| [`lib/rewrite.x`](rewrite.md) | pattern registration for compiler rewrites. |
 | [`lib/scope/scope.x`](scope.md) | memory allocation scope management. |
 | [`lib/scripting.x`](scripting.md) | the modules every script unit includes. |
 | [`lib/string/string.x`](string.md) | canonical byte strings and core text operations. |
@@ -59,7 +59,7 @@ points used by generated code, native callers, and compiler setup.
 | [`lib/thread.x`](thread.md) | native workers with explicit result lifetimes. |
 | [`lib/type.x`](type.md) | semantic type values and their structural operations. |
 | [`lib/typed-array.x`](typed-array.md) | packed typed `Array`s generated from shared methods. |
-| [`lib/typed-list.x`](typed-list.md) | typed cons chains generated from typed methods. |
+| [`lib/typed-list.x`](typed-list.md) | typed views over canonical List cells. |
 | [`lib/typed-map.x`](typed-map.md) | typed `Map`s generated from shared storage. |
 | [`lib/var/var.x`](var.md) | variant type for dynamic typing. |
 

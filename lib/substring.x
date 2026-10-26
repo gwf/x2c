@@ -5,8 +5,9 @@
 
 /** A borrowed immutable range of a String. Assignment copies the view and
     allocates nothing. Keep the source alive and unchanged through every use;
-    Use str() or string() to obtain a canonical String in the active pool.
-    Construct views through Substring.new or String.substring. */
+    use str() or string() to obtain a canonical String in the active pool.
+    Construct views through Substring.new or String.substring.
+*/
 typedef struct Substring {
   String source;
   int offset, length;
@@ -19,7 +20,8 @@ typedef Substring Substr;
 Substring Substring.new(String source, int offset, int length) {
   if (offset < 0 || length < 0 || offset > source.len() ||
       length > source.len() - offset)
-    raise %(bad-arg (operation "Substring.new") (offset $offset) (length $length));
+    raise %(bad-arg (operation "Substring.new")
+      (offset $offset) (length $length));
   return (Substring) {source, offset, length};
 }
 
@@ -48,11 +50,13 @@ inline int Substring.compare(Substring left, Substring right) {
   int order = length ? memcmp(
     (const char *) left.source + left.offset,
     (const char *) right.source + right.offset, (size_t) length) : 0;
-  return order ? (order > 0 ? 1 : -1) : left.length - right.length;
+  if (order) return order > 0 ? 1 : -1;
+  return left.length - right.length;
 }
 
 /** Materializes a canonical String in the active pool. Repeated conversion
-    reuses the canonical value. The result follows its actual owning pool. */
+    reuses the canonical value. The result follows its actual owning pool.
+*/
 String Substring.str(Substring view) => view.length
   ? x2c_string_from_bytes(
     (const char *) view.source + view.offset, view.length) : NULL;
@@ -62,10 +66,10 @@ String Substring.string(Substring view) => view.str();
 
 /** Yields the next word view. Start the caller-owned cursor at zero. The
     source must stay live; exhaustion leaves cursor and out unchanged.
-    foreach (Substr word in source) uses this allocation-free cursor. */
+    foreach (Substr word in source) uses this allocation-free cursor.
+*/
 int Substring.try_next(String source, int &cursor, Substring &out) {
-  const char *bytes = source;
-  int length = source.len(), index = cursor;
+  const char *bytes = source, int length = source.len(), index = cursor;
   while (index < length && isspace((unsigned char) bytes[index])) index++;
   if (index >= length) return 0;
   int start = index;

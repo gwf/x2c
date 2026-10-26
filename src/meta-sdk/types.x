@@ -55,7 +55,8 @@ List Type.resolve_member(Type type, String name, int call) {
 }
 
 /** Selects a callable protocol member in the current compilation context.
-    The member's own implementation receives no recursive selection. */
+    The member's own implementation receives no recursive selection.
+*/
 Code Type.protocol_member(Type type, String name) {
   _require_expansion("Type.protocol_member");
   List resolved = active.expander.resolve_protocol_member(type, name);
@@ -65,7 +66,8 @@ Code Type.protocol_member(Type type, String name) {
 }
 
 /** Answers `Type.getter`, declared in `lib/meta.x`, with the getter that
-    bracket admission selected. */
+    bracket admission selected.
+*/
 Code Type.getter(Type type) {
   _require_expansion("Type.getter");
   Compiler c = active.expander;
@@ -188,7 +190,8 @@ List Type.fields(Type t) {
     `T` is the canonical type of `value` and `N` its name, or "" when it has
     none. `K` is `struct`, `union`, `enum`, `pointer`, `scalar`, or `other`,
     `F` lists the `(name type)` rows of a struct or union's named fields,
-    and `M` the names of its direct dotted methods. */
+    and `M` the names of its direct dotted methods.
+*/
 List MetaContext.type_description(Var value) {
   Type type = Code.type(value);
   Type shape = Type.resolve(type);

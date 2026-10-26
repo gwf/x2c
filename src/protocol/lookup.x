@@ -1,4 +1,4 @@
-/* generated owners
+/*  lookup.x -- protocol member lookup
 
    A base default is generated for a participant by exactly one adopted
    protocol. Two candidates are a collision, reported once per member. */
@@ -101,7 +101,8 @@ static macro Decorator $adopted_rows(
 }
 
 /** Returns unique member spellings from the participant's visible adopted
-    conformances. Resolution remains responsible for selecting a binding. */
+    conformances. Resolution remains responsible for selecting a binding.
+*/
 List Compiler.protocol_member_names(Compiler c, Type participant) {
   Map seen = {};
   Array names = [];

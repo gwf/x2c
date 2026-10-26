@@ -115,8 +115,8 @@ static List _cache_if_stable(Compiler c, List elem) {
   if (c.runtime_literals || c.needs_resolution(elem)) return elem;
   /* Each evaluation builds a fresh Array or Map, so a List that holds one,
      at any depth, is built at runtime too. */
-  if (elem.match(%(expr (!or ("Array") ("Map")) *)) ||
-      elem.match(%(expr ("List") (expr ("List") (cons *)))))
+  if (elem ~= %(expr (!or ("Array") ("Map")) *) ||
+      elem ~= %(expr ("List") (expr ("List") (cons *))))
     return elem;
   return c.cache(%(var $elem));
 }
@@ -291,13 +291,13 @@ List Compiler.literal_cell(Compiler c, List head, List tail) {
   match (head)
     case %(!or (splice ?sexpr) (expr ("List") (splice ?sexpr))):
       return _append_splice(c, sexpr, tail);
-  if (head.match(%(expr (<macro-expr>) ?)))
+  if (head ~= %(expr (<macro-expr>) ?))
     return %(expr ("List") (cons $head $tail));
   /* A nested `List` that already folded enters the cache as its own key, the
      way a parsed element does, so the enclosing cell folds too. Converting it
      to `Var` first would leave a `List_var` call the cache cannot represent,
      and a typed-capture pattern that _typed_list rebuilds would not fold. */
-  if (head.match(%(expr ("List") (expr ("List") (cache *)))))
+  if (head ~= %(expr ("List") (expr ("List") (cache *))))
     head = c.cache(%(var $head));
   head = c.convert_expression(head, %("Var"));
   List cached = c.cache_cons_cell(head, tail);

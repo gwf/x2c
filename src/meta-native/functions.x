@@ -36,7 +36,8 @@ void Compiler.install_meta_function(Compiler c, List fn, Token marker) {
     the project's helper. The full parse installs it again. The
     compiler's linked copy answers while its source hashes agree; otherwise
     the definition replaces an earlier binding with a helper stub. A group
-    that stages in process waits for the full parse. */
+    that stages in process waits for the full parse.
+*/
 void Compiler.install_collected_meta_function(
   Compiler c, List declaration, Token marker) {
   if (c.signature_only || c.macro_holes) return;
@@ -128,7 +129,8 @@ static Array _stub_arguments(Func function, const FuncArg *argv) {
 }
 
 /** Tests a registered macro with the candidate's global and source
-    bindings. A pattern derived without them reads none. */
+    bindings. A pattern derived without them reads none.
+*/
 int Compiler.matches_macro(Compiler c, MacroMatcher &matcher, List code) {
   if (matcher.pattern) return matcher.matches(code);
   Var previous = Macro.subject();
@@ -171,7 +173,8 @@ static void _subject_globals(
 
 /** Applies a contextual `meta` marker to one initialized file-static value.
     The unit's staged `meta` group holds the compile-time instance, which
-    its module initializes for each unit. */
+    its module initializes for each unit.
+*/
 void Compiler.install_meta_declaration(
   Compiler c, List declaration, Token marker) {
   match (declaration) {
@@ -188,7 +191,8 @@ void Compiler.install_meta_declaration(
 }
 
 /** Records the provider of a public bodied meta function in its interface.
-    The provider owns both its native body and its compile-time state. */
+    The provider owns both its native body and its compile-time state.
+*/
 void Compiler.record_project_meta_effect(
   Compiler c, List declaration, Token marker) {
   if (c.source_private < 0) return;

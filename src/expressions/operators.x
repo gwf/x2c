@@ -201,7 +201,7 @@ static void _check_untyped_operand(
   if (!member || operator == <==> || operator == <!=>) return;
   if (_converts_operands(c, participant) &&
       c.resolve_protocol_member(participant, member) &&
-      other.match(%(expr ? $($source_identifier_content(%(?))))))
+      other ~= %(expr ? $($source_identifier_content(%(?)))))
     $fail.expressions_operand_untyped(c, origin);
 }
 

@@ -339,7 +339,7 @@ published on failure. Formatting follows the process locale.
 conversion failures are nested as `cause`. Allocation failures may also
 transfer while staging or canonicalizing the result.
 
-Source: `lib/string/format.x:92`
+Source: `lib/string/format.x:95`
 
 <a id="String.getindex"></a>
 #### String.getindex
@@ -969,7 +969,7 @@ backslash is returned unchanged.
 **Raises:** `<bad-arg>` for an octal escape above `\377`, which does not fit
 a byte, or `<alloc-fail>` while constructing a changed result.
 
-Source: `lib/string/escape.x:119`
+Source: `lib/string/escape.x:118`
 
 <a id="String.upper"></a>
 #### String.upper
@@ -1122,7 +1122,7 @@ input or an oversized result returns NULL.
 
 **Raises:** `<alloc-fail>` while constructing the result.
 
-Source: `lib/string/escape.x:28`
+Source: `lib/string/escape.x:27`
 
 <a id="String.free"></a>
 #### String.free
@@ -1285,7 +1285,7 @@ input without backslashes is returned unchanged.
 
 **Raises:** `<alloc-fail>` while copying or decoding.
 
-Source: `lib/string/escape.x:227`
+Source: `lib/string/escape.x:226`
 
 <a id="String.parse_char"></a>
 #### String.parse_char
@@ -1298,7 +1298,7 @@ Text after that closing quote is ignored. A decoded NUL is returned as
 zero; malformed and null input returns -1, as does an octal escape above
 `\377`, which does not fit a byte.
 
-Source: `lib/string/escape.x:208`
+Source: `lib/string/escape.x:207`
 
 <a id="String.printf"></a>
 #### String.printf
@@ -1343,7 +1343,7 @@ Empty input returns the canonical literal spelling `"\"\""`.
 
 **Raises:** `<alloc-fail>` while escaping or formatting a nonempty `String`.
 
-Source: `lib/string/escape.x:87`
+Source: `lib/string/escape.x:86`
 
 <a id="String.str"></a>
 #### String.str
@@ -1382,11 +1382,10 @@ other unconsumed character is a failure, so `1.5junk` does not parse.
 
 It accepts what C's `strtod` accepts, including hex-float literals such
 as `0x1p4` and the `inf` and `nan` spellings. A value that overflows or
-underflows `double` fails. It does not know the `0o` and `0b` prefixes
-that the integer parser adds, so `0b101` fails instead of yielding the
-leading zero.
+underflows `double` fails. The integer parser's `0o` and `0b` prefixes
+leave unconsumed text, so `0b101` fails the complete-parse check.
 
-Source: `lib/string/number.x:84`
+Source: `lib/string/number.x:83`
 
 <a id="String.try_long"></a>
 #### String.try_long
@@ -1409,7 +1408,7 @@ printf("%d %ld\n", " -0b101 ".try_long(&value), value);
 printf("%d\n", "42junk".try_long(&value));
 ```
 
-Source: `lib/string/number.x:34`
+Source: `lib/string/number.x:33`
 
 <a id="String.write_repr"></a>
 #### String.write_repr
@@ -1423,7 +1422,7 @@ remains in the `Buffer`.
 
 **Raises:** any cause from `Buffer.write_char` or `Buffer.write_len`.
 
-Source: `lib/string/escape.x:98`
+Source: `lib/string/escape.x:97`
 
 ## Runtime-internal callables
 

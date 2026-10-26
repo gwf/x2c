@@ -98,8 +98,6 @@ static void f8_registry____retain_meta_protocol(Compiler c, List adoption);
 
 static void f8_registry____retain_source_node(Compiler c, List node, Symbol storage, List location);
 
-static List f8_registry____source_key(Compiler c, List location);
-
 static void f8_registry____install_occurrence(Compiler c, Type base, List record, Symbol storage, List location);
 
 static List f8_registry____publish(f8_registry___AdoptionDraft * a);
@@ -807,7 +805,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _384 = String_var(_383);
   _385 = List_var(NULL);
   _386 = Symbol_var(106239471489226);
-  _387 = int_var(2184);
+  _387 = int_var(2186);
   _388 = String_new("");
   _389 = String_var(_388);
   _390 = String_new("x2c.hole");
@@ -890,7 +888,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _467 = cons(_459, _466);
   _468 = cons(_453, _467);
   _469 = List_var(_468);
-  _470 = int_var(2250);
+  _470 = int_var(2252);
   _471 = Symbol_var(1544849476362);
   _472 = List_var(_44);
   _473 = cons(_472, NULL);
@@ -1002,7 +1000,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _576 = cons(_459, _575);
   _577 = cons(_453, _576);
   _578 = List_var(_577);
-  _579 = int_var(2257);
+  _579 = int_var(2259);
   _580 = cons(_493, NULL);
   _581 = cons(_526, _569);
   _582 = cons(_545, _581);
@@ -1438,11 +1436,7 @@ List Compiler_origin_location(Compiler, int);
 void Sym_set(Sym, List, List);
 void Sym_mark_static(Sym, List);
 static void f8_registry____retain_source_node(Compiler c, List node, Symbol storage, List location){
-  List invocation = Compiler_origin_location(c, c -> origin);  if(! List_truth(invocation) &&(! c -> shallow ||(storage == 1317118534 && c -> source_private < 0))) return;  List key = f8_registry____source_key(c, location);  Sym_set(c -> sym, key, node);  if(storage == 1317118534) Sym_mark_static(c -> sym, key);
-}
-
-static List f8_registry____source_key(Compiler c, List location){
-  List invocation = Compiler_origin_location(c, c -> origin);  return List_truth(invocation) ? cons(String_var(_89), cons(List_var(location), cons(List_var(invocation), NULL))) : cons(String_var(_89), cons(List_var(location), NULL));
+  List invocation = Compiler_origin_location(c, c -> origin);  if(! List_truth(invocation) &&(! c -> shallow ||(storage == 1317118534 && c -> source_private < 0))) return;  List key = List_truth(invocation) ? cons(String_var(_89), cons(List_var(location), cons(List_var(invocation), NULL))) : cons(String_var(_89), cons(List_var(location), NULL));  Sym_set(c -> sym, key, node);  if(storage == 1317118534) Sym_mark_static(c -> sym, key);
 }
 
 static void f8_registry____install_occurrence(Compiler c, Type base, List record, Symbol storage, List location){
@@ -1529,7 +1523,7 @@ static Symbol _tag_value(List expression){
 }
 
 static Symbol f8_registry____published_storage(f8_registry___AdoptionDraft * a, String spelling){
-  Compiler c =(* a).c;  if((* a).storage == 1317118534) return 1317118534;  if(c -> source_private < 0) return(* a).storage;  List record = _record(c, (* a).base);  int private_native = List_truth(record) && f8_registry____has_private_native(c, List_cdr(Var_list(List_last(record))));  String base_name = _base_name((* a).base);  String forward = String_truth(base_name) ? _member_spelling((* a).participant, String_lower(base_name)) : NULL;  String reverse = String_truth(base_name) ? Compiler_reverse_converter_spelling(c, base_name, _111, spelling) : NULL;  String alternate = String_truth(base_name) ? Compiler_reverse_converter_spelling(c, base_name, _112, spelling) : NULL;  Var occurrence_value;  List occurrence = Map_try_get(c -> protocols, List_var((* a).base), &(occurrence_value)) ? Var_list_payload(occurrence_value) : NULL;  int private = c -> source_private > 0 ||(List_truth(occurrence) && f8_registry____occurrence_storage(occurrence) == 1317118534) || _is_private(c, spelling) ||(String_truth(forward) && _is_private(c, forward)) ||(String_truth(reverse) && _is_private(c, reverse)) ||(String_truth(alternate) && _is_private(c, alternate)) || private_native;  return private ? 1317118534 :(* a).storage;
+  Compiler c =(* a).c;  if((* a).storage == 1317118534) return 1317118534;  if(c -> source_private < 0) return(* a).storage;  Var occurrence_value;  List occurrence = Map_try_get(c -> protocols, List_var((* a).base), &(occurrence_value)) ? Var_list_payload(occurrence_value) : NULL;  List record = List_truth(occurrence) ? Var_list_payload(List_car(occurrence)) : NULL;  int private_native = List_truth(record) && f8_registry____has_private_native(c, List_cdr(Var_list(List_last(record))));  String base_name = _base_name((* a).base);  String forward = String_truth(base_name) ? _member_spelling((* a).participant, String_lower(base_name)) : NULL;  String reverse = String_truth(base_name) ? Compiler_reverse_converter_spelling(c, base_name, _111, spelling) : NULL;  String alternate = String_truth(base_name) ? Compiler_reverse_converter_spelling(c, base_name, _112, spelling) : NULL;  int private = c -> source_private > 0 ||(List_truth(occurrence) && f8_registry____occurrence_storage(occurrence) == 1317118534) || _is_private(c, spelling) ||(String_truth(forward) && _is_private(c, forward)) ||(String_truth(reverse) && _is_private(c, reverse)) ||(String_truth(alternate) && _is_private(c, alternate)) || private_native;  return private ? 1317118534 :(* a).storage;
 }
 
 static int f8_registry____has_private_native(Compiler c, List templates){

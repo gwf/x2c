@@ -4,7 +4,8 @@
 */
 
 /** Reports whether a linked provider and the files it read are unchanged.
-    The linked inventory retains the ordinary collector's dependency proof. */
+    The linked inventory retains the ordinary collector's dependency proof.
+*/
 int Compiler.linked_meta_provider_current(Compiler c, String path) {
   String canonical = _canonical_path(path);
   _process_cache();
@@ -50,7 +51,8 @@ static int _linked_provider_current(
 }
 
 /** Reports whether a provider's linked definition hashes still match.
-    Changes outside definitions do not require a project helper. */
+    Changes outside definitions do not require a project helper.
+*/
 int Compiler.linked_meta_definitions_current(Compiler c, String path) {
   if (c.linked_meta_provider_current(path)) return 1;
   String canonical = _canonical_path(path);
@@ -90,7 +92,8 @@ static List _meta_provider_entry(Compiler c, String canonical) {
 }
 
 /** Completes a linked function's own source hashes before a shallow call.
-    A lookahead entry never replaces the file's ordinary contribution. */
+    A lookahead entry never replaces the file's ordinary contribution.
+*/
 void Compiler.complete_meta_hashes(Compiler c) {
   List entry = _meta_provider_entry(c, _canonical_path(c.filename));
   if (entry)
@@ -138,7 +141,8 @@ void Compiler.add_linked_meta_provider_hashes(Compiler c, Map rows) {
 
 /** Selects helper C spellings for public definitions owned by `path`.
     Bindings, rather than source tokens, keep unrelated private names and
-    fields unchanged. Native supplier declarations retain their C names. */
+    fields unchanged. Native supplier declarations retain their C names.
+*/
 void Compiler.name_meta_provider_bindings(
   Compiler c, String path, int index) {
   List entry = _entry(c, _canonical_path(path));
@@ -153,7 +157,8 @@ void Compiler.name_meta_provider_bindings(
 }
 
 /** Returns this source's native definitions with their canonical declarations
-    and the public type rows needed to check other units' declarations. */
+    and the public type rows needed to check other units' declarations.
+*/
 List Compiler.loaded_provider(Compiler c) {
   List entry = _entry(c, _canonical_path(c.filename));
   Array names = [];
@@ -173,7 +178,8 @@ List Compiler.loaded_provider(Compiler c) {
 
 /** Returns the native calling type of a loaded function. Array parameters
     decay to pointers, and a parameter's outer qualifiers affect only its
-    local copy. Keep the declared type for inspection and reload checks. */
+    local copy. Keep the declared type for inspection and reload checks.
+*/
 Type Compiler.loaded_call_type(Compiler c, Type type) {
   List parameters = NULL;
   Type result = NULL;
@@ -205,7 +211,8 @@ static Type _loaded_declaration(Compiler c, Type type) {
 }
 
 /** Names declared bindings through one loaded provider. Its own source
-    declarations remain authoritative; private bindings never link out. */
+    declarations remain authoritative; private bindings never link out.
+*/
 void Compiler.name_loaded_provider(
   Compiler c, String path, int index, List provider) {
   (Map declarations, Map symbols) = provider;

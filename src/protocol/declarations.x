@@ -1,4 +1,4 @@
-/* declaration parsing
+/*  declarations.x -- protocol declaration parsing
 
    A bodyless declaration adopts a protocol; a body declares one. Full
    parsing publishes the row at once, while macro-hole and uncollected

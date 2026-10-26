@@ -1,7 +1,7 @@
+/*  fields.x -- statements that copy or set named fields */
+
 #pragma once
 #include "common.x"
-
-/*  fields.x -- statements that copy or set named fields */
 
 /* Returns `to.field = from.field;` for each of `fields`. */
 meta List _x2c_field_copies(List to, List from, List fields) {

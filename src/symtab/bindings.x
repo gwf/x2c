@@ -31,7 +31,8 @@ List Sym.define(Sym s, List key, List type) {
 
 /** Defines `name` in the active scope as an alias of the parsed
     `expression` and returns its binding. The row carries the expression's
-    type; the `(alias binding)` fact carries the expression. */
+    type; the `(alias binding)` fact carries the expression.
+*/
 List Sym.define_alias(Sym s, String name, List expression) {
   List type = NULL;
   match (expression) case %(expr ?expression_type ?): type = expression_type;
@@ -43,7 +44,8 @@ List Sym.define_alias(Sym s, String name, List expression) {
 }
 
 /** Removes the alias row `name` of the active scope, with its binding and
-    its `(alias binding)` fact. */
+    its `(alias binding)` fact.
+*/
 void Sym.undefine_alias(Sym s, String name) {
   SymScope *scope = _scope_at(s, -1);
   List key = $(name);
@@ -109,7 +111,8 @@ void Sym.define_global(Sym s, List key, List type) {
 
 /** Removes `key`'s definition and binding from the unit's writable base
     scope. A later reference no longer resolves; a later definition receives
-    a fresh binding. */
+    a fresh binding.
+*/
 void Sym.undefine_global(Sym s, List key) {
   SymScope *scope = _scope_at(s, s.base_scopes - 1);
   s.drop(scope.symbols, key);
@@ -169,7 +172,8 @@ static List _new_binding(Sym s, List key) {
 
 /** Returns how many introduced bindings no scope holds: those
     `Sym.introduce` made, as opposed to the ones each scope makes once for
-    a name it resolves. */
+    a name it resolves.
+*/
 int Sym.introduced(Sym s) {
   int held = 0;
   for (int i = 0; i < (int) s.scopes.len(); i++)
@@ -218,7 +222,8 @@ int Sym.binding_is_local_before(Sym s, List binding, int scope_count) {
 Map Compiler.semantic_binding_facts(Compiler c) => c.sym.binding_facts;
 
 /** Returns the List one semantic binding fact holds, or NULL when it is
-    absent. */
+    absent.
+*/
 List Compiler.fact(Compiler c, Var key) {
   Var stored;
   return c.sym.binding_facts.try_get(key, stored) ? stored : NULL;
@@ -235,7 +240,8 @@ void Compiler.drop_fact(Compiler c, Var key) =>
 // lookup
 
 /** Returns `key`'s type, or `NULL`. A plain key tries the current module
-    file's static spelling first and retries a miss in package space. */
+    file's static spelling first and retries a miss in package space.
+*/
 List Sym.get(Sym s, List key) {
   List found = _get_from(s, key, _file_key(s, key));
   if (found) return found;

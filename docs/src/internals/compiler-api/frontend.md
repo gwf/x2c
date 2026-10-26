@@ -36,7 +36,7 @@ replay them from the process cache. The collection runs as an empty
 unit, whatever dump or symbol mode the request selects. Returns zero
 after reporting a failure.
 
-Source: `src/frontend.x:480`
+Source: `src/frontend.x:482`
 
 <a id="Frontend.load_support"></a>
 #### Frontend.load_support
@@ -47,7 +47,7 @@ Loads process-owned collection support and the native modules `request`
 names before units, and selects those modules, in order, for its
 compile-time calls.
 
-Source: `src/frontend.x:504`
+Source: `src/frontend.x:506`
 
 <a id="Frontend.new"></a>
 #### Frontend.new
@@ -58,7 +58,7 @@ Borrows a configured request for sequential units. The request and this
 session must outlive its units. Initialize process support above any
 temporary command Context before creating a session inside that Context.
 
-Source: `src/frontend.x:515`
+Source: `src/frontend.x:517`
 
 <a id="Frontend.open"></a>
 #### Frontend.open
@@ -91,7 +91,7 @@ Opens an empty submission unit with the ordinary runtime prelude. The
 caller must close the unit on either result; submissions and inspection
 results borrow its Context.
 
-Source: `src/frontend.x:116`
+Source: `src/frontend.x:117`
 
 <a id="Frontend.start"></a>
 #### Frontend.start
@@ -101,7 +101,7 @@ Source: `src/frontend.x:116`
 Tokenizes one input into a fresh unit with its own isolated `Context`.
 The caller must close the unit on either result.
 
-Source: `src/frontend.x:128`
+Source: `src/frontend.x:129`
 
 ### `ParsedUnit`
 
@@ -113,7 +113,7 @@ Source: `src/frontend.x:128`
 Releases the unit after its caller has inspected or exported its
 results.
 
-Source: `src/frontend.x:168`
+Source: `src/frontend.x:169`
 
 <a id="ParsedUnit.collect"></a>
 #### ParsedUnit.collect
@@ -123,7 +123,7 @@ Source: `src/frontend.x:168`
 Collects symbols and retains preprocessor outputs for adapter
 inspection.
 
-Source: `src/frontend.x:134`
+Source: `src/frontend.x:135`
 
 <a id="ParsedUnit.parse"></a>
 #### ParsedUnit.parse
@@ -133,7 +133,7 @@ Source: `src/frontend.x:134`
 Parses a collected unit, retaining both its AST and unsuccessful
 reports.
 
-Source: `src/frontend.x:157`
+Source: `src/frontend.x:158`
 
 ## Public types
 

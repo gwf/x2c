@@ -35,7 +35,8 @@ static inline int Substring_equal(Substring left, Substring right){
 static inline int Substring_compare(Substring left, Substring right){
   int length = left.length < right.length ? left.length : right.length;
   int order = length ? memcmp((const char *) left.source + left.offset, (const char *) right.source + right.offset, (size_t) length) : 0;
-  return order ?(order > 0 ? 1 : - 1) : left.length - right.length;
+  if(order) return order > 0 ? 1 : - 1;
+  return left.length - right.length;
 }
 
 String Substring_str(Substring view);

@@ -8,14 +8,16 @@
    unless it depends on the current call. */
 
 /** The pattern a macro-valued `case` compiles to; the compiler lowers a
-   call of this to `Macro_case_capture_at` over the match subject. */
+   call of this to `Macro_case_capture_at` over the match subject.
+*/
 List Macro_case_pattern(Macro t, List names) => Macro_pattern(t, names);
 
 /** The pattern a macro-valued `case` compiles to when the compiler derived
    `shape`, the pattern the case tests, while compiling it. Generated
    `match` code tests `shape` in place through `Macro_case_root` when it
    can, and otherwise lowers a call of this as it lowers
-   `Macro_case_pattern`. */
+   `Macro_case_pattern`.
+*/
 List Macro_case_shape(Macro t, List names, List shape) =>
   Macro_pattern(t, names);
 
@@ -41,7 +43,8 @@ int Macro_case_capture_at(
     `t` and its arguments captured under `names` into `published`, 0 when
     `code` cannot match, and 2 after storing in `*cursor` the List the
     pattern tests: the view of `code` or, for a `statement` body, of the one
-    statement a `seq` holds. */
+    statement a `seq` holds.
+*/
 int Macro_case_root(
   List code, Macro t, List names, int statement, List *cursor,
   MatchCaptureBuffer *published) {
@@ -59,7 +62,8 @@ int Macro_case_root(
 }
 
 /** `Macro_case_enter` for a `value` that may be wrapped or may hold no
-    List. */
+    List.
+*/
 int Macro_case_view(Var value, List *cursor) {
   Var seen = _unwrap(value);
   if (seen is not <list>) return 0;
@@ -68,7 +72,8 @@ int Macro_case_view(Var value, List *cursor) {
 }
 
 /** Prepares repeated recognition without retaining subject-specific
-    bindings. */
+    bindings.
+*/
 MacroMatcher Macro.matcher(Macro shape, List holes) {
   Var previous = Macro.subject();
   Macro.use_subject(%());
@@ -79,7 +84,8 @@ MacroMatcher Macro.matcher(Macro shape, List holes) {
 }
 
 /** Tests code with the same source views and identity rules as a macro
-    case. */
+    case.
+*/
 int MacroMatcher.matches(MacroMatcher &m, List code) {
   List pattern =
     m.pattern ? m.pattern : _case_shape(m.shape, m.holes);
@@ -93,7 +99,8 @@ int MacroMatcher.matches(MacroMatcher &m, List code) {
 }
 
 /** Tests complete code against a macro and its hole patterns. Repeated
-    recognition can retain `Macro.matcher` so the pattern is derived once. */
+    recognition can retain `Macro.matcher` so the pattern is derived once.
+*/
 int Macro.matches(Macro t, List code, List holes) {
   MacroMatcher matcher = {t, holes, NULL};
   return matcher.matches(code);

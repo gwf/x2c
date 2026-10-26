@@ -325,8 +325,7 @@ static int f8_dispatch____enter(void){
 }
 
 static void f8_dispatch____leave(void){
-  ErrorThreadState state = _thread();
-  if(state -> depth > 0) state -> depth --;
+  _thread() -> depth --;
 }
 
 int Error_depth(void){

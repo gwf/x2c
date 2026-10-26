@@ -5,7 +5,8 @@
     `src/components/lambda-functions.x`;
     other expressions pass through. A noncapturing lambda typed `Func`,
     which only a meta body leaves unlifted, lifts to a `Func` of its native
-    signature. */
+    signature.
+*/
 List Compiler.lower_lambda_expr(Compiler c, List expression) {
   if (expression.car() == <at> || expression.car() == <src>)
     return Ast.rewrite_children(
@@ -51,7 +52,7 @@ module Ast _slice_node(
    through `x2c_slice_bound` to keep its own meaning. */
 static List _slice_bound(List bound) {
   if (!bound) return %(literal (int) "-2147483648");
-  if (bound.match(%(expr (int) (literal *)))) return bound;
+  if (bound ~= %(expr (int) (literal *))) return bound;
   return %(expr (int) (call "x2c_slice_bound" (args $bound)));
 }
 
@@ -192,7 +193,7 @@ module List _cast(Compiler c, List ast) {
       List declaration = %(declare @parts);
       Type type = declaration.type_from_ast();
       List operand = expression;
-      if (operand.match(%(expr ? (composite *)))) {
+      if (operand ~= %(expr ? (composite *))) {
         Type native = type;
         match (declaration)
           case %(declare ?base (bindings (bind ? ?mods))):
@@ -348,7 +349,8 @@ module List _typed_call(
 /** Preserves the fixed arguments for `params`, which ends in `(....)`, and
     packs the remaining `args` through ordinary List construction. Only an
     explicit splice contributes more than one element. The caller changes
-    the callee's final parameter to List before issuing this packed call. */
+    the callee's final parameter to List before issuing this packed call.
+*/
 List Compiler.pack_rest_arguments(Compiler c, List params, List args) {
   match (args) case %((expr (void) ())): args = NULL;
   int fixed = params.len() - 1;

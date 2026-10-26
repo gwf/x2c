@@ -37,7 +37,7 @@ X2c command-line parsing and presentation.
 Copies the driver's already-read vector, or returns NULL for direct
 invocation. The caller owns the Array; no word is expanded again.
 
-Source: `src/cli/responses.x:21`
+Source: `src/cli/responses.x:23`
 
 <a id="CliRequest.dependency_option"></a>
 #### CliRequest.dependency_option
@@ -48,7 +48,7 @@ Returns whether `s` contains a driver-owned dependency option.
 Recognizes `-MMD`, `-MP`, `-MF`, and `-MT` as leading spellings or in a
 comma-delimited pass-through argument; `NULL` returns zero.
 
-Source: `src/cli/parsing.x:554`
+Source: `src/cli/parsing.x:561`
 
 <a id="CliRequest.inspects"></a>
 #### CliRequest.inspects
@@ -66,7 +66,7 @@ Source: `src/cli/requests.x:67`
 
 Reports whether a raw command name belongs to the built-in parser.
 
-Source: `src/cli/parsing.x:655`
+Source: `src/cli/parsing.x:661`
 
 <a id="CliRequest.new"></a>
 #### CliRequest.new
@@ -89,7 +89,7 @@ and the `-Wl,` and `-Xlinker` linker pass-throughs are admitted.
 `cc_args` and `ld_args` serve native actions; no source-preprocessing
 options are returned.
 
-Source: `src/cli/parsing.x:581`
+Source: `src/cli/parsing.x:587`
 
 <a id="CliRequest.package_roots"></a>
 #### CliRequest.package_roots
@@ -118,7 +118,7 @@ canonical-pool lifetimes described by `CliRequest`.
 **Raises:** `<alloc-fail>` or `<size-limit>` while expanding response files or
 constructing request values.
 
-Source: `src/cli/parsing.x:255`
+Source: `src/cli/parsing.x:257`
 
 <a id="CliRequest.parse_arguments"></a>
 #### CliRequest.parse_arguments
@@ -127,7 +127,7 @@ Source: `src/cli/parsing.x:255`
 
 Parses already-read arguments, preserving deferred script expansion.
 
-Source: `src/cli/parsing.x:261`
+Source: `src/cli/parsing.x:263`
 
 <a id="CliRequest.read_arguments"></a>
 #### CliRequest.read_arguments
@@ -138,7 +138,7 @@ Reads initial arguments. Script options defer response-file expansion
 until parsing, so program arguments remain literal. The caller owns
 the returned Array.
 
-Source: `src/cli/responses.x:9`
+Source: `src/cli/responses.x:10`
 
 <a id="CliRequest.require_input"></a>
 #### CliRequest.require_input

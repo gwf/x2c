@@ -9,7 +9,6 @@
     to `vsnprintf`, stays with the other constructors in `string.x`.
 */
 
-
 #include <limits.h>
 #include <stdio.h>
 #include <string.h>
@@ -27,10 +26,13 @@ static macro Expression $reason.incomplete() => "incomplete conversion";
 static macro Expression $reason.width_range() => "width exceeds int range";
 static macro Expression $reason.missing_star() => "missing star value";
 static macro Expression $reason.length() => "unsupported length modifier";
-static macro Expression $reason.positional() => "positional formats are unsupported";
+static macro Expression $reason.positional() =>
+  "positional formats are unsupported";
 static macro Expression $reason.conversion() => "unsupported conversion";
-static macro Expression $reason.integer_length() => "unsupported integer length";
-static macro Expression $reason.floating_length() => "unsupported floating length";
+static macro Expression $reason.integer_length() =>
+  "unsupported integer length";
+static macro Expression $reason.floating_length() =>
+  "unsupported floating length";
 static macro Expression $reason.wide_text() =>
   "wide strings and characters are unsupported";
 static macro Expression $reason.flag() => "unsupported flag for conversion";
@@ -40,7 +42,8 @@ static macro Expression $reason.character_nul() =>
   "%c cannot produce an embedded NUL";
 static macro Expression $reason.string() => "string conversion failed";
 static macro Expression $reason.value() => "value conversion failed";
-static macro Expression $reason.range(Expr $label) => %"$($label) exceeds int range";
+static macro Expression $reason.range(Expr $label) =>
+  %"$($label) exceeds int range";
 
 // representation
 

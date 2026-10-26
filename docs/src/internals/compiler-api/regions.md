@@ -33,7 +33,7 @@ the emitted names visible in this unit. `effects` adds audit-only native
 contracts; neither input changes ordinary translation. Findings carry
 their function name and are returned without compiler diagnostics.
 
-Source: `src/regions/analysis.x:166`
+Source: `src/regions/analysis.x:167`
 
 <a id="Compiler.check_meta_regions"></a>
 #### Compiler.check_meta_regions

@@ -1,4 +1,9 @@
-/*  projection.x -- select ordered header and source declarations */
+/*  projection.x -- select ordered header and source declarations
+
+    The unit consumes its declarations where they were written, independently
+    of the public projection. In particular, a promoted include must not
+    change the native macro state before its source position.
+*/
 
 // header and source
 
@@ -29,8 +34,7 @@ static typedef struct HeaderNeeds {
    source; public inline definitions also publish their bodies. Static
    functions and objects stay in the source. Static types enter the header
    when a public declaration or inline body needs them. */
-module List _header_and_source(
-  Compiler c, List ast, Map inline_bodies) {
+module List _header_and_source(Compiler c, List ast, Map inline_bodies) {
   Partition p = {
     .c = c, .header = [], .pending = [], .open = [], .forwarded = {},
     .included = {}, .statics = {}, .source_groups = {}};
@@ -38,11 +42,7 @@ module List _header_and_source(
   return $(_finish(p), _source_projection(c, ast, inline_bodies));
 }
 
-/* The unit consumes its declarations where they were written, independently
-   of the public projection. In particular, a promoted include must not
-   change the native macro state before its source position. */
-static List _source_projection(
-  Compiler c, List ast, Map inline_bodies) {
+static List _source_projection(Compiler c, List ast, Map inline_bodies) {
   Array source = [];
   foreach (List node in ast) {
     match (node) {
@@ -155,7 +155,7 @@ static void _keep(Partition &p) {
 static List _finish(Partition &p) {
   _promote_typedefs(p.header, p.pending);
   List header = p.header.list().filter(
-    %!(item) => !item.list().match(%(pending ?)));
+    %!(item) => !(item.list() ~= %(pending ?)));
   header = _place_groups(header, _filled_groups(header), p.source_groups);
   return _typedef_forwards(header, NULL, p.c);
 }
@@ -264,7 +264,7 @@ static int _at(HeaderNeeds &n, int i, List names) {
 /* Only positions after the marker being decided have changed, so the first
    declarations come from the header as it is when first needed. */
 static int _declared_before(HeaderNeeds &n, int i, Var name) {
-  if (!n.declared) {
+  if ((void *) n.declared == 0) {
     n.declared = {};
     int count = n.header.len();
     for (int j = 0; j < count; j++)
@@ -278,7 +278,7 @@ static int _declared_before(HeaderNeeds &n, int i, Var name) {
 
 /* Every item after `i` is decided, so each is read once, as it stands. */
 static int _spelled_after(HeaderNeeds &n, int i, Var name) {
-  if (!n.spelled) n.spelled = {};
+  if ((void *) n.spelled == 0) n.spelled = {};
   while (n.walked > i + 1) {
     Var item = n.header[--n.walked];
     if (item is <list>) _spelled_types(item, n.spelled);
@@ -306,8 +306,7 @@ module void _spelled_types(List node, Map names) {
 
 // functions
 
-static void _add_function(
-  Partition &p, List type, List declarator, Ast body) {
+static void _add_function(Partition &p, List type, List declarator, Ast body) {
   match (declarator) case %(bind ?binding *):
     type = _with_attributes(p.c.semantic_binding_facts(), type, binding);
   _place_function(p, type, declarator, body);
@@ -374,9 +373,8 @@ static void _forward_tags(Partition &p, List node) {
 
 /* A nonstatic declaration belongs to the header, apart from an object of
    an anonymous type. A static aggregate body waits for type promotion.
-   A public struct or
-   union declaration puts its tag in the header, so no prototype forwards it
-   again. */
+   A public struct or union declaration puts its tag in the header, so no
+   prototype forwards it again. */
 static void _add_declaration(
   Partition &p, List decl, Type type, List bindings) {
   if (type.is_static()) _add_statics(p, bindings.cdr());
@@ -453,8 +451,7 @@ static List _tag_only(Type type, Type core, Var name) =>
    every including unit its own copy, and a runtime initializer there is not
    a C constant expression. A definition whose initializer has to run loses
    `const` in C, so its declaration loses it too. */
-static int _place_object(
-  Partition &p, List decl, Type type, List bindings) {
+static int _place_object(Partition &p, List decl, Type type, List bindings) {
   if (type.is_extern() || !_declares_object(bindings)) return 0;
   _publish_node(p, _object_header(p, decl, type, bindings));
   _keep(p);
@@ -462,8 +459,7 @@ static int _place_object(
 }
 
 /* Both forms of public object use the qualifiers their C definition keeps. */
-static List _object_header(
-  Partition &p, List decl, Type type, List bindings) {
+static List _object_header(Partition &p, List decl, Type type, List bindings) {
   if (p.c.static_value_is_runtime(decl, NULL)) {
     type = _without_const(type);
     bindings = _runtime_without_const(p.c, bindings);
@@ -556,24 +552,17 @@ static void _mark_conditional(Partition &p, List node, Symbol kind) {
 
 /* The generator writes the header guard. Includes follow their source
    position in each projection. */
-static void _place_directive(
-  Partition &p, List node, String content) {
+static void _place_directive(Partition &p, List node, String content) {
   if (_is_pragma_once(content)) return;
   int angle = 0;
   String target = Compiler.preproc_include_target(content, angle);
   if (target) _add_include(p, node, target, angle);
-  else _publish_directive(p, node);
-}
-
-/* A public directive belongs to the header. */
-static void _publish_directive(Partition &p, List node) {
-  p.header.push(node);
+  else p.header.push(node);
 }
 
 /* A late include waits under its typedef names and is promoted when a
    public declaration needs one. The source keeps it at its position. */
-static void _add_include(
-  Partition &p, List node, String target, int angle) {
+static void _add_include(Partition &p, List node, String target, int angle) {
   if (!p.source_started) {
     p.c.include_typedef_names(target, angle, p.included);
     p.header.push(node);
@@ -606,8 +595,7 @@ static Map _filled_groups(List items) {
 
 /* A group enters the header when it contains a public item, or no item.
    The independent source projection keeps its original conditional groups. */
-static List _place_groups(
-  List items, Map filled, Map other) {
+static List _place_groups(List items, Map filled, Map other) {
   Array out = [];
   foreach (List item in items) {
     match (item)

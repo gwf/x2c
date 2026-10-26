@@ -44,7 +44,7 @@ Functions and types exposed by each compiler module.
 | [`src/cli/cli.x`](cli.md) | x2c command-line parsing and presentation. |
 | [`src/collect/collect.x`](collect.md) | source-ordered shallow symbol collection and replay. |
 | [`src/compiler/compiler.x`](compiler.md) | one x2c unit's translation state and its two parses. |
-| [`src/components/bracket-access.x`](bracket-access.md) | Bracket access policy: Array and Map mutation through their typed helpers, and any other participant's read, store, and update through its indexing members, with each operand evaluated once, in order. Getter resolution remains with admission. |
+| [`src/components/bracket-access.x`](bracket-access.md) | bracket access policy. |
 | [`src/components/collection-literals.x`](collection-literals.md) | Array and Map literals. |
 | [`src/components/delegate-members.x`](delegate-members.md) | delegate fields. |
 | [`src/components/destructuring.x`](destructuring.md) | flat List destructuring. |

@@ -1,4 +1,9 @@
-/*  rewrites.x -- rewrite registration and application */
+/*  rewrites.x -- rewrite registration and application
+
+    Rewrite rules connect a translation point and operand kind to a matcher.
+    Shipped matchers can be shared between units; prepared replacement
+    skeletons retain one unit's binding identities.
+*/
 
 module typedef struct RewriteRule {
   String name;

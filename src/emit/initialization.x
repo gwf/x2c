@@ -75,7 +75,7 @@ static macro Expression $emit.object.copy(
 static macro Stmt $fail.emit_static_switch(Expr $c, Expr $site) {
   {
     String note = "place the declaration before the switch "
-                + "or within one case block";
+      "or within one case block";
     $c.report_error(
       <emit>, "switch cannot bypass dynamic static initialization",
       $site, $(note));
@@ -132,7 +132,7 @@ module List _initializer_value(Emitter &e, List ast) {
   List result = NULL;
   foreach (List choice in cases.reverse()) {
     (List condition, List path, Type type, List value) = choice;
-    if (value.match(%(expr ? (composite *))))
+    if (value ~= %(expr ? (composite *)))
       value = type ? %(expr $type (cast $type $value))
                    : %(expr (int) (literal (int) "0"));
     List emitted = _emit(e, $(value));
@@ -180,8 +180,8 @@ module List _local_static(
                                               : "static";
   foreach (List binding in bindings.cdr())
     _static_binding(e, binding, declared_base, base_name, storage, output);
-  // The region shares its source block, including a statement expression's
-  // final value; another C block here would turn that value into void.
+  /* The region shares its source block, including a statement expression's
+     final value; another C block here would turn that value into void. */
   output.push(_emit(e, body));
   return output.list_free();
 }
@@ -226,7 +226,7 @@ static void _static_binding(
   StaticRuntime runtime = {
     .e = &e, .output = output, .declared_base = declared_base,
     .type = type, .name = name, .initial = initial, .storage = storage,
-    .inferred = type.car() == <dim> || type.match(%((dim) *))};
+    .inferred = type.car() == <dim> || (type ~= %((dim) *))};
   runtime.alias = e.fresh_name("static_object_type");
   runtime.pointer = e.fresh_name("static_object");
   runtime.guard = e.fresh_name("static_guard");

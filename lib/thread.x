@@ -16,13 +16,15 @@
     output explicitly before callback exit; temporary storage is then freed.
     Workers start in the shared canonical pool. Explicit private pools retain
     their own lifetime rules. An escaping Error becomes join-fail at join;
-    policies that resume still resume inside the callback. */
+    policies that resume still resume inside the callback.
+*/
 typedef Var (*ThreadFn)(const void *input, size_t input_size);
 
 /** Computes a result from borrowed Var input. Thread.start copies the return
     bits; retained storage must already outlive callback exit. ParallelMap
     instead keeps callback storage alive through its reducer, which explicitly
-    transfers anything it retains. Input storage stays live through use. */
+    transfers anything it retains. Input storage stays live through use.
+*/
 typedef Var (*ThreadValueFn)(Var input);
 
 /** Scope-owned description of a bounded parallel mapping operation.
@@ -111,7 +113,8 @@ static void *_input(Thread thread) =>
 // cooperative waits
 
 /** Locks the internal monitor shared by stop publication and queue commits.
-    Native synchronization failure aborts without entering Error dispatch. */
+    Native synchronization failure aborts without entering Error dispatch.
+*/
 void x2c_thread_wait_lock(void) =>
   _completion_check(pthread_mutex_lock(&thread_completion_mutex));
 
@@ -120,11 +123,13 @@ void x2c_thread_wait_unlock(void) =>
   _completion_check(pthread_mutex_unlock(&thread_completion_mutex));
 
 /** Returns the current wait's borrowed Thread token, or NULL for an unmanaged
-    or cleanup-masked caller. Call while holding the internal monitor. */
+    or cleanup-masked caller. Call while holding the internal monitor.
+*/
 Thread x2c_thread_wait_owner(void) => stop_mask ? NULL : running_thread;
 
 /** Tests a borrowed wait token under the internal monitor. A null token has
-    no stop request. Queues use this before committing a rendezvous peer. */
+    no stop request. Queues use this before committing a rendezvous peer.
+*/
 int x2c_thread_wait_stopped(Thread owner) => owner && owner.stop_requested;
 
 /** Tests the current wait's pending stop under the internal monitor. */
@@ -145,7 +150,8 @@ void x2c_thread_wait(pthread_cond_t *condition) {
 }
 
 /** Raises a non-resumable stop outcome after queue locks and wait records
-    have been released. Explicit catches may handle this shared cause. */
+    have been released. Explicit catches may handle this shared cause.
+*/
 void x2c_thread_cancel(void) {
   raise %(bad-state (operation "Thread.stop") (cancelled 1));
 }
@@ -154,7 +160,8 @@ void x2c_thread_cancel(void) {
     persists and wakes a registered Channel or completion wait. Computation
     and arbitrary native I/O are not interrupted. Repeated requests are safe
     while the handle remains live; stop does not join or free it.
-    Raises: <bad-arg> for a null handle. */
+    Raises: <bad-arg> for a null handle.
+*/
 void Thread.stop(Thread t) {
   if (!t) raise %(bad-arg (operation "Thread.stop"));
   x2c_thread_wait_lock();
@@ -234,7 +241,8 @@ static Var _call_value(const void *input, size_t size) {
     Shared canonical Strings and Lists survive worker exit. Wide boxed values
     still require their backing allocation to survive.
     Thread.start_raw accepts copied byte-buffer input instead.
-    Raises: bad-arg for a null callback, or Thread.start_raw causes. */
+    Raises: bad-arg for a null callback, or Thread.start_raw causes.
+*/
 Thread Thread.start(ThreadValueFn function, Var value) {
   return _start_value(function, value, NULL, NULL);
 }
@@ -460,7 +468,8 @@ static Thread _wait_any(Array pending) {
     returns or after catching that Error. Void results remain void.
     Raises: bad-arg for NULL, bad-state for an active or completed join,
     io-fail for native join failure, error-export causes, or join-fail
-    containing the captured worker errors. */
+    containing the captured worker errors.
+*/
 Var Thread.join(Thread t) {
   if (!t) raise %(bad-arg (operation "Thread.join"));
   Symbol expected = <running>;
@@ -619,7 +628,8 @@ static void _batch_check_stop(void) {
     and invokes no completion callbacks. Stop is cooperative: native I/O and
     computation that never checks stop can delay completion. Native join
     failure aborts if cleanup cannot establish that borrowed storage is idle.
-    Raises: startup, callback, captured-error, stop, or worker join causes. */
+    Raises: startup, callback, captured-error, stop, or worker join causes.
+*/
 void Thread.run(Array jobs, Func completed) {
   Array pending = auto [];
   ((Block) pending).reserve(jobs.len());
@@ -702,7 +712,8 @@ static ParallelMap _parallel_map(
     with stop; arbitrary computation and native I/O need not. Cleanup keeps
     the primary Error. Native join failure leaving a worker live aborts.
     Raises: source, start, worker, allocation, accumulator, or stop causes,
-    including <void-op> for a void worker result. */
+    including <void-op> for a void worker result.
+*/
 Var ParallelMap.foldl(ParallelMap map, Var seed, Func accumulate) {
   if (!map) return seed;
   struct ParallelRun *run = xcalloc(1, sizeof(struct ParallelRun));

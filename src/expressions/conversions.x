@@ -4,8 +4,8 @@ static keyword loop $private.loop;
 
 module int _null_literal(List expr) =>
   _integer_literal_kind(expr, NULL) == <zero> ||
-  expr.match(
-    %(expr ? $($source_identifier_content(%((binding ? "NULL"))))));
+  expr ~=
+    %(expr ? $($source_identifier_content(%((binding ? "NULL")))));
 
 /* explicit converter calls
 
@@ -23,7 +23,7 @@ module int _null_literal(List expr) =>
 module void _note_explicit_converter(
   Compiler c, List call, String method, Token origin) {
   Type result = call.cadr();
-  if (!result.match(%(?))) return;
+  if (!(result ~= %(?))) return;
   match (call) case $called(?callee, ?argument): {
     match (callee) case %(expr ? (ident ?binding)):
       if (Compiler.supplies_native_meta(Ast.binding_spelling(binding)))
@@ -143,7 +143,7 @@ static int _implicit_converter(
    `Var.row` converter is for a `Row` destination; its explicit calls are how
    the crossing is written, not a repetition of it. */
 static int _defines_crossing(Compiler c, Type source, Type target) {
-  if (!c.fn_name || !source.match(%(?)) || !target.match(%(?))) return 0;
+  if (!c.fn_name || !(source ~= %(?)) || !(target ~= %(?))) return 0;
   String from = source.car().str(), to = target.car().str();
   return c.fn_name == %"$(from)_$(to.lower())" ||
     c.fn_name == %"$(from)_str" || c.fn_name == %"$(from)_var";
@@ -237,7 +237,7 @@ List Compiler.convert_expression(Compiler c, List expr, Type target) {
   int target_is_var = c.sym.is_var_type(target);
   List lifted = _lift_func_value(c, expr, type, target);
   if (lifted) return lifted;
-  if (expr.match(%(expr ? (composite ?))))
+  if (expr ~= %(expr ? (composite ?)))
     return _compound_literal(c, expr, target);
   List conditional = _convert_conditional_arms(c, expr, declared_target);
   if (conditional) return conditional;
@@ -295,7 +295,7 @@ static List _compound_literal(Compiler c, List composite, Type target) {
   List converted = c.convert_initializer(composite, target, NULL);
   match (converted)
     case %(expr ?type (composite *)): {
-      if (Type.tag(type).match(%((gensym *))))
+      if (Type.tag(type) ~= %((gensym *)))
         $fail.expressions_brace_anonymous(c, NULL);
       return %(expr $type (cast $type $converted));
     }
@@ -309,8 +309,8 @@ static List _convert_conditional_arms(
   match (expr) case %(expr ? $($source_operator_content(
       %(?operator ?condition ?ontrue ?onfalse)))): {
     Type true_type = ontrue.cadr(), false_type = onfalse.cadr();
-    if (ontrue.list().match(%(expr ? (composite *))) ||
-        onfalse.list().match(%(expr ? (composite *))) ||
+    if (ontrue.list() ~= %(expr ? (composite *)) ||
+        onfalse.list() ~= %(expr ? (composite *)) ||
         (true_type != false_type &&
          !(c.sym.resolve_numeric_type(true_type) &&
            c.sym.resolve_numeric_type(false_type)))) {
@@ -365,7 +365,7 @@ static List _convert_known_value(
   int type_is_var, int target_is_var) {
   List reference = _convert_reference(c, expr, type, target);
   if (reference) return reference;
-  if (type.match(%((!or (dim *) (!quote *)) char)) &&
+  if (type ~= %((!or (dim *) (!quote *)) char) &&
       (target_is_var || c.sym.is_string_type(target))) {
     List string = _raw_string_to_string(c, expr);
     if (target_is_var)
@@ -486,7 +486,7 @@ static List _var_checked_reader(
    List-valued Var read as a String. Only a raw native pointer with no typed
    Var reader should still take that path. */
 static List _var_exact_reader(Compiler c, List expr, Type target) {
-  if (!target.match(%(?))) return NULL;
+  if (!(target ~= %(?))) return NULL;
   String name = target.car().str().lower();
   List callee = NULL;
   if (target == %("String")) callee = _var_reader(c, "Var_as_string", target);
@@ -502,7 +502,7 @@ static List _var_exact_reader(Compiler c, List expr, Type target) {
 /* The reader that crosses a `Var` to `target` and yields NULL for another
    tag, when the runtime declares one, as a callee; or NULL. */
 static List _payload_reader(Compiler c, Type target) =>
-  target.match(%(?))
+  target ~= %(?)
     ? _var_reader(c, %"Var_$(target.car().str().lower())_payload", target)
     : NULL;
 
@@ -572,7 +572,7 @@ static List _box_var(Compiler c, List expr, Type type) {
     when none declares one.
 */
 List Compiler.converter_call(Compiler c, List expr, Type type, Type target) {
-  if (!type.match(%(?)) || !target.match(%(?))) return NULL;
+  if (!(type ~= %(?)) || !(target ~= %(?))) return NULL;
   List owners = type.is_bare_typedef_name()
               ? _typedef_names(c, type).list_free() : $(type);
   foreach (Type owner in owners) {
@@ -599,7 +599,7 @@ static List _converter_owned_call(
      relaxed form still takes one source argument and must return that type;
      a lowercased method name alone does not establish the result type. */
   if (cvrtrtype != %((func ($owner)) @target) &&
-      (!cvrtrtype.match(%((func (($typename))) ?)) ||
+      (!(cvrtrtype ~= %((func (($typename))) ?)) ||
        c.sym.normalize_declared_type(cvrtrtype.cdr()) !=
          c.sym.normalize_declared_type(target)))
     return NULL;
@@ -629,7 +629,7 @@ int Compiler.is_builtin_converter_call(Compiler c, List expr) {
   match (expr)
     case %(expr ?result (call ?callee (args ?argument))): {
       Type target = result, source = argument.cadr();
-      if (!source || !source.match(%(?)) || !target.match(%(?))) return 0;
+      if (!source || !(source ~= %(?)) || !(target ~= %(?))) return 0;
       if (!source.fixed_var_tag() ||
           !(target == %("Var") ||
             (source.scalar_tag() && target == %("String"))))
@@ -670,8 +670,8 @@ static List _converted_temporary(
 static void _check_null_reference(
   Compiler c, List expr, Type target) {
   if (target.car() != <&>) return;
-  if (_integer_literal_kind(expr, NULL) == <zero> || expr.match(
-    %(expr () $($source_identifier_content(%((binding ? "NULL")))))))
+  if (_integer_literal_kind(expr, NULL) == <zero> || expr ~=
+    %(expr () $($source_identifier_content(%((binding ? "NULL"))))))
     $fail.expressions_ref_null(c, NULL, target);
 }
 

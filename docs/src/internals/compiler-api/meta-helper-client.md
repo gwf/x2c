@@ -33,7 +33,7 @@ The compiler's side of the project meta helper.
 Selects the table of the unit at `filename` for the calls that follow,
 and resets the unit's `meta static` values before the first one.
 
-Source: `src/meta-helper-client.x:496`
+Source: `src/meta-helper-client.x:505`
 
 <a id="Compiler.loaded_helper_call"></a>
 #### Compiler.loaded_helper_call
@@ -43,7 +43,7 @@ Source: `src/meta-helper-client.x:496`
 Calls a loaded function with data values and helper-owned selections.
 Selectors resolve inside the helper. No address crosses its pipes.
 
-Source: `src/meta-helper-client.x:109`
+Source: `src/meta-helper-client.x:113`
 
 <a id="Compiler.meta_helper_call"></a>
 #### Compiler.meta_helper_call
@@ -59,7 +59,7 @@ call. The call runs in the table of the file that wrote it: an included
 file's own, which runs the constants it computes as its own translation
 does, or else the unit's.
 
-Source: `src/meta-helper-client.x:103`
+Source: `src/meta-helper-client.x:106`
 
 <a id="Compiler.report_meta_error"></a>
 #### Compiler.report_meta_error
@@ -70,7 +70,7 @@ Reports a meta function's error `message` with `notes` under
 `category` at the position recorded first in or around `node`, or at
 `site` when it has none. A `fatal` report does not return.
 
-Source: `src/meta-helper-client.x:47`
+Source: `src/meta-helper-client.x:48`
 
 <a id="Compiler.stop_meta_helper"></a>
 #### Compiler.stop_meta_helper
@@ -80,7 +80,7 @@ Source: `src/meta-helper-client.x:47`
 Stops the helper this process runs, which a translation worker does
 when its units are done and every process does as it ends.
 
-Source: `src/meta-helper-client.x:514`
+Source: `src/meta-helper-client.x:524`
 
 <a id="Compiler.use_meta_helper"></a>
 #### Compiler.use_meta_helper
@@ -90,7 +90,7 @@ Source: `src/meta-helper-client.x:514`
 Uses `helper` for ordinary translation, retaining its configuration
 through process shutdown. Replaces and closes the preceding helper.
 
-Source: `src/meta-helper-client.x:473`
+Source: `src/meta-helper-client.x:480`
 
 ### `MetaHelper`
 
@@ -103,7 +103,7 @@ Returns why this helper cannot call the functions of `provider`: the
 helper or the provider's table did not build. Returns NULL when it can.
 Does not invoke a function or reset native state.
 
-Source: `src/meta-helper-client.x:487`
+Source: `src/meta-helper-client.x:495`
 
 <a id="MetaHelper.new"></a>
 #### MetaHelper.new
@@ -114,7 +114,7 @@ Creates an independent helper at `path`, with failures by table index
 and source paths mapped to their table indices. No process starts until
 a call needs it. The caller keeps the canonical configuration values.
 
-Source: `src/meta-helper-client.x:450`
+Source: `src/meta-helper-client.x:455`
 
 <a id="MetaHelper.restart"></a>
 #### MetaHelper.restart
@@ -124,7 +124,7 @@ Source: `src/meta-helper-client.x:450`
 Stops the process while retaining its executable and configuration.
 Its next call starts with fresh native state.
 
-Source: `src/meta-helper-client.x:524`
+Source: `src/meta-helper-client.x:535`
 
 <a id="MetaHelper.retain_executable"></a>
 #### MetaHelper.retain_executable
@@ -134,7 +134,7 @@ Source: `src/meta-helper-client.x:524`
 Retains this helper's executable independently of later cache rebuilds.
 The copy lasts until close, including across helper restarts.
 
-Source: `src/meta-helper-client.x:464`
+Source: `src/meta-helper-client.x:470`
 
 ## Public types
 
@@ -150,7 +150,7 @@ Source: `src/meta-helper-client.x:464`
 Owns one compiled helper's configuration and process. Callers close it
 after its last call; closing again is harmless.
 
-Source: `src/meta-helper-client.x:71`
+Source: `src/meta-helper-client.x:73`
 
 ## Design notes
 

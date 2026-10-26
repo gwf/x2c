@@ -24,6 +24,7 @@ List cons(Var head, List tail) {
 
 /** Method form of `cons`, with the same identity, lifetime, and failures. */
 List List.cons(Var head, List tail) => cons(head, tail);
+
 /** Returns `cons(head, tail)`, with the same identity and failures. */
 List Var.cons(Var head, List tail)  => cons(head, tail);
 

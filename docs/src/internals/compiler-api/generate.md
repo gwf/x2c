@@ -70,7 +70,7 @@ replaces none of them. It appends generated bindings and initialization
 work to the compiler and is not idempotent. Failures are reported as
 `emit` diagnostics.
 
-Source: `src/generate/output.x:35`
+Source: `src/generate/output.x:36`
 
 <a id="Compiler.generate_code_text"></a>
 #### Compiler.generate_code_text
@@ -81,7 +81,7 @@ Returns the generated header and source of the lowered `ast` as `(hfile
 htext cfile ctext)`, named from `basename`, without writing them. It
 affects the compiler as `Compiler.generate_code` does.
 
-Source: `src/generate/output.x:47`
+Source: `src/generate/output.x:49`
 
 <a id="Compiler.header_guard"></a>
 #### Compiler.header_guard
@@ -92,7 +92,7 @@ Returns the guard macro of the header generated for this unit, named
 from its path below the home when it has one there, else as spelled, so
 a meta group that copies the unit names the same guard.
 
-Source: `src/generate/output.x:204`
+Source: `src/generate/output.x:212`
 
 <a id="Compiler.init_statements"></a>
 #### Compiler.init_statements
@@ -101,7 +101,7 @@ Source: `src/generate/output.x:204`
 
 Returns the statements queued for `phase`, in the order they were added.
 
-Source: `src/generate/initialization.x:199`
+Source: `src/generate/initialization.x:198`
 
 <a id="Compiler.initializer_function"></a>
 #### Compiler.initializer_function
@@ -123,7 +123,7 @@ conditional containing that first use follows the declarations. A unit
 without such a use gets them at its end, after the declarations they
 may assign.
 
-Source: `src/generate/output.x:101`
+Source: `src/generate/output.x:110`
 
 <a id="Compiler.run_once_body"></a>
 #### Compiler.run_once_body
@@ -133,7 +133,7 @@ Source: `src/generate/output.x:101`
 Returns a run-once initializer body: `before`, then a return when
 `guard` is set that sets it otherwise, then `after`.
 
-Source: `src/generate/initialization.x:12`
+Source: `src/generate/initialization.x:13`
 
 ### `Init`
 
@@ -146,7 +146,7 @@ Returns `function` with its entry setup: the protocol initializer and
 the type initializer run once, and a `guarded` entry calls the region's
 initializer unless its guard is set.
 
-Source: `src/generate/initialization.x:49`
+Source: `src/generate/initialization.x:51`
 
 ## Public types
 
@@ -166,7 +166,7 @@ the unit's shutdown function, `synthetic` is the synthetic initializer or
 NULL, and `reachable` holds the entries a cache-only file guards, or is
 NULL when every public entry is guarded.
 
-Source: `src/generate/generate.x:37`
+Source: `src/generate/generate.x:38`
 
 ## Design notes
 

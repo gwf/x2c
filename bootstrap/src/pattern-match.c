@@ -268,93 +268,50 @@ static int _match_element(Buffer b, Var part, String cell, Array seen, Array bin
 
 static int _match_nested(Buffer b, Array out, List pattern, Var value, Array binders, int * depths){
   int viewed = binders != NULL;
-  if((! viewed && ! List_truth(({ static MatchCaptureSite _x2c_gensym_match_site_0;  x2c_match_site_match(& _x2c_gensym_match_site_0, pattern, List_var(_23)); }))) || ! Var_is_row(value, 9, 7, 4)) return - 1;
-  _match_flush(b, out);
-  Array rests = Array_new(), paths = Array_new(), seen = Array_new();
-  int mark = Array_len(out), testing = viewed, braces = 0, step = 0;
-  int deepest = 0;
-  List rest = Var_list_payload(value);
-  String path = _24;
-  if(! viewed) Buffer_write(b, " _x2c_gensym_match_cursor = _x2c_gensym_match_expr;");
-  for(; ; ){
-    int levels = Array_len(rests);
-    String cursor = _match_cursor(levels);
-    Var part = List_truth(rest) ? List_car(rest) : Var_null();
-    if(List_truth(rest) && ! Var_is_list_binder(part)){
-      String cell = String_join(NULL, cons(String_var(cursor), cons(String_var(_25), NULL)));
-      _match_and(b, &(testing));
-      Buffer_write(b, cursor);
-      step = _match_element(b, part, cell, seen, binders, &(testing), &(braces));
-      if(step == 1){
-        _match_and(b, &(testing));
-        String next = _match_cursor(levels + 1);
-        if(viewed) Buffer_printf(b, "Macro_case_enter(%s, &%s)", cell, next);
-        else Buffer_printf(b, "(%s = Var_list_payload(%s), 1)", next, cell);
-        Array_push(rests, List_var(rest));
-        Array_push(paths, String_var(path));
-        if(levels >= deepest) deepest = levels + 1;
-        rest = Var_list_payload(part);
-        path = String_add(path, _26);
-        continue;
+  if((! viewed && !({
+    int _x2c_gensym_condition_0 = 0; {
+      List _x2c_gensym_match_expr = pattern; MatchCaptureBuffer _x2c_gensym_match_capture = { 0 };   static MatchCaptureSite _x2c_gensym_match_site_0; if (x2c_match_site_try_capture(&_x2c_gensym_match_site_0, _x2c_gensym_match_expr, List_var(_23), &_x2c_gensym_match_capture)) {{
+        _x2c_gensym_condition_0 = 1;
+      }
+       }
+    }
+    _x2c_gensym_condition_0;
+  }
+  )) || ! Var_is_row(value, 9, 7, 4)) return - 1;  _match_flush(b, out);  Array rests = Array_new(), paths = Array_new(), seen = Array_new();  int mark = Array_len(out), testing = viewed, braces = 0, step = 0;  int deepest = 0;  List rest = Var_list_payload(value);  String path = _24;  if(! viewed) Buffer_write(b, " _x2c_gensym_match_cursor = _x2c_gensym_match_expr;");  for(; ; ){
+    int levels = Array_len(rests);  String cursor = _match_cursor(levels);  Var part = List_truth(rest) ? List_car(rest) : Var_null();  if(List_truth(rest) && ! Var_is_list_binder(part)){
+      String cell = String_join(NULL, cons(String_var(cursor), cons(String_var(_25), NULL)));  _match_and(b, &(testing));  Buffer_write(b, cursor);  step = _match_element(b, part, cell, seen, binders, &(testing), &(braces));  if(step == 1){
+        _match_and(b, &(testing));  String next = _match_cursor(levels + 1);  if(viewed) Buffer_printf(b, "Macro_case_enter(%s, &%s)", cell, next);  else Buffer_printf(b, "(%s = Var_list_payload(%s), 1)", next, cell);  Array_push(rests, List_var(rest));  Array_push(paths, String_var(path));  if(levels >= deepest) deepest = levels + 1;  rest = Var_list_payload(part);  path = String_add(path, _26);  continue;
       }
       if(step == 2){
-        _match_and(b, &(testing));
-        Buffer_printf(b, "Var_equal(%s, ", cell);
-        for(int level = levels;  level;  level --) Buffer_write(b, "Var_list_payload(");
-        _match_place(b, out, List_var(pattern));
-        if(String_truth(path)) Buffer_write(b, path);
-        Buffer_write(b, "->car)");
+        _match_and(b, &(testing));  Buffer_printf(b, "Var_equal(%s, ", cell);  for(int level = levels;  level;  level --) Buffer_write(b, "Var_list_payload(");  _match_place(b, out, List_var(pattern));  if(String_truth(path)) Buffer_write(b, path);  Buffer_write(b, "->car)");
       }
 
     }
     else{
       if(! List_truth(rest)){
-        _match_and(b, &(testing));
-        Buffer_printf(b, "!%s", cursor);
+        _match_and(b, &(testing));  Buffer_printf(b, "!%s", cursor);
       }
-      else if(List_truth(List_cdr(rest)) || Array_contains(seen, part)) step = - 1;
-      else if(! x2c_var_equal(part, Symbol_var(54))){
-        Array_push(seen, part);
-        if(! _match_bind(b, part, cursor, seen, binders, &(testing), &(braces))) step = - 1;
+      else if(List_truth(List_cdr(rest)) || Array_contains(seen, part)) step = - 1;  else if(! x2c_var_equal(part, Symbol_var(54))){
+        Array_push(seen, part);  if(! _match_bind(b, part, cursor, seen, binders, &(testing), &(braces))) step = - 1;
       }
-      if(step < 0 || ! levels) break;
-      rest = Var_list_payload(Array_take_last(rests));
-      path = Var_as_string(Array_take_last(paths));
-      cursor = _match_cursor(levels - 1);
+      if(step < 0 || ! levels) break;  rest = Var_list_payload(Array_take_last(rests));  path = Var_as_string(Array_take_last(paths));  cursor = _match_cursor(levels - 1);
     }
-    if(step < 0) break;
-    _match_and(b, &(testing));
-    Buffer_printf(b, "(%s = %s->cdr, 1)", cursor, cursor);
-    rest = List_cdr(rest);
-    path = String_add(path, _27);
+    if(step < 0) break;  _match_and(b, &(testing));  Buffer_printf(b, "(%s = %s->cdr, 1)", cursor, cursor);  rest = List_cdr(rest);  path = String_add(path, _27);
   }
-  if(viewed && Array_len(seen) < Array_len(binders)) step = - 1;
-  if(step < 0){
-    while(Array_len(out) > mark) Array_take_last(out);
-    Buffer_clear(b);
-    return - 1;
+  if(viewed && Array_len(seen) < Array_len(binders)) step = - 1;  if(step < 0){
+    while(Array_len(out) > mark) Array_take_last(out);  Buffer_clear(b);  return - 1;
   }
   if(testing && ! viewed){
-    Buffer_write(b, ") {");
-    braces ++;
+    Buffer_write(b, ") {");  braces ++;
   }
-  if(deepest >(* depths))(* depths) = deepest;
-  return braces;
+  if(deepest >(* depths))(* depths) = deepest;  return braces;
 }
 
 static void _match_captures(Buffer b, List binders){
-  int index = 0;
-  {
-    Atom binder;
-    List _x2c_gensym_macro_object_1 = binders;
-    List _x2c_gensym_macro_cursor_1 = _x2c_gensym_macro_object_1;
-    Var _x2c_gensym_macro_cursor_output_1;
-    while(List_try_next(_x2c_gensym_macro_object_1, &(_x2c_gensym_macro_cursor_1), &(_x2c_gensym_macro_cursor_output_1))){
-      binder = _x2c_gensym_macro_cursor_output_1;
-      {
-        int list = Var_is_list_binder(binder);
-        Buffer_printf(b, " %s _x2c_gensym_match_%s_%d = %s_x2c_gensym_match_values[%d]%s;", list ? "List" : "Var", list ? "list" : "value", index, list ? "Var_list_payload(" : "", index, list ? ")" : "");
-        index ++;
+  int index = 0; {
+    Atom binder;  List _x2c_gensym_macro_object_1 = binders;  List _x2c_gensym_macro_cursor_1 = _x2c_gensym_macro_object_1;  Var _x2c_gensym_macro_cursor_output_1;  while(List_try_next(_x2c_gensym_macro_object_1, &(_x2c_gensym_macro_cursor_1), &(_x2c_gensym_macro_cursor_output_1))){
+      binder = _x2c_gensym_macro_cursor_output_1; {
+        int list = Var_is_list_binder(binder);  Buffer_printf(b, " %s _x2c_gensym_match_%s_%d = %s_x2c_gensym_match_values[%d]%s;", list ? "List" : "Var", list ? "list" : "value", index, list ? "Var_list_payload(" : "", index, list ? ")" : "");  index ++;
       }
 
     }
@@ -364,17 +321,11 @@ static void _match_captures(Buffer b, List binders){
 }
 
 static void _match_body(Buffer b, Array out, List body, int braces){
-  int finish = 1;
-  {
-    List _x2c_gensym_match_expr = body; List _x2c_gensym_match_cursor;
-    switch(_x2c_gensym_match_expr ? _x2c_gensym_match_expr->car.u64 : 0){
-        case 9224497953206575432ULL: ;
-       _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497953206575432ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {{
-        Var inner;
-        inner = _x2c_gensym_match_value_0;
-        {
-          body = Var_list_payload(inner);
-          finish = 0;
+  int finish = 1; {
+    List _x2c_gensym_match_expr = body; List _x2c_gensym_match_cursor;  switch(_x2c_gensym_match_expr ? _x2c_gensym_match_expr->car.u64 : 0){
+        case 9224497953206575432ULL: ;  _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497953206575432ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {{
+        Var inner;  inner = _x2c_gensym_match_value_0; {
+          body = Var_list_payload(inner);  finish = 0;
         }
 
       }
@@ -382,39 +333,24 @@ static void _match_body(Buffer b, Array out, List body, int braces){
     }
 
   }
-  _match_place(b, out, List_var(body));
-  if(finish) Buffer_write(b, " break;");
-  while(braces --) Buffer_write(b, " }");
+  _match_place(b, out, List_var(body));  if(finish) Buffer_write(b, " break;");  while(braces --) Buffer_write(b, " }");
 }
 
 static String _match_label(Symbol head, Array heads, int * labelling){
-  if(!(* labelling)) return NULL;
-  if(! head){
-    (* labelling) = 0;
-    return _28;
+  if(!(* labelling)) return NULL;  if(! head){
+    (* labelling) = 0;  return _28;
   }
-  if(Array_contains(heads, Symbol_var(head))) return NULL;
-  Array_push(heads, Symbol_var(head));
-  Var literal = Symbol_var(head);
-  return String_join(NULL, cons(String_var(_29), cons(String_var(Var_str(Var_box_ulong_long((unsigned long long) literal.u64))), cons(String_var(_30), NULL))));
+  if(Array_contains(heads, Symbol_var(head))) return NULL;  Array_push(heads, Symbol_var(head));  Var literal = Symbol_var(head);  return String_join(NULL, cons(String_var(_29), cons(String_var(Var_str(Var_box_ulong_long((unsigned long long) literal.u64))), cons(String_var(_30), NULL))));
 }
 
 static String _match_locals(int depths, int values){
-  Buffer b = Buffer_new(0);
-  Buffer_write(b, ";");
-  for(int depth = 0;  depth <= depths;  depth ++){
-    Buffer_write(b, depth ? ", " : " List ");
-    Buffer_write(b, _match_cursor(depth));
+  Buffer b = Buffer_new(0);  Buffer_write(b, ";");  for(int depth = 0;  depth <= depths;  depth ++){
+    Buffer_write(b, depth ? ", " : " List ");  Buffer_write(b, _match_cursor(depth));
   }
-  if(depths >= 0) Buffer_write(b, ";");
-  if(values > 0) Buffer_printf(b, " Var _x2c_gensym_match_values[%d]; " "MatchCaptureBuffer _x2c_gensym_match_capture = " "{ .values = _x2c_gensym_match_values, .capacity = %d };", values, values);
-  else if(! values) Buffer_write(b, " MatchCaptureBuffer _x2c_gensym_match_capture = { 0 };");
-  return Buffer_str_free(b);
+  if(depths >= 0) Buffer_write(b, ";");  if(values > 0) Buffer_printf(b, " Var _x2c_gensym_match_values[%d]; " "MatchCaptureBuffer _x2c_gensym_match_capture = " "{ .values = _x2c_gensym_match_values, .capacity = %d };", values, values);  else if(! values) Buffer_write(b, " MatchCaptureBuffer _x2c_gensym_match_capture = { 0 };");  return Buffer_str_free(b);
 }
 
 static List _match_dynamic_read(Code subject, String locals){
-  Symbol list = 806120;
-  String tested = String_printf(_31, (unsigned long) list);
-  return cons(String_var(_32), cons(List_var(subject), cons(String_var(tested), cons(String_var(_33), cons(String_var(locals), NULL)))));
+  Symbol list = 806120;  String tested = String_printf(_31, (unsigned long) list);  return cons(String_var(_32), cons(List_var(subject), cons(String_var(tested), cons(String_var(_33), cons(String_var(locals), NULL)))));
 }
 

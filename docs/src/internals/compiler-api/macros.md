@@ -86,7 +86,7 @@ Returns the syntax that invokes the template `stored`, a macro name
 spelled as a String or a local definition, with `values`: what a template
 call in a staged `meta` body evaluates to.
 
-Source: `src/macros/templates.x:166`
+Source: `src/macros/templates.x:168`
 
 ### `Compiler`
 
@@ -110,7 +110,7 @@ it names a visible alias, or NULL. A declaration in a scope inside the
 alias's scope shadows it. The expression keeps its bindings where a
 later declaration hides one of their names.
 
-Source: `src/macros/aliases.x:431`
+Source: `src/macros/aliases.x:433`
 
 <a id="Compiler.alias_form_starts"></a>
 #### Compiler.alias_form_starts
@@ -134,7 +134,7 @@ Source: `src/macros/aliases.x:67`
 Whether the rule whose meta function now runs is shipped, so that the
 names it calls resolve to the copies the compiler links.
 
-Source: `src/macros/rewrites.x:456`
+Source: `src/macros/rewrites.x:461`
 
 <a id="Compiler.bind_code_value"></a>
 #### Compiler.bind_code_value
@@ -155,7 +155,7 @@ Source: `src/macros/values.x:344`
 Binds a compile-time code `value` returned to a statement at
 `context`.
 
-Source: `src/macros/templates.x:478`
+Source: `src/macros/templates.x:486`
 
 <a id="Compiler.capture_macro_value"></a>
 #### Compiler.capture_macro_value
@@ -176,7 +176,7 @@ Source: `src/macros/values.x:219`
 Starts a declaration body whose aliases end at its closing brace, and
 returns the alias state that `Compiler.leave_alias_body` restores.
 
-Source: `src/macros/aliases.x:378`
+Source: `src/macros/aliases.x:379`
 
 <a id="Compiler.evaluate_declaration_recipe"></a>
 #### Compiler.evaluate_declaration_recipe
@@ -187,7 +187,7 @@ Evaluates a declaration recipe after its owning source is collected.
 The callback is a built-in target name and arguments are retained
 canonical values.
 
-Source: `src/macros/templates.x:149`
+Source: `src/macros/templates.x:150`
 
 <a id="Compiler.evaluate_macro_rows"></a>
 #### Compiler.evaluate_macro_rows
@@ -221,7 +221,7 @@ Evaluates the explicit meta call `expression` at `site` with the active
 expansion's captures visible to the SDK. A nonzero `slot` marks a
 template slot, which reports a call the project meta build leaves.
 
-Source: `src/macros/templates.x:93`
+Source: `src/macros/templates.x:94`
 
 <a id="Compiler.expand_macro_invocation_node"></a>
 #### Compiler.expand_macro_invocation_node
@@ -243,7 +243,7 @@ Source: `src/macros/expansion.x:22`
 
 Tests one operation's registry without invoking a translator.
 
-Source: `src/macros/rewrites.x:232`
+Source: `src/macros/rewrites.x:237`
 
 <a id="Compiler.install_compile_time_effects"></a>
 #### Compiler.install_compile_time_effects
@@ -274,7 +274,7 @@ Source: `src/macros/invocations/recognition.x:85`
 Binds quoted `syntax` with its `fresh` rows at `position`, as the
 expansion of its quotation would.
 
-Source: `src/macros/templates.x:337`
+Source: `src/macros/templates.x:344`
 
 <a id="Compiler.leave_alias_body"></a>
 #### Compiler.leave_alias_body
@@ -283,7 +283,7 @@ Source: `src/macros/templates.x:337`
 
 Ends a declaration body, restoring the aliases visible before it.
 
-Source: `src/macros/aliases.x:384`
+Source: `src/macros/aliases.x:385`
 
 <a id="Compiler.lift_meta_expression"></a>
 #### Compiler.lift_meta_expression
@@ -295,7 +295,7 @@ Scalars, immutable values, representable Array/Map roots, compiler-issued
 identifiers, and nonempty code `List`s are accepted; `invocation` locates
 an unsupported result.
 
-Source: `src/macros/templates.x:464`
+Source: `src/macros/templates.x:471`
 
 <a id="Compiler.local_macro_form_is_definition"></a>
 #### Compiler.local_macro_form_is_definition
@@ -316,7 +316,7 @@ Lowers `replacement`, which `Compiler.rewrite_lowered` bound for the
 lowered statement `source`, and keeps each part of `source` it holds as
 it is, so no statement rule is offered that part again.
 
-Source: `src/macros/rewrites.x:260`
+Source: `src/macros/rewrites.x:265`
 
 <a id="Compiler.lower_rewrite"></a>
 #### Compiler.lower_rewrite
@@ -335,7 +335,7 @@ already established for its parent. A replacement whose template and
 slot signatures an earlier use in the unit prepared lowers only its
 captured values.
 
-Source: `src/macros/rewrites.x:294`
+Source: `src/macros/rewrites.x:299`
 
 <a id="Compiler.macro_form_is_definition"></a>
 #### Compiler.macro_form_is_definition
@@ -355,7 +355,7 @@ Source: `src/macros/invocations/recognition.x:61`
 Returns the current declaration's definition-local identity. An active
 macro-definition locals map is required.
 
-Source: `src/macros/definitions/templates.x:260`
+Source: `src/macros/definitions/templates.x:261`
 
 <a id="Compiler.macro_invocation_collection"></a>
 #### Compiler.macro_invocation_collection
@@ -368,7 +368,7 @@ named-type decorator, and local `Unit` macro whose template contains
 protocol or adoption rows. `<tried>` covers Unit decorators and other
 local `Unit` macros. Other invocations return zero.
 
-Source: `src/macros/invocations/recognition.x:335`
+Source: `src/macros/invocations/recognition.x:334`
 
 <a id="Compiler.macro_invocation_site"></a>
 #### Compiler.macro_invocation_site
@@ -379,7 +379,7 @@ Resolves a stored macro invocation marker to its source token.
 Nested template markers use the active expansion's invocation; unresolved
 markers return NULL.
 
-Source: `src/macros/expansion.x:238`
+Source: `src/macros/expansion.x:235`
 
 <a id="Compiler.macro_pattern_at"></a>
 #### Compiler.macro_pattern_at
@@ -413,7 +413,7 @@ declares is a template local, apart from ordinary names of the same
 spelling. A tag it only references keeps its public spelling unless the
 template later defines or declares it.
 
-Source: `src/macros/definitions/templates.x:273`
+Source: `src/macros/definitions/templates.x:274`
 
 <a id="Compiler.macro_targets_unit"></a>
 #### Compiler.macro_targets_unit
@@ -424,7 +424,7 @@ Reports whether the macro invocation at the cursor produces file-scope
 syntax, directly or through the target it decorates. A script unit keeps
 such an invocation at file scope. This query does not consume tokens.
 
-Source: `src/macros/invocations/recognition.x:379`
+Source: `src/macros/invocations/recognition.x:378`
 
 <a id="Compiler.macro_value_literal"></a>
 #### Compiler.macro_value_literal
@@ -445,7 +445,7 @@ Matches the member rules registered for each field keyword that
 `aggregate` declares a field with, as `Compiler.rewrite` matches those
 keyed by a receiver type.
 
-Source: `src/macros/rewrites.x:218`
+Source: `src/macros/rewrites.x:223`
 
 <a id="Compiler.meta_call_starts_declaration"></a>
 #### Compiler.meta_call_starts_declaration
@@ -456,7 +456,7 @@ Returns whether tokens after an explicit meta call continue a
 declaration. The balanced argument group is inspected without moving
 the compiler cursor; a visible source macro retains its own grammar.
 
-Source: `src/macros/definitions/slots.x:163`
+Source: `src/macros/definitions/slots.x:160`
 
 <a id="Compiler.parse_alias_declaration"></a>
 #### Compiler.parse_alias_declaration
@@ -579,7 +579,7 @@ a value the active lowering watches, so it watches `bound` as well. A
 statement without an origin, such as an unbraced body, keeps nothing
 else that identifies it when a binder it uses binds again.
 
-Source: `src/macros/rewrites.x:711`
+Source: `src/macros/rewrites.x:716`
 
 <a id="Compiler.rebuild_expression"></a>
 #### Compiler.rebuild_expression
@@ -591,7 +591,7 @@ its established root `type`, child stage, and source wrappers. Binding,
 capture collection, hygiene, and effects do not run, and a statement
 expression's template-origin wrappers are omitted.
 
-Source: `src/macros/templates.x:252`
+Source: `src/macros/templates.x:255`
 
 <a id="Compiler.rebuild_function"></a>
 #### Compiler.rebuild_function
@@ -601,7 +601,7 @@ Source: `src/macros/templates.x:252`
 Rebuilds a bound function through a Function decorator without binding it
 again. The template keeps the target's return type and declarator.
 
-Source: `src/macros/templates.x:274`
+Source: `src/macros/templates.x:280`
 
 <a id="Compiler.rebuild_statement"></a>
 #### Compiler.rebuild_statement
@@ -612,7 +612,7 @@ Rebuilds a statement template as a canonical unbraced `seq`. Bound
 children keep their identities and origins; template-origin wrappers
 are omitted because this path does not open an invocation.
 
-Source: `src/macros/templates.x:260`
+Source: `src/macros/templates.x:264`
 
 <a id="Compiler.rebuild_unit_function"></a>
 #### Compiler.rebuild_unit_function
@@ -623,7 +623,7 @@ Constructs a fresh function from a Unit template after lowering. The
 caller supplies its bound name and lowered children; binding does not
 run.
 
-Source: `src/macros/templates.x:266`
+Source: `src/macros/templates.x:271`
 
 <a id="Compiler.report_meta_failure"></a>
 #### Compiler.report_meta_failure
@@ -646,7 +646,7 @@ Active rules cannot re-enter. A statement of the same kind that a
 statement replacement writes or copies, such as its source, takes the
 rules after the one that replaced it.
 
-Source: `src/macros/rewrites.x:241`
+Source: `src/macros/rewrites.x:246`
 
 <a id="Compiler.rewrite_lowered"></a>
 #### Compiler.rewrite_lowered
@@ -658,7 +658,7 @@ transform has lowered, then binds the first replacement as
 `Compiler.rewrite` does. Binding keeps the source, and each part of it
 the replacement holds, as lowered.
 
-Source: `src/macros/rewrites.x:251`
+Source: `src/macros/rewrites.x:256`
 
 <a id="Compiler.rewrite_written"></a>
 #### Compiler.rewrite_written
@@ -670,7 +670,7 @@ Binds the replacement a shipped rule gives the lowered statement
 `Compiler.rewrite_lowered` does. A statement the kernel writes is not
 source, so no program rule sees it.
 
-Source: `src/macros/rewrites.x:273`
+Source: `src/macros/rewrites.x:278`
 
 <a id="Compiler.scope_declares_alias"></a>
 #### Compiler.scope_declares_alias
@@ -681,7 +681,7 @@ Reports whether the current scope declares an alias named `name`,
 including a file-scope alias an include delivered. A declaration of that
 name in the same scope conflicts with it.
 
-Source: `src/macros/aliases.x:418`
+Source: `src/macros/aliases.x:420`
 
 <a id="Compiler.skip_macro_invocation"></a>
 #### Compiler.skip_macro_invocation
@@ -691,7 +691,7 @@ Source: `src/macros/aliases.x:418`
 Consumes a macro invocation name and its balanced argument list.
 The invocation terminator or following decorator target remains current.
 
-Source: `src/macros/invocations/recognition.x:355`
+Source: `src/macros/invocations/recognition.x:354`
 
 <a id="Compiler.skip_named_type_declaration"></a>
 #### Compiler.skip_named_type_declaration
@@ -701,7 +701,7 @@ Source: `src/macros/invocations/recognition.x:355`
 Consumes a NamedType target already projected by owning-source collection.
 CPP scanning does not produce the declaration or parse its fields again.
 
-Source: `src/macros/invocations/recognition.x:366`
+Source: `src/macros/invocations/recognition.x:365`
 
 <a id="Compiler.take_code_value"></a>
 #### Compiler.take_code_value
@@ -737,7 +737,7 @@ Source: `src/macros/invocations/expressions.x:15`
 Parses a member name in a template. A singular `Name` hole there
 supplies the spelling it captured, without hygienic renaming.
 
-Source: `src/macros/definitions/slots.x:176`
+Source: `src/macros/definitions/slots.x:173`
 
 <a id="Compiler.try_parse_macro_pattern"></a>
 #### Compiler.try_parse_macro_pattern
@@ -788,7 +788,7 @@ Returns NULL without consuming a macro hole or an invocation that
 deferred `(seq (macro-invoke ...))`, and ordinary parsing returns the bound
 expansion.
 
-Source: `src/macros/invocations/targets.x:54`
+Source: `src/macros/invocations/targets.x:53`
 
 <a id="Compiler.watched_step"></a>
 #### Compiler.watched_step
@@ -801,7 +801,7 @@ value that an enclosing replacement's source held as well lowers outside
 that replacement's rule too, and that replacement still watches its own
 values within it.
 
-Source: `src/macros/rewrites.x:725`
+Source: `src/macros/rewrites.x:730`
 
 ## Design notes
 

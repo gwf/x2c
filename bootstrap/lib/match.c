@@ -292,7 +292,6 @@ typedef struct MatchCaptureSite{
 }
 MatchCaptureSite;
 
-#include <assert.h>
 #include <string.h>
 #include "scope/scope.h"
 #include "array/array.h"
@@ -1160,7 +1159,7 @@ void MachineBuilder_set_target(MachineBuilder * b, int site, int target){
   else if(target < 0 || target >= MACHINE_CODE_MAX){
     Var _x2c_gensym_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("MachineBuilder.set_target")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/match/wordcode.x",.function = "MachineBuilder_set_target",.line = 363,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/match/wordcode.x",.function = "MachineBuilder_set_target",.line = 375,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_0, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(1345468776), int_var(target));
       __builtin_unreachable();
     }
@@ -1489,7 +1488,6 @@ static void f7_machine____return(MatchMachine * m, Symbol status){
 }
 
 static void f7_machine____pop_frame(MatchMachine * m){
-  assert((* m).fp > 0);
   MatchFrame * frame = &(* m).frames[--(* m).fp];
   (* m).pc = frame -> return_pc;
   (* m).current_entry_undo = frame -> caller_entry_undo;
@@ -1699,7 +1697,7 @@ void MatchMachine_begin(MatchMachine * m, MachineView program, Var input){
 void MatchMachine_finish(MatchMachine * m){
   if(! _init_guard_) _file_init_();
   if((* m).running){
-    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/match/machine.x",.function = "MatchMachine_finish",.line = 509,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/match/machine.x",.function = "MatchMachine_finish",.line = 507,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_1, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("MatchMachine.finish")), NULL))));
     __builtin_unreachable();
   }
@@ -1713,7 +1711,6 @@ void MatchMachine_finish(MatchMachine * m){
   (* m).error =((void) 0, Void);
   (* m).status = 598794;
   memset(&(* m).program, 0, sizeof(MachineView));
-  (* m).running = 0;
 }
 
 int MatchMachine_clean(MatchMachine * m){
@@ -1733,7 +1730,7 @@ MatchMachine * MatchMachine_acquire(MachineStats * stats){
   if(! _init_guard_) _file_init_();
   MatchMachine * m = f7_machine___machine_thread.count ? f7_machine___machine_thread.spares[-- f7_machine___machine_thread.count] : calloc(1, sizeof(MatchMachine));
   if(! m){
-    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/match/machine.x",.function = "MatchMachine_acquire",.line = 562,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/match/machine.x",.function = "MatchMachine_acquire",.line = 561,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_2, 97614135954008, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("MatchMachine.acquire")), NULL))));
     __builtin_unreachable();
   }
@@ -3440,9 +3437,7 @@ static f6_layout___MatchSlots f6_layout____choice_slots(MatchCaptureLayout m, Li
 }
 
 static f6_layout___MatchSlots f6_layout____binder_slot(MatchCaptureLayout m, Var binder){
-  int index = f6_layout____find(m, binder);
-  assert(index >= 0);
-  unsigned long bit = 1UL << index;
+  unsigned long bit = 1UL << f6_layout____find(m, binder);
   return(f6_layout___MatchSlots){
     bit, bit
   }

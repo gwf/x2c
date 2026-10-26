@@ -68,8 +68,7 @@ typedef struct Project{
   ProjectTarget targets;
   CliRequest command;
   ProjectTarget selected;
-  ProjectBuild head;
-  ProjectBuild tail;
+  ProjectBuild head, tail;
 }
 * Project;
 
@@ -703,7 +702,7 @@ static int f8_manifest____array_open(String value){
 
 int ProjectBuild_valid_name(String name){
   if(! _init_guard_) _file_init_();
-  if(! String_truth(name) || ! String_getindex(name, 0)) return 0;
+  if(! String_truth(name)) return 0;
   {
     char raw;
     String _x2c_gensym_macro_object_1 = name;

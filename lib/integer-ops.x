@@ -1,5 +1,3 @@
-#pragma once
-
 /*  integer-ops.x -- shared raw integer arithmetic
 
     Copyright (c) 2026 Gary William Flake
@@ -8,6 +6,8 @@
     Callers validate shift counts and own promotion, diagnostics for those
     counts, and result storage or boxing.
 */
+
+#pragma once
 
 macro Unit $integer.raw(Name $name) {
   static inline unsigned long long $name(

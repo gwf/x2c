@@ -555,6 +555,40 @@ class IntegrationProbe(unittest.TestCase):
         self.assertEqual(self.tip(),advance)
         self.assertEqual(len(self.state()['gates']),1)
 
+    def test_land_checks_frozen_prs_with_one_paginated_snapshot(self):
+        for number in range(1, 7):
+            self.pr(number)
+        batch=self.prepare()
+        record=json.loads(self.cli('status').stdout)['active']
+        self.assertEqual(len(record['prs']),6)
+        before=len(self.state().get('gh_calls',[]))
+        self.cli('land',batch)
+        calls=self.state()['gh_calls'][before:]
+        pulls=[call for call in calls if any('/pulls' in arg for arg in call)]
+        self.assertEqual(len(pulls),1,pulls)
+        self.assertIn('repos/fixture/x2c/pulls?state=open&base=dev&per_page=100',
+                      pulls[0])
+        self.assertIn('--paginate',pulls[0])
+        self.assertIn('--slurp',pulls[0])
+        self.assertEqual(len(self.state()['gates']),1)
+
+    def test_snapshot_rejects_no_longer_eligible_frozen_pr(self):
+        self.pr(1); batch=self.prepare(); original=self.state()
+        for change in ('closed','base','draft','label','head'):
+            with self.subTest(change=change):
+                state=json.loads(json.dumps(original))
+                pull=state['pulls']['1']
+                if change=='closed': pull['state']='closed'
+                elif change=='base': pull['base']['ref']='main'
+                elif change=='draft': pull['draft']=True
+                elif change=='label': pull['labels']=[]
+                else: pull['head']['sha']='0'*40
+                self.state_path.write_text(json.dumps(state))
+                result=self.cli('land',batch,ok=False)
+                self.assertNotEqual(result.returncode,0,result.stdout+result.stderr)
+                self.assertEqual(self.state().get('gates',[]),[])
+                self.assertEqual(self.tip(),self.base)
+
     def test_multi_pr_one_gate_includes_generated_output(self):
         heads=[self.pr(1),self.pr(2)]
         batch=self.prepare(); self.land(batch)
@@ -817,9 +851,13 @@ if hasattr(lock,'close'): lock.close()
         advanced=self.git('rev-parse','HEAD').stdout.strip()
         self.git('push','-q','origin','HEAD:refs/heads/dev')
         self.git('checkout','-q','dev')
+        before=len(self.state().get('gh_calls',[]))
         result=self.cli('land',batch,ok=False)
         self.assertEqual(json.loads(result.stdout)['state'],'review')
         self.assertIn('dev advanced',json.loads(result.stdout)['reason'])
+        calls=self.state().get('gh_calls',[])[before:]
+        self.assertFalse(any('/pulls' in arg for call in calls for arg in call),
+                         calls)
         self.assertEqual(self.tip(),advanced)
         self.assertEqual(self.state().get('gates',[]),[])
 

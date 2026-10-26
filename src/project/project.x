@@ -63,8 +63,7 @@ module typedef struct Project {
   SourceView sources;
   ProjectTarget targets;
   CliRequest command, ProjectTarget selected;
-  ProjectBuild head;
-  ProjectBuild tail;
+  ProjectBuild head, tail;
 } *Project;
 
 module {

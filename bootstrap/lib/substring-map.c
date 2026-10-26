@@ -165,7 +165,7 @@ _Noreturn static void _reinsert_error(unsigned _x2c_gensym_macro_capacity_0, int
   {
     Var _x2c_gensym_literal_part_0 = String_var(String_new("MapSubInt.reinsert"));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/substring-map.x",.function = "_reinsert_error",.line = 19,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/substring-map.x",.function = "_reinsert_error",.line = 20,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_0, 20800632064936, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(209381969202), unsigned_var(_x2c_gensym_macro_capacity_0), Symbol_var(34764938), int_var(_x2c_gensym_macro_probe_0));
       __builtin_unreachable();
     }
@@ -178,7 +178,7 @@ _Noreturn static void _insert_error(unsigned _x2c_gensym_macro_capacity_1){
   {
     Var _x2c_gensym_literal_part_1 = String_var(String_new("MapSubInt.insert"));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/substring-map.x",.function = "_insert_error",.line = 19,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/substring-map.x",.function = "_insert_error",.line = 20,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_1, 20800632064936, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_1, Symbol_var(209381969202), unsigned_var(_x2c_gensym_macro_capacity_1));
       __builtin_unreachable();
     }
@@ -318,7 +318,7 @@ static void _x2c_gensym_macro__expand_0(MapSubInt _x2c_gensym_macro_map_10){
   struct MapSubIntRecord * _x2c_gensym_macro_entries_1 = _x2c_gensym_macro_map_10 -> entries;
   unsigned _x2c_gensym_macro_cap_2 = _x2c_gensym_macro_map_10 -> capacity;
   if(_x2c_gensym_macro_cap_2 > ~ 0u / 2){
-    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/substring-map.x",.function = "_x2c_gensym_macro__expand_0",.line = 32,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/substring-map.x",.function = "_x2c_gensym_macro__expand_0",.line = 33,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_2, 1358596898646632, 1, Symbol_var(1265290), unsigned_var(_x2c_gensym_macro_cap_2));
     __builtin_unreachable();
   }

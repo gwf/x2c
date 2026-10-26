@@ -98,7 +98,8 @@ static List _function_body(
 }
 
 /** The declared result type of the function `declaration`, which its
-    `return` statements convert to, or NULL. */
+    `return` statements convert to, or NULL.
+*/
 Type Ast.declared_return(List declaration) {
   match (declaration.type_from_ast())
     case %((func *) *result): return result.type().declared();
@@ -191,8 +192,8 @@ module List _bind_collected_function(
   with (c.macro_stack = construction) {
     Token invocation = c.macro_stack ? c.macro_stack.last().list()[3] : NULL;
     with (c.origin = invocation ? c.record_origin(invocation) : c.origin) {
-    return c.bind_syntax(
-      %(function $return_type $declarator $body), <unit>, c.return_type);
+      return c.bind_syntax(
+        %(function $return_type $declarator $body), <unit>, c.return_type);
     }
   }
 }

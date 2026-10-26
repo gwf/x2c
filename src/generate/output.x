@@ -7,6 +7,7 @@
    conditional group around its item, so the code is declared whichever
    arms the C compiler selects. A missing use gives -1. */
 static typedef struct Anchors { int function, error; } Anchors;
+
 // diagnostics
 
 static macro Stmt $fail.generate_file_write(
@@ -43,12 +44,20 @@ void Compiler.generate_code(Compiler c, List ast, String dir) {
 
 /** Returns the generated header and source of the lowered `ast` as `(hfile
     htext cfile ctext)`, named from `basename`, without writing them. It
-    affects the compiler as `Compiler.generate_code` does. */
+    affects the compiler as `Compiler.generate_code` does.
+*/
 List Compiler.generate_code_text(Compiler c, List ast, String basename) =>
   _generated_code(c, _without_trivia(ast), basename);
 
 static List _without_trivia(List ast) =>
-  ast.filter(%!(node) => !node.list().match(%((!or space comment empty) *)));
+  ast.filter(%!(node) => {
+    match (node.list()) {
+      case %(space *): return 0;
+      case %(comment *): return 0;
+      case %(empty *): return 0;
+    }
+    return 1;
+  });
 
 /* The header and source of `ast` as `(hfile htext cfile ctext)`, named from
    `basename`. */
@@ -101,8 +110,7 @@ static void _publish_files(Compiler c, List outputs) {
 List Compiler.place_source_prelude(
   Compiler c, List source, List declarations) {
   (void) c;
-  Array out = [];
-  int prelude = _anchors(source, 0).function, position = 0;
+  Array out = [], int prelude = _anchors(source, 0).function, position = 0;
   foreach (List node in source) {
     if (position++ == prelude)
       foreach (List declaration in declarations) out.push(declaration);
@@ -115,8 +123,7 @@ List Compiler.place_source_prelude(
 
 /* The anchors of `source`; `error` is sought only with `errors`. */
 static Anchors _anchors(List source, int errors) {
-  Anchors at = {-1, -1};
-  int position = 0, depth = 0, opening = 0;
+  Anchors at = {-1, -1}, int position = 0, depth = 0, opening = 0;
   foreach (List item in source) {
     int here = depth ? opening : position;
     if (at.function < 0 && _is_function(item)) at.function = here;
@@ -200,7 +207,8 @@ static List _header_guard(List content, String guard) => %(
 
 /** Returns the guard macro of the header generated for this unit, named
     from its path below the home when it has one there, else as spelled, so
-    a meta group that copies the unit names the same guard. */
+    a meta group that copies the unit names the same guard.
+*/
 String Compiler.header_guard(Compiler c) {
   String home = Compiler.home_dir(), name = c.filename;
   String path = home ? Path.absolute(name) : NULL;
@@ -217,8 +225,7 @@ static List _source_unit(Compiler c, List content) {
   List error = at.error >= 0 ? _include_directive("error.h") : NULL;
   List exception =
     c.needs_exception ? _include_directive("exception.h") : NULL;
-  Array lines = [];
-  int position = 0;
+  Array lines = [], int position = 0;
   foreach (List node in content) {
     if (position == at.error)
       foreach (List include in error) _push_line(lines, include);

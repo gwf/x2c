@@ -1,4 +1,4 @@
-/* source locations
+/*  source-locations.x -- source locations
 
    An origin row locates a parsed node for later diagnostics. With source
    facts on, as for the editor adapter, declarations and references also

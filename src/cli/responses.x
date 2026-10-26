@@ -5,7 +5,8 @@
 
 /** Reads initial arguments. Script options defer response-file expansion
     until parsing, so program arguments remain literal. The caller owns
-    the returned Array. */
+    the returned Array.
+*/
 Array CliRequest.read_arguments(int argc, char **argv) {
   Array args = [];
   int script = argc > 1 && !strcmp(argv[1], "script");
@@ -17,7 +18,8 @@ Array CliRequest.read_arguments(int argc, char **argv) {
 }
 
 /** Copies the driver's already-read vector, or returns NULL for direct
-    invocation. The caller owns the Array; no word is expanded again. */
+    invocation. The caller owns the Array; no word is expanded again.
+*/
 Array CliRequest.command_arguments(int argc, char **argv) {
   if (argc < 2 || strcmp(argv[1], "--driver-arguments")) return NULL;
   Array arguments = [];

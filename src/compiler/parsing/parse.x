@@ -1,7 +1,8 @@
-/* the parse driver
+/*  parse.x -- top-level parse driver
 
-   A full parse reads the unit's top-level forms in source order. A form
-   that fails is skipped whole, so one error does not hide the next. */
+    A full parse reads the unit's top-level forms in source order. A form
+    that fails is skipped whole, so one error does not hide the next.
+*/
 
 /** Parses and types the positioned source against `globs`.
 
@@ -68,7 +69,7 @@ module void _parse_forms(Compiler c, Array nodes) {
   while (c.peek(0) != <eof>) if (!_form(c, nodes)) break;
 }
 
-// Parses one form, or recovers at the next whole form.
+// Parses one form; malformed syntax recovers until the diagnostic limit.
 static int _form(Compiler c, Array nodes) {
   Token start = c.token;
   int braces = c.braces.len();

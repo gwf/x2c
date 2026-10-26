@@ -216,7 +216,7 @@ static int _decimal_number(char *s, Symbol &?type) {
    borrowed and need not end at `n`. */
 Symbol scan_number_type(char *s, int n) {
   int i = n > 0 && s[0] == '-';
-  int ishex = i + 1 < n && s[i] == '0' && (s[i+1] == 'x' || s[i+1] == 'X');
+  int ishex = i + 1 < n && s[i] == '0' && (s[i + 1] == 'x' || s[i + 1] == 'X');
   while (i < n) {
     switch (s[i]) {
       case '.': case 'p': case 'P': return <float>;
@@ -412,8 +412,7 @@ Symbol scan_keyword_type(const char *s, int n) {
 
 /* Returns the longest supported C or x2c operator prefix, or -1. x2c adds
    `===`, `!==`, and `~=` to the C operators and recognizes @ punctuation.
-   The caller supplies a
-   nonnull NUL-terminated input. */
+   The caller supplies a nonnull NUL-terminated input. */
 int scan_c_operator(char *s) {
   switch (s[0]) {
     case '.': return s[1] == '.' && s[2] == '.' ? 3 : 1;
@@ -667,8 +666,8 @@ static int _byte_escape(char *s, Symbol *status) {
 /* C's `\x` takes every hex digit that follows it. */
 static int _hex_escape(char *s, Symbol *status) {
   if (!s[2]) return _fail(status, <incomplete>);
-  if (!_ascii_hex((unsigned char) s[2])) return _fail(status, <malformed>);
-  return 2 + _digits(s + 2, 16);
+  int digits = _digits(s + 2, 16);
+  return digits ? 2 + digits : _fail(status, <malformed>);
 }
 
 /* C's `\u` and `\U` take exactly `count` hex digits. */

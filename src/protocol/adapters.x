@@ -189,7 +189,8 @@ static void _install_generated(
 }
 
 /** Reports whether a generated member names a native protocol host function.
-    Its defining header supplies the alias instead of a C prototype. */
+    Its defining header supplies the alias instead of a C prototype.
+*/
 int Compiler.native_protocol_alias(Compiler c, String name) {
   foreach (Var conformance in c.conforms)
     match (conformance)
@@ -369,7 +370,8 @@ static List _signature_declaration(
 // alias insertion
 
 /** Remembers a source typedef's declaration and visibility, which native
-    alias insertion reads for its participant. */
+    alias insertion reads for its participant.
+*/
 void Compiler.record_source_typedef(
   Compiler c, String name, List declaration, int private) {
   c.protocol_helpers[$("source-typedef", name)] = $(declaration, private);

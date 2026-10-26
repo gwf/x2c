@@ -3,12 +3,14 @@
 // application
 
 /** Records the Macro values an anonymous macro captured where it was
-   created, so applying it later applies the same children. */
+   created, so applying it later applies the same children.
+*/
 Macro Macro_close(Macro value, List captures) =>
   value.append(%((env $captures)));
 
 /** Applies a macro value to code values. The result is a pending
-   invocation; inserting it into a program expands and binds it there. */
+   invocation; inserting it into a program expands and binds it there.
+*/
 List Macro_apply(Macro t, List values) =>
   $("x2c.template", t, _group(t, values));
 
@@ -49,7 +51,8 @@ static int _items(List items) {
     code takes an expression (`expression`), a binding, an `x2c_ident`
     spelling, or a Name hole's String becomes an identifier expression;
     in a Name hole's member position, an `x2c_ident` spelling is its
-    String. */
+    String.
+*/
 Var Macro.inserted(Var value, int lifts, int expression) {
   if (lifts) value = _expr_value(value);
   Var spelling = value;
@@ -62,7 +65,8 @@ Var Macro.inserted(Var value, int lifts, int expression) {
 
 /** Returns the name a typed quotation declares with a Name hole whose local
     holds `value`: the name form of an `x2c_ident` spelling or a String,
-    or a binding as it is. */
+    or a binding as it is.
+*/
 Var Macro.declared(Var value) {
   Var spelling = Macro.inserted(value, 0, 0);
   return spelling is <string> ? $(spelling).var() : value;
@@ -70,12 +74,14 @@ Var Macro.declared(Var value) {
 
 /** Returns the items a typed quotation splices for an expression sequence
     hole whose local holds `values`: each number, String, or Symbol becomes
-    its literal, as a spliced data List's items do. */
+    its literal, as a spliced data List's items do.
+*/
 List Macro.inserted_items(List values) => _expr_values(values);
 
 /** Returns what a typed quotation builds when its code is one hole whose
     local holds `value`: the inserted expression with the type `type`. A
-    String typed `String` is a String literal. */
+    String typed `String` is a String literal.
+*/
 List Macro.typed(List type, Var value) {
   if (value is <list> && value.list().car().is_match_op())
     return %(expr $type $value);
@@ -107,7 +113,8 @@ module List _expr_values(List values) {
 // number literals
 
 /** Returns the C type of a number's Var family, or NULL when `value` is not
-    a number. An untyped integer is an `int` when it fits one. */
+    a number. An untyped integer is an `int` when it fits one.
+*/
 List Macro.number_type(Var value) {
   switch (value.tag()) {
     case <i8>: return %(signed char);
@@ -133,7 +140,8 @@ List Macro.number_type(Var value) {
 
 /** Returns the literal expression of type `result` that holds `value`, a
     number of the scalar type `type`. An `int` value is its decimal
-    literal; another number is its exact bits cast to `type`. */
+    literal; another number is its exact bits cast to `type`.
+*/
 List Macro.number_literal(List result, List type, Var value) {
   if (value.tag() == <i32>) return _int_literal(result, value);
   List literal = _bits_literal(value);

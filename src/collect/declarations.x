@@ -118,7 +118,8 @@ module void _publish_unit_statics(Map statics, Map overlay, String path) {
     A file already in `seen`
     is skipped with the files it reaches, and each file reached is added to
     `seen`. NULL when the include does not resolve to x2c source; a runtime
-    module adds nothing the prelude has not declared. */
+    module adds nothing the prelude has not declared.
+*/
 List Compiler.include_typedef_names(
   Compiler c, String target, int angle, Map seen) {
   String path = c.sources.resolve_include(
@@ -131,7 +132,8 @@ List Compiler.include_typedef_names(
 
 /** The semantic type rows reached by an ordinary source include. Each
     file contributes once to `seen`; the current unit does not contribute
-    through a cycle back to its own still-open header. */
+    through a cycle back to its own still-open header.
+*/
 List Compiler.include_type_dependencies(
   Compiler c, String target, int angle, Map seen) {
   String path = c.sources.resolve_include(
@@ -171,7 +173,8 @@ static void _add_type_dependencies(
     header need not publish. Those cannot supply declarations here. Meta
     signatures alone do not establish a runtime declaration either. Emission
     reads the entries collection already installed without invalidating
-    them. */
+    them.
+*/
 void Compiler.include_function_declarations(
   Compiler c, String target, int angle, Map available) {
   String path = c.sources.resolve_include(
@@ -180,7 +183,8 @@ void Compiler.include_function_declarations(
 }
 
 /** The runtime umbrella includes each listed module's generated header.
-    Compiler components in the semantic prelude supply no runtime header. */
+    Compiler components in the semantic prelude supply no runtime header.
+*/
 void Compiler.runtime_function_declarations(Compiler c, Map available) {
   String path = _canonical_path(%"$(x2c_get_root())/lib/x2c.x");
   Var entry = _process_cache()[path];
@@ -191,7 +195,8 @@ void Compiler.runtime_function_declarations(Compiler c, Map available) {
 
 /** Returns the one-part names that the source at home-relative `path`
     declares itself, without its includes, as this process collected it.
-    A source this process has not collected declares no names. */
+    A source this process has not collected declares no names.
+*/
 List Compiler.collected_names(String path) {
   String canonical = _canonical_path(Compiler.absolute_home_path(path));
   Var entry = _process_cache()[canonical];
@@ -268,8 +273,7 @@ static void _add_typedef_names(
    Included signatures come from the completed graph; effects still install
    at the provider's ordinary include positions. Remove the work before
    replay, because a cold dependency can complete more pending providers. */
-module void _bind_pending_inline_bodies(
-  Compiler c, Map globs, String unit) {
+module void _bind_pending_inline_bodies(Compiler c, Map globs, String unit) {
   Array pending = c.pending_inline_bodies;
   if (!pending.len()) return;
   while (pending.len()) {
@@ -370,15 +374,15 @@ static Map _record(ColdConformances &cold, String path) {
 static Gathered _gather_prelude(Compiler c) {
   Gathered prelude = {.symbols = {}, .definitions = {}, .visited = {}};
   foreach (String source in Compiler.prelude_sources())
-    _gather_declarations(c, _canonical_path(%"$(x2c_get_root())/$source"), prelude);
+    _gather_declarations(
+      c, _canonical_path(%"$(x2c_get_root())/$source"), prelude);
   return prelude;
 }
 
 /* A compiler of its own for the file at `path` that resolves the adoptions
    visible to it as the file's translation does: it sees the declarations
    of the prelude and of the file's include closure. */
-static Compiler _cold_provider(
-  Compiler c, String path, Gathered &prelude) {
+static Compiler _cold_provider(Compiler c, String path, Gathered &prelude) {
   Compiler provider = Compiler.new_shared(c);
   provider.origins = [];
   provider.filename = path;
@@ -493,7 +497,8 @@ static Map _inline_type_dependencies(Compiler c, List ast) {
 }
 
 /** Promotes the selected type families after the owning ordinary full
-    parse. The header and Xi then use the same complete family selection. */
+    parse. The header and Xi then use the same complete family selection.
+*/
 void Compiler.publish_inline_types(Compiler c, List ast) {
   Map additions = _inline_type_dependencies(c, ast);
   if (!additions.len()) return;
@@ -610,7 +615,8 @@ void Compiler.record_conformance_rows(Compiler c, Map rows) {
 /** Returns the `(adopt ...)` rows that the current file's collected entry
     declares, in no particular order. A file that imports a package
     declares none here: the walk that records them for a cold entry does
-    not install a package's surface. */
+    not install a package's surface.
+*/
 List Compiler.declared_adoptions(Compiler c) {
   Var cached = _process_cache()[_canonical_path(c.filename)];
   if (cached is void) return NULL;

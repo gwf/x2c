@@ -89,10 +89,7 @@ static int _enter(void) {
   return 1;
 }
 
-static void _leave(void) {
-  ErrorThreadState state = _thread();
-  if (state.depth > 0) state.depth--;
-}
+static void _leave(void) => _thread().depth--;
 
 /** Returns the current nested error-dispatch depth.
     This is the nesting depth of error dispatch. `Error.count` returns the

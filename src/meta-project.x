@@ -47,14 +47,16 @@ static typedef struct Helper {
 /** Builds the helper that runs the project `meta` functions `inputs`
     reach, or finds it in the cache, and makes it the one their translation
     calls. Inputs that reach none use no helper. A group or helper that
-    does not build is reported at the first call that needs it. */
+    does not build is reported at the first call that needs it.
+*/
 void Frontend.prepare_meta(Frontend f, List inputs) {
   Compiler.use_meta_helper(_build_meta(f, inputs, NULL));
 }
 
 /** Builds one helper exposing the loaded files' public functions.
     Main's native signature stays inside the helper; argc/argv calls accept
-    an Array of argument Strings through the data protocol. */
+    an Array of argument Strings through the data protocol.
+*/
 MetaHelper Frontend.build_loaded(Frontend f, List filenames) {
   List paths = filenames.map(%!(String path) => Path.absolute(path));
   return _build_meta(f, paths, paths);

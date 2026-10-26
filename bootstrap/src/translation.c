@@ -387,11 +387,12 @@ static List _renumbered_bindings(List ast){
               Var spelling;
               spelling = _x2c_gensym_match_value_1;
               {
-                if(!(Map_contains(numbers, identity))) Map_setindex(numbers, identity, int_var((int) Map_len(numbers) + 1));
-                Map_setindex(replaced, Var_new(3683441, (void *) Var_list(node)), List_var(({
-                  Var _x2c_gensym_literal_part_0 = Map_getindex(numbers, identity);  cons(_0, cons(_x2c_gensym_literal_part_0, cons(spelling, NULL)));
+                Var number;
+                if(! Map_try_get(numbers, identity, &(number))){
+                  number = int_var((int) Map_len(numbers) + 1);
+                  Map_setindex(numbers, identity, number);
                 }
-                )));
+                Map_setindex(replaced, Var_new(3683441, (void *) Var_list(node)), List_var(cons(_0, cons(number, cons(spelling, NULL)))));
                 continue;
               }
 
@@ -473,7 +474,7 @@ String Path_stem(Path);
 static void _preflight(Translation * t){
   CliRequest request =(* t).request;
   int shared = ! CliRequest_inspects(request) && ! Map_truth((* t).unit_dirs);
-  Map stems = Map_new();
+  Map stems = shared ? Map_new() : NULL;
   {
     String input;
     List _x2c_gensym_macro_object_3 = request -> inputs;
@@ -484,8 +485,9 @@ static void _preflight(Translation * t){
       {
         CliRequest_require_input(input);
         if(! Path_is_x2c_source(input)) Diagnostics_driver_error(String_join(NULL, cons(String_var(_4), cons(String_var(input), NULL))));
+        if(! shared) continue;
         String stem = Path_stem(input);
-        if(shared && Map_contains(stems, String_var(stem))) _stem_collision(stem, Var_as_string(Map_getindex(stems, String_var(stem))), input, request -> out_dir);
+        if(Map_contains(stems, String_var(stem))) _stem_collision(stem, Var_as_string(Map_getindex(stems, String_var(stem))), input, request -> out_dir);
         Map_setindex(stems, String_var(stem), String_var(input));
       }
 
@@ -697,7 +699,7 @@ static Map _package_names(Translation * t, List roots){
 
         }
         String depfile =({
-          Var _x2c_gensym_literal_part_1 = String_var(_output_dir(&((* t)), input));  Var _x2c_gensym_literal_part_2 = String_var(Path_stem(input));  String_join(NULL, cons(_x2c_gensym_literal_part_1, cons(String_var(_6), cons(_x2c_gensym_literal_part_2, cons(String_var(_17), NULL)))));
+          Var _x2c_gensym_literal_part_0 = String_var(_output_dir(&((* t)), input));  Var _x2c_gensym_literal_part_1 = String_var(Path_stem(input));  String_join(NULL, cons(_x2c_gensym_literal_part_0, cons(String_var(_6), cons(_x2c_gensym_literal_part_1, cons(String_var(_17), NULL)))));
         }
         );
         String volatile text = NULL;

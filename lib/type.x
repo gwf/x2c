@@ -60,30 +60,29 @@ int Symbol.is_builtin_type(Symbol sym) =>
 // aggregates and enums
 
 /** Returns whether `type` is any struct or union shape. */
-int Type.is_aggregate(Type type) => !!type.match(%((!or struct union) *));
+int Type.is_aggregate(Type type) => type ~= %((!or struct union) *);
 
 /** Returns whether `t` is a body-free struct or union tag reference. */
 int Type.is_aggregate_tag(Type t) =>
-  !!t.match(%((!or struct union) (!or (!not (*)) (gensym ? ?) (binding ? ?))));
+  t ~= %((!or struct union) (!or (!not (*)) (gensym ? ?) (binding ? ?)));
 
 static int _is_aggregate_body(Type type) =>
-  !!type.match(%((!or struct union) (*)));
+  type ~= %((!or struct union) (*));
 
-/** Returns whether `type` is a tagged struct or union definition. */
-int Type.is_aggregate_tag_body(Type type) =>
-  !!type.match(%((!or struct union) ? (*)));
+/** Returns whether `t` is a tagged struct or union definition. */
+int Type.is_aggregate_tag_body(Type t) => t ~= %((!or struct union) ? (*));
 
 /** Returns whether `type` is any enum shape. */
-int Type.is_enum(Type type) => !!type.match(%(enum *));
+int Type.is_enum(Type type) => type ~= %(enum *);
 
 /** Returns whether `type` is a body-free enum tag reference. */
 int Type.is_enum_tag(Type type) =>
-  !!type.match(%(enum (!or (!not (*)) (gensym ? ?) (binding ? ?))));
+  type ~= %(enum (!or (!not (*)) (gensym ? ?) (binding ? ?)));
 
-static int _is_enum_body(Type type) => !!type.match(%(enum (*)));
+static int _is_enum_body(Type type) => type ~= %(enum (*));
 
 /** Returns whether `type` is a tagged enum definition. */
-int Type.is_enum_tag_body(Type type) => !!type.match(%(enum ? (*)));
+int Type.is_enum_tag_body(Type type) => type ~= %(enum ? (*));
 
 /** Returns the one-element tag `List` of an enum, struct, or union `Type`.
     For a compiler-generated anonymous tag, that element is a gensym node. A
@@ -109,7 +108,7 @@ List Type.body(Type t) {
 // declarators
 
 /** Returns whether `t` begins with a pointer-like modifier. */
-int Type.is_pointer(Type t) => !!t.match(%((!or (!quote *) & opt-ref ^) *));
+int Type.is_pointer(Type t) => t ~= %((!or (!quote *) & opt-ref ^) *);
 
 /** Returns whether `t` is a reference or an optional reference. */
 int Type.is_reference(Type t) => t.car() == <&> || t.car() == <opt-ref>;
@@ -178,16 +177,14 @@ int Type.function_parts(Type type, List &params, Type &?return_type) {
   if (!type) return 0;
   type = type.canonicalize();
   if (type.is_pointer()) type = type.dereference();
-  match (type)
-    case %((func (*parameters)) ?return_head *return_tail): {
-      List values = parameters;
-      match (values)
-        case %(?(Type only)) if (only.canonicalize() === %(void)):
-          values = NULL;
-      params = values;
-      if (return_type) return_type = $(return_head, @return_tail);
-      return 1;
-    }
+  if (type ~= %((func (*parameters)) ?return_head *return_tail)) {
+    List values = parameters;
+    if (values ~= %(?(Type only)) && only.canonicalize() === %(void))
+      values = NULL;
+    params = values;
+    if (return_type) return_type = $(return_head, @return_tail);
+    return 1;
+  }
   return 0;
 }
 
@@ -206,16 +203,16 @@ int Type.list_rest_index(Type type) {
 // storage classes
 
 /** Returns whether `type` carries the `static` storage class. */
-int Type.is_static(Type type) => !!type.match(%(* static *));
+int Type.is_static(Type type) => type ~= %(* static *);
 
 /** Returns whether `type` carries the `inline` function specifier. */
-int Type.is_inline(Type type) => !!type.match(%(* inline *));
+int Type.is_inline(Type type) => type ~= %(* inline *);
 
 /** Returns whether `type` carries the `extern` storage class. */
-int Type.is_extern(Type type) => !!type.match(%(* extern *));
+int Type.is_extern(Type type) => type ~= %(* extern *);
 
 /** Returns whether `type` carries the `threaded` storage class. */
-int Type.is_threaded(Type type) => !!type.match(%(* threaded *));
+int Type.is_threaded(Type type) => type ~= %(* threaded *);
 
 /** Returns whether `type` begins with the `typedef` storage class. */
 int Type.is_typedef(Type type) => type && type.car() == <typedef>;
@@ -302,11 +299,12 @@ static unsigned _qualifiers(Type &cursor) {
 // classification
 
 /** Returns whether `type` is exactly a pointer or array of `char` or
-    `const char`, without resolving typedefs or removing qualifiers. */
+    `const char`, without resolving typedefs or removing qualifiers.
+*/
 int Type.is_char_pointer_like(Type type) {
   return type &&
-         (type.match(%((!or (dim *) (!quote *)) char)) ||
-          type.match(%((!or (dim *) (!quote *)) const char)));
+         (type ~= %((!or (dim *) (!quote *)) char) ||
+          type ~= %((!or (dim *) (!quote *)) const char));
 }
 
 /** Returns whether `type` is a builtin scalar, struct, union, or enum. */
@@ -325,11 +323,10 @@ int Type.is_typedef_name(Type type) {
   return type && type.len() == 1 && type.car() is <string>;
 }
 
-/** Returns whether `type` is one bare typedef-name `String`.
+/** Returns whether `t` is one bare typedef-name `String`.
     Unlike `is_typedef_name`, this rejects pointer and array wrappers.
 */
-int Type.is_bare_typedef_name(Type type) =>
-  !!type.match(%(?)) && type.car() is <string>;
+int Type.is_bare_typedef_name(Type t) => t ~= %(?) && t.car() is <string>;
 
 /** Returns whether `type` is a fixed numeric scalar or an enum. */
 int Type.is_number(Type type) => !!type.scalar_tag() || type.is_enum();
@@ -554,7 +551,8 @@ Var Type.numeric_literal_value(Type type, String text) {
 }
 
 /** Reads an integer literal of `type` spelled in digits, with any suffix,
-    into `value`. Returns 0 for any other literal. */
+    into `value`. Returns 0 for any other literal.
+*/
 int Type.integer_literal_magnitude(
   Type type, String text, unsigned long long &value) {
   if (!type.is_integral() || !text || text[0] < '0' || text[0] > '9')

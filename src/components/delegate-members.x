@@ -120,7 +120,8 @@ macro Expression $x2c.delegate.call(
 
 $rewrite($x2c.delegate.call, %(expr <delegate> *), <?member>, <*arguments>)
 /** Rebuilds a call that finds no member on its receiver through the one
-    delegate field path that provides the method. */
+    delegate field path that provides the method.
+*/
 meta Code delegate_member(Code code) {
   match (code) case $x2c.delegate.call(?receiver, ?member, *arguments): {
     String name = Code.binding_spelling(member);

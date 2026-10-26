@@ -46,7 +46,8 @@ meta static Code _raise_value(Code value) {
 
 $rewrite($raised)
 /** Converts a raise's code and details, or declines a raise whose parts
-    already have their types. */
+    already have their types.
+*/
 meta Code raise_lowering(Code node) {
   match (node) case $raised(?code, *details): {
     Code symbol = ((Code) code).convert(%("Symbol"));

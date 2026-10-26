@@ -25,7 +25,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _2 = List_var(NULL);
   _3 = Symbol_var(39266);
   _4 = Symbol_var(106239471489226);
-  _5 = int_var(71);
+  _5 = int_var(45);
   _6 = String_new("");
   _7 = String_var(_6);
   _8 = String_new("x2c.hole");

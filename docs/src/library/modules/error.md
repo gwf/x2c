@@ -209,7 +209,7 @@ Returns the current nested error-dispatch depth.
 This is the nesting depth of error dispatch. `Error.count` returns the
 number of accumulated errors.
 
-Source: `lib/error/dispatch.x:101`
+Source: `lib/error/dispatch.x:98`
 
 <a id="Error.handler_depth"></a>
 #### Error.handler_depth
@@ -263,7 +263,7 @@ Marks the current nested error dispatch as already rendered by `Logger`.
 This suppresses only `Error`'s fallback report for a `<log>` policy.
 Calling outside dispatch has no effect.
 
-Source: `lib/error/dispatch.x:207`
+Source: `lib/error/dispatch.x:204`
 
 <a id="Error.policy_adopt"></a>
 #### Error.policy_adopt
@@ -403,7 +403,7 @@ Registrations and records created by that callback are reclaimed toward
 the saved heights before the interrupted unwind continues. State the
 callback itself removed is not reconstructed.
 
-Source: `lib/error/handlers.x:500`
+Source: `lib/error/handlers.x:498`
 
 <a id="Error.restore_landing"></a>
 #### Error.restore_landing
@@ -470,7 +470,7 @@ Handlers newer than `saved_head` are reclaimed. Records at and above
 `stack_height` are also reclaimed; pass the current height on normal frame
 exit to preserve collected errors.
 
-Source: `lib/error/handlers.x:488`
+Source: `lib/error/handlers.x:487`
 
 <a id="Error.unwind_head"></a>
 #### Error.unwind_head

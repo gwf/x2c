@@ -27,7 +27,8 @@ List Ast.defer_captures(List environment, List records) {
 }
 
 /** Returns `stmts` with each `defer` statement and the statements after
-    it replaced by one region; a list without `defer` returns unchanged. */
+    it replaced by one region; a list without `defer` returns unchanged.
+*/
 List Compiler.rewrite_defer_list(Compiler c, List stmts) {
   for (List suffix = stmts; suffix; suffix = suffix.cdr()) {
     List anchored = suffix.car();
@@ -139,8 +140,8 @@ static void _capture(DeferCaptures &d, List binding) {
   d.records.push($(binding, stored_type, field));
 }
 
-// File-static cleanup thunks cannot name block-local or variably-sized types.
-// Keep the existing landing-frame lowering for those uncommon cases.
+/* File-static cleanup thunks cannot name block-local or variably-sized types.
+   Those types use the landing-frame lowering. */
 static int _defer_type_hoistable(Compiler c, Type type) {
   if (!type) return 0;
   Type flat = type.flatten_all();
@@ -154,8 +155,8 @@ static int _defer_type_hoistable(Compiler c, Type type) {
   return 1;
 }
 
-// Replace captured object references with pointer dereferences through the
-// thunk environment. Expression types remain the source expression's type.
+/* Captured object references become pointer dereferences through the thunk
+   environment. Expression types remain the source expression's type. */
 static List _rewrite_captures(
   DeferCaptures &d, List ast, String env_name) {
   if (!ast) return ast;

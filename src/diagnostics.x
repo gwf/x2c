@@ -2,7 +2,7 @@
 
     Each report has one ordered entry. The store borrows its printer, while
     canonical entry values retain their producing-pool lifetimes.
- */
+*/
 
 #pragma once
 #include "common.x"
@@ -173,9 +173,9 @@ static void _publish_limit_notice(Diagnostics diag) {
 
 /** Records and synchronously emits one diagnostic unless already limited.
     Entries retain publication order. NULL `code` becomes `<driver>`. A report
-    equal to a stored entry is ignored. Reaching
-    a limit greater than one publishes a following `<limit>` notice; a limit
-    of one stops after the first error. Later reports are ignored. Supplied
+    equal to a stored entry is ignored. Reaching a limit greater than one
+    publishes a following `<limit>` notice; a limit of one stops after the
+    first error. Later reports are ignored. Supplied
     message, location, and notes are shared; their canonical-value pools must
     outlive the store and its snapshots.
 */
@@ -254,8 +254,7 @@ static void _write_json(
 }
 
 /* An entry without a location writes null for each location key. */
-static void _write_json_location(
-  Compiler c, Buffer out, List location) {
+static void _write_json_location(Compiler c, Buffer out, List location) {
   match (location)
     case %((file ?file) (line ?line) (column ?column) (length ?length)
            (position ?position)): {
@@ -339,7 +338,7 @@ String Compiler.display_path(Compiler compiler, String path) {
   if (!path || path.startswith("<")) return path;
   if (compiler.source_facts) return Path.absolute(path);
   String root = compiler.root_dir;
-  if (root && path && path.startswith(root) &&
+  if (root && path.startswith(root) &&
       path.len() > root.len() && path[root.len()] == '/')
     return path[root.len() + 1:];
   return path;
@@ -349,9 +348,9 @@ String Compiler.display_path(Compiler compiler, String path) {
     If neither exists, returns the current file at line 1, column 1, and byte
     position 0 with zero length. Semantic facts use physical paths; ordinary
     token locations use `Compiler.display_path`.
-    Location cells and a derived path
-    are canonicalized through the active pool hierarchy and retain their actual
-    producing-pool lifetimes; an unchanged filename retains the compiler's
+    Location cells and a derived path are canonicalized through the active
+    pool hierarchy and retain their actual producing-pool lifetimes; an
+    unchanged filename retains the compiler's
     producing-pool lifetime.
 */
 List Compiler.token_location(Compiler compiler, Token token) {
@@ -372,7 +371,8 @@ List Compiler.token_location(Compiler compiler, Token token) {
 
 /** Returns the file that the line markers of a merged text give `token`,
     and sets `line` to the token's line in that file. A token outside the
-    marked regions keeps the compiler's own file and its line. */
+    marked regions keeps the compiler's own file and its line.
+*/
 String Compiler.token_source(Compiler c, Token token, int &?line) {
   if (line) line = token.line;
   List region = _token_region(c, token);
@@ -384,7 +384,8 @@ String Compiler.token_source(Compiler c, Token token, int &?line) {
 
 /** Returns the prefix that the statics of the module file holding the
     current token take, or NULL outside a module unit. A module's first row
-    marks the start of its text, so other units return before any scan. */
+    marks the start of its text, so other units return before any scan.
+*/
 String Compiler.file_prefix(Compiler c) {
   Array markers = c.line_markers;
   Token token = _unit_token(c);
@@ -419,7 +420,8 @@ static int _in_unit(Compiler c, Token token) {
 }
 
 /** Returns `token`'s column in the file that holds it. A module region
-    that begins inside a line of its file continues that line's columns. */
+    that begins inside a line of its file continues that line's columns.
+*/
 int Compiler.token_column(Compiler c, Token token) {
   match (_token_region(c, token))
     case %(? ?(int text_line) ? ? ? ?(String before) ?):
@@ -430,7 +432,8 @@ int Compiler.token_column(Compiler c, Token token) {
 /** Returns the file that a module's line markers give byte `position` of
     the compiler's text, and sets `offset` to that byte's offset in the file.
     Without such a marker, the file is the compiler's own and `offset` is
-    `position`. */
+    `position`.
+*/
 String Compiler.text_source(Compiler c, int position, int &offset) {
   offset = position;
   match (_region(c, position))

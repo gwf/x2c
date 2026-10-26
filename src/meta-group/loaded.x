@@ -63,7 +63,7 @@ void Compiler.prepare_loaded_main(Compiler c, Array nodes) {
         nodes[i] = %(function $spec $declarator
           (block @body (return (int) $($!int{ 0 }))));
         for (int j = c.meta_group.len() - 1; j >= 0; j--)
-          if (List.match(c.meta_group[j], %(function ? "main" ?)))
+          if (c.meta_group[j] ~= %(function ? "main" ?))
             c.meta_group.remove(j);
         Type adapted = %(declare $(entry.cadr())
           (bindings $(entry.caddr()))).type_from_ast();
@@ -118,7 +118,7 @@ static Type _loaded_shape(Compiler c, Type type) =>
 
 static int _loaded_aggregate(Compiler c, Type type, int root) {
   Type shape = _loaded_shape(c, type);
-  if (shape.match(%(struct ?))) return !!c.sym.field_order(shape);
+  if (shape ~= %(struct ?)) return !!c.sym.field_order(shape);
   if (!shape.is_array()) return 0;
   List dimension = shape.car();
   return root || (dimension.cdr() && dimension.cadr().list());
@@ -172,7 +172,7 @@ static void _loaded_snapshot_fields(
     (String name, Type field) = row;
     field = field.qualify(c.sym.normalize_declared_type(type));
     if (!name) {
-      if (_loaded_shape(c, field).match(%(struct ?)))
+      if (_loaded_shape(c, field) ~= %(struct ?))
         _loaded_snapshot_fields(c, field, target, value, budget, fields);
       continue;
     }
@@ -270,7 +270,7 @@ static void _loaded_path(LoadedPath path, Type type, List target, int root) {
     _loaded_path(
       path, element, %(expr $element (index $target $argument)), 0);
   }
-  else if (shape.match(%(struct ?)))
+  else if (shape ~= %(struct ?))
     _loaded_fields(path, type, target);
 }
 
@@ -280,7 +280,7 @@ static void _loaded_fields(LoadedPath path, Type type, List target) {
     (String name, Type field) = row;
     field = field.qualify(c.sym.normalize_declared_type(type));
     if (!name) {
-      if (_loaded_shape(c, field).match(%(struct ?)))
+      if (_loaded_shape(c, field) ~= %(struct ?))
         _loaded_fields(path, field, target);
       continue;
     }

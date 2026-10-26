@@ -528,9 +528,9 @@ Scope.destroy(work);
 ~}
 ```
 
-**Raises:** `<alloc-fail>` when the scope or name copy cannot be allocated,
-or `<size-limit>` when the name is too large. Before `Error`
-initialization these failures terminate the process.
+**Raises:** `<alloc-fail>` when the scope or name copy cannot be
+allocated. Before `Error` initialization this failure terminates the
+process.
 
 Source: `lib/scope/regions.x:304`
 
@@ -657,7 +657,7 @@ printf("reclaimed = %d\n", Scope.stats().live_allocations == before);
 ~}
 ```
 
-Source: `lib/scope/accounting.x:107`
+Source: `lib/scope/accounting.x:106`
 
 <a id="Scope.top"></a>
 #### Scope.top

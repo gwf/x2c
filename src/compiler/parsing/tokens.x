@@ -1,3 +1,5 @@
+/*  tokens.x -- compiler tokenization and cursor navigation */
+
 // tokenizing
 
 /** Scans source and positions the compiler at its first non-trivia token.
@@ -36,7 +38,8 @@ static void _report_malformed_token(Compiler c) {
   if (status != <malformed> && status != <indent>) return;
   for (size_t i = 0; i < c.tokenizer.tokens.len(); i++) {
     Token token = &((struct Token *) c.tokenizer.tokens)[i];
-    if (token.type == <error>) $fail.compiler_token_malformed(c, token, status);
+    if (token.type == <error>)
+      $fail.compiler_token_malformed(c, token, status);
   }
 }
 
@@ -167,7 +170,6 @@ void Compiler.next(Compiler c) {
 }
 
 static void _update_brace_stack(Compiler c, Token consumed) {
-  if (!consumed) return;
   switch (consumed.type) {
     case <"{">: case <"%{">: case <"${">:
       c.braces.push(consumed);
@@ -189,12 +191,14 @@ inline int Compiler.test(Compiler c, Symbol type) {
 
 /** Reports whether the current token is the identifier `word`. A contextual
     keyword such as `with` or `as` is an ordinary identifier elsewhere. This
-    query does not consume tokens. */
+    query does not consume tokens.
+*/
 int Compiler.at_word(Compiler c, String word) =>
   c.peek(0) == <ident> && c.token.text == word;
 
 /** Consumes the identifier `word` when current and reports whether it
-    matched. */
+    matched.
+*/
 int Compiler.take_word(Compiler c, String word) {
   if (!c.at_word(word)) return 0;
   c.next();

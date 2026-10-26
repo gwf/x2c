@@ -1,4 +1,4 @@
-// source files and dependencies
+/*  source-files.x -- source files and dependencies */
 
 /** Reads a source through the request view and retains exact response
     bytes.
@@ -52,7 +52,8 @@ String Path.real(String path) {
 }
 
 /** Returns `Path.absolute(path)`, resolving an existing file through
-    `Path.real`. */
+    `Path.real`.
+*/
 String Path.resolved_absolute(String path) {
   String real = Path.real(path);
   return real ? real : Path.absolute(path);
@@ -107,7 +108,8 @@ void Compiler.merge_translation_dependencies(Compiler c, Map dependencies) {
 }
 
 /** Returns the canonical path of the source `file`. A relative name that
-    is not a file resolves against the home. */
+    is not a file resolves against the home.
+*/
 String Compiler.source_path(Compiler c, String file) {
   if (!file || file.startswith("<")) return file;
   String rooted = %"$(c.root_dir)/$file";

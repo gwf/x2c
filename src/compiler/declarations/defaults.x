@@ -1,4 +1,4 @@
-/* declaration defaults
+/*  defaults.x -- declaration defaults
 
    A declaration producer can offer defaults: functions that bind only when
    no other declaration takes their name, and constructors that forward to

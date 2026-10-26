@@ -14,7 +14,9 @@ with the same effective build configuration and tools. Anything else is
 It exits 0 for valid and 1 for stale, so a shell can branch on it.
 
 `ensure` accepts the two publication gates, reuses a valid record, or runs the
-corresponding Make target with live output and records the resulting tree only
+corresponding Make target with live output. For a prior agent-pr-check proof,
+Markdown and independent external-command changes run only existing consumer
+checks while retaining compiler proof. It records the resulting exact tree only
 after success, and only when nothing but the gate's own regenerated outputs
 changed while it ran. `check` remains available for direct inspection.
 Records are in untracked `debug/`, so they belong to this workspace and
@@ -301,6 +303,48 @@ def differences(old: dict, new: dict) -> list[str] | None:
     return reasons
 
 
+def incremental_steps(old: dict, new: dict) -> list[list[str]] | None:
+    """Retain compiler proof when only documentation or external commands moved.
+
+    These are consumers of the compiler, not inputs to its bootstrap. Keep
+    shared build scripts and the built-in build command outside this boundary.
+    None means full validation; an empty list means the proof is unchanged.
+    """
+    if (old.get("version") != FORMAT or
+            old.get("configuration") != new["configuration"]):
+        return None
+    before, after = old["files"], new["files"]
+    paths = {p for p in before.keys() | after.keys()
+             if before.get(p) != after.get(p)}
+    docs = book = commands = False
+    for path in paths:
+        # A symlink or executable documentation file is not ordinary prose.
+        modes = [files[path].split(":")[:2]
+                 for files in (before, after) if path in files]
+        if any(mode[0] != "100000" for mode in modes):
+            return None
+        if (all(mode[1] == "0" for mode in modes) and
+                (path.endswith(".md") or path in
+                 {"site/public/llms.txt", "site/public/llms-full.txt"})):
+            docs = True
+            book |= path.startswith("docs/")
+        elif (path.startswith("commands/") and
+              not path.startswith("commands/build/") and
+              (len(path.split("/")) >= 3 or path == "commands/manifest.txt")):
+            commands = True
+        else:
+            return None
+    steps = []
+    if docs or commands:
+        steps.append(["make", "doc-check"])
+    if book:
+        steps.append(["make", "-o", "build", "doc-outputs"])
+    if commands:
+        steps.extend([["make", "-o", "build", "commands-check"],
+                      ["bash", "unittest/probes/run-cli-boundary.sh"]])
+    return steps
+
+
 def cmd_check(gate: str | None) -> int:
     records = load()
     current = digest()
@@ -351,16 +395,31 @@ def cmd_ensure(gate: str) -> int:
     if cmd_check(gate) == 0:
         return 0
     before = digest()
-    result = run_gate(gate)
+    previous = load().get(gate, {})
+    steps = incremental_steps(previous, before) if gate == "agent-pr-check" else None
+    if steps is None:
+        result = run_gate(gate)
+    else:
+        print("retaining compiler validation; checking changed consumers", flush=True)
+        result = 0
+        for step in steps:
+            print("running " + shlex.join(step), flush=True)
+            result = subprocess.run(step, cwd=ROOT, check=False).returncode
+            if result:
+                break
     if result:
         return result
     after = digest()
-    moved = differences(sources(before), sources(after))
+    moved = (differences(before, after) if steps is not None else
+             differences(sources(before), sources(after)))
     if moved:
         print(f"{gate}: not recorded - the tree moved during the gate: "
               f"{'; '.join(moved)}")
         return 1
     records = load()
+    if steps is not None:
+        after["reused_from_head"] = previous.get("recorded_at_head")
+        after["completed_steps"] = steps
     records[gate] = after
     save(records)
     print(f"recorded {gate} green for this tree")

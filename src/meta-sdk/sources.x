@@ -149,7 +149,8 @@ static int _literal_string(Var syntax, String &value) {
 
 /** Returns what a `meta` parameter declared `Source` receives for the
     captured syntax `value`: `((text T) (file F) (syntax value))`, where `T`
-    is the text the developer wrote and `F` the file it is in. */
+    is the text the developer wrote and `F` the file it is in.
+*/
 List MetaContext.source_description(Var value) {
   String text = Code.source_text(value);
   List source = active.captures[((ulong) value.u64)];
