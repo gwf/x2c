@@ -162,7 +162,6 @@ static List _foreach_expand(
   return _with_iter(f, converter);
 }
 
-/* The function that makes an Iter of a `type` value. */
 static List _converter(Type type) =>
   type == %("Var") ? MetaContext.function_reference("Var_iter")
                     : type.protocol_member("iter");
@@ -391,7 +390,6 @@ static Shape _shape(String owner, Type type, List location) {
   return s;
 }
 
-/* The fields a layout names. */
 static List _named(List fields) {
   Array named = [];
   foreach (List field in fields)
@@ -504,7 +502,6 @@ static List _comparison(Shape &s) {
   return %();
 }
 
-/* Supplies missing `str` and `repr` methods. */
 static List _writers(Shape &s) {
   String owner = s.owner;
   Array writers = [];
@@ -627,7 +624,6 @@ static List _class_initializer(String owner, Var heap_value) {
   return %();
 }
 
-/* One argument for each of `parameters` after the receiver. */
 static List _init_arguments(List parameters) {
   Array arguments = [];
   foreach (List parameter in parameters.cdr())
@@ -802,8 +798,7 @@ static List _method(Type type, String name) {
   return %();
 }
 
-/* The method `member` of `owner` when the class defines it, as opposed
-   to one it inherits. */
+// Selects a method the class defines itself.
 static List _own_method(String owner, String member) {
   Code found = _method($(owner), member);
   if (found && found.binding_spelling() == %"$(owner)_$(member)")
@@ -867,8 +862,8 @@ static List _binding_record(Var group, Var name, List function) {
     x2c_diagnostic_fail(
       "native Lisp binding appears after its group was installed",
       %("group: $group_name"));
-  foreach (List row in _binding_rows_for(group_name, c.binding_rows))
-    if (row[1] == lisp_name)
+  foreach (List row in c.binding_rows)
+    if (row.car() == group_name && row[1] == lisp_name)
       x2c_diagnostic_fail(
         "duplicate native Lisp binding name",
         %("group: $group_name" "name: $lisp_name"));
@@ -907,13 +902,11 @@ static List _binding_install(List lisp, Var group) {
 }
 
 static List _binding_statement(List lisp, List row) {
-  match (row) case %(?group ?(String name) ?(String function) ?type): {
-    List signature = MetaContext.literal_list(type);
-    return $!{
-      Lisp_bind($lisp, $name, Func_new($(x2c_ident(function)), $signature));
-    };
-  }
-  return %();
+  (String name, String function, List type) = row.cdr();
+  List signature = MetaContext.literal_list(type);
+  return $!{
+    Lisp_bind($lisp, $name, Func_new($(x2c_ident(function)), $signature));
+  };
 }
 
 static List _binding_call(String name, List arguments) =>
