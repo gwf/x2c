@@ -83,7 +83,8 @@ enum { PENDING_AREAS = 5 };
 
 /** Holds generated code awaiting insertion, by `Pending.area` destination:
     unit support declarations, which `Compiler.transform` lowers after the
-    unit, then the lowered statements of each file initialization area. */
+    unit, then the lowered statements of each file initialization area.
+*/
 typedef struct Pending { Array areas[PENDING_AREAS]; } Pending;
 
 /** Holds each destination's length for `Pending.restore`. */
@@ -93,14 +94,16 @@ typedef struct PendingMark { int lengths[PENDING_AREAS]; } PendingMark;
 typedef struct Sym *Sym;
 
 /** Names the slots a rewrite's first lowering watches; see "prepared
-    replacements" in macros.x. */
+    replacements" in macros.x.
+*/
 typedef struct SlotWatch *SlotWatch;
 
 /** One syntax the parser is inside, which `x2c_enclosing` answers: a
     function body with its declaration in `node`, and `lowering` set while
     the transform lowers it, a block item with the token or origin it
     starts at, or an initialized declarator with its declaration base in
-    `base` and its `(bind ...)` node in `node`. */
+    `base` and its `(bind ...)` node in `node`.
+*/
 typedef struct Ancestor {
   Symbol what;
   Token token;
