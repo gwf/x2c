@@ -1170,15 +1170,15 @@ static Split f7_cursors____new(String str, String sep, int(* next)(Split split, 
 }
 
 static int f7_cursors____words_next(Split split, int * cursor, String * out){
-  if(! split || ! String_truth(split -> str)) return 0;  const char * p = split -> str;  int length = String_len(split -> str), index = * cursor;  while(index < length && isspace((unsigned char) p[index])) index ++;  if(index >= length) return 0;  int start = index;  while(index < length && ! isspace((unsigned char) p[index])) index ++;  String field = x2c_string_from_bytes(p + start, index - start);  * out = field;  * cursor = index;  return 1;
+  if(! String_truth(split -> str)) return 0;  const char * p = split -> str;  int length = String_len(split -> str), index = * cursor;  while(index < length && isspace((unsigned char) p[index])) index ++;  if(index >= length) return 0;  int start = index;  while(index < length && ! isspace((unsigned char) p[index])) index ++;  String field = x2c_string_from_bytes(p + start, index - start);  * out = field;  * cursor = index;  return 1;
 }
 
 static int f7_cursors____lines_next(Split split, int * cursor, String * out){
-  if(! split || ! String_truth(split -> str)) return 0;  int start = * cursor, next, end = f7_cursors____line_end(split -> str, start, 0, &(next));  if(end < 0) return 0;  String field = String_new_len(split -> str + start, end - start);  * out = field;  * cursor = next;  return 1;
+  if(! String_truth(split -> str)) return 0;  int start = * cursor, next, end = f7_cursors____line_end(split -> str, start, 0, &(next));  if(end < 0) return 0;  String field = String_new_len(split -> str + start, end - start);  * out = field;  * cursor = next;  return 1;
 }
 
 static int f7_cursors____splits_next(Split split, int * cursor, String * out){
-  if(! split || ! String_truth(split -> str)) return 0;  int start = * cursor, next;  int end = f7_cursors____end(split -> str, split -> sep, start, &(next));  if(end < 0) return 0;  String field = String_new_len(split -> str + start, end - start);  * out = field;  * cursor = next;  return 1;
+  if(! String_truth(split -> str)) return 0;  int start = * cursor, next;  int end = f7_cursors____end(split -> str, split -> sep, start, &(next));  if(end < 0) return 0;  String field = String_new_len(split -> str + start, end - start);  * out = field;  * cursor = next;  return 1;
 }
 
 Split String_words(String str){

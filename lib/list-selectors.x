@@ -12,9 +12,7 @@
 #pragma once
 #include "x2c.x"
 
-/*  list-selectors.x -- compound List selector templates
-
-    One helper builds a selector's car and cdr chain from its spelling, and
+/* One helper builds a selector's car and cdr chain from its spelling, and
     two templates state the List and Var forms by the selector's last step.
 */
 

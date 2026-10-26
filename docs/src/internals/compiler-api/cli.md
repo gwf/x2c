@@ -57,7 +57,7 @@ Source: `src/cli/parsing.x:554`
 
 Returns whether `request` selects a terminating inspection or dump mode.
 
-Source: `src/cli/requests.x:65`
+Source: `src/cli/requests.x:67`
 
 <a id="CliRequest.is_builtin"></a>
 #### CliRequest.is_builtin
@@ -75,7 +75,7 @@ Source: `src/cli/parsing.x:655`
 
 Constructs a request with the command's ordinary CLI defaults.
 
-Source: `src/cli/requests.x:37`
+Source: `src/cli/requests.x:39`
 
 <a id="CliRequest.package_options"></a>
 #### CliRequest.package_options
@@ -102,7 +102,7 @@ when it exists. A root named twice is searched twice and resolves the
 same entries. Explicit directories are borrowed; the result is a fresh
 `List` only when the home directory is appended.
 
-Source: `src/cli/requests.x:73`
+Source: `src/cli/requests.x:75`
 
 <a id="CliRequest.parse"></a>
 #### CliRequest.parse
@@ -148,7 +148,7 @@ Source: `src/cli/responses.x:9`
 Exits with a driver error unless `input` names a regular file.
 A wildcard or directory operand adds a note on what to pass instead.
 
-Source: `src/cli/requests.x:95`
+Source: `src/cli/requests.x:97`
 
 ### `Compiler`
 
@@ -159,7 +159,7 @@ Source: `src/cli/requests.x:95`
 
 Returns the version line `--version` prints, without a newline.
 
-Source: `src/cli/requests.x:62`
+Source: `src/cli/requests.x:64`
 
 ### `TargetKind`
 
@@ -172,7 +172,7 @@ Returns the target kind spelled `spelling`, or 0 when no kind has that
 spelling. `refusal` says why this compiler refuses a known spelling, and
 is NULL otherwise.
 
-Source: `src/cli/requests.x:18`
+Source: `src/cli/requests.x:19`
 
 <a id="TargetKind.of"></a>
 #### TargetKind.of
@@ -182,7 +182,7 @@ Source: `src/cli/requests.x:18`
 Returns the row of target kind `kind`; any other kind reads as an
 executable.
 
-Source: `src/cli/requests.x:28`
+Source: `src/cli/requests.x:30`
 
 ## Public types
 

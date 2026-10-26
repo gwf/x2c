@@ -991,7 +991,7 @@ the transform lowers it, a block item with the token or origin it
 starts at, or an initialized declarator with its declaration base in
 `base` and its `(bind ...)` node in `node`.
 
-Source: `src/compiler/compiler.x:104`
+Source: `src/compiler/compiler.x:107`
 
 <a id="Compiler"></a>
 ### Compiler
@@ -1005,7 +1005,7 @@ the current `Scope`. `Compiler.free_bindings` permits early cleanup;
 otherwise Scope teardown releases them. All their calls must return
 first.
 
-Source: `src/compiler/compiler.x:119`
+Source: `src/compiler/compiler.x:122`
 
 <a id="Diagnostics"></a>
 ### Diagnostics
@@ -1066,7 +1066,7 @@ Holds generated code awaiting insertion, by `Pending.area` destination:
 unit support declarations, which `Compiler.transform` lowers after the
 unit, then the lowered statements of each file initialization area.
 
-Source: `src/compiler/compiler.x:87`
+Source: `src/compiler/compiler.x:88`
 
 <a id="PendingMark"></a>
 ### PendingMark
@@ -1075,7 +1075,7 @@ Source: `src/compiler/compiler.x:87`
 
 Holds each destination's length for `Pending.restore`.
 
-Source: `src/compiler/compiler.x:90`
+Source: `src/compiler/compiler.x:91`
 
 <a id="ScriptUnit"></a>
 ### ScriptUnit
@@ -1097,7 +1097,7 @@ Source: `src/compiler/compiler.x:36`
 Names the slots a rewrite's first lowering watches; see "prepared
 replacements" in macros.x.
 
-Source: `src/compiler/compiler.x:97`
+Source: `src/compiler/compiler.x:99`
 
 <a id="Sym"></a>
 ### Sym
@@ -1106,7 +1106,7 @@ Source: `src/compiler/compiler.x:97`
 
 Names the scope-owned semantic table belonging to one compiler.
 
-Source: `src/compiler/compiler.x:93`
+Source: `src/compiler/compiler.x:94`
 
 <a id="SymScope"></a>
 ### SymScope
@@ -1132,7 +1132,7 @@ copying it does not coordinate completion. The symbol table's undo log
 holds the rows it may restore from `mark`; the staged generated-name
 counters and other snapshots live in its initial Scope.
 
-Source: `src/compiler/compiler.x:299`
+Source: `src/compiler/compiler.x:300`
 
 ## Design notes
 

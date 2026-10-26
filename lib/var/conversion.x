@@ -118,7 +118,8 @@ extern const X2CVarNumericInfo x2c_var_numerics[];
     source, `<conv-range>` when the result does not fit, or `<alloc-fail>`
     while boxing a wide result. A nonnumeric source is rejected before
     decoding, with the decoder's `<bad-types>` detail nested under
-    `<no-convert>`. */
+    `<no-convert>`.
+*/
 meta native Var Var.convert(Var value, Symbol target) {
   if (!value.encoding_valid()) {
     unsigned long bits = value.u64;

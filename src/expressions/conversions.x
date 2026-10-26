@@ -569,7 +569,8 @@ static List _box_var(Compiler c, List expr, Type type) {
 
 /** The call to the converter that `type`, or the first of its typedef names
     that declares one, provides for `target`, applied to `expr`, or NULL
-    when none declares one. */
+    when none declares one.
+*/
 List Compiler.converter_call(Compiler c, List expr, Type type, Type target) {
   if (!type.match(%(?)) || !target.match(%(?))) return NULL;
   List owners = type.is_bare_typedef_name()
@@ -622,7 +623,8 @@ static String _converter_name(Type owner, Type target) {
 }
 
 /** The global builtin boxers and scalar formatters only observe their
-    arguments. A custom converter or a shadowed callee may change state. */
+    arguments. A custom converter or a shadowed callee may change state.
+*/
 int Compiler.is_builtin_converter_call(Compiler c, List expr) {
   match (expr)
     case %(expr ?result (call ?callee (args ?argument))): {

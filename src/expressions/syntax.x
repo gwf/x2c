@@ -510,7 +510,8 @@ static List _parse_slice(Compiler c, List expr, List start) {
 }
 
 /** Parses an explicit List splice argument, or returns NULL without consuming
-    an ordinary argument. Parentheses delimit a complete splice expression. */
+    an ordinary argument. Parentheses delimit a complete splice expression.
+*/
 List Compiler.parse_call_splice(Compiler c) {
   if (!c.test(<@>)) return NULL;
   List value;

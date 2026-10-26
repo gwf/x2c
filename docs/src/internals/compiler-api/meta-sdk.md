@@ -707,7 +707,7 @@ compiler running the call and `site` where the call stands. Each
 evaluation installs its part with `with`, so a captured entry is valid
 only while its expansion is active.
 
-Source: `src/meta-sdk/meta-sdk.x:24`
+Source: `src/meta-sdk/meta-sdk.x:25`
 
 ## Design notes
 

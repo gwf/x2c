@@ -137,9 +137,9 @@ typedef struct f6_policy___ErrorPolicyCapture{
 }
 * f6_policy___ErrorPolicyCapture;
 
-static int f6_policy____fill_contexts(ErrorContextState context, Symbol * pairs, int at, int capacity);
+static int f6_policy____fill_contexts(ErrorContextState context, Symbol * pairs, int at);
 
-static int f6_policy____fill_pairs(Map policy, Symbol * pairs, int at, int capacity);
+static int f6_policy____fill_pairs(Map policy, Symbol * pairs, int at);
 
 static void _record(const X2CErrorSite * site, Symbol code, List detail);
 
@@ -515,22 +515,21 @@ void * Error_policy_capture(void){
     __builtin_unreachable();
   }
   capture -> pairs =(Symbol *)(capture + 1);
-  int written = f6_policy____fill_pairs(state -> policy, capture -> pairs, 0, capacity);
-  capture -> count = f6_policy____fill_contexts(state -> context_top, capture -> pairs, written, capacity);
+  int written = f6_policy____fill_pairs(state -> policy, capture -> pairs, 0);
+  capture -> count = f6_policy____fill_contexts(state -> context_top, capture -> pairs, written);
   return capture;
 }
 
-static int f6_policy____fill_contexts(ErrorContextState context, Symbol * pairs, int at, int capacity){
+static int f6_policy____fill_contexts(ErrorContextState context, Symbol * pairs, int at){
   if(! context) return at;
-  at = f6_policy____fill_contexts(context -> prev, pairs, at, capacity);
-  return f6_policy____fill_pairs(context -> policy, pairs, at, capacity);
+  at = f6_policy____fill_contexts(context -> prev, pairs, at);
+  return f6_policy____fill_pairs(context -> policy, pairs, at);
 }
 
-static int f6_policy____fill_pairs(Map policy, Symbol * pairs, int at, int capacity){
+static int f6_policy____fill_pairs(Map policy, Symbol * pairs, int at){
   unsigned cursor = 0;
   Var key =((void) 0, Void), value =((void) 0, Void);
   while(Map_try_next(policy, &(cursor), &(key), &(value))){
-    if(at + 2 > capacity) break;
     pairs[at ++] = Var_symbol(key);
     pairs[at ++] = Var_symbol(value);
   }

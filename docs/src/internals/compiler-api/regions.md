@@ -71,7 +71,7 @@ Source: `src/regions/analysis.x:126`
 Reports whether the runtime table proves the lifetime effects of the
 native function `name`.
 
-Source: `src/regions/runtime.x:191`
+Source: `src/regions/runtime.x:194`
 
 <a id="Compiler.region_effect"></a>
 #### Compiler.region_effect
@@ -81,7 +81,7 @@ Source: `src/regions/runtime.x:191`
 The runtime table's effect row for the operation `name`, such as
 `(open scope)` or `(exit)`, or void when the table has no row.
 
-Source: `src/regions/runtime.x:195`
+Source: `src/regions/runtime.x:199`
 
 <a id="Compiler.region_result"></a>
 #### Compiler.region_result
@@ -93,7 +93,7 @@ for the active Scope, `<slot>` for the Scope its first argument names,
 `<pool>` for the canonical-value pool, or 0 when nothing is known. What
 the operation does to its arguments is a separate fact.
 
-Source: `src/regions/runtime.x:175`
+Source: `src/regions/runtime.x:176`
 
 <a id="Compiler.region_wrapper"></a>
 #### Compiler.region_wrapper
@@ -103,7 +103,7 @@ Source: `src/regions/runtime.x:175`
 Reports whether the runtime operation `name` returns its argument's
 storage unchanged, as a `Var` box or its unboxing does.
 
-Source: `src/regions/runtime.x:187`
+Source: `src/regions/runtime.x:189`
 
 ## Design notes
 

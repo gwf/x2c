@@ -108,7 +108,7 @@ input `String`s, and `dest` must remain live until iteration ends.
 Constructing the iterator does not raise. Pulling may raise
 `<alloc-fail>` as `Split.try_next` does. A null `dest` returns NULL.
 
-Source: `lib/string/cursors.x:275`
+Source: `lib/string/cursors.x:270`
 
 <a id="Split.try_next"></a>
 #### Split.try_next
@@ -137,7 +137,7 @@ boxing adapter for every other binder.
 **Raises:** `<alloc-fail>` while canonicalizing a nonempty field. `Null`
 arguments produce exhaustion without raising.
 
-Source: `lib/string/cursors.x:249`
+Source: `lib/string/cursors.x:244`
 
 <a id="Split.var"></a>
 #### Split.var
@@ -148,7 +148,7 @@ Boxes a borrowed descriptor as a `<split>` `Var`, so a `Split` can cross
 into compile-time code or a `Var` container. The box does not own the
 descriptor, which stays live only as long as its `Scope`.
 
-Source: `lib/string/cursors.x:27`
+Source: `lib/string/cursors.x:25`
 
 ### `String`
 
@@ -556,13 +556,13 @@ the rule that a trailing ending does not add a final empty line.
 Each yielded field is a canonical `String`. Distinct fields remain resident
 in the active `String` pool; bracket bulk traversal with `Pool.open` /
 `Pool.close` and promote retained values when that residency should be
-temporary. The cursor borrows `str`, whose
-actual owning pool must remain live through traversal.
+temporary. The cursor borrows `str`, whose actual owning pool must remain
+live through traversal.
 
 **Raises:** `<alloc-fail>` when the cursor descriptor cannot be allocated.
 An empty `String` produces an exhausted cursor.
 
-Source: `lib/string/cursors.x:211`
+Source: `lib/string/cursors.x:206`
 
 <a id="String.lower"></a>
 #### String.lower
@@ -832,8 +832,7 @@ the result holds one more element than the number of separators found.
 An empty field is the empty `String`, the null pointer. An empty or null
 `sep` yields a one-element `List` holding `str`, and splitting the empty
 `String` yields the empty `List`. The canonical fields and `List` remain
-live
-until their actual `String` and `List` pools are released.
+live until their actual `String` and `List` pools are released.
 
 ```x2c
 printf("%s\n", "a:b:c".split(":").repr());
@@ -842,7 +841,7 @@ printf("%s\n", "a::b".split(":").repr());
 
 **Raises:** the same causes as `String.split_n`.
 
-Source: `lib/string/cursors.x:117`
+Source: `lib/string/cursors.x:113`
 
 <a id="String.split_lines"></a>
 #### String.split_lines
@@ -855,13 +854,12 @@ nonzero `keep_ends` leaves each line's ending attached to it. A trailing
 line ending does not produce a final empty line, so text that ends in a
 newline yields as many lines as it has endings. A null or empty `str`
 returns `nil`. The canonical fields and `List` remain live until their
-actual
-`String` and `List` pools are released.
+actual `String` and `List` pools are released.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing fields or the
 result.
 
-Source: `lib/string/cursors.x:130`
+Source: `lib/string/cursors.x:125`
 
 <a id="String.split_n"></a>
 #### String.split_n
@@ -871,13 +869,12 @@ Source: `lib/string/cursors.x:130`
 Splits `str` at no more than `max_splits` separators.
 A negative limit splits every occurrence; zero returns `str` as one field.
 A null `str` returns `nil`. A null or empty `sep` returns `str` as one
-field.
-The canonical fields and `List` remain live until their actual `String` and
-`List` pools are released.
+field. The canonical fields and `List` remain live until their actual
+`String` and `List` pools are released.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the result.
 
-Source: `lib/string/cursors.x:87`
+Source: `lib/string/cursors.x:84`
 
 <a id="String.splits"></a>
 #### String.splits
@@ -892,12 +889,12 @@ separator yields `str` once, while an empty `str` yields nothing.
 Each yielded field is a canonical `String`. Distinct fields remain resident
 in the active `String` pool; bracket bulk traversal with `Pool.open` /
 `Pool.close` and promote retained values when that residency should be
-temporary. The cursor borrows `str` and
-`sep`; both actual owning pools must remain live through traversal.
+temporary. The cursor borrows `str` and `sep`; both actual owning pools
+must remain live through traversal.
 
 **Raises:** `<alloc-fail>` when the cursor descriptor cannot be allocated.
 
-Source: `lib/string/cursors.x:225`
+Source: `lib/string/cursors.x:220`
 
 <a id="String.squeeze"></a>
 #### String.squeeze
@@ -1025,13 +1022,13 @@ preserves empty fields around every explicit separator.
 Each yielded field is a canonical `String`. Distinct fields remain resident
 in the active `String` pool; bracket bulk traversal with `Pool.open` /
 `Pool.close` and promote retained values when that residency should be
-temporary. The cursor borrows `str`, whose
-actual owning pool must remain live through traversal.
+temporary. The cursor borrows `str`, whose actual owning pool must remain
+live through traversal.
 
 **Raises:** `<alloc-fail>` when the cursor descriptor cannot be allocated.
 An empty `String` produces an exhausted cursor.
 
-Source: `lib/string/cursors.x:196`
+Source: `lib/string/cursors.x:191`
 
 <a id="String.write_str"></a>
 #### String.write_str
@@ -1056,7 +1053,7 @@ Source: `lib/string/adapters.x:16`
 
 Unboxes a descriptor from a `Var` produced by `Split.var`.
 
-Source: `lib/string/cursors.x:30`
+Source: `lib/string/cursors.x:28`
 
 ## Advanced and interop API
 
@@ -1483,12 +1480,11 @@ Source: `lib/string/storage.x:329`
 
 Describes an immutable, repeatable lazy traversal of a borrowed `String`.
 The descriptor is `Scope`-owned and keeps no position; each caller or
-`Iter`
-keeps its own cursor. The input and separator are not retained, so their
-actual `String` pools must remain live through every traversal. No cleanup
-is needed before the descriptor's `Scope` is released.
+`Iter` keeps its own cursor. The input and separator are not retained, so
+their actual `String` pools must remain live through every traversal. No
+cleanup is needed before the descriptor's `Scope` is released.
 
-Source: `lib/string/cursors.x:19`
+Source: `lib/string/cursors.x:17`
 
 <a id="String"></a>
 ### String

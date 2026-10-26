@@ -11,8 +11,15 @@ void Sym.set(Sym s, List key, List type) {
   if (_retained_member(key)) s.put(s.binding_facts, %(aggfact $key), type);
 }
 
-static int _retained_member(List key) =>
-  !!key.match(%((!or struct union) (!or (binding ? ?) (gensym ? ?)) ? *));
+static int _retained_member(List key) {
+  match (key) {
+    case %(struct (binding ? ?) ? *): return 1;
+    case %(struct (gensym ? ?) ? *): return 1;
+    case %(union (binding ? ?) ? *): return 1;
+    case %(union (gensym ? ?) ? *): return 1;
+    default: return 0;
+  }
+}
 
 /** Defines `key` and returns its stable binding in the active scope. */
 List Sym.define(Sym s, List key, List type) {
