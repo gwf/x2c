@@ -22,6 +22,8 @@ typedef struct List{
 
 List List_cons_in(Pool pool, Var head, List tail);
 
+List List_new(List items);
+
 List cons(Var head, List tail);
 
 List List_cons(Var head, List tail);

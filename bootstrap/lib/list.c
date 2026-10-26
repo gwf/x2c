@@ -319,6 +319,10 @@ List List_cons_in(Pool pool, Var head, List tail){
   return Var_list_payload(Pool_intern_new(pool, List_var(cell), cell));
 }
 
+List List_new(List items){
+  return items;
+}
+
 #include "error.h"
 
 
@@ -326,7 +330,7 @@ List List_cons_in(Pool pool, Var head, List tail){
 
 List cons(Var head, List tail){
   if(Var_is_void(head)){
-    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/list/cells.x",.function = "cons",.line = 15,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/list/cells.x",.function = "cons",.line = 21,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_0, 48270474208, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("List.cons")), NULL))));
     __builtin_unreachable();
   }
