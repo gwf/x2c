@@ -51,8 +51,7 @@ typedef struct ToolRun {
 // command reports
 
 static macro Stmt $report.toolchain_tool_failed(Expr $phase, Expr $status) =>
-  fprintf(
-    stderr, "x2c: %s failed with status %d\n", $phase, $status);
+  fprintf(stderr, "x2c: %s failed with status %d\n", $phase, $status);
 
 // tool selection
 
@@ -156,8 +155,7 @@ void ToolAction.as_program(ToolAction action) {
   action.report = 0;
 }
 
-static ToolAction _action(
-  Toolchain t, Symbol phase, List arguments) =>
+static ToolAction _action(Toolchain t, Symbol phase, List arguments) =>
   ToolAction.new(phase, arguments, t.verbose, t.dry_run);
 
 /** Builds but does not start one C compilation action.
@@ -226,7 +224,8 @@ ToolAction Toolchain.module_action(
   Toolchain t, String output, List inputs, String loader) =>
   _action(
     t,
-    <link>, %($(t.cc) @inputs @(t.ld_args) @(_module_shape(loader)) "-o" $output));
+    <link>,
+    %($(t.cc) @inputs @(t.ld_args) @(_module_shape(loader)) "-o" $output));
 
 static List _module_shape(String loader) {
 #ifdef __APPLE__
