@@ -35,6 +35,7 @@ Linked list with `Var` elements.
 | [`List.list_n`](#List.list_n) | Builds a `List` from exactly `element_count` `Var` arguments. |
 | [`List.map`](#List.map) | Returns a canonical `List` holding `fn` applied front to back. |
 | [`List.map2`](#List.map2) | Maps `fn` over aligned pairs from `a` and `b`. |
+| [`List.new`](#List.new) | Returns the List packed from the supplied values and explicit splices. |
 | [`List.reverse`](#List.reverse) | Returns a new `List` holding the elements of `lst` in reverse order. |
 | [`List.sort`](#List.sort) | Returns a copy of `lst` ordered by `Var.compare`. |
 | [`List.sort_by`](#List.sort_by) | Returns a stable sorted copy using `Array.sort_by`'s callback contract. |
@@ -82,7 +83,7 @@ null pointer.
 `<size-limit>`, or `<invariant>` when a new canonical cell cannot be
 installed.
 
-Source: `lib/list/cells.x:14`
+Source: `lib/list/cells.x:20`
 
 ### `Array`
 
@@ -389,6 +390,17 @@ this has the length, order, ownership, and failures of `List.zip_with`.
 
 Source: `lib/list/transformations.x:102`
 
+<a id="List.new"></a>
+#### List.new
+
+`List List.new(.... items)`
+
+Returns the List packed from the supplied values and explicit splices.
+An ordinary List argument remains one element. With no values, returns
+nil. The result has ordinary List identity and pool lifetime.
+
+Source: `lib/list/cells.x:9`
+
 <a id="List.reverse"></a>
 #### List.reverse
 
@@ -667,7 +679,7 @@ Source: `lib/list/traversal.x:17`
 Compares `a` and `b` lexicographically through `Var.compare`.
 Element comparison causes propagate.
 
-Source: `lib/list/cells.x:61`
+Source: `lib/list/cells.x:67`
 
 <a id="List.cons"></a>
 #### List.cons
@@ -676,7 +688,7 @@ Source: `lib/list/cells.x:61`
 
 Method form of `cons`, with the same identity, lifetime, and failures.
 
-Source: `lib/list/cells.x:20`
+Source: `lib/list/cells.x:26`
 
 <a id="List.cons_in"></a>
 #### List.cons_in
@@ -707,7 +719,7 @@ Two `List`s built from one `long` value hold two boxes and are unequal,
 while `List.compare` reads the values and calls them equal. Use
 `List.compare` where content has to decide.
 
-Source: `lib/list/cells.x:52`
+Source: `lib/list/cells.x:58`
 
 <a id="List.flatten"></a>
 #### List.flatten
@@ -748,7 +760,7 @@ number boxed in a `Scope`, an `Array`, or a `Map` gives two equal-looking
 `List`s two hashes. Mutating an object referenced by the head does not
 change this hash.
 
-Source: `lib/list/cells.x:35`
+Source: `lib/list/cells.x:41`
 
 <a id="List.nth_cdr"></a>
 #### List.nth_cdr
@@ -781,7 +793,7 @@ When another thread's pool promotes an equal cell first, that cell stays
 canonical; this one still survives, but `Pool.is_permanent` answers 0 for
 it. A null `lst` returns itself unchanged.
 
-Source: `lib/list/cells.x:91`
+Source: `lib/list/cells.x:97`
 
 <a id="List.repr"></a>
 #### List.repr
@@ -917,7 +929,7 @@ Source: `lib/list/traversal.x:33`
 
 Returns `cons(head, tail)`, with the same identity and failures.
 
-Source: `lib/list/cells.x:22`
+Source: `lib/list/cells.x:28`
 
 ## Runtime-internal callables
 
@@ -945,7 +957,7 @@ concurrent promotion of an equal value still gets 1, though
 
 **Raises:** `<alloc-fail>` when promotion metadata cannot be allocated.
 
-Source: `lib/list/cells.x:119`
+Source: `lib/list/cells.x:125`
 
 ## Public types
 

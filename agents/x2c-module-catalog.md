@@ -534,17 +534,18 @@ Public functions:
 
 `Compiler.parse_expression`, `Compiler.parse_assignment`,
 `Compiler.parse_conditional`, `Compiler.parse_parenthesized_statement`,
-`Compiler.parse_macro_expression_target`, `Compiler.parse_primary`,
-`Compiler.parse_variable`, `Compiler.resolve_expression`,
-`Compiler.needs_resolution`, `Compiler.var_tag_expression`,
-`Compiler.resolve_map_entry`, `Compiler.reveal_binding`,
-`_x2c_nominal_getindex`, `Compiler.resolve_postfix_member`,
-`Compiler.postfix_completions`, `_x2c_func_call_arguments`,
-`Compiler.func_call_parts`, `Compiler.complete_iter_chain`,
-`Compiler.printf_static_format`, `_x2c_indexed_builtin_helper`,
-`Compiler.check_explicit_converter`, `Compiler.promote_string_literal`,
-`Compiler.convert_expression`, `Compiler.convert_segment_to_string`,
-`Compiler.converter_call`, `Compiler.is_builtin_converter_call`
+`Compiler.parse_macro_expression_target`, `Compiler.parse_call_splice`,
+`Compiler.parse_primary`, `Compiler.parse_variable`,
+`Compiler.resolve_expression`, `Compiler.needs_resolution`,
+`Compiler.var_tag_expression`, `Compiler.resolve_map_entry`,
+`Compiler.reveal_binding`, `_x2c_nominal_getindex`,
+`Compiler.resolve_postfix_member`, `Compiler.postfix_completions`,
+`_x2c_func_call_arguments`, `Compiler.func_call_parts`,
+`Compiler.complete_iter_chain`, `Compiler.printf_static_format`,
+`_x2c_indexed_builtin_helper`, `Compiler.check_explicit_converter`,
+`Compiler.promote_string_literal`, `Compiler.convert_expression`,
+`Compiler.convert_segment_to_string`, `Compiler.converter_call`,
+`Compiler.is_builtin_converter_call`
 
 ### [src/generate/generate.x](../src/generate/generate.x)
 
@@ -795,10 +796,10 @@ Public functions:
 `Sym.is_var_type`, `Sym.is_string_type`, `Sym.is_array_type`,
 `Sym.is_map_type`, `Sym.is_named_value_type`, `Sym.lookup_field`,
 `Sym.declare_field_order`, `Sym.field_order`, `Sym.mark_field`,
-`Sym.marked_fields`, `Sym.aggregate_of`, `Sym.put`, `Sym.drop`,
-`Compiler.begin_semantic_transaction`, `SymTxn.local_macros_changed`,
-`Sym.transacting`, `SymTxn.commit`, `SymTxn.commit_transient`,
-`SymTxn.rollback`
+`Sym.marked_fields`, `Sym.aggregate_of`, `Sym.same_list_rest_convention`,
+`Sym.put`, `Sym.drop`, `Compiler.begin_semantic_transaction`,
+`SymTxn.local_macros_changed`, `Sym.transacting`, `SymTxn.commit`,
+`SymTxn.commit_transient`, `SymTxn.rollback`
 
 ### [src/transform/transform.x](../src/transform/transform.x)
 
@@ -807,7 +808,8 @@ x2c AST transformation pipeline.
 Public functions:
 
 `Compiler.transform`, `Compiler.normalize`, `Compiler.shipped_support`,
-`Compiler.lower_lambda_expr`, `Compiler.call_in_order`
+`Compiler.lower_lambda_expr`, `Compiler.pack_rest_arguments`,
+`Compiler.call_in_order`
 
 ## Runtime modules
 
@@ -1340,11 +1342,12 @@ Public functions:
 `Type.is_enum_tag_body`, `Type.tag`, `Type.body`, `Type.is_pointer`,
 `Type.is_reference`, `Type.is_array`, `Type.is_function`, `Type.is_bitfield`,
 `Type.dereference`, `Type.qualify`, `Type.reference`, `Type.apply`,
-`Type.function_parts`, `Type.is_static`, `Type.is_inline`, `Type.is_extern`,
-`Type.is_threaded`, `Type.is_typedef`, `Type.base_type`, `Type.canonicalize`,
-`Type.declared`, `Type.discards_qualifiers`, `Type.is_char_pointer_like`,
-`Type.is_builtin`, `Type.is_typedef_name`, `Type.is_bare_typedef_name`,
-`Type.is_number`, `Type.is_integral`, `Type.scalar`, `Type.scalar_tag`,
+`Type.function_parts`, `Type.is_list_rest`, `Type.list_rest_index`,
+`Type.is_static`, `Type.is_inline`, `Type.is_extern`, `Type.is_threaded`,
+`Type.is_typedef`, `Type.base_type`, `Type.canonicalize`, `Type.declared`,
+`Type.discards_qualifiers`, `Type.is_char_pointer_like`, `Type.is_builtin`,
+`Type.is_typedef_name`, `Type.is_bare_typedef_name`, `Type.is_number`,
+`Type.is_integral`, `Type.scalar`, `Type.scalar_tag`,
 `Type.var_numeric_extractor`, `Type.var_numeric_update_helper`, `Type.promote`,
 `Type.widest`, `Type.numeric_literal`, `Type.numeric_literal_value`,
 `Type.integer_literal_magnitude`
@@ -1586,8 +1589,9 @@ generic native function binding.
 
 Public functions:
 
-`Func.apply`, `FuncArg.value`, `FuncArg.reference`, `Func.apply_value`,
-`Func.apply_values`, `x2c_func_reference_type`, `x2c_func_value_argument`,
+`Func.apply`, `FuncArg.value`, `FuncArg.splice`, `x2c_func_splice_argument`,
+`FuncArg.reference`, `Func.apply_value`, `Func.apply_values`,
+`x2c_func_reference_type`, `x2c_func_value_argument`,
 `x2c_func_pointer_argument`, `x2c_func_unrepresentable_argument`,
 `x2c_func_record_result`, `x2c_func_reference_argument`,
 `x2c_func_declared_reference_argument`, `Func.new`, `Func.new_rest`,
@@ -1635,13 +1639,13 @@ linked list with `Var` elements.
 
 Public functions:
 
-`List.cons_in`, `cons`, `List.cons`, `Var.cons`, `List.hash`, `List.equal`,
-`List.compare`, `List.promote`, `List.try_own`, `car`, `cdr`, `List.car`,
-`List.cdr`, `List.caar`, `List.cadr`, `List.cddr`, `List.caddr`, `Var.car`,
-`Var.cdr`, `Var.caar`, `Var.cadr`, `Var.cddr`, `Var.caddr`, `List.try_next`,
-`List.iter`, `List.len`, `List.last`, `List.index`, `List.contains`,
-`List.nth_cdr`, `List.getindex`, `List.get`, `List.assoc`, `List.head`,
-`List.tail`, `List.subseq`, `List.getslice`, `List.unpack_n`,
+`List.cons_in`, `List.new`, `cons`, `List.cons`, `Var.cons`, `List.hash`,
+`List.equal`, `List.compare`, `List.promote`, `List.try_own`, `car`, `cdr`,
+`List.car`, `List.cdr`, `List.caar`, `List.cadr`, `List.cddr`, `List.caddr`,
+`Var.car`, `Var.cdr`, `Var.caar`, `Var.cadr`, `Var.cddr`, `Var.caddr`,
+`List.try_next`, `List.iter`, `List.len`, `List.last`, `List.index`,
+`List.contains`, `List.nth_cdr`, `List.getindex`, `List.get`, `List.assoc`,
+`List.head`, `List.tail`, `List.subseq`, `List.getslice`, `List.unpack_n`,
 `List.unpack_vars_n`, `Array.list`, `Array.list_free`, `List.array`,
 `Map.list`, `Iter.list`, `List.append`, `List.concat_n`, `List.list_n`,
 `List.reverse`, `List.map`, `List.filter`, `List.foldl`, `List.find`,

@@ -15,6 +15,7 @@ X2c AST transformation pipeline.
 | [`Compiler.call_in_order`](#Compiler.call_in_order) | Calls the typed callable `callee` with `arguments`, each converted to its parameter and evaluated once, in source order, as a statement expression. |
 | [`Compiler.lower_lambda_expr`](#Compiler.lower_lambda_expr) | Lowers a resolved lambda expression, under any position wrappers and parentheses, through the lambda rule of `src/components/lambda-functions.x`; other expressions pass through. |
 | [`Compiler.normalize`](#Compiler.normalize) | Normalizes one bound and typed node. |
+| [`Compiler.pack_rest_arguments`](#Compiler.pack_rest_arguments) | Preserves the fixed arguments for `params`, which ends in `(....)`, and packs the remaining `args` through ordinary List construction. |
 | [`Compiler.shipped_support`](#Compiler.shipped_support) | Adds to the unit's pending support the file-scope code a rule gives the form `source` of `kind`, bound and lowered with the support. |
 | [`Compiler.transform`](#Compiler.transform) | Lowers a bound and typed top-level AST to the normalized form consumed by emission. |
 
@@ -55,6 +56,18 @@ normalized where it is produced; children enter the same operation, so
 completed units do not require another unit walk.
 
 Source: `src/transform/traversal.x:33`
+
+<a id="Compiler.pack_rest_arguments"></a>
+#### Compiler.pack_rest_arguments
+
+`List Compiler.pack_rest_arguments(Compiler c, List params, List args)`
+
+Preserves the fixed arguments for `params`, which ends in `(....)`, and
+packs the remaining `args` through ordinary List construction. Only an
+explicit splice contributes more than one element. The caller changes
+the callee's final parameter to List before issuing this packed call.
+
+Source: `src/transform/expressions.x:340`
 
 <a id="Compiler.shipped_support"></a>
 #### Compiler.shipped_support

@@ -38,6 +38,7 @@ prefix.
 | [`x2c_func_reference_argument`](func.md#x2c_func_reference_argument) | `lib/func/func.x` | `void *x2c_func_reference_argument( Func fn, const FuncArg *argv, unsigned i, List want)` |
 | [`x2c_func_reference_type`](func.md#x2c_func_reference_type) | `lib/func/func.x` | `List x2c_func_reference_type(Func fn, unsigned argc, unsigned index)` |
 | [`x2c_func_shared`](func.md#x2c_func_shared) | `lib/func/func.x` | `Func x2c_func_shared(FuncAdapter adapter, List signature)` |
+| [`x2c_func_splice_argument`](func.md#x2c_func_splice_argument) | `lib/func/func.x` | `FuncArg x2c_func_splice_argument(Func fn, unsigned index, List items)` |
 | [`x2c_func_unrepresentable_argument`](func.md#x2c_func_unrepresentable_argument) | `lib/func/func.x` | `FuncArg x2c_func_unrepresentable_argument(Func fn, unsigned i, List source)` |
 | [`x2c_func_value_argument`](func.md#x2c_func_value_argument) | `lib/func/func.x` | `Var x2c_func_value_argument( Func fn, const FuncArg *argv, unsigned i, Symbol want)` |
 | `x2c_get_executable` | `src/utils.x` | `String x2c_get_executable(void)` |
@@ -107,4 +108,4 @@ prefix.
 | [`x2c_var_update_ulong_long`](var.md#x2c_var_update_ulong_long) | `lib/var/var.x` | `unsigned long long x2c_var_update_ulong_long(volatile unsigned long long *lhs, Symbol op, Var rhs)` |
 | [`x2c_var_update_volatile`](var.md#x2c_var_update_volatile) | `lib/var/var.x` | `Var x2c_var_update_volatile(volatile Var &?lhs, Symbol op, Var rhs)` |
 
-Total: 95 functions.
+Total: 96 functions.

@@ -17,11 +17,12 @@ Generic native function binding.
 | [`Func.apply_value`](#Func.apply_value) | Applies `fn` to one argument passed by value. |
 | [`Func.apply_values`](#Func.apply_values) | Applies `fn` to two arguments passed by value, `left` then `right`. |
 | [`Func.context`](#Func.context) | Returns borrowed read-only access to a `Func`'s copied context. |
-| [`Func.new`](#Func.new) | Builds a fixed-arity native-function binding in the current `Scope`. |
-| [`Func.new_context`](#Func.new_context) | Builds a fixed-arity binding with copied context in the current `Scope`. |
-| [`Func.new_rest`](#Func.new_rest) | Builds a native-function binding that takes any number of value arguments. |
+| [`Func.new`](#Func.new) | Builds a native-function binding in the current `Scope`. |
+| [`Func.new_context`](#Func.new_context) | Builds a binding with copied context in the current `Scope`. |
+| [`Func.new_rest`](#Func.new_rest) | Builds a native binding with fixed parameters and a List rest tail. |
 | [`Func.var`](#Func.var) | Boxes `function` without copying or retaining the `Func`. |
 | [`FuncArg.reference`](#FuncArg.reference) | Constructs a `Func` argument borrowing a typed lvalue address. |
+| [`FuncArg.splice`](#FuncArg.splice) | Marks an explicit List splice in a rest tail. |
 | [`FuncArg.value`](#FuncArg.value) | Constructs a `Func` argument by copying one `Var` value. |
 | [`Var.func`](#Var.func) | Returns the borrowed native callable carried by `v`. |
 
@@ -39,7 +40,7 @@ argument is accepted, as C converts it to the parameter's pointer type.
 
 **Raises:** `<bad-types>` for any other argument.
 
-Source: `lib/func/func.x:253`
+Source: `lib/func/func.x:286`
 
 #### x2c_func_record_result
 
@@ -48,7 +49,7 @@ Source: `lib/func/func.x:253`
 Boxes a record result as a `<p48>` to a copy of its `size` bytes in the
 active `Scope`.
 
-Source: `lib/func/func.x:275`
+Source: `lib/func/func.x:308`
 
 #### x2c_func_reference_argument
 
@@ -58,7 +59,7 @@ Checks a reference argument whose stored pointee matches `want` exactly.
 
 **Raises:** `<bad-types>` on the same mismatches as the shared checker.
 
-Source: `lib/func/func.x:282`
+Source: `lib/func/func.x:315`
 
 #### x2c_func_value_argument
 
@@ -78,7 +79,7 @@ A detail names the argument's tag, since any tag may arrive here and an
 identity-bearing detail value terminates at the error floor before it
 reaches the handler that would report it.
 
-Source: `lib/func/func.x:216`
+Source: `lib/func/func.x:249`
 
 ### `Func`
 
@@ -90,9 +91,10 @@ Source: `lib/func/func.x:216`
 Invokes a bound native function synchronously and returns its boxed result.
 `argv` is borrowed only for the call. Value bits are passed by value;
 reference arguments alias their caller-owned targets and may be mutated.
-A rest binding first interns one `List` containing the value arguments in
-their original order; rest arguments must not be `void`, since `List`s
-exclude `void` from their element domain.
+A rest binding keeps its fixed arguments and interns one List containing
+trailing values in their original order. Explicit splices add their
+elements.
+Rest arguments must not be `void`, since Lists exclude void elements.
 
 **Raises:** `<bad-arg>` for a null binding or argument storage, `<bad-arity>`
 for the wrong argument count, `<void-op>`, `<bad-types>`, `<bad-enc>`,
@@ -102,7 +104,7 @@ or any cause raised by the adapter or native target. A `void` adapter
 result remains no-value. Other results have the ownership of the value the
 adapter returned.
 
-Source: `lib/func/func.x:107`
+Source: `lib/func/func.x:108`
 
 <a id="Func.apply_value"></a>
 #### Func.apply_value
@@ -114,7 +116,7 @@ Applies `fn` to one argument passed by value.
 reference parameter raises `<bad-types>`. Returns, owns, and raises as
 `Func.apply` does.
 
-Source: `lib/func/func.x:150`
+Source: `lib/func/func.x:183`
 
 <a id="Func.apply_values"></a>
 #### Func.apply_values
@@ -125,7 +127,7 @@ Applies `fn` to two arguments passed by value, `left` then `right`.
 Each travels as `Func.apply_value` carries its argument. Returns, owns,
 and raises as `Func.apply` does.
 
-Source: `lib/func/func.x:159`
+Source: `lib/func/func.x:192`
 
 <a id="Func.context"></a>
 #### Func.context
@@ -138,14 +140,15 @@ NULL when the binding has no context.
 
 **Raises:** `<bad-arg>` for a null binding. It does not return on failure.
 
-Source: `lib/func/func.x:447`
+Source: `lib/func/func.x:482`
 
 <a id="Func.new"></a>
 #### Func.new
 
 `Func Func.new(FuncAdapter adapter, List signature)`
 
-Builds a fixed-arity native-function binding in the current `Scope`.
+Builds a native-function binding in the current `Scope`.
+A final `....` signature parameter selects List-rest calling semantics.
 A direct function expression is compiler-adapted; an expression already
 typed `FuncAdapter` is stored as supplied. The canonical `signature` and
 adapter code are borrowed for the `Func` lifetime. Only the signature's
@@ -155,14 +158,15 @@ parameter count and types.
 **Raises:** `<bad-sig>` for a null adapter or a malformed signature, and
 `<alloc-fail>` when binding storage cannot be allocated.
 
-Source: `lib/func/func.x:355`
+Source: `lib/func/func.x:389`
 
 <a id="Func.new_context"></a>
 #### Func.new_context
 
 `Func Func.new_context( FuncAdapter adapter, List signature, const void *context, size_t context_size)`
 
-Builds a fixed-arity binding with copied context in the current `Scope`.
+Builds a binding with copied context in the current `Scope`.
+A final `....` signature parameter selects List-rest calling semantics.
 The max_align_t-aligned bytes share the `Func` allocation. The byte copy is
 shallow: changing the source bytes does not change the binding, while any
 pointers inside them keep their original targets and lifetimes. A zero
@@ -173,26 +177,24 @@ borrowed for the `Func` lifetime.
 the allocation size overflows, `<bad-sig>` for a null adapter or malformed
 signature, or `<alloc-fail>` when storage cannot be allocated. None return.
 
-Source: `lib/func/func.x:382`
+Source: `lib/func/func.x:415`
 
 <a id="Func.new_rest"></a>
 #### Func.new_rest
 
 `Func Func.new_rest(FuncAdapter adapter, List signature)`
 
-Builds a native-function binding that takes any number of value arguments.
-The signature declares one `List` parameter, and the adapter receives every
-argument in order through that `List`. `Func.apply` enforces no arity and
-conses the arguments itself. Use this for a variadic operation; a fixed one
-belongs in `Func.new`, which is faster and reports a wrong count. The
-canonical `signature` and adapter code are borrowed for the `Func`
-lifetime. The result belongs to the current `Scope`.
+Builds a native binding with fixed parameters and a List rest tail.
+The signature ends in `List` or `....`. The adapter receives fixed
+arguments followed by a List containing the remaining values in order.
+A signature with only one List parameter retains the zero-prefix behavior.
+The canonical signature and adapter code are borrowed for the Func
+lifetime. The result belongs to the current Scope.
 
-**Raises:** `<bad-sig>` for a null adapter, a malformed signature, or a
-signature whose parameters are anything but one `List`, and `<alloc-fail>`
-when binding storage cannot be allocated.
+**Raises:** `<bad-sig>` for a null adapter, malformed signature, or a final
+parameter other than List or `....`, and `<alloc-fail>` for storage.
 
-Source: `lib/func/func.x:369`
+Source: `lib/func/func.x:401`
 
 <a id="Func.var"></a>
 #### Func.var
@@ -203,7 +205,7 @@ Boxes `function` without copying or retaining the `Func`.
 The returned `Var` carries the same pointer and shares its `Scope`
 lifetime.
 
-Source: `lib/func/func.x:466`
+Source: `lib/func/func.x:501`
 
 ### `FuncArg`
 
@@ -218,7 +220,17 @@ an optional reference may use a null address. This constructor performs
 no validation. Compiler-generated adapters use the checked reference
 reader before calling native code.
 
-Source: `lib/func/func.x:142`
+Source: `lib/func/func.x:175`
+
+<a id="FuncArg.splice"></a>
+#### FuncArg.splice
+
+`FuncArg FuncArg.splice(List items)`
+
+Marks an explicit List splice in a rest tail. The List is borrowed until
+the synchronous call completes; ordinary List values remain one element.
+
+Source: `lib/func/func.x:154`
 
 <a id="FuncArg.value"></a>
 #### FuncArg.value
@@ -229,7 +241,7 @@ Constructs a `Func` argument by copying one `Var` value.
 Pointer-bearing payload storage is not copied or retained and must outlive
 the call that consumes the argument.
 
-Source: `lib/func/func.x:134`
+Source: `lib/func/func.x:149`
 
 ### `Var`
 
@@ -242,7 +254,7 @@ Returns the borrowed native callable carried by `v`.
 
 **Raises:** `<bad-types>` when the value is not a `Func`.
 
-Source: `lib/func/func.x:470`
+Source: `lib/func/func.x:505`
 
 ## Runtime-internal callables
 
@@ -254,6 +266,7 @@ for source readers but are not supported as user API.
 | [`x2c_func_declared_reference_argument`](#x2c_func_declared_reference_argument) | Checks a generated adapter's declared pointee against the stored signature and its resolved `want` against the source address before casting. |
 | [`x2c_func_reference_type`](#x2c_func_reference_type) | Returns the borrowed pointee type for reference parameter `index`. |
 | [`x2c_func_shared`](#x2c_func_shared) | Builds the shared handle for a direct function or noncapturing lambda. |
+| [`x2c_func_splice_argument`](#x2c_func_splice_argument) | Prepares an explicit splice only after the binding's fixed parameters. |
 | [`x2c_func_unrepresentable_argument`](#x2c_func_unrepresentable_argument) | Rejects a value argument whose source type has no `Var` representation. |
 | [`Func.move`](#Func.move) | Transfers `function`'s storage to the `Scope` held by `slot`. |
 | [`Func.signature`](#Func.signature) | Returns a native binding's borrowed canonical signature. |
@@ -269,7 +282,7 @@ and its resolved `want` against the source address before casting.
 
 **Raises:** `<bad-types>` on either mismatch.
 
-Source: `lib/func/func.x:289`
+Source: `lib/func/func.x:322`
 
 #### x2c_func_reference_type
 
@@ -283,7 +296,7 @@ read.
 **Raises:** `<bad-arg>` for a null `Func` or an index outside `argc`, or
 `<bad-arity>` when `argc` disagrees with a fixed signature.
 
-Source: `lib/func/func.x:180`
+Source: `lib/func/func.x:213`
 
 #### x2c_func_shared
 
@@ -296,7 +309,16 @@ and `Func.move` never transfers it.
 
 **Raises:** the causes of `Func.new`.
 
-Source: `lib/func/func.x:393`
+Source: `lib/func/func.x:426`
+
+#### x2c_func_splice_argument
+
+`FuncArg x2c_func_splice_argument(Func fn, unsigned index, List items)`
+
+Prepares an explicit splice only after the binding's fixed parameters.
+Raises `<bad-types>` when the splice occupies a fixed parameter.
+
+Source: `lib/func/func.x:160`
 
 #### x2c_func_unrepresentable_argument
 
@@ -306,7 +328,7 @@ Rejects a value argument whose source type has no `Var` representation.
 Generated calls use this branch instead of compiling an impossible
 conversion. Raises: `<bad-types>`.
 
-Source: `lib/func/func.x:268`
+Source: `lib/func/func.x:301`
 
 ### `Func`
 
@@ -322,7 +344,7 @@ operation that takes ownership. A NULL `function` does nothing.
 
 **Raises:** the causes of `Scope.move`, which leave ownership unchanged.
 
-Source: `lib/func/func.x:458`
+Source: `lib/func/func.x:493`
 
 <a id="Func.signature"></a>
 #### Func.signature
@@ -333,7 +355,7 @@ Returns a native binding's borrowed canonical signature.
 The result has the `((func (PARAMETERS...)) RESULT...)` shape supplied to
 the constructor and remains valid for the binding's lifetime.
 
-Source: `lib/func/func.x:437`
+Source: `lib/func/func.x:472`
 
 ## Public types
 
@@ -354,7 +376,7 @@ synchronously with borrowed `fn` and `argv`; the callback code must outlive
 the `Func`. Compiler-generated adapters use the checked value and reference
 readers, call their native target, and box its result. A returned `void`
 remains no-value. Adapters receive no count. Fixed bindings check arity
-first, and rest bindings receive one packed `List` argument.
+first. Rest bindings receive fixed arguments followed by one packed List.
 
 Source: `lib/func/func.x:48`
 
@@ -364,10 +386,10 @@ Source: `lib/func/func.x:48`
 `typedef struct FuncArg { FuncArgData data; List reference_type; } FuncArg`
 
 Argument carrier borrowed for one synchronous `Func.apply` call.
-A null `reference_type` selects the copied `Var` bits; otherwise
-`reference` and the canonical source type are borrowed and must remain
-valid through the call. A reference target may be mutated by the native
-function.
+A null `reference_type` selects copied Var bits; `(splice)` selects a
+List value whose elements enter the rest tail. Otherwise, `reference`
+and its canonical source type are borrowed and must remain valid through
+the call. A reference target may be mutated by the native function.
 
 Source: `lib/func/func.x:35`
 

@@ -59,7 +59,7 @@ its `discard` member may release what it owns before the enclosing scope
 ends. Returns null when no selected argument type has a `discard` member,
 or an ordinary pointer or aggregate result may borrow an argument.
 
-Source: `src/protocol/call-helpers.x:131`
+Source: `src/protocol/call-helpers.x:136`
 
 <a id="Compiler.dump_conformance"></a>
 #### Compiler.dump_conformance
@@ -80,9 +80,10 @@ Source: `src/protocol/lookup.x:163`
 
 Returns `(declarations arguments)` for a helper that forwards its
 parameters of `types`: each declaration names a fresh parameter `a0`,
-`a1`, ..., and each argument reads it.
+`a1`, ..., and each argument reads it. A List rest parameter forwards
+its elements with an explicit splice.
 
-Source: `src/protocol/call-helpers.x:29`
+Source: `src/protocol/call-helpers.x:30`
 
 <a id="Compiler.generate_protocol_adapters"></a>
 #### Compiler.generate_protocol_adapters
@@ -141,7 +142,7 @@ Source: `src/protocol/declarations.x:122`
 
 The `discard_helper` for `participant`'s protocol `member`.
 
-Source: `src/protocol/call-helpers.x:157`
+Source: `src/protocol/call-helpers.x:162`
 
 <a id="Compiler.protocol_member_names"></a>
 #### Compiler.protocol_member_names
@@ -189,7 +190,7 @@ A matching helper is emitted once into the unit's pending support;
 `postfix` selects whether it returns the old or stored value. Returns null
 when the member cannot implement this update shape.
 
-Source: `src/protocol/call-helpers.x:62`
+Source: `src/protocol/call-helpers.x:67`
 
 <a id="Compiler.publish_protocol_node"></a>
 #### Compiler.publish_protocol_node

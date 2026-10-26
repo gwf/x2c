@@ -62,7 +62,7 @@ Builds an adapter with `type`'s public signature that passes its own
 Func as the first argument of `target`, before the declared arguments.
 The target can read per-instance bindings with `Func.context`.
 
-Source: `src/callables/adapters.x:215`
+Source: `src/callables/adapters.x:229`
 
 <a id="Compiler.func_parameters"></a>
 #### Compiler.func_parameters
@@ -74,7 +74,7 @@ function taking the lambda parameter rows `entries`: its Func
 signature as a cached `List`, and each argument as `_func_reads`
 reads it from `argv` of the Func `fn`.
 
-Source: `src/callables/adapters.x:282`
+Source: `src/callables/adapters.x:296`
 
 <a id="Compiler.func_signature"></a>
 #### Compiler.func_signature
@@ -83,7 +83,7 @@ Source: `src/callables/adapters.x:282`
 
 Returns the canonical signature shared by native and meta Func adapters.
 
-Source: `src/callables/adapters.x:386`
+Source: `src/callables/adapters.x:401`
 
 <a id="Compiler.lift_func_expression"></a>
 #### Compiler.lift_func_expression
