@@ -1,3 +1,5 @@
+/*  tokens.x -- compiler tokenization and cursor navigation */
+
 // tokenizing
 
 /** Scans source and positions the compiler at its first non-trivia token.
@@ -167,7 +169,6 @@ void Compiler.next(Compiler c) {
 }
 
 static void _update_brace_stack(Compiler c, Token consumed) {
-  if (!consumed) return;
   switch (consumed.type) {
     case <"{">: case <"%{">: case <"${">:
       c.braces.push(consumed);
@@ -189,12 +190,14 @@ inline int Compiler.test(Compiler c, Symbol type) {
 
 /** Reports whether the current token is the identifier `word`. A contextual
     keyword such as `with` or `as` is an ordinary identifier elsewhere. This
-    query does not consume tokens. */
+    query does not consume tokens.
+*/
 int Compiler.at_word(Compiler c, String word) =>
   c.peek(0) == <ident> && c.token.text == word;
 
 /** Consumes the identifier `word` when current and reports whether it
-    matched. */
+    matched.
+*/
 int Compiler.take_word(Compiler c, String word) {
   if (!c.at_word(word)) return 0;
   c.next();
