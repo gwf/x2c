@@ -63,6 +63,12 @@ static List _dynamic(
 }
 
 module List _truthy(Compiler c, List ast) {
+  match (ast) {
+    case %(if ?condition ?yes) if (_pattern_condition(condition)):
+      return _condition_then(condition, yes);
+    case %(if ?condition ?yes ?no) if (_pattern_condition(condition)):
+      return _condition_else(c, condition, yes, no);
+  }
   Macro if_then = $if_then, if_else = $if_else;
   Macro while_loop = $while_loop, do_loop = $do_loop;
   Macro for_loop = $for_loop;

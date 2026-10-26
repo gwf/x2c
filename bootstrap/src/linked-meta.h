@@ -69,6 +69,8 @@ Code lambda_cells(Code node);
 
 Code match_lowering(Code node);
 
+Code match_condition_lowering(Code node);
+
 Code printf_values(Code code);
 
 Code protocol_conformance(Code node);

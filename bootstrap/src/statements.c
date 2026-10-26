@@ -80,11 +80,9 @@ static List _match_case(Compiler c);
 
 static List _case_pattern(Compiler c, Token start, List * types);
 
-static List _parse_pattern(Compiler c, List * types);
+static List _parse_pattern(Compiler c, List * types, int operand);
 
 static void _require_list_literal(Compiler c, List pattern, Token start);
-
-static List _typed_captures(Compiler c, List types, List * temporaries);
 
 static List _capture_temporaries(Compiler c, List types, Array locals);
 
@@ -739,13 +737,13 @@ static List _match_case(Compiler c){
 }
 
 static List _case_pattern(Compiler c, Token start, List * types){
-  List pattern = _parse_pattern(c, &((* types)));
+  List pattern = _parse_pattern(c, &((* types)), 0);
   if(List_truth((* types))) pattern = Compiler_typed_match_pattern(c, pattern, (* types));
   _require_list_literal(c, pattern, start);
   return pattern;
 }
 
-static List _parse_pattern(Compiler c, List * types){
+static List _parse_pattern(Compiler c, List * types, int operand){
   Array captures = Array_new();
   const Array _x2c_gensym_macro_acquired_1 = captures;
   {
@@ -798,7 +796,7 @@ static List _parse_pattern(Compiler c, List * types){
                   {
                     pattern = Compiler_try_parse_macro_pattern(c);
                     if(! List_truth(pattern)) pattern = Compiler_try_parse_macro_pattern_insertion(c, 0);
-                    if(! List_truth(pattern)) pattern = Compiler_parse_expression(c);
+                    if(! List_truth(pattern)) pattern = operand ? Compiler_parse_pattern_operand(c) : Compiler_parse_expression(c);
                     (* types) = Array_list(captures);
                   }
 
@@ -828,6 +826,15 @@ static List _parse_pattern(Compiler c, List * types){
 
 }
 
+List Compiler_parse_match_condition(Compiler c, List subject, Token origin){
+  if(! _init_guard_) _file_init_();
+  List types = NULL;
+  List pattern = _parse_pattern(c, &(types), 1);
+  if(List_truth(types)) pattern = Compiler_typed_match_pattern(c, pattern, types);
+  _require_list_literal(c, pattern, origin);
+  return Compiler_bind_match_condition(c, subject, pattern, types, origin);
+}
+
 static void _require_list_literal(Compiler c, List pattern, Token start){
   {
     List _x2c_gensym_match_expr = pattern; MatchCaptureBuffer _x2c_gensym_match_capture = { 0 };
@@ -840,9 +847,10 @@ static void _require_list_literal(Compiler c, List pattern, Token start){
 
 }
 
+List Compiler_typed_capture_declarations(Compiler c, List types, List * temporaries);
 SymScope Sym_pop_scope(Sym);
 List Compiler_parse_case_body(Compiler c, List types){
-  if(! _init_guard_) _file_init_();  List temporaries = NULL;  List declarations = List_truth(types) ? _typed_captures(c, types, &(temporaries)) : NULL;  List guard = Compiler_peek(c, 0) == 588 ? _keyword_paren_expr(c, 588) : NULL;  Compiler_expect(c, 117);  List body = Compiler_parse_governed(c, 43159332400040);  if(List_truth(guard)) body =({
+  if(! _init_guard_) _file_init_();  List temporaries = NULL;  List declarations = List_truth(types) ? Compiler_typed_capture_declarations(c, types, &(temporaries)) : NULL;  List guard = Compiler_peek(c, 0) == 588 ? _keyword_paren_expr(c, 588) : NULL;  Compiler_expect(c, 117);  List body = Compiler_parse_governed(c, 43159332400040);  if(List_truth(guard)) body =({
     Var _x2c_gensym_literal_part_0 = List_var(guard);  Var _x2c_gensym_literal_part_1 = List_var(cons(_104, cons(List_var(body), _106)));  cons(_107, cons(_x2c_gensym_literal_part_0, cons(_x2c_gensym_literal_part_1, NULL)));
   }
   );  if(List_truth(types)){
@@ -855,8 +863,8 @@ List Compiler_parse_case_body(Compiler c, List types){
 }
 
 void Sym_push_new_scope(Sym);
-static List _typed_captures(Compiler c, List types, List * temporaries){
-  Array locals = Array_new(); (* temporaries) = _capture_temporaries(c, types, locals);  Sym_push_new_scope(c -> sym);  List declarations = _capture_locals(c, locals);  Array_free(locals);  return declarations;
+List Compiler_typed_capture_declarations(Compiler c, List types, List * temporaries){
+  if(! _init_guard_) _file_init_();  Array locals = Array_new(); (* temporaries) = _capture_temporaries(c, types, locals);  Sym_push_new_scope(c -> sym);  List declarations = _capture_locals(c, locals);  Array_free(locals);  return declarations;
 }
 
 static List _capture_temporaries(Compiler c, List types, Array locals){

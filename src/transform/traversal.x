@@ -75,7 +75,8 @@ static Ast _step_tag(Compiler c, Ast ast, Symbol tag) {
       return _destructures(ast) ? _destructuring(c, ast, tag, <statement>)
                                 : _default_node(c, ast);
     case <dstrasgn>: return _destructuring_value(c, ast);
-    case <match>: return _shipped_statement(c, ast, tag);
+    case <match>: case <match-if>:
+      return _shipped_statement(c, ast, tag);
     case <defer>: next = _defer_node(c, ast); break;
     case <return>: next = _return(c, ast); break;
     case <raise>: return _raise_node(c, ast);

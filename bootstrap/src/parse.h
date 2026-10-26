@@ -126,5 +126,7 @@ List Compiler_bind_match_arm(Compiler c, List pattern, Var body, Token start, in
 
 List Compiler_bind_callable_body(Compiler c, List syntax, Type return_type);
 
+List Compiler_bind_match_condition(Compiler c, List subject, List pattern, List types, Token origin);
+
 
 #endif /* __GUARD_0x9760D7B6__ */

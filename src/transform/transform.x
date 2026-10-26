@@ -76,6 +76,7 @@ module {
   "traversal.x",
   "expressions.x",
   "operators.x",
+  "conditions.x",
   "literals.x",
 }
 

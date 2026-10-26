@@ -90,7 +90,15 @@ static int _conditional_joins(Compiler c, Type type, Type other) =>
 
 module List _binary(Resolve &r, Var operator, List left, List right) {
   List lhs = r.c.resolve_expression(left, r.origin);
-  List rhs = r.c.resolve_expression(right, r.origin);
+  List rhs;
+  if (operator == <&&>) {
+    int scoped = r.c.open_condition_scope(lhs);
+    defer { if (scoped) r.c.sym.pop_scope(); }
+    rhs = r.c.resolve_expression(right, r.origin);
+  }
+  else rhs = r.c.resolve_expression(right, r.origin);
+  if (operator == <~=>)
+    return r.c.bind_match_condition(lhs, rhs, NULL, r.origin);
   return _binary_expression(r.c, operator, lhs, rhs, r.origin);
 }
 
