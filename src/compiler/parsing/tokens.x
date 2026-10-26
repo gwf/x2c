@@ -38,7 +38,8 @@ static void _report_malformed_token(Compiler c) {
   if (status != <malformed> && status != <indent>) return;
   for (size_t i = 0; i < c.tokenizer.tokens.len(); i++) {
     Token token = &((struct Token *) c.tokenizer.tokens)[i];
-    if (token.type == <error>) $fail.compiler_token_malformed(c, token, status);
+    if (token.type == <error>)
+      $fail.compiler_token_malformed(c, token, status);
   }
 }
 
@@ -174,7 +175,7 @@ static void _update_brace_stack(Compiler c, Token consumed) {
       c.braces.push(consumed);
       break;
     case <"}">:
-      if (c.braces.len()) c.braces.take_last();
+      if (c.braces) c.braces.take_last();
       else
         $fail.compiler_brace_unexpected(c, consumed);
       break;
@@ -205,7 +206,7 @@ int Compiler.take_word(Compiler c, String word) {
 }
 
 module void _check_unmatched_braces(Compiler c) {
-  if (!c.braces.len()) return;
+  if (!c.braces) return;
   $fail.compiler_brace_missing(c, c.braces[-1]);
 }
 
