@@ -6,6 +6,7 @@ typedef struct Numbers { Var values[WIDTH]; String last; } Numbers;
 typedef char *A;
 typedef char *B;
 typedef struct Aliases { A values[WIDTH]; B last; } Aliases;
+typedef struct Chars { char text[WIDTH]; Var last; } Chars;
 
 static Texts rows[1] = {[0].values[WIDTH - 1] = "array", "end"};
 
@@ -19,5 +20,11 @@ int main(void) {
   printf("%d %d %d %d\n", text.values[WIDTH - 1].len() + last.len(),
     number + numbers.last.len(),
     rows[0].values[WIDTH - 1].len() + row_last.len(), alias.last == source);
+  Chars flat = {'a', 'b', 7};
+  Chars braced = {{'c', 'd'}, 8};
+  Chars string = {"e", 9};
+  printf("%c%c %d %c%c %d %c %d\n", flat.text[0], flat.text[1],
+    flat.last.int(), braced.text[0], braced.text[1], braced.last.int(),
+    string.text[0], string.last.int());
   return 0;
 }

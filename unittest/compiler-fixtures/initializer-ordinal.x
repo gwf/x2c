@@ -9,6 +9,7 @@ struct Matrix { Score values[ROWS][COLS]; Var tail; };
 struct Record { String name; Var tail; };
 struct Cell { String names[COLS]; Var tail; };
 struct Bits { String names[ROWS]; unsigned int tag:3; };
+struct Text { char text[2]; Var number; };
 
 static int calls;
 static Score next(int n) { calls++; return n; }
@@ -47,5 +48,11 @@ int main(void) {
   String row_first = cells[0].tail, row_second = cells[1].tail;
   printf("%d %d %d %d %d\n", cells[0].names[2].len(), row_first.len(),
     cells[1].names[0].len(), cells[1].names[2].len(), row_second.len());
+  struct Text flat = {'a', 'b', 7};
+  struct Text braced = {{'c', 'd'}, 8};
+  struct Text string = {"e", 9};
+  printf("%c%c %d %c%c %d %c %d\n", flat.text[0], flat.text[1],
+    flat.number.int(), braced.text[0], braced.text[1], braced.number.int(),
+    string.text[0], string.number.int());
   return 0;
 }
