@@ -27,6 +27,8 @@ static List _try_departure(Atom frame);
 
 static List _try_exits(Atom frame, List handle, Atom finalizer);
 
+static List _try_catch_handle(List node);
+
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -1252,5 +1254,18 @@ static List _try_exits(Atom frame, List handle, Atom finalizer){
     Var _x2c_gensym_literal_part_23 = List_var(cons(_10, cons(_1022, cons(_164, cons(List_var(before), NULL)))));  Var _x2c_gensym_literal_part_24 = List_var(cons(_4, cons(List_var(cons(_5, cons(_8, cons(List_var(cons(_385, cons(_980, cons(List_var(cons(_142, cons(List_var(cons(_10, cons(_24, cons(_25, cons(List_var(address), NULL))))), NULL))), NULL)))), NULL)))), NULL)));  cons(_3, cons(_x2c_gensym_literal_part_23, cons(_x2c_gensym_literal_part_24, NULL)));
   }
   )), NULL)));
+}
+
+static List _try_catch_handle(List node){
+  {
+    List _x2c_gensym_match_expr = node; List _x2c_gensym_match_cursor, _x2c_gensym_match_cursor1;
+      _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497936761660594ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && Var_is(_x2c_gensym_match_cursor->car, 806120) && (_x2c_gensym_match_cursor1 = Var_list_payload(_x2c_gensym_match_cursor->car), 1) && _x2c_gensym_match_cursor1 && _x2c_gensym_match_cursor1->car.u64 == 9224712623392659814ULL && (_x2c_gensym_match_cursor1 = _x2c_gensym_match_cursor1->cdr, 1) && _x2c_gensym_match_cursor1 && (_x2c_gensym_match_cursor1 = _x2c_gensym_match_cursor1->cdr, 1) && _x2c_gensym_match_cursor1) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_cursor1->car; if ((_x2c_gensym_match_cursor1 = _x2c_gensym_match_cursor1->cdr, 1) && !_x2c_gensym_match_cursor1 && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {{
+      Var handle;
+      handle = _x2c_gensym_match_value_0;
+      return Var_list_payload(handle);
+    }
+     } }
+  }
+  return NULL;
 }
 
