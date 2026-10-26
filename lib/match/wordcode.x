@@ -112,7 +112,8 @@ typedef struct MachineWord {
     A builder view observes in-place target patches. Growth may invalidate its
     pointers, emissions and additions leave its counts stale, and free
     invalidates it. A frozen-program view stays valid while the program is
-    allocated. */
+    allocated.
+*/
 typedef struct MachineView {
   const MachineWord *code;
   const Var *consts;
@@ -124,7 +125,8 @@ typedef struct MachineView {
     The first ineligibility reason is sticky. Constants and binders are
     shallow values whose pointees must outlive any frozen program. Copying
     a builder shares its mutable arrays; release them through one owner.
-    Status is `<prepared>`, `<ineligible>`, or `<malformed>`. */
+    Status is `<prepared>`, `<ineligible>`, or `<malformed>`.
+*/
 typedef struct MachineBuilder {
   MachineWord *code;
   Var *consts;
@@ -145,7 +147,8 @@ typedef struct MachineSpan {
 /** Stores either one captured value or one borrowed List span.
 
     The value's pointee and the span's List cells are borrowed.
-    Kind is `<invalid>`, `<value>`, or `<span>`. */
+    Kind is `<invalid>`, `<value>`, or `<span>`.
+*/
 typedef struct MachineSlot {
   Symbol kind;
   Var value;
@@ -166,7 +169,8 @@ typedef struct MachineMark {
 /** Saves a Match call's return pc, undo position, and caller value.
 
     MW_CALL jumps within the single view that `begin` bound. No Match opcode
-    assigns `program`, and a Match frame has no caller program to restore. */
+    assigns `program`, and a Match frame has no caller program to restore.
+*/
 typedef struct MatchFrame {
   int return_pc, caller_entry_undo;
   Var caller_value;
@@ -175,7 +179,8 @@ typedef struct MatchFrame {
 /** Stores the cursors, integers, and journal mark for one frame depth.
 
     One register bank per depth means the frame pointer names the active bank
-    and teardown is one clear. */
+    and teardown is one clear.
+*/
 typedef struct MachineRegs {
   List cursors[MACHINE_CURSOR_REGS];
   int distances[MACHINE_CURSOR_REGS], ints[MACHINE_INT_REGS];
@@ -185,7 +190,8 @@ typedef struct MachineRegs {
 /** Collects optional, caller-owned execution counters.
 
     Initialize the structure before use and keep it alive while a machine
-    retains its pointer. Updates are not synchronized. */
+    retains its pointer. Updates are not synchronized.
+*/
 typedef struct MachineStats {
   long scan_cells, retries, calls, returns;
   long range_comparisons, final_range_comparisons;
@@ -206,7 +212,8 @@ typedef struct MachineStats {
     initializes only its binder slots. Count fields guard every array, so
     unused capacity is never touched or cleared. The program, input Lists,
     and optional stats sink must outlive execution and span materialization.
-    `dispose` releases the reusable materialization scratch allocation. */
+    `dispose` releases the reusable materialization scratch allocation.
+*/
 typedef struct MatchMachine {
   MachineView program;
   int pc, Symbol status, int running;
@@ -232,7 +239,8 @@ typedef struct MatchMachine {
 
     VALUE slots use language equality and require an exact-length List. SPAN
     slots compare exactly `length` cells and require the stored end boundary.
-    The inputs and span remain borrowed. */
+    The inputs and span remain borrowed.
+*/
 inline int MachineSlot.prefix_equal(
   MachineSlot *slot, List input, int length, MachineStats *stats) {
   if (stats) stats.range_comparisons++;
@@ -257,7 +265,8 @@ inline int MachineSlot.prefix_equal(
     on each element, as `prefix_equal` does. SPAN slots also require the exact
     range boundary. Interned consing can make a materialized interior prefix
     identical to an existing suffix, and a successful instruction then
-    memoizes that suffix as VALUE. */
+    memoizes that suffix as VALUE.
+*/
 inline int MachineSlot.final_equal(
   MachineSlot *slot, List input, MachineStats *stats) {
   if (slot.kind == <value>) {
@@ -292,7 +301,8 @@ inline int MachineSlot.final_equal(
 /** Append one range-checked instruction and return its site. The opcode need
    only fit in a byte; a decoder reports unsupported words. `a` and `target`
    may be -1, the patch placeholder. A failed builder keeps its first reason
-   and all later emissions return -1. Allocation can raise. */
+   and all later emissions return -1. Allocation can raise.
+*/
 int MachineBuilder.emit(
   MachineBuilder &b, int op, int a, int operand_b, int c, int d, int target) {
   if (b.status != <prepared> || _grow_code(b) < 0) return -1;
@@ -319,7 +329,8 @@ static int _grow_code(MachineBuilder &b) {
 }
 
 /** Intern a constant by raw Var bits and return its byte-sized index. The
-   stored value is shallow; capacity failure makes the builder ineligible. */
+   stored value is shallow; capacity failure makes the builder ineligible.
+*/
 int MachineBuilder.constant(MachineBuilder &b, Var value) {
   if (b.status != <prepared>) return -1;
   for (int i = 0; i < b.const_count; i++)
@@ -358,7 +369,8 @@ int MachineBuilder.binder(MachineBuilder &b, Atom binder) {
    after full code fails the builder with `code-capacity` instead.
 
    Raises: `<bad-arg>` when target is otherwise outside the code domain. A
-   failure leaves the patch site unchanged. */
+   failure leaves the patch site unchanged.
+*/
 void MachineBuilder.set_target(MachineBuilder &b, int site, int target) {
   if (target == b.length && b.length == MACHINE_CODE_MAX)
     _fail(b, "code-capacity");
@@ -370,7 +382,8 @@ void MachineBuilder.set_target(MachineBuilder &b, int site, int target) {
 
 /** Apply one validated target to the listed patch sites in order. Negative
    sites are ignored; each nonnegative site must name emitted code. An
-   invalid target raises even when `count` is zero. */
+   invalid target raises even when `count` is zero.
+*/
 void MachineBuilder.patch(
   MachineBuilder &b, int *sites, int count, int target) {
   if (target < 0 || target >= MACHINE_CODE_MAX) b.set_target(-1, target);
@@ -390,7 +403,8 @@ static int _fail(MachineBuilder &b, const char *reason) {
 /** Copy a prepared builder with a selected root into one immutable Scope
    allocation. Return null for an ineligible or rootless builder. The producer
    must make root name emitted code; freeze only checks that it is
-   nonnegative. */
+   nonnegative.
+*/
 MachineProgram MachineBuilder.freeze(MachineBuilder &b) {
   if (b.status != <prepared> || b.root < 0) return NULL;
   size_t bytes = _program_bytes(b.length, b.const_count, b.binder_count);
@@ -445,14 +459,16 @@ void MachineBuilder.init(MachineBuilder &b) {
 }
 
 /** Free the mutable arrays. Any builder view becomes invalid; constant and
-   binder pointees are not freed. */
+   binder pointees are not freed.
+*/
 void MachineBuilder.drop(MachineBuilder &b) {
   xfree(b.code);
   xfree(b.consts);
 }
 
 /** Release the owned mutable arrays, invalidating this builder and its copies.
-   Assign a new builder before reusing its storage. */
+   Assign a new builder before reusing its storage.
+*/
 void MachineBuilder.free(MachineBuilder &b) => b.drop();
 
 /** Cleanup's value receiver releases the same shallow backing arrays. */
