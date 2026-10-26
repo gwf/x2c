@@ -42,7 +42,7 @@ int Type_is_aggregate(Type type);
 
 int Type_is_aggregate_tag(Type t);
 
-int Type_is_aggregate_tag_body(Type type);
+int Type_is_aggregate_tag_body(Type t);
 
 int Type_is_enum(Type type);
 
@@ -102,7 +102,7 @@ int Type_is_builtin(Type type);
 
 int Type_is_typedef_name(Type type);
 
-int Type_is_bare_typedef_name(Type type);
+int Type_is_bare_typedef_name(Type t);
 
 int Type_is_number(Type type);
 

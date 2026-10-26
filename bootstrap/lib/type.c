@@ -391,10 +391,10 @@ static int _is_aggregate_body(Type type){
   );
 }
 
-int Type_is_aggregate_tag_body(Type type){
+int Type_is_aggregate_tag_body(Type t){
   if(! _init_guard_) _file_init_();  return({
     int _x2c_gensym_condition_3 = 0; {
-      List _x2c_gensym_match_expr = Type_list(type); MatchCaptureBuffer _x2c_gensym_match_capture = { 0 };   static MatchCaptureSite _x2c_gensym_match_site_0; if (x2c_match_site_try_capture(&_x2c_gensym_match_site_0, _x2c_gensym_match_expr, List_var(_33), &_x2c_gensym_match_capture)) {{
+      List _x2c_gensym_match_expr = Type_list(t); MatchCaptureBuffer _x2c_gensym_match_capture = { 0 };   static MatchCaptureSite _x2c_gensym_match_site_0; if (x2c_match_site_try_capture(&_x2c_gensym_match_site_0, _x2c_gensym_match_expr, List_var(_33), &_x2c_gensym_match_capture)) {{
         _x2c_gensym_condition_3 = 1;
       }
        }
@@ -712,11 +712,11 @@ int Type_is_typedef_name(Type type){
   if(! _init_guard_) _file_init_();  type = Type_base_type(type);  return List_truth(Type_list(type)) && List_len(Type_list(type)) == 1 && Var_is_row(List_car(Type_list(type)), 11, 7, 1);
 }
 
-int Type_is_bare_typedef_name(Type type){
+int Type_is_bare_typedef_name(Type t){
   if(! _init_guard_) _file_init_();  return({
     int _x2c_gensym_condition_15 = 0; {
-      List _x2c_gensym_match_expr = Type_list(type); List _x2c_gensym_match_cursor;   _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {{
-        if(Var_is_row(List_car(Type_list(type)), 11, 7, 1)) _x2c_gensym_condition_15 = 1;
+      List _x2c_gensym_match_expr = Type_list(t); List _x2c_gensym_match_cursor;   _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {{
+        if(Var_is_row(List_car(Type_list(t)), 11, 7, 1)) _x2c_gensym_condition_15 = 1;
       }
        }
     }

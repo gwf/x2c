@@ -14642,7 +14642,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_23(void
   _11859 = cons(_223, _11858);
   _11860 = String_new("lib/type.x");
   _11861 = String_var(_11860);
-  _11862 = String_new("3c45ee0e");
+  _11862 = String_new("afae906a");
   _11863 = String_var(_11862);
   _11864 = cons(_9354, NULL);
   _11865 = cons(_10031, _11864);
