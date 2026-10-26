@@ -1,9 +1,10 @@
-// resolution
+/*  resolution.x -- protocol conformance resolution
 
-/* Native and ordinary resolution are the only conformance-row producers. A
-   row carries base, participant, converters, type-variable maps, and member
-   rows of `(name status source expected default-kind template)`. Consumers
-   dispatch on `status`; a non-list cache value records failed resolution. */
+    Native and ordinary resolution are the only conformance-row producers. A
+    row carries base, participant, converters, type-variable maps, and member
+    rows of `(name status source expected default-kind template)`. Consumers
+    dispatch on `status`; a non-list cache value records failed resolution.
+*/
 static typedef struct ProtocolRequirements {
   String binder;
   List associations, templates;
