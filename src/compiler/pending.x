@@ -1,20 +1,23 @@
 // pending support declarations and file initialization
 
 /** Appends a declaration the kernel generated to the unit's pending
-    support. It is implementation, so its definitions are written. */
+    support. It is implementation, so its definitions are written.
+*/
 void Compiler.add_early(Compiler c, List decl) {
   c.add_support(Ast.written_definitions(decl));
 }
 
 /** Appends the declaration `decl` to the unit's pending support as it is:
-    a definition offered to every function rule, or a written one. */
+    a definition offered to every function rule, or a written one.
+*/
 void Compiler.add_support(Compiler c, List decl) {
   c.pending.area(<support>).push(decl);
 }
 
 /** Appends the lowered statement `stmt` to the file initialization area
     `phase`. Bound code that still needs lowering, such as a `String`
-    literal, would reach C as is. */
+    literal, would reach C as is.
+*/
 void Compiler.add_init(Compiler c, Symbol phase, List stmt) {
   c.pending.area(phase).push(stmt);
 }
