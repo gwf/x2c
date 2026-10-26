@@ -5,7 +5,8 @@
     `src/components/lambda-functions.x`;
     other expressions pass through. A noncapturing lambda typed `Func`,
     which only a meta body leaves unlifted, lifts to a `Func` of its native
-    signature. */
+    signature.
+*/
 List Compiler.lower_lambda_expr(Compiler c, List expression) {
   if (expression.car() == <at> || expression.car() == <src>)
     return Ast.rewrite_children(
@@ -347,7 +348,8 @@ module List _typed_call(
 /** Preserves the fixed arguments for `params`, which ends in `(....)`, and
     packs the remaining `args` through ordinary List construction. Only an
     explicit splice contributes more than one element. The caller changes
-    the callee's final parameter to List before issuing this packed call. */
+    the callee's final parameter to List before issuing this packed call.
+*/
 List Compiler.pack_rest_arguments(Compiler c, List params, List args) {
   match (args) case %((expr (void) ())): args = NULL;
   int fixed = params.len() - 1;
