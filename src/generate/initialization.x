@@ -49,7 +49,8 @@ static void _prepare(Init &i, List source) {
     initializer unless its guard is set.
 */
 List Init.enter(Init &i, List function, int guarded) {
-  if (function ~= %(function ? (bind (binding ? ?(String name)) ?) (block *body))) {
+  if (function ~=
+      %(function ? (bind (binding ? ?(String name)) ?) (block *body))) {
     if (name == "x2c_initialize_protocols")
       return _protocol_initializer(i.c, function, body);
     if (i.initializer && name == i.initializer)
@@ -63,10 +64,11 @@ List Init.enter(Init &i, List function, int guarded) {
    functions are never guarded, and a cache-only file guards only the
    entries that reach a cache. */
 static int _patches(Init &i, List item) {
-  if (item ~= %(function (!set ?type (*)) (bind (binding ? ?(String name)) ?)
-           (block *)))
-    return !type.type().is_static() && !_protocol_bootstrap(name) &&
-      (i.reachable == NULL || name in i.reachable);
+  match (item)
+    case %(function (!set ?type (*)) (bind (binding ? ?(String name)) ?)
+           (block *)):
+      return !type.type().is_static() && !_protocol_bootstrap(name) &&
+        (i.reachable == NULL || name in i.reachable);
   return 0;
 }
 
@@ -213,8 +215,8 @@ static Map _cache_reachable(List source) {
   Map callers = {}, reachable = {}, Array queue = [];
   foreach (List node in source)
     if (node ~= %(!set ?definition
-             (function ? (bind (binding ? ?spelling) ?) ?)))
-      if (_record_calls(definition, spelling, callers)) queue.push(spelling);
+                   (function ? (bind (binding ? ?spelling) ?) ?)) &&
+        _record_calls(definition, spelling, callers)) queue.push(spelling);
   for (int i = 0; i < queue.len(); i++) {
     Var key = queue[i];
     if (key in reachable) continue;
