@@ -87,8 +87,7 @@ static Block _prepare_export(Block array, Context source) {
   return NULL;
 }
 
-static ArrayString _prepare_string_export(
-  ArrayString array, Context source) {
+static ArrayString _prepare_string_export(ArrayString array, Context source) {
   ArrayString staged = ArrayString.new(), result = NULL;
   defer if (result == NULL) staged.free();
   ((Block) staged).reserve(array.cap);
