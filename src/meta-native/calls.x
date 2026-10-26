@@ -9,7 +9,8 @@
    compile time, and its value becomes syntax at the call. */
 
 /** Executes an explicit meta call and inserts its result at a code
-    boundary. */
+    boundary.
+*/
 List Compiler.evaluate_meta_expression(
   Compiler c, List expression, Token site) =>
   _meta_result(
@@ -17,7 +18,8 @@ List Compiler.evaluate_meta_expression(
 
 /** Executes an explicit meta call written as a whole statement at
     `context`. A code List result binds there, so the call may return a
-    statement as well as an expression. */
+    statement as well as an expression.
+*/
 List Compiler.evaluate_meta_statement(
   Compiler c, List expression, Symbol context, Token site) {
   Var value = c.evaluate_meta_value(expression, site, 0);
@@ -67,14 +69,16 @@ static int _code_result(Compiler c, Var value) {
 /** Runs the explicit meta call `expression` at `site`. The project meta
     build's own parse leaves a project function's call for the translation:
     an expression takes a placeholder, and a template `slot`, which has
-    none, is reported. */
+    none, is reported.
+*/
 Var Compiler.run_meta_call(
   Compiler c, List expression, Token site, int slot) =>
   _run_meta(c, expression, NULL, NULL, site, slot);
 
 /** Applies the meta function spelled `name` to the evaluated `arguments`
     at `site`, outside any expansion. A call the project meta build leaves
-    for the translation returns void. */
+    for the translation returns void.
+*/
 Var Compiler.apply_meta_function(
   Compiler c, String name, List arguments, Token site) {
   MetaContext *context = MetaContext.current();
@@ -146,7 +150,8 @@ static Var _meta_named_value(
 /** Calls `function`, the binding of `name`, with `arguments`; what it
     allocates belongs to the unit's values Scope. A declared native
     iterator operation called without its destination gets a new Iter
-    there. */
+    there.
+*/
 Var Compiler.apply_meta_binding(
   Compiler c, String name, Var function, List arguments) {
   Scope.push(&c.bindings().values);
