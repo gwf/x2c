@@ -89,7 +89,8 @@ List Compiler.evaluate_macro_rows(Compiler c, Var value) {
 
 /** Evaluates the explicit meta call `expression` at `site` with the active
     expansion's captures visible to the SDK. A nonzero `slot` marks a
-    template slot, which reports a call the project meta build leaves. */
+    template slot, which reports a call the project meta build leaves.
+*/
 Var Compiler.evaluate_meta_value(
   Compiler c, List expression, Token site, int slot) {
   List active = c.macro_stack ? c.macro_stack.car() : NULL;
@@ -162,7 +163,8 @@ Var Compiler.evaluate_declaration_recipe(
 
 /** Returns the syntax that invokes the template `stored`, a macro name
     spelled as a String or a local definition, with `values`: what a template
-    call in a staged `meta` body evaluates to. */
+    call in a staged `meta` body evaluates to.
+*/
 List x2c_template_call(Var stored, List values) =>
   _sdk_template_call(
     stored is <string> ? Atom.intern(stored.str()) : stored, values);
@@ -248,7 +250,8 @@ module Var _helper_result(Compiler c, Var value) {
 /** Rebuilds an expression from a pending Macro value application, preserving
     its established root `type`, child stage, and source wrappers. Binding,
     capture collection, hygiene, and effects do not run, and a statement
-    expression's template-origin wrappers are omitted. */
+    expression's template-origin wrappers are omitted.
+*/
 List Compiler.rebuild_expression(Compiler c, Type type, List application) {
   List rebuilt = _rebuild(c, application, NULL);
   return %(expr $type @(rebuilt.cddr()));
@@ -256,13 +259,15 @@ List Compiler.rebuild_expression(Compiler c, Type type, List application) {
 
 /** Rebuilds a statement template as a canonical unbraced `seq`. Bound
     children keep their identities and origins; template-origin wrappers
-    are omitted because this path does not open an invocation. */
+    are omitted because this path does not open an invocation.
+*/
 List Compiler.rebuild_statement(Compiler c, List application) =>
   _rebuild(c, application, NULL);
 
 /** Constructs a fresh function from a Unit template after lowering. The
     caller supplies its bound name and lowered children; binding does not
-    run. */
+    run.
+*/
 List Compiler.rebuild_unit_function(Compiler c, List application) {
   List function = _rebuild(c, application, NULL).cadr();
   match (function) case %(api-source ? ? ?inner): return inner;
@@ -270,7 +275,8 @@ List Compiler.rebuild_unit_function(Compiler c, List application) {
 }
 
 /** Rebuilds a bound function through a Function decorator without binding it
-    again. The template keeps the target's return type and declarator. */
+    again. The template keeps the target's return type and declarator.
+*/
 List Compiler.rebuild_function(Compiler c, List target, List application) =>
   _rebuild(c, application, target).cadr();
 
@@ -333,7 +339,8 @@ static List _row_fields(List row) {
 }
 
 /** Binds quoted `syntax` with its `fresh` rows at `position`, as the
-    expansion of its quotation would. */
+    expansion of its quotation would.
+*/
 List Compiler.land_quotation(
   Compiler c, List fresh, Var syntax, Symbol position, Type return_type) {
   Token site = c.macro_invocation_site(<m-invoke>);
@@ -474,7 +481,8 @@ List Compiler.lift_meta_expression(
 }
 
 /** Binds a compile-time code `value` returned to a statement at
-    `context`. */
+    `context`.
+*/
 List Compiler.bind_meta_statement(
   Compiler c, List value, Symbol context) {
   value = _helper_result(c, value);
