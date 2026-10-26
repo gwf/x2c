@@ -316,7 +316,8 @@ module String _definition_note(List definition) {
 }
 
 /** Reports that the meta call `source` failed with `error` at
-    `invocation`. */
+    `invocation`.
+*/
 void Compiler.report_meta_failure(
   Compiler c, Token invocation, List error, String source) {
   $fail.macros_meta_failed(c, invocation, source, error);
