@@ -15,7 +15,8 @@
 #include "compiler-meta.x"
 
 /** Binds `function` into the session `lisp` as `name` through a fresh
-    `Func` carrying the function's signature. */
+    `Func` carrying the function's signature.
+*/
 macro Stmt $lisp.bind(Expr $lisp, Expr $name, Expr $function) {
   Func callable = Func.new(
     $function, $_x2c_literal_list($Code.native_signature($function)));
@@ -23,7 +24,8 @@ macro Stmt $lisp.bind(Expr $lisp, Expr $name, Expr $function) {
 }
 
 /** Records the decorated function as `name` in the binding group `group`,
-    which `$lisp.install` binds into a session. */
+    which `$lisp.install` binds into a session.
+*/
 macro Decorator $lisp.binding(
   Function $function, Name $group, Literal $name
 ) {
