@@ -2,17 +2,13 @@
 
 // typedef resolution
 
-/* Longest typedef chain any legitimate source may hand to the resolver:
-   a mutually recursive pair (typedef A B; typedef B A;) otherwise walks
-   forever.  A bound rather than a visited set, because is_var_type
-   resolves on nearly every converted expression and that hot path
-   must not allocate.
+/* The resolver uses a hop budget to terminate recursive typedefs, including
+   a mutually recursive pair (typedef A B; typedef B A;). is_var_type resolves
+   on nearly every converted expression, so this hot path must not allocate.
 
-   One user typedef costs two resolver hops, the name node ("B") and then
-   the (typedef "B") node it maps to, so the raw recursion budget is
-   twice the user-visible chain bound.  The budget counts every hop
-   rather than only name hops so that the walk still terminates if a
-   typedef node is ever mapped straight onto another typedef node. */
+   Each user typedef costs two hops: its name node ("B") and the
+   (typedef "B") node it maps to. The raw budget is twice the typedef bound
+   and counts every hop, including direct typedef-to-typedef links. */
 #define RESOLVE_KEY_MAX_TYPEDEFS 64
 #define RESOLVE_KEY_MAX_HOPS (2 * RESOLVE_KEY_MAX_TYPEDEFS)
 
@@ -26,8 +22,7 @@ Type Sym.resolve_key(Sym s, Type key) {
 /* Resolve a typedef chain, optionally stopping at a semantic type
    identity. origin is the type the caller asked about, kept only so an
    over-budget walk can name it instead of some mid-chain link. */
-static Type _resolve_chain(
-  Sym s, Type key, Type stop, Type origin, int hops) {
+static Type _resolve_chain(Sym s, Type key, Type stop, Type origin, int hops) {
   if (hops > RESOLVE_KEY_MAX_HOPS) _typedef_budget_error(s, origin);
   while (key.car() is <symbol> &&
          (key.car().symbol().is_type_qualifier() || key.car() == <unqual>))
@@ -43,10 +38,9 @@ static Type _resolve_chain(
   return key;
 }
 
-/* The resolver cannot tell a true cycle from an absurdly long chain, so the
-   diagnostic states only what it can determine. `typedef Color Color;` is
-   legal C; it binds ("Color") to (typedef "Color") and back, so cycles are
-   real. */
+/* The hop budget does not distinguish cycles from long chains, so the
+   diagnostic reports only excessive depth. `typedef Color Color;` is legal
+   C; it binds ("Color") to (typedef "Color") and back. */
 static void _typedef_budget_error(Sym s, Type origin) {
   $fail.symbols_typedef_depth(s.c, NULL, origin);
 }
@@ -74,7 +68,8 @@ Type Sym.next_typedef(Sym s, Type type, int &hops) {
 }
 
 /** Returns the name of the one file-scope typedef declared directly as
-    `type`, or NULL when no typedef or several typedefs are. */
+    `type`, or NULL when no typedef or several typedefs are.
+*/
 Type Sym.sole_typedef(Sym s, Type type) {
   String found = NULL;
   for (int i = 0; i < s.base_scopes; i++)
@@ -248,7 +243,6 @@ int Sym.is_map_type(Sym s, Type type) => s.is_named_value_type(type, "Map");
 
 /** Reports whether `type` reaches a named value type before its definition. */
 int Sym.is_named_value_type(Sym s, Type type, String name) {
-  // Stop at the named type instead of resolving through its typedef.
   if (!type || !name) return 0;
   Type wanted = $(name), origin = type.canonicalize();
   type = _resolve_chain(s, origin, wanted, origin, 0);
@@ -294,8 +288,7 @@ void Sym.declare_field_order(Sym s, Type type, List fields) {
   s.set(%(@type "field-order"), %(fields @(rows.list_free())));
 }
 
-static List _field_row(
-  Sym s, Type type, List declaration, List declarator) {
+static List _field_row(Sym s, Type type, List declaration, List declarator) {
   String name = Ast.binding_spelling(declarator.cadr());
   Type declared = name ? s.get($(@type, name))
     : %(declare $(declaration.cadr()) (bindings $declarator))
@@ -307,14 +300,16 @@ static List _field_row(
 List Sym.field_order(Sym s, Type type) => s.get(%(@type "field-order"));
 
 /** Records that the field `name` of `aggregate` was declared with the field
-    keyword `mark`, such as `delegate`, and that `aggregate` declares one. */
+    keyword `mark`, such as `delegate`, and that `aggregate` declares one.
+*/
 void Sym.mark_field(Sym s, Type aggregate, Symbol mark, String name) {
   s.set($(@aggregate, mark, name), $(mark));
   s.set($(@aggregate, mark), $(mark));
 }
 
 /** Returns the `(NAME TYPE)` rows of the fields of `aggregate` declared with
-    `mark`, in declaration order. */
+    `mark`, in declaration order.
+*/
 List Sym.marked_fields(Sym s, Type aggregate, Symbol mark) {
   List order = s.field_order(aggregate);
   Array rows = [];
@@ -341,7 +336,8 @@ Type Sym.aggregate_of(Sym s, Type type) {
 
 /** Compares only List rest conventions in corresponding callable positions,
     including callback parameters and returned function pointers. Native C
-    checking owns other type differences, but cannot see this convention. */
+    checking owns other type differences, but cannot see this convention.
+*/
 int Sym.same_list_rest_convention(Sym s, Type source, Type target) {
   if (source == target) return 1;
   source = s.resolve_key(source);
