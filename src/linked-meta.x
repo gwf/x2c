@@ -708,11 +708,12 @@ static Code _lambda_cell(List name, Type type, Code value) {
   Type bytes = %(* void), pointer = cons(<*>, type), literal = type;
   Code allocated = $!($bytes){ Scope_malloc(sizeof($type)) };
   if (value) {
-    if (!type.match(%((dim *) *)) && !value.match(%(expr ? (composite ?)))) {
+    if (!(type ~= %((dim *) *)) &&
+        !(value ~= %(expr ? (composite ?)))) {
       literal = cons(%(dim $($!int{ 1 })), type);
       value = value.convert(type);
     }
-    if (!value.match(%(expr ? (composite ?))))
+    if (!(value ~= %(expr ? (composite ?))))
       value = %(expr $literal (composite (commas $value)));
     allocated = $!($bytes){
       Scope_memdup((const void *)&($literal)$value, sizeof($type))
@@ -871,7 +872,7 @@ static List _lambda_items(Code body) {
   match (body) case %(block *items):
     return $(
       @(_lambda_returning(items, source_return_none())), source_return_none());
-  List items = body.match(%(expr (void) ?))
+  List items = body ~= %(expr (void) ?)
     ? %((stmnt $body) $(source_return_none()))
     : %((stmnt (return $(body.convert(%("Var"))))));
   match (x2c_enclosing(<statement>)) case %(at ?origin ?):
@@ -932,7 +933,7 @@ Code lambda_lift(Code node) {
 
 static int _lambda_in_public_inline(void) {
   match (x2c_enclosing(<function>)) case %(function ?(Type type) *):
-    return type.match(%(* inline *)) && !type.match(%(* static *));
+    return type ~= %(* inline *) && !(type ~= %(* static *));
   return 0;
 }
 
@@ -1313,7 +1314,7 @@ static int _match_nested(
   Buffer b, Array out, List pattern, Var value, Array binders, int &depths) {
   int viewed = binders != NULL;
   if ((!viewed &&
-       !pattern.match(%(expr ? (!or (cache ?) (expr ? (cache ?)))))) ||
+       !(pattern ~= %(expr ? (!or (cache ?) (expr ? (cache ?)))))) ||
       value is not <list>)
     return -1;
   _match_flush(b, out);
@@ -1953,8 +1954,8 @@ static String _string_case_bytes(String spelling) {
 }
 
 static int _string_case_text(Type type) =>
-  type.match(%((!or (dim *) (!quote *)) char)) ||
-  type.match(%((!or (dim *) (!quote *)) const char));
+  type ~= %((!or (dim *) (!quote *)) char) ||
+  type ~= %((!or (dim *) (!quote *)) const char);
 
 static String _string_case_key(List label) {
   match (label) {
