@@ -193,8 +193,8 @@ static List _location(Token tokens, List range) {
 
 static Symbol _type_kind(Token first, List base, List modifiers) {
   if (first.text == "class") return <class>;
-  if (modifiers ~= %(?pointer (fnmod *) *))
-    if (pointer == <*>) return <callback>;
+  if (modifiers ~= %(?pointer (fnmod *) *) && pointer == <*>)
+    return <callback>;
   if (base ~= %((!or ?kind struct union enum) *)) return kind;
   return <alias>;
 }
