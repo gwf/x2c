@@ -1,7 +1,5 @@
 /*  diagnostics.x -- macro diagnostics and source notes */
 
-/* macros diagnostics. */
-
 static macro Stmt $fail.macros_result_type(
   Expr $c, Expr $site, Expr $expected, Expr $actual) =>
   $c.report_error(
@@ -144,8 +142,7 @@ static macro Stmt $fail.macros_typed_quotation(Expr $c, Expr $origin) =>
     $origin,
     %("a typed, Type, or Param quotation builds where it is written"));
 
-static macro Stmt $fail.macros_typed_quotation_nested(
-  Expr $c, Expr $origin) {
+static macro Stmt $fail.macros_typed_quotation_nested(Expr $c, Expr $origin) {
   {
     String note = "write $($!T{ ... }) to insert the code it builds";
     $c.report_error(
@@ -274,8 +271,7 @@ static macro Stmt $fail.macros_macro_pattern_arity(
     %"macro pattern '$($name)' takes $($expected) argument patterns",
     $origin, NULL);
 
-static macro Stmt $fail.macros_meta_expr(
-  Expr $c, Expr $origin, Expr $value) =>
+static macro Stmt $fail.macros_meta_expr(Expr $c, Expr $origin, Expr $value) =>
   $c.report_error(
     <macro>, "compile-time result cannot fill an expression slot",
     $origin, $("value:", $value.repr()));
@@ -315,8 +311,7 @@ static macro Stmt $fail.macros_variable_unbound(
 module String _definition_note(List definition) {
   List origin = definition.assoc(<origin>);
   String file = origin.assoc(<file>);
-  int line = origin.assoc(<line>),
-      column = origin.assoc(<column>);
+  int line = origin.assoc(<line>), column = origin.assoc(<column>);
   return %"definition: $file:$line:$column";
 }
 
