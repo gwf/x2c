@@ -132,8 +132,7 @@ static void _isolate(
    a call of `x2c_template_call`, which is declared after the leading
    directives; a meta build's native calls go through their modules; and
    the entry follows. */
-static List _lower(
-  Compiler c, Array units, String stamp, String suffix) {
+static List _lower(Compiler c, Array units, String stamp, String suffix) {
   List binding = c.sym.introduce("x2c_template_call");
   Type type = $!Type{ List (Var, List) };
   List callee = %(expr $type (ident $binding));
@@ -262,8 +261,7 @@ static int _boxes_func(Compiler c, List declared, List parameter) =>
 /* The native function `name` of `type` read through its module's address,
    or NULL when no native module supplies it. The read keeps the function
    type of the module that supplied the compiler's binding. */
-static List _native_symbol(
-  Compiler c, Type type, String name, List lookup) {
+static List _native_symbol(Compiler c, Type type, String name, List lookup) {
   if (!type.is_function() || !(name in c.native_meta)) return NULL;
   String module = c.native_meta_module(name, type);
   if (!module) return NULL;
