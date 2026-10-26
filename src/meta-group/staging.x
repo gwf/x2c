@@ -76,7 +76,7 @@ static String _stage(Compiler c, String &failure) {
       ((Func) targets["x2c_module_reset"].pointer()).apply(0, NULL);
   }
   foreach (List entry in c.meta_group)
-    match (entry) case %(function ? ?(String target) ?(Type type) *): {
+    if (entry ~= %(function ? ?(String target) ?(Type type) *)) {
       if (target in c.meta_group_bound || !(target in targets)) continue;
       Var bound = targets[target];
       if (!c.native_meta_accepts(bound, c.func_signature(type))) continue;
