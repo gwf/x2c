@@ -179,9 +179,7 @@ set of dump flags is listed under [compiler options](../reference/cli.md).
   `src/meta-project.x`
 - Member positions: the unit's `line_markers` rows, read by
   `Compiler.token_source`, `Compiler.token_column`, and
-  `Compiler.text_source` in `src/diagnostics.x`; a replayed compile-time
-  effect records its site in the member's own text through
-  `Compiler.source_token`
+  `Compiler.text_source` in `src/diagnostics.x`
 - Member dependencies and the entry's content hash: `FileWalk` in
   `src/collect/collect.x`
 - The `module` storage class: `_module_storage_form` in `src/parse/units.x`
