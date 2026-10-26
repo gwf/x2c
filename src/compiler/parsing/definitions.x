@@ -62,8 +62,7 @@ module void _record_span(Compiler c, List node, int start, int end) {
     case %((!or typedef declare) *): key = node;
   }
   if (key)
-    c.set_fact(
-      %(definition-span $key), $(start, end, c.source_private > 0));
+    c.set_fact(%(definition-span $key), $(start, end, c.source_private > 0));
 }
 
 /* function completion
@@ -73,8 +72,7 @@ module void _record_span(Compiler c, List node, int start, int end) {
    between two prototypes. */
 
 // Record only prototypes reached in positioned full-parse source order.
-static void _record_prototypes(
-  Compiler c, Type declared_type, List items) {
+static void _record_prototypes(Compiler c, Type declared_type, List items) {
   foreach (List target in items)
     match (target)
       case %(bind ?binding ?modifiers): {
@@ -104,8 +102,7 @@ static void _record_prototype(
 
 /* A source attribute on the prototype belongs to the function; the
    generator writes it on the prototype it derives from the definition. */
-static void _record_attributes(
-  Compiler c, List binding, List modifiers) {
+static void _record_attributes(Compiler c, List binding, List modifiers) {
   List attributes = NULL;
   foreach (Var item in modifiers)
     if (item is <list> && car(item) is <string>)
@@ -193,8 +190,7 @@ static int _omitted_specifier(Var item, int keep_qualifiers) {
 
 // static initializers
 
-static void _record_static_object(
-  Compiler c, Type declared, List bindings) {
+static void _record_static_object(Compiler c, Type declared, List bindings) {
   if (!declared.is_static()) return;
   int declared_var = c.sym.is_var_type(declared);
   if (!declared_var && !_initializable_type(c, declared)) return;
