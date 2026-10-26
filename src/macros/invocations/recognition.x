@@ -314,8 +314,7 @@ module List _lookup(Compiler c, Atom name, Token invocation) {
 
 /* Includes publish names immediately. Decode a template into this unit's
    bindings only when it is used, keeping the result in the same name map. */
-module int _try_macro(
-  Compiler c, Map definitions, Atom name, Var &stored) {
+module int _try_macro(Compiler c, Map definitions, Atom name, Var &stored) {
   if (!definitions.try_get(name, stored)) return 0;
   match (stored) case %(imported-macro ?definition): {
     stored = _rebind_imported(c, c.thaw_declaration_syntax(definition));
@@ -396,11 +395,10 @@ module Var _rebind_imported(Compiler c, Var stored) {
 module List _rebind_globals(Compiler c, List syntax) {
   Map replacements = {};
   _reference_bindings(c, syntax, replacements);
-  return replacements.len() ? _replace_bindings(syntax, replacements) : syntax;
+  return replacements ? _replace_bindings(syntax, replacements) : syntax;
 }
 
-static void _reference_bindings(
-  Compiler c, List syntax, Map replacements) {
+static void _reference_bindings(Compiler c, List syntax, Map replacements) {
   match (syntax)
     case %(expr ? $($source_identifier_content(%(?binding)))): {
       String spelling = NULL;
