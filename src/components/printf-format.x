@@ -21,7 +21,7 @@ meta static int _printf_is_var(Code value) => value.type().is_named("Var");
 
 /* Reports `message` about the printf-family call `call`. */
 meta static void _printf_fail(Code call, String message) {
-  match (call) case %(expr ? (call ?callee *)):
+  if (call ~= %(expr ? (call ?callee *)))
     x2c_diagnostic_fail_at(
       call, <xform>, message,
       %("printf-family call: $(Code.binding_spelling(callee))"));
@@ -174,7 +174,7 @@ meta static Code _printf_lowered(Code code, Code format, List values) {
   String spelling = format.format();
   if (!spelling)
     $fail.printf_static_format(code);
-  match (code) case %(expr ?type (call ?callee (args *given))): {
+  if (code ~= %(expr ?type (call ?callee (args *given)))) {
     Array arguments = given;
     int next = given.len() - values.len();
     _printf_scan(code, spelling[1:spelling.len() - 1], arguments, next);
@@ -188,7 +188,7 @@ meta static Code _printf_lowered(Code code, Code format, List values) {
 
 /* A C library member names only a function no declaration resolves. */
 meta static Code _printf_library(Code code, Code format, List values) {
-  match (code) case %(expr ? (call (expr () ?) ?)):
+  if (code ~= %(expr ? (call (expr () ?) ?)))
     return _printf_lowered(code, format, values);
   return code;
 }
