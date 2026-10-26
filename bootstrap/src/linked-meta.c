@@ -11957,7 +11957,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_17(void
 
 __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_18(void){
   _9216 = String_var(_9215);
-  _9217 = String_new("c12d0080");
+  _9217 = String_new("06aa9c28");
   _9218 = String_var(_9217);
   _9219 = cons(_9218, NULL);
   _9220 = cons(_9216, _9219);
@@ -11990,7 +11990,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_18(void
   _9247 = List_var(_9246);
   _9248 = String_new("lib/common.x");
   _9249 = String_var(_9248);
-  _9250 = String_new("aa3f89da");
+  _9250 = String_new("410a6dd7");
   _9251 = String_var(_9250);
   _9252 = cons(_9251, NULL);
   _9253 = cons(_9249, _9252);
@@ -12052,7 +12052,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_18(void
   _9309 = List_var(_9308);
   _9310 = String_new("lib/var/var.x");
   _9311 = String_var(_9310);
-  _9312 = String_new("1de7ddcd");
+  _9312 = String_new("fe178d52");
   _9313 = String_var(_9312);
   _9314 = cons(_9313, NULL);
   _9315 = cons(_9311, _9314);
@@ -12356,7 +12356,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_18(void
   _9613 = cons(_9166, _9612);
   _9614 = cons(_9588, _9613);
   _9615 = List_var(_9614);
-  _9616 = String_new("dd6c3bf3");
+  _9616 = String_new("5bd8a5b1");
   _9617 = String_var(_9616);
   _9618 = cons(_9617, NULL);
   _9619 = cons(_9615, _9618);
@@ -17519,7 +17519,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_28(void
   _14746 = cons(_223, _14745);
   _14747 = String_new("src/linked-meta.x");
   _14748 = String_var(_14747);
-  _14749 = String_new("987c3869");
+  _14749 = String_new("7d2559b1");
   _14750 = String_var(_14749);
   _14751 = String_new("cwd:./channel.x");
   _14752 = String_var(_14751);
