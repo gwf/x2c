@@ -60,6 +60,7 @@ static macro Expression $lisp.native.target.map() =>
   (lisp_symbol)
   (lisp_procedure)
   (List_reverse)
+  (List_concat)
   (List_len)
   (List_match)
   (lisp_match_replace)

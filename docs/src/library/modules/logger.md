@@ -25,7 +25,7 @@ owns a private `Scope` for sink state. An invalid level returns NULL.
 **Raises:** `<alloc-fail>` when the `Logger` or its private `Scope` cannot be
 allocated.
 
-Source: `lib/logger.x:820`
+Source: `lib/logger.x:821`
 
 ## Advanced and interop API
 
@@ -74,7 +74,7 @@ Logs borrowed `fields` globally at debug level under `category`.
 Pass separate `(key value)` Lists or splice an existing `@fields` List.
 Delivery and failure behavior follow `log_event`.
 
-Source: `lib/logger.x:805`
+Source: `lib/logger.x:806`
 
 #### log_error
 
@@ -84,7 +84,7 @@ Logs borrowed `fields` globally at error level under `category`.
 Pass separate `(key value)` Lists or splice an existing `@fields` List.
 Delivery and failure behavior follow `log_event`.
 
-Source: `lib/logger.x:808`
+Source: `lib/logger.x:809`
 
 #### log_event
 
@@ -104,7 +104,7 @@ Logs borrowed `fields` globally at fatal level under `category`.
 Pass separate `(key value)` Lists or splice an existing `@fields` List.
 Delivery and failure behavior follow `log_event`.
 
-Source: `lib/logger.x:809`
+Source: `lib/logger.x:810`
 
 #### log_get_global_logger
 
@@ -122,7 +122,7 @@ Logs borrowed `fields` globally at info level under `category`.
 Pass separate `(key value)` Lists or splice an existing `@fields` List.
 Delivery and failure behavior follow `log_event`.
 
-Source: `lib/logger.x:806`
+Source: `lib/logger.x:807`
 
 #### log_set_global_logger
 
@@ -151,7 +151,7 @@ Logs borrowed `fields` globally at trace level under `category`.
 Pass separate `(key value)` Lists or splice an existing `@fields` List.
 Delivery and failure behavior follow `log_event`.
 
-Source: `lib/logger.x:804`
+Source: `lib/logger.x:805`
 
 #### log_warn
 
@@ -161,7 +161,7 @@ Logs borrowed `fields` globally at warn level under `category`.
 Pass separate `(key value)` Lists or splice an existing `@fields` List.
 Delivery and failure behavior follow `log_event`.
 
-Source: `lib/logger.x:807`
+Source: `lib/logger.x:808`
 
 ### `Logger`
 
@@ -251,7 +251,7 @@ Logs borrowed `fields` synchronously at debug level under `category`.
 Pass separate `(key value)` Lists or splice an existing `@fields` List.
 Delivery and failure behavior follow `Logger.log`.
 
-Source: `lib/logger.x:786`
+Source: `lib/logger.x:787`
 
 <a id="Logger.error"></a>
 #### Logger.error
@@ -262,7 +262,7 @@ Logs borrowed `fields` synchronously at error level under `category`.
 Pass separate `(key value)` Lists or splice an existing `@fields` List.
 Delivery and failure behavior follow `Logger.log`.
 
-Source: `lib/logger.x:789`
+Source: `lib/logger.x:790`
 
 <a id="Logger.fatal"></a>
 #### Logger.fatal
@@ -273,7 +273,7 @@ Logs borrowed `fields` synchronously at fatal level under `category`.
 Pass separate `(key value)` Lists or splice an existing `@fields` List.
 Delivery and failure behavior follow `Logger.log`.
 
-Source: `lib/logger.x:790`
+Source: `lib/logger.x:791`
 
 <a id="Logger.flush"></a>
 #### Logger.flush
@@ -301,7 +301,7 @@ nothing.
 Either failure leaves the `Logger` and all sinks live; earlier flushers may
 already have run.
 
-Source: `lib/logger.x:838`
+Source: `lib/logger.x:839`
 
 <a id="Logger.info"></a>
 #### Logger.info
@@ -312,7 +312,7 @@ Logs borrowed `fields` synchronously at info level under `category`.
 Pass separate `(key value)` Lists or splice an existing `@fields` List.
 Delivery and failure behavior follow `Logger.log`.
 
-Source: `lib/logger.x:787`
+Source: `lib/logger.x:788`
 
 <a id="Logger.initialize"></a>
 #### Logger.initialize
@@ -327,7 +327,7 @@ shuts down.
 
 **Raises:** any cause from `Error` or `Logger` initialization.
 
-Source: `lib/logger.x:858`
+Source: `lib/logger.x:859`
 
 <a id="Logger.level_priority"></a>
 #### Logger.level_priority
@@ -418,7 +418,7 @@ a no-op.
 event delivery or a sink flusher. The failure may interrupt the remaining
 cleanup.
 
-Source: `lib/logger.x:879`
+Source: `lib/logger.x:880`
 
 <a id="Logger.sink_count"></a>
 #### Logger.sink_count
@@ -438,7 +438,7 @@ Logs borrowed `fields` synchronously at trace level under `category`.
 Pass separate `(key value)` Lists or splice an existing `@fields` List.
 Delivery and failure behavior follow `Logger.log`.
 
-Source: `lib/logger.x:785`
+Source: `lib/logger.x:786`
 
 <a id="Logger.warn"></a>
 #### Logger.warn
@@ -449,7 +449,7 @@ Logs borrowed `fields` synchronously at warn level under `category`.
 Pass separate `(key value)` Lists or splice an existing `@fields` List.
 Delivery and failure behavior follow `Logger.log`.
 
-Source: `lib/logger.x:788`
+Source: `lib/logger.x:789`
 
 ## Runtime-internal callables
 
