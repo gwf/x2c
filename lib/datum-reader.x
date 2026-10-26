@@ -85,20 +85,17 @@ static Var _list(LispReader &r, int depth) {
   if (depth >= LISP_READ_DEPTH_MAX)
     raise %(size-limit (operation "Lisp.read") (depth $depth));
   Array elements = auto [];
-  Var out = void;
   loop {
     Token token = r.tokenizer.next();
-    if (!token || token.type == <eof>) break;
+    if (!token || token.type == <eof>) return void;
     if (token.type == <")">) {
       r.end = token.pos + token.len;
-      out = elements.list();
-      break;
+      return elements.list();
     }
     Var element = _parse_form(r, token, depth);
-    if (element is void) break;
+    if (element is void) return void;
     elements.push(element);
   }
-  return out;
 }
 
 static Var _atom(LispReader &r, Token token) {
