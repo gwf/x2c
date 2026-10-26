@@ -141,12 +141,11 @@ static String _lifecycle_owner(
 
 static void _require_signature(
   Compiler c, List decl, String name, String role) {
-  match (decl)
-    case %(declare (void)
-           (bindings
-             (bind ?
-               ((fnmod (params (param (void) (bind () ())))))))):
-      return;
+  if (decl ~= %(declare (void)
+                (bindings
+                  (bind ?
+                    ((fnmod (params (param (void) (bind () ())))))))))
+    return;
   $fail.parse_lifecycle_signature(c, c.token, role, name);
 }
 
