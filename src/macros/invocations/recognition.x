@@ -316,7 +316,7 @@ module List _lookup(Compiler c, Atom name, Token invocation) {
    bindings only when it is used, keeping the result in the same name map. */
 module int _try_macro(Compiler c, Map definitions, Atom name, Var &stored) {
   if (!definitions.try_get(name, stored)) return 0;
-  match (stored) case %(imported-macro ?definition): {
+  if (stored ~= %(imported-macro ?definition)) {
     stored = _rebind_imported(c, c.thaw_declaration_syntax(definition));
     c.sym.put(definitions, name, stored);
   }
@@ -399,13 +399,12 @@ module List _rebind_globals(Compiler c, List syntax) {
 }
 
 static void _reference_bindings(Compiler c, List syntax, Map replacements) {
-  match (syntax)
-    case %(expr ? $($source_identifier_content(%(?binding)))): {
-      String spelling = NULL;
-      if (Ast.try_binding(binding, NULL, spelling))
-        replacements[binding] = c.sym.reference_global($(spelling));
-      return;
-    }
+  if (syntax ~= %(expr ? $($source_identifier_content(%(?binding))))) {
+    String spelling = NULL;
+    if (Ast.try_binding(binding, NULL, spelling))
+      replacements[binding] = c.sym.reference_global($(spelling));
+    return;
+  }
   foreach (Var child in syntax)
     if (child is <list>) _reference_bindings(c, child, replacements);
 }
