@@ -34,8 +34,7 @@ List Ast.binding(int identity, String spelling) =>
     Returns one on success and writes only non-`NULL` outputs; failure returns
     zero without changing either output.
 */
-int Ast.try_binding(
-  List binding, int &?identity, String &?spelling) {
+int Ast.try_binding(List binding, int &?identity, String &?spelling) {
   match (binding)
     case %(binding ?id ?(String name)): {
       if (!id.is_integer() || id.integer() <= 0) return 0;
@@ -151,9 +150,11 @@ String Ast.addressed_identifier(Var value) {
   return NULL;
 }
 
-/** Returns the name an expression designates directly, following the forms
-    that still name the same object - parentheses, a member, an array index,
-    a dereference - or `NULL` when the expression designates no single name.
+/** Returns the name of the stored object an expression designates directly.
+    Parentheses, aggregate members, and native array indexes keep their
+    containing object's name. A dereference or pointer member keeps that name
+    only when its operand takes the object's address. Other expressions
+    return `NULL`.
     A declaration qualifier that must reach one object, such as the `volatile`
     an error transfer requires, applies to this name.
 */
@@ -225,7 +226,8 @@ int Ast.contains_head(Var value, Symbol kind) {
     by its address, swapped for its value, and adds each rebuilt ancestor
     to `replaced`. Only the ancestors of a swapped list are new, so `root`
     returns itself when nothing beneath it is swapped. The walk keeps deep
-    expression chains off the C stack. */
+    expression chains off the C stack.
+*/
 Var Ast.replace_nodes(Var root, Map replaced) {
   Array levels = auto [];
   List node;
@@ -284,7 +286,8 @@ Ast Ast.without_origin(Ast ast) {
 }
 
 /** Returns `replacement` under the anchors of `original`, the statement it
-    replaces, so a rewrite does not lose the node's source position. */
+    replaces, so a rewrite does not lose the node's source position.
+*/
 Ast Ast.rewrap_origin(Ast original, Ast replacement) {
   match (original)
     case %(at ?origin ?inner):
