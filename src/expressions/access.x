@@ -77,10 +77,9 @@ static List _typedef_index(Compiler c, List expr, List index, Type type) {
   if (!resolved && collection)
     resolved = c.resolve_protocol_member(type, "getindex");
   Type signature = resolved ? resolved.cadr() : NULL;
-  match (signature)
-    case %((func (!set ?params (?receiver ?))) ?rtype):
-      if (collection || receiver == type)
-        return _getindex_expression(c, expr, index, params, rtype);
+  if (signature ~= %((func (!set ?params (?receiver ?))) ?rtype) &&
+      (collection || receiver == type))
+    return _getindex_expression(c, expr, index, params, rtype);
   return _native_index(c, expr, index, type);
 }
 
@@ -93,15 +92,13 @@ static int _collection_index_type(Compiler c, Type type) =>
 */
 List _x2c_nominal_getindex(Compiler c, Type type) {
   if (!type.is_typedef_name()) return NULL;
-  match (type)
-    case %(?(String nominal)): {
-      String source = %"$(nominal)_getindex";
-      if (source == c.fn_name && _collection_index_type(c, type)) return NULL;
-      Type signature = c.sym.get($(source));
-      match (signature)
-        case %((func ($type ?)) ?):
-          return $(c.sym.reference($(source), NULL), signature);
-    }
+  if (type ~= %(?(String nominal))) {
+    String source = %"$(nominal)_getindex";
+    if (source == c.fn_name && _collection_index_type(c, type)) return NULL;
+    Type signature = c.sym.get($(source));
+    if (signature ~= %((func ($type ?)) ?))
+      return $(c.sym.reference($(source), NULL), signature);
+  }
   return NULL;
 }
 
@@ -215,7 +212,7 @@ static List _field_member(
    `typedef struct T {...} T;` declares, or else the only typedef declared
    directly as that aggregate. */
 module Type _tag_typedef(Compiler c, Type aggregate) {
-  match (aggregate) case %(? ?(String tag)): {
+  if (aggregate ~= %(? ?(String tag))) {
     Type name = $(tag), declared = c.sym.get(%(typedef $tag));
     if (declared && c.sym.resolve_key(declared) == aggregate) return name;
   }
@@ -284,10 +281,9 @@ module List _member(Resolve &r, Var operator, List receiver, List field) {
   Type receiver_type = receiver.cadr();
   List resolution = r.c.resolve_postfix_member(
     receiver_type, field, operator, 0);
-  match (resolution)
-    case %(field ?access ?field_type):
-      return source_operator_expression(
-        field_type, $(access, receiver, field));
+  if (resolution ~= %(field ?access ?field_type))
+    return source_operator_expression(
+      field_type, $(access, receiver, field));
   Type type = _deferred_receiver(receiver) ? %(<macro-expr>) : NULL;
   return source_operator_expression(type, $(operator, receiver, field));
 }
@@ -324,9 +320,7 @@ List Compiler.postfix_completions(Compiler c, Type receiver, Symbol access) {
   names.sort();
   foreach (String name in names) {
     List resolution = c.resolve_postfix_member(receiver, $(name), access, 1);
-    match (resolution) {
-      case %((!or field method) ? ?): accepted.push(name);
-    }
+    if (resolution ~= %((!or field method) ? ?)) accepted.push(name);
   }
   return accepted.list_free();
 }
