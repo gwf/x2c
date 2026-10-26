@@ -33,7 +33,8 @@
     source, `initializer` names the type initializer, `shutdown` registers
     the unit's shutdown function, `synthetic` is the synthetic initializer or
     NULL, and `reachable` holds the entries a cache-only file guards, or is
-    NULL when every public entry is guarded. */
+    NULL when every public entry is guarded.
+*/
 typedef struct Init {
   Compiler c, String initializer, List guard, entry, shutdown, synthetic;
   Map reachable;
