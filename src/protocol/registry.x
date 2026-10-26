@@ -169,8 +169,8 @@ module String _canonical_file(Compiler c, List location) {
 static int _module_member(Compiler c, String file) {
   if (c.line_markers)
     foreach (List row in c.line_markers)
-      match (row) case %(? ? ?(String member) ? ? ? ?):
-        if (_normalize_file(c, member) == file) return 1;
+      if ((row ~= %(? ? ?(String member) ? ? ? ?)) &&
+          _normalize_file(c, member) == file) return 1;
   return 0;
 }
 
