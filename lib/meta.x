@@ -507,14 +507,13 @@ List type_declaration_parts(List type) {
 
 /* A function modifier's parameter types become parameter declarations. */
 static Var _modifier_syntax(Var modifier) {
-  match (modifier)
-    case %(func ?(List parameters)): {
-      Array params = [];
-      foreach (List parameter in parameters) {
-        List (base, modifiers) = type_declaration_parts(parameter);
-        params.push(%(param $base (bind () $modifiers)));
-      }
-      return %(fnmod (params @(params.list_free())));
+  if (modifier ~= %(func ?(List parameters))) {
+    Array params = [];
+    foreach (List parameter in parameters) {
+      List (base, modifiers) = type_declaration_parts(parameter);
+      params.push(%(param $base (bind () $modifiers)));
     }
+    return %(fnmod (params @(params.list_free())));
+  }
   return modifier;
 }
