@@ -283,35 +283,35 @@ static Map _initial_copies(Compiler c, Array units) {
     if (entry ~= %(static (!set ?declaration (declare ?spec
                    (bindings (op = (!set ?bound (bind ?binding ?mods))
                                   ?initializer)))))) {
-        Type type =
-          %(declare $spec (bindings $bound)).type_from_ast().declared();
-        if (<const> in type) continue;
-        if (type.is_array()) {
-          List zero = _braced(initializer)
-            ? c.zero_initializer(initializer) : initializer;
-          if (c.meta_build)
-            for (int i = 0; i < (int) units.len(); i++)
-              if (units[i] == declaration)
-                units[i] = %(declare $spec (bindings
-                  (op = $bound $zero)));
-          continue;
-        }
-        int copied = _braced(initializer) &&
-                     (!c.meta_build || type.tag().car() is <list>);
-        if (!c.meta_build && !copied) continue;
-        List copy = copied
-          ? c.sym.introduce(
-            %"_x2c_gensym_meta_initial_$(binding.list().last())") : NULL;
-        for (int i = 0; i < (int) units.len(); i++)
-          if (units[i] == declaration) {
-            List original = c.meta_build ? bound : %(op = $bound $initializer);
-            List bindings = copied
-              ? %($original (op = (bind $copy $mods) $initializer))
-              : $(original);
-            units[i] = %(declare $spec (bindings @bindings));
-          }
-        if (copied) copies[binding] = %(expr $type (ident $copy));
+      Type type =
+        %(declare $spec (bindings $bound)).type_from_ast().declared();
+      if (<const> in type) continue;
+      if (type.is_array()) {
+        List zero = _braced(initializer)
+          ? c.zero_initializer(initializer) : initializer;
+        if (c.meta_build)
+          for (int i = 0; i < (int) units.len(); i++)
+            if (units[i] == declaration)
+              units[i] = %(declare $spec (bindings
+                (op = $bound $zero)));
+        continue;
       }
+      int copied = _braced(initializer) &&
+                   (!c.meta_build || type.tag().car() is <list>);
+      if (!c.meta_build && !copied) continue;
+      List copy = copied
+        ? c.sym.introduce(
+          %"_x2c_gensym_meta_initial_$(binding.list().last())") : NULL;
+      for (int i = 0; i < (int) units.len(); i++)
+        if (units[i] == declaration) {
+          List original = c.meta_build ? bound : %(op = $bound $initializer);
+          List bindings = copied
+            ? %($original (op = (bind $copy $mods) $initializer))
+            : $(original);
+          units[i] = %(declare $spec (bindings @bindings));
+        }
+      if (copied) copies[binding] = %(expr $type (ident $copy));
+    }
   return copies;
 }
 
@@ -382,26 +382,26 @@ static List _resets(Compiler c, Map initials) {
   foreach (List entry in c.meta_group)
     if (entry ~= %(static (declare ?spec
                    (bindings (op = (!set ?bound (bind ?binding *))
-                                  ?initializer)))) {
-        Type type =
-          %(declare $spec (bindings $bound)).type_from_ast().declared();
-        if (<const> in type) continue;
-        Var initial;
-        if (initials.try_get(binding, initial)) initializer = initial;
-        List target = %(expr $type (ident $binding));
-        if (type.is_array()) {
-          if (!_braced(initializer))
-            initializer = %(expr () (composite (commas $initializer)));
-          Type native = %("__typeof__" (parens $target));
-          initializer = %(expr $type (cast $native
-            $(c.convert_initializer(initializer, type, target))));
-          resets.push(
-            c.rebuild_statement(
-              $!{ memcpy($target, $initializer, sizeof($target)); }).cadr());
-        }
-        else resets.push(
-          c.rebuild_statement($!{ $target = $initializer; }).cadr());
+                                  ?initializer))))) {
+      Type type =
+        %(declare $spec (bindings $bound)).type_from_ast().declared();
+      if (<const> in type) continue;
+      Var initial;
+      if (initials.try_get(binding, initial)) initializer = initial;
+      List target = %(expr $type (ident $binding));
+      if (type.is_array()) {
+        if (!_braced(initializer))
+          initializer = %(expr () (composite (commas $initializer)));
+        Type native = %("__typeof__" (parens $target));
+        initializer = %(expr $type (cast $native
+          $(c.convert_initializer(initializer, type, target))));
+        resets.push(
+          c.rebuild_statement(
+            $!{ memcpy($target, $initializer, sizeof($target)); }).cadr());
       }
+      else resets.push(
+        c.rebuild_statement($!{ $target = $initializer; }).cadr());
+    }
   return resets.list_free();
 }
 
