@@ -19,10 +19,9 @@
    type. */
 meta static String _delegate_type_name(Type type) {
   List base = type_base_suffix(type);
-  match (base)
-    case %((!or struct union)
-           (!or ?tag (!not (*)) (gensym ? ?) (binding ? ?))):
-      return tag.str();
+  if (base ~= %((!or struct union)
+           (!or ?tag (!not (*)) (gensym ? ?) (binding ? ?))))
+    return tag.str();
   return base.car().str();
 }
 
@@ -123,7 +122,7 @@ $rewrite($x2c.delegate.call, %(expr <delegate> *), <?member>, <*arguments>)
     delegate field path that provides the method.
 */
 meta Code delegate_member(Code code) {
-  match (code) case $x2c.delegate.call(?receiver, ?member, *arguments): {
+  if (code ~= $x2c.delegate.call(?receiver, ?member, *arguments)) {
     String name = Code.binding_spelling(member);
     List fields = _delegate_fields(receiver.cadr(), name);
     if (!fields) return code;
