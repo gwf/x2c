@@ -1,4 +1,4 @@
-/* top-level definitions
+/*  definitions.x -- top-level definitions
 
    Each form the full parse reads records the facts that later checks use:
    its object and function definitions, prototypes, static initializers,
