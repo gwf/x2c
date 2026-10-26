@@ -47,9 +47,8 @@ module List _stored_definition(
   List definition = NULL;
   if (stored.is_atom())
     definition = _lookup(c, Atom.intern(stored.str()), invocation);
-  else match (stored)
-    case %(local-macro ?name):
-      definition = c.sym.lookup_macro(Atom.intern(name.str()));
+  else if (stored ~= %(local-macro ?name))
+    definition = c.sym.lookup_macro(Atom.intern(name.str()));
   return definition ? definition : stored;
 }
 
@@ -185,7 +184,7 @@ static List _member_bindings(
    value's own. */
 module Var _member_spelling(Compiler c, Var value) {
   Var spelling;
-  match (value) case %("x2c.ident" (!is ?name type string)): return name;
+  if (value ~= %("x2c.ident" (!is ?name type string))) return name;
   if (value is not <list>) return value;
   if (c.semantic_binding_facts().try_get(%(source-spelling $value), spelling))
     return spelling;
@@ -319,9 +318,9 @@ module void _file_scope_locals(List rows, Map locals) {
     case %(function ?type (bind ?binder ?) ?):
       if (binder.is_binder() && !type.type().is_static()) locals[binder] = 1;
     case %((!or ?kind declare typedef) ?type (bindings *rows)): {
-      match (type) case %(* (!or struct union enum) ?tag *):
+      if (type ~= %(* (!or struct union enum) ?tag *))
         if (tag.is_binder()) locals[tag] = 1;
-      match (type) case %(* enum ? (*members) *):
+      if (type ~= %(* enum ? (*members) *))
         _file_scope_declarators(members, locals);
       if (kind == <typedef> || !type.type().is_static())
         _file_scope_declarators(rows, locals);
@@ -330,7 +329,7 @@ module void _file_scope_locals(List rows, Map locals) {
 }
 
 static void _file_scope_declarators(List declarators, Map locals) {
-  foreach (Var declarator in declarators) match (declarator)
-    case $source_declarator_row(%(?binder ?)):
-      if (binder.is_binder()) locals[binder] = 1;
+  foreach (Var declarator in declarators)
+    if (declarator ~= $source_declarator_row(%(?binder ?)))
+    if (binder.is_binder()) locals[binder] = 1;
 }
