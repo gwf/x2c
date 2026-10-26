@@ -270,7 +270,8 @@ static List _assignment(List binding, List type, List rhs) =>
   %(stmnt (expr $type (op = (expr $type (ident $binding)) $rhs)));
 
 /** Preserves native initializer shape so C infers dimensions and checks
-   designators before cached values are assigned during initialization. */
+   designators before cached values are assigned during initialization.
+*/
 List Compiler.zero_initializer(Compiler c, List value) {
   List zero = %(expr (int) (literal (int) "0"));
   match (value) {
@@ -501,7 +502,8 @@ static List _cache_refs(List node, Map bindings, int &?replaced) {
 }
 
 /** Returns the declaration of the file's initialization `guard`, which
-    starts at zero. */
+    starts at zero.
+*/
 List Compiler.initialization_guard(Compiler c, List guard) =>
   c.rebuild_statement($!{ static int $guard = 0; }).cadr();
 
