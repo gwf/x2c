@@ -1,8 +1,9 @@
-/* portable compile-time syntax
+/*  portable-syntax.x -- portable compile-time syntax
 
-   Public macro definitions and effects cross Context and interface
-   boundaries. Freezing turns tokens and origin indices into portable rows;
-   thawing rebuilds them in the importing unit. Local recipes stay live. */
+    Public macro definitions and effects cross Context and interface
+    boundaries. Freezing turns tokens and origin indices into portable rows;
+    thawing rebuilds them in the importing unit. Local recipes stay live.
+*/
 
 /** Retains exported syntax across translation units and cached interfaces.
     Tokens and origin indices become portable source data; marker-shaped user
