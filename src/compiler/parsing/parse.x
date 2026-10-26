@@ -68,7 +68,7 @@ module void _parse_forms(Compiler c, Array nodes) {
   while (c.peek(0) != <eof>) if (!_form(c, nodes)) break;
 }
 
-// Parses one form, or recovers at the next whole form.
+// Parses one form; malformed syntax recovers until the diagnostic limit.
 static int _form(Compiler c, Array nodes) {
   Token start = c.token;
   int braces = c.braces.len();
