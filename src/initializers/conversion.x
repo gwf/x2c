@@ -11,10 +11,9 @@ List Compiler.convert_initializer(
 
 static List _convert_initializer(
   Compiler c, List value, Type type, List target, int &?native_used) {
-  match (value)
-    case %(expr ? (composite ?payload)):
-      return _convert_composite(
-        c, payload.cdr(), type.canonicalize(), target, NULL, native_used);
+  if (value ~= %(expr ? (composite ?payload)))
+    return _convert_composite(
+      c, payload.cdr(), type.canonicalize(), target, NULL, native_used);
   return c.convert_expression(value, type.declared());
 }
 
@@ -193,9 +192,8 @@ static List _convert_homogeneous_row(
 }
 
 static List _replace_value(List original, List value) {
-  match (original)
-    case %((!or ?tag dotinit indexinit) ?key ?inner):
-      return $(tag, key, _replace_value(inner, value));
+  if (original ~= %((!or ?tag dotinit indexinit) ?key ?inner))
+    return $(tag, key, _replace_value(inner, value));
   return value;
 }
 
@@ -206,10 +204,10 @@ static List _convert_alternative(
   if (!condition)
     return _convert_initializer(c, value, type, target, native_used);
   if (native_used) native_used = 1;
-  match (value)
-    case %(expr ?stored (call "__builtin_choose_expr"
-                             (args ?when ?yes ?no))):
-      if (stored === type && when === condition) return value;
+  if (value ~= %(expr ?stored (call "__builtin_choose_expr"
+                           (args ?when ?yes ?no))) &&
+      stored === type && when === condition)
+    return value;
   List result = _speculate(c, value, type, condition, target, native_used);
   List zero = _zero_value(type, target);
   return !result ? _rejected_initializer(type, condition, zero)
@@ -304,9 +302,9 @@ static List _convert_mixed_row(
     List result = _convert_case(
       c, choice, prepared, native_target, row_condition, native_used);
     int identity = result === prepared;
-    match (result)
-      case %(expr ? (call "__builtin_choose_expr" (args ? ?yes ?))):
-        if (yes === prepared) identity = 1;
+    if (result ~= %(expr ? (call "__builtin_choose_expr" (args ? ?yes ?))) &&
+        yes === prepared)
+      identity = 1;
     if (!identity) native_identity = 0;
     converted.push($(condition, path, destination, result));
   }
@@ -489,24 +487,23 @@ List Compiler.initializer_native_types(Compiler c, Type type) {
 
 static Var _native_modifier(Compiler c, Var modifier, Var &reused) {
   reused = modifier;
-  match (modifier)
-    case %(dim ?bound): {
-      unsigned long long count;
-      if (!bound || _literal_integer(bound, count)) return modifier;
-      match (bound)
-        case %(expr ? $($sizeof_grouped(%(struct ?tag (fields
-            (declare (char) (bindings (bind ? ((dim ?)))))))))): {
-          reused = %(dim (expr (unsigned long)
-            (sizeof (parens (struct $tag)))));
-          return modifier;
-        }
-      String name = c.fresh_name("initializer_bound");
-      Type bytes = %((dim $bound) char);
-      List field = bytes.declaration_ast(%("bytes"));
-      Type declared = %(struct $name (fields $field));
-      List size = %(expr (unsigned long) (sizeof (parens $declared)));
-      reused = %(dim (expr (unsigned long) (sizeof (parens (struct $name)))));
-      return %(dim $size);
-    }
+  if (modifier ~= %(dim ?bound)) {
+    unsigned long long count;
+    if (!bound || _literal_integer(bound, count)) return modifier;
+    match (bound)
+      case %(expr ? $($sizeof_grouped(%(struct ?tag (fields
+          (declare (char) (bindings (bind ? ((dim ?)))))))))): {
+        reused = %(dim (expr (unsigned long)
+          (sizeof (parens (struct $tag)))));
+        return modifier;
+      }
+    String name = c.fresh_name("initializer_bound");
+    Type bytes = %((dim $bound) char);
+    List field = bytes.declaration_ast(%("bytes"));
+    Type declared = %(struct $name (fields $field));
+    List size = %(expr (unsigned long) (sizeof (parens $declared)));
+    reused = %(dim (expr (unsigned long) (sizeof (parens (struct $name)))));
+    return %(dim $size);
+  }
   return modifier;
 }
