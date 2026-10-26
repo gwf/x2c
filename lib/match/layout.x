@@ -17,7 +17,7 @@ static typedef struct MatchLayoutBuilder {
   int count, malformed_binder, leading_list_binder, past_capacity;
 } MatchLayoutBuilder;
 
-/* The slots a pattern binds on every match and on some match. */
+// The slots a pattern binds on every match and on some match.
 static typedef struct MatchSlots {
   unsigned long definite, possible;
 } MatchSlots;
@@ -96,13 +96,13 @@ static List _normalize_pattern(List pattern) {
   if (!op.is_match_op() || op == <!quote> || !args) return normalized;
   Var binder = args.car();
   List rest = args.cdr();
-  // `(!set BINDER PAT)` is the form this produces, so leave it alone
+  // `(!set BINDER PAT)` is the form this produces, so leave it alone.
   if (!binder.is_binder() || !rest || (op == <!set> && !rest.cdr()))
     return normalized;
   return %(!set $binder $(_normalize_pattern($(op, @rest))));
 }
 
-/* Normalizes siblings iteratively and retains every unchanged suffix. */
+// Normalizes siblings iteratively and retains every unchanged suffix.
 static List _normalize_elements(List elements) {
   Block spine = auto Block.new(sizeof(NormalizedCell));
   for (List cell = elements; cell; cell = cell.cdr()) {
@@ -135,7 +135,7 @@ MatchCaptureLayout MatchCaptureLayout.analyze(Var pattern) {
   if (malformed) builder.count = 0;
   else if (pattern is <list>) normalized = _normalize_pattern(pattern);
   MatchCaptureLayout layout = _layout(builder, normalized, malformed);
-  // a binder-free pattern has nothing to report as definite or possible
+  // Binder-free patterns keep the zero-initialized slot masks.
   if (!malformed && builder.count) {
     MatchSlots slots = _slots(layout, normalized);
     layout.definite = slots.definite;
@@ -172,7 +172,7 @@ static void _collect(MatchLayoutBuilder &b, Var pattern) {
   }
 }
 
-/* A sigil-leading `Atom` must spell a binder; a named binder takes a slot. */
+// A sigil-leading `Atom` must spell a binder; a named binder takes a slot.
 static void _atom(MatchLayoutBuilder &b, Var atom) {
   int kind = _binder_kind(atom);
   if (kind < 0) b.malformed_binder = 1;
@@ -180,7 +180,7 @@ static void _atom(MatchLayoutBuilder &b, Var atom) {
     b.past_capacity = 1;
 }
 
-/* Returns the slot for `binder`, or -1 once the pattern is past capacity. */
+// Returns the slot for `binder`, or -1 once the pattern is past capacity.
 static int _add(MatchLayoutBuilder &b, Atom binder) {
   for (int i = 0; i < b.count; i++)
     if (b.binders[i].u64 == binder.u64) return i;
@@ -189,7 +189,8 @@ static int _add(MatchLayoutBuilder &b, Atom binder) {
   return b.count++;
 }
 
-/* The first malformation the walk noted, or NULL. */
+/* Error priority is binder spelling, a leading list binder in a guard, then
+   binder capacity. */
 static const char *_malformed(MatchLayoutBuilder &b) {
   if (b.malformed_binder) return "binder-name";
   if (b.leading_list_binder) return "leading-list-binder-in-guard";
@@ -197,7 +198,7 @@ static const char *_malformed(MatchLayoutBuilder &b) {
   return NULL;
 }
 
-/* The binder table shares the record's allocation. */
+// The binder table shares the record's allocation.
 static MatchCaptureLayout _layout(
   MatchLayoutBuilder &b, Var normalized, const char *malformed) {
   size_t bytes = sizeof(struct MatchCaptureLayout) + sizeof(Atom) * b.count;
@@ -218,8 +219,7 @@ static MatchCaptureLayout _layout(
    on some match. Analysis reads the normalized pattern, where a leading
    binder survives only as the `!set` capture form. */
 
-static MatchSlots _slots(
-  MatchCaptureLayout m, Var pattern) {
+static MatchSlots _slots(MatchCaptureLayout m, Var pattern) {
   if (_named_binder(pattern)) return _binder_slot(m, pattern);
   if (pattern is not <list> || pattern.is_nil()) return (MatchSlots) {0, 0};
   List list = pattern;
@@ -234,8 +234,7 @@ static MatchSlots _slots(
 
 /* `(!set BINDER TEST)` binds and tests, as the matcher runs it; any other
    set is a choice. A negation binds nothing on every match. */
-static MatchSlots _guard_slots(
-  MatchCaptureLayout m, Var op, List args) {
+static MatchSlots _guard_slots(MatchCaptureLayout m, Var op, List args) {
   if (op == <!and> || (op == <!set> && _set_capture(args)))
     return _sequence_slots(m, args);
   if (op == <!or> || op == <!set>) return _choice_slots(m, args);
@@ -248,8 +247,7 @@ static int _set_capture(List args) =>
 
 /* Every element of a sequence matches, so each one's definite slots are
    definite. */
-static MatchSlots _sequence_slots(
-  MatchCaptureLayout m, List patterns) {
+static MatchSlots _sequence_slots(MatchCaptureLayout m, List patterns) {
   MatchSlots slots = {0, 0};
   foreach (Var pattern in patterns) slots = _union(slots, _slots(m, pattern));
   return slots;
@@ -257,8 +255,7 @@ static MatchSlots _sequence_slots(
 
 /* One alternative matches, so only the slots every one binds are
    definite. */
-static MatchSlots _choice_slots(
-  MatchCaptureLayout m, List patterns) {
+static MatchSlots _choice_slots(MatchCaptureLayout m, List patterns) {
   MatchSlots slots = {0, 0};
   int first = 1;
   foreach (Var pattern in patterns) {
@@ -270,11 +267,8 @@ static MatchSlots _choice_slots(
   return slots;
 }
 
-static MatchSlots _binder_slot(
-  MatchCaptureLayout m, Var binder) {
-  int index = _find(m, binder);
-  assert(index >= 0);
-  unsigned long bit = 1UL << index;
+static MatchSlots _binder_slot(MatchCaptureLayout m, Var binder) {
+  unsigned long bit = 1UL << _find(m, binder);
   return (MatchSlots) {bit, bit};
 }
 
@@ -312,9 +306,8 @@ List MatchCaptureLayout.definite_list(MatchCaptureLayout layout) =>
 List MatchCaptureLayout.possible_list(MatchCaptureLayout layout) =>
   layout ? _binders(layout, layout.possible) : NULL;
 
-/* Selection by `included` preserves slot order. */
-static List _binders(
-  MatchCaptureLayout layout, unsigned long included) {
+// Selection by `included` preserves slot order.
+static List _binders(MatchCaptureLayout layout, unsigned long included) {
   List binders = NULL;
   for (int i = layout.binder_count - 1; i >= 0; i--)
     if (_capture_bit(included, i)) binders = cons(layout.binders[i], binders);
