@@ -331,7 +331,7 @@ meta Code lambda_lift(Code node) {
    a bridge. */
 meta static int _lambda_in_public_inline(void) {
   match (x2c_enclosing(<function>)) case %(function ?(Type type) *):
-    return type.match(%(* inline *)) && !type.match(%(* static *));
+    return type ~= %(* inline *) && !(type ~= %(* static *));
   return 0;
 }
 
