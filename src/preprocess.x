@@ -18,7 +18,8 @@
    collection, and generation read directives through them. */
 
 /** Returns the preprocessor line `text` without its `#` and the blanks
-    around the directive. */
+    around the directive.
+*/
 String Compiler.preproc_directive(String text) =>
   text.strip(" \t").remove_prefix("#").strip(" \t");
 
@@ -38,7 +39,8 @@ Symbol Compiler.preproc_conditional_kind(String text) {
     2 when C never takes its first arm, because the condition requires a
     never-defined name or is `0`; 1 when C never takes the arms after its
     first `#else`, because the condition is exactly `!defined(NAME)`; and 0
-    otherwise. */
+    otherwise.
+*/
 int Compiler.preproc_open_state(String text) {
   String line = _directive_line(Compiler.preproc_directive(text)).replace(
     "defined ( <never> )", "defined <never>");
@@ -75,7 +77,8 @@ static int _never_defined(String name) {
 }
 
 /** Returns a group's hidden-arm state after its `#elif` or `#else`: 2 when
-    the group's state was 1, and 0 otherwise. */
+    the group's state was 1, and 0 otherwise.
+*/
 int Compiler.preproc_branch_state(int state) => state == 1 ? 2 : 0;
 
 /** Returns the file named by the `#include` line `text`, or `NULL` for any
@@ -95,7 +98,8 @@ String Compiler.preproc_include_target(String text, int &angle) {
 
 /** Returns the file that the host preprocessor's line marker `text`,
     `# N "file" flags`, names and sets `line` to N, or returns `NULL` for
-    any other line. */
+    any other line.
+*/
 String Compiler.preproc_marker_file(String text, int &line) {
   String body = Compiler.preproc_directive(text);
   size_t digits = 0;
@@ -109,7 +113,7 @@ String Compiler.preproc_marker_file(String text, int &line) {
 }
 
 /* Returns the name token of the `#define` or `#undef` directive `content`,
-   or NULL for any other directive, and sets `*undefined` for `#undef`. The
+   or NULL for any other directive, and sets `undefined` for `#undef`. The
    directive is scanned as x2c tokens. */
 static Token _macro_directive(String content, int &undefined) {
   String directive = Compiler.preproc_directive(content);
@@ -298,7 +302,8 @@ List Compiler.leading_preproc(Compiler c) {
 }
 
 /** Records object-like `#define` names and removes names after `#undef`.
-    Source storage determines visibility independently of directives. */
+    Source storage determines visibility independently of directives.
+*/
 void Compiler.note_preprocessor_macros(Compiler c, List directives) {
   foreach (List directive in directives) c.note_object_macro(directive.cadr());
 }
@@ -395,9 +400,10 @@ static int _is_annotation(Compiler c, String word) {
    any prefix. */
 static int _prefix_rank(Var v) {
   if (v is not <list>) return 0;
-  if (List.match(v, %(* static *))) return 4;
-  foreach (Symbol word in v) if (word.is_type_qualifier()) return 1;
-  return v.list() ? 3 : 2;
+  List words = v;
+  if (<static> in words) return 4;
+  foreach (Symbol word in words) if (word.is_type_qualifier()) return 1;
+  return words ? 3 : 2;
 }
 
 /* conditional groups around placed items
