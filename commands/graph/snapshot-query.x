@@ -342,8 +342,14 @@ static int _sq_binding(
   return 0;
 }
 
+static int _sq_node_where(
+  SnapshotQuery &q, Map entity, List node, List parents, Map filter);
+
 static int _sq_node_filter(
   SnapshotQuery &q, Map entity, List node, List parents, Map request) {
+  if (request.contains("node_where") &&
+      !_sq_node_where(q, entity, node, parents,
+        _sq_object(request["node_where"], "node_where"))) return 0;
   if (request.contains("inside")) {
     String wanted = _sq_string(request["inside"], "inside");
     int found = 0;
@@ -393,6 +399,38 @@ static int _sq_node_filter(
     if (!found) return 0;
   }
   return 1;
+}
+
+/* Node predicates compose independently of entity selection predicates. */
+static int _sq_node_where(
+  SnapshotQuery &q, Map entity, List node, List parents, Map filter) {
+  Map simple = {};
+  foreach ((String key, Var value) in filter) {
+    if (key == "all" || key == "any") {
+      Array filters = _sq_array(value, key);
+      int found = key == "all";
+      foreach (Var child, filters) {
+        int matches = _sq_node_where(q, entity, node, parents,
+          _sq_object(child, key));
+        if (key == "all" && !matches) { found = 0; break; }
+        if (key == "any" && matches) { found = 1; break; }
+      }
+      if (!found) return 0;
+    }
+    else if (key == "not") {
+      if (_sq_node_where(q, entity, node, parents,
+            _sq_object(value, key))) return 0;
+    }
+    else {
+      int known = 0;
+      foreach (String field, %("inside" "callee" "binding"
+          "declared_type" "resolved_type" "argument_type"))
+        if (field == key) { known = 1; break; }
+      if (!known) _sq_error(%"unknown node filter: $key");
+      simple[key] = value;
+    }
+  }
+  return _sq_node_filter(q, entity, node, parents, simple);
 }
 
 static Map _sq_location(List origin, Map entity) {
@@ -472,10 +510,29 @@ static Array _sq_match(SnapshotQuery &q, Map request) {
   return rows;
 }
 
+/* A direct name selector denotes one identity. Broader selectors, such as
+   kind or an explicit any-set, deliberately select several entities. */
+static Map _sq_name_ambiguity(SnapshotQuery &q, Map request) {
+  if (!request.contains("select")) return NULL;
+  Map selector = _sq_object(request["select"], "select");
+  if (!selector.contains("name") || selector.contains("id")) return NULL;
+  Array candidates = _sq_select(q, selector);
+  if (candidates.len() < 2) return NULL;
+  Array rows = [];
+  foreach (Map entity, candidates) rows.push(_sq_summary(entity));
+  Map result = _sq_page(q.snapshot, request, rows);
+  result["status"] = "ambiguous";
+  return result;
+}
+
 /** Executes one data-only query without opening a compiler or source file. */
 Map graph_snapshot_query(Map snapshot, Map request) {
   SnapshotQuery q = _sq_open(snapshot);
   String op = _sq_string(request["op"], "op");
+  if (op == "traverse" || op == "match") {
+    Map ambiguous = _sq_name_ambiguity(q, request);
+    if ((void *) ambiguous) return ambiguous;
+  }
   Array rows = NULL;
   switch (op) {
     case "find": rows = _sq_find(q, request); break;
