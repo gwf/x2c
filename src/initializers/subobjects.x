@@ -1,4 +1,9 @@
-/*  subobjects.x -- initializer destinations and native bounds */
+/*  subobjects.x -- initializer destinations and native bounds
+
+    Paths are stacks of (owner kind selector type following-fields)
+    frames. The same subobject walk owns conversion and deferred native
+    assignment.
+*/
 
 static keyword loop $private.loop;
 
@@ -22,7 +27,8 @@ static Type _resolve_shape(Compiler c, Type type) {
     (native-condition path destination value). Explicit braces start a nested
     walk. Scalar runs map their ordinal through the native dimensions; other
     inputs retain possible cursor continuations. A NULL condition is
-    unconditional, and a NULL destination is excess. */
+    unconditional, and a NULL destination is excess.
+*/
 List Compiler.initializer_rows(
   Compiler c, Type root, List items, List target) {
   List scalar = _scalar_rows(c, root, items, target);
@@ -120,8 +126,7 @@ static List _designated_path(
   }
 }
 
-static List _named_field_path(
-  Compiler c, Type type, Var name, List parent) {
+static List _named_field_path(Compiler c, Type type, Var name, List parent) {
   Type owner = _resolve_shape(c, type);
   List fields = c.sym.field_order(owner).cdr();
   while (fields) {
@@ -129,8 +134,7 @@ static List _named_field_path(
     List path = _field_path(owner, fields, parent);
     if (row.car() == name) return path;
     Type member = row.cadr();
-    if (!row.car() &&
-        _resolve_shape(c, member).is_aggregate()) {
+    if (!row.car() && _resolve_shape(c, member).is_aggregate()) {
       List nested = _named_field_path(c, member, name, path);
       if (nested) return nested;
     }
@@ -141,15 +145,15 @@ static List _named_field_path(
 
 /** Returns the initializer path selecting one visible aggregate field.
     Anonymous aggregate members remain explicit path frames, so consumers
-    observe the same member promotion as native initializer conversion. */
+    observe the same member promotion as native initializer conversion.
+*/
 List Compiler.initializer_field_path(
   Compiler c, Type type, List field) =>
   _named_field_path(c, type, field.car(), NULL);
 
 /* An enum constant captures one native index expansion where the original
    designator occurred. Its ordinary cast shape survives normalization. */
-static List _capture_index(
-  Compiler c, List index, List &reference) {
+static List _capture_index(Compiler c, List index, List &reference) {
   match (index)
     case %(expr ? $($source_cast_content(
         %((enum ((op = ?binding ?original)))
@@ -200,8 +204,7 @@ static int _fills_whole(Compiler c, Type type, List value) {
   return !resolved.is_array() && !resolved.is_aggregate();
 }
 
-static int _fills_char_array(
-  Compiler c, Type type, List value) {
+static int _fills_char_array(Compiler c, Type type, List value) {
   if (!value.match(
     %(expr (* char) $($source_literal_content(%((* char) ?)))))) return 0;
   Type array = _resolve_shape(c, type);
@@ -211,21 +214,15 @@ static int _fills_char_array(
          element === %(unsigned char);
 }
 
-/* initializer paths
-
-   Paths are stacks of (owner kind selector type following-fields)
-   frames. The same subobject walk owns conversion and deferred native
-   assignment. */
+// initializer paths
 
 static Type _path_type(List path, Type root) {
   if (!path) return root;
-  (Type owner, Symbol kind, Var selector, Type type, List rest) =
-    path.car();
-  return type;
+  List frame = path.car();
+  return frame[3];
 }
 
-static List _first_path(
-  Compiler c, Type type, List parent) {
+static List _first_path(Compiler c, Type type, List parent) {
   Type owner = _resolve_shape(c, type);
   if (owner.is_array()) {
     List zero = $!int{ 0 };
@@ -236,8 +233,7 @@ static List _first_path(
   return NULL;
 }
 
-static List _field_path(
-  Type owner, List fields, List parent) {
+static List _field_path(Type owner, List fields, List parent) {
   fields = _next_field(fields);
   if (!fields) return NULL;
   List row = fields.car();
@@ -336,8 +332,7 @@ List Compiler.initializer_slot(Compiler c, List target, List path) {
    cursor histories. Children pair ordinary path frames with
    (type count children) layouts. */
 
-static List _scalar_rows(
-  Compiler c, Type root, List items, List target) {
+static List _scalar_rows(Compiler c, Type root, List items, List target) {
   int symbolic = 0;
   List string = NULL;
   if (!_scalar_inputs(c, items, string)) return NULL;
