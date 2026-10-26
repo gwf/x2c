@@ -42,8 +42,7 @@ List Compiler.expand_macro_invocation_node(
 
 /* The definition a node names: a visible macro, a local macro, or a Macro
    value whose references bind in this unit. */
-module List _stored_definition(
-  Compiler c, Var stored, Token invocation) {
+module List _stored_definition(Compiler c, Var stored, Token invocation) {
   List definition = NULL;
   if (stored.is_atom())
     definition = _lookup(c, Atom.intern(stored.str()), invocation);
@@ -107,8 +106,7 @@ static List _bind_expansion(Expansion &x, Symbol position) {
   List fresh_input = _fresh_names(x, old_stack);
   List match_input = fresh_input
     ? x.input.append(%((fresh @fresh_input))) : x.input;
-  List replacement_bindings = match_input.match(
-    x.definition.assoc(<pattern>));
+  List replacement_bindings = match_input.match(x.definition.assoc(<pattern>));
   int matched = !!replacement_bindings;
   replacement_bindings = replacement_bindings.append(x.direct);
   List template_bindings = NULL;
@@ -160,8 +158,7 @@ static List _fresh_names(Expansion &x, List old_stack) {
 
 /* A Name hole in a member position supplies the captured spelling, so a
    template local passed there keeps the spelling its source wrote. */
-static List _member_bindings(
-  Compiler c, List parameters, List input) {
+static List _member_bindings(Compiler c, List parameters, List input) {
   List captures = NULL, bindings = NULL;
   match (input) {
     case %(args *rows): captures = rows;
@@ -251,8 +248,7 @@ Token Compiler.macro_invocation_site(Compiler c, Var site) {
    interface, so its spelling is stable: collection and full parsing expand
    the same invocation to the same spelling. */
 
-static List _introduced_binding(
-  Compiler c, String source, Token root) =>
+static List _introduced_binding(Compiler c, String source, Token root) =>
   c.sym.introduce(
     root ? _file_scope_name(c, root, source)
          : c.fresh_name(%"macro_$source"));
@@ -266,8 +262,7 @@ module List _private_name(Compiler c, String source, Token root) {
 
 /* The spelling names the owning unit and the root invocation's offset, and
    counts repeats of the same name there. */
-static String _file_scope_name(
-  Compiler c, Token root, String source) {
+static String _file_scope_name(Compiler c, Token root, String source) {
   String key = %"macro:$(_scope_owner(c)):$(root.pos):$source";
   Var stored;
   int count = c.names.counters.try_get(key, stored) ? stored : 0;
