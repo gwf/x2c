@@ -4,13 +4,11 @@
 
     An `Atom` preserves its spelling exactly. Compact spellings use immediate
     `Symbol`s when `Symbol` encoding round-trips every byte; all other
-    spellings
-    use the private `<lsym>` representation with a direct pointer to the
-    canonical `String`. `String` canonicalization makes equal long `Atom`s
+    spellings use the private `<lsym>` representation with a direct pointer
+    to the canonical `String`. Canonicalization makes equal long `Atom`s
     bit-identical. Compact `Atom`s have value lifetime. A long `Atom` borrows
-    its
-    canonical spelling, which may belong to any pool in the active chain and
-    lives until its owning pool is released.
+    its canonical spelling, which may belong to any pool in the active chain.
+    The spelling lives until its owning pool is released.
 */
 
 #pragma once
@@ -18,9 +16,9 @@
 #include "common.x"
 
 /** Promotes a long `Atom` spelling into its parent `String` pool.
-    Returns `atom` unchanged. Compact `Atom`s and long spellings
-    not owned by the
-    innermost pool are unchanged. A promoted spelling keeps the same pointer.
+    Returns `atom` unchanged. Compact `Atom`s and long spellings not owned by
+    the innermost pool are unchanged. A promoted spelling keeps the same
+    pointer.
     Raises: `<alloc-fail>` when promotion metadata cannot be allocated.
 */
 Self Atom.promote(Self atom) {
@@ -28,12 +26,12 @@ Self Atom.promote(Self atom) {
   return atom;
 }
 
-/* True when a spelling can be written bare and read back identically
-   by the Lisp reader: the first byte is printable and not a delimiter, the
-   spelling opens no comment, has no numeric prefix, and holds no backslash,
-   which would read as an escape. Both reader scanners consume it whole.
-   The unit-interface writer delegates its bare-symbol decision here. */
-/** Reports whether a spelling can round-trip as a bare Lisp `Atom`. */
+/** Reports whether a spelling can round-trip as a bare Lisp `Atom`.
+    The first byte is printable and not a delimiter. The spelling opens no
+    comment, has no numeric prefix, and holds no backslash, which would read
+    as an escape. Both reader scanners consume it whole. The unit-interface
+    writer uses the same bare-symbol decision.
+*/
 int Atom.bare_spelling(String spelling) {
   if (!spelling || !*spelling || _numeric_prefix(spelling)) return 0;
   unsigned char first = (unsigned char) spelling[0];
@@ -45,10 +43,9 @@ int Atom.bare_spelling(String spelling) {
 }
 
 /** Appends the exact spelling of `atom` to `out`.
-    Neither representation allocates a `String`. An `<lsym>` `Atom` already
-    owns
-    its bytes, and a compact `<symbol>` decodes straight into `out`. An invalid
-    `Atom` appends nothing.
+    Neither representation allocates a `String`. An `<lsym>` `Atom` borrows
+    its canonical bytes, and a compact `<symbol>` decodes straight into `out`.
+    An invalid `Atom` appends nothing.
     Raises: `<size-limit>` or `<alloc-fail>` when `out` cannot grow.
 */
 Buffer Atom.write_str(Atom atom, Buffer out) {
@@ -60,9 +57,8 @@ Buffer Atom.write_str(Atom atom, Buffer out) {
 /** Writes the escaped readable spelling of `atom` to `out`.
     The escaping makes the result readable as the same exact `Atom`. An invalid
     `Atom` appends nothing.
-    Raises: `<alloc-fail>` while decoding a compact `Atom`, or
-    `<size-limit>` or
-    `<alloc-fail>` when `out` cannot grow.
+    Raises: `<alloc-fail>` while decoding a compact `Atom`, or `<size-limit>`
+    or `<alloc-fail>` when `out` cannot grow.
 */
 Buffer Atom.write_repr(Atom value, Buffer out) {
   static const char hex[] = "0123456789ABCDEF", String spelling = value.str();
@@ -93,9 +89,8 @@ meta native int Var.is_atom(Var value) => value is <symbol> || value is <lsym>;
 
 /** Returns the exact spelling of `atom` as a `String`.
     A compact `Atom` is decoded and canonicalized through the active pool
-    chain.
-    A long `Atom` returns its borrowed canonical spelling under the module
-    lifetime rule above. An invalid `Atom` returns NULL.
+    chain. A long `Atom` returns its borrowed canonical spelling under the
+    module lifetime rule above. An invalid `Atom` returns NULL.
     Raises: `<alloc-fail>` while canonicalizing a compact spelling.
 */
 String Atom.str(Atom atom) {
@@ -204,17 +199,14 @@ static int _decodes_to(Symbol compact, String canonical, int length) {
 }
 
 /** Returns the canonical `Atom` with the supplied exact spelling.
-    Repeated interning of equal bytes returns a bit-identical `Atom`. A
-    spelling
-    that round-trips through either compact encoding becomes an immediate
+    Interning equal bytes returns bit-identical `Atom`s. A spelling that
+    round-trips through either compact encoding becomes an immediate
     `Symbol`; every other spelling borrows its canonical `String` under the
-    module
-    lifetime rule above. Use `Atom.promote` before a long `Atom` escapes its
-    innermost owning pool.
+    module lifetime rule above. Use `Atom.promote` before a long `Atom`
+    escapes its innermost owning pool.
     Raises: `<bad-arg>` when `spelling` is null or empty, `<alloc-fail>` when
     its canonical `String` cannot be allocated, or `<bad-enc>` if the
-    long-`Atom`
-    pointer cannot be boxed.
+    long-`Atom` pointer cannot be boxed.
 */
 Atom Atom.intern(String spelling) {
   if (!spelling || !*spelling) raise %(bad-arg (operation "Atom.intern"));
