@@ -311,11 +311,14 @@ static Map _sq_summary(Map entity) {
   return result;
 }
 
-static Map _sq_view(Map entity, String view) {
+static Map _sq_view(SnapshotQuery &q, Map entity, String view) {
   Map result = _sq_summary(entity);
   if (view == "summary") return result;
   String field = view == "typed_ast" ? "ast" : view;
   result[field] = entity.getdefault(field, NULL);
+  if (view == "source" && entity["kind"] == "file")
+    foreach (Map file, q.snapshot["files"].array())
+      if (file["path"] == entity["file"]) result[field] = file["text"];
   return result;
 }
 
@@ -345,7 +348,7 @@ static Map _sq_inspect(SnapshotQuery &q, Map request) {
   Array rows = [];
   String view = request.getdefault("view", "summary");
   foreach (Map entity, selected)
-    rows.push(_sq_view(entity, selected.len() == 1 ? view : "summary"));
+    rows.push(_sq_view(q, entity, selected.len() == 1 ? view : "summary"));
   Map result = _sq_page(q.snapshot, request, rows);
   result["status"] = selected.len() == 1 ? "found"
     : selected.len() ? "ambiguous" : "not-found";

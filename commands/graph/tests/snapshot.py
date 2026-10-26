@@ -155,6 +155,10 @@ def lifecycle(p, sources):
                   "removed_relations"):
         assert not unchanged[field], (field, unchanged[field])
     original = sources[0].read_text()
+    files = p.find(snapshot, kind="file", file=str(sources[0]))["results"]
+    file_view = p.query(snapshot, op="inspect", select={"id": files[0]["id"]},
+                        view="source")
+    assert file_view["results"][0]["source"] == original, file_view
     source_view = p.query(snapshot, op="inspect", select={"name": "snapshot_leaf"},
                           view="source")
     source = source_view["results"][0]["source"]
