@@ -7,10 +7,10 @@
     adoption into a conformance, answers member and operator lookups, and
     presents each conformance as native aliases or a `conform` form, from which
     `src/components/protocol-adapters.x` writes the adapters. Registries are
-    rebuilt per
-    translation unit; a static row is visible only in the unit of its canonical
-    source path. The unit that declares an external adoption resolves it and
-    records the conformance in its interface, which an including unit reuses.
+    rebuilt per translation unit; a static row is visible only in the unit of
+    its canonical source path. The unit that declares an external adoption
+    resolves it and records the conformance in its interface, which an
+    including unit reuses.
 */
 #pragma once
 #include "compiler/compiler.x"
