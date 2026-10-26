@@ -195,7 +195,7 @@ static void *_calloc_in(Scope *slot, size_t count, size_t size) {
     _raw_fatal("calloc size overflow");
   }
   size_t total = count * size, void *ptr = _malloc_in(slot, total, NULL);
-  if (ptr && total) memset(ptr, 0, total);
+  if (total) memset(ptr, 0, total);
   return ptr;
 }
 
