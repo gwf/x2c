@@ -43,15 +43,15 @@ meta static List _lambda_cell_name(List binding, Map cells) {
    that cell, or NULL: a reference reads the cell's address. */
 meta static Code _lambda_cell_read(Var node, Map cells) {
   Var cell;
-  match (node) case %(expr ?(Type read) (ident ?binding)):
-    if (cells.try_get(binding, cell)) {
-      Type type = cell.list().cadr();
-      List name = _lambda_cell_name(binding, cells);
-      if (read.car() == <&>) return %(expr $read (ident $name));
-      Type pointer = cons(<*>, type);
-      return %(expr $type
-               (parens (expr $type (op * (expr $pointer (ident $name))))));
-    }
+  if (node ~= %(expr ?(Type read) (ident ?binding)) &&
+      cells.try_get(binding, cell)) {
+    Type type = cell.list().cadr();
+    List name = _lambda_cell_name(binding, cells);
+    if (read.car() == <&>) return %(expr $read (ident $name));
+    Type pointer = cons(<*>, type);
+    return %(expr $type
+             (parens (expr $type (op * (expr $pointer (ident $name))))));
+  }
   return NULL;
 }
 
@@ -109,7 +109,7 @@ meta static List _lambda_targets(List node) {
   match (node) {
     case %(dstrdecl (params *params) ?):
       foreach (List param in params)
-        match (param) case %(param ? (bind ?binding ?)): targets.push(binding);
+        if (param ~= %(param ? (bind ?binding ?))) targets.push(binding);
     case %(dstrdecl ? (targets *names) ?): return names;
   }
   return targets.list_free();
@@ -177,7 +177,7 @@ meta static Var _lambda_declare_cells(List node, Map cells) {
     case %(for (decl ?base ?bindings) ?test ?next ?body): {
       Code declaration =
         _lambda_declare_cells(%(declare $base $bindings), cells);
-      match (declaration) case %(seq *initial):
+      if (declaration ~= %(seq *initial))
         return %(block @initial
                  $(Code.lowered(%(for () $test $next $body), NULL)));
     }
@@ -255,13 +255,13 @@ meta static List _lambda_returning(List items, List none) {
    expression body keeps the origin of the item that holds the lambda, so
    lowering it later reports there. */
 meta static List _lambda_items(Code body) {
-  match (body) case %(block *items):
+  if (body ~= %(block *items))
     return $(
       @(_lambda_returning(items, source_return_none())), source_return_none());
   List items = body ~= %(expr (void) ?)
     ? %((stmnt $body) $(source_return_none()))
     : %((stmnt (return $(body.convert(%("Var"))))));
-  match (x2c_enclosing(<statement>)) case %(at ?origin ?):
+  if (x2c_enclosing(<statement>) ~= %(at ?origin ?))
     return %((at $origin $(items.car())) @(items.cdr()));
   return items;
 }
@@ -286,7 +286,7 @@ meta static List _lambda_closure_params(
   foreach (List param in _lambda_params(params)) {
     Type read = reads.car().list().car();
     reads = reads.cdr();
-    match (param) case %(param ? (bind ?binding (& *))): {
+    if (param ~= %(param ? (bind ?binding (& *)))) {
       Type reference = cons(<&>, read.cdr());
       (List base, List modifiers) = reference.parts();
       param = %(param $base (bind $binding $modifiers));
@@ -294,7 +294,7 @@ meta static List _lambda_closure_params(
     out.push(param);
   }
   foreach (List capture in captures)
-    match (capture) case %(capture ?binding ?(Type type) ?): {
+    if (capture ~= %(capture ?binding ?(Type type) ?)) {
       (List base, List modifiers) = type.parts();
       out.push(%(param $base (bind $binding $modifiers)));
     }
@@ -330,7 +330,7 @@ meta Code lambda_lift(Code node) {
    inline, so its body reaches the unit's private declarations only through
    a bridge. */
 meta static int _lambda_in_public_inline(void) {
-  match (x2c_enclosing(<function>)) case %(function ?(Type type) *):
+  if (x2c_enclosing(<function>) ~= %(function ?(Type type) *))
     return type ~= %(* inline *) && !(type ~= %(* static *));
   return 0;
 }
@@ -339,9 +339,9 @@ meta static int _lambda_in_public_inline(void) {
    path so that units whose public inline functions share a header link
    together. */
 meta static String _lambda_bridge_role(void) {
-  match (x2c_enclosing(<unit>))
-    case %(expr ? (segments (segexp (expr ? (literal ? ?(String path)))))):
-      return %"func_from_capture_$("%08x".printf(path.hash()))";
+  if (x2c_enclosing(<unit>) ~=
+      %(expr ? (segments (segexp (expr ? (literal ? ?(String path)))))))
+    return %"func_from_capture_$("%08x".printf(path.hash()))";
   return "func_from_capture";
 }
 
@@ -456,7 +456,7 @@ meta static Code _lambda_value(
   List adapter, List context, Code signature, List captures) {
   Array setup = [], values = [], types = [];
   foreach (List capture in captures)
-    match (capture) case %(capture ? ?(Type type) ?(Code value)): {
+    if (capture ~= %(capture ? ?(Type type) ?(Code value))) {
       Type stored = _lambda_field_type(type);
       (List base, List modifiers) = stored.parts();
       List local = x2c_binding_fresh("lambda_capture_value");
@@ -551,7 +551,7 @@ meta static List _lambda_designated(Var value) {
 meta static Map _lambda_shared(List params, List items) {
   Map declared = {}, shared = {}, cells = {};
   foreach (List param in params)
-    match (param) case %(param ? (bind ?binding *)): declared[binding] = 1;
+    if (param ~= %(param ? (bind ?binding *))) declared[binding] = 1;
   List node;
   $ast.walk(items, node) match (node) {
     case %(declare (!set ?base (* static *)) *): continue;
@@ -560,13 +560,12 @@ meta static Map _lambda_shared(List params, List items) {
       foreach (List binding in _lambda_targets(node)) declared[binding] = 1;
     case %(lambda *parts): {
       foreach (List part in parts)
-        match (part) case %(captures *rows):
+        if (part ~= %(captures *rows))
           foreach (List row in rows)
-            match (row)
-              case %(capture ? (& *type) (expr ? (op & ?target))): {
-                List binding = _lambda_designated(target);
-                if (binding) shared[binding] = type;
-              }
+            if (row ~= %(capture ? (& *type) (expr ? (op & ?target)))) {
+              List binding = _lambda_designated(target);
+              if (binding) shared[binding] = type;
+            }
       continue;
     }
   }
@@ -593,7 +592,7 @@ meta Code lambda_cells(Code node) {
       if (!cells.len()) return node;
       Array entry = [];
       foreach (List param in params)
-        match (param) case %(param ? (bind ?binding *)): {
+        if (param ~= %(param ? (bind ?binding *))) {
           Code cell = _lambda_copied_cell(binding, cells);
           if (cell) entry.push(cell);
         }
