@@ -80,7 +80,7 @@ void Compiler.prepare_loaded_main(Compiler c, Array nodes) {
 void Compiler.prepare_loaded_functions(Compiler c, Array nodes) {
   Map present = {};
   foreach (List entry in c.meta_group)
-    match (entry) case %(function ? ?name ?): present[name] = 1;
+    if (entry ~= %(function ? ?name ?)) present[name] = 1;
   Var identity, String name;
   foreach (List node in nodes)
     if (_function_identity(node, identity, name) &&
@@ -89,7 +89,7 @@ void Compiler.prepare_loaded_functions(Compiler c, Array nodes) {
       present[name] = 1;
     }
   foreach (List node in nodes)
-    match (node) case %(declare ?spec (bindings *rows)):
+    if (node ~= %(declare ?spec (bindings *rows)))
       foreach (List row in rows) _loaded_global(c, spec, row, present);
 }
 
@@ -293,9 +293,9 @@ static void _loaded_fields(LoadedPath path, Type type, List target) {
 
 static void _loaded_global(Compiler c, Type spec, List row, Map present) {
   int initialized = 0;
-  match (row) case %(op = ?bound ?): { row = bound; initialized = 1; }
+  if (row ~= %(op = ?bound ?)) { row = bound; initialized = 1; }
   if (spec.is_static() || (spec.is_extern() && !initialized)) return;
-  match (row) case %(bind ?binding ?): {
+  if (row ~= %(bind ?binding ?)) {
     String name = Ast.binding_spelling(binding);
     if (!name || name in present || $(name) in c.sym.file_statics()) return;
     Type type = %(declare $spec (bindings $row)).type_from_ast();
