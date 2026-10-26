@@ -67,7 +67,7 @@ packs the remaining `args` through ordinary List construction. Only an
 explicit splice contributes more than one element. The caller changes
 the callee's final parameter to List before issuing this packed call.
 
-Source: `src/transform/expressions.x:351`
+Source: `src/transform/expressions.x:352`
 
 <a id="Compiler.shipped_support"></a>
 #### Compiler.shipped_support
@@ -79,7 +79,7 @@ the form `source` of `kind`, bound and lowered with the support. The
 kernel has no lowering of its own for `source`, so no rule ends the
 translation as `_shipped_lowering` does.
 
-Source: `src/transform/traversal.x:123`
+Source: `src/transform/traversal.x:124`
 
 <a id="Compiler.transform"></a>
 #### Compiler.transform

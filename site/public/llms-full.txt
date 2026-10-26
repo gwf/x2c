@@ -5523,6 +5523,33 @@ program registers there runs first. A program's `switch` rule receives the
 statements in the arms. It does not receive the `switch` that the lowering
 writes.
 
+### Pattern conditions
+
+`subject ~= pattern` returns an `int` indicating whether the subject matches.
+It evaluates the subject once, has equality precedence, and uses the same
+patterns and typed captures as `match`.
+
+```x2c
+#include "x2c.x"
+List row = %(pair 2 3);
+if (row ~= %(pair ?(int a) ?(int b)) && a < b) {
+  printf("%d %d\n", a, b);
+}
+```
+
+Captures are visible on the right of `&&` and in the true arm of `if`.
+Parentheses preserve that visibility. Captures do not enter `else` or the
+following statement. Negation, `||`, and other operators do not export
+captures. An outer variable with the same name remains visible outside the
+successful scope. A later pattern in an `&&` chain can shadow an earlier
+capture.
+
+Unlike a `match` statement, a pattern condition does not introduce a target
+for `break`. A `break` or `continue` in the true body retains its ordinary
+loop or switch target. Pattern conditions use the existing match lowering:
+simple static patterns become direct C tests; complex patterns can use the
+cached runtime matcher.
+
 ### Errors and cleanup
 
 `try` requires a following filtered `catch`, `finally`, or both.

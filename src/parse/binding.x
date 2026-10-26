@@ -368,7 +368,7 @@ static List _bind_if(Compiler c, Var condition, Var ontrue) {
   List test = _bind_clause(c, condition);
   int true_is_present = 1;
   List binding = c.optional_reference_test(test, true_is_present);
-  List yes = _bind_branch(c, ontrue, binding, true_is_present);
+  List yes = _bind_condition_branch(c, test, ontrue, binding, true_is_present);
   c.settle_reference(binding, true_is_present, yes, NULL);
   return %(if $test $yes);
 }
@@ -377,11 +377,18 @@ static List _bind_if_else(Compiler c, Var condition, Var ontrue, Var onfalse) {
   List test = _bind_clause(c, condition);
   int true_is_present = 1;
   List binding = c.optional_reference_test(test, true_is_present);
-  List yes = _bind_branch(c, ontrue, binding, true_is_present);
+  List yes = _bind_condition_branch(c, test, ontrue, binding, true_is_present);
   List no = _bind_branch(c, onfalse, binding, !true_is_present);
   c.settle_reference(binding, true_is_present, yes, no);
   // A source `if` without `else` parses no false arm.
   return no ? %(if $test $yes $no) : %(if $test $yes);
+}
+
+static List _bind_condition_branch(
+  Compiler c, List test, Var arm, List binding, int present) {
+  int scoped = c.open_condition_scope(test);
+  defer { if (scoped) c.sym.pop_scope(); }
+  return _bind_branch(c, arm, binding, present);
 }
 
 static List _bind_branch(Compiler c, Var arm, List binding, int present) {
@@ -598,4 +605,35 @@ List Compiler.bind_callable_body(Compiler c, List syntax, Type return_type) {
     }
   }
   return c.bind_syntax(syntax, <block>, return_type);
+}
+
+/** Binds a pattern condition without publishing its captures to the caller.
+    Its declarations belong to the successful path; visible rows retain the
+    identities that `&&` and `if` expose in their own scopes.
+*/
+List Compiler.bind_match_condition(
+  Compiler c, List subject, List pattern, List types, Token origin) {
+  subject = _resolve(c, subject);
+  pattern = _resolve(c, pattern);
+  if (c.macro_holes)
+    return %(expr (<macro-expr>) (matches $subject $pattern $types));
+  c.sym.push_new_scope();
+  defer c.sym.pop_scope();
+  _check_binders(c, pattern, origin, "match");
+  List bindings = c.define_pattern_binders(pattern);
+  List declarations = c.pattern_binder_declarations(bindings, NULL);
+  List temporaries = NULL, native = NULL;
+  if (types) native = c.typed_capture_declarations(types, temporaries);
+  Array visible = [];
+  foreach (List row in bindings) {
+    String name = row.car().str()[1:];
+    List key = $(name);
+    List binding = c.sym.current_binding(key);
+    visible.push($(binding ? binding : row.cadr(), c.sym.get(key)));
+  }
+  if (types) c.sym.pop_scope();
+  List body = types ? %(block @declarations @temporaries (block @native))
+                    : %(block @declarations);
+  return %(expr (int)
+    (matches $subject $pattern $body $(visible.list_free())));
 }

@@ -345,6 +345,10 @@ List Compiler_match_capture_value(Var binder, int index);
 
 List Compiler_pattern_binder_declarations(Compiler c, List bindings, List handle);
 
+List Compiler_condition_bindings(List expression);
+
+int Compiler_open_condition_scope(Compiler c, List expression);
+
 int Compiler_read_source(Compiler c, String path, String volatile * text);
 
 String Compiler_canonical_path(Compiler c, String path);

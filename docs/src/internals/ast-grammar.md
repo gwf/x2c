@@ -512,6 +512,9 @@ MATCH      ::= (match EXPR (MATCH-ROW*))
 MATCH-ROW  ::= (PATTERN-EXPR ARM-BODY) | ((*) ARM-BODY)
              | PREPROCESSOR | MATCH-ROW-SLOT
 ARM-BODY   ::= STATEMENT | (guarded STATEMENT)
+PATTERN-TEST ::= (expr () (matches EXPR PATTERN-EXPR TYPED-CAPTURES))
+              | (expr (int) (matches EXPR PATTERN-EXPR BLOCK VISIBLE-BINDINGS))
+MATCH-IF   ::= (match-if EXPR (PATTERN-EXPR STATEMENT))
 ```
 
 Raise arguments alternate detail-key expressions and value expressions. A
@@ -525,6 +528,15 @@ Match rows can interleave preprocessor directives. Guards initially become an
 with declarations before `(guarded STATEMENT)` is applied. Therefore `guarded`
 does not require an immediate `if` child. Match and catch bodies can already
 contain generated capture declarations at the bound stage.
+
+`~=` parses as `matches` expression content. Binding replaces its typed
+capture descriptions with capture declarations and `(BINDING TYPE)` rows.
+The rows expose the existing identities only to successful continuations.
+Positive `&&` and `if` lower to nested conditions. Their internal `match-if`
+uses ordinary match tests without a switch or implicit break. A predicate
+used as a value wraps those conditions in a statement expression returning
+an `int`. Constructed `(expr () (op ~= EXPR PATTERN-EXPR))` also enters the
+same pattern binder.
 
 Owners: [_raise_statement, _catch_cases, _match_cases,
 Compiler.parse_case_body][statements]; [_bind_catchcases, _bind_try,
@@ -1133,6 +1145,7 @@ classified cache/transport records. Descriptor row keys are indexed through
 | `map` | [Collections, List construction, and String segments](#collections-list-construction-and-string-segments) |
 | `map-entry` | [Collections, List construction, and String segments](#collections-list-construction-and-string-segments) |
 | `match` | [Match, raise, and catch rows](#match-raise-and-catch-rows) |
+| `match-if`, `matches` | [Match, raise, and catch rows](#match-raise-and-catch-rows) |
 | `members` | [Imports, protocols, and static assertions](#imports-protocols-and-static-assertions) |
 | `meta-call` | [Pending applications and captures](#pending-applications-and-captures) |
 | `meta-cap` | [Pending applications and captures](#pending-applications-and-captures) |

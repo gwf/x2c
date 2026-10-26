@@ -244,7 +244,8 @@ x2c statement parsing.
 Public functions:
 
 `Compiler.parse_source_clause`, `Compiler.finish_return_statement`,
-`Compiler.parse_match_row_argument`, `Compiler.parse_case_body`,
+`Compiler.parse_match_row_argument`, `Compiler.parse_match_condition`,
+`Compiler.parse_case_body`, `Compiler.typed_capture_declarations`,
 `Compiler.parse_governed`, `Compiler.parse_block_item`,
 `Compiler.parse_compound_statement`, `Compiler.parse_block_items`,
 `Compiler.parse_callable_body`
@@ -407,6 +408,7 @@ Public functions:
 `Compiler.match_value_is_static`, `Compiler.match_pattern_is_static`,
 `Compiler.match_pattern_binders`, `Compiler.define_pattern_binders`,
 `Compiler.match_capture_value`, `Compiler.pattern_binder_declarations`,
+`Compiler.condition_bindings`, `Compiler.open_condition_scope`,
 `Compiler.read_source`, `Compiler.canonical_path`,
 `Compiler.owns_package_source`, `Path.real`, `Path.resolved_absolute`,
 `Compiler.portable_path`, `Compiler.absolute_home_path`,
@@ -532,7 +534,8 @@ expression syntax and its resolution.
 Public functions:
 
 `Compiler.parse_expression`, `Compiler.parse_assignment`,
-`Compiler.parse_conditional`, `Compiler.parse_parenthesized_statement`,
+`Compiler.parse_conditional`, `Compiler.parse_pattern_operand`,
+`Compiler.parse_parenthesized_statement`,
 `Compiler.parse_macro_expression_target`, `Compiler.parse_call_splice`,
 `Compiler.parse_primary`, `Compiler.parse_variable`,
 `Compiler.resolve_expression`, `Compiler.needs_resolution`,
@@ -723,7 +726,7 @@ Public functions:
 `Compiler.leave_item`, `Compiler.finish_initializers`, `Compiler.bind_syntax`,
 `Compiler.source_clause`, `Compiler.bind_source_statement`,
 `Compiler.bind_catch_arm`, `Compiler.bind_match_arm`,
-`Compiler.bind_callable_body`
+`Compiler.bind_callable_body`, `Compiler.bind_match_condition`
 
 ### [src/project/project.x](../src/project/project.x)
 

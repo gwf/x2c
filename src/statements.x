@@ -396,23 +396,33 @@ static List _match_case(Compiler c) {
 /* Typed captures rewrite the pattern after `case` and leave their rows in
    `types`. */
 static List _case_pattern(Compiler c, Token start, List &types) {
-  List pattern = _parse_pattern(c, types);
+  List pattern = _parse_pattern(c, types, 0);
   if (types) pattern = c.typed_match_pattern(pattern, types);
   _require_list_literal(c, pattern, start);
   return pattern;
 }
 
 /* Parses a pattern while `c.match_types` collects its typed captures. */
-static List _parse_pattern(Compiler c, List &types) {
+static List _parse_pattern(Compiler c, List &types, int operand) {
   Array captures = auto [];
   List pattern = NULL;
   with (c.in_pattern = 1, c.match_types = captures) {
     pattern = c.try_parse_macro_pattern();
     if (!pattern) pattern = c.try_parse_macro_pattern_insertion(0);
-    if (!pattern) pattern = c.parse_expression();
+    if (!pattern) pattern = operand ? c.parse_pattern_operand()
+                                   : c.parse_expression();
     types = captures;
   }
   return pattern;
+}
+
+/** Parses the pattern operand of `~=` through the match pattern owner. */
+List Compiler.parse_match_condition(Compiler c, List subject, Token origin) {
+  List types = NULL;
+  List pattern = _parse_pattern(c, types, 1);
+  if (types) pattern = c.typed_match_pattern(pattern, types);
+  _require_list_literal(c, pattern, origin);
+  return c.bind_match_condition(subject, pattern, types, origin);
 }
 
 static void _require_list_literal(Compiler c, List pattern, Token start) {
@@ -426,7 +436,8 @@ static void _require_list_literal(Compiler c, List pattern, Token start) {
 */
 List Compiler.parse_case_body(Compiler c, List types) {
   List temporaries = NULL;
-  List declarations = types ? _typed_captures(c, types, temporaries) : NULL;
+  List declarations = types
+    ? c.typed_capture_declarations(types, temporaries) : NULL;
   List guard = c.peek(0) == <if> ? _keyword_paren_expr(c, <if>) : NULL;
   c.expect(<:>);
   List body = c.parse_governed(<statement>);
@@ -442,7 +453,11 @@ List Compiler.parse_case_body(Compiler c, List types) {
 /* A typed capture binds a Var, which a temporary in the arm scope keeps. A
    new scope then declares the capture's name with its type, read from the
    temporary; the caller closes that scope. */
-static List _typed_captures(Compiler c, List types, List &temporaries) {
+/** Declares typed pattern captures in a new scope, returning their native
+    declarations and the preceding Var temporaries. The caller closes it.
+*/
+List Compiler.typed_capture_declarations(
+  Compiler c, List types, List &temporaries) {
   Array locals = [];
   temporaries = _capture_temporaries(c, types, locals);
   c.sym.push_new_scope();
