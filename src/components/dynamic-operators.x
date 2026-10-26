@@ -49,7 +49,7 @@ macro Stmt $fail.operators_operand(
 
 // dynamic operators
 
-/* A `Var` operand, or a value `+` beside text or a number combines with. */
+/* Accepts `Var` or, according to `text`, a text or numeric type. */
 meta static int _dynamic_operand(Type type, int text) =>
   type.is_named("Var") || (text ? type.is_text() : !!type.numeric());
 
@@ -104,12 +104,9 @@ meta static Code _dynamic_update(
 meta static String _dynamic_helper(Type type) {
   if (type.is_named("Var")) return "x2c_var_update_volatile";
   Type scalar = type.numeric();
-  match (scalar)
-    case %(enum *):
-      $fail.operators_enum_target(NULL);
+  match (scalar) case %(enum *): $fail.operators_enum_target(NULL);
   String helper = type.update_helper();
-  if (!helper)
-    $fail.operators_numeric_target(NULL, type);
+  if (!helper) $fail.operators_numeric_target(NULL, type);
   return helper;
 }
 
