@@ -95,11 +95,11 @@ Inserts native aliases and presents other resolved conformances as
 public or private boundary. Each other conformance whose forward converter
 the unit defines goes to the rule on the `conform` head, which
 `src/components/protocol-adapters.x` registers to write its adapters into
-the unit's
-pending support. The external conformances the unit declares are first
-recorded in its interface. Returns `ast` with native insertions applied.
+the unit's pending support. The external conformances the unit declares
+are first recorded in its interface. Returns `ast` with native insertions
+applied.
 
-Source: `src/protocol/adapters.x:111`
+Source: `src/protocol/adapters.x:113`
 
 <a id="Compiler.install_generated_protocol_symbols"></a>
 #### Compiler.install_generated_protocol_symbols
@@ -109,7 +109,7 @@ Source: `src/protocol/adapters.x:111`
 Publishes external native alias and ordinary adapter signatures.
 Protocols must already be resolved in the active symbol table.
 
-Source: `src/protocol/adapters.x:150`
+Source: `src/protocol/adapters.x:152`
 
 <a id="Compiler.native_protocol_alias"></a>
 #### Compiler.native_protocol_alias
@@ -119,7 +119,7 @@ Source: `src/protocol/adapters.x:150`
 Reports whether a generated member names a native protocol host function.
 Its defining header supplies the alias instead of a C prototype.
 
-Source: `src/protocol/adapters.x:191`
+Source: `src/protocol/adapters.x:193`
 
 <a id="Compiler.parse_protocol_declaration"></a>
 #### Compiler.parse_protocol_declaration
@@ -227,7 +227,7 @@ Source: `src/protocol/registry.x:505`
 Remembers a source typedef's declaration and visibility, which native
 alias insertion reads for its participant.
 
-Source: `src/protocol/adapters.x:372`
+Source: `src/protocol/adapters.x:373`
 
 <a id="Compiler.resolve_as_declared"></a>
 #### Compiler.resolve_as_declared

@@ -25,7 +25,7 @@ Disjoint sets with union-find.
 
 Releases the set's arrays when `DisjointSet.free` releases the set.
 
-Source: `lib/lib.x:43`
+Source: `lib/lib.x:42`
 
 <a id="DisjointSet.find"></a>
 #### DisjointSet.find
@@ -35,7 +35,7 @@ Source: `lib/lib.x:43`
 Returns the representative of `x` and compresses its traversed path.
 `set` must be live and `x` must be between zero and `set.length - 1`.
 
-Source: `lib/lib.x:51`
+Source: `lib/lib.x:50`
 
 <a id="DisjointSet.init"></a>
 #### DisjointSet.init
@@ -44,13 +44,12 @@ Source: `lib/lib.x:51`
 
 Creates a union-find over elements `0` through `n - 1`.
 `n` must be nonnegative. The result belongs to the active `Scope` and
-starts
-with each element in its own component.
+starts with each element in its own component.
 
 **Raises:** `<size-limit>` or `<alloc-fail>` while allocating the structure or
 its arrays.
 
-Source: `lib/lib.x:31`
+Source: `lib/lib.x:30`
 
 <a id="DisjointSet.num_components"></a>
 #### DisjointSet.num_components
@@ -59,7 +58,7 @@ Source: `lib/lib.x:31`
 
 Returns the live set's current number of disjoint components.
 
-Source: `lib/lib.x:93`
+Source: `lib/lib.x:92`
 
 <a id="DisjointSet.sizes"></a>
 #### DisjointSet.sizes
@@ -73,7 +72,7 @@ which may be an ancestor of the active pool.
 
 **Raises:** `<size-limit>` or `<alloc-fail>` while collecting or sorting rows.
 
-Source: `lib/lib.x:85`
+Source: `lib/lib.x:84`
 
 <a id="DisjointSet.union"></a>
 #### DisjointSet.union
@@ -85,7 +84,7 @@ Merges the components containing `a` and `b` by size.
 component's root wins unless the sizes tie, when the root of `a` wins.
 Merging an existing component is a no-op.
 
-Source: `lib/lib.x:67`
+Source: `lib/lib.x:66`
 
 ## Public types
 

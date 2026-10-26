@@ -218,7 +218,7 @@ starting at `start`, or NULL. A doc comment opens with two asterisks and
 ends on the line before `start` or on its line. Macro templates carry the
 text until their selected body binds at the invocation.
 
-Source: `src/parse/units.x:590`
+Source: `src/parse/units.x:588`
 
 <a id="Compiler.enclosing"></a>
 #### Compiler.enclosing
@@ -277,7 +277,7 @@ Constructs a foreign alias from one direct function declaration and target.
 typed, a function. Storage is limited to `static` or `inline`, when
 present, and variadic parameters are rejected.
 
-Source: `src/parse/units.x:758`
+Source: `src/parse/units.x:753`
 
 <a id="Compiler.finish_initializers"></a>
 #### Compiler.finish_initializers

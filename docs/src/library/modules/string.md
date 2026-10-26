@@ -86,7 +86,7 @@ Copies bytes only when needed; the caller retains its input storage.
 Null input or a nonpositive length returns the empty String.
 Raises alloc-fail if canonical storage cannot be allocated.
 
-Source: `lib/string/storage.x:148`
+Source: `lib/string/storage.x:149`
 
 ### `Split`
 
@@ -1141,7 +1141,7 @@ unrelated pool is not a valid argument.
 
 A null argument is ignored.
 
-Source: `lib/string/storage.x:291`
+Source: `lib/string/storage.x:292`
 
 <a id="String.hash"></a>
 #### String.hash
@@ -1200,7 +1200,7 @@ printf("%s %d\n", canonical, canonical == "abcde");
 null argument returns NULL, and a buffer empty at its first byte is
 released and reported as NULL, the empty `String`, without raising.
 
-Source: `lib/string/storage.x:235`
+Source: `lib/string/storage.x:236`
 
 <a id="String.malloc"></a>
 #### String.malloc
@@ -1226,7 +1226,7 @@ printf("%d writable bytes\n", buf.len());
 **Raises:** `<alloc-fail>` when storage cannot be allocated. A nonpositive or
 oversized `len` returns NULL without raising.
 
-Source: `lib/string/storage.x:202`
+Source: `lib/string/storage.x:203`
 
 <a id="String.new_fill"></a>
 #### String.new_fill
@@ -1334,7 +1334,7 @@ unchanged.
 **Raises:** `<alloc-fail>`, `<size-limit>`, or `<invariant>` while recording
 the promotion.
 
-Source: `lib/string/storage.x:314`
+Source: `lib/string/storage.x:315`
 
 <a id="String.repr"></a>
 #### String.repr
@@ -1451,7 +1451,7 @@ transient buffer or a `String` a nested pool can still reclaim. Unlike
 `String.try_own` it neither promotes nor allocates, so a caller may ask
 about a `String` it does not own.
 
-Source: `lib/string/storage.x:339`
+Source: `lib/string/storage.x:340`
 
 <a id="String.try_own"></a>
 #### String.try_own
@@ -1467,7 +1467,7 @@ remain.
 **Raises:** `<alloc-fail>`, `<size-limit>`, or `<invariant>` while recording a
 promotion.
 
-Source: `lib/string/storage.x:328`
+Source: `lib/string/storage.x:329`
 
 ## Public types
 

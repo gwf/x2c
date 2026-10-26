@@ -113,7 +113,7 @@ Source: `src/compiler/source-files.x:87`
 Appends a declaration the kernel generated to the unit's pending
 support. It is implementation, so its definitions are written.
 
-Source: `src/compiler/pending.x:5`
+Source: `src/compiler/pending.x:6`
 
 <a id="Compiler.add_init"></a>
 #### Compiler.add_init
@@ -124,7 +124,7 @@ Appends the lowered statement `stmt` to the file initialization area
 `phase`. Bound code that still needs lowering, such as a `String`
 literal, would reach C as is.
 
-Source: `src/compiler/pending.x:18`
+Source: `src/compiler/pending.x:21`
 
 <a id="Compiler.add_support"></a>
 #### Compiler.add_support
@@ -134,7 +134,7 @@ Source: `src/compiler/pending.x:18`
 Appends the declaration `decl` to the unit's pending support as it is:
 a definition offered to every function rule, or a written one.
 
-Source: `src/compiler/pending.x:11`
+Source: `src/compiler/pending.x:13`
 
 <a id="Compiler.add_translation_dependency"></a>
 #### Compiler.add_translation_dependency
@@ -846,7 +846,7 @@ Source: `src/compiler/source-files.x:56`
 
 Returns the storage of the destination `area`.
 
-Source: `src/compiler/pending.x:28`
+Source: `src/compiler/pending.x:31`
 
 <a id="Pending.checkpoint"></a>
 #### Pending.checkpoint
@@ -855,7 +855,7 @@ Source: `src/compiler/pending.x:28`
 
 Returns the mark that `restore` returns every destination to.
 
-Source: `src/compiler/pending.x:38`
+Source: `src/compiler/pending.x:41`
 
 <a id="Pending.initializes"></a>
 #### Pending.initializes
@@ -864,7 +864,7 @@ Source: `src/compiler/pending.x:38`
 
 Whether any file initialization area holds a statement.
 
-Source: `src/compiler/pending.x:32`
+Source: `src/compiler/pending.x:35`
 
 <a id="Pending.reset"></a>
 #### Pending.reset
@@ -873,7 +873,7 @@ Source: `src/compiler/pending.x:32`
 
 Gives every destination fresh, empty storage.
 
-Source: `src/compiler/pending.x:23`
+Source: `src/compiler/pending.x:26`
 
 <a id="Pending.restore"></a>
 #### Pending.restore
@@ -882,7 +882,7 @@ Source: `src/compiler/pending.x:23`
 
 Drops the code queued since `mark`.
 
-Source: `src/compiler/pending.x:46`
+Source: `src/compiler/pending.x:49`
 
 ### `Symbol`
 
