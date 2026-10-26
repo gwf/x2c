@@ -415,8 +415,7 @@ static int _completed_prototype(Compiler c, List binding) {
   Var stored;
   if (!c.semantic_binding_facts().try_get(%(completion $binding), stored))
     return 0;
-  match (stored) case %(completed *): return 1;
-  return 0;
+  return stored ~= %(completed *);
 }
 
 /* `struct b { ... } g;` at public file scope publishes the body, without
@@ -506,9 +505,7 @@ static int _declares_object(List bindings) {
 /* `struct { ... } name;` gives `name` a type that no other declaration can
    repeat, so it has no `extern` declaration to publish. */
 static int _anonymous_body(Type type) {
-  match (type.base_type())
-    case %((!or struct union enum) (gensym *) (*)): return 1;
-  return 0;
+  return type.base_type() ~= %((!or struct union enum) (gensym *) (*));
 }
 
 /* The header form of a declaration: an `extern` declaration without its
