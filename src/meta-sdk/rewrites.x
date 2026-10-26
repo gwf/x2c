@@ -151,10 +151,10 @@ Code Code.register_rewrite(Code function, List pattern, List holes) {
            ((!or ?head array map segments dstrasgn lambda) *)):
       { point = <literal>; kinds = $(head); }
     case %((!quote !or)
-           ((!or ?head switch try raise match dstrdecl conform)
+           ((!or ?head switch try raise match match-if dstrdecl conform)
             *) *):
       { point = <node>; kinds = $(head); }
-    case %((!or ?head switch try raise match dstrdecl conform) *):
+    case %((!or ?head switch try raise match match-if dstrdecl conform) *):
       { point = <node>; kinds = $(head); }
     case %(stmnt (expr ? (dstrasgn *))): { point = <node>; kinds = %(stmnt); }
     case %(!or (api-source ? ? (function ?type *)) (function ?type *)):

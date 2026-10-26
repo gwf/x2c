@@ -31,6 +31,8 @@ List Compiler_parse_assignment(Compiler c);
 
 List Compiler_parse_conditional(Compiler c);
 
+List Compiler_parse_pattern_operand(Compiler c);
+
 List Compiler_parse_parenthesized_statement(Compiler c);
 
 List Compiler_parse_macro_expression_target(Compiler c);

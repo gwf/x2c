@@ -411,7 +411,7 @@ Symbol scan_keyword_type(const char *s, int n) {
 }
 
 /* Returns the longest supported C or x2c operator prefix, or -1. x2c adds
-   `===` and `!==` to the C operators and recognizes @ punctuation.
+   `===`, `!==`, and `~=` to the C operators and recognizes @ punctuation.
    The caller supplies a
    nonnull NUL-terminated input. */
 int scan_c_operator(char *s) {
@@ -425,9 +425,9 @@ int scan_c_operator(char *s) {
     case '|': return s[1] == '=' || s[1] == '|' ? 2 : 1;
     case '=': return s[1] == '=' ? 2 + (s[2] == '=') : 1;
     case '!': return s[1] == '=' ? 2 + (s[2] == '=') : 1;
-    case '*': case '/': case '%': case '^':
+    case '*': case '/': case '%': case '^': case '~':
       return s[1] == '=' ? 2 : 1;
-    case '@': case '~': case ';': case ',': case ':': case '(': case ')':
+    case '@': case ';': case ',': case ':': case '(': case ')':
     case '[': case ']': case '{': case '}': case '?':
       return 1;
   }

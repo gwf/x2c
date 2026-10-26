@@ -132,7 +132,7 @@ responsibility for `callable`, `values`, and their referents.
 or evaluator-only callable, `<bad-arity>` or `<bad-types>` at the call
 boundary, or a cause raised by the called procedure.
 
-Source: `lib/lisp/evaluate.x:761`
+Source: `lib/lisp/evaluate.x:762`
 
 <a id="Lisp.bind"></a>
 #### Lisp.bind
@@ -180,7 +180,7 @@ ownership rule. Effects completed before a later failure are not rolled
 back. Raises: `<bad-arg>` for a null session, or any evaluator, imported
 operation, or called-procedure cause.
 
-Source: `lib/lisp/evaluate.x:744`
+Source: `lib/lisp/evaluate.x:745`
 
 <a id="Lisp.eval_file"></a>
 #### Lisp.eval_file
@@ -198,7 +198,7 @@ the stream has been consumed.
 `<size-limit>`, or `<alloc-fail>` while reading, or any cause from
 `Lisp.eval_string`.
 
-Source: `lib/lisp/evaluate.x:823`
+Source: `lib/lisp/evaluate.x:824`
 
 <a id="Lisp.eval_string"></a>
 #### Lisp.eval_string
@@ -216,7 +216,7 @@ session; borrowed referents keep their original lifetimes.
 **Raises:** `<bad-arg>` for a null session, `<incomplete>` or `<malformed>`
 while reading, or any cause from `Lisp.eval`.
 
-Source: `lib/lisp/evaluate.x:797`
+Source: `lib/lisp/evaluate.x:798`
 
 <a id="Lisp.freeze"></a>
 #### Lisp.freeze
@@ -271,7 +271,7 @@ made after a catch. The store is async-signal-safe, so a signal handler
 may interrupt a running evaluation; the owner clears the flag before the
 next one. `lisp` must be a live session.
 
-Source: `lib/lisp/evaluate.x:677`
+Source: `lib/lisp/evaluate.x:678`
 
 <a id="Lisp.try_get"></a>
 #### Lisp.try_get
@@ -341,7 +341,7 @@ been constructed.
 reader syntax, or `<alloc-fail>`, `<size-limit>`, or `<bad-enc>` while
 tokenizing, constructing, interning, or boxing the form.
 
-Source: `lib/lisp/evaluate.x:781`
+Source: `lib/lisp/evaluate.x:782`
 
 <a id="Lisp.remove_global"></a>
 #### Lisp.remove_global
@@ -588,7 +588,7 @@ Source: `lib/lisp/primitives.x:213`
 
 Marks the actual Lambda installed for one lowered source function.
 
-Source: `lib/lisp/evaluate.x:839`
+Source: `lib/lisp/evaluate.x:840`
 
 #### lisp_str
 

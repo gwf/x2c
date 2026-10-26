@@ -97,6 +97,10 @@ static List _parse_conditional_tail(Compiler c, List condition) {
       NULL, %(? $condition $ontrue $(c.parse_conditional()))), origin);
 }
 
+/** Parses the right operand of a pattern test at relational precedence. */
+List Compiler.parse_pattern_operand(Compiler c) =>
+  _parse_binary_level(c, 7);
+
 static List _parse_binary_ops(Compiler c) =>
   _parse_binary_level(c, 1);
 
@@ -120,7 +124,17 @@ static List _parse_binary_level_tail(Compiler c, int level, List lhs) {
     Symbol op = _binary_operator(c);
     Token origin = c.token;
     c.next();
-    List rhs = _parse_binary_level(c, level + 1);
+    if (op == <~=>) {
+      lhs = c.parse_match_condition(c.resolve_expression(lhs, origin), origin);
+      continue;
+    }
+    List rhs;
+    if (op == <&&>) {
+      int scoped = c.open_condition_scope(lhs);
+      rhs = _parse_binary_level(c, level + 1);
+      if (scoped) c.sym.pop_scope();
+    }
+    else rhs = _parse_binary_level(c, level + 1);
     if (first) {
       lhs = c.resolve_expression(lhs, origin);
       first = 0;
@@ -496,7 +510,8 @@ static List _parse_slice(Compiler c, List expr, List start) {
 }
 
 /** Parses an explicit List splice argument, or returns NULL without consuming
-    an ordinary argument. Parentheses delimit a complete splice expression. */
+    an ordinary argument. Parentheses delimit a complete splice expression.
+*/
 List Compiler.parse_call_splice(Compiler c) {
   if (!c.test(<@>)) return NULL;
   List value;

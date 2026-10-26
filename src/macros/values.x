@@ -8,7 +8,8 @@
    application. */
 
 /** Returns the literal expression that carries `value`, a macro definition
-    or one of its references, as run-time data. */
+    or one of its references, as run-time data.
+*/
 List Compiler.macro_value_literal(Compiler c, List value) =>
   c.cache_literal_list(_macro_value_names(value));
 
@@ -302,7 +303,8 @@ static Map _code_effects(Compiler c, Var effects) {
     transform time, in placement order before its first statement;
     `(unit-support)` among the unit's support declarations, once per KEY
     with `(unit-support KEY)`; or `(unit-init)` in the unit's file
-    initialization, in AREA with `(unit-init AREA)`. */
+    initialization, in AREA with `(unit-init AREA)`.
+*/
 void Compiler.place(Compiler c, List where, Var code) {
   match (where) {
     case %(after-statement): c.place_after(code);
@@ -337,7 +339,8 @@ static void _place_support(Compiler c, Var code) {
 
 /** Binds a code-value carrier that a meta call returned outside a macro
     value application as an application binds it, under a transaction that
-    also covers its effects. */
+    also covers its effects.
+*/
 List Compiler.bind_code_value(
   Compiler c, List carrier, Symbol position, Type return_type) {
   List bound = NULL;

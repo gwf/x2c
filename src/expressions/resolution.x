@@ -147,6 +147,8 @@ static List _content(Resolve &r, List content) {
       return _resolve_identifier(r.c, value, r.type, r.origin);
     case %(!set ?binding (binding ? ?)): return _binding(r, binding);
     case $source_literal_content(%(*)): return r.input;
+    case %(matches ?subject ?pattern ?types):
+      return r.c.bind_match_condition(subject, pattern, types, r.origin);
     case %(tpl-call *): return r.input;
     case %(macro-value ?form): return r.c.capture_macro_value(form);
     case %(meta-call ? (args *)): return _meta_call(r);

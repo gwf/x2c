@@ -673,7 +673,8 @@ void Lisp.call_budget(Lisp lisp, long budget) {
     nonzero, every interpreted call raises `<interrupt>`, including calls
     made after a catch. The store is async-signal-safe, so a signal handler
     may interrupt a running evaluation; the owner clears the flag before the
-    next one. `lisp` must be a live session. */
+    next one. `lisp` must be a live session.
+*/
 void Lisp.set_interrupted(Lisp lisp, int interrupted) {
   lisp.interrupted = interrupted;
   if (interrupted) lisp.call_exhausted = 1;

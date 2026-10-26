@@ -19,7 +19,11 @@ List Compiler_finish_return_statement(Compiler c, List expr);
 
 List Compiler_parse_match_row_argument(Compiler c);
 
+List Compiler_parse_match_condition(Compiler c, List subject, Token origin);
+
 List Compiler_parse_case_body(Compiler c, List types);
+
+List Compiler_typed_capture_declarations(Compiler c, List types, List * temporaries);
 
 List Compiler_parse_governed(Compiler c, Symbol position);
 

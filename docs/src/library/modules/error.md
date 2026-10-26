@@ -277,7 +277,7 @@ one adopted while `Error` is unavailable, is released without effect.
 Failure to update `Error`-owned storage reaches the non-reentrant error
 floor.
 
-Source: `lib/error/policy.x:133`
+Source: `lib/error/policy.x:130`
 
 <a id="Error.policy_capture"></a>
 #### Error.policy_capture
@@ -313,7 +313,7 @@ Source: `lib/error/policy.x:46`
 Releases a policy capture that no thread adopted. A NULL capture is
 accepted and does nothing.
 
-Source: `lib/error/policy.x:153`
+Source: `lib/error/policy.x:150`
 
 <a id="Error.policy_set"></a>
 #### Error.policy_set
@@ -511,7 +511,7 @@ cases handlers pushed inside the `Context` are reclaimed. Tokens must close
 in nesting order; an out-of-order close reaches the raw error floor. A null
 token does nothing and a closed token is invalid.
 
-Source: `lib/error/policy.x:180`
+Source: `lib/error/policy.x:177`
 
 <a id="Error.context_open"></a>
 #### Error.context_open
@@ -526,7 +526,7 @@ matching close. An unavailable `Error` runtime returns NULL.
 
 **Raises:** `<alloc-fail>` when the overlay cannot be allocated.
 
-Source: `lib/error/policy.x:162`
+Source: `lib/error/policy.x:159`
 
 <a id="Error.since_in"></a>
 #### Error.since_in

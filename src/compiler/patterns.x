@@ -132,3 +132,32 @@ List Compiler.pattern_binder_declarations(
   }
   return declarations.list_free();
 }
+
+/** Returns captures established by a true condition. Other operations do
+    not establish names, including negation and disjunction.
+*/
+List Compiler.condition_bindings(List expression) {
+  match (expression) {
+    case %(expr ? (matches ? ? ? ?bindings)): return bindings;
+    case %(expr ? (parens ?inner)):
+      return Compiler.condition_bindings(inner);
+    case %(expr ? (op && ?left ?right)):
+      return Compiler.condition_bindings(left).append(
+        Compiler.condition_bindings(right));
+  }
+  return NULL;
+}
+
+/** Opens a scope for the captures established by a true condition. Returns
+    whether a scope was opened; the caller closes it after its continuation.
+*/
+int Compiler.open_condition_scope(Compiler c, List expression) {
+  List bindings = Compiler.condition_bindings(expression);
+  if (!bindings) return 0;
+  c.sym.push_new_scope();
+  foreach (List row in bindings) {
+    Type type = row.cadr();
+    c.sym.bind_identity(NULL, row.car(), type.declaration_ast(row.car()));
+  }
+  return 1;
+}

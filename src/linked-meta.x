@@ -1571,6 +1571,37 @@ Code match_lowering(Code node) {
   return node;
 }
 
+static Code _match_condition(Code subject, List pattern, List body) {
+  Buffer b = Buffer.new(0);
+  Array out = [];
+  int sites = 0, depths = -1, values = -1;
+  int dynamic = subject.type().is_named("Var");
+  if (dynamic) b.write(" if (!_x2c_gensym_match_none) {");
+  int braces = _match_nested(
+    b, out, pattern, ((Code) pattern).pattern_value(), NULL, depths);
+  if (braces < 0) {
+    List binders = _match_binders(((Code) pattern).pattern_value());
+    values = binders.len();
+    braces = _match_test(b, out, pattern, binders, sites, depths);
+    _match_captures(b, binders);
+  }
+  _match_place(b, out, body);
+  braces += dynamic;
+  while (braces--) b.write(" }");
+  _match_flush(b, out);
+  String locals = _match_locals(depths, values);
+  List prologue = dynamic ? _match_dynamic_read(subject, locals)
+    : $("List _x2c_gensym_match_expr =", subject.convert(%("List")), locals);
+  return Code.lowered(%(block $prologue @(_match_items(out))), NULL);
+}
+
+/** Lowers a pattern condition through the ordinary match tests. */
+Code match_condition_lowering(Code node) {
+  match (node) case %(match-if ?subject (?pattern ?body)):
+    return _match_condition(subject, pattern, body);
+  return node;
+}
+
 /* --- src/components/printf-format.x -------------------------------------- */
 
 static int _printf_is_var(Code value) => value.type().is_named("Var");
@@ -2149,6 +2180,7 @@ static List _operator_rows(void) => %(
   (<|>        3 <|=>     0         0)
   (<^>        4 <^=>     0         0)
   (<&>        5 <&=>     0         0)
+  (<~=>       6 0        0         0)
   (<"==">     6 0        <equal>   0)
   (<!=>       6 0        <equal>   1)
   (<"===">    6 0        0         0)
@@ -2303,6 +2335,8 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_match_lowered", _match_lowered);
   $linked.row(rows, "_match_dynamic_read", _match_dynamic_read);
   $linked.row(rows, "match_lowering", match_lowering);
+  $linked.row(rows, "_match_condition", _match_condition);
+  $linked.row(rows, "match_condition_lowering", match_condition_lowering);
   $linked.row(rows, "_printf_is_var", _printf_is_var);
   $linked.row(rows, "_printf_fail", _printf_fail);
   $linked.row(rows, "_printf_valid", _printf_valid);

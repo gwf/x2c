@@ -496,3 +496,37 @@ meta Code match_lowering(Code node) {
     return _match_lowered(subject, rows);
   return node;
 }
+
+/* A pattern condition uses the same cursor tests and fallback as an arm,
+   without the switch and implicit break of a match statement. */
+meta static Code _match_condition(Code subject, List pattern, List body) {
+  Buffer b = Buffer.new(0);
+  Array out = [];
+  int sites = 0, depths = -1, values = -1;
+  int dynamic = subject.type().is_named("Var");
+  if (dynamic) b.write(" if (!_x2c_gensym_match_none) {");
+  int braces = _match_nested(
+    b, out, pattern, ((Code) pattern).pattern_value(), NULL, depths);
+  if (braces < 0) {
+    List binders = _match_binders(((Code) pattern).pattern_value());
+    values = binders.len();
+    braces = _match_test(b, out, pattern, binders, sites, depths);
+    _match_captures(b, binders);
+  }
+  _match_place(b, out, body);
+  braces += dynamic;
+  while (braces--) b.write(" }");
+  _match_flush(b, out);
+  String locals = _match_locals(depths, values);
+  List prologue = dynamic ? _match_dynamic_read(subject, locals)
+    : $("List _x2c_gensym_match_expr =", subject.convert(%("List")), locals);
+  return Code.lowered(%(block $prologue @(_match_items(out))), NULL);
+}
+
+$rewrite(%(match-if *))
+/** Lowers a pattern condition through the ordinary match tests. */
+meta Code match_condition_lowering(Code node) {
+  match (node) case %(match-if ?subject (?pattern ?body)):
+    return _match_condition(subject, pattern, body);
+  return node;
+}

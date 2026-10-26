@@ -109,6 +109,7 @@ static List _expression_rewrite(Compiler c, List expression) {
 }
 
 module Ast _expression_node(Compiler c, Ast ast) {
+  if (_pattern_condition(ast)) return _step(c, _condition_value(c, ast));
   Var content = ast.caddr();
   if (content is <list> && content.list().car() == <var>)
     return _step(c, _to_var(c, content.list().cadr()));
