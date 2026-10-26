@@ -74,7 +74,7 @@ meta Code destructure_declaration(Code node) {
       Array items = [_destructure_read(values, source)];
       int index = 0;
       foreach (List parameter in parameters)
-        match (parameter) case %(param ?base ?declarator): {
+        if (parameter ~= %(param ?base ?declarator)) {
           Code element = _destructure_element(values, index++);
           items.push(%(declare $base (bindings (op = $declarator $element))));
         }
@@ -99,14 +99,13 @@ meta Code destructure_declaration(Code node) {
 $rewrite(%(stmnt (expr ? (dstrasgn *))))
 /** Reads the source of `(a, b) = source;` into its targets in a block. */
 meta Code destructure_statement(Code node) {
-  match (node)
-    case %(stmnt (expr ? (dstrasgn (targets *targets) ?source))): {
-      Atom values = Atom.intern("?__destructure");
-      return _destructure_bound(
-        %(block $(_destructure_read(values, source))
-                @(_destructure_writes(targets, values))),
-        values, NULL);
-    }
+  if (node ~= %(stmnt (expr ? (dstrasgn (targets *targets) ?source)))) {
+    Atom values = Atom.intern("?__destructure");
+    return _destructure_bound(
+      %(block $(_destructure_read(values, source))
+              @(_destructure_writes(targets, values))),
+      values, NULL);
+  }
   return node;
 }
 
@@ -115,19 +114,18 @@ $rewrite(%(expr ? (dstrasgn *)))
     source in a result local as the expression's value.
 */
 meta Code destructure_value(Code node) {
-  match (node)
-    case %(expr ?(Type type) (dstrasgn (targets *targets) ?source)): {
-      Atom values = Atom.intern("?__destructure");
-      Atom result = Atom.intern("?__destructure_result");
-      (List base, List modifiers) = type.parts();
-      Code kept = %(expr $type (ident $result));
-      List block = %(block
-        (declare $base (bindings (op = (bind $result $modifiers) $source)))
-        $(_destructure_read(values, kept))
-        @(_destructure_writes(targets, values))
-        (stmnt $kept));
-      return _destructure_bound(
-        %(expr $type (parens $block)), values, result);
-    }
+  if (node ~= %(expr ?(Type type) (dstrasgn (targets *targets) ?source))) {
+    Atom values = Atom.intern("?__destructure");
+    Atom result = Atom.intern("?__destructure_result");
+    (List base, List modifiers) = type.parts();
+    Code kept = %(expr $type (ident $result));
+    List block = %(block
+      (declare $base (bindings (op = (bind $result $modifiers) $source)))
+      $(_destructure_read(values, kept))
+      @(_destructure_writes(targets, values))
+      (stmnt $kept));
+    return _destructure_bound(
+      %(expr $type (parens $block)), values, result);
+  }
   return node;
 }
