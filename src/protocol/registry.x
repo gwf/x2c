@@ -1,3 +1,10 @@
+/*  registry.x -- protocol and adoption registry rows
+
+    Protocol occurrences retain the declaration record with its linkage and
+    source location. Adoption rows use base, participant, and, for static rows,
+    canonical source path as identity so another unit cannot consume them.
+*/
+
 static typedef struct AdoptionDraft {
   Compiler c;
   Type base, participant, representation;
@@ -46,7 +53,8 @@ static macro Stmt $fail.protocol_adoption_conflict(
 static macro Stmt $report.protocol_adoption_conflict(
   Expr $c, Expr $site, Expr $adoption, Expr $previous) {
   {
-    String first = %"first: $(_location_string(_adoption_location($previous)))";
+    String first =
+      %"first: $(_location_string(_adoption_location($previous)))";
     String second = %"second: $(_location_string($adoption.location))";
     String spelling =
       _adoption_spelling($adoption.base, $adoption.participant);
@@ -58,9 +66,6 @@ static macro Stmt $report.protocol_adoption_conflict(
 
 // registry rows
 
-/* Protocol occurrences retain the declaration record with its linkage and
-   source location. Adoption rows use base, participant, and, for static rows,
-   canonical source path as identity so another unit cannot consume them. */
 static List _occurrence(List record, Symbol storage, List location) =>
   $(record, storage, location);
 
@@ -112,8 +117,7 @@ static List _adoption_row(
   return c.adoptions.try_get(key, stored) ? stored : NULL;
 }
 
-module List _visible_adoption(
-  Compiler c, Type base, Type participant) {
+module List _visible_adoption(Compiler c, Type base, Type participant) {
   List local = _adoption_row(c, base, participant, <static>);
   return local ? local : _adoption_row(c, base, participant, <external>);
 }
@@ -221,7 +225,8 @@ static String _representation_error(Type representation) {
     source spelling, and package mode rewrites that joined name as a whole, so
     the package prefix sits at the front of the derived binding instead of
     inside it. The split is keyed on a known package because a foreign
-    header may spell `__` in a type name. */
+    header may spell `__` in a type name.
+*/
 String Compiler.reverse_converter_spelling(
   Compiler c, String base_name, String infix, String participant) {
   int split = participant.find("__");
@@ -312,18 +317,13 @@ static void _retain_source_node(
       (!c.shallow ||
        (storage == <static> && c.source_private < 0)))
     return;
-  List key = _source_key(c, location);
+  // Keep definition provenance in a generated node while its invocation site
+  // makes repeated expansions distinct in the retained symbol table.
+  List key = invocation
+           ? $("source-node", location, invocation)
+           : $("source-node", location);
   c.sym.set(key, node);
   if (storage == <static>) c.sym.mark_static(key);
-}
-
-// Keep definition provenance in a generated node while its invocation site
-// makes repeated expansions distinct in the retained symbol table.
-static List _source_key(Compiler c, List location) {
-  List invocation = c.origin_location(c.origin);
-  return invocation
-       ? $("source-node", location, invocation)
-       : $("source-node", location);
 }
 
 static void _install_occurrence(
@@ -421,12 +421,14 @@ module Symbol _tag_value(List expression) {
   return 0;
 }
 
-static Symbol _published_storage(
-  AdoptionDraft &a, String spelling) {
+static Symbol _published_storage(AdoptionDraft &a, String spelling) {
   Compiler c = a.c;
   if (a.storage == <static>) return <static>;
   if (c.source_private < 0) return a.storage;
-  List record = _record(c, a.base);
+  Var occurrence_value;
+  List occurrence = c.protocols.try_get(a.base, occurrence_value)
+    ? occurrence_value : NULL;
+  List record = occurrence ? occurrence.car() : NULL;
   int private_native = record &&
     _has_private_native(c, record.last().list().cdr());
   String base_name = _base_name(a.base);
@@ -436,9 +438,6 @@ static Symbol _published_storage(
     ? c.reverse_converter_spelling(base_name, "", spelling) : NULL;
   String alternate = base_name
     ? c.reverse_converter_spelling(base_name, "as_", spelling) : NULL;
-  Var occurrence_value;
-  List occurrence = c.protocols.try_get(a.base, occurrence_value)
-    ? occurrence_value : NULL;
   int private = c.source_private > 0 ||
     (occurrence && _occurrence_storage(occurrence) == <static>) ||
     _is_private(c, spelling) ||
