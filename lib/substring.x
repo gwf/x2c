@@ -20,7 +20,8 @@ typedef Substring Substr;
 Substring Substring.new(String source, int offset, int length) {
   if (offset < 0 || length < 0 || offset > source.len() ||
       length > source.len() - offset)
-    raise %(bad-arg (operation "Substring.new") (offset $offset) (length $length));
+    raise %(bad-arg (operation "Substring.new")
+      (offset $offset) (length $length));
   return (Substring) {source, offset, length};
 }
 
@@ -68,8 +69,7 @@ String Substring.string(Substring view) => view.str();
     foreach (Substr word in source) uses this allocation-free cursor.
 */
 int Substring.try_next(String source, int &cursor, Substring &out) {
-  const char *bytes = source;
-  int length = source.len(), index = cursor;
+  const char *bytes = source, int length = source.len(), index = cursor;
   while (index < length && isspace((unsigned char) bytes[index])) index++;
   if (index >= length) return 0;
   int start = index;

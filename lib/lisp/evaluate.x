@@ -470,7 +470,8 @@ static List _value_list(const Var *values, int count) {
 
 /* Binds each name before `.` to one value and the name after it to the
    rest. */
-static void _bind_params(Scope *frame, Lambda lambda, List args, Map bindings) {
+static void _bind_params(
+  Scope *frame, Lambda lambda, List args, Map bindings) {
   Var body = lambda.body;
   for (List p = lambda.params; p; p = p.cdr()) {
     Var name = p.car();

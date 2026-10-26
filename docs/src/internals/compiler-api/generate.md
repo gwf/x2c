@@ -92,7 +92,7 @@ Returns the guard macro of the header generated for this unit, named
 from its path below the home when it has one there, else as spelled, so
 a meta group that copies the unit names the same guard.
 
-Source: `src/generate/output.x:214`
+Source: `src/generate/output.x:212`
 
 <a id="Compiler.init_statements"></a>
 #### Compiler.init_statements

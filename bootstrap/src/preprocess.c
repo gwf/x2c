@@ -348,7 +348,9 @@ static void _note_layout_macro(ArmScan * s, String content){
   int value = 0;
   for(;  token -> type != 11212;  token = Token_skip_trivia(token + 1)){
     if(token -> type != 19147688) continue;
-    int level = Var_int(Var_convert(String_equal(token -> text, _26) ? int_var(_attribute_layout(token)) : Map_contains(layout, String_var(token -> text)) ? Map_getindex(layout, String_var(token -> text)) : int_var(0), 3453797));
+    int level = 0;
+    if(String_equal(token -> text, _26)) level = _attribute_layout(token);
+    else if(Map_contains(layout, String_var(token -> text))) level = Var_int(Var_convert(Map_getindex(layout, String_var(token -> text)), 3453797));
     if(level > value) value = level;
   }
   if(value &&(!(Map_contains(layout, String_var(name -> text))) || x2c_var_order(Map_getindex(layout, String_var(name -> text)), int_var(value)) < 0)) Map_setindex(layout, String_var(name -> text), int_var(value));

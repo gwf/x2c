@@ -38,7 +38,8 @@ static void _report_malformed_token(Compiler c) {
   if (status != <malformed> && status != <indent>) return;
   for (size_t i = 0; i < c.tokenizer.tokens.len(); i++) {
     Token token = &((struct Token *) c.tokenizer.tokens)[i];
-    if (token.type == <error>) $fail.compiler_token_malformed(c, token, status);
+    if (token.type == <error>)
+      $fail.compiler_token_malformed(c, token, status);
   }
 }
 

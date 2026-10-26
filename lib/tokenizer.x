@@ -741,7 +741,8 @@ static void _open_block(_Layout &l, _LayoutLine line, int j, int next) {
   if (header.labeled) _edit(l, line.last).after = "{";
   else if (!_condition(l, line.first, line.last, "{"))
     _edit(l, line.last).type = <"{">;
-  if (first.text == "do" && line.last == line.first + 1 && _bare_do(l, line, j))
+  if (first.text == "do" && line.last == line.first + 1 &&
+      _bare_do(l, line, j))
     _edit(l, line.first).type = <space>;
   l.indents[++l.top] = next;
   l.enums[l.top] = header.enumeration;

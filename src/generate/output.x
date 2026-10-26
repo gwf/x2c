@@ -110,8 +110,7 @@ static void _publish_files(Compiler c, List outputs) {
 List Compiler.place_source_prelude(
   Compiler c, List source, List declarations) {
   (void) c;
-  Array out = [];
-  int prelude = _anchors(source, 0).function, position = 0;
+  Array out = [], int prelude = _anchors(source, 0).function, position = 0;
   foreach (List node in source) {
     if (position++ == prelude)
       foreach (List declaration in declarations) out.push(declaration);
@@ -124,8 +123,7 @@ List Compiler.place_source_prelude(
 
 /* The anchors of `source`; `error` is sought only with `errors`. */
 static Anchors _anchors(List source, int errors) {
-  Anchors at = {-1, -1};
-  int position = 0, depth = 0, opening = 0;
+  Anchors at = {-1, -1}, int position = 0, depth = 0, opening = 0;
   foreach (List item in source) {
     int here = depth ? opening : position;
     if (at.function < 0 && _is_function(item)) at.function = here;
@@ -227,8 +225,7 @@ static List _source_unit(Compiler c, List content) {
   List error = at.error >= 0 ? _include_directive("error.h") : NULL;
   List exception =
     c.needs_exception ? _include_directive("exception.h") : NULL;
-  Array lines = [];
-  int position = 0;
+  Array lines = [], int position = 0;
   foreach (List node in content) {
     if (position == at.error)
       foreach (List include in error) _push_line(lines, include);

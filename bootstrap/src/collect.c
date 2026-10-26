@@ -5704,7 +5704,7 @@ static void f8_packages____import_package(Compiler c, String path, String name, 
 }
 
 void Compiler_configure_interfaces(String out_dir, int cold){
-  if(! _init_guard_) _file_init_();  _process_cache();  f10_interfaces___interface_out_dir = out_dir;  String stage = Compiler_stage_dir();  f10_interfaces___interface_mirror = cold ? NULL : String_truth(stage) ? stage : x2c_get_root();
+  if(! _init_guard_) _file_init_();  _process_cache();  f10_interfaces___interface_out_dir = out_dir;  String stage = Compiler_stage_dir();  if(cold) f10_interfaces___interface_mirror = NULL;  else f10_interfaces___interface_mirror = String_truth(stage) ? stage : x2c_get_root();
 }
 
 static List _interface_read(Compiler c, String canonical){
@@ -5969,7 +5969,11 @@ static Map _read_dependencies(Compiler c, List stored){
                 {
                   String name = Var_as_string(_x2c_gensym_match_value_29);
                   {
-                    String path = Var_is_row(hash, 11, 7, 1) && String_startswith(Var_as_string(hash), _218) ?(String_startswith(name, _110) ? name : Compiler_absolute_home_path(name)) : _canonical_path(Compiler_absolute_home_path(name));
+                    String path = name;
+                    if(Var_is_row(hash, 11, 7, 1) && String_startswith(Var_as_string(hash), _218)){
+                      if(! String_startswith(name, _110)) path = Compiler_absolute_home_path(name);
+                    }
+                    else path = _canonical_path(Compiler_absolute_home_path(name));
                     int unhashed = Var_is_integer(hash) && Var_integer(hash) == 1;
                     if(! unhashed && ! _hash_matches(c, path, hash)) return NULL;
                     _cache_dependency(dependencies, path, hash);
@@ -6191,14 +6195,20 @@ static List _interface_include_dirs(Compiler c, String canonical){
       dir = Var_as_string(_x2c_gensym_macro_cursor_output_93);
       {
         String portable = Compiler_portable_path(dir);
-        Array_push(dirs, List_var(String_equal(dir, x2c_get_root()) ? _398 : ! String_equal(portable, dir) ? cons(_395, cons(String_var(portable), NULL)) : String_startswith(dir, _33) ? cons(_399, cons(String_var(dir), NULL)) : cons(_400, cons(String_var(dir), NULL))));
+        List row = NULL;
+        if(String_equal(dir, x2c_get_root())) row = _398;
+        else if(! String_equal(portable, dir)) row = cons(_395, cons(String_var(portable), NULL));
+        else row = String_startswith(dir, _33) ? cons(_399, cons(String_var(dir), NULL)) : cons(_400, cons(String_var(dir), NULL));
+        Array_push(dirs, List_var(row));
       }
 
     }
 
   }
   String root = Compiler_package_directory(c -> package_source_dirs, canonical);
-  String package = String_truth(root) && Compiler_is_package_source(root, canonical) ? Path_basename(root) : Compiler_owns_package_source(c, canonical) ? c -> package : NULL;
+  String package = NULL;
+  if(String_truth(root) && Compiler_is_package_source(root, canonical)) package = Path_basename(root);
+  else if(Compiler_owns_package_source(c, canonical)) package = c -> package;
   int source = Path_is_x2c_source(canonical);
   Array_push(dirs, List_var(source && String_truth(package) ? cons(_401, cons(String_var(package), NULL)) : _402));
   return Array_list_free(dirs);

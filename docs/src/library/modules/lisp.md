@@ -132,7 +132,7 @@ responsibility for `callable`, `values`, and their referents.
 or evaluator-only callable, `<bad-arity>` or `<bad-types>` at the call
 boundary, or a cause raised by the called procedure.
 
-Source: `lib/lisp/evaluate.x:762`
+Source: `lib/lisp/evaluate.x:763`
 
 <a id="Lisp.bind"></a>
 #### Lisp.bind
@@ -166,7 +166,7 @@ The budget belongs to the public entry. `Lisp.eval`, `Lisp.apply`, and
 `Lisp.eval_string` each open one, and a call that runs it out does not
 renew it, so one entry reports a runaway once however many calls follow.
 
-Source: `lib/lisp/evaluate.x:668`
+Source: `lib/lisp/evaluate.x:669`
 
 <a id="Lisp.eval"></a>
 #### Lisp.eval
@@ -180,7 +180,7 @@ ownership rule. Effects completed before a later failure are not rolled
 back. Raises: `<bad-arg>` for a null session, or any evaluator, imported
 operation, or called-procedure cause.
 
-Source: `lib/lisp/evaluate.x:745`
+Source: `lib/lisp/evaluate.x:746`
 
 <a id="Lisp.eval_file"></a>
 #### Lisp.eval_file
@@ -198,7 +198,7 @@ the stream has been consumed.
 `<size-limit>`, or `<alloc-fail>` while reading, or any cause from
 `Lisp.eval_string`.
 
-Source: `lib/lisp/evaluate.x:824`
+Source: `lib/lisp/evaluate.x:825`
 
 <a id="Lisp.eval_string"></a>
 #### Lisp.eval_string
@@ -216,7 +216,7 @@ session; borrowed referents keep their original lifetimes.
 **Raises:** `<bad-arg>` for a null session, `<incomplete>` or `<malformed>`
 while reading, or any cause from `Lisp.eval`.
 
-Source: `lib/lisp/evaluate.x:798`
+Source: `lib/lisp/evaluate.x:799`
 
 <a id="Lisp.freeze"></a>
 #### Lisp.freeze
@@ -271,7 +271,7 @@ made after a catch. The store is async-signal-safe, so a signal handler
 may interrupt a running evaluation; the owner clears the flag before the
 next one. `lisp` must be a live session.
 
-Source: `lib/lisp/evaluate.x:678`
+Source: `lib/lisp/evaluate.x:679`
 
 <a id="Lisp.try_get"></a>
 #### Lisp.try_get
@@ -341,7 +341,7 @@ been constructed.
 reader syntax, or `<alloc-fail>`, `<size-limit>`, or `<bad-enc>` while
 tokenizing, constructing, interning, or boxing the form.
 
-Source: `lib/lisp/evaluate.x:782`
+Source: `lib/lisp/evaluate.x:783`
 
 <a id="Lisp.remove_global"></a>
 #### Lisp.remove_global
@@ -588,7 +588,7 @@ Source: `lib/lisp/primitives.x:213`
 
 Marks the actual Lambda installed for one lowered source function.
 
-Source: `lib/lisp/evaluate.x:840`
+Source: `lib/lisp/evaluate.x:841`
 
 #### lisp_str
 

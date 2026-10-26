@@ -119,8 +119,7 @@ void Compiler.finish_collected_declaration(
   else c.next();
 }
 
-static void _skip_body(
-  Compiler c, List declaration, Token meta, int native) {
+static void _skip_body(Compiler c, List declaration, Token meta, int native) {
   if (native) c.record_native_meta_effect(declaration, meta);
   else if (meta) c.record_project_meta_effect(declaration, meta);
   match (declaration)
