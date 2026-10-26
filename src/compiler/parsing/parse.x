@@ -1,7 +1,8 @@
-/* the parse driver
+/*  parse.x -- top-level parse driver
 
-   A full parse reads the unit's top-level forms in source order. A form
-   that fails is skipped whole, so one error does not hide the next. */
+    A full parse reads the unit's top-level forms in source order. A form
+    that fails is skipped whole, so one error does not hide the next.
+*/
 
 /** Parses and types the positioned source against `globs`.
 
