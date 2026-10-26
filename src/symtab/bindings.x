@@ -218,7 +218,8 @@ int Sym.binding_is_local_before(Sym s, List binding, int scope_count) {
 Map Compiler.semantic_binding_facts(Compiler c) => c.sym.binding_facts;
 
 /** Returns the List one semantic binding fact holds, or NULL when it is
-    absent. */
+    absent.
+*/
 List Compiler.fact(Compiler c, Var key) {
   Var stored;
   return c.sym.binding_facts.try_get(key, stored) ? stored : NULL;
