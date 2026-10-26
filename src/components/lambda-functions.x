@@ -97,8 +97,9 @@ meta static Code _lambda_copied_cell(List binding, Map cells) {
   Var cell;
   if (!cells.try_get(binding, cell)) return NULL;
   Type type = cell.list().cadr();
-  return _lambda_declared_cell(
-    binding, %(expr $type (ident $binding)), cells);
+  Code value = %(expr $type (ident $binding));
+  return _lambda_cell(
+    _lambda_cell_name(binding, cells), type, value);
 }
 
 /* The bindings that the destructuring declaration `node` declares. */
@@ -189,8 +190,7 @@ meta static Var _lambda_declare_cells(List node, Map cells) {
    `cells` maps uses its cell, recording each rebuilt node that holds a
    cell declaration in `declaring`. A block that holds one keeps its other
    items as they are bound. An unchanged node is kept as it was. */
-meta static Var _lambda_rebuild(
-  Var ast, List none, Map cells, Map declaring) {
+meta static Var _lambda_rebuild(Var ast, List none, Map cells, Map declaring) {
   Array pending = [ast], modes = [0], done = [];
   while (pending.len()) {
     Var node = pending.take_last();
@@ -311,7 +311,8 @@ meta static Code _lambda_function(List name, List params, Code body) {
 
 $rewrite($lambda_expression)
 /** Lifts the noncapturing lambda `node` to a static function, whose name
-    is its value. */
+    is its value.
+*/
 meta Code lambda_lift(Code node) {
   match (node) case %(expr ?type $($lambda_expression(?body, *params))): {
     List name = x2c_binding_fresh("lambda");
@@ -492,7 +493,8 @@ meta static Code _lambda_value(
 $rewrite($lambda_captured)
 /** Lifts the capturing lambda `node` to a static function of its
     parameters and captures, and answers a `Func` of a record of the
-    captured values and addresses. */
+    captured values and addresses.
+*/
 meta Code lambda_closure(Code node) {
   match (node)
     case %(expr ? $($lambda_captured(?body, *captures, *params))): {
@@ -579,7 +581,8 @@ $rewrite(%(function ? (bind ? ((fnmod (params *)))) (block *)))
     declared as its cell, and every read goes through the cell. A lifted
     lambda's function moves its own. The function binds again only its
     cells and the statements that hold them; its other statements are kept
-    as they are bound. */
+    as they are bound.
+*/
 meta Code lambda_cells(Code node) {
   match (node)
     case %(function ?type
