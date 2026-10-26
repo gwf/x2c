@@ -74,13 +74,12 @@ List Compiler.lower_cleanup(Compiler c, List node) {
    `return` converts to the function's declared result, including one that
    a rule's replacement for a `try` writes. */
 static List _lower_function(Compiler c, List node) {
-  match (node)
-    case %(function ?type ?bindings ?body): {
-      List declaration = %(declare $type (bindings $bindings));
-      with (c.return_type = Ast.declared_return(declaration)) {
-        return _lowered_function(c, type, bindings, body);
-      }
+  if (node ~= %(function ?type ?bindings ?body)) {
+    List declaration = %(declare $type (bindings $bindings));
+    with (c.return_type = Ast.declared_return(declaration)) {
+      return _lowered_function(c, type, bindings, body);
     }
+  }
   return node;
 }
 
@@ -312,7 +311,7 @@ static Var _inside(Walk &w, List cleanup, List marker, Var body) {
 }
 
 static List _statements(List code) {
-  match (code) case %(code-value ? (seq *statements) ?): return statements;
+  if (code ~= %(code-value ? (seq *statements) ?)) return statements;
   return code;
 }
 
@@ -419,7 +418,7 @@ static List _region(Walk &w, List cleanup, List body) =>
 /* Binds `code` with each token `parts` maps replaced. A template's
    definition holds none, so only the values it applies are searched. */
 static List _bind_parts(Compiler c, Var code, Map parts) {
-  match (code) case %("x2c.template" ?definition ?values): {
+  if (code ~= %("x2c.template" ?definition ?values)) {
     Var replaced = _replaced(values, parts);
     if (replaced != values)
       code = $("x2c.template", definition, replaced);
