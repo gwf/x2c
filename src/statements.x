@@ -466,8 +466,8 @@ List Compiler.typed_capture_declarations(
 
 static List _capture_temporaries(Compiler c, List types, Array locals) {
   Array declarations = [];
-  foreach (List row in types) match (row)
-    case %(?name ?type): {
+  foreach (List row in types)
+    if (row ~= %(?name ?type)) {
       String temporary = c.fresh_name("match_value");
       declarations.push(
         _capture_declaration(
@@ -494,8 +494,8 @@ static List _capture_declaration(
 
 static List _capture_locals(Compiler c, Array locals) {
   Array declarations = [];
-  foreach (List row in locals) match (row)
-    case %(?name ?type ?temporary):
+  foreach (List row in locals)
+    if (row ~= %(?name ?type ?temporary))
       declarations.push(
         _capture_declaration(
           c, type, name, %(expr () (ident ($temporary))), 0));
