@@ -355,7 +355,7 @@ static Region _active(Walk &w) {
 module List _source_call(Var value) {
   match (value)
     case $($called(?callee, *rows)): {
-      match (rows) case %((expr ? ())): rows = NULL;
+      if (rows ~= %((expr ? ()))) rows = NULL;
       return $(callee, rows);
     }
   return NULL;
