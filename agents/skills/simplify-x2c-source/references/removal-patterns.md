@@ -203,11 +203,10 @@ alone do not demonstrate removed machinery.
 
 ## Extend the search to repeated and discarded work
 
-The following examples were submitted for integration on 2026-10-26 and were
-still open when recorded. They are provisional examples, not claims of
-publication or measured speedup. Inspect the linked revision and current
-source before applying them. They extend PR-3 and PR-4 in
-[the standard](../../../x2c-code-standard.md).
+The following examples landed on `dev` by `c33ed2332` on 2026-10-26.
+They demonstrate removed operations, not measured speedups. Inspect the
+linked revision and current source before applying them. They extend PR-3
+and PR-4 in [the standard](../../../x2c-code-standard.md).
 
 ### Reuse a result within one operation
 
@@ -261,6 +260,40 @@ Inspect loops whose successful body necessarily satisfies their exit
 condition. Trace the producer's guarantee, failure, and partial-progress
 behavior before replacing repetition. Keep loops that may receive empty
 chunks, short reads, or other successful results that leave work outstanding.
+
+### Stop an existence search at the first match
+
+Commit `89940f95d` changes typed-capture duplicate detection in
+`src/literals/quotation.x` to return when it finds a match. The old loop
+set a boolean and continued traversing the remaining records.
+
+Look for loops that set a found flag without stopping. Confirm that later
+iterations have no required diagnostics, effects, or aggregation before
+returning early. This differs from a search that must select the last match
+or collect every match.
+
+### Keep temporaries that sequence required work
+
+Commit `2db4e6a42` removes temporary-only diagnostic blocks in
+`src/expressions-reports.x`, but retains the temporary that sequences the
+typedef-crossing diagnostic. A temporary can encode evaluation order even
+when its value has only one use.
+
+Before substituting an initializer into call arguments or a macro expansion,
+check evaluation order, evaluation count, and lifetime. Identical diagnostic
+text alone does not establish equivalent behavior. Keep the temporary when
+it preserves required sequencing.
+
+### Check allocation and identity claims during Clean
+
+Commit `c40b3724f` corrects the `List.reverse` documentation in
+`lib/list/building.x`: canonical `cons` may reuse existing cells. The result
+has reversed elements, but its cells are not necessarily fresh allocations.
+
+When Clean encounters claims such as "new", "fresh", or "copy", inspect the
+owning operation. Distinguish result contents, allocation, canonical identity,
+and ownership. Correct the claim without changing working code to satisfy a
+stale comment; this is documentation repair, not removed machinery.
 
 ## Keep pulling after the first deletion
 
