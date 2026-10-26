@@ -255,8 +255,9 @@ static void _write_json(
 
 /* An entry without a location writes null for each location key. */
 static void _write_json_location(Compiler c, Buffer out, List location) {
-  if (location ~= %((file ?file) (line ?line) (column ?column) (length ?length)
-           (position ?position))) {
+  if (location ~=
+      %((file ?file) (line ?line) (column ?column) (length ?length)
+        (position ?position))) {
     out.write(%",\"file\":$(Var.json(_json_path(c, file)))");
     out.write(%",\"line\":$line,\"column\":$column");
     out.write(%",\"length\":$length,\"position\":$position");
@@ -273,7 +274,7 @@ static void _write_json_location(Compiler c, Buffer out, List location) {
 */
 void Compiler.print_diagnostic(Compiler compiler, List entry) {
   if (entry ~= %((code ?code) (severity ?severity) (message ?message)
-           (location ?location) (notes ?notes))) {
+                (location ?location) (notes ?notes))) {
     String note = _note_line(notes);
     if (diagnostics_json >= 0) {
       _write_json(compiler, code, severity, message, location, note);
@@ -289,8 +290,9 @@ void Compiler.print_diagnostic(Compiler compiler, List entry) {
 /* A located heading names its source position and shows that line. */
 static void _write_heading(
   Compiler c, Symbol code, String message, List location) {
-  if (location ~= %((file ?file) (line ?line) (column ?column) (length ?length)
-           (position ?position))) {
+  if (location ~=
+      %((file ?file) (line ?line) (column ?column) (length ?length)
+        (position ?position))) {
     String place = %"$file:$line:$column";
     fprintf(stderr, "%s: %s: %s\n", place, code.str(), message);
     _show_source_context(c, line, column, length, position);
@@ -387,10 +389,8 @@ String Compiler.file_prefix(Compiler c) {
   Array markers = c.line_markers;
   Token token = _unit_token(c);
   if (!markers || !token) return NULL;
-  if (markers[0] ~= %(? ? ? ? ? ? ?)) {
-    if (_token_region(c, token) ~=
-        %(? ? ? ? ? ? ?(String prefix))) return prefix;
-  }
+  if (markers[0] ~= %(? ? ? ? ? ? ?) &&
+      _token_region(c, token) ~= %(? ? ? ? ? ? ?(String prefix))) return prefix;
   return NULL;
 }
 
@@ -421,8 +421,8 @@ static int _in_unit(Compiler c, Token token) {
 */
 int Compiler.token_column(Compiler c, Token token) {
   if (_token_region(c, token) ~=
-      %(? ?(int text_line) ? ? ? ?(String before) ?))
-    if (token.line == text_line) return before.len() + token.col;
+      %(? ?(int text_line) ? ? ? ?(String before) ?) &&
+      token.line == text_line) return before.len() + token.col;
   return token.col;
 }
 
@@ -537,13 +537,13 @@ static void _show_source_context(
   char *line_start, *line_end;
   if (!_context_line(compiler, line, line_start, line_end)) return;
   if (_region(compiler, position) ~=
-      %(? ?(int text_line) ? ? ? ?(String before) ?))
-    if (line == text_line && before.len()) {
-      String shown =
-        %"$before$(String.new_len(line_start, line_end - line_start))";
-      line_start = shown;
-      line_end = line_start + shown.len();
-    }
+      %(? ?(int text_line) ? ? ? ?(String before) ?) &&
+      line == text_line && before.len()) {
+    String shown =
+      %"$before$(String.new_len(line_start, line_end - line_start))";
+    line_start = shown;
+    line_end = line_start + shown.len();
+  }
   _context_caret(line_start, line_end, column, length);
 }
 

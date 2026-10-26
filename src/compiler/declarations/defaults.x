@@ -68,8 +68,9 @@ static void _produce_defaults(Defaults &d, Map declarations) {
   foreach (List entry in ordered) {
     (Var position, Var key, Var value) = entry;
     (void) position;
-    if (value ~= %(declaration-source ?end (declaration-bundle (rows *rows))
-               ?facts)) {
+    if (value ~=
+        %(declaration-source ?end (declaration-bundle (rows *rows))
+          ?facts)) {
       _restore_declaration_bindings(d.c, rows, facts, {});
       Array produced = [];
       _produce_rows(d.c, rows, produced);
@@ -83,7 +84,7 @@ static void _produce_defaults(Defaults &d, Map declarations) {
 static void _produce_rows(Compiler c, List rows, Array selected) {
   foreach (List row in rows) {
     if (row ~= %(declaration-pending ?callback ?arguments
-               ?construction ?privacy)) {
+                  ?construction ?privacy)) {
       with (c.macro_stack = construction, c.source_private = privacy) {
         _produce_rows(c, _generated_rows(c, callback, arguments), selected);
       }
@@ -166,10 +167,9 @@ static int _taken(Defaults &d, String spelling) {
 }
 
 static List _bind_default(Compiler c, List syntax) {
-  if (c.source_private)
-    if (syntax ~= %(function ?type ?declarator ?body))
-      if (!type.type().is_static())
-        syntax = %(function (static @type) $declarator $body);
+  if (c.source_private && syntax ~= %(function ?type ?declarator ?body) &&
+      !type.type().is_static())
+    syntax = %(function (static @type) $declarator $body);
   return c.bind_syntax(syntax, <unit>, NULL);
 }
 

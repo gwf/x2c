@@ -748,8 +748,7 @@ static List _class_write_fields(String owner, List fields) {
 static List _field_write(List field) {
   List value = _field_value(field);
   Type type = field[1];
-  int array = 0;
-  if (type ~= %((dim *) *)) array = 1;
+  int array = type ~= %((dim *) *);
   List writer = %();
   if (!array && !type.canonicalize().is_pointer())
     writer = _method(type, "write_repr");

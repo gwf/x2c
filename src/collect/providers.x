@@ -57,8 +57,8 @@ int Compiler.linked_meta_definitions_current(Compiler c, String path) {
   String canonical = _canonical_path(path);
   String provider = Compiler.portable_path(canonical);
   List source = Compiler.linked_meta_provider_source(provider);
-  if (source ~= %(source ?hash *))
-    if (_hash_matches(c, canonical, hash)) return 1;
+  if (source ~= %(source ?hash *) && _hash_matches(c, canonical, hash))
+    return 1;
   if (source ~= %(source ? ? ?(String definitions))) {
     List entry = _meta_provider_entry(c, canonical);
     if (!entry) return 0;

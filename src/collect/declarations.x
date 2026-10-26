@@ -15,8 +15,8 @@ module List _type_family(List key) {
 static List _row_type_family(Map rows, Map statics, List key, Var value) {
   List family = _type_family(key);
   if (family) return family;
-  if (key ~= %(?(String name)))
-    if (%(typedef $name) in rows) return %(typedef $name);
+  if (key ~= %(?(String name)) && %(typedef $name) in rows)
+    return %(typedef $name);
   if (!(key in statics) && value is <list>) {
     Type type = value;
     if (type.is_enum()) return _type_family(type.base_type());
@@ -37,8 +37,8 @@ module void _needed_types(List syntax, Map rows, Map needed) {
   while (pending.len()) {
     Var item = pending.take_last();
     if (item is not <list>) continue;
-    if (item ~=
-        %((!or declare typedef function) ?base *) && (base.type().is_static())) continue;
+    if (item ~= %((!or declare typedef function) ?base *) &&
+        base.type().is_static()) continue;
     if (item ~= %(adopt ? ? static *)) continue;
     if (item ~= %(declaration-function ?declaration *)) {
       if (!declaration.list().type_from_ast().is_static())
@@ -54,8 +54,8 @@ module void _needed_types(List syntax, Map rows, Map needed) {
     /* A typedef spelling is needed through any declarator. Aggregate
        completeness remains attached to the direct tag demand above. */
     Type base = type.type().base_type();
-    if (base ~= %(?(String name)))
-      if (%(typedef $name) in rows) needed[%(typedef $name)] = 1;
+    if (base ~= %(?(String name)) && %(typedef $name) in rows)
+      needed[%(typedef $name)] = 1;
     foreach (Var part in item) pending.push(part);
   }
 }
@@ -226,9 +226,8 @@ static Array _declared_functions(List entry) {
     foreach (Var part in entry.car()) {
       if (part is not <map>) continue;
       foreach (Var (key, value) in part.map())
-        if (key ~=
-            %(?(String name)) && (value is <list> && value.list().type().is_function()))
-            names.push(name);
+        if (key ~= %(?(String name)) && value is <list> &&
+            value.list().type().is_function()) names.push(name);
     }
     declared_functions[entry] = names;
     return names;
