@@ -1,4 +1,4 @@
-/* match pattern values
+/*  patterns.x -- match pattern values
 
    The compile-time value graph behind a Match pattern represents dynamic
    expressions by a private marker, so binder analysis can distinguish a
@@ -111,7 +111,8 @@ List Compiler.match_capture_value(Var binder, int index) =>
       binder.is_list_binder() ? "list" : "value")_$index")));
 
 /** Builds ordinary declarations from a pattern scope's issued bindings.
-    A catch reads through its handler; a match reads its capture slots. */
+    A catch reads through its handler; a match reads its capture slots.
+*/
 List Compiler.pattern_binder_declarations(
   Compiler c, List bindings, List handle) {
   Array declarations = [];
