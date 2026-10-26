@@ -43,7 +43,7 @@ A unit's meta group, emitted as C.
 Binds the session's group function `name` when it is not bound yet, by
 staging the group, and reports at `site` a function that cannot run.
 
-Source: `src/meta-group/staging.x:53`
+Source: `src/meta-group/staging.x:56`
 
 <a id="Compiler.finish_meta_functions"></a>
 #### Compiler.finish_meta_functions
@@ -105,7 +105,7 @@ Source: `src/meta-group/selection.x:27`
 Returns the C compiler and the runtime header directory that build
 `meta` code, or NULL before `Compiler.use_meta_toolchain`.
 
-Source: `src/meta-group/toolchain.x:28`
+Source: `src/meta-group/toolchain.x:30`
 
 <a id="Compiler.meta_cc_identity"></a>
 #### Compiler.meta_cc_identity
@@ -115,7 +115,7 @@ Source: `src/meta-group/toolchain.x:28`
 Returns the identity of the C compiler at `cc`: its path and content
 hash.
 
-Source: `src/meta-group/toolchain.x:35`
+Source: `src/meta-group/toolchain.x:38`
 
 <a id="Compiler.meta_cc_run"></a>
 #### Compiler.meta_cc_run
@@ -126,7 +126,7 @@ Runs `arguments`, a C compiler command building the group C in
 `directory`, and returns NULL, or else its first error, which names
 `directory` when a group's C is the cause.
 
-Source: `src/meta-group/toolchain.x:44`
+Source: `src/meta-group/toolchain.x:48`
 
 <a id="Compiler.meta_reaches_compile_time"></a>
 #### Compiler.meta_reaches_compile_time
@@ -213,7 +213,7 @@ can place supporting functions through the ordinary compiler APIs.
 `declarations` supplies session types. Returns the loaded module's
 targets, or NULL with `failure` set. Publishes no evaluator bindings.
 
-Source: `src/meta-group/staging.x:91`
+Source: `src/meta-group/staging.x:95`
 
 <a id="Compiler.use_meta_build_directory"></a>
 #### Compiler.use_meta_build_directory
@@ -223,7 +223,7 @@ Source: `src/meta-group/staging.x:91`
 Directs each provider group into `directory`, using `owners` to name
 their headers by table, or stops that when `directory` is NULL.
 
-Source: `src/meta-group/staging.x:13`
+Source: `src/meta-group/staging.x:14`
 
 <a id="Compiler.use_meta_toolchain"></a>
 #### Compiler.use_meta_toolchain
@@ -234,7 +234,7 @@ Selects the C compiler `cc` that builds the `meta` code of the units
 this process translates, with the runtime headers this compiler was
 built with, found from its installed headers in `include_dir`.
 
-Source: `src/meta-group/toolchain.x:9`
+Source: `src/meta-group/toolchain.x:10`
 
 <a id="Compiler.write_meta_build"></a>
 #### Compiler.write_meta_build
@@ -247,7 +247,7 @@ x2c sources it read in `group-K.deps`, or its failure in
 `group-K.failure`. Included native and type providers use the same
 group header and object even when they have no `meta` functions.
 
-Source: `src/meta-group/staging.x:27`
+Source: `src/meta-group/staging.x:29`
 
 ## Design notes
 

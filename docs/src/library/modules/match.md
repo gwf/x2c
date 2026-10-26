@@ -452,16 +452,16 @@ for source readers but are not supported as user API.
 | [`MatchCaptureLayout.possible_list`](#MatchCaptureLayout.possible_list) | Returns possible binders in canonical positional order. |
 | [`MatchLease.release`](#MatchLease.release) | Releases the prepared program held by `lease`. |
 | [`MatchMachine.acquire`](#MatchMachine.acquire) | Returns an open machine reporting to `stats`, one of this thread's spares or a new one. |
-| [`MatchMachine.begin`](#MatchMachine.begin) | Begin execution of a valid Match program in opened, completed storage and borrow its view and input Lists until finish. |
-| [`MatchMachine.clean`](#MatchMachine.clean) | Report whether the observable invocation state is idle and cleared. |
-| [`MatchMachine.dispose`](#MatchMachine.dispose) | Free reusable materialization scratch. |
-| [`MatchMachine.finish`](#MatchMachine.finish) | Return a stopped invocation to idle and clear its borrowed execution state. |
-| [`MatchMachine.materialize_span`](#MatchMachine.materialize_span) | Materialize a borrowed span. |
-| [`MatchMachine.open`](#MatchMachine.open) | Initialize fresh caller-owned storage without touching unused fixed arrays. |
+| [`MatchMachine.begin`](#MatchMachine.begin) | Begins a valid Match program in opened, completed storage. |
+| [`MatchMachine.clean`](#MatchMachine.clean) | Reports whether the observable invocation state is idle and cleared. |
+| [`MatchMachine.dispose`](#MatchMachine.dispose) | Frees reusable materialization scratch. |
+| [`MatchMachine.finish`](#MatchMachine.finish) | Returns a stopped invocation to idle and clears borrowed execution state. |
+| [`MatchMachine.materialize_span`](#MatchMachine.materialize_span) | Materializes a borrowed span. |
+| [`MatchMachine.open`](#MatchMachine.open) | Initializes fresh caller-owned storage, leaving unused fixed arrays alone. |
 | [`MatchMachine.release`](#MatchMachine.release) | Disposes `m` and keeps it as a spare of this thread, or frees it. |
 | [`MatchMachine.release_spares`](#MatchMachine.release_spares) | Frees this thread's spare machines. |
-| [`MatchMachine.run`](#MatchMachine.run) | Execute Match words until success, failure, or a stored machine error. |
-| [`MatchMachine.step`](#MatchMachine.step) | Execute one Match word and report whether another word remains. |
+| [`MatchMachine.run`](#MatchMachine.run) | Executes Match words until success, failure, or a stored machine error. |
+| [`MatchMachine.step`](#MatchMachine.step) | Executes one Match word and reports whether another word remains. |
 | [`MatchPlan.borrowable`](#MatchPlan.borrowable) | Reports whether a plan may borrow `pattern` by its canonical identity. |
 | [`MatchPlan.execute`](#MatchPlan.execute) | Executes `plan` against `input` and publishes association bindings. |
 | [`MatchPlan.execute_capture`](#MatchPlan.execute_capture) | Executes a prepared plan into caller-owned positional storage. |
@@ -484,7 +484,7 @@ for source readers but are not supported as user API.
 
 Intern a binder by raw Atom bits and return its fixed-table index.
 
-Source: `lib/match/wordcode.x:347`
+Source: `lib/match/wordcode.x:358`
 
 <a id="MachineBuilder.cleanup"></a>
 #### MachineBuilder.cleanup
@@ -493,7 +493,7 @@ Source: `lib/match/wordcode.x:347`
 
 Cleanup's value receiver releases the same shallow backing arrays.
 
-Source: `lib/match/wordcode.x:459`
+Source: `lib/match/wordcode.x:475`
 
 <a id="MachineBuilder.constant"></a>
 #### MachineBuilder.constant
@@ -503,7 +503,7 @@ Source: `lib/match/wordcode.x:459`
 Intern a constant by raw Var bits and return its byte-sized index. The
 stored value is shallow; capacity failure makes the builder ineligible.
 
-Source: `lib/match/wordcode.x:323`
+Source: `lib/match/wordcode.x:334`
 
 <a id="MachineBuilder.drop"></a>
 #### MachineBuilder.drop
@@ -513,7 +513,7 @@ Source: `lib/match/wordcode.x:323`
 Free the mutable arrays. Any builder view becomes invalid; constant and
 binder pointees are not freed.
 
-Source: `lib/match/wordcode.x:449`
+Source: `lib/match/wordcode.x:464`
 
 <a id="MachineBuilder.emit"></a>
 #### MachineBuilder.emit
@@ -525,7 +525,7 @@ only fit in a byte; a decoder reports unsupported words. `a` and `target`
 may be -1, the patch placeholder. A failed builder keeps its first reason
 and all later emissions return -1. Allocation can raise.
 
-Source: `lib/match/wordcode.x:296`
+Source: `lib/match/wordcode.x:306`
 
 <a id="MachineBuilder.free"></a>
 #### MachineBuilder.free
@@ -535,7 +535,7 @@ Source: `lib/match/wordcode.x:296`
 Release the owned mutable arrays, invalidating this builder and its copies.
 Assign a new builder before reusing its storage.
 
-Source: `lib/match/wordcode.x:456`
+Source: `lib/match/wordcode.x:472`
 
 <a id="MachineBuilder.freeze"></a>
 #### MachineBuilder.freeze
@@ -547,7 +547,7 @@ allocation. Return null for an ineligible or rootless builder. The producer
 must make root name emitted code; freeze only checks that it is
 nonnegative.
 
-Source: `lib/match/wordcode.x:394`
+Source: `lib/match/wordcode.x:408`
 
 <a id="MachineBuilder.init"></a>
 #### MachineBuilder.init
@@ -556,7 +556,7 @@ Source: `lib/match/wordcode.x:394`
 
 Prepare fresh builder storage with no root selected.
 
-Source: `lib/match/wordcode.x:442`
+Source: `lib/match/wordcode.x:456`
 
 <a id="MachineBuilder.new"></a>
 #### MachineBuilder.new
@@ -565,7 +565,7 @@ Source: `lib/match/wordcode.x:442`
 
 Return an empty builder with no root selected.
 
-Source: `lib/match/wordcode.x:435`
+Source: `lib/match/wordcode.x:449`
 
 <a id="MachineBuilder.patch"></a>
 #### MachineBuilder.patch
@@ -576,7 +576,7 @@ Apply one validated target to the listed patch sites in order. Negative
 sites are ignored; each nonnegative site must name emitted code. An
 invalid target raises even when `count` is zero.
 
-Source: `lib/match/wordcode.x:374`
+Source: `lib/match/wordcode.x:387`
 
 <a id="MachineBuilder.set_target"></a>
 #### MachineBuilder.set_target
@@ -590,7 +590,7 @@ after full code fails the builder with `code-capacity` instead.
 **Raises:** `<bad-arg>` when target is otherwise outside the code domain. A
 failure leaves the patch site unchanged.
 
-Source: `lib/match/wordcode.x:362`
+Source: `lib/match/wordcode.x:374`
 
 ### `MachineProgram`
 
@@ -601,7 +601,7 @@ Source: `lib/match/wordcode.x:362`
 
 Return the exact byte size of the program's single packed allocation.
 
-Source: `lib/match/wordcode.x:429`
+Source: `lib/match/wordcode.x:443`
 
 <a id="MachineProgram.view"></a>
 #### MachineProgram.view
@@ -610,7 +610,7 @@ Source: `lib/match/wordcode.x:429`
 
 Borrow a frozen program's packed sections until the program is freed.
 
-Source: `lib/match/wordcode.x:416`
+Source: `lib/match/wordcode.x:430`
 
 ### `MachineSlot`
 
@@ -627,7 +627,7 @@ range boundary. Interned consing can make a materialized interior prefix
 identical to an existing suffix, and a successful instruction then
 memoizes that suffix as VALUE.
 
-Source: `lib/match/wordcode.x:261`
+Source: `lib/match/wordcode.x:270`
 
 <a id="MachineSlot.prefix_equal"></a>
 #### MachineSlot.prefix_equal
@@ -640,7 +640,7 @@ VALUE slots use language equality and require an exact-length List. SPAN
 slots compare exactly `length` cells and require the stored end boundary.
 The inputs and span remain borrowed.
 
-Source: `lib/match/wordcode.x:236`
+Source: `lib/match/wordcode.x:244`
 
 ### `MatchCache`
 
@@ -821,7 +821,7 @@ Reports whether a committed capture slot is present.
 A null buffer or an index outside its capacity or `Match`'s binder limit
 returns false. Presence is independent of the captured `Var` value.
 
-Source: `lib/match/layout.x:334`
+Source: `lib/match/layout.x:327`
 
 ### `MatchCaptureLayout`
 
@@ -851,7 +851,7 @@ follows the module pool-chain lifetime above.
 
 **Raises:** `<alloc-fail>` while constructing the `List`.
 
-Source: `lib/match/layout.x:304`
+Source: `lib/match/layout.x:298`
 
 <a id="MatchCaptureLayout.free"></a>
 #### MatchCaptureLayout.free
@@ -861,7 +861,7 @@ Source: `lib/match/layout.x:304`
 Releases one canonical `Match` capture layout.
 A null layout is ignored; every alias is invalid afterward.
 
-Source: `lib/match/layout.x:295`
+Source: `lib/match/layout.x:289`
 
 <a id="MatchCaptureLayout.index"></a>
 #### MatchCaptureLayout.index
@@ -871,7 +871,7 @@ Source: `lib/match/layout.x:295`
 Returns the canonical slot for `binder`, or -1 when it is absent.
 A null layout returns -1. Comparison uses exact `Atom` identity.
 
-Source: `lib/match/layout.x:327`
+Source: `lib/match/layout.x:320`
 
 <a id="MatchCaptureLayout.possible_list"></a>
 #### MatchCaptureLayout.possible_list
@@ -884,7 +884,7 @@ follows the module pool-chain lifetime above.
 
 **Raises:** `<alloc-fail>` while constructing the `List`.
 
-Source: `lib/match/layout.x:312`
+Source: `lib/match/layout.x:306`
 
 ### `MatchLease`
 
@@ -914,73 +914,74 @@ or a new one. `MatchMachine.release` returns it.
 
 **Raises:** `<alloc-fail>` when a new machine cannot be allocated.
 
-Source: `lib/match/machine.x:558`
+Source: `lib/match/machine.x:557`
 
 <a id="MatchMachine.begin"></a>
 #### MatchMachine.begin
 
 `void MatchMachine.begin(MatchMachine &m, MachineView program, Var input)`
 
-Begin execution of a valid Match program in opened, completed storage and
-borrow its view and input Lists until finish. Zero undo entries prove every
-slot of the previous program was restored, so only the new program's binder
-slots are initialized. A dirty machine records <not-idle> and stops.
+Begins a valid Match program in opened, completed storage.
+Borrows its view and input Lists until finish. Zero undo entries prove
+every slot of the previous program was restored, so only the new program's
+binder slots are initialized. A dirty machine records <not-idle> and stops.
 
-Source: `lib/match/machine.x:486`
+Source: `lib/match/machine.x:483`
 
 <a id="MatchMachine.clean"></a>
 #### MatchMachine.clean
 
 `int MatchMachine.clean(MatchMachine &m)`
 
-Report whether the observable invocation state is idle and cleared. Scratch
-capacity and the optional stats pointer do not affect the answer.
+Reports whether the observable invocation state is idle and cleared.
+Scratch capacity and the optional stats pointer do not affect the answer.
 
-Source: `lib/match/machine.x:525`
+Source: `lib/match/machine.x:523`
 
 <a id="MatchMachine.dispose"></a>
 #### MatchMachine.dispose
 
 `void MatchMachine.dispose(MatchMachine &m)`
 
-Free reusable materialization scratch. Finish active execution first;
-this does not clear invocation state.
+Frees reusable materialization scratch.
+Finish active execution first; this does not clear invocation state.
 
-Source: `lib/match/machine.x:533`
+Source: `lib/match/machine.x:532`
 
 <a id="MatchMachine.finish"></a>
 #### MatchMachine.finish
 
 `void MatchMachine.finish(MatchMachine &m)`
 
-Return a stopped invocation to idle and clear its borrowed execution state.
+Returns a stopped invocation to idle and clears borrowed execution state.
 Reusable scratch and the optional stats pointer remain installed.
 
 **Raises:** `<bad-state>` when execution is still running.
 
-Source: `lib/match/machine.x:508`
+Source: `lib/match/machine.x:506`
 
 <a id="MatchMachine.materialize_span"></a>
 #### MatchMachine.materialize_span
 
 `List MatchMachine.materialize_span(MatchMachine &m, MachineSpan span)`
 
-Materialize a borrowed span. A complete suffix shares the existing
-immutable List directly, an empty span returns nil, and a proper prefix
-copies through growable machine scratch once. An invalid end stores
-<bad-span>; allocation and consing can raise.
+Materializes a borrowed span.
+A complete suffix shares the existing immutable List directly, an empty
+span returns nil, and a proper prefix copies through growable machine
+scratch once. An invalid end stores <bad-span>; allocation and consing can
+raise.
 
-Source: `lib/match/machine.x:386`
+Source: `lib/match/machine.x:381`
 
 <a id="MatchMachine.open"></a>
 #### MatchMachine.open
 
 `void MatchMachine.open(MatchMachine &m)`
 
-Initialize fresh caller-owned storage without touching unused fixed
-arrays. The caller must eventually dispose any materialization scratch.
+Initializes fresh caller-owned storage, leaving unused fixed arrays alone.
+The caller must eventually dispose any materialization scratch.
 
-Source: `lib/match/machine.x:463`
+Source: `lib/match/machine.x:459`
 
 <a id="MatchMachine.release"></a>
 #### MatchMachine.release
@@ -989,7 +990,7 @@ Source: `lib/match/machine.x:463`
 
 Disposes `m` and keeps it as a spare of this thread, or frees it.
 
-Source: `lib/match/machine.x:569`
+Source: `lib/match/machine.x:568`
 
 <a id="MatchMachine.release_spares"></a>
 #### MatchMachine.release_spares
@@ -998,29 +999,29 @@ Source: `lib/match/machine.x:569`
 
 Frees this thread's spare machines.
 
-Source: `lib/match/machine.x:577`
+Source: `lib/match/machine.x:576`
 
 <a id="MatchMachine.run"></a>
 #### MatchMachine.run
 
 `void MatchMachine.run(MatchMachine &m)`
 
-Execute Match words until success, failure, or a stored machine error.
+Executes Match words until success, failure, or a stored machine error.
 
-Source: `lib/match/machine.x:41`
+Source: `lib/match/machine.x:36`
 
 <a id="MatchMachine.step"></a>
 #### MatchMachine.step
 
 `int MatchMachine.step(MatchMachine &m)`
 
-Execute one Match word and report whether another word remains. Fetch
-advances pc before dispatch, so calls save the following word and branches
-replace it. Machine invariant failures roll back all captures and store an
-error; predicates that raise can instead transfer out while the machine is
-marked running.
+Executes one Match word and reports whether another word remains.
+Fetch advances pc before dispatch, so calls save the following word and
+branches replace it. Machine invariant failures roll back all captures and
+store an error; predicates that raise can instead transfer out while the
+machine is marked running.
 
-Source: `lib/match/machine.x:50`
+Source: `lib/match/machine.x:46`
 
 ### `MatchPlan`
 
@@ -1256,7 +1257,7 @@ shallow values whose pointees must outlive any frozen program. Copying
 a builder shares its mutable arrays; release them through one owner.
 Status is `<prepared>`, `<ineligible>`, or `<malformed>`.
 
-Source: `lib/match/wordcode.x:128`
+Source: `lib/match/wordcode.x:130`
 
 <a id="MachineMark"></a>
 ### MachineMark
@@ -1265,7 +1266,7 @@ Source: `lib/match/wordcode.x:128`
 
 Records an undo-journal position for a later rollback.
 
-Source: `lib/match/wordcode.x:162`
+Source: `lib/match/wordcode.x:165`
 
 <a id="MachineProgram"></a>
 ### MachineProgram
@@ -1290,7 +1291,7 @@ Stores the cursors, integers, and journal mark for one frame depth.
 One register bank per depth means the frame pointer names the active bank
 and teardown is one clear.
 
-Source: `lib/match/wordcode.x:179`
+Source: `lib/match/wordcode.x:184`
 
 <a id="MachineSlot"></a>
 ### MachineSlot
@@ -1302,7 +1303,7 @@ Stores either one captured value or one borrowed List span.
 The value's pointee and the span's List cells are borrowed.
 Kind is `<invalid>`, `<value>`, or `<span>`.
 
-Source: `lib/match/wordcode.x:149`
+Source: `lib/match/wordcode.x:152`
 
 <a id="MachineSpan"></a>
 ### MachineSpan
@@ -1311,7 +1312,7 @@ Source: `lib/match/wordcode.x:149`
 
 Borrows the half-open List range from begin to end with its cell count.
 
-Source: `lib/match/wordcode.x:141`
+Source: `lib/match/wordcode.x:143`
 
 <a id="MachineStats"></a>
 ### MachineStats
@@ -1323,7 +1324,7 @@ Collects optional, caller-owned execution counters.
 Initialize the structure before use and keep it alive while a machine
 retains its pointer. Updates are not synchronized.
 
-Source: `lib/match/wordcode.x:189`
+Source: `lib/match/wordcode.x:195`
 
 <a id="MachineUndo"></a>
 ### MachineUndo
@@ -1332,7 +1333,7 @@ Source: `lib/match/wordcode.x:189`
 
 Records the prior value of one capture slot for rollback.
 
-Source: `lib/match/wordcode.x:156`
+Source: `lib/match/wordcode.x:159`
 
 <a id="MachineView"></a>
 ### MachineView
@@ -1346,7 +1347,7 @@ pointers, emissions and additions leave its counts stale, and free
 invalidates it. A frozen-program view stays valid while the program is
 allocated.
 
-Source: `lib/match/wordcode.x:116`
+Source: `lib/match/wordcode.x:117`
 
 <a id="MachineWord"></a>
 ### MachineWord
@@ -1418,7 +1419,7 @@ Saves a Match call's return pc, undo position, and caller value.
 MW_CALL jumps within the single view that `begin` bound. No Match opcode
 assigns `program`, and a Match frame has no caller program to restore.
 
-Source: `lib/match/wordcode.x:170`
+Source: `lib/match/wordcode.x:174`
 
 <a id="MatchKey"></a>
 ### MatchKey
@@ -1462,7 +1463,7 @@ unused capacity is never touched or cleared. The program, input Lists,
 and optional stats sink must outlive execution and span materialization.
 `dispose` releases the reusable materialization scratch allocation.
 
-Source: `lib/match/wordcode.x:210`
+Source: `lib/match/wordcode.x:217`
 
 ## Design notes
 

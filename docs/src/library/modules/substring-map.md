@@ -31,7 +31,7 @@ Native counts of borrowed String views.
 
 Releases the record and its backing Blocks, borrowing stored values.
 
-Source: `lib/substring-map.x:88`
+Source: `lib/substring-map.x:90`
 
 <a id="MapSubInt.enumerate"></a>
 #### MapSubInt.enumerate
@@ -53,7 +53,7 @@ anything retaining it must not outlive that `Scope`.
 for MapLongDouble, `<alloc-fail>` or `<bad-enc>` while boxing its key.
 Shared causes do not return from the pull.
 
-Source: `lib/substring-map.x:88`
+Source: `lib/substring-map.x:90`
 
 <a id="MapSubInt.increment"></a>
 #### MapSubInt.increment
@@ -63,7 +63,7 @@ Source: `lib/substring-map.x:88`
 Adds one occurrence without copying or interning the word's bytes.
 The aggregate count must fit in int.
 
-Source: `lib/substring-map.x:46`
+Source: `lib/substring-map.x:48`
 
 <a id="MapSubInt.iter"></a>
 #### MapSubInt.iter
@@ -76,7 +76,7 @@ live during traversal. A null `dest` returns NULL. Values follow bucket
 order, a null map is exhausted, and structural mutation invalidates the
 iterator.
 
-Source: `lib/substring-map.x:88`
+Source: `lib/substring-map.x:90`
 
 <a id="MapSubInt.keys"></a>
 #### MapSubInt.keys
@@ -96,7 +96,7 @@ that `Scope`.
 **Raises:** MapLongDouble iteration may raise `<alloc-fail>` or `<bad-enc>`
 while boxing a key.
 
-Source: `lib/substring-map.x:88`
+Source: `lib/substring-map.x:90`
 
 <a id="MapSubInt.move_to"></a>
 #### MapSubInt.move_to
@@ -110,7 +110,7 @@ a scope if empty. NULL maps do nothing.
 **Raises:** `<bad-arg>` for a NULL destination slot, or `<alloc-fail>` while
 creating its scope. Those failures leave ownership unchanged.
 
-Source: `lib/substring-map.x:32`
+Source: `lib/substring-map.x:33`
 
 <a id="MapSubInt.new"></a>
 #### MapSubInt.new
@@ -119,7 +119,7 @@ Source: `lib/substring-map.x:32`
 
 Creates an empty count table in the current Scope.
 
-Source: `lib/substring-map.x:39`
+Source: `lib/substring-map.x:40`
 
 <a id="MapSubInt.scope"></a>
 #### MapSubInt.scope
@@ -133,7 +133,7 @@ explicitly moved into it. NULL returns NULL.
 
 **Raises:** `<alloc-fail>` when creating the scope.
 
-Source: `lib/substring-map.x:32`
+Source: `lib/substring-map.x:33`
 
 <a id="MapSubInt.strings"></a>
 #### MapSubInt.strings
@@ -142,7 +142,7 @@ Source: `lib/substring-map.x:32`
 
 Copies counts to a Map with canonical String keys in the active pool.
 
-Source: `lib/substring-map.x:58`
+Source: `lib/substring-map.x:60`
 
 <a id="MapSubInt.try_next"></a>
 #### MapSubInt.try_next
@@ -151,7 +151,7 @@ Source: `lib/substring-map.x:58`
 
 Yields each unique view and its count without allocating.
 
-Source: `lib/substring-map.x:53`
+Source: `lib/substring-map.x:55`
 
 <a id="MapSubInt.var"></a>
 #### MapSubInt.var
@@ -161,7 +161,7 @@ Source: `lib/substring-map.x:53`
 Boxes `map` with its registered typed-map tag without copying it.
 The typed pointer and `Var` share the same mutable map identity.
 
-Source: `lib/substring-map.x:88`
+Source: `lib/substring-map.x:90`
 
 ### `Var`
 
@@ -174,7 +174,7 @@ Returns the typed-map pointer carried by `value`.
 `value` must carry this family's registered tag; the converter does
 not validate the tag before reading its pointer payload.
 
-Source: `lib/substring-map.x:88`
+Source: `lib/substring-map.x:90`
 
 ## Public types
 
@@ -192,7 +192,7 @@ String alive and unchanged until the table's final use. Counting copies
 only the view; strings() materializes each unique key once. Context export
 preserves the table and exports the source Strings used by its views.
 
-Source: `lib/substring-map.x:12`
+Source: `lib/substring-map.x:13`
 
 ## Tests and examples
 

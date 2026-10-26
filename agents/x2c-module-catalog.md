@@ -417,7 +417,7 @@ Public functions:
 
 ### [src/components/bracket-access.x](../src/components/bracket-access.x)
 
-Bracket access policy: Array and Map mutation through their typed helpers, and any other participant's read, store, and update through its indexing members, with each operand evaluated once, in order. Getter resolution remains with admission.
+bracket access policy.
 
 Public functions:
 
@@ -1213,7 +1213,7 @@ Public functions:
 
 ### [lib/rewrite.x](../lib/rewrite.x)
 
-Pattern registration for compiler rewrites.
+pattern registration for compiler rewrites.
 
 Public functions:
 
@@ -1441,7 +1441,7 @@ Public functions:
 
 ### [lib/typed-list.x](../lib/typed-list.x)
 
-typed cons chains generated from typed methods.
+typed views over canonical List cells.
 
 Public functions:
 

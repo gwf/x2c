@@ -67,7 +67,7 @@ the last formal in `P` canonicalize to `Iter`. `Iter` arguments are
 completed recursively; a call missing only that last formal receives the
 hidden destination. Variadic calls and `Iter_unzip` are returned unchanged.
 
-Source: `src/expressions/calls.x:435`
+Source: `src/expressions/calls.x:436`
 
 <a id="Compiler.convert_expression"></a>
 #### Compiler.convert_expression
@@ -122,7 +122,7 @@ Var, or `(no-value)` when it has no Var form; its address, or 0; and its
 type, which is `(expr ("List") (ident reference))` for a null argument
 that takes the callee's own type.
 
-Source: `src/expressions/calls.x:371`
+Source: `src/expressions/calls.x:372`
 
 <a id="Compiler.is_builtin_converter_call"></a>
 #### Compiler.is_builtin_converter_call
@@ -141,7 +141,7 @@ Source: `src/expressions/conversions.x:628`
 
 True when syntax still needs ordinary binding or macro substitution.
 
-Source: `src/expressions/resolution.x:80`
+Source: `src/expressions/resolution.x:79`
 
 <a id="Compiler.parse_assignment"></a>
 #### Compiler.parse_assignment
@@ -152,7 +152,7 @@ Parses one right-associative assignment expression.
 A parenthesized identifier list on the left becomes a destructuring
 assignment only for `=`. `c.token` stops after the expression.
 
-Source: `src/expressions/syntax.x:38`
+Source: `src/expressions/syntax.x:37`
 
 <a id="Compiler.parse_call_splice"></a>
 #### Compiler.parse_call_splice
@@ -162,7 +162,7 @@ Source: `src/expressions/syntax.x:38`
 Parses an explicit List splice argument, or returns NULL without consuming
 an ordinary argument. Parentheses delimit a complete splice expression.
 
-Source: `src/expressions/syntax.x:515`
+Source: `src/expressions/syntax.x:514`
 
 <a id="Compiler.parse_conditional"></a>
 #### Compiler.parse_conditional
@@ -173,7 +173,7 @@ Parses a binary expression and its optional conditional tail.
 The false arm recurses at conditional precedence, making `?:`
 right-associative, and `c.token` stops after the expression.
 
-Source: `src/expressions/syntax.x:87`
+Source: `src/expressions/syntax.x:86`
 
 <a id="Compiler.parse_expression"></a>
 #### Compiler.parse_expression
@@ -184,7 +184,7 @@ Parses an assignment expression and any following comma expressions.
 A comma expression retains source order and takes the type of its final
 value. `c.token` stops at the first token outside the expression.
 
-Source: `src/expressions/syntax.x:13`
+Source: `src/expressions/syntax.x:12`
 
 <a id="Compiler.parse_macro_expression_target"></a>
 #### Compiler.parse_macro_expression_target
@@ -195,7 +195,7 @@ Parses one macro target through the cast-expression grammar.
 Parsing starts at `c.token` and leaves it at the first token after
 the target.
 
-Source: `src/expressions/syntax.x:291`
+Source: `src/expressions/syntax.x:290`
 
 <a id="Compiler.parse_parenthesized_statement"></a>
 #### Compiler.parse_parenthesized_statement
@@ -211,7 +211,7 @@ resumes at the postfix tail it had already reached. This entry consumes
 the terminating `;` and returns `(stmnt expression)` or an origin-anchored
 `(dstrdecl ...)`.
 
-Source: `src/expressions/syntax.x:222`
+Source: `src/expressions/syntax.x:221`
 
 <a id="Compiler.parse_pattern_operand"></a>
 #### Compiler.parse_pattern_operand
@@ -220,7 +220,7 @@ Source: `src/expressions/syntax.x:222`
 
 Parses the right operand of a pattern test at relational precedence.
 
-Source: `src/expressions/syntax.x:101`
+Source: `src/expressions/syntax.x:100`
 
 <a id="Compiler.parse_primary"></a>
 #### Compiler.parse_primary
@@ -231,7 +231,7 @@ Parses one primary expression or expression-valued macro slot.
 Dispatch starts at `c.token` to the selected literal, identifier,
 grouping, or macro parser and leaves the token after that primary form.
 
-Source: `src/expressions/syntax.x:632`
+Source: `src/expressions/syntax.x:631`
 
 <a id="Compiler.parse_variable"></a>
 #### Compiler.parse_variable
@@ -241,17 +241,17 @@ Source: `src/expressions/syntax.x:632`
 Parses and resolves one complex identifier expression.
 Parsing starts at `c.token` and leaves it after the identifier.
 
-Source: `src/expressions/syntax.x:704`
+Source: `src/expressions/syntax.x:703`
 
 <a id="Compiler.postfix_completions"></a>
 #### Compiler.postfix_completions
 
-`List Compiler.postfix_completions( Compiler c, Type receiver, Symbol access)`
+`List Compiler.postfix_completions(Compiler c, Type receiver, Symbol access)`
 
 Returns sorted visible field and method names that resolve on `receiver`
 through `access`.
 
-Source: `src/expressions/access.x:325`
+Source: `src/expressions/access.x:318`
 
 <a id="Compiler.printf_static_format"></a>
 #### Compiler.printf_static_format
@@ -264,7 +264,7 @@ literal, the canonical `String` one becomes, or the `String_new` of one;
 any other format, such as a variable or an object macro, is not readable
 here. A `String` literal's text is spelled as a C literal.
 
-Source: `src/expressions/calls.x:523`
+Source: `src/expressions/calls.x:524`
 
 <a id="Compiler.promote_string_literal"></a>
 #### Compiler.promote_string_literal
@@ -290,7 +290,7 @@ inputs are returned unchanged; abstract declarations use the declaration
 binder. `origin` anchors diagnostics and generated operations that must
 retain source position.
 
-Source: `src/expressions/resolution.x:55`
+Source: `src/expressions/resolution.x:53`
 
 <a id="Compiler.resolve_map_entry"></a>
 #### Compiler.resolve_map_entry
@@ -300,7 +300,7 @@ Source: `src/expressions/resolution.x:55`
 Resolves the key and value of one `(map-entry key value)` AST row.
 Any other shape is reported at `origin` as a parse error.
 
-Source: `src/expressions/resolution.x:460`
+Source: `src/expressions/resolution.x:453`
 
 <a id="Compiler.resolve_postfix_member"></a>
 #### Compiler.resolve_postfix_member
@@ -308,12 +308,12 @@ Source: `src/expressions/resolution.x:460`
 `List Compiler.resolve_postfix_member( Compiler c, Type receiver_type, List field, Symbol access, int call_context)`
 
 Resolves one field or method selection without consuming parser tokens.
-`field` is a single-name `List` and `access` is `.` or `->`. The result is a
-`(field access type)`, `(method binding signature)`, or `(ambiguous ...)`
+`field` is a single-name `List` and `access` is `.` or `->`. The result is
+a `(field access type)`, `(method binding signature)`, or `(ambiguous ...)`
 row, or NULL when no member is visible. Method lookup is enabled only by
 `call_context` and records the selected binding in `c.sym`.
 
-Source: `src/expressions/access.x:174`
+Source: `src/expressions/access.x:170`
 
 <a id="Compiler.reveal_binding"></a>
 #### Compiler.reveal_binding
@@ -324,7 +324,7 @@ Keeps `binding` reachable from the cursor where a later declaration of
 its spelling hides it. A hidden local takes a fresh emitted spelling;
 a hidden file-scope name makes the visible automatic locals take one.
 
-Source: `src/expressions/identifiers.x:194`
+Source: `src/expressions/identifiers.x:192`
 
 <a id="Compiler.var_tag_expression"></a>
 #### Compiler.var_tag_expression
@@ -334,24 +334,23 @@ Source: `src/expressions/identifiers.x:194`
 Builds an exact tag expression, deferring macro type slots until
 binding.
 
-Source: `src/expressions/resolution.x:347`
+Source: `src/expressions/resolution.x:340`
 
 ## Public types
 
 | Type | Kind | Summary |
 | --- | --- | --- |
-| [`PrintfFn`](#PrintfFn) | struct | A printf-family function: its name, the indexes of its format and first value arguments, and whether only a spelling no declaration resolves names it. |
+| [`PrintfFn`](#PrintfFn) | struct | A printf-family function: its spelling, format and first-value argument indexes, and whether recognition requires an unresolved callee. |
 
 <a id="PrintfFn"></a>
 ### PrintfFn
 
 `typedef struct PrintfFn { const char *name, int fmt_arg, first_arg, unresolved; } PrintfFn`
 
-A printf-family function: its name, the indexes of its format and first
-value arguments, and whether only a spelling no declaration resolves
-names it.
+A printf-family function: its spelling, format and first-value argument
+indexes, and whether recognition requires an unresolved callee.
 
-Source: `src/expressions/expressions.x:19`
+Source: `src/expressions/expressions.x:18`
 
 ## Design notes
 

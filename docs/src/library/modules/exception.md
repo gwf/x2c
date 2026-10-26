@@ -30,7 +30,7 @@ Records must leave in last-in, first-out order. The record is unlinked
 before its callback runs, so a callback that transfers cannot run it again.
 A null or out-of-order record exits through the raw exception fatal path.
 
-Source: `lib/exception.x:83`
+Source: `lib/exception.x:82`
 
 #### x2c_cleanup_push
 
@@ -39,10 +39,9 @@ Source: `lib/exception.x:83`
 Pushes one compiler-generated cleanup record.
 `record` and its `fn` must be nonnull, and the record and borrowed `env`
 must remain live until leave or `Error` transfer. Invalid registration
-exits
-through the raw exception fatal path.
+exits through the raw exception fatal path.
 
-Source: `lib/exception.x:71`
+Source: `lib/exception.x:70`
 
 #### x2c_exception_claim
 
@@ -57,7 +56,7 @@ this landing and running the finalizer again; that transfer abandons this
 frame and replaces any `Error` it was already carrying. A null or already
 claimed frame reports zero.
 
-Source: `lib/exception.x:180`
+Source: `lib/exception.x:179`
 
 #### x2c_exception_is_error_target
 
@@ -66,7 +65,7 @@ Source: `lib/exception.x:180`
 Reports whether `frame` is carrying an `Error` transfer targeted to itself.
 A null, inactive, handled, or intervening frame returns false.
 
-Source: `lib/exception.x:168`
+Source: `lib/exception.x:167`
 
 #### x2c_exception_landed
 
@@ -76,7 +75,7 @@ Restores `Error` handler and dispatch state after a frame landing.
 Compiler-generated code calls this only on the nonzero `sigsetjmp` path.
 A null frame does nothing.
 
-Source: `lib/exception.x:150`
+Source: `lib/exception.x:149`
 
 #### x2c_exception_leave
 
@@ -91,7 +90,7 @@ frame's error-stack watermark and transfers to the next outer frame. A null
 or already left frame does nothing; cleanup imbalance exits through the raw
 fatal path.
 
-Source: `lib/exception.x:203`
+Source: `lib/exception.x:202`
 
 #### x2c_exception_mark_handled
 
@@ -101,7 +100,7 @@ Marks a selected exception-frame `Error` transfer as handled.
 This prevents `x2c_exception_leave` from continuing the transfer outward.
 A null frame does nothing.
 
-Source: `lib/exception.x:190`
+Source: `lib/exception.x:189`
 
 #### x2c_exception_push
 
@@ -112,7 +111,7 @@ The frame records the current cleanup, handler, dispatch-depth, and error
 stack watermarks and must remain live until `x2c_exception_leave`. A null
 frame does nothing.
 
-Source: `lib/exception.x:96`
+Source: `lib/exception.x:95`
 
 ### `ExceptionFrame`
 
@@ -130,7 +129,7 @@ post-cleanup handler head, and jumps to that frame's landing. It never
 returns normally. An invalid target exits through the raw exception fatal
 path. The transfer does not restore the process signal mask.
 
-Source: `lib/exception.x:128`
+Source: `lib/exception.x:127`
 
 ## Runtime-internal callables
 
@@ -149,7 +148,7 @@ for source readers but are not supported as user API.
 
 Reports whether any active frame is carrying an `Error` transfer.
 
-Source: `lib/exception.x:158`
+Source: `lib/exception.x:157`
 
 ## Public types
 

@@ -55,7 +55,7 @@ System utilities for environment discovery and workers.
 
 Returns `hash` extended with `length` `bytes` by 64-bit FNV-1a.
 
-Source: `src/utils.x:416`
+Source: `src/utils.x:418`
 
 #### fnv_file
 
@@ -64,7 +64,7 @@ Source: `src/utils.x:416`
 Returns `hash` extended with the contents of the file at `path`.
 A missing or unreadable file clears `ok`.
 
-Source: `src/utils.x:401`
+Source: `src/utils.x:403`
 
 #### x2c_get_executable
 
@@ -133,7 +133,7 @@ Returns the checked-in bootstrap's runtime directory when this process
 is the bootstrap compiler, or NULL. Its headers and archive match the
 runtime the bootstrap compiler was built with.
 
-Source: `src/utils.x:221`
+Source: `src/utils.x:223`
 
 <a id="Compiler.cache_root"></a>
 #### Compiler.cache_root
@@ -143,7 +143,7 @@ Source: `src/utils.x:221`
 Returns the per-user cache root: `X2C_CACHE_DIR`, `XDG_CACHE_HOME/x2c`,
 or `~/.cache/x2c`, whichever is set first, or NULL when none is.
 
-Source: `src/utils.x:509`
+Source: `src/utils.x:511`
 
 <a id="Compiler.command_environment"></a>
 #### Compiler.command_environment
@@ -152,7 +152,7 @@ Source: `src/utils.x:509`
 
 Returns the home, driver, and identity supplied to external commands.
 
-Source: `src/utils.x:256`
+Source: `src/utils.x:258`
 
 <a id="Compiler.command_path"></a>
 #### Compiler.command_path
@@ -161,7 +161,7 @@ Source: `src/utils.x:256`
 
 Returns an executable command in this compiler's libexec, or NULL.
 
-Source: `src/utils.x:248`
+Source: `src/utils.x:250`
 
 <a id="Compiler.cpp_include_dirs"></a>
 #### Compiler.cpp_include_dirs
@@ -172,7 +172,7 @@ Returns the borrowed preprocessor `List` `<root>/lib`, then `<root>/src`.
 `<root>/src` is present only when the home has that directory. Returns
 NULL before environment setup.
 
-Source: `src/utils.x:289`
+Source: `src/utils.x:291`
 
 <a id="Compiler.default_include_dirs"></a>
 #### Compiler.default_include_dirs
@@ -182,7 +182,7 @@ Source: `src/utils.x:289`
 Returns the borrowed default include `List`, `<root>/include/x2c`.
 Returns NULL before environment setup.
 
-Source: `src/utils.x:283`
+Source: `src/utils.x:285`
 
 <a id="Compiler.driver_executable"></a>
 #### Compiler.driver_executable
@@ -193,7 +193,7 @@ Returns the matching compiler executable for a recursive translation.
 External commands use the driver's X2C path or their adjacent installed
 compiler. An unavailable or changed compiler returns NULL.
 
-Source: `src/utils.x:190`
+Source: `src/utils.x:191`
 
 <a id="Compiler.home_dir"></a>
 #### Compiler.home_dir
@@ -202,7 +202,7 @@ Source: `src/utils.x:190`
 
 Returns the discovered or configured home, or NULL when there is none.
 
-Source: `src/utils.x:206`
+Source: `src/utils.x:207`
 
 <a id="Compiler.home_libexec"></a>
 #### Compiler.home_libexec
@@ -211,7 +211,7 @@ Source: `src/utils.x:206`
 
 Returns the command directory for this checkout or installed home.
 
-Source: `src/utils.x:236`
+Source: `src/utils.x:238`
 
 <a id="Compiler.home_packages"></a>
 #### Compiler.home_packages
@@ -220,7 +220,7 @@ Source: `src/utils.x:236`
 
 Returns `<home>/packages`, which may not exist, or NULL without a home.
 
-Source: `src/utils.x:230`
+Source: `src/utils.x:232`
 
 <a id="Compiler.identity"></a>
 #### Compiler.identity
@@ -232,7 +232,7 @@ Ordinary compiler startup hashes its executable with FNV-1a; an external
 command uses the identity embedded from the compiler that built it.
 Returns NULL if ordinary startup could not read its executable.
 
-Source: `src/utils.x:377`
+Source: `src/utils.x:379`
 
 <a id="Compiler.is_package_source"></a>
 #### Compiler.is_package_source
@@ -242,7 +242,7 @@ Source: `src/utils.x:377`
 Recognizes a package's `src/` files or its package-named legacy entry.
 Other files under the package directory are consumers.
 
-Source: `src/utils.x:364`
+Source: `src/utils.x:366`
 
 <a id="Compiler.module_stamp"></a>
 #### Compiler.module_stamp
@@ -253,7 +253,7 @@ Returns the stamp a native module records: `x2c-module-stamp:` and the
 running compiler's identity. Returns NULL when the executable cannot be
 read. Only the compiler that built a module loads it.
 
-Source: `src/utils.x:383`
+Source: `src/utils.x:385`
 
 <a id="Compiler.package_directory"></a>
 #### Compiler.package_directory
@@ -264,7 +264,7 @@ Returns the package directory that holds `path` below one of `roots`:
 the root's child on the way to `path`, compared by canonical path, when
 that child's name is an identifier. Returns NULL for any other path.
 
-Source: `src/utils.x:330`
+Source: `src/utils.x:332`
 
 <a id="Compiler.run_command"></a>
 #### Compiler.run_command
@@ -275,7 +275,7 @@ Runs an external command with inherited streams and returns its status.
 Resolves only this compiler's libexec and passes literal arguments without
 a shell. An unavailable command reports an error and exits with status 2.
 
-Source: `src/utils.x:270`
+Source: `src/utils.x:272`
 
 <a id="Compiler.stage_dir"></a>
 #### Compiler.stage_dir
@@ -285,7 +285,7 @@ Source: `src/utils.x:270`
 Returns the directory of a compiler staged at `<home>/builds/<stage>/`,
 or NULL for any other compiler.
 
-Source: `src/utils.x:211`
+Source: `src/utils.x:212`
 
 ### `Diagnostics`
 
@@ -299,7 +299,7 @@ The streams are flushed and `atexit` handlers do not run, so the call is
 safe inside a `try` body or a catch arm, whose records those handlers
 would otherwise find still live.
 
-Source: `src/utils.x:488`
+Source: `src/utils.x:490`
 
 <a id="Diagnostics.host_error"></a>
 #### Diagnostics.host_error
@@ -310,7 +310,7 @@ Reports a caught `<not-found>` or `<io-fail>` through
 `Diagnostics.driver_error` as its operation, path or program, and system
 reason.
 
-Source: `src/utils.x:498`
+Source: `src/utils.x:500`
 
 ### `Env`
 
@@ -323,7 +323,7 @@ Returns the spelling of the first `PATH` candidate for the program `name`
 that this process may execute, searched as `execvp` searches, or NULL.
 An empty entry names the current directory.
 
-Source: `src/utils.x:295`
+Source: `src/utils.x:297`
 
 ### `Job`
 
@@ -336,7 +336,7 @@ Decodes the wait status `raw` of a child that has ended. Returns its
 exit status, `128 + signal` when a signal ended it, or -1 otherwise,
 and stores that signal in `signal`, or 0 when no signal ended it.
 
-Source: `src/utils.x:475`
+Source: `src/utils.x:477`
 
 ### `Path`
 
@@ -348,7 +348,7 @@ Source: `src/utils.x:475`
 Returns the identity a compiler executable at `path` has when it runs:
 the FNV-1a hash of its bytes, or NULL when `path` is NULL or unreadable.
 
-Source: `src/utils.x:391`
+Source: `src/utils.x:393`
 
 <a id="Path.identifier_hash"></a>
 #### Path.identifier_hash
@@ -357,7 +357,7 @@ Source: `src/utils.x:391`
 
 Hashes unit filename spelling for stable generated C identifiers.
 
-Source: `src/utils.x:426`
+Source: `src/utils.x:428`
 
 <a id="Path.is_layout_source"></a>
 #### Path.is_layout_source
@@ -366,7 +366,7 @@ Source: `src/utils.x:426`
 
 Reports whether `path` names a file in the indentation syntax.
 
-Source: `src/utils.x:323`
+Source: `src/utils.x:325`
 
 <a id="Path.is_x2c_source"></a>
 #### Path.is_x2c_source
@@ -377,7 +377,7 @@ Reports whether `path` is x2c source: a `.x` or `.xp` file, or a script
 that starts with a shebang. Files ending in `.c`, `.h`, `.o`, or `.a`
 are excluded even when they start with a shebang.
 
-Source: `src/utils.x:309`
+Source: `src/utils.x:311`
 
 <a id="Path.lock_file"></a>
 #### Path.lock_file
@@ -388,7 +388,7 @@ Locks the file `p`, creating it, and returns a descriptor that holds the
 lock until it is closed or the process exits. Returns -1 when `wait` is
 zero and another process holds the lock.
 
-Source: `src/utils.x:438`
+Source: `src/utils.x:440`
 
 <a id="Path.publish_files"></a>
 #### Path.publish_files
@@ -404,7 +404,7 @@ destinations replaced.
 
 **Raises:** `<not-found>` or `<io-fail>`, after removing the siblings.
 
-Source: `src/utils.x:458`
+Source: `src/utils.x:460`
 
 ### `SourceView`
 
@@ -417,7 +417,7 @@ Resolves the first readable package entry under `roots`, preferring `.x`
 to `.xp`, using the importing compiler's source view. Returns its directory
 through `directory`, or NULL when the package does not exist.
 
-Source: `src/utils.x:346`
+Source: `src/utils.x:348`
 
 ## Public types
 

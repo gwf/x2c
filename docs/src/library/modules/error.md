@@ -209,7 +209,7 @@ Returns the current nested error-dispatch depth.
 This is the nesting depth of error dispatch. `Error.count` returns the
 number of accumulated errors.
 
-Source: `lib/error/dispatch.x:101`
+Source: `lib/error/dispatch.x:98`
 
 <a id="Error.handler_depth"></a>
 #### Error.handler_depth
@@ -263,7 +263,7 @@ Marks the current nested error dispatch as already rendered by `Logger`.
 This suppresses only `Error`'s fallback report for a `<log>` policy.
 Calling outside dispatch has no effect.
 
-Source: `lib/error/dispatch.x:207`
+Source: `lib/error/dispatch.x:204`
 
 <a id="Error.policy_adopt"></a>
 #### Error.policy_adopt

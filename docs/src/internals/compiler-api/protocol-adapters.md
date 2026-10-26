@@ -10,38 +10,12 @@ Protocol adapters and Var descriptors.
 
 ## Design notes
 
-The compiler presents each resolved conformance whose forward converter
-the unit defines, and whose participant is not numeric, as a `conform`
-form. It has settled each member's owner and storage, reported their
-collisions and missing conversions, and introduced the generated names:
-
-  (conform BASE PARTICIPANT FORWARD REVERSE BINDER DESCRIPTOR (ROW...))
-
-FORWARD and REVERSE spell the participant's converters to and from
-BASE, and BINDER is the protocol's type variable. A ROW is
-`(MEMBER STATUS SOURCE EXPECTED TEMPLATE PART...)`: STATUS is
-`base-dflt`, `implmntd`, or `no-member`, SOURCE the function that
-implements the member, EXPECTED its signature for the participant, and
-TEMPLATE its signature in the protocol. Each PART asks for one
-function NAME, a binding. `(default NAME STORAGE)` is the forwarding
-member `PARTICIPANT_MEMBER`, `static` when STORAGE is `static`, which
-calls SOURCE. `(inherited NAME EXPECTED)` is the prototype of that
-member, which another conformance defines with the signature EXPECTED.
-`(thunk NAME ERASED)` is the descriptor slot MEMBER's function, whose
-signature ERASED types each protocol variable `Var`. DESCRIPTOR is
-`(METHODS NAME VAR-TAG AREA [TAG])` for a `Var` participant with its
-own descriptor, and empty otherwise: the method table's name, the
-registered type name and its Var tag, the `unit-init` area, and an
-explicit tag. A rule answers file-scope code for the unit's support, or
-`(seq)` when it placed everything.
-
-This rule places each function and the static method table among the
-unit's support declarations, and the table's assignment and the
-descriptor's registration in the unit's initialization. A forwarding
-member or thunk passes each parameter the protocol types BINDER
-through a converter: FORWARD for a forwarding member, REVERSE for a
-thunk. A thunk that prints a boxed struct or union, a copy that has an
-identity only before unboxing, guards its rendering path.
+Lowers resolved `conform` forms from `src/protocol/adapters.x` into
+support functions and Var descriptors. The producer settles each
+member's owner and storage, collisions, missing conversions, and
+generated names. This component places functions and method tables in
+unit support, and table assignments and descriptor registrations in
+unit initialization.
 
 Each definition precedes the definitions that call it: the compiler
 settles whether a linked copy reaches a compile-time operation when the
