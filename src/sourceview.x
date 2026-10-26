@@ -34,8 +34,9 @@ void SourceView.init(SourceView sources) {
     is a present snapshot, not a request to fall back to the disk file.
 */
 void SourceView.set(SourceView s, String path, String text, int changed) {
-  s.overlays[Path.absolute(path)] = text;
-  if (changed) s.dirty_paths[Path.absolute(path)] = 1;
+  path = Path.absolute(path);
+  s.overlays[path] = text;
+  if (changed) s.dirty_paths[path] = 1;
 }
 
 /** Returns whether this logical file has an unsaved overlay. */
