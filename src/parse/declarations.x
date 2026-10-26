@@ -140,7 +140,8 @@ int Compiler.test_static_assert(Compiler c) =>
   c.at_word("_Static_assert");
 
 /** Parses a C assertion declaration; native C owns constant-expression
-    checks. */
+    checks.
+*/
 List Compiler.parse_static_assert(Compiler c) {
   if (c.shallow) {
     _x2c_skip_shallow_expression(c, 0);
@@ -298,7 +299,8 @@ static List _destructure_binds(List targets) {
 // finishing a declaration
 
 /** Rejects transparent references in object and function-result types.
-    References inside a function's parameter list remain supported. */
+    References inside a function's parameter list remain supported.
+*/
 void Compiler.check_reference_placement(Compiler c, Type type) {
   type = c.sym.normalize_declared_type(type);
   if (<&> in type || <opt-ref> in type)
