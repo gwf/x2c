@@ -83,7 +83,8 @@ enum { PENDING_AREAS = 5 };
 
 /** Holds generated code awaiting insertion, by `Pending.area` destination:
     unit support declarations, which `Compiler.transform` lowers after the
-    unit, then the lowered statements of each file initialization area. */
+    unit, then the lowered statements of each file initialization area.
+*/
 typedef struct Pending { Array areas[PENDING_AREAS]; } Pending;
 
 /** Holds each destination's length for `Pending.restore`. */
@@ -93,14 +94,16 @@ typedef struct PendingMark { int lengths[PENDING_AREAS]; } PendingMark;
 typedef struct Sym *Sym;
 
 /** Names the slots a rewrite's first lowering watches; see "prepared
-    replacements" in macros.x. */
+    replacements" in macros.x.
+*/
 typedef struct SlotWatch *SlotWatch;
 
 /** One syntax the parser is inside, which `x2c_enclosing` answers: a
     function body with its declaration in `node`, and `lowering` set while
     the transform lowers it, a block item with the token or origin it
     starts at, or an initialized declarator with its declaration base in
-    `base` and its `(bind ...)` node in `node`. */
+    `base` and its `(bind ...)` node in `node`.
+*/
 typedef struct Ancestor {
   Symbol what;
   Token token;
@@ -138,8 +141,8 @@ typedef struct Compiler {
   // The unit's text when its `module` block was spliced, or NULL.
   ModuleSource unit_source;
   List return_type, include_dirs;
-  // File paths map to content hashes or 1 when text is not embedded.
-  // Include-search candidates map to absence or their resolved identity.
+  /* File paths map to content hashes or 1 when text is not embedded.
+     Include-search candidates map to absence or their resolved identity. */
   Map deps;
   List aggregate_type, macro_stack, Sym sym;
   /* The last binding identity issued before the outermost active expansion
@@ -163,15 +166,14 @@ typedef struct Compiler {
      index to the groups open after it. */
   List arms;
   Map arm_stacks;
-  /* Token indices around attributes that can change native record layout. */
+  // Token indices around attributes that can change native record layout.
   Array layout_marks, packed_marks;
   /* The cursor after a governed statement took the directives before it,
      which the following item must not read again. */
   Token directives_taken;
   Map protocols, conforms, protocol_helpers;
-  // Answers derived from the occurrence and adoption tables. Publishing a
-  // protocol or an adoption changes what these would say, so the whole map
-  // is dropped there rather than invalidated key by key.
+  /* Answers derived from the occurrence and adoption tables. Publishing a
+     protocol or adoption drops the whole map because those answers change. */
   Map proto_cache;
   // Visible protocol adoptions indexed by base and participant.
   Map adoptions;
@@ -179,8 +181,8 @@ typedef struct Compiler {
   // Open declaration bodies whose aliases end at their closing brace.
   int alias_level;
   Map local_macro_captures;
-  // Depth of macro value applications being bound; their transactions
-  // also cover effects and code-value carriers are consumed.
+  /* Depth of macro value applications being bound; their transactions
+     also cover effects and code-value carriers are consumed. */
   int macro_application;
   List lambda_scopes;
   Array match_types;
@@ -240,7 +242,7 @@ typedef struct Compiler {
      what lets a call to a compile-time-only one be refused everywhere
      else. */
   int meta_body;
-  /* A Unit target retains meta code and complete initializers. */
+  // A Unit target retains meta code and complete initializers.
   int capture_unit;
   List active_rewrites;
   /* The rules active while a rule's meta function runs, that rule first;
@@ -254,9 +256,8 @@ typedef struct Compiler {
   /* Where the expression statement being parsed starts. A meta call there
      that the statement's `;` ends is evaluated as the statement. */
   Token meta_statement;
-  /* A collection pass whose protocol registries are
-     installed from the collected symbols on first use;
-     `_install_imports` owns the installation. */
+  /* A collection pass whose protocol registries are installed from collected
+     symbols on first use; `_install_imports` owns the installation. */
   int import_protocols;
   int in_pattern, match_is, runtime_literals, inline_header;
   // In-process native modules retain their cached constants for the process.
@@ -277,8 +278,8 @@ typedef struct Compiler {
   Array placements;
   // Where each line of `lines_text` starts, for showing diagnostic lines.
   String lines_text, Array line_starts;
-  // The unit's script record, and the same record on the compiler whose own
-  // file is that script; both NULL for an ordinary unit.
+  /* The unit's script record, and the same record on the compiler whose own
+     file is that script; both NULL for an ordinary unit. */
   ScriptUnit unit_script, script;
   MetaBindings meta_bindings, int borrowed_bindings;
   GenNames names;
