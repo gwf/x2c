@@ -138,6 +138,69 @@ Inspect both authored and generated code. A tiny macro diff can hide more
 runtime work; a larger source rewrite can be a clear win when generated output
 and execution shrink.
 
+## Trace temporary values into their consumers
+
+The campaign from `a92eb95f8` through `ca8f1a876` supplies small examples of
+PR-3 in [the standard](../../../x2c-code-standard.md). Trace a temporary value
+from construction to its consumers. If it only carries information into the
+next operation, consider constructing the final result directly or consuming
+the original input.
+
+- In `a8c006e3a`, `src/cache.x` stopped splitting IDs into three temporary
+  lists and then traversing them to construct declaration bindings.
+  `_slot_declarations` constructs the bindings while classifying IDs. The
+  change preserves List/String/Var grouping and descending slot order.
+- In `113f8bc69`, `src/builtins.x` stopped constructing a filtered binding
+  list solely to check for a duplicate name. The original traversal tests
+  group and name together. `_binding_rows_for` remains for installation,
+  whose consumer needs the selected rows in installation order.
+
+Look for materialized selections used only for existence, counting, or one
+traversal, and collections immediately converted into another representation.
+Keep a selection that consumers reuse or need as a value. A lazy iterator
+filter does not imply a temporary collection. In particular, distinguish
+disposable intermediates from caches and indexes that avoid repeated work.
+Source reduction alone does not justify removing those fast paths.
+
+## Move live values instead of swapping discarded values
+
+Commit `9879f04b0` simplified deletion in `lib/map/generics.x`. The old loop
+swapped each successor with the deletion hole. The replacement copies each
+successor into the hole and clears the final slot. It removes temporary
+values and writes that only carried discarded contents forward.
+
+Inspect deletion and compaction loops for this pattern. Establish whether
+intermediate contents are observable and whether ownership, destruction, or
+callbacks require each swap. The Map example does not authorize replacing
+swaps in sorting or other operations that retain both values.
+
+## Recognize smaller consequences of established contracts
+
+These campaign examples apply existing rules in
+[the standard](../../../x2c-code-standard.md), rather than adding new rules:
+
+| Example | Existing guidance | What must remain |
+| --- | --- | --- |
+| `113f8bc69`: `_binding_statement` destructures the internal binding row instead of matching it and silently returning an empty result | EX-9, trusted fixed shapes | The producer's shape guarantee; checks for variable or external input |
+| `fbc6cbaab`: tokenizer mode operations replace forwarding helpers, and `token_len` disappears | FA-7, forwarding chains; PR-3, unnecessary state | Deferred rollback and `mode_committed`, which carry real failure behavior |
+| `e8bfac15c`: `_compile_is` uses one structural match instead of a classifier helper and manual shape tests | Matching and traversal decision table | Exact arity, accepted payloads, fallback behavior, and efficient generated operations |
+| `e8bfac15c`: unconditional `xfree(l.sites)` replaces its null guard | PR-4, established guarantees | The documented `xfree(NULL)` contract; ownership guards are a different condition |
+| `523ca07f4`: datum-reader `_list` returns at each outcome instead of assigning `out`, breaking, and returning later | PR-3, unnecessary state | Cleanup and any required post-loop work |
+
+Optional searches from the repository root locate candidates:
+
+```sh
+rg -n 'if .*xfree' src lib -g '*.x' -g '!x2c.x' -g '!linked-meta.x'
+rg -n '\.filter\(|selected\.push|return .*list_free' src lib -g '*.x' -g '!x2c.x' -g '!linked-meta.x'
+rg -n 'swap_|return out;|static inline' src lib -g '*.x' -g '!x2c.x' -g '!linked-meta.x'
+```
+
+These are discovery signals, not automatic replacements. Trace the producers
+and consumers before selecting a change. Compare generated operations when a
+shorter spelling may add traversal, allocation, conversion, or lost reuse.
+Keep comment, layout, and nested-ternary cleanup under Clean; those changes
+alone do not demonstrate removed machinery.
+
 ## Keep pulling after the first deletion
 
 Calibration for PR-3 in [the standard](../../../x2c-code-standard.md).
