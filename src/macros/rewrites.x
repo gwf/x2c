@@ -46,9 +46,9 @@ static typedef struct Preparation {
 } Preparation;
 
 /** Records the source values a replacement's lowering watches. A watched
-    value is source the translator captured, so it lowers under the `outer` rules,
-    those active outside the translator's own. A first lowering's
-    `preparation` records the outputs for a reusable skeleton.
+    value is source the translator captured, so it lowers under the
+    `outer` rules, those active outside the translator's own. A first
+    lowering's `preparation` records the outputs for a reusable skeleton.
     A replacement lowered as written within another's has that one as its
     `parent`, whose source it may hold
     as well. A shipped rule's replacement, a statement the kernel wrote,
@@ -56,7 +56,8 @@ static typedef struct Preparation {
     written definition while its function rules are chosen: their own
     code is not source, so no user rule sees it, while the values the
     watch holds are. A watch whose values are
-    lowered already has them `kept` as they are. */
+    lowered already has them `kept` as they are.
+*/
 struct SlotWatch {
   List values;
   Preparation *preparation;
@@ -212,7 +213,8 @@ static List _rewrite_candidates(Compiler c, Symbol point, Var kind) {
 
 /** Matches the member rules registered for each field keyword that
     `aggregate` declares a field with, as `Compiler.rewrite` matches those
-    keyed by a receiver type. */
+    keyed by a receiver type.
+*/
 List Compiler.marked_rewrite(
   Compiler c, Type aggregate, List source, Token site) {
   Var stored;
@@ -234,7 +236,8 @@ int Compiler.has_rewrites(Compiler c, Symbol point, Var kind) =>
     replacement. A translator declines with void, null, or its input itself.
     Active rules cannot re-enter. A statement of the same kind that a
     statement replacement writes or copies, such as its source, takes the
-    rules after the one that replaced it. */
+    rules after the one that replaced it.
+*/
 List Compiler.rewrite(
   Compiler c, Symbol point, Var kind, List source, Symbol position,
   Type expected, Token site) =>
@@ -243,7 +246,8 @@ List Compiler.rewrite(
 /** Matches registered patterns for the statement `source`, which the
     transform has lowered, then binds the first replacement as
     `Compiler.rewrite` does. Binding keeps the source, and each part of it
-    the replacement holds, as lowered. */
+    the replacement holds, as lowered.
+*/
 List Compiler.rewrite_lowered(
   Compiler c, Symbol point, Var kind, List source, Symbol position,
   Type expected, Token site) =>
@@ -251,7 +255,8 @@ List Compiler.rewrite_lowered(
 
 /** Lowers `replacement`, which `Compiler.rewrite_lowered` bound for the
     lowered statement `source`, and keeps each part of `source` it holds as
-    it is, so no statement rule is offered that part again. */
+    it is, so no statement rule is offered that part again.
+*/
 List Compiler.lower_replacement(Compiler c, List replacement, List source) {
   Array parts = auto [];
   _held_parts(source, <node>, parts);
@@ -263,7 +268,8 @@ List Compiler.lower_replacement(Compiler c, List replacement, List source) {
 /** Binds the replacement a shipped rule gives the lowered statement
     `source` of `kind`, which the kernel wrote while lowering, as
     `Compiler.rewrite_lowered` does. A statement the kernel writes is not
-    source, so no program rule sees it. */
+    source, so no program rule sees it.
+*/
 List Compiler.rewrite_written(
   Compiler c, Symbol kind, List source, Type expected) {
   struct SlotWatch written = {.shipped = 1};
@@ -283,7 +289,8 @@ List Compiler.rewrite_written(
     so only shipped rules see it. An expression retains the result type
     already established for its parent. A replacement whose template and
     slot signatures an earlier use in the unit prepared lowers only its
-    captured values. */
+    captured values.
+*/
 List Compiler.lower_rewrite(
   Compiler c, Symbol point, Var kind, List source, Symbol position,
   Type expected, Token site) =>
@@ -444,7 +451,8 @@ module List _written_support(Compiler c, List bound) {
 }
 
 /** Whether the rule whose meta function now runs is shipped, so that the
-    names it calls resolve to the copies the compiler links. */
+    names it calls resolve to the copies the compiler links.
+*/
 int Compiler.applying_shipped(Compiler c) {
   RewriteRule applying = c.applying ? c.applying.car() : NULL;
   return applying && applying.builtin;
@@ -698,7 +706,8 @@ static int _find_slot(SlotWatch watch, Ast ast) {
 /** Records that binding built the statement `bound` again from `source`,
     a value the active lowering watches, so it watches `bound` as well. A
     statement without an origin, such as an unbraced body, keeps nothing
-    else that identifies it when a binder it uses binds again. */
+    else that identifies it when a binder it uses binds again.
+*/
 void Compiler.rebound(Compiler c, Var source, List bound) {
   SlotWatch watch = c.slot_watch;
   if (!watch || watch.preparation || bound === source ||
@@ -707,11 +716,12 @@ void Compiler.rebound(Compiler c, Var source, List bound) {
   watch.values = watch.values.append($(bound));
 }
 
-/** Lowers `ast` when it is a value the active lowering watches; NULL otherwise.
-    A preparing watch also records what lowering produced. A value that an
-    enclosing replacement's source held as well lowers outside that
-    replacement's rule too, and that replacement still watches its own
-    values within it. */
+/** Lowers `ast` when it is a value the active lowering watches; NULL
+    otherwise. A preparing watch also records what lowering produced. A
+    value that an enclosing replacement's source held as well lowers outside
+    that replacement's rule too, and that replacement still watches its own
+    values within it.
+*/
 Ast Compiler.watched_step(Compiler c, Ast ast) {
   SlotWatch watch = c.slot_watch, owner = watch;
   int slot = _find_slot(watch, ast);
