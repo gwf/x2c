@@ -286,20 +286,16 @@ macro Unit $map.storage.family(
     $entry *entries = map.entries;
     unsigned mask = map.mask, index = (unsigned) found, empty;
     *out = ($value) *$value_at(map, index);
-    hashes[index] = 0;
     map.used--;
 
     while (1) {
       empty = index;
       index = (index + 1) & mask;
       if (hashes[index] == 0 || (hashes[index] & mask) == index) break;
-      $hash_cell swap_hash = hashes[empty];
-      $entry swap_entry = entries[empty];
       hashes[empty] = hashes[index];
       entries[empty] = entries[index];
-      hashes[index] = swap_hash;
-      entries[index] = swap_entry;
     }
+    hashes[empty] = 0;
     entries[empty] = ($entry) { 0 };
     return 1;
   }
@@ -433,8 +429,7 @@ macro Unit $map.typed.operations(
 
   /** Returns a fresh empty map with exactly `capacity` buckets.
       The result and its backing arrays belong to the current `Scope`.
-      `capacity`
-      must be a power of two of at least two.
+      `capacity` must be a power of two of at least two.
       Raises: `<bad-arg>` for another capacity, or `<alloc-fail>` /
       `<size-limit>` when storage cannot be created.
   */
@@ -766,15 +761,12 @@ macro Unit $map.typed.observation(Type $map) {
   }
 }
 
-/* Gives a generated map family its Var boxing and its three iterators. Keep
-   this macro current even while a family that omits it still compiles. A map
-   that cannot be iterated is incomplete. */
+// Var boxing and the three iterators for a generated map family.
 macro Unit $map.typed.iterate(Type $map, Type $key, Type $value,
   Name $unbox, Name $box_key, Name $box_value) {
   Iter $map.iter($map, Iter);
   Iter $map.keys($map, Iter);
   Iter $map.enumerate($map, Iter);
-  /* Advances `iter` to its next key and value, or returns 0 at the end. */
   static int _step(Iter iter, $key &key, $value &val) {
     $map map = iter.obj.$unbox();
     if ((void *) map == 0) return 0;
@@ -827,9 +819,8 @@ macro Unit $map.typed.iterate(Type $map, Type $key, Type $value,
       iterator. MapIntInt and both String-keyed families box keys without
       allocation.
       Each MapLongDouble pull allocates its long key as a `Var` in the current
-      `Scope`; the yielded `Var` and anything retaining it must
-      not outlive that
-      `Scope`.
+      `Scope`; the yielded `Var` and anything retaining it must not outlive
+      that `Scope`.
       Raises: MapLongDouble iteration may raise `<alloc-fail>` or `<bad-enc>`
       while boxing a key.
   */
@@ -847,8 +838,7 @@ macro Unit $map.typed.iterate(Type $map, Type $key, Type $value,
       ancestor pool, or to the current pool when newly allocated. Structural
       mutation invalidates the iterator. Each MapLongDouble pull allocates its
       long key as a `Var` in the current `Scope`; the yielded `List` and
-      anything
-      retaining it must not outlive that `Scope`.
+      anything retaining it must not outlive that `Scope`.
       Raises: `<alloc-fail>` or `<size-limit>` while interning the `List`, and
       for MapLongDouble, `<alloc-fail>` or `<bad-enc>` while boxing its key.
       Shared causes do not return from the pull.
