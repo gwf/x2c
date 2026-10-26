@@ -1138,7 +1138,7 @@ unrelated pool is not a valid argument.
 
 A null argument is ignored.
 
-Source: `lib/string/storage.x:292`
+Source: `lib/string/storage.x:293`
 
 <a id="String.hash"></a>
 #### String.hash
@@ -1189,6 +1189,7 @@ is not valid here because installing its pointer would outlive its storage.
 ~String buf = String.malloc(6);
 ~char *bytes = buf;
 ~for (int i = 0; i < 5; i++) bytes[i] = 'a' + i;
+~bytes[5] = '\0';
 String canonical = buf.intern_free();
 printf("%s %d\n", canonical, canonical == "abcde");
 ```
@@ -1197,7 +1198,7 @@ printf("%s %d\n", canonical, canonical == "abcde");
 null argument returns NULL, and a buffer empty at its first byte is
 released and reported as NULL, the empty `String`, without raising.
 
-Source: `lib/string/storage.x:236`
+Source: `lib/string/storage.x:237`
 
 <a id="String.malloc"></a>
 #### String.malloc
@@ -1331,7 +1332,7 @@ unchanged.
 **Raises:** `<alloc-fail>`, `<size-limit>`, or `<invariant>` while recording
 the promotion.
 
-Source: `lib/string/storage.x:315`
+Source: `lib/string/storage.x:316`
 
 <a id="String.repr"></a>
 #### String.repr
@@ -1447,7 +1448,7 @@ transient buffer or a `String` a nested pool can still reclaim. Unlike
 `String.try_own` it neither promotes nor allocates, so a caller may ask
 about a `String` it does not own.
 
-Source: `lib/string/storage.x:340`
+Source: `lib/string/storage.x:341`
 
 <a id="String.try_own"></a>
 #### String.try_own
@@ -1463,7 +1464,7 @@ remain.
 **Raises:** `<alloc-fail>`, `<size-limit>`, or `<invariant>` while recording a
 promotion.
 
-Source: `lib/string/storage.x:329`
+Source: `lib/string/storage.x:330`
 
 ## Public types
 

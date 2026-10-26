@@ -24,10 +24,10 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayChar.copy`](#ArrayChar.copy) | Returns a fresh packed copy, or NULL for a null array. |
 | [`ArrayChar.count`](#ArrayChar.count) | Returns how many native elements equal `value`. |
 | [`ArrayChar.equal`](#ArrayChar.equal) | Reports elementwise native equality. |
-| [`ArrayChar.find`](#ArrayChar.find) | Returns the first index whose native element equals `value`, or -1. |
+| [`ArrayChar.find`](#ArrayChar.find) | Returns the first element accepted by `pred`'s ordinary `Var` truth, or `void` when absent. |
 | [`ArrayChar.getindex`](#ArrayChar.getindex) | Reads raw `index` with the bounds and null preconditions of a C pointer. |
 | [`ArrayChar.getslice`](#ArrayChar.getslice) | Returns a fresh packed array for normalized `[start:end:step]`. |
-| [`ArrayChar.indexof`](#ArrayChar.indexof) | Returns the same first-match index as `ArrayChar.find`. |
+| [`ArrayChar.index`](#ArrayChar.index) | Returns the first index whose native element equals `value`, or -1. |
 | [`ArrayChar.insert`](#ArrayChar.insert) | Inserts `value` at normalized `index` and returns it. |
 | [`ArrayChar.iter`](#ArrayChar.iter) | Initializes `dest` to lazily yield boxed elements in index order. |
 | [`ArrayChar.new`](#ArrayChar.new) | Returns a fresh empty array in the active allocation scope. |
@@ -59,10 +59,10 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayDbl.copy`](#ArrayDbl.copy) | Returns a fresh packed copy, or NULL for a null array. |
 | [`ArrayDbl.count`](#ArrayDbl.count) | Returns how many native elements equal `value`. |
 | [`ArrayDbl.equal`](#ArrayDbl.equal) | Reports elementwise native equality. |
-| [`ArrayDbl.find`](#ArrayDbl.find) | Returns the first index whose native element equals `value`, or -1. |
+| [`ArrayDbl.find`](#ArrayDbl.find) | Returns the first element accepted by `pred`'s ordinary `Var` truth, or `void` when absent. |
 | [`ArrayDbl.getindex`](#ArrayDbl.getindex) | Reads raw `index` with the bounds and null preconditions of a C pointer. |
 | [`ArrayDbl.getslice`](#ArrayDbl.getslice) | Returns a fresh packed array for normalized `[start:end:step]`. |
-| [`ArrayDbl.indexof`](#ArrayDbl.indexof) | Returns the same first-match index as `ArrayDbl.find`. |
+| [`ArrayDbl.index`](#ArrayDbl.index) | Returns the first index whose native element equals `value`, or -1. |
 | [`ArrayDbl.insert`](#ArrayDbl.insert) | Inserts `value` at normalized `index` and returns it. |
 | [`ArrayDbl.iter`](#ArrayDbl.iter) | Initializes `dest` to lazily yield boxed elements in index order. |
 | [`ArrayDbl.new`](#ArrayDbl.new) | Returns a fresh empty array in the active allocation scope. |
@@ -94,10 +94,10 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayFloat.copy`](#ArrayFloat.copy) | Returns a fresh packed copy, or NULL for a null array. |
 | [`ArrayFloat.count`](#ArrayFloat.count) | Returns how many native elements equal `value`. |
 | [`ArrayFloat.equal`](#ArrayFloat.equal) | Reports elementwise native equality. |
-| [`ArrayFloat.find`](#ArrayFloat.find) | Returns the first index whose native element equals `value`, or -1. |
+| [`ArrayFloat.find`](#ArrayFloat.find) | Returns the first element accepted by `pred`'s ordinary `Var` truth, or `void` when absent. |
 | [`ArrayFloat.getindex`](#ArrayFloat.getindex) | Reads raw `index` with the bounds and null preconditions of a C pointer. |
 | [`ArrayFloat.getslice`](#ArrayFloat.getslice) | Returns a fresh packed array for normalized `[start:end:step]`. |
-| [`ArrayFloat.indexof`](#ArrayFloat.indexof) | Returns the same first-match index as `ArrayFloat.find`. |
+| [`ArrayFloat.index`](#ArrayFloat.index) | Returns the first index whose native element equals `value`, or -1. |
 | [`ArrayFloat.insert`](#ArrayFloat.insert) | Inserts `value` at normalized `index` and returns it. |
 | [`ArrayFloat.iter`](#ArrayFloat.iter) | Initializes `dest` to lazily yield boxed elements in index order. |
 | [`ArrayFloat.new`](#ArrayFloat.new) | Returns a fresh empty array in the active allocation scope. |
@@ -129,10 +129,10 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayInt.copy`](#ArrayInt.copy) | Returns a fresh packed copy, or NULL for a null array. |
 | [`ArrayInt.count`](#ArrayInt.count) | Returns how many native elements equal `value`. |
 | [`ArrayInt.equal`](#ArrayInt.equal) | Reports elementwise native equality. |
-| [`ArrayInt.find`](#ArrayInt.find) | Returns the first index whose native element equals `value`, or -1. |
+| [`ArrayInt.find`](#ArrayInt.find) | Returns the first element accepted by `pred`'s ordinary `Var` truth, or `void` when absent. |
 | [`ArrayInt.getindex`](#ArrayInt.getindex) | Reads raw `index` with the bounds and null preconditions of a C pointer. |
 | [`ArrayInt.getslice`](#ArrayInt.getslice) | Returns a fresh packed array for normalized `[start:end:step]`. |
-| [`ArrayInt.indexof`](#ArrayInt.indexof) | Returns the same first-match index as `ArrayInt.find`. |
+| [`ArrayInt.index`](#ArrayInt.index) | Returns the first index whose native element equals `value`, or -1. |
 | [`ArrayInt.insert`](#ArrayInt.insert) | Inserts `value` at normalized `index` and returns it. |
 | [`ArrayInt.iter`](#ArrayInt.iter) | Initializes `dest` to lazily yield boxed elements in index order. |
 | [`ArrayInt.new`](#ArrayInt.new) | Returns a fresh empty array in the active allocation scope. |
@@ -164,10 +164,10 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayLong.copy`](#ArrayLong.copy) | Returns a fresh packed copy, or NULL for a null array. |
 | [`ArrayLong.count`](#ArrayLong.count) | Returns how many native elements equal `value`. |
 | [`ArrayLong.equal`](#ArrayLong.equal) | Reports elementwise native equality. |
-| [`ArrayLong.find`](#ArrayLong.find) | Returns the first index whose native element equals `value`, or -1. |
+| [`ArrayLong.find`](#ArrayLong.find) | Returns the first element accepted by `pred`'s ordinary `Var` truth, or `void` when absent. |
 | [`ArrayLong.getindex`](#ArrayLong.getindex) | Reads raw `index` with the bounds and null preconditions of a C pointer. |
 | [`ArrayLong.getslice`](#ArrayLong.getslice) | Returns a fresh packed array for normalized `[start:end:step]`. |
-| [`ArrayLong.indexof`](#ArrayLong.indexof) | Returns the same first-match index as `ArrayLong.find`. |
+| [`ArrayLong.index`](#ArrayLong.index) | Returns the first index whose native element equals `value`, or -1. |
 | [`ArrayLong.insert`](#ArrayLong.insert) | Inserts `value` at normalized `index` and returns it. |
 | [`ArrayLong.iter`](#ArrayLong.iter) | Initializes `dest` to lazily yield boxed elements in index order. |
 | [`ArrayLong.new`](#ArrayLong.new) | Returns a fresh empty array in the active allocation scope. |
@@ -199,10 +199,10 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayShort.copy`](#ArrayShort.copy) | Returns a fresh packed copy, or NULL for a null array. |
 | [`ArrayShort.count`](#ArrayShort.count) | Returns how many native elements equal `value`. |
 | [`ArrayShort.equal`](#ArrayShort.equal) | Reports elementwise native equality. |
-| [`ArrayShort.find`](#ArrayShort.find) | Returns the first index whose native element equals `value`, or -1. |
+| [`ArrayShort.find`](#ArrayShort.find) | Returns the first element accepted by `pred`'s ordinary `Var` truth, or `void` when absent. |
 | [`ArrayShort.getindex`](#ArrayShort.getindex) | Reads raw `index` with the bounds and null preconditions of a C pointer. |
 | [`ArrayShort.getslice`](#ArrayShort.getslice) | Returns a fresh packed array for normalized `[start:end:step]`. |
-| [`ArrayShort.indexof`](#ArrayShort.indexof) | Returns the same first-match index as `ArrayShort.find`. |
+| [`ArrayShort.index`](#ArrayShort.index) | Returns the first index whose native element equals `value`, or -1. |
 | [`ArrayShort.insert`](#ArrayShort.insert) | Inserts `value` at normalized `index` and returns it. |
 | [`ArrayShort.iter`](#ArrayShort.iter) | Initializes `dest` to lazily yield boxed elements in index order. |
 | [`ArrayShort.new`](#ArrayShort.new) | Returns a fresh empty array in the active allocation scope. |
@@ -234,10 +234,10 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayString.copy`](#ArrayString.copy) | Returns a fresh packed copy, or NULL for a null array. |
 | [`ArrayString.count`](#ArrayString.count) | Returns how many native elements equal `value`. |
 | [`ArrayString.equal`](#ArrayString.equal) | Reports elementwise native equality. |
-| [`ArrayString.find`](#ArrayString.find) | Returns the first index whose native element equals `value`, or -1. |
+| [`ArrayString.find`](#ArrayString.find) | Returns the first element accepted by `pred`'s ordinary `Var` truth, or `void` when absent. |
 | [`ArrayString.getindex`](#ArrayString.getindex) | Reads raw `index` with the bounds and null preconditions of a C pointer. |
 | [`ArrayString.getslice`](#ArrayString.getslice) | Returns a fresh packed array for normalized `[start:end:step]`. |
-| [`ArrayString.indexof`](#ArrayString.indexof) | Returns the same first-match index as `ArrayString.find`. |
+| [`ArrayString.index`](#ArrayString.index) | Returns the first index whose native element equals `value`, or -1. |
 | [`ArrayString.insert`](#ArrayString.insert) | Inserts `value` at normalized `index` and returns it. |
 | [`ArrayString.iter`](#ArrayString.iter) | Initializes `dest` to lazily yield boxed elements in index order. |
 | [`ArrayString.new`](#ArrayString.new) | Returns a fresh empty array in the active allocation scope. |
@@ -453,12 +453,13 @@ Source: `lib/typed-array.x:103`
 <a id="ArrayChar.find"></a>
 #### ArrayChar.find
 
-`int ArrayChar.find(ArrayChar array, char value)`
+`Var ArrayChar.find(ArrayChar array, Func pred)`
 
-Returns the first index whose native element equals `value`, or -1.
-A null array returns -1; the scan is linear and preserves source order.
-
-**Raises:** `<size-limit>` when the length exceeds the integer index domain.
+Returns the first element accepted by `pred`'s ordinary `Var` truth,
+or `void` when absent. A null array or predicate returns `void`.
+Elements are boxed as in iteration; the array and its storage are
+unchanged. Raises: any cause from boxing, `pred`, or its result's truth
+operation.
 
 Source: `lib/typed-array.x:103`
 
@@ -485,12 +486,15 @@ the integer index domain, or `<alloc-fail>` on allocation failure.
 
 Source: `lib/typed-array.x:103`
 
-<a id="ArrayChar.indexof"></a>
-#### ArrayChar.indexof
+<a id="ArrayChar.index"></a>
+#### ArrayChar.index
 
-`int ArrayChar.indexof(ArrayChar array, char value)`
+`int ArrayChar.index(ArrayChar array, char value)`
 
-Returns the same first-match index as `ArrayChar.find`.
+Returns the first index whose native element equals `value`, or -1.
+A null array returns -1; the scan is linear and preserves source order.
+
+**Raises:** `<size-limit>` when the length exceeds the integer index domain.
 
 Source: `lib/typed-array.x:103`
 
@@ -881,12 +885,13 @@ Source: `lib/typed-array.x:148`
 <a id="ArrayDbl.find"></a>
 #### ArrayDbl.find
 
-`int ArrayDbl.find(ArrayDbl array, double value)`
+`Var ArrayDbl.find(ArrayDbl array, Func pred)`
 
-Returns the first index whose native element equals `value`, or -1.
-A null array returns -1; the scan is linear and preserves source order.
-
-**Raises:** `<size-limit>` when the length exceeds the integer index domain.
+Returns the first element accepted by `pred`'s ordinary `Var` truth,
+or `void` when absent. A null array or predicate returns `void`.
+Elements are boxed as in iteration; the array and its storage are
+unchanged. Raises: any cause from boxing, `pred`, or its result's truth
+operation.
 
 Source: `lib/typed-array.x:148`
 
@@ -913,12 +918,15 @@ the integer index domain, or `<alloc-fail>` on allocation failure.
 
 Source: `lib/typed-array.x:148`
 
-<a id="ArrayDbl.indexof"></a>
-#### ArrayDbl.indexof
+<a id="ArrayDbl.index"></a>
+#### ArrayDbl.index
 
-`int ArrayDbl.indexof(ArrayDbl array, double value)`
+`int ArrayDbl.index(ArrayDbl array, double value)`
 
-Returns the same first-match index as `ArrayDbl.find`.
+Returns the first index whose native element equals `value`, or -1.
+A null array returns -1; the scan is linear and preserves source order.
+
+**Raises:** `<size-limit>` when the length exceeds the integer index domain.
 
 Source: `lib/typed-array.x:148`
 
@@ -1307,12 +1315,13 @@ Source: `lib/typed-array.x:139`
 <a id="ArrayFloat.find"></a>
 #### ArrayFloat.find
 
-`int ArrayFloat.find(ArrayFloat array, float value)`
+`Var ArrayFloat.find(ArrayFloat array, Func pred)`
 
-Returns the first index whose native element equals `value`, or -1.
-A null array returns -1; the scan is linear and preserves source order.
-
-**Raises:** `<size-limit>` when the length exceeds the integer index domain.
+Returns the first element accepted by `pred`'s ordinary `Var` truth,
+or `void` when absent. A null array or predicate returns `void`.
+Elements are boxed as in iteration; the array and its storage are
+unchanged. Raises: any cause from boxing, `pred`, or its result's truth
+operation.
 
 Source: `lib/typed-array.x:139`
 
@@ -1339,12 +1348,15 @@ the integer index domain, or `<alloc-fail>` on allocation failure.
 
 Source: `lib/typed-array.x:139`
 
-<a id="ArrayFloat.indexof"></a>
-#### ArrayFloat.indexof
+<a id="ArrayFloat.index"></a>
+#### ArrayFloat.index
 
-`int ArrayFloat.indexof(ArrayFloat array, float value)`
+`int ArrayFloat.index(ArrayFloat array, float value)`
 
-Returns the same first-match index as `ArrayFloat.find`.
+Returns the first index whose native element equals `value`, or -1.
+A null array returns -1; the scan is linear and preserves source order.
+
+**Raises:** `<size-limit>` when the length exceeds the integer index domain.
 
 Source: `lib/typed-array.x:139`
 
@@ -1733,12 +1745,13 @@ Source: `lib/typed-array.x:121`
 <a id="ArrayInt.find"></a>
 #### ArrayInt.find
 
-`int ArrayInt.find(ArrayInt array, int value)`
+`Var ArrayInt.find(ArrayInt array, Func pred)`
 
-Returns the first index whose native element equals `value`, or -1.
-A null array returns -1; the scan is linear and preserves source order.
-
-**Raises:** `<size-limit>` when the length exceeds the integer index domain.
+Returns the first element accepted by `pred`'s ordinary `Var` truth,
+or `void` when absent. A null array or predicate returns `void`.
+Elements are boxed as in iteration; the array and its storage are
+unchanged. Raises: any cause from boxing, `pred`, or its result's truth
+operation.
 
 Source: `lib/typed-array.x:121`
 
@@ -1765,12 +1778,15 @@ the integer index domain, or `<alloc-fail>` on allocation failure.
 
 Source: `lib/typed-array.x:121`
 
-<a id="ArrayInt.indexof"></a>
-#### ArrayInt.indexof
+<a id="ArrayInt.index"></a>
+#### ArrayInt.index
 
-`int ArrayInt.indexof(ArrayInt array, int value)`
+`int ArrayInt.index(ArrayInt array, int value)`
 
-Returns the same first-match index as `ArrayInt.find`.
+Returns the first index whose native element equals `value`, or -1.
+A null array returns -1; the scan is linear and preserves source order.
+
+**Raises:** `<size-limit>` when the length exceeds the integer index domain.
 
 Source: `lib/typed-array.x:121`
 
@@ -2161,12 +2177,13 @@ Source: `lib/typed-array.x:130`
 <a id="ArrayLong.find"></a>
 #### ArrayLong.find
 
-`int ArrayLong.find(ArrayLong array, long value)`
+`Var ArrayLong.find(ArrayLong array, Func pred)`
 
-Returns the first index whose native element equals `value`, or -1.
-A null array returns -1; the scan is linear and preserves source order.
-
-**Raises:** `<size-limit>` when the length exceeds the integer index domain.
+Returns the first element accepted by `pred`'s ordinary `Var` truth,
+or `void` when absent. A null array or predicate returns `void`.
+Elements are boxed as in iteration; the array and its storage are
+unchanged. Raises: any cause from boxing, `pred`, or its result's truth
+operation.
 
 Source: `lib/typed-array.x:130`
 
@@ -2193,12 +2210,15 @@ the integer index domain, or `<alloc-fail>` on allocation failure.
 
 Source: `lib/typed-array.x:130`
 
-<a id="ArrayLong.indexof"></a>
-#### ArrayLong.indexof
+<a id="ArrayLong.index"></a>
+#### ArrayLong.index
 
-`int ArrayLong.indexof(ArrayLong array, long value)`
+`int ArrayLong.index(ArrayLong array, long value)`
 
-Returns the same first-match index as `ArrayLong.find`.
+Returns the first index whose native element equals `value`, or -1.
+A null array returns -1; the scan is linear and preserves source order.
+
+**Raises:** `<size-limit>` when the length exceeds the integer index domain.
 
 Source: `lib/typed-array.x:130`
 
@@ -2589,12 +2609,13 @@ Source: `lib/typed-array.x:112`
 <a id="ArrayShort.find"></a>
 #### ArrayShort.find
 
-`int ArrayShort.find(ArrayShort array, short value)`
+`Var ArrayShort.find(ArrayShort array, Func pred)`
 
-Returns the first index whose native element equals `value`, or -1.
-A null array returns -1; the scan is linear and preserves source order.
-
-**Raises:** `<size-limit>` when the length exceeds the integer index domain.
+Returns the first element accepted by `pred`'s ordinary `Var` truth,
+or `void` when absent. A null array or predicate returns `void`.
+Elements are boxed as in iteration; the array and its storage are
+unchanged. Raises: any cause from boxing, `pred`, or its result's truth
+operation.
 
 Source: `lib/typed-array.x:112`
 
@@ -2621,12 +2642,15 @@ the integer index domain, or `<alloc-fail>` on allocation failure.
 
 Source: `lib/typed-array.x:112`
 
-<a id="ArrayShort.indexof"></a>
-#### ArrayShort.indexof
+<a id="ArrayShort.index"></a>
+#### ArrayShort.index
 
-`int ArrayShort.indexof(ArrayShort array, short value)`
+`int ArrayShort.index(ArrayShort array, short value)`
 
-Returns the same first-match index as `ArrayShort.find`.
+Returns the first index whose native element equals `value`, or -1.
+A null array returns -1; the scan is linear and preserves source order.
+
+**Raises:** `<size-limit>` when the length exceeds the integer index domain.
 
 Source: `lib/typed-array.x:112`
 
@@ -3017,12 +3041,13 @@ Source: `lib/typed-array.x:157`
 <a id="ArrayString.find"></a>
 #### ArrayString.find
 
-`int ArrayString.find(ArrayString array, String value)`
+`Var ArrayString.find(ArrayString array, Func pred)`
 
-Returns the first index whose native element equals `value`, or -1.
-A null array returns -1; the scan is linear and preserves source order.
-
-**Raises:** `<size-limit>` when the length exceeds the integer index domain.
+Returns the first element accepted by `pred`'s ordinary `Var` truth,
+or `void` when absent. A null array or predicate returns `void`.
+Elements are boxed as in iteration; the array and its storage are
+unchanged. Raises: any cause from boxing, `pred`, or its result's truth
+operation.
 
 Source: `lib/typed-array.x:157`
 
@@ -3049,12 +3074,15 @@ the integer index domain, or `<alloc-fail>` on allocation failure.
 
 Source: `lib/typed-array.x:157`
 
-<a id="ArrayString.indexof"></a>
-#### ArrayString.indexof
+<a id="ArrayString.index"></a>
+#### ArrayString.index
 
-`int ArrayString.indexof(ArrayString array, String value)`
+`int ArrayString.index(ArrayString array, String value)`
 
-Returns the same first-match index as `ArrayString.find`.
+Returns the first index whose native element equals `value`, or -1.
+A null array returns -1; the scan is linear and preserves source order.
+
+**Raises:** `<size-limit>` when the length exceeds the integer index domain.
 
 Source: `lib/typed-array.x:157`
 
