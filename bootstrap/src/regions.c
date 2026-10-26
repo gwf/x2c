@@ -188,7 +188,7 @@ static void f4_walk____walk_at(Walk * w, int origin, Var inner);
 
 static void f4_walk____walk_block(Walk * w, List statements);
 
-static void f4_walk____close_to(Walk * w, Region region, Region outer);
+static void f4_walk____close_to(Region region, Region outer);
 
 static void f4_walk____walk_sequence(Walk * w, List statements);
 
@@ -2200,11 +2200,11 @@ static void f4_walk____walk_block(Walk * w, List statements){
     }
 
   }
-  f4_walk____close_to(&((* w)), (* w).open, outer); (* w).open = outer; (* w).restored = restored; (* w).depth -= 1;
+  f4_walk____close_to((* w).open, outer); (* w).open = outer; (* w).restored = restored; (* w).depth -= 1;
 }
 
-static void f4_walk____close_to(Walk * w, Region region, Region outer){
-  if(region == outer) return;  f4_walk____close_to(&((* w)), region -> outer, outer);  region -> closed = 1;
+static void f4_walk____close_to(Region region, Region outer){
+  if(region == outer) return;  f4_walk____close_to(region -> outer, outer);  region -> closed = 1;
 }
 
 static void f4_walk____walk_sequence(Walk * w, List statements){
@@ -2619,10 +2619,10 @@ static void f4_walk____scan_children(Walk * w, List children){
 }
 
 static void f4_walk____store(Walk * w, Var target, Var value){
-  if(! List_truth(_binding_of(target))) f4_walk____scan(&((* w)), target, 0);  if(Map_contains((* w).restored, f4_walk____target_place(&((* w)), target))){
+  List named = _binding_of(target);  if(! List_truth(named)) f4_walk____scan(&((* w)), target, 0);  if(Map_contains((* w).restored, f4_walk____target_place(&((* w)), target))){
     f4_walk____scan(&((* w)), value, 0);  return;
   }
-  Type type = List_type(_expression_type(target));  List named = _binding_of(target);  Var found = List_truth(named) ? Map_getindex((* w).facts, List_var(named)) :((void) 0, Void);  if(! Var_is_void(found)){
+  Type type = List_type(_expression_type(target));  Var found = List_truth(named) ? Map_getindex((* w).facts, List_var(named)) :((void) 0, Void);  if(! Var_is_void(found)){
     f4_walk____assign(&((* w)), Var_fact(found), value, type, 1);  return;
   }
   f4_walk____scan(&((* w)), value, 0);  if(List_truth(named)){
