@@ -5,9 +5,9 @@
     Pool owns canonical identity for a stack of nested levels. Lookup walks
     outward and a miss lands in the innermost level; release returns empty
     blocks to one process-wide depot and moves promoted survivors to the
-    parent at the same address. Levels have no sibling branches, so the
-    active chain holds one canonical pointer per equal value. `String` and
-    `List` intern into one such stack per thread.
+    parent at the same address. Threads start at one shared process root and
+    may open their own child levels. `String` and `List` lookup follows the
+    active thread's chain of child and ancestor levels.
 */
 
 #pragma once

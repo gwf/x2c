@@ -194,10 +194,16 @@ main.x:1:1: driver: package 'tally' was built by another compiler; rebuild it
 Modules load on macOS, Linux and WSL. On other platforms, importing a
 package that has a module reports that native modules are not supported.
 There, link the package's compile-time part into a compiler built from a
-checkout's `src/*.x` instead:
+checkout instead. From the repository root, after `make build-safe`, run
+this command in Bash:
 
 ```sh
-./x2c build --extension packages/tally --output /tmp/x2c src/*.x
+compiler_sources=()
+while IFS= read -r source; do compiler_sources+=("$source"); done < <(
+  tools/sources.sh --root "$PWD")
+builds/0/x2c build --extension packages/tally \
+  --x-include-dir "$PWD/src" --c-include-dir "$PWD/builds/0/src" \
+  --output /tmp/x2c "${compiler_sources[@]}"
 ```
 
 That compiler then calls `tally`'s `meta` functions through

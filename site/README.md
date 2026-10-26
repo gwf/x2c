@@ -51,7 +51,7 @@ Landing-page repository counts are recomputed from the current source tree
 when Astro renders the page, using `tools/repo-metrics.py --summary-json`.
 Python 3 and `cloc` must be available on `PATH`, including for direct Astro
 builds and development previews. The Pages workflow installs both. The
-compiler and library cards count top-level `.x` files in `src/` and `lib/`.
+compiler and library cards count `.x` files recursively in `src/` and `lib/`.
 The X Lisp card counts tracked `.xlisp` files. The compiler support card
 counts ordinary `.x` modules under `etc/`. The X Lisp count includes tests,
 examples, and packages. Both counts skip files that begin with a

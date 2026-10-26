@@ -114,9 +114,9 @@ void Pool.close(void) {
 }
 
 /** Removes the innermost open bracket without destroying it.
-    `Thread` keeps the detached pool sealed until join copies its survivors.
-    The returned pool remains owned by the caller until that transfer or an
-    explicit `Pool.release`.
+    The returned pool remains owned by the caller until explicitly released.
+    Keep it and its ancestors alive while its values are in use. `Thread.join`
+    does not copy values or transfer pool ownership.
     Raises: `<bad-state>` when no bracket is open. The failure leaves the
     active pool unchanged.
 */

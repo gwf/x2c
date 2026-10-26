@@ -524,7 +524,9 @@ Tensor Tensor.masked_select(Tensor a, Tensor mask) =>
 Tensor Tensor.where(Tensor condition, Tensor a, Tensor b) =>
   _wrap(xt_where(condition.native, a.native, b.native), "where");
 
-/* Shape and indexing; results view the same storage. */
+/* Shape and indexing. Transpose, squeeze, unsqueeze, select, slice, and
+   narrow share storage. Reshape and flatten may copy when the layout requires
+   it; index_select, masked_select, cat, and stack allocate result storage. */
 
 Tensor Tensor.reshape(Tensor a, List shape) {
   int rank;

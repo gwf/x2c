@@ -226,6 +226,7 @@ String String.malloc(int len) {
     ~String buf = String.malloc(6);
     ~char *bytes = buf;
     ~for (int i = 0; i < 5; i++) bytes[i] = 'a' + i;
+    ~bytes[5] = '\0';
     String canonical = buf.intern_free();
     printf("%s %d\n", canonical, canonical == "abcde");
     ```
