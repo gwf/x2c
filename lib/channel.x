@@ -24,7 +24,8 @@
     lifetimes. Ordinary send copies bits without ownership changes;
     send_owned explicitly hands off a detached, exclusively owned storage
     subtree. Close ends sends and lets accepted values drain. Every user
-    and waiter must finish before the Channel's storage scope is destroyed. */
+    and waiter must finish before the Channel's storage scope is destroyed.
+*/
 typedef struct Channel *Channel;
 
 static typedef struct ChannelMessage {
@@ -101,7 +102,8 @@ static size_t _capacity(Var value) {
     Short forms are new(), new(capacity), and new(tag); omitted capacity
     means rendezvous. Queuing does not intern or export message contents.
     Raises: <bad-arg> for an unknown tag or invalid capacity, <alloc-fail>
-    for storage, or <io-fail> for native condition initialization. */
+    for storage, or <io-fail> for native condition initialization.
+*/
 Channel Channel.new(Var type, Var capacity) {
   if (capacity is void) {
     if (type == <unbounded> || type is not <symbol>) {
@@ -149,7 +151,8 @@ meta static Code _new_one(Code code) {
 
 /** Returns the Channel's own storage scope. Owned queued payloads stay
     detached; ordinary messages remain borrowed. This scope is not a shared
-    adoption destination for concurrent senders. NULL returns NULL. */
+    adoption destination for concurrent senders. NULL returns NULL.
+*/
 Scope Channel.scope(Channel channel) => channel ? channel.lifetime : NULL;
 
 // rendezvous queues
@@ -342,7 +345,8 @@ static void _send(Channel channel, Var value, int owned) {
     commits under synchronization; later stop cannot retract that send.
     Raises: <bad-arg> for NULL, <void-op> for void, <bad-types> for a tag
     mismatch, <bad-state> for closure or cooperative stop, or <alloc-fail>
-    for native buffered queue storage. Failure dispatch holds no queue lock. */
+    for native buffered queue storage. Failure dispatch holds no queue lock.
+*/
 void Channel.send(Channel c, Var value) => _send(c, value, 0);
 
 /** Hands off an exclusively owned payload. Ordinary Map and Array records,
@@ -357,7 +361,8 @@ void Channel.send(Channel c, Var value) => _send(c, value, 0);
     must not be handed off twice. Canonical Strings/Lists and independent
     referenced objects are not implicitly adopted. Pointer provenance and
     ownership graphs remain caller responsibilities.
-    Raises: the send causes, or <bad-arg> for a null/nonpointer payload. */
+    Raises: the send causes, or <bad-arg> for a null/nonpointer payload.
+*/
 void Channel.send_owned(Channel c, Var value) => _send(c, value, 1);
 
 /** Receives one accepted Var. Ordinary payloads stay borrowed. Owned Map and
@@ -367,7 +372,8 @@ void Channel.send_owned(Channel c, Var value) => _send(c, value, 1);
     Returns void only after close and draining; null remains ordinary data.
     A committed delivery succeeds despite a later stop request.
     Raises: <bad-arg> for NULL, <alloc-fail> preparing receiver storage, or
-    <bad-state> for cooperative stop. */
+    <bad-state> for cooperative stop.
+*/
 Var Channel.receive(Channel channel) {
   if (!channel) raise %(bad-arg (operation "Channel.receive"));
   Scope *destination = Scope.top();
@@ -396,7 +402,8 @@ Var Channel.receive(Channel channel) {
 /** Ends sends and wakes waiters; accepted messages remain available to drain.
     Repeated close is harmless. Closing does not stop Thread users, free
     payloads, or acknowledge completion of a borrow.
-    Raises: <bad-arg> for NULL. */
+    Raises: <bad-arg> for NULL.
+*/
 void Channel.close(Channel channel) {
   if (!channel) raise %(bad-arg (operation "Channel.close"));
   x2c_thread_wait_lock();
@@ -409,7 +416,8 @@ void Channel.close(Channel channel) {
     user and waiter must already have finished. Undelivered owned payload
     subtrees are destroyed outside the queue monitor; ordinary payloads are
     not followed. NULL does nothing. Owner destruction releases these native
-    queue nodes and resources through the same finalizer. */
+    queue nodes and resources through the same finalizer.
+*/
 void Channel.free(Channel channel) {
   if (channel) { channel.close(); channel.lifetime.destroy(); }
 }
@@ -422,7 +430,8 @@ $cleanup.by(Channel, free);
 Var Channel.var(Channel channel) => Var.new(<channel>, channel);
 
 /** Reads a Channel handle with its exact tag. Ownership is unchanged.
-    Raises: <bad-types> for another tag. */
+    Raises: <bad-types> for another tag.
+*/
 Channel Var.channel(Var value) {
   if (value is not <channel>) raise %(bad-types (operation "Var.channel"));
   return value.pointer();
@@ -440,7 +449,8 @@ static int _next(Iter iter, Var *out) {
 
 /** Initializes a borrowed iterator that blocks for each received message.
     Normal close and draining end iteration; cooperative stop raises instead.
-    The Channel must outlive traversal. */
+    The Channel must outlive traversal.
+*/
 Iter Channel.iter(Channel c, Iter dest) => dest.init(c, _next, void);
 
 protocol Iter(Channel);
