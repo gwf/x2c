@@ -53,7 +53,7 @@ static SnapshotQuery _sq_open(Map snapshot) {
     .edges = snapshot["edges"]};
   foreach (Map entity, q.entities) {
     q.entities_by_id[entity["id"]] = entity;
-    if (entity["binding"])
+    if (entity.contains("binding"))
       _sq_append(q.bindings, _sq_binding_key(entity, entity["binding"]),
         entity);
   }
