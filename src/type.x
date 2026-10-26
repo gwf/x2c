@@ -164,14 +164,16 @@ static Type _modify(Type type, List mods) => %( @mods @type );
    qualifier, and function-pointer precedence matches parsed source. */
 
 /** Answers `Type.parts`, declared in `lib/meta.x`, through
-    `type_declaration_parts`, which a project's helper shares. */
+    `type_declaration_parts`, which a project's helper shares.
+*/
 List Type.parts(Type type) => type_declaration_parts(type);
 
 /** Returns the declaration specifiers `t` without the pointer, array, or
     function modifiers an alias in them contributes, and sets `modifiers`
     to those modifiers, for `Ast.append_modifiers` to give each declarator.
     Storage and source specifier text, such as `("_Noreturn")`, stay on
-    the base. */
+    the base.
+*/
 List Type.declaration_base(Type t, List &modifiers) {
   Array storage = [], text = [], typed = [];
   defer { storage.free(); text.free(); typed.free(); }
