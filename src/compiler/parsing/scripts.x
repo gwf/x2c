@@ -1,4 +1,4 @@
-/* script units
+/*  scripts.x -- script statements and generated entry points
 
    A script unit that defines `main` rejects top-level statements; one that
    does not runs them, in source order, inside a generated `main`. */
@@ -33,7 +33,7 @@ module void _parse_script(Compiler c, Array nodes) {
   }
   if (conflict) {
     c.token = conflict;
-    _report_script_statement(c);
+    $fail.compiler_script_main(c, c.token);
   }
 }
 
@@ -107,11 +107,7 @@ static void _skip_script_statement(Compiler c) {
    a statement beside `main` is the one form it rejects. */
 static void _reject_statement(Compiler c) {
   if (c.script && c.script.defines_main && c.script_statement_executes())
-    _report_script_statement(c);
-}
-
-static void _report_script_statement(Compiler c) {
-  $fail.compiler_script_main(c, c.token);
+    $fail.compiler_script_main(c, c.token);
 }
 
 /* A file-scope conditional directive also governs the statements it
