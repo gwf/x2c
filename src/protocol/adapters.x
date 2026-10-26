@@ -1,3 +1,5 @@
+/*  adapters.x -- protocol adapter presentation and native alias placement */
+
 static macro Expression $reason.protocol_collision_prefix(
   Expr $member, Expr $participant) =>
   %"member '$($member)' of '$($participant)' ";
@@ -104,9 +106,9 @@ static List _collision_notes(Symbol kind, List first, List second) {
     public or private boundary. Each other conformance whose forward converter
     the unit defines goes to the rule on the `conform` head, which
     `src/components/protocol-adapters.x` registers to write its adapters into
-    the unit's
-    pending support. The external conformances the unit declares are first
-    recorded in its interface. Returns `ast` with native insertions applied.
+    the unit's pending support. The external conformances the unit declares
+    are first recorded in its interface. Returns `ast` with native insertions
+    applied.
 */
 List Compiler.generate_protocol_adapters(Compiler c, List ast) {
   _record_conformances(c);
@@ -215,8 +217,7 @@ static int _defines_function(Compiler c, String name) {
 
 /* Presents one conformance to the rule on the `conform` head, which
    `src/components/protocol-adapters.x` documents and ships. The owner of
-   each
-   member, its collisions and missing conversions, and the generated
+   each member, its collisions and missing conversions, and the generated
    names are settled here; the rule writes the code. */
 static void _present_conformance(
   Compiler c, List conformance, int central_initializer) {
