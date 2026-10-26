@@ -148,8 +148,6 @@ List Iter_list(Iter iter);
 
 List List_append(List a, List b);
 
-List List_concat(List lists);
-
 List List_concat_n(unsigned list_count, ...);
 
 List List_list_n(unsigned element_count, ...);

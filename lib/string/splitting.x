@@ -116,13 +116,13 @@ meta native String String.remove_suffix(String str, String suffix) {
 */
 meta native List String.partition(String str, String sep) {
   String empty = NULL;
-  if (!sep) return %( $str $empty $empty );
+  if (!sep) return $(str, empty, empty);
   int sep_length = sep.len(), found = str.find(sep);
-  if (found < 0) return %( $str $empty $empty );
+  if (found < 0) return $(str, empty, empty);
   String before = String.new_len(str, found);
   String after = String.new_len(
     str + found + sep_length, str.len() - found - sep_length);
-  return %( $before $sep $after );
+  return $(before, sep, after);
 }
 
 /** Splits `str` around its final occurrence of `sep`.
@@ -136,11 +136,11 @@ meta native List String.partition(String str, String sep) {
 */
 meta native List String.rpartition(String str, String sep) {
   String empty = NULL;
-  if (!sep) return %( $empty $empty $str );
+  if (!sep) return $(empty, empty, str);
   int sep_length = sep.len(), found = str.rfind(sep);
-  if (found < 0) return %( $empty $empty $str );
+  if (found < 0) return $(empty, empty, str);
   String before = String.new_len(str, found);
   String after = String.new_len(
     str + found + sep_length, str.len() - found - sep_length);
-  return %( $before $sep $after );
+  return $(before, sep, after);
 }

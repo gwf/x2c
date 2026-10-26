@@ -204,7 +204,7 @@ List type_declaration_parts(List type){
 
   }
   return({
-    Var _x2c_gensym_literal_part_1 = List_var(List_append(qualifiers, base));  Var _x2c_gensym_literal_part_2 = List_var(List_append(Array_list_free(syntax), NULL));  cons(_x2c_gensym_literal_part_1, cons(_x2c_gensym_literal_part_2, NULL));
+    Var _x2c_gensym_literal_part_1 = List_var(List_append(qualifiers, base));  Var _x2c_gensym_literal_part_2 = List_var(Array_list_free(syntax));  cons(_x2c_gensym_literal_part_1, cons(_x2c_gensym_literal_part_2, NULL));
   }
   );
 }

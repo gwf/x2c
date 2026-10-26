@@ -6,13 +6,13 @@ import "torch" with Torch, Tensor, TorchLisp, AutogradContext;
 
 static Tensor _square(AutogradContext context, List inputs) {
   Tensor input = inputs[0].tensor();
-  context.save_for_backward(%($input));
+  context.save_for_backward($(input));
   return input.square();
 }
 static List _gradient(AutogradContext context, Tensor gradient) {
   Tensor input = context.saved_tensors()[0].tensor();
   Tensor result = gradient * input * 2;
-  return %($result);
+  return $(result);
 }
 
 static long _live(void) {
@@ -31,7 +31,7 @@ int main(void) {
   for (int i = 0; i < 64; i++) {
     auto {
       Tensor input = Tensor.ones(%(16), XT_FLOAT32).requires_grad_(1);
-      Tensor output = Tensor.custom(forward, backward, %($input));
+      Tensor output = Tensor.custom(forward, backward, $(input));
       output.sum().backward_callbacks();
     }
     if (_live() != baseline) return 3;

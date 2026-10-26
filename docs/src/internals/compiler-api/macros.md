@@ -155,7 +155,7 @@ Source: `src/macros/values.x:341`
 Binds a compile-time code `value` returned to a statement at
 `context`.
 
-Source: `src/macros/templates.x:479`
+Source: `src/macros/templates.x:478`
 
 <a id="Compiler.capture_macro_value"></a>
 #### Compiler.capture_macro_value
@@ -274,7 +274,7 @@ Source: `src/macros/invocations/recognition.x:87`
 Binds quoted `syntax` with its `fresh` rows at `position`, as the
 expansion of its quotation would.
 
-Source: `src/macros/templates.x:338`
+Source: `src/macros/templates.x:337`
 
 <a id="Compiler.leave_alias_body"></a>
 #### Compiler.leave_alias_body
@@ -295,7 +295,7 @@ Scalars, immutable values, representable Array/Map roots, compiler-issued
 identifiers, and nonempty code `List`s are accepted; `invocation` locates
 an unsupported result.
 
-Source: `src/macros/templates.x:465`
+Source: `src/macros/templates.x:464`
 
 <a id="Compiler.local_macro_form_is_definition"></a>
 #### Compiler.local_macro_form_is_definition

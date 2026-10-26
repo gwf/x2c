@@ -39,7 +39,7 @@ static void list_nil_is_native_zero(void) {
 
 static void list_builders_and_indexing(void) {
   Var one = 1L, two = 2L, three = 3L, four = 4L;
-  List seq = %( $one $two $three $four );
+  List seq = $(one, two, three, four);
   const int raw[] = { 1, 2, 3, 4 };
   if (!expect_list_ints("seq", seq, raw, 4)) return;
   EXPECT_INT_EQ(seq.last().integer(), 4);
@@ -84,9 +84,9 @@ static void list_constructor_failures_transfer(void) {
 
 static void list_append_concat_reverse(void) {
   Var one = 1L, two = 2L, three = 3L, four = 4L, five = 5L;
-  List left = %( $one $two );
-  List mid = %( $three );
-  List right = %( $four $five );
+  List left = $(one, two);
+  List mid = $(three);
+  List right = $(four, five);
   List appended = left.append(mid);
   const int append_vals[] = { 1, 2, 3 };
   expect_list_ints("left.append(mid)", appended, append_vals, 3);
@@ -102,7 +102,7 @@ static void list_append_concat_reverse(void) {
   EXPECT_TRUE(List.concat() == NULL);
   EXPECT_PTR_EQ(List.concat_n(3, left, mid, right), combined);
   EXPECT_PTR_EQ(List.concat_n(0), NULL);
-  List lists = %($left $mid), empty = NULL;
+  List lists = $(left, mid), empty = NULL;
   EXPECT_PTR_EQ(List.concat(@empty), NULL);
   EXPECT_PTR_EQ(List.concat(left), left);
   EXPECT_PTR_EQ(List.concat(@lists, right, empty), combined);
@@ -114,7 +114,7 @@ static void list_append_concat_reverse(void) {
 
 static void list_head_tail_and_slicing(void) {
   Var one = 1L, two = 2L, three = 3L, four = 4L, five = 5L, six = 6L;
-  List seq = %( $one $two $three $four $five $six ), head = seq.head(3);
+  List seq = $(one, two, three, four, five, six), head = seq.head(3);
   const int head_vals[] = { 1, 2, 3 };
   expect_list_ints("seq.head(3)", head, head_vals, 3);
   List tail = seq.tail(2);
@@ -157,13 +157,13 @@ static void list_full_slice_preserves_active_owner(void) {
 
 static void list_flatten_variants(void) {
   Var one = 1, two = 2, three = 3, four = 4, five = 5;
-  List inner = %( $one $two );
-  List single = %( $inner );
+  List inner = $(one, two);
+  List single = $(inner);
   List flattened = single.flatten();
   List empty = NULL;
-  List tail_inner = %( $four );
-  List nested_tail = %( $tail_inner $five );
-  List deep = %( $inner $three $nested_tail );
+  List tail_inner = $(four);
+  List nested_tail = $(tail_inner, five);
+  List deep = $(inner, three, nested_tail);
   const int flat_all_vals[] = { 1, 2, 3, 4, 5 };
   List flattened_all = deep.flatten_all();
   EXPECT_TRUE(flattened == inner);
@@ -298,11 +298,11 @@ static void list_map2_zip_and_sublis(void) {
 
 static void list_map_and_unpack(void) {
   Var zero = 0L, one = 1L, two = 2L;
-  List seq = %( $zero $one $two ), mapped = seq.map(add_one);
+  List seq = $(zero, one, two), mapped = seq.map(add_one);
   const int map_vals[] = { 1, 2, 3 };
   if (!expect_list_ints("seq.map(add_one)", mapped, map_vals, 3)) return;
   List empty = NULL;
-  List outer = %( $seq $mapped );
+  List outer = $(seq, mapped);
   List first = NULL, second = NULL;
   Var v0 = void, v1 = void, v2 = void;
   EXPECT_NULL(empty.map(add_one));
@@ -438,11 +438,11 @@ static void list_assoc_hash_equal(void) {
   Var one = 1L, two = 2L, nine = 9L;
   List pair1 = %(alpha $one);
   List pair2 = %(beta $two);
-  List assoc = %( $pair1 $pair2 );
+  List assoc = $(pair1, pair2);
   Var fetched = assoc.assoc(<beta>);
   List empty = NULL;
-  List assoc_copy = %( $pair1 $pair2 );
-  List different = %( $pair1 $(%(beta $nine)) );
+  List assoc_copy = $(pair1, pair2);
+  List different = $(pair1, %(beta $nine));
   EXPECT_INT_EQ(fetched.integer(), 2);
   EXPECT_TRUE(assoc.assoc(<missing>) is void);
   EXPECT_INT_EQ(assoc.get(<alpha>).integer(), 1);

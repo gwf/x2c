@@ -53,15 +53,14 @@ meta static List _protocol_forward(
     List name = x2c_ident(%"a$(index++)");
     params.push($!Param{ $type $name });
     Code argument = $!( $name );
-    if (templates.car() == %($binder))
+    if (templates.car() == $(binder))
       argument = $!( $(x2c_ident(convert))($argument) );
     if (type == %(....))
       argument = %(expr ("List") (splice $argument));
     arguments.push(argument);
     templates = templates.cdr();
   }
-  return %($(params.list_free()) $(x2c_ident(source))
-           $(arguments.list_free()));
+  return $(params.list_free(), x2c_ident(source), arguments.list_free());
 }
 
 /* The function `name`, declared `declared`, that returns the call

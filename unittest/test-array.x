@@ -636,7 +636,7 @@ static void array_sort_callbacks_cover_merge_tails(void) {
   $test.scoped();
   Array values = [];
   for (int index = 0; index < 17; index++)
-    values.push(%($((index * 7) % 5) $index));
+    values.push($((index * 7) % 5, index));
   Array by_key = values.copy();
   by_key.sort_by(%!(List row) => row.car());
   values.sort_with(%!(List left, List right) =>

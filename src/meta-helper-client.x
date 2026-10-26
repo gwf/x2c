@@ -192,7 +192,7 @@ static void _send(Call &c, List arguments) {
   }
   Var subject = Macro.subject();
   if (subject is void) subject = %();
-  _send_frame(c, %($(c.operation) $(c.table) $(c.name) $arguments $subject));
+  _send_frame(c, $(c.operation, c.table, c.name, arguments, subject));
 }
 
 static void _send_frame(Call &call, List message) {

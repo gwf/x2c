@@ -136,7 +136,7 @@ static void _capture(DeferCaptures &d, List binding) {
   }
   List field = c.sym.introduce(c.fresh_name("defer_capture"));
   d.captures[binding] = field;
-  d.records.push(%($binding $stored_type $field));
+  d.records.push($(binding, stored_type, field));
 }
 
 // File-static cleanup thunks cannot name block-local or variably-sized types.
@@ -148,7 +148,7 @@ static int _defer_type_hoistable(Compiler c, Type type) {
   Type base = type.base_type();
   if (!base) return 0;
   Var first = base.car();
-  if (first is <string>) return c.sym.get(%($first)) != NULL;
+  if (first is <string>) return c.sym.get($(first)) != NULL;
   if (first == <struct> || first == <union> || first == <enum>)
     return base.len() == 2 && c.sym.get(base) != NULL;
   return 1;
@@ -200,7 +200,7 @@ static List _defer_callback(
   List env_local, List rewritten) {
   List body = Code.lowered(%(seq $rewritten), NULL);
   if (env_binding) {
-    Type type = %($(Ast.binding_spelling(env_binding)));
+    Type type = $(Ast.binding_spelling(env_binding));
     return c.bind_syntax(
       $!Unit{ static void $callback(void *$opaque) {
         $type *$env_local = ($type *)$opaque;

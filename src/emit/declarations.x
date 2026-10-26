@@ -7,17 +7,13 @@ static macro Expression $emit.alias.definition(Expr $target, Expr $native) =>
 
 static macro Expression $emit.alias.checked(
   Expr $native, Expr $pointer, Expr $message, Expr $definition) =>
-  %(
-    "#ifndef X2CCPP"
-    "_Static_assert("
-    "_Generic(&" @($native) ", " @($pointer) ": 1, default: 0), "
-    "\"$($message)\");"
-    "#endif"
-    $($definition)
-  );
+  $(
+    "#ifndef X2CCPP", "_Static_assert(", "_Generic(&", @($native), ", ",
+    @($pointer), ": 1, default: 0), ", %"\"$($message)\");", "#endif",
+    $definition);
 
 module List _parameters(Emitter &e, Var parameters) {
-  List c_params = _emit(e, %($parameters));
+  List c_params = _emit(e, $(parameters));
   return %("(" @c_params ")");
 }
 
@@ -34,8 +30,8 @@ module List _decl_stmt(Emitter &e, List ast) {
 
 static List _declare(Emitter &e, List ast) {
   List (type, bindings) = ast.cdr();
-  type = _emit(e, %( $type ));
-  bindings = %( $bindings );
+  type = _emit(e, $(type));
+  bindings = $(bindings);
   return type.append(_emit(e, bindings));
 }
 
@@ -49,7 +45,7 @@ module List _bind(Emitter &e, Ast ast) {
 module List _param(Emitter &e, List ast) {
   List (type, mods) = ast.cdr();
   List code = _emit(e, type === %(....) ? %("List") : type);
-  mods = %( $mods );
+  mods = $(mods);
   return code.append(_emit(e, mods));
 }
 
@@ -62,9 +58,9 @@ module List _function(Emitter &e, List ast) {
   if (e.semantic_binding_facts().try_get(
     %(defer-ownr $function_binding), defer_owner))
     e.fn_name = defer_owner;
-  type = _emit(e, %( $type ));
-  bindings = %( $bindings );
-  body = %( $body );
+  type = _emit(e, $(type));
+  bindings = $(bindings);
+  body = $(body);
   List decl, body_code;
   with (e.static_objects = {}) {
     decl = _emit(e, bindings);
@@ -95,7 +91,7 @@ module List _typedef(Emitter &e, List ast) {
       List binding = declarator.cadr();
       Var type;
       if (e.semantic_binding_facts().try_get(%(ntype $binding), type))
-        e.native_aliases = cons(%($type $binding), e.native_aliases);
+        e.native_aliases = cons($(type, binding), e.native_aliases);
     }
   return code;
 }
@@ -107,7 +103,7 @@ module List _block(Emitter &e, List ast) {
 }
 
 module List _binding(Emitter &e, List ast) =>
-  %($(e.emitted_binding_name(ast)));
+  $(e.emitted_binding_name(ast));
 
 // declarators
 
@@ -174,8 +170,8 @@ module List _semantic_type(Emitter &e, Type type) {
 
 module List _semantic_name(Emitter &e, Type type, String name) {
   List (base, mods) = type.parts();
-  List declarator = _declarator(e, %($name), mods);
-  return %($(_emit(e, base)) @declarator);
+  List declarator = _declarator(e, $(name), mods);
+  return $(_emit(e, base), @declarator);
 }
 
 // tagged types
@@ -201,7 +197,7 @@ module List _aggregate(Emitter &e, List ast) {
   List tag = ast.type().tag();
   if (_is_gensym_tag(tag) && !ast.type().is_aggregate_tag()) tag = NULL;
   if (tag) tag = _emit(e, tag);
-  if (ast.type().is_aggregate_tag()) return %( $(ast.car()) @tag );
+  if (ast.type().is_aggregate_tag()) return $(ast.car(), @tag);
   List body = ast.type().body();
   body = _emit(e, body);
   body = body.flatten_all();
@@ -210,7 +206,7 @@ module List _aggregate(Emitter &e, List ast) {
 
 static List _tagged(List ast, List tag, List body) {
   if (tag && body) return %( $(ast.car()) @tag "{" @body "}");
-  if (tag) return %( $(ast.car()) @tag );
+  if (tag) return $(ast.car(), @tag);
   return %( $(ast.car()) "{" @body "}");
 }
 

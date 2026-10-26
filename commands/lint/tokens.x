@@ -340,7 +340,7 @@ static void _repeated_accessors(Lint l):
        l.tokens[at + 3].type != <"("> || l.tokens[at + 4].type != <")">:
       continue
     String call = %"$(t.text).$(l.tokens[at + 2].text)()"
-    List key = %($line_depth $call)
+    List key = $(line_depth, call)
     if key in reported: continue
     Array lines = seen.setdefault(key, [])
     lines.push(line)

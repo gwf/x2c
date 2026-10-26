@@ -346,12 +346,12 @@ static void pool_list_bracket_promotes_result(void) {
   Pool.open_named("test-list-bracket");
   for (int i = 0; i < 100; i++) {
     String garbage = String.printf("pool-garbage-%d", i);
-    List cell = %( $garbage $i );
+    List cell = $(garbage, i);
     EXPECT_INT_EQ(cell.len(), 2);
   }
   String label = String.new("pool-keep-me");
   List nested = %(1 2 3);
-  List result = %( $label 42 $nested );
+  List result = $(label, 42, nested);
   List promoted = result.promote();
   EXPECT_TRUE(promoted == result);  // pointer stability
   Pool.close();

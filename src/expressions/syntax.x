@@ -51,7 +51,7 @@ static List _parse_assignment_tail(Compiler c, List lhs) {
     case %(expr ?type ?): return %(expr $type (dstrasgn $targets $rhs));
   if (op == <=>) c.check_explicit_converter(rhs, lhs.cadr(), 0);
   return c.resolve_expression(
-    source_operator_expression(NULL, %($op $lhs $rhs)), origin);
+    source_operator_expression(NULL, $(op, lhs, rhs)), origin);
 }
 
 static List _destructure_targets(Compiler c, List lhs) {
@@ -180,7 +180,7 @@ static int _is_type_selector_start(Compiler c) {
   if (c.test_declaration()) return 1;
   if (c.peek(0) != <ident>) return 0;
   String spelling = c.token.text;
-  return !c.sym.get(%($spelling));
+  return !c.sym.get($(spelling));
 }
 
 static Type _parse_is_type(Compiler c, Token origin) {
@@ -381,7 +381,7 @@ static List _parse_unary_op(Compiler c) {
   c.next();
   List operand = increment ? _parse_unary_op(c) : _parse_cast(c);
   return c.resolve_expression(
-    source_operator_expression(NULL, %($op $operand)), origin);
+    source_operator_expression(NULL, $(op, operand)), origin);
 }
 
 static List _parse_sizeof(Compiler c) {
@@ -495,7 +495,7 @@ static List _parse_slice(Compiler c, List expr, List start) {
     $fail.expressions_slice_zero(c, c.token);
   c.expect(<]>);
   return %(expr $type $(source_slice_content(
-    %($expr $start $stop $step))));
+    $(expr, start, stop, step))));
 }
 
 /** Parses an explicit List splice argument, or returns NULL without consuming
@@ -557,7 +557,7 @@ static List _apply_macro_value(
     %(expr () (ident "Macro_apply")), origin);
   Macro called = $called;
   return c.resolve_expression(
-    c.rebuild_expression(%("List"), called(callee, %($expr $values))),
+    c.rebuild_expression(%("List"), called(callee, $(expr, values))),
     origin);
 }
 
@@ -595,11 +595,11 @@ static List _parse_field_name(
   Compiler c, Symbol op_sym, List lhs_opt) {
   c.require_input();
   List slot = c.try_parse_macro_member();
-  if (slot) return %($slot);
+  if (slot) return $(slot);
   String field_name = c.token.text;
   if (!field_name || !field_name.is_identifier())
     $fail.expressions_member_ident(c, c.token, op_sym, lhs_opt);
-  List field = %( $field_name );
+  List field = $(field_name);
   c.next();
   return field;
 }
@@ -609,7 +609,7 @@ static List _parse_postfix_decinc(Compiler c, List expr) {
   Symbol op = c.peek(0);
   c.next();
   return c.resolve_expression(
-    source_postfix_expression(NULL, %($op $expr)), origin);
+    source_postfix_expression(NULL, $(op, expr)), origin);
 }
 
 // primary expressions
@@ -739,7 +739,7 @@ static int _string_word_follows(Compiler c) {
   Var definition;
   if (c.object_macros.try_get(c.token.text, definition))
     return definition == <string>;
-  return !c.sym.get(%($(c.token.text)));
+  return !c.sym.get($(c.token.text));
 }
 
 static List _parse_parens(Compiler c) {
@@ -868,7 +868,7 @@ static List _parse_designated_init(Compiler c) {
     c.expect(<=>);
     value = c.parse_assignment();
   }
-  return %($tag $key $value);
+  return $(tag, key, value);
 }
 
 static List _parse_bracket_array(Compiler c) {
@@ -890,7 +890,7 @@ static List _parse_va_arg(Compiler c) {
   Type type = NULL;
   List decl = c.parse_type_operand(&type);
   c.expect(<)>);
-  expr = source_va_arg_content(%($expr $decl));
+  expr = source_va_arg_content($(expr, decl));
   return %( expr $type $expr );
 }
 
@@ -910,6 +910,6 @@ static List _parse_generic(Compiler c) {
   }
   c.expect(<)>);
   List selection = source_generic_content(
-    %($control @(associations.list_free())));
+    $(control, @(associations.list_free())));
   return c.resolve_expression(%(expr () $selection), origin);
 }

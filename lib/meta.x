@@ -470,7 +470,7 @@ List type_declaration_parts(List type) {
   }
   Array syntax = [];
   foreach (Var item in reversed.reverse()) syntax.push(_modifier_syntax(item));
-  return %($(qualifiers.append(base)) (@(syntax.list_free())));
+  return $(qualifiers.append(base), syntax.list_free());
 }
 
 /* A function modifier's parameter types become parameter declarations. */

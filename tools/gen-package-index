@@ -101,7 +101,7 @@ try:
   output.make_dirs()
   Array rows = []
   List directories = options["package-dir"]
-  if !directories: directories = %($(root.join("packages")))
+  if !directories: directories = $(root.join("packages"))
   foreach Var directory in directories:
     source_rows(directory, output, base, rows)
   foreach Var tarball in options["bundles"]:

@@ -333,7 +333,7 @@ static List _ledger_rows(String text):
   foreach RegexMatch found in row.find_all(text[start:stop]):
     String name = found[1]
     if name == "Contract" || name == "---": continue
-    rows.push(%($(_collapsed(name.replace("`", ""))) $(found[2])))
+    rows.push($(_collapsed(name.replace("`", "")), found[2]))
   return rows.list_free()
 
 static void _check_ledger_placement(void):

@@ -227,8 +227,7 @@ static void _mark(Splice &s, int line, int offset) {
   while (start > 0 && s.text[start - 1] != '\n') start--;
   String before = s.text[start:offset];
   s.markers.push(
-    %($((int) s.out.len()) $(s.line) $(s.path) $line $offset $before
-      $(s.file_prefix)));
+    $((int) s.out.len(), s.line, s.path, line, offset, before, s.file_prefix));
 }
 
 // Each file's text ends its last line before the next file's begins.

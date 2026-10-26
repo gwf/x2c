@@ -154,7 +154,7 @@ Var Compiler.apply_meta_binding(
   Var signature;
   if (c.native_meta.try_get(name, signature) &&
       arguments.len() == Compiler.iterator_arity(signature))
-    arguments = arguments.append(%($(Iter.new())));
+    arguments = arguments.append($(Iter.new()));
   return _apply_linked(function.pointer(), arguments);
 }
 

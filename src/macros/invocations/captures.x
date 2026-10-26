@@ -103,7 +103,7 @@ static Var _name_argument(Compiler c) {
   String spelling = c.token.text;
   c.next();
   if (!c.macro_holes) return spelling;
-  List visible = c.sym.lookup(%($spelling), NULL);
+  List visible = c.sym.lookup($(spelling), NULL);
   if (visible && visible in c.macro_definition_locals()) return visible;
   List local = c.macro_introduced_name(spelling);
   c.bind_template_local(local, NULL, NULL);
@@ -213,7 +213,7 @@ static List _forwarded_capture(Compiler c, Var captured) {
   if (kind == <unit>)
     return _capture_layout(
       0, %(source $source), %(value $source), %(expression $source),
-      %(splice), %($(_hole_key(hole, "construction"))));
+      %(splice), $(_hole_key(hole, "construction")));
   if (kind != <expr> && kind != <name>) return NULL;
   return _capture_layout(
     0, %(source $source), %(value $(_hole_key(hole, "value"))),

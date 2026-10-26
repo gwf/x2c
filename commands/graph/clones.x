@@ -182,7 +182,7 @@ static uint64_t _index_value(CloneIndex &index, Var value, int origin) {
     if (!origin) { index.unlocated++; return id; }
     Array stream = [];
     _collect_bindings(index, node, {}, stream);
-    List key = %($((int) id) @(stream.list_free()));
+    List key = $((int) id, @(stream.list_free()));
     List site = %(
       site $(index.function)
       $(project_location(index.parsed.compiler, index.path, origin))

@@ -134,8 +134,9 @@ static String _build_module(String directory, String module, List code) {
   Toolchain linker = Toolchain.for_meta(meta_cc);
   List arguments = linker.module_action(
     output,
-    %("-fsigned-char" "-fPIC" "-O0" "-iquote" $directory
-      "-iquote" $meta_include_dir $(%"$directory/$cfile")),
+    $(
+      "-fsigned-char", "-fPIC", "-O0", "-iquote", directory, "-iquote",
+      meta_include_dir, %"$directory/$cfile"),
     x2c_get_executable()).arguments;
   String failure = Compiler.meta_cc_run(arguments, directory);
   if (!failure) Path.move_to(output, module);

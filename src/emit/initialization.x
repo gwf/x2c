@@ -78,7 +78,7 @@ static macro Stmt $fail.emit_static_switch(Expr $c, Expr $site) {
                 + "or within one case block";
     $c.report_error(
       <emit>, "switch cannot bypass dynamic static initialization",
-      $site, %($note));
+      $site, $(note));
   }
 }
 
@@ -109,9 +109,9 @@ module List _initializer_macro(Emitter &e, List input, List body) {
   String expanded = %"$(name)_expanded";
   String definition =
     $emit.initializer.expanded(expanded, formal, replacement);
-  e.native_macros.push(%($expanded $definition));
+  e.native_macros.push($(expanded, definition));
   String forwarding = $emit.initializer.forwarding(name, formal, expanded);
-  e.native_macros.push(%($name $forwarding));
+  e.native_macros.push($(name, forwarding));
   Array arguments = [];
   foreach (List argument in input.cdr()) {
     List emitted = _emit(e, argument.cadr());
@@ -135,10 +135,10 @@ module List _initializer_value(Emitter &e, List ast) {
     if (value.match(%(expr ? (composite *))))
       value = type ? %(expr $type (cast $type $value))
                    : %(expr (int) (literal (int) "0"));
-    List emitted = _emit(e, %($value));
+    List emitted = _emit(e, $(value));
     if (!result || !condition) result = emitted;
     else {
-      List test = _emit(e, %($condition));
+      List test = _emit(e, $(condition));
       result = %("__builtin_choose_expr(" @test ","
                   @emitted "," @result ")");
     }
@@ -149,13 +149,13 @@ module List _initializer_value(Emitter &e, List ast) {
 module List _index_init(Emitter &e, Var index, List value) {
   String assign = value.car() == <dotinit> ||
                   value.car() == <indexinit> ? "" : " =";
-  return %("[" @(_emit(e, %($index))) "]" $assign @(_emit(e, %($value))));
+  return %("[" @(_emit(e, $(index))) "]" $assign @(_emit(e, $(value))));
 }
 
 module List _dot_init(Emitter &e, Var field, List value) {
   String assign = value.car() == <dotinit> ||
                   value.car() == <indexinit> ? "" : "=";
-  return %("." @(_emit(e, %($field))) $assign @(_emit(e, %($value))));
+  return %("." @(_emit(e, $(field))) $assign @(_emit(e, $(value))));
 }
 
 // local statics
@@ -208,7 +208,7 @@ static void _static_binding(
       name = captured; mods = modifiers;
     }
   }
-  Type type = mods.append(%($base_name));
+  Type type = mods.append($(base_name));
   String spelling = e.emitted_binding_name(name);
   List record = NULL;
   match (initial) case %(staticinit ?cleanup ?value): {
@@ -246,7 +246,7 @@ static void _prepare(StaticRuntime &r) {
     r.output.push(%(@probe_decl ";"));
     r.e.static_objects[r.name] = r.slot;
     r.prefix = $emit.object.inferred_alias(r.formal, r.alias);
-    r.source = %("&" $(r.formal));
+    r.source = $("&", r.formal);
     r.object = r.alias;
     return;
   }
@@ -255,7 +255,7 @@ static void _prepare(StaticRuntime &r) {
   List value = _emit((*r.e), r.initial);
   r.prefix = $emit.object.fixed_alias(alias_decl, r.alias);
   r.initial_copy = %($(r.alias) $(r.temporary) "=" @value ";");
-  r.source = %("&" $(r.temporary));
+  r.source = $("&", r.temporary);
 }
 
 static void _static(StaticRuntime &r) {
@@ -297,7 +297,7 @@ static List _capture_source(
     case %((!or ?kind initval initcode)
            (!set ?input (input *)) *body): {
       List captured = _capture_source(e, input, inputs, declarations);
-      return %($kind $captured @body);
+      return $(kind, captured, @body);
     }
     case %(expr ?type (!set ?content (composite *))): {
       List captured = _capture_source(e, content, inputs, declarations);
@@ -309,7 +309,7 @@ static List _capture_source(
         case %(call (expr ?callable ?) ?): opaque = !callable;
       if (opaque || !_source_type_definition(content)) {
         String formal = e.fresh_name("static_input");
-        inputs.push(%($formal $node));
+        inputs.push($(formal, node));
         return %(expr $type $formal);
       }
       List captured = _capture_source(e, content, inputs, declarations);

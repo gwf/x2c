@@ -208,7 +208,7 @@ int main(void) {
     unsigned cursor = 0;
     Var key, map_value;
     while (entries.try_next(cursor, key, map_value)) {
-      List pair = %($key $map_value);
+      List pair = $(key, map_value);
       sink += pair.cadr().integer();
     }
   }

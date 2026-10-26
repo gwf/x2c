@@ -278,4 +278,4 @@ static List _paths(String root, List values) =>
   values.map(%!(String value) => Path.join(root, value));
 
 static List _path_options(String root, List values, String option) =>
-  _paths(root, values).map(%!(path) => %($option $path)).flatten();
+  _paths(root, values).map(%!(path) => $(option, path)).flatten();

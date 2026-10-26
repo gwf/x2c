@@ -180,7 +180,7 @@ static Type _meta_callee(Compiler c) {
   Token end = _scan_name(c, name);
   c.next();
   String member = c.package_alias_spelling();
-  List callee = name && (!member || c.sym.get_exact(%($member)))
+  List callee = name && (!member || c.sym.get_exact($(member)))
               ? c.parse_complex_identifier() : NULL;
   Type type = callee && c.token == end ? c.sym.get(callee) : NULL;
   c.token = start;
@@ -407,7 +407,7 @@ static void _reference_bindings(
     case %(expr ? $($source_identifier_content(%(?binding)))): {
       String spelling = NULL;
       if (Ast.try_binding(binding, NULL, spelling))
-        replacements[binding] = c.sym.reference_global(%($spelling));
+        replacements[binding] = c.sym.reference_global($(spelling));
       return;
     }
   foreach (Var child in syntax)

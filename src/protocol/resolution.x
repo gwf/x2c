@@ -126,14 +126,14 @@ static macro Stmt $report.protocol_signature_conflict(
       %"'$($binding)' has a signature incompatible " +
         %"with $($owner) member '$($member)'",
       $location,
-      %($protocol_note $conflict_note $expected_note));
+      $(protocol_note, conflict_note, expected_note));
   }
 }
 
 static Type _declared(Compiler c, String name) {
-  if (c.sym.get(%("generated-protocol" $name)))
+  if (c.sym.get($("generated-protocol", name)))
     return NULL;
-  return c.sym.get(%($name));
+  return c.sym.get($(name));
 }
 
 /** Resolves every visible adoption into the current conformance registry.
@@ -176,27 +176,27 @@ module void _record_conformances(Compiler c) {
 
 static String _recorded_spelling(Compiler c, String name) {
   if (!name) return name;
-  List binding = c.sym.lookup(%($name), NULL);
+  List binding = c.sym.lookup($(name), NULL);
   return binding ? Ast.binding_spelling(binding) : name;
 }
 
 static List _recorded_conformance(
   Compiler c, Type base, Type participant) {
   if (_visibility(c, base, participant) != <external>) return NULL;
-  match (c.conforms[%($base $participant)])
+  match (c.conforms[$(base, participant)])
     case %(protocol-conformance ? ? ?forward ?reverse ? ?(Map bindings)
            (members *rows)): {
       if (_native_rows(rows)) return NULL;
       Array bound = [], resolved = [];
       foreach ((String name, Type type) in bindings)
-        bound.push(%($name $type));
+        bound.push($(name, type));
       bound.sort();
       foreach (List row in rows)
         match (row)
           case %(?member ?(Symbol status) ?(String source) *): {
             source = _recorded_spelling(c, source);
             if (status != <no-member> && !_is_private(c, source))
-              resolved.push(%($member $status $source));
+              resolved.push($(member, status, source));
           }
       forward = _recorded_spelling(c, forward);
       reverse = _recorded_spelling(c, reverse);
@@ -246,7 +246,7 @@ static List _recorded(Compiler c, Type base, Type participant) {
   Var recorded;
   if (_owns_adoption(c, base, participant) ||
       !c.protocol_helpers.try_get(
-        %("recorded-conformance" $base $participant), recorded))
+        $("recorded-conformance", base, participant), recorded))
     return NULL;
   return recorded;
 }
@@ -255,7 +255,7 @@ static List _recorded(Compiler c, Type base, Type participant) {
    this unit does not own. Returns 0 when there is none to reuse. */
 module int _reuse_conformance(
   Compiler c, Type base, Type participant) {
-  match (%($(_record(c, base)) $(_recorded(c, base, participant))))
+  match ($(_record(c, base), _recorded(c, base, participant)))
     case %((? ? ? ? (members *templates))
            (conformance ? ? ?forward ?reverse (bindings *bound) *members)): {
       Map variables = {}, bindings = {}, resolved = {};
@@ -271,7 +271,7 @@ module int _reuse_conformance(
         Type expected = _substitute_signature(type, variables, bindings);
         rows.push(_recorded_row(resolved[member], member, expected, type));
       }
-      c.conforms[%($base $participant)] = %(
+      c.conforms[$(base, participant)] = %(
         protocol-conformance $base $participant $forward $reverse
         $variables $bindings (members @(rows.list_free()))
       );
@@ -287,11 +287,11 @@ module List _unused_recorded(Compiler c) {
   foreach (Var key in c.protocol_helpers.keys())
     match (key)
       case %("recorded-conformance" ?(Type base) ?(Type participant)):
-        candidates.push(%($base $participant));
+        candidates.push($(base, participant));
   // Ownership answers are memoized in the helpers, so they follow the scan.
   foreach (List pair in candidates) {
     List row = _recorded(c, pair.car(), pair.cadr());
-    if (row && !(pair in c.conforms)) unused.push(%($pair $row));
+    if (row && !(pair in c.conforms)) unused.push($(pair, row));
   }
   candidates.free();
   return unused.list_free();
@@ -320,7 +320,7 @@ static List _recorded_row(
   match (recorded)
     case %(? ?(Symbol status) ?(String source)): {
       Symbol kind = status == <base-dflt> ? <ordinary> : <none>;
-      return %($member $status $source $expected $kind $template);
+      return $(member, status, source, expected, kind, template);
     }
   String source = NULL;
   return %($member no-member $source $expected none $template);
@@ -430,7 +430,7 @@ static void _report_sig_conflicts(
     match (row)
       case %(?(String member) sig-cnflct ?(String binding)
              ?(Type expected) ? ?): {
-        List dedupe = %("protocol-sig-conflict" $participant $member);
+        List dedupe = $("protocol-sig-conflict", participant, member);
         if (dedupe in c.protocol_helpers) continue;
         c.protocol_helpers[dedupe] = 1;
         Type actual = _declared(c, binding);
@@ -451,7 +451,7 @@ static List _resolve_native(
   Compiler c, Type base, Type participant, ProtocolRequirements &requirements,
   Type participant_definition, List &failure) {
   failure = NULL;
-  List key = %($base $participant);
+  List key = $(base, participant);
   Var stored;
   if (c.conforms.try_get(key, stored)) {
     if (stored is not <list>) return NULL;
@@ -563,8 +563,8 @@ module void _install_native_bindings(
     match (row)
       case %(?(String member) ? ? ? ? ?(Type signature)): {
         String generated = _member_spelling(participant, member);
-        if (!c.sym.get(%($generated)))
-          c.sym.define_global(%($generated), signature);
+        if (!c.sym.get($(generated)))
+          c.sym.define_global($(generated), signature);
       }
 }
 
@@ -586,7 +586,7 @@ static List _resolve_ordinary(
   ProtocolRequirements &requirements, List &failure) {
   failure = NULL;
   Var stored;
-  List key = %($base $participant);
+  List key = $(base, participant);
   if (c.conforms.try_get(key, stored))
     return stored is <list> ? stored : NULL;
   String base_name = _base_name(base);
@@ -734,7 +734,7 @@ static Type _method_signature(
   }
   if (!signature) return NULL;
 
-  List binding = c.sym.reference(%($source), NULL);
+  List binding = c.sym.reference($(source), NULL);
   signature = _relative_signature(c, binding, signature, participant);
   List parameters = NULL, Type result = NULL;
   if (_function_parts(signature, parameters, result) &&
@@ -787,7 +787,7 @@ static List _complete(MemberResolution &r, List row) {
           }
         }
       }
-      return %($member $status $source $expected $default_kind $template);
+      return $(member, status, source, expected, default_kind, template);
     }
   return NULL;
 }
@@ -813,7 +813,7 @@ static List _requirement(ProtocolAdapters &a, List rows) {
 module List _descriptor_requirement(
   ProtocolAdapters &a, String member, Type template) {
   if (a.base !== %("Var") ||
-      !a.c.sym.lookup_field(%(struct "VarMethods"), %($member)))
+      !a.c.sym.lookup_field(%(struct "VarMethods"), $(member)))
     return NULL;
   return _conversion_requirement(a, member, template, <thunk>);
 }
@@ -822,7 +822,7 @@ static List _conversion_requirement(
   ProtocolAdapters &a, String member, Type template, Symbol adapter) {
   int fallback = adapter == <fallback>;
   List parameters = template.car().list().cadr();
-  Type result = template.cdr(), variable = %($(a.binder));
+  Type result = template.cdr(), variable = $(a.binder);
   Symbol direction = fallback ? <forward> : <reverse>;
   foreach (Var parameter in parameters) {
     if (parameter == variable) {

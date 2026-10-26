@@ -1,7 +1,8 @@
 #include "x2c.x"
 
 /* The spliced declaration supplies `retained`, so the project meta build,
-   which leaves `one_item` for the translation, never sees its type. */
+   which leaves `one_item` for the translation, never sees its type. The
+   meta group keeps no later definition that names it. */
 meta static List one_item(List target) => %($target);
 
 macro Unit $computed(Expr $value, Name $public) {
@@ -9,6 +10,7 @@ macro Unit $computed(Expr $value, Name $public) {
   $x2c_ident("macro_slot_helper")(void) {
     return $value;
   }
+  static $Code.type($value) $x2c_ident("slot_copy");
   static int $public(void) {
     return $value;
   }
@@ -22,7 +24,10 @@ $through_sequence(int retained = 42;);
 
 $computed(retained, answer);
 
+int copy = retained;
+int read_it(void) { return retained; }
+
 int main(void) {
-  printf("%d\n", answer());
+  printf("%d %d %d\n", answer(), copy, read_it());
   return 0;
 }

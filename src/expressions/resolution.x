@@ -7,7 +7,7 @@ module List _cast_expression(
   Compiler c, List decl, Type type, List operand) {
   if (c.sym.is_string_type(type) && _is_raw_string_literal(operand))
     return c.convert_expression(operand, type);
-  return %(expr $type $(source_cast_content(%($decl $operand))));
+  return %(expr $type $(source_cast_content($(decl, operand))));
 }
 
 /* A statement expression has the value and type of its final expression
@@ -271,7 +271,7 @@ static List _is_type(Resolve &r, List operand, Type target) {
   Macro called = $called;
   if (target === %(void) || target === %("Void")) {
     List callee = _resolve_identifier(r.c, "Var_is_void", NULL, r.origin);
-    return r.c.rebuild_expression(%(int), called(callee, %($lhs)));
+    return r.c.rebuild_expression(%(int), called(callee, $(lhs)));
   }
   Symbol vartag = _require_var_tag(r.c, target, r.origin);
   List direct = _constant_row_test(r.c, lhs, vartag, r.origin);
@@ -306,7 +306,7 @@ static List _is_symbol(Resolve &r, List operand, List selector) {
     }
   List callee = _resolve_identifier(r.c, "Var_is", NULL, r.origin);
   Macro called = $called;
-  return r.c.rebuild_expression(%(int), called(callee, %($lhs $selector)));
+  return r.c.rebuild_expression(%(int), called(callee, $(lhs, selector)));
 }
 
 /* A statically known tag whose encoding row the decoder discriminates on
@@ -390,10 +390,10 @@ static List _segments(Resolve &r, List items) {
       List expression = r.c.resolve_expression(value, r.origin);
       if (_deferred_receiver(expression)) {
         type = %(<macro-expr>);
-        resolved.push(%($tag $expression));
+        resolved.push($(tag, expression));
         continue;
       }
-      resolved.push(%($tag $(r.c.convert_segment_to_string(expression))));
+      resolved.push($(tag, r.c.convert_segment_to_string(expression)));
       continue;
     }
     default: resolved.push(item);
@@ -472,7 +472,7 @@ static List _initval(Resolve &r, List content) {
     Array inputs = [];
     foreach (List argument in header.cdr()) {
       List value = r.c.resolve_expression(argument.cadr(), r.origin);
-      inputs.push(%($(argument.car()) $value));
+      inputs.push($(argument.car(), value));
     }
     resolved.push(%(input @(inputs.list_free())));
   }
@@ -480,7 +480,7 @@ static List _initval(Resolve &r, List content) {
     (List condition, List path, Type destination, List value) = choice;
     if (condition) condition = r.c.resolve_expression(condition, r.origin);
     value = r.c.resolve_expression(value, r.origin);
-    resolved.push(%($condition $path $destination $value));
+    resolved.push($(condition, path, destination, value));
   }
   return %(expr $(r.type) (initval @(resolved.list_free())));
 }
@@ -545,7 +545,7 @@ static List _generic(Resolve &r, List control, List associations) {
         %(association $selector $(r.c.resolve_expression(value, r.origin))));
   Type type = control.cadr() === %(<macro-expr>) ? %(<macro-expr>) : NULL;
   return %(expr $type $(source_generic_content(
-    %($control @(resolved.list_free())))));
+    $(control, @(resolved.list_free())))));
 }
 
 /* A `sizeof` keeps its grouped or bare form around the resolved operand;
@@ -564,6 +564,7 @@ static List _sizeof(Resolve &r, Macro form, Var argument) {
 static List _va_arg(Resolve &r, List argument, List declaration) {
   return %(expr $(r.type)
            $(source_va_arg_content(
-             %($(r.c.resolve_expression(argument, r.origin))
-               $(r.c.resolve_expression(declaration, r.origin))))));
+             $(
+               r.c.resolve_expression(argument, r.origin),
+               r.c.resolve_expression(declaration, r.origin)))));
 }

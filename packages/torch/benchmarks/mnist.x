@@ -83,7 +83,7 @@ static List _dataset(String root, int train) {
      ordinary doubles. */
   double mean = MEAN, deviation = STD;
   Tensor normalized = (images - mean) / deviation;
-  return %($normalized $targets);
+  return $(normalized, targets);
 }
 
 static double _accuracy(Module model, Tensor images, Tensor targets) {

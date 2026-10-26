@@ -503,11 +503,11 @@ static void cache_invocation_releases_on_transfer(void) {
   });
   long first = 1, second = 2;
   Var pattern = Var.new(<cacheobj>, &first);
-  List input = %($(Var.new(<cacheobj>, &second)));
+  List input = $(Var.new(<cacheobj>, &second));
   MatchCache cache = MatchCache.new(2);
   List bindings = %(unchanged);
   int caught = 0;
-  try _try_match(cache, input, %($pattern), bindings);
+  try _try_match(cache, input, $(pattern), bindings);
   catch %(bad-op (operation cache-eq)): caught = 1;
   EXPECT_TRUE(caught);
   EXPECT_LIST_EQ(bindings, %(unchanged));

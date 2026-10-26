@@ -161,7 +161,7 @@ static void _prepare_include_dirs(void) {
   String include_dir = %"$root_path/include/x2c";
   String src_dir = %"$root_path/src", lib_dir = %"$root_path/lib";
   default_includes = cons(include_dir, NULL);
-  cpp_includes = Path.is_dir(src_dir) ? %($lib_dir $src_dir) : %($lib_dir);
+  cpp_includes = Path.is_dir(src_dir) ? $(lib_dir, src_dir) : $(lib_dir);
 }
 
 /** Overrides the repository root and rebuilds its default include `List`s.
@@ -276,7 +276,7 @@ int Compiler.run_command(String name, List arguments) {
   if (!path)
     $fail.utils_command_missing(name);
   Map options = {env: Compiler.command_environment(), stdout: <inherit>};
-  try return %($path @arguments).job().options(options).status();
+  try return $(path, @arguments).job().options(options).status();
   catch %((!or not-found io-fail) *detail): Diagnostics.host_error(detail);
   return 2;
 }

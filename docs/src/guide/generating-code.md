@@ -171,7 +171,7 @@ macro Unit $sample.make_function(Name $name, Expr $result) {
 
 meta static List build_function(String name, int n) {
   List node = $sample.make_function(name, n * 2);
-  return %($node);
+  return $(node);
 }
 
 macro Unit $sample.make_answer() { @build_function("answer", 21) }
@@ -215,7 +215,7 @@ meta static List choose_body(List function) {
   List body = Code.body(function);
   String name = Code.name(function);
   List node = name == "tracked" ? $sample.counted(body) : $sample.plain(body);
-  return %($node);
+  return $(node);
 }
 
 macro Decorator $sample.count_if_tracked(Function $function) {
@@ -339,7 +339,7 @@ result of a call, `$(expression)` inserts it without one:
 typedef struct Call { List callee; List arguments; Type result; } Call;
 
 meta static List scaled_call(List callee, List a, List b) {
-  Call d = {.callee = callee, .arguments = %($a $b), .result = %(int)};
+  Call d = {.callee = callee, .arguments = $(a, b), .result = %(int)};
   return $!( ({
     $(d.result) value = $(d.callee)(@(d.arguments));
     value * $(d.arguments.len());
@@ -526,7 +526,7 @@ meta static List sum_function(String name, int count) {
   }
   List declared = params.list_free();
   List function = $!Unit{ double $name(@declared) { return $total; } };
-  return %($function);
+  return $(function);
 }
 macro Unit $sample.define_sum(Literal $name, Literal $count) {
   @sum_function($name, $count)

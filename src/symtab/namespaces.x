@@ -14,7 +14,7 @@ void Compiler.record_declaration_visibility(Compiler c, List declaration) {
     case %(function ?type (bind ?identity *) *): {
       if (!private && !type.type().is_static()) return;
       String name = Ast.binding_spelling(identity);
-      if (name) c.sym.mark_static(%($name));
+      if (name) c.sym.mark_static($(name));
     }
     case %(
       (!or ?kind typedef declare) ?type (bindings *rows)
@@ -25,7 +25,7 @@ void Compiler.record_declaration_visibility(Compiler c, List declaration) {
         match (base)
           case %((!or ?tag struct union enum) ?name *body):
             if (name && (body || !rows || rows === %((bind () ()))))
-              c.sym.mark_static(%($tag $name));
+              c.sym.mark_static($(tag, name));
       }
       _record_rows_visibility(c, declaration, kind, private, mark, rows);
       if (kind == <declare> && !mark)
@@ -74,7 +74,7 @@ static void _record_binding_visibility(
     c.record_source_typedef(name, declaration, mark);
     if (mark) c.sym.mark_static(%(typedef $name));
   }
-  if (mark && name) c.sym.mark_static(%($name));
+  if (mark && name) c.sym.mark_static($(name));
 }
 
 // module and package names
@@ -182,11 +182,11 @@ void Compiler.register_package_member(
   Token member_token, Token local_token) {
   /* Keep the source spellings so a later conflict says `geo.Vec` rather
      than naming the package-prefixed C symbol. */
-  List binding = %($name $member);
+  List binding = $(name, member);
   Var bound = c.package_members[local];
   if (bound is not void && bound.list() === binding) return;
   String spelling = %"$(name)__$member";
-  if (!c.sym.get_exact(%($spelling)))
+  if (!c.sym.get_exact($(spelling)))
     $fail.parse_package_member(c, member_token, name, member);
   _check_package_binding(c, "name", local, local_token);
   c.package_members[local] = binding;
@@ -207,7 +207,7 @@ static void _check_package_binding(
   }
   if (bound)
     $fail.symbols_package_bound(c, token, kind, local, bound);
-  if (c.sym.get_exact(%($local)))
+  if (c.sym.get_exact($(local)))
     $fail.symbols_package_collision(c, token, kind, local);
 }
 
@@ -218,7 +218,7 @@ static void _check_package_binding(
 String Compiler.package_member_spelling(Compiler c, String name) {
   if (!c.package_members.len()) return NULL;
   Var bound = c.package_members[name];
-  if (bound is void || c.sym.get_exact(%($name))) return NULL;
+  if (bound is void || c.sym.get_exact($(name))) return NULL;
   List pair = bound;
   (String package, String member_name) = pair;
   return %"$(package)__$member_name";

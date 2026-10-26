@@ -21,7 +21,7 @@ module List _storage_class(Compiler c) {
   loop {
     Symbol symbol = c.peek(0);
     String attribute = _attribute(c);
-    if (attribute) text.push(%($attribute));
+    if (attribute) text.push($(attribute));
     else if (c.take_word("_Noreturn")) text.push(%("_Noreturn"));
     else if (symbol.is_inline() ||
              (symbol == <threaded> ? !seen_threaded++ :
@@ -134,7 +134,7 @@ Type Compiler.parse_type_name(Compiler c) {
 module List _type_specifier(Compiler c) {
   c.require_input();
   List slot = c.try_parse_macro_slot(<type>);
-  if (slot) return %($slot);
+  if (slot) return $(slot);
   List syntax = NULL;
   switch (c.peek(0)) {
     case <struct>: case <union>: case <enum>:
@@ -185,7 +185,7 @@ static List _typedef_name(Compiler c) {
   if (!name) name = c.token.text;
   c.next();
   if (c.package || c.line_markers) name = _type_reference(c, 0, name);
-  return %($name);
+  return $(name);
 }
 
 /* Module and package files spell their own file-scope type names bare. A
@@ -194,15 +194,15 @@ static List _typedef_name(Compiler c) {
    package mode a bare-key miss with a prefixed hit re-spells the
    reference. ASTs carry raw strings and emit literally. */
 module String _type_reference(Compiler c, Symbol tag, String name) {
-  List bare = tag ? %($tag $name) : %($name);
+  List bare = tag ? $(tag, name) : $(name);
   if (c.sym.has_local(bare)) return name;
   String own = c.scoped_spelling(c.file_prefix(), name);
-  if (own != name && c.sym.get_exact(tag ? %($tag $own) : %($own)))
+  if (own != name && c.sym.get_exact(tag ? $(tag, own) : $(own)))
     return own;
   String prefixed = c.package_spelling(name);
   if (prefixed == name) return name;
   if (c.sym.get_exact(bare)) return name;
-  List hit = tag ? %($tag $prefixed) : %($prefixed);
+  List hit = tag ? $(tag, prefixed) : $(prefixed);
   return c.sym.get_exact(hit) ? prefixed : name;
 }
 
@@ -219,7 +219,7 @@ static List _tagged_type(Compiler c) {
   int defines = c.peek(0) == <"{"> ||
     (c.peek(0) == <;> && (tag != <enum> || c.macro_holes));
   Var used = c.aggregate_name(tag, (name ? name : c.gensym()).car(), defines);
-  List type = %($tag $used), members = NULL;
+  List type = $(tag, used), members = NULL;
   if (c.test(<"{">)) {
     members = c.parse_members(tag == <enum> ? <enumerator> : <field>, type);
     c.expect(<"}">);
@@ -228,7 +228,7 @@ static List _tagged_type(Compiler c) {
       return _publish_aggregate_type(c, tag, used, members, first);
     if (tag != <enum>) members = cons(<fields>, members);
   }
-  return members ? type.append(%($members)) : type;
+  return members ? type.append($(members)) : type;
 }
 
 /* C places an aggregate's own attributes after its keyword and after its
@@ -252,7 +252,7 @@ static void _skip_attributes(Compiler c) {
    which publishes it; a literal tag there is a template local. */
 static List _tag_name(Compiler c) {
   List slot = c.try_parse_macro_slot(<name>);
-  return slot ? %($slot) : c.parse_optional_identifier();
+  return slot ? $(slot) : c.parse_optional_identifier();
 }
 
 /* An aggregate definition takes the prefix its declaration key carries, so
@@ -263,8 +263,8 @@ static List _scoped_aggregate_name(Compiler c, Symbol tag, List name) {
   if (name.car() is not <string>) return name;
   String spelling = name.car();
   if (c.peek(0) == <"{">)
-    return %($(c.declared_spelling(c.private_prefix(NULL), spelling)));
-  return %($(_type_reference(c, tag, spelling)));
+    return $(c.declared_spelling(c.private_prefix(NULL), spelling));
+  return $(_type_reference(c, tag, spelling));
 }
 
 /* Publishes an aggregate whose tokens start at `first`. A constructed
@@ -277,13 +277,13 @@ static List _publish_aggregate_type(
   int packed = _attribute_since(c, first, c.packed_marks);
   if (tag == <struct> && packed && c.source_private >= 0)
     $fail.parse_attribute_packed(c, first);
-  List type = %($tag $name);
+  List type = $(tag, name);
   List body = tag == <enum> ? members : %(fields @members);
   if (name is <list> && name.car() == <binding>)
-    c.sym.bind_identity(%($tag), name, %($tag $body));
+    c.sym.bind_identity($(tag), name, $(tag, body));
   else
     c.sym.declare_resolved(
-      NULL, type, tag == <enum> ? %(enum) : %($tag $body));
+      NULL, type, tag == <enum> ? %(enum) : $(tag, body));
   if (tag != <enum>) {
     c.sym.declare_field_order(type, members);
     if (layout) c.sym.set(%(@type "layout-attribute"), %(unknown));
@@ -292,13 +292,13 @@ static List _publish_aggregate_type(
       c.sym.set(%(@type "x2c-record"), %(x2c));
   }
   else {
-    c.sym.set(%(@type "enumerators"), %(@type $members).type_from_ast());
+    c.sym.set(%(@type "enumerators"), $(@type, members).type_from_ast());
     if (!layout && _enum_fits_int(type, members)) {
       c.sym.set(%(@type "int-range"), %(int));
       _record_enum_values(c, members);
     }
   }
-  return %($tag $name $body);
+  return $(tag, name, body);
 }
 
 module int _layout_attribute_since(Compiler c, Token first) =>
@@ -433,7 +433,7 @@ List Compiler.parse_named_type(Compiler c) {
   Token start = c.token;
   String name = c.declared_spelling(c.private_prefix(NULL), c.token.text);
   c.expect(<ident>);
-  List key = %($name);
+  List key = $(name);
   if (!c.sym.get_exact(key)) c.sym.define(key, %(typedef $name));
   if (c.test(<;>)) return %(named-type $name ());
   List qualifiers = _type_qualifiers(c);
@@ -453,7 +453,7 @@ static List _record_body(Compiler c, String name, Token start) {
   Symbol tag = c.peek(0) == <union> ? <union> : <struct>;
   if (c.peek(0) != <"{">) c.next();
   c.expect(<"{">);
-  List fields = c.parse_members(<field>, %($tag $name));
+  List fields = c.parse_members(<field>, $(tag, name));
   c.expect(<"}">);
   return c.macro_holes ? %($tag $name (fields @fields))
                        : _publish_aggregate_type(c, tag, name, fields, start);
@@ -520,7 +520,7 @@ List Compiler.parse_enumerator(Compiler c, Type context) {
   String spelling = c.token.text;
   Token origin = c.token;
   c.next();
-  List binding = %($spelling), syntax = binding;
+  List binding = $(spelling), syntax = binding;
   if (c.test(<=>)) {
     List value = c.parse_conditional();
     syntax = %(op = $binding $value);
@@ -570,7 +570,7 @@ module List _publish_enumerator(
   String spelling = exact ? exact : Ast.binding_spelling(binding);
   if (!spelling)
     $fail.parse_syntax_position(c, origin);
-  List key = %($spelling);
+  List key = $(spelling);
   if (exact) key = c.sym.declared_key(NULL, key, context);
   Symbol prior = c.sym.enumerator_owner(key);
   if (prior && binding) {
@@ -579,7 +579,7 @@ module List _publish_enumerator(
   }
   if (prior)
     $fail.parse_enum_bound(c, origin, spelling);
-  if (exact) binding = c.sym.declare(NULL, %($exact), context);
+  if (exact) binding = c.sym.declare(NULL, $(exact), context);
   else
     c.sym.bind_identity(NULL, binding, context.declaration_ast(binding));
   c.sym.declare_enumerator(key, <enumerator>);
@@ -673,7 +673,7 @@ static Var _finish_type_spec(Compiler c, Var spec) {
   if (spec is not <list>) return spec;
   match (spec) {
     case %((!or ?tag struct union) ?name):
-      return %($tag $(_finish_tag_name(c, name)));
+      return $(tag, _finish_tag_name(c, name));
     case %((!or ?tag struct union) ?name (fields *members)):
       return _finish_aggregate_type(c, tag, name, members);
     case %(enum ?name):
@@ -698,7 +698,7 @@ static List _finish_aggregate_type(
   // Each constructed anonymous body defines a distinct type.
   match (name) case %(gensym ? ?): name = c.gensym().car();
   if (tag != <enum>) name = c.aggregate_name(tag, name, 1);
-  List type = %($tag $name);
+  List type = $(tag, name);
   Array bound = [];
   Symbol position = tag == <enum> ? <enumerator> : <field>;
   with (c.aggregate_type = type) {

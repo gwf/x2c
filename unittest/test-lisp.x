@@ -317,7 +317,7 @@ static int _lisp_bound_sum(int left, int right) {
 
 $lisp.binding(test_policy, "native-pair")
 static List _lisp_bound_pair(String label, int value) {
-  return %($label $value);
+  return $(label, value);
 }
 
 static String _lisp_bound_greet(String name) {

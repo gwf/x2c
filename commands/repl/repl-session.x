@@ -154,7 +154,7 @@ List ReplSession.symbols(ReplSession session) {
   foreach (Var (name, entry), session.names) names.push(name);
   foreach (String name, names.sort()) {
     List entry = session.names[name];
-    entries.push(%($(entry.car()) $name));
+    entries.push($(entry.car(), name));
   }
   return entries.list_free();
 }
@@ -186,15 +186,15 @@ static String _function_declaration(
   if (!entry || (entry.car() != <function> && entry.car() != <native>))
     return NULL;
   Compiler c = session.compiler;
-  Type type = c.sym.get_exact(%($name));
+  Type type = c.sym.get_exact($(name));
   match (entry) case %(native (source ?(String path)) *): {
     ReplLoadedFile file = session.files[path];
-    type = file.symbols[%($name)];
+    type = file.symbols[$(name)];
     source = path;
   }
-  List declaration = type.declaration_ast(%($name));
+  List declaration = type.declaration_ast($(name));
   String text = String.new(
-    c.code_pretty_string(c.emit(%($declaration), NULL), NULL));
+    c.code_pretty_string(c.emit($(declaration), NULL), NULL));
   return text.strip(NULL).rstrip(";");
 }
 
@@ -284,8 +284,8 @@ static List _completion_filter(
     else if (type == <macro>) candidate_kind = <callable>;
     if (candidate_kind != <session> &&
         _is_internal(session, name, semantic_type))
-      internal.push(%($candidate_kind $name));
-    else candidates.push(%($candidate_kind $name));
+      internal.push($(candidate_kind, name));
+    else candidates.push($(candidate_kind, name));
   }
   return (candidates.len() ? candidates : internal).sort().list_free();
 }

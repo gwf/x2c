@@ -106,9 +106,9 @@ module List _declaration_types(Compiler c, List storage) {
   Type binding_type = c.sym.local_type(%( @words @quals @spec ));
   if (spec.is_aggregate_tag_body()) {
     Var (aggregate, tag, body) = spec;
-    binding_type = %( @words @quals $aggregate $tag );
+    binding_type = $(@words, @quals, aggregate, tag);
   }
-  return %( $(c.sym.local_type(%( @storage @quals @spec ))) $binding_type );
+  return $(c.sym.local_type(%( @storage @quals @spec )), binding_type);
 }
 
 /** Parses a non-function, non-typedef `Decl` macro argument.
@@ -129,7 +129,7 @@ List Compiler.parse_declaration_argument(Compiler c) {
   if (_destructure_starts(c))
     return _destructure_declaration(c, type, binding_type, 1);
   List binding = _declarator_init(c, binding_type, NULL);
-  List declaration = _finish_declaration(c, <declare>, type, %($binding), 0);
+  List declaration = _finish_declaration(c, <declare>, type, $(binding), 0);
   if (declaration.type_from_ast().is_function())
     $fail.parse_decl_function(c, c.token);
   return declaration;
@@ -206,7 +206,7 @@ static int _type_name_starts(Compiler c, int require_declarator) {
   String alias = c.package_alias_spelling();
   String name = alias ? alias
               : c.package_member_spelling(c.token.text);
-  Type lookup = c.sym.get(%($(name ? name : c.token.text)));
+  Type lookup = c.sym.get($(name ? name : c.token.text));
   if (lookup && !lookup.is_typedef()) return 0;
   c.next();
   if (alias) { c.next(); c.next(); }
@@ -378,7 +378,7 @@ static List _lower_self_declaration(Compiler c, List declaration) {
   Type relative = signature.declared();
   Type concrete = lowered.type_from_ast().declared();
   c.set_fact(%(self $binding), relative);
-  c.sym.set(%($spelling), concrete);
+  c.sym.set($(spelling), concrete);
   c.sym.set(%(self $spelling), relative);
   _lower_parameter_self(c, owner.car());
   return lowered;
@@ -386,11 +386,11 @@ static List _lower_self_declaration(Compiler c, List declaration) {
 
 static Type _self_owner_type(Compiler c, List method) {
   String source = method.car();
-  Type declared = c.sym.get(%($source));
+  Type declared = c.sym.get($(source));
   if (declared.is_typedef())
-    return %($(_type_reference(c, 0, source)));
+    return $(_type_reference(c, 0, source));
   Symbol builtin = Atom.intern(source);
-  return builtin.is_builtin_type() ? %($builtin) : NULL;
+  return builtin.is_builtin_type() ? $(builtin) : NULL;
 }
 
 static void _lower_parameter_self(Compiler c, Var replacement) {

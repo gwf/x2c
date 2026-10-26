@@ -27,7 +27,7 @@ List constructed = cons(int_var(1),
 Lisp lisp = Lisp.new(); defer lisp.destroy();
 List runtime = lisp.eval(%(list (* 1 1) (* 2 2) (* 3 3)));
 
-~List ways = %($comptime $literal $constructed $runtime);
+~List ways = $(comptime, literal, constructed, runtime);
 ~foreach (List left in ways)
 ~  foreach (List right in ways) assert(left == right);
 assert(comptime == literal && literal == constructed &&

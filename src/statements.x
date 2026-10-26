@@ -42,13 +42,13 @@ static macro Stmt $fail.statements_match_default(Expr $c, Expr $site) =>
 static macro Stmt $fail.statements_match_arm(Expr $c, Expr $site) =>
   $c.report_error(
     <parse>, "expected 'case' or 'default' in match statement",
-    $site, %( "token:" $($c.token.text) ));
+    $site, $("token:", $c.token.text));
 
 static macro Stmt $fail.statements_match_pattern(
   Expr $c, Expr $origin, Expr $pattern) =>
   $c.report_error(
     <parse>, "match case pattern must be a %() list literal",
-    $origin, %( "pattern:" $($pattern.repr()) ));
+    $origin, $("pattern:", $pattern.repr()));
 
 static macro Stmt $fail.statements_try_handler(Expr $c, Expr $site) =>
   $c.report_error(
@@ -364,12 +364,12 @@ static int _arm_directives(
    the current branch. */
 static int _default_after_directive(Array groups, int saw_default, List d) {
   Symbol kind = Compiler.preproc_conditional_kind(d.cadr());
-  if (kind == <open>) groups.push(%($saw_default $saw_default));
+  if (kind == <open>) groups.push($(saw_default, saw_default));
   else if (kind && groups.len()) {
     (int before, int any) = groups.take_last();
     any |= saw_default;
     if (kind == <close>) return any;
-    groups.push(%($before $any));
+    groups.push($(before, any));
     return before;
   }
   return saw_default;
@@ -460,7 +460,7 @@ static List _capture_temporaries(
       declarations.push(
         _capture_declaration(
           c, %("Var"), temporary, %(expr () (ident ($name))), 1));
-      locals.push(%($name $type $temporary));
+      locals.push($(name, type, temporary));
     }
   return declarations.list_free();
 }
@@ -473,7 +473,7 @@ static List _capture_declaration(
     initializer = c.resolve_expression(initializer, c.token);
     c.bind_template_local(binding, type, NULL);
   }
-  else binding = temporary ? c.sym.introduce(name) : %("x2c.ident" $name);
+  else binding = temporary ? c.sym.introduce(name) : $("x2c.ident", name);
   return c.bind_syntax(
     %(declare $type
       (bindings (op = (bind $binding ()) $initializer))),

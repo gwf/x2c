@@ -11,7 +11,7 @@ module List _unary(Resolve &r, Var operator, List operand) {
   if (operator == <*> && operand.cadr().car() == <&> &&
       lhs_type.car() != <&>) return lhs;
   if (lhs_type === %(<macro-expr>))
-    return source_operator_expression(%(<macro-expr>), %($operator $lhs));
+    return source_operator_expression(%(<macro-expr>), $(operator, lhs));
   List lowered = operator == <->
     ? _protocol_operator_expression(r.c, operator, lhs, NULL) : NULL;
   if (lowered) return lowered;
@@ -38,7 +38,7 @@ module List _unary(Resolve &r, Var operator, List operand) {
     _check_dynamic_target(r.c, lhs, r.origin);
   if ((operator == <++> || operator == <-->) &&
       _builtin_index_lvalue(r.c, lhs)) type = %("Var");
-  return source_operator_expression(type, %($operator $lhs));
+  return source_operator_expression(type, $(operator, lhs));
 }
 
 module List _postfix(Resolve &r, Var operator, List operand) {
@@ -48,12 +48,12 @@ module List _postfix(Resolve &r, Var operator, List operand) {
     $fail.expressions_optional_ref_unchecked(r.c, r.origin);
   if (operand_type === %(<macro-expr>))
     return source_postfix_expression(
-      %(<macro-expr>), %($operator $operand));
+      %(<macro-expr>), $(operator, operand));
   if (r.c.sym.is_var_type(operand_type))
     _check_dynamic_target(r.c, operand, r.origin);
   if (_builtin_index_lvalue(r.c, operand)) operand_type = %("Var");
   return source_postfix_expression(
-    operand_type, %($operator $operand));
+    operand_type, $(operator, operand));
 }
 
 module List _conditional(
@@ -66,7 +66,7 @@ module List _conditional(
       true_type === %(<macro-expr>) ||
       false_type === %(<macro-expr>))
     return source_operator_expression(
-      %(<macro-expr>), %($operator $condition $ontrue $onfalse));
+      %(<macro-expr>), $(operator, condition, ontrue, onfalse));
   /* Arms of one declared type keep it, so a `Symbol` conditional stays a
      `Symbol` rather than the integer that represents it. */
   Type type = true_type;
@@ -82,7 +82,7 @@ module List _conditional(
       onfalse = r.c.convert_expression(onfalse, type);
   }
   return source_operator_expression(
-    type, %($operator $condition $ontrue $onfalse));
+    type, $(operator, condition, ontrue, onfalse));
 }
 
 /* A conditional whose arms are a `Var` and another value is a `Var`: the
@@ -103,7 +103,7 @@ module List _binary_expression(
   if (lhs_type === %(<macro-expr>) ||
       rhs_type === %(<macro-expr>))
     return source_operator_expression(
-      %(<macro-expr>), %($operator $lhs $rhs));
+      %(<macro-expr>), $(operator, lhs, rhs));
   if (operator.is_assignment_op()) {
     if (operator != <=> &&
         (c.sym.is_var_type(lhs_type) || c.sym.is_var_type(rhs_type)))
@@ -116,10 +116,10 @@ module List _binary_expression(
     if (operator == <=> &&
         !(c.meta_body && c.sym.is_named_value_type(type, "Func")))
       rhs = c.convert_expression(rhs, type);
-    return source_operator_expression(type, %($operator $lhs $rhs));
+    return source_operator_expression(type, $(operator, lhs, rhs));
   }
   if (c.rewrite_rules && c.has_rewrites(<binary>, operator)) {
-    List source = source_operator_expression(NULL, %($operator $lhs $rhs));
+    List source = source_operator_expression(NULL, $(operator, lhs, rhs));
     List rewritten = c.rewrite(
       <binary>, operator, source, <expression>, NULL, origin);
     if (rewritten) return rewritten;
@@ -204,7 +204,7 @@ static void _check_untyped_operand(
 static List _native_binary_expression(
   Compiler c, Symbol operator, List lhs, List rhs, Token origin) {
   Type type = _binary_op_type(c, operator, lhs, rhs);
-  List operation = source_operator_content(%($operator $lhs $rhs));
+  List operation = source_operator_content($(operator, lhs, rhs));
   if (c.sym.is_var_type(lhs.cadr()) || c.sym.is_var_type(rhs.cadr()))
     operation = c.anchor_origin(operation, origin);
   return %(expr $type $operation);
@@ -309,13 +309,13 @@ static List _protocol_operator_expression(
   (List binding, Type signature) = resolved;
   Type result = signature.cdr(), List arguments = NULL;
   int which = 0;
-  if (!rhs) arguments = %($lhs);
+  if (!rhs) arguments = $(lhs);
   else if (op == <in>) {
     List parameters = signature.car().cadr();
     lhs = c.convert_expression(lhs, parameters.cadr());
-    arguments = %($rhs $lhs);
+    arguments = $(rhs, lhs);
   }
-  else arguments = %($lhs $rhs);
+  else arguments = $(lhs, rhs);
   if (op != <in>) {
     if (_is_operator_temporary(c, lhs)) which |= 1;
     if (rhs && _is_operator_temporary(c, rhs)) which |= 2;

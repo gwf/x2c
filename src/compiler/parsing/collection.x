@@ -143,7 +143,7 @@ void Compiler.record_inline_function(Compiler c, List declaration) {
   match (declaration)
     case %(declare ? (bindings (bind ?binding ?))): {
       String name = Ast.binding_spelling(binding);
-      c.sym.set(%("function-inline" $name), %(inline));
+      c.sym.set($("function-inline", name), %(inline));
     }
 }
 

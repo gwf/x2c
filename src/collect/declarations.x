@@ -9,7 +9,7 @@
 module List _type_family(List key) {
   match (key) {
     case %((!or ?kind typedef struct union enum) ?name *):
-      return %($kind $name);
+      return $(kind, name);
   }
   return NULL;
 }
@@ -104,12 +104,12 @@ module void _select_public(FileWalk &w) {
    paths. Only `.x` units publish markers; a C header's static inline
    functions belong to every file that includes it. */
 module void _publish_unit_statics(Map statics, Map overlay, String path) {
-  List owner = %($(Compiler.portable_path(path)));
+  List owner = $(Compiler.portable_path(path));
   foreach (List key in statics.keys())
-    match (%($key)) case %((function ?(String name))): {
-      overlay.del(%($name));
+    match ($(key)) case %((function ?(String name))): {
+      overlay.del($(name));
       overlay.del(%(self $name));
-      overlay[%("unit-static" $name)] = owner;
+      overlay[$("unit-static", name)] = owner;
     }
 }
 
@@ -150,7 +150,7 @@ static void _add_type_dependencies(
   List entry = _entry(c, path);
   if (!entry) return;
   foreach (Var part in entry.car())
-    match (%($part)) {
+    match ($(part)) {
       case %(?(Map rows)):
         foreach (Var (key, value) in rows) {
           if (value is not <list> ||
@@ -254,10 +254,10 @@ static void _add_typedef_names(
   List entry = _entry(c, path);
   if (entry)
     foreach (Var part in entry.car())
-      match (%($part)) {
+      match ($(part)) {
         case %(?(Map rows)):
           foreach (Var key in rows.keys())
-            match (%($key)) case %((typedef ?(String name))):
+            match ($(key)) case %((typedef ?(String name))):
               names.push(name);
         case %(?(String include)):
           _add_typedef_names(c, names, include, seen);
@@ -285,7 +285,7 @@ module void _bind_pending_inline_bodies(
     body.tokenize(text);
     if (markers is not void) body.line_markers = markers;
     List ast = body.full_parse(symbols, 0);
-    _retain_rows(%($hashes));
+    _retain_rows($(hashes));
     Map additions = _inline_type_dependencies(body, ast);
     _publish_inline_dependencies(body, path, own, statics, additions);
     foreach (Var part in _entry(body, path).car())
@@ -535,7 +535,7 @@ static void _publish_inline_dependencies(
   _cache_dependencies(entry[3], c.deps);
   if (!additions.len()) return;
   Map retained = _cache_copy(additions);
-  _retain_rows(%($retained));
+  _retain_rows($(retained));
   Array replaced = auto [];
   foreach ((List key, Var value) in retained) {
     Var owner;
@@ -545,8 +545,8 @@ static void _publish_inline_dependencies(
   }
   foreach (List key in replaced) retained.del(key);
   if (!retained.len()) return;
-  List parts = entry.car().list().append(%($retained));
-  List updated = %($parts @(entry.cdr()));
+  List parts = entry.car().list().append($(retained));
+  List updated = $(parts, @(entry.cdr()));
   _require_retained(updated.try_own());
   _process_cache()[path] = updated;
 }
@@ -571,7 +571,7 @@ void Compiler.record_generated_symbol(
   Compiler c, String name, Type signature) {
   Map contribution = _contribution(c.filename);
   if (contribution == NULL) return;
-  List key = %($name), marker_key = %("generated-protocol" $name);
+  List key = $(name), marker_key = $("generated-protocol", name);
   List marker = %(generated);
   _require_retained(key.try_own());
   _require_retained(marker_key.try_own());

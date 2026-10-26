@@ -317,13 +317,13 @@ static int _compiler_owns(String path) {
    directories and each imported package's headers. A package linked into
    the compiler uses the headers of its build. */
 static List _group_flags(CliRequest request, Map packages) {
-  List includes = request.include_dirs.map(%!(dir) => %("-I" $dir)).flatten();
+  List includes = request.include_dirs.map(%!(dir) => $("-I", dir)).flatten();
   List flags = %(@includes @(_host_args(request.cc_args)));
   foreach ((String root, int _) in packages)
-    flags = %(@flags "-iquote" $(%"$root/builds") "-iquote" $(%"$root/src"));
+    flags = $(@flags, "-iquote", %"$root/builds", "-iquote", %"$root/src");
   String archive = Compiler.extension_archive();
   if (archive)
-    flags = %("-iquote" $(%"$(Path.dirname(archive))/include") @flags);
+    flags = $("-iquote", %"$(Path.dirname(archive))/include", @flags);
   return flags;
 }
 
@@ -377,9 +377,9 @@ static List _cc_flags(void) => %("-fsigned-char" "-O1");
 
 /* Every helper links one unit that answers the compiler's calls: its
    protocol loop and the compiler queries generated from `lib/meta.x`. */
-static List _loop_sources(void) => %(
-  $(%"$(x2c_get_root())/etc/meta-helper.x")
-  $(%"$(x2c_get_root())/etc/meta-queries.x"));
+static List _loop_sources(void) => $(
+  %"$(x2c_get_root())/etc/meta-helper.x",
+  %"$(x2c_get_root())/etc/meta-queries.x");
 
 /* The text of that unit, or NULL when a source is missing. */
 static String _loop_text(void) {
@@ -486,7 +486,7 @@ static List _loaded_provider(Helper &h, String path, int index) {
   with (f.request.package_dirs = f.request.package_dirs) {
     foreach ((String root, int _) in h.packages)
       f.request.package_dirs = f.request.package_dirs.append(
-        %($(Path.dirname(root))));
+        $(Path.dirname(root)));
     return _collect_provider(h, f, path, index);
   }
 }
@@ -547,7 +547,7 @@ static void _parse(Helper &h, String path, int index) {
         f.request.source_map = f.request.source_map || h.entries) {
     foreach ((String root, int _) in h.packages)
       f.request.package_dirs = f.request.package_dirs.append(
-        %($(Path.dirname(root))));
+        $(Path.dirname(root)));
     _parse_source(h, f, path, index);
   }
 }
@@ -579,9 +579,10 @@ static String _compile(Helper &h, int index, String unit) {
   if (Path.is_file(%"$base.failure")) return Path.read_text(%"$base.failure");
   Toolchain t = h.toolchain;
   List command =
-    %($(t.cc) @(_cc_flags()) "-iquote" $(h.directory)
-      "-iquote" $(Path.dirname(unit)) "-iquote" $(h.include) @(h.flags)
-      "-MD" "-MF" $(%"$base.d") "-c" $(%"$base.c") "-o" $(%"$base.o"));
+    $(
+      t.cc, @(_cc_flags()), "-iquote", h.directory, "-iquote",
+      Path.dirname(unit), "-iquote", h.include, @(h.flags), "-MD", "-MF",
+      %"$base.d", "-c", %"$base.c", "-o", %"$base.o");
   String failure = h.entries ? _compile_loaded(command)
                              : Compiler.meta_cc_run(command, h.directory);
   _add_depfile(%"$base.d", h.deps);
@@ -612,7 +613,7 @@ static void _record(Helper &h, int index, String failure) {
   String base = _base(h, index);
   if (!Path.is_file(%"$base.deps")) return;
   h.groups.push(index);
-  if (failure) h.failures.push(%($index $failure));
+  if (failure) h.failures.push($(index, failure));
   else {
     h.built.push(index);
     h.objects.push(%"$base.o");
@@ -678,8 +679,9 @@ static String _compile_support(
   Toolchain t = h.toolchain;
   String include = h.include, output = _temporary(object);
   String failure = Compiler.meta_cc_run(
-    %($(t.cc) @(_cc_flags()) "-iquote" $directory "-iquote" $include
-      "-c" $(%"$directory/meta-helper.c") "-o" $output), NULL);
+    $(
+      t.cc, @(_cc_flags()), "-iquote", directory, "-iquote", include, "-c",
+      %"$directory/meta-helper.c", "-o", output), NULL);
   if (!failure) Path.move_to(output, object);
   return failure;
 }
@@ -709,16 +711,16 @@ static List _link_arguments(
   Helper &h, String output, String tables, String support) {
   Toolchain t = h.toolchain;
 #ifdef __APPLE__
-  t.ld_args = %($(%"-Wl,-force_load,$(t.runtime_lib)"));
+  t.ld_args = $(%"-Wl,-force_load,$(t.runtime_lib)");
 #else
   t.ld_args = %("-Wl,--export-dynamic,--whole-archive" $(t.runtime_lib)
                 "-Wl,--no-whole-archive");
 #endif
-  List inputs = %(@(h.objects.list()) $tables $support);
+  List inputs = $(@(h.objects.list()), tables, support);
   String archive = Compiler.extension_archive();
-  if (archive) inputs = inputs.append(%($archive));
+  if (archive) inputs = inputs.append($(archive));
   ToolAction link = t.link_action(output, inputs);
-  return %(@(link.arguments) @(_cc_flags()) "-iquote" $(h.include));
+  return $(@(link.arguments), @(_cc_flags()), "-iquote", h.include);
 }
 
 // manifests
@@ -743,7 +745,7 @@ static List _digests(Map paths) {
   Array rows = [];
   foreach ((String path, int _) in paths) {
     String digest = _digest(path);
-    if (digest) rows.push(%($path $digest));
+    if (digest) rows.push($(path, digest));
   }
   return rows.sort();
 }

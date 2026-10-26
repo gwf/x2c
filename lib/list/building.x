@@ -51,7 +51,7 @@ Array List.array(List lst) {
 */
 meta native List Map.list(Map map) {
   Array pairs = [];
-  foreach (Var (key, value) in map) pairs.push(%($key $value));
+  foreach (Var (key, value) in map) pairs.push($(key, value));
   return pairs.list_free();
 }
 

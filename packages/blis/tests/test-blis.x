@@ -127,7 +127,7 @@ static void blis_collection_copy_converts_every_numeric_tag(void) {
   float single = 1.25f;
   long double wide = 2.5L;
   BlisObject copied = auto
-    BlisObject.copy_vector(%(3 $single $wide), BLIS_DOUBLE);
+    BlisObject.copy_vector($(3, single, wide), BLIS_DOUBLE);
 
   EXPECT_NEAR(copied.at(0, 0), 3.0, 1e-12);
   EXPECT_NEAR(copied.at(1, 0), 1.25, 1e-12);
@@ -135,7 +135,7 @@ static void blis_collection_copy_converts_every_numeric_tag(void) {
 
   Var exceptional = Var.box_long_double(0.0L / 0.0L);
   int exceptional_caught = 0;
-  try BlisObject.copy_vector(%($exceptional), BLIS_DOUBLE);
+  try BlisObject.copy_vector($(exceptional), BLIS_DOUBLE);
   catch %(bad-arg *detail): {
     exceptional_caught = 1;
     EXPECT_STR_EQ(detail.assoc(<operation>).string(), "copy_vector");
@@ -144,7 +144,7 @@ static void blis_collection_copy_converts_every_numeric_tag(void) {
 
   Var infinity = Var.box_long_double(1.0L / 0.0L);
   exceptional_caught = 0;
-  try BlisObject.copy_vector(%($infinity), BLIS_DOUBLE);
+  try BlisObject.copy_vector($(infinity), BLIS_DOUBLE);
   catch %(bad-arg *detail): {
     exceptional_caught = 1;
     EXPECT_STR_EQ(detail.assoc(<operation>).string(), "copy_vector");

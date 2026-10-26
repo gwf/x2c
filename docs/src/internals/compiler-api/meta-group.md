@@ -84,7 +84,7 @@ Source: `src/meta-group/selection.x:18`
 Returns why the group function `name` has no compile-time entry, from
 its type.
 
-Source: `src/meta-group/selection.x:295`
+Source: `src/meta-group/selection.x:333`
 
 <a id="Compiler.meta_calls_wait"></a>
 #### Compiler.meta_calls_wait
@@ -170,7 +170,7 @@ Source: `src/meta-group/loaded.x:55`
 Answers whether a definition has public native linkage.
 Main is excluded because its process entry needs a separate adapter.
 
-Source: `src/meta-group/selection.x:285`
+Source: `src/meta-group/selection.x:323`
 
 <a id="Compiler.refuse_meta_call"></a>
 #### Compiler.refuse_meta_call
@@ -180,7 +180,7 @@ Source: `src/meta-group/selection.x:285`
 Reports at `site` that the `meta` function `name` cannot run at compile
 time, and `why`.
 
-Source: `src/meta-group/selection.x:314`
+Source: `src/meta-group/selection.x:352`
 
 <a id="Compiler.refuse_record_meta_call"></a>
 #### Compiler.refuse_record_meta_call
@@ -191,7 +191,7 @@ Reports at `site` that the group function `name` cannot run at compile
 time when its result is a struct or union, which its type alone
 decides.
 
-Source: `src/meta-group/selection.x:322`
+Source: `src/meta-group/selection.x:360`
 
 <a id="Compiler.stage_meta_in_process"></a>
 #### Compiler.stage_meta_in_process
