@@ -1,4 +1,4 @@
-// generated call helpers
+/*  call-helpers.x -- generated call helpers */
 
 static typedef struct DiscardCall {
   Compiler c;
@@ -15,7 +15,8 @@ static typedef struct DiscardCall {
 /** Returns the function `result name(params) { body }` bound in this
     unit. `result` is the storage class and result type, so static, inline
     and external helpers share it; `params` are the parameter declarations,
-    and `body` its lowered statements. */
+    and `body` its lowered statements.
+*/
 List Compiler.wrapper_function(
   Compiler c, Type result, List binding, List params, List body) {
   List lowered = Code.lowered(%(seq @body), NULL);
@@ -26,7 +27,8 @@ List Compiler.wrapper_function(
 /** Returns `(declarations arguments)` for a helper that forwards its
     parameters of `types`: each declaration names a fresh parameter `a0`,
     `a1`, ..., and each argument reads it. A List rest parameter forwards
-    its elements with an explicit splice. */
+    its elements with an explicit splice.
+*/
 List Compiler.forward_parameters(Compiler c, List types) {
   Array declarations = [], arguments = [];
   int index = 0;
@@ -45,8 +47,7 @@ List Compiler.forward_parameters(Compiler c, List types) {
 /* Binds `syntax`, a template that defines the function `binding`. The
    template's own definition is not authored API of this unit; a documented
    prototype the function completes keeps its prose. */
-static List _generated_function(
-  Compiler c, List binding, List syntax) {
+static List _generated_function(Compiler c, List binding, List syntax) {
   List key = %(api-definition $binding);
   Var authored;
   int documented = c.semantic_binding_facts().try_get(key, authored);
