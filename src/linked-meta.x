@@ -219,16 +219,16 @@ static List _update_cast_in(List id)  => _update_row(id)[3].car();
 static List _update_cast_out(List id) => _update_row(id)[3].cdr().car();
 
 static List _update_box(List id, List lhs) {
-  List value = $!( $lhs[0] );
+  List value = $!($lhs[0]);
   Type into = _update_cast_in(id);
-  if (into) value = $!( ($into)$value );
-  return $!( $(x2c_ident(_update_boxer(id)))($value) );
+  if (into) value = $!(($into)$value);
+  return $!($(x2c_ident(_update_boxer(id)))($value));
 }
 
 static List _update_decode(List id, List value) {
-  List decoded = $!( $(x2c_ident(_update_decoder(id)))($value) );
+  List decoded = $!($(x2c_ident(_update_decoder(id)))($value));
   Type back = _update_cast_out(id);
-  if (back) return $!( ($back)$decoded );
+  if (back) return $!(($back)$decoded);
   return decoded;
 }
 
