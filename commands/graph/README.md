@@ -489,3 +489,208 @@ This is a parsed source graph for trusted x2c programs. Parsing executes their
 meta functions and macros. Calls introduced only by later transforms,
 generated protocol adapters, C-only code, and speculative callback targets
 are outside this tool's analysis.
+
+## Reusable project snapshots
+
+`snapshot` retains a configured project's bound, macro-expanded syntax,
+semantic relationships, and source text. Each query runs in a new process and
+reads saved data. It does not parse live source, execute meta code, or rebuild
+anything. `snapshot` itself performs normal compiler analysis, including
+compile-time execution. The format remains experimental and requires the
+compiler identity that produced it.
+
+```sh
+# An explicit set of units, with the ordinary build configuration options.
+x2c graph snapshot /tmp/compiler-analysis -I . -I src \
+  $(tools/sources.sh --area src)
+
+# A manifest target and its dependency targets, using their own settings.
+x2c graph snapshot /tmp/project-analysis \
+  --manifest-path /path/to/x2c.toml --target app --profile release
+
+x2c graph status /tmp/project-analysis
+x2c graph query /tmp/project-analysis /tmp/query.json
+x2c graph diff /tmp/project-analysis /tmp/project-analysis-after
+```
+
+The selected manifest target/profile and its dependencies form one snapshot.
+Use separate snapshots for other configurations. Explicit inputs form one
+analysis set. Module members belong to their entry unit. Native dependencies
+and declarations without analyzed implementations remain recorded boundaries.
+Snapshot construction does not install packages or build the application;
+prepare missing dependencies through the project's ordinary workflow.
+
+`status` checks saved dependency fingerprints and source membership. Its JSON
+contains `fresh`, `changed`, `missing`, `added_inputs`, and `removed_inputs`.
+It also reports the retained effective target `configurations`, including
+include paths, compiler arguments, and native modules.
+If an edited manifest cannot be planned, `membership_checked` is false and
+`membership_error` explains why; recorded dependency changes are still shown.
+Queries continue to read the named snapshot after source edits. Rebuild
+explicitly when a current-tree answer is required. A failed rebuild preserves
+the preceding snapshot. Inspection returns the saved source, not the current
+file contents.
+
+### Query vocabulary
+
+Put one JSON object in the query file. Each result identifies its snapshot and
+coverage and includes `results`, `total`, `offset`, `limit`, and `truncated`.
+The default limit is 100. Continue with `offset` when results are truncated;
+ranking or a first page is not an exhaustive reference inventory.
+
+| `op` | Inputs | Result |
+| --- | --- | --- |
+| `find` | `where` | Matching entity summaries. |
+| `inspect` | `select`, `view` | One entity's summary, declaration, source, or typed AST. |
+| `traverse` | `select`, `relations`, `direction`, `depth`, `where` | Reachable entities with distance and the edge that reached each entity. |
+| `path` | `select`, `target`, `relations`, `direction` | A shortest path with entities and occurrence evidence. |
+| `match` | `pattern`, optional `select` and structural filters | AST matches, captures, enclosing entity IDs, and available locations. |
+
+Selectors use entity attributes such as `id`, `name`, `kind`, `unit`, or
+`domain`. An ambiguous `inspect` returns candidates with status `ambiguous`;
+select one exact ID instead of guessing. Names of local functions and types
+can repeat. A typedef and its aggregate tag are also distinct entities.
+
+`where` supports exact entity attributes, `text` substring search, and
+`all`, `any`, and `not` combinations. `reachable_from` takes a traversal
+configuration containing `select`, `relations`, `direction`, and `depth`.
+`direction` is `out` or `in`; omitted depth traverses the recorded closure.
+Traversal includes selected roots at distance zero.
+
+Relationship kinds include `calls`, `references`, `contains`, `aliases`,
+`field-value`, `field-pointer`, `parameter`, `result`, `callback`, `body-type`,
+`reads`, `writes`, `mutates`, `representation`, `conforms`, `implements`,
+and `delegates`.
+Fields have their own identities: field-to-type edges distinguish value
+storage from pointers, and function-to-field edges record accesses. A pointer
+edge does not establish ownership. A field write does not include arbitrary
+writes through aliases or callees.
+
+### Questions to ask
+
+The function names below come from the acceptance fixture. To try these
+queries against that fixture, build its snapshot first:
+
+```sh
+x2c graph snapshot /tmp/example-analysis \
+  commands/graph/tests/fixtures/snapshot-a.x \
+  commands/graph/tests/fixtures/snapshot-b.x
+```
+
+Use `/tmp/example-analysis` as the snapshot argument for the JSON examples.
+Replace selectors with the names or IDs returned for your own project.
+
+Find the entry point, then inspect its saved definition:
+
+```json
+{"op":"find","where":{"kind":"function","name":"snapshot_entry"}}
+```
+
+```json
+{"op":"inspect","select":{"id":"ID_FROM_FIND"},"view":"source"}
+```
+
+`view` also accepts `summary`, `declaration`, and `typed_ast`. `declaration`
+returns canonical declaration syntax, including its type and bindings.
+`typed_ast` returns the full bound subtree in the `ast` result field, with
+portable source-origin wrappers. Use `source` for the original source text.
+File entities return their complete saved source. Unit entities retain the
+complete bound AST, including top-level forms outside declaration subtrees.
+Select a unit explicitly to match that entire AST. Without `select`, matching
+searches declaration subtrees to avoid repeating their unit-level copies.
+
+Find callers, transitive callees, and a source-evidenced path:
+
+```json
+{"op":"traverse","select":{"name":"snapshot_leaf"},"relations":["calls"],"direction":"in"}
+```
+
+```json
+{"op":"traverse","select":{"name":"snapshot_entry"},"relations":["calls"]}
+```
+
+```json
+{"op":"path","select":{"name":"snapshot_entry"},"target":{"name":"snapshot_leaf"},"relations":["calls"]}
+```
+
+Find public interfaces that use a type: select its exact type ID, traverse
+`parameter`, `result`, and `callback` in reverse, and retain public functions.
+Starting from a type, reverse `field-value` and `field-pointer` to distinguish
+embedding from indirection.
+
+```json
+{"op":"traverse","select":{"id":"TYPE_ID"},"relations":["parameter","result","callback"],"direction":"in","where":{"all":[{"kind":"function"},{"visibility":"public"}]}}
+```
+
+Find reachable direct field writes by following calls and writes together:
+
+```json
+{"op":"traverse","select":{"name":"snapshot_entry"},"relations":["calls","writes"],"where":{"kind":"field"}}
+```
+
+To restrict that answer to one type, first find its fields through `contains`
+and use their IDs in an `any` filter. To return the reachable functions that
+directly write those fields, reverse the write edges and intersect callers:
+
+```json
+{"op":"traverse","select":{"any":[{"id":"FIELD_ID"}]},"relations":["writes","mutates"],"direction":"in","depth":1,"where":{"all":[{"kind":"function"},{"reachable_from":{"select":{"name":"snapshot_entry"},"relations":["calls"]}}]}}
+```
+
+To find functions requiring a type's
+representation, traverse `representation` in reverse from the type. Inspect
+the `via` evidence before concluding that making the type opaque is safe.
+
+```json
+{"op":"traverse","select":{"id":"TYPE_ID"},"relations":["representation"],"direction":"in","where":{"kind":"function"}}
+```
+
+Structural patterns use the existing Match grammar as datum text. Test a
+pattern on one selected entity before omitting `select` to search all saved
+ASTs. Provenance wrappers do not obstruct ordinary matching. `inside` accepts
+`loop` or a canonical AST head. Binding filters refer to resolved names or IDs. `callee` restricts that
+filter to a call target, while `binding` considers the matched subtree.
+Type filters use canonical datum text.
+
+`node_where` composes structural filters with `all`, `any`, and `not`.
+For example, this selects loop calls to either named function while excluding
+calls with a double argument:
+
+```json
+{"op":"match","pattern":"(expr ?type (call ?callee (args *args)))","node_where":{"all":[{"inside":"loop"},{"any":[{"callee":"snapshot_leaf"},{"callee":"snapshot_middle"}]},{"not":{"argument_type":"(double)"}}]}}
+```
+
+Top-level structural filters remain conjunctions. Entity `where` filters the
+enclosing entity; `node_where` filters each matched AST node.
+
+```json
+{"op":"match","select":{"name":"snapshot_entry"},"pattern":"(expr ?type (call ?callee (args *args)))","inside":"loop","callee":"snapshot_leaf","argument_type":"(* struct \"SnapshotValue\")"}
+```
+
+Matches return captures rather than evaluating query code. Available filters
+also include `declared_type`, `resolved_type`, and `where` with
+`reachable_from`. Declarations and resolved types remain separate so an alias
+or pointer wrapper does not disappear from the question being asked.
+
+Build a second snapshot after editing, then use `diff` to inspect changed
+signatures, field relationships, or calls. Diff reports `added`, `removed`,
+`changed`, `added_relations`, and `removed_relations`. It matches qualified
+identities rather than compiler binding numbers and does not guess renames.
+
+### Coverage and interpretation
+
+A path proves a relationship in the saved analysis. `no-recorded-path` does
+not prove that no runtime path exists. Indirect calls, native bodies, alias
+mutation, and later-transform behavior remain outside these direct facts.
+Protocol and delegation relationships come from compiler records; they do not
+justify speculative dispatch targets.
+
+Source-written and generated entities are marked separately. Constructed ASTs
+can lack exact source spans. Queries preserve that absence rather than invent
+locations. A syntax or type match establishes the reported shape and compiler
+facts, not execution feasibility, ownership, or safe deletion.
+
+The focused acceptance command is:
+
+```sh
+python3 commands/graph/tests/snapshot.py
+```

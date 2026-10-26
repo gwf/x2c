@@ -3,6 +3,10 @@
 /*  graph-output.x -- command help display */
 
 macro Stmt $output.graph.usage(Expr $program) {
+  Stderr.printf("       %s snapshot OUTPUT [BUILD_OPTIONS] [FILE...]\n", $program);
+  Stderr.printf("       %s status SNAPSHOT\n", $program);
+  Stderr.printf("       %s query SNAPSHOT QUERY_FILE\n", $program);
+  Stderr.printf("       %s diff BEFORE AFTER\n", $program);
   Stderr.printf("usage: %s graph|digest [-I DIR] FILE...\n", $program);
   Stderr.printf("       %s clones [--min-size N] [-I DIR] FILE...\n", $program);
   Stderr.printf(
