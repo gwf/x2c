@@ -621,12 +621,9 @@ static Code _dynamic_update(
 static String _dynamic_helper(Type type) {
   if (type.is_named("Var")) return "x2c_var_update_volatile";
   Type scalar = type.numeric();
-  match (scalar)
-    case %(enum *):
-      $fail.operators_enum_target(NULL);
+  match (scalar) case %(enum *): $fail.operators_enum_target(NULL);
   String helper = type.update_helper();
-  if (!helper)
-    $fail.operators_numeric_target(NULL, type);
+  if (!helper) $fail.operators_numeric_target(NULL, type);
   return helper;
 }
 
