@@ -104,8 +104,10 @@ module List _parse_hole(Compiler c, Symbol role) {
   c.token = c.after_hole();
   Atom name = _hole_name(hole);
   int sequence = token.type == <@> || token.type == <"@(">;
-  if (sequence != hole.assoc(<sequence>).int())
-    _cardinality_error(c, name.str(), sequence, token);
+  if (sequence != hole.assoc(<sequence>).int()) {
+    String spelling = name.str();
+    $fail.macros_hole_cardinality(c, token, sequence, spelling);
+  }
   if (sequence && !(role in sequence_roles))
     $fail.macros_splice_position(c, c.token);
   Symbol inferred = _role_kind(role), kind = hole.assoc(<kind>);
@@ -120,11 +122,6 @@ module List _parse_hole(Compiler c, Symbol role) {
   }
   String projection = _hole_projection(c, hole, role, sequence);
   return %(macro-bind $(_hole_key(hole, projection)));
-}
-
-static void _cardinality_error(
-  Compiler c, String spelling, int sequence, Token token) {
-  $fail.macros_hole_cardinality(c, token, sequence, spelling);
 }
 
 static Symbol _role_kind(Symbol role) {
