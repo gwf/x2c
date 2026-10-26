@@ -10,19 +10,15 @@ Match statements.
 
 ## Design notes
 
-A match lowers to C text around its subject, patterns, and bodies: a
-block that reads the subject once as a List and switches on the bits of
-its head. Lowering steps into the nodes the text holds, and the
-`switch` is the barrier the cleanup walk knows, so an arm's `break`
-leaves the match and `continue` reaches the enclosing loop. Each arm
-tests its pattern, declares its binders, runs its body, and breaks; an
-arm that fails falls into the next. A static pattern of literals,
-unique binders, typed captures, nested Lists, and a final `*` is tested
-in place by nested `if` tests on cursors over the subject. Any other
-pattern captures into a buffer: a macro-valued case through its macro,
-and the rest through the Match runtime, at a static site when the
-pattern's value is the same each time it runs.
+C text surrounds the subject, patterns, and bodies. A block reads the
+subject once as a List and switches on its head's bits. Lowering steps
+into the embedded nodes. The generated `switch` makes `break` leave
+the match and `continue` reach the enclosing loop. A failed arm
+continues to the next arm.
 
-Each definition precedes the definitions that call it: the compiler
-settles whether a linked copy reaches a compile-time operation when the
-copy binds.
+Static patterns of literals, unique binders, typed captures, nested
+Lists, and a final `*` use direct cursor tests. Other patterns capture
+through macros or Match, with static sites for fixed pattern values.
+
+Definitions that reach compile-time operations precede their callers:
+the compiler settles a linked copy's reachability when the copy binds.

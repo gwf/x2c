@@ -1118,7 +1118,7 @@ Holds a compiler's declarations in nested scopes.
 The lowest `base_scopes` contain file-scope declarations. Active
 transactions retain the rows each write replaces in `undo`.
 
-Source: `src/symtab/symtab.x:122`
+Source: `src/symtab/symtab.x:120`
 
 ## Design notes
 
