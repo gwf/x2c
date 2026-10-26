@@ -8,7 +8,8 @@
 /** A scope-owned count table that borrows Substr keys. Keep every source
     String alive and unchanged until the table's final use. Counting copies
     only the view; strings() materializes each unique key once. Context export
-    preserves the table and exports the source Strings used by its views. */
+    preserves the table and exports the source Strings used by its views.
+*/
 typedef struct MapSubInt {
   Scope scope, Bytes hashes, entries;
   unsigned used, capacity, mask;
@@ -42,7 +43,8 @@ MapSubInt MapSubInt.new(void) {
 }
 
 /** Adds one occurrence without copying or interning the word's bytes.
-    The aggregate count must fit in int. */
+    The aggregate count must fit in int.
+*/
 void MapSubInt.increment(MapSubInt map, Substr word) {
   int one = 1, inserted;
   int *count = map.get_or_insert(&word, &one, &inserted);
