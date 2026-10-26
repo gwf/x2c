@@ -26,7 +26,8 @@ List Compiler.definition_rows(Compiler c, List ast) {
       if (row) rows.push(row);
     }
     case %(typedef ?base (bindings *declarators)):
-      foreach (List declarator in declarators) if (declarator ~= %(bind ?binding ?modifiers))
+      foreach (List declarator in declarators)
+        if (declarator ~= %(bind ?binding ?modifiers))
           rows.push(
             %(typedef $(Ast.binding_spelling(binding)) $base $modifiers
               $(_span(c, node))));
@@ -43,13 +44,14 @@ static List _function_row(
   Type signature =
     %(declare $type (bindings (bind $binding $modifiers))).type_from_ast();
   int line = 1, Var doc = "", List declarator = NULL, span = _span(c, binding);
-  if (c.semantic_binding_facts()[%(api-definition $binding)] ~= %(?(int recorded) ?text ?range)) {
+  if (c.semantic_binding_facts()[%(api-definition $binding)] ~=
+      %(?(int recorded) ?text ?range)) {
     line = recorded;
     if (text is <string>) doc = text;
     declarator = range;
   }
   /* Authored prose precedes the whole form, before any decorator. */
-  if (span ~= %(?(int start) *)) if (declarator || alias) {
+  if (span ~= %(?(int start) *) && (declarator || alias)) {
     Token first = c.tokenizer.tokens;
     first += start;
     if (alias) line = first.line;
@@ -65,7 +67,8 @@ static List _function_row(
 
 /* A method displays as `Owner.member`. */
 static String _display(Compiler c, List binding, String name) {
-  if (c.semantic_binding_facts()[%(method $binding)] ~= %(?(String owner) ?(String member))) return %"$owner.$member";
+  if (c.semantic_binding_facts()[%(method $binding)] ~=
+      %(?(String owner) ?(String member))) return %"$owner.$member";
   return c.unprefixed(name);
 }
 
@@ -75,7 +78,8 @@ static List _span(Compiler c, List key) =>
 static List _parameter_names(Compiler c, List modifiers) {
   Array names = [];
   if (modifiers ~= %((fnmod (params *parameters)) *))
-    foreach (List parameter in parameters) if (parameter ~= %(param ? (bind ?binding ?)))
+    foreach (List parameter in parameters)
+      if (parameter ~= %(param ? (bind ?binding ?)))
         names.push(_parameter_name(c, binding));
   return names.list_free();
 }
@@ -109,7 +113,7 @@ void Compiler.dump_definitions(Compiler c, List ast) {
 
 static void _print_function(Compiler c, Token tokens, List row) {
   if (row ~= %(function ?name ?display ?type ?names ?line ?doc ?is_static
-           ?origin ?declarator ?span)) {
+              ?origin ?declarator ?span)) {
     String text = "";
     if (declarator ~= %(?(int start) ?(int body)))
       text = _source_text(tokens + start, tokens + body);
