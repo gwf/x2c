@@ -109,8 +109,13 @@ mkdir -p "$cold_root/src"
 mkdir -p "$cold_root/src/components"
 cp "$ROOT"/src/components/*.x "$cold_root/src/components"/
 cp "$ROOT"/src/grammar.x "$cold_root/src/"
+# Header guards hash the home-relative path, so the example sits at the same
+# place under this home.
+mkdir -p "$cold_root/examples"
+cp "$ROOT/examples/foreach.x" "$cold_root/examples/"
 [[ -z "$("$cold_root/bin/x2c" env prelude)" ]] || exit 1
-"$cold_root/bin/x2c" translate --out-dir "$BUILD/cold" "$ROOT/examples/foreach.x"
+"$cold_root/bin/x2c" translate --out-dir "$BUILD/cold" \
+  "$cold_root/examples/foreach.x"
 diff -u "$BUILD/cold/foreach.c" "$BUILD/default/foreach.c"
 diff -u "$BUILD/cold/foreach.h" "$BUILD/default/foreach.h"
 # Interfaces its own compiler wrote make the same home replay the prelude
@@ -126,7 +131,8 @@ for source in "${library_sources[@]}"; do
   cp "$BUILD/cold-interfaces/${name%.x}.xi" "${source%/*}/"
 done
 [[ -n "$("$cold_root/bin/x2c" env prelude)" ]] || exit 1
-"$cold_root/bin/x2c" translate --out-dir "$BUILD/warm" "$ROOT/examples/foreach.x"
+"$cold_root/bin/x2c" translate --out-dir "$BUILD/warm" \
+  "$cold_root/examples/foreach.x"
 diff -u "$BUILD/warm/foreach.c" "$BUILD/default/foreach.c"
 diff -u "$BUILD/warm/foreach.h" "$BUILD/default/foreach.h"
 
