@@ -1,4 +1,4 @@
-// shallow collection
+/*  collection.x -- shallow declaration collection */
 
 /** Collects file-scope declarations into `globals` without parsing bodies. */
 void Compiler.shallow_parse(Compiler c, Map globals) {
@@ -16,7 +16,7 @@ void Compiler.shallow_parse(Compiler c, Map globals) {
     contributes above `base`.
 */
 void Compiler.shallow_parse_overlay(Compiler c, Map base, Map overlay) {
-  if (c.macros == NULL || !c.macros.len()) _start_macros(c);
+  if (!c.macros) _start_macros(c);
   c.sym.reset_overlay(base, overlay);
   _shallow_parse_loop(c);
   // Only linkage groups remain open; a later segment of the file closes them.
@@ -54,7 +54,8 @@ static void _shallow_parse_loop(Compiler c) {
 
 /** Starts a collection pass with the syntax prelude. It parses no bodies,
     and an import it reads installs the protocols visible to it when a
-    template or `meta` body first asks for one. */
+    template or `meta` body first asks for one.
+*/
 void Compiler.start_collection(Compiler c) {
   c.install_syntax_prelude();
   c.rebuild_protocols(NULL);
@@ -136,7 +137,8 @@ static void _skip_body(
 }
 
 /** Records the header linkage of a public inline definition. Semantic
-    function types discard storage, so this declaration fact survives there. */
+    function types discard storage, so this declaration fact survives there.
+*/
 void Compiler.record_inline_function(Compiler c, List declaration) {
   Type type = declaration.type_from_ast();
   if (!type.is_inline() || type.is_static() || c.source_private) return;
