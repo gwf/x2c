@@ -73,9 +73,10 @@ int Compiler.meta_binding(Compiler c, String name, Var &out) =>
 void Compiler.record_native_meta_effect(
   Compiler c, List declaration, Token marker) {
   if (c.source_private < 0) return;
-  if (!declaration.type_from_ast().is_function()) return;
+  Type type = declaration.type_from_ast();
+  if (!type.is_function()) return;
   String path = Compiler.portable_path(Path.resolved_absolute(c.filename));
-  Type type = declaration.type_from_ast().canonicalize();
+  type = type.canonicalize();
   if (type.is_static()) return;
   String name = _native_meta_name(c, declaration, marker);
   if (%(function $name) in c.sym.file_statics()) return;
@@ -217,9 +218,9 @@ int Compiler.native_meta_accepts(Compiler c, Var function, List signature) {
     _native_signature_type(c, ((Func) function.pointer()).signature());
   match (signature)
     case %((func ?(List parameters)) *result): {
+      if (target == _native_signature_type(c, signature)) return 1;
       List boxed = parameters.search_replace(%("Func"), %("Var"));
-      return target == _native_signature_type(c, signature) ||
-             target == _native_signature_type(c, %((func $boxed) @result));
+      return target == _native_signature_type(c, %((func $boxed) @result));
     }
   return 0;
 }
@@ -331,7 +332,7 @@ static int _native_owned(Compiler c, List type) {
 /* native target inventory
 
    The native functions interface rows advertise. The entry
-   `lib/lisp-targets/lisp-targets.x` generates its target inventory from them. */
+   `lib/lisp-targets/lisp-targets.x` generates its inventory from them. */
 
 /** Returns the declared native targets advertised by `meta` interface
     rows, in the row form `lib/lisp-targets/lisp-targets.x` uses for its
