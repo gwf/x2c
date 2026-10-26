@@ -35,12 +35,11 @@ static List _wrap(Definition &d) {
   if (target != <function>) return replacement;
   Var return_binder = _hole_key(d.target, "return");
   Var declarator_binder = _hole_key(d.target, "declarator");
-  match (replacement)
-    case %(seq *body):
-      return %(
-        seq
-          (function $return_binder $declarator_binder (block @body))
-      );
+  if (replacement ~= %(seq *body))
+    return %(
+      seq
+        (function $return_binder $declarator_binder (block @body))
+    );
   return replacement;
 }
 
@@ -119,11 +118,11 @@ static Map _binder_uses(List template) {
   Map uses = {};
   List syntax;
   $ast.walk(template, syntax) {
-    match (syntax)
-      case %((!or macro-invoke macro-slot meta-call tpl-call macro-value
-                  "x2c.template" macrodef syntax-recipe declaration-recipe)
-             *):
-        return NULL;
+    if (syntax ~= %((!or macro-invoke macro-slot meta-call tpl-call macro-value
+                        "x2c.template" macrodef syntax-recipe
+                        declaration-recipe)
+                   *))
+      return NULL;
     foreach (Var item in syntax)
       if (item.is_binder()) uses[item] += 1;
   }
