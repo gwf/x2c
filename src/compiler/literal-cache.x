@@ -1,4 +1,8 @@
-// the literal cache
+/*  literal-cache.x -- compiler literal cache
+
+    Interns immutable literal forms under stable unit cache IDs; dynamic
+    values use runtime construction.
+*/
 
 /** Interns a constant key and returns its stable `(cache id)` reference. */
 List Compiler.cache(Compiler c, List key) {
