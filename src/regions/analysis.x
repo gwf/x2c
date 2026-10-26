@@ -162,7 +162,8 @@ void Compiler.check_meta_regions(Compiler c, List fn) {
     project audit. `seed` contains prior project-round summaries indexed by
     the emitted names visible in this unit. `effects` adds audit-only native
     contracts; neither input changes ordinary translation. Findings carry
-    their function name and are returned without compiler diagnostics. */
+    their function name and are returned without compiler diagnostics.
+*/
 Map Compiler.audit_regions(
   Compiler c, List ast, Map seed, Map effects, Array findings) {
   Walk w = {
