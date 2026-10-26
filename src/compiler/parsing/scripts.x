@@ -204,11 +204,11 @@ static Bytes _append_placed(Bytes stream, Token token, Token first) {
 static void _check_script_locals(Compiler c, List ast) {
   Map locals = _script_locals(ast);
   if (!locals.len()) return;
-  foreach (List node in ast) match (node)
-    case %(function ? (bind (binding ? ?(String function)) ?)
-           (block *items)):
-      if (function != "x2c_script" && function != "main")
-        _check_local_uses(c, items, locals);
+  foreach (List node in ast)
+    if (node ~= %(function ? (bind (binding ? ?(String function)) ?)
+                   (block *items)) &&
+        function != "x2c_script" && function != "main")
+      _check_local_uses(c, items, locals);
 }
 
 static Map _script_locals(List ast) {
@@ -216,25 +216,26 @@ static Map _script_locals(List ast) {
   foreach (List node in ast) match (node)
     case %(function ? (bind (binding ? "x2c_script") ?)
         $($source_block_content(%(*items)))):
-      foreach (List item in items) match (item)
-        case %(at ? (declare ? (bindings *bindings))):
-          foreach (List binding in bindings) match (binding)
-            case %(!or (bind (binding ? ?(String name)) ?)
-                       (op = (bind (binding ? ?(String name)) ?) ?)):
+      foreach (List item in items)
+        if (item ~= %(at ? (declare ? (bindings *bindings))))
+          foreach (List binding in bindings)
+            if (binding ~= %(!or (bind (binding ? ?(String name)) ?)
+                               (op = (bind (binding ? ?(String name)) ?) ?)))
               locals[name] = 1;
   return locals;
 }
 
 static void _check_local_uses(Compiler c, List items, Map locals) {
-  foreach (List item in items) match (item) case %(at ?origin ?statement):
-    foreach (String name in locals.keys()) {
-      Var found;
-      List bindings;
-      int present = statement.list().try_search(
-        %(expr () $(source_identifier_content(%((binding ? $name))))),
-        found, bindings);
-      if (!present) continue;
-      c.origin = origin;
-      $fail.compiler_script_local(c, NULL, name);
-    }
+  foreach (List item in items)
+    if (item ~= %(at ?origin ?statement))
+      foreach (String name in locals.keys()) {
+        Var found;
+        List bindings;
+        int present = statement.list().try_search(
+          %(expr () $(source_identifier_content(%((binding ? $name))))),
+          found, bindings);
+        if (!present) continue;
+        c.origin = origin;
+        $fail.compiler_script_local(c, NULL, name);
+      }
 }
