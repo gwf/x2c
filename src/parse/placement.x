@@ -16,7 +16,8 @@ module List _entry_code(Compiler c, int depth) {
 
 /** Enters `row` as the innermost syntax `Compiler.enclosing` answers. Its
     owner leaves it with `Block.pop`, or with `Compiler.leave_item` for a
-    block item. */
+    block item.
+*/
 void Compiler.enter(Compiler c, Ancestor row) {
   c.ancestors.push(&row);
 }
@@ -27,7 +28,8 @@ void Compiler.enter(Compiler c, Ancestor row) {
     block item, as its one-declarator declaration; the block item, or the
     one the transform lowers, as its origin anchor; the function, as a
     definition whose body is still the empty `(seq)`; or the unit, as a
-    `String` expression of its path. */
+    `String` expression of its path.
+*/
 List Compiler.enclosing(Compiler c, Symbol what) {
   if (what == <unit>) {
     String path = c.filename ? c.display_path(c.filename) : "<stdin>";
@@ -55,7 +57,8 @@ static List _ancestor_code(Compiler c, Ancestor row) {
 
 /** Enters the function definition `declaration`, whose body the
     transform lowers next, so a rule lowering that body places code at its
-    entry. Returns the row's depth for `Compiler.leave_function`. */
+    entry. Returns the row's depth for `Compiler.leave_function`.
+*/
 int Compiler.enter_function(Compiler c, List declaration, int callback) {
   int depth = c.ancestors.len();
   Ancestor row = {
@@ -69,7 +72,8 @@ int Compiler.enter_function(Compiler c, List declaration, int callback) {
     since it was entered or last asked, in placement order, or NULL. The
     code binds in a scope of its own with the function's result type; its
     caller lowers it while the row is still entered, so a placement that
-    lowering makes lands at the entry too. */
+    lowering makes lands at the entry too.
+*/
 List Compiler.function_entry(Compiler c, int depth) {
   if (!c.placements.len()) return NULL;
   List declaration = ((Ancestor *) c.ancestors.bytes)[depth].node;
@@ -83,7 +87,8 @@ List Compiler.function_entry(Compiler c, int depth) {
 }
 
 /** Leaves the function row at `depth` that `Compiler.enter_function`
-    began. */
+    began.
+*/
 void Compiler.exit_function(Compiler c, int depth) {
   c.ancestors.truncate(depth);
 }
@@ -92,7 +97,8 @@ void Compiler.exit_function(Compiler c, int depth) {
     after its parameters bind and before its first statement. While parsing,
     a lambda body is inside the definition that holds it; while lowering, a
     lambda body is the body of its own lifted function, and a finalizer the
-    kernel wrote as a callback has no entry a program can place at. */
+    kernel wrote as a callback has no entry a program can place at.
+*/
 void Compiler.place_entry(Compiler c, Var code) {
   Ancestor *rows = c.ancestors.bytes;
   int depth = (int) c.ancestors.len() - 1;
@@ -104,7 +110,8 @@ void Compiler.place_entry(Compiler c, Var code) {
 
 /** Records `code` to follow the innermost block item, or the initialized
     declarator whose initializer is being parsed directly in it. The
-    expansion that placed it gives it its result when it finishes. */
+    expansion that placed it gives it its result when it finishes.
+*/
 void Compiler.place_after(Compiler c, Var code) {
   Ancestor *rows = c.ancestors.bytes;
   int depth = (int) c.ancestors.len() - 1;
@@ -117,7 +124,8 @@ void Compiler.place_after(Compiler c, Var code) {
 }
 
 /** Gives the placements made since `first` the `result` of the expansion
-    that made them. */
+    that made them.
+*/
 void Compiler.close_placements(Compiler c, int first, List result) {
   for (int i = first; i < (int) c.placements.len(); i++) {
     (int depth, List binding, List placed, Var code) = c.placements[i].list();
@@ -127,7 +135,8 @@ void Compiler.close_placements(Compiler c, int first, List result) {
 
 /** Leaves the block item `enter` began and returns the code placed after
     it, bound in its block, or NULL. A declarator in the item that placed
-    code is incomplete unless its block declaration took that code. */
+    code is incomplete unless its block declaration took that code.
+*/
 List Compiler.leave_item(Compiler c) {
   int depth = (int) c.ancestors.len() - 1;
   Ancestor row = ((Ancestor *) c.ancestors.bytes)[depth];
