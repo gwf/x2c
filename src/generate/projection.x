@@ -1,4 +1,9 @@
-/*  projection.x -- select ordered header and source declarations */
+/*  projection.x -- select ordered header and source declarations
+
+    The unit consumes its declarations where they were written, independently
+    of the public projection. In particular, a promoted include must not
+    change the native macro state before its source position.
+*/
 
 // header and source
 
@@ -37,9 +42,6 @@ module List _header_and_source(Compiler c, List ast, Map inline_bodies) {
   return $(_finish(p), _source_projection(c, ast, inline_bodies));
 }
 
-/* The unit consumes its declarations where they were written, independently
-   of the public projection. In particular, a promoted include must not
-   change the native macro state before its source position. */
 static List _source_projection(Compiler c, List ast, Map inline_bodies) {
   Array source = [];
   foreach (List node in ast) {
