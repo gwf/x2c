@@ -41,7 +41,8 @@ static macro Stmt $fail.meta_sdk_constant() =>
   MetaContext.reject("captured code is not a compile-time constant", NULL);
 
 static macro Stmt $fail.meta_sdk_enclosing_role(Expr $value) =>
-  _reject_value("x2c_enclosing names declarator, statement, function, or unit", $value);
+  _reject_value(
+    "x2c_enclosing names declarator, statement, function, or unit", $value);
 
 // syntax queries
 
@@ -55,7 +56,7 @@ Type Code.type(Code value) {
         type = active.expander.resolve_expression(value, active.site).cadr();
       return type.canonicalize();
     }
-    case %(param ? ?):  return value.type_from_ast().canonicalize();
+    case %(param ? ?): return value.type_from_ast().canonicalize();
     case %((!or declare decl typedef) *):
       return value.type_from_ast().canonicalize();
   }
@@ -87,7 +88,8 @@ Var Code.value(Code code) {
 
 /** Answers `Code.call_in_order`, declared in `lib/meta.x`. The call binds
     its temporaries here, so the result is a carrier that binds no
-    further. */
+    further.
+*/
 Code Code.call_in_order(Code member, List arguments, Type type) {
   _require_expansion("Code.call_in_order");
   List call = active.expander.call_in_order(member, arguments);
@@ -95,11 +97,13 @@ Code Code.call_in_order(Code member, List arguments, Type type) {
 }
 
 /** Answers `Code.lowered`, declared in `lib/meta.x`, with the carrier
-    `Compiler.take_code_value` consumes. */
+    `Compiler.take_code_value` consumes.
+*/
 Code Code.lowered(Code c, List effects) => %(code-value "lowered" $c $effects);
 
 /** Answers `Code.bound`, declared in `lib/meta.x`, with the carrier
-    `Compiler.take_code_value` consumes. */
+    `Compiler.take_code_value` consumes.
+*/
 Code Code.bound(Code c, List effects) => %(code-value "bound" $c $effects);
 
 /** Answers `Code.func_parameters`, declared in `lib/meta.x`. */
@@ -180,7 +184,8 @@ List Code.declared_bindings(List declaration) {
 /** Returns the typed expression naming the function `name`, or an empty
     List when no function of that name is visible. This reads the symbol
     table only, so any compile-time call may use it, including one outside
-    a macro expansion. */
+    a macro expansion.
+*/
 List MetaContext.function_reference(String name) {
   Compiler c = active.evaluator;
   if (!c) raise %(bad-state (operation "_x2c.function.reference"));
@@ -268,8 +273,10 @@ Var MetaContext.fresh_binding(String stem) {
 
 /** Answers `Code.name`, declared in `lib/meta.x`. */
 String Code.name(Code function) {
-  List identity = function.match_replace(
-    %(function ? (bind ?binding ?) ?), <?binding>);
+  List identity = function;
+  match (function)
+    case %(function ? (bind ?binding ?) ?):
+      identity = binding is <list> ? binding.list() : NULL;
   return Code.binding_spelling(identity);
 }
 
@@ -293,8 +300,10 @@ List Code.arguments(Code parameters) {
 
 /** Answers `Code.parameter`, declared in `lib/meta.x`. */
 Code Code.parameter(Code function, String wanted) {
-  List parameters = function.match_replace(
-    %(function ? (bind ? ((fnmod (params *bound)) *)) ?), %(*bound));
+  List parameters = function;
+  match (function)
+    case %(function ? (bind ? ((fnmod (params *bound)) *)) ?):
+      parameters = bound;
   foreach (List parameter in parameters) {
     match (parameter) {
       case %(param ? (bind ?identity *)):
@@ -308,7 +317,8 @@ Code Code.parameter(Code function, String wanted) {
 }
 
 /** Returns the `Func` signature of the function syntax `syntax`. A native
-    binding stores the same signature as an ordinary Func adapter. */
+    binding stores the same signature as an ordinary Func adapter.
+*/
 List Code.native_signature(List syntax) {
   match (syntax)
     case %(function ?rtype ?declarator ?):
