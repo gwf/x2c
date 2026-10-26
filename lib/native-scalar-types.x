@@ -1,7 +1,3 @@
-#pragma once
-#include "common.x"
-#include "macrovalue/macrovalue.x"
-
 /*  native-scalar-types.x -- exact C scalar ledger
 
     These are the native C scalar spellings the compiler can carry through a
@@ -9,7 +5,7 @@
     `native_scalar_access` returns each row's native size, alignment, load,
     and store for compile-time code that keeps C objects in bytes and for
     the compiler's layouts.  Var's i48/u48 numeric payload families are
-    deliberately absent: neither is an exact C type.
+    absent: neither is an exact C type.
 
     `native_scalar_types` is the one table. Each key is Type.scalar's
     canonical spelling, and each value is:
@@ -22,11 +18,17 @@
     expansion.
 */
 
+#pragma once
+#include "common.x"
+#include "macrovalue/macrovalue.x"
+
 /* Reads one exact C scalar from `bytes`; a wide result is boxed in
    `owner`. */
 typedef Var (*NativeScalarLoad)(const void *bytes, Scope *owner);
+
 /* Writes `value`, converted to one exact C scalar type, to `bytes`. */
 typedef void (*NativeScalarStore)(void *bytes, Var value);
+
 /* Describes one exact C scalar type in native bytes: its Var tag, size,
    alignment, load, and store. Compile-time code that keeps C objects in
    bytes, and the compiler's layouts, select a row with
@@ -66,8 +68,7 @@ meta List _scalar_access_record(Type type) {
   return x2c_ident(name);
 }
 
-meta Symbol _scalar_tag(Type type) =>
-  native_scalar_types()[type].list().car();
+meta Symbol _scalar_tag(Type type) => native_scalar_types()[type].list().car();
 
 /* `type` as the List expression of its words, as the parser builds
    `%(unsigned long)`. A quotation hole does not reach inside `%(...)`. */
