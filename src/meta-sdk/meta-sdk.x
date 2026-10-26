@@ -20,7 +20,8 @@
     `has_bindings` whether it bound captured values. `evaluator` is the
     compiler running the call and `site` where the call stands. Each
     evaluation installs its part with `with`, so a captured entry is valid
-    only while its expansion is active. */
+    only while its expansion is active.
+*/
 typedef struct MetaContext {
   Compiler expander, evaluator;
   String definition_file;
