@@ -22,7 +22,7 @@ The compiler surface a `meta` function calls.
 Returns the suffix of `type` that begins at its typedef name or base
 keyword, sharing `type`, or `NULL` when it has none.
 
-Source: `lib/meta.x:413`
+Source: `lib/meta.x:460`
 
 #### type_declaration_parts
 
@@ -32,7 +32,7 @@ Returns `(base modifiers)` for reconstructing a declaration of `type`.
 Function modifiers hold parameter syntax, and modifier order retains C
 declarator precedence.
 
-Source: `lib/meta.x:443`
+Source: `lib/meta.x:492`
 
 #### type_name_error
 
@@ -43,7 +43,7 @@ other than a C type keyword, as `%(String)` and `%(* Point)` do, or
 `NULL`. A type name is a String, as in `%("String")` and `%(* "Point")`;
 neither a short Symbol nor a long Atom supplies that representation.
 
-Source: `lib/meta.x:426`
+Source: `lib/meta.x:474`
 
 ## Public types
 
@@ -62,7 +62,7 @@ Source: `lib/meta.x:426`
 
 Captured code parsed from source or produced by a quotation.
 
-Source: `lib/meta.x:42`
+Source: `lib/meta.x:43`
 
 <a id="Macro"></a>
 ### Macro
@@ -72,7 +72,7 @@ Source: `lib/meta.x:42`
 A macro as a value: called to build code, or used in a Match `case` to
 recognize code and capture its parameters.
 
-Source: `lib/meta.x:36`
+Source: `lib/meta.x:37`
 
 <a id="Source"></a>
 ### Source
@@ -83,7 +83,7 @@ A `meta` parameter declared `Source` receives, at a `$` call, captured
 syntax with the source text it came from: `((text T) (file F) (syntax
 S))`. `Code.source_text` and `x2c_embed_text` read it directly.
 
-Source: `lib/meta.x:54`
+Source: `lib/meta.x:57`
 
 <a id="Type"></a>
 ### Type
@@ -92,7 +92,7 @@ Source: `lib/meta.x:54`
 
 Semantic type syntax with canonical List-pool lifetime.
 
-Source: `lib/meta.x:39`
+Source: `lib/meta.x:40`
 
 <a id="TypeInfo"></a>
 ### TypeInfo
@@ -103,7 +103,7 @@ A `meta` parameter declared `TypeInfo` receives, at a `$` call, the
 description of its argument's type: `((name N) (kind K) (type T)
 (fields F) (methods M))`. Read a part with `List.assoc`.
 
-Source: `lib/meta.x:49`
+Source: `lib/meta.x:51`
 
 ## Design notes
 

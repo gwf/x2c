@@ -258,7 +258,7 @@ identity is unknown, since no compiler could replay that interface. A
 contribution that the interface grammar cannot spell is reported as an
 `emit` diagnostic.
 
-Source: `src/collect/interfaces.x:272`
+Source: `src/collect/interfaces.x:271`
 
 <a id="Compiler.is_prelude_source"></a>
 #### Compiler.is_prelude_source
@@ -301,7 +301,7 @@ the records hold this compiler's collection rather than a table linked
 into it; the unit's own entries for them are restored afterwards. A
 record the interface grammar cannot spell is left out.
 
-Source: `src/collect/interfaces.x:375`
+Source: `src/collect/interfaces.x:373`
 
 <a id="Compiler.loaded_call_type"></a>
 #### Compiler.loaded_call_type
@@ -377,7 +377,7 @@ Returns the path of the first prelude interface this compiler wrote, or
 NULL when there is none or the compiler's identity is unknown. Its
 source hashes are not checked.
 
-Source: `src/collect/interfaces.x:228`
+Source: `src/collect/interfaces.x:227`
 
 <a id="Compiler.prelude_missing_interfaces"></a>
 #### Compiler.prelude_missing_interfaces
@@ -390,7 +390,7 @@ NULL when every one is present or there is no prelude interface. A
 missing interface walks that unit cold in every process, so a converged
 stage build reports none.
 
-Source: `src/collect/interfaces.x:237`
+Source: `src/collect/interfaces.x:236`
 
 <a id="Compiler.prelude_sources"></a>
 #### Compiler.prelude_sources

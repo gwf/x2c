@@ -1278,7 +1278,7 @@ One allocation holds this header followed by aligned code, constant, and
 binder sections. The copied Var and Atom bits do not own their pointees.
 The program contains no execution state and never changes after freeze.
 
-Source: `lib/match/match.x:39`
+Source: `lib/match/match.x:40`
 
 <a id="MachineRegs"></a>
 ### MachineRegs

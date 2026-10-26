@@ -379,7 +379,7 @@ Resolves a stored macro invocation marker to its source token.
 Nested template markers use the active expansion's invocation; unresolved
 markers return NULL.
 
-Source: `src/macros/expansion.x:235`
+Source: `src/macros/expansion.x:238`
 
 <a id="Compiler.macro_pattern_at"></a>
 #### Compiler.macro_pattern_at
