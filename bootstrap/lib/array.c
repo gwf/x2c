@@ -875,6 +875,7 @@ static int _x2c_gensym_macro__next_0(Iter _x2c_gensym_macro_iter_0, Var * _x2c_g
 
 Iter Array_iter(Array _x2c_gensym_macro_array_39, Iter _x2c_gensym_macro_dest_0){
   if(_x2c_gensym_macro_dest_0 == NULL) return NULL;
+  if(_x2c_gensym_macro_array_39 == NULL) return Iter_init(_x2c_gensym_macro_dest_0, ((void) 0, Void), NULL, int_var(0));
   return Iter_init(_x2c_gensym_macro_dest_0, Array_var(_x2c_gensym_macro_array_39), _x2c_gensym_macro__next_0, int_var(0));
 }
 

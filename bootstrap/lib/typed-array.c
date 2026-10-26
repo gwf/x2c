@@ -2250,6 +2250,7 @@ Iter Iter_init(Iter, Var, IterNextFn, Var);
 Iter ArrayChar_iter(ArrayChar _x2c_gensym_macro_array_48, Iter _x2c_gensym_macro_dest_0){
   if(! _init_guard_) _file_init_();
   if(_x2c_gensym_macro_dest_0 == NULL) return NULL;
+  if(_x2c_gensym_macro_array_48 == NULL) return Iter_init(_x2c_gensym_macro_dest_0, ((void) 0, Void), NULL, int_var(0));
   return Iter_init(_x2c_gensym_macro_dest_0, ArrayChar_var(_x2c_gensym_macro_array_48), _x2c_gensym_macro__next_0, int_var(0));
 }
 
@@ -2860,6 +2861,7 @@ static int _x2c_gensym_macro__next_1(Iter _x2c_gensym_macro_iter_1, Var * _x2c_g
 Iter ArrayShort_iter(ArrayShort _x2c_gensym_macro_array_97, Iter _x2c_gensym_macro_dest_1){
   if(! _init_guard_) _file_init_();
   if(_x2c_gensym_macro_dest_1 == NULL) return NULL;
+  if(_x2c_gensym_macro_array_97 == NULL) return Iter_init(_x2c_gensym_macro_dest_1, ((void) 0, Void), NULL, int_var(0));
   return Iter_init(_x2c_gensym_macro_dest_1, ArrayShort_var(_x2c_gensym_macro_array_97), _x2c_gensym_macro__next_1, int_var(0));
 }
 
@@ -3468,6 +3470,7 @@ static int _x2c_gensym_macro__next_2(Iter _x2c_gensym_macro_iter_2, Var * _x2c_g
 Iter ArrayInt_iter(ArrayInt _x2c_gensym_macro_array_146, Iter _x2c_gensym_macro_dest_2){
   if(! _init_guard_) _file_init_();
   if(_x2c_gensym_macro_dest_2 == NULL) return NULL;
+  if(_x2c_gensym_macro_array_146 == NULL) return Iter_init(_x2c_gensym_macro_dest_2, ((void) 0, Void), NULL, int_var(0));
   return Iter_init(_x2c_gensym_macro_dest_2, ArrayInt_var(_x2c_gensym_macro_array_146), _x2c_gensym_macro__next_2, int_var(0));
 }
 
@@ -4078,6 +4081,7 @@ static int _x2c_gensym_macro__next_3(Iter _x2c_gensym_macro_iter_3, Var * _x2c_g
 Iter ArrayLong_iter(ArrayLong _x2c_gensym_macro_array_195, Iter _x2c_gensym_macro_dest_3){
   if(! _init_guard_) _file_init_();
   if(_x2c_gensym_macro_dest_3 == NULL) return NULL;
+  if(_x2c_gensym_macro_array_195 == NULL) return Iter_init(_x2c_gensym_macro_dest_3, ((void) 0, Void), NULL, int_var(0));
   return Iter_init(_x2c_gensym_macro_dest_3, ArrayLong_var(_x2c_gensym_macro_array_195), _x2c_gensym_macro__next_3, int_var(0));
 }
 
@@ -4686,6 +4690,7 @@ static int _x2c_gensym_macro__next_4(Iter _x2c_gensym_macro_iter_4, Var * _x2c_g
 Iter ArrayFloat_iter(ArrayFloat _x2c_gensym_macro_array_244, Iter _x2c_gensym_macro_dest_4){
   if(! _init_guard_) _file_init_();
   if(_x2c_gensym_macro_dest_4 == NULL) return NULL;
+  if(_x2c_gensym_macro_array_244 == NULL) return Iter_init(_x2c_gensym_macro_dest_4, ((void) 0, Void), NULL, int_var(0));
   return Iter_init(_x2c_gensym_macro_dest_4, ArrayFloat_var(_x2c_gensym_macro_array_244), _x2c_gensym_macro__next_4, int_var(0));
 }
 
@@ -5294,6 +5299,7 @@ static int _x2c_gensym_macro__next_5(Iter _x2c_gensym_macro_iter_5, Var * _x2c_g
 Iter ArrayDbl_iter(ArrayDbl _x2c_gensym_macro_array_293, Iter _x2c_gensym_macro_dest_5){
   if(! _init_guard_) _file_init_();
   if(_x2c_gensym_macro_dest_5 == NULL) return NULL;
+  if(_x2c_gensym_macro_array_293 == NULL) return Iter_init(_x2c_gensym_macro_dest_5, ((void) 0, Void), NULL, int_var(0));
   return Iter_init(_x2c_gensym_macro_dest_5, ArrayDbl_var(_x2c_gensym_macro_array_293), _x2c_gensym_macro__next_5, int_var(0));
 }
 
@@ -5904,6 +5910,7 @@ static int _x2c_gensym_macro__next_6(Iter _x2c_gensym_macro_iter_6, Var * _x2c_g
 Iter ArrayString_iter(ArrayString _x2c_gensym_macro_array_342, Iter _x2c_gensym_macro_dest_6){
   if(! _init_guard_) _file_init_();
   if(_x2c_gensym_macro_dest_6 == NULL) return NULL;
+  if(_x2c_gensym_macro_array_342 == NULL) return Iter_init(_x2c_gensym_macro_dest_6, ((void) 0, Void), NULL, int_var(0));
   return Iter_init(_x2c_gensym_macro_dest_6, ArrayString_var(_x2c_gensym_macro_array_342), _x2c_gensym_macro__next_6, int_var(0));
 }
 
