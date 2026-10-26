@@ -62,21 +62,19 @@ static void _prepare_shadow(
 static void _produce_defaults(Defaults &d, Map declarations) {
   Array ordered = [];
   foreach (Var (key, value) in declarations)
-    match (key)
-      case %("source-node" (declaration ? ?position)):
-        ordered.push($(position, key, value));
+    if (key ~= %("source-node" (declaration ? ?position)))
+      ordered.push($(position, key, value));
   ordered.sort();
   foreach (List entry in ordered) {
     (Var position, Var key, Var value) = entry;
     (void) position;
-    match (value)
-      case %(declaration-source ?end (declaration-bundle (rows *rows))
-               ?facts): {
-        _restore_declaration_bindings(d.c, rows, facts, {});
-        Array produced = [];
-        _produce_rows(d.c, rows, produced);
-        d.sources.push($(declarations, key, end, produced.list_free()));
-      }
+    if (value ~= %(declaration-source ?end (declaration-bundle (rows *rows))
+               ?facts)) {
+      _restore_declaration_bindings(d.c, rows, facts, {});
+      Array produced = [];
+      _produce_rows(d.c, rows, produced);
+      d.sources.push($(declarations, key, end, produced.list_free()));
+    }
   }
 }
 
@@ -84,14 +82,13 @@ static void _produce_defaults(Defaults &d, Map declarations) {
    construction, and the rows it generates are produced in turn. */
 static void _produce_rows(Compiler c, List rows, Array selected) {
   foreach (List row in rows) {
-    match (row)
-      case %(declaration-pending ?callback ?arguments
-               ?construction ?privacy): {
-        with (c.macro_stack = construction, c.source_private = privacy) {
-          _produce_rows(c, _generated_rows(c, callback, arguments), selected);
-        }
-        continue;
+    if (row ~= %(declaration-pending ?callback ?arguments
+               ?construction ?privacy)) {
+      with (c.macro_stack = construction, c.source_private = privacy) {
+        _produce_rows(c, _generated_rows(c, callback, arguments), selected);
       }
+      continue;
+    }
     selected.push(row);
   }
 }
@@ -115,8 +112,7 @@ static void _select(Defaults &d) {
     (Map declarations, Var key, Var end, List rows) = d.sources[index];
     List selected = _select_rows(d, rows);
     foreach (List row in selected)
-      match (row)
-        case %(declaration-forward ?child *): d.pending[child] = 1;
+      if (row ~= %(declaration-forward ?child *)) d.pending[child] = 1;
     d.sources[index] = $(declarations, key, end, selected);
   }
 }
@@ -125,14 +121,13 @@ static List _select_rows(Defaults &d, List rows) {
   Compiler c = d.c;
   Array selected = [];
   foreach (List row in rows) {
-    match (row)
-      case %(declaration-default ?function ?construction ?privacy): {
-        with (c.macro_stack = construction, c.source_private = privacy) {
-          Var syntax = _unless_taken(d, function);
-          if (syntax is not void) selected.push(_bind_default(c, syntax));
-        }
-        continue;
+    if (row ~= %(declaration-default ?function ?construction ?privacy)) {
+      with (c.macro_stack = construction, c.source_private = privacy) {
+        Var syntax = _unless_taken(d, function);
+        if (syntax is not void) selected.push(_bind_default(c, syntax));
       }
+      continue;
+    }
     selected.push(row);
   }
   return selected.list_free();
@@ -141,17 +136,16 @@ static List _select_rows(Defaults &d, List rows) {
 /* Returns the function to bind for a default, named through its macro
    slot, or void when a declaration already takes its name. */
 static Var _unless_taken(Defaults &d, List syntax) {
-  match (syntax)
-    case %(function ?return_type (bind ?name ?modifiers) ?body): {
-      name = d.c.evaluate_macro_slot(name);
-      String spelling = Ast.binding_spelling(name);
-      match (name) {
-        case %(?(String literal)): spelling = literal;
-        case %("x2c.ident" ?(String literal)): spelling = literal;
-      }
-      if (spelling && _taken(d, spelling)) return void;
-      return %(function $return_type (bind $name $modifiers) $body);
+  if (syntax ~= %(function ?return_type (bind ?name ?modifiers) ?body)) {
+    name = d.c.evaluate_macro_slot(name);
+    String spelling = Ast.binding_spelling(name);
+    match (name) {
+      case %(?(String literal)): spelling = literal;
+      case %("x2c.ident" ?(String literal)): spelling = literal;
     }
+    if (spelling && _taken(d, spelling)) return void;
+    return %(function $return_type (bind $name $modifiers) $body);
+  }
   return syntax;
 }
 
@@ -173,10 +167,9 @@ static int _taken(Defaults &d, String spelling) {
 
 static List _bind_default(Compiler c, List syntax) {
   if (c.source_private)
-    match (syntax)
-      case %(function ?type ?declarator ?body):
-        if (!type.type().is_static())
-          syntax = %(function (static @type) $declarator $body);
+    if (syntax ~= %(function ?type ?declarator ?body))
+      if (!type.type().is_static())
+        syntax = %(function (static @type) $declarator $body);
   return c.bind_syntax(syntax, <unit>, NULL);
 }
 
@@ -200,22 +193,22 @@ static void _forward(Defaults &d) {
 static List _forward_rows(Defaults &d, List rows, int &remaining) {
   Array selected = [];
   foreach (List row in rows) {
-    match (row)
-      case %(declaration-forward ?child ?parent ?member ?fallback ?privacy): {
-        List bound = NULL;
-        with (d.c.source_private = privacy) {
-          bound = _forwarded(d, child, parent, member, fallback);
-        }
-        if (!bound) {
-          remaining++;
-          selected.push(row);
-        }
-        else {
-          d.pending.del(child);
-          if (bound.car() != <seq>) selected.push(bound);
-        }
-        continue;
+    if (row ~=
+        %(declaration-forward ?child ?parent ?member ?fallback ?privacy)) {
+      List bound = NULL;
+      with (d.c.source_private = privacy) {
+        bound = _forwarded(d, child, parent, member, fallback);
       }
+      if (!bound) {
+        remaining++;
+        selected.push(row);
+      }
+      else {
+        d.pending.del(child);
+        if (bound.car() != <seq>) selected.push(bound);
+      }
+      continue;
+    }
     selected.push(row);
   }
   return selected.list_free();
@@ -236,11 +229,10 @@ static List _forwarded(
     return fallback ? _bind_default(c, fallback.car()) : NULL;
   }
   List binding = NULL, Type signature = NULL;
-  match (method)
-    case %(method ?target ?type): {
-      binding = target;
-      signature = type;
-    }
+  if (method ~= %(method ?target ?type)) {
+    binding = target;
+    signature = type;
+  }
   if (!signature) return NULL;
   return _bind_default(c, _forwarder(c, name, child, binding, signature));
 }
@@ -250,7 +242,7 @@ static List _forwarded(
 static List _forwarder(
   Compiler c, String name, Type child, List binding, Type signature) {
   List types = NULL;
-  match (signature) case %((func ?parameters) *): types = parameters;
+  if (signature ~= %((func ?parameters) *)) types = parameters;
   Array forwarded = [];
   foreach (Var type in types) {
     if (type == <...>)
