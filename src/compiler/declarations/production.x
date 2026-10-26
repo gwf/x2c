@@ -1,4 +1,4 @@
-/* declaration production
+/*  production.x -- declaration production
 
    A declaration producer's source effects wait until production needs
    their state. Collection retains the bundle a producer returns with its
@@ -74,7 +74,8 @@ static int _retain_bundle(
 }
 
 /** Binds a retained declaration production at the cursor, then advances
-    past its source. Returns NULL when collection retained no production. */
+    past its source. Returns NULL when collection retained no production.
+*/
 List Compiler.replay_declaration_source(Compiler c) {
   List source = c.sym.get(_declaration_source_key(c, c.token));
   match (source)
