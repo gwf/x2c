@@ -585,8 +585,10 @@ Find the entry point, then inspect its saved definition:
 {"op":"inspect","select":{"id":"ID_FROM_FIND"},"view":"source"}
 ```
 
-`view` also accepts `summary`, `declaration`, and `typed_ast`. The typed AST
-retains the canonical List forms, with portable source-origin wrappers.
+`view` also accepts `summary`, `declaration`, and `typed_ast`. `declaration`
+returns canonical declaration syntax, including its type and bindings.
+`typed_ast` returns the full bound subtree in the `ast` result field, with
+portable source-origin wrappers. Use `source` for the original source text.
 
 Find callers, transitive callees, and a source-evidenced path:
 
