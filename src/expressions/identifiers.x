@@ -62,11 +62,11 @@ static List _capture_lambda_value(
   result = c.capture_lambda_identifier(binding, type);
   if (result ~= %(expr ?captured_type $($source_identifier_content(
       %(?captured))))) {
-      if (type.car() != <&> && captured_type.car() == <&>)
-        read_reference = 1;
-      type = captured_type;
-      binding = captured;
-    }
+    if (type.car() != <&> && captured_type.car() == <&>)
+      read_reference = 1;
+    type = captured_type;
+    binding = captured;
+  }
   return result;
 }
 
