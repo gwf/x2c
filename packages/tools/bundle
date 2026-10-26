@@ -82,8 +82,8 @@ if (options["manifest"]) {
     fail("dependency manifest has no distribution data");
   distribution = found;
 }
-Path legacy = package.join(%"builds/$name.link");
-if (!options["manifest"] && legacy.read_text().strip(" \n"))
+Path native_response = package.join(%"builds/$name.native.rsp");
+if (!options["manifest"] && native_response.read_text().strip(" \t\r\n"))
   fail("native link inputs require distribution data");
 String prefix = options["prefix"].str();
 Map variables = {"prefix": prefix ? prefix : "", "package": package};
@@ -158,10 +158,12 @@ Map identity = {
   "x2c_sha256": x2c_sha256,
   "runtime_sha256": runtime_sha256,
   "archive_sha256": archive_sha256,
-  "dependency_version": manifest["version"],
-  "dependency_profile": manifest["profile"],
-  "dependency_toolchain": toolchain,
 };
+if (toolchain) identity["dependency_toolchain"] = toolchain;
+foreach (String field, %("version" "profile")) {
+  Var value;
+  if (manifest.try_get(field, value)) identity[%"dependency_$field"] = value;
+}
 stage.join("BUNDLE.json").write_text(Var.pretty_json(identity) + "\n");
 
 Path tarball = work.join(%"$name-native.tar.gz");

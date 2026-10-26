@@ -110,8 +110,9 @@ List List.map2(List a, List b, Func fn) {
     `lst` is unchanged. There is no comparator parameter. `Var.compare` orders
     the element tags involved, so a mixed-kind `List` still sorts. A `List` of
     fewer than two cells is returned as it stands.
-    Raises: whatever element comparison raises, or `<alloc-fail>` while
-    constructing the result.
+    Comparisons follow `Array.sort`'s libc `qsort` contract, including its
+    exception for nonlocal exits. Raises: `<alloc-fail>` while constructing
+    the result.
 */
 Self List.sort(Self lst) {
   if (!lst || !lst.cdr()) return lst;
@@ -134,7 +135,8 @@ Self List.sort_with(Self lst, Func compare) {
 /** Returns a stable sorted copy using `Array.sort_by`'s callback contract.
     The key runs once per element in input order; an empty List invokes none.
     The input List is unchanged. Raises: allocation and the key's ordinary
-    causes, including failure to compare the resulting keys.
+    causes during key extraction. Key comparisons follow `Array.sort_by`'s
+    libc `qsort` exception for nonlocal exits.
 */
 Self List.sort_by(Self lst, Func key) {
   if (!lst) return lst;
