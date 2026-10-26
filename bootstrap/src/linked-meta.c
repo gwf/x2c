@@ -16598,7 +16598,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_26(void
   _13806 = List_var(_13805);
   _13807 = String_new("src/compiler/patterns.x");
   _13808 = String_var(_13807);
-  _13809 = String_new("1d7a6177");
+  _13809 = String_new("c6e957c7");
   _13810 = String_var(_13809);
   _13811 = cons(_13810, NULL);
   _13812 = cons(_13808, _13811);
@@ -16915,7 +16915,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_27(void
   _14120 = cons(_223, _14119);
   _14121 = String_new("src/components/pattern-match.x");
   _14122 = String_var(_14121);
-  _14123 = String_new("98c4057b");
+  _14123 = String_new("17cac0d8");
   _14124 = String_var(_14123);
   _14125 = String_new("3f3f3c46");
   _14126 = String_var(_14125);
@@ -17649,7 +17649,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_29(void
   _14848 = List_var(_14847);
   _14849 = String_new("src/operator-ledger.x");
   _14850 = String_var(_14849);
-  _14851 = String_new("09f2890c");
+  _14851 = String_new("a354a78f");
   _14852 = String_var(_14851);
   _14853 = cons(_14852, NULL);
   _14854 = cons(_14850, _14853);
@@ -18135,7 +18135,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_29(void
   _15334 = List_var(_15333);
   _15335 = String_new("src/statements.x");
   _15336 = String_var(_15335);
-  _15337 = String_new("b392c237");
+  _15337 = String_new("f2db1219");
   _15338 = String_var(_15337);
   _15339 = cons(_15338, NULL);
   _15340 = cons(_15336, _15339);
@@ -18800,7 +18800,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_31(void
   _15993 = List_var(_15992);
   _15994 = String_new("src/parse/binding.x");
   _15995 = String_var(_15994);
-  _15996 = String_new("26f4d53c");
+  _15996 = String_new("4ae634ed");
   _15997 = String_var(_15996);
   _15998 = cons(_15997, NULL);
   _15999 = cons(_15995, _15998);
