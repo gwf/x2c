@@ -258,7 +258,7 @@ int Compiler.take_code_value(
   Compiler c, Var input, Var &value, int &retained) {
   match (input) case %(code-value ?(String stage) ?code ?effects): {
     Map replacements = _code_effects(c, effects);
-    value = replacements.len() ? _replace_bindings(code, replacements) : code;
+    value = replacements ? _replace_bindings(code, replacements) : code;
     retained = stage != "source";
     if (stage != "lowered") {
       Var binder = _carrier_binder(value);
