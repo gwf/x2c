@@ -103,7 +103,7 @@ static void _sx_declaration_source(
     entity["offset"] = begin;
     entity["origin"] = "source";
     if (text) {
-      entity["declaration"] =
+      entity["source_spelling"] =
         String.new_len(text + begin.int(), end.int() - begin.int());
       int line = 1, column = 1;
       for (int i = 0; i < begin.int(); i++) {
@@ -144,6 +144,7 @@ static void _sx_types(SnapshotExtract &s, Map entity, Type type) {
   String declared = _sx_ast(s, plain);
   String resolved = _sx_ast(s, s.c.sym.normalize_declared_type(plain));
   entity["declared_type"] = declared;
+  entity["declaration"] = _sx_ast(s, plain.declaration_ast(NULL));
   entity["resolved_type"] = resolved;
   s.types[%"$(s.domain)::$(s.unit)::$declared"] = resolved;
 }
@@ -222,6 +223,7 @@ static Map _sx_binding(
   entity["origin"] = project_origin(s.c, binding).str();
   _sx_types(s, entity, type);
   _sx_span(s, entity, binding, binding);
+  entity["declaration"] = _sx_ast(s, type.declaration_ast(binding));
   s.bindings[binding] = id;
   _sx_edge(s, owner, id, "contains", 0);
   return entity;
@@ -239,6 +241,7 @@ static void _sx_fields(SnapshotExtract &s, Type aggregate, String owner) {
     List binding = s.c.sym.lookup(%(@aggregate $name), NULL);
     _sx_declaration_source(s, field, _sx_declaration(s, binding));
     _sx_types(s, field, type);
+    field["declaration"] = _sx_ast(s, type.declaration_ast(binding));
     _sx_edge(s, owner, id, "contains", 0);
     Type resolved = s.c.sym.normalize_declared_type(type);
     String kind = resolved.is_pointer() || resolved.is_reference()
@@ -275,6 +278,7 @@ static void _sx_declarations(
       Map entity = _sx_binding(s, binding, type, "function", owner);
       entity["definition"] = 1;
       entity["ast"] = _sx_ast(s, node);
+      entity["declaration"] = _sx_ast(s, %(declare $base (bindings $target)));
       _sx_span(s, entity, binding, binding);
       _sx_declarations(s, body, entity["id"], 0);
       return;
@@ -297,6 +301,7 @@ static void _sx_declarations(
             entity["owner"] = owner;
             entity["ast"] = _sx_ast(s, node);
             _sx_types(s, entity, type);
+            entity["declaration"] = _sx_ast(s, node);
             _sx_span(s, entity, node, binding);
             s.bindings[binding] = id;
             _sx_type_edge(s, id, type, "aliases", 0);
@@ -515,12 +520,12 @@ void graph_snapshot_resolve(Map snapshot) {
   foreach (String id, by_id.keys()) ids.push(id);
   foreach (String id, ids.sort()) unique.push(by_id[id]);
   snapshot["entities"] = unique;
-  foreach (Map edge, edges) {
-    String kind = edge["kind"];
-    if (kind != "calls" && kind != "references") continue;
-    Map prior = by_id[edge["to"]];
-    if (!prior || prior["definition"].int()) continue;
-    String domain = edge["domain"], name = prior["emitted_name"];
+  foreach (Map prior, unique) {
+    if (prior["definition"].int() || prior["visibility"] != "public")
+      continue;
+    if (prior["kind"] != "function" && prior["kind"] != "global")
+      continue;
+    String domain = prior["domain"], name = prior["emitted_name"];
     Array domains = [domain], dependencies = links.getdefault(domain, NULL);
     if (dependencies) foreach (Var dependency, dependencies)
       if (!domains.list().contains(dependency)) domains.push(dependency);
@@ -533,14 +538,24 @@ void graph_snapshot_resolve(Map snapshot) {
         count++;
       }
     }
-    if (count == 1) {
-      edge["to"] = found["id"];
+    if (count == 1) prior["canonical"] = found["id"];
+    else prior["resolution"] = count ? "ambiguous" : "external";
+  }
+  foreach (Map edge, edges) {
+    String kind = edge["kind"];
+    if (kind != "calls" && kind != "references" && kind != "implements")
+      continue;
+    Map prior = by_id[edge["to"]];
+    if (!prior || prior["definition"].int()) continue;
+    String canonical = prior.getdefault("canonical", NULL);
+    if (canonical) {
+      edge["to"] = canonical;
       edge["resolved"] = 1;
     }
     else {
       edge["resolved"] = 0;
-      edge["target_name"] = name;
-      edge["reason"] = count ? "ambiguous" : "external";
+      edge["target_name"] = prior["emitted_name"];
+      edge["reason"] = prior.getdefault("resolution", "external");
     }
   }
 }
