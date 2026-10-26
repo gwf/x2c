@@ -79,8 +79,7 @@ static int _protocol_bootstrap(String name) =>
 
 // initializers
 
-static macro Decorator $initializer_body(Function $function,
-    Stmt @body) {
+static macro Decorator $initializer_body(Function $function, Stmt @body) {
   @body
 }
 
@@ -136,16 +135,14 @@ static List _guarded(Init &i, List function, List body) {
   return i.c.rebuild_function(function, shape(condition, callee, body));
 }
 
-module List _replace_body(
-  Compiler c, List function, List statements) {
+module List _replace_body(Compiler c, List function, List statements) {
   Macro shape = $initializer_body;
   return c.rebuild_function(function, shape(statements));
 }
 
 /* Install generated built-in protocol methods before any ordinary file
    constructor can create a String- or List-backed cache. */
-static List _protocol_initializer(
-  Compiler c, List function, List body) {
+static List _protocol_initializer(Compiler c, List function, List body) {
   List guard = c.sym.introduce("_x2c_gensym_protocol_guard_");
   List declaration = c.initialization_guard(guard);
   List queued = c.init_statements(<protocol>).append(body);
