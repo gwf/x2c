@@ -186,7 +186,8 @@ String x2c_get_executable(void) => executable_path;
 
 /** Returns the matching compiler executable for a recursive translation.
     External commands use the driver's X2C path or their adjacent installed
-    compiler. An unavailable or changed compiler returns NULL. */
+    compiler. An unavailable or changed compiler returns NULL.
+*/
 String Compiler.driver_executable(void) {
   if (!external_command) return executable_path;
   String path = Env.get("X2C");
@@ -217,7 +218,8 @@ String Compiler.stage_dir(void) {
 
 /** Returns the checked-in bootstrap's runtime directory when this process
     is the bootstrap compiler, or NULL. Its headers and archive match the
-    runtime the bootstrap compiler was built with. */
+    runtime the bootstrap compiler was built with.
+*/
 String Compiler.bootstrap_runtime_dir(void) {
   String executable = x2c_get_executable();
   if (!executable || !root_path) return NULL;
