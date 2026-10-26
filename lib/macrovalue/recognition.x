@@ -56,7 +56,7 @@ int Macro_case_root(
       _pending_parts(t, code, grouped))
     return _pending_capture(t, grouped, names, published);
   if (!Macro_case_enter(code, cursor)) return 0;
-  if (statement) match (*cursor) case %(seq ?only):
+  if (statement && *cursor ~= %(seq ?only))
     return Macro_case_enter(only, cursor) ? 2 : 0;
   return 2;
 }
@@ -156,8 +156,8 @@ static List _invoke_values(Macro t, List rows) {
     holes = holes.cdr();
     Var value = hole.assoc(<kind>) == <expr>
       ? row.assoc(<expression>) : row.assoc(<value>);
-    if (hole.assoc(<sequence>).int())
-      match (row) case %(capture ? (value *items) *): value = items;
+    if (hole.assoc(<sequence>).int() &&
+        row ~= %(capture ? (value *items) *)) value = items;
     projected.push(value);
   }
   return projected.list_free();
@@ -371,10 +371,9 @@ static int _has_slot(const int *slots, int count, int slot) {
 static String _source_spelling(Var value) {
   if (value is not <list>) return NULL;
   foreach (List row in macro_subject is <list> ? macro_subject.list() : NULL)
-    match (row)
-      case %(source-spelling ?binding ?(String spelling)):
-        if (List.compare(binding, value) == 0) return spelling;
-  match (value) case %(binding ? ?(String spelling)): return spelling;
+    if (row ~= %(source-spelling ?binding ?(String spelling)) &&
+        List.compare(binding, value) == 0) return spelling;
+  if (value ~= %(binding ? ?(String spelling))) return spelling;
   return NULL;
 }
 
@@ -401,8 +400,8 @@ static Var _unwrap(Var value) {
       case %(at ? ?body): value = body;
       case %(src ? ?body): value = body;
       case %(expr (<macro-expr>) ?inner): {
-        // A nested match keeps both tests in place on this hot path.
-        match (inner) case %(expr *): {
+        // Both expression tests stay in place on this hot path.
+        if (inner ~= %(expr *)) {
           value = inner;
           continue;
         }
