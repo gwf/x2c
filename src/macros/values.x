@@ -180,8 +180,8 @@ static List _macro_subpattern(Macro shape, List patterns, int content) {
   }
   List pattern = _substitute_binders(
     shape.pattern(names.list_free()), replacements);
-  match (pattern)
-    case %(expr ? ?body): return content ? body : %(!or $pattern $body);
+  if (pattern ~= %(expr ? ?body))
+    return content ? body : %(!or $pattern $body);
   return pattern;
 }
 
@@ -256,7 +256,7 @@ static List _captured_pair(Compiler c, List binding, Type type) {
 */
 int Compiler.take_code_value(
   Compiler c, Var input, Var &value, int &retained) {
-  match (input) case %(code-value ?(String stage) ?code ?effects): {
+  if (input ~= %(code-value ?(String stage) ?code ?effects)) {
     Map replacements = _code_effects(c, effects);
     value = replacements.len() ? _replace_bindings(code, replacements) : code;
     retained = stage != "source";
