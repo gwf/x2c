@@ -256,7 +256,8 @@ static List _definition_local(Compiler c, String spelling, int tag) {
 }
 
 /** Returns the current declaration's definition-local identity. An active
-    macro-definition locals map is required. */
+    macro-definition locals map is required.
+*/
 List Compiler.macro_introduced_name(Compiler c, String spelling) {
   Map locals = c.macro_definition_locals();
   List current = c.sym.current_binding($(spelling));
