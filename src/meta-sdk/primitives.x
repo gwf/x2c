@@ -53,7 +53,8 @@ static Map _linked_prelude(void) {
 }
 
 /** Returns `values`, such as a signature, as a cached literal
-    of the expanding unit. */
+    of the expanding unit.
+*/
 List MetaContext.literal_list(List values) =>
   active.expander.cache_literal_list(values);
 
@@ -98,7 +99,8 @@ static List _declared_targets(List paths) {
 }
 
 /** Adds the SDK primitives the compiler's shipped sources call through
-    `lib/compiler-meta.x` to the built-in targets `rows`. */
+    `lib/compiler-meta.x` to the built-in targets `rows`.
+*/
 void Compiler.add_sdk_targets(Map rows) {
   rows["_x2c_literal_list"] = (Func) MetaContext.literal_list;
   rows["_x2c_native_rows"] = (Func) _native_rows;
