@@ -7,7 +7,8 @@ static macro Stmt $fail.callable_shared(Expr $c, Expr $source) =>
 
 static macro Stmt $fail.callable_context(Expr $c, Expr $source) =>
   _adapter_error(
-    $c, "function pointer conversion needs Func.new_context from lib/func/func.x",
+    $c,
+    "function pointer conversion needs Func.new_context from lib/func/func.x",
     %("Func"), $source, NULL);
 
 static macro Stmt $fail.callable_native_context(
@@ -64,8 +65,7 @@ static List _helper_body(Compiler c, List body) {
     case $source_block_content(%(*items)):
       return source_block_content($(@items, source_return_none()));
     case %(expr (void) ?):
-      return source_block_content(
-        %((stmnt $body) $(source_return_none())));
+      return source_block_content(%((stmnt $body) $(source_return_none())));
   }
   List result = c.convert_expression(body, %("Var"));
   return source_block_content(%((stmnt (return $result))));
@@ -160,8 +160,7 @@ static int _is_func_adapter_target(Compiler c, Type type) {
 module List _direct_func_adapter(
   Compiler c, Type diagnostic_type, List source_binding, Type source_type) {
   Type key_type = source_type.canonicalize();
-  List key = %(fadapt $source_binding $key_type);
-  List adapter = NULL;
+  List key = %(fadapt $source_binding $key_type), adapter = NULL;
   $adapter.memo(c, key, adapter) {
     List target = _func_bound(source_type, source_binding);
     adapter = _build_func_adapter(
@@ -184,8 +183,7 @@ module List _build_func_adapter(
     params = params.map(%!(Type parameter) =>
       parameter == %(....) ? %("List") : parameter);
     Type native_type = target.cadr();
-    List target_params = NULL;
-    Type target_result = NULL;
+    List target_params = NULL, Type target_result = NULL;
     native_type.function_parts(target_params, target_result);
     target_params = target_params.map(%!(Type parameter) =>
       parameter == %(....) ? %("List") : parameter);
@@ -265,7 +263,8 @@ static List _func_argument_locals(
 static List _func_reads(
   Compiler c, Type diagnostic_type, List types, List fn, List argv) {
   Type value_type = NULL, reference_type = NULL;
-  List value_helper = _adapter_helper(c, "x2c_func_value_argument", value_type);
+  List value_helper = _adapter_helper(
+    c, "x2c_func_value_argument", value_type);
   List reference_helper = _adapter_helper(
     c, "x2c_func_declared_reference_argument", reference_type);
   FuncReaders readers = {
@@ -274,8 +273,7 @@ static List _func_reads(
     .reference = _func_bound(reference_type, reference_helper),
     .fn = fn, .argv = argv
   };
-  Array reads = [];
-  int index = 0;
+  Array reads = [], int index = 0;
   foreach (Type type in types) {
     Type storage_type = NULL;
     List value = _read(readers, type, index++, storage_type);
@@ -330,7 +328,8 @@ static List _pointer(
   List pointer_helper = _adapter_helper(
     c, "x2c_func_pointer_argument", pointer_type);
   List picked = _call(
-    r, $!Type{ void * }, _func_bound(pointer_type, pointer_helper), index, NULL);
+    r, $!Type{ void * }, _func_bound(pointer_type, pointer_helper),
+    index, NULL);
   storage_type = parameter_type;
   if (resolved.is_pointer())
     return c.convert_expression(picked, parameter_type);
@@ -365,8 +364,7 @@ static void _publish_func_adapter(
   Compiler c, List binding, List fn_binding, List argv_binding,
   List body, List setup) {
   List fn_parameter = Type.parameter_ast(%("Func"), fn_binding);
-  List argv_parameter = Type.parameter_ast(
-    %(* const "FuncArg"), argv_binding);
+  List argv_parameter = Type.parameter_ast(%(* const "FuncArg"), argv_binding);
   c.add_early(
     c.wrapper_function(
       %(static "Var"), binding, $(fn_parameter, argv_parameter),
@@ -392,8 +390,7 @@ static List _func_record_call(Compiler c, Type return_type, List call) {
 
 /** Returns the canonical signature shared by native and meta Func adapters. */
 List Compiler.func_signature(Compiler c, Type type) {
-  List params = NULL;
-  Type result = NULL;
+  List params = NULL, Type result = NULL;
   type.function_parts(params, result);
   Array declared = [];
   foreach (List parameter in params)
