@@ -13,8 +13,8 @@ static typedef struct Surface {
   Array exports;
 } Surface;
 
-/** Collects a package once and installs its public surface in the current
-    unit.
+/** Collects a package once and installs its public surface in the
+    current unit.
     `name` resolves through the compiler's registered package roots. A cold
     entry include closure is parsed in package mode; cached entries replay
     their previously collected declarations. Public declarations and
