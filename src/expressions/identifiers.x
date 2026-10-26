@@ -1,8 +1,6 @@
 /*  identifiers.x -- binding identities and reference reads */
 
-
-module int _identifier_needs_resolution(
-  Compiler c, List binding) {
+module int _identifier_needs_resolution(Compiler c, List binding) {
   String spelling = Ast.binding_spelling(binding);
   Map facts = c.semantic_binding_facts();
   int retained_parameter = %(lambda-param $binding) in facts;
@@ -231,8 +229,7 @@ static Type _identifier_type(
    would otherwise report only an undefined symbol at link time. A macro body
    is the defining library's own syntax, bound wherever it expands, so only a
    reference written in an `.x` unit is reported. */
-static void _check_unit_static(
-  Compiler c, String spelling, Token origin) {
+static void _check_unit_static(Compiler c, String spelling, Token origin) {
   if (!Path.is_x2c_source(c.filename)) return;
   List owner = c.sym.get($("unit-static", spelling));
   if (!owner) return;
