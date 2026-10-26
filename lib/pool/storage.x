@@ -280,7 +280,7 @@ static inline unsigned _slot_index(PoolBlock block, void *alloc) =>
   ((char *) alloc - _data(block)) / pool_class_sizes[block.class_index];
 
 static int _contains(PoolBlock block, const void *ptr) {
-  if (!block || !ptr || !block.owner) return 0;
+  if (!block.owner) return 0;
   const char *data = _data(block), *candidate = ptr;
   unsigned size = pool_class_sizes[block.class_index];
   if (candidate < data || candidate >= data + block.used) return 0;
