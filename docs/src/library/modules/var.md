@@ -222,7 +222,7 @@ while boxing a wide result. A nonnumeric source is rejected before
 decoding, with the decoder's `<bad-types>` detail nested under
 `<no-convert>`.
 
-Source: `lib/var/conversion.x:122`
+Source: `lib/var/conversion.x:123`
 
 <a id="Var.div"></a>
 #### Var.div
@@ -559,7 +559,7 @@ Source: `lib/var/operators.x:554`
 Converts a decoded numeric value to native `float` without boxing.
 Uses the target host cast, preserving its rounding behavior.
 
-Source: `lib/var/conversion.x:326`
+Source: `lib/var/conversion.x:327`
 
 <a id="X2CVarNumeric.f64"></a>
 #### X2CVarNumeric.f64
@@ -569,7 +569,7 @@ Source: `lib/var/conversion.x:326`
 Converts a decoded numeric value to native `double` without boxing.
 Uses the target host cast, preserving its rounding behavior.
 
-Source: `lib/var/conversion.x:335`
+Source: `lib/var/conversion.x:336`
 
 <a id="X2CVarNumeric.ldouble"></a>
 #### X2CVarNumeric.ldouble
@@ -579,7 +579,7 @@ Source: `lib/var/conversion.x:335`
 Converts a decoded numeric value to native `long double` without boxing.
 Uses the target host cast, preserving its rounding behavior.
 
-Source: `lib/var/conversion.x:344`
+Source: `lib/var/conversion.x:345`
 
 ## Advanced and interop API
 
@@ -1123,7 +1123,7 @@ active `Scope`.
 **Raises:** `<bad-target>` for a noninteger target, or `<alloc-fail>` or
 `<bad-enc>` while boxing a wide result.
 
-Source: `lib/var/conversion.x:251`
+Source: `lib/var/conversion.x:252`
 
 <a id="Var.integer_compare"></a>
 #### Var.integer_compare
@@ -1170,7 +1170,7 @@ callers applying integer promotion must first select its resulting
 signedness. Ranks four through six select the 48-bit, `long`, and
 `long long` families. A rank above six returns the null `Symbol`.
 
-Source: `lib/var/conversion.x:280`
+Source: `lib/var/conversion.x:281`
 
 <a id="Var.kind"></a>
 #### Var.kind
@@ -1275,7 +1275,7 @@ use the members described by `X2CVarNumeric`.
 `<void-op>` for `void`, or `<bad-types>` for a nonnumeric tag. These
 failures leave `out` unchanged.
 
-Source: `lib/var/conversion.x:168`
+Source: `lib/var/conversion.x:169`
 
 <a id="Var.numeric_info"></a>
 #### Var.numeric_info
@@ -1286,7 +1286,7 @@ Writes numeric-family metadata for `tag` and returns nonzero.
 The special `<nan>`, `<-inf>`, and `<+inf>` tags report the `<f64>` family.
 A null `out` or nonnumeric tag returns zero and leaves storage untouched.
 
-Source: `lib/var/conversion.x:152`
+Source: `lib/var/conversion.x:153`
 
 <a id="Var.parse"></a>
 #### Var.parse
@@ -1369,7 +1369,7 @@ Source: `lib/var/classes.x:207`
 Interprets the low `bits` of `raw` as a two's-complement signed value.
 `bits` must be between one and the width of `unsigned long long`.
 
-Source: `lib/var/conversion.x:299`
+Source: `lib/var/conversion.x:300`
 
 <a id="Var.string"></a>
 #### Var.string
@@ -1486,7 +1486,7 @@ Returns a mask containing the low `bits` bits.
 Zero yields zero and a width at least `unsigned long long` yields
 `ULLONG_MAX`; `bits` must not be negative.
 
-Source: `lib/var/conversion.x:292`
+Source: `lib/var/conversion.x:293`
 
 ## Runtime-internal callables
 

@@ -107,7 +107,7 @@ The call to the converter that `type`, or the first of its typedef names
 that declares one, provides for `target`, applied to `expr`, or NULL
 when none declares one.
 
-Source: `src/expressions/conversions.x:573`
+Source: `src/expressions/conversions.x:574`
 
 <a id="Compiler.func_call_parts"></a>
 #### Compiler.func_call_parts
@@ -131,7 +131,7 @@ Source: `src/expressions/calls.x:371`
 The global builtin boxers and scalar formatters only observe their
 arguments. A custom converter or a shadowed callee may change state.
 
-Source: `src/expressions/conversions.x:626`
+Source: `src/expressions/conversions.x:628`
 
 <a id="Compiler.needs_resolution"></a>
 #### Compiler.needs_resolution
@@ -161,7 +161,7 @@ Source: `src/expressions/syntax.x:38`
 Parses an explicit List splice argument, or returns NULL without consuming
 an ordinary argument. Parentheses delimit a complete splice expression.
 
-Source: `src/expressions/syntax.x:500`
+Source: `src/expressions/syntax.x:501`
 
 <a id="Compiler.parse_conditional"></a>
 #### Compiler.parse_conditional
@@ -221,7 +221,7 @@ Parses one primary expression or expression-valued macro slot.
 Dispatch starts at `c.token` to the selected literal, identifier,
 grouping, or macro parser and leaves the token after that primary form.
 
-Source: `src/expressions/syntax.x:617`
+Source: `src/expressions/syntax.x:618`
 
 <a id="Compiler.parse_variable"></a>
 #### Compiler.parse_variable
@@ -231,7 +231,7 @@ Source: `src/expressions/syntax.x:617`
 Parses and resolves one complex identifier expression.
 Parsing starts at `c.token` and leaves it after the identifier.
 
-Source: `src/expressions/syntax.x:689`
+Source: `src/expressions/syntax.x:690`
 
 <a id="Compiler.postfix_completions"></a>
 #### Compiler.postfix_completions
