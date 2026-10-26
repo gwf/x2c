@@ -164,9 +164,8 @@ static List _member_row(
 void Compiler.dump_conformance(Compiler c, Map globs) {
   Array names = [];
   foreach (Var (key, value) in globs)
-    match ($(key, value))
-      case %((?(String name)) (typedef *)):
-        names.push(name);
+    if ($(key, value) ~= %((?(String name)) (typedef *)))
+      names.push(name);
   names.sort();
   List protocols = _ordered_occurrences(c), rows = NULL;
   Type base = NULL;
@@ -187,22 +186,21 @@ static void _dump_row(
     "(%s %s %s %s", kind, owned ? "owned" : "visible",
     base.repr(), participant.repr());
   foreach (List row in rows)
-    match (row)
-      case %(?(String member) ?(Symbol status) ?(String source) ? ? ?): {
-        const char *name = NULL, *punctuation = "none";
-        switch (status) {
-          case <implmntd>: name = "implemented"; break;
-          case <base-dflt>: name = "base-default"; break;
-          case <sig-cnflct>: name = "sig-conflict"; break;
-          case <no-member>: name = "no-member"; break;
-          case <native>: name = "native"; break;
-        }
-        if (status == <implmntd> || status == <base-dflt> ||
-            status == <native>)
-          punctuation = "dot+punctuation";
-        printf(
-          " (%s %s %s %s)", member, name, source ? source : "-", punctuation);
+    if (row ~= %(?(String member) ?(Symbol status) ?(String source) ? ? ?)) {
+      const char *name = NULL, *punctuation = "none";
+      switch (status) {
+        case <implmntd>: name = "implemented"; break;
+        case <base-dflt>: name = "base-default"; break;
+        case <sig-cnflct>: name = "sig-conflict"; break;
+        case <no-member>: name = "no-member"; break;
+        case <native>: name = "native"; break;
       }
+      if (status == <implmntd> || status == <base-dflt> ||
+          status == <native>)
+        punctuation = "dot+punctuation";
+      printf(
+        " (%s %s %s %s)", member, name, source ? source : "-", punctuation);
+    }
   printf(")\n");
 }
 
@@ -246,11 +244,10 @@ static List _generated_member(
   Compiler c, List ancestry, String member) {
   foreach (Type current in ancestry) {
     List decision = _generated_owner(c, current, member);
-    match (decision)
-      case %(owner ? ? ?signature ?): {
-        String source = _member_spelling(current, member);
-        return $(source, signature);
-      }
+    if (decision ~= %(owner ? ? ?signature ?)) {
+      String source = _member_spelling(current, member);
+      return $(source, signature);
+    }
   }
   return NULL;
 }
@@ -283,12 +280,11 @@ static List _adopted_member(
   foreach (Type current in ancestry) {
     List row = _member_row(c, protocols, current, member);
     if (!row) continue;
-    match (row)
-      case %(? ?(Symbol status) ?(String source) ?(Type signature) ? ?): {
-        if (status == <implmntd>) return $(source, signature);
-        if (status == <native>)
-          return $(_member_spelling(current, member), signature);
-      }
+    if (row ~= %(? ?(Symbol status) ?(String source) ?(Type signature) ? ?)) {
+      if (status == <implmntd>) return $(source, signature);
+      if (status == <native>)
+        return $(_member_spelling(current, member), signature);
+    }
     return %();
   }
   return %();
@@ -319,26 +315,24 @@ static List _generated_decision(
 
 static int _consider(
   GeneratedOwners &g, Compiler c, Type base, List row) {
-  match (row)
-    case %(?(String member) base-dflt ?(String source)
-           ?(Type expected) ordinary ?): {
-      if (member != g.member) return 0;
-      Symbol storage = _visibility(c, base, g.participant);
-      List owner = %(owner $base $source $expected $storage);
-      g.candidates.push(owner);
-      if (storage == <mixed>) {
-        g.result = %(linkage $owner $owner);
-        return 1;
-      }
-      if (!g.first_linkage) {
-        g.first_linkage = owner;
-        g.first_storage = storage;
-      }
-      else if (g.first_storage != storage) {
-        g.result = %(linkage $(g.first_linkage) $owner);
-        return 1;
-      }
+  if (row ~= %(?(String member) base-dflt ?(String source)
+               ?(Type expected) ordinary ?) && member == g.member) {
+    Symbol storage = _visibility(c, base, g.participant);
+    List owner = %(owner $base $source $expected $storage);
+    g.candidates.push(owner);
+    if (storage == <mixed>) {
+      g.result = %(linkage $owner $owner);
+      return 1;
     }
+    if (!g.first_linkage) {
+      g.first_linkage = owner;
+      g.first_storage = storage;
+    }
+    else if (g.first_storage != storage) {
+      g.result = %(linkage $(g.first_linkage) $owner);
+      return 1;
+    }
+  }
   return 0;
 }
 
