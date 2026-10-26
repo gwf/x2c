@@ -2,7 +2,6 @@
 
 static keyword loop $private.loop;
 
-
 module int _null_literal(List expr) =>
   _integer_literal_kind(expr, NULL) == <zero> ||
   expr.match(
@@ -266,8 +265,7 @@ List Compiler.convert_expression(Compiler c, List expr, Type target) {
   return expr;
 }
 
-static List _adapt_lambda_value(
-  Compiler c, List expr, Type target) {
+static List _adapt_lambda_value(Compiler c, List expr, Type target) {
   Type type = expr.cadr();
   if (!type.is_function()) return expr;
   List lowered = c.lower_lambda_expr(expr);
@@ -293,8 +291,7 @@ static List _lift_func_value(
    compound literal of the destination, because C accepts a bare brace only
    as an initializer. An anonymous struct or union has no spelling for that
    literal. */
-static List _compound_literal(
-  Compiler c, List composite, Type target) {
+static List _compound_literal(Compiler c, List composite, Type target) {
   List converted = c.convert_initializer(composite, target, NULL);
   match (converted)
     case %(expr ?type (composite *)): {
@@ -368,12 +365,12 @@ static List _convert_known_value(
   int type_is_var, int target_is_var) {
   List reference = _convert_reference(c, expr, type, target);
   if (reference) return reference;
-  if (type.match(%((!or (dim *) (!quote *)) char))) {
+  if (type.match(%((!or (dim *) (!quote *)) char)) &&
+      (target_is_var || c.sym.is_string_type(target))) {
     List string = _raw_string_to_string(c, expr);
-    if (c.sym.is_string_type(target))
-      return %(expr $target $(string.caddr()));
     if (target_is_var)
       return %(expr ("Var") (call "String_var" (args $string)));
+    return %(expr $target $(string.caddr()));
   }
   if (type_is_var && !target_is_var) {
     List reader = _read_var(c, expr, type, target);
@@ -412,12 +409,9 @@ static List _convert_reference(
     to `Var` and renders it at runtime.
 
     A declared numeric converter keeps its formatting; other numeric segments
-    use `Var.str`. A segment statically spelled `Var` also uses `Var.str` for
-    every
-    runtime tag. The ordinary `Var`-to-`String` conversion is
-    not equivalent: it
-    extracts only a `String` payload and yields empty `String` for every other
-    tag.
+    use `Var.str`. A segment statically spelled `Var` uses `Var.str` for every
+    runtime tag. An ordinary `String` destination uses `Var.as_string`, which
+    returns NULL for `void` and `Null`.
 */
 List Compiler.convert_segment_to_string(Compiler c, List expr) {
   Type type = expr.cadr().type().canonicalize();
@@ -433,8 +427,7 @@ List Compiler.convert_segment_to_string(Compiler c, List expr) {
 
 // Var crossings
 
-static List _read_var(
-  Compiler c, List expr, Type type, Type target) {
+static List _read_var(Compiler c, List expr, Type type, Type target) {
   if (target === %("Symbol"))
     return %(expr $target (call "Var_symbol" (args $expr)));
   Type scalar_target = c.sym.resolve_numeric_type(target);
