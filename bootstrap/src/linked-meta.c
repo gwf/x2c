@@ -12451,7 +12451,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_18(void
   _9708 = String_var(_9707);
   _9709 = String_new("lib/tokenizer.x");
   _9710 = String_var(_9709);
-  _9711 = String_new("53da5fa6");
+  _9711 = String_new("7a2950d5");
   _9712 = String_var(_9711);
   _9713 = cons(_9712, NULL);
   _9714 = cons(_9710, _9713);
@@ -14516,7 +14516,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_22(void
   _11761 = cons(_223, _11760);
   _11762 = String_new("lib/system-macros.x");
   _11763 = String_var(_11762);
-  _11764 = String_new("769f3af5");
+  _11764 = String_new("82d2a2e0");
   _11765 = String_var(_11764);
   _11766 = String_new("48187db4");
   _11767 = String_var(_11766);

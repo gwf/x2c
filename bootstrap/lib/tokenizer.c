@@ -1233,10 +1233,10 @@ static int _hole(_Layout * l, _LayoutLine line){
   int last = line.last;
   for(int first = line.first;  first < last;  first ++){
     if(first != line.first &&(* l).sig[first - 1] -> type != 83) continue;
-    if((* l).sig[first] -> type != 129) continue;
+    if((* l).sig[first] -> type != 129 ||(* l).depths[first]) continue;
     if((* l).sig[last] -> type == 83 ||(* l).sig[last] -> type == 251) return 1;
   }
-  return(* l).sig[last] -> type == 19147688 && last > line.first &&((* l).sig[last - 1] -> type == 73 ||(* l).sig[last - 1] -> type == 129) &&(last - 1 == line.first ||(* l).sig[last - 2] -> type == 83);
+  return(* l).sig[last] -> type == 19147688 && last > line.first &&((* l).sig[last - 1] -> type == 73 ||(* l).sig[last - 1] -> type == 129) && !(* l).depths[last - 1] &&(last - 1 == line.first ||(* l).sig[last - 2] -> type == 83);
 }
 
 static int _condition(_Layout * l, int first, int colon, String body){
