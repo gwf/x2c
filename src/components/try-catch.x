@@ -60,14 +60,13 @@ macro Stmt $x2c.try.site(
     a slot. */
 meta List _x2c_try_catch_site(List frame, List clause) {
   Macro site = $x2c.try.site;
-  match (clause)
-    case %(?handle ?(String state) ?(List arms) *patterns): {
-      int count = arms.len(), filtered = patterns.len();
-      String fallback = filtered < count ? filtered.str() : "-1";
-      return site(
-        frame, handle, count, %(expr (int) (literal (int) $fallback)),
-        %(expr (int) $state), patterns);
-    }
+  if (clause ~= %(?handle ?(String state) ?(List arms) *patterns)) {
+    int count = arms.len(), filtered = patterns.len();
+    String fallback = filtered < count ? filtered.str() : "-1";
+    return site(
+      frame, handle, count, %(expr (int) (literal (int) $fallback)),
+      %(expr (int) $state), patterns);
+  }
   return NULL;
 }
 
@@ -76,7 +75,7 @@ meta List _x2c_try_catch_site(List frame, List clause) {
 /* Whether a lowered arm, a code value around its statement, returns or
    raises on every path out of it. */
 meta static int _try_arm_exits(List arm) {
-  match (arm) case %(code-value ? ?statement ?): {
+  if (arm ~= %(code-value ? ?statement ?)) {
     Code lowered = statement;
     return lowered.exits();
   }
@@ -121,9 +120,8 @@ macro Stmt $x2c.try.handled(
 meta List _x2c_try_landing(List frame, List clause, List exits) {
   Macro landing = $x2c.try.handled;
   List otherwise = $!{ { $exits __builtin_unreachable(); } };
-  match (clause)
-    case %(?handle ? ?arms *):
-      return landing(frame, handle, otherwise, arms);
+  if (clause ~= %(?handle ? ?arms *))
+    return landing(frame, handle, otherwise, arms);
   return otherwise;
 }
 
@@ -134,9 +132,8 @@ meta List _x2c_try_landing(List frame, List clause, List exits) {
     this in a slot. */
 meta List _x2c_try_exits_placement(List exits) {
   Atom token = Atom.intern("?__try_cleanup");
-  match (exits)
-    case %(code-value ? ?statements ?):
-      return Code.lowered(statements, %((cleanup $token $statements)));
+  if (exits ~= %(code-value ? ?statements ?))
+    return Code.lowered(statements, %((cleanup $token $statements)));
   return NULL;
 }
 
