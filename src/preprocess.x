@@ -164,16 +164,15 @@ void Compiler.scan_conditionals(Compiler c) {
 
 static void _directive(ArmScan &s, Token token, size_t i) {
   Symbol kind = Compiler.preproc_conditional_kind(token.text);
-  int conditional = kind == <open> || (kind && s.stack.len());
+  int conditional = kind == <open> || (kind && s.stack);
   if (kind == <open>)
-    s.stack.push(
-      $(++s.serial, 0, Compiler.preproc_open_state(token.text)));
-  else if (kind == <branch> && s.stack.len()) {
+    s.stack.push($(++s.serial, 0, Compiler.preproc_open_state(token.text)));
+  else if (kind == <branch> && s.stack) {
     Var (id, arm, state) = s.stack[-1];
     Var branch = Compiler.preproc_branch_state(state);
     s.stack[-1] = $(id, arm.integer() + 1, branch);
   }
-  else if (kind == <close> && s.stack.len()) s.stack.take_last();
+  else if (kind == <close> && s.stack) s.stack.take_last();
   else if (!s.hidden) _note_layout_macro(s, token.text);
   if (!conditional) return;
   s.c.arm_stacks[(long) i] = s.stack.list();
@@ -256,15 +255,16 @@ static void _note_layout_macro(ArmScan &s, String content) {
   Token name = _macro_directive(content, undefined);
   if (!name) return;
   Map layout = s.layout;
-  if (!s.stack.len()) layout.del(name.text);
+  if (!s.stack) layout.del(name.text);
   if (undefined) return;
   Token token = name + 1;
   if (token.type == <(>) token = token.after_group();
   int value = 0;
   for (; token.type != <eof>; token = Token.skip_trivia(token + 1)) {
     if (token.type != <ident>) continue;
-    int level = token.text == "__attribute__" ? _attribute_layout(token)
-              : token.text in layout ? layout[token.text] : 0;
+    int level = 0;
+    if (token.text == "__attribute__") level = _attribute_layout(token);
+    else if (token.text in layout) level = layout[token.text];
     if (level > value) value = level;
   }
   if (value && (!(name.text in layout) || layout[name.text] < value))
@@ -329,8 +329,7 @@ void Compiler.note_object_macro(Compiler c, String content) {
 /* A function-like macro whose body is empty or an attribute is an
    `<annotation>`, and one that wraps its parameter is a `<wrapper>`; any
    other function-like macro is skipped. */
-static void _note_function_macro(
-  Compiler c, String name, Token params) {
+static void _note_function_macro(Compiler c, String name, Token params) {
   Token after = params.after_group(), String param = NULL;
   Token first = Token.skip_trivia(params + 1);
   if (first.type == <ident> && Token.skip_trivia(first + 1).type == <)>)
