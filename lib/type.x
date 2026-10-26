@@ -302,7 +302,8 @@ static unsigned _qualifiers(Type &cursor) {
 // classification
 
 /** Returns whether `type` is exactly a pointer or array of `char` or
-    `const char`, without resolving typedefs or removing qualifiers. */
+    `const char`, without resolving typedefs or removing qualifiers.
+*/
 int Type.is_char_pointer_like(Type type) {
   return type &&
          (type.match(%((!or (dim *) (!quote *)) char)) ||
@@ -554,7 +555,8 @@ Var Type.numeric_literal_value(Type type, String text) {
 }
 
 /** Reads an integer literal of `type` spelled in digits, with any suffix,
-    into `value`. Returns 0 for any other literal. */
+    into `value`. Returns 0 for any other literal.
+*/
 int Type.integer_literal_magnitude(
   Type type, String text, unsigned long long &value) {
   if (!type.is_integral() || !text || text[0] < '0' || text[0] > '9')
