@@ -121,8 +121,9 @@ static void _sx_span(
   _sx_declaration_source(s, entity, _sx_declaration(s, binding));
   Var span = s.c.semantic_binding_facts()[%(definition-span $key)];
   match (span) case %(?start ?end ?): {
-    Token first = s.c.tokenizer.tokens + start.int();
-    Token last = s.c.tokenizer.tokens + end.int() - 1;
+    Token tokens = s.c.tokenizer.tokens;
+    Token first = tokens + start.int();
+    Token last = tokens + end.int() - 1;
     int begin = first.pos, finish = last.pos + last.len, local = begin;
     String file = s.c.text_source(begin, local);
     entity["file"] = file ? Path.absolute(file) : s.unit;
@@ -182,7 +183,8 @@ static void _sx_type_edge(
   _sx_edge(s, from, target, kind, origin);
   List parameters;
   Type result, resolved = s.c.sym.normalize_declared_type(type);
-  if (resolved.function_parts(parameters, result)) {
+  if ((resolved.is_pointer() || kind == "parameter") &&
+      resolved.function_parts(parameters, result)) {
     foreach (Type parameter, parameters)
       _sx_type_edge(s, from, parameter, "callback", origin);
     _sx_type_edge(s, from, result, "callback", origin);
@@ -194,6 +196,8 @@ static Map _sx_binding(
   if (s.bindings.contains(binding)) return s.records[s.bindings[binding]];
   String name = Ast.binding_spelling(binding);
   String emitted = s.c.emitted_binding_name(binding);
+  Var method = s.c.semantic_binding_facts()[%(method $binding)];
+  match (method) case %(?owner_name ?member): name = %"$owner_name.$member";
   String id = %"$owner::$kind::$emitted";
   if (s.records.contains(id)) id = %"$id::$(binding.cadr())";
   Map entity = _sx_entity(s, id, kind, name, owner);
@@ -437,13 +441,16 @@ static void _sx_protocols(SnapshotExtract &s) {
       _sx_type_edge(s, from, base, "conforms", 0);
       List conformance = s.c.conforms[$(base, participant)];
       if (!conformance) continue;
-      List node;
-      $ast.walk(conformance, node) match (node) {
-        case %(ident ?binding): {
-          String target = _sx_reference(s, binding, NULL, from);
-          if (target != "") _sx_edge(s, from, target, "references", 0);
+      match (conformance.last()) case %(members *members):
+        foreach (List member, members) {
+          match (member) case %(? ?status ?selected ?type *): {
+            if (selected is not <string> || status == <no-member>) continue;
+            List binding = s.c.sym.lookup($(selected), NULL);
+            if (!binding) continue;
+            String target = _sx_reference(s, binding, type, from);
+            if (target != "") _sx_edge(s, from, target, "implements", 0);
+          }
         }
-      }
     }
   }
 }
