@@ -277,8 +277,9 @@ static Buffer _write_byte_repr(Buffer out, unsigned byte) {
    a double's digits. */
 static Buffer _write_float_repr(
   Buffer out, long double value, Symbol width, String suffix) {
-  int limit = width == <f32> ? FLT_DECIMAL_DIG
-            : (width == <f64> ? DBL_DECIMAL_DIG : LDBL_DECIMAL_DIG);
+  int limit = LDBL_DECIMAL_DIG;
+  if (width == <f32>) limit = FLT_DECIMAL_DIG;
+  else if (width == <f64>) limit = DBL_DECIMAL_DIG;
   char text[48];
   int digits = limit - 3;
   for (; digits < limit; digits++) {
@@ -505,7 +506,8 @@ static int _numeric_compare(
     if (ak == <integer> && bk == <integer>) cmp = a.integer_compare(b);
     else if (ak == <integer>) cmp = a.integer_floating_compare(b);
     else if (bk == <integer>) cmp = -b.integer_floating_compare(a);
-    else cmp = da < db ? -1 : da > db ? 1 : 0;
+    else if (da < db) cmp = -1;
+    else cmp = da > db ? 1 : 0;
     if (cmp) return cmp;
   }
   return _numeric_tie(a, b, atag, btag, awide && bwide);
