@@ -18,8 +18,7 @@ static typedef struct Decoration {
 
 /* A Block decorator's Name arguments are referenced in the block's scope,
    which opens before the arguments are read. */
-static void _bind_name_arguments(
-  Compiler c, List definition, List arguments) {
+static void _bind_name_arguments(Compiler c, List definition, List arguments) {
   List parameters = definition.assoc(<parameters>);
   List captures = arguments.cdr();
   while (parameters) {
