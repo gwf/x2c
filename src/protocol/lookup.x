@@ -101,7 +101,8 @@ static macro Decorator $adopted_rows(
 }
 
 /** Returns unique member spellings from the participant's visible adopted
-    conformances. Resolution remains responsible for selecting a binding. */
+    conformances. Resolution remains responsible for selecting a binding.
+*/
 List Compiler.protocol_member_names(Compiler c, Type participant) {
   Map seen = {};
   Array names = [];
