@@ -960,7 +960,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _374 = String_var(_373);
   _375 = List_var(NULL);
   _376 = Symbol_var(106239471489226);
-  _377 = int_var(2241);
+  _377 = int_var(2237);
   _378 = String_new("");
   _379 = String_var(_378);
   _380 = Atom_intern(String_new("macro-param"));

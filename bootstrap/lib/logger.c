@@ -139,6 +139,8 @@ static void _lock(void);
 
 static void _unlock(void);
 
+static void _log_fields(Logger logger, Symbol level, Symbol category, List fields);
+
 static void _capture_time(long long * wall_time, long long * monotonic_time);
 
 static inline int _should_log(Logger logger, Symbol level, Symbol category);
@@ -214,6 +216,8 @@ static Var _retain_lisp_symbol(LogMemorySink l, Var value);
 static List _retain_list(LogMemorySink l, List list);
 
 static int _pool_chain_owns(Pool pool, Var value);
+
+static void _log_global_fields(Symbol level, Symbol category, List fields);
 
 static int _plain_report(Logger logger);
 
@@ -359,10 +363,14 @@ static void _unlock(void){
 
 void Logger_initialize(void);
 
-void Logger_flush(Logger logger);
-
 void Logger_log(Logger logger, Symbol level, Symbol category, List fields){
   if(! _init_guard_) Logger_initialize();
+  _log_fields(logger, level, category, fields);
+}
+
+void Logger_flush(Logger logger);
+
+static void _log_fields(Logger logger, Symbol level, Symbol category, List fields){
   _lock();
   {
     X2CCleanup _x2c_gensym_defer_record_0 ={
@@ -786,7 +794,7 @@ static LogSink _new_sink(Logger logger, LogEmitter emit, LogFlusher flush, Var d
 
 static void _require_quiescent(Logger logger, String owner){
   if(logger && logger -> emission_depth != 0){
-    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/logger.x",.function = "_require_quiescent",.line = 333,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/logger.x",.function = "_require_quiescent",.line = 339,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_0, 4477477457162, 1, Symbol_var(34096809266140), String_var(owner));
     __builtin_unreachable();
   }
@@ -1383,6 +1391,10 @@ Logger log_get_global_logger(void){
 
 void log_event(Symbol level, Symbol category, List fields){
   if(! _init_guard_) Logger_initialize();
+  _log_global_fields(level, category, fields);
+}
+
+static void _log_global_fields(Symbol level, Symbol category, List fields){
   _lock();
   {
     X2CCleanup _x2c_gensym_defer_record_26 ={
@@ -1391,7 +1403,7 @@ void log_event(Symbol level, Symbol category, List fields){
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_26);
     {
-      Logger_log(global_logger, level, category, fields);
+      _log_fields(global_logger, level, category, fields);
     }
     x2c_cleanup_leave(& _x2c_gensym_defer_record_26);
   }
@@ -1447,7 +1459,7 @@ Symbol Logger_error_handler(List errors, Var data){
 
       }
       if(policy == 2260136 && _plain_report(logger)) _report_uncaught(entry);
-      else Logger_log(logger, 11703268, 392730881588392, entry);
+      else Logger_log(logger, 11703268, 392730881588392, List_append(entry, NULL));
       Error_note_rendered();
       {
         Symbol _x2c_gensym_return_value_24 = 285842436424;
@@ -1513,62 +1525,62 @@ static String _detail_text(List detail){
 
 void Logger_trace(Logger logger, Symbol category, List fields){
   if(! _init_guard_) Logger_initialize();
-  Logger_log(logger, 43124938, category, fields);
+  _log_fields(logger, 43124938, category, fields);
 }
 
 void Logger_debug(Logger logger, Symbol category, List fields){
   if(! _init_guard_) Logger_initialize();
-  Logger_log(logger, 8721742, category, fields);
+  _log_fields(logger, 8721742, category, fields);
 }
 
 void Logger_info(Logger logger, Symbol category, List fields){
   if(! _init_guard_) Logger_initialize();
-  Logger_log(logger, 618910, category, fields);
+  _log_fields(logger, 618910, category, fields);
 }
 
 void Logger_warn(Logger logger, Symbol category, List fields){
   if(! _init_guard_) Logger_initialize();
-  Logger_log(logger, 1510556, category, fields);
+  _log_fields(logger, 1510556, category, fields);
 }
 
 void Logger_error(Logger logger, Symbol category, List fields){
   if(! _init_guard_) Logger_initialize();
-  Logger_log(logger, 11703268, category, fields);
+  _log_fields(logger, 11703268, category, fields);
 }
 
 void Logger_fatal(Logger logger, Symbol category, List fields){
   if(! _init_guard_) Logger_initialize();
-  Logger_log(logger, 12689496, category, fields);
+  _log_fields(logger, 12689496, category, fields);
 }
 
 void log_trace(Symbol category, List fields){
   if(! _init_guard_) Logger_initialize();
-  log_event(43124938, category, fields);
+  _log_global_fields(43124938, category, fields);
 }
 
 void log_debug(Symbol category, List fields){
   if(! _init_guard_) Logger_initialize();
-  log_event(8721742, category, fields);
+  _log_global_fields(8721742, category, fields);
 }
 
 void log_info(Symbol category, List fields){
   if(! _init_guard_) Logger_initialize();
-  log_event(618910, category, fields);
+  _log_global_fields(618910, category, fields);
 }
 
 void log_warn(Symbol category, List fields){
   if(! _init_guard_) Logger_initialize();
-  log_event(1510556, category, fields);
+  _log_global_fields(1510556, category, fields);
 }
 
 void log_error(Symbol category, List fields){
   if(! _init_guard_) Logger_initialize();
-  log_event(11703268, category, fields);
+  _log_global_fields(11703268, category, fields);
 }
 
 void log_fatal(Symbol category, List fields){
   if(! _init_guard_) Logger_initialize();
-  log_event(12689496, category, fields);
+  _log_global_fields(12689496, category, fields);
 }
 
 Logger Logger_new(Symbol min_level){
@@ -1719,7 +1731,7 @@ static void _log_pending(Logger active){
     Var _x2c_gensym_macro_cursor_output_2;
     while(List_try_next(_x2c_gensym_macro_object_2, &(_x2c_gensym_macro_cursor_2), &(_x2c_gensym_macro_cursor_output_2))){
       entry = Var_list_payload(_x2c_gensym_macro_cursor_output_2);
-      Logger_log(active, 11703268, 392730881588392, entry);
+      Logger_log(active, 11703268, 392730881588392, List_append(entry, NULL));
     }
 
   }
