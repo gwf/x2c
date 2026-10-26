@@ -49,8 +49,8 @@ static List _candidates(Sample sample):
   (String where, String code, String expected, int runs) = sample
   if Regex.compile("\\bmain\\s*\\(").match(code):
     return %(("as written" $code))
-  List wrapped = %("wrapped in main" $(_wrapped_in_main(code)))
-  return runs ? %($wrapped) : %(("as written" $code) $wrapped)
+  List wrapped = $("wrapped in main", _wrapped_in_main(code))
+  return runs ? $(wrapped) : %(("as written" $code) $wrapped)
 
 /* Python's repr of a str, for the ASCII the samples print. */
 static String _repr(String text):
@@ -83,7 +83,7 @@ static Job _limited(List command):
 
 static void _launch(Job job, List attempt):
   long deadline = time(NULL) + _DEADLINE
-  attempts.push(%($(job.start()) @attempt $deadline))
+  attempts.push($(job.start(), @attempt, deadline))
 
 /* Removes and returns an attempt whose job finished or passed its
    deadline, waiting until one does. */
@@ -140,7 +140,7 @@ static void _advance(List attempt):
   int exit = job.status()
   String output = _stdout(job), errors = job.errors()
   if phase == <build> && !exit && runs:
-    _launch(_limited(%($(work.join("sample"))))
+    _launch(_limited($(work.join("sample")))
               .options({dir: work, input: "", stderr: <capture>}),
             %($index $candidate $work <run>))
     return

@@ -62,7 +62,7 @@ static Var _constructed_identifier(Var result, Var construction) {
   match (result)
     case %("x2c.ident" ?(String spelling)):
       exact = spelling;
-  if (exact) return %($construction $exact);
+  if (exact) return $(construction, exact);
   return result;
 }
 
@@ -84,7 +84,7 @@ List Compiler.evaluate_macro_rows(Compiler c, Var value) {
   value = c.evaluate_macro_slot(value);
   return value is <list> && !value.is_nil() &&
          value.list().car() == <seq>
-       ? value.list().cdr() : %($value);
+       ? value.list().cdr() : $(value);
 }
 
 /** Evaluates the explicit meta call `expression` at `site` with the active
@@ -202,7 +202,7 @@ static List _hole_row(
   if (!hole.assoc(<sequence>).int())
     return _capture_row_project(
       c,
-      hole, %($(lifts ? _lifted(c, value, invocation) : value)),
+      hole, $(lifts ? _lifted(c, value, invocation) : value),
       retain_syntax);
   List sources = value;
   if (lifts) {
@@ -292,9 +292,8 @@ static List _rebuild(
   List rows = _template_arguments(c, definition, values, c.token, 1).cdr();
   if (target)
     rows = rows.append(
-      %(
-        $(_capture_row_project(
-          c, definition.assoc(<targetp>), %($target), 1))));
+      $(_capture_row_project(
+          c, definition.assoc(<targetp>), $(target), 1)));
   List bindings = NULL;
   foreach (List row in rows) {
     bindings = _row_bindings(keys.car(), row, bindings);
@@ -327,7 +326,7 @@ static List _row_fields(List row) {
         result = returned;
         declarator = declared;
       }
-      return %($source $value $expression $splice $result $declarator);
+      return $(source, value, expression, splice, result, declarator);
     }
   }
   return NULL;

@@ -18,7 +18,7 @@ static macro Stmt $fail.literals_insert_name(
     String hint = $sigil == <@>
       ? "use '@(...)' to splice an expression"
       : "use '$(...)' to insert an expression";
-    $c.report_error(<parse>, message, $site, %($hint));
+    $c.report_error(<parse>, message, $site, $(hint));
   }
 }
 
@@ -338,7 +338,7 @@ static List _parse_typed_capture(Compiler c) {
   Atom binder = Atom.intern(%"?$name");
   List tag = c.var_tag_expression(type, origin);
   if ((void *) c.match_types) {
-    List row = %($name $type);
+    List row = $(name, type);
     if (!_recorded(c, name, type, tag, origin)) c.match_types.push(row);
     return _atom_element(c, binder.str());
   }

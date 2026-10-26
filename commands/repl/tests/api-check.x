@@ -19,7 +19,7 @@ static int _has_completion(List candidates, String spelling) {
 static int _has_completion_kind(
   List candidates, Symbol kind, String spelling) {
   foreach (Var row, candidates)
-    match (row) case %($kind $spelling): return 1;
+    match (row) case $(kind, spelling): return 1;
   return 0;
 }
 

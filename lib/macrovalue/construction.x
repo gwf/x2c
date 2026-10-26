@@ -10,7 +10,7 @@ Macro Macro_close(Macro value, List captures) =>
 /** Applies a macro value to code values. The result is a pending
    invocation; inserting it into a program expands and binds it there. */
 List Macro_apply(Macro t, List values) =>
-  %("x2c.template" $t $(_group(t, values)));
+  $("x2c.template", t, _group(t, values));
 
 /* Groups positional arguments by the definition's parameters: a sequence
    parameter takes every remaining argument as one List. */
@@ -65,7 +65,7 @@ Var Macro.inserted(Var value, int lifts, int expression) {
     or a binding as it is. */
 Var Macro.declared(Var value) {
   Var spelling = Macro.inserted(value, 0, 0);
-  return spelling is <string> ? %($spelling).var() : value;
+  return spelling is <string> ? $(spelling).var() : value;
 }
 
 /** Returns the items a typed quotation splices for an expression sequence

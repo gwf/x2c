@@ -47,7 +47,7 @@ static int _right_operand_level(Symbol operator) {
    frames per operand, which the pinned chain stack budgets cannot spend. */
 module List _operand(Emitter &e, Var node, int level) {
   List code = node is <list> && !node.is_nil()
-            ? _emit(e, node) : _emit(e, %($node));
+            ? _emit(e, node) : _emit(e, $(node));
   if (_emitted_precedence(node) < level) return _parens(code);
   return code;
 }
@@ -98,17 +98,17 @@ static List _op_spine(Emitter &e, Var operator, Var left, Var right) {
 
 module List _postfix(Emitter &e, Symbol operator, Var argument) {
   List c_arg = _operand(e, argument, EMIT_POSTFIX);
-  return %(@c_arg $operator);
+  return $(@c_arg, operator);
 }
 
 module List _generic(Emitter &e, Var control, List associations) {
-  List c_control = _emit(e, %($control));
+  List c_control = _emit(e, $(control));
   Array rows = [];
   foreach (List association in associations) match (association) {
     case %(association default ?value):
-      rows.push(%("default" ":" @(_emit(e, %($value)))));
+      rows.push(%("default" ":" @(_emit(e, $(value)))));
     case %(association ?type ?value):
-      rows.push(%(@(_semantic_type(e, type)) ":" @(_emit(e, %($value)))));
+      rows.push(%(@(_semantic_type(e, type)) ":" @(_emit(e, $(value)))));
   }
   List c_rows = _commas(rows.list_free());
   return %("_Generic(" @c_control ", " @c_rows ")");
@@ -116,7 +116,7 @@ module List _generic(Emitter &e, Var control, List associations) {
 
 module List _unary(Emitter &e, Symbol operator, Var argument) {
   List c_arg = _operand(e, argument, EMIT_UNARY);
-  return %($operator @c_arg);
+  return $(operator, @c_arg);
 }
 
 module List _binary(
@@ -124,8 +124,9 @@ module List _binary(
   match (left)
     case %(expr ? (op *)): return _op_spine(e, operator, left, right);
   Symbol binary = operator;
-  return %(@(_operand(e, left, _left_operand_level(binary))) $operator
-           @(_operand(e, right, _right_operand_level(binary))));
+  return $(
+    @(_operand(e, left, _left_operand_level(binary))), operator,
+    @(_operand(e, right, _right_operand_level(binary))));
 }
 
 module List _ident(Emitter &e, Var binding) {
@@ -133,11 +134,11 @@ module List _ident(Emitter &e, Var binding) {
      keeps the spelling it lands with. */
   match (binding)
     case %((!or binding-name binding-global) ?(String spelling)):
-      return %($spelling);
+      return $(spelling);
   Var pointer;
   if (e.static_objects && e.static_objects.try_get(binding, pointer))
     return %("(*" $pointer ")");
-  return _emit(e, %($binding));
+  return _emit(e, $(binding));
 }
 
 // calls
@@ -146,7 +147,7 @@ module List _call(Emitter &e, Var function, Var arguments) {
   List site_call = _match_site_call(e, function, arguments);
   if (site_call) return site_call;
   return %(@(_operand(e, function, EMIT_POSTFIX)) "("
-           @(_emit(e, %($arguments))) ")");
+           @(_emit(e, $(arguments))) ")");
 }
 
 /* A source-literal pattern is the same value on every call, so the call gets
@@ -165,7 +166,7 @@ static List _match_site_call(Emitter &e, Var function, Var arguments) {
   String entry = _match_site_entry(name);
   if (!entry) return NULL;
   Type type = NULL;
-  List global = e.c.sym.resolve_global(%($name), type);
+  List global = e.c.sym.resolve_global($(name), type);
   if (!global || global != binding || !type.is_function())
     return NULL;
   List args = arguments;
@@ -175,7 +176,7 @@ static List _match_site_call(Emitter &e, Var function, Var arguments) {
           !e.match_pattern_is_static(pattern))
         return NULL;
       String site = e.fresh_name("match_site");
-      List c_args = _emit(e, %($arguments));
+      List c_args = _emit(e, $(arguments));
       return %("({ static MatchCaptureSite " $site ";"
                $entry "(&" $site "," @c_args "); })");
     }
@@ -226,7 +227,7 @@ module List _literal(Emitter &e, List ast) {
   if (text[digits] == '0' &&
       (text[digits + 1] == 'o' || text[digits + 1] == 'O'))
     text = text[:digits] + "0" + String.new(text + digits + 2);
-  return %( $text );
+  return $(text);
 }
 
 static List _atom_intern(String spelling) {

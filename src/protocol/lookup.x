@@ -30,7 +30,7 @@ List Compiler.protocol_members_for(Compiler c, Type participant, Type base) {
     }
     if (!ancestry) return NULL;
   }
-  List key = %($base $owner);
+  List key = $(base, owner);
   Var stored = c.conforms[key];
   /* One adoption is resolved where it is asked for when the parse has not
      resolved it. `_publish` already skips resolving during
@@ -59,7 +59,7 @@ static void _install_imports(Compiler c) {
 
 module List _ancestry(Compiler c, Type participant) {
   List result = NULL;
-  $memo(c.proto_cache, %("protocol-ancestry" $participant), result) {
+  $memo(c.proto_cache, $("protocol-ancestry", participant), result) {
     Array ancestry = [], Type current = participant;
     for (int distance = 0; current && distance <= 128; distance++) {
       ancestry.push(current);
@@ -77,7 +77,7 @@ static List _ordered_occurrences(Compiler c) {
   $memo(c.proto_cache, <proto-ordr>, result) {
     Array ordered = [];
     foreach ((Type base, List occurrence) in c.protocols)
-      ordered.push(%($base $occurrence));
+      ordered.push($(base, occurrence));
     ordered.sort();
     result = ordered.list_free();
   }
@@ -131,7 +131,7 @@ int Compiler.protocol_rejects_direct_member(
   Compiler c, Type participant, String member) {
   Type owner = participant.canonicalize();
   int rejects = 0;
-  $memo(c.proto_cache, %("protocol-rejects" $owner $member), rejects) {
+  $memo(c.proto_cache, $("protocol-rejects", owner, member), rejects) {
     List protocols = _ordered_occurrences(c);
     foreach (Type ancestor in _ancestry(c, owner)) {
       List row = _member_row(c, protocols, ancestor, member);
@@ -163,14 +163,14 @@ static List _member_row(
 void Compiler.dump_conformance(Compiler c, Map globs) {
   Array names = [];
   foreach (Var (key, value) in globs)
-    match (%($key $value))
+    match ($(key, value))
       case %((?(String name)) (typedef *)):
         names.push(name);
   names.sort();
   List protocols = _ordered_occurrences(c), rows = NULL;
   Type base = NULL;
   foreach (String candidate in names) {
-    Type participant = %($candidate);
+    Type participant = $(candidate);
     $adopted_rows(c, protocols, participant, base, rows) {
       _dump_row(
         "conformance", _owns_adoption(c, base, participant), base,
@@ -221,13 +221,13 @@ List Compiler.resolve_protocol_member(
   if (!resolved) return NULL;
   (String spelling, Type signature) = resolved;
   if (spelling == c.fn_name) return NULL;
-  return %($(c.sym.reference(%($spelling), NULL)) $signature);
+  return $(c.sym.reference($(spelling), NULL), signature);
 }
 
 /* Cache the selected declaration, not a transaction-owned binding identity. */
 static List _resolve_member(
   Compiler c, Type participant, String member_name) {
-  List key = %("protocol-member" $participant $member_name), selected = NULL;
+  List key = $("protocol-member", participant, member_name), selected = NULL;
   $memo(c.proto_cache, key, selected) {
     List protocols = _ordered_occurrences(c);
     List ancestry = _ancestry(c, participant);
@@ -248,7 +248,7 @@ static List _generated_member(
     match (decision)
       case %(owner ? ? ?signature ?): {
         String source = _member_spelling(current, member);
-        return %($source $signature);
+        return $(source, signature);
       }
   }
   return NULL;
@@ -265,9 +265,9 @@ static List _base_alias(
     List declared = record.last().list().cdr();
     if (!_declares_member(declared, member)) continue;
     String source = %"$(base_name)_$member";
-    Type signature = c.sym.get(%($source));
+    Type signature = c.sym.get($(source));
     if (!signature || !signature.is_function()) continue;
-    return %($source $signature);
+    return $(source, signature);
   }
   return NULL;
 }
@@ -284,9 +284,9 @@ static List _adopted_member(
     if (!row) continue;
     match (row)
       case %(? ?(Symbol status) ?(String source) ?(Type signature) ? ?): {
-        if (status == <implmntd>) return %($source $signature);
+        if (status == <implmntd>) return $(source, signature);
         if (status == <native>)
-          return %($(_member_spelling(current, member)) $signature);
+          return $(_member_spelling(current, member), signature);
       }
     return %();
   }
@@ -296,7 +296,7 @@ static List _adopted_member(
 /* Select the sole generated owner across all adopted protocols. */
 module List _generated_owner(
   Compiler c, Type participant, String member) {
-  List key = %("protocol-generated-owner" $participant $member), owner = NULL;
+  List key = $("protocol-generated-owner", participant, member), owner = NULL;
   $memo(c.proto_cache, key, owner) {
     owner = _generated_decision(c, participant, member);
   }

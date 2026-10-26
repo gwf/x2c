@@ -78,11 +78,11 @@ END {
     if (parameters != "void") {
       n = split(parameters, parts, ",")
       for (p = 1; p <= n; p++)
-        arguments = arguments (p > 1 ? " " : "") "$" name_of(parts[p] "(")
+        arguments = arguments (p > 1 ? ", " : "") name_of(parts[p] "(")
     }
     target = names[i]
     sub(/\./, "_", target)
-    ask = "_ask(\"" target "\", %(" arguments "))"
+    ask = "_ask(\"" target "\", $(" arguments "))"
     if (signature ~ /^void /) {
       if (length(one " { " ask "; }") <= 79) print one " { " ask "; }"
       else print signature " {\n  " ask ";\n}"

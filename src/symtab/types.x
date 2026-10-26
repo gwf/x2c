@@ -39,7 +39,7 @@ static Type _resolve_chain(
   }
   match (key) case %((!or ?kind struct union)
       (binding ? ?spelling)):
-    if (!s.field_order(key)) return %($kind $spelling);
+    if (!s.field_order(key)) return $(kind, spelling);
   return key;
 }
 
@@ -84,7 +84,7 @@ Type Sym.sole_typedef(Sym s, Type type) {
           if (found && found != name) return NULL;
           found = name;
         }
-  return found ? %($found) : NULL;
+  return found ? $(found) : NULL;
 }
 
 /** Resolves typedef bases while retaining every declarator qualifier. */
@@ -139,7 +139,7 @@ static Type _local_tag(Sym s, Type type, Type base) {
     SymScope *scope = _scope_at(s, i);
     Var binding;
     if (scope.bindings.try_get(base, binding))
-      return _replace_type_base(type, base, %($(base.car()) $binding));
+      return _replace_type_base(type, base, $(base.car(), binding));
   }
   return type;
 }
@@ -250,7 +250,7 @@ int Sym.is_map_type(Sym s, Type type) => s.is_named_value_type(type, "Map");
 int Sym.is_named_value_type(Sym s, Type type, String name) {
   // Stop at the named type instead of resolving through its typedef.
   if (!type || !name) return 0;
-  Type wanted = %($name), origin = type.canonicalize();
+  Type wanted = $(name), origin = type.canonicalize();
   type = _resolve_chain(s, origin, wanted, origin, 0);
   return type == wanted;
 }
@@ -297,10 +297,10 @@ void Sym.declare_field_order(Sym s, Type type, List fields) {
 static List _field_row(
   Sym s, Type type, List declaration, List declarator) {
   String name = Ast.binding_spelling(declarator.cadr());
-  Type declared = name ? s.get(%(@type $name))
+  Type declared = name ? s.get($(@type, name))
     : %(declare $(declaration.cadr()) (bindings $declarator))
       .type_from_ast().declared();
-  return %($name $declared);
+  return $(name, declared);
 }
 
 /** Returns recorded fields in source order, or `NULL`. */
@@ -309,8 +309,8 @@ List Sym.field_order(Sym s, Type type) => s.get(%(@type "field-order"));
 /** Records that the field `name` of `aggregate` was declared with the field
     keyword `mark`, such as `delegate`, and that `aggregate` declares one. */
 void Sym.mark_field(Sym s, Type aggregate, Symbol mark, String name) {
-  s.set(%(@aggregate $mark $name), %($mark));
-  s.set(%(@aggregate $mark), %($mark));
+  s.set($(@aggregate, mark, name), $(mark));
+  s.set($(@aggregate, mark), $(mark));
 }
 
 /** Returns the `(NAME TYPE)` rows of the fields of `aggregate` declared with
@@ -320,7 +320,7 @@ List Sym.marked_fields(Sym s, Type aggregate, Symbol mark) {
   Array rows = [];
   foreach (List row in order ? order.cdr() : NULL) {
     String name = row.car();
-    if (name && s.get(%(@aggregate $mark $name))) rows.push(row);
+    if (name && s.get($(@aggregate, mark, name))) rows.push(row);
   }
   return rows.list_free();
 }

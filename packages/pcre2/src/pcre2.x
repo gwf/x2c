@@ -306,7 +306,7 @@ static RegexpCapture _regexp_capture(
     (char *) subject + start, (int) (end - start)
   ) : NULL;
   ulong first = matched ? (ulong) start : 0, last = matched ? (ulong) end : 0;
-  return %($capture_index $name $matched $text $first $last);
+  return $(capture_index, name, matched, text, first, last);
 }
 
 static RegexpMatch _regexp_result(Regexp regexp, String subject) {

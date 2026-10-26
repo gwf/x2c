@@ -157,7 +157,7 @@ static List _convert_initval_row(
     (List condition, List path, Type destination, List input) = choice;
     List value = _convert_case(
       c, choice, input, native_target, row_condition, native_used);
-    checked.push(%($condition $path $destination $value));
+    checked.push($(condition, path, destination, value));
   }
   List header = NULL;
   Ast.initializer_cases(terminal.caddr(), header);
@@ -194,7 +194,7 @@ static List _convert_homogeneous_row(
 static List _replace_value(List original, List value) {
   match (original)
     case %((!or ?tag dotinit indexinit) ?key ?inner):
-      return %($tag $key $(_replace_value(inner, value)));
+      return $(tag, key, _replace_value(inner, value));
   return value;
 }
 
@@ -307,7 +307,7 @@ static List _convert_mixed_row(
       case %(expr ? (call "__builtin_choose_expr" (args ? ?yes ?))):
         if (yes === prepared) identity = 1;
     if (!identity) native_identity = 0;
-    converted.push(%($condition $path $destination $result));
+    converted.push($(condition, path, destination, result));
   }
   if (native_identity) {
     converted.free();
@@ -321,7 +321,7 @@ static List _capture_leaves(
   Compiler c, List value, Array inputs) {
   match (value) {
     case %((!or ?kind dotinit indexinit) ?key ?inner):
-      return %($kind $key $(_capture_leaves(c, inner, inputs)));
+      return $(kind, key, _capture_leaves(c, inner, inputs));
     case %(expr ?type $($source_composite_content(%(*items)))): {
       Array captured = [];
       foreach (List item in items)
@@ -347,7 +347,7 @@ static List _capture_value(
     return value;
   if (_is_literal(value)) return value;
   String formal = c.fresh_name("initializer_value");
-  inputs.push(%($formal $value));
+  inputs.push($(formal, value));
   return %(expr $type $formal);
 }
 
@@ -380,10 +380,10 @@ static List _materialize_mixed_row(
       !destination && source.match(%(expr ? (composite *)))
         ? result : result.search_replace(%(!quote $source), placeholder);
     if (substituted !== result) uses_input = 1;
-    replaced.push(%($condition $path $destination $substituted));
+    replaced.push($(condition, path, destination, substituted));
   }
   List choices = replaced.list_free();
-  if (uses_input) inputs = cons(%($formal $source), inputs);
+  if (uses_input) inputs = cons($(formal, source), inputs);
   if (inputs) choices = cons(%(input @inputs), choices);
   List result = %(expr () (initval @choices));
   return _replace_value(original, result);
@@ -405,7 +405,7 @@ static List _adapt_choices(
       }
     }
     if (!_adapter_type(c, value.cadr())) return NULL;
-    prepared.push(%($condition $path $destination $value));
+    prepared.push($(condition, path, destination, value));
   }
   Array adapted = [];
   foreach (List choice in prepared.list()) {
@@ -414,8 +414,8 @@ static List _adapt_choices(
     Type callable = adapter.cadr(), result = callable.apply();
     Macro called = $called;
     value = c.rebuild_expression(
-      result, called(adapter, %($placeholder)));
-    adapted.push(%($condition $path $destination $value));
+      result, called(adapter, $(placeholder)));
+    adapted.push($(condition, path, destination, value));
   }
   return adapted.list_free();
 }
@@ -434,7 +434,7 @@ static List _value_adapter(
     List binding = c.sym.introduce(c.fresh_name("initializer_adapt"));
     c.add_early(
       c.wrapper_function(
-        %(static @result), binding, %($(from.parameter_ast(parameter))),
+        %(static @result), binding, $(from.parameter_ast(parameter)),
         %((return $result $body))));
     Type callable = %((func ($from)) @result);
     adapter = $!($callable){ $binding };
@@ -472,11 +472,11 @@ List Compiler.initializer_native_types(Compiler c, Type type) {
     case %(!or ((!or ?kind struct union) (gensym ? ?) ?body)
                ((!or ?kind struct union) (!set ?body (fields *)))): {
       String name = c.fresh_name("initializer_type");
-      definition = %($kind $name $body);
-      reference = %($kind $name);
+      definition = $(kind, name, body);
+      reference = $(kind, name);
     }
     case %((!or ?kind struct union) ?name (fields *)):
-      reference = %($kind $name);
+      reference = $(kind, name);
   }
   Array definitions = [], references = [];
   for (List rest = type; rest !== base; rest = rest.cdr()) {
@@ -487,7 +487,7 @@ List Compiler.initializer_native_types(Compiler c, Type type) {
   }
   definition = definitions.list_free().append(definition);
   reference = references.list_free().append(reference);
-  return %($definition $reference);
+  return $(definition, reference);
 }
 
 static Var _native_modifier(Compiler c, Var modifier, Var &reused) {

@@ -98,7 +98,7 @@ module String _native_meta_name(
 /** Records the native advertisements retained by included interfaces. Each
     binds on first use, so a unit with no compile-time code pays nothing. */
 void Compiler.install_native_meta_effects(Compiler c, Map globs) {
-  List unit = %($(Path.resolved_absolute(c.filename)));
+  List unit = $(Path.resolved_absolute(c.filename));
   foreach (Var (key, value) in globs) {
     if (_declared_in(key, unit)) continue;
     if (value is <list>) c.install_project_meta_effect(value);
@@ -322,7 +322,7 @@ static int _native_handle(Compiler c, List type, int parameter) {
    adopts `Var` or `Cleanup`. A signature spells a `typedef struct X *X`
    handle as its pointer, so the adoption is read from the typedef `X`. */
 static int _native_owned(Compiler c, List type) {
-  match (type) case %((!quote *) struct ?(String tag)): type = %($tag);
+  match (type) case %((!quote *) struct ?(String tag)): type = $(tag);
   return c.sym.var_tag_for_type(type, NULL) ||
          c.protocol_members_for(type, %("Var")) ||
          c.protocol_members_for(type, %("Cleanup"));
@@ -350,7 +350,7 @@ List Compiler.native_meta_targets(List paths, int callbacks) {
       if (!callbacks && _takes_callback(signature)) continue;
       String into = %"$(name)_into";
       selected[name] = Compiler.iterator_arity(signature) >= 0
-        ? %($name (as $into)) : %($name);
+        ? %($name (as $into)) : $(name);
     }
   }
   Array names = selected.keys();
@@ -390,10 +390,10 @@ static List _witness_rows(Compiler c, Type base, Type participant) {
   foreach (List member in conformance.last().list().cdr())
     match (member) {
       case %(? implmntd ?(String name) ?(Type type) *):
-        rows = cons(%($name $(c.func_signature(type))), rows);
+        rows = cons($(name, c.func_signature(type)), rows);
       case %(?(String name) base-dflt ? ?(Type type) ordinary ?): {
         String forward = %"$(participant.car())_$name";
-        rows = cons(%($forward $(c.func_signature(type))), rows);
+        rows = cons($(forward, c.func_signature(type)), rows);
       }
     }
   return rows;

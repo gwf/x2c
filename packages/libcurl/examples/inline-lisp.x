@@ -33,7 +33,7 @@ int main(int argc, char **argv) {
       (let ((page (http-get url)))
         (substring page 13 (- (string-length page) 15)))
   ));
-  List pages = %($(base + "/guide") $(base + "/reference"));
+  List pages = $(base + "/guide", base + "/reference");
   foreach(String found, lisp.eval(%( map title '$pages )).list())
     printf("%s", %"title: $found\n");
 

@@ -64,7 +64,7 @@ static void _produce_defaults(Defaults &d, Map declarations) {
   foreach (Var (key, value) in declarations)
     match (key)
       case %("source-node" (declaration ? ?position)):
-        ordered.push(%($position $key $value));
+        ordered.push($(position, key, value));
   ordered.sort();
   foreach (List entry in ordered) {
     (Var position, Var key, Var value) = entry;
@@ -75,7 +75,7 @@ static void _produce_defaults(Defaults &d, Map declarations) {
         _restore_declaration_bindings(d.c, rows, facts, {});
         Array produced = [];
         _produce_rows(d.c, rows, produced);
-        d.sources.push(%($declarations $key $end $(produced.list_free())));
+        d.sources.push($(declarations, key, end, produced.list_free()));
       }
   }
 }
@@ -100,7 +100,7 @@ static void _produce_rows(Compiler c, List rows, Array selected) {
 static List _generated_rows(Compiler c, Var callback, Var arguments) {
   List generated = c.bind_syntax(
     c.evaluate_declaration_recipe(callback, arguments), <unit>, NULL);
-  List additions = %($generated);
+  List additions = $(generated);
   match (generated) {
     case %(seq *children): additions = children;
     case %(declaration-bundle (rows *children)): additions = children;
@@ -117,7 +117,7 @@ static void _select(Defaults &d) {
     foreach (List row in selected)
       match (row)
         case %(declaration-forward ?child *): d.pending[child] = 1;
-    d.sources[index] = %($declarations $key $end $selected);
+    d.sources[index] = $(declarations, key, end, selected);
   }
 }
 
@@ -160,7 +160,7 @@ static Var _unless_taken(Defaults &d, List syntax) {
    default then completes. */
 static int _taken(Defaults &d, String spelling) {
   Compiler c = d.c;
-  List key = %($spelling);
+  List key = $(spelling);
   Type declared = c.sym.get(key);
   if (!declared) return 0;
   if (!declared.is_function() || spelling in d.definitions ||
@@ -190,7 +190,7 @@ static void _forward(Defaults &d) {
     for (size_t index = 0; index < d.sources.len(); index++) {
       (Map declarations, Var key, Var end, List rows) = d.sources[index];
       rows = _forward_rows(d, rows, remaining);
-      d.sources[index] = %($declarations $key $end $rows);
+      d.sources[index] = $(declarations, key, end, rows);
     }
     if (remaining && remaining == previous)
       $fail.compiler_ctor_parent(d.c, d.c.token);
@@ -229,8 +229,8 @@ static List _forwarded(
   Defaults &d, Type child, Type parent, String member, List fallback) {
   Compiler c = d.c;
   String name = %"$(child.car())_$member";
-  if (c.sym.get(%($name))) return %(seq);
-  List method = c.resolve_postfix_member(parent, %($member), <.>, 1);
+  if (c.sym.get($(name))) return %(seq);
+  List method = c.resolve_postfix_member(parent, $(member), <.>, 1);
   if (!method) {
     if (parent in d.pending) return NULL;
     return fallback ? _bind_default(c, fallback.car()) : NULL;
@@ -260,7 +260,7 @@ static List _forwarder(
   (List params, List args) = c.forward_parameters(forwarded.list_free());
   if (!params) params = %((param (void) (bind () ())));
   Type result = c.source_private ? %(static @child) : child;
-  List function = %($name), callee = $!($signature){ $binding };
+  List function = $(name), callee = $!($signature){ $binding };
   return c.rebuild_unit_function($!Unit{
     $result $function(@params) { return ($child)$callee(@args); }
   });

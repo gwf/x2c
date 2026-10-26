@@ -26,7 +26,7 @@ static macro Stmt $fail.macros_expansion_depth(
     String first_note = %"first expansion: $($first_note)";
     $c.report_error(
       <macro>, "macro expansion depth exceeds 64", $origin,
-      %($($definition_note) $first_note));
+      $($definition_note, first_note));
   }
 }
 
@@ -150,7 +150,7 @@ static macro Stmt $fail.macros_typed_quotation_nested(
     String note = "write $($!T{ ... }) to insert the code it builds";
     $c.report_error(
       <parse>, "typed quotation inside a quotation must be written as a hole",
-      $origin, %($note));
+      $origin, $(note));
   }
 }
 
@@ -175,7 +175,7 @@ static macro Stmt $fail.macros_keyword_internal(
   Expr $c, Expr $origin, Expr $spelling, Expr $definition_note) =>
   $c.report_error(
     <macro>, %"keyword alias cannot name internal macro kind '$($spelling)'",
-    $origin, %($($definition_note)));
+    $origin, $($definition_note));
 
 static macro Stmt $fail.macros_keyword_builtin(Expr $c, Expr $origin) =>
   $c.report_error(
@@ -241,13 +241,13 @@ static macro Stmt $fail.macros_decorator_target(
   Expr $c, Expr $origin, Expr $spelling, Expr $definition_note) =>
   $c.report_error(
     <macro>, %"decorator '$($spelling)' requires a following target",
-    $origin, %($($definition_note)));
+    $origin, $($definition_note));
 
 static macro Stmt $fail.macros_decorator_semicolon(
   Expr $c, Expr $origin, Expr $definition_note) =>
   $c.report_error(
     <macro>, "decorator application must not end with ';'",
-    $origin, %($($definition_note)));
+    $origin, $($definition_note));
 
 static macro Stmt $fail.macros_result_expr(
   Expr $c, Expr $origin, Expr $kind, Expr $spelling, Expr $definition_note) {
@@ -257,7 +257,7 @@ static macro Stmt $fail.macros_result_expr(
       : %"macro '$($spelling)'";
     $c.report_error(
       <macro>, %"$subject cannot be invoked in an expression", $origin,
-      $kind == <decorator> ? %($($definition_note)) : NULL);
+      $kind == <decorator> ? $($definition_note) : NULL);
   }
 }
 
@@ -265,7 +265,7 @@ static macro Stmt $fail.macros_decorator_expr(
   Expr $c, Expr $origin, Expr $spelling, Expr $definition_note) =>
   $c.report_error(
     <macro>, %"decorator '$($spelling)' requires a following expression",
-    $origin, %($($definition_note)));
+    $origin, $($definition_note));
 
 static macro Stmt $fail.macros_macro_pattern_arity(
   Expr $c, Expr $origin, Expr $name, Expr $expected) =>
@@ -278,7 +278,7 @@ static macro Stmt $fail.macros_meta_expr(
   Expr $c, Expr $origin, Expr $value) =>
   $c.report_error(
     <macro>, "compile-time result cannot fill an expression slot",
-    $origin, %( "value:" $($value.repr()) ));
+    $origin, $("value:", $value.repr()));
 
 static macro Stmt $fail.macros_type_name(
   Expr $c, Expr $origin, Expr $message) =>
@@ -294,7 +294,7 @@ static macro Stmt $fail.macros_meta_failed(
     String form_note = %"form: $($source)",
       error_note = %"error: $($error.repr())";
     $c.report_error(
-      <macro>, "meta call failed", $origin, %($form_note $error_note));
+      <macro>, "meta call failed", $origin, $(form_note, error_note));
   }
 }
 

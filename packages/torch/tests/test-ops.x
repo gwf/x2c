@@ -102,10 +102,10 @@ static void ops_list_and_creation_arguments(void) {
   Tensor a = _grid();
 
   // cat and stack take a List of tensors.
-  Tensor doubled = Tensor.cat(%($a $a), 0);
+  Tensor doubled = Tensor.cat($(a, a), 0);
   EXPECT_STR_EQ(doubled.shape().str(), "( 4 3 )");
   EXPECT_NEAR(doubled.sum().item().double(), 42.0, 1e-12);
-  Tensor stacked = Tensor.stack(%($a $a), 0);
+  Tensor stacked = Tensor.stack($(a, a), 0);
   EXPECT_STR_EQ(stacked.shape().str(), "( 2 2 3 )");
 
   // linspace is a creation op: [0 0.25 0.5 0.75 1].

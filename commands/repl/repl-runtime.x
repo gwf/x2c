@@ -190,7 +190,7 @@ static Var _lisp_func_adapter(Func function, const FuncArg *arguments) {
   if (!Lisp.active() || Lisp.active() != context.lisp)
     raise %(bad-state (operation "Lisp callback") (reason "wrong session"));
   Var argv = Var.new(<p48>, arguments);
-  return context.lisp.apply(context.callable, %($function $argv));
+  return context.lisp.apply(context.callable, $(function, argv));
 }
 
 /** Constructs a signature-bearing Func for one lowered source callable. */

@@ -50,10 +50,10 @@ static List _from_ast(List node, List context) {
     case %(fnmod *params): return %(func @(_from_ast(params, NULL)));
     case %(param ?type ?mods): return _from_ast(mods, type);
     // Binding identity is AST metadata; semantic Types retain the spelling.
-    case %(binding ? ?spelling): return %($spelling);
+    case %(binding ? ?spelling): return $(spelling);
     // An integer literal, such as an array bound, keeps only its spelling.
     case %(expr (int) $($source_literal_content(%(? ?value)))):
-      return %($value);
+      return $(value);
     case %(expr *): return _from_items(node, context);
     case %(struct *): return _from_aggregate(node, <struct>);
     case %(union *): return _from_aggregate(node, <union>);
@@ -133,9 +133,9 @@ static List _from_aggregate(List node, Var head) {
   if (node.type().is_aggregate_tag()) return node;
   if (!node.type().is_aggregate_tag_body()) {
     List fields = _from_ast(node.cadr(), NULL).flatten();
-    return %( $head $fields );
+    return $(head, fields);
   }
-  return %( $head $(node.cadr()) );
+  return $(head, node.cadr());
 }
 
 /* Source specifier text, `("_Noreturn")` or `("__attribute__((unused))")`,
@@ -273,7 +273,7 @@ void Type.register_var_tag(Type t, String name, String converter) {
   Type key = t.canonicalize();
   Var row = declared_typetags[key];
   if (row is void)
-    declared_typetags[key] = %( $(name.lower().symbol()) $converter );
+    declared_typetags[key] = $(name.lower().symbol(), converter);
 }
 
 /** Replaces a registered type's inferred `Var` tag with `tag`, or with the
@@ -286,7 +286,7 @@ void Type.register_var_adoption(Type type, Type representation, Symbol tag) {
   Var row = declared_typetags[key];
   if (!tag && representation) tag = representation.fixed_var_tag();
   if (row is void || !tag) return;
-  declared_typetags[key] = %($tag $(row.list().cadr()));
+  declared_typetags[key] = $(tag, row.list().cadr());
 }
 
 /** Starts an empty set of source-declared `Var` rows for one translation

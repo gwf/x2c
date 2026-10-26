@@ -82,7 +82,7 @@ static void _clean(String entry) {
 /* The request builds the one script into the entry's executable, quietly
    unless it is verbose. */
 static void _configure(CliRequest c, String script) {
-  c.inputs = %($script);
+  c.inputs = $(script);
   c.state_seed = "direct";
   if (!c.verbose) c.quiet = 1;
   c.output = _executable(c);
@@ -141,5 +141,5 @@ static void _exec(CliRequest c) {
 
 /* Prints the command that executes the script, without running it. */
 static void _print_run(CliRequest c) {
-  ToolAction.new(<run>, %($(_executable(c)) @(c.run_args)), 0, 1).start();
+  ToolAction.new(<run>, $(_executable(c), @(c.run_args)), 0, 1).start();
 }

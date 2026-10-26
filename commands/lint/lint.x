@@ -216,7 +216,7 @@ static int _quoting(Lint l, int at, int outer):
 
 /* Invalid directives remain visible even when another rule is selected. */
 static void _bad_suppression(Lint l, int line, String message):
-  l.findings.push(%($line "bad-suppression" $message))
+  l.findings.push($(line, "bad-suppression", message))
 
 /* Only standalone line-comment tokens can qualify the next source line. */
 static void _allowances(Lint l):
@@ -327,7 +327,7 @@ int Lint.add(Lint l, String code, int line, String message):
   if allowance && allowance[0] == code:
     allowance[1] = 1
     return 0
-  l.findings.push(%($line $code $message))
+  l.findings.push($(line, code, message))
   return 1
 
 /** Reports allowances for selected codes with no matching finding. */
@@ -346,7 +346,7 @@ void Lint.fix(Lint l, String code, int line, String message, int from,
   if !l.add(code, line, message): return
   int start = l.tokens[from].pos
   int end = to < from ? start : l.tokens[to].pos + l.tokens[to].len
-  l.edits.push(%($start $end $replacement))
+  l.edits.push($(start, end, replacement))
 
 /** Returns the text from the start of the token at `from` to the end of
     the token at `to`. */

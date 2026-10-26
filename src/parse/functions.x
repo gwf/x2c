@@ -17,7 +17,7 @@ List Compiler.parse_function_definition(Compiler c) {
   int first = start - tokens, body = c.token - tokens;
   List function = _finish_function(c, declaration, NULL);
   if (!c.macro_holes)
-    _definition_source(c, function, start.line, NULL, %($first $body));
+    _definition_source(c, function, start.line, NULL, $(first, body));
   return function;
 }
 
@@ -132,7 +132,7 @@ static String _lifecycle_owner(
   if (!method) return NULL;
   match (method)
     case %(?name $member): {
-      String owner = name, Type owner_type = c.sym.get(%($owner));
+      String owner = name, Type owner_type = c.sym.get($(owner));
       return owner_type.is_typedef() ? owner : NULL;
     }
   return NULL;

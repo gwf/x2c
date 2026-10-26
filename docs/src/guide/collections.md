@@ -650,9 +650,9 @@ word only points at compares by address: a wide number boxed in a `Scope`
 Var first = Var.box_long(5l);
 Var second = Var.box_long(5l);
 Map counts = {};
-counts[%($first)] = "boxed";
+counts[$(first)] = "boxed";
 
-printf("same number, rebuilt key: %s\n", counts[%($second)].repr());
+printf("same number, rebuilt key: %s\n", counts[$(second)].repr());
 printf("small number key: %s\n", %(5) == %(5) ? "matches" : "differs");
 ```
 
@@ -1462,7 +1462,7 @@ foreach(String word in text.words())
 
 Array ranked = [];
 foreach((String word, int count) in counts)
-  ranked.push(%($count $word));
+  ranked.push($(count, word));
 ranked.sort();
 ranked.reverse();
 

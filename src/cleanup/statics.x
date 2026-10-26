@@ -63,7 +63,7 @@ static List _landing_form(Compiler c, List node, Map runtime) {
     foreach (List row in rows)
       match (row) {
         case %((!or ?kind outer region) ?token ?part):
-          parts.push(%($kind $token $(_static_regions(c, part, runtime))));
+          parts.push($(kind, token, _static_regions(c, part, runtime)));
         default: parts.push(row);
       }
     return %(landing $code $(parts.list_free()));

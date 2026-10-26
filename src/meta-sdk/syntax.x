@@ -185,7 +185,7 @@ List MetaContext.function_reference(String name) {
   Compiler c = active.evaluator;
   if (!c) raise %(bad-state (operation "_x2c.function.reference"));
   Type type = NULL;
-  List binding = c.sym.lookup(%($name), type);
+  List binding = c.sym.lookup($(name), type);
   if (!binding || !type || !type.is_function()) return %();
   return %(expr $type (ident $binding));
 }
@@ -235,7 +235,7 @@ List x2c_ident(String spelling) {
   _require_expansion("x2c_ident");
   if (!spelling.is_identifier())
     $fail.meta_sdk_identifier(spelling);
-  return %("x2c.ident" $spelling);
+  return $("x2c.ident", spelling);
 }
 
 /** Answers `x2c_binding_fresh`, declared in `lib/meta.x`. */

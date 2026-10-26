@@ -34,7 +34,7 @@ List Compiler.lift_lambda_types(Compiler c, List function) {
           (!bindings || bindings === %((bind () ())));
         if (!anonymous_member &&
             (type.is_aggregate_tag_body() || type.is_enum_tag_body())) {
-          definitions[%($(type.car()) $(type.cadr()))] = type;
+          definitions[$(type.car(), type.cadr())] = type;
           ordered = cons(type, ordered);
         }
       }
@@ -48,13 +48,13 @@ List Compiler.lift_lambda_types(Compiler c, List function) {
   $ast.walk(function.cadddr(), node) {
     match (node) {
       case %((!or struct union enum) ? ?): {
-        List tag = %($(node.car()) $(node.cadr()));
+        List tag = $(node.car(), node.cadr());
         if (tag in needed) replaced[(void *) node] = tag;
       }
       case %(declare ?(Type base) (bindings *bindings)): {
         Type type = base.base_type();
         if (!type.is_aggregate() && !type.is_enum()) continue;
-        List tag = %($(type.car()) $(type.cadr()));
+        List tag = $(type.car(), type.cadr());
         if (tag in needed &&
             (!bindings || bindings === %((bind () ()))))
           replaced[(void *) node] = %(seq);
@@ -65,7 +65,7 @@ List Compiler.lift_lambda_types(Compiler c, List function) {
   int public = signature.is_inline() && !signature.is_static();
   Array declarations = [];
   foreach (Type type in ordered)
-    if (%($(type.car()) $(type.cadr())) in needed) {
+    if ($(type.car(), type.cadr()) in needed) {
       Type body = (Type) Ast.rewrite_children(
         (Ast) type, %!(List child) => Ast.replace_nodes(child, replaced));
       declarations.push(_lambda_type_declaration(c, body, public));
@@ -81,7 +81,7 @@ static void _lambda_needed_types(
   List node;
   $ast.walk(syntax, node)
     match (node) case %((!or struct union enum) ?name *): {
-      List tag = %($(node.car()) $name);
+      List tag = $(node.car(), name);
       Var definition;
       if (!(tag in needed) && definitions.try_get(tag, definition)) {
         needed[tag] = 1;
@@ -97,7 +97,7 @@ static Code _lambda_type_declaration(Compiler c, Type type, int public) {
   String role = "lambda_type";
   if (public) role = %"lambda_type_$(Path.identifier_hash(c.filename))";
   List alias = c.sym.introduce(c.fresh_name(role));
-  c.set_fact(%(ntype $alias), %($(type.car()) $name));
+  c.set_fact(%(ntype $alias), $(type.car(), name));
   Type base = public ? type : cons(<static>, type);
   Code declaration = %(typedef $base (bindings (bind $alias ())));
   if (name.car() != <gensym>)
@@ -195,7 +195,7 @@ static int _params_look_typed(Compiler c) {
   String folded = c.package_alias_spelling();
   if (!folded) folded = c.package_member_spelling(c.token.text);
   String name = folded ? folded : c.token.text;
-  return c.sym.get(%($name)).type().is_typedef();
+  return c.sym.get($(name)).type().is_typedef();
 }
 
 static List _parse_typed_params(Compiler c) {
@@ -219,7 +219,7 @@ static List _parse_bare_param(Compiler c) {
   if (c.peek(0) != <ident>)
     $fail.lambdas_param_ident(c, c.token);
   String name = c.token.text;
-  List binding = c.sym.define(%($name), %("Var"));
+  List binding = c.sym.define($(name), %("Var"));
   c.set_fact(%(parameter $binding), 1);
   c.set_fact(%(lambda-param $binding), 1);
   c.set_fact(%(automatic $binding), 1);
@@ -274,7 +274,7 @@ static List _shared_binding(Compiler c) {
   String spelling = c.token.text;
   c.expect(<ident>);
   Type type = NULL;
-  List binding = c.sym.lookup(%($spelling), type);
+  List binding = c.sym.lookup($(spelling), type);
   if (!type)
     $fail.lambdas_ident_untyped(c, origin, spelling);
   return binding;
@@ -368,7 +368,7 @@ static void _prescribe(
     case %(capture ?target ?captured_type ?expression): {
       Type source = NULL, target_type = captured_type;
       List binding = target is <string>
-                   ? c.sym.lookup(%($target), source) : target;
+                   ? c.sym.lookup($(target), source) : target;
       if (<macro-expr> in target_type) {
         Var stored;
         if (!source) {
@@ -377,7 +377,7 @@ static void _prescribe(
           else {
             Type global_type = NULL;
             List global = c.sym.resolve_global(
-              %($(Ast.binding_spelling(binding))), global_type);
+              $(Ast.binding_spelling(binding)), global_type);
             if (global == binding) source = global_type;
           }
         }
@@ -385,7 +385,7 @@ static void _prescribe(
       }
       if (!Ast.binding_spelling(binding)) {
         binding = c.sym.introduce(_alias_spelling(target, binding));
-        aliases.push(%($binding $target_type));
+        aliases.push($(binding, target_type));
       }
       prescribed.push(%(capture $binding $target_type $expression));
     }

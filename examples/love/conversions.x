@@ -22,13 +22,8 @@ int main(void) {
   printf("list-length: %d\n", list_round_trip.len());
   printf("symbol: %s\n", symbol_round_trip.str());
 
-  List mixed = %(
-    $integer_value
-    $floating_value
-    $string_value
-    $symbol_value
-    $list_value
-  );
+  List mixed = $(
+    integer_value, floating_value, string_value, symbol_value, list_value);
   foreach(Var item in mixed)
     printf("mixed: %s %s\n", item.tag().str(), item);
 

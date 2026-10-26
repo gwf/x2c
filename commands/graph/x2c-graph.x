@@ -115,7 +115,7 @@ static int _field_access_matches(
   match (node)
     case %(op (!or (!quote .) (!quote ->)) (expr ?type ?) (?member)):
       return type is <list> && member is <string> &&
-             List.equal(type, %($receiver_name)) &&
+             List.equal(type, $(receiver_name)) &&
              member.str() == field_name;
   return 0;
 }
@@ -206,7 +206,7 @@ static void _collect_tail_calls(
     }
     case %(op (!quote ?) ?condition ?ontrue ?onfalse): {
       _collect_tail_calls(walk, condition, origin, 0);
-      foreach (Var arm, %($ontrue $onfalse))
+      foreach (Var arm, $(ontrue, onfalse))
         _collect_tail_calls(walk, arm, origin, tail);
       return;
     }
@@ -1134,7 +1134,7 @@ static List _parse_loop_allocation_units(
   if (!_analyze_inputs(
     frontend, inputs,
     %!(ParsedUnit *parsed, String input, String path) =>
-      %($(LoopAllocations.analyze_unit(parsed.compiler, parsed.ast, path))),
+      $(LoopAllocations.analyze_unit(parsed.compiler, parsed.ast, path)),
     units)) return NULL;
   return LoopAllocations.finish(units, limit);
 }
@@ -1144,11 +1144,11 @@ static List _parse_lifetime_units(
   List units;
   if (!_analyze_inputs(
     frontend, inputs,
-    %!(ParsedUnit *parsed, String input, String path) => %($(
+    %!(ParsedUnit *parsed, String input, String path) => $(
       Lifetime.analyze_unit(
         parsed.compiler, parsed.ast, path,
         project_function_targets(parsed.compiler, parsed.ast, path))
-    )),
+    ),
     units)) return NULL;
   return allocation_returns
        ? Lifetime.allocation_returns(units, allocation_returns)
@@ -1393,15 +1393,15 @@ static void _architecture_call_counts(
             foreach (List function, members)
               match (function)
                 case %(function ?name ?visibility (calls *)):
-                  definitions[%($path $name)] = visibility;
+                  definitions[$(path, name)] = visibility;
   Map seen_cross_units = {}, seen_units = {}, seen_functions = {};
   foreach (List call, _direct_calls(graph))
     match (call)
       case %(call ?path ?name ? ?target ?callee ?count): {
-        List key = %($target $callee);
+        List key = $(target, callee);
         if (!definitions.contains(key)) continue;
         project_count(calls, key, count);
-        List unit_key = %($target $callee $path);
+        List unit_key = $(target, callee, path);
         if (!seen_units.contains(unit_key)) {
           seen_units[unit_key] = 1;
           project_count(units, key, 1);
@@ -1410,7 +1410,7 @@ static void _architecture_call_counts(
           seen_cross_units[unit_key] = 1;
           project_count(cross_units, key, 1);
         }
-        List function_key = %($target $callee $path $name);
+        List function_key = $(target, callee, path, name);
         if (!seen_functions.contains(function_key)) {
           seen_functions[function_key] = 1;
           project_count(functions, key, 1);
@@ -1447,8 +1447,7 @@ static List _architecture_choke_points(List graph) {
         case %(function ?path ?name ?
                (callers (cross-units ?cross) (units ?) (functions ?count))
                (calls ?calls)):
-          return %($(-cross.int()) $(-count.int()) $(-calls.int())
-                   $path $name);
+          return $(-cross.int(), -count.int(), -calls.int(), path, name);
       return nil;
     }, ARCHITECTURE_LIMIT);
 }
@@ -1458,7 +1457,7 @@ static Map _unit_edges(List graph) {
   foreach (List call, _direct_calls(graph))
     match (call)
       case %(call ?path ? ? ?target ? ?count):
-        if (target != path) project_count(edges, %($path $target), count);
+        if (target != path) project_count(edges, $(path, target), count);
   return edges;
 }
 
@@ -1470,7 +1469,7 @@ static List _architecture_reciprocal(List graph) {
     (String left, String right) = key;
     if (strcmp(left, right) >= 0) continue;
     Var reverse_value;
-    if (!edges.try_get(%($right $left), reverse_value)) continue;
+    if (!edges.try_get($(right, left), reverse_value)) continue;
     int forward = raw_count.int(), reverse = reverse_value.int();
     if (forward < ARCHITECTURE_RECIPROCAL_CALLS ||
         reverse < ARCHITECTURE_RECIPROCAL_CALLS)
@@ -1486,7 +1485,7 @@ static List _architecture_reciprocal(List graph) {
       match (record)
         case %(units ?left ?right (calls (? ? ?forward) (? ? ?reverse))): {
           int a = forward.int(), b = reverse.int();
-          return %($(a < b ? -a : -b) $(-(a + b)) $left $right);
+          return $(a < b ? -a : -b, -(a + b), left, right);
         }
       return nil;
     }, ARCHITECTURE_LIMIT);
@@ -1494,7 +1493,7 @@ static List _architecture_reciprocal(List graph) {
 
 static void _record_boundary_function(
   Map seen, Map counts, List direction, String name) {
-  List key = %(@direction $name);
+  List key = $(@direction, name);
   if (seen.contains(key)) return;
   seen[key] = 1;
   project_count(counts, direction, 1);
@@ -1502,15 +1501,15 @@ static void _record_boundary_function(
 
 static void _record_boundary_participant(
   Map seen, Map counts, String left, String right, String path, String name) {
-  List key = %($left $right $path $name);
+  List key = $(left, right, path, name);
   if (seen.contains(key)) return;
   seen[key] = 1;
-  project_count(counts, %($left $right $path), 1);
+  project_count(counts, $(left, right, path), 1);
 }
 
 static List _boundary_direction(
   String from, String to, Map callers, Map callees, Map edges, Map calls) {
-  List direction = %($from $to);
+  List direction = $(from, to);
   return %(
     direction $from $to
     (functions
@@ -1533,8 +1532,8 @@ static List _architecture_dependency_width(List graph) {
         String left = strcmp(source_path, target_path) < 0
                     ? source_path : target_path;
         String right = left == source_path ? target_path : source_path;
-        List pair = %($left $right);
-        List direction = %($source_path $target_path);
+        List pair = $(left, right);
+        List direction = $(source_path, target_path);
         pairs[pair] = 1;
         project_count(edges, direction, 1);
         project_count(calls, direction, count);
@@ -1555,9 +1554,9 @@ static List _architecture_dependency_width(List graph) {
     List pair = raw_pair;
     (String left, String right) = pair;
     int left_width =
-      participants.getdefault(%($left $right $left), 0).int();
+      participants.getdefault($(left, right, left), 0).int();
     int right_width =
-      participants.getdefault(%($left $right $right), 0).int();
+      participants.getdefault($(left, right, right), 0).int();
     int lesser = left_width < right_width ? left_width : right_width;
     if (lesser < ARCHITECTURE_BOUNDARY_FUNCTIONS) continue;
     List forward = _boundary_direction(
@@ -1581,12 +1580,10 @@ static List _architecture_dependency_width(List graph) {
                            (direction ? ? ? (edges ?reverse_edges)
                                             (calls ?reverse_calls)))): {
           int a = left_width.int(), b = right_width.int();
-          return %(
-            $(a < b ? -a : -b) $(-(a + b))
-            $(-(forward_edges.int() + reverse_edges.int()))
-            $(-(forward_calls.int() + reverse_calls.int()))
-            $left $right
-          );
+          return $(
+            a < b ? -a : -b, -(a + b),
+            -(forward_edges.int() + reverse_edges.int()),
+            -(forward_calls.int() + reverse_calls.int()), left, right);
         }
       return nil;
     }, ARCHITECTURE_LIMIT);
@@ -1643,7 +1640,7 @@ static List _components(List names, Map adjacency, String excluded) {
     groups.push(%(group @(members.list_free())));
   }
   groups.sort_by(
-    %!(List group) => %($(1 - group.len()) $(group.cadr())));
+    %!(List group) => $(1 - group.len(), group.cadr()));
   return groups.list_free();
 }
 
@@ -1734,7 +1731,7 @@ static List _architecture_bridges(List graph) {
         case %(function ?path ?name (groups ? *rest)): {
           int outside = 0;
           foreach (Var size, rest) outside += size.int();
-          return %($(-rest.car().int()) $(-outside) $path $name);
+          return $(-rest.car().int(), -outside, path, name);
         }
       return nil;
     }, ARCHITECTURE_LIMIT);
@@ -1820,8 +1817,8 @@ static List _structure_files(
       case %(function ?(String name) ?storage (calls *calls)): {
         List target = %(target $path $name);
         String file = _definition_file(attributes, target);
-        project_count(tallies, %($file $storage), 1);
-        project_count(internal, %($file), 0);
+        project_count(tallies, $(file, storage), 1);
+        project_count(internal, $(file), 0);
         foreach (List call, calls)
           match (call)
             case %(call direct ?(String destination) ?(String callee) ?count):
@@ -1829,9 +1826,9 @@ static List _structure_files(
                 String callee_file =
                   _definition_file(attributes, %(target $path $callee));
                 if (callee_file == file)
-                  project_count(internal, %($file), count.int());
+                  project_count(internal, $(file), count.int());
                 else {
-                  project_count(between, %($file $callee_file), count.int());
+                  project_count(between, $(file, callee_file), count.int());
                   project_add_unique(interface, callee_file, callee);
                 }
               }
@@ -1895,8 +1892,7 @@ static List _structure(List graph, Map attributes, String wanted) {
                       int outside = 0;
                       foreach (List group, rest)
                         outside += group.len() - 1;
-                      return %($(1 - rest.car().list().len())
-                               $(-outside) $name);
+                      return $(1 - rest.car().list().len(), -outside, name);
                     }
                   return nil;
                 },

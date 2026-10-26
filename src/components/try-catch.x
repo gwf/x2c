@@ -223,7 +223,7 @@ meta static List _try_exits(Atom frame, List handle, Atom finalizer) {
   if (handle) {
     List handler = %(expr (("ErrorHandler")) (ident $handle));
     List close = $!{ x2c_error_catch_close($handler); $handler = NULL; };
-    before = %($close);
+    before = $(close);
   }
   List address = _try_frame_address(frame);
   if (finalizer)
@@ -255,7 +255,7 @@ meta static List _try_catch_clause(List handle, List records, Array rows) {
     rows.push(%(region $arm $(record.cadr())));
     arms.push(arm);
   }
-  return %($handle $state $(arms.list_free()) @(patterns.list_free()));
+  return $(handle, state, arms.list_free(), @(patterns.list_free()));
 }
 
 /* The landing form of the try `node`: its frame, its finalizer in a

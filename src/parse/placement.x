@@ -122,7 +122,7 @@ void Compiler.place_after(Compiler c, Var code) {
 void Compiler.close_placements(Compiler c, int first, List result) {
   for (int i = first; i < (int) c.placements.len(); i++) {
     (int depth, List binding, List placed, Var code) = c.placements[i].list();
-    if (!placed) c.placements[i] = %($depth $binding $result $code);
+    if (!placed) c.placements[i] = $(depth, binding, result, code);
   }
 }
 
@@ -307,5 +307,5 @@ static Type _share_declaration_type(
   foreach (Var item in base)
     if (item is <symbol> && item.symbol().is_storage_class())
       storage.push(item);
-  return %(@(storage.list_free()) $name);
+  return $(@(storage.list_free()), name);
 }

@@ -101,7 +101,7 @@ module Var _replace(Var input, ReplacementSource &source) {
     ReplacementCell row = ((ReplacementCell *) spine.bytes)[i - 1];
     Var head = row.value;
     if (row.splice && head is <list>) tail = %(@head @tail);
-    else tail = %($head @tail);
+    else tail = $(head, @tail);
   }
   return tail;
 }

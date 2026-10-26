@@ -337,6 +337,6 @@ static void _write_row(Buffer out, String label, String help) {
 List Args.from_argv(int argc, char **argv) {
   List result = NULL;
   for (int i = argc - 1; i > 0; i--)
-    result = %($(String.new(argv[i])) @result);
+    result = $(String.new(argv[i]), @result);
   return result;
 }

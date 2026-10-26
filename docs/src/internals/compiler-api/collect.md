@@ -224,7 +224,7 @@ The ordered cache walk counts each file once and groups effects by the
 canonical path of the unit's direct include. The parser installs those
 effects when it reaches that include.
 
-Source: `src/collect/walk.x:664`
+Source: `src/collect/walk.x:665`
 
 <a id="Compiler.install_included_effects"></a>
 #### Compiler.install_included_effects
@@ -234,7 +234,7 @@ Source: `src/collect/walk.x:664`
 Installs the definitions of each include among the directives before
 the cursor.
 
-Source: `src/collect/walk.x:710`
+Source: `src/collect/walk.x:711`
 
 <a id="Compiler.install_syntax_prelude"></a>
 #### Compiler.install_syntax_prelude

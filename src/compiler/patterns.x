@@ -95,8 +95,8 @@ List Compiler.define_pattern_binders(Compiler c, List pattern) {
       binding = c.macro_introduced_name(name);
       c.bind_template_local(binding, _binder_type(binder), NULL);
     }
-    else binding = c.sym.declare(NULL, %($name), _binder_type(binder));
-    rows.push(%($binder $binding));
+    else binding = c.sym.declare(NULL, $(name), _binder_type(binder));
+    rows.push($(binder, binding));
   }
   return rows.list_free();
 }

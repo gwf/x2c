@@ -50,7 +50,7 @@ static void _collect_functions(Var node, Array found) {
       foreach (List row in rows)
         match (row) case %(param ? (bind ?parameter ?)):
           parameters.push(parameter);
-      found.push(%($name $(parameters.list_free()) $body));
+      found.push($(name, parameters.list_free(), body));
     }
     case %(*children):
       foreach (Var child in children) _collect_functions(child, found);
@@ -75,7 +75,7 @@ static void _analyze(Walk &w, List function) {
   _walk(w, body);
   Array rows = [];
   foreach (List row in w.sinks.keys()) rows.push(row);
-  List summary = %($(w.fresh) $(rows.sort().list_free())),
+  List summary = $(w.fresh, rows.sort().list_free()),
        previous = w.summaries[name];
   if (summary == previous) return;
   w.summaries[name] = summary;
@@ -96,7 +96,7 @@ module List _summary(Walk &w, String callee) {
     case %(alloc *): return %(1 ());
     case %(pool): return %(2 ((0 result) (1 result)));
     case %(store): return %(0 ((1 (param 0)) (2 (param 0))));
-    case %(summary ?owner ?sinks): return %($owner $sinks);
+    case %(summary ?owner ?sinks): return $(owner, sinks);
   }
   _read(w, callee);
   Var local = w.summaries[callee];

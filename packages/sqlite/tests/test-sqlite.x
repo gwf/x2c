@@ -141,28 +141,28 @@ static void bound_values_copy_binary_and_preserve_numeric_edges(void) {
   Prepared integer = auto db.prepare("SELECT ?");
   unsigned long long outside = (unsigned long long) LLONG_MAX + 1;
   int caught = 0;
-  try { integer.bind(%($outside)); }
+  try { integer.bind($(outside)); }
   catch %(conv-range *_): { caught = 1; }
   EXPECT_TRUE(caught);
   outside = ULLONG_MAX;
   caught = 0;
-  try { integer.bind(%($outside)); }
+  try { integer.bind($(outside)); }
   catch %(conv-range *_): { caught = 1; }
   EXPECT_TRUE(caught);
   double nan = NAN;
   caught = 0;
-  try { integer.bind(%($nan)); }
+  try { integer.bind($(nan)); }
   catch %(conv-range *_): { caught = 1; }
   EXPECT_TRUE(caught);
 #if LDBL_MAX_EXP > DBL_MAX_EXP
   long double wide = LDBL_MAX;
   caught = 0;
-  try { integer.bind(%($wide)); }
+  try { integer.bind($(wide)); }
   catch %(conv-range *_): { caught = 1; }
   EXPECT_TRUE(caught);
 #endif
   double infinity = INFINITY;
-  integer.bind(%($infinity));
+  integer.bind($(infinity));
   EXPECT_TRUE(isinf(integer.next()[0].floating()));
 }
 

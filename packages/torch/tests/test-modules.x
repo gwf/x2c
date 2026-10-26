@@ -18,7 +18,7 @@ static String _names(List pairs) {
   List names = %();
   foreach (List pair, pairs) {
     String name = pair[0].str();
-    names = names.append(%($name));
+    names = names.append($(name));
   }
   return names;
 }

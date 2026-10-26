@@ -138,7 +138,7 @@ static List _fresh_names(Expansion &x, List old_stack) {
   Map file_locals = {};
   // The outermost active row's fourth field is its invocation token.
   Token root = old_stack ? old_stack.last().list()[3] : x.invocation;
-  if (c.sym.at_file_scope()) _file_scope_locals(%($(x.template)), file_locals);
+  if (c.sym.at_file_scope()) _file_scope_locals($(x.template), file_locals);
   Array fresh_values = [];
   foreach (List fresh in x.definition.assoc(<fresh>).list()) {
     Var (binder, spelling, exposed) = fresh;
@@ -146,11 +146,11 @@ static List _fresh_names(Expansion &x, List old_stack) {
     if (exposed.int()) {
       List binding = _introduced_binding(c, spelling.str(), owner);
       List hole = _hole(binder, <name>, 0);
-      fresh_values.push(_capture_row_project(c, hole, %($binding), 0));
+      fresh_values.push(_capture_row_project(c, hole, $(binding), 0));
     }
     else
       x.direct = cons(
-        %($binder $(_private_name(c, spelling.str(), owner))), x.direct);
+        $(binder, _private_name(c, spelling.str(), owner)), x.direct);
   }
   List members = _member_bindings(
     c, x.definition.assoc(<parameters>), x.input);
@@ -175,7 +175,7 @@ static List _member_bindings(
       continue;
     Var member = _hole_key(parameter, "member");
     bindings = cons(
-      %($member $(_member_spelling(c, capture.assoc(<value>)))), bindings);
+      $(member, _member_spelling(c, capture.assoc(<value>))), bindings);
   }
   return bindings;
 }
@@ -222,7 +222,7 @@ static Ast _construct(Expansion &x, List bindings) {
        (x.c.shallow && definition.assoc(<kind>) == <unit>) ||
        definition.assoc(<target>) == <named-type>)) {
     List rows = constructed.car() == <seq>
-              ? constructed.cdr() : %($constructed);
+              ? constructed.cdr() : $(constructed);
     constructed = %(declaration-bundle (rows @rows));
   }
   return constructed;
@@ -277,7 +277,7 @@ static String _file_scope_name(
 /* The unit's owner spelling, cached per file and package. */
 static String _scope_owner(Compiler c) {
   String owner = NULL;
-  $memo(c.names.file_scope_owners, %($(c.filename) $(c.package)), owner) {
+  $memo(c.names.file_scope_owners, $(c.filename, c.package), owner) {
     owner = c.filename ? _owner_spelling(c) : "";
   }
   return owner;
@@ -300,13 +300,13 @@ static String _owner_spelling(Compiler c) {
    including those a nested invocation declares from this template's names. */
 module void _file_scope_locals(List rows, Map locals) {
   foreach (Var row in rows) match (row) {
-    case %((!or at src) ? ?inner): _file_scope_locals(%($inner), locals);
-    case %(api-source ? ? ?inner): _file_scope_locals(%($inner), locals);
+    case %((!or at src) ? ?inner): _file_scope_locals($(inner), locals);
+    case %(api-source ? ? ?inner): _file_scope_locals($(inner), locals);
     case %(seq *inner): _file_scope_locals(inner, locals);
     case %(macro-invoke ((!quote !quote) ?(List definition))
            ?(List input) ?): {
       Map declared = {};
-      _file_scope_locals(%($(definition.assoc(<template>))), declared);
+      _file_scope_locals($(definition.assoc(<template>)), declared);
       List bindings = NULL;
       input.try_match(definition.assoc(<pattern>), bindings);
       foreach (List pair in bindings)

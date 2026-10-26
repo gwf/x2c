@@ -165,7 +165,7 @@ static Map _history(String path, int start, int end):
     else if current && line.startswith("author-time "):
       times[current] = atoi(line + 12)
   Array top = [], order = []
-  foreach Var (sha, count) in counts: order.push(%($count $sha))
+  foreach Var (sha, count) in counts: order.push($(count, sha))
   List sorted = order.list_free().sort_by(%!(List item) => -item.car().int())
   int repair = 0, most = 0, newest = 0, oldest = 0
   foreach List item in sorted:
@@ -332,7 +332,7 @@ static int _scan(Path x2c, int budget, Path base):
                            _structure_points(x2c, sources))
   _enrich(regions, texts)
   List ranked = regions.list().sort_by(%!(Map item) =>
-    %($(-item["score"].integer()) $(item["candidate_id"])))
+    $(-item["score"].integer(), item["candidate_id"]))
   String digests = ""
   foreach String path in sources:
     String text = texts[path]
@@ -392,7 +392,7 @@ static List _deleted_ranges(String commit):
       List parts = String.new(range + 1).split(",")
       int start = atoi(parts.car().string())
       int count = parts.cdr() ? atoi(parts.cadr().string()) : 1
-      if count: ranges.push(%($old $start $count))
+      if count: ranges.push($(old, start, count))
   return ranges.list_free()
 
 static int _trace(String commit):

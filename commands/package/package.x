@@ -329,20 +329,20 @@ static void _build_source(String package, String name, String spec) {
   _refuse_native(package, name);
   Path builds = _empty_builds(package);
   List paths =
-    %("--x-include-dir" $src "--package-dir" $(Path.dirname(package)));
+    $("--x-include-dir", src, "--package-dir", Path.dirname(package));
   _run(%($x2c "translate" "--out-dir" $builds @paths @units), "translate");
   _run(
-    %($x2c "build" "--kind" $(TargetKind.of(<static-lib>).spelling)
-      "--output" "$builds/lib$name.a"
-      "--build-dir" "$builds/cc" @(_files_with(builds, ".c"))
-      @(_files_with(src, ".c"))),
+    $(
+      x2c, "build", "--kind", TargetKind.of(<static-lib>).spelling, "--output",
+      %"$builds/lib$name.a", "--build-dir", %"$builds/cc",
+      @(_files_with(builds, ".c")), @(_files_with(src, ".c"))),
     "build");
   if (_native_meta(builds, name))
     _run(
-      %($x2c "build" "--kind" $(TargetKind.of(<module>).spelling)
-        "--output" "$builds/$name.module"
-        "--build-dir" "$builds/module" @paths @units
-        @(_files_with(src, ".c"))),
+      $(
+        x2c, "build", "--kind", TargetKind.of(<module>).spelling, "--output",
+        %"$builds/$name.module", "--build-dir", %"$builds/module", @paths,
+        @units, @(_files_with(src, ".c"))),
       "module build");
   Path.write_text(%"$builds/$name.native.rsp", NULL);
 }
@@ -628,7 +628,7 @@ static void _write_lock(String path, List rows) {
     out.write_char('\n');
   }
   String text = out;
-  try Path.publish_files(%($path $text));
+  try Path.publish_files($(path, text));
   catch %(io-fail *detail): Diagnostics.host_error(detail);
 }
 

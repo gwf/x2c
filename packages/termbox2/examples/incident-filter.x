@@ -24,7 +24,7 @@ static List _read_incidents(String path) {
     String severity = fields[1];
     String service = fields[2];
     String text = fields[3];
-    incidents = cons(%($time $severity $service $text), incidents);
+    incidents = cons($(time, severity, service, text), incidents);
   }
   return incidents.reverse();
 }
@@ -162,7 +162,7 @@ static List _run(String path) {
   filter = typed.join(NULL);
   String service = chosen < 0 ? "<none>" :
     matched[chosen].list()[2].string();
-  return %($filter $(matched.len()) $service);
+  return $(filter, matched.len(), service);
 }
 
 static int _report_failure(Symbol cause, List detail) {

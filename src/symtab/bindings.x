@@ -28,7 +28,7 @@ List Sym.define(Sym s, List key, List type) {
 List Sym.define_alias(Sym s, String name, List expression) {
   List type = NULL;
   match (expression) case %(expr ?expression_type ?): type = expression_type;
-  List binding = s.define(%($name), type);
+  List binding = s.define($(name), type);
   s.put(s.binding_facts, %(alias $binding), expression);
   _scope_at(s, -1).aliases++;
   s.aliases++;
@@ -39,7 +39,7 @@ List Sym.define_alias(Sym s, String name, List expression) {
     its `(alias binding)` fact. */
 void Sym.undefine_alias(Sym s, String name) {
   SymScope *scope = _scope_at(s, -1);
-  List key = %($name);
+  List key = $(name);
   Var binding;
   if (scope.bindings.try_get(key, binding))
     s.drop(s.binding_facts, %(alias $binding));
@@ -54,7 +54,7 @@ void Sym.undefine_alias(Sym s, String name) {
 static void _seed_var_tag(Sym s, List key, List type) {
   String owner = _var_converter_owner(key, type);
   if (!owner) return;
-  String converter = %"$(owner)_var", Type declared = %($owner);
+  String converter = %"$(owner)_var", Type declared = $(owner);
   String name = s.c.unprefixed(owner);
   if (s.c.file_prefixes()) _claim_class_tag(s, name, owner);
   declared.register_var_tag(name, converter);
@@ -144,7 +144,7 @@ static List _scope_binding(Sym s, SymScope &scope, List key) {
 static void _note_source_key(
   Sym s, SymScope &scope, List key, List binding) {
   Compiler c = s.c;
-  List source_key = %($(scope.symbols) $key);
+  List source_key = $(scope.symbols, key);
   s.put(s.binding_facts, %(src-key $binding), source_key);
   Var declaration;
   if (c.source_primary && !c.shallow &&
@@ -171,7 +171,7 @@ int Sym.introduced(Sym s) {
 }
 
 /** Allocates a fresh binding identity for a compiler-introduced spelling. */
-List Sym.introduce(Sym s, String spelling) => _new_binding(s, %($spelling));
+List Sym.introduce(Sym s, String spelling) => _new_binding(s, $(spelling));
 
 /** Returns `key`'s binding in the current scope, or `NULL`. */
 List Sym.current_binding(Sym s, List key) {
@@ -279,7 +279,7 @@ module List _package_retry_key(Sym s, List key) {
   if (!package || !key || key.cdr() || key.car() is not <string>) return NULL;
   String spelling = key.car();
   String prefixed = s.c.package_spelling(spelling);
-  return prefixed == spelling ? NULL : %($prefixed);
+  return prefixed == spelling ? NULL : $(prefixed);
 }
 
 /** Resolves an existing key and optionally stores its semantic type.

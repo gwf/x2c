@@ -28,7 +28,7 @@ static Code _rewrite_registration(
   Array rows = [];
   foreach (Var kind in kinds)
     rows.push(%(rewrite $point $kind $name $shape $holes));
-  return %($(Code.bound(function, rows.list_free())));
+  return $(Code.bound(function, rows.list_free()));
 }
 
 /* A function pattern is keyed by the return type it spells, or by `<any>`
@@ -56,7 +56,7 @@ static int _function_hole(Macro shape) {
 /* The operators an operator position names: one operator, or each of
    `(!or OP...)`, any of them quoted. */
 static List _rule_operators(Var position) {
-  List operators = %($position);
+  List operators = $(position);
   match (position) case %((!quote !or) *choices): operators = choices;
   Array found = [];
   foreach (Var operator in operators) {
@@ -125,7 +125,7 @@ Code Code.register_rewrite(Code function, List pattern, List holes) {
       point = operator.is_assignment_op() ? 0 : <binary>;
       match (left) case %(expr ? (index ? ?)):
         if (operator.is_assignment_op()) point = <access>;
-      if (_rule_dynamic(type, %($left $right))) {
+      if (_rule_dynamic(type, $(left, right))) {
         point = <binary>;
         kinds = _rule_dynamic_kinds(kinds, <op>);
       }
@@ -135,30 +135,30 @@ Code Code.register_rewrite(Code function, List pattern, List holes) {
     case %(expr ? (postfix ? (expr ? (index ? ?)))):
       { point = <access>; kinds = %(postfix); }
     case %(expr ?type ((!or ?form op postfix) ?position ?operand)):
-      if (_rule_dynamic(type, %($operand))) {
+      if (_rule_dynamic(type, $(operand))) {
         point = <unary>;
         kinds = _rule_dynamic_kinds(_rule_operators(position), form);
       }
     case %(expr ? (call (expr ? (op ((!quote !quote) .)
             ((!quote !and) (expr ?type *)) ?)) ?)): {
       point = <member>;
-      kinds = %($type);
+      kinds = $(type);
       if (type is <symbol>) holes = _unmarked(holes, type);
     }
     case %(expr ? (call (expr ? (ident (binding ? ?(String callee)))) ?)):
-      { point = <call>; kinds = %($callee); }
+      { point = <call>; kinds = $(callee); }
     case %(expr ?
            ((!or ?head array map segments dstrasgn lambda) *)):
-      { point = <literal>; kinds = %($head); }
+      { point = <literal>; kinds = $(head); }
     case %((!quote !or)
            ((!or ?head switch try raise match dstrdecl conform)
             *) *):
-      { point = <node>; kinds = %($head); }
+      { point = <node>; kinds = $(head); }
     case %((!or ?head switch try raise match dstrdecl conform) *):
-      { point = <node>; kinds = %($head); }
+      { point = <node>; kinds = $(head); }
     case %(stmnt (expr ? (dstrasgn *))): { point = <node>; kinds = %(stmnt); }
     case %(!or (api-source ? ? (function ?type *)) (function ?type *)):
-      { point = <function>; kinds = %($(_function_rule_key(type))); }
+      { point = <function>; kinds = $(_function_rule_key(type)); }
   }
   if (!point) $fail.meta_sdk_rewrite_pattern();
   return _rewrite_registration(

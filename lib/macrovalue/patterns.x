@@ -70,7 +70,7 @@ static List _binder_rows(Macro t, List names, int case_pattern) {
       given = Atom.intern("*" + given.str()[1:]);
     Var selected = _hidden(given);
     int sequence = hole.assoc(<sequence>);
-    Var projected = sequence ? %($selected).var() : selected;
+    Var projected = sequence ? $(selected).var() : selected;
     // An explicit expression pattern owns its type constraint.
     if (!sequence && selected is <list> && selected.list().car() == <expr>)
       projected = %(!and $selected);
@@ -78,11 +78,11 @@ static List _binder_rows(Macro t, List names, int case_pattern) {
       projected = %(!and $given $(_name_identity(hole)));
     Var expression = !sequence && kind == <name>
                    ? %(expr ? (ident $projected)).var() : projected;
-    rows = cons(%($(_key(hole, "expression")) $expression), rows);
-    rows = cons(%($(_key(hole, "value")) $projected), rows);
-    rows = cons(%($(_key(hole, "source")) $projected), rows);
-    rows = cons(%($(_key(hole, "member")) $selected), rows);
-    rows = cons(%($(_key(hole, "splice")) ($selected)), rows);
+    rows = cons($(_key(hole, "expression"), expression), rows);
+    rows = cons($(_key(hole, "value"), projected), rows);
+    rows = cons($(_key(hole, "source"), projected), rows);
+    rows = cons($(_key(hole, "member"), selected), rows);
+    rows = cons($(_key(hole, "splice"), $(selected)), rows);
   }
   return rows;
 }
@@ -169,12 +169,12 @@ static List _value_rows(Macro t, List values) {
                        : _expr_value(value);
     Var expression = !sequence && kind == <name>
                    ? %(expr () (ident $value)).var() : value;
-    rows = cons(%($(_key(hole, "expression")) $expression), rows);
-    rows = cons(%($(_key(hole, "value")) $value), rows);
-    rows = cons(%($(_key(hole, "source")) $value), rows);
+    rows = cons($(_key(hole, "expression"), expression), rows);
+    rows = cons($(_key(hole, "value"), value), rows);
+    rows = cons($(_key(hole, "source"), value), rows);
     if (kind == <name>)
-      rows = cons(%($(_key(hole, "member")) $value), rows);
-    rows = cons(%($(_key(hole, "splice")) $value), rows);
+      rows = cons($(_key(hole, "member"), value), rows);
+    rows = cons($(_key(hole, "splice"), value), rows);
     values = sequence ? NULL : values.cdr();
   }
   return rows;

@@ -59,7 +59,7 @@ static Module _rnn(void) {
 static List _layers(Module model) {
   Module ih = model.child("ih"), hh = model.child("hh"),
          out = model.child("out");
-  return %($ih $hh $out);
+  return $(ih, hh, out);
 }
 
 static Module _built(String directory, String name) {
@@ -77,7 +77,7 @@ static Tensor _predict(List layers, Tensor h) =>
 
 static Tensor _zero_state(long streams) {
   long hidden = HIDDEN;
-  return Tensor.zeros(%($streams $hidden), XT_FLOAT32);
+  return Tensor.zeros($(streams, hidden), XT_FLOAT32);
 }
 
 /* Takes ownership of `state` for the caller's next window and releases
@@ -148,7 +148,7 @@ static void _train(List layers, Optimizer adam, Tensor streams, int count,
                                 &piece);
           (part / scale).backward();
           Tensor detached = piece.detach();
-          pieces = pieces.append(%($detached));
+          pieces = pieces.append($(detached));
         }
         ended = Tensor.cat(pieces, 0);
       }

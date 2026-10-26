@@ -153,11 +153,11 @@ List Sym.visible_symbols(Sym s) {
     foreach (Var (key, value) in scope.symbols)
       match (key)
         case %(?(String name)):
-          if (_unseen(seen, name)) rows.push(%($name $value));
+          if (_unseen(seen, name)) rows.push($(name, value));
     if (scope.macros != NULL)
       foreach ((Var name, List definition) in scope.macros)
         if (name is <string> && _unseen(seen, name))
-          rows.push(%($name $(_macro_kind(definition))));
+          rows.push($(name, _macro_kind(definition)));
   }
   return rows.list_free();
 }

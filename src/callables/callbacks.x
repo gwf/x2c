@@ -18,7 +18,7 @@ static macro Stmt $fail.callable_callback_arity(
   Expr $cb, Expr $target_count, Expr $source_count) {
   String detail = "target has %d parameters; source has %d".printf(
     $target_count, $source_count);
-  _fail($cb, "typed callback adapter arity mismatch", %($detail));
+  _fail($cb, "typed callback adapter arity mismatch", $(detail));
 }
 
 static macro Stmt $fail.callable_callback_void_return(Expr $cb) =>
@@ -31,7 +31,7 @@ static macro Stmt $fail.callable_callback_parameter(
   Expr $cb, Expr $index, Expr $target, Expr $source) {
   String detail = "parameter %d: %s cannot adapt to %s".printf(
     $index + 1, $target.repr(), $source.repr());
-  _fail($cb, "typed callback adapter parameter mismatch", %($detail));
+  _fail($cb, "typed callback adapter parameter mismatch", $(detail));
 }
 
 // callback adapters
@@ -187,7 +187,7 @@ List Compiler.adapt_lambda_arg(Compiler c, List argument, List expected_type) {
   List source_params = NULL;
   cb.source.function_parts(source_params, NULL);
   _collect_param_types(source_params, cb.source_params);
-  List result = return_type is <list> ? return_type : %( $return_type );
+  List result = return_type is <list> ? return_type : $(return_type);
   if (all_var && result === %("Var")) return argument;
   cb.result = result;
   return _publish_lambda(cb);
@@ -220,7 +220,7 @@ static int _collect_param_types(List raw_params, List &out_types) {
     Var ptype = entry;
     match (entry)
       case %(param ? ?): ptype = entry.list().type_from_ast();
-    List ptype_list = ptype is <list> ? ptype : %( $ptype );
+    List ptype_list = ptype is <list> ? ptype : $(ptype);
     types.push(ptype_list);
     if (all_var && ptype_list != %("Var")) all_var = 0;
   }

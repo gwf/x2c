@@ -154,7 +154,7 @@ static List _bind_form(
     case %((!or break continue default empty)) if (statement): return input;
     case %(case ?expr) if (statement): return %(case $(_resolve(c, expr)));
     case %((!or ?tag goto label) ?name) if (statement):
-      return %($tag $name);
+      return $(tag, name);
     case $expression_statement(?expr) if (statement):
       return _bind_expression_statement(c, expr, context);
     case $deferred(?body) if (statement):
@@ -455,7 +455,7 @@ List Compiler.bind_catch_arm(
   }
   List statement = _bind_statement(c, body);
   if (_declares_binders(body, bindings))
-    return %($pattern $statement);
+    return $(pattern, statement);
   return %($pattern (block
     @(c.pattern_binder_declarations(bindings, handle)) $statement));
 }
@@ -556,7 +556,7 @@ List Compiler.bind_match_arm(
   }
   List statement = _bind_arm_body(c, body, types);
   if (!bindings || _declares_binders(body, bindings))
-    return %($pattern $statement);
+    return $(pattern, statement);
   List declarations = c.pattern_binder_declarations(bindings, NULL);
   match (statement)
     case %(guarded ?inner):

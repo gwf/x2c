@@ -39,7 +39,7 @@ module Ast _slice_node(
   if (!nominal)
     $fail.transform_slice_unsupported(c, NULL, type, NULL);
   String fnname = %"$(nominal)_getslice";
-  if (!c.sym.get(%($fnname)))
+  if (!c.sym.get($(fnname)))
     $fail.transform_slice_unsupported(c, NULL, type, %());
   start = _slice_bound(start);
   stop = _slice_bound(stop);
@@ -89,19 +89,19 @@ static List _expression_rewrite(Compiler c, List expression) {
         List target = _access_source(left);
         if (target == left) return NULL;
         kind = operator;
-        source = source_operator_expression(type, %($operator $target $right));
+        source = source_operator_expression(type, $(operator, target, right));
       }
     case %(expr ?type (op (!or ?operator ++ --) ?operand)): {
       List target = _access_source(operand);
       if (target == operand) return NULL;
       kind = <prefix>;
-      source = source_operator_expression(type, %($operator $target));
+      source = source_operator_expression(type, $(operator, target));
     }
     case %(expr ?type (postfix ?operator ?operand)): {
       List target = _access_source(operand);
       if (target == operand) return NULL;
       kind = <postfix>;
-      source = source_postfix_expression(type, %($operator $target));
+      source = source_postfix_expression(type, $(operator, target));
     }
   }
   return kind ? c.lower_rewrite(
@@ -251,7 +251,7 @@ module List _declaration(Compiler c, List ast) {
               match (converted)
                 case %(expr ("Func")
                        (ident (!set ?dependency (binding ? ?)))):
-                  c.static_init_deps[var] = %($dependency);
+                  c.static_init_deps[var] = $(dependency);
           }
         values.push(new_bind);
       }
@@ -266,7 +266,7 @@ module List _return(Compiler c, List ast) {
   match (ast)
     case $return_value(?expression): {
       List value = c.convert_expression(expression, source_return_type(ast));
-      return source_return_content(%($value));
+      return source_return_content($(value));
     }
   return ast;
 }

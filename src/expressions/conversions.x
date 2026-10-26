@@ -33,7 +33,7 @@ module void _note_explicit_converter(
     if (method != spelled && (method != "str" || result !== %("String")))
       return;
     c.protocol_helpers["explicit-converter"] =
-      %($call $method $(c.token_location(origin)));
+      $(call, method, c.token_location(origin));
   }
 }
 
@@ -343,7 +343,7 @@ static List _convert_generic_arms(
       }
     if (changed)
       return %(expr $declared_target $(source_generic_content(
-        %($control @(converted.list_free())))));
+        $(control, @(converted.list_free())))));
     converted.free();
   }
   return NULL;
@@ -475,7 +475,7 @@ static List _read_var(
 static List _var_checked_reader(
   Compiler c, List expr, Type type, Type target) {
   List owners = target.is_bare_typedef_name()
-              ? _typedef_names(c, target).list_free() : %($target);
+              ? _typedef_names(c, target).list_free() : $(target);
   foreach (Type owner in owners) {
     List reader = _var_exact_reader(c, expr, owner);
     if (!reader) reader = c.converter_call(expr, type, owner);
@@ -503,7 +503,7 @@ static List _var_exact_reader(Compiler c, List expr, Type target) {
   }
   if (!callee) return NULL;
   Macro called = $called;
-  return c.rebuild_expression(target, called(callee, %($expr)));
+  return c.rebuild_expression(target, called(callee, $(expr)));
 }
 
 /* The reader that crosses a `Var` to `target` and yields NULL for another
@@ -517,7 +517,7 @@ static List _payload_reader(Compiler c, Type target) =>
    NULL. */
 static List _var_reader(Compiler c, String reader, Type target) {
   Type readertype = NULL;
-  List binding = c.sym.resolve_global(%($reader), readertype);
+  List binding = c.sym.resolve_global($(reader), readertype);
   if (!binding || !readertype || readertype.car() is not <list>) return NULL;
   List function = readertype.car();
   (Var function_tag, List parameters) = function;
@@ -539,13 +539,13 @@ static List _declared_var_converter(
   }
   if (!converter) return NULL;
   String typename = converter_type.car().str(), Type cvrtrtype = NULL;
-  List converter_binding = c.sym.resolve_global(%($converter), cvrtrtype);
+  List converter_binding = c.sym.resolve_global($(converter), cvrtrtype);
   if (cvrtrtype === %((func (($typename))) "Var")) {
     List argument = type == converter_type
       ? expr : %(expr $converter_type $expr);
     List callee = %(expr $cvrtrtype (ident $converter_binding));
     Macro called = $called;
-    return c.rebuild_expression(%("Var"), called(callee, %($argument)));
+    return c.rebuild_expression(%("Var"), called(callee, $(argument)));
   }
   $fail.expressions_var_loss(c, NULL, type);
 }
@@ -580,7 +580,7 @@ static List _box_var(Compiler c, List expr, Type type) {
 List Compiler.converter_call(Compiler c, List expr, Type type, Type target) {
   if (!type.match(%(?)) || !target.match(%(?))) return NULL;
   List owners = type.is_bare_typedef_name()
-              ? _typedef_names(c, type).list_free() : %($type);
+              ? _typedef_names(c, type).list_free() : $(type);
   foreach (Type owner in owners) {
     if (owner == target) return NULL;
     int declared = 0;
@@ -596,7 +596,7 @@ static List _converter_owned_call(
   String convfuncname = _converter_name(owner, target);
   Type cvrtrtype = NULL;
   List converter_binding = c.sym.resolve_global(
-    %($convfuncname), cvrtrtype);
+    $(convfuncname), cvrtrtype);
   declared = !!converter_binding || !!cvrtrtype;
   List callee = %(expr $cvrtrtype (ident $converter_binding));
   List argument = expr.cadr() == owner
@@ -610,7 +610,7 @@ static List _converter_owned_call(
          c.sym.normalize_declared_type(target)))
     return NULL;
   Macro called = $called;
-  List call = c.rebuild_expression(target, called(callee, %($argument)));
+  List call = c.rebuild_expression(target, called(callee, $(argument)));
   return _converted_temporary(c, call, owner, target);
 }
 
@@ -650,7 +650,7 @@ int Compiler.is_builtin_converter_call(Compiler c, List expr) {
       if (spelling != _converter_name(source, target)) return 0;
       Type declared = NULL;
       return !binding ||
-        binding == c.sym.resolve_global(%($spelling), declared);
+        binding == c.sym.resolve_global($(spelling), declared);
     }
   return 0;
 }

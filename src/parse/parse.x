@@ -40,7 +40,7 @@ static macro Stmt $fail.parse_body_expected(
   Expr $c, Expr $site, Expr $unexpected) =>
   $c.report_error(
     <parse>, "expected ';', '{', or '=>'",
-    $site, %("token:" $($c.token.text) "symbol:" $($unexpected.str())));
+    $site, $("token:", $c.token.text, "symbol:", $unexpected.str()));
 
 static macro Stmt $fail.parse_meta_function(Expr $c, Expr $origin) =>
   $c.report_error(
@@ -155,7 +155,7 @@ static macro Stmt $fail.parse_dimension_close(
   Expr $c, Expr $site, Expr $expr, Expr $unexpected) =>
   $c.report_error(
     <parse>, "expected ']'",
-    $site, %("dimension:" $($expr.str()) "symbol:" $($unexpected.str())));
+    $site, $("dimension:", $expr.str(), "symbol:", $unexpected.str()));
 
 static macro Stmt $fail.parse_macro_member(Expr $c, Expr $site) =>
   $c.report_error(
@@ -171,8 +171,7 @@ static macro Stmt $fail.parse_params_close(
   Expr $c, Expr $site, Expr $params, Expr $unexpected) =>
   $c.report_error(
     <parse>, "expected ')'",
-    $site, %("parameters:" $($params.str())
-      "symbol:" $($unexpected.str())));
+    $site, $("parameters:", $params.str(), "symbol:", $unexpected.str()));
 
 static macro Stmt $fail.parse_params_empty(Expr $c, Expr $site) =>
   $c.report_error(
@@ -183,7 +182,7 @@ static macro Stmt $fail.parse_method_member(
   Expr $c, Expr $site, Expr $owner) =>
   $c.report_error(
     <parse>, "expected method name after dot",
-    $site, %( "typedef:" $($owner) "token:" $($c.token.text)  ));
+    $site, $("typedef:", $owner, "token:", $c.token.text));
 
 static macro Stmt $fail.parse_function_body(Expr $c, Expr $site) =>
   $c.report_error(
@@ -194,13 +193,13 @@ static macro Stmt $fail.parse_shutdown_duplicate(
   Expr $c, Expr $site, Expr $name) =>
   $c.report_error(
     <parse>, "translation unit has more than one type shutdown",
-    $site, %( "shutdown:" $($name) ));
+    $site, $("shutdown:", $name));
 
 static macro Stmt $fail.parse_init_duplicate(
   Expr $c, Expr $site, Expr $name) =>
   $c.report_error(
     <parse>, "translation unit has more than one type initializer",
-    $site, %( "initializer:" $($name) ));
+    $site, $("initializer:", $name));
 
 static macro Stmt $fail.parse_lifecycle_signature(
   Expr $c, Expr $site, Expr $role, Expr $name) {

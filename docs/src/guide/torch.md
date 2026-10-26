@@ -265,7 +265,7 @@ From `examples/jit-infer.x`:
 JitModule model = JitModule.load(path);
 model.eval();
 Torch.inference_mode();
-List results = model.forward(%($x));
+List results = model.forward($(x));
 Tensor logits = results[0].tensor();
 ```
 

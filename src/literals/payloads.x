@@ -9,7 +9,7 @@ static macro Stmt $fail.literals_symbol_bare(
       ? "use raise %(code (key value)...);"
       : "use catch %(code (key pattern)...):";
     $c.report_error(
-      <parse>, %"$label $role must be a bare Symbol", $origin, %($hint));
+      <parse>, %"$label $role must be a bare Symbol", $origin, $(hint));
   }
 }
 

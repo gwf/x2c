@@ -45,7 +45,7 @@ static List _session_value(PromptFunction &p, Type type, List binding) {
   String name = Ast.binding_spelling(binding);
   Compiler c = p.session.compiler;
   Type global_type = NULL;
-  List global = c.sym.resolve_global(%($name), global_type);
+  List global = c.sym.resolve_global($(name), global_type);
   if (!global || !global.equal(binding)) return NULL;
   List entry = p.session.inspect(name);
   if (type.is_function()) {
@@ -192,7 +192,7 @@ static List _prepare(Compiler c, PromptFunction &p) {
         rewritten = _rewrite(p, body);
       }
       c.add_early(%(function (static @spec) $declarator
-        $(c.prepend_setup(rewritten, %($setup)))));
+        $(c.prepend_setup(rewritten, $(setup)))));
       List target = %(expr $(p.body_type) (ident $(p.body)));
       List adapter = c.context_func_adapter(p.type, target);
       List signature = c.cache_literal_list(c.func_signature(p.type));

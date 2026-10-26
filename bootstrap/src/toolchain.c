@@ -39,11 +39,11 @@ typedef struct ToolRun{
 #include <unistd.h>
 #include "report.h"
 #include "utils.h"
-static List _127, _124, _123, _122, _121, _118, _116, _115, _113, _111, _107, _64, _61, _58, _44, _43;
+static List _125, _122, _121, _120, _119, _116, _114, _113, _111, _109, _105, _56, _53, _50, _36, _35;
 
-static String _135, _134, _133, _132, _131, _130, _129, _128, _125, _119, _109, _105, _103, _101, _99, _97, _95, _93, _91, _89, _87, _85, _83, _81, _79, _77, _75, _73, _71, _69, _67, _66, _65, _62, _59, _56, _54, _52, _51, _50, _49, _48, _47, _46, _45, _41, _39, _37, _35, _33, _31, _29, _27, _25, _23, _21, _19, _17, _15, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _133, _132, _131, _130, _129, _128, _127, _126, _123, _117, _107, _103, _101, _99, _97, _95, _93, _91, _89, _87, _85, _83, _81, _79, _77, _75, _73, _71, _69, _67, _65, _63, _61, _59, _58, _57, _54, _51, _48, _46, _44, _43, _42, _41, _40, _39, _38, _37, _33, _31, _29, _27, _26, _25, _24, _23, _21, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
-static Var _126, _120, _117, _114, _112, _110, _108, _106, _104, _102, _100, _98, _96, _94, _92, _90, _88, _86, _84, _82, _80, _78, _76, _74, _72, _70, _68, _63, _60, _57, _55, _53, _42, _40, _38, _36, _34, _32, _30, _28, _26, _24, _22, _20, _18, _16, _14;
+static Var _124, _118, _115, _112, _110, _108, _106, _104, _102, _100, _98, _96, _94, _92, _90, _88, _86, _84, _82, _80, _78, _76, _74, _72, _70, _68, _66, _64, _62, _60, _55, _52, _49, _47, _45, _34, _32, _30, _28, _22, _20;
 
 static int _init_guard_ = 0;
 
@@ -100,7 +100,7 @@ static Func _x2c_gensym_func_handle_0;
 
 
 
-_x2c_gensym_initializer_choice_242786A8_0((_x2c_gensym_func_handle_0 = x2c_func_shared(_x2c_gensym_func_adapt_0, _118)))
+_x2c_gensym_initializer_choice_242786A8_0((_x2c_gensym_func_handle_0 = x2c_func_shared(_x2c_gensym_func_adapt_0, _116)))
 typedef struct _x2c_gensym_lambda_context_0{
   Var c0;
 }
@@ -128,128 +128,126 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _11 = String_new("/builds/0/libx2c.a");
   _12 = String_new("META_CC");
   _13 = String_new("-MMD");
-  _14 = String_var(_13);
-  _15 = String_new("-MP");
-  _16 = String_var(_15);
-  _17 = String_new("-MF");
-  _18 = String_var(_17);
-  _19 = String_new("-MT");
+  _14 = String_new("-MP");
+  _15 = String_new("-MF");
+  _16 = String_new("-MT");
+  _17 = String_new("-c");
+  _18 = String_new("-o");
+  _19 = String_new("-E");
   _20 = String_var(_19);
-  _21 = String_new("-c");
+  _21 = String_new("-o");
   _22 = String_var(_21);
-  _23 = String_new("-o");
-  _24 = String_var(_23);
-  _25 = String_new("-E");
-  _26 = String_var(_25);
-  _27 = String_new("-fsigned-char");
+  _23 = String_new("-fsigned-char");
+  _24 = String_new("-iquote");
+  _25 = String_new("rcs");
+  _26 = String_new("-lm");
+  _27 = String_new("-bundle");
   _28 = String_var(_27);
-  _29 = String_new("-iquote");
+  _29 = String_new("-bundle_loader");
   _30 = String_var(_29);
-  _31 = String_new("rcs");
+  _31 = String_new("-shared");
   _32 = String_var(_31);
-  _33 = String_new("-lm");
+  _33 = String_new("-Wl,-Bsymbolic-functions");
   _34 = String_var(_33);
-  _35 = String_new("-bundle");
-  _36 = String_var(_35);
-  _37 = String_new("-bundle_loader");
-  _38 = String_var(_37);
-  _39 = String_new("-shared");
-  _40 = String_var(_39);
-  _41 = String_new("-Wl,-Bsymbolic-functions");
-  _42 = String_var(_41);
-  _43 = cons(_42, NULL);
-  _44 = cons(_40, _43);
-  _45 = String_new("x2c: unable to execute ");
-  _46 = String_new(": ");
-  _47 = String_new("\n");
-  _48 = String_new("-fkeep-system-includes");
-  _49 = String_new("-ftrack-macro-expansion=0");
-  _50 = String_new("/cpp.d");
-  _51 = String_new("");
-  _52 = String_new("-x");
-  _53 = String_var(_52);
-  _54 = String_new("c");
+  _35 = cons(_34, NULL);
+  _36 = cons(_32, _35);
+  _37 = String_new("x2c: unable to execute ");
+  _38 = String_new(": ");
+  _39 = String_new("\n");
+  _40 = String_new("-fkeep-system-includes");
+  _41 = String_new("-ftrack-macro-expansion=0");
+  _42 = String_new("/cpp.d");
+  _43 = String_new("");
+  _44 = String_new("-x");
+  _45 = String_var(_44);
+  _46 = String_new("c");
+  _47 = String_var(_46);
+  _48 = String_new("/dev/null");
+  _49 = String_var(_48);
+  _50 = cons(_49, NULL);
+  _51 = String_new("-fkeep-system-includes");
+  _52 = String_var(_51);
+  _53 = cons(_52, NULL);
+  _54 = String_new("-ftrack-macro-expansion=0");
   _55 = String_var(_54);
-  _56 = String_new("/dev/null");
-  _57 = String_var(_56);
-  _58 = cons(_57, NULL);
-  _59 = String_new("-fkeep-system-includes");
+  _56 = cons(_55, NULL);
+  _57 = String_new("-I");
+  _58 = String_new("-idirafter");
+  _59 = String_new("-imacros");
   _60 = String_var(_59);
-  _61 = cons(_60, NULL);
-  _62 = String_new("-ftrack-macro-expansion=0");
-  _63 = String_var(_62);
-  _64 = cons(_63, NULL);
-  _65 = String_new("-I");
-  _66 = String_new("-idirafter");
-  _67 = String_new("-imacros");
+  _61 = String_new("-D__asm(x)=");
+  _62 = String_var(_61);
+  _63 = String_new("-D__asm__(x)=");
+  _64 = String_var(_63);
+  _65 = String_new("-D__attribute__(x)=");
+  _66 = String_var(_65);
+  _67 = String_new("-D__format__(x)=");
   _68 = String_var(_67);
-  _69 = String_new("-D__asm(x)=");
+  _69 = String_new("-D__printf__(x)=");
   _70 = String_var(_69);
-  _71 = String_new("-D__asm__(x)=");
+  _71 = String_new("-D__inline__=");
   _72 = String_var(_71);
-  _73 = String_new("-D__attribute__(x)=");
+  _73 = String_new("-D__inline=");
   _74 = String_var(_73);
-  _75 = String_new("-D__format__(x)=");
+  _75 = String_new("-D_Nullable=");
   _76 = String_var(_75);
-  _77 = String_new("-D__printf__(x)=");
+  _77 = String_new("-D_Nonnull=");
   _78 = String_var(_77);
-  _79 = String_new("-D__inline__=");
+  _79 = String_new("-DX2CCPP");
   _80 = String_var(_79);
-  _81 = String_new("-D__inline=");
+  _81 = String_new("-D__restrict=");
   _82 = String_var(_81);
-  _83 = String_new("-D_Nullable=");
+  _83 = String_new("-D__extension__=");
   _84 = String_var(_83);
-  _85 = String_new("-D_Nonnull=");
+  _85 = String_new("-Wno-unicode");
   _86 = String_var(_85);
-  _87 = String_new("-DX2CCPP");
+  _87 = String_new("-Wno-invalid-pp-token");
   _88 = String_var(_87);
-  _89 = String_new("-D__restrict=");
+  _89 = String_new("-I");
   _90 = String_var(_89);
-  _91 = String_new("-D__extension__=");
+  _91 = String_new(".");
   _92 = String_var(_91);
-  _93 = String_new("-Wno-unicode");
+  _93 = String_new("-MMD");
   _94 = String_var(_93);
-  _95 = String_new("-Wno-invalid-pp-token");
+  _95 = String_new("-MF");
   _96 = String_var(_95);
-  _97 = String_new("-I");
+  _97 = String_new("-MT");
   _98 = String_var(_97);
-  _99 = String_new(".");
+  _99 = String_new("x2c-dependencies");
   _100 = String_var(_99);
-  _101 = String_new("x2c-dependencies");
+  _101 = String_new("-include");
   _102 = String_var(_101);
-  _103 = String_new("-include");
+  _103 = String_new("-");
   _104 = String_var(_103);
-  _105 = String_new("-");
-  _106 = String_var(_105);
-  _107 = cons(_106, NULL);
-  _108 = Symbol_var(437126);
-  _109 = String_new("Var");
-  _110 = String_var(_109);
+  _105 = cons(_104, NULL);
+  _106 = Symbol_var(437126);
+  _107 = String_new("Var");
+  _108 = String_var(_107);
+  _109 = cons(_108, NULL);
+  _110 = List_var(_109);
   _111 = cons(_110, NULL);
   _112 = List_var(_111);
   _113 = cons(_112, NULL);
-  _114 = List_var(_113);
-  _115 = cons(_114, NULL);
-  _116 = cons(_108, _115);
-  _117 = List_var(_116);
-  _118 = cons(_117, _111);
-  _119 = String_new("-v");
-  _120 = String_var(_119);
-  _121 = cons(_55, _58);
-  _122 = cons(_53, _121);
-  _123 = cons(_120, _122);
-  _124 = cons(_26, _123);
-  _125 = String_new("-print-search-dirs");
-  _126 = String_var(_125);
-  _127 = cons(_126, NULL);
-  _128 = String_new("End of search list");
-  _129 = String_new("search starts here");
-  _130 = String_new(" (");
-  _131 = String_new("/include");
-  _132 = String_new("lib");
-  _133 = String_new("libraries: ");
-  _134 = String_new("=");
-  _135 = String_new(":");
+  _114 = cons(_106, _113);
+  _115 = List_var(_114);
+  _116 = cons(_115, _109);
+  _117 = String_new("-v");
+  _118 = String_var(_117);
+  _119 = cons(_47, _50);
+  _120 = cons(_45, _119);
+  _121 = cons(_118, _120);
+  _122 = cons(_20, _121);
+  _123 = String_new("-print-search-dirs");
+  _124 = String_var(_123);
+  _125 = cons(_124, NULL);
+  _126 = String_new("End of search list");
+  _127 = String_new("search starts here");
+  _128 = String_new(" (");
+  _129 = String_new("/include");
+  _130 = String_new("lib");
+  _131 = String_new("libraries: ");
+  _132 = String_new("=");
+  _133 = String_new(":");
   _x2c_gensym_static_initialize_0();
 }
 
@@ -388,7 +386,7 @@ static ToolAction _action(Toolchain t, Symbol phase, List arguments){
 ToolAction Toolchain_compile_action(Toolchain t, String source, String object, String depfile, List gen_dirs){
   if(! _init_guard_) _file_init_();
   return _action(t, 7477414666, ({
-    List _x2c_gensym_literal_part_0 = _compile_arguments(t, gen_dirs);  List_append(_x2c_gensym_literal_part_0, cons(_14, cons(_16, cons(_18, cons(String_var(depfile), cons(_20, cons(String_var(object), cons(_22, cons(String_var(source), cons(_24, cons(String_var(object), NULL)))))))))));
+    List _x2c_gensym_literal_part_0 = _compile_arguments(t, gen_dirs);  List_append(_x2c_gensym_literal_part_0, cons(String_var(_13), cons(String_var(_14), cons(String_var(_15), cons(String_var(depfile), cons(String_var(_16), cons(String_var(object), cons(String_var(_17), cons(String_var(source), cons(String_var(_18), cons(String_var(object), NULL)))))))))));
   }
   ));
 }
@@ -396,41 +394,41 @@ ToolAction Toolchain_compile_action(Toolchain t, String source, String object, S
 ToolAction Toolchain_preprocess_action(Toolchain t, String source, String output, List gen_dirs){
   if(! _init_guard_) _file_init_();
   return _action(t, 1165861522189542, ({
-    List _x2c_gensym_literal_part_1 = _compile_arguments(t, gen_dirs);  List_append(_x2c_gensym_literal_part_1, cons(_26, cons(String_var(source), cons(_24, cons(String_var(output), NULL)))));
+    List _x2c_gensym_literal_part_1 = _compile_arguments(t, gen_dirs);  List_append(_x2c_gensym_literal_part_1, cons(_20, cons(String_var(source), cons(_22, cons(String_var(output), NULL)))));
   }
   ));
 }
 
 static List _compile_arguments(Toolchain t, List gen_dirs){
   return({
-    Var _x2c_gensym_literal_part_2 = String_var(t -> cc);  List _x2c_gensym_literal_part_3 = List_flatten(List_map(gen_dirs, _x2c_gensym_func_handle_0));  cons(_x2c_gensym_literal_part_2, cons(_28, List_append(_x2c_gensym_literal_part_3, cons(_30, cons(String_var(t -> include_dir), List_append(t -> cc_args, NULL))))));
+    Var _x2c_gensym_literal_part_2 = String_var(t -> cc);  List _x2c_gensym_literal_part_3 = List_flatten(List_map(gen_dirs, _x2c_gensym_func_handle_0));  cons(_x2c_gensym_literal_part_2, cons(String_var(_23), List_append(_x2c_gensym_literal_part_3, cons(String_var(_24), cons(String_var(t -> include_dir), List_append(t -> cc_args, NULL))))));
   }
   );
 }
 
 ToolAction Toolchain_archive_action(Toolchain t, String output, List objects){
   if(! _init_guard_) _file_init_();
-  return _action(t, 3362278794, cons(String_var(t -> ar), cons(_32, cons(String_var(output), List_append(objects, NULL)))));
+  return _action(t, 3362278794, cons(String_var(t -> ar), cons(String_var(_25), cons(String_var(output), List_append(objects, NULL)))));
 }
 
 ToolAction Toolchain_link_action(Toolchain t, String output, List inputs){
   if(! _init_guard_) _file_init_();
-  return _action(t, 805782, cons(String_var(t -> cc), List_append(inputs, List_append(t -> ld_args, cons(String_var(t -> runtime_lib), cons(_34, cons(_24, cons(String_var(output), NULL))))))));
+  return _action(t, 805782, cons(String_var(t -> cc), List_append(inputs, List_append(t -> ld_args, cons(String_var(t -> runtime_lib), cons(String_var(_26), cons(String_var(_18), cons(String_var(output), NULL))))))));
 }
 
 ToolAction Toolchain_module_action(Toolchain t, String output, List inputs, String loader){
   if(! _init_guard_) _file_init_();
   return _action(t, 805782, ({
-    Var _x2c_gensym_literal_part_4 = String_var(t -> cc);  List _x2c_gensym_literal_part_5 = inputs;  List _x2c_gensym_literal_part_6 = t -> ld_args;  List _x2c_gensym_literal_part_7 = _module_shape(loader);  cons(_x2c_gensym_literal_part_4, List_append(_x2c_gensym_literal_part_5, List_append(_x2c_gensym_literal_part_6, List_append(_x2c_gensym_literal_part_7, cons(_24, cons(String_var(output), NULL))))));
+    Var _x2c_gensym_literal_part_4 = String_var(t -> cc);  List _x2c_gensym_literal_part_5 = inputs;  List _x2c_gensym_literal_part_6 = t -> ld_args;  List _x2c_gensym_literal_part_7 = _module_shape(loader);  cons(_x2c_gensym_literal_part_4, List_append(_x2c_gensym_literal_part_5, List_append(_x2c_gensym_literal_part_6, List_append(_x2c_gensym_literal_part_7, cons(_22, cons(String_var(output), NULL))))));
   }
   ));
 }
 
 static List _module_shape(String loader){
 #ifdef __APPLE__
-  return cons(_36, cons(_38, cons(String_var(loader), NULL)));
+  return cons(_28, cons(_30, cons(String_var(loader), NULL)));
 #else
-  return _44;
+  return _36;
 #endif
 
 }
@@ -543,7 +541,7 @@ static Job _start_tool(Job command, String program, String * failure){
 static String _start_failure(String program, List detail){
   long error = Var_long(Var_convert(List_assoc(detail, Symbol_var(11703198)), 818062));
   String reason = String_new(strerror((int) error));
-  return String_join(NULL, cons(String_var(_45), cons(String_var(program), cons(String_var(_46), cons(String_var(reason), cons(String_var(_47), NULL))))));
+  return String_join(NULL, cons(String_var(_37), cons(String_var(program), cons(String_var(_38), cons(String_var(reason), cons(String_var(_39), NULL))))));
 }
 
 int Toolchain_preprocess(Toolchain t, const char * fname, List include_dirs, const char * imacros, String * output, String * errors, String * dependencies){
@@ -552,13 +550,13 @@ int Toolchain_preprocess(Toolchain t, const char * fname, List include_dirs, con
   (* errors) = NULL;
   (* dependencies) = NULL;
   if(! fname) return - 1;
-  if(! t -> keep_system_includes) t -> keep_system_includes = _accepts(t -> cc, _48);
-  if(! t -> inline_macro_expansions) t -> inline_macro_expansions = _accepts(t -> cc, _49);
+  if(! t -> keep_system_includes) t -> keep_system_includes = _accepts(t -> cc, _40);
+  if(! t -> inline_macro_expansions) t -> inline_macro_expansions = _accepts(t -> cc, _41);
   Path scratch = Path_temp_dir();
-  String depfile = String_join(NULL, cons(String_var(scratch), cons(String_var(_50), NULL)));
+  String depfile = String_join(NULL, cons(String_var(scratch), cons(String_var(_42), NULL)));
   List arguments = _cpp_arguments(t, include_dirs, String_new(imacros), depfile, String_new(fname));
   if(t -> verbose) _print_action(1165861522189542, arguments);
-  Job command = Job_options(_captured(arguments), Map_update_n(Map_new(), 1, Symbol_var(19826024), String_var(_51)));
+  Job command = Job_options(_captured(arguments), Map_update_n(Map_new(), 1, Symbol_var(19826024), String_var(_43)));
   int status = _capture(command, Var_as_string(List_car(arguments)), &((* output)), &((* errors)));
   {
     ExceptionFrame _x2c_gensym_exception_frame_2;
@@ -606,13 +604,13 @@ int Toolchain_preprocess(Toolchain t, const char * fname, List include_dirs, con
 
 static int _accepts(String cc, String option){
   String output = NULL, errors = NULL;
-  List probe = cons(String_var(cc), cons(_26, cons(_53, cons(_55, cons(String_var(option), _58)))));
+  List probe = cons(String_var(cc), cons(_20, cons(_45, cons(_47, cons(String_var(option), _50)))));
   return tool_capture(probe, &(output), &(errors)) == 0 ? 1 : - 1;
 }
 
 static List _cpp_arguments(Toolchain t, List include_dirs, String macros, String depfile, String source){
   return({
-    Var _x2c_gensym_literal_part_8 = String_var(t -> cc);  List _x2c_gensym_literal_part_9 = t -> keep_system_includes > 0 ? _61 : NULL;  List _x2c_gensym_literal_part_10 = t -> inline_macro_expansions > 0 ? _64 : NULL;  List _x2c_gensym_literal_part_11 = _includes(_65, Compiler_cpp_include_dirs());  List _x2c_gensym_literal_part_12 = _includes(_65, include_dirs);  List _x2c_gensym_literal_part_13 = _includes(_66, Compiler_default_include_dirs());  List _x2c_gensym_literal_part_14 = t -> cpp_args;  List _x2c_gensym_literal_part_15 = String_truth(macros) ? cons(_68, cons(String_var(macros), NULL)) : NULL;  cons(_x2c_gensym_literal_part_8, cons(_26, cons(_53, cons(_55, cons(_70, cons(_72, cons(_74, cons(_76, cons(_78, cons(_80, cons(_82, cons(_84, cons(_86, cons(_88, cons(_90, cons(_92, cons(_94, cons(_96, List_append(_x2c_gensym_literal_part_9, List_append(_x2c_gensym_literal_part_10, cons(_98, cons(_100, List_append(_x2c_gensym_literal_part_11, List_append(_x2c_gensym_literal_part_12, List_append(_x2c_gensym_literal_part_13, List_append(_x2c_gensym_literal_part_14, List_append(_x2c_gensym_literal_part_15, cons(_14, cons(_18, cons(String_var(depfile), cons(_20, cons(_102, cons(_104, cons(String_var(source), _107))))))))))))))))))))))))))))))))));
+    Var _x2c_gensym_literal_part_8 = String_var(t -> cc);  List _x2c_gensym_literal_part_9 = t -> keep_system_includes > 0 ? _53 : NULL;  List _x2c_gensym_literal_part_10 = t -> inline_macro_expansions > 0 ? _56 : NULL;  List _x2c_gensym_literal_part_11 = _includes(_57, Compiler_cpp_include_dirs());  List _x2c_gensym_literal_part_12 = _includes(_57, include_dirs);  List _x2c_gensym_literal_part_13 = _includes(_58, Compiler_default_include_dirs());  List _x2c_gensym_literal_part_14 = t -> cpp_args;  List _x2c_gensym_literal_part_15 = String_truth(macros) ? cons(_60, cons(String_var(macros), NULL)) : NULL;  cons(_x2c_gensym_literal_part_8, cons(_20, cons(_45, cons(_47, cons(_62, cons(_64, cons(_66, cons(_68, cons(_70, cons(_72, cons(_74, cons(_76, cons(_78, cons(_80, cons(_82, cons(_84, cons(_86, cons(_88, List_append(_x2c_gensym_literal_part_9, List_append(_x2c_gensym_literal_part_10, cons(_90, cons(_92, List_append(_x2c_gensym_literal_part_11, List_append(_x2c_gensym_literal_part_12, List_append(_x2c_gensym_literal_part_13, List_append(_x2c_gensym_literal_part_14, List_append(_x2c_gensym_literal_part_15, cons(_94, cons(_96, cons(String_var(depfile), cons(_98, cons(_100, cons(_102, cons(String_var(source), _105))))))))))))))))))))))))))))))))));
   }
   );
 }
@@ -622,7 +620,7 @@ static List _includes(String option, List directories){
     Var _x2c_gensym_lambda_capture_value_0 = String_var(option);  struct _x2c_gensym_lambda_context_0 _x2c_gensym_lambda_context_1 ={
       _x2c_gensym_lambda_capture_value_0
     }
-    ;  Func_new_context(_x2c_gensym_lambda_2, _118, & _x2c_gensym_lambda_context_1, sizeof _x2c_gensym_lambda_context_1);
+    ;  Func_new_context(_x2c_gensym_lambda_2, _116, & _x2c_gensym_lambda_context_1, sizeof _x2c_gensym_lambda_context_1);
   }
   )));
 }
@@ -632,9 +630,9 @@ List Toolchain_search_directories(Toolchain t){
   Array directories = Array_new();
   List flags = t -> cc_args;
   String output = NULL, errors = NULL;
-  List search = cons(String_var(t -> cc), List_append(flags, _124));
+  List search = cons(String_var(t -> cc), List_append(flags, _122));
   if(! tool_capture(search, &(output), &(errors))) _add_include_directories(directories, errors);
-  List arguments = cons(String_var(t -> cc), List_append(flags, _127));
+  List arguments = cons(String_var(t -> cc), List_append(flags, _125));
   if(! tool_capture(arguments, &(output), &(errors))) _add_library_directories(directories, output);
   return Array_list_free(directories);
 }
@@ -649,8 +647,8 @@ static void _add_include_directories(Array directories, String listing){
     while(List_try_next(_x2c_gensym_macro_object_1, &(_x2c_gensym_macro_cursor_1), &(_x2c_gensym_macro_cursor_output_1))){
       line = Var_as_string(_x2c_gensym_macro_cursor_output_1);
       {
-        if(String_startswith(line, _128)) return;
-        if(String_contains(line, _129)) listed = 1;
+        if(String_startswith(line, _126)) return;
+        if(String_contains(line, _127)) listed = 1;
         else if(listed) _add_include_directory(directories, line);
       }
 
@@ -662,10 +660,10 @@ static void _add_include_directories(Array directories, String listing){
 
 static void _add_include_directory(Array directories, String line){
   String directory = String_strip(line, " ");
-  int note = String_find(directory, _130);
+  int note = String_find(directory, _128);
   if(note >= 0) directory = String_getslice(directory, (-2147483647 - 1), x2c_slice_bound(note), 1);
   Array_push(directories, String_var(directory));
-  if(String_endswith(directory, _131)) Array_push(directories, String_var(Path_join(Path_dirname(directory), _132)));
+  if(String_endswith(directory, _129)) Array_push(directories, String_var(Path_join(Path_dirname(directory), _130)));
 }
 
 static void _add_library_directories(Array directories, String output){
@@ -677,11 +675,11 @@ static void _add_library_directories(Array directories, String output){
     while(List_try_next(_x2c_gensym_macro_object_3, &(_x2c_gensym_macro_cursor_3), &(_x2c_gensym_macro_cursor_output_3))){
       line = Var_as_string(_x2c_gensym_macro_cursor_output_3);
       {
-        if(! String_startswith(line, _133)) continue;
-        String list = String_remove_prefix(String_remove_prefix(line, _133), _134);
+        if(! String_startswith(line, _131)) continue;
+        String list = String_remove_prefix(String_remove_prefix(line, _131), _132);
         {
           String directory;
-          List _x2c_gensym_macro_object_2 = String_split(list, _135);
+          List _x2c_gensym_macro_object_2 = String_split(list, _133);
           List _x2c_gensym_macro_cursor_2 = _x2c_gensym_macro_object_2;
           Var _x2c_gensym_macro_cursor_output_2;
           while(List_try_next(_x2c_gensym_macro_object_2, &(_x2c_gensym_macro_cursor_2), &(_x2c_gensym_macro_cursor_output_2))){
@@ -764,7 +762,7 @@ static int _shell_safe(String argument){
 }
 
 static Var _x2c_gensym_lambda_0(Var directory){
-  return List_var(cons(_30, cons(directory, NULL)));
+  return List_var(cons(String_var(_24), cons(directory, NULL)));
   ;
 }
 

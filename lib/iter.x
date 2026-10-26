@@ -475,7 +475,7 @@ static int _zip_with_next(Iter iter, Var *out) {
   Var left, right;
   if (!left_iter.try_next(left) || !right_iter.try_next(right)) return 0;
   if (iter.aux) *out = iter.aux.apply_values(left, right);
-  else *out = %($left $right);
+  else *out = $(left, right);
   return 1;
 }
 
@@ -513,7 +513,7 @@ static int _enumerate_next(Iter iter, Var *out) {
   if (!source.try_next(value)) return 0;
   int index = iter.state;
   iter.state = index + 1;
-  *out = %($index $value);
+  *out = $(index, value);
   return 1;
 }
 

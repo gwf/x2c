@@ -264,7 +264,7 @@ when an x2c crossing requires a `Var`:
 ```x2c
 Var absent = (Var) { .u64 = 0 };
 Var also_absent = NULL;
-List row = %($absent 1);
+List row = $(absent, 1);
 
 printf("null=%d void=%d truthy=%d len=%d\n",
        absent.is_null(), absent is void, absent.truth(), row.len());

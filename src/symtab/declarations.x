@@ -79,8 +79,8 @@ static List _declared_key(Sym s, List context, List key, List ast) {
     if (own in s.statics) return own;
   }
   if (!prefix && (!c.package || ast.type().is_static())) return key;
-  if (plain) return %($(c.declared_spelling(prefix, head)));
-  if (tagged) return %($head $(c.declared_spelling(prefix, tag)));
+  if (plain) return $(c.declared_spelling(prefix, head));
+  if (tagged) return $(head, c.declared_spelling(prefix, tag));
   return key;
 }
 
@@ -106,7 +106,7 @@ static void _link_local(Sym s, List key) =>
 int Sym.is_file_static(Sym s, Var binding) {
   if (binding is not <list> || !Ast.try_binding(binding, NULL, NULL))
     return 0;
-  return %($(Ast.binding_spelling(binding))) in s.statics;
+  return $(Ast.binding_spelling(binding)) in s.statics;
 }
 
 static int _global_key(Sym s, List key) {
@@ -124,7 +124,7 @@ static void _check_module_shadow(
   Compiler c = s.c;
   foreach (List context in contexts) {
     if (prefix && !(name in s.prefixed) &&
-        %(@context $name) in s.statics)
+        $(@context, name) in s.statics)
       $fail.symbols_module_shadow(c, c.token, name);
     if (!c.module_declaration ||
         !(c.source_private > 0 || ast.type().is_static())) continue;
@@ -191,7 +191,7 @@ static Type _stored_type(Type type, Type key, List ast) {
   if ((type.is_aggregate_tag_body() && !key.is_aggregate_tag()) ||
       (type.is_enum_tag_body() && !key.is_enum_tag() && !key.is_typedef())) {
     Var (aggregate, tag) = ast;
-    type = %( $aggregate $tag );
+    type = $(aggregate, tag);
   }
   return type.declared();
 }
@@ -236,7 +236,7 @@ static void _mark_automatic(Sym s, List binding, Type type) {
     Locals of other scopes keep their spellings for the native macros that
     name them. */
 List Sym.unshadow_visible(Sym s, String spelling) {
-  List key = %($spelling), visible = NULL;
+  List key = $(spelling), visible = NULL;
   String alias = s.c.fresh_name("binding_shadow");
   for (int i = s.base_scopes; i < (int) s.scopes.len(); i++) {
     SymScope *scope = _scope_at(s, i);
@@ -258,12 +258,12 @@ static void _unshadow_local(Sym s, List binding, String alias) {
 /** Installs an existing binding with `ast`'s qualifier-preserving type. */
 List Sym.bind_identity(Sym s, List context, List binding, List ast) {
   String spelling = Ast.binding_spelling(binding);
-  List key = context ? %(@context $spelling) : %($spelling);
+  List key = context ? $(@context, spelling) : $(spelling);
   SymScope *scope = _scope_at(s, -1);
   Type annotation = ast.type_from_ast();
   s.put(scope.symbols, key, annotation.declared());
   if (context === %(typedef)) {
-    key = %($spelling);
+    key = $(spelling);
     s.put(scope.symbols, key, %(typedef $spelling));
     _local_typedef(s, annotation, binding);
   }
@@ -291,7 +291,7 @@ Var Compiler.aggregate_name(
     List local = c.macro_tag_name(kind, name, definition);
     return local ? local : name;
   }
-  Type type = %($kind $name);
+  Type type = $(kind, name);
   if (s.at_file_scope()) {
     /* Only a definition or standalone forward owns this package tag.
        A field or prototype may merely refer to a tag from a C header. */

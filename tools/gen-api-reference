@@ -82,7 +82,7 @@ static void _flush_section(Array sections, String kind, Array lines):
   while lines.len() && !lines[-1].string().strip(NULL): lines.pop()
   while lines.len() && !lines[0].string().strip(NULL): lines.remove(0)
   if lines.len():
-    sections.push(%($kind $(String.join("\n", lines))))
+    sections.push($(kind, String.join("\n", lines)))
 
 /* Keyed sections of a doc comment as `(kind text)`, where kind is NULL for
    ordinary prose. Blank lines carry no meaning. */
@@ -205,7 +205,7 @@ static List _public_surface(Unit unit, int compiler):
     item["doc"] = _public_doc(label, name, line, doc)
     item["summary"] = _first_sentence(doc)
     declarations.push(item)
-  return %($(callables.list_free()) $(declarations.list_free()))
+  return $(callables.list_free(), declarations.list_free())
 
 // Ledgers
 
@@ -218,9 +218,8 @@ static Array _ledger_rows(Path path, String expected):
     Array parts = line.split("|")
     if parts.len() != 3:
       _fatal(%"$(_relative(path)):$number: expected $expected")
-    rows.push(%($number $(parts[0].string().strip(NULL))
-                $(parts[1].string().strip(NULL))
-                $(parts[2].string().strip(NULL))))
+    rows.push($(number, parts[0].string().strip(NULL),
+      parts[1].string().strip(NULL), parts[2].string().strip(NULL)))
   return rows
 
 /* `path` to `(visibility note)` for every library module. */
@@ -234,7 +233,7 @@ static Map _manifest(int validate):
              "api, contract, optional, internal")
     if rows.contains(path):
       _fatal(%"$where:$number: duplicate row for $path")
-    rows[path] = %($visibility $note)
+    rows[path] = $(visibility, note)
   if !validate: return rows
   Map present = {}
   foreach String path in _sources("lib/*.x").append(_sources("lib/*/*.x")):
@@ -395,9 +394,9 @@ static void _doc(Array lines, Map module, Map item):
 
 static void _entry(Array lines, Map module, Map item, int level):
   _heading(lines, item["name"], level)
-  _add(lines, %("" $(%"`$(item["signature"])`") ""))
+  _add(lines, $("", %"`$(item["signature"])`", ""))
   _doc(lines, module, item)
-  _add(lines, %($(%"Source: `$(item["path"]):$(item["line"])`") ""))
+  _add(lines, $(%"Source: `$(item["path"]):$(item["line"])`", ""))
 
 /* Public types, then the types the tier ledger marks internal. */
 static void _types(Array lines, Map module):
@@ -413,7 +412,7 @@ static void _types(Array lines, Map module):
 static void _type_section(
     Array lines, Map module, String heading, List note, List items):
   if !items: return
-  _add(lines, %($(%"## $heading") ""))
+  _add(lines, $(%"## $heading", ""))
   _add(lines, note)
   _add(lines, %("| Type | Kind | Summary |" "| --- | --- | --- |"))
   List sorted = items.sort_by(%!(Map item) => item["name"])
@@ -427,7 +426,7 @@ static void _type_section(
 static void _callables(Array lines, Map module, List items):
   _add(lines, %("| Function | Summary |" "| --- | --- |"))
   foreach Map item in
-      items.sort_by(%!(Map item) => %($(item["receiver"]) $(item["method"]))):
+      items.sort_by(%!(Map item) => $(item["receiver"], item["method"])):
     lines.push(%"| [`$(item["name"])`](#$(item["name"])) | " +
                %"$(item["summary"]) |")
   lines.push("")
@@ -445,7 +444,7 @@ static void _prose(Array lines, Map module):
   Array prose = module["prose"]
   if !prose.len(): return
   _add(lines, %("## Design notes" ""))
-  foreach String paragraph in prose: _add(lines, %($paragraph ""))
+  foreach String paragraph in prose: _add(lines, $(paragraph, ""))
 
 static String _text(Array lines) =>
   String.join("\n", lines).rstrip(NULL) + "\n"
@@ -462,7 +461,7 @@ static String _page(Map module):
     List tiered = items.filter(%!(Map item) => item["tier"] == tier)
     if !tiered: continue
     if tier == "primary": primary = 1
-    _add(lines, %($(%"## $(_tier_heading(tier))") ""))
+    _add(lines, $(%"## $(_tier_heading(tier))", ""))
     if tier == "internal":
       _add(lines, %(
         "These callables connect runtime translation units. They are documented"
@@ -471,7 +470,7 @@ static String _page(Map module):
   _types(lines, module)
   _prose(lines, module)
   if primary:
-    _add(lines, %("## Tests and examples" "" $(evidence[module["stem"]]) ""))
+    _add(lines, $("## Tests and examples", "", evidence[module["stem"]], ""))
   return _text(lines)
 
 static String _compiler_page(Map module):
@@ -548,12 +547,12 @@ static String _c_api(Array modules, Unit utils):
   foreach Map module in modules:
     foreach Map item in module["items"].array():
       if item["name"].str().startswith("x2c_"):
-        rows.push(%($(module["path"]) $(module["stem"]) $item))
+        rows.push($(module["path"], module["stem"], item))
   foreach List definition in utils.callables():
     (String name, String signature, int line, String doc) = definition
     if !name.startswith("x2c_"): continue
     if !doc: _fatal(%"src/utils.x:$line: $name has no doc comment")
-    rows.push(%("src/utils.x" "" $(_item(definition, "advanced", NULL))))
+    rows.push($("src/utils.x", "", _item(definition, "advanced", NULL)))
   Array lines = [
     mixed_banner, "", "# x2c C API", "",
     "The `x2c_*` prefix is reserved for stable C entry points used by",
@@ -567,7 +566,7 @@ static String _c_api(Array modules, Unit utils):
     String name = item["name"]
     String function = stem ? %"[`$name`]($stem.md#$name)" : %"`$name`"
     lines.push(%"| $function | `$path` | `$(item["signature"])` |")
-  _add(lines, %("" $(%"Total: $(rows.len()) functions.") ""))
+  _add(lines, $("", %"Total: $(rows.len()) functions.", ""))
   return String.join("\n", lines)
 
 /* Replaces one generated section of SUMMARY.md, or inserts it before the
@@ -655,25 +654,22 @@ static List _build(void):
     foreach Map item in module["items"].array():
       see_index[item["name"]] = module["stem"]
   Array pages = [
-    %($(pages_dir.join("index.md")) $(_index(modules))),
-    %($(pages_dir.join("x2c-c-api.md"))
-      $(_c_api(modules, units["src/utils.x"]))),
-    %($(compiler_dir.join("index.md")) $(_compiler_index(compiler)))]
+    $(pages_dir.join("index.md"), _index(modules)),
+    $(pages_dir.join("x2c-c-api.md"), _c_api(modules, units["src/utils.x"])),
+    $(compiler_dir.join("index.md"), _compiler_index(compiler))]
   foreach Map module in modules:
     if _published(module):
-      pages.push(%($(pages_dir.join(%"$(module["stem"]).md"))
-                   $(_page(module))))
+      pages.push($(pages_dir.join(%"$(module["stem"]).md"), _page(module)))
   foreach Map module in compiler:
-    pages.push(%($(compiler_dir.join(%"$(module["stem"]).md"))
-                 $(_compiler_page(module))))
+    pages.push($(compiler_dir.join(%"$(module["stem"]).md"), _compiler_page(module)))
   String summary = _summary(modules, compiler, summary_path.read_text())
-  return %($(pages.list_free()) $summary)
+  return $(pages.list_free(), summary)
 
 static List _stale(List pages):
   Map generated = {}
   foreach List entry in pages: generated[entry.car().str()] = 1
   Array stale = []
-  foreach Path directory in %($pages_dir $compiler_dir):
+  foreach Path directory in $(pages_dir, compiler_dir):
     foreach Path page in directory.join("*.md").glob():
       if !generated.contains(page): stale.push(page)
   return stale.list_free()

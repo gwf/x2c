@@ -451,7 +451,7 @@ static void _using_names(Compiler c) {
     String spelling = c.token.text;
     c.expect(<ident>);
     /* A name no x2c declaration supplies is a native name left to C. */
-    List binding = c.sym.reference_global(%($spelling));
+    List binding = c.sym.reference_global($(spelling));
     c.macro_holes[%(using $(Ast.binding_spelling(binding)))] = binding;
   } while (c.test(<,>));
 }

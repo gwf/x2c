@@ -19,7 +19,7 @@ macro Stmt $fail.access_string_store(Expr $site) {
                   "transient String.malloc buffer";
     x2c_diagnostic_fail_at(
       $site, <xform>, "String does not support bracket assignment",
-      %($note));
+      $(note));
   }
 }
 
@@ -115,7 +115,7 @@ meta static Code _participant_store(
   Code setter = type.protocol_member("setindex");
   if (!setter)
     $fail.access_store(NULL, type);
-  return setter.call_in_order(%($base $key $value), code.cadr());
+  return setter.call_in_order($(base, key, value), code.cadr());
 }
 
 /* Updates through the participant's `updateindex` member, or through
@@ -128,7 +128,7 @@ meta static Code _participant_update(
     $fail.access_update(NULL, type, value);
   List operation = $!Symbol{ $op };
   List arguments = value
-    ? %($base $key $operation $value) : %($base $key $operation);
+    ? $(base, key, operation, value) : $(base, key, operation);
   return member.call_in_order(arguments, code.cadr());
 }
 

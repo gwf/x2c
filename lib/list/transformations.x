@@ -90,7 +90,7 @@ List List.zip_with(List a, List b, Func fn) {
   for (; a && b; a = a.cdr(), b = b.cdr()) {
     Var left = a.car, right = b.car;
     if (fn) values.push(fn.apply_values(left, right));
-    else values.push(%($left $right));
+    else values.push($(left, right));
   }
   return values;
 }

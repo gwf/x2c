@@ -18,7 +18,7 @@ static void ingest(String filename, String database) {
       if (!line.strip(NULL)) continue;
       String (url, status, us) = line.words().iter().list();
       long status_code = atol(status), elapsed = atol(us);
-      insert.bind(%($url $status_code $elapsed)).execute();
+      insert.bind($(url, status_code, elapsed)).execute();
     }
   });
 }

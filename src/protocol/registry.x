@@ -19,7 +19,7 @@ static macro Stmt $fail.protocol_decl_conflict(
     String second = %"second: $($second_location)";
     $c.report_error(
       <protocol>, %"conflicting protocol declarations for $($base.repr())",
-      $site, %($first $second));
+      $site, $(first, second));
   }
 }
 
@@ -39,7 +39,7 @@ static macro Stmt $fail.protocol_adoption_conflict(
       _adoption_spelling($adoption.base, $adoption.participant);
     $c.report_error(
       <protocol>, %"conflicting adoption declarations for $spelling",
-      $site, %($first $second));
+      $site, $(first, second));
   }
 }
 
@@ -52,7 +52,7 @@ static macro Stmt $report.protocol_adoption_conflict(
       _adoption_spelling($adoption.base, $adoption.participant);
     $c.diagnostics.report(
       <protocol>, %"conflicting adoption declarations for $spelling",
-      $site, %($first $second));
+      $site, $(first, second));
   }
 }
 
@@ -62,7 +62,7 @@ static macro Stmt $report.protocol_adoption_conflict(
    source location. Adoption rows use base, participant, and, for static rows,
    canonical source path as identity so another unit cannot consume them. */
 static List _occurrence(List record, Symbol storage, List location) =>
-  %( $record $storage $location );
+  $(record, storage, location);
 
 static Symbol _occurrence_storage(List occurrence) => occurrence.cadr();
 
@@ -106,8 +106,8 @@ static List _adoption_row(
   Compiler c, Type base, Type participant, Symbol storage) {
   String path = _path(c);
   List key = storage == <static>
-           ? %($base $participant $path)
-           : %($base $participant);
+           ? $(base, participant, path)
+           : $(base, participant);
   Var stored;
   return c.adoptions.try_get(key, stored) ? stored : NULL;
 }
@@ -194,7 +194,7 @@ module String _location_string(List location) {
 }
 
 module int _is_private(Compiler c, String name) =>
-  %($name) in c.sym.file_statics();
+  $(name) in c.sym.file_statics();
 
 // spellings
 
@@ -322,8 +322,8 @@ static void _retain_source_node(
 static List _source_key(Compiler c, List location) {
   List invocation = c.origin_location(c.origin);
   return invocation
-       ? %("source-node" $location $invocation)
-       : %("source-node" $location);
+       ? $("source-node", location, invocation)
+       : $("source-node", location);
 }
 
 static void _install_occurrence(
@@ -360,7 +360,7 @@ static List _publish(AdoptionDraft &a) {
   Compiler c = a.c;
   if (a.tag_expression) a.tag_expression = _tag_syntax(a.tag_expression);
   String spelling = a.participant.car().str();
-  List declared = c.sym.get(%($spelling));
+  List declared = c.sym.get($(spelling));
   if ((!declared || !declared.type().is_typedef()) && !c.shallow)
     $fail.protocol_type_undeclared(c, a.participant_token, spelling);
   a.tag = _check_modifiers(a);
@@ -368,7 +368,7 @@ static List _publish(AdoptionDraft &a) {
   _check_previous(a);
   _install(a);
   // An adoption resolved when the parse began has reported its failures.
-  List pair = %($(a.base) $(a.participant));
+  List pair = $(a.base, a.participant);
   int resolved = pair in c.conforms;
   c.conforms.del(pair);
   c.proto_cache = {};
@@ -461,7 +461,7 @@ static void _check_previous(AdoptionDraft &a) {
   Compiler c = a.c;
   if (c.shallow) return;
   String path = _canonical_file(c, a.location);
-  List key = %("parsed-protocol-adoption" $(a.base) $(a.participant) $path);
+  List key = $("parsed-protocol-adoption", a.base, a.participant, path);
   Var previous;
   if (!c.protocol_helpers.try_get(key, previous)) {
     c.protocol_helpers[key] = _node(a);
@@ -479,8 +479,8 @@ static void _install(AdoptionDraft &a) {
   if (a.storage == <static> && path != _path(c)) return;
   a.participant.register_var_adoption(a.representation, a.tag);
   List key = a.storage == <static>
-           ? %($(a.base) $(a.participant) $path)
-           : %($(a.base) $(a.participant));
+           ? $(a.base, a.participant, path)
+           : $(a.base, a.participant);
   List row = _node(a);
   Var stored;
   if (!c.adoptions.try_get(key, stored)) {
@@ -518,7 +518,7 @@ void Compiler.rebuild_protocols(Compiler c, Map symbols) {
       }
       case %(adopt *): _install_stored(c, value);
       case %(conformance ?base ?participant *):
-        c.protocol_helpers[%("recorded-conformance" $base $participant)] =
+        c.protocol_helpers[$("recorded-conformance", base, participant)] =
           value;
     }
   }

@@ -67,7 +67,7 @@ static macro Expression $func_size(Expr $value) => sizeof $value;
 static List _helper_body(Compiler c, List body) {
   match (body) {
     case $source_block_content(%(*items)):
-      return source_block_content(%(@items $(source_return_none())));
+      return source_block_content($(@items, source_return_none()));
     case %(expr (void) ?):
       return source_block_content(
         %((stmnt $body) $(source_return_none())));
@@ -230,7 +230,7 @@ List Compiler.context_func_adapter(Compiler c, Type type, List target) {
   List self = c.sym.introduce(c.fresh_name("func_binding"));
   return _build_func_adapter(
     c, %("Func"), type, target, self, NULL,
-    %($(_func_bound(%("Func"), self))));
+    $(_func_bound(%("Func"), self)));
 }
 
 static void _require_func_readers(
@@ -284,7 +284,7 @@ static List _func_reads(
   foreach (Type type in types) {
     Type storage_type = NULL;
     List value = _read(readers, type, index++, storage_type);
-    reads.push(%($storage_type $value));
+    reads.push($(storage_type, value));
   }
   return reads.list_free();
 }
@@ -320,7 +320,7 @@ static List _reference(
   Type target = parameter_type.cdr(), pointer = target.reference();
   List picked = _call(
     r, $!Type{ void * }, r.reference, index,
-    %($(c.cache_literal_list(target)) $(_type_literal(c, target))));
+    $(c.cache_literal_list(target), _type_literal(c, target)));
   storage_type = pointer;
   return c.convert_expression(picked, pointer);
 }
@@ -351,7 +351,7 @@ static List _value(
   if (!tag)
     $fail.callable_parameter(r.c, r.diagnostic_type, parameter_type);
   List picked = _call(
-    r, %("Var"), r.value, index, %($(_adapter_symbol_literal(tag))));
+    r, %("Var"), r.value, index, $(_adapter_symbol_literal(tag)));
   storage_type = parameter_type;
   return r.c.convert_expression(picked, parameter_type);
 }
@@ -360,7 +360,7 @@ static List _value(
 static List _call(
   FuncReaders &r, Type result_type, List target, int index,
   List details) {
-  List arguments = %($(r.fn) $(r.argv) $($!int{ $index }) @details);
+  List arguments = $(r.fn, r.argv, $!int{ $index }, @details);
   return _func_call(r.c, result_type, target, arguments);
 }
 
@@ -371,7 +371,7 @@ static void _publish_func_adapter(
   Compiler c, List binding, List fn_binding, List argv_binding,
   List body, List setup) {
   List parameters = _named_decl_params(
-    %(("Func") (* const "FuncArg")), %($fn_binding $argv_binding));
+    %(("Func") (* const "FuncArg")), $(fn_binding, argv_binding));
   c.add_early(
     c.wrapper_function(
       %(static "Var"), binding, parameters.cdr(),
@@ -391,7 +391,7 @@ static List _func_record_call(
     return_type.reference(), address_shape(value));
   List size = c.rebuild_expression(%(unsigned long), size_shape(value));
   List helper = _func_bound(result_type, result_helper);
-  List boxed = _func_call(c, %("Var"), helper, %($address $size));
+  List boxed = _func_call(c, %("Var"), helper, $(address, size));
   /* The record is copied into a Var after the native call completes. */
   return c.rebuild_statement(
     $!{ { $return_type $result = $call; return $boxed; } }).cadr();
@@ -418,7 +418,7 @@ static List _adapter_symbol_literal(Symbol value) =>
   %(expr ("Symbol") "$((unsigned long) value)");
 
 module List _adapter_helper(Compiler c, String name, Type &type) =>
-  c.sym.resolve_global(%($name), type);
+  c.sym.resolve_global($(name), type);
 
 /* The issued identity `binding` read as a `type`. */
 module List _func_bound(Type type, List binding) => $!($type){ $binding };
@@ -456,5 +456,5 @@ module void _adapter_error(
   Compiler c, String message, Type target, Type source, List details) {
   String target_note = $note.callable_target(target);
   String source_note = $note.callable_source(source);
-  c.report_error(<type>, message, NULL, %($target_note $source_note @details));
+  c.report_error(<type>, message, NULL, $(target_note, source_note, @details));
 }
