@@ -19,37 +19,25 @@ module List _parameters(Emitter &e, Var parameters) {
 
 // declarations
 
-module List _declare_stmt(Emitter &e, List ast) =>
-  %( @(_declare(e, ast)) ";");
-
-module List _decl_stmt(Emitter &e, List ast) {
-  if (ast ~= %(decl *declaration)) ast = %(declare @declaration);
-  return _declare(e, ast);
-}
-
-static List _declare(Emitter &e, List ast) {
-  List (type, bindings) = ast.cdr();
+module List _declare(Emitter &e, List type, List bindings) {
   type = _emit(e, $(type));
   bindings = $(bindings);
   return type.append(_emit(e, bindings));
 }
 
-module List _bind(Emitter &e, Ast ast) {
-  List (ident, mods) = ast.cdr();
+module List _bind(Emitter &e, List ident, List mods) {
   ident = _emit(e, ident);
   if (!mods) return ident;
   return _declarator(e, ident, mods);
 }
 
-module List _param(Emitter &e, List ast) {
-  List (type, mods) = ast.cdr();
+module List _param(Emitter &e, List type, List mods) {
   List code = _emit(e, type === %(....) ? %("List") : type);
   mods = $(mods);
   return code.append(_emit(e, mods));
 }
 
-module List _function(Emitter &e, List ast) {
-  List (type, bindings, body) = ast.cdr();
+module List _function(Emitter &e, List type, List bindings, List body) {
   String old_fn = e.fn_name;
   List function_binding = bindings.cadr();
   e.fn_name = Ast.binding_spelling(function_binding);
@@ -162,8 +150,8 @@ static List _function_declarator(Emitter &e, List decl, List parameters) {
 }
 
 module List _semantic_type(Emitter &e, Type type) {
-  List declaration = type.declaration_ast(NULL);
-  return _declare(e, declaration);
+  List (_, base, bindings) = type.declaration_ast(NULL);
+  return _declare(e, base, bindings);
 }
 
 module List _semantic_name(Emitter &e, Type type, String name) {
