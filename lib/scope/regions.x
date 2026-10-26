@@ -230,7 +230,6 @@ meta native Scope Scope.new(void) {
     Raises: `<alloc-fail>` while creating the scope or its initial owner.
 */
 Scope Scope.child(void) {
-  _require_running();
   Scope *active = Scope.top();
   if (!*active) *active = _new_scope(NULL);
   Scope child = _new_scope(NULL);
