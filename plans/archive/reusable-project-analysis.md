@@ -1,7 +1,8 @@
-> Status: active
-> Approved implementation: persistent x2c graph snapshots, CLI queries,
-> type dependencies, structural AST search, and an agent skill.
-> Implementation and validation are in progress.
+> Status: done
+> Implemented 2026-10-26 through `41348efa`: persistent snapshots, function
+> and type queries, structural matching, comparison, documentation, and skill.
+> Focused acceptance and the complete graph suite passed. Publication uses
+> the existing agent-pr-check gate on the integrated delivery tree.
 
 # Reusable project analysis
 
@@ -75,3 +76,47 @@ live compiler service. Existing datum, Match, project, and frontend operations
 supply the shared mechanisms. The key risk is preserving complete semantic
 context across unit teardown; reload and identity fixtures exercise that
 boundary before expanding queries.
+
+
+## Implementation evidence
+
+The command reference is `commands/graph/README.md`; the agent workflow is
+`agents/skills/query-x2c-project/SKILL.md`. Acceptance lives in
+`commands/graph/tests/snapshot.py` and `query-boundary.py`, called by the
+existing graph suite. No new recurring gate was added.
+
+Review corrections preserve complete unit ASTs, distinguish struct tags from
+typedefs in comparison, retain effective target configurations, and exclude
+indirect pointer stores and pointer-size operations from direct field/layout
+claims. Source-file inspection reads retained text. Unchanged full rebuilds
+compare without declaration or relationship differences.
+
+### Measured workload
+
+Measured on Apple M4 Max, arm64, at `41348efa`, on 2026-10-26. One explicit
+analysis set contained 179 source units: 62 compiler, 69 runtime, and 48 command
+files. Compiler/runtime entry units came from `tools/sources.sh --area src`
+and `--area lib`, excluding generated `lib/x2c.x`. Command inputs were each
+registered command's top-level `.x` files. Include paths were `.` and `src`.
+The snapshot includes bound unit ASTs and declaration ASTs.
+
+| Measurement | Result |
+| --- | --- |
+| Full rebuild, wall time | 380.63 s |
+| Peak resident memory, `/usr/bin/time -l` | 4,872,454,144 bytes |
+| Snapshot disk size | 499,103,270 bytes |
+| Find, three fresh processes | 4.149, 4.098, 4.143 s; median 4.143 s |
+| Transitive callees, three fresh processes | 7.692, 7.732, 7.691 s; median 7.692 s |
+| Structural match, three fresh processes | 4.084, 4.092, 4.142 s; median 4.092 s |
+
+All query measurements include loading the saved snapshot. Find selected
+`Compiler.bind_syntax` (one entity). Traverse followed its `calls` closure
+(3,598 entities, first ten returned). Match selected that function and used
+`(expr ?type (call ?callee (args *args)))` (17 matches, first ten returned).
+Results have explicit truncation. These are initial costs, not evidence of a
+speed improvement. Queries currently load the entire datum snapshot; the
+measured startup cost remains a limitation of this experimental CLI.
+
+The raw local measurement directory was
+`/private/var/folders/ys/92c9nxl16ds47h6mhvb9w_cm0000gt/T/x2c-analysis-final-s2rl59tr`.
+It contains the exact input list, revision, time output, query JSON, and samples.
