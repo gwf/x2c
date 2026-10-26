@@ -167,11 +167,10 @@ module Symbol _target_kind(Definition &d) {
   return d.target.assoc(<kind>);
 }
 
-/* Reports the body forms the result kind accepts. */
 static void _body_error(Definition &d) {
-  String form = _has_expression_body(d) ? "'=> expression;'"
-              : d.kind == <block-item> ? "'{ ... }' or '=> expression;'"
-              : "'{ ... }'";
+  String form = "'{ ... }'";
+  if (_has_expression_body(d)) form = "'=> expression;'";
+  else if (d.kind == <block-item>) form = "'{ ... }' or '=> expression;'";
   $fail.macros_macro_body(d.c, d.c.token, _kind_spelling(d.kind), form);
 }
 
@@ -206,7 +205,7 @@ module void _body(Definition &d) {
   }
 }
 
-/* A Stmt result's body after `=>` is one arrow statement. */
+// A Stmt result's body after `=>` is one arrow statement.
 static List _read_body(Definition &d) {
   Compiler c = d.c;
   if (d.kind == <type> || d.kind == <param>) return _part_body(d);
@@ -279,7 +278,7 @@ module List _recorded(Map m) {
    it takes a sequence. A `using` hole is a Name that each expansion fills
    with a fresh identifier. */
 
-/* A parameter: an optional kind, `$NAME` or sequence `@NAME`. */
+// A parameter: an optional kind, `$NAME` or sequence `@NAME`.
 static List _signature_hole(Compiler c) {
   Symbol kind = 0;
   if (c.peek(0) == <ident> && (c.peek(1) == <$> || c.peek(1) == <@>))
@@ -346,7 +345,7 @@ module List _hole_record(Compiler c, Atom name) {
   return stored;
 }
 
-/* The final hole records, with the kinds the body inferred. */
+// The final hole records, with the kinds the body inferred.
 static List _parameter_rows(Compiler c, List parameters) {
   Array rows = [];
   foreach (List parameter in parameters)
@@ -450,7 +449,7 @@ static void _using_names(Compiler c) {
   do {
     String spelling = c.token.text;
     c.expect(<ident>);
-    /* A name no x2c declaration supplies is a native name left to C. */
+    // A name no x2c declaration supplies is a native name left to C.
     List binding = c.sym.reference_global($(spelling));
     c.macro_holes[%(using $(Ast.binding_spelling(binding)))] = binding;
   } while (c.test(<,>));
@@ -461,7 +460,7 @@ static List _closed_seq(Compiler c, List rows) {
   return %(seq @rows);
 }
 
-/* Directives between the items stay in the body. */
+// Directives between the items stay in the body.
 static List _unit_items(Compiler c) {
   Array items = [];
   while (c.peek(0) != <"}">) {
