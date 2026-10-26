@@ -67,7 +67,7 @@ packs the remaining `args` through ordinary List construction. Only an
 explicit splice contributes more than one element. The caller changes
 the callee's final parameter to List before issuing this packed call.
 
-Source: `src/transform/expressions.x:351`
+Source: `src/transform/expressions.x:354`
 
 <a id="Compiler.shipped_support"></a>
 #### Compiler.shipped_support
