@@ -5,9 +5,11 @@ first.
 
 ## Unreleased
 
-- Stop highlighting `$(...)` and `@(...)` as embedded compile-time Lisp in
-  x2c source; the compiler no longer accepts those forms. `.xlisp` files
-  keep the standalone Lisp grammar.
+- Highlight parenthesized `$(expression)` insertion and `@(expression)`
+  splicing in Lists, Strings, and quotation holes, replacing the retired
+  braced `${expression}` and `@{expression}` forms. `$(...)` in code, the
+  evaluated List, shares the quotation-hole scopes. `.xlisp` files keep the
+  standalone Lisp grammar.
 
 - Highlight `with (place = value, ...)` assignment blocks at statement
   start, including inside function bodies, and leave `with(...)` calls in

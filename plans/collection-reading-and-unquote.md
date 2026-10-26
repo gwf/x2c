@@ -1,7 +1,9 @@
 # Collection reading and parenthesized unquote
 
-> Status: in progress
+> Status: landed
 > Specification and implementation plan approved in discussion, 2026-10-25.
+> Implemented, validated with `agent-pr-check`, and published to `dev` in
+> `b9eed26d1` on 2026-10-25.
 > Its prerequisite, [Native compiler with runtime Lisp](native-compiler-runtime-lisp.md),
 > landed on dev in `ff3aba2aa` with cleanup `735e72f73`. Compiler `$(...)`
 > and `@(...)` evaluation is gone; implementation starts from `735e72f73`.

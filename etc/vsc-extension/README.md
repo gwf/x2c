@@ -13,9 +13,9 @@ Lisp files; and the C-compatible syntax used by the language.
 
 Macro signatures use `$value` for one syntax value and `@items` for a
 sequence. Code templates highlight `@items`, `@producer(args)`, and
-quotation holes such as `@{expression}`. Singular `$` unquotes and `$!` source quotations use the macro sigil scope,
+quotation holes such as `@(expression)`. Singular `$` unquotes and `$!` source quotations use the macro sigil scope,
 including a standalone `$`. The color settings below make sigils bold. Quoted Lists retain runtime
-`@items` and `@{expression}` splices; Lisp retains `,@` unquote-splicing.
+`@items` and `@(expression)` splices; Lisp retains `,@` unquote-splicing.
 Native C variadic `...` remains distinct from macro syntax.
 
 With a current x2c compiler available, the extension also provides compiler
@@ -237,7 +237,7 @@ The grammar also highlights native `auto` regions, control statements, and
 function definitions, with `auto (destination)` for an explicit Scope.
 Empty `auto()` is rejected by the compiler, not the TextMate highlighter.
 
-`$!`, `$name`, `${expression}`, and a standalone `$` use pronounced
+`$!`, `$name`, `$(expression)`, and a standalone `$` use pronounced
 sigil styling with the settings above. `@` sequence forms share that styling.
 The grammar supplies scopes; the active VS Code theme controls their color
 and weight. Applying the recommended settings is necessary to guarantee bold

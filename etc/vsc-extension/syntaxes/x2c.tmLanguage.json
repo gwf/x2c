@@ -3987,13 +3987,13 @@
 		},
 		"x2c_macro_expression_hole": {
 			"name": "meta.macro.hole.expression.x2c",
-			"begin": "(?:(\\$)|(@))(\\{)",
+			"begin": "(?:(\\$)|(@))(\\()",
 			"beginCaptures": {
 				"1": { "name": "punctuation.definition.macro.sigil.x2c" },
 				"2": { "name": "punctuation.definition.macro.splice.x2c" },
 				"3": { "name": "punctuation.section.macro.hole.begin.x2c" }
 			},
-			"end": "\\}",
+			"end": "\\)",
 			"endCaptures": {
 				"0": { "name": "punctuation.section.macro.hole.end.x2c" }
 			},
@@ -4058,8 +4058,8 @@
 			"patterns": [
 				{ "include": "#x2c_current_typed_capture" },
 				{ "include": "#comments" },
-				{ "include": "#x2c_current_braced_unquote" },
-				{ "include": "#x2c_current_braced_splice" },
+				{ "include": "#x2c_current_grouped_unquote" },
+				{ "include": "#x2c_current_grouped_splice" },
 				{ "match": "(?<!\\\\)(?:@=|@(?=[\\s)]|$))", "name": "constant.other.atom.x2c" },
 				{ "include": "#x2c_current_list_interpolation" },
 				{ "include": "#x2c_current_list_nested" },
@@ -4127,13 +4127,13 @@
 				}
 			]
 		},
-		"x2c_current_braced_unquote": {
+		"x2c_current_grouped_unquote": {
 			"name": "meta.interpolation.expression.x2c",
-			"begin": "(?<!\\\\)\\$\\{",
+			"begin": "(?<!\\\\)\\$\\(",
 			"beginCaptures": {
 				"0": { "name": "punctuation.definition.interpolation.expression.begin.x2c" }
 			},
-			"end": "\\}",
+			"end": "\\)",
 			"endCaptures": {
 				"0": { "name": "punctuation.definition.interpolation.expression.end.x2c" }
 			},
@@ -4141,13 +4141,13 @@
 				{ "include": "$self" }
 			]
 		},
-		"x2c_current_braced_splice": {
+		"x2c_current_grouped_splice": {
 			"name": "meta.interpolation.list.expression.x2c",
-			"begin": "(?<!\\\\)@\\{",
+			"begin": "(?<!\\\\)@\\(",
 			"beginCaptures": {
 				"0": { "name": "punctuation.definition.interpolation.list.expression.begin.x2c" }
 			},
-			"end": "\\}",
+			"end": "\\)",
 			"endCaptures": {
 				"0": { "name": "punctuation.definition.interpolation.list.expression.end.x2c" }
 			},
@@ -4190,7 +4190,7 @@
 		"x2c_current_collection_content": {
 			"patterns": [
 				{ "include": "#comments" },
-				{ "include": "#x2c_current_braced_unquote" },
+				{ "include": "#x2c_current_grouped_unquote" },
 				{ "include": "#x2c_current_collection_interpolation" },
 				{ "include": "#x2c_macro_splice_hole" },
 				{ "include": "#x2c_current_list_nested" },
@@ -4293,7 +4293,7 @@
 		},
 		"x2c_current_string_interpolation": {
 			"patterns": [
-				{ "include": "#x2c_current_braced_unquote" },
+				{ "include": "#x2c_current_grouped_unquote" },
 				{
 					"name": "meta.interpolation.variable.x2c",
 					"match": "(?<![\\\\$])(\\$)([A-Za-z_][A-Za-z0-9_]*)",

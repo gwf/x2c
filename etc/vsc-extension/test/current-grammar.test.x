@@ -381,7 +381,7 @@ macro Stmt $legacy_using() using $temporary => {}
 macro Expression $legacy_expression(Expr $value) => ($value)
 //                                               ^^ keyword.operator.arrow.x2c
 
-List list = %(root (child 42) [1 2] {key $value} "$value ${call()}"
+List list = %(root (child 42) [1 2] {key $value} "$value $(call())"
 //          ^^ punctuation.definition.literal.list.begin.x2c
 //                 ^ punctuation.definition.literal.list.nested.begin.x2c
 //                            ^ punctuation.definition.literal.array.nested.begin.x2c
@@ -389,7 +389,7 @@ List list = %(root (child 42) [1 2] {key $value} "$value ${call()}"
 //                                       ^ punctuation.definition.interpolation.x2c
 //                                                ^ punctuation.definition.interpolation.x2c
 //                                                       ^^ punctuation.definition.interpolation.expression.begin.x2c
-  $value ${call()} @values @{make_values()} ?optional *rest);
+  $value $(call()) @values @(make_values()) ?optional *rest);
 //^ punctuation.definition.interpolation.x2c
 //       ^^ punctuation.definition.interpolation.expression.begin.x2c
 //                 ^ punctuation.definition.interpolation.list.x2c
@@ -397,7 +397,7 @@ List list = %(root (child 42) [1 2] {key $value} "$value ${call()}"
 //                                          ^^^^^^^^^ variable.other.pattern.optional.x2c
 //                                                    ^^^^^ variable.other.pattern.variadic.x2c
 
-Array array = %[ready, "text", [nested, $value], {kind: widget}, ${call()}];
+Array array = %[ready, "text", [nested, $value], {kind: widget}, $(call())];
 //            ^^ punctuation.definition.literal.array.begin.x2c
 //              ^^^^^ constant.other.atom.x2c
 //                      ^^^^ string.quoted.double.x2c
@@ -409,7 +409,7 @@ Array array = %[ready, "text", [nested, $value], {kind: widget}, ${call()}];
 return %(ok);
 // <------ keyword.control.x2c
 //     ^^ punctuation.definition.literal.list.begin.x2c
-Map map = %{key: 42, runtime: $value, computed: ${call()}};
+Map map = %{key: 42, runtime: $value, computed: $(call())};
 //        ^^ punctuation.definition.literal.map.begin.x2c
 //          ^^^ constant.other.atom.x2c
 //             ^ punctuation.separator.literal.collection.x2c
@@ -417,7 +417,7 @@ Map map = %{key: 42, runtime: $value, computed: ${call()}};
 //                            ^ punctuation.definition.interpolation.x2c
 //                                    ^^^^^^^^ constant.other.atom.x2c
 //                                              ^^ punctuation.definition.interpolation.expression.begin.x2c
-String string = %"value $name ${compute()}";
+String string = %"value $name $(compute())";
 //              ^^ punctuation.definition.literal.string.begin.x2c
 //                      ^ punctuation.definition.interpolation.x2c
 //                            ^^ punctuation.definition.interpolation.expression.begin.x2c
@@ -477,25 +477,25 @@ const char *plain = "$(not_lisp) $name";
 //                   ^ string.quoted.double - punctuation.definition.macro.sigil.x2c
 call(value);
 //  ^ - punctuation.definition.literal.list.begin.x2c
-List braced = %(${old} @{values});
-//              ^^ punctuation.definition.interpolation.expression.begin.x2c
-//                   ^ punctuation.definition.interpolation.expression.end.x2c
-//                     ^^ punctuation.definition.interpolation.list.expression.begin.x2c
-//                             ^ punctuation.definition.interpolation.list.expression.end.x2c
-String braced_text = %"${old} @{old}";
-//                     ^^ punctuation.definition.interpolation.expression.begin.x2c
-//                          ^ punctuation.definition.interpolation.expression.end.x2c
-//                            ^^ - punctuation.definition.interpolation.list.expression.begin.x2c
-List rejected_parenthesized = %($(old) @(values));
-//                              ^^ - punctuation.definition.interpolation.expression.begin.x2c
-//                                     ^^ - punctuation.definition.interpolation.list.expression.begin.x2c
-String rejected_parenthesized_text = %"$(old)";
-//                                     ^^ - punctuation.definition.interpolation.expression.begin.x2c
-List nested_text = %("value ${old}");
+List grouped = %($(value) @(values));
+//               ^^ punctuation.definition.interpolation.expression.begin.x2c
+//                      ^ punctuation.definition.interpolation.expression.end.x2c
+//                        ^^ punctuation.definition.interpolation.list.expression.begin.x2c
+//                                ^ punctuation.definition.interpolation.list.expression.end.x2c
+String grouped_text = %"$(value) @(value)";
+//                      ^^ punctuation.definition.interpolation.expression.begin.x2c
+//                             ^ punctuation.definition.interpolation.expression.end.x2c
+//                               ^^ - punctuation.definition.interpolation.list.expression.begin.x2c
+List retired_braced = %(${old} @{values});
+//                      ^^ - punctuation.definition.interpolation.expression.begin.x2c
+//                             ^^ - punctuation.definition.interpolation.list.expression.begin.x2c
+String retired_braced_text = %"${old}";
+//                             ^^ - punctuation.definition.interpolation.expression.begin.x2c
+List nested_text = %("value $(name)");
 //                          ^^ punctuation.definition.interpolation.expression.begin.x2c
-String escaped = %"\${old}";
-//                   ^^ - punctuation.definition.interpolation.expression.begin.x2c
-List nested_x2c = %([${$twice(20)}] {answer: ${$twice(20)}});
+String escaped = %"\$(name)";
+//                  ^^ - punctuation.definition.interpolation.expression.begin.x2c
+List nested_x2c = %([$($twice(20))] {answer: $($twice(20))});
 //                   ^^ punctuation.definition.interpolation.expression.begin.x2c
 //                     ^ punctuation.definition.macro.sigil.x2c
 //                                           ^^ punctuation.definition.interpolation.expression.begin.x2c
@@ -504,6 +504,9 @@ Var ordinary = %{old};
 //             ^^ - punctuation.definition.interpolation.expression.begin.x2c
 Var old_splice = @{old};
 //               ^ - punctuation.definition.interpolation.list.x2c
+List evaluated = $(first, @rest);
+//               ^ punctuation.definition.macro.sigil.x2c
+//                ^ punctuation.section.macro.hole.begin.x2c
 
 List typed = %(?(String text) ? (String text));
 //             ^^ punctuation.definition.pattern.capture.begin.x2c
@@ -520,15 +523,15 @@ call(@fixture.row.values($value));
 //   ^ punctuation.definition.macro.splice.x2c
 //    ^^^^^^^^^^^^^^^^^^ entity.name.function.macro.x2c
 //                       ^ punctuation.definition.macro.sigil.x2c
-List quotation = $!{ call(@items, @{parts}); };
+List quotation = $!{ call(@items, @(parts)); };
 //               ^^ punctuation.definition.macro.sigil.x2c
 //                        ^ punctuation.definition.macro.splice.x2c
 //                         ^^^^^ variable.other.macro.hole.x2c
 //                                ^^ meta.macro.hole.expression.x2c
-List array_quotation = $!{ return %[${10}, @items, ${40}]; };
+List array_quotation = $!{ return %[$(10), @items, $(40)]; };
 //                                         ^ punctuation.definition.macro.splice.x2c
 //                                          ^^^^^ variable.other.macro.hole.x2c
-List list_data = %(head @items @{values} @(values));
+List list_data = %(head @items @(values) @{values});
 //                      ^^^^^^ meta.interpolation.list.x2c
 //                             ^^ meta.interpolation.list.expression.x2c
 //                                       ^^ - punctuation.definition.interpolation.list.expression.begin.x2c
