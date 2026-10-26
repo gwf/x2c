@@ -297,9 +297,9 @@ int Scope.contains(Scope scope, Scope candidate) {
     ~  return 0;
     ~}
     ```
-    Raises: `<alloc-fail>` when the scope or name copy cannot be allocated,
-    or `<size-limit>` when the name is too large. Before `Error`
-    initialization these failures terminate the process.
+    Raises: `<alloc-fail>` when the scope or name copy cannot be
+    allocated. Before `Error` initialization this failure terminates the
+    process.
 */
 meta native Scope Scope.new_named(const char *name) {
   _require_running();
