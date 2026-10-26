@@ -334,32 +334,25 @@ int Ast_try_binding(List binding, int * identity, String * spelling){
   if(! _init_guard_) _file_init_();
   {
     List _x2c_gensym_match_expr = binding; List _x2c_gensym_match_cursor;
-    switch(_x2c_gensym_match_expr ? _x2c_gensym_match_expr->car.u64 : 0){
-        case 9224497941690207118ULL: ;
-       _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497941690207118ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && Var_is(_x2c_gensym_match_cursor->car, 1318210446)) { Var _x2c_gensym_match_value_1 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {{
-        Var id;
-        id = _x2c_gensym_match_value_0;
-        Var name;
-        name = _x2c_gensym_match_value_1;
+      _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497941690207118ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && Var_is(_x2c_gensym_match_cursor->car, 1318210446)) { Var _x2c_gensym_match_value_1 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {{
+      Var id;
+      id = _x2c_gensym_match_value_0;
+      Var name;
+      name = _x2c_gensym_match_value_1;
+      Var _x2c_gensym_match_value_0 = name;
+      {
+        String name = Var_as_string(_x2c_gensym_match_value_0);
         {
-          Var _x2c_gensym_match_value_0 = name;
-          {
-            String name = Var_as_string(_x2c_gensym_match_value_0);
-            {
-              if(! Var_is_integer(id) || Var_integer(id) <= 0) return 0;
-              if(identity)(* identity) = Var_int(Var_convert(id, 3453797));
-              if(spelling)(* spelling) = name;
-              return 1;
-            }
-
-          }
-
+          if(! Var_is_integer(id) || Var_integer(id) <= 0) return 0;
+          if(identity)(* identity) = Var_int(Var_convert(id, 3453797));
+          if(spelling)(* spelling) = name;
+          return 1;
         }
 
       }
-       break; } } } default: break;
-    }
 
+    }
+     } } }
   }
   return 0;
 }

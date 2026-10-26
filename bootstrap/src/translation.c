@@ -379,27 +379,23 @@ static List _renumbered_bindings(List ast){
         if(! Var_is_row(node, 9, 7, 4) || Var_is_nil(node)) continue;
         {
           List _x2c_gensym_match_expr = Var_list(node); List _x2c_gensym_match_cursor;
-          switch(_x2c_gensym_match_expr ? _x2c_gensym_match_expr->car.u64 : 0){
-              case 9224497941690207118ULL: ;
-             _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497941690207118ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor) { Var _x2c_gensym_match_value_1 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {{
-              Var identity;
-              identity = _x2c_gensym_match_value_0;
-              Var spelling;
-              spelling = _x2c_gensym_match_value_1;
-              {
-                Var number;
-                if(! Map_try_get(numbers, identity, &(number))){
-                  number = int_var((int) Map_len(numbers) + 1);
-                  Map_setindex(numbers, identity, number);
-                }
-                Map_setindex(replaced, Var_new(3683441, (void *) Var_list(node)), List_var(cons(_0, cons(number, cons(spelling, NULL)))));
-                continue;
+            _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497941690207118ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor) { Var _x2c_gensym_match_value_1 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {{
+            Var identity;
+            identity = _x2c_gensym_match_value_0;
+            Var spelling;
+            spelling = _x2c_gensym_match_value_1;
+            {
+              Var number;
+              if(! Map_try_get(numbers, identity, &(number))){
+                number = int_var((int) Map_len(numbers) + 1);
+                Map_setindex(numbers, identity, number);
               }
-
+              Map_setindex(replaced, Var_new(3683441, (void *) Var_list(node)), List_var(cons(_0, cons(number, cons(spelling, NULL)))));
+              continue;
             }
-             break; } } } default: break;
-          }
 
+          }
+           } } }
         }
         {
           Var child;
@@ -432,16 +428,12 @@ static List _renumbered_bindings(List ast){
 static String _node_repr(List node){
   {
     List _x2c_gensym_match_expr = node; List _x2c_gensym_match_cursor, _x2c_gensym_match_cursor1;
-    switch(_x2c_gensym_match_expr ? _x2c_gensym_match_expr->car.u64 : 0){
-        case 9224498832502366540ULL: ;
-       _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224498832502366540ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && Var_is(_x2c_gensym_match_cursor->car, 806120) && (_x2c_gensym_match_cursor1 = Var_list_payload(_x2c_gensym_match_cursor->car), 1) && _x2c_gensym_match_cursor1 && _x2c_gensym_match_cursor1->car.u64 == 9224497936762538826ULL && (_x2c_gensym_match_cursor1 = _x2c_gensym_match_cursor1->cdr, 1) && _x2c_gensym_match_cursor1) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_cursor1->car; if ((_x2c_gensym_match_cursor1 = _x2c_gensym_match_cursor1->cdr, 1) && !_x2c_gensym_match_cursor1 && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1)) {{
-        Var name;
-        name = _x2c_gensym_match_value_0;
-        return String_join(NULL, cons(String_var(_1), cons(String_var(Var_str(name)), cons(String_var(_2), NULL))));
-      }
-       break; } } default: break;
+      _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224498832502366540ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && Var_is(_x2c_gensym_match_cursor->car, 806120) && (_x2c_gensym_match_cursor1 = Var_list_payload(_x2c_gensym_match_cursor->car), 1) && _x2c_gensym_match_cursor1 && _x2c_gensym_match_cursor1->car.u64 == 9224497936762538826ULL && (_x2c_gensym_match_cursor1 = _x2c_gensym_match_cursor1->cdr, 1) && _x2c_gensym_match_cursor1) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_cursor1->car; if ((_x2c_gensym_match_cursor1 = _x2c_gensym_match_cursor1->cdr, 1) && !_x2c_gensym_match_cursor1 && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1)) {{
+      Var name;
+      name = _x2c_gensym_match_value_0;
+      return String_join(NULL, cons(String_var(_1), cons(String_var(Var_str(name)), cons(String_var(_2), NULL))));
     }
-
+     } }
   }
   return List_repr(node);
 }

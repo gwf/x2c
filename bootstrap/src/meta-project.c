@@ -1118,33 +1118,26 @@ static String _loaded_providers(Helper * h){
                 List provider = _loaded_provider(&((* h)), path, index ++);
                 {
                   List _x2c_gensym_match_expr = provider; List _x2c_gensym_match_cursor;
-                  switch(_x2c_gensym_match_expr ? _x2c_gensym_match_expr->car.u64 : 0){
-                      case 9224497949733334154ULL: ;
-                     _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497949733334154ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && Var_is(_x2c_gensym_match_cursor->car, 1318210446)) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {{
-                      Var message;
-                      message = _x2c_gensym_match_value_0;
+                    _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497949733334154ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && Var_is(_x2c_gensym_match_cursor->car, 1318210446)) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {{
+                    Var message;
+                    message = _x2c_gensym_match_value_0;
+                    Var _x2c_gensym_match_value_0 = message;
+                    {
+                      String message = Var_as_string(_x2c_gensym_match_value_0);
                       {
-                        Var _x2c_gensym_match_value_0 = message;
+                        String _x2c_gensym_return_value_5 = message;
                         {
-                          String message = Var_as_string(_x2c_gensym_match_value_0);
-                          {
-                            String _x2c_gensym_return_value_5 = message;
-                            {
-                              x2c_cleanup_leave(& _x2c_gensym_defer_record_4);
-                              x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
-                              return _x2c_gensym_return_value_5;
-                            }
-
-                          }
-
+                          x2c_cleanup_leave(& _x2c_gensym_defer_record_4);
+                          x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
+                          return _x2c_gensym_return_value_5;
                         }
 
                       }
 
                     }
-                     break; } } default: break;
-                  }
 
+                  }
+                   } }
                 }
                 Map_setindex((* h).providers, String_var(path), List_var(provider));
                 if(_package_source(&((* h)), path)){

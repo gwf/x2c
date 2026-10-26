@@ -115,16 +115,16 @@ static List _match_items(Array out){
         {
           Var _x2c_gensym_match_var = piece; int _x2c_gensym_match_none = !Var_is(_x2c_gensym_match_var, 806120);
           List _x2c_gensym_match_expr = Var_list_payload(_x2c_gensym_match_var); List _x2c_gensym_match_cursor;
-          switch(_x2c_gensym_match_expr ? _x2c_gensym_match_expr->car.u64 : 0){
-              case 9224497972340888518ULL: ; if (!_x2c_gensym_match_none) { _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497972340888518ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {{
+            if (!_x2c_gensym_match_none) { _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497972340888518ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {{
+            {
               if(Array_len(run)) Array_push(items, List_var(cons(String_var(_0), Array_list(run))));
               Array_clear(run);
               Array_push(items, piece);
               continue;
             }
-             break; } } default: break;
-          }
 
+          }
+           } }
         }
         Array_push(run, piece);
       }
@@ -164,29 +164,23 @@ static Symbol _match_capture_tag(Var element, Var * binder){
   {
     Var _x2c_gensym_match_var = element; int _x2c_gensym_match_none = !Var_is(_x2c_gensym_match_var, 806120);
     List _x2c_gensym_match_expr = Var_list_payload(_x2c_gensym_match_var); List _x2c_gensym_match_cursor;
-    switch(0){
-        default: ; if (!_x2c_gensym_match_none) { _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497936761680486ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497936762981386ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && Var_is(_x2c_gensym_match_cursor->car, 1328354264)) { Var _x2c_gensym_match_value_1 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {{
-        Var name;
-        name = _x2c_gensym_match_value_0;
-        Var tag;
-        tag = _x2c_gensym_match_value_1;
-        {
-          Var _x2c_gensym_match_value_0 = tag;
-          {
-            Symbol tag = Var_symbol(_x2c_gensym_match_value_0);
-            if(tag != 1059020478773725 && tag != 1479708786 && tag != 1468512){
-              (* binder) = name;
-              return tag;
-            }
-
-          }
-
+      if (!_x2c_gensym_match_none) { _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497936761680486ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497936762981386ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && Var_is(_x2c_gensym_match_cursor->car, 1328354264)) { Var _x2c_gensym_match_value_1 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {{
+      Var name;
+      name = _x2c_gensym_match_value_0;
+      Var tag;
+      tag = _x2c_gensym_match_value_1;
+      Var _x2c_gensym_match_value_0 = tag;
+      {
+        Symbol tag = Var_symbol(_x2c_gensym_match_value_0);
+        if(tag != 1059020478773725) if(tag != 1479708786) if(tag != 1468512){
+          (* binder) = name;
+          return tag;
         }
 
       }
-       break; } } } }
-    }
 
+    }
+     } } } }
   }
   return 0;
 }

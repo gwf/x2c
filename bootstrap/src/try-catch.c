@@ -932,11 +932,11 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _890 = cons(_889, NULL);
   _891 = cons(_267, _890);
   _892 = List_var(_891);
-  _893 = int_var(106);
+  _893 = int_var(105);
   _894 = cons(_893, NULL);
   _895 = cons(_573, _894);
   _896 = List_var(_895);
-  _897 = int_var(4011);
+  _897 = int_var(3983);
   _898 = cons(_897, NULL);
   _899 = cons(_586, _898);
   _900 = List_var(_899);
@@ -1097,41 +1097,34 @@ List _x2c_try_catch_site(List frame, List clause){
   Macro site = _629;
   {
     List _x2c_gensym_match_expr = clause; List _x2c_gensym_match_cursor;
-    switch(0){
-        default: ;
-       _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && Var_is(_x2c_gensym_match_cursor->car, 1318210446)) { Var _x2c_gensym_match_value_1 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && Var_is(_x2c_gensym_match_cursor->car, 806120)) { Var _x2c_gensym_match_value_2 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1)) { List _x2c_gensym_match_list_3 = _x2c_gensym_match_cursor;
+      _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && Var_is(_x2c_gensym_match_cursor->car, 1318210446)) { Var _x2c_gensym_match_value_1 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && Var_is(_x2c_gensym_match_cursor->car, 806120)) { Var _x2c_gensym_match_value_2 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1)) { List _x2c_gensym_match_list_3 = _x2c_gensym_match_cursor;
+    {
+      Var handle;
+      handle = _x2c_gensym_match_value_0;
+      Var state;
+      state = _x2c_gensym_match_value_1;
+      Var arms;
+      arms = _x2c_gensym_match_value_2;
+      List patterns;
+      patterns = _x2c_gensym_match_list_3;
+      Var _x2c_gensym_match_value_0 = state;
+      Var _x2c_gensym_match_value_1 = arms;
       {
-        Var handle;
-        handle = _x2c_gensym_match_value_0;
-        Var state;
-        state = _x2c_gensym_match_value_1;
-        Var arms;
-        arms = _x2c_gensym_match_value_2;
-        List patterns;
-        patterns = _x2c_gensym_match_list_3;
+        String state = Var_as_string(_x2c_gensym_match_value_0);
+        List arms = Var_list_payload(_x2c_gensym_match_value_1);
         {
-          Var _x2c_gensym_match_value_0 = state;
-          Var _x2c_gensym_match_value_1 = arms;
-          {
-            String state = Var_as_string(_x2c_gensym_match_value_0);
-            List arms = Var_list_payload(_x2c_gensym_match_value_1);
-            {
-              int count = List_len(arms), filtered = List_len(patterns);
-              String fallback = filtered < count ? int_str(filtered) : _630;
-              return Macro_apply(site, ({
-                Var _x2c_gensym_literal_part_4 = List_var(frame);  Var _x2c_gensym_literal_part_5 = handle;  Var _x2c_gensym_literal_part_6 = int_var(count);  Var _x2c_gensym_literal_part_7 = List_var(cons(_5, cons(_337, cons(List_var(cons(_339, cons(_337, cons(String_var(fallback), NULL)))), NULL))));  Var _x2c_gensym_literal_part_8 = List_var(cons(_5, cons(_337, cons(String_var(state), NULL))));  cons(_x2c_gensym_literal_part_4, cons(_x2c_gensym_literal_part_5, cons(_x2c_gensym_literal_part_6, cons(_x2c_gensym_literal_part_7, cons(_x2c_gensym_literal_part_8, cons(List_var(patterns), NULL))))));
-              }
-              ));
-            }
-
+          int count = List_len(arms), filtered = List_len(patterns);
+          String fallback = filtered < count ? int_str(filtered) : _630;
+          return Macro_apply(site, ({
+            Var _x2c_gensym_literal_part_4 = List_var(frame);  Var _x2c_gensym_literal_part_5 = handle;  Var _x2c_gensym_literal_part_6 = int_var(count);  Var _x2c_gensym_literal_part_7 = List_var(cons(_5, cons(_337, cons(List_var(cons(_339, cons(_337, cons(String_var(fallback), NULL)))), NULL))));  Var _x2c_gensym_literal_part_8 = List_var(cons(_5, cons(_337, cons(String_var(state), NULL))));  cons(_x2c_gensym_literal_part_4, cons(_x2c_gensym_literal_part_5, cons(_x2c_gensym_literal_part_6, cons(_x2c_gensym_literal_part_7, cons(_x2c_gensym_literal_part_8, cons(List_var(patterns), NULL))))));
           }
-
+          ));
         }
 
       }
-       break; } } } }
-    }
 
+    }
+     } } } }
   }
   return NULL;
 }
@@ -1142,18 +1135,14 @@ List _x2c_try_landing(List frame, List clause, List exits){
   List otherwise = cons(_1, cons(_2, cons(List_var(cons(_3, cons(List_var(cons(_426, cons(List_var(cons(_10, cons(_924, cons(_156, cons(List_var(exits), NULL))))), _962))), NULL))), NULL)));
   {
     List _x2c_gensym_match_expr = clause; List _x2c_gensym_match_cursor;
-    switch(0){
-        default: ;
-       _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor) { Var _x2c_gensym_match_value_1 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1)) {{
-        Var handle;
-        handle = _x2c_gensym_match_value_0;
-        Var arms;
-        arms = _x2c_gensym_match_value_1;
-        return Macro_apply(landing, cons(List_var(frame), cons(handle, cons(List_var(otherwise), cons(arms, NULL)))));
-      }
-       break; } } }
+      _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor) { Var _x2c_gensym_match_value_1 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1)) {{
+      Var handle;
+      handle = _x2c_gensym_match_value_0;
+      Var arms;
+      arms = _x2c_gensym_match_value_1;
+      return Macro_apply(landing, cons(List_var(frame), cons(handle, cons(List_var(otherwise), cons(arms, NULL)))));
     }
-
+     } } }
   }
   return otherwise;
 }

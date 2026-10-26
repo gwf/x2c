@@ -213,48 +213,42 @@ static Var _modifier_syntax(Var modifier){
   {
     Var _x2c_gensym_match_var = modifier; int _x2c_gensym_match_none = !Var_is(_x2c_gensym_match_var, 806120);
     List _x2c_gensym_match_expr = Var_list_payload(_x2c_gensym_match_var); List _x2c_gensym_match_cursor;
-    switch(_x2c_gensym_match_expr ? _x2c_gensym_match_expr->car.u64 : 0){
-        case 9224497936762055558ULL: ; if (!_x2c_gensym_match_none) { _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497936762055558ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && Var_is(_x2c_gensym_match_cursor->car, 806120)) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {{
-        Var parameters;
-        parameters = _x2c_gensym_match_value_0;
+      if (!_x2c_gensym_match_none) { _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497936762055558ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && Var_is(_x2c_gensym_match_cursor->car, 806120)) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {{
+      Var parameters;
+      parameters = _x2c_gensym_match_value_0;
+      Var _x2c_gensym_match_value_0 = parameters;
+      {
+        List parameters = Var_list_payload(_x2c_gensym_match_value_0);
         {
-          Var _x2c_gensym_match_value_0 = parameters;
+          Array params = Array_new();
           {
-            List parameters = Var_list_payload(_x2c_gensym_match_value_0);
-            {
-              Array params = Array_new();
+            List parameter;
+            List _x2c_gensym_macro_object_1 = parameters;
+            List _x2c_gensym_macro_cursor_1 = _x2c_gensym_macro_object_1;
+            Var _x2c_gensym_macro_cursor_output_1;
+            while(List_try_next(_x2c_gensym_macro_object_1, &(_x2c_gensym_macro_cursor_1), &(_x2c_gensym_macro_cursor_output_1))){
+              parameter = Var_list_payload(_x2c_gensym_macro_cursor_output_1);
               {
-                List parameter;
-                List _x2c_gensym_macro_object_1 = parameters;
-                List _x2c_gensym_macro_cursor_1 = _x2c_gensym_macro_object_1;
-                Var _x2c_gensym_macro_cursor_output_1;
-                while(List_try_next(_x2c_gensym_macro_object_1, &(_x2c_gensym_macro_cursor_1), &(_x2c_gensym_macro_cursor_output_1))){
-                  parameter = Var_list_payload(_x2c_gensym_macro_cursor_output_1);
-                  {
-                    List base, modifiers;
-                    List _x2c_gensym_destructure_0 = type_declaration_parts(parameter);
-                    base = Var_list_payload(List_getindex(_x2c_gensym_destructure_0, 0));
-                    modifiers = Var_list_payload(List_getindex(_x2c_gensym_destructure_0, 1));
-                    Array_push(params, List_var(({
-                      Var _x2c_gensym_literal_part_3 = List_var(base);  Var _x2c_gensym_literal_part_4 = List_var(cons(_4, cons(_2, cons(List_var(modifiers), NULL))));  cons(_5, cons(_x2c_gensym_literal_part_3, cons(_x2c_gensym_literal_part_4, NULL)));
-                    }
-                    )));
-                  }
-
+                List base, modifiers;
+                List _x2c_gensym_destructure_0 = type_declaration_parts(parameter);
+                base = Var_list_payload(List_getindex(_x2c_gensym_destructure_0, 0));
+                modifiers = Var_list_payload(List_getindex(_x2c_gensym_destructure_0, 1));
+                Array_push(params, List_var(({
+                  Var _x2c_gensym_literal_part_3 = List_var(base);  Var _x2c_gensym_literal_part_4 = List_var(cons(_4, cons(_2, cons(List_var(modifiers), NULL))));  cons(_5, cons(_x2c_gensym_literal_part_3, cons(_x2c_gensym_literal_part_4, NULL)));
                 }
-
+                )));
               }
-              return List_var(cons(_6, cons(List_var(cons(_7, List_append(Array_list_free(params), NULL))), NULL)));
+
             }
 
           }
-
+          return List_var(cons(_6, cons(List_var(cons(_7, List_append(Array_list_free(params), NULL))), NULL)));
         }
 
       }
-       break; } } } default: break;
-    }
 
+    }
+     } } }
   }
   return modifier;
 }

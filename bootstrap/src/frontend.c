@@ -682,21 +682,18 @@ static List _unit_private_rows(Compiler c, Map globs){
       {
         Var _x2c_gensym_match_var = key; int _x2c_gensym_match_none = !Var_is(_x2c_gensym_match_var, 806120);
         List _x2c_gensym_match_expr = Var_list_payload(_x2c_gensym_match_var); List _x2c_gensym_match_cursor;
-        switch(0){
-            default: ; if (!_x2c_gensym_match_none) { _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && Var_equal(_x2c_gensym_match_cursor->car, _21 ->car) && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {{
-            Var name;
-            name = _x2c_gensym_match_value_0;
-            {
-              String path = Compiler_absolute_home_path(Var_as_string(List_car(Var_list(owner))));
-              if(String_equal(Compiler_canonical_path(c, path), unit)) continue;
-              Array_push(rows, List_var(_unit_private_row(globs, cons(name, NULL))));
-              Array_push(rows, List_var(_unit_private_row(globs, cons(_22, cons(name, NULL)))));
-            }
-
+          if (!_x2c_gensym_match_none) { _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && Var_equal(_x2c_gensym_match_cursor->car, _21 ->car) && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {{
+          Var name;
+          name = _x2c_gensym_match_value_0;
+          {
+            String path = Compiler_absolute_home_path(Var_as_string(List_car(Var_list(owner))));
+            if(String_equal(Compiler_canonical_path(c, path), unit)) continue;
+            Array_push(rows, List_var(_unit_private_row(globs, cons(name, NULL))));
+            Array_push(rows, List_var(_unit_private_row(globs, cons(_22, cons(name, NULL)))));
           }
-           break; } } }
-        }
 
+        }
+         } } }
       }
 
     }

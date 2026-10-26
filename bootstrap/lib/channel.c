@@ -662,11 +662,10 @@ Channel Channel_new(Var type, Var capacity){
 static Code _new_empty(Code code){
   {
     List _x2c_gensym_match_expr = code; MatchCaptureBuffer _x2c_gensym_match_capture = { 0 };
-    switch(0){
-        default: ; static MacroCaseSite _x2c_gensym_macro_site_0; if (Macro_case_capture_at(&_x2c_gensym_macro_site_0, _x2c_gensym_match_expr, _154, NULL, &_x2c_gensym_match_capture)) {return _199;
-       break; }
+      static MacroCaseSite _x2c_gensym_macro_site_0; if (Macro_case_capture_at(&_x2c_gensym_macro_site_0, _x2c_gensym_match_expr, _154, NULL, &_x2c_gensym_match_capture)) {{
+      return _199;
     }
-
+     }
   }
   return code;
 }
@@ -676,16 +675,13 @@ Var Macro_inserted(Var, int, int);
 static Code _new_one(Code code){
   {
     List _x2c_gensym_match_expr = code; Var _x2c_gensym_match_values[1]; MatchCaptureBuffer _x2c_gensym_match_capture = { .values = _x2c_gensym_match_values, .capacity = 1 };
-    switch(0){
-        default: ; static MacroCaseSite _x2c_gensym_macro_site_0; if (Macro_case_capture_at(&_x2c_gensym_macro_site_0, _x2c_gensym_match_expr, _333, _207, &_x2c_gensym_match_capture)) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_values[0];
-      {
-        Var value;
-        value = _x2c_gensym_match_value_0;
-        return cons(_38, cons(_158, cons(List_var(cons(_42, cons(_56, cons(List_var(cons(_31, cons(Macro_inserted(value, 1, 1), _348))), NULL)))), NULL)));
-      }
-       break; }
+      static MacroCaseSite _x2c_gensym_macro_site_0; if (Macro_case_capture_at(&_x2c_gensym_macro_site_0, _x2c_gensym_match_expr, _333, _207, &_x2c_gensym_match_capture)) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_values[0];
+    {
+      Var value;
+      value = _x2c_gensym_match_value_0;
+      return cons(_38, cons(_158, cons(List_var(cons(_42, cons(_56, cons(List_var(cons(_31, cons(Macro_inserted(value, 1, 1), _348))), NULL)))), NULL)));
     }
-
+     }
   }
   return code;
 }
