@@ -645,11 +645,11 @@ static Map _sq_name_ambiguity(SnapshotQuery &q, Map request) {
 }
 
 /** Executes one data-only query without opening a compiler or source file. */
-Map graph_snapshot_query(Map snapshot, Map request) {
+static Map _sq_execute(SnapshotQuery q, Map request) {
   String op = _sq_validate_query(request);
   MatchPlan pattern = auto op == "match"
     ? _sq_prepare_pattern(request["pattern"]) : NULL;
-  SnapshotQuery q = _sq_open(snapshot);
+  q.reachable = {};
   if (op == "traverse" || op == "match") {
     Map ambiguous = _sq_name_ambiguity(q, request);
     if ((void *) ambiguous) return ambiguous;
@@ -663,7 +663,38 @@ Map graph_snapshot_query(Map snapshot, Map request) {
     case "match": rows = _sq_match(q, request, pattern); break;
     default: _sq_error(%"unknown operation: $op");
   }
-  return _sq_page(snapshot, request, rows);
+  return _sq_page(q.snapshot, request, rows);
+}
+
+/** Executes one query with indexes owned by the caller's lifetime. */
+Map graph_snapshot_query(Map snapshot, Map request) =>
+  _sq_execute(_sq_open(snapshot), request);
+
+/* Every request owns its parse, reachability cache, Match plan, and reply.
+   The session indexes are complete before this isolated lifetime opens. */
+static int _sq_serve_request(SnapshotQuery session) {
+  Context request = Context.open_isolated_named("graph query");
+  defer request.close();
+  String line = Stdin.readline();
+  if (!line) return 0;
+  Map response;
+  try {
+    Map query = _sq_object(Json.parse(line), "query");
+    response = _sq_execute(session, query);
+  }
+  catch %(*failure): response = {"snapshot": session.snapshot["identity"],
+    "coverage": session.snapshot["coverage"], "error": failure.repr()};
+  Stdout.printf("%s\n", Var.json(response));
+  Stdout.flush();
+  return 1;
+}
+
+/** Serves ordered JSON lines against one immutable loaded snapshot. */
+void graph_snapshot_serve(Map snapshot) {
+  SnapshotQuery session = _sq_open(snapshot);
+  _sq_index_edges(session);
+  Stderr.printf("x2c graph serve: ready %s\n", snapshot["identity"].str());
+  while (_sq_serve_request(session)) {}
 }
 
 /* Only declaration ownership participates in cross-snapshot identity.

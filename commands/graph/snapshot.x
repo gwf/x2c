@@ -12,6 +12,7 @@
 Map graph_snapshot_extract(ParsedUnit *parsed, String domain);
 void graph_snapshot_resolve(Map snapshot);
 Map graph_snapshot_query(Map snapshot, Map query);
+void graph_snapshot_serve(Map snapshot);
 Map graph_snapshot_diff(Map before, Map after);
 
 static String _snapshot_fingerprint(Path path) {
@@ -260,6 +261,10 @@ int graph_snapshot_command(int argc, char **argv) {
     }
     else {
       Map snapshot = graph_snapshot_read(String.new(argv[2]));
+      if (verb == "serve" && argc == 3) {
+        graph_snapshot_serve(snapshot);
+        return 0;
+      }
       if (verb == "status" && argc == 3)
         result = _snapshot_status(snapshot, Path.absolute(String.new(argv[0])));
       else if (verb == "query" && argc == 4) {

@@ -32,6 +32,12 @@ or explicit source files. Snapshot creation neither installs dependencies nor
 builds application executables. Follow the ordinary project workflow if a
 required dependency is unavailable.
 
+For a sequence of queries, keep `x2c graph serve SNAPSHOT` running. Send one
+query JSON object per stdin line and read one response per stdout line. The
+server retains indexes, reports readiness on stderr, and releases temporary
+request data. Restart it after rebuilding when you need the new snapshot.
+Invalid requests return an `error` response without ending the session.
+
 ## Find, follow, inspect
 
 Find entities by name, kind, unit, or source text. Resolve ambiguous names with

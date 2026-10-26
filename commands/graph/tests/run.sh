@@ -1057,5 +1057,6 @@ do
 done
 parallel_start certify sh commands/graph/tests/certify.sh
 parallel_start snapshots python3 commands/graph/tests/snapshot.py
+parallel_start serve python3 commands/graph/tests/serve.py
 parallel_start query_boundary python3 commands/graph/tests/query-boundary.py "$tool"
 parallel_wait

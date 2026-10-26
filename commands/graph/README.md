@@ -531,6 +531,32 @@ explicitly when a current-tree answer is required. A failed rebuild preserves
 the preceding snapshot. Inspection returns the saved source, not the current
 file contents.
 
+### Persistent queries
+
+Run `x2c graph serve SNAPSHOT` to load one snapshot and its entity, binding,
+and relationship indexes once. Send one ordinary query JSON object per line
+on stdin. Each line produces one JSON response on stdout, flushed immediately.
+Responses are ordered; clients can keep stdin open for successive requests.
+The server writes a `x2c graph serve: ready SNAPSHOT_ID` line to stderr after
+loading and indexing. Closing stdin ends the session; a final unterminated
+line is processed before exit.
+
+```sh
+cat queries.jsonl | x2c graph serve /tmp/project-analysis
+```
+
+Successful responses are identical to `query`. An invalid JSON or query line
+returns an object containing `snapshot`, `coverage`, and an `error` string;
+the following request still runs. Snapshot loading failures remain command
+errors on stderr with a nonzero exit status.
+
+The loaded snapshot stays fixed even if its directory is rebuilt or removed.
+Restart the process to load a replacement. The server never checks freshness,
+parses source, or executes meta code. Each request releases its temporary
+allocations and reachability cache after writing its reply. Only the loaded
+snapshot and reusable indexes remain resident. This is a foreground stdio
+server; it does not open a network port or manage a background daemon.
+
 ### Query vocabulary
 
 Put one JSON object in the query file. Each result identifies its snapshot and
