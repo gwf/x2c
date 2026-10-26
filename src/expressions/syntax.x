@@ -1,10 +1,9 @@
-/*  syntax.x -- expression grammar */
+/*  syntax.x -- expression grammar
 
-/* expression grammar
-
-   Each parser entry consumes exactly its grammar level and leaves `c.token`
-   at the first token that belongs to its caller. Each level resolves the
-   nodes it builds, so higher levels receive typed or deferred nodes. */
+    Each parser entry consumes exactly its grammar level and leaves `c.token`
+    at the first token that belongs to its caller. Each level resolves the
+    nodes it builds, so higher levels receive typed or deferred nodes.
+*/
 
 /** Parses an assignment expression and any following comma expressions.
     A comma expression retains source order and takes the type of its final
