@@ -24,8 +24,8 @@ module void _note_explicit_converter(
   Compiler c, List call, String method, Token origin) {
   Type result = call.cadr();
   if (!(result ~= %(?))) return;
-  match (call) case $called(?callee, ?argument): {
-    match (callee) case %(expr ? (ident ?binding)):
+  if (call ~= $called(?callee, ?argument)) {
+    if (callee ~= %(expr ? (ident ?binding)))
       if (Compiler.supplies_native_meta(Ast.binding_spelling(binding)))
         return;
     String spelled = result.car().str().lower();
@@ -58,11 +58,11 @@ void Compiler.check_explicit_converter(
 module void _check_converter_args(
   Compiler c, List result, int method, List notes) {
   List callee = NULL, params = NULL, arguments = NULL, supplied = NULL;
-  match (result) case $called(?function, *values): {
+  if (result ~= $called(?function, *values)) {
     callee = function;
     supplied = values;
     arguments = method ? cdr(values) : values;
-    match (callee) case %(expr ((func ?declared) *) ?):
+    if (callee ~= %(expr ((func ?declared) *) ?))
       params = method ? cdr(declared) : declared;
   }
   List n = notes;
@@ -73,7 +73,7 @@ module void _check_converter_args(
     Type expected = param.car() == <param> ? param.type_from_ast() : param;
     if (expected.is_list_rest()) {
       expected = %("Var");
-      match (argument) case %(expr ? (splice ?value)):
+      if (argument ~= %(expr ? (splice ?value)))
         argument = value, expected = %("List");
     }
     _check_noted_converter(c, car(n), argument, expected, 0);
@@ -293,12 +293,11 @@ static List _lift_func_value(
    literal. */
 static List _compound_literal(Compiler c, List composite, Type target) {
   List converted = c.convert_initializer(composite, target, NULL);
-  match (converted)
-    case %(expr ?type (composite *)): {
-      if (Type.tag(type) ~= %((gensym *)))
-        $fail.expressions_brace_anonymous(c, NULL);
-      return %(expr $type (cast $type $converted));
-    }
+  if (converted ~= %(expr ?type (composite *))) {
+    if (Type.tag(type) ~= %((gensym *)))
+      $fail.expressions_brace_anonymous(c, NULL);
+    return %(expr $type (cast $type $converted));
+  }
   return converted;
 }
 
@@ -306,8 +305,8 @@ static List _compound_literal(Compiler c, List composite, Type target) {
    the result as a whole. */
 static List _convert_conditional_arms(
   Compiler c, List expr, Type declared_target) {
-  match (expr) case %(expr ? $($source_operator_content(
-      %(?operator ?condition ?ontrue ?onfalse)))): {
+  if (expr ~= %(expr ? $($source_operator_content(
+      %(?operator ?condition ?ontrue ?onfalse))))) {
     Type true_type = ontrue.cadr(), false_type = onfalse.cadr();
     if (ontrue.list() ~= %(expr ? (composite *)) ||
         onfalse.list() ~= %(expr ? (composite *)) ||
@@ -328,16 +327,16 @@ static List _convert_conditional_arms(
    destination conversion because only one association runs. */
 static List _convert_generic_arms(
   Compiler c, List expr, Type declared_target) {
-  match (expr) case %(expr () $($source_generic_content(
-      %(?control *associations)))): {
+  if (expr ~= %(expr () $($source_generic_content(
+      %(?control *associations))))) {
     Array converted = [];
     int changed = 0;
-    foreach (List association in associations) match (association)
-      case %(association ?selector ?value): {
-        List result = c.convert_expression(value, declared_target);
-        if (result != value) changed = 1;
-        converted.push(%(association $selector $result));
-      }
+    foreach (List association in associations)
+      if (association ~= %(association ?selector ?value)) {
+      List result = c.convert_expression(value, declared_target);
+      if (result != value) changed = 1;
+      converted.push(%(association $selector $result));
+    }
     if (changed)
       return %(expr $declared_target $(source_generic_content(
         $(control, @(converted.list_free())))));
@@ -626,27 +625,25 @@ static String _converter_name(Type owner, Type target) {
     arguments. A custom converter or a shadowed callee may change state.
 */
 int Compiler.is_builtin_converter_call(Compiler c, List expr) {
-  match (expr)
-    case %(expr ?result (call ?callee (args ?argument))): {
-      Type target = result, source = argument.cadr();
-      if (!source || !(source ~= %(?)) || !(target ~= %(?))) return 0;
-      if (!source.fixed_var_tag() ||
-          !(target == %("Var") ||
-            (source.scalar_tag() && target == %("String"))))
-        return 0;
-      List binding = NULL;
-      String spelling = NULL;
-      if (callee is <string>) spelling = callee;
-      else match (callee)
-        case %(expr ? $($source_identifier_content(%(?bound)))): {
-          binding = bound;
-          spelling = Ast.binding_spelling(binding);
-        }
-      if (spelling != _converter_name(source, target)) return 0;
-      Type declared = NULL;
-      return !binding ||
-        binding == c.sym.resolve_global($(spelling), declared);
+  if (expr ~= %(expr ?result (call ?callee (args ?argument)))) {
+    Type target = result, source = argument.cadr();
+    if (!source || !(source ~= %(?)) || !(target ~= %(?))) return 0;
+    if (!source.fixed_var_tag() ||
+        !(target == %("Var") ||
+          (source.scalar_tag() && target == %("String"))))
+      return 0;
+    List binding = NULL;
+    String spelling = NULL;
+    if (callee is <string>) spelling = callee;
+    else if (callee ~= %(expr ? $($source_identifier_content(%(?bound))))) {
+      binding = bound;
+      spelling = Ast.binding_spelling(binding);
     }
+    if (spelling != _converter_name(source, target)) return 0;
+    Type declared = NULL;
+    return !binding ||
+      binding == c.sym.resolve_global($(spelling), declared);
+  }
   return 0;
 }
 
@@ -657,10 +654,9 @@ static List _converted_temporary(
   Compiler c, List call, Type owner, Type target) {
   if (c.sym.resolve_numeric_type(owner) &&
       c.resolve_protocol_member(target, "discard")) {
-    match (call)
-      case $called(%(expr ? $($source_identifier_content(
-          %((!set ?binding (*)))))), *arguments):
-        _note_fresh_callee(c, binding);
+    if (call ~= $called(%(expr ? $($source_identifier_content(
+          %((!set ?binding (*)))))), *arguments))
+      _note_fresh_callee(c, binding);
   }
   return call;
 }
