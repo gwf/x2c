@@ -22,8 +22,7 @@ class DisjointSet struct {
 
 /** Creates a union-find over elements `0` through `n - 1`.
     `n` must be nonnegative. The result belongs to the active `Scope` and
-    starts
-    with each element in its own component.
+    starts with each element in its own component.
 
     Raises: `<size-limit>` or `<alloc-fail>` while allocating the structure or
     its arrays.
