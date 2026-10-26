@@ -114,6 +114,7 @@ typedef struct Compiler{
   Array unit_nodes, meta_group;
   Map meta_group_bound;
   int meta_build;
+  int skipped_form;
   int load_source;
   int runtime_inc, runtime_hdrs, collect_protocols, shallow, source_private;
   int module_declaration;

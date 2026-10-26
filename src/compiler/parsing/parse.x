@@ -30,6 +30,7 @@ List Compiler.full_parse(Compiler c, Map globs, int generated_symbols) {
    state that collection or an earlier parse left. */
 static void _reset_parse(Compiler c, Map globs, int generated) {
   c.meta_group.clear();
+  c.skipped_form = 0;
   c.meta_group_bound = {};
   c.meta_comptime = {};
   c.meta_regions = {};
@@ -78,6 +79,7 @@ static int _form(Compiler c, Array nodes) {
   }
   catch %(malformed (category ?category) *): {
     (void) category;
+    if (!c.skipped_form) c.skipped_form = nodes.len() + 1;
     if (!_recover_form(c, start, braces)) return 0;
     _append_preproc(c, nodes);
     return c.peek(0) != <eof>;

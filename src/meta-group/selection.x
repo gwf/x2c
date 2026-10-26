@@ -107,10 +107,10 @@ static void _check_runtime_meta_calls(Compiler c, Var root) {
 module Array _units(Compiler c) {
   String lib = %"$(x2c_get_root())/lib/";
   Array ordered = _runtime_includes(c, lib);
-  _source_order(c, ordered, lib);
-  Map reached = _roots(c, ordered);
-  _close(ordered, reached);
-  return _reachable(c, ordered, reached);
+  Map later = _source_order(c, ordered, lib);
+  Map reached = _roots(c, ordered, later);
+  _close(ordered, reached, later);
+  return _reachable(c, ordered, reached, later);
 }
 
 /* The runtime prelude declares more than `x2c.h` includes, and a body can
@@ -143,12 +143,44 @@ static Array _runtime_includes(Compiler c, String lib) {
   return ordered;
 }
 
-static void _source_order(Compiler c, Array ordered, String lib) {
-  Map placeholders = _placeholders(c);
-  foreach (List unit in c.unit_nodes) {
-    Var node = _group_include(c, unit, lib);
-    if (node is not void) ordered.push(_uninitialized(node, placeholders));
+/* Copies the unit's definitions in source order and returns, by address,
+   those after a form the project meta build's parse skipped. A later
+   definition may name what the skipped form declares, so none is a root:
+   the group keeps a later variable only when a meta function reaches it,
+   and a later function only as its prototype unless one does. */
+static Map _source_order(Compiler c, Array ordered, String lib) {
+  Map placeholders = _placeholders(c), later = {};
+  int skipped = c.meta_build ? c.skipped_form - 1 : -1;
+  for (int i = 0; i < c.unit_nodes.len(); i++) {
+    Var node = _group_include(c, c.unit_nodes[i], lib);
+    if (node is void) continue;
+    List copy = _uninitialized(node, placeholders);
+    if (skipped >= 0 && i >= skipped) later[_address(copy)] = 1;
+    ordered.push(copy);
   }
+  return later;
+}
+
+static String _address(List node) => %"$((long) (void *) node)";
+
+/* A later variable declaration, kept only when a meta function reaches
+   one of its names. Types and directives stay. */
+static int _optional(List item, Map later) {
+  if (!(_address(item) in later)) return 0;
+  match (item) case %(declare ?(Type spec) (bindings ? *)):
+    return !spec.is_typedef();
+  return 0;
+}
+
+/* Whether `item` declares a name in `reached`. */
+static int _declares_reached(List item, Map reached) {
+  match (item) case %(declare ? (bindings *rows)):
+    foreach (List row in rows) {
+      match (row) case %(op = ?bound ?): row = bound;
+      match (row) case %(bind (binding ?identity ?) ?):
+        if (identity in reached) return 1;
+    }
+  return 0;
 }
 
 /* The values the project meta build's parse put in place of calls left for
@@ -157,7 +189,7 @@ static Map _placeholders(Compiler c) {
   Map placeholders = {};
   foreach (List entry in c.meta_group)
     match (entry) case %(later ?(List placeholder)):
-      placeholders[%"$((long) (void *) placeholder)"] = 1;
+      placeholders[_address(placeholder)] = 1;
   return placeholders;
 }
 
@@ -200,7 +232,7 @@ static Var _uninitialized(Var node, Map placeholders) {
    within it. */
 static int _holds(Var node, Map placeholders) {
   if (node is not <list>) return 0;
-  if (%"$((long) (void *) (List) node)" in placeholders) return 1;
+  if (_address(node) in placeholders) return 1;
   foreach (Var child in (List) node) if (_holds(child, placeholders)) return 1;
   return 0;
 }
@@ -208,13 +240,14 @@ static int _holds(Var node, Map placeholders) {
 /* What the group reaches before following function bodies: each group
    function and what it names, and what every other definition names. A
    group function the unit's definitions lack joins them. */
-static Map _roots(Compiler c, Array ordered) {
+static Map _roots(Compiler c, Array ordered, Map later) {
   Map present = {}, reached = {};
   Var identity, String name;
   foreach (List item in ordered)
     if (_function_identity(item, identity, name)) {
       present[identity] = 1;
-      if (c.meta_build && c.public_native_function(item, name))
+      if (c.meta_build && !(_address(item) in later) &&
+          c.public_native_function(item, name))
         reached[identity] = 1;
     }
   foreach (List entry in c.meta_group)
@@ -225,26 +258,30 @@ static Map _roots(Compiler c, Array ordered) {
       reached[identity] = 1;
     }
   foreach (List item in ordered)
-    if (!_function_identity(item, identity, name))
+    if (!_function_identity(item, identity, name) && !_optional(item, later))
       Ast.collect_binding_references(item, reached);
   return reached;
 }
 
-/* A function reaches only what it names, so collecting from each reached
-   function until nothing new is reached closes the set. */
-static void _close(Array ordered, Map reached) {
+/* A function or later variable reaches only what it names, so collecting
+   from each reached one until nothing new is reached closes the set. */
+static void _close(Array ordered, Map reached, Map later) {
   Map expanded = {};
   Var identity, String name;
   int grew = 1;
   while (grew) {
     grew = 0;
-    foreach (List item in ordered)
-      if (_function_identity(item, identity, name) &&
-          identity in reached && !(identity in expanded)) {
-        expanded[identity] = 1;
-        Ast.collect_binding_references(item, reached);
-        grew = 1;
-      }
+    foreach (List item in ordered) {
+      String key = _address(item);
+      if (key in expanded) continue;
+      if (_function_identity(item, identity, name)
+            ? !(identity in reached)
+            : !_optional(item, later) || !_declares_reached(item, reached))
+        continue;
+      expanded[key] = 1;
+      Ast.collect_binding_references(item, reached);
+      grew = 1;
+    }
   }
 }
 
@@ -253,10 +290,11 @@ static void _close(Array ordered, Map reached) {
    drops what nothing calls. A result with no base type came from a name
    the parse never declared, such as one a skipped form supplies, and has
    no C prototype. */
-static Array _reachable(Compiler c, Array ordered, Map reached) {
+static Array _reachable(Compiler c, Array ordered, Map reached, Map later) {
   Array units = [];
   Var identity, String name;
   foreach (List item in ordered) {
+    if (_optional(item, later) && !_declares_reached(item, reached)) continue;
     if (!_function_identity(item, identity, name) ||
         (identity in reached && (name != "main" || c.load_source)))
       units.push(item);

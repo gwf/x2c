@@ -123,6 +123,7 @@ typedef struct Compiler{
   Array unit_nodes, meta_group;
   Map meta_group_bound;
   int meta_build;
+  int skipped_form;
   int load_source;
   int runtime_inc, runtime_hdrs, collect_protocols, shallow, source_private;
   int module_declaration;
@@ -959,7 +960,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _374 = String_var(_373);
   _375 = List_var(NULL);
   _376 = Symbol_var(106239471489226);
-  _377 = int_var(2236);
+  _377 = int_var(2241);
   _378 = String_new("");
   _379 = String_var(_378);
   _380 = Atom_intern(String_new("macro-param"));
@@ -1693,6 +1694,7 @@ Map Compiler_included_compile_time_effects(Compiler, Map);
 
 static void f13_parsing_parse____reset_parse(Compiler c, Map globs, int generated){
   Array_clear(c -> meta_group);
+  c -> skipped_form = 0;
   c -> meta_group_bound = Map_new();
   c -> meta_comptime = Map_new();
   c -> meta_regions = Map_new();
@@ -1761,6 +1763,7 @@ static int f13_parsing_parse____form(Compiler c, Array nodes){
           category = x2c_error_catch_capture(_x2c_gensym_error_handler_1, 0);
           {
             (void) category;
+            if(! c -> skipped_form) c -> skipped_form = Array_len(nodes) + 1;
             if(! _recover_form(c, start, braces)){
               int _x2c_gensym_return_value_0 = 0;
               {
