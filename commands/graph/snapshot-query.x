@@ -292,7 +292,7 @@ static int _sq_filter(SnapshotQuery &q, Map entity, Map filter) {
     }
     else if (key == "text") {
       String source = entity.getdefault("source", "");
-      if (!strstr(source, value.str())) return 0;
+      if (!source.contains(value)) return 0;
     }
     else if (key == "reachable_from") {
       if (!_sq_reachable(q, entity, value)) return 0;

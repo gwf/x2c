@@ -11,7 +11,8 @@ def main():
     with tempfile.TemporaryDirectory(prefix='x2c-serve-') as temporary:
         root = Path(temporary).resolve()
         source, snapshot, query_file = root/'source.x', root/'snapshot', root/'query.json'
-        source.write_text('int leaf(int x) => x + 1;\nint entry(int x) => leaf(x);\n')
+        source.write_text('typedef int HeaderNeeds;\n'
+                          'int leaf(int x) => x + 1;\nint entry(int x) => leaf(x);\n')
 
         def command(*args):
             result = subprocess.run([tool, *map(str, args)], capture_output=True,
@@ -28,11 +29,23 @@ def main():
              'pattern': '(expr ?type (call ?callee (args *args)))'},
             {'op': 'find', 'where': {'reachable_from': {
                 'select': {'name': 'entry'}, 'relations': ['calls']}}},
+            # Type records can have an empty source String. Boolean text
+            # filters must handle that record and keep the server alive.
+            {'op': 'find', 'where': {'all': [{'kind': 'type'}, {'any': [
+                {'text': 'HeaderNeeds'}, {'text': 'RuntimeScan'},
+                {'text': 'Preparation'}, {'text': 'Effects'}]}]}},
+            {'op': 'find', 'where': {'all': [{'kind': 'type'}, {'text': ''}]}},
+            {'op': 'find', 'where': {'all': [{'kind': 'function'},
+                                           {'text': 'leaf(x)'}]}},
         ]
         expected = []
         for query in queries:
             query_file.write_text(json.dumps(query))
             expected.append(command('query', snapshot, query_file))
+        assert [row['name'] for row in expected[6]['results']] == ['HeaderNeeds']
+        assert any(row['name'] == 'HeaderNeeds' for row in expected[7]['results'])
+        assert any(row['name'] == '(int)' for row in expected[7]['results'])
+        assert [row['name'] for row in expected[8]['results']] == ['entry']
         process = subprocess.Popen([tool, 'serve', snapshot], stdin=subprocess.PIPE,
                                    stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         try:
