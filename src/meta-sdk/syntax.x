@@ -76,10 +76,8 @@ Type Code.type(Code value) {
 Var Code.value(Code code) {
   _require_expansion("Code.value");
   Compiler compiler = Compiler.expanding();
-  match (code) {
-    case %(expr ? (macro-value ?definition)):
-      code = compiler.capture_macro_value(definition);
-  }
+  if (code ~= %(expr ? (macro-value ?definition)))
+    code = compiler.capture_macro_value(definition);
   Var value = compiler.folded_constant(code);
   if (value is void)
     $fail.meta_sdk_constant();
@@ -162,7 +160,7 @@ List Code.declared_bindings(List declaration) {
     case %((!or declare decl typedef) ? (bindings *bindings)):
       foreach (List binding in bindings) {
         List bound = binding;
-        match (binding) case %(op = ?target ?): bound = target;
+        if (binding ~= %(op = ?target ?)) bound = target;
         match (bound) {
           case %(bind (!set ?identity (binding ? ?)) *): {
             List type = _binding_type(identity);
@@ -208,24 +206,21 @@ String Code.binding_spelling(Var syntax) {
   if (syntax is not <list> || syntax.is_nil())
     $fail.meta_sdk_binding_syntax(syntax);
   List value = syntax;
-  match (value)
-    case %(expr ? (!set ?content (? *))): value = content;
+  if (value ~= %(expr ? (!set ?content (? *)))) value = content;
   match (value) {
     case $source_identifier_content(%((!set ?captured (*)))):
       value = captured;
     case %(bind (!set ?captured (*)) ?): value = captured;
   }
-  match (value)
-    case %((!is ?name type string)): return name;
+  if (value ~= %((!is ?name type string))) return name;
   return _binding_spelling(value, syntax);
 }
 
 static String _binding_spelling(List value, Var syntax) {
   int identity = 0, String spelling = NULL;
-  match (value)
-    case %(binding ?id (!is ? type string)):
-      if (!id.is_integer() || id.integer() > INT_MAX)
-        $fail.meta_sdk_binding_known(value);
+  if (value ~= %(binding ?id (!is ? type string)) &&
+      (!id.is_integer() || id.integer() > INT_MAX))
+    $fail.meta_sdk_binding_known(value);
   if (!Ast.try_binding(value, identity, spelling))
     $fail.meta_sdk_binding_identifier(syntax);
   Var registered =
@@ -274,43 +269,38 @@ Var MetaContext.fresh_binding(String stem) {
 /** Answers `Code.name`, declared in `lib/meta.x`. */
 String Code.name(Code function) {
   List identity = function;
-  match (function)
-    case %(function ? (bind ?binding ?) ?):
-      identity = binding is <list> ? binding.list() : NULL;
+  if (function ~= %(function ? (bind ?binding ?) ?))
+    identity = binding is <list> ? binding.list() : NULL;
   return Code.binding_spelling(identity);
 }
 
 /** Answers `Code.body`, declared in `lib/meta.x`. */
 List Code.body(Code function) {
-  match (function) case %(function ? ? (block *body)): return body;
+  if (function ~= %(function ? ? (block *body))) return body;
   return %();
 }
 
 /** Answers `Code.arguments`, declared in `lib/meta.x`. */
 List Code.arguments(Code parameters) {
-  match (parameters) case %(params *items): parameters = items;
-  match (parameters) case %((param (void) (bind () ?))): return %();
+  if (parameters ~= %(params *items)) parameters = items;
+  if (parameters ~= %((param (void) (bind () ?)))) return %();
   Array arguments = [];
   foreach (List parameter in parameters)
-    match (parameter)
-      case %(param ? (bind ?identity *)):
-        arguments.push(%(expr () (ident $identity)));
+    if (parameter ~= %(param ? (bind ?identity *)))
+      arguments.push(%(expr () (ident $identity)));
   return arguments.list_free();
 }
 
 /** Answers `Code.parameter`, declared in `lib/meta.x`. */
 Code Code.parameter(Code function, String wanted) {
   List parameters = function;
-  match (function)
-    case %(function ? (bind ? ((fnmod (params *bound)) *)) ?):
-      parameters = bound;
+  if (function ~= %(function ? (bind ? ((fnmod (params *bound)) *)) ?))
+    parameters = bound;
   foreach (List parameter in parameters) {
-    match (parameter) {
-      case %(param ? (bind ?identity *)):
-        if (Code.binding_spelling(identity) == wanted) {
-          Type type = parameter.type_from_ast().canonicalize();
-          return %(expr $type (ident $identity));
-        }
+    if (parameter ~= %(param ? (bind ?identity *)) &&
+        Code.binding_spelling(identity) == wanted) {
+      Type type = parameter.type_from_ast().canonicalize();
+      return %(expr $type (ident $identity));
     }
   }
   $fail.meta_sdk_parameter_missing(function, wanted);
@@ -320,10 +310,9 @@ Code Code.parameter(Code function, String wanted) {
     binding stores the same signature as an ordinary Func adapter.
 */
 List Code.native_signature(List syntax) {
-  match (syntax)
-    case %(function ?rtype ?declarator ?):
-      return active.expander.func_signature(
-        %(declare $rtype (bindings $declarator)).type_from_ast());
+  if (syntax ~= %(function ?rtype ?declarator ?))
+    return active.expander.func_signature(
+      %(declare $rtype (bindings $declarator)).type_from_ast());
   return active.expander.func_signature(Code.type(syntax));
 }
 
