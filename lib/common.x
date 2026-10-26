@@ -608,12 +608,8 @@ inline int Var.is_row(
   Var value, unsigned top, unsigned long mask, unsigned long bottom) =>
   value.u64 >> 48 == top && (value.u64 & mask) == bottom;
 
-/*  common.x -- `Var` accessors for the boxed runtime classes
-
-    `lib/common.x` projects one accessor per class. Each reads its tag's
-    encoding fields from the compiled ledger table through `Var.tag_top` and
-    `Var.tag_bottom`, so this file does not carry the ledger.
-*/
+/* Each boxed-class accessor reads its tag's encoding fields from the
+   compiled ledger through `Var.tag_top` and `Var.tag_bottom`. */
 
 /* Object rows carry their payload pointer in the low 48 bits with the
    bottom three bits reserved for the row selector, so reading one back is
@@ -846,12 +842,11 @@ void x2c_initialize(void) {
 
 // index normalization
 
-/* Normalize an ordinary element index following x2c index conventions.
-   Negative indices count once from the end. Returns -1 when the normalized
-   index is outside the concrete element range.
-
-   Raises: `<bad-arg>` when length is negative. */
-/** Normalizes one element index against `length`. */
+/** Normalizes one element index against `length`.
+    Negative indices count once from the end. Returns -1 when the normalized
+    index is outside the concrete element range.
+    Raises: `<bad-arg>` when length is negative.
+*/
 int x2c_normalize_index(int index, int length) {
   if (length < 0)
     raise %(bad-arg (operation "x2c_normalize_index") (length $length));
@@ -865,18 +860,18 @@ int x2c_normalize_index(int index, int length) {
     shorter than INT_MAX clamps the same way. */
 int x2c_slice_bound(int bound) => bound == INT_MIN ? bound + 1 : bound;
 
-/* Normalize slice bounds in place following x2c conventions:
-   - Forward negative stops use the endpoint after the final element, so -1
-     becomes len and larger magnitudes move left.
-   - Start uses the concrete element domain (0..len-1) and stays within
-     [-1, len], depending on step direction.
-   - INT_MIN marks a missing bound. Start defaults to 0 or len - 1; stop
-     defaults to the forward endpoint or the reverse sentinel before zero.
-   Returns the resulting element count or 0 if the slice is empty.
-
-   Raises: `<bad-arg>` when either bound pointer is NULL, step is zero, or
-   length is negative. */
-/** Normalizes slice bounds and returns the resulting element count. */
+/** Normalizes slice bounds and returns the resulting element count.
+    Bounds change in place following x2c conventions:
+    - Forward negative stops use the endpoint after the final element, so -1
+      becomes len and larger magnitudes move left.
+    - Start uses the concrete element domain (0..len-1) and stays within
+      [-1, len], depending on step direction.
+    - INT_MIN marks a missing bound. Start defaults to 0 or len - 1; stop
+      defaults to the forward endpoint or the reverse sentinel before zero.
+    Returns 0 if the slice is empty.
+    Raises: `<bad-arg>` when either bound pointer is NULL, step is zero, or
+    length is negative.
+*/
 int x2c_normalize_slice(int *start, int *stop, int step, int length) {
   if (!start || !stop || !step || length < 0)
     raise %(bad-arg (operation "x2c_normalize_slice"));
@@ -901,8 +896,7 @@ int x2c_normalize_slice(int *start, int *stop, int step, int length) {
     }
   }
   if (*stop < -1) *stop = -1;
-  if (step > 0 && *stop > length) *stop = length;
-  if (step < 0 && *stop > length) *stop = length;
+  if (*stop > length) *stop = length;
   /* The span must be strictly positive before it is counted. C division
      truncates toward zero, so an empty or reversed range would otherwise
      count one element and the caller would read a position outside the
@@ -915,7 +909,6 @@ int x2c_normalize_slice(int *start, int *stop, int step, int length) {
 }
 
 #include "dispatch.x"
-#include <limits.h>
 
 File Stdin, Stdout, Stderr;
 /* Sentinel symmetry for Var encoding:
