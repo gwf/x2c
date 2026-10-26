@@ -1,14 +1,10 @@
-/*  algorithms.x -- native standard algorithms for every Lisp session
+/*  algorithms.x -- native standard algorithms for Lisp sessions
 
     Copyright (c) 2026 Gary William Flake
 
-    `etc/init.xlisp` binds these operations by name through the `Lisp`
-    native target table, so every `Lisp.new` session shares them. Each
-    follows the Lisp definition it replaced: nil is the empty `List`, truth
-    is any other value, and a list walk reads through `lisp_car` and
-    `lisp_cdr` so a nonlist operand raises `<bad-types>`. A
-    `String` or `List` operand reads through `_string` or `_list`, which
-    raise `<bad-types>` for another tag as the Func adapter does.
+    `etc/init.xlisp` binds these operations in every session. They preserve
+    Lisp's nil-only false value and report `<bad-types>` for invalid list,
+    `String`, or `List` operands.
 */
 
 #include "x2c.x"
@@ -79,8 +75,7 @@ Var lisp_append(List lists) {
   if (!lists) return %();
   List reversed = List.reverse(lists);
   Var result = reversed.car();
-  foreach (Var left in reversed.cdr())
-    result = _append2(left, result);
+  foreach (Var left in reversed.cdr()) result = _append2(left, result);
   return result;
 }
 
@@ -121,13 +116,12 @@ Var lisp_match(Var input, Var pat) {
 Var lisp_bound(Var bindings, Var name) =>
   lisp_cadr(lisp_assoc(name, bindings));
 
-/* Replaces a whole match of `pat` by `template`, and otherwise every
-    matching sublist.
+/* Replaces `input` when its root matches `pat`; otherwise replaces every
+   matching sublist.
 */
 Var lisp_search_replace(Var input, Var pat, Var template) {
   List list = _list(input, "search-replace");
-  if (_nil(lisp_match(input, pat)))
-    return list.search_replace(pat, template);
+  if (_nil(list.match(pat))) return list.search_replace(pat, template);
   return lisp_match_replace(list, pat, template);
 }
 
