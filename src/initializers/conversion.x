@@ -3,7 +3,8 @@
 // initializer conversion
 
 /** Converts an initializer using its declared native object for array
-    bounds. */
+    bounds.
+*/
 List Compiler.convert_initializer(
   Compiler c, List value, Type type, List target) =>
   _convert_initializer(c, value, type, target, NULL);
@@ -29,8 +30,8 @@ static List _convert_composite(
   int discarded = 0;
   List rows = _composite_rows(
     c, target, items, native_target, parent_condition, discarded);
-  // Preserve C's excess warning only when this synthetic alternative applies.
-  // The always-true ICE stays on a retained value, so braces remain braces.
+  /* Preserve C's excess warning only when this synthetic alternative applies.
+     The always-true ICE stays on a retained value, so braces remain braces. */
   List excess_check = discarded
     ? _composite_excess_check(parent_condition) : NULL;
   foreach (List row in rows) {
@@ -442,8 +443,8 @@ static List _value_adapter(
   return adapter;
 }
 
-// Inline native type definitions cannot be copied into conversion arms.
-// A selected by-value adapter consumes the original expression just once.
+/* Inline native type definitions cannot be copied into conversion arms.
+   A selected by-value adapter consumes the original expression just once. */
 static Type _adapter_type(Compiler c, Type type) {
   if (c.sym.is_var_type(type)) return %("Var");
   Type scalar = c.sym.resolve_key(type).scalar();
@@ -465,7 +466,8 @@ List Compiler.convert_compound_literal(
 
 /** Returns native definition/reference types for a compound literal.
     Macro expansion stays in the original cast; named tags let later sizeof
-    expressions reuse that exact layout without a new scope. */
+    expressions reuse that exact layout without a new scope.
+*/
 List Compiler.initializer_native_types(Compiler c, Type type) {
   Type base = type.base_type(), definition = base, reference = base;
   match (base) {

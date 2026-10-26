@@ -134,7 +134,7 @@ Source: `src/macros/aliases.x:67`
 Whether the rule whose meta function now runs is shipped, so that the
 names it calls resolve to the copies the compiler links.
 
-Source: `src/macros/rewrites.x:448`
+Source: `src/macros/rewrites.x:456`
 
 <a id="Compiler.bind_code_value"></a>
 #### Compiler.bind_code_value
@@ -243,7 +243,7 @@ Source: `src/macros/expansion.x:22`
 
 Tests one operation's registry without invoking a translator.
 
-Source: `src/macros/rewrites.x:230`
+Source: `src/macros/rewrites.x:232`
 
 <a id="Compiler.install_compile_time_effects"></a>
 #### Compiler.install_compile_time_effects
@@ -254,7 +254,7 @@ Installs included compile-time definitions in their source order.
 Keyword aliases retain the definition visible when their source declared
 them, even if a later macro definition uses the same name.
 
-Source: `src/macros/invocations/recognition.x:39`
+Source: `src/macros/invocations/recognition.x:37`
 
 <a id="Compiler.keyword_form_is_definition"></a>
 #### Compiler.keyword_form_is_definition
@@ -264,7 +264,7 @@ Source: `src/macros/invocations/recognition.x:39`
 Returns whether the current tokens begin a `keyword NAME $macro` alias.
 This query does not consume tokens.
 
-Source: `src/macros/invocations/recognition.x:87`
+Source: `src/macros/invocations/recognition.x:85`
 
 <a id="Compiler.land_quotation"></a>
 #### Compiler.land_quotation
@@ -305,7 +305,7 @@ Source: `src/macros/templates.x:464`
 Returns whether the current tokens begin a local macro definition.
 This query does not consume tokens.
 
-Source: `src/macros/invocations/recognition.x:77`
+Source: `src/macros/invocations/recognition.x:75`
 
 <a id="Compiler.lower_replacement"></a>
 #### Compiler.lower_replacement
@@ -316,7 +316,7 @@ Lowers `replacement`, which `Compiler.rewrite_lowered` bound for the
 lowered statement `source`, and keeps each part of `source` it holds as
 it is, so no statement rule is offered that part again.
 
-Source: `src/macros/rewrites.x:255`
+Source: `src/macros/rewrites.x:260`
 
 <a id="Compiler.lower_rewrite"></a>
 #### Compiler.lower_rewrite
@@ -335,7 +335,7 @@ already established for its parent. A replacement whose template and
 slot signatures an earlier use in the unit prepared lowers only its
 captured values.
 
-Source: `src/macros/rewrites.x:287`
+Source: `src/macros/rewrites.x:294`
 
 <a id="Compiler.macro_form_is_definition"></a>
 #### Compiler.macro_form_is_definition
@@ -345,7 +345,7 @@ Source: `src/macros/rewrites.x:287`
 Returns whether the current tokens have macro-definition introducer form.
 This query does not consume tokens.
 
-Source: `src/macros/invocations/recognition.x:63`
+Source: `src/macros/invocations/recognition.x:61`
 
 <a id="Compiler.macro_introduced_name"></a>
 #### Compiler.macro_introduced_name
@@ -355,7 +355,7 @@ Source: `src/macros/invocations/recognition.x:63`
 Returns the current declaration's definition-local identity. An active
 macro-definition locals map is required.
 
-Source: `src/macros/definitions/templates.x:264`
+Source: `src/macros/definitions/templates.x:260`
 
 <a id="Compiler.macro_invocation_collection"></a>
 #### Compiler.macro_invocation_collection
@@ -368,7 +368,7 @@ named-type decorator, and local `Unit` macro whose template contains
 protocol or adoption rows. `<tried>` covers Unit decorators and other
 local `Unit` macros. Other invocations return zero.
 
-Source: `src/macros/invocations/recognition.x:337`
+Source: `src/macros/invocations/recognition.x:335`
 
 <a id="Compiler.macro_invocation_site"></a>
 #### Compiler.macro_invocation_site
@@ -379,7 +379,7 @@ Resolves a stored macro invocation marker to its source token.
 Nested template markers use the active expansion's invocation; unresolved
 markers return NULL.
 
-Source: `src/macros/expansion.x:235`
+Source: `src/macros/expansion.x:238`
 
 <a id="Compiler.macro_pattern_at"></a>
 #### Compiler.macro_pattern_at
@@ -400,7 +400,7 @@ Returns whether the parser claims the macro invocation at the cursor for
 `position`. A bare keyword alias is claimed only where its result fits.
 This query does not consume tokens.
 
-Source: `src/macros/invocations/recognition.x:148`
+Source: `src/macros/invocations/recognition.x:146`
 
 <a id="Compiler.macro_tag_name"></a>
 #### Compiler.macro_tag_name
@@ -413,7 +413,7 @@ declares is a template local, apart from ordinary names of the same
 spelling. A tag it only references keeps its public spelling unless the
 template later defines or declares it.
 
-Source: `src/macros/definitions/templates.x:277`
+Source: `src/macros/definitions/templates.x:273`
 
 <a id="Compiler.macro_targets_unit"></a>
 #### Compiler.macro_targets_unit
@@ -424,7 +424,7 @@ Reports whether the macro invocation at the cursor produces file-scope
 syntax, directly or through the target it decorates. A script unit keeps
 such an invocation at file scope. This query does not consume tokens.
 
-Source: `src/macros/invocations/recognition.x:381`
+Source: `src/macros/invocations/recognition.x:379`
 
 <a id="Compiler.macro_value_literal"></a>
 #### Compiler.macro_value_literal
@@ -445,7 +445,7 @@ Matches the member rules registered for each field keyword that
 `aggregate` declares a field with, as `Compiler.rewrite` matches those
 keyed by a receiver type.
 
-Source: `src/macros/rewrites.x:216`
+Source: `src/macros/rewrites.x:218`
 
 <a id="Compiler.meta_call_starts_declaration"></a>
 #### Compiler.meta_call_starts_declaration
@@ -508,7 +508,7 @@ Parses and installs one source-local `keyword` alias.
 The named macro must already be visible; the alias captures that definition
 and consumes its terminating semicolon. Returns the alias.
 
-Source: `src/macros/invocations/recognition.x:99`
+Source: `src/macros/invocations/recognition.x:97`
 
 <a id="Compiler.parse_macro_definition"></a>
 #### Compiler.parse_macro_definition
@@ -529,7 +529,7 @@ Source: `src/macros/definitions/reading.x:20`
 Parses a quotation at `$!` into the code it builds from the locals its
 body names.
 
-Source: `src/macros/definitions/quotations.x:19`
+Source: `src/macros/definitions/quotations.x:20`
 
 <a id="Compiler.peek_macro_hole"></a>
 #### Compiler.peek_macro_hole
@@ -567,7 +567,7 @@ Source: `src/macros/values.x:306`
 Publishes a canonical `macrodef` in source order and returns `node`.
 A later definition with the same name affects only later invocations.
 
-Source: `src/macros/invocations/recognition.x:14`
+Source: `src/macros/invocations/recognition.x:12`
 
 <a id="Compiler.rebound"></a>
 #### Compiler.rebound
@@ -579,7 +579,7 @@ a value the active lowering watches, so it watches `bound` as well. A
 statement without an origin, such as an unbraced body, keeps nothing
 else that identifies it when a binder it uses binds again.
 
-Source: `src/macros/rewrites.x:702`
+Source: `src/macros/rewrites.x:711`
 
 <a id="Compiler.rebuild_expression"></a>
 #### Compiler.rebuild_expression
@@ -633,7 +633,7 @@ Source: `src/macros/templates.x:266`
 Reports that the meta call `source` failed with `error` at
 `invocation`.
 
-Source: `src/macros/diagnostics.x:325`
+Source: `src/macros/diagnostics.x:320`
 
 <a id="Compiler.rewrite"></a>
 #### Compiler.rewrite
@@ -646,7 +646,7 @@ Active rules cannot re-enter. A statement of the same kind that a
 statement replacement writes or copies, such as its source, takes the
 rules after the one that replaced it.
 
-Source: `src/macros/rewrites.x:238`
+Source: `src/macros/rewrites.x:241`
 
 <a id="Compiler.rewrite_lowered"></a>
 #### Compiler.rewrite_lowered
@@ -658,7 +658,7 @@ transform has lowered, then binds the first replacement as
 `Compiler.rewrite` does. Binding keeps the source, and each part of it
 the replacement holds, as lowered.
 
-Source: `src/macros/rewrites.x:247`
+Source: `src/macros/rewrites.x:251`
 
 <a id="Compiler.rewrite_written"></a>
 #### Compiler.rewrite_written
@@ -670,7 +670,7 @@ Binds the replacement a shipped rule gives the lowered statement
 `Compiler.rewrite_lowered` does. A statement the kernel writes is not
 source, so no program rule sees it.
 
-Source: `src/macros/rewrites.x:267`
+Source: `src/macros/rewrites.x:273`
 
 <a id="Compiler.scope_declares_alias"></a>
 #### Compiler.scope_declares_alias
@@ -691,7 +691,7 @@ Source: `src/macros/aliases.x:418`
 Consumes a macro invocation name and its balanced argument list.
 The invocation terminator or following decorator target remains current.
 
-Source: `src/macros/invocations/recognition.x:357`
+Source: `src/macros/invocations/recognition.x:355`
 
 <a id="Compiler.skip_named_type_declaration"></a>
 #### Compiler.skip_named_type_declaration
@@ -701,7 +701,7 @@ Source: `src/macros/invocations/recognition.x:357`
 Consumes a NamedType target already projected by owning-source collection.
 CPP scanning does not produce the declaration or parse its fields again.
 
-Source: `src/macros/invocations/recognition.x:368`
+Source: `src/macros/invocations/recognition.x:366`
 
 <a id="Compiler.take_code_value"></a>
 #### Compiler.take_code_value
@@ -795,13 +795,13 @@ Source: `src/macros/invocations/targets.x:54`
 
 `Ast Compiler.watched_step(Compiler c, Ast ast)`
 
-Lowers `ast` when it is a value the active lowering watches; NULL otherwise.
-A preparing watch also records what lowering produced. A value that an
-enclosing replacement's source held as well lowers outside that
-replacement's rule too, and that replacement still watches its own
+Lowers `ast` when it is a value the active lowering watches; NULL
+otherwise. A preparing watch also records what lowering produced. A
+value that an enclosing replacement's source held as well lowers outside
+that replacement's rule too, and that replacement still watches its own
 values within it.
 
-Source: `src/macros/rewrites.x:715`
+Source: `src/macros/rewrites.x:725`
 
 ## Design notes
 

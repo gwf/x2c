@@ -12,9 +12,8 @@
    it: generated names, literal caches, helpers, initializers, and semantic
    rows are its own. */
 module List _emit(
-  Compiler c, String stamp, String stem, String suffix, String &failure) {
-  return _emit_prepared(c, stamp, stem, suffix, NULL, NULL, failure);
-}
+  Compiler c, String stamp, String stem, String suffix, String &failure) =>
+  _emit_prepared(c, stamp, stem, suffix, NULL, NULL, failure);
 
 module List _emit_prepared(
   Compiler c, String stamp, String stem, String suffix,

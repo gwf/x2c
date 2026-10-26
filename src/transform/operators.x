@@ -180,7 +180,7 @@ static List _compound(
     member_type = %("String");
   }
   if (!lhs_is_var) {
-    // A member with no update helper leaves the rule the operand as written.
+    // Without an update helper, the dynamic rule receives the original RHS.
     List converted = rhs;
     List updated = _protocol_update(c, member_type, op, lhs, converted, op);
     if (updated) return updated;
@@ -195,6 +195,11 @@ static int _string_operand(Compiler c, Type type) =>
   c.sym.is_string_type(type)
       || type.canonicalize().is_char_pointer_like();
 
+/* `x += y`, `++x`, and `x++` resolve the operator's member on the receiver
+   type and use its update helper. A null `rhs` selects a postfix update,
+   which returns the receiver's old value. When `rhs` is present, conversion
+   updates the caller's slot before the helper lookup. A missing helper
+   returns NULL. */
 static List _protocol_update(
   Compiler c, Type type, Symbol op, List arg, List &?rhs, Symbol spelled) {
   Symbol member = c.operator_member(op);
@@ -218,12 +223,6 @@ static List _protocol_update(
   return _update_call(arg, spell, value, helper);
 }
 
-/* One protocol-member update. `x += y`, `++x`, and `x++` all resolve the
-   operator's member on the receiver type, convert the right operand to the
-   member's declared parameter, and ask for the update helper. A null `rhs`
-   is a postfix update, which reads the receiver before the helper runs.
-   The converted operand stays in `*rhs` when no helper exists, so a caller
-   continues into the dynamic path with the operand it already built. */
 static List _update_call(
   List target, List operator, List value, String helper) {
   Type type = target.cadr();

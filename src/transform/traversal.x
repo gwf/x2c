@@ -11,8 +11,9 @@
     generated origins or diagnostics to `c`.
 */
 List Compiler.transform(Compiler c, List ast) {
-  /* Regions are read before lowering, while region `auto`, initializer `auto`, and the
-     `defer` beside each region are still the forms the parser produced. */
+  /* Regions are read before lowering, while region `auto`, initializer
+     `auto`, and the `defer` beside each region are still the forms the parser
+     produced. */
   c.check_regions(ast);
   List newast = _sequence(c, ast, 0);
   // Merge and lower synthesized lambda siblings.
@@ -117,7 +118,8 @@ module List _shipped_lowering(
 /** Adds to the unit's pending support the file-scope code a rule gives
     the form `source` of `kind`, bound and lowered with the support. The
     kernel has no lowering of its own for `source`, so no rule ends the
-    translation as `_shipped_lowering` does. */
+    translation as `_shipped_lowering` does.
+*/
 void Compiler.shipped_support(
   Compiler c, Symbol kind, List source, String form) {
   List bound = c.rewrite(<node>, kind, source, <unit>, NULL, NULL);

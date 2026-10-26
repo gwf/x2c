@@ -224,7 +224,7 @@ int String_len(String str){
 }
 
 unsigned String_hash(String str){
-  if(! String_truth(str) || ! * str) return 0;  f7_storage___StringHeader header = f7_storage____header(str);  return header -> hash ? header -> hash : f7_storage____hash_n(str, strlen(str));
+  if(! String_truth(str)) return 0;  f7_storage___StringHeader header = f7_storage____header(str);  return header -> hash ? header -> hash : f7_storage____hash_n(str, strlen(str));
 }
 
 int String_equal(String x, String y){
@@ -308,15 +308,15 @@ static void _free_unchecked(String str){
 }
 
 String String_promote(String str){
-  if(! String_truth(str) || ! * str) return str;  Pool_promote(Pool_current(), String_var(str), f7_storage____header(str));  return str;
+  if(! String_truth(str)) return str;  Pool_promote(Pool_current(), String_var(str), f7_storage____header(str));  return str;
 }
 
 int String_try_own(String str){
-  if(! String_truth(str) || ! * str) return 1;  return Pool_own(Pool_current(), String_var(str), f7_storage____header(str));
+  if(! String_truth(str)) return 1;  return Pool_own(Pool_current(), String_var(str), f7_storage____header(str));
 }
 
 int String_is_permanent(String str){
-  if(! String_truth(str) || ! * str) return 1;  return Pool_is_permanent(String_var(str));
+  if(! String_truth(str)) return 1;  return Pool_is_permanent(String_var(str));
 }
 
 static int _is_active_canonical(String str){

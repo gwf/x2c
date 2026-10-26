@@ -5,11 +5,11 @@
 
 #include "compiler/compiler.h"
 #include <ctype.h>
-static List _41, _40, _37, _36, _35;
+static List _36, _35;
 
-static String _38, _32, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _33, _32, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
-static Var _39, _34, _33, _31;
+static Var _34, _31;
 
 static int _init_guard_ = 0;
 
@@ -113,15 +113,10 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _30 = String_new("vector_size");
   _31 = Symbol_var(35579270086);
   _32 = String_new("__declspec");
-  _33 = Symbol_var(54);
-  _34 = Symbol_var(1317118534);
-  _35 = cons(_33, NULL);
-  _36 = cons(_34, _35);
-  _37 = cons(_33, _36);
-  _38 = String_new("#endif");
-  _39 = String_var(_38);
-  _40 = cons(_39, NULL);
-  _41 = cons(_31, _40);
+  _33 = String_new("#endif");
+  _34 = String_var(_33);
+  _35 = cons(_34, NULL);
+  _36 = cons(_31, _35);
 }
 
 String Compiler_preproc_directive(String text){
@@ -478,21 +473,20 @@ static int _is_annotation(Compiler c, String word){
 
 static int _prefix_rank(Var v){
   if(! Var_is_row(v, 9, 7, 4)) return 0;
-  if(List_truth(({ static MatchCaptureSite _x2c_gensym_match_site_0;  x2c_match_site_match(& _x2c_gensym_match_site_0, Var_list_payload(v), List_var(_37)); }))) return 4;
+  List words = Var_list_payload(v);
+  if(List_contains(words, Symbol_var(1317118534))) return 4;
   {
     Symbol word;
-    Iter _x2c_gensym_macro_iterator_3 = Var_iter(v, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_gensym_macro_item_3;
-    while(Iter_try_next(_x2c_gensym_macro_iterator_3, &(_x2c_gensym_macro_item_3))){
-      word = Var_symbol(_x2c_gensym_macro_item_3);
+    List _x2c_gensym_macro_object_3 = words;
+    List _x2c_gensym_macro_cursor_3 = _x2c_gensym_macro_object_3;
+    Var _x2c_gensym_macro_cursor_output_2;
+    while(List_try_next(_x2c_gensym_macro_object_3, &(_x2c_gensym_macro_cursor_3), &(_x2c_gensym_macro_cursor_output_2))){
+      word = Var_symbol(_x2c_gensym_macro_cursor_output_2);
       if(Symbol_is_type_qualifier(word)) return 1;
     }
 
   }
-  return List_truth(Var_list(v)) ? 3 : 2;
+  return List_truth(words) ? 3 : 2;
 }
 
 List Compiler_preproc_track_arms(List arms, String text){
@@ -514,16 +508,16 @@ List Compiler_preproc_within_arms(List arms, List items){
     List group;
     List _x2c_gensym_macro_object_5 = List_reverse(arms);
     List _x2c_gensym_macro_cursor_5 = _x2c_gensym_macro_object_5;
-    Var _x2c_gensym_macro_cursor_output_3;
-    while(List_try_next(_x2c_gensym_macro_object_5, &(_x2c_gensym_macro_cursor_5), &(_x2c_gensym_macro_cursor_output_3))){
-      group = Var_list_payload(_x2c_gensym_macro_cursor_output_3);
+    Var _x2c_gensym_macro_cursor_output_4;
+    while(List_try_next(_x2c_gensym_macro_object_5, &(_x2c_gensym_macro_cursor_5), &(_x2c_gensym_macro_cursor_output_4))){
+      group = Var_list_payload(_x2c_gensym_macro_cursor_output_4);
       {
         List directive;
         List _x2c_gensym_macro_object_4 = group;
         List _x2c_gensym_macro_cursor_4 = _x2c_gensym_macro_object_4;
-        Var _x2c_gensym_macro_cursor_output_2;
-        while(List_try_next(_x2c_gensym_macro_object_4, &(_x2c_gensym_macro_cursor_4), &(_x2c_gensym_macro_cursor_output_2))){
-          directive = Var_list_payload(_x2c_gensym_macro_cursor_output_2);
+        Var _x2c_gensym_macro_cursor_output_3;
+        while(List_try_next(_x2c_gensym_macro_object_4, &(_x2c_gensym_macro_cursor_4), &(_x2c_gensym_macro_cursor_output_3))){
+          directive = Var_list_payload(_x2c_gensym_macro_cursor_output_3);
           Array_push(out, List_var(directive));
         }
 
@@ -536,14 +530,14 @@ List Compiler_preproc_within_arms(List arms, List items){
     List item;
     List _x2c_gensym_macro_object_6 = items;
     List _x2c_gensym_macro_cursor_6 = _x2c_gensym_macro_object_6;
-    Var _x2c_gensym_macro_cursor_output_4;
-    while(List_try_next(_x2c_gensym_macro_object_6, &(_x2c_gensym_macro_cursor_6), &(_x2c_gensym_macro_cursor_output_4))){
-      item = Var_list_payload(_x2c_gensym_macro_cursor_output_4);
+    Var _x2c_gensym_macro_cursor_output_5;
+    while(List_try_next(_x2c_gensym_macro_object_6, &(_x2c_gensym_macro_cursor_6), &(_x2c_gensym_macro_cursor_output_5))){
+      item = Var_list_payload(_x2c_gensym_macro_cursor_output_5);
       Array_push(out, List_var(item));
     }
 
   }
-  for(unsigned i = List_len(arms);  i;  i --) Array_push(out, List_var(_41));
+  for(unsigned i = List_len(arms);  i;  i --) Array_push(out, List_var(_36));
   return Array_list_free(out);
 }
 

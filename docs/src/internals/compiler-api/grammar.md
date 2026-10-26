@@ -54,16 +54,16 @@ Source: `src/grammar.x:98`
 
 Builds block content with its complete source-ordered statements.
 
-Source: `src/grammar.x:194`
+Source: `src/grammar.x:201`
 
 #### source_call_content
 
-`meta List source_call_content( Macro call, List callee, List arguments)`
+`meta List source_call_content(Macro call, List callee, List arguments)`
 
 Returns bare call content with the supplied callee and argument
 patterns.
 
-Source: `src/grammar.x:182`
+Source: `src/grammar.x:191`
 
 #### source_cast_content
 
@@ -72,7 +72,7 @@ Source: `src/grammar.x:182`
 Builds cast content with its children unchanged.
 The first child is a declaration or a semantic type at different stages.
 
-Source: `src/grammar.x:140`
+Source: `src/grammar.x:142`
 
 #### source_catch_handle
 
@@ -82,7 +82,7 @@ Returns the error handler the parser introduced for the catch arms of
 the parsed try `node`, or NULL for a try without catches. The arms read
 their captures through it, and no source form writes it.
 
-Source: `src/grammar.x:226`
+Source: `src/grammar.x:232`
 
 #### source_commas_content
 
@@ -90,7 +90,7 @@ Source: `src/grammar.x:226`
 
 Builds comma sequence content from its ordered rows.
 
-Source: `src/grammar.x:147`
+Source: `src/grammar.x:151`
 
 #### source_composite_content
 
@@ -98,7 +98,7 @@ Source: `src/grammar.x:147`
 
 Builds braced initializer content from its ordered comma rows.
 
-Source: `src/grammar.x:152`
+Source: `src/grammar.x:157`
 
 #### source_conditional_statement
 
@@ -118,7 +118,7 @@ Returns a source form's content pattern without its typed shell.
 Bare-content dispatch arms retain the fixed head the match emitter labels.
 Inside a shell, write `%(expr ? $($shape(...)))` instead.
 
-Source: `src/grammar.x:177`
+Source: `src/grammar.x:185`
 
 #### source_declarator_row
 
@@ -126,7 +126,7 @@ Source: `src/grammar.x:177`
 
 Returns a pattern for a declarator row, with or without its initializer.
 
-Source: `src/grammar.x:206`
+Source: `src/grammar.x:210`
 
 #### source_expression
 
@@ -135,7 +135,7 @@ Source: `src/grammar.x:206`
 Returns the source expression beneath casts and parentheses with
 its type.
 
-Source: `src/grammar.x:211`
+Source: `src/grammar.x:216`
 
 #### source_generic_content
 
@@ -143,7 +143,7 @@ Source: `src/grammar.x:211`
 
 Builds generic selection content with its declaration and ordered rows.
 
-Source: `src/grammar.x:143`
+Source: `src/grammar.x:145`
 
 #### source_identifier_content
 
@@ -151,7 +151,7 @@ Source: `src/grammar.x:143`
 
 Builds identifier content with its bound child records.
 
-Source: `src/grammar.x:198`
+Source: `src/grammar.x:204`
 
 #### source_literal_content
 
@@ -159,7 +159,7 @@ Source: `src/grammar.x:198`
 
 Builds literal content with its typed child records.
 
-Source: `src/grammar.x:202`
+Source: `src/grammar.x:207`
 
 #### source_operator_content
 
@@ -168,7 +168,7 @@ Source: `src/grammar.x:202`
 Builds operator content with its token and source-ordered operands.
 Constructed nonstandard operators retain the same form.
 
-Source: `src/grammar.x:161`
+Source: `src/grammar.x:168`
 
 #### source_operator_expression
 
@@ -176,7 +176,7 @@ Source: `src/grammar.x:161`
 
 Builds a typed operator expression from its content children.
 
-Source: `src/grammar.x:164`
+Source: `src/grammar.x:171`
 
 #### source_postfix_content
 
@@ -184,7 +184,7 @@ Source: `src/grammar.x:164`
 
 Builds postfix update content with its token and operand.
 
-Source: `src/grammar.x:168`
+Source: `src/grammar.x:175`
 
 #### source_postfix_expression
 
@@ -192,7 +192,7 @@ Source: `src/grammar.x:168`
 
 Builds a typed postfix update expression from its content children.
 
-Source: `src/grammar.x:171`
+Source: `src/grammar.x:178`
 
 #### source_retain_catch_handle
 
@@ -201,7 +201,7 @@ Source: `src/grammar.x:171`
 Restores the binder's handler after a caught template rebuild.
 The source form has no hole for this derived identity.
 
-Source: `src/grammar.x:233`
+Source: `src/grammar.x:240`
 
 #### source_return_content
 
@@ -209,7 +209,7 @@ Source: `src/grammar.x:233`
 
 Builds return content with all bound and normalized fields.
 
-Source: `src/grammar.x:190`
+Source: `src/grammar.x:198`
 
 #### source_return_none
 
@@ -217,7 +217,7 @@ Source: `src/grammar.x:190`
 
 Returns the return of no value that ends a function returning `Var`.
 
-Source: `src/grammar.x:85`
+Source: `src/grammar.x:84`
 
 #### source_return_type
 
@@ -226,7 +226,7 @@ Source: `src/grammar.x:85`
 Returns a return node's target type, or NULL for another form.
 The binder supplies the type; the source form does not write it.
 
-Source: `src/grammar.x:79`
+Source: `src/grammar.x:78`
 
 #### source_slice_content
 
@@ -234,7 +234,7 @@ Source: `src/grammar.x:79`
 
 Builds slice content while retaining omitted bounds.
 
-Source: `src/grammar.x:150`
+Source: `src/grammar.x:154`
 
 #### source_string_content
 
@@ -243,7 +243,7 @@ Source: `src/grammar.x:150`
 Builds string content from its ordered text, expression, and cache rows.
 The parser and resolver share this shape.
 
-Source: `src/grammar.x:157`
+Source: `src/grammar.x:163`
 
 #### source_va_arg_content
 
@@ -251,7 +251,7 @@ Source: `src/grammar.x:157`
 
 Builds va-arg content with its declaration and operand.
 
-Source: `src/grammar.x:145`
+Source: `src/grammar.x:148`
 
 ## Design notes
 

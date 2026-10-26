@@ -55,7 +55,7 @@ An invalid index, a null or unselected handle, or an unbound alternative
 returns `void`. The value remains valid until the handle is closed; use
 `Error.snapshot` to keep it longer.
 
-Source: `lib/error/handlers.x:402`
+Source: `lib/error/handlers.x:399`
 
 #### x2c_error_catch_close
 
@@ -69,7 +69,7 @@ of running arms instead. Handles must close in stack order on whichever
 chain holds them; violating that order reaches the raw error floor. A null
 handle does nothing.
 
-Source: `lib/error/handlers.x:439`
+Source: `lib/error/handlers.x:436`
 
 #### x2c_error_catch_detach
 
@@ -85,7 +85,7 @@ shutdown walks that chain, so an `exit()` from inside an arm still
 reclaims them. Repeated detach and a null handle do nothing. Detaching out
 of stack order reaches the raw error floor.
 
-Source: `lib/error/handlers.x:420`
+Source: `lib/error/handlers.x:417`
 
 #### x2c_error_catch_push
 
@@ -97,7 +97,7 @@ A hand-written caller that has no static site uses this form; `arm_count`
 prepared for this registration alone. Results and failures follow
 `x2c_error_catch_site_push`.
 
-Source: `lib/error/handlers.x:363`
+Source: `lib/error/handlers.x:360`
 
 #### x2c_error_catch_selected
 
@@ -106,7 +106,7 @@ Source: `lib/error/handlers.x:363`
 Returns the selected zero-based catch arm, or -1 before selection or for a
 null handle.
 
-Source: `lib/error/handlers.x:394`
+Source: `lib/error/handlers.x:391`
 
 #### x2c_error_catch_site_pending
 
@@ -115,7 +115,7 @@ Source: `lib/error/handlers.x:394`
 Reports whether one catch site still needs its patterns at registration.
 A bound static site answers 0, so its caller can skip constructing them.
 
-Source: `lib/error/handlers.x:386`
+Source: `lib/error/handlers.x:383`
 
 #### x2c_error_catch_site_push
 
@@ -140,7 +140,7 @@ lowering fence. A fenced arm can never be selected. The registration is
 reclaimed and the error reaches the enclosing handler; the caller's own
 frame is not yet pushed, so it never sees its own failure.
 
-Source: `lib/error/handlers.x:254`
+Source: `lib/error/handlers.x:253`
 
 #### x2c_error_raise
 
@@ -218,7 +218,7 @@ Source: `lib/error/dispatch.x:101`
 
 Returns the current thread's number of registered `Error` handlers.
 
-Source: `lib/error/handlers.x:219`
+Source: `lib/error/handlers.x:218`
 
 <a id="Error.handler_head"></a>
 #### Error.handler_head
@@ -229,7 +229,7 @@ Returns the current thread's borrowed top `Error`-handler pointer.
 Exception frames use this opaque value as a restore watermark; it remains
 valid only while its registration remains live.
 
-Source: `lib/error/handlers.x:229`
+Source: `lib/error/handlers.x:228`
 
 <a id="Error.initialize_raw"></a>
 #### Error.initialize_raw
@@ -403,7 +403,7 @@ Registrations and records created by that callback are reclaimed toward
 the saved heights before the interrupted unwind continues. State the
 callback itself removed is not reconstructed.
 
-Source: `lib/error/handlers.x:503`
+Source: `lib/error/handlers.x:500`
 
 <a id="Error.restore_landing"></a>
 #### Error.restore_landing
@@ -416,7 +416,7 @@ depth captured when the frame was pushed. The saved head is restored only
 when the current handler head is still a suffix of its chain; dispatch
 bookkeeping is cleared.
 
-Source: `lib/error/handlers.x:478`
+Source: `lib/error/handlers.x:475`
 
 <a id="Error.shutdown_raw"></a>
 #### Error.shutdown_raw
@@ -470,7 +470,7 @@ Handlers newer than `saved_head` are reclaimed. Records at and above
 `stack_height` are also reclaimed; pass the current height on normal frame
 exit to preserve collected errors.
 
-Source: `lib/error/handlers.x:491`
+Source: `lib/error/handlers.x:488`
 
 <a id="Error.unwind_head"></a>
 #### Error.unwind_head
@@ -483,7 +483,7 @@ even though the running callbacks are temporarily hidden from nested
 raises. Exception frames store the opaque result as their landing
 watermark.
 
-Source: `lib/error/handlers.x:467`
+Source: `lib/error/handlers.x:464`
 
 ## Runtime-internal callables
 

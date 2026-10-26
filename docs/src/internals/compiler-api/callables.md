@@ -51,7 +51,7 @@ for callable defers and function-pointer `Func` values. The complete
 typedef is bound at once, so each field keeps its member type. It binds
 at file scope whatever local scope is open.
 
-Source: `src/callables/adapters.x:84`
+Source: `src/callables/adapters.x:79`
 
 <a id="Compiler.context_func_adapter"></a>
 #### Compiler.context_func_adapter
@@ -62,19 +62,19 @@ Builds an adapter with `type`'s public signature that passes its own
 Func as the first argument of `target`, before the declared arguments.
 The target can read per-instance bindings with `Func.context`.
 
-Source: `src/callables/adapters.x:229`
+Source: `src/callables/adapters.x:224`
 
 <a id="Compiler.func_parameters"></a>
 #### Compiler.func_parameters
 
-`List Compiler.func_parameters( Compiler c, List entries, List fn, List argv)`
+`List Compiler.func_parameters(Compiler c, List entries, List fn, List argv)`
 
 Returns `(SIGNATURE (STORAGE READ)...)` for an adapter of a `Var`
 function taking the lambda parameter rows `entries`: its Func
 signature as a cached `List`, and each argument as `_func_reads`
 reads it from `argv` of the Func `fn`.
 
-Source: `src/callables/adapters.x:296`
+Source: `src/callables/adapters.x:292`
 
 <a id="Compiler.func_signature"></a>
 #### Compiler.func_signature
@@ -83,7 +83,7 @@ Source: `src/callables/adapters.x:296`
 
 Returns the canonical signature shared by native and meta Func adapters.
 
-Source: `src/callables/adapters.x:401`
+Source: `src/callables/adapters.x:394`
 
 <a id="Compiler.lift_func_expression"></a>
 #### Compiler.lift_func_expression
@@ -126,7 +126,7 @@ cast, or addressed; an indirect function-pointer value is rejected.
 A function already having the adapter's pointee type passes through,
 and new helpers are cached and queued with `Compiler.add_early`.
 
-Source: `src/callables/adapters.x:126`
+Source: `src/callables/adapters.x:121`
 
 <a id="Compiler.prepend_setup"></a>
 #### Compiler.prepend_setup
@@ -135,7 +135,7 @@ Source: `src/callables/adapters.x:126`
 
 Puts `setup` at the entry of a block or typed expression `body`.
 
-Source: `src/callables/adapters.x:97`
+Source: `src/callables/adapters.x:92`
 
 ## Design notes
 

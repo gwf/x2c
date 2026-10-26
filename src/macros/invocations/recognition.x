@@ -1,7 +1,5 @@
 /*  recognition.x -- macro invocation recognition */
 
-/*  invocations.x -- macro recognition and argument capture */
-
 module typedef struct MacroPos {
   Symbol kind, const char *description, int semicolon;
 } MacroPos;

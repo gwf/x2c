@@ -205,7 +205,8 @@ static List _recorded_conformance(Compiler c, Type base, Type participant) {
 }
 
 /** Returns the interface rows of the resolved conformances `adoptions`
-    declare. */
+    declare.
+*/
 Map Compiler.conformance_rows(Compiler c, List adoptions) {
   Map rows = {};
   foreach (List adoption in adoptions) {

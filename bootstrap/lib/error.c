@@ -1004,7 +1004,7 @@ ErrorHandler x2c_error_catch_site_push(void * target, ErrorCatchSite * site, Var
     {
       Var _x2c_gensym_literal_part_2 = String_var(String_join(NULL, cons(String_var(String_new("catch")), NULL)));
       {
-        static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/error/handlers.x",.function = "x2c_error_catch_site_push",.line = 272,.runtime = 1};
+        static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/error/handlers.x",.function = "x2c_error_catch_site_push",.line = 271,.runtime = 1};
         x2c_error_raise_n(& _x2c_gensym_error_site_3, 1358596898646632, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_2, Symbol_var(3226), int_var(arm), Symbol_var(12939466), String_var(fence));
         __builtin_unreachable();
       }

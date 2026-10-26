@@ -37,7 +37,7 @@ byte `Block` owned by the active `Scope`. The compiler emits them for each
 `%<<...>>` literal. Members must be distinct: the table search does not
 end for a repeated `Symbol`.
 
-Source: `lib/symbolset.x:176`
+Source: `lib/symbolset.x:175`
 
 <a id="SymbolSet.getindex"></a>
 #### SymbolSet.getindex
@@ -46,10 +46,9 @@ Source: `lib/symbolset.x:176`
 
 Returns the `Symbol` at `index`, or zero when the index is out of range.
 Negative indices count from the end. Zero is also a valid empty `Symbol`,
-so
-use `SymbolSet.len` when an out-of-range result must be distinguished.
+so use `SymbolSet.len` when an out-of-range result must be distinguished.
 
-Source: `lib/symbolset.x:119`
+Source: `lib/symbolset.x:118`
 
 <a id="SymbolSet.index"></a>
 #### SymbolSet.index
@@ -72,7 +71,7 @@ The caller owns `dest`, which must remain valid through every pull. The
 iterator borrows the generated set storage and allocates nothing. A null
 `dest` returns NULL; a null set produces an empty iterator.
 
-Source: `lib/symbolset.x:140`
+Source: `lib/symbolset.x:139`
 
 <a id="SymbolSet.len"></a>
 #### SymbolSet.len

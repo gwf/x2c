@@ -188,7 +188,7 @@ static void f4_walk____walk_at(Walk * w, int origin, Var inner);
 
 static void f4_walk____walk_block(Walk * w, List statements);
 
-static void f4_walk____close_to(Walk * w, Region region, Region outer);
+static void f4_walk____close_to(Region region, Region outer);
 
 static void f4_walk____walk_sequence(Walk * w, List statements);
 
@@ -921,7 +921,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _631 = cons(_628, _630);
   _632 = List_var(_631);
   _633 = Symbol_var(1133019155420);
-  _634 = int_var(3462);
+  _634 = int_var(3453);
   _635 = cons(_634, NULL);
   _636 = cons(_633, _635);
   _637 = List_var(_636);
@@ -1133,11 +1133,11 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _843 = cons(_842, NULL);
   _844 = cons(_584, _843);
   _845 = List_var(_844);
-  _846 = int_var(36);
+  _846 = int_var(35);
   _847 = cons(_846, NULL);
   _848 = cons(_620, _847);
   _849 = List_var(_848);
-  _850 = int_var(1157);
+  _850 = int_var(1153);
   _851 = cons(_850, NULL);
   _852 = cons(_633, _851);
   _853 = List_var(_852);
@@ -1245,11 +1245,11 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _955 = cons(_954, NULL);
   _956 = cons(_584, _955);
   _957 = List_var(_956);
-  _958 = int_var(75);
+  _958 = int_var(73);
   _959 = cons(_958, NULL);
   _960 = cons(_620, _959);
   _961 = List_var(_960);
-  _962 = int_var(2196);
+  _962 = int_var(2187);
   _963 = cons(_962, NULL);
   _964 = cons(_633, _963);
   _965 = List_var(_964);
@@ -1314,7 +1314,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
 }
 
 __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_2(void){
-  _1024 = int_var(3042);
+  _1024 = int_var(3033);
   _1025 = cons(_1024, NULL);
   _1026 = cons(_633, _1025);
   _1027 = List_var(_1026);
@@ -1717,7 +1717,7 @@ static Fact _slot(Walk * w, Var argument){
 }
 
 static Fact _new_fact(Walk * w, List binding, int param){
-  Fact fact = xcalloc(1, sizeof(struct Fact));  * fact =(struct Fact){
+  Fact fact = xmalloc(sizeof(struct Fact));  * fact =(struct Fact){
     .depth =(* w).depth, .origin =(* w).origin, .param = param
   }
   ;  if(List_truth(binding)) Map_setindex((* w).facts, List_var(binding), Fact_var(fact));  return fact;
@@ -1754,7 +1754,7 @@ static int _empty(Var value){
 
 static Region _owner(Walk * w, Fact slot){
   if(! slot || slot -> param >= 0) return NULL;  if(! slot -> owner){
-    slot -> owner = xcalloc(1, sizeof(struct Region));  * slot -> owner =(struct Region){
+    slot -> owner = xmalloc(sizeof(struct Region));  * slot -> owner =(struct Region){
       26155096, slot -> depth, slot -> origin
     }
     ;
@@ -1774,7 +1774,7 @@ static void _move(Fact fact, Region region){
 }
 
 static Region _open_region(Walk * w, Symbol kind, Fact slot){
-  Region region = xcalloc(1, sizeof(struct Region));  * region =(struct Region){
+  Region region = xmalloc(sizeof(struct Region));  * region =(struct Region){
     kind, (* w).depth, (* w).origin, 0, slot, (* w).open
   }
   ;  return(* w).open = region;
@@ -1929,7 +1929,7 @@ static List _parameter_types(Var call){
 
 static Var _passed(List types, List arguments, int index, Type * type){
   Var argument = List_getindex(arguments, index);
-  Var declared = index < List_len(types) ? List_getindex(types, index) :((void) 0, Void);
+  Var declared = List_getindex(types, index);
   (* type) = Var_is_row(declared, 9, 7, 4) ? List_type(Var_list(declared)) : NULL;
   if(! Type_is_reference((* type))) return argument;
   Type given = List_type(_expression_type(argument));
@@ -2200,11 +2200,11 @@ static void f4_walk____walk_block(Walk * w, List statements){
     }
 
   }
-  f4_walk____close_to(&((* w)), (* w).open, outer); (* w).open = outer; (* w).restored = restored; (* w).depth -= 1;
+  f4_walk____close_to((* w).open, outer); (* w).open = outer; (* w).restored = restored; (* w).depth -= 1;
 }
 
-static void f4_walk____close_to(Walk * w, Region region, Region outer){
-  if(region == outer) return;  f4_walk____close_to(&((* w)), region -> outer, outer);  region -> closed = 1;
+static void f4_walk____close_to(Region region, Region outer){
+  if(region == outer) return;  f4_walk____close_to(region -> outer, outer);  region -> closed = 1;
 }
 
 static void f4_walk____walk_sequence(Walk * w, List statements){
@@ -2619,10 +2619,10 @@ static void f4_walk____scan_children(Walk * w, List children){
 }
 
 static void f4_walk____store(Walk * w, Var target, Var value){
-  if(! List_truth(_binding_of(target))) f4_walk____scan(&((* w)), target, 0);  if(Map_contains((* w).restored, f4_walk____target_place(&((* w)), target))){
+  List named = _binding_of(target);  if(! List_truth(named)) f4_walk____scan(&((* w)), target, 0);  if(Map_contains((* w).restored, f4_walk____target_place(&((* w)), target))){
     f4_walk____scan(&((* w)), value, 0);  return;
   }
-  Type type = List_type(_expression_type(target));  List named = _binding_of(target);  Var found = List_truth(named) ? Map_getindex((* w).facts, List_var(named)) :((void) 0, Void);  if(! Var_is_void(found)){
+  Type type = List_type(_expression_type(target));  Var found = List_truth(named) ? Map_getindex((* w).facts, List_var(named)) :((void) 0, Void);  if(! Var_is_void(found)){
     f4_walk____assign(&((* w)), Var_fact(found), value, type, 1);  return;
   }
   f4_walk____scan(&((* w)), value, 0);  if(List_truth(named)){

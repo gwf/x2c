@@ -117,7 +117,7 @@ static int _pending_parts(Macro t, List code, List &grouped) {
   return 0;
 }
 
-/* The arguments of a `macro-invoke` of this same definition. */
+// The arguments of a `macro-invoke` of this same definition.
 static int _invoked_parts(
   Macro t, Var descriptor, List rows, List &grouped) {
   if (!_same(t, descriptor)) return 0;
@@ -183,7 +183,6 @@ static List _internal_names(Macro t, List names, int pending) {
   return internal.list_free();
 }
 
-/* Recognizes `code` with `plan` and publishes its captures by `route`. */
 static int _capture(
   List code, MatchPlan plan, MacroFixedSlots *policy, MacroPublishing *route,
   MatchCaptureBuffer *published) {
@@ -257,7 +256,7 @@ static List _case_shape(Macro t, List names) {
   return _view(pattern);
 }
 
-/* Declaration order gives each body-local binder its identity. */
+// Declaration order gives each body-local binder its identity.
 static Atom _fixed(int index) => Atom.intern(%"?__fixed_$index");
 
 /* Removes source wrappers and template shells throughout a pattern, down
@@ -275,7 +274,7 @@ static Var _view(Var value) {
   return parts.list_free();
 }
 
-/* The slots of a prepared plan that hold the macro's fixed locals. */
+// Records fixed-local and Name slots in the prepared plan.
 static MacroFixedSlots _fixed_slots(
   Macro t, List names, MatchPlan plan) {
   MacroFixedSlots policy;
@@ -372,7 +371,7 @@ static String _source_spelling(Var value) {
   return NULL;
 }
 
-/* Whether a fixed local's slot other than `slot` holds `value`. */
+// Whether a fixed local's slot other than `slot` holds `value`.
 static int _held_elsewhere(
   MatchMachine &machine, MacroFixedSlots *policy, int slot, Var value) {
   for (int i = 0; i < policy.count; i++) {
@@ -395,7 +394,7 @@ static Var _unwrap(Var value) {
       case %(at ? ?body): value = body;
       case %(src ? ?body): value = body;
       case %(expr (<macro-expr>) ?inner): {
-        /* A nested match keeps both tests in place on this hot path. */
+        // A nested match keeps both tests in place on this hot path.
         match (inner) case %(expr *): {
           value = inner;
           continue;

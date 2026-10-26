@@ -34,6 +34,6 @@ Source: `src/format.x:34`
 
 ## Design notes
 
-Converts emitted token `List`s to pretty or compact C text without changing
-token order. Parenthesis depth suppresses statement breaks within
-expressions, and `Buffer` materializes the final `String`.
+Formats emitted token `List`s as C text without changing token order.
+Parenthesis depth suppresses statement breaks within expressions, and
+`Buffer` materializes the final `String`.

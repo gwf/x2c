@@ -1197,7 +1197,7 @@ Source: `lib/var/encoding.x:178`
 
 Reports whether `tag` has a built-in encoding or declared custom class.
 
-Source: `lib/var/var.x:87`
+Source: `lib/var/var.x:89`
 
 <a id="Var.list"></a>
 #### Var.list
@@ -1603,7 +1603,7 @@ Names the built-in `Var` tags in `var-tags.x` ledger order, which
 is the order of `x2c_var_taginfo`; `lib/var-ledger.x` checks the two
 agree.
 
-Source: `lib/var/var.x:53`
+Source: `lib/var/var.x:54`
 
 <a id="VarDecodeGroup"></a>
 ### VarDecodeGroup
@@ -1614,7 +1614,7 @@ Resolves one encoding top: the selector is the middle field when
 `by_middle` is set and the bottom field under `mask` otherwise, and
 `ids` maps it to a `TagId`, or `_invalid_` where no tag has it.
 
-Source: `lib/var/var.x:81`
+Source: `lib/var/var.x:83`
 
 <a id="VarTagInfo"></a>
 ### VarTagInfo
@@ -1623,7 +1623,7 @@ Source: `lib/var/var.x:81`
 
 Describes one built-in `Var` tag's kind and encoding fields.
 
-Source: `lib/var/var.x:73`
+Source: `lib/var/var.x:74`
 
 ## Design notes
 

@@ -150,7 +150,7 @@ Source: `src/collect/interfaces.x:26`
 Selects a source file's own package, as its standalone translation does.
 A cold provider does not register an import in its including unit.
 
-Source: `src/collect/walk.x:438`
+Source: `src/collect/walk.x:436`
 
 <a id="Compiler.declared_adoptions"></a>
 #### Compiler.declared_adoptions
@@ -224,7 +224,7 @@ The ordered cache walk counts each file once and groups effects by the
 canonical path of the unit's direct include. The parser installs those
 effects when it reaches that include.
 
-Source: `src/collect/walk.x:665`
+Source: `src/collect/walk.x:663`
 
 <a id="Compiler.install_included_effects"></a>
 #### Compiler.install_included_effects
@@ -234,7 +234,7 @@ Source: `src/collect/walk.x:665`
 Installs the definitions of each include among the directives before
 the cursor.
 
-Source: `src/collect/walk.x:711`
+Source: `src/collect/walk.x:709`
 
 <a id="Compiler.install_syntax_prelude"></a>
 #### Compiler.install_syntax_prelude
@@ -258,7 +258,7 @@ identity is unknown, since no compiler could replay that interface. A
 contribution that the interface grammar cannot spell is reported as an
 `emit` diagnostic.
 
-Source: `src/collect/interfaces.x:272`
+Source: `src/collect/interfaces.x:271`
 
 <a id="Compiler.is_prelude_source"></a>
 #### Compiler.is_prelude_source
@@ -301,7 +301,7 @@ the records hold this compiler's collection rather than a table linked
 into it; the unit's own entries for them are restored afterwards. A
 record the interface grammar cannot spell is left out.
 
-Source: `src/collect/interfaces.x:375`
+Source: `src/collect/interfaces.x:373`
 
 <a id="Compiler.loaded_call_type"></a>
 #### Compiler.loaded_call_type
@@ -377,7 +377,7 @@ Returns the path of the first prelude interface this compiler wrote, or
 NULL when there is none or the compiler's identity is unknown. Its
 source hashes are not checked.
 
-Source: `src/collect/interfaces.x:228`
+Source: `src/collect/interfaces.x:227`
 
 <a id="Compiler.prelude_missing_interfaces"></a>
 #### Compiler.prelude_missing_interfaces
@@ -390,7 +390,7 @@ NULL when every one is present or there is no prelude interface. A
 missing interface walks that unit cold in every process, so a converged
 stage build reports none.
 
-Source: `src/collect/interfaces.x:237`
+Source: `src/collect/interfaces.x:236`
 
 <a id="Compiler.prelude_sources"></a>
 #### Compiler.prelude_sources
@@ -486,7 +486,7 @@ Source: `src/collect/declarations.x:184`
 The file the include of `target` from `includer_dir` names, searched as
 collection searches `dirs`, or NULL.
 
-Source: `src/collect/walk.x:524`
+Source: `src/collect/walk.x:522`
 
 ## Design notes
 

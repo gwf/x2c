@@ -138,7 +138,7 @@ Source: `src/parse/binding.x:548`
 Binds one constructed parameter in the current scope, including nested
 function modifiers and reference parameter facts.
 
-Source: `src/parse/declarators.x:511`
+Source: `src/parse/declarators.x:507`
 
 <a id="Compiler.bind_source_statement"></a>
 #### Compiler.bind_source_statement
@@ -174,7 +174,7 @@ Installs a definition-local template binding or typedef provisionally.
 Later template types name a local typedef by its identity, so each
 expansion refers to that expansion's private typedef.
 
-Source: `src/parse/declarators.x:291`
+Source: `src/parse/declarators.x:286`
 
 <a id="Compiler.check_reference_placement"></a>
 #### Compiler.check_reference_placement
@@ -218,7 +218,7 @@ starting at `start`, or NULL. A doc comment opens with two asterisks and
 ends on the line before `start` or on its line. Macro templates carry the
 text until their selected body binds at the invocation.
 
-Source: `src/parse/units.x:590`
+Source: `src/parse/units.x:588`
 
 <a id="Compiler.enclosing"></a>
 #### Compiler.enclosing
@@ -277,7 +277,7 @@ Constructs a foreign alias from one direct function declaration and target.
 typed, a function. Storage is limited to `static` or `inline`, when
 present, and variadic parameters are rejected.
 
-Source: `src/parse/units.x:758`
+Source: `src/parse/units.x:753`
 
 <a id="Compiler.finish_initializers"></a>
 #### Compiler.finish_initializers
@@ -334,7 +334,7 @@ Returns the folded package-member spelling at the current token, or NULL.
 The token must be an unshadowed imported alias followed by `.` and an
 identifier. This lookahead does not consume tokens.
 
-Source: `src/parse/declarators.x:616`
+Source: `src/parse/declarators.x:610`
 
 <a id="Compiler.parse_basic_identifier"></a>
 #### Compiler.parse_basic_identifier
@@ -343,7 +343,7 @@ Source: `src/parse/declarators.x:616`
 
 Consumes one `ident` token and returns its spelling as a one-item `List`.
 
-Source: `src/parse/declarators.x:629`
+Source: `src/parse/declarators.x:623`
 
 <a id="Compiler.parse_complex_identifier"></a>
 #### Compiler.parse_complex_identifier
@@ -354,7 +354,7 @@ Parses the current identifier or dotted owner/member as a one-item name.
 Package aliases and imported method spellings are folded through the
 current `Sym`, and all accepted tokens are consumed.
 
-Source: `src/parse/declarators.x:554`
+Source: `src/parse/declarators.x:549`
 
 <a id="Compiler.parse_declaration_argument"></a>
 #### Compiler.parse_declaration_argument
@@ -386,7 +386,7 @@ Source: `src/parse/declarations.x:15`
 Parses one declarator row for a macro argument without installing it.
 Its enclosing declaration supplies the base type when expanded.
 
-Source: `src/parse/declarators.x:213`
+Source: `src/parse/declarators.x:208`
 
 <a id="Compiler.parse_enumerator"></a>
 #### Compiler.parse_enumerator
@@ -397,7 +397,7 @@ Parses one enumerator for enum type `context` and returns its AST.
 Outside macro-template parsing, its binding is published immediately so
 later initializers and enumerators can resolve it.
 
-Source: `src/parse/types.x:512`
+Source: `src/parse/types.x:510`
 
 <a id="Compiler.parse_enumerators"></a>
 #### Compiler.parse_enumerators
@@ -409,7 +409,7 @@ Returns their flat source-order `List` and leaves the brace unconsumed.
 An alias among them needs no comma; the owner of the brace holds the
 alias body they declare into.
 
-Source: `src/parse/types.x:492`
+Source: `src/parse/types.x:490`
 
 <a id="Compiler.parse_field"></a>
 #### Compiler.parse_field
@@ -420,7 +420,7 @@ Parses one field for aggregate type `context` and returns its AST.
 Ordinary fields publish their binding in the aggregate's field scope and
 consume their terminating semicolon; macro forms follow their own syntax.
 
-Source: `src/parse/types.x:359`
+Source: `src/parse/types.x:358`
 
 <a id="Compiler.parse_fields"></a>
 #### Compiler.parse_fields
@@ -432,7 +432,7 @@ Returns a flat field `List`, publishes delegate-field metadata, and leaves
 the closing brace unconsumed. The owner of the brace holds the alias
 body the fields declare into.
 
-Source: `src/parse/types.x:342`
+Source: `src/parse/types.x:341`
 
 <a id="Compiler.parse_function_definition"></a>
 #### Compiler.parse_function_definition
@@ -466,7 +466,7 @@ caller consumed, up to its closing brace, which stays unconsumed.
 `position` is `<field>` or `<enumerator>` and `context` is the type.
 An alias among the members ends at the brace.
 
-Source: `src/parse/types.x:330`
+Source: `src/parse/types.x:329`
 
 <a id="Compiler.parse_named_type"></a>
 #### Compiler.parse_named_type
@@ -477,7 +477,7 @@ Captures a name followed by an ordinary complete type and semicolon.
 The reserved typedef identity permits fields to refer to their enclosing
 named type before its pointer or value representation is complete.
 
-Source: `src/parse/types.x:430`
+Source: `src/parse/types.x:429`
 
 <a id="Compiler.parse_optional_identifier"></a>
 #### Compiler.parse_optional_identifier
@@ -486,7 +486,7 @@ Source: `src/parse/types.x:430`
 
 Consumes and returns the current identifier, or NULL without consuming.
 
-Source: `src/parse/declarators.x:636`
+Source: `src/parse/declarators.x:630`
 
 <a id="Compiler.parse_parameter"></a>
 #### Compiler.parse_parameter
@@ -497,7 +497,7 @@ Parses one parameter and returns `(param TYPE DECLARATOR)` or `(...)`.
 Outside macro-template parsing, a named parameter is installed in the
 current `Sym` scope. The following delimiter remains current.
 
-Source: `src/parse/declarators.x:495`
+Source: `src/parse/declarators.x:490`
 
 <a id="Compiler.parse_parameter_list"></a>
 #### Compiler.parse_parameter_list
@@ -508,7 +508,7 @@ Parses a nonempty comma-separated parameter `List` in source order.
 The caller owns the parameter scope; the first non-comma delimiter remains
 current.
 
-Source: `src/parse/declarators.x:478`
+Source: `src/parse/declarators.x:473`
 
 <a id="Compiler.parse_simple_declaration"></a>
 #### Compiler.parse_simple_declaration
@@ -575,7 +575,7 @@ Source: `src/parse/units.x:15`
 Parses a type specifier with qualifiers and pointer/reference modifiers.
 Returns its flat `Type` AST and leaves the first following token current.
 
-Source: `src/parse/types.x:126`
+Source: `src/parse/types.x:125`
 
 <a id="Compiler.parse_type_operand"></a>
 #### Compiler.parse_type_operand

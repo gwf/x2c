@@ -51,7 +51,8 @@ static List _loaded_entry(Compiler c, List binding, Type type) {
 /** Exposes a loaded unit's main through the ordinary helper target table.
     Native calls retain its declared signature; the public argc/argv entry
     takes an Array of Strings. A renamed main still returns zero on falling
-    through its closing brace. Source text and tokens are unchanged. */
+    through its closing brace. Source text and tokens are unchanged.
+*/
 void Compiler.prepare_loaded_main(Compiler c, Array nodes) {
   for (int i = 0; i < nodes.len(); i++)
     match (nodes[i])
@@ -74,7 +75,8 @@ void Compiler.prepare_loaded_main(Compiler c, Array nodes) {
 
 /** Adds a loaded unit's public functions and object accessors to its targets.
     Meta closure must finish first so these entries retain runtime semantics.
-    Existing meta entries and the adapted main keep their original targets. */
+    Existing meta entries and the adapted main keep their original targets.
+*/
 void Compiler.prepare_loaded_functions(Compiler c, Array nodes) {
   Map present = {};
   foreach (List entry in c.meta_group)

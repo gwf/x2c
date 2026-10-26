@@ -204,10 +204,10 @@ Source: `src/toolchain.x:225`
 
 Creates a `Scope`-owned host toolchain with the tools, native options,
 and verbose and dry-run modes of `request`, and resolves its native
-layout. Tool
-selection is explicit value, `X2C_CC` or `X2C_AR`, `CC` or `AR`, the
-installed toolchain record, then `cc` or `ar`. Explicit tool `String`s and
-option `List`s are borrowed.
+layout. Tool selection is explicit value, `X2C_CC` or `X2C_AR`,
+`CC` or `AR`, the installed toolchain record, then `cc` or `ar`.
+Explicit tool `String`s and option `List`s are borrowed without copying
+their contents.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the toolchain
 or its canonical layout.
@@ -226,15 +226,15 @@ library's. System headers keep their include directives when the host
 supports that mode. `output`, `errors`, and `dependencies` are cleared
 before use. Source and include paths remain distinct argv elements, and
 stdout and stderr are captured separately. The temporary depfile is read
-into `dependencies` when possible and removed on returning paths, including
-a handled `<io-fail>` while reading it. A non-returning `<bad-arg>`,
-`<size-limit>`, or `<alloc-fail>` may transfer before removal. Returns the
-shell-style child status, 127 when the preprocessor cannot start, or -1 for
-invalid arguments or local setup failure. This operation does not consult
+into `dependencies` when present, then its directory is removed. A raised
+`<io-fail>`, `<bad-arg>`, `<size-limit>`, or `<alloc-fail>` can transfer
+before removal. Returns the shell-style child status, 127 when the
+preprocessor cannot start, or -1 when `fname` is NULL. Temporary-directory
+creation and removal failures raise. This operation does not consult
 `dry_run`.
 
 **Raises:** `<io-fail>`, `<bad-arg>`, `<size-limit>`, or `<alloc-fail>` while
-constructing arguments or reading captured text.
+reading text, constructing arguments, or managing the temporary directory.
 
 Source: `src/toolchain.x:353`
 

@@ -2,34 +2,17 @@
 
     Copyright (c) 2025 Gary William Flake
 
-    A `meta` function runs inside the compiler, so it can ask the compiler
-    questions and build syntax for it to bind. This module declares those
-    operations in x2c; the macro values a `meta` function applies and
-    recognizes are in `macrovalue/macrovalue.x`. Code builds code with
-    quotations (`$!( ... )`, `$!{ ... }`, `$!T{ ... }`) and `%(...)` Lists,
-    so the surface declares no constructors.
+    Declares compiler-supplied operations on captured `Code` and semantic
+    `Type` values, and the `x2c_` helpers without a captured receiver. Code
+    construction uses quotations and canonical Lists; macro values live in
+    `macrovalue/macrovalue.x`. The shared declaration-part helpers serve
+    both the compiler and a project's meta helper. The language reference
+    specifies "Compile-time calls and operations".
 
-    The operations on a value are methods of the value's type: `Code`,
-    captured code, and `Type`, a semantic type. The rest are `x2c_` helpers
-    that have no captured receiver: the identifier check, the invocation
-    site, embedded text, ancestry and placement, diagnostics, and the
-    definition hashes. Compile-time code calls each by its declared name,
-    as in `x2c_invocation_line()`. The semantics are specified under
-    "Compile-time calls and operations" in the language reference.
-
-    Each operation is a bodyless `meta` prototype the compiler supplies. A
+    Each compiler operation is a bodyless `meta` prototype. A
     `meta` function that reaches one, directly or through another `meta`
     function, is compile-time only: the compiler emits no run-time form for
     it and diagnoses a run-time call where it is written.
-
-    Three operations let a macro contribute code beyond its result.
-    `x2c_enclosing` answers the initialized declarator, block item,
-    function, or unit around the invocation, and `x2c_place` puts code
-    after that declarator or block item, on the exits of its block, at the
-    entry of its function, among the unit's support declarations, or in its
-    initialization, under the expansion's transaction. `x2c_binding_fresh`
-    returns a new binding, so placed code can declare a name that the
-    result also refers to. `$auto` is built on them.
 
     The library builds it as an optional module, but the prelude's
     `var/var.x` includes it for its own `meta` rows, so every unit sees its
@@ -49,7 +32,8 @@
 #include "symbolset.x"
 
 /** A macro as a value: called to build code, or used in a Match `case` to
-    recognize code and capture its parameters. */
+    recognize code and capture its parameters.
+*/
 typedef List Macro;
 
 /** Semantic type syntax with canonical List-pool lifetime. */
@@ -62,12 +46,14 @@ typedef List Code;
 
 /** A `meta` parameter declared `TypeInfo` receives, at a `$` call, the
    description of its argument's type: `((name N) (kind K) (type T)
-   (fields F) (methods M))`. Read a part with `List.assoc`. */
+   (fields F) (methods M))`. Read a part with `List.assoc`.
+*/
 typedef List TypeInfo;
 
 /** A `meta` parameter declared `Source` receives, at a `$` call, captured
    syntax with the source text it came from: `((text T) (file F) (syntax
-   S))`. `Code.source_text` and `x2c_embed_text` read it directly. */
+   S))`. `Code.source_text` and `x2c_embed_text` read it directly.
+*/
 typedef List Source;
 
 /* captured code
@@ -78,32 +64,38 @@ typedef List Source;
    code only refers to. */
 
 /** Returns the canonical semantic type of captured code in the current
-    expansion. Unbound expressions are resolved in that expansion. */
+    expansion. Unbound expressions are resolved in that expansion.
+*/
 meta Type Code.type(Code value);
 
 /** Returns the value of captured constant code, including a literal or a
-    macro value. Rejects expressions that require runtime evaluation. */
+    macro value. Rejects expressions that require runtime evaluation.
+*/
 meta Var Code.value(Code code);
 
 /** Returns the source text the developer wrote for `syntax`, exactly as it
     appears in the file: the text a `Source` argument carries. Fails the
-    expansion when the captured syntax is incomplete. */
+    expansion when the captured syntax is incomplete.
+*/
 meta String Code.source_text(Var syntax);
 
 /** Returns the spelling of the binding `syntax` names: an identifier
     `String`, or identifier or binding syntax. Fails the expansion when
-    `syntax` is neither or names an unknown binding. */
+    `syntax` is neither or names an unknown binding.
+*/
 meta String Code.binding_spelling(Var syntax);
 
 /** Returns the spelling of the function `function` defines. */
 meta String Code.name(Code function);
 
 /** Returns the `Func` signature of the function `value` defines or names,
-    the form `Func.new` takes, as `((func ("Var")) "Var")`. */
+    the form `Func.new` takes, as `((func ("Var")) "Var")`.
+*/
 meta List Code.native_signature(Code value);
 
 /** Returns the expression reading the parameter of `function` spelled
-    `name`. Fails the expansion when `function` has no such parameter. */
+    `name`. Fails the expansion when `function` has no such parameter.
+*/
 meta Code Code.parameter(Code function, String name);
 
 /** Returns the statements in the body of `function`. */
@@ -111,25 +103,30 @@ meta List Code.body(Code function);
 
 /** Returns the argument expressions that forward `parameters`, a `params`
     form or the parameters themselves. A `(void)` parameter list answers
-    nothing. */
+    nothing.
+*/
 meta List Code.arguments(Code parameters);
 
 /** Tests whether control cannot reach the end of the statement
     `statement`, because it ends in a `return` or in a raise or call that
-    does not return. */
+    does not return.
+*/
 meta int Code.exits(Code statement);
 
 /** Returns the C spelling of the static string literal `value` holds as a
     printf-family format, or NULL when the format is not known until the
-    program runs. A `String` literal's text is spelled as a C literal. */
+    program runs. A `String` literal's text is spelled as a C literal.
+*/
 meta String Code.format(Code value);
 
 /** Tests whether the Match pattern expression `pattern` builds the same
-    value each time it runs, so it can be prepared once. */
+    value each time it runs, so it can be prepared once.
+*/
 meta int Code.is_static_pattern(Code pattern);
 
 /** Returns the value the Match pattern expression `pattern` builds, with
-    the Symbol `x2c-dyn` in place of each part computed when it runs. */
+    the Symbol `x2c-dyn` in place of each part computed when it runs.
+*/
 meta Var Code.pattern_value(Code pattern);
 
 /* lowering code
@@ -138,39 +135,45 @@ meta Var Code.pattern_value(Code pattern);
    compiler would, marked as already lowered. */
 
 /** Returns the expression `value` converted to `target` as a destination of
-    that type converts it. */
+    that type converts it.
+*/
 meta Code Code.convert(Code value, Type target);
 
 /** Returns `value` as a `String` when it is a C string literal, or one in
     parentheses or in both arms of a conditional, as a method receiver,
     a `foreach` collection, or a raise detail converts one; returns any
-    other `value` itself. */
+    other `value` itself.
+*/
 meta Code Code.promoted(Code value);
 
 /** Returns a `type` expression that calls the protocol member `member`
     with `arguments`, each converted to its parameter and evaluated once,
-    in order, before the call. */
+    in order, before the call.
+*/
 meta Code Code.call_in_order(Code member, List arguments, Type type);
 
 /** Returns `code`, which is already bound, typed, and lowered, marked so
     that a translator's result is placed as written instead of bound and
     lowered again. Each of `effects` applies first, in order; a
     `(cleanup TOKEN PLACED)` row replaces TOKEN in `code` with the lowered
-    statements PLACED and marks the unit as needing exception support. */
+    statements PLACED and marks the unit as needing exception support.
+*/
 meta Code Code.lowered(Code code, List effects);
 
 /** Returns `code`, which is already bound and typed, marked so that a
     translator's result or placed code is lowered without being bound
     again. Each of `effects` applies first, in order; a
     `(new-name TOKEN ROLE)` row replaces TOKEN in `code` with a fresh
-    binding. */
+    binding.
+*/
 meta Code Code.bound(Code code, List effects);
 
 /** Returns `(SIGNATURE (TYPE READ)...)` for a `Func` adapter of a `Var`
     function that takes `parameters`, a lambda's parameters: its signature
     as a constant `List`, and for each parameter, the expression that reads
     its argument from `argv`, the argument vector of the `Func` `fn`, with
-    the type of the local that holds it, a pointer for a reference. */
+    the type of the local that holds it, a pointer for a reference.
+*/
 meta List Code.func_parameters(Code parameters, Code fn, Code argv);
 
 /* registering translators */
@@ -209,7 +212,8 @@ meta List Code.func_parameters(Code parameters, Code fn, Code argv);
     returning its input, void, or null, and then costs only its match and
     call. A replacement is a function definition to bind, or a bound or
     lowered code-value carrier; it is lowered as written and offered to
-    the other rules, but not again to the rule that returned it. */
+    the other rules, but not again to the rule that returned it.
+*/
 meta Code Code.register_rewrite(Code function, List pattern, List holes);
 
 /** Registers block items to follow matching local initializations. */
@@ -233,74 +237,88 @@ meta Type Type.numeric(Type type);
 meta int Type.is_text(Type type);
 
 /** Tests whether a `Var` can hold a value of `type`: a numeric scalar or
-    enum, Symbol, Var, Atom, String, List, or a typedef of one. */
+    enum, Symbol, Var, Atom, String, List, or a typedef of one.
+*/
 meta int Type.is_value(Type type);
 
 /** Returns the type the type key `type` resolves to through its typedefs. */
 meta Type Type.resolve(Type type);
 
 /** Returns `(BASE MODIFIERS)`, the declaration parts that spell `type` in
-    source. */
+    source.
+*/
 meta List Type.parts(Type type);
 
 /** Returns the type the pointer or array `type` refers to. */
 meta Type Type.element(Type type);
 
 /** Returns the parameter types of the function `type`, or of the function
-    a pointer or array `type` refers to. */
+    a pointer or array `type` refers to.
+*/
 meta List Type.parameters(Type type);
 
 /** Returns the result type of the function `type`. */
 meta Type Type.return_type(Type type);
 
 /** Returns the struct or union tag `type` reaches through typedefs or one
-    pointer level, or NULL. */
+    pointer level, or NULL.
+*/
 meta Type Type.aggregate(Type type);
 
 /** Returns the named fields of the struct or union `type`, in declaration
     order, each as a `(NAME TYPE)` row. Fails the expansion when `type` is
-    not a complete aggregate. */
+    not a complete aggregate.
+*/
 meta List Type.fields(Type type);
 
 /** Returns the `(NAME TYPE)` layout rows of the type `type` resolves to,
-    including its unnamed members. */
+    including its unnamed members.
+*/
 meta List Type.layout(Type type);
 
 /** Returns the `(NAME TYPE)` layout rows of the fields of the aggregate tag
     `aggregate` declared with the field keyword `mark`, such as `delegate`,
-    in declaration order. */
+    in declaration order.
+*/
 meta List Type.marked_fields(Type aggregate, Symbol mark);
 
 /** Returns the members of the enum `type` as `(NAME VALUE)` rows in
     declaration order. An implicit value is nil; a literal value retains
-    its spelling, and another value is its expression. */
+    its spelling, and another value is its expression.
+*/
 meta List Type.members(Type type);
 
 /** Returns how ordinary member lookup selects `name` on a `type` receiver
     with `.`: `(field ACCESS TYPE)`, `(method BINDING SIGNATURE)`,
     `(ambiguous PACKAGE...)` when imported packages each provide the method,
     or NULL. Methods are selected only when `call` is nonzero, as for a
-    call. */
+    call.
+*/
 meta List Type.resolve_member(Type type, String name, int call);
 
 /** Returns the selected protocol callable, or null if unavailable in the
-    current function. Selection includes explicit protocol adoption. */
+    current function. Selection includes explicit protocol adoption.
+*/
 meta Code Type.protocol_member(Type type, String name);
 
 /** Returns the callable a bracket read on a `type` value calls: its own
-    `getindex`, else the selected protocol member, or null. */
+    `getindex`, else the selected protocol member, or null.
+*/
 meta Code Type.getter(Type type);
 
 /** Returns the runtime helper that applies a dynamic update to a `type`
-    lvalue, a numeric scalar, or null for any other type. */
+    lvalue, a numeric scalar, or null for any other type.
+*/
 meta String Type.update_helper(Type type);
 
 /** Returns the generated tag name for the type named `name`, unique to
-    this source file. */
+    this source file.
+*/
 meta Symbol Type.tag_name(String name);
 
 /** Returns the spelling of the reverse converter from the type named
-    `base` to the type named `participant`. */
+    `base` to the type named `participant`.
+*/
 meta String Type.reverse_name(String base, String participant);
 
 /* names
@@ -311,19 +329,22 @@ meta String Type.reverse_name(String base, String participant);
 
 /** Returns the checked identifier syntax for `spelling`, which the compiler
     resolves where the returned expression is bound. Fails the expansion
-    when `spelling` is not an identifier. */
+    when `spelling` is not an identifier.
+*/
 meta List x2c_ident(String spelling);
 
 /** Returns a new binding the compiler names from `role`, as it names its
     own generated declarations, so that code a meta function places can
     declare it and its result can refer to it. Fails the expansion when
-    `role` is not an identifier. */
+    `role` is not an identifier.
+*/
 meta List x2c_binding_fresh(String role);
 
 /** Returns the binding the unit gave `key`, or the first time a new one
     the compiler names from `role`, so that code placed once for `key` and
     each result that refers to it agree. Fails the expansion when `role`
-    is not an identifier. */
+    is not an identifier.
+*/
 meta List x2c_binding_for(Var key, String role);
 
 /* the invocation site
@@ -344,7 +365,8 @@ meta int x2c_invocation_column(void);
 /** Returns the text of the file at `path`, a `String` or a `Source`
     holding a `String` literal, resolved against the source that named it,
     and records it as a translation dependency. Fails the expansion when it
-    cannot be read. */
+    cannot be read.
+*/
 meta String x2c_embed_text(Var path);
 
 /* ancestry and placement
@@ -359,7 +381,8 @@ meta String x2c_embed_text(Var path);
     the item being lowered, as its origin anchor for
     `x2c_diagnostic_fail_at`; `<function>` the enclosing function
     definition, whose body is still the empty `(seq)`; and `<unit>` a
-    `String` expression of the unit's path. */
+    `String` expression of the unit's path.
+*/
 meta Code x2c_enclosing(Symbol what);
 
 /** Places `code` under the expansion's transaction. `where` is
@@ -377,7 +400,8 @@ meta Code x2c_enclosing(Symbol what);
     unit's initialization, or `%(unit-init AREA)` in its `protocol`,
     `prepare`, `statics`, or `finish` area. Code placed after a declarator
     requires the expansion's result to be that declarator's complete
-    initializer. */
+    initializer.
+*/
 meta void x2c_place(List where, Code code);
 
 /* failing
@@ -386,25 +410,29 @@ meta void x2c_place(List where, Code code);
    the developer wrote, which no return value can do. */
 
 /** Reports `message` with `notes` at the macro invocation and fails the
-    expansion. This does not return. */
+    expansion. This does not return.
+*/
 meta void x2c_diagnostic_fail(String message, List notes);
 
 /** Reports `message` with `notes` under `category`, such as `<parse>` or
     `<type>`, at `node`, syntax the macro received, and fails the
     expansion. The position is the first one recorded in or around `node`,
     such as a captured statement's; a node without one reports at the macro
-    invocation. This does not return. */
+    invocation. This does not return.
+*/
 meta void x2c_diagnostic_fail_at(
   Var node, Symbol category, String message, List notes);
 
 /** Reports `message` with `notes` under `category` at `node`, located as
     `x2c_diagnostic_fail_at` locates it, and returns so the expansion
-    continues. The translation fails when it finishes. */
+    continues. The translation fails when it finishes.
+*/
 meta void x2c_diagnostic_error_at(
   Var node, Symbol category, String message, List notes);
 
 /** Reports `message` with `notes` as a warning where it is raised, and
-    returns so the expansion continues. */
+    returns so the expansion continues.
+*/
 meta void x2c_diagnostic_warn(String message, List notes);
 
 // definition hashes
@@ -413,7 +441,8 @@ meta void x2c_diagnostic_warn(String message, List notes);
     unit has defined so far to its definition's String hash, from the first
     token after any `meta` marker to the end of its body or initializer.
     The compiler links copies of shipped `meta` code and binds a definition
-    to its copy only when these hashes agree. */
+    to its copy only when these hashes agree.
+*/
 meta Map x2c_meta_definition_hashes(void);
 
 /* declaration parts
@@ -426,7 +455,8 @@ static const SymbolSet _base_keywords = %<<typedef struct union enum unqual int
 static const SymbolSet _type_qualifiers = %<<const restrict volatile>>;
 
 /** Returns the suffix of `type` that begins at its typedef name or base
-    keyword, sharing `type`, or `NULL` when it has none. */
+    keyword, sharing `type`, or `NULL` when it has none.
+*/
 List type_base_suffix(List type) {
   for (; type; type = type.cdr()) {
     Var head = type.car();
@@ -439,7 +469,8 @@ List type_base_suffix(List type) {
 /** Returns the diagnostic for a `type` that names its type with an Atom
     other than a C type keyword, as `%(String)` and `%(* Point)` do, or
     `NULL`. A type name is a String, as in `%("String")` and `%(* "Point")`;
-    neither a short Symbol nor a long Atom supplies that representation. */
+    neither a short Symbol nor a long Atom supplies that representation.
+*/
 String type_name_error(List type) {
   Var name = type.last();
   if (name is not <lsym> &&
@@ -456,7 +487,8 @@ String type_name_error(List type) {
 
 /** Returns `(base modifiers)` for reconstructing a declaration of `type`.
     Function modifiers hold parameter syntax, and modifier order retains C
-    declarator precedence. */
+    declarator precedence.
+*/
 List type_declaration_parts(List type) {
   List base = type_base_suffix(type);
   if (!base) return %($type ());

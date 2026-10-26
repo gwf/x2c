@@ -73,11 +73,8 @@ static String _display(Compiler c, List binding, String name) {
   return c.unprefixed(name);
 }
 
-static List _span(Compiler c, List key) {
-  Var span = NULL;
-  c.semantic_binding_facts().try_get(%(definition-span $key), span);
-  return span;
-}
+static List _span(Compiler c, List key) =>
+  c.fact(%(definition-span $key));
 
 static List _parameter_names(Compiler c, List modifiers) {
   Array names = [];

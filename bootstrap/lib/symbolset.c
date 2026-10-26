@@ -155,7 +155,9 @@ Iter SymbolSet_iter(SymbolSet x, Iter dest){
 Block SymbolSet_encode(Array symbols){
   Hash h = _hash(symbols);
   int count =(int) Array_len(symbols);
-  int width = count <= 0x100 ? 1 : count <= 0x10000 ? 2 : 4;
+  int width = 4;
+  if(count <= 0x100) width = 1;
+  else if(count <= 0x10000) width = 2;
   Block bytes = Block_new(1);
   _put(bytes, width, 1);
   _put(bytes, 0, 3);
@@ -188,7 +190,6 @@ static Hash _hash(Array symbols){
     h.vertices =(int) h.span * 3;
     h.table = xcalloc(h.vertices, sizeof(uint32_t));
     for(uint64_t attempt = 0;  ! built && attempt < 4096;  attempt ++){
-      memset(h.table, 0, (size_t) h.vertices * sizeof(uint32_t));
       h.seed = UINT64_C(0x9e3779b97f4a7c15) + attempt * UINT64_C(0xd1b54a32d192ed03);
       built = _try_seed(symbols, h.span, h.seed, h.table);
     }

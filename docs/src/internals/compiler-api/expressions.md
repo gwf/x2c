@@ -52,7 +52,7 @@ for a typed destination, 1 for an interpolation hole, which displays
 every value through `Var.str`, and 2 for a printf-family value, which
 the format converts when it is a Var.
 
-Source: `src/expressions/conversions.x:48`
+Source: `src/expressions/conversions.x:47`
 
 <a id="Compiler.complete_iter_chain"></a>
 #### Compiler.complete_iter_chain
@@ -80,7 +80,7 @@ performs the conversion implicitly; an unsupported x2c conversion reports
 a type error through `c`. Synthesized operations may add generated
 bindings or immutable literal entries to compiler state.
 
-Source: `src/expressions/conversions.x:229`
+Source: `src/expressions/conversions.x:228`
 
 <a id="Compiler.convert_segment_to_string"></a>
 #### Compiler.convert_segment_to_string
@@ -92,14 +92,11 @@ A missing `String` conversion is expected: the transform boxes that segment
 to `Var` and renders it at runtime.
 
 A declared numeric converter keeps its formatting; other numeric segments
-use `Var.str`. A segment statically spelled `Var` also uses `Var.str` for
-every
-runtime tag. The ordinary `Var`-to-`String` conversion is
-not equivalent: it
-extracts only a `String` payload and yields empty `String` for every other
-tag.
+use `Var.str`. A segment statically spelled `Var` uses `Var.str` for every
+runtime tag. An ordinary `String` destination uses `Var.as_string`, which
+returns NULL for `void` and `Null`.
 
-Source: `src/expressions/conversions.x:422`
+Source: `src/expressions/conversions.x:416`
 
 <a id="Compiler.converter_call"></a>
 #### Compiler.converter_call
@@ -110,7 +107,7 @@ The call to the converter that `type`, or the first of its typedef names
 that declares one, provides for `target`, applied to `expr`, or NULL
 when none declares one.
 
-Source: `src/expressions/conversions.x:580`
+Source: `src/expressions/conversions.x:573`
 
 <a id="Compiler.func_call_parts"></a>
 #### Compiler.func_call_parts
@@ -134,7 +131,7 @@ Source: `src/expressions/calls.x:371`
 The global builtin boxers and scalar formatters only observe their
 arguments. A custom converter or a shadowed callee may change state.
 
-Source: `src/expressions/conversions.x:633`
+Source: `src/expressions/conversions.x:626`
 
 <a id="Compiler.needs_resolution"></a>
 #### Compiler.needs_resolution
@@ -164,7 +161,7 @@ Source: `src/expressions/syntax.x:38`
 Parses an explicit List splice argument, or returns NULL without consuming
 an ordinary argument. Parentheses delimit a complete splice expression.
 
-Source: `src/expressions/syntax.x:503`
+Source: `src/expressions/syntax.x:500`
 
 <a id="Compiler.parse_conditional"></a>
 #### Compiler.parse_conditional
@@ -197,7 +194,7 @@ Parses one macro target through the cast-expression grammar.
 Parsing starts at `c.token` and leaves it at the first token after
 the target.
 
-Source: `src/expressions/syntax.x:279`
+Source: `src/expressions/syntax.x:277`
 
 <a id="Compiler.parse_parenthesized_statement"></a>
 #### Compiler.parse_parenthesized_statement
@@ -213,7 +210,7 @@ resumes at the postfix tail it had already reached. This entry consumes
 the terminating `;` and returns `(stmnt expression)` or an origin-anchored
 `(dstrdecl ...)`.
 
-Source: `src/expressions/syntax.x:209`
+Source: `src/expressions/syntax.x:208`
 
 <a id="Compiler.parse_primary"></a>
 #### Compiler.parse_primary
@@ -224,7 +221,7 @@ Parses one primary expression or expression-valued macro slot.
 Dispatch starts at `c.token` to the selected literal, identifier,
 grouping, or macro parser and leaves the token after that primary form.
 
-Source: `src/expressions/syntax.x:621`
+Source: `src/expressions/syntax.x:617`
 
 <a id="Compiler.parse_variable"></a>
 #### Compiler.parse_variable
@@ -234,7 +231,7 @@ Source: `src/expressions/syntax.x:621`
 Parses and resolves one complex identifier expression.
 Parsing starts at `c.token` and leaves it after the identifier.
 
-Source: `src/expressions/syntax.x:693`
+Source: `src/expressions/syntax.x:689`
 
 <a id="Compiler.postfix_completions"></a>
 #### Compiler.postfix_completions
@@ -244,7 +241,7 @@ Source: `src/expressions/syntax.x:693`
 Returns sorted visible field and method names that resolve on `receiver`
 through `access`.
 
-Source: `src/expressions/access.x:327`
+Source: `src/expressions/access.x:325`
 
 <a id="Compiler.printf_static_format"></a>
 #### Compiler.printf_static_format
@@ -269,7 +266,7 @@ method receiver, a `foreach` collection, or a raise detail. Parentheses
 and a conditional whose arms are both literals count as the literal; any
 other expression is returned unchanged.
 
-Source: `src/expressions/conversions.x:181`
+Source: `src/expressions/conversions.x:180`
 
 <a id="Compiler.resolve_expression"></a>
 #### Compiler.resolve_expression
@@ -301,13 +298,12 @@ Source: `src/expressions/resolution.x:458`
 `List Compiler.resolve_postfix_member( Compiler c, Type receiver_type, List field, Symbol access, int call_context)`
 
 Resolves one field or method selection without consuming parser tokens.
-`field` is a single-name `List` and `access` is `.` or
-`->`. The result is a
+`field` is a single-name `List` and `access` is `.` or `->`. The result is a
 `(field access type)`, `(method binding signature)`, or `(ambiguous ...)`
 row, or NULL when no member is visible. Method lookup is enabled only by
 `call_context` and records the selected binding in `c.sym`.
 
-Source: `src/expressions/access.x:177`
+Source: `src/expressions/access.x:174`
 
 <a id="Compiler.reveal_binding"></a>
 #### Compiler.reveal_binding

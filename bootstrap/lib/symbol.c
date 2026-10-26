@@ -29,7 +29,6 @@ static int _char_to_5bit(int c){
 }
 
 static int _bytes_fit_5bit(const char * str, int len){
-  if(! str) return 0;
   for(int i = 0;  i < len;  i ++) if(! _char_to_5bit(str[i])) return 0;
   return 1;
 }
@@ -106,7 +105,7 @@ String Symbol_str(Symbol symbol){
 
 int Symbol_compare(Symbol a, Symbol b){
   if(a == b) return 0;
-  if(! a) return b ? - 1 : 0;
+  if(! a) return - 1;
   if(! b) return 1;
   char a_text[SYMBOL_MAX_5BIT + 1], b_text[SYMBOL_MAX_5BIT + 1];
   Symbol_decode(a, a_text);
@@ -128,26 +127,14 @@ String Symbol_repr(Symbol symbol){
 
 Buffer Symbol_write_str(Symbol symbol, Buffer out){
   if(! symbol) return out;
-  char text[SYMBOL_MAX_5BIT + 1] ={
-    __builtin_choose_expr(0ULL <(sizeof(text) /(sizeof(text[0]))), 0, (__typeof__(text[0ULL])){
-      0
-    }
-    )
-  }
-  ;
+  char text[SYMBOL_MAX_5BIT + 1];
   Symbol_decode(symbol, text);
   return Buffer_write(out, text);
 }
 
 Buffer Symbol_write_repr(Symbol symbol, Buffer out){
   if(! symbol) return Buffer_write(out, "<>");
-  char text[SYMBOL_MAX_5BIT + 1] ={
-    __builtin_choose_expr(0ULL <(sizeof(text) /(sizeof(text[0]))), 0, (__typeof__(text[0ULL])){
-      0
-    }
-    )
-  }
-  ;
+  char text[SYMBOL_MAX_5BIT + 1];
   Symbol_decode(symbol, text);
   Buffer_write_char(out, '<');
   if(!(symbol & 1)) Buffer_write(out, text);

@@ -115,7 +115,7 @@ declaration-producing macro can call one during collection, before
 the parse installs the advertisements, so the first lookup there
 installs the ones visible so far.
 
-Source: `src/meta-native/bindings.x:122`
+Source: `src/meta-native/bindings.x:123`
 
 <a id="Compiler.bindings"></a>
 #### Compiler.bindings
@@ -226,7 +226,7 @@ Source: `src/meta-native/functions.x:20`
 Records the native advertisements retained by included interfaces. Each
 binds on first use, so a unit with no compile-time code pays nothing.
 
-Source: `src/meta-native/bindings.x:100`
+Source: `src/meta-native/bindings.x:101`
 
 <a id="Compiler.install_native_meta_function"></a>
 #### Compiler.install_native_meta_function
@@ -236,7 +236,7 @@ Source: `src/meta-native/bindings.x:100`
 Installs a prototype-only `meta` function from the compiler's trusted
 native target registry. The declaration keeps its ordinary runtime form.
 
-Source: `src/meta-native/bindings.x:135`
+Source: `src/meta-native/bindings.x:136`
 
 <a id="Compiler.install_project_meta_effect"></a>
 #### Compiler.install_project_meta_effect
@@ -257,7 +257,7 @@ passes when it omits its destination, or -1 for another signature. An
 iterator operation takes its destination last, and its native target is
 `NAME_into`.
 
-Source: `src/meta-native/bindings.x:414`
+Source: `src/meta-native/bindings.x:415`
 
 <a id="Compiler.linked_meta_provider_source"></a>
 #### Compiler.linked_meta_provider_source
@@ -330,7 +330,7 @@ Answers whether the native target `function` matches the declared
 parameter, which takes the compile-time callable and adapts it. Aliases
 of one native type match each other.
 
-Source: `src/meta-native/bindings.x:214`
+Source: `src/meta-native/bindings.x:215`
 
 <a id="Compiler.native_meta_module"></a>
 #### Compiler.native_meta_module
@@ -340,7 +340,7 @@ Source: `src/meta-native/bindings.x:214`
 Returns the selected file-backed native module that supplies `name`,
 with its native `type`, or NULL for a linked or absent target.
 
-Source: `src/meta-native/bindings.x:250`
+Source: `src/meta-native/bindings.x:251`
 
 <a id="Compiler.native_meta_targets"></a>
 #### Compiler.native_meta_targets
@@ -353,7 +353,7 @@ inventory, or only those declared in the files `paths` names when it is
 not empty. A target that takes a `Func` is left out unless `callbacks`
 is nonzero. Sorting makes that inventory independent of Map order.
 
-Source: `src/meta-native/bindings.x:342`
+Source: `src/meta-native/bindings.x:343`
 
 <a id="Compiler.native_module_targets"></a>
 #### Compiler.native_module_targets

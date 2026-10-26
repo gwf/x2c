@@ -69,8 +69,7 @@ static List _inline_prototype(Compiler c, List node) {
 }
 
 static int _inline_binding(Compiler c, List binding) =>
-  c.sym.get($("function-inline", Ast.binding_spelling(binding)))
-    != NULL;
+  c.sym.get($("function-inline", Ast.binding_spelling(binding))) != NULL;
 
 /* Native directives and initializer inputs keep their source order.
    Public inline definitions keep their macro state at their positions.

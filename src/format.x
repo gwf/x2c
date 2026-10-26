@@ -2,9 +2,9 @@
 
     Copyright (c) 2025 Gary William Flake
 
-    Converts emitted token `List`s to pretty or compact C text without changing
-    token order. Parenthesis depth suppresses statement breaks within
-    expressions, and `Buffer` materializes the final `String`.
+    Formats emitted token `List`s as C text without changing token order.
+    Parenthesis depth suppresses statement breaks within expressions, and
+    `Buffer` materializes the final `String`.
 */
 
 #pragma once

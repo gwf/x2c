@@ -102,7 +102,7 @@ Source: `src/meta-sdk/syntax.x:242`
 
 Answers `x2c_diagnostic_error_at`, declared in `lib/meta.x`.
 
-Source: `src/meta-sdk/context.x:68`
+Source: `src/meta-sdk/context.x:70`
 
 #### x2c_diagnostic_fail
 
@@ -110,7 +110,7 @@ Source: `src/meta-sdk/context.x:68`
 
 Answers `x2c_diagnostic_fail`, declared in `lib/meta.x`.
 
-Source: `src/meta-sdk/context.x:54`
+Source: `src/meta-sdk/context.x:56`
 
 #### x2c_diagnostic_fail_at
 
@@ -118,7 +118,7 @@ Source: `src/meta-sdk/context.x:54`
 
 Answers `x2c_diagnostic_fail_at`, declared in `lib/meta.x`.
 
-Source: `src/meta-sdk/context.x:60`
+Source: `src/meta-sdk/context.x:62`
 
 #### x2c_diagnostic_warn
 
@@ -127,7 +127,7 @@ Source: `src/meta-sdk/context.x:60`
 A warning reports where it is raised and returns, so a macro can keep
 expanding. Failure stays separate because it never returns.
 
-Source: `src/meta-sdk/context.x:77`
+Source: `src/meta-sdk/context.x:80`
 
 #### x2c_embed_text
 
@@ -159,7 +159,7 @@ Source: `src/meta-sdk/syntax.x:234`
 
 Answers `x2c_invocation_column`, declared in `lib/meta.x`.
 
-Source: `src/meta-sdk/context.x:50`
+Source: `src/meta-sdk/context.x:52`
 
 #### x2c_invocation_file
 
@@ -167,7 +167,7 @@ Source: `src/meta-sdk/context.x:50`
 
 Answers `x2c_invocation_file`, declared in `lib/meta.x`.
 
-Source: `src/meta-sdk/context.x:42`
+Source: `src/meta-sdk/context.x:44`
 
 #### x2c_invocation_line
 
@@ -175,7 +175,7 @@ Source: `src/meta-sdk/context.x:42`
 
 Answers `x2c_invocation_line`, declared in `lib/meta.x`.
 
-Source: `src/meta-sdk/context.x:46`
+Source: `src/meta-sdk/context.x:48`
 
 #### x2c_meta_definition_hashes
 
@@ -422,7 +422,7 @@ Source: `src/meta-sdk/primitives.x:102`
 Returns the compiler running the current compile-time call. A slot
 function compiled into the compiler reads its facts through it.
 
-Source: `src/meta-sdk/context.x:29`
+Source: `src/meta-sdk/context.x:31`
 
 ### `MetaContext`
 
@@ -434,7 +434,7 @@ Source: `src/meta-sdk/context.x:29`
 Returns the context of the running compile-time call, which an
 evaluation changes with `with` for its own extent.
 
-Source: `src/meta-sdk/context.x:25`
+Source: `src/meta-sdk/context.x:26`
 
 <a id="MetaContext.fresh_binding"></a>
 #### MetaContext.fresh_binding
@@ -464,7 +464,7 @@ Source: `src/meta-sdk/syntax.x:184`
 
 Returns the location of the active macro invocation.
 
-Source: `src/meta-sdk/context.x:35`
+Source: `src/meta-sdk/context.x:37`
 
 <a id="MetaContext.literal_list"></a>
 #### MetaContext.literal_list
@@ -485,7 +485,7 @@ Reports `message` and `notes` at the active invocation and never
 returns, so the rejected operation's caller cannot continue with a
 missing answer. With no active invocation it is a bad state.
 
-Source: `src/meta-sdk/context.x:95`
+Source: `src/meta-sdk/context.x:99`
 
 <a id="MetaContext.source_description"></a>
 #### MetaContext.source_description

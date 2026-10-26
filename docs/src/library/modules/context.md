@@ -27,7 +27,7 @@ Bounded runtime state and value export.
 
 Ends the owned lifetime when a managed local leaves its block.
 
-Source: `lib/context.x:435`
+Source: `lib/context.x:440`
 
 <a id="Context.close"></a>
 #### Context.close
@@ -40,10 +40,9 @@ The `Context` must be current; all pointers into its remaining `Scope` or
 private canonical pool become invalid.
 
 **Raises:** `<bad-state>` for a null or noncurrent `Context`, or while its
-`Match`
-cache has an active lease. The failure leaves the `Context` active.
+`Match` cache has an active lease. The failure leaves the `Context` active.
 
-Source: `lib/context.x:411`
+Source: `lib/context.x:416`
 
 <a id="Context.current"></a>
 #### Context.current
@@ -52,7 +51,7 @@ Source: `lib/context.x:411`
 
 Returns the `Context` currently active on this thread, or NULL.
 
-Source: `lib/context.x:401`
+Source: `lib/context.x:406`
 
 <a id="Context.export"></a>
 #### Context.export
@@ -76,7 +75,7 @@ rolled back.
 unsupported value without a registered exporter, or a cause from nested
 allocation, hashing, equality, or custom export.
 
-Source: `lib/context.x:67`
+Source: `lib/context.x:68`
 
 <a id="Context.open"></a>
 #### Context.open
@@ -91,7 +90,7 @@ allocations.
 Failed construction restores the parent's `Scope`, canonical pool, `Error`,
 `Match`, and current `Context` state.
 
-Source: `lib/context.x:338`
+Source: `lib/context.x:340`
 
 <a id="Context.open_isolated"></a>
 #### Context.open_isolated
@@ -105,7 +104,7 @@ Export surviving immutable values before closing the `Context`.
 Failed construction restores the parent's `Scope`, canonical pool, `Error`,
 `Match`, and current `Context` state.
 
-Source: `lib/context.x:355`
+Source: `lib/context.x:359`
 
 <a id="Context.open_isolated_named"></a>
 #### Context.open_isolated_named
@@ -120,7 +119,7 @@ The diagnostic name is copied; export survivors before closing the
 Failed construction restores the parent's `Scope`, canonical pool, `Error`,
 `Match`, and current `Context` state.
 
-Source: `lib/context.x:364`
+Source: `lib/context.x:369`
 
 <a id="Context.open_named"></a>
 #### Context.open_named
@@ -135,7 +134,7 @@ parent.
 Failed construction restores the parent's `Scope`, canonical pool, `Error`,
 `Match`, and current `Context` state.
 
-Source: `lib/context.x:347`
+Source: `lib/context.x:350`
 
 ## Advanced and interop API
 
@@ -160,7 +159,7 @@ Application code exports its value with `Context.export` instead.
 
 **Raises:** allocation and table-growth causes while recording the move.
 
-Source: `lib/context.x:305`
+Source: `lib/context.x:306`
 
 <a id="Context.owns"></a>
 #### Context.owns
@@ -174,7 +173,7 @@ allocation scheduled by `Context.move_allocation` answers zero, although
 physical ownership changes only when the enclosing root export commits.
 Scheduling a complete scope does not hide its unvisited descendants.
 
-Source: `lib/context.x:279`
+Source: `lib/context.x:280`
 
 ## Runtime-internal callables
 
@@ -201,7 +200,7 @@ Returns the borrowed `Scope` slot that receives exports from `c`.
 The slot remains valid only while the `Context`'s destination state lives;
 a null `Context` returns NULL.
 
-Source: `lib/context.x:295`
+Source: `lib/context.x:296`
 
 <a id="Context.export_nested"></a>
 #### Context.export_nested
@@ -225,7 +224,7 @@ rolled back.
 exporter, or a cause from nested allocation, hashing, equality, or custom
 export.
 
-Source: `lib/context.x:270`
+Source: `lib/context.x:271`
 
 <a id="Context.export_scope"></a>
 #### Context.export_scope
@@ -247,7 +246,7 @@ rolled back.
 exporter, or a cause from nested allocation, hashing, equality, or custom
 export.
 
-Source: `lib/context.x:88`
+Source: `lib/context.x:89`
 
 <a id="Context.initialize"></a>
 #### Context.initialize
@@ -256,7 +255,7 @@ Source: `lib/context.x:88`
 
 Registers `Context` cleanup before workers can start.
 
-Source: `lib/context.x:438`
+Source: `lib/context.x:443`
 
 <a id="Context.move_block"></a>
 #### Context.move_block
@@ -269,7 +268,7 @@ that owner. Uncovered storage moves with `Block.move_to`.
 
 **Raises:** allocation and table-growth causes while recording the move.
 
-Source: `lib/context.x:323`
+Source: `lib/context.x:324`
 
 <a id="Context.move_scope"></a>
 #### Context.move_scope
@@ -282,7 +281,7 @@ Exporters call this for grouped storage, never from channel transport.
 
 **Raises:** allocation and table-growth causes while recording the move.
 
-Source: `lib/context.x:314`
+Source: `lib/context.x:315`
 
 ## Design notes
 

@@ -236,9 +236,9 @@ module List _declaration(Compiler c, List ast) {
   match (ast) {
     case %((!or ?head declare decl) ?target
            (bindings *bound_list)): {
-      Array values = [], List new_bind = NULL;
+      Array values = [];
       foreach (Ast binding in bound_list) {
-        new_bind = binding;
+        Ast new_bind = binding;
         match (binding)
           case %(op = (bind ?var ?mods) ?rhs): {
             Type target_type = %(declare $target
@@ -327,9 +327,6 @@ module List _typed_call(
   List rest = p;
   while (rest && rest.car() != %(....)) rest = rest.cdr();
   if (rest) {
-    if (rest !== p)
-      c.report_error(<xform>, "too few arguments for List rest function",
-        NULL, NULL);
     List packed = c.pack_rest_arguments(p, a).car();
     packed = c.maybe_adapt_func_arg(packed, %("List"));
     values.push(c.convert_expression(packed, %("List")));

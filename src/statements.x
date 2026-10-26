@@ -157,9 +157,10 @@ static List _label_statement(Compiler c) {
 /* `with (place = value, ...) { ... }` expands the built-in `$x2c.with`
    decorator over its braced body at `position`. */
 static List _with_statement(Compiler c, Symbol position) {
-  if (c.peek(1) != <(>)
+  Token open = Token.skip_trivia(c.token + 1);
+  if (open.type != <(>)
     $fail.statements_with_header(c, c.token);
-  Token body = Token.skip_trivia(c.token + 1).after_group();
+  Token body = open.after_group();
   if (body.type != <"{">)
     $fail.statements_with_body(c, body);
   return c.try_parse_macro_target_at(position);
@@ -221,9 +222,10 @@ static List _do_body(Compiler c) {
    present one does. */
 static List _for_init(Compiler c) {
   c.expect(<(>);
-  List init = c.peek(0) == <;> ? NULL
-            : c.test_declaration() ? c.parse_type_operand(NULL)
-            : c.parse_expression();
+  List init = NULL;
+  if (c.peek(0) != <;>)
+    init = c.test_declaration() ? c.parse_type_operand(NULL)
+                              : c.parse_expression();
   c.expect(<;>);
   return init;
 }
@@ -413,8 +415,7 @@ static List _parse_pattern(Compiler c, List &types) {
   return pattern;
 }
 
-static void _require_list_literal(
-  Compiler c, List pattern, Token start) {
+static void _require_list_literal(Compiler c, List pattern, Token start) {
   match (pattern)
     case %(!not (expr ("List") *)):
       $fail.statements_match_pattern(c, start, pattern);
@@ -441,8 +442,7 @@ List Compiler.parse_case_body(Compiler c, List types) {
 /* A typed capture binds a Var, which a temporary in the arm scope keeps. A
    new scope then declares the capture's name with its type, read from the
    temporary; the caller closes that scope. */
-static List _typed_captures(
-  Compiler c, List types, List &temporaries) {
+static List _typed_captures(Compiler c, List types, List &temporaries) {
   Array locals = [];
   temporaries = _capture_temporaries(c, types, locals);
   c.sym.push_new_scope();
@@ -451,8 +451,7 @@ static List _typed_captures(
   return declarations;
 }
 
-static List _capture_temporaries(
-  Compiler c, List types, Array locals) {
+static List _capture_temporaries(Compiler c, List types, Array locals) {
   Array declarations = [];
   foreach (List row in types) match (row)
     case %(?name ?type): {

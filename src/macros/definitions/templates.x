@@ -47,13 +47,11 @@ static List _wrap(Definition &d) {
 /* Each nested `(macro-bind BINDER)` slot becomes its binder. A whole slot
    keeps a List shell: `expr` for an expression, `macro-bind` otherwise. */
 static List _slot_binders(List replacement) {
-  match (replacement) case %(macro-bind ?): return replacement;
-  List bindings;
-  Var expression_slot = %(
-    expr (<macro-expr>) (macro-bind ?binder)
-  );
-  if (replacement.try_match(expression_slot, bindings))
-    return replacement.search_replace(%(macro-bind ?binder), <?binder>);
+  match (replacement) {
+    case %(macro-bind ?): return replacement;
+    case %(expr (<macro-expr>) (macro-bind ?)):
+      return replacement.search_replace(%(macro-bind ?binder), <?binder>);
+  }
   return replacement.search_replace(
     %(!or
       (expr (<macro-expr>) (macro-bind ?binder))
@@ -127,7 +125,7 @@ static Map _binder_uses(List template) {
              *):
         return NULL;
     foreach (Var item in syntax)
-      if (item.is_binder()) uses[item] = uses.getdefault(item, 0) + 1;
+      if (item.is_binder()) uses[item] += 1;
   }
   return uses;
 }
@@ -173,8 +171,8 @@ static List _rebuild_keys(Definition &d, Map uses) {
 }
 
 /* Whether the template uses each hole, the target's included, at most
-   once. A leaf template applies no templates and uses each hole once, so
-   its application cannot recurse or multiply the applications its
+   once. A leaf template applies no templates and uses each hole at most
+   once, so its application cannot recurse or multiply the applications its
    arguments hold. A definition inside a template is never a leaf, because
    its template can hold the enclosing template's holes. */
 static int _uses_holes_once(Definition &d, Map uses) {
@@ -190,7 +188,6 @@ static int _uses_holes_once(Definition &d, Map uses) {
   return 1;
 }
 
-/* Makes the finished definition visible in place of its signature. */
 module List _publish(Definition &d) {
   List node = _definition_node(d);
   with (d.c.token = d.start) { _show(d, node); }
@@ -246,7 +243,6 @@ static Atom _local_binder(Var identity, int tag) {
   return Atom.intern(%"?__macro_$(tag ? "tag" : "local")_$(ordinal)");
 }
 
-/* Introduces one declaration in the current lexical scope. */
 static List _definition_local(Compiler c, String spelling, int tag) {
   Map locals = c.macro_definition_locals();
   Var order = locals[<order>];

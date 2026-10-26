@@ -128,7 +128,7 @@ for `+` beside text, text. The call is returned lowered, because an
 operator chain applies this rule once for each term and binding would
 search the whole remaining chain each time.
 
-Source: `src/linked-meta.x:586`
+Source: `src/linked-meta.x:587`
 
 #### dynamic_change
 
@@ -146,7 +146,7 @@ Source: `src/linked-meta.x:655`
 Updates a `Var` or numeric lvalue with a `Var` or numeric operand
 through the update helper of its storage.
 
-Source: `src/linked-meta.x:635`
+Source: `src/linked-meta.x:634`
 
 #### dynamic_unary
 

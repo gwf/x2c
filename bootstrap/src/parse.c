@@ -1430,7 +1430,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _579 = cons(_578, NULL);
   _580 = cons(_494, _579);
   _581 = List_var(_580);
-  _582 = int_var(64);
+  _582 = int_var(60);
   _583 = cons(_582, NULL);
   _584 = cons(_500, _583);
   _585 = List_var(_584);
@@ -1440,7 +1440,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _589 = List_var(_588);
   _590 = cons(_510, _507);
   _591 = List_var(_590);
-  _592 = int_var(90211);
+  _592 = int_var(90180);
   _593 = cons(_592, NULL);
   _594 = cons(_515, _593);
   _595 = List_var(_594);
@@ -2051,11 +2051,11 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_2(void)
   _1197 = cons(_1196, NULL);
   _1198 = cons(_487, _1197);
   _1199 = List_var(_1198);
-  _1200 = int_var(74);
+  _1200 = int_var(72);
   _1201 = cons(_1200, NULL);
   _1202 = cons(_500, _1201);
   _1203 = List_var(_1202);
-  _1204 = int_var(2157);
+  _1204 = int_var(2148);
   _1205 = cons(_1204, NULL);
   _1206 = cons(_515, _1205);
   _1207 = List_var(_1206);
@@ -2133,11 +2133,11 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_2(void)
   _1279 = cons(_1278, NULL);
   _1280 = cons(_487, _1279);
   _1281 = List_var(_1280);
-  _1282 = int_var(75);
+  _1282 = int_var(73);
   _1283 = cons(_1282, NULL);
   _1284 = cons(_500, _1283);
   _1285 = List_var(_1284);
-  _1286 = int_var(2196);
+  _1286 = int_var(2187);
   _1287 = cons(_1286, NULL);
   _1288 = cons(_515, _1287);
   _1289 = List_var(_1288);
@@ -2210,7 +2210,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_2(void)
   _1356 = cons(_1355, NULL);
   _1357 = cons(_500, _1356);
   _1358 = List_var(_1357);
-  _1359 = int_var(3042);
+  _1359 = int_var(3033);
   _1360 = cons(_1359, NULL);
   _1361 = cons(_515, _1360);
   _1362 = List_var(_1361);
@@ -2267,11 +2267,11 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_2(void)
   _1413 = cons(_1412, NULL);
   _1414 = cons(_487, _1413);
   _1415 = List_var(_1414);
-  _1416 = int_var(36);
+  _1416 = int_var(35);
   _1417 = cons(_1416, NULL);
   _1418 = cons(_500, _1417);
   _1419 = List_var(_1418);
-  _1420 = int_var(1157);
+  _1420 = int_var(1153);
   _1421 = cons(_1420, NULL);
   _1422 = cons(_515, _1421);
   _1423 = List_var(_1422);
@@ -2368,11 +2368,11 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_2(void)
   _1514 = cons(_1513, NULL);
   _1515 = cons(_487, _1514);
   _1516 = List_var(_1515);
-  _1517 = int_var(57);
+  _1517 = int_var(55);
   _1518 = cons(_1517, NULL);
   _1519 = cons(_500, _1518);
   _1520 = List_var(_1519);
-  _1521 = int_var(1626);
+  _1521 = int_var(1618);
   _1522 = cons(_1521, NULL);
   _1523 = cons(_515, _1522);
   _1524 = List_var(_1523);
@@ -2443,11 +2443,11 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_3(void)
   _1586 = cons(_1585, NULL);
   _1587 = cons(_487, _1586);
   _1588 = List_var(_1587);
-  _1589 = int_var(52);
+  _1589 = int_var(50);
   _1590 = cons(_1589, NULL);
   _1591 = cons(_500, _1590);
   _1592 = List_var(_1591);
-  _1593 = int_var(1502);
+  _1593 = int_var(1494);
   _1594 = cons(_1593, NULL);
   _1595 = cons(_515, _1594);
   _1596 = List_var(_1595);
@@ -2541,11 +2541,11 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_3(void)
   _1684 = cons(_1683, NULL);
   _1685 = cons(_487, _1684);
   _1686 = List_var(_1685);
-  _1687 = int_var(69);
+  _1687 = int_var(67);
   _1688 = cons(_1687, NULL);
   _1689 = cons(_500, _1688);
   _1690 = List_var(_1689);
-  _1691 = int_var(2013);
+  _1691 = int_var(2004);
   _1692 = cons(_1691, NULL);
   _1693 = cons(_515, _1692);
   _1694 = List_var(_1693);
@@ -2637,11 +2637,11 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_3(void)
   _1780 = cons(_1779, NULL);
   _1781 = cons(_487, _1780);
   _1782 = List_var(_1781);
-  _1783 = int_var(41);
+  _1783 = int_var(40);
   _1784 = cons(_1783, NULL);
   _1785 = cons(_500, _1784);
   _1786 = List_var(_1785);
-  _1787 = int_var(1246);
+  _1787 = int_var(1242);
   _1788 = cons(_1787, NULL);
   _1789 = cons(_515, _1788);
   _1790 = List_var(_1789);
@@ -2738,11 +2738,11 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_3(void)
   _1881 = cons(_1880, NULL);
   _1882 = cons(_487, _1881);
   _1883 = List_var(_1882);
-  _1884 = int_var(46);
+  _1884 = int_var(45);
   _1885 = cons(_1884, NULL);
   _1886 = cons(_500, _1885);
   _1887 = List_var(_1886);
-  _1888 = int_var(1362);
+  _1888 = int_var(1358);
   _1889 = cons(_1888, NULL);
   _1890 = cons(_515, _1889);
   _1891 = List_var(_1890);
@@ -2864,11 +2864,11 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_3(void)
   _2007 = cons(_2006, NULL);
   _2008 = cons(_487, _2007);
   _2009 = List_var(_2008);
-  _2010 = int_var(63);
+  _2010 = int_var(61);
   _2011 = cons(_2010, NULL);
   _2012 = cons(_500, _2011);
   _2013 = List_var(_2012);
-  _2014 = int_var(1843);
+  _2014 = int_var(1835);
   _2015 = cons(_2014, NULL);
   _2016 = cons(_515, _2015);
   _2017 = List_var(_2016);
@@ -3049,11 +3049,11 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_4(void)
   _2189 = cons(_2188, NULL);
   _2190 = cons(_487, _2189);
   _2191 = List_var(_2190);
-  _2192 = int_var(31);
+  _2192 = int_var(30);
   _2193 = cons(_2192, NULL);
   _2194 = cons(_500, _2193);
   _2195 = List_var(_2194);
-  _2196 = int_var(1004);
+  _2196 = int_var(1000);
   _2197 = cons(_2196, NULL);
   _2198 = cons(_515, _2197);
   _2199 = List_var(_2198);
@@ -3261,7 +3261,7 @@ List Compiler_parse_top_level_mode(Compiler c, int skip_body){
 static int f5_units____static_interface_form(Compiler c){
   if(Compiler_peek(c, 0) != 1317118534) return 0;
   Token next = Token_skip_trivia(c -> token + 1);
-  return Compiler_peek(c, 1) == 44661285196 || Compiler_peek(c, 1) == 1139215899608 || String_equal(next -> text, _1);
+  return next -> type == 44661285196 || next -> type == 1139215899608 || String_equal(next -> text, _1);
 }
 
 List Sym_get(Sym, List);
@@ -4957,7 +4957,7 @@ static int _prefix_macro_words(Compiler c, int rank, Array words){
 }
 
 static int f5_types____unseen_prefix(Compiler c){
-  Symbol next = Compiler_peek(c, 1);  return c -> shallow && String_endswith(c -> filename, _193) &&(Symbol_is_builtin_type(next) || Symbol_is_type_modifier(next) || Symbol_is_type_qualifier(next) || Symbol_is_storage_class(next) || Symbol_is_inline(next));
+  if(! c -> shallow || ! String_endswith(c -> filename, _193)) return 0;  Symbol next = Compiler_peek(c, 1);  return Symbol_is_builtin_type(next) || Symbol_is_type_modifier(next) || Symbol_is_type_qualifier(next) || Symbol_is_storage_class(next) || Symbol_is_inline(next);
 }
 
 static List _type_qualifiers(Compiler c){
@@ -5306,7 +5306,7 @@ static List _publish_enumerator(Compiler c, List input, Type context, Token orig
     }
 
   }
-  name = Compiler_evaluate_macro_slot(c, name);  String exact = _syntax_exact_name(name);  List binding = String_truth(exact) ? NULL : Var_is_row(name, 9, 7, 4) ? Var_list(name) : NULL;  String spelling = String_truth(exact) ? exact : Ast_binding_spelling(binding);  if(! String_truth(spelling)) Compiler_report_error(c, 33658058, _268, origin, NULL);  List key = cons(String_var(spelling), NULL);  if(String_truth(exact)) key = Sym_declared_key(c -> sym, NULL, key, Type_list(context));  Symbol prior = Sym_enumerator_owner(c -> sym, key);  if(prior && List_truth(binding)){
+  name = Compiler_evaluate_macro_slot(c, name);  String exact = _syntax_exact_name(name);  List binding = ! String_truth(exact) && Var_is_row(name, 9, 7, 4) ? Var_list(name) : NULL;  String spelling = String_truth(exact) ? exact : Ast_binding_spelling(binding);  if(! String_truth(spelling)) Compiler_report_error(c, 33658058, _268, origin, NULL);  List key = cons(String_var(spelling), NULL);  if(String_truth(exact)) key = Sym_declared_key(c -> sym, NULL, key, Type_list(context));  Symbol prior = Sym_enumerator_owner(c -> sym, key);  if(prior && List_truth(binding)){
     List existing = Sym_lookup(c -> sym, key, NULL);  if(List_truth(existing) && List_equal(existing, binding)) return input;
   }
   if(prior) Compiler_report_error(c, 33658058, String_join(NULL, cons(String_var(_269), cons(String_var(spelling), cons(String_var(_270), NULL)))), origin, cons(String_var(String_join(NULL, cons(String_var(_271), cons(String_var(spelling), cons(String_var(_272), NULL))))), NULL));  if(String_truth(exact)) binding = Sym_declare(c -> sym, NULL, cons(String_var(exact), NULL), Type_list(context));  else Sym_bind_identity(c -> sym, NULL, binding, Type_declaration_ast(context, binding));  Sym_declare_enumerator(c -> sym, key, 384101446165476);  return List_truth(initializer) ? cons(_170, cons(_171, cons(List_var(binding), cons(List_var(initializer), NULL)))) : binding;
@@ -5536,7 +5536,7 @@ static List f11_declarators____initialized(Compiler c, List type, List bind, Tok
 }
 
 static List _declarator(Compiler c, List type, List context, List * method_identity_out, Token * source_first, Token * source_after){
-  List ptr = _pointer(c), method_identity = NULL;  List key, infix;  List _x2c_gensym_destructure_5 = List_cdr(f11_declarators____direct_declarator(c, List_type(context), &(method_identity), &((* source_first)), &((* source_after))));  key = Var_list_payload(List_getindex(_x2c_gensym_destructure_5, 0));  infix = Var_list_payload(List_getindex(_x2c_gensym_destructure_5, 1));  List sfx = f11_declarators____declarator_suffix(c, c -> load_source && ! List_truth(c -> return_type) && List_equal(key, _632));  List modifiers = List_append(infix, List_append(sfx, List_append(ptr, NULL)));  List ast = List_append(modifiers, type);  List binding = key;  Compiler_bind_template_local(c, key, ast, context); (* method_identity_out) = method_identity;  return cons(_40, cons(List_var(binding), cons(List_var(modifiers), NULL)));
+  List ptr = _pointer(c), method_identity = NULL;  List key, infix;  List _x2c_gensym_destructure_5 = List_cdr(f11_declarators____direct_declarator(c, List_type(context), &(method_identity), &((* source_first)), &((* source_after))));  key = Var_list_payload(List_getindex(_x2c_gensym_destructure_5, 0));  infix = Var_list_payload(List_getindex(_x2c_gensym_destructure_5, 1));  List sfx = f11_declarators____declarator_suffix(c, c -> load_source && ! List_truth(c -> return_type) && List_equal(key, _632));  List modifiers = List_append(infix, List_append(sfx, List_append(ptr, NULL)));  List ast = List_append(modifiers, type);  Compiler_bind_template_local(c, key, ast, context); (* method_identity_out) = method_identity;  return cons(_40, cons(List_var(key), cons(List_var(modifiers), NULL)));
 }
 
 static List _pointer(Compiler c){
@@ -5544,7 +5544,7 @@ static List _pointer(Compiler c){
     Symbol symbol = Compiler_peek(c, 0);  if(symbol == 54 || symbol == 189 || symbol == 77 || Symbol_is_type_qualifier(symbol)){
       Compiler_next(c);  int optional = symbol == 77 && Compiler_peek(c, 0) == 58;  ptr = cons(Symbol_var(optional ? 33330008396 : symbol), ptr);  if(optional) Compiler_next(c);  continue;
     }
-    if(Compiler_peek(c, 0) != 19147688 || !(Map_contains(c -> object_macros, String_var(c -> token -> text)))) return ptr;  Array quals = Array_new();  const Array _x2c_gensym_macro_acquired_3 = quals; {
+    if(symbol != 19147688 || !(Map_contains(c -> object_macros, String_var(c -> token -> text)))) return ptr;  Array quals = Array_new();  const Array _x2c_gensym_macro_acquired_3 = quals; {
       _x2c_gensym_defer_env_16 _x2c_gensym_macro_environment_16 ={
         0
       }

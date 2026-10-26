@@ -108,7 +108,7 @@ Source: `src/regions/runtime.x:187`
 ## Design notes
 
 A region is an `auto` block, a `Scope.retain` and `Scope.release`
-pair, a `auto (&slot)` push, a `Pool.open` bracket, an initializer `auto`
+pair, an `auto (&slot)` push, a `Pool.open` bracket, an initializer `auto`
 local, a Scope local that `Scope.destroy` ends, or the function's own
 storage, which an address taken with `&` borrows. The pass reads the
 typed forms the parser produced, before the transform driver rewrites

@@ -170,8 +170,6 @@ static int _parallel_park(Thread thread);
 
 static Thread _parallel_wait(struct ParallelRun * run);
 
-static Var _parallel_result(Thread worker);
-
 static void _parallel_assign(Thread worker, Var input);
 
 static void _parallel_stop(struct ParallelRun * run, Array workers);
@@ -1398,7 +1396,7 @@ Var ParallelMap_foldl(ParallelMap map, Var seed, Func accumulate){
       int active = Array_len(workers);
       while(active){
         Thread worker = _parallel_wait(run);
-        Var item = _parallel_result(worker);
+        Var item = _read_result(worker);
         active --;
         if(Var_is_void(item)){
           static const X2CErrorSite _x2c_gensym_error_site_17 = {.file = "../../lib/thread.x",.function = "ParallelMap_foldl",.line = 726,.runtime = 1};
@@ -1463,11 +1461,6 @@ static Thread _parallel_wait(struct ParallelRun * run){
   x2c_thread_wait_unlock();
   if(! ready) x2c_thread_cancel();
   return ready;
-}
-
-static Var _parallel_result(Thread worker){
-  if(! Var_is_void(worker -> errors)) return _read_result(worker);
-  return worker -> result;
 }
 
 static void _parallel_assign(Thread worker, Var input){

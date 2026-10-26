@@ -97,7 +97,6 @@ void x2c_initialize_command_environment(
   _initialize_environment(argv0, embedded_identity);
 }
 
-/* Initializes ordinary and external command paths with the chosen identity. */
 static void _initialize_environment(
   const char *argv0, String embedded_identity) {
   if (root_path) return;
@@ -157,7 +156,6 @@ static int _is_home(Path p) =>
   p.join("include").is_dir() && p.join("etc/compiler-prelude.x").is_file();
 
 static void _prepare_include_dirs(void) {
-  if (!root_path) return;
   String include_dir = %"$root_path/include/x2c";
   String src_dir = %"$root_path/src", lib_dir = %"$root_path/lib";
   default_includes = cons(include_dir, NULL);
@@ -172,8 +170,6 @@ static void _prepare_include_dirs(void) {
 void x2c_set_root(String root) {
   root_path = Path.absolute(root);
   root_found = 1;
-  default_includes = NULL;
-  cpp_includes = NULL;
   _prepare_include_dirs();
 }
 
@@ -306,8 +302,9 @@ String Env.find_program(String name) {
 
 // source files and packages
 
-/** Reports whether `path` is x2c source: a `.x` or `.xp` file, or a file
-    of any other name whose first line is a shebang, which is a script.
+/** Reports whether `path` is x2c source: a `.x` or `.xp` file, or a script
+    that starts with a shebang. Files ending in `.c`, `.h`, `.o`, or `.a`
+    are excluded even when they start with a shebang.
 */
 int Path.is_x2c_source(String path) {
   if (path.endswith(".x") || path.endswith(".xp")) return 1;

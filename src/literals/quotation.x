@@ -2,7 +2,7 @@
 
 static keyword loop $private.loop;
 
-/* literals diagnostics. */
+// diagnostics
 
 static macro Stmt $fail.literals_macro_pattern_static(
   Expr $c, Expr $origin) =>
@@ -285,7 +285,8 @@ module List _parse_literal_element(Compiler c) {
 
 /** Conses the element expression `head` onto the cells `tail`, or appends
     the List a `(splice EXPR)` head holds, and folds the cell into the
-    literal cache when both parts are constant. */
+    literal cache when both parts are constant.
+*/
 List Compiler.literal_cell(Compiler c, List head, List tail) {
   match (head)
     case %(!or (splice ?sexpr) (expr ("List") (splice ?sexpr))):
@@ -348,14 +349,13 @@ static List _parse_typed_capture(Compiler c) {
 /* An arm records a binder once for each Var tag and declared type. */
 static int _recorded(
   Compiler c, String name, Type type, List tag, Token origin) {
-  int repeated = 0;
   foreach (List previous in c.match_types) match (previous)
     case %(?previous_name ?previous_type):
       if (previous_name == name &&
           c.var_tag_expression(previous_type, origin) == tag &&
           c.sym.normalize_declared_type(previous_type) ==
-          c.sym.normalize_declared_type(type)) repeated = 1;
-  return repeated;
+          c.sym.normalize_declared_type(type)) return 1;
+  return 0;
 }
 
 /* `(!is ?binder type TAG)`, or `(!is type TAG)` without a binder. */

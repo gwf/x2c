@@ -44,7 +44,7 @@ Protocols from declaration to conform forms.
 Returns the interface rows of the resolved conformances `adoptions`
 declare.
 
-Source: `src/protocol/resolution.x:209`
+Source: `src/protocol/resolution.x:210`
 
 <a id="Compiler.discard_helper"></a>
 #### Compiler.discard_helper
@@ -95,11 +95,11 @@ Inserts native aliases and presents other resolved conformances as
 public or private boundary. Each other conformance whose forward converter
 the unit defines goes to the rule on the `conform` head, which
 `src/components/protocol-adapters.x` registers to write its adapters into
-the unit's
-pending support. The external conformances the unit declares are first
-recorded in its interface. Returns `ast` with native insertions applied.
+the unit's pending support. The external conformances the unit declares
+are first recorded in its interface. Returns `ast` with native insertions
+applied.
 
-Source: `src/protocol/adapters.x:111`
+Source: `src/protocol/adapters.x:113`
 
 <a id="Compiler.install_generated_protocol_symbols"></a>
 #### Compiler.install_generated_protocol_symbols
@@ -109,7 +109,7 @@ Source: `src/protocol/adapters.x:111`
 Publishes external native alias and ordinary adapter signatures.
 Protocols must already be resolved in the active symbol table.
 
-Source: `src/protocol/adapters.x:150`
+Source: `src/protocol/adapters.x:152`
 
 <a id="Compiler.native_protocol_alias"></a>
 #### Compiler.native_protocol_alias
@@ -119,7 +119,7 @@ Source: `src/protocol/adapters.x:150`
 Reports whether a generated member names a native protocol host function.
 Its defining header supplies the alias instead of a C prototype.
 
-Source: `src/protocol/adapters.x:191`
+Source: `src/protocol/adapters.x:193`
 
 <a id="Compiler.parse_protocol_declaration"></a>
 #### Compiler.parse_protocol_declaration
@@ -227,7 +227,7 @@ Source: `src/protocol/registry.x:505`
 Remembers a source typedef's declaration and visibility, which native
 alias insertion reads for its participant.
 
-Source: `src/protocol/adapters.x:372`
+Source: `src/protocol/adapters.x:373`
 
 <a id="Compiler.resolve_as_declared"></a>
 #### Compiler.resolve_as_declared
@@ -239,7 +239,7 @@ parse resolves its own: before the parse, and again, after the
 generated members are published, where the parse publishes each one.
 Their declaring units report their failures, so nothing is reported.
 
-Source: `src/protocol/resolution.x:225`
+Source: `src/protocol/resolution.x:226`
 
 <a id="Compiler.resolve_protocol_member"></a>
 #### Compiler.resolve_protocol_member
@@ -300,7 +300,7 @@ declarations, keeps their rows in per-unit registries, resolves each
 adoption into a conformance, answers member and operator lookups, and
 presents each conformance as native aliases or a `conform` form, from which
 `src/components/protocol-adapters.x` writes the adapters. Registries are
-rebuilt per
-translation unit; a static row is visible only in the unit of its canonical
-source path. The unit that declares an external adoption resolves it and
-records the conformance in its interface, which an including unit reuses.
+rebuilt per translation unit; a static row is visible only in the unit of
+its canonical source path. The unit that declares an external adoption
+resolves it and records the conformance in its interface, which an
+including unit reuses.

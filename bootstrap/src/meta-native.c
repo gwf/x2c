@@ -4886,9 +4886,10 @@ int Type_is_function(Type);
 void Compiler_record_native_meta_effect(Compiler c, List declaration, Token marker){
   if(! _init_guard_) _file_init_();
   if(c -> source_private < 0) return;
-  if(! Type_is_function(List_type_from_ast(declaration))) return;
+  Type type = List_type_from_ast(declaration);
+  if(! Type_is_function(type)) return;
   String path = Compiler_portable_path(Path_resolved_absolute(c -> filename));
-  Type type = Type_canonicalize(List_type_from_ast(declaration));
+  type = Type_canonicalize(type);
   if(Type_is_static(type)) return;
   String name = _native_meta_name(c, declaration, marker);
   if(Map_contains(Sym_file_statics(c -> sym), List_var(cons(_1712, cons(String_var(name), NULL))))) return;
@@ -5074,9 +5075,10 @@ int Compiler_native_meta_accepts(Compiler c, Var function, List signature){
           {
             List parameters = Var_list_payload(_x2c_gensym_match_value_4);
             {
+              if(List_equal(target, f8_bindings____native_signature_type(c, signature))) return 1;
               List boxed =({ static MatchCaptureSite _x2c_gensym_match_site_0;
               x2c_match_site_search_replace(& _x2c_gensym_match_site_0, parameters, List_var(_641), List_var(_12)); });
-              return List_equal(target, f8_bindings____native_signature_type(c, signature)) || List_equal(target, f8_bindings____native_signature_type(c, ({
+              return List_equal(target, f8_bindings____native_signature_type(c, ({
                 Var _x2c_gensym_literal_part_26 = List_var(cons(_0, cons(List_var(boxed), NULL)));  cons(_x2c_gensym_literal_part_26, List_append(result, NULL));
               }
               )));

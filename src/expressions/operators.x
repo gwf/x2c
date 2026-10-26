@@ -1,6 +1,5 @@
 /*  operators.x -- operator types and protocol operations */
 
-
 // operators
 
 module List _unary(Resolve &r, Var operator, List operand) {
@@ -47,13 +46,11 @@ module List _postfix(Resolve &r, Var operator, List operand) {
   if (operand_type.car() == <opt-ref>)
     $fail.expressions_optional_ref_unchecked(r.c, r.origin);
   if (operand_type === %(<macro-expr>))
-    return source_postfix_expression(
-      %(<macro-expr>), $(operator, operand));
+    return source_postfix_expression(%(<macro-expr>), $(operator, operand));
   if (r.c.sym.is_var_type(operand_type))
     _check_dynamic_target(r.c, operand, r.origin);
   if (_builtin_index_lvalue(r.c, operand)) operand_type = %("Var");
-  return source_postfix_expression(
-    operand_type, $(operator, operand));
+  return source_postfix_expression(operand_type, $(operator, operand));
 }
 
 module List _conditional(
@@ -67,8 +64,8 @@ module List _conditional(
       false_type === %(<macro-expr>))
     return source_operator_expression(
       %(<macro-expr>), $(operator, condition, ontrue, onfalse));
-  /* Arms of one declared type keep it, so a `Symbol` conditional stays a
-     `Symbol` rather than the integer that represents it. */
+  /* Arms of one declared type keep it. A `Symbol` conditional therefore
+     retains `Symbol` as its type. */
   Type type = true_type;
   if (true_type.declared() != false_type.declared()) {
     Type left = r.c.sym.resolve_numeric_type(type);
@@ -212,8 +209,7 @@ static List _native_binary_expression(
 
 // operator result types
 
-static List _binary_op_type(
-  Compiler c, Symbol op, List lhs, List rhs) {
+static List _binary_op_type(Compiler c, Symbol op, List lhs, List rhs) {
   _check_optional_operands(c, op, lhs, rhs);
   if (op == <in>) return NULL;
   if (_is_comparison(op)) return %(int);
@@ -279,7 +275,7 @@ static List _binary_op_type_addsub(
     else if (op == <+> && rpointer) return rtype;
   }
   else if (c.sym.resolve_key(ltype).is_pointer()) {
-    if (rscalar)        return ltype;
+    if (rscalar) return ltype;
     else if (rpointer) return op == <-> ? %("ptrdiff_t") : %(int);
   }
   return NULL;
@@ -327,8 +323,7 @@ static List _protocol_operator_expression(
     if (!member) member = c.derived_member(op);
     Type participant = lhs.cadr();
     participant = participant.canonicalize();
-    List helper = c.protocol_discard_helper(
-      participant, member, which);
+    List helper = c.protocol_discard_helper(participant, member, which);
     if (helper) (binding, signature) = helper;
   }
   Macro called = $called;
@@ -412,8 +407,8 @@ static Type _converted_participant(
 
 /* Two different typedef names that share an ancestor meet at the nearest
    one that has `member`, so an alias of `String` compares with a `String`,
-   or with another alias, through `String.equal` rather than as the pointers
-   C sees. */
+   or with another alias, through `String.equal`. C would otherwise compare
+   their pointers. */
 static Type _shared_participant(
   Compiler c, Type lhs_type, Type rhs_type, Symbol member) {
   if (!lhs_type.is_bare_typedef_name() || !rhs_type.is_bare_typedef_name())

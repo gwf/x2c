@@ -1,6 +1,3 @@
-#pragma once
-#include "compiler-meta.x"
-
 /*  var-tags.x -- the Var tag ledger and its projections
 
     Each row gives a tag's dense ID, coarse kind, and encoding fields. The
@@ -14,6 +11,9 @@
     table, and the `TagId` check; src/type-ledger.x projects the type lookup
     and the constant rows.
 */
+
+#pragma once
+#include "compiler-meta.x"
 
 meta List _tag_groups(void) => %(
   (
@@ -162,7 +162,7 @@ meta int _tag_rank(List row)     => row[7];
 meta int _tag_floating(List row) => _tag_kind(row) == <floating>;
 meta int _tag_unsigned(List row) => row[0].str().startswith("u");
 
-/* --- the tag table and tag sets ----------------------------------------- */
+// tag table and tag sets
 
 meta List _tag_info_row(List row) => $!( {
   $(row[0]), $(_tag_kind(row)), $(_tag_top(row)), $(_tag_middle(row)),
@@ -189,7 +189,7 @@ meta List _tag_names(void) {
   return names;
 }
 
-/* --- the numeric table --------------------------------------------------- */
+// numeric table
 
 meta List _tag_numeric_rows(void) {
   Array rows = [];
@@ -229,7 +229,7 @@ meta List _tag_numeric_table(void) {
   return $!( { @(cells.list_free()) } );
 }
 
-/* --- the built-in decoder ------------------------------------------------ */
+// built-in decoder
 
 /* `f64`, `symbol` and `void` are answered before the switch is reached. */
 meta int _tag_decode_row(List row) {
@@ -243,7 +243,7 @@ meta List _tag_decode_rows(void) {
   return rows;
 }
 
-/* --- the rows a statically known tag is tested with ---------------------- */
+// constant tag rows
 
 /* A group of one is selected by its top alone; the decoder narrows a group
    of two or four to the low bit or two of the bottom field. */
@@ -303,7 +303,7 @@ meta List _tag_constant_rows(void) {
   return entries;
 }
 
-/* --- the decoder table -------------------------------------------------- */
+// decoder table
 
 /* The top a table slot resolves. `var.x` rotates the 16-bit top left one
    bit, so the even slots are tops 0x0000-0x000F and the odd slots are tops
@@ -337,7 +337,7 @@ meta List _tag_decode_groups(void) {
   return $!( { @(groups.list_free()) } );
 }
 
-/* --- the enum check ----------------------------------------------------- */
+// enum check
 
 /* `TagId` is written out in `lib/var/var.x`; each row asserts that its ID
    has the row's ledger position. */
@@ -356,7 +356,7 @@ meta List _tag_id_checks(void) {
   return checks;
 }
 
-/* --- the type lookup ----------------------------------------------------- */
+// type lookup
 
 /* Type's tag lookup: each `(TYPE TAG)` of `native`, then every boxed row
    as its capitalized source type name and a pointer to it, such as
@@ -376,7 +376,7 @@ meta Map _tag_types(List native) {
   return types;
 }
 
-/* --- what the consuming units write -------------------------------------- */
+// consumer projections
 
 macro Expression $var.tag.info() => $_tag_info();
 

@@ -899,7 +899,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _526 = cons(_522, _525);
   _527 = List_var(_526);
   _528 = Symbol_var(805770);
-  _529 = int_var(489);
+  _529 = int_var(479);
   _530 = cons(_529, NULL);
   _531 = cons(_528, _530);
   _532 = List_var(_531);
@@ -913,7 +913,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _540 = cons(_538, _539);
   _541 = List_var(_540);
   _542 = Symbol_var(1133019155420);
-  _543 = int_var(20124);
+  _543 = int_var(19767);
   _544 = cons(_543, NULL);
   _545 = cons(_542, _544);
   _546 = List_var(_545);
@@ -1261,7 +1261,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _888 = cons(_887, NULL);
   _889 = cons(_522, _888);
   _890 = List_var(_889);
-  _891 = int_var(36);
+  _891 = int_var(35);
   _892 = cons(_891, NULL);
   _893 = cons(_528, _892);
   _894 = List_var(_893);
@@ -1271,7 +1271,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _898 = cons(_897, NULL);
   _899 = cons(_538, _898);
   _900 = List_var(_899);
-  _901 = int_var(1157);
+  _901 = int_var(1153);
   _902 = cons(_901, NULL);
   _903 = cons(_542, _902);
   _904 = List_var(_903);
@@ -1329,7 +1329,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _956 = cons(_1, _815);
   _957 = List_var(_956);
   _958 = Symbol_var(106239471489226);
-  _959 = int_var(1274);
+  _959 = int_var(1264);
   _960 = String_new("");
   _961 = String_var(_960);
   _962 = Symbol_var(13528008);
@@ -1337,7 +1337,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _964 = List_var(_814);
   _965 = cons(_567, _814);
   _966 = List_var(_965);
-  _967 = int_var(1281);
+  _967 = int_var(1271);
 }
 
 static Array f9_transfers____expression_blocks(List expression){
@@ -1918,10 +1918,7 @@ static List f9_transfers____rewrite_switch(f9_transfers___Walk * w, List subject
 }
 
 static List f9_transfers____case_label(f9_transfers___Walk * w, List label){
-  for(int i =(* w).switch_stop;  i <(int) Array_len((* w).regions);  i ++) if(Var_truth(List_car(Var_list(Array_getindex((* w).regions, i))))){
-    f9_transfers____report_at(&((* w)), (* w).origin, _141, _144);  break;
-  }
-  return f9_transfers____rewrite_children(&((* w)), label);
+  for(int i =(* w).switch_stop;  i <(int) Array_len((* w).regions);  i ++) if(Var_truth(List_car(Var_list(Array_getindex((* w).regions, i))))) f9_transfers____report_at(&((* w)), (* w).origin, _141, _144);  return f9_transfers____rewrite_children(&((* w)), label);
 }
 
 static Var f9_transfers____bounded(f9_transfers___Walk * w, Var body, int is_loop){
@@ -1963,13 +1960,7 @@ static List f9_transfers____unwind(f9_transfers___Walk * w, int stop){
 }
 
 static int f9_transfers____goto_stop(f9_transfers___Walk * w, Var label){
-  String name = f9_transfers____label_spelling(label);  Var stored;  if(! String_truth(name) || ! Map_try_get((* w).labels, String_var(name), &(stored))){
-    f9_transfers____report_at(&((* w)), (* w).origin, _145, NULL);  return(int) Array_len((* w).regions);
-  }
-  List target = Var_list_payload(stored), source = f9_transfers____region_path(&((* w)));  int source_depth = List_len(source), target_depth = List_len(target);  List suffix = source;  for(int i = source_depth;  i > target_depth && List_truth(suffix);  i --) suffix = List_cdr(suffix);  if(target_depth > source_depth || suffix != target){
-    f9_transfers____report_at(&((* w)), (* w).origin, _146, _149);  return(int) Array_len((* w).regions);
-  }
-  return target_depth;
+  String name = f9_transfers____label_spelling(label);  Var stored;  if(! String_truth(name) || ! Map_try_get((* w).labels, String_var(name), &(stored))) f9_transfers____report_at(&((* w)), (* w).origin, _145, NULL);  List target = Var_list_payload(stored), source = f9_transfers____region_path(&((* w)));  int source_depth = List_len(source), target_depth = List_len(target);  List suffix = source;  for(int i = source_depth;  i > target_depth && List_truth(suffix);  i --) suffix = List_cdr(suffix);  if(target_depth > source_depth || suffix != target) f9_transfers____report_at(&((* w)), (* w).origin, _146, _149);  return target_depth;
 }
 
 static List f9_transfers____region_path(f9_transfers___Walk * w){

@@ -484,8 +484,9 @@ static List _label_statement(Compiler c){
 void Compiler_report_error(Compiler, Symbol, String, Token, List);
 
 static List _with_statement(Compiler c, Symbol position){
-  if(Compiler_peek(c, 1) != 81) Compiler_report_error(c, 33658058, _57, c -> token, _60);
-  Token body = Token_after_group(Token_skip_trivia(c -> token + 1));
+  Token open = Token_skip_trivia(c -> token + 1);
+  if(open -> type != 81) Compiler_report_error(c, 33658058, _57, c -> token, _60);
+  Token body = Token_after_group(open);
   if(body -> type != 247) Compiler_report_error(c, 33658058, _61, body, NULL);
   return Compiler_try_parse_macro_target_at(c, position);
 }
@@ -537,7 +538,8 @@ static List _do_body(Compiler c){
 
 static List _for_init(Compiler c){
   Compiler_expect(c, 81);
-  List init = Compiler_peek(c, 0) == 119 ? NULL : Compiler_test_declaration(c) ? Compiler_parse_type_operand(c, NULL) : Compiler_parse_expression(c);
+  List init = NULL;
+  if(Compiler_peek(c, 0) != 119) init = Compiler_test_declaration(c) ? Compiler_parse_type_operand(c, NULL) : Compiler_parse_expression(c);
   Compiler_expect(c, 119);
   return init;
 }

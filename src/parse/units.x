@@ -62,7 +62,7 @@ List Compiler.parse_top_level_mode(Compiler c, int skip_body) {
 static int _static_interface_form(Compiler c) {
   if (c.peek(0) != <static>) return 0;
   Token next = Token.skip_trivia(c.token + 1);
-  return c.peek(1) == <typedef> || c.peek(1) == <protocol> ||
+  return next.type == <typedef> || next.type == <protocol> ||
          next.text == "class";
 }
 
@@ -406,8 +406,7 @@ static List _import_members(Compiler c, String name) {
 /* A declaration ends at `;`. A `meta` one installs its compile-time form
    and publishes its prose; an ordinary function prototype keeps its name
    callable at run time. */
-static List _declared(
-  Compiler c, List decl, Token meta, Token first) {
+static List _declared(Compiler c, List decl, Token meta, Token first) {
   _record_meta_hash(c, decl, first, 0);
   if (meta && decl.type_from_ast().is_function())
     c.install_native_meta_function(decl, meta);
@@ -508,8 +507,7 @@ static void _store_collected_meta(
   _store_meta_hash(c, name, void, first);
 }
 
-static void _store_meta_hash(
-  Compiler c, String name, Var body, Token first) {
+static void _store_meta_hash(Compiler c, String name, Var body, Token first) {
   if (!name) return;
   uint64_t hash = FNV_OFFSET_BASIS;
   for (Token token = first; token < c.token; token++)
@@ -605,8 +603,7 @@ String Compiler.definition_doc(Compiler c, Token start) {
 
 /* A definition an API source form wraps keeps its line and doc comment,
    or those of the invocation that expands it. */
-module List _bind_api_source(
-  Compiler c, Var line, Var doc, Var syntax) {
+module List _bind_api_source(Compiler c, Var line, Var doc, Var syntax) {
   List bound = c.bind_syntax(syntax, <unit>, c.return_type);
   Token invocation = c.macro_stack ? c.macro_stack.last().list()[3] : NULL;
   String invocation_doc = invocation ? c.definition_doc(invocation) : NULL;
@@ -708,8 +705,7 @@ module List _bind_recipe(
 
 /* Collection keeps a declaration recipe pending with the macro stack that
    constructed it; the full parse evaluates it. */
-module List _bind_decl_recipe(
-  Compiler c, Var callback, Var arguments) {
+module List _bind_decl_recipe(Compiler c, Var callback, Var arguments) {
   if (c.shallow)
     return %(declaration-pending $callback $arguments
               $(c.macro_stack) $(c.source_private));
@@ -725,8 +721,7 @@ module List _bind_default(Compiler c, Var function) {
 
 /* Binds a local macro definition in a block and publishes any other one
    at file scope. */
-module List _bind_macrodef(
-  Compiler c, Var definition, Symbol context) {
+module List _bind_macrodef(Compiler c, Var definition, Symbol context) {
   List macro = definition;
   int local = macro.assoc(<local>).int();
   if (local && context == <block>) {

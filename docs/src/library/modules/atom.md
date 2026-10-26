@@ -20,14 +20,13 @@ Canonical exact names.
 `Buffer Atom.write_str(Atom atom, Buffer out)`
 
 Appends the exact spelling of `atom` to `out`.
-Neither representation allocates a `String`. An `<lsym>` `Atom` already
-owns
-its bytes, and a compact `<symbol>` decodes straight into `out`. An invalid
-`Atom` appends nothing.
+Neither representation allocates a `String`. An `<lsym>` `Atom` borrows
+its canonical bytes, and a compact `<symbol>` decodes straight into `out`.
+An invalid `Atom` appends nothing.
 
 **Raises:** `<size-limit>` or `<alloc-fail>` when `out` cannot grow.
 
-Source: `lib/atom.x:54`
+Source: `lib/atom.x:51`
 
 ### `Var`
 
@@ -38,7 +37,7 @@ Source: `lib/atom.x:54`
 
 Reports whether `value` is an exact-spelling `Atom`.
 
-Source: `lib/atom.x:92`
+Source: `lib/atom.x:88`
 
 ## Advanced and interop API
 
@@ -60,8 +59,12 @@ Source: `lib/atom.x:92`
 `int Atom.bare_spelling(String spelling)`
 
 Reports whether a spelling can round-trip as a bare Lisp `Atom`.
+The first byte is printable and not a delimiter. The spelling opens no
+comment, has no numeric prefix, and holds no backslash, which would read
+as an escape. Both reader scanners consume it whole. The unit-interface
+writer uses the same bare-symbol decision.
 
-Source: `lib/atom.x:37`
+Source: `lib/atom.x:35`
 
 <a id="Atom.first"></a>
 #### Atom.first
@@ -70,7 +73,7 @@ Source: `lib/atom.x:37`
 
 Returns the first byte of `atom`'s exact spelling, or NUL when invalid.
 
-Source: `lib/atom.x:108`
+Source: `lib/atom.x:103`
 
 <a id="Atom.initialize"></a>
 #### Atom.initialize
@@ -84,7 +87,7 @@ Repeated calls after successful registration have no effect.
 `<alloc-fail>` while lower-casing the descriptor name, or `<init-fail>`
 when registration returns zero.
 
-Source: `lib/atom.x:166`
+Source: `lib/atom.x:161`
 
 <a id="Atom.intern"></a>
 #### Atom.intern
@@ -92,20 +95,17 @@ Source: `lib/atom.x:166`
 `Atom Atom.intern(String spelling)`
 
 Returns the canonical `Atom` with the supplied exact spelling.
-Repeated interning of equal bytes returns a bit-identical `Atom`. A
-spelling
-that round-trips through either compact encoding becomes an immediate
+Interning equal bytes returns bit-identical `Atom`s. A spelling that
+round-trips through either compact encoding becomes an immediate
 `Symbol`; every other spelling borrows its canonical `String` under the
-module
-lifetime rule above. Use `Atom.promote` before a long `Atom` escapes its
-innermost owning pool.
+module lifetime rule above. Use `Atom.promote` before a long `Atom`
+escapes its innermost owning pool.
 
 **Raises:** `<bad-arg>` when `spelling` is null or empty, `<alloc-fail>` when
 its canonical `String` cannot be allocated, or `<bad-enc>` if the
-long-`Atom`
-pointer cannot be boxed.
+long-`Atom` pointer cannot be boxed.
 
-Source: `lib/atom.x:219`
+Source: `lib/atom.x:211`
 
 <a id="Atom.promote"></a>
 #### Atom.promote
@@ -113,13 +113,13 @@ Source: `lib/atom.x:219`
 `Self Atom.promote(Self atom)`
 
 Promotes a long `Atom` spelling into its parent `String` pool.
-Returns `atom` unchanged. Compact `Atom`s and long spellings
-not owned by the
-innermost pool are unchanged. A promoted spelling keeps the same pointer.
+Returns `atom` unchanged. Compact `Atom`s and long spellings not owned by
+the innermost pool are unchanged. A promoted spelling keeps the same
+pointer.
 
 **Raises:** `<alloc-fail>` when promotion metadata cannot be allocated.
 
-Source: `lib/atom.x:26`
+Source: `lib/atom.x:24`
 
 <a id="Atom.str"></a>
 #### Atom.str
@@ -128,13 +128,12 @@ Source: `lib/atom.x:26`
 
 Returns the exact spelling of `atom` as a `String`.
 A compact `Atom` is decoded and canonicalized through the active pool
-chain.
-A long `Atom` returns its borrowed canonical spelling under the module
-lifetime rule above. An invalid `Atom` returns NULL.
+chain. A long `Atom` returns its borrowed canonical spelling under the
+module lifetime rule above. An invalid `Atom` returns NULL.
 
 **Raises:** `<alloc-fail>` while canonicalizing a compact spelling.
 
-Source: `lib/atom.x:101`
+Source: `lib/atom.x:96`
 
 <a id="Atom.write_repr"></a>
 #### Atom.write_repr
@@ -145,23 +144,20 @@ Writes the escaped readable spelling of `atom` to `out`.
 The escaping makes the result readable as the same exact `Atom`. An invalid
 `Atom` appends nothing.
 
-**Raises:** `<alloc-fail>` while decoding a compact `Atom`, or
-`<size-limit>` or
-`<alloc-fail>` when `out` cannot grow.
+**Raises:** `<alloc-fail>` while decoding a compact `Atom`, or `<size-limit>`
+or `<alloc-fail>` when `out` cannot grow.
 
-Source: `lib/atom.x:67`
+Source: `lib/atom.x:63`
 
 ## Design notes
 
 An `Atom` preserves its spelling exactly. Compact spellings use immediate
 `Symbol`s when `Symbol` encoding round-trips every byte; all other
-spellings
-use the private `<lsym>` representation with a direct pointer to the
-canonical `String`. `String` canonicalization makes equal long `Atom`s
+spellings use the private `<lsym>` representation with a direct pointer
+to the canonical `String`. Canonicalization makes equal long `Atom`s
 bit-identical. Compact `Atom`s have value lifetime. A long `Atom` borrows
-its
-canonical spelling, which may belong to any pool in the active chain and
-lives until its owning pool is released.
+its canonical spelling, which may belong to any pool in the active chain.
+The spelling lives until its owning pool is released.
 
 ## Tests and examples
 

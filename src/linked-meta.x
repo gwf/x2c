@@ -582,7 +582,8 @@ static int _dynamic_operand(Type type, int text) =>
     `Var.binary`, after rejecting an operand that is neither a number nor,
     for `+` beside text, text. The call is returned lowered, because an
     operator chain applies this rule once for each term and binding would
-    search the whole remaining chain each time. */
+    search the whole remaining chain each time.
+*/
 Code dynamic_binary(Code code) {
   match (code) case %(expr ? (op ?(Symbol op) ?left ?right)): {
     Code lhs = left, rhs = right;
@@ -621,17 +622,15 @@ static Code _dynamic_update(
 static String _dynamic_helper(Type type) {
   if (type.is_named("Var")) return "x2c_var_update_volatile";
   Type scalar = type.numeric();
-  match (scalar)
-    case %(enum *):
-      $fail.operators_enum_target(NULL);
+  match (scalar) case %(enum *): $fail.operators_enum_target(NULL);
   String helper = type.update_helper();
-  if (!helper)
-    $fail.operators_numeric_target(NULL, type);
+  if (!helper) $fail.operators_numeric_target(NULL, type);
   return helper;
 }
 
 /** Updates a `Var` or numeric lvalue with a `Var` or numeric operand
-    through the update helper of its storage. */
+    through the update helper of its storage.
+*/
 Code dynamic_compound(Code code) {
   match (code) case %(expr ? (op ?(Symbol op) ?left ?right)): {
     Code target = left, rhs = right;
@@ -651,7 +650,8 @@ Code dynamic_compound(Code code) {
 }
 
 /** Adds or subtracts one through the `Var` update helpers; the postfix
-    forms return the value before the change. */
+    forms return the value before the change.
+*/
 Code dynamic_change(Code code) {
   match (code) {
     case %(expr ? (op ?(Symbol op) ?(Code target))): {

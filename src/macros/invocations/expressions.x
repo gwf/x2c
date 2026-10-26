@@ -27,8 +27,8 @@ List Compiler.try_parse_macro_expression(Compiler c) {
     _expression_invocation(c, definition, invocation), invocation);
 }
 
-/* Returns the Macro value a `$` name without arguments names. Otherwise the
-   cursor returns to the `$`. */
+/* Returns the Macro value of a `$name` without arguments; otherwise restores
+   the cursor to `$`. */
 static List _named_macro_value(Compiler c, Token invocation) {
   Atom name = _name(c);
   if (c.peek(0) != <(>) {
@@ -71,13 +71,14 @@ static Array _meta_arguments(Compiler c, List parameters, Symbol head) {
   Array arguments = [];
   c.expect(<(>);
   if (c.peek(0) != <)>) loop {
-    int rest = parameters && parameters.car() == %(....);
+    Type parameter = parameters ? parameters.car() : NULL;
+    int rest = parameter == %(....);
     List argument = rest && !c.peek_macro_hole()
       ? c.parse_call_splice() : NULL;
     if (!argument) argument = _meta_argument(c);
     if (parameters && !rest && !c.macro_holes &&
-        !(head == <meta-call> && c.sym.is_var_type(parameters.car())))
-      argument = c.convert_expression(argument, parameters.car());
+        !(head == <meta-call> && c.sym.is_var_type(parameter)))
+      argument = c.convert_expression(argument, parameter);
     if (!rest) parameters = parameters.cdr();
     arguments.push(argument);
     if (!c.test(<,>)) break;
@@ -137,8 +138,7 @@ static List _template_call(Compiler c, List definition) {
     (args @(arguments.list_free()))));
 }
 
-static void _not_expression(
-  Compiler c, List definition, Token invocation) {
+static void _not_expression(Compiler c, List definition, Token invocation) {
   Symbol kind = definition.assoc(<kind>);
   String spelling = definition.assoc(<name>).str();
   $fail.macros_result_expr(

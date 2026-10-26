@@ -109,8 +109,7 @@ static List _parse_binary_level(Compiler c, int level) {
   return _parse_binary_level_tail(c, level, _parse_binary_level(c, level + 1));
 }
 
-static List _parse_binary_level_tail(
-  Compiler c, int level, List lhs) {
+static List _parse_binary_level_tail(Compiler c, int level, List lhs) {
   int first = 1;
   while (_binary_operator(c).binary_precedence() == level ||
          (level == 7 && _is_type_operator(c))) {
@@ -232,8 +231,7 @@ List Compiler.parse_parenthesized_statement(Compiler c) {
   return _finish_paren_statement(c, _parse_group_rest(c), 1);
 }
 
-static List _finish_paren_statement(
-  Compiler c, List expression, int postfix) {
+static List _finish_paren_statement(Compiler c, List expression, int postfix) {
   if (postfix) expression = _parse_postfix_tail(c, expression);
   expression = _parse_binary_levels_from(c, expression);
   expression = _parse_conditional_tail(c, expression);
@@ -456,7 +454,6 @@ static List _parse_postfix_tail(Compiler c, List expr) {
   return expr;
 }
 
-/* The operators that apply to the expression written before them. */
 static int _postfix_operator(Symbol token) {
   switch (token) {
     case <[>:
@@ -591,8 +588,7 @@ static List _parse_postfix_dot(Compiler c, List expr) {
   return result;
 }
 
-static List _parse_field_name(
-  Compiler c, Symbol op_sym, List lhs_opt) {
+static List _parse_field_name(Compiler c, Symbol op_sym, List lhs_opt) {
   c.require_input();
   List slot = c.try_parse_macro_member();
   if (slot) return $(slot);

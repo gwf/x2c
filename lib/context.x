@@ -63,7 +63,8 @@ static threaded Context current_context;
 
     Raises: `<bad-state>` unless `context` is current, `<bad-types>` for an
     unsupported value without a registered exporter, or a cause from nested
-    allocation, hashing, equality, or custom export. */
+    allocation, hashing, equality, or custom export.
+*/
 meta native Var Context.export(Context context, Var value) {
   if (!context || current_context != context)
     raise %(bad-state (operation "Context.export"));
@@ -334,7 +335,8 @@ void Context.move_block(Context c, Block block) {
 
     Raises: `<alloc-fail>` or `<size-limit>` while constructing nested state.
     Failed construction restores the parent's `Scope`, canonical pool, `Error`,
-    `Match`, and current `Context` state. */
+    `Match`, and current `Context` state.
+*/
 meta native Context Context.open(void) => _open(NULL, 0);
 
 /** Opens and makes current a named `Context` that inherits immutable values.
@@ -343,7 +345,8 @@ meta native Context Context.open(void) => _open(NULL, 0);
 
     Raises: `<alloc-fail>` or `<size-limit>` while constructing nested state.
     Failed construction restores the parent's `Scope`, canonical pool, `Error`,
-    `Match`, and current `Context` state. */
+    `Match`, and current `Context` state.
+*/
 Context Context.open_named(const char *name) => _open(name, 0);
 
 /** Opens and makes current a `Context` with a private canonical-value pool.
@@ -351,7 +354,8 @@ Context Context.open_named(const char *name) => _open(name, 0);
 
     Raises: `<alloc-fail>` or `<size-limit>` while constructing nested state.
     Failed construction restores the parent's `Scope`, canonical pool, `Error`,
-    `Match`, and current `Context` state. */
+    `Match`, and current `Context` state.
+*/
 Context Context.open_isolated(void) => _open(NULL, 1);
 
 /** Opens and makes current a named `Context` with a private canonical pool.
@@ -360,7 +364,8 @@ Context Context.open_isolated(void) => _open(NULL, 1);
 
     Raises: `<alloc-fail>` or `<size-limit>` while constructing nested state.
     Failed construction restores the parent's `Scope`, canonical pool, `Error`,
-    `Match`, and current `Context` state. */
+    `Match`, and current `Context` state.
+*/
 Context Context.open_isolated_named(const char *name) => _open(name, 1);
 
 static Context _open(const char *name, int isolated) {
@@ -406,8 +411,8 @@ meta native Context Context.current(void) => current_context;
     private canonical pool become invalid.
 
     Raises: `<bad-state>` for a null or noncurrent `Context`, or while its
-    `Match`
-    cache has an active lease. The failure leaves the `Context` active. */
+    `Match` cache has an active lease. The failure leaves the `Context` active.
+*/
 meta native void Context.close(Context c) {
   if (!c || current_context != c)
     raise %(bad-state (operation "Context.close"));

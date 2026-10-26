@@ -118,7 +118,7 @@ void Bytes_cleanup(Bytes _x2c_gensym_macro_value_1){
 }
 
 static size_t _allocation_size(size_t width, size_t cap){
-  if(! width || cap >(SIZE_MAX - sizeof(Block)) / width) return 0;
+  if(cap >(SIZE_MAX - sizeof(Block)) / width) return 0;
   return sizeof(Block) + width * cap;
 }
 
@@ -307,13 +307,13 @@ Bytes Bytes_new(size_t width){
 void Block_free(Block b){
   if(b == NULL) return;
   if(b -> lifetime) Scope_destroy(b -> lifetime);
-  if(b -> bytes != NULL) xfree(_allocation(b));
+  xfree(_allocation(b));
   xfree(b);
 }
 
 void Block_move_to(Block block, Scope * scope){
   if(block == NULL) return;
-  if(block -> bytes != NULL) Scope_move(_allocation(block), scope);
+  Scope_move(_allocation(block), scope);
   Scope_move(block, scope);
   Scope_transfer(block -> lifetime, * scope);
 }
