@@ -221,6 +221,9 @@ typedef struct Compiler {
   /* Zero for ordinary parsing, one for metadata collection, or the
      project helper table index plus one. */
   int meta_build;
+  /* One plus the unit node count before the first form a full parse
+     skipped, or zero. */
+  int skipped_form;
   int load_source;  // Expose the loaded unit's public functions.
   int runtime_inc, runtime_hdrs, collect_protocols, shallow, source_private;
   int module_declaration;  // Parsing a `module` declaration.

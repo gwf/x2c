@@ -258,29 +258,15 @@ passed six repeated nested-Make probes, and help output remains byte-identical.
 - The project meta build writes a unit's meta group from an incomplete
   parse. A template slot that calls a project meta function, such as
   `@one_item($target)` in `macro Unit $through_sequence(Unit $target)`, is
-  left for the translation. The meta build's parse reports "this meta call
-  is left for the translation", skips the whole form, and continues.
-  `write_meta_build` then writes the group anyway, and nobody sees that error.
-  Later definitions that read what the skipped form declares reach the group
-  without those declarations. An unreached function whose result type came
-  from such a name, as in `static $Code.type(retained) helper(void)`, now
-  gets no prototype; `macro-computed-slots` covers it. These shapes still
-  stop the group from compiling, so the translation reports "this function
-  cannot run at compile time":
-  - `static $Code.type(retained) $x2c_ident("slot_copy");` becomes
-    `static slot_copy;`, which has no type.
-  - `int copy = retained;` names an undeclared identifier.
-  - A public function whose body reads `retained` keeps that body, because
-    the meta build reaches every public function.
-
-  An untyped reference cannot identify these names: C library names such as
-  `fprintf`, `stdout`, `EOF`, `errno`, and `INT_MAX` also parse with an empty
-  type. Two repairs at the cause remain open:
-  - C1: after the meta build skips a form because a slot was left for the
-    translation, the group keeps only earlier definitions, plus meta
-    functions and what they reach. Reachability follows identifier bindings
-    but not type names, so a later type that a later meta function uses
-    would be lost.
+  left for the translation, and the meta build's parse skips the whole
+  form. Definitions after that form may name what it declares, so the group
+  roots none of them: it keeps a later variable only when a meta function
+  reaches it, and a later function only as its prototype unless one does.
+  An unreached function whose result type names such a declaration gets no
+  prototype. `macro-computed-slots` covers an untyped helper, an untyped
+  global, a global initialized from the declaration, and a public function
+  that reads it. A meta function that itself reaches such a definition
+  still cannot run at compile time; C2 below would remove that limit:
   - C2: the meta build runs a same-unit `meta static` function by staging
     the group so far in process, as `bind_meta_group` does for a session.
     Nothing is deferred and the parse is complete. This depends on
