@@ -323,7 +323,7 @@ static int _array_open(String value) {
     letters, digits, underscores, and hyphens, and is not empty.
 */
 int ProjectBuild.valid_name(String name) {
-  if (!name || !name[0]) return 0;
+  if (!name) return 0;
   foreach (char raw in name) {
     unsigned char ch = raw;
     if (!(isalnum(ch) || ch == '_' || ch == '-')) return 0;
