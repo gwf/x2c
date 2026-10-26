@@ -395,7 +395,7 @@ module Var _rebind_imported(Compiler c, Var stored) {
 module List _rebind_globals(Compiler c, List syntax) {
   Map replacements = {};
   _reference_bindings(c, syntax, replacements);
-  return replacements ? _replace_bindings(syntax, replacements) : syntax;
+  return replacements.len() ? _replace_bindings(syntax, replacements) : syntax;
 }
 
 static void _reference_bindings(Compiler c, List syntax, Map replacements) {
