@@ -362,6 +362,21 @@ static void array_index_contains_count(void) {
   EXPECT_FALSE(arr.contains(forty_two));
 }
 
+static void array_null_iterator_is_exhausted(void) {
+  $test.scoped();
+  Array values = [10], missing = NULL;
+  struct Iter storage;
+  values.iter(&storage);
+  Iter iter = missing.iter(&storage);
+  EXPECT_TRUE(iter == &storage);
+  Var value = 73;
+  EXPECT_FALSE(iter.try_next(value));
+  EXPECT_FALSE(iter.try_next(value));
+  EXPECT_INT_EQ(value.int(), 73);
+  EXPECT_NULL(missing.iter(NULL));
+  EXPECT_NULL(values.iter(NULL));
+}
+
 static void array_find_matches_list_and_iter(void) {
   $test.scoped();
   Array values = [10, 20, 20, 30];
@@ -753,6 +768,7 @@ void array_suite(void) {
   $test.run(array_region_end_matches_slice_stop);
   $test.run(array_splice_and_concat);
   $test.run(array_index_contains_count);
+  $test.run(array_null_iterator_is_exhausted);
   $test.run(array_find_matches_list_and_iter);
   $test.run(array_sort_reverse_join);
   $test.run(array_join_empty_string_elements);

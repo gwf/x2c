@@ -221,6 +221,16 @@ static void typed_array_copy_slice_and_iteration(void) {
   int total = 0;
   foreach(int value, values) total += value;
   EXPECT_INT_EQ(total, 15);
+
+  struct Iter storage;
+  values.iter(&storage);
+  ArrayInt missing = NULL;
+  Iter iter = missing.iter(&storage);
+  EXPECT_TRUE(iter == &storage);
+  Var value = 73;
+  EXPECT_FALSE(iter.try_next(value));
+  EXPECT_INT_EQ(value.int(), 73);
+  EXPECT_NULL(missing.iter(NULL));
 }
 
 static void _expect_typed_array_common(
