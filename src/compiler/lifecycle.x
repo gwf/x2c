@@ -1,3 +1,10 @@
+/*  lifecycle.x -- compiler ownership and lifecycle
+
+    A child compiler owns its tokens, symbols, and diagnostics. Package
+    registries and generated-name state belong to the whole translation
+    unit, so every child must mutate the owner's exact objects.
+*/
+
 /** Boxes a compiler pointer for lambda capture traversal.
     Captures store non-reference values as `Var`, so the caller keeps the
     compiler alive while code uses the boxed pointer.
@@ -30,7 +37,8 @@ void Compiler.close_child(Compiler c, Compiler child) {
 // related compilers
 
 /** Shares `owner`'s pending `meta` group and the definitions it reads, which
-    belong with the bindings that hold the group's stubs. */
+    belong with the bindings that hold the group's stubs.
+*/
 void Compiler.share_meta_group(Compiler c, Compiler owner) {
   $copy_fields(c, owner, meta_group, meta_group_bound);
 }
@@ -100,9 +108,6 @@ static void _init_tables(Compiler c) {
               meta_group_bound);
 }
 
-/* A child compiler owns its tokens, symbols, and diagnostics. Package
-   registries and generated-name state belong to the whole translation
-   unit, so every child must mutate the owner's exact objects. */
 static void _share_unit(Compiler c, Compiler owner) {
   $copy_fields(c, owner, package, package_dirs, package_source_dirs,
                package_roots, package_aliases, package_members,
