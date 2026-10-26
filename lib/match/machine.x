@@ -8,8 +8,6 @@
     predicates for pattern classification.
 */
 
-
-#include <assert.h>
 #include <string.h>
 #include "scope/scope.x"
 #include "array/array.x"
@@ -17,19 +15,16 @@
 
 // operands
 
-static List *_cursor(MatchMachine &m, int reg) =>
-  &m.regs[m.fp].cursors[reg];
+static List *_cursor(MatchMachine &m, int reg) => &m.regs[m.fp].cursors[reg];
 
 static int *_distance(MatchMachine &m, int reg) =>
   &m.regs[m.fp].distances[reg];
 
-static int *_int_reg(MatchMachine &m, int reg) =>
-  &m.regs[m.fp].ints[reg];
+static int *_int_reg(MatchMachine &m, int reg) => &m.regs[m.fp].ints[reg];
 
 static MachineMark *_mark(MatchMachine &m) => &m.regs[m.fp].mark;
 
-static Var _const(MatchMachine &m, int index) =>
-  m.program.consts[index];
+static Var _const(MatchMachine &m, int index) => m.program.consts[index];
 
 static void _clear_registers(MatchMachine &m, int depth) {
   memset(&m.regs[depth], 0, sizeof(MachineRegs));
@@ -37,16 +32,17 @@ static void _clear_registers(MatchMachine &m, int depth) {
 
 // execution
 
-/** Execute Match words until success, failure, or a stored machine error. */
+/** Executes Match words until success, failure, or a stored machine error. */
 void MatchMachine.run(MatchMachine &m) {
   while (m.step()) {}
 }
 
-/** Execute one Match word and report whether another word remains. Fetch
-   advances pc before dispatch, so calls save the following word and branches
-   replace it. Machine invariant failures roll back all captures and store an
-   error; predicates that raise can instead transfer out while the machine is
-   marked running. */
+/** Executes one Match word and reports whether another word remains.
+    Fetch advances pc before dispatch, so calls save the following word and
+    branches replace it. Machine invariant failures roll back all captures and
+    store an error; predicates that raise can instead transfer out while the
+    machine is marked running.
+*/
 int MatchMachine.step(MatchMachine &m) {
   if (!m.running) return 0;
   _execute(m, m.program.code[m.pc++]);
@@ -227,8 +223,7 @@ static void _call(MatchMachine &m, const MachineWord &w) {
 
 /* Saves the caller's state in a new frame and continues at `entry` on
    `argument`. */
-static void _push_frame(
-  MatchMachine &m, Var argument, int entry) {
+static void _push_frame(MatchMachine &m, Var argument, int entry) {
   if (m.fp + 1 >= MACHINE_FRAME_MAX) {
     _error(m, <frame-max>);
     return;
@@ -254,7 +249,6 @@ static void _return(MatchMachine &m, Symbol status) {
 }
 
 static void _pop_frame(MatchMachine &m) {
-  assert(m.fp > 0);
   MatchFrame *frame = &m.frames[--m.fp];
   m.pc = frame.return_pc;
   m.current_entry_undo = frame.caller_entry_undo;
@@ -289,8 +283,7 @@ static void _set_span(MatchMachine &m, const MachineWord &w) {
   else _journal(m, w.a, capture);
 }
 
-static void _journal(
-  MatchMachine &m, int index, MachineSlot capture) {
+static void _journal(MatchMachine &m, int index, MachineSlot capture) {
   if (m.undo_count >= MACHINE_UNDO_MAX) {
     _error(m, <undo-max>);
     return;
@@ -379,10 +372,12 @@ static void _bind_head(MatchMachine &m, const MachineWord &w) {
 
 // spans
 
-/** Materialize a borrowed span. A complete suffix shares the existing
-   immutable List directly, an empty span returns nil, and a proper prefix
-   copies through growable machine scratch once. An invalid end stores
-   <bad-span>; allocation and consing can raise. */
+/** Materializes a borrowed span.
+    A complete suffix shares the existing immutable List directly, an empty
+    span returns nil, and a proper prefix copies through growable machine
+    scratch once. An invalid end stores <bad-span>; allocation and consing can
+    raise.
+*/
 List MatchMachine.materialize_span(MatchMachine &m, MachineSpan span) {
   if (m.stats) m.stats.materialization_requests++;
   if (!span.end) {
@@ -458,8 +453,9 @@ static void _count_share(MatchMachine &m) {
 
 // lifecycle
 
-/** Initialize fresh caller-owned storage without touching unused fixed
-   arrays. The caller must eventually dispose any materialization scratch. */
+/** Initializes fresh caller-owned storage, leaving unused fixed arrays alone.
+    The caller must eventually dispose any materialization scratch.
+*/
 void MatchMachine.open(MatchMachine &m) {
   memset(&m.program, 0, sizeof(MachineView));
   m.pc = 0;
@@ -479,10 +475,11 @@ void MatchMachine.open(MatchMachine &m) {
   m.scratch_capacity = 0;
 }
 
-/** Begin execution of a valid Match program in opened, completed storage and
-   borrow its view and input Lists until finish. Zero undo entries prove every
-   slot of the previous program was restored, so only the new program's binder
-   slots are initialized. A dirty machine records <not-idle> and stops. */
+/** Begins a valid Match program in opened, completed storage.
+    Borrows its view and input Lists until finish. Zero undo entries prove
+    every slot of the previous program was restored, so only the new program's
+    binder slots are initialized. A dirty machine records <not-idle> and stops.
+*/
 void MatchMachine.begin(MatchMachine &m, MachineView program, Var input) {
   if (m.running || m.undo_count || m.fp) {
     _error(m, <not-idle>);
@@ -501,10 +498,11 @@ void MatchMachine.begin(MatchMachine &m, MachineView program, Var input) {
   _count_call(m);
 }
 
-/** Return a stopped invocation to idle and clear its borrowed execution state.
-   Reusable scratch and the optional stats pointer remain installed.
+/** Returns a stopped invocation to idle and clears borrowed execution state.
+    Reusable scratch and the optional stats pointer remain installed.
 
-   Raises: `<bad-state>` when execution is still running. */
+    Raises: `<bad-state>` when execution is still running.
+*/
 void MatchMachine.finish(MatchMachine &m) {
   if (m.running) raise %(bad-state (operation "MatchMachine.finish"));
   _clear_slots(m);
@@ -517,19 +515,20 @@ void MatchMachine.finish(MatchMachine &m) {
   m.error = void;
   m.status = <idle>;
   memset(&m.program, 0, sizeof(MachineView));
-  m.running = 0;
 }
 
-/** Report whether the observable invocation state is idle and cleared. Scratch
-   capacity and the optional stats pointer do not affect the answer. */
+/** Reports whether the observable invocation state is idle and cleared.
+    Scratch capacity and the optional stats pointer do not affect the answer.
+*/
 int MatchMachine.clean(MatchMachine &m) {
   if (m.running || m.program.code || m.fp || m.undo_count || m.slot_count)
     return 0;
   return m.status == <idle> && m.error is void;
 }
 
-/** Free reusable materialization scratch. Finish active execution first;
-   this does not clear invocation state. */
+/** Frees reusable materialization scratch.
+    Finish active execution first; this does not clear invocation state.
+*/
 void MatchMachine.dispose(MatchMachine &m) {
   if (m.scratch) xfree(m.scratch);
   m.scratch = NULL;
