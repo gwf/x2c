@@ -368,7 +368,8 @@ static List _renumber_bindings(List node, Map identities) {
     the compiler identity. Each is walked cold by a compiler of its own, so
     the records hold this compiler's collection rather than a table linked
     into it; the unit's own entries for them are restored afterwards. A
-    record the interface grammar cannot spell is left out. */
+    record the interface grammar cannot spell is left out.
+*/
 Map Compiler.linked_prelude_records(Compiler c) {
   Map records = {}, saved = {};
   foreach (String source in _linked_prelude_sources()) {
