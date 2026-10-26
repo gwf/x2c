@@ -201,8 +201,7 @@ module void _unwind_to(
 /* Returns the handler that leaves exactly `depth` registered, or the current
    head when the stack is already that shallow. The height is measured once
    here so an unwind does not re-measure it per cleanup record. */
-module ErrorHandler _handler_at_depth(
-  ErrorThreadState state, int depth) {
+module ErrorHandler _handler_at_depth(ErrorThreadState state, int depth) {
   ErrorHandler stop = state.handler_top;
   for (int height = Error.handler_depth(); height > depth && stop; height--)
     stop = stop.prev;
@@ -278,8 +277,7 @@ ErrorHandler x2c_error_catch_site_push(
 /* Binds a pending site, then returns why the first fenced arm this
    registration can reach is unusable, or NULL. A transient site prepares
    its plans for this registration alone. */
-static const char *_prepare_arms(
-  ErrorHandler h, Var *patterns, int &arm) {
+static const char *_prepare_arms(ErrorHandler h, Var *patterns, int &arm) {
   ErrorCatchSite *site = h.site;
   if (_state(site) == ERROR_CATCH_PENDING) _bind(site, patterns);
   if (_state(site) == ERROR_CATCH_TRANSIENT)
@@ -333,7 +331,6 @@ static void _site_unlock(void) =>
   Mutex.recursive_unlock(
     &catch_site_mutex, "Error: could not unlock catch site");
 
-/* Prepares one plan per arm for a registration of a transient site. */
 static const char *_prepare_plans(
   ErrorHandler h, Var *patterns, int &fenced_arm) {
   ErrorCatchSite *site = h.site;
