@@ -115,10 +115,9 @@ static void _merge_surface(Surface &s, String path, Map rows) {
 static void _take_exports(Surface &s, Map rows) {
   Array found = auto [];
   foreach (Var (key, value) in rows)
-    match ($(key, value))
-      case %(("source-node" (? ? ?position))
-             (!set ?effect ((!or compile-time project-meta) *))):
-        found.push($(position, effect));
+    if ($(key, value) ~= %(("source-node" (? ? ?position))
+                            (!set ?effect ((!or compile-time project-meta) *))))
+      found.push($(position, effect));
   found.sort();
   foreach (List entry in found) s.exports.push(entry.cadr());
 }
@@ -155,7 +154,7 @@ module int _in_runtime(String path) =>
    prefixed aggregate crosses with it. Source-node and helper rows carry no C
    spelling of their own. */
 static String _package_key_spelling(List key) {
-  match (key) case %("function-inline" ?(String name)): return name;
+  if (key ~= %("function-inline" ?(String name))) return name;
   Var (head, spelling_value) = key;
   if (head is <string>) {
     String spelling = head;
@@ -196,16 +195,15 @@ module void _replay_package_imports(
   Array imports = NULL;
   defer if (imports) imports.free();
   foreach (Var (key, value) in rows)
-    match (key)
-      case %("source-node" (? ?path ?position)): {
-        if (value is not <list> || !value.list() ||
-            !(value.list().car() in
-              %(package-import compile-time project-meta))) continue;
-        if (exports == NULL || !_imported_here(c, path)) {
-          if (!imports) imports = [];
-          imports.push($(path, position, value));
-        }
+    if (key ~= %("source-node" (? ?path ?position))) {
+      if (value is not <list> || !value.list() ||
+          !(value.list().car() in
+            %(package-import compile-time project-meta))) continue;
+      if (exports == NULL || !_imported_here(c, path)) {
+        if (!imports) imports = [];
+        imports.push($(path, position, value));
       }
+    }
   if (!imports.len()) return;
   imports.sort();
   _import_all(c, globs, imports, exports);
