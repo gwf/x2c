@@ -95,7 +95,7 @@ static int _number_compare(Var a, Var b) {
   if (ak == <integer> && bk == <integer>) return a.integer_compare(b);
   if (ak == <integer>) return a.integer_floating_compare(b);
   if (bk == <integer>) return -b.integer_floating_compare(a);
-  return da < db ? -1 : da > db ? 1 : 0;
+  return da < db ? -1 : da > db;
 }
 
 /** Compares Lisp numbers by value and returns a boxed negative, zero, or
