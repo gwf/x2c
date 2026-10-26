@@ -87,12 +87,6 @@ static macro Stmt $error.read.char(Expr $reader) =>
 static macro Stmt $error.read.key(Expr $reader) =>
   _fail($reader, "expected a string key");
 
-static macro Expression $reason.read.colon() => "expected ':'";
-
-static macro Expression $reason.read.object.sep() => "expected ',' or '}'";
-
-static macro Expression $reason.read.array.sep() => "expected ',' or ']'";
-
 static macro Stmt $error.read.string.end(Expr $reader) =>
   _fail($reader, "unterminated string");
 
@@ -248,14 +242,14 @@ static Var _object(Reader &r) {
     _space(r);
     if (_peek(r) != '"') $error.read.key(r);
     String name = _string(r);
-    _expect(r, ':', $reason.read.colon());
+    _expect(r, ':', "expected ':'");
     object[name] = _read_value(r);
     _space(r);
     if (_peek(r) == '}') {
       r.at++;
       return object;
     }
-    _expect(r, ',', $reason.read.object.sep());
+    _expect(r, ',', "expected ',' or '}'");
   }
 }
 
@@ -274,7 +268,7 @@ static Var _array(Reader &r) {
       r.at++;
       return array;
     }
-    _expect(r, ',', $reason.read.array.sep());
+    _expect(r, ',', "expected ',' or ']'");
   }
 }
 
@@ -431,14 +425,12 @@ static void _space(Reader &r) {
   }
 }
 
-static int _peek(Reader &r) =>
-  (unsigned char) r.text[r.at];
+static int _peek(Reader &r) => (unsigned char) r.text[r.at];
 
 static void _fail(Reader &r, String why) {
   int line = 1, column = 1, offset = r.at;
   scan_next_line_col((char *) r.text, offset, &line, &column);
-  if (r.path)
-    $error.read.file(r.path, why, offset, line, column);
+  if (r.path) $error.read.file(r.path, why, offset, line, column);
   $error.read.text(why, offset, line, column);
 }
 
@@ -479,9 +471,7 @@ String Var.pretty_json(Var value) => _json(value, 1);
 /** Replaces the file at `path` with `value` as compact JSON text.
     Raises: the causes of `Var.json` and `Path.write_text`.
 */
-void Json.write_file(Var value, Path path) {
-  path.write_text(value.json());
-}
+void Json.write_file(Var value, Path path) => path.write_text(value.json());
 
 static String _json(Var value, int pretty) {
   Buffer out = auto Buffer.new(0);
@@ -491,8 +481,7 @@ static String _json(Var value, int pretty) {
 }
 
 static void _write_value(Writer &w, Var value, int depth) {
-  if (depth > JSON_MAX_DEPTH)
-    $error.write.depth();
+  if (depth > JSON_MAX_DEPTH) $error.write.depth();
   if (value.is_null()) w.out.write("null");
   else if (value is <jsonbool>) w.out.write(value.jsonbool().str());
   else if (value is <string> || value.is_atom())
@@ -535,8 +524,7 @@ static void _members(Writer &w, Map object, int depth) {
   foreach (Var name in names) {
     String text = name.str();
     // A String and a Symbol with the same spelling would write one name twice.
-    if (count && text == previous)
-      $error.write.duplicate(text);
+    if (count && text == previous) $error.write.duplicate(text);
     previous = text;
     if (count++) w.out.write_char(',');
     _line(w, depth + 1);
@@ -596,8 +584,7 @@ static void _write_integer(Buffer out, Var value) {
    Python's `repr` does, and a fraction or exponent is always present so the
    text reads back as a `double`. */
 static void _write_double(Buffer out, double number) {
-  if (!isfinite(number))
-    $error.write.nonfinite();
+  if (!isfinite(number)) $error.write.nonfinite();
   char text[32];
   int precision = 0;
   do snprintf(text, sizeof(text), "%.*e", precision++, number);
