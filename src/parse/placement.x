@@ -53,7 +53,6 @@ static List _ancestor_code(Compiler c, Ancestor row) {
   return %(at $origin (seq));
 }
 
-
 /** Enters the function definition `declaration`, whose body the
     transform lowers next, so a rule lowering that body places code at its
     entry. Returns the row's depth for `Compiler.leave_function`. */
