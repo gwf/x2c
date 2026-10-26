@@ -157,8 +157,7 @@ static List _array_declarator(Emitter &e, List decl, List dimension) {
   List size = _emit(e, dimension);
   return size ? %(@decl "[" @size "]") : %(@decl "[]");
 }
-static List _function_declarator(
-  Emitter &e, List decl, List parameters) {
+static List _function_declarator(Emitter &e, List decl, List parameters) {
   if (decl.type().is_pointer()) decl = _parens(decl);
   return %(@decl "(" @(_emit(e, parameters)) ")");
 }
