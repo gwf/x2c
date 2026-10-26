@@ -117,7 +117,7 @@ $rewrite($switched)
     index among the labels it owns, or declines another switch.
 */
 meta Code string_switch_lowering(Code node) {
-  match (node) case $switched(?selector, ?body): {
+  if (node ~= $switched(?selector, ?body)) {
     Type type = selector.cadr();
     if (!type.is_named("String")) return node;
     Map indices = {};
