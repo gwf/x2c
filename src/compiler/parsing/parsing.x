@@ -1,4 +1,4 @@
-/* The shallow and full parses, script assembly, and shared token state. */
+/*  parsing.x -- parsing passes, script assembly and shared token state */
 
 static macro Stmt $fail.compiler_token_eof(Expr $c, Expr $site) =>
   $c.report_error(
@@ -10,7 +10,8 @@ static macro Stmt $fail.compiler_script_main(Expr $c, Expr $site) =>
   $c.report_error(
     <parse>,
     "a script that defines main cannot have top-level statements",
-    $site, %("move the statement into main, or remove main so the statements run"));
+    $site,
+    %("move the statement into main, or remove main so the statements run"));
 
 static macro Stmt $fail.compiler_script_local(
   Expr $c, Expr $site, Expr $name) =>
