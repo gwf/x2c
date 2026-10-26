@@ -522,6 +522,8 @@ prepare missing dependencies through the project's ordinary workflow.
 
 `status` checks saved dependency fingerprints and source membership. Its JSON
 contains `fresh`, `changed`, `missing`, `added_inputs`, and `removed_inputs`.
+It also reports the retained effective target `configurations`, including
+include paths, compiler arguments, and native modules.
 If an edited manifest cannot be planned, `membership_checked` is false and
 `membership_error` explains why; recorded dependency changes are still shown.
 Queries continue to read the named snapshot after source edits. Rebuild
@@ -592,6 +594,10 @@ Find the entry point, then inspect its saved definition:
 returns canonical declaration syntax, including its type and bindings.
 `typed_ast` returns the full bound subtree in the `ast` result field, with
 portable source-origin wrappers. Use `source` for the original source text.
+File entities return their complete saved source. Unit entities retain the
+complete bound AST, including top-level forms outside declaration subtrees.
+Select a unit explicitly to match that entire AST. Without `select`, matching
+searches declaration subtrees to avoid repeating their unit-level copies.
 
 Find callers, transitive callees, and a source-evidenced path:
 

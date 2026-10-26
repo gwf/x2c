@@ -159,6 +159,14 @@ def lifecycle(p, sources):
     file_view = p.query(snapshot, op="inspect", select={"id": files[0]["id"]},
                         view="source")
     assert file_view["results"][0]["source"] == original, file_view
+    units = p.find(snapshot, kind="unit", unit=str(sources[0]))["results"]
+    unit_view = p.query(snapshot, op="inspect", select={"id": units[0]["id"]},
+                        view="typed_ast")
+    assert "snapshot_entry" in unit_view["results"][0]["ast"], unit_view
+    unit_matches = p.query(snapshot, op="match", select={"id": units[0]["id"]},
+                           pattern="(expr ?type (call ?callee (args *args)))",
+                           inside="loop", callee="snapshot_leaf")
+    assert unit_matches["total"] == 1, unit_matches
     source_view = p.query(snapshot, op="inspect", select={"name": "snapshot_leaf"},
                           view="source")
     source = source_view["results"][0]["source"]

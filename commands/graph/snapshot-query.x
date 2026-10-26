@@ -620,9 +620,12 @@ static Array _sq_match(
   Map where = request.contains("where")
     ? request["where"].map() : {};
   Array rows = [];
-  foreach (Map entity, _sq_select(q, selector))
+  foreach (Map entity, _sq_select(q, selector)) {
+    // Whole-unit syntax overlaps the declaration subtrees searched by default.
+    if (entity["kind"] == "unit" && !request.contains("select")) continue;
     if (_sq_filter(q, entity, where))
       _sq_match_entity(q, entity, request, pattern, rows);
+  }
   return rows;
 }
 

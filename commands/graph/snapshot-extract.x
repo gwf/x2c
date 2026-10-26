@@ -507,6 +507,7 @@ Map graph_snapshot_extract(ParsedUnit *parsed, String domain) {
     [], [], [], {}, {}, {}, {}};
   Map unit_entity = _sx_entity(s, s.unit_id, "unit", unit, "");
   unit_entity["definition"] = 1;
+  unit_entity["ast"] = _sx_ast(s, parsed.ast);
   _sx_declarations(s, parsed.ast, s.unit_id, 1);
   _sx_bodies(s, parsed.ast);
   _sx_protocols(s);
