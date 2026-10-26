@@ -25,6 +25,8 @@ are needed rather than maintaining another copy.
 
 - [plan-x2c-change](skills/plan-x2c-change/SKILL.md) - answer a question about
   current behavior, or decide a design before implementation.
+- [query-x2c-project](skills/query-x2c-project/SKILL.md) - query saved
+  compiler-backed project analysis for callers, types, paths, and AST shapes.
 - [proposed-module-layout](skills/proposed-module-layout/SKILL.md) - propose
   module components, symbol owners, and private storage changes from source
   responsibilities without implementing the split.
