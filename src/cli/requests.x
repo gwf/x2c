@@ -14,7 +14,8 @@ static TargetKind target_kinds[] = {
 
 /** Returns the target kind spelled `spelling`, or 0 when no kind has that
     spelling. `refusal` says why this compiler refuses a known spelling, and
-    is NULL otherwise. */
+    is NULL otherwise.
+*/
 Symbol TargetKind.named(String spelling, String &refusal) {
   refusal = spelling == "shared-library" ?
     "shared-library is not supported by this compiler" : NULL;
@@ -24,7 +25,8 @@ Symbol TargetKind.named(String spelling, String &refusal) {
 }
 
 /** Returns the row of target kind `kind`; any other kind reads as an
-    executable. */
+    executable.
+*/
 TargetKind *TargetKind.of(Symbol kind) {
   for (TargetKind *row = target_kinds; row.kind; row++)
     if (row.kind == kind) return row;
