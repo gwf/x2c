@@ -5,11 +5,9 @@
 
 static keyword loop $private.loop;
 
-
 // declarators
 
-module List _declarator_list(
-  Compiler c, List type, List context, int row) {
+module List _declarator_list(Compiler c, List type, List context, int row) {
   Array bindings = auto [];
   loop {
     bindings.push(_declarator_init(c, type, context));
@@ -21,8 +19,7 @@ module List _declarator_list(
 
 /* Install each declaration binding before resolving its initializer so later
    declarators and source-order dependency analysis share the same identity. */
-module List _declarator_init(
-  Compiler c, List type, List context) {
+module List _declarator_init(Compiler c, List type, List context) {
   // A computed declarator name still needs ordinary binding.
   List slot = c.peek_macro_hole() || c.peek(0) == <@>
     ? c.try_parse_macro_slot(<decl-row>) : NULL;
@@ -46,8 +43,7 @@ module List _declarator_init(
 
 /* Collection skips an initializer. `init_tokens` records the declarator's
    first token, not the token where expression parsing finishes. */
-static List _initialized(
-  Compiler c, List type, List bind, Token origin) {
+static List _initialized(Compiler c, List type, List bind, Token origin) {
   List binding = bind.cadr();
   if (Ast.try_binding(binding, NULL, NULL)) {
     Token tokens = c.tokenizer.tokens;
@@ -82,10 +78,9 @@ module List _declarator(
   List ast = modifiers.append(type);
   // A parenthesized declarator is assembled twice. Preserve its raw key until
   // the outer call has the base type and can establish the binding once.
-  List binding = key;
   c.bind_template_local(key, ast, context);
   method_identity_out = method_identity;
-  return %( bind $binding $modifiers );
+  return %( bind $key $modifiers );
 }
 
 module List _pointer(Compiler c) {
@@ -100,7 +95,7 @@ module List _pointer(Compiler c) {
       if (optional) c.next();
       continue;
     }
-    if (c.peek(0) != <ident> || !(c.token.text in c.object_macros))
+    if (symbol != <ident> || !(c.token.text in c.object_macros))
       return ptr;
     Array quals = auto [];
     if (!_prefix_macro_words(c, 1, quals)) return ptr;
@@ -123,7 +118,6 @@ static List _direct_declarator(
     if (bind) return bind;
   }
   if (!c.token.text.is_identifier()) return %(bind () ());
-  // Identifier or typedef name or method-sugar target
   Token first = c.token;
   List ident = _complex_identifier(c, method_identity);
   source_first = first;
@@ -209,7 +203,8 @@ static List _array_suffix(Compiler c) {
 }
 
 /** Parses one declarator row for a macro argument without installing it.
-    Its enclosing declaration supplies the base type when expanded. */
+    Its enclosing declaration supplies the base type when expanded.
+*/
 List Compiler.parse_declarator_argument(Compiler c) {
   List slot = c.try_parse_macro_slot(<decl-row>);
   if (slot) return slot;
@@ -507,7 +502,8 @@ List Compiler.parse_parameter(Compiler c) {
 }
 
 /** Binds one constructed parameter in the current scope, including nested
-    function modifiers and reference parameter facts. */
+    function modifiers and reference parameter facts.
+*/
 List Compiler.bind_parameter(Compiler c, List base, List declarator) =>
   _finish_parameter(c, base, _finish_fnmods(c, declarator), NULL, NULL, NULL);
 
@@ -535,8 +531,7 @@ module List _finish_parameter(
 }
 
 // Records a parameter binding and whether it is a reference, or optional.
-static void _parameter_facts(
-  Compiler c, Var binding, List parameter) {
+static void _parameter_facts(Compiler c, Var binding, List parameter) {
   if (binding) c.set_fact(%(parameter $binding), 1);
   Type type = parameter.type_from_ast();
   if (type.is_reference())
@@ -557,8 +552,7 @@ List Compiler.parse_complex_identifier(Compiler c) =>
 /* Accept one of two forms of dotted identifiers: TYPE.IDENTIFIER or
    IDENTIFIER.TYPE. Preserve the explicit owner/member pair for declarations
    whose mangled spellings alone would be ambiguous. */
-static List _complex_identifier(
-  Compiler c, List &?method_identity) {
+static List _complex_identifier(Compiler c, List &?method_identity) {
   if (method_identity) method_identity = NULL;
   String ident = _package_alias_member(c), Symbol toktype = c.token.type;
   /* Only a declarator asks for the method identity, and there the name is
@@ -583,7 +577,7 @@ static List _complex_identifier(
    and the package spells the method. */
 static List _member_name(
   Compiler c, String owner, List &?method_identity) {
-  // a weaker test that accepts anything that looks like an identifier
+  // Keyword tokens may also spell method members.
   if (!c.token.text.is_identifier())
     $fail.parse_method_member(c, c.token, owner);
   String member = c.token.text, ident = %"$(owner)_$member";
