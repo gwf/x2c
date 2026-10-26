@@ -59,9 +59,7 @@ static Var _slot_value(Compiler c, List slot) {
 
 static Var _constructed_identifier(Var result, Var construction) {
   String exact = NULL;
-  match (result)
-    case %("x2c.ident" ?(String spelling)):
-      exact = spelling;
+  if (result ~= %("x2c.ident" ?(String spelling))) exact = spelling;
   if (exact) return $(construction, exact);
   return result;
 }
@@ -135,11 +133,10 @@ static Var _replace_target(Var produced, Var target, Var required) {
     return items.list();
   }
   for (int i = 0; i < (int) items.len(); i++)
-    match (items[i]) case %(falias ?found ?native):
-      if (found == target) {
-        items[i] = %(falias $required $native);
-        return items.list();
-      }
+    if (items[i] ~= %(falias ?found ?native) && found == target) {
+      items[i] = %(falias $required $native);
+      return items.list();
+    }
   return void;
 }
 
@@ -150,8 +147,7 @@ static Var _replace_target(Var produced, Var target, Var required) {
 Var Compiler.evaluate_declaration_recipe(
   Compiler c, Atom callback, List arguments) {
   Token invocation = c.token;
-  match (c.macro_stack)
-    case %((? ? ? ?token) *): invocation = token;
+  if (c.macro_stack ~= %((? ? ? ?token) *)) invocation = token;
   return c.apply_meta_function(callback.str(), arguments, invocation);
 }
 
@@ -230,17 +226,15 @@ module Var _helper_result(Compiler c, Var value) {
     case %(code-value "lowered" *): return value;
     case $source_literal_content(%(*)): return value;
   }
-  match (value) {
-    case %("x2c.template" ?stored ?(List values)): {
-      stored = _helper_result(c, stored);
-      values = _helper_result(c, values);
-      Token site = c.macro_invocation_site(<m-invoke>);
-      if (!site) site = c.token;
-      MetaContext *context = MetaContext.current();
-      with (context.expander = c, context.site = site) {
-        return _sdk_template_call(
-          stored is <string> ? Atom.intern(stored.str()) : stored, values);
-      }
+  if (value ~= %("x2c.template" ?stored ?(List values))) {
+    stored = _helper_result(c, stored);
+    values = _helper_result(c, values);
+    Token site = c.macro_invocation_site(<m-invoke>);
+    if (!site) site = c.token;
+    MetaContext *context = MetaContext.current();
+    with (context.expander = c, context.site = site) {
+      return _sdk_template_call(
+        stored is <string> ? Atom.intern(stored.str()) : stored, values);
     }
   }
   List child;
@@ -270,7 +264,7 @@ List Compiler.rebuild_statement(Compiler c, List application) =>
 */
 List Compiler.rebuild_unit_function(Compiler c, List application) {
   List function = _rebuild(c, application, NULL).cadr();
-  match (function) case %(api-source ? ? ?inner): return inner;
+  if (function ~= %(api-source ? ? ?inner)) return inner;
   return function;
 }
 
@@ -287,7 +281,7 @@ List Compiler.rebuild_function(Compiler c, List target, List application) =>
    it uses. Quoted syntax fills its own holes and keeps their values. */
 static List _rebuild(
   Compiler c, List application, List target) {
-  match (application) case %("x2c.quoted" ? ?syntax): {
+  if (application ~= %("x2c.quoted" ? ?syntax)) {
     Landing landing = {.c = c, .site = c.token, .retain = 1};
     return _fill_syntax(landing, syntax);
   }
@@ -328,7 +322,7 @@ static List _row_fields(List row) {
     case %(capture (source ?source) (value ?value) (expression ?expression)
                    (splice *splice)): {
       List result = NULL, declarator = NULL;
-      match (value) case %(function ?returned ?declared ?): {
+      if (value ~= %(function ?returned ?declared ?)) {
         result = returned;
         declarator = declared;
       }
@@ -359,9 +353,8 @@ List Compiler.land_quotation(
     }
     transaction.commit();
   }
-  if (position == <block> || position == <statement> ||
-      position == <unit>)
-    match (bound) case %(seq ?item): return item;
+  if ((position == <block> || position == <statement> ||
+       position == <unit>) && bound ~= %(seq ?item)) return item;
   return bound;
 }
 
@@ -422,7 +415,7 @@ static Var _fill_syntax(Landing &l, Var syntax) {
 /* A retained declaration with its base's pointer, array, and function
    modifiers moved onto each declarator, as parsing moves them. */
 static Var _retained_declaration(List declaration) {
-  match (declaration) case %(declare ?specifiers (bindings *rows)): {
+  if (declaration ~= %(declare ?specifiers (bindings *rows))) {
     List modifiers = NULL;
     List base = Type.declaration_base(specifiers, modifiers);
     if (!modifiers) return declaration;
@@ -438,11 +431,11 @@ static Var _retained_declaration(List declaration) {
 static int _splices(Landing &l, Var item, List &spliced) {
   if (item is not <list> || item.is_nil() || item.list().car() is not <string>)
     return 0;
-  match (item) case %("x2c.hole" ?(List hole) ?projection ?value):
-    if (projection == <splice> || hole.assoc(<sequence>).int()) {
-      spliced = _project_hole(l, hole, projection, value);
-      return 1;
-    }
+  if (item ~= %("x2c.hole" ?(List hole) ?projection ?value) &&
+      (projection == <splice> || hole.assoc(<sequence>).int())) {
+    spliced = _project_hole(l, hole, projection, value);
+    return 1;
+  }
   return 0;
 }
 
@@ -508,8 +501,8 @@ static int _statement_expression(Compiler c, List value) {
 }
 
 static Var _sdk_identifier_result(Var value) {
-  match (value)
-    case %("x2c.ident" (!is ?spelling type string)): return spelling;
+  if (value ~= %("x2c.ident" (!is ?spelling type string)))
+    return spelling;
   return value is <list> &&
          Ast.try_binding(value, NULL, NULL) ? value : void;
 }
