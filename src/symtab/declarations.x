@@ -25,8 +25,7 @@ static List _declare(
   Type ctxkey = %( @context @key ), type = ast.type_from_ast();
   Type declared_type = type;
   Type prior = type.is_function() ? s.get(ctxkey) : NULL;
-  if (type.is_function() && prior.is_function() &&
-      !s.same_list_rest_convention(type, prior))
+  if (prior.is_function() && !s.same_list_rest_convention(type, prior))
     s.c.report_error(<type>, "conflicting List rest calling convention",
       NULL, NULL);
   if ((int) s.scopes.len() == s.base_scopes && !context)
@@ -46,7 +45,8 @@ static List _declare(
 
 /** Returns the key a declaration of `key` with type `ast` takes in this
     unit: its file-private or package spelling at file scope, else `key`.
-    Retained declarations keep their already resolved spelling. */
+    Retained declarations keep their already resolved spelling.
+*/
 List Sym.declared_key(Sym s, List context, List key, List ast) {
   if (!s.c.package && !s.c.line_markers) return key;
   return _declared_key(s, context, key, ast);
@@ -162,8 +162,9 @@ static int _is_reserved_spelling(String s) {
   if (s.startswith("_x2c_gensym_") ||
       s == "_init_guard_" || s == "_file_init_")
     return 1;
-  if (s.len() < 2 || s[0] != '_') return 0;
-  for (int i = 1; i < s.len(); i++) if (s[i] < '0' || s[i] > '9') return 0;
+  int length = s.len();
+  if (length < 2 || s[0] != '_') return 0;
+  for (int i = 1; i < length; i++) if (s[i] < '0' || s[i] > '9') return 0;
   return 1;
 }
 
@@ -234,7 +235,8 @@ static void _mark_automatic(Sym s, List binding, Type type) {
     sees, the enclosing ones too, under one fresh spelling, so a file-scope
     name a template keeps reaches the global there, and returns them.
     Locals of other scopes keep their spellings for the native macros that
-    name them. */
+    name them.
+*/
 List Sym.unshadow_visible(Sym s, String spelling) {
   List key = $(spelling), visible = NULL;
   String alias = s.c.fresh_name("binding_shadow");
