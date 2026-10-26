@@ -119,11 +119,11 @@ meta int collection_Array_equal(int unused) {
   return a.equal(b)
     && !(a === b);
 }
-meta int collection_Array_indexof(int unused) {
+meta int collection_Array_index(int unused) {
   (void) unused;
   Array a = [1, 2, 1];
-  return a.indexof(1) == 0
-    && a.indexof(9) == -1;
+  return a.index(1) == 0
+    && a.index(9) == -1;
 }
 meta int collection_Array_truth(int unused) {
   (void) unused;
@@ -213,8 +213,8 @@ int main(int argc, char **argv) {
     collection_Array_sort(argc - 1));
   printf("%d %d\n", $collection_Array_equal(0),
     collection_Array_equal(argc - 1));
-  printf("%d %d\n", $collection_Array_indexof(0),
-    collection_Array_indexof(argc - 1));
+  printf("%d %d\n", $collection_Array_index(0),
+    collection_Array_index(argc - 1));
   printf("%d %d\n", $collection_Array_truth(0),
     collection_Array_truth(argc - 1));
   printf("%d %d\n", $collection_Map_copy(0),

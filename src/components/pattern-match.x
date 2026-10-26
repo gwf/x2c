@@ -112,7 +112,7 @@ meta static int _match_bind(
   int &braces) {
   int list = binder.is_list_binder();
   if (binders != NULL) {
-    int slot = binders.find(binder);
+    int slot = binders.index(binder);
     if (slot < 0) return 0;
     _match_and(b, testing);
     b.printf(

@@ -4698,7 +4698,7 @@ List.get       List.assoc    List.array    List.sort
 
 Array.new      Array.len     Array.push    Array.getindex  Array.setindex
 Array.take_last Array.shift  Array.unshift Array.insert    Array.remove
-Array.find     Array.contains Array.count  Array.join      Array.list
+Array.index    Array.find    Array.contains Array.count    Array.join Array.list
 
 Map.new        Map.len       Map.get       Map.getindex    Map.setindex
 Map.contains   Map.del       Map.getdefault Map.setdefault Map.list
