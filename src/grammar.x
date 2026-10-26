@@ -1,7 +1,3 @@
-#pragma once
-#include "common.x"
-#include "macrovalue/macrovalue.x"
-
 /*  grammar.x -- the source forms that lowering recognizes
 
     Copyright (c) 2026 Gary William Flake.
@@ -11,6 +7,11 @@
     parsed node. The accessors read the parts of a parsed node that no
     source form writes, such as a handler the parser introduced.
 */
+
+#pragma once
+#include "common.x"
+#include "macrovalue/macrovalue.x"
+
 /* A try whose only exit work is its finalizer. */
 macro Stmt $tried(Stmt $body, Stmt $finalizer) {
   try $body finally $finalizer
@@ -58,8 +59,7 @@ macro Stmt $do_loop(Stmt $body, Expr $condition) {
 
 /* Optional header clauses retain the parser's absent fields; the first
    clause can also be a declaration in its own for scope. */
-macro Stmt $for_loop(
-  Expr $init, Expr $condition, Expr $advance, Stmt $body) {
+macro Stmt $for_loop(Expr $init, Expr $condition, Expr $advance, Stmt $body) {
   for ($init; $condition; $advance) $body
 }
 
