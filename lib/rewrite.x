@@ -1,4 +1,4 @@
-/* Pattern registration for compiler rewrites. */
+/*  rewrite.x -- pattern registration for compiler rewrites */
 #pragma once
 #include "meta.x"
 #include "macrovalue/macrovalue.x"
