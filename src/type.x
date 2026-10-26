@@ -26,7 +26,7 @@
 */
 Type List.type_from_ast(List ast) {
   List type = _from_ast(ast, NULL);
-  match (type) case %((*)): return type.car();
+  if (type ~= %((*))) return type.car();
   return type;
 }
 
