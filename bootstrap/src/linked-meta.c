@@ -16577,7 +16577,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_26(void
   _13810 = List_var(_13809);
   _13811 = String_new("src/diagnostics.x");
   _13812 = String_var(_13811);
-  _13813 = String_new("c4215b34");
+  _13813 = String_new("fb51fb4a");
   _13814 = String_var(_13813);
   _13815 = cons(_13814, NULL);
   _13816 = cons(_13812, _13815);
@@ -16613,7 +16613,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_27(void
   _13843 = List_var(_13842);
   _13844 = String_new("src/stage.x");
   _13845 = String_var(_13844);
-  _13846 = String_new("909449bb");
+  _13846 = String_new("3a6e8128");
   _13847 = String_var(_13846);
   _13848 = cons(_13847, NULL);
   _13849 = cons(_13845, _13848);
@@ -18613,7 +18613,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_30(void
   _15834 = List_var(_15833);
   _15835 = String_new("src/meta-sdk/primitives.x");
   _15836 = String_var(_15835);
-  _15837 = String_new("a68b2434");
+  _15837 = String_new("787250f1");
   _15838 = String_var(_15837);
   _15839 = cons(_15838, NULL);
   _15840 = cons(_15836, _15839);

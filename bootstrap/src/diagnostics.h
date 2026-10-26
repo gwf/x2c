@@ -63,8 +63,6 @@ int Compiler_token_column(Compiler c, Token token);
 
 String Compiler_text_source(Compiler c, int position, int * offset);
 
-Token Compiler_source_token(Compiler c, Token token, String * file);
-
 _Noreturn void Compiler_report_error(Compiler compiler, Symbol code, String message, Token token, List notes);
 
 void Compiler_report_problem(Compiler c, Symbol code, String message, Token token, List notes);

@@ -1929,7 +1929,7 @@ static List f10_primitives____native_rows(Symbol inventory, List leading, List t
 }
 
 static List f10_primitives____declared_targets(List paths){
-  List rows = Compiler_native_meta_targets(paths, 0);  if(! List_truth(rows)) MetaContext_reject(_384, _387);  return rows;
+  List rows = Compiler_native_meta_targets(paths, 1);  if(! List_truth(rows)) MetaContext_reject(_384, _387);  return rows;
 }
 
 void Compiler_add_sdk_targets(Map rows){

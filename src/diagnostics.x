@@ -441,19 +441,6 @@ String Compiler.text_source(Compiler c, int position, int &offset) {
   return c.filename;
 }
 
-/** Returns a copy of `token` at its line, column, and byte offset in the
-    own text of the file that holds it, and sets `file` to that file. The
-    host preprocessor's rows record no offsets, so a token of its output
-    keeps its merged offset. */
-Token Compiler.source_token(Compiler c, Token token, String &file) {
-  Token placed = xcalloc(1, sizeof(struct Token));
-  *placed = *token;
-  placed.col = c.token_column(token);
-  file = c.token_source(token, placed.line);
-  (void) c.text_source(token.pos, placed.pos);
-  return placed;
-}
-
 /* The region that places `token`. The host preprocessor's rows place only
    the tokens scanned from its output. A module's rows place any token of
    the spliced text, including the thawed copy of a queued effect's site. */

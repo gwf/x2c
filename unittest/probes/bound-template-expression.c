@@ -4,7 +4,7 @@
 #include "compiler.h"
 #include "diagnostics.h"
 #include "expressions.h"
-#include "lisp.h"
+#include "datum-reader.h"
 #include "macros.h"
 #include "meta.h"
 #include "parse.h"
@@ -18,10 +18,10 @@ static void require(int condition, const char *message) {
   exit(1);
 }
 
-static List read_list(Lisp reader, const char *text) {
+static List read_list(const char *text) {
   unsigned cursor = 0;
   Var result;
-  Lisp_read(reader, String_new(text), &cursor, &result);
+  datum_read_form(String_new(text), &cursor, &result);
   return Var_list(result);
 }
 
@@ -30,7 +30,7 @@ static Macro definition(Compiler c, const char *text) {
   return Compiler_parse_macro_definition(c);
 }
 
-static void check(Compiler c, Lisp reader, Macro plain, Macro captured,
+static void check(Compiler c, Macro plain, Macro captured,
     const char *text, Type override, int source_wrapper) {
   Compiler_tokenize(c, (char *) text);
   List code = Compiler_parse_assignment(c);
@@ -38,14 +38,14 @@ static void check(Compiler c, Lisp reader, Macro plain, Macro captured,
   List content = Var_list(List_caddr(code));
   int has_captures = List_len(content) == 4;
   Macro shape = has_captures ? captured : plain;
-  List names = read_list(reader, has_captures
+  List names = read_list(has_captures
     ? "(?body *captures *params)" : "(?body *params)");
   List bindings = List_match(code, List_var(Macro_pattern(shape, names)));
   require(bindings != NULL, "source template did not recognize the lambda");
   List body = Var_list(List_assoc(bindings, List_car(names)));
   if (source_wrapper) {
     body = List_list_n(3, Atom_intern(String_new("src")),
-      List_var(read_list(reader, "(source \"<caller>\" 10 20)")),
+      List_var(read_list("(source \"<caller>\" 10 20)")),
       List_var(body));
     content = List_append(List_getslice(content, 0, List_len(content) - 1, 1),
       List_list_n(1, List_var(body)));
@@ -88,19 +88,19 @@ static void check(Compiler c, Lisp reader, Macro plain, Macro captured,
     source_wrapper ? " (retained src wrapper)" : "");
 }
 
-static void check_bound_expr_holes(Compiler c, Lisp reader) {
+static void check_bound_expr_holes(Compiler c) {
   Macro indexed = definition(c,
     "macro Expression $indexed(Expr $base, Expr $selector) => "
     "$base[$selector];");
-  List base = read_list(reader,
+  List base = read_list(
     "(expr (* int) (ident (binding 17 \"pointer\")))");
-  List selector = read_list(reader,
+  List selector = read_list(
     "(expr (long) (cast (long) "
     "(expr (\"Var\") (ident (binding 18 \"selected\")))))");
   List result = Compiler_rebuild_expression(c, NULL,
     Macro_apply(indexed, List_list_n(2, List_var(base),
       List_var(selector))));
-  List expected = read_list(reader,
+  List expected = read_list(
     "(expr () (index "
     "(expr (* int) (ident (binding 17 \"pointer\"))) "
     "(expr (long) (cast (long) "
@@ -112,7 +112,7 @@ static void check_bound_expr_holes(Compiler c, Lisp reader) {
     Var_list(List_caddr(index)) == selector,
     "bound index lost captured expression identities");
 
-  List sourced = read_list(reader,
+  List sourced = read_list(
     "(src (source \"input.x\" 4 12) "
     "(expr (* int) (ident (binding 17 \"pointer\"))))");
   result = Compiler_rebuild_expression(c, NULL,
@@ -124,20 +124,20 @@ static void check_bound_expr_holes(Compiler c, Lisp reader) {
     "bound index lost source wrapper or captured identity");
 
   Macro called = definition(c,
-    "macro Expression $called(Expr $callee, Expr $arguments...) => "
-    "$callee($arguments...);");
-  List callee = read_list(reader,
+    "macro Expression $called(Expr $callee, Expr @arguments) => "
+    "$callee(@arguments);");
+  List callee = read_list(
     "(expr ((func ((\"Map\") (\"Var\"))) \"Var\") "
     "(ident (binding 19 \"Map_getindex\")))");
-  List receiver = read_list(reader,
+  List receiver = read_list(
     "(expr (\"Map\") (ident (binding 20 \"map\")))");
-  List key = read_list(reader,
+  List key = read_list(
     "(expr (\"Var\") (call \"String_var\" "
     "(args (expr (\"String\") (literal (\"String\") \"key\")))))");
   List args = List_list_n(2, List_var(receiver), List_var(key));
-  result = Compiler_rebuild_expression(c, read_list(reader, "(\"Var\")"),
+  result = Compiler_rebuild_expression(c, read_list("(\"Var\")"),
     Macro_apply(called, List_list_n(2, List_var(callee), List_var(args))));
-  expected = read_list(reader,
+  expected = read_list(
     "(expr (\"Var\") (call "
     "(expr ((func ((\"Map\") (\"Var\"))) \"Var\") "
     "(ident (binding 19 \"Map_getindex\"))) "
@@ -155,10 +155,10 @@ static void check_bound_expr_holes(Compiler c, Lisp reader) {
     "bound call lost captured expression identities");
 }
 
-static void check_array_source_form(Compiler c, Lisp reader) {
+static void check_array_source_form(Compiler c) {
   Macro array = definition(c,
-    "macro Expression $array_value(Expr $items...) => %[$items...];");
-  List names = read_list(reader, "(*items)");
+    "macro Expression $array_value(Expr @items) => %[@items];");
+  List names = read_list("(*items)");
   const char *sources[] = {"%[]", "%[1, 2, 3]"};
   const int counts[] = {0, 3};
   for (int i = 0; i < 2; i++) {
@@ -180,25 +180,25 @@ static void check_array_source_form(Compiler c, Lisp reader) {
         "array rebuild lost child identity");
   }
 
-  List wrapped = read_list(reader,
+  List wrapped = read_list(
     "(src (source \"input.x\" 4 12) "
     "(expr (int) (literal (int) \"7\")))");
-  List rebuilt = Compiler_rebuild_expression(c, read_list(reader, "(\"Array\")"),
+  List rebuilt = Compiler_rebuild_expression(c, read_list("(\"Array\")"),
     Macro_apply(array, List_list_n(1,
       List_var(List_list_n(1, List_var(wrapped))))));
   require(Var_list(List_cadr(Var_list(List_caddr(rebuilt)))) == wrapped,
     "array rebuild lost a source wrapper");
 
-  List raw = read_list(reader,
+  List raw = read_list(
     "(expr (\"Array\") (array (expr (<macro-expr>) (ident \"snapshot\")) "
     "(src (source \"input.x\" 5 9) "
     "(expr (int) (literal (int) \"3\")))))");
   List resolved = Compiler_resolve_expression(c, raw, c->token);
   require(List_equal(Var_list(List_cadr(resolved)),
-    read_list(reader, "(\"Array\")")), "resolved array root type changed");
+    read_list("(\"Array\")")), "resolved array root type changed");
   List members = List_cdr(Var_list(List_caddr(resolved)));
   List first = Var_list(List_car(members));
-  require(List_equal(Var_list(List_cadr(first)), read_list(reader, "(int)")),
+  require(List_equal(Var_list(List_cadr(first)), read_list("(int)")),
     "array member was not resolved");
   require(Var_list(List_cadr(members)) ==
     Var_list(List_caddr(Var_list(List_caddr(raw)))),
@@ -208,10 +208,10 @@ static void check_array_source_form(Compiler c, Lisp reader) {
   require(Compiler_error_count(c) == 0, "array source form reported an error");
 }
 
-static void check_map_source_form(Compiler c, Lisp reader) {
+static void check_map_source_form(Compiler c) {
   Macro map = definition(c,
-    "macro Expression $map_value(Entry $rows...) => %{$($rows...)};");
-  List names = read_list(reader, "(*rows)");
+    "macro Expression $map_value(Entry @rows) => %{@rows};");
+  List names = read_list("(*rows)");
   const char *sources[] = {"%{}", "%{\"a\": 1, \"b\": 2}"};
   const int counts[] = {0, 2};
   for (int i = 0; i < 2; i++) {
@@ -240,7 +240,7 @@ static void check_map_source_form(Compiler c, Lisp reader) {
     }
   }
 
-  List raw = read_list(reader,
+  List raw = read_list(
     "(expr (\"Map\") (map "
     "(map-entry (expr (<macro-expr>) (ident \"snapshot\")) "
     "(expr (int) (literal (int) \"3\"))) "
@@ -258,14 +258,14 @@ static void check_map_source_form(Compiler c, Lisp reader) {
   List first_out = Var_list(List_car(output));
   List second_out = Var_list(List_cadr(output));
   require(List_equal(Var_list(List_cadr(Var_list(List_cadr(first_out)))),
-    read_list(reader, "(int)")), "map key was not resolved");
+    read_list("(int)")), "map key was not resolved");
   require(List_equal(Var_list(List_cadr(Var_list(List_caddr(second_out)))),
-    read_list(reader, "(int)")), "map value was not resolved");
+    read_list("(int)")), "map value was not resolved");
   require(Var_list(List_caddr(first_out)) == Var_list(List_caddr(first)) &&
     Var_list(List_cadr(second_out)) == Var_list(List_cadr(second)),
     "resolved map changed an established child");
 
-  List computed = read_list(reader,
+  List computed = read_list(
     "(expr (\"Map\") (map (seq "
     "(map-entry (expr (<macro-expr>) (ident \"snapshot\")) "
     "(expr (int) (literal (int) \"2\"))) "
@@ -276,9 +276,9 @@ static void check_map_source_form(Compiler c, Lisp reader) {
   require(List_len(output) == 2, "computed Map rows did not expand");
   require(List_equal(Var_list(List_cadr(Var_list(
       List_cadr(Var_list(List_car(output)))))),
-    read_list(reader, "(int)")) &&
+    read_list("(int)")) &&
     List_equal(Var_list(List_cadr(Var_list(List_cadr(output)))),
-    read_list(reader, "(expr (int) (literal (int) \"3\"))")),
+    read_list("(expr (int) (literal (int) \"3\"))")),
     "computed Map row order changed");
   require(Compiler_error_count(c) == 0, "map source form reported an error");
 }
@@ -292,29 +292,28 @@ int main(int argc, char **argv) {
   c->filename = String_new("<bound-template-probe>");
   Sym_reset(c->sym, NULL);
   Macro plain = definition(c,
-    "macro Expression $plain(Expr $body, Param $params...) => "
-    "%!($params...) => $body;");
+    "macro Expression $plain(Expr $body, Param @params) => "
+    "%!(@params) => $body;");
   Macro captured = definition(c,
     "macro Expression $captured(Expr $body, Captures $captures, "
-    "Param $params...) => %!($params...) using $captures => $body;");
+    "Param @params) => %!(@params) using $captures => $body;");
   Sym_push_new_scope(c->sym);
   Compiler_tokenize(c, "int snapshot, shared, unused");
   Compiler_parse_simple_declaration(c);
-  Lisp reader = Lisp_new();
-  check_array_source_form(c, reader);
-  check_map_source_form(c, reader);
-  check(c, reader, plain, captured,
+  check_array_source_form(c);
+  check_map_source_form(c);
+  check(c, plain, captured,
     "%!(int n) using &shared => snapshot + shared + n", NULL, 0);
-  check(c, reader, plain, captured,
+  check(c, plain, captured,
     "%!() using &shared => { shared++; return shared; }", NULL, 0);
-  check(c, reader, plain, captured,
+  check(c, plain, captured,
     "%!(int a, int b) => a + b", NULL, 0);
-  check(c, reader, plain, captured, "%!() => 7", NULL, 0);
-  check(c, reader, plain, captured, "%!() => 7", NULL, 1);
+  check(c, plain, captured, "%!() => 7", NULL, 0);
+  check(c, plain, captured, "%!() => 7", NULL, 1);
   /* An explicit but unused capture may leave no rows while the established
      result is still Func. Reconstruction must not infer a callable type. */
-  check(c, reader, plain, captured, "%!() using &unused => 7",
-    read_list(reader, "(\"Func\")"), 0);
+  check(c, plain, captured, "%!() using &unused => 7",
+    read_list("(\"Func\")"), 0);
   c->macro_holes = Map_new();
   List holes = Var_list(List_assoc(captured,
     Symbol_var(Symbol_new("parameters"))));
@@ -324,12 +323,11 @@ int main(int argc, char **argv) {
     Map_setindex(c->macro_holes, Atom_intern(String_new(binder + 1)),
       List_var(hole));
   }
-  check(c, reader, plain, captured,
-    "%!($params...) using $captures => $body", NULL, 0);
-  check(c, reader, plain, captured, "%!($params...) => $body", NULL, 0);
+  check(c, plain, captured,
+    "%!(@params) using $captures => $body", NULL, 0);
+  check(c, plain, captured, "%!(@params) => $body", NULL, 0);
   c->macro_holes = NULL;
-  check_bound_expr_holes(c, reader);
-  Lisp_destroy(reader);
+  check_bound_expr_holes(c);
   Scope_release();
   return 0;
 }

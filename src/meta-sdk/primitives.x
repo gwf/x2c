@@ -91,7 +91,7 @@ static List _native_rows(Symbol inventory, List leading, List trailing) {
 /* A native module's entry exports the prototypes its own sources declare,
    and a module that declares none is a mistake. */
 static List _declared_targets(List paths) {
-  List rows = Compiler.native_meta_targets(paths, 0);
+  List rows = Compiler.native_meta_targets(paths, 1);
   if (!rows)
     $fail.meta_sdk_native_declarations();
   return rows;

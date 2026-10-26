@@ -584,7 +584,7 @@ static List _number_literal(Compiler c, Type declared, Type type, Var value){
 
 List Compiler_convert_expression(Compiler, List, Type);
 static List _data_literal(Compiler c, Type declared, Var value, Token site){
-  _refuse(c, value, site);  List expression = _data_form(c, value);  return List_truth(expression) && List_truth(Type_list(declared)) ? Compiler_convert_expression(c, expression, declared) : expression;
+  if(Var_is_row(value, 9, 7, 4)) _refuse(c, value, site);  List expression = _data_form(c, value);  return List_truth(expression) && List_truth(Type_list(declared)) ? Compiler_convert_expression(c, expression, declared) : expression;
 }
 
 static List _data_form(Compiler c, Var value){

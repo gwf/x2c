@@ -292,7 +292,7 @@ static List _number_literal(Compiler c, Type declared, Type type, Var value) {
 
 /* Data code for `value`, converted to `declared` when there is one. */
 static List _data_literal(Compiler c, Type declared, Var value, Token site) {
-  _refuse(c, value, site);
+  if (value is <list>) _refuse(c, value, site);
   List expression = _data_form(c, value);
   return expression && declared
     ? c.convert_expression(expression, declared) : expression;

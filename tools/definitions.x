@@ -9,6 +9,7 @@
     comments as the book prints them.
 */
 #include "scripting.x"
+#include "datum-reader.x"
 #include <unistd.h>
 
 /** One unit's projection: `path`, `module` (its opening comment, or NULL),
@@ -43,7 +44,7 @@ static List _units(String dump):
   Unit unit = NULL
   unsigned cursor = 0
   Var rows = void
-  Lisp.read(NULL, %"($dump)", cursor, rows)
+  datum_read_form(%"($dump)", cursor, rows)
   foreach List row in rows.list():
     Symbol kind = row.car()
     if kind == <unit>:

@@ -16,6 +16,7 @@
     body adds around one statement or after a `case` label. A file that
     fails is reported and left unchanged. `--check` reports without writing.
 */
+#include "datum-reader.x"
 #include <stdlib.h>
 #include <string.h>
 
@@ -125,7 +126,9 @@ static List _ast(String path) {
   Array forms = [];
   unsigned cursor = 0;
   Var form = void;
-  while (Lisp.read(NULL, dump, cursor, form) == <value>)
+  Scope tokens_scope = auto Scope.new_named("AST tokens");
+  Tokenizer tokenizer = datum_scan_tokens(dump, &tokens_scope);
+  while (datum_read_token_form(tokenizer, dump, 0, cursor, form) == <value>)
     forms.push(_plain(form));
   return forms.list_free();
 }

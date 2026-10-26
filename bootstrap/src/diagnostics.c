@@ -681,16 +681,6 @@ String Compiler_text_source(Compiler c, int position, int * offset){
   return c -> filename;
 }
 
-Token Compiler_source_token(Compiler c, Token token, String * file){
-  if(! _init_guard_) _file_init_();
-  Token placed = xcalloc(1, sizeof(struct Token));
-  * placed = * token;
-  placed -> col = Compiler_token_column(c, token);
-  (* file) = Compiler_token_source(c, token, &(placed -> line));
-  (void) Compiler_text_source(c, token -> pos, &(placed -> pos));
-  return placed;
-}
-
 static List _token_region(Compiler c, Token token){
   List region = _region(c, token -> pos);
   {
@@ -748,7 +738,7 @@ _Noreturn void Compiler_report_error(Compiler compiler, Symbol code, String mess
   Compiler_report_problem(compiler, code, message, token, notes);
   Diagnostics diag = compiler -> diagnostics;
   if(compiler -> recovery_depth > 0){
-    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/diagnostics.x",.function = "Compiler_report_error",.line = 501};
+    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/diagnostics.x",.function = "Compiler_report_error",.line = 488};
     x2c_error_raise_n(& _x2c_gensym_error_site_0, 28682226919752, 1, Symbol_var(209659067570), Symbol_var(code));
     __builtin_unreachable();
   }
