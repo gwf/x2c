@@ -272,16 +272,17 @@ static int _is_automatic(List declaration) {
 /* A `for` that declares a local in `escaped` moves the declaration into a
    block around the loop, so the address escapes once, before the loop. */
 static List _escape_loop(Preserve &p, List loop) {
-  if (loop ~= %(for (decl ?type (!set ?bindings (bindings *binds))) *rest)) {
-    Array output = [];
-    _escape_declared(p, output, binds);
-    List escapes = output.list_free();
-    if (!escapes) return NULL;
-    List declaration = _declaration(
-      p, %(declare $type $bindings), p.escaped);
-    List remaining = _preserve_locals(p, %(for () @rest));
-    return source_block_content($(declaration, @escapes, remaining));
-  }
+  match (loop)
+    case %(for (decl ?type (!set ?bindings (bindings *binds))) *rest): {
+      Array output = [];
+      _escape_declared(p, output, binds);
+      List escapes = output.list_free();
+      if (!escapes) return NULL;
+      List declaration = _declaration(
+        p, %(declare $type $bindings), p.escaped);
+      List remaining = _preserve_locals(p, %(for () @rest));
+      return source_block_content($(declaration, @escapes, remaining));
+    }
   return NULL;
 }
 
