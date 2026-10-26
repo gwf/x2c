@@ -67,11 +67,12 @@ meta static Code _lambda_cell(List name, Type type, Code value) {
   Type bytes = %(* void), pointer = cons(<*>, type), literal = type;
   Code allocated = $!($bytes){ Scope_malloc(sizeof($type)) };
   if (value) {
-    if (!type.match(%((dim *) *)) && !value.match(%(expr ? (composite ?)))) {
+    if (!(type ~= %((dim *) *)) &&
+        !(value ~= %(expr ? (composite ?)))) {
       literal = cons(%(dim $($!int{ 1 })), type);
       value = value.convert(type);
     }
-    if (!value.match(%(expr ? (composite ?))))
+    if (!(value ~= %(expr ? (composite ?))))
       value = %(expr $literal (composite (commas $value)));
     allocated = $!($bytes){
       Scope_memdup((const void *)&($literal)$value, sizeof($type))
@@ -257,7 +258,7 @@ meta static List _lambda_items(Code body) {
   match (body) case %(block *items):
     return $(
       @(_lambda_returning(items, source_return_none())), source_return_none());
-  List items = body.match(%(expr (void) ?))
+  List items = body ~= %(expr (void) ?)
     ? %((stmnt $body) $(source_return_none()))
     : %((stmnt (return $(body.convert(%("Var"))))));
   match (x2c_enclosing(<statement>)) case %(at ?origin ?):
