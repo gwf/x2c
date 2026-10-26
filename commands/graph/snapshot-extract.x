@@ -154,6 +154,8 @@ static String _sx_type(SnapshotExtract &s, Type type) {
   Type base = type.base_type();
   if (!base) return "";
   if (base.is_typedef()) base = base.cdr();
+  Type scalar = base.scalar();
+  if (scalar) base = scalar;
   String key = _sx_ast(s, base);
   if (s.type_ids.contains(key)) return s.type_ids[key];
   String name = key;
@@ -164,7 +166,7 @@ static String _sx_type(SnapshotExtract &s, Type type) {
   }
   List binding = s.c.sym.lookup(base, NULL);
   List declaration = _sx_declaration(s, binding);
-  String owner_file = s.unit;
+  String owner_file = scalar ? "<builtin>" : s.unit;
   if (declaration) owner_file = declaration.car();
   else if (base.is_aggregate_tag()) {
     List fields = s.c.sym.field_order(base);
@@ -178,7 +180,11 @@ static String _sx_type(SnapshotExtract &s, Type type) {
   String id = %"$(s.domain)::$owner_file::type::$key";
   Map entity = _sx_entity(s, id, "type", name, s.unit_id);
   entity["origin"] = "external";
-  entity["file"] = owner_file;
+  entity["file"] = scalar ? "" : owner_file;
+  if (scalar) {
+    entity["unit"] = "";
+    entity["owner"] = "";
+  }
   _sx_declaration_source(s, entity, declaration);
   if (binding) entity["binding"] = snapshot_text(binding);
   _sx_types(s, entity, base);
