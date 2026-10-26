@@ -131,8 +131,7 @@ static macro Stmt $report.protocol_signature_conflict(
 }
 
 static Type _declared(Compiler c, String name) {
-  if (c.sym.get($("generated-protocol", name)))
-    return NULL;
+  if (c.sym.get($("generated-protocol", name))) return NULL;
   return c.sym.get($(name));
 }
 
@@ -180,8 +179,7 @@ static String _recorded_spelling(Compiler c, String name) {
   return binding ? Ast.binding_spelling(binding) : name;
 }
 
-static List _recorded_conformance(
-  Compiler c, Type base, Type participant) {
+static List _recorded_conformance(Compiler c, Type base, Type participant) {
   if (_visibility(c, base, participant) != <external>) return NULL;
   match (c.conforms[$(base, participant)])
     case %(protocol-conformance ? ? ?forward ?reverse ? ?(Map bindings)
@@ -253,8 +251,7 @@ static List _recorded(Compiler c, Type base, Type participant) {
 
 /* Installs the conformance an included interface recorded for an adoption
    this unit does not own. Returns 0 when there is none to reuse. */
-module int _reuse_conformance(
-  Compiler c, Type base, Type participant) {
+module int _reuse_conformance(Compiler c, Type base, Type participant) {
   match ($(_record(c, base), _recorded(c, base, participant)))
     case %((? ? ? ? (members *templates))
            (conformance ? ? ?forward ?reverse (bindings *bound) *members)): {
@@ -487,8 +484,7 @@ static List _resolve_native(
   return conformance;
 }
 
-static List _rows(
-  NativeResolution &r, List templates, List &failure) {
+static List _rows(NativeResolution &r, List templates, List &failure) {
   Array members = [];
   Map native_bindings = NULL;
   foreach (List template in templates) {
@@ -556,8 +552,7 @@ static Type _participant_definition(Compiler c, Type participant) {
   return definition is <list> ? definition : NULL;
 }
 
-module void _install_native_bindings(
-  Compiler c, Type participant, List rows) {
+module void _install_native_bindings(Compiler c, Type participant, List rows) {
   if (!_native_rows(rows)) return;
   foreach (List row in rows)
     match (row)
@@ -621,8 +616,7 @@ does_not_conform: c.conforms[key] = 0;
   return NULL;
 }
 
-static String _forward_binding(
-  Compiler c, Type base, Type participant) {
+static String _forward_binding(Compiler c, Type base, Type participant) {
   String base_name = _base_name(base);
   if (!base_name || !participant.is_bare_typedef_name()) return NULL;
   String binding = _member_spelling(participant, base_name.lower());
@@ -631,8 +625,7 @@ static String _forward_binding(
   return binding;
 }
 
-static String _reverse_binding(
-  Compiler c, Type base, Type participant) {
+static String _reverse_binding(Compiler c, Type base, Type participant) {
   String base_name = _base_name(base);
   if (!base_name || !participant.is_bare_typedef_name()) return NULL;
   String participant_name = participant.car();
@@ -650,8 +643,7 @@ static String _reverse_binding(
 /* Members are selected against the participant's bindings first; the
    associated-type defaults fill what selection left unbound before each
    member's expected signature is completed. */
-static List _resolve(
-  MemberResolution &r, List associations, List templates) {
+static List _resolve(MemberResolution &r, List associations, List templates) {
   r.variables[r.binder] = 1;
   r.bindings[r.binder] = r.participant;
   foreach (List association in associations) {
