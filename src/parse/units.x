@@ -293,7 +293,8 @@ int Compiler.script_statement_executes(Compiler c) =>
 
 /** Reports whether the cursor begins a protocol declaration or adoption,
     including its `meta` and `static` markers. This query does not consume
-    tokens. */
+    tokens.
+*/
 int Compiler.protocol_form_starts(Compiler c) {
   int at = c.at_word("meta");
   if (c.peek(at) == <static>) at++;
@@ -301,7 +302,8 @@ int Compiler.protocol_form_starts(Compiler c) {
 }
 
 /** Reports whether the cursor begins a contextual top-level `meta`
-    declaration: a function or an initialized file-static value. */
+    declaration: a function or an initialized file-static value.
+*/
 int Compiler.meta_form_is_declaration(Compiler c) {
   if (!c.at_word("meta")) return 0;
   Token head = c.token;
