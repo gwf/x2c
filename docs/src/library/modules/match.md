@@ -1078,7 +1078,7 @@ Releases resources owned by `plan`.
 A null plan is ignored; the plan, layout, program, and all aliases to them
 are invalid afterward. Borrowed pattern constants are not released.
 
-Source: `lib/match/plan.x:76`
+Source: `lib/match/plan.x:75`
 
 <a id="MatchPlan.prepare"></a>
 #### MatchPlan.prepare
@@ -1094,7 +1094,7 @@ pattern constants, which must outlive it.
 
 **Raises:** `<alloc-fail>` while analyzing, lowering, or freezing.
 
-Source: `lib/match/plan.x:43`
+Source: `lib/match/plan.x:42`
 
 <a id="MatchPlan.raise_ineligible"></a>
 #### MatchPlan.raise_ineligible

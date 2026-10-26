@@ -44,7 +44,7 @@ Protocols from declaration to conform forms.
 Returns the interface rows of the resolved conformances `adoptions`
 declare.
 
-Source: `src/protocol/resolution.x:211`
+Source: `src/protocol/resolution.x:209`
 
 <a id="Compiler.discard_helper"></a>
 #### Compiler.discard_helper
@@ -239,7 +239,7 @@ parse resolves its own: before the parse, and again, after the
 generated members are published, where the parse publishes each one.
 Their declaring units report their failures, so nothing is reported.
 
-Source: `src/protocol/resolution.x:227`
+Source: `src/protocol/resolution.x:225`
 
 <a id="Compiler.resolve_protocol_member"></a>
 #### Compiler.resolve_protocol_member
@@ -265,7 +265,7 @@ adoptions owned by the current translation unit. An adoption another
 unit declared and recorded keeps that conformance, which is installed
 when it is first used.
 
-Source: `src/protocol/resolution.x:145`
+Source: `src/protocol/resolution.x:144`
 
 <a id="Compiler.reverse_converter_spelling"></a>
 #### Compiler.reverse_converter_spelling
