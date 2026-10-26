@@ -436,6 +436,12 @@ promotion. `min` and `max` use total `Var` ordering and keep the first of
 equal values. `min`, `max`, and `find` return `void` when there is nothing to
 return, and `foldl` given a `void` seed uses the first element as its seed.
 
+`find(predicate)` has the same element-or-`void` result as Array and List
+search. It consumes through the first match and leaves the following elements
+available. An unsuccessful search exhausts the iterator; a null predicate
+returns `void` without consuming anything. Zero, false, and NULL are valid
+matched elements, so use `is void` to test absence.
+
 ## Handing a pipeline to foreach
 
 An `Iter` is iterable, so `foreach` can consume a fluent pipeline directly.

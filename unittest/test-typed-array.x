@@ -414,8 +414,8 @@ static void typed_array_int_slice_search_and_concat(void) {
   EXPECT_INT_EQ(alias[3], 3);
   EXPECT_INT_EQ(alias[4], 3);
 
-  EXPECT_INT_EQ(alias.find(3), 3);
-  EXPECT_INT_EQ(alias.indexof(9), -1);
+  EXPECT_INT_EQ(alias.index(3), 3);
+  EXPECT_INT_EQ(alias.index(9), -1);
   EXPECT_INT_EQ(alias.count(1), 2);
 
   ArrayInt combined = values.concat(alias);
@@ -446,7 +446,7 @@ static void typed_array_double_generated_sequences(void) {
   EXPECT_TRUE(values[1] == 8.5);
   EXPECT_TRUE(values[2] == 9.5);
   EXPECT_TRUE(values[3] == 3.5);
-  EXPECT_INT_EQ(values.find(9.5), 2);
+  EXPECT_INT_EQ(values.index(9.5), 2);
   EXPECT_INT_EQ(values.count(8.5), 1);
 
   ArrayDbl combined = values.concat(replacement);
@@ -456,6 +456,39 @@ static void typed_array_double_generated_sequences(void) {
   EXPECT_TRUE(combined[0] == 9.5);
   EXPECT_TRUE(combined.shift() == 9.5);
   EXPECT_TRUE(combined.remove(-1) == 1.5);
+}
+
+static void typed_array_find_boxes_matches(void) {
+  $test.scoped();
+  ArrayChar chars = [0, 2];
+  ArrayShort shorts = [0, 20];
+  ArrayInt ints = [0, 200];
+  ArrayLong longs = [0, 3000000000L];
+  ArrayFloat floats = [0.0f, 2.5f];
+  ArrayDbl doubles = [0.0, 3.5];
+  ArrayString strings = [NULL, "match"];
+  Func accept = %!(Var value) => value;
+  EXPECT_INT_EQ(chars.find(accept).char(), 2);
+  EXPECT_INT_EQ(shorts.find(accept).short(), 20);
+  EXPECT_INT_EQ(ints.find(accept).int(), 200);
+  EXPECT_TRUE(longs.find(accept).long() == 3000000000L);
+  EXPECT_TRUE(floats.find(accept).float() == 2.5f);
+  EXPECT_TRUE(doubles.find(accept).double() == 3.5);
+  EXPECT_STR_EQ(strings.find(accept).string(), "match");
+  EXPECT_INT_EQ(chars.index(2), 1);
+  EXPECT_INT_EQ(shorts.index(20), 1);
+  EXPECT_INT_EQ(ints.index(200), 1);
+  EXPECT_INT_EQ(longs.index(3000000000L), 1);
+  EXPECT_INT_EQ(floats.index(2.5f), 1);
+  EXPECT_INT_EQ(doubles.index(3.5), 1);
+  EXPECT_INT_EQ(strings.index("match"), 1);
+  EXPECT_TRUE(ints.find(NULL) is void);
+  EXPECT_TRUE(ints.find(%!(Var value) => value > 999) is void);
+  EXPECT_INT_EQ(ints[0], 0);
+  EXPECT_INT_EQ(ints[1], 200);
+  ArrayInt empty = ArrayInt.new(), missing = NULL;
+  EXPECT_TRUE(empty.find(accept) is void);
+  EXPECT_TRUE(missing.find(accept) is void);
 }
 
 /* A typed array shares the generated region code, so a negative `end` is the
@@ -640,6 +673,7 @@ void typed_array_suite(void) {
   $test.run(typed_array_int_sequence_mutations);
   $test.run(typed_array_int_slice_search_and_concat);
   $test.run(typed_array_double_generated_sequences);
+  $test.run(typed_array_find_boxes_matches);
   $test.run(typed_array_region_end_matches_slice_stop);
   $test.run(typed_array_int_raise_paths_transfer);
   $test.run(typed_array_double_raise_paths_transfer);

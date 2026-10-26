@@ -948,19 +948,47 @@ static void lisp_numeric_comparison_reads_the_value(void) {
 }
 
 
-/* Only nesting costs the reader a frame, and past the fence it reports a
-   size rather than exhausting the C stack. */
+static String _nested_reader_source(String open, String close, int count) {
+  Buffer source = auto Buffer.new(0);
+  source.write("  ");
+  for (int i = 0; i < count; i++) source.write(open);
+  source.write("x");
+  if (close) for (int i = 0; i < count; i++) source.write(close);
+  return source.str();
+}
+
+/* Lists and reader prefixes share the same nesting limit. */
 static void lisp_read_fences_nesting_depth(void) {
   Lisp lisp = Lisp.kernel();
-  Buffer deep = auto Buffer.new(0);
-  for (int i = 0; i < 20000; i++) deep.write("(");
-  for (int i = 0; i < 20000; i++) deep.write(")");
-  Symbol code = 0;
+  foreach (String open in %("(" "'" "`" "," ",@" "('")) {
+    String close = open[0] == '(' ? ")" : NULL;
+    int nesting = open == "('" ? 2 : 1;
+    unsigned cursor = 0;
+    Var out = void;
+    EXPECT_INT_EQ(lisp.read(
+      _nested_reader_source(open, close, 1023 / nesting), cursor, out),
+      <value>);
+    EXPECT_TRUE(out is not void);
+    cursor = 0;
+    out = 17;
+    int caught = 0;
+    try lisp.read(
+      _nested_reader_source(open, close, 1024 / nesting), cursor, out);
+    catch %(size-limit *detail): {
+      caught++;
+      EXPECT_INT_EQ(detail.assoc(<depth>).int(), 1024);
+      EXPECT_STR_EQ(detail.assoc(<operation>).string(), "Lisp.read");
+    }
+    EXPECT_INT_EQ(caught, 1);
+    EXPECT_INT_EQ(cursor, 2);
+    EXPECT_INT_EQ(out.int(), 17);
+  }
   unsigned cursor = 0;
   Var out = void;
-  try lisp.read(deep, cursor, out);
-  catch %(size-limit *): code = <size-limit>;
-  EXPECT_INT_EQ(code, <size-limit>);
+  int caught = 0;
+  try lisp.read(_nested_reader_source("'", NULL, 200000), cursor, out);
+  catch %(size-limit *): caught++;
+  EXPECT_INT_EQ(caught, 1);
   Symbol status;
   EXPECT_TRUE(_read1(lisp, "((((((((((x))))))))))", &status) is <list>);
   EXPECT_INT_EQ(status, <value>);
@@ -1725,6 +1753,14 @@ static void lisp_standard_environment_uses_library_operations(void) {
     lisp, "(Iter.foldl (range 1 3 1) 0 nil)"), <bad-arg>);
   EXPECT_INT_EQ(Var.integer(
     _ev(lisp, "(List.find '(0 2) (lambda (x) x))")), 0);
+  EXPECT_INT_EQ(Var.integer(_ev(lisp,
+    "(Array.find (List.array '(0 20 30)) (lambda (x) (> x 10)))")), 20);
+  EXPECT_INT_EQ(Var.integer(_ev(lisp,
+    "(Array.find (List.array '(0 20)) (lambda (x) x))")), 0);
+  EXPECT_INT_EQ(Var.integer(_ev(lisp,
+    "(Array.index (List.array '(0 20)) 20)")), 1);
+  EXPECT_TRUE(_ev(lisp,
+    "(Array.find (List.array '(0 20)) nil)") is void);
   EXPECT_VAR_EQ(
     _ev(lisp, "(Iter.list (Iter.map (range 1 3 1)"
               "                     (lambda (x) (+ x 20))))"),

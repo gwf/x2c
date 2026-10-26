@@ -679,10 +679,16 @@ static void iter_fold_predicates_and_zip_with(void) {
   EXPECT_TRUE(range(0, 0, 1, &head_base_storage)
     .head(0, &head_storage).all(NULL));
   struct Iter find_base_storage;
-  Var found = range(0, 4, 1, &find_base_storage).find(greater_than_one);
+  Iter find_base = range(0, 4, 1, &find_base_storage);
+  Var found = find_base.find(greater_than_one);
   EXPECT_INT_EQ(found.int(), 2);
+  EXPECT_INT_EQ(find_base.next().int(), 3);
   struct Iter find_void_base_storage;
-  EXPECT_TRUE(range(0, 1, 1, &find_void_base_storage).find(NULL) is void);
+  Iter find_void_base = range(0, 1, 1, &find_void_base_storage);
+  EXPECT_TRUE(find_void_base.find(NULL) is void);
+  EXPECT_INT_EQ(find_void_base.next().int(), 0);
+  EXPECT_TRUE(find_void_base.find(greater_than_one) is void);
+  EXPECT_TRUE(find_void_base.next() is void);
   struct Iter any_void_base_storage;
   EXPECT_FALSE(range(0, 1, 1, &any_void_base_storage).any(NULL));
   struct Iter zip_left_storage, zip_right_storage, zip_storage;

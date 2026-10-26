@@ -250,13 +250,14 @@
 
 (_natives Array.new Array.len Array.push Array.getindex Array.setindex
   Array.take_last Array.shift Array.unshift Array.insert Array.remove
-  Array.find Array.contains Array.count Array.join Array.list Array.map
+  Array.index Array.contains Array.count Array.join Array.list Array.map
   Array.map2 Array.sort_by Array.sort_with Array.foldl Array.copy
   Array.getslice Array.concat Array.reverse Array.compare Array.sort
-  Array.equal Array.indexof Array.truth Array.capacity Array.remslice
+  Array.equal Array.truth Array.capacity Array.remslice
   Array.setslice Array.splice Array.updateindex Array.postfixindex
   Array.clear Array.heap_push Array.heapify Array.heap_pop Array.pop
   Array.resize Array.truncate)
+(def Array.find (bind "Lisp_Array_find" nil))
 (def Array.iter (C.iterator.call (bind "Array_iter_into" nil) 1))
 
 // Map

@@ -47,6 +47,15 @@ static typedef struct LispReader {
   Tokenizer tokenizer, char *source, unsigned base, end;
 } LispReader;
 
+/* Elements are read in a loop; only Lists and prefixes add nesting. */
+#define LISP_READ_DEPTH_MAX 1024
+
+static int _nested_depth(int depth) {
+  if (++depth >= LISP_READ_DEPTH_MAX)
+    raise %(size-limit (operation "Lisp.read") (depth $depth));
+  return depth;
+}
+
 /* The form that starts at `token`, or `void` when the tokens end inside
    it. A form is never `void`. */
 static Var _parse_form(LispReader &r, Token token, int depth) {
@@ -57,33 +66,26 @@ static Var _parse_form(LispReader &r, Token token, int depth) {
       if (r.tokenizer.status() == <incomplete>) return void;
       return _malformed_token(r, token);
     case <")">:  return _malformed_token(r, token);
-    case <"(">:  return _list(r, depth + 1);
+    case <"(">:  return _list(r, _nested_depth(depth));
     case <"'">:  prefix = Atom.intern("quote");            break;
     case <"`">:  prefix = Atom.intern("quasiquote");       break;
     case <",">:  prefix = Atom.intern("unquote");          break;
     case <",@">: prefix = Atom.intern("unquote-splicing"); break;
   }
-  if (prefix is not void) return _prefixed(r, prefix, depth);
+  if (prefix is not void) return _prefixed(r, prefix, _nested_depth(depth));
   r.end = token.pos + token.len;
   return _atom(r, token);
 }
 
 /* A reader prefix wraps the next form, as `'x` reads `(quote x)`. */
 static Var _prefixed(LispReader &r, Var prefix, int depth) {
-  Var inner = _parse_form(r, r.tokenizer.next(), depth + 1);
+  Var inner = _parse_form(r, r.tokenizer.next(), depth);
   if (inner is void) return void;
   return $(prefix, inner);
 }
 
-/* A form's elements are read in a loop, so only nesting costs a frame.
-   The reader fences that nesting instead of exhausting the C stack, which
-   on a worker thread is a fraction of the main thread's. */
-#define LISP_READ_DEPTH_MAX 1024
-
 /* Starts after `(`; incomplete input returns `void`. */
 static Var _list(LispReader &r, int depth) {
-  if (depth >= LISP_READ_DEPTH_MAX)
-    raise %(size-limit (operation "Lisp.read") (depth $depth));
   Array elements = auto [];
   loop {
     Token token = r.tokenizer.next();
