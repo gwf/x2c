@@ -7,6 +7,7 @@
 
 #include "x2c.h"
 #include "compiler/compiler.h"
+#include "compiler-meta.h"
 int Symbol_binary_precedence(Symbol op);
 
 Symbol Symbol_compound_operator(Symbol op);

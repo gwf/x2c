@@ -17,11 +17,13 @@ typedef struct LispReader{
 }
 LispReader;
 
+#define LISP_READ_DEPTH_MAX 1024
+static int _nested_depth(int depth);
+
 static Var _parse_form(LispReader * r, Token token, int depth);
 
 static Var _prefixed(LispReader * r, Var prefix, int depth);
 
-#define LISP_READ_DEPTH_MAX 1024
 static Var _list(LispReader * r, int depth);
 
 static Var _atom(LispReader * r, Token token);
@@ -93,6 +95,32 @@ Symbol datum_read_token_form(Tokenizer tokenizer, String source, unsigned base, 
   return 46228810;
 }
 
+static Var String_var(String);
+
+String String_join(String, List);
+
+static Var Symbol_var(Symbol);
+
+static Var int_var(int);
+
+#include "error.h"
+
+
+
+
+static int _nested_depth(int depth){
+  if(++ depth >= LISP_READ_DEPTH_MAX){
+    Var _x2c_gensym_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("Lisp.read")), NULL)));
+    {
+      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/datum-reader.x",.function = "_nested_depth",.line = 54,.runtime = 1};
+      x2c_error_raise_n(& _x2c_gensym_error_site_0, 1358596898646632, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(8750352), int_var(depth));
+      __builtin_unreachable();
+    }
+
+  }
+  return depth;
+}
+
 Atom Atom_intern(String);
 
 static Var _parse_form(LispReader * r, Token token, int depth){
@@ -102,7 +130,7 @@ static Var _parse_form(LispReader * r, Token token, int depth){
     case 11703268 : if(Tokenizer_status((* r).tokenizer) == 664344300629258) return((void) 0, Void);
     return _malformed_token(&((* r)), token);
     case 83 : return _malformed_token(&((* r)), token);
-    case 81 : return _list(&((* r)), depth + 1);
+    case 81 : return _list(&((* r)), _nested_depth(depth));
     case 79 : prefix = Atom_intern(_0);
     break;
     case 193 : prefix = Atom_intern(_1);
@@ -112,7 +140,7 @@ static Var _parse_form(LispReader * r, Token token, int depth){
     case 11393 : prefix = Atom_intern(_3);
     break;
   }
-  if(! Var_is_void(prefix)) return _prefixed(&((* r)), prefix, depth);
+  if(! Var_is_void(prefix)) return _prefixed(&((* r)), prefix, _nested_depth(depth));
   (* r).end = token -> pos + token -> len;
   return _atom(&((* r)), token);
 }
@@ -120,18 +148,10 @@ static Var _parse_form(LispReader * r, Token token, int depth){
 static Var List_var(List);
 
 static Var _prefixed(LispReader * r, Var prefix, int depth){
-  Var inner = _parse_form(&((* r)), Tokenizer_next((* r).tokenizer), depth + 1);
+  Var inner = _parse_form(&((* r)), Tokenizer_next((* r).tokenizer), depth);
   if(Var_is_void(inner)) return((void) 0, Void);
   return List_var(cons(prefix, cons(inner, NULL)));
 }
-
-static Var String_var(String);
-
-String String_join(String, List);
-
-static Var Symbol_var(Symbol);
-
-static Var int_var(int);
 
 Array Array_new(void);
 
@@ -143,21 +163,7 @@ List Array_list(Array);
 
 Var Array_push(Array, Var);
 
-#include "error.h"
-
-
-
-
 static Var _list(LispReader * r, int depth){
-  if(depth >= LISP_READ_DEPTH_MAX){
-    Var _x2c_gensym_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("Lisp.read")), NULL)));
-    {
-      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/datum-reader.x",.function = "_list",.line = 85,.runtime = 1};
-      x2c_error_raise_n(& _x2c_gensym_error_site_0, 1358596898646632, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(8750352), int_var(depth));
-      __builtin_unreachable();
-    }
-
-  }
   Array elements = Array_new();
   const Array _x2c_gensym_macro_acquired_0 = elements;
   {
@@ -273,7 +279,7 @@ _Noreturn static Var _malformed(String source, unsigned at){
   int line = 1, column = 1;
   scan_next_line_col(source, (int) at, & line, & column);
   {
-    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/datum-reader.x",.function = "_malformed",.line = 145,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/datum-reader.x",.function = "_malformed",.line = 147,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_1, 28682226919752, 3, Symbol_var(1307939018), String_var(source), Symbol_var(805770), int_var(line), Symbol_var(233614172), int_var(column));
     __builtin_unreachable();
   }
@@ -284,7 +290,7 @@ _Noreturn static Var _incomplete(String source, unsigned at){
   int line = 1, column = 1;
   scan_next_line_col(source, (int) at, & line, & column);
   {
-    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/datum-reader.x",.function = "_incomplete",.line = 151,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/datum-reader.x",.function = "_incomplete",.line = 153,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_2, 664344300629258, 3, Symbol_var(1307939018), String_var(source), Symbol_var(805770), int_var(line), Symbol_var(233614172), int_var(column));
     __builtin_unreachable();
   }

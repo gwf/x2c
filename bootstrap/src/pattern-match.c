@@ -193,7 +193,7 @@ static void _match_and(Buffer b, int * testing){
 static int _match_bind(Buffer b, Var binder, String cell, Array seen, Array binders, int * testing, int * braces){
   int list = Var_is_list_binder(binder);
   if(binders != NULL){
-    int slot = Array_find(binders, binder);
+    int slot = Array_index(binders, binder);
     if(slot < 0) return 0;
     _match_and(b, &((* testing)));
     Buffer_printf(b, "(_x2c_gensym_match_values[%d] = %s%s%s, 1)", slot, list ? "List_var(" : "", cell, list ? ")" : "");
