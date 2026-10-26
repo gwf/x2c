@@ -65,8 +65,7 @@ module int _flow(Walk &w, Var value, Type type, Symbol sink, Fact target) {
   List named = NULL;
   Fact fact = _value_fact(w, value, named);
   if (!fact) fact = _returned_argument(w, value, named);
-  int born = 0;
-  Region other = NULL;
+  int born = 0, Region other = NULL;
   Acquired acquired = fact ? fact.acquired : NULL;
   Region region = fact ? fact.region
                        : _birth(w, value, NULL, born, other, acquired);
@@ -101,8 +100,7 @@ static int _owners(
   Flow &f, Fact target, Region region, Region other, int born) {
   int reported = 0;
   for (int choice = 0; choice < (born == 3 ? 2 : 1); choice++) {
-    Region owner = choice ? other : region;
-    int kind = born;
+    Region owner = choice ? other : region, int kind = born;
     if (born == 3) kind = choice ? 2 : 1;
     if (owner && target && target.born == 3 && f.sink == <heap>) {
       struct Fact pooled = *target;
@@ -191,8 +189,7 @@ module String _subject(Walk &w, Var value, List named, Fact fact) {
   match (source_expression(value)) case $source_any_lambda():
     return "a closure";
   if (!named) return "a fresh allocation";
-  String name = %"'$(Ast.binding_spelling(named))'";
-  Var own = w.facts[named];
+  String name = %"'$(Ast.binding_spelling(named))'", Var own = w.facts[named];
   if (own is not void && own.pointer() == fact) return name;
   List arguments = NULL;
   if (_callee_of(value, arguments)) return %"an address from $name";
