@@ -148,8 +148,7 @@ static void _read_row(Option &o, List row, Map index, int position) {
       if (!o.spelling ||
           (text.startswith("--") && !o.spelling.startswith("--")))
         o.spelling = text;
-      o.spellings =
-        o.spellings ? %"$(o.spellings), $text" : text;
+      o.spellings = o.spellings ? %"$(o.spellings), $text" : text;
       index[text] = position;
     }
     else if (text == "required") o.required = 1;
