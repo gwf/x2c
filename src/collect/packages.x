@@ -115,8 +115,9 @@ static void _merge_surface(Surface &s, String path, Map rows) {
 static void _take_exports(Surface &s, Map rows) {
   Array found = auto [];
   foreach (Var (key, value) in rows)
-    if ($(key, value) ~= %(("source-node" (? ? ?position))
-                            (!set ?effect ((!or compile-time project-meta) *))))
+    if ($(key, value) ~=
+        %(("source-node" (? ? ?position))
+          (!set ?effect ((!or compile-time project-meta) *))))
       found.push($(position, effect));
   found.sort();
   foreach (List entry in found) s.exports.push(entry.cadr());
