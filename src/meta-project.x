@@ -422,7 +422,7 @@ static String _loaded_providers(Helper &h) {
   int index = 1;
   foreach (String path in h.owners) {
     List provider = _loaded_provider(h, path, index++);
-    match (provider) case %(failure ?(String message)): return message;
+    if (provider ~= %(failure ?(String message))) return message;
     h.providers[path] = provider;
     if (_package_source(h, path))
       foreach (String name in provider.car().map().keys()) packaged[name] = 1;
