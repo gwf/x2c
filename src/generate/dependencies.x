@@ -28,7 +28,7 @@ module List _forward_declarations(
   foreach (List node in source) {
     node = _inline_prototype(c, node);
     if (node.car() == <typedef> && node in f.seen) continue;
-    if (source_includes) match (node) case %(preproc ?(String text)): {
+    if (source_includes && node ~= %(preproc ?(String text))) {
       int angle = 0;
       String target = Compiler.preproc_include_target(text, angle);
       if (target)
@@ -54,11 +54,11 @@ static List _inline_prototype(Compiler c, List node) {
       Array rows = [], int changed = 0;
       foreach (List declarator in declarators) {
         List base = type;
-        match (declarator) case %(bind ?binding ((fnmod *) *)):
-          if (_inline_binding(c, binding)) {
-            base = %(static @type);
-            changed = 1;
-          }
+        if (declarator ~= %(bind ?binding ((fnmod *) *)) &&
+            _inline_binding(c, binding)) {
+          base = %(static @type);
+          changed = 1;
+        }
         rows.push(%(declare $base (bindings $declarator)));
       }
       if (changed) return rows.list_free();
@@ -96,7 +96,7 @@ module List _move_bodies(List source, Map inline_bodies) {
           out.push(_prototype(type, signature));
         continue;
       }
-    match (node) case %(preproc ?content):
+    if (node ~= %(preproc ?content))
       arms = Compiler.preproc_track_arms(arms, content);
     out.push(node);
   }
@@ -111,7 +111,7 @@ static Map _undef_positions(List source) {
   Array open = auto [];
   int position = 0;
   foreach (List node in source) {
-    match (node) case %(preproc ?(String content)): {
+    if (node ~= %(preproc ?(String content))) {
       Symbol kind = Compiler.preproc_conditional_kind(content);
       if (kind == <open>) open.push(position);
       else if (kind == <close> && open.len()) open.take_last();
@@ -216,7 +216,7 @@ static void _source_declarations(Var value, Map statics) {
 static void _set_static(Map statics, Var base, List declarator) {
   List binding = _declaration_binding(declarator);
   if (!binding) return;
-  match (declarator) case %(op = ?target ?): declarator = target;
+  if (declarator ~= %(op = ?target ?)) declarator = target;
   statics[binding] = %(declare $base (bindings $declarator));
 }
 
@@ -301,6 +301,6 @@ static void _types(Forward &f, Type type) {
   Type base = type.base_type();
   if (base.is_bare_typedef_name()) _declaration(f, base.car());
   foreach (Var modifier in type)
-    match (modifier) case %(func (*parameters)):
+    if (modifier ~= %(func (*parameters)))
       foreach (Type parameter in parameters) _types(f, parameter);
 }
