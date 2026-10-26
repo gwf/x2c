@@ -31,10 +31,8 @@ module void _parse_manifest(Project p) {
 /* A copy of the line that the parser may write into, without its comment
    and surrounding space. */
 static char *_content(String text) {
-  int length = text ? strlen(text) : 0;
-  char *line = xmalloc(length + 1);
-  if (length) memcpy(line, text, length);
-  line[length] = 0;
+  const char *source = text;
+  char *line = xmemdup(source ? source : "", (size_t) text.len() + 1);
   _strip_comment(line);
   return _trim(line);
 }
