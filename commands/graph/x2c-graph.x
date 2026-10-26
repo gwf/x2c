@@ -2816,7 +2816,7 @@ int main(int argc, char **argv) {
     return 0;
   }
   String verb = argc > 1 ? String.new(argv[1]) : "";
-  if (verb in %("snapshot" "status" "query" "diff" "_snapshot-members"))
+  if (verb in %("snapshot" "status" "query" "serve" "diff" "_snapshot-members"))
     return graph_snapshot_command(argc, argv);
   int datasets = verb == "datasets", compare = verb == "compare";
   List rows = _command_rows(verb), words = Args.from_argv(argc, argv).cdr();
