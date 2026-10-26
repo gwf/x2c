@@ -182,8 +182,6 @@ static Type f10_resolution____final_value_type(List items);
 
 static int _deferred_receiver(List expr);
 
-static List f10_resolution____resolve_content(Compiler c, List input, Type input_type, List content, Token origin);
-
 static List f10_resolution____content(Resolve * r, List content);
 
 static List f10_resolution____operator(Resolve * r, List parts);
@@ -839,7 +837,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _256 = cons(_253, _255);
   _257 = List_var(_256);
   _258 = Symbol_var(1133019155420);
-  _259 = int_var(4799);
+  _259 = int_var(4797);
   _260 = cons(_259, NULL);
   _261 = cons(_258, _260);
   _262 = List_var(_261);
@@ -955,7 +953,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _372 = cons(_371, NULL);
   _373 = cons(_245, _372);
   _374 = List_var(_373);
-  _375 = int_var(4875);
+  _375 = int_var(4873);
   _376 = cons(_375, NULL);
   _377 = cons(_258, _376);
   _378 = List_var(_377);
@@ -1254,7 +1252,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _668 = cons(_667, NULL);
   _669 = cons(_245, _668);
   _670 = List_var(_669);
-  _671 = int_var(3799);
+  _671 = int_var(3797);
   _672 = cons(_671, NULL);
   _673 = cons(_258, _672);
   _674 = List_var(_673);
@@ -1516,7 +1514,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _930 = cons(_929, NULL);
   _931 = cons(_245, _930);
   _932 = List_var(_931);
-  _933 = int_var(3453);
+  _933 = int_var(3451);
   _934 = cons(_933, NULL);
   _935 = cons(_258, _934);
   _936 = List_var(_935);
@@ -1583,7 +1581,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _997 = cons(_996, NULL);
   _998 = cons(_245, _997);
   _999 = List_var(_998);
-  _1000 = int_var(3292);
+  _1000 = int_var(3290);
   _1001 = cons(_1000, NULL);
   _1002 = cons(_258, _1001);
   _1003 = List_var(_1002);
@@ -1737,7 +1735,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_2(void)
   _1148 = cons(_1147, NULL);
   _1149 = cons(_245, _1148);
   _1150 = List_var(_1149);
-  _1151 = int_var(3648);
+  _1151 = int_var(3646);
   _1152 = cons(_1151, NULL);
   _1153 = cons(_258, _1152);
   _1154 = List_var(_1153);
@@ -1825,7 +1823,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_2(void)
   _1236 = cons(_1235, NULL);
   _1237 = cons(_245, _1236);
   _1238 = List_var(_1237);
-  _1239 = int_var(4663);
+  _1239 = int_var(4661);
   _1240 = cons(_1239, NULL);
   _1241 = cons(_258, _1240);
   _1242 = List_var(_1241);
@@ -1879,7 +1877,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_2(void)
   _1290 = cons(_1289, NULL);
   _1291 = cons(_245, _1290);
   _1292 = List_var(_1291);
-  _1293 = int_var(4596);
+  _1293 = int_var(4594);
   _1294 = cons(_1293, NULL);
   _1295 = cons(_258, _1294);
   _1296 = List_var(_1295);
@@ -2099,7 +2097,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_2(void)
   _1510 = cons(_1509, NULL);
   _1511 = cons(_245, _1510);
   _1512 = List_var(_1511);
-  _1513 = int_var(3960);
+  _1513 = int_var(3958);
   _1514 = cons(_1513, NULL);
   _1515 = cons(_258, _1514);
   _1516 = List_var(_1515);
@@ -2200,7 +2198,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_3(void)
   _1608 = cons(_1607, NULL);
   _1609 = cons(_245, _1608);
   _1610 = List_var(_1609);
-  _1611 = int_var(4017);
+  _1611 = int_var(4015);
   _1612 = cons(_1611, NULL);
   _1613 = cons(_258, _1612);
   _1614 = List_var(_1613);
@@ -2810,7 +2808,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_4(void)
   _2215 = cons(_2214, NULL);
   _2216 = cons(_253, _2215);
   _2217 = List_var(_2216);
-  _2218 = int_var(92868);
+  _2218 = int_var(92604);
   _2219 = cons(_2218, NULL);
   _2220 = cons(_258, _2219);
   _2221 = List_var(_2220);
@@ -3006,7 +3004,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_4(void)
   _2411 = cons(_2410, NULL);
   _2412 = cons(_245, _2411);
   _2413 = List_var(_2412);
-  _2414 = int_var(93230);
+  _2414 = int_var(92966);
   _2415 = cons(_2414, NULL);
   _2416 = cons(_258, _2415);
   _2417 = List_var(_2416);
@@ -3123,7 +3121,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_4(void)
   _2528 = cons(_2527, NULL);
   _2529 = cons(_245, _2528);
   _2530 = List_var(_2529);
-  _2531 = int_var(93813);
+  _2531 = int_var(93549);
   _2532 = cons(_2531, NULL);
   _2533 = cons(_258, _2532);
   _2534 = List_var(_2533);
@@ -3224,7 +3222,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_5(void)
   _2626 = cons(_2625, NULL);
   _2627 = cons(_245, _2626);
   _2628 = List_var(_2627);
-  _2629 = int_var(93897);
+  _2629 = int_var(93633);
   _2630 = cons(_2629, NULL);
   _2631 = cons(_258, _2630);
   _2632 = List_var(_2631);
@@ -3349,7 +3347,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_5(void)
   _2751 = cons(_2750, NULL);
   _2752 = cons(_245, _2751);
   _2753 = List_var(_2752);
-  _2754 = int_var(93642);
+  _2754 = int_var(93378);
   _2755 = cons(_2754, NULL);
   _2756 = cons(_258, _2755);
   _2757 = List_var(_2756);
@@ -3441,7 +3439,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_5(void)
   _2843 = cons(_2842, NULL);
   _2844 = cons(_245, _2843);
   _2845 = List_var(_2844);
-  _2846 = int_var(94104);
+  _2846 = int_var(93840);
   _2847 = cons(_2846, NULL);
   _2848 = cons(_258, _2847);
   _2849 = List_var(_2848);
@@ -3653,7 +3651,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_5(void)
   _3055 = cons(_3054, NULL);
   _3056 = cons(_245, _3055);
   _3057 = List_var(_3056);
-  _3058 = int_var(96237);
+  _3058 = int_var(95973);
   _3059 = cons(_3058, NULL);
   _3060 = cons(_258, _3059);
   _3061 = List_var(_3060);
@@ -4546,7 +4544,7 @@ List Compiler_postfix_completions(Compiler c, Type receiver, Symbol access);
 static List f6_syntax____parse_postfix_arrow(Compiler c, List expr){
   Token origin = c -> token;  Compiler_expect(c, 11645);  if(Compiler_at_completion(c)){
     List rows = Compiler_postfix_completions(c, Var_type(List_cadr(expr)), 11645); {
-      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/expressions/syntax.x",.function = "f6_syntax____parse_postfix_arrow",.line = 581};  x2c_error_raise_n(& _x2c_gensym_error_site_0, 1248787135328, 3, Symbol_var(740232), Symbol_var(28280237222), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(NULL));
+      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/expressions/syntax.x",.function = "f6_syntax____parse_postfix_arrow",.line = 580};  x2c_error_raise_n(& _x2c_gensym_error_site_0, 1248787135328, 3, Symbol_var(740232), Symbol_var(28280237222), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(NULL));
     }
 
   }
@@ -4557,7 +4555,7 @@ List Compiler_resolve_postfix_member(Compiler c, Type receiver_type, List field,
 static List f6_syntax____parse_postfix_dot(Compiler c, List expr){
   Token origin = c -> token;  Compiler_expect(c, 93);  if(Compiler_at_completion(c)){
     Type receiver = Var_type(_is_raw_string_literal(expr) ? List_var(_742) : List_cadr(expr));  List rows = Compiler_postfix_completions(c, receiver, 93); {
-      static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../src/expressions/syntax.x",.function = "f6_syntax____parse_postfix_dot",.line = 595};  x2c_error_raise_n(& _x2c_gensym_error_site_1, 1248787135328, 3, Symbol_var(740232), Symbol_var(28280237222), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(NULL));
+      static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../src/expressions/syntax.x",.function = "f6_syntax____parse_postfix_dot",.line = 594};  x2c_error_raise_n(& _x2c_gensym_error_site_1, 1248787135328, 3, Symbol_var(740232), Symbol_var(28280237222), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(NULL));
     }
 
   }
@@ -4822,7 +4820,10 @@ List Compiler_resolve_expression(Compiler c, List input, Token origin){
         Var type;  type = _x2c_gensym_match_value_0;  Var content;  content = _x2c_gensym_match_value_1; {
           Var _x2c_gensym_match_value_2 = content; {
             List content = Var_list_payload(_x2c_gensym_match_value_2); {
-              if(Var_truth(type) && ! Compiler_needs_resolution(c, List_var(input))) return input;  return f10_resolution____resolve_content(c, input, Var_type(type), content, origin);
+              if(Var_truth(type) && ! Compiler_needs_resolution(c, List_var(input))) return input;  Resolve r ={
+                .c = c, .input = input, .type = Var_type(type), .origin = origin
+              }
+              ;  return f10_resolution____content(&(r), content);
             }
 
           }
@@ -4965,13 +4966,6 @@ static int _deferred_receiver(List expr){
 
   }
   return 0;
-}
-
-static List f10_resolution____resolve_content(Compiler c, List input, Type input_type, List content, Token origin){
-  Resolve r ={
-    .c = c, .input = input, .type = input_type, .origin = origin
-  }
-  ;  return f10_resolution____content(&(r), content);
 }
 
 List Compiler_var_tag_expression(Compiler c, Type target, Token origin);
@@ -5177,7 +5171,7 @@ static List f10_resolution____invocation(Resolve * r, List content){
         Var stored;  stored = _x2c_gensym_match_value_0;  Var input;  input = _x2c_gensym_match_value_1;  Var site;  site = _x2c_gensym_match_value_2; {
           Var _x2c_gensym_match_value_5 = stored; {
             List stored = Var_list_payload(_x2c_gensym_match_value_5);  if(x2c_var_equal(List_car(stored), Symbol_var(895740748108))) return({
-              Var _x2c_gensym_literal_part_41 = List_cadr((* r).input);  Var _x2c_gensym_literal_part_42 = List_var(({
+              Var _x2c_gensym_literal_part_41 = List_var((* r).type);  Var _x2c_gensym_literal_part_42 = List_var(({
                 Var _x2c_gensym_literal_part_40 = List_var(cons(_26, cons(List_var(stored), NULL)));  cons(_781, cons(_x2c_gensym_literal_part_40, cons(input, cons(site, NULL))));
               }
               ));  cons(_0, cons(_x2c_gensym_literal_part_41, cons(_x2c_gensym_literal_part_42, NULL)));
@@ -5590,7 +5584,7 @@ static List f10_resolution____generic(Resolve * r, List control, List associatio
 }
 
 static List f10_resolution____sizeof(Resolve * r, Macro form, Var argument){
-  if(! Var_is_row(argument, 9, 7, 4)) return(* r).input;  List operand = Var_list_payload(argument);  Type type = Var_type(List_cadr((* r).input));  if(type == _454) type = List_type(_521);  return Compiler_rebuild_expression((* r).c, type, Macro_apply(form, cons(List_var(Compiler_resolve_expression((* r).c, operand, (* r).origin)), NULL)));
+  if(! Var_is_row(argument, 9, 7, 4)) return(* r).input;  List operand = Var_list_payload(argument);  Type type =(* r).type;  if(type == _454) type = List_type(_521);  return Compiler_rebuild_expression((* r).c, type, Macro_apply(form, cons(List_var(Compiler_resolve_expression((* r).c, operand, (* r).origin)), NULL)));
 }
 
 static List f10_resolution____va_arg(Resolve * r, List argument, List declaration){

@@ -4056,7 +4056,7 @@ static Var f9_functions____meta_stub(Func function, const FuncArg * argv){
 
   }
   if(Compiler_meta_calls_wait(c)){
-    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/meta-native/functions.x",.function = "f9_functions____meta_stub",.line = 101};
+    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/meta-native/functions.x",.function = "f9_functions____meta_stub",.line = 102};
     x2c_error_raise_n(& _x2c_gensym_error_site_0, 927167433253220, 1, Symbol_var(920394), String_var(name));
   }
   List rows = f9_functions____subject_rows(c, values);
@@ -4596,7 +4596,7 @@ static Var f5_calls____run_meta(Compiler c, List expression, String name, List a
           Var volatile category;
           category = x2c_error_catch_capture(_x2c_gensym_error_handler_0, 0);
           {
-            static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../src/meta-native/calls.x",.function = "f5_calls____run_meta",.line = 99};
+            static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../src/meta-native/calls.x",.function = "f5_calls____run_meta",.line = 103};
             x2c_error_raise_n(& _x2c_gensym_error_site_1, 28682226919752, 1, Symbol_var(209659067570), category);
             __builtin_unreachable();
           }
@@ -4795,7 +4795,7 @@ static Var f5_calls____meta_function(Compiler c, String name, Token site){
   if(! Compiler_meta_binding(c, name, &(function)) && _bind_project_meta(c, name)) Compiler_meta_binding(c, name, &(function));
   if(! Compiler_meta_binding(c, name, &(function)) && Compiler_bind_native_meta(c, name)) Compiler_meta_binding(c, name, &(function));
   if(Var_is_void(function) && c -> meta_build){
-    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../src/meta-native/calls.x",.function = "f5_calls____meta_function",.line = 221};
+    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../src/meta-native/calls.x",.function = "f5_calls____meta_function",.line = 226};
     x2c_error_raise_n(& _x2c_gensym_error_site_2, 927167433253220, 1, Symbol_var(920394), String_var(name));
   }
   if(Var_is_void(function)) Compiler_report_error(c, 27335838, _1804, site, cons(String_var(String_join(NULL, cons(String_var(_1809), cons(String_var(name), NULL)))), NULL));

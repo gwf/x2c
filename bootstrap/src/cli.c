@@ -1294,16 +1294,18 @@ static f7_parsing___Given f7_parsing____take_option(Array args, int * i, Symbol 
 
 static CliOption * f7_parsing____find_option(String spelling, Symbol command, String * attached){
   (* attached) = NULL;
+  int length = String_len(spelling);
   for(CliOption * option = cli_options;  String_truth(option -> spelling);  option ++){
     if(!(SymbolSet_contains(option -> commands, command))) continue;
     String form = option -> spelling;
-    int longer = String_len(spelling) > String_len(form) && String_startswith(spelling, form);
+    int form_length = String_len(form);
+    int longer = length > form_length && String_startswith(spelling, form);
     if(option -> prefix){
       if(longer) return option;
       continue;
     }
     if(String_equal(spelling, form) || String_equal(spelling, option -> alias)) return option;
-    if(option -> value && String_len(form) == 2 && longer){
+    if(option -> value && form_length == 2 && longer){
       (* attached) = String_getslice(spelling, 2, (-2147483647 - 1), 1);
       return option;
     }
@@ -1790,10 +1792,13 @@ static int f4_help____in_group(CliOption * option, Symbol command, Symbol group)
 }
 
 static void f4_help____print_option(const CliOption * option){
-  String spelled = String_truth((* option).label) ?(* option).label : String_truth((* option).alias) ?({
+  String spelled;
+  if(String_truth((* option).label)) spelled =(* option).label;
+  else if(String_truth((* option).alias)) spelled =({
     Var _x2c_gensym_literal_part_0 = String_var((* option).spelling);  Var _x2c_gensym_literal_part_1 = String_var((* option).alias);  String_join(NULL, cons(_x2c_gensym_literal_part_0, cons(String_var(_143), cons(_x2c_gensym_literal_part_1, NULL))));
   }
-  ) :(* option).spelling;
+  );
+  else spelled =(* option).spelling;
   String label =(* option).value ?({
     Var _x2c_gensym_literal_part_2 = String_var(spelled);  Var _x2c_gensym_literal_part_3 = String_var(String_new((* option).value));  String_join(NULL, cons(_x2c_gensym_literal_part_2, cons(String_var(_144), cons(_x2c_gensym_literal_part_3, NULL))));
   }

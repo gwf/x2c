@@ -609,7 +609,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _269 = cons(_266, _268);
   _270 = List_var(_269);
   _271 = Symbol_var(1133019155420);
-  _272 = int_var(3292);
+  _272 = int_var(3290);
   _273 = cons(_272, NULL);
   _274 = cons(_271, _273);
   _275 = List_var(_274);
@@ -735,7 +735,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _395 = cons(_394, NULL);
   _396 = cons(_258, _395);
   _397 = List_var(_396);
-  _398 = int_var(4477);
+  _398 = int_var(4475);
   _399 = cons(_398, NULL);
   _400 = cons(_271, _399);
   _401 = List_var(_400);
@@ -978,7 +978,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _635 = cons(_634, NULL);
   _636 = cons(_258, _635);
   _637 = List_var(_636);
-  _638 = int_var(3648);
+  _638 = int_var(3646);
   _639 = cons(_638, NULL);
   _640 = cons(_271, _639);
   _641 = List_var(_640);
@@ -1085,7 +1085,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _742 = cons(_741, NULL);
   _743 = cons(_258, _742);
   _744 = List_var(_743);
-  _745 = int_var(2187);
+  _745 = int_var(2185);
   _746 = cons(_745, NULL);
   _747 = cons(_271, _746);
   _748 = List_var(_747);
@@ -1259,7 +1259,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _916 = cons(_915, NULL);
   _917 = cons(_258, _916);
   _918 = List_var(_917);
-  _919 = int_var(3799);
+  _919 = int_var(3797);
   _920 = cons(_919, NULL);
   _921 = cons(_271, _920);
   _922 = List_var(_921);
@@ -1462,11 +1462,11 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_2(void)
   _1116 = cons(_1115, NULL);
   _1117 = cons(_227, _1116);
   _1118 = List_var(_1117);
-  _1119 = int_var(40);
+  _1119 = int_var(41);
   _1120 = cons(_1119, NULL);
   _1121 = cons(_258, _1120);
   _1122 = List_var(_1121);
-  _1123 = int_var(1242);
+  _1123 = int_var(1243);
   _1124 = cons(_1123, NULL);
   _1125 = cons(_271, _1124);
   _1126 = List_var(_1125);
@@ -1560,11 +1560,11 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_2(void)
   _1214 = cons(_1213, NULL);
   _1215 = cons(_227, _1214);
   _1216 = List_var(_1215);
-  _1217 = int_var(45);
+  _1217 = int_var(46);
   _1218 = cons(_1217, NULL);
   _1219 = cons(_258, _1218);
   _1220 = List_var(_1219);
-  _1221 = int_var(1358);
+  _1221 = int_var(1359);
   _1222 = cons(_1221, NULL);
   _1223 = cons(_271, _1222);
   _1224 = List_var(_1223);
@@ -1646,11 +1646,11 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_2(void)
   _1300 = cons(_1299, NULL);
   _1301 = cons(_227, _1300);
   _1302 = List_var(_1301);
-  _1303 = int_var(50);
+  _1303 = int_var(51);
   _1304 = cons(_1303, NULL);
   _1305 = cons(_258, _1304);
   _1306 = List_var(_1305);
-  _1307 = int_var(1494);
+  _1307 = int_var(1495);
   _1308 = cons(_1307, NULL);
   _1309 = cons(_271, _1308);
   _1310 = List_var(_1309);
@@ -1719,11 +1719,11 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_2(void)
   _1373 = cons(_1372, NULL);
   _1374 = cons(_227, _1373);
   _1375 = List_var(_1374);
-  _1376 = int_var(55);
+  _1376 = int_var(56);
   _1377 = cons(_1376, NULL);
   _1378 = cons(_258, _1377);
   _1379 = List_var(_1378);
-  _1380 = int_var(1618);
+  _1380 = int_var(1619);
   _1381 = cons(_1380, NULL);
   _1382 = cons(_271, _1381);
   _1383 = List_var(_1382);
@@ -1854,11 +1854,11 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_2(void)
   _1508 = cons(_1507, NULL);
   _1509 = cons(_227, _1508);
   _1510 = List_var(_1509);
-  _1511 = int_var(61);
+  _1511 = int_var(62);
   _1512 = cons(_1511, NULL);
   _1513 = cons(_258, _1512);
   _1514 = List_var(_1513);
-  _1515 = int_var(1835);
+  _1515 = int_var(1836);
   _1516 = cons(_1515, NULL);
   _1517 = cons(_271, _1516);
   _1518 = List_var(_1517);
@@ -3661,7 +3661,13 @@ static List _ordered_list(Compiler c, List chain){
               List node = chain;  int spliced = 0;  for(List cell = f8_literals____list_cell(node);  List_truth(cell);  cell = f8_literals____list_cell(node)){
                 List _x2c_gensym_destructure_2 = cell;  Symbol kind = Var_symbol(List_getindex(_x2c_gensym_destructure_2, 0));  List part = Var_list_payload(List_getindex(_x2c_gensym_destructure_2, 1));  List rest = Var_list_payload(List_getindex(_x2c_gensym_destructure_2, 2));  if(kind != 228262) spliced = 1;  List value = kind == 228262 ? _to_var(c, part) : f8_literals____passed_as(f8_literals____spliced(c, part), List_type(_72));  value = _step(c, value);  Array_push(kinds, Symbol_var(kind));  Array_push(values, List_var(value));  Array_push(orders, int_var(f8_literals____part_order(c, List_var(value))));  node = rest;
               }
-              int counted = ! spliced && List_truth(({ static MatchCaptureSite _x2c_gensym_match_site_3;  x2c_match_site_match(& _x2c_gensym_match_site_3, node, List_var(_947)); }));  node = _step(c, f8_literals____passed_as(f8_literals____to_list(c, node), List_type(_72)));  Array_push(kinds, Symbol_var(29272));  Array_push(values, List_var(node));  Array_push(orders, int_var(f8_literals____part_order(c, List_var(node))));  List declarations = f8_literals____ordered_parts(c, values, orders);  List rebuilt = Var_list_payload(Array_take_last(values));  if(counted && Array_len(values) > 128){
+              int counted = 0;  if(! spliced){
+                List _x2c_gensym_match_expr = node; List _x2c_gensym_match_cursor;  switch(_x2c_gensym_match_expr ? _x2c_gensym_match_expr->car.u64 : 0){
+                    case 9224497936761647704ULL: ;  _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497936761647704ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {counted = 1;  break; } default: break;
+                }
+
+              }
+              node = _step(c, f8_literals____passed_as(f8_literals____to_list(c, node), List_type(_72)));  Array_push(kinds, Symbol_var(29272));  Array_push(values, List_var(node));  Array_push(orders, int_var(f8_literals____part_order(c, List_var(node))));  List declarations = f8_literals____ordered_parts(c, values, orders);  List rebuilt = Var_list_payload(Array_take_last(values));  if(counted && Array_len(values) > 128){
                 List _x2c_gensym_return_value_6 = f8_literals____ordered(declarations, List_type(_72), f8_literals____list_n(c, values)); {
                   x2c_cleanup_leave(& _x2c_gensym_defer_record_15);  x2c_cleanup_leave(& _x2c_gensym_defer_record_14);  x2c_cleanup_leave(& _x2c_gensym_defer_record_13);  return _x2c_gensym_return_value_6;
                 }

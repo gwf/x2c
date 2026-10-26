@@ -921,7 +921,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _631 = cons(_628, _630);
   _632 = List_var(_631);
   _633 = Symbol_var(1133019155420);
-  _634 = int_var(3453);
+  _634 = int_var(3451);
   _635 = cons(_634, NULL);
   _636 = cons(_633, _635);
   _637 = List_var(_636);
@@ -1133,11 +1133,11 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _843 = cons(_842, NULL);
   _844 = cons(_584, _843);
   _845 = List_var(_844);
-  _846 = int_var(35);
+  _846 = int_var(36);
   _847 = cons(_846, NULL);
   _848 = cons(_620, _847);
   _849 = List_var(_848);
-  _850 = int_var(1153);
+  _850 = int_var(1154);
   _851 = cons(_850, NULL);
   _852 = cons(_633, _851);
   _853 = List_var(_852);
@@ -1249,7 +1249,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _959 = cons(_958, NULL);
   _960 = cons(_620, _959);
   _961 = List_var(_960);
-  _962 = int_var(2187);
+  _962 = int_var(2185);
   _963 = cons(_962, NULL);
   _964 = cons(_633, _963);
   _965 = List_var(_964);
@@ -1314,7 +1314,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
 }
 
 __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_2(void){
-  _1024 = int_var(3033);
+  _1024 = int_var(3031);
   _1025 = cons(_1024, NULL);
   _1026 = cons(_633, _1025);
   _1027 = List_var(_1026);
@@ -2011,7 +2011,8 @@ static void f5_flows____sink_parameter(Walk * w, Fact fact, Symbol sink, Fact ta
   if(sink == 534624){
     if(! target) row = Symbol_var(46060699100);
     else if(target -> param >= 0) row = List_var(cons(_270, cons(int_var(target -> param), NULL)));
-    else row = target -> born ? Symbol_var(1219734312) :(target -> region || target -> other) ?((void) 0, Void) : Symbol_var(1219800220);
+    else if(target -> born) row = Symbol_var(1219734312);
+    else row = target -> region || target -> other ?((void) 0, Void) : Symbol_var(1219800220);
   }
   if(sink != 26155096 && ! Var_is_void(row)) Map_setindex((* w).sinks, List_var(cons(int_var(fact -> param), cons(row, NULL))), int_var(1));
 }
@@ -2042,15 +2043,18 @@ static int f5_flows____check(f5_flows___Flow * f, Fact target, Region region, in
   }
   Region cleanup = _cleanup(region -> acquired);
   if(cleanup && f5_flows____check(&((* f)), target, cleanup, 1, report)) return 1;
-  String subject = _subject(&((*(* f).w)), (* f).value, (* f).named, (* f).fact);
   if(region -> closed){
-    if(report) _warn(&((*(* f).w)), 1218923484, (* f).w -> origin, String_join(NULL, cons(String_var(subject), cons(String_var(_769), NULL))), f5_flows____opened(&((*(* f).w)), region));
+    if(report){
+      String subject = _subject(&((*(* f).w)), (* f).value, (* f).named, (* f).fact);
+      _warn(&((*(* f).w)), 1218923484, (* f).w -> origin, String_join(NULL, cons(String_var(subject), cons(String_var(_769), NULL))), f5_flows____opened(&((*(* f).w)), region));
+    }
     return 1;
   }
   if(region -> kind == 26155096) return 0;
   String exit = f5_flows____exit_reason(&((* f)), target, region);
   if(! String_truth(exit)) return 0;
   if(report){
+    String subject = _subject(&((*(* f).w)), (* f).value, (* f).named, (* f).fact);
     if(region ==(* f).w -> frame){
       String _x2c_gensym_macro_message_0 = String_join(NULL, cons(String_var(subject), cons(String_var(_770), cons(String_var(exit), NULL))));
       _warn(&((*(* f).w)), 1218923484, (* f).w -> origin, _x2c_gensym_macro_message_0, _773);

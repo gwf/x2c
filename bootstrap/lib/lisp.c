@@ -3104,7 +3104,7 @@ static int f10_primitives____number_compare(Var a, Var b){
   if(ak == 20309162340 && bk == 20309162340) return Var_integer_compare(a, b);
   if(ak == 20309162340) return Var_integer_floating_compare(a, b);
   if(bk == 20309162340) return - Var_integer_floating_compare(b, a);
-  return da < db ? - 1 : da > db ? 1 : 0;
+  return da < db ? - 1 : da > db;
 }
 
 Var lisp_compare(Var a, Var b){

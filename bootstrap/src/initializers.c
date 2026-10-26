@@ -580,7 +580,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _387 = cons(_384, _386);
   _388 = List_var(_387);
   _389 = Symbol_var(1133019155420);
-  _390 = int_var(3960);
+  _390 = int_var(3958);
   _391 = cons(_390, NULL);
   _392 = cons(_389, _391);
   _393 = List_var(_392);
@@ -697,7 +697,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _504 = cons(_503, NULL);
   _505 = cons(_376, _504);
   _506 = List_var(_505);
-  _507 = int_var(4017);
+  _507 = int_var(4015);
   _508 = cons(_507, NULL);
   _509 = cons(_389, _508);
   _510 = List_var(_509);
@@ -977,7 +977,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _781 = cons(_780, NULL);
   _782 = cons(_376, _781);
   _783 = List_var(_782);
-  _784 = int_var(3799);
+  _784 = int_var(3797);
   _785 = cons(_784, NULL);
   _786 = cons(_389, _785);
   _787 = List_var(_786);
@@ -1314,13 +1314,8 @@ static int f10_subobjects____fills_char_array(Compiler c, Type type, List value)
 
 static Type f10_subobjects____path_type(List path, Type root){
   if(! List_truth(path)) return root;
-  List _x2c_gensym_destructure_3 = Var_list_payload(List_car(path));
-  Type owner = Var_type(List_getindex(_x2c_gensym_destructure_3, 0));
-  Symbol kind = Var_symbol(List_getindex(_x2c_gensym_destructure_3, 1));
-  Var selector = List_getindex(_x2c_gensym_destructure_3, 2);
-  Type type = Var_type(List_getindex(_x2c_gensym_destructure_3, 3));
-  List rest = Var_list_payload(List_getindex(_x2c_gensym_destructure_3, 4));
-  return type;
+  List frame = Var_list_payload(List_car(path));
+  return Var_type(List_getindex(frame, 3));
 }
 
 static List f10_subobjects____first_path(Compiler c, Type type, List parent){
@@ -1359,12 +1354,12 @@ static List f10_subobjects____next_field(List fields){
 static void f10_subobjects____advance_path(Compiler c, List target, List path, List condition, Array states){
   while(List_truth(path)){
     List frame = Var_list_payload(List_car(path)), parent = List_cdr(path);
-    List _x2c_gensym_destructure_4 = frame;
-    Type owner = Var_type(List_getindex(_x2c_gensym_destructure_4, 0));
-    Symbol kind = Var_symbol(List_getindex(_x2c_gensym_destructure_4, 1));
-    Var selector = List_getindex(_x2c_gensym_destructure_4, 2);
-    Type type = Var_type(List_getindex(_x2c_gensym_destructure_4, 3));
-    List rest = Var_list_payload(List_getindex(_x2c_gensym_destructure_4, 4));
+    List _x2c_gensym_destructure_3 = frame;
+    Type owner = Var_type(List_getindex(_x2c_gensym_destructure_3, 0));
+    Symbol kind = Var_symbol(List_getindex(_x2c_gensym_destructure_3, 1));
+    Var selector = List_getindex(_x2c_gensym_destructure_3, 2);
+    Type type = Var_type(List_getindex(_x2c_gensym_destructure_3, 3));
+    List rest = Var_list_payload(List_getindex(_x2c_gensym_destructure_3, 4));
     if(kind == 13183752){
       List next = x2c_var_equal(List_car(Type_list(owner)), Symbol_var(44977116)) ? NULL : f10_subobjects____field_path(owner, rest, parent);
       if(List_truth(next)){
@@ -1380,12 +1375,12 @@ static void f10_subobjects____advance_path(Compiler c, List target, List path, L
 }
 
 static int f10_subobjects____next_index(Compiler c, List target, List frame, List parent, List * condition, Array states){
-  List _x2c_gensym_destructure_5 = frame;
-  Type owner = Var_type(List_getindex(_x2c_gensym_destructure_5, 0));
-  Symbol kind = Var_symbol(List_getindex(_x2c_gensym_destructure_5, 1));
-  Var selector = List_getindex(_x2c_gensym_destructure_5, 2);
-  Type type = Var_type(List_getindex(_x2c_gensym_destructure_5, 3));
-  List rest = Var_list_payload(List_getindex(_x2c_gensym_destructure_5, 4));
+  List _x2c_gensym_destructure_4 = frame;
+  Type owner = Var_type(List_getindex(_x2c_gensym_destructure_4, 0));
+  Symbol kind = Var_symbol(List_getindex(_x2c_gensym_destructure_4, 1));
+  Var selector = List_getindex(_x2c_gensym_destructure_4, 2);
+  Type type = Var_type(List_getindex(_x2c_gensym_destructure_4, 3));
+  List rest = Var_list_payload(List_getindex(_x2c_gensym_destructure_4, 4));
   List index = Var_list_payload(selector), dimension = Var_list_payload(Var_cadr(List_car(Type_list(owner))));
   unsigned long long at, count;
   List base;
@@ -1451,12 +1446,12 @@ List Compiler_initializer_slot(Compiler c, List target, List path){
     while(List_try_next(_x2c_gensym_macro_object_5, &(_x2c_gensym_macro_cursor_5), &(_x2c_gensym_macro_cursor_output_5))){
       frame = Var_list_payload(_x2c_gensym_macro_cursor_output_5);
       {
-        List _x2c_gensym_destructure_6 = frame;
-        Type owner = Var_type(List_getindex(_x2c_gensym_destructure_6, 0));
-        Symbol kind = Var_symbol(List_getindex(_x2c_gensym_destructure_6, 1));
-        Var selector = List_getindex(_x2c_gensym_destructure_6, 2);
-        Type selected = Var_type(List_getindex(_x2c_gensym_destructure_6, 3));
-        List rest = Var_list_payload(List_getindex(_x2c_gensym_destructure_6, 4));
+        List _x2c_gensym_destructure_5 = frame;
+        Type owner = Var_type(List_getindex(_x2c_gensym_destructure_5, 0));
+        Symbol kind = Var_symbol(List_getindex(_x2c_gensym_destructure_5, 1));
+        Var selector = List_getindex(_x2c_gensym_destructure_5, 2);
+        Type selected = Var_type(List_getindex(_x2c_gensym_destructure_5, 3));
+        List rest = Var_list_payload(List_getindex(_x2c_gensym_destructure_5, 4));
         if(kind == 19800432) target =({
           Var _x2c_gensym_literal_part_23 = List_var(selected);  Var _x2c_gensym_literal_part_24 = List_var(cons(_23, cons(List_var(target), cons(selector, NULL))));  cons(_3, cons(_x2c_gensym_literal_part_23, cons(_x2c_gensym_literal_part_24, NULL)));
         }
@@ -1605,12 +1600,12 @@ static List f10_subobjects____record_layout(Compiler c, Type type, Type owner, L
       while(List_truth(fields)){
         List path = f10_subobjects____field_path(owner, fields, NULL);
         if(! List_truth(path)) break;
-        List _x2c_gensym_destructure_7 = Var_list_payload(List_car(path));
-        Type parent = Var_type(List_getindex(_x2c_gensym_destructure_7, 0));
-        Symbol kind = Var_symbol(List_getindex(_x2c_gensym_destructure_7, 1));
-        Var name = List_getindex(_x2c_gensym_destructure_7, 2);
-        Type member = Var_type(List_getindex(_x2c_gensym_destructure_7, 3));
-        List rest = Var_list_payload(List_getindex(_x2c_gensym_destructure_7, 4));
+        List _x2c_gensym_destructure_6 = Var_list_payload(List_car(path));
+        Type parent = Var_type(List_getindex(_x2c_gensym_destructure_6, 0));
+        Symbol kind = Var_symbol(List_getindex(_x2c_gensym_destructure_6, 1));
+        Var name = List_getindex(_x2c_gensym_destructure_6, 2);
+        Type member = Var_type(List_getindex(_x2c_gensym_destructure_6, 3));
+        List rest = Var_list_payload(List_getindex(_x2c_gensym_destructure_6, 4));
         List slot = Compiler_initializer_slot(c, target, path);
         List child = f10_subobjects____scalar_layout(c, member, slot, string, &((* symbolic)));
         if(! List_truth(child)){
@@ -1656,10 +1651,10 @@ static List f10_subobjects____record_layout(Compiler c, Type type, Type owner, L
 }
 
 static void f10_subobjects____ordinal_cases(List layout, List ordinal, List path, List condition, List value, Array cases){
-  List _x2c_gensym_destructure_8 = layout;
-  Type type = Var_type(List_getindex(_x2c_gensym_destructure_8, 0));
-  List count = Var_list_payload(List_getindex(_x2c_gensym_destructure_8, 1));
-  List children = Var_list_payload(List_getindex(_x2c_gensym_destructure_8, 2));
+  List _x2c_gensym_destructure_7 = layout;
+  Type type = Var_type(List_getindex(_x2c_gensym_destructure_7, 0));
+  List count = Var_list_payload(List_getindex(_x2c_gensym_destructure_7, 1));
+  List children = Var_list_payload(List_getindex(_x2c_gensym_destructure_7, 2));
   if(! List_truth(children)){
     Array_push(cases, List_var(cons(List_var(condition), cons(List_var(path), cons(List_var(type), cons(List_var(value), NULL))))));
     return;
@@ -1674,9 +1669,9 @@ static void f10_subobjects____ordinal_cases(List layout, List ordinal, List path
     while(List_try_next(_x2c_gensym_macro_object_8, &(_x2c_gensym_macro_cursor_8), &(_x2c_gensym_macro_cursor_output_8))){
       entry = Var_list_payload(_x2c_gensym_macro_cursor_output_8);
       {
-        List _x2c_gensym_destructure_9 = entry;
-        List frame = Var_list_payload(List_getindex(_x2c_gensym_destructure_9, 0));
-        List child = Var_list_payload(List_getindex(_x2c_gensym_destructure_9, 1));
+        List _x2c_gensym_destructure_8 = entry;
+        List frame = Var_list_payload(List_getindex(_x2c_gensym_destructure_8, 0));
+        List child = Var_list_payload(List_getindex(_x2c_gensym_destructure_8, 1));
         Symbol kind = Var_symbol(List_cadr(frame));
         List units = Var_list_payload(List_cadr(child)), position = ordinal, active = condition;
         if(kind == 19800432) frame = f10_subobjects____ordinal_index(frame, ordinal, units, one, &(position));
@@ -1691,12 +1686,12 @@ static void f10_subobjects____ordinal_cases(List layout, List ordinal, List path
 }
 
 static List f10_subobjects____ordinal_index(List frame, List ordinal, List units, List one, List * position){
-  List _x2c_gensym_destructure_10 = frame;
-  Type owner = Var_type(List_getindex(_x2c_gensym_destructure_10, 0));
-  Symbol kind = Var_symbol(List_getindex(_x2c_gensym_destructure_10, 1));
-  Var selector = List_getindex(_x2c_gensym_destructure_10, 2);
-  Type selected = Var_type(List_getindex(_x2c_gensym_destructure_10, 3));
-  List rest = Var_list_payload(List_getindex(_x2c_gensym_destructure_10, 4));
+  List _x2c_gensym_destructure_9 = frame;
+  Type owner = Var_type(List_getindex(_x2c_gensym_destructure_9, 0));
+  Symbol kind = Var_symbol(List_getindex(_x2c_gensym_destructure_9, 1));
+  Var selector = List_getindex(_x2c_gensym_destructure_9, 2);
+  Type selected = Var_type(List_getindex(_x2c_gensym_destructure_9, 3));
+  List rest = Var_list_payload(List_getindex(_x2c_gensym_destructure_9, 4));
   List index = ordinal;
   (* position) = _94;
   if(units != one){
@@ -1927,7 +1922,7 @@ static List f10_conversion____composite_excess_check(List parent_condition){
 }
 
 static List f10_conversion____convert_composite_row(Compiler c, List row, List native_target, List row_condition, List parent_condition, int * native_used){
-  List _x2c_gensym_destructure_11 = row;  List original = Var_list_payload(List_getindex(_x2c_gensym_destructure_11, 0));  List cases = Var_list_payload(List_getindex(_x2c_gensym_destructure_11, 1));  List value = original;  while(x2c_var_equal(List_car(value), Symbol_var(9639129704)) || x2c_var_equal(List_car(value), Symbol_var(20762258403944))) value = Var_list_payload(List_caddr(value));  if(List_truth(({ static MatchCaptureSite _x2c_gensym_match_site_3;  x2c_match_site_match(& _x2c_gensym_match_site_3, value, List_var(_544)); }))) return row_condition == parent_condition ? original : f10_conversion____convert_initval_row(c, row, value, native_target, row_condition, native_used);  f10_conversion___RowSelection selected = f10_conversion____select_row(cases);  if(selected.homogeneous) return f10_conversion____convert_homogeneous_row(c, original, value, selected, native_target, row_condition, native_used);  return f10_conversion____convert_mixed_row(c, row, value, native_target, row_condition, parent_condition, native_used);
+  List _x2c_gensym_destructure_10 = row;  List original = Var_list_payload(List_getindex(_x2c_gensym_destructure_10, 0));  List cases = Var_list_payload(List_getindex(_x2c_gensym_destructure_10, 1));  List value = original;  while(x2c_var_equal(List_car(value), Symbol_var(9639129704)) || x2c_var_equal(List_car(value), Symbol_var(20762258403944))) value = Var_list_payload(List_caddr(value));  if(List_truth(({ static MatchCaptureSite _x2c_gensym_match_site_3;  x2c_match_site_match(& _x2c_gensym_match_site_3, value, List_var(_544)); }))) return row_condition == parent_condition ? original : f10_conversion____convert_initval_row(c, row, value, native_target, row_condition, native_used);  f10_conversion___RowSelection selected = f10_conversion____select_row(cases);  if(selected.homogeneous) return f10_conversion____convert_homogeneous_row(c, original, value, selected, native_target, row_condition, native_used);  return f10_conversion____convert_mixed_row(c, row, value, native_target, row_condition, parent_condition, native_used);
 }
 
 static f10_conversion___RowSelection f10_conversion____select_row(List cases){
@@ -1937,7 +1932,7 @@ static f10_conversion___RowSelection f10_conversion____select_row(List cases){
   ;  int applicable_seen = 0; {
     List choice;  List _x2c_gensym_macro_object_12 = cases;  List _x2c_gensym_macro_cursor_12 = _x2c_gensym_macro_object_12;  Var _x2c_gensym_macro_cursor_output_12;  while(List_try_next(_x2c_gensym_macro_object_12, &(_x2c_gensym_macro_cursor_12), &(_x2c_gensym_macro_cursor_output_12))){
       choice = Var_list_payload(_x2c_gensym_macro_cursor_output_12); {
-        List _x2c_gensym_destructure_12 = choice;  List condition = Var_list_payload(List_getindex(_x2c_gensym_destructure_12, 0));  List path = Var_list_payload(List_getindex(_x2c_gensym_destructure_12, 1));  Type destination = Var_type(List_getindex(_x2c_gensym_destructure_12, 2));  List input = Var_list_payload(List_getindex(_x2c_gensym_destructure_12, 3));  if(! List_truth(Type_list(destination))){
+        List _x2c_gensym_destructure_11 = choice;  List condition = Var_list_payload(List_getindex(_x2c_gensym_destructure_11, 0));  List path = Var_list_payload(List_getindex(_x2c_gensym_destructure_11, 1));  Type destination = Var_type(List_getindex(_x2c_gensym_destructure_11, 2));  List input = Var_list_payload(List_getindex(_x2c_gensym_destructure_11, 3));  if(! List_truth(Type_list(destination))){
           selected.excess = 1;  continue;
         }
         selected.applicable = applicable_seen ? _condition_or(selected.applicable, condition) : condition;  applicable_seen = 1;  if(! List_truth(Type_list(selected.type))){
@@ -1953,10 +1948,10 @@ static f10_conversion___RowSelection f10_conversion____select_row(List cases){
 }
 
 static List f10_conversion____convert_initval_row(Compiler c, List row, List terminal, List native_target, List row_condition, int * native_used){
-  List _x2c_gensym_destructure_13 = row;  List original = Var_list_payload(List_getindex(_x2c_gensym_destructure_13, 0));  List cases = Var_list_payload(List_getindex(_x2c_gensym_destructure_13, 1));  Array checked = Array_new(); {
+  List _x2c_gensym_destructure_12 = row;  List original = Var_list_payload(List_getindex(_x2c_gensym_destructure_12, 0));  List cases = Var_list_payload(List_getindex(_x2c_gensym_destructure_12, 1));  Array checked = Array_new(); {
     List choice;  List _x2c_gensym_macro_object_13 = cases;  List _x2c_gensym_macro_cursor_13 = _x2c_gensym_macro_object_13;  Var _x2c_gensym_macro_cursor_output_13;  while(List_try_next(_x2c_gensym_macro_object_13, &(_x2c_gensym_macro_cursor_13), &(_x2c_gensym_macro_cursor_output_13))){
       choice = Var_list_payload(_x2c_gensym_macro_cursor_output_13); {
-        List _x2c_gensym_destructure_14 = choice;  List condition = Var_list_payload(List_getindex(_x2c_gensym_destructure_14, 0));  List path = Var_list_payload(List_getindex(_x2c_gensym_destructure_14, 1));  Type destination = Var_type(List_getindex(_x2c_gensym_destructure_14, 2));  List input = Var_list_payload(List_getindex(_x2c_gensym_destructure_14, 3));  List value = f10_conversion____convert_case(c, choice, input, native_target, row_condition, native_used);  Array_push(checked, List_var(cons(List_var(condition), cons(List_var(path), cons(List_var(destination), cons(List_var(value), NULL))))));
+        List _x2c_gensym_destructure_13 = choice;  List condition = Var_list_payload(List_getindex(_x2c_gensym_destructure_13, 0));  List path = Var_list_payload(List_getindex(_x2c_gensym_destructure_13, 1));  Type destination = Var_type(List_getindex(_x2c_gensym_destructure_13, 2));  List input = Var_list_payload(List_getindex(_x2c_gensym_destructure_13, 3));  List value = f10_conversion____convert_case(c, choice, input, native_target, row_condition, native_used);  Array_push(checked, List_var(cons(List_var(condition), cons(List_var(path), cons(List_var(destination), cons(List_var(value), NULL))))));
       }
 
     }
@@ -1966,7 +1961,7 @@ static List f10_conversion____convert_initval_row(Compiler c, List row, List ter
 }
 
 static List f10_conversion____convert_case(Compiler c, List choice, List value, List native_target, List row_condition, int * native_used){
-  List _x2c_gensym_destructure_15 = choice;  List condition = Var_list_payload(List_getindex(_x2c_gensym_destructure_15, 0));  List path = Var_list_payload(List_getindex(_x2c_gensym_destructure_15, 1));  Type destination = Var_type(List_getindex(_x2c_gensym_destructure_15, 2));  List input = Var_list_payload(List_getindex(_x2c_gensym_destructure_15, 3));  if(! List_truth(Type_list(destination))) return value;  return f10_conversion____convert_alternative(c, value, destination, _condition_and(row_condition, condition), Compiler_initializer_slot(c, native_target, path), native_used);
+  List _x2c_gensym_destructure_14 = choice;  List condition = Var_list_payload(List_getindex(_x2c_gensym_destructure_14, 0));  List path = Var_list_payload(List_getindex(_x2c_gensym_destructure_14, 1));  Type destination = Var_type(List_getindex(_x2c_gensym_destructure_14, 2));  List input = Var_list_payload(List_getindex(_x2c_gensym_destructure_14, 3));  if(! List_truth(Type_list(destination))) return value;  return f10_conversion____convert_alternative(c, value, destination, _condition_and(row_condition, condition), Compiler_initializer_slot(c, native_target, path), native_used);
 }
 
 static List f10_conversion____convert_homogeneous_row(Compiler c, List original, List value, f10_conversion___RowSelection selected, List native_target, List row_condition, int * native_used){
@@ -2063,7 +2058,7 @@ static List f10_conversion____speculate(Compiler c, List value, Type type, List 
 }
 
 static List f10_conversion____zero_value(Type type, List target){
-  Type native = Type_is_bitfield(type) ? Type_base_type(type) : List_truth(target) ? List_type(cons(_576, cons(List_var(cons(_104, cons(List_var(target), NULL))), NULL))) : type;  return({
+  Type native = type;  if(Type_is_bitfield(type)) native = Type_base_type(type);  else if(List_truth(target)) native = List_type(cons(_576, cons(List_var(cons(_104, cons(List_var(target), NULL))), NULL)));  return({
     Var _x2c_gensym_literal_part_82 = List_var(type);  Var _x2c_gensym_literal_part_83 = List_var(({
       Var _x2c_gensym_literal_part_80 = List_var(native);  Var _x2c_gensym_literal_part_81 = List_var(cons(_3, cons(List_var(type), cons(List_var(cons(_61, cons(List_var(cons(_248, cons(List_var(_94), NULL))), NULL))), NULL))));  cons(_24, cons(_x2c_gensym_literal_part_80, cons(_x2c_gensym_literal_part_81, NULL)));
     }
@@ -2096,10 +2091,10 @@ static List f10_conversion____accepted_initializer(List result, Type type, List 
 }
 
 static List f10_conversion____convert_mixed_row(Compiler c, List row, List source, List native_target, List row_condition, List parent_condition, int * native_used){
-  List _x2c_gensym_destructure_16 = row;  List original = Var_list_payload(List_getindex(_x2c_gensym_destructure_16, 0));  List cases = Var_list_payload(List_getindex(_x2c_gensym_destructure_16, 1));  Array converted = Array_new(), captured = Array_new();  List prepared = source;  if(List_truth(({ static MatchCaptureSite _x2c_gensym_match_site_5;  x2c_match_site_match(& _x2c_gensym_match_site_5, source, List_var(_66)); }))) prepared = f10_conversion____capture_leaves(c, source, captured);  int native_identity = ! List_truth(parent_condition); {
+  List _x2c_gensym_destructure_15 = row;  List original = Var_list_payload(List_getindex(_x2c_gensym_destructure_15, 0));  List cases = Var_list_payload(List_getindex(_x2c_gensym_destructure_15, 1));  Array converted = Array_new(), captured = Array_new();  List prepared = source;  if(List_truth(({ static MatchCaptureSite _x2c_gensym_match_site_5;  x2c_match_site_match(& _x2c_gensym_match_site_5, source, List_var(_66)); }))) prepared = f10_conversion____capture_leaves(c, source, captured);  int native_identity = ! List_truth(parent_condition); {
     List choice;  List _x2c_gensym_macro_object_14 = cases;  List _x2c_gensym_macro_cursor_14 = _x2c_gensym_macro_object_14;  Var _x2c_gensym_macro_cursor_output_14;  while(List_try_next(_x2c_gensym_macro_object_14, &(_x2c_gensym_macro_cursor_14), &(_x2c_gensym_macro_cursor_output_14))){
       choice = Var_list_payload(_x2c_gensym_macro_cursor_output_14); {
-        List _x2c_gensym_destructure_17 = choice;  List condition = Var_list_payload(List_getindex(_x2c_gensym_destructure_17, 0));  List path = Var_list_payload(List_getindex(_x2c_gensym_destructure_17, 1));  Type destination = Var_type(List_getindex(_x2c_gensym_destructure_17, 2));  List input = Var_list_payload(List_getindex(_x2c_gensym_destructure_17, 3));  List result = f10_conversion____convert_case(c, choice, prepared, native_target, row_condition, native_used);  int identity = result == prepared; {
+        List _x2c_gensym_destructure_16 = choice;  List condition = Var_list_payload(List_getindex(_x2c_gensym_destructure_16, 0));  List path = Var_list_payload(List_getindex(_x2c_gensym_destructure_16, 1));  Type destination = Var_type(List_getindex(_x2c_gensym_destructure_16, 2));  List input = Var_list_payload(List_getindex(_x2c_gensym_destructure_16, 3));  List result = f10_conversion____convert_case(c, choice, prepared, native_target, row_condition, native_used);  int identity = result == prepared; {
           List _x2c_gensym_match_expr = result; List _x2c_gensym_match_cursor, _x2c_gensym_match_cursor1, _x2c_gensym_match_cursor2;  switch(_x2c_gensym_match_expr ? _x2c_gensym_match_expr->car.u64 : 0){
               case 9224497936761996324ULL: ;  _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497936761996324ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && Var_is(_x2c_gensym_match_cursor->car, 806120) && (_x2c_gensym_match_cursor1 = Var_list_payload(_x2c_gensym_match_cursor->car), 1) && _x2c_gensym_match_cursor1 && _x2c_gensym_match_cursor1->car.u64 == 9224497936761817880ULL && (_x2c_gensym_match_cursor1 = _x2c_gensym_match_cursor1->cdr, 1) && _x2c_gensym_match_cursor1 && Var_equal(_x2c_gensym_match_cursor1->car, Var_list_payload(_610 ->cdr->cdr->car)->cdr->car) && (_x2c_gensym_match_cursor1 = _x2c_gensym_match_cursor1->cdr, 1) && _x2c_gensym_match_cursor1 && Var_is(_x2c_gensym_match_cursor1->car, 806120) && (_x2c_gensym_match_cursor2 = Var_list_payload(_x2c_gensym_match_cursor1->car), 1) && _x2c_gensym_match_cursor2 && _x2c_gensym_match_cursor2->car.u64 == 9224497936761721318ULL && (_x2c_gensym_match_cursor2 = _x2c_gensym_match_cursor2->cdr, 1) && _x2c_gensym_match_cursor2 && (_x2c_gensym_match_cursor2 = _x2c_gensym_match_cursor2->cdr, 1) && _x2c_gensym_match_cursor2) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_cursor2->car; if ((_x2c_gensym_match_cursor2 = _x2c_gensym_match_cursor2->cdr, 1) && _x2c_gensym_match_cursor2 && (_x2c_gensym_match_cursor2 = _x2c_gensym_match_cursor2->cdr, 1) && !_x2c_gensym_match_cursor2 && (_x2c_gensym_match_cursor1 = _x2c_gensym_match_cursor1->cdr, 1) && !_x2c_gensym_match_cursor1 && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {{
               Var yes;  yes = _x2c_gensym_match_value_0;  if(x2c_var_identical(yes, List_var(prepared))) identity = 1;
@@ -2182,7 +2177,7 @@ static List f10_conversion____materialize_mixed_row(Compiler c, List original, L
   );  List values = Array_list_free(converted);  List adapted = f10_conversion____adapt_choices(c, source, values, placeholder);  if(List_truth(adapted)) values = adapted;  Array replaced = Array_new();  List inputs = Array_list_free(captured);  int uses_input = ! ! List_truth(adapted); {
     List choice;  List _x2c_gensym_macro_object_16 = values;  List _x2c_gensym_macro_cursor_16 = _x2c_gensym_macro_object_16;  Var _x2c_gensym_macro_cursor_output_16;  while(List_try_next(_x2c_gensym_macro_object_16, &(_x2c_gensym_macro_cursor_16), &(_x2c_gensym_macro_cursor_output_16))){
       choice = Var_list_payload(_x2c_gensym_macro_cursor_output_16); {
-        List _x2c_gensym_destructure_18 = choice;  List condition = Var_list_payload(List_getindex(_x2c_gensym_destructure_18, 0));  List path = Var_list_payload(List_getindex(_x2c_gensym_destructure_18, 1));  Type destination = Var_type(List_getindex(_x2c_gensym_destructure_18, 2));  List result = Var_list_payload(List_getindex(_x2c_gensym_destructure_18, 3));  List substituted = ! List_truth(Type_list(destination)) && List_truth(({ static MatchCaptureSite _x2c_gensym_match_site_6;  x2c_match_site_match(& _x2c_gensym_match_site_6, source, List_var(_66)); })) ? result : List_search_replace(result, List_var(cons(_657, cons(List_var(source), NULL))), List_var(placeholder));  if(substituted != result) uses_input = 1;  Array_push(replaced, List_var(cons(List_var(condition), cons(List_var(path), cons(List_var(destination), cons(List_var(substituted), NULL))))));
+        List _x2c_gensym_destructure_17 = choice;  List condition = Var_list_payload(List_getindex(_x2c_gensym_destructure_17, 0));  List path = Var_list_payload(List_getindex(_x2c_gensym_destructure_17, 1));  Type destination = Var_type(List_getindex(_x2c_gensym_destructure_17, 2));  List result = Var_list_payload(List_getindex(_x2c_gensym_destructure_17, 3));  List substituted = ! List_truth(Type_list(destination)) && List_truth(({ static MatchCaptureSite _x2c_gensym_match_site_6;  x2c_match_site_match(& _x2c_gensym_match_site_6, source, List_var(_66)); })) ? result : List_search_replace(result, List_var(cons(_657, cons(List_var(source), NULL))), List_var(placeholder));  if(substituted != result) uses_input = 1;  Array_push(replaced, List_var(cons(List_var(condition), cons(List_var(path), cons(List_var(destination), cons(List_var(substituted), NULL))))));
       }
 
     }
@@ -2203,7 +2198,7 @@ static List f10_conversion____adapt_choices(Compiler c, List source, List choice
       {
         List choice;  List _x2c_gensym_macro_object_17 = choices;  List _x2c_gensym_macro_cursor_17 = _x2c_gensym_macro_object_17;  Var _x2c_gensym_macro_cursor_output_17;  while(List_try_next(_x2c_gensym_macro_object_17, &(_x2c_gensym_macro_cursor_17), &(_x2c_gensym_macro_cursor_output_17))){
           choice = Var_list_payload(_x2c_gensym_macro_cursor_output_17); {
-            List _x2c_gensym_destructure_19 = choice;  List condition = Var_list_payload(List_getindex(_x2c_gensym_destructure_19, 0));  List path = Var_list_payload(List_getindex(_x2c_gensym_destructure_19, 1));  Type destination = Var_type(List_getindex(_x2c_gensym_destructure_19, 2));  List value = Var_list_payload(List_getindex(_x2c_gensym_destructure_19, 3));  if(List_truth(Type_list(destination)) && ! List_truth(Type_list(f10_conversion____adapter_type(c, destination)))){
+            List _x2c_gensym_destructure_18 = choice;  List condition = Var_list_payload(List_getindex(_x2c_gensym_destructure_18, 0));  List path = Var_list_payload(List_getindex(_x2c_gensym_destructure_18, 1));  Type destination = Var_type(List_getindex(_x2c_gensym_destructure_18, 2));  List value = Var_list_payload(List_getindex(_x2c_gensym_destructure_18, 3));  if(List_truth(Type_list(destination)) && ! List_truth(Type_list(f10_conversion____adapter_type(c, destination)))){
               List _x2c_gensym_return_value_3 = NULL; {
                 x2c_cleanup_leave(& _x2c_gensym_defer_record_2);  return _x2c_gensym_return_value_3;
               }
@@ -2242,7 +2237,7 @@ static List f10_conversion____adapt_choices(Compiler c, List source, List choice
       Array adapted = Array_new(); {
         List choice;  List _x2c_gensym_macro_object_18 = Array_list(prepared);  List _x2c_gensym_macro_cursor_18 = _x2c_gensym_macro_object_18;  Var _x2c_gensym_macro_cursor_output_18;  while(List_try_next(_x2c_gensym_macro_object_18, &(_x2c_gensym_macro_cursor_18), &(_x2c_gensym_macro_cursor_output_18))){
           choice = Var_list_payload(_x2c_gensym_macro_cursor_output_18); {
-            List _x2c_gensym_destructure_20 = choice;  List condition = Var_list_payload(List_getindex(_x2c_gensym_destructure_20, 0));  List path = Var_list_payload(List_getindex(_x2c_gensym_destructure_20, 1));  Type destination = Var_type(List_getindex(_x2c_gensym_destructure_20, 2));  List value = Var_list_payload(List_getindex(_x2c_gensym_destructure_20, 3));  List adapter = f10_conversion____value_adapter(c, source, value);  Type callable = Var_type(List_cadr(adapter)), result = Type_apply(callable);  Macro called = _809;  value = Compiler_rebuild_expression(c, result, Macro_apply(called, ({
+            List _x2c_gensym_destructure_19 = choice;  List condition = Var_list_payload(List_getindex(_x2c_gensym_destructure_19, 0));  List path = Var_list_payload(List_getindex(_x2c_gensym_destructure_19, 1));  Type destination = Var_type(List_getindex(_x2c_gensym_destructure_19, 2));  List value = Var_list_payload(List_getindex(_x2c_gensym_destructure_19, 3));  List adapter = f10_conversion____value_adapter(c, source, value);  Type callable = Var_type(List_cadr(adapter)), result = Type_apply(callable);  Macro called = _809;  value = Compiler_rebuild_expression(c, result, Macro_apply(called, ({
               Var _x2c_gensym_literal_part_98 = List_var(adapter);  Var _x2c_gensym_literal_part_99 = List_var(cons(List_var(placeholder), NULL));  cons(_x2c_gensym_literal_part_98, cons(_x2c_gensym_literal_part_99, NULL));
             }
             )));  Array_push(adapted, List_var(cons(List_var(condition), cons(List_var(path), cons(List_var(destination), cons(List_var(value), NULL))))));
@@ -2288,7 +2283,7 @@ static Type f10_conversion____adapter_type(Compiler c, Type type){
 
 List Compiler_initializer_native_types(Compiler c, Type type);
 List Compiler_convert_compound_literal(Compiler c, List value, Type type, Type native_type){
-  if(! _init_guard_) _file_init_();  List _x2c_gensym_destructure_21 = Compiler_initializer_native_types(c, native_type);  Type definition = Var_type(List_getindex(_x2c_gensym_destructure_21, 0));  Type reference = Var_type(List_getindex(_x2c_gensym_destructure_21, 1));  List target = f10_conversion____zero_pointer_target(type, reference);  int native_used = 0;  List converted = f10_conversion____convert_initializer(c, value, type, target, &(native_used));  if(! native_used) definition = native_type;  return cons(_24, cons(List_var(definition), cons(List_var(converted), NULL)));
+  if(! _init_guard_) _file_init_();  List _x2c_gensym_destructure_20 = Compiler_initializer_native_types(c, native_type);  Type definition = Var_type(List_getindex(_x2c_gensym_destructure_20, 0));  Type reference = Var_type(List_getindex(_x2c_gensym_destructure_20, 1));  List target = f10_conversion____zero_pointer_target(type, reference);  int native_used = 0;  List converted = f10_conversion____convert_initializer(c, value, type, target, &(native_used));  if(! native_used) definition = native_type;  return cons(_24, cons(List_var(definition), cons(List_var(converted), NULL)));
 }
 
 List Compiler_initializer_native_types(Compiler c, Type type){

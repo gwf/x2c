@@ -27,7 +27,8 @@ static inline int Substring_equal(Substring left, Substring right){
 static inline int Substring_compare(Substring left, Substring right){
   int length = left.length < right.length ? left.length : right.length;
   int order = length ? memcmp((const char *) left.source + left.offset, (const char *) right.source + right.offset, (size_t) length) : 0;
-  return order ?(order > 0 ? 1 : - 1) : left.length - right.length;
+  if(order) return order > 0 ? 1 : - 1;
+  return left.length - right.length;
 }
 
 static Var String_var(String);
@@ -45,7 +46,7 @@ Substring Substring_new(String source, int offset, int length){
   if(offset < 0 || length < 0 || offset > String_len(source) || length > String_len(source) - offset){
     Var _x2c_gensym_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("Substring.new")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/substring.x",.function = "Substring_new",.line = 20,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/substring.x",.function = "Substring_new",.line = 21,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_0, 4372499598, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(1019648360), int_var(offset), Symbol_var(816725264), int_var(length));
       __builtin_unreachable();
     }

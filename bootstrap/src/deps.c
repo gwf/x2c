@@ -264,12 +264,15 @@ static String _contents(CliRequest request, Compiler compiler, String input, Str
 }
 
 static void _write_targets(Buffer out, CliRequest request, String input, String output_dir){
+  if(String_truth(request -> dep_target)){
+    _write_word(out, request -> dep_target);
+    return;
+  }
   String base =({
     Var _x2c_gensym_literal_part_2 = String_var(String_rstrip(output_dir, "/"));  Var _x2c_gensym_literal_part_3 = String_var(Path_stem(input));  String_join(NULL, cons(_x2c_gensym_literal_part_2, cons(String_var(_0), cons(_x2c_gensym_literal_part_3, NULL))));
   }
   );
-  _write_word(out, String_truth(request -> dep_target) ? request -> dep_target : String_join(NULL, cons(String_var(base), cons(String_var(_4), NULL))));
-  if(String_truth(request -> dep_target)) return;
+  _write_word(out, String_join(NULL, cons(String_var(base), cons(String_var(_4), NULL))));
   Buffer_write_char(out, ' ');
   _write_word(out, String_join(NULL, cons(String_var(base), cons(String_var(_5), NULL))));
 }

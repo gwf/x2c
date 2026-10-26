@@ -424,10 +424,7 @@ const char * Scope_name(Scope scope){
 }
 
 static void _register_name(Scope scope, const char * name){
-  if(! name) return;  size_t length = strlen(name);  if(length == SIZE_MAX){
-    static const X2CErrorSite _x2c_gensym_error_site_15 = {.file = "../../lib/scope/accounting.x",.function = "_register_name",.line = 33,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_15, 1358596898646632, 0);  __builtin_unreachable();
-  }
-  f10_accounting___ScopeName node = _raw_malloc(sizeof(struct f10_accounting___ScopeName));  char * copy = _raw_malloc(length + 1);  memcpy(copy, name, length + 1);  node -> scope = scope;  node -> name = copy;  f10_accounting____metadata_lock();  node -> next = f10_accounting___scope_names;  f10_accounting___scope_names = node;  f10_accounting____metadata_unlock();
+  if(! name) return;  size_t length = strlen(name);  f10_accounting___ScopeName node = _raw_malloc(sizeof(struct f10_accounting___ScopeName));  char * copy = _raw_malloc(length + 1);  memcpy(copy, name, length + 1);  node -> scope = scope;  node -> name = copy;  f10_accounting____metadata_lock();  node -> next = f10_accounting___scope_names;  f10_accounting___scope_names = node;  f10_accounting____metadata_unlock();
 }
 
 static f10_accounting___ScopeName f10_accounting____find_name(Scope scope){
@@ -509,14 +506,14 @@ static void _free_name_registry(void){
 
 static void * _raw_malloc(size_t size){
   void * ptr = malloc(size);  if(! ptr){
-    static const X2CErrorSite _x2c_gensym_error_site_16 = {.file = "../../lib/scope/runtime.x",.function = "_raw_malloc",.line = 5,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_16, 97614135954008, 0);  __builtin_unreachable();
+    static const X2CErrorSite _x2c_gensym_error_site_15 = {.file = "../../lib/scope/runtime.x",.function = "_raw_malloc",.line = 5,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_15, 97614135954008, 0);  __builtin_unreachable();
   }
   atomic_fetch_add(& raw_alloc_count, 1);  return ptr;
 }
 
 static void * f7_runtime____raw_realloc(void * ptr, size_t size){
   void * result = realloc(ptr, size);  if(! result){
-    static const X2CErrorSite _x2c_gensym_error_site_17 = {.file = "../../lib/scope/runtime.x",.function = "f7_runtime____raw_realloc",.line = 12,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_17, 97614135954008, 0);  __builtin_unreachable();
+    static const X2CErrorSite _x2c_gensym_error_site_16 = {.file = "../../lib/scope/runtime.x",.function = "f7_runtime____raw_realloc",.line = 12,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_16, 97614135954008, 0);  __builtin_unreachable();
   }
   return result;
 }
@@ -531,7 +528,7 @@ static void * _raw_grow(void * items, int count, int * capacity, size_t size){
   }
   else if(count ==(* capacity)){
     if((* capacity) > INT_MAX / 2){
-      static const X2CErrorSite _x2c_gensym_error_site_18 = {.file = "../../lib/scope/runtime.x",.function = "_raw_grow",.line = 30,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_18, 1358596898646632, 0);  __builtin_unreachable();
+      static const X2CErrorSite _x2c_gensym_error_site_17 = {.file = "../../lib/scope/runtime.x",.function = "_raw_grow",.line = 30,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_17, 1358596898646632, 0);  __builtin_unreachable();
     }
     items = f7_runtime____raw_realloc(items, (* capacity) * 2 * size); (* capacity) *= 2;
   }
@@ -561,7 +558,7 @@ static void f7_runtime____ensure_running(void){
 
 void Scope_shutdown_hook(void(* hook)(void)){
   if(! _init_guard_) Scope_initialize();  _require_running();  if(! hook){
-    static const X2CErrorSite _x2c_gensym_error_site_19 = {.file = "../../lib/scope/runtime.x",.function = "Scope_shutdown_hook",.line = 85,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_19, 4372499598, 0);  __builtin_unreachable();
+    static const X2CErrorSite _x2c_gensym_error_site_18 = {.file = "../../lib/scope/runtime.x",.function = "Scope_shutdown_hook",.line = 85,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_18, 4372499598, 0);  __builtin_unreachable();
   }
   f7_runtime___hooks = _raw_grow(f7_runtime___hooks, f7_runtime___hook_count, &(f7_runtime___hook_capacity), sizeof(* f7_runtime___hooks));  f7_runtime___hooks[f7_runtime___hook_count ++] = hook;
 }

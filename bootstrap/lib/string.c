@@ -825,7 +825,7 @@ static inline char f6_escape____escape_letter(unsigned char ch){
 }
 
 String String_repr(String str){
-  if(! _init_guard_) _file_init_();  if(! String_truth(str) || ! * str) return _3;  return String_printf(_4, String_escape(str));
+  if(! _init_guard_) _file_init_();  if(! String_truth(str)) return _3;  return String_printf(_4, String_escape(str));
 }
 
 Buffer String_write_repr(String str, Buffer out){
@@ -838,7 +838,7 @@ Buffer String_write_repr(String str, Buffer out){
 String String_unescape(String str){
   if(! _init_guard_) _file_init_();  int n = String_len(str);  if(n == 0) return NULL;  if(!(String_contains(str, _5))) return str;  String string = String_malloc(n + 1);  if(f6_escape____unescape_into(string, str) < 0){
     String_free(string); {
-      static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/string/escape.x",.function = "String_unescape",.line = 126,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_7, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("String.unescape")), NULL))));  __builtin_unreachable();
+      static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/string/escape.x",.function = "String_unescape",.line = 125,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_7, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("String.unescape")), NULL))));  __builtin_unreachable();
     }
 
   }
@@ -884,14 +884,14 @@ static inline int f6_escape____named_escape(int esc){
 }
 
 int String_parse_char(String str){
-  if(! String_truth(str) || ! * str) return - 1;  const char * at = str;  if(* at ++ != '\'' || ! * at) return - 1;  int byte = * at ++;  if(byte == '\\'){
+  if(! String_truth(str)) return - 1;  const char * at = str;  if(* at ++ != '\'' || ! * at) return - 1;  int byte = * at ++;  if(byte == '\\'){
     if(! * at) return - 1;  byte = f6_escape____decode_escape(&(at));  if(byte < 0 || byte > 0377) return - 1;
   }
   return * at == '\'' ? byte : - 1;
 }
 
 String String_parse(String str){
-  if(! _init_guard_) _file_init_();  if(! String_truth(str) || ! * str) return NULL;  int n = String_len(str);  if(String_getindex(str, 0) == '%' && String_getindex(str, 1) == '"' && String_getindex(str, n - 1) == '"') return String_unescape(String_new_len(str + 2, n - 3));  if(String_getindex(str, 0) == '"' && String_getindex(str, n - 1) == '"') return String_unescape(String_new_len(str + 1, n - 2));  return String_unescape(str);
+  if(! _init_guard_) _file_init_();  if(! String_truth(str)) return NULL;  int n = String_len(str);  if(String_getindex(str, 0) == '%' && String_getindex(str, 1) == '"' && String_getindex(str, n - 1) == '"') return String_unescape(String_new_len(str + 2, n - 3));  if(String_getindex(str, 0) == '"' && String_getindex(str, n - 1) == '"') return String_unescape(String_new_len(str + 1, n - 2));  return String_unescape(str);
 }
 
 String String_format(String fmt, List values){
@@ -1085,7 +1085,7 @@ static Var f6_format____number(f6_format___Format * f, Var arg, Symbol target){
 
 _Noreturn static void f6_format____format_error(int offset, String reason){
   {
-    static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/string/format.x",.function = "f6_format____format_error",.line = 331,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_8, 435316840, 2, Symbol_var(1019648360), int_var(offset), Symbol_var(1218550748), String_var(reason));  __builtin_unreachable();
+    static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/string/format.x",.function = "f6_format____format_error",.line = 334,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_8, 435316840, 2, Symbol_var(1019648360), int_var(offset), Symbol_var(1218550748), String_var(reason));  __builtin_unreachable();
   }
 
 }
@@ -1097,7 +1097,7 @@ static void f6_format____fail(f6_format___Format * f, String reason){
 _Noreturn static void f6_format____nested(f6_format___Format * f, String reason, Var code, List details){
   List cause = cons(code, details); {
     Var _x2c_gensym_literal_part_4 = int_var((* f).offset); {
-      static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/string/format.x",.function = "f6_format____nested",.line = 342,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_9, 435316840, 3, Symbol_var(1019648360), _x2c_gensym_literal_part_4, Symbol_var(1218550748), String_var(reason), Symbol_var(6401226), List_var(cause));  __builtin_unreachable();
+      static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/string/format.x",.function = "f6_format____nested",.line = 345,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_9, 435316840, 3, Symbol_var(1019648360), _x2c_gensym_literal_part_4, Symbol_var(1218550748), String_var(reason), Symbol_var(6401226), List_var(cause));  __builtin_unreachable();
     }
 
   }
@@ -1113,7 +1113,7 @@ int String_try_long(String str, long * out){
     negative = * digits == '-';  digits ++;
   }
   if(digits[0] == '0' &&(digits[1] == 'b' || digits[1] == 'B' || digits[1] == 'o' || digits[1] == 'O')){
-    int base = digits[1] == 'b' || digits[1] == 'B' ? 2 : 8;  const char * number = digits + 2;  char * stop = NULL;  if(number[0] < '0' || number[0] >= '0' + base) return 0;  errno = 0;  unsigned long magnitude = strtoul(number, & stop, base);  if(stop == number || errno == ERANGE || ! f6_number____only_space(stop)) return 0;  unsigned long limit = negative ?(unsigned long) LONG_MAX + 1ul :(unsigned long) LONG_MAX;  if(magnitude > limit) return 0;  * out = negative ?(magnitude == limit ? LONG_MIN : -(long) magnitude) :(long) magnitude;  return 1;
+    int base = digits[1] == 'b' || digits[1] == 'B' ? 2 : 8;  const char * number = digits + 2;  char * stop = NULL;  if(number[0] < '0' || number[0] >= '0' + base) return 0;  errno = 0;  unsigned long magnitude = strtoul(number, & stop, base);  if(errno == ERANGE || ! f6_number____only_space(stop)) return 0;  unsigned long limit = negative ?(unsigned long) LONG_MAX + 1ul :(unsigned long) LONG_MAX;  if(magnitude > limit) return 0;  if(! negative) * out =(long) magnitude;  else if(magnitude == limit) * out = LONG_MIN;  else * out = -(long) magnitude;  return 1;
   }
   char * stop = NULL;  errno = 0;  long value = strtol(str, & stop, 0);  if(stop ==(const char *) str || errno == ERANGE || ! f6_number____only_space(stop)) return 0;  * out = value;  return 1;
 }

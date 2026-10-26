@@ -621,8 +621,8 @@ static int _byte_escape(char * s, Symbol * status){
 
 static int _hex_escape(char * s, Symbol * status){
   if(! s[2]) return _fail(status, 664344300629258);
-  if(! _ascii_hex((unsigned char) s[2])) return _fail(status, 28682226919752);
-  return 2 + _digits(s + 2, 16);
+  int digits = _digits(s + 2, 16);
+  return digits ? 2 + digits : _fail(status, 28682226919752);
 }
 
 static int _universal_escape(char * s, int count, Symbol * status){

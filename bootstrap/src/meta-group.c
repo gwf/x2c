@@ -296,7 +296,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _25 = List_var(NULL);
   _26 = Symbol_var(39266);
   _27 = Symbol_var(106239471489226);
-  _28 = int_var(156);
+  _28 = int_var(160);
   _29 = String_new("");
   _30 = String_var(_29);
   _31 = Symbol_var(150408);
@@ -412,7 +412,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _141 = cons(_112, _140);
   _142 = cons(_106, _141);
   _143 = List_var(_142);
-  _144 = int_var(159);
+  _144 = int_var(163);
   _145 = String_new("Array");
   _146 = String_var(_145);
   _147 = cons(_146, NULL);
@@ -1639,7 +1639,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_2(void)
   _1362 = cons(_1359, _1361);
   _1363 = List_var(_1362);
   _1364 = Symbol_var(1133019155420);
-  _1365 = int_var(4017);
+  _1365 = int_var(4015);
   _1366 = cons(_1365, NULL);
   _1367 = cons(_1364, _1366);
   _1368 = List_var(_1367);

@@ -503,7 +503,7 @@ List Compiler_origin_location(Compiler compiler, int occurrence){
 }
 
 String Compiler_display_path(Compiler compiler, String path){
-  if(! _init_guard_) _file_init_();  if(! String_truth(path) || String_startswith(path, _7)) return path;  if(compiler -> source_facts) return Path_absolute(path);  String root = compiler -> root_dir;  if(String_truth(root) && String_truth(path) && String_startswith(path, root) && String_len(path) > String_len(root) && String_getindex(path, String_len(root)) == '/') return String_getslice(path, x2c_slice_bound(String_len(root) + 1), (-2147483647 - 1), 1);
+  if(! _init_guard_) _file_init_();  if(! String_truth(path) || String_startswith(path, _7)) return path;  if(compiler -> source_facts) return Path_absolute(path);  String root = compiler -> root_dir;  if(String_truth(root) && String_startswith(path, root) && String_len(path) > String_len(root) && String_getindex(path, String_len(root)) == '/') return String_getslice(path, x2c_slice_bound(String_len(root) + 1), (-2147483647 - 1), 1);
   return path;
 }
 
@@ -738,7 +738,7 @@ _Noreturn void Compiler_report_error(Compiler compiler, Symbol code, String mess
   Compiler_report_problem(compiler, code, message, token, notes);
   Diagnostics diag = compiler -> diagnostics;
   if(compiler -> recovery_depth > 0){
-    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/diagnostics.x",.function = "Compiler_report_error",.line = 488};
+    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/diagnostics.x",.function = "Compiler_report_error",.line = 491};
     x2c_error_raise_n(& _x2c_gensym_error_site_0, 28682226919752, 1, Symbol_var(209659067570), Symbol_var(code));
     __builtin_unreachable();
   }

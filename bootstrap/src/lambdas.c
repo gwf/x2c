@@ -552,7 +552,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _356 = cons(_353, _355);
   _357 = List_var(_356);
   _358 = Symbol_var(1133019155420);
-  _359 = int_var(3453);
+  _359 = int_var(3451);
   _360 = cons(_359, NULL);
   _361 = cons(_358, _360);
   _362 = List_var(_361);
@@ -628,7 +628,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _432 = cons(_431, NULL);
   _433 = cons(_345, _432);
   _434 = List_var(_433);
-  _435 = int_var(3292);
+  _435 = int_var(3290);
   _436 = cons(_435, NULL);
   _437 = cons(_358, _436);
   _438 = List_var(_437);
@@ -1022,7 +1022,7 @@ String Compiler_package_member_spelling(Compiler, String);
 int Type_is_typedef(Type);
 List Sym_get(Sym, List);
 static int _params_look_typed(Compiler c){
-  if(Compiler_peek(c, 0) == 1519197) return 1;  Symbol head = Compiler_peek(c, 0);  if(Map_truth(c -> macro_holes) &&(head == 73 || head == 129)) return 1;  if(Symbol_is_builtin_type(head) || Symbol_is_type_qualifier(head) || head == 1318234344 || head == 44977116 || head == 357722 || head == 1473096) return 1;  if(head != 19147688) return 0;  String folded = Compiler_package_alias_spelling(c);  if(! String_truth(folded)) folded = Compiler_package_member_spelling(c, c -> token -> text);  String name = String_truth(folded) ? folded : c -> token -> text;  return Type_is_typedef(List_type(Sym_get(c -> sym, cons(String_var(name), NULL))));
+  Symbol head = Compiler_peek(c, 0);  if(head == 1519197) return 1;  if(Map_truth(c -> macro_holes) &&(head == 73 || head == 129)) return 1;  if(Symbol_is_builtin_type(head) || Symbol_is_type_qualifier(head)) return 1;  if(head != 19147688) return 0;  String folded = Compiler_package_alias_spelling(c);  if(! String_truth(folded)) folded = Compiler_package_member_spelling(c, c -> token -> text);  String name = String_truth(folded) ? folded : c -> token -> text;  return Type_is_typedef(List_type(Sym_get(c -> sym, cons(String_var(name), NULL))));
 }
 
 static List _parse_typed_params(Compiler c){
