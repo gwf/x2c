@@ -33,16 +33,16 @@ static List _meta_result(
   Compiler c, List expression, Var value, Token site) {
   if (value is void && c.meta_build) {
     /* A meta body's pattern makes the call when the body runs. */
-    if (c.meta_body)
-      match (expression) case %(expr ?type (meta-call ?callee ?arguments)):
-        return c.resolve_expression(
-          %(expr $type (call $callee $arguments)), site);
+    if (c.meta_body &&
+        expression ~= %(expr ?type (meta-call ?callee ?arguments)))
+      return c.resolve_expression(
+        %(expr $type (call $callee $arguments)), site);
     List placeholder = %(expr (int) (literal (int) "0"));
     c.meta_group.push(%(later $placeholder));
     return placeholder;
   }
   Type declared = expression.cadr();
-  match (expression) case %(expr ? (meta-call (expr ?signature ?) ?)):
+  if (expression ~= %(expr ? (meta-call (expr ?signature ?) ?)))
     declared = signature.cdr();
   if (declared === %(void))
     return %(expr (void) (cast (void) (expr (int) (literal (int) "0"))));
@@ -192,7 +192,7 @@ static Var _apply_linked(Func function, List arguments) {
 static Array _meta_values(
   Compiler c, Var callee, List arguments, Token site) {
   List params = NULL;
-  match (callee) case %((func ?declared) *): params = declared;
+  if (callee ~= %((func ?declared) *)) params = declared;
   Array values = [];
   foreach (List argument in arguments) {
     Type want = NULL;
@@ -201,14 +201,12 @@ static Array _meta_values(
       want = params.car();
       params = params.cdr();
     }
-    if (rest)
-      match (argument)
-        case %(expr ? (splice ?items)): {
-          List splice = c.meta_argument(
-            items, %("List"), site, _meta_call_value);
-          foreach (Var value in splice) values.push(value);
-          continue;
-        }
+    if (rest && argument ~= %(expr ? (splice ?items))) {
+      List splice = c.meta_argument(
+        items, %("List"), site, _meta_call_value);
+      foreach (Var value in splice) values.push(value);
+      continue;
+    }
     values.push(c.meta_argument(argument, want, site, _meta_call_value));
   }
   return values;
