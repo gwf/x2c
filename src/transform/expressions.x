@@ -306,25 +306,11 @@ module List _typed_call(
   int list_varargs = callee_name == "List_list_n";
   if (c.fn_name && _iter_immediate_consumer(callee_name) && args)
     args = cons(c.complete_iter_chain(args.car()), args.cdr());
-  Array values = [], int arg_index = 0, missing = 0;
-  for (List p = params, a = args; p || a;
-       p = p.cdr(), a = a.cdr(), arg_index++) {
+  Array values = [], int arg_index = 0;
+  List p = params, a = args;
+  for (; a; p = p.cdr(), a = a.cdr(), arg_index++) {
     List param = p ? p.car().list() : NULL;
-    if (param === %(....)) {
-      if (missing)
-        c.report_error(<xform>, "too few arguments for List rest function",
-          NULL, NULL);
-      a = c.pack_rest_arguments(p, a);
-      param = %("List"), p = %($param);
-      List native = params[0:arg_index].append(%($param));
-      Type signature = callee.cadr();
-      if (signature.is_pointer())
-        signature = cons(signature.car(),
-          cons(%(func $native), signature.cdr().cdr()));
-      else signature = cons(%(func $native), signature.cdr());
-      callee = %(expr $signature $(callee.caddr()));
-    }
-    if (!a) { missing = 1; continue; }
+    if (param === %(....)) break;
     List arg = a.car();
     match (arg) case %(expr ? (splice ?)):
       c.report_error(<xform>, "List splice requires a rest argument",
@@ -337,6 +323,23 @@ module List _typed_call(
       ? c.convert_expression(arg, expected)
       : c.lower_lambda_expr(arg);
     values.push(converted);
+  }
+  List rest = p;
+  while (rest && rest.car() != %(....)) rest = rest.cdr();
+  if (rest) {
+    if (rest !== p)
+      c.report_error(<xform>, "too few arguments for List rest function",
+        NULL, NULL);
+    List packed = c.pack_rest_arguments(p, a).car();
+    packed = c.maybe_adapt_func_arg(packed, %("List"));
+    values.push(c.convert_expression(packed, %("List")));
+    List native = params[0:arg_index].append(%(("List")));
+    Type signature = callee.cadr();
+    if (signature.is_pointer())
+      signature = cons(signature.car(),
+        cons(%(func $native), signature.cdr().cdr()));
+    else signature = cons(%(func $native), signature.cdr());
+    callee = %(expr $signature $(callee.caddr()));
   }
   List newargs = values.list_free();
   if (!newargs) newargs = supplied;
