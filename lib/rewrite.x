@@ -15,7 +15,8 @@ meta Code register_rewrite(Code function, Code pattern, List holes) {
     pattern, at the compiler operations its form selects, as
     `Code.register_rewrite` describes. User translators run in registration
     order before builtin defaults. Returning void, null, or the input itself
-    declines the rewrite. */
+    declines the rewrite.
+*/
 macro Decorator $rewrite(Unit $function, Expr $pattern, Expr @holes) {
   @register_rewrite($function, $pattern, $holes)
 }
