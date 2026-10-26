@@ -48,7 +48,6 @@ typedef struct MacroCaseSite {
 #include "array/array.x"
 #include "atom.x"
 #include "list/list.x"
-#include "match/match.x"
 #include "meta.x"
 #include "string/string.x"
 #include "var/var.x"
