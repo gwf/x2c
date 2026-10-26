@@ -2841,12 +2841,12 @@ static List _binding_record(Var group, Var name, List function){
   if(List_contains(c -> binding_sealed, String_var(group_name))) x2c_diagnostic_fail(_1468, cons(String_var(String_join(NULL, cons(String_var(_1469), cons(String_var(group_name), NULL)))), NULL));
   {
     List row;
-    List _x2c_gensym_macro_object_13 = _binding_rows_for(group_name, c -> binding_rows);
+    List _x2c_gensym_macro_object_13 = c -> binding_rows;
     List _x2c_gensym_macro_cursor_13 = _x2c_gensym_macro_object_13;
     Var _x2c_gensym_macro_cursor_output_13;
     while(List_try_next(_x2c_gensym_macro_object_13, &(_x2c_gensym_macro_cursor_13), &(_x2c_gensym_macro_cursor_output_13))){
       row = Var_list_payload(_x2c_gensym_macro_cursor_output_13);
-      if(x2c_var_equal(List_getindex(row, 1), String_var(lisp_name))) x2c_diagnostic_fail(_1470, ({
+      if(x2c_var_equal(List_car(row), String_var(group_name)) && x2c_var_equal(List_getindex(row, 1), String_var(lisp_name))) x2c_diagnostic_fail(_1470, ({
         Var _x2c_gensym_literal_part_134 = String_var(String_join(NULL, cons(String_var(_1469), cons(String_var(group_name), NULL))));  Var _x2c_gensym_literal_part_135 = String_var(String_join(NULL, cons(String_var(_1471), cons(String_var(lisp_name), NULL))));  cons(_x2c_gensym_literal_part_134, cons(_x2c_gensym_literal_part_135, NULL));
       }
       ));
@@ -2907,49 +2907,21 @@ static List _binding_install(List lisp, Var group){
 List MetaContext_literal_list(List);
 
 static List _binding_statement(List lisp, List row){
-  {
-    List _x2c_gensym_match_expr = row; List _x2c_gensym_match_cursor;
-    switch(0){
-        default: ;
-       _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && Var_is(_x2c_gensym_match_cursor->car, 1318210446)) { Var _x2c_gensym_match_value_1 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && Var_is(_x2c_gensym_match_cursor->car, 1318210446)) { Var _x2c_gensym_match_value_2 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor) { Var _x2c_gensym_match_value_3 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {{
-        Var group;
-        group = _x2c_gensym_match_value_0;
-        Var name;
-        name = _x2c_gensym_match_value_1;
-        Var function;
-        function = _x2c_gensym_match_value_2;
-        Var type;
-        type = _x2c_gensym_match_value_3;
-        {
-          Var _x2c_gensym_match_value_0 = name;
-          Var _x2c_gensym_match_value_1 = function;
-          {
-            String name = Var_as_string(_x2c_gensym_match_value_0);
-            String function = Var_as_string(_x2c_gensym_match_value_1);
-            {
-              List signature = MetaContext_literal_list(Var_list_payload(type));
-              return({
-                List _x2c_gensym_hole_20 = x2c_ident(function);  cons(_2, cons(_3, cons(List_var(cons(_118, cons(List_var(cons(_121, cons(List_var(cons(_4, cons(_7, cons(List_var(cons(_8, cons(_1486, cons(List_var(({
-                  Var _x2c_gensym_literal_part_139 = List_var(cons(_25, cons(_129, cons(_130, cons(List_var(lisp), NULL)))));  Var _x2c_gensym_literal_part_140 = List_var(cons(_25, cons(_129, cons(_130, cons(String_var(name), NULL)))));  Var _x2c_gensym_literal_part_141 = List_var(cons(_4, cons(_7, cons(List_var(cons(_8, cons(_1498, cons(List_var(({
-                    Var _x2c_gensym_literal_part_137 = List_var(cons(_25, cons(_129, cons(_130, cons(List_var(_x2c_gensym_hole_20), NULL)))));  Var _x2c_gensym_literal_part_138 = List_var(cons(_25, cons(_129, cons(_130, cons(List_var(signature), NULL)))));  cons(_23, cons(_x2c_gensym_literal_part_137, cons(_x2c_gensym_literal_part_138, NULL)));
-                  }
-                  )), NULL)))), NULL))));  cons(_23, cons(_x2c_gensym_literal_part_139, cons(_x2c_gensym_literal_part_140, cons(_x2c_gensym_literal_part_141, NULL))));
-                }
-                )), NULL)))), NULL)))), NULL))), NULL))), NULL)));
-              }
-              );
-            }
-
-          }
-
-        }
-
+  List _x2c_gensym_destructure_1 = List_cdr(row);
+  String name = Var_as_string(List_getindex(_x2c_gensym_destructure_1, 0));
+  String function = Var_as_string(List_getindex(_x2c_gensym_destructure_1, 1));
+  List type = Var_list_payload(List_getindex(_x2c_gensym_destructure_1, 2));
+  List signature = MetaContext_literal_list(type);
+  return({
+    List _x2c_gensym_hole_20 = x2c_ident(function);  cons(_2, cons(_3, cons(List_var(cons(_118, cons(List_var(cons(_121, cons(List_var(cons(_4, cons(_7, cons(List_var(cons(_8, cons(_1486, cons(List_var(({
+      Var _x2c_gensym_literal_part_139 = List_var(cons(_25, cons(_129, cons(_130, cons(List_var(lisp), NULL)))));  Var _x2c_gensym_literal_part_140 = List_var(cons(_25, cons(_129, cons(_130, cons(String_var(name), NULL)))));  Var _x2c_gensym_literal_part_141 = List_var(cons(_4, cons(_7, cons(List_var(cons(_8, cons(_1498, cons(List_var(({
+        Var _x2c_gensym_literal_part_137 = List_var(cons(_25, cons(_129, cons(_130, cons(List_var(_x2c_gensym_hole_20), NULL)))));  Var _x2c_gensym_literal_part_138 = List_var(cons(_25, cons(_129, cons(_130, cons(List_var(signature), NULL)))));  cons(_23, cons(_x2c_gensym_literal_part_137, cons(_x2c_gensym_literal_part_138, NULL)));
       }
-       break; } } } } }
+      )), NULL)))), NULL))));  cons(_23, cons(_x2c_gensym_literal_part_139, cons(_x2c_gensym_literal_part_140, cons(_x2c_gensym_literal_part_141, NULL))));
     }
-
+    )), NULL)))), NULL)))), NULL))), NULL))), NULL)));
   }
-  return NULL;
+  );
 }
 
 static List _binding_call(String name, List arguments){

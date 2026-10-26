@@ -47,9 +47,9 @@ typedef struct MachineProgram{
 }
 * MachineProgram;
 
-static List _13, _9, _7, _5, _4, _1;
+static List _3;
 
-static Var _12, _11, _10, _8, _6, _3, _2, _0;
+static Var _2, _1, _0;
 
 static int _init_guard_ = 0;
 
@@ -464,8 +464,6 @@ static int f4_plan____compile_and(f4_plan___MatchLower * l, List args);
 static int f4_plan____compile_quote(f4_plan___MatchLower * l, List args);
 
 static int f4_plan____compile_is(f4_plan___MatchLower * l, List args);
-
-static int f4_plan____match_kind(List args);
 
 static int f4_plan____is_kind(f4_plan___MatchLower * l, int kind);
 
@@ -928,20 +926,10 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   }
   ;
   x2c_register_tagged_descriptor(232583392266, String_new("MachineProgram"), _x2c_gensym_protocol_methods_0);
-  _0 = Symbol_var(107482);
-  _1 = cons(_0, NULL);
-  _2 = Symbol_var(45156);
-  _3 = Symbol_var(154018148);
-  _4 = cons(_3, NULL);
-  _5 = cons(_2, _4);
-  _6 = Symbol_var(806120);
-  _7 = cons(_6, _4);
-  _8 = Symbol_var(992);
-  _9 = cons(_8, NULL);
-  _10 = Symbol_var(2005352);
-  _11 = Symbol_var(54);
-  _12 = List_var(NULL);
-  _13 = cons(_12, NULL);
+  _0 = Symbol_var(2005352);
+  _1 = Symbol_var(54);
+  _2 = List_var(NULL);
+  _3 = cons(_2, NULL);
   _x2c_gensym_static_initialize_0();
   _x2c_gensym_static_initialize_1();
 }
@@ -1818,7 +1806,7 @@ static void f4_plan____lower(MatchPlan plan, Var pattern){
       plan -> status = l.b.status;
       plan -> reason = l.b.reason;
       if(plan -> status == 1138535534920) plan -> program = MachineBuilder_freeze(&(l.b));
-      if(l.sites) xfree(l.sites);
+      xfree(l.sites);
     }
     x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
   }
@@ -2105,19 +2093,30 @@ static int f4_plan____compile_quote(f4_plan___MatchLower * l, List args){
 }
 
 static int f4_plan____compile_is(f4_plan___MatchLower * l, List args){
-  int kind = f4_plan____match_kind(args);
-  if(kind >= 0) return f4_plan____is_kind(&((* l)), kind);
-  if(List_equal(args, _1)) return f4_plan____is_atom(&((* l)));
-  if(List_truth(args) && x2c_var_equal(List_car(args), Symbol_var(1362954)) && List_truth(List_cdr(args)) && ! List_truth(List_cddr(args))) return f4_plan____is_type(&((* l)), List_cadr(args));
-  return f4_plan____never(&((* l)));
-}
+  {
+    List _x2c_gensym_match_expr = args; List _x2c_gensym_match_cursor;
+    switch(_x2c_gensym_match_expr ? _x2c_gensym_match_expr->car.u64 : 0){
+        case 9224497936761663588ULL: ;
+       _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497936761663588ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497936915636580ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {return f4_plan____is_kind(&((* l)), MACHINE_KIND_ATOM_BINDER);
+       break; } case 9224497936762424552ULL: ;
+       _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497936762424552ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497936915636580ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {return f4_plan____is_kind(&((* l)), MACHINE_KIND_LIST_BINDER);
+       break; } case 9224497936915636580ULL: ;
+       _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497936915636580ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {return f4_plan____is_kind(&((* l)), MACHINE_KIND_BINDER);
+       break; } case 9224497936761619424ULL: ;
+       _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497936761619424ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {return f4_plan____is_kind(&((* l)), MACHINE_KIND_MATCH_OP);
+       break; } case 9224497936761725914ULL: ;
+       _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497936761725914ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {return f4_plan____is_atom(&((* l)));
+       break; } case 9224497936762981386ULL: ;
+       _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497936762981386ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {{
+        Var tag;
+        tag = _x2c_gensym_match_value_0;
+        return f4_plan____is_type(&((* l)), tag);
+      }
+       break; } } default: break;
+    }
 
-static int f4_plan____match_kind(List args){
-  if(List_equal(args, _5)) return MACHINE_KIND_ATOM_BINDER;
-  if(List_equal(args, _7)) return MACHINE_KIND_LIST_BINDER;
-  if(List_equal(args, _4)) return MACHINE_KIND_BINDER;
-  if(List_equal(args, _9)) return MACHINE_KIND_MATCH_OP;
-  return - 1;
+  }
+  return f4_plan____never(&((* l)));
 }
 
 static int f4_plan____is_kind(f4_plan___MatchLower * l, int kind){
@@ -3233,7 +3232,7 @@ static List f6_layout____normalize_pattern(List pattern){
   List rest = List_cdr(args);
   if(! Var_is_binder(binder) || ! List_truth(rest) ||(x2c_var_equal(op, Symbol_var(2005352)) && ! List_truth(List_cdr(rest)))) return normalized;
   return({
-    Var _x2c_gensym_literal_part_3 = binder;  Var _x2c_gensym_literal_part_4 = List_var(f6_layout____normalize_pattern(cons(op, List_append(rest, NULL))));  cons(_10, cons(_x2c_gensym_literal_part_3, cons(_x2c_gensym_literal_part_4, NULL)));
+    Var _x2c_gensym_literal_part_3 = binder;  Var _x2c_gensym_literal_part_4 = List_var(f6_layout____normalize_pattern(cons(op, List_append(rest, NULL))));  cons(_0, cons(_x2c_gensym_literal_part_3, cons(_x2c_gensym_literal_part_4, NULL)));
   }
   );
 }
@@ -3831,7 +3830,7 @@ static int f9_traversal____test(f9_traversal___MatchWalk * m, Var node){
 }
 
 static List f9_traversal____hit(f9_traversal___MatchWalk * walk, Var node){
-  return cons(List_var(cons(_11, cons(node, NULL))), _publish_captures((* walk).plan -> layout, (* walk).captures));
+  return cons(List_var(cons(_1, cons(node, NULL))), _publish_captures((* walk).plan -> layout, (* walk).captures));
 }
 
 static Var f9_traversal____spine_get(Block spine, size_t index){
@@ -4133,7 +4132,7 @@ List x2c_match_site_match(MatchCaptureSite * site, List input, Var pat){
   if(! _init_guard_) _file_init_();
   List bindings;
   if(! x2c_match_site_try_match(site, input, pat, & bindings)) return NULL;
-  return List_truth(bindings) ? bindings : _13;
+  return List_truth(bindings) ? bindings : _3;
 }
 
 int List_try_search(List input, Var pat, Var * out_match, List * out_bindings);
@@ -4229,7 +4228,7 @@ List List_match(List input, Var pat){
   if(! _init_guard_) _file_init_();
   List bindings;
   if(! List_try_match(input, pat, &(bindings))) return NULL;
-  return List_truth(bindings) ? bindings : _13;
+  return List_truth(bindings) ? bindings : _3;
 }
 
 int List_try_match_replace(List input, Var pat, Var template, Var * out){

@@ -137,11 +137,11 @@ Array Array_new(void);
 
 void x2c_cleanup_push(X2CCleanup *);
 
+void x2c_cleanup_leave(X2CCleanup *);
+
 List Array_list(Array);
 
 Var Array_push(Array, Var);
-
-void x2c_cleanup_leave(X2CCleanup *);
 
 #include "error.h"
 
@@ -172,26 +172,38 @@ static Var _list(LispReader * r, int depth){
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_0);
     {
-      Var out =((void) 0, Void);
       while(1){
         Token token = Tokenizer_next((* r).tokenizer);
-        if(! token || token -> type == 11212) break;
+        if(! token || token -> type == 11212){
+          Var _x2c_gensym_return_value_0 =((void) 0, Void);
+          {
+            x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
+            return _x2c_gensym_return_value_0;
+          }
+
+        }
         if(token -> type == 83){
           (* r).end = token -> pos + token -> len;
-          out = List_var(Array_list(elements));
-          break;
+          {
+            Var _x2c_gensym_return_value_1 = List_var(Array_list(elements));
+            {
+              x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
+              return _x2c_gensym_return_value_1;
+            }
+
+          }
+
         }
         Var element = _parse_form(&((* r)), token, depth);
-        if(Var_is_void(element)) break;
-        Array_push(elements, element);
-      }
-      {
-        Var _x2c_gensym_return_value_0 = out;
-        {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
-          return _x2c_gensym_return_value_0;
-        }
+        if(Var_is_void(element)){
+          Var _x2c_gensym_return_value_2 =((void) 0, Void);
+          {
+            x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
+            return _x2c_gensym_return_value_2;
+          }
 
+        }
+        Array_push(elements, element);
       }
 
     }
@@ -261,7 +273,7 @@ _Noreturn static Var _malformed(String source, unsigned at){
   int line = 1, column = 1;
   scan_next_line_col(source, (int) at, & line, & column);
   {
-    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/datum-reader.x",.function = "_malformed",.line = 148,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/datum-reader.x",.function = "_malformed",.line = 145,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_1, 28682226919752, 3, Symbol_var(1307939018), String_var(source), Symbol_var(805770), int_var(line), Symbol_var(233614172), int_var(column));
     __builtin_unreachable();
   }
@@ -272,7 +284,7 @@ _Noreturn static Var _incomplete(String source, unsigned at){
   int line = 1, column = 1;
   scan_next_line_col(source, (int) at, & line, & column);
   {
-    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/datum-reader.x",.function = "_incomplete",.line = 154,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/datum-reader.x",.function = "_incomplete",.line = 151,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_2, 664344300629258, 3, Symbol_var(1307939018), String_var(source), Symbol_var(805770), int_var(line), Symbol_var(233614172), int_var(column));
     __builtin_unreachable();
   }
@@ -331,10 +343,10 @@ Symbol datum_read_form(String source, unsigned * cursor, Var * out){
     {
       Tokenizer tokenizer = datum_scan_tokens(source + base, & tokens_scope);
       {
-        Symbol _x2c_gensym_return_value_1 = datum_read_token_form(tokenizer, source, base, &((* cursor)), out);
+        Symbol _x2c_gensym_return_value_3 = datum_read_token_form(tokenizer, source, base, &((* cursor)), out);
         {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_2);
-          return _x2c_gensym_return_value_1;
+          return _x2c_gensym_return_value_3;
         }
 
       }

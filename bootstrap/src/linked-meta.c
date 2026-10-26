@@ -12130,7 +12130,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_18(void
   _9387 = String_var(_9386);
   _9388 = String_new("lib/dispatch.x");
   _9389 = String_var(_9388);
-  _9390 = String_new("ab3bc8cb");
+  _9390 = String_new("9b4598e9");
   _9391 = String_var(_9390);
   _9392 = cons(_9391, NULL);
   _9393 = cons(_9389, _9392);
@@ -12447,7 +12447,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_18(void
   _9704 = cons(_223, _9703);
   _9705 = String_new("lib/datum-reader.x");
   _9706 = String_var(_9705);
-  _9707 = String_new("595d8252");
+  _9707 = String_new("8c5f6a21");
   _9708 = String_var(_9707);
   _9709 = String_new("lib/tokenizer.x");
   _9710 = String_var(_9709);
@@ -13759,7 +13759,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_21(void
   _11007 = List_var(_11006);
   _11008 = String_new("lib/match/plan.x");
   _11009 = String_var(_11008);
-  _11010 = String_new("7b58b4e4");
+  _11010 = String_new("80a1c532");
   _11011 = String_var(_11010);
   _11012 = cons(_11011, NULL);
   _11013 = cons(_11009, _11012);
@@ -15550,7 +15550,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_24(void
   _12789 = cons(_223, _12788);
   _12790 = String_new("src/builtins.x");
   _12791 = String_var(_12790);
-  _12792 = String_new("3b24f30b");
+  _12792 = String_new("a33dbeeb");
   _12793 = String_var(_12792);
   _12794 = String_new("src/macros/macros.x");
   _12795 = String_var(_12794);
@@ -18940,7 +18940,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_31(void
   _16158 = List_var(_16157);
   _16159 = String_new("src/protocol/resolution.x");
   _16160 = String_var(_16159);
-  _16161 = String_new("89c7ffeb");
+  _16161 = String_new("62d7ecd7");
   _16162 = String_var(_16161);
   _16163 = cons(_16162, NULL);
   _16164 = cons(_16160, _16163);
