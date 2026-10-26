@@ -75,7 +75,7 @@ static macro Expression $emit.object.copy(
 static macro Stmt $fail.emit_static_switch(Expr $c, Expr $site) {
   {
     String note = "place the declaration before the switch "
-                + "or within one case block";
+      "or within one case block";
     $c.report_error(
       <emit>, "switch cannot bypass dynamic static initialization",
       $site, $(note));
@@ -180,8 +180,8 @@ module List _local_static(
                                               : "static";
   foreach (List binding in bindings.cdr())
     _static_binding(e, binding, declared_base, base_name, storage, output);
-  // The region shares its source block, including a statement expression's
-  // final value; another C block here would turn that value into void.
+  /* The region shares its source block, including a statement expression's
+     final value; another C block here would turn that value into void. */
   output.push(_emit(e, body));
   return output.list_free();
 }
