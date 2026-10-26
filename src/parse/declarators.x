@@ -352,9 +352,8 @@ module List _install_declarator(
 // A name after its macro slot; `("x2c.ident" NAME)` is an exact spelling.
 static Var _declared_name(Compiler c, Var name, int &exact_name) {
   name = c.evaluate_macro_slot(name);
-  match (name)
-    case %("x2c.ident" ?(String exact)):
-      name = exact, exact_name = 1;
+  if (name ~= %("x2c.ident" ?(String exact)))
+    name = exact, exact_name = 1;
   return name;
 }
 
@@ -524,9 +523,8 @@ module List _finish_parameter(
   declarator = Ast.append_modifiers(declarator, modifiers);
   if (list_rest) base = %(....);
   List parameter = %(param $base $declarator);
-  match (declarator)
-    case %(bind ?binding ?):
-      if (!c.macro_holes) _parameter_facts(c, binding, parameter);
+  if (declarator ~= %(bind ?binding ?) && !c.macro_holes)
+    _parameter_facts(c, binding, parameter);
   return parameter;
 }
 
@@ -657,9 +655,8 @@ module List _finish_fnmods(Compiler c, List declarator) {
 }
 
 static Var _finish_fnmod(Compiler c, Var modifier) {
-  match (modifier)
-    case %(fnmod (params *parameters)):
-      return %(fnmod (params @(_finish_prototype(c, parameters))));
+  if (modifier ~= %(fnmod (params *parameters)))
+    return %(fnmod (params @(_finish_prototype(c, parameters))));
   return modifier;
 }
 
