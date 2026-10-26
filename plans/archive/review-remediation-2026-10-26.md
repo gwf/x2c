@@ -7,8 +7,8 @@
 > Gary selected consistent search names, retained libc with a qsort callback
 > exception, and selected one operator-fact table. Gary accepted `find(predicate)`,
 > `index(value)`, the source/ABI break, and no compatibility aliases.
-> The full publication gate passed. Baseline installer defects remain outside
-> these repairs; the installed-prefix verification limit is recorded below.
+> The full publication gate passed. The subsequent installer repair below
+> resolves the original clean-installation verification limit.
 
 ## Result and scope
 
@@ -446,13 +446,31 @@ retired instructions were 30,967,765,150 on `01491d642` and 31,027,800,100 on
 `91ff5996`, a 0.19% increase. Median elapsed time was 1.89 and 1.90 seconds.
 Later test-expectation and prose changes do not change that measured code.
 
-Actual `make install` still fails on the baseline and candidate while writing
-interfaces because `x2c_ident` is unresolved. The baseline staged payload also
+At initial completion, `make install` failed on the baseline and candidate
+while writing interfaces because `x2c_ident` was unresolved. The staged payload also
 omits nested runtime sources needed by an ordinary project meta helper.
 R12's installed-prefix check used the existing package-probe staging method:
 matching interfaces and all runtime source directories. It passed without a
 checkout dependency. This verifies the shared owner in a prepared prefix;
-it does not establish that the unchanged installer works.
+at that point it did not establish that the unchanged installer worked.
+
+## Installer follow-up
+
+Gary requested repair and clean installation on 2026-10-26. The installer
+omitted the split `array`, `func`, `map`, and `lisp-targets` source directories.
+That incomplete payload caused both interface generation's unresolved
+`x2c_ident` and the installed project-helper failures. The repair replaces
+the directory list with a recursive runtime-source copy. Interface generation
+is unchanged.
+
+A fresh `make install PREFIX=...` now succeeds. Both installed source trees
+contain all 128 runtime source files. The package-install probe uses the real
+installer instead of manually copying runtime sources and checkout interfaces.
+Its installed project helper, imports, and warm/cold C/H comparisons pass.
+The shared-row project helper and all ten native/Var compound updates also
+pass from the clean prefix, returning `22 11 11`. The release-bundle installer
+test passes, including relocation, package use, reinstall, and checksum refusal.
+No source or interface files are added after installation.
 
 ## Plan review
 

@@ -70,17 +70,13 @@ static void copy(Path source, Path target) {
 }
 
 static void copy_support(Path destination) {
+  foreach (Path source, root.join("lib").walk()) {
+    if (!source.is_file() || !source.endswith(".x")) continue;
+    String relative = source.remove_prefix(%"$root/lib/");
+    copy(source, destination.join("lib").join(relative));
+    copy(source, destination.join("include/x2c").join(relative));
+  }
   List rows = %(
-    ("lib" ("*.x") ("lib" "include/x2c"))
-    ("lib/match" ("*.x") ("lib/match" "include/x2c/match"))
-    ("lib/string" ("*.x") ("lib/string" "include/x2c/string"))
-    ("lib/var" ("*.x") ("lib/var" "include/x2c/var"))
-    ("lib/list" ("*.x") ("lib/list" "include/x2c/list"))
-    ("lib/lisp" ("*.x") ("lib/lisp" "include/x2c/lisp"))
-    ("lib/scope" ("*.x") ("lib/scope" "include/x2c/scope"))
-    ("lib/pool" ("*.x") ("lib/pool" "include/x2c/pool"))
-    ("lib/error" ("*.x") ("lib/error" "include/x2c/error"))
-    ("lib/macrovalue" ("*.x") ("lib/macrovalue" "include/x2c/macrovalue"))
     ("src" ("grammar.x") ("src"))
     ("src/components" ("*.x") ("src/components"))
     ("builds/0/lib" ("*.h") ("include/x2c"))
