@@ -809,7 +809,6 @@ static List f9_quotation____parse_typed_capture(Compiler c){
 Type Sym_normalize_declared_type(Sym, Type);
 
 static int f9_quotation____recorded(Compiler c, String name, Type type, List tag, Token origin){
-  int repeated = 0;
   {
     List previous;
     Array _x2c_gensym_macro_object_0 = c -> match_types;
@@ -826,7 +825,7 @@ static int f9_quotation____recorded(Compiler c, String name, Type type, List tag
             previous_name = _x2c_gensym_match_value_0;
             Var previous_type;
             previous_type = _x2c_gensym_match_value_1;
-            if(x2c_var_equal(previous_name, String_var(name)) && List_equal(Compiler_var_tag_expression(c, Var_type(previous_type), origin), tag) && List_equal(Type_list(Sym_normalize_declared_type(c -> sym, Var_type(previous_type))), Type_list(Sym_normalize_declared_type(c -> sym, type)))) repeated = 1;
+            if(x2c_var_equal(previous_name, String_var(name)) && List_equal(Compiler_var_tag_expression(c, Var_type(previous_type), origin), tag) && List_equal(Type_list(Sym_normalize_declared_type(c -> sym, Var_type(previous_type))), Type_list(Sym_normalize_declared_type(c -> sym, type)))) return 1;
           }
            break; } } }
         }
@@ -836,7 +835,7 @@ static int f9_quotation____recorded(Compiler c, String name, Type type, List tag
     }
 
   }
-  return repeated;
+  return 0;
 }
 
 static List f9_quotation____tag_test(Compiler c, Atom binder, List tag){

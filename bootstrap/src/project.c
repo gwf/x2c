@@ -428,10 +428,8 @@ static void _parse_manifest(Project p){
 }
 
 static char * f8_manifest____content(String text){
-  int length = String_truth(text) ? strlen(text) : 0;
-  char * line = xmalloc(length + 1);
-  if(length) memcpy(line, text, length);
-  line[length] = 0;
+  const char * source = text;
+  char * line = xmemdup(source ? source : "", (size_t) String_len(text) + 1);
   f8_manifest____strip_comment(line);
   return f8_manifest____trim(line);
 }

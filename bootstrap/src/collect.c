@@ -2528,13 +2528,14 @@ static void f4_walk____include_file(FileWalk * w, String target, int angle){
   if(! String_truth(path) ||(covered && ! Path_is_x2c_source(path))) return;
   String canonical = _canonical_path(path);
   Compiler_add_translation_dependency((* w).c, canonical);
-  if(!(Map_contains((* w).visited, String_var(canonical)))){
+  Var state;
+  if(! Map_try_get((* w).visited, String_var(canonical), &(state))){
     Map_setindex((* w).visited, String_var(canonical), int_var(1));
     List entry = _collection_entry((* w).c, canonical);
     if(! List_truth(entry)) entry = _walk_cold((* w).c, target, canonical, (* w).globs, (* w).visited);
     _replay_cached((* w).c, entry, canonical, (* w).globs, (* w).visited, NULL);
   }
-  else if(Var_is(Map_getindex((* w).visited, String_var(canonical)), 3313778)) f4_walk____replay_included((* w).c, (* w).globs, canonical, Map_new(), NULL, (* w).visited);
+  else if(Var_is(state, 3313778)) f4_walk____replay_included((* w).c, (* w).globs, canonical, Map_new(), NULL, (* w).visited);
   _cache_dependency((* w).dependencies, canonical, String_var(f4_walk____walked_hash((* w).c, target, canonical)));
   Array_push((* w).parts, String_var(canonical));
 }
