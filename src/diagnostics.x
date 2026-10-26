@@ -390,7 +390,8 @@ String Compiler.file_prefix(Compiler c) {
   Token token = _unit_token(c);
   if (!markers || !token) return NULL;
   if (markers[0] ~= %(? ? ? ? ? ? ?) &&
-      _token_region(c, token) ~= %(? ? ? ? ? ? ?(String prefix))) return prefix;
+      _token_region(c, token) ~= %(? ? ? ? ? ? ?(String prefix)))
+    return prefix;
   return NULL;
 }
 

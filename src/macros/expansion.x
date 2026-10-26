@@ -318,8 +318,8 @@ module void _file_scope_locals(List rows, Map locals) {
     case %(function ?type (bind ?binder ?) ?):
       if (binder.is_binder() && !type.type().is_static()) locals[binder] = 1;
     case %((!or ?kind declare typedef) ?type (bindings *rows)): {
-      if (type ~= %(* (!or struct union enum) ?tag *))
-        if (tag.is_binder()) locals[tag] = 1;
+      if (type ~= %(* (!or struct union enum) ?tag *) && tag.is_binder())
+        locals[tag] = 1;
       if (type ~= %(* enum ? (*members) *))
         _file_scope_declarators(members, locals);
       if (kind == <typedef> || !type.type().is_static())
@@ -330,6 +330,6 @@ module void _file_scope_locals(List rows, Map locals) {
 
 static void _file_scope_declarators(List declarators, Map locals) {
   foreach (Var declarator in declarators)
-    if (declarator ~= $source_declarator_row(%(?binder ?)))
-    if (binder.is_binder()) locals[binder] = 1;
+    if (declarator ~= $source_declarator_row(%(?binder ?)) && binder.is_binder())
+      locals[binder] = 1;
 }

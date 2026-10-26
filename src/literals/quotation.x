@@ -349,8 +349,7 @@ static List _parse_typed_capture(Compiler c) {
 static int _recorded(
   Compiler c, String name, Type type, List tag, Token origin) {
   foreach (List previous in c.match_types)
-    if (previous ~= %(?previous_name ?previous_type))
-    if (previous_name == name &&
+    if (previous ~= %(?previous_name ?previous_type) && previous_name == name &&
         c.var_tag_expression(previous_type, origin) == tag &&
         c.sym.normalize_declared_type(previous_type) ==
         c.sym.normalize_declared_type(type)) return 1;
@@ -372,7 +371,7 @@ List Compiler.typed_match_pattern(Compiler c, List pattern, List types) {
   Map tags = {};
   foreach (List row in types)
     if (row ~= %(?name ?type))
-    tags[Atom.intern(%"?$(name)")] = c.var_tag_expression(type, c.token);
+      tags[Atom.intern(%"?$(name)")] = c.var_tag_expression(type, c.token);
   return _typed_pattern(c, pattern, tags);
 }
 

@@ -12,9 +12,9 @@ Var Compiler.match_pattern_value(Compiler c, Var node) {
   Var (head, second, third) = ast;
   if (head == <cache>) return c.match_pattern_value(c.id_keys[second]);
   if (head == <expr>) {
-    if (ast ~= %(expr ("Var") (call ? (args ?argument))))
-      if (c.is_builtin_converter_call(ast))
-        return c.match_pattern_value(argument);
+    if (ast ~= %(expr ("Var") (call ? (args ?argument))) &&
+        c.is_builtin_converter_call(ast))
+      return c.match_pattern_value(argument);
     return c.match_pattern_value(ast.last());
   }
   if (head == <var>) return c.match_pattern_value(second);
@@ -30,11 +30,11 @@ Var Compiler.match_pattern_value(Compiler c, Var node) {
    computed; typed builtin boxers were recognized with their expression. */
 static Var _call_value(Compiler c, Var callee, Var args) {
   String converter = _converter_name(callee);
-  if (converter == "Macro_case_pattern" || converter == "Macro_case_shape")
-    if (args ~= %(args ? ?names *)) {
-      List labels = c.match_pattern_value(names);
-      return %(!and x2c-dyn @labels);
-    }
+  if ((converter == "Macro_case_pattern" || converter == "Macro_case_shape") &&
+      args ~= %(args ? ?names *)) {
+    List labels = c.match_pattern_value(names);
+    return %(!and x2c-dyn @labels);
+  }
   return <x2c-dyn>;
 }
 

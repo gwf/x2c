@@ -106,9 +106,9 @@ void Compiler.finish_collected_declaration(
   /* Lexical privacy also marks a name in Sym.statics, so a static function
      is marked again as `(function name)`. File collection reads that key to
      keep the function out of an ordinary include's interface. */
-  if (declaration ~= %(declare ?type (bindings (bind ?binding ((fnmod *) *)))))
-    if (type.type().is_static())
-      c.sym.mark_static(%(function $(Ast.binding_spelling(binding))));
+  if (declaration ~= %(declare ?type (bindings (bind ?binding ((fnmod *) *)))) &&
+      type.type().is_static())
+    c.sym.mark_static(%(function $(Ast.binding_spelling(binding))));
   if (c.peek(0) == <"{"> || c.peek(0) == <"%{"> || _x2c_at_function_arrow(c))
     _skip_body(c, declaration, meta, native);
   else if (c.peek(0) == <;>) {

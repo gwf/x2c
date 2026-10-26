@@ -282,11 +282,10 @@ List Sym.bind_identity(Sym s, List context, List binding, List ast) {
 Var Compiler.aggregate_name(
   Compiler c, Symbol kind, Var name, int definition) {
   Sym s = c.sym;
-  if (definition && !c.macro_holes)
-    if (name ~= %(gensym *))
-      if (c.enclosing(<declarator>) ~=
-          %(declare ?(Type base) *) && (<auto> in base && !base.base_type()))
-          return s.introduce(c.fresh_name("inferred_type"));
+  if (definition && !c.macro_holes && name ~= %(gensym *) &&
+      c.enclosing(<declarator>) ~= %(declare ?(Type base) *) &&
+      <auto> in base && !base.base_type())
+    return s.introduce(c.fresh_name("inferred_type"));
   if (name is not <string>) return name;
   if (c.macro_holes) {
     List local = c.macro_tag_name(kind, name, definition);

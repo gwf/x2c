@@ -25,9 +25,8 @@ module void _note_explicit_converter(
   Type result = call.cadr();
   if (!(result ~= %(?))) return;
   if (call ~= $called(?callee, ?argument)) {
-    if (callee ~= %(expr ? (ident ?binding)))
-      if (Compiler.supplies_native_meta(Ast.binding_spelling(binding)))
-        return;
+    if (callee ~= %(expr ? (ident ?binding)) &&
+        Compiler.supplies_native_meta(Ast.binding_spelling(binding))) return;
     String spelled = result.car().str().lower();
     if (method != spelled && (method != "str" || result !== %("String")))
       return;
@@ -333,10 +332,10 @@ static List _convert_generic_arms(
     int changed = 0;
     foreach (List association in associations)
       if (association ~= %(association ?selector ?value)) {
-      List result = c.convert_expression(value, declared_target);
-      if (result != value) changed = 1;
-      converted.push(%(association $selector $result));
-    }
+        List result = c.convert_expression(value, declared_target);
+        if (result != value) changed = 1;
+        converted.push(%(association $selector $result));
+      }
     if (changed)
       return %(expr $declared_target $(source_generic_content(
         $(control, @(converted.list_free())))));
