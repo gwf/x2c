@@ -571,7 +571,7 @@ static int _produces(FileWalk &w) {
   foreach (Var part in w.parts) {
     if (part is not <map>) continue;
     foreach (Var value in part.map())
-      match (value) case %(declaration-source *): return 1;
+      if (value ~= %(declaration-source *)) return 1;
   }
   return 0;
 }
