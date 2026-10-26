@@ -320,7 +320,8 @@ static String _member_type_name(Type type) {
 // member completion
 
 /** Returns sorted visible field and method names that resolve on `receiver`
-    through `access`. */
+    through `access`.
+*/
 List Compiler.postfix_completions(
   Compiler c, Type receiver, Symbol access) {
   Map seen = {};
