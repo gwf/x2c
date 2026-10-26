@@ -97,26 +97,23 @@ void *Error.policy_capture(void) {
     sizeof(struct ErrorPolicyCapture) + (size_t) capacity * sizeof(Symbol));
   if (!capture) raise %(alloc-fail (operation "Error.policy_capture"));
   capture.pairs = (Symbol *) (capture + 1);
-  int written = _fill_pairs(state.policy, capture.pairs, 0, capacity);
-  capture.count =
-    _fill_contexts(state.context_top, capture.pairs, written, capacity);
+  int written = _fill_pairs(state.policy, capture.pairs, 0);
+  capture.count = _fill_contexts(state.context_top, capture.pairs, written);
   return capture;
 }
 
 /* Outermost context first, so replaying the pairs in order reproduces the
    overlays an inner context placed over an outer one. */
-static int _fill_contexts(
-  ErrorContextState context, Symbol *pairs, int at, int capacity) {
+static int _fill_contexts(ErrorContextState context, Symbol *pairs, int at) {
   if (!context) return at;
-  at = _fill_contexts(context.prev, pairs, at, capacity);
-  return _fill_pairs(context.policy, pairs, at, capacity);
+  at = _fill_contexts(context.prev, pairs, at);
+  return _fill_pairs(context.policy, pairs, at);
 }
 
-static int _fill_pairs(Map policy, Symbol *pairs, int at, int capacity) {
+static int _fill_pairs(Map policy, Symbol *pairs, int at) {
   unsigned cursor = 0;
   Var key = void, value = void;
   while (policy.try_next(cursor, key, value)) {
-    if (at + 2 > capacity) break;
     pairs[at++] = key;
     pairs[at++] = value;
   }
