@@ -1,4 +1,4 @@
-/* generated owners
+/*  lookup.x -- protocol member lookup
 
    A base default is generated for a participant by exactly one adopted
    protocol. Two candidates are a collision, reported once per member. */
