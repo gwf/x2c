@@ -355,7 +355,7 @@ Source: `src/macros/invocations/recognition.x:61`
 Returns the current declaration's definition-local identity. An active
 macro-definition locals map is required.
 
-Source: `src/macros/definitions/templates.x:264`
+Source: `src/macros/definitions/templates.x:260`
 
 <a id="Compiler.macro_invocation_collection"></a>
 #### Compiler.macro_invocation_collection
@@ -413,7 +413,7 @@ declares is a template local, apart from ordinary names of the same
 spelling. A tag it only references keeps its public spelling unless the
 template later defines or declares it.
 
-Source: `src/macros/definitions/templates.x:277`
+Source: `src/macros/definitions/templates.x:273`
 
 <a id="Compiler.macro_targets_unit"></a>
 #### Compiler.macro_targets_unit
@@ -529,7 +529,7 @@ Source: `src/macros/definitions/reading.x:20`
 Parses a quotation at `$!` into the code it builds from the locals its
 body names.
 
-Source: `src/macros/definitions/quotations.x:19`
+Source: `src/macros/definitions/quotations.x:20`
 
 <a id="Compiler.peek_macro_hole"></a>
 #### Compiler.peek_macro_hole

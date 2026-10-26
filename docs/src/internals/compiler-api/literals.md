@@ -42,7 +42,7 @@ Builds the typed List expression that conses the element expressions
 `elements`, in order, onto the cells `tail`. A `(splice EXPR)` element
 appends the List that EXPR holds, as `literal_cell` does.
 
-Source: `src/literals/quotation.x:318`
+Source: `src/literals/quotation.x:319`
 
 <a id="Compiler.literal_cell"></a>
 #### Compiler.literal_cell
@@ -53,7 +53,7 @@ Conses the element expression `head` onto the cells `tail`, or appends
 the List a `(splice EXPR)` head holds, and folds the cell into the
 literal cache when both parts are constant.
 
-Source: `src/literals/quotation.x:289`
+Source: `src/literals/quotation.x:290`
 
 <a id="Compiler.parse_array_literal"></a>
 #### Compiler.parse_array_literal

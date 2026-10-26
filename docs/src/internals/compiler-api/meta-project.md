@@ -26,7 +26,7 @@ Builds one helper exposing the loaded files' public functions.
 Main's native signature stays inside the helper; argc/argv calls accept
 an Array of argument Strings through the data protocol.
 
-Source: `src/meta-project.x:85`
+Source: `src/meta-project.x:58`
 
 <a id="Frontend.prepare_meta"></a>
 #### Frontend.prepare_meta
@@ -38,7 +38,7 @@ reach, or finds it in the cache, and makes it the one their translation
 calls. Inputs that reach none use no helper. A group or helper that
 does not build is reported at the first call that needs it.
 
-Source: `src/meta-project.x:78`
+Source: `src/meta-project.x:51`
 
 ## Design notes
 
