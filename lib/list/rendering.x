@@ -16,7 +16,7 @@ static typedef struct Render {
   Symbol mode;
 } Render;
 
-/** Returns the human-readable rendering of `lst`.
+/** Returns the human-readable display spelling.
     Elements are rendered with their own `str`, so a `String` element appears
     unquoted. The writer pads inside parentheses and breaks nested structure
     across lines at about 80 columns. Nil renders as `()`. The canonical
@@ -31,11 +31,11 @@ String List.str(List lst) {
   return buf;
 }
 
-/** Appends the `List` display text to `out`, using each element's `write_str`.
+/** Appends the display form using each element's `write_str`.
     `List.str` calls this to build its result. The display form has one space
     inside each parenthesis, as in `( a b )`, including when nested in another
-    container. This method temporarily sets the destination `Buffer`'s padding
-    to one and restores it afterward.
+    container. Destination padding is set to one during the write, then
+    restored.
 */
 Buffer List.write_str(List lst, Buffer out) {
   Render r = {out, <str>};
@@ -43,7 +43,7 @@ Buffer List.write_str(List lst, Buffer out) {
   return out;
 }
 
-/** Returns the re-readable rendering of `lst`.
+/** Returns syntax that can be read back in.
     This is the `%(...)` spelling of the same data. Elements are rendered with
     their own `repr`, so `String`s come back quoted and `Atom`s print as bare
     names, and `nil` renders as `()`. Long nested structure wraps at about 80
@@ -58,14 +58,13 @@ String List.repr(List lst) {
   return buf;
 }
 
-/** Appends the readable representation of `List` to a `Buffer`. */
+/** Appends the re-readable spelling to the existing output. */
 Buffer List.write_repr(List lst, Buffer out) {
   Render r = {out, <repr>};
   _value(r, lst);
   return out;
 }
 
-/* Renders `elem` at the current column, breaking lines as it goes. */
 static void _value(Render &r, Var elem) {
   Buffer out = r.out;
   if (out.pos >= _WIDTH - 1 || out.pos - out._indent > 40)
@@ -118,7 +117,7 @@ static void _items(Render &r, Var elem) {
   _close(out);
 }
 
-/* Writes `elem` on one line. */
+/* Writes into the fit-check buffer without wrapping. */
 static void _flat(Render &r, Var elem) {
   if (elem is not <list>) _write_leaf(r, elem);
   else if (!elem.list()) r.out.write("()");
@@ -142,7 +141,7 @@ static void _write_leaf(Render &r, Var elem) {
   else elem.write_repr(r.out);
 }
 
-/* Opens a List and makes the column after its padding the tabstop. */
+/* Writes the opening delimiter and sets the padded column as the tabstop. */
 static void _open(List lst, Buffer out) {
   out.write("(");
   if (lst.car() is not <list>) out.pad();
