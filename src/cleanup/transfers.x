@@ -10,7 +10,6 @@ static typedef struct Walk {
   Map labels;
 } Walk;
 
-/* The runtime type of a defer region's record. */
 static String _record_type = "X2CCleanup";
 
 static macro Stmt $fail.cleanup_case_region(Expr $w, Expr $site) =>
@@ -221,7 +220,6 @@ static List _rewrite_children(Walk &w, List node) {
   $ast.rewrite_children(node, child, _rewrite(w, child));
 }
 
-/* Lowers `inner` with `origin` as the source position of its reports. */
 static Var _lower_at(Walk &w, int origin, Var inner) {
   int previous = w.origin;
   w.origin = origin;
@@ -288,10 +286,8 @@ static List _rewrite_switch(Walk &w, List subject, List body) {
    the emitter reports a switch that bypasses it. */
 static List _case_label(Walk &w, List label) {
   for (int i = w.switch_stop; i < (int) w.regions.len(); i++)
-    if (w.regions[i].list().car()) {
+    if (w.regions[i].list().car())
       $fail.cleanup_case_region(w, w.origin);
-      break;
-    }
   return _rewrite_children(w, label);
 }
 
@@ -308,7 +304,6 @@ static Var _bounded(Walk &w, Var body, int is_loop) {
   return result;
 }
 
-/* Rewrite a region's body and its handlers with the region open. */
 static Var _inside(Walk &w, List cleanup, List marker, Var body) {
   w.regions.push($(_statements(cleanup), marker));
   Var result = _rewrite(w, body);
@@ -344,19 +339,15 @@ static List _unwind(Walk &w, int stop) {
 static int _goto_stop(Walk &w, Var label) {
   String name = _label_spelling(label);
   Var stored;
-  if (!name || !w.labels.try_get(name, stored)) {
+  if (!name || !w.labels.try_get(name, stored))
     $fail.cleanup_goto_missing(w, w.origin);
-    return (int) w.regions.len();
-  }
   List target = stored, source = _region_path(w);
   int source_depth = source.len(), target_depth = target.len();
   List suffix = source;
   for (int i = source_depth; i > target_depth && suffix; i--)
     suffix = suffix.cdr();
-  if (target_depth > source_depth || suffix !== target) {
+  if (target_depth > source_depth || suffix !== target)
     $fail.cleanup_goto_region(w, w.origin);
-    return (int) w.regions.len();
-  }
   return target_depth;
 }
 
@@ -422,7 +413,6 @@ static List _lower_landing(Walk &w, Var code, List rows) {
   return _bind_parts(c, code, parts);
 }
 
-/* Lowers the body inside the scope that `cleanup` leaves. */
 static List _region(Walk &w, List cleanup, List body) =>
   Code.lowered(_inside(w, cleanup, body, body), NULL);
 
