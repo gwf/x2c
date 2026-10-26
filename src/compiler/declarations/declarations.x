@@ -1,4 +1,4 @@
-/* Declaration production, portable syntax, and default selection. */
+/*  declarations.x -- declaration production, portable syntax, and defaults */
 
 static macro Stmt $fail.compiler_ctor_parent(Expr $c, Expr $site) =>
   $c.report_error(
