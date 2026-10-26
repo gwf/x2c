@@ -137,24 +137,23 @@ meta static Symbol _update_tag(List id)     => _update_row(id)[0];
 meta static String _update_boxer(List id)   => _update_row(id)[1];
 meta static String _update_decoder(List id) => _update_row(id)[2];
 
-/* Empty stands for "no cast", so these two tests read emptiness rather than
-   absence, which is what an empty entry in the row's cast pair means. */
+/* An empty cast entry means the source and destination types already agree. */
 meta static List _update_cast_in(List id)  => _update_row(id)[3].car();
 meta static List _update_cast_out(List id) => _update_row(id)[3].cdr().car();
 
 /* The destination's current value, boxed in the family the row names. */
 meta static List _update_box(List id, List lhs) {
-  List value = $!( $lhs[0] );
+  List value = $!($lhs[0]);
   Type into = _update_cast_in(id);
-  if (into) value = $!( ($into)$value );
-  return $!( $(x2c_ident(_update_boxer(id)))($value) );
+  if (into) value = $!(($into)$value);
+  return $!($(x2c_ident(_update_boxer(id)))($value));
 }
 
 /* The converted result read back as the storage type. */
 meta static List _update_decode(List id, List value) {
-  List decoded = $!( $(x2c_ident(_update_decoder(id)))($value) );
+  List decoded = $!($(x2c_ident(_update_decoder(id)))($value));
   Type back = _update_cast_out(id);
-  if (back) return $!( ($back)$decoded );
+  if (back) return $!(($back)$decoded);
   return decoded;
 }
 
