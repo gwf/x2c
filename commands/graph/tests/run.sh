@@ -1056,4 +1056,5 @@ do
   parallel_start "$check" "check_$check"
 done
 parallel_start certify sh commands/graph/tests/certify.sh
+parallel_start snapshots python3 commands/graph/tests/snapshot.py
 parallel_wait

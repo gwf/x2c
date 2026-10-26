@@ -89,10 +89,20 @@ static void _snapshot_dependency(Map fingerprints, String path) {
     _snapshot_fingerprint(path);
 }
 
-static void _snapshot_merge(Map snapshot, Map unit) {
-  foreach (String key, %("entities" "edges" "files")) {
+static void _snapshot_merge(Map snapshot, Map unit, Map files) {
+  foreach (String key, %("entities" "edges")) {
     Array destination = snapshot[key];
     foreach (Var row, unit[key]) destination.push(row);
+  }
+  Array sources = snapshot["files"];
+  foreach (Map file, unit["files"]) {
+    String path = file["path"];
+    if (files.contains(path)) {
+      if (files[path] != file["text"])
+        raise %(bad-state (reason "source changed during snapshot")
+                (path $path));
+    }
+    else { files[path] = file["text"]; sources.push(file); }
   }
   Map types = snapshot["types"];
   foreach (Var (key, value), unit["types"]) types[key] = value;
@@ -100,6 +110,7 @@ static void _snapshot_merge(Map snapshot, Map unit) {
 
 static void _snapshot_analyze(Map snapshot, ProjectBuild plan) {
   Map fingerprints = snapshot["fingerprints"];
+  Map files = {};
   for (ProjectBuild node = plan; node; node = node.next) {
     CliRequest request = node.request;
     request.dry_run = 0;
@@ -107,12 +118,15 @@ static void _snapshot_analyze(Map snapshot, ProjectBuild plan) {
     Frontend frontend = Frontend.new(request);
     frontend.prepare_meta(inputs);
     foreach (String input, inputs) {
+      // Collection cache rows outlive their compiler's source declarations.
+      // A saved-analysis unit needs fresh declaration provenance as well.
+      Compiler.refresh_source_collections();
       ParsedUnit parsed;
       if (!frontend.open_reporting(input, parsed))
         raise %(malformed (input $input));
-      Map unit;
+      String retained = NULL;
       try {
-        unit = graph_snapshot_extract(&parsed, _snapshot_domain(request));
+        Map unit = graph_snapshot_extract(&parsed, _snapshot_domain(request));
         Map dependencies = {};
         foreach (String path, parsed.compiler.deps.keys())
           _snapshot_dependency(dependencies, path);
@@ -120,10 +134,11 @@ static void _snapshot_analyze(Map snapshot, ProjectBuild plan) {
         foreach (String module, request.native_modules)
           _snapshot_dependency(dependencies, module);
         unit["fingerprints"] = dependencies;
-        unit = parsed.context.export(unit);
+        retained = parsed.context.export(snapshot_text(unit));
       }
       finally parsed.close();
-      _snapshot_merge(snapshot, unit);
+      Map unit = snapshot_value(retained);
+      _snapshot_merge(snapshot, unit, files);
       foreach (Var (path, fingerprint), unit["fingerprints"])
         fingerprints[path] = fingerprint;
     }
