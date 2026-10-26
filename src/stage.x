@@ -248,8 +248,10 @@ List Compiler.meta_value_expression(
   else c.sym.var_tag_for_type(type, type);
   if ((value.is_integer() || value.is_floating()) && type !== %("Var"))
     return _number_literal(c, declared, type, value);
-  Type kind = value is <array> ? %("Array") : value is <map> ? %("Map")
-    : value is <list> ? %("List") : NULL;
+  Type kind = NULL;
+  if (value is <array>) kind = %("Array");
+  else if (value is <map>) kind = %("Map");
+  else if (value is <list>) kind = %("List");
   // Without a declared type, a List result is code; an Array or Map is data.
   if (declared ? type === %("Var") || type === kind
       : kind && kind !== %("List"))
