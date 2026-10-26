@@ -120,7 +120,7 @@ static List _convert_composite_row(
   List value = original;
   while (value.car() == <dotinit> || value.car() == <indexinit>)
     value = value.caddr();
-  if (value.match(%(expr ? (initval *))))
+  if (value ~= %(expr ? (initval *)))
     return row_condition === parent_condition ? original
       : _convert_initval_row(
         c, row, value, native_target, row_condition, native_used);
@@ -280,7 +280,7 @@ static List _rejected_initializer(Type type, List condition, List zero) {
 
 static List _accepted_initializer(
   List result, Type type, List target, List condition, List zero) {
-  if (result.match(%(expr ? (composite *)))) {
+  if (result ~= %(expr ? (composite *))) {
     Type native = target ? %("__typeof__" (parens $target)) : type;
     return %(expr $type (cast $native $result));
   }
@@ -296,7 +296,7 @@ static List _convert_mixed_row(
   (List original, List cases) = row;
   Array converted = [], captured = [];
   List prepared = source;
-  if (source.match(%(expr ? (composite *))))
+  if (source ~= %(expr ? (composite *)))
     prepared = _capture_leaves(c, source, captured);
   int native_identity = !parent_condition;
   foreach (List choice in cases) {
