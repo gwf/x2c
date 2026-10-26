@@ -351,13 +351,14 @@ rm -rf "$BUILD/home/packages/mine"
 for name in pure mixed; do
   directory="$BUILD/src/$name"
   mkdir -p "$directory/src"
-  printf 'PACKAGE := %s\nROOT := %s\nX2C := %s\ninclude %s/packages/package.mk\n' \
+  printf 'PACKAGE := %s\nROOT := %s\nX2C := %s\nPACKAGE_C_FLAGS := --c-include-dir src\ninclude %s/packages/package.mk\n' \
     "$name" "$ROOT" "$X2C" "$ROOT" >"$directory/Makefile"
   if [[ "$name" == pure ]]; then
     printf 'int answer(void) { return 42; }\n' >"$directory/src/$name.x"
   else
-    printf 'native int native_answer(void);\nint answer(void) { return native_answer(); }\n' \
+    printf '#include "answer.h"\nint answer(void) { return native_answer(); }\n' \
       >"$directory/src/$name.x"
+    printf 'int native_answer(void);\n' >"$directory/src/answer.h"
     printf 'int native_answer(void) { return 42; }\n' >"$directory/src/answer.c"
   fi
   make -C "$directory" bundle >"$BUILD/$name-bundle.log" 2>&1 ||
