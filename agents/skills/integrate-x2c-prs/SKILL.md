@@ -67,8 +67,10 @@ Repeat this loop without routine user approval:
 4. Settle known candidate blockers before validation. Run focused checks only
    to answer a concrete unresolved question. Perform the applicable existing
    [performance work](../../performance-checkpoints.md) once for the coherent
-   batch, with comparable converged builds and inputs. Reuse a suitable
-   baseline. Do not expand measurements for overlapping noise or concerns
+   batch. Select the checkpoint during review and reuse a converged baseline.
+   If candidate convergence depends on the gate, measure after `land` finishes;
+   do not add a separate bootstrap run merely to measure earlier. Compare the
+   same inputs and build states. Do not expand measurements for noise or concerns
    about revisions outside this batch. Evidence remains advisory under that
    policy; missing measurements must not become an indefinite publication hold.
 5. Run `tools/integrate-dev.py land <batch-id>`. Follow the command through
