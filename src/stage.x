@@ -58,7 +58,8 @@ static const SymbolSet meta_comparisons = %<<"<" ">" "<=" ">=" "==" "!=">>;
     `call` evaluates. Captured literal syntax reaches a parameter that is not
     syntax as the literal's value, a `TypeInfo` parameter as the description
     of its type, and a `Source` parameter with its source text. Anything
-    else is reported at `site`. */
+    else is reported at `site`.
+*/
 Var Compiler.meta_argument(
   Compiler c, List node, Type want, Token site, MetaCall call) {
   Var value = void;
@@ -133,7 +134,8 @@ static Var _scalar_value(Compiler c, Var value, Type want) {
 /** Returns the value of the folded constant `node`, or void when part of it
     is only known at run time. Literal folding hoists a constant into the
     compiler cache and leaves `(cache ID)`, a graph of ids over `cons`,
-    `var` and `string` leaves. */
+    `var` and `string` leaves.
+*/
 Var Compiler.folded_constant(Compiler c, Var node) {
   match (node) {
     case %(cache ?(int id)): return _cached_constant(c, c.id_keys[id]);
@@ -207,7 +209,8 @@ static Var _joined_constant(Compiler c, Var left, Var right) {
 
 /** Returns the value of a String or character literal from its source
     `spelling`, quotes included: adjacent pieces are unescaped on their own
-    and joined, as C does, and a character is its code. */
+    and joined, as C does, and a character is its code.
+*/
 Var Compiler.literal_text_value(String spelling) {
   int len = spelling.len();
   if (len >= 2 && spelling[0] == '"') {
