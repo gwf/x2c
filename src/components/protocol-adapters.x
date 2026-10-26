@@ -50,7 +50,7 @@ meta static Code _protocol_function(List declared, List name, List forward) {
    guards the rendering path. */
 meta static int _protocol_renders(String member, Type participant) {
   if (!(member in %("str" "repr" "write_str" "write_repr"))) return 0;
-  match (Type.resolve(participant)) case %((!or struct union) *): return 1;
+  if (Type.resolve(participant) ~= %((!or struct union) *)) return 1;
   return 0;
 }
 
@@ -91,35 +91,34 @@ meta static Code _protocol_prototype(List name, Type expected) {
 /* Places the method table `methods`, its assignment from `slots`, and the
    registration of the descriptor `name`. */
 meta static void _protocol_descriptor(List descriptor, List slots) {
-  match (descriptor)
-    case %(?(List methods) ?(String name) ?(Symbol var_tag) ?(Symbol area)
-           *explicit): {
-      Code table = %(expr ("VarMethods") (ident $methods));
-      List init = %(unit-init $area);
-      x2c_place(%(unit-support), $!Unit{ static VarMethods $methods; });
-      /* A table with no slots stays zero, which avoids an empty
-         initializer that C accepts only from C23 on. */
-      if (slots) x2c_place(init, $!{ $table = (VarMethods){ @slots }; });
-      Code text = %(expr ("String") (call "String_new" (args
-        (expr (* char) (literal (* char) $(%"\"$name\""))))));
-      if (explicit) {
-        Code tag = $!Symbol{ $(explicit.car()) };
-        x2c_place(
-          init, $!{ x2c_register_tagged_descriptor($tag, $text, $table); });
-        return;
-      }
-      Code symbol = %(expr ("Symbol") (literal ("Symbol") $name $var_tag));
-      if (area == <protocol>) {
-        x2c_place(
-          init, $!{ x2c_register_builtin_descriptor($symbol, $table); });
-        return;
-      }
+  if (descriptor ~= %(?(List methods) ?(String name) ?(Symbol var_tag)
+      ?(Symbol area) *explicit)) {
+    Code table = %(expr ("VarMethods") (ident $methods));
+    List init = %(unit-init $area);
+    x2c_place(%(unit-support), $!Unit{ static VarMethods $methods; });
+    /* A table with no slots stays zero, which avoids an empty
+       initializer that C accepts only from C23 on. */
+    if (slots) x2c_place(init, $!{ $table = (VarMethods){ @slots }; });
+    Code text = %(expr ("String") (call "String_new" (args
+      (expr (* char) (literal (* char) $(%"\"$name\""))))));
+    if (explicit) {
+      Code tag = $!Symbol{ $(explicit.car()) };
       x2c_place(
-        init, $!{
-          if (!x2c_register_builtin_descriptor($symbol, $table))
-            x2c_register_descriptor($text, $table);
-        });
+        init, $!{ x2c_register_tagged_descriptor($tag, $text, $table); });
+      return;
     }
+    Code symbol = %(expr ("Symbol") (literal ("Symbol") $name $var_tag));
+    if (area == <protocol>) {
+      x2c_place(
+        init, $!{ x2c_register_builtin_descriptor($symbol, $table); });
+      return;
+    }
+    x2c_place(
+      init, $!{
+        if (!x2c_register_builtin_descriptor($symbol, $table))
+          x2c_register_descriptor($text, $table);
+      });
+  }
 }
 
 /* The compiler presents each resolved conformance whose forward converter
@@ -153,43 +152,42 @@ $rewrite(%(conform *))
     descriptor registration of one conformance.
 */
 meta Code protocol_conformance(Code node) {
-  match (node)
-    case %(conform ? ?(Type participant) ?(String forward)
-           ?(String reverse) ?(String binder) ?descriptor (*rows)): {
-      Array slots = [];
-      foreach (List row in rows) match (row)
-        case %(?(String member) ? ?(String source) ?(Type expected)
-               ?(Type template) *parts):
-          foreach (List part in parts) match (part) {
-            case %(default ?(List name) ?(Symbol storage)): {
-              List declared = storage == <static>
-                ? %(static inline @(expected.cdr()))
-                : expected.cdr();
-              List forwarded = _protocol_forward(
-                expected, source, template, binder, forward);
-              Code adapter =
-                _protocol_function(declared, name, forwarded);
-              x2c_place(%(unit-support), adapter);
-            }
-            case %(inherited ?(List name) ?(Type owner_expected)): {
-              source = Code.binding_spelling(name);
-              expected = owner_expected;
-              x2c_place(%(unit-support), _protocol_prototype(name, expected));
-            }
-            case %(thunk ?(List name) ?(Type erased)): {
-              Type result = erased.cdr();
-              List declared = %(static inline @result);
-              List forwarded = _protocol_forward(
-                erased, source, template, binder, reverse);
-              Code thunk = _protocol_renders(member, participant)
-                ? _protocol_guarded(member, name, result, forwarded)
-                : _protocol_function(declared, name, forwarded);
-              x2c_place(%(unit-support), thunk);
-              slots.push(%(dotinit ($member) (expr $erased (ident $name))));
-            }
+  if (node ~= %(conform ? ?(Type participant) ?(String forward)
+      ?(String reverse) ?(String binder) ?descriptor (*rows))) {
+    Array slots = [];
+    foreach (List row in rows)
+      if (row ~= %(?(String member) ? ?(String source) ?(Type expected)
+          ?(Type template) *parts))
+        foreach (List part in parts) match (part) {
+          case %(default ?(List name) ?(Symbol storage)): {
+            List declared = storage == <static>
+              ? %(static inline @(expected.cdr()))
+              : expected.cdr();
+            List forwarded = _protocol_forward(
+              expected, source, template, binder, forward);
+            Code adapter =
+              _protocol_function(declared, name, forwarded);
+            x2c_place(%(unit-support), adapter);
           }
-      _protocol_descriptor(descriptor, slots.list_free());
-      return %(seq);
-    }
+          case %(inherited ?(List name) ?(Type owner_expected)): {
+            source = Code.binding_spelling(name);
+            expected = owner_expected;
+            x2c_place(%(unit-support), _protocol_prototype(name, expected));
+          }
+          case %(thunk ?(List name) ?(Type erased)): {
+            Type result = erased.cdr();
+            List declared = %(static inline @result);
+            List forwarded = _protocol_forward(
+              erased, source, template, binder, reverse);
+            Code thunk = _protocol_renders(member, participant)
+              ? _protocol_guarded(member, name, result, forwarded)
+              : _protocol_function(declared, name, forwarded);
+            x2c_place(%(unit-support), thunk);
+            slots.push(%(dotinit ($member) (expr $erased (ident $name))));
+          }
+        }
+    _protocol_descriptor(descriptor, slots.list_free());
+    return %(seq);
+  }
   return node;
 }
