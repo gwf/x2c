@@ -142,8 +142,7 @@ static Ast _destructuring(
 }
 
 static int _destructures(List statement) {
-  match (statement) case %(stmnt (expr ? (dstrasgn *))): return 1;
-  return 0;
+  return statement ~= %(stmnt (expr ? (dstrasgn *)));
 }
 
 /* A destructuring assignment expression has its source's type. */
