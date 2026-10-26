@@ -5,7 +5,7 @@ static keyword loop $private.loop;
 module int _null_literal(List expr) =>
   _integer_literal_kind(expr, NULL) == <zero> ||
   expr ~=
-    %(expr ? $($source_identifier_content(%((binding ? "NULL")))));
+    %(expr ? (ident (binding ? "NULL")));
 
 /* explicit converter calls
 
@@ -154,10 +154,9 @@ module int _is_raw_string_literal(List expr) {
   match (expr) {
     case %(expr ? $($grouped(?inner))):
       return _is_raw_string_literal(inner);
-    case %(expr ? $($source_literal_content(%(?type ?)))):
+    case %(expr ? (literal ?type ?)):
       return Type.is_char_pointer_like(type);
-    case %(expr ? $($source_operator_content(
-        %(? ? ?ontrue ?onfalse)))):
+    case %(expr ? (op ? ? ?ontrue ?onfalse)):
       return _is_raw_string_literal(ontrue) &&
              _is_raw_string_literal(onfalse);
   }
@@ -186,8 +185,7 @@ List Compiler.promote_string_literal(Compiler c, List expr) =>
 static List _raw_string_to_string(Compiler c, List expr) {
   match (expr) {
     case %(expr (!or (* char) ((dim *) char))
-        $($source_literal_content(
-          %((!or (* char) ((dim *) char)) ?)))): {
+        (literal (!or (* char) ((dim *) char)) ?)): {
       List value = %(expr ("String") (call "String_new" (args $expr)));
       if (c.runtime_literals) return value;
       return %(expr ("String") $(c.cache(%(string $value))));
@@ -200,8 +198,7 @@ static List _raw_string_to_string(Compiler c, List expr) {
         return %(expr ("String") (parens $converted));
       }
     case %(expr (!or (* char) ((dim *) char))
-        $($source_operator_content(
-          %(? ?condition ?ontrue ?onfalse)))): {
+        (op ? ?condition ?ontrue ?onfalse)): {
       List converted_true = _raw_string_to_string(c, ontrue);
       List converted_false = _raw_string_to_string(c, onfalse);
       return %(expr ("String")
@@ -304,8 +301,7 @@ static List _compound_literal(Compiler c, List composite, Type target) {
    the result as a whole. */
 static List _convert_conditional_arms(
   Compiler c, List expr, Type declared_target) {
-  if (expr ~= %(expr ? $($source_operator_content(
-      %(?operator ?condition ?ontrue ?onfalse))))) {
+  if (expr ~= %(expr ? (op ?operator ?condition ?ontrue ?onfalse))) {
     Type true_type = ontrue.cadr(), false_type = onfalse.cadr();
     if (ontrue.list() ~= %(expr ? (composite *)) ||
         onfalse.list() ~= %(expr ? (composite *)) ||
@@ -326,8 +322,7 @@ static List _convert_conditional_arms(
    destination conversion because only one association runs. */
 static List _convert_generic_arms(
   Compiler c, List expr, Type declared_target) {
-  if (expr ~= %(expr () $($source_generic_content(
-      %(?control *associations))))) {
+  if (expr ~= %(expr () (generic ?control *associations))) {
     Array converted = [];
     int changed = 0;
     foreach (List association in associations)
@@ -337,8 +332,8 @@ static List _convert_generic_arms(
         converted.push(%(association $selector $result));
       }
     if (changed)
-      return %(expr $declared_target $(source_generic_content(
-        $(control, @(converted.list_free())))));
+      return %(expr $declared_target
+               (generic $control @(converted.list_free())));
     converted.free();
   }
   return NULL;
@@ -350,9 +345,9 @@ static List _convert_untyped(
   if (generic) return generic;
   if (target_is_var)
     match (expr) {
-      case %(expr () $($source_identifier_content(%((binding ? "NULL"))))):
+      case %(expr () (ident (binding ? "NULL"))):
         return %(expr ("Var") (call "Var_null" (args)));
-      case %(expr () $($source_identifier_content(%((binding ? ?))))):
+      case %(expr () (ident (binding ? ?))):
         $fail.expressions_var_unresolved(c, NULL);
     }
   return expr;
@@ -634,7 +629,7 @@ int Compiler.is_builtin_converter_call(Compiler c, List expr) {
     List binding = NULL;
     String spelling = NULL;
     if (callee is <string>) spelling = callee;
-    else if (callee ~= %(expr ? $($source_identifier_content(%(?bound))))) {
+    else if (callee ~= %(expr ? (ident ?bound))) {
       binding = bound;
       spelling = Ast.binding_spelling(binding);
     }
@@ -653,8 +648,7 @@ static List _converted_temporary(
   Compiler c, List call, Type owner, Type target) {
   if (c.sym.resolve_numeric_type(owner) &&
       c.resolve_protocol_member(target, "discard")) {
-    if (call ~= $called(%(expr ? $($source_identifier_content(
-          %((!set ?binding (*)))))), *arguments))
+    if (call ~= $called(%(expr ? (ident (!set ?binding (*)))), *arguments))
       _note_fresh_callee(c, binding);
   }
   return call;
@@ -666,7 +660,7 @@ static void _check_null_reference(
   Compiler c, List expr, Type target) {
   if (target.car() != <&>) return;
   if (_integer_literal_kind(expr, NULL) == <zero> || expr ~=
-    %(expr () $($source_identifier_content(%((binding ? "NULL"))))))
+    %(expr () (ident (binding ? "NULL"))))
     $fail.expressions_ref_null(c, NULL, target);
 }
 
@@ -777,7 +771,7 @@ static String _not_null_pointer_constant(Compiler c, List expr) {
     // Unary minus or plus over a nonzero literal is still nonzero.  The
     // pattern has a fixed length, so a binary use of the same operator,
     // which would need folding, does not match it.
-    case %(expr ? $($source_operator_content(%(?oper ?operand)))): {
+    case %(expr ? (op ?oper ?operand)): {
       Symbol op = oper;
       if (op != <-> && op != <+>) return NULL;
       String inner = NULL;
@@ -790,8 +784,7 @@ static String _not_null_pointer_constant(Compiler c, List expr) {
     // because an enum constant and a variable of enum type are spelled
     // identically here, and a zero-valued enum constant *is* a null pointer
     // constant.
-    case %(expr ?type $($source_identifier_content(
-        %((binding ? ?name))))): {
+    case %(expr ?type (ident (binding ? ?name))): {
       Type vartype = c.sym.resolve_numeric_type(type);
       if (!vartype || vartype.is_enum() || !vartype.is_integral()) return NULL;
       return name;
@@ -816,7 +809,7 @@ static Symbol _integer_literal_kind(List expr, String &?out_text) {
   match (expr) {
     case %(expr ? $($grouped(?inner))):
       return _integer_literal_kind(inner, out_text);
-    case %(expr ? $($source_literal_content(%(?ltype ?text)))): {
+    case %(expr ? (literal ?ltype ?text)): {
       String spelling = text, Type type = ltype;
       unsigned long long value;
       // A character constant is integral too, but it is not spelled in

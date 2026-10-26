@@ -155,9 +155,8 @@ List Compiler.initializer_field_path(
    designator occurred. Its ordinary cast shape survives normalization. */
 static List _capture_index(Compiler c, List index, List &reference) {
   match (index)
-    case %(expr ? $($source_cast_content(
-        %((enum ((op = ?binding ?original)))
-          (!set ?value (expr ? (ident ?binding))))))): {
+    case %(expr ? (cast (enum ((op = ?binding ?original)))
+          (!set ?value (expr ? (ident ?binding))))): {
       reference = value;
       return index;
     }
@@ -206,7 +205,7 @@ static int _fills_whole(Compiler c, Type type, List value) {
 
 static int _fills_char_array(Compiler c, Type type, List value) {
   if (!(value ~=
-    %(expr (* char) $($source_literal_content(%((* char) ?)))))) return 0;
+    %(expr (* char) (literal (* char) ?)))) return 0;
   Type array = _resolve_shape(c, type);
   if (!array.is_array()) return 0;
   Type element = c.sym.resolve_key(array.cdr()).scalar();
@@ -367,7 +366,7 @@ static int _scalar_inputs(Compiler c, List items, List &string) {
     }
     if (value ~=
       %(expr (* char)
-        $($source_literal_content(%((* char) ?))))) string = value;
+        (literal (* char) ?))) string = value;
   }
   return 1;
 }
@@ -503,9 +502,8 @@ module List _condition_and(List first, List second) {
   if (!first) return second;
   if (!second) return first;
   match (second)
-    case %(expr ? $($source_operator_content(
-        %(< (expr ? $($grouped(?index)))
-            (expr ? $($grouped(?bound))))))): {
+    case %(expr ? (op < (expr ? $($grouped(?index)))
+            (expr ? $($grouped(?bound))))): {
       unsigned long long at;
       List base;
       _index_position(index, base, at);
@@ -518,15 +516,13 @@ module List _condition_and(List first, List second) {
 static List _drop_bound(
   List condition, List bound, List base, unsigned long long minimum) {
   match (condition) {
-    case %(expr ? $($source_operator_content(
-        %(&& (expr ? $($grouped(?left)))
-             (expr ? $($grouped(?right))))))):
+    case %(expr ? (op && (expr ? $($grouped(?left)))
+             (expr ? $($grouped(?right))))):
       return _condition_and(
         _drop_bound(left, bound, base, minimum),
         _drop_bound(right, bound, base, minimum));
-    case %(expr ? $($source_operator_content(
-        %(< (expr ? $($grouped(?index)))
-            (expr ? $($grouped(?length))))))): {
+    case %(expr ? (op < (expr ? $($grouped(?index)))
+            (expr ? $($grouped(?length))))): {
       unsigned long long at;
       List origin;
       _index_position(index, origin, at);
@@ -544,8 +540,7 @@ static void _index_position(
   base = NULL;
   if (_literal_integer(index, offset)) return;
   match (index)
-    case %(expr ? $($source_operator_content(
-        %(+ (expr ? $($grouped(?origin))) ?amount)))):
+    case %(expr ? (op + (expr ? $($grouped(?origin))) ?amount)):
       if (_literal_integer(amount, offset)) {
         base = origin;
         return;
@@ -558,7 +553,7 @@ static void _index_position(
    A bare spelling is the int bound a canonical array type keeps. */
 module int _literal_integer(List expression, unsigned long long &value) {
   match (expression) {
-    case %(expr ? $($source_literal_content(%(?type ?spelling)))):
+    case %(expr ? (literal ?type ?spelling)):
       return ((Type) type).integer_literal_magnitude(spelling, value);
     case %(?(String spelling)):
       return Type.integer_literal_magnitude(%(int), spelling, value);

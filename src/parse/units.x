@@ -537,7 +537,7 @@ static void _referenced_names(Var node, Map seen, Array names) {
     if (current is not <list>) continue;
     List syntax = current;
     match (syntax)
-      case $source_identifier_content(%((binding ? ?name))): {
+      case %(ident (binding ? ?name)): {
         if (name is not <string>) break;
         String spelling = name;
         if (!(spelling in seen)) {
@@ -785,8 +785,7 @@ static List _alias_target(
   Compiler c, List declaration, Var binding, List native_syntax) {
   List native = c.resolve_expression(native_syntax, c.token);
   match (native)
-    case %(expr (!set ?native_type (*)) $($source_identifier_content(
-        %(?native_binding)))): {
+    case %(expr (!set ?native_type (*)) (ident ?native_binding)): {
       if (native_type && !native_type.type().is_function())
         $fail.parse_alias_function(c, c.token, native_type);
       if (List.equal(binding, native_binding))

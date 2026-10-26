@@ -127,15 +127,8 @@ the source forms that lowering recognizes.
 
 Public functions:
 
-`source_return_type`, `source_return_none`, `source_conditional_statement`,
-`source_any_lambda`, `source_cast_content`, `source_generic_content`,
-`source_va_arg_content`, `source_commas_content`, `source_slice_content`,
-`source_composite_content`, `source_string_content`, `source_operator_content`,
-`source_operator_expression`, `source_postfix_content`,
-`source_postfix_expression`, `source_content_pattern`, `source_call_content`,
-`source_return_content`, `source_block_content`, `source_identifier_content`,
-`source_literal_content`, `source_declarator_row`, `source_expression`,
-`source_catch_handle`, `source_retain_catch_handle`
+`Ast.return_none`, `Ast.lambda_pattern`, `Ast.declarator_pattern`,
+`Macro.content_pattern`, `Macro.call_content`
 
 ### [src/lambdas.x](../src/lambdas.x)
 

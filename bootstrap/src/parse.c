@@ -476,6 +476,8 @@ static void f7_binding____check_binders(Compiler c, List pattern, Token start, S
 
 static int f7_binding____declares_binders(List body, List bindings);
 
+static List f7_binding____retain_catch_handle(List rebuilt, List handle);
+
 static List f7_binding____bind_try(Compiler c, Var body, Var catches, Var cleanup);
 
 static List f7_binding____bind_match(Compiler c, Var subject, Var cases);
@@ -1457,7 +1459,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _589 = List_var(_588);
   _590 = cons(_510, _507);
   _591 = List_var(_590);
-  _592 = int_var(90004);
+  _592 = int_var(89947);
   _593 = cons(_592, NULL);
   _594 = cons(_515, _593);
   _595 = List_var(_594);
@@ -1937,11 +1939,11 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_2(void)
   _1066 = cons(_1065, NULL);
   _1067 = cons(_494, _1066);
   _1068 = List_var(_1067);
-  _1069 = int_var(21);
+  _1069 = int_var(54);
   _1070 = cons(_1069, NULL);
   _1071 = cons(_500, _1070);
   _1072 = List_var(_1071);
-  _1073 = int_var(670);
+  _1073 = int_var(1947);
   _1074 = cons(_1073, NULL);
   _1075 = cons(_515, _1074);
   _1076 = List_var(_1075);
@@ -2068,11 +2070,11 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_2(void)
   _1197 = cons(_1196, NULL);
   _1198 = cons(_487, _1197);
   _1199 = List_var(_1198);
-  _1200 = int_var(72);
+  _1200 = int_var(105);
   _1201 = cons(_1200, NULL);
   _1202 = cons(_500, _1201);
   _1203 = List_var(_1202);
-  _1204 = int_var(2146);
+  _1204 = int_var(3423);
   _1205 = cons(_1204, NULL);
   _1206 = cons(_515, _1205);
   _1207 = List_var(_1206);
@@ -2150,11 +2152,11 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_2(void)
   _1279 = cons(_1278, NULL);
   _1280 = cons(_487, _1279);
   _1281 = List_var(_1280);
-  _1282 = int_var(73);
+  _1282 = int_var(106);
   _1283 = cons(_1282, NULL);
   _1284 = cons(_500, _1283);
   _1285 = List_var(_1284);
-  _1286 = int_var(2185);
+  _1286 = int_var(3462);
   _1287 = cons(_1286, NULL);
   _1288 = cons(_515, _1287);
   _1289 = List_var(_1288);
@@ -2222,11 +2224,11 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_2(void)
   _1351 = cons(_1350, NULL);
   _1352 = cons(_487, _1351);
   _1353 = List_var(_1352);
-  _1354 = int_var(95);
+  _1354 = int_var(109);
   _1355 = cons(_1354, NULL);
   _1356 = cons(_500, _1355);
   _1357 = List_var(_1356);
-  _1358 = int_var(3025);
+  _1358 = int_var(3594);
   _1359 = cons(_1358, NULL);
   _1360 = cons(_515, _1359);
   _1361 = List_var(_1360);
@@ -2283,11 +2285,11 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_2(void)
   _1412 = cons(_1411, NULL);
   _1413 = cons(_487, _1412);
   _1414 = List_var(_1413);
-  _1415 = int_var(36);
+  _1415 = int_var(69);
   _1416 = cons(_1415, NULL);
   _1417 = cons(_500, _1416);
   _1418 = List_var(_1417);
-  _1419 = int_var(1154);
+  _1419 = int_var(2431);
   _1420 = cons(_1419, NULL);
   _1421 = cons(_515, _1420);
   _1422 = List_var(_1421);
@@ -2384,11 +2386,11 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_2(void)
   _1513 = cons(_1512, NULL);
   _1514 = cons(_487, _1513);
   _1515 = List_var(_1514);
-  _1516 = int_var(56);
+  _1516 = int_var(89);
   _1517 = cons(_1516, NULL);
   _1518 = cons(_500, _1517);
   _1519 = List_var(_1518);
-  _1520 = int_var(1619);
+  _1520 = int_var(2896);
   _1521 = cons(_1520, NULL);
   _1522 = cons(_515, _1521);
   _1523 = List_var(_1522);
@@ -2459,11 +2461,11 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_3(void)
   _1585 = cons(_1584, NULL);
   _1586 = cons(_487, _1585);
   _1587 = List_var(_1586);
-  _1588 = int_var(51);
+  _1588 = int_var(84);
   _1589 = cons(_1588, NULL);
   _1590 = cons(_500, _1589);
   _1591 = List_var(_1590);
-  _1592 = int_var(1495);
+  _1592 = int_var(2772);
   _1593 = cons(_1592, NULL);
   _1594 = cons(_515, _1593);
   _1595 = List_var(_1594);
@@ -2557,11 +2559,11 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_3(void)
   _1683 = cons(_1682, NULL);
   _1684 = cons(_487, _1683);
   _1685 = List_var(_1684);
-  _1686 = int_var(67);
+  _1686 = int_var(100);
   _1687 = cons(_1686, NULL);
   _1688 = cons(_500, _1687);
   _1689 = List_var(_1688);
-  _1690 = int_var(2002);
+  _1690 = int_var(3279);
   _1691 = cons(_1690, NULL);
   _1692 = cons(_515, _1691);
   _1693 = List_var(_1692);
@@ -2653,11 +2655,11 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_3(void)
   _1779 = cons(_1778, NULL);
   _1780 = cons(_487, _1779);
   _1781 = List_var(_1780);
-  _1782 = int_var(41);
+  _1782 = int_var(74);
   _1783 = cons(_1782, NULL);
   _1784 = cons(_500, _1783);
   _1785 = List_var(_1784);
-  _1786 = int_var(1243);
+  _1786 = int_var(2520);
   _1787 = cons(_1786, NULL);
   _1788 = cons(_515, _1787);
   _1789 = List_var(_1788);
@@ -2754,11 +2756,11 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_3(void)
   _1880 = cons(_1879, NULL);
   _1881 = cons(_487, _1880);
   _1882 = List_var(_1881);
-  _1883 = int_var(46);
+  _1883 = int_var(79);
   _1884 = cons(_1883, NULL);
   _1885 = cons(_500, _1884);
   _1886 = List_var(_1885);
-  _1887 = int_var(1359);
+  _1887 = int_var(2636);
   _1888 = cons(_1887, NULL);
   _1889 = cons(_515, _1888);
   _1890 = List_var(_1889);
@@ -2880,11 +2882,11 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_3(void)
   _2006 = cons(_2005, NULL);
   _2007 = cons(_487, _2006);
   _2008 = List_var(_2007);
-  _2009 = int_var(62);
+  _2009 = int_var(95);
   _2010 = cons(_2009, NULL);
   _2011 = cons(_500, _2010);
   _2012 = List_var(_2011);
-  _2013 = int_var(1836);
+  _2013 = int_var(3113);
   _2014 = cons(_2013, NULL);
   _2015 = cons(_515, _2014);
   _2016 = List_var(_2015);
@@ -2956,11 +2958,11 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_4(void)
   _2079 = cons(_2078, NULL);
   _2080 = cons(_487, _2079);
   _2081 = List_var(_2080);
-  _2082 = int_var(16);
+  _2082 = int_var(49);
   _2083 = cons(_2082, NULL);
   _2084 = cons(_500, _2083);
   _2085 = List_var(_2084);
-  _2086 = int_var(514);
+  _2086 = int_var(1791);
   _2087 = cons(_2086, NULL);
   _2088 = cons(_515, _2087);
   _2089 = List_var(_2088);
@@ -3065,11 +3067,11 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_4(void)
   _2188 = cons(_2187, NULL);
   _2189 = cons(_487, _2188);
   _2190 = List_var(_2189);
-  _2191 = int_var(31);
+  _2191 = int_var(64);
   _2192 = cons(_2191, NULL);
   _2193 = cons(_500, _2192);
   _2194 = List_var(_2193);
-  _2195 = int_var(1001);
+  _2195 = int_var(2278);
   _2196 = cons(_2195, NULL);
   _2197 = cons(_515, _2196);
   _2198 = List_var(_2197);
@@ -7668,12 +7670,15 @@ static int f7_binding____declares_binders(List body, List bindings){
 
 }
 
-List source_retain_catch_handle(List, List);
+static List f7_binding____retain_catch_handle(List rebuilt, List handle){
+  Var marker = Var_caddr(List_caddr(rebuilt));  return List_search_replace(rebuilt, List_var(cons(_395, cons(marker, NULL))), List_var(handle));
+}
+
 static List f7_binding____bind_try(Compiler c, Var body, Var catches, Var cleanup){
   List bound = f7_binding____bind_statement(c, body);  List arms = Var_truth(catches) ? f7_binding____bind_statement(c, catches) : NULL;  List finalizer = Var_truth(cleanup) ? f7_binding____bind_statement(c, cleanup) : NULL;  Macro tried = _2111, caught = _1100;  List statement = List_truth(arms) ? Macro_apply(caught, ({
     Var _x2c_gensym_literal_part_138 = List_var(bound);  Var _x2c_gensym_literal_part_139 = List_var(finalizer);  Var _x2c_gensym_literal_part_140 = List_cadr(arms);  cons(_x2c_gensym_literal_part_138, cons(_x2c_gensym_literal_part_139, cons(_x2c_gensym_literal_part_140, NULL)));
   }
-  )) : Macro_apply(tried, cons(List_var(bound), cons(List_var(finalizer), NULL)));  List rebuilt = Var_list_payload(List_cadr(Compiler_rebuild_statement(c, statement)));  return List_truth(arms) ? source_retain_catch_handle(rebuilt, Var_list_payload(List_caddr(arms))) : rebuilt;
+  )) : Macro_apply(tried, cons(List_var(bound), cons(List_var(finalizer), NULL)));  List rebuilt = Var_list_payload(List_cadr(Compiler_rebuild_statement(c, statement)));  return List_truth(arms) ? f7_binding____retain_catch_handle(rebuilt, Var_list_payload(List_caddr(arms))) : rebuilt;
 }
 
 static List f7_binding____bind_match(Compiler c, Var subject, Var cases){

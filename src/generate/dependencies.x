@@ -186,7 +186,7 @@ static void _set_typedef(Map names, List binding, Var value) {
 
 module List _declaration_binding(List declarator) {
   match (declarator)
-    case $source_declarator_row(%((!set ?binding (binding ? ?)) ?)):
+    case $Ast.declarator_pattern(%((!set ?binding (binding ? ?)) ?)):
       return binding;
   return NULL;
 }

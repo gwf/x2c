@@ -8,7 +8,8 @@ meta static List literal_shape(List fields) => cons(<literal>, fields);
 
 meta static List spelling(List label) {
   match (label) {
-    case %(expr ? $($source_literal_content(%(? ?text)))): {
+    case $Ast.lambda_pattern(): return $!String{ "lambda" };
+    case %(expr ? (literal ? ?text)): {
       String written = text;
       return $!String{ $written };
     }
@@ -25,6 +26,7 @@ macro Expression $written(Expr $label) => $spelling($label);
 macro Expression $hi(Expr $label) => $is_hi($label);
 
 int main(void) {
+  if ($written(%!() => 0) != "lambda") return 1;
   printf("%s %s\n", $written("hi"), $written(42));
   printf("%d %d\n", $hi("hi"), $hi("ho"));
   return 0;

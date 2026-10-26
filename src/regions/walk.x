@@ -26,7 +26,7 @@ static macro Expression $reason.region_freed() => "it was freed";
 module void _walk(Walk &w, Var node) {
   match (node) {
     case %(at ?origin ?inner): _walk_at(w, origin, inner);
-    case $source_block_content(%(*statements)): _walk_block(w, statements);
+    case %(block *statements): _walk_block(w, statements);
     case %(seq *statements): _walk_sequence(w, statements);
     case $deferred(?body): _walk_defer(w, body);
     // A lowered defer keeps its environment and capture records.
@@ -34,8 +34,7 @@ module void _walk(Walk &w, Var node) {
       _walk_defer(w, body);
     case %((!or declare decl) ?specifiers (bindings *bindings)):
       _declare(w, specifiers, bindings);
-    case $return_value(?result):
-      _walk_return(w, source_return_type(node), result);
+    case %(return ?type ?result): _walk_return(w, type, result);
     /* A jump leaves the statements after it to another path, and a label is
        where that path arrives, so neither carries forward what the path
        before it freed. */
@@ -43,10 +42,11 @@ module void _walk(Walk &w, Var node) {
     case $expression_statement(?expression): _walk_expression(w, expression);
     /* A control construct's children run conditionally, so they count as a
        nested block: what they free does not end the fall-through. */
-    case $source_conditional_statement(): _walk_conditional(w, node.cdr());
+    case %((!or if while do for switch try match with foreach finally) *):
+      _walk_conditional(w, node.cdr());
     case %(catchcases ?rows): _walk(w, rows);
     case %((!or expr case) *): _scan(w, node, 0);
-    case $source_content_pattern($grouped, %(?inner)):
+    case $Macro.content_pattern($grouped, %(?inner)):
       _scan(w, node, 0);
     // Match and catch arms are bare `(PATTERN STATEMENT ...)` rows.
     case %((*) *): _walk_rows(w, node);
@@ -261,7 +261,7 @@ static void _end(Walk &w, Var argument, String op, Symbol how) {
   List named = NULL;
   Fact storage = _value_fact(w, argument, named);
   int literal = 0;
-  if (_unwrap(argument) ~= $source_literal_content(%(*fields)))
+  if (_unwrap(argument) ~= %(literal *fields))
     literal = 1;
   if (op && (literal || (storage &&
       (storage.region == w.frame || storage.born == 2)))) {
@@ -333,8 +333,7 @@ static int _scan_assignment(Walk &w, Var node, Var root) {
 static void _scan_node(Walk &w, Var node) {
   match (node) {
     case %(expr ? ?inner): w.pending.push(inner);
-    case $source_identifier_content(
-        %((!set ?binding (binding ? ?)))):
+    case %(ident (!set ?binding (binding ? ?))):
       _scan_ident(w, binding);
     // A statement expression declares locals of its own.
     case %((!or declare decl) ?specifiers (bindings *bindings)):
@@ -423,7 +422,7 @@ static void _store(Walk &w, Var target, Var value) {
    storage. */
 static Var _target_place(Walk &w, Var target) {
   Var inner = _unwrap(target);
-  if (inner ~= $source_operator_content(%((!quote *) ?pointer))) {
+  if (inner ~= %(op (!quote *) ?pointer)) {
     Fact fact = _fact_of(w, pointer, NULL);
     if (fact && fact.place) return fact.place;
   }

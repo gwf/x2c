@@ -18,11 +18,11 @@ static Map _changed_bindings(List ast):
   List node
   $ast.walk(ast, node):
     match node:
-      case $source_operator_content(%(& ?target)):
+      case %(op & ?target):
         _changed(changed, target)
       case %(dstrasgn (targets *targets) ?):
         foreach List target in targets: _changed(changed, target)
-      case $source_call_content($called,
+      case $Macro.call_content($called,
           %(expr ?callee_type ?), %(*arguments)):
         List parameters = NULL
         if !Type.function_parts(callee_type, parameters, NULL): continue

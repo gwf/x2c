@@ -24,7 +24,7 @@ List Compiler.lower_lambda_expr(Compiler c, List expression) {
       return c.lift_func_expression(
         c.rebuild_expression(signature, lambda(body, params)));
     }
-    case $source_any_lambda():
+    case $Ast.lambda_pattern():
       return _shipped_lowering(
         c, <literal>, <lambda>, expression, <expression>, expression.cadr(),
         "lambda");
@@ -89,19 +89,19 @@ static List _expression_rewrite(Compiler c, List expression) {
         List target = _access_source(left);
         if (target == left) return NULL;
         kind = operator;
-        source = source_operator_expression(type, $(operator, target, right));
+        source = %(expr $type (op $operator $target $right));
       }
     case %(expr ?type (op (!or ?operator ++ --) ?operand)): {
       List target = _access_source(operand);
       if (target == operand) return NULL;
       kind = <prefix>;
-      source = source_operator_expression(type, $(operator, target));
+      source = %(expr $type (op $operator $target));
     }
     case %(expr ?type (postfix ?operator ?operand)): {
       List target = _access_source(operand);
       if (target == operand) return NULL;
       kind = <postfix>;
-      source = source_postfix_expression(type, $(operator, target));
+      source = %(expr $type (postfix $operator $target));
     }
   }
   return kind ? c.lower_rewrite(
@@ -129,11 +129,11 @@ module Ast _expression_node(Compiler c, Ast ast) {
    heads, with expression rewrites already applied. */
 static List _op_chain_first(List ast) {
   if (ast ~= %(expr ? ?content) &&
-      content ~= $source_operator_content(%(? ?first *rest)) &&
+      content ~= %(op ? ?first *rest) &&
       first is <list>) {
     List operand = first;
     if (operand ~= %(expr ? ?inner) &&
-        inner ~= $source_operator_content(%(*parts)))
+        inner ~= %(op *parts))
       return operand;
   }
   return NULL;
@@ -163,7 +163,7 @@ static Ast _op_chain(Compiler c, Ast ast) {
     ast = c.lower_lambda_expr(ast);
   }
   for (int i = (int) levels.len() - 1; i >= 0; i--)
-    if (levels[i].caddr() ~= $source_operator_content(%(?operator ? *rest))) {
+    if (levels[i].caddr() ~= %(op ?operator ? *rest)) {
       Array parts = [];
       if (operator is <list>) parts.push(_step(c, operator));
       else parts.push(operator);
@@ -172,7 +172,7 @@ static Ast _op_chain(Compiler c, Ast ast) {
         if (operand is <list>) parts.push(_step(c, operand));
         else parts.push(operand);
       }
-      rebuilt = source_operator_expression(types[i], parts.list_free());
+      rebuilt = %(expr $(types[i]) (op @(parts.list_free())));
     }
   return rebuilt;
 }
@@ -181,9 +181,8 @@ static Ast _op_chain(Compiler c, Ast ast) {
 
 module List _cast(Compiler c, List ast) {
   match (ast)
-    case $source_cast_content(
-        %((!set ?declarator (decl *parts))
-          (!set ?expression (expr ?source_type ?)))): {
+    case %(cast (!set ?declarator (decl *parts))
+          (!set ?expression (expr ?source_type ?))): {
       List declaration = %(declare @parts);
       Type type = declaration.type_from_ast();
       List operand = expression;
@@ -196,7 +195,7 @@ module List _cast(Compiler c, List ast) {
       int source_var = c.sym.is_var_type(source_type);
       int target_var = c.sym.is_var_type(type);
       int unresolved = 0;
-      if (expression ~= %(expr () $($source_identifier_content(%(?name)))))
+      if (expression ~= %(expr () (ident ?name)))
         unresolved = 1;
       int target_func = source_type &&
         c.sym.resolve_key(type) === c.sym.resolve_key(%("Func"));
@@ -207,7 +206,7 @@ module List _cast(Compiler c, List ast) {
       return %(cast $type $expression);
     }
   match (ast)
-    case $source_cast_content(%(?target (!set ?value (expr ? (composite *))))):
+    case %(cast ?target (!set ?value (expr ? (composite *)))):
       return c.convert_compound_literal(value, target, target);
   return ast;
 }
@@ -253,9 +252,9 @@ module List _declaration(Compiler c, List ast) {
 }
 
 module List _return(Compiler c, List ast) {
-  if (ast ~= $return_value(?expression)) {
-    List value = c.convert_expression(expression, source_return_type(ast));
-    return source_return_content($(value));
+  if (ast ~= %(return ?type ?expression)) {
+    List value = c.convert_expression(expression, type);
+    return %(return $value);
   }
   return ast;
 }
@@ -288,7 +287,7 @@ module List _typed_call(
   List supplied = args;
   if (args === %((expr (void) ()))) args = NULL;
   String callee_name = NULL;
-  if (callee ~= %(expr ? $($source_identifier_content(%(?binding)))))
+  if (callee ~= %(expr ? (ident ?binding)))
     callee_name = Ast.binding_spelling(binding);
   int list_varargs = callee_name == "List_list_n";
   if (c.fn_name && _iter_immediate_consumer(callee_name) && args)

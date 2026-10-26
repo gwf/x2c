@@ -62,13 +62,13 @@ static macro Expression $func_size(Expr $value) => sizeof $value;
    of the expression's value as a `Var`. */
 static List _helper_body(Compiler c, List body) {
   match (body) {
-    case $source_block_content(%(*items)):
-      return source_block_content($(@items, source_return_none()));
+    case %(block *items):
+      return %(block @items $(Ast.return_none()));
     case %(expr (void) ?):
-      return source_block_content(%((stmnt $body) $(source_return_none())));
+      return %(block (stmnt $body) $(Ast.return_none()));
   }
   List result = c.convert_expression(body, %("Var"));
-  return source_block_content(%((stmnt (return $result))));
+  return %(block (stmnt (return $result)));
 }
 
 /** Binds the file-static context type `name` with the field rows `fields`,
@@ -93,8 +93,8 @@ List Compiler.prepend_setup(Compiler c, List body, List setup) {
   if (!setup) return body;
   Macro shape = $statement_value;
   match (body) {
-    case $source_block_content(%(*items)):
-      return source_block_content(%(@setup @items));
+    case %(block *items):
+      return %(block @setup @items);
     case %(!set ?expression (expr ?type ?)):
       return c.rebuild_expression(type, shape(expression, setup));
   }

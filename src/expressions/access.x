@@ -4,7 +4,7 @@ static keyword loop $private.loop;
 
 module int _is_addressable(Compiler c, List expression) {
   match (expression) {
-    case %(expr ? $($source_identifier_content(%(?binding)))): {
+    case %(expr ? (ident ?binding)): {
       Map facts = c.semantic_binding_facts();
       Type declared = facts[%(type $binding)];
       return !(%(lambda-snapshot $binding) in facts) &&
@@ -13,13 +13,11 @@ module int _is_addressable(Compiler c, List expression) {
     case %(expr ? $($indexed(?receiver, ?selector))):
       return !c.sym.normalize_declared_type(receiver.cadr()).is_array() ||
              _is_addressable(c, receiver);
-    case %(expr ? $($source_operator_content(
-        %((!quote *) ?operand)))): return 1;
-    case %(expr ? $($source_operator_content(
-        %((!quote ->) ?receiver ?field)))): return 1;
+    case %(expr ? (op (!quote *) ?operand)): return 1;
+    case %(expr ? (op (!quote ->) ?receiver ?field)): return 1;
     case %(expr ? $($grouped(?base))):
       return _is_addressable(c, base);
-    case %(expr ? $($source_operator_content(%(. ?base ?)))):
+    case %(expr ? (op . ?base ?)):
       return _is_addressable(c, base);
   }
   return 0;
@@ -58,7 +56,7 @@ module List _resolve_indexed(
   Type receiver_type = receiver.cadr();
   // A field of a foreign struct has no x2c type; C indexes it alone.
   if (!receiver_type &&
-      receiver ~= %(expr () $($source_operator_content(%((!or . ->) * *)))))
+      receiver ~= %(expr () (op (!or . ->) * *)))
     return %(expr () (index $receiver $selector));
   $fail.expressions_index_unsupported(c, origin, receiver_type);
 }
@@ -149,7 +147,7 @@ module List _slice(Resolve &r, List slice) {
   if (start) start = r.c.resolve_expression(start, r.origin);
   if (stop) stop = r.c.resolve_expression(stop, r.origin);
   if (step) step = r.c.resolve_expression(step, r.origin);
-  List operation = source_slice_content($(receiver, start, stop, step));
+  List operation = %(slice $receiver $start $stop $step);
   if (r.type === %(<macro-expr>))
     operation = r.c.anchor_origin(operation, r.origin);
   return %(expr $(receiver.cadr()) $operation);
@@ -282,10 +280,9 @@ module List _member(Resolve &r, Var operator, List receiver, List field) {
   List resolution = r.c.resolve_postfix_member(
     receiver_type, field, operator, 0);
   if (resolution ~= %(field ?access ?field_type))
-    return source_operator_expression(
-      field_type, $(access, receiver, field));
+    return %(expr $field_type (op $access $receiver $field));
   Type type = _deferred_receiver(receiver) ? %(<macro-expr>) : NULL;
-  return source_operator_expression(type, $(operator, receiver, field));
+  return %(expr $type (op $operator $receiver $field));
 }
 
 module void _report_method_ambiguity(

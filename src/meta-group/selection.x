@@ -46,7 +46,7 @@ int Compiler.meta_reaches_compile_time(Compiler c, Var node) {
   List syntax = node;
   match (syntax) {
     case %((!or tpl-call meta-call) *): return 1;
-    case $source_identifier_content(%((binding ? ?name))): {
+    case %(ident (binding ? ?name)): {
       if (name is not <string>) break;
       String spelling = name;
       // Expansion can insert a call typed by its macro definition.
@@ -385,7 +385,7 @@ module String _unbound(Compiler c) {
 static String _unbound_callee(Compiler c, Var node) {
   if (node is not <list>) return NULL;
   Var bound;
-  match (node) case $source_identifier_content(%((binding ? ?name))): {
+  match (node) case %(ident (binding ? ?name)): {
     if (name is not <string>) break;
     String spelling = name;
     String unbound = %"<unbound $spelling>";

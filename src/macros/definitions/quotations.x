@@ -158,7 +158,7 @@ static List _checked_type(Compiler c, List type, Token origin) {
     c, "x2c_diagnostic_fail", %($error (expr ("List") (nil))), origin);
   return c.resolve_expression(
     %(expr () (op ? $error
-      (expr ("Type") $(source_commas_content($(fail, type)))) $type)),
+      (expr ("Type") (commas $fail $type)) $type)),
     origin);
 }
 

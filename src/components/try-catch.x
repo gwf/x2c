@@ -255,6 +255,12 @@ meta static List _try_catch_clause(List handle, List records, Array rows) {
   return $(handle, state, arms.list_free(), @(patterns.list_free()));
 }
 
+/* The handler the parser introduced, which no source hole writes. */
+meta static List _try_catch_handle(List node) {
+  if (node ~= %(try ? (catchcases ? ?handle) ?)) return handle;
+  return NULL;
+}
+
 /* The landing form of the try `node`: its frame, its finalizer in a
    region that leaves the frame, its exits, then its body and each arm
    inside them. */
@@ -265,7 +271,7 @@ meta static Code _try_landing(
   Atom exits = Atom.intern("?__try_exits");
   Atom lowered = Atom.intern("?__try_body");
   Atom finished = NULL;
-  List handle = arms ? source_catch_handle(node) : NULL;
+  List handle = arms ? _try_catch_handle(node) : NULL;
   Array rows = [%(new-name $frame "exception_frame")];
   if (finalizer) {
     Atom departure = Atom.intern("?__try_departure");

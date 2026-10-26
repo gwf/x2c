@@ -320,17 +320,17 @@ static List _capture_leaves(Compiler c, List value, Array inputs) {
   match (value) {
     case %((!or ?kind dotinit indexinit) ?key ?inner):
       return $(kind, key, _capture_leaves(c, inner, inputs));
-    case %(expr ?type $($source_composite_content(%(*items)))): {
+    case %(expr ?type (composite (commas *items))): {
       Array captured = [];
       foreach (List item in items)
         captured.push(_capture_leaves(c, item, inputs));
-      return %(expr $type $(source_composite_content(captured.list_free())));
+      return %(expr $type (composite (commas @(captured.list_free()))));
     }
     /* A value leaf; an internally constructed native call may have a bare
        string callee. */
-    case %(expr ?type (!or $($source_identifier_content(%(*)))
-                           $($source_operator_content(%(*)))
-                           $($source_cast_content(%(*)))
+    case %(expr ?type (!or (ident *)
+                           (op *)
+                           (cast *)
                            $($grouped(?))
                            (call *))):
       return _capture_value(c, value, type, inputs);
@@ -350,10 +350,10 @@ static List _capture_value(Compiler c, List value, Type type, Array inputs) {
 // Capturing native leaves must preserve construction and cache facts.
 static int _is_literal(List value) {
   match (value) {
-    case %(expr ? $($source_literal_content(%(*)))): return 1;
+    case %(expr ? (literal *)): return 1;
     case %(expr ? $($grouped(?inner))):
       return _is_literal(inner);
-    case %(expr ? $($source_cast_content(%(? ?inner)))):
+    case %(expr ? (cast ? ?inner)):
       return _is_literal(inner);
   }
   return 0;

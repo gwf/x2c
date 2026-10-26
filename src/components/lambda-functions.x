@@ -257,9 +257,9 @@ meta static List _lambda_returning(List items, List none) {
 meta static List _lambda_items(Code body) {
   if (body ~= %(block *items))
     return $(
-      @(_lambda_returning(items, source_return_none())), source_return_none());
+      @(_lambda_returning(items, Ast.return_none())), Ast.return_none());
   List items = body ~= %(expr (void) ?)
-    ? %((stmnt $body) $(source_return_none()))
+    ? %((stmnt $body) $(Ast.return_none()))
     : %((stmnt (return $(body.convert(%("Var"))))));
   if (x2c_enclosing(<statement>) ~= %(at ?origin ?))
     return %((at $origin $(items.car())) @(items.cdr()));

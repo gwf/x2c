@@ -35,15 +35,15 @@ List Compiler.parse_atomic_literal(Compiler c) {
   String text = c.token.text, List literal = NULL;
   switch (c.peek(0)) {
     case <void>:
-      literal = source_literal_content(%(("Var") "void"));
+      literal = %(literal ("Var") "void");
       break;
     case <lit-char>:
-      literal = source_literal_content(%((char) $text));
+      literal = %(literal (char) $text);
       break;
     case <lit-int>:    literal = _number_literal(c, text, 0); break;
     case <lit-float>:  literal = _number_literal(c, text, 1); break;
     case <lit-char*>:
-      literal = source_literal_content(%((* char) $text));
+      literal = %(literal (* char) $text);
       break;
     case <lit-atom>:   literal = _atom_literal(c, text);      break;
     case <lit-symbol>: literal = _symbol_literal(c, text);    break;

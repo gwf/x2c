@@ -178,7 +178,7 @@ static List _bind_form(Compiler c, List input, Symbol context, int pending) {
       return _bind_try(c, body, NULL, cleanup);
     case $matched(?subject, *cases) if (statement):
       return _bind_match(c, subject, cases);
-    case $source_block_content(%(*children)) if (statement):
+    case %(block *children) if (statement):
       return _bind_block(c, input);
     case %(group *children) if (statement): return _bind_group(c, children);
   }
@@ -504,6 +504,12 @@ static int _declares_binders(List body, List bindings) {
   return 1;
 }
 
+/* Restores the existing catch handler after the template rebuild. */
+static List _retain_catch_handle(List rebuilt, List handle) {
+  Var marker = rebuilt.caddr().caddr();
+  return rebuilt.search_replace(%(!quote $marker), handle);
+}
+
 // Source clauses parse here, so body, arms, and finalizer go in token order.
 static List _bind_try(Compiler c, Var body, Var catches, Var cleanup) {
   List bound = _bind_statement(c, body);
@@ -513,7 +519,7 @@ static List _bind_try(Compiler c, Var body, Var catches, Var cleanup) {
   List statement = arms
     ? caught(bound, finalizer, arms.cadr()) : tried(bound, finalizer);
   List rebuilt = c.rebuild_statement(statement).cadr();
-  return arms ? source_retain_catch_handle(rebuilt, arms.caddr()) : rebuilt;
+  return arms ? _retain_catch_handle(rebuilt, arms.caddr()) : rebuilt;
 }
 
 /* Binds each `match` arm's captures in a scope of its own. A source
@@ -595,7 +601,7 @@ List Compiler.bind_callable_body(Compiler c, List syntax, Type return_type) {
   match (syntax) {
     case %(at ?origin ?body):
       return _anchor(c, origin, c.bind_callable_body(body, return_type));
-    case $source_block_content(%(*children)): {
+    case %(block *children): {
       Array stmts = [];
       List present_before = c.present_references();
       defer c.restore_reference_presence(present_before);

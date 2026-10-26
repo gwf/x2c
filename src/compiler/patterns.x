@@ -47,7 +47,7 @@ static Var _cons_value(Compiler c, Var head, Var tail) {
 
 static String _converter_name(Var node) {
   if (node is <string>) return node;
-  if (node ~= %(expr ? $($source_identifier_content(%(?binding)))))
+  if (node ~= %(expr ? (ident ?binding)))
     return Ast.binding_spelling(binding);
   return NULL;
 }

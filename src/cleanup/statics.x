@@ -24,20 +24,20 @@ module List _static_regions(Compiler c, List ast, Map runtime) {
     case %(try *): return _landing_form(c, ast, runtime);
     case %(declare ?type ?bindings):
       return _static_initializers(c, type, bindings, runtime);
-    case $source_block_content(%(*statements)): {
+    case %(block *statements): {
       Array before = [];
       for (List rest = statements; rest; rest = rest.cdr()) {
         List statement = rest.car();
         if (_runtime_static_declaration(c, statement, runtime)) {
           List guard = _static_regions(c, statement, runtime);
           List body = _static_regions(
-            c, source_block_content(rest.cdr()), runtime);
+            c, %(block @(rest.cdr())), runtime);
           before.push(%(localinit $guard $body));
           break;
         }
         before.push(_static_regions(c, statement, runtime));
       }
-      return source_block_content(before.list_free());
+      return %(block @(before.list_free()));
     }
   }
   Var child;
@@ -145,9 +145,9 @@ static int _value(RuntimeScan &s, List node) {
   match (node) {
     case %((!or cache call var array map varray vmap initval cons append) *):
       return 1;
-    case %(expr ?type $($source_identifier_content(%(?binding)))):
+    case %(expr ?type (ident ?binding)):
       return _identifier(s, type, binding);
-    case %(expr ? $($source_operator_content(%(& ?inner)))):
+    case %(expr ? (op & ?inner)):
       return _push(s, inner, 1);
     case %(expr ?type (!set ?content
         $($indexed(?receiver, ?selector)))): {
@@ -175,14 +175,14 @@ static int _address(RuntimeScan &s, List node) {
   match (node) {
     case %(!or (expr ? ?inner)
         $($grouped(?inner))
-        $($source_operator_content(%(. ?inner ?)))):
+        (op . ?inner ?)):
       return _push(s, inner, 1);
-    case $source_identifier_content(%(?binding)): return _input(s, binding);
+    case %(ident ?binding): return _input(s, binding);
     case $($indexed(%(!set ?base (expr ?type ?)), ?index)): {
       _push(s, index, 0);
       return _push(s, base, type.list().type().is_array());
     }
-    case $source_operator_content(%((!quote *) ?inner)):
+    case %(op (!quote *) ?inner):
       return _push(s, inner, 0);
   }
   return 1;

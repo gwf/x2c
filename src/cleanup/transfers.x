@@ -164,10 +164,10 @@ static String _label_spelling(Var label) {
   if (label is not <list>) return NULL;
   List node = label;
   match (node) {
-    case $source_identifier_content(%(?binding)):
+    case %(ident ?binding):
       return Ast.binding_spelling(binding);
     case %(expr ? ?inner): return _label_spelling(inner);
-    case $source_content_pattern($grouped, %(?inner)):
+    case $Macro.content_pattern($grouped, %(?inner)):
       return _label_spelling(inner);
     case %(?(String name)): return name;
   }
@@ -191,8 +191,8 @@ static Var _rewrite(Walk &w, Var value) {
       return _rewrite_localinit(w, node, guard, body);
     case %(staticinit ?record ?initial):
       return _rewrite_staticinit(w, node, record, initial);
-    case $source_return_content(%()): return _transfer(w, 0, node);
-    case $source_return_content(%((!set ?expression (expr ? ?)))):
+    case %(return): return _transfer(w, 0, node);
+    case %(return (!set ?expression (expr ? ?))):
       return _lower_return(w, node, expression);
     case %(break): return _transfer(w, w.break_stop, node);
     case %(continue): return _transfer(w, w.continue_stop, node);
@@ -232,7 +232,7 @@ static Var _lower_at(Walk &w, int origin, Var inner) {
    so a static-local region alone leaves the return as it is. */
 static List _lower_return(Walk &w, List node, List expression) {
   List value = _rewrite(w, expression);
-  if (value != expression) node = source_return_content($(value));
+  if (value != expression) node = %(return $value);
   List cleanup = _unwind(w, 0);
   return cleanup ? _return_value(w, value, cleanup) : node;
 }
@@ -244,9 +244,9 @@ static List _return_value(Walk &w, List expression, List cleanup) {
   Type type = w.c.return_type;
   List declaration =
     w.c.rebuild_statement($!{ $type $binding = $expression; }).cadr();
-  List returned = source_return_content(%((expr $type (ident $binding))));
-  List statement = source_block_content($(@cleanup, returned));
-  return source_block_content($(declaration, statement));
+  List returned = %(return (expr $type (ident $binding)));
+  List statement = %(block @cleanup $returned);
+  return %(block $declaration $statement);
 }
 
 /* A function-static initializer remains in ancestry for label checks,
@@ -319,7 +319,7 @@ static List _statements(List code) {
    region keeps its own shape. */
 static List _transfer(Walk &w, int stop, List statement) {
   List cleanup = _unwind(w, stop);
-  return cleanup ? source_block_content($(@cleanup, statement)) : statement;
+  return cleanup ? %(block @cleanup $statement) : statement;
 }
 
 /* The statements that leave every region down to `stop`, innermost first.

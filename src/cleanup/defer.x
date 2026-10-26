@@ -38,7 +38,7 @@ List Compiler.rewrite_defer_list(Compiler c, List stmts) {
       List finalizer = final_stmt;
       if (c.source_map) finalizer = Ast.rewrap_origin(anchored, finalizer);
       List region = c.lower_defer_region(
-        source_block_content(rest), finalizer);
+        %(block @rest), finalizer);
       Array before = [];
       for (List item = stmts; item != suffix; item = item.cdr())
         before.push(item.car());
@@ -110,7 +110,7 @@ static void _collect_captures(DeferCaptures &d, List ast) {
     List binding = bound, known = d.declared;
     if (!(binding in known)) d.declared = cons(binding, known);
   }
-  if (ast ~= %(expr ? $($source_identifier_content(%(?bound))))) {
+  if (ast ~= %(expr ? (ident ?bound))) {
     _capture(d, bound);
     return;
   }
@@ -159,7 +159,7 @@ static List _rewrite_captures(
   DeferCaptures &d, List ast, String env_name) {
   if (!ast) return ast;
   if (ast ~= %(expr ?captured_type
-      $($source_identifier_content(%(?bound))))) {
+      (ident ?bound))) {
     List binding = bound;
     Var field_var;
     if (!d.captures.try_get(binding, field_var)) return ast;

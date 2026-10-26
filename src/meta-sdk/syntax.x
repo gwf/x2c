@@ -64,7 +64,7 @@ Type Code.type(Code value) {
   if (Ast.try_binding(value, NULL, NULL)) binding = value;
   else
     match (value) {
-      case $source_identifier_content(%((!set ?captured (*)) *)):
+      case %(ident (!set ?captured (*)) *):
         binding = captured;
       case %(bind (!set ?captured (*)) *): binding = captured;
     }
@@ -209,7 +209,7 @@ String Code.binding_spelling(Var syntax) {
   match (value)
     case %(expr ? (!set ?content (? *))): value = content;
   match (value) {
-    case $source_identifier_content(%((!set ?captured (*)))):
+    case %(ident (!set ?captured (*))):
       value = captured;
     case %(bind (!set ?captured (*)) ?): value = captured;
   }

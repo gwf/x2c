@@ -203,15 +203,14 @@ static Var _native_targets(Compiler c, Var node, List lookup) {
   match (node) {
     case %(expr ?(Type result) $($called(
         %(!set ?callee
-          (expr ? $($source_identifier_content(%((binding ? ?name)))))),
+          (expr ? (ident (binding ? ?name)))),
         %(*arguments)))): {
       if (name is not <string>) break;
       String spelling = name;
       List call = _native_call(c, callee, spelling, arguments, lookup);
       if (call) return c.convert_expression(call, result);
     }
-    case %(expr ?(Type type) $($source_identifier_content(
-        %((binding ? ?name))))): {
+    case %(expr ?(Type type) (ident (binding ? ?name))): {
       if (name is not <string>) break;
       String spelling = name;
       List symbol = _native_symbol(c, type, spelling, lookup);

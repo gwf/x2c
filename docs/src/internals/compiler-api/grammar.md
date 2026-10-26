@@ -12,250 +12,84 @@ The source forms that lowering recognizes.
 
 | Function | Summary |
 | --- | --- |
-| [`source_any_lambda`](#source_any_lambda) | Returns a pattern for either lambda form, with or without captures. |
-| [`source_block_content`](#source_block_content) | Builds block content with its complete source-ordered statements. |
-| [`source_call_content`](#source_call_content) | Returns bare call content with the supplied callee and argument patterns. |
-| [`source_cast_content`](#source_cast_content) | Builds cast content with its children unchanged. |
-| [`source_catch_handle`](#source_catch_handle) | Returns the error handler the parser introduced for the catch arms of the parsed try `node`, or NULL for a try without catches. |
-| [`source_commas_content`](#source_commas_content) | Builds comma sequence content from its ordered rows. |
-| [`source_composite_content`](#source_composite_content) | Builds braced initializer content from its ordered comma rows. |
-| [`source_conditional_statement`](#source_conditional_statement) | Returns the canonical pattern for conditional statements. |
-| [`source_content_pattern`](#source_content_pattern) | Returns a source form's content pattern without its typed shell. |
-| [`source_declarator_row`](#source_declarator_row) | Returns a pattern for a declarator row, with or without its initializer. |
-| [`source_expression`](#source_expression) | Returns the source expression beneath casts and parentheses with its type. |
-| [`source_generic_content`](#source_generic_content) | Builds generic selection content with its declaration and ordered rows. |
-| [`source_identifier_content`](#source_identifier_content) | Builds identifier content with its bound child records. |
-| [`source_literal_content`](#source_literal_content) | Builds literal content with its typed child records. |
-| [`source_operator_content`](#source_operator_content) | Builds operator content with its token and source-ordered operands. |
-| [`source_operator_expression`](#source_operator_expression) | Builds a typed operator expression from its content children. |
-| [`source_postfix_content`](#source_postfix_content) | Builds postfix update content with its token and operand. |
-| [`source_postfix_expression`](#source_postfix_expression) | Builds a typed postfix update expression from its content children. |
-| [`source_retain_catch_handle`](#source_retain_catch_handle) | Restores the binder's handler after a caught template rebuild. |
-| [`source_return_content`](#source_return_content) | Builds return content with all bound and normalized fields. |
-| [`source_return_none`](#source_return_none) | Returns the return of no value that ends a function returning `Var`. |
-| [`source_return_type`](#source_return_type) | Returns a return node's target type, or NULL for another form. |
-| [`source_slice_content`](#source_slice_content) | Builds slice content while retaining omitted bounds. |
-| [`source_string_content`](#source_string_content) | Builds string content from its ordered text, expression, and cache rows. |
-| [`source_va_arg_content`](#source_va_arg_content) | Builds va-arg content with its declaration and operand. |
+| [`Ast.declarator_pattern`](#Ast.declarator_pattern) | Returns a pattern for a declarator row, with or without its initializer. |
+| [`Ast.lambda_pattern`](#Ast.lambda_pattern) | Returns a pattern for either lambda form, with or without captures. |
+| [`Ast.return_none`](#Ast.return_none) | Returns the return of no value that ends a function returning `Var`. |
+| [`Macro.call_content`](#Macro.call_content) | Returns bare call content with the supplied callee and argument patterns. |
+| [`Macro.content_pattern`](#Macro.content_pattern) | Returns a source form's content pattern without its typed shell. |
 
-### Functions
+### `Ast`
 
-#### source_any_lambda
+<a id="Ast.declarator_pattern"></a>
+#### Ast.declarator_pattern
 
-`meta List source_any_lambda(void)`
+`meta List Ast.declarator_pattern(List fields)`
+
+Returns a pattern for a declarator row, with or without its initializer.
+
+Source: `src/grammar.x:29`
+
+<a id="Ast.lambda_pattern"></a>
+#### Ast.lambda_pattern
+
+`meta List Ast.lambda_pattern(void)`
 
 Returns a pattern for either lambda form, with or without captures.
 
-Source: `src/grammar.x:98`
+Source: `src/grammar.x:26`
 
-#### source_block_content
+<a id="Ast.return_none"></a>
+#### Ast.return_none
 
-`meta List source_block_content(List fields)`
+`meta List Ast.return_none(void)`
 
-Builds block content with its complete source-ordered statements.
+Returns the return of no value that ends a function returning `Var`.
 
-Source: `src/grammar.x:201`
+Source: `src/grammar.x:22`
 
-#### source_call_content
+### `Macro`
 
-`meta List source_call_content(Macro call, List callee, List arguments)`
+<a id="Macro.call_content"></a>
+#### Macro.call_content
+
+`meta List Macro.call_content(Macro call, List callee, List arguments)`
 
 Returns bare call content with the supplied callee and argument
 patterns.
 
-Source: `src/grammar.x:191`
+Source: `src/grammar.x:42`
 
-#### source_cast_content
+<a id="Macro.content_pattern"></a>
+#### Macro.content_pattern
 
-`meta List source_cast_content(List parts)`
-
-Builds cast content with its children unchanged.
-The first child is a declaration or a semantic type at different stages.
-
-Source: `src/grammar.x:142`
-
-#### source_catch_handle
-
-`meta List source_catch_handle(List node)`
-
-Returns the error handler the parser introduced for the catch arms of
-the parsed try `node`, or NULL for a try without catches. The arms read
-their captures through it, and no source form writes it.
-
-Source: `src/grammar.x:232`
-
-#### source_commas_content
-
-`meta List source_commas_content(List rows)`
-
-Builds comma sequence content from its ordered rows.
-
-Source: `src/grammar.x:151`
-
-#### source_composite_content
-
-`meta List source_composite_content(List rows)`
-
-Builds braced initializer content from its ordered comma rows.
-
-Source: `src/grammar.x:157`
-
-#### source_conditional_statement
-
-`meta List source_conditional_statement(void)`
-
-Returns the canonical pattern for conditional statements.
-With is normally parsed away; foreach and finally remain accepted
-canonical compatibility heads.
-
-Source: `src/grammar.x:91`
-
-#### source_content_pattern
-
-`meta List source_content_pattern(Macro shape, List names)`
+`meta List Macro.content_pattern(Macro shape, List names)`
 
 Returns a source form's content pattern without its typed shell.
 Bare-content dispatch arms retain the fixed head the match emitter labels.
 Inside a shell, write `%(expr ? $($shape(...)))` instead.
 
-Source: `src/grammar.x:185`
+Source: `src/grammar.x:36`
 
-#### source_declarator_row
+## Public types
 
-`meta List source_declarator_row(List fields)`
+| Type | Kind | Summary |
+| --- | --- | --- |
+| [`Ast`](#Ast) | alias | Represents one compiler AST node as a canonical immutable `List`. |
 
-Returns a pattern for a declarator row, with or without its initializer.
+<a id="Ast"></a>
+### Ast
 
-Source: `src/grammar.x:210`
+`typedef List Ast`
 
-#### source_expression
+Represents one compiler AST node as a canonical immutable `List`.
+`NULL` denotes no node, and nonempty nodes have the canonical `List`-pool
+lifetime.
 
-`meta Var source_expression(Var value)`
-
-Returns the source expression beneath casts and parentheses with
-its type.
-
-Source: `src/grammar.x:216`
-
-#### source_generic_content
-
-`meta List source_generic_content(List parts)`
-
-Builds generic selection content with its declaration and ordered rows.
-
-Source: `src/grammar.x:145`
-
-#### source_identifier_content
-
-`meta List source_identifier_content(List fields)`
-
-Builds identifier content with its bound child records.
-
-Source: `src/grammar.x:204`
-
-#### source_literal_content
-
-`meta List source_literal_content(List fields)`
-
-Builds literal content with its typed child records.
-
-Source: `src/grammar.x:207`
-
-#### source_operator_content
-
-`meta List source_operator_content(List parts)`
-
-Builds operator content with its token and source-ordered operands.
-Constructed nonstandard operators retain the same form.
-
-Source: `src/grammar.x:168`
-
-#### source_operator_expression
-
-`meta List source_operator_expression(List type, List parts)`
-
-Builds a typed operator expression from its content children.
-
-Source: `src/grammar.x:171`
-
-#### source_postfix_content
-
-`meta List source_postfix_content(List parts)`
-
-Builds postfix update content with its token and operand.
-
-Source: `src/grammar.x:175`
-
-#### source_postfix_expression
-
-`meta List source_postfix_expression(List type, List parts)`
-
-Builds a typed postfix update expression from its content children.
-
-Source: `src/grammar.x:178`
-
-#### source_retain_catch_handle
-
-`meta List source_retain_catch_handle(List rebuilt, List handle)`
-
-Restores the binder's handler after a caught template rebuild.
-The source form has no hole for this derived identity.
-
-Source: `src/grammar.x:240`
-
-#### source_return_content
-
-`meta List source_return_content(List fields)`
-
-Builds return content with all bound and normalized fields.
-
-Source: `src/grammar.x:198`
-
-#### source_return_none
-
-`meta List source_return_none(void)`
-
-Returns the return of no value that ends a function returning `Var`.
-
-Source: `src/grammar.x:84`
-
-#### source_return_type
-
-`meta List source_return_type(List node)`
-
-Returns a return node's target type, or NULL for another form.
-The binder supplies the type; the source form does not write it.
-
-Source: `src/grammar.x:78`
-
-#### source_slice_content
-
-`meta List source_slice_content(List parts)`
-
-Builds slice content while retaining omitted bounds.
-
-Source: `src/grammar.x:154`
-
-#### source_string_content
-
-`meta List source_string_content(List rows)`
-
-Builds string content from its ordered text, expression, and cache rows.
-The parser and resolver share this shape.
-
-Source: `src/grammar.x:163`
-
-#### source_va_arg_content
-
-`meta List source_va_arg_content(List parts)`
-
-Builds va-arg content with its declaration and operand.
-
-Source: `src/grammar.x:148`
+Source: `src/grammar.x:19`
 
 ## Design notes
 
 Each macro's body is the source form a lowering receives, so a lowering
 recognizes its input with `case` on the macro instead of spelling the
-parsed node. The accessors read the parts of a parsed node that no
-source form writes, such as a handler the parser introduced.
+parsed node. Ast helpers describe shared canonical forms; Macro helpers
+derive bare-content patterns from source macros.

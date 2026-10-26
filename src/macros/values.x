@@ -363,11 +363,11 @@ static Var _carrier_binder(Var value) {
   if (value.is_binder()) return value.str().len() > 1 ? value : NULL;
   if (value is not <list>) return NULL;
   match (value) {
-    case $source_identifier_content(%(?name *)):
+    case %(ident ?name *):
       if (name.is_binder() && name.str().len() > 1) return name;
     case %(bind ?name *):
       if (name.is_binder() && name.str().len() > 1) return name;
-    case $source_literal_content(%(*)): return NULL;
+    case %(literal *): return NULL;
     case %((!or "x2c.template" "x2c.quoted" macro-invoke macrodef
                 code-value) *):
       return NULL;

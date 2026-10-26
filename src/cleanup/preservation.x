@@ -141,7 +141,7 @@ module Var _preserve_locals(Preserve &p, Var value) {
   match (node) {
     case %(param ?type ?bind):
       return %(param $type $(_binding(p, bind, p.escaped)));
-    case $source_block_content(%(*statements)): return _block(p, statements);
+    case %(block *statements): return _block(p, statements);
     case %(!set ?declaration ((!or declare decl) ? (bindings *))):
       return _declaration(p, declaration, NULL);
   }
@@ -175,7 +175,7 @@ static List _block(Preserve &p, List statements) {
     }
     output.push(_preserve_locals(p, statement));
   }
-  return source_block_content(output.list_free());
+  return %(block @(output.list_free()));
 }
 
 /* Split before qualifying, so a base-type qualifier one declarator needs
@@ -233,7 +233,7 @@ static List _binding(Preserve &p, List bind, Map escaped) {
 
 static int _declares_name(Preserve &p, List bindings) {
   foreach (List binding in bindings.cdr())
-    if (binding ~= $source_declarator_row(%(?name ?))) {
+    if (binding ~= $Ast.declarator_pattern(%(?name ?))) {
       String spelling = Ast.binding_spelling(name);
       if (spelling && spelling in p.names) return 1;
     }
@@ -281,7 +281,7 @@ static List _escape_loop(Preserve &p, List loop) {
       List declaration = _declaration(
         p, %(declare $type $bindings), p.escaped);
       List remaining = _preserve_locals(p, %(for () @rest));
-      return source_block_content($(declaration, @escapes, remaining));
+      return %(block $declaration @escapes $remaining);
     }
   return NULL;
 }
@@ -292,7 +292,7 @@ static List _escape_loop(Preserve &p, List loop) {
 static void _escape_declared(Preserve &p, Array output, List binds) {
   Compiler c = p.c;
   foreach (List bind in binds)
-    if (bind ~= $source_declarator_row(%(?name ?))) {
+    if (bind ~= $Ast.declarator_pattern(%(?name ?))) {
       String spelling = Ast.binding_spelling(name);
       if (spelling && spelling in p.escaped) {
         output.push(

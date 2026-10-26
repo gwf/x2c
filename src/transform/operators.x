@@ -6,19 +6,19 @@ module List _operator(Compiler c, List ast) {
   List truthy = _truthy(c, ast);
   if (truthy != ast) return truthy;
   match (ast) {
-    case $source_operator_content(%(?operator
-             (!set ?lhs (expr ?lhs_type ?)) (!set ?rhs (expr ?rhs_type ?)))):
+    case %(op ?operator
+             (!set ?lhs (expr ?lhs_type ?)) (!set ?rhs (expr ?rhs_type ?))):
       return _binary_operator(c, ast, operator, lhs, lhs_type, rhs, rhs_type);
-    case $source_operator_content(%(
+    case %(op
              (!or ?operator + - ~)
-             (!set ?argument (expr ?argument_type ?)))):
+             (!set ?argument (expr ?argument_type ?))):
       if (c.sym.is_var_type(argument_type)) {
-        List operation = source_operator_content($(operator, argument));
+        List operation = %(op $operator $argument);
         return _dynamic(c, <unary>, argument_type, operation);
       }
-    case $source_operator_content(%(
+    case %(op
              (!or ?operator ++ --)
-             (!set ?argument (expr ?argument_type ?)))):
+             (!set ?argument (expr ?argument_type ?))):
       return _change(c, ast, operator, argument, argument_type, 0);
   }
   return ast;
@@ -26,8 +26,8 @@ module List _operator(Compiler c, List ast) {
 
 module List _postfix(Compiler c, List ast) {
   match (ast)
-    case $source_postfix_content(%(?operator
-           (!set ?argument (expr ?argument_type ?)))):
+    case %(postfix ?operator
+           (!set ?argument (expr ?argument_type ?))):
       return _change(c, ast, operator, argument, argument_type, 1);
   return ast;
 }
@@ -44,8 +44,8 @@ static List _change(
       : _protocol_update(c, type, binary, arg, one, binary);
     return updated ? updated : ast;
   }
-  List operation = postfix ? source_postfix_content($(op, arg))
-                           : source_operator_content($(op, arg));
+  List operation = postfix ? %(postfix $op $arg)
+                           : %(op $op $arg);
   return _dynamic(c, <unary>, type, operation);
 }
 
@@ -90,17 +90,17 @@ module List _truthy(Compiler c, List ast) {
         for_loop(
           init, _truthy_expression(c, condition), increment,
           body)).cadr();
-    case $source_operator_content(%((!or ?operator && ||) ?lhs ?rhs)): {
+    case %(op (!or ?operator && ||) ?lhs ?rhs): {
       List left = _truthy_expression(c, lhs);
       List right = _truthy_expression(c, rhs);
-      return source_operator_content($(operator, left, right));
+      return %(op $operator $left $right);
     }
-    case $source_operator_content(%(? ?condition ?ontrue ?onfalse)): {
+    case %(op ? ?condition ?ontrue ?onfalse): {
       List test = _truthy_expression(c, condition);
-      return source_operator_content(%(? $test $ontrue $onfalse));
+      return %(op ? $test $ontrue $onfalse);
     }
-    case $source_operator_content(%(! ?condition)):
-      return source_operator_content(%(! $(_truthy_expression(c, condition))));
+    case %(op ! ?condition):
+      return %(op ! $(_truthy_expression(c, condition)));
   }
   return ast;
 }
@@ -164,7 +164,7 @@ static List _binary_operator(
   if (operator.compound_assignment() &&
       (c.sym.is_var_type(lhs_type) || c.sym.is_var_type(rhs_type)))
     return _dynamic(
-      c, <binary>, %("Var"), source_operator_content($(operator, lhs, rhs)));
+      c, <binary>, %("Var"), %(op $operator $lhs $rhs));
   return ast;
 }
 
@@ -192,8 +192,7 @@ static List _compound(
     if (updated) return updated;
   }
   if (!lhs_is_var && !c.sym.is_var_type(rhs_type)) return ast;
-  List operation = source_operator_content(
-    $(op.compound_assignment(), lhs, rhs));
+  List operation = %(op $(op.compound_assignment()) $lhs $rhs);
   return _dynamic(c, <binary>, lhs_type, operation);
 }
 

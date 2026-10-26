@@ -59,7 +59,7 @@ static typedef struct Flow {
 module int _flow(Walk &w, Var value, Type type, Symbol sink, Fact target) {
   if (_number(w, type, value)) return 0;
   match (_unwrap(value))
-    case $source_operator_content(%((!quote ?) ? ?yes ?no)):
+    case %(op (!quote ?) ? ?yes ?no):
       return _flow(w, yes, type, sink, target) ||
              _flow(w, no, type, sink, target);
   List named = NULL;
@@ -186,14 +186,14 @@ static List _opened(Walk &w, Region region) {
    address by the local it borrows from. A callee may hand back the address
    it was given or one inside it. */
 module String _subject(Walk &w, Var value, List named, Fact fact) {
-  if (source_expression(value) ~= $source_any_lambda())
+  if (_under_casts(value) ~= $Ast.lambda_pattern())
     return "a closure";
   if (!named) return "a fresh allocation";
   String name = %"'$(Ast.binding_spelling(named))'", Var own = w.facts[named];
   if (own is not void && own.pointer() == fact) return name;
   List arguments = NULL;
   if (_callee_of(value, arguments)) return %"an address from $name";
-  if ((fact ? fact.place : NULL) ~= $source_identifier_content(%(*)))
+  if ((fact ? fact.place : NULL) ~= %(ident *))
     return %"the address of $name";
   return %"an address inside $name";
 }

@@ -8,55 +8,17 @@
 #include "x2c.h"
 #include "common.h"
 #include "macrovalue/macrovalue.h"
-List source_return_type(List node);
+typedef List Ast;
 
-List source_return_none(void);
+List Ast_return_none(void);
 
-List source_conditional_statement(void);
+List Ast_lambda_pattern(void);
 
-List source_any_lambda(void);
+List Ast_declarator_pattern(List fields);
 
-List source_cast_content(List parts);
+List Macro_content_pattern(Macro shape, List names);
 
-List source_generic_content(List parts);
-
-List source_va_arg_content(List parts);
-
-List source_commas_content(List rows);
-
-List source_slice_content(List parts);
-
-List source_composite_content(List rows);
-
-List source_string_content(List rows);
-
-List source_operator_content(List parts);
-
-List source_operator_expression(List type, List parts);
-
-List source_postfix_content(List parts);
-
-List source_postfix_expression(List type, List parts);
-
-List source_content_pattern(Macro shape, List names);
-
-List source_call_content(Macro call, List callee, List arguments);
-
-List source_return_content(List fields);
-
-List source_block_content(List fields);
-
-List source_identifier_content(List fields);
-
-List source_literal_content(List fields);
-
-List source_declarator_row(List fields);
-
-Var source_expression(Var value);
-
-List source_catch_handle(List node);
-
-List source_retain_catch_handle(List rebuilt, List handle);
+List Macro_call_content(Macro call, List callee, List arguments);
 
 
 #endif /* __GUARD_0xB51D9586__ */
