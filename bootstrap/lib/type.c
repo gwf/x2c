@@ -12,11 +12,11 @@
 #include "symbolset.h"
 #include "native-scalar-types.h"
 #include <limits.h>
-static List _208, _207, _206, _200, _199, _198, _192, _191, _190, _184, _183, _182, _176, _175, _174, _168, _167, _166, _163, _162, _161, _155, _154, _153, _147, _146, _145, _139, _138, _137, _132, _131, _130, _124, _123, _122, _116, _115, _114, _108, _107, _106, _100, _98, _97, _96, _95, _94, _93, _92, _90, _88, _86, _85, _82, _80, _79, _77, _76, _73, _72, _71, _69, _67, _66, _64, _63, _61, _60, _58, _57, _55, _53, _51, _49, _48, _47, _46, _45, _40, _38, _37, _36, _35, _33, _32, _31, _30, _29, _27, _26, _25, _24, _22, _19, _18, _17, _13, _12, _9, _8, _5, _4, _3;
+static List _205, _204, _203, _197, _196, _195, _189, _188, _187, _181, _180, _179, _173, _172, _171, _165, _164, _163, _160, _159, _158, _152, _151, _150, _144, _143, _142, _136, _135, _134, _129, _128, _127, _121, _120, _119, _113, _112, _111, _105, _104, _103, _97, _95, _94, _93, _92, _91, _90, _89, _87, _85, _83, _82, _79, _77, _76, _74, _73, _70, _69, _68, _66, _64, _63, _61, _60, _58, _57, _55, _54, _52, _50, _48, _46, _45, _44, _43, _42, _37, _35, _33, _32, _31, _30, _29, _27, _26, _25, _24, _22, _19, _18, _17, _13, _12, _9, _8, _5, _4, _3;
 
-static String _209, _204, _202, _196, _194, _188, _186, _180, _178, _172, _170, _164, _159, _157, _151, _149, _143, _141, _135, _133, _128, _126, _120, _118, _112, _110, _104, _102;
+static String _206, _201, _199, _193, _191, _185, _183, _177, _175, _169, _167, _161, _156, _154, _148, _146, _140, _138, _132, _130, _125, _123, _117, _115, _109, _107, _101, _99;
 
-static Var _205, _203, _201, _197, _195, _193, _189, _187, _185, _181, _179, _177, _173, _171, _169, _165, _160, _158, _156, _152, _150, _148, _144, _142, _140, _136, _134, _129, _127, _125, _121, _119, _117, _113, _111, _109, _105, _103, _101, _99, _91, _89, _87, _84, _83, _81, _78, _75, _74, _70, _68, _65, _62, _59, _56, _54, _52, _50, _44, _43, _42, _41, _39, _34, _28, _23, _21, _20, _16, _15, _14, _11, _10, _7, _6, _2, _1, _0;
+static Var _202, _200, _198, _194, _192, _190, _186, _184, _182, _178, _176, _174, _170, _168, _166, _162, _157, _155, _153, _149, _147, _145, _141, _139, _137, _133, _131, _126, _124, _122, _118, _116, _114, _110, _108, _106, _102, _100, _98, _96, _88, _86, _84, _81, _80, _78, _75, _72, _71, _67, _65, _62, _59, _56, _53, _51, _49, _47, _41, _40, _39, _38, _36, _34, _28, _23, _21, _20, _16, _15, _14, _11, _10, _7, _6, _2, _1, _0;
 
 static int _init_guard_ = 0;
 
@@ -85,7 +85,7 @@ Map Map_new(void);
 
 static Var List_var(List);
 
-_x2c_gensym_initializer_choice_DF23AB2E_0((scalartypes = Map_update_n(Map_new(), 14, List_var(_76), List_var(_108), List_var(_85), List_var(_116), List_var(_82), List_var(_124), List_var(_100), List_var(_132), List_var(_94), List_var(_139), List_var(_86), List_var(_147), List_var(_96), List_var(_155), List_var(_92), List_var(_163), List_var(_90), List_var(_168), List_var(_98), List_var(_176), List_var(_88), List_var(_184), List_var(_95), List_var(_192), List_var(_97), List_var(_200), List_var(_93), List_var(_208))))
+_x2c_gensym_initializer_choice_DF23AB2E_0((scalartypes = Map_update_n(Map_new(), 14, List_var(_73), List_var(_105), List_var(_82), List_var(_113), List_var(_79), List_var(_121), List_var(_97), List_var(_129), List_var(_91), List_var(_136), List_var(_83), List_var(_144), List_var(_93), List_var(_152), List_var(_89), List_var(_160), List_var(_87), List_var(_165), List_var(_95), List_var(_173), List_var(_85), List_var(_181), List_var(_92), List_var(_189), List_var(_94), List_var(_197), List_var(_90), List_var(_205))))
 static List _scalar_row(Type type);
 
 static int _scalar_numeric_info(Type type, X2CVarNumericInfo * info);
@@ -143,181 +143,178 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _32 = cons(_16, _12);
   _33 = cons(_6, _32);
   _34 = Symbol_var(357722);
-  _35 = cons(_34, _8);
-  _36 = cons(_34, _29);
-  _37 = cons(_34, _12);
-  _38 = cons(_34, _32);
-  _39 = Symbol_var(2050325770);
-  _40 = cons(_39, _8);
-  _41 = List_var(_40);
-  _42 = Symbol_var(77);
-  _43 = Symbol_var(33330008396);
-  _44 = Symbol_var(189);
-  _45 = cons(_44, NULL);
-  _46 = cons(_43, _45);
-  _47 = cons(_42, _46);
-  _48 = cons(_41, _47);
-  _49 = cons(_0, _48);
-  _50 = List_var(_49);
-  _51 = cons(_50, _8);
-  _52 = Symbol_var(1473096);
-  _53 = cons(_52, NULL);
-  _54 = Symbol_var(194457181);
-  _55 = cons(_54, NULL);
-  _56 = Symbol_var(1317118534);
+  _35 = cons(_34, _29);
+  _36 = Symbol_var(2050325770);
+  _37 = cons(_36, _8);
+  _38 = List_var(_37);
+  _39 = Symbol_var(77);
+  _40 = Symbol_var(33330008396);
+  _41 = Symbol_var(189);
+  _42 = cons(_41, NULL);
+  _43 = cons(_40, _42);
+  _44 = cons(_39, _43);
+  _45 = cons(_38, _44);
+  _46 = cons(_0, _45);
+  _47 = List_var(_46);
+  _48 = cons(_47, _8);
+  _49 = Symbol_var(1473096);
+  _50 = cons(_49, NULL);
+  _51 = Symbol_var(194457181);
+  _52 = cons(_51, NULL);
+  _53 = Symbol_var(1317118534);
+  _54 = cons(_53, _8);
+  _55 = cons(_7, _54);
+  _56 = Symbol_var(634145674);
   _57 = cons(_56, _8);
   _58 = cons(_7, _57);
-  _59 = Symbol_var(634145674);
+  _59 = Symbol_var(387198108);
   _60 = cons(_59, _8);
   _61 = cons(_7, _60);
-  _62 = Symbol_var(387198108);
+  _62 = Symbol_var(1392787923272);
   _63 = cons(_62, _8);
   _64 = cons(_7, _63);
-  _65 = Symbol_var(1392787923272);
+  _65 = Symbol_var(8794);
   _66 = cons(_65, _8);
-  _67 = cons(_7, _66);
-  _68 = Symbol_var(8794);
-  _69 = cons(_68, _8);
-  _70 = List_var(_69);
-  _71 = cons(_41, NULL);
-  _72 = cons(_70, _71);
-  _73 = cons(_0, _72);
-  _74 = List_var(_73);
-  _75 = Symbol_var(213092);
-  _76 = cons(_75, NULL);
-  _77 = cons(_74, _76);
-  _78 = Symbol_var(7304424);
-  _79 = cons(_78, _76);
-  _80 = cons(_74, _79);
-  _81 = Symbol_var(13400168);
+  _67 = List_var(_66);
+  _68 = cons(_38, NULL);
+  _69 = cons(_67, _68);
+  _70 = cons(_0, _69);
+  _71 = List_var(_70);
+  _72 = Symbol_var(213092);
+  _73 = cons(_72, NULL);
+  _74 = cons(_71, _73);
+  _75 = Symbol_var(7304424);
+  _76 = cons(_75, _73);
+  _77 = cons(_71, _76);
+  _78 = Symbol_var(13400168);
+  _79 = cons(_78, NULL);
+  _80 = Symbol_var(818062);
+  _81 = Symbol_var(301273866);
   _82 = cons(_81, NULL);
-  _83 = Symbol_var(818062);
-  _84 = Symbol_var(301273866);
-  _85 = cons(_84, NULL);
-  _86 = cons(_83, _85);
-  _87 = Symbol_var(1474468213064);
-  _88 = cons(_87, _76);
-  _89 = Symbol_var(1294430536);
-  _90 = cons(_89, _76);
-  _91 = Symbol_var(40402088);
-  _92 = cons(_91, NULL);
-  _93 = cons(_87, _92);
-  _94 = cons(_83, NULL);
-  _95 = cons(_87, _94);
-  _96 = cons(_83, _94);
-  _97 = cons(_87, _96);
-  _98 = cons(_87, NULL);
-  _99 = Symbol_var(19368);
-  _100 = cons(_99, NULL);
-  _101 = Symbol_var(26993);
-  _102 = String_new("Var_char");
-  _103 = String_var(_102);
-  _104 = String_new("x2c_var_update_i8");
-  _105 = String_var(_104);
-  _106 = cons(_105, NULL);
-  _107 = cons(_103, _106);
-  _108 = cons(_101, _107);
-  _109 = Symbol_var(3356265);
-  _110 = String_new("Var_floating");
-  _111 = String_var(_110);
-  _112 = String_new("x2c_var_update_f64");
-  _113 = String_var(_112);
-  _114 = cons(_113, NULL);
-  _115 = cons(_111, _114);
-  _116 = cons(_109, _115);
-  _117 = Symbol_var(3355493);
-  _118 = String_new("Var_float");
-  _119 = String_var(_118);
-  _120 = String_new("x2c_var_update_f32");
-  _121 = String_var(_120);
-  _122 = cons(_121, NULL);
-  _123 = cons(_119, _122);
-  _124 = cons(_117, _123);
-  _125 = Symbol_var(3453797);
-  _126 = String_new("Var_int");
-  _127 = String_var(_126);
-  _128 = String_new("x2c_var_update_i32");
-  _129 = String_var(_128);
-  _130 = cons(_129, NULL);
-  _131 = cons(_127, _130);
-  _132 = cons(_125, _131);
-  _133 = String_new("Var_long");
-  _134 = String_var(_133);
-  _135 = String_new("x2c_var_update_long");
-  _136 = String_var(_135);
-  _137 = cons(_136, NULL);
-  _138 = cons(_134, _137);
-  _139 = cons(_83, _138);
-  _140 = Symbol_var(26071077642);
-  _141 = String_new("Var_long_double");
-  _142 = String_var(_141);
-  _143 = String_new("x2c_var_update_long_double");
-  _144 = String_var(_143);
-  _145 = cons(_144, NULL);
-  _146 = cons(_142, _145);
-  _147 = cons(_140, _146);
-  _148 = Symbol_var(25983886);
-  _149 = String_new("Var_long_long");
-  _150 = String_var(_149);
-  _151 = String_new("x2c_var_update_long_long");
-  _152 = String_var(_151);
-  _153 = cons(_152, NULL);
-  _154 = cons(_150, _153);
-  _155 = cons(_148, _154);
-  _156 = Symbol_var(3453293);
-  _157 = String_new("Var_short");
-  _158 = String_var(_157);
-  _159 = String_new("x2c_var_update_i16");
-  _160 = String_var(_159);
-  _161 = cons(_160, NULL);
-  _162 = cons(_158, _161);
-  _163 = cons(_156, _162);
-  _164 = String_new("x2c_var_update_schar");
-  _165 = String_var(_164);
-  _166 = cons(_165, NULL);
-  _167 = cons(_103, _166);
-  _168 = cons(_101, _167);
-  _169 = Symbol_var(3847013);
-  _170 = String_new("Var_uint");
-  _171 = String_var(_170);
-  _172 = String_new("x2c_var_update_u32");
-  _173 = String_var(_172);
-  _174 = cons(_173, NULL);
-  _175 = cons(_171, _174);
-  _176 = cons(_169, _175);
-  _177 = Symbol_var(30065);
-  _178 = String_new("Var_uchar");
-  _179 = String_var(_178);
-  _180 = String_new("x2c_var_update_u8");
-  _181 = String_var(_180);
-  _182 = cons(_181, NULL);
-  _183 = cons(_179, _182);
-  _184 = cons(_177, _183);
-  _185 = Symbol_var(44858254);
-  _186 = String_new("Var_ulong");
-  _187 = String_var(_186);
-  _188 = String_new("x2c_var_update_ulong");
-  _189 = String_var(_188);
-  _190 = cons(_189, NULL);
-  _191 = cons(_187, _190);
-  _192 = cons(_185, _191);
-  _193 = Symbol_var(1435270030);
-  _194 = String_new("Var_ulong_long");
-  _195 = String_var(_194);
-  _196 = String_new("x2c_var_update_ulong_long");
-  _197 = String_var(_196);
-  _198 = cons(_197, NULL);
-  _199 = cons(_195, _198);
-  _200 = cons(_193, _199);
-  _201 = Symbol_var(3846509);
-  _202 = String_new("Var_ushort");
-  _203 = String_var(_202);
-  _204 = String_new("x2c_var_update_u16");
-  _205 = String_var(_204);
-  _206 = cons(_205, NULL);
-  _207 = cons(_203, _206);
-  _208 = cons(_201, _207);
-  _209 = String_new("Var_int");
+  _83 = cons(_80, _82);
+  _84 = Symbol_var(1474468213064);
+  _85 = cons(_84, _73);
+  _86 = Symbol_var(1294430536);
+  _87 = cons(_86, _73);
+  _88 = Symbol_var(40402088);
+  _89 = cons(_88, NULL);
+  _90 = cons(_84, _89);
+  _91 = cons(_80, NULL);
+  _92 = cons(_84, _91);
+  _93 = cons(_80, _91);
+  _94 = cons(_84, _93);
+  _95 = cons(_84, NULL);
+  _96 = Symbol_var(19368);
+  _97 = cons(_96, NULL);
+  _98 = Symbol_var(26993);
+  _99 = String_new("Var_char");
+  _100 = String_var(_99);
+  _101 = String_new("x2c_var_update_i8");
+  _102 = String_var(_101);
+  _103 = cons(_102, NULL);
+  _104 = cons(_100, _103);
+  _105 = cons(_98, _104);
+  _106 = Symbol_var(3356265);
+  _107 = String_new("Var_floating");
+  _108 = String_var(_107);
+  _109 = String_new("x2c_var_update_f64");
+  _110 = String_var(_109);
+  _111 = cons(_110, NULL);
+  _112 = cons(_108, _111);
+  _113 = cons(_106, _112);
+  _114 = Symbol_var(3355493);
+  _115 = String_new("Var_float");
+  _116 = String_var(_115);
+  _117 = String_new("x2c_var_update_f32");
+  _118 = String_var(_117);
+  _119 = cons(_118, NULL);
+  _120 = cons(_116, _119);
+  _121 = cons(_114, _120);
+  _122 = Symbol_var(3453797);
+  _123 = String_new("Var_int");
+  _124 = String_var(_123);
+  _125 = String_new("x2c_var_update_i32");
+  _126 = String_var(_125);
+  _127 = cons(_126, NULL);
+  _128 = cons(_124, _127);
+  _129 = cons(_122, _128);
+  _130 = String_new("Var_long");
+  _131 = String_var(_130);
+  _132 = String_new("x2c_var_update_long");
+  _133 = String_var(_132);
+  _134 = cons(_133, NULL);
+  _135 = cons(_131, _134);
+  _136 = cons(_80, _135);
+  _137 = Symbol_var(26071077642);
+  _138 = String_new("Var_long_double");
+  _139 = String_var(_138);
+  _140 = String_new("x2c_var_update_long_double");
+  _141 = String_var(_140);
+  _142 = cons(_141, NULL);
+  _143 = cons(_139, _142);
+  _144 = cons(_137, _143);
+  _145 = Symbol_var(25983886);
+  _146 = String_new("Var_long_long");
+  _147 = String_var(_146);
+  _148 = String_new("x2c_var_update_long_long");
+  _149 = String_var(_148);
+  _150 = cons(_149, NULL);
+  _151 = cons(_147, _150);
+  _152 = cons(_145, _151);
+  _153 = Symbol_var(3453293);
+  _154 = String_new("Var_short");
+  _155 = String_var(_154);
+  _156 = String_new("x2c_var_update_i16");
+  _157 = String_var(_156);
+  _158 = cons(_157, NULL);
+  _159 = cons(_155, _158);
+  _160 = cons(_153, _159);
+  _161 = String_new("x2c_var_update_schar");
+  _162 = String_var(_161);
+  _163 = cons(_162, NULL);
+  _164 = cons(_100, _163);
+  _165 = cons(_98, _164);
+  _166 = Symbol_var(3847013);
+  _167 = String_new("Var_uint");
+  _168 = String_var(_167);
+  _169 = String_new("x2c_var_update_u32");
+  _170 = String_var(_169);
+  _171 = cons(_170, NULL);
+  _172 = cons(_168, _171);
+  _173 = cons(_166, _172);
+  _174 = Symbol_var(30065);
+  _175 = String_new("Var_uchar");
+  _176 = String_var(_175);
+  _177 = String_new("x2c_var_update_u8");
+  _178 = String_var(_177);
+  _179 = cons(_178, NULL);
+  _180 = cons(_176, _179);
+  _181 = cons(_174, _180);
+  _182 = Symbol_var(44858254);
+  _183 = String_new("Var_ulong");
+  _184 = String_var(_183);
+  _185 = String_new("x2c_var_update_ulong");
+  _186 = String_var(_185);
+  _187 = cons(_186, NULL);
+  _188 = cons(_184, _187);
+  _189 = cons(_182, _188);
+  _190 = Symbol_var(1435270030);
+  _191 = String_new("Var_ulong_long");
+  _192 = String_var(_191);
+  _193 = String_new("x2c_var_update_ulong_long");
+  _194 = String_var(_193);
+  _195 = cons(_194, NULL);
+  _196 = cons(_192, _195);
+  _197 = cons(_190, _196);
+  _198 = Symbol_var(3846509);
+  _199 = String_new("Var_ushort");
+  _200 = String_var(_199);
+  _201 = String_new("x2c_var_update_u16");
+  _202 = String_var(_201);
+  _203 = cons(_202, NULL);
+  _204 = cons(_200, _203);
+  _205 = cons(_198, _204);
+  _206 = String_new("Var_int");
   _x2c_gensym_static_initialize_0();
 }
 
@@ -354,141 +351,181 @@ int Symbol_is_builtin_type(Symbol sym){
   return _is_number_type(sym) || _is_tag_keyword(sym) || sym == 1473096;
 }
 
-static int List_truth(List);
-
 int Type_is_aggregate(Type type){
   if(! _init_guard_) _file_init_();
-  return ! ! List_truth(({ static MatchCaptureSite _x2c_gensym_match_site_0;  x2c_match_site_match(& _x2c_gensym_match_site_0, Type_list(type), List_var(_9)); }));
+  return({
+    int _x2c_gensym_condition_0 = 0; {
+      List _x2c_gensym_match_expr = Type_list(type); MatchCaptureBuffer _x2c_gensym_match_capture = { 0 };   static MatchCaptureSite _x2c_gensym_match_site_0; if (x2c_match_site_try_capture(&_x2c_gensym_match_site_0, _x2c_gensym_match_expr, List_var(_9), &_x2c_gensym_match_capture)) {{
+        _x2c_gensym_condition_0 = 1;
+      }
+       }
+    }
+    _x2c_gensym_condition_0;
+  }
+  );
 }
 
 int Type_is_aggregate_tag(Type t){
-  if(! _init_guard_) _file_init_();
-  return ! ! List_truth(({ static MatchCaptureSite _x2c_gensym_match_site_1;  x2c_match_site_match(& _x2c_gensym_match_site_1, Type_list(t), List_var(_30)); }));
+  if(! _init_guard_) _file_init_();  return({
+    int _x2c_gensym_condition_1 = 0; {
+      List _x2c_gensym_match_expr = Type_list(t); MatchCaptureBuffer _x2c_gensym_match_capture = { 0 };   static MatchCaptureSite _x2c_gensym_match_site_0; if (x2c_match_site_try_capture(&_x2c_gensym_match_site_0, _x2c_gensym_match_expr, List_var(_30), &_x2c_gensym_match_capture)) {{
+        _x2c_gensym_condition_1 = 1;
+      }
+       }
+    }
+    _x2c_gensym_condition_1;
+  }
+  );
 }
 
 static int _is_aggregate_body(Type type){
-  return ! ! List_truth(({ static MatchCaptureSite _x2c_gensym_match_site_2;  x2c_match_site_match(& _x2c_gensym_match_site_2, Type_list(type), List_var(_31)); }));
+  return({
+    int _x2c_gensym_condition_2 = 0; {
+      List _x2c_gensym_match_expr = Type_list(type); MatchCaptureBuffer _x2c_gensym_match_capture = { 0 };   static MatchCaptureSite _x2c_gensym_match_site_0; if (x2c_match_site_try_capture(&_x2c_gensym_match_site_0, _x2c_gensym_match_expr, List_var(_31), &_x2c_gensym_match_capture)) {{
+        _x2c_gensym_condition_2 = 1;
+      }
+       }
+    }
+    _x2c_gensym_condition_2;
+  }
+  );
 }
 
 int Type_is_aggregate_tag_body(Type type){
-  if(! _init_guard_) _file_init_();
-  return ! ! List_truth(({ static MatchCaptureSite _x2c_gensym_match_site_3;  x2c_match_site_match(& _x2c_gensym_match_site_3, Type_list(type), List_var(_33)); }));
+  if(! _init_guard_) _file_init_();  return({
+    int _x2c_gensym_condition_3 = 0; {
+      List _x2c_gensym_match_expr = Type_list(type); MatchCaptureBuffer _x2c_gensym_match_capture = { 0 };   static MatchCaptureSite _x2c_gensym_match_site_0; if (x2c_match_site_try_capture(&_x2c_gensym_match_site_0, _x2c_gensym_match_expr, List_var(_33), &_x2c_gensym_match_capture)) {{
+        _x2c_gensym_condition_3 = 1;
+      }
+       }
+    }
+    _x2c_gensym_condition_3;
+  }
+  );
 }
 
 int Type_is_enum(Type type){
-  if(! _init_guard_) _file_init_();
-  return ! ! List_truth(({ static MatchCaptureSite _x2c_gensym_match_site_4;  x2c_match_site_match(& _x2c_gensym_match_site_4, Type_list(type), List_var(_35)); }));
+  if(! _init_guard_) _file_init_();  return({
+    int _x2c_gensym_condition_4 = 0; {
+      List _x2c_gensym_match_expr = Type_list(type); List _x2c_gensym_match_cursor;   _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497936761976154ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1)) {{
+        _x2c_gensym_condition_4 = 1;
+      }
+       }
+    }
+    _x2c_gensym_condition_4;
+  }
+  );
 }
 
 int Type_is_enum_tag(Type type){
-  if(! _init_guard_) _file_init_();
-  return ! ! List_truth(({ static MatchCaptureSite _x2c_gensym_match_site_5;  x2c_match_site_match(& _x2c_gensym_match_site_5, Type_list(type), List_var(_36)); }));
+  if(! _init_guard_) _file_init_();  return({
+    int _x2c_gensym_condition_5 = 0; {
+      List _x2c_gensym_match_expr = Type_list(type); MatchCaptureBuffer _x2c_gensym_match_capture = { 0 };   static MatchCaptureSite _x2c_gensym_match_site_0; if (x2c_match_site_try_capture(&_x2c_gensym_match_site_0, _x2c_gensym_match_expr, List_var(_35), &_x2c_gensym_match_capture)) {{
+        _x2c_gensym_condition_5 = 1;
+      }
+       }
+    }
+    _x2c_gensym_condition_5;
+  }
+  );
 }
 
 static int _is_enum_body(Type type){
-  return ! ! List_truth(({ static MatchCaptureSite _x2c_gensym_match_site_6;  x2c_match_site_match(& _x2c_gensym_match_site_6, Type_list(type), List_var(_37)); }));
+  return({
+    int _x2c_gensym_condition_6 = 0; {
+      List _x2c_gensym_match_expr = Type_list(type); List _x2c_gensym_match_cursor, _x2c_gensym_match_cursor1;   _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497936761976154ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && Var_is(_x2c_gensym_match_cursor->car, 806120) && (_x2c_gensym_match_cursor1 = Var_list_payload(_x2c_gensym_match_cursor->car), 1) && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {{
+        _x2c_gensym_condition_6 = 1;
+      }
+       }
+    }
+    _x2c_gensym_condition_6;
+  }
+  );
 }
 
 int Type_is_enum_tag_body(Type type){
-  if(! _init_guard_) _file_init_();
-  return ! ! List_truth(({ static MatchCaptureSite _x2c_gensym_match_site_7;  x2c_match_site_match(& _x2c_gensym_match_site_7, Type_list(type), List_var(_38)); }));
+  if(! _init_guard_) _file_init_();  return({
+    int _x2c_gensym_condition_7 = 0; {
+      List _x2c_gensym_match_expr = Type_list(type); List _x2c_gensym_match_cursor, _x2c_gensym_match_cursor1;   _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497936761976154ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && Var_is(_x2c_gensym_match_cursor->car, 806120) && (_x2c_gensym_match_cursor1 = Var_list_payload(_x2c_gensym_match_cursor->car), 1) && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {{
+        _x2c_gensym_condition_7 = 1;
+      }
+       }
+    }
+    _x2c_gensym_condition_7;
+  }
+  );
 }
 
 List Type_tag(Type type){
-  if(! _init_guard_) _file_init_();
-  if(Type_is_enum_tag(type) || Type_is_enum_tag_body(type) || Type_is_aggregate_tag(type) || Type_is_aggregate_tag_body(type)) return cons(List_cadr(Type_list(type)), NULL);
-  return NULL;
+  if(! _init_guard_) _file_init_();  if(Type_is_enum_tag(type) || Type_is_enum_tag_body(type) || Type_is_aggregate_tag(type) || Type_is_aggregate_tag_body(type)) return cons(List_cadr(Type_list(type)), NULL);  return NULL;
 }
 
 List Type_body(Type t){
-  if(! _init_guard_) _file_init_();
-  if(Type_is_enum_tag(t) || Type_is_aggregate_tag(t)) return NULL;
-  if(_is_enum_body(t) || _is_aggregate_body(t)) return cdr(Type_list(t));
-  if(Type_is_enum_tag_body(t) || Type_is_aggregate_tag_body(t)) return Type_list(List_cddr(t));
-  return NULL;
+  if(! _init_guard_) _file_init_();  if(Type_is_enum_tag(t) || Type_is_aggregate_tag(t)) return NULL;  if(_is_enum_body(t) || _is_aggregate_body(t)) return cdr(Type_list(t));  if(Type_is_enum_tag_body(t) || Type_is_aggregate_tag_body(t)) return Type_list(List_cddr(t));  return NULL;
 }
 
 int Type_is_pointer(Type t){
-  if(! _init_guard_) _file_init_();
-  return ! ! List_truth(({ static MatchCaptureSite _x2c_gensym_match_site_8;  x2c_match_site_match(& _x2c_gensym_match_site_8, Type_list(t), List_var(_51)); }));
+  if(! _init_guard_) _file_init_();  return({
+    int _x2c_gensym_condition_8 = 0; {
+      List _x2c_gensym_match_expr = Type_list(t); MatchCaptureBuffer _x2c_gensym_match_capture = { 0 };   static MatchCaptureSite _x2c_gensym_match_site_0; if (x2c_match_site_try_capture(&_x2c_gensym_match_site_0, _x2c_gensym_match_expr, List_var(_48), &_x2c_gensym_match_capture)) {{
+        _x2c_gensym_condition_8 = 1;
+      }
+       }
+    }
+    _x2c_gensym_condition_8;
+  }
+  );
 }
 
 int Type_is_reference(Type t){
-  if(! _init_guard_) _file_init_();
-  return x2c_var_equal(List_car(Type_list(t)), Symbol_var(77)) || x2c_var_equal(List_car(Type_list(t)), Symbol_var(33330008396));
+  if(! _init_guard_) _file_init_();  return x2c_var_equal(List_car(Type_list(t)), Symbol_var(77)) || x2c_var_equal(List_car(Type_list(t)), Symbol_var(33330008396));
 }
 
 int Type_is_array(Type type){
-  if(! _init_guard_) _file_init_();
-  return _declarator_kind(type) == 8794;
+  if(! _init_guard_) _file_init_();  return _declarator_kind(type) == 8794;
 }
 
 int Type_is_function(Type type){
-  if(! _init_guard_) _file_init_();
-  Symbol kind = _declarator_kind(type);
-  return kind == 437126 || kind == 634145674;
+  if(! _init_guard_) _file_init_();  Symbol kind = _declarator_kind(type);  return kind == 437126 || kind == 634145674;
 }
 
 int Type_is_bitfield(Type type){
-  if(! _init_guard_) _file_init_();
-  return _declarator_kind(type) == 158121667336;
+  if(! _init_guard_) _file_init_();  return _declarator_kind(type) == 158121667336;
 }
 
+static int List_truth(List);
 int Var_is(Var, Symbol);
-
 static Var int_var(int);
-
 static Symbol _declarator_kind(Type type){
-  while(List_truth(Type_list(type)) && Var_is_row(List_car(Type_list(type)), 9, 7, 4)) type = Var_type(List_car(Type_list(type)));
-  return Var_symbol(List_truth(Type_list(type)) && Var_is(List_car(Type_list(type)), 1328354264) ? List_car(Type_list(type)) : int_var(0));
+  while(List_truth(Type_list(type)) && Var_is_row(List_car(Type_list(type)), 9, 7, 4)) type = Var_type(List_car(Type_list(type)));  return Var_symbol(List_truth(Type_list(type)) && Var_is(List_car(Type_list(type)), 1328354264) ? List_car(Type_list(type)) : int_var(0));
 }
 
 Type Type_qualify(Type type, Type source);
-
 Type Type_dereference(Type type){
-  if(! _init_guard_) _file_init_();
-  Type declared = type;
-  _qualifiers(&(type));
-  if(Type_is_array(type)) return Type_qualify(List_type(cdr(Type_list(type))), declared);
-  if(Type_is_pointer(type)) return List_type(cdr(Type_list(type)));
-  return NULL;
+  if(! _init_guard_) _file_init_();  Type declared = type;  _qualifiers(&(type));  if(Type_is_array(type)) return Type_qualify(List_type(cdr(Type_list(type))), declared);  if(Type_is_pointer(type)) return List_type(cdr(Type_list(type)));  return NULL;
 }
 
 static Symbol Var_symbol(Var);
-
 int Iter_try_next(Iter, Var *);
-
 Type Type_qualify(Type type, Type source){
-  if(! _init_guard_) _file_init_();
-  if(! Var_is(List_car(Type_list(source)), 1328354264) || ! Symbol_is_type_qualifier(Var_symbol(List_car(Type_list(source))))) return type;
-  Array out = Array_new();
-  {
-    Var item;
-    Iter _x2c_gensym_macro_iterator_0 = List_iter(Type_list(source), &(struct Iter){
+  if(! _init_guard_) _file_init_();  if(! Var_is(List_car(Type_list(source)), 1328354264) || ! Symbol_is_type_qualifier(Var_symbol(List_car(Type_list(source))))) return type;  Array out = Array_new(); {
+    Var item;  Iter _x2c_gensym_macro_iterator_0 = List_iter(Type_list(source), &(struct Iter){
       int_var(0)
     }
-    );
-    Var _x2c_gensym_macro_item_0;
-    while(Iter_try_next(_x2c_gensym_macro_iterator_0, &(_x2c_gensym_macro_item_0))){
-      item = _x2c_gensym_macro_item_0;
-      {
-        if(! Var_is(item, 1328354264) || ! Symbol_is_type_qualifier(Var_symbol(item))) break;
-        Array_push(out, item);
+    );  Var _x2c_gensym_macro_item_0;  while(Iter_try_next(_x2c_gensym_macro_iterator_0, &(_x2c_gensym_macro_item_0))){
+      item = _x2c_gensym_macro_item_0; {
+        if(! Var_is(item, 1328354264) || ! Symbol_is_type_qualifier(Var_symbol(item))) break;  Array_push(out, item);
       }
 
     }
 
   }
   {
-    Var item;
-    Iter _x2c_gensym_macro_iterator_1 = List_iter(Type_list(type), &(struct Iter){
+    Var item;  Iter _x2c_gensym_macro_iterator_1 = List_iter(Type_list(type), &(struct Iter){
       int_var(0)
     }
-    );
-    Var _x2c_gensym_macro_item_1;
-    while(Iter_try_next(_x2c_gensym_macro_iterator_1, &(_x2c_gensym_macro_item_1))){
-      item = _x2c_gensym_macro_item_1;
-      Array_push(out, item);
+    );  Var _x2c_gensym_macro_item_1;  while(Iter_try_next(_x2c_gensym_macro_iterator_1, &(_x2c_gensym_macro_item_1))){
+      item = _x2c_gensym_macro_item_1;  Array_push(out, item);
     }
 
   }
@@ -496,146 +533,119 @@ Type Type_qualify(Type type, Type source){
 }
 
 Type Type_reference(Type type){
-  if(! _init_guard_) _file_init_();
-  return List_type(cons(_7, List_append(Type_list(type), NULL)));
+  if(! _init_guard_) _file_init_();  return List_type(cons(_7, List_append(Type_list(type), NULL)));
 }
 
 Type Type_apply(Type type){
-  if(! _init_guard_) _file_init_();
-  if(! List_truth(Type_list(type))) return NULL;
-  if(Type_is_pointer(type)) return Type_apply(List_type(cdr(Type_list(type))));
-  Symbol kind = _declarator_kind(type);
-  if(kind == 8794) return Type_apply(List_type(cdr(Type_list(type))));
-  if(kind == 437126 || kind == 634145674) return List_type(cdr(Type_list(type)));
-  return NULL;
+  if(! _init_guard_) _file_init_();  if(! List_truth(Type_list(type))) return NULL;  if(Type_is_pointer(type)) return Type_apply(List_type(cdr(Type_list(type))));  Symbol kind = _declarator_kind(type);  if(kind == 8794) return Type_apply(List_type(cdr(Type_list(type))));  if(kind == 437126 || kind == 634145674) return List_type(cdr(Type_list(type)));  return NULL;
 }
 
 Type Type_canonicalize(Type type);
-
 int Type_function_parts(Type type, List * params, Type * return_type){
-  if(! _init_guard_) _file_init_();
-  if(! List_truth(Type_list(type))) return 0;
-  type = Type_canonicalize(type);
-  if(Type_is_pointer(type)) type = Type_dereference(type);
-  {
-    List _x2c_gensym_match_expr = Type_list(type); List _x2c_gensym_match_cursor, _x2c_gensym_match_cursor1, _x2c_gensym_match_cursor2;
-    switch(0){
-        default: ;
-       _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && Var_is(_x2c_gensym_match_cursor->car, 806120) && (_x2c_gensym_match_cursor1 = Var_list_payload(_x2c_gensym_match_cursor->car), 1) && _x2c_gensym_match_cursor1 && _x2c_gensym_match_cursor1->car.u64 == 9224497936762055558ULL && (_x2c_gensym_match_cursor1 = _x2c_gensym_match_cursor1->cdr, 1) && _x2c_gensym_match_cursor1 && Var_is(_x2c_gensym_match_cursor1->car, 806120) && (_x2c_gensym_match_cursor2 = Var_list_payload(_x2c_gensym_match_cursor1->car), 1)) { List _x2c_gensym_match_list_0 = _x2c_gensym_match_cursor2; if ((_x2c_gensym_match_cursor1 = _x2c_gensym_match_cursor1->cdr, 1) && !_x2c_gensym_match_cursor1 && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor) { Var _x2c_gensym_match_value_1 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1)) { List _x2c_gensym_match_list_2 = _x2c_gensym_match_cursor;
-      {
-        List parameters;
-        parameters = _x2c_gensym_match_list_0;
-        Var return_head;
-        return_head = _x2c_gensym_match_value_1;
-        List return_tail;
-        return_tail = _x2c_gensym_match_list_2;
-        {
-          List values = parameters;
-          {
-            List _x2c_gensym_match_expr = values; List _x2c_gensym_match_cursor;
-            switch(0){
-                default: ;
-               _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && Var_is(_x2c_gensym_match_cursor->car, 806120)) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {{
-                Var only;
-                only = _x2c_gensym_match_value_0;
-                {
-                  Var _x2c_gensym_match_value_0 = only;
-                  {
-                    Type only = Var_type(_x2c_gensym_match_value_0);
-                    if(Type_canonicalize(only) == _53){
-                      values = NULL;
-                      break;
-                    }
-
-                  }
-
-                }
-
-              }
-               } }
+  if(! _init_guard_) _file_init_();  if(! List_truth(Type_list(type))) return 0;  type = Type_canonicalize(type);  if(Type_is_pointer(type)) type = Type_dereference(type); {
+    List _x2c_gensym_match_expr = Type_list(type); List _x2c_gensym_match_cursor, _x2c_gensym_match_cursor1, _x2c_gensym_match_cursor2;   _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && Var_is(_x2c_gensym_match_cursor->car, 806120) && (_x2c_gensym_match_cursor1 = Var_list_payload(_x2c_gensym_match_cursor->car), 1) && _x2c_gensym_match_cursor1 && _x2c_gensym_match_cursor1->car.u64 == 9224497936762055558ULL && (_x2c_gensym_match_cursor1 = _x2c_gensym_match_cursor1->cdr, 1) && _x2c_gensym_match_cursor1 && Var_is(_x2c_gensym_match_cursor1->car, 806120) && (_x2c_gensym_match_cursor2 = Var_list_payload(_x2c_gensym_match_cursor1->car), 1)) { List _x2c_gensym_match_list_0 = _x2c_gensym_match_cursor2; if ((_x2c_gensym_match_cursor1 = _x2c_gensym_match_cursor1->cdr, 1) && !_x2c_gensym_match_cursor1 && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor) { Var _x2c_gensym_match_value_1 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1)) { List _x2c_gensym_match_list_2 = _x2c_gensym_match_cursor; {
+      List parameters;  parameters = _x2c_gensym_match_list_0;  Var return_head;  return_head = _x2c_gensym_match_value_1;  List return_tail;  return_tail = _x2c_gensym_match_list_2; {
+        List values = parameters; {
+          List _x2c_gensym_match_expr = values; List _x2c_gensym_match_cursor;   _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && Var_is(_x2c_gensym_match_cursor->car, 806120)) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {{
+            Var only;  only = _x2c_gensym_match_value_0;  Var _x2c_gensym_match_value_0 = only; {
+              Type only = Var_type(_x2c_gensym_match_value_0);  if(Type_canonicalize(only) == _50) values = NULL;
             }
 
           }
-          (* params) = values;
-          if(return_type)(* return_type) = List_type(cons(return_head, List_append(return_tail, NULL)));
-          return 1;
+           } }
         }
-
+        (* params) = values;  if(return_type)(* return_type) = List_type(cons(return_head, List_append(return_tail, NULL)));  return 1;
       }
-       break; } } }
-    }
 
+    }
+     } } }
   }
   return 0;
 }
 
 int Type_is_list_rest(Type type){
-  if(! _init_guard_) _file_init_();
-  return type == _55;
+  if(! _init_guard_) _file_init_();  return type == _52;
 }
 
 int Type_list_rest_index(Type type){
-  if(! _init_guard_) _file_init_();
-  List parameters = NULL;
-  if(! Type_function_parts(type, &(parameters), NULL) || ! List_truth(parameters) || ! Type_is_list_rest(Var_type(List_last(parameters)))) return - 1;
-  return List_len(parameters) - 1;
+  if(! _init_guard_) _file_init_();  List parameters = NULL;  if(! Type_function_parts(type, &(parameters), NULL) || ! List_truth(parameters) || ! Type_is_list_rest(Var_type(List_last(parameters)))) return - 1;  return List_len(parameters) - 1;
 }
 
 int Type_is_static(Type type){
-  if(! _init_guard_) _file_init_();
-  return ! ! List_truth(({ static MatchCaptureSite _x2c_gensym_match_site_9;  x2c_match_site_match(& _x2c_gensym_match_site_9, Type_list(type), List_var(_58)); }));
+  if(! _init_guard_) _file_init_();  return({
+    int _x2c_gensym_condition_9 = 0; {
+      List _x2c_gensym_match_expr = Type_list(type); MatchCaptureBuffer _x2c_gensym_match_capture = { 0 };   static MatchCaptureSite _x2c_gensym_match_site_0; if (x2c_match_site_try_capture(&_x2c_gensym_match_site_0, _x2c_gensym_match_expr, List_var(_55), &_x2c_gensym_match_capture)) {{
+        _x2c_gensym_condition_9 = 1;
+      }
+       }
+    }
+    _x2c_gensym_condition_9;
+  }
+  );
 }
 
 int Type_is_inline(Type type){
-  if(! _init_guard_) _file_init_();
-  return ! ! List_truth(({ static MatchCaptureSite _x2c_gensym_match_site_10;  x2c_match_site_match(& _x2c_gensym_match_site_10, Type_list(type), List_var(_61)); }));
+  if(! _init_guard_) _file_init_();  return({
+    int _x2c_gensym_condition_10 = 0; {
+      List _x2c_gensym_match_expr = Type_list(type); MatchCaptureBuffer _x2c_gensym_match_capture = { 0 };   static MatchCaptureSite _x2c_gensym_match_site_0; if (x2c_match_site_try_capture(&_x2c_gensym_match_site_0, _x2c_gensym_match_expr, List_var(_58), &_x2c_gensym_match_capture)) {{
+        _x2c_gensym_condition_10 = 1;
+      }
+       }
+    }
+    _x2c_gensym_condition_10;
+  }
+  );
 }
 
 int Type_is_extern(Type type){
-  if(! _init_guard_) _file_init_();
-  return ! ! List_truth(({ static MatchCaptureSite _x2c_gensym_match_site_11;  x2c_match_site_match(& _x2c_gensym_match_site_11, Type_list(type), List_var(_64)); }));
+  if(! _init_guard_) _file_init_();  return({
+    int _x2c_gensym_condition_11 = 0; {
+      List _x2c_gensym_match_expr = Type_list(type); MatchCaptureBuffer _x2c_gensym_match_capture = { 0 };   static MatchCaptureSite _x2c_gensym_match_site_0; if (x2c_match_site_try_capture(&_x2c_gensym_match_site_0, _x2c_gensym_match_expr, List_var(_61), &_x2c_gensym_match_capture)) {{
+        _x2c_gensym_condition_11 = 1;
+      }
+       }
+    }
+    _x2c_gensym_condition_11;
+  }
+  );
 }
 
 int Type_is_threaded(Type type){
-  if(! _init_guard_) _file_init_();
-  return ! ! List_truth(({ static MatchCaptureSite _x2c_gensym_match_site_12;  x2c_match_site_match(& _x2c_gensym_match_site_12, Type_list(type), List_var(_67)); }));
+  if(! _init_guard_) _file_init_();  return({
+    int _x2c_gensym_condition_12 = 0; {
+      List _x2c_gensym_match_expr = Type_list(type); MatchCaptureBuffer _x2c_gensym_match_capture = { 0 };   static MatchCaptureSite _x2c_gensym_match_site_0; if (x2c_match_site_try_capture(&_x2c_gensym_match_site_0, _x2c_gensym_match_expr, List_var(_64), &_x2c_gensym_match_capture)) {{
+        _x2c_gensym_condition_12 = 1;
+      }
+       }
+    }
+    _x2c_gensym_condition_12;
+  }
+  );
 }
 
 int Type_is_typedef(Type type){
-  if(! _init_guard_) _file_init_();
-  return List_truth(Type_list(type)) && x2c_var_equal(List_car(Type_list(type)), Symbol_var(44661285196));
+  if(! _init_guard_) _file_init_();  return List_truth(Type_list(type)) && x2c_var_equal(List_car(Type_list(type)), Symbol_var(44661285196));
 }
 
 Type Type_base_type(Type type){
-  if(! _init_guard_) _file_init_();
-  return List_type(type_base_suffix(Type_list(type)));
+  if(! _init_guard_) _file_init_();  return List_type(type_base_suffix(Type_list(type)));
 }
 
 Type Type_canonicalize(Type type){
-  if(! _init_guard_) _file_init_();
-  return _canonical(type, 0);
+  if(! _init_guard_) _file_init_();  return _canonical(type, 0);
 }
 
 Type Type_declared(Type type){
-  if(! _init_guard_) _file_init_();
-  return _canonical(type, 1);
+  if(! _init_guard_) _file_init_();  return _canonical(type, 1);
 }
 
 static Type _canonical(Type type, int keep_qualifiers){
-  List rest = Type_list(type);
-  while(List_truth(rest) && _kept(List_car(rest), keep_qualifiers)) rest = List_cdr(rest);
-  if(! List_truth(rest)) return type;
-  Array out = Array_new();
-  {
-    Var item;
-    Iter _x2c_gensym_macro_iterator_2 = List_iter(Type_list(type), &(struct Iter){
+  List rest = Type_list(type);  while(List_truth(rest) && _kept(List_car(rest), keep_qualifiers)) rest = List_cdr(rest);  if(! List_truth(rest)) return type;  Array out = Array_new(); {
+    Var item;  Iter _x2c_gensym_macro_iterator_2 = List_iter(Type_list(type), &(struct Iter){
       int_var(0)
     }
-    );
-    Var _x2c_gensym_macro_item_2;
-    while(Iter_try_next(_x2c_gensym_macro_iterator_2, &(_x2c_gensym_macro_item_2))){
-      item = _x2c_gensym_macro_item_2;
-      if(_kept(item, keep_qualifiers)) Array_push(out, item);
+    );  Var _x2c_gensym_macro_item_2;  while(Iter_try_next(_x2c_gensym_macro_iterator_2, &(_x2c_gensym_macro_item_2))){
+      item = _x2c_gensym_macro_item_2;  if(_kept(item, keep_qualifiers)) Array_push(out, item);
     }
 
   }
@@ -651,101 +661,90 @@ static int _omit_specifier(Symbol first, int keep_qualifiers){
 }
 
 int Type_discards_qualifiers(Type source, Type target){
-  if(! _init_guard_) _file_init_();
-  _qualifiers(&(source));
-  _qualifiers(&(target));
-  while(List_truth(Type_list(source)) && List_truth(Type_list(target))){
-    source = List_cdr(source);
-    target = List_cdr(target);
-    unsigned wanted = _qualifiers(&(source)), offered = _qualifiers(&(target));
-    if(wanted & ~ offered) return 1;
-    if(target == _53) return 0;
+  if(! _init_guard_) _file_init_();  _qualifiers(&(source));  _qualifiers(&(target));  while(List_truth(Type_list(source)) && List_truth(Type_list(target))){
+    source = List_cdr(source);  target = List_cdr(target);  unsigned wanted = _qualifiers(&(source)), offered = _qualifiers(&(target));  if(wanted & ~ offered) return 1;  if(target == _50) return 0;
   }
   return 0;
 }
 
 static unsigned _qualifiers(Type * cursor){
-  unsigned found = 0;
-  Type type =(* cursor);
-  while(List_truth(Type_list(type)) && Var_is(List_car(Type_list(type)), 1328354264)){
-    Symbol head = Var_symbol(List_car(Type_list(type)));
-    if(! Symbol_is_type_qualifier(head)) break;
-    switch(head){
-      case 7304424 : found |= 1;
-      break;
-      case 1544849476362 : found |= 2;
-      break;
-      case 1249006209256 : found |= 4;
-      break;
+  unsigned found = 0;  Type type =(* cursor);  while(List_truth(Type_list(type)) && Var_is(List_car(Type_list(type)), 1328354264)){
+    Symbol head = Var_symbol(List_car(Type_list(type)));  if(! Symbol_is_type_qualifier(head)) break;  switch(head){
+      case 7304424 : found |= 1;  break;  case 1544849476362 : found |= 2;  break;  case 1249006209256 : found |= 4;  break;
     }
     type = List_cdr(type);
   }
-  (* cursor) = type;
-  return found;
+  (* cursor) = type;  return found;
 }
 
 int Type_is_char_pointer_like(Type type){
-  if(! _init_guard_) _file_init_();
-  return List_truth(Type_list(type)) &&(List_truth(({ static MatchCaptureSite _x2c_gensym_match_site_13;  x2c_match_site_match(& _x2c_gensym_match_site_13, Type_list(type), List_var(_77)); })) || List_truth(({ static MatchCaptureSite _x2c_gensym_match_site_14;  x2c_match_site_match(& _x2c_gensym_match_site_14, Type_list(type), List_var(_80)); })));
+  if(! _init_guard_) _file_init_();  return List_truth(Type_list(type)) &&(({
+    int _x2c_gensym_condition_13 = 0; {
+      List _x2c_gensym_match_expr = Type_list(type); MatchCaptureBuffer _x2c_gensym_match_capture = { 0 };   static MatchCaptureSite _x2c_gensym_match_site_0; if (x2c_match_site_try_capture(&_x2c_gensym_match_site_0, _x2c_gensym_match_expr, List_var(_74), &_x2c_gensym_match_capture)) {{
+        _x2c_gensym_condition_13 = 1;
+      }
+       }
+    }
+    _x2c_gensym_condition_13;
+  }
+  ) ||({
+    int _x2c_gensym_condition_14 = 0; {
+      List _x2c_gensym_match_expr = Type_list(type); MatchCaptureBuffer _x2c_gensym_match_capture = { 0 };   static MatchCaptureSite _x2c_gensym_match_site_0; if (x2c_match_site_try_capture(&_x2c_gensym_match_site_0, _x2c_gensym_match_expr, List_var(_77), &_x2c_gensym_match_capture)) {{
+        _x2c_gensym_condition_14 = 1;
+      }
+       }
+    }
+    _x2c_gensym_condition_14;
+  }
+  ));
 }
 
 Type Type_scalar(Type t);
-
 int Type_is_builtin(Type type){
-  if(! _init_guard_) _file_init_();
-  return ! ! List_truth(Type_list(Type_scalar(type))) || _is_tagged(type);
+  if(! _init_guard_) _file_init_();  return ! ! List_truth(Type_list(Type_scalar(type))) || _is_tagged(type);
 }
 
 static int _is_tagged(Type type){
-  if(! List_truth(Type_list(type))) return 0;
-  Var first = List_car(Type_list(type));
-  if(Var_is(first, 1328354264)) return _is_tag_keyword(Var_symbol(first));
-  return 0;
+  if(! List_truth(Type_list(type))) return 0;  Var first = List_car(Type_list(type));  if(Var_is(first, 1328354264)) return _is_tag_keyword(Var_symbol(first));  return 0;
 }
 
 int Type_is_typedef_name(Type type){
-  if(! _init_guard_) _file_init_();
-  type = Type_base_type(type);
-  return List_truth(Type_list(type)) && List_len(Type_list(type)) == 1 && Var_is_row(List_car(Type_list(type)), 11, 7, 1);
+  if(! _init_guard_) _file_init_();  type = Type_base_type(type);  return List_truth(Type_list(type)) && List_len(Type_list(type)) == 1 && Var_is_row(List_car(Type_list(type)), 11, 7, 1);
 }
 
 int Type_is_bare_typedef_name(Type type){
-  if(! _init_guard_) _file_init_();
-  return ! ! List_truth(({ static MatchCaptureSite _x2c_gensym_match_site_15;  x2c_match_site_match(& _x2c_gensym_match_site_15, Type_list(type), List_var(_17)); })) && Var_is_row(List_car(Type_list(type)), 11, 7, 1);
+  if(! _init_guard_) _file_init_();  return({
+    int _x2c_gensym_condition_15 = 0; {
+      List _x2c_gensym_match_expr = Type_list(type); List _x2c_gensym_match_cursor;   _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {{
+        if(Var_is_row(List_car(Type_list(type)), 11, 7, 1)) _x2c_gensym_condition_15 = 1;
+      }
+       }
+    }
+    _x2c_gensym_condition_15;
+  }
+  );
 }
 
 Symbol Type_scalar_tag(Type type);
-
 int Type_is_number(Type type){
-  if(! _init_guard_) _file_init_();
-  return ! ! Type_scalar_tag(type) || Type_is_enum(type);
+  if(! _init_guard_) _file_init_();  return ! ! Type_scalar_tag(type) || Type_is_enum(type);
 }
 
 int Var_numeric_info(Symbol, X2CVarNumericInfo *);
-
 int Type_is_integral(Type type){
-  if(! _init_guard_) _file_init_();
-  if(Type_is_enum(type)) return 1;
-  X2CVarNumericInfo info;
-  return Var_numeric_info(Type_scalar_tag(type), &(info)) && ! info.floating;
+  if(! _init_guard_) _file_init_();  if(Type_is_enum(type)) return 1;  X2CVarNumericInfo info;  return Var_numeric_info(Type_scalar_tag(type), &(info)) && ! info.floating;
 }
 
 Type Type_scalar(Type t){
-  if(! _init_guard_) _file_init_();
-  Specifiers s ={
+  if(! _init_guard_) _file_init_();  Specifiers s ={
     0
   }
-  ;
-  {
-    Var item;
-    Iter _x2c_gensym_macro_iterator_3 = List_iter(Type_list(t), &(struct Iter){
+  ; {
+    Var item;  Iter _x2c_gensym_macro_iterator_3 = List_iter(Type_list(t), &(struct Iter){
       int_var(0)
     }
-    );
-    Var _x2c_gensym_macro_item_3;
-    while(Iter_try_next(_x2c_gensym_macro_iterator_3, &(_x2c_gensym_macro_item_3))){
-      item = _x2c_gensym_macro_item_3;
-      if(! Var_is(item, 1328354264) || ! _add(&(s), Var_symbol(item))) return NULL;
+    );  Var _x2c_gensym_macro_item_3;  while(Iter_try_next(_x2c_gensym_macro_iterator_3, &(_x2c_gensym_macro_item_3))){
+      item = _x2c_gensym_macro_item_3;  if(! Var_is(item, 1328354264) || ! _add(&(s), Var_symbol(item))) return NULL;
     }
 
   }
@@ -753,280 +752,136 @@ Type Type_scalar(Type t){
 }
 
 static int _add(Specifiers * s, Symbol symbol){
-  if(_omit_specifier(symbol, 0)) return 1;
-  (* s).count ++;
-  switch(symbol){
-    case 1294430536 :(* s).sign = - 1;
-    (* s).signs ++;
-    break;
-    case 1474468213064 :(* s).sign = 1;
-    (* s).signs ++;
-    break;
-    case 40402088 :(* s).shorts ++;
-    break;
-    case 818062 :(* s).longs ++;
-    break;
-    case 19368 :(* s).ints ++;
-    break;
-    case 213092 :(* s).chars ++;
-    break;
-    case 13400168 :(* s).floats ++;
-    break;
-    case 301273866 :(* s).doubles ++;
-    break;
-    case 1473096 :(* s).voids ++;
-    break;
-    default: return 0;
+  if(_omit_specifier(symbol, 0)) return 1; (* s).count ++;  switch(symbol){
+    case 1294430536 :(* s).sign = - 1; (* s).signs ++;  break;  case 1474468213064 :(* s).sign = 1; (* s).signs ++;  break;  case 40402088 :(* s).shorts ++;  break;  case 818062 :(* s).longs ++;  break;  case 19368 :(* s).ints ++;  break;  case 213092 :(* s).chars ++;  break;  case 13400168 :(* s).floats ++;  break;  case 301273866 :(* s).doubles ++;  break;  case 1473096 :(* s).voids ++;  break;  default: return 0;
   }
   return 1;
 }
 
 static Type _spelling(Specifiers * s){
-  if(!(* s).count ||(* s).signs > 1 ||(* s).shorts > 1 ||(* s).longs > 2 ||(* s).ints > 1 ||(* s).chars > 1 ||(* s).floats > 1 ||(* s).doubles > 1 ||(* s).voids > 1) return NULL;
-  if((* s).voids) return(* s).count == 1 ? List_type(_53) : NULL;
-  if((* s).floats) return(* s).count == 1 ? List_type(_82) : NULL;
-  if((* s).doubles){
-    if((* s).longs <= 1 &&(* s).count ==(* s).doubles +(* s).longs) return List_type((* s).longs ? _86 : _85);
-    return NULL;
+  if(!(* s).count ||(* s).signs > 1 ||(* s).shorts > 1 ||(* s).longs > 2 ||(* s).ints > 1 ||(* s).chars > 1 ||(* s).floats > 1 ||(* s).doubles > 1 ||(* s).voids > 1) return NULL;  if((* s).voids) return(* s).count == 1 ? List_type(_50) : NULL;  if((* s).floats) return(* s).count == 1 ? List_type(_79) : NULL;  if((* s).doubles){
+    if((* s).longs <= 1 &&(* s).count ==(* s).doubles +(* s).longs) return List_type((* s).longs ? _83 : _82);  return NULL;
   }
   if((* s).chars){
-    if((* s).shorts ||(* s).longs ||(* s).ints ||(* s).count !=(* s).chars +(* s).signs) return NULL;
-    if((* s).sign > 0) return List_type(_88);
-    if((* s).sign < 0) return List_type(_90);
-    return List_type(_76);
+    if((* s).shorts ||(* s).longs ||(* s).ints ||(* s).count !=(* s).chars +(* s).signs) return NULL;  if((* s).sign > 0) return List_type(_85);  if((* s).sign < 0) return List_type(_87);  return List_type(_73);
   }
-  if((* s).shorts &&(* s).longs) return NULL;
-  if((* s).count !=(* s).signs +(* s).shorts +(* s).longs +(* s).ints) return NULL;
-  if((* s).shorts) return List_type((* s).sign > 0 ? _93 : _92);
-  if((* s).longs == 1) return List_type((* s).sign > 0 ? _95 : _94);
-  if((* s).longs == 2) return List_type((* s).sign > 0 ? _97 : _96);
-  return List_type((* s).sign > 0 ? _98 : _100);
+  if((* s).shorts &&(* s).longs) return NULL;  if((* s).count !=(* s).signs +(* s).shorts +(* s).longs +(* s).ints) return NULL;  if((* s).shorts) return List_type((* s).sign > 0 ? _90 : _89);  if((* s).longs == 1) return List_type((* s).sign > 0 ? _92 : _91);  if((* s).longs == 2) return List_type((* s).sign > 0 ? _94 : _93);  return List_type((* s).sign > 0 ? _95 : _97);
 }
 
 Var Map_getindex(Map, Var);
-
 static List Var_list_payload(Var);
-
 static List _scalar_row(Type type){
-  Type scalar = Type_scalar(type);
-  if(! List_truth(Type_list(scalar))) return NULL;
-  Var row = Map_getindex(scalartypes, List_var(scalar));
-  return Var_is_row(row, 9, 7, 4) ? Var_list_payload(row) : NULL;
+  Type scalar = Type_scalar(type);  if(! List_truth(Type_list(scalar))) return NULL;  Var row = Map_getindex(scalartypes, List_var(scalar));  return Var_is_row(row, 9, 7, 4) ? Var_list_payload(row) : NULL;
 }
 
 List Var_list(Var);
-
 static int _scalar_numeric_info(Type type, X2CVarNumericInfo * info){
-  Var row = Map_getindex(scalartypes, List_var(type));
-  return Var_is_row(row, 9, 7, 4) && Var_numeric_info(Var_symbol(List_car(Var_list(row))), &((* info)));
+  Var row = Map_getindex(scalartypes, List_var(type));  return Var_is_row(row, 9, 7, 4) && Var_numeric_info(Var_symbol(List_car(Var_list(row))), &((* info)));
 }
 
 Symbol Type_scalar_tag(Type type){
-  if(! _init_guard_) _file_init_();
-  List row = _scalar_row(type);
-  return Var_symbol(List_truth(row) ? List_car(row) : Symbol_var((Symbol) 0));
+  if(! _init_guard_) _file_init_();  List row = _scalar_row(type);  return Var_symbol(List_truth(row) ? List_car(row) : Symbol_var((Symbol) 0));
 }
 
 String Var_as_string(Var);
-
 String Type_var_numeric_extractor(Type type){
-  if(! _init_guard_) _file_init_();
-  if(Type_is_enum(type)) return _209;
-  List row = _scalar_row(type);
-  return List_truth(row) ? Var_as_string(List_cadr(row)) : NULL;
+  if(! _init_guard_) _file_init_();  if(Type_is_enum(type)) return _206;  List row = _scalar_row(type);  return List_truth(row) ? Var_as_string(List_cadr(row)) : NULL;
 }
 
 String Type_var_numeric_update_helper(Type type){
-  if(! _init_guard_) _file_init_();
-  List row = _scalar_row(type);
-  return List_truth(row) ? Var_as_string(List_caddr(row)) : NULL;
+  if(! _init_guard_) _file_init_();  List row = _scalar_row(type);  return List_truth(row) ? Var_as_string(List_caddr(row)) : NULL;
 }
 
 Type Type_promote(Type type){
-  if(! _init_guard_) _file_init_();
-  if(Type_is_enum(type)) return List_type(_100);
-  type = Type_scalar(type);
-  if(! List_truth(Type_list(type))) return NULL;
-  X2CVarNumericInfo info;
-  if(_scalar_numeric_info(type, &(info)) && ! info.floating && info.rank < 3) return List_type(_100);
-  return type;
+  if(! _init_guard_) _file_init_();  if(Type_is_enum(type)) return List_type(_97);  type = Type_scalar(type);  if(! List_truth(Type_list(type))) return NULL;  X2CVarNumericInfo info;  if(_scalar_numeric_info(type, &(info)) && ! info.floating && info.rank < 3) return List_type(_97);  return type;
 }
 
 Type Type_widest(Type a, Type b){
-  if(! _init_guard_) _file_init_();
-  if(! List_truth(Type_list(a)) || ! List_truth(Type_list(b))) return NULL;
-  a = Type_promote(a);
-  b = Type_promote(b);
-  if(! List_truth(Type_list(a)) || ! List_truth(Type_list(b))) return NULL;
-  X2CVarNumericInfo ai ={
+  if(! _init_guard_) _file_init_();  if(! List_truth(Type_list(a)) || ! List_truth(Type_list(b))) return NULL;  a = Type_promote(a);  b = Type_promote(b);  if(! List_truth(Type_list(a)) || ! List_truth(Type_list(b))) return NULL;  X2CVarNumericInfo ai ={
     0
   }
   , bi ={
     0
   }
-  ;
-  _scalar_numeric_info(a, &(ai));
-  _scalar_numeric_info(b, &(bi));
-  if(ai.floating || bi.floating) return ai.rank >= bi.rank ? a : b;
-  int ua = ai.unsigned_value, ub = bi.unsigned_value;
-  int ra = ai.rank, rb = bi.rank;
-  if(ua == ub) return ra >= rb ? a : b;
-  if(ua && ra >= rb) return a;
-  if(ub && rb >= ra) return b;
-  Type signed_type = ua ? b : a;
-  int signed_bits = ua ? bi.bits : ai.bits;
-  int unsigned_bits = ua ? ai.bits : bi.bits;
-  if(signed_bits > unsigned_bits) return signed_type;
-  return _unsigned_scalar(signed_type);
+  ;  _scalar_numeric_info(a, &(ai));  _scalar_numeric_info(b, &(bi));  if(ai.floating || bi.floating) return ai.rank >= bi.rank ? a : b;  int ua = ai.unsigned_value, ub = bi.unsigned_value;  int ra = ai.rank, rb = bi.rank;  if(ua == ub) return ra >= rb ? a : b;  if(ua && ra >= rb) return a;  if(ub && rb >= ra) return b;  Type signed_type = ua ? b : a;  int signed_bits = ua ? bi.bits : ai.bits;  int unsigned_bits = ua ? ai.bits : bi.bits;  if(signed_bits > unsigned_bits) return signed_type;  return _unsigned_scalar(signed_type);
 }
 
 static Type _unsigned_scalar(Type type){
   switch(Type_scalar_tag(type)){
-    case 26993 : return List_type(_88);
-    case 3453293 : return List_type(_93);
-    case 3453797 : return List_type(_98);
-    case 818062 : return List_type(_95);
-    case 25983886 : return List_type(_97);
+    case 26993 : return List_type(_85);  case 3453293 : return List_type(_90);  case 3453797 : return List_type(_95);  case 818062 : return List_type(_92);  case 25983886 : return List_type(_94);
   }
   return type;
 }
 
 int String_len(String);
-
 int String_getindex(String, int);
-
 Type Type_numeric_literal(String text, int floating){
-  if(! _init_guard_) _file_init_();
-  int length = String_len(text);
-  if(floating){
-    int last = String_getindex(text, length - 1);
-    if(last == 'f' || last == 'F') return List_type(_82);
-    if(last == 'l' || last == 'L') return List_type(_86);
-    return List_type(_85);
+  if(! _init_guard_) _file_init_();  int length = String_len(text);  if(floating){
+    int last = String_getindex(text, length - 1);  if(last == 'f' || last == 'F') return List_type(_79);  if(last == 'l' || last == 'L') return List_type(_83);  return List_type(_82);
   }
-  int negative = String_getindex(text, 0) == '-';
-  if(negative || String_getindex(text, 0) == '+') text = String_getslice(text, 1, (-2147483647 - 1), 1);
-  length = String_len(text);
-  int suffix = _integer_literal_end(text);
-  int is_unsigned = 0, longs = 0;
-  for(int i = suffix;  i < length;  i ++){
-    int ch = String_getindex(text, i);
-    if(ch == 'u' || ch == 'U') is_unsigned = 1;
-    else longs ++;
+  int negative = String_getindex(text, 0) == '-';  if(negative || String_getindex(text, 0) == '+') text = String_getslice(text, 1, (-2147483647 - 1), 1);  length = String_len(text);  int suffix = _integer_literal_end(text);  int is_unsigned = 0, longs = 0;  for(int i = suffix;  i < length;  i ++){
+    int ch = String_getindex(text, i);  if(ch == 'u' || ch == 'U') is_unsigned = 1;  else longs ++;
   }
-  unsigned long long magnitude;
-  int decimal;
-  if(! _literal_magnitude(text, suffix, &(magnitude), &(decimal))) return NULL;
-  return _integer_literal_type(magnitude, decimal, is_unsigned, longs, negative);
+  unsigned long long magnitude;  int decimal;  if(! _literal_magnitude(text, suffix, &(magnitude), &(decimal))) return NULL;  return _integer_literal_type(magnitude, decimal, is_unsigned, longs, negative);
 }
 
 static Var float_var(float);
-
 static Var double_var(double);
-
 Var Var_convert(Var, Symbol);
-
 Var Type_numeric_literal_value(Type type, String text){
-  if(! _init_guard_) _file_init_();
-  Symbol tag = Type_scalar_tag(type);
-  if(tag == 3355493){
-    float value = strtof(text, NULL);
-    return float_var(value);
+  if(! _init_guard_) _file_init_();  Symbol tag = Type_scalar_tag(type);  if(tag == 3355493){
+    float value = strtof(text, NULL);  return float_var(value);
   }
   if(tag == 3356265){
-    double value = strtod(text, NULL);
-    return double_var(value);
+    double value = strtod(text, NULL);  return double_var(value);
   }
   if(tag == 26071077642){
-    long double value = strtold(text, NULL);
-    return Var_box_long_double(value);
+    long double value = strtold(text, NULL);  return Var_box_long_double(value);
   }
-  int negative = String_getindex(text, 0) == '-';
-  if(negative || String_getindex(text, 0) == '+') text = String_getslice(text, 1, (-2147483647 - 1), 1);
-  int end = _integer_literal_end(text);
-  unsigned long long magnitude;
-  int decimal;
-  if(! _literal_magnitude(text, end, &(magnitude), &(decimal))) return((void) 0, Void);
-  Var value = Var_box_ulong_long(negative ? 0ULL - magnitude : magnitude);
-  return Var_convert(value, tag);
+  int negative = String_getindex(text, 0) == '-';  if(negative || String_getindex(text, 0) == '+') text = String_getslice(text, 1, (-2147483647 - 1), 1);  int end = _integer_literal_end(text);  unsigned long long magnitude;  int decimal;  if(! _literal_magnitude(text, end, &(magnitude), &(decimal))) return((void) 0, Void);  Var value = Var_box_ulong_long(negative ? 0ULL - magnitude : magnitude);  return Var_convert(value, tag);
 }
 
 static int String_truth(String);
-
 int Type_integer_literal_magnitude(Type type, String text, unsigned long long * value){
-  if(! _init_guard_) _file_init_();
-  if(! Type_is_integral(type) || ! String_truth(text) || String_getindex(text, 0) < '0' || String_getindex(text, 0) > '9') return 0;
-  int decimal;
-  return _literal_magnitude(text, _integer_literal_end(text), &((* value)), &(decimal));
+  if(! _init_guard_) _file_init_();  if(! Type_is_integral(type) || ! String_truth(text) || String_getindex(text, 0) < '0' || String_getindex(text, 0) > '9') return 0;  int decimal;  return _literal_magnitude(text, _integer_literal_end(text), &((* value)), &(decimal));
 }
 
 static int _integer_literal_end(String text){
-  int end = String_len(text);
-  while(end > 0){
-    int ch = String_getindex(text, end - 1);
-    if(ch != 'u' && ch != 'U' && ch != 'l' && ch != 'L') break;
-    end --;
+  int end = String_len(text);  while(end > 0){
+    int ch = String_getindex(text, end - 1);  if(ch != 'u' && ch != 'U' && ch != 'l' && ch != 'L') break;  end --;
   }
   return end;
 }
 
 static int scan_ascii_hex_value(int);
-
 static int _literal_magnitude(String text, int end, unsigned long long * magnitude, int * decimal){
-  int pos = 0, base = _radix(text, end, &(pos));
-  (* decimal) = base == 10;
-  unsigned long long sum = 0;
-  for(;  pos < end;  pos ++){
-    unsigned digit = scan_ascii_hex_value((unsigned char) String_getindex(text, pos));
-    if(sum >(ULLONG_MAX - digit) /(unsigned) base) return 0;
-    sum = sum *(unsigned) base + digit;
+  int pos = 0, base = _radix(text, end, &(pos)); (* decimal) = base == 10;  unsigned long long sum = 0;  for(;  pos < end;  pos ++){
+    unsigned digit = scan_ascii_hex_value((unsigned char) String_getindex(text, pos));  if(sum >(ULLONG_MAX - digit) /(unsigned) base) return 0;  sum = sum *(unsigned) base + digit;
   }
-  (* magnitude) = sum;
-  return 1;
+  (* magnitude) = sum;  return 1;
 }
 
 static int _radix(String text, int end, int * pos){
-  if(end < 2 || String_getindex(text, 0) != '0') return 10;
-  switch(String_getindex(text, 1)){
-    case 'x' : case 'X' :(* pos) = 2;
-    return 16;
-    case 'b' : case 'B' :(* pos) = 2;
-    return 2;
-    case 'o' : case 'O' :(* pos) = 2;
-    return 8;
+  if(end < 2 || String_getindex(text, 0) != '0') return 10;  switch(String_getindex(text, 1)){
+    case 'x' : case 'X' :(* pos) = 2;  return 16;  case 'b' : case 'B' :(* pos) = 2;  return 2;  case 'o' : case 'O' :(* pos) = 2;  return 8;
   }
   return String_getindex(text, 1) >= '0' && String_getindex(text, 1) <= '7' ? 8 : 10;
 }
 
 static Type _integer_literal_type(unsigned long long magnitude, int decimal, int is_unsigned, int longs, int negative){
-  int signed_only = decimal || negative;
-  if(! is_unsigned && ! longs){
-    if(magnitude <=(unsigned long long) INT_MAX + negative) return List_type(_100);
-    if(! signed_only && magnitude <= UINT_MAX) return List_type(_98);
-    if(magnitude <=(unsigned long long) LONG_MAX + negative) return List_type(_94);
-    if(! signed_only && magnitude <= ULONG_MAX) return List_type(_95);
-    if(magnitude <=(unsigned long long) LLONG_MAX + negative) return List_type(_96);
-    if(! signed_only) return List_type(_97);
-    return NULL;
+  int signed_only = decimal || negative;  if(! is_unsigned && ! longs){
+    if(magnitude <=(unsigned long long) INT_MAX + negative) return List_type(_97);  if(! signed_only && magnitude <= UINT_MAX) return List_type(_95);  if(magnitude <=(unsigned long long) LONG_MAX + negative) return List_type(_91);  if(! signed_only && magnitude <= ULONG_MAX) return List_type(_92);  if(magnitude <=(unsigned long long) LLONG_MAX + negative) return List_type(_93);  if(! signed_only) return List_type(_94);  return NULL;
   }
   if(is_unsigned && ! longs){
-    if(magnitude <= UINT_MAX) return List_type(_98);
-    if(magnitude <= ULONG_MAX) return List_type(_95);
-    return List_type(_97);
+    if(magnitude <= UINT_MAX) return List_type(_95);  if(magnitude <= ULONG_MAX) return List_type(_92);  return List_type(_94);
   }
   if(! is_unsigned && longs == 1){
-    if(magnitude <=(unsigned long long) LONG_MAX + negative) return List_type(_94);
-    if(! signed_only && magnitude <= ULONG_MAX) return List_type(_95);
-    if(magnitude <=(unsigned long long) LLONG_MAX + negative) return List_type(_96);
-    if(! signed_only) return List_type(_97);
-    return NULL;
+    if(magnitude <=(unsigned long long) LONG_MAX + negative) return List_type(_91);  if(! signed_only && magnitude <= ULONG_MAX) return List_type(_92);  if(magnitude <=(unsigned long long) LLONG_MAX + negative) return List_type(_93);  if(! signed_only) return List_type(_94);  return NULL;
   }
-  if(is_unsigned && longs == 1) return List_type(magnitude <= ULONG_MAX ? _95 : _97);
-  if(! is_unsigned && longs == 2){
-    if(magnitude <=(unsigned long long) LLONG_MAX + negative) return List_type(_96);
-    return signed_only ? NULL : List_type(_97);
+  if(is_unsigned && longs == 1) return List_type(magnitude <= ULONG_MAX ? _92 : _94);  if(! is_unsigned && longs == 2){
+    if(magnitude <=(unsigned long long) LLONG_MAX + negative) return List_type(_93);  return signed_only ? NULL : List_type(_94);
   }
-  return List_type(_97);
+  return List_type(_94);
 }
 
 #undef _x2c_gensym_initializer_choice_DF23AB2E_0_expanded

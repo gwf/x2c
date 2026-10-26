@@ -204,11 +204,11 @@ SymTxn;
 #include <stdlib.h>
 #include <string.h>
 #include "fields.h"
-static List _576, _573, _561, _560, _559, _557, _556, _555, _553, _552, _549, _545, _541, _537, _535, _534, _532, _529, _528, _527, _525, _524, _523, _521, _520, _519, _517, _516, _513, _508, _507, _506, _504, _503, _502, _498, _497, _496, _494, _493, _491, _490, _489, _485, _484, _483, _481, _480, _479, _478, _474, _473, _472, _471, _467, _466, _465, _463, _462, _460, _459, _458, _456, _455, _452, _439, _438, _434, _433, _431, _430, _429, _427, _426, _424, _423, _422, _419, _414, _413, _412, _410, _409, _406, _405, _400, _399, _397, _396, _392, _391, _390, _388, _387, _383, _382, _372, _370, _369, _368, _366, _365, _364, _361, _358, _355, _354, _353, _352, _351, _346, _345, _343, _342, _338, _337, _334, _333, _330, _329, _327, _326, _324, _323, _322, _321, _320, _314, _313, _312, _310, _309, _307, _306, _305, _303, _302, _297, _295, _294, _293, _292, _291, _290, _289, _288, _287, _286, _285, _284, _283, _280, _279, _278, _277, _276, _275, _274, _268, _267, _265, _264, _262, _261, _259, _258, _257, _255, _252, _250, _249, _248, _247, _246, _245, _244, _243, _242, _241, _233, _231, _223, _222, _221, _220, _216, _215, _214, _213, _209, _208, _206, _200, _196, _187, _186, _185, _183, _182, _179, _178, _174, _173, _172, _171, _169, _168, _167, _164, _163, _158, _157, _156, _155, _154, _139, _135, _133, _132, _131, _123, _122, _121, _119, _118, _116, _115, _114, _112, _111, _110, _109, _108, _106, _105, _104, _102, _101, _97, _96, _95, _93, _92, _88, _87, _86, _84, _79, _78, _69, _68, _67, _65, _64, _63, _59, _58, _56, _55, _54, _52, _51, _50, _49, _44, _43, _42, _41, _39, _38, _34, _33, _32, _30, _29, _28, _19, _13, _8, _7;
+static List _576, _573, _561, _560, _559, _557, _556, _555, _553, _552, _550, _547, _543, _539, _535, _534, _532, _529, _528, _527, _525, _524, _523, _521, _520, _519, _517, _516, _513, _508, _507, _506, _504, _503, _502, _498, _497, _496, _494, _493, _491, _490, _489, _485, _484, _483, _481, _480, _479, _478, _474, _473, _472, _471, _467, _466, _465, _463, _462, _460, _459, _458, _456, _455, _452, _439, _438, _434, _433, _431, _430, _429, _427, _426, _424, _423, _422, _419, _414, _413, _412, _410, _409, _406, _405, _400, _399, _397, _396, _392, _391, _390, _388, _387, _383, _382, _372, _370, _369, _368, _366, _365, _364, _361, _358, _355, _354, _353, _352, _351, _346, _345, _343, _342, _338, _337, _334, _333, _330, _329, _327, _326, _324, _323, _322, _321, _320, _314, _313, _312, _310, _309, _307, _306, _305, _303, _302, _297, _295, _294, _293, _292, _291, _290, _289, _288, _287, _286, _285, _284, _283, _280, _279, _278, _277, _276, _275, _274, _268, _267, _265, _264, _262, _261, _259, _258, _257, _255, _252, _250, _249, _248, _247, _246, _245, _244, _243, _242, _241, _233, _231, _223, _222, _221, _220, _216, _215, _214, _213, _209, _208, _206, _200, _196, _187, _186, _185, _183, _182, _179, _178, _174, _173, _172, _171, _169, _168, _167, _164, _163, _158, _157, _156, _155, _154, _139, _135, _133, _132, _131, _123, _122, _121, _119, _118, _116, _115, _114, _112, _111, _110, _109, _108, _106, _105, _104, _102, _101, _97, _96, _95, _93, _92, _88, _87, _86, _84, _79, _78, _69, _68, _67, _65, _64, _63, _59, _58, _56, _55, _54, _52, _51, _50, _49, _44, _43, _42, _41, _39, _38, _34, _33, _32, _30, _29, _28, _19, _13, _8, _7;
 
-static String _582, _581, _578, _571, _569, _568, _567, _566, _563, _562, _547, _543, _539, _530, _511, _500, _487, _448, _447, _446, _444, _416, _378, _373, _359, _356, _347, _339, _301, _253, _201, _198, _197, _194, _193, _192, _191, _190, _189, _188, _176, _175, _147, _146, _145, _144, _142, _129, _128, _127, _125, _76, _74, _73, _72, _26, _22, _21, _20, _17, _16, _15, _14, _11, _5;
+static String _582, _581, _578, _571, _569, _568, _567, _566, _563, _562, _545, _541, _537, _530, _511, _500, _487, _448, _447, _446, _444, _416, _378, _373, _359, _356, _347, _339, _301, _253, _201, _198, _197, _194, _193, _192, _191, _190, _189, _188, _176, _175, _147, _146, _145, _144, _142, _129, _128, _127, _125, _76, _74, _73, _72, _26, _22, _21, _20, _17, _16, _15, _14, _11, _5;
 
-static Var _580, _579, _577, _575, _574, _572, _570, _565, _564, _558, _554, _551, _550, _548, _546, _544, _542, _540, _538, _536, _533, _531, _526, _522, _518, _515, _514, _512, _510, _509, _505, _501, _499, _495, _492, _488, _486, _482, _477, _476, _475, _470, _469, _468, _464, _461, _457, _454, _453, _451, _450, _449, _445, _443, _442, _441, _440, _437, _436, _435, _432, _428, _425, _421, _420, _418, _417, _415, _411, _408, _407, _404, _403, _402, _401, _398, _395, _394, _393, _389, _386, _385, _384, _381, _380, _379, _377, _376, _375, _374, _371, _367, _363, _362, _360, _357, _350, _349, _348, _344, _341, _340, _336, _335, _332, _331, _328, _325, _319, _318, _317, _316, _315, _311, _308, _304, _300, _299, _298, _296, _282, _281, _273, _272, _271, _270, _269, _266, _263, _260, _256, _254, _251, _240, _239, _238, _237, _236, _235, _234, _232, _230, _229, _228, _227, _226, _225, _224, _219, _218, _217, _212, _211, _210, _207, _205, _204, _203, _202, _199, _195, _184, _181, _180, _177, _170, _166, _165, _162, _161, _160, _159, _153, _152, _151, _150, _149, _148, _143, _141, _140, _138, _137, _136, _134, _130, _126, _124, _120, _117, _113, _107, _103, _100, _99, _98, _94, _91, _90, _89, _85, _83, _82, _81, _80, _77, _75, _71, _70, _66, _62, _61, _60, _57, _53, _48, _47, _46, _45, _40, _37, _36, _35, _31, _27, _25, _24, _23, _18, _12, _10, _9, _6, _4, _3, _2, _1, _0;
+static Var _580, _579, _577, _575, _574, _572, _570, _565, _564, _558, _554, _551, _549, _548, _546, _544, _542, _540, _538, _536, _533, _531, _526, _522, _518, _515, _514, _512, _510, _509, _505, _501, _499, _495, _492, _488, _486, _482, _477, _476, _475, _470, _469, _468, _464, _461, _457, _454, _453, _451, _450, _449, _445, _443, _442, _441, _440, _437, _436, _435, _432, _428, _425, _421, _420, _418, _417, _415, _411, _408, _407, _404, _403, _402, _401, _398, _395, _394, _393, _389, _386, _385, _384, _381, _380, _379, _377, _376, _375, _374, _371, _367, _363, _362, _360, _357, _350, _349, _348, _344, _341, _340, _336, _335, _332, _331, _328, _325, _319, _318, _317, _316, _315, _311, _308, _304, _300, _299, _298, _296, _282, _281, _273, _272, _271, _270, _269, _266, _263, _260, _256, _254, _251, _240, _239, _238, _237, _236, _235, _234, _232, _230, _229, _228, _227, _226, _225, _224, _219, _218, _217, _212, _211, _210, _207, _205, _204, _203, _202, _199, _195, _184, _181, _180, _177, _170, _166, _165, _162, _161, _160, _159, _153, _152, _151, _150, _149, _148, _143, _141, _140, _138, _137, _136, _134, _130, _126, _124, _120, _117, _113, _107, _103, _100, _99, _98, _94, _91, _90, _89, _85, _83, _82, _81, _80, _77, _75, _71, _70, _66, _62, _61, _60, _57, _53, _48, _47, _46, _45, _40, _37, _36, _35, _31, _27, _25, _24, _23, _18, _12, _10, _9, _6, _4, _3, _2, _1, _0;
 
 static int _init_guard_ = 0;
 
@@ -1120,21 +1120,21 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _533 = List_var(_532);
   _534 = cons(_533, _527);
   _535 = cons(_70, _534);
-  _536 = Symbol_var(29272);
-  _537 = cons(_536, NULL);
-  _538 = Symbol_var(228262);
-  _539 = String_new("String");
-  _540 = String_var(_539);
-  _541 = cons(_540, NULL);
-  _542 = List_var(_541);
-  _543 = String_new("Atom");
-  _544 = String_var(_543);
-  _545 = cons(_544, NULL);
-  _546 = List_var(_545);
-  _547 = String_new("Symbol");
-  _548 = String_var(_547);
-  _549 = cons(_548, NULL);
-  _550 = List_var(_549);
+  _536 = Symbol_var(228262);
+  _537 = String_new("String");
+  _538 = String_var(_537);
+  _539 = cons(_538, NULL);
+  _540 = List_var(_539);
+  _541 = String_new("Atom");
+  _542 = String_var(_541);
+  _543 = cons(_542, NULL);
+  _544 = List_var(_543);
+  _545 = String_new("Symbol");
+  _546 = String_var(_545);
+  _547 = cons(_546, NULL);
+  _548 = List_var(_547);
+  _549 = Symbol_var(29272);
+  _550 = cons(_549, NULL);
   _551 = Symbol_var(63879563258792);
   _552 = cons(_551, NULL);
   _553 = cons(_437, _552);
@@ -3669,7 +3669,43 @@ static List f13_literal_cache____cache_alias(List key){
 }
 
 List Compiler_cache_cons_cell(Compiler c, List head, List tail){
-  if(! _init_guard_) _file_init_();  if(c -> runtime_literals) return NULL;  List head_cache = NULL, tail_cache = NULL;  if(List_truth(({ static MatchCaptureSite _x2c_gensym_match_site_0;  x2c_match_site_match(& _x2c_gensym_match_site_0, head, List_var(_529)); }))) head_cache = Var_list_payload(List_caddr(head));  else if(List_truth(({ static MatchCaptureSite _x2c_gensym_match_site_1;  x2c_match_site_match(& _x2c_gensym_match_site_1, head, List_var(_525)); }))) head_cache = head;  if(! List_truth(head_cache)) return NULL;  if(List_truth(({ static MatchCaptureSite _x2c_gensym_match_site_2;  x2c_match_site_match(& _x2c_gensym_match_site_2, tail, List_var(_535)); }))) tail_cache = Var_list_payload(List_caddr(tail));  else if(List_truth(({ static MatchCaptureSite _x2c_gensym_match_site_3;  x2c_match_site_match(& _x2c_gensym_match_site_3, tail, List_var(_537)); }))) tail_cache = tail;  if(! List_truth(tail_cache)) return NULL;  List cached = Compiler_cache(c, cons(_538, cons(List_var(head_cache), cons(List_var(tail_cache), NULL))));  return cons(_70, cons(_533, cons(List_var(cached), NULL)));
+  if(! _init_guard_) _file_init_();  if(c -> runtime_literals) return NULL;  List head_cache = NULL, tail_cache = NULL; {
+    int _x2c_gensym_condition_0 = 0; {
+      List _x2c_gensym_match_expr = head; List _x2c_gensym_match_cursor, _x2c_gensym_match_cursor1;   _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497936761996324ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && Var_is(_x2c_gensym_match_cursor->car, 806120) && (_x2c_gensym_match_cursor1 = Var_list_payload(_x2c_gensym_match_cursor->car), 1) && _x2c_gensym_match_cursor1 && Var_equal(_x2c_gensym_match_cursor1->car, Var_list_payload(_529 ->cdr->car)->car) && (_x2c_gensym_match_cursor1 = _x2c_gensym_match_cursor1->cdr, 1) && !_x2c_gensym_match_cursor1 && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && Var_is(_x2c_gensym_match_cursor->car, 806120) && (_x2c_gensym_match_cursor1 = Var_list_payload(_x2c_gensym_match_cursor->car), 1) && _x2c_gensym_match_cursor1 && _x2c_gensym_match_cursor1->car.u64 == 9224497936767982090ULL && (_x2c_gensym_match_cursor1 = _x2c_gensym_match_cursor1->cdr, 1) && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {{
+        {
+          _x2c_gensym_condition_0 = 1;  head_cache = Var_list_payload(List_caddr(head));
+        }
+
+      }
+       }
+    }
+    if(! _x2c_gensym_condition_0){
+      List _x2c_gensym_match_expr = head; List _x2c_gensym_match_cursor;   _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497936767982090ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1)) {{
+        head_cache = head;
+      }
+       }
+    }
+
+  }
+  if(! List_truth(head_cache)) return NULL; {
+    int _x2c_gensym_condition_1 = 0; {
+      List _x2c_gensym_match_expr = tail; List _x2c_gensym_match_cursor, _x2c_gensym_match_cursor1;   _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497936761996324ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && Var_is(_x2c_gensym_match_cursor->car, 806120) && (_x2c_gensym_match_cursor1 = Var_list_payload(_x2c_gensym_match_cursor->car), 1) && _x2c_gensym_match_cursor1 && Var_equal(_x2c_gensym_match_cursor1->car, Var_list_payload(_535 ->cdr->car)->car) && (_x2c_gensym_match_cursor1 = _x2c_gensym_match_cursor1->cdr, 1) && !_x2c_gensym_match_cursor1 && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && Var_is(_x2c_gensym_match_cursor->car, 806120) && (_x2c_gensym_match_cursor1 = Var_list_payload(_x2c_gensym_match_cursor->car), 1) && _x2c_gensym_match_cursor1 && _x2c_gensym_match_cursor1->car.u64 == 9224497936767982090ULL && (_x2c_gensym_match_cursor1 = _x2c_gensym_match_cursor1->cdr, 1) && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {{
+        {
+          _x2c_gensym_condition_1 = 1;  tail_cache = Var_list_payload(List_caddr(tail));
+        }
+
+      }
+       }
+    }
+    if(! _x2c_gensym_condition_1){
+      List _x2c_gensym_match_expr = tail; List _x2c_gensym_match_cursor;   _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497936761647704ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {{
+        tail_cache = tail;
+      }
+       }
+    }
+
+  }
+  if(! List_truth(tail_cache)) return NULL;  List cached = Compiler_cache(c, cons(_536, cons(List_var(head_cache), cons(List_var(tail_cache), NULL))));  return cons(_70, cons(_533, cons(List_var(cached), NULL)));
 }
 
 List Compiler_cache_literal_var(Compiler c, Var value){
@@ -3677,12 +3713,12 @@ List Compiler_cache_literal_var(Compiler c, Var value){
     List cached = f13_literal_cache____cache_literal_list(c, Var_list_payload(value));  return Compiler_cache(c, cons(_510, cons(List_var(cons(_70, cons(_533, cons(List_var(cons(_70, cons(_533, cons(List_var(cached), NULL)))), NULL)))), NULL)));
   }
   if(Var_is_row(value, 11, 7, 1)){
-    List literal = cons(_70, cons(_542, cons(List_var(cons(_499, cons(_542, cons(value, NULL)))), NULL)));  List cached = Compiler_cache(c, cons(_48, cons(List_var(literal), NULL)));  return Compiler_cache(c, cons(_510, cons(List_var(cons(_70, cons(_542, cons(List_var(cached), NULL)))), NULL)));
+    List literal = cons(_70, cons(_540, cons(List_var(cons(_499, cons(_540, cons(value, NULL)))), NULL)));  List cached = Compiler_cache(c, cons(_48, cons(List_var(literal), NULL)));  return Compiler_cache(c, cons(_510, cons(List_var(cons(_70, cons(_540, cons(List_var(cached), NULL)))), NULL)));
   }
-  if(Var_is_integer(value) || Var_is_floating(value)) return f13_literal_cache____cache_boxed(c, Compiler_meta_value_expression(c, NULL, value, NULL));  if(Var_is(value, 826970)) return f13_literal_cache____cache_boxed(c, cons(_70, cons(_546, cons(List_var(({
-    Var _x2c_gensym_literal_part_59 = String_var(Var_str(value));  cons(_499, cons(_546, cons(_x2c_gensym_literal_part_59, cons(value, NULL))));
+  if(Var_is_integer(value) || Var_is_floating(value)) return f13_literal_cache____cache_boxed(c, Compiler_meta_value_expression(c, NULL, value, NULL));  if(Var_is(value, 826970)) return f13_literal_cache____cache_boxed(c, cons(_70, cons(_544, cons(List_var(({
+    Var _x2c_gensym_literal_part_59 = String_var(Var_str(value));  cons(_499, cons(_544, cons(_x2c_gensym_literal_part_59, cons(value, NULL))));
   }
-  )), NULL))));  if(! Var_is(value, 1328354264)) return NULL;  String spelling = Symbol_str(Var_symbol(value));  List literal = cons(_70, cons(_550, cons(List_var(cons(_499, cons(_550, cons(String_var(spelling), cons(value, NULL))))), NULL)));  return Compiler_cache(c, cons(_510, cons(List_var(literal), NULL)));
+  )), NULL))));  if(! Var_is(value, 1328354264)) return NULL;  String spelling = Symbol_str(Var_symbol(value));  List literal = cons(_70, cons(_548, cons(List_var(cons(_499, cons(_548, cons(String_var(spelling), cons(value, NULL))))), NULL)));  return Compiler_cache(c, cons(_510, cons(List_var(literal), NULL)));
 }
 
 List Compiler_convert_expression(Compiler, List, Type);
@@ -3705,8 +3741,8 @@ static List f13_literal_cache____cache_literal_list(Compiler c, List values){
         }
 
       }
-      List cached = _537;  for(int i =(int) Array_len(heads) - 1;  i >= 0;  i --){
-        List head = Var_list_payload(Array_getindex(heads, i));  cached = Compiler_cache(c, cons(_538, cons(List_var(head), cons(List_var(cached), NULL))));
+      List cached = _550;  for(int i =(int) Array_len(heads) - 1;  i >= 0;  i --){
+        List head = Var_list_payload(Array_getindex(heads, i));  cached = Compiler_cache(c, cons(_536, cons(List_var(head), cons(List_var(cached), NULL))));
       }
       {
         List _x2c_gensym_return_value_5 = cached; {

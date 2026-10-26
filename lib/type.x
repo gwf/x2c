@@ -69,9 +69,8 @@ int Type.is_aggregate_tag(Type t) =>
 static int _is_aggregate_body(Type type) =>
   type ~= %((!or struct union) (*));
 
-/** Returns whether `type` is a tagged struct or union definition. */
-int Type.is_aggregate_tag_body(Type type) =>
-  type ~= %((!or struct union) ? (*));
+/** Returns whether `t` is a tagged struct or union definition. */
+int Type.is_aggregate_tag_body(Type t) => t ~= %((!or struct union) ? (*));
 
 /** Returns whether `type` is any enum shape. */
 int Type.is_enum(Type type) => type ~= %(enum *);
@@ -324,11 +323,10 @@ int Type.is_typedef_name(Type type) {
   return type && type.len() == 1 && type.car() is <string>;
 }
 
-/** Returns whether `type` is one bare typedef-name `String`.
+/** Returns whether `t` is one bare typedef-name `String`.
     Unlike `is_typedef_name`, this rejects pointer and array wrappers.
 */
-int Type.is_bare_typedef_name(Type type) =>
-  type ~= %(?) && type.car() is <string>;
+int Type.is_bare_typedef_name(Type t) => t ~= %(?) && t.car() is <string>;
 
 /** Returns whether `type` is a fixed numeric scalar or an enum. */
 int Type.is_number(Type type) => !!type.scalar_tag() || type.is_enum();
