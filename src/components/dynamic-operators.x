@@ -12,6 +12,7 @@
 */
 #pragma once
 #include "rewrite.x"
+#include "compiler-meta.x"
 
 /* The linked meta copies include these diagnostics from this owner. */
 macro Stmt $fail.operators_numeric_operands(
@@ -80,10 +81,8 @@ meta Code dynamic_binary(Code code) {
 
 /* The operation a compound assignment applies before it stores. */
 meta static Symbol _dynamic_operation(Symbol assignment) {
-  foreach (List row in %((<+=> <+>) (<-=> <->) (<*=> <*>) (</=> </>)
-                       (<%=> <%>) (<"<<="> <"<<">) (<">>="> <">>">)
-                       (<&=> <&>) (<^=> <^>) (<|=> <|>)))
-    if (row.car() == assignment) return row.cadr();
+  foreach (List row in _x2c_operator_rows())
+    if (row[2] && row[2] == assignment) return row.car();
   return 0;
 }
 

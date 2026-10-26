@@ -20,11 +20,11 @@
 #include "native-scalar-types.h"
 typedef struct Lisp * Lisp;
 
-static List _179, _177, _176, _174, _172, _166, _159, _157, _155, _154, _152, _149, _147, _146, _144, _142, _140, _139, _137, _136, _133, _131, _130, _128, _125, _123, _122, _120, _119, _118, _116, _114, _113, _111, _110, _108, _103, _101, _100, _98, _96, _92, _90, _89, _87, _83, _81, _80, _78, _76, _74, _73, _71, _69, _65, _63, _61, _60, _58, _53, _51, _50, _48, _45, _44, _40, _38, _37, _35, _33, _28, _26, _25, _23, _22, _20, _19, _17, _15;
+static List _182, _180, _179, _177, _175, _169, _161, _159, _157, _156, _154, _151, _149, _148, _146, _144, _142, _141, _139, _138, _135, _133, _132, _130, _127, _125, _124, _122, _121, _120, _118, _116, _115, _113, _112, _110, _105, _103, _102, _100, _98, _94, _92, _90, _89, _87, _83, _81, _80, _78, _76, _74, _73, _71, _69, _65, _63, _61, _60, _58, _53, _51, _50, _48, _45, _44, _40, _38, _37, _35, _33, _28, _26, _25, _23, _22, _20, _19, _17, _15;
 
-static String _184, _183, _182, _181, _180, _170, _169, _168, _167, _165, _164, _163, _162, _161, _160, _158, _151, _150, _143, _135, _134, _127, _126, _117, _106, _105, _104, _94, _93, _86, _85, _84, _77, _67, _66, _64, _57, _56, _55, _54, _47, _46, _42, _41, _31, _30, _29, _13, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _187, _186, _185, _184, _183, _173, _172, _171, _170, _168, _167, _166, _165, _164, _163, _162, _160, _153, _152, _145, _137, _136, _129, _128, _119, _108, _107, _106, _96, _95, _93, _86, _85, _84, _77, _67, _66, _64, _57, _56, _55, _54, _47, _46, _42, _41, _31, _30, _29, _13, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
-static Var _178, _175, _173, _171, _156, _153, _148, _145, _141, _138, _132, _129, _124, _121, _115, _112, _109, _107, _102, _99, _97, _95, _91, _88, _82, _79, _75, _72, _70, _68, _62, _59, _52, _49, _43, _39, _36, _34, _32, _27, _24, _21, _18, _16, _14, _12;
+static Var _181, _178, _176, _174, _158, _155, _150, _147, _143, _140, _134, _131, _126, _123, _117, _114, _111, _109, _104, _101, _99, _97, _91, _88, _82, _79, _75, _72, _70, _68, _62, _59, _52, _49, _43, _39, _36, _34, _32, _27, _24, _21, _18, _16, _14, _12;
 
 static int _init_guard_ = 0;
 
@@ -298,6 +298,8 @@ static Array f6_native____array_sort_with(Array values, Var callable);
 
 static Var f6_native____array_foldl(Array values, Var seed, Var callable);
 
+static Var f6_native____array_find(Array values, Var callable);
+
 static String f6_native____string_map(String value, Var callable);
 
 static String f6_native____string_filter(String value, Var callable);
@@ -329,6 +331,8 @@ static int f6_native____predicate_list_any(List values, Var callable);
 static int f6_native____predicate_list_all(List values, Var callable);
 
 static Var f6_native____predicate_list_find(List values, Var callable);
+
+static Var f6_native____predicate_array_find(Array values, Var callable);
 
 static String f6_native____predicate_string_filter(String value, Var callable);
 
@@ -388,12 +392,14 @@ static Var _x2c_gensym_func_adapt_32(Func _x2c_gensym_func_binding_32, const Fun
 static Var _x2c_gensym_func_adapt_33(Func _x2c_gensym_func_binding_33, const FuncArg * _x2c_gensym_func_argv_33);
 static Var _x2c_gensym_func_adapt_34(Func _x2c_gensym_func_binding_34, const FuncArg * _x2c_gensym_func_argv_34);
 static Var _x2c_gensym_func_adapt_35(Func _x2c_gensym_func_binding_35, const FuncArg * _x2c_gensym_func_argv_35);
+static Var _x2c_gensym_func_adapt_36(Func _x2c_gensym_func_binding_36, const FuncArg * _x2c_gensym_func_argv_36);
+static Var _x2c_gensym_func_adapt_37(Func _x2c_gensym_func_binding_37, const FuncArg * _x2c_gensym_func_argv_37);
 #include "exception.h"
 
 
 
 
-_x2c_gensym_initializer_choice_A8155D0F_0((f6_native___callback_targets = Map_update_n(Map_new(), 36, String_var(_30), Func_var(Func_new(_x2c_gensym_func_adapt_0, _40)), String_var(_41), Func_var(Func_new(_x2c_gensym_func_adapt_1, _40)), String_var(_42), Func_var(Func_new(_x2c_gensym_func_adapt_2, _45)), String_var(_46), Func_var(Func_new(_x2c_gensym_func_adapt_3, _45)), String_var(_47), Func_var(Func_new(_x2c_gensym_func_adapt_4, _53)), String_var(_54), Func_var(Func_new(_x2c_gensym_func_adapt_5, _40)), String_var(_55), Func_var(Func_new(_x2c_gensym_func_adapt_6, _40)), String_var(_56), Func_var(Func_new(_x2c_gensym_func_adapt_7, _53)), String_var(_57), Func_var(Func_new(_x2c_gensym_func_adapt_8, _63)), String_var(_64), Func_var(Func_new(_x2c_gensym_func_adapt_9, _65)), String_var(_66), Func_var(Func_new(_x2c_gensym_func_adapt_10, _76)), String_var(_77), Func_var(Func_new(_x2c_gensym_func_adapt_11, _83)), String_var(_84), Func_var(Func_new(_x2c_gensym_func_adapt_12, _76)), String_var(_85), Func_var(Func_new(_x2c_gensym_func_adapt_13, _76)), String_var(_86), Func_var(Func_new(_x2c_gensym_func_adapt_14, _92)), String_var(_93), Func_var(Func_new(_x2c_gensym_func_adapt_15, _103)), String_var(_104), Func_var(Func_new(_x2c_gensym_func_adapt_16, _103)), String_var(_105), Func_var(Func_new(_x2c_gensym_func_adapt_17, _116)), String_var(_117), Func_var(Func_new(_x2c_gensym_func_adapt_18, _125)), String_var(_126), Func_var(Func_new(_x2c_gensym_func_adapt_19, _125)), String_var(_127), Func_var(Func_new(_x2c_gensym_func_adapt_20, _133)), String_var(_134), Func_var(Func_new(_x2c_gensym_func_adapt_21, _133)), String_var(_135), Func_var(Func_new(_x2c_gensym_func_adapt_22, _142)), String_var(_143), Func_var(Func_new(_x2c_gensym_func_adapt_23, _149)), String_var(_150), Func_var(Func_new(_x2c_gensym_func_adapt_24, _149)), String_var(_151), Func_var(Func_new(_x2c_gensym_func_adapt_25, _157)), String_var(_158), Func_var(Func_new(_x2c_gensym_func_adapt_26, _159)), String_var(_160), Func_var(Func_new(_x2c_gensym_func_adapt_27, _40)), String_var(_161), Func_var(Func_new(_x2c_gensym_func_adapt_28, _45)), String_var(_162), Func_var(Func_new(_x2c_gensym_func_adapt_29, _45)), String_var(_163), Func_var(Func_new(_x2c_gensym_func_adapt_30, _65)), String_var(_164), Func_var(Func_new(_x2c_gensym_func_adapt_31, _103)), String_var(_165), Func_var(Func_new(_x2c_gensym_func_adapt_32, _166)), String_var(_167), Func_var(Func_new(_x2c_gensym_func_adapt_33, _149)), String_var(_168), Func_var(Func_new(_x2c_gensym_func_adapt_34, _149)), String_var(_169), Func_var(Func_new(_x2c_gensym_func_adapt_35, _159)))))
+_x2c_gensym_initializer_choice_A8155D0F_0((f6_native___callback_targets = Map_update_n(Map_new(), 38, String_var(_30), Func_var(Func_new(_x2c_gensym_func_adapt_0, _40)), String_var(_41), Func_var(Func_new(_x2c_gensym_func_adapt_1, _40)), String_var(_42), Func_var(Func_new(_x2c_gensym_func_adapt_2, _45)), String_var(_46), Func_var(Func_new(_x2c_gensym_func_adapt_3, _45)), String_var(_47), Func_var(Func_new(_x2c_gensym_func_adapt_4, _53)), String_var(_54), Func_var(Func_new(_x2c_gensym_func_adapt_5, _40)), String_var(_55), Func_var(Func_new(_x2c_gensym_func_adapt_6, _40)), String_var(_56), Func_var(Func_new(_x2c_gensym_func_adapt_7, _53)), String_var(_57), Func_var(Func_new(_x2c_gensym_func_adapt_8, _63)), String_var(_64), Func_var(Func_new(_x2c_gensym_func_adapt_9, _65)), String_var(_66), Func_var(Func_new(_x2c_gensym_func_adapt_10, _76)), String_var(_77), Func_var(Func_new(_x2c_gensym_func_adapt_11, _83)), String_var(_84), Func_var(Func_new(_x2c_gensym_func_adapt_12, _76)), String_var(_85), Func_var(Func_new(_x2c_gensym_func_adapt_13, _76)), String_var(_86), Func_var(Func_new(_x2c_gensym_func_adapt_14, _92)), String_var(_93), Func_var(Func_new(_x2c_gensym_func_adapt_15, _94)), String_var(_95), Func_var(Func_new(_x2c_gensym_func_adapt_16, _105)), String_var(_106), Func_var(Func_new(_x2c_gensym_func_adapt_17, _105)), String_var(_107), Func_var(Func_new(_x2c_gensym_func_adapt_18, _118)), String_var(_119), Func_var(Func_new(_x2c_gensym_func_adapt_19, _127)), String_var(_128), Func_var(Func_new(_x2c_gensym_func_adapt_20, _127)), String_var(_129), Func_var(Func_new(_x2c_gensym_func_adapt_21, _135)), String_var(_136), Func_var(Func_new(_x2c_gensym_func_adapt_22, _135)), String_var(_137), Func_var(Func_new(_x2c_gensym_func_adapt_23, _144)), String_var(_145), Func_var(Func_new(_x2c_gensym_func_adapt_24, _151)), String_var(_152), Func_var(Func_new(_x2c_gensym_func_adapt_25, _151)), String_var(_153), Func_var(Func_new(_x2c_gensym_func_adapt_26, _159)), String_var(_160), Func_var(Func_new(_x2c_gensym_func_adapt_27, _161)), String_var(_162), Func_var(Func_new(_x2c_gensym_func_adapt_28, _40)), String_var(_163), Func_var(Func_new(_x2c_gensym_func_adapt_29, _45)), String_var(_164), Func_var(Func_new(_x2c_gensym_func_adapt_30, _45)), String_var(_165), Func_var(Func_new(_x2c_gensym_func_adapt_31, _65)), String_var(_166), Func_var(Func_new(_x2c_gensym_func_adapt_32, _94)), String_var(_167), Func_var(Func_new(_x2c_gensym_func_adapt_33, _105)), String_var(_168), Func_var(Func_new(_x2c_gensym_func_adapt_34, _169)), String_var(_170), Func_var(Func_new(_x2c_gensym_func_adapt_35, _151)), String_var(_171), Func_var(Func_new(_x2c_gensym_func_adapt_36, _151)), String_var(_172), Func_var(Func_new(_x2c_gensym_func_adapt_37, _161)))))
 static Func _native_target(String name);
 static pthread_once_t f8_sessions___lisp_initialize_once;
 _x2c_gensym_initializer_choice_A8155D0F_1((f8_sessions___lisp_initialize_once =(pthread_once_t) PTHREAD_ONCE_INIT))
@@ -410,7 +416,7 @@ static Var f8_sessions____cell(Scope * owner, Var value);
 static Var f8_sessions____cell_load(Var cell);
 static void f8_sessions____cell_store(Var cell, Var value);
 static String f8_sessions___lisp_standard_source;
-_x2c_gensym_initializer_choice_A8155D0F_2((f8_sessions___lisp_standard_source = _170))
+_x2c_gensym_initializer_choice_A8155D0F_2((f8_sessions___lisp_standard_source = _173))
 static void f8_sessions____install_specials(Lisp lisp);
 static Var f8_sessions____special_stub(void);
 static Var f10_primitives____bool(int x);
@@ -554,6 +560,8 @@ static Var _x2c_gensym_func_adapt_32(Func _x2c_gensym_func_binding_32, const Fun
 static Var _x2c_gensym_func_adapt_33(Func _x2c_gensym_func_binding_33, const FuncArg * _x2c_gensym_func_argv_33);
 static Var _x2c_gensym_func_adapt_34(Func _x2c_gensym_func_binding_34, const FuncArg * _x2c_gensym_func_argv_34);
 static Var _x2c_gensym_func_adapt_35(Func _x2c_gensym_func_binding_35, const FuncArg * _x2c_gensym_func_argv_35);
+static Var _x2c_gensym_func_adapt_36(Func _x2c_gensym_func_binding_36, const FuncArg * _x2c_gensym_func_argv_36);
+static Var _x2c_gensym_func_adapt_37(Func _x2c_gensym_func_binding_37, const FuncArg * _x2c_gensym_func_argv_37);
 typedef struct _x2c_gensym_defer_env_15{
   const void * _x2c_gensym_defer_capture_21;  const void * _x2c_gensym_defer_capture_22;
 }
@@ -565,7 +573,7 @@ typedef struct _x2c_gensym_defer_env_16{
 _x2c_gensym_defer_env_16;
 static void _x2c_gensym_defer_cleanup_21(void * _x2c_gensym_defer_opaque_21);
 static void _x2c_gensym_defer_cleanup_22(void * _x2c_gensym_defer_opaque_22);
-static Var _x2c_gensym_func_adapt_36(Func _x2c_gensym_func_binding_36, const FuncArg * _x2c_gensym_func_argv_36);
+static Var _x2c_gensym_func_adapt_38(Func _x2c_gensym_func_binding_38, const FuncArg * _x2c_gensym_func_argv_38);
 static void _x2c_gensym_defer_cleanup_23(void * _x2c_gensym_defer_opaque_23);
 static void _x2c_gensym_defer_cleanup_24(void * _x2c_gensym_defer_opaque_24);
 int x2c_register_builtin_descriptor(Symbol, VarMethods);
@@ -671,98 +679,101 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _90 = cons(_12, _89);
   _91 = List_var(_90);
   _92 = cons(_91, _15);
-  _93 = String_new("String_map");
-  _94 = String_new("String");
-  _95 = String_var(_94);
-  _96 = cons(_95, NULL);
-  _97 = List_var(_96);
-  _98 = cons(_97, _17);
+  _93 = String_new("Array_find");
+  _94 = cons(_75, _15);
+  _95 = String_new("String_map");
+  _96 = String_new("String");
+  _97 = String_var(_96);
+  _98 = cons(_97, NULL);
   _99 = List_var(_98);
-  _100 = cons(_99, NULL);
-  _101 = cons(_12, _100);
-  _102 = List_var(_101);
-  _103 = cons(_102, _96);
-  _104 = String_new("String_filter");
-  _105 = String_new("Iter_init");
-  _106 = String_new("Iter");
-  _107 = String_var(_106);
-  _108 = cons(_107, NULL);
-  _109 = List_var(_108);
-  _110 = cons(_16, _23);
-  _111 = cons(_109, _110);
-  _112 = List_var(_111);
-  _113 = cons(_112, NULL);
-  _114 = cons(_12, _113);
-  _115 = List_var(_114);
-  _116 = cons(_115, _108);
-  _117 = String_new("Iter_map_into");
-  _118 = cons(_109, NULL);
-  _119 = cons(_16, _118);
-  _120 = cons(_109, _119);
-  _121 = List_var(_120);
-  _122 = cons(_121, NULL);
-  _123 = cons(_12, _122);
-  _124 = List_var(_123);
-  _125 = cons(_124, _108);
-  _126 = String_new("Iter_filter_into");
-  _127 = String_new("Iter_zip_with_into");
-  _128 = cons(_109, _120);
-  _129 = List_var(_128);
-  _130 = cons(_129, NULL);
-  _131 = cons(_12, _130);
-  _132 = List_var(_131);
-  _133 = cons(_132, _108);
-  _134 = String_new("Iter_map2_into");
-  _135 = String_new("Iter_scan_into");
-  _136 = cons(_16, _119);
-  _137 = cons(_109, _136);
-  _138 = List_var(_137);
-  _139 = cons(_138, NULL);
-  _140 = cons(_12, _139);
-  _141 = List_var(_140);
-  _142 = cons(_141, _108);
-  _143 = String_new("Iter_any");
-  _144 = cons(_109, _17);
-  _145 = List_var(_144);
-  _146 = cons(_145, NULL);
-  _147 = cons(_12, _146);
-  _148 = List_var(_147);
-  _149 = cons(_148, _44);
-  _150 = String_new("Iter_all");
-  _151 = String_new("Iter_foldl");
-  _152 = cons(_109, _23);
-  _153 = List_var(_152);
-  _154 = cons(_153, NULL);
-  _155 = cons(_12, _154);
-  _156 = List_var(_155);
-  _157 = cons(_156, _15);
-  _158 = String_new("Iter_find");
-  _159 = cons(_148, _15);
-  _160 = String_new("Lisp_List_filter");
-  _161 = String_new("Lisp_List_any");
-  _162 = String_new("Lisp_List_all");
-  _163 = String_new("Lisp_List_find");
-  _164 = String_new("Lisp_String_filter");
-  _165 = String_new("Lisp_Iter_filter");
-  _166 = cons(_148, _108);
-  _167 = String_new("Lisp_Iter_any");
-  _168 = String_new("Lisp_Iter_all");
-  _169 = String_new("Lisp_Iter_find");
-  _170 = String_new("// x2c Lisp standard environment\n\n(def nil ())\n(def true \'true)\n(def false nil)\n\n// Native value and list boundary\n\n(def car (bind \"Var_car\" nil))\n(def cdr (bind \"Var_cdr\" nil))\n(def cons (bind \"Var_cons\" nil))\n(def atom? (bind \"lisp_atom\" nil))\n(def pair? (bind \"lisp_pair\" nil))\n(def list? (bind \"lisp_list\" nil))\n(def eq? (bind \"lisp_eq\" nil))\n(def type (bind \"lisp_type\" nil))\n(def number? (bind \"lisp_number\" nil))\n(def string? (bind \"lisp_string\" nil))\n(def symbol? (bind \"lisp_symbol\" nil))\n(def procedure? (bind \"lisp_procedure\" nil))\n(def reverse (bind \"List_reverse\" nil))\n(def length (bind \"List_len\" nil))\n(def _match (bind \"List_match\" nil))\n(def match-replace (bind \"lisp_match_replace\" nil))\n(def search (bind \"List_search\" nil))\n(def _search-replace (bind \"List_search_replace\" nil))\n\n// Native number and text boundary\n\n(def _add (bind \"lisp_add\" nil))\n(def _binary (bind \"Var_binary\" nil))\n(def _compare (bind \"lisp_compare\" nil))\n(def str (bind \"lisp_str\" nil))\n(def repr (bind \"lisp_repr\" nil))\n(def string-length (bind \"String_len\" nil))\n(def _string-append (bind \"lisp_string_append\" nil))\n(def substring (bind \"lisp_substring\" nil))\n(def string-downcase (bind \"lisp_string_downcase\" nil))\n\n// Definition and control vocabulary\n\n(def defmacro\n  (macro (name params body)\n    `(def ,name (macro ,params ,body))))\n\n(defmacro defun (name params body)\n  `(def ,name (lambda ,params ,body)))\n\n(defmacro if (test ontrue onfalse)\n  `(cond (,test ,ontrue) (true ,onfalse)))\n\n(defun list (. values) values)\n(def equal? eq?)\n\n(defmacro and (. forms)\n  (if (null? forms)\n      true\n      (if (null? (cdr forms))\n          (car forms)\n          `(if ,(car forms) (and ,@(cdr forms)) false))))\n\n(defmacro or (. forms)\n  (if (null? forms)\n      false\n      (if (null? (cdr forms))\n          (car forms)\n          `((lambda (_or_value)\n              (if _or_value _or_value (or ,@(cdr forms))))\n            ,(car forms)))))\n\n(def begin (bind \"lisp_begin\" nil))\n(def append (bind \"lisp_append\" nil))\n\n// These nine are variadic, and a variadic lambda cannot be prepared, so\n// written in Lisp they would pull every arithmetic call in a compiled\n// body back onto the evaluator.\n\n(def + (bind \"lisp_plus\" nil))\n(def - (bind \"lisp_minus\" nil))\n(def * (bind \"lisp_times\" nil))\n(def / (bind \"lisp_divide\" nil))\n\n(def = (bind \"lisp_eq_chain\" nil))\n(def < (bind \"lisp_lt_chain\" nil))\n(def <= (bind \"lisp_le_chain\" nil))\n(def > (bind \"lisp_gt_chain\" nil))\n(def >= (bind \"lisp_ge_chain\" nil))\n\n(def string-append (bind \"lisp_string_append_all\" nil))\n\n(defmacro let (bindings body)\n  `((lambda ,(map car bindings) ,body) ,@(map cadr bindings)))\n\n(defmacro let* (bindings body)\n  (if (null? bindings)\n      body\n      `(let (,(car bindings)) (let* ,(cdr bindings) ,body))))\n\n// Tries each clause\'s pattern against subject in order and evaluates the\n// first body whose pattern matches, with that pattern\'s binders in scope.\n// A final (else body) clause runs when nothing matched.\n(defmacro match-case (subject . clauses)\n  (foldl\n    (lambda (rest clause)\n      (if (equal? (car clause) \'else) (cadr clause)\n        `(let ((_match-case-subject ,subject))\n           (let ((_match-case-bindings\n                   (match _match-case-subject \',(car clause))))\n             (cond (_match-case-bindings\n                     (let ,(_binder-lets \'_match-case-bindings\n                                         (_binders (car clause)))\n                       ,(cadr clause)))\n                   (true ,rest))))))\n    nil\n    (reverse clauses)))\n\n// Short aliases for common operations\n\n(def add _add)\n(def len length)\n(def lower string-downcase)\n\n// Standard algorithms from lib/lisp-targets/algorithms.x.\n\n(def last (bind \"lisp_last\" nil))\n(def member (bind \"lisp_member\" nil))\n(def assoc (bind \"lisp_assoc\" nil))\n(def not (bind \"lisp_not\" nil))\n(def null? (bind \"lisp_null\" nil))\n(def sub (bind \"lisp_sub\" nil))\n(def mul (bind \"lisp_mul\" nil))\n(def div (bind \"lisp_div\" nil))\n(def mod (bind \"lisp_mod\" nil))\n(def % mod)\n(def caar (bind \"lisp_caar\" nil))\n(def cadr (bind \"lisp_cadr\" nil))\n(def cdar (bind \"lisp_cdar\" nil))\n(def cddr (bind \"lisp_cddr\" nil))\n(def caaar (bind \"lisp_caaar\" nil))\n(def caadr (bind \"lisp_caadr\" nil))\n(def cadar (bind \"lisp_cadar\" nil))\n(def caddr (bind \"lisp_caddr\" nil))\n(def cdaar (bind \"lisp_cdaar\" nil))\n(def cdadr (bind \"lisp_cdadr\" nil))\n(def cddar (bind \"lisp_cddar\" nil))\n(def cdddr (bind \"lisp_cdddr\" nil))\n(def match (bind \"lisp_match\" nil))\n(def bound (bind \"lisp_bound\" nil))\n(def search-replace (bind \"lisp_search_replace\" nil))\n(def binder? (bind \"lisp_binder\" nil))\n(def _binders (bind \"lisp_binders\" nil))\n(def _binder-lets (bind \"lisp_binder_lets\" nil))\n\n// These callbacks run before the Func runtime is installed. They read\n// through private names so a session that redefines car, cdr, or cons\n// keeps them working.\n(def List_car car)\n(def List_cdr cdr)\n(def Var_cons cons)\n(def List_reverse reverse)\n(defun _filter-onto (keep values kept)\n  (if (equal? values nil) (List_reverse kept)\n      (_filter-onto keep (List_cdr values)\n                    (if (equal? (keep (List_car values)) nil) kept\n                        (Var_cons (List_car values) kept)))))\n(defun filter (keep values) (_filter-onto keep values nil))\n(defun _map-onto (procedure values mapped)\n  (if (equal? values nil) (List_reverse mapped)\n      (_map-onto procedure (List_cdr values)\n                 (Var_cons (procedure (List_car values)) mapped))))\n(defun map (procedure values) (_map-onto procedure values nil))\n(defun foldl (procedure initial values)\n  (if (equal? values nil) initial\n      (foldl procedure (procedure initial (List_car values))\n             (List_cdr values))))\n(def reduce foldl)\n\n// File operations and recursive list algorithms\n\n(def read-file (bind \"lisp_read_file\" nil))\n(def write-file (bind \"lisp_write_file\" nil))\n\n(def sort (bind \"List_sort\" nil))\n(def List_sort sort)\n\n(defun fib (value)\n  (if (or (= value 0) (= value 1))\n      value\n      (+ (fib (- value 2)) (fib (- value 1)))))\n\n(defun subst (replacement target tree)\n  (if (atom? tree)\n      (if (equal? tree target) replacement tree)\n      (cons (subst replacement target (car tree))\n            (subst replacement target (cdr tree)))))\n\n// x2c value operations\n//\n// A Lisp value is an x2c Var: a Lisp list is a List, a Lisp string is a\n// String, a quoted name is a Symbol. These names are the library\'s own\n// operations over those types, so a macro and the program it generates\n// compute with the same List, String, Map, and Array.\n//\n// The Lisp core keeps its own spellings for cons-cell and text work:\n// `car`, `cdr`, `cons`, `length`, `reverse`, `string-append`, `substring`,\n// `lower`, `str`, and `repr` are unchanged and reach the same code.\n\n// Each `Owner.member` named here binds the library operation\n// `Owner_member`; the few that bind another native are defined by hand.\n// A Lisp macro expands again at each call, so the generators below call\n// `cond` and native operations rather than `if`, `let`, or `map`.\n(def _list_map (bind \"List_map\" nil))\n(def _string_replace (bind \"String_replace\" nil))\n(defmacro _natives (. names)\n  (cons \'begin\n        (_list_map\n          names\n          (lambda (name)\n            `(def ,name (bind ,(_string_replace (str name) \".\" \"_\") nil))))))\n\n// An iterator operation takes its destination last. A call that omits it\n// gets a fresh Iter, allocated in the current Scope; a call with explicit\n// storage passes it. The REPL binds lowered iterator calls the same way.\n(defun C.iterator.call (explicit arity)\n  (let ((fresh (bind \"Iter_new\" nil)))\n    (lambda (. arguments)\n      (apply explicit\n             (if (eq? (length arguments) arity)\n                 (append arguments (list (fresh)))\n                 arguments)))))\n\n// List\n\n(_natives List.concat List.getindex List.last List.index List.contains\n  List.assoc List.get\n  List.array List.sort List.map List.map2 List.sort_by List.sort_with\n  List.zip_with List.foldl List.unique List.sublis List.flatten\n  List.flatten_all List.nth_cdr List.tail List.head List.subseq List.getslice\n  List.hash List.compare List.replace List.match_replace List.truth\n  List.listchar List.listshort List.listint List.listfloat List.listdbl\n  List.liststring List.listsymbol List.cdddr List.cddddr)\n(def List_concat List.concat)\n(def List.filter (bind \"Lisp_List_filter\" nil))\n(def List.any    (bind \"Lisp_List_any\" nil))\n(def List.all    (bind \"Lisp_List_all\" nil))\n(def List.find   (bind \"Lisp_List_find\" nil))\n(def List.iter   (C.iterator.call (bind \"List_iter_into\" nil) 1))\n\n// Array\n\n(_natives Array.new Array.len Array.push Array.getindex Array.setindex\n  Array.take_last Array.shift Array.unshift Array.insert Array.remove\n  Array.find Array.contains Array.count Array.join Array.list Array.map\n  Array.map2 Array.sort_by Array.sort_with Array.foldl Array.copy\n  Array.getslice Array.concat Array.reverse Array.compare Array.sort\n  Array.equal Array.indexof Array.truth Array.capacity Array.remslice\n  Array.setslice Array.splice Array.updateindex Array.postfixindex\n  Array.clear Array.heap_push Array.heapify Array.heap_pop Array.pop\n  Array.resize Array.truncate)\n(def Array.iter (C.iterator.call (bind \"Array_iter_into\" nil) 1))\n\n// Map\n\n(_natives Map.new Map.len Map.get Map.getindex Map.setindex Map.contains\n  Map.del Map.getdefault Map.setdefault Map.list Map.copy Map.merge\n  Map.compare Map.equal Map.truth Map.new_capacity Map.updateindex\n  Map.postfixindex Map.set Map.get_hashed)\n(def Map.iter      (C.iterator.call (bind \"Map_iter_into\" nil) 1))\n(def Map.keys      (C.iterator.call (bind \"Map_keys_into\" nil) 1))\n(def Map.enumerate (C.iterator.call (bind \"Map_enumerate_into\" nil) 1))\n\n// String\n\n(_natives String.len String.format String.find String.rfind String.count\n  String.contains String.startswith String.endswith String.getindex\n  String.getslice String.add String.lower String.upper String.capitalize\n  String.repeat String.replace String.join String.split String.split_lines\n  String.partition String.rpartition String.find_all String.remove_prefix\n  String.remove_suffix String.escape String.unescape String.contains_digit\n  String.is_alpha String.is_alpha_under String.is_digit String.is_alnum\n  String.is_alnum_under String.is_identifier String.is_space String.is_lower\n  String.is_lower_under String.is_upper String.is_upper_under String.compare\n  String.hash String.symbol String.dedent String.keep String.reject\n  String.squeeze String.pad_left String.pad_right String.pad_center\n  String.new_fill String.find_within String.replace_n String.split_n\n  String.map String.intern String.parse String.parse_char String.withindex\n  String.truth String.sha256)\n(def String_format String.format)\n(def String.strip   (bind \"lisp_string_strip\" nil))\n(def String.lstrip  (bind \"lisp_string_lstrip\" nil))\n(def String.rstrip  (bind \"lisp_string_rstrip\" nil))\n(def String.filter  (bind \"Lisp_String_filter\" nil))\n(def String.new_len (bind \"_string_new_len\" nil))\n(def String.iter    (C.iterator.call (bind \"String_iter_into\" nil) 1))\n\n// Iter\n\n(_natives Iter.foldl Iter.next Iter.min Iter.max Iter.list Iter.array\n  Iter.count Iter.sum Iter.product)\n(def Iter.filter (bind \"Lisp_Iter_filter\" nil))\n(def Iter.any    (bind \"Lisp_Iter_any\" nil))\n(def Iter.all    (bind \"Lisp_Iter_all\" nil))\n(def Iter.find   (bind \"Lisp_Iter_find\" nil))\n(def Var.iter (C.iterator.call (bind \"Var_iter_into\" nil) 1))\n(def range (C.iterator.call (bind \"range_into\" nil) 3))\n(def Iter.map (C.iterator.call (bind \"Iter_map_into\" nil) 2))\n(def Iter.zip (C.iterator.call (bind \"Iter_zip_into\" nil) 2))\n(def Iter.zip_with (C.iterator.call (bind \"Iter_zip_with_into\" nil) 3))\n(def Iter.map2 (C.iterator.call (bind \"Iter_map2_into\" nil) 3))\n(def Iter.chain (C.iterator.call (bind \"Iter_chain_into\" nil) 2))\n(def Iter.enumerate (C.iterator.call (bind \"Iter_enumerate_into\" nil) 2))\n(def Iter.repeat (C.iterator.call (bind \"Iter_repeat_into\" nil) 2))\n(def Iter.head (C.iterator.call (bind \"Iter_head_into\" nil) 2))\n(def Iter.accumulate (C.iterator.call (bind \"Iter_accumulate_into\" nil) 2))\n(def Iter.scan (C.iterator.call (bind \"Iter_scan_into\" nil) 3))\n(def Iter.unique (C.iterator.call (bind \"Iter_unique_into\" nil) 1))\n\n// Var and Symbol\n\n(_natives Var.tag Var.kind Var.is Var.parse Var.convert Var.integer\n  Var.floating Var.is_null Var.is_void Var.list Var.array Var.map Var.string\n  Var.symbol Var.char Var.short Var.int Var.long Var.long_long Var.unsigned\n  Var.ushort Var.uchar Var.uint Var.ulong Var.ulong_long Var.float Var.double\n  Var.long_double Var.long_value Var.ulong_value Var.long_long_value\n  Var.ulong_long_value Var.long_double_value Var.compare Var.contains\n  Var.hash Var.same Var.is_atom Var.is_atom_binder Var.is_binder\n  Var.is_list_binder Var.is_match_op Var.is_floating Var.is_integer\n  Var.is_pointer Var.is_reference Var.is_object Var.is_wide Var.is_nil\n  Var.add Var.sub Var.mul Var.div Var.mod Var.neg Var.truth Var.setindex\n  Var.updateindex Var.postfixindex Var.listchar Var.listshort Var.listint\n  Var.listfloat Var.listdbl Var.liststring Var.listsymbol Var.cdddr\n  Var.cddddr Var.json Var.pretty_json Var.clone_wide Var.getindex Var.null)\n(_natives Symbol.len Symbol.str Symbol.compare Symbol.first Symbol.last)\n(def Symbol.new_len (bind \"_symbol_new_len\" nil))\n(def Symbol.parse   (bind \"_symbol_parse\" nil))\n\n// A compound selector `List.cxxr` or `Var.cxxr` applies the car and cdr\n// steps its name spells, right to left. The steps read raw slots so\n// exhaustion keeps `void` distinct from `nil`. The source declarations\n// remain in the optional list-selectors module.\n(defun _selector_car (value)\n  (if (= (Var.is_void value) 1) value (car value)))\n(defun _selector_cdr (value)\n  (if (= (Var.is_void value) 1) nil (cdr value)))\n(defun _selector_steps (spelling index last)\n  (cond ((= index last) \'value)\n        (true\n          (cons (cond ((equal? (substring spelling index (+ index 1)) \"a\")\n                       \'_selector_car)\n                      (true \'_selector_cdr))\n                (cons (_selector_steps spelling (+ index 1) last) nil)))))\n(defmacro _selectors (. names)\n  (cons \'begin\n        (_list_map\n          names\n          (lambda (name)\n            `(def ,name\n               (lambda (value)\n                 ,(_selector_steps\n                    (str name)\n                    (+ (String.find (str name) \".\") 2)\n                    (- (string-length (str name)) 1))))))))\n(_selectors List.caaaar List.caaadr List.caaar List.caadar List.caaddr\n  List.caadr List.cadaar List.cadadr List.cadar List.caddar List.cadddr\n  List.cdaaar List.cdaadr List.cdaar List.cdadar List.cdaddr List.cdadr\n  List.cdar List.cddaar List.cddadr List.cddar List.cdddar)\n(_selectors Var.caaaar Var.caaadr Var.caaar Var.caadar Var.caaddr Var.caadr\n  Var.cadaar Var.cadadr Var.cadar Var.caddar Var.cadddr Var.cdaaar\n  Var.cdaadr Var.cdaar Var.cdadar Var.cdaddr Var.cdadr Var.cdar Var.cddaar\n  Var.cddadr Var.cddar Var.cdddar)\n");
-  _171 = Symbol_var(1473096);
-  _172 = cons(_171, NULL);
-  _173 = List_var(_172);
-  _174 = cons(_173, NULL);
-  _175 = List_var(_174);
-  _176 = cons(_175, NULL);
-  _177 = cons(_12, _176);
+  _100 = cons(_99, _17);
+  _101 = List_var(_100);
+  _102 = cons(_101, NULL);
+  _103 = cons(_12, _102);
+  _104 = List_var(_103);
+  _105 = cons(_104, _98);
+  _106 = String_new("String_filter");
+  _107 = String_new("Iter_init");
+  _108 = String_new("Iter");
+  _109 = String_var(_108);
+  _110 = cons(_109, NULL);
+  _111 = List_var(_110);
+  _112 = cons(_16, _23);
+  _113 = cons(_111, _112);
+  _114 = List_var(_113);
+  _115 = cons(_114, NULL);
+  _116 = cons(_12, _115);
+  _117 = List_var(_116);
+  _118 = cons(_117, _110);
+  _119 = String_new("Iter_map_into");
+  _120 = cons(_111, NULL);
+  _121 = cons(_16, _120);
+  _122 = cons(_111, _121);
+  _123 = List_var(_122);
+  _124 = cons(_123, NULL);
+  _125 = cons(_12, _124);
+  _126 = List_var(_125);
+  _127 = cons(_126, _110);
+  _128 = String_new("Iter_filter_into");
+  _129 = String_new("Iter_zip_with_into");
+  _130 = cons(_111, _122);
+  _131 = List_var(_130);
+  _132 = cons(_131, NULL);
+  _133 = cons(_12, _132);
+  _134 = List_var(_133);
+  _135 = cons(_134, _110);
+  _136 = String_new("Iter_map2_into");
+  _137 = String_new("Iter_scan_into");
+  _138 = cons(_16, _121);
+  _139 = cons(_111, _138);
+  _140 = List_var(_139);
+  _141 = cons(_140, NULL);
+  _142 = cons(_12, _141);
+  _143 = List_var(_142);
+  _144 = cons(_143, _110);
+  _145 = String_new("Iter_any");
+  _146 = cons(_111, _17);
+  _147 = List_var(_146);
+  _148 = cons(_147, NULL);
+  _149 = cons(_12, _148);
+  _150 = List_var(_149);
+  _151 = cons(_150, _44);
+  _152 = String_new("Iter_all");
+  _153 = String_new("Iter_foldl");
+  _154 = cons(_111, _23);
+  _155 = List_var(_154);
+  _156 = cons(_155, NULL);
+  _157 = cons(_12, _156);
+  _158 = List_var(_157);
+  _159 = cons(_158, _15);
+  _160 = String_new("Iter_find");
+  _161 = cons(_150, _15);
+  _162 = String_new("Lisp_List_filter");
+  _163 = String_new("Lisp_List_any");
+  _164 = String_new("Lisp_List_all");
+  _165 = String_new("Lisp_List_find");
+  _166 = String_new("Lisp_Array_find");
+  _167 = String_new("Lisp_String_filter");
+  _168 = String_new("Lisp_Iter_filter");
+  _169 = cons(_150, _110);
+  _170 = String_new("Lisp_Iter_any");
+  _171 = String_new("Lisp_Iter_all");
+  _172 = String_new("Lisp_Iter_find");
+  _173 = String_new("// x2c Lisp standard environment\n\n(def nil ())\n(def true \'true)\n(def false nil)\n\n// Native value and list boundary\n\n(def car (bind \"Var_car\" nil))\n(def cdr (bind \"Var_cdr\" nil))\n(def cons (bind \"Var_cons\" nil))\n(def atom? (bind \"lisp_atom\" nil))\n(def pair? (bind \"lisp_pair\" nil))\n(def list? (bind \"lisp_list\" nil))\n(def eq? (bind \"lisp_eq\" nil))\n(def type (bind \"lisp_type\" nil))\n(def number? (bind \"lisp_number\" nil))\n(def string? (bind \"lisp_string\" nil))\n(def symbol? (bind \"lisp_symbol\" nil))\n(def procedure? (bind \"lisp_procedure\" nil))\n(def reverse (bind \"List_reverse\" nil))\n(def length (bind \"List_len\" nil))\n(def _match (bind \"List_match\" nil))\n(def match-replace (bind \"lisp_match_replace\" nil))\n(def search (bind \"List_search\" nil))\n(def _search-replace (bind \"List_search_replace\" nil))\n\n// Native number and text boundary\n\n(def _add (bind \"lisp_add\" nil))\n(def _binary (bind \"Var_binary\" nil))\n(def _compare (bind \"lisp_compare\" nil))\n(def str (bind \"lisp_str\" nil))\n(def repr (bind \"lisp_repr\" nil))\n(def string-length (bind \"String_len\" nil))\n(def _string-append (bind \"lisp_string_append\" nil))\n(def substring (bind \"lisp_substring\" nil))\n(def string-downcase (bind \"lisp_string_downcase\" nil))\n\n// Definition and control vocabulary\n\n(def defmacro\n  (macro (name params body)\n    `(def ,name (macro ,params ,body))))\n\n(defmacro defun (name params body)\n  `(def ,name (lambda ,params ,body)))\n\n(defmacro if (test ontrue onfalse)\n  `(cond (,test ,ontrue) (true ,onfalse)))\n\n(defun list (. values) values)\n(def equal? eq?)\n\n(defmacro and (. forms)\n  (if (null? forms)\n      true\n      (if (null? (cdr forms))\n          (car forms)\n          `(if ,(car forms) (and ,@(cdr forms)) false))))\n\n(defmacro or (. forms)\n  (if (null? forms)\n      false\n      (if (null? (cdr forms))\n          (car forms)\n          `((lambda (_or_value)\n              (if _or_value _or_value (or ,@(cdr forms))))\n            ,(car forms)))))\n\n(def begin (bind \"lisp_begin\" nil))\n(def append (bind \"lisp_append\" nil))\n\n// These nine are variadic, and a variadic lambda cannot be prepared, so\n// written in Lisp they would pull every arithmetic call in a compiled\n// body back onto the evaluator.\n\n(def + (bind \"lisp_plus\" nil))\n(def - (bind \"lisp_minus\" nil))\n(def * (bind \"lisp_times\" nil))\n(def / (bind \"lisp_divide\" nil))\n\n(def = (bind \"lisp_eq_chain\" nil))\n(def < (bind \"lisp_lt_chain\" nil))\n(def <= (bind \"lisp_le_chain\" nil))\n(def > (bind \"lisp_gt_chain\" nil))\n(def >= (bind \"lisp_ge_chain\" nil))\n\n(def string-append (bind \"lisp_string_append_all\" nil))\n\n(defmacro let (bindings body)\n  `((lambda ,(map car bindings) ,body) ,@(map cadr bindings)))\n\n(defmacro let* (bindings body)\n  (if (null? bindings)\n      body\n      `(let (,(car bindings)) (let* ,(cdr bindings) ,body))))\n\n// Tries each clause\'s pattern against subject in order and evaluates the\n// first body whose pattern matches, with that pattern\'s binders in scope.\n// A final (else body) clause runs when nothing matched.\n(defmacro match-case (subject . clauses)\n  (foldl\n    (lambda (rest clause)\n      (if (equal? (car clause) \'else) (cadr clause)\n        `(let ((_match-case-subject ,subject))\n           (let ((_match-case-bindings\n                   (match _match-case-subject \',(car clause))))\n             (cond (_match-case-bindings\n                     (let ,(_binder-lets \'_match-case-bindings\n                                         (_binders (car clause)))\n                       ,(cadr clause)))\n                   (true ,rest))))))\n    nil\n    (reverse clauses)))\n\n// Short aliases for common operations\n\n(def add _add)\n(def len length)\n(def lower string-downcase)\n\n// Standard algorithms from lib/lisp-targets/algorithms.x.\n\n(def last (bind \"lisp_last\" nil))\n(def member (bind \"lisp_member\" nil))\n(def assoc (bind \"lisp_assoc\" nil))\n(def not (bind \"lisp_not\" nil))\n(def null? (bind \"lisp_null\" nil))\n(def sub (bind \"lisp_sub\" nil))\n(def mul (bind \"lisp_mul\" nil))\n(def div (bind \"lisp_div\" nil))\n(def mod (bind \"lisp_mod\" nil))\n(def % mod)\n(def caar (bind \"lisp_caar\" nil))\n(def cadr (bind \"lisp_cadr\" nil))\n(def cdar (bind \"lisp_cdar\" nil))\n(def cddr (bind \"lisp_cddr\" nil))\n(def caaar (bind \"lisp_caaar\" nil))\n(def caadr (bind \"lisp_caadr\" nil))\n(def cadar (bind \"lisp_cadar\" nil))\n(def caddr (bind \"lisp_caddr\" nil))\n(def cdaar (bind \"lisp_cdaar\" nil))\n(def cdadr (bind \"lisp_cdadr\" nil))\n(def cddar (bind \"lisp_cddar\" nil))\n(def cdddr (bind \"lisp_cdddr\" nil))\n(def match (bind \"lisp_match\" nil))\n(def bound (bind \"lisp_bound\" nil))\n(def search-replace (bind \"lisp_search_replace\" nil))\n(def binder? (bind \"lisp_binder\" nil))\n(def _binders (bind \"lisp_binders\" nil))\n(def _binder-lets (bind \"lisp_binder_lets\" nil))\n\n// These callbacks run before the Func runtime is installed. They read\n// through private names so a session that redefines car, cdr, or cons\n// keeps them working.\n(def List_car car)\n(def List_cdr cdr)\n(def Var_cons cons)\n(def List_reverse reverse)\n(defun _filter-onto (keep values kept)\n  (if (equal? values nil) (List_reverse kept)\n      (_filter-onto keep (List_cdr values)\n                    (if (equal? (keep (List_car values)) nil) kept\n                        (Var_cons (List_car values) kept)))))\n(defun filter (keep values) (_filter-onto keep values nil))\n(defun _map-onto (procedure values mapped)\n  (if (equal? values nil) (List_reverse mapped)\n      (_map-onto procedure (List_cdr values)\n                 (Var_cons (procedure (List_car values)) mapped))))\n(defun map (procedure values) (_map-onto procedure values nil))\n(defun foldl (procedure initial values)\n  (if (equal? values nil) initial\n      (foldl procedure (procedure initial (List_car values))\n             (List_cdr values))))\n(def reduce foldl)\n\n// File operations and recursive list algorithms\n\n(def read-file (bind \"lisp_read_file\" nil))\n(def write-file (bind \"lisp_write_file\" nil))\n\n(def sort (bind \"List_sort\" nil))\n(def List_sort sort)\n\n(defun fib (value)\n  (if (or (= value 0) (= value 1))\n      value\n      (+ (fib (- value 2)) (fib (- value 1)))))\n\n(defun subst (replacement target tree)\n  (if (atom? tree)\n      (if (equal? tree target) replacement tree)\n      (cons (subst replacement target (car tree))\n            (subst replacement target (cdr tree)))))\n\n// x2c value operations\n//\n// A Lisp value is an x2c Var: a Lisp list is a List, a Lisp string is a\n// String, a quoted name is a Symbol. These names are the library\'s own\n// operations over those types, so a macro and the program it generates\n// compute with the same List, String, Map, and Array.\n//\n// The Lisp core keeps its own spellings for cons-cell and text work:\n// `car`, `cdr`, `cons`, `length`, `reverse`, `string-append`, `substring`,\n// `lower`, `str`, and `repr` are unchanged and reach the same code.\n\n// Each `Owner.member` named here binds the library operation\n// `Owner_member`; the few that bind another native are defined by hand.\n// A Lisp macro expands again at each call, so the generators below call\n// `cond` and native operations rather than `if`, `let`, or `map`.\n(def _list_map (bind \"List_map\" nil))\n(def _string_replace (bind \"String_replace\" nil))\n(defmacro _natives (. names)\n  (cons \'begin\n        (_list_map\n          names\n          (lambda (name)\n            `(def ,name (bind ,(_string_replace (str name) \".\" \"_\") nil))))))\n\n// An iterator operation takes its destination last. A call that omits it\n// gets a fresh Iter, allocated in the current Scope; a call with explicit\n// storage passes it. The REPL binds lowered iterator calls the same way.\n(defun C.iterator.call (explicit arity)\n  (let ((fresh (bind \"Iter_new\" nil)))\n    (lambda (. arguments)\n      (apply explicit\n             (if (eq? (length arguments) arity)\n                 (append arguments (list (fresh)))\n                 arguments)))))\n\n// List\n\n(_natives List.concat List.getindex List.last List.index List.contains\n  List.assoc List.get\n  List.array List.sort List.map List.map2 List.sort_by List.sort_with\n  List.zip_with List.foldl List.unique List.sublis List.flatten\n  List.flatten_all List.nth_cdr List.tail List.head List.subseq List.getslice\n  List.hash List.compare List.replace List.match_replace List.truth\n  List.listchar List.listshort List.listint List.listfloat List.listdbl\n  List.liststring List.listsymbol List.cdddr List.cddddr)\n(def List_concat List.concat)\n(def List.filter (bind \"Lisp_List_filter\" nil))\n(def List.any    (bind \"Lisp_List_any\" nil))\n(def List.all    (bind \"Lisp_List_all\" nil))\n(def List.find   (bind \"Lisp_List_find\" nil))\n(def List.iter   (C.iterator.call (bind \"List_iter_into\" nil) 1))\n\n// Array\n\n(_natives Array.new Array.len Array.push Array.getindex Array.setindex\n  Array.take_last Array.shift Array.unshift Array.insert Array.remove\n  Array.index Array.contains Array.count Array.join Array.list Array.map\n  Array.map2 Array.sort_by Array.sort_with Array.foldl Array.copy\n  Array.getslice Array.concat Array.reverse Array.compare Array.sort\n  Array.equal Array.truth Array.capacity Array.remslice\n  Array.setslice Array.splice Array.updateindex Array.postfixindex\n  Array.clear Array.heap_push Array.heapify Array.heap_pop Array.pop\n  Array.resize Array.truncate)\n(def Array.find (bind \"Lisp_Array_find\" nil))\n(def Array.iter (C.iterator.call (bind \"Array_iter_into\" nil) 1))\n\n// Map\n\n(_natives Map.new Map.len Map.get Map.getindex Map.setindex Map.contains\n  Map.del Map.getdefault Map.setdefault Map.list Map.copy Map.merge\n  Map.compare Map.equal Map.truth Map.new_capacity Map.updateindex\n  Map.postfixindex Map.set Map.get_hashed)\n(def Map.iter      (C.iterator.call (bind \"Map_iter_into\" nil) 1))\n(def Map.keys      (C.iterator.call (bind \"Map_keys_into\" nil) 1))\n(def Map.enumerate (C.iterator.call (bind \"Map_enumerate_into\" nil) 1))\n\n// String\n\n(_natives String.len String.format String.find String.rfind String.count\n  String.contains String.startswith String.endswith String.getindex\n  String.getslice String.add String.lower String.upper String.capitalize\n  String.repeat String.replace String.join String.split String.split_lines\n  String.partition String.rpartition String.find_all String.remove_prefix\n  String.remove_suffix String.escape String.unescape String.contains_digit\n  String.is_alpha String.is_alpha_under String.is_digit String.is_alnum\n  String.is_alnum_under String.is_identifier String.is_space String.is_lower\n  String.is_lower_under String.is_upper String.is_upper_under String.compare\n  String.hash String.symbol String.dedent String.keep String.reject\n  String.squeeze String.pad_left String.pad_right String.pad_center\n  String.new_fill String.find_within String.replace_n String.split_n\n  String.map String.intern String.parse String.parse_char String.withindex\n  String.truth String.sha256)\n(def String_format String.format)\n(def String.strip   (bind \"lisp_string_strip\" nil))\n(def String.lstrip  (bind \"lisp_string_lstrip\" nil))\n(def String.rstrip  (bind \"lisp_string_rstrip\" nil))\n(def String.filter  (bind \"Lisp_String_filter\" nil))\n(def String.new_len (bind \"_string_new_len\" nil))\n(def String.iter    (C.iterator.call (bind \"String_iter_into\" nil) 1))\n\n// Iter\n\n(_natives Iter.foldl Iter.next Iter.min Iter.max Iter.list Iter.array\n  Iter.count Iter.sum Iter.product)\n(def Iter.filter (bind \"Lisp_Iter_filter\" nil))\n(def Iter.any    (bind \"Lisp_Iter_any\" nil))\n(def Iter.all    (bind \"Lisp_Iter_all\" nil))\n(def Iter.find   (bind \"Lisp_Iter_find\" nil))\n(def Var.iter (C.iterator.call (bind \"Var_iter_into\" nil) 1))\n(def range (C.iterator.call (bind \"range_into\" nil) 3))\n(def Iter.map (C.iterator.call (bind \"Iter_map_into\" nil) 2))\n(def Iter.zip (C.iterator.call (bind \"Iter_zip_into\" nil) 2))\n(def Iter.zip_with (C.iterator.call (bind \"Iter_zip_with_into\" nil) 3))\n(def Iter.map2 (C.iterator.call (bind \"Iter_map2_into\" nil) 3))\n(def Iter.chain (C.iterator.call (bind \"Iter_chain_into\" nil) 2))\n(def Iter.enumerate (C.iterator.call (bind \"Iter_enumerate_into\" nil) 2))\n(def Iter.repeat (C.iterator.call (bind \"Iter_repeat_into\" nil) 2))\n(def Iter.head (C.iterator.call (bind \"Iter_head_into\" nil) 2))\n(def Iter.accumulate (C.iterator.call (bind \"Iter_accumulate_into\" nil) 2))\n(def Iter.scan (C.iterator.call (bind \"Iter_scan_into\" nil) 3))\n(def Iter.unique (C.iterator.call (bind \"Iter_unique_into\" nil) 1))\n\n// Var and Symbol\n\n(_natives Var.tag Var.kind Var.is Var.parse Var.convert Var.integer\n  Var.floating Var.is_null Var.is_void Var.list Var.array Var.map Var.string\n  Var.symbol Var.char Var.short Var.int Var.long Var.long_long Var.unsigned\n  Var.ushort Var.uchar Var.uint Var.ulong Var.ulong_long Var.float Var.double\n  Var.long_double Var.long_value Var.ulong_value Var.long_long_value\n  Var.ulong_long_value Var.long_double_value Var.compare Var.contains\n  Var.hash Var.same Var.is_atom Var.is_atom_binder Var.is_binder\n  Var.is_list_binder Var.is_match_op Var.is_floating Var.is_integer\n  Var.is_pointer Var.is_reference Var.is_object Var.is_wide Var.is_nil\n  Var.add Var.sub Var.mul Var.div Var.mod Var.neg Var.truth Var.setindex\n  Var.updateindex Var.postfixindex Var.listchar Var.listshort Var.listint\n  Var.listfloat Var.listdbl Var.liststring Var.listsymbol Var.cdddr\n  Var.cddddr Var.json Var.pretty_json Var.clone_wide Var.getindex Var.null)\n(_natives Symbol.len Symbol.str Symbol.compare Symbol.first Symbol.last)\n(def Symbol.new_len (bind \"_symbol_new_len\" nil))\n(def Symbol.parse   (bind \"_symbol_parse\" nil))\n\n// A compound selector `List.cxxr` or `Var.cxxr` applies the car and cdr\n// steps its name spells, right to left. The steps read raw slots so\n// exhaustion keeps `void` distinct from `nil`. The source declarations\n// remain in the optional list-selectors module.\n(defun _selector_car (value)\n  (if (= (Var.is_void value) 1) value (car value)))\n(defun _selector_cdr (value)\n  (if (= (Var.is_void value) 1) nil (cdr value)))\n(defun _selector_steps (spelling index last)\n  (cond ((= index last) \'value)\n        (true\n          (cons (cond ((equal? (substring spelling index (+ index 1)) \"a\")\n                       \'_selector_car)\n                      (true \'_selector_cdr))\n                (cons (_selector_steps spelling (+ index 1) last) nil)))))\n(defmacro _selectors (. names)\n  (cons \'begin\n        (_list_map\n          names\n          (lambda (name)\n            `(def ,name\n               (lambda (value)\n                 ,(_selector_steps\n                    (str name)\n                    (+ (String.find (str name) \".\") 2)\n                    (- (string-length (str name)) 1))))))))\n(_selectors List.caaaar List.caaadr List.caaar List.caadar List.caaddr\n  List.caadr List.cadaar List.cadadr List.cadar List.caddar List.cadddr\n  List.cdaaar List.cdaadr List.cdaar List.cdadar List.cdaddr List.cdadr\n  List.cdar List.cddaar List.cddadr List.cddar List.cdddar)\n(_selectors Var.caaaar Var.caaadr Var.caaar Var.caadar Var.caaddr Var.caadr\n  Var.cadaar Var.cadadr Var.cadar Var.caddar Var.cadddr Var.cdaaar\n  Var.cdaadr Var.cdaar Var.cdadar Var.cdaddr Var.cdadr Var.cdar Var.cddaar\n  Var.cddadr Var.cddar Var.cdddar)\n");
+  _174 = Symbol_var(1473096);
+  _175 = cons(_174, NULL);
+  _176 = List_var(_175);
+  _177 = cons(_176, NULL);
   _178 = List_var(_177);
-  _179 = cons(_178, _15);
-  _180 = String_new("=");
-  _181 = String_new("<");
-  _182 = String_new("<=");
-  _183 = String_new(">");
-  _184 = String_new(">=");
+  _179 = cons(_178, NULL);
+  _180 = cons(_12, _179);
+  _181 = List_var(_180);
+  _182 = cons(_181, _15);
+  _183 = String_new("=");
+  _184 = String_new("<");
+  _185 = String_new("<=");
+  _186 = String_new(">");
+  _187 = String_new(">=");
   _x2c_gensym_static_initialize_0();
   _x2c_gensym_static_initialize_1();
   _x2c_gensym_static_initialize_2();
@@ -2536,6 +2547,12 @@ static Var f6_native____array_foldl(Array values, Var seed, Var callable){
   return Array_foldl(values, seed, f6_native____binary_callback(callable));
 }
 
+Var Array_find(Array, Func);
+
+static Var f6_native____array_find(Array values, Var callable){
+  return Array_find(values, f6_native____unary_callback(callable));
+}
+
 String String_map(String, Func);
 
 static String f6_native____string_map(String value, Var callable){
@@ -2628,6 +2645,10 @@ static int f6_native____predicate_list_all(List values, Var callable){
 
 static Var f6_native____predicate_list_find(List values, Var callable){
   return List_find(values, f6_native____predicate_callback(callable));
+}
+
+static Var f6_native____predicate_array_find(Array values, Var callable){
+  return Array_find(values, f6_native____predicate_callback(callable));
 }
 
 static String f6_native____predicate_string_filter(String value, Var callable){
@@ -2822,7 +2843,7 @@ static void f8_sessions____install_specials(Lisp lisp){
   for(unsigned i = 0;  i < _canonical_count();  i ++){
     const LispCanonicalName * info = & lisp_canonical_names[i];
     if(! info -> special) continue;
-    lisp -> specials[i] = Func_new(_x2c_gensym_func_adapt_36, _179);
+    lisp -> specials[i] = Func_new(_x2c_gensym_func_adapt_38, _182);
     Atom name = Atom_intern(String_new(info -> spelling));
     Map_setindex(lisp -> reserved, name, Func_var(lisp -> specials[i]));
   }
@@ -3241,27 +3262,27 @@ static Var f10_primitives____chain(List values, String operation, int want, int 
 
 Var lisp_eq_chain(List values){
   if(! _init_guard_) _file_init_();
-  return f10_primitives____chain(values, _180, 0, 1);
+  return f10_primitives____chain(values, _183, 0, 1);
 }
 
 Var lisp_lt_chain(List values){
   if(! _init_guard_) _file_init_();
-  return f10_primitives____chain(values, _181, - 1, 1);
+  return f10_primitives____chain(values, _184, - 1, 1);
 }
 
 Var lisp_le_chain(List values){
   if(! _init_guard_) _file_init_();
-  return f10_primitives____chain(values, _182, 1, 0);
+  return f10_primitives____chain(values, _185, 1, 0);
 }
 
 Var lisp_gt_chain(List values){
   if(! _init_guard_) _file_init_();
-  return f10_primitives____chain(values, _183, 1, 1);
+  return f10_primitives____chain(values, _186, 1, 1);
 }
 
 Var lisp_ge_chain(List values){
   if(! _init_guard_) _file_init_();
-  return f10_primitives____chain(values, _184, - 1, 0);
+  return f10_primitives____chain(values, _187, - 1, 0);
 }
 
 Var lisp_str(Var value){
@@ -3618,35 +3639,34 @@ static Var _x2c_gensym_func_adapt_14(Func _x2c_gensym_func_binding_14, const Fun
 }
 
 static Var _x2c_gensym_func_adapt_15(Func _x2c_gensym_func_binding_15, const FuncArg * _x2c_gensym_func_argv_15){
-  String a0 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_15, _x2c_gensym_func_argv_15, 0, 1318210446));
+  Array a0 = Var_array_payload(x2c_func_value_argument(_x2c_gensym_func_binding_15, _x2c_gensym_func_argv_15, 0, 3313778));
   Var a1 = x2c_func_value_argument(_x2c_gensym_func_binding_15, _x2c_gensym_func_argv_15, 1, 45156);
-  return String_var(f6_native____string_map(a0, a1));
+  return f6_native____array_find(a0, a1);
   ;
 }
 
 static Var _x2c_gensym_func_adapt_16(Func _x2c_gensym_func_binding_16, const FuncArg * _x2c_gensym_func_argv_16){
   String a0 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_16, _x2c_gensym_func_argv_16, 0, 1318210446));
   Var a1 = x2c_func_value_argument(_x2c_gensym_func_binding_16, _x2c_gensym_func_argv_16, 1, 45156);
+  return String_var(f6_native____string_map(a0, a1));
+  ;
+}
+
+static Var _x2c_gensym_func_adapt_17(Func _x2c_gensym_func_binding_17, const FuncArg * _x2c_gensym_func_argv_17){
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_17, _x2c_gensym_func_argv_17, 0, 1318210446));
+  Var a1 = x2c_func_value_argument(_x2c_gensym_func_binding_17, _x2c_gensym_func_argv_17, 1, 45156);
   return String_var(f6_native____string_filter(a0, a1));
   ;
 }
 
 static Iter Var_iter_payload(Var);
 
-static Var _x2c_gensym_func_adapt_17(Func _x2c_gensym_func_binding_17, const FuncArg * _x2c_gensym_func_argv_17){
-  Iter a0 = Var_iter_payload(x2c_func_value_argument(_x2c_gensym_func_binding_17, _x2c_gensym_func_argv_17, 0, 631140));
-  Var a1 = x2c_func_value_argument(_x2c_gensym_func_binding_17, _x2c_gensym_func_argv_17, 1, 45156);
-  Var a2 = x2c_func_value_argument(_x2c_gensym_func_binding_17, _x2c_gensym_func_argv_17, 2, 45156);
-  Var a3 = x2c_func_value_argument(_x2c_gensym_func_binding_17, _x2c_gensym_func_argv_17, 3, 45156);
-  return Iter_var(f6_native____iter_init(a0, a1, a2, a3));
-  ;
-}
-
 static Var _x2c_gensym_func_adapt_18(Func _x2c_gensym_func_binding_18, const FuncArg * _x2c_gensym_func_argv_18){
   Iter a0 = Var_iter_payload(x2c_func_value_argument(_x2c_gensym_func_binding_18, _x2c_gensym_func_argv_18, 0, 631140));
   Var a1 = x2c_func_value_argument(_x2c_gensym_func_binding_18, _x2c_gensym_func_argv_18, 1, 45156);
-  Iter a2 = Var_iter_payload(x2c_func_value_argument(_x2c_gensym_func_binding_18, _x2c_gensym_func_argv_18, 2, 631140));
-  return Iter_var(f6_native____iter_map_into(a0, a1, a2));
+  Var a2 = x2c_func_value_argument(_x2c_gensym_func_binding_18, _x2c_gensym_func_argv_18, 2, 45156);
+  Var a3 = x2c_func_value_argument(_x2c_gensym_func_binding_18, _x2c_gensym_func_argv_18, 3, 45156);
+  return Iter_var(f6_native____iter_init(a0, a1, a2, a3));
   ;
 }
 
@@ -3654,16 +3674,15 @@ static Var _x2c_gensym_func_adapt_19(Func _x2c_gensym_func_binding_19, const Fun
   Iter a0 = Var_iter_payload(x2c_func_value_argument(_x2c_gensym_func_binding_19, _x2c_gensym_func_argv_19, 0, 631140));
   Var a1 = x2c_func_value_argument(_x2c_gensym_func_binding_19, _x2c_gensym_func_argv_19, 1, 45156);
   Iter a2 = Var_iter_payload(x2c_func_value_argument(_x2c_gensym_func_binding_19, _x2c_gensym_func_argv_19, 2, 631140));
-  return Iter_var(f6_native____iter_filter_into(a0, a1, a2));
+  return Iter_var(f6_native____iter_map_into(a0, a1, a2));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_20(Func _x2c_gensym_func_binding_20, const FuncArg * _x2c_gensym_func_argv_20){
   Iter a0 = Var_iter_payload(x2c_func_value_argument(_x2c_gensym_func_binding_20, _x2c_gensym_func_argv_20, 0, 631140));
-  Iter a1 = Var_iter_payload(x2c_func_value_argument(_x2c_gensym_func_binding_20, _x2c_gensym_func_argv_20, 1, 631140));
-  Var a2 = x2c_func_value_argument(_x2c_gensym_func_binding_20, _x2c_gensym_func_argv_20, 2, 45156);
-  Iter a3 = Var_iter_payload(x2c_func_value_argument(_x2c_gensym_func_binding_20, _x2c_gensym_func_argv_20, 3, 631140));
-  return Iter_var(f6_native____iter_zip_with_into(a0, a1, a2, a3));
+  Var a1 = x2c_func_value_argument(_x2c_gensym_func_binding_20, _x2c_gensym_func_argv_20, 1, 45156);
+  Iter a2 = Var_iter_payload(x2c_func_value_argument(_x2c_gensym_func_binding_20, _x2c_gensym_func_argv_20, 2, 631140));
+  return Iter_var(f6_native____iter_filter_into(a0, a1, a2));
   ;
 }
 
@@ -3672,107 +3691,123 @@ static Var _x2c_gensym_func_adapt_21(Func _x2c_gensym_func_binding_21, const Fun
   Iter a1 = Var_iter_payload(x2c_func_value_argument(_x2c_gensym_func_binding_21, _x2c_gensym_func_argv_21, 1, 631140));
   Var a2 = x2c_func_value_argument(_x2c_gensym_func_binding_21, _x2c_gensym_func_argv_21, 2, 45156);
   Iter a3 = Var_iter_payload(x2c_func_value_argument(_x2c_gensym_func_binding_21, _x2c_gensym_func_argv_21, 3, 631140));
-  return Iter_var(f6_native____iter_map2_into(a0, a1, a2, a3));
+  return Iter_var(f6_native____iter_zip_with_into(a0, a1, a2, a3));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_22(Func _x2c_gensym_func_binding_22, const FuncArg * _x2c_gensym_func_argv_22){
   Iter a0 = Var_iter_payload(x2c_func_value_argument(_x2c_gensym_func_binding_22, _x2c_gensym_func_argv_22, 0, 631140));
-  Var a1 = x2c_func_value_argument(_x2c_gensym_func_binding_22, _x2c_gensym_func_argv_22, 1, 45156);
+  Iter a1 = Var_iter_payload(x2c_func_value_argument(_x2c_gensym_func_binding_22, _x2c_gensym_func_argv_22, 1, 631140));
   Var a2 = x2c_func_value_argument(_x2c_gensym_func_binding_22, _x2c_gensym_func_argv_22, 2, 45156);
   Iter a3 = Var_iter_payload(x2c_func_value_argument(_x2c_gensym_func_binding_22, _x2c_gensym_func_argv_22, 3, 631140));
-  return Iter_var(f6_native____iter_scan_into(a0, a1, a2, a3));
+  return Iter_var(f6_native____iter_map2_into(a0, a1, a2, a3));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_23(Func _x2c_gensym_func_binding_23, const FuncArg * _x2c_gensym_func_argv_23){
   Iter a0 = Var_iter_payload(x2c_func_value_argument(_x2c_gensym_func_binding_23, _x2c_gensym_func_argv_23, 0, 631140));
   Var a1 = x2c_func_value_argument(_x2c_gensym_func_binding_23, _x2c_gensym_func_argv_23, 1, 45156);
-  return int_var(f6_native____iter_any(a0, a1));
+  Var a2 = x2c_func_value_argument(_x2c_gensym_func_binding_23, _x2c_gensym_func_argv_23, 2, 45156);
+  Iter a3 = Var_iter_payload(x2c_func_value_argument(_x2c_gensym_func_binding_23, _x2c_gensym_func_argv_23, 3, 631140));
+  return Iter_var(f6_native____iter_scan_into(a0, a1, a2, a3));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_24(Func _x2c_gensym_func_binding_24, const FuncArg * _x2c_gensym_func_argv_24){
   Iter a0 = Var_iter_payload(x2c_func_value_argument(_x2c_gensym_func_binding_24, _x2c_gensym_func_argv_24, 0, 631140));
   Var a1 = x2c_func_value_argument(_x2c_gensym_func_binding_24, _x2c_gensym_func_argv_24, 1, 45156);
-  return int_var(f6_native____iter_all(a0, a1));
+  return int_var(f6_native____iter_any(a0, a1));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_25(Func _x2c_gensym_func_binding_25, const FuncArg * _x2c_gensym_func_argv_25){
   Iter a0 = Var_iter_payload(x2c_func_value_argument(_x2c_gensym_func_binding_25, _x2c_gensym_func_argv_25, 0, 631140));
   Var a1 = x2c_func_value_argument(_x2c_gensym_func_binding_25, _x2c_gensym_func_argv_25, 1, 45156);
-  Var a2 = x2c_func_value_argument(_x2c_gensym_func_binding_25, _x2c_gensym_func_argv_25, 2, 45156);
-  return f6_native____iter_foldl(a0, a1, a2);
+  return int_var(f6_native____iter_all(a0, a1));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_26(Func _x2c_gensym_func_binding_26, const FuncArg * _x2c_gensym_func_argv_26){
   Iter a0 = Var_iter_payload(x2c_func_value_argument(_x2c_gensym_func_binding_26, _x2c_gensym_func_argv_26, 0, 631140));
   Var a1 = x2c_func_value_argument(_x2c_gensym_func_binding_26, _x2c_gensym_func_argv_26, 1, 45156);
-  return f6_native____iter_find(a0, a1);
+  Var a2 = x2c_func_value_argument(_x2c_gensym_func_binding_26, _x2c_gensym_func_argv_26, 2, 45156);
+  return f6_native____iter_foldl(a0, a1, a2);
   ;
 }
 
 static Var _x2c_gensym_func_adapt_27(Func _x2c_gensym_func_binding_27, const FuncArg * _x2c_gensym_func_argv_27){
-  List a0 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_27, _x2c_gensym_func_argv_27, 0, 806120));
+  Iter a0 = Var_iter_payload(x2c_func_value_argument(_x2c_gensym_func_binding_27, _x2c_gensym_func_argv_27, 0, 631140));
   Var a1 = x2c_func_value_argument(_x2c_gensym_func_binding_27, _x2c_gensym_func_argv_27, 1, 45156);
-  return List_var(f6_native____predicate_list_filter(a0, a1));
+  return f6_native____iter_find(a0, a1);
   ;
 }
 
 static Var _x2c_gensym_func_adapt_28(Func _x2c_gensym_func_binding_28, const FuncArg * _x2c_gensym_func_argv_28){
   List a0 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_28, _x2c_gensym_func_argv_28, 0, 806120));
   Var a1 = x2c_func_value_argument(_x2c_gensym_func_binding_28, _x2c_gensym_func_argv_28, 1, 45156);
-  return int_var(f6_native____predicate_list_any(a0, a1));
+  return List_var(f6_native____predicate_list_filter(a0, a1));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_29(Func _x2c_gensym_func_binding_29, const FuncArg * _x2c_gensym_func_argv_29){
   List a0 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_29, _x2c_gensym_func_argv_29, 0, 806120));
   Var a1 = x2c_func_value_argument(_x2c_gensym_func_binding_29, _x2c_gensym_func_argv_29, 1, 45156);
-  return int_var(f6_native____predicate_list_all(a0, a1));
+  return int_var(f6_native____predicate_list_any(a0, a1));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_30(Func _x2c_gensym_func_binding_30, const FuncArg * _x2c_gensym_func_argv_30){
   List a0 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_30, _x2c_gensym_func_argv_30, 0, 806120));
   Var a1 = x2c_func_value_argument(_x2c_gensym_func_binding_30, _x2c_gensym_func_argv_30, 1, 45156);
-  return f6_native____predicate_list_find(a0, a1);
+  return int_var(f6_native____predicate_list_all(a0, a1));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_31(Func _x2c_gensym_func_binding_31, const FuncArg * _x2c_gensym_func_argv_31){
-  String a0 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_31, _x2c_gensym_func_argv_31, 0, 1318210446));
+  List a0 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_31, _x2c_gensym_func_argv_31, 0, 806120));
   Var a1 = x2c_func_value_argument(_x2c_gensym_func_binding_31, _x2c_gensym_func_argv_31, 1, 45156);
-  return String_var(f6_native____predicate_string_filter(a0, a1));
+  return f6_native____predicate_list_find(a0, a1);
   ;
 }
 
 static Var _x2c_gensym_func_adapt_32(Func _x2c_gensym_func_binding_32, const FuncArg * _x2c_gensym_func_argv_32){
-  Iter a0 = Var_iter_payload(x2c_func_value_argument(_x2c_gensym_func_binding_32, _x2c_gensym_func_argv_32, 0, 631140));
+  Array a0 = Var_array_payload(x2c_func_value_argument(_x2c_gensym_func_binding_32, _x2c_gensym_func_argv_32, 0, 3313778));
   Var a1 = x2c_func_value_argument(_x2c_gensym_func_binding_32, _x2c_gensym_func_argv_32, 1, 45156);
-  return Iter_var(f6_native____predicate_iter_filter(a0, a1));
+  return f6_native____predicate_array_find(a0, a1);
   ;
 }
 
 static Var _x2c_gensym_func_adapt_33(Func _x2c_gensym_func_binding_33, const FuncArg * _x2c_gensym_func_argv_33){
-  Iter a0 = Var_iter_payload(x2c_func_value_argument(_x2c_gensym_func_binding_33, _x2c_gensym_func_argv_33, 0, 631140));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_33, _x2c_gensym_func_argv_33, 0, 1318210446));
   Var a1 = x2c_func_value_argument(_x2c_gensym_func_binding_33, _x2c_gensym_func_argv_33, 1, 45156);
-  return int_var(f6_native____predicate_iter_any(a0, a1));
+  return String_var(f6_native____predicate_string_filter(a0, a1));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_34(Func _x2c_gensym_func_binding_34, const FuncArg * _x2c_gensym_func_argv_34){
   Iter a0 = Var_iter_payload(x2c_func_value_argument(_x2c_gensym_func_binding_34, _x2c_gensym_func_argv_34, 0, 631140));
   Var a1 = x2c_func_value_argument(_x2c_gensym_func_binding_34, _x2c_gensym_func_argv_34, 1, 45156);
-  return int_var(f6_native____predicate_iter_all(a0, a1));
+  return Iter_var(f6_native____predicate_iter_filter(a0, a1));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_35(Func _x2c_gensym_func_binding_35, const FuncArg * _x2c_gensym_func_argv_35){
   Iter a0 = Var_iter_payload(x2c_func_value_argument(_x2c_gensym_func_binding_35, _x2c_gensym_func_argv_35, 0, 631140));
   Var a1 = x2c_func_value_argument(_x2c_gensym_func_binding_35, _x2c_gensym_func_argv_35, 1, 45156);
+  return int_var(f6_native____predicate_iter_any(a0, a1));
+  ;
+}
+
+static Var _x2c_gensym_func_adapt_36(Func _x2c_gensym_func_binding_36, const FuncArg * _x2c_gensym_func_argv_36){
+  Iter a0 = Var_iter_payload(x2c_func_value_argument(_x2c_gensym_func_binding_36, _x2c_gensym_func_argv_36, 0, 631140));
+  Var a1 = x2c_func_value_argument(_x2c_gensym_func_binding_36, _x2c_gensym_func_argv_36, 1, 45156);
+  return int_var(f6_native____predicate_iter_all(a0, a1));
+  ;
+}
+
+static Var _x2c_gensym_func_adapt_37(Func _x2c_gensym_func_binding_37, const FuncArg * _x2c_gensym_func_argv_37){
+  Iter a0 = Var_iter_payload(x2c_func_value_argument(_x2c_gensym_func_binding_37, _x2c_gensym_func_argv_37, 0, 631140));
+  Var a1 = x2c_func_value_argument(_x2c_gensym_func_binding_37, _x2c_gensym_func_argv_37, 1, 45156);
   return f6_native____predicate_iter_find(a0, a1);
   ;
 }
@@ -3791,7 +3826,7 @@ static void _x2c_gensym_defer_cleanup_22(void * _x2c_gensym_defer_opaque_22){
   Scope_pop();
 }
 
-static Var _x2c_gensym_func_adapt_36(Func _x2c_gensym_func_binding_36, const FuncArg * _x2c_gensym_func_argv_36){
+static Var _x2c_gensym_func_adapt_38(Func _x2c_gensym_func_binding_38, const FuncArg * _x2c_gensym_func_argv_38){
   return f8_sessions____special_stub();
   ;
 }

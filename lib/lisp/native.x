@@ -99,6 +99,8 @@ static Array _array_sort_with(Array values, Var callable) =>
   values.sort_with(_binary_callback(callable));
 static Var _array_foldl(Array values, Var seed, Var callable) =>
   values.foldl(seed, _binary_callback(callable));
+static Var _array_find(Array values, Var callable) =>
+  values.find(_unary_callback(callable));
 
 static String _string_map(String value, Var callable) =>
   value.map(_unary_callback(callable));
@@ -151,6 +153,8 @@ static int _predicate_list_all(List values, Var callable) =>
   values.all(_predicate_callback(callable));
 static Var _predicate_list_find(List values, Var callable) =>
   values.find(_predicate_callback(callable));
+static Var _predicate_array_find(Array values, Var callable) =>
+  values.find(_predicate_callback(callable));
 static String _predicate_string_filter(String value, Var callable) =>
   value.filter(_predicate_callback(callable));
 static Iter _predicate_iter_filter(Iter iter, Var callable) =>
@@ -189,6 +193,7 @@ static macro Expression $lisp.callback.target.map() => $_x2c_target_map(%(
   (_array_sort_by (as Array_sort_by))
   (_array_sort_with (as Array_sort_with))
   (_array_foldl (as Array_foldl))
+  (_array_find (as Array_find))
   (_string_map (as String_map))
   (_string_filter (as String_filter))
   // Iterator operations are declared `meta` in iter.x and adopted with
@@ -208,6 +213,7 @@ static macro Expression $lisp.callback.target.map() => $_x2c_target_map(%(
   (_predicate_list_any (as Lisp_List_any))
   (_predicate_list_all (as Lisp_List_all))
   (_predicate_list_find (as Lisp_List_find))
+  (_predicate_array_find (as Lisp_Array_find))
   (_predicate_string_filter (as Lisp_String_filter))
   (_predicate_iter_filter (as Lisp_Iter_filter))
   (_predicate_iter_any (as Lisp_Iter_any))

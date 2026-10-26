@@ -350,15 +350,57 @@ static void array_splice_and_concat(void) {
   EXPECT_VAR_EQ(combined[4], five);
 }
 
-static void array_find_contains_count(void) {
+static void array_index_contains_count(void) {
   $test.scoped();
   Var five = 5, six = 6, seven = 7, forty_two = 42;
   Array arr = Array.update_n([], 4, five, six, five, seven);
-  EXPECT_INT_EQ(arr.find(five), 0);
-  EXPECT_INT_EQ(arr.indexof(seven), 3);
+  EXPECT_INT_EQ(arr.index(five), 0);
+  EXPECT_INT_EQ(arr.index(seven), 3);
+  EXPECT_INT_EQ(arr.index(forty_two), -1);
   EXPECT_INT_EQ(arr.count(five), 2);
   EXPECT_TRUE(arr.contains(six));
   EXPECT_FALSE(arr.contains(forty_two));
+}
+
+static void array_find_matches_list_and_iter(void) {
+  $test.scoped();
+  Array values = [10, 20, 20, 30];
+  List list = values;
+  Func accept = %!(Var value) => value >= 20;
+  EXPECT_INT_EQ(values.find(accept).int(), 20);
+  EXPECT_VAR_EQ(values.find(accept), list.find(accept));
+  struct Iter storage;
+  Iter iter = values.iter(&storage);
+  EXPECT_VAR_EQ(values.find(accept), iter.find(accept));
+  EXPECT_INT_EQ(iter.next().int(), 20);
+  EXPECT_INT_EQ(iter.next().int(), 30);
+  EXPECT_TRUE(iter.next() is void);
+  EXPECT_TRUE(values.list() == list);
+
+  Func always = %!(Var value) => { (void) value; return 1; };
+  int false_value = 1 == 2;
+  Array zero = [0], falsity = [false_value], null_value = [NULL];
+  EXPECT_VAR_EQ(zero.find(always), zero[0]);
+  EXPECT_VAR_EQ(falsity.find(always), falsity[0]);
+  EXPECT_VAR_EQ(null_value.find(always), null_value[0]);
+  EXPECT_TRUE(zero.find(always) is not void);
+  EXPECT_TRUE(falsity.find(always) is not void);
+  EXPECT_TRUE(null_value.find(always) is not void);
+  EXPECT_TRUE(values.find(NULL) is void);
+  EXPECT_TRUE(values.find(%!(Var value) => value > 99) is void);
+  Array empty = [], missing = NULL;
+  EXPECT_TRUE(empty.find(always) is void);
+  EXPECT_TRUE(missing.find(always) is void);
+  EXPECT_INT_EQ(missing.index(1), -1);
+
+  Func identity = %!(Var value) => value;
+  Array callbacks = [identity];
+  EXPECT_INT_EQ(callbacks.index(identity), 0);
+  int caught = 0;
+  try values.find(_raise_during_array_map);
+  catch %(invariant (value 73)): caught++;
+  EXPECT_INT_EQ(caught, 1);
+  EXPECT_TRUE(values.list() == list);
 }
 
 static void array_sort_reverse_join(void) {
@@ -710,7 +752,8 @@ void array_suite(void) {
   $test.run(array_setslice_and_remslice);
   $test.run(array_region_end_matches_slice_stop);
   $test.run(array_splice_and_concat);
-  $test.run(array_find_contains_count);
+  $test.run(array_index_contains_count);
+  $test.run(array_find_matches_list_and_iter);
   $test.run(array_sort_reverse_join);
   $test.run(array_join_empty_string_elements);
   $test.run(array_sort_callbacks_keep_ties_and_identity);

@@ -1,9 +1,10 @@
-/*  compiler-meta.x -- compiler-private meta operations
+/*  compiler-meta.x -- compiler-private meta operations and facts
 
     Copyright (c) 2026 Gary William Flake
 
-    These bodyless `meta` prototypes name native operations the compiler
-    supplies for its own shipped sources: the built-in macros' algorithms
+    The operator rows give shipped compiler sources their shared facts.
+    Bodyless `meta` prototypes name native operations the compiler
+    supplies for those sources: the built-in macros' algorithms
     that need the full meta surface, Lisp binding groups, and the generated
     target tables, hashes, interface records, and SymbolSets. The implicit
     prelude reaches them through `lisp-bindings.x`, but they are not part
@@ -13,6 +14,33 @@
 #pragma once
 
 #include "meta.x"
+
+/* Operator, precedence, compound assignment, protocol member, and derived
+   comparison flag. Zero denotes an absent compound spelling or member. */
+meta List _x2c_operator_rows(void) => %(
+  (<||>       1 0        0         0)
+  (<&&>       2 0        0         0)
+  (<|>        3 <|=>     0         0)
+  (<^>        4 <^=>     0         0)
+  (<&>        5 <&=>     0         0)
+  (<~=>       6 0        0         0)
+  (<"==">     6 0        <equal>   0)
+  (<!=>       6 0        <equal>   1)
+  (<"===">    6 0        0         0)
+  (<!==>      6 0        0         0)
+  (<"<">      7 0        <compare> 1)
+  (<"<=">     7 0        <compare> 1)
+  (<">">      7 0        <compare> 1)
+  (<">=">     7 0        <compare> 1)
+  (<in>       7 0        0         0)
+  (<"<<">     8 <"<<=">  0         0)
+  (<">>">     8 <">>=">  0         0)
+  (<+>        9 <+=>     <add>     0)
+  (<->        9 <-=>     <sub>     0)
+  (<*>       10 <*=>     <mul>     0)
+  (</>       10 </=>     <div>     0)
+  (<%>       10 <%=>     <mod>     0)
+);
 
 /* Returns `values` as a cached literal expression of the expanding unit,
    so a template can insert data such as a signature as a constant. */

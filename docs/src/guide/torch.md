@@ -73,10 +73,11 @@ EXPECT_NEAR((2.0 * a).sum().item().double(), 20.0, 1e-12);
 `t[key]` reads three ways: an integer selects along the first dimension,
 a List of integers selects each dimension in turn, so `t[%(1 2)]` is
 `t.select(0, 1).select(0, 2)`, and a bool `Tensor` is a mask.
-`select`, `narrow`, `slice`, `reshape`, `transpose`, `t`, `squeeze`,
-`unsqueeze`, `flatten`, `index_select`, `masked_select`, `cat`, and
-`stack` are the shape operations `torch.x` spells; results view the same
-storage.
+`select`, `narrow`, `slice`, `transpose`, `t`, `squeeze`, and `unsqueeze`
+return views that share source storage. `reshape` and `flatten` may share
+storage or copy, depending on the source layout. `index_select`,
+`masked_select`, `cat`, and `stack` allocate result storage. Changes to the
+source therefore affect its views, but not those copies.
 
 <!-- ignore: an import needs the built torch package archive. -->
 ```x2c,ignore

@@ -6,6 +6,8 @@
 #define __GUARD_0x37594033__
 
 #include "meta.h"
+List _x2c_operator_rows(void);
+
 List _x2c_literal_list(List values);
 
 List _x2c_auto_release(Code local, List binding, List acquired);

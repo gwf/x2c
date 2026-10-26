@@ -958,9 +958,36 @@ printf("%s top=%s len=%zu\n", stack.repr(), top.repr(), stack.len());
 ```
 
 The positional operations are `push`, `take_last`, `shift`, `unshift`,
-`insert`, `remove`, and `splice`; searching is `find` / `indexof`,
+`insert`, `remove`, and `splice`; searching is `index`, `find`,
 `contains`, and `count`; and there are `map`, `map2`, `foldl`, `sort`,
 `reverse`, `concat`, `copy`, and `join`.
+
+`index(value)` returns the first equal element's zero-based position, or `-1`.
+`find(predicate)` returns the first accepted element as `Var`, or `void`.
+These names have the same meanings on Array and List; Iter also has `find`.
+Predicates use ordinary `Var` truth. A null predicate returns `void`.
+Matching zero, false, or NULL remains distinct from absence: test `is void`.
+Searching leaves Array and List storage unchanged and borrows matched values.
+Typed Arrays use native equality for `index` and box `find` results as their
+iterators do.
+
+```x2c
+Array array = [10, 20, 30];
+List list = %(10 20 30);
+Func over_ten = %!(int value) => value > 10;
+printf("%d %d index=%d\n", array.find(over_ten).int(),
+       list.find(over_ten).int(), array.index(20));
+```
+
+```text
+20 20 index=1
+```
+
+Array value searches formerly written `find(value)` or `indexof(value)` now
+use `index(value)`, including typed Arrays. The old `indexof` name is removed;
+`find` now takes a predicate and returns an element. This changes the native
+signatures, so native consumers must rebuild. There are no compatibility
+aliases. List and Iter `find` calls keep their existing contracts.
 
 Use `sort_by` to order by a computed key, or `sort_with` for a comparator.
 Both preserve the input order of ties. Arrays change in place and return the
@@ -983,10 +1010,13 @@ keys with `Var.compare`. `sort_with` passes two values to its callback and
 converts the result to `int`: negative orders the first value before the
 second, zero ties, and positive orders it after. Comparators must give a
 consistent ordering. Callbacks are borrowed, run synchronously, and must not
-mutate the Array being sorted; they may sort another container. If a callback
-or comparison fails, the Array keeps its original element order. Callback
-side effects are not undone. Empty inputs call neither callback; a singleton
-calls its key once but never calls a comparator.
+mutate the Array being sorted; they may sort another container. A failing
+`sort_with` callback or `sort_by` key extractor leaves the original element
+order unchanged. Callback side effects are not undone. Comparisons in `sort`
+and `sort_by` run inside libc qsort and must return normally. If an Error or
+other nonlocal exit crosses qsort, cleanup, memory safety, and container state
+are not guaranteed. Empty inputs call neither callback; a singleton calls its
+key once but never calls a comparator.
 
 `Array.map`, `Array.map2`, and `Array.foldl` accept the same `Func` values
 as the `List` operations and pass elements by value. `String.filter` and
@@ -1005,12 +1035,12 @@ items.insert(1, "b");
 items.unshift("start");
 Var gone = items.remove(0);
 printf("%s removed=%s\n", items.repr(), gone.repr());
-printf("find b at %d, joined %s\n", items.find("b"), items.join("-"));
+printf("index of b is %d, joined %s\n", items.index("b"), items.join("-"));
 ```
 
 ```text
 [ "a", "b", "c" ] removed="start"
-find b at 1, joined a-b-c
+index of b is 1, joined a-b-c
 ```
 
 `Array` also carries binary min-heap helpers, which turn it into a priority

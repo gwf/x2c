@@ -7,36 +7,12 @@
 */
 
 #include "compiler/compiler.x"
-
-meta static List _operator_rows(void) => %(
-  (<||>       1 0        0         0)
-  (<&&>       2 0        0         0)
-  (<|>        3 <|=>     0         0)
-  (<^>        4 <^=>     0         0)
-  (<&>        5 <&=>     0         0)
-  (<~=>       6 0        0         0)
-  (<"==">     6 0        <equal>   0)
-  (<!=>       6 0        <equal>   1)
-  (<"===">    6 0        0         0)
-  (<!==>      6 0        0         0)
-  (<"<">      7 0        <compare> 1)
-  (<"<=">     7 0        <compare> 1)
-  (<">">      7 0        <compare> 1)
-  (<">=">     7 0        <compare> 1)
-  (<in>       7 0        0         0)
-  (<"<<">     8 <"<<=">  0         0)
-  (<">>">     8 <">>=">  0         0)
-  (<+>        9 <+=>     <add>     0)
-  (<->        9 <-=>     <sub>     0)
-  (<*>       10 <*=>     <mul>     0)
-  (</>       10 </=>     <div>     0)
-  (<%>       10 <%=>     <mod>     0)
-);
+#include "compiler-meta.x"
 
 /* Select key and value columns; -1 includes both direct and derived rows. */
 meta static List _operator_cases(int key, int value, int derived) {
   Array cases = [];
-  foreach (List row in _operator_rows()) {
+  foreach (List row in _x2c_operator_rows()) {
     if (!row[key] || !row[value]) continue;
     if (derived >= 0 && row[4] != derived) continue;
     Symbol label = row[key];

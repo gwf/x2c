@@ -2,6 +2,7 @@
 
 #include "list-selectors.x"
 #include "test-support.x"
+#include "test-macros.x"
 #include <limits.h>
 
 static int expect_list_ints(
@@ -219,6 +220,7 @@ static int _list_counted_greater_than_two(Var value) {
 }
 
 static void list_fold_and_predicates(void) {
+  $test.scoped();
   List numbers = %(1 2 3 4);
   Var sum = numbers.foldl(0, sum_pair);
   EXPECT_INT_EQ(sum.integer(), 10);
@@ -232,6 +234,13 @@ static void list_fold_and_predicates(void) {
   Var found = numbers.find(greater_than_two);
   EXPECT_INT_EQ(found.integer(), 3);
   EXPECT_TRUE(numbers.find(NULL) is void);
+  EXPECT_INT_EQ(numbers.find(_list_truthy_string).int(), 3);
+  Func always = %!(Var value) => { (void) value; return 1; };
+  EXPECT_INT_EQ((%(0)).find(always).int(), 0);
+  Var null_value = (Var) { .u64 = 0 };
+  List null_values = $(null_value);
+  EXPECT_TRUE(null_values.find(always).is_null());
+  EXPECT_TRUE(empty.find(always) is void);
   int missing = 0;
   try numbers.foldl(99, NULL);
   catch %(bad-arg *): missing++;
@@ -635,7 +644,6 @@ static void list_optional_compound_selectors(void) {
   EXPECT_TRUE(boxed.cddddr() == %(i));
 }
 
-#include "test-macros.x"
 
 void list_suite(void) {
   $test.run(list_canonical_identity);

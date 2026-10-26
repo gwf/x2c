@@ -4,91 +4,20 @@
 #include "x2c.h"
 
 #include "rewrite.h"
-static List _59, _58, _57, _56, _55, _54, _53, _52, _51, _50, _48, _47, _43, _42, _38, _37, _33, _32, _28, _27, _23, _22, _18, _17, _13, _12, _8, _7, _3, _2;
-
-static Var _49, _46, _45, _44, _41, _40, _39, _36, _35, _34, _31, _30, _29, _26, _25, _24, _21, _20, _19, _16, _15, _14, _11, _10, _9, _6, _5, _4, _1, _0;
-
-static int _init_guard_ = 0;
-
-__attribute__((constructor, noinline, cold)) static void _file_init_(void);
-
+#include "compiler-meta.h"
 static Symbol _dynamic_operation(Symbol assignment);
 
-__attribute__((constructor, noinline, cold)) static void _file_init_(void){
-  x2c_initialize_protocols();
-  if(_init_guard_) return;
-  _init_guard_ = 1;
-  _0 = Symbol_var(11131);
-  _1 = Symbol_var(56);
-  _2 = cons(_1, NULL);
-  _3 = cons(_0, _2);
-  _4 = List_var(_3);
-  _5 = Symbol_var(11643);
-  _6 = Symbol_var(62);
-  _7 = cons(_6, NULL);
-  _8 = cons(_5, _7);
-  _9 = List_var(_8);
-  _10 = Symbol_var(10875);
-  _11 = Symbol_var(54);
-  _12 = cons(_11, NULL);
-  _13 = cons(_10, _12);
-  _14 = List_var(_13);
-  _15 = Symbol_var(12155);
-  _16 = Symbol_var(95);
-  _17 = cons(_16, NULL);
-  _18 = cons(_15, _17);
-  _19 = List_var(_18);
-  _20 = Symbol_var(9595);
-  _21 = Symbol_var(75);
-  _22 = cons(_21, NULL);
-  _23 = cons(_20, _22);
-  _24 = List_var(_23);
-  _25 = Symbol_var(1981563);
-  _26 = Symbol_var(15481);
-  _27 = cons(_26, NULL);
-  _28 = cons(_25, _27);
-  _29 = List_var(_28);
-  _30 = Symbol_var(2047611);
-  _31 = Symbol_var(15997);
-  _32 = cons(_31, NULL);
-  _33 = cons(_30, _32);
-  _34 = List_var(_33);
-  _35 = Symbol_var(9851);
-  _36 = Symbol_var(77);
-  _37 = cons(_36, NULL);
-  _38 = cons(_35, _37);
-  _39 = List_var(_38);
-  _40 = Symbol_var(24187);
-  _41 = Symbol_var(189);
-  _42 = cons(_41, NULL);
-  _43 = cons(_40, _42);
-  _44 = List_var(_43);
-  _45 = Symbol_var(31867);
-  _46 = Symbol_var(249);
-  _47 = cons(_46, NULL);
-  _48 = cons(_45, _47);
-  _49 = List_var(_48);
-  _50 = cons(_49, NULL);
-  _51 = cons(_44, _50);
-  _52 = cons(_39, _51);
-  _53 = cons(_34, _52);
-  _54 = cons(_29, _53);
-  _55 = cons(_24, _54);
-  _56 = cons(_19, _55);
-  _57 = cons(_14, _56);
-  _58 = cons(_9, _57);
-  _59 = cons(_4, _58);
-}
+List _x2c_operator_rows(void);
 
 static Symbol _dynamic_operation(Symbol assignment){
   {
     List row;
-    List _x2c_gensym_macro_object_0 = _59;
+    List _x2c_gensym_macro_object_0 = _x2c_operator_rows();
     List _x2c_gensym_macro_cursor_0 = _x2c_gensym_macro_object_0;
     Var _x2c_gensym_macro_cursor_output_0;
     while(List_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_0), &(_x2c_gensym_macro_cursor_output_0))){
       row = Var_list_payload(_x2c_gensym_macro_cursor_output_0);
-      if(x2c_var_equal(List_car(row), Symbol_var(assignment))) return Var_symbol(List_cadr(row));
+      if(Var_truth(List_getindex(row, 2)) && x2c_var_equal(List_getindex(row, 2), Symbol_var(assignment))) return Var_symbol(List_car(row));
     }
 
   }

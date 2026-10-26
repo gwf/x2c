@@ -82,7 +82,7 @@ Source: `src/initializers/subobjects.x:32`
 
 Selects a native subobject without evaluating it when used by sizeof.
 
-Source: `src/initializers/subobjects.x:316`
+Source: `src/initializers/subobjects.x:320`
 
 ## Design notes
 

@@ -802,6 +802,10 @@ understands, and raise again in x2c. Verify which thread invokes each
 callback; entering x2c from an arbitrary worker thread needs a proven runtime
 guarantee. Make callback-only objects invalid outside the callback.
 
+The runtime's libc `qsort` calls are a documented exception. Comparisons
+invoked by `qsort` must return normally. If an Error or another nonlocal exit
+crosses `qsort`, cleanup, memory safety, and container state are not guaranteed.
+
 ## Diagnostics and messages
 
 **DG-1** Keep diagnostic wording with its owner. Compiler and driver macros

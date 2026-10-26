@@ -2,6 +2,14 @@
 
 #define __GUARD_0x37594033__
 #include "meta.h"
+static List _157, _156, _155, _154, _153, _152, _151, _150, _149, _148, _147, _146, _145, _144, _143, _142, _141, _140, _139, _138, _137, _136, _134, _133, _132, _131, _126, _125, _124, _123, _118, _117, _116, _115, _109, _108, _107, _106, _101, _100, _99, _98, _92, _91, _90, _86, _85, _84, _79, _78, _75, _72, _69, _66, _65, _64, _63, _58, _55, _52, _51, _50, _49, _48, _45, _44, _43, _42, _38, _37, _33, _32, _31, _26, _25, _24, _19, _18, _17, _12, _11, _7, _6, _5, _4, _3;
+
+static Var _135, _130, _129, _128, _127, _122, _121, _120, _119, _114, _113, _112, _111, _110, _105, _104, _103, _102, _97, _96, _95, _94, _93, _89, _88, _87, _83, _82, _81, _80, _77, _76, _74, _73, _71, _70, _68, _67, _62, _61, _60, _59, _57, _56, _54, _53, _47, _46, _41, _40, _39, _36, _35, _34, _30, _29, _28, _27, _23, _22, _21, _20, _16, _15, _14, _13, _10, _9, _8, _2, _1, _0;
+
+static int _init_guard_ = 0;
+
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
+
 List _x2c_literal_list(List values);
 
 List _x2c_auto_release(Code local, List binding, List acquired);
@@ -21,4 +29,181 @@ Map _x2c_meta_linked_hashes(void);
 Map _x2c_prelude_records(void);
 
 Var _x2c_symbol_set(List symbols);
+
+static Var Symbol_var(Symbol);
+
+static Var int_var(int);
+
+List cons(Var, List);
+
+static Var List_var(List);
+
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
+  x2c_initialize_protocols();
+  if(_init_guard_) return;
+  _init_guard_ = 1;
+  _0 = Symbol_var(31993);
+  _1 = int_var(1);
+  _2 = int_var(0);
+  _3 = cons(_2, NULL);
+  _4 = cons(_2, _3);
+  _5 = cons(_2, _4);
+  _6 = cons(_1, _5);
+  _7 = cons(_0, _6);
+  _8 = List_var(_7);
+  _9 = Symbol_var(9805);
+  _10 = int_var(2);
+  _11 = cons(_10, _5);
+  _12 = cons(_9, _11);
+  _13 = List_var(_12);
+  _14 = Symbol_var(249);
+  _15 = int_var(3);
+  _16 = Symbol_var(31867);
+  _17 = cons(_16, _4);
+  _18 = cons(_15, _17);
+  _19 = cons(_14, _18);
+  _20 = List_var(_19);
+  _21 = Symbol_var(189);
+  _22 = int_var(4);
+  _23 = Symbol_var(24187);
+  _24 = cons(_23, _4);
+  _25 = cons(_22, _24);
+  _26 = cons(_21, _25);
+  _27 = List_var(_26);
+  _28 = Symbol_var(77);
+  _29 = int_var(5);
+  _30 = Symbol_var(9851);
+  _31 = cons(_30, _4);
+  _32 = cons(_29, _31);
+  _33 = cons(_28, _32);
+  _34 = List_var(_33);
+  _35 = Symbol_var(32379);
+  _36 = int_var(6);
+  _37 = cons(_36, _5);
+  _38 = cons(_35, _37);
+  _39 = List_var(_38);
+  _40 = Symbol_var(15739);
+  _41 = Symbol_var(11642968);
+  _42 = cons(_41, _3);
+  _43 = cons(_2, _42);
+  _44 = cons(_36, _43);
+  _45 = cons(_40, _44);
+  _46 = List_var(_45);
+  _47 = Symbol_var(8571);
+  _48 = cons(_1, NULL);
+  _49 = cons(_41, _48);
+  _50 = cons(_2, _49);
+  _51 = cons(_36, _50);
+  _52 = cons(_47, _51);
+  _53 = List_var(_52);
+  _54 = Symbol_var(2014587);
+  _55 = cons(_54, _37);
+  _56 = List_var(_55);
+  _57 = Symbol_var(1097083);
+  _58 = cons(_57, _37);
+  _59 = List_var(_58);
+  _60 = Symbol_var(121);
+  _61 = int_var(7);
+  _62 = Symbol_var(7477398666);
+  _63 = cons(_62, _48);
+  _64 = cons(_2, _63);
+  _65 = cons(_61, _64);
+  _66 = cons(_60, _65);
+  _67 = List_var(_66);
+  _68 = Symbol_var(15483);
+  _69 = cons(_68, _65);
+  _70 = List_var(_69);
+  _71 = Symbol_var(125);
+  _72 = cons(_71, _65);
+  _73 = List_var(_72);
+  _74 = Symbol_var(15995);
+  _75 = cons(_74, _65);
+  _76 = List_var(_75);
+  _77 = Symbol_var(604);
+  _78 = cons(_61, _5);
+  _79 = cons(_77, _78);
+  _80 = List_var(_79);
+  _81 = Symbol_var(15481);
+  _82 = int_var(8);
+  _83 = Symbol_var(1981563);
+  _84 = cons(_83, _4);
+  _85 = cons(_82, _84);
+  _86 = cons(_81, _85);
+  _87 = List_var(_86);
+  _88 = Symbol_var(15997);
+  _89 = Symbol_var(2047611);
+  _90 = cons(_89, _4);
+  _91 = cons(_82, _90);
+  _92 = cons(_88, _91);
+  _93 = List_var(_92);
+  _94 = Symbol_var(56);
+  _95 = int_var(9);
+  _96 = Symbol_var(11131);
+  _97 = Symbol_var(2312);
+  _98 = cons(_97, _3);
+  _99 = cons(_96, _98);
+  _100 = cons(_95, _99);
+  _101 = cons(_94, _100);
+  _102 = List_var(_101);
+  _103 = Symbol_var(62);
+  _104 = Symbol_var(11643);
+  _105 = Symbol_var(40260);
+  _106 = cons(_105, _3);
+  _107 = cons(_104, _106);
+  _108 = cons(_95, _107);
+  _109 = cons(_103, _108);
+  _110 = List_var(_109);
+  _111 = Symbol_var(54);
+  _112 = int_var(10);
+  _113 = Symbol_var(10875);
+  _114 = Symbol_var(27992);
+  _115 = cons(_114, _3);
+  _116 = cons(_113, _115);
+  _117 = cons(_112, _116);
+  _118 = cons(_111, _117);
+  _119 = List_var(_118);
+  _120 = Symbol_var(95);
+  _121 = Symbol_var(12155);
+  _122 = Symbol_var(8812);
+  _123 = cons(_122, _3);
+  _124 = cons(_121, _123);
+  _125 = cons(_112, _124);
+  _126 = cons(_120, _125);
+  _127 = List_var(_126);
+  _128 = Symbol_var(75);
+  _129 = Symbol_var(9595);
+  _130 = Symbol_var(27592);
+  _131 = cons(_130, _3);
+  _132 = cons(_129, _131);
+  _133 = cons(_112, _132);
+  _134 = cons(_128, _133);
+  _135 = List_var(_134);
+  _136 = cons(_135, NULL);
+  _137 = cons(_127, _136);
+  _138 = cons(_119, _137);
+  _139 = cons(_110, _138);
+  _140 = cons(_102, _139);
+  _141 = cons(_93, _140);
+  _142 = cons(_87, _141);
+  _143 = cons(_80, _142);
+  _144 = cons(_76, _143);
+  _145 = cons(_73, _144);
+  _146 = cons(_70, _145);
+  _147 = cons(_67, _146);
+  _148 = cons(_59, _147);
+  _149 = cons(_56, _148);
+  _150 = cons(_53, _149);
+  _151 = cons(_46, _150);
+  _152 = cons(_39, _151);
+  _153 = cons(_34, _152);
+  _154 = cons(_27, _153);
+  _155 = cons(_20, _154);
+  _156 = cons(_13, _155);
+  _157 = cons(_8, _156);
+}
+
+List _x2c_operator_rows(void){
+  if(! _init_guard_) _file_init_();
+  return _157;
+}
 

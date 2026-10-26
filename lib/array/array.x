@@ -83,9 +83,8 @@ meta native Self Array.getslice(Self, int, int, int);
 meta native Self Array.setslice(Self, int, int, Self);
 meta native Self Array.remslice(Self, int, int);
 meta native Self Array.splice(Self, int, int, Self);
-meta native int Array.find(Array, Var);
+meta native int Array.index(Array, Var);
 meta native int Array.count(Array, Var);
-meta native int Array.indexof(Array, Var);
 meta native Self Array.concat(Self, Self);
 meta native Self Array.reverse(Self);
 meta native Var Array.unshift(Array, Var);
@@ -259,8 +258,9 @@ static int _sort_compare(const void *ap, const void *bp) {
     Array sorted = numbers.sort();
     printf("%s %d\n", numbers.repr(), sorted == numbers);
     ```
-    Raises: causes from element comparison. The `Array` may already be
-    partially reordered when a catch receives the cause.
+    Comparisons run inside libc `qsort` and must return normally. If an Error
+    or another nonlocal exit crosses `qsort`, cleanup, memory safety, and
+    container state are not guaranteed.
 */
 meta native Self Array.sort(Self array) {
   if (!array || array.length < 2) return array;
@@ -322,9 +322,12 @@ static int _sort_key_compare(const void *ap, const void *bp) {
     The borrowed callback runs front to back and must not mutate this Array.
     Keys use `Var.compare`; equal keys preserve the original element order.
     A null or empty Array invokes no callback. Sorting another Array inside
-    the callback is valid. Raises: allocation, key comparison, `Func.apply`,
-    or callback causes. Failure leaves the original Array unchanged;
-    callback side effects are not undone.
+    the callback is valid. Raises: allocation, `Func.apply`, or key-extraction
+    causes. Failure during key extraction leaves the original Array unchanged;
+    callback side effects are not undone. Key comparisons run inside libc
+    `qsort` and must return normally. If an Error or another nonlocal exit
+    crosses `qsort`, cleanup, memory safety, and container state are not
+    guaranteed.
 */
 Self Array.sort_by(Self array, Func key) {
   if (!array) return array;

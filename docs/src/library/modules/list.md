@@ -438,11 +438,11 @@ Returns a copy of `lst` ordered by `Var.compare`.
 `lst` is unchanged. There is no comparator parameter. `Var.compare` orders
 the element tags involved, so a mixed-kind `List` still sorts. A `List` of
 fewer than two cells is returned as it stands.
+Comparisons follow `Array.sort`'s libc `qsort` contract, including its
+exception for nonlocal exits. Raises: `<alloc-fail>` while constructing
+the result.
 
-**Raises:** whatever element comparison raises, or `<alloc-fail>` while
-constructing the result.
-
-Source: `lib/list/transformations.x:116`
+Source: `lib/list/transformations.x:117`
 
 <a id="List.sort_by"></a>
 #### List.sort_by
@@ -452,9 +452,10 @@ Source: `lib/list/transformations.x:116`
 Returns a stable sorted copy using `Array.sort_by`'s callback contract.
 The key runs once per element in input order; an empty List invokes none.
 The input List is unchanged. Raises: allocation and the key's ordinary
-causes, including failure to compare the resulting keys.
+causes during key extraction. Key comparisons follow `Array.sort_by`'s
+libc `qsort` exception for nonlocal exits.
 
-Source: `lib/list/transformations.x:139`
+Source: `lib/list/transformations.x:141`
 
 <a id="List.sort_with"></a>
 #### List.sort_with
@@ -465,7 +466,7 @@ Returns a stable sorted copy using `Array.sort_with`'s callback contract.
 The input List is unchanged. Fewer than two cells return unchanged without
 a callback. Raises: allocation and the comparator's ordinary causes.
 
-Source: `lib/list/transformations.x:127`
+Source: `lib/list/transformations.x:128`
 
 <a id="List.tail"></a>
 #### List.tail
@@ -507,7 +508,7 @@ of fewer than two cells is returned as it stands.
 **Raises:** causes from `Map` hashing or equality, or `<alloc-fail>` or
 `<size-limit>` while constructing the result.
 
-Source: `lib/list/transformations.x:154`
+Source: `lib/list/transformations.x:156`
 
 <a id="List.unpack_n"></a>
 #### List.unpack_n
@@ -747,7 +748,7 @@ identity, and `nil` returns `nil`.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the result.
 
-Source: `lib/list/transformations.x:169`
+Source: `lib/list/transformations.x:171`
 
 <a id="List.flatten_all"></a>
 #### List.flatten_all
@@ -759,7 +760,7 @@ Nested `nil` contributes no element and `nil` returns `nil`.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the result.
 
-Source: `lib/list/transformations.x:186`
+Source: `lib/list/transformations.x:188`
 
 <a id="List.hash"></a>
 #### List.hash
@@ -857,7 +858,7 @@ rebuilt canonically, and `nil` returns `nil`.
 **Raises:** a cause from key equality, or `<alloc-fail>` or `<size-limit>`
 while constructing the result.
 
-Source: `lib/list/transformations.x:207`
+Source: `lib/list/transformations.x:209`
 
 <a id="List.subseq"></a>
 #### List.subseq

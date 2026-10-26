@@ -357,10 +357,11 @@ macro Unit $array.typed.operations(Type $array, Type $element, Literal $zero,
   Self $array.setslice(Self, int, int, Self);
   Self $array.remslice(Self, int, int);
   Self $array.splice(Self, int, int, Self);
-  int $array.find($array, $element);
+  int $array.index($array, $element);
+  Var $array.find($array, Func);
+  Iter $array.iter($array, Iter);
   int $array.contains($array, $element);
   int $array.count($array, $element);
-  int $array.indexof($array, $element);
   Self $array.concat(Self, Self);
   Self $array.reverse(Self);
   int $array.equal($array, $array);
@@ -582,7 +583,7 @@ macro Unit $array.typed.operations(Type $array, Type $element, Literal $zero,
       A null array returns -1; the scan is linear and preserves source order.
       Raises: `<size-limit>` when the length exceeds the integer index domain.
   */
-  int $array.find($array array, $element value) {
+  int $array.index($array array, $element value) {
     if (array == NULL) return -1;
     if (array.length > INT_MAX) _size_limit($owner, array.length);
     return array.find_element(value);
@@ -593,7 +594,7 @@ macro Unit $array.typed.operations(Type $array, Type $element, Literal $zero,
       integer index domain.
   */
   int $array.contains($array array, $element value) {
-    return array.find(value) != -1;
+    return array.index(value) != -1;
   }
 
   /** Returns how many native elements equal `value`.
@@ -606,9 +607,16 @@ macro Unit $array.typed.operations(Type $array, Type $element, Literal $zero,
     return array.count_element(value);
   }
 
-  /** Returns the same first-match index as `$array.find`. */
-  int $array.indexof($array array, $element value) {
-    return array.find(value);
+  /** Returns the first element accepted by `pred`'s ordinary `Var` truth,
+      or `void` when absent. A null array or predicate returns `void`.
+      Elements are boxed as in iteration; the array and its storage are
+      unchanged. Raises: any cause from boxing, `pred`, or its result's truth
+      operation.
+  */
+  Var $array.find($array array, Func pred) {
+    if (!array) return void;
+    struct Iter storage;
+    return array.iter(&storage).find(pred);
   }
 
   /** Returns a fresh array holding `a` followed by `b`.

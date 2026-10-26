@@ -7,5 +7,6 @@
 
 #include "x2c.h"
 #include "rewrite.h"
+#include "compiler-meta.h"
 
 #endif /* __GUARD_0xBBABE71D__ */

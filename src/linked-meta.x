@@ -16,6 +16,7 @@
 #include "x2c.x"
 #include "channel.x"
 #include "common.x"
+#include "compiler-meta.x"
 #include "lisp-bindings.x"
 #include "list-selectors.x"
 #include "native-scalar-types.x"
@@ -602,10 +603,8 @@ Code dynamic_binary(Code code) {
 }
 
 static Symbol _dynamic_operation(Symbol assignment) {
-  foreach (List row in %((<+=> <+>) (<-=> <->) (<*=> <*>) (</=> </>)
-                       (<%=> <%>) (<"<<="> <"<<">) (<">>="> <">>">)
-                       (<&=> <&>) (<^=> <^>) (<|=> <|>)))
-    if (row.car() == assignment) return row.cadr();
+  foreach (List row in _x2c_operator_rows())
+    if (row[2] && row[2] == assignment) return row.car();
   return 0;
 }
 
@@ -1249,7 +1248,7 @@ static int _match_bind(
   int &braces) {
   int list = binder.is_list_binder();
   if (binders != NULL) {
-    int slot = binders.find(binder);
+    int slot = binders.index(binder);
     if (slot < 0) return 0;
     _match_and(b, testing);
     b.printf(
@@ -2182,34 +2181,9 @@ Code try_lowering(Code node) {
 
 /* --- src/operator-ledger.x ----------------------------------------------- */
 
-static List _operator_rows(void) => %(
-  (<||>       1 0        0         0)
-  (<&&>       2 0        0         0)
-  (<|>        3 <|=>     0         0)
-  (<^>        4 <^=>     0         0)
-  (<&>        5 <&=>     0         0)
-  (<~=>       6 0        0         0)
-  (<"==">     6 0        <equal>   0)
-  (<!=>       6 0        <equal>   1)
-  (<"===">    6 0        0         0)
-  (<!==>      6 0        0         0)
-  (<"<">      7 0        <compare> 1)
-  (<"<=">     7 0        <compare> 1)
-  (<">">      7 0        <compare> 1)
-  (<">=">     7 0        <compare> 1)
-  (<in>       7 0        0         0)
-  (<"<<">     8 <"<<=">  0         0)
-  (<">>">     8 <">>=">  0         0)
-  (<+>        9 <+=>     <add>     0)
-  (<->        9 <-=>     <sub>     0)
-  (<*>       10 <*=>     <mul>     0)
-  (</>       10 </=>     <div>     0)
-  (<%>       10 <%=>     <mod>     0)
-);
-
 static List _operator_cases(int key, int value, int derived) {
   Array cases = [];
-  foreach (List row in _operator_rows()) {
+  foreach (List row in _x2c_operator_rows()) {
     if (!row[key] || !row[value]) continue;
     if (derived >= 0 && row[4] != derived) continue;
     Symbol label = row[key];
@@ -2387,8 +2361,8 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_try_catch_handle", _try_catch_handle);
   $linked.row(rows, "_try_landing", _try_landing);
   $linked.row(rows, "try_lowering", try_lowering);
-  $linked.row(rows, "_operator_rows", _operator_rows);
   $linked.row(rows, "_operator_cases", _operator_cases);
+  $linked.row(rows, "_x2c_operator_rows", _x2c_operator_rows);
   $linked.row(rows, "native_scalar_types", native_scalar_types);
   $linked.row(rows, "_scalar_tag", _scalar_tag);
   $linked.row(rows, "_scalar_key", _scalar_key);

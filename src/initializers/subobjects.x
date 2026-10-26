@@ -204,13 +204,17 @@ static int _fills_whole(Compiler c, Type type, List value) {
 }
 
 static int _fills_char_array(Compiler c, Type type, List value) {
-  if (!(value ~=
-    %(expr (* char) (literal (* char) ?)))) return 0;
-  Type array = _resolve_shape(c, type);
-  if (!array.is_array()) return 0;
-  Type element = c.sym.resolve_key(array.cdr()).scalar();
-  return element === %(char) || element === %(signed char) ||
-         element === %(unsigned char);
+  match (value) {
+    case %(expr ? (literal ?literal_type ?)): {
+      if (!Type.is_char_pointer_like(literal_type)) return 0;
+      Type array = _resolve_shape(c, type);
+      if (!array.is_array()) return 0;
+      Type element = c.sym.resolve_key(array.cdr()).scalar();
+      return element === %(char) || element === %(signed char) ||
+             element === %(unsigned char);
+    }
+  }
+  return 0;
 }
 
 // initializer paths
@@ -364,9 +368,8 @@ static int _scalar_inputs(Compiler c, List items, List &string) {
       }
       default: return 0;
     }
-    if (value ~=
-      %(expr (* char)
-        (literal (* char) ?))) string = value;
+    if (value ~= %(expr ? (literal ?literal_type ?)))
+      if (Type.is_char_pointer_like(literal_type)) string = value;
   }
   return 1;
 }

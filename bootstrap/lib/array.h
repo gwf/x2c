@@ -21,6 +21,8 @@ typedef Block Array;
 #include "iter.h"
 #include "block.h"
 #include "var/var.h"
+Iter Array_iter(Array, Iter);
+
 Array Array_new(void);
 
 int Array_try_next(Array _x2c_gensym_macro_array_15, int * _x2c_gensym_macro_cursor_1, Var * _x2c_gensym_macro_out_4);
@@ -49,13 +51,13 @@ Array Array_remslice(Array _x2c_gensym_macro_array_26, int _x2c_gensym_macro_sta
 
 Array Array_splice(Array _x2c_gensym_macro_array_27, int _x2c_gensym_macro_index_6, int _x2c_gensym_macro_remove_count_1, Array _x2c_gensym_macro_values_3);
 
-int Array_find(Array _x2c_gensym_macro_array_28, Var _x2c_gensym_macro_value_9);
+int Array_index(Array _x2c_gensym_macro_array_28, Var _x2c_gensym_macro_value_9);
 
 int Array_contains(Array _x2c_gensym_macro_array_29, Var _x2c_gensym_macro_value_10);
 
 int Array_count(Array _x2c_gensym_macro_array_30, Var _x2c_gensym_macro_value_11);
 
-int Array_indexof(Array _x2c_gensym_macro_array_31, Var _x2c_gensym_macro_value_12);
+Var Array_find(Array _x2c_gensym_macro_array_31, Func _x2c_gensym_macro_pred_0);
 
 Array Array_concat(Array _x2c_gensym_macro_a_2, Array _x2c_gensym_macro_b_2);
 
@@ -100,6 +102,8 @@ Buffer Array_write_str(Array _x2c_gensym_macro_array_34, Buffer _x2c_gensym_macr
 String Array_str(Array _x2c_gensym_macro_array_35);
 
 String Array_repr(Array _x2c_gensym_macro_array_36);
+
+Iter Array_iter(Array, Iter);
 
 Iter Array_iter(Array _x2c_gensym_macro_array_39, Iter _x2c_gensym_macro_dest_0);
 

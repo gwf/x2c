@@ -21,7 +21,7 @@ lib/clibc.x|internal|C library prototypes for integer and string conversions, an
 lib/cmath.x|internal|C99 `<math.h>` prototypes, declared so a `Var` argument unboxes at a math call; the unit still includes `<math.h>`.
 lib/common-types.x|api|
 lib/common.x|api|
-lib/compiler-meta.x|internal|Compiler-private `meta` prototypes for the native operations the compiler supplies to its own shipped sources.
+lib/compiler-meta.x|internal|Compiler-private operator facts and `meta` prototypes for native operations supplied to the compiler's shipped sources.
 lib/context.x|api|
 lib/dispatch.x|api|
 lib/error/error.x|api|

@@ -347,6 +347,62 @@ grep -q "built for 'x2c 0.0.0'" "$BUILD/fake.stderr" || fail "fake diagnostic"
 "$x2c" remove -q greet
 rm -rf "$BUILD/home/packages/mine"
 
+# Packages without dependency manifests use the shared build and bundle path.
+for name in pure mixed; do
+  directory="$BUILD/src/$name"
+  mkdir -p "$directory/src"
+  printf 'PACKAGE := %s\nROOT := %s\nX2C := %s\nPACKAGE_C_FLAGS := --c-include-dir src\ninclude %s/packages/package.mk\n' \
+    "$name" "$ROOT" "$X2C" "$ROOT" >"$directory/Makefile"
+  if [[ "$name" == pure ]]; then
+    printf 'int answer(void) { return 42; }\n' >"$directory/src/$name.x"
+  else
+    printf '#include "answer.h"\nint answer(void) { return native_answer(); }\n' \
+      >"$directory/src/$name.x"
+    printf 'int native_answer(void);\n' >"$directory/src/answer.h"
+    printf 'int native_answer(void) { return 42; }\n' >"$directory/src/answer.c"
+  fi
+  make -C "$directory" bundle >"$BUILD/$name-bundle.log" 2>&1 ||
+    fail "$name bundle; see $BUILD/$name-bundle.log"
+  [[ ! -e "$directory/builds/$name.link" ]] || fail "legacy link file required"
+  bundle="$directory/builds/bundle/$name"
+  python3 - "$bundle/BUNDLE.json" <<'PYTHON'
+import json, sys
+identity = json.load(open(sys.argv[1]))
+assert all(not key.startswith('dependency_') for key in identity), identity
+for key in ('package', 'platform', 'machine', 'x2c_version', 'x2c_sha256',
+            'runtime_sha256', 'archive_sha256'):
+    assert identity[key], (key, identity)
+PYTHON
+  "$x2c" install -q "$bundle"
+  printf 'import "%s" as sample;\nint main(void) { return sample.answer() != 42; }\n' \
+    "$name" >"$BUILD/$name-client.x"
+  "$x2c" run -q "$BUILD/$name-client.x" || fail "$name bundle consumer"
+  "$x2c" remove -q "$name"
+done
+
+# A nonempty native response still requires explicit distribution data.
+printf '%s\n' '-lm' >"$directory/builds/mixed.native.rsp"
+if make -C "$directory" bundle >"$BUILD/native-without-manifest.log" 2>&1; then
+  fail "native inputs bundled without distribution data"
+fi
+grep -q 'native link inputs require distribution data' \
+  "$BUILD/native-without-manifest.log" || fail "native distribution diagnostic"
+cat >"$BUILD/dependency.json" <<'MANIFEST'
+{"schema":1,"name":"inert","sources":[{}],"version":"1.0",
+ "profile":"test","distribution":{"native_args":["-lm"]}}
+MANIFEST
+make -C "$directory" bundle DEPENDENCY_MANIFEST="$BUILD/dependency.json" \
+  >"$BUILD/manifest-bundle.log" 2>&1 || fail "manifest-backed bundle"
+python3 - "$bundle/BUNDLE.json" <<'PYTHON'
+import json, sys
+identity = json.load(open(sys.argv[1]))
+assert identity['dependency_version'] == '1.0', identity
+assert identity['dependency_profile'] == 'test', identity
+PYTHON
+"$x2c" install -q "$bundle"
+"$x2c" run -q "$BUILD/mixed-client.x" || fail "manifest-backed bundle consumer"
+"$x2c" remove -q mixed
+
 # A project manifest pins packages, and `x2c build` installs what the home
 # does not already hold, then records the resolution in x2c.lock.
 mkdir -p "$BUILD/project/src"

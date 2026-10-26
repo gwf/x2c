@@ -7,24 +7,28 @@ These maps list the current owners. The generated
 
 ## Compiler organization
 
-Files below are relative to `src/` unless a path is shown.
+Compiler paths below are relative to `src/`. Paths beginning with `lib/` or
+`commands/` are relative to the repository root.
 
-- entry and shared state: `main.x`, `cli.x`, `translation.x`, `frontend.x`, `compiler.x`
+- entry and shared state: `main.x`, `cli/cli.x`, `translation.x`,
+  `frontend.x`, `compiler/compiler.x`
   (its members in `compiler/` hold parsing, declarations, generated names,
   lifecycle, binding facts, the literal cache, match patterns, and source
   files and locations), `symtab/symtab.x`, `diagnostics.x`, `sourceview.x`,
-  `collect.x`, `report.x`, `deps.x`, `utils.x`;
+  `collect/collect.x`, `report.x`, `deps.x`, `utils.x`;
 - shared runtime tokenization: `lib/tokenizer.x`; compiler parsing:
-  `preprocess.x`, `parse.x`, `expressions.x`, `initializers.x`,
-  `statements.x`, `literals.x`, `lambdas.x`, `macros.x`, `grammar.x`,
+  `preprocess.x`, `parse/parse.x`, `expressions/expressions.x`,
+  `initializers/initializers.x`, `statements.x`, `literals/literals.x`,
+  `lambdas.x`, `macros/macros.x`, `grammar.x`,
   `ast-rewrite.x`, `ast.x`;
-- compile-time code: `stage.x`, `meta-sdk.x`, `meta-native.x`,
-  `builtins.x`, `meta-group.x`, `meta-project.x`, `meta-helper-client.x`;
+- compile-time code: `stage.x`, `meta-sdk/meta-sdk.x`,
+  `meta-native/meta-native.x`, `builtins.x`, `meta-group/meta-group.x`,
+  `meta-project.x`, `meta-helper-client.x`;
 - semantic representation and lowering: `type.x`, `type-ledger.x`,
-  `protocol.x`, `operator-ledger.x`, `transform.x`, which drives
-  normalization and dispatches to the shipped components, `callables.x`,
-  which lowers only `Func` conversions, `cleanup.x`, `adapter-memo.x`,
-  `regions.x`;
+  `protocol/protocol.x`, `operator-ledger.x`, `transform/transform.x`, which
+  drives normalization and dispatches to the shipped components,
+  `callables/callables.x`, which lowers only `Func` conversions,
+  `cleanup/cleanup.x`, `adapter-memo.x`, `regions/regions.x`;
 - shipped components under `src/components/`, each lowering one language
   feature on the rewrite
   primitives: `bracket-access.x` (bracket access policy),
@@ -37,8 +41,8 @@ Files below are relative to `src/` unless a path is shown.
   adapters and Var descriptors), `raise.x` (raise),
   `string-switch.x` (switches on a String), and
   `try-catch.x` (try, catch, and finally);
-- output: `cache.x`, `generate.x`, `emit.x`, `format.x`;
-- project planning and native primitives: `project.x`, `toolchain.x`;
+- output: `cache.x`, `generate/generate.x`, `emit/emit.x`, `format.x`;
+- project planning and native primitives: `project/project.x`, `toolchain.x`;
   build/run/script workflows live in `commands/build/`, and the editor
   adapter lives in `commands/editor/`;
 - external package management: `commands/package/` owns installation, removal,
@@ -53,50 +57,31 @@ code compiled into the compiler. Style censuses and these maps exclude it.
 
 ## Runtime organization
 
-Files below are relative to `lib/`.
+Paths below are relative to `lib/`.
 
-```text
-common, scope, pool,          shared representation, lifetime, interning,
-static-init, private-keywords static initialization, and the private loop
-                              keyword
-var, varconvert, varops,      tagged values, conversions, operations, the
-var-ledger, var-tags,         tag and C scalar ledgers, pointer converter
-var-adapters, integer-ops,    templates, and raw integer arithmetic
-native-scalar-types
-dispatch, protocols, cleanup  dynamic behavior and protocol adoption
-string/string                canonical immutable values, classification,
-                              numeric parsing, formatting, escaping,
-                              splitting, and lazy field cursors
-symbol, symbolset, atom,      closed vocabularies, and the optional
-list, list-selectors          compound List selectors
-block, buffer, array, map,    mutable storage and builders, and the Array
-array-generics, map-generics  and Map family generators
-typed-array, typed-map,       typed collection families and their
-typed-list                    typed views
-iter, match/match            traversal, pattern matching, plan lowering
-                              and caching, and the Match wordcode machine
-macrovalue, system-macros    macros as values that build and recognize
-                              code, and convenience macros
-error, error_init,            ambient errors, their shared causes and
-error-macros, error-private,  transfer layouts, and structured control
-func-errors, exception        flow
-file, logger, path, process,  system boundaries, argument parsing, and the
-args, scripting               modules a script unit includes
-json, datum                   values as JSON text and as Lisp reader text
-diff, digest, regex           line differences, SHA-256 digests, and
-                              regular expressions
-context, thread, thread-state bounded runtime state, native workers, and
-mutex                         their coordination primitive
-scan, tokenizer               lexical scanners and the shared tokenizer
-func, lisp, lisp-targets,     native callable binding, runtime Lisp and
-lisp-bindings                 the native operations its sessions bind
-meta, compiler-meta, type,    the meta function surface, compiler-private
-rewrite                       meta operations, structural Type
-                              operations, and rewrite registration
-clibc, cmath                  C prototypes declared for compile-time calls
-                              and Var unboxing
-lib                           DisjointSet utility
-```
+| Source | Responsibility |
+| --- | --- |
+| `common.x`, `scope/scope.x`, `pool/pool.x` | Shared representation, allocation lifetimes, and canonical values. |
+| `static-init.x`, `private-keywords.x` | Static initialization and the private loop keyword. |
+| `var/var.x`, `var/conversion.x`, `var/operators.x` | Tagged values, conversions, and operations. |
+| `var-ledger.x`, `var-tags.x`, `var-adapters.x`, `integer-ops.x`, `native-scalar-types.x` | Tag and scalar ledgers, pointer converter templates, and raw integer arithmetic. |
+| `dispatch.x`, `protocols.x`, `cleanup.x` | Dynamic behavior and protocol adoption. |
+| `string/string.x` | Canonical immutable text, classification, numeric parsing, formatting, escaping, splitting, and lazy field cursors. |
+| `symbol.x`, `symbolset.x`, `atom.x`, `list/list.x`, `list-selectors.x` | Closed vocabularies, canonical Lists, and optional compound List selectors. |
+| `block.x`, `buffer.x`, `array/array.x`, `map/map.x` | Mutable storage and builders. |
+| `array/generics.x`, `map/generics.x`, `typed-array.x`, `typed-map.x`, `typed-list.x` | Collection family generators and typed views. |
+| `iter.x`, `match/match.x` | Traversal, pattern matching, plan lowering and caching, and the Match wordcode machine. |
+| `macrovalue/macrovalue.x`, `system-macros.x` | Macros as values and convenience macros. |
+| `error/error.x`, `error_init.x`, `error-macros.x`, `error-private.x`, `func/errors.x`, `exception.x` | Ambient errors, shared causes, transfer layouts, and structured control flow. |
+| `file.x`, `logger.x`, `path.x`, `process.x`, `args.x`, `scripting.x` | System boundaries, argument parsing, and script-unit includes. |
+| `json.x`, `datum.x`, `datum-reader.x` | JSON and Lisp reader text. |
+| `diff.x`, `digest.x`, `regex.x` | Line differences, SHA-256 digests, and regular expressions. |
+| `context.x`, `thread.x`, `thread-state.x`, `channel.x`, `mutex.x` | Runtime state, native workers, communication, and coordination. |
+| `scan.x`, `tokenizer.x` | Lexical scanners and the shared tokenizer. |
+| `func/func.x`, `lisp/lisp.x`, `lisp-targets/lisp-targets.x`, `lisp-bindings.x` | Native callable binding, runtime Lisp, and its native operations. |
+| `meta.x`, `compiler-meta.x`, `type.x`, `rewrite.x` | Public and compiler-private meta operations, structural Type operations, and rewrite registration. |
+| `clibc.x`, `cmath.x` | C prototypes for compile-time calls and Var unboxing. |
+| `lib.x` | DisjointSet utility. |
 
 `docs/library-manifest.txt` records visibility. `lib/Makefile` records the
 prelude and optional sources; it generates `lib/x2c.x`. See RT-6 and AR-9.

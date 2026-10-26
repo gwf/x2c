@@ -3559,9 +3559,11 @@ For `+`, when each operand is a `String`, an alias reaching `String`, a
 the result is the `String` that `String.add` returns, so `path + ".o"`
 concatenates.
 
-The shipped component `src/components/dynamic-operators.x` implements these
-lowerings. It also implements the dynamic compound assignments and increments
-below, and unary fallback rejection after protocol resolution. It registers
+`src/expressions/operators.x` resolves String addition and ordinary protocol
+operators. `src/transform/operators.x` lowers Var comparisons. The shipped
+component `src/components/dynamic-operators.x` supplies unresolved dynamic
+arithmetic, compound assignments, increments, and unary fallback rejection
+after protocol resolution. It registers
 each translator with `$rewrite` and a Match pattern typed `Var`, such as
 `%(expr ("Var") (op (!or + - (!quote *) / % ...) ? ?))`, which keys the rule
 by each operator the pattern names and `Var`. A pattern that types the
@@ -4696,7 +4698,7 @@ List.get       List.assoc    List.array    List.sort
 
 Array.new      Array.len     Array.push    Array.getindex  Array.setindex
 Array.take_last Array.shift  Array.unshift Array.insert    Array.remove
-Array.find     Array.contains Array.count  Array.join      Array.list
+Array.index    Array.find    Array.contains Array.count    Array.join Array.list
 
 Map.new        Map.len       Map.get       Map.getindex    Map.setindex
 Map.contains   Map.del       Map.getdefault Map.setdefault Map.list

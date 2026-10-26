@@ -50,8 +50,9 @@ instead of edited by hand. The compiler under development is `builds/0/x2c`; see
 
 ## The compiler pipeline
 
-The compiler lives under `src/`. `src/main.x` dispatches commands and runs the
-translation loop; `src/cli/cli.x` parses the command line. `src/frontend.x` owns
+The compiler lives under `src/`. `src/main.x` dispatches commands;
+`src/cli/cli.x` parses the command line. `src/translation.x` coordinates input
+translation and workers. `src/frontend.x` owns
 configured source stages and isolated unit lifetimes shared with internal
 tools. Nested interning pools keep batch translation close to single-file peak
 memory. For each input file the translator runs one pipeline:
@@ -506,7 +507,7 @@ builds the final `String`. The result is valid C, with spacing determined by
 the emitter. `src/generate/generate.x` then writes the `.h`, `.c`, and `.xi` files
 together, named from the input basename inside the `--out-dir` directory. A
 write failure replaces none of them and becomes a diagnostic carrying the
-target path and the host error. `src/main.x` then writes the `.d` file
+target path and the host error. `src/translation.x` then writes the `.d` file
 through `src/deps.x`.
 
 `unittest/compiler-fixtures/` pins the output of each phase. It stores

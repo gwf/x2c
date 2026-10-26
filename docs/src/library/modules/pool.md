@@ -65,9 +65,9 @@ Source: `lib/pool/threads.x:34`
 `Pool Pool.detach(void)`
 
 Removes the innermost open bracket without destroying it.
-`Thread` keeps the detached pool sealed until join copies its survivors.
-The returned pool remains owned by the caller until that transfer or an
-explicit `Pool.release`.
+The returned pool remains owned by the caller until explicitly released.
+Keep it and its ancestors alive while its values are in use. `Thread.join`
+does not copy values or transfer pool ownership.
 
 **Raises:** `<bad-state>` when no bracket is open. The failure leaves the
 active pool unchanged.
@@ -469,9 +469,9 @@ Source: `lib/pool/pool.x:28`
 Pool owns canonical identity for a stack of nested levels. Lookup walks
 outward and a miss lands in the innermost level; release returns empty
 blocks to one process-wide depot and moves promoted survivors to the
-parent at the same address. Levels have no sibling branches, so the
-active chain holds one canonical pointer per equal value. `String` and
-`List` intern into one such stack per thread.
+parent at the same address. Threads start at one shared process root and
+may open their own child levels. `String` and `List` lookup follows the
+active thread's chain of child and ancestor levels.
 
 ## Tests and examples
 

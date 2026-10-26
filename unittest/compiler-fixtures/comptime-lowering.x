@@ -543,9 +543,9 @@ meta int ct_arr_count(int n) {
   return xs.count(n);
 }
 
-meta int ct_arr_find(int n) {
+meta int ct_arr_index(int n) {
   Array xs = [n, n + 1];
-  return xs.find(n + 1);
+  return xs.index(n + 1);
 }
 
 meta int ct_arr_unshift(int n) {
@@ -822,7 +822,7 @@ int main(void) {
   printf("str-lines    %s\n", $ct_str_lines("one\ntwo"));
   printf("arr-contains %d\n", $ct_arr_contains(4));
   printf("arr-count    %d\n", $ct_arr_count(4));
-  printf("arr-find     %d\n", $ct_arr_find(4));
+  printf("arr-index    %d\n", $ct_arr_index(4));
   printf("arr-unshift  %d\n", $ct_arr_unshift(4));
   printf("map-default  %d\n", $ct_map_setdefault(4));
   printf("meta-poly    %d %d\n", $mt_poly(7), mt_poly(7));

@@ -198,8 +198,9 @@ From lowest to highest:
 | Cast/unary | Cast, prefix update, address, dereference, sign, `~ ! sizeof` | Prefix nesting |
 | Postfix | Call, index, slice, member selection, postfix update | Left |
 
-`src/operator-ledger.x` defines the binary rows except the contextual `is`
-handler in `src/expressions/expressions.x`. Assignment parses a conditional left side;
+`lib/compiler-meta.x` defines the binary rows, and `src/operator-ledger.x`
+projects their precedence lookups. The contextual `is` handler lives in
+`src/expressions/expressions.x`. Assignment parses a conditional left side;
 whether that side is assignable is a semantic question. An expression-bodied
 function uses a full expression, while a lambda expression body uses an
 assignment expression. Calls and literal element lists permit a trailing

@@ -165,6 +165,13 @@ module List _emit(Emitter &e, List ast) {
     case %((!or fnmod func) ?params): return _parameters(e, params);
     case %(label ?name): return _label(e, name);
     case %(ident ?binding): return _ident(e, binding);
+    case %(declare ?type ?bindings):
+      return %(@(_declare(e, type, bindings)) ";");
+    case %(decl ?type ?bindings): return _declare(e, type, bindings);
+    case %(bind ?ident ?mods): return _bind(e, ident, mods);
+    case %(param ?type ?mods): return _param(e, type, mods);
+    case %(function ?type ?bindings ?body):
+      return _function(e, type, bindings, body);
     case %(falias (!set ?declaration (declare ? (bindings (bind ?target ?))))
                   ?native):
       return _foreign_alias(e, declaration, target, native);
@@ -209,12 +216,7 @@ static List _leaf(Emitter &e, List ast) {
     case <adopt>: case <macrodef>: case <protocol>: return NULL;
     case <literal>:    return _literal(e, ast);
     case <preproc>:    return _preproc(e, ast);
-    case <bind>:       return _bind(e, ast);
-    case <declare>:    return _declare_stmt(e, ast);
-    case <decl>:       return _decl_stmt(e, ast);
     case <enum>:       return _enum(e, ast);
-    case <function>:   return _function(e, ast);
-    case <param>:      return _param(e, ast);
     case <struct>:     return _aggregate(e, ast);
     case <typedef>:    return _typedef(e, ast);
     case <union>:      return _aggregate(e, ast);
