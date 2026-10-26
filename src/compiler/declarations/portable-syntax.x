@@ -97,7 +97,7 @@ static Var _freeze_cache_key(Compiler c, Var key) {
   if (Ast.try_binding(key, NULL, name))
     return %(declaration-cache-binding $name);
   if (key is not <list>) return _freeze_leaf(key);
-  match (key) case %(cache ?): return c.freeze_declaration_syntax(key);
+  if (key ~= %(cache ?)) return c.freeze_declaration_syntax(key);
   Array out = [];
   foreach (Var child in key.list()) out.push(_freeze_cache_key(c, child));
   return out.list_free();
@@ -135,10 +135,9 @@ static Token _thaw_token(
 
 // A frozen location becomes a new row of this parse's origin table.
 static List _thaw_origin(Compiler c, List location, Var node) {
-  match (location)
-    case %((file ?file) (line ?line) (column ?column) (length ?length)
-           (position ?position)):
-      c.origins.push(%(source $file $line $column $length $position));
+  if (location ~= %((file ?file) (line ?line) (column ?column)
+                    (length ?length) (position ?position)))
+    c.origins.push(%(source $file $line $column $length $position));
   int occurrence = c.origins.len();
   return %(at $occurrence $(c.thaw_declaration_syntax(node)));
 }
@@ -162,9 +161,8 @@ static List _macro_row(Compiler c, List row, int thaw) {
 static List _declaration_location(List location, int thaw) {
   Array rows = [];
   foreach (List row in location) {
-    match (row)
-      case %(file ?path):
-        row = %(file $(_declaration_path(path, thaw)));
+    if (row ~= %(file ?path))
+      row = %(file $(_declaration_path(path, thaw)));
     rows.push(row);
   }
   return rows.list_free();
