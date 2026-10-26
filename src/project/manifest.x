@@ -115,8 +115,7 @@ static void _enter_target(Manifest &m, ProjectTarget target) {
   m.target = target;
 }
 
-static void _enter_profile(
-  Manifest &m, ProjectTarget target, String name) {
+static void _enter_profile(Manifest &m, ProjectTarget target, String name) {
   ProjectProfile profile = _profile(target, name);
   if (!profile) profile = _new_profile(target, name);
   if (profile.declared)
