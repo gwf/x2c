@@ -1454,7 +1454,7 @@ static void var_recursive_rendering(void) {
   // A cycle through an immutable list stops at the mutable container that
   // closes it, so the array's address appears one level inside the list.
   array.truncate(0);
-  List list = %(1 $array);
+  List list = $(1, array);
   array.push(list);
   pointer = array.var().pointer_string();
   EXPECT_STR_EQ(list.repr(), %"(1 [ (1 $pointer) ])");
@@ -1465,13 +1465,14 @@ static void var_recursive_rendering(void) {
   Array child = [1, 2];
   Array repeated = [child, child];
   EXPECT_STR_EQ(repeated.repr(), "[ [ 1, 2 ], [ 1, 2 ] ]");
-  List repeated_list = %($child $child);
+  List repeated_list = $(child, child);
   EXPECT_STR_EQ(repeated_list.repr(), "([ 1, 2 ] [ 1, 2 ])");
 
   // Exercise the multiline List writer as well as its trial line rendering.
   Array long_cycle = [];
-  List long_list = %("abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz"
-                    "abcdefghijklmnopqrstuvwxyz" $long_cycle);
+  List long_list = $(
+    "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz",
+    "abcdefghijklmnopqrstuvwxyz", long_cycle);
   long_cycle.push(long_list);
   EXPECT_TRUE(long_list.repr().contains(long_cycle.var().pointer_string()));
 }
@@ -1493,7 +1494,7 @@ static void var_rendering_restores_after_error(void) {
   Var value = Var.new(<fixture>, &fixture);
   Array array = [value];
   Map map = {1: array};
-  List list = %($map);
+  List list = $(map);
   Buffer out = Buffer.new(0);
   int caught = 0;
   try list.write_repr(out);

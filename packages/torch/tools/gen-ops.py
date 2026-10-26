@@ -635,7 +635,7 @@ static int _scalar(Var value, int64_t &integer, double &floating) {
 static List _pair(xt_tensor a, xt_tensor b, String operation) {
   Tensor first = Tensor.adopt(a, operation);
   Tensor second = Tensor.adopt(b, operation);
-  return %($first $second);
+  return $(first, second);
 }
 
 '''
@@ -716,7 +716,7 @@ def emit_x(op):
         for out in outs:
             body += ['Tensor %s_t = Tensor.adopt(%s, "%s");' % (out, out,
                                                                 name),
-                     "result = result.append(%%($%s_t));" % out]
+                     "result = result.append($(%s_t));" % out]
         body.append("return result;")
     elif rkind == "tensors":
         body += ["xt_tensor *items = NULL;",
@@ -725,7 +725,7 @@ def emit_x(op):
                  "List result = %();",
                  "for (int64_t i = 0; i < count; i++) {",
                  '@Tensor item = Tensor.adopt(items[i], "%s");' % name,
-                 "@result = result.append(%($item));",
+                 "@result = result.append($(item));",
                  "}",
                  "xt_free_handles(items);",
                  "return result;"]

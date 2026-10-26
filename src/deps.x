@@ -43,7 +43,7 @@ int Compiler.write_depfile(
   long error = 0;
   try {
     String text = _contents(request, compiler, input, output_dir);
-    Path.publish_files(%($path $text));
+    Path.publish_files($(path, text));
     return 1;
   }
   catch %((!or not-found io-fail) *failure): error = failure.assoc(<"errno">);

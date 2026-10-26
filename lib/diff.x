@@ -61,7 +61,7 @@ static void _replace(Script &s) {
 }
 
 static void _emit(Script &s, Symbol kind, String line) =>
-  s.edits.push(%($kind $line));
+  s.edits.push($(kind, line));
 
 static int _same(Script &s, int i, int j) =>
   s.old[i].string() == s.new[j].string();

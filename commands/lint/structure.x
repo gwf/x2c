@@ -234,8 +234,8 @@ static void _lifecycles(Lint l):
       if !(mate in lowered): continue
       List other = lowered[mate]
       (String other_name, int other_start) = other
-      List key = name < other_name ? %($name $other_name) :
-        %($other_name $name)
+      List key = name < other_name ? $(name, other_name) :
+        $(other_name, name)
       if key in seen: continue
       seen[key] = 1
       int line = l.at(start).line, other_line = l.at(other_start).line
@@ -270,14 +270,14 @@ static void _tables(Lint l):
     int first = l.first[t.line] == at
     int name = first && depth == 0 ? _type_name(l, at) : -1
     if name >= 0 && l.token_is(l.prev(name), "enum"):
-      enums.push(%($name $(l.next(name))))
+      enums.push($(name, l.next(name)))
     if t.type == <ident> && l.token_is(l.next(at), "[") &&
        l.token_is(l.next(l.partner[l.next(at)]), "=") &&
        l.token_is(l.next(l.next(l.partner[l.next(at)])), "{") && first == 0:
-      tables.push(%($at $(l.next(l.next(l.partner[l.next(at)])))))
+      tables.push($(at, l.next(l.next(l.partner[l.next(at)]))))
     if t.text == "switch" && l.token_is(l.next(at), "("):
       int open = l.next(l.partner[l.next(at)])
-      if l.token_is(open, "{"): switches.push(%($at $open))
+      if l.token_is(open, "{"): switches.push($(at, open))
   foreach List entry in enums:
     Var (name, open) = entry
     Map words = _words(l, open.int())
@@ -377,7 +377,7 @@ void lint_corpus_rules(Lint *lints, int count):
       if text.len() < 80 || l.end_line(l.prev(end)) - l.at(start).line + 1 < 5:
         continue
       Array owners = bodies.setdefault(text, [])
-      owners.push(%($index $name $(l.at(start).line)))
+      owners.push($(index, name, l.at(start).line))
   foreach Var (text, owners) in bodies:
     Array entries = owners
     Map files = {}

@@ -81,7 +81,7 @@ static List _auto_expand(List value) {
     c.sym.put(c.semantic_binding_facts(), %(managed $binding), 1);
     Macro release = $auto_release;
     x2c_place(
-      %(after-statement), x2c_template_call(release, %($local $binding)));
+      %(after-statement), x2c_template_call(release, $(local, binding)));
   }
   return value;
 }
@@ -192,7 +192,7 @@ static List _cursor_spec(Type collection_type, Type owner, int arity) {
   List output_types = outputs.map(%!(Type output) => output.element());
   /* A fourth element marks reference parameters. */
   if (cursor_parameter.car() == <*>)
-    return %($function $cursor_type $output_types);
+    return $(function, cursor_type, output_types);
   return %($function $cursor_type $output_types reference);
 }
 
@@ -232,7 +232,7 @@ static List _with_cursor(Foreach &f, List spec) {
   List function = spec[0], cursor_type = spec[1], types = spec[2];
   int by_reference = spec.len() > 3;
   List outputs = types.map(
-    %!(Var type) => %($type $(MetaContext.fresh_binding("cursor_output"))));
+    %!(Var type) => $(type, MetaContext.fresh_binding("cursor_output")));
   List values = outputs.map(%!(List record) => _expr(record[0], record[1]));
   List addresses = by_reference ? values : values.map(
     %!(List value) => _address(value));
@@ -248,17 +248,15 @@ static List _with_cursor(Foreach &f, List spec) {
     $!{ { @(_cursor_assignments(f.targets, values)) $(f.body) } };
   List initial = Type.resolve(cursor_type) == Type.resolve(f.type)
     ? object_expression : $!( 0 );
-  List setup = %(
-    $(_declare(f.type, f.object, f.collection))
-    $(_declare(cursor_type, f.cursor, initial))
-    @declarations);
+  List setup = $(
+    _declare(f.type, f.object, f.collection),
+    _declare(cursor_type, f.cursor, initial), @declarations);
   return _loop(f, condition, loop_body, setup);
 }
 
 static List _cursor_assignments(List targets, List outputs) {
-  if (targets.len() == 1) return %($(_assign(targets[0], outputs.last())));
-  return %($(_assign(targets[0], outputs[0]))
-           $(_assign(targets[1], outputs[1])));
+  if (targets.len() == 1) return $(_assign(targets[0], outputs.last()));
+  return $(_assign(targets[0], outputs[0]), _assign(targets[1], outputs[1]));
 }
 
 /* `Iter_try_next` reads each item into a Var; a pair of names takes the
@@ -275,12 +273,12 @@ static List _with_iter(Foreach &f, List converter) {
   List condition =
     $!( $next($(_expr(%("Iter"), f.iterator)), $item_argument) );
   List assignments = f.targets.len() == 1
-    ? %($(_assign(f.targets[0], item_expression)))
+    ? $(_assign(f.targets[0], item_expression))
     : _pair_assignments(f.targets, item_expression, f.pair);
   List loop_body = $!{ { @assignments $(f.body) } };
-  List setup = %(
-    $(_declare(%("Iter"), f.iterator, initializer))
-    $(_declare(%("Var"), f.item, %())));
+  List setup = $(
+    _declare(%("Iter"), f.iterator, initializer),
+    _declare(%("Var"), f.item, %()));
   return _loop(f, condition, loop_body, setup);
 }
 
@@ -311,7 +309,7 @@ static List _pair_assignments(List targets, List item, Var pair) {
     $first = $pair[0];
     $second = $pair[1];
   };
-  return %($assignments);
+  return $(assignments);
 }
 
 static List _expr(List type, Var binding) => $!($type){ $binding };
@@ -340,7 +338,7 @@ static List _callback_adapt(List target, List source) =>
 static List _class_expand(List capture) {
   String owner = capture[1];
   Type type = capture[2];
-  if (!type) return %($capture);
+  if (!type) return $(capture);
   if (!type.canonicalize().is_pointer() && type.car() == <enum>)
     x2c_diagnostic_fail(
       %"class $owner cannot take an enum value " +
@@ -366,7 +364,7 @@ static List _class_defaults(String owner, List type, List location) {
   List body = _class_constructor(s);
   if (s.alias) return %(seq @body);
   List release = _release(s);
-  if (s.heap && s.aggregate) body = body.append(%($(_alloc(s))));
+  if (s.heap && s.aggregate) body = body.append($(_alloc(s)));
   if (s.heap) body = body.append(_cleanup(s, release));
   if (s.aggregate || s.heap) body = body.append(_boxed(s));
   else body = body.append(_scalar(s));
@@ -388,7 +386,7 @@ static Shape _shape(String owner, Type type, List location) {
     .owner = owner, .type = type, .location = location, .pointee = pointee,
     .representation = representation, .named = named, .heap = heap,
     .alias = alias, .aggregate = aggregate, .positional = positional};
-  s.parameter = _param(%($owner), "value");
+  s.parameter = _param($(owner), "value");
   s.tag = Type.tag_name(owner);
   return s;
 }
@@ -429,7 +427,7 @@ static List _class_constructor(Shape &s) {
   if (s.alias)
     return %((default-forward ($owner) $(s.type) "new"
       $(constructor[1])));
-  return %($constructor);
+  return $(constructor);
 }
 
 /* What `free` runs: the class's own `drop` on a set value, then the
@@ -442,17 +440,17 @@ static List _release(Shape &s) {
         Scope_free((void *) value);
       }
     : $!{ Scope_free((void *) value); };
-  return %($release);
+  return $(release);
 }
 
 /* Zeroed heap storage belongs to the active scope. */
 static List _alloc(Shape &s) {
-  Type type = %($(s.owner));
+  Type type = $(s.owner);
   List body = $!{
     $type value = Scope_calloc(1, sizeof(*value));
     return value;
   };
-  return _default(s.owner, "alloc", type, %(), %($body));
+  return _default(s.owner, "alloc", type, %(), $(body));
 }
 
 /* Pairs heap release methods with their protocol adoption. */
@@ -460,10 +458,10 @@ static List _cleanup(Shape &s, List release) {
   String owner = s.owner;
   List parameter = s.parameter;
   List free_method = _default(
-    owner, "free", %(void), %($parameter), release);
+    owner, "free", %(void), $(parameter), release);
   List freed = $!{ value.free(); };
   List cleanup_method = _default(
-    owner, "cleanup", %(void), %($parameter), %($freed));
+    owner, "cleanup", %(void), $(parameter), $(freed));
   return %($free_method $cleanup_method
     (adopt ("Cleanup") ($owner) external $(s.location)));
 }
@@ -483,13 +481,13 @@ static List _boxed(Shape &s) {
    copy of an aggregate's boxed record. */
 static List _boxing(Shape &s) {
   String owner = s.owner;
-  Type type = %($owner), pointer = %(* $owner);
+  Type type = $(owner), pointer = %(* $owner);
   List unboxed = s.heap ? $!( ($type)Var_pointer(value) )
                         : $!( *($pointer)Var_pointer(value) );
   List returned = $!{ return $(_box(s.tag, s.heap)); };
   List var_method = _default(
-    owner, "var", %("Var"), %($(s.parameter)), %($returned));
-  return %($var_method $(_unbox(owner, unboxed)));
+    owner, "var", %("Var"), $(s.parameter), $(returned));
+  return $(var_method, _unbox(owner, unboxed));
 }
 
 /* `equal` and `hash` of a heap or positional class; a value class of
@@ -497,10 +495,9 @@ static List _boxing(Shape &s) {
 static List _comparison(Shape &s) {
   String owner = s.owner;
   if (s.heap || s.positional)
-    return %($(_equal(owner, s.heap, s.named))
-             $(_hash(owner, s.heap, s.named)));
-  if (!_method(%($owner), "equal") ||
-      !_method(%($owner), "hash"))
+    return $(_equal(owner, s.heap, s.named), _hash(owner, s.heap, s.named));
+  if (!_method($(owner), "equal") ||
+      !_method($(owner), "hash"))
     x2c_diagnostic_fail(
       %"value class $owner requires compatible equal " +
       "and hash methods", %());
@@ -524,11 +521,11 @@ static List _writers(Shape &s) {
 /* Boxing uses the underlying representation. */
 static List _scalar(Shape &s) {
   String owner = s.owner;
-  Type type = %($owner), representation = s.representation;
+  Type type = $(owner), representation = s.representation;
   List boxed = $!{ return (Var)($representation)value; };
   List unboxed = $!( ($type)($representation)value );
   List var_method = _default(
-    owner, "var", %("Var"), %($(s.parameter)), %($boxed));
+    owner, "var", %("Var"), $(s.parameter), $(boxed));
   return %($var_method $(_unbox(owner, unboxed))
     (adopt ("Var") ($owner) external $representation $(s.location)));
 }
@@ -549,10 +546,10 @@ static List _new(
 }
 
 static List _scalar_new(String owner, Type representation, int heap) {
-  List parameters = %($(_param(representation, "initial")));
+  List parameters = $(_param(representation, "initial"));
   List value = x2c_ident("value");
   List declaration = $!{ $representation $value = initial; };
-  return _finish_new(owner, %($owner), parameters, %($declaration), heap);
+  return _finish_new(owner, $(owner), parameters, $(declaration), heap);
 }
 
 static List _positional_new(
@@ -567,14 +564,14 @@ static List _positional_new(
   List declaration =
     $!{ $representation $value = { @(arguments.list_free()) }; };
   return _finish_new(
-    owner, %($owner), parameters.list_free(), %($declaration), heap);
+    owner, $(owner), parameters.list_free(), $(declaration), heap);
 }
 
 /* Another aggregate starts zeroed, or from `alloc` for a heap class, and
    the deferred initializer calls its `init`. */
 static List _initialized_new(
   String owner, int heap, List extras) {
-  Type type = %($owner);
+  Type type = $(owner);
   Array parameters = [];
   foreach (List extra in extras)
     parameters.push(_param(extra, %"argument_$(parameters.len())"));
@@ -595,7 +592,7 @@ static List _finish_new(
   String owner, List type, List parameters, List body, int copy) {
   List returned = copy ? $!{ return Scope_memdup(&value, sizeof(value)); }
                        : $!{ return value; };
-  return _default(owner, "new", type, parameters, body.append(%($returned)));
+  return _default(owner, "new", type, parameters, body.append($(returned)));
 }
 
 /* The deferred initializer calls the class's `init` on the value and the
@@ -603,7 +600,7 @@ static List _finish_new(
    a zero frees the value and fails `new`. */
 static List _class_initializer(String owner, Var heap_value) {
   int heap = heap_value != %();
-  List type = %($owner);
+  List type = $(owner);
   List receiver = heap ? type : $!Type{ $type * };
   Code method = _method(type, "init");
   if (method) {
@@ -648,19 +645,18 @@ static List _box(Symbol tag, int heap) {
 static List _unbox(String owner, List expression) {
   List returned = $!{ return $expression; };
   return %(default $(_function(
-    Type.reverse_name("Var", owner), %($owner),
-    %($(_param(%("Var"), "value"))), %($returned))));
+    Type.reverse_name("Var", owner), $(owner),
+    $(_param(%("Var"), "value")), $(returned))));
 }
 
 /* A heap class compares addresses; a value class, each named field's Var
    form. */
 static List _equal(String owner, int heap, List fields) {
   List same = $!{ return (void *)left == (void *)right; };
-  List body = heap ? %($same) : _fields_equal(fields);
+  List body = heap ? $(same) : _fields_equal(fields);
   return _default(
     owner, "equal", %(int),
-    %($(_param(%($owner), "left"))
-      $(_param(%($owner), "right"))), body);
+    $(_param($(owner), "left"), _param($(owner), "right")), body);
 }
 
 static List _fields_equal(List fields) {
@@ -682,10 +678,10 @@ static List _fields_equal(List fields) {
    field's Var hash. */
 static List _hash(String owner, int heap, List fields) {
   List hashed = $!{ return x2c_hash_word((unsigned long)value); };
-  List body = heap ? %($hashed) : _fields_hash(fields);
+  List body = heap ? $(hashed) : _fields_hash(fields);
   return _default(
     owner, "hash", %(unsigned),
-    %($(_param(%($owner), "value"))), body);
+    $(_param($(owner), "value")), body);
 }
 
 /* `hash` is an exact name, so the separately built statements share it. */
@@ -708,16 +704,15 @@ static List _fields_hash(List fields) {
 static List _writer(
   String owner, int heap, List fields, String member, List selected) {
   List body;
-  List parameters = %($(_param(%($owner), "value"))
-                      $(_param(%("Buffer"), "out")));
+  List parameters = $(_param($(owner), "value"), _param(%("Buffer"), "out"));
   if (selected) {
     List written = $!{ return out.write(value.$member()); };
-    body = %($written);
+    body = $(written);
   }
   else if (member == "str") {
     List shown = heap ? $!{ return $(_pointer_output(owner, $!( value ))); }
                       : $!{ return value.write_repr(out); };
-    body = %($shown);
+    body = $(shown);
   }
   else {
     body = heap ? _repr_guard(owner) : %();
@@ -736,7 +731,7 @@ static List _repr_guard(String owner) {
     if (!path.enter(value)) return $address;
     defer path.leave();
   };
-  return %($guard);
+  return $(guard);
 }
 
 /* The deferred body of `write_repr`: `Owner { a: ..., b: ... }`. */
@@ -781,7 +776,7 @@ static List _string_method(String owner, String member) {
   };
   return _default(
     owner, member, %("String"),
-    %($(_param(%($owner), "value"))), %($body));
+    $(_param($(owner), "value")), $(body));
 }
 
 static List _pointer_output(String owner, List value) {
@@ -810,7 +805,7 @@ static List _method(Type type, String name) {
 /* The method `member` of `owner` when the class defines it, as opposed
    to one it inherits. */
 static List _own_method(String owner, String member) {
-  Code found = _method(%($owner), member);
+  Code found = _method($(owner), member);
   if (found && found.binding_spelling() == %"$(owner)_$(member)")
     return found;
   return %();
@@ -839,7 +834,7 @@ static List _field_on(List field, List receiver) {
 
 static List _field_value(List field) => _field_on(field, x2c_ident("value"));
 
-static List _param(Type type, String name) => type.parameter_ast(%($name));
+static List _param(Type type, String name) => type.parameter_ast($(name));
 
 /* A function with no parameters declares `(void)`, so its prototype is not
    an old-style declaration. */
@@ -949,10 +944,12 @@ static List _binding_target_row(List row) {
 static List _binding_target(String bind_name, String name, String maker) {
   List func = _binding_call(
     maker,
-    %($(_binding_ident(name))
-      $(MetaContext.literal_list(_binding_name_signature(name)))));
-  return %($(_binding_call("String_var", %($($!String{ $bind_name }))))
-    $(_binding_call("Func_var", %($func))));
+    $(
+      _binding_ident(name),
+      MetaContext.literal_list(_binding_name_signature(name))));
+  return $(
+    _binding_call("String_var", $($!String{ $bind_name })),
+    _binding_call("Func_var", $(func)));
 }
 
 static List _binding_name_signature(String name) =>

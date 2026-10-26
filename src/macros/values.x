@@ -77,7 +77,7 @@ static List _pattern_macro(Compiler c) {
   if (c.peek(0) == <$>) return _macro_value(c, _name(c));
   if (c.peek(0) != <ident>) return NULL;
   Type type = NULL;
-  List binding = c.sym.lookup(%($(c.token.text)), type);
+  List binding = c.sym.lookup($(c.token.text), type);
   if (!binding || !c.sym.is_named_value_type(type, "Macro")) return NULL;
   List expression = c.resolve_expression(
     %(expr $type (ident $binding)), c.token);

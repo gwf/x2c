@@ -157,8 +157,8 @@ static List _interface_entry(
   if (dependencies == NULL) return NULL;
   foreach (Var definition in definitions)
     if (definition is not <string>) return NULL;
-  List entry = %(
-    $(parts.list_free()) $hash $definitions $dependencies $include_dirs);
+  List entry = $(
+    parts.list_free(), hash, definitions, dependencies, include_dirs);
   _retain(canonical);
   _require_retained(entry.try_own());
   _process_cache()[canonical] = entry;
@@ -296,9 +296,9 @@ static List _stored_record(String canonical, List entry) {
   Map identities = {}, Array parts = [];
   foreach (Var part in cached_parts)
     parts.push(_stored_part(part, identities));
-  return %(
-    $(Compiler.portable_path(canonical)) $hash $(parts.list_free())
-    $definitions $(_stored_dependencies(dependencies)) $include_dirs);
+  return $(
+    Compiler.portable_path(canonical), hash, parts.list_free(), definitions,
+    _stored_dependencies(dependencies), include_dirs);
 }
 
 /* Search roots and the file's package mode must match before replay. */
@@ -326,7 +326,7 @@ module List _interface_include_dirs(
 static Var _stored_part(Var part, Map identities) {
   if (part is not <map>) return Compiler.portable_path(part);
   Array rows = [];
-  foreach (Var (key, value) in part.map()) rows.push(%($key $value));
+  foreach (Var (key, value) in part.map()) rows.push($(key, value));
   rows.sort();
   return _renumber_bindings(rows.list_free(), identities);
 }
@@ -334,14 +334,14 @@ static Var _stored_part(Var part, Map identities) {
 module List _stored_dependencies(Map dependencies) {
   Array rows = [];
   foreach ((String path, Var hash) in dependencies)
-    rows.push(%($(Compiler.portable_path(path)) $hash));
+    rows.push($(Compiler.portable_path(path), hash));
   rows.sort();
   return rows.list_free();
 }
 
 module List _stored_meta_hashes(Map hashes) {
   Array rows = [];
-  foreach (String (spelling, hash) in hashes) rows.push(%($spelling $hash));
+  foreach (String (spelling, hash) in hashes) rows.push($(spelling, hash));
   rows.sort();
   return rows.list_free();
 }

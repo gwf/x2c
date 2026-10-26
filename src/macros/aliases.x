@@ -152,7 +152,7 @@ List Compiler.parse_alias_statement(Compiler c, int block) {
 }
 
 static void _define_local(Compiler c, AliasHead &head) {
-  if (%($(head.name)) in c.sym.current_symbols())
+  if ($(head.name) in c.sym.current_symbols())
     $fail.parse_decl_bound(c, head.start, head.name);
   c.sym.define_alias(head.name, head.expression);
 }
@@ -259,7 +259,7 @@ static void _declare(Compiler c, AliasHead &head, int collecting) {
   int depth = c.sym.scope_count(), level = c.alias_level;
   int file_scope = !level && c.sym.at_file_scope();
   if (collecting && file_scope && !c.interface_provider &&
-      c.sym.get(%($(head.name))))
+      c.sym.get($(head.name)))
     $fail.parse_decl_bound(c, head.start, head.name);
   Var key = head.storage ? _private_key(c, head.name) : head.name;
   _install(c, key, %(declared $depth $level $(head.expression)));
@@ -271,7 +271,7 @@ static void _declare(Compiler c, AliasHead &head, int collecting) {
 
 static List _private_key(Compiler c, String name) {
   String file = c.file_prefix();
-  return %($(file ? file : "") $name);
+  return $(file ? file : "", name);
 }
 
 /* A public alias is keyed by its name alone; a `static` one by its file's
@@ -288,7 +288,7 @@ static List _unalias(Compiler c, int block) {
   c.next();
   c.expect(<;>);
   if (!block) $fail.macros_unalias_governed(c, start);
-  List row = c.sym.current_binding(%($name));
+  List row = c.sym.current_binding($(name));
   if (row && c.fact(%(alias $row))) {
     c.sym.undefine_alias(name);
     return %(seq);
@@ -319,7 +319,7 @@ static void _install(Compiler c, Var key, List entry) {
   Map table = _table(c);
   table = table ? table.copy() : {};
   Var shadowed;
-  if (table.try_get(key, shadowed)) entry = entry.append(%($shadowed));
+  if (table.try_get(key, shadowed)) entry = entry.append($(shadowed));
   table[key] = entry;
   c.sym.put(c.macros, <alias>, table);
 }
@@ -396,7 +396,7 @@ void Compiler.leave_alias_body(Compiler c, Map mark) {
 module void _install_imported_alias(Compiler c, String name, List frozen) {
   if (_full_parse(c) &&
       (_same_scope(c, _entry(c, name, NULL)) ||
-       c.sym.current_binding(%($name))))
+       c.sym.current_binding($(name))))
     $problem.macros_alias_included(c, c.token, name);
   _install(c, name, %(imported $frozen));
 }
@@ -416,7 +416,7 @@ module void _remove_imported_alias(Compiler c, String name) {
     including a file-scope alias an include delivered. A declaration of that
     name in the same scope conflicts with it. */
 int Compiler.scope_declares_alias(Compiler c, String name) {
-  List row = c.sym.current_binding(%($name));
+  List row = c.sym.current_binding($(name));
   if (row && c.fact(%(alias $row))) return 1;
   return _same_scope(c, _entry(c, name, NULL));
 }
@@ -433,7 +433,7 @@ List Compiler.alias_expression(Compiler c) {
   Map table = _table(c);
   if (!table && !c.sym.has_aliases()) return NULL;
   String name = c.token.text;
-  List symbol = %($name);
+  List symbol = $(name);
   int scope = c.sym.declaring_scope(symbol);
   Var key;
   List entry = _entry(c, name, key), expression = NULL;

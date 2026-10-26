@@ -32,8 +32,8 @@ int main(void) {
        a.sort(1, 1)[0].tensor().to_values()[0].double());
   show("split_second_sum", a.split(1, 0)[1].tensor().sum().item().double());
   show("chunk_third_sum", a.chunk(3, 1)[2].tensor().sum().item().double());
-  show("cat_sum", Tensor.cat(%($a $a), 0).sum().item().double());
-  show("stack_rank", (double) Tensor.stack(%($a $a), 0).rank());
+  show("cat_sum", Tensor.cat($(a, a), 0).sum().item().double());
+  show("stack_rank", (double) Tensor.stack($(a, a), 0).rank());
   show("linspace_sum", Torch.linspace(0, 1, 5, XT_FLOAT64, NULL)
                             .sum().item().double());
   show("eye_sum", Torch.eye(3, XT_FLOAT64, NULL).sum().item().double());

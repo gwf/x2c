@@ -131,9 +131,9 @@ static Var _ship_rewrite(Compiler c, List row) {
     match (row)
       case %(compile-time rewrite ?point ?kind ?name ?shape ?holes): {
         if (_unit_bound(row) || !Compiler.links_meta_function(name)) break;
-        List thawed = %($(c.thaw_declaration_syntax(kind))
-          $(c.thaw_declaration_syntax(shape))
-          $(c.thaw_declaration_syntax(holes)));
+        List thawed = $(
+          c.thaw_declaration_syntax(kind), c.thaw_declaration_syntax(shape),
+          c.thaw_declaration_syntax(holes));
         _require_owned(thawed.try_own());
         Var (own_kind, own_shape, own_holes) = thawed;
         shared = _rewrite_rule(
@@ -218,7 +218,7 @@ List Compiler.marked_rewrite(
   Var stored;
   if (!c.rewrite_rules.try_get(<member>, stored)) return NULL;
   foreach (Var (mark, _) in stored.map()) {
-    if (mark is not <symbol> || !c.sym.get(%(@aggregate $mark))) continue;
+    if (mark is not <symbol> || !c.sym.get($(@aggregate, mark))) continue;
     List rewritten = c.rewrite(
       <member>, mark, source, <expression>, NULL, site);
     if (rewritten) return rewritten;
@@ -339,7 +339,7 @@ static List _rewrite(
 static Var _applied(
   Compiler c, RewriteRule rule, List source, Token site) {
   with (c.applying = cons(rule, c.active_rewrites)) {
-    return c.apply_meta_function(rule.name, %($source), site);
+    return c.apply_meta_function(rule.name, $(source), site);
   }
 }
 
@@ -502,7 +502,7 @@ static List _prepared(
   Var shape = _template(c, result, sources, values, refused);
   if (refused) return _watched(c, result, sources, position, expected, site);
   RewriteRule rule = c.active_rewrites.car();
-  List key = %($((int) position) $(rule.builtin) $expected $shape);
+  List key = $((int) position, rule.builtin, expected, shape);
   if (!c.prepared_rewrites) c.prepared_rewrites = {};
   Var stored;
   if (c.prepared_rewrites.try_get(key, stored))
@@ -531,7 +531,7 @@ static List _prepared(
     !preparation.repeated && preparation.order.len() == values.len()
     ? _skeleton(lowered, preparation.outputs) : NULL;
   c.prepared_rewrites[key] =
-    skeleton ? %($skeleton $(preparation.order.list())) : 0;
+    skeleton ? $(skeleton, preparation.order.list()) : 0;
   return lowered;
 }
 
@@ -588,7 +588,7 @@ static Var _capture_slot(
     return value;
   }
   values.push(value);
-  return %("x2c.slot" $type $shape);
+  return $("x2c.slot", type, shape);
 }
 
 /* What conversion and lowering read of a slot value's content besides its
@@ -617,7 +617,7 @@ static Var _slot_shape(Compiler c, Var content) {
 /* `prefix` followed by the shape of `content`, or void when it has none. */
 static Var _nested_shape(Compiler c, Var prefix, Var content) {
   Var shape = _slot_shape(c, content);
-  return shape is void ? void : %($prefix $shape);
+  return shape is void ? void : $(prefix, shape);
 }
 
 /* Whether a template holds pending code or a carrier, which binding expands
@@ -650,7 +650,7 @@ static Var _marked(Var node, Array outputs, Array found, int &refused) {
   for (int i = 0; i < (int) outputs.len(); i++)
     if (outputs[i].list() === syntax) {
       found[i] = found[i].int() + 1;
-      return %("x2c.slot" $i);
+      return $("x2c.slot", i);
     }
   match (syntax)
     case %((!or at block seq stmnt decl declare) *): refused = 1;
@@ -704,7 +704,7 @@ void Compiler.rebound(Compiler c, Var source, List bound) {
   if (!watch || watch.preparation || bound === source ||
       _find_slot(watch, source) < 0)
     return;
-  watch.values = watch.values.append(%($bound));
+  watch.values = watch.values.append($(bound));
 }
 
 /** Lowers `ast` when it is a value the active lowering watches; NULL otherwise.

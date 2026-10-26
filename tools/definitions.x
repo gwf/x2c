@@ -97,14 +97,15 @@ List Unit.callables(Unit unit):
     String display = row["display"], doc = row["doc"]
     int line = row["line"].integer()
     List source = row["source"]
-    if !source: source = %($(unit["path"]) $line)
+    if !source: source = $(unit["path"], line)
     if row["origin"] == <alias> && !doc: continue
     if row["origin"] == <source>:
-      found.push(%($display $(row["text"]) $line $(Prose.normalize(doc)) $source))
+      found.push($(display, row["text"], line, Prose.normalize(doc), source))
       continue
     if line == 1 && !doc: continue
-    found.push(%($display $(Unit.signature(display, row["type"], row["params"]))
-                 $line $(Prose.normalize(doc)) $source))
+    found.push($(
+      display, Unit.signature(display, row["type"], row["params"]), line,
+      Prose.normalize(doc), source))
   return found.sort_by(%!(List item) => item.caddr()).list_free()
 
 // Type rendering follows the canonical Type lists of unit interfaces.

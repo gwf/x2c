@@ -7,9 +7,9 @@
 #include "grammar.h"
 static List _23, _22, _21, _19, _18, _17, _15, _14, _13, _11, _10;
 
-static String _34, _32, _31, _30, _29, _28, _27, _26, _25, _24, _5, _4, _3, _2, _1, _0;
+static String _33, _32, _31, _30, _29, _28, _27, _26, _25, _24, _5, _4, _3, _2, _1, _0;
 
-static Var _35, _33, _20, _16, _12, _9, _8, _7, _6;
+static Var _20, _16, _12, _9, _8, _7, _6;
 
 static int _init_guard_ = 0;
 
@@ -86,9 +86,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _30 = String_new("ULL: ;");
   _31 = String_new("; int _x2c_gensym_match_none = " "!Var_is(_x2c_gensym_match_var, %lu);");
   _32 = String_new("Var _x2c_gensym_match_var =");
-  _33 = String_var(_32);
-  _34 = String_new("List _x2c_gensym_match_expr = Var_list_payload(_x2c_gensym_match_var)");
-  _35 = String_var(_34);
+  _33 = String_new("List _x2c_gensym_match_expr = Var_list_payload(_x2c_gensym_match_var)");
 }
 
 static void _match_flush(Buffer b, Array out){
@@ -417,6 +415,6 @@ static String _match_locals(int depths, int values){
 static List _match_dynamic_read(Code subject, String locals){
   Symbol list = 806120;
   String tested = String_printf(_31, (unsigned long) list);
-  return cons(_33, cons(List_var(subject), cons(String_var(tested), cons(_35, cons(String_var(locals), NULL)))));
+  return cons(String_var(_32), cons(List_var(subject), cons(String_var(tested), cons(String_var(_33), cons(String_var(locals), NULL)))));
 }
 

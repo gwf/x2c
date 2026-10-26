@@ -171,8 +171,9 @@ ToolAction Toolchain.compile_action(
   Toolchain t, String source, String object, String depfile, List gen_dirs) =>
   _action(
     t, <compile>,
-    %(@(_compile_arguments(t, gen_dirs)) "-MMD" "-MP" "-MF" $depfile
-      "-MT" $object "-c" $source "-o" $object));
+    $(
+      @(_compile_arguments(t, gen_dirs)), "-MMD", "-MP", "-MF", depfile, "-MT",
+      object, "-c", source, "-o", object));
 
 /** Builds the preprocessor action whose output identifies an object.
     It uses the compilation's native flags and include order and keeps line
@@ -186,10 +187,10 @@ ToolAction Toolchain.preprocess_action(
     t, <preprocess>,
     %(@(_compile_arguments(t, gen_dirs)) "-E" $source "-o" $output));
 
-static List _compile_arguments(Toolchain t, List gen_dirs) => %(
-  $(t.cc) "-fsigned-char"
-  @(gen_dirs.map(%!(directory) => %("-iquote" $directory)).flatten())
-  "-iquote" $(t.include_dir) @(t.cc_args));
+static List _compile_arguments(Toolchain t, List gen_dirs) => $(
+  t.cc, "-fsigned-char",
+  @(gen_dirs.map(%!(directory) => $("-iquote", directory)).flatten()),
+  "-iquote", t.include_dir, @(t.cc_args));
 
 /** Builds but does not start an `ar rcs` action in object-list order.
     The action does not remove an existing archive, so callers requiring exact
@@ -199,7 +200,7 @@ static List _compile_arguments(Toolchain t, List gen_dirs) => %(
 */
 ToolAction Toolchain.archive_action(
   Toolchain t, String output, List objects) =>
-  _action(t, <archive>, %($(t.ar) "rcs" $output @objects));
+  _action(t, <archive>, $(t.ar, "rcs", output, @objects));
 
 /** Builds but does not start a host-compiler link action.
     Input order is preserved; configured linker arguments, the matching x2c
@@ -210,7 +211,7 @@ ToolAction Toolchain.archive_action(
 ToolAction Toolchain.link_action(Toolchain t, String output, List inputs) =>
   _action(
     t, <link>,
-    %($(t.cc) @inputs @(t.ld_args) $(t.runtime_lib) "-lm" "-o" $output));
+    $(t.cc, @inputs, @(t.ld_args), t.runtime_lib, "-lm", "-o", output));
 
 /** Builds but does not start the link of a native module. The module leaves
     the x2c runtime unresolved and uses the loading process's copy. macOS
@@ -404,7 +405,7 @@ static List _cpp_arguments(
     "-include" $source "-");
 
 static List _includes(String option, List directories) =>
-  directories.map(%!(directory) => %($option $directory)).flatten();
+  directories.map(%!(directory) => $(option, directory)).flatten();
 
 // default search paths
 

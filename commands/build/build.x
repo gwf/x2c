@@ -194,7 +194,7 @@ Build CliRequest.prepare(CliRequest request) {
 static void _add_extensions(CliRequest request) {
   foreach (String package, request.extensions) {
     String root = Path.absolute(package), parent = Path.dirname(root);
-    request.package_dirs = request.package_dirs.append(%($parent));
+    request.package_dirs = request.package_dirs.append($(parent));
     request.inputs = request.inputs.append(Path.glob(%"$root/src/*.x"))
       .append(Path.glob(%"$root/src/*.c"));
   }
@@ -277,7 +277,7 @@ static void _make_work_dirs(Build b) {
     b.obj_root = %"$(b.work_dir)/obj";
     b.dep_root = %"$(b.work_dir)/dep";
     if (!b.temporary) b.state_root = %"$(b.work_dir)/.x2c-state";
-    List roots = %($(b.gen_root) $(b.obj_root) $(b.dep_root) $(b.state_root));
+    List roots = $(b.gen_root, b.obj_root, b.dep_root, b.state_root);
     if (!request.dry_run)
       foreach (Path root, roots) if (root) root.make_dirs();
   }
@@ -483,7 +483,7 @@ CliRequest Build.module_entry(Build b) {
     Diagnostics.driver_error("cannot read the running compiler to stamp");
   Path entry = %"$(b.work_dir)/module/x2c_module.x";
   _write_entry(entry, b.units, $source.build.module(stamp));
-  return _entry_request(b, %($entry));
+  return _entry_request(b, $(entry));
 }
 
 /** Writes the registration unit of each package the request links in with
@@ -593,7 +593,7 @@ static void _place_unit_headers(Build b) {
 
 static void _place_includes(Build b, Map headers, String unit) {
   String directory = _unit_dir(b, unit);
-  List searched = %($(Path.dirname(unit)) @(b.request.include_dirs));
+  List searched = $(Path.dirname(unit), @(b.request.include_dirs));
   foreach (String suffix, %(".h" ".c")) {
     String text = Path.read_text(_unit_file(directory, unit, suffix));
     foreach (String line, text.split_lines(0)) {
@@ -732,7 +732,7 @@ static String _compile_command(Build b, CcJob job) {
 int Build.write_commands(String path, Array commands) {
   String text = %"[\n$(",\n".join(commands))\n]\n";
   try {
-    Path.publish_files(%($path $text));
+    Path.publish_files($(path, text));
     $progress.build_database_written(path);
     return 1;
   }
@@ -931,7 +931,7 @@ static int _dsym(Build b) {
   if (!_mapped_debug(b)) return 0;
   String output = b.output, symbols = %"$output.dSYM";
   return ToolAction.new(
-    <dsym>, %("dsymutil" $output "-o" $symbols), b.request.verbose,
+    <dsym>, $("dsymutil", output, "-o", symbols), b.request.verbose,
     b.request.dry_run).run();
 }
 
@@ -1053,7 +1053,7 @@ int Build.run_program(Build b) {
   $progress.build_running(b);
   String executable = Path.absolute(b.output);
   ToolAction action = ToolAction.new(
-    <run>, %($executable @(b.request.run_args)), b.request.verbose,
+    <run>, $(executable, @(b.request.run_args)), b.request.verbose,
     b.request.dry_run);
   action.as_program();
   return action.run();
@@ -1358,7 +1358,7 @@ static void _state_write_lines(String path, uint64_t hash, List lines) {
     out.write_char('\n');
   }
   String text = out;
-  try Path.publish_files(%($path $text));
+  try Path.publish_files($(path, text));
   catch %((!or not-found io-fail) *): {}
 }
 

@@ -81,7 +81,7 @@ List Compiler.setup_cache_init(
   Map bindings = _cache_bindings(c, source_ids, NULL);
   source = _source_cache(c, source, source_ids, bindings, statics);
   statics.initializers.free();
-  return %($header $source $bindings);
+  return $(header, source, bindings);
 }
 
 static Array _cache_ids(Compiler c, List code) {
@@ -103,7 +103,7 @@ static Array _cache_ids(Compiler c, List code) {
    replaces one memo entry and may cause harmless extra work. */
 static void _collect_ids(
   Compiler c, Var value, List *seen, Array ids) {
-  auto Array pending = [%($value)], marked = [];
+  auto Array pending = [$(value)], marked = [];
   marked.resize(c.id_keys.len());
   while (pending) {
     Var frame = pending[-1];
@@ -129,7 +129,7 @@ static void _collect_ids(
         if (!marked[id].is_null()) continue;
         marked[id] = 1;
         pending.push(id);
-        pending.push(%($(c.id_keys[id])));
+        pending.push($(c.id_keys[id]));
         continue;
       }
     pending.push(node);
@@ -166,7 +166,7 @@ static List _rewrite_statics(Compiler c, List code, StaticQueue &q) {
     for (int i = first; i < q.initializers.len(); i++) {
       List initializer = q.initializers[i];
       List function = c.initializer_function(
-        %(static void), initializer.caddr(), %($(initializer.cadr())));
+        %(static void), initializer.caddr(), $(initializer.cadr()));
       output.push(%(sourceinit $function));
     }
   }
@@ -242,7 +242,7 @@ static List _defer_binding(
 static List _record(
   StaticQueue &q, List name, List mods, List assign) {
   List helper = q.c.sym.introduce(q.c.fresh_name("static_initialize"));
-  List initializer = %($name $assign $helper $(q.arms));
+  List initializer = $(name, assign, helper, q.arms);
   q.initializers.push(initializer);
   q.pending.setdefault(name, []).array().push(initializer);
   return %(bind $name $mods);
@@ -289,7 +289,7 @@ List Compiler.zero_initializer(Compiler c, List value) {
         match (zero)
           case %(expr ?type (!set ?body (composite *))):
             zero = _initializer_rhs(type, NULL, NULL, type, body);
-        zeroed.push(%($condition $path $destination $zero));
+        zeroed.push($(condition, path, destination, zero));
       }
       return %(expr $type (initval @(zeroed.list_free())));
     }
@@ -307,7 +307,7 @@ List Compiler.zero_initializer(Compiler c, List value) {
       return %(composite (commas @(zeroed.list_free())));
     }
     case %((!or ?tag dotinit indexinit) ?key ?inner):
-      return %($tag $key $(c.zero_initializer(inner)));
+      return $(tag, key, c.zero_initializer(inner));
   }
   return zero;
 }
@@ -379,7 +379,7 @@ static List _array_slot(
   foreach (List frame in path.reverse()) {
     (Type owner, Symbol kind, Var selector, Type selected, List rest) = frame;
     List parent = slot;
-    slot = c.initializer_slot(parent, %($frame));
+    slot = c.initializer_slot(parent, $(frame));
     if (kind == <index>) {
       List length = %(expr (unsigned)
         (op / (expr (unsigned) (sizeof (parens $parent)))
@@ -429,7 +429,7 @@ static List _array_input(
   }
   List declaration =
     c.rebuild_statement($!{ $type $binding = $initial; }).cadr();
-  return %($declaration @code);
+  return $(declaration, @code);
 }
 
 // header caches
@@ -450,8 +450,8 @@ static List _header_cache(
   if (!ids) return header;
   Map bindings = auto _cache_bindings(c, ids, prefix);
   HeaderCache cache = {
-    c, prefix, c.sym.reference(%($guard_name), NULL),
-    c.sym.reference(%($initializer_name), NULL), bindings};
+    c, prefix, c.sym.reference($(guard_name), NULL),
+    c.sym.reference($(initializer_name), NULL), bindings};
   return _entries(cache, header, _prelude(cache, ids));
 }
 
@@ -627,7 +627,7 @@ static void _add_calls(
   foreach (List initializer in definitions) {
     List helper = initializer.caddr(), arms = initializer[3];
     List call = _helper_call(q.c, helper);
-    foreach (List statement in Compiler.preproc_within_arms(arms, %($call)))
+    foreach (List statement in Compiler.preproc_within_arms(arms, $(call)))
       q.c.add_init(area, statement);
   }
 }
@@ -660,7 +660,7 @@ static Map _cache_bindings(Compiler c, Array ids, String prefix) {
   int slot = 0;
   foreach (int id in ids) {
     String name = prefix ? %"$prefix$slot" : %"_$slot";
-    bindings[id] = c.sym.reference(%($name), NULL);
+    bindings[id] = c.sym.reference($(name), NULL);
     slot++;
   }
   return bindings;
@@ -702,7 +702,7 @@ static List _split_ids(Array keys, Array ids) {
     }
     __builtin_unreachable();
   }
-  return %($list_ids $string_ids $var_ids);
+  return $(list_ids, string_ids, var_ids);
 }
 
 static List _declare_slots(List ids, String type, Map bindings) {

@@ -550,7 +550,7 @@ static Var _lower_load(Lowering &l, Type type, Var place) {
   if (!layout) return %(C.load $place);
   if (layout.car() == <record>) return place;
   Var base = place, offset = 0;
-  match (place) case %(C.at ?object ?at ?): (base, offset) = %($object $at);
+  match (place) case %(C.at ?object ?at ?): (base, offset) = $(object, at);
   return %(C.peek $base $offset (quote $layout));
 }
 
@@ -561,7 +561,7 @@ static Var _lower_poke(Lowering &l, Type type, Var place, Var value) {
   List layout = l.owner.type_layout(type);
   if (!layout) return %(C.store $place $value);
   Var base = place, offset = 0;
-  match (place) case %(C.at ?object ?at ?): (base, offset) = %($object $at);
+  match (place) case %(C.at ?object ?at ?): (base, offset) = $(object, at);
   return %(C.poke $base $offset (quote $layout) $value);
 }
 
@@ -978,7 +978,7 @@ static Var _lower_pointer_step(
   Lowering &l, Var operator, List operands, Var left, Var right) {
   Var pointer = operands.car(), count = operands.cadr();
   if (operator == <+> && !_lower_step_layout(l, pointer))
-    (pointer, count, left, right) = %($count $pointer $right $left);
+    (pointer, count, left, right) = $(count, pointer, right, left);
   List layout = _lower_step_layout(l, pointer);
   if (!layout || !_lower_numeric_type(l, _lower_type_of(count)))
     return void;
@@ -1073,7 +1073,7 @@ static Var _lower_lambda(Lowering &l, List params, List held, Var body) {
         Var slot = _lower_name(l, "capture");
         captures.push(slot);
         captured.push(value);
-        saved.push(%($id $slot));
+        saved.push($(id, slot));
       }
   }
   /* A declared parameter carries its type; a bare one is the binding
@@ -1102,7 +1102,7 @@ static Var _lower_lambda(Lowering &l, List params, List held, Var body) {
       values.push(_lower_boxed(l, id, slot, 0));
       slot = box;
     }
-    saved.push(%($id $slot));
+    saved.push($(id, slot));
   }
   foreach (List pair, saved) {
     Var (id, value) = pair;
@@ -1232,7 +1232,7 @@ static Var _lower_getindex(
   List layout = is_c_array ? _lower_pointee_layout(l, receiver) : NULL;
   match (layout) case %(? ? ?size *):
     return %(C.index $target $index $size (quote $layout));
-  return %($(Atom.intern(container + "_getindex")) $target $index);
+  return $(Atom.intern(container + "_getindex"), target, index);
 }
 
 /* `sizeof` reads the size from the native layout of its operand's type; the
@@ -1360,7 +1360,7 @@ static Var _lower_content(Lowering &l, List type, Var content) {
       if (applied)
         return _lower_update_expr(
           l, target, applied, _lower_expr(l, rhs));
-      return _lower_operands(l, type, operator, %($target $rhs));
+      return _lower_operands(l, type, operator, $(target, rhs));
     }
     /* `*` is a sequence binder in a pattern, so a unary deref is matched by
        arity and then by its operator. */
@@ -1374,7 +1374,7 @@ static Var _lower_content(Lowering &l, List type, Var content) {
         return _lower_update_expr(
           l, operand, operator == <++> ? <+> : <->,
           _lower_step_of(operand));
-      return _lower_operands(l, type, operator, %($operand));
+      return _lower_operands(l, type, operator, $(operand));
     }
     case %(repl-assert ?test ?(String text)): {
       Var value = _lower_expr(l, test);
@@ -1588,7 +1588,7 @@ static Var _lower_arms(
   }
   Var taken;
   with (l.match_values = captures) {
-    taken = _lower_block_apart(l, %($(arm.cadr()) @rest), k);
+    taken = _lower_block_apart(l, $(arm.cadr(), @rest), k);
   }
   if (_lower_failed(l, taken)) return void;
   Map saved = _lower_env_copy(l, l.env);
@@ -1664,7 +1664,7 @@ static Var _lower_loop(
   /* A loop carries the locals its forms read, the cells it declares, and
      the values an enclosing continuation needs. */
   Map used = auto {};
-  foreach (Var form, %($test $body $step $rest $k))
+  foreach (Var form, $(test, body, step, rest, k))
     _lower_scan_names(form, used, used);
   /* The element is read where it is used, so the loop does not carry it. */
   struct LowerCursor walk;
@@ -1786,7 +1786,7 @@ static int _lower_terminated(List body) {
    both arrays over. A `default` selects on no value, so it carries none
    even where a `case` label shares the arm with it. */
 static Var _lower_arm(Array tests, Array body, int fallback) {
-  if (!fallback) return %($(tests.list_free()) $(body.list_free()));
+  if (!fallback) return $(tests.list_free(), body.list_free());
   tests.free();
   return %(() $(body.list_free()));
 }
@@ -1866,7 +1866,7 @@ static Var _lower_switch(
     }
     Var test = tested.car();
     if (tested.cdr()) test = cons(<or>, tested);
-    clauses.push(%($test $taken));
+    clauses.push($(test, taken));
   }
   l.on_break = saved_break;
   if (l.declined) return void;
@@ -2076,7 +2076,7 @@ static Var _lower_coerce(Lowering &l, List want, Var node, Var value) {
         if (l.uncallable)
           return $decline.conversion.missing(
             l, _lower_type_text(from), _lower_type_text(want));
-        return %($(Atom.intern(name)) $value);
+        return $(Atom.intern(name), value);
       }
     }
   return value;
@@ -2215,7 +2215,7 @@ static Var _lower_destructure(
     slot = _lower_name(l, "hold");
     l.env[id] = slot;
     Var boxed = _lower_boxed(l, id, element, 0);
-    wraps = cons(%($slot $boxed), wraps);
+    wraps = cons($(slot, boxed), wraps);
   }
   Var after = _lower_block(l, rest, k);
   if (_lower_failed(l, after)) return void;
@@ -2269,7 +2269,7 @@ static Var _lower_setindex_value(
   if (_lower_failed(l, target) || _lower_failed(l, index) ||
       _lower_failed(l, value))
     return void;
-  Var store = %($(Atom.intern(container + "_setindex")) $target $index $value);
+  Var store = $(Atom.intern(container + "_setindex"), target, index, value);
   List layout = is_c_array ? _lower_pointee_layout(l, receiver) : NULL;
   match (layout) case %(? ? ?size *):
     store = %(C.index.set $target $index $size (quote $layout) $value);
@@ -2327,9 +2327,9 @@ static Var _lower_element_update(
   if (_lower_failed(l, object) || _lower_failed(l, index)) return void;
   Var held = _lower_name(l, "held"), at = _lower_name(l, "at");
   Var value = _lower_name(l, "new");
-  Var old = %($(Atom.intern(container + "_getindex")) $held $at);
+  Var old = $(Atom.intern(container + "_getindex"), held, at);
   Var combined = _lower_update_value(l, target, operator, old, right);
-  Var store = %($(Atom.intern(container + "_setindex")) $held $at $value);
+  Var store = $(Atom.intern(container + "_setindex"), held, at, value);
   return %((lambda ($held $at) ((lambda ($value) (begin $store $value))
     $combined)) $object $index);
 }
@@ -2555,7 +2555,7 @@ static Var _lower_defer(Lowering &l, Var cleanup, List rest, List k) {
   Var undo = void, body = void;
   with (l.on_break = NULL, l.on_continue = NULL, l.pending = NULL) {
     l.env = _lower_env_copy(l, inside);
-    undo = _lower_block(l, %($cleanup), %(end));
+    undo = _lower_block(l, $(cleanup), %(end));
   }
   with (l.pending = &frame) {
     l.env = inside;
@@ -2633,11 +2633,11 @@ static Var _lower_stmnt(Lowering &l, Var form, List rest, List k) {
     }
     case %(stmnt ?e):      return _lower_expression_stmnt(l, e, rest, k);
     case %(if ?test ?then):
-      return _lower_branch(l, test, %($then), %(), rest, k);
+      return _lower_branch(l, test, $(then), %(), rest, k);
     case %(if ?test ?then ?alt):
-      return _lower_branch(l, test, %($then), %($alt), rest, k);
+      return _lower_branch(l, test, $(then), $(alt), rest, k);
     case %(while ?test ?body):
-      return _lower_loop(l, test, %($body), %(), rest, k);
+      return _lower_loop(l, test, $(body), %(), rest, k);
     case %(match ?subject ?arms):
       return _lower_match(l, subject, arms, rest, k);
     case %(switch ?subject (block *items)):
@@ -2656,7 +2656,7 @@ static Var _lower_stmnt(Lowering &l, Var form, List rest, List k) {
        `continue` reach it, and a failing test leaves through its `break`. */
     case %(do ?body ?test):
       return _lower_loop(
-        l, %(expr (int) (literal (int) "1")), %($body),
+        l, %(expr (int) (literal (int) "1")), $(body),
         %((if $test (empty) (break))), rest, k);
     /* A `for` is the same loop with its step as the continuation the body
        and every `continue` reach, so nothing can skip it. The init declares
@@ -2667,7 +2667,7 @@ static Var _lower_stmnt(Lowering &l, Var form, List rest, List k) {
           l, %($(_lower_for_init(init)) (for () $test $step $body) @rest), k);
       List guard = test ? test : %(expr (int) (literal (int) "1"));
       return _lower_loop(
-        l, guard, %($body), step ? %((stmnt $step)) : %(), rest, k);
+        l, guard, $(body), step ? %((stmnt $step)) : %(), rest, k);
     }
   }
   return $decline.statement.unsupported(l);

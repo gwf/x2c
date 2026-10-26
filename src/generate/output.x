@@ -65,10 +65,9 @@ static List _generated_code(Compiler c, List ast, String basename) {
   List hcode = _emit_header(c, header);
   List ccode = _emit_source(c, source, bindings, inline_bodies);
   String hfile = %"$basename.h", cfile = %"$basename.c";
-  return %(
-    $hfile $(c.code_pretty_string(hcode, hfile))
-    $cfile $(c.code_pretty_string(ccode, cfile))
-  );
+  return $(
+    hfile, c.code_pretty_string(hcode, hfile), cfile,
+    c.code_pretty_string(ccode, cfile));
 }
 
 static List _emit_header(Compiler c, List header) {

@@ -114,7 +114,7 @@ static List _direct_func_handle(
     handle = c.sym.introduce(c.fresh_name("func_handle"));
     List value = _func_call(
       c, %("Func"), _func_bound(constructor_type, constructor),
-      %($(_func_bound(%("FuncAdapter"), adapter)) $signature));
+      $(_func_bound(%("FuncAdapter"), adapter), signature));
     c.add_early(
       c.rebuild_statement($!{ static Func $handle = $value; }).cadr());
   }
@@ -178,7 +178,7 @@ static List _indirect_func_lift(
   );
   Type factory_type = %((func ($pointer_type)) "Func");
   return _func_bridge_call(
-    c, bridge, parameters, factory_type, %($expression));
+    c, bridge, parameters, factory_type, $(expression));
 }
 
 static List _indirect_func_value(
@@ -226,7 +226,7 @@ static List _build_indirect_func_adapter(
   String context_name = NULL;
   List field_binding = NULL;
   _func_pointer_context(c, pointer_type, context_name, field_binding);
-  Type context_type = %($context_name);
+  Type context_type = $(context_name);
   Type context_pointer = %(* const $context_name);
   Type context_helper_type = NULL;
   if (!_adapter_helper(c, "Func_context", context_helper_type) ||
@@ -241,7 +241,7 @@ static List _build_indirect_func_adapter(
   List target = $!($pointer_type){ $context->$field_name };
   List adapter = _build_func_adapter(
     c, diagnostic_type, pointer_type, target, fn_binding,
-    %($context_declaration), NULL);
+    $(context_declaration), NULL);
   return %(indirect-adapter $adapter $context_type $field_binding);
 }
 
@@ -254,7 +254,7 @@ static List _context_local(
   List helper = _adapter_helper(c, "Func_context", helper_type);
   List call = _func_call(
     c, $!Type{ const void * }, _func_bound(helper_type, helper),
-    %($(_func_bound(%("Func"), fn))));
+    $(_func_bound(%("Func"), fn)));
   List cast = %(expr $pointer (cast $pointer $call));
   return c.rebuild_statement($!{ $pointer $local = $cast; }).cadr();
 }
@@ -266,7 +266,7 @@ static void _func_pointer_context(
   List context_binding = c.sym.introduce(context_name);
   field_binding = c.sym.introduce(c.fresh_name("func_pointer"));
   List field = c.rebuild_statement($!{ $pointer_type $field_binding; }).cadr();
-  c.add_early(c.capture_environment(context_binding, %($field)));
+  c.add_early(c.capture_environment(context_binding, $(field)));
 }
 
 static List _func_context_declaration(
@@ -285,7 +285,7 @@ static List _func_context_call(
   List address = c.rebuild_expression(type.reference(), address_shape(value));
   List size = c.rebuild_expression(%(size_t), size_shape(value));
   return _func_call(
-    c, %("Func"), constructor, %($adapter $signature $address $size));
+    c, %("Func"), constructor, $(adapter, signature, address, size));
 }
 
 static List _func_present_statement(

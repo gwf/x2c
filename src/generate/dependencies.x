@@ -69,7 +69,7 @@ static List _inline_prototype(Compiler c, List node) {
 }
 
 static int _inline_binding(Compiler c, List binding) =>
-  c.sym.get(%("function-inline" $(Ast.binding_spelling(binding))))
+  c.sym.get($("function-inline", Ast.binding_spelling(binding)))
     != NULL;
 
 /* Native directives and initializer inputs keep their source order.
@@ -92,7 +92,7 @@ module List _move_bodies(List source, Map inline_bodies) {
           out.push(node);
           continue;
         }
-        bodies.push(%($node @arms));
+        bodies.push($(node, @arms));
         if (type.list().type().is_static())
           out.push(_prototype(type, signature));
         continue;
@@ -142,7 +142,7 @@ static void _place_bodies(Array out, Array bodies, List arms) {
       continue;
     }
     List reopened = written.head(written.len() - open);
-    List statement = %($(pending.car()));
+    List statement = $(pending.car());
     foreach (List item in Compiler.preproc_within_arms(reopened, statement))
       out.push(item);
   }
@@ -272,11 +272,11 @@ static void _binding(Forward &f, Var binding) {
 static void _global(Forward &f, Var binding, String spelling) {
   Compiler c = f.c;
   Type type = NULL;
-  List global = spelling ? c.sym.resolve_global(%($spelling), type) : NULL;
+  List global = spelling ? c.sym.resolve_global($(spelling), type) : NULL;
   if (!global || !global.equal(binding) || !type.is_function()) return;
   if (global in f.available || %(native $spelling) in f.available ||
       global in f.seen) return;
-  if (c.sym.get(%("generated-protocol" $spelling)) &&
+  if (c.sym.get($("generated-protocol", spelling)) &&
       (!c.meta_build || c.native_protocol_alias(spelling))) return;
   f.seen[global] = 1;
   _types(f, type);

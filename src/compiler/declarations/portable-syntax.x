@@ -106,7 +106,7 @@ static Var _thaw_cache_key(Compiler c, Var key) {
   if (key is not <list>) return key;
   match (key) {
     case %(declaration-cache-binding ?name):
-      return c.sym.reference_global(%($name));
+      return c.sym.reference_global($(name));
     case %(declaration-cache ?): return c.thaw_declaration_syntax(key);
     case %((!or declaration-void declaration-empty-symbol declaration-atom
                 declaration-token declaration-origin declaration-list) *):

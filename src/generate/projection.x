@@ -35,7 +35,7 @@ module List _header_and_source(
     .c = c, .header = [], .pending = [], .open = [], .forwarded = {},
     .included = {}, .statics = {}, .source_groups = {}};
   foreach (Ast node in ast) _add(p, node);
-  return %($(_finish(p)) $(_source_projection(c, ast, inline_bodies)));
+  return $(_finish(p), _source_projection(c, ast, inline_bodies));
 }
 
 /* The unit consumes its declarations where they were written, independently
@@ -171,7 +171,7 @@ static void _add_typedef(Partition &p, List node) {
   Type core = type.base_type();
   int body = 0;
   match (core) case %((!or struct union enum) ?name (*)):
-    body = p.c.publishes_type_family(%($(core.car()) $name));
+    body = p.c.publishes_type_family($(core.car(), name));
   if (type.is_static() && !_publishes_typedefs(p, _typedef_names(node))) {
     _keep(p);
     if (body) _publish_node(p, %(declare $core (bindings (bind () ()))));
@@ -213,7 +213,7 @@ static List _without_static(List type) =>
    header, which then keeps them, so this changes no header placement. */
 static void _hold(Partition &p, List names, List node) {
   p.header.push(%(pending $(p.pending.len())));
-  p.pending.push(%($names $node));
+  p.pending.push($(names, node));
   foreach (Var group in p.open) p.source_groups[group] = 1;
 }
 
@@ -300,7 +300,7 @@ module void _spelled_types(List node, Map names) {
     if (base.car() is <string> && !base.cdr()) names[base.car()] = 1;
     match (base)
       case %((!or ?kind struct union enum) ?name *):
-        names[%($kind $name)] = 1;
+        names[$(kind, name)] = 1;
   }
 }
 
@@ -326,11 +326,11 @@ static void _place_function(
   Partition &p, Type type, List declarator, Ast body) {
   type = _noreturn(type, declarator, body);
   if (type.is_static()) {
-    _add_statics(p, %($declarator));
+    _add_statics(p, $(declarator));
     _keep(p);
     return;
   }
-  _forward_tags(p, %($type $declarator));
+  _forward_tags(p, $(type, declarator));
   p.header.push(_header_function(type, declarator, body));
   if (!type.is_inline()) _keep(p);
 }
@@ -397,7 +397,7 @@ static void _add_declaration(
   }
   if (type.is_static() && _body_tag(type)) {
     List core = type.base_type();
-    List family = %($(core.car()) $(core.cadr()));
+    List family = $(core.car(), core.cadr());
     if (p.c.publishes_type_family(family))
       _publish_node(p, %(declare $core (bindings (bind () ()))));
     else _keep(p);
@@ -446,7 +446,7 @@ static String _body_tag(Type type) {
 
 /* `type` with its tag body `core` replaced by the bare tag `name`. */
 static List _tag_only(Type type, Type core, Var name) =>
-  type.list()[:type.len() - core.len()].append(%($(core.car()) $name));
+  type.list()[:type.len() - core.len()].append($(core.car(), name));
 
 /* A public file-scope object has one definition, in the source, and an
    `extern` declaration in the header. Defining it in the header would give
@@ -665,7 +665,7 @@ static Array _forward_candidates(List items, int complete_enums) {
           case %(enum ? (*)): forward = node;
       if (!forward) continue;
       foreach (String alias in _typedef_names(node))
-        candidates.push(%($alias $forward));
+        candidates.push($(alias, forward));
     }
   return candidates;
 }

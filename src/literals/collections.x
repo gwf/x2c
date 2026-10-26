@@ -4,7 +4,7 @@ static macro Stmt $fail.literals_symbol_duplicate(
   Expr $c, Expr $origin, Expr $symbol) =>
   $c.report_error(
     <parse>, "duplicate Symbol in symbol set",
-    $origin, %("symbol:" $($symbol.repr())));
+    $origin, $("symbol:", $symbol.repr()));
 
 static macro Stmt $fail.literals_symbol_literal(Expr $c, Expr $origin) =>
   $c.report_error(

@@ -89,7 +89,7 @@ static void plan_literals_and_quotes(void) {
   long wide1 = 42, wide2 = 42;
   Var w1 = wide1, w2 = wide2;
   EXPECT_TRUE(w1 == w2 && w1.u64 != w2.u64);
-  _exact_case(%($w2), %($w1), %(()));
+  _exact_case($(w2), $(w1), %(()));
   _exact_case(%($w2 tail), %($w1 tail), %(()));
 
   _exact_case(%(!and ?capture red),
@@ -97,7 +97,7 @@ static void plan_literals_and_quotes(void) {
   _exact_case(%(!and other red), %(!quote (!and ?capture red)), NULL);
   // Shallow quote: boxed-equal one-element lists fail !quote but
   // match the ordinary elementwise pattern.
-  _exact_case(%($w2), %(!quote ($w1)), NULL);
+  _exact_case($(w2), %(!quote ($w1)), NULL);
 }
 
 // binders and repeats - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -191,7 +191,7 @@ static void plan_is_parity(void) {
   _parity_case(%(x), %((!is type 5)));
   Array arr = [1, 2];
   Map map = { k: 1 };
-  List typed = %( $arr $map );
+  List typed = $(arr, map);
   _parity_case(typed, %((!is type varray) (!is type vmap)));
 }
 
@@ -422,7 +422,7 @@ static void plan_status_categorization(void) {
 static List _wide_operand(int inner) {
   List sub = NULL;
   for (int i = 0; i < inner; i++) sub = cons(<?>, sub);
-  return %($sub);
+  return $(sub);
 }
 
 /* Across these sizes a guard arm or block ends on or just past the last
@@ -1121,7 +1121,7 @@ static void plan_keys_refuse_only_unmatchable_inputs(void) {
   // A key that is not a canonical identity compares by language equality.
   String tag = String.new("x2c.template");
   Var text = %("x2c.template" ?arguments);
-  _exact_case(%($tag 1), text, %((?arguments 1)));
+  _exact_case($(tag, 1), text, %((?arguments 1)));
   _exact_case(%(template 1), text, NULL);
 
   MatchPlan plan = MatchPlan.prepare(%(expr ? (call *)));

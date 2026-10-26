@@ -47,8 +47,8 @@ List Sample.fences(String text):
       String text_body = body.len() ?
         String.join("\n", body.list_free()) + "\n" : NULL
       int stop = offsets[end].integer() + line.len()
-      fences.push(%($indent $(found["info"]) $text_body $(at + 1)
-                    $(offsets[at]) $stop))
+      fences.push($(
+        indent, found["info"], text_body, at + 1, offsets[at], stop))
       at = end
       break
   return fences.list_free()
@@ -119,5 +119,5 @@ List Sample.collect(Path root, Path path, Array errors):
         expected = _dedent(next_body, next_indent)
         runs = 1
         status = fence["status"] ? atoi(fence["status"]) : 0
-    samples.push(%($where $code $expected $runs $status))
+    samples.push($(where, code, expected, runs, status))
   return samples.list_free()

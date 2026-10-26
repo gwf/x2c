@@ -315,11 +315,11 @@ static CurlHeader _curl_header(String line) {
            (line[start] == ' ' || line[start] == '\t')) start++;
     value = String.new_len(line + start, length - start);
   }
-  return %($line $parsed $name $value);
+  return $(line, parsed, name, value);
 }
 
 static CurlResponseBlock _curl_block(String status, List headers) =>
-  %($status $(headers.reverse()));
+  $(status, headers.reverse());
 
 static int _curl_status_line(String line) =>
   line.len() >= 5 && !memcmp(line, "HTTP/", 5);

@@ -751,7 +751,7 @@ static Var _thread_race_promote_worker(const void *input, size_t input_size) {
   const ThreadRaceInput *race = input;
   Pool.open();
   Var value = 500681;
-  List list = %($value);
+  List list = $(value);
   _thread_race_arrive(race.arrived);
   race.proven[race.index] = List.try_own(list) && Pool.is_permanent(list);
   race.promoted[race.index] = list;
@@ -777,7 +777,7 @@ static void thread_promotions_keep_the_first_canonical_identity(void) {
     threads[i].free();
   }
   Var value = 500681;
-  List canonical = %($value);
+  List canonical = $(value);
   int permanent = 0;
   for (int i = 0; i < THREAD_RACERS; i++) {
     if (!proven[i]) continue;

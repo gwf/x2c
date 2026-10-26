@@ -132,7 +132,7 @@ static int _native_cpp(CliRequest request) =>
    read is unsaved. */
 static int _serve(Query &q, CliRequest request) {
   Frontend frontend = Frontend.new(request);
-  frontend.prepare_meta(%($(q.source)));
+  frontend.prepare_meta($(q.source));
   Context command = Context.open_isolated_named("editor request");
   defer command.close();
   ParsedUnit unit;
@@ -249,7 +249,7 @@ static void _hover(Query &q, List row) {
   List declaration = type.declaration_ast(row[3]);
   Map hover = _location(q, row[0], row[1], row[2]);
   hover[<text>] =
-    String.new(c.code_pretty_string(c.emit(%($declaration), NULL), NULL));
+    String.new(c.code_pretty_string(c.emit($(declaration), NULL), NULL));
   q.reply[<hover>] = hover;
 }
 

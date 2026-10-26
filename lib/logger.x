@@ -753,7 +753,7 @@ static String _detail_text(List detail) {
     Var value = pair.cadr();
     String text = value is <string> || value is <symbol>
                 ? value.str() : value.repr();
-    parts = %(@parts $(%"$(pair.car) $text"));
+    parts = $(@parts, %"$(pair.car) $text");
   }
   return String.join(", ", parts);
 }

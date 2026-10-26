@@ -5,7 +5,7 @@ import "torch" with Torch, Tensor, Module, Optimizer, AutogradContext;
 
 static Tensor _swish(AutogradContext context, List inputs) {
   Tensor input = inputs[0].tensor();
-  context.save_for_backward(%($input));
+  context.save_for_backward($(input));
   return input * input.sigmoid();
 }
 
@@ -13,7 +13,7 @@ static List _swish_gradient(AutogradContext context, Tensor gradient) {
   Tensor input = context.saved_tensors()[0].tensor();
   Tensor sigmoid = input.sigmoid();
   Tensor result = gradient * (sigmoid + input * sigmoid * (1 - sigmoid));
-  return %($result);
+  return $(result);
 }
 
 int main(void) {
@@ -36,7 +36,7 @@ int main(void) {
       defer Scope.release();
       optimizer.zero_grad();
       Tensor hidden = model.child("hidden").forward(input);
-      Tensor active = Tensor.custom(forward, backward, %($hidden));
+      Tensor active = Tensor.custom(forward, backward, $(hidden));
       Tensor loss = Tensor.mse_loss(model.child("output").forward(active), target);
       loss.backward_callbacks();
       optimizer.step();

@@ -97,7 +97,7 @@ static void match_replace_template(void) {
   Symbol set_sym = <"set!">;
   List template = %( $set_sym ?name ?value );
   List replaced = input.match_replace(pattern, template);
-  List expected = %( $set_sym $name_sym $ten );
+  List expected = $(set_sym, name_sym, ten);
   EXPECT_TRUE(replaced == expected);
 }
 
@@ -131,7 +131,7 @@ static void match_replace_returns_tail_binding(void) {
   List pattern = %( chunk ?first ?mid *tail );
   Var tail_template = <"*tail">;
   List replaced = input.match_replace(pattern, tail_template);
-  List expected = %( $payload 5 );
+  List expected = $(payload, 5);
   if (!EXPECT_TRUE(replaced == expected)) {
     Stdout.printf("match_replace_returns_tail_binding mismatch\n");
     Stdout.printf("replaced structure\n");
@@ -436,8 +436,9 @@ static void match_is_type_accepts_var_tags(void) {
   Map map_value = { foo: 1 };
   Var symbol_var = <bar>;
 
-  List samples = %( $string_value $integer_var $float_var $list_value
-                    $array_value $map_value $symbol_var );
+  List samples = $(
+    string_value, integer_var, float_var, list_value, array_value, map_value,
+    symbol_var);
   List cases = %( ($string_value string)
                   ($integer_var i32)
                   ($float_var f64)

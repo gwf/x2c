@@ -30,7 +30,7 @@ static String _apply(String text, List edits):
 static String _generated(List translate, Path path, Path work):
   Path.remove_tree(work)
   Path.make_dirs(work)
-  List command = translate.append(%("--out-dir" $work $path))
+  List command = translate.append($("--out-dir", work, path))
   if command.job().options({stderr: <capture>}).status(): return NULL
   String stem = path.stem()
   return work.join(%"$stem.c").read_text() + work.join(%"$stem.h").read_text()
@@ -57,7 +57,7 @@ int Lint.apply_fixes(Lint l, List translate, Path work):
   if !_proves(l, edits, translate, work, base):
     Array proven = []
     foreach List edit in edits:
-      if _proves(l, %($edit), translate, work, base): proven.push(edit)
+      if _proves(l, $(edit), translate, work, base): proven.push(edit)
     kept = proven.list_free()
     if kept && !_proves(l, kept, translate, work, base): kept = NULL
   file.write_text(_apply(l.text, kept))

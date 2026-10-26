@@ -357,7 +357,7 @@ static List _unit_private_rows(Compiler c, Map globs) {
     match (key) case %("unit-static" ?name): {
       String path = Compiler.absolute_home_path(owner.list().car());
       if (c.canonical_path(path) == unit) continue;
-      rows.push(_unit_private_row(globs, %($name)));
+      rows.push(_unit_private_row(globs, $(name)));
       rows.push(_unit_private_row(globs, %(self $name)));
     }
   return rows.list_free();
@@ -365,7 +365,7 @@ static List _unit_private_rows(Compiler c, Map globs) {
 
 static List _unit_private_row(Map globs, List key) {
   Var value = globs[key];
-  return value is void ? %($key) : %($key $value);
+  return value is void ? $(key) : $(key, value);
 }
 
 /* A helper parse continues after a declaration producer fails before its
@@ -448,7 +448,7 @@ static String _take_line_markers(Compiler cpp, String text) {
       text_line++;
     }
     else if (!file.startswith("<"))
-      markers.push(%($position $text_line $file $number));
+      markers.push($(position, text_line, file, number));
   }
   cpp.line_markers = markers;
   return "\n".join(kept.list_free());

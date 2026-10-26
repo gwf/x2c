@@ -64,7 +64,7 @@ static int _scalar(Var value, int64_t &integer, double &floating) {
 static List _pair(xt_tensor a, xt_tensor b, String operation) {
   Tensor first = Tensor.adopt(a, operation);
   Tensor second = Tensor.adopt(b, operation);
-  return %($first $second);
+  return $(first, second);
 }
 
 
@@ -103,7 +103,7 @@ List Torch.align_tensors(List tensors) {
   List result = %();
   for (int64_t i = 0; i < count; i++) {
     Tensor item = Tensor.adopt(items[i], "align_tensors");
-    result = result.append(%($item));
+    result = result.append($(item));
   }
   xt_free_handles(items);
   return result;
@@ -492,7 +492,7 @@ List Torch.atleast_1d_sequence(List tensors) {
   List result = %();
   for (int64_t i = 0; i < count; i++) {
     Tensor item = Tensor.adopt(items[i], "atleast_1d");
-    result = result.append(%($item));
+    result = result.append($(item));
   }
   xt_free_handles(items);
   return result;
@@ -510,7 +510,7 @@ List Torch.atleast_2d_sequence(List tensors) {
   List result = %();
   for (int64_t i = 0; i < count; i++) {
     Tensor item = Tensor.adopt(items[i], "atleast_2d");
-    result = result.append(%($item));
+    result = result.append($(item));
   }
   xt_free_handles(items);
   return result;
@@ -528,7 +528,7 @@ List Torch.atleast_3d_sequence(List tensors) {
   List result = %();
   for (int64_t i = 0; i < count; i++) {
     Tensor item = Tensor.adopt(items[i], "atleast_3d");
-    result = result.append(%($item));
+    result = result.append($(item));
   }
   xt_free_handles(items);
   return result;
@@ -707,7 +707,7 @@ List Torch.broadcast_tensors(List tensors) {
   List result = %();
   for (int64_t i = 0; i < count; i++) {
     Tensor item = Tensor.adopt(items[i], "broadcast_tensors");
-    result = result.append(%($item));
+    result = result.append($(item));
   }
   xt_free_handles(items);
   return result;
@@ -759,7 +759,7 @@ List Tensor.unsafe_chunk(Tensor self, int64_t chunks, int64_t dim) {
   List result = %();
   for (int64_t i = 0; i < count; i++) {
     Tensor item = Tensor.adopt(items[i], "unsafe_chunk");
-    result = result.append(%($item));
+    result = result.append($(item));
   }
   xt_free_handles(items);
   return result;
@@ -772,7 +772,7 @@ List Tensor.chunk(Tensor self, int64_t chunks, int64_t dim) {
   List result = %();
   for (int64_t i = 0; i < count; i++) {
     Tensor item = Tensor.adopt(items[i], "chunk");
-    result = result.append(%($item));
+    result = result.append($(item));
   }
   xt_free_handles(items);
   return result;
@@ -786,7 +786,7 @@ List Tensor.tensor_split(Tensor self, int64_t sections, int64_t dim) {
   List result = %();
   for (int64_t i = 0; i < count; i++) {
     Tensor item = Tensor.adopt(items[i], "tensor_split");
-    result = result.append(%($item));
+    result = result.append($(item));
   }
   xt_free_handles(items);
   return result;
@@ -802,7 +802,7 @@ List Tensor.tensor_split_indices(Tensor self, List indices, int64_t dim) {
   List result = %();
   for (int64_t i = 0; i < count; i++) {
     Tensor item = Tensor.adopt(items[i], "tensor_split");
-    result = result.append(%($item));
+    result = result.append($(item));
   }
   xt_free_handles(items);
   return result;
@@ -817,7 +817,7 @@ List Tensor.tensor_split_tensor(Tensor self,
   List result = %();
   for (int64_t i = 0; i < count; i++) {
     Tensor item = Tensor.adopt(items[i], "tensor_split");
-    result = result.append(%($item));
+    result = result.append($(item));
   }
   xt_free_handles(items);
   return result;
@@ -1163,13 +1163,13 @@ List Tensor.cudnn_batch_norm(Tensor input, Tensor weight, Tensor bias,
       "cudnn_batch_norm");
   List result = %();
   Tensor out0_t = Tensor.adopt(out0, "cudnn_batch_norm");
-  result = result.append(%($out0_t));
+  result = result.append($(out0_t));
   Tensor out1_t = Tensor.adopt(out1, "cudnn_batch_norm");
-  result = result.append(%($out1_t));
+  result = result.append($(out1_t));
   Tensor out2_t = Tensor.adopt(out2, "cudnn_batch_norm");
-  result = result.append(%($out2_t));
+  result = result.append($(out2_t));
   Tensor out3_t = Tensor.adopt(out3, "cudnn_batch_norm");
-  result = result.append(%($out3_t));
+  result = result.append($(out3_t));
   return result;
 }
 
@@ -1337,7 +1337,7 @@ List Tensor.gradient(Tensor self, Var spacing, int64_t dim, int dim_set,
   List result = %();
   for (int64_t i = 0; i < count; i++) {
     Tensor item = Tensor.adopt(items[i], "gradient");
-    result = result.append(%($item));
+    result = result.append($(item));
   }
   xt_free_handles(items);
   return result;
@@ -1357,7 +1357,7 @@ List Tensor.gradient_scalararray(Tensor self, Var spacing, List dim,
   List result = %();
   for (int64_t i = 0; i < count; i++) {
     Tensor item = Tensor.adopt(items[i], "gradient");
-    result = result.append(%($item));
+    result = result.append($(item));
   }
   xt_free_handles(items);
   return result;
@@ -1373,7 +1373,7 @@ List Tensor.gradient_array(Tensor self, List dim, int64_t edge_order) {
   List result = %();
   for (int64_t i = 0; i < count; i++) {
     Tensor item = Tensor.adopt(items[i], "gradient");
-    result = result.append(%($item));
+    result = result.append($(item));
   }
   xt_free_handles(items);
   return result;
@@ -1390,7 +1390,7 @@ List Tensor.gradient_tensorarrayint(Tensor self, List spacing, int64_t dim,
   List result = %();
   for (int64_t i = 0; i < count; i++) {
     Tensor item = Tensor.adopt(items[i], "gradient");
-    result = result.append(%($item));
+    result = result.append($(item));
   }
   xt_free_handles(items);
   return result;
@@ -1409,7 +1409,7 @@ List Tensor.gradient_tensorarray(Tensor self, List spacing, List dim,
   List result = %();
   for (int64_t i = 0; i < count; i++) {
     Tensor item = Tensor.adopt(items[i], "gradient");
-    result = result.append(%($item));
+    result = result.append($(item));
   }
   xt_free_handles(items);
   return result;
@@ -1576,13 +1576,13 @@ List Tensor.embedding_bag(Tensor weight, Tensor indices, Tensor offsets,
       &out3), "embedding_bag");
   List result = %();
   Tensor out0_t = Tensor.adopt(out0, "embedding_bag");
-  result = result.append(%($out0_t));
+  result = result.append($(out0_t));
   Tensor out1_t = Tensor.adopt(out1, "embedding_bag");
-  result = result.append(%($out1_t));
+  result = result.append($(out1_t));
   Tensor out2_t = Tensor.adopt(out2, "embedding_bag");
-  result = result.append(%($out2_t));
+  result = result.append($(out2_t));
   Tensor out3_t = Tensor.adopt(out3, "embedding_bag");
-  result = result.append(%($out3_t));
+  result = result.append($(out3_t));
   return result;
 }
 
@@ -1597,13 +1597,13 @@ List Tensor.embedding_bag_padding(Tensor weight, Tensor indices,
       padding_idx_set, &out0, &out1, &out2, &out3), "embedding_bag");
   List result = %();
   Tensor out0_t = Tensor.adopt(out0, "embedding_bag");
-  result = result.append(%($out0_t));
+  result = result.append($(out0_t));
   Tensor out1_t = Tensor.adopt(out1, "embedding_bag");
-  result = result.append(%($out1_t));
+  result = result.append($(out1_t));
   Tensor out2_t = Tensor.adopt(out2, "embedding_bag");
-  result = result.append(%($out2_t));
+  result = result.append($(out2_t));
   Tensor out3_t = Tensor.adopt(out3, "embedding_bag");
-  result = result.append(%($out3_t));
+  result = result.append($(out3_t));
   return result;
 }
 
@@ -1905,11 +1905,11 @@ List Tensor.native_group_norm(Tensor input, Tensor weight, Tensor bias,
       "native_group_norm");
   List result = %();
   Tensor out0_t = Tensor.adopt(out0, "native_group_norm");
-  result = result.append(%($out0_t));
+  result = result.append($(out0_t));
   Tensor out1_t = Tensor.adopt(out1, "native_group_norm");
-  result = result.append(%($out1_t));
+  result = result.append($(out1_t));
   Tensor out2_t = Tensor.adopt(out2, "native_group_norm");
-  result = result.append(%($out2_t));
+  result = result.append($(out2_t));
   return result;
 }
 
@@ -2056,11 +2056,11 @@ List Tensor.native_layer_norm(Tensor input, List normalized_shape,
       &out2), "native_layer_norm");
   List result = %();
   Tensor out0_t = Tensor.adopt(out0, "native_layer_norm");
-  result = result.append(%($out0_t));
+  result = result.append($(out0_t));
   Tensor out1_t = Tensor.adopt(out1, "native_layer_norm");
-  result = result.append(%($out1_t));
+  result = result.append($(out1_t));
   Tensor out2_t = Tensor.adopt(out2, "native_layer_norm");
-  result = result.append(%($out2_t));
+  result = result.append($(out2_t));
   return result;
 }
 
@@ -2532,13 +2532,13 @@ List Tensor.mkldnn_rnn_layer(Tensor input, Tensor weight0, Tensor weight1,
       &out0, &out1, &out2, &out3), "mkldnn_rnn_layer");
   List result = %();
   Tensor out0_t = Tensor.adopt(out0, "mkldnn_rnn_layer");
-  result = result.append(%($out0_t));
+  result = result.append($(out0_t));
   Tensor out1_t = Tensor.adopt(out1, "mkldnn_rnn_layer");
-  result = result.append(%($out1_t));
+  result = result.append($(out1_t));
   Tensor out2_t = Tensor.adopt(out2, "mkldnn_rnn_layer");
-  result = result.append(%($out2_t));
+  result = result.append($(out2_t));
   Tensor out3_t = Tensor.adopt(out3, "mkldnn_rnn_layer");
-  result = result.append(%($out3_t));
+  result = result.append($(out3_t));
   return result;
 }
 
@@ -2552,11 +2552,11 @@ List Tensor.miopen_batch_norm(Tensor input, Tensor weight, Tensor bias,
       "miopen_batch_norm");
   List result = %();
   Tensor out0_t = Tensor.adopt(out0, "miopen_batch_norm");
-  result = result.append(%($out0_t));
+  result = result.append($(out0_t));
   Tensor out1_t = Tensor.adopt(out1, "miopen_batch_norm");
-  result = result.append(%($out1_t));
+  result = result.append($(out1_t));
   Tensor out2_t = Tensor.adopt(out2, "miopen_batch_norm");
-  result = result.append(%($out2_t));
+  result = result.append($(out2_t));
   return result;
 }
 
@@ -2725,11 +2725,11 @@ List Tensor.native_batch_norm(Tensor input, Tensor weight, Tensor bias,
       momentum, eps, &out0, &out1, &out2), "native_batch_norm");
   List result = %();
   Tensor out0_t = Tensor.adopt(out0, "native_batch_norm");
-  result = result.append(%($out0_t));
+  result = result.append($(out0_t));
   Tensor out1_t = Tensor.adopt(out1, "native_batch_norm");
-  result = result.append(%($out1_t));
+  result = result.append($(out1_t));
   Tensor out2_t = Tensor.adopt(out2, "native_batch_norm");
-  result = result.append(%($out2_t));
+  result = result.append($(out2_t));
   return result;
 }
 
@@ -3240,7 +3240,7 @@ List Tensor.unsafe_split(Tensor self, int64_t split_size, int64_t dim) {
   List result = %();
   for (int64_t i = 0; i < count; i++) {
     Tensor item = Tensor.adopt(items[i], "unsafe_split");
-    result = result.append(%($item));
+    result = result.append($(item));
   }
   xt_free_handles(items);
   return result;
@@ -3253,7 +3253,7 @@ List Tensor.split(Tensor self, int64_t split_size, int64_t dim) {
   List result = %();
   for (int64_t i = 0; i < count; i++) {
     Tensor item = Tensor.adopt(items[i], "split");
-    result = result.append(%($item));
+    result = result.append($(item));
   }
   xt_free_handles(items);
   return result;
@@ -3269,7 +3269,7 @@ List Tensor.split_sizes(Tensor self, List split_size, int64_t dim) {
   List result = %();
   for (int64_t i = 0; i < count; i++) {
     Tensor item = Tensor.adopt(items[i], "split");
-    result = result.append(%($item));
+    result = result.append($(item));
   }
   xt_free_handles(items);
   return result;
@@ -3286,7 +3286,7 @@ List Tensor.unsafe_split_with_sizes(Tensor self, List split_sizes,
   List result = %();
   for (int64_t i = 0; i < count; i++) {
     Tensor item = Tensor.adopt(items[i], "unsafe_split_with_sizes");
-    result = result.append(%($item));
+    result = result.append($(item));
   }
   xt_free_handles(items);
   return result;
@@ -3302,7 +3302,7 @@ List Tensor.split_with_sizes(Tensor self, List split_sizes, int64_t dim) {
   List result = %();
   for (int64_t i = 0; i < count; i++) {
     Tensor item = Tensor.adopt(items[i], "split_with_sizes");
-    result = result.append(%($item));
+    result = result.append($(item));
   }
   xt_free_handles(items);
   return result;
@@ -3315,7 +3315,7 @@ List Tensor.hsplit(Tensor self, int64_t sections) {
   List result = %();
   for (int64_t i = 0; i < count; i++) {
     Tensor item = Tensor.adopt(items[i], "hsplit");
-    result = result.append(%($item));
+    result = result.append($(item));
   }
   xt_free_handles(items);
   return result;
@@ -3331,7 +3331,7 @@ List Tensor.hsplit_array(Tensor self, List indices) {
   List result = %();
   for (int64_t i = 0; i < count; i++) {
     Tensor item = Tensor.adopt(items[i], "hsplit");
-    result = result.append(%($item));
+    result = result.append($(item));
   }
   xt_free_handles(items);
   return result;
@@ -3344,7 +3344,7 @@ List Tensor.vsplit(Tensor self, int64_t sections) {
   List result = %();
   for (int64_t i = 0; i < count; i++) {
     Tensor item = Tensor.adopt(items[i], "vsplit");
-    result = result.append(%($item));
+    result = result.append($(item));
   }
   xt_free_handles(items);
   return result;
@@ -3360,7 +3360,7 @@ List Tensor.vsplit_array(Tensor self, List indices) {
   List result = %();
   for (int64_t i = 0; i < count; i++) {
     Tensor item = Tensor.adopt(items[i], "vsplit");
-    result = result.append(%($item));
+    result = result.append($(item));
   }
   xt_free_handles(items);
   return result;
@@ -3373,7 +3373,7 @@ List Tensor.dsplit(Tensor self, int64_t sections) {
   List result = %();
   for (int64_t i = 0; i < count; i++) {
     Tensor item = Tensor.adopt(items[i], "dsplit");
-    result = result.append(%($item));
+    result = result.append($(item));
   }
   xt_free_handles(items);
   return result;
@@ -3389,7 +3389,7 @@ List Tensor.dsplit_array(Tensor self, List indices) {
   List result = %();
   for (int64_t i = 0; i < count; i++) {
     Tensor item = Tensor.adopt(items[i], "dsplit");
-    result = result.append(%($item));
+    result = result.append($(item));
   }
   xt_free_handles(items);
   return result;
@@ -3710,11 +3710,11 @@ List Tensor.unique_dim(Tensor self, int64_t dim, int sorted,
       return_counts, &out0, &out1, &out2), "unique_dim");
   List result = %();
   Tensor out0_t = Tensor.adopt(out0, "unique_dim");
-  result = result.append(%($out0_t));
+  result = result.append($(out0_t));
   Tensor out1_t = Tensor.adopt(out1, "unique_dim");
-  result = result.append(%($out1_t));
+  result = result.append($(out1_t));
   Tensor out2_t = Tensor.adopt(out2, "unique_dim");
-  result = result.append(%($out2_t));
+  result = result.append($(out2_t));
   return result;
 }
 
@@ -3725,11 +3725,11 @@ List Tensor.unique_consecutive(Tensor self, int return_inverse,
       return_counts, dim, dim_set, &out0, &out1, &out2), "unique_consecutive");
   List result = %();
   Tensor out0_t = Tensor.adopt(out0, "unique_consecutive");
-  result = result.append(%($out0_t));
+  result = result.append($(out0_t));
   Tensor out1_t = Tensor.adopt(out1, "unique_consecutive");
-  result = result.append(%($out1_t));
+  result = result.append($(out1_t));
   Tensor out2_t = Tensor.adopt(out2, "unique_consecutive");
-  result = result.append(%($out2_t));
+  result = result.append($(out2_t));
   return result;
 }
 
@@ -3740,11 +3740,11 @@ List Tensor.unique_dim_consecutive(Tensor self, int64_t dim,
       return_counts, &out0, &out1, &out2), "unique_dim_consecutive");
   List result = %();
   Tensor out0_t = Tensor.adopt(out0, "unique_dim_consecutive");
-  result = result.append(%($out0_t));
+  result = result.append($(out0_t));
   Tensor out1_t = Tensor.adopt(out1, "unique_dim_consecutive");
-  result = result.append(%($out1_t));
+  result = result.append($(out1_t));
   Tensor out2_t = Tensor.adopt(out2, "unique_dim_consecutive");
-  result = result.append(%($out2_t));
+  result = result.append($(out2_t));
   return result;
 }
 
@@ -4250,7 +4250,7 @@ List Tensor.unbind(Tensor self, int64_t dim) {
   List result = %();
   for (int64_t i = 0; i < count; i++) {
     Tensor item = Tensor.adopt(items[i], "unbind");
-    result = result.append(%($item));
+    result = result.append($(item));
   }
   xt_free_handles(items);
   return result;
@@ -4349,7 +4349,7 @@ List Torch.quantize_per_tensor_tensors(List tensors, Tensor scales,
   List result = %();
   for (int64_t i = 0; i < count; i++) {
     Tensor item = Tensor.adopt(items[i], "quantize_per_tensor");
-    result = result.append(%($item));
+    result = result.append($(item));
   }
   xt_free_handles(items);
   return result;
@@ -4372,7 +4372,7 @@ List Torch.dequantize_tensors(List tensors) {
   List result = %();
   for (int64_t i = 0; i < count; i++) {
     Tensor item = Tensor.adopt(items[i], "dequantize");
-    result = result.append(%($item));
+    result = result.append($(item));
   }
   xt_free_handles(items);
   return result;
@@ -4475,7 +4475,7 @@ List Torch.meshgrid(List tensors) {
   List result = %();
   for (int64_t i = 0; i < count; i++) {
     Tensor item = Tensor.adopt(items[i], "meshgrid");
-    result = result.append(%($item));
+    result = result.append($(item));
   }
   xt_free_handles(items);
   return result;
@@ -4491,7 +4491,7 @@ List Torch.meshgrid_indexing(List tensors, String indexing) {
   List result = %();
   for (int64_t i = 0; i < count; i++) {
     Tensor item = Tensor.adopt(items[i], "meshgrid");
-    result = result.append(%($item));
+    result = result.append($(item));
   }
   xt_free_handles(items);
   return result;
@@ -4527,11 +4527,11 @@ List Tensor.lstm(Tensor input, List hx, List params, int has_biases,
       batch_first, &out0, &out1, &out2), "lstm");
   List result = %();
   Tensor out0_t = Tensor.adopt(out0, "lstm");
-  result = result.append(%($out0_t));
+  result = result.append($(out0_t));
   Tensor out1_t = Tensor.adopt(out1, "lstm");
-  result = result.append(%($out1_t));
+  result = result.append($(out1_t));
   Tensor out2_t = Tensor.adopt(out2, "lstm");
-  result = result.append(%($out2_t));
+  result = result.append($(out2_t));
   return result;
 }
 
@@ -4548,11 +4548,11 @@ List Tensor.lstm_data(Tensor data, Tensor batch_sizes, List hx, List params,
       bidirectional, &out0, &out1, &out2), "lstm");
   List result = %();
   Tensor out0_t = Tensor.adopt(out0, "lstm");
-  result = result.append(%($out0_t));
+  result = result.append($(out0_t));
   Tensor out1_t = Tensor.adopt(out1, "lstm");
-  result = result.append(%($out1_t));
+  result = result.append($(out1_t));
   Tensor out2_t = Tensor.adopt(out2, "lstm");
-  result = result.append(%($out2_t));
+  result = result.append($(out2_t));
   return result;
 }
 
@@ -5496,7 +5496,7 @@ List Tensor.nonzero_numpy(Tensor self) {
   List result = %();
   for (int64_t i = 0; i < count; i++) {
     Tensor item = Tensor.adopt(items[i], "nonzero_numpy");
-    result = result.append(%($item));
+    result = result.append($(item));
   }
   xt_free_handles(items);
   return result;
@@ -5572,11 +5572,11 @@ List Tensor.svd(Tensor self, int some, int compute_uv) {
       "svd");
   List result = %();
   Tensor out0_t = Tensor.adopt(out0, "svd");
-  result = result.append(%($out0_t));
+  result = result.append($(out0_t));
   Tensor out1_t = Tensor.adopt(out1, "svd");
-  result = result.append(%($out1_t));
+  result = result.append($(out1_t));
   Tensor out2_t = Tensor.adopt(out2, "svd");
-  result = result.append(%($out2_t));
+  result = result.append($(out2_t));
   return result;
 }
 
@@ -5633,11 +5633,11 @@ List Tensor.lu_unpack(Tensor LU_data, Tensor LU_pivots, int unpack_data,
       unpack_pivots, &out0, &out1, &out2), "lu_unpack");
   List result = %();
   Tensor out0_t = Tensor.adopt(out0, "lu_unpack");
-  result = result.append(%($out0_t));
+  result = result.append($(out0_t));
   Tensor out1_t = Tensor.adopt(out1, "lu_unpack");
-  result = result.append(%($out1_t));
+  result = result.append($(out1_t));
   Tensor out2_t = Tensor.adopt(out2, "lu_unpack");
-  result = result.append(%($out2_t));
+  result = result.append($(out2_t));
   return result;
 }
 
@@ -6993,11 +6993,11 @@ List Tensor.linalg_lu_factor_ex(Tensor A, int pivot, int check_errors) {
       &out1, &out2), "linalg_lu_factor_ex");
   List result = %();
   Tensor out0_t = Tensor.adopt(out0, "linalg_lu_factor_ex");
-  result = result.append(%($out0_t));
+  result = result.append($(out0_t));
   Tensor out1_t = Tensor.adopt(out1, "linalg_lu_factor_ex");
-  result = result.append(%($out1_t));
+  result = result.append($(out1_t));
   Tensor out2_t = Tensor.adopt(out2, "linalg_lu_factor_ex");
-  result = result.append(%($out2_t));
+  result = result.append($(out2_t));
   return result;
 }
 
@@ -7007,11 +7007,11 @@ List Tensor.linalg_lu(Tensor A, int pivot) {
       "linalg_lu");
   List result = %();
   Tensor out0_t = Tensor.adopt(out0, "linalg_lu");
-  result = result.append(%($out0_t));
+  result = result.append($(out0_t));
   Tensor out1_t = Tensor.adopt(out1, "linalg_lu");
-  result = result.append(%($out1_t));
+  result = result.append($(out1_t));
   Tensor out2_t = Tensor.adopt(out2, "linalg_lu");
-  result = result.append(%($out2_t));
+  result = result.append($(out2_t));
   return result;
 }
 
@@ -7033,11 +7033,11 @@ List Tensor.linalg_ldl_factor_ex(Tensor self, int hermitian,
       &out0, &out1, &out2), "linalg_ldl_factor_ex");
   List result = %();
   Tensor out0_t = Tensor.adopt(out0, "linalg_ldl_factor_ex");
-  result = result.append(%($out0_t));
+  result = result.append($(out0_t));
   Tensor out1_t = Tensor.adopt(out1, "linalg_ldl_factor_ex");
-  result = result.append(%($out1_t));
+  result = result.append($(out1_t));
   Tensor out2_t = Tensor.adopt(out2, "linalg_ldl_factor_ex");
-  result = result.append(%($out2_t));
+  result = result.append($(out2_t));
   return result;
 }
 
@@ -7060,13 +7060,13 @@ List Tensor.linalg_lstsq(Tensor self, Tensor b, double rcond, int rcond_set,
       driver, &out0, &out1, &out2, &out3), "linalg_lstsq");
   List result = %();
   Tensor out0_t = Tensor.adopt(out0, "linalg_lstsq");
-  result = result.append(%($out0_t));
+  result = result.append($(out0_t));
   Tensor out1_t = Tensor.adopt(out1, "linalg_lstsq");
-  result = result.append(%($out1_t));
+  result = result.append($(out1_t));
   Tensor out2_t = Tensor.adopt(out2, "linalg_lstsq");
-  result = result.append(%($out2_t));
+  result = result.append($(out2_t));
   Tensor out3_t = Tensor.adopt(out3, "linalg_lstsq");
-  result = result.append(%($out3_t));
+  result = result.append($(out3_t));
   return result;
 }
 
@@ -7195,11 +7195,11 @@ List Tensor.linalg_svd(Tensor A, int full_matrices, String driver) {
       &out2), "linalg_svd");
   List result = %();
   Tensor out0_t = Tensor.adopt(out0, "linalg_svd");
-  result = result.append(%($out0_t));
+  result = result.append($(out0_t));
   Tensor out1_t = Tensor.adopt(out1, "linalg_svd");
-  result = result.append(%($out1_t));
+  result = result.append($(out1_t));
   Tensor out2_t = Tensor.adopt(out2, "linalg_svd");
-  result = result.append(%($out2_t));
+  result = result.append($(out2_t));
   return result;
 }
 
@@ -7327,7 +7327,7 @@ List Tensor.unflatten_dense_tensors(Tensor flat, List tensors) {
   List result = %();
   for (int64_t i = 0; i < count; i++) {
     Tensor item = Tensor.adopt(items[i], "unflatten_dense_tensors");
-    result = result.append(%($item));
+    result = result.append($(item));
   }
   xt_free_handles(items);
   return result;
@@ -7387,7 +7387,7 @@ List Tensor.split_copy(Tensor self, int64_t split_size, int64_t dim) {
   List result = %();
   for (int64_t i = 0; i < count; i++) {
     Tensor item = Tensor.adopt(items[i], "split_copy");
-    result = result.append(%($item));
+    result = result.append($(item));
   }
   xt_free_handles(items);
   return result;
@@ -7403,7 +7403,7 @@ List Tensor.split_with_sizes_copy(Tensor self, List split_sizes, int64_t dim) {
   List result = %();
   for (int64_t i = 0; i < count; i++) {
     Tensor item = Tensor.adopt(items[i], "split_with_sizes_copy");
-    result = result.append(%($item));
+    result = result.append($(item));
   }
   xt_free_handles(items);
   return result;
@@ -7457,7 +7457,7 @@ List Tensor.unbind_copy(Tensor self, int64_t dim) {
   List result = %();
   for (int64_t i = 0; i < count; i++) {
     Tensor item = Tensor.adopt(items[i], "unbind_copy");
-    result = result.append(%($item));
+    result = result.append($(item));
   }
   xt_free_handles(items);
   return result;

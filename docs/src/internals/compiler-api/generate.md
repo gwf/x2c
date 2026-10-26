@@ -92,7 +92,7 @@ Returns the guard macro of the header generated for this unit, named
 from its path below the home when it has one there, else as spelled, so
 a meta group that copies the unit names the same guard.
 
-Source: `src/generate/output.x:205`
+Source: `src/generate/output.x:204`
 
 <a id="Compiler.init_statements"></a>
 #### Compiler.init_statements
@@ -123,7 +123,7 @@ conditional containing that first use follows the declarations. A unit
 without such a use gets them at its end, after the declarations they
 may assign.
 
-Source: `src/generate/output.x:102`
+Source: `src/generate/output.x:101`
 
 <a id="Compiler.run_once_body"></a>
 #### Compiler.run_once_body

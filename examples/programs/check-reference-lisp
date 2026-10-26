@@ -13,7 +13,7 @@
 
 static Array corpus;
 
-static void _case(String name, String source) => corpus.push(%($name $source));
+static void _case(String name, String source) => corpus.push($(name, source));
 
 static void _cases(void) {
   _case("callable-repr-kind", "(substring (repr (lambda () 1)) 0 8)");
@@ -218,7 +218,7 @@ static List _run(List command, String input) {
   try output = job.output();
   catch %(cmd-fail *failure): output = %"$(failure.assoc(<output>))";
   String errors = job.errors();
-  return %($(job.status()) $output $errors);
+  return $(job.status(), output, errors);
 }
 
 static String _repr(List result) {
@@ -266,7 +266,7 @@ if (options["build"]) {
 }
 Path init = root.join("etc/init.xlisp");
 List oracle_command = %($oracle --init $init);
-List reference_command = %($reference);
+List reference_command = $(reference);
 
 corpus = [];
 _cases();
@@ -291,7 +291,7 @@ _case("io", %"(list (write-file \"$data\" \"hello\") " +
 int failures = 0;
 foreach (List entry in corpus) {
   (String name, String source) = entry;
-  List flag = %("-e" $source);
+  List flag = $("-e", source);
   if (!_agrees(oracle_command.append(flag), reference_command.append(flag),
                name, source, source, NULL))
     failures++;

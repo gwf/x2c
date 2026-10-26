@@ -13,7 +13,7 @@ static Tensor _product(AutogradContext context, List inputs) {
   EXPECT_TRUE(pthread_equal(caller, pthread_self()));
   calls++;
   Tensor x = inputs[0].tensor(), y = inputs[1].tensor();
-  context.save_for_backward(%($x $y));
+  context.save_for_backward($(x, y));
   return x * y;
 }
 
@@ -25,7 +25,7 @@ static List _product_gradient(AutogradContext context, Tensor gradient) {
   List saved = context.saved_tensors();
   Tensor dx = gradient * saved[1].tensor();
   Tensor dy = gradient * saved[0].tensor();
-  return %($dx $dy);
+  return $(dx, dy);
 }
 
 static Tensor _fail_forward(AutogradContext context, List inputs) {
@@ -52,7 +52,7 @@ static List _selected_gradient(AutogradContext context, Tensor gradient) {
   EXPECT_TRUE(context.needs_input_grad(1));
   Tensor input = context.saved_tensors()[0].tensor();
   Tensor result = gradient * input;
-  return %( $(Var.null()) $result );
+  return $(Var.null(), result);
 }
 
 static void *_other_thread(void *tensor) {
@@ -64,29 +64,29 @@ static void _device(String device) {
     .to_device(device, XT_FLOAT32, 0, 0).requires_grad_(1);
   Tensor y = Tensor.of(%(5 7), %(2), XT_FLOAT32)
     .to_device(device, XT_FLOAT32, 0, 0).requires_grad_(1);
-  Tensor output = Tensor.custom(_product, _product_gradient, %($x $y));
+  Tensor output = Tensor.custom(_product, _product_gradient, $(x, y));
   output.sum().backward_callbacks();
   EXPECT_TRUE(x.grad().equal(y));
   EXPECT_TRUE(y.grad().equal(x));
   int caught = 0;
-  try Tensor.custom(_fail_forward, _product_gradient, %($x $y));
+  try Tensor.custom(_fail_forward, _product_gradient, $(x, y));
   catch %(bad-arg (reason "forward callback")): caught++;
-  Tensor failure = Tensor.custom(_product, _fail_backward, %($x $y));
+  Tensor failure = Tensor.custom(_product, _fail_backward, $(x, y));
   try failure.sum().backward_callbacks();
   catch %(bad-arg (reason "backward callback")): caught++;
-  Tensor nested = Tensor.custom(_product, _nested_backward, %($x $y));
+  Tensor nested = Tensor.custom(_product, _nested_backward, $(x, y));
   try nested.sum().backward_callbacks();
   catch %(bad-state (library "torch") *): caught++;
-  Tensor wrong = Tensor.custom(_product, _product_gradient, %($x $y));
+  Tensor wrong = Tensor.custom(_product, _product_gradient, $(x, y));
   try wrong.sum().backward();
   catch %(bad-state (library "torch") *): caught++;
-  try Tensor.custom(_mutate, _product_gradient, %($x $y));
+  try Tensor.custom(_mutate, _product_gradient, $(x, y));
   catch %(bad-state (library "torch") *): caught++;
   EXPECT_INT_EQ(caught, 5);
   Tensor selected = Tensor.custom(_product, _selected_gradient,
-                                   %( $(x.detach()) $y ));
+                                   $(x.detach(), y));
   selected.sum().backward_callbacks();
-  Tensor remote = Tensor.custom(_product, _product_gradient, %($x $y));
+  Tensor remote = Tensor.custom(_product, _product_gradient, $(x, y));
   Tensor total = remote.sum();
   pthread_t thread;
   void *status;
@@ -104,11 +104,11 @@ static void _device(String device) {
       Tensor a = Tensor.ones(%(2), XT_FLOAT32)
         .to_device(device, XT_FLOAT32, 0, 0);
       Tensor b = a * 3;
-      Tensor prediction = Tensor.custom(_product, _product_gradient, %($a $b));
+      Tensor prediction = Tensor.custom(_product, _product_gradient, $(a, b));
       EXPECT_TRUE(prediction.equal(b));
       EXPECT_TRUE(!prediction.requires_grad());
       int rejected = 0;
-      try Tensor.custom(_mutate, _product_gradient, %($x $y));
+      try Tensor.custom(_mutate, _product_gradient, $(x, y));
       catch %(bad-state (library "torch") *): rejected = 1;
       EXPECT_TRUE(rejected);
     }

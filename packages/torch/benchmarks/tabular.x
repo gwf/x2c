@@ -63,7 +63,7 @@ static Module _mlp(void) {
 static List _layers(Module model) {
   Module l1 = model.child("l1"), l2 = model.child("l2"),
          l3 = model.child("l3");
-  return %($l1 $l2 $l3);
+  return $(l1, l2, l3);
 }
 
 static Module _built(String directory, String name) {
@@ -145,7 +145,7 @@ static double _mean_baseline(Tensor y_train, Tensor y_val) {
     Torch.inference_mode();
     Tensor mean = y_train.mean_dim(0, 1);
     long rows = y_val.size(0);
-    Tensor column = Tensor.ones(%($rows 1), XT_FLOAT32);
+    Tensor column = Tensor.ones($(rows, 1), XT_FLOAT32);
     return Tensor.mse_loss(column.matmul(mean), y_val).item().double();
   }
 }
@@ -614,7 +614,7 @@ static void _memory_control(String artifacts, Map data, int steps) {
         Bench.record_int("control_capped_at", index);
         break;
       }
-      retained.push(%($output));
+      retained.push($(output));
       count++;
       if (count % every == 0) Bench.sample("retained", count);
     }

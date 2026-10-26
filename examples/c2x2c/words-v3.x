@@ -51,7 +51,7 @@ static void print_top_ten(const Counts *counts) {
   for (size_t i = 0; i < counts.capacity; ++i)
     for (Entry *entry = counts.buckets[i]; entry; entry = entry.next) {
       if (ranked.len() == 10 && entry.count < ranked[0][0]) continue;
-      ranked.heap_push(%($(entry.count) $(entry.word.str())));
+      ranked.heap_push($(entry.count, entry.word.str()));
       if (ranked.len() > 10) ranked.heap_pop();
     }
   foreach ((int count, String word) in ranked.sort())

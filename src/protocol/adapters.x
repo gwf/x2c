@@ -38,7 +38,7 @@ static void _report_requirement(
   ProtocolAdapters &a, List failure) {
   Type base = a.base, participant = a.participant;
   List dedupe =
-    %("protocol-adapter-requirement" $base $participant $(failure.car()));
+    $("protocol-adapter-requirement", base, participant, failure.car());
   if (dedupe in a.c.protocol_helpers) return;
   a.c.protocol_helpers[dedupe] = 1;
   List row = _visible_adoption(a.c, base, participant);
@@ -53,7 +53,7 @@ static void _report_collision(
   (Type first_base, String first_source, Type first_expected) = first.cdr();
   (Type second_base, String second_source, Type second_expected) =
     second.cdr();
-  List dedupe = %("protocol-generated-collision" $participant $member);
+  List dedupe = $("protocol-generated-collision", participant, member);
   if (dedupe in c.protocol_helpers) return;
   c.protocol_helpers[dedupe] = 1;
   int linkage_conflict = kind == <linkage>;
@@ -115,7 +115,7 @@ List Compiler.generate_protocol_adapters(Compiler c, List ast) {
   int central_initializer = _defines_function(c, "x2c_initialize_protocols");
   Array ordered = [];
   foreach ((List key, Var value) in c.conforms)
-    if (value is <list>) ordered.push(%($key $value));
+    if (value is <list>) ordered.push($(key, value));
   foreach (List entry in _unused_recorded(c)) ordered.push(entry);
   ordered.sort();
   foreach (List ordered_row in ordered)
@@ -137,7 +137,7 @@ List Compiler.generate_protocol_adapters(Compiler c, List ast) {
         if (_numeric_participant(c, participant)) continue;
         _reuse_conformance(c, base, participant);
         _present_conformance(
-          c, c.conforms[%($base $participant)], central_initializer);
+          c, c.conforms[$(base, participant)], central_initializer);
       }
     }
   ordered.free();
@@ -182,8 +182,8 @@ void Compiler.install_generated_protocol_symbols(Compiler c) {
 static void _install_generated(
   Compiler c, Type participant, String member, Type signature) {
   String generated = _member_spelling(participant, member);
-  c.sym.define_global(%("generated-protocol" $generated), %(generated));
-  c.sym.define_global(%($generated), signature);
+  c.sym.define_global($("generated-protocol", generated), %(generated));
+  c.sym.define_global($(generated), signature);
 }
 
 /** Reports whether a generated member names a native protocol host function.
@@ -204,7 +204,7 @@ static int _numeric_participant(Compiler c, Type participant) =>
   c.sym.resolve_numeric_type(participant) && participant !== %("Symbol");
 
 static int _defines_function(Compiler c, String name) {
-  List binding = c.sym.reference(%($name), NULL);
+  List binding = c.sym.reference($(name), NULL);
   Var stored;
   if (!binding ||
       !c.semantic_binding_facts().try_get(%(completion $binding), stored))
@@ -278,10 +278,10 @@ static List _present(ProtocolAdapters &a, List row) {
         if (status == <no-member>)
           parts = _inherited_part(a, member, template);
         if ((status == <implmntd> || parts) &&
-            a.c.sym.lookup_field(%(struct "VarMethods"), %($member)))
-          parts = parts.append(%($(_thunk(a, member, template))));
+            a.c.sym.lookup_field(%(struct "VarMethods"), $(member)))
+          parts = parts.append($(_thunk(a, member, template)));
       }
-      return %($member $status $source $expected $template @parts);
+      return $(member, status, source, expected, template, @parts);
     }
   return NULL;
 }
@@ -297,7 +297,7 @@ static List _default_part(
       String spelling = _member_spelling(a.participant, member);
       if (storage == <static>)
         return %((default $(a.c.sym.introduce(spelling)) $storage));
-      List name = a.c.sym.reference(%($spelling), NULL);
+      List name = a.c.sym.reference($(spelling), NULL);
       a.c.record_generated_symbol(spelling, expected);
       return %((default $name $storage));
     }
@@ -316,7 +316,7 @@ static List _inherited_part(
       if (requirement) _report_requirement(a, requirement);
       else {
         String spelling = _member_spelling(a.participant, member);
-        List name = a.c.sym.reference(%($spelling), NULL);
+        List name = a.c.sym.reference($(spelling), NULL);
         return %((inherited $name $owner_expected));
       }
     }
@@ -346,8 +346,8 @@ static List _descriptor(ProtocolAdapters &a) {
   List methods =
     a.c.sym.introduce(a.c.fresh_name("protocol_methods"));
   Symbol area = a.central_initializer ? <protocol> : <prepare>;
-  return %($methods $name $(a.participant.var_tag()) $area
-           @(tag ? %($tag) : NULL));
+  return $(
+    methods, name, a.participant.var_tag(), area, @(tag ? $(tag) : NULL));
 }
 
 static List _signature_declaration(
@@ -357,7 +357,7 @@ static List _signature_declaration(
   Array declarations = [];
   foreach (Type type in parameters)
     declarations.push(type.parameter_ast(NULL));
-  List binding = c.sym.reference(%($name), NULL);
+  List binding = c.sym.reference($(name), NULL);
   List storage = make_static ? %(static @result) : result;
   return %(
     declare $storage
@@ -371,14 +371,14 @@ static List _signature_declaration(
     alias insertion reads for its participant. */
 void Compiler.record_source_typedef(
   Compiler c, String name, List declaration, int private) {
-  c.protocol_helpers[%("source-typedef" $name)] = %($declaration $private);
+  c.protocol_helpers[$("source-typedef", name)] = $(declaration, private);
 }
 
 static List _native_aliases(
   Compiler c, List ast, Type base, Type participant, List rows) {
   Var stored;
   if (!c.protocol_helpers.try_get(
-    %("source-typedef" $(participant.car())), stored)) return ast;
+    $("source-typedef", participant.car()), stored)) return ast;
   (List source, int private) = stored;
   int make_static = _visibility(c, base, participant) == <static>;
   Array aliases = [];
@@ -400,7 +400,7 @@ static List _native_alias(
   String target = _member_spelling(participant, member);
   List declaration = _signature_declaration(c, target, signature, make_static);
   if (!make_static) c.record_generated_symbol(target, signature);
-  List native_binding = c.sym.reference(%($source), NULL);
+  List native_binding = c.sym.reference($(source), NULL);
   return c.finish_foreign_alias(
     declaration, $!($signature){ $native_binding });
 }

@@ -356,7 +356,7 @@ module List _source_call(Var value) {
   match (value)
     case $($called(?callee, *rows)): {
       match (rows) case %((expr ? ())): rows = NULL;
-      return %($callee $rows);
+      return $(callee, rows);
     }
   return NULL;
 }
@@ -365,7 +365,7 @@ module List _source_call(Var value) {
 module List _source_assignment(Var value) {
   match (value) {
     case $($assigned(%(bind *), ?)): return NULL;
-    case $($assigned(?target, ?stored)): return %($target $stored);
+    case $($assigned(?target, ?stored)): return $(target, stored);
   }
   return NULL;
 }

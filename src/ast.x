@@ -424,7 +424,7 @@ static List _arm_function(List choice, List argument) {
     case %(expr ? $($called(
         %(!set ?callee (expr ?callee_type ?)), %(?actual)))): {
       if (actual !== argument) return NULL;
-      return %($condition $path $callee_type $callee);
+      return $(condition, path, callee_type, callee);
     }
   return NULL;
 }

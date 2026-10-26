@@ -75,7 +75,7 @@ static void _walk_package(
 static void _gather_surface(Surface &s, String path, List entry) {
   s.c.merge_translation_dependencies(entry[3]);
   foreach (Var part in entry.car())
-    match (%($part)) {
+    match ($(part)) {
       case %(?(Map rows)): _merge_surface(s, path, rows);
       case %(?(String include)): _include_surface(s, include);
       default: __builtin_unreachable();
@@ -115,10 +115,10 @@ static void _merge_surface(Surface &s, String path, Map rows) {
 static void _take_exports(Surface &s, Map rows) {
   Array found = auto [];
   foreach (Var (key, value) in rows)
-    match (%($key $value))
+    match ($(key, value))
       case %(("source-node" (? ? ?position))
              (!set ?effect ((!or compile-time project-meta) *))):
-        found.push(%($position $effect));
+        found.push($(position, effect));
   found.sort();
   foreach (List entry in found) s.exports.push(entry.cadr());
 }
@@ -203,7 +203,7 @@ module void _replay_package_imports(
               %(package-import compile-time project-meta))) continue;
         if (exports == NULL || !_imported_here(c, path)) {
           if (!imports) imports = [];
-          imports.push(%($path $position $value));
+          imports.push($(path, position, value));
         }
       }
   if (!imports.len()) return;
@@ -232,7 +232,7 @@ static void _import_all(
         _import_package(shadow, path, name, alias, members, exports);
       case %(? ? (!set ?effect ((!or compile-time project-meta) *))):
         if (exports != NULL) exports.push(effect);
-        else shadow.install_compile_time_effects(%($effect));
+        else shadow.install_compile_time_effects($(effect));
     }
   shadow.return_unit_state(c);
   c.merge_translation_dependencies(shadow.deps);

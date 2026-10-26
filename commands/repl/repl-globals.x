@@ -37,7 +37,7 @@ static List _path(
       String name = Ast.binding_spelling(binding);
       List entry = session.inspect(name);
       if (entry && entry.car() == <global> &&
-          binding == session.compiler.sym.resolve_global(%($name), NULL)) {
+          binding == session.compiler.sym.resolve_global($(name), NULL)) {
         path = name;
         return entry;
       }
@@ -55,7 +55,7 @@ static List _global(ReplSession session, List expression) {
   Var access;
   if (!paths.try_get(path, access))
     raise %(repl (reason "loaded field cannot cross the helper boundary"));
-  return %(@(access.list()) $(arguments.list()));
+  return $(@(access.list()), arguments.list());
 }
 
 static int _snapshot(List entry) {
@@ -98,7 +98,7 @@ static List _indices(ReplSession session, List entry, Array setup) {
       c.rebuild_statement($!{ long long $temporary = $value; }).cadr());
     arguments.push($!(long long){ $temporary });
   }
-  return %($(entry.car()) $(entry.cadr()) $(arguments.list()));
+  return $(entry.car(), entry.cadr(), arguments.list());
 }
 
 static List _with_indices(List value, Array setup) => setup.len()
@@ -191,9 +191,9 @@ static List _object_argument(
   List selected = _argument_list(c, values);
   Symbol tag = c.sym.var_tag_for_type(parameter, NULL);
   if (!tag) tag = <p48>;
-  List descriptor = _argument_list(c, %($( $!Symbol{ $(<object>) } )
-    $($!String{ $path }) $selected $($!int{ $reference })
-    $($!Symbol{ $tag })));
+  List descriptor = _argument_list(c, $(
+    $!Symbol{ $(<object>) }, $!String{ $path }, selected, $!int{ $reference },
+    $!Symbol{ $tag }));
   return _with_indices(descriptor, setup);
 }
 
@@ -212,7 +212,7 @@ static List _loaded_call(
   String name = Ast.binding_spelling(binding);
   List entry = session.inspect(name);
   if (!entry || entry.car() != <native> ||
-      binding != c.sym.resolve_global(%($name), NULL)) return NULL;
+      binding != c.sym.resolve_global($(name), NULL)) return NULL;
   List adapter = entry.assoc(<objects>);
   if (!adapter) return NULL;
   Type type = c.loaded_call_type(callee.cadr());
@@ -241,7 +241,7 @@ static List _loaded_call(
       List converted = c.convert_expression(
         _rewrite(session, argument), rest ? %("List") : parameter);
       Symbol kind = rest ? <splice> : <value>;
-      value = _argument_list(c, %($( $!Symbol{ $kind } ) $converted));
+      value = _argument_list(c, $( $!Symbol{ $kind } , converted));
     }
     parameters = parameters.cdr();
     List temporary = c.sym.introduce(c.fresh_name("repl_argument"));

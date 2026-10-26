@@ -15,9 +15,9 @@ static int String.count_items(String label, .... items) {
 int main(void) {
   List pair = %(2 3), empty = NULL;
   assert(!collect());
-  assert(collect(pair) == %($pair));
+  assert(collect(pair) == $(pair));
   Type integer = %(int), real = %(double);
-  assert(collect(integer, real) == %($integer $real));
+  assert(collect(integer, real) == $(integer, real));
   assert(collect(1, @pair, @empty, 4) == %(1 2 3 4));
 
   int (*count)(int, .... items) = count_after;
@@ -26,7 +26,7 @@ int main(void) {
 
   Func dynamic = count_after, all = collect;
   assert(dynamic(10, 1, @pair, 4) == 14);
-  assert(all(pair).list() == %($pair));
+  assert(all(pair).list() == $(pair));
   assert(all(@empty).list() == empty);
 
   String label = "items";

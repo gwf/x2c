@@ -30,7 +30,7 @@ static Func _unary_callback(Var callable) {
   if (!owner) return NULL;
   return %!(Var value) => {
     Lisp session = _callback_session(owner, "Lisp callback");
-    return _apply_values(session, callable, %($value));
+    return _apply_values(session, callable, $(value));
   };
 }
 
@@ -39,7 +39,7 @@ static Func _binary_callback_for(Var callable, String operation) {
   if (!owner) return NULL;
   return %!(Var left, Var right) => {
     Lisp session = _callback_session(owner, operation);
-    return _apply_values(session, callable, %($left $right));
+    return _apply_values(session, callable, $(left, right));
   };
 }
 
@@ -51,7 +51,7 @@ static Func _predicate_callback(Var callable) {
   if (!owner) return NULL;
   return %!(Var value) => {
     Lisp session = _callback_session(owner, "Lisp callback");
-    return lisp_truth(_apply_values(session, callable, %($value)));
+    return lisp_truth(_apply_values(session, callable, $(value)));
   };
 }
 

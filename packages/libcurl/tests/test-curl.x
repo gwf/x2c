@@ -571,7 +571,7 @@ static void curl_concurrent_batch_broadcasts_body_and_raw_options(void) {
   CurlEasy easy = auto test_easy();
   String echo = fixture_url + "/echo";
   CurlBatch batch = auto easy.body("text/plain", "ping")
-    .request_all("POST", %($echo $echo $echo), 2);
+    .request_all("POST", $(echo, echo, echo), 2);
   for (int i = 0; i < batch.len(); i++) {
     String text = batch.response(i).text();
     EXPECT_TRUE(text.contains("\"method\": \"POST\""));
@@ -589,7 +589,7 @@ static void curl_concurrent_batch_broadcasts_body_and_raw_options(void) {
   CurlResponse single_reset = auto easy.get(echo);
   EXPECT_TRUE(single_reset.text().contains("\"content_length\": null"));
   CurlBatch empty_body = auto easy.body_bytes("application/json", body)
-    .request_all("POST", %($echo $echo $echo), 2);
+    .request_all("POST", $(echo, echo, echo), 2);
   for (int i = 0; i < empty_body.len(); i++) {
     String text = empty_body.response(i).text();
     EXPECT_TRUE(text.contains("\"method\": \"POST\""));
@@ -608,7 +608,7 @@ static void curl_concurrent_batch_broadcasts_body_and_raw_options(void) {
   EXPECT_INT_EQ(set, CURLE_OK);
   easy.header("Accept: application/json");
   String compat = fixture_url + "/compat";
-  CurlBatch configured = auto easy.get_all(%($compat $compat), 2);
+  CurlBatch configured = auto easy.get_all($(compat, compat), 2);
   EXPECT_STR_EQ(configured.response(0).text(), "matched");
   EXPECT_STR_EQ(configured.response(1).text(), "matched");
 }
@@ -632,7 +632,7 @@ static void curl_concurrent_batch_empty_lifetime_and_timeout(void) {
   easy.timeouts(100, 100);
   String slow = fixture_url + "/batch/delay?ms=500";
   String ok = fixture_url + "/ok";
-  CurlBatch batch = auto easy.get_all(%($slow $ok), 2);
+  CurlBatch batch = auto easy.get_all($(slow, ok), 2);
   int timeout = 0;
   try batch.response(0);
   catch %(io-fail *detail): {

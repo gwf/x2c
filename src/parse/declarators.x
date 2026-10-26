@@ -138,7 +138,7 @@ module int _parameters_follow(Compiler c) {
   Token head = c.token;
   c.next();
   Symbol next = c.peek(0);
-  Type lookup = c.sym.get(%($(c.token.text)));
+  Type lookup = c.sym.get($(c.token.text));
   int named = next == <ident> && !lookup.is_typedef() &&
               !(c.signature_only && c.test_declaration());
   int parameters = next == <)> || (!named && c.test_declaration());
@@ -240,7 +240,7 @@ static List _template_declarator(Compiler c, int member) {
       int shadows_alias = !!c.alias_expression();
       c.next();
       if (member) return %(bind ($spelling) ());
-      if (shadows_alias) c.sym.define(%($spelling), NULL);
+      if (shadows_alias) c.sym.define($(spelling), NULL);
       return %(bind $(c.macro_introduced_name(spelling)) ());
     }
   }
@@ -251,7 +251,7 @@ static List _template_declarator(Compiler c, int member) {
 static List _literal_method(Compiler c) {
   Symbol owner_token = c.peek(0), String owner_spelling = c.token.text;
   Type owner_type =
-    owner_spelling ? c.sym.get(%($owner_spelling)) : NULL;
+    owner_spelling ? c.sym.get($(owner_spelling)) : NULL;
   int literal_owner =
     owner_token.is_builtin_type() ||
     owner_token.is_type_modifier() ||
@@ -294,8 +294,8 @@ void Compiler.bind_template_local(
   if (c.macro_holes && local is <string> &&
       (!context || context === %(typedef))) {
     if (context === %(typedef)) {
-      c.sym.set(%($local), %(typedef $local));
-      c.sym.set(%(typedef $local), %($key));
+      c.sym.set($(local), %(typedef $local));
+      c.sym.set(%(typedef $local), $(key));
     }
     else c.sym.bind_identity(
       NULL, key,
@@ -333,7 +333,7 @@ module List _install_declarator(
   name = _method_spelling(c, name, declared_type, method, exact_name);
   String exact = _syntax_exact_name(name);
   _check_rebinding(c, exact, exact_name, declaration);
-  List binding = exact ? c.sym.declare(context, %($exact), declared_type)
+  List binding = exact ? c.sym.declare(context, $(exact), declared_type)
                : name is <list> ? name.list() : NULL;
   if (binding && !exact) _bind_identity(c, context, binding, declaration);
   if (binding)
@@ -381,7 +381,7 @@ static Var _method_spelling(
         if (owner_name.startswith(prefix))
           owner_name = owner_name[prefix.len():];
       }
-      method = %($owner_name $member);
+      method = $(owner_name, member);
     }
     case %((!or
               (src (source (!is ? type string) ? ?) ?)
@@ -406,11 +406,11 @@ static void _check_rebinding(
   Compiler c, String exact, int exact_name, List declaration) {
   if (exact && c.scope_declares_alias(exact))
     $fail.parse_decl_bound(c, c.token, exact);
-  List existing = exact ? c.sym.current_binding(%($exact)) : NULL;
+  List existing = exact ? c.sym.current_binding($(exact)) : NULL;
   if (exact_name || (existing &&
       %(parameter $existing) in c.semantic_binding_facts())) {
     Var prior = existing
-              ? c.sym.current_symbols()[%($exact)] : void;
+              ? c.sym.current_symbols()[$(exact)] : void;
     if (prior is <list>) {
       Type prior_type = prior;
       Type candidate = declaration.type_from_ast();
@@ -424,7 +424,7 @@ static void _check_rebinding(
 static void _bind_identity(
   Compiler c, List context, List binding, List declaration) {
   String spelling = Ast.binding_spelling(binding);
-  List visible = c.sym.lookup(%($spelling), NULL);
+  List visible = c.sym.lookup($(spelling), NULL);
   if (visible != binding) c.sym.bind_identity(context, binding, declaration);
 }
 
@@ -567,14 +567,14 @@ static List _complex_identifier(
   if (!ident && toktype == <ident> && !method_identity)
     ident = c.package_member_spelling(c.token.text);
   if (!ident) ident = c.token.text;
-  Type idtype = c.sym.get(%( $ident ));
+  Type idtype = c.sym.get($(ident));
   c.next();
   if ((toktype.is_builtin_type() || toktype.is_type_modifier() ||
        (toktype == <ident> &&
         (idtype.is_typedef() || (c.signature_only && method_identity)))) &&
       c.test(<.>))
     return _member_name(c, ident, method_identity);
-  return %($ident);
+  return $(ident);
 }
 
 /* The member after `TYPE.` spells a method, which a declarator records as
@@ -587,13 +587,13 @@ static List _member_name(
   if (!c.token.text.is_identifier())
     $fail.parse_method_member(c, c.token, owner);
   String member = c.token.text, ident = %"$(owner)_$member";
-  if (method_identity) method_identity = %($owner $member);
-  if (!method_identity && !c.sym.get_exact(%($ident))) {
+  if (method_identity) method_identity = $(owner, member);
+  if (!method_identity && !c.sym.get_exact($(ident))) {
     String imported = c.imported_spelling(ident);
     if (imported) ident = imported;
   }
   c.next();
-  return %( $ident );
+  return $(ident);
 }
 
 /* Consume `alias .` and return the folded spelling. The member token stays
@@ -604,7 +604,7 @@ module String _package_alias_member(Compiler c) {
   String package = c.package_aliases[c.token.text];
   c.next();
   c.next();
-  if (!c.sym.get_exact(%($spelling)))
+  if (!c.sym.get_exact($(spelling)))
     $fail.parse_package_member(c, c.token, package, c.token.text);
   return spelling;
 }
@@ -618,7 +618,7 @@ String Compiler.package_alias_spelling(Compiler c) {
   if (c.peek(0) != <ident> || c.peek(1) != <.>) return NULL;
   String alias = c.token.text;
   Var package = c.package_aliases[alias];
-  if (package is void || c.sym.get_exact(%($alias))) return NULL;
+  if (package is void || c.sym.get_exact($(alias))) return NULL;
   Token member = Token.skip_trivia(Token.skip_trivia(c.token + 1) + 1);
   return member.text.is_identifier()
        ? %"$(package)__$(member.text)" : NULL;
@@ -629,7 +629,7 @@ String Compiler.package_alias_spelling(Compiler c) {
 List Compiler.parse_basic_identifier(Compiler c) {
   String ident = c.token.text;
   c.expect(<ident>);
-  return %($ident);
+  return $(ident);
 }
 
 /** Consumes and returns the current identifier, or NULL without consuming. */

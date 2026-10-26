@@ -56,7 +56,7 @@ static List _advance_row(
     _advance_path(c, target, path, condition, following);
   }
   states = _merge_states(following);
-  return %($original $cases);
+  return $(original, cases);
 }
 
 /* An initval supplies its own cases; otherwise each cursor state descends
@@ -82,7 +82,7 @@ static List _row_cases(
       path = next;
       type = _path_type(path, root);
     }
-    cases.push(%($condition $path $type $value));
+    cases.push($(condition, path, type, value));
   }
   return cases.list_free();
 }
@@ -114,7 +114,7 @@ static List _designated_path(
       }
     }
     value = node;
-    foreach (List selector in selectors) node = selector.append(%($node));
+    foreach (List selector in selectors) node = selector.append($(node));
     normalized = node;
     return path;
   }
@@ -175,7 +175,7 @@ static List _merge_states(Array states) {
   Array merged = [];
   foreach (List state in states) {
     (List condition, List path, int available) = state;
-    List key = %($path $available);
+    List key = $(path, available);
     Var stored;
     if (!positions.try_get(key, stored)) {
       positions[key] = merged.len();
@@ -185,7 +185,7 @@ static List _merge_states(Array states) {
     int at = stored;
     List previous = merged[at];
     condition = _condition_or(previous.car(), condition);
-    merged[at] = %($condition $path $available);
+    merged[at] = $(condition, path, available);
   }
   states.free();
   return merged.list_free();
@@ -354,7 +354,7 @@ static List _scalar_rows(
     Array cases = [];
     _ordinal_cases(layout, ordinal, NULL, condition, value, cases);
     cases.push(%(() () () $value));
-    rows.push(%($value $(cases.list_free())));
+    rows.push($(value, cases.list_free()));
   }
   return rows.list_free();
 }
@@ -428,11 +428,11 @@ static List _record_layout(
     if (!child) return NULL;
     List units = child.cadr();
     count = count ? _ull_op(<+>, count, units) : units;
-    children.push(%($(path.car()) $child));
+    children.push($(path.car(), child));
     fields = rest;
   }
   if (!count) return NULL;
-  return %($type $count $(children.list()));
+  return $(type, count, children.list());
 }
 
 static void _ordinal_cases(
@@ -440,7 +440,7 @@ static void _ordinal_cases(
   Array cases) {
   (Type type, List count, List children) = layout;
   if (!children) {
-    cases.push(%($condition $path $type $value));
+    cases.push($(condition, path, type, value));
     return;
   }
   List start = NULL;

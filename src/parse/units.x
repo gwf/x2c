@@ -396,7 +396,7 @@ static List _import_members(Compiler c, String name) {
     }
     c.register_package_member(
       name, member, local, member_token, local_token);
-    members.push(%($member $local));
+    members.push($(member, local));
   } while (c.test(<,>));
   return members.list_free();
 }
@@ -447,7 +447,7 @@ static List _defined(
     return NULL;
   if (c.macro_holes)
     return %(api-source $(first.line) $(c.definition_doc(first)) $function);
-  _definition_source(c, function, first.line, NULL, %($start $body));
+  _definition_source(c, function, first.line, NULL, $(start, body));
   return function;
 }
 
@@ -527,7 +527,7 @@ static void _store_meta_hash(
    expression chains off the C stack without reversing their children. */
 static void _referenced_names(Var node, Map seen, Array names) {
   Array pending = auto [];
-  List rest = %($node);
+  List rest = $(node);
   while (rest || pending.len()) {
     if (!rest) {
       rest = pending.take_last();
@@ -574,11 +574,11 @@ module void _definition_source(
   Compiler c, List function, int line, String doc, List declarator) {
   match (function) {
     case %(function ? (bind ?binding ?) ?):
-      c.set_fact(%(api-definition $binding), %($line $doc $declarator));
+      c.set_fact(%(api-definition $binding), $(line, doc, declarator));
     case %(declare ? (bindings (bind ?binding ?))):
       if (doc && function.type_from_ast().is_function())
         c.set_fact(
-          %(api-definition $binding), %($line $doc $declarator));
+          %(api-definition $binding), $(line, doc, declarator));
   }
 }
 
@@ -667,7 +667,7 @@ static Map _hole_spellings(Compiler c) {
 }
 
 module List _bind_named_type(Compiler c, String name, Var type) {
-  List key = %($name);
+  List key = $(name);
   if (!c.sym.get_exact(key)) c.sym.define(key, %(typedef $name));
   if (!type.list_payload()) return %(seq);
   List declaration = type.type().declaration_ast(key);
@@ -739,7 +739,7 @@ module List _bind_macrodef(
 }
 
 module List _bind_preproc(Compiler c, List directive) {
-  c.note_preprocessor_macros(%($directive));
+  c.note_preprocessor_macros($(directive));
   return directive;
 }
 

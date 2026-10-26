@@ -369,9 +369,9 @@ meta Map _tag_types(List native) {
     if (!_tag_descriptor(row)) continue;
     String tag = row[0].str();
     String name = tag.capitalize();
-    types[%($name)] = row[0];
+    types[$(name)] = row[0];
     Symbol pointer = tag + "*";
-    types[%($star $name)] = pointer;
+    types[$(star, name)] = pointer;
   }
   return types;
 }

@@ -72,7 +72,7 @@ static Var _parse_form(LispReader &r, Token token, int depth) {
 static Var _prefixed(LispReader &r, Var prefix, int depth) {
   Var inner = _parse_form(r, r.tokenizer.next(), depth + 1);
   if (inner is void) return void;
-  return %($prefix $inner);
+  return $(prefix, inner);
 }
 
 /* A form's elements are read in a loop, so only nesting costs a frame.

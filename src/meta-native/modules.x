@@ -80,7 +80,7 @@ void Compiler.select_native_modules(List paths) {
     if (!_native_module_loaded(key)) _add_native_module(key, e.targets);
     linked.push(key);
   }
-  paths = %($compiler_supplier @paths @(linked.list_free()));
+  paths = $(compiler_supplier, @paths, @(linked.list_free()));
   paths.try_own();
   native_module_order = paths;
 }
@@ -102,7 +102,7 @@ void Compiler.select_package_module(
     _load_package_module(c, name, module, token);
   if (module in native_module_order) return;
   auto (&native_module_scope) {
-    native_module_order = native_module_order.append(%($module));
+    native_module_order = native_module_order.append($(module));
     native_module_order.try_own();
   }
 }

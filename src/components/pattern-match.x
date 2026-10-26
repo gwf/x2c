@@ -476,7 +476,7 @@ meta static Code _match_lowered(Code subject, List rows) {
   String locals = _match_locals(depths, values);
   List prologue = dynamic
     ? _match_dynamic_read(subject, locals)
-    : %("List _x2c_gensym_match_expr =" $(subject.convert(%("List"))) $locals);
+    : $("List _x2c_gensym_match_expr =", subject.convert(%("List")), locals);
   return Code.lowered(
     %(block $prologue
             (switch (expr ("uint64_t") ($selector)) (block @items))), NULL);
@@ -489,8 +489,10 @@ meta static List _match_dynamic_read(Code subject, String locals) {
   String tested = "; int _x2c_gensym_match_none = "
     "!Var_is(_x2c_gensym_match_var, %lu);"
     .printf((unsigned long) list);
-  return %("Var _x2c_gensym_match_var =" $subject $tested
-           "List _x2c_gensym_match_expr = Var_list_payload(_x2c_gensym_match_var)" $locals);
+  return $(
+    "Var _x2c_gensym_match_var =", subject, tested,
+    "List _x2c_gensym_match_expr = Var_list_payload(_x2c_gensym_match_var)",
+    locals);
 }
 
 $rewrite($matched)

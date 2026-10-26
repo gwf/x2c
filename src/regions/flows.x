@@ -92,7 +92,7 @@ static void _sink_parameter(Walk &w, Fact fact, Symbol sink, Fact target) {
            : (target.region || target.other) ? void : <return>;
   }
   if (sink != <local> && row is not void)
-    w.sinks[%($(fact.param) $row)] = 1;
+    w.sinks[$(fact.param, row)] = 1;
 }
 
 static int _owners(
@@ -173,8 +173,8 @@ static String _exit_reason(Flow &f, Fact target, Region region) {
 module void _warn(
   Walk &w, Symbol code, int origin, String message, List notes) {
   w.warnings.push(
-    w.audit ? %($(w.function) $code $origin $message $notes)
-            : %($code $origin $message $notes));
+    w.audit ? $(w.function, code, origin, message, notes)
+            : $(code, origin, message, notes));
 }
 
 static List _opened(Walk &w, Region region) {

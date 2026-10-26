@@ -25,7 +25,7 @@ int main(int argc, char **argv) {
     Tensor x = Tensor.arange(0.0, 8.0, 1.0, XT_FLOAT32).reshape(%(2 4)) / 8.0;
 
     Torch.inference_mode();
-    List results = model.forward(%($x));
+    List results = model.forward($(x));
     Tensor logits = results[0].tensor();
     printf("model %s\n", path);
     printf("input %s\n", x.shape().str());
@@ -36,7 +36,7 @@ int main(int argc, char **argv) {
        List; this one adds the predicted class per row. */
     JitModule pair = JitModule.load("builds/scripted-pair.pt");
     pair.eval();
-    List both = pair.forward(%($x));
+    List both = pair.forward($(x));
     printf("tuple results %d\n", both.len());
     _print_row("classes", both[1].tensor());
     return 0;

@@ -9,7 +9,7 @@ int main(int argc, char **argv) {
   CliRequest request = xcalloc(1, sizeof(struct CliRequest));
   request.command = <translate>;
   Frontend frontend = Frontend.new(request);
-  frontend.prepare_meta(%($(String.new(argv[1]))));
+  frontend.prepare_meta($(String.new(argv[1])));
   Context command = Context.open_isolated_named("AST parity command");
   ParsedUnit parsed;
   if (!frontend.open(String.new(argv[1]), parsed)) {

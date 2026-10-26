@@ -28,7 +28,7 @@ Map Compiler.collect_symbols(Compiler c, Map globs) {
      Keep type rows: public inline bodies can promote imported families. */
   if (canonical in visited)
     foreach (String name in _entry(c, canonical).caddr()) {
-      globs.del(%($name));
+      globs.del($(name));
       globs.del(%(self $name));
       c.fn_defs.del(name);
     }
@@ -155,7 +155,7 @@ static List _syntax_effects(List entry) {
   foreach (Var part in entry.car()) if (part is <map>)
     foreach (Var (key, value) in part.map())
       match (key) case %("source-node" (compile-time ? ?position)):
-        rows.push(%($position $value));
+        rows.push($(position, value));
   rows.sort();
   Array effects = [];
   foreach (List row in rows) effects.push(row.cadr());
@@ -560,8 +560,9 @@ static void _queue_public_bodies(FileWalk &w) {
   foreach (Var part in w.parts) if (part is <map>) own.merge(part);
   w.c.public_bodies = 1;
   w.c.pending_inline_bodies.push(
-    %($(w.c) $(w.path) $(w.text) $(w.globs) $own
-      $(w.statics) $(w.hashes) @(w.module ? %($(w.module.markers)) : NULL)));
+    $(
+      w.c, w.path, w.text, w.globs, own, w.statics, w.hashes,
+      @(w.module ? $(w.module.markers) : NULL)));
 }
 
 static int _produces(FileWalk &w) {
@@ -600,7 +601,7 @@ static void _publish(FileWalk &w) {
   }
   List definitions = _sorted_names(w.definitions);
   List roots = _interface_include_dirs(w.c, w.path);
-  List entry = %($parts $hash $definitions $(w.dependencies) $roots);
+  List entry = $(parts, hash, definitions, w.dependencies, roots);
   _require_retained(entry.try_own());
   Var prior = _process_cache()[w.path];
   if (prior is <list> && List.equal(prior.list()[4], roots)) return;

@@ -41,7 +41,7 @@ static List _public_definitions(Compiler c, Map &symbols, Map globals) {
       match (entry) case %(function ? "main" ?type):
         symbols[%("main")] = type;
   foreach (String name, candidates)
-    if (%($name) in symbols) names.push(name);
+    if ($(name) in symbols) names.push(name);
   return names.list_free();
 }
 
@@ -75,7 +75,7 @@ static void _pair_types(Var before, Var after, ReloadTypes &types) {
     else if (!(b in types.reverse)) {
       types.forward[a] = b;
       types.reverse[b] = a;
-      types.pairs.push(%($a $b));
+      types.pairs.push($(a, b));
       return;
     }
     _changed("public type identity changed");
@@ -117,7 +117,7 @@ static Map _stable_types(Compiler c, Map visible, Map symbols) {
       match (key) case %(?kind ?name *tail): {
         if (name != pair.car()) continue;
         Var replacement;
-        if (symbols.try_get(%($kind $(pair.cadr()) @tail), replacement))
+        if (symbols.try_get($(kind, pair.cadr(), @tail), replacement))
           _pair_types(value, replacement, types);
       }
   }
@@ -148,7 +148,7 @@ static void _check_type_rows(Map before, Map after) {
     List family = NULL;
     match (key) {
       case %((!or ?kind typedef struct union enum) ?name *):
-        family = %($kind $name);
+        family = $(kind, name);
       case %(?name "layout-attribute"): family = %(typedef $name);
     }
     if (family && family in after && !(key in after))
@@ -169,10 +169,10 @@ static void _check_names(
   ReplSession session, ReplLoadedFile file, ReplLoadedFile retired,
   Map visible, Map symbols, List names) {
   foreach (String name, names) {
-    if (file && %($name) in file.symbols) continue;
-    if (retired && %($name) in retired.symbols) continue;
+    if (file && $(name) in file.symbols) continue;
+    if (retired && $(name) in retired.symbols) continue;
     Var existing;
-    if (%($name) in visible || name in session.names ||
+    if ($(name) in visible || name in session.names ||
         name.startswith("__repl_") ||
         session.evaluator.try_get(name, existing))
       raise %(repl (reason $(%"name already defined: $name")));
@@ -234,7 +234,7 @@ static String _row_name(List key) {
 static List _row_family(List key, Var declaration) {
   match (key) {
     case %((!or ?kind typedef struct union enum) ?name *):
-      return %($kind $name);
+      return $(kind, name);
     case %(?name "layout-attribute"): return %(typedef $name);
     case %(?name): if (declaration == %(typedef $name)) return declaration;
   }
@@ -284,7 +284,7 @@ static void _check_unreferenced(ReplSession session, String name) {
 static void _check_value_unreferenced(
   ReplSession session, String name, Symbol kind) {
   Compiler c = session.compiler;
-  List binding = c.sym.resolve_global(%($name), NULL);
+  List binding = c.sym.resolve_global($(name), NULL);
   String use = kind == <native> ? "called" : "used";
   Var callable = void, stored = void;
   session.evaluator.try_get(name, callable);
@@ -310,7 +310,7 @@ static void _check_type_unreferenced(ReplSession session, String name) {
         if (_mentions_type(syntax, name))
           _referred(%"$name is used by prompt function $referrer");
       case %(value):
-        if (_mentions_type(c.sym.get_exact(%($referrer)), name))
+        if (_mentions_type(c.sym.get_exact($(referrer)), name))
           _referred(%"$name is used by prompt variable $referrer");
     }
   foreach (List declaration, session.declarations) {
@@ -346,7 +346,7 @@ static int _mentions_type(Var syntax, String name) {
 /* Prompt variables are native objects addressed through `C.globals`. */
 static int _holds(Compiler c, String name, Map globals, Var callable) {
   Type type = NULL;
-  List binding = c.sym.resolve_global(%($name), type);
+  List binding = c.sym.resolve_global($(name), type);
   if (callable is not <func> || type != %("Func")) return 0;
   Var address = globals[binding.cadr()];
   return *(Func *) address.pointer() == callable.pointer();
@@ -409,7 +409,7 @@ static void _adopt_type(ReplSession session, List family) {
 static void _forget(ReplSession session, Var adapter) {
   match (adapter) case %(expr ? (ident ?binding)): {
     String hidden = Ast.binding_spelling(binding);
-    session.compiler.sym.undefine_global(%($hidden));
+    session.compiler.sym.undefine_global($(hidden));
     session.evaluator.remove_global(hidden);
   }
 }
@@ -437,7 +437,7 @@ static List _remove(
 static Map _signatures(Compiler c, Map symbols, List names) {
   Map signatures = {};
   foreach (String name, names) {
-    Type type = symbols[%($name)];
+    Type type = symbols[$(name)];
     if (type.is_function()) signatures[name] = c.func_signature(type);
   }
   return signatures;
@@ -572,8 +572,8 @@ static List _object_adapter(
   Type result = signature.apply();
   Type type = %((func (("List"))) @result);
   String hidden = %"__repl_call_$(session.accessors.len())";
-  c.sym.define_global(%($hidden), type);
-  List binding = c.sym.resolve_global(%($hidden), NULL);
+  c.sym.define_global($(hidden), type);
+  List binding = c.sym.resolve_global($(hidden), NULL);
   LoadedCall call = {.session = session, .file = file, .name = name};
   Func function = Func.new_context(
     _call_objects, c.func_signature(type), &call, sizeof call);
@@ -600,8 +600,8 @@ static List _accessor(
   Type type = %((func $(parameters.list())) @bridge);
   String request = (setter ? "set global " : "get global ") + name;
   String hidden = %"__repl_global_$(session.accessors.len())";
-  c.sym.define_global(%($hidden), type);
-  List binding = c.sym.resolve_global(%($hidden), NULL);
+  c.sym.define_global($(hidden), type);
+  List binding = c.sym.resolve_global($(hidden), NULL);
   LoadedCall call = {.session = session, .file = file, .name = request};
   Func function = Func.new_context(
     _call, c.func_signature(type), &call, sizeof call);
@@ -620,7 +620,7 @@ static void _publish_globals(
       List get = _accessor(session, file, path, bridge, dimensions, 0);
       List set = writable
         ? _accessor(session, file, path, bridge, dimensions, 1) : NULL;
-      paths[path] = %($get $set);
+      paths[path] = $(get, set);
     }
     session.names[name] = %(global (source $(file.path)) $paths);
   }
@@ -740,11 +740,12 @@ ReplResult ReplSession.load(
       ReplLoadedFile file = session.files[path].pointer();
       List gone =
         file ? _check_removed(session, file, published, 0, dropped) : NULL;
-      if (gone) removed.push(%($path $gone));
+      if (gone) removed.push($(path, gone));
     }
     if (retired)
-      removed.push(%($(retired.path)
-        $(_check_removed(session, retired, published, 1, dropped))));
+      removed.push($(
+        retired.path,
+        _check_removed(session, retired, published, 1, dropped)));
     helper.retain_executable();
     // Declaration inspection may have called meta code. Runtime starts fresh.
     helper.restart();

@@ -179,7 +179,7 @@ module Ast _interpolation(Compiler c, Ast ast) {
   Array rows = [];
   foreach (List row in ast.cdr()) match (row) {
     case %((!or ?tag segvar segexp) ?value):
-      rows.push(%($tag $(c.convert_segment_to_string(value))));
+      rows.push($(tag, c.convert_segment_to_string(value)));
     default: rows.push(row);
   }
   List source = source_string_content(rows.list_free());

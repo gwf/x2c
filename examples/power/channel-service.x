@@ -21,11 +21,11 @@ int main(void) {
   });
 
   jobs.push(%!(void) => {
-    requests.send(%("first" $first_reply));
+    requests.send($("first", first_reply));
     return first_reply.receive();
   });
   jobs.push(%!(void) => {
-    requests.send(%("second" $second_reply));
+    requests.send($("second", second_reply));
     return second_reply.receive();
   });
 

@@ -163,11 +163,11 @@ static void _directive(ArmScan &s, Token token, size_t i) {
   int conditional = kind == <open> || (kind && s.stack.len());
   if (kind == <open>)
     s.stack.push(
-      %($(++s.serial) 0 $(Compiler.preproc_open_state(token.text))));
+      $(++s.serial, 0, Compiler.preproc_open_state(token.text)));
   else if (kind == <branch> && s.stack.len()) {
     Var (id, arm, state) = s.stack[-1];
     Var branch = Compiler.preproc_branch_state(state);
-    s.stack[-1] = %($id $(arm.integer() + 1) $branch);
+    s.stack[-1] = $(id, arm.integer() + 1, branch);
   }
   else if (kind == <close> && s.stack.len()) s.stack.take_last();
   else if (!s.hidden) _note_layout_macro(s, token.text);

@@ -99,7 +99,7 @@ static List _normalize_pattern(List pattern) {
   // `(!set BINDER PAT)` is the form this produces, so leave it alone
   if (!binder.is_binder() || !rest || (op == <!set> && !rest.cdr()))
     return normalized;
-  return %(!set $binder $(_normalize_pattern(%($op @rest))));
+  return %(!set $binder $(_normalize_pattern($(op, @rest))));
 }
 
 /* Normalizes siblings iteratively and retains every unchanged suffix. */

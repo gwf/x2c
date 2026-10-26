@@ -370,7 +370,7 @@ List Tensor.shape(Tensor t) {
   List shape = %();
   for (int dim = 0; dim < t.rank(); dim++) {
     long size = t.size(dim);
-    shape = shape.append(%($size));
+    shape = shape.append($(size));
   }
   return shape;
 }
@@ -845,9 +845,9 @@ List Module.forward_state(Module m, Tensor input) {
          "forward_state");
   Tensor sequence = _wrap(output, "forward_state");
   Tensor state = _wrap(hidden, "forward_state");
-  if (!cell) return %($sequence $state);
+  if (!cell) return $(sequence, state);
   Tensor memory = _wrap(cell, "forward_state");
-  return %($sequence $state $memory);
+  return $(sequence, state, memory);
 }
 
 /** Every trainable parameter, including those of children, as a List of
@@ -858,7 +858,7 @@ List Module.parameters(Module m) {
   List values = %();
   for (int64_t i = 0; i < count; i++) {
     Tensor parameter = _wrap(xt_module_parameter(m.native, i), "parameters");
-    values = values.append(%($parameter));
+    values = values.append($(parameter));
   }
   return values;
 }
@@ -885,7 +885,7 @@ List Module.buffers(Module m) {
   List values = %();
   for (int64_t i = 0; i < count; i++) {
     Tensor buffer = _wrap(xt_module_buffer(m.native, i), "buffers");
-    values = values.append(%($buffer));
+    values = values.append($(buffer));
   }
   return values;
 }
@@ -1317,7 +1317,7 @@ List Torch.mnist(String root, int train) {
   _check(xt_mnist_load(root, train, &images, &targets), "mnist");
   Tensor x = _wrap(images, "mnist");
   Tensor y = _wrap(targets, "mnist");
-  return %($x $y);
+  return $(x, y);
 }
 
 /* TorchScript.
@@ -1347,7 +1347,7 @@ List JitModule.forward(JitModule m, List inputs) {
   List results = %();
   for (int i = 0; i < total; i++) {
     Tensor value = _wrap(produced[i], "jit forward");
-    results = results.append(%($value));
+    results = results.append($(value));
   }
   return results;
 }

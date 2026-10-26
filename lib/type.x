@@ -92,7 +92,7 @@ int Type.is_enum_tag_body(Type type) => !!type.match(%(enum ? (*)));
 List Type.tag(Type type) {
   if (type.is_enum_tag() || type.is_enum_tag_body() ||
       type.is_aggregate_tag() || type.is_aggregate_tag_body())
-    return %( $(type.cadr()) );
+    return $(type.cadr());
   return NULL;
 }
 
@@ -185,7 +185,7 @@ int Type.function_parts(Type type, List &params, Type &?return_type) {
         case %(?(Type only)) if (only.canonicalize() === %(void)):
           values = NULL;
       params = values;
-      if (return_type) return_type = %($return_head @return_tail);
+      if (return_type) return_type = $(return_head, @return_tail);
       return 1;
     }
   return 0;

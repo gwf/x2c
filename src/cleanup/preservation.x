@@ -187,7 +187,7 @@ static List _block(Preserve &p, List statements) {
 static void _split(
   Preserve &p, Array output, int origin, List declaration, Type type,
   List bindings) {
-  List parts = %($declaration);
+  List parts = $(declaration);
   if (_declares_name(p, bindings) || _declares_pointee(p, bindings)) {
     Symbol head = declaration.car();
     Array split = [];
@@ -287,7 +287,7 @@ static List _escape_loop(Preserve &p, List loop) {
       List declaration = _declaration(
         p, %(declare $type $bindings), p.escaped);
       List remaining = _preserve_locals(p, %(for () @rest));
-      return source_block_content(%($declaration @escapes $remaining));
+      return source_block_content($(declaration, @escapes, remaining));
     }
   return NULL;
 }
@@ -316,6 +316,6 @@ module List _escape_parameters(Preserve &p, List body, List bindings) {
   match (bindings) case %(bind ? ((fnmod (params *parameters)) *)):
     foreach (List parameter in parameters)
       match (parameter) case %(param ? ?bind):
-        _escape_declared(p, output, %($bind));
+        _escape_declared(p, output, $(bind));
   return p.c.prepend_setup(body, output.list_free());
 }

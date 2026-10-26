@@ -145,10 +145,10 @@ static void _loop_add_event(
       Symbol source = tag == <direct> ? <direct> : <helper>;
       List key = %(site $unit $function $visibility $location);
       groups[key] = cons(
-        %($source $kind $operation $use $depth),
+        $(source, kind, operation, use, depth),
         groups.getdefault(key, NULL));
-      functions[%($unit $function $visibility)] = 1;
-      project_count(totals, %($source $kind), 1);
+      functions[$(unit, function, visibility)] = 1;
+      project_count(totals, $(source, kind), 1);
     }
 }
 
@@ -214,11 +214,10 @@ static List _loop_candidate_rank(List candidate) {
            (operations *) (loop-depth ?depth)): {
       int helpers = helper_pooled.int() + helper_scoped.int();
       int direct = direct_pooled.int() + scoped.int();
-      return %(
-        $(-(scoped.int() + helper_scoped.int())) $(-discarded.int())
-        $(-helpers) $(-(direct + helpers)) $(-depth.int())
-        $unit $function $source $line $column
-      );
+      return $(
+        -(scoped.int() + helper_scoped.int()), -discarded.int(), -helpers,
+        -(direct + helpers), -depth.int(), unit, function, source, line,
+        column);
     }
   return nil;
 }
