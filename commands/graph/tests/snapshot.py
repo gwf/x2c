@@ -151,6 +151,17 @@ def lifecycle(p, sources):
     original = sources[0].read_text()
     source_view = p.query(snapshot, op="inspect", select={"name": "snapshot_leaf"},
                           view="source")
+    source = source_view["results"][0]["source"]
+    assert "snapshot_leaf(SnapshotValue *value)" in source, source_view
+    assert "value.count = snapshot_helper(value.count);" in source, source_view
+    assert "return value.count;" in source, source_view
+    declaration = p.query(snapshot, op="inspect", select={"name": "snapshot_leaf"},
+                          view="declaration")
+    signature = declaration["results"][0]["declaration"]
+    assert "snapshot_leaf" in signature and "SnapshotValue" in signature, declaration
+    ast = p.query(snapshot, op="inspect", select={"name": "snapshot_leaf"},
+                  view="typed_ast")
+    assert "function" in ast["results"][0]["ast"], ast
     sources[0].write_text(original.replace("value + 1", "value + 2"))
     status = p.command("status", snapshot)
     assert not status["fresh"] and str(sources[0]) in status["changed"], status
