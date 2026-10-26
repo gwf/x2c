@@ -414,7 +414,8 @@ inline int Iter.truth(Iter iter) => iter != NULL;
 inline int List.truth(List list) => list != NULL;
 
 /** Returns nonzero when `string` contains at least one byte.
-    The canonical empty String is null, with no allocated storage. */
+    The canonical empty String is null, with no allocated storage.
+*/
 inline int String.truth(String string) => string != NULL && *string != '\0';
 
 /** Avalanches one 64-bit word.
@@ -857,7 +858,8 @@ int x2c_normalize_index(int index, int length) {
 
 /** Returns an explicit slice `bound` that `x2c_normalize_slice` cannot
     read as omitted. INT_MIN becomes INT_MIN + 1, which every collection
-    shorter than INT_MAX clamps the same way. */
+    shorter than INT_MAX clamps the same way.
+*/
 int x2c_slice_bound(int bound) => bound == INT_MIN ? bound + 1 : bound;
 
 /** Normalizes slice bounds and returns the resulting element count.
