@@ -113,8 +113,7 @@ int SymbolSet.contains(SymbolSet x, Symbol symbol) => x.index(symbol) >= 0;
 
 /** Returns the `Symbol` at `index`, or zero when the index is out of range.
     Negative indices count from the end. Zero is also a valid empty `Symbol`,
-    so
-    use `SymbolSet.len` when an out-of-range result must be distinguished.
+    so use `SymbolSet.len` when an out-of-range result must be distinguished.
 */
 Symbol SymbolSet.getindex(SymbolSet x, int index) {
   int count = (int) x.len();
@@ -142,7 +141,7 @@ Iter SymbolSet.iter(SymbolSet x, Iter dest) {
   return dest.init((void *) x, _next, 0);
 }
 
-/* Encoding
+/* encoding
 
    Each Symbol is an edge on its three vertices. A seed works when peeling,
    which removes an edge at a vertex of degree one, removes every edge; the
@@ -176,7 +175,9 @@ static typedef struct Graph {
 Block SymbolSet.encode(Array symbols) {
   Hash h = _hash(symbols);
   int count = (int) symbols.len();
-  int width = count <= 0x100 ? 1 : count <= 0x10000 ? 2 : 4;
+  int width = 4;
+  if (count <= 0x100) width = 1;
+  else if (count <= 0x10000) width = 2;
   Block bytes = Block.new(1);
   _put(bytes, width, 1);
   _put(bytes, 0, 3);
@@ -208,9 +209,9 @@ static Hash _hash(Array symbols) {
   while ((uint64_t) h.span * 3 < (uint64_t) count * 3 / 2) h.span <<= 1;
   while (!built) {
     h.vertices = (int) h.span * 3;
+    // Failed seeds leave the table untouched; only a complete peel assigns it.
     h.table = xcalloc(h.vertices, sizeof(uint32_t));
     for (uint64_t attempt = 0; !built && attempt < 4096; attempt++) {
-      memset(h.table, 0, (size_t) h.vertices * sizeof(uint32_t));
       h.seed = UINT64_C(0x9e3779b97f4a7c15) +
                attempt * UINT64_C(0xd1b54a32d192ed03);
       built = _try_seed(symbols, h.span, h.seed, h.table);
