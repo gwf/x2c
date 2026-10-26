@@ -27,8 +27,7 @@ module int _is_addressable(Compiler c, List expression) {
 
 /* Dynamic update helpers take a writable native address rather than leaving
    those requirements for the C assignment operator to check. */
-module void _check_dynamic_target(
-  Compiler c, List target, Token origin) {
+module void _check_dynamic_target(Compiler c, List target, Token origin) {
   match (target) {
     case %(expr ? (getindex ? ?)): return;
     case %(expr ? $($grouped(?inner))):
@@ -65,8 +64,7 @@ module List _resolve_indexed(
   $fail.expressions_index_unsupported(c, origin, receiver_type);
 }
 
-static List _postfix_index_expression(
-  Compiler c, List expr, List index) {
+static List _postfix_index_expression(Compiler c, List expr, List index) {
   Type type = expr.cadr(), element = type.dereference();
   if (element) return %(expr $element (index $expr $index));
   type = type.canonicalize();
@@ -74,8 +72,7 @@ static List _postfix_index_expression(
   return _typedef_index(c, expr, index, type);
 }
 
-static List _typedef_index(
-  Compiler c, List expr, List index, Type type) {
+static List _typedef_index(Compiler c, List expr, List index, Type type) {
   int collection = _collection_index_type(c, type);
   List resolved = _x2c_nominal_getindex(c, type);
   if (!resolved && collection)
@@ -117,8 +114,7 @@ static List _getindex_expression(
   return %(expr ($rtype) (getindex $expr $index));
 }
 
-static List _native_index(
-  Compiler c, List expr, List index, Type type) {
+static List _native_index(Compiler c, List expr, List index, Type type) {
   Type native = _index_native_type(c, expr.cadr());
   Type shape = native.canonicalize();
   // A boxable handle to a record has no C array reading.
@@ -166,8 +162,8 @@ module List _slice(Resolve &r, List slice) {
 // member lookup
 
 /** Resolves one field or method selection without consuming parser tokens.
-    `field` is a single-name `List` and `access` is `.` or `->`. The result is a
-    `(field access type)`, `(method binding signature)`, or `(ambiguous ...)`
+    `field` is a single-name `List` and `access` is `.` or `->`. The result is
+    a `(field access type)`, `(method binding signature)`, or `(ambiguous ...)`
     row, or NULL when no member is visible. Method lookup is enabled only by
     `call_context` and records the selected binding in `c.sym`.
 */
@@ -200,8 +196,7 @@ static int _method_owner(Type type) =>
   !type.is_aggregate() && (type.is_typedef_name() || type.is_builtin());
 
 /* Lookup and completion follow the same typedef owner from an aggregate. */
-static Type _next_method_type(
-  Compiler c, Type type, int &hops, int &tagged) {
+static Type _next_method_type(Compiler c, Type type, int &hops, int &tagged) {
   if (type.is_pointer()) return NULL;
   if (type.is_aggregate()) return !tagged++ ? _tag_typedef(c, type) : NULL;
   return c.sym.next_typedef(type, hops).canonicalize();
@@ -262,8 +257,7 @@ static List _method_member(
 
 /* Find a method that an imported package adds to an external receiver. The
    package names are sorted so an ambiguous call reports deterministically. */
-static List _imported_method(
-  Compiler c, String method, Type receiver) {
+static List _imported_method(Compiler c, String method, Type receiver) {
   List packages = c.imported_providers(method);
   if (!packages) return NULL;
   if (packages.cdr()) return cons(<ambiguous>, packages);
@@ -286,8 +280,7 @@ static Type _receiver_relative_signature(
   return relative.search_replace(<self>, base.car());
 }
 
-module List _member(
-  Resolve &r, Var operator, List receiver, List field) {
+module List _member(Resolve &r, Var operator, List receiver, List field) {
   receiver = r.c.resolve_expression(receiver, r.origin);
   Type receiver_type = receiver.cadr();
   List resolution = r.c.resolve_postfix_member(
@@ -322,8 +315,7 @@ static String _member_type_name(Type type) {
 /** Returns sorted visible field and method names that resolve on `receiver`
     through `access`.
 */
-List Compiler.postfix_completions(
-  Compiler c, Type receiver, Symbol access) {
+List Compiler.postfix_completions(Compiler c, Type receiver, Symbol access) {
   Map seen = {};
   Array names = auto [], accepted = [];
   Type fields = c.sym.resolve_key(receiver);
