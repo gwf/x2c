@@ -197,8 +197,7 @@ module List _literal(Emitter &e, List ast) {
   (List type, String text, Var value) = ast.cdr();
   if (type === %("Var") && text == "void") return %("((void) 0, Void)");
   if (type === %("String")) {
-    String qq = "\"";
-    text = qq + text.escape() + qq;
+    text = %"\"$(text.escape())\"";
     return %("String_new" "(" $text ")");
   }
   if (type === %("Symbol")) {
@@ -232,7 +231,7 @@ module List _literal(Emitter &e, List ast) {
 }
 
 static List _atom_intern(String spelling) {
-  String qq = "\"", text = %"$qq$(spelling.escape())$qq";
+  String text = %"\"$(spelling.escape())\"";
   Atom atom = Atom.intern(spelling);
   if (atom is <symbol>) return %( "Symbol_var(Symbol_new($text))" );
   return %( "Atom_intern(String_new($text))" );
