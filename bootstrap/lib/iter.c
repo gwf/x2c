@@ -208,7 +208,7 @@ static int _range_general_next(Iter iter, Var * out){
   if((step > 0 && current > stop) ||(step < 0 && current < stop)) return 0;
   * out = int_var(current);
   long long next =(long long) current + step;
-  if((step > 0 && next > stop) ||(step < 0 && next < stop) || next > INT_MAX || next < INT_MIN) iter -> next = NULL;
+  if((step > 0 && next > stop) ||(step < 0 && next < stop)) iter -> next = NULL;
   else iter -> state = int_var((int) next);
   return 1;
 }
@@ -464,15 +464,14 @@ static int _unzip_column_next(Iter iter, Var * out){
 }
 
 static int _unzip_ensure(UnzipShared * shared, int column){
-  while(shared -> heads[column] >= Array_len(shared -> buffers[column])){
-    if(shared -> done) return 0;
-    Var pair;
-    if(! Iter_try_next(shared -> source, &(pair))){
-      shared -> done = 1;
-      return 0;
-    }
-    _unzip_buffer_push(shared, pair);
+  if(shared -> heads[column] < Array_len(shared -> buffers[column])) return 1;
+  if(shared -> done) return 0;
+  Var pair;
+  if(! Iter_try_next(shared -> source, &(pair))){
+    shared -> done = 1;
+    return 0;
   }
+  _unzip_buffer_push(shared, pair);
   return 1;
 }
 
@@ -481,7 +480,7 @@ static void _unzip_buffer_push(UnzipShared * shared, Var pair){
     Var _x2c_gensym_literal_part_1 = String_var(String_join(NULL, cons(String_var(String_new("Iter.unzip")), NULL)));
     Var _x2c_gensym_literal_part_2 = String_var(String_join(NULL, cons(String_var(String_new("two-element List")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/iter.x",.function = "_unzip_buffer_push",.line = 704,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/iter.x",.function = "_unzip_buffer_push",.line = 702,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_2, 4477479911782, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_1, Symbol_var(1510312), _x2c_gensym_literal_part_2, Symbol_var(46228810), pair);
       __builtin_unreachable();
     }
@@ -492,7 +491,7 @@ static void _unzip_buffer_push(UnzipShared * shared, Var pair){
     Var _x2c_gensym_literal_part_3 = String_var(String_join(NULL, cons(String_var(String_new("Iter.unzip")), NULL)));
     Var _x2c_gensym_literal_part_4 = String_var(String_join(NULL, cons(String_var(String_new("two-element List")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/iter.x",.function = "_unzip_buffer_push",.line = 708,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/iter.x",.function = "_unzip_buffer_push",.line = 706,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_3, 4372499598, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_3, Symbol_var(1510312), _x2c_gensym_literal_part_4, Symbol_var(46228810), pair);
       __builtin_unreachable();
     }
