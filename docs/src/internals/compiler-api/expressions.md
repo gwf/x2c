@@ -53,7 +53,7 @@ for a typed destination, 1 for an interpolation hole, which displays
 every value through `Var.str`, and 2 for a printf-family value, which
 the format converts when it is a Var.
 
-Source: `src/expressions/conversions.x:47`
+Source: `src/expressions/conversions.x:46`
 
 <a id="Compiler.complete_iter_chain"></a>
 #### Compiler.complete_iter_chain
@@ -67,7 +67,7 @@ the last formal in `P` canonicalize to `Iter`. `Iter` arguments are
 completed recursively; a call missing only that last formal receives the
 hidden destination. Variadic calls and `Iter_unzip` are returned unchanged.
 
-Source: `src/expressions/calls.x:436`
+Source: `src/expressions/calls.x:435`
 
 <a id="Compiler.convert_expression"></a>
 #### Compiler.convert_expression
@@ -81,7 +81,7 @@ performs the conversion implicitly; an unsupported x2c conversion reports
 a type error through `c`. Synthesized operations may add generated
 bindings or immutable literal entries to compiler state.
 
-Source: `src/expressions/conversions.x:228`
+Source: `src/expressions/conversions.x:227`
 
 <a id="Compiler.convert_segment_to_string"></a>
 #### Compiler.convert_segment_to_string
@@ -97,7 +97,7 @@ use `Var.str`. A segment statically spelled `Var` uses `Var.str` for every
 runtime tag. An ordinary `String` destination uses `Var.as_string`, which
 returns NULL for `void` and `Null`.
 
-Source: `src/expressions/conversions.x:416`
+Source: `src/expressions/conversions.x:414`
 
 <a id="Compiler.converter_call"></a>
 #### Compiler.converter_call
@@ -108,7 +108,7 @@ The call to the converter that `type`, or the first of its typedef names
 that declares one, provides for `target`, applied to `expr`, or NULL
 when none declares one.
 
-Source: `src/expressions/conversions.x:574`
+Source: `src/expressions/conversions.x:572`
 
 <a id="Compiler.func_call_parts"></a>
 #### Compiler.func_call_parts
@@ -122,7 +122,7 @@ Var, or `(no-value)` when it has no Var form; its address, or 0; and its
 type, which is `(expr ("List") (ident reference))` for a null argument
 that takes the callee's own type.
 
-Source: `src/expressions/calls.x:372`
+Source: `src/expressions/calls.x:371`
 
 <a id="Compiler.is_builtin_converter_call"></a>
 #### Compiler.is_builtin_converter_call
@@ -132,7 +132,7 @@ Source: `src/expressions/calls.x:372`
 The global builtin boxers and scalar formatters only observe their
 arguments. A custom converter or a shadowed callee may change state.
 
-Source: `src/expressions/conversions.x:628`
+Source: `src/expressions/conversions.x:626`
 
 <a id="Compiler.needs_resolution"></a>
 #### Compiler.needs_resolution
@@ -141,7 +141,7 @@ Source: `src/expressions/conversions.x:628`
 
 True when syntax still needs ordinary binding or macro substitution.
 
-Source: `src/expressions/resolution.x:79`
+Source: `src/expressions/resolution.x:78`
 
 <a id="Compiler.parse_assignment"></a>
 #### Compiler.parse_assignment
@@ -251,7 +251,7 @@ Source: `src/expressions/syntax.x:702`
 Returns sorted visible field and method names that resolve on `receiver`
 through `access`.
 
-Source: `src/expressions/access.x:317`
+Source: `src/expressions/access.x:313`
 
 <a id="Compiler.printf_static_format"></a>
 #### Compiler.printf_static_format
@@ -264,7 +264,7 @@ literal, the canonical `String` one becomes, or the `String_new` of one;
 any other format, such as a variable or an object macro, is not readable
 here. A `String` literal's text is spelled as a C literal.
 
-Source: `src/expressions/calls.x:524`
+Source: `src/expressions/calls.x:523`
 
 <a id="Compiler.promote_string_literal"></a>
 #### Compiler.promote_string_literal
@@ -276,7 +276,7 @@ method receiver, a `foreach` collection, or a raise detail. Parentheses
 and a conditional whose arms are both literals count as the literal; any
 other expression is returned unchanged.
 
-Source: `src/expressions/conversions.x:180`
+Source: `src/expressions/conversions.x:179`
 
 <a id="Compiler.resolve_expression"></a>
 #### Compiler.resolve_expression
@@ -290,7 +290,7 @@ inputs are returned unchanged; abstract declarations use the declaration
 binder. `origin` anchors diagnostics and generated operations that must
 retain source position.
 
-Source: `src/expressions/resolution.x:53`
+Source: `src/expressions/resolution.x:52`
 
 <a id="Compiler.resolve_map_entry"></a>
 #### Compiler.resolve_map_entry
@@ -300,7 +300,7 @@ Source: `src/expressions/resolution.x:53`
 Resolves the key and value of one `(map-entry key value)` AST row.
 Any other shape is reported at `origin` as a parse error.
 
-Source: `src/expressions/resolution.x:453`
+Source: `src/expressions/resolution.x:452`
 
 <a id="Compiler.resolve_postfix_member"></a>
 #### Compiler.resolve_postfix_member
@@ -313,7 +313,7 @@ a `(field access type)`, `(method binding signature)`, or `(ambiguous ...)`
 row, or NULL when no member is visible. Method lookup is enabled only by
 `call_context` and records the selected binding in `c.sym`.
 
-Source: `src/expressions/access.x:169`
+Source: `src/expressions/access.x:166`
 
 <a id="Compiler.reveal_binding"></a>
 #### Compiler.reveal_binding
@@ -324,7 +324,7 @@ Keeps `binding` reachable from the cursor where a later declaration of
 its spelling hides it. A hidden local takes a fresh emitted spelling;
 a hidden file-scope name makes the visible automatic locals take one.
 
-Source: `src/expressions/identifiers.x:192`
+Source: `src/expressions/identifiers.x:191`
 
 <a id="Compiler.var_tag_expression"></a>
 #### Compiler.var_tag_expression
@@ -334,7 +334,7 @@ Source: `src/expressions/identifiers.x:192`
 Builds an exact tag expression, deferring macro type slots until
 binding.
 
-Source: `src/expressions/resolution.x:340`
+Source: `src/expressions/resolution.x:339`
 
 ## Public types
 

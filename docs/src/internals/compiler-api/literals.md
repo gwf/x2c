@@ -42,7 +42,7 @@ Builds the typed List expression that conses the element expressions
 `elements`, in order, onto the cells `tail`. A `(splice EXPR)` element
 appends the List that EXPR holds, as `literal_cell` does.
 
-Source: `src/literals/quotation.x:319`
+Source: `src/literals/quotation.x:318`
 
 <a id="Compiler.literal_cell"></a>
 #### Compiler.literal_cell
@@ -229,7 +229,7 @@ Source: `src/literals/quotation.x:184`
 
 Applies each typed capture's predicate to every unquoted occurrence.
 
-Source: `src/literals/quotation.x:373`
+Source: `src/literals/quotation.x:371`
 
 ## Design notes
 

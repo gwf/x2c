@@ -190,7 +190,7 @@ compiler's linked copy answers while its source hashes agree; otherwise
 the definition replaces an earlier binding with a helper stub. A group
 that stages in process waits for the full parse.
 
-Source: `src/meta-native/functions.x:41`
+Source: `src/meta-native/functions.x:40`
 
 <a id="Compiler.install_meta_declaration"></a>
 #### Compiler.install_meta_declaration
@@ -201,7 +201,7 @@ Applies a contextual `meta` marker to one initialized file-static value.
 The unit's staged `meta` group holds the compile-time instance, which
 its module initializes for each unit.
 
-Source: `src/meta-native/functions.x:178`
+Source: `src/meta-native/functions.x:177`
 
 <a id="Compiler.install_meta_function"></a>
 #### Compiler.install_meta_function
@@ -245,7 +245,7 @@ Source: `src/meta-native/bindings.x:141`
 
 Installs an included meta function's evaluator advertisement.
 
-Source: `src/meta-native/functions.x:210`
+Source: `src/meta-native/functions.x:206`
 
 <a id="Compiler.iterator_arity"></a>
 #### Compiler.iterator_arity
@@ -257,7 +257,7 @@ passes when it omits its destination, or -1 for another signature. An
 iterator operation takes its destination last, and its native target is
 `NAME_into`.
 
-Source: `src/meta-native/bindings.x:423`
+Source: `src/meta-native/bindings.x:420`
 
 <a id="Compiler.linked_meta_provider_source"></a>
 #### Compiler.linked_meta_provider_source
@@ -266,7 +266,7 @@ Source: `src/meta-native/bindings.x:423`
 
 Returns a linked provider's source and dependency hashes.
 
-Source: `src/meta-native/linked.x:97`
+Source: `src/meta-native/linked.x:96`
 
 <a id="Compiler.links_extension"></a>
 #### Compiler.links_extension
@@ -285,7 +285,7 @@ Source: `src/meta-native/modules.x:271`
 
 Reports whether the compiler links the `meta` function `name`.
 
-Source: `src/meta-native/linked.x:94`
+Source: `src/meta-native/linked.x:93`
 
 <a id="Compiler.load_native_module"></a>
 #### Compiler.load_native_module
@@ -307,7 +307,7 @@ Source: `src/meta-native/modules.x:124`
 Tests a registered macro with the candidate's global and source
 bindings. A pattern derived without them reads none.
 
-Source: `src/meta-native/functions.x:134`
+Source: `src/meta-native/functions.x:133`
 
 <a id="Compiler.meta_binding"></a>
 #### Compiler.meta_binding
@@ -340,7 +340,7 @@ Source: `src/meta-native/bindings.x:221`
 Returns the selected file-backed native module that supplies `name`,
 with its native `type`, or NULL for a linked or absent target.
 
-Source: `src/meta-native/bindings.x:258`
+Source: `src/meta-native/bindings.x:256`
 
 <a id="Compiler.native_meta_targets"></a>
 #### Compiler.native_meta_targets
@@ -353,7 +353,7 @@ inventory, or only those declared in the files `paths` names when it is
 not empty. A target that takes a `Func` is left out unless `callbacks`
 is nonzero. Sorting makes that inventory independent of Map order.
 
-Source: `src/meta-native/bindings.x:350`
+Source: `src/meta-native/bindings.x:348`
 
 <a id="Compiler.native_module_targets"></a>
 #### Compiler.native_module_targets
@@ -407,7 +407,7 @@ Source: `src/meta-native/bindings.x:76`
 Records the provider of a public bodied meta function in its interface.
 The provider owns both its native body and its compile-time state.
 
-Source: `src/meta-native/functions.x:196`
+Source: `src/meta-native/functions.x:192`
 
 <a id="Compiler.run_meta_call"></a>
 #### Compiler.run_meta_call

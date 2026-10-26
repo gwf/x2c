@@ -275,7 +275,7 @@ Source: `src/compiler/declarations/production.x:17`
 Returns captures established by a true condition. Other operations do
 not establish names, including negation and disjunction.
 
-Source: `src/compiler/patterns.x:140`
+Source: `src/compiler/patterns.x:139`
 
 <a id="Compiler.copy_source_declaration"></a>
 #### Compiler.copy_source_declaration
@@ -293,7 +293,7 @@ Source: `src/compiler/source-locations.x:82`
 
 Declares pattern locals and returns their capture-token/binding pairs.
 
-Source: `src/compiler/patterns.x:89`
+Source: `src/compiler/patterns.x:88`
 
 <a id="Compiler.emitted_binding_name"></a>
 #### Compiler.emitted_binding_name
@@ -412,7 +412,7 @@ Source: `src/compiler/binding-facts.x:22`
 
 Returns the typed expression reading one native match capture slot.
 
-Source: `src/compiler/patterns.x:108`
+Source: `src/compiler/patterns.x:107`
 
 <a id="Compiler.match_pattern_binders"></a>
 #### Compiler.match_pattern_binders
@@ -423,7 +423,7 @@ Returns definite binders from a typed `Match` pattern AST.
 
 When `possible` is non-null, stores every binder appearing on any path.
 
-Source: `src/compiler/patterns.x:78`
+Source: `src/compiler/patterns.x:77`
 
 <a id="Compiler.match_pattern_is_static"></a>
 #### Compiler.match_pattern_is_static
@@ -432,7 +432,7 @@ Source: `src/compiler/patterns.x:78`
 
 Reports whether a typed `Match` pattern has a fully static value graph.
 
-Source: `src/compiler/patterns.x:66`
+Source: `src/compiler/patterns.x:65`
 
 <a id="Compiler.match_pattern_value"></a>
 #### Compiler.match_pattern_value
@@ -450,7 +450,7 @@ Source: `src/compiler/patterns.x:8`
 
 Reports whether a recovered pattern value graph is fully static.
 
-Source: `src/compiler/patterns.x:57`
+Source: `src/compiler/patterns.x:56`
 
 <a id="Compiler.merge_source_declarations"></a>
 #### Compiler.merge_source_declarations
@@ -508,7 +508,7 @@ Source: `src/compiler/parsing/tokens.x:165`
 Opens a scope for the captures established by a true condition. Returns
 whether a scope was opened; the caller closes it after its continuation.
 
-Source: `src/compiler/patterns.x:155`
+Source: `src/compiler/patterns.x:154`
 
 <a id="Compiler.optional_reference_test"></a>
 #### Compiler.optional_reference_test
@@ -551,7 +551,7 @@ Source: `src/compiler/source-files.x:26`
 Builds ordinary declarations from a pattern scope's issued bindings.
 A catch reads through its handler; a match reads its capture slots.
 
-Source: `src/compiler/patterns.x:116`
+Source: `src/compiler/patterns.x:115`
 
 <a id="Compiler.peek"></a>
 #### Compiler.peek
@@ -604,7 +604,7 @@ Source: `src/compiler/source-files.x:6`
 Records the header linkage of a public inline definition. Semantic
 function types discard storage, so this declaration fact survives there.
 
-Source: `src/compiler/parsing/collection.x:141`
+Source: `src/compiler/parsing/collection.x:140`
 
 <a id="Compiler.record_origin"></a>
 #### Compiler.record_origin

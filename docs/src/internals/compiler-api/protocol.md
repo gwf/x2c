@@ -44,7 +44,7 @@ Protocols from declaration to conform forms.
 Returns the interface rows of the resolved conformances `adoptions`
 declare.
 
-Source: `src/protocol/resolution.x:211`
+Source: `src/protocol/resolution.x:210`
 
 <a id="Compiler.discard_helper"></a>
 #### Compiler.discard_helper
@@ -59,7 +59,7 @@ its `discard` member may release what it owns before the enclosing scope
 ends. Returns null when no selected argument type has a `discard` member,
 or an ordinary pointer or aggregate result may borrow an argument.
 
-Source: `src/protocol/call-helpers.x:137`
+Source: `src/protocol/call-helpers.x:135`
 
 <a id="Compiler.dump_conformance"></a>
 #### Compiler.dump_conformance
@@ -119,7 +119,7 @@ Source: `src/protocol/adapters.x:152`
 Reports whether a generated member names a native protocol host function.
 Its defining header supplies the alias instead of a C prototype.
 
-Source: `src/protocol/adapters.x:194`
+Source: `src/protocol/adapters.x:190`
 
 <a id="Compiler.parse_protocol_declaration"></a>
 #### Compiler.parse_protocol_declaration
@@ -142,7 +142,7 @@ Source: `src/protocol/declarations.x:122`
 
 The `discard_helper` for `participant`'s protocol `member`.
 
-Source: `src/protocol/call-helpers.x:163`
+Source: `src/protocol/call-helpers.x:161`
 
 <a id="Compiler.protocol_member_names"></a>
 #### Compiler.protocol_member_names
@@ -227,7 +227,7 @@ Source: `src/protocol/registry.x:504`
 Remembers a source typedef's declaration and visibility, which native
 alias insertion reads for its participant.
 
-Source: `src/protocol/adapters.x:375`
+Source: `src/protocol/adapters.x:367`
 
 <a id="Compiler.resolve_as_declared"></a>
 #### Compiler.resolve_as_declared
@@ -239,7 +239,7 @@ parse resolves its own: before the parse, and again, after the
 generated members are published, where the parse publishes each one.
 Their declaring units report their failures, so nothing is reported.
 
-Source: `src/protocol/resolution.x:227`
+Source: `src/protocol/resolution.x:226`
 
 <a id="Compiler.resolve_protocol_member"></a>
 #### Compiler.resolve_protocol_member
@@ -252,7 +252,7 @@ null when no eligible resolved member exists; positive and negative
 results are cached. Inside the selected implementation itself the result
 is null, so the member's own body keeps the native operation.
 
-Source: `src/protocol/lookup.x:217`
+Source: `src/protocol/lookup.x:215`
 
 <a id="Compiler.resolve_protocols"></a>
 #### Compiler.resolve_protocols

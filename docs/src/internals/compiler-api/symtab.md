@@ -189,7 +189,7 @@ Package-owned methods use `<package>__<Type>_<member>` internally while
 consumers retain the spelling from the package header. Sorting keeps
 ambiguity diagnostics deterministic.
 
-Source: `src/symtab/namespaces.x:236`
+Source: `src/symtab/namespaces.x:237`
 
 <a id="Compiler.imported_spelling"></a>
 #### Compiler.imported_spelling
@@ -198,7 +198,7 @@ Source: `src/symtab/namespaces.x:236`
 
 Returns an unambiguous imported spelling for `name`, or `NULL`.
 
-Source: `src/symtab/namespaces.x:247`
+Source: `src/symtab/namespaces.x:248`
 
 <a id="Compiler.macro_definition_locals"></a>
 #### Compiler.macro_definition_locals
@@ -207,7 +207,7 @@ Source: `src/symtab/namespaces.x:247`
 
 Returns the active macro definition's borrowed local map, or `NULL`.
 
-Source: `src/symtab/scopes.x:209`
+Source: `src/symtab/scopes.x:208`
 
 <a id="Compiler.macro_template_local"></a>
 #### Compiler.macro_template_local
@@ -218,7 +218,7 @@ Reports whether `binding` is a local of the active macro definition or
 of a template that encloses it; a nested definition's literal names
 share the enclosing template's names.
 
-Source: `src/symtab/scopes.x:218`
+Source: `src/symtab/scopes.x:217`
 
 <a id="Compiler.package_member_spelling"></a>
 #### Compiler.package_member_spelling
@@ -229,7 +229,7 @@ Returns a visible `with` name's package-prefixed spelling, or `NULL`.
 
 An ordinary declaration of the local spelling shadows the `with` name.
 
-Source: `src/symtab/namespaces.x:221`
+Source: `src/symtab/namespaces.x:222`
 
 <a id="Compiler.package_spelling"></a>
 #### Compiler.package_spelling
@@ -240,7 +240,7 @@ Returns a name in the current package namespace, preserving prefixes.
 
 Idempotence lets parsing and declaration rewrites share this operation.
 
-Source: `src/symtab/namespaces.x:158`
+Source: `src/symtab/namespaces.x:159`
 
 <a id="Compiler.private_prefix"></a>
 #### Compiler.private_prefix
@@ -276,7 +276,7 @@ Shallow collection and full parsing both see an import, so repeating the
 same package and alias is a no-op. Another binding of the local spelling
 is a parse error.
 
-Source: `src/symtab/namespaces.x:170`
+Source: `src/symtab/namespaces.x:171`
 
 <a id="Compiler.register_package_member"></a>
 #### Compiler.register_package_member
@@ -288,7 +288,7 @@ Registers one package member under a bare local spelling.
 The package member must already exist in the symbol table. Repeating the
 same binding is a no-op; any conflicting local binding is an error.
 
-Source: `src/symtab/namespaces.x:183`
+Source: `src/symtab/namespaces.x:184`
 
 <a id="Compiler.scoped_spelling"></a>
 #### Compiler.scoped_spelling
@@ -334,7 +334,7 @@ Source: `src/symtab/bindings.x:233`
 Returns the source name of a spelling this unit gave a file prefix, or
 `name`. Var tags and descriptor names use that short name.
 
-Source: `src/symtab/namespaces.x:149`
+Source: `src/symtab/namespaces.x:150`
 
 ### `Sym`
 
@@ -345,7 +345,7 @@ Source: `src/symtab/namespaces.x:149`
 
 Resolves typedefs or one pointer layer to an aggregate tag, or `NULL`.
 
-Source: `src/symtab/types.x:323`
+Source: `src/symtab/types.x:322`
 
 <a id="Sym.at_file_scope"></a>
 #### Sym.at_file_scope
@@ -467,7 +467,7 @@ Records declaration AST fields in source order after binding finishes.
 `Field` types already use member keys. Unnamed rows retain their type
 and an empty name so initializer traversal preserves anonymous subobjects.
 
-Source: `src/symtab/types.x:279`
+Source: `src/symtab/types.x:278`
 
 <a id="Sym.declare_resolved"></a>
 #### Sym.declare_resolved
@@ -543,7 +543,7 @@ Defines or replaces a macro in the active lexical scope.
 Replacing a name already defined in this scope does not increase the
 local macro count.
 
-Source: `src/symtab/scopes.x:187`
+Source: `src/symtab/scopes.x:186`
 
 <a id="Sym.drop"></a>
 #### Sym.drop
@@ -570,7 +570,7 @@ Source: `src/symtab/bindings.x:195`
 
 Returns recorded fields in source order, or `NULL`.
 
-Source: `src/symtab/types.x:300`
+Source: `src/symtab/types.x:299`
 
 <a id="Sym.file_statics"></a>
 #### Sym.file_statics
@@ -634,7 +634,7 @@ Source: `src/symtab/bindings.x:256`
 
 Returns whether any lexical scope contains a local macro definition.
 
-Source: `src/symtab/scopes.x:195`
+Source: `src/symtab/scopes.x:194`
 
 <a id="Sym.introduce"></a>
 #### Sym.introduce
@@ -663,7 +663,7 @@ Source: `src/symtab/bindings.x:177`
 
 Reports whether `type` reaches the named `Array` value type.
 
-Source: `src/symtab/types.x:238`
+Source: `src/symtab/types.x:237`
 
 <a id="Sym.is_file_static"></a>
 #### Sym.is_file_static
@@ -681,7 +681,7 @@ Source: `src/symtab/declarations.x:105`
 
 Reports whether `type` reaches the named `Map` value type.
 
-Source: `src/symtab/types.x:242`
+Source: `src/symtab/types.x:241`
 
 <a id="Sym.is_named_value_type"></a>
 #### Sym.is_named_value_type
@@ -690,7 +690,7 @@ Source: `src/symtab/types.x:242`
 
 Reports whether `type` reaches a named value type before its definition.
 
-Source: `src/symtab/types.x:245`
+Source: `src/symtab/types.x:244`
 
 <a id="Sym.is_string_type"></a>
 #### Sym.is_string_type
@@ -699,7 +699,7 @@ Source: `src/symtab/types.x:245`
 
 Reports whether `type` reaches the named `String` value type.
 
-Source: `src/symtab/types.x:234`
+Source: `src/symtab/types.x:233`
 
 <a id="Sym.is_var_type"></a>
 #### Sym.is_var_type
@@ -708,7 +708,7 @@ Source: `src/symtab/types.x:234`
 
 Reports whether `type` reaches the named `Var` value type.
 
-Source: `src/symtab/types.x:231`
+Source: `src/symtab/types.x:230`
 
 <a id="Sym.local_type"></a>
 #### Sym.local_type
@@ -720,7 +720,7 @@ File-scope names retain their semantic identity. Local alias definitions
 are resolved before they are installed, so one lookup crosses the whole
 local chain without consulting names shadowed since its declaration.
 
-Source: `src/symtab/types.x:123`
+Source: `src/symtab/types.x:122`
 
 <a id="Sym.lookup"></a>
 #### Sym.lookup
@@ -744,7 +744,7 @@ A member of an anonymous struct or union belongs to its enclosing
 aggregate in C, so unnamed rows are searched the way a designated
 initializer already reaches them.
 
-Source: `src/symtab/types.x:259`
+Source: `src/symtab/types.x:258`
 
 <a id="Sym.lookup_macro"></a>
 #### Sym.lookup_macro
@@ -753,7 +753,7 @@ Source: `src/symtab/types.x:259`
 
 Returns the innermost visible local macro named `name`, or `NULL`.
 
-Source: `src/symtab/scopes.x:198`
+Source: `src/symtab/scopes.x:197`
 
 <a id="Sym.mark_field"></a>
 #### Sym.mark_field
@@ -763,7 +763,7 @@ Source: `src/symtab/scopes.x:198`
 Records that the field `name` of `aggregate` was declared with the field
 keyword `mark`, such as `delegate`, and that `aggregate` declares one.
 
-Source: `src/symtab/types.x:305`
+Source: `src/symtab/types.x:304`
 
 <a id="Sym.mark_static"></a>
 #### Sym.mark_static
@@ -782,7 +782,7 @@ Source: `src/symtab/scopes.x:147`
 Returns the `(NAME TYPE)` rows of the fields of `aggregate` declared with
 `mark`, in declaration order.
 
-Source: `src/symtab/types.x:313`
+Source: `src/symtab/types.x:312`
 
 <a id="Sym.new"></a>
 #### Sym.new
@@ -813,7 +813,7 @@ Source: `src/symtab/types.x:64`
 
 Resolves typedef bases while retaining every declarator qualifier.
 
-Source: `src/symtab/types.x:86`
+Source: `src/symtab/types.x:85`
 
 <a id="Sym.pop_scope"></a>
 #### Sym.pop_scope
@@ -934,7 +934,7 @@ Resolves a numeric typedef without reducing semantic object types.
 Returns `NULL` when resolution yields neither a numeric type nor a
 recognized builtin numeric typedef.
 
-Source: `src/symtab/types.x:162`
+Source: `src/symtab/types.x:161`
 
 <a id="Sym.same_list_rest_convention"></a>
 #### Sym.same_list_rest_convention
@@ -945,7 +945,7 @@ Compares only List rest conventions in corresponding callable positions,
 including callback parameters and returned function pointers. Native C
 checking owns other type differences, but cannot see this convention.
 
-Source: `src/symtab/types.x:340`
+Source: `src/symtab/types.x:339`
 
 <a id="Sym.scope_count"></a>
 #### Sym.scope_count
@@ -1047,7 +1047,7 @@ Returns a type's `Var` tag and optionally stores its resolved type.
 `resolved` receives the final type even when the result is zero because no
 `Var` tag is registered. A null input stores `NULL` and returns zero.
 
-Source: `src/symtab/types.x:210`
+Source: `src/symtab/types.x:209`
 
 <a id="Sym.visible_symbols"></a>
 #### Sym.visible_symbols

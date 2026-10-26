@@ -74,7 +74,7 @@ because it calls, allocates, or reads an object other than a function
 name. `runtime` holds the function-local statics already known to run
 that way, or is `NULL` at file scope.
 
-Source: `src/cleanup/statics.x:120`
+Source: `src/cleanup/statics.x:118`
 
 ## Design notes
 

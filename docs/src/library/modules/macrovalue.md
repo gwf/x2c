@@ -181,7 +181,7 @@ Returns the name a typed quotation declares with a Name hole whose local
 holds `value`: the name form of an `x2c_ident` spelling or a String,
 or a binding as it is.
 
-Source: `lib/macrovalue/construction.x:70`
+Source: `lib/macrovalue/construction.x:69`
 
 <a id="Macro.inserted"></a>
 #### Macro.inserted
@@ -196,7 +196,7 @@ spelling, or a Name hole's String becomes an identifier expression;
 in a Name hole's member position, an `x2c_ident` spelling is its
 String.
 
-Source: `lib/macrovalue/construction.x:56`
+Source: `lib/macrovalue/construction.x:55`
 
 <a id="Macro.inserted_items"></a>
 #### Macro.inserted_items
@@ -207,7 +207,7 @@ Returns the items a typed quotation splices for an expression sequence
 hole whose local holds `values`: each number, String, or Symbol becomes
 its literal, as a spliced data List's items do.
 
-Source: `lib/macrovalue/construction.x:79`
+Source: `lib/macrovalue/construction.x:78`
 
 <a id="Macro.matcher"></a>
 #### Macro.matcher
@@ -238,7 +238,7 @@ Returns the literal expression of type `result` that holds `value`, a
 number of the scalar type `type`. An `int` value is its decimal
 literal; another number is its exact bits cast to `type`.
 
-Source: `lib/macrovalue/construction.x:145`
+Source: `lib/macrovalue/construction.x:144`
 
 <a id="Macro.number_type"></a>
 #### Macro.number_type
@@ -248,7 +248,7 @@ Source: `lib/macrovalue/construction.x:145`
 Returns the C type of a number's Var family, or NULL when `value` is not
 a number. An untyped integer is an `int` when it fits one.
 
-Source: `lib/macrovalue/construction.x:118`
+Source: `lib/macrovalue/construction.x:117`
 
 <a id="Macro.subject"></a>
 #### Macro.subject
@@ -268,7 +268,7 @@ Returns what a typed quotation builds when its code is one hole whose
 local holds `value`: the inserted expression with the type `type`. A
 String typed `String` is a String literal.
 
-Source: `lib/macrovalue/construction.x:85`
+Source: `lib/macrovalue/construction.x:84`
 
 <a id="Macro.use_subject"></a>
 #### Macro.use_subject

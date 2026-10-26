@@ -52,7 +52,7 @@ Prints the `--dump-definitions` projection of the lowered unit `ast`:
 with one, then one row per `Compiler.definition_rows` entry. The
 command-line reference in the book describes the fields.
 
-Source: `src/generate/definitions.x:105`
+Source: `src/generate/definitions.x:103`
 
 <a id="Compiler.generate_code"></a>
 #### Compiler.generate_code
@@ -92,7 +92,7 @@ Returns the guard macro of the header generated for this unit, named
 from its path below the home when it has one there, else as spelled, so
 a meta group that copies the unit names the same guard.
 
-Source: `src/generate/output.x:212`
+Source: `src/generate/output.x:213`
 
 <a id="Compiler.init_statements"></a>
 #### Compiler.init_statements

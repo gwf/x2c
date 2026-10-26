@@ -140,7 +140,7 @@ NULL when the binding has no context.
 
 **Raises:** `<bad-arg>` for a null binding. It does not return on failure.
 
-Source: `lib/func/func.x:488`
+Source: `lib/func/func.x:487`
 
 <a id="Func.new"></a>
 #### Func.new
@@ -205,7 +205,7 @@ Boxes `function` without copying or retaining the `Func`.
 The returned `Var` carries the same pointer and shares its `Scope`
 lifetime.
 
-Source: `lib/func/func.x:507`
+Source: `lib/func/func.x:506`
 
 ### `FuncArg`
 
@@ -254,7 +254,7 @@ Returns the borrowed native callable carried by `v`.
 
 **Raises:** `<bad-types>` when the value is not a `Func`.
 
-Source: `lib/func/func.x:512`
+Source: `lib/func/func.x:511`
 
 ## Runtime-internal callables
 
@@ -344,7 +344,7 @@ operation that takes ownership. A NULL `function` does nothing.
 
 **Raises:** the causes of `Scope.move`, which leave ownership unchanged.
 
-Source: `lib/func/func.x:499`
+Source: `lib/func/func.x:498`
 
 <a id="Func.signature"></a>
 #### Func.signature
@@ -355,7 +355,7 @@ Returns a native binding's borrowed canonical signature.
 The result has the `((func (PARAMETERS...)) RESULT...)` shape supplied to
 the constructor and remains valid for the binding's lifetime.
 
-Source: `lib/func/func.x:478`
+Source: `lib/func/func.x:477`
 
 ## Public types
 

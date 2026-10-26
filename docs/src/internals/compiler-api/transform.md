@@ -30,7 +30,7 @@ Calls the typed callable `callee` with `arguments`, each converted to
 its parameter and evaluated once, in source order, as a statement
 expression.
 
-Source: `src/transform/literals.x:227`
+Source: `src/transform/literals.x:226`
 
 <a id="Compiler.lower_lambda_expr"></a>
 #### Compiler.lower_lambda_expr
@@ -67,7 +67,7 @@ packs the remaining `args` through ordinary List construction. Only an
 explicit splice contributes more than one element. The caller changes
 the callee's final parameter to List before issuing this packed call.
 
-Source: `src/transform/expressions.x:354`
+Source: `src/transform/expressions.x:339`
 
 <a id="Compiler.shipped_support"></a>
 #### Compiler.shipped_support

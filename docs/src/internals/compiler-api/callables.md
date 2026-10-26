@@ -39,7 +39,7 @@ original parameter types before calling it, then converts its `Var` result
 to the expected return type. Already compatible or unsupported shapes pass
 through unchanged.
 
-Source: `src/callables/callbacks.x:167`
+Source: `src/callables/callbacks.x:166`
 
 <a id="Compiler.capture_environment"></a>
 #### Compiler.capture_environment

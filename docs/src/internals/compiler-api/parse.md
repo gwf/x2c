@@ -150,7 +150,7 @@ Source: `src/parse/binding.x:614`
 Binds one constructed parameter in the current scope, including nested
 function modifiers and reference parameter facts.
 
-Source: `src/parse/declarators.x:507`
+Source: `src/parse/declarators.x:506`
 
 <a id="Compiler.bind_source_statement"></a>
 #### Compiler.bind_source_statement
@@ -230,7 +230,7 @@ starting at `start`, or NULL. A doc comment opens with two asterisks and
 ends on the line before `start` or on its line. Macro templates carry the
 text until their selected body binds at the invocation.
 
-Source: `src/parse/units.x:590`
+Source: `src/parse/units.x:588`
 
 <a id="Compiler.enclosing"></a>
 #### Compiler.enclosing
@@ -289,7 +289,7 @@ Constructs a foreign alias from one direct function declaration and target.
 typed, a function. Storage is limited to `static` or `inline`, when
 present, and variadic parameters are rejected.
 
-Source: `src/parse/units.x:755`
+Source: `src/parse/units.x:751`
 
 <a id="Compiler.finish_initializers"></a>
 #### Compiler.finish_initializers
@@ -346,7 +346,7 @@ Returns the folded package-member spelling at the current token, or NULL.
 The token must be an unshadowed imported alias followed by `.` and an
 identifier. This lookahead does not consume tokens.
 
-Source: `src/parse/declarators.x:610`
+Source: `src/parse/declarators.x:608`
 
 <a id="Compiler.parse_basic_identifier"></a>
 #### Compiler.parse_basic_identifier
@@ -355,7 +355,7 @@ Source: `src/parse/declarators.x:610`
 
 Consumes one `ident` token and returns its spelling as a one-item `List`.
 
-Source: `src/parse/declarators.x:623`
+Source: `src/parse/declarators.x:621`
 
 <a id="Compiler.parse_complex_identifier"></a>
 #### Compiler.parse_complex_identifier
@@ -366,7 +366,7 @@ Parses the current identifier or dotted owner/member as a one-item name.
 Package aliases and imported method spellings are folded through the
 current `Sym`, and all accepted tokens are consumed.
 
-Source: `src/parse/declarators.x:549`
+Source: `src/parse/declarators.x:547`
 
 <a id="Compiler.parse_declaration_argument"></a>
 #### Compiler.parse_declaration_argument
@@ -498,7 +498,7 @@ Source: `src/parse/types.x:429`
 
 Consumes and returns the current identifier, or NULL without consuming.
 
-Source: `src/parse/declarators.x:630`
+Source: `src/parse/declarators.x:628`
 
 <a id="Compiler.parse_parameter"></a>
 #### Compiler.parse_parameter
@@ -509,7 +509,7 @@ Parses one parameter and returns `(param TYPE DECLARATOR)` or `(...)`.
 Outside macro-template parsing, a named parameter is installed in the
 current `Sym` scope. The following delimiter remains current.
 
-Source: `src/parse/declarators.x:490`
+Source: `src/parse/declarators.x:489`
 
 <a id="Compiler.parse_parameter_list"></a>
 #### Compiler.parse_parameter_list
@@ -520,7 +520,7 @@ Parses a nonempty comma-separated parameter `List` in source order.
 The caller owns the parameter scope; the first non-comma delimiter remains
 current.
 
-Source: `src/parse/declarators.x:473`
+Source: `src/parse/declarators.x:472`
 
 <a id="Compiler.parse_simple_declaration"></a>
 #### Compiler.parse_simple_declaration
