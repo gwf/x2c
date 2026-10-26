@@ -71,11 +71,14 @@ static Array _meta_arguments(Compiler c, List parameters, Symbol head) {
   Array arguments = [];
   c.expect(<(>);
   if (c.peek(0) != <)>) loop {
-    List argument = _meta_argument(c);
-    if (parameters && !c.macro_holes &&
+    int rest = parameters && parameters.car() == %(....);
+    List argument = rest && !c.peek_macro_hole()
+      ? c.parse_call_splice() : NULL;
+    if (!argument) argument = _meta_argument(c);
+    if (parameters && !rest && !c.macro_holes &&
         !(head == <meta-call> && c.sym.is_var_type(parameters.car())))
       argument = c.convert_expression(argument, parameters.car());
-    parameters = parameters.cdr();
+    if (!rest) parameters = parameters.cdr();
     arguments.push(argument);
     if (!c.test(<,>)) break;
   }

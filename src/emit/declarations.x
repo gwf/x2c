@@ -48,7 +48,7 @@ module List _bind(Emitter &e, Ast ast) {
 
 module List _param(Emitter &e, List ast) {
   List (type, mods) = ast.cdr();
-  List code = _emit(e, type);
+  List code = _emit(e, type === %(....) ? %("List") : type);
   mods = %( $mods );
   return code.append(_emit(e, mods));
 }

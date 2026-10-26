@@ -68,10 +68,15 @@ module void _check_converter_args(
   }
   List n = notes;
   for (List p = params, a = arguments; p && a;
-       p = cdr(p), a = cdr(a), n = cdr(n)) {
+       p = car(p) == %(....) ? p : cdr(p), a = cdr(a), n = cdr(n)) {
     if (car(p) is not <list> || car(a) is not <list>) continue;
     List param = car(p), argument = car(a);
     Type expected = param.car() == <param> ? param.type_from_ast() : param;
+    if (expected.is_list_rest()) {
+      expected = %("Var");
+      match (argument) case %(expr ? (splice ?value)):
+        argument = value, expected = %("List");
+    }
     _check_noted_converter(c, car(n), argument, expected, 0);
   }
   /* A static printf-family format converts each Var value it consumes. The
@@ -716,6 +721,9 @@ static void _check_object_pointer(
 static void _check_native_crossing(
   Compiler c, List expr, Type type, Type target,
   Type declared_source, Type declared_target) {
+  if (!c.sym.same_list_rest_convention(type, target))
+    c.report_error(<type>, "incompatible List rest calling convention",
+      NULL, NULL);
   String integer = _not_null_pointer_constant(c, expr);
   if (integer && c.sym.resolve_key(target).is_pointer())
     $fail.expressions_pointer_integer(c, NULL, integer, target);

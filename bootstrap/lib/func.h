@@ -41,6 +41,10 @@ static inline FuncArg FuncArg_value(Var value){
   ;
 }
 
+FuncArg FuncArg_splice(List items);
+
+FuncArg x2c_func_splice_argument(Func fn, unsigned index, List items);
+
 static inline FuncArg FuncArg_reference(const void * reference, List type){
   return(FuncArg){
     .data.reference = reference, .reference_type = type

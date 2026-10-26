@@ -493,12 +493,16 @@ List Compiler.parse_parameter_list(Compiler c) {
     current `Sym` scope. The following delimiter remains current.
 */
 List Compiler.parse_parameter(Compiler c) {
-  if (c.test(<...>)) return %(...);
-  List qual = _type_qualifiers(c);
-  List spec = _type_specifier(c), type = %( @qual @spec );
+  int rest = c.test(<...>);
+  if (rest && !c.test(<.>)) return %(...);
+  List qual = rest ? NULL : _type_qualifiers(c);
+  List spec = rest ? %(....) : _type_specifier(c), type = %( @qual @spec );
   List method = NULL;
   Token first = NULL, after = NULL;
   List declarator = _declarator(c, type, NULL, method, first, after);
+  if (rest && (declarator.caddr() || c.peek(0) == <,>))
+    c.report_error(<parse>, "List rest parameter must be a final name",
+      c.token, NULL);
   return _finish_parameter(c, type, declarator, method, first, after);
 }
 
@@ -510,7 +514,8 @@ List Compiler.bind_parameter(Compiler c, List base, List declarator) =>
 module List _finish_parameter(
   Compiler c, List base, List declarator, List method_identity,
   Token source_first, Token source_after) {
-  base = _finish_type(c, base);
+  int list_rest = base === %(....);
+  base = _finish_type(c, list_rest ? %("List") : base);
   if (<auto> in base && !c.macro_holes && !c.shallow)
     $fail.parse_auto_storage(c, c.token);
   int preserved_self = 0;
@@ -521,6 +526,7 @@ module List _finish_parameter(
   List modifiers = NULL;
   base = Type.declaration_base(base, modifiers);
   declarator = Ast.append_modifiers(declarator, modifiers);
+  if (list_rest) base = %(....);
   List parameter = %(param $base $declarator);
   match (declarator)
     case %(bind ?binding ?):

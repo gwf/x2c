@@ -24,6 +24,11 @@ static List _declare(
   _check_spelling(s.c, _declared_spelling(key));
   Type ctxkey = %( @context @key ), type = ast.type_from_ast();
   Type declared_type = type;
+  Type prior = type.is_function() ? s.get(ctxkey) : NULL;
+  if (type.is_function() && prior.is_function() &&
+      !s.same_list_rest_convention(type, prior))
+    s.c.report_error(<type>, "conflicting List rest calling convention",
+      NULL, NULL);
   if ((int) s.scopes.len() == s.base_scopes && !context)
     _track_static(s, (List) ctxkey, ast);
   List binding = NULL;

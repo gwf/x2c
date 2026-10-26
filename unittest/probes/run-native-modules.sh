@@ -39,18 +39,26 @@ bundle() {
 }
 
 cat >src/helpers.x <<'EOF'
+#include "x2c.x"
 meta int triple(int);
+meta int rest_total(int, ....);
 
 int triple(int x) { return 3 * x; }
+int rest_total(int prefix, .... items) {
+  foreach (int item in items) prefix += item;
+  return prefix;
+}
 EOF
 cat >src/main.x <<'EOF'
 #include <stdio.h>
 #include "helpers.x"
 
 meta static int nine(void) => triple(3);
+meta static int six(void) => rest_total(1, 2, 3);
 
 int main(void) {
   printf("%d %d\n", $nine(), triple(5));
+  printf("rest %d %d\n", $rest_total(1, 2, 3), $six());
   return 0;
 }
 EOF
@@ -69,6 +77,7 @@ esac
 "$X2C" translate -q --native-module helpers.so --out-dir out -I src \
   src/main.x
 grep -Fq '9, triple(5)' out/main.c || fail "module result"
+grep -Fq '"rest %d %d\n", 6, 6' out/main.c || fail "module rest result"
 
 expect_error "no binding for triple" \
   "$X2C" translate -q --out-dir out -I src src/main.x
@@ -231,14 +240,14 @@ int twelve_value(void);
 meta static int nine(void) => triple(3);
 int main(void) { return $nine() + twelve_value(); }
 EOF
-[[ $("$X2C" run -q) == "9 15" ]] || fail "manifest module result"
+[[ $("$X2C" run -q) == $'9 15\nrest 6 6' ]] || fail "manifest module result"
 "$X2C" build -v >rebuild.out 2>&1
 grep -Fq "unchanged link $BUILD/.x2c-build/helpers.so" rebuild.out ||
   fail "unchanged module output replaced"
 grep -Fq "up-to-date translate $BUILD/src/main.x" rebuild.out ||
   fail "consumer retranslated after an unchanged module"
 sed -i.bak 's/3 \* x/4 * x/' src/helpers.x
-[[ $("$X2C" run -q) == "12 20" ]] || fail "consumer after a module edit"
+[[ $("$X2C" run -q) == $'12 20\nrest 6 6' ]] || fail "consumer after a module edit"
 # `other` names no module, so the one `lib` loaded does not reach it.
 expect_error "no binding for triple" "$X2C" build -q --target other
 

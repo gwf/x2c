@@ -191,6 +191,18 @@ int Type.function_parts(Type type, List &params, Type &?return_type) {
   return 0;
 }
 
+/** Returns whether this parameter is the List rest calling convention. */
+int Type.is_list_rest(Type type) => type === %(....);
+
+/** Returns the fixed prefix length, or -1 for a callable without List rest.
+*/
+int Type.list_rest_index(Type type) {
+  List parameters = NULL;
+  if (!type.function_parts(parameters, NULL) || !parameters ||
+      !parameters.last().type().is_list_rest()) return -1;
+  return parameters.len() - 1;
+}
+
 // storage classes
 
 /** Returns whether `type` carries the `static` storage class. */

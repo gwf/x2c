@@ -312,6 +312,37 @@ test ! -s "$tmp/err"
 
 python3 commands/repl/tests/reload.py "$tmp"
 
+
+# Rest calls preserve nested Lists across the helper boundary. A reference
+# prefix uses an object envelope; its explicit rest splice still packs once.
+cat >"$tmp/rest.x" <<'EOF'
+int rest_global = 10;
+List loaded_rest(.... items) { return items; }
+int loaded_rest_ref(int &value, .... items) {
+  value += items.len();
+  return value;
+}
+EOF
+printf '%s\n' ":load \"$tmp/rest.x\"" \
+  'List rest_pair = %(2 3);' 'List rest_empty = NULL;' \
+  'loaded_rest();' 'loaded_rest(rest_pair);' \
+  'loaded_rest(1, @rest_pair, @rest_empty, 4);' \
+  'Func rest_loaded = loaded_rest;' 'rest_loaded(rest_pair);' \
+  'loaded_rest_ref(rest_global, 1, @rest_pair, 4);' \
+  'rest_global;' >"$tmp/input"
+builds/0/x2c repl <"$tmp/input" >"$tmp/out" 2>"$tmp/err"
+grep '^=>' "$tmp/out" >"$tmp/rest-values"
+cat >"$tmp/rest-expected" <<'EOF'
+=> ()
+=> ((2 3))
+=> (1 2 3 4)
+=> ((2 3))
+=> 14
+=> 14
+EOF
+cmp "$tmp/rest-expected" "$tmp/rest-values"
+test ! -s "$tmp/err"
+
 # Every retained executable directory belongs to a closed session.
 set -- "$tmp"/x2c-*
 test ! -e "$1"

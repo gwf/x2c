@@ -600,6 +600,51 @@ expression. Leaving a statement expression runs cleanup as described in
 [Errors and cleanup](#errors-and-cleanup). A statement expression is an
 ordinary `sizeof` operand, so `sizeof({ ...; })` measures its value's type.
 
+### List rest parameters
+
+A final `.... name` parameter receives an ordinary `List`. Write separate
+arguments at the call site; the compiler packs the arguments after the fixed
+parameters into that List. With no trailing arguments, the List is empty.
+There can be one rest parameter, with zero or more fixed parameters before it.
+
+```x2c
+static int count_items(String label, .... items) => items.len();
+
+int main(void) {
+  List pair = %(2 3), empty = NULL;
+  printf("%d %d %d\n", count_items("none"),
+         count_items("nested", pair),
+         count_items("spliced", 1, @pair, @empty, 4));
+  return 0;
+}
+```
+
+```text
+0 1 4
+```
+
+An ordinary List argument contributes **one element**, including a value
+whose type aliases List, such as `Type`. Explicit `@list` or `@(expression)`
+splices the List's elements into the tail, as in `$(...)`. An empty splice
+contributes nothing. The
+packed tail follows ordinary ordered List construction: each value and splice
+is evaluated once in source order. Fixed arguments retain ordinary call
+semantics relative to the tail.
+
+`List.new(.... items)` is the named, passable equivalent of `$(...)`. For
+example, `List.new(1, @pair, 4)` constructs the same List as `$(1, @pair, 4)`.
+`List.new()` and `$()` both return the empty List.
+
+The same packing applies to methods, typed function pointers, and `Func`
+calls. A method's receiver remains a fixed argument. A four-dot signature is
+distinct from a signature with an ordinary final `List` parameter; that
+ordinary parameter requires the caller to supply its List explicitly.
+
+Generated C receives the fixed parameters followed by one ordinary `List`.
+The callee does not scan C varargs or a sentinel. Ordinary List element,
+conversion, allocation, and lifetime rules apply; packing does not deep-copy
+elements. C `...` retains its C varargs calling convention.
+
 ### Reference parameters
 
 A function parameter declared `T &name` aliases an addressable `T` supplied by
@@ -3727,7 +3772,7 @@ A noncapturing lambda remains a generated C function and can adapt to a
 supported C callback type, including `int (*)(int)`, in an initializer,
 assignment, argument, or return. A local typedef of the callback type has the
 same behavior. Parentheses around the lambda preserve this adaptation.
-Where a `Func` is expected, including a `(Func)` cast, a fixed nonvariadic
+Where a `Func` is expected, including a `(Func)` cast, a fixed or four-dot
 function or function-pointer value converts implicitly when the `Func` conversion supports
 its parameters and result. A lambda after a cast needs its own parentheses,
 as in `(Func) (%!(int a) => a * 13)`, because `%!` after `)` reads as modulo.
@@ -3746,8 +3791,10 @@ ownership of a `Func` leave it in place. A
 function-pointer expression is evaluated once and its exact pointer is copied
 into a new `Func`; later assignment to the source pointer does not retarget it.
 A null function pointer instead produces null `Func` without allocating a
-binding. Variadic functions do not convert implicitly; use the advanced
-`Func.new_rest` API when a native operation consumes a rest `List`.
+binding. C `...` functions do not convert implicitly. Four-dot functions
+convert with their rest calling convention, including any fixed parameters.
+An ordinary List argument remains one rest element through `Func`; explicit
+`@list` or `@(expression)` splices its elements as in a direct call.
 
 A capturing lambda has static type `Func`; calling it directly returns `Var`.
 The same is true after a noncapturing lambda converts to `Func`. Successful

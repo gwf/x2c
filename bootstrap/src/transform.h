@@ -34,6 +34,8 @@ void Compiler_shipped_support(Compiler c, Symbol kind, List source, String form)
 
 List Compiler_lower_lambda_expr(Compiler c, List expression);
 
+List Compiler_pack_rest_arguments(Compiler c, List params, List args);
+
 List Compiler_call_in_order(Compiler c, List callee, List arguments);
 
 #endif

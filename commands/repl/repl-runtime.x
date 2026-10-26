@@ -212,6 +212,12 @@ void *lisp_func_value(FuncArg *argv, unsigned index, Var value) {
   return argv;
 }
 
+/** Prepares an explicit List splice for a lowered rest call. */
+void *lisp_func_splice(Func fn, FuncArg *argv, unsigned index, List value) {
+  argv[index] = x2c_func_splice_argument(fn, index, value);
+  return argv;
+}
+
 /** Prepares an address without loading the caller's object. A non-lvalue
     supplies zero, which the ordinary reference reader rejects. */
 void *lisp_func_reference(
@@ -230,6 +236,7 @@ Var lisp_func_invalid(Func fn, unsigned index, List source) {
 
 void repl_runtime_initialize(Lisp lisp) {
   $lisp.bind(lisp, "repl.native.lisp_func_value", lisp_func_value);
+  $lisp.bind(lisp, "repl.native.lisp_func_splice", lisp_func_splice);
   $lisp.bind(lisp, "repl.native.lisp_func_reference", lisp_func_reference);
   $lisp.bind(lisp, "repl.native.lisp_void", lisp_void);
   $lisp.bind(lisp, "repl.native.lisp_cell", lisp_cell);

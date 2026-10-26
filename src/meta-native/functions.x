@@ -116,7 +116,14 @@ static Array _stub_arguments(Func function, const FuncArg *argv) {
   if (parameters == %((void))) parameters = NULL;
   Array values = [];
   int count = parameters.len();
-  for (int i = 0; i < count; i++) values.push(argv[i].data.value);
+  for (int i = 0; i < count; i++) {
+    if (parameters.car() == %(....)) {
+      List rest = argv[i].data.value;
+      foreach (Var value in rest) values.push(value);
+    }
+    else values.push(argv[i].data.value);
+    parameters = parameters.cdr();
+  }
   return values;
 }
 

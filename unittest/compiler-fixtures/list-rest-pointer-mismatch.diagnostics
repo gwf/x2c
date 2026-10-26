@@ -1,0 +1,2 @@
+unittest/compiler-fixtures/list-rest-pointer-mismatch.x:4:1: type: incompatible List rest calling convention
+

@@ -84,6 +84,7 @@ static List _rewrite_call(
       for (int i = 0; declared && i < rewritten.len(); i++) {
         Var param = car(declared);
         declared = cdr(declared);
+        if (param == %(....)) break;
         if (param is <list> && !((Type) param).is_reference())
           rewritten[i] = c.convert_expression(rewritten[i], param);
       }

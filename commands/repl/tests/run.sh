@@ -132,7 +132,6 @@ cat >"$tmp/reports-expected" <<'EOF'
             ^
 
 rejected: unsupported: a call of a value that is not a function name
-rejected: unsupported: a conversion from List to Var
 EOF
 cmp "$tmp/reports-expected" "$tmp/reports"
 

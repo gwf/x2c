@@ -274,19 +274,36 @@ module List _return(Compiler c, List ast) {
 // calls
 
 module List _call(Compiler c, List ast) {
-  match (ast)
-    case $($called(?callee, *arguments)):
-      match (callee.cadr()) {
-        case %((func ?parameters) *):
-          return _typed_call(c, callee, parameters, arguments);
-        case %((!or (!quote *) & ^) (func ?parameters) *):
-          return _typed_call(c, callee, parameters, arguments);
-      }
+  match (ast) case $($called(?callee, *arguments)): {
+    match (callee.cadr()) {
+      case %((func ?parameters) *):
+        return _typed_call(c, callee, parameters, arguments);
+      case %((!or (!quote *) & ^) (func ?parameters) *):
+        return _typed_call(c, callee, parameters, arguments);
+    }
+    Type resolved = c.sym.resolve_key(callee.cadr());
+    List parameters = NULL;
+    if (resolved.list_rest_index() >= 0 &&
+        resolved.function_parts(parameters, NULL)) {
+      callee = %(expr $resolved $(callee.caddr()));
+      return _typed_call(c, callee, parameters, arguments);
+    }
+  }
   return ast;
 }
 
-static List _typed_call(
+module List _typed_call(
   Compiler c, List callee, List params, List args) {
+  if (params && params.last().type().is_list_rest()) {
+    args = c.pack_rest_arguments(params, args);
+    params = params[0:-1].append(%(("List")));
+    Type signature = callee.cadr();
+    if (signature.is_pointer())
+      signature = cons(signature.car(),
+        cons(%(func $params), signature.cdr().cdr()));
+    else signature = cons(%(func $params), signature.cdr());
+    callee = %(expr $signature $(callee.caddr()));
+  }
   String callee_name = NULL;
   match (callee) {
     case %(expr ? $($source_identifier_content(%(?binding)))):
@@ -299,6 +316,9 @@ static List _typed_call(
   for (List p = params, a = args; a;
        p = p.cdr(), a = a.cdr(), arg_index++) {
     List param = (p ? p.car().list() : NULL), arg = a.car();
+    match (arg) case %(expr ? (splice ?)):
+      c.report_error(<xform>, "List splice requires a rest argument",
+        NULL, NULL);
     List expected = param;
     if (list_varargs && arg_index > 0) expected = %("Var");
     if (param && param.car() == <param>) expected = param.type_from_ast();
@@ -311,6 +331,28 @@ static List _typed_call(
   List newargs = values.list_free();
   Macro called = $called;
   return c.rebuild_expression(NULL, called(callee, newargs)).caddr();
+}
+
+/** Preserves the fixed arguments for `params`, which ends in `(....)`, and
+    packs the remaining `args` through ordinary List construction. Only an
+    explicit splice contributes more than one element. The caller changes
+    the callee's final parameter to List before issuing this packed call. */
+List Compiler.pack_rest_arguments(Compiler c, List params, List args) {
+  match (args) case %((expr (void) ())): args = NULL;
+  int fixed = params.len() - 1;
+  if (args.len() < fixed)
+    c.report_error(<xform>, "too few arguments for List rest function",
+      NULL, NULL);
+  Array prefix = [];
+  for (int i = 0; i < fixed; i++, args = args.cdr()) {
+    match (args.car()) case %(expr ? (splice ?)):
+      c.report_error(<xform>, "List splice requires a rest argument",
+        NULL, NULL);
+    prefix.push(args.car());
+  }
+  auto Array elements = args.array();
+  prefix.push(c.list_expression(elements, %(nil)));
+  return prefix.list_free();
 }
 
 static int _iter_immediate_consumer(String name) =>

@@ -88,7 +88,7 @@ static void _check_arity(
 static int _parameters_variadic(List parameters) {
   foreach (Var parameter in parameters)
     if (parameter == <...> || (parameter is <list> && !parameter.is_nil() &&
-        parameter.car() == <...>))
+        (parameter.car() == <...> || parameter.car() == <....>)))
       return 1;
   return 0;
 }
@@ -275,6 +275,11 @@ static macro Stmt $func_null_argument(Expr $function, Expr $storage,
 
 /* The by-value alternative: the argument boxed, or the diagnostic call for
    a type with no Var form. */
+static macro Stmt $func_splice(Expr $function, Expr $storage,
+    Expr $index, Expr $value) {
+  $storage[$index] = x2c_func_splice_argument($function, $index, $value);
+}
+
 static macro Expression $func_value(Expr $argument) =>
   FuncArg_value($argument);
 
@@ -297,6 +302,12 @@ List _x2c_func_call_arguments(List function, List storage, List arguments) {
   int position = 0;
   foreach (List argument in arguments) {
     List index = $!int{ $(position++) };
+    match (argument) case %(expr ? (splice ?value)): {
+      Macro splice = $func_splice;
+      prepared.push(splice(function, storage, index,
+        c.convert_expression(value, %("List"))));
+      continue;
+    }
     Type type = argument.cadr();
     int forwarded = type.car() == <opt-ref>;
     List source = c.cache_literal_list(
@@ -380,7 +391,10 @@ static List _func_arg_part(List argument) {
   Macro prepare = $func_argument, absent = $func_null_argument,
         boxed = $func_value;
   Var value = %(no-value), address = NULL, source = NULL;
+  Macro splice = $func_splice;
   match (argument) {
+    case splice(?function, ?storage, ?index, ?value):
+      return %(func-splice $value);
     case prepare(
       ?function, ?storage, ?count, ?index, ?pointer, ?type, ?alternative): {
       match (alternative) case boxed(?boxed_value): value = boxed_value;

@@ -498,6 +498,19 @@ static List _parse_slice(Compiler c, List expr, List start) {
     %($expr $start $stop $step))));
 }
 
+/** Parses an explicit List splice argument, or returns NULL without consuming
+    an ordinary argument. Parentheses delimit a complete splice expression. */
+List Compiler.parse_call_splice(Compiler c) {
+  if (!c.test(<@>)) return NULL;
+  List value;
+  if (c.test(<(>)) {
+    value = c.parse_expression();
+    c.expect(<)>);
+  }
+  else value = c.parse_variable();
+  return %(expr ("List") (splice $value));
+}
+
 static List _parse_postfix_apply(Compiler c, List expr) {
   Token origin = c.token;
   c.expect(<(>);
@@ -505,6 +518,7 @@ static List _parse_postfix_apply(Compiler c, List expr) {
   if (c.peek(0) == <)>) arguments.push(%(expr (void) ()));
   while (c.peek(0) != <)>) {
     List argument = c.try_parse_macro_slot(<argument>);
+    if (!argument) argument = c.parse_call_splice();
     arguments.push(argument ? argument : c.parse_assignment());
     notes.push(c.protocol_helpers.getdefault("explicit-converter", %()));
     if (!c.test(<,>)) break;

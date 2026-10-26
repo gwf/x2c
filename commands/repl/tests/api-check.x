@@ -379,6 +379,25 @@ static void _interpreter_ownership(ReplSession s) {
   _expect(s, "returned.x;", <value>, 23);
 }
 
+static void _rest_arguments(ReplSession s) {
+  _expect(s, "List rest_items(.... items) { return items; }", <defined>, void);
+  _expect(s, "int rest_count(int prefix, .... items) "
+             "{ return prefix + items.len(); }", <defined>, void);
+  _expect(s, "List rest_pair = %(2 3);", <executed>, void);
+  _expect(s, "List rest_empty = NULL;", <executed>, void);
+  _expect(s, "rest_items();", <value>, %());
+  _expect(s, "rest_items(rest_pair);", <value>, %((2 3)));
+  _expect(s, "rest_items(1, @rest_pair, @rest_empty, 4);",
+          <value>, %(1 2 3 4));
+  _expect(s, "rest_count(10, rest_pair);", <value>, 11);
+  _expect(s, "Func rest_dynamic = rest_count;", <executed>, void);
+  _expect(s, "rest_dynamic(10, 1, @rest_pair, @rest_empty, 4);", <value>, 14);
+  _expect(s, "rest_dynamic(10);", <value>, 10);
+  _expect(s, "int rest_forward(void) { return rest_count(10, 1, 2); }",
+          <defined>, void);
+  _expect(s, "rest_forward();", <value>, 12);
+}
+
 static void _lambda_results(ReplSession s) {
   _expect(
     s, "Func lambda_uncast = %!() => %!() => 17;", <rejected>, void);
@@ -832,6 +851,7 @@ int main(int argc, char **argv) {
         _meta_records(session);
         _interpreter_ownership(session);
         _lambda_results(session);
+        _rest_arguments(session);
         _reference_captures(session);
         _reference_arguments(session);
         _compiled_functions(session);

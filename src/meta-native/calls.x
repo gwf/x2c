@@ -191,10 +191,19 @@ static Array _meta_values(
   Array values = [];
   foreach (List argument in arguments) {
     Type want = NULL;
-    if (params) {
+    int rest = params && params.car() == %(....);
+    if (params && !rest) {
       want = params.car();
       params = params.cdr();
     }
+    if (rest)
+      match (argument)
+        case %(expr ? (splice ?items)): {
+          List splice = c.meta_argument(
+            items, %("List"), site, _meta_call_value);
+          foreach (Var value in splice) values.push(value);
+          continue;
+        }
     values.push(c.meta_argument(argument, want, site, _meta_call_value));
   }
   return values;

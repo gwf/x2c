@@ -225,6 +225,13 @@ static List _statement_expression(List declarations, List expression) =>
 List Compiler.call_in_order(Compiler c, List callee, List arguments) {
   Type signature = callee.cadr();
   List parameters = signature.car().list().cadr();
+  if (parameters && parameters.last().type().is_list_rest()) {
+    List normalized = _typed_call(c, callee, parameters, arguments);
+    callee = normalized.cadr();
+    arguments = normalized.caddr().list().cdr();
+    signature = callee.cadr();
+    parameters = signature.car().list().cadr();
+  }
   Array converted = [];
   for (List actual = arguments, expected = parameters;
        actual && expected;

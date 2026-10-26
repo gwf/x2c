@@ -542,7 +542,10 @@ static Var _call(Func function, const FuncArg *argv) {
     if (_is_record(c, parameter.car()))
       raise %(repl (reason $(call.name + " failed: record values cannot "
                                              "cross the helper boundary")));
-    arguments.push(x2c_func_value_argument(function, argv, i, <var>));
+    Var value = x2c_func_value_argument(function, argv, i, <var>);
+    if (parameter.car() == %(....))
+      foreach (Var item, value.list()) arguments.push(item);
+    else arguments.push(value);
   }
   List problem = datum_result_problem(arguments, {});
   if (problem)

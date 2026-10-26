@@ -395,9 +395,12 @@ static void _lower_scan(Lowering &l, Var form) {
   if (application) {
     _lower_scan(l, application.car());
     foreach (List argument, application.cdr())
-      match (argument) case %(func-arg ?value ?address ?): {
-        _lower_scan(l, value);
-        _lower_scan(l, address);
+      match (argument) {
+        case %(func-arg ?value ?address ?): {
+          _lower_scan(l, value);
+          _lower_scan(l, address);
+        }
+        case %(func-splice ?value): _lower_scan(l, value);
       }
     return;
   }
@@ -693,8 +696,8 @@ static Var _lower_to_type(Lowering &l, Type want, Var value) {
 static List _lower_param_type(List params) {
   if (!params) return NULL;
   List param = params.car();
-  if (param && param.car() == <param>) return param.type_from_ast();
-  return param;
+  if (param && param.car() == <param>) param = param.type_from_ast();
+  return param == %(....) ? %("List") : param;
 }
 
 static List _lower_args(
@@ -749,7 +752,9 @@ static Var _lower_native_call(
   Lowering &l, List callee, String name, List args) {
   List params = NULL;
   match (callee) case %((func ?declared) *): params = declared;
-  int references = 0;
+  int rest = params && params.last() == %(....);
+  if (rest) args = l.compiler.pack_rest_arguments(params, args);
+  int references = rest;
   for (List p = params; p; p = p.cdr()) {
     Type parameter = _lower_param_type(p);
     references |= parameter.is_reference();
@@ -767,7 +772,9 @@ static Var _lower_native_call(
     prepare.push(
       parameter.is_reference()
       ? %(C.func.reference $argv $index $value (quote $(parameter.cdr())))
-      : %(C.func.value $argv $index $value));
+      : rest && !p
+        ? %(C.func.splice $(Atom.intern(name)) $argv $index $value)
+        : %(C.func.value $argv $index $value));
     index++;
   }
   l.automatic = 1;
@@ -816,23 +823,32 @@ static Var _lower_application(Lowering &l, Var content) {
   int count = parts.len() - 1, index = 0;
   Array prepare = auto [];
   foreach (List part, parts.cdr())
-    match (part) case %(func-arg ?value ?address ?source): {
-      Var type = List.match(
-        source, %(expr ("List") (ident ?)))
-        ? %(C.func.reference-type $fn $count $index)
-        : _lower_expr(l, source);
-      Var pointer = _lower_expr(l, address);
-      if (l.declined) return void;
-      Var by_value = %(C.func.invalid $fn $index $type);
-      if (!List.match(value, %(no-value))) {
-        value = _lower_expr(l, value);
-        if (_lower_failed(l, value)) return void;
-        by_value = %(C.func.value $argv $index $value);
+    match (part) {
+      case %(func-splice ?value): {
+        Var list = _lower_expr(l, value);
+        if (_lower_failed(l, list)) return void;
+        prepare.push(%(C.func.splice $fn $argv $index $list));
+        index++;
       }
-      List reference = %(C.func.reference $argv $index $pointer $type);
-      prepare.push(
-        %(if (C.func.reference-type $fn $count $index) $reference $by_value));
-      index++;
+      case %(func-arg ?value ?address ?source): {
+        Var type = List.match(
+          source, %(expr ("List") (ident ?)))
+          ? %(C.func.reference-type $fn $count $index)
+          : _lower_expr(l, source);
+        Var pointer = _lower_expr(l, address);
+        if (l.declined) return void;
+        Var by_value = %(C.func.invalid $fn $index $type);
+        if (!List.match(value, %(no-value))) {
+          value = _lower_expr(l, value);
+          if (_lower_failed(l, value)) return void;
+          by_value = %(C.func.value $argv $index $value);
+        }
+        List reference = %(C.func.reference $argv $index $pointer $type);
+        prepare.push(
+          %(if (C.func.reference-type $fn $count $index)
+               $reference $by_value));
+        index++;
+      }
     }
   l.automatic = 1;
   Var apply = %(C.func.apply $fn $count $argv);
@@ -858,6 +874,7 @@ static Var _lower_func_adapter(Lowering &l, Type type, Var callable) {
   int index = 0;
   foreach (Type parameter, params) {
     if (parameter.equal(%(void))) continue;
+    if (parameter == %(....)) parameter = %("List");
     Var value;
     if (parameter.is_reference()) {
       Type target = parameter.cdr();

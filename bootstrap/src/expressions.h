@@ -35,6 +35,8 @@ List Compiler_parse_parenthesized_statement(Compiler c);
 
 List Compiler_parse_macro_expression_target(Compiler c);
 
+List Compiler_parse_call_splice(Compiler c);
+
 List Compiler_parse_primary(Compiler c);
 
 List Compiler_parse_variable(Compiler c);

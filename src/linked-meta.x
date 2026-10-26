@@ -1729,6 +1729,8 @@ static List _protocol_forward(
     Code argument = $!( $name );
     if (templates.car() == %($binder))
       argument = $!( $(x2c_ident(convert))($argument) );
+    if (type == %(....))
+      argument = %(expr ("List") (splice $argument));
     arguments.push(argument);
     templates = templates.cdr();
   }

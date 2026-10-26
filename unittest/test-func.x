@@ -251,6 +251,47 @@ static void func_pointer_conversion_preserves_references(void) {
   EXPECT_INT_EQ(value, 41);
 }
 
+static List _rest_with_prefix(int prefix, List values) => cons(prefix, values);
+
+static int _rest_with_reference(int &count, List values) {
+  count += values.len();
+  return count;
+}
+
+static void func_rest_keeps_prefix_and_explicit_splices(void) {
+  Func fn = Func.new_rest(
+    _rest_with_prefix, %((func ((int) ("List"))) "List"));
+  List nested = %(2 3);
+  FuncArg arguments[] = {
+    FuncArg.value(7), FuncArg.value(nested),
+    FuncArg.splice(NULL), FuncArg.splice(%(4 5)), FuncArg.value(6)
+  };
+  EXPECT_TRUE(fn.apply(5, arguments) == %(7 (2 3) 4 5 6));
+  EXPECT_TRUE(fn.apply(1, arguments) == %(7));
+  int caught = 0;
+  try fn.apply(0, NULL);
+  catch %(bad-arity *): caught = 1;
+  EXPECT_TRUE(caught);
+
+  caught = 0;
+  try x2c_func_splice_argument(fn, 0, nested);
+  catch %(bad-types *): caught = 1;
+  EXPECT_TRUE(caught);
+}
+
+static void func_rest_preserves_reference_prefix(void) {
+  Func fn = Func.new_rest(
+    _rest_with_reference, %((func ((& int) ("List"))) int));
+  int count = 10;
+  FuncArg arguments[] = {
+    FuncArg.reference(&count, %(int)), FuncArg.value(1), FuncArg.value(2)
+  };
+  EXPECT_TRUE(x2c_func_reference_type(fn, 3, 0) == %(int));
+  EXPECT_NULL(x2c_func_reference_type(fn, 3, 1));
+  EXPECT_INT_EQ(fn.apply(3, arguments).integer(), 12);
+  EXPECT_INT_EQ(count, 12);
+}
+
 /* A value already typed FuncAdapter passes through unadapted: the compiler
    leaves it alone and the runtime calls it as written. */
 static void func_handwritten_adapter_passes_through(void) {
@@ -776,6 +817,8 @@ void func_suite(void) {
   $test.run(func_generated_reference_target_aliases_source);
   $test.run(func_reference_and_signature_disagreement_fails);
   $test.run(func_rest_accepts_values_and_rejects_references);
+  $test.run(func_rest_keeps_prefix_and_explicit_splices);
+  $test.run(func_rest_preserves_reference_prefix);
   $test.run(func_rejects_null_adapter);
   $test.run(func_generated_target_runs);
   $test.run(func_generated_target_transfers_error);

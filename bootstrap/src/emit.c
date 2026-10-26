@@ -27,11 +27,11 @@ enum{
 }
 ;
 
-static List _501, _476, _473, _467, _464, _460, _456, _455, _454, _453, _452, _451, _450, _435, _425, _424, _422, _421, _420, _419, _415, _414, _413, _408, _407, _404, _403, _402, _399, _397, _396, _395, _393, _391, _390, _388, _387, _386, _384, _383, _382, _381, _379, _378, _377, _375, _374, _373, _367, _365, _364, _363, _361, _358, _357, _356, _353, _352, _351, _349, _348, _345, _344, _343, _340, _339, _338, _336, _333, _332, _331, _330, _327, _289, _252, _251, _234, _232, _228, _226, _225, _224, _221, _219, _218, _217, _216, _215, _214, _194, _193, _192, _190, _189, _188, _183, _180, _179, _178, _176, _175, _142, _141, _138, _131, _128, _125, _120, _114, _113, _112, _109, _108, _107, _105, _104, _103, _101, _100, _98, _97, _90, _89, _86, _85, _84, _78, _77, _75, _74, _73, _71, _70, _69, _63, _56, _47, _44, _37, _25, _22, _13, _6;
+static List _506, _489, _486, _476, _473, _467, _464, _460, _456, _455, _454, _453, _452, _451, _450, _435, _425, _424, _422, _421, _420, _419, _415, _414, _413, _408, _407, _404, _403, _402, _399, _397, _396, _395, _393, _391, _390, _388, _387, _386, _384, _383, _382, _381, _379, _378, _377, _375, _374, _373, _367, _365, _364, _363, _361, _358, _357, _356, _353, _352, _351, _349, _348, _345, _344, _343, _340, _339, _338, _336, _333, _332, _331, _330, _327, _289, _252, _251, _234, _232, _228, _226, _225, _224, _221, _219, _218, _217, _216, _215, _214, _194, _193, _192, _190, _189, _188, _183, _180, _179, _178, _176, _175, _142, _141, _138, _131, _128, _125, _120, _114, _113, _112, _109, _108, _107, _105, _104, _103, _101, _100, _98, _97, _90, _89, _86, _85, _84, _78, _77, _75, _74, _73, _71, _70, _69, _63, _56, _47, _44, _37, _25, _22, _13, _6;
 
-static String _499, _496, _494, _492, _490, _489, _488, _487, _486, _484, _483, _482, _481, _480, _479, _478, _477, _474, _471, _469, _468, _465, _462, _461, _458, _457, _448, _446, _444, _442, _440, _438, _436, _433, _431, _429, _428, _426, _409, _405, _385, _325, _323, _321, _319, _317, _315, _313, _311, _309, _307, _305, _303, _301, _299, _297, _295, _293, _292, _291, _287, _285, _283, _281, _279, _277, _275, _273, _271, _269, _267, _265, _263, _261, _259, _257, _255, _254, _253, _249, _247, _245, _243, _241, _240, _239, _238, _237, _236, _235, _229, _210, _209, _207, _206, _205, _204, _203, _202, _200, _199, _198, _197, _195, _186, _168, _167, _166, _165, _164, _163, _162, _161, _160, _159, _158, _157, _155, _153, _151, _149, _147, _145, _143, _139, _136, _135, _133, _129, _126, _123, _121, _118, _116, _115, _79, _61, _59, _57, _54, _52, _50, _48, _45, _42, _40, _38, _35, _33, _31, _29, _28, _26, _23, _20, _18, _16, _14, _11, _9, _7, _4, _2, _1, _0;
+static String _504, _501, _499, _497, _495, _494, _493, _492, _491, _487, _484, _483, _482, _481, _480, _479, _478, _477, _474, _471, _469, _468, _465, _462, _461, _458, _457, _448, _446, _444, _442, _440, _438, _436, _433, _431, _429, _428, _426, _409, _405, _385, _325, _323, _321, _319, _317, _315, _313, _311, _309, _307, _305, _303, _301, _299, _297, _295, _293, _292, _291, _287, _285, _283, _281, _279, _277, _275, _273, _271, _269, _267, _265, _263, _261, _259, _257, _255, _254, _253, _249, _247, _245, _243, _241, _240, _239, _238, _237, _236, _235, _229, _210, _209, _207, _206, _205, _204, _203, _202, _200, _199, _198, _197, _195, _186, _168, _167, _166, _165, _164, _163, _162, _161, _160, _159, _158, _157, _155, _153, _151, _149, _147, _145, _143, _139, _136, _135, _133, _129, _126, _123, _121, _118, _116, _115, _79, _61, _59, _57, _54, _52, _50, _48, _45, _42, _40, _38, _35, _33, _31, _29, _28, _26, _23, _20, _18, _16, _14, _11, _9, _7, _4, _2, _1, _0;
 
-static Var _500, _498, _497, _495, _493, _491, _485, _475, _472, _470, _466, _463, _459, _449, _447, _445, _443, _441, _439, _437, _434, _432, _430, _427, _423, _418, _417, _416, _412, _411, _410, _406, _401, _400, _398, _394, _392, _389, _380, _376, _372, _371, _370, _369, _368, _366, _362, _360, _359, _355, _354, _350, _347, _346, _342, _341, _337, _335, _334, _329, _328, _326, _324, _322, _320, _318, _316, _314, _312, _310, _308, _306, _304, _302, _300, _298, _296, _294, _290, _288, _286, _284, _282, _280, _278, _276, _274, _272, _270, _268, _266, _264, _262, _260, _258, _256, _250, _248, _246, _244, _242, _233, _231, _230, _227, _223, _222, _220, _213, _212, _211, _208, _201, _196, _191, _187, _185, _184, _182, _181, _177, _174, _173, _172, _171, _170, _169, _156, _154, _152, _150, _148, _146, _144, _140, _137, _134, _132, _130, _127, _124, _122, _119, _117, _111, _110, _106, _102, _99, _96, _95, _94, _93, _92, _91, _88, _87, _83, _82, _81, _80, _76, _72, _68, _67, _66, _65, _64, _62, _60, _58, _55, _53, _51, _49, _46, _43, _41, _39, _36, _34, _32, _30, _27, _24, _21, _19, _17, _15, _12, _10, _8, _5, _3;
+static Var _505, _503, _502, _500, _498, _496, _490, _488, _485, _475, _472, _470, _466, _463, _459, _449, _447, _445, _443, _441, _439, _437, _434, _432, _430, _427, _423, _418, _417, _416, _412, _411, _410, _406, _401, _400, _398, _394, _392, _389, _380, _376, _372, _371, _370, _369, _368, _366, _362, _360, _359, _355, _354, _350, _347, _346, _342, _341, _337, _335, _334, _329, _328, _326, _324, _322, _320, _318, _316, _314, _312, _310, _308, _306, _304, _302, _300, _298, _296, _294, _290, _288, _286, _284, _282, _280, _278, _276, _274, _272, _270, _268, _266, _264, _262, _260, _258, _256, _250, _248, _246, _244, _242, _233, _231, _230, _227, _223, _222, _220, _213, _212, _211, _208, _201, _196, _191, _187, _185, _184, _182, _181, _177, _174, _173, _172, _171, _170, _169, _156, _154, _152, _150, _148, _146, _144, _140, _137, _134, _132, _130, _127, _124, _122, _119, _117, _111, _110, _106, _102, _99, _96, _95, _94, _93, _92, _91, _88, _87, _83, _82, _81, _80, _76, _72, _68, _67, _66, _65, _64, _62, _60, _58, _55, _53, _51, _49, _46, _43, _41, _39, _36, _34, _32, _30, _27, _24, _21, _19, _17, _15, _12, _10, _8, _5, _3;
 
 static int _init_guard_ = 0;
 
@@ -735,23 +735,28 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _482 = String_new("Symbol_var(Symbol_new(");
   _483 = String_new("))");
   _484 = String_new("Atom_intern(String_new(");
-  _485 = Symbol_var(292894421269412);
-  _486 = String_new("native alias ");
-  _487 = String_new(" does not match ");
-  _488 = String_new(" ");
-  _489 = String_new("\");");
-  _490 = String_new("#ifndef X2CCPP");
-  _491 = String_var(_490);
-  _492 = String_new("_Generic(&");
-  _493 = String_var(_492);
-  _494 = String_new(": 1, default: 0), ");
-  _495 = String_var(_494);
-  _496 = String_new("#endif");
-  _497 = String_var(_496);
-  _498 = Symbol_var(30723082);
-  _499 = String_new("[]");
+  _485 = Symbol_var(194457181);
+  _486 = cons(_485, NULL);
+  _487 = String_new("List");
+  _488 = String_var(_487);
+  _489 = cons(_488, NULL);
+  _490 = Symbol_var(292894421269412);
+  _491 = String_new("native alias ");
+  _492 = String_new(" does not match ");
+  _493 = String_new(" ");
+  _494 = String_new("\");");
+  _495 = String_new("#ifndef X2CCPP");
+  _496 = String_var(_495);
+  _497 = String_new("_Generic(&");
+  _498 = String_var(_497);
+  _499 = String_new(": 1, default: 0), ");
   _500 = String_var(_499);
-  _501 = cons(_500, NULL);
+  _501 = String_new("#endif");
+  _502 = String_var(_501);
+  _503 = Symbol_var(30723082);
+  _504 = String_new("[]");
+  _505 = String_var(_504);
+  _506 = cons(_505, NULL);
 }
 
 List Compiler_emit(Compiler c, List ast, Map cache_bindings){
@@ -1829,12 +1834,12 @@ static List _bind(Emitter * e, Ast ast){
 }
 
 static List _param(Emitter * e, List ast){
-  List type, mods;  List _x2c_gensym_destructure_9 = List_cdr(ast);  type = Var_list_payload(List_getindex(_x2c_gensym_destructure_9, 0));  mods = Var_list_payload(List_getindex(_x2c_gensym_destructure_9, 1));  List code = _emit(&((* e)), type);  mods = cons(List_var(mods), NULL);  return List_append(code, _emit(&((* e)), mods));
+  List type, mods;  List _x2c_gensym_destructure_9 = List_cdr(ast);  type = Var_list_payload(List_getindex(_x2c_gensym_destructure_9, 0));  mods = Var_list_payload(List_getindex(_x2c_gensym_destructure_9, 1));  List code = _emit(&((* e)), type == _486 ? _489 : type);  mods = cons(List_var(mods), NULL);  return List_append(code, _emit(&((* e)), mods));
 }
 
 Map Compiler_semantic_binding_facts(Compiler);
 static List _function(Emitter * e, List ast){
-  List type, bindings, body;  List _x2c_gensym_destructure_10 = List_cdr(ast);  type = Var_list_payload(List_getindex(_x2c_gensym_destructure_10, 0));  bindings = Var_list_payload(List_getindex(_x2c_gensym_destructure_10, 1));  body = Var_list_payload(List_getindex(_x2c_gensym_destructure_10, 2));  String old_fn =(* e).fn_name;  List function_binding = Var_list_payload(List_cadr(bindings)); (* e).fn_name = Ast_binding_spelling(function_binding);  Var defer_owner;  if(Map_try_get(Compiler_semantic_binding_facts((* e).c), List_var(cons(_485, cons(List_var(function_binding), NULL))), &(defer_owner)))(* e).fn_name = Var_as_string(defer_owner);  type = _emit(&((* e)), cons(List_var(type), NULL));  bindings = cons(List_var(bindings), NULL);  body = cons(List_var(body), NULL);  List decl, body_code; {
+  List type, bindings, body;  List _x2c_gensym_destructure_10 = List_cdr(ast);  type = Var_list_payload(List_getindex(_x2c_gensym_destructure_10, 0));  bindings = Var_list_payload(List_getindex(_x2c_gensym_destructure_10, 1));  body = Var_list_payload(List_getindex(_x2c_gensym_destructure_10, 2));  String old_fn =(* e).fn_name;  List function_binding = Var_list_payload(List_cadr(bindings)); (* e).fn_name = Ast_binding_spelling(function_binding);  Var defer_owner;  if(Map_try_get(Compiler_semantic_binding_facts((* e).c), List_var(cons(_490, cons(List_var(function_binding), NULL))), &(defer_owner)))(* e).fn_name = Var_as_string(defer_owner);  type = _emit(&((* e)), cons(List_var(type), NULL));  bindings = cons(List_var(bindings), NULL);  body = cons(List_var(body), NULL);  List decl, body_code; {
     Map * _x2c_gensym_macro_address_1 = &(* e).static_objects;  Map _x2c_gensym_macro_previous_1 = * _x2c_gensym_macro_address_1; {
       _x2c_gensym_defer_env_6 _x2c_gensym_macro_environment_6 ={
         0
@@ -1857,8 +1862,8 @@ static List _function(Emitter * e, List ast){
 
 Type List_type_from_ast(List);
 static List _foreign_alias(Emitter * e, List declaration, List target, List native_binding){
-  Type function_type = Type_declared(List_type_from_ast(declaration));  Type pointer_type = Type_reference(function_type);  List pointer = _semantic_type(&((* e)), pointer_type);  List native = _emit(&((* e)), native_binding);  String target_name = Compiler_emitted_binding_name((* e).c, target);  String native_name = Compiler_emitted_binding_name((* e).c, native_binding);  String message = String_join(NULL, cons(String_var(_486), cons(String_var(target_name), cons(String_var(_487), cons(String_var(native_name), NULL)))));  String define = String_join(NULL, cons(String_var(_167), cons(String_var(target_name), cons(String_var(_488), cons(String_var(native_name), NULL)))));  return({
-    List _x2c_gensym_literal_part_98 = native;  List _x2c_gensym_literal_part_99 = pointer;  Var _x2c_gensym_literal_part_100 = String_var(String_join(NULL, cons(String_var(_158), cons(String_var(message), cons(String_var(_489), NULL)))));  cons(_491, cons(_17, cons(_493, List_append(_x2c_gensym_literal_part_98, cons(_10, List_append(_x2c_gensym_literal_part_99, cons(_495, cons(_x2c_gensym_literal_part_100, cons(_497, cons(String_var(define), NULL))))))))));
+  Type function_type = Type_declared(List_type_from_ast(declaration));  Type pointer_type = Type_reference(function_type);  List pointer = _semantic_type(&((* e)), pointer_type);  List native = _emit(&((* e)), native_binding);  String target_name = Compiler_emitted_binding_name((* e).c, target);  String native_name = Compiler_emitted_binding_name((* e).c, native_binding);  String message = String_join(NULL, cons(String_var(_491), cons(String_var(target_name), cons(String_var(_492), cons(String_var(native_name), NULL)))));  String define = String_join(NULL, cons(String_var(_167), cons(String_var(target_name), cons(String_var(_493), cons(String_var(native_name), NULL)))));  return({
+    List _x2c_gensym_literal_part_98 = native;  List _x2c_gensym_literal_part_99 = pointer;  Var _x2c_gensym_literal_part_100 = String_var(String_join(NULL, cons(String_var(_158), cons(String_var(message), cons(String_var(_494), NULL)))));  cons(_496, cons(_17, cons(_498, List_append(_x2c_gensym_literal_part_98, cons(_10, List_append(_x2c_gensym_literal_part_99, cons(_500, cons(_x2c_gensym_literal_part_100, cons(_502, cons(String_var(define), NULL))))))))));
   }
   );
 }
@@ -1870,7 +1875,7 @@ static List _typedef(Emitter * e, List ast){
         List declarators;  declarators = _x2c_gensym_match_list_0; {
           List declarator;  List _x2c_gensym_macro_object_11 = declarators;  List _x2c_gensym_macro_cursor_11 = _x2c_gensym_macro_object_11;  Var _x2c_gensym_macro_cursor_output_11;  while(List_try_next(_x2c_gensym_macro_object_11, &(_x2c_gensym_macro_cursor_11), &(_x2c_gensym_macro_cursor_output_11))){
             declarator = Var_list_payload(_x2c_gensym_macro_cursor_output_11); {
-              List binding = Var_list_payload(List_cadr(declarator));  Var type;  if(Map_try_get(Compiler_semantic_binding_facts((* e).c), List_var(cons(_498, cons(List_var(binding), NULL))), &(type)))(* e).native_aliases = cons(List_var(cons(type, cons(List_var(binding), NULL))), (* e).native_aliases);
+              List binding = Var_list_payload(List_cadr(declarator));  Var type;  if(Map_try_get(Compiler_semantic_binding_facts((* e).c), List_var(cons(_503, cons(List_var(binding), NULL))), &(type)))(* e).native_aliases = cons(List_var(cons(type, cons(List_var(binding), NULL))), (* e).native_aliases);
             }
 
           }
@@ -1954,7 +1959,7 @@ static List f12_declarations____native_declarator(List decl, List * mods, Symbol
 
 int Type_is_pointer(Type);
 static List f12_declarations____array_declarator(Emitter * e, List decl, List dimension){
-  if(Type_is_pointer(List_type(decl))) decl = _parens(decl);  List size = _emit(&((* e)), dimension);  return List_truth(size) ? List_append(decl, cons(_34, List_append(size, _37))) : List_append(decl, _501);
+  if(Type_is_pointer(List_type(decl))) decl = _parens(decl);  List size = _emit(&((* e)), dimension);  return List_truth(size) ? List_append(decl, cons(_34, List_append(size, _37))) : List_append(decl, _506);
 }
 
 static List f12_declarations____function_declarator(Emitter * e, List decl, List parameters){

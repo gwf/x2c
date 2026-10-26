@@ -95,7 +95,10 @@ declarator from a parenthesized name using the current typedef environment.
 A declarator can have no direct name: this represents an abstract declarator,
 an unnamed bit-field, or a type-only declaration, as allowed by its context.
 Function declarator parameter lists are nonempty: `(void)` is the no-argument
-form. Calls and lambdas separately permit `()`. Array dimensions use an
+form. A final `.... name` parameter accepts a List rest tail, with zero or
+more fixed parameters before it. It is distinct from C `...`; see
+[List rest parameters](../language.md#list-rest-parameters).
+Calls and lambdas separately permit `()`. Array dimensions use an
 expression; bit-field widths use a primary expression, which can be grouped.
 A full `type-operand` can contain abstract declarators; `type-name` only
 contains qualifiers, a specifier, and pointer/reference modifiers. These

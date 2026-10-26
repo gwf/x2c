@@ -27,10 +27,10 @@ typedef union FuncArgData {
 } FuncArgData;
 
 /** Argument carrier borrowed for one synchronous `Func.apply` call.
-    A null `reference_type` selects the copied `Var` bits; otherwise
-    `reference` and the canonical source type are borrowed and must remain
-    valid through the call. A reference target may be mutated by the native
-    function.
+    A null `reference_type` selects copied Var bits; `(splice)` selects a
+    List value whose elements enter the rest tail. Otherwise, `reference`
+    and its canonical source type are borrowed and must remain valid through
+    the call. A reference target may be mutated by the native function.
 */
 typedef struct FuncArg {
   FuncArgData data;
@@ -43,7 +43,7 @@ typedef struct FuncArg {
     the `Func`. Compiler-generated adapters use the checked value and reference
     readers, call their native target, and box its result. A returned `void`
     remains no-value. Adapters receive no count. Fixed bindings check arity
-    first, and rest bindings receive one packed `List` argument.
+    first. Rest bindings receive fixed arguments followed by one packed List.
 */
 typedef Var (*FuncAdapter)(Func fn, const FuncArg *argv);
 
@@ -67,9 +67,9 @@ module {
 /* The Func's Scope owns one allocation containing the handle and optional
    max_align_t-aligned context bytes. `sig`, `params`, and `adapter` are stored
    without retaining their canonical Lists or callback code, so they must
-   outlive the binding. A `rest` binding conses value arguments into the one
-   List its adapter expects. A `shared` binding is the file-static handle
-   that every conversion of one direct function reuses; it lives for the
+   outlive the binding. A `rest` binding packs trailing value arguments into
+   the final List its adapter expects. A `shared` binding is the file-static
+   handle that every conversion of one direct function reuses; it lives for the
    program, so `Func.move` leaves it in place. */
 static struct Func {
   List sig, params, FuncAdapter adapter;
@@ -93,9 +93,10 @@ static void *_context(Func f) => (unsigned char *) f + _context_offset();
 /** Invokes a bound native function synchronously and returns its boxed result.
     `argv` is borrowed only for the call. Value bits are passed by value;
     reference arguments alias their caller-owned targets and may be mutated.
-    A rest binding first interns one `List` containing the value arguments in
-    their original order; rest arguments must not be `void`, since `List`s
-    exclude `void` from their element domain.
+    A rest binding keeps its fixed arguments and interns one List containing
+    trailing values in their original order. Explicit splices add their
+    elements.
+    Rest arguments must not be `void`, since Lists exclude void elements.
 
     Raises: `<bad-arg>` for a null binding or argument storage, `<bad-arity>`
     for the wrong argument count, `<void-op>`, `<bad-types>`, `<bad-enc>`,
@@ -114,17 +115,31 @@ Var Func.apply(Func f, unsigned argc, const FuncArg *argv) {
     }
     return f.adapter(f, argv);
   }
+  return _apply_rest(f, argc, argv);
+}
+
+/* Keep tail construction and its temporary array off the fixed-call path. */
+static Var _apply_rest(Func f, unsigned argc, const FuncArg *argv) {
   List sig = f.sig, rest = NULL;
-  for (unsigned i = argc; i; i--) {
+  unsigned fixed = f.nparams - 1;
+  if (argc < fixed) $error.apply.arity(sig, fixed, argc);
+  for (unsigned i = argc; i > fixed; i--) {
     unsigned index = i - 1;
+    if (argv[index].reference_type == %(splice)) {
+      List items = argv[index].data.value;
+      rest = items.append(rest);
+      continue;
+    }
     if (argv[index].reference_type)
       $error.arg.value(sig, index);
     Var value = argv[index].data.value;
     if (value is void) $error.arg.void(sig, index);
     rest = cons(value, rest);
   }
-  FuncArg packed = FuncArg.value(rest);
-  return f.adapter(f, &packed);
+  FuncArg packed[f.nparams];
+  if (fixed) memcpy(packed, argv, fixed * sizeof(FuncArg));
+  packed[fixed] = FuncArg.value(rest);
+  return f.adapter(f, packed);
 }
 
 /** Constructs a `Func` argument by copying one `Var` value.
@@ -132,6 +147,24 @@ Var Func.apply(Func f, unsigned argc, const FuncArg *argv) {
     the call that consumes the argument.
 */
 inline FuncArg FuncArg.value(Var value) => (FuncArg) { .data.value = value };
+
+/** Marks an explicit List splice in a rest tail. The List is borrowed until
+    the synchronous call completes; ordinary List values remain one element.
+*/
+FuncArg FuncArg.splice(List items) =>
+  (FuncArg) { .data.value = items, .reference_type = %(splice) };
+
+/** Prepares an explicit splice only after the binding's fixed parameters.
+    Raises `<bad-types>` when the splice occupies a fixed parameter.
+*/
+FuncArg x2c_func_splice_argument(Func fn, unsigned index, List items) {
+  if (!fn) $error.apply.args();
+  if (!fn.rest || index < fn.nparams - 1) {
+    List sig = fn.sig;
+    $error.arg.value(sig, index);
+  }
+  return FuncArg.splice(items);
+}
 
 /** Constructs a `Func` argument borrowing a typed lvalue address.
     The address and canonical `type` must remain valid through `Func.apply`;
@@ -180,11 +213,11 @@ inline Var Func.apply_values(Func fn, Var left, Var right) {
 List x2c_func_reference_type(Func fn, unsigned argc, unsigned index) {
   if (!fn || index >= argc)
     $error.apply.index(index);
-  if (fn.rest) return NULL;
-  if (argc != fn.nparams) {
+  unsigned fixed = fn.rest ? fn.nparams - 1 : fn.nparams;
+  if (fn.rest && argc >= fixed && index >= fixed) return NULL;
+  if (fn.rest ? argc < fixed : argc != fixed) {
     List sig = fn.sig;
-    unsigned expected = fn.nparams;
-    $error.apply.arity(sig, expected, argc);
+    $error.apply.arity(sig, fixed, argc);
   }
   List parameter = _parameter(fn, index);
   return _is_reference(parameter) ? parameter.cdr() : NULL;
@@ -343,7 +376,8 @@ static unsigned _type_qualifiers(List &cursor) {
 
 // construction
 
-/** Builds a fixed-arity native-function binding in the current `Scope`.
+/** Builds a native-function binding in the current `Scope`.
+    A final `....` signature parameter selects List-rest calling semantics.
     A direct function expression is compiler-adapted; an expression already
     typed `FuncAdapter` is stored as supplied. The canonical `signature` and
     adapter code are borrowed for the `Func` lifetime. Only the signature's
@@ -355,21 +389,20 @@ static unsigned _type_qualifiers(List &cursor) {
 Func Func.new(FuncAdapter adapter, List signature) =>
   _new(adapter, signature, 0, NULL, 0);
 
-/** Builds a native-function binding that takes any number of value arguments.
-    The signature declares one `List` parameter, and the adapter receives every
-    argument in order through that `List`. `Func.apply` enforces no arity and
-    conses the arguments itself. Use this for a variadic operation; a fixed one
-    belongs in `Func.new`, which is faster and reports a wrong count. The
-    canonical `signature` and adapter code are borrowed for the `Func`
-    lifetime. The result belongs to the current `Scope`.
-    Raises: `<bad-sig>` for a null adapter, a malformed signature, or a
-    signature whose parameters are anything but one `List`, and `<alloc-fail>`
-    when binding storage cannot be allocated.
+/** Builds a native binding with fixed parameters and a List rest tail.
+    The signature ends in `List` or `....`. The adapter receives fixed
+    arguments followed by a List containing the remaining values in order.
+    A signature with only one List parameter retains the zero-prefix behavior.
+    The canonical signature and adapter code are borrowed for the Func
+    lifetime. The result belongs to the current Scope.
+    Raises: `<bad-sig>` for a null adapter, malformed signature, or a final
+    parameter other than List or `....`, and `<alloc-fail>` for storage.
 */
 Func Func.new_rest(FuncAdapter adapter, List signature) =>
   _new(adapter, signature, 1, NULL, 0);
 
-/** Builds a fixed-arity binding with copied context in the current `Scope`.
+/** Builds a binding with copied context in the current `Scope`.
+    A final `....` signature parameter selects List-rest calling semantics.
     The max_align_t-aligned bytes share the `Func` allocation. The byte copy is
     shallow: changing the source bytes does not change the binding, while any
     pointers inside them keep their original targets and lifetimes. A zero
@@ -402,8 +435,6 @@ Func x2c_func_shared(FuncAdapter adapter, List signature) {
 static Func _new(
   FuncAdapter adapter, List signature, int rest,
   const void *context, size_t context_size) {
-  if (rest && !signature.match(%((func (("List"))) ? *)))
-    $error.bind.sig(signature);
   if (!adapter) $error.bind.sig(signature);
   List params = NULL;
   match (signature)
@@ -415,6 +446,10 @@ static Func _new(
   size_t context_offset = _context_offset();
   if (context_size > SIZE_MAX - context_offset)
     $error.context.size(context_size);
+  Var last = params.last();
+  if (last == %(....)) rest = 1;
+  else if (rest && last != %("List"))
+    $error.bind.sig(signature);
   int n = params.len();
   int void_params = n == 1 && params.car() is <list> &&
                     params.car() == %(void);

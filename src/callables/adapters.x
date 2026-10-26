@@ -184,6 +184,20 @@ module List _build_func_adapter(
     Type func_type = c.sym.resolve_key(%("Func"));
     $fail.callable_variadic(c, diagnostic_type, source_type, func_type);
   }
+  /* Func.apply already packed the tail. Read and call its native List ABI. */
+  if (params && params.last() == %(....)) {
+    params = params.map(%!(Type parameter) =>
+      parameter == %(....) ? %("List") : parameter);
+    Type native_type = target.cadr();
+    List target_params = NULL;
+    Type target_result = NULL;
+    native_type.function_parts(target_params, target_result);
+    target_params = target_params.map(%!(Type parameter) =>
+      parameter == %(....) ? %("List") : parameter);
+    Type direct = %((func $target_params) @target_result);
+    native_type = native_type.is_pointer() ? %(* @direct) : direct;
+    target = %(expr $native_type $(target.caddr()));
+  }
   source_type = source_type.canonicalize();
   return_type = return_type.canonicalize();
 
@@ -289,6 +303,7 @@ List Compiler.func_parameters(
 
 static List _read(
   FuncReaders &r, Type parameter_type, int index, Type &storage_type) {
+  if (parameter_type == %(....)) parameter_type = %("List");
   if (parameter_type.is_reference())
     return _reference(r, parameter_type, index, storage_type);
   Symbol tag = r.c.sym.var_tag_for_type(parameter_type, NULL);
@@ -389,7 +404,8 @@ List Compiler.func_signature(Compiler c, Type type) {
   type.function_parts(params, result);
   Array declared = [];
   foreach (List parameter in params)
-    declared.push(parameter.type().declared());
+    declared.push(
+      parameter == %(....) ? parameter : parameter.type().declared());
   List parameter_types = params ? declared.list_free() : %((void));
   Type declared_result = result.declared();
   return %((func $parameter_types) @declared_result);

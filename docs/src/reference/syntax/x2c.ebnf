@@ -65,7 +65,7 @@ declarator-suffix = ( ( "[" , [ expression ] , "]" ) |
     ( ":" , primary ) |
     attribute ) ;
 parameter-list = ( parameter , { ( "," , parameter ) } ) ;
-parameter = ( ( { qualifier } , type-specifier , declarator ) | "..." | parameter-slot ) ;
+parameter = ( ( { qualifier } , type-specifier , declarator ) | "..." | ( "...." , [ identifier ] ) | parameter-slot ) ;
 destructuring-targets = ( "(" , identifier , "," , identifier , { ( "," , identifier ) } , ")" ) ;
 typed-destructuring = ( "(" , parameter-list , ")" , "=" , assignment , ";" ) ;
 aggregate = ( ( "struct" | "union" ) ,

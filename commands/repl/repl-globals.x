@@ -218,6 +218,8 @@ static List _loaded_call(
   Type type = c.loaded_call_type(callee.cadr());
   List parameters = NULL;
   type.function_parts(parameters, NULL);
+  if (parameters && parameters.last() == %(....))
+    arguments = c.pack_rest_arguments(parameters, arguments);
   if (parameters.len() != arguments.len()) return NULL;
   Array selected = auto [];
   int objects = 0;
@@ -234,8 +236,12 @@ static List _loaded_call(
   foreach (List argument, arguments) {
     List value = selected[i++];
     if (!value) {
-      List converted = c.convert_expression(_rewrite(session, argument), parameters.car());
-      value = _argument_list(c, %($( $!Symbol{ $(<value>) } ) $converted));
+      Type parameter = parameters.car();
+      int rest = parameter == %(....);
+      List converted = c.convert_expression(
+        _rewrite(session, argument), rest ? %("List") : parameter);
+      Symbol kind = rest ? <splice> : <value>;
+      value = _argument_list(c, %($( $!Symbol{ $kind } ) $converted));
     }
     parameters = parameters.cdr();
     List temporary = c.sym.introduce(c.fresh_name("repl_argument"));

@@ -239,6 +239,11 @@ SEGMENT    ::= (segvar EXPR) | (segexp EXPR) | (cache CACHE-ID)
              | (segraw TEXT)
 ```
 
+A call-site rest splice uses `(expr ("List") (splice EXPR))`. Ordinary
+List-valued arguments retain their expression form and contribute one value.
+Dynamic-call extraction represents a splice as `(func-splice EXPR)` alongside
+ordinary `(func-arg VALUE ADDRESS SOURCE)` rows.
+
 Map rows contain key then value; they are not argument Lists. `splice` retains
 a value that contributes a sequence. `cons` and `append` express runtime List
 construction; immutable portions can instead become cache references. `var` is
@@ -380,6 +385,11 @@ A C no-argument parameter list is explicitly `(params (param (void) (bind ()
 ())))`. Do not replace it with `(params)` solely because lambdas and calls
 permit empty parameter/argument sequences.
 
+A four-dot rest parameter uses `(param (....) (bind NAME ()))`. Its
+semantic parameter Type is `(....)`, distinct from `("List")`, while its
+bound local and emitted native parameter are ordinary Lists. The final
+position in the parameter sequence owns the rest convention.
+
 Owners: [_declarator, _declarator_suffix, _array_suffix,
 Compiler.parse_parameter][declarators]; [List.type_from_ast][compiler-type];
 [_declarator and _parameters][emit-declarations]. Runtime
@@ -401,7 +411,7 @@ ENUMERATORS ::= (ENUMERATOR*)
 ENUMERATOR ::= NAME | DECLARATOR | (op = NAME EXPR)
              | (op = DECLARATOR EXPR) | ENUMERATOR-SLOT
 TYPE       ::= (SEMANTIC-PREFIX* SEMANTIC-TAIL) | UNQUAL-TYPE
-             | (<macro-expr>)
+             | (<macro-expr>) | (....)
 SEMANTIC-PREFIX ::= QUALIFIER | STORAGE | inline | meta
                    | SEMANTIC-MODIFIER | (NATIVE-TEXT)
 SEMANTIC-TAIL ::= TYPE-WORD+ | SPELLING | struct TAG-NAME
@@ -960,7 +970,7 @@ being mistaken for additional program nodes.
 | --- | --- | --- |
 | Initializer and lambda facts | `enum-value`, `first`, `next`, `lambda-capture`, `lambda-depth`, `lambda-order`, `lambda-param`, `lambda-scope`, `lambda-snapshot`, `parameter`, `reference-param`, `optional-reference-param` | [type parser][type-parser], [lambdas][lambdas], binding facts; not accepted expression heads. |
 | Binding and source facts | `aggfact`, `alias`, `automatic`, `class-tag`, `defer-ownr`, `definition-span`, `ntype`, `present-references`, `source-spelling`, `src-key`, `type`, `using` | [symbol bindings][symbol-bindings] and [binding facts][binding-facts]; keyed compiler state. |
-| Member and callable results | `field`, `method`, `delegate`, `step`, `ambiguous`, `func-arg`, `indirect-adapter`, `inherited`, `thunk`, `no-value` | [access][access], [calls][calls], [callable adapters][callable-adapters]; lookup/extraction results. |
+| Member and callable results | `field`, `method`, `delegate`, `step`, `ambiguous`, `func-arg`, `func-splice`, `indirect-adapter`, `inherited`, `thunk`, `no-value` | [access][access], [calls][calls], [callable adapters][callable-adapters]; lookup/extraction results. |
 | Memo and resolution keys | `fadapt`, `fgetter`, `fhandle`, `findirect`, `fpointer-factory`, memo-key `tadapt`, `iadapt`, `string-switch`, `unit-support`, `unit-init` | [callable values][callable-values], [callbacks][callbacks], components and placement; not expression productions despite repeated heads. |
 | Region analysis | `alloc`, `close`, `destroy`, `exit`, `free`, `move`, `open`, `pool`, `store`, `summary`, `wrap` | [region analysis][regions-owner]; describes effects, not executable AST nodes. |
 | Declaration replay | `(declaration-source END BUNDLE FACTS)`, `(package-import PACKAGE ALIAS MEMBERS)`, `("source-node" ...)`, `(imported-macro DEFINITION)` | [declaration production][declaration-production], [portable syntax][portable-syntax], macro registry; retains source-order effects outside binder syntax. |

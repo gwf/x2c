@@ -2,6 +2,12 @@
 
 // construction
 
+/** Returns the List packed from the supplied values and explicit splices.
+    An ordinary List argument remains one element. With no values, returns
+    nil. The result has ordinary List identity and pool lifetime.
+*/
+List List.new(.... items) => items;
+
 /** Returns the canonical cons cell for `head` and `tail`.
     Repeating the call with the same head bits and canonical tail returns the
     same cell from the active pool chain. An ancestor hit remains owned there;
