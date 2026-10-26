@@ -2,34 +2,17 @@
 
     Copyright (c) 2025 Gary William Flake
 
-    A `meta` function runs inside the compiler, so it can ask the compiler
-    questions and build syntax for it to bind. This module declares those
-    operations in x2c; the macro values a `meta` function applies and
-    recognizes are in `macrovalue/macrovalue.x`. Code builds code with
-    quotations (`$!( ... )`, `$!{ ... }`, `$!T{ ... }`) and `%(...)` Lists,
-    so the surface declares no constructors.
+    Declares compiler-supplied operations on captured `Code` and semantic
+    `Type` values, and the `x2c_` helpers without a captured receiver. Code
+    construction uses quotations and canonical Lists; macro values live in
+    `macrovalue/macrovalue.x`. The shared declaration-part helpers serve
+    both the compiler and a project's meta helper. The language reference
+    specifies "Compile-time calls and operations".
 
-    The operations on a value are methods of the value's type: `Code`,
-    captured code, and `Type`, a semantic type. The rest are `x2c_` helpers
-    that have no captured receiver: the identifier check, the invocation
-    site, embedded text, ancestry and placement, diagnostics, and the
-    definition hashes. Compile-time code calls each by its declared name,
-    as in `x2c_invocation_line()`. The semantics are specified under
-    "Compile-time calls and operations" in the language reference.
-
-    Each operation is a bodyless `meta` prototype the compiler supplies. A
+    Each compiler operation is a bodyless `meta` prototype. A
     `meta` function that reaches one, directly or through another `meta`
     function, is compile-time only: the compiler emits no run-time form for
     it and diagnoses a run-time call where it is written.
-
-    Three operations let a macro contribute code beyond its result.
-    `x2c_enclosing` answers the initialized declarator, block item,
-    function, or unit around the invocation, and `x2c_place` puts code
-    after that declarator or block item, on the exits of its block, at the
-    entry of its function, among the unit's support declarations, or in its
-    initialization, under the expansion's transaction. `x2c_binding_fresh`
-    returns a new binding, so placed code can declare a name that the
-    result also refers to. `$auto` is built on them.
 
     The library builds it as an optional module, but the prelude's
     `var/var.x` includes it for its own `meta` rows, so every unit sees its
