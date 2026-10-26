@@ -1440,7 +1440,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _589 = List_var(_588);
   _590 = cons(_510, _507);
   _591 = List_var(_590);
-  _592 = int_var(90196);
+  _592 = int_var(90190);
   _593 = cons(_592, NULL);
   _594 = cons(_515, _593);
   _595 = List_var(_594);
@@ -4957,7 +4957,7 @@ static int _prefix_macro_words(Compiler c, int rank, Array words){
 }
 
 static int f5_types____unseen_prefix(Compiler c){
-  Symbol next = Compiler_peek(c, 1);  return c -> shallow && String_endswith(c -> filename, _193) &&(Symbol_is_builtin_type(next) || Symbol_is_type_modifier(next) || Symbol_is_type_qualifier(next) || Symbol_is_storage_class(next) || Symbol_is_inline(next));
+  if(! c -> shallow || ! String_endswith(c -> filename, _193)) return 0;  Symbol next = Compiler_peek(c, 1);  return Symbol_is_builtin_type(next) || Symbol_is_type_modifier(next) || Symbol_is_type_qualifier(next) || Symbol_is_storage_class(next) || Symbol_is_inline(next);
 }
 
 static List _type_qualifiers(Compiler c){
@@ -5306,7 +5306,7 @@ static List _publish_enumerator(Compiler c, List input, Type context, Token orig
     }
 
   }
-  name = Compiler_evaluate_macro_slot(c, name);  String exact = _syntax_exact_name(name);  List binding = String_truth(exact) ? NULL : Var_is_row(name, 9, 7, 4) ? Var_list(name) : NULL;  String spelling = String_truth(exact) ? exact : Ast_binding_spelling(binding);  if(! String_truth(spelling)) Compiler_report_error(c, 33658058, _268, origin, NULL);  List key = cons(String_var(spelling), NULL);  if(String_truth(exact)) key = Sym_declared_key(c -> sym, NULL, key, Type_list(context));  Symbol prior = Sym_enumerator_owner(c -> sym, key);  if(prior && List_truth(binding)){
+  name = Compiler_evaluate_macro_slot(c, name);  String exact = _syntax_exact_name(name);  List binding = ! String_truth(exact) && Var_is_row(name, 9, 7, 4) ? Var_list(name) : NULL;  String spelling = String_truth(exact) ? exact : Ast_binding_spelling(binding);  if(! String_truth(spelling)) Compiler_report_error(c, 33658058, _268, origin, NULL);  List key = cons(String_var(spelling), NULL);  if(String_truth(exact)) key = Sym_declared_key(c -> sym, NULL, key, Type_list(context));  Symbol prior = Sym_enumerator_owner(c -> sym, key);  if(prior && List_truth(binding)){
     List existing = Sym_lookup(c -> sym, key, NULL);  if(List_truth(existing) && List_equal(existing, binding)) return input;
   }
   if(prior) Compiler_report_error(c, 33658058, String_join(NULL, cons(String_var(_269), cons(String_var(spelling), cons(String_var(_270), NULL)))), origin, cons(String_var(String_join(NULL, cons(String_var(_271), cons(String_var(spelling), cons(String_var(_272), NULL))))), NULL));  if(String_truth(exact)) binding = Sym_declare(c -> sym, NULL, cons(String_var(exact), NULL), Type_list(context));  else Sym_bind_identity(c -> sym, NULL, binding, Type_declaration_ast(context, binding));  Sym_declare_enumerator(c -> sym, key, 384101446165476);  return List_truth(initializer) ? cons(_170, cons(_171, cons(List_var(binding), cons(List_var(initializer), NULL)))) : binding;

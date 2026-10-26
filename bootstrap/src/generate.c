@@ -3621,8 +3621,9 @@ static String f11_definitions____display(Compiler c, List binding, String name){
   return Compiler_unprefixed(c, name);
 }
 
+List Compiler_fact(Compiler, Var);
 static List f11_definitions____span(Compiler c, List key){
-  Var span = Var_null();  Map_try_get(Compiler_semantic_binding_facts(c), List_var(cons(_933, cons(List_var(key), NULL))), &(span));  return Var_list_payload(span);
+  return Compiler_fact(c, List_var(cons(_933, cons(List_var(key), NULL))));
 }
 
 static List f11_definitions____parameter_names(Compiler c, List modifiers){

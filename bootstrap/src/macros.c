@@ -3581,10 +3581,7 @@ static List f22_definitions_quotations____hole_local(Compiler c, Map holes, int 
   Compiler_expect(c, 81);
   Token origin = c -> token;
   List value = Compiler_parse_expression(c);
-  if(! Var_truth(List_cadr(value))){
-    String _x2c_gensym_macro_message_0 = _207;
-    Compiler_report_error(c, 1362954, _x2c_gensym_macro_message_0, origin, _210);
-  }
+  if(! Var_truth(List_cadr(value))) Compiler_report_error(c, 1362954, _207, origin, _210);
   Compiler_expect(c, 83);
   String name = Compiler_fresh_name(c, _211);
   Map_setindex(holes, List_var(cons(_187, cons(int_var(position), NULL))), String_var(name));
@@ -4058,8 +4055,8 @@ static List _parse_hole(Compiler c, Symbol role){
 
 static void f17_definitions_slots____cardinality_error(Compiler c, String spelling, int sequence, Token token){
   {
-    String _x2c_gensym_macro_message_1 = sequence ? String_join(NULL, cons(String_var(_307), cons(String_var(spelling), cons(String_var(_308), NULL)))) : String_join(NULL, cons(String_var(_309), cons(String_var(spelling), cons(String_var(_310), NULL))));
-    Compiler_report_error(c, 33658058, _x2c_gensym_macro_message_1, token, NULL);
+    String _x2c_gensym_macro_message_0 = sequence ? String_join(NULL, cons(String_var(_307), cons(String_var(spelling), cons(String_var(_308), NULL)))) : String_join(NULL, cons(String_var(_309), cons(String_var(spelling), cons(String_var(_310), NULL))));
+    Compiler_report_error(c, 33658058, _x2c_gensym_macro_message_0, token, NULL);
   }
 
 }
@@ -6743,7 +6740,7 @@ static List _target_at(Compiler c, Symbol position, int open){
 
 static void f19_invocations_targets____check_position(Compiler c, List definition, Token invocation, Symbol position){
   Symbol kind = Var_symbol(List_assoc(definition, Symbol_var(740232)));  const MacroPos * place = _position(position);  if(kind == place -> kind ||(kind == 9147004580456 && position == 1405544)) return;  Atom name = List_assoc(definition, Symbol_var(920394));  String spelling = Atom_str(name), result_kind = _kind_spelling(kind); {
-    String _x2c_gensym_macro_message_2 = String_add(String_join(NULL, cons(String_var(_574), cons(String_var(spelling), cons(String_var(_575), cons(String_var(result_kind), cons(String_var(_576), NULL)))))), String_join(NULL, cons(String_var(_577), cons(String_var(String_new(place -> description)), NULL))));  Compiler_report_error(c, 27335838, _x2c_gensym_macro_message_2, invocation, NULL);
+    String _x2c_gensym_macro_message_1 = String_add(String_join(NULL, cons(String_var(_574), cons(String_var(spelling), cons(String_var(_575), cons(String_var(result_kind), cons(String_var(_576), NULL)))))), String_join(NULL, cons(String_var(_577), cons(String_var(String_new(place -> description)), NULL))));  Compiler_report_error(c, 27335838, _x2c_gensym_macro_message_1, invocation, NULL);
   }
 
 }

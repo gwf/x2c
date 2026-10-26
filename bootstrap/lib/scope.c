@@ -216,7 +216,7 @@ static void * f10_allocation____calloc_in(Scope * slot, size_t count, size_t siz
     }
     _raw_fatal("calloc size overflow");
   }
-  size_t total = count * size;  void * ptr = f10_allocation____malloc_in(slot, total, NULL);  if(ptr && total) memset(ptr, 0, total);  return ptr;
+  size_t total = count * size;  void * ptr = f10_allocation____malloc_in(slot, total, NULL);  if(total) memset(ptr, 0, total);  return ptr;
 }
 
 static void * f10_allocation____memdup_in(Scope * slot, const void * ptr, size_t size){
