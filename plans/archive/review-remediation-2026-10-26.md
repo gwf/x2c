@@ -1,12 +1,14 @@
 # Repository consistency repairs from the October 26 review
 
-> Status: active, implementation authorized on 2026-10-26.
+> Status: done. R1-R12 and Q1 implemented and validated on 2026-10-26.
+> Implementation through `12705c82e`; the final delivery also closes this plan.
 > Baseline: `4ea1067462a37e4c1db0d18b3f2d18cd70b0210f`.
 > Covers findings R1-R12 and the qsort contract conflict Q1.
 > Gary selected consistent search names, retained libc with a qsort callback
 > exception, and selected one operator-fact table. Gary accepted `find(predicate)`,
 > `index(value)`, the source/ABI break, and no compatibility aliases.
-> Implementation is in progress.
+> The full publication gate passed. Baseline installer defects remain outside
+> these repairs; the installed-prefix verification limit is recorded below.
 
 ## Result and scope
 
@@ -21,7 +23,7 @@ for the explicitly proposed search migration in D1.
 Change authoritative sources and regenerate their derived artifacts through
 existing targets. This plan adds no recurring gate or publication step.
 
-The earlier [language-reference writing plan](review-remediation-2026-10-11.md)
+The earlier [language-reference writing plan](../review-remediation-2026-10-11.md)
 retains its separate scope. This plan owns only the October 26 findings.
 
 ## Evidence at the baseline
@@ -52,13 +54,13 @@ Temporary review artifacts are useful supporting evidence, but implementation
 must reproduce these observations from source. Their `/tmp` paths are not
 dependencies of this plan.
 
-## Selected directions and design recommendations
+## Selected directions
 
 ### D1. Use `index(value)` and `find(predicate)`
 
-Owners: [Array operations](../lib/array/generics.x),
-[List transformations](../lib/list/transformations.x),
-[List indexing](../lib/list/traversal.x), and [Iter](../lib/iter.x).
+Owners: [Array operations](../../lib/array/generics.x),
+[List transformations](../../lib/list/transformations.x),
+[List indexing](../../lib/list/traversal.x), and [Iter](../../lib/iter.x).
 
 Gary approved these two operations on 2026-10-26:
 
@@ -111,11 +113,11 @@ binding; unrelated String, SymbolSet, graph, and application methods stay as is.
 
 ### D2. Keep libc and document the qsort callback exception
 
-Owners: [Array sorting](../lib/array/array.x),
-[Map comparison](../lib/map/generics.x),
-[List sorting](../lib/list/transformations.x),
-[Var comparison](../lib/dispatch.x), and
-[ER-8](../agents/x2c-code-standard.md#errors).
+Owners: [Array sorting](../../lib/array/array.x),
+[Map comparison](../../lib/map/generics.x),
+[List sorting](../../lib/list/transformations.x),
+[Var comparison](../../lib/dispatch.x), and
+[ER-8](../../agents/x2c-code-standard.md#errors).
 
 Gary selected the exception on 2026-10-26. Keep the existing libc calls and
 sorting algorithms. The review established a documentation conflict; it did
@@ -146,11 +148,11 @@ claims unsupported qsort unwinding is safe.
 
 ### D3. Consolidate operator facts in the existing private meta owner
 
-Owners: [operator ledger](../src/operator-ledger.x),
-[dynamic operators](../src/components/dynamic-operators.x),
-[compiler meta operations](../lib/compiler-meta.x),
-[prelude collection](../src/collect/walk.x), and
-[installed payload](../etc/x2c-payload.x).
+Owners: [operator ledger](../../src/operator-ledger.x),
+[dynamic operators](../../src/components/dynamic-operators.x),
+[compiler meta operations](../../lib/compiler-meta.x),
+[prelude collection](../../src/collect/walk.x), and
+[installed payload](../../etc/x2c-payload.x).
 
 Gary selected one table. Recommend placing the existing 22 operator rows in
 `lib/compiler-meta.x`, exposed by the ordinary internal, nonstatic meta function
@@ -181,7 +183,7 @@ change. A shared linear lookup needs no new registry or cache.
 
 ### R1. Fence reader-prefix recursion
 
-Change [datum-reader.x](../lib/datum-reader.x) so the existing depth fence
+Change [datum-reader.x](../../lib/datum-reader.x) so the existing depth fence
 covers each recursive descent through Lists and reader prefixes. Give the
 policy one owner. Preserve the existing List threshold, `size-limit` cause,
 operation detail, cursor behavior, and incomplete-input handling.
@@ -195,7 +197,7 @@ or new public limit is needed.
 ### R2. Recognize string literals exactly in initializers
 
 Repair both recognizers in
-[initializer subobjects](../src/initializers/subobjects.x). Preserve source
+[initializer subobjects](../../src/initializers/subobjects.x). Preserve source
 literal recognition and destination-array checks. Capture the literal's type
 and use the existing `Type.is_char_pointer_like` query, following the nearby
 working conversion owner. Add no second validator or origin tracking for
@@ -208,7 +210,7 @@ The program must print both characters and integer seven without C warnings.
 
 ### R3. Complete the bundle path without a dependency manifest
 
-Update [bundle](../packages/tools/bundle) to inspect `.native.rsp`, preserving
+Update [bundle](../../packages/tools/bundle) to inspect `.native.rsp`, preserving
 the requirement for distribution data when native inputs need it. An empty
 response requires no legacy `.link` file and no dummy manifest.
 
@@ -227,15 +229,15 @@ network preparation or new matrix entry.
 ### R4. Correct String finalization instructions
 
 Write the terminating NUL in the source example in
-[String storage](../lib/string/storage.x). Preserve the uninitialized-buffer
+[String storage](../../lib/string/storage.x). Preserve the uninitialized-buffer
 contract of `String.malloc`. Regenerate the String reference and derived text.
 Run the corrected example once with reused storage and verify `abcde 1`.
 Do not add allocator initialization or another required output-sample run.
 
 ### R5. State Torch view and copy behavior
 
-Correct [Torch source commentary](../packages/torch/src/torch.x) and the
-[Torch guide](../docs/src/guide/torch.md). Separate views, allocating results,
+Correct [Torch source commentary](../../packages/torch/src/torch.x) and the
+[Torch guide](../../docs/src/guide/torch.md). Separate views, allocating results,
 and layout-dependent operations such as `reshape` and `flatten`.
 Keep native wrapper behavior and handle ownership unchanged.
 
@@ -245,12 +247,12 @@ dependency installation is needed solely to edit this prose.
 
 ### R6. Correct Pool and Thread ownership explanations
 
-Update the [Pool header](../lib/pool/pool.x) and
-[Pool.detach documentation](../lib/pool/threads.x). Explain the shared
+Update the [Pool header](../../lib/pool/pool.x) and
+[Pool.detach documentation](../../lib/pool/threads.x). Explain the shared
 process root, thread-active child pools, and caller ownership of detached
 pools. Remove the claim that Thread join copies successful survivors.
-Use [the current Thread contract](../lib/thread.x) and
-[the lifetime guide](../docs/src/guide/contexts-and-threads.md) as the premises.
+Use [the current Thread contract](../../lib/thread.x) and
+[the lifetime guide](../../docs/src/guide/contexts-and-threads.md) as the premises.
 
 Regenerate the Pool reference and derived text. Cross-check the explanations
 against worker initialization, detach, release, and join. No new result walk,
@@ -259,9 +261,9 @@ copy, export, lock, or ownership obligation is part of this repair.
 ### R7. Publish a working extension-compiler recipe
 
 Replace the stale `src/*.x` recipe in
-[the package guide](../docs/src/guide/packages.md) with the unit enumeration
+[the package guide](../../docs/src/guide/packages.md) with the unit enumeration
 and include directories used by
-[the native-module probe](../unittest/probes/run-native-modules.sh).
+[the native-module probe](../../unittest/probes/run-native-modules.sh).
 Use `tools/sources.sh`; do not copy the current count into build logic.
 Specify the shell needed by the published command.
 
@@ -279,8 +281,8 @@ existing List and Iter names and implementations unchanged.
 
 Update affected Lisp callback target rows through their existing adapters.
 Migrate first-party calls by binding and receiver, and
-update [the collections guide](../docs/src/guide/collections.md),
-[the iteration guide](../docs/src/guide/iteration.md), API comments, examples,
+update [the collections guide](../../docs/src/guide/collections.md),
+[the iteration guide](../../docs/src/guide/iteration.md), API comments, examples,
 and the migration documentation for the removed signatures. Keep unrelated
 methods and Lisp language spellings unchanged. Add no forwarding aliases.
 
@@ -295,22 +297,22 @@ Array/List input storage unchanged.
 ### R9. Repair module navigation
 
 Correct the 19 former entry paths in
-[the organization guide](../agents/x2c-code-organization-guide.md), using
-[the source README](../src/README.md) and `tools/sources.sh` as references.
+[the organization guide](../../agents/x2c-code-organization-guide.md), using
+[the source README](../../src/README.md) and `tools/sources.sh` as references.
 Distinguish entry units, nested members, and independent components.
 Check the corresponding runtime names while editing that map.
 
-Update [the site README](../site/README.md) to describe the statistics tool's
+Update [the site README](../../site/README.md) to describe the statistics tool's
 recursive source inventory. This is part of the source-layout explanation;
 the statistics algorithm does not change. Verify every edited path directly,
 because the current path audit does not interpret all relative filename lists.
 
 ### R10. Correct implementation-owner descriptions
 
-Update [architecture](../docs/src/internals/architecture.md) so the narrative
+Update [architecture](../../docs/src/internals/architecture.md) so the narrative
 and ownership table agree: main dispatches; translation coordinates inputs
 and writes depfiles through deps. Update
-[the operator reference](../docs/src/reference/language.md) to distinguish
+[the operator reference](../../docs/src/reference/language.md) to distinguish
 expression/protocol resolution, Var comparison lowering, and dynamic fallback.
 
 Trace the edited descriptions to their named functions. Reuse the String-add
@@ -318,9 +320,9 @@ and Var-comparison AST/output probe. Preserve all operator semantics.
 
 ### R11. Narrow declaration emission helpers
 
-In [emitter dispatch](../src/emit/dispatch.x), match the complete `declare`,
+In [emitter dispatch](../../src/emit/dispatch.x), match the complete `declare`,
 `decl`, `bind`, `param`, and `function` productions. Pass their named captures
-to [declaration emission](../src/emit/declarations.x). Remove `_declare_stmt`
+to [declaration emission](../../src/emit/declarations.x). Remove `_declare_stmt`
 and `_decl_stmt`; keep the statement semicolon at its recognized production.
 Destructure the trusted `Type.declaration_ast` result at the other caller.
 
@@ -399,10 +401,58 @@ and update this plan as batches land.
 A separate agent, capped at medium reasoning, source-reviewed all R1-R12 and
 Q1. It rejected the proposed extra search name and compatibility wrappers
 because they retained conflicting meanings while adding API surface. D1/R8
-now recommends existing `index` and `find` conventions with an explicit
-source/ABI decision. The remaining recommendations passed that source review.
-R11 is a readability change, not a demonstrated defect. R12 still requires
-integrated verification. The agent ran no builds or runtime reproductions.
+recommended existing `index` and `find` conventions with an explicit
+source/ABI decision. Gary then accepted both names and the break. The remaining recommendations passed that source review.
+R11 is a readability change, not a demonstrated defect. R12 required integrated verification. The agent ran no builds or runtime
+reproductions. Its subsequent review of the authored implementation found no
+actionable defects across all 13 items.
+
+## Implementation evidence
+
+All 13 repairs are implemented. No compatibility aliases or replacement
+sorting algorithm were added. Existing generators refreshed the runtime API,
+linked meta code, bootstrap, module catalog, and book.
+
+- R1/R8: the combined Array, typed-Array, List, Iter, and Lisp suites passed
+  197 tests and 6,538 assertions. The 200,000-prefix case raises `size-limit`.
+  Ordinary and typed Array predicate search also passed a compile-time probe.
+- R2: flat, braced, and string character-array initializers pass the ordinal
+  and symbolic fixtures. The flat reproduction now prints `ab 7`.
+- R3: pure-x2c and mixed C/x2c bundles build through the shared Makefile,
+  install, and run importing consumers. Native-input refusal and a prepared
+  manifest-backed control pass in the existing package-install probe.
+- R4-R7/R9/R10: the corrected String sample passed with reused storage;
+  pinned Torch mutation/layout probes passed; Pool/Thread prose follows the
+  ownership source. The exact extension recipe built a compiler that handles
+  absent and stale modules. Edited source paths and implementation owners
+  were checked directly.
+- R11: 14 representative C/H artifacts were byte-identical before and after
+  the emitter cleanup. Existing declaration and stack fixtures pass.
+- R12: one authored 22-row table serves both consumers. All ten native/Var
+  compound operations, project-helper use, and prepared installed-prefix
+  warm/cold translation passed. Source-unit inventory is unchanged.
+- Q1: only the contract prose changed. Key extraction, `sort_with`, and Map's
+  final comparisons retain their existing Error behavior.
+
+`tools/gate-state.py ensure agent-pr-check` passed on the integrated code:
+1,049 unit tests with 27,366 assertions; 1,294 compiler fixtures with 2,859
+artifacts; documentation audit; 122 compiled output examples; command checks;
+bootstrap/stage comparisons; and cold collection. The first attempt exposed
+only two old Array symbol snapshots, which were regenerated and reviewed.
+
+The performance checkpoint used three alternating runs per tree of seven
+byte-identical translation inputs with matching prelude interfaces. Median
+retired instructions were 30,967,765,150 on `01491d642` and 31,027,800,100 on
+`91ff5996`, a 0.19% increase. Median elapsed time was 1.89 and 1.90 seconds.
+Later test-expectation and prose changes do not change that measured code.
+
+Actual `make install` still fails on the baseline and candidate while writing
+interfaces because `x2c_ident` is unresolved. The baseline staged payload also
+omits nested runtime sources needed by an ordinary project meta helper.
+R12's installed-prefix check used the existing package-probe staging method:
+matching interfaces and all runtime source directories. It passed without a
+checkout dependency. This verifies the shared owner in a prepared prefix;
+it does not establish that the unchanged installer works.
 
 ## Plan review
 
@@ -414,7 +464,7 @@ distribution contract; R3 reads that format without reconstructing it.
 
 The design reuses the reader fence, Type queries, package metadata readers,
 AST patterns, generators, and existing tests. R8 gives existing scans canonical
-names and removes redundant spellings; its recommended migration changes ABI.
+names and removes redundant spellings; its approved migration changes ABI.
 R11 removes two internal forwarders and redundant node reconstruction.
 R12's one private meta function
 shares operator facts through an existing shipped owner and removes two table
@@ -431,8 +481,8 @@ results, absence, and migrated call contracts. Q1 adds no test for unsupported
 nonlocal exits through qsort. No new validator or dedicated diagnostic is
 proposed. Routine prose and navigation repairs need no new rejection tests.
 
-D1 records the recommended names and return contracts for Gary's selected
+D1 records the approved names and return contracts for Gary's selected
 API consolidation. D2 records his libc exception. D3 records his single-table
 choice and the approved private owner. Gary authorized implementation of the
-full plan on 2026-10-26. Broader changes require a new discussion of affected paths and
-costs before implementation.
+full plan on 2026-10-26. Broader changes require a new discussion of affected
+paths and costs before implementation.

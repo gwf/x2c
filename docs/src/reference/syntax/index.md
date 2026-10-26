@@ -40,7 +40,7 @@ change.
 | Language reference | `docs/src/reference/language.md` | User-facing forms, examples, semantic constraints; a small protocol grammar under Protocols | No complete grammar or lexical rule inventory |
 | Syntax guides | `docs/src/guide/{from-c,indentation,macros,match,collections,symbols,protocols}.md` | Explanations and examples of individual forms | Examples do not define all accepted token sequences |
 | Declaration parser | `src/parse/parse.x` | Recursive-descent rules for units, imports, types, declarations, declarators, parameters, fields, enumerators | Mixes recognition with name binding, collection, and semantic work |
-| Expression parser and precedence ledger | `src/expressions/expressions.x`, `src/operator-ledger.x` | Expression productions, ambiguity decisions, complete binary operator precedence rows | Depends on type and macro state |
+| Expression parser and precedence ledger | `src/expressions/expressions.x`, `src/operator-ledger.x`, `lib/compiler-meta.x` | Expression productions, ambiguity decisions, precedence lookups, and shared binary operator rows | Depends on type and macro state |
 | Statement parser | `src/statements.x` | Statements, blocks, match/catch arms, directive-aware governed statements | Macro-produced statements also enter binding |
 | Literal and lambda parsers | `src/literals/literals.x`, `src/lambdas.x` | Quoted data, interpolation, patterns, lambdas and captures | Token modes determine which spellings reach them |
 | Macro parser and built-ins | `src/macros/macros.x`, `etc/compiler-prelude.x` | Category table, definitions, invocations, quotations, typed holes, keyword aliases; built-in `class` and `foreach` | Grammar is extended by visible definitions; libraries such as `lib/system-macros.x` add more |
