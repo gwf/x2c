@@ -12130,7 +12130,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_18(void
   _9554 = cons(_223, _9553);
   _9555 = String_new("lib/datum-reader.x");
   _9556 = String_var(_9555);
-  _9557 = String_new("f90fc83c");
+  _9557 = String_new("5b34430f");
   _9558 = String_var(_9557);
   _9559 = String_new("lib/tokenizer.x");
   _9560 = String_var(_9559);

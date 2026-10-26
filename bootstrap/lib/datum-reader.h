@@ -9,7 +9,7 @@
 #include "tokenizer.h"
 #include "scan.h"
 #include <limits.h>
-Symbol Tokenizer_read_lisp_form(Tokenizer tokenizer, String source, unsigned base, unsigned * cursor, Var * out);
+Symbol Tokenizer_read_lisp_form(Tokenizer t, String source, unsigned base, unsigned * cursor, Var * out);
 
 #define LISP_READ_DEPTH_MAX 1024
 Tokenizer Tokenizer_from_lisp(String source, Scope * scope);

@@ -99,9 +99,9 @@ int String_len(String);
 
 int Var_is_void(Var);
 
-Symbol Tokenizer_read_lisp_form(Tokenizer tokenizer, String source, unsigned base, unsigned * cursor, Var * out){
+Symbol Tokenizer_read_lisp_form(Tokenizer t, String source, unsigned base, unsigned * cursor, Var * out){
   if(! _init_guard_) _file_init_();
-  Token token = Tokenizer_next(tokenizer);
+  Token token = Tokenizer_next(t);
   if(! token || token -> type == 11212){
     (* cursor) = String_len(source);
     return 11212;
@@ -109,7 +109,7 @@ Symbol Tokenizer_read_lisp_form(Tokenizer tokenizer, String source, unsigned bas
   unsigned start = base + token -> pos;
   (* cursor) = start;
   LispReader r ={
-    tokenizer, source, base, 0
+    t, source, base, 0
   }
   ;
   Var form = _parse_form(&(r), token, 0);
@@ -136,7 +136,7 @@ static int _nested_depth(int depth){
   if(++ depth >= LISP_READ_DEPTH_MAX){
     Var _x2c_gensym_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("Lisp.read")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/datum-reader.x",.function = "_nested_depth",.line = 56,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/datum-reader.x",.function = "_nested_depth",.line = 55,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_0, 1358596898646632, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(8750352), int_var(depth));
       __builtin_unreachable();
     }
@@ -303,7 +303,7 @@ _Noreturn static Var _malformed(String source, unsigned at){
   int line = 1, column = 1;
   scan_next_line_col(source, (int) at, & line, & column);
   {
-    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/datum-reader.x",.function = "_malformed",.line = 149,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/datum-reader.x",.function = "_malformed",.line = 148,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_1, 28682226919752, 3, Symbol_var(1307939018), String_var(source), Symbol_var(805770), int_var(line), Symbol_var(233614172), int_var(column));
     __builtin_unreachable();
   }
@@ -314,7 +314,7 @@ _Noreturn static Var _incomplete(String source, unsigned at){
   int line = 1, column = 1;
   scan_next_line_col(source, (int) at, & line, & column);
   {
-    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/datum-reader.x",.function = "_incomplete",.line = 155,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/datum-reader.x",.function = "_incomplete",.line = 154,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_2, 664344300629258, 3, Symbol_var(1307939018), String_var(source), Symbol_var(805770), int_var(line), Symbol_var(233614172), int_var(column));
     __builtin_unreachable();
   }
