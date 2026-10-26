@@ -196,7 +196,7 @@ static List _merge_states(Array states) {
 }
 
 static int _fills_whole(Compiler c, Type type, List value) {
-  if (value.match(%(expr ? (composite *)))) return 1;
+  if (value ~= %(expr ? (composite *))) return 1;
   Type source = value.cadr(), resolved = _resolve_shape(c, type);
   if (_resolve_shape(c, source) == resolved) return 1;
   if (c.sym.is_var_type(type)) return 1;
@@ -205,7 +205,7 @@ static int _fills_whole(Compiler c, Type type, List value) {
 }
 
 static int _fills_char_array(Compiler c, Type type, List value) {
-  if (!value.match(
+  if (!(value ~=
     %(expr (* char) $($source_literal_content(%((* char) ?)))))) return 0;
   Type array = _resolve_shape(c, type);
   if (!array.is_array()) return 0;
@@ -365,9 +365,9 @@ static int _scalar_inputs(Compiler c, List items, List &string) {
       }
       default: return 0;
     }
-    if (value.match(
+    if (value ~=
       %(expr (* char)
-        $($source_literal_content(%((* char) ?)))))) string = value;
+        $($source_literal_content(%((* char) ?))))) string = value;
   }
   return 1;
 }

@@ -214,7 +214,7 @@ static List _defer_binding(
       Type resolved = c.sym.resolve_key(declared);
       // C initializes constant braces in place, including const fields.
       if ((resolved.is_array() ||
-           (resolved.is_aggregate() && List.match(value, %(composite ?)))) &&
+           (resolved.is_aggregate() && value ~= %(composite ?))) &&
           !c.static_value_is_runtime(value, NULL)) return bound;
       if (resolved.is_array()) {
         match (value)
@@ -261,10 +261,7 @@ static List _initializer_rhs(
   return %(expr $cast_type $rhs_value);
 }
 
-static inline int _is_composite(List value) {
-  match (value) case %(composite *): return 1;
-  return 0;
-}
+static inline int _is_composite(List value) => value ~= %(composite *);
 
 static List _assignment(List binding, List type, List rhs) =>
   %(stmnt (expr $type (op = (expr $type (ident $binding)) $rhs)));
@@ -476,13 +473,12 @@ static List _entries(HeaderCache &h, List header, List prelude) {
     node = _cache_refs(node, h.bindings, replaced);
     int captured = node.car() == <sourceinit>;
     List function = captured ? node.cadr() : node;
-    match (function) case %(function ? ? (block *)):
-      if (replaced) {
-        foreach (List item in prelude) output.push(item);
-        prelude = NULL;
-        function = entry.enter(function, 1);
-        node = captured ? %(sourceinit $function) : function;
-      }
+    if (function ~= %(function ? ? (block *)) && replaced) {
+      foreach (List item in prelude) output.push(item);
+      prelude = NULL;
+      function = entry.enter(function, 1);
+      node = captured ? %(sourceinit $function) : function;
+    }
     output.push(node);
   }
   return output.list_free();

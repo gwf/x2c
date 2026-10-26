@@ -8,7 +8,7 @@ module int _is_addressable(Compiler c, List expression) {
       Map facts = c.semantic_binding_facts();
       Type declared = facts[%(type $binding)];
       return !(%(lambda-snapshot $binding) in facts) &&
-             !declared.match(%(* register *));
+             !(declared ~= %(* register *));
     }
     case %(expr ? $($indexed(?receiver, ?selector))):
       return !c.sym.normalize_declared_type(receiver.cadr()).is_array() ||
@@ -58,8 +58,7 @@ module List _resolve_indexed(
   Type receiver_type = receiver.cadr();
   // A field of a foreign struct has no x2c type; C indexes it alone.
   if (!receiver_type &&
-      List.match(
-        receiver, %(expr () $($source_operator_content(%((!or . ->) * *))))))
+      receiver ~= %(expr () $($source_operator_content(%((!or . ->) * *)))))
     return %(expr () (index $receiver $selector));
   $fail.expressions_index_unsupported(c, origin, receiver_type);
 }

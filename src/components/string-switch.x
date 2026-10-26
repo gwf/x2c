@@ -38,8 +38,8 @@ meta static String _string_case_bytes(String spelling) {
    `Type.is_char_pointer_like`, which a component cannot include; see
    `Compiler.prelude_sources`. */
 meta static int _string_case_text(Type type) =>
-  type.match(%((!or (dim *) (!quote *)) char)) ||
-  type.match(%((!or (dim *) (!quote *)) const char));
+  type ~= %((!or (dim *) (!quote *)) char) ||
+  type ~= %((!or (dim *) (!quote *)) const char);
 
 /* A label's content: the bytes its literals spell, in quotes, or the name
    of a native macro x2c types as a string literal. NULL for any other

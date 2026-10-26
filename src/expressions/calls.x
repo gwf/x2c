@@ -126,7 +126,7 @@ static List _discarding_callee(
   List binding = NULL;
   match (callee) case %(expr ? $($source_identifier_content(
       %((!set ?bound (*)))))): binding = bound;
-  if (!binding || !callee_type.match(%((func *) *)) ||
+  if (!binding || !(callee_type ~= %((func *) *)) ||
       %"discard-helper $((long) binding)" in c.protocol_helpers)
     return callee;
   int which = 0, index = 0;

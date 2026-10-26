@@ -31,11 +31,11 @@ static List _cache_alias(List key) {
 List Compiler.cache_cons_cell(Compiler c, List head, List tail) {
   if (c.runtime_literals) return NULL;
   List head_cache = NULL, tail_cache = NULL;
-  if (head.match(%(expr ("Var") (cache *)))) head_cache = head.caddr();
-  else if (head.match(%(cache *))) head_cache = head;
+  if (head ~= %(expr ("Var") (cache *))) head_cache = head.caddr();
+  else if (head ~= %(cache *)) head_cache = head;
   if (!head_cache) return NULL;
-  if (tail.match(%(expr ("List") (cache *)))) tail_cache = tail.caddr();
-  else if (tail.match(%(nil))) tail_cache = tail;
+  if (tail ~= %(expr ("List") (cache *))) tail_cache = tail.caddr();
+  else if (tail ~= %(nil)) tail_cache = tail;
   if (!tail_cache) return NULL;
   List cached = c.cache(%(cons $head_cache $tail_cache));
   return %(expr ("List") $cached);

@@ -119,7 +119,7 @@ static List _symbol_expression(Symbol value) =>
 
 // Inject conversions so assignment RHS matches the annotated LHS type.
 static List _assignment(Compiler c, Symbol op, List lhs, List rhs) {
-  if (lhs.match(%(expr ? (slice *))))
+  if (lhs ~= %(expr ? (slice *)))
     $fail.transform_slice_assignment(c, NULL);
   rhs = c.convert_expression(rhs, lhs.cadr());
   return %(op $op $lhs $rhs);

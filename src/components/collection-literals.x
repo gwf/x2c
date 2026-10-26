@@ -12,11 +12,11 @@
 /** Builds an Array literal from its elements. */
 $rewrite($array_value)
 meta Code array_literal(Code code) {
-  match (code) case $array_value(*items): {
+  if (code ~= $array_value(*items)) {
     if (!items) return $!Array{ Array.new() };
     Array values = [];
     foreach (Code item in items) {
-      if (item.match(%(expr ? (composite (commas)))))
+      if (item ~= %(expr ? (composite (commas))))
         item = $!Map{ Map.new() };
       values.push(%(expr ("Var") (var $item)));
     }
@@ -30,12 +30,12 @@ meta Code array_literal(Code code) {
 /** Builds a Map literal from its keys and values, alternating. */
 $rewrite($map_value)
 meta Code map_literal(Code code) {
-  match (code) case $map_value(*rows): {
+  if (code ~= $map_value(*rows)) {
     if (!rows) return $!Map{ Map.new() };
     Array values = [];
     foreach (List row in rows)
       foreach (Code item in row.cdr()) {
-        if (item.match(%(expr ? (composite (commas)))))
+        if (item ~= %(expr ? (composite (commas))))
           item = $!Map{ Map.new() };
         values.push(%(expr ("Var") (var $item)));
       }

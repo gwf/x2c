@@ -132,7 +132,7 @@ module List _initializer_value(Emitter &e, List ast) {
   List result = NULL;
   foreach (List choice in cases.reverse()) {
     (List condition, List path, Type type, List value) = choice;
-    if (value.match(%(expr ? (composite *))))
+    if (value ~= %(expr ? (composite *)))
       value = type ? %(expr $type (cast $type $value))
                    : %(expr (int) (literal (int) "0"));
     List emitted = _emit(e, $(value));
@@ -226,7 +226,7 @@ static void _static_binding(
   StaticRuntime runtime = {
     .e = &e, .output = output, .declared_base = declared_base,
     .type = type, .name = name, .initial = initial, .storage = storage,
-    .inferred = type.car() == <dim> || type.match(%((dim) *))};
+    .inferred = type.car() == <dim> || (type ~= %((dim) *))};
   runtime.alias = e.fresh_name("static_object_type");
   runtime.pointer = e.fresh_name("static_object");
   runtime.guard = e.fresh_name("static_guard");
