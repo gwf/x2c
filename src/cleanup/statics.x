@@ -50,7 +50,7 @@ module List _static_regions(Compiler c, List ast, Map runtime) {
    and ordinary replacements both pass through static-region processing. */
 static List _landing_form(Compiler c, List node, Map runtime) {
   int written = 0;
-  match (node) case %(try ?body () ?finalizer kernel): {
+  if (node ~= %(try ?body () ?finalizer kernel)) {
     node = %(try $body () $finalizer);
     written = 1;
   }
@@ -58,7 +58,7 @@ static List _landing_form(Compiler c, List node, Map runtime) {
     ? c.rewrite_written(<try>, node, c.return_type)
     : c.rewrite_lowered(
       <node>, <try>, node, <statement>, c.return_type, NULL);
-  match (form) case %(landing ?code ?rows): {
+  if (form ~= %(landing ?code ?rows)) {
     Array parts = [];
     foreach (List row in rows)
       match (row) {
@@ -78,17 +78,16 @@ static List _static_initializers(
   Compiler c, Type type, List bindings, Map runtime) {
   Array output = [];
   foreach (List binding in bindings.cdr()) {
-    match (binding)
-      case %(op = ?declaration ?value): {
-        declaration = _static_regions(c, declaration, runtime);
-        List initial = _static_regions(c, value, runtime);
-        if (type.is_static() && c.static_value_is_runtime(value, runtime)) {
-          List record = _region_binding(c, "static_cleanup");
-          initial = %(staticinit $record $initial);
-        }
-        output.push(%(op = $declaration $initial));
-        continue;
+    if (binding ~= %(op = ?declaration ?value)) {
+      declaration = _static_regions(c, declaration, runtime);
+      List initial = _static_regions(c, value, runtime);
+      if (type.is_static() && c.static_value_is_runtime(value, runtime)) {
+        List record = _region_binding(c, "static_cleanup");
+        initial = %(staticinit $record $initial);
       }
+      output.push(%(op = $declaration $initial));
+      continue;
+    }
     output.push(_static_regions(c, binding, runtime));
   }
   return %(declare $type (bindings @(output.list_free())));
@@ -102,12 +101,11 @@ static int _runtime_static_declaration(
     case %(declare (!set ?type (*)) (bindings *bindings)):
       if (type.list().type().is_static())
         foreach (List binding in bindings)
-          match (binding)
-            case %(op = (bind ?name ?) ?value):
-              if (c.static_value_is_runtime(value, runtime)) {
-                runtime[name] = 1;
-                found = 1;
-              }
+          if (binding ~= %(op = (bind ?name ?) ?value))
+            if (c.static_value_is_runtime(value, runtime)) {
+              runtime[name] = 1;
+              found = 1;
+            }
   }
   return found;
 }
@@ -200,7 +198,7 @@ static int _input(RuntimeScan &s, List binding) =>
    initializer, without evaluating calls in a fixed-size operand. */
 static int _sizeof_dimensions(RuntimeScan &s, List operand) {
   List node;
-  $ast.walk(operand, node) match (node) case %(dim ?dimension): {
+  $ast.walk(operand, node) if (node ~= %(dim ?dimension)) {
     if (dimension && s.c.static_value_is_runtime(dimension, s.runtime))
       return 1;
     continue;
