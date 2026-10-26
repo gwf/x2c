@@ -3,9 +3,8 @@
     Copyright (c) 2026 Gary William Flake
 
     Declares `Block` storage views, `Iter` traversal, and `Var` boxing for
-    built-in
-    runtime types. Each declaration generates its static adapters and
-    dynamic descriptor rows.
+    built-in runtime types. Each declaration generates its static
+    adapters and dynamic descriptor rows.
  */
 
 #pragma once
