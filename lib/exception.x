@@ -65,8 +65,7 @@ threaded const volatile void *volatile x2c_exception_escaped;
 /** Pushes one compiler-generated cleanup record.
     `record` and its `fn` must be nonnull, and the record and borrowed `env`
     must remain live until leave or `Error` transfer. Invalid registration
-    exits
-    through the raw exception fatal path.
+    exits through the raw exception fatal path.
 */
 void x2c_cleanup_push(X2CCleanup *record) {
   if (!record || !record.fn) _fatal("invalid cleanup registration");
