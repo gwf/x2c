@@ -9,7 +9,8 @@
 static String meta_build_directory = NULL;
 
 /** Directs each provider group into `directory`, using `owners` to name
-    their headers by table, or stops that when `directory` is NULL. */
+    their headers by table, or stops that when `directory` is NULL.
+*/
 void Compiler.use_meta_build_directory(
   String directory, Array owners, Map providers) {
   meta_build_directory = directory;
@@ -23,7 +24,8 @@ void Compiler.use_meta_build_directory(
     directory as `group-K.c` and `group-K.h`, K being its table, with the
     x2c sources it read in `group-K.deps`, or its failure in
     `group-K.failure`. Included native and type providers use the same
-    group header and object even when they have no `meta` functions. */
+    group header and object even when they have no `meta` functions.
+*/
 void Compiler.write_meta_build(Compiler c) {
   int index = c.meta_build - 1;
   if (!meta_build_directory) return;
@@ -49,7 +51,8 @@ void Compiler.write_meta_build(Compiler c) {
 static Scope session_meta_scope = NULL;
 
 /** Binds the session's group function `name` when it is not bound yet, by
-    staging the group, and reports at `site` a function that cannot run. */
+    staging the group, and reports at `site` a function that cannot run.
+*/
 void Compiler.bind_meta_group(Compiler c, String name, Token site) {
   if (name in c.meta_group_bound) return;
   String failure = NULL;
@@ -87,7 +90,8 @@ static String _stage(Compiler c, String &failure) {
     receives this compiler and returns the factory's typed definition; it
     can place supporting functions through the ordinary compiler APIs.
     `declarations` supplies session types. Returns the loaded module's
-    targets, or NULL with `failure` set. Publishes no evaluator bindings. */
+    targets, or NULL with `failure` set. Publishes no evaluator bindings.
+*/
 Map Compiler.stage_session_function(
   Compiler c, List declarations, Func prepare, String &failure) {
   failure = c.groups_meta() ? NULL : "native modules are unavailable";
