@@ -48,7 +48,8 @@ Map Compiler.collect_symbols(Compiler c, Map globs) {
    public inline function, such as `lib/type.x`: a unit calling one would
    declare it without a definition. */
 /** Returns the compiler-owned prelude sources relative to its home. Their
-    runtime implementations are already linked into the shipped binaries. */
+    runtime implementations are already linked into the shipped binaries.
+*/
 List Compiler.prelude_sources(void) => %(
   "lib/x2c.x" "src/grammar.x"
   "src/components/bracket-access.x"
@@ -131,7 +132,8 @@ static const char syntax_marker[] = "_x2c.syntax.prelude";
 
 /** Installs the syntax prelude's macros and keyword aliases into `c`'s
     macro state once. A later file walk with the same macros, whose keyword
-    aliases start empty, merges the aliases again. */
+    aliases start empty, merges the aliases again.
+*/
 void Compiler.install_syntax_prelude(Compiler c) {
   Var installed;
   if (c.macros.try_get(syntax_marker, installed)) {
@@ -432,7 +434,8 @@ static String _include_text(Compiler c, String target, String path) {
 }
 
 /** Selects a source file's own package, as its standalone translation does.
-    A cold provider does not register an import in its including unit. */
+    A cold provider does not register an import in its including unit.
+*/
 void Compiler.configure_package(Compiler c, List roots, String filename) {
   String source = Path.absolute(filename);
   String package = Compiler.package_directory(roots, source);
@@ -518,7 +521,8 @@ static Array _include_dirs(
 }
 
 /** The file the include of `target` from `includer_dir` names, searched as
-    collection searches `dirs`, or NULL. */
+    collection searches `dirs`, or NULL.
+*/
 String SourceView.resolve_include(
   SourceView s, List dirs, String includer_dir, String target, int angle) {
   int covered = 0;
@@ -705,7 +709,8 @@ static void _replay_included(
 }
 
 /** Installs the definitions of each include among the directives before
-    the cursor. */
+    the cursor.
+*/
 void Compiler.install_included_effects(Compiler c) {
   Token first = c.token, tokens = c.tokenizer.tokens;
   for (Token token = first; token > tokens;) {
