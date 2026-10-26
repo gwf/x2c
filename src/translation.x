@@ -1,6 +1,10 @@
 /*  translation.x -- synchronous compiler translation requests
 
     Copyright (c) 2026 Gary William Flake.
+
+    One request's units share a frontend. `unit_dirs` maps each input to its
+    own output directory on the build path, where the caller reports progress;
+    `x2c translate` has neither.
 */
 
 #pragma once
@@ -166,9 +170,13 @@ static List _renumbered_bindings(List ast) {
     Var node = pending.take_last();
     if (node is not <list> || node.is_nil()) continue;
     match (node.list()) case %(binding ?identity ?spelling): {
-      if (!(identity in numbers)) numbers[identity] = (int) numbers.len() + 1;
+      Var number;
+      if (!numbers.try_get(identity, number)) {
+        number = (int) numbers.len() + 1;
+        numbers[identity] = number;
+      }
       replaced[(void *) node.list()] =
-        %(binding $(numbers[identity]) $spelling);
+        %(binding $number $spelling);
       continue;
     }
     foreach (Var child in node.list().reverse()) pending.push(child);
@@ -184,9 +192,6 @@ static String _node_repr(List node) {
 
 // translation requests
 
-/* One request's units share a frontend. `unit_dirs` maps each input to its
-   own output directory on the build path, where the caller reports progress;
-   `x2c translate` has neither. */
 static typedef struct Translation {
   CliRequest request, Frontend frontend, Map unit_dirs;
   void *context;
@@ -196,7 +201,8 @@ static typedef struct Translation {
 
 /** Translates a request synchronously. Optional per-input directories and a
     parent-process progress callback let a caller own build state. Without a
-    callback, translation reports its own progress and receipt. */
+    callback, translation reports its own progress and receipt.
+*/
 int translate_request(
   CliRequest request, Map unit_dirs, void *context,
   void (*progress)(void *context, String input, int completed)) {
@@ -229,13 +235,15 @@ int translate_request(
    `--out-dir` must not share an output stem; inspection writes nothing. */
 static void _preflight(Translation &t) {
   CliRequest request = t.request;
-  int shared = !request.inspects() && !t.unit_dirs, Map stems = {};
+  int shared = !request.inspects() && !t.unit_dirs;
+  Map stems = shared ? {} : NULL;
   foreach (String input in request.inputs) {
     CliRequest.require_input(input);
     if (!Path.is_x2c_source(input))
       $fail.main_input_not_x(input);
+    if (!shared) continue;
     String stem = Path.stem(input);
-    if (shared && stem in stems)
+    if (stem in stems)
       _stem_collision(stem, stems[stem], input, request.out_dir);
     stems[stem] = input;
   }
@@ -387,9 +395,8 @@ static List _imported_packages(String path) {
   return names.list_free();
 }
 
-/* One slice per worker. Fewer, larger slices measured better than more,
-   smaller ones. The fork and the copy-on-write faults behind it cost more
-   than the imbalance a long unit at the tail of a slice can cause.
+/* One slice per worker amortizes fork and copy-on-write costs across units,
+   accepting imbalance from a long unit at the tail of a slice.
 
    A build asks for one slice per unit. Each of its units then translates in
    a worker that has translated nothing else, so a unit records the headers
