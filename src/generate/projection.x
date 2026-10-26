@@ -645,9 +645,9 @@ static Array _forward_candidates(List items, int complete_enums) {
   foreach (List node in items)
     match (node) case %(typedef ?base ?bindings): {
       List forward = _typedef_forward(base, bindings);
-      if (!forward && complete_enums)
-        match (base.list().type().base_type())
-          case %(enum ? (*)): forward = node;
+      if (!forward && complete_enums &&
+          (base.list().type().base_type() ~= %(enum ? (*))))
+        forward = node;
       if (!forward) continue;
       foreach (String alias in _typedef_names(node))
         candidates.push($(alias, forward));
