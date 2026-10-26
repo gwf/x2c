@@ -4,7 +4,7 @@
 
     Like `cmath.x`, these prototypes are marked `meta`, so the compiler links
     each function and compile-time code calls the native one. The set is
-    deliberately small: integer and string conversions and string
+    small: integer and string conversions and string
     comparison. `<ctype.h>` is absent because C libraries may define
     its functions as macros, which a redeclaration cannot follow. Anything
     else reaches compile time through a native extension.
