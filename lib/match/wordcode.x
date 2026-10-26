@@ -5,7 +5,7 @@
     MachineBuilder emits range-checked 8-byte words and freezes them into one
     exact-sized, immutable MachineProgram allocation. This module also
     defines the `Match` invocation state and frame layouts that
-    `machine.x` reads. `Match` stack-allocates each invocation, so
+    `machine.x` reads. `Match` acquires a machine per invocation, so
     nested matches keep separate state and no process-global machine exists.
     The decoder uses the <idle>, <running>, <ok>, <fail>, and <error> status
     names, and no instruction calls the recursive matcher.
@@ -213,12 +213,12 @@ typedef struct MatchMachine {
   Var value, error;
   int fp, current_entry_undo, undo_count, slot_count;
   MachineStats *stats;
-  // An optional relation replaces plain equality when a repeated binder is
-  // compared, for value slots and for prefix or final sequence slots.
+  /* An optional relation replaces plain equality when a repeated binder is
+     compared, for value slots and for prefix or final sequence slots. */
   int (*relation)(void *, int, Var, Var, void *);
   void *relation_context;
-  // An optional view gives the value a list pattern examines when the
-  // machine enters an element; captures keep the element itself.
+  /* An optional view gives the value a list pattern examines when the
+     machine enters an element; captures keep the element itself. */
   Var (*view)(Var);
   Var *scratch;
   int scratch_capacity;
