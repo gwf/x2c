@@ -1,7 +1,5 @@
 /*  adapters.x -- FuncAdapter calling convention and helper construction */
 
-/* Callable conversion failures retain the shared signature-note owner. */
-
 static macro Stmt $fail.callable_shared(Expr $c, Expr $source) =>
   _adapter_error(
     $c, "function conversion needs x2c_func_shared from lib/func/func.x",
@@ -18,8 +16,7 @@ static macro Stmt $fail.callable_native_context(
     $c, "native binding needs Func.context from lib/func/func.x",
     $target, $source, NULL);
 
-static macro Stmt $fail.callable_direct(
-  Expr $c, Expr $target, Expr $source) =>
+static macro Stmt $fail.callable_direct(Expr $c, Expr $target, Expr $source) =>
   _adapter_error(
     $c, "native binding target must be a direct function",
     $target, $source,
@@ -53,13 +50,11 @@ static macro Expression $note.callable_source(Expr $source) =>
   $source ? %"source signature: $($source.repr())"
           : "source signature: unresolved";
 
-/* Helper syntax shared by every lowering below. */
-
 static macro Expression $func_address(Expr $value) => &$value;
 
 static macro Expression $func_size(Expr $value) => sizeof $value;
 
-// Func adapter bodies
+// func adapter bodies
 
 /* The body of an adapter that runs `body`: a block's items and then a
    return of no value, a void expression and then that return, or a return
@@ -106,7 +101,7 @@ List Compiler.prepend_setup(Compiler c, List body, List setup) {
   return body;
 }
 
-// Func adapters
+// func adapters
 
 /* The argument readers of one adapter, with its `Func` and argument vector
    parameters read as expressions. */
@@ -212,8 +207,7 @@ module List _build_func_adapter(
   List names = _auto_names(c, params.len());
   List locals = _func_argument_locals(
     c, diagnostic_type, params, names, fn_binding, argv_binding);
-  List arguments = params.zip_with(
-    names, _func_bound);
+  List arguments = params.zip_with(names, _func_bound);
   List call = _func_call(c, return_type, target, %(@leading @arguments));
   Type resolved_result = c.sym.resolve_key(return_type);
   if (resolved_result && resolved_result.car() == <struct>)
@@ -225,7 +219,8 @@ module List _build_func_adapter(
 
 /** Builds an adapter with `type`'s public signature that passes its own
     Func as the first argument of `target`, before the declared arguments.
-    The target can read per-instance bindings with `Func.context`. */
+    The target can read per-instance bindings with `Func.context`.
+*/
 List Compiler.context_func_adapter(Compiler c, Type type, List target) {
   List self = c.sym.introduce(c.fresh_name("func_binding"));
   return _build_func_adapter(
@@ -292,9 +287,9 @@ static List _func_reads(
 /** Returns `(SIGNATURE (STORAGE READ)...)` for an adapter of a `Var`
     function taking the lambda parameter rows `entries`: its Func
     signature as a cached `List`, and each argument as `_func_reads`
-    reads it from `argv` of the Func `fn`. */
-List Compiler.func_parameters(
-  Compiler c, List entries, List fn, List argv) {
+    reads it from `argv` of the Func `fn`.
+*/
+List Compiler.func_parameters(Compiler c, List entries, List fn, List argv) {
   List types = c.lambda_param_types(entries);
   Type adapter = c.sym.resolve_key(%("FuncAdapter"));
   List reads = entries ? _func_reads(c, adapter, types, fn, argv) : NULL;
@@ -335,8 +330,7 @@ static List _pointer(
   List pointer_helper = _adapter_helper(
     c, "x2c_func_pointer_argument", pointer_type);
   List picked = _call(
-    r,
-    $!Type{ void * }, _func_bound(pointer_type, pointer_helper), index, NULL);
+    r, $!Type{ void * }, _func_bound(pointer_type, pointer_helper), index, NULL);
   storage_type = parameter_type;
   if (resolved.is_pointer())
     return c.convert_expression(picked, parameter_type);
@@ -370,16 +364,16 @@ static List _call(
 static void _publish_func_adapter(
   Compiler c, List binding, List fn_binding, List argv_binding,
   List body, List setup) {
-  List parameters = _named_decl_params(
-    %(("Func") (* const "FuncArg")), $(fn_binding, argv_binding));
+  List fn_parameter = Type.parameter_ast(%("Func"), fn_binding);
+  List argv_parameter = Type.parameter_ast(
+    %(* const "FuncArg"), argv_binding);
   c.add_early(
     c.wrapper_function(
-      %(static "Var"), binding, parameters.cdr(),
+      %(static "Var"), binding, $(fn_parameter, argv_parameter),
       c.prepend_setup(_helper_body(c, body), setup).cdr()));
 }
 
-static List _func_record_call(
-  Compiler c, Type return_type, List call) {
+static List _func_record_call(Compiler c, Type return_type, List call) {
   /* A record result is returned as `<p48>` to a copy of its bytes. */
   Type result_type = NULL;
   List result_helper = _adapter_helper(
@@ -392,7 +386,6 @@ static List _func_record_call(
   List size = c.rebuild_expression(%(unsigned long), size_shape(value));
   List helper = _func_bound(result_type, result_helper);
   List boxed = _func_call(c, %("Var"), helper, $(address, size));
-  /* The record is copied into a Var after the native call completes. */
   return c.rebuild_statement(
     $!{ { $return_type $result = $call; return $boxed; } }).cadr();
 }
@@ -423,13 +416,12 @@ module List _adapter_helper(Compiler c, String name, Type &type) =>
 /* The issued identity `binding` read as a `type`. */
 module List _func_bound(Type type, List binding) => $!($type){ $binding };
 
-module List _func_call(
-  Compiler c, Type type, List callee, List arguments) {
+module List _func_call(Compiler c, Type type, List callee, List arguments) {
   Macro shape = $called;
   return c.rebuild_expression(type, shape(callee, arguments));
 }
 
-// Build fresh binding identities a0..aN.
+// Each a0..aN name gets a fresh binding identity.
 static List _auto_names(Compiler c, int count) {
   Array out = [];
   for (int index = 0; index < count; index++)
@@ -437,15 +429,8 @@ static List _auto_names(Compiler c, int count) {
   return out.list_free();
 }
 
-// Produce typed parameters from types and their binding identities.
-static List _named_decl_params(List types, List names) {
-  List params = types.zip_with(
-    names, %!(Type type, List name) => type.parameter_ast(name));
-  return %(params @params);
-}
-
 module int _typed_params_variadic(List params) {
-  foreach(Var value in params) {
+  foreach (Var value in params) {
     if (value == <...>) return 1;
     match (value) case %(...): return 1;
   }
