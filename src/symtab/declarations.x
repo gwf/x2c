@@ -16,8 +16,7 @@ List Sym.declare(Sym s, List context, List key, List ast) =>
 List Sym.declare_resolved(Sym s, List context, List key, List ast) =>
   _declare(s, context, key, ast, key);
 
-static List _declare(
-  Sym s, List context, List key, List ast, List declared) {
+static List _declare(Sym s, List context, List key, List ast, List declared) {
   if (!s.at_file_scope() && !List.equal(declared, key))
     _link_local(s, declared);
   key = declared;
@@ -203,8 +202,7 @@ static void _local_typedef(Sym s, Type type, List binding) {
   if (s.at_file_scope()) return;
   if (type.is_aggregate_tag())
     s.put(s.binding_facts, %(ntype $binding), type);
-  s.put(
-    s.binding_facts, %(emitted $binding), s.c.fresh_name("local_typedef"));
+  s.put(s.binding_facts, %(emitted $binding), s.c.fresh_name("local_typedef"));
 }
 
 /* A block-scope `extern` declaration or function prototype names an
