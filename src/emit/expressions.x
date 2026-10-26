@@ -150,11 +150,12 @@ module List _call(Emitter &e, Var function, Var arguments) {
            @(_emit(e, $(arguments))) ")");
 }
 
-/* A source-literal pattern is the same value on every call, so the call gets
-   its own process-lifetime plan site and prepares once. A computed pattern
-   keeps the ordinary entry, which prepares one plan per call. Only a direct
-   global function binding identifies a runtime operation. Returns NULL
-   when the call is not one of those operations or its pattern is computed. */
+/* A source-literal pattern gets its own process-lifetime plan site, which
+   retains a borrowable pattern's plan. Computed patterns use the ordinary
+   entry's active plan cache: admitted canonical patterns reuse plans; other
+   patterns need transient plans. Only a direct global function binding
+   identifies a runtime operation. Returns NULL for other calls or computed
+   patterns. */
 static List _match_site_call(Emitter &e, Var function, Var arguments) {
   List binding = NULL;
   while (!binding && function is <list>) match (function) {
