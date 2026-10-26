@@ -285,8 +285,9 @@ int Type.discards_qualifiers(Type source, Type target) {
 static unsigned _qualifiers(Type &cursor) {
   unsigned found = 0;
   Type type = cursor;
-  while (type && type.car() is <symbol>) {
-    Symbol head = type.car();
+  foreach (Var item in type.list()) {
+    if (item is not <symbol>) break;
+    Symbol head = item;
     if (!head.is_type_qualifier()) break;
     switch (head) {
       case <const>:    found |= 1; break;

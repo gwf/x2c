@@ -495,9 +495,9 @@ List type_declaration_parts(List type) {
   List reversed = %(), qualifiers = %();
   for (List rest = type; rest !== base; rest = rest.cdr())
     reversed = cons(rest.car(), reversed);
-  while (reversed && reversed.car() is <symbol> &&
-         reversed.car() in _type_qualifiers) {
-    qualifiers = cons(reversed.car(), qualifiers);
+  foreach (Var item in reversed) {
+    if (item is not <symbol> || !(item in _type_qualifiers)) break;
+    qualifiers = cons(item, qualifiers);
     reversed = reversed.cdr();
   }
   Array syntax = [];

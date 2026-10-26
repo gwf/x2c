@@ -75,14 +75,18 @@ module List _auto_declaration(
         $fail.parse_auto_inference(c, c.token);
       Type resolved = c.sym.normalize_declared_type(type);
       Type shape = resolved;
-      while (shape.car() is <symbol> &&
-             shape.car().symbol().is_type_qualifier()) shape = shape.cdr();
+      foreach (Var item in shape.list()) {
+        if (item is not <symbol> || !item.symbol().is_type_qualifier()) break;
+        shape = shape.cdr();
+      }
       if (shape == %(void)) $fail.parse_auto_inference(c, c.token);
       if (shape.is_array()) type = %(* @(resolved.dereference()));
       else if (shape.is_function()) type = %(* @type);
       else {
-        while (type.car() is <symbol> &&
-               type.car().symbol().is_type_qualifier()) type = type.cdr();
+        foreach (Var item in type.list()) {
+          if (item is not <symbol> || !item.symbol().is_type_qualifier()) break;
+          type = type.cdr();
+        }
         if (c.sym.normalize_declared_type(type) != shape)
           type = %(unqual @type);
       }

@@ -182,9 +182,10 @@ Type Compiler.loaded_call_type(Compiler c, Type type) {
   foreach (Type parameter in parameters) {
     Type shape = c.sym.normalize_declared_type(parameter);
     if (shape.is_array()) parameter = shape.dereference().reference();
-    while (parameter.car() is <symbol> &&
-           parameter.car().symbol().is_type_qualifier())
+    foreach (Var item in parameter.list()) {
+      if (item is not <symbol> || !item.symbol().is_type_qualifier()) break;
       parameter = parameter.cdr();
+    }
     adjusted.push(parameter);
   }
   return %((func $(adjusted.list_free())) @result);

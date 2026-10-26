@@ -627,10 +627,11 @@ static void _record_enum_values(Compiler c, List members) {
 module List _finish_type(Compiler c, List type) {
   List base = type;
   Array storage = [];
-  while (base.car() is <symbol> &&
-         (base.car().symbol().is_type_qualifier() ||
-          base.car().symbol().is_storage_class())) {
-    storage.push(base.car());
+  foreach (Var item in base) {
+    if (item is not <symbol> ||
+        !(item.symbol().is_type_qualifier() || item.symbol().is_storage_class()))
+      break;
+    storage.push(item);
     base = base.cdr();
   }
   if (base != type &&

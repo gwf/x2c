@@ -190,14 +190,15 @@ static List _sequence(Emitter &e, List ast) {
 
 static List _prefix(Emitter &e, List ast) {
   Array prefix = [];
-  while (ast && ast.car() is <symbol>) {
-    Symbol item = ast.car();
+  foreach (Var part in ast) {
+    if (part is not <symbol>) break;
+    Symbol item = part;
     if (item == <typedef> ||
         (!item.is_storage_class() && !item.is_type_qualifier() &&
          !item.is_inline()))
       break;
     if (item == <threaded>) prefix.push("_Thread_local");
-    else prefix.push(ast.car());
+    else prefix.push(part);
     ast = ast.cdr();
   }
   return prefix.list_free().append(_emit(e, ast));

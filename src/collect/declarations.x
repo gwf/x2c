@@ -49,9 +49,12 @@ module void _needed_types(List syntax, Map rows, Map needed) {
       continue;
     }
     List type = item;
-    while (type.car() is <symbol> &&
-           (type.car().symbol().is_type_qualifier() ||
-            type.car().symbol().is_storage_class())) type = type.cdr();
+    foreach (Var part in type) {
+      if (part is not <symbol> ||
+          !(part.symbol().is_type_qualifier() || part.symbol().is_storage_class()))
+        break;
+      type = type.cdr();
+    }
     List family = _type_family(type);
     if (family && family in rows) needed[family] = 1;
     /* A typedef spelling is needed through any declarator. Aggregate

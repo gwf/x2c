@@ -141,10 +141,16 @@ static List _func_bridge_call(
 static Type _func_pointer_value_type(Compiler c, Type type) {
   Type resolved = c.sym.resolve_key(type);
   if (resolved) type = resolved;
-  while (type && _func_type_qualifier(type.car())) type = type.cdr();
+  foreach (Var item in type.list()) {
+    if (!_func_type_qualifier(item)) break;
+    type = type.cdr();
+  }
   if (!type || type.car() != <*>) return NULL;
   List tail = type.cdr();
-  while (tail && _func_type_qualifier(tail.car())) tail = tail.cdr();
+  foreach (Var item in tail) {
+    if (!_func_type_qualifier(item)) break;
+    tail = tail.cdr();
+  }
   Type pointer = cons(<*>, tail);
   return pointer.dereference().is_function() ? pointer : NULL;
 }

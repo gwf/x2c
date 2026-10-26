@@ -366,8 +366,9 @@ static int _reference_type_accepts(List target, List source) {
 
 static unsigned _type_qualifiers(List &cursor) {
   unsigned qualifiers = 0;
-  while (cursor && cursor.car() is <symbol>) {
-    Symbol head = cursor.car();
+  foreach (Var item in cursor) {
+    if (item is not <symbol>) break;
+    Symbol head = item;
     switch (head) {
       case <const>:    qualifiers |= 1; break;
       case <volatile>: qualifiers |= 2; break;

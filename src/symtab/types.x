@@ -24,9 +24,11 @@ Type Sym.resolve_key(Sym s, Type key) {
    over-budget walk can name it instead of some mid-chain link. */
 static Type _resolve_chain(Sym s, Type key, Type stop, Type origin, int hops) {
   if (hops > RESOLVE_KEY_MAX_HOPS) _typedef_budget_error(s, origin);
-  while (key.car() is <symbol> &&
-         (key.car().symbol().is_type_qualifier() || key.car() == <unqual>))
+  foreach (Var item in key.list()) {
+    if (item is not <symbol> ||
+        !(item.symbol().is_type_qualifier() || item == <unqual>)) break;
     key = key.cdr();
+  }
   if (stop && key == stop) return key;
   if (key.is_typedef_name() || key.is_typedef()) {
     Type type = _typedef_target(s, key);
@@ -92,8 +94,10 @@ static Type _normalize_chain(Sym s, Type type, Type origin, int hops) {
   Type base = type.base_type();
   if (base.car() == <unqual>) {
     Type value = _normalize_chain(s, base.cdr(), origin, hops + 1);
-    while (value.car() is <symbol> &&
-           value.car().symbol().is_type_qualifier()) value = value.cdr();
+    foreach (Var item in value.list()) {
+      if (item is not <symbol> || !item.symbol().is_type_qualifier()) break;
+      value = value.cdr();
+    }
     return _replace_type_base(type, base, value);
   }
   Type next = _typedef_base_step(s, type, base);

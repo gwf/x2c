@@ -293,10 +293,12 @@ module void _spelled_types(List node, Map names) {
   List item;
   $ast.walk(node, item) {
     List base = item;
-    while (base.car() is <symbol> &&
-           (base.car().symbol().is_type_qualifier() ||
-            base.car().symbol().is_storage_class()))
+    foreach (Var part in base) {
+      if (part is not <symbol> ||
+          !(part.symbol().is_type_qualifier() || part.symbol().is_storage_class()))
+        break;
       base = base.cdr();
+    }
     if (base.car() is <string> && !base.cdr()) names[base.car()] = 1;
     match (base)
       case %((!or ?kind struct union enum) ?name *):
