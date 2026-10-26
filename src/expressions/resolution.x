@@ -1,10 +1,12 @@
-/*  resolution.x -- canonical expression resolution */
+/*  resolution.x -- canonical expression resolution
 
+    Parsed source and constructed syntax enter the same resolver, which
+    dispatches on a node's content.
+*/
 
 /* A C string literal cast to `String` is promoted as an assignment
    promotes it; C would reinterpret the literal's bytes as a header. */
-module List _cast_expression(
-  Compiler c, List decl, Type type, List operand) {
+module List _cast_expression(Compiler c, List decl, Type type, List operand) {
   if (c.sym.is_string_type(type) && _is_raw_string_literal(operand))
     return c.convert_expression(operand, type);
   return %(expr $type $(source_cast_content($(decl, operand))));
@@ -14,8 +16,7 @@ module List _cast_expression(
    statement, and is void otherwise. A defer directly inside would wrap that
    statement in a cleanup region, and C would lose the value. A template
    binds its statement expression where it expands. */
-module List _statement_expression(
-  Compiler c, List block, Token origin) {
+module List _statement_expression(Compiler c, List block, Token origin) {
   List items = Ast.without_origin(block).cdr();
   if (_defers_directly(items))
     $fail.expressions_statement_defer(c, origin);
@@ -40,10 +41,7 @@ static Type _final_value_type(List items) {
   return %(void);
 }
 
-/* expression resolution
-
-   Parsed source and constructed syntax enter the same resolver, which
-   dispatches on a node's content. */
+// expression resolution
 
 /** Resolves and type-annotates one expression AST in current compiler state.
     Existing `expr` type annotations are resolved semantic types.
@@ -70,7 +68,8 @@ List Compiler.resolve_expression(Compiler c, List input, Token origin) {
       return c.bind_syntax(input, <expression>, c.return_type);
     case %(expr ?type ?(List content)): {
       if (type && !c.needs_resolution(input)) return input;
-      return _resolve_content(c, input, type, content, origin);
+      Resolve r = {.c = c, .input = input, .type = type, .origin = origin};
+      return _content(r, content);
     }
   }
   return input;
@@ -113,12 +112,6 @@ int Compiler.needs_resolution(Compiler c, Var value) {
 module int _deferred_receiver(List expr) {
   match (expr) case %(expr (<macro-expr>) ?): return 1;
   return 0;
-}
-
-static List _resolve_content(
-  Compiler c, List input, Type input_type, List content, Token origin) {
-  Resolve r = {.c = c, .input = input, .type = input_type, .origin = origin};
-  return _content(r, content);
 }
 
 static List _content(Resolve &r, List content) {
@@ -209,8 +202,7 @@ static List _binding(Resolve &r, List binding) {
   return _resolve_identifier(r.c, binding, r.type, r.origin);
 }
 
-static List _lambda(
-  Resolve &r, List body, List captures, List params) {
+static List _lambda(Resolve &r, List body, List captures, List params) {
   if (r.c.macro_holes) return r.input;
   return r.c.bind_lambda_expression(
     r.type, %(params @params), captures, body);
@@ -242,7 +234,7 @@ static List _invocation(Resolve &r, List content) {
     return r.c.bind_syntax(content, <expression>, r.c.return_type);
   match (content) case %(macro-invoke ?(List stored) ?input ?site):
     if (stored.car() == <macrodef>)
-      return %(expr $(r.input.cadr())
+      return %(expr $(r.type)
         (macro-invoke (!quote $stored) $input $site));
   return r.input;
 }
@@ -341,7 +333,8 @@ static Symbol _require_var_tag(Compiler c, Type target, Token origin) {
 }
 
 /** Builds an exact tag expression, deferring macro type slots until
-    binding. */
+    binding.
+*/
 List Compiler.var_tag_expression(Compiler c, Type target, Token origin) {
   if (_deferred_type_test(target))
     return %(expr (<macro-expr>) (type-tag $target));
@@ -494,8 +487,7 @@ static List _composite(Resolve &r, List elements) {
     values.list_free())));
 }
 
-static List _resolve_initializer(
-  Compiler c, List node, Token origin) {
+static List _resolve_initializer(Compiler c, List node, Token origin) {
   match (node) {
     case %(dotinit ?field ?value):
       return %(dotinit $field $(_resolve_initializer(c, value, origin)));
@@ -549,13 +541,13 @@ static List _generic(Resolve &r, List control, List associations) {
 }
 
 /* A `sizeof` keeps its grouped or bare form around the resolved operand;
-   an operand that is not syntax stays as written. */
-/* A template leaves `sizeof` of a typedef name untyped until it expands;
+   an operand that is not syntax stays as written. A template leaves
+   `sizeof` of a typedef name untyped until it expands;
    binding the operand there makes it the `size_t` it always is. */
 static List _sizeof(Resolve &r, Macro form, Var argument) {
   if (argument is not <list>) return r.input;
   List operand = argument;
-  Type type = r.input.cadr();
+  Type type = r.type;
   if (type === %(<macro-expr>)) type = %("size_t");
   return r.c.rebuild_expression(
     type, form(r.c.resolve_expression(operand, r.origin)));
