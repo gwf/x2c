@@ -175,7 +175,7 @@ static void _update_brace_stack(Compiler c, Token consumed) {
       c.braces.push(consumed);
       break;
     case <"}">:
-      if (c.braces) c.braces.take_last();
+      if (c.braces.len()) c.braces.take_last();
       else
         $fail.compiler_brace_unexpected(c, consumed);
       break;
@@ -206,7 +206,7 @@ int Compiler.take_word(Compiler c, String word) {
 }
 
 module void _check_unmatched_braces(Compiler c) {
-  if (!c.braces) return;
+  if (!c.braces.len()) return;
   $fail.compiler_brace_missing(c, c.braces[-1]);
 }
 
