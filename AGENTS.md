@@ -289,7 +289,12 @@ The code command reuses valid evidence or runs `precommit` and the remaining
 extended checks. It owns bootstrap refresh, safe rebuild, and self-host
 comparison; do not run its broad components separately merely to publish.
 Review every resulting artifact delta. Edits, regeneration, or integration
-that change the validated tree require ensuring the command again. A commit,
+that change the validated tree require ensuring the command again. The helper
+retains compiler validation when only ordinary Markdown or independent external
+commands changed, and runs their applicable existing checks. Upstream movement
+alone is not a reason to repeat compiler validation. Shared build/toolchain,
+compiler, runtime, bootstrap, and built-in build-command changes still require
+the full gate. A commit,
 review, push, or elapsed time does not invalidate an unchanged result.
 
 Performance evidence stays outside these correctness gates. Follow

@@ -81,8 +81,10 @@ Add `--depends-on N:HEAD_SHA` for each required PR revision and `--notes TEXT`
 for bootstrap transition or interaction notes. The submitting checkout's
 clean `HEAD` must match the PR head. The coordinator preserves PR prose,
 writes the pinned submission metadata, and applies `integration-ready` last.
-Re-run `submit` after changing the head; old metadata does not enroll a new
-revision. Attach the PR in the app when supported, without making that feature
+Keep enrolled heads stable. Put cosmetic follow-ups in a later PR so they do
+not invalidate a frozen candidate. For a correctness repair, withdraw or
+coordinate the affected submission, then re-run `submit` after changing its
+head; old metadata does not enroll a new revision. Attach the PR in the app when supported, without making that feature
 part of the common protocol.
 
 For an available author session, submission can include an optional

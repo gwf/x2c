@@ -558,7 +558,9 @@ class IntegrationProbe(unittest.TestCase):
     def test_land_checks_frozen_prs_with_one_paginated_snapshot(self):
         for number in range(1, 7):
             self.pr(number)
-        batch=self.prepare('--max-batch','6')
+        batch=self.prepare()
+        record=json.loads(self.cli('status').stdout)['active']
+        self.assertEqual(len(record['prs']),6)
         before=len(self.state().get('gh_calls',[]))
         self.cli('land',batch)
         calls=self.state()['gh_calls'][before:]

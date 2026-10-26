@@ -305,6 +305,7 @@ class Queue:
     def select(self, entries, base, args):
         available = {e["number"]: e for e in entries}
         selected, errors = [], []
+        capacity = args.max_batch if args.max_batch is not None else len(entries)
 
         def include(entry, chain, group):
             number = entry["number"]
@@ -328,7 +329,7 @@ class Queue:
                 if number not in available:
                     raise ValueError("PR is not eligible")
                 include(available[number], set(), group)
-                if len(selected) + len(group) > args.max_batch:
+                if len(selected) + len(group) > capacity:
                     raise ValueError("dependency group exceeds remaining batch capacity")
                 selected.extend(group)
             except ValueError as error:
@@ -341,7 +342,7 @@ class Queue:
             oldest = dt.datetime.fromisoformat(
                 min(e["ready_at"] for e in selected).replace("Z", "+00:00"))
             age = (dt.datetime.now(dt.timezone.utc) - oldest).total_seconds()
-            if len(selected) < args.max_batch and age < args.window:
+            if len(selected) < (args.max_batch or 5) and age < args.window:
                 return [], errors, max(0, args.window - age)
         return selected, errors, 0
 
@@ -667,7 +668,8 @@ def main():
     commands.add_parser("status", help="show readiness and durable batch state")
     for name in ("prepare", "wait"):
         operation = commands.add_parser(name)
-        operation.add_argument("--max-batch", type=int, default=5)
+        operation.add_argument("--max-batch", type=int,
+                               help="explicit cap; default freezes the ready backlog")
         operation.add_argument("--window", type=float, default=300)
         operation.add_argument("--flush", action="store_true")
         if name == "prepare":
@@ -696,7 +698,7 @@ def main():
         if args.operation == "wait":
             if not 0 <= args.timeout <= 60:
                 raise ValueError("wait timeout must be between 0 and 60 seconds")
-            if args.max_batch < 1 or args.window < 0:
+            if (args.max_batch is not None and args.max_batch < 1) or args.window < 0:
                 raise ValueError("batch size must be positive and window nonnegative")
             signal.signal(signal.SIGTERM, interrupt_wait)
             deadline = time.monotonic() + (args.timeout or 60)
@@ -715,7 +717,7 @@ def main():
         else:
             with queue.lock():
                 if args.operation == "prepare":
-                    if args.max_batch < 1 or args.window < 0:
+                    if (args.max_batch is not None and args.max_batch < 1) or args.window < 0:
                         raise ValueError("batch size must be positive and window nonnegative")
                     queue.prepare(args)
                 elif args.operation == "land":
