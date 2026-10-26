@@ -48,7 +48,7 @@ static void _collect_functions(Var node, Array found) {
                     ?body): {
       Array parameters = [];
       foreach (List row in rows)
-        match (row) case %(param ? (bind ?parameter ?)):
+        if (row ~= %(param ? (bind ?parameter ?)))
           parameters.push(parameter);
       found.push($(name, parameters.list_free(), body));
     }
@@ -145,7 +145,7 @@ void Compiler.check_regions(Compiler c, List ast) {
     in `meta_regions`.
 */
 void Compiler.check_meta_regions(Compiler c, List fn) {
-  match (fn) case %(function ? (bind (binding ? ?(String name)) *) ?): {
+  if (fn ~= %(function ? (bind (binding ? ?(String name)) *) ?)) {
     /* A replaced definition starts again from an empty summary. */
     c.meta_regions[name] = %(0 ());
   }
