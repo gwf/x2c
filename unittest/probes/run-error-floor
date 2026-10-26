@@ -14,7 +14,7 @@ static Job _run(String name) {
   Job job = command.job().options({stderr: <capture>});
   String output = NULL;
   try output = job.output();
-  catch %(cmd-fail *failure): output = %"${failure.assoc(<output>)}";
+  catch %(cmd-fail *failure): output = %"$(failure.assoc(<output>))";
   if (output) probe_fail(%"$name: unexpected standard output");
   return job;
 }
@@ -47,7 +47,7 @@ static void _check_uncaught(String name, String code) {
 static Job _passes(String name) {
   Job job = _run(name);
   if (job.status())
-    probe_fail(%"$name: exited with status ${job.status()}");
+    probe_fail(%"$name: exited with status $(job.status())");
   return job;
 }
 
@@ -122,7 +122,7 @@ foreach (List exit_case, %(("exit-in-try" 3 1) ("exit-in-catch" 4 1)
   (String name, int status, int quiet) = exit_case;
   Job job = _run(name);
   if (job.status() != status)
-    probe_fail(%"$name: exited with status ${job.status()}, not $status");
+    probe_fail(%"$name: exited with status $(job.status()), not $status");
   String errors = job.errors();
   if (quiet && errors) probe_fail(%"$name: unexpected standard error");
   foreach (String pattern, %("Scope leak detected" "x2c error floor"))

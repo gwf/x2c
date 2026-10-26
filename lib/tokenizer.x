@@ -815,15 +815,18 @@ static void _one_line_body(_Layout &l, _LayoutLine line) {
   }
 }
 
+/* A hole stands at bracket depth zero; a `@` or `$` after a `)` inside a
+   literal, as in `%($(x) @rest)`, is an element. */
 static int _hole(_Layout &l, _LayoutLine line) {
   int last = line.last;
   for (int first = line.first; first < last; first++) {
     if (first != line.first && l.sig[first - 1].type != <")">) continue;
-    if (l.sig[first].type != <@>) continue;
+    if (l.sig[first].type != <@> || l.depths[first]) continue;
     if (l.sig[last].type == <")"> || l.sig[last].type == <"}">) return 1;
   }
   return l.sig[last].type == <ident> && last > line.first &&
     (l.sig[last - 1].type == <$> || l.sig[last - 1].type == <@>) &&
+    !l.depths[last - 1] &&
     (last - 1 == line.first || l.sig[last - 2].type == <")">);
 }
 

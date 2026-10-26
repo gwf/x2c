@@ -787,7 +787,7 @@ cat >"$declarations/src/effects.x" <<EOF2
 #include "path.x"
 meta int projection_effect(String mark) {
   String path = "$declarations/effects";
-  Path.write_text(path, %"\${Path.read_text(path)}\$mark");
+  Path.write_text(path, %"\$(Path.read_text(path))\$mark");
   return 0;
 }
 EOF2
@@ -942,7 +942,7 @@ cat >"$declaration_root/src/producer.x" <<'EOF2'
 #include "path.x"
 meta List projection_persisted(void) {
   String path = "effects";
-  Path.write_text(path, %"${Path.read_text(path)}p");
+  Path.write_text(path, %"$(Path.read_text(path))p");
   return %((default
     (function (int) (bind ("persisted_answer") ((fnmod (params))))
       (block (return () (expr (int) (literal (int) "13")))))));

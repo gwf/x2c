@@ -295,7 +295,7 @@ EOF
   cmp -s old.so .x2c-build/helpers.so || fail "failed link replaced module"
 )
 
-printf 'meta int triple(int);\nprintln(%%"${triple(4)}");\n' |
+printf 'meta int triple(int);\nprintln(%%"$(triple(4))");\n' |
   "$X2C" repl --native-module .x2c-build/helpers.so >repl.out 2>&1
 grep -qx "16" repl.out || {
   cat repl.out >&2

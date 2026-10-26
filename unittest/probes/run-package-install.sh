@@ -405,7 +405,7 @@ import "greet" as g;
 
 int main(void) {
   g.Greeting greeting = g.Greeting.new("x2c");
-  printf("%s", %"\${greeting.line()}\n");
+  printf("%s", %"\$(greeting.line())\n");
   fflush(stdout);
   for (int i = 0; i < 400 && access("$BUILD/release-run", F_OK); i++)
     usleep(50000);

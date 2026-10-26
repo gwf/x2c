@@ -58,10 +58,9 @@ meta List _macros_source(Source code) =>
    Unlike C `assert` this transfers to a catch and is not compiled out. */
 macro Stmt $assert(Expr $check) {
   {
-    if (!($check)) {
+    if (!($check))
       raise %(invariant
         (check $($_macros_source($check)))
         (at $($_macros_location())));
-    }
   }
 }

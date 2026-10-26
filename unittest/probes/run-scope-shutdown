@@ -10,7 +10,7 @@
 static String _stdout(Job job) {
   String output = NULL;
   try output = job.output();
-  catch %(cmd-fail *failure): output = %"${failure.assoc(<output>)}";
+  catch %(cmd-fail *failure): output = %"$(failure.assoc(<output>))";
   return output;
 }
 
@@ -19,7 +19,7 @@ static String _stdout(Job job) {
 static String _passes(Path program, String mode, String output) {
   Job job = %($program $mode).job().options({stderr: <capture>});
   if (job.status())
-    probe_fail(%"$mode: exited with status ${job.status()}");
+    probe_fail(%"$mode: exited with status $(job.status())");
   if (_stdout(job).rstrip("\n") != output)
     probe_fail(%"$mode: unexpected standard output");
   return job.errors();

@@ -210,7 +210,7 @@ static void check_array_source_form(Compiler c, Lisp reader) {
 
 static void check_map_source_form(Compiler c, Lisp reader) {
   Macro map = definition(c,
-    "macro Expression $map_value(Entry $rows...) => %{${$rows...}};");
+    "macro Expression $map_value(Entry $rows...) => %{$($rows...)};");
   List names = read_list(reader, "(*rows)");
   const char *sources[] = {"%{}", "%{\"a\": 1, \"b\": 2}"};
   const int counts[] = {0, 2};

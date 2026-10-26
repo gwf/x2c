@@ -114,7 +114,7 @@ cmp "$tmp/list-expected" "$tmp/list"
 
 # Reports locate the submission's own lines and name what it wrote.
 printf '%s\n' '1 +;' 'int y = 1;' 'y = 1 +' '  2 +;' 'nosuch.len();' \
-  '(%!() => 42)();' 'List x = %(b c);' '%(a ${x});' |
+  '(%!() => 42)();' 'List x = %(b c);' '%(a $(x));' |
   builds/0/libexec/x2c-repl >/dev/null 2>"$tmp/reports" || true
 cat >"$tmp/reports-expected" <<'EOF'
 <repl>:1:4: parse: expected atomic expression

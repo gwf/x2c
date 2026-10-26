@@ -2119,7 +2119,7 @@ cat >"$SCRIPT/helpers/greet.x" <<'EOF'
 #pragma once
 #include "lib/inner.x"
 String greeting(void);
-String greeting(void) => %"answer ${inner_value() + 2}";
+String greeting(void) => %"answer $(inner_value() + 2)";
 EOF
 cat >"$SCRIPT/helpers/uses.x" <<'EOF'
 #!/usr/bin/env -S x2c script

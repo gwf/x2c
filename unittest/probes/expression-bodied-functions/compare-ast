@@ -24,7 +24,7 @@ static Var _plain(Var value):
 static List _forms(String path):
   Regex macrodef = Regex.compile("\\(macrodef <macro ([^>]*)>\\)")
   String dump = macrodef.replace_fn(Path.new(path).read_text(),
-    %!(RegexMatch found) => %"(macrodef \"${found[1]}\")")
+    %!(RegexMatch found) => %"(macrodef \"$(found[1])\")")
   unsigned cursor = 0
   Var forms = void
   Lisp.read(NULL, %"($dump)", cursor, forms)
