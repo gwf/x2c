@@ -66,7 +66,8 @@ static void _sq_index_edges(SnapshotQuery &q) {
   q.outgoing = {};
   q.incoming = {};
   foreach (Map edge, _sq_sorted(q.edges)) {
-    String from = edge["from"], to = edge["to"];
+    String from = edge.getdefault("from", NULL);
+    String to = edge.getdefault("to", NULL);
     if (from) _sq_append(q.outgoing, from, edge);
     if (to) _sq_append(q.incoming, to, edge);
   }
@@ -126,8 +127,8 @@ static Map _sq_walk(
     if (!adjacency.contains(id)) continue;
     foreach (Map edge, adjacency[id].array()) {
       if (!_sq_relation(edge, request)) continue;
-      String source = edge[inward ? "to" : "from"];
-      String target = edge[inward ? "from" : "to"];
+      String source = edge.getdefault(inward ? "to" : "from", NULL);
+      String target = edge.getdefault(inward ? "from" : "to", NULL);
       if (!source || !target || source != id ||
           distances.contains(target) ||
           !q.entities_by_id.contains(target)) continue;
@@ -555,14 +556,16 @@ static Map _sq_entity_index(Array entities) {
 
 static String _sq_declaration_key(Map entity, Map entities) {
   Array owners = [];
-  String owner = entity["owner"];
+  String owner = entity.getdefault("owner", NULL);
   while (owner && entities.contains(owner)) {
     Map parent = entities[owner];
-    owners.push([parent["kind"], parent["name"], parent["file"]]);
-    owner = parent["owner"];
+    owners.push([parent["kind"], parent["name"],
+                 parent.getdefault("file", NULL)]);
+    owner = parent.getdefault("owner", NULL);
   }
-  return Var.json([entity["domain"], entity["unit"], entity["file"],
-                   entity["kind"], entity["name"], owners]);
+  return Var.json([entity.getdefault("domain", NULL),
+    entity.getdefault("unit", NULL), entity.getdefault("file", NULL),
+    entity["kind"], entity["name"], owners]);
 }
 
 static Map _sq_declarations(Array entities, Map by_id) {
@@ -576,9 +579,9 @@ static Map _sq_declarations(Array entities, Map by_id) {
 }
 
 static Map _sq_signature(Map entity) =>
-  {"declared_type": entity["declared_type"],
-   "resolved_type": entity["resolved_type"],
-   "visibility": entity["visibility"]};
+  {"declared_type": entity.getdefault("declared_type", NULL),
+   "resolved_type": entity.getdefault("resolved_type", NULL),
+   "visibility": entity.getdefault("visibility", NULL)};
 
 static Map _sq_edge_set(Map snapshot, Map by_id) {
   Map entities = {}, result = {};
@@ -586,8 +589,10 @@ static Map _sq_edge_set(Map snapshot, Map by_id) {
     entities[entity["id"]] = _sq_declaration_key(entity, by_id);
   foreach (Map edge, snapshot["edges"].array()) {
     Map relation = edge.copy();
-    relation["from"] = entities.getdefault(edge["from"], edge["from"]);
-    relation["to"] = entities.getdefault(edge["to"], edge["to"]);
+    Var from = edge.getdefault("from", NULL);
+    Var to = edge.getdefault("to", NULL);
+    relation["from"] = entities.getdefault(from, from);
+    relation["to"] = entities.getdefault(to, to);
     relation.del("line");
     relation.del("column");
     relation.del("offset");
@@ -608,7 +613,8 @@ Map graph_snapshot_diff(Map before, Map after) {
   Array added_edges = [], removed_edges = [];
   foreach (Map entity, before["entities"].array()) {
     String key = _sq_declaration_key(entity, old_ids);
-    if (!old[key] || !current[key]) removed.push(_sq_summary(entity));
+    if (!old.getdefault(key, NULL) || !current.getdefault(key, NULL))
+      removed.push(_sq_summary(entity));
     else {
       Map replacement = current[key];
       if (!_sq_equal(_sq_signature(entity), _sq_signature(replacement)))
@@ -618,7 +624,8 @@ Map graph_snapshot_diff(Map before, Map after) {
   }
   foreach (Map entity, after["entities"].array()) {
     String key = _sq_declaration_key(entity, new_ids);
-    if (!old[key] || !current[key]) added.push(_sq_summary(entity));
+    if (!old.getdefault(key, NULL) || !current.getdefault(key, NULL))
+      added.push(_sq_summary(entity));
   }
   Map old_edges = _sq_edge_set(before, old_ids);
   Map new_edges = _sq_edge_set(after, new_ids);
