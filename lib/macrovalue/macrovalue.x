@@ -16,7 +16,8 @@
 #include "match/match.x"
 
 /** Records fixed-local slots for distinct-identity checks and Name slots
-    for member-spelling comparisons during recognition. */
+    for member-spelling comparisons during recognition.
+*/
 typedef struct MacroFixedSlots {
   int count, slots[MACHINE_BINDER_MAX];
   int names, name_slots[MACHINE_BINDER_MAX];
@@ -58,7 +59,8 @@ typedef struct MacroCaseSite {
     source wrapper or `seq`. Returns 2 after storing `code` in `*cursor`
     for a subject headed by `head`, 0 for an empty subject or one headed by
     another Symbol than a wrapper, `expr`, or `seq`, which cannot match,
-    and -1 when `Macro_case_root` must decide. */
+    and -1 when `Macro_case_root` must decide.
+*/
 inline int Macro_case_start(List code, Symbol head, List *cursor) {
   if (!code) return 0;
   Symbol first = Macro_case_symbol(code.car);
@@ -72,7 +74,8 @@ inline int Macro_case_start(List code, Symbol head, List *cursor) {
 
 /** Whether an `expr` node whose content is `content` is its own view: the
     content is not a List headed by an Atom, as a retained invocation's is,
-    or by the `expr` a template shell holds. */
+    or by the `expr` a template shell holds.
+*/
 inline int Macro_case_own(Var content) {
   List node = content.list_payload();
   if (!node) return 1;
@@ -89,7 +92,8 @@ inline Symbol Macro_case_symbol(Var value) {
 /** Stores in `*cursor` the List a macro-valued `case` examines for
     `value`, beneath its source wrappers, and returns whether there is
     one. A List headed by another Symbol than a wrapper or `expr` is its
-    own view. */
+    own view.
+*/
 inline int Macro_case_enter(Var value, List *cursor) {
   List node = value.list_payload();
   Symbol head = node ? Macro_case_symbol(node.car) : 0;
@@ -102,7 +106,8 @@ inline int Macro_case_enter(Var value, List *cursor) {
 /** Retains a macro and hole patterns for repeated recognition. A pattern
     independent of subject bindings is derived once; contextual references
     are resolved against each subject. The caller keeps the source values
-    alive as long as this record. Match plans use the active Match cache. */
+    alive as long as this record. Match plans use the active Match cache.
+*/
 typedef struct MacroMatcher {
   Macro shape;
   List holes, pattern;
