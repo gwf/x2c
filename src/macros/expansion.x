@@ -330,6 +330,7 @@ module void _file_scope_locals(List rows, Map locals) {
 
 static void _file_scope_declarators(List declarators, Map locals) {
   foreach (Var declarator in declarators)
-    if (declarator ~= $source_declarator_row(%(?binder ?)) && binder.is_binder())
+    if (declarator ~= $source_declarator_row(%(?binder ?)) &&
+        binder.is_binder())
       locals[binder] = 1;
 }
