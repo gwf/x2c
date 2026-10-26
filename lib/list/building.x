@@ -149,9 +149,9 @@ static List _list_va(unsigned n, va_list ap) {
   return values;
 }
 
-/** Returns a new `List` holding the elements of `lst` in reverse order.
-    Fresh cells are built through `cons`, so the result is canonical and `lst`
-    is untouched. Reversing `nil` gives `nil`.
+/** Returns a canonical `List` with `lst`'s elements reversed.
+    `cons` may reuse existing cells, and `lst` is unchanged. Reversing `nil`
+    gives `nil`.
     Raises: `<alloc-fail>` while constructing the result.
 */
 Self List.reverse(Self lst) {
