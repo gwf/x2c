@@ -68,7 +68,8 @@ Type Sym.next_typedef(Sym s, Type type, int &hops) {
 }
 
 /** Returns the name of the one file-scope typedef declared directly as
-    `type`, or NULL when no typedef or several typedefs are. */
+    `type`, or NULL when no typedef or several typedefs are.
+*/
 Type Sym.sole_typedef(Sym s, Type type) {
   String found = NULL;
   for (int i = 0; i < s.base_scopes; i++)
@@ -299,14 +300,16 @@ static List _field_row(Sym s, Type type, List declaration, List declarator) {
 List Sym.field_order(Sym s, Type type) => s.get(%(@type "field-order"));
 
 /** Records that the field `name` of `aggregate` was declared with the field
-    keyword `mark`, such as `delegate`, and that `aggregate` declares one. */
+    keyword `mark`, such as `delegate`, and that `aggregate` declares one.
+*/
 void Sym.mark_field(Sym s, Type aggregate, Symbol mark, String name) {
   s.set($(@aggregate, mark, name), $(mark));
   s.set($(@aggregate, mark), $(mark));
 }
 
 /** Returns the `(NAME TYPE)` rows of the fields of `aggregate` declared with
-    `mark`, in declaration order. */
+    `mark`, in declaration order.
+*/
 List Sym.marked_fields(Sym s, Type aggregate, Symbol mark) {
   List order = s.field_order(aggregate);
   Array rows = [];
@@ -333,7 +336,8 @@ Type Sym.aggregate_of(Sym s, Type type) {
 
 /** Compares only List rest conventions in corresponding callable positions,
     including callback parameters and returned function pointers. Native C
-    checking owns other type differences, but cannot see this convention. */
+    checking owns other type differences, but cannot see this convention.
+*/
 int Sym.same_list_rest_convention(Sym s, Type source, Type target) {
   if (source == target) return 1;
   source = s.resolve_key(source);
