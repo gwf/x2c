@@ -155,7 +155,7 @@ static void _keep(Partition &p) {
 static List _finish(Partition &p) {
   _promote_typedefs(p.header, p.pending);
   List header = p.header.list().filter(
-    %!(item) => !item.list().match(%(pending ?)));
+    %!(item) => !(item.list() ~= %(pending ?)));
   header = _place_groups(header, _filled_groups(header), p.source_groups);
   return _typedef_forwards(header, NULL, p.c);
 }
