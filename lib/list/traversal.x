@@ -13,30 +13,40 @@ inline List cdr(List x)  => x ? x.cdr : NULL;
 
 /** Method form of `car`: the head of `lst`, or `void` when `lst` is `nil`. */
 inline Var  List.car(List lst)     => car(lst);
+
 /** Method form of `cdr`: the tail of `lst`, or `nil` when `lst` is `nil`. */
 inline Self List.cdr(Self lst)     => cdr(lst);
+
 /** Returns `car(car(lst))`.
     Compound accessors read from right to left: `a` applies `car` and `d`
     applies `cdr`. Every step is `nil`-safe.
 */
 inline Var  List.caar(List lst)    => car(car(lst));
+
 /** Returns `car(cdr(lst))`, or `void` when there is no second element. */
 inline Var  List.cadr(List lst)    => car(cdr(lst));
+
 /** Returns the tail after two cells, or `nil`. */
 inline Self List.cddr(Self lst)    => cdr(cdr(lst));
+
 /** Returns the third element, or `void`. */
 inline Var  List.caddr(List lst)   => car(cdr(cdr(lst)));
 
 /** Treats `var` as a `List` and returns its first element. */
 Var  Var.car(Var var)              => car(var.pointer());
+
 /** Treats `var` as a `List` and returns its tail. */
 List Var.cdr(Var var)              => cdr(var.pointer());
+
 /** Applies the `caar` selector chain to `Var`. */
 inline Var  Var.caar(Var var)      => car(car(var));
+
 /** Applies the `cadr` selector chain to `Var`. */
 inline Var  Var.cadr(Var var)      => car(cdr(var));
+
 /** Applies the `cddr` selector chain to `Var`. */
 inline List Var.cddr(Var var)      => cdr(cdr(var));
+
 /** Applies the `caddr` selector chain to `Var`. */
 inline Var  Var.caddr(Var var)     => car(cdr(cdr(var)));
 
@@ -78,6 +88,7 @@ static int _next(Iter iter, Var *out) {
   iter.state = lst;
   return 1;
 }
+
 // indexing
 
 /** Returns the number of cells in `lst` in O(n) time. */
@@ -240,6 +251,7 @@ meta native Self List.getslice(Self list, int start, int stop, int step) {
 
 static int _is_active_canonical(List list) =>
   Pool.current().lookup(list) === list;
+
 // unpacking
 
 /** Writes at most `destination_count` elements through `List` pointers.
