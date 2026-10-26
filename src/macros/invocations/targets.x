@@ -94,8 +94,8 @@ static List _invoke_definition(
   List node = _invocation_node(c, definition, input, invocation);
   List result = deferred ? %(seq $node) :
     c.bind_syntax(node, position, c.return_type);
-  if (result.car() != <seq> || result.len() != 1 ||
-      transaction.local_macros_changed()) transaction.commit();
+  if (result != %(seq) || transaction.local_macros_changed())
+    transaction.commit();
   return result;
 }
 
