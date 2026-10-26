@@ -231,13 +231,15 @@
 
 // List
 
-(_natives List.getindex List.last List.index List.contains List.assoc List.get
+(_natives List.concat List.getindex List.last List.index List.contains
+  List.assoc List.get
   List.array List.sort List.map List.map2 List.sort_by List.sort_with
   List.zip_with List.foldl List.unique List.sublis List.flatten
   List.flatten_all List.nth_cdr List.tail List.head List.subseq List.getslice
   List.hash List.compare List.replace List.match_replace List.truth
   List.listchar List.listshort List.listint List.listfloat List.listdbl
   List.liststring List.listsymbol List.cdddr List.cddddr)
+(def List_concat List.concat)
 (def List.filter (bind "Lisp_List_filter" nil))
 (def List.any    (bind "Lisp_List_any" nil))
 (def List.all    (bind "Lisp_List_all" nil))

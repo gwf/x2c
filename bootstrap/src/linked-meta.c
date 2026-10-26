@@ -13442,7 +13442,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_20(void
   _10693 = cons(_223, _10692);
   _10694 = String_new("lib/logger.x");
   _10695 = String_var(_10694);
-  _10696 = String_new("21bd5e1a");
+  _10696 = String_new("4755d03a");
   _10697 = String_var(_10696);
   _10698 = String_new("cwd:./assert.h");
   _10699 = String_var(_10698);
