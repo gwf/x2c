@@ -15,7 +15,8 @@ static const SymbolSet quoted_roles = %<<statement block name param>>;
    `$!Type{ type-name }` and `$!Param{ parameter }`. */
 
 /** Parses a quotation at `$!` into the code it builds from the locals its
-    body names. */
+    body names.
+*/
 List Compiler.parse_macro_quotation(Compiler c) {
   Token start = c.token;
   c.expect(<$>);
