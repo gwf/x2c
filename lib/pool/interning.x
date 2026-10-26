@@ -53,7 +53,8 @@ static String _get_string(
 /** Finds an existing nonempty String from borrowed NUL-free bytes and their
     x2c_hash_bytes content hash, searching inner and its ancestors.
     Returns NULL on a miss and allocates nothing. Native comparisons cannot
-    raise, so each acquired pool lock is released directly. */
+    raise, so each acquired pool lock is released directly.
+*/
 String x2c_pool_lookup_string(
   Pool inner, const char *bytes, int length, unsigned hash) {
   int threads_active = pool_multithreaded;
