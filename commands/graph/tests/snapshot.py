@@ -112,6 +112,14 @@ def saved_queries(p, snapshot):
                             "relations": ["calls"]}},
     ]})
     assert "snapshot_leaf" in names(reachable) and "snapshot_other" not in names(reachable)
+    pointer_writes = p.query(snapshot, op="traverse",
+                             select={"name": "snapshot_pointer_store"},
+                             relations=["writes", "mutates"], where={"kind": "field"})
+    assert pointer_writes["total"] == 0, pointer_writes
+    pointer_layout = p.query(snapshot, op="traverse",
+                             select={"name": "snapshot_pointer_layout"},
+                             relations=["representation"], where={"kind": "type"})
+    assert pointer_layout["total"] == 0, pointer_layout
 
     pattern = "(expr ?type (call ?callee (args *args)))"
     matches = p.query(snapshot, op="match", select={"name": "snapshot_entry"},

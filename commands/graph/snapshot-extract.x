@@ -391,9 +391,11 @@ static void _sx_walk(
       return;
     }
     case %(call ?callee (args *arguments)): {
-      if (callee == "_Alignof" && arguments)
-        _sx_type_edge(s, owner, _sx_operand_type(arguments.car()),
-          "representation", origin);
+      if (callee == "_Alignof" && arguments) {
+        Type type = _sx_operand_type(arguments.car());
+        if (type && !s.c.sym.normalize_declared_type(type).is_pointer())
+          _sx_type_edge(s, owner, type, "representation", origin);
+      }
       List binding;
       Symbol kind = project_callee(s.c, callee, binding);
       String to = kind == <direct>
@@ -416,6 +418,10 @@ static void _sx_walk(
       _sx_walk(s, base, owner, origin, "reads");
       return;
     }
+    case %(op (!quote *) ?operand): {
+      // Writing the pointee does not replace the field holding its address.
+      _sx_walk(s, operand, owner, origin, "reads"); return;
+    }
     case %(op = ?left ?right): {
       _sx_walk(s, left, owner, origin, "writes");
       _sx_walk(s, right, owner, origin, "reads"); return;
@@ -436,7 +442,8 @@ static void _sx_walk(
     }
     case %((!or sizeof alignof) ?operand): {
       Type type = _sx_operand_type(operand);
-      if (type) _sx_type_edge(s, owner, type, "representation", origin);
+      if (type && !s.c.sym.normalize_declared_type(type).is_pointer())
+        _sx_type_edge(s, owner, type, "representation", origin);
     }
     case %(declare ?base (bindings *rows)):
       foreach (List row, rows) {

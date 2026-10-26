@@ -10,6 +10,10 @@ typedef struct SnapshotHolder {
 
 int snapshot_global;
 
+void snapshot_pointer_store(SnapshotHolder *holder, SnapshotValue value) {
+  *holder.pointer = value;
+}
+
 static int snapshot_helper(int value) => value + 1;
 
 int snapshot_leaf(SnapshotValue *value) {
@@ -28,6 +32,7 @@ int snapshot_entry(SnapshotValue *value) {
 SnapshotAlias snapshot_signature(SnapshotAlias value) => value;
 
 size_t snapshot_layout(void) => sizeof(SnapshotValue);
+size_t snapshot_pointer_layout(void) => sizeof(SnapshotValue *);
 
 int snapshot_callback(SnapshotCallback callback, SnapshotValue *value) {
   return callback(value);
