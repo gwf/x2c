@@ -784,13 +784,14 @@ static void _alias_parameters(Compiler c, List parameters) {
 static List _alias_target(
   Compiler c, List declaration, Var binding, List native_syntax) {
   List native = c.resolve_expression(native_syntax, c.token);
-  if (native ~= %(expr (!set ?native_type (*))
-                  $($source_identifier_content(%(?native_binding))))) {
-    if (native_type && !native_type.type().is_function())
-      $fail.parse_alias_function(c, c.token, native_type);
-    if (List.equal(binding, native_binding))
-      $fail.parse_alias_self(c, c.token);
-    return %(falias $declaration $native_binding);
-  }
+  match (native)
+    case %(expr (!set ?native_type (*)) $($source_identifier_content(
+        %(?native_binding)))): {
+      if (native_type && !native_type.type().is_function())
+        $fail.parse_alias_function(c, c.token, native_type);
+      if (List.equal(binding, native_binding))
+        $fail.parse_alias_self(c, c.token);
+      return %(falias $declaration $native_binding);
+    }
   $fail.parse_alias_identifier(c, c.token);
 }

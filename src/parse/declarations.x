@@ -442,7 +442,7 @@ module List _bind_declaration(
       declarator = _finish_fnmods(c, declarator);
       if (context != <field> && _has_bitfield(declarator))
         return _construction_error(c);
-      if (declarator ~= %(op = * *)) initializes = 1;
+      match (declarator) case %(op = * *): initializes = 1;
       List installed = _install_declarator(
         c, base, declaration_context, declarator, NULL, preserved_self);
       output.push(installed);
@@ -502,12 +502,13 @@ module List _bind_typed_targets(
   Compiler c, List parameters, Var source) {
   Array bound_parameters = [];
   foreach (List parameter in parameters)
-    if (parameter ~= %(param ?base (!set ?declarator (bind ? ?)))) {
-      List declaration = c.bind_syntax(
-        %(declare $base (bindings $declarator)), <block>, c.return_type);
-      if (declaration ~= %(declare ?bound_base (bindings ?binding)))
-        bound_parameters.push(%( param $bound_base $binding ));
-    }
+    match (parameter)
+      case %(param ?base (!set ?declarator (bind ? ?))): {
+        List declaration = c.bind_syntax(
+          %(declare $base (bindings $declarator)), <block>, c.return_type);
+        if (declaration ~= %(declare ?bound_base (bindings ?binding)))
+          bound_parameters.push(%( param $bound_base $binding ));
+      }
   return %(dstrdecl (params @(bound_parameters.list_free()))
            $(_resolve(c, source)));
 }

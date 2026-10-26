@@ -206,7 +206,8 @@ String Code.binding_spelling(Var syntax) {
   if (syntax is not <list> || syntax.is_nil())
     $fail.meta_sdk_binding_syntax(syntax);
   List value = syntax;
-  if (value ~= %(expr ? (!set ?content (? *)))) value = content;
+  match (value)
+    case %(expr ? (!set ?content (? *))): value = content;
   match (value) {
     case $source_identifier_content(%((!set ?captured (*)))):
       value = captured;

@@ -311,7 +311,7 @@ static void _scan_call(Walk &w, Var call, String callee, List arguments) {
 /* The later operands of `&&`, `||`, and `?:` run on some paths, so they
    count as a nested block, as a conditional statement's children do. */
 static int _scan_conditional(Walk &w, Var node) {
-  if (node ~= %(op (!or && || (!quote ?)) ?first *later)) {
+  match (node) case %(op (!or && || (!quote ?)) ?first *later): {
     w.pending.push(<unnested>);
     _scan_children(w, later);
     w.pending.push(<nested>);
