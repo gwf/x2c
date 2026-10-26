@@ -91,7 +91,8 @@ void Compiler.record_native_meta_effect(
 module String _native_meta_name(
   Compiler c, List declaration, Token marker) {
   String name = NULL;
-  if (declaration ~= %(declare ? (bindings (bind (binding ? ?(String spelling)) *))))
+  if (declaration ~= %(
+        declare ? (bindings (bind (binding ? ?(String spelling)) *))))
     name = spelling;
   if (!name)
     $fail.meta_native_meta_name(c, marker);
