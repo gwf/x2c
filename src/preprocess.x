@@ -164,15 +164,15 @@ void Compiler.scan_conditionals(Compiler c) {
 
 static void _directive(ArmScan &s, Token token, size_t i) {
   Symbol kind = Compiler.preproc_conditional_kind(token.text);
-  int conditional = kind == <open> || (kind && s.stack);
+  int conditional = kind == <open> || (kind && s.stack.len());
   if (kind == <open>)
     s.stack.push($(++s.serial, 0, Compiler.preproc_open_state(token.text)));
-  else if (kind == <branch> && s.stack) {
+  else if (kind == <branch> && s.stack.len()) {
     Var (id, arm, state) = s.stack[-1];
     Var branch = Compiler.preproc_branch_state(state);
     s.stack[-1] = $(id, arm.integer() + 1, branch);
   }
-  else if (kind == <close> && s.stack) s.stack.take_last();
+  else if (kind == <close> && s.stack.len()) s.stack.take_last();
   else if (!s.hidden) _note_layout_macro(s, token.text);
   if (!conditional) return;
   s.c.arm_stacks[(long) i] = s.stack.list();
@@ -255,7 +255,7 @@ static void _note_layout_macro(ArmScan &s, String content) {
   Token name = _macro_directive(content, undefined);
   if (!name) return;
   Map layout = s.layout;
-  if (!s.stack) layout.del(name.text);
+  if (!s.stack.len()) layout.del(name.text);
   if (undefined) return;
   Token token = name + 1;
   if (token.type == <(>) token = token.after_group();
