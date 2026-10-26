@@ -32,10 +32,10 @@ static keyword loop $private.loop;
     `Array` is the same object as its `Block` view. Its handle and backing
     storage belong to the construction-time active Scope. `Array.scope`
     lazily creates a separate scope for explicitly owned contents.
-    Assignment aliases it;
-    `Array.copy` creates a new container, but still borrows any objects
-    referenced by its elements. `Array.free` destroys owned contents and
-    frees its record and backing storage, invalidating all aliases.
+    Assignment aliases it; `Array.copy` creates a new container, but still
+    borrows any objects referenced by its elements. `Array.free` destroys
+    owned contents and frees its record and backing storage, invalidating
+    all aliases.
 */
 typedef Block Array;
 
@@ -59,14 +59,17 @@ static void _size_limit(String owner, size_t size) {
   (void) owner;
   raise %(size-limit (size $size));
 }
+
 static void _bad_operation(String owner, Symbol operation) {
   (void) owner;
   raise %(bad-arg (operation "Array") (action $operation));
 }
+
 static void _bad_index(String owner, int index, size_t size) {
   (void) owner;
   raise %(bad-arg (operation "Array") (index $index) (size $size));
 }
+
 static void _bad_step(String owner, int step) {
   (void) owner;
   raise %(bad-arg (operation "Array.getslice") (step $step));
@@ -172,10 +175,9 @@ Var Array.updateindex(Array array, int index, Symbol op, Var rhs) {
 /** Applies postfix `Array` element increment or decrement.
     The returned value is the original element. The slot remains unchanged if
     the index or operation is invalid.
-    Raises: `<bad-arg>` for a null `Array` or invalid index,
-    `<size-limit>` when
-    its length cannot be indexed, or any cause from `Var.postfix`. The element
-    is unchanged on failure.
+    Raises: `<bad-arg>` for a null `Array` or invalid index, `<size-limit>`
+    when its length cannot be indexed, or any cause from `Var.postfix`.
+    The element is unchanged on failure.
 */
 Var Array.postfixindex(Array array, int index, Symbol op) {
   if (array == NULL) raise %(bad-arg (operation "Array.postfixindex"));
@@ -190,9 +192,8 @@ Var Array.postfixindex(Array array, int index, Symbol op) {
 /** Returns a new `Array` holding `func` applied to each element of `array`.
     `array` itself is untouched, and elements are passed as values. An empty
     input returns a fresh empty `Array` without invoking or checking `func`.
-    The
-    callback is invoked front to back and is not retained. It must not mutate
-    `array` while the walk is in progress; `Func` rejects a `void` result.
+    The callback runs front to back and is not retained. It must not mutate
+    `array` during the walk; `Func` rejects a `void` result.
     Raises: whatever `Func.apply` or `func` raises, or an allocation cause
     while constructing the result. The partial result is freed.
 */
@@ -259,8 +260,8 @@ static int _sort_compare(const void *ap, const void *bp) {
     printf("%s %d\n", numbers.repr(), sorted == numbers);
     ```
     Raises: causes from element comparison. The `Array` may already be
-    partially
-    reordered when a catch receives the cause. */
+    partially reordered when a catch receives the cause.
+*/
 meta native Self Array.sort(Self array) {
   if (!array || array.length < 2) return array;
   qsort(array.bytes, array.length, sizeof(Var), _sort_compare);
@@ -326,7 +327,7 @@ static int _sort_key_compare(const void *ap, const void *bp) {
     callback side effects are not undone.
 */
 Self Array.sort_by(Self array, Func key) {
-  if (!array || !array.length) return array;
+  if (!array) return array;
   size_t count = array.length;
   struct ArraySortEntry *entries =
     xcalloc(count, sizeof(struct ArraySortEntry));
@@ -438,7 +439,8 @@ meta native void Array.heapify(Array heap) {
     The receiver here is the `Array`. In `String.join` the separator is the
     receiver and the elements arrive as a `List`. Raises: `<alloc-fail>` or
     `<size-limit>` while rendering or canonicalizing the result, or a cause
-    from an element's `write_str`. */
+    from an element's `write_str`.
+*/
 meta native String Array.join(Array array, String separator) {
   size_t n = array.length;
   if (n == 0) return "";
