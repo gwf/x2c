@@ -249,7 +249,6 @@ static int _is_home(Path p){
 }
 
 static void _prepare_include_dirs(void){
-  if(! String_truth(root_path)) return;
   String include_dir = String_join(NULL, cons(String_var(root_path), cons(String_var(_15), NULL)));
   String src_dir = String_join(NULL, cons(String_var(root_path), cons(String_var(_16), NULL))), lib_dir = String_join(NULL, cons(String_var(root_path), cons(String_var(_17), NULL)));
   default_includes = cons(String_var(include_dir), NULL);
@@ -260,8 +259,6 @@ void x2c_set_root(String root){
   if(! _init_guard_) _file_init_();
   root_path = Path_absolute(root);
   root_found = 1;
-  default_includes = NULL;
-  cpp_includes = NULL;
   _prepare_include_dirs();
 }
 
