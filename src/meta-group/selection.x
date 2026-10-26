@@ -69,16 +69,16 @@ void Compiler.finish_meta_functions(Compiler c, Array nodes) {
   while (grew) {
     grew = 0;
     foreach (List entry in c.meta_group)
-      match (entry) case %(function ?fn ?(String name) ?):
-        if (!(name in c.meta_comptime) && c.meta_reaches_compile_time(fn)) {
-          c.meta_comptime[name] = 1;
-          grew = 1;
-        }
+      if ((entry ~= %(function ?fn ?(String name) ?)) &&
+          !(name in c.meta_comptime) && c.meta_reaches_compile_time(fn)) {
+        c.meta_comptime[name] = 1;
+        grew = 1;
+      }
   }
   int check_calls = 0;
   foreach (List entry in c.meta_group)
-    match (entry) case %(function ? ?(String name) ?):
-      if (name in c.meta_comptime) check_calls = 1;
+    if ((entry ~= %(function ? ?(String name) ?)) &&
+        name in c.meta_comptime) check_calls = 1;
   int retained = 0;
   foreach (List node in nodes) {
     if (c.meta_is_comptime_only(node)) continue;
@@ -169,7 +169,7 @@ static Map _source_order(Compiler c, Array ordered, String lib) {
    one of its names. Types and directives stay. */
 static int _optional(List item, Map later) {
   if (!((void *) item in later)) return 0;
-  match (item) case %(declare ?(Type spec) (bindings ? *)):
+  if (item ~= %(declare ?(Type spec) (bindings ? *)))
     return !spec.is_typedef();
   return 0;
 }
@@ -179,8 +179,8 @@ static int _declares_reached(List item, Map reached) {
   match (item) case %(declare ? (bindings *rows)):
     foreach (List row in rows) {
       match (row) case %(op = ?bound ?): row = bound;
-      match (row) case %(bind (binding ?identity ?) ?):
-        if (identity in reached) return 1;
+      if ((row ~= %(bind (binding ?identity ?) ?)) &&
+          identity in reached) return 1;
     }
   return 0;
 }
