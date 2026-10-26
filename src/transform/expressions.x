@@ -128,14 +128,14 @@ module Ast _expression_node(Compiler c, Ast ast) {
    transform the deepest term, and rebuild upward. Entered only for chain
    heads, with expression rewrites already applied. */
 static List _op_chain_first(List ast) {
-  if (ast ~= %(expr ? ?content))
-    if (content ~= $source_operator_content(%(? ?first *rest)) &&
-        first is <list>) {
-      List operand = first;
-      if (operand ~= %(expr ? ?inner) &&
-          inner ~= $source_operator_content(%(*parts)))
-        return operand;
-    }
+  if (ast ~= %(expr ? ?content) &&
+      content ~= $source_operator_content(%(? ?first *rest)) &&
+      first is <list>) {
+    List operand = first;
+    if (operand ~= %(expr ? ?inner) &&
+        inner ~= $source_operator_content(%(*parts)))
+      return operand;
+  }
   return NULL;
 }
 
