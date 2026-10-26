@@ -35,13 +35,12 @@ List Ast.binding(int identity, String spelling) =>
     zero without changing either output.
 */
 int Ast.try_binding(List binding, int &?identity, String &?spelling) {
-  match (binding)
-    case %(binding ?id ?(String name)): {
-      if (!id.is_integer() || id.integer() <= 0) return 0;
-      if (identity) identity = id;
-      if (spelling) spelling = name;
-      return 1;
-    }
+  if (binding ~= %(binding ?id ?(String name))) {
+    if (!id.is_integer() || id.integer() <= 0) return 0;
+    if (identity) identity = id;
+    if (spelling) spelling = name;
+    return 1;
+  }
   return 0;
 }
 
