@@ -1430,7 +1430,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _579 = cons(_578, NULL);
   _580 = cons(_494, _579);
   _581 = List_var(_580);
-  _582 = int_var(64);
+  _582 = int_var(60);
   _583 = cons(_582, NULL);
   _584 = cons(_500, _583);
   _585 = List_var(_584);
@@ -1440,7 +1440,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _589 = List_var(_588);
   _590 = cons(_510, _507);
   _591 = List_var(_590);
-  _592 = int_var(90190);
+  _592 = int_var(90180);
   _593 = cons(_592, NULL);
   _594 = cons(_515, _593);
   _595 = List_var(_594);
@@ -5536,7 +5536,7 @@ static List f11_declarators____initialized(Compiler c, List type, List bind, Tok
 }
 
 static List _declarator(Compiler c, List type, List context, List * method_identity_out, Token * source_first, Token * source_after){
-  List ptr = _pointer(c), method_identity = NULL;  List key, infix;  List _x2c_gensym_destructure_5 = List_cdr(f11_declarators____direct_declarator(c, List_type(context), &(method_identity), &((* source_first)), &((* source_after))));  key = Var_list_payload(List_getindex(_x2c_gensym_destructure_5, 0));  infix = Var_list_payload(List_getindex(_x2c_gensym_destructure_5, 1));  List sfx = f11_declarators____declarator_suffix(c, c -> load_source && ! List_truth(c -> return_type) && List_equal(key, _632));  List modifiers = List_append(infix, List_append(sfx, List_append(ptr, NULL)));  List ast = List_append(modifiers, type);  List binding = key;  Compiler_bind_template_local(c, key, ast, context); (* method_identity_out) = method_identity;  return cons(_40, cons(List_var(binding), cons(List_var(modifiers), NULL)));
+  List ptr = _pointer(c), method_identity = NULL;  List key, infix;  List _x2c_gensym_destructure_5 = List_cdr(f11_declarators____direct_declarator(c, List_type(context), &(method_identity), &((* source_first)), &((* source_after))));  key = Var_list_payload(List_getindex(_x2c_gensym_destructure_5, 0));  infix = Var_list_payload(List_getindex(_x2c_gensym_destructure_5, 1));  List sfx = f11_declarators____declarator_suffix(c, c -> load_source && ! List_truth(c -> return_type) && List_equal(key, _632));  List modifiers = List_append(infix, List_append(sfx, List_append(ptr, NULL)));  List ast = List_append(modifiers, type);  Compiler_bind_template_local(c, key, ast, context); (* method_identity_out) = method_identity;  return cons(_40, cons(List_var(key), cons(List_var(modifiers), NULL)));
 }
 
 static List _pointer(Compiler c){
@@ -5544,7 +5544,7 @@ static List _pointer(Compiler c){
     Symbol symbol = Compiler_peek(c, 0);  if(symbol == 54 || symbol == 189 || symbol == 77 || Symbol_is_type_qualifier(symbol)){
       Compiler_next(c);  int optional = symbol == 77 && Compiler_peek(c, 0) == 58;  ptr = cons(Symbol_var(optional ? 33330008396 : symbol), ptr);  if(optional) Compiler_next(c);  continue;
     }
-    if(Compiler_peek(c, 0) != 19147688 || !(Map_contains(c -> object_macros, String_var(c -> token -> text)))) return ptr;  Array quals = Array_new();  const Array _x2c_gensym_macro_acquired_3 = quals; {
+    if(symbol != 19147688 || !(Map_contains(c -> object_macros, String_var(c -> token -> text)))) return ptr;  Array quals = Array_new();  const Array _x2c_gensym_macro_acquired_3 = quals; {
       _x2c_gensym_defer_env_16 _x2c_gensym_macro_environment_16 ={
         0
       }

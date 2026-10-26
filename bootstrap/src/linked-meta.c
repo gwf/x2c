@@ -5203,7 +5203,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_4(void)
   _2502 = cons(_2501, NULL);
   _2503 = List_var(_2502);
   _2504 = Symbol_var(106239471489226);
-  _2505 = int_var(1020);
+  _2505 = int_var(1023);
   _2506 = String_new("");
   _2507 = String_var(_2506);
   _2508 = cons(_199, _2084);
@@ -5899,7 +5899,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_6(void)
   _3192 = cons(_2036, _3191);
   _3193 = Symbol_var(194457181);
   _3194 = cons(_3193, NULL);
-  _3195 = int_var(1742);
+  _3195 = int_var(1745);
   _3196 = String_new("str");
   _3197 = String_var(_3196);
   _3198 = String_new("repr");
@@ -5949,7 +5949,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_6(void)
   _3242 = List_var(_3241);
   _3243 = cons(_3242, NULL);
   _3244 = List_var(_3243);
-  _3245 = int_var(1760);
+  _3245 = int_var(1763);
   _3246 = Symbol_var(60);
   _3247 = String_new("RenderPath_enter");
   _3248 = String_var(_3247);
@@ -6294,7 +6294,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_7(void)
   _3584 = Atom_intern(String_new("string-switch"));
   _3585 = String_new("string_switch");
   _3586 = String_new("s");
-  _3587 = int_var(1969);
+  _3587 = int_var(1972);
   _3588 = cons(_2259, NULL);
   _3589 = cons(_6, _3588);
   _3590 = List_var(_3589);
@@ -12255,7 +12255,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_18(void
   _9512 = List_var(_9511);
   _9513 = String_new("lib/protocols.x");
   _9514 = String_var(_9513);
-  _9515 = String_new("df3f8fe0");
+  _9515 = String_new("b0b36725");
   _9516 = String_var(_9515);
   _9517 = cons(_9516, NULL);
   _9518 = cons(_9514, _9517);
@@ -12368,7 +12368,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_18(void
   _9625 = String_var(_9624);
   _9626 = String_new("lib/meta.x");
   _9627 = String_var(_9626);
-  _9628 = String_new("9d51928e");
+  _9628 = String_new("6e1846ab");
   _9629 = String_var(_9628);
   _9630 = cons(_9629, NULL);
   _9631 = cons(_9627, _9630);
@@ -12411,7 +12411,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_18(void
   _9668 = List_var(_9667);
   _9669 = String_new("lib/match/match.x");
   _9670 = String_var(_9669);
-  _9671 = String_new("c2597a03");
+  _9671 = String_new("3697c582");
   _9672 = String_var(_9671);
   _9673 = cons(_9672, NULL);
   _9674 = cons(_9670, _9673);
@@ -14188,7 +14188,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_22(void
   _11433 = List_var(_11432);
   _11434 = String_new("lib/scope/regions.x");
   _11435 = String_var(_11434);
-  _11436 = String_new("a44f6677");
+  _11436 = String_new("b310b9af");
   _11437 = String_var(_11436);
   _11438 = cons(_11437, NULL);
   _11439 = cons(_11435, _11438);
@@ -15550,7 +15550,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_24(void
   _12789 = cons(_223, _12788);
   _12790 = String_new("src/builtins.x");
   _12791 = String_var(_12790);
-  _12792 = String_new("a33dbeeb");
+  _12792 = String_new("a9c26987");
   _12793 = String_var(_12792);
   _12794 = String_new("src/macros/macros.x");
   _12795 = String_var(_12794);
@@ -16223,7 +16223,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_26(void
   _13456 = List_var(_13455);
   _13457 = String_new("src/collect/interfaces.x");
   _13458 = String_var(_13457);
-  _13459 = String_new("4ea26145");
+  _13459 = String_new("988506a5");
   _13460 = String_var(_13459);
   _13461 = cons(_13460, NULL);
   _13462 = cons(_13458, _13461);
@@ -16789,7 +16789,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_27(void
   _14019 = cons(_223, _14018);
   _14020 = String_new("src/components/dynamic-operators.x");
   _14021 = String_var(_14020);
-  _14022 = String_new("e1865a35");
+  _14022 = String_new("c5903636");
   _14023 = String_var(_14022);
   _14024 = String_new("64f7a56e");
   _14025 = String_var(_14024);
@@ -17068,7 +17068,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_27(void
   _14298 = List_var(_14297);
   _14299 = String_new("src/expressions/access.x");
   _14300 = String_var(_14299);
-  _14301 = String_new("85bc9204");
+  _14301 = String_new("393407ca");
   _14302 = String_var(_14301);
   _14303 = cons(_14302, NULL);
   _14304 = cons(_14300, _14303);
@@ -17519,7 +17519,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_28(void
   _14746 = cons(_223, _14745);
   _14747 = String_new("src/linked-meta.x");
   _14748 = String_var(_14747);
-  _14749 = String_new("75e6be06");
+  _14749 = String_new("b07fbead");
   _14750 = String_var(_14749);
   _14751 = String_new("cwd:./channel.x");
   _14752 = String_var(_14751);
@@ -17890,7 +17890,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_29(void
   _15114 = List_var(_15113);
   _15115 = String_new("src/macros/expansion.x");
   _15116 = String_var(_15115);
-  _15117 = String_new("bef26e6a");
+  _15117 = String_new("4f70c90a");
   _15118 = String_var(_15117);
   _15119 = cons(_15118, NULL);
   _15120 = cons(_15116, _15119);
@@ -18241,7 +18241,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_30(void
   _15462 = List_var(_15461);
   _15463 = String_new("src/meta-group/selection.x");
   _15464 = String_var(_15463);
-  _15465 = String_new("d74493e7");
+  _15465 = String_new("8083aa5c");
   _15466 = String_var(_15465);
   _15467 = cons(_15466, NULL);
   _15468 = cons(_15464, _15467);
@@ -18737,7 +18737,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_31(void
   _15955 = List_var(_15954);
   _15956 = String_new("src/parse/declarators.x");
   _15957 = String_var(_15956);
-  _15958 = String_new("c0ff11f8");
+  _15958 = String_new("e44b9561");
   _15959 = String_var(_15958);
   _15960 = cons(_15959, NULL);
   _15961 = cons(_15957, _15960);
@@ -18940,7 +18940,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_31(void
   _16158 = List_var(_16157);
   _16159 = String_new("src/protocol/resolution.x");
   _16160 = String_var(_16159);
-  _16161 = String_new("62d7ecd7");
+  _16161 = String_new("ca83aae2");
   _16162 = String_var(_16161);
   _16163 = cons(_16162, NULL);
   _16164 = cons(_16160, _16163);
@@ -19275,7 +19275,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_32(void
   _16490 = List_var(_16489);
   _16491 = String_new("src/symtab/types.x");
   _16492 = String_var(_16491);
-  _16493 = String_new("5675afba");
+  _16493 = String_new("f016540e");
   _16494 = String_var(_16493);
   _16495 = cons(_16494, NULL);
   _16496 = cons(_16492, _16495);
@@ -19353,7 +19353,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_32(void
   _16568 = List_var(_16567);
   _16569 = String_new("src/transform/expressions.x");
   _16570 = String_var(_16569);
-  _16571 = String_new("0ed54522");
+  _16571 = String_new("d76fcfe6");
   _16572 = String_var(_16571);
   _16573 = cons(_16572, NULL);
   _16574 = cons(_16570, _16573);
@@ -19410,7 +19410,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_32(void
   _16625 = List_var(_16624);
   _16626 = String_new("src/transform/traversal.x");
   _16627 = String_var(_16626);
-  _16628 = String_new("262b3a6d");
+  _16628 = String_new("a723ede7");
   _16629 = String_var(_16628);
   _16630 = cons(_16629, NULL);
   _16631 = cons(_16627, _16630);

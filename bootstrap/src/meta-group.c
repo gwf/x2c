@@ -126,8 +126,6 @@ static Array f9_selection____runtime_includes(Compiler c, String lib);
 
 static Map f9_selection____source_order(Compiler c, Array ordered, String lib);
 
-static String f9_selection____address(List node);
-
 static int f9_selection____optional(List item, Map later);
 
 static int f9_selection____declares_reached(List item, Map reached);
@@ -2614,17 +2612,13 @@ static Array f9_selection____runtime_includes(Compiler c, String lib){
 
 static Map f9_selection____source_order(Compiler c, Array ordered, String lib){
   Map placeholders = f9_selection____placeholders(c), later = Map_new();  int skipped = c -> meta_build ? c -> skipped_form - 1 : - 1;  for(int i = 0;  i < Array_len(c -> unit_nodes);  i ++){
-    Var node = f9_selection____group_include(c, Array_getindex(c -> unit_nodes, i), lib);  if(Var_is_void(node)) continue;  List copy = Var_list_payload(f9_selection____uninitialized(node, placeholders));  if(skipped >= 0 && i >= skipped) Map_setindex(later, String_var(f9_selection____address(copy)), int_var(1));  Array_push(ordered, List_var(copy));
+    Var node = f9_selection____group_include(c, Array_getindex(c -> unit_nodes, i), lib);  if(Var_is_void(node)) continue;  List copy = Var_list_payload(f9_selection____uninitialized(node, placeholders));  if(skipped >= 0 && i >= skipped) Map_setindex(later, Var_new(3683441, (void *) copy), int_var(1));  Array_push(ordered, List_var(copy));
   }
   return later;
 }
 
-static String f9_selection____address(List node){
-  return String_join(NULL, cons(String_var(long_str((long)(void *) node)), NULL));
-}
-
 static int f9_selection____optional(List item, Map later){
-  if(!(Map_contains(later, String_var(f9_selection____address(item))))) return 0; {
+  if(!(Map_contains(later, Var_new(3683441, (void *) item)))) return 0; {
     List _x2c_gensym_match_expr = item; List _x2c_gensym_match_cursor, _x2c_gensym_match_cursor1;  switch(_x2c_gensym_match_expr ? _x2c_gensym_match_expr->car.u64 : 0){
         case 9224497945694178442ULL: ;  _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497945694178442ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && Var_is(_x2c_gensym_match_cursor->car, 806120)) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && Var_is(_x2c_gensym_match_cursor->car, 806120) && (_x2c_gensym_match_cursor1 = Var_list_payload(_x2c_gensym_match_cursor->car), 1) && _x2c_gensym_match_cursor1 && _x2c_gensym_match_cursor1->car.u64 == 9224498094476456422ULL && (_x2c_gensym_match_cursor1 = _x2c_gensym_match_cursor1->cdr, 1) && _x2c_gensym_match_cursor1 && (_x2c_gensym_match_cursor1 = _x2c_gensym_match_cursor1->cdr, 1) && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {{
         Var spec;  spec = _x2c_gensym_match_value_0; {
@@ -2690,7 +2684,7 @@ static Map f9_selection____placeholders(Compiler c){
             case 9224497936786891108ULL: ;  _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497936786891108ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && Var_is(_x2c_gensym_match_cursor->car, 806120)) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {{
             Var placeholder;  placeholder = _x2c_gensym_match_value_0; {
               Var _x2c_gensym_match_value_6 = placeholder; {
-                List placeholder = Var_list_payload(_x2c_gensym_match_value_6);  Map_setindex(placeholders, String_var(f9_selection____address(placeholder)), int_var(1));
+                List placeholder = Var_list_payload(_x2c_gensym_match_value_6);  Map_setindex(placeholders, Var_new(3683441, (void *) placeholder), int_var(1));
               }
 
             }
@@ -2800,10 +2794,11 @@ static Var f9_selection____uninitialized(Var node, Map placeholders){
 
 static int f9_selection____holds(Var node, Map placeholders){
   if(! Var_is_row(node, 9, 7, 4)) return 0;
-  if(Map_contains(placeholders, String_var(f9_selection____address(Var_list_payload(node))))) return 1;
+  List syntax = Var_list_payload(node);
+  if(Map_contains(placeholders, Var_new(3683441, (void *) syntax))) return 1;
   {
     Var child;
-    List _x2c_gensym_macro_object_16 = Var_list_payload(node);
+    List _x2c_gensym_macro_object_16 = syntax;
     List _x2c_gensym_macro_cursor_17 = _x2c_gensym_macro_object_16;
     Var _x2c_gensym_macro_cursor_output_17;
     while(List_try_next(_x2c_gensym_macro_object_16, &(_x2c_gensym_macro_cursor_17), &(_x2c_gensym_macro_cursor_output_17))){
@@ -2830,7 +2825,7 @@ static Map f9_selection____roots(Compiler c, Array ordered, Map later){
       item = Var_list_payload(_x2c_gensym_macro_cursor_output_18);
       if(_function_identity(item, &(identity), &(name))){
         Map_setindex(present, identity, int_var(1));
-        if(c -> meta_build && !(Map_contains(later, String_var(f9_selection____address(item)))) && Compiler_public_native_function(c, item, name)) Map_setindex(reached, identity, int_var(1));
+        if(c -> meta_build && !(Map_contains(later, Var_new(3683441, (void *) item))) && Compiler_public_native_function(c, item, name)) Map_setindex(reached, identity, int_var(1));
       }
 
     }
@@ -2894,10 +2889,10 @@ static void f9_selection____close(Array ordered, Map reached, Map later){
       while(Array_try_next(_x2c_gensym_macro_object_20, &(_x2c_gensym_macro_cursor_21), &(_x2c_gensym_macro_cursor_output_21))){
         item = Var_list_payload(_x2c_gensym_macro_cursor_output_21);
         {
-          String key = f9_selection____address(item);
-          if(Map_contains(expanded, String_var(key))) continue;
+          Var key = Var_new(3683441, (void *) item);
+          if(Map_contains(expanded, key)) continue;
           if(_function_identity(item, &(identity), &(name)) ? !(Map_contains(reached, identity)) : ! f9_selection____optional(item, later) || ! f9_selection____declares_reached(item, reached)) continue;
-          Map_setindex(expanded, String_var(key), int_var(1));
+          Map_setindex(expanded, key, int_var(1));
           Ast_collect_binding_references(List_var(item), reached);
           grew = 1;
         }
