@@ -44,7 +44,7 @@ int String.len(String str) {
     their current NUL-terminated contents.
 */
 meta native unsigned String.hash(String str) {
-  if (!str || !*str) return 0;
+  if (!str) return 0;
   StringHeader header = _header(str);
   return header.hash ? header.hash : _hash_n(str, strlen(str));
 }
@@ -144,7 +144,8 @@ meta native Self String.intern(Self string) => string.new();
 /** Canonicalizes a known NUL-free byte span in the active pool chain.
     Copies bytes only when needed; the caller retains its input storage.
     Null input or a nonpositive length returns the empty String.
-    Raises alloc-fail if canonical storage cannot be allocated. */
+    Raises alloc-fail if canonical storage cannot be allocated.
+*/
 String x2c_string_from_bytes(const char *bytes, int length) =>
   _from_bytes_in(Pool.current(), bytes, length);
 
@@ -312,7 +313,7 @@ module void _free_unchecked(String str) {
     the promotion.
 */
 Self String.promote(Self str) {
-  if (!str || !*str) return str;
+  if (!str) return str;
   Pool.current().promote(str, _header(str));
   return str;
 }
@@ -326,7 +327,7 @@ Self String.promote(Self str) {
     promotion.
 */
 int String.try_own(String str) {
-  if (!str || !*str) return 1;
+  if (!str) return 1;
   return Pool.current().own(str, _header(str));
 }
 
@@ -337,7 +338,7 @@ int String.try_own(String str) {
     about a `String` it does not own.
 */
 int String.is_permanent(String str) {
-  if (!str || !*str) return 1;
+  if (!str) return 1;
   return Pool.is_permanent(str);
 }
 
