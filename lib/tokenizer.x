@@ -81,7 +81,6 @@ void Tokenizer.scan(Tokenizer t) {
   if (t.layout) _layout(t);
 }
 
-/* Scans one token in the current mode, or returns zero. */
 static int _step(Tokenizer t) {
   switch (_scan_mode(t)) {
     case <x2c>: case <x2c-par>: return _language_tokens(t);
@@ -245,8 +244,7 @@ static int _lisp_prefix(Tokenizer t, int list, int collection) {
 /* Punctuation in Lisp-shaped text, or -1 when the character is not
    punctuation in this mode. Lists and collections nest strings, arrays,
    and maps; only a collection ends an atom at `]`, `}`, `:`, or `,`. */
-static int _lisp_punctuation(
-  Tokenizer t, int list, int collection) {
+static int _lisp_punctuation(Tokenizer t, int list, int collection) {
   char *text = t.text + t.pos;
   int data = list || collection;
   switch (text[0]) {
@@ -318,7 +316,7 @@ static int _string_tokens(Tokenizer t) {
     return text[1] == '{' || text[1] == '('
          ? _operator(t, 2)
          : _named_reference(t);
-  if (text[0] == '"')  return _operator(t, 1);
+  if (text[0] == '"') return _operator(t, 1);
   int len = scan_string_segment(text);
   if (len < 0) return t.error();
   return t.tokenize(len, <segment>);
@@ -385,7 +383,7 @@ static int _error(Tokenizer tokenizer, Symbol status) {
 static int _operator(Tokenizer t, int len) {
   Symbol op = Symbol.new_len(t.text + t.pos, len), push = 0;
   Symbol mode = _scan_mode(t);
-  int pop = 0, token_len = len, Symbol token_type = op;
+  int pop = 0, Symbol token_type = op;
   switch (mode) {
     case <x2c>: case <x2c-par>:
       switch (op) {
@@ -421,28 +419,20 @@ static int _operator(Tokenizer t, int len) {
       switch (op) {
         case <"${">: push = <x2c>; break;
         case <"$(">: push = <x2c-par>; break;
-        case <"\"">: pop = 1; token_len = 1; token_type = <"\"">; break;
+        case <"\"">: pop = 1; break;
       }
       break;
   }
-  if (push) _push_mode(t, push);
+  if (push) t.modes.push(push);
   int mode_committed = !push;
-  defer if (!mode_committed) _pop_mode(t);
-  t.tokenize(token_len, token_type);
+  defer if (!mode_committed) t.modes.take_last();
+  t.tokenize(len, token_type);
   mode_committed = 1;
-  if (pop) _pop_mode(t);
+  if (pop) t.modes.take_last();
   return 1;
 }
 
 static inline Symbol _scan_mode(Tokenizer t) => t.modes[-1];
-
-static inline void _push_mode(Tokenizer tokenizer, Symbol mode) {
-  tokenizer.modes.push(mode);
-}
-
-static inline void _pop_mode(Tokenizer tokenizer) {
-  if (tokenizer.modes.len()) tokenizer.modes.take_last();
-}
 
 // operand context
 
@@ -745,8 +735,7 @@ static int _next_statement(_Layout &l, int i) {
   return j;
 }
 
-static void _open_block(
-  _Layout &l, _LayoutLine line, int j, int next) {
+static void _open_block(_Layout &l, _LayoutLine line, int j, int next) {
   Token first = l.sig[line.first];
   _LayoutHeader header = _header(l, line);
   if (header.labeled) _edit(l, line.last).after = "{";
