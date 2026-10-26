@@ -182,26 +182,25 @@ static String _recorded_spelling(Compiler c, String name) {
 
 static List _recorded_conformance(Compiler c, Type base, Type participant) {
   if (_visibility(c, base, participant) != <external>) return NULL;
-  match (c.conforms[$(base, participant)])
-    case %(protocol-conformance ? ? ?forward ?reverse ? ?(Map bindings)
-           (members *rows)): {
-      if (_native_rows(rows)) return NULL;
-      Array bound = [], resolved = [];
-      foreach ((String name, Type type) in bindings)
-        bound.push($(name, type));
-      bound.sort();
-      foreach (List row in rows)
-        match (row)
-          case %(?member ?(Symbol status) ?(String source) *): {
-            source = _recorded_spelling(c, source);
-            if (status != <no-member> && !_is_private(c, source))
-              resolved.push($(member, status, source));
-          }
-      forward = _recorded_spelling(c, forward);
-      reverse = _recorded_spelling(c, reverse);
-      return %(conformance $base $participant $forward $reverse
-               (bindings @(bound.list_free())) @(resolved.list_free()));
-    }
+  if (c.conforms[$(base, participant)] ~= %(
+        protocol-conformance ? ? ?forward ?reverse ? ?(Map bindings)
+        (members *rows))) {
+    if (_native_rows(rows)) return NULL;
+    Array bound = [], resolved = [];
+    foreach ((String name, Type type) in bindings)
+      bound.push($(name, type));
+    bound.sort();
+    foreach (List row in rows)
+      if (row ~= %(?member ?(Symbol status) ?(String source) *)) {
+        source = _recorded_spelling(c, source);
+        if (status != <no-member> && !_is_private(c, source))
+          resolved.push($(member, status, source));
+      }
+    forward = _recorded_spelling(c, forward);
+    reverse = _recorded_spelling(c, reverse);
+    return %(conformance $base $participant $forward $reverse
+             (bindings @(bound.list_free())) @(resolved.list_free()));
+  }
   return NULL;
 }
 
@@ -254,28 +253,28 @@ static List _recorded(Compiler c, Type base, Type participant) {
 /* Installs the conformance an included interface recorded for an adoption
    this unit does not own. Returns 0 when there is none to reuse. */
 module int _reuse_conformance(Compiler c, Type base, Type participant) {
-  match ($(_record(c, base), _recorded(c, base, participant)))
-    case %((? ? ? ? (members *templates))
-           (conformance ? ? ?forward ?reverse (bindings *bound) *members)): {
-      Map variables = {}, bindings = {}, resolved = {};
-      foreach (List pair in bound) {
-        (String name, Type type) = pair;
-        variables[name] = 1;
-        bindings[name] = type;
-      }
-      foreach (List member in members) resolved[member.car()] = member;
-      Array rows = [];
-      foreach (List template in templates) {
-        (String member, Type type) = template;
-        Type expected = _substitute_signature(type, variables, bindings);
-        rows.push(_recorded_row(resolved[member], member, expected, type));
-      }
-      c.conforms[$(base, participant)] = %(
-        protocol-conformance $base $participant $forward $reverse
-        $variables $bindings (members @(rows.list_free()))
-      );
-      return 1;
+  if ($(_record(c, base), _recorded(c, base, participant)) ~= %(
+        (? ? ? ? (members *templates))
+        (conformance ? ? ?forward ?reverse (bindings *bound) *members))) {
+    Map variables = {}, bindings = {}, resolved = {};
+    foreach (List pair in bound) {
+      (String name, Type type) = pair;
+      variables[name] = 1;
+      bindings[name] = type;
     }
+    foreach (List member in members) resolved[member.car()] = member;
+    Array rows = [];
+    foreach (List template in templates) {
+      (String member, Type type) = template;
+      Type expected = _substitute_signature(type, variables, bindings);
+      rows.push(_recorded_row(resolved[member], member, expected, type));
+    }
+    c.conforms[$(base, participant)] = %(
+      protocol-conformance $base $participant $forward $reverse
+      $variables $bindings (members @(rows.list_free()))
+    );
+    return 1;
+  }
   return 0;
 }
 
@@ -284,9 +283,8 @@ module int _reuse_conformance(Compiler c, Type base, Type participant) {
 module List _unused_recorded(Compiler c) {
   Array candidates = [], unused = [];
   foreach (Var key in c.protocol_helpers.keys())
-    match (key)
-      case %("recorded-conformance" ?(Type base) ?(Type participant)):
-        candidates.push($(base, participant));
+    if (key ~= %("recorded-conformance" ?(Type base) ?(Type participant)))
+      candidates.push($(base, participant));
   // Ownership answers are memoized in the helpers, so they follow the scan.
   foreach (List pair in candidates) {
     List row = _recorded(c, pair.car(), pair.cadr());
@@ -300,11 +298,10 @@ module List _unused_recorded(Compiler c) {
    converter is defined, so that its forwarding members are published. */
 module void _reuse_defaults(Compiler c) {
   foreach (List entry in _unused_recorded(c))
-    match (entry)
-      case %((?(Type base) ?(Type participant))
-             (conformance ? ? ?(String forward) ? ? *members)):
-        if (forward in c.fn_defs && _has_default(members))
-          _reuse_conformance(c, base, participant);
+    if (entry ~= %((?(Type base) ?(Type participant))
+                   (conformance ? ? ?(String forward) ? ? *members)) &&
+        forward in c.fn_defs && _has_default(members))
+      _reuse_conformance(c, base, participant);
 }
 
 static int _has_default(List members) {
@@ -316,11 +313,10 @@ static int _has_default(List members) {
    does not list resolved as `no-member`. */
 static List _recorded_row(
   Var recorded, String member, Type expected, Type template) {
-  match (recorded)
-    case %(? ?(Symbol status) ?(String source)): {
-      Symbol kind = status == <base-dflt> ? <ordinary> : <none>;
-      return $(member, status, source, expected, kind, template);
-    }
+  if (recorded ~= %(? ?(Symbol status) ?(String source))) {
+    Symbol kind = status == <base-dflt> ? <ordinary> : <none>;
+    return $(member, status, source, expected, kind, template);
+  }
   String source = NULL;
   return %($member no-member $source $expected none $template);
 }
@@ -333,14 +329,13 @@ module void _resolve_adoption(
     $report.protocol_base_missing(c, location, base);
     return;
   }
-  match (record)
-    case %(? ? ?(String binder) (associated *associations)
-           (members *members)): {
-      ProtocolRequirements requirements = {
-        .binder = binder, .associations = associations,
-        .templates = members};
-      _resolve_record(c, base, participant, location, requirements);
-    }
+  if (record ~= %(? ? ?(String binder) (associated *associations)
+                  (members *members))) {
+    ProtocolRequirements requirements = {
+      .binder = binder, .associations = associations,
+      .templates = members};
+    _resolve_record(c, base, participant, location, requirements);
+  }
 }
 
 static void _resolve_record(
@@ -426,17 +421,16 @@ static void _report_sig_conflicts(
   String owner = _adoption_spelling(base, participant);
   String declaration_site = _definition_location(c, base);
   foreach (List row in rows)
-    match (row)
-      case %(?(String member) sig-cnflct ?(String binding)
-             ?(Type expected) ? ?): {
-        List dedupe = $("protocol-sig-conflict", participant, member);
-        if (dedupe in c.protocol_helpers) continue;
-        c.protocol_helpers[dedupe] = 1;
-        Type actual = _declared(c, binding);
-        $report.protocol_signature_conflict(
-          c, location, member, owner, declaration_site, binding, actual,
-          expected);
-      }
+    if (row ~= %(?(String member) sig-cnflct ?(String binding)
+                  ?(Type expected) ? ?)) {
+      List dedupe = $("protocol-sig-conflict", participant, member);
+      if (dedupe in c.protocol_helpers) continue;
+      c.protocol_helpers[dedupe] = 1;
+      Type actual = _declared(c, binding);
+      $report.protocol_signature_conflict(
+        c, location, member, owner, declaration_site, binding, actual,
+        expected);
+    }
 }
 
 static String _definition_location(Compiler c, Type base) {
@@ -557,12 +551,11 @@ static Type _participant_definition(Compiler c, Type participant) {
 module void _install_native_bindings(Compiler c, Type participant, List rows) {
   if (!_native_rows(rows)) return;
   foreach (List row in rows)
-    match (row)
-      case %(?(String member) ? ? ? ? ?(Type signature)): {
-        String generated = _member_spelling(participant, member);
-        if (!c.sym.get($(generated)))
-          c.sym.define_global($(generated), signature);
-      }
+    if (row ~= %(?(String member) ? ? ? ? ?(Type signature))) {
+      String generated = _member_spelling(participant, member);
+      if (!c.sym.get($(generated)))
+        c.sym.define_global($(generated), signature);
+    }
 }
 
 static int _is_native(List templates) {
@@ -572,8 +565,7 @@ static int _is_native(List templates) {
 }
 
 module int _native_rows(List rows) {
-  match (rows) case %((? native *) *): return 1;
-  return 0;
+  return rows ~= %((? native *) *);
 }
 
 // ordinary conformance
@@ -670,21 +662,20 @@ static List _resolve(MemberResolution &r, List associations, List templates) {
 }
 
 static List _select(MemberResolution &r, List row) {
-  match (row)
-    case %(?(String member) ?(Type template) ?): {
-      String selected = NULL;
-      Type actual = _find_member(r, member, selected);
-      Symbol status = <no-member>;
-      if (actual) {
-        Map candidate = r.bindings.copy();
-        if (_unify_signature(template, actual, r.variables, candidate)) {
-          r.bindings = candidate;
-          status = <implmntd>;
-        }
-        else status = <sig-cnflct>;
+  if (row ~= %(?(String member) ?(Type template) ?)) {
+    String selected = NULL;
+    Type actual = _find_member(r, member, selected);
+    Symbol status = <no-member>;
+    if (actual) {
+      Map candidate = r.bindings.copy();
+      if (_unify_signature(template, actual, r.variables, candidate)) {
+        r.bindings = candidate;
+        status = <implmntd>;
       }
-      return %($member $status $selected $actual none $template);
+      else status = <sig-cnflct>;
     }
+    return %($member $status $selected $actual none $template);
+  }
   return NULL;
 }
 
@@ -760,47 +751,45 @@ static int _default_completes(
   !(%(function $name) in c.sym.file_statics());
 
 static List _complete(MemberResolution &r, List row) {
-  match (row)
-    case %(?(String member) ?(Symbol status) ?(String source)
-           ? ? ?(Type template)): {
-      Type expected = _substitute_signature(template, r.variables, r.bindings);
-      Symbol default_kind = <none>;
-      if (status == <no-member>) {
-        String base_name = _base_name(r.base);
-        if (base_name && r.base !== %("Var")) {
-          String fallback = %"$(base_name)_$member";
-          Type fallback_type = _declared(r.c, fallback);
-          Map base_bindings = r.bindings.copy();
-          base_bindings[r.binder] = r.base;
-          Type base_signature = _substitute_signature(
-            template, r.variables, base_bindings);
-          if (fallback_type == base_signature) {
-            status = <base-dflt>;
-            source = fallback;
-            default_kind = <ordinary>;
-          }
+  if (row ~= %(?(String member) ?(Symbol status) ?(String source)
+               ? ? ?(Type template))) {
+    Type expected = _substitute_signature(template, r.variables, r.bindings);
+    Symbol default_kind = <none>;
+    if (status == <no-member>) {
+      String base_name = _base_name(r.base);
+      if (base_name && r.base !== %("Var")) {
+        String fallback = %"$(base_name)_$member";
+        Type fallback_type = _declared(r.c, fallback);
+        Map base_bindings = r.bindings.copy();
+        base_bindings[r.binder] = r.base;
+        Type base_signature = _substitute_signature(
+          template, r.variables, base_bindings);
+        if (fallback_type == base_signature) {
+          status = <base-dflt>;
+          source = fallback;
+          default_kind = <ordinary>;
         }
       }
-      return $(member, status, source, expected, default_kind, template);
     }
+    return $(member, status, source, expected, default_kind, template);
+  }
   return NULL;
 }
 
 static List _requirement(ProtocolAdapters &a, List rows) {
   foreach (List row in rows)
-    match (row)
-      case %(?(String member) ?(Symbol status) ? ?
-             ?(Symbol default_kind) ?(Type template)): {
-        if (status == <base-dflt> && default_kind == <ordinary>) {
-          List requirement =
-            _conversion_requirement(a, member, template, <fallback>);
-          if (requirement) return requirement;
-        }
-        if (status == <implmntd>) {
-          List requirement = _descriptor_requirement(a, member, template);
-          if (requirement) return requirement;
-        }
+    if (row ~= %(?(String member) ?(Symbol status) ? ?
+                  ?(Symbol default_kind) ?(Type template))) {
+      if (status == <base-dflt> && default_kind == <ordinary>) {
+        List requirement =
+          _conversion_requirement(a, member, template, <fallback>);
+        if (requirement) return requirement;
       }
+      if (status == <implmntd>) {
+        List requirement = _descriptor_requirement(a, member, template);
+        if (requirement) return requirement;
+      }
+    }
   return NULL;
 }
 
@@ -839,12 +828,11 @@ static List _conversion_requirement(
 // signature unification
 
 static int _function_parts(Type signature, List &parameters, Type &result) {
-  match (signature)
-    case %((func ?arguments) *return_type): {
-      parameters = arguments;
-      result = return_type;
-      return 1;
-    }
+  if (signature ~= %((func ?arguments) *return_type)) {
+    parameters = arguments;
+    result = return_type;
+    return 1;
+  }
   return 0;
 }
 
@@ -852,8 +840,7 @@ static int _function_parts(Type signature, List &parameters, Type &result) {
    as `(* "T")` it is the base suffix, so walking a Type by car and cdr
    reaches it as a whole Type in that position too. */
 static String _type_variable(Var value, Map variables) {
-  match (value)
-    case %(?(String name)) if (name in variables): return name;
+  if (value ~= %(?(String name)) && name in variables) return name;
   return NULL;
 }
 
