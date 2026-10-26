@@ -1,47 +1,40 @@
-/*  typed-list.x -- typed cons chains generated from typed methods
+/*  typed-list.x -- typed views over canonical List cells
 
     Copyright (c) 2026 Gary William Flake
 
-    A typed list is a `List` whose car always carries one known `Var` tag. It
-    shares `List`'s canonical pool, so a typed chain and the plain literal that
-    spells it are the same cells, and a typed `cons` finds a cell an untyped
-    `cons` already built.
+    A typed list is a `List` whose car carries a `Var` tag accepted by its
+    family. It shares `List`'s canonical pool: a typed chain and the plain
+    literal that spells it are the same cells, and typed `cons` finds a cell
+    built by untyped `cons`.
+    Interning, hashing, equality, printing, and comparison remain `List`
+    operations; the typed views need no separate code for them. `List.hash`
+    reads raw car bits and the cdr pointer; `List.equal` compares them. Neither
+    dispatches on the tag.
 
-    A typed chain costs what an untyped one costs. `cons` searches the pool
+    A typed chain costs what an untyped one costs: `cons` searches the pool
     and, on a miss, allocates and inserts a cell. `ArrayInt.push` copies an
     element into contiguous storage. Use `typed-array.x` for indexing or bulk
     numeric storage, and typed lists for shared tails and canonical identity.
 
-    There is no long family. `Var.box_long` allocates a `Scope`-owned box, so a
-    cell outliving that scope would hold a dangling car, and `List.equal`
-    compares car bits. Two boxes of one number differ, so every cons would
+    Receiver-relative `List` methods retain the typed spelling for operations
+    that never inspect an element. The generated typed family supplies those
+    that do, reading and writing cars through the cheap encoding for the tag
+    instead of `Var.new` and `Var.integer`.
+
+    A typed list inherits `List.var`, so boxing and native `Func` checks use
+    `<list>`. The typed family does not adopt `protocol Var`: an `as List`
+    adoption would declare Var participation, but it would not add typed
+    bracket indexing. Widen to `List` for operations whose Var callbacks can
+    replace elements.
+
+    There is no long family. `Var.box_long` allocates a `Scope`-owned box, so
+    a cell outliving that scope would hold a dangling car. `List.equal`
+    compares car bits; two boxes of one number differ, so every cons would
     miss and the interning table would grow without bound.
 */
 
 #pragma once
 #include "x2c.x"
-
-/*  typed-list.x -- typed views over canonical List cells
-
-    Copyright (c) 2026 Gary William Flake
-
-    A typed list is a List. Its cells are interned cons cells whose car
-    always carries one known Var tag, so the interning pool, hashing,
-    equality, printing, and comparison are List's own and need no generated
-    code. `List.hash` reads the raw car bits and the cdr pointer;
-    `List.equal` compares them; neither consults the tag.
-
-    Receiver-relative List methods retain the typed spelling for operations
-    that never inspect an element. The typed family supplies the operations
-    that do. It reads and writes the car through the cheap encoding for its
-    tag instead of `Var.new` and `Var.integer`.
-
-    The typed family does not adopt `protocol Var`. A typed list inherits
-    `List.var`, so boxing and native Func checks already use `<list>`. An
-    `as List` adoption would only declare Var participation; it would not add
-    typed bracket indexing. Widen to List for operations whose Var callbacks
-    can replace elements.
-*/
 
 static macro Unit $list.typed.family(Type $list, Type $element,
   Name $encode, Name $decode, Literal $tag, Name $lower,
@@ -99,7 +92,8 @@ static macro Unit $list.typed.family(Type $list, Type $element,
       does not copy or mutate cells, and preserves their existing `List`-pool
       lifetime.
 
-      Raises: `<no-convert>` for the first foreign element. */
+      Raises: `<no-convert>` for the first foreign element.
+  */
   $list List.$lower(List xs) {
     int index = 0;
     for (List cur = xs; cur; cur = cur.cdr()) {
@@ -113,11 +107,12 @@ static macro Unit $list.typed.family(Type $list, Type $element,
   /* Without this the compiler resolves the typedef to a pointer and emits a
      bare `Var_pointer`, so any Var would become a typed list. */
   /** Extracts and validates `value` as `$list` without copying its cells.
-      A `Var` without the `<list>` tag becomes `nil`. A `List`
-      payload follows the
-      same element validation, identity, and lifetime rules as `List.$lower`.
+      A `Var` without the `<list>` tag becomes `nil`. A `List` payload follows
+      the same element validation, identity, and lifetime rules as
+      `List.$lower`.
 
-      Raises: `<no-convert>` for the first foreign element. */
+      Raises: `<no-convert>` for the first foreign element.
+  */
   $list Var.$lower(Var value) {
     List xs = value.list_payload();
     return xs.$lower();
