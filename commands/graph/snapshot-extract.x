@@ -309,6 +309,8 @@ static void _sx_declarations(
           else if (top_level || type.is_function()) {
             Map entity = _sx_binding(s, binding, type,
               type.is_function() ? "function" : "global", owner);
+            if (entity["definition"].int() &&
+                (type.is_function() || type.contains(<extern>))) continue;
             if (entity["ast"] == "") entity["ast"] = _sx_ast(s, node);
             _sx_span(s, entity, node, binding);
             if (type.is_function() || type.contains(<extern>))
@@ -346,6 +348,14 @@ static String _sx_field(SnapshotExtract &s, Type receiver, String member) {
   return s.records.contains(id) ? id : "";
 }
 
+static Type _sx_operand_type(Var operand) {
+  operand = Ast.without_origin(operand);
+  match (operand) case %(parens ?inner): operand = inner;
+  match (operand) case %(decl *parts):
+    return %(declare @parts).type_from_ast();
+  return project_expression_type(operand);
+}
+
 static void _sx_walk(
   SnapshotExtract &s, Var value, String owner, int origin, String access) {
   if (value is not <list>) return;
@@ -370,6 +380,9 @@ static void _sx_walk(
       return;
     }
     case %(call ?callee (args *arguments)): {
+      if (callee == "_Alignof" && arguments)
+        _sx_type_edge(s, owner, _sx_operand_type(arguments.car()),
+          "representation", origin);
       List binding;
       Symbol kind = project_callee(s.c, callee, binding);
       String to = kind == <direct>
@@ -411,13 +424,14 @@ static void _sx_walk(
       return;
     }
     case %((!or sizeof alignof) ?operand): {
-      operand = Ast.without_origin(operand);
-      match (operand) case %(parens ?inner): operand = inner;
-      Type type = project_expression_type(operand);
-      match (operand) case %(decl *parts):
-        type = %(declare @parts).type_from_ast();
+      Type type = _sx_operand_type(operand);
       if (type) _sx_type_edge(s, owner, type, "representation", origin);
     }
+    case %(declare ?base (bindings *rows)):
+      foreach (List row, rows) {
+        Type type = %(declare $base (bindings $row)).type_from_ast();
+        _sx_type_edge(s, owner, type, "body-type", origin);
+      }
     case %(offsetof ?type ?):
       _sx_type_edge(s, owner, type, "representation", origin);
     case %(function *): return;
