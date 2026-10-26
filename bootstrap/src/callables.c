@@ -466,7 +466,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _249 = cons(_246, _248);
   _250 = List_var(_249);
   _251 = Symbol_var(1133019155420);
-  _252 = int_var(4063);
+  _252 = int_var(4058);
   _253 = cons(_252, NULL);
   _254 = cons(_251, _253);
   _255 = List_var(_254);
@@ -620,11 +620,11 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _403 = cons(_402, NULL);
   _404 = cons(_194, _403);
   _405 = List_var(_404);
-  _406 = int_var(53);
+  _406 = int_var(54);
   _407 = cons(_406, NULL);
   _408 = cons(_238, _407);
   _409 = List_var(_408);
-  _410 = int_var(2719);
+  _410 = int_var(2723);
   _411 = cons(_410, NULL);
   _412 = cons(_251, _411);
   _413 = List_var(_412);
@@ -679,11 +679,11 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _462 = cons(_461, NULL);
   _463 = cons(_194, _462);
   _464 = List_var(_463);
-  _465 = int_var(55);
+  _465 = int_var(56);
   _466 = cons(_465, NULL);
   _467 = cons(_238, _466);
   _468 = List_var(_467);
-  _469 = int_var(2783);
+  _469 = int_var(2787);
   _470 = cons(_469, NULL);
   _471 = cons(_251, _470);
   _472 = List_var(_471);
@@ -1370,7 +1370,7 @@ static int f8_adapters____is_func_adapter_target(Compiler c, Type type){
 }
 
 static List _direct_func_adapter(Compiler c, Type diagnostic_type, List source_binding, Type source_type){
-  Type key_type = Type_canonicalize(source_type);  List key = cons(_311, cons(List_var(source_binding), cons(List_var(key_type), NULL)));  List adapter = NULL;  Var _x2c_gensym_macro_cached_0;  if(Map_try_get(c -> names -> adapters, List_var(key), &(_x2c_gensym_macro_cached_0))) adapter = Var_list_payload(_x2c_gensym_macro_cached_0);  else{
+  Type key_type = Type_canonicalize(source_type);  List key = cons(_311, cons(List_var(source_binding), cons(List_var(key_type), NULL))), adapter = NULL;  Var _x2c_gensym_macro_cached_0;  if(Map_try_get(c -> names -> adapters, List_var(key), &(_x2c_gensym_macro_cached_0))) adapter = Var_list_payload(_x2c_gensym_macro_cached_0);  else{
     {
       List target = _func_bound(source_type, source_binding);  adapter = _build_func_adapter(c, diagnostic_type, source_type, target, NULL, NULL, NULL);
     }

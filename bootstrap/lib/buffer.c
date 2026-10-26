@@ -255,7 +255,7 @@ Buffer Buffer_push(Buffer buf){
 }
 
 Buffer Buffer_pop(Buffer buf){
-  if(Block_truth(buf -> indents)) Block_try_pop(buf -> indents, NULL);
+  Block_try_pop(buf -> indents, NULL);
   return buf;
 }
 
@@ -381,8 +381,8 @@ void Buffer_move_to(Buffer buf, Scope * scope){
 
 void Buffer_free(Buffer buf){
   if(buf == NULL) return;
-  if(buf -> content != NULL) Block_free(buf -> content);
-  if(buf -> indents != NULL) Block_free(buf -> indents);
+  Block_free(buf -> content);
+  Block_free(buf -> indents);
   xfree(buf);
 }
 

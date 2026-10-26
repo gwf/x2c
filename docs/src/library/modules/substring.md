@@ -28,7 +28,7 @@ Borrowed immutable views of String bytes.
 
 Returns a borrowed immutable view of the requested byte range.
 
-Source: `lib/substring.x:28`
+Source: `lib/substring.x:29`
 
 ### `Substring`
 
@@ -39,7 +39,7 @@ Source: `lib/substring.x:28`
 
 Compares contents in bytewise lexical order.
 
-Source: `lib/substring.x:47`
+Source: `lib/substring.x:48`
 
 <a id="Substring.equal"></a>
 #### Substring.equal
@@ -48,7 +48,7 @@ Source: `lib/substring.x:47`
 
 Compares contents without materializing either view.
 
-Source: `lib/substring.x:40`
+Source: `lib/substring.x:41`
 
 <a id="Substring.hash"></a>
 #### Substring.hash
@@ -57,7 +57,7 @@ Source: `lib/substring.x:40`
 
 Hashes the referenced bytes, independent of their source or offset.
 
-Source: `lib/substring.x:35`
+Source: `lib/substring.x:36`
 
 <a id="Substring.len"></a>
 #### Substring.len
@@ -66,7 +66,7 @@ Source: `lib/substring.x:35`
 
 Returns the byte length without allocating.
 
-Source: `lib/substring.x:32`
+Source: `lib/substring.x:33`
 
 <a id="Substring.new"></a>
 #### Substring.new
@@ -85,7 +85,7 @@ Source: `lib/substring.x:20`
 Materializes a canonical String in the active pool. Repeated conversion
 reuses the canonical value. The result follows its actual owning pool.
 
-Source: `lib/substring.x:59`
+Source: `lib/substring.x:60`
 
 <a id="Substring.string"></a>
 #### Substring.string
@@ -94,7 +94,7 @@ Source: `lib/substring.x:59`
 
 Materializes the same canonical String as str().
 
-Source: `lib/substring.x:64`
+Source: `lib/substring.x:65`
 
 <a id="Substring.try_next"></a>
 #### Substring.try_next
@@ -105,7 +105,7 @@ Yields the next word view. Start the caller-owned cursor at zero. The
 source must stay live; exhaustion leaves cursor and out unchanged.
 foreach (Substr word in source) uses this allocation-free cursor.
 
-Source: `lib/substring.x:70`
+Source: `lib/substring.x:71`
 
 ## Public types
 

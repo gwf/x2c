@@ -403,7 +403,7 @@ Registrations and records created by that callback are reclaimed toward
 the saved heights before the interrupted unwind continues. State the
 callback itself removed is not reconstructed.
 
-Source: `lib/error/handlers.x:500`
+Source: `lib/error/handlers.x:498`
 
 <a id="Error.restore_landing"></a>
 #### Error.restore_landing
@@ -470,7 +470,7 @@ Handlers newer than `saved_head` are reclaimed. Records at and above
 `stack_height` are also reclaimed; pass the current height on normal frame
 exit to preserve collected errors.
 
-Source: `lib/error/handlers.x:488`
+Source: `lib/error/handlers.x:487`
 
 <a id="Error.unwind_head"></a>
 #### Error.unwind_head

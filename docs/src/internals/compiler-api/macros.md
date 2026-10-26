@@ -379,7 +379,7 @@ Resolves a stored macro invocation marker to its source token.
 Nested template markers use the active expansion's invocation; unresolved
 markers return NULL.
 
-Source: `src/macros/expansion.x:238`
+Source: `src/macros/expansion.x:235`
 
 <a id="Compiler.macro_pattern_at"></a>
 #### Compiler.macro_pattern_at
@@ -633,7 +633,7 @@ Source: `src/macros/templates.x:271`
 Reports that the meta call `source` failed with `error` at
 `invocation`.
 
-Source: `src/macros/diagnostics.x:321`
+Source: `src/macros/diagnostics.x:320`
 
 <a id="Compiler.rewrite"></a>
 #### Compiler.rewrite
@@ -788,7 +788,7 @@ Returns NULL without consuming a macro hole or an invocation that
 deferred `(seq (macro-invoke ...))`, and ordinary parsing returns the bound
 expansion.
 
-Source: `src/macros/invocations/targets.x:54`
+Source: `src/macros/invocations/targets.x:53`
 
 <a id="Compiler.watched_step"></a>
 #### Compiler.watched_step

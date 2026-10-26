@@ -121,7 +121,7 @@ A reference reuses the nearest visible tag; a definition or standalone
 forward declaration introduces the tag in the current lexical scope. A
 macro template names its tags as template locals.
 
-Source: `src/symtab/declarations.x:282`
+Source: `src/symtab/declarations.x:280`
 
 <a id="Compiler.begin_semantic_transaction"></a>
 #### Compiler.begin_semantic_transaction
@@ -345,7 +345,7 @@ Source: `src/symtab/namespaces.x:149`
 
 Resolves typedefs or one pointer layer to an aggregate tag, or `NULL`.
 
-Source: `src/symtab/types.x:324`
+Source: `src/symtab/types.x:323`
 
 <a id="Sym.at_file_scope"></a>
 #### Sym.at_file_scope
@@ -384,7 +384,7 @@ Source: `src/symtab/scopes.x:122`
 
 Installs an existing binding with `ast`'s qualifier-preserving type.
 
-Source: `src/symtab/declarations.x:261`
+Source: `src/symtab/declarations.x:259`
 
 <a id="Sym.binding_is_local"></a>
 #### Sym.binding_is_local
@@ -487,7 +487,7 @@ Returns the key a declaration of `key` with type `ast` takes in this
 unit: its file-private or package spelling at file scope, else `key`.
 Retained declarations keep their already resolved spelling.
 
-Source: `src/symtab/declarations.x:50`
+Source: `src/symtab/declarations.x:49`
 
 <a id="Sym.declaring_scope"></a>
 #### Sym.declaring_scope
@@ -672,7 +672,7 @@ Source: `src/symtab/types.x:238`
 
 Reports whether `binding` names a file-scope static of this unit.
 
-Source: `src/symtab/declarations.x:106`
+Source: `src/symtab/declarations.x:105`
 
 <a id="Sym.is_map_type"></a>
 #### Sym.is_map_type
@@ -945,7 +945,7 @@ Compares only List rest conventions in corresponding callable positions,
 including callback parameters and returned function pointers. Native C
 checking owns other type differences, but cannot see this convention.
 
-Source: `src/symtab/types.x:341`
+Source: `src/symtab/types.x:340`
 
 <a id="Sym.scope_count"></a>
 #### Sym.scope_count
@@ -1035,7 +1035,7 @@ name a template keeps reaches the global there, and returns them.
 Locals of other scopes keep their spellings for the native macros that
 name them.
 
-Source: `src/symtab/declarations.x:240`
+Source: `src/symtab/declarations.x:238`
 
 <a id="Sym.var_tag_for_type"></a>
 #### Sym.var_tag_for_type

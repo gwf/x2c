@@ -326,8 +326,8 @@ Source: `lib/buffer.x:120`
 `char Buffer.get(Buffer buf, ptrdiff_t index)`
 
 Returns the byte at `index`, or NUL when `index` is out of range.
-Prefer `Buffer.try_get` to distinguish an out-of-range index from a NUL
-byte.
+Stored bytes are never NUL. Prefer `Buffer.try_get` to also report
+whether the index is present.
 
 Source: `lib/buffer.x:249`
 
