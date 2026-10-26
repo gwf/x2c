@@ -112,7 +112,8 @@ int Frontend.open_reporting(Frontend f, String filename, ParsedUnit &unit) {
 
 /** Opens an empty submission unit with the ordinary runtime prelude. The
     caller must close the unit on either result; submissions and inspection
-    results borrow its Context. */
+    results borrow its Context.
+*/
 int Frontend.open_session(Frontend frontend, ParsedUnit &unit) =>
   (Compiler.stage_meta_in_process(), 1) && _start(
     frontend, NULL, unit, _unit_context(),
@@ -476,7 +477,8 @@ static void _share_session(Compiler cpp, Compiler c) {
     before any unit opens. Units, and the workers a translation forks, then
     replay them from the process cache. The collection runs as an empty
     unit, whatever dump or symbol mode the request selects. Returns zero
-    after reporting a failure. */
+    after reporting a failure.
+*/
 int Frontend.load_prelude(Frontend frontend) {
   struct CliRequest request = *frontend.request;
   request.dump = 0;
