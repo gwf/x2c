@@ -629,11 +629,12 @@ the `via` evidence before concluding that making the type opaque is safe.
 Structural patterns use the existing Match grammar as datum text. Test a
 pattern on one selected entity before omitting `select` to search all saved
 ASTs. Provenance wrappers do not obstruct ordinary matching. `inside` accepts
-`loop` or a canonical AST head. Binding filters refer to resolved names or IDs.
+`loop` or a canonical AST head. Binding filters refer to resolved names or IDs. `callee` restricts that
+filter to a call target, while `binding` considers the matched subtree.
 Type filters use canonical datum text.
 
 ```json
-{"op":"match","select":{"name":"snapshot_entry"},"pattern":"(expr ?type (call ?callee (args *args)))","inside":"loop","binding":"snapshot_leaf","argument_type":"(* struct \"SnapshotValue\")"}
+{"op":"match","select":{"name":"snapshot_entry"},"pattern":"(expr ?type (call ?callee (args *args)))","inside":"loop","callee":"snapshot_leaf","argument_type":"(* struct \"SnapshotValue\")"}
 ```
 
 Matches return captures rather than evaluating query code. Available filters

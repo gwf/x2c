@@ -115,12 +115,12 @@ def saved_queries(p, snapshot):
 
     pattern = "(expr ?type (call ?callee (args *args)))"
     matches = p.query(snapshot, op="match", select={"name": "snapshot_entry"},
-                      pattern=pattern, inside="loop", binding="snapshot_leaf")
+                      pattern=pattern, inside="loop", callee="snapshot_leaf")
     assert matches["total"] == 1, matches
     assert matches["results"][0]["captures"], matches
     assert matches["results"][0].get("line"), matches
     typed = p.query(snapshot, op="match", select={"name": "snapshot_entry"},
-                    pattern=pattern, inside="loop", binding="snapshot_leaf",
+                    pattern=pattern, inside="loop", callee="snapshot_leaf",
                     argument_type='(* struct "SnapshotValue")')
     assert typed["total"] == 1, typed
     page = p.query(snapshot, op="find", where={"kind": "function"}, limit=1)
