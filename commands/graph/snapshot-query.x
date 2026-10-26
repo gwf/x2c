@@ -12,7 +12,7 @@ String snapshot_text(Var value);
 Var snapshot_value(String text);
 
 typedef struct SnapshotQuery {
-  Map snapshot, entities_by_id, reachable;
+  Map snapshot, entities_by_id, reachable, outgoing, incoming, bindings;
   Array entities, edges;
 } SnapshotQuery;
 
@@ -35,21 +35,41 @@ static String _sq_string(Var value, String field) {
   return value;
 }
 
-/* JSON has a deterministic spelling, including object key order. Sorting
-   their spellings keeps equal occurrence rows rather than merging them. */
-static Array _sq_sorted(Array rows) {
-  Array spellings = [], result = [];
-  foreach (Var row, rows) spellings.push(row.json());
-  spellings.sort();
-  foreach (String spelling, spellings) result.push(Json.parse(spelling));
-  return result;
+/* sort_by computes each key once and preserves the original records. */
+static Array _sq_sorted(Array rows) =>
+  rows.copy().sort_by(%!(Var row) => row.json());
+
+static void _sq_append(Map index, String key, Var value) {
+  if (!index.contains(key)) index[key] = [];
+  index[key].array().push(value);
 }
 
+static String _sq_binding_key(Map entity, String binding) =>
+  %"$(entity["domain"])::$(entity["unit"])::$binding";
+
 static SnapshotQuery _sq_open(Map snapshot) {
-  SnapshotQuery q = {snapshot, {}, {}, snapshot["entities"],
-                     _sq_sorted(snapshot["edges"])};
-  foreach (Map entity, q.entities) q.entities_by_id[entity["id"]] = entity;
+  SnapshotQuery q = {.snapshot = snapshot, .entities_by_id = {},
+    .reachable = {}, .bindings = {}, .entities = snapshot["entities"],
+    .edges = snapshot["edges"]};
+  foreach (Map entity, q.entities) {
+    q.entities_by_id[entity["id"]] = entity;
+    if (entity["binding"])
+      _sq_append(q.bindings, _sq_binding_key(entity, entity["binding"]),
+        entity);
+  }
   return q;
+}
+
+/* Build indexes only for queries which follow relationships. */
+static void _sq_index_edges(SnapshotQuery &q) {
+  if ((void *) q.outgoing) return;
+  q.outgoing = {};
+  q.incoming = {};
+  foreach (Map edge, _sq_sorted(q.edges)) {
+    String from = edge["from"], to = edge["to"];
+    if (from) _sq_append(q.outgoing, from, edge);
+    if (to) _sq_append(q.incoming, to, edge);
+  }
 }
 
 static int _sq_equal(Var left, Var right) => left.json() == right.json();
@@ -83,7 +103,7 @@ static Array _sq_select(SnapshotQuery &q, Map selector) {
   Array selected = [];
   foreach (Map entity, q.entities)
     if (_sq_filter(q, entity, selector)) selected.push(entity);
-  return _sq_sorted(selected);
+  return selected.sort_by(%!(Map entity) => entity["id"]);
 }
 
 /* Each predecessor retains the actual occurrence edge used by this search. */
@@ -96,12 +116,15 @@ static Map _sq_walk(
     distances[id] = 0;
     pending.push(id);
   }
+  _sq_index_edges(q);
   int inward = _sq_inward(request), limit = _sq_depth(request);
+  Map adjacency = inward ? q.incoming : q.outgoing;
   for (int index = 0; index < pending.len(); index++) {
     String id = pending[index];
     int depth = distances[id];
     if (depth == limit) continue;
-    foreach (Map edge, q.edges) {
+    if (!adjacency.contains(id)) continue;
+    foreach (Map edge, adjacency[id].array()) {
       if (!_sq_relation(edge, request)) continue;
       String source = edge[inward ? "to" : "from"];
       String target = edge[inward ? "from" : "to"];
@@ -309,14 +332,11 @@ static int _sq_binding(
   List current;
   $ast.walk(node, current) match (current) {
     case %(binding ? ?name): {
-      String spelling = snapshot_text(current);
-      foreach (Map candidate, q.entities) {
-        if (candidate["domain"] != entity["domain"] ||
-            candidate["unit"] != entity["unit"] ||
-            candidate.getdefault("binding", "") != spelling) continue;
+      String key = _sq_binding_key(entity, snapshot_text(current));
+      if (!q.bindings.contains(key)) continue;
+      foreach (Map candidate, q.bindings[key].array())
         if (candidate["id"] == wanted || candidate["name"] == wanted)
           return 1;
-      }
     }
   }
   return 0;
@@ -389,7 +409,7 @@ static Map _sq_location(List origin, Map entity) {
 }
 
 static void _sq_match_entity(
-  SnapshotQuery &q, Map entity, Map request, Var pattern, Array rows) {
+  SnapshotQuery &q, Map entity, Map request, MatchPlan pattern, Array rows) {
   String text = entity.getdefault("ast", NULL);
   if (!text) return;
   Array pending = [$(snapshot_value(text), (List) NULL, (List) NULL)];
@@ -412,8 +432,10 @@ static void _sq_match_entity(
       }
     }
     List structural = _sq_structure(node, structures), captures;
-    if (_sq_node_filter(q, entity, structural, parents, request) &&
-        structural.try_match(pattern, captures)) {
+    int matched = pattern.try_match(structural, captures);
+    if (matched < 0) _sq_error("structural matching failed");
+    if (matched == 1 &&
+        _sq_node_filter(q, entity, structural, parents, request)) {
       Map row = _sq_location(origin, entity), bindings = {};
       foreach (List binding, captures)
         bindings[binding.car().str()] = snapshot_text(binding.cadr());
@@ -434,7 +456,11 @@ static void _sq_match_entity(
 }
 
 static Array _sq_match(SnapshotQuery &q, Map request) {
-  Var pattern = snapshot_value(_sq_string(request["pattern"], "pattern"));
+  Var value = snapshot_value(_sq_string(request["pattern"], "pattern"));
+  MatchPlan pattern = auto MatchPlan.prepare(value);
+  if (pattern.status == <malformed>) _sq_error("malformed Match pattern");
+  if (pattern.status == <ineligible>)
+    MatchPlan.raise_ineligible(pattern.reason, "graph query");
   Map selector = request.contains("select")
     ? _sq_object(request["select"], "select") : {};
   Map where = request.contains("where")
