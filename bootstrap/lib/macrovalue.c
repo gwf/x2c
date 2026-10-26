@@ -32,7 +32,6 @@ MacroCaseSite;
 #include "array/array.h"
 #include "atom.h"
 #include "list/list.h"
-#include "match/match.h"
 #include "meta.h"
 #include "string/string.h"
 #include "var/var.h"

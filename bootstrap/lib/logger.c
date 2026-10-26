@@ -818,7 +818,6 @@ static void _unlink_sink(Logger logger, LogSink sink){
 }
 
 static void _retire_sink(LogSink sink){
-  if(! sink) return;
   if(sink -> destroy) sink -> destroy(sink -> data);
   sink -> prev = sink -> next = NULL;
   sink -> emit = NULL;
@@ -937,7 +936,6 @@ static LogSink _add_text_sink(Logger logger, File file, int color, int flush_eac
 
 static void _emit_text(Logger logger, const LogEvent * event, Var data){
   LogTextSink context = Var_logtextsink(data);
-  if(! logger || ! context || ! context -> file || context -> depth < 0) return;
   if(context -> depth ==(int) context -> scratch -> length) _add_scratch(logger, context);
   Buffer * buffers = context -> scratch -> bytes;
   Buffer out = Buffer_clear(buffers[context -> depth]);
@@ -1094,7 +1092,6 @@ static void _write_start_time(Buffer out, long long wall_time_us, int color){
 Buffer Var_write_repr(Var, Buffer);
 
 static void _write_field(Buffer out, List field, int color){
-  if(! List_truth(field)) return;
   Var key, value;
   List _x2c_gensym_destructure_0 = field;
   key = List_getindex(_x2c_gensym_destructure_0, 0);

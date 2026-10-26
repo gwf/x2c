@@ -1406,9 +1406,9 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _42 = String_new("local decorators cannot target ");
   _43 = String_new(" syntax");
   _44 = String_new("parenthesized macro body requires Expression result or target");
-  _45 = String_new("'=> expression;'");
-  _46 = String_new("'{ ... }' or '=> expression;'");
-  _47 = String_new("'{ ... }'");
+  _45 = String_new("'{ ... }'");
+  _46 = String_new("'=> expression;'");
+  _47 = String_new("'{ ... }' or '=> expression;'");
   _48 = String_new(" macro body requires ");
   _49 = Symbol_var(39266);
   _50 = Symbol_var(41184168);
@@ -2479,7 +2479,9 @@ static Symbol _target_kind(Definition * d){
 }
 
 static void f19_definitions_reading____body_error(Definition * d){
-  String form = f19_definitions_reading____has_expression_body(&((* d))) ? _45 :(* d).kind == 168163805864282 ? _46 : _47;
+  String form = _45;
+  if(f19_definitions_reading____has_expression_body(&((* d)))) form = _46;
+  else if((* d).kind == 168163805864282) form = _47;
   Compiler_report_error((* d).c, 33658058, ({
     Var _x2c_gensym_literal_part_0 = String_var(_kind_spelling((* d).kind));  String_join(NULL, cons(_x2c_gensym_literal_part_0, cons(String_var(_48), cons(String_var(form), NULL))));
   }

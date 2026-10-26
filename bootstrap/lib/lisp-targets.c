@@ -4253,7 +4253,7 @@ static String f10_algorithms____string(Var value, String operation){
     Var _x2c_gensym_literal_part_0 = String_var(operation);
     Var _x2c_gensym_literal_part_1 = Symbol_var(Var_tag(value));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/lisp-targets/algorithms.x",.function = "f10_algorithms____string",.line = 25,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/lisp-targets/algorithms.x",.function = "f10_algorithms____string",.line = 21,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_0, 4477479911782, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(74754136), _x2c_gensym_literal_part_1, Symbol_var(1510312), Symbol_var(1318210446));
       __builtin_unreachable();
     }
@@ -4269,7 +4269,7 @@ static List f10_algorithms____list(Var value, String operation){
     Var _x2c_gensym_literal_part_2 = String_var(operation);
     Var _x2c_gensym_literal_part_3 = Symbol_var(Var_tag(value));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/lisp-targets/algorithms.x",.function = "f10_algorithms____list",.line = 32,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/lisp-targets/algorithms.x",.function = "f10_algorithms____list",.line = 28,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_1, 4477479911782, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_2, Symbol_var(74754136), _x2c_gensym_literal_part_3, Symbol_var(1510312), Symbol_var(806120));
       __builtin_unreachable();
     }
@@ -4468,7 +4468,7 @@ List List_search_replace(List, Var, Var);
 Var lisp_search_replace(Var input, Var pat, Var template){
   if(! _init_guard_) _file_init_();
   List list = f10_algorithms____list(input, _1);
-  if(f10_algorithms____nil(lisp_match(input, pat))) return List_var(List_search_replace(list, pat, template));
+  if(f10_algorithms____nil(List_var(List_match(list, pat)))) return List_var(List_search_replace(list, pat, template));
   return lisp_match_replace(list, pat, template);
 }
 

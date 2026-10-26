@@ -7133,11 +7133,11 @@ static List f11_conversions____convert_untyped(Compiler c, List expr, Type decla
 }
 
 static List f11_conversions____convert_known_value(Compiler c, List expr, Type type, Type target, int type_is_var, int target_is_var){
-  List reference = f11_conversions____convert_reference(c, expr, type, target);  if(List_truth(reference)) return reference;  if(List_truth(({ static MatchCaptureSite _x2c_gensym_match_site_19;  x2c_match_site_match(& _x2c_gensym_match_site_19, Type_list(type), List_var(_3392)); }))){
-    List string = f11_conversions____raw_string_to_string(c, expr);  if(Sym_is_string_type(c -> sym, target)) return({
+  List reference = f11_conversions____convert_reference(c, expr, type, target);  if(List_truth(reference)) return reference;  if(List_truth(({ static MatchCaptureSite _x2c_gensym_match_site_19;  x2c_match_site_match(& _x2c_gensym_match_site_19, Type_list(type), List_var(_3392)); })) &&(target_is_var || Sym_is_string_type(c -> sym, target))){
+    List string = f11_conversions____raw_string_to_string(c, expr);  if(target_is_var) return cons(_0, cons(_3367, cons(List_var(cons(_625, cons(_3394, cons(List_var(cons(_133, cons(List_var(string), NULL))), NULL)))), NULL)));  return({
       Var _x2c_gensym_literal_part_180 = List_var(target);  Var _x2c_gensym_literal_part_181 = List_caddr(string);  cons(_0, cons(_x2c_gensym_literal_part_180, cons(_x2c_gensym_literal_part_181, NULL)));
     }
-    );  if(target_is_var) return cons(_0, cons(_3367, cons(List_var(cons(_625, cons(_3394, cons(List_var(cons(_133, cons(List_var(string), NULL))), NULL)))), NULL)));
+    );
   }
   if(type_is_var && ! target_is_var){
     List reader = f11_conversions____read_var(c, expr, type, target);  if(List_truth(reader)) return reader;

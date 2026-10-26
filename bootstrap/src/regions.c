@@ -1717,7 +1717,7 @@ static Fact _slot(Walk * w, Var argument){
 }
 
 static Fact _new_fact(Walk * w, List binding, int param){
-  Fact fact = xcalloc(1, sizeof(struct Fact));  * fact =(struct Fact){
+  Fact fact = xmalloc(sizeof(struct Fact));  * fact =(struct Fact){
     .depth =(* w).depth, .origin =(* w).origin, .param = param
   }
   ;  if(List_truth(binding)) Map_setindex((* w).facts, List_var(binding), Fact_var(fact));  return fact;
@@ -1754,7 +1754,7 @@ static int _empty(Var value){
 
 static Region _owner(Walk * w, Fact slot){
   if(! slot || slot -> param >= 0) return NULL;  if(! slot -> owner){
-    slot -> owner = xcalloc(1, sizeof(struct Region));  * slot -> owner =(struct Region){
+    slot -> owner = xmalloc(sizeof(struct Region));  * slot -> owner =(struct Region){
       26155096, slot -> depth, slot -> origin
     }
     ;
@@ -1774,7 +1774,7 @@ static void _move(Fact fact, Region region){
 }
 
 static Region _open_region(Walk * w, Symbol kind, Fact slot){
-  Region region = xcalloc(1, sizeof(struct Region));  * region =(struct Region){
+  Region region = xmalloc(sizeof(struct Region));  * region =(struct Region){
     kind, (* w).depth, (* w).origin, 0, slot, (* w).open
   }
   ;  return(* w).open = region;
@@ -1929,7 +1929,7 @@ static List _parameter_types(Var call){
 
 static Var _passed(List types, List arguments, int index, Type * type){
   Var argument = List_getindex(arguments, index);
-  Var declared = index < List_len(types) ? List_getindex(types, index) :((void) 0, Void);
+  Var declared = List_getindex(types, index);
   (* type) = Var_is_row(declared, 9, 7, 4) ? List_type(Var_list(declared)) : NULL;
   if(! Type_is_reference((* type))) return argument;
   Type given = List_type(_expression_type(argument));
