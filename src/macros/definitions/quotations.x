@@ -262,9 +262,9 @@ static List _built_item(
   match (item) {
     case %(at m-origin ?node): item = $("x2c.at", node);
     case %(expr (<macro-expr>) ?binder):
-      if (keys.try_get(binder, row) && row is <list>)
-        match (row) case %((macro-param ? (kind expr) ?) expression):
-          return _built_hole(c, row, 1, start);
+      if (keys.try_get(binder, row) && row is <list> &&
+          row ~= %((macro-param ? (kind expr) ?) expression))
+        return _built_hole(c, row, 1, start);
   }
   List cells = _built_cells(c, item, keys, start);
   return cells ? %(expr ("List") $cells) : NULL;
@@ -325,7 +325,7 @@ static List _typed_construction(Definition &d, Map holes) {
    they are written, as a typed quotation builds its expression. */
 static List _part_construction(Definition &d) {
   Map keys = _written_keys(d);
-  match (d.rebuild.car()) case %(macro-bind ?binder):
+  if (d.rebuild.car() ~= %(macro-bind ?binder))
     return _typed_hole(d.c, keys[binder], d.start);
   return %(expr ("List") $(_typed_cells(d.c, d.rebuild.car(), keys, d.start)));
 }
