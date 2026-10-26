@@ -21,11 +21,13 @@ static macro Expression $note.meta_sdk_value_notes(Expr $value) =>
 module MetaContext active;
 
 /** Returns the context of the running compile-time call, which an
-    evaluation changes with `with` for its own extent. */
+    evaluation changes with `with` for its own extent.
+*/
 MetaContext *MetaContext.current(void) => &active;
 
 /** Returns the compiler running the current compile-time call. A slot
-    function compiled into the compiler reads its facts through it. */
+    function compiled into the compiler reads its facts through it.
+*/
 Compiler Compiler.expanding(void) =>
   active.expander ? active.expander : active.evaluator;
 
@@ -73,7 +75,8 @@ void x2c_diagnostic_error_at(
 }
 
 /** A warning reports where it is raised and returns, so a macro can keep
-   expanding. Failure stays separate because it never returns. */
+   expanding. Failure stays separate because it never returns.
+*/
 void x2c_diagnostic_warn(String message, List notes) {
   _check_notes("x2c_diagnostic_warn", notes);
   active.expander.report_warning(
@@ -91,7 +94,8 @@ static void _check_notes(String operation, List notes) {
 
 /** Reports `message` and `notes` at the active invocation and never
     returns, so the rejected operation's caller cannot continue with a
-    missing answer. With no active invocation it is a bad state. */
+    missing answer. With no active invocation it is a bad state.
+*/
 void MetaContext.reject(String message, List notes) {
   Compiler c = active.evaluator;
   if (c) c.report_error(<macro>, message, active.site, notes);
