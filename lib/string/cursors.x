@@ -8,13 +8,11 @@
     line-ending scans.
 */
 
-
 /** Describes an immutable, repeatable lazy traversal of a borrowed `String`.
     The descriptor is `Scope`-owned and keeps no position; each caller or
-    `Iter`
-    keeps its own cursor. The input and separator are not retained, so their
-    actual `String` pools must remain live through every traversal. No cleanup
-    is needed before the descriptor's `Scope` is released.
+    `Iter` keeps its own cursor. The input and separator are not retained, so
+    their actual `String` pools must remain live through every traversal. No
+    cleanup is needed before the descriptor's `Scope` is released.
 */
 typedef struct Split *Split;
 
@@ -79,9 +77,8 @@ static inline int _line_end(String str, int start, int keep_ends, int &next) {
 /** Splits `str` at no more than `max_splits` separators.
     A negative limit splits every occurrence; zero returns `str` as one field.
     A null `str` returns `nil`. A null or empty `sep` returns `str` as one
-    field.
-    The canonical fields and `List` remain live until their actual `String` and
-    `List` pools are released.
+    field. The canonical fields and `List` remain live until their actual
+    `String` and `List` pools are released.
     Raises: `<alloc-fail>` or `<size-limit>` while constructing the result.
 */
 meta native List String.split_n(String str, String sep, int max_splits) {
@@ -105,8 +102,7 @@ meta native List String.split_n(String str, String sep, int max_splits) {
     An empty field is the empty `String`, the null pointer. An empty or null
     `sep` yields a one-element `List` holding `str`, and splitting the empty
     `String` yields the empty `List`. The canonical fields and `List` remain
-    live
-    until their actual `String` and `List` pools are released.
+    live until their actual `String` and `List` pools are released.
 
     ```x2c
     printf("%s\n", "a:b:c".split(":").repr());
@@ -122,8 +118,7 @@ meta native List String.split(String str, String sep) => str.split_n(sep, -1);
     line ending does not produce a final empty line, so text that ends in a
     newline yields as many lines as it has endings. A null or empty `str`
     returns `nil`. The canonical fields and `List` remain live until their
-    actual
-    `String` and `List` pools are released.
+    actual `String` and `List` pools are released.
     Raises: `<alloc-fail>` or `<size-limit>` while constructing fields or the
     result.
 */
@@ -147,7 +142,7 @@ static Split _new(
 }
 
 static int _words_next(Split split, int *cursor, String *out) {
-  if (!split || !split.str) return 0;
+  if (!split.str) return 0;
   const char *p = split.str, int length = split.str.len(), index = *cursor;
   while (index < length && isspace((unsigned char) p[index])) index++;
   if (index >= length) return 0;
@@ -160,7 +155,7 @@ static int _words_next(Split split, int *cursor, String *out) {
 }
 
 static int _lines_next(Split split, int *cursor, String *out) {
-  if (!split || !split.str) return 0;
+  if (!split.str) return 0;
   int start = *cursor, next, end = _line_end(split.str, start, 0, next);
   if (end < 0) return 0;
   String field = String.new_len(split.str + start, end - start);
@@ -170,7 +165,7 @@ static int _lines_next(Split split, int *cursor, String *out) {
 }
 
 static int _splits_next(Split split, int *cursor, String *out) {
-  if (!split || !split.str) return 0;
+  if (!split.str) return 0;
   int start = *cursor, next;
   int end = _end(split.str, split.sep, start, next);
   if (end < 0) return 0;
@@ -188,8 +183,8 @@ static int _splits_next(Split split, int *cursor, String *out) {
     Each yielded field is a canonical `String`. Distinct fields remain resident
     in the active `String` pool; bracket bulk traversal with `Pool.open` /
     `Pool.close` and promote retained values when that residency should be
-    temporary. The cursor borrows `str`, whose
-    actual owning pool must remain live through traversal.
+    temporary. The cursor borrows `str`, whose actual owning pool must remain
+    live through traversal.
     Raises: `<alloc-fail>` when the cursor descriptor cannot be allocated.
     An empty `String` produces an exhausted cursor.
 */
@@ -203,8 +198,8 @@ meta native Split String.words(String str) => _new(str, NULL, _words_next);
     Each yielded field is a canonical `String`. Distinct fields remain resident
     in the active `String` pool; bracket bulk traversal with `Pool.open` /
     `Pool.close` and promote retained values when that residency should be
-    temporary. The cursor borrows `str`, whose
-    actual owning pool must remain live through traversal.
+    temporary. The cursor borrows `str`, whose actual owning pool must remain
+    live through traversal.
     Raises: `<alloc-fail>` when the cursor descriptor cannot be allocated.
     An empty `String` produces an exhausted cursor.
 */
@@ -218,8 +213,8 @@ meta native Split String.lines(String str) => _new(str, NULL, _lines_next);
     Each yielded field is a canonical `String`. Distinct fields remain resident
     in the active `String` pool; bracket bulk traversal with `Pool.open` /
     `Pool.close` and promote retained values when that residency should be
-    temporary. The cursor borrows `str` and
-    `sep`; both actual owning pools must remain live through traversal.
+    temporary. The cursor borrows `str` and `sep`; both actual owning pools
+    must remain live through traversal.
     Raises: `<alloc-fail>` when the cursor descriptor cannot be allocated.
 */
 meta native Split String.splits(String str, String sep) =>
