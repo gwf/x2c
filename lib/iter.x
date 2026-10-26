@@ -263,8 +263,7 @@ static int _range_general_next(Iter iter, Var *out) {
   if ((step > 0 && current > stop) || (step < 0 && current < stop)) return 0;
   *out = current;
   long long next = (long long) current + step;
-  if ((step > 0 && next > stop) || (step < 0 && next < stop) ||
-      next > INT_MAX || next < INT_MIN)
+  if ((step > 0 && next > stop) || (step < 0 && next < stop))
     iter.next = NULL;
   else iter.state = (int) next;
   return 1;
@@ -688,15 +687,14 @@ static int _unzip_column_next(Iter iter, Var *out) {
 }
 
 static int _unzip_ensure(UnzipShared *shared, int column) {
-  while (shared.heads[column] >= shared.buffers[column].len()) {
-    if (shared.done) return 0;
-    Var pair;
-    if (!shared.source.try_next(pair)) {
-      shared.done = 1;
-      return 0;
-    }
-    _unzip_buffer_push(shared, pair);
+  if (shared.heads[column] < shared.buffers[column].len()) return 1;
+  if (shared.done) return 0;
+  Var pair;
+  if (!shared.source.try_next(pair)) {
+    shared.done = 1;
+    return 0;
   }
+  _unzip_buffer_push(shared, pair);
   return 1;
 }
 
