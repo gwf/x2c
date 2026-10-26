@@ -215,9 +215,8 @@ static List _protocol_update(
   if (!resolved) return NULL;
   if (rhs) {
     List converted = NULL;
-    match (resolved)
-      case %(? ((func (? ?parameter *)) ?)):
-        converted = c.convert_expression(rhs, parameter);
+    if (resolved ~= %(? ((func (? ?parameter *)) ?)))
+      converted = c.convert_expression(rhs, parameter);
     if (!converted) return NULL;
     rhs = converted;
   }
