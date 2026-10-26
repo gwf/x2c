@@ -36,8 +36,7 @@ void Compiler.record_declaration_visibility(Compiler c, List declaration) {
 
 /* A public object definition belongs to this source, including a tentative
    definition. An extern declaration only names its native supplier. */
-static void _record_native_objects(
-  Compiler c, Type spec, List rows) {
+static void _record_native_objects(Compiler c, Type spec, List rows) {
   if (!c.shallow || c.source_private < 0 ||
       !Path.is_x2c_source(c.filename)) return;
   String path = Compiler.portable_path(c.canonical_path(c.filename));
@@ -82,7 +81,8 @@ static void _record_binding_visibility(
 /** Returns the prefix that a file-scope declaration of `type` takes in the
     current module file, or NULL. A static takes it, and so does each
     declaration of a `static typedef` or `static class`; a `module`
-    declaration and every declaration outside a module unit do not. */
+    declaration and every declaration outside a module unit do not.
+*/
 String Compiler.private_prefix(Compiler c, Type type) {
   if (c.module_declaration ||
       !(c.source_private > 0 || (type && type.is_static())))
@@ -96,7 +96,8 @@ String Compiler.private_prefix(Compiler c, Type type) {
     or `Var_second__node` for a private class `second__Node`, stays
     unchanged; it is unique in the unit, so code generated outside the file
     still reaches it. Ordinary source spellings always take their file's
-    prefix, even when they resemble another generated spelling. */
+    prefix, even when they resemble another generated spelling.
+*/
 String Compiler.scoped_spelling(Compiler c, String prefix, String name) {
   if (!prefix) return c.package_spelling(name);
   if (!name || (c.macro_stack && _derived_spelling(c.sym, name)))
@@ -108,7 +109,8 @@ String Compiler.scoped_spelling(Compiler c, String prefix, String name) {
     a spelling that took `prefix` so the names the compiler derives from
     it are known to hold their prefix already. A replayed collected
     declaration was spelled when it was collected, so its names are final
-    and are recorded as they are. */
+    and are recorded as they are.
+*/
 String Compiler.declared_spelling(Compiler c, String prefix, String name) {
   String spelled =
     c.replaying_declaration ? name : c.scoped_spelling(prefix, name);
@@ -142,7 +144,8 @@ List Compiler.file_prefixes(Compiler c) {
 }
 
 /** Returns the source name of a spelling this unit gave a file prefix, or
-    `name`. Var tags and descriptor names use that short name. */
+    `name`. Var tags and descriptor names use that short name.
+*/
 String Compiler.unprefixed(Compiler c, String name) {
   Var bare;
   return c.sym.prefixed.try_get(name, bare) ? bare : name;
