@@ -172,7 +172,7 @@ List Compiler.adapt_lambda_arg(Compiler c, List argument, List expected_type) {
       Macro grouped = $grouped;
       return c.rebuild_expression(expected_type, grouped(adapted));
     }
-    case %(expr ?type $($source_identifier_content(%(?binding)))): {
+    case %(expr ?type (ident ?binding)): {
       cb.source = type;
       cb.source_binding = binding;
     }

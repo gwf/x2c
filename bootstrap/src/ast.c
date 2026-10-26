@@ -11,8 +11,6 @@
 #define __GUARD_0xA7CD7021__
 #include "x2c.h"
 
-typedef List Ast;
-
 #include "error-macros.h"
 #include "ast-rewrite.h"
 #include "grammar.h"

@@ -224,7 +224,7 @@ module Var _helper_result(Compiler c, Var value) {
   match (value) {
     case %((!or macrodef "x2c.quoted") *): return value;
     case %(code-value "lowered" *): return value;
-    case $source_literal_content(%(*)): return value;
+    case %(literal *): return value;
   }
   if (value ~= %("x2c.template" ?stored ?(List values))) {
     stored = _helper_result(c, stored);

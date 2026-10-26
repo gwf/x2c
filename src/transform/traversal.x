@@ -170,7 +170,7 @@ module Ast _finish(Compiler c, Ast ast) {
       return _step(c, %(at $origin (parens $inner)));
     case %(parens (block *body)):
       return %(parens $(_block_node(c, body, 1)));
-    case $source_block_content(%(*body)): return _block_node(c, body, 0);
+    case %(block *body): return _block_node(c, body, 0);
   }
   return _children(c, ast);
 }
@@ -325,13 +325,13 @@ static List _entered_body(
   if (!items) return lowered;
   List deferred = c.rewrite_defer_list(items);
   if (deferred != items) items = _sequence(c, deferred, 0);
-  return source_block_content(items);
+  return %(block @items);
 }
 
 static Ast _defer_node(Compiler c, Ast ast) {
   match (ast)
     case %(defer ?finalizer):
-      return c.lower_defer_region(source_block_content(%()), finalizer);
+      return c.lower_defer_region(%(block), finalizer);
   return ast;
 }
 
@@ -343,7 +343,7 @@ static Ast _block_node(
   List lowered = _sequence(c, body, value_tail);
   List deferred = c.rewrite_defer_list(lowered);
   if (deferred != lowered) lowered = _sequence(c, deferred, value_tail);
-  return source_block_content(lowered);
+  return %(block @lowered);
 }
 
 /* A raise takes its statement rule's replacement. A raise its rules leave

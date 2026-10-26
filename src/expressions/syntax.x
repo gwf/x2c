@@ -16,7 +16,7 @@ static List _parse_expression_tail(Compiler c, List expr) {
   if (c.peek(0) == <,>) {
     expr = cons(expr, _parse_comma_list(c));
     List last = expr.last(), type = last.cadr();
-    return %(expr $type $(source_commas_content(expr)));
+    return %(expr $type (commas @expr));
   }
   return expr;
 }
@@ -50,7 +50,7 @@ static List _parse_assignment_tail(Compiler c, List lhs) {
     case %(expr ?type ?): return %(expr $type (dstrasgn $targets $rhs));
   if (op == <=>) c.check_explicit_converter(rhs, lhs.cadr(), 0);
   return c.resolve_expression(
-    source_operator_expression(NULL, $(op, lhs, rhs)), origin);
+    %(expr () (op $op $lhs $rhs)), origin);
 }
 
 static List _destructure_targets(Compiler c, List lhs) {
@@ -58,7 +58,7 @@ static List _destructure_targets(Compiler c, List lhs) {
     case %(expr ? $($grouped(?target))): {
       if (_destructure_identifier(target)) return %(targets $target);
       match (target)
-        case %(expr ? $($source_commas_content(%(*targets)))): {
+        case %(expr ? (commas *targets)): {
           foreach (List entry in targets) {
             if (_destructure_identifier(entry)) continue;
             $fail.expressions_destructure_target(c, c.token);
@@ -71,9 +71,9 @@ static List _destructure_targets(Compiler c, List lhs) {
 
 static int _destructure_identifier(List expression) {
   match (expression) {
-    case %(expr ? $($source_identifier_content(%(?)))): return 1;
+    case %(expr ? (ident ?)): return 1;
     case %(expr ? $($grouped($dereferenced(%(expr (& *)
-        $($source_identifier_content(%(?)))))))):
+        (ident ?)))))):
       return 1;
   }
   return 0;
@@ -92,8 +92,7 @@ static List _parse_conditional_tail(Compiler c, List condition) {
   List ontrue = c.parse_expression();
   c.expect(<:>);
   return c.resolve_expression(
-    source_operator_expression(
-      NULL, %(? $condition $ontrue $(c.parse_conditional()))), origin);
+    %(expr () (op ? $condition $ontrue $(c.parse_conditional()))), origin);
 }
 
 /** Parses the right operand of a pattern test at relational precedence. */
@@ -367,12 +366,11 @@ static int _c_type_known(Compiler c, List operand) {
   match (operand) {
     case %(expr ? $($grouped(?inner))):
       return _c_type_known(c, inner);
-    case %(expr ? $($source_literal_content(%((char) *)))): return 0;
+    case %(expr ? (literal (char) *)): return 0;
     case %(expr ? $($sizeof_grouped(?operand))): return 0;
     case %(expr ? $($sizeof_expression(?operand))): return 0;
     case %(expr ? (offsetof *)): return 0;
-    case %(expr ? $($source_operator_content(
-        %(- (expr ?left *) (expr ?right *))))): {
+    case %(expr ? (op - (expr ?left *) (expr ?right *))): {
       Type l = left, r = right;
       if ((l.is_pointer() || l.is_array()) && (r.is_pointer() || r.is_array()))
         return 0;
@@ -392,7 +390,7 @@ static List _parse_unary_op(Compiler c) {
   c.next();
   List operand = increment ? _parse_unary_op(c) : _parse_cast(c);
   return c.resolve_expression(
-    source_operator_expression(NULL, $(op, operand)), origin);
+    %(expr () (op $op $operand)), origin);
 }
 
 static List _parse_sizeof(Compiler c) {
@@ -500,11 +498,10 @@ static List _parse_slice(Compiler c, List expr, List start) {
     stop = c.parse_expression();
     if (c.test(<:>) && c.peek(0) != <]>) step = c.parse_expression();
   }
-  if (step && (step ~= %(expr ? $($source_literal_content(%(? "0"))))))
+  if (step && (step ~= %(expr ? (literal ? "0"))))
     $fail.expressions_slice_zero(c, c.token);
   c.expect(<]>);
-  return %(expr $type $(source_slice_content(
-    $(expr, start, stop, step))));
+  return %(expr $type (slice $expr $start $stop $step));
 }
 
 /** Parses an explicit List splice argument, or returns NULL without consuming
@@ -541,11 +538,10 @@ static List _parse_postfix_apply(Compiler c, List expr) {
   List result = c.resolve_expression(
     c.rebuild_expression(NULL, called(expr, supplied)), origin);
   int method = expr ~=
-    %(expr () $($source_operator_content(%(. ? (?)))));
+    %(expr () (op . ? (?)));
   _check_converter_args(c, result, method, notes.list_free());
   if (method && supplied === %((expr (void) ())))
-    match (expr) case %(expr () $($source_operator_content(
-        %(. ? (?name))))):
+    match (expr) case %(expr () (op . ? (?name))):
       _note_explicit_converter(c, result, name.str(), origin);
   return result;
 }
@@ -580,7 +576,7 @@ static List _parse_postfix_arrow(Compiler c, List expr) {
   }
   List field = _parse_field_name(c, <"->">, expr);
   return c.resolve_expression(
-    source_operator_expression(NULL, %(-> $expr $field)), origin);
+    %(expr () (op -> $expr $field)), origin);
 }
 
 static List _parse_postfix_dot(Compiler c, List expr) {
@@ -593,7 +589,7 @@ static List _parse_postfix_dot(Compiler c, List expr) {
     raise %(replcomp (kind <members>) (rows $rows) (keywords ()));
   }
   List field = _parse_field_name(c, <.>, expr);
-  List result = source_operator_expression(NULL, %(. $expr $field));
+  List result = %(expr () (op . $expr $field));
   if (c.peek(0) != <(>)
     return c.resolve_expression(result, origin);
   // Allocate a method identity before parsing its arguments.
@@ -618,7 +614,7 @@ static List _parse_postfix_decinc(Compiler c, List expr) {
   Symbol op = c.peek(0);
   c.next();
   return c.resolve_expression(
-    source_postfix_expression(NULL, $(op, expr)), origin);
+    %(expr () (postfix $op $expr)), origin);
 }
 
 // primary expressions
@@ -713,7 +709,7 @@ List Compiler.parse_variable(Compiler c) {
   Token after = c.token;
   List result = c.resolve_expression(%(expr () (ident $name)), origin);
   if (c.source_facts) match (result)
-    case %(expr ?type $($source_identifier_content(%(?binding)))):
+    case %(expr ?type (ident ?binding)):
       c.record_source_reference(binding, type, origin, after);
   if (c.source_map &&
       (origin.text == "__FILE__" || origin.text == "__LINE__"))
@@ -801,7 +797,7 @@ static List _parse_composite(Compiler c) {
   }
   List elems = _parse_composite_elements(c);
   c.expect(<"}">);
-  return %(expr () $(source_composite_content(elems)));
+  return %(expr () (composite (commas @elems)));
 }
 
 /* An entry that begins with a Map-entry macro, or whose first bracket-level
@@ -899,7 +895,7 @@ static List _parse_va_arg(Compiler c) {
   Type type = NULL;
   List decl = c.parse_type_operand(&type);
   c.expect(<)>);
-  expr = source_va_arg_content($(expr, decl));
+  expr = %(va-arg $expr $decl);
   return %( expr $type $expr );
 }
 
@@ -918,7 +914,6 @@ static List _parse_generic(Compiler c) {
     associations.push(%(association $type $(c.parse_assignment())));
   }
   c.expect(<)>);
-  List selection = source_generic_content(
-    $(control, @(associations.list_free())));
+  List selection = %(generic $control @(associations.list_free()));
   return c.resolve_expression(%(expr () $selection), origin);
 }

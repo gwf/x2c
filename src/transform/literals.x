@@ -66,7 +66,7 @@ static int _part_order(Compiler c, Var part) {
   match (node) {
     case %(!or (cache ?) (literal *) (nil)): return 0;
     case %(expr () (ident ?)): return 2;
-    case $source_identifier_content(%(?)): return 1;
+    case %(ident ?): return 1;
     case %(cons ?head ?tail):
       return _part_order(c, head) || _part_order(c, tail) ? 2 : 0;
     case %(expr ? (call ? (args ?argument))):
@@ -74,7 +74,7 @@ static int _part_order(Compiler c, Var part) {
         ? _part_order(c, argument) : 2;
     case %(!or (expr ? ?inner) (cast ? ?inner) $($grouped(?inner))):
       return _part_order(c, inner);
-    case $source_operator_content(%((!or . (!quote ->)) ?inner ?)): {
+    case %(op (!or . (!quote ->)) ?inner ?): {
       int order = _part_order(c, inner);
       return order > 1 ? order : 1;
     }
@@ -172,8 +172,7 @@ static List _list_cell(List node) {
    where re-entrant string-pool bootstrap can hand back NULL Strings. */
 module Ast _interpolation(Compiler c, Ast ast) {
   match (ast)
-    case $source_string_content(
-        %((segexp (expr ("String") (literal ("String") ?text))))):
+    case %(segments (segexp (expr ("String") (literal ("String") ?text)))):
       if (!c.runtime_literals)
         return c.cache(%(string (expr ("String") (literal ("String") $text))));
   Array rows = [];
@@ -182,7 +181,7 @@ module Ast _interpolation(Compiler c, Ast ast) {
       rows.push($(tag, c.convert_segment_to_string(value)));
     default: rows.push(row);
   }
-  List source = source_string_content(rows.list_free());
+  List source = %(segments @(rows.list_free()));
   List lowered = _shipped_lowering(
     c, <literal>, <segments>, %(expr ("String") $source), <expression>,
     %("String"), "interpolated String");

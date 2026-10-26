@@ -222,8 +222,7 @@ static void _collect_references(Var value, Map references, Array ordered) {
     return;
   }
   match (node)
-    case %(expr (!set ?type (*)) $($source_identifier_content(
-        %((!set ?binding (binding ? ?)))))): {
+    case %(expr (!set ?type (*)) (ident (!set ?binding (binding ? ?)))): {
       if (!type.type().is_function()) {
         if (!(binding in references)) ordered.push(binding);
         references[binding] = 1;

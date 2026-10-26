@@ -8,6 +8,18 @@
 #include "x2c.h"
 #include "common.h"
 #include "macrovalue/macrovalue.h"
+typedef List Ast;
+
+List Ast_return_none(void);
+
+List Ast_lambda_pattern(void);
+
+List Ast_declarator_pattern(List fields);
+
+List Macro_content_pattern(Macro shape, List names);
+
+List Macro_call_content(Macro call, List callee, List arguments);
+
 List source_return_type(List node);
 
 List source_return_none(void);

@@ -132,7 +132,7 @@ static void _embed_reject(Compiler c, String message, String path) {
 
 static int _literal_string(Var syntax, String &value) {
   match (syntax)
-    case %(expr ? $($source_literal_content(%(? ?source)))): {
+    case %(expr ? (literal ? ?source)): {
       if (source is not <string>) break;
       String text = source;
       int quoted = text.len() >= 2 && text[0] == '"' &&

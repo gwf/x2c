@@ -6,12 +6,6 @@
 
 #pragma once
 
-/** Represents one compiler AST node as a canonical immutable `List`.
-    `NULL` denotes no node, and nonempty nodes have the canonical `List`-pool
-    lifetime.
-*/
-typedef List Ast;
-
 #include "error-macros.x"
 #include "ast-rewrite.x"
 #include "grammar.x"
@@ -118,7 +112,7 @@ static List _designated(Var value) {
       case $($grouped(?inner)): value = inner;
       case $($indexed(%(!set ?base (expr ((dim *) *) ?)), ?)):
         value = base;
-      case $source_operator_content(%(. ?base *)): value = base;
+      case %(op . ?base *): value = base;
       default: return node;
     }
   }
@@ -132,7 +126,7 @@ static List _designated(Var value) {
 List Ast.lvalue_binding(Ast ast) {
   List designated = _designated(ast);
   match (designated)
-    case $source_identifier_content(%(?binding)): return binding;
+    case %(ident ?binding): return binding;
   return NULL;
 }
 
@@ -161,9 +155,9 @@ String Ast.addressed_identifier(Var value) {
 String Ast.direct_identifier(Var value) {
   List designated = _designated(value);
   match (designated) {
-    case $source_identifier_content(%(?binding)):
+    case %(ident ?binding):
       return Ast.binding_spelling(binding);
-    case $source_operator_content(%((!quote ->) ?base *)):
+    case %(op (!quote ->) ?base *):
       return Ast.addressed_identifier(base);
     case $($dereferenced(?base)):
       return Ast.addressed_identifier(base);
@@ -181,7 +175,7 @@ String Ast.indirect_identifier(Var value) {
   match (designated) {
     case $($indexed(%(!set ?base (expr ? ?)), ?)):
       return Ast.direct_identifier(base);
-    case $source_operator_content(%((!quote ->) ?base *)):
+    case %(op (!quote ->) ?base *):
       return Ast.direct_identifier(base);
     case $($dereferenced(?base)):
       return Ast.direct_identifier(base);
@@ -195,10 +189,10 @@ String Ast.indirect_identifier(Var value) {
 */
 List Ast.written_operand(Ast node) {
   match (node) {
-    case $source_operator_content(%(?operator ?target *)):
+    case %(op ?operator ?target *):
       if (operator is <symbol> && Symbol.changes_left_operand(operator))
         return target;
-    case $source_postfix_content(%(? ?target)): return target;
+    case %(postfix ? ?target): return target;
   }
   return NULL;
 }
@@ -259,8 +253,7 @@ void Ast.collect_binding_references(Var node, Map referenced) {
   if (node is not <list>) return;
   List syntax = node;
   // A definition's own binder is a `bind`, so a function does not name itself.
-  match (syntax) case $source_identifier_content(
-      %((binding ?identity ?))): {
+  match (syntax) case %(ident (binding ?identity ?)): {
     referenced[identity] = 1;
     return;
   }
@@ -320,9 +313,9 @@ List Ast.entry_call(String entry) =>
 int Ast.reference_guard_exits(List arm) {
   if (Ast.never_returns(arm)) return 1;
   match (arm) {
-    case $source_return_content(%(*)): return 1;
+    case %(return *): return 1;
     case %(at ? ?body): return Ast.reference_guard_exits(body);
-    case $source_block_content(%(*items)):
+    case %(block *items):
       return items && Ast.reference_guard_exits(items.last());
   }
   return 0;
@@ -338,8 +331,7 @@ int Ast.reference_guard_exits(List arm) {
 */
 int Ast.never_returns(Ast ast) {
   match (Ast.without_origin(ast)) {
-    case %(raise (expr ("Symbol") $($source_literal_content(
-              %(("Symbol") ? ?code)))) *):
+    case %(raise (expr ("Symbol") (literal ("Symbol") ? ?code)) *):
       return code in nonreturning_error_causes;
     case %(stmnt (expr ? $($called(%(expr () (ident ?binding)), %(*))))):
       return Ast.binding_spelling(binding) in terminating_calls;

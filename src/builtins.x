@@ -91,7 +91,7 @@ static List _auto_expand(List value) {
 static void _auto_reject_managed(List value) {
   match (value) {
     case %(expr ? $($grouped(?inner))): _auto_reject_managed(inner);
-    case %(expr ? $($source_identifier_content(%(?binding)))): {
+    case %(expr ? (ident ?binding)): {
       Compiler c = Compiler.expanding();
       if (%(managed $binding) in c.semantic_binding_facts())
         _auto_fail(

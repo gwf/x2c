@@ -866,9 +866,9 @@ static List _lambda_returning(List items, List none) {
 static List _lambda_items(Code body) {
   if (body ~= %(block *items))
     return $(
-      @(_lambda_returning(items, source_return_none())), source_return_none());
+      @(_lambda_returning(items, Ast.return_none())), Ast.return_none());
   List items = body ~= %(expr (void) ?)
-    ? %((stmnt $body) $(source_return_none()))
+    ? %((stmnt $body) $(Ast.return_none()))
     : %((stmnt (return $(body.convert(%("Var"))))));
   if (x2c_enclosing(<statement>) ~= %(at ?origin ?))
     return %((at $origin $(items.car())) @(items.cdr()));
@@ -2141,6 +2141,11 @@ static List _try_catch_clause(List handle, List records, Array rows) {
   return $(handle, state, arms.list_free(), @(patterns.list_free()));
 }
 
+static List _try_catch_handle(List node) {
+  if (node ~= %(try ? (catchcases ? ?handle) ?)) return handle;
+  return NULL;
+}
+
 static Code _try_landing(
   Code node, List body, List arms, List finalizer) {
   _try_check_label(finalizer);
@@ -2148,7 +2153,7 @@ static Code _try_landing(
   Atom exits = Atom.intern("?__try_exits");
   Atom lowered = Atom.intern("?__try_body");
   Atom finished = NULL;
-  List handle = arms ? source_catch_handle(node) : NULL;
+  List handle = arms ? _try_catch_handle(node) : NULL;
   Array rows = [%(new-name $frame "exception_frame")];
   if (finalizer) {
     Atom departure = Atom.intern("?__try_departure");
@@ -2379,6 +2384,7 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_try_departure", _try_departure);
   $linked.row(rows, "_try_exits", _try_exits);
   $linked.row(rows, "_try_catch_clause", _try_catch_clause);
+  $linked.row(rows, "_try_catch_handle", _try_catch_handle);
   $linked.row(rows, "_try_landing", _try_landing);
   $linked.row(rows, "try_lowering", try_lowering);
   $linked.row(rows, "_operator_rows", _operator_rows);
@@ -2428,31 +2434,11 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_x2c_try_landing", _x2c_try_landing);
   $linked.row(rows, "_x2c_field_copies", _x2c_field_copies);
   $linked.row(rows, "_x2c_field_sets", _x2c_field_sets);
-  $linked.row(rows, "source_return_type", source_return_type);
-  $linked.row(rows, "source_return_none", source_return_none);
-  $linked.row(rows, "source_conditional_statement", source_conditional_statement);
-  $linked.row(rows, "source_any_lambda", source_any_lambda);
-  $linked.row(rows, "source_cast_content", source_cast_content);
-  $linked.row(rows, "source_generic_content", source_generic_content);
-  $linked.row(rows, "source_va_arg_content", source_va_arg_content);
-  $linked.row(rows, "source_commas_content", source_commas_content);
-  $linked.row(rows, "source_slice_content", source_slice_content);
-  $linked.row(rows, "source_composite_content", source_composite_content);
-  $linked.row(rows, "source_string_content", source_string_content);
-  $linked.row(rows, "source_operator_content", source_operator_content);
-  $linked.row(rows, "source_operator_expression", source_operator_expression);
-  $linked.row(rows, "source_postfix_content", source_postfix_content);
-  $linked.row(rows, "source_postfix_expression", source_postfix_expression);
-  $linked.row(rows, "source_content_pattern", source_content_pattern);
-  $linked.row(rows, "source_call_content", source_call_content);
-  $linked.row(rows, "source_return_content", source_return_content);
-  $linked.row(rows, "source_block_content", source_block_content);
-  $linked.row(rows, "source_identifier_content", source_identifier_content);
-  $linked.row(rows, "source_literal_content", source_literal_content);
-  $linked.row(rows, "source_declarator_row", source_declarator_row);
-  $linked.row(rows, "source_expression", source_expression);
-  $linked.row(rows, "source_catch_handle", source_catch_handle);
-  $linked.row(rows, "source_retain_catch_handle", source_retain_catch_handle);
+  $linked.row(rows, "Ast_return_none", Ast_return_none);
+  $linked.row(rows, "Ast_lambda_pattern", Ast_lambda_pattern);
+  $linked.row(rows, "Ast_declarator_pattern", Ast_declarator_pattern);
+  $linked.row(rows, "Macro_content_pattern", Macro_content_pattern);
+  $linked.row(rows, "Macro_call_content", Macro_call_content);
   return rows;
 }
 

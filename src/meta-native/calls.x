@@ -123,9 +123,8 @@ static List meta_call_form = NULL;
 static Var _meta_call_value(Compiler c, List expression, Token site) {
   match (expression)
     case %(expr ? (meta-call
-        (expr ?callee $($source_identifier_content(
-          %((!or (binding ? ?name)
-                 ((!or binding-name binding-global) ?name))))))
+        (expr ?callee (ident (!or (binding ? ?name)
+                 ((!or binding-name binding-global) ?name))))
         (args *arguments))): {
       if (name is not <string>) break;
       Array values = _meta_values(c, callee, arguments, site);

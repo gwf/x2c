@@ -87,7 +87,7 @@ that the walk replaces in CODE and in later rows with what the row lowered:
 a fresh binding, bound exits, or a region that runs the exits bound before
 it on every transfer out of it. The finalizer's region leaves the frame,
 and the body and each arm run the try's exits. The walk applies the rows in
-order and then binds CODE. `source_catch_handle` reads the handler the parser
+order and then binds CODE. `_try_catch_handle` reads the handler the parser
 introduced, which no source form writes.
 
 ```x2c
@@ -101,7 +101,7 @@ meta static Code _try_landing(
   Atom exits = Atom.intern("?__try_exits");
   Atom lowered = Atom.intern("?__try_body");
   Atom finished = NULL;
-  List handle = arms ? source_catch_handle(node) : NULL;
+  List handle = arms ? _try_catch_handle(node) : NULL;
   Array rows = [%(new-name $frame "exception_frame")];
   if (finalizer) {
     Atom departure = Atom.intern("?__try_departure");
@@ -416,11 +416,10 @@ A hand-built `%(...)` List is still right in these cases:
 
 ### Canonical composition with metafunctions
 
-Use an existing List metafunction when a family carries canonical rows that
-an expression hole would reinterpret. String's `source_string_content`
-owns the `segments` envelope while preserving cache, `segvar`, `segexp`, and
-constructed `segraw` rows. Its callers retain conversion and resolution
-order. This needs no new Segment parameter kind.
+Use canonical List literals for rows that an expression hole would
+reinterpret. `%(segments @rows)` preserves cache, `segvar`, `segexp`, and
+constructed `segraw` rows. Keep conversion and resolution in their existing
+order. This needs no Segment parameter kind or envelope-building helper.
 
 Recognize a source form with its macro inside a pattern: `$($indexed(?r,
 ?s))` matches the typed expression or its bare content, and inside an
@@ -428,7 +427,7 @@ Recognize a source form with its macro inside a pattern: `$($indexed(?r,
 hole's argument may itself be a pattern, such as
 `$($indexed(%(!set ?base (expr ?type ?)), ?index))`; the macro's pattern is
 derived with a binder in that hole first, so the argument keeps its exact
-constraints. A bare-content dispatch arm keeps `source_content_pattern`,
+constraints. A bare-content dispatch arm uses `Macro.content_pattern`,
 whose fixed head lets the match emitter label the arm. Preserve the original
 root and wrapper dispatch: a macro case can look through origins that a raw
 case did not.

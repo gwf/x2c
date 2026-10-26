@@ -27,7 +27,7 @@ List Compiler.parse_string_literal(Compiler c) {
   c.expect(<"\"">);
   if (segments ~= %((cache *)))
     return %(expr ("String") $(segments.car()));
-  return %(expr ("String") $(source_string_content(segments)));
+  return %(expr ("String") (segments @segments));
 }
 
 static List _parse_string_segments(Compiler c) {

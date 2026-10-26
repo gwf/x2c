@@ -411,7 +411,7 @@ static void _add_param(Compiler c, Array entries, List parameter) {
 }
 
 static List _bind_body(Compiler c, List body) {
-  if (body ~= $source_block_content(%(*)))
+  if (body ~= %(block *))
     return c.bind_callable_body(body, %("Var"));
   with (c.return_type = %("Var")) {
     return c.resolve_expression(body, c.token);
@@ -632,12 +632,12 @@ static void _check_lambda_captures(Compiler c, List ast) {
   List node;
   $ast.walk(ast, node)
     match (node) {
-      case $source_any_lambda(): continue;
-      case $source_operator_content(%(& ?target)):
+      case $Ast.lambda_pattern(): continue;
+      case %(op & ?target):
         _require_capture_lvalue(c, target);
       case %(dstrasgn (targets *targets) ?):
         foreach (List target in targets) _require_capture_lvalue(c, target);
-      case $source_call_content($called,
+      case $Macro.call_content($called,
           %(expr ?callee_type ?), %(*arguments)):
         _require_reference_arguments(c, callee_type, arguments);
       default: _require_capture_lvalue(c, Ast.written_operand(node));

@@ -78,7 +78,7 @@ allocates belongs to the unit's values Scope. A declared native
 iterator operation called without its destination gets a new Iter
 there.
 
-Source: `src/meta-native/calls.x:155`
+Source: `src/meta-native/calls.x:154`
 
 <a id="Compiler.apply_meta_function"></a>
 #### Compiler.apply_meta_function

@@ -60,7 +60,7 @@ static void _record_rows_visibility(
   Compiler c, List declaration, Symbol kind, int private, int mark,
   List rows) {
   foreach (List row in rows)
-    match (row) case $source_declarator_row(%(?identity *)):
+    match (row) case $Ast.declarator_pattern(%(?identity *)):
       _record_binding_visibility(
         c, declaration, kind, private, mark, identity);
 }

@@ -9,21 +9,21 @@ static protocol Var(Fact) as void *;
 module Fact _base(Walk &w, Var place, int &through) {
   through = 1;
   match (_unwrap(place)) {
-    case $source_operator_content(%((!quote ->) ?base ?)): {
+    case %(op (!quote ->) ?base ?): {
       Fact fact = _fact_of(w, base, NULL);
       if (!fact) fact = _base(w, base, through);
       through = 1;
       return fact;
     }
-    case $source_operator_content(%((!quote .) ?base ?)):
+    case %(op (!quote .) ?base ?):
       return _base(w, base, through);
-    case $source_operator_content(%((!quote *) ?base)):
+    case %(op (!quote *) ?base):
       return _fact_of(w, base, NULL);
     case $($indexed(%(!set ?base (expr ?type ?)), ?)):
       return _indexed_base(w, base, type, through);
     case %(getindex (!set ?base (expr ?type ?)) ?):
       return _indexed_base(w, base, type, through);
-    case $source_identifier_content(%(?binding)): {
+    case %(ident ?binding): {
       through = 0;
       return _fact_of(w, place, NULL);
     }
@@ -73,9 +73,8 @@ static Fact _borrow(Walk &w, Var place, List &?named) {
 module List _root(Var place) {
   while (1)
     match (_unwrap(place)) {
-      case $source_identifier_content(
-          %((!set ?binding (binding ? ?)))): return binding;
-      case $source_operator_content(%(? ?base *)): place = base;
+      case %(ident (!set ?binding (binding ? ?))): return binding;
+      case %(op ? ?base *): place = base;
       case $($indexed(?base, ?selector)): place = base;
       case %(getindex ?base ?): place = base;
       default: return NULL;
@@ -116,7 +115,7 @@ module Region _birth(
     case %(alloc *): return _active(w);
     case %(pool): return _pooled(w, born);
   }
-  match (source_expression(value)) {
+  match (_under_casts(value)) {
     /* A closure holds what it captures, so it lives no longer than they. A
        reference capture moves its local into a cell of the active region,
        so the closure holds the local's value, not its address. */
@@ -207,15 +206,14 @@ module Fact _returned_argument(Walk &w, Var value, List &?named) {
 module Fact _fact_of(Walk &w, Var expression, List &?named) {
   Var inner = _unwrap(expression);
   match (inner) {
-    case $source_identifier_content(
-        %((!set ?binding (binding ? ?)))): {
+    case %(ident (!set ?binding (binding ? ?))): {
       if (named) named = binding;
       Var found = w.facts[binding];
       return found is void ? NULL : found;
     }
-    case $source_operator_content(%((!quote &) ?place)):
+    case %(op (!quote &) ?place):
       return _borrow(w, place, named);
-    case $source_operator_content(%((!quote ?) ? ?yes ?no)): {
+    case %(op (!quote ?) ? ?yes ?no): {
       List yes_name = NULL, no_name = NULL;
       Fact fact = _fact_of(w, yes, yes_name);
       Fact other = _fact_of(w, no, no_name);
@@ -243,7 +241,7 @@ module Fact _value_fact(Walk &w, Var value, List &?named) {
   Fact fact = _fact_of(w, value, named);
   Type type = _expression_type(value);
   if (!fact || fact.param >= 0 || !type || !type.is_array()) return fact;
-  match (_unwrap(value)) case $source_identifier_content(%(*fields)):
+  match (_unwrap(value)) case %(ident *fields):
     return _borrow(w, value, named);
   return fact;
 }
@@ -281,8 +279,8 @@ module int _closed(Region region) {
 /* A known empty handle has no identity to share with another empty slot. */
 module int _empty(Var value) {
   match (_unwrap(value)) {
-    case $source_identifier_content(%((binding ? "NULL"))): return 1;
-    case $source_literal_content(%(?ltype ?text)): {
+    case %(ident (binding ? "NULL")): return 1;
+    case %(literal ?ltype ?text): {
       Type type = ltype;
       unsigned long long number;
       return type.integer_literal_magnitude(text, number) && !number;
@@ -351,6 +349,19 @@ static Region _active(Walk &w) {
 
 // canonical forms the pass reads
 
+/* Removes casts and parentheses, retaining the final typed expression. */
+module Var _under_casts(Var value) {
+  while (1) {
+    match (value) {
+      case %(expr ? (parens ?inner)): value = inner;
+      case %(expr ? (cast ? ?inner)): value = inner;
+      case %(parens ?inner): value = inner;
+      case %(cast ? ?inner): value = inner;
+      default: return value;
+    }
+  }
+}
+
 /* The parser's empty argument marker represents no arguments. */
 module List _source_call(Var value) {
   match (value)
@@ -375,8 +386,8 @@ module Var _unwrap(Var value) {
   while (1)
     match (value) {
       case %(expr ? ?inner): value = inner;
-      case $source_cast_content(%(? ?inner)): value = inner;
-      case $source_content_pattern($grouped, %(?inner)): value = inner;
+      case %(cast ? ?inner): value = inner;
+      case $Macro.content_pattern($grouped, %(?inner)): value = inner;
       default: return value;
     }
 }
@@ -387,8 +398,7 @@ module List _expression_type(Var value) {
 }
 
 module List _binding_of(Var value) {
-  match (_unwrap(value)) case $source_identifier_content(
-      %((!set ?binding (binding ? ?)))):
+  match (_unwrap(value)) case %(ident (!set ?binding (binding ? ?))):
     return binding;
   return NULL;
 }
@@ -396,7 +406,7 @@ module List _binding_of(Var value) {
 /* The place `&place` names, or void. */
 module Var _address_of(Var value) {
   match (_unwrap(value))
-    case $source_operator_content(%((!quote &) ?place)): return place;
+    case %(op (!quote &) ?place): return place;
   return void;
 }
 

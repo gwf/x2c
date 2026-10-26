@@ -10,7 +10,7 @@ module List _unary(Resolve &r, Var operator, List operand) {
   if (operator == <*> && operand.cadr().car() == <&> &&
       lhs_type.car() != <&>) return lhs;
   if (lhs_type === %(<macro-expr>))
-    return source_operator_expression(%(<macro-expr>), $(operator, lhs));
+    return %(expr (<macro-expr>) (op $operator $lhs));
   List lowered = operator == <->
     ? _protocol_operator_expression(r.c, operator, lhs, NULL) : NULL;
   if (lowered) return lowered;
@@ -37,7 +37,7 @@ module List _unary(Resolve &r, Var operator, List operand) {
     _check_dynamic_target(r.c, lhs, r.origin);
   if ((operator == <++> || operator == <-->) &&
       _builtin_index_lvalue(r.c, lhs)) type = %("Var");
-  return source_operator_expression(type, $(operator, lhs));
+  return %(expr $type (op $operator $lhs));
 }
 
 module List _postfix(Resolve &r, Var operator, List operand) {
@@ -46,11 +46,11 @@ module List _postfix(Resolve &r, Var operator, List operand) {
   if (operand_type.car() == <opt-ref>)
     $fail.expressions_optional_ref_unchecked(r.c, r.origin);
   if (operand_type === %(<macro-expr>))
-    return source_postfix_expression(%(<macro-expr>), $(operator, operand));
+    return %(expr (<macro-expr>) (postfix $operator $operand));
   if (r.c.sym.is_var_type(operand_type))
     _check_dynamic_target(r.c, operand, r.origin);
   if (_builtin_index_lvalue(r.c, operand)) operand_type = %("Var");
-  return source_postfix_expression(operand_type, $(operator, operand));
+  return %(expr $operand_type (postfix $operator $operand));
 }
 
 module List _conditional(
@@ -62,8 +62,7 @@ module List _conditional(
   if (condition.cadr() === %(<macro-expr>) ||
       true_type === %(<macro-expr>) ||
       false_type === %(<macro-expr>))
-    return source_operator_expression(
-      %(<macro-expr>), $(operator, condition, ontrue, onfalse));
+    return %(expr (<macro-expr>) (op $operator $condition $ontrue $onfalse));
   /* Arms of one declared type keep it. A `Symbol` conditional therefore
      retains `Symbol` as its type. */
   Type type = true_type;
@@ -78,8 +77,7 @@ module List _conditional(
     else if (_conditional_joins(r.c, true_type, false_type))
       onfalse = r.c.convert_expression(onfalse, type);
   }
-  return source_operator_expression(
-    type, $(operator, condition, ontrue, onfalse));
+  return %(expr $type (op $operator $condition $ontrue $onfalse));
 }
 
 /* A conditional whose arms are a `Var` and another value is a `Var`: the
@@ -107,8 +105,7 @@ module List _binary_expression(
   Type lhs_type = lhs.cadr(), rhs_type = rhs.cadr();
   if (lhs_type === %(<macro-expr>) ||
       rhs_type === %(<macro-expr>))
-    return source_operator_expression(
-      %(<macro-expr>), $(operator, lhs, rhs));
+    return %(expr (<macro-expr>) (op $operator $lhs $rhs));
   if (operator.is_assignment_op()) {
     if (operator != <=> &&
         (c.sym.is_var_type(lhs_type) || c.sym.is_var_type(rhs_type)))
@@ -121,10 +118,10 @@ module List _binary_expression(
     if (operator == <=> &&
         !(c.meta_body && c.sym.is_named_value_type(type, "Func")))
       rhs = c.convert_expression(rhs, type);
-    return source_operator_expression(type, $(operator, lhs, rhs));
+    return %(expr $type (op $operator $lhs $rhs));
   }
   if (c.rewrite_rules && c.has_rewrites(<binary>, operator)) {
-    List source = source_operator_expression(NULL, $(operator, lhs, rhs));
+    List source = %(expr () (op $operator $lhs $rhs));
     List rewritten = c.rewrite(
       <binary>, operator, source, <expression>, NULL, origin);
     if (rewritten) return rewritten;
@@ -185,9 +182,9 @@ static int _convert_string_addition(
   int constant =
     !c.needs_resolution(lhs) && !c.needs_resolution(rhs) &&
     !lhs.try_search(
-      $source_identifier_content(%((*))), matched, bindings) &&
+      %(ident (*)), matched, bindings) &&
     !rhs.try_search(
-      $source_identifier_content(%((*))), matched, bindings);
+      %(ident (*)), matched, bindings);
   lhs = c.convert_expression(lhs, %("String"));
   rhs = c.convert_expression(rhs, %("String"));
   return constant;
@@ -200,7 +197,7 @@ static void _check_untyped_operand(
   if (!member || operator == <==> || operator == <!=>) return;
   if (_converts_operands(c, participant) &&
       c.resolve_protocol_member(participant, member) &&
-      other ~= %(expr ? $($source_identifier_content(%(?)))))
+      other ~= %(expr ? (ident ?)))
     $fail.expressions_operand_untyped(c, origin);
 }
 
@@ -208,7 +205,7 @@ static void _check_untyped_operand(
 static List _native_binary_expression(
   Compiler c, Symbol operator, List lhs, List rhs, Token origin) {
   Type type = _binary_op_type(c, operator, lhs, rhs);
-  List operation = source_operator_content($(operator, lhs, rhs));
+  List operation = %(op $operator $lhs $rhs);
   if (c.sym.is_var_type(lhs.cadr()) || c.sym.is_var_type(rhs.cadr()))
     operation = c.anchor_origin(operation, origin);
   return %(expr $type $operation);
@@ -462,8 +459,7 @@ module int _is_operator_temporary(Compiler c, List expression) {
     case %(expr ? $($grouped(?inner))):
       return _is_operator_temporary(c, inner);
   }
-  if (expression ~= $called(%(expr ? $($source_identifier_content(
-        %((!set ?binding (*)))))), *arguments))
+  if (expression ~= $called(%(expr ? (ident (!set ?binding (*)))), *arguments))
     return %"fresh-callee $((long) binding.list())" in c.protocol_helpers;
   return 0;
 }

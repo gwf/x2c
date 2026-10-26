@@ -53,22 +53,22 @@ module int _direct_func_source(
   Type type, List payload, int through_cast, Type &source_type,
   List &source_binding) {
   match (payload) {
-    case $source_identifier_content(%(?binding)): {
+    case %(ident ?binding): {
       if (!type || type.is_pointer() || !type.is_function()) return 0;
       source_type = type;
       source_binding = binding;
       return 1;
     }
-    case $source_cast_content(%(? (expr ?inner_type ?inner_payload))):
+    case %(cast ? (expr ?inner_type ?inner_payload)):
       return through_cast && _direct_func_source(
         inner_type, inner_payload, 1, source_type, source_binding);
-    case $source_content_pattern($grouped, %(?inner)):
+    case $Macro.content_pattern($grouped, %(?inner)):
       match (inner)
         case %(expr ?inner_type ?inner_payload):
           return _direct_func_source(
             inner_type, inner_payload, through_cast, source_type,
             source_binding);
-    case $source_operator_content(%(& (expr ?inner_type ?inner_payload))):
+    case %(op & (expr ?inner_type ?inner_payload)):
       return _direct_func_source(
         inner_type, inner_payload, through_cast, source_type,
         source_binding);
@@ -305,20 +305,20 @@ static List _deref_func_lift(
   while (unwrapped) {
     unwrapped = 0;
     match (probe) {
-      case $source_content_pattern($grouped, %(?inner)):
+      case $Macro.content_pattern($grouped, %(?inner)):
         match (inner)
           case %(expr ? ?inner_payload): {
             probe = inner_payload;
             unwrapped = 1;
           }
-      case $source_operator_content(%(& (expr ? ?inner_payload))): {
+      case %(op & (expr ? ?inner_payload)): {
         probe = inner_payload;
         unwrapped = 1;
       }
     }
   }
   match (probe)
-    case $source_operator_content(%(* (expr ?operand_type ?))): {
+    case %(op * (expr ?operand_type ?)): {
       Type resolved = c.sym.resolve_key(operand_type);
       if (resolved && resolved.is_pointer() &&
           resolved.dereference().is_function())

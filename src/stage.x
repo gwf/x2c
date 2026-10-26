@@ -79,10 +79,10 @@ Var Compiler.meta_argument(
         c.capture_macro_value(definition), want, site, call);
     case %(expr ? (meta-call *)): value = call(c, node, site);
     /* Negation multiplies, so a negated zero keeps its sign. */
-    case %(expr ?type $($source_operator_content(%(- ?operand)))):
+    case %(expr ?type (op - ?operand)):
       value = c.meta_argument(operand, type, site, call).binary(<*>, -1);
     case %(expr ?type
-        $($source_operator_content(%(?operator ?left ?right)))):
+        (op ?operator ?left ?right)):
       if (operator in meta_operators) {
         Type common = NULL;
         if (operator in meta_comparisons) {
@@ -113,7 +113,7 @@ static Var _captured_value(Compiler c, Var captured, Type want) {
 /* A name that is not a constant, such as a template's own local, passes as
    its syntax. Anything else is reported at `site`. */
 static Var _name_syntax(Compiler c, List node, Token site) {
-  if (node ~= %(expr ? $($source_identifier_content(%(?))))) return node;
+  if (node ~= %(expr ? (ident ?))) return node;
   $fail.stage_argument_constant(c, site);
 }
 
@@ -160,30 +160,30 @@ static Var _constant_leaf(Compiler c, List expr) {
   match (expr) {
     case %(expr ? $($grouped(?inner))):
       return _constant_leaf(c, inner);
-    case %(expr ?type $($source_cast_content(%(? ?inner)))):
+    case %(expr ?type (cast ? ?inner)):
       return _cast_constant(c, type, inner);
     case %(expr ? (!set ?node (cache ?))): return c.folded_constant(node);
     case %(expr ? (!set ?node (expr ? (cache ?)))):
       return c.folded_constant(node);
     case %(expr ? (nil)):                       return %();
     case %(expr ? (expr ? (nil))):              return %();
-    case %(expr ? $($source_literal_content(%(? ? ?symbol)))): return symbol;
+    case %(expr ? (literal ? ? ?symbol)): return symbol;
     case %(expr ("String") $($called(
-        %(expr ? $($source_identifier_content(%((binding ? "String_add"))))),
+        %(expr ? (ident (binding ? "String_add"))),
         %(?left ?right)))):
       return _joined_constant(c, left, right);
     case %(expr ("String") (call "String_new" (args ?inner))):
       return _constant_leaf(c, inner);
     case %(expr ("Var") $($called(
-        %(expr ? $($source_identifier_content(%((binding ? "int_var"))))),
+        %(expr ? (ident (binding ? "int_var"))),
         %(?inner)))):
       return _constant_leaf(c, inner);
-    case %(expr ("String") $($source_literal_content(%(? ?text))))
+    case %(expr ("String") (literal ? ?text))
       if (text is <string>): return text;
-    case %(expr (* char) $($source_literal_content(%(? ?text))))
+    case %(expr (* char) (literal ? ?text))
       if (text is <string>):
       return Compiler.literal_text_value(text);
-    case %(expr ?type $($source_literal_content(%(? ?text))))
+    case %(expr ?type (literal ? ?text))
       if (text is <string>):
       return ((Type) type).numeric_literal_value(text);
   }
@@ -376,7 +376,7 @@ static List _map_form(Compiler c, Var value) {
 void Compiler.check_meta_call(Compiler c, List callee, Token origin) {
   if (c.meta_body || !c.meta_comptime.len()) return;
   if (callee ~= %(
-        expr ? $($source_identifier_content(%((binding ? ?name))))) &&
+        expr ? (ident (binding ? ?name))) &&
       name is <string> && name in c.meta_comptime)
     $fail.stage_function_only(c, origin, name);
 }

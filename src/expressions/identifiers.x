@@ -60,8 +60,7 @@ static List _capture_lambda_value(
   Compiler c, List result, List &binding, Type &type, int &read_reference) {
   if (!c.lambda_scopes || c.macro_holes) return result;
   result = c.capture_lambda_identifier(binding, type);
-  if (result ~= %(expr ?captured_type $($source_identifier_content(
-      %(?captured))))) {
+  if (result ~= %(expr ?captured_type (ident ?captured))) {
     if (type.car() != <&> && captured_type.car() == <&>)
       read_reference = 1;
     type = captured_type;

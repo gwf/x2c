@@ -399,7 +399,7 @@ module List _rebind_globals(Compiler c, List syntax) {
 }
 
 static void _reference_bindings(Compiler c, List syntax, Map replacements) {
-  if (syntax ~= %(expr ? $($source_identifier_content(%(?binding))))) {
+  if (syntax ~= %(expr ? (ident ?binding))) {
     String spelling = NULL;
     if (Ast.try_binding(binding, NULL, spelling))
       replacements[binding] = c.sym.reference_global($(spelling));

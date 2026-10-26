@@ -26,8 +26,7 @@ module List _call(Resolve &r, List function, List supplied) {
     .c = r.c, .result_type = r.type, .supplied = supplied,
     .origin = r.origin};
   match (function)
-    case %(expr ? $($source_operator_content(
-        %(. ?receiver (!set ?field (?name)))))):
+    case %(expr ? (op . ?receiver (!set ?field (?name)))):
       return _method(site, receiver, field);
   return _function(site, function);
 }
@@ -124,8 +123,7 @@ static List _resolve_call_arguments(
 static List _discarding_callee(
   Compiler c, List callee, Type callee_type, List arguments) {
   List binding = NULL;
-  match (callee) case %(expr ? $($source_identifier_content(
-      %((!set ?bound (*)))))): binding = bound;
+  match (callee) case %(expr ? (ident (!set ?bound (*)))): binding = bound;
   if (!binding || !(callee_type ~= %((func *) *)) ||
       %"discard-helper $((long) binding)" in c.protocol_helpers)
     return callee;
@@ -501,7 +499,7 @@ static const PrintfFn printf_family_info[] = {
    user function that happens to use a libc spelling is not one. */
 module const PrintfFn *_printf_family(List l) {
   match (l)
-    case %(expr ?type $($source_identifier_content(%(?binding)))): {
+    case %(expr ?type (ident ?binding)): {
       String name = Ast.binding_spelling(binding);
       int count = sizeof(printf_family_info) / sizeof(printf_family_info[0]);
       for (int i = 0; i < count; i++) {
@@ -522,8 +520,7 @@ module const PrintfFn *_printf_family(List l) {
 */
 String Compiler.printf_static_format(Compiler c, Var format) {
   match (format) {
-    case %(expr (* char) $($source_literal_content(
-        %((* char) ?spelled)))): {
+    case %(expr (* char) (literal (* char) ?spelled)): {
       String spelling = spelled;
       int length = spelling ? spelling.len() : 0;
       if (length < 2 || spelling[0] != '"' || spelling[length - 1] != '"')
@@ -533,8 +530,7 @@ String Compiler.printf_static_format(Compiler c, Var format) {
     case %(expr ("String") (cache ?id)): {
       List key = c.id_keys[id];
       match (key)
-        case %(string (expr ("String") $($source_literal_content(
-            %(("String") ?text))))): {
+        case %(string (expr ("String") (literal ("String") ?text))): {
           String spelling = text;
           return spelling.repr();
         }

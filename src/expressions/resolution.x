@@ -9,7 +9,7 @@
 module List _cast_expression(Compiler c, List decl, Type type, List operand) {
   if (c.sym.is_string_type(type) && _is_raw_string_literal(operand))
     return c.convert_expression(operand, type);
-  return %(expr $type $(source_cast_content($(decl, operand))));
+  return %(expr $type (cast $decl $operand));
 }
 
 /* A statement expression has the value and type of its final expression
@@ -94,7 +94,7 @@ int Compiler.needs_resolution(Compiler c, Var value) {
       case %((!or macro-bind macro-invoke macro-slot meta-call macro-value
                   "x2c.quoted") *):
         return 1;
-      case $source_identifier_content(%(?name)):
+      case %(ident ?name):
         if (name is <list>) {
           List binding = name;
           if (_identifier_needs_resolution(c, binding)) return 1;
@@ -135,10 +135,10 @@ static List _content(Resolve &r, List content) {
   }
   match (r.input) case $called(?callee, *args): return _call(r, callee, args);
   match (content) {
-    case $source_identifier_content(%(?value)):
+    case %(ident ?value):
       return _resolve_identifier(r.c, value, r.type, r.origin);
     case %(!set ?binding (binding ? ?)): return _binding(r, binding);
-    case $source_literal_content(%(*)): return r.input;
+    case %(literal *): return r.input;
     case %(matches ?subject ?pattern ?types):
       return r.c.bind_match_condition(subject, pattern, types, r.origin);
     case %(tpl-call *): return r.input;
@@ -149,36 +149,36 @@ static List _content(Resolve &r, List content) {
     case %("x2c.quoted" *):
       return r.c.bind_syntax(content, <expression>, r.c.return_type);
     case %(macro-slot ? ? *): return _macro_slot(r, content);
-    case $source_string_content(%(*items)): return _segments(r, items);
+    case %(segments *items): return _segments(r, items);
     case %(cons ?head ?tail): return _cons(r, head, tail);
     case %(append ?head ?tail): return _append(r, head, tail);
-    case $source_slice_content(%(? ? ? ?)): return _slice(r, content);
+    case %(slice ? ? ? ?): return _slice(r, content);
     case %(getindex ?base ?index): return _getindex(r, base, index);
     case %(dstrasgn (targets *rows) ?value):
       return _destructure(r, rows, value);
-    case $source_content_pattern($sizeof_grouped, %(?value)):
+    case $Macro.content_pattern($sizeof_grouped, %(?value)):
       return _sizeof(r, $sizeof_grouped, value);
-    case $source_content_pattern($sizeof_expression, %(?value)):
+    case $Macro.content_pattern($sizeof_expression, %(?value)):
       return _sizeof(r, $sizeof_expression, value);
-    case $source_generic_content(%(?control *rows)):
+    case %(generic ?control *rows):
       return _generic(r, control, rows);
-    case $source_va_arg_content(%(?expr ?decl)): return _va_arg(r, expr, decl);
-    case $source_commas_content(%(*items)): return _commas(r, items);
+    case %(va-arg ?expr ?decl): return _va_arg(r, expr, decl);
+    case %(commas *items): return _commas(r, items);
     case %(splice ?value): return _splice(r, value);
     case %((!or offsetof nil cache macro-bind) *): return r.input;
-    case $source_content_pattern($grouped, %(?inner)):
+    case $Macro.content_pattern($grouped, %(?inner)):
       return _parens(r, inner);
     case %(initval *): return _initval(r, content);
-    case $source_composite_content(%(*items)): return _composite(r, items);
-    case $source_cast_content(%((!set ?decl (decl *)) ?value)):
+    case %(composite (commas *items)): return _composite(r, items);
+    case %(cast (!set ?decl (decl *)) ?value):
       return _cast(r, decl, value);
     case %(type-tag ?target): return r.c.var_tag_expression(target, r.origin);
-    case $source_content_pattern($has_type, %(?value ?target)):
+    case $Macro.content_pattern($has_type, %(?value ?target)):
       return _is_type(r, value, target);
-    case $source_content_pattern($has_symbol, %(?value ?tag)):
+    case $Macro.content_pattern($has_symbol, %(?value ?tag)):
       return _is_symbol(r, value, tag);
-    case $source_operator_content(%(*parts)): return _operator(r, parts);
-    case $source_postfix_content(%(?op ?value)): return _postfix(r, op, value);
+    case %(op *parts): return _operator(r, parts);
+    case %(postfix ?op ?value): return _postfix(r, op, value);
     case %(tadapt ?target ?value): return _tadapt(r, target, value);
   }
   if (content && content.car() == <array>) return _array_value(r);
@@ -289,8 +289,7 @@ static List _is_symbol(Resolve &r, List operand, List selector) {
   if (!r.c.sym.is_named_value_type(selector_type, "Symbol"))
     $fail.expressions_is_selector(r.c, r.origin, selector_type);
   match (selector)
-    case %(expr ("Symbol") $($source_literal_content(
-        %(("Symbol") ? ?tag_value)))): {
+    case %(expr ("Symbol") (literal ("Symbol") ? ?tag_value)): {
       if (tag_value is <symbol>) {
         Symbol tag = tag_value;
         List direct = _constant_row_test(r.c, lhs, tag, r.origin);
@@ -392,7 +391,7 @@ static List _segments(Resolve &r, List items) {
     }
     default: resolved.push(item);
   }
-  return %(expr $type $(source_string_content(resolved.list_free())));
+  return %(expr $type (segments @(resolved.list_free())));
 }
 
 static List _cons(Resolve &r, List head, List tail) {
@@ -483,8 +482,7 @@ static List _composite(Resolve &r, List elements) {
   foreach (Var element in elements)
     foreach (List row in r.c.evaluate_macro_rows(element))
       values.push(_resolve_initializer(r.c, row, r.origin));
-  return %(expr $(r.type) $(source_composite_content(
-    values.list_free())));
+  return %(expr $(r.type) (composite (commas @(values.list_free()))));
 }
 
 static List _resolve_initializer(Compiler c, List node, Token origin) {
@@ -516,7 +514,7 @@ static List _commas(Resolve &r, List expressions) {
   List values = resolved.list_free();
   Type type = r.type;
   if (values) type = values.last().cadr();
-  return %(expr $type $(source_commas_content(values)));
+  return %(expr $type (commas @values));
 }
 
 static List _destructure(Resolve &r, List targets, List source) {
@@ -536,8 +534,7 @@ static List _generic(Resolve &r, List control, List associations) {
       resolved.push(
         %(association $selector $(r.c.resolve_expression(value, r.origin))));
   Type type = control.cadr() === %(<macro-expr>) ? %(<macro-expr>) : NULL;
-  return %(expr $type $(source_generic_content(
-    $(control, @(resolved.list_free())))));
+  return %(expr $type (generic $control @(resolved.list_free())));
 }
 
 /* A `sizeof` keeps its grouped or bare form around the resolved operand;
@@ -555,8 +552,6 @@ static List _sizeof(Resolve &r, Macro form, Var argument) {
 
 static List _va_arg(Resolve &r, List argument, List declaration) {
   return %(expr $(r.type)
-           $(source_va_arg_content(
-             $(
-               r.c.resolve_expression(argument, r.origin),
-               r.c.resolve_expression(declaration, r.origin)))));
+           (va-arg $(r.c.resolve_expression(argument, r.origin))
+                   $(r.c.resolve_expression(declaration, r.origin))));
 }

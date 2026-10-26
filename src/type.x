@@ -37,7 +37,7 @@ static List _from_ast(List node, List context) {
   if (!node) return node;
   match (node) {
     // Initializers do not contribute to the declared Type.
-    case $source_operator_content(%(= (!set ?binding (bind *)) ?)):
+    case %(op = (!set ?binding (bind *)) ?):
       return _from_ast(binding, context);
     case %(declare ?source_type ?bindings):
       return _from_declarators(_without_leading_text(source_type), bindings);
@@ -52,7 +52,7 @@ static List _from_ast(List node, List context) {
     // Binding identity is AST metadata; semantic Types retain the spelling.
     case %(binding ? ?spelling): return $(spelling);
     // An integer literal, such as an array bound, keeps only its spelling.
-    case %(expr (int) $($source_literal_content(%(? ?value)))):
+    case %(expr (int) (literal ? ?value)):
       return $(value);
     case %(expr *): return _from_items(node, context);
     case %(struct *): return _from_aggregate(node, <struct>);

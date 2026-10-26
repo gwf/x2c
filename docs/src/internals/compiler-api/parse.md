@@ -104,7 +104,7 @@ Source: `src/parse/auto.x:16`
 Binds a callable's outer block in its active parameter scope. Ordinary
 constructed blocks open their own scope before using this operation.
 
-Source: `src/parse/binding.x:594`
+Source: `src/parse/binding.x:600`
 
 <a id="Compiler.bind_catch_arm"></a>
 #### Compiler.bind_catch_arm
@@ -129,7 +129,7 @@ definite binders of `pattern` when the arm `binds`. Binder diagnostics
 use `start`. A source arm's body parses here with the typed captures
 `types` that its pattern recorded.
 
-Source: `src/parse/binding.x:550`
+Source: `src/parse/binding.x:556`
 
 <a id="Compiler.bind_match_condition"></a>
 #### Compiler.bind_match_condition
@@ -140,7 +140,7 @@ Binds a pattern condition without publishing its captures to the caller.
 Its declarations belong to the successful path; visible rows retain the
 identities that `&&` and `if` expose in their own scopes.
 
-Source: `src/parse/binding.x:614`
+Source: `src/parse/binding.x:620`
 
 <a id="Compiler.bind_parameter"></a>
 #### Compiler.bind_parameter

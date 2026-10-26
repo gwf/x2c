@@ -294,7 +294,7 @@ static int _complete(List syntax, List result) {
   if (syntax === result) return 1;
   match (syntax) {
     case %(expr ? ?inner): return _complete(inner, result);
-    case $source_content_pattern($grouped, %(?inner)):
+    case $Macro.content_pattern($grouped, %(?inner)):
       return _complete(inner, result);
   }
   return 0;

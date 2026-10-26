@@ -196,7 +196,7 @@ Source: `src/linked-meta.x:919`
 
 Returns linked definition hashes and provider source dependencies.
 
-Source: `src/linked-meta.x:2462`
+Source: `src/linked-meta.x:2448`
 
 #### linked_meta_targets
 
@@ -205,7 +205,7 @@ Source: `src/linked-meta.x:2462`
 Returns a fresh Map of linked copies and runtime builders by name.
 The Map borrows shared Func handles that live for the program.
 
-Source: `src/linked-meta.x:2225`
+Source: `src/linked-meta.x:2230`
 
 #### match_condition_lowering
 
@@ -273,7 +273,7 @@ Source: `src/linked-meta.x:2014`
 
 Lowers the parsed try `node` to its landing form.
 
-Source: `src/linked-meta.x:2168`
+Source: `src/linked-meta.x:2173`
 
 ## Design notes
 

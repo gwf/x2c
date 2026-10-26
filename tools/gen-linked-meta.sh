@@ -46,11 +46,12 @@ function scan(line,    i, ch, n) {
 function finish(    name, text) {
   text = def
   if (!isvalue) {
-    if (text !~ /=>/ && text !~ /\{/) { prototypes[++nproto] = defname; return }
+    if (text !~ /=>/ && text !~ /\{/) { prototypes[++nproto] = defcall; return }
     if (text !~ /\)[ \t\n]*(=>|\{)/) return
   }
   ndef++
   names[ndef] = defname
+  calls[ndef] = defcall
   bodies[ndef] = (defdoc == "" ? "" : defdoc "\n") text
   statics[ndef] = (header ~ /^meta static /)
   values[ndef] = isvalue
@@ -73,7 +74,11 @@ indoc { doc = doc "\n" $0; if ($0 ~ /\*\//) indoc = 0; next }
   defname = $0
   if (isvalue) sub(/[ \t]*=.*/, "", defname)
   sub(/\(.*/, "", defname)
-  sub(/.*[^A-Za-z0-9_]/, "", defname)
+  sub(/.*[^A-Za-z0-9_.]/, "", defname)
+  # Calls may use a receiver; registrations use the lowered linkage name.
+  defcall = defname
+  sub(/.*\./, "", defcall)
+  gsub(/\./, "_", defname)
   def = substr($0, 6)
   depth = 0; quote = ""; incomment = 0
   scan($0)
@@ -155,7 +160,7 @@ END {
     for (i = 1; i <= ndef; i++) {
       if (reaches[i]) continue
       for (j = 1; j <= ndef; j++)
-        if (reaches[j] && refers(code[i], names[j], values[j])) {
+        if (reaches[j] && refers(code[i], calls[j], values[j])) {
           reaches[i] = 1; changed = 1; break
         }
     }

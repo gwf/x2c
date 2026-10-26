@@ -448,7 +448,7 @@ List Compiler.alias_expression(Compiler c) {
 }
 
 static void _reveal_bindings(Compiler c, List syntax) {
-  if (syntax ~= %(expr ? $($source_identifier_content(%(?binding))))) {
+  if (syntax ~= %(expr ? (ident ?binding))) {
     c.reveal_binding(binding);
     return;
   }

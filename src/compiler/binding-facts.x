@@ -51,14 +51,13 @@ List Compiler.optional_reference_test(
   match (condition) {
     case %(expr ? $($grouped(?inner))):
       return c.optional_reference_test(inner, truth);
-    case %(expr ? $($source_operator_content(%(! ?operand)))): {
+    case %(expr ? (op ! ?operand)): {
       truth = !truth;
       return c.optional_reference_test(operand, truth);
     }
-    case %(expr ? $($source_operator_content(
-        %((!or ?op == !=) ?left ?right)))):
+    case %(expr ? (op (!or ?op == !=) ?left ?right)):
       return _null_comparison(c, op, left, right, truth);
-    case %(expr (opt-ref *) $($source_identifier_content(%(?binding)))):
+    case %(expr (opt-ref *) (ident ?binding)):
       if (%(optional-reference-param $binding) in
           c.semantic_binding_facts()) return binding;
   }
@@ -82,9 +81,8 @@ static int _null_literal(List expr) {
   match (expr) {
     case %(expr ? $($grouped(?inner))):
       return _null_literal(inner);
-    case %(expr ? $($source_identifier_content(
-        %((binding ? "NULL"))))): return 1;
-    case %(expr ? $($source_literal_content(%(? "0")))): return 1;
+    case %(expr ? (ident (binding ? "NULL"))): return 1;
+    case %(expr ? (literal ? "0")): return 1;
   }
   return 0;
 }

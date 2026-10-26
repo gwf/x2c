@@ -416,7 +416,7 @@ static void _report_modifier(AdoptionDraft &a, String message) {
 
 module Symbol _tag_value(List expression) {
   match (expression)
-    case %(expr ("Symbol") $($source_literal_content(%(("Symbol") ? ?tag)))):
+    case %(expr ("Symbol") (literal ("Symbol") ? ?tag)):
       if (tag is <symbol>) return tag;
   return 0;
 }
@@ -533,7 +533,7 @@ static void _install_stored(Compiler c, List value) {
     }
     case %(adopt ?base ?participant ?storage
              (tag (!set ?tag_expression (expr ("Symbol")
-               $($source_literal_content(%(("Symbol") ? ?candidate))))))
+               (literal ("Symbol") ? ?candidate))))
              ?location) if (candidate is <symbol>): {
       Symbol tag = candidate;
       AdoptionDraft draft = {

@@ -5,11 +5,13 @@
 
 #include "common.h"
 #include "macrovalue/macrovalue.h"
-static List _61, _57, _56, _52, _51, _50, _48, _45, _44, _41, _40, _39, _38, _37, _36, _35, _34, _33, _32, _31, _19, _18, _17, _15, _14, _13, _11, _10, _9, _3;
+typedef List Ast;
+
+static List _60, _58, _57, _56, _55, _54, _53, _52, _51, _50, _49, _48, _37, _36, _32, _28, _27, _26, _24, _23, _19, _18, _17, _15, _14, _13, _11, _10, _9, _3;
 
 static String _7, _1;
 
-static Var _62, _60, _59, _58, _55, _54, _53, _49, _47, _46, _43, _42, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _16, _12, _8, _6, _5, _4, _2, _0;
+static Var _62, _61, _59, _47, _46, _45, _44, _43, _42, _41, _40, _39, _38, _35, _34, _33, _31, _30, _29, _25, _22, _21, _20, _16, _12, _8, _6, _5, _4, _2, _0;
 
 static int _init_guard_ = 0;
 
@@ -39,49 +41,80 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _17 = cons(_16, NULL);
   _18 = cons(_4, _17);
   _19 = cons(_0, _18);
-  _20 = Symbol_var(62436);
-  _21 = Symbol_var(588);
-  _22 = Symbol_var(48777994);
-  _23 = Symbol_var(286);
-  _24 = Symbol_var(13284);
-  _25 = Symbol_var(1323933904);
-  _26 = Symbol_var(42162);
-  _27 = Symbol_var(27369680);
-  _28 = Symbol_var(1527056);
-  _29 = Symbol_var(13929613520);
-  _30 = Symbol_var(13518332722);
-  _31 = cons(_30, NULL);
-  _32 = cons(_29, _31);
-  _33 = cons(_28, _32);
-  _34 = cons(_27, _33);
-  _35 = cons(_26, _34);
-  _36 = cons(_25, _35);
-  _37 = cons(_24, _36);
-  _38 = cons(_23, _37);
-  _39 = cons(_22, _38);
-  _40 = cons(_21, _39);
-  _41 = cons(_20, _40);
-  _42 = List_var(_41);
-  _43 = Symbol_var(54);
-  _44 = cons(_43, NULL);
-  _45 = cons(_42, _44);
-  _46 = Symbol_var(58);
-  _47 = Symbol_var(808259842);
-  _48 = cons(_47, _44);
-  _49 = List_var(_48);
-  _50 = cons(_49, NULL);
-  _51 = cons(_46, _50);
-  _52 = cons(_5, _51);
-  _53 = Symbol_var(7656885669130);
-  _54 = Symbol_var(62481260874);
-  _55 = Symbol_var(1903408535926054);
-  _56 = cons(_55, NULL);
-  _57 = cons(_54, _56);
-  _58 = Symbol_var(150408);
-  _59 = Symbol_var(992);
-  _60 = Symbol_var(123);
-  _61 = cons(_46, NULL);
+  _20 = Symbol_var(58);
+  _21 = Symbol_var(808259842);
+  _22 = Symbol_var(54);
+  _23 = cons(_22, NULL);
+  _24 = cons(_21, _23);
+  _25 = List_var(_24);
+  _26 = cons(_25, NULL);
+  _27 = cons(_20, _26);
+  _28 = cons(_5, _27);
+  _29 = Symbol_var(150408);
+  _30 = Symbol_var(992);
+  _31 = Symbol_var(123);
+  _32 = cons(_20, NULL);
+  _33 = Symbol_var(62436);
+  _34 = Symbol_var(62481260874);
+  _35 = Symbol_var(1903408535926054);
+  _36 = cons(_35, NULL);
+  _37 = cons(_34, _36);
+  _38 = Symbol_var(588);
+  _39 = Symbol_var(48777994);
+  _40 = Symbol_var(286);
+  _41 = Symbol_var(13284);
+  _42 = Symbol_var(1323933904);
+  _43 = Symbol_var(42162);
+  _44 = Symbol_var(27369680);
+  _45 = Symbol_var(1527056);
+  _46 = Symbol_var(13929613520);
+  _47 = Symbol_var(13518332722);
+  _48 = cons(_47, NULL);
+  _49 = cons(_46, _48);
+  _50 = cons(_45, _49);
+  _51 = cons(_44, _50);
+  _52 = cons(_43, _51);
+  _53 = cons(_42, _52);
+  _54 = cons(_41, _53);
+  _55 = cons(_40, _54);
+  _56 = cons(_39, _55);
+  _57 = cons(_38, _56);
+  _58 = cons(_33, _57);
+  _59 = List_var(_58);
+  _60 = cons(_59, _23);
+  _61 = Symbol_var(7656885669130);
   _62 = Symbol_var(2050325770);
+}
+
+List Ast_return_none(void){
+  if(! _init_guard_) _file_init_();
+  return _19;
+}
+
+List Ast_lambda_pattern(void){
+  if(! _init_guard_) _file_init_();
+  return _28;
+}
+
+List Ast_declarator_pattern(List fields){
+  if(! _init_guard_) _file_init_();
+  return({
+    Var _x2c_gensym_literal_part_0 = List_var(cons(_29, List_append(fields, NULL)));  Var _x2c_gensym_literal_part_1 = List_var(cons(_30, cons(_31, cons(List_var(cons(_29, List_append(fields, NULL))), _32))));  cons(_33, cons(_x2c_gensym_literal_part_0, cons(_x2c_gensym_literal_part_1, NULL)));
+  }
+  );
+}
+
+List Macro_content_pattern(Macro shape, List names){
+  return Var_list_payload(List_caddr(Macro_pattern(shape, names)));
+}
+
+List Macro_call_content(Macro call, List callee, List arguments){
+  if(! _init_guard_) _file_init_();
+  List pattern = Macro_pattern(call, _37);
+  return List_replace(Var_list(List_caddr(pattern)), ({
+    Var _x2c_gensym_literal_part_2 = List_var(cons(_34, cons(List_var(callee), NULL)));  Var _x2c_gensym_literal_part_3 = List_var(cons(_35, cons(List_var(arguments), NULL)));  cons(_x2c_gensym_literal_part_2, cons(_x2c_gensym_literal_part_3, NULL));
+  }
+  ));
 }
 
 List source_return_type(List node){
@@ -104,12 +137,12 @@ List source_return_none(void){
 
 List source_conditional_statement(void){
   if(! _init_guard_) _file_init_();
-  return _45;
+  return _60;
 }
 
 List source_any_lambda(void){
   if(! _init_guard_) _file_init_();
-  return _52;
+  return _28;
 }
 
 List source_cast_content(List parts){
@@ -134,7 +167,7 @@ List source_slice_content(List parts){
 
 List source_composite_content(List rows){
   if(! _init_guard_) _file_init_();
-  return cons(_53, cons(List_var(source_commas_content(rows)), NULL));
+  return cons(_61, cons(List_var(source_commas_content(rows)), NULL));
 }
 
 List source_string_content(List rows){
@@ -148,7 +181,7 @@ List source_operator_content(List parts){
 List source_operator_expression(List type, List parts){
   if(! _init_guard_) _file_init_();
   return({
-    Var _x2c_gensym_literal_part_0 = List_var(type);  Var _x2c_gensym_literal_part_1 = List_var(source_operator_content(parts));  cons(_5, cons(_x2c_gensym_literal_part_0, cons(_x2c_gensym_literal_part_1, NULL)));
+    Var _x2c_gensym_literal_part_4 = List_var(type);  Var _x2c_gensym_literal_part_5 = List_var(source_operator_content(parts));  cons(_5, cons(_x2c_gensym_literal_part_4, cons(_x2c_gensym_literal_part_5, NULL)));
   }
   );
 }
@@ -160,7 +193,7 @@ List source_postfix_content(List parts){
 List source_postfix_expression(List type, List parts){
   if(! _init_guard_) _file_init_();
   return({
-    Var _x2c_gensym_literal_part_2 = List_var(type);  Var _x2c_gensym_literal_part_3 = List_var(source_postfix_content(parts));  cons(_5, cons(_x2c_gensym_literal_part_2, cons(_x2c_gensym_literal_part_3, NULL)));
+    Var _x2c_gensym_literal_part_6 = List_var(type);  Var _x2c_gensym_literal_part_7 = List_var(source_postfix_content(parts));  cons(_5, cons(_x2c_gensym_literal_part_6, cons(_x2c_gensym_literal_part_7, NULL)));
   }
   );
 }
@@ -171,9 +204,9 @@ List source_content_pattern(Macro shape, List names){
 
 List source_call_content(Macro call, List callee, List arguments){
   if(! _init_guard_) _file_init_();
-  List pattern = Macro_pattern(call, _57);
+  List pattern = Macro_pattern(call, _37);
   return List_replace(Var_list(List_caddr(pattern)), ({
-    Var _x2c_gensym_literal_part_4 = List_var(cons(_54, cons(List_var(callee), NULL)));  Var _x2c_gensym_literal_part_5 = List_var(cons(_55, cons(List_var(arguments), NULL)));  cons(_x2c_gensym_literal_part_4, cons(_x2c_gensym_literal_part_5, NULL));
+    Var _x2c_gensym_literal_part_8 = List_var(cons(_34, cons(List_var(callee), NULL)));  Var _x2c_gensym_literal_part_9 = List_var(cons(_35, cons(List_var(arguments), NULL)));  cons(_x2c_gensym_literal_part_8, cons(_x2c_gensym_literal_part_9, NULL));
   }
   ));
 }
@@ -197,7 +230,7 @@ List source_literal_content(List fields){
 List source_declarator_row(List fields){
   if(! _init_guard_) _file_init_();
   return({
-    Var _x2c_gensym_literal_part_6 = List_var(cons(_58, List_append(fields, NULL)));  Var _x2c_gensym_literal_part_7 = List_var(cons(_59, cons(_60, cons(List_var(cons(_58, List_append(fields, NULL))), _61))));  cons(_20, cons(_x2c_gensym_literal_part_6, cons(_x2c_gensym_literal_part_7, NULL)));
+    Var _x2c_gensym_literal_part_10 = List_var(cons(_29, List_append(fields, NULL)));  Var _x2c_gensym_literal_part_11 = List_var(cons(_30, cons(_31, cons(List_var(cons(_29, List_append(fields, NULL))), _32))));  cons(_33, cons(_x2c_gensym_literal_part_10, cons(_x2c_gensym_literal_part_11, NULL)));
   }
   );
 }
