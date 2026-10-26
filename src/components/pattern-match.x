@@ -192,7 +192,7 @@ meta static int _match_nested(
   Buffer b, Array out, List pattern, Var value, Array binders, int &depths) {
   int viewed = binders != NULL;
   if ((!viewed &&
-       !pattern.match(%(expr ? (!or (cache ?) (expr ? (cache ?)))))) ||
+       !(pattern ~= %(expr ? (!or (cache ?) (expr ? (cache ?)))))) ||
       value is not <list>)
     return -1;
   _match_flush(b, out);
