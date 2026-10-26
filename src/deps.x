@@ -90,9 +90,12 @@ static String _contents(
 
 static void _write_targets(
   Buffer out, CliRequest request, String input, String output_dir) {
+  if (request.dep_target) {
+    _write_word(out, request.dep_target);
+    return;
+  }
   String base = %"$(output_dir.rstrip("/"))/$(Path.stem(input))";
-  _write_word(out, request.dep_target ? request.dep_target : %"$base.c");
-  if (request.dep_target) return;
+  _write_word(out, %"$base.c");
   out.write_char(' ');
   _write_word(out, %"$base.h");
 }
