@@ -165,14 +165,29 @@ static String _sx_type(SnapshotExtract &s, Type type) {
   List declaration = _sx_declaration(s, binding);
   String owner_file = s.unit;
   if (declaration) owner_file = declaration.car();
+  else if (base.is_aggregate_tag()) {
+    List fields = s.c.sym.field_order(base);
+    foreach (List field, fields ? fields.cdr() : NULL) {
+      if (field.car() is not <string>) continue;
+      List field_binding = s.c.sym.lookup(%(@base $(field.car())), NULL);
+      List field_source = _sx_declaration(s, field_binding);
+      if (field_source) { owner_file = field_source.car(); break; }
+    }
+  }
   String id = %"$(s.domain)::$owner_file::type::$key";
   Map entity = _sx_entity(s, id, "type", name, s.unit_id);
   entity["origin"] = "external";
+  entity["file"] = owner_file;
   _sx_declaration_source(s, entity, declaration);
   if (binding) entity["binding"] = snapshot_text(binding);
   _sx_types(s, entity, base);
   s.type_ids[key] = id;
   _sx_edge(s, s.unit_id, id, "contains", 0);
+  Type alias = s.c.sym.get(base);
+  if (alias && alias.is_typedef()) {
+    _sx_types(s, entity, alias.cdr());
+    _sx_type_edge(s, id, alias.cdr(), "aliases", 0);
+  }
   return id;
 }
 
@@ -394,7 +409,8 @@ static void _sx_walk(
       operand = Ast.without_origin(operand);
       match (operand) case %(parens ?inner): operand = inner;
       Type type = project_expression_type(operand);
-      match (operand) case %(decl *): type = operand.list().type_from_ast();
+      match (operand) case %(decl *parts):
+        type = %(declare @parts).type_from_ast();
       if (type) _sx_type_edge(s, owner, type, "representation", origin);
     }
     case %(offsetof ?type ?):
