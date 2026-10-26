@@ -302,6 +302,10 @@ dependencies = ["core"]
 ''')
     snapshot = p.root / "configurations"
     p.command("snapshot", snapshot, "--manifest-path", manifest)
+    configurations = p.command("status", snapshot)["configurations"]
+    assert set(configurations) == {"core", "app"}, configurations
+    assert configurations["core"]["cpp_args"] != configurations["app"]["cpp_args"]
+    assert configurations["core"]["include_dirs"] != configurations["app"]["include_dirs"]
     types = p.find(snapshot, kind="type", name="SnapshotConfigured")["results"]
     assert len(types) == 2 and len({row["id"] for row in types}) == 2, types
     assert {row["domain"]: row["resolved_type"] for row in types} == {

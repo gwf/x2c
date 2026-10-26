@@ -117,6 +117,17 @@ static void _snapshot_analyze(Map snapshot, ProjectBuild plan) {
     Array inputs = _snapshot_inputs(request);
     Frontend frontend = Frontend.new(request);
     frontend.prepare_meta(inputs);
+    Map configurations = snapshot["configurations"];
+    configurations[_snapshot_domain(request)] = {
+      "target": request.target, "profile": request.profile,
+      "kind": request.kind, "inputs": inputs,
+      "include_dirs": frontend.include_dirs,
+      "package_dirs": request.package_dirs, "cpp_args": request.cpp_args,
+      "cc_args": request.cc_args, "ld_args": request.ld_args,
+      "native_modules": request.native_modules,
+      "extensions": request.extensions, "cc": request.cc,
+      "meta_cc": request.meta_cc, "no_cpp": request.no_cpp,
+      "live_symbols": request.live_symbols, "cpp_symbols": request.cpp_symbols};
     foreach (String input, inputs) {
       // Collection cache rows outlive their compiler's source declarations.
       // A saved-analysis unit needs fresh declaration provenance as well.
@@ -152,7 +163,8 @@ static Map _snapshot_build(Array arguments) {
     "version": 1, "compiler": x2c_embedded_identity(),
     "cwd": Path.absolute("."), "arguments": arguments,
     "entities": [], "edges": [], "files": [], "types": {},
-    "fingerprints": {}, "membership": _snapshot_membership(plan),
+    "fingerprints": {}, "configurations": {},
+    "membership": _snapshot_membership(plan),
     "links": _snapshot_links(plan),
     "coverage": ["bound macro-expanded syntax",
       "direct calls and recorded references; indirect targets unresolved",
@@ -215,6 +227,7 @@ static Map _snapshot_status(Map snapshot, String executable) {
   }
   return {"snapshot": snapshot["identity"],
     "coverage": snapshot["coverage"],
+    "configurations": snapshot["configurations"],
     "fresh": Json.bool(!status && !changed.len() && !missing.len() &&
                        !added.len() && !removed.len()),
     "membership_checked": Json.bool(!status), "membership_error": errors,
