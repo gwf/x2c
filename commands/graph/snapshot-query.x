@@ -35,6 +35,115 @@ static String _sq_string(Var value, String field) {
   return value;
 }
 
+/* Validate the external query once, before selection can short-circuit.
+   Evaluation below relies on these shapes and the existing predicate names. */
+static void _sq_keys(Map object, List allowed) {
+  foreach (String key, object.keys())
+    if (!(key in allowed)) _sq_error(%"unknown query field: $key");
+}
+
+static void _sq_integer(Var value, int minimum, String field) {
+  if (!value.is_integer() || value.integer() < minimum ||
+      value.integer() > INT_MAX)
+    _sq_error(%"$field must be an integer at least $minimum");
+}
+
+static List _sq_node_fields(void) =>
+  %("inside" "callee" "binding" "declared_type" "resolved_type"
+    "argument_type");
+
+static void _sq_validate_walk(Map request) {
+  if (request.contains("depth")) _sq_integer(request["depth"], 0, "depth");
+  if (request.contains("direction")) {
+    String direction = _sq_string(request["direction"], "direction");
+    if (!(direction in %("in" "out")))
+      _sq_error("direction must be in or out");
+  }
+  if (!request.contains("relations")) return;
+  foreach (Var value, _sq_array(request["relations"], "relations")) {
+    String relation = _sq_string(value, "relation");
+    if (!(relation in %("calls" "references" "contains" "aliases"
+          "field-value" "field-pointer" "parameter" "result" "callback"
+          "body-type" "reads" "writes" "mutates" "representation"
+          "conforms" "delegates" "implements")))
+      _sq_error(%"unknown relation: $relation");
+  }
+}
+
+static void _sq_validate_filter(Map filter, int node) {
+  foreach ((String key, Var value) in filter) {
+    if (key == "all" || key == "any") {
+      foreach (Var child, _sq_array(value, key))
+        _sq_validate_filter(_sq_object(child, key), node);
+    }
+    else if (key == "not")
+      _sq_validate_filter(_sq_object(value, key), node);
+    else if (!node && key == "reachable_from") {
+      Map reach = _sq_object(value, key);
+      _sq_keys(reach, %("select" "relations" "direction" "depth"));
+      _sq_validate_filter(_sq_object(reach["select"], "select"), 0);
+      _sq_validate_walk(reach);
+    }
+    else {
+      List allowed = node ? _sq_node_fields()
+        : %("id" "name" "kind" "unit" "file" "domain" "visibility"
+            "origin" "owner" "declared_type" "resolved_type" "binding"
+            "text");
+      if (!(key in allowed)) _sq_error(%"unknown filter: $key");
+      String text = _sq_string(value, key);
+      if (node && (key in %("declared_type" "resolved_type" "argument_type"))
+          && snapshot_value(text) is not <list>)
+        _sq_error(%"$key must contain a type List datum");
+    }
+  }
+}
+
+static String _sq_validate_query(Map request) {
+  String op = _sq_string(request["op"], "op");
+  List fields = NULL;
+  switch (op) {
+    case "find": fields = %("where"); break;
+    case "inspect": fields = %("select" "view"); break;
+    case "traverse":
+      fields = %("select" "where" "relations" "direction" "depth");
+      break;
+    case "path":
+      fields = %("select" "target" "relations" "direction" "depth");
+      break;
+    case "match":
+      fields = %("select" "where" "pattern" "node_where")
+        .append(_sq_node_fields());
+      break;
+    default: _sq_error(%"unknown operation: $op");
+  }
+  _sq_keys(request, %("op" "offset" "limit").append(fields));
+  if (request.contains("offset")) _sq_integer(request["offset"], 0, "offset");
+  if (request.contains("limit")) _sq_integer(request["limit"], 1, "limit");
+  if (request.contains("select") ||
+      (op in %("inspect" "traverse" "path")))
+    _sq_validate_filter(_sq_object(request["select"], "select"), 0);
+  if (op == "path")
+    _sq_validate_filter(_sq_object(request["target"], "target"), 0);
+  if (request.contains("where"))
+    _sq_validate_filter(_sq_object(request["where"], "where"), 0);
+  if (op == "traverse" || op == "path") _sq_validate_walk(request);
+  if (request.contains("view")) {
+    String view = _sq_string(request["view"], "view");
+    if (!(view in %("summary" "declaration" "source" "typed_ast")))
+      _sq_error("view must be summary, declaration, source, or typed_ast");
+  }
+  if (op == "match") {
+    (void) _sq_string(request["pattern"], "pattern");
+    Map predicates = {};
+    foreach (String field, _sq_node_fields())
+      if (request.contains(field)) predicates[field] = request[field];
+    _sq_validate_filter(predicates, 1);
+    if (request.contains("node_where"))
+      _sq_validate_filter(_sq_object(request["node_where"], "node_where"), 1);
+  }
+  return op;
+}
+
 /* sort_by computes each key once and preserves the original records. */
 static Array _sq_sorted(Array rows) =>
   rows.copy().sort_by(%!(Var row) => row.json());
@@ -94,26 +203,17 @@ static int _sq_equal(Var left, Var right) => left.json() == right.json();
 
 static int _sq_relation(Map edge, Map request) {
   if (!request.contains("relations")) return edge["kind"] == "calls";
-  Array kinds = _sq_array(request["relations"], "relations");
+  Array kinds = request["relations"];
   foreach (Var kind, kinds)
-    if (_sq_string(kind, "relation") == edge["kind"]) return 1;
+    if (kind == edge["kind"]) return 1;
   return 0;
 }
 
-static int _sq_inward(Map request) {
-  String direction = request.getdefault("direction", "out");
-  if (direction != "in" && direction != "out")
-    _sq_error("direction must be in or out");
-  return direction == "in";
-}
+static int _sq_inward(Map request) =>
+  request.getdefault("direction", "out") == "in";
 
-static int _sq_depth(Map request) {
-  if (!request.contains("depth")) return INT_MAX;
-  Var depth = request["depth"];
-  if (!depth.is_integer() || depth.integer() < 0 ||
-      depth.integer() > INT_MAX) _sq_error("depth must be nonnegative");
-  return depth.int();
-}
+static int _sq_depth(Map request) =>
+  request.getdefault("depth", (int) INT_MAX);
 
 static int _sq_filter(SnapshotQuery &q, Map entity, Map filter);
 
@@ -168,7 +268,7 @@ static Map _sq_walk(
 static int _sq_reachable(SnapshotQuery &q, Map entity, Map request) {
   String key = Var.json(request);
   if (!q.reachable.contains(key)) {
-    Map selector = _sq_object(request["select"], "reachable_from.select");
+    Map selector = request["select"];
     q.reachable[key] = _sq_walk(q, _sq_select(q, selector), request, NULL);
   }
   return q.reachable[key].map().contains(
@@ -178,32 +278,26 @@ static int _sq_reachable(SnapshotQuery &q, Map entity, Map request) {
 static int _sq_filter(SnapshotQuery &q, Map entity, Map filter) {
   foreach ((String key, Var value) in filter) {
     if (key == "all" || key == "any") {
-      Array filters = _sq_array(value, key);
+      Array filters = value;
       int found = key == "all";
       foreach (Var child, filters) {
-        int matches = _sq_filter(q, entity, _sq_object(child, key));
+        int matches = _sq_filter(q, entity, child);
         if (key == "all" && !matches) { found = 0; break; }
         if (key == "any" && matches) { found = 1; break; }
       }
       if (!found) return 0;
     }
     else if (key == "not") {
-      if (_sq_filter(q, entity, _sq_object(value, key))) return 0;
+      if (_sq_filter(q, entity, value)) return 0;
     }
     else if (key == "text") {
       String source = entity.getdefault("source", "");
-      if (!strstr(source, _sq_string(value, key))) return 0;
+      if (!strstr(source, value.str())) return 0;
     }
     else if (key == "reachable_from") {
-      if (!_sq_reachable(q, entity, _sq_object(value, key))) return 0;
+      if (!_sq_reachable(q, entity, value)) return 0;
     }
     else {
-      int known = 0;
-      foreach (String field, %("id" "name" "kind" "unit" "file"
-          "domain" "visibility" "origin" "owner" "declared_type"
-          "resolved_type" "binding"))
-        if (field == key) { known = 1; break; }
-      if (!known) _sq_error(%"unknown filter: $key");
       if (!entity.contains(key) || !_sq_equal(entity[key], value)) return 0;
     }
   }
@@ -221,26 +315,13 @@ static Map _sq_view(Map entity, String view) {
   Map result = _sq_summary(entity);
   if (view == "summary") return result;
   String field = view == "typed_ast" ? "ast" : view;
-  if (field != "ast" && field != "source" && field != "declaration")
-    _sq_error("view must be summary, declaration, source, or typed_ast");
   result[field] = entity.getdefault(field, NULL);
   return result;
 }
 
 static Map _sq_page(Map snapshot, Map request, Array rows) {
-  int offset = 0, limit = 100;
-  if (request.contains("offset")) {
-    Var value = request["offset"];
-    if (!value.is_integer() || value.integer() < 0 ||
-        value.integer() > INT_MAX) _sq_error("offset must be nonnegative");
-    offset = value.int();
-  }
-  if (request.contains("limit")) {
-    Var value = request["limit"];
-    if (!value.is_integer() || value.integer() < 1 ||
-        value.integer() > INT_MAX) _sq_error("limit must be positive");
-    limit = value.int();
-  }
+  int offset = request.getdefault("offset", 0);
+  int limit = request.getdefault("limit", 100);
   Array ordered = _sq_sorted(rows), page = [];
   for (int i = offset; i < ordered.len() && page.len() < limit; i++)
     page.push(ordered[i]);
@@ -253,14 +334,14 @@ static Map _sq_page(Map snapshot, Map request, Array rows) {
 
 static Array _sq_find(SnapshotQuery &q, Map request) {
   Map where = request.contains("where")
-    ? _sq_object(request["where"], "where") : {};
+    ? request["where"].map() : {};
   Array rows = [];
   foreach (Map entity, _sq_select(q, where)) rows.push(_sq_summary(entity));
   return rows;
 }
 
 static Map _sq_inspect(SnapshotQuery &q, Map request) {
-  Array selected = _sq_select(q, _sq_object(request["select"], "select"));
+  Array selected = _sq_select(q, request["select"].map());
   Array rows = [];
   String view = request.getdefault("view", "summary");
   foreach (Map entity, selected)
@@ -272,11 +353,11 @@ static Map _sq_inspect(SnapshotQuery &q, Map request) {
 }
 
 static Array _sq_traverse(SnapshotQuery &q, Map request) {
-  Array starts = _sq_select(q, _sq_object(request["select"], "select"));
+  Array starts = _sq_select(q, request["select"].map());
   Map predecessors = {};
   Map distances = _sq_walk(q, starts, request, predecessors);
   Map where = request.contains("where")
-    ? _sq_object(request["where"], "where") : {};
+    ? request["where"].map() : {};
   Array rows = [];
   foreach ((String id, Var distance) in distances) {
     Map entity = q.entities_by_id[id];
@@ -291,8 +372,8 @@ static Array _sq_traverse(SnapshotQuery &q, Map request) {
 }
 
 static Map _sq_path(SnapshotQuery &q, Map request) {
-  Array starts = _sq_select(q, _sq_object(request["select"], "select"));
-  Array targets = _sq_select(q, _sq_object(request["target"], "target"));
+  Array starts = _sq_select(q, request["select"].map());
+  Array targets = _sq_select(q, request["target"].map());
   if (starts.len() != 1 || targets.len() != 1) {
     Map result = _sq_page(q.snapshot, request, []);
     result["status"] = !starts.len() || !targets.len()
@@ -378,9 +459,9 @@ static int _sq_node_filter(
   SnapshotQuery &q, Map entity, List node, List parents, Map request) {
   if (request.contains("node_where") &&
       !_sq_node_where(q, entity, node, parents,
-        _sq_object(request["node_where"], "node_where"))) return 0;
+        request["node_where"].map())) return 0;
   if (request.contains("inside")) {
-    String wanted = _sq_string(request["inside"], "inside");
+    String wanted = request["inside"].str();
     int found = 0;
     foreach (Var head, parents) {
       String name = head.str();
@@ -392,7 +473,7 @@ static int _sq_node_filter(
   }
   if (request.contains("binding") &&
       !_sq_binding(q, entity, node,
-        _sq_string(request["binding"], "binding"))) return 0;
+        request["binding"].str())) return 0;
   if (request.contains("callee")) {
     List callee = NULL;
     match (node) {
@@ -400,7 +481,7 @@ static int _sq_node_filter(
       case %(expr ? (call ?function (args *))): callee = function;
     }
     if (!callee || !_sq_binding(q, entity, callee,
-          _sq_string(request["callee"], "callee"))) return 0;
+          request["callee"].str())) return 0;
   }
   foreach (String field, %("declared_type" "resolved_type")) {
     if (!request.contains(field)) continue;
@@ -409,7 +490,7 @@ static int _sq_node_filter(
     if (!type) return 0;
     String actual = field == "resolved_type"
       ? _sq_resolved(q, entity, type) : snapshot_text(type);
-    if (!_sq_type_equal(actual, _sq_string(request[field], field))) return 0;
+    if (!_sq_type_equal(actual, request[field].str())) return 0;
   }
   if (request.contains("argument_type")) {
     List arguments = NULL;
@@ -421,7 +502,7 @@ static int _sq_node_filter(
     foreach (List argument, arguments)
       match (argument) case %(expr ?type ?):
         if (_sq_type_equal(_sq_resolved(q, entity, type),
-              _sq_string(request["argument_type"], "argument_type"))) {
+              request["argument_type"].str())) {
           found = 1;
           break;
         }
@@ -436,26 +517,19 @@ static int _sq_node_where(
   Map simple = {};
   foreach ((String key, Var value) in filter) {
     if (key == "all" || key == "any") {
-      Array filters = _sq_array(value, key);
+      Array filters = value;
       int found = key == "all";
       foreach (Var child, filters) {
-        int matches = _sq_node_where(q, entity, node, parents,
-          _sq_object(child, key));
+        int matches = _sq_node_where(q, entity, node, parents, child);
         if (key == "all" && !matches) { found = 0; break; }
         if (key == "any" && matches) { found = 1; break; }
       }
       if (!found) return 0;
     }
     else if (key == "not") {
-      if (_sq_node_where(q, entity, node, parents,
-            _sq_object(value, key))) return 0;
+      if (_sq_node_where(q, entity, node, parents, value)) return 0;
     }
     else {
-      int known = 0;
-      foreach (String field, %("inside" "callee" "binding"
-          "declared_type" "resolved_type" "argument_type"))
-        if (field == key) { known = 1; break; }
-      if (!known) _sq_error(%"unknown node filter: $key");
       simple[key] = value;
     }
   }
@@ -522,16 +596,26 @@ static void _sq_match_entity(
   }
 }
 
-static Array _sq_match(SnapshotQuery &q, Map request) {
-  Var value = snapshot_value(_sq_string(request["pattern"], "pattern"));
-  MatchPlan pattern = auto MatchPlan.prepare(value);
-  if (pattern.status == <malformed>) _sq_error("malformed Match pattern");
-  if (pattern.status == <ineligible>)
-    MatchPlan.raise_ineligible(pattern.reason, "graph query");
+static MatchPlan _sq_prepare_pattern(String text) {
+  MatchPlan pattern = MatchPlan.prepare(snapshot_value(text));
+  if (pattern.status == <malformed>) {
+    pattern.free();
+    _sq_error("malformed Match pattern");
+  }
+  if (pattern.status == <ineligible>) {
+    const char *reason = pattern.reason;
+    pattern.free();
+    MatchPlan.raise_ineligible(reason, "graph query");
+  }
+  return pattern;
+}
+
+static Array _sq_match(
+  SnapshotQuery &q, Map request, MatchPlan pattern) {
   Map selector = request.contains("select")
-    ? _sq_object(request["select"], "select") : {};
+    ? request["select"].map() : {};
   Map where = request.contains("where")
-    ? _sq_object(request["where"], "where") : {};
+    ? request["where"].map() : {};
   Array rows = [];
   foreach (Map entity, _sq_select(q, selector))
     if (_sq_filter(q, entity, where))
@@ -543,7 +627,7 @@ static Array _sq_match(SnapshotQuery &q, Map request) {
    kind or an explicit any-set, deliberately select several entities. */
 static Map _sq_name_ambiguity(SnapshotQuery &q, Map request) {
   if (!request.contains("select")) return NULL;
-  Map selector = _sq_object(request["select"], "select");
+  Map selector = request["select"].map();
   if (!selector.contains("name") || selector.contains("id")) return NULL;
   Array candidates = _sq_select(q, selector);
   if (candidates.len() < 2) return NULL;
@@ -556,8 +640,10 @@ static Map _sq_name_ambiguity(SnapshotQuery &q, Map request) {
 
 /** Executes one data-only query without opening a compiler or source file. */
 Map graph_snapshot_query(Map snapshot, Map request) {
+  String op = _sq_validate_query(request);
+  MatchPlan pattern = auto op == "match"
+    ? _sq_prepare_pattern(request["pattern"]) : NULL;
   SnapshotQuery q = _sq_open(snapshot);
-  String op = _sq_string(request["op"], "op");
   if (op == "traverse" || op == "match") {
     Map ambiguous = _sq_name_ambiguity(q, request);
     if ((void *) ambiguous) return ambiguous;
@@ -568,7 +654,7 @@ Map graph_snapshot_query(Map snapshot, Map request) {
     case "inspect": return _sq_inspect(q, request);
     case "traverse": rows = _sq_traverse(q, request); break;
     case "path": return _sq_path(q, request);
-    case "match": rows = _sq_match(q, request); break;
+    case "match": rows = _sq_match(q, request, pattern); break;
     default: _sq_error(%"unknown operation: $op");
   }
   return _sq_page(snapshot, request, rows);
