@@ -2188,7 +2188,7 @@ Var Lisp_apply(Lisp lisp, Var callable, List values){
 Symbol Lisp_read(Lisp lisp, String source, unsigned * cursor, Var * out){
   if(! _init_guard_) _file_init_();
   (void) lisp;
-  return datum_read_form(source, cursor, out);
+  return String_read_lisp_form(source, cursor, out);
 }
 
 static int String_truth(String);
@@ -2244,12 +2244,12 @@ Var Lisp_eval_string(Lisp lisp, String source){
             ;
             x2c_cleanup_push(& _x2c_gensym_defer_record_18);
             {
-              Tokenizer tokenizer = datum_scan_tokens(source, & tokens_scope);
+              Tokenizer tokenizer = Tokenizer_from_lisp(source, & tokens_scope);
               unsigned cursor = 0;
               Var result = List_var(NULL);
               while(1){
                 Var form =((void) 0, Void);
-                if(datum_read_token_form(tokenizer, source, 0, &(cursor), &(form)) == 11212) break;
+                if(Tokenizer_read_lisp_form(tokenizer, source, 0, &(cursor), &(form)) == 11212) break;
                 result = f8_evaluate____eval(lisp, form, NULL);
               }
               {

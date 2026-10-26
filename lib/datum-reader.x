@@ -26,16 +26,15 @@ static keyword loop $private.loop;
    `source` at EOF; a failure raises with `cursor` at the form's first
    token. */
 Symbol Tokenizer.read_lisp_form(
-  Tokenizer tokenizer, String source, unsigned base, unsigned &cursor,
-  Var &?out) {
-  Token token = tokenizer.next();
+  Tokenizer t, String source, unsigned base, unsigned &cursor, Var &?out) {
+  Token token = t.next();
   if (!token || token.type == <eof>) {
     cursor = source.len();
     return <eof>;
   }
   unsigned start = base + token.pos;
   cursor = start;
-  LispReader r = {tokenizer, source, base, 0};
+  LispReader r = {t, source, base, 0};
   Var form = _parse_form(r, token, 0);
   if (form is void) _incomplete(source, start);
   if (out) out = form;

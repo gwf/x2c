@@ -560,7 +560,7 @@ static void _refuse(Compiler c, Var value, Token site){
       .fn = _x2c_gensym_defer_cleanup_0, .env = & _x2c_gensym_macro_environment_0
     }
     ;  x2c_cleanup_push(& _x2c_gensym_defer_record_0); {
-      List problem = datum_result_problem(value, marks);  if(List_truth(problem)) Compiler_report_error(c, 27335838, Var_as_string(List_car(problem)), site, Var_list_payload(List_cadr(problem)));
+      List problem = Var_independent_data_problem(value, marks);  if(List_truth(problem)) Compiler_report_error(c, 27335838, Var_as_string(List_car(problem)), site, Var_list_payload(List_cadr(problem)));
     }
     x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
   }

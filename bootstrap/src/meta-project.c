@@ -1787,7 +1787,7 @@ static List _write_manifest(Helper * h, String failure){
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_12);
     {
-      datum_write(out, List_var(manifest), 0);
+      Buffer_write_datum(out, List_var(manifest), 0);
       Path_write_text(String_join(NULL, cons(String_var((* h).directory), cons(String_var(_92), NULL))), Buffer_str(out));
       {
         List _x2c_gensym_return_value_13 = manifest;
@@ -1848,7 +1848,7 @@ static List _current(String directory){
     }
     volatile ErrorHandler _x2c_gensym_error_handler_2 = x2c_error_catch_site_push(& _x2c_gensym_exception_frame_2, & _x2c_gensym_macro_site_2, _x2c_gensym_macro_patterns_2);
     x2c_exception_push(& _x2c_gensym_exception_frame_2);
-    if(! sigsetjmp(_x2c_gensym_exception_frame_2.env, 0)) datum_read(text, &(cursor), &(datum));
+    if(! sigsetjmp(_x2c_gensym_exception_frame_2.env, 0)) String_read_datum(text, &(cursor), &(datum));
     else{
       x2c_exception_landed(& _x2c_gensym_exception_frame_2);
       if(x2c_exception_is_error_target(& _x2c_gensym_exception_frame_2)){

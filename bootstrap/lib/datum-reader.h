@@ -8,12 +8,13 @@
 #include "private-keywords.h"
 #include "tokenizer.h"
 #include "scan.h"
-Symbol datum_read_token_form(Tokenizer tokenizer, String source, unsigned base, unsigned * cursor, Var * out);
+#include <limits.h>
+Symbol Tokenizer_read_lisp_form(Tokenizer tokenizer, String source, unsigned base, unsigned * cursor, Var * out);
 
 #define LISP_READ_DEPTH_MAX 1024
-Tokenizer datum_scan_tokens(String source, Scope * scope);
+Tokenizer Tokenizer_from_lisp(String source, Scope * scope);
 
-Symbol datum_read_form(String source, unsigned * cursor, Var * out);
+Symbol String_read_lisp_form(String source, unsigned * cursor, Var * out);
 
 
 #endif /* __GUARD_0xDF42A675__ */

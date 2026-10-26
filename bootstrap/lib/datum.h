@@ -7,20 +7,17 @@
 
 #include "x2c.h"
 #include "datum-reader.h"
-#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
-int datum_write(Buffer out, Var value, int tagged);
+int Buffer_write_datum(Buffer out, Var value, int tagged);
 
-int datum_read(String text, unsigned * cursor, Var * out);
+int String_read_datum(String text, unsigned * cursor, Var * out);
 
-int datum_read_plain(String text, unsigned * cursor, Var * out);
+int Buffer_write_datum_frame(Buffer out, Var value);
 
-int datum_frame(Buffer out, Var value);
+int String_read_datum_frame(String input, size_t * used, Var * value);
 
-int datum_unframe(String input, size_t * used, Var * value);
-
-List datum_result_problem(Var value, Map marks);
+List Var_independent_data_problem(Var value, Map marks);
 
 
 #endif /* __GUARD_0x2D33392F__ */

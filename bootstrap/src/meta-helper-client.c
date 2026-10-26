@@ -686,7 +686,7 @@ static int _write_frame(List message, double deadline){
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_2);
     {
-      if(! datum_frame(out, List_var(message))){
+      if(! Buffer_write_datum_frame(out, List_var(message))){
         int _x2c_gensym_return_value_2 = 0;
         {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_2);
@@ -805,7 +805,7 @@ static int _read_reply(double deadline, Var * reply){
 static int _take_frame(Var * reply){
   String input = Buffer_str(active -> input);
   size_t used = 0;
-  if(! datum_unframe(input, &(used), &((* reply)))) return 0;
+  if(! String_read_datum_frame(input, &(used), &((* reply)))) return 0;
   String rest = String_getslice(input, x2c_slice_bound(used), (-2147483647 - 1), 1);
   Buffer_clear(active -> input);
   if(String_truth(rest)) Buffer_write(active -> input, rest);

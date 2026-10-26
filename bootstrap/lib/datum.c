@@ -3,7 +3,6 @@
 #define __GUARD_0x2D33392F__
 #include "x2c.h"
 #include "datum-reader.h"
-#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 static List _50, _48, _43, _42, _40, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21;
@@ -28,22 +27,6 @@ static int _write_array(Buffer out, Array array);
 
 static int _write_map(Buffer out, Map map);
 
-static int _plain_form(char * s, unsigned * at, Var * out, Array items, int depth);
-
-static int _plain_list(char * s, unsigned * at, Var * out, Array items, int depth);
-
-static int _plain_string(char * s, unsigned * at, Var * out);
-
-static int _plain_integer(char * s, unsigned * at, Var * out);
-
-static int _plain_atom(char * s, unsigned * at, Var * out);
-
-static int _digit(char c);
-
-static int _blank(char c);
-
-static int _token_end(char c);
-
 static Var _decode(Var value);
 
 static List _decode_list(List list);
@@ -54,21 +37,14 @@ static Map _decode_map(List entries);
 
 static List _items_problem(Var value, Map marks);
 
+static int _x2c_gensym_string_switch_0(String s);
+
 typedef struct _x2c_gensym_defer_env_0{
   const void * _x2c_gensym_defer_capture_0;
 }
 _x2c_gensym_defer_env_0;
 
 static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0);
-
-static int _x2c_gensym_string_switch_0(String s);
-
-typedef struct _x2c_gensym_defer_env_1{
-  const void * _x2c_gensym_defer_capture_1;
-}
-_x2c_gensym_defer_env_1;
-
-static void _x2c_gensym_defer_cleanup_1(void * _x2c_gensym_defer_opaque_1);
 
 static Var String_var(String);
 
@@ -213,7 +189,7 @@ static Array Var_array_payload(Var);
 
 static Map Var_map_payload(Var);
 
-int datum_write(Buffer out, Var value, int tagged){
+int Buffer_write_datum(Buffer out, Var value, int tagged){
   if(! _init_guard_) _file_init_();
   if(Var_is_row(value, 9, 7, 4)) return _write_list(out, Var_list_payload(value), tagged);
   if(tagged && Var_is_null(value)) Buffer_write(out, "(x2c.null)");
@@ -239,7 +215,7 @@ static int _write_list(Buffer out, List list, int tagged){
   int quoted = tagged && _tag_headed(list);
   Buffer_write(out, quoted ? "(x2c.quote (" : "(");
   for(List p = list;  List_truth(p);  p = List_cdr(p)){
-    if(! datum_write(out, List_car(p), tagged)) return 0;
+    if(! Buffer_write_datum(out, List_car(p), tagged)) return 0;
     if(List_truth(List_cdr(p))) Buffer_write_char(out, ' ');
   }
   Buffer_write(out, quoted ? "))" : ")");
@@ -286,7 +262,7 @@ static int _write_array(Buffer out, Array array){
       item = _x2c_gensym_macro_cursor_output_1;
       {
         Buffer_write_char(out, ' ');
-        if(! datum_write(out, item, 1)) return 0;
+        if(! Buffer_write_datum(out, item, 1)) return 0;
       }
 
     }
@@ -311,9 +287,9 @@ static int _write_map(Buffer out, Map map){
       item = _x2c_gensym_macro_cursor_output_3;
       {
         Buffer_write(out, " (");
-        if(! datum_write(out, key, 1)) return 0;
+        if(! Buffer_write_datum(out, key, 1)) return 0;
         Buffer_write_char(out, ' ');
-        if(! datum_write(out, item, 1)) return 0;
+        if(! Buffer_write_datum(out, item, 1)) return 0;
         Buffer_write_char(out, ')');
       }
 
@@ -324,156 +300,12 @@ static int _write_map(Buffer out, Map map){
   return 1;
 }
 
-int datum_read_plain(String text, unsigned * cursor, Var * out);
-
-int datum_read(String text, unsigned * cursor, Var * out){
+int String_read_datum(String text, unsigned * cursor, Var * out){
   if(! _init_guard_) _file_init_();
   Var value =((void) 0, Void);
-  if(! datum_read_plain(text, &((* cursor)), &(value))) return 0;
+  if(String_read_lisp_form(text, &((* cursor)), &(value)) != 46228810) return 0;
   (* out) = _decode(value);
   return 1;
-}
-
-static int String_truth(String);
-
-int String_getindex(String, int);
-
-Array Array_new(void);
-
-void x2c_cleanup_push(X2CCleanup *);
-
-void x2c_cleanup_leave(X2CCleanup *);
-
-int datum_read_plain(String text, unsigned * cursor, Var * out){
-  Var value =((void) 0, Void);
-  unsigned at =(* cursor);
-  if(String_truth(text)) while(_blank(String_getindex(text, at))) at ++;
-  Array items = Array_new();
-  const Array _x2c_gensym_macro_acquired_0 = items;
-  {
-    _x2c_gensym_defer_env_0 _x2c_gensym_macro_environment_0 ={
-      0
-    }
-    ;
-    _x2c_gensym_macro_environment_0._x2c_gensym_defer_capture_0 =(const void *) & _x2c_gensym_macro_acquired_0;
-    X2CCleanup _x2c_gensym_defer_record_0 ={
-      .fn = _x2c_gensym_defer_cleanup_0, .env = & _x2c_gensym_macro_environment_0
-    }
-    ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_0);
-    {
-      if(String_truth(text) && String_getindex(text, at) && _plain_form(text, &(at), &(value), items, 1))(* cursor) = at;
-      else if(datum_read_form(text, &((* cursor)), &(value)) != 46228810){
-        int _x2c_gensym_return_value_0 = 0;
-        {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
-          return _x2c_gensym_return_value_0;
-        }
-
-      }
-      (* out) = value;
-      {
-        int _x2c_gensym_return_value_1 = 1;
-        {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
-          return _x2c_gensym_return_value_1;
-        }
-
-      }
-
-    }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
-  }
-
-}
-
-static int _plain_form(char * s, unsigned * at, Var * out, Array items, int depth){
-  char c = s[(* at)];
-  if(c == '(') return _plain_list(s, &((* at)), &((* out)), items, depth);
-  if(c == '"') return _plain_string(s, &((* at)), &((* out)));
-  if(_digit(c) ||(c == '-' && _digit(s[(* at) + 1]))) return _plain_integer(s, &((* at)), &((* out)));
-  return _plain_atom(s, &((* at)), &((* out)));
-}
-
-Var Array_push(Array, Var);
-
-Var Array_getindex(Array, int);
-
-static int _plain_list(char * s, unsigned * at, Var * out, Array items, int depth){
-  if(depth >= LISP_READ_DEPTH_MAX) return 0;
-  int first = Array_len(items);
-  for((* at) ++; ; ){
-    while(_blank(s[(* at)]))(* at) ++;
-    if(s[(* at)] == ')') break;
-    Var item =((void) 0, Void);
-    if(! _plain_form(s, &((* at)), &(item), items, depth + 1)) return 0;
-    Array_push(items, item);
-  }
-  (* at) ++;
-  List list = NULL;
-  for(int i = Array_len(items) - 1;  i >= first;  i --) list = cons(Array_getindex(items, i), list);
-  Array_truncate(items, first);
-  (* out) = List_var(list);
-  return 1;
-}
-
-int scan_c_string(char *);
-
-String String_unescape(String);
-
-String String_new_len(const char *, int);
-
-static int _plain_string(char * s, unsigned * at, Var * out){
-  int length = scan_c_string(s +(* at));
-  if(length < 0 || ! _token_end(s[(* at) + length])) return 0;
-  (* out) = String_var(String_unescape(String_new_len(s +(* at) + 1, length - 2)));
-  (* at) += length;
-  return 1;
-}
-
-static Var int_var(int);
-
-static Var long_var(long);
-
-static int _plain_integer(char * s, unsigned * at, Var * out){
-  unsigned end =(* at) +(s[(* at)] == '-');
-  if(s[end] == '0' && _digit(s[end + 1])) return 0;
-  long value = 0;
-  for(;  _digit(s[end]);  end ++){
-    int digit = s[end] - '0';
-    if(value >(LONG_MAX - digit) / 10) return 0;
-    value = value * 10 + digit;
-  }
-  if(! _token_end(s[end])) return 0;
-  if(s[(* at)] == '-') value = - value;
-  if(value ==(int) value)(* out) = int_var((int) value);
-  else(* out) = long_var(value);
-  (* at) = end;
-  return 1;
-}
-
-Atom Atom_intern(String);
-
-static int _plain_atom(char * s, unsigned * at, Var * out){
-  int length = 0;
-  while(! _token_end(s[(* at) + length])) length ++;
-  String spelling = String_new_len(s +(* at), length);
-  if(! Atom_bare_spelling(spelling)) return 0;
-  (* out) = Atom_intern(spelling);
-  (* at) += length;
-  return 1;
-}
-
-static int _digit(char c){
-  return c >= '0' && c <= '9';
-}
-
-static int _blank(char c){
-  return c == ' ' || c == '\n' || c == '\t' || c == '\r';
-}
-
-static int _token_end(char c){
-  return ! c || c == ')' || _blank(c);
 }
 
 int Var_is_nil(Var);
@@ -481,6 +313,8 @@ int Var_is_nil(Var);
 Var Var_null(void);
 
 static Var Symbol_var(Symbol);
+
+Atom Atom_intern(String);
 
 static Var List_cadr(List);
 
@@ -514,6 +348,10 @@ static Var _decode(Var value){
   }
   return Map_var(_decode_map(List_cdr(list)));
 }
+
+Array Array_new(void);
+
+Var Array_push(Array, Var);
 
 List Array_list_free(Array);
 
@@ -571,33 +409,37 @@ static Map _decode_map(List entries){
 
 Buffer Buffer_new(size_t);
 
+void x2c_cleanup_push(X2CCleanup *);
+
+void x2c_cleanup_leave(X2CCleanup *);
+
 size_t Buffer_len(Buffer);
 
 String Buffer_str(Buffer);
 
 String String_join(String, List);
 
-int datum_frame(Buffer out, Var value){
+int Buffer_write_datum_frame(Buffer out, Var value){
   if(! _init_guard_) _file_init_();
   Buffer body = Buffer_new(0);
-  const Buffer _x2c_gensym_macro_acquired_1 = body;
+  const Buffer _x2c_gensym_macro_acquired_0 = body;
   {
-    _x2c_gensym_defer_env_1 _x2c_gensym_macro_environment_1 ={
+    _x2c_gensym_defer_env_0 _x2c_gensym_macro_environment_0 ={
       0
     }
     ;
-    _x2c_gensym_macro_environment_1._x2c_gensym_defer_capture_1 =(const void *) & _x2c_gensym_macro_acquired_1;
-    X2CCleanup _x2c_gensym_defer_record_1 ={
-      .fn = _x2c_gensym_defer_cleanup_1, .env = & _x2c_gensym_macro_environment_1
+    _x2c_gensym_macro_environment_0._x2c_gensym_defer_capture_0 =(const void *) & _x2c_gensym_macro_acquired_0;
+    X2CCleanup _x2c_gensym_defer_record_0 ={
+      .fn = _x2c_gensym_defer_cleanup_0, .env = & _x2c_gensym_macro_environment_0
     }
     ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_1);
+    x2c_cleanup_push(& _x2c_gensym_defer_record_0);
     {
-      if(! datum_write(body, value, 1)){
-        int _x2c_gensym_return_value_2 = 0;
+      if(! Buffer_write_datum(body, value, 1)){
+        int _x2c_gensym_return_value_0 = 0;
         {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_1);
-          return _x2c_gensym_return_value_2;
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
+          return _x2c_gensym_return_value_0;
         }
 
       }
@@ -606,16 +448,16 @@ int datum_frame(Buffer out, Var value){
       }
       ));
       {
-        int _x2c_gensym_return_value_3 = 1;
+        int _x2c_gensym_return_value_1 = 1;
         {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_1);
-          return _x2c_gensym_return_value_3;
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
+          return _x2c_gensym_return_value_1;
         }
 
       }
 
     }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_1);
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
   }
 
 }
@@ -624,12 +466,14 @@ int String_find(String, String);
 
 int String_len(String);
 
+String String_new_len(const char *, int);
+
 #include "error.h"
 
 
 
 
-int datum_unframe(String input, size_t * used, Var * value){
+int String_read_datum_frame(String input, size_t * used, Var * value){
   if(! _init_guard_) _file_init_();
   int newline = String_find(input, _35);
   if(newline <= 0) return 0;
@@ -638,8 +482,8 @@ int datum_unframe(String input, size_t * used, Var * value){
   String frame = String_new_len(input + newline + 1, length);
   unsigned cursor = 0;
   (* value) =((void) 0, Void);
-  if(! datum_read(frame, &(cursor), &((* value)))){
-    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/datum.x",.function = "datum_unframe",.line = 322,.runtime = 1};
+  if(! String_read_datum(frame, &(cursor), &((* value)))){
+    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/datum.x",.function = "String_read_datum_frame",.line = 222,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_0, 28682226919752, 1, Symbol_var(13765450), String_var(frame));
     __builtin_unreachable();
   }
@@ -655,7 +499,9 @@ static Var ulong_var(ulong);
 
 Var Map_getindex(Map, Var);
 
-List datum_result_problem(Var value, Map marks){
+static Var int_var(int);
+
+List Var_independent_data_problem(Var value, Map marks){
   if(! _init_guard_) _file_init_();
   if(Var_is_pointer(value) && value.u64) return _43;
   if(Var_is_row(value, 9, 7, 4)) return _items_problem(value, marks);
@@ -681,7 +527,7 @@ static List _items_problem(Var value, Map marks){
     while(List_try_next(_x2c_gensym_macro_object_5, &(_x2c_gensym_macro_cursor_5), &(_x2c_gensym_macro_cursor_output_6))){
       item = _x2c_gensym_macro_cursor_output_6;
       {
-        List problem = datum_result_problem(item, marks);
+        List problem = Var_independent_data_problem(item, marks);
         if(List_truth(problem)) return problem;
       }
 
@@ -696,7 +542,7 @@ static List _items_problem(Var value, Map marks){
     while(Array_try_next(_x2c_gensym_macro_object_6, &(_x2c_gensym_macro_cursor_6), &(_x2c_gensym_macro_cursor_output_7))){
       item = _x2c_gensym_macro_cursor_output_7;
       {
-        List problem = datum_result_problem(item, marks);
+        List problem = Var_independent_data_problem(item, marks);
         if(List_truth(problem)) return problem;
       }
 
@@ -713,8 +559,8 @@ static List _items_problem(Var value, Map marks){
       key = _x2c_gensym_macro_cursor_output_8;
       item = _x2c_gensym_macro_cursor_output_9;
       {
-        List problem = datum_result_problem(key, marks);
-        if(! List_truth(problem)) problem = datum_result_problem(item, marks);
+        List problem = Var_independent_data_problem(key, marks);
+        if(! List_truth(problem)) problem = Var_independent_data_problem(item, marks);
         if(List_truth(problem)) return problem;
       }
 
@@ -722,13 +568,6 @@ static List _items_problem(Var value, Map marks){
 
   }
   return NULL;
-}
-
-void Array_cleanup(Array);
-
-static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0){
-  _x2c_gensym_defer_env_0 * _x2c_gensym_defer_data_0 =(_x2c_gensym_defer_env_0 *) _x2c_gensym_defer_opaque_0;
-  Array_cleanup((*(const Array *) _x2c_gensym_defer_data_0->_x2c_gensym_defer_capture_0));
 }
 
 static int _x2c_gensym_string_switch_0(String s){
@@ -746,8 +585,8 @@ static int _x2c_gensym_string_switch_0(String s){
 
 void Buffer_cleanup(Buffer);
 
-static void _x2c_gensym_defer_cleanup_1(void * _x2c_gensym_defer_opaque_1){
-  _x2c_gensym_defer_env_1 * _x2c_gensym_defer_data_1 =(_x2c_gensym_defer_env_1 *) _x2c_gensym_defer_opaque_1;
-  Buffer_cleanup((*(const Buffer *) _x2c_gensym_defer_data_1->_x2c_gensym_defer_capture_1));
+static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0){
+  _x2c_gensym_defer_env_0 * _x2c_gensym_defer_data_0 =(_x2c_gensym_defer_env_0 *) _x2c_gensym_defer_opaque_0;
+  Buffer_cleanup((*(const Buffer *) _x2c_gensym_defer_data_0->_x2c_gensym_defer_capture_0));
 }
 
