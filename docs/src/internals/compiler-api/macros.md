@@ -134,7 +134,7 @@ Source: `src/macros/aliases.x:67`
 Whether the rule whose meta function now runs is shipped, so that the
 names it calls resolve to the copies the compiler links.
 
-Source: `src/macros/rewrites.x:448`
+Source: `src/macros/rewrites.x:456`
 
 <a id="Compiler.bind_code_value"></a>
 #### Compiler.bind_code_value
@@ -243,7 +243,7 @@ Source: `src/macros/expansion.x:22`
 
 Tests one operation's registry without invoking a translator.
 
-Source: `src/macros/rewrites.x:230`
+Source: `src/macros/rewrites.x:232`
 
 <a id="Compiler.install_compile_time_effects"></a>
 #### Compiler.install_compile_time_effects
@@ -316,7 +316,7 @@ Lowers `replacement`, which `Compiler.rewrite_lowered` bound for the
 lowered statement `source`, and keeps each part of `source` it holds as
 it is, so no statement rule is offered that part again.
 
-Source: `src/macros/rewrites.x:255`
+Source: `src/macros/rewrites.x:260`
 
 <a id="Compiler.lower_rewrite"></a>
 #### Compiler.lower_rewrite
@@ -335,7 +335,7 @@ already established for its parent. A replacement whose template and
 slot signatures an earlier use in the unit prepared lowers only its
 captured values.
 
-Source: `src/macros/rewrites.x:287`
+Source: `src/macros/rewrites.x:294`
 
 <a id="Compiler.macro_form_is_definition"></a>
 #### Compiler.macro_form_is_definition
@@ -445,7 +445,7 @@ Matches the member rules registered for each field keyword that
 `aggregate` declares a field with, as `Compiler.rewrite` matches those
 keyed by a receiver type.
 
-Source: `src/macros/rewrites.x:216`
+Source: `src/macros/rewrites.x:218`
 
 <a id="Compiler.meta_call_starts_declaration"></a>
 #### Compiler.meta_call_starts_declaration
@@ -579,7 +579,7 @@ a value the active lowering watches, so it watches `bound` as well. A
 statement without an origin, such as an unbraced body, keeps nothing
 else that identifies it when a binder it uses binds again.
 
-Source: `src/macros/rewrites.x:702`
+Source: `src/macros/rewrites.x:711`
 
 <a id="Compiler.rebuild_expression"></a>
 #### Compiler.rebuild_expression
@@ -633,7 +633,7 @@ Source: `src/macros/templates.x:266`
 Reports that the meta call `source` failed with `error` at
 `invocation`.
 
-Source: `src/macros/diagnostics.x:325`
+Source: `src/macros/diagnostics.x:320`
 
 <a id="Compiler.rewrite"></a>
 #### Compiler.rewrite
@@ -646,7 +646,7 @@ Active rules cannot re-enter. A statement of the same kind that a
 statement replacement writes or copies, such as its source, takes the
 rules after the one that replaced it.
 
-Source: `src/macros/rewrites.x:238`
+Source: `src/macros/rewrites.x:241`
 
 <a id="Compiler.rewrite_lowered"></a>
 #### Compiler.rewrite_lowered
@@ -658,7 +658,7 @@ transform has lowered, then binds the first replacement as
 `Compiler.rewrite` does. Binding keeps the source, and each part of it
 the replacement holds, as lowered.
 
-Source: `src/macros/rewrites.x:247`
+Source: `src/macros/rewrites.x:251`
 
 <a id="Compiler.rewrite_written"></a>
 #### Compiler.rewrite_written
@@ -670,7 +670,7 @@ Binds the replacement a shipped rule gives the lowered statement
 `Compiler.rewrite_lowered` does. A statement the kernel writes is not
 source, so no program rule sees it.
 
-Source: `src/macros/rewrites.x:267`
+Source: `src/macros/rewrites.x:273`
 
 <a id="Compiler.scope_declares_alias"></a>
 #### Compiler.scope_declares_alias
@@ -795,13 +795,13 @@ Source: `src/macros/invocations/targets.x:54`
 
 `Ast Compiler.watched_step(Compiler c, Ast ast)`
 
-Lowers `ast` when it is a value the active lowering watches; NULL otherwise.
-A preparing watch also records what lowering produced. A value that an
-enclosing replacement's source held as well lowers outside that
-replacement's rule too, and that replacement still watches its own
+Lowers `ast` when it is a value the active lowering watches; NULL
+otherwise. A preparing watch also records what lowering produced. A
+value that an enclosing replacement's source held as well lowers outside
+that replacement's rule too, and that replacement still watches its own
 values within it.
 
-Source: `src/macros/rewrites.x:715`
+Source: `src/macros/rewrites.x:725`
 
 ## Design notes
 

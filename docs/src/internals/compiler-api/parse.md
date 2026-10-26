@@ -397,7 +397,7 @@ Parses one enumerator for enum type `context` and returns its AST.
 Outside macro-template parsing, its binding is published immediately so
 later initializers and enumerators can resolve it.
 
-Source: `src/parse/types.x:512`
+Source: `src/parse/types.x:510`
 
 <a id="Compiler.parse_enumerators"></a>
 #### Compiler.parse_enumerators
@@ -409,7 +409,7 @@ Returns their flat source-order `List` and leaves the brace unconsumed.
 An alias among them needs no comma; the owner of the brace holds the
 alias body they declare into.
 
-Source: `src/parse/types.x:492`
+Source: `src/parse/types.x:490`
 
 <a id="Compiler.parse_field"></a>
 #### Compiler.parse_field
@@ -420,7 +420,7 @@ Parses one field for aggregate type `context` and returns its AST.
 Ordinary fields publish their binding in the aggregate's field scope and
 consume their terminating semicolon; macro forms follow their own syntax.
 
-Source: `src/parse/types.x:359`
+Source: `src/parse/types.x:358`
 
 <a id="Compiler.parse_fields"></a>
 #### Compiler.parse_fields
@@ -432,7 +432,7 @@ Returns a flat field `List`, publishes delegate-field metadata, and leaves
 the closing brace unconsumed. The owner of the brace holds the alias
 body the fields declare into.
 
-Source: `src/parse/types.x:342`
+Source: `src/parse/types.x:341`
 
 <a id="Compiler.parse_function_definition"></a>
 #### Compiler.parse_function_definition
@@ -466,7 +466,7 @@ caller consumed, up to its closing brace, which stays unconsumed.
 `position` is `<field>` or `<enumerator>` and `context` is the type.
 An alias among the members ends at the brace.
 
-Source: `src/parse/types.x:330`
+Source: `src/parse/types.x:329`
 
 <a id="Compiler.parse_named_type"></a>
 #### Compiler.parse_named_type
@@ -477,7 +477,7 @@ Captures a name followed by an ordinary complete type and semicolon.
 The reserved typedef identity permits fields to refer to their enclosing
 named type before its pointer or value representation is complete.
 
-Source: `src/parse/types.x:430`
+Source: `src/parse/types.x:429`
 
 <a id="Compiler.parse_optional_identifier"></a>
 #### Compiler.parse_optional_identifier
@@ -575,7 +575,7 @@ Source: `src/parse/units.x:15`
 Parses a type specifier with qualifiers and pointer/reference modifiers.
 Returns its flat `Type` AST and leaves the first following token current.
 
-Source: `src/parse/types.x:126`
+Source: `src/parse/types.x:125`
 
 <a id="Compiler.parse_type_operand"></a>
 #### Compiler.parse_type_operand

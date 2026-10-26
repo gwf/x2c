@@ -148,7 +148,7 @@ Adds a loaded unit's public functions and object accessors to its targets.
 Meta closure must finish first so these entries retain runtime semantics.
 Existing meta entries and the adapted main keep their original targets.
 
-Source: `src/meta-group/loaded.x:78`
+Source: `src/meta-group/loaded.x:80`
 
 <a id="Compiler.prepare_loaded_main"></a>
 #### Compiler.prepare_loaded_main
@@ -160,7 +160,7 @@ Native calls retain its declared signature; the public argc/argv entry
 takes an Array of Strings. A renamed main still returns zero on falling
 through its closing brace. Source text and tokens are unchanged.
 
-Source: `src/meta-group/loaded.x:55`
+Source: `src/meta-group/loaded.x:56`
 
 <a id="Compiler.public_native_function"></a>
 #### Compiler.public_native_function

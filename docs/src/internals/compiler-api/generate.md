@@ -52,7 +52,7 @@ Prints the `--dump-definitions` projection of the lowered unit `ast`:
 with one, then one row per `Compiler.definition_rows` entry. The
 command-line reference in the book describes the fields.
 
-Source: `src/generate/definitions.x:108`
+Source: `src/generate/definitions.x:105`
 
 <a id="Compiler.generate_code"></a>
 #### Compiler.generate_code

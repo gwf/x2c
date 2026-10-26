@@ -37,7 +37,7 @@ Linked list with `Var` elements.
 | [`List.map`](#List.map) | Returns a canonical `List` holding `fn` applied front to back. |
 | [`List.map2`](#List.map2) | Maps `fn` over aligned pairs from `a` and `b`. |
 | [`List.new`](#List.new) | Returns the List packed from the supplied values and explicit splices. |
-| [`List.reverse`](#List.reverse) | Returns a new `List` holding the elements of `lst` in reverse order. |
+| [`List.reverse`](#List.reverse) | Returns a canonical `List` with `lst`'s elements reversed. |
 | [`List.sort`](#List.sort) | Returns a copy of `lst` ordered by `Var.compare`. |
 | [`List.sort_by`](#List.sort_by) | Returns a stable sorted copy using `Array.sort_by`'s callback contract. |
 | [`List.sort_with`](#List.sort_with) | Returns a stable sorted copy using `Array.sort_with`'s callback contract. |
@@ -421,9 +421,9 @@ Source: `lib/list/cells.x:9`
 
 `Self List.reverse(Self lst)`
 
-Returns a new `List` holding the elements of `lst` in reverse order.
-Fresh cells are built through `cons`, so the result is canonical and `lst`
-is untouched. Reversing `nil` gives `nil`.
+Returns a canonical `List` with `lst`'s elements reversed.
+`cons` may reuse existing cells, and `lst` is unchanged. Reversing `nil`
+gives `nil`.
 
 **Raises:** `<alloc-fail>` while constructing the result.
 
