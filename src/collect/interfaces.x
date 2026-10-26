@@ -75,8 +75,7 @@ static List _interface_candidates(String canonical) {
    path and hash, and the content hashes of the includes, macros, and
    embedded text it depends on, validate. The entry uses process_cache_scope
    ownership and the same ordered parts representation as a cold walk. */
-static List _interface_load(
-  Compiler c, String canonical, String path) {
+static List _interface_load(Compiler c, String canonical, String path) {
   String identity = Compiler.identity();
   match (_interface_record(path))
     case %(interface 6 ?(String compiler) *stored):
@@ -279,8 +278,7 @@ String Compiler.interface_text(Compiler c) {
   $fail.collect_interface_write(c, NULL);
 }
 
-static int _write_interface_entry(
-  Buffer out, String canonical, List entry) {
+static int _write_interface_entry(Buffer out, String canonical, List entry) {
   List record = %(
     interface 6 $(Compiler.identity()) @(_stored_record(canonical, entry)));
   /* An interface is plain data, which a loader never evaluates. */
@@ -302,8 +300,7 @@ static List _stored_record(String canonical, List entry) {
 }
 
 /* Search roots and the file's package mode must match before replay. */
-module List _interface_include_dirs(
-  Compiler c, String canonical) {
+module List _interface_include_dirs(Compiler c, String canonical) {
   Array dirs = [];
   foreach (String dir in c.include_dirs) {
     String portable = Compiler.portable_path(dir);
@@ -371,7 +368,8 @@ static List _renumber_bindings(List node, Map identities) {
     the compiler identity. Each is walked cold by a compiler of its own, so
     the records hold this compiler's collection rather than a table linked
     into it; the unit's own entries for them are restored afterwards. A
-    record the interface grammar cannot spell is left out. */
+    record the interface grammar cannot spell is left out.
+*/
 Map Compiler.linked_prelude_records(Compiler c) {
   Map records = {}, saved = {};
   foreach (String source in _linked_prelude_sources()) {
