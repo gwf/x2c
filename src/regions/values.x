@@ -257,7 +257,7 @@ module Fact _slot(Walk &w, Var argument) {
 }
 
 module Fact _new_fact(Walk &w, List binding, int param) {
-  Fact fact = xcalloc(1, sizeof(struct Fact));
+  Fact fact = xmalloc(sizeof(struct Fact));
   *fact = (struct Fact) {.depth = w.depth, .origin = w.origin, .param = param};
   if (binding) w.facts[binding] = fact;
   return fact;
@@ -298,7 +298,7 @@ module int _empty(Var value) {
 module Region _owner(Walk &w, Fact slot) {
   if (!slot || slot.param >= 0) return NULL;
   if (!slot.owner) {
-    slot.owner = xcalloc(1, sizeof(struct Region));
+    slot.owner = xmalloc(sizeof(struct Region));
     *slot.owner = (struct Region) {<local>, slot.depth, slot.origin};
   }
   return slot.owner;
@@ -324,7 +324,7 @@ module void _move(Fact fact, Region region) {
 }
 
 module Region _open_region(Walk &w, Symbol kind, Fact slot) {
-  Region region = xcalloc(1, sizeof(struct Region));
+  Region region = xmalloc(sizeof(struct Region));
   *region = (struct Region) {kind, w.depth, w.origin, 0, slot, w.open};
   return w.open = region;
 }
@@ -424,7 +424,7 @@ module List _parameter_types(Var call) {
    a reference is already that address. */
 module Var _passed(List types, List arguments, int index, Type &type) {
   Var argument = arguments[index];
-  Var declared = index < types.len() ? types[index] : void;
+  Var declared = types[index];
   type = declared is <list> ? declared.list() : NULL;
   if (!type.is_reference()) return argument;
   Type given = _expression_type(argument);
