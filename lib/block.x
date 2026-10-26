@@ -49,7 +49,7 @@ $cleanup.by(Bytes, free);
 /* The size of an allocation for `cap` elements, or zero when it cannot be
    represented. */
 static size_t _allocation_size(size_t width, size_t cap) {
-  if (!width || cap > (SIZE_MAX - sizeof(Block)) / width) return 0;
+  if (cap > (SIZE_MAX - sizeof(Block)) / width) return 0;
   return sizeof(Block) + width * cap;
 }
 
@@ -121,8 +121,8 @@ static void _append_growing(Block b, const void *source, size_t count) {
 }
 
 /* The offset of `p` inside `b`'s reserved storage, or SIZE_MAX outside it.
-   The offset survives growth because realloc preserves the entire
-   allocation, not only logical content. */
+   The offset survives growth because realloc preserves all reserved
+   storage. */
 static size_t _reserved_offset(Block b, const void *p) {
   uintptr_t start = (uintptr_t) b.bytes, at = (uintptr_t) p;
   if (at < start || at - start >= b.cap * b.width) return SIZE_MAX;
@@ -322,7 +322,7 @@ Bytes Bytes.new(size_t width) => Block.new(width).bytes;
 void Block.free(Block b) {
   if (b == NULL) return;
   if (b.lifetime) b.lifetime.destroy();
-  if (b.bytes != NULL) xfree(_allocation(b));
+  xfree(_allocation(b));
   xfree(b);
 }
 
@@ -336,7 +336,7 @@ void Block.free(Block b) {
 */
 void Block.move_to(Block block, Scope *scope) {
   if (block == NULL) return;
-  if (block.bytes != NULL) Scope.move(_allocation(block), scope);
+  Scope.move(_allocation(block), scope);
   Scope.move(block, scope);
   block.lifetime.transfer(*scope);
 }
