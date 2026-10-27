@@ -1,16 +1,17 @@
 # Simplify the duplicate owners the 2026-10-27 review listed
 
-> Status: active
-> Six candidates from the 2026-10-27 review of `dev`, each reproduced in
-> source before selection. Three are implemented here; three are rejected
-> with the evidence below. Delivery is direct to `dev` after
-> `agent-pr-check`.
+> Status: done
+> Published to `dev` on 2026-10-27 in `76cca9ad2` with its bootstrap
+> refresh. Candidates 3, 4, and 6 landed; candidate 1 kept its walkers and
+> merged the `available` and `seen` maps; candidates 2 and 5 were rejected
+> for the reasons recorded below. `agent-pr-check` passed on the integrated
+> tree, and 1307 compiler fixtures and the split suite passed before it.
 
 ## Context
 
 The review of `origin/dev` (`0397c7277`) found no defects but listed
 duplicate owners and manual AST walks that PR-2, PR-3, and PR-4 in
-[the standard](../agents/x2c-code-standard.md) say to consolidate. Gary
+[the standard](../../agents/x2c-code-standard.md) say to consolidate. Gary
 asked for one plan rather than several sessions. Each claim below was read
 in current source first; a claim that does not survive reading is rejected
 and recorded so the next review does not raise it again.

@@ -80,6 +80,9 @@ selected here.
 
 Completed work archived on 2026-10-27:
 
+- [Review simplification candidates](archive/simplify-review-candidates-2026-10-27.md):
+  three duplicate owners removed in `76cca9ad2`; three candidates rejected
+  with evidence.
 - [Match pattern tests](archive/match-pattern-tests.md): delivered in
   `5fd0a079e`; every Match operator is tested in place.
 - [List rest parameters](archive/list-rest-parameters.md): delivered in
