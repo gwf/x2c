@@ -55,7 +55,10 @@ Work in this order:
 4. Apply LT-1 to acquisitions and paired state; follow HP-1 and HP-2
    when the affected work is on a measured hot path.
 5. Apply NM and the standard's role-name glossary.
-6. Apply FI-4 and FI-5 to the outline and reading order.
+6. Apply FI-4 and FI-5 with
+   [order-x2c-functions](../order-x2c-functions/SKILL.md) for file order.
+   For an order-only request, use that skill directly without this skill's
+   function reshaping or body changes.
 7. Apply CM with [clean-x2c-source](../clean-x2c-source/SKILL.md).
 
 Preserve the PR-10 compatibility boundary. Apply MO-4 to a large move and

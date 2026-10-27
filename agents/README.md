@@ -45,6 +45,9 @@ are needed rather than maintaining another copy.
   repository area and report reproduced findings; edit only when authorized.
 - [simplify-x2c-source](skills/simplify-x2c-source/SKILL.md) - remove connected
   architectural redundancy while preserving behavior.
+- [order-x2c-functions](skills/order-x2c-functions/SKILL.md) - check or revise
+  public-first function order and thematic private groups without changing
+  function definitions.
 - [beautify-x2c-source](skills/beautify-x2c-source/SKILL.md) - rewrite one
   file to the shape standard: short functions, one-line dispatch arms,
   reused owners, glossary names, and reading order, with behavior unchanged.
