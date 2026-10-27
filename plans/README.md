@@ -51,6 +51,7 @@ and status; it does not implement the remaining features.
 | [Structured lint findings](x2c-lint-and-format.md) | Approved phase 8 List output and compiler consumption. | Add the optional interface; preserve the experimental distribution and conditional editor integration. |
 | [Detached Channel ownership](detached-channel-ownership.md) | Close out evidence for the correction already present on `dev`. | Recover final benchmark, verification, and delivery/hold records; do not repeat implementation. |
 | [Match pattern tests](match-pattern-tests.md) | Test every Match operator in place through V1-style pattern tests; prototype measured 5.6% fewer self-translation instructions. | Gary approves or declines the design. |
+| [Map and Array rest parameters](map-and-array-rest-parameters.md) | Keyword arguments through `Map @name`, and `Array @name`; nothing implemented. | Gary answers the open questions. |
 
 ### Research and reference
 
@@ -76,6 +77,11 @@ and [deployment operations](../etc/release/README.md), including the unresolved
 first-cutover recovery prerequisite. No production promotion is selected here.
 
 ### Decisions and completed records
+
+Completed work archived on 2026-10-27:
+
+- [List rest parameters](archive/list-rest-parameters.md): delivered in
+  `075623030`; its `.... name` spelling became `List @name`.
 
 Completed work archived on 2026-10-26:
 

@@ -1,10 +1,11 @@
 # Four-dot List rest parameters
 
-> Status: implemented
-> Implementation started from origin/dev 54707ce61. Authored changes were
-> replayed onto b9eed26d1 after collection-reading-and-unquote and the
-> home-relative header guards landed. Publication requires the final gate
-> and performance checkpoint on the integrated tree.
+> Status: done
+> Delivered in 075623030 on 2026-10-25. On 2026-10-27 the source spelling
+> `.... name` was replaced by `List @name`; the semantic Type `(....)`, call
+> packing, and native List ABI described below are unchanged. Map and Array
+> rest parameters are scoped in
+> [map-and-array-rest-parameters.md](../map-and-array-rest-parameters.md).
 
 A final `.... name` parameter receives an ordinary List. The compiler packs
 separate trailing arguments at the call site; an absent tail becomes nil.
