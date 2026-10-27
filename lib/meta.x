@@ -132,7 +132,7 @@ meta Var Code.pattern_value(Code pattern);
 /* lowering code
 
    What a translator returns: code converted, promoted, or called as the
-   compiler would, marked as already lowered. */
+   compiler would, marked as lowered code, which binding keeps as it is. */
 
 /** Returns the expression `value` converted to `target` as a destination of
     that type converts it.
@@ -152,9 +152,11 @@ meta Code Code.promoted(Code value);
 */
 meta Code Code.call_in_order(Code member, List arguments, Type type);
 
-/** Returns `code`, which is already bound, typed, and lowered, marked so
-    that a translator's result is placed as written instead of bound and
-    lowered again. Each of `effects` applies first, in order; a
+/** Returns `code`, which is already bound and typed, marked so that
+    binding keeps it as it is and does not search it for a leftover binder.
+    The transform still lowers it as written, with the code around it; the
+    source parts of a rewrite's input that it holds lower in place, outside
+    the rule that returned it. Each of `effects` applies first, in order; a
     `(cleanup TOKEN PLACED)` row replaces TOKEN in `code` with the lowered
     statements PLACED and marks the unit as needing exception support.
 */
