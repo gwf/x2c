@@ -343,6 +343,33 @@ EOF
 cmp "$tmp/rest-expected" "$tmp/rest-values"
 test ! -s "$tmp/err"
 
+# Map rest entries and splices cross the helper boundary as key/value pairs.
+cat >"$tmp/map-rest.x" <<'EOF'
+int map_global = 10;
+int loaded_map(Map @options) { return options.len(); }
+int loaded_map_ref(int &value, Map @options) {
+  value += options.len();
+  return value;
+}
+EOF
+printf '%s\n' ":load \"$tmp/map-rest.x\"" \
+  'Map map_base = {a: 1, b: 2};' 'loaded_map();' \
+  'loaded_map(x: 1, @map_base, a: 3);' \
+  'Func map_loaded = loaded_map;' 'map_loaded(y: 1, @map_base);' \
+  'loaded_map_ref(map_global, k: 1, @map_base);' \
+  'map_global;' >"$tmp/input"
+builds/0/x2c repl <"$tmp/input" >"$tmp/out" 2>"$tmp/err"
+grep '^=>' "$tmp/out" >"$tmp/map-rest-values"
+cat >"$tmp/map-rest-expected" <<'EOF'
+=> 0
+=> 3
+=> 3
+=> 13
+=> 13
+EOF
+cmp "$tmp/map-rest-expected" "$tmp/map-rest-values"
+test ! -s "$tmp/err"
+
 # Every retained executable directory belongs to a closed session.
 set -- "$tmp"/x2c-*
 test ! -e "$1"

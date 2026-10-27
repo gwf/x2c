@@ -51,7 +51,7 @@ and status; it does not implement the remaining features.
 | [Structured lint findings](x2c-lint-and-format.md) | Approved phase 8 List output and compiler consumption. | Add the optional interface; preserve the experimental distribution and conditional editor integration. |
 | [Detached Channel ownership](detached-channel-ownership.md) | Close out evidence for the correction already present on `dev`. | Recover final benchmark, verification, and delivery/hold records; do not repeat implementation. |
 | [Match pattern tests](match-pattern-tests.md) | Test every Match operator in place through V1-style pattern tests; prototype measured 5.6% fewer self-translation instructions. | Gary approves or declines the design. |
-| [Map and Array rest parameters](map-and-array-rest-parameters.md) | Keyword arguments through `Map @name` are decided and not started; `Array @name` is deferred. | Implement Map rest when scheduled; Array waits for a caller that needs indexed access. |
+| [Map and Array rest parameters](map-and-array-rest-parameters.md) | `Map @name` keyword arguments are implemented; `Array @name` is deferred. | Array waits for a caller that needs indexed access to its tail. |
 
 ### Research and reference
 

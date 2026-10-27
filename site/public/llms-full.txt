@@ -1967,6 +1967,46 @@ The callee does not scan C varargs or a sentinel. Ordinary List element,
 conversion, allocation, and lifetime rules apply; packing does not deep-copy
 elements. C `...` retains its C varargs calling convention.
 
+### Map rest parameters
+
+A final `Map @name` parameter receives a fresh `Map` of keyword arguments.
+After the fixed parameters, each argument is a `key: value` entry or an
+explicit `@map` or `@(expression)` splice of a Map. Entries follow the
+[Map literal](https://x2c-lang.dev/docs/reference/language.html#array-and-map-literals) rules: a bare identifier key is an
+Atom, and any other key is an expression. With no trailing arguments, the Map
+is empty.
+
+```x2c
+static String connect(String host, Map @options) {
+  int port = options.getdefault(<port>, 80).integer();
+  return %"$host:$port";
+}
+
+int main(void) {
+  Map secure = {port: 443};
+  printf("%s %s %s\n", connect("a"), connect("b", port: 8080),
+         connect("c", @secure, port: 8443));
+  return 0;
+}
+```
+
+```text
+a:80 b:8080 c:8443
+```
+
+A splice merges the Map's entries at its position. Entries and splices are
+evaluated once each in source order, and a later entry or splice replaces an
+earlier key, as in a Map literal. A function has at most one rest parameter,
+so a Map rest function rejects a positional argument after its fixed
+parameters, and a `key: value` argument requires a Map rest parameter.
+
+Methods, typed function pointers, protocol forwarders, and meta functions
+pack the same way. A `Func` call passes each entry as its key followed by its
+value, and `Func.apply` pairs those values into the Map; native and Lisp
+callers pass `key, value` pairs the same way. A key without a value raises
+`<bad-arity>`. Generated C receives the fixed parameters followed by one
+ordinary `Map`.
+
 ### Reference parameters
 
 A function parameter declared `T &name` aliases an addressable `T` supplied by
@@ -5096,7 +5136,7 @@ A noncapturing lambda remains a generated C function and can adapt to a
 supported C callback type, including `int (*)(int)`, in an initializer,
 assignment, argument, or return. A local typedef of the callback type has the
 same behavior. Parentheses around the lambda preserve this adaptation.
-Where a `Func` is expected, including a `(Func)` cast, a fixed or List rest
+Where a `Func` is expected, including a `(Func)` cast, a fixed or rest
 function or function-pointer value converts implicitly when the `Func` conversion supports
 its parameters and result. A lambda after a cast needs its own parentheses,
 as in `(Func) (%!(int a) => a * 13)`, because `%!` after `)` reads as modulo.
@@ -5115,7 +5155,7 @@ ownership of a `Func` leave it in place. A
 function-pointer expression is evaluated once and its exact pointer is copied
 into a new `Func`; later assignment to the source pointer does not retarget it.
 A null function pointer instead produces null `Func` without allocating a
-binding. C `...` functions do not convert implicitly. List rest functions
+binding. C `...` functions do not convert implicitly. Rest functions
 convert with their rest calling convention, including any fixed parameters.
 An ordinary List argument remains one rest element through `Func`; explicit
 `@list` or `@(expression)` splices its elements as in a direct call.

@@ -1,0 +1,10 @@
+1:
+2:mode=w,retries=3
+3:dyn=7,s=8,sym=9
+4:mode=r,size=2 5:mode=r,size=1
+6:a=2
+4 trace 123
+t/k=1
+7:z=0
+8:mode=r,q=1,size=1
+a key without a value is bad-arity

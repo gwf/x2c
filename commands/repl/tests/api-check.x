@@ -405,6 +405,18 @@ static void _rest_arguments(ReplSession s) {
           <value>, %(1 2 3 4));
 }
 
+static void _map_rest_arguments(ReplSession s) {
+  _expect(s, "int map_count(int prefix, Map @options) "
+             "{ return prefix + options.len(); }", <defined>, void);
+  _expect(s, "Map map_base = {a: 1, b: 2};", <executed>, void);
+  _expect(s, "map_count(10);", <value>, 10);
+  _expect(s, "map_count(10, x: 1, y: 2);", <value>, 12);
+  _expect(s, "map_count(10, @map_base, a: 3);", <value>, 12);
+  _expect(s, "Func map_dynamic = map_count;", <executed>, void);
+  _expect(s, "map_dynamic(10, z: 1, @map_base);", <value>, 13);
+  _expect(s, "map_count(10, 1);", <rejected>, void);
+}
+
 static void _lambda_results(ReplSession s) {
   _expect(
     s, "Func lambda_uncast = %!() => %!() => 17;", <rejected>, void);
@@ -859,6 +871,7 @@ int main(int argc, char **argv) {
         _interpreter_ownership(session);
         _lambda_results(session);
         _rest_arguments(session);
+        _map_rest_arguments(session);
         _reference_captures(session);
         _reference_arguments(session);
         _compiled_functions(session);
