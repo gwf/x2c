@@ -276,7 +276,7 @@ literal, the canonical `String` one becomes, or the `String_new` of one;
 any other format, such as a variable or an object macro, is not readable
 here. A `String` literal's text is spelled as a C literal.
 
-Source: `src/expressions/calls.x:540`
+Source: `src/expressions/calls.x:538`
 
 <a id="Compiler.promote_string_literal"></a>
 #### Compiler.promote_string_literal
