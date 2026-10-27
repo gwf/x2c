@@ -26,10 +26,10 @@ static double scale_grad(double a, double b, double * a_grad, double * b_grad){
   double a_bar = 0.0;
   double b_bar = 0.0;
   _x2c_gensym_macro_result_0 = a * b + exp(a);
-  ArrayDbl_push(_x2c_gensym_macro_tape_0, 1.0);
+  ArrayDbl_push(_x2c_gensym_macro_tape_0, 1);
   goto _x2c_gensym_macro_reverse_0;
   _x2c_gensym_macro_reverse_0 : _x2c_gensym_macro_code_0 = ArrayDbl_take_last(_x2c_gensym_macro_tape_0);
-  if(_x2c_gensym_macro_code_0 == 1.0){
+  if(_x2c_gensym_macro_code_0 == 1){
     a_bar += b;
     b_bar += a;
     a_bar += exp(a);
@@ -112,10 +112,10 @@ static double model_grad(double x, double y, int n, double * x_grad, double * y_
   }
   ArrayDbl_push(_x2c_gensym_macro_tape_1, _ad_trip5);
   _x2c_gensym_macro_result_1 = t > 4.0 ? sqrt(t) + s : exp(t) - s;
-  ArrayDbl_push(_x2c_gensym_macro_tape_1, 6.0);
+  ArrayDbl_push(_x2c_gensym_macro_tape_1, 6);
   goto _x2c_gensym_macro_reverse_1;
   _x2c_gensym_macro_reverse_1 : _x2c_gensym_macro_code_1 = ArrayDbl_take_last(_x2c_gensym_macro_tape_1);
-  if(_x2c_gensym_macro_code_1 == 6.0){
+  if(_x2c_gensym_macro_code_1 == 6){
     if(t > 4.0){
       t_bar += 0.5 / sqrt(t);
       s_bar += 1.0;

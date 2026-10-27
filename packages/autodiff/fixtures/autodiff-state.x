@@ -33,16 +33,18 @@ static double reverse_user(double x) {
    or locals. */
 meta static List ad_twin(List fn) {
   match (fn) {
-    case %(function ?spec (bind (binding ?id ?name) ?rest) ?body):
-      return %(function $spec (bind (binding $id $(name + "_ck")) $rest)
-                 $body);
+    case $ad.form.function(?spec, ?identity, *params, *items): {
+      Macro function = $ad.form.function;
+      String name = Code.binding_spelling(identity) + "_ck";
+      return function(spec, name, params, items);
+    }
   }
   return fn;
 }
 
 meta static List ad_both_ways(List fn) {
   List checkpointed =
-    ad_checkpoint(ad_twin(fn), %(expr (int) (literal (int) "2")));
+    ad_checkpoint(ad_twin(fn), $!int{ 2 });
   List recorded = ad_reverse(fn);
   return %(@checkpointed @recorded);
 }

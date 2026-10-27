@@ -59,7 +59,7 @@ static double walk_grad(double x, double y, int n, double * x_grad, double * y_g
     if(i == 2){
       ArrayDbl_push(_x2c_gensym_macro_tape_0, i);
       i = i + 1;
-      ArrayDbl_push(_x2c_gensym_macro_tape_0, 1.0);
+      ArrayDbl_push(_x2c_gensym_macro_tape_0, 1);
       continue;
       ArrayDbl_push(_x2c_gensym_macro_tape_0, 1.0);
     }
@@ -67,7 +67,7 @@ static double walk_grad(double x, double y, int n, double * x_grad, double * y_g
       ArrayDbl_push(_x2c_gensym_macro_tape_0, 0.0);
     }
     if(s > 40.0){
-      ArrayDbl_push(_x2c_gensym_macro_tape_0, 2.0);
+      ArrayDbl_push(_x2c_gensym_macro_tape_0, 2);
       break;
       ArrayDbl_push(_x2c_gensym_macro_tape_0, 1.0);
     }
@@ -85,7 +85,7 @@ static double walk_grad(double x, double y, int n, double * x_grad, double * y_g
   t = x * y + 3.0;
   if(t > 100.0){
     _x2c_gensym_macro_result_0 = t * s;
-    ArrayDbl_push(_x2c_gensym_macro_tape_0, 4.0);
+    ArrayDbl_push(_x2c_gensym_macro_tape_0, 4);
     goto _x2c_gensym_macro_reverse_0;
     ArrayDbl_push(_x2c_gensym_macro_tape_0, 1.0);
   }
@@ -108,10 +108,10 @@ static double walk_grad(double x, double y, int n, double * x_grad, double * y_g
   }
   ArrayDbl_push(_x2c_gensym_macro_tape_0, _ad_trip6);
   _x2c_gensym_macro_result_0 = s * atan2(y, x) + fmax(x, y);
-  ArrayDbl_push(_x2c_gensym_macro_tape_0, 7.0);
+  ArrayDbl_push(_x2c_gensym_macro_tape_0, 7);
   goto _x2c_gensym_macro_reverse_0;
   _x2c_gensym_macro_reverse_0 : _x2c_gensym_macro_code_0 = ArrayDbl_take_last(_x2c_gensym_macro_tape_0);
-  if(_x2c_gensym_macro_code_0 == 4.0){
+  if(_x2c_gensym_macro_code_0 == 4){
     t_bar += s;
     s_bar += t;
     t = ArrayDbl_take_last(_x2c_gensym_macro_tape_0);
@@ -122,10 +122,10 @@ static double walk_grad(double x, double y, int n, double * x_grad, double * y_g
     _ad_trip3 =(int) ArrayDbl_take_last(_x2c_gensym_macro_tape_0);
     while(_ad_trip3 > 0){
       _x2c_gensym_macro_code_0 = ArrayDbl_take_last(_x2c_gensym_macro_tape_0);
-      if(_x2c_gensym_macro_code_0 == 1.0){
+      if(_x2c_gensym_macro_code_0 == 1){
         i =(int) ArrayDbl_take_last(_x2c_gensym_macro_tape_0);
       }
-      else if(_x2c_gensym_macro_code_0 == 2.0){
+      else if(_x2c_gensym_macro_code_0 == 2){
         if(ArrayDbl_take_last(_x2c_gensym_macro_tape_0) != 0.0){
 
         }
@@ -142,7 +142,7 @@ static double walk_grad(double x, double y, int n, double * x_grad, double * y_g
         s_bar += _x2c_gensym_macro_seed_0;
         x_bar += _x2c_gensym_macro_seed_0 *(double) i * x;
         x_bar += _x2c_gensym_macro_seed_0 *(double) i * x;
-        y_bar += _x2c_gensym_macro_seed_0 * hypot(x, y) *(y < 0.0 ? -1.0 : 1.0);
+        y_bar += _x2c_gensym_macro_seed_0 * hypot(x, y) *(y < 0.0 ? - 1.0 : 1.0);
         x_bar += _x2c_gensym_macro_seed_0 * fabs(y) *(x / hypot(x, y));
         y_bar += _x2c_gensym_macro_seed_0 * fabs(y) *(y / hypot(x, y));
         if(ArrayDbl_take_last(_x2c_gensym_macro_tape_0) != 0.0){
@@ -166,7 +166,7 @@ static double walk_grad(double x, double y, int n, double * x_grad, double * y_g
     _x2c_gensym_macro_seed_0 = s_bar;
     s_bar = 0.0;
   }
-  else if(_x2c_gensym_macro_code_0 == 7.0){
+  else if(_x2c_gensym_macro_code_0 == 7){
     s_bar += atan2(y, x);
     y_bar += s *(x /(y * y + x * x));
     x_bar += s * -(y /(y * y + x * x));
@@ -202,10 +202,10 @@ static double walk_grad(double x, double y, int n, double * x_grad, double * y_g
     _ad_trip3 =(int) ArrayDbl_take_last(_x2c_gensym_macro_tape_0);
     while(_ad_trip3 > 0){
       _x2c_gensym_macro_code_0 = ArrayDbl_take_last(_x2c_gensym_macro_tape_0);
-      if(_x2c_gensym_macro_code_0 == 1.0){
+      if(_x2c_gensym_macro_code_0 == 1){
         i =(int) ArrayDbl_take_last(_x2c_gensym_macro_tape_0);
       }
-      else if(_x2c_gensym_macro_code_0 == 2.0){
+      else if(_x2c_gensym_macro_code_0 == 2){
         if(ArrayDbl_take_last(_x2c_gensym_macro_tape_0) != 0.0){
 
         }
@@ -222,7 +222,7 @@ static double walk_grad(double x, double y, int n, double * x_grad, double * y_g
         s_bar += _x2c_gensym_macro_seed_0;
         x_bar += _x2c_gensym_macro_seed_0 *(double) i * x;
         x_bar += _x2c_gensym_macro_seed_0 *(double) i * x;
-        y_bar += _x2c_gensym_macro_seed_0 * hypot(x, y) *(y < 0.0 ? -1.0 : 1.0);
+        y_bar += _x2c_gensym_macro_seed_0 * hypot(x, y) *(y < 0.0 ? - 1.0 : 1.0);
         x_bar += _x2c_gensym_macro_seed_0 * fabs(y) *(x / hypot(x, y));
         y_bar += _x2c_gensym_macro_seed_0 * fabs(y) *(y / hypot(x, y));
         if(ArrayDbl_take_last(_x2c_gensym_macro_tape_0) != 0.0){
@@ -296,10 +296,10 @@ static double replay_grad(double x, double y, int n, double * x_grad, double * y
   ArrayDbl_push(_x2c_gensym_macro_tape_1, _ad_total3);
   ArrayDbl_push(_x2c_gensym_macro_tape_1, _ad_blocks4);
   _x2c_gensym_macro_result_1 = s * atan2(y, x);
-  ArrayDbl_push(_x2c_gensym_macro_tape_1, 7.0);
+  ArrayDbl_push(_x2c_gensym_macro_tape_1, 7);
   goto _x2c_gensym_macro_reverse_1;
   _x2c_gensym_macro_reverse_1 : _x2c_gensym_macro_code_1 = ArrayDbl_take_last(_x2c_gensym_macro_tape_1);
-  if(_x2c_gensym_macro_code_1 == 7.0){
+  if(_x2c_gensym_macro_code_1 == 7){
     s_bar += atan2(y, x);
     y_bar += s *(x /(y * y + x * x));
     x_bar += s * -(y /(y * y + x * x));
@@ -317,7 +317,7 @@ static double replay_grad(double x, double y, int n, double * x_grad, double * y
         if(i == 2){
           ArrayDbl_push(_x2c_gensym_macro_tape_1, i);
           i = i + 1;
-          ArrayDbl_push(_x2c_gensym_macro_tape_1, 1.0);
+          ArrayDbl_push(_x2c_gensym_macro_tape_1, 1);
           continue;
           ArrayDbl_push(_x2c_gensym_macro_tape_1, 1.0);
         }
@@ -332,7 +332,7 @@ static double replay_grad(double x, double y, int n, double * x_grad, double * y
       }
       while(_ad_trip2 > 0){
         _x2c_gensym_macro_code_1 = ArrayDbl_take_last(_x2c_gensym_macro_tape_1);
-        if(_x2c_gensym_macro_code_1 == 1.0){
+        if(_x2c_gensym_macro_code_1 == 1){
           i =(int) ArrayDbl_take_last(_x2c_gensym_macro_tape_1);
         }
         else{
@@ -343,7 +343,7 @@ static double replay_grad(double x, double y, int n, double * x_grad, double * y
           s_bar += _x2c_gensym_macro_seed_1;
           x_bar += _x2c_gensym_macro_seed_1 *(double) i * x;
           x_bar += _x2c_gensym_macro_seed_1 *(double) i * x;
-          y_bar += _x2c_gensym_macro_seed_1 * hypot(x, y) *(y < 0.0 ? -1.0 : 1.0);
+          y_bar += _x2c_gensym_macro_seed_1 * hypot(x, y) *(y < 0.0 ? - 1.0 : 1.0);
           x_bar += _x2c_gensym_macro_seed_1 * fabs(y) *(x / hypot(x, y));
           y_bar += _x2c_gensym_macro_seed_1 * fabs(y) *(y / hypot(x, y));
           if(ArrayDbl_take_last(_x2c_gensym_macro_tape_1) != 0.0){
