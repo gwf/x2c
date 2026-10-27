@@ -1,5 +1,7 @@
 #include "x2c.x"
 
+typedef String (*OptionsPointer)(int, Map @);
+
 static int trace = 0;
 
 static int step(int value) {
@@ -38,6 +40,8 @@ int main(void) {
   printf("%s\n", "t".tag(k: 1));
   String (*pointer)(int, Map @options) = opts;
   printf("%s\n", pointer(7, z: 0));
+  OptionsPointer alias = opts;
+  printf("%s\n", alias(10, w: 1));
   Func dynamic = opts, counted = count;
   printf("%s\n", dynamic(8, q: 1, @base));
   FuncArg odd[1] = {FuncArg.value(<key>)};

@@ -29,10 +29,8 @@ meta static List _protocol_forward(
     Code argument = $!( $name );
     if (templates.car() == $(binder))
       argument = $!( $(x2c_ident(convert))($argument) );
-    if (type == %(....) || type == %(.... "Map")) {
-      List container = type == %(....) ? %("List") : %("Map");
-      argument = %(expr $container (splice $argument));
-    }
+    if (type ~= %(.... ?container))
+      argument = %(expr ($container) (splice $argument));
     arguments.push(argument);
     templates = templates.cdr();
   }

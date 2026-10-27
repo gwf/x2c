@@ -2007,6 +2007,14 @@ callers pass `key, value` pairs the same way. A key without a value raises
 `<bad-arity>`. Generated C receives the fixed parameters followed by one
 ordinary `Map`.
 
+The packed Map is a fresh mutable Map owned by the `Scope` active at the call,
+as a `{...}` literal written in that argument position would be. It outlives
+the callee's return and is freed when that Scope ends, so the callee may
+read, change, or return it, and a change never reaches a spliced Map. Entry
+values are shared, not copied. A call allocates its Map even for an empty
+tail; repeated calls in a long-lived Scope accumulate one Map each until an
+`auto` block or `Scope.release` ends their region.
+
 ### Reference parameters
 
 A function parameter declared `T &name` aliases an addressable `T` supplied by

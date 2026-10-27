@@ -14,8 +14,8 @@ A final `List @name` parameter packs the trailing call arguments into one
 ordinary List; see "List rest parameters" in
 [the language reference](../docs/src/reference/language.md#list-rest-parameters).
 The parser in `Compiler.parse_parameter` reads `@` after a `List` type and
-produces `(param (....) (bind NAME ()))`. Every later owner tests the
-semantic Type `(....)`: call typing and lowering, `Compiler.pack_rest_arguments`,
+produced `(param (....) (bind NAME ()))`, now `(.... "List")`. Every later
+owner tests that semantic Type: call typing and lowering, `Compiler.pack_rest_arguments`,
 callable conversion, Func adapters, meta-native calls, protocol forwarders,
 the REPL, and the runtime `Func` constructor in `lib/func/func.x`. There are
 about 20 such code sites in `src/` and `lib/`, plus seven in
@@ -40,9 +40,9 @@ Reused owners:
   reference (first `:` outside brackets and not part of `?:`) is unchanged.
 - Packing builds the existing `$map_value(...)` syntax and lets
   `src/components/collection-literals.x` lower it, as a bare `{...}` does.
-- The parameter Type generalizes from `(....)` to a marker that names its
-  container, for example `(.... "Map")`. Each existing `(....)` site then
-  branches on the container instead of assuming List.
+- The parameter Type names its container: `(.... "Map")` beside List's
+  marker, which became `(.... "List")` on 2026-10-27. Each rest site reads
+  the container through `Type.rest_container` instead of assuming List.
 
 Decisions (Gary, 2026-10-27):
 
