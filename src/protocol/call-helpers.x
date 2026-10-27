@@ -26,8 +26,8 @@ List Compiler.wrapper_function(
 
 /** Returns `(declarations arguments)` for a helper that forwards its
     parameters of `types`: each declaration names a fresh parameter `a0`,
-    `a1`, ..., and each argument reads it. A List rest parameter forwards
-    its elements with an explicit splice.
+    `a1`, ..., and each argument reads it. A rest parameter forwards its
+    List elements or Map entries with an explicit splice.
 */
 List Compiler.forward_parameters(Compiler c, List types) {
   Array declarations = [], arguments = [];
@@ -35,9 +35,10 @@ List Compiler.forward_parameters(Compiler c, List types) {
   foreach (Type type in types) {
     List binding = c.sym.introduce(%"a$(index++)");
     declarations.push(type.parameter_ast(binding));
-    if (type == %(....)) {
-      List value = $!List{ $binding };
-      arguments.push(%(expr ("List") (splice $value)));
+    Type container = type.rest_container();
+    if (container) {
+      List value = $!($container){ $binding };
+      arguments.push(%(expr $container (splice $value)));
     }
     else arguments.push($!($type){ $binding });
   }

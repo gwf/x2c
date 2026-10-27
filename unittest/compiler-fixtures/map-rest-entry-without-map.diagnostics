@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/map-rest-entry-without-map.x:5:18: xform: key: value argument requires a Map rest parameter
+  int main(void) { return plain(value: 1); }
+                   ^^^^^^
+

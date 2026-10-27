@@ -8,6 +8,7 @@
 #include "common.h"
 #include "var/var.h"
 #include "list/list.h"
+#include "map/map.h"
 #include "string/string.h"
 typedef union FuncArgData{
   Var value;
@@ -43,7 +44,11 @@ static inline FuncArg FuncArg_value(Var value){
 
 FuncArg FuncArg_splice(List items);
 
+FuncArg FuncArg_splice_map(Map entries);
+
 FuncArg x2c_func_splice_argument(Func fn, unsigned index, List items);
+
+FuncArg x2c_func_map_splice_argument(Func fn, unsigned index, Map entries);
 
 static inline FuncArg FuncArg_reference(const void * reference, List type){
   return(FuncArg){

@@ -121,6 +121,10 @@ static Array _stub_arguments(Func function, const FuncArg *argv) {
       List rest = argv[i].data.value;
       foreach (Var value in rest) values.push(value);
     }
+    else if (parameters.car() == %(.... "Map")) {
+      Map rest = argv[i].data.value;
+      foreach (Var (key, value) in rest) values.push(key), values.push(value);
+    }
     else values.push(argv[i].data.value);
     parameters = parameters.cdr();
   }

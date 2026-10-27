@@ -273,7 +273,7 @@ module List _call(Compiler c, List ast) {
     if (!type) return ast;
     Type resolved = c.sym.resolve_key(type);
     List parameters = NULL;
-    if (resolved.list_rest_index() >= 0 &&
+    if (resolved.rest_index() >= 0 &&
         resolved.function_parts(parameters, NULL)) {
       callee = %(expr $resolved $(callee.caddr()));
       return _typed_call(c, callee, parameters, arguments);
@@ -296,11 +296,9 @@ module List _typed_call(
   List p = params, a = args;
   for (; a; p = p.cdr(), a = a.cdr(), arg_index++) {
     List param = p ? p.car().list() : NULL;
-    if (param === %(....)) break;
+    if (Type.rest_container(param)) break;
     List arg = a.car();
-    if (arg ~= %(expr ? (splice ?)))
-      c.report_error(<xform>, "List splice requires a rest argument",
-        NULL, NULL);
+    _require_rest(c, arg);
     List expected = param;
     if (list_varargs && arg_index > 0) expected = %("Var");
     if (param && param.car() == <param>) expected = param.type_from_ast();
@@ -311,12 +309,13 @@ module List _typed_call(
     values.push(converted);
   }
   List rest = p;
-  while (rest && rest.car() != %(....)) rest = rest.cdr();
+  while (rest && !Type.rest_container(rest.car())) rest = rest.cdr();
   if (rest) {
+    Type container = Type.rest_container(rest.car());
     List packed = c.pack_rest_arguments(p, a).car();
-    packed = c.maybe_adapt_func_arg(packed, %("List"));
-    values.push(c.convert_expression(packed, %("List")));
-    List native = params[0:arg_index].append(%(("List")));
+    packed = c.maybe_adapt_func_arg(packed, container);
+    values.push(c.convert_expression(packed, container));
+    List native = params[0:arg_index].append($(container));
     Type signature = callee.cadr();
     if (signature.is_pointer())
       signature = cons(signature.car(),
@@ -330,28 +329,45 @@ module List _typed_call(
   return c.rebuild_expression(NULL, called(callee, newargs)).caddr();
 }
 
-/** Preserves the fixed arguments for `params`, which ends in `(....)`, and
-    packs the remaining `args` through ordinary List construction. Only an
-    explicit splice contributes more than one element. The caller changes
-    the callee's final parameter to List before issuing this packed call.
+/** Preserves the fixed arguments for `params`, which ends in a rest
+    parameter, and packs the remaining `args` into its container. A List
+    tail uses ordinary List construction, where only an explicit splice
+    contributes more than one element. A Map tail holds `key: value` entries
+    and Map splices; later entries win. The caller changes the callee's
+    final parameter to the container before issuing this packed call.
 */
 List Compiler.pack_rest_arguments(Compiler c, List params, List args) {
   if (args ~= %((expr (void) ()))) args = NULL;
   int fixed = params.len() - 1;
   if (args.len() < fixed)
-    c.report_error(<xform>, "too few arguments for List rest function",
+    c.report_error(<xform>, "too few arguments for rest function",
       NULL, NULL);
   Array prefix = [];
   for (int i = 0; i < fixed; i++, args = args.cdr()) {
-    if (args.car() ~= %(expr ? (splice ?)))
-      c.report_error(<xform>, "List splice requires a rest argument",
-        NULL, NULL);
+    _require_rest(c, args.car());
     prefix.push(args.car());
   }
   auto Array elements = args.array();
-  prefix.push(c.list_expression(elements, %(nil)));
+  if (Type.rest_container(params.last()) == %("Map"))
+    prefix.push(_map_tail(c, elements));
+  else {
+    foreach (List element in elements)
+      if (element ~= %(expr ? (map-entry ? ?))) _entry_without_map(c);
+    prefix.push(c.list_expression(elements, %(nil)));
+  }
   return prefix.list_free();
 }
+
+/* A splice or entry outside a rest tail has no container to enter. */
+static void _require_rest(Compiler c, List argument) {
+  if (argument ~= %(expr ? (splice ?)))
+    c.report_error(<xform>, "splice requires a rest argument", NULL, NULL);
+  if (argument ~= %(expr ? (map-entry ? ?))) _entry_without_map(c);
+}
+
+static void _entry_without_map(Compiler c) =>
+  c.report_error(<xform>, "key: value argument requires a Map rest parameter",
+    NULL, NULL);
 
 static int _iter_immediate_consumer(String name) =>
   name == "Iter_try_next" || name == "Iter_next" ||

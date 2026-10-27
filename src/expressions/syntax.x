@@ -526,6 +526,18 @@ List Compiler.parse_call_splice(Compiler c) {
   return %(expr ("List") (splice $value));
 }
 
+/** Parses a `key: value` argument for a Map rest parameter as
+    `(expr ("Map") (map-entry KEY VALUE))`, or returns NULL without consuming
+    an ordinary argument. Map literal rules decide the entry and its key.
+*/
+List Compiler.parse_call_entry(Compiler c) {
+  if (!_at_map_entry(c)) return NULL;
+  List entry = c.parse_map_entry();
+  if (entry ~= %(seq *rows))
+    return %(seq @(rows.map(%!(List row) => %(expr ("Map") $row))));
+  return %(expr ("Map") $entry);
+}
+
 static List _parse_postfix_apply(Compiler c, List expr) {
   Token origin = c.token;
   c.expect(<(>);
@@ -534,6 +546,7 @@ static List _parse_postfix_apply(Compiler c, List expr) {
   while (c.peek(0) != <)>) {
     List argument = c.try_parse_macro_slot(<argument>);
     if (!argument) argument = c.parse_call_splice();
+    if (!argument) argument = c.parse_call_entry();
     arguments.push(argument ? argument : c.parse_assignment());
     notes.push(c.protocol_helpers.getdefault("explicit-converter", %()));
     if (!c.test(<,>)) break;
@@ -798,7 +811,7 @@ static int _statement_expression_follows(Compiler c) {
 
 static List _parse_composite(Compiler c) {
   c.expect(<"{">);
-  if (_brace_starts_map(c)) {
+  if (_at_map_entry(c)) {
     List entries = c.parse_map_entries();
     c.expect(<"}">);
     return %(expr ("Map") (map @entries));
@@ -809,8 +822,9 @@ static List _parse_composite(Compiler c) {
 }
 
 /* An entry that begins with a Map-entry macro, or whose first bracket-level
-   `:` belongs to no conditional, makes a brace a Map literal. */
-static int _brace_starts_map(Compiler c) {
+   `:` belongs to no conditional, makes a brace a Map literal and a call
+   argument a Map rest entry. */
+static int _at_map_entry(Compiler c) {
   if (c.macro_starts_target_at(<map-entry>)) return 1;
   Token token = c.token;
   for (int conditionals = 0;; token = token.after_group()) {

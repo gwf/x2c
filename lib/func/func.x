@@ -13,6 +13,7 @@
 #include "common.x"
 #include "var/var.x"
 #include "list/list.x"
+#include "map/map.x"
 #include "string/string.x"
 
 Func Var.func(Var value);
@@ -28,7 +29,8 @@ typedef union FuncArgData {
 
 /** Argument carrier borrowed for one synchronous `Func.apply` call.
     A null `reference_type` selects copied Var bits; `(splice)` selects a
-    List value whose elements enter the rest tail. Otherwise, `reference`
+    List whose elements enter a List rest tail, or a Map whose entries enter
+    a Map rest tail. Otherwise, `reference`
     and its canonical source type are borrowed and must remain valid through
     the call. A reference target may be mutated by the native function.
 */
@@ -68,7 +70,8 @@ module {
    max_align_t-aligned context bytes. `sig`, `params`, and `adapter` are stored
    without retaining their canonical Lists or callback code, so they must
    outlive the binding. A `rest` binding packs trailing value arguments into
-   the final List its adapter expects. A `shared` binding is the file-static
+   the final List (`rest` 1) or Map (`rest` 2) its adapter expects. A
+   `shared` binding is the file-static
    handle that every conversion of one direct function reuses; it lives for the
    program, so `Func.move` leaves it in place. */
 static struct Func {
@@ -95,16 +98,18 @@ static void *_context(Func f) => (unsigned char *) f + _context_offset();
     reference arguments alias their caller-owned targets and may be mutated.
     A rest binding keeps its fixed arguments and interns one List containing
     trailing values in their original order. Explicit splices add their
-    elements.
+    elements. A Map rest binding instead pairs the trailing values, each key
+    followed by its value, into one fresh Map, and merges each spliced Map
+    where it occurs; later entries win.
     Rest arguments must not be `void`, since Lists exclude void elements.
 
     Raises: `<bad-arg>` for a null binding or argument storage, `<bad-arity>`
-    for the wrong argument count, `<void-op>`, `<bad-types>`, `<bad-enc>`,
-    `<bad-target>`, `<no-convert>`, or `<conv-range>` while converting an
-    argument, `<alloc-fail>` or `<size-limit>` while packing rest arguments,
-    or any cause raised by the adapter or native target. A `void` adapter
-    result remains no-value. Other results have the ownership of the value the
-    adapter returned.
+    for the wrong argument count or a key without a value, `<void-op>`,
+    `<bad-types>`, `<bad-enc>`, `<bad-target>`, `<no-convert>`, or
+    `<conv-range>` while converting an argument, `<alloc-fail>` or
+    `<size-limit>` while packing rest arguments, or any cause raised by the
+    adapter or native target. A `void` adapter result remains no-value. Other
+    results have the ownership of the value the adapter returned.
 */
 Var Func.apply(Func f, unsigned argc, const FuncArg *argv) {
   if (!f || (argc && !argv)) $error.apply.args();
@@ -121,26 +126,51 @@ Var Func.apply(Func f, unsigned argc, const FuncArg *argv) {
 
 /* Keep tail construction and its temporary array off the fixed-call path. */
 static Var _apply_rest(Func f, unsigned argc, const FuncArg *argv) {
-  List sig = f.sig, rest = NULL;
   unsigned fixed = f.nparams - 1;
-  if (argc < fixed) $error.apply.arity(sig, fixed, argc);
+  if (argc < fixed) $error.apply.arity(f.sig, fixed, argc);
+  FuncArg packed[f.nparams];
+  if (fixed) memcpy(packed, argv, fixed * sizeof(FuncArg));
+  packed[fixed] = f.rest == 2
+    ? FuncArg.value(_map_tail(f.sig, fixed, argc, argv))
+    : FuncArg.value(_list_tail(f.sig, fixed, argc, argv));
+  return f.adapter(f, packed);
+}
+
+static List _list_tail(
+  List sig, unsigned fixed, unsigned argc, const FuncArg *argv) {
+  List rest = NULL;
   for (unsigned i = argc; i > fixed; i--) {
     unsigned index = i - 1;
     if (argv[index].reference_type == %(splice)) {
       List items = argv[index].data.value;
       rest = items.append(rest);
+    }
+    else rest = cons(_tail_value(sig, argv, index), rest);
+  }
+  return rest;
+}
+
+static Map _map_tail(
+  List sig, unsigned fixed, unsigned argc, const FuncArg *argv) {
+  Map tail = Map.new();
+  for (unsigned i = fixed; i < argc; i++) {
+    if (argv[i].reference_type == %(splice)) {
+      tail.merge(argv[i].data.value);
       continue;
     }
-    if (argv[index].reference_type)
-      $error.arg.value(sig, index);
-    Var value = argv[index].data.value;
-    if (value is void) $error.arg.void(sig, index);
-    rest = cons(value, rest);
+    if (i + 1 == argc) $error.apply.arity(sig, argc + 1, argc);
+    Var key = _tail_value(sig, argv, i++);
+    tail.set(key, _tail_value(sig, argv, i));
   }
-  FuncArg packed[f.nparams];
-  if (fixed) memcpy(packed, argv, fixed * sizeof(FuncArg));
-  packed[fixed] = FuncArg.value(rest);
-  return f.adapter(f, packed);
+  return tail;
+}
+
+/* A trailing value is passed by value and is not void. */
+static Var _tail_value(List sig, const FuncArg *argv, unsigned index) {
+  if (argv[index].reference_type) $error.arg.value(sig, index);
+  Var value = argv[index].data.value;
+  if (value is void) $error.arg.void(sig, index);
+  return value;
 }
 
 /** Constructs a `Func` argument by copying one `Var` value.
@@ -155,16 +185,38 @@ inline FuncArg FuncArg.value(Var value) => (FuncArg) { .data.value = value };
 FuncArg FuncArg.splice(List items) =>
   (FuncArg) { .data.value = items, .reference_type = %(splice) };
 
-/** Prepares an explicit splice only after the binding's fixed parameters.
-    Raises `<bad-types>` when the splice occupies a fixed parameter.
+/** Marks an explicit Map splice in a Map rest tail. The Map is borrowed
+    until the synchronous call completes.
+*/
+FuncArg FuncArg.splice_map(Map entries) =>
+  (FuncArg) { .data.value = entries, .reference_type = %(splice) };
+
+/** Prepares an explicit List splice only after the fixed parameters of a
+    List rest binding.
+    Raises `<bad-types>` when the splice occupies a fixed parameter or the
+    binding has no List rest.
 */
 FuncArg x2c_func_splice_argument(Func fn, unsigned index, List items) {
+  _check_splice(fn, index, 1);
+  return FuncArg.splice(items);
+}
+
+/** Prepares an explicit Map splice only after the fixed parameters of a
+    Map rest binding.
+    Raises `<bad-types>` when the splice occupies a fixed parameter or the
+    binding has no Map rest.
+*/
+FuncArg x2c_func_map_splice_argument(Func fn, unsigned index, Map entries) {
+  _check_splice(fn, index, 2);
+  return FuncArg.splice_map(entries);
+}
+
+static void _check_splice(Func fn, unsigned index, int rest) {
   if (!fn) $error.apply.args();
-  if (!fn.rest || index < fn.nparams - 1) {
+  if (fn.rest != rest || index < fn.nparams - 1) {
     List sig = fn.sig;
     $error.arg.value(sig, index);
   }
-  return FuncArg.splice(items);
 }
 
 /** Constructs a `Func` argument borrowing a typed lvalue address.
@@ -382,8 +434,8 @@ static unsigned _type_qualifiers(List &cursor) {
 // construction
 
 /** Builds a native-function binding in the current `Scope`.
-    A final `(....)` signature parameter, the Type of a `List @name`
-    parameter, selects List-rest calling semantics.
+    A final `(....)` or `(.... "Map")` signature parameter, the Type of a
+    `List @name` or `Map @name` parameter, selects rest calling semantics.
     A direct function expression is compiler-adapted; an expression already
     typed `FuncAdapter` is stored as supplied. The canonical `signature` and
     adapter code are borrowed for the `Func` lifetime. Only the signature's
@@ -408,8 +460,8 @@ Func Func.new_rest(FuncAdapter adapter, List signature) =>
   _new(adapter, signature, 1, NULL, 0);
 
 /** Builds a binding with copied context in the current `Scope`.
-    A final `(....)` signature parameter, the Type of a `List @name`
-    parameter, selects List-rest calling semantics.
+    A final `(....)` or `(.... "Map")` signature parameter, the Type of a
+    `List @name` or `Map @name` parameter, selects rest calling semantics.
     The max_align_t-aligned bytes share the `Func` allocation. The byte copy is
     shallow: changing the source bytes does not change the binding, while any
     pointers inside them keep their original targets and lifetimes. A zero
@@ -454,6 +506,7 @@ static Func _new(
     $error.context.size(context_size);
   Var last = params.last();
   if (last == %(....)) rest = 1;
+  else if (last == %(.... "Map")) rest = 2;
   else if (rest && last != %("List"))
     $error.bind.sig(signature);
   int n = params.len();

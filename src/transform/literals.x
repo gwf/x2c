@@ -218,6 +218,47 @@ static List _passed_as(List value, Type type) {
 static List _statement_expression(List declarations, List expression) =>
   %(parens (block @declarations (stmnt $expression)));
 
+/* A Map rest tail: each run of entries becomes one Map literal and each
+   splice one Map. The parts are held in source order and merged into the
+   first, so every part is evaluated once and later entries win. */
+module List _map_tail(Compiler c, Array items) {
+  Array parts = auto [];
+  List rows = NULL;
+  foreach (List item in items) match (item) {
+    case %(expr ? (!set ?row (map-entry ? ?))): rows = cons(row, rows);
+    case %(expr ? (splice ?value)): {
+      if (rows || !parts.len()) parts.push(_map_literal(c, rows));
+      parts.push(c.convert_expression(value, %("Map")));
+      rows = NULL;
+    }
+    default:
+      c.report_error(<xform>,
+        "a Map rest argument must be a key: value entry or a splice",
+        NULL, NULL);
+  }
+  if (rows || !parts.len()) parts.push(_map_literal(c, rows));
+  if (parts.len() == 1) return parts[0];
+  Type signature = NULL;
+  List binding = c.sym.reference(%("Map_merge"), signature);
+  List merge = %(expr $signature (ident $binding)), merged = NULL;
+  Macro called = $called;
+  Array declarations = [];
+  foreach (List part in parts) {
+    List value = _sequenced(c, part, "map_part", declarations);
+    merged = merged
+      ? c.rebuild_expression(%("Map"), called(merge, $(merged, value)))
+      : value;
+  }
+  return %(expr ("Map")
+    $(_statement_expression(declarations.list_free(), merged)));
+}
+
+/* `reversed` holds a run of entries, last first. */
+static List _map_literal(Compiler c, List reversed) {
+  Macro map_value = $map_value;
+  return c.rebuild_expression(%("Map"), map_value(reversed.reverse()));
+}
+
 /** Calls the typed callable `callee` with `arguments`, each converted to
     its parameter and evaluated once, in source order, as a statement
     expression.
@@ -225,7 +266,7 @@ static List _statement_expression(List declarations, List expression) =>
 List Compiler.call_in_order(Compiler c, List callee, List arguments) {
   Type signature = callee.cadr();
   List parameters = signature.car().list().cadr();
-  if (parameters && parameters.last().type().is_list_rest()) {
+  if (parameters && parameters.last().type().rest_container()) {
     List normalized = _typed_call(c, callee, parameters, arguments);
     callee = normalized.cadr();
     arguments = normalized.caddr().list().cdr();

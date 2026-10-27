@@ -2,9 +2,11 @@
 
 > Status: active
 > Recorded 2026-10-27 after `List @name` replaced the four-dot spelling of
-> List rest parameters. Gary settled the Map questions the same day; Map rest
-> is decision-complete and not started. Array rest stays deferred until a
-> caller needs it. Map and Array are separate changes.
+> List rest parameters. Gary settled the Map questions the same day, and Map
+> rest was implemented on 2026-10-27 as described below. Array rest stays
+> deferred until a caller needs indexed access to its tail. A Map produced by
+> a meta call cannot yet reach any Map meta parameter, so it cannot be
+> spliced into a meta call's Map rest either.
 
 ## Starting point
 

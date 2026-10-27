@@ -303,6 +303,7 @@ static FuncArg _loaded_argument(List argument) {
   match (argument) {
     case %(value ?value): return FuncArg.value(value);
     case %(splice ?(List items)): return FuncArg.splice(items);
+    case %(splice ?(Map entries)): return FuncArg.splice_map(entries);
     case %(object ?(String path) ?(List indices) ?(int reference) ?(Symbol tag)): {
       String name = "address global " + path;
       foreach (Var (index, value), helper_tables) {

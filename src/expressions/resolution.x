@@ -165,6 +165,8 @@ static List _content(Resolve &r, List content) {
     case %(va-arg ?expr ?decl): return _va_arg(r, expr, decl);
     case %(commas *items): return _commas(r, items);
     case %(splice ?value): return _splice(r, value);
+    case %(!set ?entry (map-entry ? ?)):
+      return %(expr $(r.type) $(r.c.resolve_map_entry(entry, r.origin)));
     case %((!or offsetof nil cache macro-bind) *): return r.input;
     case $Macro.content_pattern($grouped, %(?inner)):
       return _parens(r, inner);

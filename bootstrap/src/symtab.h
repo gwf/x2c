@@ -187,7 +187,7 @@ List Sym_marked_fields(Sym s, Type aggregate, Symbol mark);
 
 Type Sym_aggregate_of(Sym s, Type type);
 
-int Sym_same_list_rest_convention(Sym s, Type source, Type target);
+int Sym_same_rest_convention(Sym s, Type source, Type target);
 
 void Sym_put(Sym s, Map map, Var key, Var value);
 

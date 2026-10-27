@@ -240,6 +240,8 @@
   (repl.native.lisp_func_value argv index value))
 (defun C.func.splice (fn argv index value)
   (repl.native.lisp_func_splice fn argv index value))
+(defun C.func.map-splice (fn argv index value)
+  (repl.native.lisp_func_map_splice fn argv index value))
 (defun C.func.reference (argv index address source)
   (repl.native.lisp_func_reference argv index address source))
 (defun C.func.invalid (fn index source)

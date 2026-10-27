@@ -1,4 +1,4 @@
-unittest/compiler-fixtures/list-rest-nested-declaration-mismatch.x:5:31: type: conflicting List rest calling convention
+unittest/compiler-fixtures/list-rest-nested-declaration-mismatch.x:5:31: type: conflicting rest calling convention
   int invoke(Ordinary callback) { return callback(%(1 2)); }
                                 ^
 

@@ -400,7 +400,8 @@ static void _lower_scan(Lowering &l, Var form) {
           _lower_scan(l, value);
           _lower_scan(l, address);
         }
-        case %(func-splice ?value): _lower_scan(l, value);
+        case %((!or func-splice func-map-splice) ?value):
+          _lower_scan(l, value);
       }
     return;
   }
@@ -697,7 +698,8 @@ static List _lower_param_type(List params) {
   if (!params) return NULL;
   List param = params.car();
   if (param && param.car() == <param>) param = param.type_from_ast();
-  return param == %(....) ? %("List") : param;
+  Type container = Type.rest_container(param);
+  return container ? container : param;
 }
 
 static List _lower_args(
@@ -735,9 +737,12 @@ static List _lower_args(
    the lowered code pays a lookup and nothing more. Its type carries the
    parameter types the arguments have to reach, and carries none where the
    compiler constructed the call itself. */
+/* Map rest packing adds its `Map_merge` call after the scan, so a callee
+   binds where it is lowered as well. */
 static Var _lower_call(Lowering &l, List callee, String name, List args) {
   List params = NULL;
   match (callee) case %((func ?declared) *): params = declared;
+  _lower_known(l, name);
   List values = _lower_args(l, params, args, name);
   if (l.declined) return void;
   return cons(Atom.intern(name), values);
@@ -752,9 +757,9 @@ static Var _lower_native_call(
   Lowering &l, List callee, String name, List args) {
   List params = NULL;
   match (callee) case %((func ?declared) *): params = declared;
-  int rest = params && params.last() == %(....);
+  Type rest = params ? Type.rest_container(params.last()) : NULL;
   if (rest) args = l.compiler.pack_rest_arguments(params, args);
-  int references = rest;
+  int references = !!rest;
   for (List p = params; p; p = p.cdr()) {
     Type parameter = _lower_param_type(p);
     references |= parameter.is_reference();
@@ -773,7 +778,9 @@ static Var _lower_native_call(
       parameter.is_reference()
       ? %(C.func.reference $argv $index $value (quote $(parameter.cdr())))
       : rest && !p
-        ? %(C.func.splice $(Atom.intern(name)) $argv $index $value)
+        ? rest == %("Map")
+          ? %(C.func.map-splice $(Atom.intern(name)) $argv $index $value)
+          : %(C.func.splice $(Atom.intern(name)) $argv $index $value)
         : %(C.func.value $argv $index $value));
     index++;
   }
@@ -830,6 +837,12 @@ static Var _lower_application(Lowering &l, Var content) {
         prepare.push(%(C.func.splice $fn $argv $index $list));
         index++;
       }
+      case %(func-map-splice ?value): {
+        Var map = _lower_expr(l, value);
+        if (_lower_failed(l, map)) return void;
+        prepare.push(%(C.func.map-splice $fn $argv $index $map));
+        index++;
+      }
       case %(func-arg ?value ?address ?source): {
         Var type = List.match(
           source, %(expr ("List") (ident ?)))
@@ -874,7 +887,8 @@ static Var _lower_func_adapter(Lowering &l, Type type, Var callable) {
   int index = 0;
   foreach (Type parameter, params) {
     if (parameter.equal(%(void))) continue;
-    if (parameter == %(....)) parameter = %("List");
+    Type container = parameter.rest_container();
+    if (container) parameter = container;
     Var value;
     if (parameter.is_reference()) {
       Type target = parameter.cdr();

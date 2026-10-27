@@ -332,11 +332,11 @@ Type Sym.aggregate_of(Sym s, Type type) {
   return type && type.is_aggregate_tag() ? type : NULL;
 }
 
-/** Compares only List rest conventions in corresponding callable positions,
+/** Compares only rest conventions in corresponding callable positions,
     including callback parameters and returned function pointers. Native C
     checking owns other type differences, but cannot see this convention.
 */
-int Sym.same_list_rest_convention(Sym s, Type source, Type target) {
+int Sym.same_rest_convention(Sym s, Type source, Type target) {
   if (source == target) return 1;
   source = s.resolve_key(source);
   target = s.resolve_key(target);
@@ -344,15 +344,17 @@ int Sym.same_list_rest_convention(Sym s, Type source, Type target) {
   List left = NULL, right = NULL, Type left_result = NULL, right_result = NULL;
   if (source.function_parts(left, left_result) &&
       target.function_parts(right, right_result)) {
-    if (source.list_rest_index() != target.list_rest_index()) return 0;
+    if (source.rest_index() != target.rest_index()) return 0;
     while (left && right) {
-      if (!s.same_list_rest_convention(left.car(), right.car())) return 0;
+      if (left.car().type().rest_container() !=
+          right.car().type().rest_container() ||
+          !s.same_rest_convention(left.car(), right.car())) return 0;
       left = left.cdr(), right = right.cdr();
     }
-    return s.same_list_rest_convention(left_result, right_result);
+    return s.same_rest_convention(left_result, right_result);
   }
   if (source.is_pointer() && target.is_pointer())
-    return s.same_list_rest_convention(
+    return s.same_rest_convention(
       source.dereference(), target.dereference());
   return 1;
 }

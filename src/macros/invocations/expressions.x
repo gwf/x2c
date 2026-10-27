@@ -72,9 +72,11 @@ static Array _meta_arguments(Compiler c, List parameters, Symbol head) {
   c.expect(<(>);
   if (c.peek(0) != <)>) loop {
     Type parameter = parameters ? parameters.car() : NULL;
-    int rest = parameter == %(....);
+    Type rest = Type.rest_container(parameter);
     List argument = rest && !c.peek_macro_hole()
       ? c.parse_call_splice() : NULL;
+    if (!argument && rest == %("Map") && !c.peek_macro_hole())
+      argument = c.parse_call_entry();
     if (!argument) argument = _meta_argument(c);
     if (parameters && !rest && !c.macro_holes &&
         !(head == <meta-call> && c.sym.is_var_type(parameter)))

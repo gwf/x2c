@@ -387,7 +387,10 @@ permit empty parameter/argument sequences.
 
 A List rest parameter, `List @NAME`, uses `(param (....) (bind NAME ()))`. Its
 semantic parameter Type is `(....)`, distinct from `("List")`, while its
-bound local and emitted native parameter are ordinary Lists. The final
+bound local and emitted native parameter are ordinary Lists. A Map rest
+parameter, `Map @NAME`, uses `(.... "Map")` the same way, with a Map local
+and native parameter. A `key: value` call argument is
+`(expr ("Map") (map-entry KEY VALUE))`. The final
 position in the parameter sequence owns the rest convention.
 
 Owners: [_declarator, _declarator_suffix, _array_suffix,

@@ -490,13 +490,13 @@ List Compiler.parse_parameter(Compiler c) {
   if (c.test(<...>)) return %(...);
   List qual = _type_qualifiers(c), spec = _type_specifier(c);
   List type = %( @qual @spec );
-  int rest = type == %("List") && c.test(<@>);
-  if (rest) type = %(....);
+  int rest = (type == %("List") || type == %("Map")) && c.test(<@>);
+  if (rest) type = type == %("List") ? %(....) : %(.... "Map");
   List method = NULL;
   Token first = NULL, after = NULL;
   List declarator = _declarator(c, type, NULL, method, first, after);
   if (rest && (declarator.caddr() || c.peek(0) == <,>))
-    c.report_error(<parse>, "List rest parameter must be a final name",
+    c.report_error(<parse>, "rest parameter must be a final name",
       c.token, NULL);
   return _finish_parameter(c, type, declarator, method, first, after);
 }
@@ -510,8 +510,8 @@ List Compiler.bind_parameter(Compiler c, List base, List declarator) =>
 module List _finish_parameter(
   Compiler c, List base, List declarator, List method_identity,
   Token source_first, Token source_after) {
-  int list_rest = base === %(....);
-  base = _finish_type(c, list_rest ? %("List") : base);
+  List rest = base, container = rest.type().rest_container();
+  base = _finish_type(c, container ? container : base);
   if (<auto> in base && !c.macro_holes && !c.shallow)
     $fail.parse_auto_storage(c, c.token);
   int preserved_self = 0;
@@ -522,7 +522,7 @@ module List _finish_parameter(
   List modifiers = NULL;
   base = Type.declaration_base(base, modifiers);
   declarator = Ast.append_modifiers(declarator, modifiers);
-  if (list_rest) base = %(....);
+  if (container) base = rest;
   List parameter = %(param $base $declarator);
   if (declarator ~= %(bind ?binding ?) && !c.macro_holes)
     _parameter_facts(c, binding, parameter);

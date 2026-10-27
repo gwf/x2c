@@ -70,7 +70,9 @@ module void _check_converter_args(
     if (car(p) is not <list> || car(a) is not <list>) continue;
     List param = car(p), argument = car(a);
     Type expected = param.car() == <param> ? param.type_from_ast() : param;
-    if (expected.is_list_rest()) {
+    Type container = expected.rest_container();
+    if (container == %("Map")) break;
+    if (container) {
       expected = %("Var");
       if (argument ~= %(expr ? (splice ?value)))
         argument = value, expected = %("List");
@@ -720,8 +722,8 @@ static void _check_object_pointer(
 static void _check_native_crossing(
   Compiler c, List expr, Type type, Type target,
   Type declared_source, Type declared_target) {
-  if (!c.sym.same_list_rest_convention(type, target))
-    c.report_error(<type>, "incompatible List rest calling convention",
+  if (!c.sym.same_rest_convention(type, target))
+    c.report_error(<type>, "incompatible rest calling convention",
       NULL, NULL);
   String integer = _not_null_pointer_constant(c, expr);
   if (integer && c.sym.resolve_key(target).is_pointer())
