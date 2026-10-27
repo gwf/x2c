@@ -489,9 +489,12 @@ Var Thread.join(Thread t) {
   return _read_result(t);
 }
 
+/* Export consumes the capture, so a later cleanup join of the same worker
+   reports no second failure. */
 static Var _read_result(Thread t) {
   if (t.errors is not void) {
     Var errors = Context.export_scope(t.error_scope, t.error_pool, t.errors);
+    t.errors = void;
     raise %(join-fail (errors $errors));
   }
   return t.result;
@@ -547,8 +550,9 @@ Var Thread.finish_any(Array pending) {
     Entries must be unique, valid handles exclusively owned by this caller,
     with no concurrent mutation, joining, or freeing.
     Failures are collected and raised as `<join-fail>` only after cleanup.
-    During an existing Error unwind, a native stderr diagnostic reports the
-    cleanup failure instead; the original Error continues unchanged.
+    During an existing Error unwind, the original Error continues unchanged:
+    consumed workers' failures are dropped, and a native stderr diagnostic
+    reports only handles that remain unjoined.
     Raises: `<join-fail>` containing the captured join failures, including
     `<bad-arg>` for a null entry or `<bad-state>` for a joining entry.
     Error snapshot failures use the existing raw Error floor.
@@ -574,9 +578,10 @@ void Thread.finish_all(Array pending) {
   }
   if (!failures) return;
   if (unwinding) {
-    fprintf(
-      stderr, "Thread.finish_all: cleanup failed; %zu handle(s) remain.\n",
-      pending.len());
+    if (pending.len())
+      fprintf(
+        stderr, "Thread.finish_all: cleanup failed; %zu handle(s) remain.\n",
+        pending.len());
     return;
   }
   raise %(join-fail (errors $(failures.reverse())));
