@@ -51,6 +51,7 @@ module int _inherited(Lisp lisp, Var name) {
   return 0;
 }
 
+/* Empty Maps bypass key hashing, including registered callbacks. */
 module int _binding_get(Map bindings, Var name, Var &out) {
   Var slot;
   if (!bindings || !bindings.try_get(name, slot)) return 0;

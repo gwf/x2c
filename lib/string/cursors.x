@@ -5,7 +5,9 @@
     A Split description is immutable and `Scope`-owned. It keeps no position;
     the caller holds the cursor, so one Split supports repeated, nested, and
     concurrent walks. Eager and lazy splitting share the same separator and
-    line-ending scans.
+    line-ending scans. Every descriptor has one of the three traversal
+    callbacks. Scanners receive nonempty text and positions the traversal
+    produced.
 */
 
 /** Describes an immutable, repeatable lazy traversal of a borrowed `String`.
@@ -44,7 +46,7 @@ static struct Split {
 
 static inline int _end(String str, String sep, int start, int &next) {
   int length = str.len();
-  if (!str || start < 0 || start > length) return -1;
+  if (start < 0) return -1;
   if (!sep) {
     next = -1;
     return length;
@@ -60,7 +62,7 @@ static inline int _end(String str, String sep, int start, int &next) {
 
 static inline int _line_end(String str, int start, int keep_ends, int &next) {
   int length = str.len();
-  if (!str || start < 0 || start >= length) return -1;
+  if (start >= length) return -1;
   const char *text = str;
   int end = start;
   while (end < length && text[end] != '\n' && text[end] != '\r') end++;
@@ -240,7 +242,7 @@ meta native Split String.splits(String str, String sep) =>
     arguments produce exhaustion without raising.
 */
 int Split.try_next(Split split, int &?cursor, String &?out) {
-  if (!split || !cursor || !out || !split.next) return 0;
+  if (!split || !cursor || !out) return 0;
   return split.next(split, &cursor, &out);
 }
 

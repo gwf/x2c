@@ -42,6 +42,4 @@ static void print_top_ten(MapSubInt counts) {
     printf("%d\t%s\n", count, word);
 }
 
-static void count_word(MapSubInt counts, Substr word) {
-  counts.increment(word); // Map owns lookup, insertion, and growth.
-}
+static void count_word(MapSubInt counts, Substr word) => counts.increment(word);

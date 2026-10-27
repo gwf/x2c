@@ -46,9 +46,10 @@ Iter String.iter(String x, Iter dest) {
   return dest.init(x, _next, 0);
 }
 
+/* String.iter starts at zero and advances within the String. */
 static int _next(Iter iter, Var *out) {
   int index = iter.state, String str = iter.obj;
-  if (index < 0 || index >= str.len()) return 0;
+  if (index >= str.len()) return 0;
   *out = str[index];
   iter.state = index + 1;
   return 1;

@@ -181,7 +181,8 @@ static Var _export_wide(Context c, Var v) {
   return v;
 }
 
-static Var _export_string(Context c, String value) {
+/* Each export helper receives the tag selected by _export_value. */
+static String _export_string(Context c, String value) {
   if (!c.pool || !c.pool.owns(value)) return value;
   return String.new_in(c.destination_pool, value, value.len());
 }
@@ -211,7 +212,7 @@ static List _export_list(Context c, List list) {
 
 /* Visit each container once. Root export commits only outermost scheduled
    scopes, preserving adoption regardless of reference traversal order. */
-static Var _export_array(Context c, Array array) {
+static Array _export_array(Context c, Array array) {
   if (!c.owns(array) || _visited(c, array)) return array;
   c.move_block(array);
   Var *items = array.bytes;
@@ -220,7 +221,7 @@ static Var _export_array(Context c, Array array) {
   return array;
 }
 
-static Var _export_map(Context c, Map map) {
+static Map _export_map(Context c, Map map) {
   if (!c.owns(map) || _visited(c, map)) return map;
   map.export_to(c, _export_callback, c.destination_scope);
   c.move_allocation(map);

@@ -770,9 +770,10 @@ macro Unit $map.typed.iterate(Type $map, Type $key, Type $value,
   Iter $map.iter($map, Iter);
   Iter $map.keys($map, Iter);
   Iter $map.enumerate($map, Iter);
+  /* Iter.try_next supplies callback outputs; Map.try_next owns null-map
+     exhaustion. */
   static int _step(Iter iter, $key &key, $value &val) {
     $map map = iter.obj.$unbox();
-    if ((void *) map == 0) return 0;
     unsigned cursor = iter.state;
     if (!map.try_next(cursor, key, val)) return 0;
     iter.state = cursor;
@@ -782,7 +783,7 @@ macro Unit $map.typed.iterate(Type $map, Type $key, Type $value,
   static int _next(Iter iter, Var *out) {
     $key key;
     $value val;
-    if (!out || !_step(iter, key, val)) return 0;
+    if (!_step(iter, key, val)) return 0;
     *out = $box_value(val);
     return 1;
   }
@@ -790,7 +791,7 @@ macro Unit $map.typed.iterate(Type $map, Type $key, Type $value,
   static int _keys_next(Iter iter, Var *out) {
     $key key;
     $value val;
-    if (!out || !_step(iter, key, val)) return 0;
+    if (!_step(iter, key, val)) return 0;
     *out = $box_key(key);
     return 1;
   }
@@ -798,7 +799,7 @@ macro Unit $map.typed.iterate(Type $map, Type $key, Type $value,
   static int _enumerate_next(Iter iter, Var *out) {
     $key key;
     $value val;
-    if (!out || !_step(iter, key, val)) return 0;
+    if (!_step(iter, key, val)) return 0;
     Var boxed_key = $box_key(key), boxed_value = $box_value(val);
     *out = List_var(cons(boxed_key, cons(boxed_value, NULL)));
     return 1;

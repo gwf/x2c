@@ -167,7 +167,8 @@ static List _converter(Type type) =>
                     : type.protocol_member("iter");
 
 /* A source or element owner can supply `int try_next(Source, C *, O *...)`.
-   Return its cursor and output types when the source and arity match. */
+   Return its cursor and output types when the source and arity match.
+   _foreach_expand admits one or two targets; List accessors handle nil. */
 static List _cursor_spec(Type collection_type, Type owner, int arity) {
   if (!_atom_type(collection_type) || !_atom_type(owner)) return %();
   Code function = _method(owner, "try_next");
@@ -175,8 +176,8 @@ static List _cursor_spec(Type collection_type, Type owner, int arity) {
   Type type = function.type();
   List parameters = type.parameters();
   List rest = parameters.cdr();
-  Type cursor_parameter = rest ? rest.car() : %();
-  List outputs = rest ? rest.cdr() : %();
+  Type cursor_parameter = rest.car();
+  List outputs = rest.cdr();
   if (type.return_type() != %(int) ||
       (owner == collection_type
         ? parameters.car() != collection_type
@@ -186,7 +187,7 @@ static List _cursor_spec(Type collection_type, Type owner, int arity) {
   if (!cursor_type.is_integral() &&
       cursor_type.resolve() != collection_type.resolve())
     return %();
-  if (!outputs || (arity == 2 && outputs.len() < 2)) return %();
+  if (outputs.len() < arity) return %();
   if (!_valid_outputs(outputs)) return %();
   List output_types = outputs.map(%!(Type output) => output.element());
   /* A fourth element marks reference parameters. */
@@ -198,7 +199,6 @@ static List _cursor_spec(Type collection_type, Type owner, int arity) {
 /* A requested element can supply a native cursor for this source. Match
    its output exactly before considering the collection's default cursor. */
 static List _typed_cursor_spec(Type collection_type, List targets) {
-  if (!targets) return %();
   Type requested = Code.type(targets.last());
   List spec = _cursor_spec(collection_type, requested, targets.len());
   if (!spec) return %();
@@ -207,12 +207,8 @@ static List _typed_cursor_spec(Type collection_type, List targets) {
   return output.resolve() == requested.resolve() ? spec : %();
 }
 
-/* Whether `type` is named by one String or Symbol. */
-static int _atom_type(List type) {
-  if (type.len() != 1) return 0;
-  Var name = type.car();
-  return name is <string> || name.kind() == <symbol>;
-}
+/* Callers supply semantic Types; every singleton is a String or Symbol. */
+static int _atom_type(Type type) => type.len() == 1;
 
 /* Whether each output parameter points to a named type. */
 static int _valid_outputs(List outputs) {
@@ -388,10 +384,11 @@ static Shape _shape(String owner, Type type, List location) {
   return s;
 }
 
+/* Type.layout supplies String names, including empty anonymous names. */
 static List _named(List fields) {
   Array named = [];
   foreach (List field in fields)
-    if (field.car() is <string> && field.car().str().len() > 0)
+    if (field.car().str().len() > 0)
       named.push(field);
   return named.list_free();
 }

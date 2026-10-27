@@ -169,9 +169,9 @@ static void f12_declarations____lower_parameter_self(Compiler c, Var replacement
 
 static List _bind_collected_initializers(Compiler c, List input, Var declaration, Var construction);
 
-static List _bind_declaration(Compiler c, Var tag, Var base, List declarators, Symbol context);
+static List _bind_declaration(Compiler c, Symbol tag, Var base, List declarators, Symbol context);
 
-static int f12_declarations____declaration_legal(Var tag, Symbol context);
+static int f12_declarations____declaration_legal(Symbol tag, Symbol context);
 
 static int f12_declarations____has_bitfield(List declarator);
 
@@ -1354,7 +1354,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _493 = List_var(_492);
   _494 = cons(_414, _411);
   _495 = List_var(_494);
-  _496 = int_var(89782);
+  _496 = int_var(89855);
   _497 = cons(_496, NULL);
   _498 = cons(_419, _497);
   _499 = List_var(_498);
@@ -4699,7 +4699,7 @@ static List _bind_collected_initializers(Compiler c, List input, Var declaration
 
 List Compiler_finish_initializers(Compiler c, List declaration, Token origin);
 
-static List _bind_declaration(Compiler c, Var tag, Var base, List declarators, Symbol context){
+static List _bind_declaration(Compiler c, Symbol tag, Var base, List declarators, Symbol context){
   int shallow = c -> shallow;
   if(c -> public_bodies && context == 1405544) c -> shallow = 1;
   {
@@ -4726,7 +4726,7 @@ static List _bind_declaration(Compiler c, Var tag, Var base, List declarators, S
       if(List_contains(Var_list(base), Symbol_var(109854)) && ! Map_truth(c -> macro_holes) && ! c -> shallow && context != 5011670) Compiler_report_error(c, 33658058, _68, c -> token, NULL);
       base = List_var(_finish_type(c, Var_list_payload(base)));
       List field_context = context == 13183752 ? c -> aggregate_type : NULL;
-      List declaration_context = x2c_var_equal(tag, Symbol_var(44661285196)) ? _70 : field_context;
+      List declaration_context = tag == 44661285196 ? _70 : field_context;
       Array output = Array_new();
       int preserved_self = 0, initializes = 0;
       {
@@ -4774,13 +4774,13 @@ static List _bind_declaration(Compiler c, Var tag, Var base, List declarators, S
         }
 
       }
-      List decl = _finish_declaration(c, Var_symbol(tag), Var_list_payload(base), Array_list_free(output), preserved_self);  if(context == 1405544) Compiler_record_declaration_visibility(c, decl);  if(c -> shallow && context == 1405544 && initializes){
+      List decl = _finish_declaration(c, tag, Var_list_payload(base), Array_list_free(output), preserved_self);  if(context == 1405544) Compiler_record_declaration_visibility(c, decl);  if(c -> shallow && context == 1405544 && initializes){
         List _x2c_gensym_return_value_6 = cons(_105, cons(List_var(decl), cons(List_var(c -> macro_stack), NULL))); {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_9);  return _x2c_gensym_return_value_6;
         }
 
       }
-      if(context == 5011670 && x2c_var_equal(tag, Symbol_var(8932560010))){
+      if(context == 5011670 && tag == 8932560010){
         List _x2c_gensym_return_value_7 = Compiler_finish_initializers(c, decl, c -> token); {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_9);  return _x2c_gensym_return_value_7;
         }
@@ -4799,8 +4799,8 @@ static List _bind_declaration(Compiler c, Var tag, Var base, List declarators, S
 
 }
 
-static int f12_declarations____declaration_legal(Var tag, Symbol context){
-  if(x2c_var_equal(tag, Symbol_var(44661285196))) return context == 1405544 || context == 5011670;  if(x2c_var_equal(tag, Symbol_var(272600))) return context == 5011670;  return context == 1405544 || context == 5011670 || context == 13183752;
+static int f12_declarations____declaration_legal(Symbol tag, Symbol context){
+  if(tag == 44661285196) return context == 1405544 || context == 5011670;  if(tag == 272600) return context == 5011670;  return context == 1405544 || context == 5011670 || context == 13183752;
 }
 
 static int f12_declarations____has_bitfield(List declarator){
@@ -8113,7 +8113,7 @@ static List f7_binding____bind_form(Compiler c, List input, Symbol context, int 
         base = x2c_match_value_1;
         List declarators;
         declarators = x2c_match_list_2;
-        return _bind_declaration(c, tag, base, declarators, context);
+        return _bind_declaration(c, Var_symbol(tag), base, declarators, context);
       }
       break;
       }}{List _x2c_gensym_match_at_366, _x2c_gensym_match_at_367, _x2c_gensym_match_at_368, _x2c_gensym_match_at_369, _x2c_gensym_match_at_370, _x2c_gensym_match_at_371; Var x2c_match_value_0, x2c_match_value_2; List x2c_match_list_1; if(_x2c_gensym_match_expr_59 && _x2c_gensym_match_expr_59 ->car.u64 == 9224498253821913304ULL &&(_x2c_gensym_match_at_366 = _x2c_gensym_match_expr_59 ->cdr) &&(x2c_match_value_0 = _x2c_gensym_match_at_366 ->car, 1) &&(_x2c_gensym_match_at_367 = _x2c_gensym_match_at_366 ->cdr) &&(Var_is(_x2c_gensym_match_at_367 -> car, 806120) &&(_x2c_gensym_match_at_368 = Var_list_payload(_x2c_gensym_match_at_367 -> car), 1)) && _x2c_gensym_match_at_368 && _x2c_gensym_match_at_368 ->car.u64 == 9224497979816619302ULL &&(_x2c_gensym_match_at_369 = _x2c_gensym_match_at_368 ->cdr, 1) &&(x2c_match_list_1 = _x2c_gensym_match_at_369, 1) &&(_x2c_gensym_match_at_370 = _x2c_gensym_match_at_367 ->cdr) &&(x2c_match_value_2 = _x2c_gensym_match_at_370 ->car, 1) && !(_x2c_gensym_match_at_371 = _x2c_gensym_match_at_370 ->cdr)){

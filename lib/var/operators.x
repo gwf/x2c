@@ -131,7 +131,8 @@ Var Var.binary(Var lhs, Symbol op, Var rhs) {
   raise %(bad-op (op $op));
 }
 
-static Var _predicate(int holds) => Var.box_i32_bits((unsigned) !!holds);
+/* Comparisons and _logical already return zero or one. */
+static Var _predicate(int holds) => Var.box_i32_bits((unsigned) holds);
 
 /* The direct API is eager: it reads both operands' truth, left first. */
 static int _logical(Var lhs, Symbol op, Var rhs) {

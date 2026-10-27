@@ -50,15 +50,15 @@ static Var _export_value(Context c, Var v);
 
 static Var _export_wide(Context c, Var v);
 
-static Var _export_string(Context c, String value);
+static String _export_string(Context c, String value);
 
 static Var _export_atom(Context c, Var value);
 
 static List _export_list(Context c, List list);
 
-static Var _export_array(Context c, Array array);
+static Array _export_array(Context c, Array array);
 
-static Var _export_map(Context c, Map map);
+static Map _export_map(Context c, Map map);
 
 static Var _export_callback(Var value, Context c);
 
@@ -236,11 +236,11 @@ static Var _export_value(Context c, Var v){
   if(Var_is_void(v) || Var_is_null(v) || Var_is_nil(v) || Var_is(v, 1328354264)) return v;
   if(Var_is_wide(v)) return _export_wide(c, v);
   if(Var_is_integer(v) || Var_is_floating(v)) return v;
-  if(Var_is_row(v, 11, 7, 1)) return _export_string(c, Var_as_string(v));
+  if(Var_is_row(v, 11, 7, 1)) return String_var(_export_string(c, Var_as_string(v)));
   if(Var_is(v, 826970)) return _export_atom(c, v);
   if(Var_is_row(v, 9, 7, 4)) return List_var(_export_list(c, Var_list_payload(v)));
-  if(Var_is(v, 3313778)) return _export_array(c, Var_array_payload(v));
-  if(Var_is(v, 26720)) return _export_map(c, Var_map_payload(v));
+  if(Var_is(v, 3313778)) return Array_var(_export_array(c, Var_array_payload(v)));
+  if(Var_is(v, 26720)) return Map_var(_export_map(c, Var_map_payload(v)));
   if(Var_is_row(v, 8, 7, 1) || Var_is_row(v, 8, 7, 3) || Var_is_row(v, 8, 7, 2)) return _export_storage(c, v);
   Var custom;
   if(Var_try_export_context(v, c, &(custom))) return custom;
@@ -282,9 +282,9 @@ static Var _export_wide(Context c, Var v){
   return v;
 }
 
-static Var _export_string(Context c, String value){
-  if(! c -> pool || ! Pool_owns(c -> pool, String_var(value))) return String_var(value);
-  return String_var(String_new_in(c -> destination_pool, value, String_len(value)));
+static String _export_string(Context c, String value){
+  if(! c -> pool || ! Pool_owns(c -> pool, String_var(value))) return value;
+  return String_new_in(c -> destination_pool, value, String_len(value));
 }
 
 static Var _export_atom(Context c, Var value){
@@ -337,26 +337,26 @@ int Context_owns(Context context, void * allocation);
 
 void Context_move_block(Context c, Block block);
 
-static Var _export_array(Context c, Array array){
-  if(! Context_owns(c, array) || _visited(c, Array_var(array))) return Array_var(array);
+static Array _export_array(Context c, Array array){
+  if(! Context_owns(c, array) || _visited(c, Array_var(array))) return array;
   Context_move_block(c, Array_block(array));
   Var * items = array -> bytes;
   for(size_t i = 0;  i < array -> length;  i ++) items[i] = _export_value(c, items[i]);
-  return Array_var(array);
+  return array;
 }
 
 void Context_move_allocation(Context c, void * allocation);
 
 void Context_move_scope(Context c, Scope storage);
 
-static Var _export_map(Context c, Map map){
-  if(! Context_owns(c, map) || _visited(c, Map_var(map))) return Map_var(map);
+static Map _export_map(Context c, Map map){
+  if(! Context_owns(c, map) || _visited(c, Map_var(map))) return map;
   Map_export_to(map, c, _export_callback, c -> destination_scope);
   Context_move_allocation(c, map);
   Context_move_block(c, Bytes_block(map -> hashes));
   Context_move_block(c, Bytes_block(map -> entries));
   Context_move_scope(c, map -> scope);
-  return Map_var(map);
+  return map;
 }
 
 static Var _export_callback(Var value, Context c){
@@ -486,7 +486,7 @@ Context Context_current(void){
 void Context_close(Context c){
   if(! _init_guard_) Context_initialize();
   if(! c || current_context != c){
-    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/context.x",.function = "Context_close",.line = 414,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/context.x",.function = "Context_close",.line = 415,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_2, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Context.close")), NULL))));
     __builtin_unreachable();
   }

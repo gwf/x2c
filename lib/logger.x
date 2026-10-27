@@ -637,7 +637,8 @@ static Var _retain_wide(LogMemorySink l, Var value) {
   return copy;
 }
 
-static Var _retain_string(LogMemorySink l, String value) {
+/* Only the String branch reaches this helper. */
+static String _retain_string(LogMemorySink l, String value) {
   if (_pool_chain_owns(l.pool, value)) return value;
   return String.new_in(l.pool, value, value.len());
 }

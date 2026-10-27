@@ -111,8 +111,9 @@ static Var _captured_value(Compiler c, Var captured, Type want) {
 }
 
 /* A name that is not a constant, such as a template's own local, passes as
-   its syntax. Anything else is reported at `site`. */
-static Var _name_syntax(Compiler c, List node, Token site) {
+   its syntax. The caller supplies expression syntax; anything other than a
+   name is reported at `site`. */
+static List _name_syntax(Compiler c, List node, Token site) {
   if (node ~= %(expr ? (ident ?))) return node;
   $fail.stage_argument_constant(c, site);
 }
@@ -191,10 +192,11 @@ static Var _constant_leaf(Compiler c, List expr) {
   return expr;
 }
 
-static Var _cast_constant(Compiler c, Var type, List inner) {
+/* The type comes from a canonical cast expression's semantic Type slot. */
+static Var _cast_constant(Compiler c, Type type, List inner) {
   Var constant = _constant_leaf(c, inner);
   if (constant is void) return void;
-  Symbol tag = ((Type) type).scalar_tag();
+  Symbol tag = type.scalar_tag();
   return tag ? constant.convert(tag) : constant;
 }
 

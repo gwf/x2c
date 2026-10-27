@@ -168,7 +168,7 @@ static void _collect_declared(Var value, Map declared) {
 }
 
 /* A function is found by its binding and by its native spelling. */
-static void _set_function(Map names, Var binding, Var value) {
+static void _set_function(Map names, List binding, Var value) {
   names[binding] = value;
   names[%(native $(Ast.binding_spelling(binding)))] = value;
 }
@@ -207,7 +207,7 @@ static void _source_declarations(Var value, Map statics) {
   }
 }
 
-static void _set_static(Map statics, Var base, List declarator) {
+static void _set_static(Map statics, List base, List declarator) {
   List binding = _declaration_binding(declarator);
   if (!binding) return;
   if (declarator ~= %(op = ?target ?)) declarator = target;
@@ -215,9 +215,10 @@ static void _set_static(Map statics, Var base, List declarator) {
 }
 
 /* Pending sibling suffixes stay off the C stack. Only declaration
-   dependencies recurse; ordinary expressions share the same worklist. */
-static void _dependencies(Forward &f, Var value) {
-  if (value is not <list> || value.is_nil()) return;
+   dependencies recurse; ordinary expressions share the same worklist.
+   Inputs are source Lists or declarations produced for statics. */
+static void _dependencies(Forward &f, List value) {
+  if (!value) return;
   Array resume = auto [];
   for (List node = value; node; node = _next(node, resume)) _visit(f, node);
 }
@@ -251,7 +252,7 @@ static void _visit(Forward &f, List node) {
 
 /* A binding needs its static declaration, found by binding or by native
    spelling, or else the prototype of the global function it names. */
-static void _binding(Forward &f, Var binding) {
+static void _binding(Forward &f, List binding) {
   String spelling = Ast.binding_spelling(binding);
   List native = %(native $spelling);
   if (binding in f.statics) _declaration(f, binding);
@@ -262,7 +263,7 @@ static void _binding(Forward &f, Var binding) {
 /* A helper group omits its provider's runtime header, so forward the
    ordinary adapters its typed bodies call. Native aliases still come from
    their defining headers; a host function-like macro cannot be prototyped. */
-static void _global(Forward &f, Var binding, String spelling) {
+static void _global(Forward &f, List binding, String spelling) {
   Compiler c = f.c, Type type = NULL;
   List global = spelling ? c.sym.resolve_global($(spelling), type) : NULL;
   if (!global || !global.equal(binding) || !type.is_function()) return;

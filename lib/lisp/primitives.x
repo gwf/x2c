@@ -70,12 +70,10 @@ Symbol lisp_type(Var value) => value.tag();
 // numbers
 
 /* Orders the four number classes the total order uses:
-   -inf < finite < +inf < NaN. */
-static int _number_class(Var value, long double magnitude) {
-  Symbol tag = value.tag();
-  if (tag == <-inf>) return 0;
-  if (tag == <+inf>) return 2;
-  if (tag == <nan> || magnitude != magnitude) return 3;
+   -inf < finite < +inf < NaN. The magnitude is the floating value, or zero
+   for an integer operand. */
+static int _number_class(long double magnitude) {
+  if (magnitude != magnitude) return 3;
   if (magnitude == 1.0L / 0.0L) return 2;
   if (magnitude == -1.0L / 0.0L) return 0;
   return 1;
@@ -93,7 +91,7 @@ Var lisp_compare(Var a, Var b) {
   Symbol ak = a.kind(), bk = b.kind();
   long double da = ak == <floating> ? a.long_double() : 0.0L;
   long double db = bk == <floating> ? b.long_double() : 0.0L;
-  int ca = _number_class(a, da), cb = _number_class(b, db);
+  int ca = _number_class(da), cb = _number_class(db);
   if (ca != cb) return ca < cb ? -1 : 1;
   if (ca != 1) return 0;
   if (ak == <integer> && bk == <integer>) return a.integer_compare(b);

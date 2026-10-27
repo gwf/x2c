@@ -100,8 +100,9 @@ List _x2c_nominal_getindex(Compiler c, Type type) {
   return NULL;
 }
 
+/* The matched getter signature supplies its two-parameter List. */
 static List _getindex_expression(
-  Compiler c, List expr, List index, Var params, Var rtype) {
+  Compiler c, List expr, List index, List params, Var rtype) {
   Type key = params.cadr(), supplied = index.cadr();
   if (key.is_integral() && c.sym.is_named_value_type(supplied, "Symbol"))
     $fail.expressions_index_symbol(c, c.token);

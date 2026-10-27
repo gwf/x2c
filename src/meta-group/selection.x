@@ -151,7 +151,8 @@ static Array _runtime_includes(Compiler c, String lib) {
    those after a form the project meta build's parse skipped. A later
    definition may name what the skipped form declares, so none is a root:
    the group keeps a later variable only when a meta function reaches it,
-   and a later function only as its prototype unless one does. */
+   and a later function only as its prototype unless one does. Unit nodes
+   are Lists; the include helper's void result is removed here. */
 static Map _source_order(Compiler c, Array ordered, String lib) {
   Map placeholders = _placeholders(c), later = {};
   int skipped = c.meta_build ? c.skipped_form - 1 : -1;
@@ -197,7 +198,7 @@ static Map _placeholders(Compiler c) {
 
 /* A project's included provider uses its group header, which declares the
    types and native functions shared by the provider objects. */
-static Var _group_include(Compiler c, Var node, String lib) {
+static Var _group_include(Compiler c, List node, String lib) {
   match (node) case %(preproc ?(String text)): {
     int angle = 0;
     String target = Compiler.preproc_include_target(text, angle);
@@ -216,7 +217,7 @@ static Var _group_include(Compiler c, Var node, String lib) {
 /* `node`, a declaration whose initializer holds a placeholder, without
    its initializers: a placeholder has the wrong type for C, and the
    group's copy never had the call's value. */
-static Var _uninitialized(Var node, Map placeholders) {
+static List _uninitialized(List node, Map placeholders) {
   if (!_holds(node, placeholders)) return node;
   match (node)
     case %(declare ?spec (bindings *bindings)): {
