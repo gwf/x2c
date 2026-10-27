@@ -1,9 +1,10 @@
 # Map and Array rest parameters
 
-> Status: needs author scoping
+> Status: active
 > Recorded 2026-10-27 after `List @name` replaced the four-dot spelling of
-> List rest parameters. Nothing here is implemented. Gary decides the open
-> questions below before work starts; Map and Array are separate changes.
+> List rest parameters. Gary settled the Map questions the same day; Map rest
+> is decision-complete and not started. Array rest stays deferred until a
+> caller needs it. Map and Array are separate changes.
 
 ## Starting point
 
@@ -41,25 +42,24 @@ Reused owners:
   container, for example `(.... "Map")`. Each existing `(....)` site then
   branches on the container instead of assuming List.
 
-Questions for Gary:
+Decisions (Gary, 2026-10-27):
 
-1. **Combined tails.** May one function have both `List @args` and
-   `Map @options`? Recommendation: yes, with positional arguments going to
-   the List and entries to the Map, in any order, still evaluated in source
-   order. Without the List, a positional argument after the fixed prefix is
-   an arity error.
-2. **Map splices.** Does `@m` at a call with a Map rest merge the entries of
-   Map `m`? Recommendation: yes, but only when the callee has no List rest,
-   so `@` keeps one meaning per call. With both rests, `@` splices a List
-   and a Map is merged with an explicit `@(m)` entry-row form or is not
-   supported in the first change.
-3. **Dynamic calls.** `Func.apply` receives one positional argument array
-   and has no channel for keys. Recommendation: a Func whose signature ends
-   in a Map rest receives its Map as one final positional argument, and only
-   direct, method, and typed-pointer calls pack `key: value` syntax. A
-   keyword channel through `Func.apply` would change public runtime ABI.
-4. **Duplicate keys.** Recommendation: follow Map literal behavior (last
-   write wins) rather than adding a rejection.
+1. **One rest per function.** A signature ends in either `List @name` or
+   `Map @name`, never both. At a direct, method, or typed-pointer call to a
+   Map rest function, every argument after the fixed prefix is a
+   `key: value` entry or a Map splice; a positional argument there is
+   rejected.
+2. **Map splices.** With one rest per function, `@` has one meaning at each
+   call: `@m` and `@(expression)` at a Map rest call merge that Map's
+   entries into the packed Map, in source order with the other entries.
+   This follows from decision 1; no combined-tail rule is needed.
+3. **Dynamic calls pack automatically.** A Func whose signature ends in a
+   Map rest builds its Map in `Func.apply`, as `_apply_rest` builds a List
+   today. A call site passes each entry as its key followed by its value,
+   so a native or Lisp caller passes `k1, v1, k2, v2`. A Map splice travels
+   as one marked argument whose entries are merged. An odd number of
+   trailing values raises `<bad-arity>`.
+4. **Duplicate keys.** Last write wins, as in a Map literal.
 
 ## Array rest parameters
 
@@ -87,19 +87,27 @@ Each selected change:
    `Array @name`) in `Compiler.parse_parameter`; refresh bootstrap before
    adopting the spelling.
 2. Parse entry arguments in calls through `Compiler.parse_map_entry` (Map
-   only) and reject an entry argument when the callee has no Map rest.
+   only). Reject an entry argument when the callee has no Map rest, and a
+   positional tail argument when it has one.
 3. Extend `Compiler.pack_rest_arguments` to build the container's literal
    syntax for its tail, and update the other marker sites, the REPL lowering,
    and `Func.new`/`Func.new_rest` signature checks.
-4. Document the form beside "List rest parameters" and add one executable
+4. Map only: make `_apply_rest` in `lib/func/func.x` pair the trailing
+   values into a Map for a Map rest signature, and add a Map splice
+   constructor beside `FuncArg.splice` and `x2c_func_splice_argument`.
+   Existing runtime signatures stay unchanged; the additions are new public
+   functions.
+5. Document the form beside "List rest parameters" and add one executable
    example; render the parameter in `tools/definitions.x`.
-5. Review and fix the completed authored diff, then run
+6. Review and fix the completed authored diff, then run
    `tools/gate-state.py ensure agent-pr-check`.
 
 Validation covers zero, one, and many entries; Atom and expression keys;
-evaluation order across fixed arguments, positional rest, and entries;
-methods, typed pointers, and Func conversion; and the rejection of an entry
-argument for a callee without a Map rest.
+Map splices and duplicate keys; evaluation order across fixed arguments,
+entries, and splices; methods, typed pointers, and Func calls, including
+alternating keys and values from a native caller and an odd count; and the
+rejection of an entry argument for a callee without a Map rest and of a
+positional tail argument for a callee with one.
 
 ## Plan review
 
@@ -108,12 +116,17 @@ argument for a callee without a Map rest.
   evaluation order, and fresh identity, so packing builds that syntax instead
   of a second Map builder.
 - The design reuses `Compiler.parse_map_entry`, `$map_value`, the Array
-  literal lowering, and the existing rest call path. The one lasting change
-  is the marker's container field, which is necessary because C sees each
-  rest parameter only as its container type.
+  literal lowering, the existing rest call path, and `_apply_rest`. The
+  lasting changes are the marker's container field, which is necessary
+  because C sees each rest parameter only as its container type, and one
+  Map splice constructor, which is necessary because `FuncArg.splice` takes
+  a List and its signature is public.
 - The source stays direct: a rest parameter is a container literal written
   across the call's arguments, with the same `@` used by macros and splices.
-- One new diagnostic rejects a `key: value` argument for a callee without a
-  Map rest; it protects against silently passing an entry as a positional
-  value. The existing final-parameter check covers misplaced rest
-  parameters. No other validators are proposed.
+- Two compile-time rejections protect deliberate public behavior: a
+  `key: value` argument for a callee without a Map rest, which would
+  otherwise pass an entry as a positional value, and a positional tail
+  argument for a Map rest callee (decision 1). `Func.apply` raises
+  `<bad-arity>` for an odd trailing count, because pairing would otherwise
+  read past the last value. The existing final-parameter check covers
+  misplaced rest parameters. No other validators are proposed.
