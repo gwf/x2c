@@ -389,14 +389,12 @@ Map Compiler.linked_prelude_records(Compiler c) {
   return records;
 }
 
-static macro Expression $linked.prelude() => $_x2c_prelude_records();
-
 /* The record linked for `canonical`, read as its interface would be, or
    NULL. */
 static List _linked_record(String canonical) {
   if (!linked_records) {
     _process_cache();
-    auto (&process_cache_scope) linked_records = $linked.prelude();
+    auto (&process_cache_scope) linked_records = $_x2c_prelude_records();
   }
   Var text;
   if (!linked_records.try_get(Compiler.portable_path(canonical), text))
