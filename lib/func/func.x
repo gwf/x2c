@@ -467,15 +467,16 @@ static Var _tail_value(List sig, const FuncArg *argv, unsigned index) {
   return value;
 }
 
+/* _new stores params with its count; List accessors also accept nil. */
 static List _parameter(Func fn, unsigned index) {
   if (!fn || index >= fn.nparams) return NULL;
   List params = fn.params;
-  while (params && index--) params = params.cdr();
-  return params && params.car() is <list> ? params.car() : NULL;
+  while (index--) params = params.cdr();
+  return params.car();
 }
 
 static int _is_reference(List parameter) =>
-  parameter && (parameter.car() == <&> || parameter.car() == <opt-ref>);
+  parameter.car() == <&> || parameter.car() == <opt-ref>;
 
 /* Returns reference argument `i` after checking its declared source type.
     The adapter supplies the pointee type it will cast to.
@@ -515,7 +516,7 @@ static int _reference_type_accepts(List target, List source) {
 
 static unsigned _type_qualifiers(List &cursor) {
   unsigned qualifiers = 0;
-  while (cursor && cursor.car() is <symbol>) {
+  while (cursor.car() is <symbol>) {
     Symbol head = cursor.car();
     switch (head) {
       case <const>:    qualifiers |= 1; break;

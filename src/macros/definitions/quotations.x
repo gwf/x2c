@@ -240,7 +240,8 @@ static List _built_item(
   match (item) {
     case %(at m-origin ?node): item = $("x2c.at", node);
     case %(expr (<macro-expr>) ?binder):
-      if (keys.try_get(binder, row) && row is <list> &&
+      /* The List pattern itself rejects other value tags. */
+      if (keys.try_get(binder, row) &&
           row ~= %((macro-param ? (kind expr) ?) expression))
         return _built_hole(c, row, 1, start);
   }

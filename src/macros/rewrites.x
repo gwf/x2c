@@ -516,7 +516,8 @@ static Var _template(
     syntax, child, _template(c, child, sources, values, refused));
 }
 
-static Var _capture_slot(
+/* A captured slot returns its expression List or a List signature. */
+static List _capture_slot(
   Compiler c, List value, Var type, Var content, Array values,
   int &refused) {
   if (content ~= %(literal *)) return value;
@@ -583,9 +584,9 @@ static List _skeleton(List lowered, Array outputs) {
   return refused ? NULL : skeleton;
 }
 
-static Var _marked(Var node, Array outputs, Array found, int &refused) {
-  if (node is not <list> || node.is_nil()) return node;
-  List syntax = node;
+/* The lowered root and recursive children are Lists. */
+static List _marked(List syntax, Array outputs, Array found, int &refused) {
+  if (!syntax) return syntax;
   for (int i = 0; i < (int) outputs.len(); i++)
     if (outputs[i].list() === syntax) {
       found[i] = found[i].int() + 1;
@@ -609,13 +610,13 @@ static List _fill_values(Compiler c, List prepared, Array values) {
   return _filled(skeleton, lowered);
 }
 
-static Var _filled(Var node, Array lowered) {
-  if (node is not <list> || node.is_nil()) return node;
-  List syntax = node;
+/* Preparation and lowering supply a List skeleton and List replacements. */
+static List _filled(List syntax, Array lowered) {
+  if (!syntax) return syntax;
   Var head = syntax.car();
   if (head is <string> && head == "x2c.slot")
     return lowered[syntax.cadr().int()];
-  Var child;
+  List child;
   $ast.rewrite_children(syntax, child, _filled(child, lowered));
 }
 

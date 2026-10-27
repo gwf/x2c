@@ -324,7 +324,8 @@ static Map _read_rows(List stored) {
     List pair = row;
     _require_retained(pair.try_own());
     Var (key, value) = pair;
-    if (value is <list> && value ~= %(meta-hashes ?provider ?(List stored))) {
+    /* The List pattern itself rejects other value tags. */
+    if (value ~= %(meta-hashes ?provider ?(List stored))) {
       Map hashes = _read_rows(stored);
       if (hashes == NULL) return NULL;
       value = %(meta-hashes $provider $hashes);
