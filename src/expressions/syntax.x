@@ -85,10 +85,16 @@ List Compiler.parse_conditional(Compiler c) =>
 static List _parse_conditional_tail(Compiler c, List condition) {
   Token origin = c.token;
   if (!c.test(<?>)) return condition;
+  condition = c.resolve_expression(condition, origin);
+  List present_before = c.assume_condition(condition, 1);
   List ontrue = c.parse_expression();
+  c.restore_reference_presence(present_before);
   c.expect(<:>);
+  present_before = c.assume_condition(condition, 0);
+  List onfalse = c.parse_conditional();
+  c.restore_reference_presence(present_before);
   return c.resolve_expression(
-    %(expr () (op ? $condition $ontrue $(c.parse_conditional()))), origin);
+    %(expr () (op ? $condition $ontrue $onfalse)), origin);
 }
 
 /** Parses the right operand of a pattern test at relational precedence. */
@@ -122,21 +128,27 @@ static List _parse_binary_level_tail(Compiler c, int level, List lhs) {
       lhs = c.parse_match_condition(c.resolve_expression(lhs, origin), origin);
       continue;
     }
-    List rhs;
-    if (op == <&&>) {
-      int scoped = c.open_condition_scope(lhs);
-      rhs = _parse_binary_level(c, level + 1);
-      if (scoped) c.sym.pop_scope();
-    }
-    else rhs = _parse_binary_level(c, level + 1);
     if (first) {
       lhs = c.resolve_expression(lhs, origin);
       first = 0;
     }
+    List rhs = _parse_right_operand(c, op, lhs, level + 1);
     rhs = c.resolve_expression(rhs, origin);
     lhs = _binary_expression(c, op, lhs, rhs, origin);
   }
   return lhs;
+}
+
+/* The right operand of `&&` sees its left operand's pattern captures, and
+   that of `&&` or `||` runs only after the left operand's test decides. */
+static List _parse_right_operand(Compiler c, Symbol op, List lhs, int level) {
+  if (op != <&&> && op != <||>) return _parse_binary_level(c, level);
+  int scoped = op == <&&> && c.open_condition_scope(lhs);
+  List present_before = c.assume_condition(lhs, op == <&&>);
+  List rhs = _parse_binary_level(c, level);
+  c.restore_reference_presence(present_before);
+  if (scoped) c.sym.pop_scope();
+  return rhs;
 }
 
 static List _parse_binary_levels_from(Compiler c, List lhs) {

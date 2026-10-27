@@ -35,6 +35,18 @@ void Compiler.settle_reference(
     c.mark_reference_present(binding);
 }
 
+/** Marks the optional reference that `condition` tests present for an
+    operand that runs only when `condition` has truth `holds`, if that truth
+    proves presence. Returns the facts to restore after the operand.
+*/
+List Compiler.assume_condition(Compiler c, List condition, int holds) {
+  List before = c.present_references();
+  int true_is_present = 1;
+  List binding = c.optional_reference_test(condition, true_is_present);
+  if (binding && true_is_present == holds) c.mark_reference_present(binding);
+  return before;
+}
+
 /** Restores the optional-reference facts saved before a lexical path. */
 void Compiler.restore_reference_presence(Compiler c, List before) {
   if (before === c.present_references()) return;
@@ -44,7 +56,8 @@ void Compiler.restore_reference_presence(Compiler c, List before) {
 
 /** Returns the optional-reference parameter tested by `condition`, or NULL.
     `truth` is set to whether the condition's true arm proves that the caller
-    supplied an object. Only a direct truth or null test proves presence.
+    supplied an object. A direct truth or null test proves presence, alone
+    or as an operand of `&&` or `||`.
 */
 List Compiler.optional_reference_test(
   Compiler c, List condition, int &truth) {
@@ -57,6 +70,8 @@ List Compiler.optional_reference_test(
     }
     case %(expr ? (op (!or ?op == !=) ?left ?right)):
       return _null_comparison(c, op, left, right, truth);
+    case %(expr ? (op (!or ?op && ||) ?left ?right)):
+      return _junction_test(c, op, left, right, truth);
     case %(expr (opt-ref *) (ident ?binding)):
       if (%(optional-reference-param $binding) in
           c.semantic_binding_facts()) return binding;
@@ -64,17 +79,31 @@ List Compiler.optional_reference_test(
   return NULL;
 }
 
-/* A comparison with a null literal tests the other operand; its true arm
-   proves presence for `!=`. */
+/* A comparison with a null literal tests the other operand; `==` inverts
+   the truth that proves presence. */
 static List _null_comparison(
   Compiler c, Var op, Var left, Var right, int &truth) {
-  if (_null_literal(right)) {
-    truth = op == <!=>;
-    return c.optional_reference_test(left, truth);
-  }
-  if (!_null_literal(left)) return NULL;
-  truth = op == <!=>;
-  return c.optional_reference_test(right, truth);
+  List operand = right;
+  if (_null_literal(right)) operand = left;
+  else if (!_null_literal(left)) return NULL;
+  if (op == <==>) truth = !truth;
+  return c.optional_reference_test(operand, truth);
+}
+
+/* A conjunction proves presence only where it holds, and a disjunction only
+   where it fails, so an operand's test counts only at that truth. */
+static List _junction_test(
+  Compiler c, Var op, List left, List right, int &truth) {
+  int proving = op == <&&> ? truth : !truth;
+  List binding = _test_at(c, right, truth, proving);
+  if (!binding) binding = _test_at(c, left, truth, proving);
+  if (binding) truth = proving;
+  return binding;
+}
+
+static List _test_at(Compiler c, List operand, int truth, int proving) {
+  List binding = c.optional_reference_test(operand, truth);
+  return truth == proving ? binding : NULL;
 }
 
 static int _null_literal(List expr) {

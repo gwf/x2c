@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/optional-reference-negated-test.x:7:3: type: check optional reference before using its value
+    return use(value);
+    ^^^^^^
+
