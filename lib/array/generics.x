@@ -412,7 +412,7 @@ macro Unit $array.typed.operations(Type $array, Type $element, Literal $zero,
       changing the array.
   */
   int $array.try_take_last($array array, $element &?out) {
-    return out ? array != NULL && Block_try_pop((Block) array, &out) : 0;
+    return array != NULL && out ? Block_try_pop((Block) array, &out) : 0;
   }
 
   /** Removes and returns the last element.

@@ -27,8 +27,8 @@ module int _prepared(MatchPlan plan, const char *owner) {
 
 module int _buffer_valid(
   MatchCaptureLayout layout, MatchCaptureBuffer &?captures) {
-  if (!captures) return 0;
-  if (!layout || captures.capacity < layout.binder_count) return 0;
+  if (!captures || !layout || captures.capacity < layout.binder_count)
+    return 0;
   return !layout.binder_count || captures.values != NULL;
 }
 
@@ -113,8 +113,7 @@ static int _key_equal(MatchPlan plan, Var value, Var key) =>
    machine and every lazy-span materialization have succeeded. */
 module int _run_capture(
   MachineView view, MatchMachine &m, Var input, MatchCaptureBuffer &?captures) {
-  if (!captures) return -1;
-  if (captures.capacity < view.binder_count ||
+  if (!captures || captures.capacity < view.binder_count ||
       (view.binder_count && !captures.values))
     return -1;
   m.begin(view, input);
