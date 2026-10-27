@@ -12,6 +12,29 @@
 #include "typed-array.x"
 #include "typed-list.x"
 
+int main(int argc, char **argv) {
+  if (argc != 4) return 2;
+  int n = atoi(argv[1]), jumps = atoi(argv[2]), runs = atoi(argv[3]);
+  Array graph = [];
+  for (int i = 0; i < n; i++) graph.push(%());
+  for (int i = 1; i < n; i++) _add(graph, i - 1, i);
+  uint32_t state = 1;
+  for (int vertex = 0; vertex < n; vertex++)
+    for (int j = 0; j < jumps; j++) {
+      state = state * 1664525u + 1013904223u;
+      int neighbor = state % n;
+      if (neighbor != vertex) _add(graph, vertex, neighbor);
+    }
+  ArrayInt distance = ArrayInt.new();
+  for (int i = 0; i < n; i++) distance.push(-1);
+  ArrayInt queue = distance.copy();
+  int checksum = 0;
+  for (int run = 0; run < runs; run++)
+    checksum += _bfs(graph, queue, distance);
+  printf("%d\n", checksum);
+  return 0;
+}
+
 static void _add(Array graph, int a, int b) {
   graph[a] = ListInt.cons(b, (ListInt) graph[a].list());
   graph[b] = ListInt.cons(a, (ListInt) graph[b].list());
@@ -36,27 +59,4 @@ static int _bfs(Array graph, ArrayInt queue, ArrayInt distance) {
     }
   }
   return distance[n - 1];
-}
-
-int main(int argc, char **argv) {
-  if (argc != 4) return 2;
-  int n = atoi(argv[1]), jumps = atoi(argv[2]), runs = atoi(argv[3]);
-  Array graph = [];
-  for (int i = 0; i < n; i++) graph.push(%());
-  for (int i = 1; i < n; i++) _add(graph, i - 1, i);
-  uint32_t state = 1;
-  for (int vertex = 0; vertex < n; vertex++)
-    for (int j = 0; j < jumps; j++) {
-      state = state * 1664525u + 1013904223u;
-      int neighbor = state % n;
-      if (neighbor != vertex) _add(graph, vertex, neighbor);
-    }
-  ArrayInt distance = ArrayInt.new();
-  for (int i = 0; i < n; i++) distance.push(-1);
-  ArrayInt queue = distance.copy();
-  int checksum = 0;
-  for (int run = 0; run < runs; run++)
-    checksum += _bfs(graph, queue, distance);
-  printf("%d\n", checksum);
-  return 0;
 }

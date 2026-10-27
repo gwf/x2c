@@ -219,6 +219,23 @@ static List _declaration(Preserve &p, List declaration, Map escaped) {
   return %($head $type (bindings @(preserved.list_free())));
 }
 
+/* A `for` that declares a local in `escaped` moves the declaration into a
+   block around the loop, so the address escapes once, before the loop. */
+static List _escape_loop(Preserve &p, List loop) {
+  match (loop)
+    case %(for (decl ?type (!set ?bindings (bindings *binds))) *rest): {
+      Array output = [];
+      _escape_declared(p, output, binds);
+      List escapes = output.list_free();
+      if (!escapes) return NULL;
+      List declaration = _declaration(
+        p, %(declare $type $bindings), p.escaped);
+      List remaining = _preserve_locals(p, %(for () @rest));
+      return %(block $declaration @escapes $remaining);
+    }
+  return NULL;
+}
+
 /* Qualify one binding that a transfer may leave stale, unless `escaped`
    names it: its address escapes instead. */
 static List _binding(Preserve &p, List bind, Map escaped) {
@@ -269,21 +286,14 @@ static int _is_automatic(List declaration) {
          !type.is_threaded();
 }
 
-/* A `for` that declares a local in `escaped` moves the declaration into a
-   block around the loop, so the address escapes once, before the loop. */
-static List _escape_loop(Preserve &p, List loop) {
-  match (loop)
-    case %(for (decl ?type (!set ?bindings (bindings *binds))) *rest): {
-      Array output = [];
-      _escape_declared(p, output, binds);
-      List escapes = output.list_free();
-      if (!escapes) return NULL;
-      List declaration = _declaration(
-        p, %(declare $type $bindings), p.escaped);
-      List remaining = _preserve_locals(p, %(for () @rest));
-      return %(block $declaration @escapes $remaining);
-    }
-  return NULL;
+/* A parameter in `escaped` escapes before the function body runs. */
+module List _escape_parameters(Preserve &p, List body, List bindings) {
+  Array output = [];
+  if (bindings ~= %(bind ? ((fnmod (params *parameters)) *)))
+    foreach (List parameter in parameters)
+      if (parameter ~= %(param ? ?bind))
+        _escape_declared(p, output, $(bind));
+  return p.c.prepend_setup(body, output.list_free());
 }
 
 /* Escape the address of each of `binds` that `escaped` names. Once the
@@ -301,14 +311,4 @@ static void _escape_declared(Preserve &p, Array output, List binds) {
             c.return_type));
       }
     }
-}
-
-/* A parameter in `escaped` escapes before the function body runs. */
-module List _escape_parameters(Preserve &p, List body, List bindings) {
-  Array output = [];
-  if (bindings ~= %(bind ? ((fnmod (params *parameters)) *)))
-    foreach (List parameter in parameters)
-      if (parameter ~= %(param ? ?bind))
-        _escape_declared(p, output, $(bind));
-  return p.c.prepend_setup(body, output.list_free());
 }

@@ -46,17 +46,6 @@ VarDescriptor *x2c_var_custom_descriptor(Var value);
 VarDescriptor *x2c_var_declare(Symbol tag);
 int x2c_var_tag_descriptor_index(Symbol tag);
 
-static VarDescriptor *_descriptor(Var value) {
-  VarDescriptor *descriptor = _row(x2c_var_descriptor_index(value));
-  if (!descriptor) descriptor = x2c_var_custom_descriptor(value);
-  return descriptor && descriptor.value_dispatch ? descriptor : NULL;
-}
-
-static VarDescriptor *_row(int index) {
-  int count = sizeof(builtin_descriptors) / sizeof(builtin_descriptors[0]);
-  return index >= 0 && index < count ? &builtin_descriptors[index] : NULL;
-}
-
 // display text
 
 static macro Expression $display.format.character() => "%c";
@@ -69,12 +58,19 @@ static macro Expression $display.format.ullong() => "%llu";
 static macro Expression $display.format.floating() => "%lf";
 static macro Expression $display.format.extended() => "%Lf";
 
-/** Returns the display `String` of `Var`. */
-String Var.str(Var v) {
-  VarDescriptor *descriptor = _descriptor(v);
-  if (descriptor && descriptor.methods.str) return descriptor.methods.str(v);
-  return v.fallback_str();
-}
+// recursive rendering
+
+static threaded RenderPath *render_path;
+
+/* registration lock
+
+   One recursive mutex serializes registration. The first successful native
+   worker start freezes it, and descriptor lookups take no lock. */
+
+static pthread_mutex_t descriptor_mutex;
+static pthread_once_t descriptor_mutex_once =
+  (pthread_once_t) PTHREAD_ONCE_INIT;
+static int descriptor_registration_frozen;
 
 /** Returns what a `String` destination reads from `Var`: its `String`
     payload, the display `String` of any other value, or NULL for `void`
@@ -86,6 +82,13 @@ String Var.as_string(Var v) {
   return v.is_void() || v.is_null() ? NULL : v.str();
 }
 
+/** Returns the display `String` of `Var`. */
+String Var.str(Var v) {
+  VarDescriptor *descriptor = _descriptor(v);
+  if (descriptor && descriptor.methods.str) return descriptor.methods.str(v);
+  return v.fallback_str();
+}
+
 /** Returns the non-dispatch display `String` of `Var`. */
 String Var.fallback_str(Var v) {
   Symbol tag = v.tag();
@@ -95,29 +98,6 @@ String Var.fallback_str(Var v) {
     case <void>:     return "void";
   }
   return v.pointer_string();
-}
-
-static String _primitive_str(Var v, Symbol tag) {
-  switch (tag) {
-    case <i8>:   case <u8>:   return $display.format.character().printf(v);
-    case <i16>:  case <i32>:  return $display.format.sint().printf(v);
-    case <i48>:  case <long>:  return $display.format.slong().printf(v);
-    case <llong>: return $display.format.sllong().printf(v);
-    case <u16>:  case <u32>:  return $display.format.uint().printf(v);
-    case <u48>:  case <ulong>:  return $display.format.ulong().printf(v);
-    case <ullong>: return $display.format.ullong().printf(v);
-    case <f32>:  case <f64>:  return $display.format.floating().printf(v);
-    case <ldouble>: return $display.format.extended().printf(v);
-    case <nan>:  case <+inf>: case <-inf>: return %"$tag";
-  }
-  return v.pointer_string();
-}
-
-/** Formats the fallback display `String` for a pointer-bearing `Var`. */
-String Var.pointer_string(Var v) {
-  Symbol tag = v.tag();
-  if (tag == <p48>) return "<0x%012lX>".printf((long) v.pointer());
-  return "<%s: 0x%012lX>".printf(tag.str(), (long) v.pointer());
 }
 
 /** Appends the display text of `Var` to a `Buffer`.
@@ -137,10 +117,6 @@ Buffer Var.write_str(Var v, Buffer out) {
   return v.fallback_write_str(out);
 }
 
-/* A NULL text is the empty `String` and writes nothing. */
-static Buffer _write_text(Buffer out, String text) =>
-  text ? out.write(text) : out;
-
 /** Appends the non-dispatch display text of `Var` to a `Buffer`.
     A primitive, pointer, or `void` renders straight into `out` instead of
     through an intermediate `String`.
@@ -153,22 +129,6 @@ Buffer Var.fallback_write_str(Var v, Buffer out) {
     case <pointer>: case <reference>:
       return out.write(v.pointer_string());
     case <void>:      return out.write("void");
-  }
-  return out.write(v.pointer_string());
-}
-
-static Buffer _write_primitive_str(Var v, Symbol tag, Buffer out) {
-  switch (tag) {
-    case <i8>:  case <u8>:  return out.printf($display.format.character(), v);
-    case <i16>:  case <i32>:  return out.printf($display.format.sint(), v);
-    case <i48>:  case <long>:  return out.printf($display.format.slong(), v);
-    case <llong>: return out.printf($display.format.sllong(), v);
-    case <u16>:  case <u32>:  return out.printf($display.format.uint(), v);
-    case <u48>:  case <ulong>:  return out.printf($display.format.ulong(), v);
-    case <ullong>: return out.printf($display.format.ullong(), v);
-    case <f32>:  case <f64>:  return out.printf($display.format.floating(), v);
-    case <ldouble>: return out.printf($display.format.extended(), v);
-    case <nan>:  case <+inf>: case <-inf>: return out.write(%"$tag");
   }
   return out.write(v.pointer_string());
 }
@@ -194,10 +154,12 @@ String Var.fallback_repr(Var v) {
   return v.pointer_string();
 }
 
-/* `_write_primitive_repr` owns the numeric repr spellings. The `String`
-   form renders through a `Buffer`, so the two forms cannot drift apart. */
-static String _primitive_repr(Var v, Symbol tag) =>
-  _write_primitive_repr(v, tag, Buffer.new(0)).str_free();
+/** Formats the fallback display `String` for a pointer-bearing `Var`. */
+String Var.pointer_string(Var v) {
+  Symbol tag = v.tag();
+  if (tag == <p48>) return "<0x%012lX>".printf((long) v.pointer());
+  return "<%s: 0x%012lX>".printf(tag.str(), (long) v.pointer());
+}
 
 /** Appends the readable representation of `Var` to a `Buffer`. */
 Buffer Var.write_repr(Var v, Buffer out) {
@@ -225,78 +187,6 @@ Buffer Var.fallback_write_repr(Var v, Buffer out) {
   return v.write_pointer_repr(out);
 }
 
-/* Each numeric tag prints its own value with its own C spelling, so the text
-   names both the number and the width it was boxed at. The narrow integer
-   tags read their payload through `Var.long`, which does not widen a signed
-   value into another tag's domain. */
-static Buffer _write_primitive_repr(Var v, Symbol tag, Buffer out) {
-  switch (tag) {
-    case <i8>:  case <u8>:
-      return _write_byte_repr(out, (unsigned) (uchar) v.long());
-    case <u16>: case <i16>:
-      return out.printf("0x%04X", (unsigned) (ushort) v.long());
-    case <i32>:  return out.printf("%d", (int) v.long());
-    case <u32>:  return out.printf("%uu", (unsigned) v.long());
-    case <u48>:  return out.printf("0x%012lXul", v.ulong() & 0xFFFFFFFFFFFFul);
-    case <i48>:
-      return out.printf("0x%012lXl", (ulong) v.long() & 0xFFFFFFFFFFFFul);
-    case <long>:  return out.printf("%ldl", v.long());
-    case <ulong>:  return out.printf("%luul", v.ulong());
-    case <llong>: return out.printf("%lldll", v.long_long());
-    case <ullong>: return out.printf("%lluull", v.ulong_long());
-    case <f32>:  return _write_float_repr(out, v.floating(), <f32>, "f");
-    case <f64>:  return _write_float_repr(out, v.floating(), <f64>, NULL);
-    case <ldouble>:
-      return _write_float_repr(out, v.long_double(), <ldouble>, "l");
-    case <nan>:  return out.write("NaN");
-    case <+inf>: return out.write("+Inf");
-    case <-inf>: return out.write("-Inf");
-  }
-  return v.write_pointer_repr(out);
-}
-
-/* A byte is spelled the way C spells a character constant. Writing the raw
-   byte instead would put a NUL or a control byte inside the repr text. */
-static Buffer _write_byte_repr(Buffer out, unsigned byte) {
-  switch (byte) {
-    case '\\': return out.write("'\\\\'");
-    case '\'': return out.write("'\\''");
-    case '\n': return out.write("'\\n'");
-    case '\t': return out.write("'\\t'");
-    case '\r': return out.write("'\\r'");
-  }
-  if (byte >= 0x20 && byte < 0x7F) return out.printf("'%c'", (int) byte);
-  return out.printf("'\\x%02X'", byte);
-}
-
-/* The shortest decimal that reads back as `value`, followed by the suffix
-   that names its C type. `*_DECIMAL_DIG` is the precision that always
-   round-trips that width on this target; starting three digits short keeps
-   0.1 spelled `0.1` instead of `0.10000000000000001`. The candidate is
-   narrowed to `width` before the comparison, so a float is not asked to match
-   a double's digits. */
-static Buffer _write_float_repr(
-  Buffer out, long double value, Symbol width, String suffix) {
-  int limit = LDBL_DECIMAL_DIG;
-  if (width == <f32>) limit = FLT_DECIMAL_DIG;
-  else if (width == <f64>) limit = DBL_DECIMAL_DIG;
-  char text[48];
-  int digits = limit - 3;
-  for (; digits < limit; digits++) {
-    snprintf(text, sizeof text, "%.*Lg", digits, value);
-    long double back = strtold(text, NULL);
-    if (width == <f32>) back = (float) back;
-    else if (width == <f64>) back = (double) back;
-    if (back == value) break;
-  }
-  if (digits == limit) snprintf(text, sizeof text, "%.*Lg", limit, value);
-  /* `%g` drops the point for a whole value, and bare digits read back as an
-     integer, so restore the form that says floating. */
-  if (text[strspn(text, "+-0123456789")] == '\0') strcat(text, ".0");
-  out.write(text);
-  return suffix ? out.write(suffix) : out;
-}
-
 /** Writes the fallback readable form of a pointer-bearing `Var`. */
 Buffer Var.write_pointer_repr(Var v, Buffer out) {
   Symbol tag = v.tag();
@@ -305,10 +195,6 @@ Buffer Var.write_pointer_repr(Var v, Buffer out) {
   tag.decode(name);
   return out.printf("<%s: 0x%012lX>", name, (long) v.pointer());
 }
-
-// recursive rendering
-
-static threaded RenderPath *render_path;
 
 /** Enters an object's recursive rendering, or returns zero for a cycle.
     Keep `path` alive and defer `path.leave()` after a successful entry.
@@ -353,9 +239,6 @@ unsigned Var.hash(Var v) {
   return _default_hash(v);
 }
 
-/* Map stores a nonzero hash beside each record, so zero becomes all ones. */
-static unsigned _nonzero(unsigned hash) => hash ? hash : -1;
-
 /** Returns the non-dispatch runtime hash of `Var`.
     Raises: `<void-op>` for `void`.
 */
@@ -364,11 +247,6 @@ unsigned Var.fallback_hash(Var v) {
   if (v.is_wide()) return v.wide_hash();
   return _default_hash(v);
 }
-
-/* A Var is one 64-bit word, so it hashes as one through the shared mixer.
-   Every Map, Set, and symbol table runs this hash on every lookup. Map masks
-   the low bits, which fmix64 avalanches as well as the high ones. */
-static unsigned _default_hash(Var v) => x2c_hash_word(v.u64);
 
 /** Applies the registered equality operation for `a` and `b`.
     Two numbers are equal only with the same tag and the same bits, so this
@@ -450,104 +328,20 @@ int Var.fallback_compare(Var a, Var b) {
   return _group_compare(a, b, ak, atag, btag);
 }
 
-static int _group(Symbol kind, Symbol tag) {
-  if (_is_numeric_kind(kind)) return 0;
-  if (kind == <symbol>) return 1;
-  switch (tag) {
-    case <string>: return 2;
-    case <array>:  return 3;
-    case <list>:   return 4;
-    case <map>:    return 5;
-  }
-  if (kind == <object>) return 6;
-  if (kind == <reference>) return 7;
-  if (kind == <pointer>) return 8;
-  return 9;
-}
-
-static int _is_numeric_kind(Symbol kind) =>
-  (kind == <integer>) || (kind == <floating>);
-
-/* Values of one group without a registered ordering order by tag, then by
-   address or encoding. */
-static int _group_compare(
-  Var a, Var b, Symbol kind, Symbol atag, Symbol btag) {
-  int tc = atag.compare(btag);
-  if (tc) return tc;
-  if (kind == <pointer> || kind == <reference> || kind == <object>)
-    return _compare_addresses(a, b);
-  return _compare_bits(a, b);
-}
-
-static int _compare_addresses(Var a, Var b) {
-  uintptr_t ap = (uintptr_t) a.pointer(), bp = (uintptr_t) b.pointer();
-  if (ap == bp) return 0;
-  return (ap < bp) ? -1 : 1;
-}
-
-static int _compare_bits(Var a, Var b) {
-  if (a.u64 == b.u64) return 0;
-  return (a.u64 < b.u64) ? -1 : 1;
-}
-
-/* numeric ordering
-
-   Numbers order -Inf < finite < +Inf < NaN. Equal values break ties by rank,
-   wider first, then by tag and encoding. */
-
-static int _numeric_compare(
-  Var a, Var b, Symbol ak, Symbol bk, Symbol atag, Symbol btag) {
-  int awide = a.is_wide(), bwide = b.is_wide();
-  long double da = _float_value(a, ak, awide), db = _float_value(b, bk, bwide);
-  int ca = _numeric_class(atag, da), cb = _numeric_class(btag, db);
-  if (ca != cb) return (ca < cb) ? -1 : 1;
-  if (ca == 1) {
-    int cmp;
-    if (ak == <integer> && bk == <integer>) cmp = a.integer_compare(b);
-    else if (ak == <integer>) cmp = a.integer_floating_compare(b);
-    else if (bk == <integer>) cmp = -b.integer_floating_compare(a);
-    else if (da < db) cmp = -1;
-    else cmp = da > db ? 1 : 0;
-    if (cmp) return cmp;
-  }
-  return _numeric_tie(a, b, atag, btag, awide && bwide);
-}
-
-/* An integer compares through its payload, so only a floating kind reads a
-   value here. */
-static long double _float_value(Var v, Symbol kind, int wide) {
-  if (kind != <floating>) return 0.0L;
-  return wide ? v.long_double_value() : (long double) v.floating();
-}
-
-static int _numeric_class(Symbol tag, long double value) {
-  if (tag == <-inf>) return 0;
-  if (tag == <+inf>) return 2;
-  if (tag == <nan> || value != value) return 3;
-  if (value == 1.0 / 0.0) return 2;
-  if (value == -1.0 / 0.0) return 0;
-  return 1;
-}
-
-/* The encoding decides last, so distinct encodings of one value keep a
-   strict order. */
-static int _numeric_tie(Var a, Var b, Symbol atag, Symbol btag, int wide) {
-  int ra = _numeric_rank(atag), rb = _numeric_rank(btag);
-  if (ra != rb) return (ra < rb) ? 1 : -1;  // Higher rank sorts first.
-  int tc = atag.compare(btag);
-  if (tc) return tc;
-  if (atag == btag && wide) return a.wide_compare(b);
-  return _compare_bits(a, b);
-}
-
-static int _numeric_rank(Symbol tag) {
-  if (tag == <float>) tag = <f32>;
-  if (tag == <double>) tag = <f64>;
-  X2CVarNumericInfo info;
-  return Var.numeric_info(tag, info) ? info.rank : 0;
-}
-
 // iteration
+
+/** Returns an iterator over what a two-name `foreach` destructures.
+    A boxed `Map` yields `(key value)` `List`s, as `Map.enumerate` does, and
+    any other value yields what `Var.iter` yields.
+    Raises: `<void-op>` for `void`. A null `dest` returns NULL without
+    raising.
+*/
+meta native Iter Var.enumerate(Var x, Iter dest) {
+  if (x is <map>) return Map.enumerate(x.map(), dest);
+  return Var.iter(x, dest);
+}
+
+
 
 /** Returns an iterator over `Var`.
     Raises: `<void-op>` for `void`. A null `dest` returns NULL without
@@ -560,17 +354,6 @@ meta native Iter Var.iter(Var x, Iter dest) {
   if (descriptor && descriptor.methods.iter)
     return descriptor.methods.iter(x, dest);
   return x.fallback_iter(dest);
-}
-
-/** Returns an iterator over what a two-name `foreach` destructures.
-    A boxed `Map` yields `(key value)` `List`s, as `Map.enumerate` does, and
-    any other value yields what `Var.iter` yields.
-    Raises: `<void-op>` for `void`. A null `dest` returns NULL without
-    raising.
-*/
-meta native Iter Var.enumerate(Var x, Iter dest) {
-  if (x is <map>) return Map.enumerate(x.map(), dest);
-  return Var.iter(x, dest);
 }
 
 /** Returns a non-dispatch iterator over `Var`.
@@ -664,21 +447,6 @@ meta native Var Var.postfixindex(Var value, Var key, Symbol op) {
   raise %(no-member (tag $tag) (member $member));
 }
 
-static void _valid_member_operand(Var value, String side) {
-  if (!value.encoding_valid()) {
-    unsigned long bits = value.u64;
-    raise %(bad-enc (value $bits) (side $side));
-  }
-  if (value is void) raise %(void-op (side $side));
-}
-
-static VarDescriptor *_required_descriptor(Var value, Symbol member) {
-  VarDescriptor *descriptor = _descriptor(value);
-  if (descriptor) return descriptor;
-  Symbol tag = value.tag();
-  raise %(no-member (tag $tag) (member $member));
-}
-
 // optional callbacks
 
 /** Tries the registered truth callback for `value`.
@@ -710,18 +478,6 @@ int Var.try_dispatch_binary(Var lhs, Symbol member, Var rhs, Var &?result) {
   if (!callback) return 0;
   result = callback(lhs, rhs);
   return 1;
-}
-
-static VarBinaryFn _binary_callback(VarMethods *methods, Symbol member) {
-  switch (member) {
-    case <add>:    return methods.add;
-    case <sub>:    return methods.sub;
-    case <mul>:    return methods.mul;
-    case <div>:    return methods.div;
-    case <mod>:    return methods.mod;
-    case <matmul>: return methods.matmul;
-  }
-  return NULL;
 }
 
 /** Tries the registered `<neg>` callback for `value`.
@@ -792,6 +548,21 @@ int x2c_register_builtin_descriptor(Symbol tag, VarMethods methods) {
   return 1;
 }
 
+/** Attempts to reserve a custom `Var` tag and merge its descriptor callbacks.
+    This no-result form discards the status from
+    `x2c_try_register_descriptor`; all registration and freeze behavior is
+    otherwise identical. The name and function pointers are borrowed under
+    the same process-wide lifetime requirements.
+
+    Raises: `<bad-state>` after descriptor registration is frozen, or
+    `<alloc-fail>` while checking lowercase spelling.
+    Distinct full names that encode one `Symbol` through `_`/`-` folding or
+    truncation abort.
+*/
+void x2c_register_descriptor(String name, VarMethods methods) {
+  x2c_try_register_descriptor(name, methods);
+}
+
 /** Declares a custom `Var` tag and merges its descriptor callbacks.
     Returns zero for a null or non-lowercase name, and one otherwise. An
     already active built-in name selects its existing row. Non-NULL fields
@@ -816,19 +587,15 @@ int x2c_try_register_descriptor(String name, VarMethods methods) {
   return 1;
 }
 
-/** Attempts to reserve a custom `Var` tag and merge its descriptor callbacks.
-    This no-result form discards the status from
-    `x2c_try_register_descriptor`; all registration and freeze behavior is
-    otherwise identical. The name and function pointers are borrowed under
-    the same process-wide lifetime requirements.
-
-    Raises: `<bad-state>` after descriptor registration is frozen, or
-    `<alloc-fail>` while checking lowercase spelling.
-    Distinct full names that encode one `Symbol` through `_`/`-` folding or
-    truncation abort.
+/** Registers an explicitly tagged type or raises `<bad-state>` for a null tag
+    or name. Tag/name collisions follow the existing fatal descriptor
+    diagnostic; registration still freezes at worker startup.
 */
-void x2c_register_descriptor(String name, VarMethods methods) {
-  x2c_try_register_descriptor(name, methods);
+void x2c_register_tagged_descriptor(
+  Symbol tag, String name, VarMethods methods) {
+  if (!x2c_try_register_tagged_descriptor(tag, name, methods))
+    raise %(bad-state (operation "x2c_register_tagged_descriptor")
+                     (tag $tag) (name $name));
 }
 
 /** Declares custom `tag` under full type `name` and merges descriptor
@@ -854,15 +621,285 @@ int x2c_try_register_tagged_descriptor(
   return 1;
 }
 
-/** Registers an explicitly tagged type or raises `<bad-state>` for a null tag
-    or name. Tag/name collisions follow the existing fatal descriptor
-    diagnostic; registration still freezes at worker startup.
+/** Locks descriptor registration while a native worker starts.
+    The caller must pair this on the same thread with
+    `x2c_descriptor_thread_start_end`.
 */
-void x2c_register_tagged_descriptor(
-  Symbol tag, String name, VarMethods methods) {
-  if (!x2c_try_register_tagged_descriptor(tag, name, methods))
-    raise %(bad-state (operation "x2c_register_tagged_descriptor")
-                     (tag $tag) (name $name));
+void x2c_descriptor_thread_start_begin(void) {
+  _lock();
+}
+
+/** Ends a native worker start and unlocks descriptor registration.
+    A nonzero `success` permanently freezes subsequent registration; zero
+    leaves it open for another attempt.
+*/
+void x2c_descriptor_thread_start_end(int success) {
+  if (success) descriptor_registration_frozen = 1;
+  _unlock();
+}
+
+/** Reports under the descriptor lock whether registration is frozen. */
+int x2c_descriptor_registration_frozen(void) {
+  _lock();
+  int frozen = descriptor_registration_frozen;
+  _unlock();
+  return frozen;
+}
+
+static VarDescriptor *_descriptor(Var value) {
+  VarDescriptor *descriptor = _row(x2c_var_descriptor_index(value));
+  if (!descriptor) descriptor = x2c_var_custom_descriptor(value);
+  return descriptor && descriptor.value_dispatch ? descriptor : NULL;
+}
+
+static VarDescriptor *_row(int index) {
+  int count = sizeof(builtin_descriptors) / sizeof(builtin_descriptors[0]);
+  return index >= 0 && index < count ? &builtin_descriptors[index] : NULL;
+}
+
+static String _primitive_str(Var v, Symbol tag) {
+  switch (tag) {
+    case <i8>:   case <u8>:   return $display.format.character().printf(v);
+    case <i16>:  case <i32>:  return $display.format.sint().printf(v);
+    case <i48>:  case <long>:  return $display.format.slong().printf(v);
+    case <llong>: return $display.format.sllong().printf(v);
+    case <u16>:  case <u32>:  return $display.format.uint().printf(v);
+    case <u48>:  case <ulong>:  return $display.format.ulong().printf(v);
+    case <ullong>: return $display.format.ullong().printf(v);
+    case <f32>:  case <f64>:  return $display.format.floating().printf(v);
+    case <ldouble>: return $display.format.extended().printf(v);
+    case <nan>:  case <+inf>: case <-inf>: return %"$tag";
+  }
+  return v.pointer_string();
+}
+
+/* A NULL text is the empty `String` and writes nothing. */
+static Buffer _write_text(Buffer out, String text) =>
+  text ? out.write(text) : out;
+
+static Buffer _write_primitive_str(Var v, Symbol tag, Buffer out) {
+  switch (tag) {
+    case <i8>:  case <u8>:  return out.printf($display.format.character(), v);
+    case <i16>:  case <i32>:  return out.printf($display.format.sint(), v);
+    case <i48>:  case <long>:  return out.printf($display.format.slong(), v);
+    case <llong>: return out.printf($display.format.sllong(), v);
+    case <u16>:  case <u32>:  return out.printf($display.format.uint(), v);
+    case <u48>:  case <ulong>:  return out.printf($display.format.ulong(), v);
+    case <ullong>: return out.printf($display.format.ullong(), v);
+    case <f32>:  case <f64>:  return out.printf($display.format.floating(), v);
+    case <ldouble>: return out.printf($display.format.extended(), v);
+    case <nan>:  case <+inf>: case <-inf>: return out.write(%"$tag");
+  }
+  return out.write(v.pointer_string());
+}
+
+/* `_write_primitive_repr` owns the numeric repr spellings. The `String`
+   form renders through a `Buffer`, so the two forms cannot drift apart. */
+static String _primitive_repr(Var v, Symbol tag) =>
+  _write_primitive_repr(v, tag, Buffer.new(0)).str_free();
+
+/* Each numeric tag prints its own value with its own C spelling, so the text
+   names both the number and the width it was boxed at. The narrow integer
+   tags read their payload through `Var.long`, which does not widen a signed
+   value into another tag's domain. */
+static Buffer _write_primitive_repr(Var v, Symbol tag, Buffer out) {
+  switch (tag) {
+    case <i8>:  case <u8>:
+      return _write_byte_repr(out, (unsigned) (uchar) v.long());
+    case <u16>: case <i16>:
+      return out.printf("0x%04X", (unsigned) (ushort) v.long());
+    case <i32>:  return out.printf("%d", (int) v.long());
+    case <u32>:  return out.printf("%uu", (unsigned) v.long());
+    case <u48>:  return out.printf("0x%012lXul", v.ulong() & 0xFFFFFFFFFFFFul);
+    case <i48>:
+      return out.printf("0x%012lXl", (ulong) v.long() & 0xFFFFFFFFFFFFul);
+    case <long>:  return out.printf("%ldl", v.long());
+    case <ulong>:  return out.printf("%luul", v.ulong());
+    case <llong>: return out.printf("%lldll", v.long_long());
+    case <ullong>: return out.printf("%lluull", v.ulong_long());
+    case <f32>:  return _write_float_repr(out, v.floating(), <f32>, "f");
+    case <f64>:  return _write_float_repr(out, v.floating(), <f64>, NULL);
+    case <ldouble>:
+      return _write_float_repr(out, v.long_double(), <ldouble>, "l");
+    case <nan>:  return out.write("NaN");
+    case <+inf>: return out.write("+Inf");
+    case <-inf>: return out.write("-Inf");
+  }
+  return v.write_pointer_repr(out);
+}
+
+/* A byte is spelled the way C spells a character constant. Writing the raw
+   byte instead would put a NUL or a control byte inside the repr text. */
+static Buffer _write_byte_repr(Buffer out, unsigned byte) {
+  switch (byte) {
+    case '\\': return out.write("'\\\\'");
+    case '\'': return out.write("'\\''");
+    case '\n': return out.write("'\\n'");
+    case '\t': return out.write("'\\t'");
+    case '\r': return out.write("'\\r'");
+  }
+  if (byte >= 0x20 && byte < 0x7F) return out.printf("'%c'", (int) byte);
+  return out.printf("'\\x%02X'", byte);
+}
+
+/* The shortest decimal that reads back as `value`, followed by the suffix
+   that names its C type. `*_DECIMAL_DIG` is the precision that always
+   round-trips that width on this target; starting three digits short keeps
+   0.1 spelled `0.1` instead of `0.10000000000000001`. The candidate is
+   narrowed to `width` before the comparison, so a float is not asked to match
+   a double's digits. */
+static Buffer _write_float_repr(
+  Buffer out, long double value, Symbol width, String suffix) {
+  int limit = LDBL_DECIMAL_DIG;
+  if (width == <f32>) limit = FLT_DECIMAL_DIG;
+  else if (width == <f64>) limit = DBL_DECIMAL_DIG;
+  char text[48];
+  int digits = limit - 3;
+  for (; digits < limit; digits++) {
+    snprintf(text, sizeof text, "%.*Lg", digits, value);
+    long double back = strtold(text, NULL);
+    if (width == <f32>) back = (float) back;
+    else if (width == <f64>) back = (double) back;
+    if (back == value) break;
+  }
+  if (digits == limit) snprintf(text, sizeof text, "%.*Lg", limit, value);
+  /* `%g` drops the point for a whole value, and bare digits read back as an
+     integer, so restore the form that says floating. */
+  if (text[strspn(text, "+-0123456789")] == '\0') strcat(text, ".0");
+  out.write(text);
+  return suffix ? out.write(suffix) : out;
+}
+
+/* Map stores a nonzero hash beside each record, so zero becomes all ones. */
+static unsigned _nonzero(unsigned hash) => hash ? hash : -1;
+
+/* A Var is one 64-bit word, so it hashes as one through the shared mixer.
+   Every Map, Set, and symbol table runs this hash on every lookup. Map masks
+   the low bits, which fmix64 avalanches as well as the high ones. */
+static unsigned _default_hash(Var v) => x2c_hash_word(v.u64);
+
+static int _group(Symbol kind, Symbol tag) {
+  if (_is_numeric_kind(kind)) return 0;
+  if (kind == <symbol>) return 1;
+  switch (tag) {
+    case <string>: return 2;
+    case <array>:  return 3;
+    case <list>:   return 4;
+    case <map>:    return 5;
+  }
+  if (kind == <object>) return 6;
+  if (kind == <reference>) return 7;
+  if (kind == <pointer>) return 8;
+  return 9;
+}
+
+static int _is_numeric_kind(Symbol kind) =>
+  (kind == <integer>) || (kind == <floating>);
+
+/* Values of one group without a registered ordering order by tag, then by
+   address or encoding. */
+static int _group_compare(
+  Var a, Var b, Symbol kind, Symbol atag, Symbol btag) {
+  int tc = atag.compare(btag);
+  if (tc) return tc;
+  if (kind == <pointer> || kind == <reference> || kind == <object>)
+    return _compare_addresses(a, b);
+  return _compare_bits(a, b);
+}
+
+static int _compare_addresses(Var a, Var b) {
+  uintptr_t ap = (uintptr_t) a.pointer(), bp = (uintptr_t) b.pointer();
+  if (ap == bp) return 0;
+  return (ap < bp) ? -1 : 1;
+}
+
+/* numeric ordering
+
+   Numbers order -Inf < finite < +Inf < NaN. Equal values break ties by rank,
+   wider first, then by tag and encoding. */
+
+static int _numeric_compare(
+  Var a, Var b, Symbol ak, Symbol bk, Symbol atag, Symbol btag) {
+  int awide = a.is_wide(), bwide = b.is_wide();
+  long double da = _float_value(a, ak, awide), db = _float_value(b, bk, bwide);
+  int ca = _numeric_class(atag, da), cb = _numeric_class(btag, db);
+  if (ca != cb) return (ca < cb) ? -1 : 1;
+  if (ca == 1) {
+    int cmp;
+    if (ak == <integer> && bk == <integer>) cmp = a.integer_compare(b);
+    else if (ak == <integer>) cmp = a.integer_floating_compare(b);
+    else if (bk == <integer>) cmp = -b.integer_floating_compare(a);
+    else if (da < db) cmp = -1;
+    else cmp = da > db ? 1 : 0;
+    if (cmp) return cmp;
+  }
+  return _numeric_tie(a, b, atag, btag, awide && bwide);
+}
+
+/* An integer compares through its payload, so only a floating kind reads a
+   value here. */
+static long double _float_value(Var v, Symbol kind, int wide) {
+  if (kind != <floating>) return 0.0L;
+  return wide ? v.long_double_value() : (long double) v.floating();
+}
+
+static int _numeric_class(Symbol tag, long double value) {
+  if (tag == <-inf>) return 0;
+  if (tag == <+inf>) return 2;
+  if (tag == <nan> || value != value) return 3;
+  if (value == 1.0 / 0.0) return 2;
+  if (value == -1.0 / 0.0) return 0;
+  return 1;
+}
+
+/* The encoding decides last, so distinct encodings of one value keep a
+   strict order. */
+static int _numeric_tie(Var a, Var b, Symbol atag, Symbol btag, int wide) {
+  int ra = _numeric_rank(atag), rb = _numeric_rank(btag);
+  if (ra != rb) return (ra < rb) ? 1 : -1;  // Higher rank sorts first.
+  int tc = atag.compare(btag);
+  if (tc) return tc;
+  if (atag == btag && wide) return a.wide_compare(b);
+  return _compare_bits(a, b);
+}
+
+static int _compare_bits(Var a, Var b) {
+  if (a.u64 == b.u64) return 0;
+  return (a.u64 < b.u64) ? -1 : 1;
+}
+
+static int _numeric_rank(Symbol tag) {
+  if (tag == <float>) tag = <f32>;
+  if (tag == <double>) tag = <f64>;
+  X2CVarNumericInfo info;
+  return Var.numeric_info(tag, info) ? info.rank : 0;
+}
+
+static void _valid_member_operand(Var value, String side) {
+  if (!value.encoding_valid()) {
+    unsigned long bits = value.u64;
+    raise %(bad-enc (value $bits) (side $side));
+  }
+  if (value is void) raise %(void-op (side $side));
+}
+
+static VarDescriptor *_required_descriptor(Var value, Symbol member) {
+  VarDescriptor *descriptor = _descriptor(value);
+  if (descriptor) return descriptor;
+  Symbol tag = value.tag();
+  raise %(no-member (tag $tag) (member $member));
+}
+
+static VarBinaryFn _binary_callback(VarMethods *methods, Symbol member) {
+  switch (member) {
+    case <add>:    return methods.add;
+    case <sub>:    return methods.sub;
+    case <mul>:    return methods.mul;
+    case <div>:    return methods.div;
+    case <mod>:    return methods.mod;
+    case <matmul>: return methods.matmul;
+  }
+  return NULL;
 }
 
 /* A lowercase name spells its tag as a restricted Symbol, and a built-in
@@ -873,17 +910,6 @@ static VarDescriptor *_reserve(String name) {
   if (!tag) return 0;
   VarDescriptor *row = _tag_row(tag);
   if (row && row.value_dispatch) return _claim_name(row, tag, name);
-  return _claim_name(_declare(tag), tag, name);
-}
-
-/* An explicit tag names a custom type, so a built-in tag aborts. */
-static VarDescriptor *_reserve_tagged(Symbol tag, String name) {
-  if (!tag || !name) return 0;
-  if (_tag_row(tag)) {
-    fprintf(
-      stderr, "Var descriptor: explicit tag <%s> is built in\n", tag.str());
-    abort();
-  }
   return _claim_name(_declare(tag), tag, name);
 }
 
@@ -915,6 +941,19 @@ static VarDescriptor *_claim_name(
   return descriptor;
 }
 
+static void _lock(void) =>
+  Mutex.recursive_lock(
+    &descriptor_mutex, &descriptor_mutex_once, _mutex_initialize,
+    "Var descriptor: could not lock mutex");
+
+static void _unlock(void) =>
+  Mutex.recursive_unlock(
+    &descriptor_mutex, "Var descriptor: could not unlock mutex");
+
+static void _mutex_initialize(void) =>
+  Mutex.recursive_initialize(
+    &descriptor_mutex, "Var descriptor: could not initialize mutex");
+
 /*  Every VarMethods field is a function pointer, so one pass over the struct
     installs each supplied method and stays correct when a method is added.
     NULL leaves an earlier callback installed; non-NULL pointers are borrowed
@@ -933,50 +972,13 @@ static void _install_methods(VarDescriptor *descriptor, VarMethods methods) {
   }
 }
 
-/* registration lock
-
-   One recursive mutex serializes registration. The first successful native
-   worker start freezes it, and descriptor lookups take no lock. */
-
-static pthread_mutex_t descriptor_mutex;
-static pthread_once_t descriptor_mutex_once =
-  (pthread_once_t) PTHREAD_ONCE_INIT;
-static int descriptor_registration_frozen;
-
-static void _lock(void) =>
-  Mutex.recursive_lock(
-    &descriptor_mutex, &descriptor_mutex_once, _mutex_initialize,
-    "Var descriptor: could not lock mutex");
-
-static void _unlock(void) =>
-  Mutex.recursive_unlock(
-    &descriptor_mutex, "Var descriptor: could not unlock mutex");
-
-static void _mutex_initialize(void) =>
-  Mutex.recursive_initialize(
-    &descriptor_mutex, "Var descriptor: could not initialize mutex");
-
-/** Locks descriptor registration while a native worker starts.
-    The caller must pair this on the same thread with
-    `x2c_descriptor_thread_start_end`.
-*/
-void x2c_descriptor_thread_start_begin(void) {
-  _lock();
-}
-
-/** Ends a native worker start and unlocks descriptor registration.
-    A nonzero `success` permanently freezes subsequent registration; zero
-    leaves it open for another attempt.
-*/
-void x2c_descriptor_thread_start_end(int success) {
-  if (success) descriptor_registration_frozen = 1;
-  _unlock();
-}
-
-/** Reports under the descriptor lock whether registration is frozen. */
-int x2c_descriptor_registration_frozen(void) {
-  _lock();
-  int frozen = descriptor_registration_frozen;
-  _unlock();
-  return frozen;
+/* An explicit tag names a custom type, so a built-in tag aborts. */
+static VarDescriptor *_reserve_tagged(Symbol tag, String name) {
+  if (!tag || !name) return 0;
+  if (_tag_row(tag)) {
+    fprintf(
+      stderr, "Var descriptor: explicit tag <%s> is built in\n", tag.str());
+    abort();
+  }
+  return _claim_name(_declare(tag), tag, name);
 }

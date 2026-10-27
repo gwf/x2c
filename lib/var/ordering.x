@@ -24,29 +24,6 @@ int Var.integer_compare(Var a, Var b) {
   return ap.magnitude < bp.magnitude ? -1 : 1;
 }
 
-static VarIntegerParts _integer_parts(Var v) {
-  switch (v.tag()) {
-    case <u8>: case <u16>: case <u32>: case <u48>:
-      return _unsigned_parts((unsigned long long) v.integer());
-    case <ulong>:  return _unsigned_parts(v.ulong_value());
-    case <ullong>: return _unsigned_parts(v.ulong_long_value());
-    case <long>:   return _signed_parts(v.long_value());
-    case <llong>:  return _signed_parts(v.long_long_value());
-  }
-  return _signed_parts(v.integer());
-}
-
-static VarIntegerParts _unsigned_parts(unsigned long long magnitude) =>
-  (VarIntegerParts) { 0, magnitude };
-
-static VarIntegerParts _signed_parts(long long value) =>
-  (VarIntegerParts) { value < 0, _signed_magnitude(value) };
-
-static unsigned long long _signed_magnitude(long long value) {
-  if (value >= 0) return (unsigned long long) value;
-  return (unsigned long long) (-(value + 1)) + 1;
-}
-
 /** Orders an integer-kinded `integer` against a floating `floating`.
     Returns -1, 0, or 1 for less, equal, and greater. The integer is never
     converted to floating point, so a large `<ullong>` and a nearby `double`
@@ -69,6 +46,29 @@ int Var.integer_floating_compare(Var integer, Var floating) {
   }
   if (value < 0.0L) return 1;
   return _magnitude_compare(parts.magnitude, value);
+}
+
+static VarIntegerParts _integer_parts(Var v) {
+  switch (v.tag()) {
+    case <u8>: case <u16>: case <u32>: case <u48>:
+      return _unsigned_parts((unsigned long long) v.integer());
+    case <ulong>:  return _unsigned_parts(v.ulong_value());
+    case <ullong>: return _unsigned_parts(v.ulong_long_value());
+    case <long>:   return _signed_parts(v.long_value());
+    case <llong>:  return _signed_parts(v.long_long_value());
+  }
+  return _signed_parts(v.integer());
+}
+
+static VarIntegerParts _unsigned_parts(unsigned long long magnitude) =>
+  (VarIntegerParts) { 0, magnitude };
+
+static VarIntegerParts _signed_parts(long long value) =>
+  (VarIntegerParts) { value < 0, _signed_magnitude(value) };
+
+static unsigned long long _signed_magnitude(long long value) {
+  if (value >= 0) return (unsigned long long) value;
+  return (unsigned long long) (-(value + 1)) + 1;
 }
 
 static int _magnitude_compare(

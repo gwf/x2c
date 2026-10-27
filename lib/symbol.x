@@ -28,79 +28,6 @@
 static const char _symbol_alphabet[] =
   "\0abcdefghijklmnopqrstuvwxyz*+?!-";
 
-/* The maximum-capacity encodings within the 64-bit Symbol value, numbered
-   from bit 63 on the left to bit 0 on the right:
-
-   6666555555555544444444443333333333222222222211111111110000000000
-   3210987654321098765432109876543210987654321098765432109876543210
-
-   XXXXXXXXXXXXX[555][555][555][555][555][555][555][555][555][555]0
-   XXXXXXXXXXXXX0[77777][77777][77777][77777][77777][77777][77777]1
-
-   X marks an unused bit, [555] a 5-bit character, and [77777] a
-   7-bit character. The low bit selects 5- or 7-bit encoding. Shorter
-   spellings use fewer leading character groups.
-
-   Var admits Symbol payloads below 2^51. The 5-bit form fixes bit 0 at
-   zero; the 7-bit form uses bit 0 as one and fixes bit 50 at zero.
-
-   The restricted alphabet folds case and aliases '_' with '-'. A zero from
-   _char_to_5bit means that the byte requires 7-bit encoding.
-*/
-static int _char_to_5bit(int c) {
-  if (c >= 'a' && c <= 'z') return c - 'a' + 1;
-  if (c >= 'A' && c <= 'Z') return c - 'A' + 1;
-  switch (c) {
-    case '*': return 27;
-    case '+': return 28;
-    case '?': return 29;
-    case '!': return 30;
-    case '_': case '-': return 31;
-    default: return 0;
-  }
-}
-
-static int _bytes_fit_5bit(const char *str, int len) {
-  for (int i = 0; i < len; i++) if (!_char_to_5bit(str[i])) return 0;
-  return 1;
-}
-
-/** Encodes at most `len` bytes of `str` as a compact `Symbol`.
-    A null `str` or nonpositive `len` returns zero. All `len` readable bytes
-    select the encoding before the result is truncated to ten restricted or
-    seven general bytes. The restricted encoding folds ASCII case and treats
-    underscore as hyphen; the general encoding retains each low seven bits,
-    including embedded NUL. `String` and `Buffer` conversions stop at the first
-    decoded NUL.
-*/
-Symbol Symbol.new_len(const char *str, int len) {
-  if (!str || len <= 0) return 0;
-
-  int is_5bit = _bytes_fit_5bit(str, len);
-  int max_len = is_5bit ? SYMBOL_MAX_5BIT : SYMBOL_MAX_7BIT;
-  if (len > max_len) len = max_len;
-
-  uint64_t result = 0;
-  if (is_5bit) {
-    for (int i = 0; i < len; i++) {
-      result <<= 5;
-      result |= (uint64_t) (0x1F & _char_to_5bit(str[i]));
-    }
-    return result << 1;
-  }
-
-  for (int i = 0; i < len; i++) {
-    result <<= 7;
-    result |= (uint64_t) (0x7F & (unsigned char) str[i]);
-  }
-  return (result << 1) | 1;
-}
-
-/** Encodes the nonnull NUL-terminated spelling `str` as a compact `Symbol`.
-    Encoding and truncation follow `Symbol.new_len`.
-*/
-Symbol Symbol.new(const char *str) => Symbol.new_len(str, strlen(str));
-
 /** Encodes `spelling` only when the `Symbol` preserves every byte.
     Returns 1 and writes `out` on success; returns 0 and leaves `out`
     untouched when case folding, `_`/`-` folding, or truncation would change
@@ -116,39 +43,6 @@ meta native int Symbol.try_new(String spelling, Symbol &?out) {
 }
 
 // decoding
-
-/** Returns the number of decoded bytes in `symbol`. */
-meta native int Symbol.len(Symbol symbol) {
-  int len = 0, bits = (symbol & 1) ? 7 : 5;
-  for (symbol >>= 1; symbol; symbol >>= bits) len++;
-  return len;
-}
-
-/** Decodes `symbol` into caller-owned byte storage.
-    `dest` must hold at least `SYMBOL_MAX_5BIT + 1` bytes. A nonzero `Symbol`
-    is NUL-terminated there. A null destination or zero `Symbol` leaves
-    storage unchanged.
-*/
-void Symbol.decode(Symbol symbol, char *dest) {
-  if (!dest || !symbol) return;
-  int len = symbol.len();
-  memset(dest, 0, SYMBOL_MAX_5BIT + 1);
-  if (symbol & 1) {
-    symbol >>= 1;
-    for (int i = 0; i < len; i++) {
-      dest[len - i - 1] = symbol & 0x7F;
-      symbol >>= 7;
-    }
-  }
-  else {
-    symbol >>= 1;
-    for (int i = 0; i < len; i++) {
-      dest[len - i - 1] = _symbol_alphabet[symbol & 0x1F];
-      symbol >>= 5;
-    }
-  }
-  dest[len] = '\0';
-}
 
 /** Returns the decoded spelling as a canonical `String`.
     Conversion stops at the first decoded NUL.
@@ -229,6 +123,32 @@ Buffer Symbol.write_repr(Symbol symbol, Buffer out) {
   return out.write_char('>');
 }
 
+/** Decodes `symbol` into caller-owned byte storage.
+    `dest` must hold at least `SYMBOL_MAX_5BIT + 1` bytes. A nonzero `Symbol`
+    is NUL-terminated there. A null destination or zero `Symbol` leaves
+    storage unchanged.
+*/
+void Symbol.decode(Symbol symbol, char *dest) {
+  if (!dest || !symbol) return;
+  int len = symbol.len();
+  memset(dest, 0, SYMBOL_MAX_5BIT + 1);
+  if (symbol & 1) {
+    symbol >>= 1;
+    for (int i = 0; i < len; i++) {
+      dest[len - i - 1] = symbol & 0x7F;
+      symbol >>= 7;
+    }
+  }
+  else {
+    symbol >>= 1;
+    for (int i = 0; i < len; i++) {
+      dest[len - i - 1] = _symbol_alphabet[symbol & 0x1F];
+      symbol >>= 5;
+    }
+  }
+  dest[len] = '\0';
+}
+
 /** Returns the first decoded byte of `symbol`, or NUL for zero. */
 meta native char Symbol.first(Symbol symbol) {
   if (!symbol) return '\0';
@@ -238,6 +158,15 @@ meta native char Symbol.first(Symbol symbol) {
   value >>= bits * (len - 1);
   if (bits == 5) return _symbol_alphabet[value & 0x1F];
   return value & 0x7F;
+}
+
+
+
+/** Returns the number of decoded bytes in `symbol`. */
+meta native int Symbol.len(Symbol symbol) {
+  int len = 0, bits = (symbol & 1) ? 7 : 5;
+  for (symbol >>= 1; symbol; symbol >>= bits) len++;
+  return len;
 }
 
 /** Returns the final decoded byte of `symbol`, or NUL for zero. */
@@ -278,4 +207,77 @@ Symbol Symbol.parse(char *text) {
     return Symbol.new(unquoted);
   }
   return Symbol.new_len(text + 1, len - 2);
+}
+
+/** Encodes the nonnull NUL-terminated spelling `str` as a compact `Symbol`.
+    Encoding and truncation follow `Symbol.new_len`.
+*/
+Symbol Symbol.new(const char *str) => Symbol.new_len(str, strlen(str));
+
+/** Encodes at most `len` bytes of `str` as a compact `Symbol`.
+    A null `str` or nonpositive `len` returns zero. All `len` readable bytes
+    select the encoding before the result is truncated to ten restricted or
+    seven general bytes. The restricted encoding folds ASCII case and treats
+    underscore as hyphen; the general encoding retains each low seven bits,
+    including embedded NUL. `String` and `Buffer` conversions stop at the first
+    decoded NUL.
+*/
+Symbol Symbol.new_len(const char *str, int len) {
+  if (!str || len <= 0) return 0;
+
+  int is_5bit = _bytes_fit_5bit(str, len);
+  int max_len = is_5bit ? SYMBOL_MAX_5BIT : SYMBOL_MAX_7BIT;
+  if (len > max_len) len = max_len;
+
+  uint64_t result = 0;
+  if (is_5bit) {
+    for (int i = 0; i < len; i++) {
+      result <<= 5;
+      result |= (uint64_t) (0x1F & _char_to_5bit(str[i]));
+    }
+    return result << 1;
+  }
+
+  for (int i = 0; i < len; i++) {
+    result <<= 7;
+    result |= (uint64_t) (0x7F & (unsigned char) str[i]);
+  }
+  return (result << 1) | 1;
+}
+
+static int _bytes_fit_5bit(const char *str, int len) {
+  for (int i = 0; i < len; i++) if (!_char_to_5bit(str[i])) return 0;
+  return 1;
+}
+
+/* The maximum-capacity encodings within the 64-bit Symbol value, numbered
+   from bit 63 on the left to bit 0 on the right:
+
+   6666555555555544444444443333333333222222222211111111110000000000
+   3210987654321098765432109876543210987654321098765432109876543210
+
+   XXXXXXXXXXXXX[555][555][555][555][555][555][555][555][555][555]0
+   XXXXXXXXXXXXX0[77777][77777][77777][77777][77777][77777][77777]1
+
+   X marks an unused bit, [555] a 5-bit character, and [77777] a
+   7-bit character. The low bit selects 5- or 7-bit encoding. Shorter
+   spellings use fewer leading character groups.
+
+   Var admits Symbol payloads below 2^51. The 5-bit form fixes bit 0 at
+   zero; the 7-bit form uses bit 0 as one and fixes bit 50 at zero.
+
+   The restricted alphabet folds case and aliases '_' with '-'. A zero from
+   _char_to_5bit means that the byte requires 7-bit encoding.
+*/
+static int _char_to_5bit(int c) {
+  if (c >= 'a' && c <= 'z') return c - 'a' + 1;
+  if (c >= 'A' && c <= 'Z') return c - 'A' + 1;
+  switch (c) {
+    case '*': return 27;
+    case '+': return 28;
+    case '?': return 29;
+    case '!': return 30;
+    case '_': case '-': return 31;
+    default: return 0;
+  }
 }

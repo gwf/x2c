@@ -146,19 +146,6 @@ meta native Var Var.convert(Var value, Symbol target) {
        : _convert_to_integer(source, target, info.unsigned_value, info.bits);
 }
 
-/** Writes numeric-family metadata for `tag` and returns nonzero.
-    The special `<nan>`, `<-inf>`, and `<+inf>` tags report the `<f64>` family.
-    A null `out` or nonnumeric tag returns zero and leaves storage untouched.
-*/
-int Var.numeric_info(Symbol tag, X2CVarNumericInfo &?out) {
-  if (!out) return 0;
-  if (tag == <nan> || tag == <-inf> || tag == <+inf>) tag = <f64>;
-  int row = x2c_var_numeric_tags.index(tag);
-  if (row < 0) return 0;
-  out = x2c_var_numerics[row];
-  return 1;
-}
-
 /** Decodes a numeric `value` into caller-owned `out` storage.
     The result retains no pointer into `value`; integer and floating payloads
     use the members described by `X2CVarNumeric`.
@@ -178,6 +165,117 @@ void Var.numeric_decode(Var value, X2CVarNumeric &?out) {
   if (!Var.numeric_info(tag, info)) $error.decode.type(tag);
   _numeric_decode(value, info, out);
 }
+
+// integer targets
+
+/** Boxes the low target-width bits of `raw` using integer `target`.
+    Signed targets interpret those bits as two's-complement. Immediate targets
+    return self-contained values; wide targets allocate their boxes in the
+    active `Scope`.
+    Raises: `<bad-target>` for a noninteger target, or `<alloc-fail>` or
+    `<bad-enc>` while boxing a wide result.
+*/
+Var Var.integer_box(Symbol target, unsigned long long raw) {
+  X2CVarNumericInfo info;
+  if (!Var.numeric_info(target, info) || info.floating)
+    $error.target.invalid(target);
+  raw &= Var.width_mask(info.bits);
+  long long signed_value = Var.signed_from_bits(raw, info.bits);
+  switch (target) {
+    case <i8>:     return Var.box_i8((char) signed_value);
+    case <u8>:     return Var.box_u8((uchar) raw);
+    case <i16>:    return Var.box_i16((short) signed_value);
+    case <u16>:    return Var.box_u16((ushort) raw);
+    case <i32>:    return Var.box_i32_bits((unsigned) raw);
+    case <u32>:    return Var.box_u32((unsigned) raw);
+    case <i48>:    return Var.new(<i48>, (long) signed_value);
+    case <u48>:    return Var.new(<u48>, (unsigned long) raw);
+    case <long>:   return Var.box_long((long) signed_value);
+    case <ulong>:  return Var.box_ulong((unsigned long) raw);
+    case <llong>:  return Var.box_long_long(signed_value);
+    case <ullong>: return Var.box_ulong_long(raw);
+  }
+  $error.target.invalid(target);
+}
+
+/** Writes numeric-family metadata for `tag` and returns nonzero.
+    The special `<nan>`, `<-inf>`, and `<+inf>` tags report the `<f64>` family.
+    A null `out` or nonnumeric tag returns zero and leaves storage untouched.
+*/
+int Var.numeric_info(Symbol tag, X2CVarNumericInfo &?out) {
+  if (!out) return 0;
+  if (tag == <nan> || tag == <-inf> || tag == <+inf>) tag = <f64>;
+  int row = x2c_var_numeric_tags.index(tag);
+  if (row < 0) return 0;
+  out = x2c_var_numerics[row];
+  return 1;
+}
+
+/** Returns the integer tag selected by `rank` and signedness.
+    `rank` must be positive. Ranks one through three map to `<i32>` or `<u32>`;
+    callers applying integer promotion must first select its resulting
+    signedness. Ranks four through six select the 48-bit, `long`, and
+    `long long` families. A rank above six returns the null `Symbol`.
+*/
+Symbol Var.integer_tag(int rank, int unsigned_value) {
+  if (rank <= 3) return unsigned_value ? <u32> : <i32>;
+  if (rank == 4) return unsigned_value ? <u48> : <i48>;
+  if (rank == 5) return unsigned_value ? <ulong> : <long>;
+  if (rank == 6) return unsigned_value ? <ullong> : <llong>;
+  return 0;
+}
+
+// floating targets
+
+/** Converts a decoded numeric value to native `float` without boxing.
+    Uses the target host cast, preserving its rounding behavior.
+*/
+float X2CVarNumeric.f32(X2CVarNumeric &value) {
+  if (value.floating) return (float) value.floating_value;
+  if (value.unsigned_value) return (float) value.raw;
+  return (float) Var.signed_from_bits(value.raw, value.bits);
+}
+
+/** Converts a decoded numeric value to native `double` without boxing.
+    Uses the target host cast, preserving its rounding behavior.
+*/
+double X2CVarNumeric.f64(X2CVarNumeric &value) {
+  if (value.floating) return (double) value.floating_value;
+  if (value.unsigned_value) return (double) value.raw;
+  return (double) Var.signed_from_bits(value.raw, value.bits);
+}
+
+/** Converts a decoded numeric value to native `long double` without boxing.
+    Uses the target host cast, preserving its rounding behavior.
+*/
+long double X2CVarNumeric.ldouble(X2CVarNumeric &value) {
+  if (value.floating) return value.floating_value;
+  if (value.unsigned_value) return (long double) value.raw;
+  return (long double) Var.signed_from_bits(value.raw, value.bits);
+}
+
+/** Interprets the low `bits` of `raw` as a two's-complement signed value.
+    `bits` must be between one and the width of `unsigned long long`.
+*/
+long long Var.signed_from_bits(unsigned long long raw, int bits) {
+  if (bits < (int) (sizeof(unsigned long long) * CHAR_BIT)) {
+    unsigned long long mask = Var.width_mask(bits), sign = 1ull << (bits - 1);
+    raw &= mask;
+    if (raw & sign) return -(long long) ((~raw & mask) + 1ull);
+    return (long long) raw;
+  }
+  long long value;
+  memcpy(&value, &raw, sizeof value);
+  return value;
+}
+
+/** Returns a mask containing the low `bits` bits.
+    Zero yields zero and a width at least `unsigned long long` yields
+    `ULLONG_MAX`; `bits` must not be negative.
+*/
+unsigned long long Var.width_mask(int bits) =>
+  bits >= (int) (sizeof(unsigned long long) * CHAR_BIT)
+       ? ULLONG_MAX : (1ull << bits) - 1ull;
 
 /* Both callers establish valid numeric encoding and family metadata before
    payload extraction; the public decoder still owns its argument checks.
@@ -207,7 +305,7 @@ static void _numeric_decode(
   out = decoded;
 }
 
-// integer targets
+
 
 /* Integer-to-integer never passes through floating point; it narrows modulo
    the target width. Only floating-to-integer is range checked, and only
@@ -242,74 +340,7 @@ static long double _integer_limit(int bits) {
   return (long double) (1ull << bits);
 }
 
-/** Boxes the low target-width bits of `raw` using integer `target`.
-    Signed targets interpret those bits as two's-complement. Immediate targets
-    return self-contained values; wide targets allocate their boxes in the
-    active `Scope`.
-    Raises: `<bad-target>` for a noninteger target, or `<alloc-fail>` or
-    `<bad-enc>` while boxing a wide result.
-*/
-Var Var.integer_box(Symbol target, unsigned long long raw) {
-  X2CVarNumericInfo info;
-  if (!Var.numeric_info(target, info) || info.floating)
-    $error.target.invalid(target);
-  raw &= Var.width_mask(info.bits);
-  long long signed_value = Var.signed_from_bits(raw, info.bits);
-  switch (target) {
-    case <i8>:     return Var.box_i8((char) signed_value);
-    case <u8>:     return Var.box_u8((uchar) raw);
-    case <i16>:    return Var.box_i16((short) signed_value);
-    case <u16>:    return Var.box_u16((ushort) raw);
-    case <i32>:    return Var.box_i32_bits((unsigned) raw);
-    case <u32>:    return Var.box_u32((unsigned) raw);
-    case <i48>:    return Var.new(<i48>, (long) signed_value);
-    case <u48>:    return Var.new(<u48>, (unsigned long) raw);
-    case <long>:   return Var.box_long((long) signed_value);
-    case <ulong>:  return Var.box_ulong((unsigned long) raw);
-    case <llong>:  return Var.box_long_long(signed_value);
-    case <ullong>: return Var.box_ulong_long(raw);
-  }
-  $error.target.invalid(target);
-}
 
-/** Returns the integer tag selected by `rank` and signedness.
-    `rank` must be positive. Ranks one through three map to `<i32>` or `<u32>`;
-    callers applying integer promotion must first select its resulting
-    signedness. Ranks four through six select the 48-bit, `long`, and
-    `long long` families. A rank above six returns the null `Symbol`.
-*/
-Symbol Var.integer_tag(int rank, int unsigned_value) {
-  if (rank <= 3) return unsigned_value ? <u32> : <i32>;
-  if (rank == 4) return unsigned_value ? <u48> : <i48>;
-  if (rank == 5) return unsigned_value ? <ulong> : <long>;
-  if (rank == 6) return unsigned_value ? <ullong> : <llong>;
-  return 0;
-}
-
-/** Returns a mask containing the low `bits` bits.
-    Zero yields zero and a width at least `unsigned long long` yields
-    `ULLONG_MAX`; `bits` must not be negative.
-*/
-unsigned long long Var.width_mask(int bits) =>
-  bits >= (int) (sizeof(unsigned long long) * CHAR_BIT)
-       ? ULLONG_MAX : (1ull << bits) - 1ull;
-
-/** Interprets the low `bits` of `raw` as a two's-complement signed value.
-    `bits` must be between one and the width of `unsigned long long`.
-*/
-long long Var.signed_from_bits(unsigned long long raw, int bits) {
-  if (bits < (int) (sizeof(unsigned long long) * CHAR_BIT)) {
-    unsigned long long mask = Var.width_mask(bits), sign = 1ull << (bits - 1);
-    raw &= mask;
-    if (raw & sign) return -(long long) ((~raw & mask) + 1ull);
-    return (long long) raw;
-  }
-  long long value;
-  memcpy(&value, &raw, sizeof value);
-  return value;
-}
-
-// floating targets
 
 /* Floating results use host casts, so a wide target gets a new Scope box. */
 static Var _convert_to_float(X2CVarNumeric &source, Symbol target) {
@@ -319,31 +350,4 @@ static Var _convert_to_float(X2CVarNumeric &source, Symbol target) {
     case <ldouble>: return Var.box_long_double(source.ldouble());
     default: $error.target.invalid(target);
   }
-}
-
-/** Converts a decoded numeric value to native `float` without boxing.
-    Uses the target host cast, preserving its rounding behavior.
-*/
-float X2CVarNumeric.f32(X2CVarNumeric &value) {
-  if (value.floating) return (float) value.floating_value;
-  if (value.unsigned_value) return (float) value.raw;
-  return (float) Var.signed_from_bits(value.raw, value.bits);
-}
-
-/** Converts a decoded numeric value to native `double` without boxing.
-    Uses the target host cast, preserving its rounding behavior.
-*/
-double X2CVarNumeric.f64(X2CVarNumeric &value) {
-  if (value.floating) return (double) value.floating_value;
-  if (value.unsigned_value) return (double) value.raw;
-  return (double) Var.signed_from_bits(value.raw, value.bits);
-}
-
-/** Converts a decoded numeric value to native `long double` without boxing.
-    Uses the target host cast, preserving its rounding behavior.
-*/
-long double X2CVarNumeric.ldouble(X2CVarNumeric &value) {
-  if (value.floating) return value.floating_value;
-  if (value.unsigned_value) return (long double) value.raw;
-  return (long double) Var.signed_from_bits(value.raw, value.bits);
 }

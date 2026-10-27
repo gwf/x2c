@@ -40,25 +40,6 @@ typedef struct NativeScalarAccess {
   NativeScalarStore store;
 } *NativeScalarAccess;
 
-meta Map native_scalar_types(void) => {
-  %(char): %(i8 "Var_char" "x2c_var_update_i8"),
-  %(signed char): %(i8 "Var_char" "x2c_var_update_schar"),
-  %(unsigned char): %(u8 "Var_uchar" "x2c_var_update_u8"),
-  %(short): %(i16 "Var_short" "x2c_var_update_i16"),
-  %(unsigned short): %(u16 "Var_ushort" "x2c_var_update_u16"),
-  %(int): %(i32 "Var_int" "x2c_var_update_i32"),
-  %(unsigned): %(u32 "Var_uint" "x2c_var_update_u32"),
-  %(long): %(long "Var_long" "x2c_var_update_long"),
-  %(unsigned long): %(ulong "Var_ulong" "x2c_var_update_ulong"),
-  %(long long): %(llong "Var_long_long" "x2c_var_update_long_long"),
-  %(unsigned long long):
-    %(ullong "Var_ulong_long" "x2c_var_update_ulong_long"),
-  %(float): %(f32 "Var_float" "x2c_var_update_f32"),
-  %(double): %(f64 "Var_floating" "x2c_var_update_f64"),
-  %(long double):
-    %(ldouble "Var_long_double" "x2c_var_update_long_double"),
-};
-
 /* The access record for `type` is `_native_scalar_access` followed by each
    word of `type`, so `(unsigned long)` names
    `_native_scalar_access_unsigned_long`. */
@@ -79,6 +60,37 @@ meta List _scalar_key(Type type) {
   return key;
 }
 
+/* One template application per row, in sorted order so emission does not
+   depend on hash layout. */
+meta List _scalar_access_units(Macro access) {
+  Array units = [];
+  List rows = native_scalar_types().list().sort();
+  foreach (List row in rows) {
+    Type type = row.car();
+    units.push(access(type));
+  }
+  return units.list_free();
+}
+
+meta Map native_scalar_types(void) => {
+  %(char): %(i8 "Var_char" "x2c_var_update_i8"),
+  %(signed char): %(i8 "Var_char" "x2c_var_update_schar"),
+  %(unsigned char): %(u8 "Var_uchar" "x2c_var_update_u8"),
+  %(short): %(i16 "Var_short" "x2c_var_update_i16"),
+  %(unsigned short): %(u16 "Var_ushort" "x2c_var_update_u16"),
+  %(int): %(i32 "Var_int" "x2c_var_update_i32"),
+  %(unsigned): %(u32 "Var_uint" "x2c_var_update_u32"),
+  %(long): %(long "Var_long" "x2c_var_update_long"),
+  %(unsigned long): %(ulong "Var_ulong" "x2c_var_update_ulong"),
+  %(long long): %(llong "Var_long_long" "x2c_var_update_long_long"),
+  %(unsigned long long):
+    %(ullong "Var_ulong_long" "x2c_var_update_ulong_long"),
+  %(float): %(f32 "Var_float" "x2c_var_update_f32"),
+  %(double): %(f64 "Var_floating" "x2c_var_update_f64"),
+  %(long double):
+    %(ldouble "Var_long_double" "x2c_var_update_long_double"),
+};
+
 /* Native size, alignment, load, and store for one row's type. */
 macro Unit $native.scalar.access(Type $type) {
   static Var _load(const void *bytes, Scope *owner) {
@@ -97,18 +109,6 @@ macro Unit $native.scalar.access(Type $type) {
     $_scalar_tag($type), sizeof($type), _Alignof($type),
     _load, _store
   };
-}
-
-/* One template application per row, in sorted order so emission does not
-   depend on hash layout. */
-meta List _scalar_access_units(Macro access) {
-  Array units = [];
-  List rows = native_scalar_types().list().sort();
-  foreach (List row in rows) {
-    Type type = row.car();
-    units.push(access(type));
-  }
-  return units.list_free();
 }
 
 macro Unit $native.scalar.access.all() {

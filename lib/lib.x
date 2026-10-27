@@ -44,20 +44,6 @@ void DisjointSet.drop(DisjointSet set) {
   xfree(set.size);
 }
 
-/** Returns the representative of `x` and compresses its traversed path.
-    `set` must be live and `x` must be between zero and `set.length - 1`.
-*/
-int DisjointSet.find(DisjointSet set, int x) {
-  int p = set.parent[x];
-  if (p == x) return x;
-  while (p != set.parent[p]) {
-    set.parent[x] = set.parent[p];
-    x = p;
-    p = set.parent[p];
-  }
-  return p;
-}
-
 /** Merges the components containing `a` and `b` by size.
     `set` must be live and both elements must be in range. The larger
     component's root wins unless the sizes tie, when the root of `a` wins.
@@ -72,6 +58,20 @@ void DisjointSet.union(DisjointSet set, int a, int b) {
   set.parent[b_root] = a_root;
   set.size[a_root] += set.size[b_root];
   set.ncmpnts--;
+}
+
+/** Returns the representative of `x` and compresses its traversed path.
+    `set` must be live and `x` must be between zero and `set.length - 1`.
+*/
+int DisjointSet.find(DisjointSet set, int x) {
+  int p = set.parent[x];
+  if (p == x) return x;
+  while (p != set.parent[p]) {
+    set.parent[x] = set.parent[p];
+    x = p;
+    p = set.parent[p];
+  }
+  return p;
 }
 
 /** Returns canonical `(size representative)` rows for the current roots.

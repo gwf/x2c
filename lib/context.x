@@ -46,6 +46,9 @@ static struct Context {
 
 static threaded Context current_context;
 
+static pthread_once_t context_shutdown_once =
+  (pthread_once_t) PTHREAD_ONCE_INIT;
+
 // export
 
 /** Exports `value` into the parent of the current `Context`.
@@ -96,6 +99,168 @@ Var Context.export_scope(Scope source_scope, Pool pool, Var value) {
   return _export_root(&source, value);
 }
 
+/* custom exporters
+
+   A registered exporter for a custom class recurses through
+   `Context.export_nested` and moves its own storage. */
+
+/** Recursively exports one nested value through an active or sealed `Context`.
+    Registered custom exporters call this; other callers export their
+    complete result with `Context.export`. Call only during an enclosing
+    `Context.export` or `Context.export_scope`: its root commits pending
+    storage moves after traversal. Built-in movable families preserve
+    identity. A custom exact-descriptor exporter defines its returned value,
+    including identity. For built-ins, private canonical pointers may change,
+    so callers must use the result; inherited or borrowed values are unchanged.
+
+    Built-in `Array` and `Map` export restores the container's source ownership
+    if recursive export fails, but nested exports already completed are not
+    rolled back.
+
+    Raises: `<bad-types>` for an unsupported value without a registered
+    exporter, or a cause from nested allocation, hashing, equality, or custom
+    export.
+*/
+Var Context.export_nested(Context c, Var value) => _export_value(c, value);
+
+/** Returns the borrowed `Scope` slot that receives exports from `c`.
+    The slot remains valid only while the `Context`'s destination state lives;
+    a null `Context` returns NULL.
+*/
+Scope *Context.export_destination(Context c) => c ? c.destination_scope : NULL;
+
+/** Schedules one allocation during a registered custom export callback.
+    A null allocation or one outside `c`'s `Scope` chain is unchanged.
+    It immediately answers zero to `Context.owns`, preserving custom cycle
+    guards. Root export keeps it beneath any scheduled owning scope, or
+    relinks it individually after traversal when no such owner is exported.
+    Application code exports its value with `Context.export` instead.
+    Raises: allocation and table-growth causes while recording the move.
+*/
+void Context.move_allocation(Context c, void *allocation) {
+  if (c.owns(allocation)) _export_memo(c).set(allocation, 1);
+}
+
+/** Schedules Block storage and nullable owned contents for an exporter.
+    Root export keeps allocations covered by a scheduled storage scope under
+    that owner. Uncovered storage moves with `Block.move_to`.
+    Raises: allocation and table-growth causes while recording the move.
+*/
+void Context.move_block(Context c, Block block) {
+  if (!c.owns(block)) return;
+  _export_memo(c).set(block, 1);
+  c.move_scope(block.lifetime);
+}
+
+/** Reports whether a managed allocation still needs export from `context`.
+    The nonnull pointer must come from a `Scope` allocator. Registered custom
+    exporters call this before moving their own storage. An individual
+    allocation scheduled by `Context.move_allocation` answers zero, although
+    physical ownership changes only when the enclosing root export commits.
+    Scheduling a complete scope does not hide its unvisited descendants.
+*/
+int Context.owns(Context context, void *allocation) =>
+  allocation && context &&
+  !(context.exported != NULL && context.exported.contains(allocation)) &&
+  _owns_scope(context, Scope.owner(allocation));
+
+/** Schedules custom-exporter storage while preserving explicit adoption.
+    Root export reparents outermost requested scopes after recursive export.
+    Exporters call this for grouped storage, never from channel transport.
+    Raises: allocation and table-growth causes while recording the move.
+*/
+void Context.move_scope(Context c, Scope storage) {
+  if (_owns_scope(c, storage)) _export_memo(c).set(storage, 1);
+}
+
+// lifecycle
+
+/** Opens and makes current a `Context` using the active canonical-value pool.
+    Close it before its parent; its `Scope` owns subsequent mutable
+    allocations.
+
+    Raises: `<alloc-fail>` or `<size-limit>` while constructing nested state.
+    Failed construction restores the parent's `Scope`, canonical pool, `Error`,
+    `Match`, and current `Context` state.
+*/
+meta native Context Context.open(void) => _open(NULL, 0);
+
+/** Opens and makes current a named `Context` that inherits immutable values.
+    The diagnostic name is copied, and the `Context` must close before its
+    parent.
+
+    Raises: `<alloc-fail>` or `<size-limit>` while constructing nested state.
+    Failed construction restores the parent's `Scope`, canonical pool, `Error`,
+    `Match`, and current `Context` state.
+*/
+Context Context.open_named(const char *name) => _open(name, 0);
+
+/** Opens and makes current a `Context` with a private canonical-value pool.
+    Export surviving immutable values before closing the `Context`.
+
+    Raises: `<alloc-fail>` or `<size-limit>` while constructing nested state.
+    Failed construction restores the parent's `Scope`, canonical pool, `Error`,
+    `Match`, and current `Context` state.
+*/
+Context Context.open_isolated(void) => _open(NULL, 1);
+
+/** Opens and makes current a named `Context` with a private canonical pool.
+    The diagnostic name is copied; export survivors before closing the
+    `Context`.
+
+    Raises: `<alloc-fail>` or `<size-limit>` while constructing nested state.
+    Failed construction restores the parent's `Scope`, canonical pool, `Error`,
+    `Match`, and current `Context` state.
+*/
+Context Context.open_isolated_named(const char *name) => _open(name, 1);
+
+/** Returns the `Context` currently active on this thread, or NULL. */
+meta native Context Context.current(void) => current_context;
+
+/** Ends the owned lifetime when a managed local leaves its block. */
+meta native void Context.cleanup(Context value) { value.close(); }
+
+/** Registers `Context` cleanup before workers can start. */
+void Context.initialize(void) {
+  if (pthread_once(&context_shutdown_once, _register_shutdown)) {
+    fprintf(stderr, "Context: could not register shutdown\n");
+    abort();
+  }
+}
+
+/** Closes the current `Context`, reclaims unexported state, and restores
+    parent.
+    The `Context` must be current; all pointers into its remaining `Scope` or
+    private canonical pool become invalid.
+
+    Raises: `<bad-state>` for a null or noncurrent `Context`, or while its
+    `Match` cache has an active lease. The failure leaves the `Context` active.
+*/
+meta native void Context.close(Context c) {
+  if (!c || current_context != c)
+    raise %(bad-state (operation "Context.close"));
+
+  /* Match and Error teardown can still use Context-owned values. Release the
+     private canonical pool before its Scope, restore the destination Scope
+     before destroying the child, and publish the parent only after teardown
+     can no longer observe this Context. */
+  MatchCache.context_close(c.match_state);
+  Error.context_close(c.error_state, x2c_exception_unwinding());
+  if (c.pool) Pool.close();
+
+  Scope scope = c.scope, Context parent = c.parent;
+  /* Drop any slot the body pushed and never popped, as an `exit()` from
+     inside the `Context` leaves. Popping one of those instead would leave
+     this `Context`'s own slot active, and destroying it would raise. */
+  while (Scope.top() != &c.scope) Scope.pop();
+  Scope.pop();
+  scope.destroy();
+  current_context = parent;
+  xfree(c);
+}
+
+// export
+
 static Var _export_root(Context c, Var value) {
   if (c.exported != NULL) return _export_value(c, value);
   defer {
@@ -105,28 +270,6 @@ static Var _export_root(Context c, Var value) {
   Var result = _export_value(c, value);
   _commit_export(c);
   return result;
-}
-
-/* Moving a whole ownership subtree cannot mark only the visited container:
-   its adopted descendants still need recursive canonical-value export. */
-static int _visited(Context c, Var value) {
-  _export_memo(c);
-  if (c.exported.contains(value)) return 1;
-  c.exported.set(value, 1);
-  return 0;
-}
-
-static Map _export_memo(Context c) {
-  if (c.exported == NULL) c.exported = Map.new();
-  return c.exported;
-}
-
-/* Scope keys mark complete storage moves. Container keys mark visits; raw
-   storage keys and wide-box bit identities record primitive move actions. */
-static int _scheduled_owner(Context c, Scope scope) {
-  for (; scope; scope = scope.parent())
-    if (c.exported.contains(scope)) return 1;
-  return 0;
 }
 
 static void _commit_export(Context c) {
@@ -154,6 +297,14 @@ static void _commit_export(Context c) {
   }
 }
 
+/* Scope keys mark complete storage moves. Container keys mark visits; raw
+   storage keys and wide-box bit identities record primitive move actions. */
+static int _scheduled_owner(Context c, Scope scope) {
+  for (; scope; scope = scope.parent())
+    if (c.exported.contains(scope)) return 1;
+  return 0;
+}
+
 static Var _export_value(Context c, Var v) {
   if (v is void || v.is_null() || v.is_nil() || v is <symbol>) return v;
   if (v.is_wide()) return _export_wide(c, v);
@@ -169,29 +320,6 @@ static Var _export_value(Context c, Var v) {
   if (v.try_export_context(c, custom)) return custom;
   Symbol tag = v.tag();
   raise %(bad-types (operation "Context.export") (tag $tag));
-}
-
-static Var _export_wide(Context c, Var v) {
-  if (!_owns_scope(c, v.wide_owner())) return v;
-  Map memo = _export_memo(c);
-  Scope scratch = memo;
-  /* Numeric Map equality compares values, so use the encoded box identity
-     as the key and keep its temporary key box under the memo's own scope. */
-  auto (&scratch) memo.set(Var.box_ulong(v.u64), v);
-  return v;
-}
-
-static Var _export_string(Context c, Var value) {
-  if (!c.pool || !c.pool.owns(value)) return value;
-  String string = value;
-  return String.new_in(c.destination_pool, string, string.len());
-}
-
-static Var _export_atom(Context c, Var value) {
-  String spelling = value.str();
-  if (!c.pool || !c.pool.owns(spelling)) return value;
-  String result = String.new_in(c.destination_pool, spelling, spelling.len());
-  return Var.new(<lsym>, result);
 }
 
 static List _export_list(Context c, List list) {
@@ -236,6 +364,38 @@ static Var _export_map(Context c, Var value) {
 /* `Map.export_to` takes the value-first C signature of a custom exporter. */
 static Var _export_callback(Var value, Context c) => _export_value(c, value);
 
+/* Moving a whole ownership subtree cannot mark only the visited container:
+   its adopted descendants still need recursive canonical-value export. */
+static int _visited(Context c, Var value) {
+  _export_memo(c);
+  if (c.exported.contains(value)) return 1;
+  c.exported.set(value, 1);
+  return 0;
+}
+
+static Var _export_wide(Context c, Var v) {
+  if (!_owns_scope(c, v.wide_owner())) return v;
+  Map memo = _export_memo(c);
+  Scope scratch = memo;
+  /* Numeric Map equality compares values, so use the encoded box identity
+     as the key and keep its temporary key box under the memo's own scope. */
+  auto (&scratch) memo.set(Var.box_ulong(v.u64), v);
+  return v;
+}
+
+static Var _export_string(Context c, Var value) {
+  if (!c.pool || !c.pool.owns(value)) return value;
+  String string = value;
+  return String.new_in(c.destination_pool, string, string.len());
+}
+
+static Var _export_atom(Context c, Var value) {
+  String spelling = value.str();
+  if (!c.pool || !c.pool.owns(spelling)) return value;
+  String result = String.new_in(c.destination_pool, spelling, spelling.len());
+  return Var.new(<lsym>, result);
+}
+
 /* Block, Bytes, and Buffer storage moves and keeps its identity. */
 static Var _export_storage(Context c, Var v) {
   void *allocation = v is <bytes> ? v.bytes().block() : v.pointer();
@@ -245,41 +405,10 @@ static Var _export_storage(Context c, Var v) {
   return v;
 }
 
-/* custom exporters
-
-   A registered exporter for a custom class recurses through
-   `Context.export_nested` and moves its own storage. */
-
-/** Recursively exports one nested value through an active or sealed `Context`.
-    Registered custom exporters call this; other callers export their
-    complete result with `Context.export`. Call only during an enclosing
-    `Context.export` or `Context.export_scope`: its root commits pending
-    storage moves after traversal. Built-in movable families preserve
-    identity. A custom exact-descriptor exporter defines its returned value,
-    including identity. For built-ins, private canonical pointers may change,
-    so callers must use the result; inherited or borrowed values are unchanged.
-
-    Built-in `Array` and `Map` export restores the container's source ownership
-    if recursive export fails, but nested exports already completed are not
-    rolled back.
-
-    Raises: `<bad-types>` for an unsupported value without a registered
-    exporter, or a cause from nested allocation, hashing, equality, or custom
-    export.
-*/
-Var Context.export_nested(Context c, Var value) => _export_value(c, value);
-
-/** Reports whether a managed allocation still needs export from `context`.
-    The nonnull pointer must come from a `Scope` allocator. Registered custom
-    exporters call this before moving their own storage. An individual
-    allocation scheduled by `Context.move_allocation` answers zero, although
-    physical ownership changes only when the enclosing root export commits.
-    Scheduling a complete scope does not hide its unvisited descendants.
-*/
-int Context.owns(Context context, void *allocation) =>
-  allocation && context &&
-  !(context.exported != NULL && context.exported.contains(allocation)) &&
-  _owns_scope(context, Scope.owner(allocation));
+static Map _export_memo(Context c) {
+  if (c.exported == NULL) c.exported = Map.new();
+  return c.exported;
+}
 
 static int _owns_scope(Context context, Scope owner) {
   if (!context || !owner) return 0;
@@ -288,84 +417,7 @@ static int _owns_scope(Context context, Scope owner) {
   return 0;
 }
 
-/** Returns the borrowed `Scope` slot that receives exports from `c`.
-    The slot remains valid only while the `Context`'s destination state lives;
-    a null `Context` returns NULL.
-*/
-Scope *Context.export_destination(Context c) => c ? c.destination_scope : NULL;
-
-/** Schedules one allocation during a registered custom export callback.
-    A null allocation or one outside `c`'s `Scope` chain is unchanged.
-    It immediately answers zero to `Context.owns`, preserving custom cycle
-    guards. Root export keeps it beneath any scheduled owning scope, or
-    relinks it individually after traversal when no such owner is exported.
-    Application code exports its value with `Context.export` instead.
-    Raises: allocation and table-growth causes while recording the move.
-*/
-void Context.move_allocation(Context c, void *allocation) {
-  if (c.owns(allocation)) _export_memo(c).set(allocation, 1);
-}
-
-/** Schedules custom-exporter storage while preserving explicit adoption.
-    Root export reparents outermost requested scopes after recursive export.
-    Exporters call this for grouped storage, never from channel transport.
-    Raises: allocation and table-growth causes while recording the move.
-*/
-void Context.move_scope(Context c, Scope storage) {
-  if (_owns_scope(c, storage)) _export_memo(c).set(storage, 1);
-}
-
-/** Schedules Block storage and nullable owned contents for an exporter.
-    Root export keeps allocations covered by a scheduled storage scope under
-    that owner. Uncovered storage moves with `Block.move_to`.
-    Raises: allocation and table-growth causes while recording the move.
-*/
-void Context.move_block(Context c, Block block) {
-  if (!c.owns(block)) return;
-  _export_memo(c).set(block, 1);
-  c.move_scope(block.lifetime);
-}
-
 // lifecycle
-
-/** Opens and makes current a `Context` using the active canonical-value pool.
-    Close it before its parent; its `Scope` owns subsequent mutable
-    allocations.
-
-    Raises: `<alloc-fail>` or `<size-limit>` while constructing nested state.
-    Failed construction restores the parent's `Scope`, canonical pool, `Error`,
-    `Match`, and current `Context` state.
-*/
-meta native Context Context.open(void) => _open(NULL, 0);
-
-/** Opens and makes current a named `Context` that inherits immutable values.
-    The diagnostic name is copied, and the `Context` must close before its
-    parent.
-
-    Raises: `<alloc-fail>` or `<size-limit>` while constructing nested state.
-    Failed construction restores the parent's `Scope`, canonical pool, `Error`,
-    `Match`, and current `Context` state.
-*/
-Context Context.open_named(const char *name) => _open(name, 0);
-
-/** Opens and makes current a `Context` with a private canonical-value pool.
-    Export surviving immutable values before closing the `Context`.
-
-    Raises: `<alloc-fail>` or `<size-limit>` while constructing nested state.
-    Failed construction restores the parent's `Scope`, canonical pool, `Error`,
-    `Match`, and current `Context` state.
-*/
-Context Context.open_isolated(void) => _open(NULL, 1);
-
-/** Opens and makes current a named `Context` with a private canonical pool.
-    The diagnostic name is copied; export survivors before closing the
-    `Context`.
-
-    Raises: `<alloc-fail>` or `<size-limit>` while constructing nested state.
-    Failed construction restores the parent's `Scope`, canonical pool, `Error`,
-    `Match`, and current `Context` state.
-*/
-Context Context.open_isolated_named(const char *name) => _open(name, 1);
 
 static Context _open(const char *name, int isolated) {
   Context.initialize();
@@ -401,58 +453,10 @@ static Context _open(const char *name, int isolated) {
   }
 }
 
-/** Returns the `Context` currently active on this thread, or NULL. */
-meta native Context Context.current(void) => current_context;
-
-/** Closes the current `Context`, reclaims unexported state, and restores
-    parent.
-    The `Context` must be current; all pointers into its remaining `Scope` or
-    private canonical pool become invalid.
-
-    Raises: `<bad-state>` for a null or noncurrent `Context`, or while its
-    `Match` cache has an active lease. The failure leaves the `Context` active.
-*/
-meta native void Context.close(Context c) {
-  if (!c || current_context != c)
-    raise %(bad-state (operation "Context.close"));
-
-  /* Match and Error teardown can still use Context-owned values. Release the
-     private canonical pool before its Scope, restore the destination Scope
-     before destroying the child, and publish the parent only after teardown
-     can no longer observe this Context. */
-  MatchCache.context_close(c.match_state);
-  Error.context_close(c.error_state, x2c_exception_unwinding());
-  if (c.pool) Pool.close();
-
-  Scope scope = c.scope, Context parent = c.parent;
-  /* Drop any slot the body pushed and never popped, as an `exit()` from
-     inside the `Context` leaves. Popping one of those instead would leave
-     this `Context`'s own slot active, and destroying it would raise. */
-  while (Scope.top() != &c.scope) Scope.pop();
-  Scope.pop();
-  scope.destroy();
-  current_context = parent;
-  xfree(c);
+static void _register_shutdown(void) {
+  Scope.shutdown_hook(_shutdown);
 }
-
-/** Ends the owned lifetime when a managed local leaves its block. */
-meta native void Context.cleanup(Context value) { value.close(); }
-
-/** Registers `Context` cleanup before workers can start. */
-void Context.initialize(void) {
-  if (pthread_once(&context_shutdown_once, _register_shutdown)) {
-    fprintf(stderr, "Context: could not register shutdown\n");
-    abort();
-  }
-}
-
-static pthread_once_t context_shutdown_once =
-  (pthread_once_t) PTHREAD_ONCE_INIT;
 
 static void _shutdown(void) {
   while (current_context) current_context.close();
-}
-
-static void _register_shutdown(void) {
-  Scope.shutdown_hook(_shutdown);
 }

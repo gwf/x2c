@@ -161,13 +161,6 @@ static Map pooled_results = %{
   "String_concat": 1,   "String_join": 1
 };
 
-module Var _effect(Walk &w, String name) {
-  if (!w.audit) return runtime[name];
-  Var effect;
-  return w.effects && w.effects.try_get(name, effect)
-       ? effect : runtime[name];
-}
-
 /** The owner of the storage the runtime operation `name` returns: `<scope>`
     for the active Scope, `<slot>` for the Scope its first argument names,
     `<pool>` for the canonical-value pool, or 0 when nothing is known. What
@@ -197,3 +190,12 @@ int Compiler.has_region_row(String name) => name in runtime;
     `(open scope)` or `(exit)`, or void when the table has no row.
 */
 Var Compiler.region_effect(String name) => runtime[name];
+
+// runtime lifetime contracts
+
+module Var _effect(Walk &w, String name) {
+  if (!w.audit) return runtime[name];
+  Var effect;
+  return w.effects && w.effects.try_get(name, effect)
+       ? effect : runtime[name];
+}

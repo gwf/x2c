@@ -316,18 +316,6 @@ int MachineBuilder.emit(
   return b.length++;
 }
 
-/* Makes room for one more word, or fails the builder at MACHINE_CODE_MAX. */
-static int _grow_code(MachineBuilder &b) {
-  if (b.length < b.code_capacity) return 0;
-  if (b.code_capacity >= MACHINE_CODE_MAX) return _fail(b, "code-capacity");
-  int capacity = b.code_capacity ? b.code_capacity * 2 : 64;
-  if (capacity > MACHINE_CODE_MAX) capacity = MACHINE_CODE_MAX;
-  MachineWord *grown = xrealloc(b.code, sizeof(MachineWord) * capacity);
-  b.code = grown;
-  b.code_capacity = capacity;
-  return 0;
-}
-
 /** Intern a constant by raw Var bits and return its byte-sized index. The
    stored value is shallow; capacity failure makes the builder ineligible.
 */
@@ -340,20 +328,6 @@ int MachineBuilder.constant(MachineBuilder &b, Var value) {
   return b.const_count++;
 }
 
-/* Makes room for one more constant, or fails the builder at
-   MACHINE_CONST_MAX. */
-static int _grow_consts(MachineBuilder &b) {
-  if (b.const_count < b.const_capacity) return 0;
-  if (b.const_capacity >= MACHINE_CONST_MAX)
-    return _fail(b, "constant-capacity");
-  int capacity = b.const_capacity ? b.const_capacity * 2 : 16;
-  if (capacity > MACHINE_CONST_MAX) capacity = MACHINE_CONST_MAX;
-  Var *grown = xrealloc(b.consts, sizeof(Var) * capacity);
-  b.consts = grown;
-  b.const_capacity = capacity;
-  return 0;
-}
-
 /** Intern a binder by raw Atom bits and return its fixed-table index. */
 int MachineBuilder.binder(MachineBuilder &b, Atom binder) {
   if (b.status != <prepared>) return -1;
@@ -362,6 +336,16 @@ int MachineBuilder.binder(MachineBuilder &b, Atom binder) {
   if (b.binder_count >= MACHINE_BINDER_MAX) return _fail(b, "binder-capacity");
   b.binders[b.binder_count] = binder;
   return b.binder_count++;
+}
+
+/** Apply one validated target to the listed patch sites in order. Negative
+   sites are ignored; each nonnegative site must name emitted code. An
+   invalid target raises even when `count` is zero.
+*/
+void MachineBuilder.patch(
+  MachineBuilder &b, int *sites, int count, int target) {
+  if (target < 0 || target >= MACHINE_CODE_MAX) b.set_target(-1, target);
+  for (int i = 0; i < count; i++) b.set_target(sites[i], target);
 }
 
 /** Set a nonnegative instruction site's branch target; a negative site is a
@@ -378,24 +362,6 @@ void MachineBuilder.set_target(MachineBuilder &b, int site, int target) {
     raise %(bad-arg (operation "MachineBuilder.set_target") (target $target));
   else if (site >= 0)
     b.code[site].target = target;
-}
-
-/** Apply one validated target to the listed patch sites in order. Negative
-   sites are ignored; each nonnegative site must name emitted code. An
-   invalid target raises even when `count` is zero.
-*/
-void MachineBuilder.patch(
-  MachineBuilder &b, int *sites, int count, int target) {
-  if (target < 0 || target >= MACHINE_CODE_MAX) b.set_target(-1, target);
-  for (int i = 0; i < count; i++) b.set_target(sites[i], target);
-}
-
-static int _fail(MachineBuilder &b, const char *reason) {
-  if (b.status == <prepared>) {
-    b.status = <ineligible>;
-    b.reason = reason;
-  }
-  return -1;
 }
 
 // immutable programs
@@ -421,10 +387,6 @@ MachineProgram MachineBuilder.freeze(MachineBuilder &b) {
     memcpy(binders, b.binders, sizeof(Atom) * b.binder_count);
   return program;
 }
-
-static size_t _program_bytes(int length, int const_count, int binder_count) =>
-  sizeof(struct MachineProgram) + sizeof(MachineWord) * length +
-  sizeof(Var) * const_count + sizeof(Atom) * binder_count;
 
 /** Borrow a frozen program's packed sections until the program is freed. */
 MachineView MachineProgram.view(MachineProgram program) {
@@ -458,6 +420,14 @@ void MachineBuilder.init(MachineBuilder &b) {
     .root = -1, .status = <prepared>, .reason = "prepared"};
 }
 
+/** Release the owned mutable arrays, invalidating this builder and its copies.
+   Assign a new builder before reusing its storage.
+*/
+void MachineBuilder.free(MachineBuilder &b) => b.drop();
+
+/** Cleanup's value receiver releases the same shallow backing arrays. */
+inline void MachineBuilder.cleanup(MachineBuilder b) => b.drop();
+
 /** Free the mutable arrays. Any builder view becomes invalid; constant and
    binder pointees are not freed.
 */
@@ -466,10 +436,40 @@ void MachineBuilder.drop(MachineBuilder &b) {
   xfree(b.consts);
 }
 
-/** Release the owned mutable arrays, invalidating this builder and its copies.
-   Assign a new builder before reusing its storage.
-*/
-void MachineBuilder.free(MachineBuilder &b) => b.drop();
+/* Makes room for one more word, or fails the builder at MACHINE_CODE_MAX. */
+static int _grow_code(MachineBuilder &b) {
+  if (b.length < b.code_capacity) return 0;
+  if (b.code_capacity >= MACHINE_CODE_MAX) return _fail(b, "code-capacity");
+  int capacity = b.code_capacity ? b.code_capacity * 2 : 64;
+  if (capacity > MACHINE_CODE_MAX) capacity = MACHINE_CODE_MAX;
+  MachineWord *grown = xrealloc(b.code, sizeof(MachineWord) * capacity);
+  b.code = grown;
+  b.code_capacity = capacity;
+  return 0;
+}
 
-/** Cleanup's value receiver releases the same shallow backing arrays. */
-inline void MachineBuilder.cleanup(MachineBuilder b) => b.drop();
+static int _fail(MachineBuilder &b, const char *reason) {
+  if (b.status == <prepared>) {
+    b.status = <ineligible>;
+    b.reason = reason;
+  }
+  return -1;
+}
+
+/* Makes room for one more constant, or fails the builder at
+   MACHINE_CONST_MAX. */
+static int _grow_consts(MachineBuilder &b) {
+  if (b.const_count < b.const_capacity) return 0;
+  if (b.const_capacity >= MACHINE_CONST_MAX)
+    return _fail(b, "constant-capacity");
+  int capacity = b.const_capacity ? b.const_capacity * 2 : 16;
+  if (capacity > MACHINE_CONST_MAX) capacity = MACHINE_CONST_MAX;
+  Var *grown = xrealloc(b.consts, sizeof(Var) * capacity);
+  b.consts = grown;
+  b.const_capacity = capacity;
+  return 0;
+}
+
+static size_t _program_bytes(int length, int const_count, int binder_count) =>
+  sizeof(struct MachineProgram) + sizeof(MachineWord) * length +
+  sizeof(Var) * const_count + sizeof(Atom) * binder_count;

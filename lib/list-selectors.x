@@ -38,12 +38,8 @@ static macro Unit $selector.cdr(Name $name) {
   inline List Var.$name(Var value) => $_selector_chain($name, value);
 }
 
-/* Each of `steps` once with `a` and once with `d` in front. */
-meta static List _selector_double(List steps) {
-  if (!steps) return NULL;
-  String rest = steps.car(), a = %"a$rest", d = %"d$rest";
-  return $(a, d, @(_selector_double(steps.cdr())));
-}
+meta static List _selector_definitions(Macro car, Macro cdr) =>
+  _selector_units(_selector_middles(), car, cdr);
 
 /* The middle of every selector name two to four steps long, shortest
    first: one doubling of `("")` per step. */
@@ -54,6 +50,13 @@ meta static List _selector_middles(void) {
     if (length > 1) middles = middles.append(level);
   }
   return middles;
+}
+
+/* Each of `steps` once with `a` and once with `d` in front. */
+meta static List _selector_double(List steps) {
+  if (!steps) return NULL;
+  String rest = steps.car(), a = %"a$rest", d = %"d$rest";
+  return $(a, d, @(_selector_double(steps.cdr())));
 }
 
 /* The List and Var forms of each selector `middles` names, from the
@@ -67,9 +70,6 @@ meta static List _selector_units(List middles, Macro car, Macro cdr) {
   String name = %"c$(middle)r";
   return $(middle.startswith("a") ? car(name) : cdr(name), @rest);
 }
-
-meta static List _selector_definitions(Macro car, Macro cdr) =>
-  _selector_units(_selector_middles(), car, cdr);
 
 /* Every selector two to four steps long that the prelude does not define. */
 static macro Unit $selectors() {

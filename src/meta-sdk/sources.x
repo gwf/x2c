@@ -36,19 +36,6 @@ static macro Expression $note.meta_sdk_path_notes(Expr $c, Expr $path) =>
 
 // source and literals
 
-/** Answers `Code.source_text`, declared in `lib/meta.x`. */
-String Code.source_text(Var value) {
-  match (value) case %((text ?(String text)) (file ?) (syntax ?)): return text;
-  _require_expansion("Code.source_text");
-  Var stored = void;
-  if (!active.captures ||
-      !active.captures.try_get(((ulong) value.u64), stored))
-    $fail.meta_sdk_source_capture(value);
-  List source = stored;
-  int begin = source.caddr(), end = source.last();
-  return String.new_len(active.expander.text + begin, end - begin);
-}
-
 /** Answers `x2c_embed_text`, declared in `lib/meta.x`. */
 String x2c_embed_text(Var requested) {
   _require_expansion("x2c_embed_text");
@@ -63,6 +50,33 @@ String x2c_embed_text(Var requested) {
   c.deps.merge_translation_dependency(path, "%08x".printf(text.hash()));
   return text;
 }
+
+/** Returns what a `meta` parameter declared `Source` receives for the
+    captured syntax `value`: `((text T) (file F) (syntax value))`, where `T`
+    is the text the developer wrote and `F` the file it is in.
+*/
+List MetaContext.source_description(Var value) {
+  String text = Code.source_text(value);
+  List source = active.captures[((ulong) value.u64)];
+  return %((text $text) (file $(source.cadr())) (syntax $value));
+}
+
+
+
+/** Answers `Code.source_text`, declared in `lib/meta.x`. */
+String Code.source_text(Var value) {
+  match (value) case %((text ?(String text)) (file ?) (syntax ?)): return text;
+  _require_expansion("Code.source_text");
+  Var stored = void;
+  if (!active.captures ||
+      !active.captures.try_get(((ulong) value.u64), stored))
+    $fail.meta_sdk_source_capture(value);
+  List source = stored;
+  int begin = source.caddr(), end = source.last();
+  return String.new_len(active.expander.text + begin, end - begin);
+}
+
+// compile-time SDK sources
 
 static String _embed_path(
   Compiler c, String source_file, String requested) {
@@ -145,14 +159,4 @@ static int _literal_string(Var syntax, String &value) {
       }
     }
   return 0;
-}
-
-/** Returns what a `meta` parameter declared `Source` receives for the
-    captured syntax `value`: `((text T) (file F) (syntax value))`, where `T`
-    is the text the developer wrote and `F` the file it is in.
-*/
-List MetaContext.source_description(Var value) {
-  String text = Code.source_text(value);
-  List source = active.captures[((ulong) value.u64)];
-  return %((text $text) (file $(source.cadr())) (syntax $value));
 }

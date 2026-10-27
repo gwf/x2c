@@ -4,11 +4,6 @@
    their state. Collection retains the bundle a producer returns with its
    token span, and the full parse replays that bundle. */
 
-static List _declaration_source_key(Compiler c, Token token) {
-  String path = Compiler.portable_path(c.canonical_path(c.filename));
-  return %("source-node" (declaration $path $(token.pos)));
-}
-
 /** Expands the file-scope unit macro at the cursor for collection and
     reports whether it did. A required expansion reports its errors. A tried
     expansion that fails keeps nothing and leaves the cursor at the
@@ -21,6 +16,25 @@ int Compiler.collect_unit_macro(Compiler c) {
   if (collection == <required>) _expand_unit_macro(c);
   return collection == <required>;
 }
+
+/** Binds a retained declaration production at the cursor, then advances
+    past its source. Returns NULL when collection retained no production.
+*/
+List Compiler.replay_declaration_source(Compiler c) {
+  List source = c.sym.get(_declaration_source_key(c, c.token));
+  if (source ~= %(declaration-source ?(int end) ?syntax ?facts)) {
+    List bound;
+    with (c.replaying_declaration = 1) {
+      _restore_declaration_bindings(c, syntax, facts, {});
+      bound = c.bind_syntax(syntax, <unit>, NULL);
+    }
+    while (c.peek(0) != <eof> && c.token.pos < end) c.next();
+    return bound;
+  }
+  return NULL;
+}
+
+// declaration production
 
 static int _try_unit_macro(Compiler c) {
   Token first = c.token;
@@ -73,21 +87,9 @@ static int _retain_bundle(
   return 0;
 }
 
-/** Binds a retained declaration production at the cursor, then advances
-    past its source. Returns NULL when collection retained no production.
-*/
-List Compiler.replay_declaration_source(Compiler c) {
-  List source = c.sym.get(_declaration_source_key(c, c.token));
-  if (source ~= %(declaration-source ?(int end) ?syntax ?facts)) {
-    List bound;
-    with (c.replaying_declaration = 1) {
-      _restore_declaration_bindings(c, syntax, facts, {});
-      bound = c.bind_syntax(syntax, <unit>, NULL);
-    }
-    while (c.peek(0) != <eof> && c.token.pos < end) c.next();
-    return bound;
-  }
-  return NULL;
+static List _declaration_source_key(Compiler c, Token token) {
+  String path = Compiler.portable_path(c.canonical_path(c.filename));
+  return %("source-node" (declaration $path $(token.pos)));
 }
 
 /* Register only this production's identities. Shared macro frames are

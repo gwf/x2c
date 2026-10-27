@@ -5,12 +5,13 @@
 #include <ctype.h>
 #include <stdio.h>
 
-static Map word_count(Path filename) {
-  String text = filename.open("r").string_close()
-    .filter(%!(unsigned char c) => !ispunct(c)).lower();
-  Map counts = {};
-  foreach (String word in text.words()) counts[word] += 1;
-  return counts;
+int main(int argc, char **argv) {
+  Path root = argc > 1 ? argv[1]
+    : "examples/data/power-channel-word-count/words";
+  Map counts = auto directory_count(root);
+  Array words = auto counts.keys().array().sort();
+  foreach (String word in words) puts(%"$word $(counts[word])");
+  return 0;
 }
 
 static Map directory_count(Path root) {
@@ -51,11 +52,10 @@ static Map directory_count(Path root) {
   return counts;
 }
 
-int main(int argc, char **argv) {
-  Path root = argc > 1 ? argv[1]
-    : "examples/data/power-channel-word-count/words";
-  Map counts = auto directory_count(root);
-  Array words = auto counts.keys().array().sort();
-  foreach (String word in words) puts(%"$word $(counts[word])");
-  return 0;
+static Map word_count(Path filename) {
+  String text = filename.open("r").string_close()
+    .filter(%!(unsigned char c) => !ispunct(c)).lower();
+  Map counts = {};
+  foreach (String word in text.words()) counts[word] += 1;
+  return counts;
 }

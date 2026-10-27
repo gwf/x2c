@@ -1,5 +1,65 @@
 /*  templates.x -- macro definition templates */
 
+/* template binders
+
+   Each hole projection has a binder whose prefix gives its cardinality, and
+   each declaration a template makes has a binder numbered in the order the
+   template declares it. */
+
+/** Returns the current declaration's definition-local identity. An active
+    macro-definition locals map is required.
+*/
+List Compiler.macro_introduced_name(Compiler c, String spelling) {
+  Map locals = c.macro_definition_locals();
+  List current = c.sym.current_binding($(spelling));
+  if (current && current in locals) return current;
+  return _definition_local(c, spelling, 0);
+}
+
+/** Returns a template's local binding for tag `name` of `kind`, or NULL
+    when it names a visible public tag. A tag the template defines or
+    declares is a template local, apart from ordinary names of the same
+    spelling. A tag it only references keeps its public spelling unless the
+    template later defines or declares it.
+*/
+List Compiler.macro_tag_name(
+  Compiler c, Symbol kind, String name, int definition) {
+  Map locals = c.macro_definition_locals();
+  List key = %(tag $name);
+  List current = c.sym.current_binding(key);
+  if (current && current in locals) {
+    if (definition) locals.del(%(provisional $current));
+    return current;
+  }
+  if (!definition) {
+    List visible = c.sym.lookup(key, NULL);
+    if (visible && visible in locals) return visible;
+    /* A name the body passed to a nested macro's Name hole is the body's
+       own in every namespace, including the tag that macro declares. */
+    Var named = locals[%(name-argument $name)];
+    if (named is <list>) return named;
+    if (c.sym.get_exact($(kind, name))) return NULL;
+  }
+  List local = _definition_local(c, name, 1);
+  c.sym.bind_identity(%(tag), local, $(kind, local));
+  if (!definition) locals[%(provisional $local)] = 1;
+  return local;
+}
+
+// macro definition templates
+
+static List _definition_local(Compiler c, String spelling, int tag) {
+  Map locals = c.macro_definition_locals();
+  Var order = locals[<order>];
+  int identity = INT_MAX - (order is <list> ? order.list().len() : 0);
+  List introduced = Ast.binding(identity, spelling);
+  c.set_fact(%(known $identity), spelling);
+  locals[<order>] = cons(introduced, order is <list> ? order : NULL);
+  locals[introduced] = spelling;
+  if (tag) locals[%(tag-local $introduced)] = 1;
+  return introduced;
+}
+
 /* definition templates
 
    Finishing a definition turns its body into the stored template, derives
@@ -224,15 +284,6 @@ module List _definition_node(Definition &d) {
   return definition;
 }
 
-/* template binders
-
-   Each hole projection has a binder whose prefix gives its cardinality, and
-   each declaration a template makes has a binder numbered in the order the
-   template declares it. */
-
-module Atom _hole_key(List hole, String projection) =>
-  Macro.binder(hole.assoc(<binder>), projection, hole.assoc(<sequence>));
-
 /* A template binder names one lexical declaration, including its namespace.
    Its ordinal keeps same-spelled declarations distinct within a template. */
 static Atom _local_binder(Var identity, int tag) {
@@ -240,58 +291,6 @@ static Atom _local_binder(Var identity, int tag) {
   (void) Ast.try_binding(identity, number, NULL);
   int ordinal = INT_MAX - number;
   return Atom.intern(%"?__macro_$(tag ? "tag" : "local")_$(ordinal)");
-}
-
-static List _definition_local(Compiler c, String spelling, int tag) {
-  Map locals = c.macro_definition_locals();
-  Var order = locals[<order>];
-  int identity = INT_MAX - (order is <list> ? order.list().len() : 0);
-  List introduced = Ast.binding(identity, spelling);
-  c.set_fact(%(known $identity), spelling);
-  locals[<order>] = cons(introduced, order is <list> ? order : NULL);
-  locals[introduced] = spelling;
-  if (tag) locals[%(tag-local $introduced)] = 1;
-  return introduced;
-}
-
-/** Returns the current declaration's definition-local identity. An active
-    macro-definition locals map is required.
-*/
-List Compiler.macro_introduced_name(Compiler c, String spelling) {
-  Map locals = c.macro_definition_locals();
-  List current = c.sym.current_binding($(spelling));
-  if (current && current in locals) return current;
-  return _definition_local(c, spelling, 0);
-}
-
-/** Returns a template's local binding for tag `name` of `kind`, or NULL
-    when it names a visible public tag. A tag the template defines or
-    declares is a template local, apart from ordinary names of the same
-    spelling. A tag it only references keeps its public spelling unless the
-    template later defines or declares it.
-*/
-List Compiler.macro_tag_name(
-  Compiler c, Symbol kind, String name, int definition) {
-  Map locals = c.macro_definition_locals();
-  List key = %(tag $name);
-  List current = c.sym.current_binding(key);
-  if (current && current in locals) {
-    if (definition) locals.del(%(provisional $current));
-    return current;
-  }
-  if (!definition) {
-    List visible = c.sym.lookup(key, NULL);
-    if (visible && visible in locals) return visible;
-    /* A name the body passed to a nested macro's Name hole is the body's
-       own in every namespace, including the tag that macro declares. */
-    Var named = locals[%(name-argument $name)];
-    if (named is <list>) return named;
-    if (c.sym.get_exact($(kind, name))) return NULL;
-  }
-  List local = _definition_local(c, name, 1);
-  c.sym.bind_identity(%(tag), local, $(kind, local));
-  if (!definition) locals[%(provisional $local)] = 1;
-  return local;
 }
 
 /* Replaces each binder or binding identity that `bindings` maps. A List
@@ -408,6 +407,11 @@ static List _unit_trailing(List hole, Map binders) {
     used |= _hole_key(hole, role) in binders;
   return used ? $(construction) : NULL;
 }
+
+
+
+module Atom _hole_key(List hole, String projection) =>
+  Macro.binder(hole.assoc(<binder>), projection, hole.assoc(<sequence>));
 
 /* A scalar capture has source, value, expression, and splice fields; a
    sequence capture has source and value. Any Unit construction requirements

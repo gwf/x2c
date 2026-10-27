@@ -12,14 +12,6 @@ Sym Sym.new(Compiler c) {
   return s;
 }
 
-module SymScope *_scope_at(Sym s, int index) {
-  int count = s.scopes.len();
-  if (index < 0) index += count;
-  if (index < 0 || index >= count) return NULL;
-  SymScope *scopes = s.scopes.bytes;
-  return scopes + index;
-}
-
 /** Resets symbol state to one base scope backed by `globals`.
 
     Later definitions mutate that caller-supplied map.
@@ -37,23 +29,6 @@ void Sym.reset_overlay(Sym s, Map base, Map overlay) {
   _clear_symbols(s, overlay, 2);
   _push_symbols(s, base != NULL ? base : {});
   _push_symbols(s, s.globals);
-}
-
-static void _clear_symbols(Sym s, Map globals, int base_scopes) {
-  s.scopes.clear();
-  s.globals = globals != NULL ? globals : {};
-  s.statics = {};
-  s.prefixed = {};
-  s.base_scopes = base_scopes;
-  s.local_macro_names = 0;
-  s.aliases = 0;
-  s.binding_facts = {};
-}
-
-static void _push_symbols(Sym s, Map symbols) {
-  struct SymScope scope = {
-    .symbols = symbols, .bindings = {}, .enumerators = {}};
-  s.scopes.push(&scope);
 }
 
 /** Pushes a new empty lexical scope. */
@@ -89,9 +64,6 @@ int Sym.base_scope_count(Sym s) => s.base_scopes;
 /** Returns whether any open scope defines an alias row. */
 int Sym.has_aliases(Sym s) => s.aliases != 0;
 
-/** Returns whether declarations currently bind at file scope. */
-int Sym.at_file_scope(Sym s) => (int) s.scopes.len() <= s.base_scopes;
-
 /** Sets aside the local scopes now open, so declarations bind at file
     scope until `Sym.reopen_scopes` restores the returned scopes.
 */
@@ -114,6 +86,18 @@ void Sym.reopen_scopes(Sym s, Block local) {
 /** Returns the mutable global symbol map supplied to the latest reset. */
 Map Sym.global_symbols(Sym s) => s.globals;
 
+/** Returns a fresh map of the base symbols with the current scope's rows
+    merged in.
+*/
+Map Sym.unit_symbols(Sym s) {
+  Map symbols = s.base_symbols();
+  if (!s.at_file_scope()) symbols.merge(s.current_symbols());
+  return symbols;
+}
+
+/** Returns whether declarations currently bind at file scope. */
+int Sym.at_file_scope(Sym s) => (int) s.scopes.len() <= s.base_scopes;
+
 /** Copies all base-scope symbols into a fresh map in source order.
 
     Package collection uses this so it resolves against the prelude and the
@@ -129,15 +113,6 @@ Map Sym.base_symbols(Sym s) {
 Map Sym.current_symbols(Sym s) {
   SymScope *scope = _scope_at(s, -1);
   return scope ? scope.symbols : NULL;
-}
-
-/** Returns a fresh map of the base symbols with the current scope's rows
-    merged in.
-*/
-Map Sym.unit_symbols(Sym s) {
-  Map symbols = s.base_symbols();
-  if (!s.at_file_scope()) symbols.merge(s.current_symbols());
-  return symbols;
 }
 
 /** Returns the borrowed set of file-static declaration keys. */
@@ -163,17 +138,6 @@ List Sym.visible_symbols(Sym s) {
           rows.push($(name, _macro_kind(definition)));
   }
   return rows.list_free();
-}
-
-static int _unseen(Map seen, Var name) {
-  if (name in seen) return 0;
-  seen[name] = 1;
-  return 1;
-}
-
-static Symbol _macro_kind(Var definition) {
-  Symbol kind = definition is <list> ? definition.list().assoc(<kind>) : 0;
-  return kind == <type> ? <typemacro> : <macro>;
 }
 
 // local macros
@@ -223,4 +187,42 @@ int Compiler.macro_template_local(Compiler c, List binding) {
     holes = current[%(enclosing)];
   }
   return 0;
+}
+
+// symbol scopes
+
+static void _clear_symbols(Sym s, Map globals, int base_scopes) {
+  s.scopes.clear();
+  s.globals = globals != NULL ? globals : {};
+  s.statics = {};
+  s.prefixed = {};
+  s.base_scopes = base_scopes;
+  s.local_macro_names = 0;
+  s.aliases = 0;
+  s.binding_facts = {};
+}
+
+static void _push_symbols(Sym s, Map symbols) {
+  struct SymScope scope = {
+    .symbols = symbols, .bindings = {}, .enumerators = {}};
+  s.scopes.push(&scope);
+}
+
+module SymScope *_scope_at(Sym s, int index) {
+  int count = s.scopes.len();
+  if (index < 0) index += count;
+  if (index < 0 || index >= count) return NULL;
+  SymScope *scopes = s.scopes.bytes;
+  return scopes + index;
+}
+
+static int _unseen(Map seen, Var name) {
+  if (name in seen) return 0;
+  seen[name] = 1;
+  return 1;
+}
+
+static Symbol _macro_kind(Var definition) {
+  Symbol kind = definition is <list> ? definition.list().assoc(<kind>) : 0;
+  return kind == <type> ? <typemacro> : <macro>;
 }

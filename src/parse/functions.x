@@ -5,6 +5,19 @@
 
 // function definitions
 
+/** Parses one function decorator target and returns its resulting AST.
+    A compatible unit macro at the current token is expanded first; otherwise
+    an ordinary function definition is required.
+*/
+List Compiler.parse_function_target(Compiler c) {
+  List macro = c.try_parse_macro_target_at(<unit>);
+  if (!macro) return c.parse_function_definition();
+  match (macro) case %(seq ?function): return function;
+  return macro;
+}
+
+
+
 /** Parses one function declaration and its required compound body.
     The parameter bindings are active while the body is parsed, and the first
     token after the closing brace remains current.
@@ -21,16 +34,16 @@ List Compiler.parse_function_definition(Compiler c) {
   return function;
 }
 
-/** Parses one function decorator target and returns its resulting AST.
-    A compatible unit macro at the current token is expanded first; otherwise
-    an ordinary function definition is required.
+/** The declared result type of the function `declaration`, which its
+    `return` statements convert to, or NULL.
 */
-List Compiler.parse_function_target(Compiler c) {
-  List macro = c.try_parse_macro_target_at(<unit>);
-  if (!macro) return c.parse_function_definition();
-  match (macro) case %(seq ?function): return function;
-  return macro;
+Type Ast.declared_return(List declaration) {
+  match (declaration.type_from_ast())
+    case %((func *) *result): return result.type().declared();
+  return NULL;
 }
+
+// function definitions and lifecycle
 
 // Complete a token-parsed or generated function in its parameter scope.
 module List _finish_function(
@@ -96,15 +109,6 @@ static List _function_body(
     body = c.prepend_setup(body, _entry_code(c, depth));
   }
   return body;
-}
-
-/** The declared result type of the function `declaration`, which its
-    `return` statements convert to, or NULL.
-*/
-Type Ast.declared_return(List declaration) {
-  match (declaration.type_from_ast())
-    case %((func *) *result): return result.type().declared();
-  return NULL;
 }
 
 static String _prepare_lifecycle(

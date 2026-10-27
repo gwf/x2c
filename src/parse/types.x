@@ -5,7 +5,396 @@
 
 static keyword loop $private.loop;
 
+// type specifiers
+
+/** Parses a type specifier with qualifiers and pointer/reference modifiers.
+    Returns its flat `Type` AST and leaves the first following token current.
+*/
+Type Compiler.parse_type_name(Compiler c) {
+  List qualifiers = _type_qualifiers(c);
+  List specifier = _type_specifier(c);
+  List pointers = _pointer(c);
+  Type type = %( @pointers @qualifiers @specifier );
+  return c.sym.local_type(type);
+}
+
+// named types
+
+/** Captures a name followed by an ordinary complete type and semicolon.
+    The reserved typedef identity permits fields to refer to their enclosing
+    named type before its pointer or value representation is complete.
+*/
+List Compiler.parse_named_type(Compiler c) {
+  List slot = c.try_parse_macro_slot(<named-type>);
+  if (slot) return slot;
+  Token start = c.token;
+  String name = c.declared_spelling(c.private_prefix(NULL), c.token.text);
+  c.expect(<ident>);
+  List key = $(name);
+  if (!c.sym.get_exact(key)) c.sym.define(key, %(typedef $name));
+  if (c.test(<;>)) return %(named-type $name ());
+  List qualifiers = _type_qualifiers(c);
+  List base = qualifiers.append(
+    _record_follows(c) ? _record_body(c, name, start) : _type_specifier(c));
+  Type type = _declare_named_type(c, key, base, start);
+  return %(named-type $name $type);
+}
+
+// fields
+
+/** Parses the members of an aggregate or enum body whose opening brace the
+    caller consumed, up to its closing brace, which stays unconsumed.
+    `position` is `<field>` or `<enumerator>` and `context` is the type.
+    An alias among the members ends at the brace.
+*/
+List Compiler.parse_members(Compiler c, Symbol position, List context) {
+  Map aliases = c.enter_alias_body();
+  defer c.leave_alias_body(aliases);
+  return position == <enumerator> ? c.parse_enumerators(context)
+                                  : c.parse_fields(context);
+}
+
+/** Parses aggregate fields in source order up to the current closing brace.
+    Returns a flat field `List`, publishes delegate-field metadata, and leaves
+    the closing brace unconsumed. The owner of the brace holds the alias
+    body the fields declare into.
+*/
+List Compiler.parse_fields(Compiler c, List context) {
+  Array fields = [];
+  while (c.peek(0) != <"}">) _push_items(fields, _field_item(c, context));
+  return fields.list_free();
+}
+
+/** Parses one field for aggregate type `context` and returns its AST.
+    Ordinary fields publish their binding in the aggregate's field scope and
+    consume their terminating semicolon; macro forms follow their own syntax.
+*/
+List Compiler.parse_field(Compiler c, List context) {
+  if (c.test_static_assert()) return c.parse_static_assert();
+  List slot = c.try_parse_macro_slot(<field>);
+  if (slot) return slot;
+  List macro = _member_macro(c, context, <field>);
+  if (macro) return macro;
+  return _field(c, context, 0);
+}
+
+// enumerations
+
+/** Parses comma-separated enumerators up to the current closing brace.
+    Returns their flat source-order `List` and leaves the brace unconsumed.
+    An alias among them needs no comma; the owner of the brace holds the
+    alias body they declare into.
+*/
+List Compiler.parse_enumerators(Compiler c, List context) {
+  Array enumerators = [];
+  while (c.peek(0) != <"}">) {
+    if (c.alias_form_starts()) {
+      _push_items(enumerators, c.parse_alias_member(<enumerator>, context));
+      continue;
+    }
+    if (c.shallow && c.macro_starts_target_at(<enumerator>))
+      c.skip_macro_invocation();
+    else _push_items(enumerators, c.parse_enumerator(context));
+    if (c.peek(0) == <"}">) break;
+    c.expect(<,>);
+  }
+  return enumerators.list_free();
+}
+
+/** Parses one enumerator for enum type `context` and returns its AST.
+    Outside macro-template parsing, its binding is published immediately so
+    later initializers and enumerators can resolve it.
+*/
+List Compiler.parse_enumerator(Compiler c, Type context) {
+  List slot = c.try_parse_macro_slot(<enumerator>);
+  if (slot) return slot;
+  List macro = _member_macro(c, context, <enumerator>);
+  if (macro) return macro;
+  if (c.macro_holes) return _template_enumerator(c, context);
+  if (c.peek(0) != <ident>)
+    $fail.parse_enum_name(c, c.token);
+  String spelling = c.token.text;
+  Token origin = c.token;
+  c.next();
+  List binding = $(spelling), syntax = binding;
+  if (c.test(<=>)) {
+    List value = c.parse_conditional();
+    syntax = %(op = $binding $value);
+  }
+  return _publish_enumerator(c, syntax, context, origin);
+}
+
 // declaration specifiers
+
+module List _type_qualifiers(Compiler c) {
+  Array quals = auto [];
+  loop {
+    _x2c_complete_here(c, <type>, _type_keywords());
+    Symbol symbol = c.peek(0);
+    if (symbol.is_type_qualifier()) {
+      quals.push(symbol);
+      c.next();
+    }
+    else if (!_prefix_macro_words(c, 1, quals)) break;
+  }
+  return quals;
+}
+
+module List _type_keywords(void) => %(
+  "void" "char" "short" "int" "long" "float" "double"
+  "signed" "unsigned" "struct" "union" "enum"
+  "const" "restrict" "volatile"
+);
+
+module List _type_specifier(Compiler c) {
+  c.require_input();
+  List slot = c.try_parse_macro_slot(<type>);
+  if (slot) return $(slot);
+  List syntax = NULL;
+  switch (c.peek(0)) {
+    case <struct>: case <union>: case <enum>:
+      syntax = _tagged_type(c); break;
+    case <ident>:
+      if (c.token.text == "Self") {
+        c.next();
+        syntax = %(self);
+        break;
+      }
+      Array words = [];
+      _prefix_macro_words(c, 2, words);
+      syntax = words.list_free();
+      if (!syntax) syntax = _typedef_name(c);
+      break;
+    default:
+      syntax = _primitive_type(c);
+  }
+  return syntax;
+}
+
+static List _primitive_type(Compiler c) {
+  Token start = c.token;
+  Array specs = [];
+  while (_is_scalar_specifier(c.peek(0))) {
+    specs.push(c.peek(0));
+    c.next();
+  }
+  Type source = specs.list_free(), scalar = source.scalar();
+  if (scalar) return scalar;
+  // The preprocessed shallow pass only contributes declarations. The full
+  // pass over the original source reports source-level type diagnostics.
+  if (c.shallow) return source;
+  $fail.parse_scalar_invalid(c, start, source);
+}
+
+static int _is_scalar_specifier(Symbol symbol) {
+  switch (symbol)
+    case <signed>: case <unsigned>: case <short>: case <long>:
+    case <char>: case <int>: case <float>: case <double>: case <void>:
+      return 1;
+  return 0;
+}
+
+static List _typedef_name(Compiler c) {
+  String name = _package_alias_member(c);
+  if (!name) name = c.package_member_spelling(c.token.text);
+  if (!name) name = c.token.text;
+  c.next();
+  if (c.package || c.line_markers) name = _type_reference(c, 0, name);
+  return $(name);
+}
+
+// aggregates
+
+static List _tagged_type(Compiler c) {
+  Token first = c.token;
+  Symbol tag = c.peek(0);
+  c.next();
+  _skip_attributes(c);
+  List name = _tag_name(c);
+  if (name && (c.package || c.line_markers))
+    name = _scoped_aggregate_name(c, tag, name);
+  int defines = c.peek(0) == <"{"> ||
+    (c.peek(0) == <;> && (tag != <enum> || c.macro_holes));
+  Var used = c.aggregate_name(tag, (name ? name : c.gensym()).car(), defines);
+  List type = $(tag, used), members = NULL;
+  if (c.test(<"{">)) {
+    members = c.parse_members(tag == <enum> ? <enumerator> : <field>, type);
+    c.expect(<"}">);
+    _skip_attributes(c);
+    if (!c.macro_holes)
+      return _publish_aggregate_type(c, tag, used, members, first);
+    if (tag != <enum>) members = cons(<fields>, members);
+  }
+  return members ? type.append($(members)) : type;
+}
+
+/* C places an aggregate's own attributes after its keyword and after its
+   closing brace, written out or through a macro whose body is attributes.
+   Collection skips them: attribute text is no part of a collected type, and
+   the layout marks hold any layout they change (see Compiler.tokenize). */
+static void _skip_attributes(Compiler c) {
+  if (!c.shallow) return;
+  loop {
+    Var definition;
+    if (_attribute(c)) continue;
+    if (c.peek(0) != <ident> ||
+        !c.object_macros.try_get(c.token.text, definition) ||
+        definition != %())
+      return;
+    c.next();
+  }
+}
+
+/* A template may spell a tag through a Name hole or a meta-call slot,
+   which publishes it; a literal tag there is a template local. */
+static List _tag_name(Compiler c) {
+  List slot = c.try_parse_macro_slot(<name>);
+  return slot ? $(slot) : c.parse_optional_identifier();
+}
+
+/* An aggregate definition takes the prefix its declaration key carries, so
+   the tag, its member keys, and the pointee spellings recorded for it agree
+   in the shallow collection an importing unit reads and in the full parse. */
+static List _scoped_aggregate_name(Compiler c, Symbol tag, List name) {
+  // A template's tag slot supplies its exact spelling where it expands.
+  if (name.car() is not <string>) return name;
+  String spelling = name.car();
+  if (c.peek(0) == <"{">)
+    return $(c.declared_spelling(c.private_prefix(NULL), spelling));
+  return $(_type_reference(c, tag, spelling));
+}
+
+/* Module and package files spell their own file-scope type names bare. A
+   block-scope typedef or tag of the name shadows every file-scope one;
+   then the current module file's static of that name comes first. In
+   package mode a bare-key miss with a prefixed hit re-spells the
+   reference. ASTs carry raw strings and emit literally. */
+module String _type_reference(Compiler c, Symbol tag, String name) {
+  List bare = tag ? $(tag, name) : $(name);
+  if (c.sym.has_local(bare)) return name;
+  String own = c.scoped_spelling(c.file_prefix(), name);
+  if (own != name && c.sym.get_exact(tag ? $(tag, own) : $(own)))
+    return own;
+  String prefixed = c.package_spelling(name);
+  if (prefixed == name) return name;
+  if (c.sym.get_exact(bare)) return name;
+  List hit = tag ? $(tag, prefixed) : $(prefixed);
+  return c.sym.get_exact(hit) ? prefixed : name;
+}
+
+/* Publishes an aggregate whose tokens start at `first`. A constructed
+   aggregate passes the current token, so its attributes are in its form. An
+   enum with a layout attribute can be narrower than int, so it has no int
+   layout. */
+static List _publish_aggregate_type(
+  Compiler c, Symbol tag, Var name, List members, Token first) {
+  int layout = _layout_attribute_since(c, first);
+  int packed = _attribute_since(c, first, c.packed_marks);
+  if (tag == <struct> && packed && c.source_private >= 0)
+    $fail.parse_attribute_packed(c, first);
+  List type = $(tag, name);
+  List body = tag == <enum> ? members : %(fields @members);
+  if (name is <list> && name.car() == <binding>)
+    c.sym.bind_identity($(tag), name, $(tag, body));
+  else
+    c.sym.declare_resolved(
+      NULL, type, tag == <enum> ? %(enum) : $(tag, body));
+  if (tag != <enum>) {
+    c.sym.declare_field_order(type, members);
+    if (layout) c.sym.set(%(@type "layout-attribute"), %(unknown));
+    // Meta code lays out only the records x2c units define.
+    if (c.source_private >= 0 && !c.filename.endswith(".h"))
+      c.sym.set(%(@type "x2c-record"), %(x2c));
+  }
+  else {
+    c.sym.set(%(@type "enumerators"), $(@type, members).type_from_ast());
+    if (!layout && _enum_fits_int(type, members)) {
+      c.sym.set(%(@type "int-range"), %(int));
+      _record_enum_values(c, members);
+    }
+  }
+  return $(tag, name, body);
+}
+
+module int _layout_attribute_since(Compiler c, Token first) =>
+  _attribute_since(c, first, c.layout_marks);
+
+/* Reports a layout attribute between `first` and the current token. Tokens
+   outside this unit's input, such as a constructed form's, have no marks. */
+static int _attribute_since(Compiler c, Token first, Array marks) {
+  Token base = c.tokenizer.tokens, end = base + c.tokenizer.tokens.len();
+  if (first < base || c.token >= end) return 0;
+  // Marks ascend, so the ones before `first` are a prefix.
+  int before = 0, count = marks.len();
+  for (int high = count; before < high;) {
+    int middle = (before + high) / 2;
+    if ((long) marks[middle] < first - base) before = middle + 1;
+    else high = middle;
+  }
+  return before % 2 ||
+         (before < count && (long) marks[before] < c.token - base);
+}
+
+static List _field_item(Compiler c, List context) {
+  if (c.alias_form_starts())
+    return c.parse_alias_member(<field>, context);
+  if (c.test(<delegate>)) return _field(c, context, 1);
+  return c.parse_field(context);
+}
+
+/* A macro invocation may stand for an aggregate member. It expands with
+   the aggregate as the current aggregate type. */
+static List _member_macro(Compiler c, List context, Symbol position) {
+  if (c.peek(0) != <$> && c.peek(0) != <ident>) return NULL;
+  with (c.aggregate_type = context) {
+    return c.try_parse_macro_target_at(position);
+  }
+}
+
+static List _field(Compiler c, List context, int delegated) {
+  Array declarations = [];
+  loop {
+    declarations.push(_field_group(c, context));
+    if (!_group_comma(c)) break;
+    c.next();
+  }
+  List rows = declarations.list_free();
+  if (delegated) _declare_delegates(c, context, rows);
+  c.expect(<;>);
+  match (rows) case %(?only): return only;
+  return %(seq @rows);
+}
+
+// Each declarator of a delegate field must name the field.
+static void _declare_delegates(Compiler c, List context, List rows) {
+  foreach (List declaration in rows)
+    match (declaration)
+      case %(declare ? (bindings *declarators)): {
+        if (!declarators)
+          $fail.parse_delegate_name(c, c.token);
+        foreach (List declarator in declarators)
+          match (declarator)
+            case %(bind ?binding ?): _declare_delegate(c, context, binding);
+      }
+}
+
+static void _declare_delegate(Compiler c, List context, Var binding) {
+  String name = Ast.binding_spelling(binding);
+  if (!name)
+    $fail.parse_delegate_name(c, c.token);
+  if (!c.macro_holes) c.sym.mark_field(context, <delegate>, name);
+}
+
+static List _field_group(Compiler c, List context) {
+  List storage = _storage_class(c);
+  if (<auto> in storage && !c.macro_holes && !c.shallow)
+    $fail.parse_auto_storage(c, c.token);
+  List (type, binding_type) = _declaration_types(c, storage);
+  List binds = _declarator_list(c, binding_type, context, 1);
+  return _finish_declaration(c, <declare>, type, binds, 0);
+}
+
+
 
 /* Declaration specifiers before the qualifiers and type: storage classes
    and `inline` in source order, then `_Noreturn` and attributes as source
@@ -95,431 +484,6 @@ static int _unseen_prefix(Compiler c) {
   return next.is_builtin_type() || next.is_type_modifier() ||
          next.is_type_qualifier() || next.is_storage_class() ||
          next.is_inline();
-}
-
-module List _type_qualifiers(Compiler c) {
-  Array quals = auto [];
-  loop {
-    _x2c_complete_here(c, <type>, _type_keywords());
-    Symbol symbol = c.peek(0);
-    if (symbol.is_type_qualifier()) {
-      quals.push(symbol);
-      c.next();
-    }
-    else if (!_prefix_macro_words(c, 1, quals)) break;
-  }
-  return quals;
-}
-
-module List _type_keywords(void) => %(
-  "void" "char" "short" "int" "long" "float" "double"
-  "signed" "unsigned" "struct" "union" "enum"
-  "const" "restrict" "volatile"
-);
-
-// type specifiers
-
-/** Parses a type specifier with qualifiers and pointer/reference modifiers.
-    Returns its flat `Type` AST and leaves the first following token current.
-*/
-Type Compiler.parse_type_name(Compiler c) {
-  List qualifiers = _type_qualifiers(c);
-  List specifier = _type_specifier(c);
-  List pointers = _pointer(c);
-  Type type = %( @pointers @qualifiers @specifier );
-  return c.sym.local_type(type);
-}
-
-module List _type_specifier(Compiler c) {
-  c.require_input();
-  List slot = c.try_parse_macro_slot(<type>);
-  if (slot) return $(slot);
-  List syntax = NULL;
-  switch (c.peek(0)) {
-    case <struct>: case <union>: case <enum>:
-      syntax = _tagged_type(c); break;
-    case <ident>:
-      if (c.token.text == "Self") {
-        c.next();
-        syntax = %(self);
-        break;
-      }
-      Array words = [];
-      _prefix_macro_words(c, 2, words);
-      syntax = words.list_free();
-      if (!syntax) syntax = _typedef_name(c);
-      break;
-    default:
-      syntax = _primitive_type(c);
-  }
-  return syntax;
-}
-
-static List _primitive_type(Compiler c) {
-  Token start = c.token;
-  Array specs = [];
-  while (_is_scalar_specifier(c.peek(0))) {
-    specs.push(c.peek(0));
-    c.next();
-  }
-  Type source = specs.list_free(), scalar = source.scalar();
-  if (scalar) return scalar;
-  // The preprocessed shallow pass only contributes declarations. The full
-  // pass over the original source reports source-level type diagnostics.
-  if (c.shallow) return source;
-  $fail.parse_scalar_invalid(c, start, source);
-}
-
-static int _is_scalar_specifier(Symbol symbol) {
-  switch (symbol)
-    case <signed>: case <unsigned>: case <short>: case <long>:
-    case <char>: case <int>: case <float>: case <double>: case <void>:
-      return 1;
-  return 0;
-}
-
-static List _typedef_name(Compiler c) {
-  String name = _package_alias_member(c);
-  if (!name) name = c.package_member_spelling(c.token.text);
-  if (!name) name = c.token.text;
-  c.next();
-  if (c.package || c.line_markers) name = _type_reference(c, 0, name);
-  return $(name);
-}
-
-/* Module and package files spell their own file-scope type names bare. A
-   block-scope typedef or tag of the name shadows every file-scope one;
-   then the current module file's static of that name comes first. In
-   package mode a bare-key miss with a prefixed hit re-spells the
-   reference. ASTs carry raw strings and emit literally. */
-module String _type_reference(Compiler c, Symbol tag, String name) {
-  List bare = tag ? $(tag, name) : $(name);
-  if (c.sym.has_local(bare)) return name;
-  String own = c.scoped_spelling(c.file_prefix(), name);
-  if (own != name && c.sym.get_exact(tag ? $(tag, own) : $(own)))
-    return own;
-  String prefixed = c.package_spelling(name);
-  if (prefixed == name) return name;
-  if (c.sym.get_exact(bare)) return name;
-  List hit = tag ? $(tag, prefixed) : $(prefixed);
-  return c.sym.get_exact(hit) ? prefixed : name;
-}
-
-// aggregates
-
-static List _tagged_type(Compiler c) {
-  Token first = c.token;
-  Symbol tag = c.peek(0);
-  c.next();
-  _skip_attributes(c);
-  List name = _tag_name(c);
-  if (name && (c.package || c.line_markers))
-    name = _scoped_aggregate_name(c, tag, name);
-  int defines = c.peek(0) == <"{"> ||
-    (c.peek(0) == <;> && (tag != <enum> || c.macro_holes));
-  Var used = c.aggregate_name(tag, (name ? name : c.gensym()).car(), defines);
-  List type = $(tag, used), members = NULL;
-  if (c.test(<"{">)) {
-    members = c.parse_members(tag == <enum> ? <enumerator> : <field>, type);
-    c.expect(<"}">);
-    _skip_attributes(c);
-    if (!c.macro_holes)
-      return _publish_aggregate_type(c, tag, used, members, first);
-    if (tag != <enum>) members = cons(<fields>, members);
-  }
-  return members ? type.append($(members)) : type;
-}
-
-/* C places an aggregate's own attributes after its keyword and after its
-   closing brace, written out or through a macro whose body is attributes.
-   Collection skips them: attribute text is no part of a collected type, and
-   the layout marks hold any layout they change (see Compiler.tokenize). */
-static void _skip_attributes(Compiler c) {
-  if (!c.shallow) return;
-  loop {
-    Var definition;
-    if (_attribute(c)) continue;
-    if (c.peek(0) != <ident> ||
-        !c.object_macros.try_get(c.token.text, definition) ||
-        definition != %())
-      return;
-    c.next();
-  }
-}
-
-/* A template may spell a tag through a Name hole or a meta-call slot,
-   which publishes it; a literal tag there is a template local. */
-static List _tag_name(Compiler c) {
-  List slot = c.try_parse_macro_slot(<name>);
-  return slot ? $(slot) : c.parse_optional_identifier();
-}
-
-/* An aggregate definition takes the prefix its declaration key carries, so
-   the tag, its member keys, and the pointee spellings recorded for it agree
-   in the shallow collection an importing unit reads and in the full parse. */
-static List _scoped_aggregate_name(Compiler c, Symbol tag, List name) {
-  // A template's tag slot supplies its exact spelling where it expands.
-  if (name.car() is not <string>) return name;
-  String spelling = name.car();
-  if (c.peek(0) == <"{">)
-    return $(c.declared_spelling(c.private_prefix(NULL), spelling));
-  return $(_type_reference(c, tag, spelling));
-}
-
-/* Publishes an aggregate whose tokens start at `first`. A constructed
-   aggregate passes the current token, so its attributes are in its form. An
-   enum with a layout attribute can be narrower than int, so it has no int
-   layout. */
-static List _publish_aggregate_type(
-  Compiler c, Symbol tag, Var name, List members, Token first) {
-  int layout = _layout_attribute_since(c, first);
-  int packed = _attribute_since(c, first, c.packed_marks);
-  if (tag == <struct> && packed && c.source_private >= 0)
-    $fail.parse_attribute_packed(c, first);
-  List type = $(tag, name);
-  List body = tag == <enum> ? members : %(fields @members);
-  if (name is <list> && name.car() == <binding>)
-    c.sym.bind_identity($(tag), name, $(tag, body));
-  else
-    c.sym.declare_resolved(
-      NULL, type, tag == <enum> ? %(enum) : $(tag, body));
-  if (tag != <enum>) {
-    c.sym.declare_field_order(type, members);
-    if (layout) c.sym.set(%(@type "layout-attribute"), %(unknown));
-    // Meta code lays out only the records x2c units define.
-    if (c.source_private >= 0 && !c.filename.endswith(".h"))
-      c.sym.set(%(@type "x2c-record"), %(x2c));
-  }
-  else {
-    c.sym.set(%(@type "enumerators"), $(@type, members).type_from_ast());
-    if (!layout && _enum_fits_int(type, members)) {
-      c.sym.set(%(@type "int-range"), %(int));
-      _record_enum_values(c, members);
-    }
-  }
-  return $(tag, name, body);
-}
-
-module int _layout_attribute_since(Compiler c, Token first) =>
-  _attribute_since(c, first, c.layout_marks);
-
-/* Reports a layout attribute between `first` and the current token. Tokens
-   outside this unit's input, such as a constructed form's, have no marks. */
-static int _attribute_since(Compiler c, Token first, Array marks) {
-  Token base = c.tokenizer.tokens, end = base + c.tokenizer.tokens.len();
-  if (first < base || c.token >= end) return 0;
-  // Marks ascend, so the ones before `first` are a prefix.
-  int before = 0, count = marks.len();
-  for (int high = count; before < high;) {
-    int middle = (before + high) / 2;
-    if ((long) marks[middle] < first - base) before = middle + 1;
-    else high = middle;
-  }
-  return before % 2 ||
-         (before < count && (long) marks[before] < c.token - base);
-}
-
-// fields
-
-/** Parses the members of an aggregate or enum body whose opening brace the
-    caller consumed, up to its closing brace, which stays unconsumed.
-    `position` is `<field>` or `<enumerator>` and `context` is the type.
-    An alias among the members ends at the brace.
-*/
-List Compiler.parse_members(Compiler c, Symbol position, List context) {
-  Map aliases = c.enter_alias_body();
-  defer c.leave_alias_body(aliases);
-  return position == <enumerator> ? c.parse_enumerators(context)
-                                  : c.parse_fields(context);
-}
-
-/** Parses aggregate fields in source order up to the current closing brace.
-    Returns a flat field `List`, publishes delegate-field metadata, and leaves
-    the closing brace unconsumed. The owner of the brace holds the alias
-    body the fields declare into.
-*/
-List Compiler.parse_fields(Compiler c, List context) {
-  Array fields = [];
-  while (c.peek(0) != <"}">) _push_items(fields, _field_item(c, context));
-  return fields.list_free();
-}
-
-static List _field_item(Compiler c, List context) {
-  if (c.alias_form_starts())
-    return c.parse_alias_member(<field>, context);
-  if (c.test(<delegate>)) return _field(c, context, 1);
-  return c.parse_field(context);
-}
-
-/** Parses one field for aggregate type `context` and returns its AST.
-    Ordinary fields publish their binding in the aggregate's field scope and
-    consume their terminating semicolon; macro forms follow their own syntax.
-*/
-List Compiler.parse_field(Compiler c, List context) {
-  if (c.test_static_assert()) return c.parse_static_assert();
-  List slot = c.try_parse_macro_slot(<field>);
-  if (slot) return slot;
-  List macro = _member_macro(c, context, <field>);
-  if (macro) return macro;
-  return _field(c, context, 0);
-}
-
-/* A macro invocation may stand for an aggregate member. It expands with
-   the aggregate as the current aggregate type. */
-static List _member_macro(Compiler c, List context, Symbol position) {
-  if (c.peek(0) != <$> && c.peek(0) != <ident>) return NULL;
-  with (c.aggregate_type = context) {
-    return c.try_parse_macro_target_at(position);
-  }
-}
-
-static List _field(Compiler c, List context, int delegated) {
-  Array declarations = [];
-  loop {
-    declarations.push(_field_group(c, context));
-    if (!_group_comma(c)) break;
-    c.next();
-  }
-  List rows = declarations.list_free();
-  if (delegated) _declare_delegates(c, context, rows);
-  c.expect(<;>);
-  match (rows) case %(?only): return only;
-  return %(seq @rows);
-}
-
-// Each declarator of a delegate field must name the field.
-static void _declare_delegates(Compiler c, List context, List rows) {
-  foreach (List declaration in rows)
-    match (declaration)
-      case %(declare ? (bindings *declarators)): {
-        if (!declarators)
-          $fail.parse_delegate_name(c, c.token);
-        foreach (List declarator in declarators)
-          match (declarator)
-            case %(bind ?binding ?): _declare_delegate(c, context, binding);
-      }
-}
-
-static void _declare_delegate(Compiler c, List context, Var binding) {
-  String name = Ast.binding_spelling(binding);
-  if (!name)
-    $fail.parse_delegate_name(c, c.token);
-  if (!c.macro_holes) c.sym.mark_field(context, <delegate>, name);
-}
-
-static List _field_group(Compiler c, List context) {
-  List storage = _storage_class(c);
-  if (<auto> in storage && !c.macro_holes && !c.shallow)
-    $fail.parse_auto_storage(c, c.token);
-  List (type, binding_type) = _declaration_types(c, storage);
-  List binds = _declarator_list(c, binding_type, context, 1);
-  return _finish_declaration(c, <declare>, type, binds, 0);
-}
-
-// named types
-
-/** Captures a name followed by an ordinary complete type and semicolon.
-    The reserved typedef identity permits fields to refer to their enclosing
-    named type before its pointer or value representation is complete.
-*/
-List Compiler.parse_named_type(Compiler c) {
-  List slot = c.try_parse_macro_slot(<named-type>);
-  if (slot) return slot;
-  Token start = c.token;
-  String name = c.declared_spelling(c.private_prefix(NULL), c.token.text);
-  c.expect(<ident>);
-  List key = $(name);
-  if (!c.sym.get_exact(key)) c.sym.define(key, %(typedef $name));
-  if (c.test(<;>)) return %(named-type $name ());
-  List qualifiers = _type_qualifiers(c);
-  List base = qualifiers.append(
-    _record_follows(c) ? _record_body(c, name, start) : _type_specifier(c));
-  Type type = _declare_named_type(c, key, base, start);
-  return %(named-type $name $type);
-}
-
-/* A named type may define its record in place, with or without `struct`
-   or `union` before the brace. */
-static int _record_follows(Compiler c) =>
-  c.peek(0) == <"{"> ||
-  ((c.peek(0) == <struct> || c.peek(0) == <union>) && c.peek(1) == <"{">);
-
-static List _record_body(Compiler c, String name, Token start) {
-  Symbol tag = c.peek(0) == <union> ? <union> : <struct>;
-  if (c.peek(0) != <"{">) c.next();
-  c.expect(<"{">);
-  List fields = c.parse_members(<field>, $(tag, name));
-  c.expect(<"}">);
-  return c.macro_holes ? %($tag $name (fields @fields))
-                       : _publish_aggregate_type(c, tag, name, fields, start);
-}
-
-/* Completes a named type from the abstract declarator after its base. The
-   type keeps an aggregate's body in place of its tag. */
-static Type _declare_named_type(Compiler c, List key, List base, Token start) {
-  List method = NULL;
-  Token first = NULL, after = NULL;
-  List declarator = _declarator(c, base, NULL, method, first, after);
-  List modifiers = NULL;
-  match (declarator) {
-    case %(bind () ?captured): modifiers = captured;
-    default: $fail.parse_named_type_abstract(c, start);
-  }
-  c.expect(<;>);
-  Type type = %(declare $base (bindings (bind () $modifiers)))
-                .type_from_ast();
-  if (!c.macro_holes) c.sym.declare_resolved(%(typedef), key, type);
-  Type specifier = base.type().base_type();
-  if (specifier.is_aggregate_tag_body())
-    type = type.list()[:type.len() - type.base_type().len()]
-      .append(specifier);
-  return type;
-}
-
-// enumerations
-
-/** Parses comma-separated enumerators up to the current closing brace.
-    Returns their flat source-order `List` and leaves the brace unconsumed.
-    An alias among them needs no comma; the owner of the brace holds the
-    alias body they declare into.
-*/
-List Compiler.parse_enumerators(Compiler c, List context) {
-  Array enumerators = [];
-  while (c.peek(0) != <"}">) {
-    if (c.alias_form_starts()) {
-      _push_items(enumerators, c.parse_alias_member(<enumerator>, context));
-      continue;
-    }
-    if (c.shallow && c.macro_starts_target_at(<enumerator>))
-      c.skip_macro_invocation();
-    else _push_items(enumerators, c.parse_enumerator(context));
-    if (c.peek(0) == <"}">) break;
-    c.expect(<,>);
-  }
-  return enumerators.list_free();
-}
-
-/** Parses one enumerator for enum type `context` and returns its AST.
-    Outside macro-template parsing, its binding is published immediately so
-    later initializers and enumerators can resolve it.
-*/
-List Compiler.parse_enumerator(Compiler c, Type context) {
-  List slot = c.try_parse_macro_slot(<enumerator>);
-  if (slot) return slot;
-  List macro = _member_macro(c, context, <enumerator>);
-  if (macro) return macro;
-  if (c.macro_holes) return _template_enumerator(c, context);
-  if (c.peek(0) != <ident>)
-    $fail.parse_enum_name(c, c.token);
-  String spelling = c.token.text;
-  Token origin = c.token;
-  c.next();
-  List binding = $(spelling), syntax = binding;
-  if (c.test(<=>)) {
-    List value = c.parse_conditional();
-    syntax = %(op = $binding $value);
-  }
-  return _publish_enumerator(c, syntax, context, origin);
 }
 
 /* A template's enumerator is named by a hole, a meta-call slot, or a name
@@ -618,6 +582,44 @@ static void _record_enum_values(Compiler c, List members) {
   }
 }
 
+/* A named type may define its record in place, with or without `struct`
+   or `union` before the brace. */
+static int _record_follows(Compiler c) =>
+  c.peek(0) == <"{"> ||
+  ((c.peek(0) == <struct> || c.peek(0) == <union>) && c.peek(1) == <"{">);
+
+static List _record_body(Compiler c, String name, Token start) {
+  Symbol tag = c.peek(0) == <union> ? <union> : <struct>;
+  if (c.peek(0) != <"{">) c.next();
+  c.expect(<"{">);
+  List fields = c.parse_members(<field>, $(tag, name));
+  c.expect(<"}">);
+  return c.macro_holes ? %($tag $name (fields @fields))
+                       : _publish_aggregate_type(c, tag, name, fields, start);
+}
+
+/* Completes a named type from the abstract declarator after its base. The
+   type keeps an aggregate's body in place of its tag. */
+static Type _declare_named_type(Compiler c, List key, List base, Token start) {
+  List method = NULL;
+  Token first = NULL, after = NULL;
+  List declarator = _declarator(c, base, NULL, method, first, after);
+  List modifiers = NULL;
+  match (declarator) {
+    case %(bind () ?captured): modifiers = captured;
+    default: $fail.parse_named_type_abstract(c, start);
+  }
+  c.expect(<;>);
+  Type type = %(declare $base (bindings (bind () $modifiers)))
+                .type_from_ast();
+  if (!c.macro_holes) c.sym.declare_resolved(%(typedef), key, type);
+  Type specifier = base.type().base_type();
+  if (specifier.is_aggregate_tag_body())
+    type = type.list()[:type.len() - type.base_type().len()]
+      .append(specifier);
+  return type;
+}
+
 // constructed types
 
 module List _finish_type(Compiler c, List type) {
@@ -680,12 +682,6 @@ static Var _finish_type_spec(Compiler c, Var spec) {
   return spec;
 }
 
-static Var _finish_tag_name(Compiler c, Var name) {
-  name = c.evaluate_macro_slot(name);
-  String exact = _syntax_exact_name(name);
-  return exact ? exact : name;
-}
-
 static List _finish_aggregate_type(
   Compiler c, Symbol tag, Var name, List members) {
   name = _finish_tag_name(c, name);
@@ -701,4 +697,10 @@ static List _finish_aggregate_type(
         _push_items(bound, c.bind_syntax(row, position, c.return_type));
   }
   return _publish_aggregate_type(c, tag, name, bound.list_free(), c.token);
+}
+
+static Var _finish_tag_name(Compiler c, Var name) {
+  name = c.evaluate_macro_slot(name);
+  String exact = _syntax_exact_name(name);
+  return exact ? exact : name;
 }

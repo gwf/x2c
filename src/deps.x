@@ -51,6 +51,41 @@ int Compiler.write_depfile(
   return 0;
 }
 
+/** Parses prerequisite words after the first unescaped colon in `text`.
+    Backslash escapes and doubled dollars are decoded in that region. A
+    backslash-newline continues the rule; an ordinary newline ends it before
+    any phony rules. Escaped target colons remain part of their words.
+    A NULL input or no parsed prerequisites returns NULL.
+    Returned cells and path `String`s follow the current canonical `List` and
+    `String` pool lifetimes.
+*/
+List translation_depfile_parse(String text) {
+  const char *ch = text;
+  while (ch && *ch && *ch != '\n') {
+    if (*ch == '\\' && ch[1]) { ch += 2; continue; }
+    if (*ch == ':') break;
+    ch++;
+  }
+  if (!ch || *ch != ':') return NULL;
+  Array paths = [], Buffer word = Buffer.new(0);
+  // The word before the newline is pushed once, after the loop.
+  for (ch++; *ch && *ch != '\n'; ch++) {
+    if (*ch == '\\' && ch[1]) {
+      ch++;
+      if (*ch != '\n') word.write_char(*ch);
+      continue;
+    }
+    if (*ch == '$' && ch[1] == '$') ch++;
+    if (*ch == ' ' || *ch == '\t' || *ch == '\r') _push_word(paths, word);
+    else word.write_char(*ch);
+  }
+  _push_word(paths, word);
+  word.free();
+  return paths.list_free();
+}
+
+// dependency text
+
 /* Collection and cached replay populate a Map with no publication order, so
    paths are sorted to write the same depfile from both routes. */
 static String _contents(
@@ -120,39 +155,6 @@ static void _write_word(Buffer out, String word) {
       out.write_char('\\');
     out.write_char(ch);
   }
-}
-
-/** Parses prerequisite words after the first unescaped colon in `text`.
-    Backslash escapes and doubled dollars are decoded in that region. A
-    backslash-newline continues the rule; an ordinary newline ends it before
-    any phony rules. Escaped target colons remain part of their words.
-    A NULL input or no parsed prerequisites returns NULL.
-    Returned cells and path `String`s follow the current canonical `List` and
-    `String` pool lifetimes.
-*/
-List translation_depfile_parse(String text) {
-  const char *ch = text;
-  while (ch && *ch && *ch != '\n') {
-    if (*ch == '\\' && ch[1]) { ch += 2; continue; }
-    if (*ch == ':') break;
-    ch++;
-  }
-  if (!ch || *ch != ':') return NULL;
-  Array paths = [], Buffer word = Buffer.new(0);
-  // The word before the newline is pushed once, after the loop.
-  for (ch++; *ch && *ch != '\n'; ch++) {
-    if (*ch == '\\' && ch[1]) {
-      ch++;
-      if (*ch != '\n') word.write_char(*ch);
-      continue;
-    }
-    if (*ch == '$' && ch[1] == '$') ch++;
-    if (*ch == ' ' || *ch == '\t' || *ch == '\r') _push_word(paths, word);
-    else word.write_char(*ch);
-  }
-  _push_word(paths, word);
-  word.free();
-  return paths.list_free();
 }
 
 static void _push_word(Array paths, Buffer word) {

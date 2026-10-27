@@ -3,6 +3,29 @@
     Copyright (c) 2026 Gary William Flake.
 */
 
+// the syntax prelude
+
+/* `etc/compiler-prelude.x` declares the foundation types, the built-in
+   macros' native prototypes, and the built-in macros and keyword aliases.
+   Every unit collects it first, even one compiled without the runtime
+   prelude. A compiler of its own walks it once per process as the
+   compiler's own source; installing it during that walk installs nothing. */
+static int syntax_walking = 0;
+
+static const char syntax_marker[] = "_x2c.syntax.prelude";
+
+// file walks
+
+/* One cold walk of a file. Each segment of the text ends before an include,
+   and `line` and `pos` locate the current segment's
+   first token. `deferred` marks an entry collected without its declaration
+   defaults. A module's walk reads its spliced text. */
+module typedef struct FileWalk {
+  Compiler c, String path, text, dir, ModuleSource module, Map globs, visited;
+  Array parts, Map definitions, dependencies, statics, hashes;
+  int unit, linkage, line, pos, deferred;
+} FileWalk;
+
 // collecting a unit
 
 /** Collects the current translation unit's declarations into `globs`.
@@ -41,6 +64,80 @@ Map Compiler.collect_symbols(Compiler c, Map globs) {
   return globs;
 }
 
+/** Reports whether the canonical `path` is a compiler prelude source. */
+int Compiler.is_prelude_source(String path) =>
+  Compiler.portable_path(path) in Compiler.prelude_sources();
+
+/** Installs the syntax prelude's macros and keyword aliases into `c`'s
+    macro state once. A later file walk with the same macros, whose keyword
+    aliases start empty, merges the aliases again.
+*/
+void Compiler.install_syntax_prelude(Compiler c) {
+  Var installed;
+  if (c.macros.try_get(syntax_marker, installed)) {
+    c.kw_aliases.merge(installed);
+    return;
+  }
+  List entry = _syntax_entry(c, _syntax_path());
+  if (!entry) return;
+  List effects = _syntax_effects(entry);
+  c.install_compile_time_effects(effects);
+  Map aliases = {};
+  foreach (List row in effects)
+    match (row) case %(compile-time keyword ?alias ?):
+      aliases[alias] = c.kw_aliases[alias];
+  c.macros[syntax_marker] = aliases;
+}
+
+// includes
+
+/** Selects a source file's own package, as its standalone translation does.
+    A cold provider does not register an import in its including unit.
+*/
+void Compiler.configure_package(Compiler c, List roots, String filename) {
+  String source = Path.absolute(filename);
+  String package = Compiler.package_directory(roots, source);
+  if (!package || !Compiler.is_package_source(package, source)) return;
+  String name = Path.basename(package);
+  c.package = name;
+  if (!(name in c.package_roots)) c.package_roots = c.package_roots.copy();
+  c.package_roots[name] = package;
+}
+
+// replay
+
+/** Prepares included compile-time effects after full parsing resets macros.
+    The ordered cache walk counts each file once and groups effects by the
+    canonical path of the unit's direct include. The parser installs those
+    effects when it reaches that include.
+*/
+Map Compiler.included_compile_time_effects(Compiler c, Map globs) {
+  Map visited = {}, delivered = {};
+  if (c.prelude) {
+    Array effects = [];
+    foreach (String source in Compiler.prelude_sources()) {
+      String path = _canonical_path(%"$(x2c_get_root())/$source");
+      _replay_included(c, globs, path, visited, effects, NULL);
+    }
+    with (c.builtin_defs = 1) {
+      c.install_compile_time_effects(effects.list_free());
+    }
+  }
+  String unit = _canonical_path(c.filename);
+  visited[unit] = 1;
+  List entry = _entry(c, unit);
+  if (!entry) return delivered;
+  foreach (Var part in entry.car()) {
+    Array exports = [];
+    if (part is <map>) _replay_package_imports(c, globs, part, exports);
+    else if (part is <string>) {
+      _replay_included(c, globs, part, visited, exports, NULL);
+      if (exports.len()) delivered[part] = exports.list_free();
+    }
+  }
+  return delivered;
+}
+
 /* Builtin components contribute compile-time definitions beside the runtime
    prelude, with the shared source forms they recognize. They do not add
    compiler headers to a user's generated C. Their includes still declare
@@ -66,9 +163,45 @@ List Compiler.prelude_sources(void) => %(
   "src/components/protocol-adapters.x"
   "src/components/string-switch.x");
 
-/** Reports whether the canonical `path` is a compiler prelude source. */
-int Compiler.is_prelude_source(String path) =>
-  Compiler.portable_path(path) in Compiler.prelude_sources();
+/** Installs the definitions of each include among the directives before
+    the cursor.
+*/
+void Compiler.install_included_effects(Compiler c) {
+  Token first = c.token, tokens = c.tokenizer.tokens;
+  for (Token token = first; token > tokens;) {
+    token--;
+    if (token.type != <preproc> && token.type != <space> &&
+        token.type != <comment>) break;
+    first = token;
+  }
+  for (Token token = first; token < c.token; token++) {
+    int angle = 0;
+    String target = token.type == <preproc>
+                  ? Compiler.preproc_include_target(token.text, angle) : NULL;
+    if (!target) continue;
+    String path = c.sources.resolve_include(
+      c.include_dirs, Path.dirname(c.filename), target, angle);
+    if (!path) continue;
+    String canonical = _canonical_path(path);
+    Var exports = c.included_effects[canonical];
+    if (exports is void) continue;
+    c.included_effects.del(canonical);
+    // A conflict among the definitions is reported at their include line.
+    with (c.token = token) { c.install_compile_time_effects(exports); }
+  }
+}
+
+/** The file the include of `target` from `includer_dir` names, searched as
+    collection searches `dirs`, or NULL.
+*/
+String SourceView.resolve_include(
+  SourceView s, List dirs, String includer_dir, String target, int angle) {
+  int covered = 0;
+  return _resolve_include(
+    s, dirs, includer_dir, target, angle, covered, NULL);
+}
+
+// source collection walk
 
 static void _add_prelude(Compiler c, Map globs, Map visited) {
   foreach (String source in Compiler.prelude_sources()) {
@@ -90,18 +223,6 @@ static void _add_prelude(Compiler c, Map globs, Map visited) {
   }
 }
 
-// the syntax prelude
-
-/* `etc/compiler-prelude.x` declares the foundation types, the built-in
-   macros' native prototypes, and the built-in macros and keyword aliases.
-   Every unit collects it first, even one compiled without the runtime
-   prelude. A compiler of its own walks it once per process as the
-   compiler's own source; installing it during that walk installs nothing. */
-static int syntax_walking = 0;
-
-static String _syntax_path(void) =>
-  _canonical_path(%"$(x2c_get_root())/etc/compiler-prelude.x");
-
 static void _add_syntax_prelude(Compiler c, Map globs, Map visited) {
   String canonical = _syntax_path();
   visited[canonical] = 1;
@@ -111,6 +232,9 @@ static void _add_syntax_prelude(Compiler c, Map globs, Map visited) {
     _replay_cached(c, entry, canonical, globs, visited, NULL);
   }
 }
+
+static String _syntax_path(void) =>
+  _canonical_path(%"$(x2c_get_root())/etc/compiler-prelude.x");
 
 static List _syntax_entry(Compiler c, String canonical) {
   List entry = _entry(c, canonical);
@@ -126,42 +250,6 @@ static List _syntax_entry(Compiler c, String canonical) {
     _walk_apart(file, canonical, _runtime_text(file, canonical), {}, visited);
   }
   return _process_cache()[canonical];
-}
-
-static const char syntax_marker[] = "_x2c.syntax.prelude";
-
-/** Installs the syntax prelude's macros and keyword aliases into `c`'s
-    macro state once. A later file walk with the same macros, whose keyword
-    aliases start empty, merges the aliases again.
-*/
-void Compiler.install_syntax_prelude(Compiler c) {
-  Var installed;
-  if (c.macros.try_get(syntax_marker, installed)) {
-    c.kw_aliases.merge(installed);
-    return;
-  }
-  List entry = _syntax_entry(c, _syntax_path());
-  if (!entry) return;
-  List effects = _syntax_effects(entry);
-  c.install_compile_time_effects(effects);
-  Map aliases = {};
-  foreach (List row in effects)
-    match (row) case %(compile-time keyword ?alias ?):
-      aliases[alias] = c.kw_aliases[alias];
-  c.macros[syntax_marker] = aliases;
-}
-
-/* The compile-time rows of the syntax prelude's entry in source order. */
-static List _syntax_effects(List entry) {
-  Array rows = [];
-  foreach (Var part in entry.car()) if (part is <map>)
-    foreach (Var (key, value) in part.map())
-      match (key) case %("source-node" (compile-time ? ?position)):
-        rows.push($(position, value));
-  rows.sort();
-  Array effects = [];
-  foreach (List row in rows) effects.push(row.cadr());
-  return effects.list_free();
 }
 
 /* A prelude source's entry: cached in this process, linked into the
@@ -181,24 +269,6 @@ module String _runtime_text(Compiler c, String runtime) {
   if (c.read_source(runtime, text)) return text;
   $fail.collect_runtime_read(c, c.token, runtime);
 }
-
-/* Rows enter the unit's symbols and its source declarations together. */
-module void _merge_rows(Compiler c, Map globs, Map rows) {
-  globs.merge(rows);
-  c.merge_source_declarations(globs, rows);
-}
-
-// file walks
-
-/* One cold walk of a file. Each segment of the text ends before an include,
-   and `line` and `pos` locate the current segment's
-   first token. `deferred` marks an entry collected without its declaration
-   defaults. A module's walk reads its spliced text. */
-module typedef struct FileWalk {
-  Compiler c, String path, text, dir, ModuleSource module, Map globs, visited;
-  Array parts, Map definitions, dependencies, statics, hashes;
-  int unit, linkage, line, pos, deferred;
-} FileWalk;
 
 /* Record declaration segments and include edges under canonical path
    identity. The first cold visit fixes a file's contribution for later
@@ -268,6 +338,109 @@ static void _directive(FileWalk &w, Token token, int hidden) {
   Token next = token + 1;
   w.line = next.line;
   w.pos = next.pos;
+}
+
+
+
+/* Splice one include: replay its entry, or walk it cold, once per unit.
+   Its content hash joins this file's dependencies, so a replayed interface
+   is rejected when any file it spliced has changed. */
+static void _include_file(FileWalk &w, String target, int angle) {
+  int covered = 0;
+  String path = _resolve_include(
+    w.c.sources, w.c.include_dirs, w.dir, target, angle, covered, w);
+  if (!path || (covered && !Path.is_x2c_source(path))) return;
+  String canonical = _canonical_path(path);
+  w.c.add_translation_dependency(canonical);
+  Var state;
+  if (!w.visited.try_get(canonical, state)) {
+    w.visited[canonical] = 1;
+    List entry = _collection_entry(w.c, canonical);
+    if (!entry) entry = _walk_cold(w.c, target, canonical, w.globs, w.visited);
+    _replay_cached(
+      w.c, entry, canonical, w.globs, w.visited, NULL);
+  }
+  else if (state is <array>)
+    _replay_included(w.c, w.globs, canonical, {}, NULL, w.visited);
+  _cache_dependency(
+    w.dependencies, canonical, _walked_hash(w.c, target, canonical));
+  w.parts.push(canonical);
+}
+
+/* Walk one included file cold and return its entry. The walk reads the
+   includer's names through copies, so its private rows and includes stay
+   there. It runs in a compiler of its own, with the macro, import, keyword,
+   and binding state the file's own translation starts with. The includer
+   replays the selected public definitions as any later unit would. */
+module List _walk_cold(
+  Compiler c, String target, String canonical, Map globs, Map visited) {
+  String text = _include_text(c, target, canonical);
+  Compiler file = Compiler.new_shared(c);
+  defer c.close_child(file);
+  file.interface_provider = 1;
+  file.configure_package(c.package_source_dirs, canonical);
+  file.signature_only = c.signature_only;
+  file.filename = c.filename;
+  /* A fresh file installs its own includes in its own macro state. Only
+     active walks cross into that state, to preserve a cycle's prefix. */
+  Map own_visited = {};
+  foreach ((String path, Var state) in visited)
+    if (state is <array>) own_visited[path] = state;
+  _walk_apart(file, canonical, text, globs.copy(), own_visited);
+  c.merge_translation_dependencies(file.deps);
+  c.declaration_produced |= file.declaration_produced;
+  return _process_cache()[canonical];
+}
+
+/* A cold included file has its own generated spellings. Binding identities
+   remain unique across the unit and its pending inline-body parses. */
+module void _walk_apart(
+  Compiler c, String path, String text, Map globs, Map visited) {
+  ModuleSource module = c.module_source(path, text);
+  with (c.names.counters = {}) {
+    _walk_file(c, path, text, module, Path.dirname(path), globs, visited);
+  }
+}
+
+
+
+/* Replay declaration maps and includes in their recorded source order.
+   visited counts each included file's declarations, dependencies, and
+   function definitions once per translation unit. In-memory and interface
+   entries have the same shape and take this same path. Source traversal
+   keeps its processed prefix as a cold walk does. An effects array marks
+   completed-provider replay for full parsing. */
+module void _replay_cached(
+  Compiler c, List entry, String path, Map globs, Map visited,
+  Array effects) {
+  Array prefix = effects != NULL ? NULL : [];
+  if (prefix != NULL) visited[path] = prefix;
+  foreach (String name in entry.caddr()) c.fn_defs[name] = 1;
+  /* Parsing this file read these macro and embedded-text files. They are
+     prerequisites of every unit that reaches it, not only of the one that
+     parsed it. */
+  c.merge_translation_dependencies(entry[3]);
+  foreach (Var part in entry.car()) {
+    if (part is <map>) {
+      _merge_rows(c, globs, part);
+      _replay_package_imports(c, globs, part, effects);
+    }
+    else if (part is <string>)
+      _replay_include(c, part, globs, visited, effects);
+    if (prefix != NULL) prefix.push(part);
+  }
+  if (prefix != NULL) visited[path] = 1;
+}
+
+/* An included file replays once per unit, from its entry or a cold walk. */
+static void _replay_include(
+  Compiler c, String path, Map globs, Map visited, Array effects) {
+  c.add_translation_dependency(path);
+  if (path in visited) return;
+  visited[path] = 1;
+  List entry = effects != NULL ? _entry(c, path) : _collection_entry(c, path);
+  if (!entry) entry = _walk_cold(c, path, path, globs, visited);
+  _replay_cached(c, entry, path, globs, visited, effects);
 }
 
 /* A directive's `#` follows only whitespace and comments on its line. */
@@ -374,48 +547,10 @@ static void _merge_file(FileWalk &w, Compiler shadow, Map overlay) {
   if (w.unit) _publish_unit_statics(statics, overlay, w.path);
 }
 
-// includes
-
-/* Splice one include: replay its entry, or walk it cold, once per unit.
-   Its content hash joins this file's dependencies, so a replayed interface
-   is rejected when any file it spliced has changed. */
-static void _include_file(FileWalk &w, String target, int angle) {
-  int covered = 0;
-  String path = _resolve_include(
-    w.c.sources, w.c.include_dirs, w.dir, target, angle, covered, w);
-  if (!path || (covered && !Path.is_x2c_source(path))) return;
-  String canonical = _canonical_path(path);
-  w.c.add_translation_dependency(canonical);
-  Var state;
-  if (!w.visited.try_get(canonical, state)) {
-    w.visited[canonical] = 1;
-    List entry = _collection_entry(w.c, canonical);
-    if (!entry) entry = _walk_cold(w.c, target, canonical, w.globs, w.visited);
-    _replay_cached(
-      w.c, entry, canonical, w.globs, w.visited, NULL);
-  }
-  else if (state is <array>)
-    _replay_included(w.c, w.globs, canonical, {}, NULL, w.visited);
-  _cache_dependency(
-    w.dependencies, canonical, _walked_hash(w.c, target, canonical));
-  w.parts.push(canonical);
-}
-
-/* Preserve absent candidates and alias identity, not directory timestamps.
-   Canonical selected files already carry their ordinary content hashes. */
-static void _include_search_dependency(FileWalk &w, String candidate) {
-  if (!candidate.startswith("/")) candidate = %"cwd:$candidate";
-  if (!candidate.startswith("cwd:") && w.c.sources.exists(candidate) &&
-      candidate == _canonical_path(candidate)) return;
-  String hash = _include_search_hash(w.c, candidate);
-  _cache_dependency(w.dependencies, candidate, hash);
-  w.c.deps.merge_translation_dependency(candidate, hash);
-}
-
-module String _include_search_hash(Compiler c, String path) {
-  if (path.startswith("cwd:")) path = path[4:];
-  return c.sources.exists(path) ?
-    %"search:$(Compiler.portable_path(Path.absolute(path)))" : "search:absent";
+/* Rows enter the unit's symbols and its source declarations together. */
+module void _merge_rows(Compiler c, Map globs, Map rows) {
+  globs.merge(rows);
+  c.merge_source_declarations(globs, rows);
 }
 
 /* A file still being walked, as in an include cycle, has no entry yet. */
@@ -431,54 +566,6 @@ static String _include_text(Compiler c, String target, String path) {
   String text = NULL;
   if (c.read_source(path, text)) return text;
   $fail.collect_include_read(c, c.token, target, path);
-}
-
-/** Selects a source file's own package, as its standalone translation does.
-    A cold provider does not register an import in its including unit.
-*/
-void Compiler.configure_package(Compiler c, List roots, String filename) {
-  String source = Path.absolute(filename);
-  String package = Compiler.package_directory(roots, source);
-  if (!package || !Compiler.is_package_source(package, source)) return;
-  String name = Path.basename(package);
-  c.package = name;
-  if (!(name in c.package_roots)) c.package_roots = c.package_roots.copy();
-  c.package_roots[name] = package;
-}
-
-/* Walk one included file cold and return its entry. The walk reads the
-   includer's names through copies, so its private rows and includes stay
-   there. It runs in a compiler of its own, with the macro, import, keyword,
-   and binding state the file's own translation starts with. The includer
-   replays the selected public definitions as any later unit would. */
-module List _walk_cold(
-  Compiler c, String target, String canonical, Map globs, Map visited) {
-  String text = _include_text(c, target, canonical);
-  Compiler file = Compiler.new_shared(c);
-  defer c.close_child(file);
-  file.interface_provider = 1;
-  file.configure_package(c.package_source_dirs, canonical);
-  file.signature_only = c.signature_only;
-  file.filename = c.filename;
-  /* A fresh file installs its own includes in its own macro state. Only
-     active walks cross into that state, to preserve a cycle's prefix. */
-  Map own_visited = {};
-  foreach ((String path, Var state) in visited)
-    if (state is <array>) own_visited[path] = state;
-  _walk_apart(file, canonical, text, globs.copy(), own_visited);
-  c.merge_translation_dependencies(file.deps);
-  c.declaration_produced |= file.declaration_produced;
-  return _process_cache()[canonical];
-}
-
-/* A cold included file has its own generated spellings. Binding identities
-   remain unique across the unit and its pending inline-body parses. */
-module void _walk_apart(
-  Compiler c, String path, String text, Map globs, Map visited) {
-  ModuleSource module = c.module_source(path, text);
-  with (c.names.counters = {}) {
-    _walk_file(c, path, text, module, Path.dirname(path), globs, visited);
-  }
 }
 
 /* `covered` is 1 when the file is in the runtime's `lib/` or
@@ -505,6 +592,23 @@ static String _resolve_include(
   return NULL;
 }
 
+/* Preserve absent candidates and alias identity, not directory timestamps.
+   Canonical selected files already carry their ordinary content hashes. */
+static void _include_search_dependency(FileWalk &w, String candidate) {
+  if (!candidate.startswith("/")) candidate = %"cwd:$candidate";
+  if (!candidate.startswith("cwd:") && w.c.sources.exists(candidate) &&
+      candidate == _canonical_path(candidate)) return;
+  String hash = _include_search_hash(w.c, candidate);
+  _cache_dependency(w.dependencies, candidate, hash);
+  w.c.deps.merge_translation_dependency(candidate, hash);
+}
+
+module String _include_search_hash(Compiler c, String path) {
+  if (path.startswith("cwd:")) path = path[4:];
+  return c.sources.exists(path) ?
+    %"search:$(Compiler.portable_path(Path.absolute(path)))" : "search:absent";
+}
+
 /* The search order: the including file's directory for a quoted include,
    the working directory, the runtime's `lib/`, the compiler's `src/`,
    then the configured include directories. */
@@ -518,16 +622,6 @@ static Array _include_dirs(
   foreach (Var dir in extra_dirs)
     if (dir is <string>) dirs.push(canonical ? _canonical_path(dir) : dir);
   return dirs;
-}
-
-/** The file the include of `target` from `includer_dir` names, searched as
-    collection searches `dirs`, or NULL.
-*/
-String SourceView.resolve_include(
-  SourceView s, List dirs, String includer_dir, String target, int angle) {
-  int covered = 0;
-  return _resolve_include(
-    s, dirs, includer_dir, target, angle, covered, NULL);
 }
 
 // entries
@@ -618,79 +712,6 @@ static void _publish(FileWalk &w) {
   }
 }
 
-// replay
-
-/* Replay declaration maps and includes in their recorded source order.
-   visited counts each included file's declarations, dependencies, and
-   function definitions once per translation unit. In-memory and interface
-   entries have the same shape and take this same path. Source traversal
-   keeps its processed prefix as a cold walk does. An effects array marks
-   completed-provider replay for full parsing. */
-module void _replay_cached(
-  Compiler c, List entry, String path, Map globs, Map visited,
-  Array effects) {
-  Array prefix = effects != NULL ? NULL : [];
-  if (prefix != NULL) visited[path] = prefix;
-  foreach (String name in entry.caddr()) c.fn_defs[name] = 1;
-  /* Parsing this file read these macro and embedded-text files. They are
-     prerequisites of every unit that reaches it, not only of the one that
-     parsed it. */
-  c.merge_translation_dependencies(entry[3]);
-  foreach (Var part in entry.car()) {
-    if (part is <map>) {
-      _merge_rows(c, globs, part);
-      _replay_package_imports(c, globs, part, effects);
-    }
-    else if (part is <string>)
-      _replay_include(c, part, globs, visited, effects);
-    if (prefix != NULL) prefix.push(part);
-  }
-  if (prefix != NULL) visited[path] = 1;
-}
-
-/* An included file replays once per unit, from its entry or a cold walk. */
-static void _replay_include(
-  Compiler c, String path, Map globs, Map visited, Array effects) {
-  c.add_translation_dependency(path);
-  if (path in visited) return;
-  visited[path] = 1;
-  List entry = effects != NULL ? _entry(c, path) : _collection_entry(c, path);
-  if (!entry) entry = _walk_cold(c, path, path, globs, visited);
-  _replay_cached(c, entry, path, globs, visited, effects);
-}
-
-/** Prepares included compile-time effects after full parsing resets macros.
-    The ordered cache walk counts each file once and groups effects by the
-    canonical path of the unit's direct include. The parser installs those
-    effects when it reaches that include.
-*/
-Map Compiler.included_compile_time_effects(Compiler c, Map globs) {
-  Map visited = {}, delivered = {};
-  if (c.prelude) {
-    Array effects = [];
-    foreach (String source in Compiler.prelude_sources()) {
-      String path = _canonical_path(%"$(x2c_get_root())/$source");
-      _replay_included(c, globs, path, visited, effects, NULL);
-    }
-    with (c.builtin_defs = 1) {
-      c.install_compile_time_effects(effects.list_free());
-    }
-  }
-  String unit = _canonical_path(c.filename);
-  visited[unit] = 1;
-  List entry = _entry(c, unit);
-  if (!entry) return delivered;
-  foreach (Var part in entry.car()) {
-    Array exports = [];
-    if (part is <map>) _replay_package_imports(c, globs, part, exports);
-    else if (part is <string>) {
-      _replay_included(c, globs, part, visited, exports, NULL);
-      if (exports.len()) delivered[part] = exports.list_free();
-    }
-  }
-  return delivered;
-}
-
 /* Active walks supply their public recorded prefix during an include cycle. */
 static void _replay_included(
   Compiler c, Map globs, String path, Map visited, Array exports,
@@ -708,30 +729,15 @@ static void _replay_included(
   }
 }
 
-/** Installs the definitions of each include among the directives before
-    the cursor.
-*/
-void Compiler.install_included_effects(Compiler c) {
-  Token first = c.token, tokens = c.tokenizer.tokens;
-  for (Token token = first; token > tokens;) {
-    token--;
-    if (token.type != <preproc> && token.type != <space> &&
-        token.type != <comment>) break;
-    first = token;
-  }
-  for (Token token = first; token < c.token; token++) {
-    int angle = 0;
-    String target = token.type == <preproc>
-                  ? Compiler.preproc_include_target(token.text, angle) : NULL;
-    if (!target) continue;
-    String path = c.sources.resolve_include(
-      c.include_dirs, Path.dirname(c.filename), target, angle);
-    if (!path) continue;
-    String canonical = _canonical_path(path);
-    Var exports = c.included_effects[canonical];
-    if (exports is void) continue;
-    c.included_effects.del(canonical);
-    // A conflict among the definitions is reported at their include line.
-    with (c.token = token) { c.install_compile_time_effects(exports); }
-  }
+/* The compile-time rows of the syntax prelude's entry in source order. */
+static List _syntax_effects(List entry) {
+  Array rows = [];
+  foreach (Var part in entry.car()) if (part is <map>)
+    foreach (Var (key, value) in part.map())
+      match (key) case %("source-node" (compile-time ? ?position)):
+        rows.push($(position, value));
+  rows.sort();
+  Array effects = [];
+  foreach (List row in rows) effects.push(row.cadr());
+  return effects.list_free();
 }

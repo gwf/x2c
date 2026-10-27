@@ -80,6 +80,8 @@ String Compiler.code_text(Compiler c, Array tokens) {
   return text.str_free();
 }
 
+// code formatting helpers for the x2c compiler
+
 /* Emit a source position after flushing the preceding physical line. */
 static void _source_marker(Pretty &p, Var value) {
   List location = p.c.origin_location(value);
@@ -163,13 +165,6 @@ static void _after(Pretty &p, String token, char last, String next) {
 
 // whitespace rules
 
-static int _is_prefix_punct(char ch) =>
-  ch == '.' || ch == '[' || ch == '(' || ch == '{';
-
-static int _is_suffix_punct(char ch) =>
-  ch == '(' || ch == '.' || ch == '[' || ch == ']' || ch == ')' ||
-  ch == ';' || ch == ',' || ch == '{' || ch == '}';
-
 static int _need_space(String prev, String curr) {
   if (!prev || !curr) return 0;
   char p = prev[-1], c = curr[0];
@@ -179,6 +174,15 @@ static int _need_space(String prev, String curr) {
   if (_is_prefix_punct(p)) return 0;
   return 1;
 }
+
+
+
+static int _is_prefix_punct(char ch) =>
+  ch == '.' || ch == '[' || ch == '(' || ch == '{';
+
+static int _is_suffix_punct(char ch) =>
+  ch == '(' || ch == '.' || ch == '[' || ch == ']' || ch == ')' ||
+  ch == ';' || ch == ',' || ch == '{' || ch == '}';
 
 static int _token_is(String token, char ch) =>
   token && token.len() == 1 && token[0] == ch;
@@ -196,16 +200,6 @@ static void _write_indent(Buffer buff, int indent) {
   }
 }
 
-static void _write_newline(Buffer buff) {
-  while (buff.len() > 0 && buff[-1] == ' ') buff.unwrite(1);
-  buff.newline();
-}
-
-static void _write_mapped_newline(Buffer buff, int source_line) {
-  _write_newline(buff);
-  if (source_line) buff.write(%"#line $source_line\n");
-}
-
 static void _write_token(Buffer buff, String token, int source_line) {
   const char *start = token;
   while (start && *start) {
@@ -218,4 +212,14 @@ static void _write_token(Buffer buff, String token, int source_line) {
     _write_mapped_newline(buff, source_line);
     start = newline + 1;
   }
+}
+
+static void _write_mapped_newline(Buffer buff, int source_line) {
+  _write_newline(buff);
+  if (source_line) buff.write(%"#line $source_line\n");
+}
+
+static void _write_newline(Buffer buff) {
+  while (buff.len() > 0 && buff[-1] == ' ') buff.unwrite(1);
+  buff.newline();
 }

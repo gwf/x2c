@@ -63,11 +63,6 @@ static struct Mutex {
   pthread_mutex_t native;
 };
 
-static void _error(const char *operation, int error) {
-  String name = operation;
-  raise %(io-fail (operation $name) (errno $error));
-}
-
 /** Creates an unlocked `Mutex` owned by the active `Scope`.
     Raises: `<alloc-fail>` when storage cannot be allocated, or `<io-fail>`
     when native mutex initialization fails. An initialization failure releases
@@ -125,4 +120,11 @@ void Mutex.free(Mutex mutex) {
   int error = pthread_mutex_destroy(&mutex.native);
   if (error) _error("pthread_mutex_destroy", error);
   xfree(mutex);
+}
+
+// native errors
+
+static void _error(const char *operation, int error) {
+  String name = operation;
+  raise %(io-fail (operation $name) (errno $error));
 }

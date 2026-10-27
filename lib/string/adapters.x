@@ -46,14 +46,6 @@ Iter String.iter(String x, Iter dest) {
   return dest.init(x, _next, 0);
 }
 
-static int _next(Iter iter, Var *out) {
-  int index = iter.state, String str = iter.obj;
-  if (index < 0 || index >= str.len()) return 0;
-  *out = str[index];
-  iter.state = index + 1;
-  return 1;
-}
-
 /** Writes the next byte, advances `cursor`, and returns one.
     Initialize the caller-owned cursor to zero. A null `String`, a null
     pointer, a negative cursor, or exhaustion returns zero without changing
@@ -69,5 +61,13 @@ int String.try_next(String str, int &?cursor, int &?out) {
   if (cursor >= str.len()) return 0;
   out = str[cursor];
   cursor += 1;
+  return 1;
+}
+
+static int _next(Iter iter, Var *out) {
+  int index = iter.state, String str = iter.obj;
+  if (index < 0 || index >= str.len()) return 0;
+  *out = str[index];
+  iter.state = index + 1;
   return 1;
 }

@@ -1,10 +1,51 @@
 /*  slots.x -- macro definition slots */
 
+static const SymbolSet declaration_roles =
+  %<<field enumerator map-entry unit>>;
+
+static const SymbolSet sequence_roles =
+  %<<argument block field enumerator map-entry param unit catch match-row
+     decl-row>>;
+
+static const SymbolSet untyped_roles = %<<expression argument type>>;
+
+static const SymbolSet value_kinds = %<<expr name literal>>;
+
 /* template holes
 
    A named hole or computed call fills a syntax role. `$` inserts
    one value and `@` splices a sequence. The first role an untyped hole fills
    gives it its kind. */
+
+/** Returns whether tokens after an explicit meta call continue a
+    declaration. The balanced argument group is inspected without moving
+    the compiler cursor; a visible source macro retains its own grammar.
+*/
+int Compiler.meta_call_starts_declaration(Compiler c) {
+  if (c.peek(0) != <$> || _peek_invocation(c, <expression>)) return 0;
+  String name;
+  Token opening = _scan_name(c, name);
+  if (opening.type != <(> || !name) return 0;
+  Token token = opening.after_group();
+  return token.type == <$> || token.type == <ident> ||
+         token.type == <*> || token.type == <(>;
+}
+
+/** Parses a member name in a template. A singular `Name` hole there
+    supplies the spelling it captured, without hygienic renaming.
+*/
+List Compiler.try_parse_macro_member(Compiler c) {
+  List hole = c.peek_macro_hole();
+  List slot = c.try_parse_macro_slot(<name>);
+  // A quotation's first use of a hole gives the hole its kind.
+  if (hole) hole = _hole_record(c, _hole_name(hole));
+  if (!slot || !hole || hole.assoc(<kind>) != <name> ||
+      hole.assoc(<sequence>).int())
+    return slot;
+  return %(macro-bind $(_hole_key(hole, "member")));
+}
+
+
 
 /** Parses a macro hole or meta call slot for `role` while reading a
     template.
@@ -23,6 +64,32 @@ List Compiler.try_parse_macro_slot(Compiler c, Symbol role) {
     return _meta_call_slot(c, role);
   return _hole_slot(c, role);
 }
+
+/** Returns the registered hole descriptor for a named or expression hole.
+    `$NAME` and `$(expression)` insert one value; `@NAME` and `@(expression)`
+    splice a sequence. Returns NULL without consuming a non-hole spelling.
+*/
+List Compiler.peek_macro_hole(Compiler c) {
+  Symbol prefix = c.peek(0);
+  if (prefix == <"@(">) return _expression_hole(c, c.token);
+  if (prefix != <$> && prefix != <@>) return NULL;
+  if (c.peek(1) == <(>) return _expression_hole(c, c.token);
+  if (c.peek(1) != <ident>) return NULL;
+  Token name = Token.skip_trivia(c.token + 1);
+  List hole = _hole_record(c, Atom.intern(name.text));
+  return hole ? hole : _quoted_hole(c, name.text, c.token);
+}
+
+/** Returns the token after the named or expression hole at the cursor.
+    Consumes neither its `$` or `@` prefix nor its optional braces.
+*/
+Token Compiler.after_hole(Compiler c) {
+  if (c.peek(0) == <"@(">) return c.token.after_group();
+  Token next = Token.skip_trivia(c.token + 1);
+  return next.type == <(> ? next.after_group() : Token.skip_trivia(next + 1);
+}
+
+// macro definition slots
 
 /* The callable supplies syntax in the requested insertion position. */
 static List _meta_call_slot(Compiler c, Symbol role) {
@@ -61,39 +128,6 @@ static List _hole_slot(Compiler c, Symbol role) {
   List syntax = _parse_hole(c, role);
   return syntax && role == <expression>
        ? %(expr (<macro-expr>) $syntax) : syntax;
-}
-
-static const SymbolSet declaration_roles =
-  %<<field enumerator map-entry unit>>;
-
-static const SymbolSet sequence_roles =
-  %<<argument block field enumerator map-entry param unit catch match-row
-     decl-row>>;
-
-static const SymbolSet untyped_roles = %<<expression argument type>>;
-
-/** Returns the registered hole descriptor for a named or expression hole.
-    `$NAME` and `$(expression)` insert one value; `@NAME` and `@(expression)`
-    splice a sequence. Returns NULL without consuming a non-hole spelling.
-*/
-List Compiler.peek_macro_hole(Compiler c) {
-  Symbol prefix = c.peek(0);
-  if (prefix == <"@(">) return _expression_hole(c, c.token);
-  if (prefix != <$> && prefix != <@>) return NULL;
-  if (c.peek(1) == <(>) return _expression_hole(c, c.token);
-  if (c.peek(1) != <ident>) return NULL;
-  Token name = Token.skip_trivia(c.token + 1);
-  List hole = _hole_record(c, Atom.intern(name.text));
-  return hole ? hole : _quoted_hole(c, name.text, c.token);
-}
-
-/** Returns the token after the named or expression hole at the cursor.
-    Consumes neither its `$` or `@` prefix nor its optional braces.
-*/
-Token Compiler.after_hole(Compiler c) {
-  if (c.peek(0) == <"@(">) return c.token.after_group();
-  Token next = Token.skip_trivia(c.token + 1);
-  return next.type == <(> ? next.after_group() : Token.skip_trivia(next + 1);
 }
 
 /* Consumes a hole filling `role` and returns its projection. */
@@ -140,8 +174,6 @@ static String _hole_projection(
   return role in %(expression argument expr) ? "expression" : "value";
 }
 
-static const SymbolSet value_kinds = %<<expr name literal>>;
-
 static int _kind_accepts_role(Symbol kind, Symbol role) {
   Symbol expected = role == <statement> ? <block> : role;
   if (expected == <expression> || expected == <argument>)
@@ -151,32 +183,4 @@ static int _kind_accepts_role(Symbol kind, Symbol role) {
     (expected == <block> && kind == <decl>) ||
     (expected == <unit> &&
      (kind == <decl> || kind == <function> || kind == <named-type>));
-}
-
-/** Returns whether tokens after an explicit meta call continue a
-    declaration. The balanced argument group is inspected without moving
-    the compiler cursor; a visible source macro retains its own grammar.
-*/
-int Compiler.meta_call_starts_declaration(Compiler c) {
-  if (c.peek(0) != <$> || _peek_invocation(c, <expression>)) return 0;
-  String name;
-  Token opening = _scan_name(c, name);
-  if (opening.type != <(> || !name) return 0;
-  Token token = opening.after_group();
-  return token.type == <$> || token.type == <ident> ||
-         token.type == <*> || token.type == <(>;
-}
-
-/** Parses a member name in a template. A singular `Name` hole there
-    supplies the spelling it captured, without hygienic renaming.
-*/
-List Compiler.try_parse_macro_member(Compiler c) {
-  List hole = c.peek_macro_hole();
-  List slot = c.try_parse_macro_slot(<name>);
-  // A quotation's first use of a hole gives the hole its kind.
-  if (hole) hole = _hole_record(c, _hole_name(hole));
-  if (!slot || !hole || hole.assoc(<kind>) != <name> ||
-      hole.assoc(<sequence>).int())
-    return slot;
-  return %(macro-bind $(_hole_key(hole, "member")));
 }

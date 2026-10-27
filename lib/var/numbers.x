@@ -18,29 +18,7 @@ static typedef struct VarWideBox {
   VarWideValue value;
 } *VarWideBox;
 
-static VarWideBox _wide_box(Var v) => (VarWideBox) _address(v);
-
-module int _wide_encoding_valid(Var value, Symbol tag) {
-  VarWideBox box = _wide_box(value);
-  return box && box.tag == tag;
-}
-
 // wide scalars
-
-static Var _new_wide(TagId id, VarWideValue value) {
-  VarWideBox box = xmalloc(sizeof(struct VarWideBox));
-  box.tag = x2c_var_taginfo[id].tag;
-  box.value = value;
-  uintptr_t raw = (uintptr_t) box;
-  if ((raw & 0x7) != 0 || raw >= (1ul << 48)) {
-    xfree(box);
-    raise %(bad-enc (operation "Var.box"));
-  }
-  Var v = { .u64 = raw };
-  v.u64 |= x2c_var_taginfo[id].top << 48;
-  v.u64 |= x2c_var_taginfo[id].bottom;
-  return v;
-}
 
 /** Boxes a `long` into a scope-owned `<long>` value.
     A `Var` is eight bytes, and the tag consumes some of them. The five widest
@@ -189,16 +167,6 @@ meta native double Var.floating(Var v) {
   return 0.0;
 }
 
-/* `Var.decode_f64` would first test the NaN and infinity patterns, which an
-   `<f64>` tag has already excluded. */
-static double _f64_floating(Var v) {
-  unsigned long u = v.u64 == VAR_F64_NEG_MAX_ESCAPE
-                  ? VAR_F64_NEG_MAX_RAW : v.u64 - VAR_F64_SHIFT;
-  double d;
-  memcpy(&d, &u, sizeof d);
-  return d;
-}
-
 /** Returns `v`'s payload as a `long` when its tag is integral, or 0.
     This reads the payload; it does not convert. It decodes every integer
     family, from `<u8>` through `<ullong>`, including the scope-owned boxes,
@@ -250,22 +218,6 @@ meta native long Var.integer(Var v) {
   return 0;
 }
 
-static long _i48_integer(Var v) {
-  unsigned long mask = _bitmask(48), raw = v.u64 & mask;
-  if (raw & (1ul << 47)) return -(long) ((~raw & mask) + 1ul);
-  return (long) raw;
-}
-
-/* `<long>`, `<ulong>`, and `<llong>` share top 0x0005. */
-static long _wide_integer(Var v) {
-  switch (_bottom_bits(v)) {
-    case 0x5: return _wide_box(v).value.long_value;
-    case 0x6: return (long) _wide_box(v).value.ulong_value;
-    case 0x7: return (long) _wide_box(v).value.long_long_value;
-  }
-  return 0;
-}
-
 /** Returns the payload of a `<long>` box, or 0 if `v` has a different tag.
     The test is on the tag, so a `<ulong>`, `<llong>`, or `<i32>` value
     reads as 0 with no complaint. `Var.integer` accepts any integer family;
@@ -296,16 +248,6 @@ meta native long long Var.long_long_value(Var v) =>
 meta native unsigned long long Var.ulong_long_value(Var v) =>
   v is <ullong> ? _wide_box(v).value.ulong_long_value : 0;
 
-/** Returns the payload of an `<ldouble>` box, or 0.0 if `v` has another tag.
-    This is the only reader that preserves a `long double`. Every other
-    floating tag, `<f64>` included, yields 0.0 here instead of being widened.
-    `Var.floating` is the general floating reader.
-
-    A tag mismatch yields 0.0.
-*/
-meta native long double Var.long_double_value(Var v) =>
-  v is <ldouble> ? _wide_box(v).value.long_double_value : 0.0L;
-
 /* wide equality
 
    A wide box holds one or two machine words, so it mixes as words rather
@@ -326,12 +268,6 @@ unsigned Var.wide_hash(Var v) {
   }
   return 0;
 }
-
-/* Every member of the box's union starts at the union, so a family's
-   payload is its first `width` bytes. Each arm passes a constant width,
-   which lets `x2c_hash_bytes` unroll its word loop. */
-static unsigned _hash_wide(Symbol tag, VarWideValue *value, size_t width) =>
-  x2c_hash_bytes((unsigned) tag, value, width);
 
 /** Reports content equality for supported wide scalar boxes.
     Boxed `<long>`, `<ulong>`, `<llong>`, `<ullong>`, and `<ldouble>` values
@@ -386,4 +322,70 @@ int Var.wide_compare(Var a, Var b) {
     &_wide_box(a).value.long_double_value,
     &_wide_box(b).value.long_double_value, sizeof(av));
   return cmp < 0 ? -1 : cmp > 0 ? 1 : 0;
+}
+
+/** Returns the payload of an `<ldouble>` box, or 0.0 if `v` has another tag.
+    This is the only reader that preserves a `long double`. Every other
+    floating tag, `<f64>` included, yields 0.0 here instead of being widened.
+    `Var.floating` is the general floating reader.
+
+    A tag mismatch yields 0.0.
+*/
+meta native long double Var.long_double_value(Var v) =>
+  v is <ldouble> ? _wide_box(v).value.long_double_value : 0.0L;
+
+
+
+static Var _new_wide(TagId id, VarWideValue value) {
+  VarWideBox box = xmalloc(sizeof(struct VarWideBox));
+  box.tag = x2c_var_taginfo[id].tag;
+  box.value = value;
+  uintptr_t raw = (uintptr_t) box;
+  if ((raw & 0x7) != 0 || raw >= (1ul << 48)) {
+    xfree(box);
+    raise %(bad-enc (operation "Var.box"));
+  }
+  Var v = { .u64 = raw };
+  v.u64 |= x2c_var_taginfo[id].top << 48;
+  v.u64 |= x2c_var_taginfo[id].bottom;
+  return v;
+}
+
+static VarWideBox _wide_box(Var v) => (VarWideBox) _address(v);
+
+/* `Var.decode_f64` would first test the NaN and infinity patterns, which an
+   `<f64>` tag has already excluded. */
+static double _f64_floating(Var v) {
+  unsigned long u = v.u64 == VAR_F64_NEG_MAX_ESCAPE
+                  ? VAR_F64_NEG_MAX_RAW : v.u64 - VAR_F64_SHIFT;
+  double d;
+  memcpy(&d, &u, sizeof d);
+  return d;
+}
+
+static long _i48_integer(Var v) {
+  unsigned long mask = _bitmask(48), raw = v.u64 & mask;
+  if (raw & (1ul << 47)) return -(long) ((~raw & mask) + 1ul);
+  return (long) raw;
+}
+
+/* `<long>`, `<ulong>`, and `<llong>` share top 0x0005. */
+static long _wide_integer(Var v) {
+  switch (_bottom_bits(v)) {
+    case 0x5: return _wide_box(v).value.long_value;
+    case 0x6: return (long) _wide_box(v).value.ulong_value;
+    case 0x7: return (long) _wide_box(v).value.long_long_value;
+  }
+  return 0;
+}
+
+/* Every member of the box's union starts at the union, so a family's
+   payload is its first `width` bytes. Each arm passes a constant width,
+   which lets `x2c_hash_bytes` unroll its word loop. */
+static unsigned _hash_wide(Symbol tag, VarWideValue *value, size_t width) =>
+  x2c_hash_bytes((unsigned) tag, value, width);
+
+module int _wide_encoding_valid(Var value, Symbol tag) {
+  VarWideBox box = _wide_box(value);
+  return box && box.tag == tag;
 }

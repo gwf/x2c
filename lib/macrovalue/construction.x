@@ -14,53 +14,7 @@ Macro Macro_close(Macro value, List captures) =>
 List Macro_apply(Macro t, List values) =>
   $("x2c.template", t, _group(t, values));
 
-/* Groups positional arguments by the definition's parameters: a sequence
-   parameter takes every remaining argument as one List. */
-static List _group(Macro t, List values) {
-  Array grouped = [];
-  foreach (List hole in t.assoc(<parameters>).list()) {
-    int sequence = hole.assoc(<sequence>);
-    /* One List of syntax or of numbers and Strings passes the whole
-       sequence, as `call(f, items)`; the compiler lifts each scalar. */
-    if (sequence && values && !values.cdr() && values.car() is <list> &&
-        _items(values.car()))
-      values = values.car();
-    grouped.push(sequence ? values.var() : values.car());
-    values = sequence ? NULL : values.cdr();
-  }
-  return grouped.list_free();
-}
-
-/* Whether `items` is a List of arguments rather than one: empty, or led by
-   syntax, a number, or a String other than an identifier's or pending
-   code's tag. A Symbol leads one syntax node. */
-static int _items(List items) {
-  if (!items) return 1;
-  if (items ~= %((!or "x2c.ident" "x2c.quoted" "x2c.template") *)) return 0;
-  Var first = items.car();
-  return first is <list> || first is <string> || first.is_integer() ||
-         first.is_floating();
-}
-
 // typed quotations
-
-/** Returns what a typed quotation inserts for one use of a hole whose
-    local holds `value`, as a rebuild inserts it. An expression hole
-    (`lifts`) takes a number, String, or Symbol as its literal. Where the
-    code takes an expression (`expression`), a binding, an `x2c_ident`
-    spelling, or a Name hole's String becomes an identifier expression;
-    in a Name hole's member position, an `x2c_ident` spelling is its
-    String.
-*/
-Var Macro.inserted(Var value, int lifts, int expression) {
-  if (lifts) value = _expr_value(value);
-  Var spelling = value;
-  if (value ~= %("x2c.ident" ?(String name))) spelling = name;
-  if (!expression) return lifts ? value : spelling;
-  if (spelling is <string>) return %(expr () (ident $spelling));
-  if (value ~= %(binding ? ?)) return %(expr () (ident $value));
-  return value;
-}
 
 /** Returns the name a typed quotation declares with a Name hole whose local
     holds `value`: the name form of an `x2c_ident` spelling or a String,
@@ -91,22 +45,24 @@ List Macro.typed(List type, Var value) {
   return %(expr $type @(expression.cddr()));
 }
 
-/* An expression parameter takes code, so a number, String, or Symbol
-   argument becomes the literal expression that holds it, as the compiler
-   lifts a compile-time value. */
-module Var _expr_value(Var value) {
-  if (value is <string>)
-    return %(expr (* char) (literal (* char) $(value.repr())));
-  if (value is <symbol>)
-    return %(expr ("Symbol") (literal ("Symbol") $(value.str()) $value));
-  Type type = Macro.number_type(value);
-  return type ? Macro.number_literal(type, type, value) : value;
-}
 
-module List _expr_values(List values) {
-  Array lifted = [];
-  foreach (Var item in values) lifted.push(_expr_value(item));
-  return lifted.list_free();
+
+/** Returns what a typed quotation inserts for one use of a hole whose
+    local holds `value`, as a rebuild inserts it. An expression hole
+    (`lifts`) takes a number, String, or Symbol as its literal. Where the
+    code takes an expression (`expression`), a binding, an `x2c_ident`
+    spelling, or a Name hole's String becomes an identifier expression;
+    in a Name hole's member position, an `x2c_ident` spelling is its
+    String.
+*/
+Var Macro.inserted(Var value, int lifts, int expression) {
+  if (lifts) value = _expr_value(value);
+  Var spelling = value;
+  if (value ~= %("x2c.ident" ?(String name))) spelling = name;
+  if (!expression) return lifts ? value : spelling;
+  if (spelling is <string>) return %(expr () (ident $spelling));
+  if (value ~= %(binding ? ?)) return %(expr () (ident $value));
+  return value;
 }
 
 // number literals
@@ -145,6 +101,46 @@ List Macro.number_literal(List result, List type, Var value) {
   if (value.tag() == <i32>) return _int_literal(result, value);
   List literal = _bits_literal(value);
   return %(expr $result (parens (expr $result (cast $type $literal))));
+}
+
+/* Groups positional arguments by the definition's parameters: a sequence
+   parameter takes every remaining argument as one List. */
+static List _group(Macro t, List values) {
+  Array grouped = [];
+  foreach (List hole in t.assoc(<parameters>).list()) {
+    int sequence = hole.assoc(<sequence>);
+    /* One List of syntax or of numbers and Strings passes the whole
+       sequence, as `call(f, items)`; the compiler lifts each scalar. */
+    if (sequence && values && !values.cdr() && values.car() is <list> &&
+        _items(values.car()))
+      values = values.car();
+    grouped.push(sequence ? values.var() : values.car());
+    values = sequence ? NULL : values.cdr();
+  }
+  return grouped.list_free();
+}
+
+/* Whether `items` is a List of arguments rather than one: empty, or led by
+   syntax, a number, or a String other than an identifier's or pending
+   code's tag. A Symbol leads one syntax node. */
+static int _items(List items) {
+  if (!items) return 1;
+  if (items ~= %((!or "x2c.ident" "x2c.quoted" "x2c.template") *)) return 0;
+  Var first = items.car();
+  return first is <list> || first is <string> || first.is_integer() ||
+         first.is_floating();
+}
+
+/* An expression parameter takes code, so a number, String, or Symbol
+   argument becomes the literal expression that holds it, as the compiler
+   lifts a compile-time value. */
+module Var _expr_value(Var value) {
+  if (value is <string>)
+    return %(expr (* char) (literal (* char) $(value.repr())));
+  if (value is <symbol>)
+    return %(expr ("Symbol") (literal ("Symbol") $(value.str()) $value));
+  Type type = Macro.number_type(value);
+  return type ? Macro.number_literal(type, type, value) : value;
 }
 
 /* C reads a negative literal as a negation, so it takes parentheses, and
@@ -192,4 +188,10 @@ static String _hex_float(long double n) {
   }
   digits[count] = 0;
   return "%s0x1%s%sp%+dL".printf(sign, count ? "." : "", digits, exponent - 1);
+}
+
+module List _expr_values(List values) {
+  Array lifted = [];
+  foreach (Var item in values) lifted.push(_expr_value(item));
+  return lifted.list_free();
 }

@@ -84,6 +84,171 @@ $floating.step(long double, _ldouble_step);
 
 // operators
 
+/** Multiplies matrices through a registered `matmul` behavior.
+    `@` has no numeric meaning, so numeric operands raise `<bad-op>`; a
+    protocol result keeps the ownership chosen by its callback.
+*/
+Var Var.matmul(Var lhs, Var rhs) =>
+  _protocol_arithmetic(lhs, <matmul>, <@>, rhs);
+
+/** Negates a dynamic value through registered `neg` or numeric subtraction.
+    Without a selected protocol, this computes `0 - value` with ordinary `Var`
+    promotion and wrapping, so a narrow integer promotes before negation.
+    Raises: `<bad-enc>` for invalid bits, `<void-op>` for `void`, `<no-member>`
+    for an object without `neg`, or any cause from protocol or numeric
+    subtraction.
+*/
+meta native Var Var.neg(Var value) {
+  _valid_operand(value);
+  if (value is void) raise %(void-op (operation "Var.neg"));
+  Var result;
+  if (value.try_dispatch_unary(<neg>, result)) return result;
+  if (value.kind() == <object>) {
+    Symbol tag = value.tag();
+    raise %(no-member (tag $tag) (member neg));
+  }
+  return Var.sub(0, value);
+}
+
+// comparisons
+
+/** Evaluates `==` on two `Var` operands.
+    Two numbers compare as their native values do in C after the usual
+    arithmetic conversions, so `3 == 3L` and `-1 == 4294967295u` hold and a
+    NaN equals nothing. Other values compare through `Var.equal`.
+    Raises: `<bad-enc>` when a numeric comparison meets invalid `Var` bits.
+*/
+int x2c_var_equal(Var a, Var b) {
+  if (a.u64 == b.u64) return !_nan(a);
+  if (_numeric(a) && _numeric(b)) return _numeric_order(a, b) == 0;
+  return a.equal(b);
+}
+
+/** Evaluates `===` on two `Var` operands.
+    Two numbers are identical when they have the same tag and the same bits,
+    so two boxes of one `long` are identical, `NaN === NaN` holds, and
+    `+0.0 === -0.0` does not. Other values are identical when their `Var`
+    bits are, as `Var.same` reports.
+*/
+int x2c_var_identical(Var a, Var b) => a.u64 == b.u64 || a.wide_equal(b);
+
+/** Orders two `Var` operands for `<`, `<=`, `>`, and `>=`.
+    Two numbers order as their native values do in C after the usual
+    arithmetic conversions. The result is -1, 0, or 1, or NaN when a NaN
+    leaves the pair unordered, so each relation to zero is false. Other
+    values return the order `Var.compare` gives.
+    Raises: `<void-op>` when either operand is `void`, and `<bad-enc>` when
+    a numeric comparison meets invalid `Var` bits.
+*/
+double x2c_var_order(Var a, Var b) {
+  if (_numeric(a) && _numeric(b)) return _numeric_order(a, b);
+  return a.compare(b);
+}
+
+// truthiness
+
+/** Returns dynamic truthiness through registered dispatch or built-in rules.
+    Numeric and `Symbol` zero and null unhandled pointer-bearing values are
+    false; their nonzero or nonnull counterparts are true. A registered truth
+    callback supplies its own result, including for a custom object, so it may
+    return false independently of object state. The call does not retain
+    `value` or inspect the contents of an iterator itself.
+    Raises: `<bad-enc>` for invalid `Var` bits, `<void-op>` for `void`, or
+    `<bad-types>` when no truthiness rule exists, plus any cause raised by a
+    selected descriptor callback.
+*/
+meta native int Var.truth(Var value) {
+  if (!value.encoding_valid() || value is void) return value.fallback_truth();
+  switch (value.tag()) {
+    case <i8>: case <u8>: case <i16>: case <u16>: case <i32>: case <u32>:
+      return value.payload32() != 0;
+    case <i48>: case <u48>:
+      return (value.u64 & ((1ul << 48) - 1)) != 0;
+  }
+  int handled = 0, truth = value.dispatch_truth(handled);
+  return handled ? !!truth : value.fallback_truth();
+}
+
+/** Returns built-in truthiness without consulting a registered descriptor.
+    Numeric and `Symbol` zero and null pointer-bearing values are false; other
+    supported built-ins are true. Container-specific truth comes from dispatch.
+    Raises: `<bad-enc>` for invalid `Var` bits, `<void-op>` for `void`, or
+    `<bad-types>` when no truthiness rule exists.
+*/
+int Var.fallback_truth(Var value) {
+  _valid_operand(value);
+  if (value is void) raise %(void-op (operation "Var.truth"));
+  X2CVarNumericInfo info;
+  if (Var.numeric_info(value.tag(), info)) return _numeric_truth(value);
+  Symbol kind = value.kind();
+  if (kind == <symbol>) return value.symbol() != 0;
+  if (kind == <pointer> || kind == <reference> || kind == <object>)
+    return value.pointer() != NULL;
+  Symbol source = value.tag();
+  raise %(bad-types (source $source) (operation "truthy"));
+}
+
+// compound updates
+
+/** Applies a failure-atomic dynamic compound update and returns the new value.
+    The operation is limited to arithmetic, remainder, bitwise, and shift
+    operators. The result is converted back to the destination's original tag
+    and stored only after both computation and conversion complete; this does
+    not provide thread synchronization. If a delegated protocol operation
+    returns `void`, the function leaves the destination unchanged.
+    Raises: `<bad-arg>` for a null destination, or any cause from
+    `Var.binary` and `Var.convert`. These failures leave the stored value
+    unchanged.
+*/
+Var Var.update(Var &?lhs, Symbol op, Var rhs) =>
+  x2c_var_update_volatile(lhs, op, rhs);
+
+/** Applies dynamic postfix `++` or `--` and returns the prior value.
+    The update adds or subtracts an `<i32>` one through `Var.update`,
+    preserving the destination tag. If a delegated protocol operation returns
+    `void`, the function leaves the destination unchanged and returns `void`.
+    Raises: `<bad-arg>` for a null destination, `<bad-enc>` for invalid `Var`
+    bits, `<void-op>` for `void`, `<bad-op>` for an operator other than
+    `++` or `--`, or any cause from `Var.update`. These failures leave the
+    stored value unchanged.
+*/
+Var Var.postfix(Var &?lhs, Symbol op) => x2c_var_postfix_volatile(lhs, op);
+
+/** Applies `Var.postfix` semantics to a volatile destination in generated
+    code. Volatile preserves accesses across exception transfer, without
+    providing thread synchronization.
+*/
+Var x2c_var_postfix_volatile(volatile Var &?lhs, Symbol op) {
+  if (!lhs) raise %(bad-arg (operation "Var.postfix"));
+  _valid_operand(lhs);
+  if (lhs is void) raise %(void-op (op $op));
+  Symbol binary_op;
+  if (op == <++>) binary_op = <+>;
+  else if (op == <-->) binary_op = <->;
+  else raise %(bad-op (op $op));
+  Var old = lhs, one = Var.box_i32_bits(1);
+  if (x2c_var_update_volatile(lhs, binary_op, one) is void) return void;
+  return old;
+}
+
+/** Applies `Var.update` semantics to a volatile destination in generated code.
+    Volatile preserves accesses across exception transfer, without providing
+    thread synchronization.
+*/
+Var x2c_var_update_volatile(volatile Var &?lhs, Symbol op, Var rhs) {
+  if (!lhs) raise %(bad-arg (operation "Var.update"));
+  _valid_operands(lhs, rhs);
+  if (lhs is void || rhs is void) raise %(void-op (op $op));
+  if (!_numeric_operator(op)) raise %(bad-op (op $op));
+  Var result = lhs.binary(op, rhs);
+  if (result is void) return void;
+  Var stored = _same_tag_update(lhs, rhs) ? result : result.convert(lhs.tag());
+  lhs = stored;
+  return stored;
+}
+
+
+
 /** Applies a dynamic arithmetic, bitwise, comparison, or logical operator.
     Integers use C-style promotion and wrap to the result type's width;
     shifts use the promoted left operand's type and sign-fill signed right
@@ -131,14 +296,6 @@ Var Var.binary(Var lhs, Symbol op, Var rhs) {
   raise %(bad-op (op $op));
 }
 
-static Var _predicate(int holds) => Var.box_i32_bits((unsigned) !!holds);
-
-/* The direct API is eager: it reads both operands' truth, left first. */
-static int _logical(Var lhs, Symbol op, Var rhs) {
-  int left = !!lhs, right = !!rhs;
-  return op == <&&> ? left && right : left || right;
-}
-
 /** Adds dynamic values through numeric, `String`, or registered `add`
     behavior.
     Numeric promotion, failure, and result ownership follow `Var.binary`;
@@ -161,13 +318,6 @@ meta native Var Var.sub(Var lhs, Var rhs) =>
 */
 meta native Var Var.mul(Var lhs, Var rhs) =>
   _protocol_arithmetic(lhs, <mul>, <*>, rhs);
-
-/** Multiplies matrices through a registered `matmul` behavior.
-    `@` has no numeric meaning, so numeric operands raise `<bad-op>`; a
-    protocol result keeps the ownership chosen by its callback.
-*/
-Var Var.matmul(Var lhs, Var rhs) =>
-  _protocol_arithmetic(lhs, <matmul>, <@>, rhs);
 
 /** Divides dynamic values through numeric or registered `div` behavior.
     Numeric integer zero divisors raise; floating division uses host infinity
@@ -202,25 +352,6 @@ static Var _protocol_arithmetic(Var lhs, Symbol member, Symbol op, Var rhs) {
     raise %(no-member (tag $tag) (member $member));
   }
   return _general_numeric_binary(op, lhs, rhs);
-}
-
-/** Negates a dynamic value through registered `neg` or numeric subtraction.
-    Without a selected protocol, this computes `0 - value` with ordinary `Var`
-    promotion and wrapping, so a narrow integer promotes before negation.
-    Raises: `<bad-enc>` for invalid bits, `<void-op>` for `void`, `<no-member>`
-    for an object without `neg`, or any cause from protocol or numeric
-    subtraction.
-*/
-meta native Var Var.neg(Var value) {
-  _valid_operand(value);
-  if (value is void) raise %(void-op (operation "Var.neg"));
-  Var result;
-  if (value.try_dispatch_unary(<neg>, result)) return result;
-  if (value.kind() == <object>) {
-    Symbol tag = value.tag();
-    raise %(no-member (tag $tag) (member neg));
-  }
-  return Var.sub(0, value);
 }
 
 /* fast lanes
@@ -343,6 +474,19 @@ static Symbol _integer_result_tag(X2CVarNumeric &lhs, X2CVarNumeric &rhs) {
   return Var.integer_tag(signed_value.rank, 1);
 }
 
+static Var _shift_binary(Symbol op, X2CVarNumeric lhs, X2CVarNumeric rhs) {
+  _promote_integer(lhs);
+  _promote_integer(rhs);
+  unsigned long long count = _extended(rhs);
+  if (!rhs.unsigned_value && (long long) count < 0)
+    raise %(bad-shift (op $op));
+  if (count >= (unsigned long long) lhs.bits)
+    raise %(bad-shift (op $op) (count $count) (width $(lhs.bits)));
+  unsigned long long raw = _integer_raw(
+    op, _raw_for_width(lhs, lhs.bits), count, lhs.bits, lhs.unsigned_value);
+  return Var.integer_box(lhs.tag, raw);
+}
+
 static void _promote_integer(X2CVarNumeric &value) {
   if (value.rank >= 3) return;
   if (!value.unsigned_value) value.raw = _extended(value);
@@ -360,19 +504,6 @@ static unsigned long long _raw_for_width(X2CVarNumeric &value, int bits) =>
 static unsigned long long _extended(X2CVarNumeric &value) =>
   value.unsigned_value ? value.raw
   : (unsigned long long) Var.signed_from_bits(value.raw, value.bits);
-
-static Var _shift_binary(Symbol op, X2CVarNumeric lhs, X2CVarNumeric rhs) {
-  _promote_integer(lhs);
-  _promote_integer(rhs);
-  unsigned long long count = _extended(rhs);
-  if (!rhs.unsigned_value && (long long) count < 0)
-    raise %(bad-shift (op $op));
-  if (count >= (unsigned long long) lhs.bits)
-    raise %(bad-shift (op $op) (count $count) (width $(lhs.bits)));
-  unsigned long long raw = _integer_raw(
-    op, _raw_for_width(lhs, lhs.bits), count, lhs.bits, lhs.unsigned_value);
-  return Var.integer_box(lhs.tag, raw);
-}
 
 /* The wider floating operand's family; an integer operand never wins. */
 static Symbol _floating_tag(X2CVarNumeric &lhs, X2CVarNumeric &rhs) {
@@ -396,39 +527,32 @@ static Var _floating_binary(
   return Var.box_long_double(_ldouble_step(op, a, b));
 }
 
-// comparisons
-
-/** Evaluates `==` on two `Var` operands.
-    Two numbers compare as their native values do in C after the usual
-    arithmetic conversions, so `3 == 3L` and `-1 == 4294967295u` hold and a
-    NaN equals nothing. Other values compare through `Var.equal`.
-    Raises: `<bad-enc>` when a numeric comparison meets invalid `Var` bits.
-*/
-int x2c_var_equal(Var a, Var b) {
-  if (a.u64 == b.u64) return !_nan(a);
-  if (_numeric(a) && _numeric(b)) return _numeric_order(a, b) == 0;
-  return a.equal(b);
+/* The left operand is checked first. */
+static inline void _valid_operands(Var lhs, Var rhs) {
+  if (!lhs.encoding_valid()) _bad_side(lhs, <left>);
+  if (!rhs.encoding_valid()) _bad_side(rhs, <right>);
 }
 
-/** Evaluates `===` on two `Var` operands.
-    Two numbers are identical when they have the same tag and the same bits,
-    so two boxes of one `long` are identical, `NaN === NaN` holds, and
-    `+0.0 === -0.0` does not. Other values are identical when their `Var`
-    bits are, as `Var.same` reports.
-*/
-int x2c_var_identical(Var a, Var b) => a.u64 == b.u64 || a.wide_equal(b);
+static void _bad_side(Var value, Symbol side) {
+  unsigned long bits = value.u64;
+  String text = side;
+  raise %(bad-enc (value $bits) (side $text));
+}
 
-/** Orders two `Var` operands for `<`, `<=`, `>`, and `>=`.
-    Two numbers order as their native values do in C after the usual
-    arithmetic conversions. The result is -1, 0, or 1, or NaN when a NaN
-    leaves the pair unordered, so each relation to zero is false. Other
-    values return the order `Var.compare` gives.
-    Raises: `<void-op>` when either operand is `void`, and `<bad-enc>` when
-    a numeric comparison meets invalid `Var` bits.
-*/
-double x2c_var_order(Var a, Var b) {
-  if (_numeric(a) && _numeric(b)) return _numeric_order(a, b);
-  return a.compare(b);
+/* operand checks
+
+   The tests inline into the operators, and the raises live in helpers:
+   clang does not inline a check that holds a raise's error construction.
+   The side travels as a Symbol, because a String literal argument would
+   add a lazy interning guard to the top of every operator. */
+
+static inline void _valid_operand(Var value) {
+  if (!value.encoding_valid()) _bad_bits(value);
+}
+
+static void _bad_bits(Var value) {
+  unsigned long bits = value.u64;
+  raise %(bad-enc (value $bits));
 }
 
 /* Most comparisons the compiler makes have a Symbol or a List operand, so
@@ -490,84 +614,18 @@ static double _floating_order(X2CVarNumeric &lhs, X2CVarNumeric &rhs) {
   return a == b ? 0 : 0.0 / 0.0;
 }
 
-// truthiness
-
-/** Returns dynamic truthiness through registered dispatch or built-in rules.
-    Numeric and `Symbol` zero and null unhandled pointer-bearing values are
-    false; their nonzero or nonnull counterparts are true. A registered truth
-    callback supplies its own result, including for a custom object, so it may
-    return false independently of object state. The call does not retain
-    `value` or inspect the contents of an iterator itself.
-    Raises: `<bad-enc>` for invalid `Var` bits, `<void-op>` for `void`, or
-    `<bad-types>` when no truthiness rule exists, plus any cause raised by a
-    selected descriptor callback.
-*/
-meta native int Var.truth(Var value) {
-  if (!value.encoding_valid() || value is void) return value.fallback_truth();
-  switch (value.tag()) {
-    case <i8>: case <u8>: case <i16>: case <u16>: case <i32>: case <u32>:
-      return value.payload32() != 0;
-    case <i48>: case <u48>:
-      return (value.u64 & ((1ul << 48) - 1)) != 0;
-  }
-  int handled = 0, truth = value.dispatch_truth(handled);
-  return handled ? !!truth : value.fallback_truth();
-}
-
-/** Returns built-in truthiness without consulting a registered descriptor.
-    Numeric and `Symbol` zero and null pointer-bearing values are false; other
-    supported built-ins are true. Container-specific truth comes from dispatch.
-    Raises: `<bad-enc>` for invalid `Var` bits, `<void-op>` for `void`, or
-    `<bad-types>` when no truthiness rule exists.
-*/
-int Var.fallback_truth(Var value) {
-  _valid_operand(value);
-  if (value is void) raise %(void-op (operation "Var.truth"));
-  X2CVarNumericInfo info;
-  if (Var.numeric_info(value.tag(), info)) return _numeric_truth(value);
-  Symbol kind = value.kind();
-  if (kind == <symbol>) return value.symbol() != 0;
-  if (kind == <pointer> || kind == <reference> || kind == <object>)
-    return value.pointer() != NULL;
-  Symbol source = value.tag();
-  raise %(bad-types (source $source) (operation "truthy"));
-}
-
 static int _numeric_truth(Var value) {
   X2CVarNumeric numeric;
   value.numeric_decode(numeric);
   return numeric.floating ? numeric.floating_value != 0.0L : numeric.raw != 0;
 }
 
-// compound updates
+static Var _predicate(int holds) => Var.box_i32_bits((unsigned) !!holds);
 
-/** Applies a failure-atomic dynamic compound update and returns the new value.
-    The operation is limited to arithmetic, remainder, bitwise, and shift
-    operators. The result is converted back to the destination's original tag
-    and stored only after both computation and conversion complete; this does
-    not provide thread synchronization. If a delegated protocol operation
-    returns `void`, the function leaves the destination unchanged.
-    Raises: `<bad-arg>` for a null destination, or any cause from
-    `Var.binary` and `Var.convert`. These failures leave the stored value
-    unchanged.
-*/
-Var Var.update(Var &?lhs, Symbol op, Var rhs) =>
-  x2c_var_update_volatile(lhs, op, rhs);
-
-/** Applies `Var.update` semantics to a volatile destination in generated code.
-    Volatile preserves accesses across exception transfer, without providing
-    thread synchronization.
-*/
-Var x2c_var_update_volatile(volatile Var &?lhs, Symbol op, Var rhs) {
-  if (!lhs) raise %(bad-arg (operation "Var.update"));
-  _valid_operands(lhs, rhs);
-  if (lhs is void || rhs is void) raise %(void-op (op $op));
-  if (!_numeric_operator(op)) raise %(bad-op (op $op));
-  Var result = lhs.binary(op, rhs);
-  if (result is void) return void;
-  Var stored = _same_tag_update(lhs, rhs) ? result : result.convert(lhs.tag());
-  lhs = stored;
-  return stored;
+/* The direct API is eager: it reads both operands' truth, left first. */
+static int _logical(Var lhs, Symbol op, Var rhs) {
+  int left = !!lhs, right = !!rhs;
+  return op == <&&> ? left && right : left || right;
 }
 
 /* Var.update skips conversion only when the fast binary path returns the
@@ -587,64 +645,8 @@ static inline int _same_tag_update(Var lhs, Var rhs) {
   return _fast_numeric_tag(lhs, rhs) == <f64>;
 }
 
-/** Applies dynamic postfix `++` or `--` and returns the prior value.
-    The update adds or subtracts an `<i32>` one through `Var.update`,
-    preserving the destination tag. If a delegated protocol operation returns
-    `void`, the function leaves the destination unchanged and returns `void`.
-    Raises: `<bad-arg>` for a null destination, `<bad-enc>` for invalid `Var`
-    bits, `<void-op>` for `void`, `<bad-op>` for an operator other than
-    `++` or `--`, or any cause from `Var.update`. These failures leave the
-    stored value unchanged.
-*/
-Var Var.postfix(Var &?lhs, Symbol op) => x2c_var_postfix_volatile(lhs, op);
-
-/** Applies `Var.postfix` semantics to a volatile destination in generated
-    code. Volatile preserves accesses across exception transfer, without
-    providing thread synchronization.
-*/
-Var x2c_var_postfix_volatile(volatile Var &?lhs, Symbol op) {
-  if (!lhs) raise %(bad-arg (operation "Var.postfix"));
-  _valid_operand(lhs);
-  if (lhs is void) raise %(void-op (op $op));
-  Symbol binary_op;
-  if (op == <++>) binary_op = <+>;
-  else if (op == <-->) binary_op = <->;
-  else raise %(bad-op (op $op));
-  Var old = lhs, one = Var.box_i32_bits(1);
-  if (x2c_var_update_volatile(lhs, binary_op, one) is void) return void;
-  return old;
-}
-
 static Var _native_update(Var lhs, Symbol target, Symbol op, Var rhs) {
   Var result = lhs.binary(op, rhs);
   if (result is void) return void;
   return result.convert(target);
-}
-
-/* operand checks
-
-   The tests inline into the operators, and the raises live in helpers:
-   clang does not inline a check that holds a raise's error construction.
-   The side travels as a Symbol, because a String literal argument would
-   add a lazy interning guard to the top of every operator. */
-
-static inline void _valid_operand(Var value) {
-  if (!value.encoding_valid()) _bad_bits(value);
-}
-
-/* The left operand is checked first. */
-static inline void _valid_operands(Var lhs, Var rhs) {
-  if (!lhs.encoding_valid()) _bad_side(lhs, <left>);
-  if (!rhs.encoding_valid()) _bad_side(rhs, <right>);
-}
-
-static void _bad_bits(Var value) {
-  unsigned long bits = value.u64;
-  raise %(bad-enc (value $bits));
-}
-
-static void _bad_side(Var value, Symbol side) {
-  unsigned long bits = value.u64;
-  String text = side;
-  raise %(bad-enc (value $bits) (side $text));
 }

@@ -54,32 +54,6 @@
 
 typedef struct Vec3 { double x, y, z; } Vec3;
 
-static inline Vec3 Vec3.sub(Vec3 a, Vec3 b) {
-  return (Vec3) { a.x - b.x, a.y - b.y, a.z - b.z };
-}
-
-/* a + b * s and a - b * s stay single expressions so the compiler fuses
-   each multiply-accumulate exactly where the C does. */
-static inline Vec3 Vec3.add_scaled(Vec3 a, Vec3 b, double s) {
-  return (Vec3) { a.x + b.x * s, a.y + b.y * s, a.z + b.z * s };
-}
-
-static inline Vec3 Vec3.sub_scaled(Vec3 a, Vec3 b, double s) {
-  return (Vec3) { a.x - b.x * s, a.y - b.y * s, a.z - b.z * s };
-}
-
-static inline Vec3 Vec3.scale(Vec3 a, double s) {
-  return (Vec3) { a.x * s, a.y * s, a.z * s };
-}
-
-static inline Vec3 Vec3.divide(Vec3 a, double s) {
-  return (Vec3) { a.x / s, a.y / s, a.z / s };
-}
-
-static inline double Vec3.dot(Vec3 a, Vec3 b) {
-  return a.x * b.x + a.y * b.y + a.z * b.z;
-}
-
 typedef struct Body {
   Vec3 position, velocity;
   double mass;
@@ -103,11 +77,29 @@ static Body bodies[BODY_COUNT] = {
       -9.51592254519715870e-05 }, 5.15138902046611451e-05 }
 };
 
+int main(int argc, char **argv) {
+  int iterations = atoi(argv[1]);
+  for (int i = 0; i < BODY_COUNT; i++) {
+    bodies[i].velocity = bodies[i].velocity.scale(DAYS_PER_YEAR);
+    bodies[i].mass *= SOLAR_MASS;
+  }
+  _offset_momentum(BODY_COUNT, bodies);
+  printf("%.9f\n", _energy(BODY_COUNT, bodies));
+  for (int i = 0; i < iterations; i++)
+    _advance(BODY_COUNT, bodies, 0.01);
+  printf("%.9f\n", _energy(BODY_COUNT, bodies));
+  return 0;
+}
+
 static void _offset_momentum(int count, Body *system) {
   Vec3 momentum = { 0.0, 0.0, 0.0 };
   for (int i = 0; i < count; i++)
     momentum = momentum.add_scaled(system[i].velocity, system[i].mass);
   system[0].velocity = momentum.divide(-SOLAR_MASS);
+}
+
+static inline Vec3 Vec3.divide(Vec3 a, double s) {
+  return (Vec3) { a.x / s, a.y / s, a.z / s };
 }
 
 static void _advance(int count, Body *system, double dt) {
@@ -129,6 +121,20 @@ static void _advance(int count, Body *system, double dt) {
       system[i].position.add_scaled(system[i].velocity, dt);
 }
 
+/* a + b * s and a - b * s stay single expressions so the compiler fuses
+   each multiply-accumulate exactly where the C does. */
+static inline Vec3 Vec3.add_scaled(Vec3 a, Vec3 b, double s) {
+  return (Vec3) { a.x + b.x * s, a.y + b.y * s, a.z + b.z * s };
+}
+
+static inline Vec3 Vec3.sub_scaled(Vec3 a, Vec3 b, double s) {
+  return (Vec3) { a.x - b.x * s, a.y - b.y * s, a.z - b.z * s };
+}
+
+static inline Vec3 Vec3.scale(Vec3 a, double s) {
+  return (Vec3) { a.x * s, a.y * s, a.z * s };
+}
+
 static double _energy(int count, Body *system) {
   double total = 0.0;
   for (int i = 0; i < count; i++) {
@@ -142,16 +148,10 @@ static double _energy(int count, Body *system) {
   return total;
 }
 
-int main(int argc, char **argv) {
-  int iterations = atoi(argv[1]);
-  for (int i = 0; i < BODY_COUNT; i++) {
-    bodies[i].velocity = bodies[i].velocity.scale(DAYS_PER_YEAR);
-    bodies[i].mass *= SOLAR_MASS;
-  }
-  _offset_momentum(BODY_COUNT, bodies);
-  printf("%.9f\n", _energy(BODY_COUNT, bodies));
-  for (int i = 0; i < iterations; i++)
-    _advance(BODY_COUNT, bodies, 0.01);
-  printf("%.9f\n", _energy(BODY_COUNT, bodies));
-  return 0;
+static inline Vec3 Vec3.sub(Vec3 a, Vec3 b) {
+  return (Vec3) { a.x - b.x, a.y - b.y, a.z - b.z };
+}
+
+static inline double Vec3.dot(Vec3 a, Vec3 b) {
+  return a.x * b.x + a.y * b.y + a.z * b.z;
 }

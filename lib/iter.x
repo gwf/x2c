@@ -89,55 +89,6 @@ static protocol Var(UnzipSharedRef) as void *;
 
 // traversal
 
-/** Initializes caller-supplied iterator storage and returns it.
-    `iter` is caller-owned storage, normally a `struct Iter` local. This call
-    writes `obj`, the `next` callback, and the initial `state`, clears the
-    auxiliary callback slot, and returns `iter`. It allocates nothing; the
-    iterator lives as long as the supplied storage.
-
-    A callback fills `*out` and returns 1, or returns 0 to report
-    exhaustion. It must never report success with `void`, which the element
-    domain excludes. `Iter.try_next` raises `<void-op>` for that violation. A
-    null `next` yields an already-exhausted iterator. Inside a callback, read
-    the stored fields with `->`; `iter.next(...)` is receiver syntax and calls
-    the method instead of the field.
-
-    ```x2c
-    ~static int _evens_next(Iter iter, Var *out) {
-    ~  long value = iter.state.long();
-    ~  if (value > iter.obj.long()) return 0;
-    ~  *out = (int) value;
-    ~  iter.state = value + 2;
-    ~  return 1;
-    ~}
-    ~
-    ~int main(void) {
-    struct Iter storage;
-    Iter evens = Iter.init(&storage, 6, _evens_next, 0);
-    Var value;
-    while (evens.try_next(value)) printf("%d\n", value);
-    ~  return 0;
-    ~}
-    ```
-
-    Storage must outlive every iterator derived from it, because a pipeline
-    stage keeps a pointer to its source. Never return an `Iter` built over
-    locals, since the iterator would outlive the struct it names; return a
-    collected `List` or `Array`, or take the storage as a parameter. One
-    `struct Iter` is one live iterator, so reusing a single storage variable
-    for two stages of a pipeline silently overwrites the first.
-
-    A null `iter` returns NULL.
-*/
-Self Iter.init(Self iter, Var obj, IterNextFn next, Var state) {
-  if (!iter) return NULL;
-  iter.obj = obj;
-  iter.state = state;
-  iter.next = next;
-  iter.aux = NULL;
-  return iter;
-}
-
 /** Returns zeroed iterator storage owned by the active `Scope`.
     Use this when an iterator itself must be returned or stored as a value.
     Producers such as `Map.keys` initialize the result through their existing
@@ -150,41 +101,6 @@ Self Iter.init(Self iter, Var obj, IterNextFn next, Var state) {
     Raises: `<alloc-fail>` when storage cannot be allocated.
 */
 meta native Iter Iter.new(void) => xcalloc(1, sizeof(struct Iter));
-
-/** Advances `iter`, writing the next element through `out`.
-    Returns nonzero when it produced an element and zero once the iterator
-    is exhausted, and writes `out` only in the nonzero case. Prefer this
-    form. Status travels separately from the payload, so no value is reserved
-    to mean "finished".
-
-    An `Iter` is single-pass. There is no rewind, so build a fresh iterator
-    when you need a second traversal.
-
-    ```x2c
-    ~int main(void) {
-    struct Iter storage;
-    Iter counts = range(3, 1, -1, &storage);
-    Var value;
-    while (counts.try_next(value)) printf("%d\n", value);
-    ~  return 0;
-    ~}
-    ```
-    Raises: `<void-op>` when a source callback claims success with a `void`
-    element, plus any cause raised by that callback. A null `iter` or `out`
-    reads as exhausted without raising.
-*/
-int Iter.try_next(Iter iter, Var &?out) {
-  if (!out) return 0;
-  if (!iter || !iter.next) return 0;
-  /* Arrow syntax calls the stored callback. A receiver call here would
-     recursively select Iter.next. */
-  if (!iter->next(iter, &out)) {
-    iter.next = NULL;
-    return 0;
-  }
-  if (out is void) raise %(void-op (operation "Iter.try_next"));
-  return 1;
-}
 
 /** Returns the next element, or `void` once `iter` is exhausted.
     An adapter over `Iter.try_next`, unambiguous because no iterator may
@@ -236,56 +152,6 @@ meta native Iter range(int start, int end, int step, Iter iter) {
   return iter.init(_range_raw_pair(end, step), _range_general_next, start);
 }
 
-static int _range_up_next(Iter iter, Var *out) {
-  int current = _range_raw_value(iter.state);
-  int stop = _range_raw_value(iter.obj);
-  if (current > stop) return 0;
-  *out = current;
-  if (current == stop) iter.next = NULL;
-  else iter.state = _range_raw_int(current + 1);
-  return 1;
-}
-
-static int _range_down_next(Iter iter, Var *out) {
-  int current = _range_raw_value(iter.state);
-  int stop = _range_raw_value(iter.obj);
-  if (current < stop) return 0;
-  *out = current;
-  if (current == stop) iter.next = NULL;
-  else iter.state = _range_raw_int(current - 1);
-  return 1;
-}
-
-static int _range_general_next(Iter iter, Var *out) {
-  int stop = _range_raw_high(iter.obj);
-  int step = _range_raw_value(iter.obj);
-  int current = iter.state;
-  if ((step > 0 && current > stop) || (step < 0 && current < stop)) return 0;
-  *out = current;
-  long long next = (long long) current + step;
-  if ((step > 0 && next > stop) || (step < 0 && next < stop))
-    iter.next = NULL;
-  else iter.state = (int) next;
-  return 1;
-}
-
-static Var _range_raw_int(int value) =>
-  (Var) { .u64 = (unsigned long) ((long long) value - INT_MIN) };
-
-static int _range_raw_value(Var value) =>
-  (int) ((long long) (unsigned) value.u64 + INT_MIN);
-
-static Var _range_raw_pair(int high, int low) {
-  unsigned long upper = (unsigned) ((long long) high - INT_MIN);
-  unsigned lower = (unsigned) ((long long) low - INT_MIN);
-  return (Var) { .u64 = (upper << 32) | lower };
-}
-
-static int _range_raw_high(Var value) {
-  unsigned high = (unsigned) (value.u64 >> 32);
-  return (int) ((long long) high + INT_MIN);
-}
-
 // mapping stages
 
 /** Returns a lazy iterator over `func` applied to each element of `iter`.
@@ -323,13 +189,6 @@ meta native Iter Iter.map(Iter iter, Func func, Iter dest) {
   return dest;
 }
 
-static int _map_next(Iter iter, Var *out) {
-  Iter source = iter.obj;
-  if (!source.try_next(*out)) return 0;
-  *out = iter.aux.apply_value(*out);
-  return 1;
-}
-
 /** Returns a lazy iterator over elements accepted by `func`'s `Var`
     truthiness. The predicate fits in `dest`, so that storage is all you
     declare. Rejected elements are consumed without being yielded, so one
@@ -348,19 +207,6 @@ meta native Iter Iter.filter(Iter iter, Func func, Iter dest) {
   dest.init(iter, _filter_next, void);
   dest.aux = func;
   return dest;
-}
-
-static int _filter_next(Iter iter, Var *out) {
-  Iter source = iter.obj;
-  Func func = iter.aux;
-  if (!source) return 0;
-  foreach (Var value in source) {
-    if (func.apply_value(value)) {
-      *out = value;
-      return 1;
-    }
-  }
-  return 0;
 }
 
 /** Returns a lazy iterator over every new accumulator of `fn`.
@@ -398,16 +244,6 @@ meta native Iter Iter.scan(Iter iter, Var seed, Func fn, Iter dest) {
   return dest;
 }
 
-static int _scan_next(Iter iter, Var *out) {
-  Iter source = iter.obj;
-  if (!source || !iter.aux) return 0;
-  Var item;
-  if (!source.try_next(item)) return 0;
-  iter.state = iter.aux.apply_values(iter.state, item);
-  *out = iter.state;
-  return 1;
-}
-
 /** Returns a lazy iterator over the running numeric sum of `iter`.
     The numeric special case of `Iter.scan`. Each element is added through
     `Var.binary` with the same promotion and failure rules as `Iter.sum`, and
@@ -421,15 +257,6 @@ static int _scan_next(Iter iter, Var *out) {
 */
 meta native Iter Iter.accumulate(Iter iter, Var initial, Iter dest) =>
   dest.init(iter, _accumulate_next, initial is void ? (Var) 0 : initial);
-
-static int _accumulate_next(Iter iter, Var *out) {
-  Iter source = iter.obj;
-  Var item;
-  if (!source.try_next(item)) return 0;
-  iter.state = iter.state.binary(<+>, item);
-  *out = iter.state;
-  return 1;
-}
 
 // pairing stages
 
@@ -446,6 +273,20 @@ static int _accumulate_next(Iter iter, Var *out) {
 */
 meta native Iter Iter.zip(Iter left, Iter right, Iter dest) =>
   left.zip_with(right, NULL, dest);
+
+/** Returns a lazy iterator over `fn(left, right)`, requiring `fn`.
+    The strict form of `Iter.zip_with`. Behavior is identical, except that a
+    null `fn` returns NULL instead of yielding pairs. Use it when a missing
+    callback should fail at construction instead of changing the element
+    type.
+
+    The sources, destination, callback lifetime, value passing, and pull-time
+    failures are those of `Iter.zip_with`. A null `fn` or `dest` returns NULL.
+*/
+meta native Iter Iter.map2(Iter left, Iter right, Func fn, Iter dest) {
+  if (!fn) return NULL;
+  return left.zip_with(right, fn, dest);
+}
 
 /** Returns a lazy iterator over `fn(left, right)`, applied pairwise.
     Like `Iter.zip`, but each pair is combined by `fn` instead of being
@@ -468,30 +309,6 @@ meta native Iter Iter.zip_with(Iter left, Iter right, Func fn, Iter dest) {
   return dest;
 }
 
-static int _zip_with_next(Iter iter, Var *out) {
-  Iter left_iter = iter.obj, right_iter = iter.state;
-  if (!left_iter || !right_iter) return 0;
-  Var left, right;
-  if (!left_iter.try_next(left) || !right_iter.try_next(right)) return 0;
-  if (iter.aux) *out = iter.aux.apply_values(left, right);
-  else *out = $(left, right);
-  return 1;
-}
-
-/** Returns a lazy iterator over `fn(left, right)`, requiring `fn`.
-    The strict form of `Iter.zip_with`. Behavior is identical, except that a
-    null `fn` returns NULL instead of yielding pairs. Use it when a missing
-    callback should fail at construction instead of changing the element
-    type.
-
-    The sources, destination, callback lifetime, value passing, and pull-time
-    failures are those of `Iter.zip_with`. A null `fn` or `dest` returns NULL.
-*/
-meta native Iter Iter.map2(Iter left, Iter right, Func fn, Iter dest) {
-  if (!fn) return NULL;
-  return left.zip_with(right, fn, dest);
-}
-
 /** Returns a lazy iterator over `(index value)` `List`s starting at `start`.
     The first pulled value is paired with exactly `start`, then the native
     `int` index increases by one for each source value. The source and `dest`
@@ -504,16 +321,6 @@ meta native Iter Iter.map2(Iter left, Iter right, Func fn, Iter dest) {
 meta native Iter Iter.enumerate(Iter iter, int start, Iter dest) {
   if (!dest) return NULL;
   return dest.init(iter, _enumerate_next, start);
-}
-
-static int _enumerate_next(Iter iter, Var *out) {
-  Iter source = iter.obj;
-  Var value;
-  if (!source.try_next(value)) return 0;
-  int index = iter.state;
-  iter.state = index + 1;
-  *out = $(index, value);
-  return 1;
 }
 
 // sequence stages
@@ -529,15 +336,6 @@ meta native Iter Iter.chain(Iter first, Iter second, Iter dest) {
   return dest.init(first, _chain_next, second);
 }
 
-static int _chain_next(Iter iter, Var *out) {
-  Iter current = iter.obj;
-  if (current && current.try_next(*out)) return 1;
-  current = iter.state;
-  iter.obj = current;
-  iter.state = void;
-  return current && current.try_next(*out);
-}
-
 /** Returns a lazy iterator over at most `count` leading source values.
     Construction consumes nothing. Pulling stops after `count` values or
     source exhaustion, whichever comes first, and leaves any later source
@@ -550,15 +348,6 @@ meta native Iter Iter.head(Iter iter, int count, Iter dest) {
   return dest.init(iter, _head_next, count > 0 ? count : 0);
 }
 
-static int _head_next(Iter iter, Var *out) {
-  Iter source = iter.obj;
-  int remaining = iter.state;
-  if (!source || remaining <= 0) return 0;
-  if (!source.try_next(*out)) return 0;
-  iter.state = remaining - 1;
-  return 1;
-}
-
 /** Returns a lazy iterator that yields `value` at most `count` times.
     A nonpositive count yields nothing. `dest` is caller-owned, and any
     storage referenced by `value` must outlive traversal. A null `dest`
@@ -567,14 +356,6 @@ static int _head_next(Iter iter, Var *out) {
 meta native Iter Iter.repeat(Var value, int count, Iter dest) {
   if (!dest) return NULL;
   return dest.init(value, _repeat_next, count > 0 ? count : 0);
-}
-
-static int _repeat_next(Iter iter, Var *out) {
-  int remaining = iter.state;
-  if (remaining <= 0) return 0;
-  iter.state = remaining - 1;
-  *out = iter.obj;
-  return 1;
 }
 
 /** Returns a lazy iterator that yields the first occurrence of each value.
@@ -590,21 +371,6 @@ static int _repeat_next(Iter iter, Var *out) {
 meta native Iter Iter.unique(Iter iter, Iter dest) {
   if (!dest) return NULL;
   return dest.init(iter, _unique_next, %{});
-}
-
-static int _unique_next(Iter iter, Var *out) {
-  Iter source = iter.obj;
-  Map seen = iter.state;
-  if (!source) return 0;
-  loop {
-    Var value;
-    if (!source.try_next(value)) return 0;
-    if (!(value in seen)) {
-      seen[value] = value;
-      *out = value;
-      return 1;
-    }
-  }
 }
 
 // unzip columns
@@ -649,74 +415,55 @@ Iter Iter.unzip(Iter iter, UnzipShared *shared, Iter dest) {
   return dest.init((UnzipSharedRef) shared, _unzip_next, 0);
 }
 
-static void _unzip_shared_init(UnzipShared *u, Iter source) {
-  u.source = source;
-  u.buffers[0] = [];
-  u.buffers[1] = [];
-  u.heads[0] = u.heads[1] = 0;
-  u.done = 0;
-  for (int i = 0; i < 2; i++) {
-    u.columns[i].shared = u;
-    u.columns[i].column = i;
-    Iter.init(
-      &u.column_iters[i], (UnzipColumnRef) &u.columns[i],
-      _unzip_column_next, 1);
-  }
-}
 
-static int _unzip_next(Iter iter, Var *out) {
-  UnzipSharedRef shared = iter.obj;
-  if (!shared) return 0;
-  int stage = iter.state;
-  if (stage >= 2) return 0;
-  Iter child = &shared.column_iters[stage];
-  iter.state = stage + 1;
-  *out = child;
-  return 1;
-}
 
-static int _unzip_column_next(Iter iter, Var *out) {
-  UnzipColumnRef state = iter.obj;
-  if (!state) return 0;
-  UnzipShared *shared = state.shared;
-  if (!_unzip_ensure(shared, state.column)) return 0;
-  *out = shared.buffers[state.column][shared.heads[state.column]];
-  shared.heads[state.column] += 1;
-  _unzip_compact(shared, state.column);
-  return 1;
-}
+/** Initializes caller-supplied iterator storage and returns it.
+    `iter` is caller-owned storage, normally a `struct Iter` local. This call
+    writes `obj`, the `next` callback, and the initial `state`, clears the
+    auxiliary callback slot, and returns `iter`. It allocates nothing; the
+    iterator lives as long as the supplied storage.
 
-static int _unzip_ensure(UnzipShared *shared, int column) {
-  if (shared.heads[column] < shared.buffers[column].len()) return 1;
-  if (shared.done) return 0;
-  Var pair;
-  if (!shared.source.try_next(pair)) {
-    shared.done = 1;
-    return 0;
-  }
-  _unzip_buffer_push(shared, pair);
-  return 1;
-}
+    A callback fills `*out` and returns 1, or returns 0 to report
+    exhaustion. It must never report success with `void`, which the element
+    domain excludes. `Iter.try_next` raises `<void-op>` for that violation. A
+    null `next` yields an already-exhausted iterator. Inside a callback, read
+    the stored fields with `->`; `iter.next(...)` is receiver syntax and calls
+    the method instead of the field.
 
-static void _unzip_buffer_push(UnzipShared *shared, Var pair) {
-  if (pair is not <list>)
-    raise %(bad-types (operation "Iter.unzip") (want "two-element List")
-            (value $pair));
-  List list = pair;
-  if (!list || !list.cdr() || list.cdr().cdr())
-    raise %(bad-arg (operation "Iter.unzip") (want "two-element List")
-            (value $pair));
-  Var (first, second) = list;
-  shared.buffers[0].push(first);
-  shared.buffers[1].push(second);
-}
+    ```x2c
+    ~static int _evens_next(Iter iter, Var *out) {
+    ~  long value = iter.state.long();
+    ~  if (value > iter.obj.long()) return 0;
+    ~  *out = (int) value;
+    ~  iter.state = value + 2;
+    ~  return 1;
+    ~}
+    ~
+    ~int main(void) {
+    struct Iter storage;
+    Iter evens = Iter.init(&storage, 6, _evens_next, 0);
+    Var value;
+    while (evens.try_next(value)) printf("%d\n", value);
+    ~  return 0;
+    ~}
+    ```
 
-static void _unzip_compact(UnzipShared *shared, int column) {
-  int consumed = shared.heads[column];
-  if (consumed < UNZIP_COMPACT_THRESHOLD) return;
-  if (consumed < shared.buffers[column].len() - consumed) return;
-  shared.buffers[column].setslice(0, consumed, NULL);
-  shared.heads[column] = 0;
+    Storage must outlive every iterator derived from it, because a pipeline
+    stage keeps a pointer to its source. Never return an `Iter` built over
+    locals, since the iterator would outlive the struct it names; return a
+    collected `List` or `Array`, or take the storage as a parameter. One
+    `struct Iter` is one live iterator, so reusing a single storage variable
+    for two stages of a pipeline silently overwrites the first.
+
+    A null `iter` returns NULL.
+*/
+Self Iter.init(Self iter, Var obj, IterNextFn next, Var state) {
+  if (!iter) return NULL;
+  iter.obj = obj;
+  iter.state = state;
+  iter.next = next;
+  iter.aux = NULL;
+  return iter;
 }
 
 // reductions
@@ -858,4 +605,269 @@ meta native Var Iter.min(Iter iter) {
   if (!iter.try_next(best)) return void;
   foreach (Var item in iter) if (item.compare(best) < 0) best = item;
   return best;
+}
+
+/** Advances `iter`, writing the next element through `out`.
+    Returns nonzero when it produced an element and zero once the iterator
+    is exhausted, and writes `out` only in the nonzero case. Prefer this
+    form. Status travels separately from the payload, so no value is reserved
+    to mean "finished".
+
+    An `Iter` is single-pass. There is no rewind, so build a fresh iterator
+    when you need a second traversal.
+
+    ```x2c
+    ~int main(void) {
+    struct Iter storage;
+    Iter counts = range(3, 1, -1, &storage);
+    Var value;
+    while (counts.try_next(value)) printf("%d\n", value);
+    ~  return 0;
+    ~}
+    ```
+    Raises: `<void-op>` when a source callback claims success with a `void`
+    element, plus any cause raised by that callback. A null `iter` or `out`
+    reads as exhausted without raising.
+*/
+int Iter.try_next(Iter iter, Var &?out) {
+  if (!out) return 0;
+  if (!iter || !iter.next) return 0;
+  /* Arrow syntax calls the stored callback. A receiver call here would
+     recursively select Iter.next. */
+  if (!iter->next(iter, &out)) {
+    iter.next = NULL;
+    return 0;
+  }
+  if (out is void) raise %(void-op (operation "Iter.try_next"));
+  return 1;
+}
+
+// range iteration
+
+static int _range_up_next(Iter iter, Var *out) {
+  int current = _range_raw_value(iter.state);
+  int stop = _range_raw_value(iter.obj);
+  if (current > stop) return 0;
+  *out = current;
+  if (current == stop) iter.next = NULL;
+  else iter.state = _range_raw_int(current + 1);
+  return 1;
+}
+
+static int _range_down_next(Iter iter, Var *out) {
+  int current = _range_raw_value(iter.state);
+  int stop = _range_raw_value(iter.obj);
+  if (current < stop) return 0;
+  *out = current;
+  if (current == stop) iter.next = NULL;
+  else iter.state = _range_raw_int(current - 1);
+  return 1;
+}
+
+static int _range_general_next(Iter iter, Var *out) {
+  int stop = _range_raw_high(iter.obj);
+  int step = _range_raw_value(iter.obj);
+  int current = iter.state;
+  if ((step > 0 && current > stop) || (step < 0 && current < stop)) return 0;
+  *out = current;
+  long long next = (long long) current + step;
+  if ((step > 0 && next > stop) || (step < 0 && next < stop))
+    iter.next = NULL;
+  else iter.state = (int) next;
+  return 1;
+}
+
+static Var _range_raw_int(int value) =>
+  (Var) { .u64 = (unsigned long) ((long long) value - INT_MIN) };
+
+static int _range_raw_value(Var value) =>
+  (int) ((long long) (unsigned) value.u64 + INT_MIN);
+
+static Var _range_raw_pair(int high, int low) {
+  unsigned long upper = (unsigned) ((long long) high - INT_MIN);
+  unsigned lower = (unsigned) ((long long) low - INT_MIN);
+  return (Var) { .u64 = (upper << 32) | lower };
+}
+
+static int _range_raw_high(Var value) {
+  unsigned high = (unsigned) (value.u64 >> 32);
+  return (int) ((long long) high + INT_MIN);
+}
+
+// mapping stages
+
+static int _map_next(Iter iter, Var *out) {
+  Iter source = iter.obj;
+  if (!source.try_next(*out)) return 0;
+  *out = iter.aux.apply_value(*out);
+  return 1;
+}
+
+static int _filter_next(Iter iter, Var *out) {
+  Iter source = iter.obj;
+  Func func = iter.aux;
+  if (!source) return 0;
+  foreach (Var value in source) {
+    if (func.apply_value(value)) {
+      *out = value;
+      return 1;
+    }
+  }
+  return 0;
+}
+
+static int _scan_next(Iter iter, Var *out) {
+  Iter source = iter.obj;
+  if (!source || !iter.aux) return 0;
+  Var item;
+  if (!source.try_next(item)) return 0;
+  iter.state = iter.aux.apply_values(iter.state, item);
+  *out = iter.state;
+  return 1;
+}
+
+static int _accumulate_next(Iter iter, Var *out) {
+  Iter source = iter.obj;
+  Var item;
+  if (!source.try_next(item)) return 0;
+  iter.state = iter.state.binary(<+>, item);
+  *out = iter.state;
+  return 1;
+}
+
+// pairing stages
+
+static int _zip_with_next(Iter iter, Var *out) {
+  Iter left_iter = iter.obj, right_iter = iter.state;
+  if (!left_iter || !right_iter) return 0;
+  Var left, right;
+  if (!left_iter.try_next(left) || !right_iter.try_next(right)) return 0;
+  if (iter.aux) *out = iter.aux.apply_values(left, right);
+  else *out = $(left, right);
+  return 1;
+}
+
+static int _enumerate_next(Iter iter, Var *out) {
+  Iter source = iter.obj;
+  Var value;
+  if (!source.try_next(value)) return 0;
+  int index = iter.state;
+  iter.state = index + 1;
+  *out = $(index, value);
+  return 1;
+}
+
+// sequence stages
+
+static int _chain_next(Iter iter, Var *out) {
+  Iter current = iter.obj;
+  if (current && current.try_next(*out)) return 1;
+  current = iter.state;
+  iter.obj = current;
+  iter.state = void;
+  return current && current.try_next(*out);
+}
+
+static int _head_next(Iter iter, Var *out) {
+  Iter source = iter.obj;
+  int remaining = iter.state;
+  if (!source || remaining <= 0) return 0;
+  if (!source.try_next(*out)) return 0;
+  iter.state = remaining - 1;
+  return 1;
+}
+
+static int _repeat_next(Iter iter, Var *out) {
+  int remaining = iter.state;
+  if (remaining <= 0) return 0;
+  iter.state = remaining - 1;
+  *out = iter.obj;
+  return 1;
+}
+
+static int _unique_next(Iter iter, Var *out) {
+  Iter source = iter.obj;
+  Map seen = iter.state;
+  if (!source) return 0;
+  loop {
+    Var value;
+    if (!source.try_next(value)) return 0;
+    if (!(value in seen)) {
+      seen[value] = value;
+      *out = value;
+      return 1;
+    }
+  }
+}
+
+// unzip columns
+
+static void _unzip_shared_init(UnzipShared *u, Iter source) {
+  u.source = source;
+  u.buffers[0] = [];
+  u.buffers[1] = [];
+  u.heads[0] = u.heads[1] = 0;
+  u.done = 0;
+  for (int i = 0; i < 2; i++) {
+    u.columns[i].shared = u;
+    u.columns[i].column = i;
+    Iter.init(
+      &u.column_iters[i], (UnzipColumnRef) &u.columns[i],
+      _unzip_column_next, 1);
+  }
+}
+
+static int _unzip_next(Iter iter, Var *out) {
+  UnzipSharedRef shared = iter.obj;
+  if (!shared) return 0;
+  int stage = iter.state;
+  if (stage >= 2) return 0;
+  Iter child = &shared.column_iters[stage];
+  iter.state = stage + 1;
+  *out = child;
+  return 1;
+}
+
+static int _unzip_column_next(Iter iter, Var *out) {
+  UnzipColumnRef state = iter.obj;
+  if (!state) return 0;
+  UnzipShared *shared = state.shared;
+  if (!_unzip_ensure(shared, state.column)) return 0;
+  *out = shared.buffers[state.column][shared.heads[state.column]];
+  shared.heads[state.column] += 1;
+  _unzip_compact(shared, state.column);
+  return 1;
+}
+
+static int _unzip_ensure(UnzipShared *shared, int column) {
+  if (shared.heads[column] < shared.buffers[column].len()) return 1;
+  if (shared.done) return 0;
+  Var pair;
+  if (!shared.source.try_next(pair)) {
+    shared.done = 1;
+    return 0;
+  }
+  _unzip_buffer_push(shared, pair);
+  return 1;
+}
+
+static void _unzip_buffer_push(UnzipShared *shared, Var pair) {
+  if (pair is not <list>)
+    raise %(bad-types (operation "Iter.unzip") (want "two-element List")
+            (value $pair));
+  List list = pair;
+  if (!list || !list.cdr() || list.cdr().cdr())
+    raise %(bad-arg (operation "Iter.unzip") (want "two-element List")
+            (value $pair));
+  Var (first, second) = list;
+  shared.buffers[0].push(first);
+  shared.buffers[1].push(second);
+}
+
+static void _unzip_compact(UnzipShared *shared, int column) {
+  int consumed = shared.heads[column];
+  if (consumed < UNZIP_COMPACT_THRESHOLD) return;
+  if (consumed < shared.buffers[column].len() - consumed) return;
+  shared.buffers[column].setslice(0, consumed, NULL);
+  shared.heads[column] = 0;
 }

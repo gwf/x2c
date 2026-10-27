@@ -41,32 +41,6 @@ static macro Stmt $fail.meta_helper_client_helper_stopped(
     $site, %("function: $($name)" "reason: $($reason)"));
 }
 
-/** Reports a meta function's error `message` with `notes` under
-    `category` at the position recorded first in or around `node`, or at
-    `site` when it has none. A `fatal` report does not return.
-*/
-void Compiler.report_meta_error(
-  Compiler c, Var node, Symbol category, String message, Token site,
-  List notes, int fatal) {
-  int origin = _syntax_origin(node);
-  Token token = origin ? NULL : site;
-  with (c.origin = origin ? origin : c.origin) {
-    if (fatal) c.report_error(category, message, token, notes);
-    c.report_problem(category, message, token, notes);
-  }
-}
-
-/* The `N` of the first `(at N ...)` in or around `node`, or 0. */
-static int _syntax_origin(Var node) {
-  if (node is not <list>) return 0;
-  match (node) case %(at ?(int origin) ?): return origin;
-  foreach (Var child in node.list()) {
-    int origin = _syntax_origin(child);
-    if (origin) return origin;
-  }
-  return 0;
-}
-
 /** Owns one compiled helper's configuration and process. Callers close it
     after its last call; closing again is harmless.
 */
@@ -114,6 +88,109 @@ Var Compiler.loaded_helper_call(
   Compiler c, String name, Token site, List arguments, String provider) =>
   _call_helper(c, name, site, arguments, provider, <load-call>);
 
+/** Reports a meta function's error `message` with `notes` under
+    `category` at the position recorded first in or around `node`, or at
+    `site` when it has none. A `fatal` report does not return.
+*/
+void Compiler.report_meta_error(
+  Compiler c, Var node, Symbol category, String message, Token site,
+  List notes, int fatal) {
+  int origin = _syntax_origin(node);
+  Token token = origin ? NULL : site;
+  with (c.origin = origin ? origin : c.origin) {
+    if (fatal) c.report_error(category, message, token, notes);
+    c.report_problem(category, message, token, notes);
+  }
+}
+
+// lifecycle
+
+/** Creates an independent helper at `path`, with failures by table index
+    and source paths mapped to their table indices. No process starts until
+    a call needs it. The caller keeps the canonical configuration values.
+*/
+MetaHelper MetaHelper.new(String path, Map failures, Map units) {
+  MetaHelper helper = Scope.malloc_finalized(sizeof(struct MetaHelper), _drop);
+  *helper = (struct MetaHelper) {
+    .path = path, .to = -1, .from = -1, .status = -1};
+  auto (&helper.scope) {
+    helper.failures = failures ? failures.copy() : NULL;
+    helper.units = units ? units.copy() : NULL;
+    helper.input = Buffer.new(0);
+  }
+  return helper;
+}
+
+/** Retains this helper's executable independently of later cache rebuilds.
+    The copy lasts until close, including across helper restarts.
+*/
+void MetaHelper.retain_executable(MetaHelper helper) {
+  helper.snapshot = Path.temp_dir();
+  String path = %"$(helper.snapshot)/helper";
+  Path.copy_file(helper.path, path);
+  helper.path = path;
+}
+
+/** Uses `helper` for ordinary translation, retaining its configuration
+    through process shutdown. Replaces and closes the preceding helper.
+*/
+void Compiler.use_meta_helper(MetaHelper helper) {
+  if (primary) _close(primary);
+  if (!primary_scope) Scope.shutdown_hook(_shutdown);
+  primary = helper;
+  if (!helper) return;
+  Scope.move(helper, &primary_scope);
+  helper.path.try_own();
+  foreach ((int key, String value) in helper.failures) value.try_own();
+  foreach ((String key, int value) in helper.units) key.try_own();
+}
+
+/** Returns why this helper cannot call the functions of `provider`: the
+    helper or the provider's table did not build. Returns NULL when it can.
+    Does not invoke a function or reset native state.
+*/
+String MetaHelper.failure(MetaHelper m, String provider) {
+  MetaHelper previous = active;
+  active = m;
+  defer active = previous;
+  return _failure(_table_of(Path.real(provider), 0));
+}
+
+/** Selects the table of the unit at `filename` for the calls that follow,
+    and resets the unit's `meta static` values before the first one.
+*/
+void Compiler.begin_meta_unit(Compiler c, String filename) {
+  MetaHelper previous = active;
+  active = c.meta_helper ? c.meta_helper : primary;
+  defer active = previous;
+  if (!active) return;
+  active.table = filename ? _table_of(Path.absolute(filename), 0) : 0;
+  active.reset = 1;
+}
+
+/** Stops the helper this process runs, which a translation worker does
+    when its units are done and every process does as it ends.
+*/
+void Compiler.stop_meta_helper(void) {
+  if (!primary) return;
+  MetaHelper previous = active;
+  active = primary;
+  defer active = previous;
+  _stop(0);
+}
+
+/** Stops the process while retaining its executable and configuration.
+    Its next call starts with fresh native state.
+*/
+void MetaHelper.restart(MetaHelper helper) {
+  MetaHelper previous = active;
+  active = helper;
+  defer active = previous;
+  _stop(0);
+}
+
+// the compiler's side of the project meta helper
+
 static Var _call_helper(
   Compiler c, String name, Token site, List arguments, String provider,
   Symbol operation) {
@@ -153,6 +230,17 @@ static Var _call_helper(
       default: _stopped(call, "the helper sent an unknown reply");
     }
   }
+}
+
+/* The `N` of the first `(at N ...)` in or around `node`, or 0. */
+static int _syntax_origin(Var node) {
+  if (node is not <list>) return 0;
+  match (node) case %(at ?(int origin) ?): return origin;
+  foreach (Var child in node.list()) {
+    int origin = _syntax_origin(child);
+    if (origin) return origin;
+  }
+  return 0;
 }
 
 /* Answers the body's query with the compiler's own `operation` applied to
@@ -211,12 +299,6 @@ static void _set_deadline(Call &call) {
   String text = Env.get("X2C_META_TIMEOUT");
   call.limit = text ? atof(text) : 60.0;
   call.deadline = call.limit > 0 ? _now() + call.limit : 0;
-}
-
-static double _now(void) {
-  struct timespec now;
-  clock_gettime(CLOCK_MONOTONIC, &now);
-  return now.tv_sec + now.tv_nsec / 1e9;
 }
 
 /* The next reply. A helper that passes the deadline or ends first is
@@ -292,44 +374,6 @@ static void _exec(int requests, int replies) {
   _exit(127);
 }
 
-/* Whether this process started the active helper. A worker
-   forked from a process that runs one starts its own. */
-static int _running(void) =>
-  active && active.pid > 0 && active.owner == getpid();
-
-/* Whether the helper has ended, which reaps it and keeps its status. */
-static int _reaped(void) {
-  int status;
-  if (active.status < 0 &&
-      waitpid(active.pid, &status, WNOHANG) == active.pid)
-    active.status = status;
-  return active.status >= 0;
-}
-
-/* Ends the helper this process started, if any, and forgets it: asks it
-   to quit, or sends `signal` to its process group, and reaps it. A process
-   group lasts, under its id, while any process in it runs, so killing the
-   helper's group after the reap ends only what the helper started and
-   left running, such as a job whose body crashed. Returns the helper's
-   wait status. */
-static int _stop(int signal) {
-  int status = 0;
-  if (_running()) {
-    if (signal) killpg(active.pid, signal);
-    else _write_frame(%(quit), 0);
-    close(active.to);
-    close(active.from);
-    if (active.status < 0) waitpid(active.pid, &active.status, 0);
-    killpg(active.pid, SIGKILL);
-    status = active.status;
-  }
-  active.pid = 0;
-  active.status = -1;
-  active.to = active.from = -1;
-  if (active.input) active.input.clear();
-  return status;
-}
-
 /* Why the helper that answered no more ended: how it exited, or the signal
    that stopped it, which is also how a body that overflows the stack
    ends. */
@@ -341,43 +385,6 @@ static String _exit_reason(void) {
 }
 
 // frames
-
-/* Sends one frame, returning 1, 0 when the helper has gone, or -1 when
-   `deadline` passes. A helper that has exited must not end the compiler
-   with SIGPIPE; a helper not reading must not block its deadline. */
-static int _write_frame(List message, double deadline) {
-  Buffer out = auto Buffer.new(0);
-  if (!out.write_datum_frame(message)) return 0;
-  String frame = %"$out";
-  void (*previous)(int) = signal(SIGPIPE, SIG_IGN);
-  size_t done = 0, size = frame.len();
-  int status = 1;
-  while (done < size) {
-    int wait = 100;
-    if (deadline > 0) {
-      double left = deadline - _now();
-      if (left <= 0) { status = -1; break; }
-      if (left < 0.1) wait = (int) (left * 1000) + 1;
-    }
-    ssize_t n = write(active.to, (char *) frame + done, size - done);
-    if (n > 0) { done += n; continue; }
-    if (n < 0 && errno == EINTR) continue;
-    if (n < 0 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
-      struct pollfd ready = { .fd = active.to, .events = POLLOUT };
-      int polled = poll(&ready, 1, wait);
-      if ((polled < 0 && errno != EINTR) || _reaped() ||
-          (ready.revents & (POLLERR | POLLHUP | POLLNVAL))) {
-        status = 0;
-        break;
-      }
-      continue;
-    }
-    status = 0;
-    break;
-  }
-  signal(SIGPIPE, previous);
-  return status;
-}
 
 /* Reads the next reply frame into `reply`. Returns 1, 0 when the helper
    ended, or -1 when `deadline` passed first. */
@@ -441,74 +448,92 @@ static void _overdue(Call &c) {
   $fail.meta_helper_client_helper_timeout(c.compiler, c.site, c.limit, c.name);
 }
 
+/* Ends the helper this process started, if any, and forgets it: asks it
+   to quit, or sends `signal` to its process group, and reaps it. A process
+   group lasts, under its id, while any process in it runs, so killing the
+   helper's group after the reap ends only what the helper started and
+   left running, such as a job whose body crashed. Returns the helper's
+   wait status. */
+static int _stop(int signal) {
+  int status = 0;
+  if (_running()) {
+    if (signal) killpg(active.pid, signal);
+    else _write_frame(%(quit), 0);
+    close(active.to);
+    close(active.from);
+    if (active.status < 0) waitpid(active.pid, &active.status, 0);
+    killpg(active.pid, SIGKILL);
+    status = active.status;
+  }
+  active.pid = 0;
+  active.status = -1;
+  active.to = active.from = -1;
+  if (active.input) active.input.clear();
+  return status;
+}
+
+/* Whether this process started the active helper. A worker
+   forked from a process that runs one starts its own. */
+static int _running(void) =>
+  active && active.pid > 0 && active.owner == getpid();
+
+
+
+/* Sends one frame, returning 1, 0 when the helper has gone, or -1 when
+   `deadline` passes. A helper that has exited must not end the compiler
+   with SIGPIPE; a helper not reading must not block its deadline. */
+static int _write_frame(List message, double deadline) {
+  Buffer out = auto Buffer.new(0);
+  if (!out.write_datum_frame(message)) return 0;
+  String frame = %"$out";
+  void (*previous)(int) = signal(SIGPIPE, SIG_IGN);
+  size_t done = 0, size = frame.len();
+  int status = 1;
+  while (done < size) {
+    int wait = 100;
+    if (deadline > 0) {
+      double left = deadline - _now();
+      if (left <= 0) { status = -1; break; }
+      if (left < 0.1) wait = (int) (left * 1000) + 1;
+    }
+    ssize_t n = write(active.to, (char *) frame + done, size - done);
+    if (n > 0) { done += n; continue; }
+    if (n < 0 && errno == EINTR) continue;
+    if (n < 0 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
+      struct pollfd ready = { .fd = active.to, .events = POLLOUT };
+      int polled = poll(&ready, 1, wait);
+      if ((polled < 0 && errno != EINTR) || _reaped() ||
+          (ready.revents & (POLLERR | POLLHUP | POLLNVAL))) {
+        status = 0;
+        break;
+      }
+      continue;
+    }
+    status = 0;
+    break;
+  }
+  signal(SIGPIPE, previous);
+  return status;
+}
+
+static double _now(void) {
+  struct timespec now;
+  clock_gettime(CLOCK_MONOTONIC, &now);
+  return now.tv_sec + now.tv_nsec / 1e9;
+}
+
+/* Whether the helper has ended, which reaps it and keeps its status. */
+static int _reaped(void) {
+  int status;
+  if (active.status < 0 &&
+      waitpid(active.pid, &status, WNOHANG) == active.pid)
+    active.status = status;
+  return active.status >= 0;
+}
+
 static void _stopped(Call &call, String reason) {
   $fail.meta_helper_client_helper_stopped(
     call.compiler, call.site, call.name, reason);
-}
-
-// lifecycle
-
-/** Creates an independent helper at `path`, with failures by table index
-    and source paths mapped to their table indices. No process starts until
-    a call needs it. The caller keeps the canonical configuration values.
-*/
-MetaHelper MetaHelper.new(String path, Map failures, Map units) {
-  MetaHelper helper = Scope.malloc_finalized(sizeof(struct MetaHelper), _drop);
-  *helper = (struct MetaHelper) {
-    .path = path, .to = -1, .from = -1, .status = -1};
-  auto (&helper.scope) {
-    helper.failures = failures ? failures.copy() : NULL;
-    helper.units = units ? units.copy() : NULL;
-    helper.input = Buffer.new(0);
-  }
-  return helper;
-}
-
-/** Retains this helper's executable independently of later cache rebuilds.
-    The copy lasts until close, including across helper restarts.
-*/
-void MetaHelper.retain_executable(MetaHelper helper) {
-  helper.snapshot = Path.temp_dir();
-  String path = %"$(helper.snapshot)/helper";
-  Path.copy_file(helper.path, path);
-  helper.path = path;
-}
-
-/** Uses `helper` for ordinary translation, retaining its configuration
-    through process shutdown. Replaces and closes the preceding helper.
-*/
-void Compiler.use_meta_helper(MetaHelper helper) {
-  if (primary) _close(primary);
-  if (!primary_scope) Scope.shutdown_hook(_shutdown);
-  primary = helper;
-  if (!helper) return;
-  Scope.move(helper, &primary_scope);
-  helper.path.try_own();
-  foreach ((int key, String value) in helper.failures) value.try_own();
-  foreach ((String key, int value) in helper.units) key.try_own();
-}
-
-/** Returns why this helper cannot call the functions of `provider`: the
-    helper or the provider's table did not build. Returns NULL when it can.
-    Does not invoke a function or reset native state.
-*/
-String MetaHelper.failure(MetaHelper m, String provider) {
-  MetaHelper previous = active;
-  active = m;
-  defer active = previous;
-  return _failure(_table_of(Path.real(provider), 0));
-}
-
-/** Selects the table of the unit at `filename` for the calls that follow,
-    and resets the unit's `meta static` values before the first one.
-*/
-void Compiler.begin_meta_unit(Compiler c, String filename) {
-  MetaHelper previous = active;
-  active = c.meta_helper ? c.meta_helper : primary;
-  defer active = previous;
-  if (!active) return;
-  active.table = filename ? _table_of(Path.absolute(filename), 0) : 0;
-  active.reset = 1;
 }
 
 /* The table of the file at `path`, or `otherwise`. */
@@ -518,26 +543,7 @@ static int _table_of(String path, int otherwise) {
     ? table.integer() : otherwise;
 }
 
-/** Stops the helper this process runs, which a translation worker does
-    when its units are done and every process does as it ends.
-*/
-void Compiler.stop_meta_helper(void) {
-  if (!primary) return;
-  MetaHelper previous = active;
-  active = primary;
-  defer active = previous;
-  _stop(0);
-}
-
-/** Stops the process while retaining its executable and configuration.
-    Its next call starts with fresh native state.
-*/
-void MetaHelper.restart(MetaHelper helper) {
-  MetaHelper previous = active;
-  active = helper;
-  defer active = previous;
-  _stop(0);
-}
+static void _drop(void *raw) { _close(raw); }
 
 /* Stops this helper and releases its pipe buffer and configuration maps.
    A later close is harmless. */
@@ -558,8 +564,6 @@ static void _close(MetaHelper helper) {
   helper.failures = helper.units = NULL;
   helper.input = NULL;
 }
-
-static void _drop(void *raw) { _close(raw); }
 
 static void _shutdown(void) {
   primary_scope.destroy();

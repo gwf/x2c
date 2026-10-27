@@ -1,41 +1,17 @@
 /*  execution.x -- prepared-plan execution and capture publication */
 
-/* plan execution
-
-   Only a prepared plan runs. An entry point raises the fence of an
-   ineligible plan, and a malformed plan answers no match. */
-
-/** Raises the fence an ineligible plan crossed, naming `owner`.
-    This is the one place an ineligible pattern is reported. Such a pattern
-    compiles to no program, so answering "no match" would be wrong and no
-    caller could tell it from a real miss. `reason` is the plan's static
-    category string.
-    Raises: `<size-limit>` with `operation` and the fence.
-*/
-void MatchPlan.raise_ineligible(const char *reason, const char *owner) {
-  String fence = String.new(reason), site = String.new(owner);
-  raise %(size-limit (operation $site) (fence $fence));
-}
-
-/* Entry-point guard over an already prepared plan; `plan` stays owned by
-   its caller. Malformed patterns keep their categorized no-match. */
-module int _prepared(MatchPlan plan, const char *owner) {
-  if (plan && plan.status == <ineligible>)
-    MatchPlan.raise_ineligible(plan.reason, owner);
-  return plan && plan.status == <prepared>;
-}
-
-module int _buffer_valid(
-  MatchCaptureLayout layout, MatchCaptureBuffer &?captures) {
-  if (!captures || !layout || captures.capacity < layout.binder_count)
-    return 0;
-  return !layout.binder_count || captures.values != NULL;
-}
-
 /* Declares `$instance`, an open machine of this thread. */
 static macro Stmt $match.machine(Name $instance, Expr $stats) {
   MatchMachine *$instance = MatchMachine.acquire($stats);
 }
+
+/** Executes a prepared `List` match into caller-owned positional storage.
+    This is `MatchPlan.execute_capture` without statistics and has the same
+    results, atomicity, and failures.
+*/
+int MatchPlan.try_capture(
+  MatchPlan plan, List input, MatchCaptureBuffer &?captures) =>
+    plan.execute_capture(input, captures, NULL);
 
 /** Executes a prepared plan into caller-owned positional storage.
     Returns 1 on a match, 0 on a miss, and -1 for a null or malformed plan, an
@@ -54,22 +30,54 @@ int MatchPlan.execute_capture(
   return _capture(m, input, captures, stats);
 }
 
-/** Executes a prepared `List` match into caller-owned positional storage.
-    This is `MatchPlan.execute_capture` without statistics and has the same
-    results, atomicity, and failures.
+/** Executes prepared `plan` against `input`, writing bindings on success.
+    This is `MatchPlan.execute` without statistics and has the same status,
+    output atomicity, ordering, and failures.
 */
-int MatchPlan.try_capture(
-  MatchPlan plan, List input, MatchCaptureBuffer &?captures) =>
-    plan.execute_capture(input, captures, NULL);
+int MatchPlan.try_match(MatchPlan plan, List input, List &?out_bindings) =>
+  plan.execute(input, out_bindings, NULL);
 
-module int _capture(
-  MatchPlan m, Var input, MatchCaptureBuffer &?captures,
-  MachineStats &?stats) {
-  if (!m.admits(input, NULL)) return 0;
+/** Executes `plan` against `input` and publishes association bindings.
+    Returns 1 and writes `out_bindings` on a match, 0 on a miss, and -1 for a
+    null or malformed plan, null output, or machine error. Failure leaves the
+    output unchanged. A binder-free success writes `nil`; other bindings are in
+    reverse canonical slot order. `stats`, when nonnull, receives increments
+    and is not initialized here.
+    Raises: `<size-limit>` for an ineligible plan, or `<alloc-fail>` while
+    materializing or publishing bindings.
+*/
+int MatchPlan.execute(
+  MatchPlan plan, Var input, List &?out_bindings, MachineStats &?stats) {
+  if (!_prepared(plan, "MatchPlan.execute")) return -1;
+  if (!out_bindings) return -1;
+  if (!plan.admits(input, NULL)) return 0;
   $match.machine(machine, stats);
-  int result = _run_capture(m.program.view(), *machine, input, captures);
+  Var values[MACHINE_BINDER_MAX];
+  MatchCaptureBuffer captures = { values, 0, MACHINE_BINDER_MAX };
+  int result = _run_capture(plan.program.view(), *machine, input, captures);
+  /* Publication reads committed captures, never speculative matcher state. */
+  List bindings;
+  if (result == 1) bindings = _publish_captures(plan.layout, captures);
   machine.release();
+  if (result == 1) out_bindings = bindings;
   return result;
+}
+
+/* plan execution
+
+   Only a prepared plan runs. An entry point raises the fence of an
+   ineligible plan, and a malformed plan answers no match. */
+
+/** Raises the fence an ineligible plan crossed, naming `owner`.
+    This is the one place an ineligible pattern is reported. Such a pattern
+    compiles to no program, so answering "no match" would be wrong and no
+    caller could tell it from a real miss. `reason` is the plan's static
+    category string.
+    Raises: `<size-limit>` with `operation` and the fence.
+*/
+void MatchPlan.raise_ineligible(const char *reason, const char *owner) {
+  String fence = String.new(reason), site = String.new(owner);
+  raise %(size-limit (operation $site) (fence $fence));
 }
 
 /** Reports whether `input`, seen through `view` when one is given, begins
@@ -85,10 +93,29 @@ int MatchPlan.admits(MatchPlan plan, Var input, Var (*view)(Var)) {
   return 0;
 }
 
-/* The nonempty List `view` shows for `value`, or NULL. */
-static List _seen_list(Var value, Var (*view)(Var)) {
-  if (view) value = view(value);
-  return value is <list> ? value.list() : NULL;
+/* Entry-point guard over an already prepared plan; `plan` stays owned by
+   its caller. Malformed patterns keep their categorized no-match. */
+module int _prepared(MatchPlan plan, const char *owner) {
+  if (plan && plan.status == <ineligible>)
+    MatchPlan.raise_ineligible(plan.reason, owner);
+  return plan && plan.status == <prepared>;
+}
+
+module int _buffer_valid(
+  MatchCaptureLayout layout, MatchCaptureBuffer &?captures) {
+  if (!captures || !layout || captures.capacity < layout.binder_count)
+    return 0;
+  return !layout.binder_count || captures.values != NULL;
+}
+
+module int _capture(
+  MatchPlan m, Var input, MatchCaptureBuffer &?captures,
+  MachineStats &?stats) {
+  if (!m.admits(input, NULL)) return 0;
+  $match.machine(machine, stats);
+  int result = _run_capture(m.program.view(), *machine, input, captures);
+  machine.release();
+  return result;
 }
 
 static int _key_admits(
@@ -104,6 +131,12 @@ static int _key_admits(
     element = inner.car();
   }
   return _key_equal(plan, element, key.inner);
+}
+
+/* The nonempty List `view` shows for `value`, or NULL. */
+static List _seen_list(Var value, Var (*view)(Var)) {
+  if (view) value = view(value);
+  return value is <list> ? value.list() : NULL;
 }
 
 static int _key_equal(MatchPlan plan, Var value, Var key) =>
@@ -146,39 +179,6 @@ static int _commit(
     if (_capture_bit(present, i)) captures.values[i] = values[i];
   return 1;
 }
-
-/** Executes `plan` against `input` and publishes association bindings.
-    Returns 1 and writes `out_bindings` on a match, 0 on a miss, and -1 for a
-    null or malformed plan, null output, or machine error. Failure leaves the
-    output unchanged. A binder-free success writes `nil`; other bindings are in
-    reverse canonical slot order. `stats`, when nonnull, receives increments
-    and is not initialized here.
-    Raises: `<size-limit>` for an ineligible plan, or `<alloc-fail>` while
-    materializing or publishing bindings.
-*/
-int MatchPlan.execute(
-  MatchPlan plan, Var input, List &?out_bindings, MachineStats &?stats) {
-  if (!_prepared(plan, "MatchPlan.execute")) return -1;
-  if (!out_bindings) return -1;
-  if (!plan.admits(input, NULL)) return 0;
-  $match.machine(machine, stats);
-  Var values[MACHINE_BINDER_MAX];
-  MatchCaptureBuffer captures = { values, 0, MACHINE_BINDER_MAX };
-  int result = _run_capture(plan.program.view(), *machine, input, captures);
-  /* Publication reads committed captures, never speculative matcher state. */
-  List bindings;
-  if (result == 1) bindings = _publish_captures(plan.layout, captures);
-  machine.release();
-  if (result == 1) out_bindings = bindings;
-  return result;
-}
-
-/** Executes prepared `plan` against `input`, writing bindings on success.
-    This is `MatchPlan.execute` without statistics and has the same status,
-    output atomicity, ordering, and failures.
-*/
-int MatchPlan.try_match(MatchPlan plan, List input, List &?out_bindings) =>
-  plan.execute(input, out_bindings, NULL);
 
 /* The committed captures as an association List in reverse slot order. */
 module List _publish_captures(

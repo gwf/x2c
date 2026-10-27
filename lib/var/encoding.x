@@ -45,19 +45,6 @@ static typedef struct VarDecoded {
   TagId id, int custom_id, valid;
 } VarDecoded;
 
-module TagId _tag2id(Symbol tag) => (TagId) x2c_var_tags.index(tag);
-
-module inline unsigned long _bitmask(unsigned n) => (1ul << n) - 1;
-
-module inline unsigned _top_bits(Var v)    => v.u64 >> 48;
-
-module inline unsigned _middle_bits(Var v) => (v.u64 >> 32) & _bitmask(16);
-
-module inline unsigned _bottom_bits(Var v) => v.u64 & _bitmask(3);
-
-module void *_address(Var value) =>
-  (void *) (value.u64 & (_bitmask(48) - 0x7));
-
 /** Returns the top encoding field of built-in `tag`. */
 meta native unsigned long Var.tag_top(Symbol tag) {
   TagId id = _tag2id(tag);
@@ -74,63 +61,18 @@ meta native unsigned long Var.tag_bottom(Symbol tag) {
   return x2c_var_taginfo[id].bottom;
 }
 
-// decoding
-
-/* The ledger's group table resolves the pointer, object, and immediate tops.
-   Reserved encodings report invalid structure and use the f64 tag and kind.
-*/
-static VarDecoded _decode(Var value) {
-  unsigned top = _top_bits(value), btm = _bottom_bits(value);
-  if (value.u64 == VAR_VOID_BITS) return (VarDecoded) { _void_, -1, 1 };
-  if (value.u64 == VAR_F64_NEG_MAX_ESCAPE)
-    return (VarDecoded) { _f64_, -1, 1 };
-  int id = _group_id(top, _middle_bits(value), btm);
-  if (id != _invalid_) return _decode_builtin((TagId) id, value);
-  if (top >= 0x8004 && top <= 0x800B) return (VarDecoded) { _symbol_, -1, 1 };
-  if (_custom_top(top)) {
-    int custom = _custom_id(top, btm);
-    return (VarDecoded) { _invalid_, custom, _custom_valid(custom, value) };
-  }
-  if ((top >= 0x0010 && top <= 0x7FFF) || top >= 0x8010)
-    return (VarDecoded) { _f64_, -1, 1 };
-  return (VarDecoded) { _f64_, -1, 0 };
-}
-
-static inline int _group_id(unsigned top, unsigned mid, unsigned btm) {
-  unsigned slot = _group_slot(top);
-  if (slot >= 32) return _invalid_;
-  const VarDecodeGroup *group = &x2c_var_decode_groups[slot];
-  unsigned selector = group.by_middle ? mid : btm & group.mask;
-  return selector < 8 ? group.ids[selector] : _invalid_;
-}
-
-/* Rotating the top left one bit puts 0x0000-0x000F on the even slots and
-   0x8000-0x800F on the odd slots below 32; every other top lands above. */
-module inline unsigned _group_slot(unsigned top) =>
-  ((top << 1) | (top >> 15)) & 0xFFFF;
-
-/* Wide rows validate the family recorded inside their readable box. Array and
-   Map are the only built-in pointer rows whose null payload is invalid: their
-   mutable empty values have allocated storage, unlike typed List nil. */
-static VarDecoded _decode_builtin(TagId id, Var value) {
-  int valid = 1;
-  unsigned payload = (unsigned) value.u64;
-  switch (id) {
-    case _long_: case _ulong_: case _llong_: case _ullong_: case _ldouble_:
-      valid = _wide_encoding_valid(value, x2c_var_taginfo[id].tag);
-      break;
-    case _array_: case _map_: valid = _address(value) != NULL; break;
-    case _u8_: case _i8_: valid = (payload & ~0xffu) == 0; break;
-    case _u16_: case _i16_: valid = (payload & ~0xffffu) == 0; break;
-    case _nan_: case _neginf_: case _posinf_:
-      valid = (value.u64 & _bitmask(32)) == 0;
-      break;
-    default: break;
-  }
-  return (VarDecoded) { id, -1, valid };
-}
-
 // tags and kinds
+
+/** Reports whether `value` has the requested runtime tag.
+    This tests one family. A `Var` holding an `unsigned char` answers 0 for
+    `<i32>` even though both are integers. When any integer will do, ask
+    `Var.is_integer`, or compare `Var.kind`.
+    As with `Var.tag`, validate externally constructed bits first: an invalid
+    encoding uses the `<f64>` fallback.
+*/
+int Var.is(Var var, Symbol tag) => var.tag() == tag;
+
+
 
 /** Returns the `Symbol` naming the exact family of `v`'s payload.
     The tag names one family: `<i32>`, `<string>`, `<f64>`, `<symbol>`, or a
@@ -153,32 +95,6 @@ meta native Symbol Var.tag(Var v) {
   if (decoded.valid && decoded.custom_id >= 0)
     return _row_descriptor(decoded.custom_id, v).tag;
   return x2c_var_taginfo[decoded.valid ? decoded.id : _f64_].tag;
-}
-
-/** Reports whether `value` has the requested runtime tag.
-    This tests one family. A `Var` holding an `unsigned char` answers 0 for
-    `<i32>` even though both are integers. When any integer will do, ask
-    `Var.is_integer`, or compare `Var.kind`.
-    As with `Var.tag`, validate externally constructed bits first: an invalid
-    encoding uses the `<f64>` fallback.
-*/
-int Var.is(Var var, Symbol tag) => var.tag() == tag;
-
-/** Returns the `Symbol` naming the coarse category of `v`'s payload.
-    The categories are `<integer>`, `<floating>`, `<symbol>`, `<object>`,
-    `<pointer>`, `<reference>`, and `<void>`, and every tag belongs to exactly
-    one. Use kind when a group of families is treated alike. All twelve
-    integer widths answer `<integer>`, and every builtin class handle such as
-    `String`, `List`, `Map`, and `File` answers `<object>`.
-
-    `<pointer>` means a raw C pointer such as `<u8*>`, while `<reference>`
-    means a pointer to an object handle such as `<string*>`. NaN and the
-    infinities are `<floating>`. Only `void` is `<void>`.
-*/
-meta native Symbol Var.kind(Var v) {
-  VarDecoded decoded = _decode(v);
-  if (decoded.valid && decoded.custom_id >= 0) return <object>;
-  return x2c_var_taginfo[decoded.valid ? decoded.id : _f64_].kind;
 }
 
 /** Reports whether `v` belongs to the floating runtime family.
@@ -210,6 +126,23 @@ meta native int Var.is_reference(Var v) => v.kind() == <reference>;
     `<reference>` instead and answers 0 here.
 */
 meta native int Var.is_object(Var v)    => v.kind() == <object>;
+
+/** Returns the `Symbol` naming the coarse category of `v`'s payload.
+    The categories are `<integer>`, `<floating>`, `<symbol>`, `<object>`,
+    `<pointer>`, `<reference>`, and `<void>`, and every tag belongs to exactly
+    one. Use kind when a group of families is treated alike. All twelve
+    integer widths answer `<integer>`, and every builtin class handle such as
+    `String`, `List`, `Map`, and `File` answers `<object>`.
+
+    `<pointer>` means a raw C pointer such as `<u8*>`, while `<reference>`
+    means a pointer to an object handle such as `<string*>`. NaN and the
+    infinities are `<floating>`. Only `void` is `<void>`.
+*/
+meta native Symbol Var.kind(Var v) {
+  VarDecoded decoded = _decode(v);
+  if (decoded.valid && decoded.custom_id >= 0) return <object>;
+  return x2c_var_taginfo[decoded.valid ? decoded.id : _f64_].kind;
+}
 
 /** Reports whether `v` is the absence sentinel `void`.
     An API returns `void` to say there is nothing here. It is excluded from
@@ -290,3 +223,72 @@ int x2c_var_tag_descriptor_index(Symbol tag) {
   TagId id = _tag2id(tag);
   return id >= _array_ && id <= _var_ ? id - _array_ : -1;
 }
+
+module TagId _tag2id(Symbol tag) => (TagId) x2c_var_tags.index(tag);
+
+// decoding
+
+/* The ledger's group table resolves the pointer, object, and immediate tops.
+   Reserved encodings report invalid structure and use the f64 tag and kind.
+*/
+static VarDecoded _decode(Var value) {
+  unsigned top = _top_bits(value), btm = _bottom_bits(value);
+  if (value.u64 == VAR_VOID_BITS) return (VarDecoded) { _void_, -1, 1 };
+  if (value.u64 == VAR_F64_NEG_MAX_ESCAPE)
+    return (VarDecoded) { _f64_, -1, 1 };
+  int id = _group_id(top, _middle_bits(value), btm);
+  if (id != _invalid_) return _decode_builtin((TagId) id, value);
+  if (top >= 0x8004 && top <= 0x800B) return (VarDecoded) { _symbol_, -1, 1 };
+  if (_custom_top(top)) {
+    int custom = _custom_id(top, btm);
+    return (VarDecoded) { _invalid_, custom, _custom_valid(custom, value) };
+  }
+  if ((top >= 0x0010 && top <= 0x7FFF) || top >= 0x8010)
+    return (VarDecoded) { _f64_, -1, 1 };
+  return (VarDecoded) { _f64_, -1, 0 };
+}
+
+module inline unsigned _top_bits(Var v)    => v.u64 >> 48;
+
+module inline unsigned _middle_bits(Var v) => (v.u64 >> 32) & _bitmask(16);
+
+module inline unsigned _bottom_bits(Var v) => v.u64 & _bitmask(3);
+
+static inline int _group_id(unsigned top, unsigned mid, unsigned btm) {
+  unsigned slot = _group_slot(top);
+  if (slot >= 32) return _invalid_;
+  const VarDecodeGroup *group = &x2c_var_decode_groups[slot];
+  unsigned selector = group.by_middle ? mid : btm & group.mask;
+  return selector < 8 ? group.ids[selector] : _invalid_;
+}
+
+/* Rotating the top left one bit puts 0x0000-0x000F on the even slots and
+   0x8000-0x800F on the odd slots below 32; every other top lands above. */
+module inline unsigned _group_slot(unsigned top) =>
+  ((top << 1) | (top >> 15)) & 0xFFFF;
+
+/* Wide rows validate the family recorded inside their readable box. Array and
+   Map are the only built-in pointer rows whose null payload is invalid: their
+   mutable empty values have allocated storage, unlike typed List nil. */
+static VarDecoded _decode_builtin(TagId id, Var value) {
+  int valid = 1;
+  unsigned payload = (unsigned) value.u64;
+  switch (id) {
+    case _long_: case _ulong_: case _llong_: case _ullong_: case _ldouble_:
+      valid = _wide_encoding_valid(value, x2c_var_taginfo[id].tag);
+      break;
+    case _array_: case _map_: valid = _address(value) != NULL; break;
+    case _u8_: case _i8_: valid = (payload & ~0xffu) == 0; break;
+    case _u16_: case _i16_: valid = (payload & ~0xffffu) == 0; break;
+    case _nan_: case _neginf_: case _posinf_:
+      valid = (value.u64 & _bitmask(32)) == 0;
+      break;
+    default: break;
+  }
+  return (VarDecoded) { id, -1, valid };
+}
+
+module void *_address(Var value) =>
+  (void *) (value.u64 & (_bitmask(48) - 0x7));
+
+module inline unsigned long _bitmask(unsigned n) => (1ul << n) - 1;

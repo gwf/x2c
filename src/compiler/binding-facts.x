@@ -14,16 +14,7 @@ String Compiler.emitted_binding_name(Compiler c, List binding) {
   return Ast.binding_spelling(binding);
 }
 
-/** Returns the optional references proven present in this lexical path. */
-List Compiler.present_references(Compiler c) =>
-  c.fact(%(present-references));
-
-/** Records a nonnull optional parameter for the current lexical path. */
-void Compiler.mark_reference_present(Compiler c, List binding) {
-  List present = c.present_references();
-  if (!(binding in present))
-    c.set_fact(%(present-references), cons(binding, present));
-}
+// optional reference facts
 
 /** Marks the optional references that `condition` proves present after an
     `if` whose arm for the other outcome cannot fall through. A missing `no`
@@ -32,11 +23,6 @@ void Compiler.mark_reference_present(Compiler c, List binding) {
 void Compiler.settle_condition(Compiler c, List condition, List yes, List no) {
   _settle(c, c.proven_references(condition, 1), no);
   _settle(c, c.proven_references(condition, 0), yes);
-}
-
-static void _settle(Compiler c, List proven, List other_arm) {
-  if (proven && Ast.reference_guard_exits(other_arm))
-    foreach (List binding in proven) c.mark_reference_present(binding);
 }
 
 /** Marks the optional references that `condition` proves present for an
@@ -50,12 +36,23 @@ List Compiler.assume_condition(Compiler c, List condition, int holds) {
   return before;
 }
 
+/** Records a nonnull optional parameter for the current lexical path. */
+void Compiler.mark_reference_present(Compiler c, List binding) {
+  List present = c.present_references();
+  if (!(binding in present))
+    c.set_fact(%(present-references), cons(binding, present));
+}
+
 /** Restores the optional-reference facts saved before a lexical path. */
 void Compiler.restore_reference_presence(Compiler c, List before) {
   if (before === c.present_references()) return;
   if (before) c.set_fact(%(present-references), before);
   else c.drop_fact(%(present-references));
 }
+
+/** Returns the optional references proven present in this lexical path. */
+List Compiler.present_references(Compiler c) =>
+  c.fact(%(present-references));
 
 /** Returns the optional-reference parameters that `condition` proves the
     caller supplied when it has truth `holds`. Direct truth and null tests
@@ -77,6 +74,13 @@ List Compiler.proven_references(Compiler c, List condition, int holds) {
         return %($binding);
   }
   return NULL;
+}
+
+// condition proofs
+
+static void _settle(Compiler c, List proven, List other_arm) {
+  if (proven && Ast.reference_guard_exits(other_arm))
+    foreach (List binding in proven) c.mark_reference_present(binding);
 }
 
 /* A conjunction keeps its operands' proofs when it holds and a disjunction

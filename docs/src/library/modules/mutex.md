@@ -39,7 +39,7 @@ intact. No thread may retain the handle or be waiting on it.
 **Raises:** `<bad-state>` for NULL, or `<io-fail>` when native destruction
 fails.
 
-Source: `lib/mutex.x:123`
+Source: `lib/mutex.x:118`
 
 <a id="Mutex.lock"></a>
 #### Mutex.lock
@@ -51,7 +51,7 @@ The `Mutex` is non-recursive; the caller must not already hold it.
 
 **Raises:** `<bad-state>` for NULL, or `<io-fail>` when native locking fails.
 
-Source: `lib/mutex.x:90`
+Source: `lib/mutex.x:85`
 
 <a id="Mutex.new"></a>
 #### Mutex.new
@@ -64,7 +64,7 @@ Creates an unlocked `Mutex` owned by the active `Scope`.
 when native mutex initialization fails. An initialization failure releases
 the allocated storage.
 
-Source: `lib/mutex.x:76`
+Source: `lib/mutex.x:71`
 
 <a id="Mutex.try_lock"></a>
 #### Mutex.try_lock
@@ -76,7 +76,7 @@ Returns one when acquired or zero when busy.
 
 **Raises:** `<bad-state>` for NULL, or `<io-fail>` for another native failure.
 
-Source: `lib/mutex.x:100`
+Source: `lib/mutex.x:95`
 
 <a id="Mutex.unlock"></a>
 #### Mutex.unlock
@@ -87,7 +87,7 @@ Unlocks a `Mutex` held by the calling thread.
 
 **Raises:** `<bad-state>` for NULL, or `<io-fail>` when native unlocking fails.
 
-Source: `lib/mutex.x:111`
+Source: `lib/mutex.x:106`
 
 ## Runtime-internal callables
 

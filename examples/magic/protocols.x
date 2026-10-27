@@ -12,6 +12,17 @@ protocol Meters(T) {
   String T.describe(T);
 }
 
+int main(void) {
+  auto {
+    Km trip = Km.new(3);
+    Cm pencil = Cm.new(1800);
+
+    printf("%s is %ld m\n", trip.describe(), trip.magnitude());
+    printf("%s is %ld m\n", pencil.describe(), pencil.magnitude());
+  }
+  return 0;
+}
+
 long Meters.magnitude(Meters value) => value.value;
 
 String Meters.describe(Meters value) => %"$(value.value) m";
@@ -29,14 +40,3 @@ protocol Meters(Km);
 /* Cm implements nothing itself; a static adoption keeps the
    conformance local to this translation unit. */
 static protocol Meters(Cm);
-
-int main(void) {
-  auto {
-    Km trip = Km.new(3);
-    Cm pencil = Cm.new(1800);
-
-    printf("%s is %ld m\n", trip.describe(), trip.magnitude());
-    printf("%s is %ld m\n", pencil.describe(), pencil.magnitude());
-  }
-  return 0;
-}

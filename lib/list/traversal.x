@@ -2,21 +2,6 @@
 
 // accessors
 
-/** Returns the head of `x`, or `void` when `x` is `nil`. */
-inline Var  car(List x)  => x ? x.car : void;
-
-/** Returns the tail of `x`, or `nil` when `x` is `nil`.
-    Nil-safe like `car`. The tail is the same canonical structure the cell was
-    built from.
-*/
-inline List cdr(List x)  => x ? x.cdr : NULL;
-
-/** Method form of `car`: the head of `lst`, or `void` when `lst` is `nil`. */
-inline Var  List.car(List lst)     => car(lst);
-
-/** Method form of `cdr`: the tail of `lst`, or `nil` when `lst` is `nil`. */
-inline Self List.cdr(Self lst)     => cdr(lst);
-
 /** Returns `car(car(lst))`.
     Compound accessors read from right to left: `a` applies `car` and `d`
     applies `cdr`. Every step is `nil`-safe.
@@ -52,24 +37,6 @@ inline Var  Var.caddr(Var var)     => car(cdr(cdr(var)));
 
 // traversal
 
-/** Writes the next element, advances `cursor`, and returns one.
-    Initialize the caller-owned cursor to `lst`. A null pointer or an
-    exhausted cursor returns zero without changing `cursor` or `out`. The
-    cells are immutable, so only releasing the owning pool invalidates a
-    cursor.
-
-    `foreach (Var item in lst)` compiles to this loop.
-*/
-inline int List.try_next(List lst, List &?cursor, Var &?out) {
-  if (!cursor) return 0;
-  if (!out) return 0;
-  List rest = cursor;
-  if (!rest) return 0;
-  out = rest.car();
-  cursor = rest.cdr;
-  return 1;
-}
-
 /** Initializes caller-owned `dest` as a forward iterator over `lst`.
     The iterator borrows the immutable cells and yields their stored `Var` bits
     without retaining them, so the owning pool must outlive iteration. A null
@@ -80,23 +47,7 @@ Iter List.iter(List lst, Iter dest) {
   return dest.init(lst, _next, lst);
 }
 
-static int _next(Iter iter, Var *out) {
-  List lst = iter.state;
-  if (!lst) return 0;
-  *out = lst.car();
-  lst = lst.cdr;
-  iter.state = lst;
-  return 1;
-}
-
 // indexing
-
-/** Returns the number of cells in `lst` in O(n) time. */
-int List.len(List lst) {
-  int len = 0;
-  for (List l = lst; l; l = l.cdr()) len++;
-  return len;
-}
 
 /** Returns the last value in `lst`, or `void` when it is empty. */
 Var List.last(List lst) {
@@ -106,21 +57,13 @@ Var List.last(List lst) {
   return lst.car();
 }
 
+/** Reports whether `lst` contains `key` by `Var` equality. */
+int List.contains(List lst, Var key) => lst.index(key) != -1;
+
 /** Returns the first index of `key`, or -1 when absent. */
 meta native int List.index(List l, Var key) {
   for (int index = 0; l; l = l.cdr(), index++) if (l.car == key) return index;
   return -1;
-}
-
-/** Reports whether `lst` contains `key` by `Var` equality. */
-int List.contains(List lst, Var key) => lst.index(key) != -1;
-
-/** Returns the shared tail beginning `n` cells in.
-    Returns `nil` past the end and `list` itself when `n` is nonpositive.
-*/
-meta native Self List.nth_cdr(Self list, int n) {
-  while (n-- > 0 && list) list = list.cdr();
-  return list;
 }
 
 /** Returns `list[index]`, or `void` when out of range.
@@ -143,6 +86,14 @@ Var List.getindex(List list, int index) {
   }
   List nth = list.nth_cdr(index);
   return nth ? nth.car : void;
+}
+
+/** Returns the shared tail beginning `n` cells in.
+    Returns `nil` past the end and `list` itself when `n` is nonpositive.
+*/
+meta native Self List.nth_cdr(Self list, int n) {
+  while (n-- > 0 && list) list = list.cdr();
+  return list;
 }
 
 /** Looks up an integer index or association key in `list`.
@@ -170,6 +121,26 @@ Var List.assoc(List list, Var key) {
     if (pair_key == key) return value;
   }
   return void;
+}
+
+
+
+/** Writes the next element, advances `cursor`, and returns one.
+    Initialize the caller-owned cursor to `lst`. A null pointer or an
+    exhausted cursor returns zero without changing `cursor` or `out`. The
+    cells are immutable, so only releasing the owning pool invalidates a
+    cursor.
+
+    `foreach (Var item in lst)` compiles to this loop.
+*/
+inline int List.try_next(List lst, List &?cursor, Var &?out) {
+  if (!cursor) return 0;
+  if (!out) return 0;
+  List rest = cursor;
+  if (!rest) return 0;
+  out = rest.car();
+  cursor = rest.cdr;
+  return 1;
 }
 
 /** Returns the first `count` elements of `list`.
@@ -217,17 +188,6 @@ meta native Self List.subseq(Self list, int start, int stop, int step) {
   return _collect_subseq(list, start, step, span);
 }
 
-static List _collect_subseq(List list, int start, int step, int span) {
-  if (span <= 0) return NULL;
-  for (int i = 0; list && i < start; i++) list = list.cdr();
-  Array values = auto [];
-  while (list && span--) {
-    values.push(list.car);
-    for (int i = 0; list && i < step; i++) list = list.cdr();
-  }
-  return values;
-}
-
 /** Returns `list[start:stop:step]`.
     `stop` is exclusive, negative bounds count from the end, and a negative
     `step` walks backwards. A full forward slice preserves `list` only when its
@@ -249,8 +209,14 @@ meta native Self List.getslice(Self list, int start, int stop, int step) {
   return values;
 }
 
-static int _is_active_canonical(List list) =>
-  Pool.current().lookup(list) === list;
+
+
+/** Returns the number of cells in `lst` in O(n) time. */
+int List.len(List lst) {
+  int len = 0;
+  for (List l = lst; l; l = l.cdr()) len++;
+  return len;
+}
 
 // unpacking
 
@@ -284,6 +250,46 @@ int List.unpack_vars_n(List src, unsigned destination_count, ...) {
   va_end(ap);
   return count;
 }
+
+/** Method form of `car`: the head of `lst`, or `void` when `lst` is `nil`. */
+inline Var  List.car(List lst)     => car(lst);
+
+
+
+/** Returns the head of `x`, or `void` when `x` is `nil`. */
+inline Var  car(List x)  => x ? x.car : void;
+
+/** Method form of `cdr`: the tail of `lst`, or `nil` when `lst` is `nil`. */
+inline Self List.cdr(Self lst)     => cdr(lst);
+
+/** Returns the tail of `x`, or `nil` when `x` is `nil`.
+    Nil-safe like `car`. The tail is the same canonical structure the cell was
+    built from.
+*/
+inline List cdr(List x)  => x ? x.cdr : NULL;
+
+static int _next(Iter iter, Var *out) {
+  List lst = iter.state;
+  if (!lst) return 0;
+  *out = lst.car();
+  lst = lst.cdr;
+  iter.state = lst;
+  return 1;
+}
+
+static List _collect_subseq(List list, int start, int step, int span) {
+  if (span <= 0) return NULL;
+  for (int i = 0; list && i < start; i++) list = list.cdr();
+  Array values = auto [];
+  while (list && span--) {
+    values.push(list.car);
+    for (int i = 0; list && i < step; i++) list = list.cdr();
+  }
+  return values;
+}
+
+static int _is_active_canonical(List list) =>
+  Pool.current().lookup(list) === list;
 
 /* Reads each destination from `ap` as a `List *` when `lists` is set, and as
    a `Var *` otherwise. */

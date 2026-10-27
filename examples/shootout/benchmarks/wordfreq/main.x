@@ -12,9 +12,14 @@
 
 static int _random_state = 42;
 
-static int _next_int(int maximum) {
-  _random_state = (_random_state * 3877 + 29573) % 139968;
-  return (int) ((int64_t) _random_state * maximum / 139968);
+int main(int argc, char **argv) {
+  if (argc != 3) return 2;
+  String text = _make_text(atoi(argv[1]));
+  uint64_t checksum = 0;
+  for (int i = 0; i < atoi(argv[2]); i++)
+    checksum = checksum * 33 + _count(text);
+  printf("%llu\n", (unsigned long long) checksum);
+  return 0;
 }
 
 static String _make_text(int word_count) {
@@ -31,6 +36,11 @@ static String _make_text(int word_count) {
   return text.intern_free();
 }
 
+static int _next_int(int maximum) {
+  _random_state = (_random_state * 3877 + 29573) % 139968;
+  return (int) ((int64_t) _random_state * maximum / 139968);
+}
+
 static uint64_t _count(String text) {
   auto {
     MapSubInt counts = MapSubInt.new();
@@ -41,14 +51,4 @@ static uint64_t _count(String text) {
       checksum += 1 + word.len() * count;
     return checksum;
   }
-}
-
-int main(int argc, char **argv) {
-  if (argc != 3) return 2;
-  String text = _make_text(atoi(argv[1]));
-  uint64_t checksum = 0;
-  for (int i = 0; i < atoi(argv[2]); i++)
-    checksum = checksum * 33 + _count(text);
-  printf("%llu\n", (unsigned long long) checksum);
-  return 0;
 }

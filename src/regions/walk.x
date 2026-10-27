@@ -71,15 +71,30 @@ static void _walk_block(Walk &w, List statements) {
   w.depth -= 1;
 }
 
+static void _walk_sequence(Walk &w, List statements) {
+  foreach (List statement in statements) _walk(w, statement);
+}
+
+static void _walk_conditional(Walk &w, List children) {
+  Map restored = w.restored;
+  w.depth += 1;
+  foreach (Var child in children) _walk(w, child);
+  w.depth -= 1;
+  w.restored = restored;
+}
+
+static void _walk_rows(Walk &w, List rows) {
+  foreach (List row in rows) {
+    _scan(w, row.car(), 0);
+    foreach (List statement in row.cdr()) _walk(w, statement);
+  }
+}
+
 // Closes oldest first.
 static void _close_to(Region region, Region outer) {
   if (region == outer) return;
   _close_to(region.outer, outer);
   region.closed = 1;
-}
-
-static void _walk_sequence(Walk &w, List statements) {
-  foreach (List statement in statements) _walk(w, statement);
 }
 
 static void _walk_return(Walk &w, Type type, Var result) {
@@ -127,21 +142,6 @@ static int _region_call(Walk &w, String callee, List arguments) {
     default: return 0;
   }
   return 1;
-}
-
-static void _walk_conditional(Walk &w, List children) {
-  Map restored = w.restored;
-  w.depth += 1;
-  foreach (Var child in children) _walk(w, child);
-  w.depth -= 1;
-  w.restored = restored;
-}
-
-static void _walk_rows(Walk &w, List rows) {
-  foreach (List row in rows) {
-    _scan(w, row.car(), 0);
-    foreach (List statement in row.cdr()) _walk(w, statement);
-  }
 }
 
 // defers and restored places
@@ -236,6 +236,137 @@ static void _scan(Walk &w, Var value, int deferred) {
   }
 }
 
+static int _scan_assignment(Walk &w, Var node, Var root) {
+  List assignment = _source_assignment(node);
+  if (!assignment || _unwrap(node) == root) return 0;
+  (Var target, Var stored) = assignment;
+  _store(w, target, stored);
+  w.pending.push(target);
+  return 1;
+}
+
+static void _scan_node(Walk &w, Var node) {
+  match (node) {
+    case %(expr ? ?inner): w.pending.push(inner);
+    case %(ident (!set ?binding (binding ? ?))):
+      _scan_ident(w, binding);
+    // A statement expression declares locals of its own.
+    case %((!or declare decl) ?specifiers (bindings *bindings)):
+      _declare(w, specifiers, bindings);
+    // A List literal retains its values in the active Pool.
+    case %(cons ?head ?tail): _scan_cons(w, node, head, tail);
+    case %(*children): _scan_children(w, children);
+  }
+}
+
+// stores and declarations
+
+static void _store(Walk &w, Var target, Var value) {
+  List named = _binding_of(target);
+  // A store through a pointer reads the pointer.
+  if (!named) _scan(w, target, 0);
+  if (_target_place(w, target) in w.restored) {
+    _scan(w, value, 0);
+    return;
+  }
+  Type type = _expression_type(target);
+  Var found = named ? w.facts[named] : void;
+  if (found is not void) {
+    _assign(w, found, value, type, 1);
+    return;
+  }
+  _scan(w, value, 0);
+  if (named) {
+    _flow(w, value, type, <static>, NULL);
+    return;
+  }
+  int through = 0;
+  Fact object = NULL, base = _base(w, target, through);
+  // A field or element of file-scope storage is that storage.
+  if (!base && !through && _root(target)) {
+    _flow(w, value, type, <static>, NULL);
+    return;
+  }
+  Symbol sink = _sink_of(base, through, object);
+  _flow(w, value, type, sink, object);
+}
+
+/* `fact` receives `value`, declared or stored as `type`. A store of a
+   region-born local into a local declared outside that region reports
+   once, and the receiving local does not carry the region further. */
+static void _assign(Walk &w, Fact fact, Var value, Type type, int store) {
+  _scan(w, value, 0);
+  Fact source = _value_fact(w, value, NULL);
+  if (!source) source = _returned_argument(w, value, NULL);
+  int born = 0;
+  Region other = source ? source.other : NULL;
+  Acquired acquired = NULL;
+  Region region = source ? source.region
+                         : _birth(w, value, type, born, other, acquired);
+  int owners = source ? source.born : born;
+  int kept = (source || born) && !_number(w, type, value);
+  int copies = kept && _copies(w, type, value);
+  if (kept && copies) {
+    if (owners == 3) {
+      region = other;
+      other = NULL;
+      owners = 2;
+    }
+    else kept = (owners & 2) || (region && region.kind == <pool>);
+  }
+  if (kept && store && source &&
+      (region || other || _cleanup(source.acquired)))
+    kept = !_flow(w, value, type, <local>, fact);
+  if (kept && source && !copies && !source.empty)
+    acquired = _acquired(source);
+  if (copies || (source && !kept)) acquired = NULL;
+  // A nested store runs on some paths; the others keep the earlier value.
+  if (!acquired && store && fact.depth < w.depth) acquired = fact.acquired;
+  fact.acquired = acquired;
+  fact.empty = source ? source.empty : _empty(value);
+  fact.dead = 0;
+  fact.points = kept && source ? source.points : NULL;
+  fact.place = kept && source ? source.place : NULL;
+  /* A Scope local that is assigned again names other storage, whose end has
+     not been seen, so the region its previous value formed is not the one
+     the next allocation belongs to. */
+  fact.owner = NULL;
+  fact.region = kept ? region : NULL;
+  fact.other = kept ? other : NULL;
+  fact.born = kept ? owners : 0;
+  fact.param = kept && source ? source.param : -1;
+}
+
+/* A static or extern local is not the function's storage, so the walk
+   treats it as file-scope state. */
+static void _declare(Walk &w, Var specifiers, List bindings) {
+  Map types = w.c.semantic_binding_facts();
+  if (<static> in specifiers || <extern> in specifiers) {
+    foreach (List item in bindings)
+      if (item ~= %(op = (bind ?name ?) ?value)) {
+        _scan(w, value, 0);
+        _flow(w, value, types[%(type $name)], <static>, NULL);
+      }
+    return;
+  }
+  foreach (List item in bindings)
+    match (item) {
+      case %(op (!quote =) (bind (!set ?name (binding ? ?)) ?) ?value):
+        _declare_initialized(w, name, value, types[%(type $name)]);
+      case %(bind (!set ?name (binding ? ?)) ?): _new_fact(w, name, -1);
+    }
+}
+
+static void _declare_initialized(
+  Walk &w, List name, Var value, Type type) {
+  Fact fact = _new_fact(w, name, -1);
+  foreach (Var part in w.c.sym.normalize_declared_type(type)) {
+    if (part is not <symbol> || !part.symbol().is_type_qualifier()) break;
+    if (part == <const>) fact.constant = 1;
+  }
+  _assign(w, fact, value, type, 0);
+}
+
 static int _scan_call_node(Walk &w, Var node) {
   List call = _source_call(node);
   if (!call) return 0;
@@ -321,29 +452,6 @@ static int _scan_conditional(Walk &w, Var node) {
   return 0;
 }
 
-static int _scan_assignment(Walk &w, Var node, Var root) {
-  List assignment = _source_assignment(node);
-  if (!assignment || _unwrap(node) == root) return 0;
-  (Var target, Var stored) = assignment;
-  _store(w, target, stored);
-  w.pending.push(target);
-  return 1;
-}
-
-static void _scan_node(Walk &w, Var node) {
-  match (node) {
-    case %(expr ? ?inner): w.pending.push(inner);
-    case %(ident (!set ?binding (binding ? ?))):
-      _scan_ident(w, binding);
-    // A statement expression declares locals of its own.
-    case %((!or declare decl) ?specifiers (bindings *bindings)):
-      _declare(w, specifiers, bindings);
-    // A List literal retains its values in the active Pool.
-    case %(cons ?head ?tail): _scan_cons(w, node, head, tail);
-    case %(*children): _scan_children(w, children);
-  }
-}
-
 static void _scan_ident(Walk &w, Var binding) {
   Var found = w.facts[binding];
   if (found is void) return;
@@ -385,38 +493,6 @@ static void _scan_children(Walk &w, List children) {
   }
 }
 
-// stores and declarations
-
-static void _store(Walk &w, Var target, Var value) {
-  List named = _binding_of(target);
-  // A store through a pointer reads the pointer.
-  if (!named) _scan(w, target, 0);
-  if (_target_place(w, target) in w.restored) {
-    _scan(w, value, 0);
-    return;
-  }
-  Type type = _expression_type(target);
-  Var found = named ? w.facts[named] : void;
-  if (found is not void) {
-    _assign(w, found, value, type, 1);
-    return;
-  }
-  _scan(w, value, 0);
-  if (named) {
-    _flow(w, value, type, <static>, NULL);
-    return;
-  }
-  int through = 0;
-  Fact object = NULL, base = _base(w, target, through);
-  // A field or element of file-scope storage is that storage.
-  if (!base && !through && _root(target)) {
-    _flow(w, value, type, <static>, NULL);
-    return;
-  }
-  Symbol sink = _sink_of(base, through, object);
-  _flow(w, value, type, sink, object);
-}
-
 /* The place a store target names, seen through the pointer a `with` entry
    holds: `*address` and the place `address` was taken from are one
    storage. */
@@ -427,80 +503,4 @@ static Var _target_place(Walk &w, Var target) {
     if (fact && fact.place) return fact.place;
   }
   return inner;
-}
-
-/* `fact` receives `value`, declared or stored as `type`. A store of a
-   region-born local into a local declared outside that region reports
-   once, and the receiving local does not carry the region further. */
-static void _assign(Walk &w, Fact fact, Var value, Type type, int store) {
-  _scan(w, value, 0);
-  Fact source = _value_fact(w, value, NULL);
-  if (!source) source = _returned_argument(w, value, NULL);
-  int born = 0;
-  Region other = source ? source.other : NULL;
-  Acquired acquired = NULL;
-  Region region = source ? source.region
-                         : _birth(w, value, type, born, other, acquired);
-  int owners = source ? source.born : born;
-  int kept = (source || born) && !_number(w, type, value);
-  int copies = kept && _copies(w, type, value);
-  if (kept && copies) {
-    if (owners == 3) {
-      region = other;
-      other = NULL;
-      owners = 2;
-    }
-    else kept = (owners & 2) || (region && region.kind == <pool>);
-  }
-  if (kept && store && source &&
-      (region || other || _cleanup(source.acquired)))
-    kept = !_flow(w, value, type, <local>, fact);
-  if (kept && source && !copies && !source.empty)
-    acquired = _acquired(source);
-  if (copies || (source && !kept)) acquired = NULL;
-  // A nested store runs on some paths; the others keep the earlier value.
-  if (!acquired && store && fact.depth < w.depth) acquired = fact.acquired;
-  fact.acquired = acquired;
-  fact.empty = source ? source.empty : _empty(value);
-  fact.dead = 0;
-  fact.points = kept && source ? source.points : NULL;
-  fact.place = kept && source ? source.place : NULL;
-  /* A Scope local that is assigned again names other storage, whose end has
-     not been seen, so the region its previous value formed is not the one
-     the next allocation belongs to. */
-  fact.owner = NULL;
-  fact.region = kept ? region : NULL;
-  fact.other = kept ? other : NULL;
-  fact.born = kept ? owners : 0;
-  fact.param = kept && source ? source.param : -1;
-}
-
-/* A static or extern local is not the function's storage, so the walk
-   treats it as file-scope state. */
-static void _declare(Walk &w, Var specifiers, List bindings) {
-  Map types = w.c.semantic_binding_facts();
-  if (<static> in specifiers || <extern> in specifiers) {
-    foreach (List item in bindings)
-      if (item ~= %(op = (bind ?name ?) ?value)) {
-        _scan(w, value, 0);
-        _flow(w, value, types[%(type $name)], <static>, NULL);
-      }
-    return;
-  }
-  foreach (List item in bindings)
-    match (item) {
-      case %(op (!quote =) (bind (!set ?name (binding ? ?)) ?) ?value):
-        _declare_initialized(w, name, value, types[%(type $name)]);
-      case %(bind (!set ?name (binding ? ?)) ?): _new_fact(w, name, -1);
-    }
-}
-
-static void _declare_initialized(
-  Walk &w, List name, Var value, Type type) {
-  Fact fact = _new_fact(w, name, -1);
-  foreach (Var part in w.c.sym.normalize_declared_type(type)) {
-    if (part is not <symbol> || !part.symbol().is_type_qualifier()) break;
-    if (part == <const>) fact.constant = 1;
-  }
-  _assign(w, fact, value, type, 0);
 }

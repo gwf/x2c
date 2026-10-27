@@ -46,6 +46,27 @@ List Compiler.parse_raise_literal(Compiler c) {
   }
 }
 
+/** Parses a filtered-catch `%()` payload into a typed `List` pattern.
+    The call consumes the closing `)`. A code `Symbol`, binder, or pattern
+    may be followed by `*` patterns or `(key pattern)` pairs; pattern and
+    runtime-literal state is restored on every exit.
+*/
+List Compiler.parse_catch_pattern_literal(Compiler c) {
+  c.expect(<"%(">);
+  with (c.in_pattern = 1, c.runtime_literals = 1) {
+    List code = _parse_catch_code(c);
+    Array elements = [];
+    elements.push(code);
+    while (c.peek(0) != <)>) _parse_catch_detail(c, elements);
+    c.expect(<)>);
+    List pattern = c.list_expression(elements, %(nil));
+    elements.free();
+    return pattern;
+  }
+}
+
+// raise payloads and catch patterns
+
 static List _parse_raise_code(Compiler c) {
   List code = c.try_parse_macro_slot(<expression>);
   if (!code) code = _parse_insertion(c);
@@ -88,25 +109,6 @@ static List _parse_detail_value(
   if (c.peek(0) != <)>) c.report_error(<parse>, arity, origin, NULL);
   c.expect(<)>);
   return value;
-}
-
-/** Parses a filtered-catch `%()` payload into a typed `List` pattern.
-    The call consumes the closing `)`. A code `Symbol`, binder, or pattern
-    may be followed by `*` patterns or `(key pattern)` pairs; pattern and
-    runtime-literal state is restored on every exit.
-*/
-List Compiler.parse_catch_pattern_literal(Compiler c) {
-  c.expect(<"%(">);
-  with (c.in_pattern = 1, c.runtime_literals = 1) {
-    List code = _parse_catch_code(c);
-    Array elements = [];
-    elements.push(code);
-    while (c.peek(0) != <)>) _parse_catch_detail(c, elements);
-    c.expect(<)>);
-    List pattern = c.list_expression(elements, %(nil));
-    elements.free();
-    return pattern;
-  }
 }
 
 static List _parse_catch_code(Compiler c) {

@@ -1,15 +1,6 @@
 /*  calls.x -- call preparation and recognition */
 
 
-// calls
-
-module List _native(Resolve &r, String callee, List supplied) {
-  List arguments = _resolve_call_arguments(r.c, NULL, supplied, r.origin);
-  Type type = callee == "_Alignof" && r.type === %(<macro-expr>)
-            ? %("size_t") : r.type;
-  return %(expr $type (call $callee (args @arguments)));
-}
-
 /* One call being resolved: its expected result type, the arguments it
    supplies, and its origin. A method call adds the receiver, its type, and
    the member it selects. */
@@ -20,232 +11,6 @@ static typedef struct CallSite {
   Token origin;
   String method;
 } CallSite;
-
-module List _call(Resolve &r, List function, List supplied) {
-  CallSite site = {
-    .c = r.c, .result_type = r.type, .supplied = supplied,
-    .origin = r.origin};
-  match (function)
-    case %(expr ? (op . ?receiver (!set ?field (?name)))):
-      return _method(site, receiver, field);
-  return _function(site, function);
-}
-
-static List _function(CallSite &k, List function) {
-  List resolved = k.c.resolve_expression(function, k.origin);
-  Type type = resolved.cadr(), func_type = k.c.sym.resolve_key(%("Func"));
-  if (type && k.c.sym.resolve_key(type) == func_type)
-    return _resolve_func_call(k.c, resolved, k.supplied, k.origin);
-  return _finish(k, k.result_type, resolved, type, NULL);
-}
-
-static List _finish(
-  CallSite &k, Type result_type, List callee, Type callee_type,
-  List receiver) {
-  if (result_type === %(<macro-expr>)) result_type = NULL;
-  Type applied = callee_type.apply();
-  if (!applied && callee_type)
-    applied = k.c.sym.resolve_key(callee_type).apply();
-  List arguments = _resolve_call_arguments(
-    k.c, receiver, k.supplied, k.origin);
-  if (_deferred_call(callee, receiver, arguments))
-    result_type = %(<macro-expr>);
-  if (!result_type) result_type = applied;
-  if (receiver && result_type !== %(<macro-expr>))
-    _check_arity(k, callee_type, arguments);
-  k.c.check_meta_call(callee, k.origin);
-  callee = _discarding_callee(k.c, callee, callee_type, arguments);
-  Macro called = $called;
-  return k.c.rebuild_expression(result_type, called(callee, arguments));
-}
-
-/* A call waits for macro substitution when its callee, its receiver, or
-   one of its arguments does. */
-static int _deferred_call(List callee, List receiver, List arguments) {
-  if (_deferred_receiver(callee) ||
-      (receiver && _deferred_receiver(receiver)))
-    return 1;
-  foreach (Var argument in arguments)
-    if (argument is <list> && !argument.is_nil()) {
-      List syntax = argument;
-      if (_deferred_receiver(syntax) ||
-          syntax.car() == <macro-bind> || syntax.car() == <macro-slot>)
-        return 1;
-    }
-  return 0;
-}
-
-static void _check_arity(
-  CallSite &k, Type callee_type, List arguments) {
-  match (callee_type)
-    case %((func (!set ?parameters (*))) *):
-      if (!_parameters_variadic(parameters) &&
-          arguments.len() > List.len(parameters))
-        $fail.expressions_method_arity(k.c, k.origin, parameters, arguments);
-}
-
-static int _parameters_variadic(List parameters) {
-  foreach (Var parameter in parameters)
-    if (parameter == <...> || (parameter is <list> && !parameter.is_nil() &&
-        (parameter.car() == <...> || parameter.car() == <....>)))
-      return 1;
-  return 0;
-}
-
-static List _resolve_call_arguments(
-  Compiler c, List receiver, List supplied, Token origin) {
-  Array arguments = [];
-  if (receiver) arguments.push(receiver);
-  if (!receiver && !supplied) supplied = %((expr (void) ()));
-  if (receiver && supplied === %((expr (void) ()))) supplied = NULL;
-  foreach (Var argument in supplied) {
-    int slot = argument is <list> && !argument.is_nil() &&
-               argument.car() == <macro-slot>;
-    Var value = c.evaluate_macro_slot(argument);
-    if (value is <list> && !value.is_nil() &&
-        value.car() == <seq>)
-      foreach (List item in value.list().cdr())
-        arguments.push(c.resolve_expression(item, origin));
-    else if (slot)
-      arguments.push(
-        c.resolve_expression(
-          c.lift_meta_expression(value, origin), origin)
-      );
-    else if (value is <list>)
-      arguments.push(c.resolve_expression(value, origin));
-    else arguments.push(value);
-  }
-  return arguments.list_free();
-}
-
-/* A call whose receiver or argument is an unnamed operator temporary goes
-   through a helper that discards that temporary once the call returns. */
-static List _discarding_callee(
-  Compiler c, List callee, Type callee_type, List arguments) {
-  List binding = NULL;
-  match (callee) case %(expr ? (ident (!set ?bound (*)))): binding = bound;
-  if (!binding || !(callee_type ~= %((func *) *)) ||
-      %"discard-helper $((long) binding)" in c.protocol_helpers)
-    return callee;
-  int which = 0, index = 0;
-  foreach (Var argument in arguments) {
-    if (argument is <list> && _is_operator_temporary(c, argument))
-      which |= 1 << index;
-    index++;
-  }
-  if (!which) return callee;
-  String stem = Ast.binding_spelling(binding);
-  if (!stem) return callee;
-  List helper = c.discard_helper(binding, callee_type, stem, which);
-  if (!helper) return callee;
-  List (helper_binding, signature) = helper;
-  return %(expr $signature (ident $helper_binding));
-}
-
-// member invocation
-
-static List _method(CallSite &k, List receiver, List field) {
-  k.receiver = receiver;
-  k.field = field;
-  List resolution = _lookup(k);
-  if (!resolution && _deferred_receiver(k.receiver)) {
-    List callee = %(expr (<macro-expr>) (op . $(k.receiver) $(k.field)));
-    return _finish(k, k.result_type, callee, NULL, NULL);
-  }
-  /* A template's free owner can name a type only where it lands, and
-     `T.member` there calls `T_member`, as the parser folds it. */
-  if (!resolution) match (k.type) case %(typedef ?(String owner)):
-    return _function(k, %(expr () (ident ($(%"$(owner)_$(k.method)")))));
-  if (!resolution && !k.c.macro_holes && k.c.rewrite_rules) {
-    List rewritten = _member_rewrite(k);
-    if (rewritten) return rewritten;
-  }
-  if (!resolution) {
-    if (k.receiver ~= %(expr () (ident ?binding)))
-      $fail.expressions_receiver_unresolved(
-        k.c, k.origin, Ast.binding_spelling(binding));
-    Var name = k.field.car();
-    $fail.expressions_method_missing(k.c, k.origin, k.type, name);
-  }
-  match (resolution) {
-    case %(ambiguous *packages):
-      _report_method_ambiguity(k.c, k.type, k.method, packages, k.origin);
-    case %(method ?binding (!set ?signature
-      ((func (!set ?parameters (?declared *))) *returns))):
-      return _bound(k, binding, signature, declared, parameters, returns);
-    case %(field ?access ?field_type): {
-      List callee = %(expr $field_type
-        (op $access $(k.receiver) $(k.field)));
-      return _finish(k, k.result_type, callee, field_type, NULL);
-    }
-  }
-  return NULL;
-}
-
-/* Member rules are keyed by the receiver's type, or by a field keyword the
-   aggregate it reaches through typedefs or one pointer declares. */
-static List _member_rewrite(CallSite &k) {
-  List source = %(expr () (call
-    (expr () (op . $(k.receiver) $(k.field))) (args @(k.supplied))));
-  List rewritten = k.c.rewrite(
-    <member>, k.type.canonicalize(), source, <expression>, NULL, k.origin);
-  Type aggregate = rewritten ? NULL : k.c.sym.aggregate_of(k.type);
-  return aggregate
-    ? k.c.marked_rewrite(aggregate, source, k.origin) : rewritten;
-}
-
-static List _lookup(CallSite &k) {
-  k.receiver = k.c.resolve_expression(k.receiver, k.origin);
-  k.type = k.receiver.cadr();
-  k.method = k.field.car().str();
-  List resolution = k.c.resolve_postfix_member(k.type, k.field, <.>, 1);
-  if (!resolution && _is_raw_string_literal(k.receiver)) {
-    k.receiver = k.c.promote_string_literal(k.receiver);
-    k.type = k.receiver.cadr();
-    resolution = k.c.resolve_postfix_member(k.type, k.field, <.>, 1);
-  }
-  return resolution;
-}
-
-static List _bound(
-  CallSite &k, List binding, Type signature, List declared,
-  List parameters, List returns) {
-  k.receiver = _method_bind(k.c, k.receiver, k.type, declared, k.origin);
-  List callee = %(expr ((func $parameters) $returns) (ident $binding));
-  return _finish(k, signature.apply(), callee, signature, k.receiver);
-}
-
-static List _method_bind(
-  Compiler c, List receiver, Type type, Type declared, Token origin) {
-  if (!declared || !type) return receiver;
-  Type target = declared.canonicalize(), source = type.canonicalize();
-  Type named = source.is_aggregate() ? _tag_typedef(c, source) : NULL;
-  if (named) {
-    type = named.qualify(type);
-    source = named;
-    receiver = %(expr $type $(receiver.caddr()));
-  }
-  if (_receiver_points_to(source, target))
-    $fail.expressions_receiver_pointer(c, origin, type, declared);
-  if (target.car() != <*> || cdr(target) !== source)
-    return receiver;
-  if (!_is_addressable(c, receiver))
-    $fail.expressions_receiver_address(c, origin);
-  List address = %(expr $(type.reference()) (op & (parens $receiver)));
-  return c.convert_expression(address, declared);
-}
-
-/* Whether a method receiver is a pointer to the declared parameter. `.` binds
-   a receiver by identity or by one address-of, so such a call would pass the
-   wrong pointer; with a pointer typedef C only warns and the program
-   aborts. */
-static int _receiver_points_to(Type source, Type declared) {
-  while (source.is_pointer()) {
-    source = source.dereference();
-    if (source === declared) return 1;
-  }
-  return 0;
-}
 
 /* dynamic Func calls
 
@@ -350,31 +115,19 @@ static macro Expression $func_call(Expr $callee, Expr $count,
   Func_apply(function, $count, storage);
 });
 
-/* A dynamic call passes each Map rest entry as its key and then its value;
-   Func.apply pairs them into the Map. */
-static List _resolve_func_call(
-  Compiler c, List callee, List supplied, Token origin) {
-  Array flat = [];
-  foreach (List argument in
-           _resolve_call_arguments(c, NULL, supplied, origin))
-    match (argument) {
-      case %(expr ? (map-entry ?key ?value)): flat.push(key), flat.push(value);
-      default: flat.push(argument);
-    }
-  List arguments = flat.list_free();
-  if (_deferred_call(callee, NULL, arguments)) {
-    Macro called = $called;
-    return c.rebuild_expression(%(<macro-expr>), called(callee, arguments));
-  }
-  if (arguments ~= %((expr (void) ()))) arguments = NULL;
-  if (!arguments) {
-    Macro apply = $func_apply;
-    return c.bind_syntax(apply(callee), <expression>, NULL);
-  }
-  Macro call = $func_call;
-  return c.bind_syntax(
-    call(callee, arguments.len(), arguments), <expression>, NULL);
-}
+// printf formats
+
+static const PrintfFn printf_family_info[] = {
+  { "printf",        0, 1, 1 },
+  { "fprintf",       1, 2, 1 },
+  { "sprintf",       1, 2, 1 },
+  { "snprintf",      2, 3, 1 },
+  { "String_printf", 0, 1, 0 },
+  { "File_printf",   1, 2, 0 },
+  { "Buffer_printf", 1, 2, 0 }
+};
+
+
 
 /** Returns the callee and arguments of a typed `Func` call, or NULL for any
     other expression. `content` is the body of the call's `expr` node. Each
@@ -399,6 +152,58 @@ List Compiler.func_call_parts(Compiler c, Var content) {
   }
   return NULL;
 }
+
+// Iter chains
+
+/** Completes an eligible resolved `Iter` call chain for immediate consumption.
+    It accepts only a typed identifier call of the form
+    `(expr R (call (expr ((func P) T) (ident B)) (args A)))`, where `R` and
+    the last formal in `P` canonicalize to `Iter`. `Iter` arguments are
+    completed recursively; a call missing only that last formal receives the
+    hidden destination. Variadic calls and `Iter_unzip` are returned unchanged.
+*/
+List Compiler.complete_iter_chain(Compiler c, List expression) {
+  match (expression)
+    case $called(%(!set ?callee (expr ((func (!set ?parameters (*))) ?)
+                                      (ident ?binding))),
+                 *arguments):
+      return _complete_iter_call(
+        c, expression, callee, arguments, parameters, binding);
+  return expression;
+}
+
+/** Returns the C spelling of the format a printf-family call consumes when
+    it is known at translation time, or `NULL`. That is a quoted C string
+    literal, the canonical `String` one becomes, or the `String_new` of one;
+    any other format, such as a variable or an object macro, is not readable
+    here. A `String` literal's text is spelled as a C literal.
+*/
+String Compiler.printf_static_format(Compiler c, Var format) {
+  match (format) {
+    case %(expr (* char) (literal (* char) ?spelled)): {
+      String spelling = spelled;
+      int length = spelling ? spelling.len() : 0;
+      if (length < 2 || spelling[0] != '"' || spelling[length - 1] != '"')
+        return NULL;
+      return spelling;
+    }
+    case %(expr ("String") (cache ?id)): {
+      List key = c.id_keys[id];
+      match (key)
+        case %(string (expr ("String") (literal ("String") ?text))): {
+          String spelling = text;
+          return spelling.repr();
+        }
+      match (key)
+        case %(string (expr ("String") (call "String_new" (args ?literal)))):
+          return c.printf_static_format(literal);
+      return NULL;
+    }
+  }
+  return NULL;
+}
+
+// call preparation and recognition
 
 /* One prepared argument as `(func-arg value address source)`, or NULL for
    any other statement. */
@@ -440,25 +245,6 @@ static List _slot_statements(List items) {
   return opened;
 }
 
-// Iter chains
-
-/** Completes an eligible resolved `Iter` call chain for immediate consumption.
-    It accepts only a typed identifier call of the form
-    `(expr R (call (expr ((func P) T) (ident B)) (args A)))`, where `R` and
-    the last formal in `P` canonicalize to `Iter`. `Iter` arguments are
-    completed recursively; a call missing only that last formal receives the
-    hidden destination. Variadic calls and `Iter_unzip` are returned unchanged.
-*/
-List Compiler.complete_iter_chain(Compiler c, List expression) {
-  match (expression)
-    case $called(%(!set ?callee (expr ((func (!set ?parameters (*))) ?)
-                                      (ident ?binding))),
-                 *arguments):
-      return _complete_iter_call(
-        c, expression, callee, arguments, parameters, binding);
-  return expression;
-}
-
 static List _complete_iter_call(
   Compiler c, List expression, List callee, List arguments,
   List parameters, List binding) {
@@ -494,6 +280,16 @@ static List _complete_iter_call(
   return c.rebuild_expression(%("Iter"), called(callee, values));
 }
 
+// calls
+
+static int _parameters_variadic(List parameters) {
+  foreach (Var parameter in parameters)
+    if (parameter == <...> || (parameter is <list> && !parameter.is_nil() &&
+        (parameter.car() == <...> || parameter.car() == <....>)))
+      return 1;
+  return 0;
+}
+
 static int _exact_iter_type(Var value) {
   Type type = value is <list> ? value : $(value);
   return type.canonicalize() == %("Iter");
@@ -502,17 +298,258 @@ static int _exact_iter_type(Var value) {
 static List _iter_destination(void) =>
   $!(struct Iter *){ &(struct Iter){ 0 } };
 
-// printf formats
 
-static const PrintfFn printf_family_info[] = {
-  { "printf",        0, 1, 1 },
-  { "fprintf",       1, 2, 1 },
-  { "sprintf",       1, 2, 1 },
-  { "snprintf",      2, 3, 1 },
-  { "String_printf", 0, 1, 0 },
-  { "File_printf",   1, 2, 0 },
-  { "Buffer_printf", 1, 2, 0 }
-};
+
+module List _native(Resolve &r, String callee, List supplied) {
+  List arguments = _resolve_call_arguments(r.c, NULL, supplied, r.origin);
+  Type type = callee == "_Alignof" && r.type === %(<macro-expr>)
+            ? %("size_t") : r.type;
+  return %(expr $type (call $callee (args @arguments)));
+}
+
+module List _call(Resolve &r, List function, List supplied) {
+  CallSite site = {
+    .c = r.c, .result_type = r.type, .supplied = supplied,
+    .origin = r.origin};
+  match (function)
+    case %(expr ? (op . ?receiver (!set ?field (?name)))):
+      return _method(site, receiver, field);
+  return _function(site, function);
+}
+
+// member invocation
+
+static List _method(CallSite &k, List receiver, List field) {
+  k.receiver = receiver;
+  k.field = field;
+  List resolution = _lookup(k);
+  if (!resolution && _deferred_receiver(k.receiver)) {
+    List callee = %(expr (<macro-expr>) (op . $(k.receiver) $(k.field)));
+    return _finish(k, k.result_type, callee, NULL, NULL);
+  }
+  /* A template's free owner can name a type only where it lands, and
+     `T.member` there calls `T_member`, as the parser folds it. */
+  if (!resolution) match (k.type) case %(typedef ?(String owner)):
+    return _function(k, %(expr () (ident ($(%"$(owner)_$(k.method)")))));
+  if (!resolution && !k.c.macro_holes && k.c.rewrite_rules) {
+    List rewritten = _member_rewrite(k);
+    if (rewritten) return rewritten;
+  }
+  if (!resolution) {
+    if (k.receiver ~= %(expr () (ident ?binding)))
+      $fail.expressions_receiver_unresolved(
+        k.c, k.origin, Ast.binding_spelling(binding));
+    Var name = k.field.car();
+    $fail.expressions_method_missing(k.c, k.origin, k.type, name);
+  }
+  match (resolution) {
+    case %(ambiguous *packages):
+      _report_method_ambiguity(k.c, k.type, k.method, packages, k.origin);
+    case %(method ?binding (!set ?signature
+      ((func (!set ?parameters (?declared *))) *returns))):
+      return _bound(k, binding, signature, declared, parameters, returns);
+    case %(field ?access ?field_type): {
+      List callee = %(expr $field_type
+        (op $access $(k.receiver) $(k.field)));
+      return _finish(k, k.result_type, callee, field_type, NULL);
+    }
+  }
+  return NULL;
+}
+
+static List _function(CallSite &k, List function) {
+  List resolved = k.c.resolve_expression(function, k.origin);
+  Type type = resolved.cadr(), func_type = k.c.sym.resolve_key(%("Func"));
+  if (type && k.c.sym.resolve_key(type) == func_type)
+    return _resolve_func_call(k.c, resolved, k.supplied, k.origin);
+  return _finish(k, k.result_type, resolved, type, NULL);
+}
+
+/* Member rules are keyed by the receiver's type, or by a field keyword the
+   aggregate it reaches through typedefs or one pointer declares. */
+static List _member_rewrite(CallSite &k) {
+  List source = %(expr () (call
+    (expr () (op . $(k.receiver) $(k.field))) (args @(k.supplied))));
+  List rewritten = k.c.rewrite(
+    <member>, k.type.canonicalize(), source, <expression>, NULL, k.origin);
+  Type aggregate = rewritten ? NULL : k.c.sym.aggregate_of(k.type);
+  return aggregate
+    ? k.c.marked_rewrite(aggregate, source, k.origin) : rewritten;
+}
+
+static List _lookup(CallSite &k) {
+  k.receiver = k.c.resolve_expression(k.receiver, k.origin);
+  k.type = k.receiver.cadr();
+  k.method = k.field.car().str();
+  List resolution = k.c.resolve_postfix_member(k.type, k.field, <.>, 1);
+  if (!resolution && _is_raw_string_literal(k.receiver)) {
+    k.receiver = k.c.promote_string_literal(k.receiver);
+    k.type = k.receiver.cadr();
+    resolution = k.c.resolve_postfix_member(k.type, k.field, <.>, 1);
+  }
+  return resolution;
+}
+
+static List _bound(
+  CallSite &k, List binding, Type signature, List declared,
+  List parameters, List returns) {
+  k.receiver = _method_bind(k.c, k.receiver, k.type, declared, k.origin);
+  List callee = %(expr ((func $parameters) $returns) (ident $binding));
+  return _finish(k, signature.apply(), callee, signature, k.receiver);
+}
+
+static List _finish(
+  CallSite &k, Type result_type, List callee, Type callee_type,
+  List receiver) {
+  if (result_type === %(<macro-expr>)) result_type = NULL;
+  Type applied = callee_type.apply();
+  if (!applied && callee_type)
+    applied = k.c.sym.resolve_key(callee_type).apply();
+  List arguments = _resolve_call_arguments(
+    k.c, receiver, k.supplied, k.origin);
+  if (_deferred_call(callee, receiver, arguments))
+    result_type = %(<macro-expr>);
+  if (!result_type) result_type = applied;
+  if (receiver && result_type !== %(<macro-expr>))
+    _check_arity(k, callee_type, arguments);
+  k.c.check_meta_call(callee, k.origin);
+  callee = _discarding_callee(k.c, callee, callee_type, arguments);
+  Macro called = $called;
+  return k.c.rebuild_expression(result_type, called(callee, arguments));
+}
+
+static void _check_arity(
+  CallSite &k, Type callee_type, List arguments) {
+  match (callee_type)
+    case %((func (!set ?parameters (*))) *):
+      if (!_parameters_variadic(parameters) &&
+          arguments.len() > List.len(parameters))
+        $fail.expressions_method_arity(k.c, k.origin, parameters, arguments);
+}
+
+/* A call whose receiver or argument is an unnamed operator temporary goes
+   through a helper that discards that temporary once the call returns. */
+static List _discarding_callee(
+  Compiler c, List callee, Type callee_type, List arguments) {
+  List binding = NULL;
+  match (callee) case %(expr ? (ident (!set ?bound (*)))): binding = bound;
+  if (!binding || !(callee_type ~= %((func *) *)) ||
+      %"discard-helper $((long) binding)" in c.protocol_helpers)
+    return callee;
+  int which = 0, index = 0;
+  foreach (Var argument in arguments) {
+    if (argument is <list> && _is_operator_temporary(c, argument))
+      which |= 1 << index;
+    index++;
+  }
+  if (!which) return callee;
+  String stem = Ast.binding_spelling(binding);
+  if (!stem) return callee;
+  List helper = c.discard_helper(binding, callee_type, stem, which);
+  if (!helper) return callee;
+  List (helper_binding, signature) = helper;
+  return %(expr $signature (ident $helper_binding));
+}
+
+static List _method_bind(
+  Compiler c, List receiver, Type type, Type declared, Token origin) {
+  if (!declared || !type) return receiver;
+  Type target = declared.canonicalize(), source = type.canonicalize();
+  Type named = source.is_aggregate() ? _tag_typedef(c, source) : NULL;
+  if (named) {
+    type = named.qualify(type);
+    source = named;
+    receiver = %(expr $type $(receiver.caddr()));
+  }
+  if (_receiver_points_to(source, target))
+    $fail.expressions_receiver_pointer(c, origin, type, declared);
+  if (target.car() != <*> || cdr(target) !== source)
+    return receiver;
+  if (!_is_addressable(c, receiver))
+    $fail.expressions_receiver_address(c, origin);
+  List address = %(expr $(type.reference()) (op & (parens $receiver)));
+  return c.convert_expression(address, declared);
+}
+
+/* Whether a method receiver is a pointer to the declared parameter. `.` binds
+   a receiver by identity or by one address-of, so such a call would pass the
+   wrong pointer; with a pointer typedef C only warns and the program
+   aborts. */
+static int _receiver_points_to(Type source, Type declared) {
+  while (source.is_pointer()) {
+    source = source.dereference();
+    if (source === declared) return 1;
+  }
+  return 0;
+}
+
+/* A dynamic call passes each Map rest entry as its key and then its value;
+   Func.apply pairs them into the Map. */
+static List _resolve_func_call(
+  Compiler c, List callee, List supplied, Token origin) {
+  Array flat = [];
+  foreach (List argument in
+           _resolve_call_arguments(c, NULL, supplied, origin))
+    match (argument) {
+      case %(expr ? (map-entry ?key ?value)): flat.push(key), flat.push(value);
+      default: flat.push(argument);
+    }
+  List arguments = flat.list_free();
+  if (_deferred_call(callee, NULL, arguments)) {
+    Macro called = $called;
+    return c.rebuild_expression(%(<macro-expr>), called(callee, arguments));
+  }
+  if (arguments ~= %((expr (void) ()))) arguments = NULL;
+  if (!arguments) {
+    Macro apply = $func_apply;
+    return c.bind_syntax(apply(callee), <expression>, NULL);
+  }
+  Macro call = $func_call;
+  return c.bind_syntax(
+    call(callee, arguments.len(), arguments), <expression>, NULL);
+}
+
+/* A call waits for macro substitution when its callee, its receiver, or
+   one of its arguments does. */
+static int _deferred_call(List callee, List receiver, List arguments) {
+  if (_deferred_receiver(callee) ||
+      (receiver && _deferred_receiver(receiver)))
+    return 1;
+  foreach (Var argument in arguments)
+    if (argument is <list> && !argument.is_nil()) {
+      List syntax = argument;
+      if (_deferred_receiver(syntax) ||
+          syntax.car() == <macro-bind> || syntax.car() == <macro-slot>)
+        return 1;
+    }
+  return 0;
+}
+
+static List _resolve_call_arguments(
+  Compiler c, List receiver, List supplied, Token origin) {
+  Array arguments = [];
+  if (receiver) arguments.push(receiver);
+  if (!receiver && !supplied) supplied = %((expr (void) ()));
+  if (receiver && supplied === %((expr (void) ()))) supplied = NULL;
+  foreach (Var argument in supplied) {
+    int slot = argument is <list> && !argument.is_nil() &&
+               argument.car() == <macro-slot>;
+    Var value = c.evaluate_macro_slot(argument);
+    if (value is <list> && !value.is_nil() &&
+        value.car() == <seq>)
+      foreach (List item in value.list().cdr())
+        arguments.push(c.resolve_expression(item, origin));
+    else if (slot)
+      arguments.push(
+        c.resolve_expression(
+          c.lift_meta_expression(value, origin), origin)
+      );
+    else if (value is <list>)
+      arguments.push(c.resolve_expression(value, origin));
+    else arguments.push(value);
+  }
+  return arguments.list_free();
+}
 
 /* Returns the printf-family entry a callee names, or `NULL`. A resolved
    user function that happens to use a libc spelling is not one. */
@@ -528,36 +565,5 @@ module const PrintfFn *_printf_family(List l) {
         return info;
       }
     }
-  return NULL;
-}
-
-/** Returns the C spelling of the format a printf-family call consumes when
-    it is known at translation time, or `NULL`. That is a quoted C string
-    literal, the canonical `String` one becomes, or the `String_new` of one;
-    any other format, such as a variable or an object macro, is not readable
-    here. A `String` literal's text is spelled as a C literal.
-*/
-String Compiler.printf_static_format(Compiler c, Var format) {
-  match (format) {
-    case %(expr (* char) (literal (* char) ?spelled)): {
-      String spelling = spelled;
-      int length = spelling ? spelling.len() : 0;
-      if (length < 2 || spelling[0] != '"' || spelling[length - 1] != '"')
-        return NULL;
-      return spelling;
-    }
-    case %(expr ("String") (cache ?id)): {
-      List key = c.id_keys[id];
-      match (key)
-        case %(string (expr ("String") (literal ("String") ?text))): {
-          String spelling = text;
-          return spelling.repr();
-        }
-      match (key)
-        case %(string (expr ("String") (call "String_new" (args ?literal)))):
-          return c.printf_static_format(literal);
-      return NULL;
-    }
-  }
   return NULL;
 }

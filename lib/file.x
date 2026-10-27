@@ -83,27 +83,6 @@ $cleanup.by(File, close);
 
 // reading text
 
-/** Reads the remaining stream into one canonical `String`.
-    Starts at the current position, advances through EOF, and returns NULL when
-    no bytes remain.
-    Raises: `<io-fail>` on a stream read error, `<bad-arg>` when returned bytes
-    contain an embedded NUL, `<size-limit>` when the `String` cannot be
-    represented, or `<alloc-fail>` while constructing the result.
-*/
-String File.string(File file) {
-  struct stat statbuf = {0};
-  off_t position = file.tello();
-  if (position >= 0 && file.stat(&statbuf) == 0 && S_ISREG(statbuf.st_mode) &&
-      statbuf.st_size > position) {
-    uintmax_t remaining = (uintmax_t) (statbuf.st_size - position);
-    _string_allocation(remaining);
-    return _regular_text(file, (size_t) remaining);
-  }
-  Block content = auto Block.new(sizeof(char));
-  _append_rest(content, file);
-  return _text(content.bytes, content.length);
-}
-
 /** Reads one raw line into a canonical `String`.
     Includes the newline when present. Clean EOF and `<error>` both map
     to NULL. Prefer `File.readline_into` or `File.iter` when raw status and
@@ -149,114 +128,7 @@ String File.string_close(File file) {
   return file.string();
 }
 
-/* A regular file's observed extent is a sizing hint. After reading that many
-   bytes, probe once for concurrent growth before accepting EOF. */
-static String _regular_text(File file, size_t requested) {
-  int allocation = _string_allocation(requested);
-  String first = String.malloc(allocation), Block content = NULL;
-  defer {
-    if (first != NULL) first.free();
-    if (content != NULL) content.free();
-  }
-  size_t count = fread(first, 1, requested, file);
-  _check_read(file);
-  int next = count < requested ? EOF : _probe(file);
-  if (next == EOF) {
-    String text = _finish_text(first, count);
-    first = NULL;
-    return text;
-  }
-  content = Block.new(sizeof(char));
-  if (count >= INT_MAX - 1) raise %(size-limit (size $count));
-  _append_text(content, first, count);
-  first.free();
-  first = NULL;
-  _block_putc(content, (unsigned char) next);
-  _append_rest(content, file);
-  return _text(content.bytes, content.length);
-}
-
-static int _probe(File file) {
-  int next = fgetc(file);
-  if (next == EOF) _check_read(file);
-  return next;
-}
-
-static void _append_rest(Block content, File file) {
-  unsigned char bytes[BUFSIZ], size_t count;
-  while ((count = fread(bytes, 1, sizeof(bytes), file)) > 0)
-    _append_text(content, bytes, count);
-  _check_read(file);
-}
-
-static int _string_allocation(size_t length) {
-  if (length >= INT_MAX) raise %(size-limit (size $length));
-  return (int) length + 1;
-}
-
-static void _append_text(Block content, const void *bytes, size_t count) {
-  if (count >= INT_MAX - content.length) {
-    size_t size = content.length + count;
-    raise %(size-limit (size $size));
-  }
-  _validate_text(bytes, count);
-  content.append(bytes, count);
-}
-
-static String _text(const void *bytes, size_t length) {
-  if (!length) return NULL;
-  int allocation = _string_allocation(length);
-  _validate_text(bytes, length);
-  return x2c_string_from_bytes(bytes, allocation - 1);
-}
-
-/* Validates and canonicalizes an owned text buffer. `intern_free` consumes
-   the temporary allocation and returns the canonical String. */
-static String _finish_text(String text, size_t length) {
-  _validate_text(text, length);
-  char *out = text;
-  out[length] = '\0';
-  return text.intern_free();
-}
-
-/* Callers supply live byte storage whenever length is nonzero. */
-static void _validate_text(const void *bytes, size_t length) {
-  if (!length) return;
-  if (memchr(bytes, '\0', length))
-    raise %(bad-arg (operation "File.text") (reason "embedded NUL"));
-}
-
 // raw reads
-
-/** Reads one raw line into caller-owned byte storage.
-    Valid inputs clear `dest`, then include the newline when one is read.
-    Returns `<data>` when bytes were read or `<eof>` at clean EOF.
-    `Null` inputs or a `Block` width other than one report `<error>` without
-    raising and leave a nonnull `dest` unchanged; a read failure transfers
-    instead, leaving its partial bytes in `dest`.
-    Raises: `<io-fail>` on a stream read error, or `<size-limit>` or
-    `<alloc-fail>` when the destination cannot grow.
-*/
-FileReadStatus File.readline_into(File f, Block dest) {
-  if (!f || dest == NULL || dest.width != sizeof(char)) return <error>;
-  dest.clear();
-  int failed, error;
-  {
-    /* One logical line is one locked operation. The defer also unlocks before
-       a read or allocation cause transfers out of this function. */
-    flockfile(f);
-    defer funlockfile(f);
-    int c;
-    while ((c = getc_unlocked(f)) != EOF) {
-      _block_putc(dest, (unsigned char) c);
-      if (c == '\n') break;
-    }
-    failed = ferror(f);
-    error = failed ? errno : 0;
-  }
-  if (failed) _io_error(<read>, error);
-  return dest.length ? <data> : <eof>;
-}
 
 /** Reads the remaining stream bytes into caller-owned storage.
     Valid inputs clear `dest` first. Returns `<data>` when bytes were read or
@@ -275,14 +147,6 @@ FileReadStatus File.read_into(File f, Block dest) {
     dest.append(bytes, count);
   _check_read(f);
   return dest.length ? <data> : <eof>;
-}
-
-static inline void _block_putc(Block block, unsigned char value) {
-  if (block.length == SIZE_MAX) raise %(size-limit);
-  size_t expected = block.length + 1;
-  if (block.length == block.cap) block.reserve(expected);
-  ((unsigned char *) block.bytes)[block.length] = value;
-  block.length = expected;
 }
 
 // writing
@@ -317,22 +181,6 @@ int File.copy_to(File source, File output, size_t &?copied) {
   return 1;
 }
 
-/* Writes every byte or raises. `written` accumulates the accepted bytes, so
-   a catch still sees the partial count a failed write left behind. */
-static void _write_bytes(
-  File file, const void *ptr, size_t size, size_t *written) {
-  const unsigned char *bytes = ptr, size_t offset = 0;
-  defer if (written) *written += offset;
-  while (offset < size) {
-    size_t count = fwrite(bytes + offset, 1, size - offset, file);
-    if (!count) {
-      int error = errno;
-      _io_error(<write>, error);
-    }
-    offset += count;
-  }
-}
-
 // line iteration
 
 /** Returns an iterator over `File`.
@@ -359,21 +207,36 @@ Iter File.iter(File file, Iter dest) {
   return dest;
 }
 
-static int _next_line(Iter iter, Var *out) {
-  File file = iter.obj;
-  if (!file) return 0;
-  Block line = iter.state;
-  if (line == NULL) return 0;
-  int keep = 0;
-  defer if (!keep) {
-    line.free();
-    iter.state = void;
+
+
+/** Reads one raw line into caller-owned byte storage.
+    Valid inputs clear `dest`, then include the newline when one is read.
+    Returns `<data>` when bytes were read or `<eof>` at clean EOF.
+    `Null` inputs or a `Block` width other than one report `<error>` without
+    raising and leave a nonnull `dest` unchanged; a read failure transfers
+    instead, leaving its partial bytes in `dest`.
+    Raises: `<io-fail>` on a stream read error, or `<size-limit>` or
+    `<alloc-fail>` when the destination cannot grow.
+*/
+FileReadStatus File.readline_into(File f, Block dest) {
+  if (!f || dest == NULL || dest.width != sizeof(char)) return <error>;
+  dest.clear();
+  int failed, error;
+  {
+    /* One logical line is one locked operation. The defer also unlocks before
+       a read or allocation cause transfers out of this function. */
+    flockfile(f);
+    defer funlockfile(f);
+    int c;
+    while ((c = getc_unlocked(f)) != EOF) {
+      _block_putc(dest, (unsigned char) c);
+      if (c == '\n') break;
+    }
+    failed = ferror(f);
+    error = failed ? errno : 0;
   }
-  FileReadStatus status = file.readline_into(line);
-  if (status != <data>) return 0;
-  *out = _text(line.bytes, line.length);
-  keep = 1;
-  return 1;
+  if (failed) _io_error(<read>, error);
+  return dest.length ? <data> : <eof>;
 }
 
 // stdio wrappers
@@ -432,11 +295,6 @@ inline void File.setbuffer(File file, char *buf, int size) {
   setbuffer(file, buf, size);
 }
 
-/** Writes metadata for `file` into `buf`.
-    Returns zero on success or -1 on a native error.
-*/
-inline int File.stat(File file, struct stat *buf) => fstat(file.fileno(), buf);
-
 /** Formats values into `file`.
     Returns the character count or a negative value on failure.
 */
@@ -479,31 +337,38 @@ String File.repr(File file) {
 */
 String File.str(File file) => file ? file.string() : Var.pointer_string(file);
 
+
+
+/** Reads the remaining stream into one canonical `String`.
+    Starts at the current position, advances through EOF, and returns NULL when
+    no bytes remain.
+    Raises: `<io-fail>` on a stream read error, `<bad-arg>` when returned bytes
+    contain an embedded NUL, `<size-limit>` when the `String` cannot be
+    represented, or `<alloc-fail>` while constructing the result.
+*/
+String File.string(File file) {
+  struct stat statbuf = {0};
+  off_t position = file.tello();
+  if (position >= 0 && file.stat(&statbuf) == 0 && S_ISREG(statbuf.st_mode) &&
+      statbuf.st_size > position) {
+    uintmax_t remaining = (uintmax_t) (statbuf.st_size - position);
+    _string_allocation(remaining);
+    return _regular_text(file, (size_t) remaining);
+  }
+  Block content = auto Block.new(sizeof(char));
+  _append_rest(content, file);
+  return _text(content.bytes, content.length);
+}
+
+/** Writes metadata for `file` into `buf`.
+    Returns zero on success or -1 on a native error.
+*/
+inline int File.stat(File file, struct stat *buf) => fstat(file.fileno(), buf);
+
 /** Appends the readable pointer representation of `file` to `out`. */
 Buffer File.write_repr(File file, Buffer out) {
   if (!file) return Var.write_pointer_repr(file, out);
   return out.printf("<File:%p, fd:%d>", file, file.fileno());
-}
-
-// errors
-
-/** Raises `<not-found>` when `error` is `ENOENT` and `<io-fail>` otherwise,
-    with `operation`, `path`, and `errno` details.
-*/
-void File.path_error(Var operation, String path, int error) {
-  if (error == ENOENT)
-    raise %(not-found (operation $operation) (path $path) (errno $error));
-  raise %(io-fail (operation $operation) (path $path) (errno $error));
-}
-
-static void _io_error(Symbol operation, int error) {
-  raise %(io-fail (operation $operation) (errno $error));
-}
-
-static void _check_read(File file) {
-  if (!ferror(file)) return;
-  int error = errno;
-  _io_error(<read>, error);
 }
 
 // lifecycle
@@ -569,12 +434,15 @@ Self File.reopen(Self file, const char *path, const char *mode) {
   File.path_error(<reopen>, path, error);
 }
 
-static File _open_path(const char *path, const char *mode, Symbol op) {
-  if (!path || !mode) raise %(bad-arg (operation $op));
-  File file = fopen(path, mode);
-  if (file) return file;
-  int error = errno;
-  File.path_error(op, path, error);
+// errors
+
+/** Raises `<not-found>` when `error` is `ENOENT` and `<io-fail>` otherwise,
+    with `operation`, `path`, and `errno` details.
+*/
+void File.path_error(Var operation, String path, int error) {
+  if (error == ENOENT)
+    raise %(not-found (operation $operation) (path $path) (errno $error));
+  raise %(io-fail (operation $operation) (path $path) (errno $error));
 }
 
 /** Publishes the process's borrowed standard streams as `File` globals.
@@ -584,4 +452,140 @@ void File.initialize(void) {
   Stdin = stdin;
   Stdout = stdout;
   Stderr = stderr;
+}
+
+static String _text(const void *bytes, size_t length) {
+  if (!length) return NULL;
+  int allocation = _string_allocation(length);
+  _validate_text(bytes, length);
+  return x2c_string_from_bytes(bytes, allocation - 1);
+}
+
+static int _string_allocation(size_t length) {
+  if (length >= INT_MAX) raise %(size-limit (size $length));
+  return (int) length + 1;
+}
+
+/* Callers supply live byte storage whenever length is nonzero. */
+static void _validate_text(const void *bytes, size_t length) {
+  if (!length) return;
+  if (memchr(bytes, '\0', length))
+    raise %(bad-arg (operation "File.text") (reason "embedded NUL"));
+}
+
+static inline void _block_putc(Block block, unsigned char value) {
+  if (block.length == SIZE_MAX) raise %(size-limit);
+  size_t expected = block.length + 1;
+  if (block.length == block.cap) block.reserve(expected);
+  ((unsigned char *) block.bytes)[block.length] = value;
+  block.length = expected;
+}
+
+static void _io_error(Symbol operation, int error) {
+  raise %(io-fail (operation $operation) (errno $error));
+}
+
+/* Validates and canonicalizes an owned text buffer. `intern_free` consumes
+   the temporary allocation and returns the canonical String. */
+static String _finish_text(String text, size_t length) {
+  _validate_text(text, length);
+  char *out = text;
+  out[length] = '\0';
+  return text.intern_free();
+}
+
+static void _check_read(File file) {
+  if (!ferror(file)) return;
+  int error = errno;
+  _io_error(<read>, error);
+}
+
+/* A regular file's observed extent is a sizing hint. After reading that many
+   bytes, probe once for concurrent growth before accepting EOF. */
+static String _regular_text(File file, size_t requested) {
+  int allocation = _string_allocation(requested);
+  String first = String.malloc(allocation), Block content = NULL;
+  defer {
+    if (first != NULL) first.free();
+    if (content != NULL) content.free();
+  }
+  size_t count = fread(first, 1, requested, file);
+  _check_read(file);
+  int next = count < requested ? EOF : _probe(file);
+  if (next == EOF) {
+    String text = _finish_text(first, count);
+    first = NULL;
+    return text;
+  }
+  content = Block.new(sizeof(char));
+  if (count >= INT_MAX - 1) raise %(size-limit (size $count));
+  _append_text(content, first, count);
+  first.free();
+  first = NULL;
+  _block_putc(content, (unsigned char) next);
+  _append_rest(content, file);
+  return _text(content.bytes, content.length);
+}
+
+static int _probe(File file) {
+  int next = fgetc(file);
+  if (next == EOF) _check_read(file);
+  return next;
+}
+
+static void _append_rest(Block content, File file) {
+  unsigned char bytes[BUFSIZ], size_t count;
+  while ((count = fread(bytes, 1, sizeof(bytes), file)) > 0)
+    _append_text(content, bytes, count);
+  _check_read(file);
+}
+
+static void _append_text(Block content, const void *bytes, size_t count) {
+  if (count >= INT_MAX - content.length) {
+    size_t size = content.length + count;
+    raise %(size-limit (size $size));
+  }
+  _validate_text(bytes, count);
+  content.append(bytes, count);
+}
+
+/* Writes every byte or raises. `written` accumulates the accepted bytes, so
+   a catch still sees the partial count a failed write left behind. */
+static void _write_bytes(
+  File file, const void *ptr, size_t size, size_t *written) {
+  const unsigned char *bytes = ptr, size_t offset = 0;
+  defer if (written) *written += offset;
+  while (offset < size) {
+    size_t count = fwrite(bytes + offset, 1, size - offset, file);
+    if (!count) {
+      int error = errno;
+      _io_error(<write>, error);
+    }
+    offset += count;
+  }
+}
+
+static int _next_line(Iter iter, Var *out) {
+  File file = iter.obj;
+  if (!file) return 0;
+  Block line = iter.state;
+  if (line == NULL) return 0;
+  int keep = 0;
+  defer if (!keep) {
+    line.free();
+    iter.state = void;
+  }
+  FileReadStatus status = file.readline_into(line);
+  if (status != <data>) return 0;
+  *out = _text(line.bytes, line.length);
+  keep = 1;
+  return 1;
+}
+
+static File _open_path(const char *path, const char *mode, Symbol op) {
+  if (!path || !mode) raise %(bad-arg (operation $op));
+  File file = fopen(path, mode);
+  if (file) return file;
+  int error = errno;
+  File.path_error(op, path, error);
 }

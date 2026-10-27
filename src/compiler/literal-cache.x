@@ -4,19 +4,6 @@
     values use runtime construction.
 */
 
-/** Interns a constant key and returns its stable `(cache id)` reference. */
-List Compiler.cache(Compiler c, List key) {
-  match (key) {
-    case %(cache ?):                          return key;
-    case %(var (cache ?id)):                  return %(cache $id);
-    case %(expr ? (cache ?id)):               return %(cache $id);
-    case %(var (expr ("Var") (cache ?id))):   return %(cache $id);
-  }
-  int nextid = c.id_keys.len(), id = c.key_ids.setdefault(key, nextid);
-  if (id == nextid) c.id_keys.push(key);
-  return %(cache $id);
-}
-
 /** Caches a cons cell when both parts have immutable cache forms.
 
     Returns `NULL` when runtime literals are required or either part cannot
@@ -33,6 +20,16 @@ List Compiler.cache_cons_cell(Compiler c, List head, List tail) {
   if (!tail_cache) return NULL;
   List cached = c.cache(%(cons $head_cache $tail_cache));
   return %(expr ("List") $cached);
+}
+
+/** Returns a runtime `List` expression for cached compiler-owned syntax.
+
+    `values` may contain nested `List`s, `String`s, integer `Var`s, and
+    `Symbol`s.
+*/
+List Compiler.cache_literal_list(Compiler c, List values) {
+  List cached = _cache_literal_list(c, values);
+  return %(expr ("List") (expr ("List") $cached));
 }
 
 /** Interns an immutable value and returns its `(cache id)` reference.
@@ -62,10 +59,17 @@ List Compiler.cache_literal_var(Compiler c, Var value) {
   return c.cache(%(var $literal));
 }
 
-// A number or atom is cached through its conversion to a `Var`.
-static List _cache_boxed(Compiler c, List literal) {
-  literal = c.convert_expression(literal, %("Var"));
-  return c.cache(%(var $literal));
+/** Interns a constant key and returns its stable `(cache id)` reference. */
+List Compiler.cache(Compiler c, List key) {
+  match (key) {
+    case %(cache ?):                          return key;
+    case %(var (cache ?id)):                  return %(cache $id);
+    case %(expr ? (cache ?id)):               return %(cache $id);
+    case %(var (expr ("Var") (cache ?id))):   return %(cache $id);
+  }
+  int nextid = c.id_keys.len(), id = c.key_ids.setdefault(key, nextid);
+  if (id == nextid) c.id_keys.push(key);
+  return %(cache $id);
 }
 
 static List _cache_literal_list(Compiler c, List values) {
@@ -79,12 +83,8 @@ static List _cache_literal_list(Compiler c, List values) {
   return cached;
 }
 
-/** Returns a runtime `List` expression for cached compiler-owned syntax.
-
-    `values` may contain nested `List`s, `String`s, integer `Var`s, and
-    `Symbol`s.
-*/
-List Compiler.cache_literal_list(Compiler c, List values) {
-  List cached = _cache_literal_list(c, values);
-  return %(expr ("List") (expr ("List") $cached));
+// A number or atom is cached through its conversion to a `Var`.
+static List _cache_boxed(Compiler c, List literal) {
+  literal = c.convert_expression(literal, %("Var"));
+  return c.cache(%(var $literal));
 }

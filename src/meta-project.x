@@ -44,6 +44,15 @@ static typedef struct Helper {
   Array groups, built, failures, objects, int changed;
 } Helper;
 
+// reaching meta code
+
+/* The scan of one input. `units` collects included meta providers;
+   `seen` holds each file's result bits, and
+   `packages` the root of each package imported. */
+static typedef struct Scan {
+  CliRequest request, Compiler c, Array units, Map seen, packages;
+} Scan;
+
 /** Builds the helper that runs the project `meta` functions `inputs`
     reach, or finds it in the cache, and makes it the one their translation
     calls. Inputs that reach none use no helper. A group or helper that
@@ -61,6 +70,8 @@ MetaHelper Frontend.build_loaded(Frontend f, List filenames) {
   List paths = filenames.map(%!(String path) => Path.absolute(path));
   return _build_meta(f, paths, paths);
 }
+
+// helper build
 
 /* Builds an independent helper for the meta functions `inputs` reach; the
    caller owns it. `entries`, when given, names the loaded files whose public
@@ -87,16 +98,6 @@ static MetaHelper _build_meta(Frontend f, List inputs, List entries) {
   return _use(h, _manifest(h));
 }
 
-/* Whether `inputs` is the helper's own loop unit, which `_support`
-   translates in the cache. It calls no project meta code, and a helper
-   built for it would wait on the translation that builds it, as one would
-   when an edited `lib/meta.x` it includes leaves the linked copies stale. */
-static int _support_unit(List inputs) {
-  if (inputs.len() != 1) return 0;
-  String root = Compiler.cache_root();
-  return root && Path.absolute(inputs.car()).startswith(%"$root/meta/support-");
-}
-
 /* The manifest of the helper in the build directory: the one a previous
    build left while every file it read is unchanged, or a new build's. One
    process at a time does either, under the directory's lock. */
@@ -107,6 +108,54 @@ static List _manifest(Helper &h) {
   List manifest = _current(h.directory);
   if (manifest) return manifest;
   return _build(h);
+}
+
+// building the helper
+
+/* Parses each owner into the group of its table, compiles the groups, and
+   links the helper, keeping what an earlier build left when it is
+   unchanged. The parses collect included files with placeholders for
+   their meta calls, so translation collects those files again. Returns
+   the manifest the build writes. */
+static List _build(Helper &h) {
+  int count = h.owners.len() + 1;
+  for (int index = 0; index < count; index++) {
+    String base = _base(h, index);
+    h.before[index] = _digest(%"$base.o");
+    _clear(base);
+  }
+  foreach (String path in %(@(h.owners) @(h.modules) @(_loop_sources())))
+    h.deps[path] = 1;
+  if (h.entries) h.meta = _build_meta(h.frontend, h.entries, NULL);
+  defer if (h.meta) xfree(h.meta);
+  String failure = h.entries ? _loaded_providers(h) : NULL;
+  if (failure) {
+    Compiler.forget_provisional_entries();
+    return _write_manifest(h, failure);
+  }
+  Compiler.use_meta_build_directory(h.directory, h.owners, h.providers);
+  int index = 1;
+  foreach (String owner in h.owners) _parse(h, owner, index++);
+  Compiler.use_meta_build_directory(NULL, NULL, NULL);
+  index = 1;
+  foreach (String owner in h.owners) {
+    String problem = _compile(h, index, owner);
+    _record(h, index++, problem);
+    if (h.entries && problem && !failure)
+      failure = %"$owner: $problem";
+  }
+  Compiler.forget_provisional_entries();
+  return _write_manifest(h, failure ? failure : _link(h, count));
+}
+
+/* Whether `inputs` is the helper's own loop unit, which `_support`
+   translates in the cache. It calls no project meta code, and a helper
+   built for it would wait on the translation that builds it, as one would
+   when an edited `lib/meta.x` it includes leaves the linked copies stale. */
+static int _support_unit(List inputs) {
+  if (inputs.len() != 1) return 0;
+  String root = Compiler.cache_root();
+  return root && Path.absolute(inputs.car()).startswith(%"$root/meta/support-");
 }
 
 /* Each owner with a group calls its table, and a table or a helper that
@@ -126,15 +175,6 @@ static MetaHelper _use(Helper &h, List manifest) {
   return MetaHelper.new(
     failure.len() ? NULL : %"$(h.directory)/helper", failures, units);
 }
-
-// reaching meta code
-
-/* The scan of one input. `units` collects included meta providers;
-   `seen` holds each file's result bits, and
-   `packages` the root of each package imported. */
-static typedef struct Scan {
-  CliRequest request, Compiler c, Array units, Map seen, packages;
-} Scan;
 
 /* Each input or included file with meta code becomes an owner, so the
    constants it computes run in its own table when a unit collects it.
@@ -188,20 +228,6 @@ static int _file(Scan &s, String path) {
   return meta;
 }
 
-/* The file's text with its module block spliced. A malformed block leaves
-   the text as written, for translation to report. */
-static String _module_text(Scan &s, String path, String text) {
-  Compiler c = s.c;
-  ModuleSource module = NULL;
-  DiagnosticsHold hold = c.diagnostics.hold();
-  with (c.recovery_depth = c.recovery_depth + 1) {
-    try module = c.module_source(path, text);
-    catch %(malformed *): module = NULL;
-  }
-  c.diagnostics.release(hold, 0);
-  return module ? module.text : text;
-}
-
 /* Only file-scope tokens count. Each arm reads the tokens that follow its
    word. */
 static int _file_scope(Scan &s, Tokenizer tokens, String directory) {
@@ -222,29 +248,6 @@ static int _file_scope(Scan &s, Tokenizer tokens, String directory) {
       meta |= _include(s, word, directory) ? 2 : 0;
   }
   return meta;
-}
-
-/* Only a body or initializer needs a helper. Prototypes and protocol
-   adoptions use their native supplier. In `meta native name(`, `native`
-   is a type rather than the explicit native marker. */
-static int _marker(Token token) {
-  token = Token.skip_trivia(token + 1);
-  if (token.text == "native") {
-    Token name = Token.skip_trivia(token + 1);
-    if (name.type == <eof> ||
-        Token.skip_trivia(name + 1).type != <(>) return 0;
-  }
-  int depth = 0;
-  for (; token.type != <eof>; token++) {
-    Symbol kind = token.type;
-    if (!depth) {
-      if (kind == <;>) return 0;
-      if (kind == <"{"> || kind == <"=>"> || kind == <"=">) return 1;
-    }
-    if (kind == <(> || kind == <[>) depth++;
-    else if (kind == <)> || kind == <]>) depth--;
-  }
-  return 0;
 }
 
 /* The resolved entry follows the ordinary source-provider path. */
@@ -272,6 +275,43 @@ static int _include(Scan &s, String directive, String directory) {
   int meta = _file(s, path);
   if (!rooted || (meta & 1)) s.units.push(Path.resolved_absolute(path));
   return !!meta;
+}
+
+/* The file's text with its module block spliced. A malformed block leaves
+   the text as written, for translation to report. */
+static String _module_text(Scan &s, String path, String text) {
+  Compiler c = s.c;
+  ModuleSource module = NULL;
+  DiagnosticsHold hold = c.diagnostics.hold();
+  with (c.recovery_depth = c.recovery_depth + 1) {
+    try module = c.module_source(path, text);
+    catch %(malformed *): module = NULL;
+  }
+  c.diagnostics.release(hold, 0);
+  return module ? module.text : text;
+}
+
+/* Only a body or initializer needs a helper. Prototypes and protocol
+   adoptions use their native supplier. In `meta native name(`, `native`
+   is a type rather than the explicit native marker. */
+static int _marker(Token token) {
+  token = Token.skip_trivia(token + 1);
+  if (token.text == "native") {
+    Token name = Token.skip_trivia(token + 1);
+    if (name.type == <eof> ||
+        Token.skip_trivia(name + 1).type != <(>) return 0;
+  }
+  int depth = 0;
+  for (; token.type != <eof>; token++) {
+    Symbol kind = token.type;
+    if (!depth) {
+      if (kind == <;>) return 0;
+      if (kind == <"{"> || kind == <"=>"> || kind == <"=">) return 1;
+    }
+    if (kind == <(> || kind == <[>) depth++;
+    else if (kind == <)> || kind == <]>) depth--;
+  }
+  return 0;
 }
 
 /* The text between a string token's quotes. */
@@ -347,25 +387,6 @@ static String _identify(Helper &h, String stamp, String compiler) {
     + (loop ? loop.sha256() : "");
 }
 
-/* The C compiler flags of meta code, besides its include directories. */
-static List _cc_flags(void) => %("-fsigned-char" "-O1");
-
-/* Every helper links one unit that answers the compiler's calls: its
-   protocol loop and the compiler queries generated from `lib/meta.x`. */
-static List _loop_sources(void) => $(
-  %"$(x2c_get_root())/etc/meta-helper.x",
-  %"$(x2c_get_root())/etc/meta-queries.x");
-
-/* The text of that unit, or NULL when a source is missing. */
-static String _loop_text(void) {
-  String text = "";
-  foreach (String path in _loop_sources()) {
-    if (!Path.is_file(path)) return NULL;
-    text += Path.read_text(path);
-  }
-  return text;
-}
-
 /* The build directory is keyed by the identity and the paths of the
    sources. A changed source builds the same directory again, which keeps
    the helper when no group object changes. */
@@ -374,44 +395,6 @@ static String _directory(
   Array key = [identity];
   foreach (String path in owners) key.push(path);
   return %"$root/meta/project-$(String.sha256("\n".join(key)))";
-}
-
-// building the helper
-
-/* Parses each owner into the group of its table, compiles the groups, and
-   links the helper, keeping what an earlier build left when it is
-   unchanged. The parses collect included files with placeholders for
-   their meta calls, so translation collects those files again. Returns
-   the manifest the build writes. */
-static List _build(Helper &h) {
-  int count = h.owners.len() + 1;
-  for (int index = 0; index < count; index++) {
-    String base = _base(h, index);
-    h.before[index] = _digest(%"$base.o");
-    _clear(base);
-  }
-  foreach (String path in %(@(h.owners) @(h.modules) @(_loop_sources())))
-    h.deps[path] = 1;
-  if (h.entries) h.meta = _build_meta(h.frontend, h.entries, NULL);
-  defer if (h.meta) xfree(h.meta);
-  String failure = h.entries ? _loaded_providers(h) : NULL;
-  if (failure) {
-    Compiler.forget_provisional_entries();
-    return _write_manifest(h, failure);
-  }
-  Compiler.use_meta_build_directory(h.directory, h.owners, h.providers);
-  int index = 1;
-  foreach (String owner in h.owners) _parse(h, owner, index++);
-  Compiler.use_meta_build_directory(NULL, NULL, NULL);
-  index = 1;
-  foreach (String owner in h.owners) {
-    String problem = _compile(h, index, owner);
-    _record(h, index++, problem);
-    if (h.entries && problem && !failure)
-      failure = %"$owner: $problem";
-  }
-  Compiler.forget_provisional_entries();
-  return _write_manifest(h, failure ? failure : _link(h, count));
 }
 
 /* Collect every owner before emission so declarations can name a provider
@@ -481,27 +464,6 @@ static List _collect_provider(
   return unit.context.export(c.loaded_provider());
 }
 
-/* Gives the unit's compiler table `index`, and in a loaded build the
-   ordinary helper, which runs the calls its group emits as their values. */
-static void _start_parse(Helper &h, Compiler c, String path, int index) {
-  c.meta_build = index + 1;
-  c.load_source = h.entries.contains(path);
-  c.diagnostics.limit = 0;
-  if (!h.meta) return;
-  c.meta_helper = h.meta;
-  c.begin_meta_unit(path);
-}
-
-/* Nothing else reports a loaded build's diagnostics, so they print as a
-   translation prints its own. */
-static void _print_diagnostics(Compiler c) {
-  foreach (List entry in c.diagnostics()) c.print_diagnostic(entry);
-}
-
-/* The path of table `index`'s group files, without their suffixes. */
-static String _base(Helper &h, int index) =>
-  %"$(h.directory)/group-$index";
-
 /* Removes what a parse left of the group at `base`. */
 static void _clear(String base) {
   foreach (String suffix in %(".c" ".deps" ".failure")) {
@@ -543,6 +505,23 @@ static void _parse_source(
     Path.write_text(%"$(_base(h, index)).failure", "x2c reported errors");
   }
   foreach ((String read, Var _) in unit.compiler.deps) h.deps[read] = 1;
+}
+
+/* Gives the unit's compiler table `index`, and in a loaded build the
+   ordinary helper, which runs the calls its group emits as their values. */
+static void _start_parse(Helper &h, Compiler c, String path, int index) {
+  c.meta_build = index + 1;
+  c.load_source = h.entries.contains(path);
+  c.diagnostics.limit = 0;
+  if (!h.meta) return;
+  c.meta_helper = h.meta;
+  c.begin_meta_unit(path);
+}
+
+/* Nothing else reports a loaded build's diagnostics, so they print as a
+   translation prints its own. */
+static void _print_diagnostics(Compiler c) {
+  foreach (List entry in c.diagnostics()) c.print_diagnostic(entry);
 }
 
 /* Compiles the group a parse left for table `index`, adding the headers it
@@ -596,6 +575,10 @@ static void _record(Helper &h, int index, String failure) {
   }
 }
 
+/* The path of table `index`'s group files, without their suffixes. */
+static String _base(Helper &h, int index) =>
+  %"$(h.directory)/group-$index";
+
 // linking
 
 /* Links the helper with the runtime when an object or the table changed,
@@ -637,6 +620,22 @@ static String _support(Helper &h, String &failure) {
   failure = _compile_support(h, text, directory, object);
   return failure ? NULL : object;
 }
+
+/* The text of that unit, or NULL when a source is missing. */
+static String _loop_text(void) {
+  String text = "";
+  foreach (String path in _loop_sources()) {
+    if (!Path.is_file(path)) return NULL;
+    text += Path.read_text(path);
+  }
+  return text;
+}
+
+/* Every helper links one unit that answers the compiler's calls: its
+   protocol loop and the compiler queries generated from `lib/meta.x`. */
+static List _loop_sources(void) => $(
+  %"$(x2c_get_root())/etc/meta-helper.x",
+  %"$(x2c_get_root())/etc/meta-queries.x");
 
 /* Translates the loop's `text` into `directory` and compiles it to
    `object`. Returns why not, or NULL. */
@@ -697,6 +696,9 @@ static List _link_arguments(
   ToolAction link = t.link_action(output, inputs);
   return $(@(link.arguments), @(_cc_flags()), "-iquote", h.include);
 }
+
+/* The C compiler flags of meta code, besides its include directories. */
+static List _cc_flags(void) => %("-fsigned-char" "-O1");
 
 // manifests
 

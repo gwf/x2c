@@ -1,5 +1,63 @@
 /*  analysis.x -- function summaries and lifetime analysis */
 
+// entry points
+
+/** Warns about values that can outlive the region that allocated them.
+    `ast` must be the bound and typed top-level unit, before transform
+    lowering rewrites its `defer` and region forms. The call adds warnings to
+    `c` and does not change `ast`.
+*/
+void Compiler.check_regions(Compiler c, List ast) {
+  Walk w = {.c = c, .summaries = {}, .pending = [], .freed = []};
+  _fixpoint(w, ast);
+  int origin = c.origin;
+  foreach (List warning in w.warnings) {
+    (Symbol code, int at, String message, List notes) = warning;
+    c.origin = at;
+    c.report_warning(code, message, NULL, notes);
+  }
+  c.origin = origin;
+}
+
+/** Rejects a `meta` function whose body breaks the rule
+    `Compiler.check_regions` warns about. A compile-time call frees its
+    locals when it returns, so an address of one that is returned or stored
+    into a static, a parameter's object, or an unknown pointer would read
+    freed memory. The first finding is reported as an error. `fn` must be
+    the bound and typed definition. The walk reads the summaries of the
+    `meta` functions installed before `fn` and records the summary of `fn`
+    in `meta_regions`.
+*/
+void Compiler.check_meta_regions(Compiler c, List fn) {
+  if (fn ~= %(function ? (bind (binding ? ?(String name)) *) ?)) {
+    /* A replaced definition starts again from an empty summary. */
+    c.meta_regions[name] = %(0 ());
+  }
+  Walk w = {
+    .c = c, .summaries = c.meta_regions, .pending = [], .freed = [],
+    .meta = 1};
+  _fixpoint(w, fn);
+  if (!w.warnings.len()) return;
+  (Symbol code, int at, String message, List notes) = w.warnings[0];
+  with (c.origin = at) { c.report_error(code, message, NULL, notes); }
+}
+
+/** Computes one unit's region summaries and findings for an optional
+    project audit. `seed` contains prior project-round summaries indexed by
+    the emitted names visible in this unit. `effects` adds audit-only native
+    contracts; neither input changes ordinary translation. Findings carry
+    their function name and are returned without compiler diagnostics.
+*/
+Map Compiler.audit_regions(
+  Compiler c, List ast, Map seed, Map effects, Array findings) {
+  Walk w = {
+    .c = c, .summaries = seed.copy(), .effects = effects,
+    .pending = [], .freed = [], .audit = 1};
+  _fixpoint(w, ast);
+  foreach (List finding in w.warnings) findings.push(finding);
+  return w.summaries;
+}
+
 // per-unit fixpoint
 
 /* The functions `ast` defines, walked to their final summaries. */
@@ -114,62 +172,4 @@ static void _read(Walk &w, String callee) {
   int count = readers.len();
   if (!count || readers[count - 1].int() != w.current)
     readers.push(w.current);
-}
-
-// entry points
-
-/** Warns about values that can outlive the region that allocated them.
-    `ast` must be the bound and typed top-level unit, before transform
-    lowering rewrites its `defer` and region forms. The call adds warnings to
-    `c` and does not change `ast`.
-*/
-void Compiler.check_regions(Compiler c, List ast) {
-  Walk w = {.c = c, .summaries = {}, .pending = [], .freed = []};
-  _fixpoint(w, ast);
-  int origin = c.origin;
-  foreach (List warning in w.warnings) {
-    (Symbol code, int at, String message, List notes) = warning;
-    c.origin = at;
-    c.report_warning(code, message, NULL, notes);
-  }
-  c.origin = origin;
-}
-
-/** Rejects a `meta` function whose body breaks the rule
-    `Compiler.check_regions` warns about. A compile-time call frees its
-    locals when it returns, so an address of one that is returned or stored
-    into a static, a parameter's object, or an unknown pointer would read
-    freed memory. The first finding is reported as an error. `fn` must be
-    the bound and typed definition. The walk reads the summaries of the
-    `meta` functions installed before `fn` and records the summary of `fn`
-    in `meta_regions`.
-*/
-void Compiler.check_meta_regions(Compiler c, List fn) {
-  if (fn ~= %(function ? (bind (binding ? ?(String name)) *) ?)) {
-    /* A replaced definition starts again from an empty summary. */
-    c.meta_regions[name] = %(0 ());
-  }
-  Walk w = {
-    .c = c, .summaries = c.meta_regions, .pending = [], .freed = [],
-    .meta = 1};
-  _fixpoint(w, fn);
-  if (!w.warnings.len()) return;
-  (Symbol code, int at, String message, List notes) = w.warnings[0];
-  with (c.origin = at) { c.report_error(code, message, NULL, notes); }
-}
-
-/** Computes one unit's region summaries and findings for an optional
-    project audit. `seed` contains prior project-round summaries indexed by
-    the emitted names visible in this unit. `effects` adds audit-only native
-    contracts; neither input changes ordinary translation. Findings carry
-    their function name and are returned without compiler diagnostics.
-*/
-Map Compiler.audit_regions(
-  Compiler c, List ast, Map seed, Map effects, Array findings) {
-  Walk w = {
-    .c = c, .summaries = seed.copy(), .effects = effects,
-    .pending = [], .freed = [], .audit = 1};
-  _fixpoint(w, ast);
-  foreach (List finding in w.warnings) findings.push(finding);
-  return w.summaries;
 }

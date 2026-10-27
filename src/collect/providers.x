@@ -3,52 +3,6 @@
     Copyright (c) 2026 Gary William Flake.
 */
 
-/** Reports whether a linked provider and the files it read are unchanged.
-    The linked inventory retains the ordinary collector's dependency proof.
-*/
-int Compiler.linked_meta_provider_current(Compiler c, String path) {
-  String canonical = _canonical_path(path);
-  _process_cache();
-  Var current;
-  if (linked_providers.try_get(canonical, current)) return current;
-  Map seen = {};
-  int valid = _linked_provider_current(c, canonical, seen);
-  if (valid)
-    foreach (String dependency in seen.keys()) {
-      _retain(dependency);
-      linked_providers[dependency] = 1;
-    }
-  else {
-    _retain(canonical);
-    linked_providers[canonical] = 0;
-  }
-  return valid;
-}
-
-static int _linked_provider_current(
-  Compiler c, String path, Map seen) {
-  Var current;
-  if (linked_providers.try_get(path, current)) return current;
-  if (path in seen) return 1;
-  seen[path] = 1;
-  List source =
-    Compiler.linked_meta_provider_source(Compiler.portable_path(path));
-  if (source ~= %(source ?hash ?(List dependencies) *)) {
-    if (!_hash_matches(c, path, hash)) return 0;
-    Map found = _read_dependencies(c, dependencies);
-    if (found == NULL) return 0;
-    // Member content was hashed above; only included units own proofs.
-    foreach ((String dependency, Var expected) in found)
-      if (Path.is_x2c_source(dependency) && expected is <string> &&
-          !String.startswith(expected, "search:") &&
-          Compiler.linked_meta_provider_source(
-            Compiler.portable_path(dependency)) &&
-          !_linked_provider_current(c, dependency, seen)) return 0;
-    return 1;
-  }
-  return 0;
-}
-
 /** Reports whether a provider's linked definition hashes still match.
     Changes outside definitions do not require a project helper.
 */
@@ -74,20 +28,26 @@ int Compiler.linked_meta_definitions_current(Compiler c, String path) {
   return 0;
 }
 
-/* Metadata lookahead reads declarations and hashes without source effects. */
-static List _meta_provider_entry(Compiler c, String canonical) {
-  List entry = _entry(c, canonical);
-  if (!entry) {
-    DiagnosticsHold hold = c.diagnostics.hold();
-    with (c.meta_build = 1,
-          c.signature_only = 1,
-          c.recovery_depth = c.recovery_depth + 1) {
-      try entry = _walk_cold(c, canonical, canonical, {}, {});
-      catch %(malformed *): entry = NULL;
+/** Reports whether a linked provider and the files it read are unchanged.
+    The linked inventory retains the ordinary collector's dependency proof.
+*/
+int Compiler.linked_meta_provider_current(Compiler c, String path) {
+  String canonical = _canonical_path(path);
+  _process_cache();
+  Var current;
+  if (linked_providers.try_get(canonical, current)) return current;
+  Map seen = {};
+  int valid = _linked_provider_current(c, canonical, seen);
+  if (valid)
+    foreach (String dependency in seen.keys()) {
+      _retain(dependency);
+      linked_providers[dependency] = 1;
     }
-    c.diagnostics.release(hold, 0);
+  else {
+    _retain(canonical);
+    linked_providers[canonical] = 0;
   }
-  return entry;
+  return valid;
 }
 
 /** Completes a linked function's own source hashes before a shallow call.
@@ -175,40 +135,6 @@ List Compiler.loaded_provider(Compiler c) {
   return $(declarations, symbols);
 }
 
-/** Returns the native calling type of a loaded function. Array parameters
-    decay to pointers, and a parameter's outer qualifiers affect only its
-    local copy. Keep the declared type for inspection and reload checks.
-*/
-Type Compiler.loaded_call_type(Compiler c, Type type) {
-  List parameters = NULL;
-  Type result = NULL;
-  type.function_parts(parameters, result);
-  Array adjusted = [];
-  foreach (Type parameter in parameters) {
-    Type shape = c.sym.normalize_declared_type(parameter);
-    if (shape.is_array()) parameter = shape.dereference().reference();
-    while (parameter.car() is <symbol> &&
-           parameter.car().symbol().is_type_qualifier())
-      parameter = parameter.cdr();
-    adjusted.push(parameter);
-  }
-  return %((func $(adjusted.list_free())) @result);
-}
-
-static Type _loaded_declaration(Compiler c, Type type) {
-  type = c.sym.normalize_declared_type(type);
-  if (!type.is_function()) return type;
-  List parameters = NULL;
-  Type result = NULL;
-  type.function_parts(parameters, result);
-  Array declared = [];
-  foreach (Type parameter in parameters)
-    declared.push(c.sym.normalize_declared_type(parameter));
-  List args = parameters ? declared.list_free() : %((void));
-  return c.loaded_call_type(
-    %((func $args) @(c.sym.normalize_declared_type(result))));
-}
-
 /** Names declared bindings through one loaded provider. Its own source
     declarations remain authoritative; private bindings never link out.
 */
@@ -230,6 +156,91 @@ void Compiler.name_loaded_provider(
     type = type.declared();
     c.add_early(c.rebuild_statement($!{ extern $type $binding; }).cadr());
   }
+}
+
+/** Returns the native calling type of a loaded function. Array parameters
+    decay to pointers, and a parameter's outer qualifiers affect only its
+    local copy. Keep the declared type for inspection and reload checks.
+*/
+Type Compiler.loaded_call_type(Compiler c, Type type) {
+  List parameters = NULL;
+  Type result = NULL;
+  type.function_parts(parameters, result);
+  Array adjusted = [];
+  foreach (Type parameter in parameters) {
+    Type shape = c.sym.normalize_declared_type(parameter);
+    if (shape.is_array()) parameter = shape.dereference().reference();
+    while (parameter.car() is <symbol> &&
+           parameter.car().symbol().is_type_qualifier())
+      parameter = parameter.cdr();
+    adjusted.push(parameter);
+  }
+  return %((func $(adjusted.list_free())) @result);
+}
+
+// source collection providers
+
+static int _linked_provider_current(
+  Compiler c, String path, Map seen) {
+  Var current;
+  if (linked_providers.try_get(path, current)) return current;
+  if (path in seen) return 1;
+  seen[path] = 1;
+  List source =
+    Compiler.linked_meta_provider_source(Compiler.portable_path(path));
+  if (source ~= %(source ?hash ?(List dependencies) *)) {
+    if (!_hash_matches(c, path, hash)) return 0;
+    Map found = _read_dependencies(c, dependencies);
+    if (found == NULL) return 0;
+    // Member content was hashed above; only included units own proofs.
+    foreach ((String dependency, Var expected) in found)
+      if (Path.is_x2c_source(dependency) && expected is <string> &&
+          !String.startswith(expected, "search:") &&
+          Compiler.linked_meta_provider_source(
+            Compiler.portable_path(dependency)) &&
+          !_linked_provider_current(c, dependency, seen)) return 0;
+    return 1;
+  }
+  return 0;
+}
+
+/* Metadata lookahead reads declarations and hashes without source effects. */
+static List _meta_provider_entry(Compiler c, String canonical) {
+  List entry = _entry(c, canonical);
+  if (!entry) {
+    DiagnosticsHold hold = c.diagnostics.hold();
+    with (c.meta_build = 1,
+          c.signature_only = 1,
+          c.recovery_depth = c.recovery_depth + 1) {
+      try entry = _walk_cold(c, canonical, canonical, {}, {});
+      catch %(malformed *): entry = NULL;
+    }
+    c.diagnostics.release(hold, 0);
+  }
+  return entry;
+}
+
+static void _name_meta_provider(
+  Compiler c, String name, int index) {
+  if ($(name) in c.sym.file_statics()) return;
+  if (name in c.native_meta && c.bind_native_meta(name)) return;
+  List binding = c.sym.lookup($(name), NULL);
+  if (binding)
+    c.set_fact(%(emitted $binding), %"_x2c_gensym_meta_group_$(index)_$name");
+}
+
+static Type _loaded_declaration(Compiler c, Type type) {
+  type = c.sym.normalize_declared_type(type);
+  if (!type.is_function()) return type;
+  List parameters = NULL;
+  Type result = NULL;
+  type.function_parts(parameters, result);
+  Array declared = [];
+  foreach (Type parameter in parameters)
+    declared.push(c.sym.normalize_declared_type(parameter));
+  List args = parameters ? declared.list_free() : %((void));
+  return c.loaded_call_type(
+    %((func $args) @(c.sym.normalize_declared_type(result))));
 }
 
 static int _loaded_types_equal(Type declared, Type defined) {
@@ -257,13 +268,4 @@ static int _loaded_type_rows(Type type, Map visible, Map provider) {
     }
   }
   return 1;
-}
-
-static void _name_meta_provider(
-  Compiler c, String name, int index) {
-  if ($(name) in c.sym.file_statics()) return;
-  if (name in c.native_meta && c.bind_native_meta(name)) return;
-  List binding = c.sym.lookup($(name), NULL);
-  if (binding)
-    c.set_fact(%(emitted $binding), %"_x2c_gensym_meta_group_$(index)_$name");
 }

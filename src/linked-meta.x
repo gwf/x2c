@@ -45,15 +45,15 @@ static Code _new_one(Code code) {
 
 /* --- lib/common.x -------------------------------------------------------- */
 
-static Symbol _literal_tag(List tag) {
-  if (tag ~= %(expr ? (literal ? ? ?key))) return key;
-  return 0;
-}
-
 static int _var_tag_top(List tag) => (int) Var_tag_top(_literal_tag(tag));
 
 static int _var_tag_bottom(List tag) =>
   (int) Var_tag_bottom(_literal_tag(tag));
+
+static Symbol _literal_tag(List tag) {
+  if (tag ~= %(expr ? (literal ? ? ?key))) return key;
+  return 0;
+}
 
 /* --- lib/lisp-bindings.x ------------------------------------------------- */
 
@@ -68,11 +68,8 @@ static List _selector_chain(String spelling, List value) {
   return value;
 }
 
-static List _selector_double(List steps) {
-  if (!steps) return NULL;
-  String rest = steps.car(), a = %"a$rest", d = %"d$rest";
-  return $(a, d, @(_selector_double(steps.cdr())));
-}
+static List _selector_definitions(Macro car, Macro cdr) =>
+  _selector_units(_selector_middles(), car, cdr);
 
 static List _selector_middles(void) {
   List level = %(""), middles = NULL;
@@ -83,6 +80,12 @@ static List _selector_middles(void) {
   return middles;
 }
 
+static List _selector_double(List steps) {
+  if (!steps) return NULL;
+  String rest = steps.car(), a = %"a$rest", d = %"d$rest";
+  return $(a, d, @(_selector_double(steps.cdr())));
+}
+
 static List _selector_units(List middles, Macro car, Macro cdr) {
   if (!middles) return NULL;
   String middle = middles.car();
@@ -91,9 +94,6 @@ static List _selector_units(List middles, Macro car, Macro cdr) {
   String name = %"c$(middle)r";
   return $(middle.startswith("a") ? car(name) : cdr(name), @rest);
 }
-
-static List _selector_definitions(Macro car, Macro cdr) =>
-  _selector_units(_selector_middles(), car, cdr);
 
 /* --- lib/native-scalar-types.x ------------------------------------------- */
 
@@ -185,6 +185,22 @@ List _tag_id_checks(void) {
 
 /* --- lib/var/var.x ------------------------------------------------------- */
 
+static Symbol _update_tag(List id)     => _update_row(id)[0];
+
+static String _update_boxer(List id)   => _update_row(id)[1];
+
+static String _update_decoder(List id) => _update_row(id)[2];
+
+static List _update_cast_in(List id)  => _update_row(id)[3].car();
+
+static List _update_cast_out(List id) => _update_row(id)[3].cdr().car();
+
+static List _update_row(List id) {
+  match (id)
+    case %(expr ? (literal ? ? ?key)): return _update_rows().assoc(key);
+  return %();
+}
+
 static List _update_rows(void) => %(
   (char    (i8 "Var_box_i8" "Var_integer" (() (char))))
   (schar   (i8 "Var_box_i8" "Var_integer" ((char) (signed char))))
@@ -201,22 +217,6 @@ static List _update_rows(void) => %(
   (f64     (f64 "Var_box_f64" "Var_decode_f64" (() ())))
   (ldouble (ldouble "Var_box_long_double" "Var_long_double_value" (() ())))
 );
-
-static List _update_row(List id) {
-  match (id)
-    case %(expr ? (literal ? ? ?key)): return _update_rows().assoc(key);
-  return %();
-}
-
-static Symbol _update_tag(List id)     => _update_row(id)[0];
-
-static String _update_boxer(List id)   => _update_row(id)[1];
-
-static String _update_decoder(List id) => _update_row(id)[2];
-
-static List _update_cast_in(List id)  => _update_row(id)[3].car();
-
-static List _update_cast_out(List id) => _update_row(id)[3].cdr().car();
 
 static List _update_box(List id, List lhs) {
   List value = $!($lhs[0]);
@@ -1221,11 +1221,6 @@ static List _match_capture(Var binder, int index) {
   return %(ident (binding-name $(%"x2c_match_$(kind)_$index")));
 }
 
-static int _match_fresh(Array cursors, List how) {
-  cursors.push(how);
-  return cursors.len() - 1;
-}
-
 static List _match_tests(List value, Array cursors) =>
   value && value.car().is_match_op()
     ? _match_guard(value.car(), value.cdr(), <subject>, NULL, cursors)
@@ -1310,6 +1305,11 @@ static List _match_guard(
   else if (op != <!or> && op != <!set>) return NULL;
   tests.push(choice);
   return %(and @(tests.list_free()));
+}
+
+static int _match_fresh(Array cursors, List how) {
+  cursors.push(how);
+  return cursors.len() - 1;
 }
 
 static List _match_is(List args, Var cell) {
@@ -2478,15 +2478,15 @@ Map linked_meta_targets(void) {
   Map rows = {};
   $linked.row(rows, "_new_empty", _new_empty);
   $linked.row(rows, "_new_one", _new_one);
-  $linked.row(rows, "_literal_tag", _literal_tag);
   $linked.row(rows, "_var_tag_top", _var_tag_top);
   $linked.row(rows, "_var_tag_bottom", _var_tag_bottom);
+  $linked.row(rows, "_literal_tag", _literal_tag);
   $linked.row(rows, "_lisp_native_declarations", _lisp_native_declarations);
   $linked.row(rows, "_selector_chain", _selector_chain);
-  $linked.row(rows, "_selector_double", _selector_double);
-  $linked.row(rows, "_selector_middles", _selector_middles);
-  $linked.row(rows, "_selector_units", _selector_units);
   $linked.row(rows, "_selector_definitions", _selector_definitions);
+  $linked.row(rows, "_selector_middles", _selector_middles);
+  $linked.row(rows, "_selector_double", _selector_double);
+  $linked.row(rows, "_selector_units", _selector_units);
   $linked.row(rows, "_scalar_access_record", _scalar_access_record);
   $linked.row(rows, "register_rewrite", register_rewrite);
   $linked.row(rows, "_dedent_expand", _dedent_expand);
@@ -2496,13 +2496,13 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_tag_decode_group", _tag_decode_group);
   $linked.row(rows, "_tag_decode_groups", _tag_decode_groups);
   $linked.row(rows, "_tag_id_checks", _tag_id_checks);
-  $linked.row(rows, "_update_rows", _update_rows);
-  $linked.row(rows, "_update_row", _update_row);
   $linked.row(rows, "_update_tag", _update_tag);
   $linked.row(rows, "_update_boxer", _update_boxer);
   $linked.row(rows, "_update_decoder", _update_decoder);
   $linked.row(rows, "_update_cast_in", _update_cast_in);
   $linked.row(rows, "_update_cast_out", _update_cast_out);
+  $linked.row(rows, "_update_row", _update_row);
+  $linked.row(rows, "_update_rows", _update_rows);
   $linked.row(rows, "_update_box", _update_box);
   $linked.row(rows, "_update_decode", _update_decode);
   $linked.row(rows, "_update_operation", _update_operation);
@@ -2574,11 +2574,11 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_match_slot", _match_slot);
   $linked.row(rows, "_match_names", _match_names);
   $linked.row(rows, "_match_capture", _match_capture);
-  $linked.row(rows, "_match_fresh", _match_fresh);
   $linked.row(rows, "_match_tests", _match_tests);
   $linked.row(rows, "_match_value", _match_value);
   $linked.row(rows, "_match_list", _match_list);
   $linked.row(rows, "_match_guard", _match_guard);
+  $linked.row(rows, "_match_fresh", _match_fresh);
   $linked.row(rows, "_match_is", _match_is);
   $linked.row(rows, "_match_viewable", _match_viewable);
   $linked.row(rows, "_match_settled", _match_settled);
@@ -2657,43 +2657,43 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "try_lowering", try_lowering);
   $linked.row(rows, "_operator_cases", _operator_cases);
   $linked.row(rows, "_x2c_operator_rows", _x2c_operator_rows);
-  $linked.row(rows, "native_scalar_types", native_scalar_types);
   $linked.row(rows, "_scalar_tag", _scalar_tag);
   $linked.row(rows, "_scalar_key", _scalar_key);
   $linked.row(rows, "_scalar_access_units", _scalar_access_units);
-  $linked.row(rows, "_tag_groups", _tag_groups);
-  $linked.row(rows, "_tag_rows", _tag_rows);
-  $linked.row(rows, "_tag_id", _tag_id);
-  $linked.row(rows, "_tag_kind", _tag_kind);
-  $linked.row(rows, "_tag_top", _tag_top);
-  $linked.row(rows, "_tag_middle", _tag_middle);
-  $linked.row(rows, "_tag_bottom", _tag_bottom);
+  $linked.row(rows, "native_scalar_types", native_scalar_types);
+  $linked.row(rows, "_tag_info", _tag_info);
+  $linked.row(rows, "_tag_info_row", _tag_info_row);
+  $linked.row(rows, "_tag_info_sentinel", _tag_info_sentinel);
+  $linked.row(rows, "_tag_names", _tag_names);
+  $linked.row(rows, "_tag_numeric_names", _tag_numeric_names);
+  $linked.row(rows, "_tag_numeric_table", _tag_numeric_table);
+  $linked.row(rows, "_tag_numeric_rows", _tag_numeric_rows);
   $linked.row(rows, "_tag_numeric", _tag_numeric);
-  $linked.row(rows, "_tag_bits", _tag_bits);
+  $linked.row(rows, "_tag_numeric_row", _tag_numeric_row);
   $linked.row(rows, "_tag_rank", _tag_rank);
   $linked.row(rows, "_tag_floating", _tag_floating);
   $linked.row(rows, "_tag_unsigned", _tag_unsigned);
-  $linked.row(rows, "_tag_info_row", _tag_info_row);
-  $linked.row(rows, "_tag_info_sentinel", _tag_info_sentinel);
-  $linked.row(rows, "_tag_info", _tag_info);
-  $linked.row(rows, "_tag_descriptor", _tag_descriptor);
-  $linked.row(rows, "_tag_names", _tag_names);
-  $linked.row(rows, "_tag_numeric_rows", _tag_numeric_rows);
-  $linked.row(rows, "_tag_numeric_names", _tag_numeric_names);
   $linked.row(rows, "_tag_bits_expr", _tag_bits_expr);
-  $linked.row(rows, "_tag_numeric_row", _tag_numeric_row);
-  $linked.row(rows, "_tag_numeric_table", _tag_numeric_table);
-  $linked.row(rows, "_tag_decode_row", _tag_decode_row);
-  $linked.row(rows, "_tag_decode_rows", _tag_decode_rows);
-  $linked.row(rows, "_tag_group_mask", _tag_group_mask);
-  $linked.row(rows, "_tag_validated_ids", _tag_validated_ids);
-  $linked.row(rows, "_tag_constant_row", _tag_constant_row);
-  $linked.row(rows, "_tag_list", _tag_list);
-  $linked.row(rows, "_tag_sibling_counts", _tag_sibling_counts);
-  $linked.row(rows, "_tag_row_entry", _tag_row_entry);
+  $linked.row(rows, "_tag_bits", _tag_bits);
   $linked.row(rows, "_tag_constant_rows", _tag_constant_rows);
+  $linked.row(rows, "_tag_constant_row", _tag_constant_row);
+  $linked.row(rows, "_tag_validated_ids", _tag_validated_ids);
+  $linked.row(rows, "_tag_row_entry", _tag_row_entry);
+  $linked.row(rows, "_tag_list", _tag_list);
+  $linked.row(rows, "_tag_decode_rows", _tag_decode_rows);
+  $linked.row(rows, "_tag_decode_row", _tag_decode_row);
+  $linked.row(rows, "_tag_sibling_counts", _tag_sibling_counts);
   $linked.row(rows, "_tag_group_top", _tag_group_top);
+  $linked.row(rows, "_tag_top", _tag_top);
+  $linked.row(rows, "_tag_middle", _tag_middle);
+  $linked.row(rows, "_tag_bottom", _tag_bottom);
+  $linked.row(rows, "_tag_group_mask", _tag_group_mask);
+  $linked.row(rows, "_tag_id", _tag_id);
   $linked.row(rows, "_tag_types", _tag_types);
+  $linked.row(rows, "_tag_rows", _tag_rows);
+  $linked.row(rows, "_tag_groups", _tag_groups);
+  $linked.row(rows, "_tag_descriptor", _tag_descriptor);
+  $linked.row(rows, "_tag_kind", _tag_kind);
   $linked.row(rows, "array_literal", array_literal);
   $linked.row(rows, "map_literal", map_literal);
   $linked.row(rows, "interpolation_lowering", interpolation_lowering);

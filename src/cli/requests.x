@@ -12,6 +12,19 @@ static TargetKind target_kinds[] = {
   { 0 }
 };
 
+static macro Stmt $fail.cli_input_not_file(Expr $input) =>
+  Diagnostics.driver_error(%"input is not a regular file: $($input)");
+
+static macro Stmt $report.cli_input_directory(Expr $input) {
+  fprintf(stderr, "x2c: error: input is a directory: %s\n", $input);
+  fputs(
+    "note: pass source files, use a shell wildcard, or define a "
+    "manifest target\n", stderr);
+}
+
+static macro Stmt $report.cli_input_missing(Expr $input) =>
+  fprintf(stderr, "x2c: error: input does not exist: %s\n", $input);
+
 /** Returns the target kind spelled `spelling`, or 0 when no kind has that
     spelling. `refusal` says why this compiler refuses a known spelling, and
     is NULL otherwise.
@@ -45,21 +58,6 @@ CliRequest CliRequest.new(Symbol command) {
   return request;
 }
 
-// An outer Make owns concurrency unless the caller explicitly supplies -j.
-static int _default_jobs(void) {
-  if (_make_owned()) return 1;
-  long count = sysconf(_SC_NPROCESSORS_ONLN);
-  return count > 0 && count <= INT_MAX ? (int) count : 1;
-}
-
-/* Reports whether a parent Make recipe runs this process, which `MAKELEVEL`
-   set to a positive count shows. Parallel recipes share one terminal and
-   one job budget without sharing reporter state. */
-static int _make_owned(void) {
-  String level = Env.get("MAKELEVEL");
-  return level.is_digit() && atol(level) > 0;
-}
-
 /** Returns the version line `--version` prints, without a newline. */
 String Compiler.version(void) => "x2c 0.15.1";
 
@@ -78,19 +76,6 @@ List CliRequest.package_roots(CliRequest request) {
   return request.package_dirs.append(cons(home, NULL));
 }
 
-static macro Stmt $fail.cli_input_not_file(Expr $input) =>
-  Diagnostics.driver_error(%"input is not a regular file: $($input)");
-
-static macro Stmt $report.cli_input_directory(Expr $input) {
-  fprintf(stderr, "x2c: error: input is a directory: %s\n", $input);
-  fputs(
-    "note: pass source files, use a shell wildcard, or define a "
-    "manifest target\n", stderr);
-}
-
-static macro Stmt $report.cli_input_missing(Expr $input) =>
-  fprintf(stderr, "x2c: error: input does not exist: %s\n", $input);
-
 /** Exits with a driver error unless `input` names a regular file.
     A wildcard or directory operand adds a note on what to pass instead.
 */
@@ -107,4 +92,21 @@ void CliRequest.require_input(String input) {
   if (strpbrk(input, "*?["))
     fputs("note: x2c does not expand wildcard operands\n", stderr);
   exit(2);
+}
+
+// request defaults and input checks
+
+// An outer Make owns concurrency unless the caller explicitly supplies -j.
+static int _default_jobs(void) {
+  if (_make_owned()) return 1;
+  long count = sysconf(_SC_NPROCESSORS_ONLN);
+  return count > 0 && count <= INT_MAX ? (int) count : 1;
+}
+
+/* Reports whether a parent Make recipe runs this process, which `MAKELEVEL`
+   set to a positive count shows. Parallel recipes share one terminal and
+   one job budget without sharing reporter state. */
+static int _make_owned(void) {
+  String level = Env.get("MAKELEVEL");
+  return level.is_digit() && atol(level) > 0;
 }

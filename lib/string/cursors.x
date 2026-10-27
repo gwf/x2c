@@ -43,36 +43,21 @@ static struct Split {
   int (*next)(Split split, int *cursor, String *out);
 };
 
-static inline int _end(String str, String sep, int start, int &next) {
-  int length = str.len();
-  if (!str || start < 0 || start > length) return -1;
-  if (!sep) {
-    next = -1;
-    return length;
-  }
-  const char *found = strstr(str + start, sep);
-  if (!found) {
-    next = -1;
-    return length;
-  }
-  int end = found - str;
-  next = end + sep.len();
-  return end;
-}
+/** Splits `str` on every occurrence of `sep` into a `List` of `String`s.
+    Separators are not coalesced, so adjacent ones produce empty fields and
+    the result holds one more element than the number of separators found.
+    An empty field is the empty `String`, the null pointer. An empty or null
+    `sep` yields a one-element `List` holding `str`, and splitting the empty
+    `String` yields the empty `List`. The canonical fields and `List` remain
+    live until their actual `String` and `List` pools are released.
 
-static inline int _line_end(String str, int start, int keep_ends, int &next) {
-  int length = str.len();
-  if (!str || start < 0 || start >= length) return -1;
-  const char *text = str;
-  int end = start;
-  while (end < length && text[end] != '\n' && text[end] != '\r') end++;
-  int ending = 0;
-  if (end < length)
-    ending = text[end] == '\r' && end + 1 < length && text[end + 1] == '\n'
-      ? 2 : 1;
-  next = end + ending;
-  return keep_ends ? next : end;
-}
+    ```x2c
+    printf("%s\n", "a:b:c".split(":").repr());
+    printf("%s\n", "a::b".split(":").repr());
+    ```
+    Raises: the same causes as `String.split_n`.
+*/
+meta native List String.split(String str, String sep) => str.split_n(sep, -1);
 
 /** Splits `str` at no more than `max_splits` separators.
     A negative limit splits every occurrence; zero returns `str` as one field.
@@ -96,22 +81,6 @@ meta native List String.split_n(String str, String sep, int max_splits) {
   return results.list_free();
 }
 
-/** Splits `str` on every occurrence of `sep` into a `List` of `String`s.
-    Separators are not coalesced, so adjacent ones produce empty fields and
-    the result holds one more element than the number of separators found.
-    An empty field is the empty `String`, the null pointer. An empty or null
-    `sep` yields a one-element `List` holding `str`, and splitting the empty
-    `String` yields the empty `List`. The canonical fields and `List` remain
-    live until their actual `String` and `List` pools are released.
-
-    ```x2c
-    printf("%s\n", "a:b:c".split(":").repr());
-    printf("%s\n", "a::b".split(":").repr());
-    ```
-    Raises: the same causes as `String.split_n`.
-*/
-meta native List String.split(String str, String sep) => str.split_n(sep, -1);
-
 /** Splits `str` into a `List` of lines.
     LF, CR, and CRLF all end a line, and CRLF counts as one ending. A
     nonzero `keep_ends` leaves each line's ending attached to it. A trailing
@@ -132,47 +101,6 @@ meta native List String.split_lines(String str, int keep_ends) {
     start = next;
   }
   return results.list_free();
-}
-
-static Split _new(
-  String str, String sep, int (*next)(Split split, int *cursor, String *out)) {
-  Split split = xmalloc(sizeof(struct Split));
-  *split = (struct Split) {.str = str, .sep = sep, .next = next};
-  return split;
-}
-
-static int _words_next(Split split, int *cursor, String *out) {
-  if (!split.str) return 0;
-  const char *p = split.str, int length = split.str.len(), index = *cursor;
-  while (index < length && isspace((unsigned char) p[index])) index++;
-  if (index >= length) return 0;
-  int start = index;
-  while (index < length && !isspace((unsigned char) p[index])) index++;
-  String field = x2c_string_from_bytes(p + start, index - start);
-  *out = field;
-  *cursor = index;
-  return 1;
-}
-
-static int _lines_next(Split split, int *cursor, String *out) {
-  if (!split.str) return 0;
-  int start = *cursor, next, end = _line_end(split.str, start, 0, next);
-  if (end < 0) return 0;
-  String field = String.new_len(split.str + start, end - start);
-  *out = field;
-  *cursor = next;
-  return 1;
-}
-
-static int _splits_next(Split split, int *cursor, String *out) {
-  if (!split.str) return 0;
-  int start = *cursor, next;
-  int end = _end(split.str, split.sep, start, next);
-  if (end < 0) return 0;
-  String field = String.new_len(split.str + start, end - start);
-  *out = field;
-  *cursor = next;
-  return 1;
 }
 
 /** Returns a lazy cursor over whitespace-delimited words in `str`.
@@ -220,6 +148,24 @@ meta native Split String.lines(String str) => _new(str, NULL, _lines_next);
 meta native Split String.splits(String str, String sep) =>
   _new(str, sep, _splits_next);
 
+/** Returns an iterator over a lazy `String` cursor.
+    This adapter over `Split.try_next` boxes each field into a `Var` and
+    keeps the `Iter` state in step. Use the typed cursor in hot code and this
+    method when you need the `Iter` protocol.
+
+    The cursor descriptor is `Scope`-owned; `dest` is caller-supplied iterator
+    storage. Every iterator keeps its own byte position, so cursors can be
+    nested or traversed concurrently. The `Split` descriptor, its borrowed
+    input `String`s, and `dest` must remain live until iteration ends.
+
+    Constructing the iterator does not raise. Pulling may raise
+    `<alloc-fail>` as `Split.try_next` does. A null `dest` returns NULL.
+*/
+Iter Split.iter(Split split, Iter dest) {
+  if (!dest) return NULL;
+  return dest.init((void *) split, split ? _iter_next : NULL, 0);
+}
+
 /** Yields the next field and advances a caller-owned position on success.
     Position must start at zero and thereafter retain only values written by
     this method. Both it and `out` are written only on success, so an empty
@@ -246,28 +192,82 @@ int Split.try_next(Split split, int &?cursor, String &?out) {
   return split.next(split, &cursor, &out);
 }
 
+static inline int _end(String str, String sep, int start, int &next) {
+  int length = str.len();
+  if (!str || start < 0 || start > length) return -1;
+  if (!sep) {
+    next = -1;
+    return length;
+  }
+  const char *found = strstr(str + start, sep);
+  if (!found) {
+    next = -1;
+    return length;
+  }
+  int end = found - str;
+  next = end + sep.len();
+  return end;
+}
+
+static inline int _line_end(String str, int start, int keep_ends, int &next) {
+  int length = str.len();
+  if (!str || start < 0 || start >= length) return -1;
+  const char *text = str;
+  int end = start;
+  while (end < length && text[end] != '\n' && text[end] != '\r') end++;
+  int ending = 0;
+  if (end < length)
+    ending = text[end] == '\r' && end + 1 < length && text[end + 1] == '\n'
+      ? 2 : 1;
+  next = end + ending;
+  return keep_ends ? next : end;
+}
+
+static Split _new(
+  String str, String sep, int (*next)(Split split, int *cursor, String *out)) {
+  Split split = xmalloc(sizeof(struct Split));
+  *split = (struct Split) {.str = str, .sep = sep, .next = next};
+  return split;
+}
+
+static int _words_next(Split split, int *cursor, String *out) {
+  if (!split.str) return 0;
+  const char *p = split.str, int length = split.str.len(), index = *cursor;
+  while (index < length && isspace((unsigned char) p[index])) index++;
+  if (index >= length) return 0;
+  int start = index;
+  while (index < length && !isspace((unsigned char) p[index])) index++;
+  String field = x2c_string_from_bytes(p + start, index - start);
+  *out = field;
+  *cursor = index;
+  return 1;
+}
+
+static int _lines_next(Split split, int *cursor, String *out) {
+  if (!split.str) return 0;
+  int start = *cursor, next, end = _line_end(split.str, start, 0, next);
+  if (end < 0) return 0;
+  String field = String.new_len(split.str + start, end - start);
+  *out = field;
+  *cursor = next;
+  return 1;
+}
+
+static int _splits_next(Split split, int *cursor, String *out) {
+  if (!split.str) return 0;
+  int start = *cursor, next;
+  int end = _end(split.str, split.sep, start, next);
+  if (end < 0) return 0;
+  String field = String.new_len(split.str + start, end - start);
+  *out = field;
+  *cursor = next;
+  return 1;
+}
+
 static int _iter_next(Iter iter, Var *out) {
   Split split = iter.obj, int cursor = iter.state, String value;
   if (!split.try_next(cursor, value)) return 0;
   iter.state = cursor;
   *out = value;
   return 1;
-}
-
-/** Returns an iterator over a lazy `String` cursor.
-    This adapter over `Split.try_next` boxes each field into a `Var` and
-    keeps the `Iter` state in step. Use the typed cursor in hot code and this
-    method when you need the `Iter` protocol.
-
-    The cursor descriptor is `Scope`-owned; `dest` is caller-supplied iterator
-    storage. Every iterator keeps its own byte position, so cursors can be
-    nested or traversed concurrently. The `Split` descriptor, its borrowed
-    input `String`s, and `dest` must remain live until iteration ends.
-
-    Constructing the iterator does not raise. Pulling may raise
-    `<alloc-fail>` as `Split.try_next` does. A null `dest` returns NULL.
-*/
-Iter Split.iter(Split split, Iter dest) {
-  if (!dest) return NULL;
-  return dest.init((void *) split, split ? _iter_next : NULL, 0);
 }

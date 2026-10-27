@@ -104,66 +104,6 @@ int MatchPlan.search_replace(
   return 1;
 }
 
-/* walks
-
-   A walk runs the plan at each node of one traversal, sharing one machine,
-   one capture buffer, and one cell stack. */
-
-static int _test(MatchWalk &m, Var node) =>
-  m.plan.admits(node, NULL)
-    ? _run_capture(m.view, *m.m, node, *m.captures) : 0;
-
-/* One search result: `(* node)` followed by the node's bindings. */
-static List _hit(MatchWalk &walk, Var node) =>
-  cons(%(* $node), _publish_captures(walk.plan.layout, *walk.captures));
-
-static Var _spine_get(Block spine, size_t index) =>
-  ((Var *) spine.bytes)[index];
-
-/* Every traversal descends car with include_empty=1 and cdr with
-   include_empty=0 before trying the match at this node. The cdr descent runs
-   as a loop, so a `List` of any length costs one frame and only nesting
-   depth reaches the C stack. The loop visits every car in order and then
-   answers for the cells from the last one back, which is the order the
-   recursion produced. */
-static int _walk_all(MatchWalk &walk, Var input, int include_empty) {
-  Block hits = walk.spine;
-  size_t base = hits.length;
-  int visit_tail = 1;
-  while (input is <list>) {
-    List lst = input;
-    if (!lst) {
-      visit_tail = include_empty;
-      break;
-    }
-    if (_walk_all(walk, lst.car(), 1) < 0) return -1;
-    int status = _test(walk, input);
-    if (status < 0) return -1;
-    if (status == 1) {
-      Var hit = _hit(walk, input);
-      hits.push(&hit);
-    }
-    input = lst.cdr();
-    include_empty = 0;
-  }
-  if (visit_tail) {
-    int status = _test(walk, input);
-    if (status < 0) return -1;
-    if (status == 1) walk.results = cons(_hit(walk, input), walk.results);
-  }
-  _answer(walk, base);
-  return 0;
-}
-
-/* Prepends the hits the loop pushed above `base`, last one first, as the
-   recursion answered them, and releases them. */
-static void _answer(MatchWalk &walk, size_t base) {
-  Block hits = walk.spine;
-  for (size_t i = hits.length; i > base; i--)
-    walk.results = cons(_spine_get(hits, i - 1), walk.results);
-  hits.truncate(base);
-}
-
 /* The cells answer from the last one back, so the walk remembers the last
    cell that matched and settles on it once nothing earlier matches. */
 static int _walk_first(MatchWalk &walk, Var input, int include_empty) {
@@ -202,6 +142,66 @@ static int _settle(MatchWalk &walk, Var node) {
   walk.bindings = _publish_captures(walk.plan.layout, *walk.captures);
   return 1;
 }
+
+/* walks
+
+   A walk runs the plan at each node of one traversal, sharing one machine,
+   one capture buffer, and one cell stack. */
+
+static int _test(MatchWalk &m, Var node) =>
+  m.plan.admits(node, NULL)
+    ? _run_capture(m.view, *m.m, node, *m.captures) : 0;
+
+/* Every traversal descends car with include_empty=1 and cdr with
+   include_empty=0 before trying the match at this node. The cdr descent runs
+   as a loop, so a `List` of any length costs one frame and only nesting
+   depth reaches the C stack. The loop visits every car in order and then
+   answers for the cells from the last one back, which is the order the
+   recursion produced. */
+static int _walk_all(MatchWalk &walk, Var input, int include_empty) {
+  Block hits = walk.spine;
+  size_t base = hits.length;
+  int visit_tail = 1;
+  while (input is <list>) {
+    List lst = input;
+    if (!lst) {
+      visit_tail = include_empty;
+      break;
+    }
+    if (_walk_all(walk, lst.car(), 1) < 0) return -1;
+    int status = _test(walk, input);
+    if (status < 0) return -1;
+    if (status == 1) {
+      Var hit = _hit(walk, input);
+      hits.push(&hit);
+    }
+    input = lst.cdr();
+    include_empty = 0;
+  }
+  if (visit_tail) {
+    int status = _test(walk, input);
+    if (status < 0) return -1;
+    if (status == 1) walk.results = cons(_hit(walk, input), walk.results);
+  }
+  _answer(walk, base);
+  return 0;
+}
+
+/* One search result: `(* node)` followed by the node's bindings. */
+static List _hit(MatchWalk &walk, Var node) =>
+  cons(%(* $node), _publish_captures(walk.plan.layout, *walk.captures));
+
+/* Prepends the hits the loop pushed above `base`, last one first, as the
+   recursion answered them, and releases them. */
+static void _answer(MatchWalk &walk, size_t base) {
+  Block hits = walk.spine;
+  for (size_t i = hits.length; i > base; i--)
+    walk.results = cons(_spine_get(hits, i - 1), walk.results);
+  hits.truncate(base);
+}
+
+static Var _spine_get(Block spine, size_t index) =>
+  ((Var *) spine.bytes)[index];
 
 /* Rewrites children before the List that holds them. The loop pushes each
    rewritten car; the cells then rebuild from the last one back, each around

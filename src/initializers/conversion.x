@@ -1,5 +1,13 @@
 /*  conversion.x -- initializer values and native type definitions */
 
+// row conversion
+
+static typedef struct RowSelection {
+  Type type;
+  List path, applicable;
+  int homogeneous, excess;
+} RowSelection;
+
 // initializer conversion
 
 /** Converts an initializer using its declared native object for array
@@ -8,6 +16,49 @@
 List Compiler.convert_initializer(
   Compiler c, List value, Type type, List target) =>
   _convert_initializer(c, value, type, target, NULL);
+
+// compound literals
+
+/** Keeps a compound literal's native type definition at its original scope. */
+List Compiler.convert_compound_literal(
+  Compiler c, List value, Type type, Type native_type) {
+  (Type definition, Type reference) = c.initializer_native_types(native_type);
+  List target = _zero_pointer_target(type, reference);
+  int native_used = 0;
+  List converted = _convert_initializer(c, value, type, target, native_used);
+  if (!native_used) definition = native_type;
+  return %(cast $definition $converted);
+}
+
+/** Returns native definition/reference types for a compound literal.
+    Macro expansion stays in the original cast; named tags let later sizeof
+    expressions reuse that exact layout without a new scope.
+*/
+List Compiler.initializer_native_types(Compiler c, Type type) {
+  Type base = type.base_type(), definition = base, reference = base;
+  match (base) {
+    case %(!or ((!or ?kind struct union) (gensym ? ?) ?body)
+               ((!or ?kind struct union) (!set ?body (fields *)))): {
+      String name = c.fresh_name("initializer_type");
+      definition = $(kind, name, body);
+      reference = $(kind, name);
+    }
+    case %((!or ?kind struct union) ?name (fields *)):
+      reference = $(kind, name);
+  }
+  Array definitions = [], references = [];
+  for (List rest = type; rest !== base; rest = rest.cdr()) {
+    Var reused = NULL;
+    Var modifier = _native_modifier(c, rest.car(), reused);
+    definitions.push(modifier);
+    references.push(reused);
+  }
+  definition = definitions.list_free().append(definition);
+  reference = references.list_free().append(reference);
+  return $(definition, reference);
+}
+
+// initializer values and native type definitions
 
 static List _convert_initializer(
   Compiler c, List value, Type type, List target, int &?native_used) {
@@ -45,72 +96,6 @@ static List _convert_composite(
   return $!($target){ { @converted } };
 }
 
-/* An empty initializer for a Map or Array, or for a type that converts from
-   one, is a fresh empty collection. A Var holds a fresh empty Map. */
-static List _empty_collection(Compiler c, Type target) {
-  for (int kind = 0; kind < 2; kind++) {
-    Macro shape = kind ? $array_value : $map_value;
-    Type source = kind ? %("Array") : %("Map");
-    List literal = c.rebuild_expression(source, shape(%()));
-    if (!kind && c.sym.is_var_type(target))
-      return c.convert_expression(literal, target);
-    if (c.sym.resolve_key(target) == c.sym.resolve_key(source))
-      return c.convert_expression(literal, target);
-    List converted = c.converter_call(literal, source, target);
-    if (converted) return converted;
-  }
-  return NULL;
-}
-
-/* An unevaluated `*(native *) 0` typed as `viewed`, from which initializer
-   rows name their slots. */
-static List _zero_pointer_target(Type viewed, Type native) {
-  Type pointer = cons(<*>, native);
-  List zero = $!int{ 0 };
-  return %(expr $viewed (parens (expr $viewed
-    (op * (expr $pointer (parens (expr $pointer (cast $pointer $zero))))))));
-}
-
-static List _composite_rows(
-  Compiler c, Type target, List items, List native_target,
-  List parent_condition, int &discarded) {
-  Array rows = [];
-  int initialized = 0;
-  foreach (List row in c.initializer_rows(target, items, native_target)) {
-    List cases = row.cadr();
-    int available = 0;
-    foreach (List choice in cases)
-      if (choice.caddr()) { available = 1; break; }
-    if (parent_condition && initialized && !available) {
-      discarded = 1;
-      continue;
-    }
-    if (available) initialized = 1;
-    rows.push(row);
-  }
-  return rows.list_free();
-}
-
-/* Keep C's excess warning on one retained value of this alternative. */
-static List _composite_excess_check(List parent_condition) {
-  List zero = $!int{ 0 };
-  List one = $!int{ 1 };
-  List size = $!int{ $parent_condition ? $zero : $one };
-  Type array = %((dim $size) char);
-  List probe = %(expr $array (cast $array
-    (expr $array (composite (commas $zero)))));
-  List count = %(expr (unsigned) (sizeof (parens $probe)));
-  return %(expr (int) (op + $one (expr (int) (op * $zero $count))));
-}
-
-// row conversion
-
-static typedef struct RowSelection {
-  Type type;
-  List path, applicable;
-  int homogeneous, excess;
-} RowSelection;
-
 /* Every case of a row carries the value under its designators. */
 static List _convert_composite_row(
   Compiler c, List row, List native_target, List row_condition,
@@ -131,21 +116,6 @@ static List _convert_composite_row(
   return _convert_mixed_row(
     c, row, value, native_target, row_condition, parent_condition,
     native_used);
-}
-
-static RowSelection _select_row(List cases) {
-  RowSelection selected = { .homogeneous = 1 };
-  int applicable_seen = 0;
-  foreach (List choice in cases) {
-    (List condition, List path, Type destination, List input) = choice;
-    if (!destination) { selected.excess = 1; continue; }
-    selected.applicable = applicable_seen
-      ? _condition_or(selected.applicable, condition) : condition;
-    applicable_seen = 1;
-    if (!selected.type) { selected.type = destination; selected.path = path; }
-    else if (destination !== selected.type) selected.homogeneous = 0;
-  }
-  return selected;
 }
 
 static List _convert_initval_row(
@@ -189,12 +159,6 @@ static List _convert_homogeneous_row(
     : _convert_alternative(
       c, value, selected.type, condition, slot, native_used);
   return _replace_value(original, converted);
-}
-
-static List _replace_value(List original, List value) {
-  if (original ~= %((!or ?tag dotinit indexinit) ?key ?inner))
-    return $(tag, key, _replace_value(inner, value));
-  return value;
 }
 
 /* Only native-dependent alternatives speculate. */
@@ -257,35 +221,6 @@ static List _speculate(
   return result;
 }
 
-static List _zero_value(Type type, List target) {
-  Type native = type;
-  if (type.is_bitfield()) native = type.base_type();
-  else if (target) native = %("__typeof__" (parens $target));
-  return %(expr $type (cast $native (expr $type
-    (composite (commas $($!int{ 0 }))))));
-}
-
-static List _rejected_initializer(Type type, List condition, List zero) {
-  List size = %(expr (int) (op ? $condition
-    (expr (int) (literal (int) "-1"))
-    $($!int{ 1 })));
-  List check = %(expr (unsigned)
-    (sizeof ("(" "char[" $size "]" ")")));
-  Symbol comma = <,>;
-  check = %(expr (void) (cast (void) $check));
-  return %(expr $type (parens (expr $type (op $comma $check $zero))));
-}
-
-static List _accepted_initializer(
-  List result, Type type, List target, List condition, List zero) {
-  if (result ~= %(expr ? (composite *))) {
-    Type native = target ? %("__typeof__" (parens $target)) : type;
-    return %(expr $type (cast $native $result));
-  }
-  return %(expr $type
-    (call "__builtin_choose_expr" (args $condition $result $zero)));
-}
-
 // mixed rows
 
 static List _convert_mixed_row(
@@ -314,6 +249,108 @@ static List _convert_mixed_row(
     return original;
   }
   return _materialize_mixed_row(c, original, source, converted, captured);
+}
+
+/* An empty initializer for a Map or Array, or for a type that converts from
+   one, is a fresh empty collection. A Var holds a fresh empty Map. */
+static List _empty_collection(Compiler c, Type target) {
+  for (int kind = 0; kind < 2; kind++) {
+    Macro shape = kind ? $array_value : $map_value;
+    Type source = kind ? %("Array") : %("Map");
+    List literal = c.rebuild_expression(source, shape(%()));
+    if (!kind && c.sym.is_var_type(target))
+      return c.convert_expression(literal, target);
+    if (c.sym.resolve_key(target) == c.sym.resolve_key(source))
+      return c.convert_expression(literal, target);
+    List converted = c.converter_call(literal, source, target);
+    if (converted) return converted;
+  }
+  return NULL;
+}
+
+/* An unevaluated `*(native *) 0` typed as `viewed`, from which initializer
+   rows name their slots. */
+static List _zero_pointer_target(Type viewed, Type native) {
+  Type pointer = cons(<*>, native);
+  List zero = $!int{ 0 };
+  return %(expr $viewed (parens (expr $viewed
+    (op * (expr $pointer (parens (expr $pointer (cast $pointer $zero))))))));
+}
+
+static List _composite_rows(
+  Compiler c, Type target, List items, List native_target,
+  List parent_condition, int &discarded) {
+  Array rows = [];
+  int initialized = 0;
+  foreach (List row in c.initializer_rows(target, items, native_target)) {
+    List cases = row.cadr();
+    int available = 0;
+    foreach (List choice in cases)
+      if (choice.caddr()) { available = 1; break; }
+    if (parent_condition && initialized && !available) {
+      discarded = 1;
+      continue;
+    }
+    if (available) initialized = 1;
+    rows.push(row);
+  }
+  return rows.list_free();
+}
+
+/* Keep C's excess warning on one retained value of this alternative. */
+static List _composite_excess_check(List parent_condition) {
+  List zero = $!int{ 0 };
+  List one = $!int{ 1 };
+  List size = $!int{ $parent_condition ? $zero : $one };
+  Type array = %((dim $size) char);
+  List probe = %(expr $array (cast $array
+    (expr $array (composite (commas $zero)))));
+  List count = %(expr (unsigned) (sizeof (parens $probe)));
+  return %(expr (int) (op + $one (expr (int) (op * $zero $count))));
+}
+
+static RowSelection _select_row(List cases) {
+  RowSelection selected = { .homogeneous = 1 };
+  int applicable_seen = 0;
+  foreach (List choice in cases) {
+    (List condition, List path, Type destination, List input) = choice;
+    if (!destination) { selected.excess = 1; continue; }
+    selected.applicable = applicable_seen
+      ? _condition_or(selected.applicable, condition) : condition;
+    applicable_seen = 1;
+    if (!selected.type) { selected.type = destination; selected.path = path; }
+    else if (destination !== selected.type) selected.homogeneous = 0;
+  }
+  return selected;
+}
+
+static List _zero_value(Type type, List target) {
+  Type native = type;
+  if (type.is_bitfield()) native = type.base_type();
+  else if (target) native = %("__typeof__" (parens $target));
+  return %(expr $type (cast $native (expr $type
+    (composite (commas $($!int{ 0 }))))));
+}
+
+static List _rejected_initializer(Type type, List condition, List zero) {
+  List size = %(expr (int) (op ? $condition
+    (expr (int) (literal (int) "-1"))
+    $($!int{ 1 })));
+  List check = %(expr (unsigned)
+    (sizeof ("(" "char[" $size "]" ")")));
+  Symbol comma = <,>;
+  check = %(expr (void) (cast (void) $check));
+  return %(expr $type (parens (expr $type (op $comma $check $zero))));
+}
+
+static List _accepted_initializer(
+  List result, Type type, List target, List condition, List zero) {
+  if (result ~= %(expr ? (composite *))) {
+    Type native = target ? %("__typeof__" (parens $target)) : type;
+    return %(expr $type (cast $native $result));
+  }
+  return %(expr $type
+    (call "__builtin_choose_expr" (args $condition $result $zero)));
 }
 
 static List _capture_leaves(Compiler c, List value, Array inputs) {
@@ -385,6 +422,12 @@ static List _materialize_mixed_row(
   return _replace_value(original, result);
 }
 
+static List _replace_value(List original, List value) {
+  if (original ~= %((!or ?tag dotinit indexinit) ?key ?inner))
+    return $(tag, key, _replace_value(inner, value));
+  return value;
+}
+
 static List _adapt_choices(
   Compiler c, List source, List choices, List placeholder) {
   Type from = _adapter_type(c, source.cadr());
@@ -442,47 +485,6 @@ static Type _adapter_type(Compiler c, Type type) {
   if (c.sym.is_var_type(type)) return %("Var");
   Type scalar = c.sym.resolve_key(type).scalar();
   return scalar === %(void) ? NULL : scalar;
-}
-
-// compound literals
-
-/** Keeps a compound literal's native type definition at its original scope. */
-List Compiler.convert_compound_literal(
-  Compiler c, List value, Type type, Type native_type) {
-  (Type definition, Type reference) = c.initializer_native_types(native_type);
-  List target = _zero_pointer_target(type, reference);
-  int native_used = 0;
-  List converted = _convert_initializer(c, value, type, target, native_used);
-  if (!native_used) definition = native_type;
-  return %(cast $definition $converted);
-}
-
-/** Returns native definition/reference types for a compound literal.
-    Macro expansion stays in the original cast; named tags let later sizeof
-    expressions reuse that exact layout without a new scope.
-*/
-List Compiler.initializer_native_types(Compiler c, Type type) {
-  Type base = type.base_type(), definition = base, reference = base;
-  match (base) {
-    case %(!or ((!or ?kind struct union) (gensym ? ?) ?body)
-               ((!or ?kind struct union) (!set ?body (fields *)))): {
-      String name = c.fresh_name("initializer_type");
-      definition = $(kind, name, body);
-      reference = $(kind, name);
-    }
-    case %((!or ?kind struct union) ?name (fields *)):
-      reference = $(kind, name);
-  }
-  Array definitions = [], references = [];
-  for (List rest = type; rest !== base; rest = rest.cdr()) {
-    Var reused = NULL;
-    Var modifier = _native_modifier(c, rest.car(), reused);
-    definitions.push(modifier);
-    references.push(reused);
-  }
-  definition = definitions.list_free().append(definition);
-  reference = references.list_free().append(reference);
-  return $(definition, reference);
 }
 
 static Var _native_modifier(Compiler c, Var modifier, Var &reused) {

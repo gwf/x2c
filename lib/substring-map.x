@@ -22,19 +22,15 @@ $map.scaffold(
   _key, _value, _reinsert_error, _insert_error,
   "MapSubInt.reinsert", "MapSubInt.insert");
 
-static unsigned _hash(Substr *key) {
-  unsigned hash = key[0].hash();
-  return hash ? hash : -1;
-}
-static int _equal_key(Substr *a, Substr *b) => a[0].equal(b[0]);
-static int _equal_value(int *a, int *b) => a[0] == b[0];
-static void _valid(int *value) { (void) value; }
-
 $map.core.family(
   MapSubInt, struct MapSubInt, Substr, int,
   unsigned, struct MapSubIntRecord,
   _hash, _equal_key, _equal_value, _valid,
   _key, _value, _reinsert_error, _insert_error);
+
+$map.typed.publish(
+  MapSubInt, Substr, int, mapsubint, <mapsubint>,
+  _box_key, _box_value, _prepare_export);
 
 /** Creates an empty count table in the current Scope. */
 MapSubInt MapSubInt.new(void) {
@@ -51,11 +47,6 @@ void MapSubInt.increment(MapSubInt map, Substr word) {
   if (!inserted) ++*count;
 }
 
-/** Yields each unique view and its count without allocating. */
-int MapSubInt.try_next(
-  MapSubInt map, unsigned &cursor, Substr &word, int &count) =>
-  map.try_next_entry(&cursor, &word, &count);
-
 /** Copies counts to a Map with canonical String keys in the active pool. */
 Map MapSubInt.strings(MapSubInt map) {
   Map result = {};
@@ -66,7 +57,24 @@ Map MapSubInt.strings(MapSubInt map) {
   return result;
 }
 
+/** Yields each unique view and its count without allocating. */
+int MapSubInt.try_next(
+  MapSubInt map, unsigned &cursor, Substr &word, int &count) =>
+  map.try_next_entry(&cursor, &word, &count);
+
+static unsigned _hash(Substr *key) {
+  unsigned hash = key[0].hash();
+  return hash ? hash : -1;
+}
+
+static int _equal_key(Substr *a, Substr *b) => a[0].equal(b[0]);
+
+static int _equal_value(int *a, int *b) => a[0] == b[0];
+
+static void _valid(int *value) { (void) value; }
+
 static Var _box_key(Substr word) => word.str();
+
 static Var _box_value(int count) => count;
 
 /* Source pointers may change during export, but contents and hashes do not.
@@ -86,7 +94,3 @@ static MapSubInt _prepare_export(MapSubInt map, Context source) {
   }
   return NULL;
 }
-
-$map.typed.publish(
-  MapSubInt, Substr, int, mapsubint, <mapsubint>,
-  _box_key, _box_value, _prepare_export);

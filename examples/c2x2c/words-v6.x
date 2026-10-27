@@ -18,11 +18,6 @@ int main(int argc, char **argv) {
   return EXIT_SUCCESS; // Root scope reclaims the Map and ranking Array.
 }
 
-static void fail(const char *message) {
-  fprintf(stderr, "%s\n", message);
-  exit(EXIT_FAILURE);
-}
-
 static void print_top_ten(MapStringInt counts) {
   Array ranked = [];
   foreach ((String word, int count) in counts) {
@@ -56,4 +51,9 @@ static MapStringInt accumulate(MapStringInt total, MapSubInt counts) {
   foreach ((Substr word, int count) in counts) total.add_substr(word, count);
   counts.cleanup();
   return total;
+}
+
+static void fail(const char *message) {
+  fprintf(stderr, "%s\n", message);
+  exit(EXIT_FAILURE);
 }

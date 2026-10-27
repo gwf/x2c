@@ -3,11 +3,49 @@
     Copyright (c) 2025 Gary William Flake.
 */
 
-/* Pushes the items of a `seq`, or any other node itself. */
-module void _push_items(Array out, List node) {
-  if (node.car() == <seq>)
-    foreach (List item in node.cdr()) out.push(item);
-  else out.push(node);
+// constructed statements
+
+/* A source `if`, `while`, `do`, `for`, `match`, or `try` binds here with a
+   Token Var into this table for each clause, which the binder parses when it
+   reaches it, so its scopes and optional-reference facts govern that parse.
+   Syntax from a template or a meta function cannot hold these addresses.
+   Each entry's type names its clause. */
+static struct Token source_clauses[] = {
+  { .type = <test> }, { .type = <then> }, { .type = <else> },
+  { .type = <body> }, { .type = <do> },   { .type = <init> },
+  { .type = <cond> }, { .type = <next> }, { .type = <arms> },
+  { .type = <arm> },  { .type = <try> },  { .type = <catches> },
+  { .type = <catch> }, { .type = <finally> }
+};
+
+/** Binds the source `if`, `while`, `do`, `for`, `match`, or `try` at the
+    cursor through the same binders as constructed syntax.
+*/
+List Compiler.bind_source_statement(Compiler c) {
+  Symbol keyword = c.peek(0);
+  c.next();
+  switch (keyword) {
+    case <if>:
+      return _bind_if_else(
+        c, Compiler.source_clause(<test>), Compiler.source_clause(<then>),
+        Compiler.source_clause(<else>));
+    case <while>:
+      return _bind_while(
+        c, Compiler.source_clause(<test>), Compiler.source_clause(<body>));
+    case <do>:
+      return _bind_do(
+        c, Compiler.source_clause(<do>), Compiler.source_clause(<test>));
+    case <match>:
+      return _bind_match(
+        c, Compiler.source_clause(<test>), Compiler.source_clause(<arms>));
+    case <try>:
+      return _bind_try(
+        c, Compiler.source_clause(<try>), Compiler.source_clause(<catches>),
+        Compiler.source_clause(<finally>));
+  }
+  return _bind_for(
+    c, Compiler.source_clause(<init>), Compiler.source_clause(<cond>),
+    Compiler.source_clause(<next>), Compiler.source_clause(<body>));
 }
 
 // constructed syntax
@@ -43,42 +81,110 @@ List Compiler.bind_syntax(
   }
 }
 
-/* Replaces `syntax` with a staged code value and reports whether that
-   value is a retained result, which binds no further. */
-static int _take_staged(Compiler c, Var &syntax) {
-  Var staged;
-  int retained;
-  if (!c.macro_application || !c.take_code_value(syntax, staged, retained))
-    return 0;
-  syntax = staged;
-  return retained;
+/** Binds one catch arm's `body` in a scope of its own, with declarations of
+    the definite binders of `pattern`, read through `handle`, before it.
+    Binder diagnostics use `start`. A source arm's body parses here, and a
+    template's declares its binders where its expansion binds it. A parsed
+    arm's body already begins with them, so it binds unchanged.
+*/
+List Compiler.bind_catch_arm(
+  Compiler c, List pattern, Var body, Token start, List handle) {
+  c.sym.push_new_scope();
+  defer c.sym.pop_scope();
+  List bindings = NULL;
+  if (pattern) {
+    _check_binders(c, pattern, start, "catch");
+    bindings = c.define_pattern_binders(pattern);
+  }
+  List statement = _bind_statement(c, body);
+  if (_declares_binders(body, bindings))
+    return $(pattern, statement);
+  return %($pattern (block
+    @(c.pattern_binder_declarations(bindings, handle)) $statement));
 }
 
-/* Publishes a name, a declarator, or an initialized one at an enumerator
-   position as an enumerator of the aggregate being bound. Other forms go
-   to the dispatcher, so this returns NULL for them. */
-static List _bind_enumerator(Compiler c, List input) {
-  match (input) {
-    case %(!or
-           (binding ? (!is ? type string))
-           ((!is ? type string))
-           ("x2c.ident" (!is ? type string))):
-      return _publish_enumerator(c, input, c.aggregate_type, c.token);
-    case %(!set ?node
-           (bind ? ?)):
-      return _publish_enumerator(c, node, c.aggregate_type, c.token);
-    case %(!set ?node
-           (op =
-             (!or
-               (binding ? (!is ? type string))
-               ((!is ? type string))
-               ("x2c.ident" (!is ? type string))
-               (bind ? ?))
-             ?)):
-      return _publish_enumerator(c, node, c.aggregate_type, c.token);
+/** Binds one match arm's `body` in a scope of its own, which defines the
+    definite binders of `pattern` when the arm `binds`. Binder diagnostics
+    use `start`. A source arm's body parses here with the typed captures
+    `types` that its pattern recorded.
+*/
+List Compiler.bind_match_arm(
+  Compiler c, List pattern, Var body, Token start, int binds, List types) {
+  c.sym.push_new_scope();
+  defer c.sym.pop_scope();
+  List bindings = NULL;
+  if (binds) {
+    _check_binders(c, pattern, start, "match");
+    bindings = c.define_pattern_binders(pattern);
   }
-  return NULL;
+  List statement = _bind_arm_body(c, body, types);
+  if (!bindings || _declares_binders(body, bindings))
+    return $(pattern, statement);
+  List declarations = c.pattern_binder_declarations(bindings, NULL);
+  match (statement)
+    case %(guarded ?inner):
+      return %($pattern (guarded (block @declarations $inner)));
+  return %($pattern (block @declarations $statement));
 }
+
+/** Binds a callable's outer block in its active parameter scope. Ordinary
+    constructed blocks open their own scope before using this operation.
+*/
+List Compiler.bind_callable_body(Compiler c, List syntax, Type return_type) {
+  match (syntax) {
+    case %(at ?origin ?body):
+      return _anchor(c, origin, c.bind_callable_body(body, return_type));
+    case %(block *children): {
+      Array stmts = [];
+      List present_before = c.present_references();
+      defer c.restore_reference_presence(present_before);
+      foreach (Var child in children)
+        _push_items(stmts, c.bind_syntax(child, <block>, return_type));
+      return %(block @(stmts.list_free()));
+    }
+  }
+  return c.bind_syntax(syntax, <block>, return_type);
+}
+
+/** The source clause `kind`, which the binder parses when it reaches it. */
+Var Compiler.source_clause(Symbol kind) {
+  Token clause = source_clauses;
+  while (clause.type != kind) clause++;
+  return Token.var(clause);
+}
+
+/** Binds a pattern condition without publishing its captures to the caller.
+    Its declarations belong to the successful path; visible rows retain the
+    identities that `&&` and `if` expose in their own scopes.
+*/
+List Compiler.bind_match_condition(
+  Compiler c, List subject, List pattern, List types, Token origin) {
+  subject = _resolve(c, subject);
+  pattern = _resolve(c, pattern);
+  if (c.macro_holes)
+    return %(expr (<macro-expr>) (matches $subject $pattern $types));
+  c.sym.push_new_scope();
+  defer c.sym.pop_scope();
+  _check_binders(c, pattern, origin, "match");
+  List bindings = c.define_pattern_binders(pattern);
+  List declarations = c.pattern_binder_declarations(bindings, NULL);
+  List temporaries = NULL, native = NULL;
+  if (types) native = c.typed_capture_declarations(types, temporaries);
+  Array visible = [];
+  foreach (List row in bindings) {
+    String name = row.car().str()[1:];
+    List key = $(name);
+    List binding = c.sym.current_binding(key);
+    visible.push($(binding ? binding : row.cadr(), c.sym.get(key)));
+  }
+  if (types) c.sym.pop_scope();
+  List body = types ? %(block @declarations @temporaries (block @native))
+                    : %(block @declarations);
+  return %(expr (int)
+    (matches $subject $pattern $body $(visible.list_free())));
+}
+
+// constructed syntax and statement binding
 
 /* Parsed templates and meta functions are the intended producers. There
    is no separate validation pass before or after expansion. The structural
@@ -185,24 +291,6 @@ static List _bind_form(Compiler c, List input, Symbol context, int pending) {
   return _construction_error(c);
 }
 
-/* Reports a constructed form at a position that does not admit it.
-   `report_error` never returns, so a caller may return this call. */
-module List _construction_error(Compiler c) {
-  $fail.parse_syntax_position(c, c.token);
-}
-
-/* A meta call written as a whole statement may return a statement. */
-static List _bind_expression_statement(
-  Compiler c, List expression, Symbol context) {
-  if ((expression ~= %(expr ? (meta-call *))) &&
-      !c.meta_body && !c.macro_holes)
-    return c.evaluate_meta_statement(expression, context, c.token);
-  return %(stmnt $(_resolve(c, expression)));
-}
-
-module List _resolve(Compiler c, List expr) =>
-  c.resolve_expression(expr, c.token);
-
 /* A source clause parses, already bound, when the binder reaches it. */
 static List _bind_statement(Compiler c, Var stmt) {
   Symbol kind = _source_clause_kind(stmt);
@@ -210,46 +298,6 @@ static List _bind_statement(Compiler c, Var stmt) {
   List bound = c.bind_syntax(stmt, <statement>, c.return_type);
   c.rebound(stmt, bound);
   return bound;
-}
-
-static List _bind_clause(Compiler c, Var expr) {
-  Symbol kind = _source_clause_kind(expr);
-  if (kind) return c.parse_source_clause(kind);
-  return _resolve(c, expr);
-}
-
-/* A macro invocation expands at the position that holds it. A Macro value
-   applied directly stands for one statement or unit item. Inside a
-   recovery boundary it owns the transaction that covers the effects its
-   producers request; outside one, an error exits and nothing rolls back. */
-static List _bind_invocation(
-  Compiler c, Var definition, Var arguments, Var invocation, Symbol context,
-  int pending) {
-  Token site = c.macro_invocation_site(invocation);
-  if (invocation != <m-invoke>)
-    return c.expand_macro_invocation_node(
-      definition, arguments, site, context);
-  with (c.macro_application = c.macro_application + 1) {
-    SymTxn transaction = { 0 };
-    if (c.recovery_depth > 0)
-      transaction = c.begin_semantic_transaction();
-    defer transaction.rollback();
-    List bound = c.expand_macro_invocation_node(
-      definition, arguments, site, context);
-    transaction.commit();
-    if (pending && (context == <block> || context == <statement> ||
-                    context == <unit>))
-      match (bound) case %(seq ?item): return item;
-    return bound;
-  }
-}
-
-/* An anchor keeps a lone bound item, and a macro's origin marker becomes
-   the compiler's current origin. */
-static List _anchor(Compiler c, Var origin, List bound) {
-  match (bound) case %(seq ?only): bound = only;
-  Var anchor = origin == <m-origin> ? c.origin : origin;
-  return %(at $anchor $bound);
 }
 
 /* An anchored block item is followed by the code placed after it. */
@@ -276,76 +324,6 @@ static List _bind_items(Compiler c, List items, Symbol context) {
   foreach (Var item in items)
     _push_items(bound, c.bind_syntax(item, context, c.return_type));
   return %(seq @(bound.list_free()));
-}
-
-static List _bind_args(Compiler c, List arguments) {
-  Array bound = [];
-  foreach (List argument in arguments) bound.push(_resolve(c, argument));
-  return %(args @(bound.list_free()));
-}
-
-static List _bind_assert(Compiler c, Var condition, Var message) =>
-  %(c-assert $(_resolve(c, condition)) $(_resolve(c, message)));
-
-// constructed statements
-
-/* A source `if`, `while`, `do`, `for`, `match`, or `try` binds here with a
-   Token Var into this table for each clause, which the binder parses when it
-   reaches it, so its scopes and optional-reference facts govern that parse.
-   Syntax from a template or a meta function cannot hold these addresses.
-   Each entry's type names its clause. */
-static struct Token source_clauses[] = {
-  { .type = <test> }, { .type = <then> }, { .type = <else> },
-  { .type = <body> }, { .type = <do> },   { .type = <init> },
-  { .type = <cond> }, { .type = <next> }, { .type = <arms> },
-  { .type = <arm> },  { .type = <try> },  { .type = <catches> },
-  { .type = <catch> }, { .type = <finally> }
-};
-
-/** The source clause `kind`, which the binder parses when it reaches it. */
-Var Compiler.source_clause(Symbol kind) {
-  Token clause = source_clauses;
-  while (clause.type != kind) clause++;
-  return Token.var(clause);
-}
-
-// Any value other than a table entry is constructed syntax, kind 0.
-static Symbol _source_clause_kind(Var value) {
-  if (value is not <token>) return 0;
-  Token clause = value;
-  Token end =
-    source_clauses + sizeof(source_clauses) / sizeof(*source_clauses);
-  return clause >= source_clauses && clause < end ? clause.type : 0;
-}
-
-/** Binds the source `if`, `while`, `do`, `for`, `match`, or `try` at the
-    cursor through the same binders as constructed syntax.
-*/
-List Compiler.bind_source_statement(Compiler c) {
-  Symbol keyword = c.peek(0);
-  c.next();
-  switch (keyword) {
-    case <if>:
-      return _bind_if_else(
-        c, Compiler.source_clause(<test>), Compiler.source_clause(<then>),
-        Compiler.source_clause(<else>));
-    case <while>:
-      return _bind_while(
-        c, Compiler.source_clause(<test>), Compiler.source_clause(<body>));
-    case <do>:
-      return _bind_do(
-        c, Compiler.source_clause(<do>), Compiler.source_clause(<test>));
-    case <match>:
-      return _bind_match(
-        c, Compiler.source_clause(<test>), Compiler.source_clause(<arms>));
-    case <try>:
-      return _bind_try(
-        c, Compiler.source_clause(<try>), Compiler.source_clause(<catches>),
-        Compiler.source_clause(<finally>));
-  }
-  return _bind_for(
-    c, Compiler.source_clause(<init>), Compiler.source_clause(<cond>),
-    Compiler.source_clause(<next>), Compiler.source_clause(<body>));
 }
 
 static List _bind_do(Compiler c, Var body, Var condition) {
@@ -403,20 +381,6 @@ static List _bind_for(
   return %(for $init $condition $increment $(_bind_statement(c, body)));
 }
 
-/* A header clause may be absent. The resolver binds a declaring
-   initializer as a block declaration. */
-static Var _bind_header(Compiler c, Var clause) {
-  Symbol kind = _source_clause_kind(clause);
-  if (kind) return c.parse_source_clause(kind);
-  return clause is <list> ? _resolve(c, clause) : clause;
-}
-
-static List _bind_raise(Compiler c, Var code, List details) {
-  Array bound = [];
-  foreach (List detail in details) bound.push(_resolve(c, detail));
-  return %(raise $(_resolve(c, code)) (args @(bound.list_free())));
-}
-
 /* Binds each catch arm's pattern names in a scope of its own. */
 static List _bind_catchcases(Compiler c, Var arms, List handler) {
   List handle = handler ? handler.car().list()
@@ -434,27 +398,199 @@ static List _bind_catchcases(Compiler c, Var arms, List handler) {
   return %(catchcases $(bound.list_free()) $handle);
 }
 
-/** Binds one catch arm's `body` in a scope of its own, with declarations of
-    the definite binders of `pattern`, read through `handle`, before it.
-    Binder diagnostics use `start`. A source arm's body parses here, and a
-    template's declares its binders where its expansion binds it. A parsed
-    arm's body already begins with them, so it binds unchanged.
-*/
-List Compiler.bind_catch_arm(
-  Compiler c, List pattern, Var body, Token start, List handle) {
+// Source clauses parse here, so body, arms, and finalizer go in token order.
+static List _bind_try(Compiler c, Var body, Var catches, Var cleanup) {
+  List bound = _bind_statement(c, body);
+  List arms = catches ? _bind_statement(c, catches) : NULL;
+  List finalizer = cleanup ? _bind_statement(c, cleanup) : NULL;
+  Macro tried = $tried, caught = $caught;
+  List statement = arms
+    ? caught(bound, finalizer, arms.cadr()) : tried(bound, finalizer);
+  List rebuilt = c.rebuild_statement(statement).cadr();
+  return arms ? _retain_catch_handle(rebuilt, arms.caddr()) : rebuilt;
+}
+
+/* Binds each `match` arm's captures in a scope of its own. A source
+   subject parses before the arms, and source arms parse as they bind. */
+static List _bind_match(Compiler c, Var subject, Var cases) {
+  Symbol kind = _source_clause_kind(subject);
+  if (kind) subject = c.parse_source_clause(kind);
+  kind = _source_clause_kind(cases);
+  List rows = kind ? c.parse_source_clause(kind) : _bind_rows(c, cases);
+  return %(match $(_resolve(c, subject)) $rows);
+}
+
+static List _bind_rows(Compiler c, List cases) {
+  Array bound = [];
+  foreach (Var value in cases)
+    foreach (List row in c.evaluate_macro_rows(value)) {
+      if (row.car() == <preproc>) {
+        bound.push(row);
+        continue;
+      }
+      List pattern = row.car();
+      int binds = pattern !== %(*);
+      if (binds) pattern = _resolve(c, pattern);
+      bound.push(c.bind_match_arm(pattern, row.cadr(), c.token, binds, NULL));
+    }
+  return bound.list_free();
+}
+
+static List _bind_arm_body(Compiler c, Var body, List types) {
+  if (_source_clause_kind(body)) return c.parse_case_body(types);
+  match (body) case %(guarded ?statements):
+    return %(guarded $(_bind_statement(c, statements)));
+  return _bind_statement(c, body);
+}
+
+/* A constructed block opens its own scope; a callable's outer block binds
+   in its parameter scope instead. */
+static List _bind_block(Compiler c, List block) {
   c.sym.push_new_scope();
   defer c.sym.pop_scope();
-  List bindings = NULL;
-  if (pattern) {
-    _check_binders(c, pattern, start, "catch");
-    bindings = c.define_pattern_binders(pattern);
-  }
-  List statement = _bind_statement(c, body);
-  if (_declares_binders(body, bindings))
-    return $(pattern, statement);
-  return %($pattern (block
-    @(c.pattern_binder_declarations(bindings, handle)) $statement));
+  return c.bind_callable_body(block, c.return_type);
 }
+
+static List _bind_group(Compiler c, List children) {
+  Array items = [];
+  foreach (Var child in children)
+    items.push(c.bind_syntax(child, <block>, c.return_type));
+  return %(group @(items.list_free()));
+}
+
+/* Pushes the items of a `seq`, or any other node itself. */
+module void _push_items(Array out, List node) {
+  if (node.car() == <seq>)
+    foreach (List item in node.cdr()) out.push(item);
+  else out.push(node);
+}
+
+/* Replaces `syntax` with a staged code value and reports whether that
+   value is a retained result, which binds no further. */
+static int _take_staged(Compiler c, Var &syntax) {
+  Var staged;
+  int retained;
+  if (!c.macro_application || !c.take_code_value(syntax, staged, retained))
+    return 0;
+  syntax = staged;
+  return retained;
+}
+
+/* Publishes a name, a declarator, or an initialized one at an enumerator
+   position as an enumerator of the aggregate being bound. Other forms go
+   to the dispatcher, so this returns NULL for them. */
+static List _bind_enumerator(Compiler c, List input) {
+  match (input) {
+    case %(!or
+           (binding ? (!is ? type string))
+           ((!is ? type string))
+           ("x2c.ident" (!is ? type string))):
+      return _publish_enumerator(c, input, c.aggregate_type, c.token);
+    case %(!set ?node
+           (bind ? ?)):
+      return _publish_enumerator(c, node, c.aggregate_type, c.token);
+    case %(!set ?node
+           (op =
+             (!or
+               (binding ? (!is ? type string))
+               ((!is ? type string))
+               ("x2c.ident" (!is ? type string))
+               (bind ? ?))
+             ?)):
+      return _publish_enumerator(c, node, c.aggregate_type, c.token);
+  }
+  return NULL;
+}
+
+/* Reports a constructed form at a position that does not admit it.
+   `report_error` never returns, so a caller may return this call. */
+module List _construction_error(Compiler c) {
+  $fail.parse_syntax_position(c, c.token);
+}
+
+/* A meta call written as a whole statement may return a statement. */
+static List _bind_expression_statement(
+  Compiler c, List expression, Symbol context) {
+  if ((expression ~= %(expr ? (meta-call *))) &&
+      !c.meta_body && !c.macro_holes)
+    return c.evaluate_meta_statement(expression, context, c.token);
+  return %(stmnt $(_resolve(c, expression)));
+}
+
+static List _bind_clause(Compiler c, Var expr) {
+  Symbol kind = _source_clause_kind(expr);
+  if (kind) return c.parse_source_clause(kind);
+  return _resolve(c, expr);
+}
+
+/* A macro invocation expands at the position that holds it. A Macro value
+   applied directly stands for one statement or unit item. Inside a
+   recovery boundary it owns the transaction that covers the effects its
+   producers request; outside one, an error exits and nothing rolls back. */
+static List _bind_invocation(
+  Compiler c, Var definition, Var arguments, Var invocation, Symbol context,
+  int pending) {
+  Token site = c.macro_invocation_site(invocation);
+  if (invocation != <m-invoke>)
+    return c.expand_macro_invocation_node(
+      definition, arguments, site, context);
+  with (c.macro_application = c.macro_application + 1) {
+    SymTxn transaction = { 0 };
+    if (c.recovery_depth > 0)
+      transaction = c.begin_semantic_transaction();
+    defer transaction.rollback();
+    List bound = c.expand_macro_invocation_node(
+      definition, arguments, site, context);
+    transaction.commit();
+    if (pending && (context == <block> || context == <statement> ||
+                    context == <unit>))
+      match (bound) case %(seq ?item): return item;
+    return bound;
+  }
+}
+
+/* An anchor keeps a lone bound item, and a macro's origin marker becomes
+   the compiler's current origin. */
+static List _anchor(Compiler c, Var origin, List bound) {
+  match (bound) case %(seq ?only): bound = only;
+  Var anchor = origin == <m-origin> ? c.origin : origin;
+  return %(at $anchor $bound);
+}
+
+static List _bind_args(Compiler c, List arguments) {
+  Array bound = [];
+  foreach (List argument in arguments) bound.push(_resolve(c, argument));
+  return %(args @(bound.list_free()));
+}
+
+static List _bind_assert(Compiler c, Var condition, Var message) =>
+  %(c-assert $(_resolve(c, condition)) $(_resolve(c, message)));
+
+/* A header clause may be absent. The resolver binds a declaring
+   initializer as a block declaration. */
+static Var _bind_header(Compiler c, Var clause) {
+  Symbol kind = _source_clause_kind(clause);
+  if (kind) return c.parse_source_clause(kind);
+  return clause is <list> ? _resolve(c, clause) : clause;
+}
+
+// Any value other than a table entry is constructed syntax, kind 0.
+static Symbol _source_clause_kind(Var value) {
+  if (value is not <token>) return 0;
+  Token clause = value;
+  Token end =
+    source_clauses + sizeof(source_clauses) / sizeof(*source_clauses);
+  return clause >= source_clauses && clause < end ? clause.type : 0;
+}
+
+static List _bind_raise(Compiler c, Var code, List details) {
+  Array bound = [];
+  foreach (List detail in details) bound.push(_resolve(c, detail));
+  return %(raise $(_resolve(c, code)) (args @(bound.list_free())));
+}
+
+module List _resolve(Compiler c, List expr) =>
+  c.resolve_expression(expr, c.token);
 
 /* Rejects the two ways a match or catch pattern can name a binder it does
    not reliably bind. `role` is the keyword the diagnostics name. */
@@ -500,138 +636,4 @@ static int _declares_binders(List body, List bindings) {
 static List _retain_catch_handle(List rebuilt, List handle) {
   Var marker = rebuilt.caddr().caddr();
   return rebuilt.search_replace(%(!quote $marker), handle);
-}
-
-// Source clauses parse here, so body, arms, and finalizer go in token order.
-static List _bind_try(Compiler c, Var body, Var catches, Var cleanup) {
-  List bound = _bind_statement(c, body);
-  List arms = catches ? _bind_statement(c, catches) : NULL;
-  List finalizer = cleanup ? _bind_statement(c, cleanup) : NULL;
-  Macro tried = $tried, caught = $caught;
-  List statement = arms
-    ? caught(bound, finalizer, arms.cadr()) : tried(bound, finalizer);
-  List rebuilt = c.rebuild_statement(statement).cadr();
-  return arms ? _retain_catch_handle(rebuilt, arms.caddr()) : rebuilt;
-}
-
-/* Binds each `match` arm's captures in a scope of its own. A source
-   subject parses before the arms, and source arms parse as they bind. */
-static List _bind_match(Compiler c, Var subject, Var cases) {
-  Symbol kind = _source_clause_kind(subject);
-  if (kind) subject = c.parse_source_clause(kind);
-  kind = _source_clause_kind(cases);
-  List rows = kind ? c.parse_source_clause(kind) : _bind_rows(c, cases);
-  return %(match $(_resolve(c, subject)) $rows);
-}
-
-static List _bind_rows(Compiler c, List cases) {
-  Array bound = [];
-  foreach (Var value in cases)
-    foreach (List row in c.evaluate_macro_rows(value)) {
-      if (row.car() == <preproc>) {
-        bound.push(row);
-        continue;
-      }
-      List pattern = row.car();
-      int binds = pattern !== %(*);
-      if (binds) pattern = _resolve(c, pattern);
-      bound.push(c.bind_match_arm(pattern, row.cadr(), c.token, binds, NULL));
-    }
-  return bound.list_free();
-}
-
-/** Binds one match arm's `body` in a scope of its own, which defines the
-    definite binders of `pattern` when the arm `binds`. Binder diagnostics
-    use `start`. A source arm's body parses here with the typed captures
-    `types` that its pattern recorded.
-*/
-List Compiler.bind_match_arm(
-  Compiler c, List pattern, Var body, Token start, int binds, List types) {
-  c.sym.push_new_scope();
-  defer c.sym.pop_scope();
-  List bindings = NULL;
-  if (binds) {
-    _check_binders(c, pattern, start, "match");
-    bindings = c.define_pattern_binders(pattern);
-  }
-  List statement = _bind_arm_body(c, body, types);
-  if (!bindings || _declares_binders(body, bindings))
-    return $(pattern, statement);
-  List declarations = c.pattern_binder_declarations(bindings, NULL);
-  match (statement)
-    case %(guarded ?inner):
-      return %($pattern (guarded (block @declarations $inner)));
-  return %($pattern (block @declarations $statement));
-}
-
-static List _bind_arm_body(Compiler c, Var body, List types) {
-  if (_source_clause_kind(body)) return c.parse_case_body(types);
-  match (body) case %(guarded ?statements):
-    return %(guarded $(_bind_statement(c, statements)));
-  return _bind_statement(c, body);
-}
-
-/* A constructed block opens its own scope; a callable's outer block binds
-   in its parameter scope instead. */
-static List _bind_block(Compiler c, List block) {
-  c.sym.push_new_scope();
-  defer c.sym.pop_scope();
-  return c.bind_callable_body(block, c.return_type);
-}
-
-static List _bind_group(Compiler c, List children) {
-  Array items = [];
-  foreach (Var child in children)
-    items.push(c.bind_syntax(child, <block>, c.return_type));
-  return %(group @(items.list_free()));
-}
-
-/** Binds a callable's outer block in its active parameter scope. Ordinary
-    constructed blocks open their own scope before using this operation.
-*/
-List Compiler.bind_callable_body(Compiler c, List syntax, Type return_type) {
-  match (syntax) {
-    case %(at ?origin ?body):
-      return _anchor(c, origin, c.bind_callable_body(body, return_type));
-    case %(block *children): {
-      Array stmts = [];
-      List present_before = c.present_references();
-      defer c.restore_reference_presence(present_before);
-      foreach (Var child in children)
-        _push_items(stmts, c.bind_syntax(child, <block>, return_type));
-      return %(block @(stmts.list_free()));
-    }
-  }
-  return c.bind_syntax(syntax, <block>, return_type);
-}
-
-/** Binds a pattern condition without publishing its captures to the caller.
-    Its declarations belong to the successful path; visible rows retain the
-    identities that `&&` and `if` expose in their own scopes.
-*/
-List Compiler.bind_match_condition(
-  Compiler c, List subject, List pattern, List types, Token origin) {
-  subject = _resolve(c, subject);
-  pattern = _resolve(c, pattern);
-  if (c.macro_holes)
-    return %(expr (<macro-expr>) (matches $subject $pattern $types));
-  c.sym.push_new_scope();
-  defer c.sym.pop_scope();
-  _check_binders(c, pattern, origin, "match");
-  List bindings = c.define_pattern_binders(pattern);
-  List declarations = c.pattern_binder_declarations(bindings, NULL);
-  List temporaries = NULL, native = NULL;
-  if (types) native = c.typed_capture_declarations(types, temporaries);
-  Array visible = [];
-  foreach (List row in bindings) {
-    String name = row.car().str()[1:];
-    List key = $(name);
-    List binding = c.sym.current_binding(key);
-    visible.push($(binding ? binding : row.cadr(), c.sym.get(key)));
-  }
-  if (types) c.sym.pop_scope();
-  List body = types ? %(block @declarations @temporaries (block @native))
-                    : %(block @declarations);
-  return %(expr (int)
-    (matches $subject $pattern $body $(visible.list_free())));
 }

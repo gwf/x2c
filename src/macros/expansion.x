@@ -40,6 +40,21 @@ List Compiler.expand_macro_invocation_node(
   }
 }
 
+/** Resolves a stored macro invocation marker to its source token.
+    Nested template markers use the active expansion's invocation; unresolved
+    markers return NULL.
+*/
+Token Compiler.macro_invocation_site(Compiler c, Var site) {
+  if (site is <token>) return site;
+  if (site != <m-invoke> || !c.macro_stack) return NULL;
+  List active = c.macro_stack.car();
+  (Var definition, Var input, Var bindings, Token invocation) = active;
+  (void) definition, (void) input, (void) bindings;
+  return invocation;
+}
+
+// macro expansion and hygienic names
+
 /* The definition a node names: a visible macro, a local macro, or a Macro
    value whose references bind in this unit. */
 module List _stored_definition(Compiler c, Var stored, Token invocation) {
@@ -227,19 +242,6 @@ static Ast _construct(Expansion &x, List bindings) {
   return constructed;
 }
 
-/** Resolves a stored macro invocation marker to its source token.
-    Nested template markers use the active expansion's invocation; unresolved
-    markers return NULL.
-*/
-Token Compiler.macro_invocation_site(Compiler c, Var site) {
-  if (site is <token>) return site;
-  if (site != <m-invoke> || !c.macro_stack) return NULL;
-  List active = c.macro_stack.car();
-  (Var definition, Var input, Var bindings, Token invocation) = active;
-  (void) definition, (void) input, (void) bindings;
-  return invocation;
-}
-
 /* expansion names
 
    A fresh name gets a private spelling. At file scope a declaration with
@@ -247,17 +249,19 @@ Token Compiler.macro_invocation_site(Compiler c, Var site) {
    interface, so its spelling is stable: collection and full parsing expand
    the same invocation to the same spelling. */
 
-static List _introduced_binding(Compiler c, String source, Token root) =>
-  c.sym.introduce(
-    root ? _file_scope_name(c, root, source)
-         : c.fresh_name(%"macro_$source"));
-
 /* A template local's name, which keeps its source spelling. */
 module List _private_name(Compiler c, String source, Token root) {
   List binding = _introduced_binding(c, source, root);
   c.set_fact(%(source-spelling $binding), source);
   return binding;
 }
+
+
+
+static List _introduced_binding(Compiler c, String source, Token root) =>
+  c.sym.introduce(
+    root ? _file_scope_name(c, root, source)
+         : c.fresh_name(%"macro_$source"));
 
 /* The spelling names the owning unit and the root invocation's offset, and
    counts repeats of the same name there. */

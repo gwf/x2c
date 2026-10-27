@@ -44,6 +44,8 @@ Map Compiler.select_declaration_defaults(
   return additions;
 }
 
+// declaration defaults
+
 /* The shadow binds over the file's collected symbols in an overlay,
    without parsing, with the unit's bindings and meta group. */
 static void _prepare_shadow(
@@ -166,13 +168,6 @@ static int _taken(Defaults &d, String spelling) {
   return 1;
 }
 
-static List _bind_default(Compiler c, List syntax) {
-  if (c.source_private && syntax ~= %(function ?type ?declarator ?body) &&
-      !type.type().is_static())
-    syntax = %(function (static @type) $declarator $body);
-  return c.bind_syntax(syntax, <unit>, NULL);
-}
-
 /* Forwarded constructors bind as their parents' constructors complete; a
    round that completes none leaves a parent that never will. */
 static void _forward(Defaults &d) {
@@ -235,6 +230,13 @@ static List _forwarded(
   }
   if (!signature) return NULL;
   return _bind_default(c, _forwarder(c, name, child, binding, signature));
+}
+
+static List _bind_default(Compiler c, List syntax) {
+  if (c.source_private && syntax ~= %(function ?type ?declarator ?body) &&
+      !type.type().is_static())
+    syntax = %(function (static @type) $declarator $body);
+  return c.bind_syntax(syntax, <unit>, NULL);
 }
 
 /* The forwarding constructor passes each argument on and casts the result.

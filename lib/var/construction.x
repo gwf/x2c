@@ -44,15 +44,52 @@ Var Var.new(Symbol tag, ...) {
   return v;
 }
 
-/* An address shares its low bits with the row selector, so the bits under
-   `mask` must be clear. Raising from `_misaligned` keeps this test small
-   enough for clang to inline at both callers. */
-static inline void _require_aligned(Symbol tag, void *address, unsigned mask) {
-  if ((uintptr_t) address & mask) _misaligned(tag);
-}
+/** Parses `str` as source text of kind `kind` and returns the boxed value.
+    The kinds understood are `<int>`, `<float>`, `<double>`, `<string>`,
+    `<symbol>`, and `<char>`. For `<string>`, matching `%"..."` or `"..."`
+    delimiters are removed; unquoted input is also accepted, and either form
+    is unescaped. `<char>` expects `'a'` complete with its quotes and produces
+    an `<i32>`. Both `<float>` and `<double>` produce an `<f64>`; there is no
+    path here to `<f32>`.
 
-static void _misaligned(Symbol tag) {
-  raise %(bad-enc (operation "Var.new") (target $tag));
+    Integer and floating kinds require the whole input to parse, apart from
+    surrounding whitespace. Malformed input, trailing text, a value outside
+    the native reader's range, or an `<int>` outside `int` range returns
+    `void`, so a parsed numeric zero remains distinguishable from failure.
+
+    `<symbol>` accepts the leading atom or `<...>` `Symbol` literal and ignores
+    trailing text; no recognized leading `Symbol` produces the zero `Symbol`. A
+    kind this function does not handle returns `void`, and a bad character
+    literal gives `<i32>` -1.
+
+    ```x2c
+    ~Var count = Var.parse("42", <int>);
+    ~Var broken = Var.parse("abc", <int>);
+    ~Var refused = Var.parse("3", <u8>);
+    printf("%s=%s %s=%s refused=%d\n", count.tag().str(), count,
+           broken.tag().str(), broken, refused is void);
+    ```
+    Raises: `<alloc-fail>` while constructing `String` or quoted-`Symbol`
+    output.
+*/
+meta native Var Var.parse(String str, Symbol kind) {
+  switch (kind) {
+    case <int>: {
+      long value;
+      if (!str.try_long(value) || value < INT_MIN || value > INT_MAX)
+        return void;
+      return (int) value;
+    }
+    case <float>: case <double>: {
+      double value;
+      if (!str.try_double(value)) return void;
+      return value;
+    }
+    case <string>:    return str.parse();
+    case <symbol>:    return Symbol.parse(str);
+    case <char>:      return str.parse_char();
+    default:          return void;
+  }
 }
 
 /* The row's kind names the C type of the one variadic payload. */
@@ -87,6 +124,17 @@ static Var _new_pointer(TagId id, void *ptr) {
   v.u64 |= top << 48;
   v.u64 |= x2c_var_taginfo[id].bottom;
   return v;
+}
+
+/* An address shares its low bits with the row selector, so the bits under
+   `mask` must be clear. Raising from `_misaligned` keeps this test small
+   enough for clang to inline at both callers. */
+static inline void _require_aligned(Symbol tag, void *address, unsigned mask) {
+  if ((uintptr_t) address & mask) _misaligned(tag);
+}
+
+static void _misaligned(Symbol tag) {
+  raise %(bad-enc (operation "Var.new") (target $tag));
 }
 
 /* `<f32>` arrives promoted to `double`. */
@@ -172,52 +220,4 @@ static Var _new_symbol(unsigned long u) {
   if (u >= (1ul << 51))
     raise %(conv-range (operation "Var.new") (target symbol));
   return (Var) { .u64 = u + VAR_SYMBOL_OFFSET };
-}
-
-/** Parses `str` as source text of kind `kind` and returns the boxed value.
-    The kinds understood are `<int>`, `<float>`, `<double>`, `<string>`,
-    `<symbol>`, and `<char>`. For `<string>`, matching `%"..."` or `"..."`
-    delimiters are removed; unquoted input is also accepted, and either form
-    is unescaped. `<char>` expects `'a'` complete with its quotes and produces
-    an `<i32>`. Both `<float>` and `<double>` produce an `<f64>`; there is no
-    path here to `<f32>`.
-
-    Integer and floating kinds require the whole input to parse, apart from
-    surrounding whitespace. Malformed input, trailing text, a value outside
-    the native reader's range, or an `<int>` outside `int` range returns
-    `void`, so a parsed numeric zero remains distinguishable from failure.
-
-    `<symbol>` accepts the leading atom or `<...>` `Symbol` literal and ignores
-    trailing text; no recognized leading `Symbol` produces the zero `Symbol`. A
-    kind this function does not handle returns `void`, and a bad character
-    literal gives `<i32>` -1.
-
-    ```x2c
-    ~Var count = Var.parse("42", <int>);
-    ~Var broken = Var.parse("abc", <int>);
-    ~Var refused = Var.parse("3", <u8>);
-    printf("%s=%s %s=%s refused=%d\n", count.tag().str(), count,
-           broken.tag().str(), broken, refused is void);
-    ```
-    Raises: `<alloc-fail>` while constructing `String` or quoted-`Symbol`
-    output.
-*/
-meta native Var Var.parse(String str, Symbol kind) {
-  switch (kind) {
-    case <int>: {
-      long value;
-      if (!str.try_long(value) || value < INT_MIN || value > INT_MAX)
-        return void;
-      return (int) value;
-    }
-    case <float>: case <double>: {
-      double value;
-      if (!str.try_double(value)) return void;
-      return value;
-    }
-    case <string>:    return str.parse();
-    case <symbol>:    return Symbol.parse(str);
-    case <char>:      return str.parse_char();
-    default:          return void;
-  }
 }

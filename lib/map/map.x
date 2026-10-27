@@ -81,12 +81,6 @@ $map.core.family(
   _record_key, _record_value,
   _reinsert_error, _insert_error);
 
-static int _capacity_valid(unsigned n) => n >= 2 && !(n & (n - 1));
-
-static void _bad_arg(String owner) {
-  (void) owner;
-  raise %(bad-arg);
-}
 $map.typed.operations(Map, Var, Var, _bad_arg, _capacity_valid, void, 0, 1);
 Var Map.updateindex(Map, Var, Symbol, Var);
 Var Map.postfixindex(Map, Var, Symbol);
@@ -97,6 +91,13 @@ meta native Var Map.setdefault(Map, Var, Var);
 meta native void Map.set(Map, Var, Var);
 meta native Self Map.copy(Self);
 meta native Self Map.merge(Self, Self);
+
+$map.core.observe(Map, Var, Var, struct MapRecord,
+  _box_var, _box_var, _compare_var, _compare_var);
+$map.typed.observation(Map);
+$map.typed.iterate(Map, Var, Var, map, _box_var, _box_var);
+meta native Iter Map.keys(Map, Iter);
+meta native Iter Map.enumerate(Map, Iter);
 
 /** Merges `other` into `map`, combines colliding values, and returns `map`.
     The borrowed synchronous `combine` receives the destination value first
@@ -249,18 +250,19 @@ void Map.export_to(
   map.entries.block().move_to(&owner);
 }
 
-static Var _box_var(Var value) => value;
-
-static int _compare_var(Var a, Var b) => a.compare(b);
-$map.core.observe(Map, Var, Var, struct MapRecord,
-  _box_var, _box_var, _compare_var, _compare_var);
-$map.typed.observation(Map);
-$map.typed.iterate(Map, Var, Var, map, _box_var, _box_var);
-meta native Iter Map.keys(Map, Iter);
-meta native Iter Map.enumerate(Map, Iter);
-
 /** Destroys owned contents and frees the Map's record and backing Blocks.
     Referenced keys and values with independent owners remain unchanged.
     NULL does nothing. Every alias becomes invalid after destruction.
 */
 meta native void Map.cleanup(Map value) { value.free_table(); }
+
+static int _capacity_valid(unsigned n) => n >= 2 && !(n & (n - 1));
+
+static void _bad_arg(String owner) {
+  (void) owner;
+  raise %(bad-arg);
+}
+
+static Var _box_var(Var value) => value;
+
+static int _compare_var(Var a, Var b) => a.compare(b);

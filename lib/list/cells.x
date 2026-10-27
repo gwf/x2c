@@ -8,6 +8,12 @@
 */
 List List.new(List @items) => items;
 
+/** Method form of `cons`, with the same identity, lifetime, and failures. */
+List List.cons(Var head, List tail) => cons(head, tail);
+
+/** Returns `cons(head, tail)`, with the same identity and failures. */
+List Var.cons(Var head, List tail)  => cons(head, tail);
+
 /** Returns the canonical cons cell for `head` and `tail`.
     Repeating the call with the same head bits and canonical tail returns the
     same cell from the active pool chain. An ancestor hit remains owned there;
@@ -21,12 +27,6 @@ List cons(Var head, List tail) {
   if (head is void) raise %(void-op (operation "List.cons"));
   return List.cons_in(Pool.current(), head, tail);
 }
-
-/** Method form of `cons`, with the same identity, lifetime, and failures. */
-List List.cons(Var head, List tail) => cons(head, tail);
-
-/** Returns `cons(head, tail)`, with the same identity and failures. */
-List Var.cons(Var head, List tail)  => cons(head, tail);
 
 // identity
 
@@ -48,20 +48,6 @@ meta native unsigned List.hash(List lst) {
   return result ? result : -1;
 }
 
-/** Reports equality of canonical chains by exact head and tail identity.
-    It matches `List.hash`, so the same elements decide it: content for a
-    small number, `Symbol`, `Atom`, canonical `String`, or nested `List`, and
-    identity for a wide number boxed in a `Scope`, an `Array`, or a `Map`.
-    Two `List`s built from one `long` value hold two boxes and are unequal,
-    while `List.compare` reads the values and calls them equal. Use
-    `List.compare` where content has to decide.
-*/
-int List.equal(List a, List b) {
-  if ((void *) a == (void *) b) return 1;
-  if (!a || !b) return 0;
-  return a.car.same(b.car) && a.cdr == b.cdr;
-}
-
 /** Compares `a` and `b` lexicographically through `Var.compare`.
     Element comparison causes propagate.
 */
@@ -75,6 +61,20 @@ meta native int List.compare(List a, List b) {
   }
   if (a == b) return 0;
   return a ? 1 : -1;
+}
+
+/** Reports equality of canonical chains by exact head and tail identity.
+    It matches `List.hash`, so the same elements decide it: content for a
+    small number, `Symbol`, `Atom`, canonical `String`, or nested `List`, and
+    identity for a wide number boxed in a `Scope`, an `Array`, or a `Map`.
+    Two `List`s built from one `long` value hold two boxes and are unequal,
+    while `List.compare` reads the values and calls them equal. Use
+    `List.compare` where content has to decide.
+*/
+int List.equal(List a, List b) {
+  if ((void *) a == (void *) b) return 1;
+  if (!a || !b) return 0;
+  return a.car.same(b.car) && a.cdr == b.cdr;
 }
 
 // promotion
@@ -101,6 +101,17 @@ meta native Self List.promote(Self lst) {
   return lst;
 }
 
+/** Proves `lst` and its canonical children safe beyond every active pool.
+    Returns 1 when the complete value is `nil`, already permanent, or can be
+    promoted to the outermost `List` and `String` pools. Returns 0 when an
+    active pool does not own part of the value. A zero result may follow
+    successful promotion of an earlier cell or child. A thread that loses a
+    concurrent promotion of an equal value still gets 1, though
+    `Pool.is_permanent` answers 0 for its surviving copy.
+    Raises: `<alloc-fail>` when promotion metadata cannot be allocated.
+*/
+int List.try_own(List lst) => !lst || _try_own_node(lst);
+
 /* String cars and long Atom payloads promote through the String pool chain.
    List.cons_in callers can create cross-pool graphs, which this walk does
    not follow, and must preserve those borrowed lifetimes themselves. */
@@ -113,17 +124,6 @@ static void _promote_node(Var node) {
     _promote_node(cur.car);
   }
 }
-
-/** Proves `lst` and its canonical children safe beyond every active pool.
-    Returns 1 when the complete value is `nil`, already permanent, or can be
-    promoted to the outermost `List` and `String` pools. Returns 0 when an
-    active pool does not own part of the value. A zero result may follow
-    successful promotion of an earlier cell or child. A thread that loses a
-    concurrent promotion of an equal value still gets 1, though
-    `Pool.is_permanent` answers 0 for its surviving copy.
-    Raises: `<alloc-fail>` when promotion metadata cannot be allocated.
-*/
-int List.try_own(List lst) => !lst || _try_own_node(lst);
 
 static int _try_own_node(Var node) {
   if (node is <string>) return node.string().try_own();

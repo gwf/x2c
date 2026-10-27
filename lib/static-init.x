@@ -28,26 +28,6 @@ static pthread_mutex_t static_mutex =
 static pthread_cond_t static_changed =
   (pthread_cond_t) PTHREAD_COND_INITIALIZER;
 
-static void _native_error(int error) {
-  if (!error) return;
-  fprintf(
-    stderr, "static initialization: synchronization failed (%d)\n", error);
-  abort();
-}
-
-static void _lock(void) => _native_error(pthread_mutex_lock(&static_mutex));
-static void _unlock(void) =>
-  _native_error(pthread_mutex_unlock(&static_mutex));
-
-static int _cycle(X2CStatic *guard, StaticThread *self) {
-  StaticThread *owner = guard.owner;
-  while (owner) {
-    if (owner == self) return 1;
-    owner = owner.waiting ? owner.waiting.owner : NULL;
-  }
-  return 0;
-}
-
 /* Acquires initialization of a compiler-owned guard whose state starts zero.
     An owner may supply aligned `payload` bytes, keeping both bytes and guard
     alive until all calls finish. Borrowed bytes never join a shutdown chain.
@@ -124,6 +104,37 @@ void x2c_static_abort(void *data) {
   _unlock();
 }
 
+/* Releases this worker's reserved dynamic `threaded` storage. */
+void x2c_static_thread_release(void) {
+  _release(static_thread.values);
+}
+
+/* Releases reserved process storage after the runtime shutdown hooks. */
+void x2c_static_shutdown(void) {
+  _release(static_values);
+}
+
+static void _lock(void) => _native_error(pthread_mutex_lock(&static_mutex));
+
+static void _unlock(void) =>
+  _native_error(pthread_mutex_unlock(&static_mutex));
+
+static void _native_error(int error) {
+  if (!error) return;
+  fprintf(
+    stderr, "static initialization: synchronization failed (%d)\n", error);
+  abort();
+}
+
+static int _cycle(X2CStatic *guard, StaticThread *self) {
+  StaticThread *owner = guard.owner;
+  while (owner) {
+    if (owner == self) return 1;
+    owner = owner.waiting ? owner.waiting.owner : NULL;
+  }
+  return 0;
+}
+
 static void _release(X2CStatic *&values) {
   while (values) {
     X2CStatic *guard = values;
@@ -133,14 +144,4 @@ static void _release(X2CStatic *&values) {
     guard.next = NULL;
     __atomic_store_n(&guard.ready, 0, __ATOMIC_RELEASE);
   }
-}
-
-/* Releases this worker's reserved dynamic `threaded` storage. */
-void x2c_static_thread_release(void) {
-  _release(static_thread.values);
-}
-
-/* Releases reserved process storage after the runtime shutdown hooks. */
-void x2c_static_shutdown(void) {
-  _release(static_values);
 }

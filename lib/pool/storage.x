@@ -92,6 +92,99 @@ void *Pool.malloc(Pool inner, size_t size) {
   return Scope.malloc_in(&inner.scope, size);
 }
 
+/** Releases a losing or transient allocation from `inner`'s pool chain.
+    Region slots become immediately reusable; large allocations use
+    `Scope.free`. A canonical allocation still present in a table must not be
+    freed this way. A null allocation does nothing.
+    Raises: `<bad-arg>` when `inner` is NULL and `alloc` is not.
+*/
+void Pool.free(Pool inner, void *alloc) {
+  if (!alloc) return;
+  if (!inner) raise %(bad-arg (operation "Pool.free"));
+  _storage_lock();
+  defer _storage_unlock();
+  _lock(inner);
+  defer _unlock(inner);
+  PoolBlock block = _find_block(alloc);
+  pool_free_calls++;
+  if (block) _free_slot(block, alloc);
+  else xfree(alloc);
+}
+
+/* promotion
+
+   A promoted identity keeps its address: its slot is kept, and release
+   moves every block with a kept slot to the parent. A slot whose block
+   still belongs to a deeper level is recorded as a PoolPromotion, which
+   keeps it again when the promoting level is released. */
+
+/** Publishes an identity owned by `inner` in its parent.
+    `alloc` survives `inner`'s release without changing its address. When the
+    parent already holds an equal identity, that one stays canonical and
+    `object` only survives. Returns zero for a missing owner, root pool, or
+    null allocation.
+    Raises: `<alloc-fail>`, `<size-limit>`, or `<invariant>` while recording
+    the promotion; that transfer may happen before storage is marked or moved.
+*/
+int Pool.promote(Pool inner, Var object, void *alloc) {
+  if (!inner || !inner.up || !alloc) return 0;
+  return _promote_level(inner, object, alloc, _block_of(alloc));
+}
+
+/** Proves `object` safe beyond every pool in `inner`'s chain.
+    It is promoted to the outermost pool when a pool in the chain owns it.
+    `alloc` is the object's `Pool`-owned allocation. Returns one when the
+    value is already outermost or reaches it, and zero when no pool in the
+    chain owns it or a promotion fails. A null `inner` reports safe, since no
+    pool can then reclaim the value. Promotion is not transactional across
+    levels: an earlier level remains promoted if a later promotion transfers.
+    A thread that loses a concurrent promotion of an equal value still gets
+    one, though `Pool.is_permanent` answers zero for its surviving copy.
+
+    Raises: `<alloc-fail>` when promotion metadata cannot be allocated.
+*/
+int Pool.own(Pool inner, Var object, void *alloc) {
+  if (!inner) return 1;
+  Pool owner = inner;
+  while (owner && !owner.owns(object)) owner = owner.up;
+  if (!owner) return 0;
+  if (!owner.up) return 1;
+  if (!alloc) return 0;
+  PoolBlock block = _block_of(alloc);
+  while (owner.up) {
+    if (!_promote_level(owner, object, alloc, block)) return 0;
+    owner = owner.up;
+  }
+  return 1;
+}
+
+// statistics
+
+/** Returns this level's canonical counts plus process-wide storage counters.
+    A null pool reports depth and per-level counts as zero. The counters are a
+    snapshot; nothing in the result stays live with the pool.
+*/
+PoolStats Pool.stats(Pool inner) {
+  _storage_lock();
+  defer _storage_unlock();
+  _lock(inner);
+  defer _unlock(inner);
+  PoolStats stats = {
+    .allocation_calls = pool_allocation_calls,
+    .free_calls = pool_free_calls, .requested_bytes = pool_requested_bytes,
+    .block_allocations = pool_block_allocations,
+    .block_reuses = pool_block_reuses, .slot_reuses = pool_slot_reuses,
+    .backing_bytes = pool_backing_bytes,
+    .active_blocks = pool_active_blocks, .active_bytes = pool_active_bytes,
+    .depot_blocks = pool_depot_blocks, .depot_bytes = pool_depot_bytes};
+  for (Pool pool = inner; pool; pool = pool.up) stats.depth++;
+  if (inner) {
+    stats.interned = inner.interned;
+    stats.promoted = inner.promoted;
+  }
+  return stats;
+}
+
 /* Takes a slot from the class's current block, leasing another block when
    that one is full. When the depot has no block to lease, a fresh one is
    allocated with no lock held and offered to the next attempt. */
@@ -158,37 +251,6 @@ static PoolBlock _fresh_block(Pool inner, int class_index) {
   _fatal("backing block allocation failed");
 }
 
-/** Releases a losing or transient allocation from `inner`'s pool chain.
-    Region slots become immediately reusable; large allocations use
-    `Scope.free`. A canonical allocation still present in a table must not be
-    freed this way. A null allocation does nothing.
-    Raises: `<bad-arg>` when `inner` is NULL and `alloc` is not.
-*/
-void Pool.free(Pool inner, void *alloc) {
-  if (!alloc) return;
-  if (!inner) raise %(bad-arg (operation "Pool.free"));
-  _storage_lock();
-  defer _storage_unlock();
-  _lock(inner);
-  defer _unlock(inner);
-  PoolBlock block = _find_block(alloc);
-  pool_free_calls++;
-  if (block) _free_slot(block, alloc);
-  else xfree(alloc);
-}
-
-/* The freed slot is reused first, from a block that becomes its class's
-   current one. */
-static void _free_slot(PoolBlock block, void *ptr) {
-  _push_free(block, ptr);
-  block.owner.current[block.class_index] = block;
-}
-
-static void _push_free(PoolBlock block, void *slot) {
-  *(void **) slot = block.free;
-  block.free = slot;
-}
-
 // blocks
 
 /* Called with storage and pool locked. `fresh` is a block `_fresh_block`
@@ -249,17 +311,6 @@ static void _link(PoolBlock block, Pool pool) {
   pool.current[block.class_index] = block;
 }
 
-static void _depot_push(PoolBlock block) {
-  int depot_index = _depot_index(block.bytes);
-  _reset(block, NULL);
-  block.next = pool_depot[depot_index];
-  pool_depot[depot_index] = block;
-  pool_active_blocks--;
-  pool_active_bytes -= block.bytes;
-  pool_depot_blocks++;
-  pool_depot_bytes += block.bytes;
-}
-
 static int _depot_index(unsigned bytes) {
   switch (bytes) {
     case 256:  return 0;
@@ -273,44 +324,7 @@ static int _depot_index(unsigned bytes) {
 static inline char *_data(PoolBlock block) =>
   (char *) block + POOL_BLOCK_DATA_OFFSET;
 
-static inline void *_slot(PoolBlock block, unsigned slot) =>
-  _data(block) + slot * pool_class_sizes[block.class_index];
-
-static inline unsigned _slot_index(PoolBlock block, void *alloc) =>
-  ((char *) alloc - _data(block)) / pool_class_sizes[block.class_index];
-
-static int _contains(PoolBlock block, const void *ptr) {
-  if (!block.owner) return 0;
-  const char *data = _data(block), *candidate = ptr;
-  unsigned size = pool_class_sizes[block.class_index];
-  if (candidate < data || candidate >= data + block.used) return 0;
-  return (size_t) (candidate - data) % size == 0;
-}
-
 // block index
-
-/* The registered block holding `ptr`, or NULL. Storage must be locked. */
-static PoolBlock _find_block(const void *ptr) =>
-  pool_index_complete ? _index_find(ptr) : _registry_find(ptr);
-
-static PoolBlock _index_find(const void *ptr) {
-  if (!pool_index_slots) return NULL;
-  uintptr_t page = (uintptr_t) ptr >> POOL_INDEX_PAGE_SHIFT;
-  unsigned at = _index_start(page, pool_index_slots);
-  while (pool_index[at].block) {
-    if (pool_index[at].page == page &&
-        _contains(pool_index[at].block, ptr))
-      return pool_index[at].block;
-    at = (at + 1) & (pool_index_slots - 1);
-  }
-  return NULL;
-}
-
-static PoolBlock _registry_find(const void *ptr) {
-  for (PoolBlock block = pool_registry; block; block = block.registry_next)
-    if (_contains(block, ptr)) return block;
-  return NULL;
-}
 
 /* A block spans at most two pages, so it takes at most two slots. Growth is
    the one allocation here and it disables the index instead of failing, which
@@ -355,51 +369,85 @@ static void _index_place(
 static unsigned _index_start(uintptr_t page, unsigned slots) =>
   (unsigned) ((page * 0x9E3779B97F4A7C15ull) >> 32) & (slots - 1);
 
-/* promotion
-
-   A promoted identity keeps its address: its slot is kept, and release
-   moves every block with a kept slot to the parent. A slot whose block
-   still belongs to a deeper level is recorded as a PoolPromotion, which
-   keeps it again when the promoting level is released. */
-
-/** Publishes an identity owned by `inner` in its parent.
-    `alloc` survives `inner`'s release without changing its address. When the
-    parent already holds an equal identity, that one stays canonical and
-    `object` only survives. Returns zero for a missing owner, root pool, or
-    null allocation.
-    Raises: `<alloc-fail>`, `<size-limit>`, or `<invariant>` while recording
-    the promotion; that transfer may happen before storage is marked or moved.
-*/
-int Pool.promote(Pool inner, Var object, void *alloc) {
-  if (!inner || !inner.up || !alloc) return 0;
-  return _promote_level(inner, object, alloc, _block_of(alloc));
+module void _storage_lock(void) {
+  if (pool_multithreaded && pthread_mutex_lock(&pool_storage_mutex))
+    _fatal("could not lock storage mutex");
 }
 
-/** Proves `object` safe beyond every pool in `inner`'s chain.
-    It is promoted to the outermost pool when a pool in the chain owns it.
-    `alloc` is the object's `Pool`-owned allocation. Returns one when the
-    value is already outermost or reaches it, and zero when no pool in the
-    chain owns it or a promotion fails. A null `inner` reports safe, since no
-    pool can then reclaim the value. Promotion is not transactional across
-    levels: an earlier level remains promoted if a later promotion transfers.
-    A thread that loses a concurrent promotion of an equal value still gets
-    one, though `Pool.is_permanent` answers zero for its surviving copy.
+module void _storage_unlock(void) {
+  if (pool_multithreaded && pthread_mutex_unlock(&pool_storage_mutex))
+    _fatal("could not unlock storage mutex");
+}
 
-    Raises: `<alloc-fail>` when promotion metadata cannot be allocated.
-*/
-int Pool.own(Pool inner, Var object, void *alloc) {
-  if (!inner) return 1;
-  Pool owner = inner;
-  while (owner && !owner.owns(object)) owner = owner.up;
-  if (!owner) return 0;
-  if (!owner.up) return 1;
-  if (!alloc) return 0;
-  PoolBlock block = _block_of(alloc);
-  while (owner.up) {
-    if (!_promote_level(owner, object, alloc, block)) return 0;
-    owner = owner.up;
+module void _lock(Pool pool) {
+  if (pool_multithreaded && pool && pthread_mutex_lock(&pool.mutex))
+    _fatal("could not lock branch mutex");
+}
+
+module void _unlock(Pool pool) {
+  if (pool_multithreaded && pool && pthread_mutex_unlock(&pool.mutex))
+    _fatal("could not unlock branch mutex");
+}
+
+/* Ends the process on a native failure that Error cannot report. */
+module void _fatal(const char *message) {
+  fprintf(stderr, "Pool: %s\n", message);
+  abort();
+}
+
+
+
+/* Accounts for one satisfied request. The caller holds the storage lock, so
+   the small-class path takes no lock of its own. */
+static void _record_request(size_t size) {
+  pool_allocation_calls++;
+  if (SIZE_MAX - pool_requested_bytes < size) pool_requested_bytes = SIZE_MAX;
+  else pool_requested_bytes += size;
+}
+
+/* The freed slot is reused first, from a block that becomes its class's
+   current one. */
+static void _free_slot(PoolBlock block, void *ptr) {
+  _push_free(block, ptr);
+  block.owner.current[block.class_index] = block;
+}
+
+static void _push_free(PoolBlock block, void *slot) {
+  *(void **) slot = block.free;
+  block.free = slot;
+}
+
+
+
+/* The registered block holding `ptr`, or NULL. Storage must be locked. */
+static PoolBlock _find_block(const void *ptr) =>
+  pool_index_complete ? _index_find(ptr) : _registry_find(ptr);
+
+static PoolBlock _index_find(const void *ptr) {
+  if (!pool_index_slots) return NULL;
+  uintptr_t page = (uintptr_t) ptr >> POOL_INDEX_PAGE_SHIFT;
+  unsigned at = _index_start(page, pool_index_slots);
+  while (pool_index[at].block) {
+    if (pool_index[at].page == page &&
+        _contains(pool_index[at].block, ptr))
+      return pool_index[at].block;
+    at = (at + 1) & (pool_index_slots - 1);
   }
-  return 1;
+  return NULL;
+}
+
+static PoolBlock _registry_find(const void *ptr) {
+  for (PoolBlock block = pool_registry; block; block = block.registry_next)
+    if (_contains(block, ptr)) return block;
+  return NULL;
+}
+
+static int _contains(PoolBlock block, const void *ptr) {
+  if (!block.owner) return 0;
+  const char *data = _data(block), *candidate = ptr;
+  unsigned size = pool_class_sizes[block.class_index];
+  if (candidate < data || candidate >= data + block.used) return 0;
+  return (size_t) (candidate - data) % size == 0;
 }
 
 /* Moves `object` from `inner` to `inner.up`. `block` is the region block
@@ -431,6 +479,9 @@ static int _promote_level(
   inner.promoted++;
   return 1;
 }
+
+static inline unsigned _slot_index(PoolBlock block, void *alloc) =>
+  ((char *) alloc - _data(block)) / pool_class_sizes[block.class_index];
 
 /* Straight lock and unlock, with no defer: this runs on every promotion and
    nothing between the two calls can raise. */
@@ -469,6 +520,17 @@ module void _release_blocks(Pool inner) {
   for (int i = 0; i < POOL_CLASS_COUNT; i++) inner.current[i] = NULL;
 }
 
+static void _depot_push(PoolBlock block) {
+  int depot_index = _depot_index(block.bytes);
+  _reset(block, NULL);
+  block.next = pool_depot[depot_index];
+  pool_depot[depot_index] = block;
+  pool_active_blocks--;
+  pool_active_bytes -= block.bytes;
+  pool_depot_blocks++;
+  pool_depot_bytes += block.bytes;
+}
+
 static void _transfer(PoolBlock block, Pool parent) {
   _free_unkept(block);
   block.owner = parent;
@@ -486,70 +548,12 @@ static void _free_unkept(PoolBlock block) {
     if (!_slot_kept(block, slot)) _push_free(block, _slot(block, slot));
 }
 
+static inline void *_slot(PoolBlock block, unsigned slot) =>
+  _data(block) + slot * pool_class_sizes[block.class_index];
+
 static int _slot_kept(PoolBlock block, unsigned slot) {
   uint64_t mask = (uint64_t) 1 << (slot % 64);
   return (block.keep[slot / 64] & mask) != 0;
-}
-
-module void _storage_lock(void) {
-  if (pool_multithreaded && pthread_mutex_lock(&pool_storage_mutex))
-    _fatal("could not lock storage mutex");
-}
-
-module void _storage_unlock(void) {
-  if (pool_multithreaded && pthread_mutex_unlock(&pool_storage_mutex))
-    _fatal("could not unlock storage mutex");
-}
-
-module void _lock(Pool pool) {
-  if (pool_multithreaded && pool && pthread_mutex_lock(&pool.mutex))
-    _fatal("could not lock branch mutex");
-}
-
-module void _unlock(Pool pool) {
-  if (pool_multithreaded && pool && pthread_mutex_unlock(&pool.mutex))
-    _fatal("could not unlock branch mutex");
-}
-
-/* Ends the process on a native failure that Error cannot report. */
-module void _fatal(const char *message) {
-  fprintf(stderr, "Pool: %s\n", message);
-  abort();
-}
-
-// statistics
-
-/* Accounts for one satisfied request. The caller holds the storage lock, so
-   the small-class path takes no lock of its own. */
-static void _record_request(size_t size) {
-  pool_allocation_calls++;
-  if (SIZE_MAX - pool_requested_bytes < size) pool_requested_bytes = SIZE_MAX;
-  else pool_requested_bytes += size;
-}
-
-/** Returns this level's canonical counts plus process-wide storage counters.
-    A null pool reports depth and per-level counts as zero. The counters are a
-    snapshot; nothing in the result stays live with the pool.
-*/
-PoolStats Pool.stats(Pool inner) {
-  _storage_lock();
-  defer _storage_unlock();
-  _lock(inner);
-  defer _unlock(inner);
-  PoolStats stats = {
-    .allocation_calls = pool_allocation_calls,
-    .free_calls = pool_free_calls, .requested_bytes = pool_requested_bytes,
-    .block_allocations = pool_block_allocations,
-    .block_reuses = pool_block_reuses, .slot_reuses = pool_slot_reuses,
-    .backing_bytes = pool_backing_bytes,
-    .active_blocks = pool_active_blocks, .active_bytes = pool_active_bytes,
-    .depot_blocks = pool_depot_blocks, .depot_bytes = pool_depot_bytes};
-  for (Pool pool = inner; pool; pool = pool.up) stats.depth++;
-  if (inner) {
-    stats.interned = inner.interned;
-    stats.promoted = inner.promoted;
-  }
-  return stats;
 }
 
 module void _storage_initialize(void) {

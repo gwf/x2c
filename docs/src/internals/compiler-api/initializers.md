@@ -28,7 +28,7 @@ Brace initializer conversion.
 
 Keeps a compound literal's native type definition at its original scope.
 
-Source: `src/initializers/conversion.x:450`
+Source: `src/initializers/conversion.x:23`
 
 <a id="Compiler.convert_initializer"></a>
 #### Compiler.convert_initializer
@@ -38,7 +38,7 @@ Source: `src/initializers/conversion.x:450`
 Converts an initializer using its declared native object for array
 bounds.
 
-Source: `src/initializers/conversion.x:8`
+Source: `src/initializers/conversion.x:16`
 
 <a id="Compiler.initializer_field_path"></a>
 #### Compiler.initializer_field_path
@@ -49,7 +49,7 @@ Returns the initializer path selecting one visible aggregate field.
 Anonymous aggregate members remain explicit path frames, so consumers
 observe the same member promotion as native initializer conversion.
 
-Source: `src/initializers/subobjects.x:150`
+Source: `src/initializers/subobjects.x:40`
 
 <a id="Compiler.initializer_native_types"></a>
 #### Compiler.initializer_native_types
@@ -60,7 +60,7 @@ Returns native definition/reference types for a compound literal.
 Macro expansion stays in the original cast; named tags let later sizeof
 expressions reuse that exact layout without a new scope.
 
-Source: `src/initializers/conversion.x:464`
+Source: `src/initializers/conversion.x:37`
 
 <a id="Compiler.initializer_rows"></a>
 #### Compiler.initializer_rows
@@ -73,7 +73,7 @@ walk. Scalar runs map their ordinal through the native dimensions; other
 inputs retain possible cursor continuations. A NULL condition is
 unconditional, and a NULL destination is excess.
 
-Source: `src/initializers/subobjects.x:32`
+Source: `src/initializers/subobjects.x:18`
 
 <a id="Compiler.initializer_slot"></a>
 #### Compiler.initializer_slot
@@ -82,7 +82,7 @@ Source: `src/initializers/subobjects.x:32`
 
 Selects a native subobject without evaluating it when used by sizeof.
 
-Source: `src/initializers/subobjects.x:320`
+Source: `src/initializers/subobjects.x:47`
 
 ## Design notes
 

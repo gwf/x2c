@@ -22,6 +22,30 @@ static typedef struct MatchSlots {
   unsigned long definite, possible;
 } MatchSlots;
 
+/** Analyzes one `Match` pattern into its canonical positional layout.
+    Distinct named binders receive slots in lexical preorder. `!quote` is
+    opaque; alternatives contribute possible binders, while only binders in
+    every alternative are definite. The caller owns the returned layout,
+    including when `status` is `<malformed>`.
+    Raises: `<alloc-fail>` while normalizing or allocating the layout.
+*/
+MatchCaptureLayout MatchCaptureLayout.analyze(Var pattern) {
+  MatchLayoutBuilder builder = {0};
+  _collect(builder, pattern);
+  const char *malformed = _malformed(builder);
+  Var normalized = pattern;
+  if (malformed) builder.count = 0;
+  else if (pattern is <list>) normalized = _normalize_pattern(pattern);
+  MatchCaptureLayout layout = _layout(builder, normalized, malformed);
+  // Binder-free patterns keep the zero-initialized slot masks.
+  if (!malformed && builder.count) {
+    MatchSlots slots = _slots(layout, normalized);
+    layout.definite = slots.definite;
+    layout.possible = slots.possible;
+  }
+  return layout;
+}
+
 /* pattern vocabulary
 
    A binder is `?` or `*`, alone or followed by an ASCII identifier: `?`
@@ -49,36 +73,46 @@ meta native int Var.is_match_op(Var atom) {
   return 0;
 }
 
-/* The valid binder's sigil, -1 for a malformed sigil-leading Atom, or 0
-   otherwise. Compact bytes use stack storage; long bytes are borrowed. */
-static int _binder_kind(Var atom) {
-  char sigil = Atom.first(atom);
-  if (sigil != '?' && sigil != '*') return 0;
-  char decoded[SYMBOL_MAX_5BIT + 1];
-  const char *spelling;
-  if (atom is <symbol>) {
-    Symbol.decode(atom, decoded);
-    spelling = decoded;
-  }
-  else spelling = atom.pointer();
-  if (!spelling[1]) return sigil;
-  unsigned char first = (unsigned char) spelling[1];
-  if (!scan_ascii_alpha(first) && first != '_') return -1;
-  for (int i = 2; spelling[i]; i++) {
-    unsigned char ch = (unsigned char) spelling[i];
-    if (!scan_ascii_alpha(ch) && !scan_ascii_digit(ch) && ch != '_') return -1;
-  }
-  return sigil;
+// layout queries
+
+/** Releases one canonical `Match` capture layout.
+    A null layout is ignored; every alias is invalid afterward.
+*/
+void MatchCaptureLayout.free(MatchCaptureLayout layout) {
+  if (layout) xfree(layout);
 }
 
-module int _named_binder(Var value) =>
-  value.is_binder() && value != <?> && value != <*>;
+/** Returns definite binders in canonical positional order.
+    A null layout or no definite binders returns `nil`. The canonical result
+    follows the module pool-chain lifetime above.
+    Raises: `<alloc-fail>` while constructing the `List`.
+*/
+List MatchCaptureLayout.definite_list(MatchCaptureLayout layout) =>
+  layout ? _binders(layout, layout.definite) : NULL;
 
-/* A compact matcher predicate, which is control vocabulary as the final
-   operand of `!is`. */
-static int _reserved_predicate(Var atom) =>
-  atom is <symbol> &&
-  (atom == <?binder?> || atom == <*binder?> || atom == <!op?>);
+/** Returns possible binders in canonical positional order.
+    A null layout or no possible binders returns `nil`. The canonical result
+    follows the module pool-chain lifetime above.
+    Raises: `<alloc-fail>` while constructing the `List`.
+*/
+List MatchCaptureLayout.possible_list(MatchCaptureLayout layout) =>
+  layout ? _binders(layout, layout.possible) : NULL;
+
+/** Returns the canonical slot for `binder`, or -1 when it is absent.
+    A null layout returns -1. Comparison uses exact `Atom` identity.
+*/
+int MatchCaptureLayout.index(MatchCaptureLayout layout, Atom binder) =>
+  layout ? _find(layout, binder) : -1;
+
+/** Reports whether a committed capture slot is present.
+    A null buffer or an index outside its capacity or `Match`'s binder limit
+    returns false. Presence is independent of the captured `Var` value.
+*/
+int MatchCaptureBuffer.has(MatchCaptureBuffer &?m, int index) {
+  if (!m || index < 0 || index >= m.capacity || index >= MACHINE_BINDER_MAX)
+    return 0;
+  return _capture_bit(m.present, index);
+}
 
 /* pattern normalization
 
@@ -120,30 +154,6 @@ static List _normalize_elements(List elements) {
   return out;
 }
 
-/** Analyzes one `Match` pattern into its canonical positional layout.
-    Distinct named binders receive slots in lexical preorder. `!quote` is
-    opaque; alternatives contribute possible binders, while only binders in
-    every alternative are definite. The caller owns the returned layout,
-    including when `status` is `<malformed>`.
-    Raises: `<alloc-fail>` while normalizing or allocating the layout.
-*/
-MatchCaptureLayout MatchCaptureLayout.analyze(Var pattern) {
-  MatchLayoutBuilder builder = {0};
-  _collect(builder, pattern);
-  const char *malformed = _malformed(builder);
-  Var normalized = pattern;
-  if (malformed) builder.count = 0;
-  else if (pattern is <list>) normalized = _normalize_pattern(pattern);
-  MatchCaptureLayout layout = _layout(builder, normalized, malformed);
-  // Binder-free patterns keep the zero-initialized slot masks.
-  if (!malformed && builder.count) {
-    MatchSlots slots = _slots(layout, normalized);
-    layout.definite = slots.definite;
-    layout.possible = slots.possible;
-  }
-  return layout;
-}
-
 /* Collects the raw pattern's named binders in one lexical preorder walk and
    notes each malformation. `!quote` is opaque. Compact matcher predicates
    are control vocabulary only as the final operand of `!is`. The compiler's
@@ -171,6 +181,12 @@ static void _collect(MatchLayoutBuilder &b, Var pattern) {
     if (b.malformed_binder) return;
   }
 }
+
+/* A compact matcher predicate, which is control vocabulary as the final
+   operand of `!is`. */
+static int _reserved_predicate(Var atom) =>
+  atom is <symbol> &&
+  (atom == <?binder?> || atom == <*binder?> || atom == <!op?>);
 
 // A sigil-leading `Atom` must spell a binder; a named binder takes a slot.
 static void _atom(MatchLayoutBuilder &b, Var atom) {
@@ -242,9 +258,6 @@ static MatchSlots _guard_slots(MatchCaptureLayout m, Var op, List args) {
   return (MatchSlots) {0, 0};
 }
 
-static int _set_capture(List args) =>
-  args && args.cdr() && !args.cddr() && args.car().is_atom_binder();
-
 /* Every element of a sequence matches, so each one's definite slots are
    definite. */
 static MatchSlots _sequence_slots(MatchCaptureLayout m, List patterns) {
@@ -267,6 +280,34 @@ static MatchSlots _choice_slots(MatchCaptureLayout m, List patterns) {
   return slots;
 }
 
+module int _named_binder(Var value) =>
+  value.is_binder() && value != <?> && value != <*>;
+
+static int _set_capture(List args) =>
+  args && args.cdr() && !args.cddr() && args.car().is_atom_binder();
+
+/* The valid binder's sigil, -1 for a malformed sigil-leading Atom, or 0
+   otherwise. Compact bytes use stack storage; long bytes are borrowed. */
+static int _binder_kind(Var atom) {
+  char sigil = Atom.first(atom);
+  if (sigil != '?' && sigil != '*') return 0;
+  char decoded[SYMBOL_MAX_5BIT + 1];
+  const char *spelling;
+  if (atom is <symbol>) {
+    Symbol.decode(atom, decoded);
+    spelling = decoded;
+  }
+  else spelling = atom.pointer();
+  if (!spelling[1]) return sigil;
+  unsigned char first = (unsigned char) spelling[1];
+  if (!scan_ascii_alpha(first) && first != '_') return -1;
+  for (int i = 2; spelling[i]; i++) {
+    unsigned char ch = (unsigned char) spelling[i];
+    if (!scan_ascii_alpha(ch) && !scan_ascii_digit(ch) && ch != '_') return -1;
+  }
+  return sigil;
+}
+
 static MatchSlots _binder_slot(MatchCaptureLayout m, Var binder) {
   unsigned long bit = 1UL << _find(m, binder);
   return (MatchSlots) {bit, bit};
@@ -281,53 +322,12 @@ static int _find(MatchCaptureLayout layout, Atom binder) {
   return -1;
 }
 
-// layout queries
-
-/** Releases one canonical `Match` capture layout.
-    A null layout is ignored; every alias is invalid afterward.
-*/
-void MatchCaptureLayout.free(MatchCaptureLayout layout) {
-  if (layout) xfree(layout);
-}
-
-/** Returns definite binders in canonical positional order.
-    A null layout or no definite binders returns `nil`. The canonical result
-    follows the module pool-chain lifetime above.
-    Raises: `<alloc-fail>` while constructing the `List`.
-*/
-List MatchCaptureLayout.definite_list(MatchCaptureLayout layout) =>
-  layout ? _binders(layout, layout.definite) : NULL;
-
-/** Returns possible binders in canonical positional order.
-    A null layout or no possible binders returns `nil`. The canonical result
-    follows the module pool-chain lifetime above.
-    Raises: `<alloc-fail>` while constructing the `List`.
-*/
-List MatchCaptureLayout.possible_list(MatchCaptureLayout layout) =>
-  layout ? _binders(layout, layout.possible) : NULL;
-
 // Selection by `included` preserves slot order.
 static List _binders(MatchCaptureLayout layout, unsigned long included) {
   List binders = NULL;
   for (int i = layout.binder_count - 1; i >= 0; i--)
     if (_capture_bit(included, i)) binders = cons(layout.binders[i], binders);
   return binders;
-}
-
-/** Returns the canonical slot for `binder`, or -1 when it is absent.
-    A null layout returns -1. Comparison uses exact `Atom` identity.
-*/
-int MatchCaptureLayout.index(MatchCaptureLayout layout, Atom binder) =>
-  layout ? _find(layout, binder) : -1;
-
-/** Reports whether a committed capture slot is present.
-    A null buffer or an index outside its capacity or `Match`'s binder limit
-    returns false. Presence is independent of the captured `Var` value.
-*/
-int MatchCaptureBuffer.has(MatchCaptureBuffer &?m, int index) {
-  if (!m || index < 0 || index >= m.capacity || index >= MACHINE_BINDER_MAX)
-    return 0;
-  return _capture_bit(m.present, index);
 }
 
 module int _capture_bit(unsigned long bits, int index) =>

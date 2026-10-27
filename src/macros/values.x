@@ -7,33 +7,6 @@
    applying unit, and a producer can return code with effects into the
    application. */
 
-/** Returns the literal expression that carries `value`, a macro definition
-    or one of its references, as run-time data.
-*/
-List Compiler.macro_value_literal(Compiler c, List value) =>
-  c.cache_literal_list(_macro_value_names(value));
-
-/* A Macro value names its references by spelling, so its literal does not
-   depend on how this translation numbered bindings; each resolves where the
-   value's expansion lands. */
-module Var _macro_value_names(Var value) {
-  if (value is not <list>) return value;
-  String spelling = NULL;
-  if (Ast.try_binding(value, NULL, spelling))
-    return %(binding-name $spelling);
-  List child;
-  $ast.rewrite_children(value.list(), child, _macro_value_names(child));
-}
-
-/* NULL for a template's hole of that name or for an unknown macro. */
-module List _macro_value(Compiler c, Atom name) {
-  Var stored;
-  if (c.macro_holes && _hole_record(c, name)) return NULL;
-  if (!_try_macro(c, c.macros, name, stored)) return NULL;
-  List cached = c.macro_value_literal(stored);
-  return %(expr ("Macro") $(cached.caddr()));
-}
-
 /** Parses `case NAME(?a, *b)` where NAME selects a macro, as `$name` or as
     a `Macro` variable, into the pattern expression that recognizes code the
     macro builds. Returns NULL without consuming tokens for any other case.
@@ -61,6 +34,154 @@ List Compiler.try_parse_macro_pattern(Compiler c) {
     $!( Macro_case_pattern($expression, $labels) ), saved);
 }
 
+/** Parses `$NAME(P, ...)` in a pattern, where each argument is a pattern,
+    into the pattern for code NAME builds with each argument pattern in its
+    hole. It matches the shelled expression or its bare content; `content`
+    selects the content alone, for a position whose pattern already writes
+    the `(expr TYPE ...)` shell. Returns NULL without consuming tokens when
+    no macro NAME is visible.
+*/
+List Compiler.try_parse_macro_subpattern(Compiler c, int content) {
+  Token start = c.token;
+  String spelling = NULL;
+  Var stored;
+  Token end = c.macro_pattern_at(start, spelling, stored);
+  if (!end) return NULL;
+  c.token = end;
+  Macro shape = _macro_value_names(stored);
+  List patterns = c.parse_macro_pattern_arguments();
+  int expected = shape.assoc(<parameters>).list().len();
+  if (patterns.len() != expected)
+    $fail.macros_macro_pattern_arity(c, start, spelling, expected);
+  return c.cache_literal_list(_macro_subpattern(shape, patterns, content));
+}
+
+/** Returns the `(` after a visible macro's `$NAME` at `at`, storing its
+    spelling and definition, or NULL. The cursor does not move.
+*/
+Token Compiler.macro_pattern_at(
+  Compiler c, Token at, String &spelling, Var &stored) {
+  if (at.type != <$>) return NULL;
+  Token saved = c.token;
+  c.token = at;
+  Token end = _scan_name(c, spelling);
+  c.token = saved;
+  if (!spelling || end.type != <(> ||
+      !_try_macro(c, c.macros, Atom.intern(spelling), stored) ||
+      stored is not <list> || stored.list().car() != <macrodef>)
+    return NULL;
+  return end;
+}
+
+/** Returns an anonymous macro definition as a `Macro` value. Macro values
+    the body applies are captured where the literal is written, so a later
+    application applies the same children.
+*/
+List Compiler.capture_macro_value(Compiler c, List definition) {
+  List cached = c.macro_value_literal(definition);
+  List literal = %(expr ("Macro") $(cached.caddr()));
+  List rows = %(expr ("List") (nil));
+  int captured = 0;
+  foreach (List binding in definition.assoc(<captures>).list()) {
+    Type type = c.semantic_binding_facts()[%(type $binding)];
+    if (!c.sym.is_named_value_type(type, "Macro")) continue;
+    List pair = _captured_pair(c, binding, type);
+    rows = %(expr ("List")
+      (cons $(c.convert_expression(pair, %("Var"))) $rows));
+    captured = 1;
+  }
+  if (!captured) return literal;
+  List callee = c.resolve_expression(
+    %(expr () (ident "Macro_close")), c.token);
+  return c.resolve_expression(
+    %(expr ("Macro") (call $callee (args $literal $rows))), c.token);
+}
+
+
+
+/** Returns the literal expression that carries `value`, a macro definition
+    or one of its references, as run-time data.
+*/
+List Compiler.macro_value_literal(Compiler c, List value) =>
+  c.cache_literal_list(_macro_value_names(value));
+
+/** Consumes a `(code-value STAGE CODE EFFECTS)` carrier a producer returned
+    into a macro value application, or that `Compiler.bind_code_value`
+    binds as one. Effects are applied in order under the application's
+    transaction, and their tokens are replaced in the code.
+    `retained` reports a bound or lowered stage, which ordinary binding
+    leaves untouched. Lowered code is not searched for a leftover binder.
+    Returns 0 for any other value.
+*/
+int Compiler.take_code_value(
+  Compiler c, Var input, Var &value, int &retained) {
+  if (input ~= %(code-value ?(String stage) ?code ?effects)) {
+    Map replacements = _code_effects(c, effects);
+    value = replacements.len() ? _replace_bindings(code, replacements) : code;
+    retained = stage != "source";
+    if (stage != "lowered") {
+      Var binder = _carrier_binder(value);
+      if (binder) _unbound(c, binder.str(), c.token);
+    }
+    return 1;
+  }
+  return 0;
+}
+
+/** Places `code` where `where` says, under the active expansion's
+    transaction: `(after-statement)` after the enclosing block item or
+    initialized declarator; `(block-exit)` on every exit from the enclosing
+    block from that point on, as a `defer` placed after it;
+    `(function-entry)` at the entry of the enclosing function, at parse or
+    transform time, in placement order before its first statement;
+    `(unit-support)` among the unit's support declarations, once per KEY
+    with `(unit-support KEY)`; or `(unit-init)` in the unit's file
+    initialization, in AREA with `(unit-init AREA)`.
+*/
+void Compiler.place(Compiler c, List where, Var code) {
+  match (where) {
+    case %(after-statement): c.place_after(code);
+    case %(function-entry): c.place_entry(code);
+    case %(block-exit): {
+      Macro deferred = $deferred;
+      c.place_after(deferred(code));
+    }
+    case %(unit-support): _place_support(c, code);
+    case %(unit-support ?key): {
+      Var placed;
+      $adapter.memo(c, %(unit-support $key), placed) {
+        _place_support(c, code);
+        placed = 1;
+      }
+    }
+    case %(unit-init):
+      c.add_init(<finish>, c.bind_syntax(code, <block>, NULL));
+    case %(unit-init (!or ?area protocol prepare statics finish)):
+      c.add_init(area, c.bind_syntax(code, <block>, NULL));
+    default: $fail.macros_placement(c, c.token, where);
+  }
+}
+
+/** Binds a code-value carrier that a meta call returned outside a macro
+    value application as an application binds it, under a transaction that
+    also covers its effects.
+*/
+List Compiler.bind_code_value(
+  Compiler c, List carrier, Symbol position, Type return_type) {
+  List bound = NULL;
+  with (c.macro_application = c.macro_application + 1) {
+    SymTxn transaction = { 0 };
+    if (c.recovery_depth > 0)
+      transaction = c.begin_semantic_transaction();
+    defer transaction.rollback();
+    bound = c.bind_syntax(carrier, position, return_type);
+    transaction.commit();
+  }
+  return bound;
+}
+
+// macro values and placement
+
 /* The pattern a `case` on the macro `$NAME` at `at` tests for `names`,
    cached, or NULL for a `Macro` variable or a pattern that resolves a
    reference against the subject of each call. */
@@ -86,6 +207,27 @@ static List _pattern_macro(Compiler c) {
   return expression;
 }
 
+/* NULL for a template's hole of that name or for an unknown macro. */
+module List _macro_value(Compiler c, Atom name) {
+  Var stored;
+  if (c.macro_holes && _hole_record(c, name)) return NULL;
+  if (!_try_macro(c, c.macros, name, stored)) return NULL;
+  List cached = c.macro_value_literal(stored);
+  return %(expr ("Macro") $(cached.caddr()));
+}
+
+/* A Macro value names its references by spelling, so its literal does not
+   depend on how this translation numbered bindings; each resolves where the
+   value's expansion lands. */
+module Var _macro_value_names(Var value) {
+  if (value is not <list>) return value;
+  String spelling = NULL;
+  if (Ast.try_binding(value, NULL, spelling))
+    return %(binding-name $spelling);
+  List child;
+  $ast.rewrite_children(value.list(), child, _macro_value_names(child));
+}
+
 /* The `?a` and `*b` capture labels between the parentheses. */
 static List _pattern_labels(Compiler c) {
   c.expect(<(>);
@@ -102,23 +244,6 @@ static List _pattern_labels(Compiler c) {
   return names.list_free();
 }
 
-/** Returns the `(` after a visible macro's `$NAME` at `at`, storing its
-    spelling and definition, or NULL. The cursor does not move.
-*/
-Token Compiler.macro_pattern_at(
-  Compiler c, Token at, String &spelling, Var &stored) {
-  if (at.type != <$>) return NULL;
-  Token saved = c.token;
-  c.token = at;
-  Token end = _scan_name(c, spelling);
-  c.token = saved;
-  if (!spelling || end.type != <(> ||
-      !_try_macro(c, c.macros, Atom.intern(spelling), stored) ||
-      stored is not <list> || stored.list().car() != <macrodef>)
-    return NULL;
-  return end;
-}
-
 /* Whether the parenthesized labels at the cursor are all `?name` or
    `*name` binders. */
 static int _simple_labels(Compiler c) {
@@ -132,28 +257,6 @@ static int _simple_labels(Compiler c) {
     if (c.peek(at + 2) != <,>) return 0;
     at += 3;
   }
-}
-
-/** Parses `$NAME(P, ...)` in a pattern, where each argument is a pattern,
-    into the pattern for code NAME builds with each argument pattern in its
-    hole. It matches the shelled expression or its bare content; `content`
-    selects the content alone, for a position whose pattern already writes
-    the `(expr TYPE ...)` shell. Returns NULL without consuming tokens when
-    no macro NAME is visible.
-*/
-List Compiler.try_parse_macro_subpattern(Compiler c, int content) {
-  Token start = c.token;
-  String spelling = NULL;
-  Var stored;
-  Token end = c.macro_pattern_at(start, spelling, stored);
-  if (!end) return NULL;
-  c.token = end;
-  Macro shape = _macro_value_names(stored);
-  List patterns = c.parse_macro_pattern_arguments();
-  int expected = shape.assoc(<parameters>).list().len();
-  if (patterns.len() != expected)
-    $fail.macros_macro_pattern_arity(c, start, spelling, expected);
-  return c.cache_literal_list(_macro_subpattern(shape, patterns, content));
 }
 
 /* `shape`'s pattern with each argument pattern in its hole. A binder
@@ -212,30 +315,6 @@ static Var _substitute_binders(Var value, Map replacements) {
   return items.list_free();
 }
 
-/** Returns an anonymous macro definition as a `Macro` value. Macro values
-    the body applies are captured where the literal is written, so a later
-    application applies the same children.
-*/
-List Compiler.capture_macro_value(Compiler c, List definition) {
-  List cached = c.macro_value_literal(definition);
-  List literal = %(expr ("Macro") $(cached.caddr()));
-  List rows = %(expr ("List") (nil));
-  int captured = 0;
-  foreach (List binding in definition.assoc(<captures>).list()) {
-    Type type = c.semantic_binding_facts()[%(type $binding)];
-    if (!c.sym.is_named_value_type(type, "Macro")) continue;
-    List pair = _captured_pair(c, binding, type);
-    rows = %(expr ("List")
-      (cons $(c.convert_expression(pair, %("Var"))) $rows));
-    captured = 1;
-  }
-  if (!captured) return literal;
-  List callee = c.resolve_expression(
-    %(expr () (ident "Macro_close")), c.token);
-  return c.resolve_expression(
-    %(expr ("Macro") (call $callee (args $literal $rows))), c.token);
-}
-
 /* The `(identity value)` row of one captured Macro binding. */
 static List _captured_pair(Compiler c, List binding, Type type) {
   List identity = c.macro_value_literal(binding);
@@ -244,29 +323,6 @@ static List _captured_pair(Compiler c, List binding, Type type) {
     (cons $(c.convert_expression(identity, %("Var")))
       (expr ("List") (cons $(c.convert_expression(value, %("Var")))
         (expr ("List") (nil))))));
-}
-
-/** Consumes a `(code-value STAGE CODE EFFECTS)` carrier a producer returned
-    into a macro value application, or that `Compiler.bind_code_value`
-    binds as one. Effects are applied in order under the application's
-    transaction, and their tokens are replaced in the code.
-    `retained` reports a bound or lowered stage, which ordinary binding
-    leaves untouched. Lowered code is not searched for a leftover binder.
-    Returns 0 for any other value.
-*/
-int Compiler.take_code_value(
-  Compiler c, Var input, Var &value, int &retained) {
-  if (input ~= %(code-value ?(String stage) ?code ?effects)) {
-    Map replacements = _code_effects(c, effects);
-    value = replacements.len() ? _replace_bindings(code, replacements) : code;
-    retained = stage != "source";
-    if (stage != "lowered") {
-      Var binder = _carrier_binder(value);
-      if (binder) _unbound(c, binder.str(), c.token);
-    }
-    return 1;
-  }
-  return 0;
 }
 
 /* Applies a carrier's effects in order and returns what replaces each
@@ -295,66 +351,6 @@ static Map _code_effects(Compiler c, Var effects) {
   return replacements;
 }
 
-/** Places `code` where `where` says, under the active expansion's
-    transaction: `(after-statement)` after the enclosing block item or
-    initialized declarator; `(block-exit)` on every exit from the enclosing
-    block from that point on, as a `defer` placed after it;
-    `(function-entry)` at the entry of the enclosing function, at parse or
-    transform time, in placement order before its first statement;
-    `(unit-support)` among the unit's support declarations, once per KEY
-    with `(unit-support KEY)`; or `(unit-init)` in the unit's file
-    initialization, in AREA with `(unit-init AREA)`.
-*/
-void Compiler.place(Compiler c, List where, Var code) {
-  match (where) {
-    case %(after-statement): c.place_after(code);
-    case %(function-entry): c.place_entry(code);
-    case %(block-exit): {
-      Macro deferred = $deferred;
-      c.place_after(deferred(code));
-    }
-    case %(unit-support): _place_support(c, code);
-    case %(unit-support ?key): {
-      Var placed;
-      $adapter.memo(c, %(unit-support $key), placed) {
-        _place_support(c, code);
-        placed = 1;
-      }
-    }
-    case %(unit-init):
-      c.add_init(<finish>, c.bind_syntax(code, <block>, NULL));
-    case %(unit-init (!or ?area protocol prepare statics finish)):
-      c.add_init(area, c.bind_syntax(code, <block>, NULL));
-    default: $fail.macros_placement(c, c.token, where);
-  }
-}
-
-/* Adds the file-scope `code` a placement gives to the unit's support. It
-   binds at file scope whatever local scope is open. */
-static void _place_support(Compiler c, Var code) {
-  Block local = c.sym.close_local_scopes();
-  defer c.sym.reopen_scopes(local);
-  c.add_support(_written_support(c, c.bind_syntax(code, <unit>, NULL)));
-}
-
-/** Binds a code-value carrier that a meta call returned outside a macro
-    value application as an application binds it, under a transaction that
-    also covers its effects.
-*/
-List Compiler.bind_code_value(
-  Compiler c, List carrier, Symbol position, Type return_type) {
-  List bound = NULL;
-  with (c.macro_application = c.macro_application + 1) {
-    SymTxn transaction = { 0 };
-    if (c.recovery_depth > 0)
-      transaction = c.begin_semantic_transaction();
-    defer transaction.rollback();
-    bound = c.bind_syntax(carrier, position, return_type);
-    transaction.commit();
-  }
-  return bound;
-}
-
 /* A named binder left as a carrier's code, identifier, or declarator
    after its effects were applied, or NULL. Binders elsewhere are data,
    such as a lowered match pattern, and a bare `*` or `?` is syntax. A
@@ -378,4 +374,12 @@ static Var _carrier_binder(Var value) {
       if (binder) return binder;
     }
   return NULL;
+}
+
+/* Adds the file-scope `code` a placement gives to the unit's support. It
+   binds at file scope whatever local scope is open. */
+static void _place_support(Compiler c, Var code) {
+  Block local = c.sym.close_local_scopes();
+  defer c.sym.reopen_scopes(local);
+  c.add_support(_written_support(c, c.bind_syntax(code, <unit>, NULL)));
 }

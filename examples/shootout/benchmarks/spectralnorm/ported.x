@@ -17,33 +17,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static double _eval_a(int i, int j) {
-  int ij = i + j;
-  return 1.0 / (ij * (ij + 1) / 2 + i + 1);
-}
-
-static void _eval_a_times_u(int n, const double u[], double out[]) {
-  for (int i = 0; i < n; i++) {
-    double sum = 0.0;
-    for (int j = 0; j < n; j++) sum += _eval_a(i, j) * u[j];
-    out[i] = sum;
-  }
-}
-
-static void _eval_at_times_u(int n, const double u[], double out[]) {
-  for (int i = 0; i < n; i++) {
-    double sum = 0.0;
-    for (int j = 0; j < n; j++) sum += _eval_a(j, i) * u[j];
-    out[i] = sum;
-  }
-}
-
-static void _eval_ata_times_u(
-  int n, const double u[], double out[], double tmp[]) {
-  _eval_a_times_u(n, u, tmp);
-  _eval_at_times_u(n, tmp, out);
-}
-
 int main(int argc, char **argv) {
   int n = argc > 1 ? atoi(argv[1]) : 100;
   double *u = xcalloc((size_t) n, sizeof(double));
@@ -63,4 +36,31 @@ int main(int argc, char **argv) {
   }
   printf("%.9f\n", sqrt(v_bv / vv));
   return 0;
+}
+
+static void _eval_ata_times_u(
+  int n, const double u[], double out[], double tmp[]) {
+  _eval_a_times_u(n, u, tmp);
+  _eval_at_times_u(n, tmp, out);
+}
+
+static void _eval_a_times_u(int n, const double u[], double out[]) {
+  for (int i = 0; i < n; i++) {
+    double sum = 0.0;
+    for (int j = 0; j < n; j++) sum += _eval_a(i, j) * u[j];
+    out[i] = sum;
+  }
+}
+
+static void _eval_at_times_u(int n, const double u[], double out[]) {
+  for (int i = 0; i < n; i++) {
+    double sum = 0.0;
+    for (int j = 0; j < n; j++) sum += _eval_a(j, i) * u[j];
+    out[i] = sum;
+  }
+}
+
+static double _eval_a(int i, int j) {
+  int ij = i + j;
+  return 1.0 / (ij * (ij + 1) / 2 + i + 1);
 }

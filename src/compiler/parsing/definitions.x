@@ -35,21 +35,6 @@ static void _record_objects(Compiler c, List bindings, Token site) {
     }
 }
 
-/* Reports a second definition of one file-scope name, which C rejects,
-   when both sit under the same conditional arms. Definitions under
-   different arms are not compared. For a variable, whose initializer moves
-   into the generated init function, a duplicate under two true conditions
-   is therefore not detected, and the later initializer wins. */
-static void _report_redefinition(
-  Compiler c, String kind, List binding, Token site) {
-  Var arms;
-  if (!c.semantic_binding_facts().try_get(%(arms $binding), arms) ||
-      !List.equal(arms, c.arms))
-    return;
-  String spelling = c.unprefixed(Ast.binding_spelling(binding));
-  $fail.compiler_decl_duplicate(c, site, kind, spelling);
-}
-
 /* A definition remembers the token range of the top-level form that
    produced it, and whether that form is private, for the definition walk.
    A typedef or declaration may repeat its name, so each statement keys its
@@ -128,6 +113,21 @@ static void _record_definition(
   c.set_fact(%(arms $binding), c.arms);
   String spelling = Ast.binding_spelling(binding);
   if (spelling && !type.is_static()) c.fn_defs[spelling] = 1;
+}
+
+/* Reports a second definition of one file-scope name, which C rejects,
+   when both sit under the same conditional arms. Definitions under
+   different arms are not compared. For a variable, whose initializer moves
+   into the generated init function, a duplicate under two true conditions
+   is therefore not detected, and the later initializer wins. */
+static void _report_redefinition(
+  Compiler c, String kind, List binding, Token site) {
+  Var arms;
+  if (!c.semantic_binding_facts().try_get(%(arms $binding), arms) ||
+      !List.equal(arms, c.arms))
+    return;
+  String spelling = c.unprefixed(Ast.binding_spelling(binding));
+  $fail.compiler_decl_duplicate(c, site, kind, spelling);
 }
 
 /* A definition completes the prior prototype whose contract it matches. A

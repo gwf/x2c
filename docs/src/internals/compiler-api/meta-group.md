@@ -54,7 +54,7 @@ Closes compile-time-only calls across later meta definitions.
 Retained group bodies hold the bound calls, including literal insertions.
 Select runtime definitions only after that relation is complete.
 
-Source: `src/meta-group/selection.x:67`
+Source: `src/meta-group/selection.x:44`
 
 <a id="Compiler.group_meta_function"></a>
 #### Compiler.group_meta_function
@@ -84,7 +84,7 @@ Source: `src/meta-group/selection.x:19`
 Returns why the group function `name` has no compile-time entry, from
 its type.
 
-Source: `src/meta-group/selection.x:338`
+Source: `src/meta-group/selection.x:118`
 
 <a id="Compiler.meta_calls_wait"></a>
 #### Compiler.meta_calls_wait
@@ -105,7 +105,7 @@ Source: `src/meta-group/selection.x:27`
 Returns the C compiler and the runtime header directory that build
 `meta` code, or NULL before `Compiler.use_meta_toolchain`.
 
-Source: `src/meta-group/toolchain.x:30`
+Source: `src/meta-group/toolchain.x:20`
 
 <a id="Compiler.meta_cc_identity"></a>
 #### Compiler.meta_cc_identity
@@ -115,7 +115,7 @@ Source: `src/meta-group/toolchain.x:30`
 Returns the identity of the C compiler at `cc`: its path and content
 hash.
 
-Source: `src/meta-group/toolchain.x:38`
+Source: `src/meta-group/toolchain.x:28`
 
 <a id="Compiler.meta_cc_run"></a>
 #### Compiler.meta_cc_run
@@ -126,7 +126,7 @@ Runs `arguments`, a C compiler command building the group C in
 `directory`, and returns NULL, or else its first error, which names
 `directory` when a group's C is the cause.
 
-Source: `src/meta-group/toolchain.x:48`
+Source: `src/meta-group/toolchain.x:38`
 
 <a id="Compiler.meta_reaches_compile_time"></a>
 #### Compiler.meta_reaches_compile_time
@@ -137,7 +137,7 @@ Answers whether a `meta` body reaches the compiler itself: it names a
 compile-time-only function or a compiler operation, or constructs a
 template. Such a function has no runtime form.
 
-Source: `src/meta-group/selection.x:44`
+Source: `src/meta-group/selection.x:72`
 
 <a id="Compiler.prepare_loaded_functions"></a>
 #### Compiler.prepare_loaded_functions
@@ -148,7 +148,7 @@ Adds a loaded unit's public functions and object accessors to its targets.
 Meta closure must finish first so these entries retain runtime semantics.
 Existing meta entries and the adapted main keep their original targets.
 
-Source: `src/meta-group/loaded.x:80`
+Source: `src/meta-group/loaded.x:46`
 
 <a id="Compiler.prepare_loaded_main"></a>
 #### Compiler.prepare_loaded_main
@@ -160,7 +160,7 @@ Native calls retain its declared signature; the public argc/argv entry
 takes an Array of Strings. A renamed main still returns zero on falling
 through its closing brace. Source text and tokens are unchanged.
 
-Source: `src/meta-group/loaded.x:56`
+Source: `src/meta-group/loaded.x:22`
 
 <a id="Compiler.public_native_function"></a>
 #### Compiler.public_native_function
@@ -170,7 +170,7 @@ Source: `src/meta-group/loaded.x:56`
 Answers whether a definition has public native linkage.
 Main is excluded because its process entry needs a separate adapter.
 
-Source: `src/meta-group/selection.x:327`
+Source: `src/meta-group/selection.x:96`
 
 <a id="Compiler.refuse_meta_call"></a>
 #### Compiler.refuse_meta_call
@@ -180,7 +180,7 @@ Source: `src/meta-group/selection.x:327`
 Reports at `site` that the `meta` function `name` cannot run at compile
 time, and `why`.
 
-Source: `src/meta-group/selection.x:358`
+Source: `src/meta-group/selection.x:138`
 
 <a id="Compiler.refuse_record_meta_call"></a>
 #### Compiler.refuse_record_meta_call
@@ -191,7 +191,7 @@ Reports at `site` that the group function `name` cannot run at compile
 time when its result is a struct or union, which its type alone
 decides.
 
-Source: `src/meta-group/selection.x:367`
+Source: `src/meta-group/selection.x:108`
 
 <a id="Compiler.stage_meta_in_process"></a>
 #### Compiler.stage_meta_in_process
@@ -213,7 +213,7 @@ can place supporting functions through the ordinary compiler APIs.
 `declarations` supplies session types. Returns the loaded module's
 targets, or NULL with `failure` set. Publishes no evaluator bindings.
 
-Source: `src/meta-group/staging.x:95`
+Source: `src/meta-group/staging.x:70`
 
 <a id="Compiler.use_meta_build_directory"></a>
 #### Compiler.use_meta_build_directory
@@ -223,7 +223,7 @@ Source: `src/meta-group/staging.x:95`
 Directs each provider group into `directory`, using `owners` to name
 their headers by table, or stops that when `directory` is NULL.
 
-Source: `src/meta-group/staging.x:14`
+Source: `src/meta-group/staging.x:19`
 
 <a id="Compiler.use_meta_toolchain"></a>
 #### Compiler.use_meta_toolchain
@@ -247,7 +247,7 @@ x2c sources it read in `group-K.deps`, or its failure in
 `group-K.failure`. Included native and type providers use the same
 group header and object even when they have no `meta` functions.
 
-Source: `src/meta-group/staging.x:29`
+Source: `src/meta-group/staging.x:34`
 
 ## Design notes
 

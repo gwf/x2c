@@ -15,6 +15,14 @@
 
 #include "common.x"
 
+#include "buffer.x"
+#include "dispatch.x"
+#include "scan.x"
+#include "string/string.x"
+#include "symbol.x"
+
+#include <stdlib.h>
+
 /** Promotes a long `Atom` spelling into its parent `String` pool.
     Returns `atom` unchanged. Compact `Atom`s and long spellings not owned by
     the innermost pool are unchanged. A promoted spelling keeps the same
@@ -40,6 +48,40 @@ int Atom.bare_spelling(String spelling) {
   if (first == '/' && (spelling[1] == '/' || spelling[1] == '*')) return 0;
   int length = spelling.len();
   return scan_atom(spelling) == length;
+}
+
+/** Reports whether `value` is an exact-spelling `Atom`. */
+meta native int Var.is_atom(Var value) => value is <symbol> || value is <lsym>;
+
+/** Returns the first byte of `atom`'s exact spelling, or NUL when invalid. */
+char Atom.first(Atom atom) {
+  if (atom is <symbol>) return Symbol.first(atom);
+  String spelling = atom is <lsym> ? (String) atom.pointer() : NULL;
+  return spelling ? spelling[0] : '\0';
+}
+
+/** Initializes the process-wide `Atom` runtime owner.
+    Repeated calls after successful registration have no effect.
+    Raises: `<bad-state>` after descriptor registration is frozen,
+    `<alloc-fail>` while lower-casing the descriptor name, or `<init-fail>`
+    when registration returns zero.
+*/
+void Atom.initialize(void) {
+  static int initialized = 0;
+  if (initialized) return;
+  VarMethods methods = {
+    .str = (VarStrFn) Atom.str,
+    .repr = _repr,
+    .hash = _hash,
+    .equal = _equal,
+    .compare = _compare,
+    .truth = _truth,
+    .write_str = Atom.write_str,
+    .write_repr = Atom.write_repr
+  };
+  if (!x2c_try_register_descriptor("lsym", methods))
+    raise %(init-fail (operation "Atom"));
+  initialized = 1;
 }
 
 /** Appends the exact spelling of `atom` to `out`.
@@ -76,17 +118,6 @@ Buffer Atom.write_repr(Atom value, Buffer out) {
   return out;
 }
 
-#include "buffer.x"
-#include "dispatch.x"
-#include "scan.x"
-#include "string/string.x"
-#include "symbol.x"
-
-#include <stdlib.h>
-
-/** Reports whether `value` is an exact-spelling `Atom`. */
-meta native int Var.is_atom(Var value) => value is <symbol> || value is <lsym>;
-
 /** Returns the exact spelling of `atom` as a `String`.
     A compact `Atom` is decoded and canonicalized through the active pool
     chain. A long `Atom` returns its borrowed canonical spelling under the
@@ -99,11 +130,26 @@ String Atom.str(Atom atom) {
   return NULL;
 }
 
-/** Returns the first byte of `atom`'s exact spelling, or NUL when invalid. */
-char Atom.first(Atom atom) {
-  if (atom is <symbol>) return Symbol.first(atom);
-  String spelling = atom is <lsym> ? (String) atom.pointer() : NULL;
-  return spelling ? spelling[0] : '\0';
+/** Returns the canonical `Atom` with the supplied exact spelling.
+    Interning equal bytes returns bit-identical `Atom`s. A spelling that
+    round-trips through either compact encoding becomes an immediate
+    `Symbol`; every other spelling borrows its canonical `String` under the
+    module lifetime rule above. Use `Atom.promote` before a long `Atom`
+    escapes its innermost owning pool.
+    Raises: `<bad-arg>` when `spelling` is null or empty, `<alloc-fail>` when
+    its canonical `String` cannot be allocated, or `<bad-enc>` if the
+    long-`Atom` pointer cannot be boxed.
+*/
+Atom Atom.intern(String spelling) {
+  if (!spelling || !*spelling) raise %(bad-arg (operation "Atom.intern"));
+  String canonical = String.new(spelling), int length = canonical.len();
+  Symbol compact = Symbol.new_len(canonical, length);
+  if (_decodes_to(compact, canonical, length))
+    return compact;
+  compact = _exact_7bit(canonical);
+  if (_decodes_to(compact, canonical, length))
+    return compact;
+  return Var.new(<lsym>, canonical);
 }
 
 static int _numeric_prefix(String spelling) {
@@ -152,30 +198,6 @@ static int _compare(Var left, Var right) =>
 
 static int _truth(Var value) => value.pointer() != NULL;
 
-/** Initializes the process-wide `Atom` runtime owner.
-    Repeated calls after successful registration have no effect.
-    Raises: `<bad-state>` after descriptor registration is frozen,
-    `<alloc-fail>` while lower-casing the descriptor name, or `<init-fail>`
-    when registration returns zero.
-*/
-void Atom.initialize(void) {
-  static int initialized = 0;
-  if (initialized) return;
-  VarMethods methods = {
-    .str = (VarStrFn) Atom.str,
-    .repr = _repr,
-    .hash = _hash,
-    .equal = _equal,
-    .compare = _compare,
-    .truth = _truth,
-    .write_str = Atom.write_str,
-    .write_repr = Atom.write_repr
-  };
-  if (!x2c_try_register_descriptor("lsym", methods))
-    raise %(init-fail (operation "Atom"));
-  initialized = 1;
-}
-
 static Symbol _exact_7bit(String spelling) {
   int length = spelling.len();
   if (length > SYMBOL_MAX_7BIT) return 0;
@@ -196,26 +218,4 @@ static int _decodes_to(Symbol compact, String canonical, int length) {
   char text[SYMBOL_MAX_5BIT + 1];
   compact.decode(text);
   return (int) strlen(text) == length && !memcmp(text, canonical, length);
-}
-
-/** Returns the canonical `Atom` with the supplied exact spelling.
-    Interning equal bytes returns bit-identical `Atom`s. A spelling that
-    round-trips through either compact encoding becomes an immediate
-    `Symbol`; every other spelling borrows its canonical `String` under the
-    module lifetime rule above. Use `Atom.promote` before a long `Atom`
-    escapes its innermost owning pool.
-    Raises: `<bad-arg>` when `spelling` is null or empty, `<alloc-fail>` when
-    its canonical `String` cannot be allocated, or `<bad-enc>` if the
-    long-`Atom` pointer cannot be boxed.
-*/
-Atom Atom.intern(String spelling) {
-  if (!spelling || !*spelling) raise %(bad-arg (operation "Atom.intern"));
-  String canonical = String.new(spelling), int length = canonical.len();
-  Symbol compact = Symbol.new_len(canonical, length);
-  if (_decodes_to(compact, canonical, length))
-    return compact;
-  compact = _exact_7bit(canonical);
-  if (_decodes_to(compact, canonical, length))
-    return compact;
-  return Var.new(<lsym>, canonical);
 }

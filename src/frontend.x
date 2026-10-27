@@ -86,6 +86,10 @@ static macro Stmt $fail.frontend_cpp_failed(
     "failed to run C preprocessor",
     $site, %("stage: preprocess" "status: $($status)"));
 
+// symbol collection
+
+static const SymbolSet cpp_dumps = %<<dump-cpp cpp-tokens dump-csym>>;
+
 // source units
 
 /** Runs the source stages. On either result, the caller must close the
@@ -129,6 +133,43 @@ int Frontend.open_session(Frontend frontend, ParsedUnit &unit) =>
 int Frontend.start(Frontend frontend, String filename, ParsedUnit &unit) =>
   _start(frontend, filename, unit, _unit_context(), NULL);
 
+/** Parses a collected unit, retaining both its AST and unsuccessful
+    reports.
+*/
+int ParsedUnit.parse(ParsedUnit &p) {
+  Compiler c = p.compiler;
+  if (c.error_count()) return 0;
+  try p.ast = c.full_parse(p.globals, p.generated_symbols);
+  catch %(malformed *): return 0;
+  return !c.error_count();
+}
+
+// prelude
+
+/** Collects the preludes once, in a Context that shares the caller's pool,
+    before any unit opens. Units, and the workers a translation forks, then
+    replay them from the process cache. The collection runs as an empty
+    unit, whatever dump or symbol mode the request selects. Returns zero
+    after reporting a failure.
+*/
+int Frontend.load_prelude(Frontend frontend) {
+  struct CliRequest request = *frontend.request;
+  request.dump = 0;
+  request.no_cpp = request.live_symbols = request.cpp_symbols = 0;
+  struct Frontend session = *frontend;
+  session.request = &request;
+  ParsedUnit unit;
+  int loaded = _start(
+    &session, NULL, unit, Context.open_named("prelude"), "") &&
+    unit.collect(&session);
+  if (!loaded)
+    foreach (List entry in unit.compiler.diagnostics())
+      unit.compiler.print_diagnostic(entry);
+  unit.close();
+  Compiler.forget_provisional_entries();
+  return loaded;
+}
+
 /** Collects symbols and retains preprocessor outputs for adapter
     inspection.
 */
@@ -152,17 +193,6 @@ int ParsedUnit.collect(ParsedUnit &unit, Frontend frontend) {
   return !c.error_count();
 }
 
-/** Parses a collected unit, retaining both its AST and unsuccessful
-    reports.
-*/
-int ParsedUnit.parse(ParsedUnit &p) {
-  Compiler c = p.compiler;
-  if (c.error_count()) return 0;
-  try p.ast = c.full_parse(p.globals, p.generated_symbols);
-  catch %(malformed *): return 0;
-  return !c.error_count();
-}
-
 /** Releases the unit after its caller has inspected or exported its
     results.
 */
@@ -174,6 +204,37 @@ void ParsedUnit.close(ParsedUnit &unit) {
   Type.end_unit(unit.enclosing_var_tags);
   unit.context.close();
   unit = (ParsedUnit) { 0 };
+}
+
+// lifecycle
+
+/** Borrows a configured request for sequential units. The request and this
+    session must outlive its units. Initialize process support above any
+    temporary command Context before creating a session inside that Context.
+*/
+Frontend Frontend.new(CliRequest request) {
+  Frontend.load_support(request);
+  Frontend f = xcalloc(1, sizeof(struct Frontend));
+  f.request = request;
+  f.include_dirs =
+    request.include_dirs.append(Compiler.default_include_dirs());
+  f.toolchain = Toolchain.new(request);
+  Compiler.use_meta_toolchain(
+    Toolchain.meta_cc(request.meta_cc), f.toolchain.include_dir);
+  return f;
+}
+
+
+
+/** Loads process-owned collection support and the native modules `request`
+    names before units, and selects those modules, in order, for its
+    compile-time calls.
+*/
+void Frontend.load_support(CliRequest request) {
+  Compiler.configure_interfaces(request.out_dir, request.no_interfaces);
+  Compiler.select_native_modules(
+    request.native_modules.map(
+      %!(String path) => Compiler.load_native_module(path)));
 }
 
 // starting a unit
@@ -310,10 +371,6 @@ static int _source_lines(String text) {
   return lines;
 }
 
-// symbol collection
-
-static const SymbolSet cpp_dumps = %<<dump-cpp cpp-tokens dump-csym>>;
-
 /* Without a host-preprocessor mode, a unit collects only its own
    declarations. With one, a child compiler that shares the unit's package
    and name state also parses the preprocessed text, unless a dump of that
@@ -402,12 +459,6 @@ static void _check_cpp_unit(Compiler c) {
     $fail.frontend_module_symbols(c, _first_directive(c));
 }
 
-static Token _first_directive(Compiler c) {
-  for (Token token = c.tokenizer.tokens; token.type != <eof>; token++)
-    if (token.type == <preproc>) return token;
-  return c.token;
-}
-
 /* Runs the host preprocessor for a child compiler that shares the unit's
    package and name state. The unit keeps the output and the errors, which
    the frontend's sink also receives, and the unit depends on every file
@@ -430,6 +481,12 @@ static Compiler _run_cpp(Frontend frontend, ParsedUnit &unit) {
   foreach (String dependency in translation_depfile_parse(dependency_text))
     c.add_translation_dependency(dependency);
   return cpp;
+}
+
+static Token _first_directive(Compiler c) {
+  for (Token token = c.tokenizer.tokens; token.type != <eof>; token++)
+    if (token.type == <preproc>) return token;
+  return c.token;
 }
 
 /* The host's line markers leave the text the compiler reads, since one can
@@ -469,59 +526,4 @@ static void _share_session(Compiler cpp, Compiler c) {
   cpp.meta_bindings = c.meta_bindings;
   cpp.borrowed_bindings = cpp.meta_bindings != NULL;
   cpp.share_meta_group(c);
-}
-
-// prelude
-
-/** Collects the preludes once, in a Context that shares the caller's pool,
-    before any unit opens. Units, and the workers a translation forks, then
-    replay them from the process cache. The collection runs as an empty
-    unit, whatever dump or symbol mode the request selects. Returns zero
-    after reporting a failure.
-*/
-int Frontend.load_prelude(Frontend frontend) {
-  struct CliRequest request = *frontend.request;
-  request.dump = 0;
-  request.no_cpp = request.live_symbols = request.cpp_symbols = 0;
-  struct Frontend session = *frontend;
-  session.request = &request;
-  ParsedUnit unit;
-  int loaded = _start(
-    &session, NULL, unit, Context.open_named("prelude"), "") &&
-    unit.collect(&session);
-  if (!loaded)
-    foreach (List entry in unit.compiler.diagnostics())
-      unit.compiler.print_diagnostic(entry);
-  unit.close();
-  Compiler.forget_provisional_entries();
-  return loaded;
-}
-
-// lifecycle
-
-/** Loads process-owned collection support and the native modules `request`
-    names before units, and selects those modules, in order, for its
-    compile-time calls.
-*/
-void Frontend.load_support(CliRequest request) {
-  Compiler.configure_interfaces(request.out_dir, request.no_interfaces);
-  Compiler.select_native_modules(
-    request.native_modules.map(
-      %!(String path) => Compiler.load_native_module(path)));
-}
-
-/** Borrows a configured request for sequential units. The request and this
-    session must outlive its units. Initialize process support above any
-    temporary command Context before creating a session inside that Context.
-*/
-Frontend Frontend.new(CliRequest request) {
-  Frontend.load_support(request);
-  Frontend f = xcalloc(1, sizeof(struct Frontend));
-  f.request = request;
-  f.include_dirs =
-    request.include_dirs.append(Compiler.default_include_dirs());
-  f.toolchain = Toolchain.new(request);
-  Compiler.use_meta_toolchain(
-    Toolchain.meta_cc(request.meta_cc), f.toolchain.include_dir);
-  return f;
 }

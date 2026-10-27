@@ -8,6 +8,11 @@
 /* Where the project meta build writes each unit's group, while it runs. */
 static String meta_build_directory = NULL;
 
+// a session group, staged in process
+
+/* Holds what staged `meta static` values allocate. */
+static Scope session_meta_scope = NULL;
+
 /** Directs each provider group into `directory`, using `owners` to name
     their headers by table, or stops that when `directory` is NULL.
 */
@@ -45,11 +50,6 @@ void Compiler.write_meta_build(Compiler c) {
   Path.write_text(%"$base.c", source);
 }
 
-// a session group, staged in process
-
-/* Holds what staged `meta static` values allocate. */
-static Scope session_meta_scope = NULL;
-
 /** Binds the session's group function `name` when it is not bound yet, by
     staging the group, and reports at `site` a function that cannot run.
 */
@@ -60,6 +60,22 @@ void Compiler.bind_meta_group(Compiler c, String name, Token site) {
   if (!(name in c.meta_group_bound))
     c.refuse_meta_call(name, site, c.meta_call_missing(name));
 }
+
+/** Stages one session factory in an isolated native emission. `prepare`
+    receives this compiler and returns the factory's typed definition; it
+    can place supporting functions through the ordinary compiler APIs.
+    `declarations` supplies session types. Returns the loaded module's
+    targets, or NULL with `failure` set. Publishes no evaluator bindings.
+*/
+Map Compiler.stage_session_function(
+  Compiler c, List declarations, Func prepare, String &failure) {
+  failure = c.groups_meta() ? NULL : "native modules are unavailable";
+  String module = failure ? NULL : _module(c, declarations, prepare, failure);
+  if (!module) return NULL;
+  return Compiler.native_module_targets(Compiler.load_native_module(module));
+}
+
+// meta group staging
 
 /* Builds and loads the unit's `meta` group, then binds each group
    function not yet bound. Returns the loaded module,
@@ -84,20 +100,6 @@ static String _stage(Compiler c, String &failure) {
       c.meta_group_bound[target] = 1;
     }
   return module;
-}
-
-/** Stages one session factory in an isolated native emission. `prepare`
-    receives this compiler and returns the factory's typed definition; it
-    can place supporting functions through the ordinary compiler APIs.
-    `declarations` supplies session types. Returns the loaded module's
-    targets, or NULL with `failure` set. Publishes no evaluator bindings.
-*/
-Map Compiler.stage_session_function(
-  Compiler c, List declarations, Func prepare, String &failure) {
-  failure = c.groups_meta() ? NULL : "native modules are unavailable";
-  String module = failure ? NULL : _module(c, declarations, prepare, failure);
-  if (!module) return NULL;
-  return Compiler.native_module_targets(Compiler.load_native_module(module));
 }
 
 /* The group's native module under the cache root, named by the SHA-256 of

@@ -29,40 +29,6 @@ Var Compiler.freeze_declaration_syntax(Compiler c, Var syntax) {
   return _freeze_rows(c, syntax);
 }
 
-// A leaf that a List cannot carry as itself becomes a marker row.
-static Var _freeze_leaf(Var syntax) {
-  if (syntax is void) return %(declaration-void);
-  if (syntax is <symbol> && !syntax.symbol())
-    return %(declaration-empty-symbol);
-  if (syntax.is_atom() && !Atom.bare_spelling(syntax.str()))
-    return %(declaration-atom $(syntax.str()));
-  if (syntax is not <token>) return syntax;
-  Token token = syntax;
-  return %(declaration-token $(token.type.str()) $(token.text)
-            $(token.line) $(token.col) $(token.len) $(token.pos));
-}
-
-// An origin index freezes as the location it names in this parse.
-static List _freeze_origin(Compiler c, int origin, Var node) {
-  List location = c.origin_location(origin);
-  if (!location) return %(at m-origin $(c.freeze_declaration_syntax(node)));
-  return %(declaration-origin $(_declaration_location(location, 0))
-            $(c.freeze_declaration_syntax(node)));
-}
-
-// A List whose head is a marker is escaped, so thawing keeps its value.
-static List _freeze_rows(Compiler c, List syntax) {
-  Array rows = [];
-  foreach (Var row in syntax) rows.push(c.freeze_declaration_syntax(row));
-  match (syntax)
-    case %((!or declaration-void declaration-empty-symbol declaration-atom
-                declaration-token declaration-origin declaration-list
-                declaration-cache declaration-cache-binding
-                declaration-binding) *):
-      return %(declaration-list @(rows.list_free()));
-  return rows.list_free();
-}
-
 /** Restores exported syntax in the importing unit's parsing lifetime. */
 Var Compiler.thaw_declaration_syntax(Compiler c, Var syntax) {
   if (syntax is not <list> || syntax.is_nil()) return syntax;
@@ -89,6 +55,29 @@ Var Compiler.thaw_declaration_syntax(Compiler c, Var syntax) {
       return _thaw_origin(c, location, node);
   }
   return _thaw_rows(c, syntax);
+}
+
+// portable compile-time syntax
+
+// An origin index freezes as the location it names in this parse.
+static List _freeze_origin(Compiler c, int origin, Var node) {
+  List location = c.origin_location(origin);
+  if (!location) return %(at m-origin $(c.freeze_declaration_syntax(node)));
+  return %(declaration-origin $(_declaration_location(location, 0))
+            $(c.freeze_declaration_syntax(node)));
+}
+
+// A List whose head is a marker is escaped, so thawing keeps its value.
+static List _freeze_rows(Compiler c, List syntax) {
+  Array rows = [];
+  foreach (Var row in syntax) rows.push(c.freeze_declaration_syntax(row));
+  match (syntax)
+    case %((!or declaration-void declaration-empty-symbol declaration-atom
+                declaration-token declaration-origin declaration-list
+                declaration-cache declaration-cache-binding
+                declaration-binding) *):
+      return %(declaration-list @(rows.list_free()));
+  return rows.list_free();
 }
 
 /* Literal conversion calls refer to the consumer's global bindings. */
@@ -124,15 +113,6 @@ static List _thaw_rows(Compiler c, List rows) {
   return values.list_free();
 }
 
-static Token _thaw_token(
-  Var type, Var text, Var line, Var column, Var length, Var position) {
-  Token token = xcalloc(1, sizeof(struct Token));
-  *token = (struct Token) {
-    .text = text, .type = Symbol.new(type.string()), .line = line,
-    .col = column, .len = length, .pos = position};
-  return token;
-}
-
 // A frozen location becomes a new row of this parse's origin table.
 static List _thaw_origin(Compiler c, List location, Var node) {
   if (location ~= %((file ?file) (line ?line) (column ?column)
@@ -156,6 +136,28 @@ static List _macro_row(Compiler c, List row, int thaw) {
   }
   return thaw ? c.thaw_declaration_syntax(row)
               : c.freeze_declaration_syntax(row);
+}
+
+// A leaf that a List cannot carry as itself becomes a marker row.
+static Var _freeze_leaf(Var syntax) {
+  if (syntax is void) return %(declaration-void);
+  if (syntax is <symbol> && !syntax.symbol())
+    return %(declaration-empty-symbol);
+  if (syntax.is_atom() && !Atom.bare_spelling(syntax.str()))
+    return %(declaration-atom $(syntax.str()));
+  if (syntax is not <token>) return syntax;
+  Token token = syntax;
+  return %(declaration-token $(token.type.str()) $(token.text)
+            $(token.line) $(token.col) $(token.len) $(token.pos));
+}
+
+static Token _thaw_token(
+  Var type, Var text, Var line, Var column, Var length, Var position) {
+  Token token = xcalloc(1, sizeof(struct Token));
+  *token = (struct Token) {
+    .text = text, .type = Symbol.new(type.string()), .line = line,
+    .col = column, .len = length, .pos = position};
+  return token;
 }
 
 static List _declaration_location(List location, int thaw) {

@@ -10,112 +10,11 @@
 #define ERROR_CATCH_STATIC 1
 #define ERROR_CATCH_TRANSIENT 2
 
-/* catch selection
-
-   A transferring catch selects the first arm whose pattern matches the
-   newest record's `(code @detail)`. The selected arm's captures and the
-   records above the watermark then belong to the handle. */
-
-module Symbol _catch_match(ErrorHandler h) {
-  if (Error.count() <= h.watermark) return <declined>;
-  ErrorRecord *record = _record_at(Error.count() - 1);
-  Symbol code = record.entry.car().list().cadr();
-  List detail = record.entry.cadr().list().cadr();
-  ErrorThreadState state = _thread();
-  state.floor_only++;
-  List projection = _cons(record.region, code, detail);
-  Pool.open_named("Error catch bindings");
-  int selected = _catch_select(h, record, projection);
-  Pool.close();
-  if (selected) _catch_retain(h);
-  state.floor_only--;
-  return selected ? <unwind> : <declined>;
-}
-
-static int _catch_select(
-  ErrorHandler h, ErrorRecord *record, List projection) {
-  for (int i = 0; i < h.site.arm_count; i++)
-    if (_catch_arm(h, record, projection, i)) {
-      h.selected = i;
-      return 1;
-    }
-  return 0;
-}
-
-/* Tries arm `i` and, when it matches, copies its captures into the record's
-   region. The default arm matches without a plan. */
-static int _catch_arm(
-  ErrorHandler h, ErrorRecord *record, List projection, int i) {
-  MatchPlan plan = _arm_plan(h, i);
-  MatchCaptureLayout layout = plan ? plan.layout : NULL;
-  int binders = layout ? layout.binder_count : 0;
-  Var *values = binders ? xmalloc(sizeof(Var) * binders) : NULL;
-  MatchCaptureBuffer captures = {values, 0, binders};
-  int matched = i == h.site.default_arm ||
-    (plan.status == <prepared> &&
-     plan.execute_capture(projection, captures, NULL) == 1);
-  if (matched) _commit_captures(h, record, layout, captures);
-  if (values) xfree(values);
-  return matched;
-}
-
-/* A transient site's registration holds its own plans; a static site
-   retains one plan per arm. */
-static MatchPlan _arm_plan(ErrorHandler h, int i) {
-  if (i == h.site.default_arm) return NULL;
-  MatchPlan *plans = h.plans != NULL ? h.plans.bytes : NULL;
-  return plans ? plans[i] : h.site.arms[i].plan;
-}
-
-static void _commit_captures(
-  ErrorHandler handle, ErrorRecord *record, MatchCaptureLayout layout,
-  MatchCaptureBuffer &captures) {
-  if (handle.capture_values != NULL) {
-    handle.capture_values.free();
-    handle.capture_values = NULL;
-  }
-  if (!layout || !layout.binder_count) return;
-  int pushed = _scope_push(
-    <alloc-fail>, "could not enter error scope for catch captures");
-  handle.capture_values = Block.new(sizeof(Var));
-  handle.capture_values.append(NULL, layout.binder_count);
-  Var *values = handle.capture_values.bytes;
-  for (int i = 0; i < layout.binder_count; i++) {
-    values[i] = void;
-    if (captures.has(i))
-      values[i] = _copy_value(record.region, captures.values[i]);
-  }
-  if (pushed) Scope.pop();
-}
-
-/* Move the selected slice off the public record stack without destroying its
-   private regions. Capture values were copied into the newest record's region,
-   so the detached catch handle owns both them and the selected Error until
-   `_free` destroys `retained`. Records are stored newest first;
-   their order is immaterial because the catch exposes only captures. A second
-   transfer can select the same handle before its landing runs, as when a
-   `finally` raises while carrying an Error; the abandoned selection is
-   destroyed here because the replacement transfer owns the handle. */
-static void _catch_retain(ErrorHandler handle) {
-  int pushed = _scope_push(
-    <alloc-fail>, "could not enter error scope for retained catch records");
-  _retained_destroy(handle.retained);
-  handle.retained = Block.new(sizeof(ErrorRecord));
-  while (Error.count() > handle.watermark) {
-    ErrorRecord record = *_record_at(Error.count() - 1);
-    handle.retained.push(&record);
-    _thread().stack.pop();
-  }
-  if (pushed) Scope.pop();
-}
-
-static void _retained_destroy(Block retained) {
-  if (retained == NULL) return;
-  ErrorRecord *records = retained.bytes;
-  for (size_t i = 0; i < retained.length; i++)
-    _destroy(records[i].region);
-  retained.free();
-}
+/* The mutex is recursive: an `<alloc-fail>` observer that registers another
+   pending site while a bind holds it must not deadlock. */
+static pthread_mutex_t catch_site_mutex;
+static pthread_once_t catch_site_mutex_once =
+  (pthread_once_t) PTHREAD_ONCE_INIT;
 
 /* the handler stack
 
@@ -141,15 +40,6 @@ ErrorHandler Error.push(ErrorHandlerFn fn, Var data) {
   return h;
 }
 
-static ErrorHandler _handler_new(ErrorHandlerFn fn, Var data) {
-  ErrorThreadState state = _thread();
-  ErrorHandler h = Scope.malloc_in(&state.scope, sizeof(struct ErrorHandler));
-  *h = (struct ErrorHandler) {
-    .prev = state.handler_top, .fn = fn, .data = data,
-    .watermark = Error.count(), .selected = -1};
-  return h;
-}
-
 /** Closes the observing handler on top of the handler stack.
     Closing truncates and reclaims every error above the handler's registration
     watermark, then unregisters it. `Error`s below the watermark remain.
@@ -166,66 +56,37 @@ void Error.pop(ErrorHandler handle) {
   _free(handle);
 }
 
-module void _free(ErrorHandler handle) {
-  if (!handle) return;
-  // a per-call site has no static arm storage and belongs to this handler
-  if (handle.site && !handle.site.arms) xfree(handle.site);
-  _plans_free(handle.plans);
-  if (handle.capture_values != NULL) handle.capture_values.free();
-  _retained_destroy(handle.retained);
-  _destroy(handle.view);
-  xfree(handle);
-}
-
-static void _plans_free(Block plans) {
-  if (plans == NULL) return;
-  MatchPlan *items = plans.bytes;
-  for (size_t i = 0; i < plans.length; i++) items[i].free();
-  plans.free();
-}
-
-/* Pops handlers down to `stop`, reclaiming each one. `truncate` also discards
-   the records above every popped handler's watermark; a Context closed by an
-   unwinding exception keeps those for its outer handler and is the one caller
-   that passes zero. */
-module void _unwind_to(
-  ErrorThreadState state, ErrorHandler stop, int truncate) {
-  while (state.handler_top && state.handler_top != stop) {
-    ErrorHandler removed = state.handler_top;
-    state.handler_top = removed.prev;
-    if (truncate) _truncate(removed.watermark);
-    _free(removed);
-  }
-}
-
-/* Returns the handler that leaves exactly `depth` registered, or the current
-   head when the stack is already that shallow. The height is measured once
-   here so an unwind does not re-measure it per cleanup record. */
-module ErrorHandler _handler_at_depth(ErrorThreadState state, int depth) {
-  ErrorHandler stop = state.handler_top;
-  for (int height = Error.handler_depth(); height > depth && stop; height--)
-    stop = stop.prev;
-  return stop;
-}
-
-static int _chain_contains(ErrorHandler head, ErrorHandler wanted) {
-  if (!wanted) return 1;
-  for (ErrorHandler h = head; h; h = h.prev) if (h == wanted) return 1;
-  return 0;
-}
-
-/** Returns the current thread's number of registered `Error` handlers. */
-int Error.handler_depth(void) {
-  int depth = 0;
-  for (ErrorHandler h = _thread().handler_top; h; h = h.prev) depth++;
-  return depth;
-}
-
 /** Returns the current thread's borrowed top `Error`-handler pointer.
     Exception frames use this opaque value as a restore watermark; it remains
     valid only while its registration remains live.
 */
 void *Error.handler_head(void) => _thread().handler_top;
+
+/** Registers one transferring catch from patterns supplied per call.
+    A hand-written caller that has no static site uses this form; `arm_count`
+    `List` pattern `Var`s follow in source order, and one plan per arm is
+    prepared for this registration alone. Results and failures follow
+    `x2c_error_catch_site_push`.
+*/
+ErrorHandler x2c_error_catch_push(void *target, unsigned arm_count, ...) {
+  if (!Error.ready() || !arm_count)
+    _floor(<invariant>, "could not register transferring catch");
+  ErrorThreadState state = _thread();
+  ErrorCatchSite *site = Scope.malloc_in(
+    &state.scope, sizeof(ErrorCatchSite) + sizeof(Var) * arm_count);
+  Var *patterns = (void *) (site + 1);
+  *site = (ErrorCatchSite) {
+    NULL, -1, (int) arm_count, ERROR_CATCH_TRANSIENT, -1};
+  va_list args;
+  va_start(args, arm_count);
+  for (unsigned i = 0; i < arm_count; i++) {
+    patterns[i] = va_arg(args, Var);
+    if (patterns[i] == <default> && site.default_arm < 0)
+      site.default_arm = (int) i;
+  }
+  va_end(args);
+  return x2c_error_catch_site_push(target, site, patterns);
+}
 
 /* transferring catches
 
@@ -272,109 +133,6 @@ ErrorHandler x2c_error_catch_site_push(
   }
   state.handler_top = h;
   return h;
-}
-
-/* Binds a pending site, then returns why the first fenced arm this
-   registration can reach is unusable, or NULL. A transient site prepares
-   its plans for this registration alone. */
-static const char *_prepare_arms(ErrorHandler h, Var *patterns, int &arm) {
-  ErrorCatchSite *site = h.site;
-  if (_state(site) == ERROR_CATCH_PENDING) _bind(site, patterns);
-  if (_state(site) == ERROR_CATCH_TRANSIENT)
-    return _prepare_plans(h, patterns, arm);
-  if (site.fenced_arm < 0) return NULL;
-  arm = site.fenced_arm;
-  return site.arms[arm].plan.reason;
-}
-
-static int _state(ErrorCatchSite *site) =>
-  __atomic_load_n(&site.state, __ATOMIC_ACQUIRE);
-
-static void _bind(ErrorCatchSite *site, Var *patterns) {
-  _site_lock();
-  // promotion and preparation allocate, and a failure never returns here
-  defer _site_unlock();
-  if (_state(site) != ERROR_CATCH_PENDING) return;
-  int retainable = 1;
-  for (int i = 0; retainable && i < site.arm_count; i++)
-    if (i != site.default_arm)
-      retainable = List.try_own(patterns[i]) &&
-                   x2c_match_pattern_retainable(patterns[i]);
-  if (retainable)
-    for (int i = 0; i < site.arm_count; i++) {
-      if (i == site.default_arm) continue;
-      MatchPlan plan = x2c_match_site_prepare(&site.arms[i], patterns[i]);
-      if (plan.status == <ineligible> && site.fenced_arm < 0)
-        site.fenced_arm = i;
-    }
-  __atomic_store_n(
-    &site.state, retainable ? ERROR_CATCH_STATIC : ERROR_CATCH_TRANSIENT,
-    __ATOMIC_RELEASE);
-}
-
-/* The mutex is recursive: an `<alloc-fail>` observer that registers another
-   pending site while a bind holds it must not deadlock. */
-static pthread_mutex_t catch_site_mutex;
-static pthread_once_t catch_site_mutex_once =
-  (pthread_once_t) PTHREAD_ONCE_INIT;
-
-static void _site_mutex_initialize(void) =>
-  Mutex.recursive_initialize(
-    &catch_site_mutex, "Error: could not initialize catch site mutex");
-
-static void _site_lock(void) =>
-  Mutex.recursive_lock(
-    &catch_site_mutex, &catch_site_mutex_once, _site_mutex_initialize,
-    "Error: could not lock catch site");
-
-static void _site_unlock(void) =>
-  Mutex.recursive_unlock(
-    &catch_site_mutex, "Error: could not unlock catch site");
-
-static const char *_prepare_plans(
-  ErrorHandler h, Var *patterns, int &fenced_arm) {
-  ErrorCatchSite *site = h.site;
-  const char *fenced = NULL;
-  int pushed = _scope_push(
-    <alloc-fail>, "could not enter error scope for catch patterns");
-  h.plans = Block.new(sizeof(MatchPlan));
-  for (int i = 0; i < site.arm_count; i++) {
-    MatchPlan plan = i == site.default_arm || patterns[i] == <default>
-                   ? NULL : MatchPlan.prepare(patterns[i]);
-    h.plans.push(&plan);
-    if (plan && plan.status == <ineligible> && !fenced) {
-      fenced = plan.reason;
-      fenced_arm = i;
-    }
-  }
-  if (pushed) Scope.pop();
-  return fenced;
-}
-
-/** Registers one transferring catch from patterns supplied per call.
-    A hand-written caller that has no static site uses this form; `arm_count`
-    `List` pattern `Var`s follow in source order, and one plan per arm is
-    prepared for this registration alone. Results and failures follow
-    `x2c_error_catch_site_push`.
-*/
-ErrorHandler x2c_error_catch_push(void *target, unsigned arm_count, ...) {
-  if (!Error.ready() || !arm_count)
-    _floor(<invariant>, "could not register transferring catch");
-  ErrorThreadState state = _thread();
-  ErrorCatchSite *site = Scope.malloc_in(
-    &state.scope, sizeof(ErrorCatchSite) + sizeof(Var) * arm_count);
-  Var *patterns = (void *) (site + 1);
-  *site = (ErrorCatchSite) {
-    NULL, -1, (int) arm_count, ERROR_CATCH_TRANSIENT, -1};
-  va_list args;
-  va_start(args, arm_count);
-  for (unsigned i = 0; i < arm_count; i++) {
-    patterns[i] = va_arg(args, Var);
-    if (patterns[i] == <default> && site.default_arm < 0)
-      site.default_arm = (int) i;
-  }
-  va_end(args);
-  return x2c_error_catch_site_push(target, site, patterns);
 }
 
 /** Reports whether one catch site still needs its patterns at registration.
@@ -499,4 +257,246 @@ void Error.restore(int handler_depth, int stack_height) {
   ErrorThreadState state = _thread();
   _unwind_to(state, _handler_at_depth(state, handler_depth), 1);
   _truncate(stack_height);
+}
+
+/** Returns the current thread's number of registered `Error` handlers. */
+int Error.handler_depth(void) {
+  int depth = 0;
+  for (ErrorHandler h = _thread().handler_top; h; h = h.prev) depth++;
+  return depth;
+}
+
+static ErrorHandler _handler_new(ErrorHandlerFn fn, Var data) {
+  ErrorThreadState state = _thread();
+  ErrorHandler h = Scope.malloc_in(&state.scope, sizeof(struct ErrorHandler));
+  *h = (struct ErrorHandler) {
+    .prev = state.handler_top, .fn = fn, .data = data,
+    .watermark = Error.count(), .selected = -1};
+  return h;
+}
+
+module void _free(ErrorHandler handle) {
+  if (!handle) return;
+  // a per-call site has no static arm storage and belongs to this handler
+  if (handle.site && !handle.site.arms) xfree(handle.site);
+  _plans_free(handle.plans);
+  if (handle.capture_values != NULL) handle.capture_values.free();
+  _retained_destroy(handle.retained);
+  _destroy(handle.view);
+  xfree(handle);
+}
+
+static void _retained_destroy(Block retained) {
+  if (retained == NULL) return;
+  ErrorRecord *records = retained.bytes;
+  for (size_t i = 0; i < retained.length; i++)
+    _destroy(records[i].region);
+  retained.free();
+}
+
+static void _plans_free(Block plans) {
+  if (plans == NULL) return;
+  MatchPlan *items = plans.bytes;
+  for (size_t i = 0; i < plans.length; i++) items[i].free();
+  plans.free();
+}
+
+/* Binds a pending site, then returns why the first fenced arm this
+   registration can reach is unusable, or NULL. A transient site prepares
+   its plans for this registration alone. */
+static const char *_prepare_arms(ErrorHandler h, Var *patterns, int &arm) {
+  ErrorCatchSite *site = h.site;
+  if (_state(site) == ERROR_CATCH_PENDING) _bind(site, patterns);
+  if (_state(site) == ERROR_CATCH_TRANSIENT)
+    return _prepare_plans(h, patterns, arm);
+  if (site.fenced_arm < 0) return NULL;
+  arm = site.fenced_arm;
+  return site.arms[arm].plan.reason;
+}
+
+static void _bind(ErrorCatchSite *site, Var *patterns) {
+  _site_lock();
+  // promotion and preparation allocate, and a failure never returns here
+  defer _site_unlock();
+  if (_state(site) != ERROR_CATCH_PENDING) return;
+  int retainable = 1;
+  for (int i = 0; retainable && i < site.arm_count; i++)
+    if (i != site.default_arm)
+      retainable = List.try_own(patterns[i]) &&
+                   x2c_match_pattern_retainable(patterns[i]);
+  if (retainable)
+    for (int i = 0; i < site.arm_count; i++) {
+      if (i == site.default_arm) continue;
+      MatchPlan plan = x2c_match_site_prepare(&site.arms[i], patterns[i]);
+      if (plan.status == <ineligible> && site.fenced_arm < 0)
+        site.fenced_arm = i;
+    }
+  __atomic_store_n(
+    &site.state, retainable ? ERROR_CATCH_STATIC : ERROR_CATCH_TRANSIENT,
+    __ATOMIC_RELEASE);
+}
+
+static int _state(ErrorCatchSite *site) =>
+  __atomic_load_n(&site.state, __ATOMIC_ACQUIRE);
+
+static void _site_lock(void) =>
+  Mutex.recursive_lock(
+    &catch_site_mutex, &catch_site_mutex_once, _site_mutex_initialize,
+    "Error: could not lock catch site");
+
+static void _site_mutex_initialize(void) =>
+  Mutex.recursive_initialize(
+    &catch_site_mutex, "Error: could not initialize catch site mutex");
+
+static void _site_unlock(void) =>
+  Mutex.recursive_unlock(
+    &catch_site_mutex, "Error: could not unlock catch site");
+
+static const char *_prepare_plans(
+  ErrorHandler h, Var *patterns, int &fenced_arm) {
+  ErrorCatchSite *site = h.site;
+  const char *fenced = NULL;
+  int pushed = _scope_push(
+    <alloc-fail>, "could not enter error scope for catch patterns");
+  h.plans = Block.new(sizeof(MatchPlan));
+  for (int i = 0; i < site.arm_count; i++) {
+    MatchPlan plan = i == site.default_arm || patterns[i] == <default>
+                   ? NULL : MatchPlan.prepare(patterns[i]);
+    h.plans.push(&plan);
+    if (plan && plan.status == <ineligible> && !fenced) {
+      fenced = plan.reason;
+      fenced_arm = i;
+    }
+  }
+  if (pushed) Scope.pop();
+  return fenced;
+}
+
+static int _chain_contains(ErrorHandler head, ErrorHandler wanted) {
+  if (!wanted) return 1;
+  for (ErrorHandler h = head; h; h = h.prev) if (h == wanted) return 1;
+  return 0;
+}
+
+/* Pops handlers down to `stop`, reclaiming each one. `truncate` also discards
+   the records above every popped handler's watermark; a Context closed by an
+   unwinding exception keeps those for its outer handler and is the one caller
+   that passes zero. */
+module void _unwind_to(
+  ErrorThreadState state, ErrorHandler stop, int truncate) {
+  while (state.handler_top && state.handler_top != stop) {
+    ErrorHandler removed = state.handler_top;
+    state.handler_top = removed.prev;
+    if (truncate) _truncate(removed.watermark);
+    _free(removed);
+  }
+}
+
+/* Returns the handler that leaves exactly `depth` registered, or the current
+   head when the stack is already that shallow. The height is measured once
+   here so an unwind does not re-measure it per cleanup record. */
+module ErrorHandler _handler_at_depth(ErrorThreadState state, int depth) {
+  ErrorHandler stop = state.handler_top;
+  for (int height = Error.handler_depth(); height > depth && stop; height--)
+    stop = stop.prev;
+  return stop;
+}
+
+/* catch selection
+
+   A transferring catch selects the first arm whose pattern matches the
+   newest record's `(code @detail)`. The selected arm's captures and the
+   records above the watermark then belong to the handle. */
+
+module Symbol _catch_match(ErrorHandler h) {
+  if (Error.count() <= h.watermark) return <declined>;
+  ErrorRecord *record = _record_at(Error.count() - 1);
+  Symbol code = record.entry.car().list().cadr();
+  List detail = record.entry.cadr().list().cadr();
+  ErrorThreadState state = _thread();
+  state.floor_only++;
+  List projection = _cons(record.region, code, detail);
+  Pool.open_named("Error catch bindings");
+  int selected = _catch_select(h, record, projection);
+  Pool.close();
+  if (selected) _catch_retain(h);
+  state.floor_only--;
+  return selected ? <unwind> : <declined>;
+}
+
+static int _catch_select(
+  ErrorHandler h, ErrorRecord *record, List projection) {
+  for (int i = 0; i < h.site.arm_count; i++)
+    if (_catch_arm(h, record, projection, i)) {
+      h.selected = i;
+      return 1;
+    }
+  return 0;
+}
+
+/* Tries arm `i` and, when it matches, copies its captures into the record's
+   region. The default arm matches without a plan. */
+static int _catch_arm(
+  ErrorHandler h, ErrorRecord *record, List projection, int i) {
+  MatchPlan plan = _arm_plan(h, i);
+  MatchCaptureLayout layout = plan ? plan.layout : NULL;
+  int binders = layout ? layout.binder_count : 0;
+  Var *values = binders ? xmalloc(sizeof(Var) * binders) : NULL;
+  MatchCaptureBuffer captures = {values, 0, binders};
+  int matched = i == h.site.default_arm ||
+    (plan.status == <prepared> &&
+     plan.execute_capture(projection, captures, NULL) == 1);
+  if (matched) _commit_captures(h, record, layout, captures);
+  if (values) xfree(values);
+  return matched;
+}
+
+/* A transient site's registration holds its own plans; a static site
+   retains one plan per arm. */
+static MatchPlan _arm_plan(ErrorHandler h, int i) {
+  if (i == h.site.default_arm) return NULL;
+  MatchPlan *plans = h.plans != NULL ? h.plans.bytes : NULL;
+  return plans ? plans[i] : h.site.arms[i].plan;
+}
+
+static void _commit_captures(
+  ErrorHandler handle, ErrorRecord *record, MatchCaptureLayout layout,
+  MatchCaptureBuffer &captures) {
+  if (handle.capture_values != NULL) {
+    handle.capture_values.free();
+    handle.capture_values = NULL;
+  }
+  if (!layout || !layout.binder_count) return;
+  int pushed = _scope_push(
+    <alloc-fail>, "could not enter error scope for catch captures");
+  handle.capture_values = Block.new(sizeof(Var));
+  handle.capture_values.append(NULL, layout.binder_count);
+  Var *values = handle.capture_values.bytes;
+  for (int i = 0; i < layout.binder_count; i++) {
+    values[i] = void;
+    if (captures.has(i))
+      values[i] = _copy_value(record.region, captures.values[i]);
+  }
+  if (pushed) Scope.pop();
+}
+
+/* Move the selected slice off the public record stack without destroying its
+   private regions. Capture values were copied into the newest record's region,
+   so the detached catch handle owns both them and the selected Error until
+   `_free` destroys `retained`. Records are stored newest first;
+   their order is immaterial because the catch exposes only captures. A second
+   transfer can select the same handle before its landing runs, as when a
+   `finally` raises while carrying an Error; the abandoned selection is
+   destroyed here because the replacement transfer owns the handle. */
+static void _catch_retain(ErrorHandler handle) {
+  int pushed = _scope_push(
+    <alloc-fail>, "could not enter error scope for retained catch records");
+  _retained_destroy(handle.retained);
+  handle.retained = Block.new(sizeof(ErrorRecord));
+  while (Error.count() > handle.watermark) {
+    ErrorRecord record = *_record_at(Error.count() - 1);
+    handle.retained.push(&record);
+    _thread().stack.pop();
+  }
+  if (pushed) Scope.pop();
 }

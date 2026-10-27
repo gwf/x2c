@@ -67,7 +67,7 @@ Stores in `cursor` the List a macro-valued `case` examines for
 one. A List headed by another Symbol than a wrapper or `expr` is its
 own view.
 
-Source: `lib/macrovalue/macrovalue.x:97`
+Source: `lib/macrovalue/macrovalue.x:91`
 
 <a id="Macro_case_own"></a>
 #### Macro_case_own
@@ -138,7 +138,7 @@ Source: `lib/macrovalue/macrovalue.x:64`
 
 The short Symbol `value` holds, or 0 for any other value.
 
-Source: `lib/macrovalue/macrovalue.x:87`
+Source: `lib/macrovalue/macrovalue.x:101`
 
 <a id="Macro_case_view"></a>
 #### Macro_case_view
@@ -168,7 +168,7 @@ Source: `lib/macrovalue/construction.x:8`
 Derives the Match pattern that recognizes code this macro builds,
 capturing each parameter under the given binder.
 
-Source: `lib/macrovalue/patterns.x:46`
+Source: `lib/macrovalue/patterns.x:36`
 
 ### `Macro`
 
@@ -181,7 +181,7 @@ Returns the name a typed quotation declares with a Name hole whose local
 holds `value`: the name form of an `x2c_ident` spelling or a String,
 or a binding as it is.
 
-Source: `lib/macrovalue/construction.x:69`
+Source: `lib/macrovalue/construction.x:23`
 
 <a id="Macro.inserted"></a>
 #### Macro.inserted
@@ -196,7 +196,7 @@ spelling, or a Name hole's String becomes an identifier expression;
 in a Name hole's member position, an `x2c_ident` spelling is its
 String.
 
-Source: `lib/macrovalue/construction.x:55`
+Source: `lib/macrovalue/construction.x:58`
 
 <a id="Macro.inserted_items"></a>
 #### Macro.inserted_items
@@ -207,7 +207,7 @@ Returns the items a typed quotation splices for an expression sequence
 hole whose local holds `values`: each number, String, or Symbol becomes
 its literal, as a spliced data List's items do.
 
-Source: `lib/macrovalue/construction.x:78`
+Source: `lib/macrovalue/construction.x:32`
 
 <a id="Macro.matcher"></a>
 #### Macro.matcher
@@ -227,7 +227,7 @@ Source: `lib/macrovalue/recognition.x:77`
 Tests complete code against a macro and its hole patterns. Repeated
 recognition can retain `Macro.matcher` so the pattern is derived once.
 
-Source: `lib/macrovalue/recognition.x:104`
+Source: `lib/macrovalue/recognition.x:89`
 
 <a id="Macro.number_literal"></a>
 #### Macro.number_literal
@@ -238,7 +238,7 @@ Returns the literal expression of type `result` that holds `value`, a
 number of the scalar type `type`. An `int` value is its decimal
 literal; another number is its exact bits cast to `type`.
 
-Source: `lib/macrovalue/construction.x:144`
+Source: `lib/macrovalue/construction.x:100`
 
 <a id="Macro.number_type"></a>
 #### Macro.number_type
@@ -248,7 +248,7 @@ Source: `lib/macrovalue/construction.x:144`
 Returns the C type of a number's Var family, or NULL when `value` is not
 a number. An untyped integer is an `int` when it fits one.
 
-Source: `lib/macrovalue/construction.x:117`
+Source: `lib/macrovalue/construction.x:73`
 
 <a id="Macro.subject"></a>
 #### Macro.subject
@@ -257,7 +257,7 @@ Source: `lib/macrovalue/construction.x:117`
 
 Returns the table `Macro.use_subject` last set, or void.
 
-Source: `lib/macrovalue/patterns.x:14`
+Source: `lib/macrovalue/patterns.x:16`
 
 <a id="Macro.typed"></a>
 #### Macro.typed
@@ -268,7 +268,7 @@ Returns what a typed quotation builds when its code is one hole whose
 local holds `value`: the inserted expression with the type `type`. A
 String typed `String` is a String literal.
 
-Source: `lib/macrovalue/construction.x:84`
+Source: `lib/macrovalue/construction.x:38`
 
 <a id="Macro.use_subject"></a>
 #### Macro.use_subject
@@ -282,7 +282,7 @@ recognizes only the recorded global binding; with void it recognizes
 any binding of its spelling. The compiler sets these rows for each
 `meta` call and carries them through the helper.
 
-Source: `lib/macrovalue/patterns.x:23`
+Source: `lib/macrovalue/patterns.x:25`
 
 ### `MacroMatcher`
 
@@ -294,7 +294,7 @@ Source: `lib/macrovalue/patterns.x:23`
 Tests code with the same source views and identity rules as a macro
 case.
 
-Source: `lib/macrovalue/recognition.x:89`
+Source: `lib/macrovalue/recognition.x:97`
 
 ## Runtime-internal callables
 
@@ -317,7 +317,7 @@ whose binder is `binder`. Splice and construction projections are
 always sequences; return, declarator, and member projections never
 are; source, value, and expression follow the hole's `sequence`.
 
-Source: `lib/macrovalue/patterns.x:112`
+Source: `lib/macrovalue/patterns.x:45`
 
 ## Public types
 

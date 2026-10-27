@@ -1,28 +1,4 @@
 #include <assert.h>
-int wait_for_day(void) { static int days = 0; return days++ < 2; }
-Array survey_files(void) => ["first.dat", "second.dat"];
-Map inspect_file(String path) => {sizes: [12, 24], errors: 0};
-void save_findings(String path, Map findings) {
-  Array sizes = findings[<sizes>];
-  assert(sizes[0] == 12 && findings[<errors>] == 0);
-}
-int return_early(void) { {
-  Scope.retain();
-  defer Scope.release();
-  Array files = survey_files();
-  return files.length;
-} }
-void fail_in_scope(void) {
-  size_t before = Scope.stats().live_allocations;
-  try {
-    Scope.retain();
-    defer Scope.release();
-    Map findings = inspect_file("failure.dat");
-    assert(Scope.stats().live_allocations > before);
-    raise %(oops);
-  }
-  catch %(oops): {}
-}
 int main(void) {
 // Prepare the catch before measuring reclaimable working storage.
 fail_in_scope();
@@ -53,3 +29,33 @@ fail_in_scope();
 assert(Scope.stats().live_allocations == before);
 return 0;
 }
+
+int wait_for_day(void) { static int days = 0; return days++ < 2; }
+
+void save_findings(String path, Map findings) {
+  Array sizes = findings[<sizes>];
+  assert(sizes[0] == 12 && findings[<errors>] == 0);
+}
+
+int return_early(void) { {
+  Scope.retain();
+  defer Scope.release();
+  Array files = survey_files();
+  return files.length;
+} }
+
+Array survey_files(void) => ["first.dat", "second.dat"];
+
+void fail_in_scope(void) {
+  size_t before = Scope.stats().live_allocations;
+  try {
+    Scope.retain();
+    defer Scope.release();
+    Map findings = inspect_file("failure.dat");
+    assert(Scope.stats().live_allocations > before);
+    raise %(oops);
+  }
+  catch %(oops): {}
+}
+
+Map inspect_file(String path) => {sizes: [12, 24], errors: 0};

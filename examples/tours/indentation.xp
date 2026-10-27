@@ -13,16 +13,6 @@ struct Item:
   Shape shape
   double size
 
-double area(struct Item item):
-  switch item.shape:
-    case CIRCLE:
-      return 3.14159 * item.size * item.size
-    default:
-      return item.size * item.size
-
-String describe(double total) =>
-  total > 100 ? "large" : "small"
-
 int main(void):
   struct Item items[] = {
     {.shape = CIRCLE, .size = 2},
@@ -41,3 +31,13 @@ int main(void):
     .map(%!(Var w) => w.str().len())
   printf("%s\n", sizes.str())
   return 0
+
+double area(struct Item item):
+  switch item.shape:
+    case CIRCLE:
+      return 3.14159 * item.size * item.size
+    default:
+      return item.size * item.size
+
+String describe(double total) =>
+  total > 100 ? "large" : "small"

@@ -59,11 +59,6 @@ List Compiler.lower_defer_region(Compiler c, List body, List finalizer) {
   return _callable_defer(c, body, finalizer);
 }
 
-/* A region that lands is a `try` the kernel writes, marked `kernel` until
-   the cleanup walk lowers it. */
-static List _landing_region(List body, List finalizer) =>
-  %(try $body () $finalizer kernel);
-
 static int _defer_needs_landing(List ast) {
   List node;
   $ast.walk(ast, node)
@@ -103,6 +98,11 @@ static List _callable_defer(Compiler c, List body, List finalizer) {
     c.set_fact(%(defer-ownr $callback), c.fn_name);
   return %(defer $body $env_binding $callback $records $(d.written));
 }
+
+/* A region that lands is a `try` the kernel writes, marked `kernel` until
+   the cleanup walk lowers it. */
+static List _landing_region(List body, List finalizer) =>
+  %(try $body () $finalizer kernel);
 
 static void _collect_captures(DeferCaptures &d, List ast) {
   if (!ast || d.unsupported) return;

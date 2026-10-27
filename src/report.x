@@ -37,6 +37,15 @@ static struct ReportState {
   unsigned long start, update;
 } report;
 
+// the progress line
+
+static enum { BAR_WIDTH = 14 };
+
+// terminal output
+
+// A carriage return, then an erase to the end of the line.
+static const char _clear[] = "\r\033[K";
+
 // configuration
 
 /** Resets process reporting for one command.
@@ -58,6 +67,110 @@ void report_configure(
   report.color = _use_color(plain, color_mode, terminal);
 }
 
+/** Returns whether stable completion receipts are currently enabled. */
+int report_receipts(void) => report.receipts;
+
+/** Updates the terminal's transient progress line when transient mode is
+    active. Updates start after 125 ms and incomplete work is limited to one
+    update per 50 ms. `detail` may be NULL; output is clipped to the configured
+    terminal width and has no newline.
+*/
+void report_progress(Symbol phase, int done, int total, String detail) {
+  if (!report.transient) return;
+  unsigned long now = report_now_us();
+  if (!_update_due(now, done, total)) return;
+  report.update = now;
+  if (_own_line()) _draw(phase, done, total, detail);
+}
+
+/** Clears the active transient line from stderr, if this process drew one.
+    Forked workers inherit the state but leave the line to their parent.
+*/
+void report_suspend(void) {
+  if (!report.width || getpid() != report.pid) return;
+  report.width = 0;
+  _emit(_clear, sizeof(_clear) - 1, "", "", 0);
+}
+
+// receipts
+
+/** Writes a muted phase receipt when receipts are enabled.
+    A fully cached nonempty phase is marked up to date; a partial cache reports
+    its cached count, and every receipt includes the elapsed time.
+*/
+void report_phase(
+  Symbol phase, int count, String noun, int cached,
+  unsigned long microseconds) {
+  String cache = _cache_note(count, cached);
+  String name = phase.str().capitalize();
+  String duration = report_duration(microseconds);
+  report_line(<muted>, %"  $name $count $noun in $duration$cache");
+}
+
+/** Writes the muted receipt for `n` generated C files and as many headers,
+    `bytes` in all, when receipts are enabled.
+*/
+void report_generated(int n, unsigned long long bytes) {
+  String size = report_size(bytes);
+  String c_noun = n == 1 ? "C file" : "C files";
+  String h_noun = n == 1 ? "header" : "headers";
+  report_line(<muted>, %"  Generated $n $c_noun and $n $h_noun ($size)");
+}
+
+
+
+/** Writes one newline-terminated receipt to stderr when receipts are enabled.
+    In transient mode the receipt first clears the terminal line, which
+    another process may be drawing, and `line` must be non-NULL.
+*/
+void report_line(Symbol tone, String line) {
+  report.width = 0;
+  if (!report.receipts) return;
+  int clear = report.transient ? sizeof(_clear) - 1 : 0;
+  _emit(_clear, clear, _color(tone), line, 1);
+}
+
+// durations and sizes
+
+/** Returns monotonic time in microseconds, or zero when the clock read fails.
+    The value measures elapsed time; it is not a wall-clock timestamp.
+*/
+unsigned long report_now_us(void) {
+  struct timespec now;
+  if (clock_gettime(CLOCK_MONOTONIC, &now)) return 0;
+  return (unsigned long) now.tv_sec * 1000000ul +
+         (unsigned long) now.tv_nsec / 1000ul;
+}
+
+/** Returns the size of a regular file.
+    NULL, a failed `stat`, or a non-regular path returns zero.
+*/
+unsigned long long Path.regular_bytes(String path) {
+  struct stat info;
+  if (!path || stat(path, &info) || !S_ISREG(info.st_mode)) return 0;
+  return (unsigned long long) info.st_size;
+}
+
+/** Formats microseconds as integer `us`, rounded whole `ms`, or seconds with
+    two decimal places.
+*/
+String report_duration(unsigned long microseconds) {
+  if (microseconds < 1000) return "%lu us".printf(microseconds);
+  if (microseconds < 1000000) return "%.0f ms".printf(microseconds / 1000.0);
+  return "%.2f s".printf(microseconds / 1000000.0);
+}
+
+/** Formats bytes as `B`, `KiB`, or `MiB` using binary unit boundaries.
+    Byte counts are exact; larger units use one decimal place.
+*/
+String report_size(unsigned long long bytes) {
+  if (bytes < 1024) return "%llu B".printf(bytes);
+  if (bytes < 1024ull * 1024ull) return "%.1f KiB".printf(bytes / 1024.0);
+  return "%.1f MiB".printf(bytes / (1024.0 * 1024.0));
+}
+
+// progress and receipt rendering
+
 static int _columns(void) {
   struct winsize size;
   if (ioctl(fileno(stderr), TIOCGWINSZ, &size) == 0 && size.ws_col > 0)
@@ -71,26 +184,6 @@ static int _use_color(int plain, Symbol mode, int terminal) {
   if (plain || mode == <never>) return 0;
   if (mode == <always>) return 1;
   return terminal && !Env.get("NO_COLOR");
-}
-
-/** Returns whether stable completion receipts are currently enabled. */
-int report_receipts(void) => report.receipts;
-
-// the progress line
-
-static enum { BAR_WIDTH = 14 };
-
-/** Updates the terminal's transient progress line when transient mode is
-    active. Updates start after 125 ms and incomplete work is limited to one
-    update per 50 ms. `detail` may be NULL; output is clipped to the configured
-    terminal width and has no newline.
-*/
-void report_progress(Symbol phase, int done, int total, String detail) {
-  if (!report.transient) return;
-  unsigned long now = report_now_us();
-  if (!_update_due(now, done, total)) return;
-  report.update = now;
-  if (_own_line()) _draw(phase, done, total, detail);
 }
 
 /* Finished work redraws only a line this process drew. */
@@ -144,61 +237,6 @@ static int _clip(char *line, int limit) {
   return limit;
 }
 
-/** Clears the active transient line from stderr, if this process drew one.
-    Forked workers inherit the state but leave the line to their parent.
-*/
-void report_suspend(void) {
-  if (!report.width || getpid() != report.pid) return;
-  report.width = 0;
-  _emit(_clear, sizeof(_clear) - 1, "", "", 0);
-}
-
-// receipts
-
-/** Writes one newline-terminated receipt to stderr when receipts are enabled.
-    In transient mode the receipt first clears the terminal line, which
-    another process may be drawing, and `line` must be non-NULL.
-*/
-void report_line(Symbol tone, String line) {
-  report.width = 0;
-  if (!report.receipts) return;
-  int clear = report.transient ? sizeof(_clear) - 1 : 0;
-  _emit(_clear, clear, _color(tone), line, 1);
-}
-
-/** Writes a muted phase receipt when receipts are enabled.
-    A fully cached nonempty phase is marked up to date; a partial cache reports
-    its cached count, and every receipt includes the elapsed time.
-*/
-void report_phase(
-  Symbol phase, int count, String noun, int cached,
-  unsigned long microseconds) {
-  String cache = _cache_note(count, cached);
-  String name = phase.str().capitalize();
-  String duration = report_duration(microseconds);
-  report_line(<muted>, %"  $name $count $noun in $duration$cache");
-}
-
-static String _cache_note(int count, int cached) {
-  if (cached == count && count) return " (up to date)";
-  return cached ? %", $cached cached" : "";
-}
-
-/** Writes the muted receipt for `n` generated C files and as many headers,
-    `bytes` in all, when receipts are enabled.
-*/
-void report_generated(int n, unsigned long long bytes) {
-  String size = report_size(bytes);
-  String c_noun = n == 1 ? "C file" : "C files";
-  String h_noun = n == 1 ? "header" : "headers";
-  report_line(<muted>, %"  Generated $n $c_noun and $n $h_noun ($size)");
-}
-
-// terminal output
-
-// A carriage return, then an erase to the end of the line.
-static const char _clear[] = "\r\033[K";
-
 /* Each display update is one writev call, which limits interleaving between
    Make children. Reporting is best effort: it retries only EINTR and never
    changes command status for output failure. */
@@ -228,41 +266,7 @@ static const char *_color(Symbol tone) {
   }
 }
 
-// durations and sizes
-
-/** Returns monotonic time in microseconds, or zero when the clock read fails.
-    The value measures elapsed time; it is not a wall-clock timestamp.
-*/
-unsigned long report_now_us(void) {
-  struct timespec now;
-  if (clock_gettime(CLOCK_MONOTONIC, &now)) return 0;
-  return (unsigned long) now.tv_sec * 1000000ul +
-         (unsigned long) now.tv_nsec / 1000ul;
-}
-
-/** Returns the size of a regular file.
-    NULL, a failed `stat`, or a non-regular path returns zero.
-*/
-unsigned long long Path.regular_bytes(String path) {
-  struct stat info;
-  if (!path || stat(path, &info) || !S_ISREG(info.st_mode)) return 0;
-  return (unsigned long long) info.st_size;
-}
-
-/** Formats microseconds as integer `us`, rounded whole `ms`, or seconds with
-    two decimal places.
-*/
-String report_duration(unsigned long microseconds) {
-  if (microseconds < 1000) return "%lu us".printf(microseconds);
-  if (microseconds < 1000000) return "%.0f ms".printf(microseconds / 1000.0);
-  return "%.2f s".printf(microseconds / 1000000.0);
-}
-
-/** Formats bytes as `B`, `KiB`, or `MiB` using binary unit boundaries.
-    Byte counts are exact; larger units use one decimal place.
-*/
-String report_size(unsigned long long bytes) {
-  if (bytes < 1024) return "%llu B".printf(bytes);
-  if (bytes < 1024ull * 1024ull) return "%.1f KiB".printf(bytes / 1024.0);
-  return "%.1f MiB".printf(bytes / (1024.0 * 1024.0));
+static String _cache_note(int count, int cached) {
+  if (cached == count && count) return " (up to date)";
+  return cached ? %", $cached cached" : "";
 }

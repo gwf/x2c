@@ -1,5 +1,23 @@
 /*  definitions.x -- build and print authored definition rows */
 
+// definition dump
+
+/** Prints the `--dump-definitions` projection of the lowered unit `ast`:
+    `(unit PATH)`, the module comment as `(module TEXT)` when the file opens
+    with one, then one row per `Compiler.definition_rows` entry. The
+    command-line reference in the book describes the fields.
+*/
+void Compiler.dump_definitions(Compiler c, List ast) {
+  printf("%s\n", %(unit $(c.filename)).repr());
+  Token tokens = c.tokenizer.tokens, first = tokens;
+  while (first.type == <space> || first.type == <preproc>) first++;
+  if (first.type == <comment>) printf("%s\n", %(module $(first.text)).repr());
+  foreach (List row in c.definition_rows(ast)) match (row) {
+    case %(function *): _print_function(c, tokens, row);
+    case %(typedef *): _print_type(c, tokens, row);
+  }
+}
+
 // definition rows
 
 /** Returns one row for each function, foreign alias, and typedef that the
@@ -34,6 +52,8 @@ List Compiler.definition_rows(Compiler c, List ast) {
   }
   return rows.list_free();
 }
+
+// build and print authored definition rows
 
 /* The row of a function or foreign alias, or NULL when its binding has no
    spelling. */
@@ -91,24 +111,6 @@ static String _parameter_name(Compiler c, List binding) {
   Map facts = c.semantic_binding_facts();
   if (facts.try_get(%(source-spelling $binding), spelling)) name = spelling;
   return name ? name : "";
-}
-
-// definition dump
-
-/** Prints the `--dump-definitions` projection of the lowered unit `ast`:
-    `(unit PATH)`, the module comment as `(module TEXT)` when the file opens
-    with one, then one row per `Compiler.definition_rows` entry. The
-    command-line reference in the book describes the fields.
-*/
-void Compiler.dump_definitions(Compiler c, List ast) {
-  printf("%s\n", %(unit $(c.filename)).repr());
-  Token tokens = c.tokenizer.tokens, first = tokens;
-  while (first.type == <space> || first.type == <preproc>) first++;
-  if (first.type == <comment>) printf("%s\n", %(module $(first.text)).repr());
-  foreach (List row in c.definition_rows(ast)) match (row) {
-    case %(function *): _print_function(c, tokens, row);
-    case %(typedef *): _print_type(c, tokens, row);
-  }
 }
 
 static void _print_function(Compiler c, Token tokens, List row) {

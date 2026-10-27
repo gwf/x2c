@@ -41,7 +41,7 @@ argument is accepted, as C converts it to the parameter's pointer type.
 
 **Raises:** `<bad-types>` for any other argument.
 
-Source: `lib/func/func.x:340`
+Source: `lib/func/func.x:266`
 
 #### x2c_func_record_result
 
@@ -50,7 +50,7 @@ Source: `lib/func/func.x:340`
 Boxes a record result as a `<p48>` to a copy of its `size` bytes in the
 active `Scope`.
 
-Source: `lib/func/func.x:363`
+Source: `lib/func/func.x:289`
 
 #### x2c_func_reference_argument
 
@@ -60,7 +60,7 @@ Checks a reference argument whose stored pointee matches `want` exactly.
 
 **Raises:** `<bad-types>` on the same mismatches as the shared checker.
 
-Source: `lib/func/func.x:371`
+Source: `lib/func/func.x:297`
 
 #### x2c_func_value_argument
 
@@ -80,7 +80,7 @@ A detail names the argument's tag, since any tag may arrive here and an
 identity-bearing detail value terminates at the error floor before it
 reaches the handler that would report it.
 
-Source: `lib/func/func.x:303`
+Source: `lib/func/func.x:229`
 
 ### `Func`
 
@@ -107,7 +107,7 @@ for the wrong argument count or a key without a value, `<void-op>`,
 adapter or native target. A `void` adapter result remains no-value. Other
 results have the ownership of the value the adapter returned.
 
-Source: `lib/func/func.x:114`
+Source: `lib/func/func.x:167`
 
 <a id="Func.apply_value"></a>
 #### Func.apply_value
@@ -119,7 +119,7 @@ Applies `fn` to one argument passed by value.
 reference parameter raises `<bad-types>`. Returns, owns, and raises as
 `Func.apply` does.
 
-Source: `lib/func/func.x:236`
+Source: `lib/func/func.x:133`
 
 <a id="Func.apply_values"></a>
 #### Func.apply_values
@@ -130,7 +130,7 @@ Applies `fn` to two arguments passed by value, `left` then `right`.
 Each travels as `Func.apply_value` carries its argument. Returns, owns,
 and raises as `Func.apply` does.
 
-Source: `lib/func/func.x:245`
+Source: `lib/func/func.x:142`
 
 <a id="Func.context"></a>
 #### Func.context
@@ -143,7 +143,7 @@ NULL when the binding has no context.
 
 **Raises:** `<bad-arg>` for a null binding. It does not return on failure.
 
-Source: `lib/func/func.x:546`
+Source: `lib/func/func.x:386`
 
 <a id="Func.new"></a>
 #### Func.new
@@ -163,7 +163,7 @@ parameter count and types.
 **Raises:** `<bad-sig>` for a null adapter or a malformed signature, and
 `<alloc-fail>` when binding storage cannot be allocated.
 
-Source: `lib/func/func.x:448`
+Source: `lib/func/func.x:323`
 
 <a id="Func.new_context"></a>
 #### Func.new_context
@@ -184,7 +184,7 @@ borrowed for the `Func` lifetime.
 the allocation size overflows, `<bad-sig>` for a null adapter or malformed
 signature, or `<alloc-fail>` when storage cannot be allocated. None return.
 
-Source: `lib/func/func.x:478`
+Source: `lib/func/func.x:353`
 
 <a id="Func.new_rest"></a>
 #### Func.new_rest
@@ -203,7 +203,7 @@ lifetime. The result belongs to the current Scope.
 parameter other than List or `(.... "List")`, and `<alloc-fail>` for
 storage.
 
-Source: `lib/func/func.x:462`
+Source: `lib/func/func.x:337`
 
 <a id="Func.var"></a>
 #### Func.var
@@ -214,7 +214,7 @@ Boxes `function` without copying or retaining the `Func`.
 The returned `Var` carries the same pointer and shares its `Scope`
 lifetime.
 
-Source: `lib/func/func.x:565`
+Source: `lib/func/func.x:405`
 
 ### `FuncArg`
 
@@ -229,7 +229,7 @@ an optional reference may use a null address. This constructor performs
 no validation. Compiler-generated adapters use the checked reference
 reader before calling native code.
 
-Source: `lib/func/func.x:228`
+Source: `lib/func/func.x:125`
 
 <a id="FuncArg.splice"></a>
 #### FuncArg.splice
@@ -239,7 +239,7 @@ Source: `lib/func/func.x:228`
 Marks an explicit List splice in a rest tail. The List is borrowed until
 the synchronous call completes; ordinary List values remain one element.
 
-Source: `lib/func/func.x:185`
+Source: `lib/func/func.x:100`
 
 <a id="FuncArg.splice_map"></a>
 #### FuncArg.splice_map
@@ -249,7 +249,7 @@ Source: `lib/func/func.x:185`
 Marks an explicit Map splice in a Map rest tail. The Map is borrowed
 until the synchronous call completes.
 
-Source: `lib/func/func.x:191`
+Source: `lib/func/func.x:116`
 
 <a id="FuncArg.value"></a>
 #### FuncArg.value
@@ -260,7 +260,7 @@ Constructs a `Func` argument by copying one `Var` value.
 Pointer-bearing payload storage is not copied or retained and must outlive
 the call that consumes the argument.
 
-Source: `lib/func/func.x:180`
+Source: `lib/func/func.x:184`
 
 ### `Var`
 
@@ -273,7 +273,7 @@ Returns the borrowed native callable carried by `v`.
 
 **Raises:** `<bad-types>` when the value is not a `Func`.
 
-Source: `lib/func/func.x:570`
+Source: `lib/func/func.x:410`
 
 ## Runtime-internal callables
 
@@ -302,7 +302,7 @@ and its resolved `want` against the source address before casting.
 
 **Raises:** `<bad-types>` on either mismatch.
 
-Source: `lib/func/func.x:379`
+Source: `lib/func/func.x:305`
 
 #### x2c_func_map_splice_argument
 
@@ -313,7 +313,7 @@ Map rest binding.
 Raises `<bad-types>` when the splice occupies a fixed parameter or the
 binding has no Map rest.
 
-Source: `lib/func/func.x:209`
+Source: `lib/func/func.x:108`
 
 #### x2c_func_reference_type
 
@@ -327,7 +327,7 @@ read.
 **Raises:** `<bad-arg>` for a null `Func` or an index outside `argc`, or
 `<bad-arity>` when `argc` disagrees with a fixed signature.
 
-Source: `lib/func/func.x:267`
+Source: `lib/func/func.x:203`
 
 #### x2c_func_shared
 
@@ -340,7 +340,7 @@ and `Func.move` never transfers it.
 
 **Raises:** the causes of `Func.new`.
 
-Source: `lib/func/func.x:489`
+Source: `lib/func/func.x:364`
 
 #### x2c_func_splice_argument
 
@@ -351,7 +351,7 @@ List rest binding.
 Raises `<bad-types>` when the splice occupies a fixed parameter or the
 binding has no List rest.
 
-Source: `lib/func/func.x:199`
+Source: `lib/func/func.x:92`
 
 #### x2c_func_unrepresentable_argument
 
@@ -361,7 +361,7 @@ Rejects a value argument whose source type has no `Var` representation.
 Generated calls use this branch instead of compiling an impossible
 conversion. Raises: `<bad-types>`.
 
-Source: `lib/func/func.x:355`
+Source: `lib/func/func.x:281`
 
 ### `Func`
 
@@ -377,7 +377,7 @@ operation that takes ownership. A NULL `function` does nothing.
 
 **Raises:** the causes of `Scope.move`, which leave ownership unchanged.
 
-Source: `lib/func/func.x:557`
+Source: `lib/func/func.x:397`
 
 <a id="Func.signature"></a>
 #### Func.signature
@@ -388,7 +388,7 @@ Returns a native binding's borrowed canonical signature.
 The result has the `((func (PARAMETERS...)) RESULT...)` shape supplied to
 the constructor and remains valid for the binding's lifetime.
 
-Source: `lib/func/func.x:536`
+Source: `lib/func/func.x:376`
 
 ## Public types
 

@@ -3,15 +3,6 @@
 
 #include <assert.h>
 
-/* Opens a pretend connection; options default when a key is absent. */
-static String connect(String host, Map @options) {
-  int port = options.getdefault(<port>, 80).integer();
-  String scheme = options.getdefault(<scheme>, "http").str();
-  return %"$scheme://$host:$port";
-}
-
-static int count(Map @options) => options.len();
-
 int main(void) {
   Map secure = {scheme: "https", port: 443};
   puts(connect("example.org"));
@@ -25,3 +16,12 @@ int main(void) {
   puts("Later entries win; splices merge in place.");
   return 0;
 }
+
+/* Opens a pretend connection; options default when a key is absent. */
+static String connect(String host, Map @options) {
+  int port = options.getdefault(<port>, 80).integer();
+  String scheme = options.getdefault(<scheme>, "http").str();
+  return %"$scheme://$host:$port";
+}
+
+static int count(Map @options) => options.len();

@@ -64,181 +64,6 @@ static macro Stmt $report.protocol_adoption_conflict(
   }
 }
 
-// registry rows
-
-static List _occurrence(List record, Symbol storage, List location) =>
-  $(record, storage, location);
-
-static Symbol _occurrence_storage(List occurrence) => occurrence.cadr();
-
-module List _occurrence_location(List occurrence) => occurrence.caddr();
-
-module List _adoption_node(
-  Type base, Type participant, Symbol storage, Type representation,
-  List tag, List location) {
-  if (representation)
-    return %(adopt $base $participant $storage $representation $location);
-  if (tag) return %(adopt $base $participant $storage (tag $tag) $location);
-  return %(adopt $base $participant $storage $location);
-}
-
-module Symbol _adoption_storage(List adoption) => adoption.cddr().cadr();
-
-// A row without a representation or a tag has five fields.
-module Type _adoption_representation(List adoption) {
-  match (adoption) {
-    case %(adopt ? ? ? (tag (!is ? type list)) ?): return NULL;
-    case %(adopt ? ? ? ?representation ?): return representation;
-  }
-  return NULL;
-}
-
-module List _adoption_tag(List adoption) {
-  match (adoption) case %(adopt ? ? ? (tag ?(List tag)) ?): return tag;
-  return NULL;
-}
-
-module List _adoption_location(List adoption) => adoption.last();
-
-module List _record(Compiler c, Type base) {
-  Var stored;
-  if (!c.protocols.try_get(base, stored)) return NULL;
-  List occurrence = stored;
-  return occurrence.car();
-}
-
-static List _adoption_row(
-  Compiler c, Type base, Type participant, Symbol storage) {
-  String path = _path(c);
-  List key = storage == <static>
-           ? $(base, participant, path)
-           : $(base, participant);
-  Var stored;
-  return c.adoptions.try_get(key, stored) ? stored : NULL;
-}
-
-module List _visible_adoption(Compiler c, Type base, Type participant) {
-  List local = _adoption_row(c, base, participant, <static>);
-  return local ? local : _adoption_row(c, base, participant, <external>);
-}
-
-module Symbol _visibility(Compiler c, Type base, Type participant) {
-  List external = _adoption_row(c, base, participant, <external>);
-  List local = _adoption_row(c, base, participant, <static>);
-  if (external && local) {
-    if (_canonical_file(c, _adoption_location(external)) ==
-        _canonical_file(c, _adoption_location(local)))
-      return <static>;
-    return <mixed>;
-  }
-  if (local) return <static>;
-  if (external) return <external>;
-  return 0;
-}
-
-// Participation exists only for a declared adoption row.
-module int _is_adopted(Compiler c, Type base, Type participant) =>
-    !!_visibility(c, base, participant);
-
-module int _owns_adoption(Compiler c, Type base, Type participant) {
-  List row = _visible_adoption(c, base, participant);
-  return row && _canonical_file(c, _adoption_location(row)) == _path(c);
-}
-
-// source locations
-
-module String _path(Compiler c) {
-  String result = NULL;
-  $memo(c.protocol_helpers, <proto-path>, result) {
-    result = _normalize_file(c, c.filename ? c.filename : "<stdin>");
-  }
-  return result;
-}
-
-/* A module member's adoptions belong to its unit, as its other
-   declarations do. */
-module String _canonical_file(Compiler c, List location) {
-  String file = _location_file(location), result = NULL;
-  $memo(c.protocol_helpers, %(proto-file $file), result) {
-    result = _normalize_file(c, file);
-    if (_module_member(c, result)) result = _path(c);
-  }
-  return result;
-}
-
-static int _module_member(Compiler c, String file) {
-  if (c.line_markers)
-    foreach (List row in c.line_markers)
-      if ((row ~= %(? ? ?(String member) ? ? ? ?)) &&
-          _normalize_file(c, member) == file) return 1;
-  return 0;
-}
-
-/* A relative path names a file below the working directory, or else one below
-   the x2c root, where `Compiler.display_path` spells root sources. It
-   resolves on disk itself: trying the root depends on whether the first path
-   resolved, which `Compiler.canonical_path` does not report. */
-static String _normalize_file(Compiler c, String file) {
-  String real = Path.real(file), root = c.root_dir;
-  if (!real && root && file[0] != '/') real = Path.real(%"$root/$file");
-  return c.display_path(real ? real : file);
-}
-
-static String _location_file(List location) {
-  Var file = location ? location.assoc(<file>) : void;
-  return file is <string> ? file : "<unknown>";
-}
-
-module String _location_string(List location) {
-  String file = _location_file(location);
-  Var line = location ? location.assoc(<line>) : void;
-  Var column = location ? location.assoc(<column>) : void;
-  return %"$file:$(line.is_integer() ? line.integer() : 1):$(
-    column.is_integer() ? column.integer() : 1)";
-}
-
-module int _is_private(Compiler c, String name) =>
-  $(name) in c.sym.file_statics();
-
-// spellings
-
-module String _base_name(Type base) =>
-  base.is_bare_typedef_name() ? base.car() : NULL;
-
-// Prefer a typedef's bare diagnostic spelling.
-module String _type_spelling(Type type) =>
-  type.is_bare_typedef_name() ? type.car() : type.repr();
-
-module String _member_spelling(Type participant, String member) =>
-  %"$(participant.car())_$member";
-
-module String _adoption_spelling(Type base, Type participant) =>
-  %"$(_type_spelling(base))($(_type_spelling(participant)))";
-
-static String _representation_error(Type representation) {
-  String spelling = _type_spelling(representation);
-  return %"Var representation $spelling has no fixed tag";
-}
-
-/** Returns the conventional reverse converter spelling.
-    A `Base.participant` reverse converter is declared under the participant's
-    source spelling, and package mode rewrites that joined name as a whole, so
-    the package prefix sits at the front of the derived binding instead of
-    inside it. The split is keyed on a known package because a foreign
-    header may spell `__` in a type name.
-*/
-String Compiler.reverse_converter_spelling(
-  Compiler c, String base_name, String infix, String participant) {
-  int split = participant.find("__");
-  String package = split > 0 &&
-    (c.package == participant[:split] ||
-     participant[:split] in c.package_roots)
-      ? participant[:split] : NULL;
-  String bare = package ? participant[split + 2:] : participant;
-  String binding = %"$(base_name)_$infix$(bare.lower())";
-  return package ? %"$(package)__$binding" : binding;
-}
-
 /* publication
 
    A published node installs its row in the unit's registry and, in a
@@ -271,6 +96,59 @@ List Compiler.publish_protocol_node(
   }
   return _publish_adoption(c, node, participant_token, representation_token);
 }
+
+// spellings
+
+/** Returns the conventional reverse converter spelling.
+    A `Base.participant` reverse converter is declared under the participant's
+    source spelling, and package mode rewrites that joined name as a whole, so
+    the package prefix sits at the front of the derived binding instead of
+    inside it. The split is keyed on a known package because a foreign
+    header may spell `__` in a type name.
+*/
+String Compiler.reverse_converter_spelling(
+  Compiler c, String base_name, String infix, String participant) {
+  int split = participant.find("__");
+  String package = split > 0 &&
+    (c.package == participant[:split] ||
+     participant[:split] in c.package_roots)
+      ? participant[:split] : NULL;
+  String bare = package ? participant[split + 2:] : participant;
+  String binding = %"$(base_name)_$infix$(bare.lower())";
+  return package ? %"$(package)__$binding" : binding;
+}
+
+// registry lifecycle
+
+/** Rebuilds the per-unit protocol and adoption registries from `symbols`.
+    Existing rows, helper decisions, and lookup caches are discarded; a null
+    map leaves those registries empty. The conformance rows included
+    interfaces recorded are kept for reuse. Conformance reset and resolution
+    belong to `resolve_protocols`.
+*/
+void Compiler.rebuild_protocols(Compiler c, Map symbols) {
+  c.protocols = {};
+  c.adoptions = {};
+  c.protocol_helpers = {};
+  c.proto_cache = {};
+  if (!symbols) return;
+  foreach (Var value in symbols) {
+    if (value is not <list>) continue;
+    match (value) {
+      case %(protocol
+             (!set ?record ("protocol-record" ?base *))
+             ?storage ?location): {
+        _install_occurrence(c, base, record, storage, location);
+      }
+      case %(adopt *): _install_stored(c, value);
+      case %(conformance ?base ?participant *):
+        c.protocol_helpers[$("recorded-conformance", base, participant)] =
+          value;
+    }
+  }
+}
+
+// protocol and adoption registry rows
 
 static List _publish_adoption(
   Compiler c, List node, Token participant_token, Token modifier_token) {
@@ -310,21 +188,9 @@ static void _retain_meta_protocol(Compiler c, List adoption) {
     %(meta-protocol @(_adoption_location(adoption))));
 }
 
-static void _retain_source_node(
-  Compiler c, List node, Symbol storage, List location) {
-  List invocation = c.origin_location(c.origin);
-  if (!invocation &&
-      (!c.shallow ||
-       (storage == <static> && c.source_private < 0)))
-    return;
-  // Keep definition provenance in a generated node while its invocation site
-  // makes repeated expansions distinct in the retained symbol table.
-  List key = invocation
-           ? $("source-node", location, invocation)
-           : $("source-node", location);
-  c.sym.set(key, node);
-  if (storage == <static>) c.sym.mark_static(key);
-}
+// registry rows
+
+module Symbol _adoption_storage(List adoption) => adoption.cddr().cadr();
 
 static void _install_occurrence(
   Compiler c, Type base, List record, Symbol storage, List location) {
@@ -354,6 +220,13 @@ static void _install_occurrence(
     c, c.token, base, first_location, second_location);
 }
 
+
+
+static List _occurrence(List record, Symbol storage, List location) =>
+  $(record, storage, location);
+
+module List _occurrence_location(List occurrence) => occurrence.caddr();
+
 // adoption drafts
 
 static List _publish(AdoptionDraft &a) {
@@ -381,9 +254,21 @@ static List _publish(AdoptionDraft &a) {
   return published;
 }
 
-static List _node(AdoptionDraft &a) => _adoption_node(
-  a.base, a.participant, a.storage, a.representation, a.tag_expression,
-  a.location);
+static void _retain_source_node(
+  Compiler c, List node, Symbol storage, List location) {
+  List invocation = c.origin_location(c.origin);
+  if (!invocation &&
+      (!c.shallow ||
+       (storage == <static> && c.source_private < 0)))
+    return;
+  // Keep definition provenance in a generated node while its invocation site
+  // makes repeated expansions distinct in the retained symbol table.
+  List key = invocation
+           ? $("source-node", location, invocation)
+           : $("source-node", location);
+  c.sym.set(key, node);
+  if (storage == <static>) c.sym.mark_static(key);
+}
 
 static List _tag_syntax(List expression) {
   match (expression) {
@@ -403,6 +288,11 @@ static Symbol _check_modifiers(AdoptionDraft &a) {
   Symbol tag = _tag_value(a.tag_expression);
   if (!tag) _report_modifier(a, "Var adoption tag must be a Symbol literal");
   return tag;
+}
+
+static String _representation_error(Type representation) {
+  String spelling = _type_spelling(representation);
+  return %"Var representation $spelling has no fixed tag";
 }
 
 /* A constructed adoption has no modifier token, so its diagnostic goes to
@@ -448,6 +338,16 @@ static Symbol _published_storage(AdoptionDraft &a, String spelling) {
   return private ? <static> : a.storage;
 }
 
+static Symbol _occurrence_storage(List occurrence) => occurrence.cadr();
+
+
+
+module String _base_name(Type base) =>
+  base.is_bare_typedef_name() ? base.car() : NULL;
+
+module String _member_spelling(Type participant, String member) =>
+  %"$(participant.car())_$member";
+
 static int _has_private_native(Compiler c, List templates) {
   foreach (List template in templates) {
     String binding = template.caddr();
@@ -455,6 +355,11 @@ static int _has_private_native(Compiler c, List templates) {
   }
   return 0;
 }
+
+// source locations
+
+module int _is_private(Compiler c, String name) =>
+  $(name) in c.sym.file_statics();
 
 static void _check_previous(AdoptionDraft &a) {
   Compiler c = a.c;
@@ -470,6 +375,20 @@ static void _check_previous(AdoptionDraft &a) {
   if (_adoption_representation(row) == a.representation &&
       _adoption_tag(row) == a.tag_expression) return;
   $report.protocol_adoption_conflict(c, a.location, a, row);
+}
+
+// A row without a representation or a tag has five fields.
+module Type _adoption_representation(List adoption) {
+  match (adoption) {
+    case %(adopt ? ? ? (tag (!is ? type list)) ?): return NULL;
+    case %(adopt ? ? ? ?representation ?): return representation;
+  }
+  return NULL;
+}
+
+module List _adoption_tag(List adoption) {
+  match (adoption) case %(adopt ? ? ? (tag ?(List tag)) ?): return tag;
+  return NULL;
 }
 
 static void _install(AdoptionDraft &a) {
@@ -493,34 +412,78 @@ static void _install(AdoptionDraft &a) {
   $fail.protocol_adoption_conflict(c, c.token, a, first_location);
 }
 
-// registry lifecycle
+module List _adoption_location(List adoption) => adoption.last();
 
-/** Rebuilds the per-unit protocol and adoption registries from `symbols`.
-    Existing rows, helper decisions, and lookup caches are discarded; a null
-    map leaves those registries empty. The conformance rows included
-    interfaces recorded are kept for reuse. Conformance reset and resolution
-    belong to `resolve_protocols`.
-*/
-void Compiler.rebuild_protocols(Compiler c, Map symbols) {
-  c.protocols = {};
-  c.adoptions = {};
-  c.protocol_helpers = {};
-  c.proto_cache = {};
-  if (!symbols) return;
-  foreach (Var value in symbols) {
-    if (value is not <list>) continue;
-    match (value) {
-      case %(protocol
-             (!set ?record ("protocol-record" ?base *))
-             ?storage ?location): {
-        _install_occurrence(c, base, record, storage, location);
-      }
-      case %(adopt *): _install_stored(c, value);
-      case %(conformance ?base ?participant *):
-        c.protocol_helpers[$("recorded-conformance", base, participant)] =
-          value;
-    }
+/* A module member's adoptions belong to its unit, as its other
+   declarations do. */
+module String _canonical_file(Compiler c, List location) {
+  String file = _location_file(location), result = NULL;
+  $memo(c.protocol_helpers, %(proto-file $file), result) {
+    result = _normalize_file(c, file);
+    if (_module_member(c, result)) result = _path(c);
   }
+  return result;
+}
+
+
+
+module String _path(Compiler c) {
+  String result = NULL;
+  $memo(c.protocol_helpers, <proto-path>, result) {
+    result = _normalize_file(c, c.filename ? c.filename : "<stdin>");
+  }
+  return result;
+}
+
+static int _module_member(Compiler c, String file) {
+  if (c.line_markers)
+    foreach (List row in c.line_markers)
+      if ((row ~= %(? ? ?(String member) ? ? ? ?)) &&
+          _normalize_file(c, member) == file) return 1;
+  return 0;
+}
+
+/* A relative path names a file below the working directory, or else one below
+   the x2c root, where `Compiler.display_path` spells root sources. It
+   resolves on disk itself: trying the root depends on whether the first path
+   resolved, which `Compiler.canonical_path` does not report. */
+static String _normalize_file(Compiler c, String file) {
+  String real = Path.real(file), root = c.root_dir;
+  if (!real && root && file[0] != '/') real = Path.real(%"$root/$file");
+  return c.display_path(real ? real : file);
+}
+
+module String _location_string(List location) {
+  String file = _location_file(location);
+  Var line = location ? location.assoc(<line>) : void;
+  Var column = location ? location.assoc(<column>) : void;
+  return %"$file:$(line.is_integer() ? line.integer() : 1):$(
+    column.is_integer() ? column.integer() : 1)";
+}
+
+static String _location_file(List location) {
+  Var file = location ? location.assoc(<file>) : void;
+  return file is <string> ? file : "<unknown>";
+}
+
+module String _adoption_spelling(Type base, Type participant) =>
+  %"$(_type_spelling(base))($(_type_spelling(participant)))";
+
+// Prefer a typedef's bare diagnostic spelling.
+module String _type_spelling(Type type) =>
+  type.is_bare_typedef_name() ? type.car() : type.repr();
+
+static List _node(AdoptionDraft &a) => _adoption_node(
+  a.base, a.participant, a.storage, a.representation, a.tag_expression,
+  a.location);
+
+module List _adoption_node(
+  Type base, Type participant, Symbol storage, Type representation,
+  List tag, List location) {
+  if (representation)
+    return %(adopt $base $participant $storage $representation $location);
+  if (tag) return %(adopt $base $participant $storage (tag $tag) $location);
+  return %(adopt $base $participant $storage $location);
 }
 
 static void _install_stored(Compiler c, List value) {
@@ -550,4 +513,49 @@ static void _install_stored(Compiler c, List value) {
       _install(draft);
     }
   }
+}
+
+module List _record(Compiler c, Type base) {
+  Var stored;
+  if (!c.protocols.try_get(base, stored)) return NULL;
+  List occurrence = stored;
+  return occurrence.car();
+}
+
+// Participation exists only for a declared adoption row.
+module int _is_adopted(Compiler c, Type base, Type participant) =>
+    !!_visibility(c, base, participant);
+
+module Symbol _visibility(Compiler c, Type base, Type participant) {
+  List external = _adoption_row(c, base, participant, <external>);
+  List local = _adoption_row(c, base, participant, <static>);
+  if (external && local) {
+    if (_canonical_file(c, _adoption_location(external)) ==
+        _canonical_file(c, _adoption_location(local)))
+      return <static>;
+    return <mixed>;
+  }
+  if (local) return <static>;
+  if (external) return <external>;
+  return 0;
+}
+
+module int _owns_adoption(Compiler c, Type base, Type participant) {
+  List row = _visible_adoption(c, base, participant);
+  return row && _canonical_file(c, _adoption_location(row)) == _path(c);
+}
+
+module List _visible_adoption(Compiler c, Type base, Type participant) {
+  List local = _adoption_row(c, base, participant, <static>);
+  return local ? local : _adoption_row(c, base, participant, <external>);
+}
+
+static List _adoption_row(
+  Compiler c, Type base, Type participant, Symbol storage) {
+  String path = _path(c);
+  List key = storage == <static>
+           ? $(base, participant, path)
+           : $(base, participant);
+  Var stored;
+  return c.adoptions.try_get(key, stored) ? stored : NULL;
 }

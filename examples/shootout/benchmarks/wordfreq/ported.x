@@ -15,9 +15,15 @@ typedef struct { const char *word; size_t len; int count; } WordCount;
 
 static int _random_state = 42;
 
-static int _next_int(int maximum) {
-  _random_state = (_random_state * 3877 + 29573) % 139968;
-  return (int) ((int64_t) _random_state * maximum / 139968);
+int main(int argc, char **argv) {
+  if (argc != 3) return 2;
+  int word_count = atoi(argv[1]), runs = atoi(argv[2]);
+  const char *text = _make_text(word_count);
+  uint64_t checksum = 0;
+  for (int i = 0; i < runs; i++)
+    checksum = checksum * 33 + _count_words(text, word_count);
+  printf("%llu\n", (unsigned long long) checksum);
+  return 0;
 }
 
 static char *_make_text(int word_count) {
@@ -33,25 +39,9 @@ static char *_make_text(int word_count) {
   return text;
 }
 
-/* FNV-1a and the linear probe, folded into one function: the C splits them
-   only because the hash needed a name to be called twice. */
-static void _add_word(
-  WordCount *table, size_t mask, const char *word, size_t len) {
-  uint64_t hash = 1469598103934665603ULL;
-  for (size_t i = 0; i < len; i++)
-    hash = (hash ^ (unsigned char) word[i]) * 1099511628211ULL;
-  for (size_t slot = hash & mask; ; slot = (slot + 1) & mask) {
-    if (!table[slot].word) {
-      table[slot].word = word;
-      table[slot].len = len;
-      table[slot].count = 1;
-      return;
-    }
-    if (table[slot].len == len && !memcmp(table[slot].word, word, len)) {
-      table[slot].count++;
-      return;
-    }
-  }
+static int _next_int(int maximum) {
+  _random_state = (_random_state * 3877 + 29573) % 139968;
+  return (int) ((int64_t) _random_state * maximum / 139968);
 }
 
 static uint64_t _count_words(const char *text, int word_count) {
@@ -76,13 +66,23 @@ static uint64_t _count_words(const char *text, int word_count) {
   return checksum;
 }
 
-int main(int argc, char **argv) {
-  if (argc != 3) return 2;
-  int word_count = atoi(argv[1]), runs = atoi(argv[2]);
-  const char *text = _make_text(word_count);
-  uint64_t checksum = 0;
-  for (int i = 0; i < runs; i++)
-    checksum = checksum * 33 + _count_words(text, word_count);
-  printf("%llu\n", (unsigned long long) checksum);
-  return 0;
+/* FNV-1a and the linear probe, folded into one function: the C splits them
+   only because the hash needed a name to be called twice. */
+static void _add_word(
+  WordCount *table, size_t mask, const char *word, size_t len) {
+  uint64_t hash = 1469598103934665603ULL;
+  for (size_t i = 0; i < len; i++)
+    hash = (hash ^ (unsigned char) word[i]) * 1099511628211ULL;
+  for (size_t slot = hash & mask; ; slot = (slot + 1) & mask) {
+    if (!table[slot].word) {
+      table[slot].word = word;
+      table[slot].len = len;
+      table[slot].count = 1;
+      return;
+    }
+    if (table[slot].len == len && !memcmp(table[slot].word, word, len)) {
+      table[slot].count++;
+      return;
+    }
+  }
 }

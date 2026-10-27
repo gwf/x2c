@@ -55,26 +55,6 @@ protocol Cleanup(Array);
 
 $array.core.family(Array, Var);
 
-static void _size_limit(String owner, size_t size) {
-  (void) owner;
-  raise %(size-limit (size $size));
-}
-
-static void _bad_operation(String owner, Symbol operation) {
-  (void) owner;
-  raise %(bad-arg (operation "Array") (action $operation));
-}
-
-static void _bad_index(String owner, int index, size_t size) {
-  (void) owner;
-  raise %(bad-arg (operation "Array") (index $index) (size $size));
-}
-
-static void _bad_step(String owner, int step) {
-  (void) owner;
-  raise %(bad-arg (operation "Array.getslice") (step $step));
-}
-
 $array.typed.operations(Array, Var, void, 0, 1);
 Var Array.getindex(Array, int);
 Var Array.setindex(Array, int, Var);
@@ -88,6 +68,19 @@ meta native int Array.count(Array, Var);
 meta native Self Array.concat(Self, Self);
 meta native Self Array.reverse(Self);
 meta native Var Array.unshift(Array, Var);
+
+/** Releases the `Array` and its backing storage, invalidating every alias.
+    The `Block` protocol generates the definition.
+*/
+meta void Array.free(Array array);
+
+$array.typed.observe(Array, Var, _compare_var);
+$array.typed.iterate(Array, Var, array);
+
+static struct ArraySortEntry {
+  Var key, value;
+  size_t index;
+};
 
 /** Reads `index` from a non-null array, counting negatives from the end.
     Returns `void` when the normalized index is outside the array.
@@ -115,32 +108,9 @@ Var Array.setindex(Array array, int index, Var value) {
 
 /** Returns the same object as a `Block` view; no copy or transfer occurs. */
 inline Block Array.block(Array x)         => (Block) x;
+
 /** Returns the same object as an `Array` view; mutations remain shared. */
 inline Array Block.array(Block x)         => (Array) x;
-
-/** Releases the `Array` and its backing storage, invalidating every alias.
-    The `Block` protocol generates the definition.
-*/
-meta void Array.free(Array array);
-
-/** Resizes `arr`, truncating or appending `Null` elements as needed.
-    Raises: `<size-limit>` when `size` exceeds the `Array` index domain, plus
-    any cause from `Block` growth. Allocation and size failure do not return
-    here. A growth failure leaves the length and existing elements unchanged.
-*/
-meta native void Array.resize(Array arr, size_t size) {
-  if (size > INT_MAX) raise %(size-limit (size $size));
-  if (size < arr.length) Block.truncate(arr, size);
-  else if (size > arr.length) Block.append(arr, NULL, size - arr.length);
-}
-
-static int _int_length(Array array) {
-  if (array.length > INT_MAX) {
-    size_t size = array.length;
-    raise %(size-limit (size $size));
-  }
-  return (int) array.length;
-}
 
 /** Appends exactly `element_count` variadic values to `array`.
     Values appended before a later `<void-op>`, `<size-limit>`, or
@@ -238,15 +208,6 @@ Var Array.foldl(Array array, Var seed, Func fn) {
   return acc;
 }
 
-static int _compare_var(Var a, Var b) => a.compare(b);
-$array.typed.observe(Array, Var, _compare_var);
-$array.typed.iterate(Array, Var, array);
-
-static int _sort_compare(const void *ap, const void *bp) {
-  Var a = *(const Var *) ap, b = *(const Var *) bp;
-  return a.compare(b);
-}
-
 /** Sorts `array` in place in ascending order and returns that same `Array`.
     Call `Array.copy` first to preserve the original order. Ordering is
     `Var.compare`, which compares numbers numerically and `String`s, `Symbol`s,
@@ -267,9 +228,6 @@ meta native Self Array.sort(Self array) {
   qsort(array.bytes, array.length, sizeof(Var), _sort_compare);
   return array;
 }
-
-static int _sort_order(Func compare, Var left, Var right) =>
-  compare.apply_values(left, right);
 
 /** Stably sorts `array` with a borrowed synchronous comparator and returns it.
     The callback receives two values; its result converts to `int`, with a
@@ -307,15 +265,15 @@ Self Array.sort_with(Self array, Func compare) {
   return array;
 }
 
-static struct ArraySortEntry {
-  Var key, value;
-  size_t index;
-};
-
-static int _sort_key_compare(const void *ap, const void *bp) {
-  const struct ArraySortEntry *a = ap, *b = bp;
-  int order = a.key.compare(b.key);
-  return order ? order : (a.index > b.index) - (a.index < b.index);
+/** Resizes `arr`, truncating or appending `Null` elements as needed.
+    Raises: `<size-limit>` when `size` exceeds the `Array` index domain, plus
+    any cause from `Block` growth. Allocation and size failure do not return
+    here. A growth failure leaves the length and existing elements unchanged.
+*/
+meta native void Array.resize(Array arr, size_t size) {
+  if (size > INT_MAX) raise %(size-limit (size $size));
+  if (size < arr.length) Block.truncate(arr, size);
+  else if (size > arr.length) Block.append(arr, NULL, size - arr.length);
 }
 
 /** Stably sorts `array` by keys produced once per value, returning the Array.
@@ -348,27 +306,6 @@ Self Array.sort_by(Self array, Func key) {
 }
 
 // binary min-heap
-
-static void _heap_shift_up(Array heap, int i) {
-  while (i > 0) {
-    int p = (i - 1) / 2;
-    if (heap[p].compare(heap[i]) <= 0) break;
-    Var tmp = heap[p]; heap[p] = heap[i]; heap[i] = tmp;
-    i = p;
-  }
-}
-
-static void _heap_shift_down(Array heap, int i) {
-  int n = _int_length(heap);
-  loop {
-    int l = (i * 2) + 1, r = l + 1, mini = i;
-    if (l < n && heap[l].compare(heap[mini]) < 0) mini = l;
-    if (r < n && heap[r].compare(heap[mini]) < 0) mini = r;
-    if (mini == i) break;
-    Var tmp = heap[i]; heap[i] = heap[mini]; heap[mini] = tmp;
-    i = mini;
-  }
-}
 
 /** Adds `val` to `heap`, an `Array` maintained as a binary min-heap.
     The heap operations arrange an `Array` as a priority queue in place, with
@@ -466,3 +403,70 @@ meta native Array Iter.array(Iter iter) {
 
 /** Ends the owned lifetime when a managed local leaves its block. */
 meta native void Array.cleanup(Array value) { value.free(); }
+
+static void _size_limit(String owner, size_t size) {
+  (void) owner;
+  raise %(size-limit (size $size));
+}
+
+static int _int_length(Array array) {
+  if (array.length > INT_MAX) {
+    size_t size = array.length;
+    raise %(size-limit (size $size));
+  }
+  return (int) array.length;
+}
+
+static int _sort_compare(const void *ap, const void *bp) {
+  Var a = *(const Var *) ap, b = *(const Var *) bp;
+  return a.compare(b);
+}
+
+static int _sort_order(Func compare, Var left, Var right) =>
+  compare.apply_values(left, right);
+
+static int _sort_key_compare(const void *ap, const void *bp) {
+  const struct ArraySortEntry *a = ap, *b = bp;
+  int order = a.key.compare(b.key);
+  return order ? order : (a.index > b.index) - (a.index < b.index);
+}
+
+
+
+static void _heap_shift_up(Array heap, int i) {
+  while (i > 0) {
+    int p = (i - 1) / 2;
+    if (heap[p].compare(heap[i]) <= 0) break;
+    Var tmp = heap[p]; heap[p] = heap[i]; heap[i] = tmp;
+    i = p;
+  }
+}
+
+static void _heap_shift_down(Array heap, int i) {
+  int n = _int_length(heap);
+  loop {
+    int l = (i * 2) + 1, r = l + 1, mini = i;
+    if (l < n && heap[l].compare(heap[mini]) < 0) mini = l;
+    if (r < n && heap[r].compare(heap[mini]) < 0) mini = r;
+    if (mini == i) break;
+    Var tmp = heap[i]; heap[i] = heap[mini]; heap[mini] = tmp;
+    i = mini;
+  }
+}
+
+static void _bad_operation(String owner, Symbol operation) {
+  (void) owner;
+  raise %(bad-arg (operation "Array") (action $operation));
+}
+
+static void _bad_index(String owner, int index, size_t size) {
+  (void) owner;
+  raise %(bad-arg (operation "Array") (index $index) (size $size));
+}
+
+static void _bad_step(String owner, int step) {
+  (void) owner;
+  raise %(bad-arg (operation "Array.getslice") (step $step));
+}
+
+static int _compare_var(Var a, Var b) => a.compare(b);

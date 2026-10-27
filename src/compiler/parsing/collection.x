@@ -27,27 +27,6 @@ void Compiler.shallow_parse_overlay(Compiler c, Map base, Map overlay) {
   c.open_linkage += c.braces.len();
 }
 
-static void _shallow_parse_loop(Compiler c) {
-  c.start_collection();
-  c.braces.clear();
-  while (c.peek(0) != <eof>) {
-    Token start = c.token;
-    if (c.package && c.line_markers && c.source_private < 0) {
-      int line = start.line;
-      String package = c.owns_package_source(c.token_source(start, line))
-                     ? c.package : NULL;
-      with (c.package = package) { (void) c.parse_top_level_mode(1); }
-    }
-    else (void) c.parse_top_level_mode(1);
-    _debug_tokens(start, c.token);
-  }
-  /* Definitions after the last declaration, as before an include, still
-     define macros for the segments that follow. */
-  foreach (List directive in c.leading_preproc())
-    c.note_object_macro(directive.cadr());
-  c.shallow = 0;
-}
-
 /** Starts a collection pass with the syntax prelude. It parses no bodies,
     and an import it reads installs the protocols visible to it when a
     template or `meta` body first asks for one.
@@ -58,13 +37,6 @@ void Compiler.start_collection(Compiler c) {
   c.import_protocols = 1;
   c.conforms = {};
   c.shallow = 1;
-}
-
-module void _debug_tokens(Token start, Token end) {
-  if (!log_should_log(<debug>, <tokenizer>)) return;
-  for (Token tok = start; tok < end; tok++)
-    if (tok.type != <space> && tok.type != <comment> && tok.type != <preproc>)
-      $debug.compiler_token(tok);
 }
 
 /** Collects macro definitions or keyword aliases before the full source parse.
@@ -115,21 +87,6 @@ void Compiler.finish_collected_declaration(
   else c.next();
 }
 
-static void _skip_body(Compiler c, List declaration, Token meta, int native) {
-  if (native) c.record_native_meta_effect(declaration, meta);
-  else if (meta) c.record_project_meta_effect(declaration, meta);
-  if (declaration ~= %(declare ? (bindings (bind ?binding ?))))
-    _note_function_body(c, declaration.type_from_ast(), binding);
-  c.record_inline_function(declaration);
-  if (_x2c_at_function_arrow(c)) {
-    c.next();
-    c.next();
-    _x2c_skip_shallow_expression(c, 0);
-    c.expect(<;>);
-  }
-  else _shallow_block(c);
-}
-
 /** Records the header linkage of a public inline definition. Semantic
     function types discard storage, so this declaration fact survives there.
 */
@@ -140,12 +97,6 @@ void Compiler.record_inline_function(Compiler c, List declaration) {
     String name = Ast.binding_spelling(binding);
     c.sym.set($("function-inline", name), %(inline));
   }
-}
-
-// `fn_defs` holds each non-static function the unit defines.
-static void _note_function_body(Compiler c, Type type, List binding) {
-  if (!type.is_function() || type.is_static()) return;
-  c.fn_defs[Ast.binding_spelling(binding)] = 1;
 }
 
 /* Reports whether the current two tokens are `=>`. */
@@ -163,6 +114,57 @@ void _x2c_skip_shallow_expression(Compiler c, int stop_at_comma) {
     if (type.group_step() > 0) c.token = c.token.after_group();
     else c.next();
   }
+}
+
+// shallow declaration collection
+
+static void _shallow_parse_loop(Compiler c) {
+  c.start_collection();
+  c.braces.clear();
+  while (c.peek(0) != <eof>) {
+    Token start = c.token;
+    if (c.package && c.line_markers && c.source_private < 0) {
+      int line = start.line;
+      String package = c.owns_package_source(c.token_source(start, line))
+                     ? c.package : NULL;
+      with (c.package = package) { (void) c.parse_top_level_mode(1); }
+    }
+    else (void) c.parse_top_level_mode(1);
+    _debug_tokens(start, c.token);
+  }
+  /* Definitions after the last declaration, as before an include, still
+     define macros for the segments that follow. */
+  foreach (List directive in c.leading_preproc())
+    c.note_object_macro(directive.cadr());
+  c.shallow = 0;
+}
+
+module void _debug_tokens(Token start, Token end) {
+  if (!log_should_log(<debug>, <tokenizer>)) return;
+  for (Token tok = start; tok < end; tok++)
+    if (tok.type != <space> && tok.type != <comment> && tok.type != <preproc>)
+      $debug.compiler_token(tok);
+}
+
+static void _skip_body(Compiler c, List declaration, Token meta, int native) {
+  if (native) c.record_native_meta_effect(declaration, meta);
+  else if (meta) c.record_project_meta_effect(declaration, meta);
+  if (declaration ~= %(declare ? (bindings (bind ?binding ?))))
+    _note_function_body(c, declaration.type_from_ast(), binding);
+  c.record_inline_function(declaration);
+  if (_x2c_at_function_arrow(c)) {
+    c.next();
+    c.next();
+    _x2c_skip_shallow_expression(c, 0);
+    c.expect(<;>);
+  }
+  else _shallow_block(c);
+}
+
+// `fn_defs` holds each non-static function the unit defines.
+static void _note_function_body(Compiler c, Type type, List binding) {
+  if (!type.is_function() || type.is_static()) return;
+  c.fn_defs[Ast.binding_spelling(binding)] = 1;
 }
 
 static void _shallow_block(Compiler c) {

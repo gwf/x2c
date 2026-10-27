@@ -10,6 +10,8 @@ module Var macro_subject = void;
    current call's subject, which ties it to that call. */
 module int threaded macro_subject_used;
 
+static List _instantiate(Macro t, List values);
+
 /** Returns the table `Macro.use_subject` last set, or void. */
 Var Macro.subject(void) => macro_subject;
 
@@ -22,18 +24,6 @@ Var Macro.subject(void) => macro_subject;
 */
 void Macro.use_subject(Var rows) { macro_subject = rows; }
 
-/* The pattern for a `using` reference to `spelling`: any binding of it, or
-   only the subject's file-scope binding while a call sets a subject. A free
-   reference matches any binding of its spelling, since it binds where its
-   expansion lands. */
-static Var _free_reference(String spelling) {
-  if (macro_subject is void) return %(binding ? $spelling);
-  macro_subject_used = 1;
-  foreach (List row in macro_subject.list())
-    if (row.car() == spelling) return row.cadr();
-  return %(binding-name $spelling);
-}
-
 /* pattern derivation
 
    A pattern is the macro's body with each parameter's projections replaced
@@ -45,6 +35,19 @@ static Var _free_reference(String spelling) {
 */
 List Macro_pattern(Macro t, List names) {
   return _pattern(t, names, 0);
+}
+
+/** Returns the binder that captures one projection of the template hole
+    whose binder is `binder`. Splice and construction projections are
+    always sequences; return, declarator, and member projections never
+    are; source, value, and expression follow the hole's `sequence`.
+*/
+Atom Macro.binder(Var binder, String projection, int sequence) {
+  if (projection == "splice" || projection == "construction") sequence = 1;
+  else if (projection == "return" || projection == "declarator" ||
+           projection == "member") sequence = 0;
+  String prefix = sequence ? "*" : "?", name = binder.str();
+  return Atom.intern(%"$(prefix)__macro_$(projection)_$(name[1:])");
 }
 
 module List _pattern(Macro t, List names, int case_pattern) {
@@ -97,35 +100,10 @@ static Var _hidden(Var binder) {
   return Atom.intern(binder.str() + "__macro_anonymous");
 }
 
-static Var _shown(Var value) {
-  if (!value.is_binder()) return value;
-  String name = value.str();
-  if (name.len() != 18 || !name.endswith("__macro_anonymous")) return value;
-  return name[0] == '*' ? <*> : <?>;
-}
-
-/** Returns the binder that captures one projection of the template hole
-    whose binder is `binder`. Splice and construction projections are
-    always sequences; return, declarator, and member projections never
-    are; source, value, and expression follow the hole's `sequence`.
-*/
-Atom Macro.binder(Var binder, String projection, int sequence) {
-  if (projection == "splice" || projection == "construction") sequence = 1;
-  else if (projection == "return" || projection == "declarator" ||
-           projection == "member") sequence = 0;
-  String prefix = sequence ? "*" : "?", name = binder.str();
-  return Atom.intern(%"$(prefix)__macro_$(projection)_$(name[1:])");
-}
-
-static Atom _key(List hole, String projection) =>
-  Macro.binder(hole.assoc(<binder>), projection, hole.assoc(<sequence>));
-
 /* The second slot of a Name's declaration and reference projection keeps
    exact binding identity when a member label reaches the first slot first. */
 module Atom _name_identity(List hole) =>
   Atom.intern(%"?__macro_identity_$(hole.assoc(<binder>).str()[1:])");
-
-static List _instantiate(Macro t, List values);
 
 /* Inlines each child macro the body calls, instantiated with its
    arguments, and drops the shell a template leaves around an
@@ -144,19 +122,19 @@ static Var _inline(List environment, Var tree) {
   return parts.list_free();
 }
 
-/* The Macro value the environment captured for `binding`, or NULL. */
-static Macro _child(List environment, Var binding) {
-  foreach (List row in environment)
-    if (List.compare(row.car(), binding) == 0) return row.cadr();
-  return NULL;
-}
-
 /* Substitutes grouped values into the body directly. Pattern derivation
    uses this for a captured child macro; construction goes through the
    compiler's invocation rows instead. */
 static List _instantiate(Macro t, List values) {
   List rows = _value_rows(t, values), body = t.assoc(<template>);
   return _inline(t.assoc(<env>), body.replace(rows));
+}
+
+/* The Macro value the environment captured for `binding`, or NULL. */
+static Macro _child(List environment, Var binding) {
+  foreach (List row in environment)
+    if (List.compare(row.car(), binding) == 0) return row.cadr();
+  return NULL;
 }
 
 /* The rows that replace each parameter's projections with its argument. A
@@ -182,6 +160,9 @@ static List _value_rows(Macro t, List values) {
   }
   return rows;
 }
+
+static Atom _key(List hole, String projection) =>
+  Macro.binder(hole.assoc(<binder>), projection, hole.assoc(<sequence>));
 
 // pattern views
 
@@ -229,6 +210,18 @@ static List _pattern_views(List items) {
   return parts.list_free();
 }
 
+/* The pattern for a `using` reference to `spelling`: any binding of it, or
+   only the subject's file-scope binding while a call sets a subject. A free
+   reference matches any binding of its spelling, since it binds where its
+   expansion lands. */
+static Var _free_reference(String spelling) {
+  if (macro_subject is void) return %(binding ? $spelling);
+  macro_subject_used = 1;
+  foreach (List row in macro_subject.list())
+    if (row.car() == spelling) return row.cadr();
+  return %(binding-name $spelling);
+}
+
 /* A slot builds code the pattern cannot see; a spliced slot captures it
    under the sequence hole it was given. */
 static Var _slot_view(int splice, Var form) {
@@ -248,4 +241,11 @@ static Var _slot_binder(Var form) {
     if (binder) return binder;
   }
   return NULL;
+}
+
+static Var _shown(Var value) {
+  if (!value.is_binder()) return value;
+  String name = value.str();
+  if (name.len() != 18 || !name.endswith("__macro_anonymous")) return value;
+  return name[0] == '*' ? <*> : <?>;
 }

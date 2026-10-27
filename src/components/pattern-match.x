@@ -78,23 +78,6 @@ meta static List _match_capture(Var binder, int index) {
 
 // pattern tests
 
-/* A static pattern first becomes a tree of tests: (and T ...),
-   (or T ...), (not T), (true), and leaves that test one cell. A cell is a
-   cursor whose head holds a value; `<subject>` is the subject itself,
-   `<root>` its first cell, and any other cell numbers the new cursor whose
-   entry in `cursors` is `(first)` when it starts a List or `(cdr PRIOR)`.
-   Building the tree reaches no compile-time operation, so these functions
-   may call each other in any order. A literal that compares by value
-   records the `steps`,
-   `<cdr>` or `<in>`, that reach its cell in the cached pattern, latest
-   first. NULL marks a pattern these tests do not cover; Match tests it
-   instead. */
-
-meta static int _match_fresh(Array cursors, List how) {
-  cursors.push(how);
-  return cursors.len() - 1;
-}
-
 /* The tests of the pattern `value` on the subject. */
 meta static List _match_tests(List value, Array cursors) =>
   value && value.car().is_match_op()
@@ -188,6 +171,25 @@ meta static List _match_guard(
   else if (op != <!or> && op != <!set>) return NULL;
   tests.push(choice);
   return %(and @(tests.list_free()));
+}
+
+
+
+/* A static pattern first becomes a tree of tests: (and T ...),
+   (or T ...), (not T), (true), and leaves that test one cell. A cell is a
+   cursor whose head holds a value; `<subject>` is the subject itself,
+   `<root>` its first cell, and any other cell numbers the new cursor whose
+   entry in `cursors` is `(first)` when it starts a List or `(cdr PRIOR)`.
+   Building the tree reaches no compile-time operation, so these functions
+   may call each other in any order. A literal that compares by value
+   records the `steps`,
+   `<cdr>` or `<in>`, that reach its cell in the cached pattern, latest
+   first. NULL marks a pattern these tests do not cover; Match tests it
+   instead. */
+
+meta static int _match_fresh(Array cursors, List how) {
+  cursors.push(how);
+  return cursors.len() - 1;
 }
 
 /* The test of `(!is ...)` operands on the value in `cell`. */

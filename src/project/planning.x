@@ -22,6 +22,20 @@ ProjectBuild ProjectBuild.plan(CliRequest request) {
   return p.head;
 }
 
+/** Returns the explicit or nearest readable project manifest, or NULL.
+    Discovery uses the same request view as project parsing.
+*/
+String CliRequest.project_manifest(CliRequest c) {
+  if (c.manifest) return c.manifest;
+  for (Path directory = Path.absolute(".");; directory = directory.dirname()) {
+    String candidate = directory.join("x2c.toml");
+    if (c.sources.exists(candidate)) return candidate;
+    if (directory == "/") return NULL;
+  }
+}
+
+// discovery and dependency-ordered build requests
+
 /* A project whose manifest text is read and not yet parsed. */
 static Project _open_project(CliRequest request) {
   Project p = xcalloc(1, sizeof(struct Project));
@@ -33,18 +47,6 @@ static Project _open_project(CliRequest request) {
   if (!p.sources.read(p.path, p.text)) _error(p, 0, "cannot read manifest");
   p.root = Path.dirname(p.path);
   return p;
-}
-
-/** Returns the explicit or nearest readable project manifest, or NULL.
-    Discovery uses the same request view as project parsing.
-*/
-String CliRequest.project_manifest(CliRequest c) {
-  if (c.manifest) return c.manifest;
-  for (Path directory = Path.absolute(".");; directory = directory.dirname()) {
-    String candidate = directory.join("x2c.toml");
-    if (c.sources.exists(candidate)) return candidate;
-    if (directory == "/") return NULL;
-  }
 }
 
 /* The target the command names, else the manifest's default, else the
@@ -88,19 +90,6 @@ static void _validate_target(Project p, ProjectTarget target) {
   target.visited = 1;
 }
 
-/* The targets built before `target`: the libraries it links and the
-   native modules its translation loads. */
-static List _prerequisites(ProjectTarget target) =>
-  target.dependencies.append(target.native_modules);
-
-static ProjectProfile _selected_profile(
-  Project p, ProjectTarget target, String name) {
-  if (!name) return NULL;
-  ProjectProfile profile = _profile(target, name);
-  if (!profile) _error_name(p, 0, "target has no profile", name);
-  return profile;
-}
-
 // package dependencies
 
 /* The package command owns lockfile and installation state. Editor source
@@ -136,6 +125,11 @@ static void _plan_target(Project p, ProjectTarget target) {
   _append_plan(p, _target_request(p, target));
   target.planned = 1;
 }
+
+/* The targets built before `target`: the libraries it links and the
+   native modules its translation loads. */
+static List _prerequisites(ProjectTarget target) =>
+  target.dependencies.append(target.native_modules);
 
 static void _append_plan(Project p, CliRequest request) {
   ProjectBuild node = xcalloc(1, sizeof(struct ProjectBuild));
@@ -185,12 +179,6 @@ static void _set_product(Project p, ProjectTarget target, CliRequest request) {
   request.save_temps = 0;
 }
 
-static String _target_output(Project p, ProjectTarget target, Symbol kind) {
-  if (target.output) return Path.join(p.root, target.output);
-  TargetKind *row = TargetKind.of(kind);
-  return %"$(p.build_root)/$(row.prefix)$(target.name)$(row.suffix)";
-}
-
 /* A target's sources, then the archives of the libraries it links. */
 static List _target_inputs(Project p, ProjectTarget target, Symbol kind) {
   if (kind == <static-lib> && target.dependencies)
@@ -219,6 +207,12 @@ static List _target_modules(Project p, ProjectTarget target) {
     modules.push(_target_output(p, loaded, <module>));
   }
   return modules.list_free();
+}
+
+static String _target_output(Project p, ProjectTarget target, Symbol kind) {
+  if (target.output) return Path.join(p.root, target.output);
+  TargetKind *row = TargetKind.of(kind);
+  return %"$(p.build_root)/$(row.prefix)$(target.name)$(row.suffix)";
 }
 
 // options
@@ -252,6 +246,14 @@ static ProjectProfile _target_profile(Project p, ProjectTarget target) {
   return name ? _profile(target, name) : NULL;
 }
 
+static ProjectProfile _selected_profile(
+  Project p, ProjectTarget target, String name) {
+  if (!name) return NULL;
+  ProjectProfile profile = _profile(target, name);
+  if (!profile) _error_name(p, 0, "target has no profile", name);
+  return profile;
+}
+
 /* A profile's C flags, optimization, and debug option. An -O or -g among
    the command's own C flags takes the place of the profile's. */
 static List _profile_flags(Project p, ProjectProfile profile) {
@@ -274,8 +276,8 @@ static List _c_flags(Project p, List values) {
 
 static List _defines(List values) => values.map(%!(value) => %"-D$value");
 
-static List _paths(String root, List values) =>
-  values.map(%!(String value) => Path.join(root, value));
-
 static List _path_options(String root, List values, String option) =>
   _paths(root, values).map(%!(path) => $(option, path)).flatten();
+
+static List _paths(String root, List values) =>
+  values.map(%!(String value) => Path.join(root, value));

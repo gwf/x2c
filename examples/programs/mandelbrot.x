@@ -11,6 +11,27 @@ typedef struct Job {
   ArrayDbl pixels;
 } *Job;
 
+int main(int argc, char **argv) {
+  Scope.retain();
+  String path = argc > 1 ? argv[1] : "mandelbrot.ppm";
+  ArrayDbl pixels = [];
+  pixels.append(NULL, width * height);
+  Array threads = [];
+  for (int worker = 0; worker < nworkers; worker++) {
+    struct Job job = { worker, pixels };
+    threads.push(Thread.start_raw(render, &job, sizeof(job)));
+  }
+  for (int worker = 0; worker < nworkers; worker++) {
+    Thread thread = threads[worker];
+    thread.join();
+    thread.free();
+  }
+  write_image(path, _rgb(pixels));
+  puts(%"wrote $path");
+  Scope.release();
+  return 0;
+}
+
 static Var render(const void *input, size_t ignored) {
   const Job job = (Job) input;
   for (int y = job.worker; y < height; y += nworkers) {
@@ -57,25 +78,4 @@ static void write_image(String path, ArrayChar rgb) {
   defer output.close();
   output.puts(%"P6\n$width $height\n255\n");
   output.write_all(rgb.bytes, rgb.len());
-}
-
-int main(int argc, char **argv) {
-  Scope.retain();
-  String path = argc > 1 ? argv[1] : "mandelbrot.ppm";
-  ArrayDbl pixels = [];
-  pixels.append(NULL, width * height);
-  Array threads = [];
-  for (int worker = 0; worker < nworkers; worker++) {
-    struct Job job = { worker, pixels };
-    threads.push(Thread.start_raw(render, &job, sizeof(job)));
-  }
-  for (int worker = 0; worker < nworkers; worker++) {
-    Thread thread = threads[worker];
-    thread.join();
-    thread.free();
-  }
-  write_image(path, _rgb(pixels));
-  puts(%"wrote $path");
-  Scope.release();
-  return 0;
 }

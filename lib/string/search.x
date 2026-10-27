@@ -2,62 +2,6 @@
 
 // search
 
-/** Returns the index of the first occurrence of `sub` in `str`, or -1.
-    The search compares bytes, so an index may land inside a multibyte
-    sequence. An empty `sub` matches at index 0. Use `String.find_within` to
-    bound the search to a range, or `String.rfind` to scan from the end.
-*/
-meta native int String.find(String str, String sub) =>
-  str.find_within(sub, 0, -1);
-
-/** Returns the first index of `sub` within `str[start:end]`, or -1.
-    The returned index is absolute and counts from the start of `str`.
-    Negative `start` and `end` count from the end of `str`, and both are then
-    clamped to the `String`.
-
-    An `end` of -1 is the sentinel for "to the end of `str`", not "one byte
-    before the end". There is therefore no negative `end` that excludes only
-    the last byte; pass a nonnegative `end` for that. An empty `sub` matches at
-    the normalized `start`.
-
-    ```x2c
-    ~String text = "abcabc";
-    printf("%d %d %d\n", text.find_within("c", 0, -1),
-           text.find_within("c", 0, 2), text.find_within("a", -3, -1));
-    ```
-*/
-meta native int String.find_within(
-  String str, String sub, int start, int end) {
-  int n = str.len(), m = sub.len();
-  if (start < 0) start += n;
-  if (end == -1) end = n;
-  else if (end < 0) end += n;
-  start = _clamp(start, n);
-  end = _clamp(end, n);
-  if (start + m > end) return -1;
-  if (m == 0) return start;
-  if (!str) return -1;
-  const char *p = _find_bytes(str + start, end - start, sub, m);
-  if (!p) return -1;
-  return p - str;
-}
-
-static int _clamp(int index, int n) {
-  if (index < 0) return 0;
-  return index > n ? n : index;
-}
-
-module const char *_find_bytes(
-  const char *haystack, int haystack_len, const char *needle, int needle_len) {
-  if (needle_len == 0) return haystack;
-  if (!haystack || haystack_len < needle_len) return NULL;
-  for (int i = 0; i <= haystack_len - needle_len; i++)
-    if ((unsigned char) haystack[i] == (unsigned char) needle[0] &&
-        memcmp(haystack + i, needle, needle_len) == 0)
-      return haystack + i;
-  return NULL;
-}
-
 /** Returns the index of the last occurrence of `sub` in `str`, or -1.
     Scanning runs backwards from the end, and the returned index still
     measures from the start of `str`. An empty `sub` reports the length of
@@ -98,19 +42,6 @@ meta native int String.count(String str, String sub) {
   return _count_matches(str, sub, -1);
 }
 
-/* Counts non-overlapping occurrences of `sub` in `str`, left to right, up to
-   `limit` of them; a negative `limit` counts every match. */
-module int _count_matches(String str, String sub, int limit) {
-  int str_len = str.len(), sub_len = sub.len(), count = 0, pos = 0;
-  while (pos <= str_len - sub_len && (limit < 0 || count < limit)) {
-    const char *found = _find_bytes(str + pos, str_len - pos, sub, sub_len);
-    if (!found) break;
-    count++;
-    pos = found - str + sub_len;
-  }
-  return count;
-}
-
 /** Reports whether the bytes of `sub` occur anywhere in `str`.
     An empty `sub` is contained in every `String`, including the empty one,
     so a truth test on user-supplied text should check for emptiness
@@ -121,6 +52,48 @@ meta native int String.contains(String str, String sub) {
   if (!str) return 0;
   if (sub.len() == 1) return strchr(str, sub[0]) != NULL;
   return str.find(sub) != -1;
+}
+
+
+
+/** Returns the index of the first occurrence of `sub` in `str`, or -1.
+    The search compares bytes, so an index may land inside a multibyte
+    sequence. An empty `sub` matches at index 0. Use `String.find_within` to
+    bound the search to a range, or `String.rfind` to scan from the end.
+*/
+meta native int String.find(String str, String sub) =>
+  str.find_within(sub, 0, -1);
+
+/** Returns the first index of `sub` within `str[start:end]`, or -1.
+    The returned index is absolute and counts from the start of `str`.
+    Negative `start` and `end` count from the end of `str`, and both are then
+    clamped to the `String`.
+
+    An `end` of -1 is the sentinel for "to the end of `str`", not "one byte
+    before the end". There is therefore no negative `end` that excludes only
+    the last byte; pass a nonnegative `end` for that. An empty `sub` matches at
+    the normalized `start`.
+
+    ```x2c
+    ~String text = "abcabc";
+    printf("%d %d %d\n", text.find_within("c", 0, -1),
+           text.find_within("c", 0, 2), text.find_within("a", -3, -1));
+    ```
+*/
+meta native int String.find_within(
+  String str, String sub, int start, int end) {
+  int n = str.len(), m = sub.len();
+  if (start < 0) start += n;
+  if (end == -1) end = n;
+  else if (end < 0) end += n;
+  start = _clamp(start, n);
+  end = _clamp(end, n);
+  if (start + m > end) return -1;
+  if (m == 0) return start;
+  if (!str) return -1;
+  const char *p = _find_bytes(str + start, end - start, sub, m);
+  if (!p) return -1;
+  return p - str;
 }
 
 /** Reports whether `str` starts with `prefix`.
@@ -144,4 +117,33 @@ meta native int String.endswith(String str, String suffix) {
   if (suffix_len == 0) return 1;
   return str && suffix_len <= str_len &&
          memcmp(str + str_len - suffix_len, suffix, suffix_len) == 0;
+}
+
+static int _clamp(int index, int n) {
+  if (index < 0) return 0;
+  return index > n ? n : index;
+}
+
+module const char *_find_bytes(
+  const char *haystack, int haystack_len, const char *needle, int needle_len) {
+  if (needle_len == 0) return haystack;
+  if (!haystack || haystack_len < needle_len) return NULL;
+  for (int i = 0; i <= haystack_len - needle_len; i++)
+    if ((unsigned char) haystack[i] == (unsigned char) needle[0] &&
+        memcmp(haystack + i, needle, needle_len) == 0)
+      return haystack + i;
+  return NULL;
+}
+
+/* Counts non-overlapping occurrences of `sub` in `str`, left to right, up to
+   `limit` of them; a negative `limit` counts every match. */
+module int _count_matches(String str, String sub, int limit) {
+  int str_len = str.len(), sub_len = sub.len(), count = 0, pos = 0;
+  while (pos <= str_len - sub_len && (limit < 0 || count < limit)) {
+    const char *found = _find_bytes(str + pos, str_len - pos, sub, sub_len);
+    if (!found) break;
+    count++;
+    pos = found - str + sub_len;
+  }
+  return count;
 }

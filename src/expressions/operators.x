@@ -2,6 +2,17 @@
 
 // operators
 
+/* Returns <array> or <map>, including aliases, and zero for other types. */
+Symbol _x2c_indexed_builtin_helper(Compiler c, Type type) {
+  if (c.sym.is_array_type(type)) return <array>;
+  if (c.sym.is_map_type(type)) return <map>;
+  return 0;
+}
+
+
+
+// operator types and protocol operations
+
 module List _unary(Resolve &r, Var operator, List operand) {
   List lhs = r.c.resolve_expression(operand, r.origin);
   Type lhs_type = lhs.cadr();
@@ -159,13 +170,6 @@ module List _binary_expression(
 static int _builtin_index_lvalue(Compiler c, List expression) {
   if (expression ~= %(expr ? (getindex (expr ?receiver_type ?) ?)))
     return !!_x2c_indexed_builtin_helper(c, receiver_type);
-  return 0;
-}
-
-/* Returns <array> or <map>, including aliases, and zero for other types. */
-Symbol _x2c_indexed_builtin_helper(Compiler c, Type type) {
-  if (c.sym.is_array_type(type)) return <array>;
-  if (c.sym.is_map_type(type)) return <map>;
   return 0;
 }
 

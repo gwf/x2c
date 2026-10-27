@@ -46,11 +46,6 @@ int main(int argc, char **argv) {
   return EXIT_SUCCESS; // Root scope frees words and table.
 }
 
-static void fail(const char *message) {
-  fprintf(stderr, "%s\n", message);
-  exit(EXIT_FAILURE);
-}
-
 static void count_line(Counts *counts, char *line) {
   char *p = line;
   while (*p) {
@@ -140,4 +135,9 @@ static uint64_t hash_word(const char *word) {
     hash *= 0x100000001b3ULL;
   }
   return hash;
+}
+
+static void fail(const char *message) {
+  fprintf(stderr, "%s\n", message);
+  exit(EXIT_FAILURE);
 }

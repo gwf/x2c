@@ -10,24 +10,6 @@
 */
 List Array.list(Array arr) => _prepend_array(arr, NULL);
 
-static List _prepend_array(Array values, List tail) {
-  Var *items = values.bytes;
-  for (size_t i = values.len(); i; i--) tail = cons(items[i - 1], tail);
-  return tail;
-}
-
-/** Returns `arr.list()` and frees `arr`.
-    The conversion uses `Array.list`, so the result is canonical and may
-    share existing cells, including cells owned by an ancestor pool.
-    It does not adopt the `Array`'s storage. `arr` is released on success
-    and when the conversion transfers an `Error`.
-    Raises: `<alloc-fail>` while constructing the result.
-*/
-List Array.list_free(Array arr) {
-  defer arr.free();
-  return arr;
-}
-
 /** Returns a new `Array` holding the elements of `lst` in order.
     The `Array` is a fresh mutable container the caller owns and should free;
     the elements are shared, since they are only `Var`s. Convert when you need
@@ -55,6 +37,18 @@ meta native List Map.list(Map map) {
   return pairs.list_free();
 }
 
+/** Returns `arr.list()` and frees `arr`.
+    The conversion uses `Array.list`, so the result is canonical and may
+    share existing cells, including cells owned by an ancestor pool.
+    It does not adopt the `Array`'s storage. `arr` is released on success
+    and when the conversion transfers an `Error`.
+    Raises: `<alloc-fail>` while constructing the result.
+*/
+List Array.list_free(Array arr) {
+  defer arr.free();
+  return arr;
+}
+
 /** Drains `iter` into a new `List`.
     The iterator is consumed to exhaustion, so this is meaningful once and
     never returns for an infinite source. Elements appear in iteration order.
@@ -68,20 +62,6 @@ meta native List Iter.list(Iter iter) {
 }
 
 // building
-
-/** Returns the concatenation of `a` and `b`.
-    Neither input is modified. `b` becomes the shared tail of the result, so
-    only `a`'s cells are rebuilt, O(len(a)) of them. When either side is `nil`
-    the other side is returned as it stands.
-    Raises: `<alloc-fail>` or `<size-limit>` while constructing the copied
-    prefix.
-*/
-Self List.append(Self a, Self b) {
-  if (!a) return b;
-  if (!b) return a;
-  Array values = auto a;
-  return _prepend_array(values, b);
-}
 
 /** Returns the concatenation of the List arguments in order.
     Each argument is one List; `@lists` splices a List of Lists. No arguments
@@ -108,21 +88,20 @@ List List.concat_n(unsigned list_count, ...) {
   return out;
 }
 
-static List _concat_va(unsigned n, va_list ap) {
-  if (n > INT_MAX) raise %(size-limit (operation "List.concat_n") (count $n));
-  Array lists = auto [];
-  for (unsigned i = 0; i < n; i++) lists.push(va_arg(ap, List));
-  return _concat_lists(lists);
-}
 
-/* Each List is prepended to the concatenation of the ones after it. */
-static List _concat_lists(Array lists) {
-  List tail = NULL;
-  for (int i = (int) lists.len() - 1; i >= 0; i--) {
-    List current = lists[i];
-    tail = current.append(tail);
-  }
-  return tail;
+
+/** Returns the concatenation of `a` and `b`.
+    Neither input is modified. `b` becomes the shared tail of the result, so
+    only `a`'s cells are rebuilt, O(len(a)) of them. When either side is `nil`
+    the other side is returned as it stands.
+    Raises: `<alloc-fail>` or `<size-limit>` while constructing the copied
+    prefix.
+*/
+Self List.append(Self a, Self b) {
+  if (!a) return b;
+  if (!b) return a;
+  Array values = auto a;
+  return _prepend_array(values, b);
 }
 
 /** Builds a `List` from exactly `element_count` `Var` arguments.
@@ -139,16 +118,6 @@ List List.list_n(unsigned element_count, ...) {
   return out;
 }
 
-static List _list_va(unsigned n, va_list ap) {
-  Array values = auto [];
-  for (unsigned i = 0; i < n; i++) {
-    Var value = va_arg(ap, Var);
-    if (value is void) raise %(void-op (operation "List.list_n") (index $i));
-    values.push(value);
-  }
-  return values;
-}
-
 /** Returns a canonical `List` with `lst`'s elements reversed.
     `cons` may reuse existing cells, and `lst` is unchanged. Reversing `nil`
     gives `nil`.
@@ -158,4 +127,37 @@ Self List.reverse(Self lst) {
   List rev = NULL;
   foreach (Var value in lst) rev = cons(value, rev);
   return rev;
+}
+
+static List _prepend_array(Array values, List tail) {
+  Var *items = values.bytes;
+  for (size_t i = values.len(); i; i--) tail = cons(items[i - 1], tail);
+  return tail;
+}
+
+/* Each List is prepended to the concatenation of the ones after it. */
+static List _concat_lists(Array lists) {
+  List tail = NULL;
+  for (int i = (int) lists.len() - 1; i >= 0; i--) {
+    List current = lists[i];
+    tail = current.append(tail);
+  }
+  return tail;
+}
+
+static List _concat_va(unsigned n, va_list ap) {
+  if (n > INT_MAX) raise %(size-limit (operation "List.concat_n") (count $n));
+  Array lists = auto [];
+  for (unsigned i = 0; i < n; i++) lists.push(va_arg(ap, List));
+  return _concat_lists(lists);
+}
+
+static List _list_va(unsigned n, va_list ap) {
+  Array values = auto [];
+  for (unsigned i = 0; i < n; i++) {
+    Var value = va_arg(ap, Var);
+    if (value is void) raise %(void-op (operation "List.list_n") (index $i));
+    values.push(value);
+  }
+  return values;
 }

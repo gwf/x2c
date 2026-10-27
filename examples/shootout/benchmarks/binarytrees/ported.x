@@ -12,19 +12,6 @@
 typedef struct Node *Node;
 struct Node { Node left, right; int item; };
 
-static Node _new_tree(int item, int depth) {
-  Node tree = xmalloc(sizeof(struct Node));
-  tree.item = item;
-  tree.left = depth ? _new_tree(item * 2 - 1, depth - 1) : NULL;
-  tree.right = depth ? _new_tree(item * 2, depth - 1) : NULL;
-  return tree;
-}
-
-static int Node.sum(Node tree) {
-  if (!tree.left) return tree.item;
-  return tree.item + tree.left.sum() - tree.right.sum();
-}
-
 int main(int argc, char **argv) {
   if (argc != 3) return 2;
   int depth = atoi(argv[1]), iterations = atoi(argv[2]);
@@ -36,4 +23,17 @@ int main(int argc, char **argv) {
   }
   printf("%lld\n", (long long) checksum);
   return 0;
+}
+
+static Node _new_tree(int item, int depth) {
+  Node tree = xmalloc(sizeof(struct Node));
+  tree.item = item;
+  tree.left = depth ? _new_tree(item * 2 - 1, depth - 1) : NULL;
+  tree.right = depth ? _new_tree(item * 2, depth - 1) : NULL;
+  return tree;
+}
+
+static int Node.sum(Node tree) {
+  if (!tree.left) return tree.item;
+  return tree.item + tree.left.sum() - tree.right.sum();
 }

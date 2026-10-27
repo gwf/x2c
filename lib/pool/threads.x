@@ -21,21 +21,6 @@ void Pool.thread_start(void) {
   pool_multithreaded = 1;
 }
 
-/* the thread's pool
-
-   String and List share one stack because their immutable values freely
-   contain one another. The public bracket below operates on that one stack;
-   the instance methods above build a pool without making it thread-active. */
-
-/** Returns the borrowed canonical-value pool active on this thread.
-    The process root is installed lazily on first use, so the result is never
-    NULL. The pool is borrowed: do not release it with `Pool.release`.
-*/
-Pool Pool.current(void) {
-  if (!value_thread.current) Pool.initialize();
-  return value_thread.current;
-}
-
 /** Borrows a pool for one runtime callback and returns the previous pool.
     The owner keeps the pool and its ancestors alive. Exchanging the
     thread-local pointer transfers no ownership; restore it after the callback.
@@ -44,17 +29,6 @@ Pool x2c_pool_exchange(Pool pool) {
   Pool previous = Pool.current();
   value_thread.current = pool;
   return previous;
-}
-
-/** Creates the process-wide canonical-value root and makes it active here.
-    `x2c_initialize` calls this once; a repeat call does nothing.
-    Raises: `<alloc-fail>` if the root cannot be constructed. Native mutex
-    initialization failure aborts.
-*/
-void Pool.initialize(void) {
-  if (value_thread.current) return;
-  if (!value_root) value_root = Pool.retain_named(NULL, "canonical values");
-  value_thread.current = value_root;
 }
 
 /** Installs the existing process root in a newly created worker thread.
@@ -77,6 +51,17 @@ void Pool.shutdown(void) {
   value_thread.current = NULL;
 }
 
+/** Opens a child of the shared `String` and `List` canonical-value pool.
+    New canonical misses enter the child, while equal ancestor values retain
+    their existing owner. Promote anything that must outlive the bracket with
+    `String.promote` or `List.promote`: unpromoted values are discarded and
+    their identities no longer resolve. Brackets nest. The caller must match
+    this with one `Pool.close` or detach it for transfer.
+    Raises: `<alloc-fail>` while opening the pool.
+    See: Pool.close, Pool.open_named, List.promote
+*/
+Pool Pool.open(void) => Pool.open_named(NULL);
+
 /** Opens and returns a named child of the pool active on this thread.
     New canonical misses enter the child; an equal ancestor value keeps its
     existing owner and lifetime. The caller must match this with one
@@ -90,17 +75,6 @@ Pool Pool.open_named(const char *name) {
   value_thread.current = nested;
   return nested;
 }
-
-/** Opens a child of the shared `String` and `List` canonical-value pool.
-    New canonical misses enter the child, while equal ancestor values retain
-    their existing owner. Promote anything that must outlive the bracket with
-    `String.promote` or `List.promote`: unpromoted values are discarded and
-    their identities no longer resolve. Brackets nest. The caller must match
-    this with one `Pool.close` or detach it for transfer.
-    Raises: `<alloc-fail>` while opening the pool.
-    See: Pool.close, Pool.open_named, List.promote
-*/
-Pool Pool.open(void) => Pool.open_named(NULL);
 
 /** Closes the innermost open bracket and makes its parent active.
     Canonical `String`s, `List`s, and transient `String` buffers owned by that
@@ -125,6 +99,32 @@ Pool Pool.detach(void) {
   if (!detached.up) raise %(bad-state (operation "Pool.detach"));
   value_thread.current = detached.up;
   return detached;
+}
+
+/* the thread's pool
+
+   String and List share one stack because their immutable values freely
+   contain one another. The public bracket below operates on that one stack;
+   the instance methods above build a pool without making it thread-active. */
+
+/** Returns the borrowed canonical-value pool active on this thread.
+    The process root is installed lazily on first use, so the result is never
+    NULL. The pool is borrowed: do not release it with `Pool.release`.
+*/
+Pool Pool.current(void) {
+  if (!value_thread.current) Pool.initialize();
+  return value_thread.current;
+}
+
+/** Creates the process-wide canonical-value root and makes it active here.
+    `x2c_initialize` calls this once; a repeat call does nothing.
+    Raises: `<alloc-fail>` if the root cannot be constructed. Native mutex
+    initialization failure aborts.
+*/
+void Pool.initialize(void) {
+  if (value_thread.current) return;
+  if (!value_root) value_root = Pool.retain_named(NULL, "canonical values");
+  value_thread.current = value_root;
 }
 
 /** Reports whether the process root owns `value` as its canonical identity.

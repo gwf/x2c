@@ -11,12 +11,6 @@ static macro Stmt $fail.literals_symbol_literal(Expr $c, Expr $origin) =>
     <parse>, "symbol-set entries must be literal Symbols",
     $origin, %("use %<<foo bar>>"));
 
-/* An Array or Map element has no splice form. */
-static List _parse_element(Compiler c) {
-  List inserted = _parse_insertion(c);
-  return inserted ? inserted : _parse_literal_element(c);
-}
-
 /* Symbol sets
 
    `%<<...>>` builds an immutable SymbolSet, one C string that holds a
@@ -48,6 +42,79 @@ List Compiler.parse_symbol_set_literal(Compiler c) {
   return set;
 }
 
+/** Builds a typed `SymbolSet` expression from source-ordered `Symbol` values.
+    Stores the first duplicate index, or -1, through `duplicate`; a duplicate
+    returns NULL.
+*/
+List Compiler.symbol_set_expression(Compiler c, List values, int &duplicate) {
+  duplicate = _duplicate_index(values);
+  if (duplicate >= 0) return NULL;
+  Array symbols = values;
+  List set = _set_expression(symbols);
+  symbols.free();
+  return set;
+}
+
+/* Arrays and Maps
+
+   `%[...]` and `%{...}` read quoted elements. A Map entry, quoted or
+   evaluated, may come from an entry-position macro, whose `(seq ...)` rows
+   join the entries in source order. */
+
+/** Parses a quoted Array literal into a typed, source-ordered `(array ...)`
+    node and consumes its closing `]`.
+*/
+List Compiler.parse_array_literal(Compiler c) {
+  c.expect(<"%[">);
+  List elems = _parse_array_elements(c);
+  c.expect(<"]">);
+  return %(expr ("Array") (array @elems));
+}
+
+/** Parses a quoted Map literal into a typed, source-ordered `(map ...)` node
+    and consumes its closing `}`.
+*/
+List Compiler.parse_map_literal(Compiler c) {
+  c.expect(<"%{">);
+  Array entries = [];
+  while (c.peek(0) != <"}">) {
+    _push_entry(entries, _parse_quoted_entry(c));
+    if (c.peek(0) == <"}">) break;
+    c.expect(<,>);
+  }
+  List elems = entries.list_free();
+  c.expect(<"}">);
+  return %(expr ("Map") (map @elems));
+}
+
+/** Parses comma-separated `Map` entries up to but not including `}`.
+    `Entry`-position macro sequences are flattened in source order.
+*/
+List Compiler.parse_map_entries(Compiler c) => _parse_map_entries(c, 0);
+
+/** Parses an evaluated Map, `${key: value, ...}`, whose bare identifier
+    keys are expressions like any other key, and consumes its `}`. In code
+    `$` and `{` are two tokens; quoted data scans `${` as one.
+*/
+List Compiler.parse_evaluated_map(Compiler c) {
+  if (!c.test(<"${">)) {
+    c.expect(<$>);
+    c.expect(<"{">);
+  }
+  List entries = _parse_map_entries(c, 1);
+  c.expect(<"}">);
+  return %(expr ("Map") (map @entries));
+}
+
+/** Parses one `Map` entry without consuming its following comma or `}`.
+    A bare identifier key is an Atom; any other key is an expression.
+    A direct row returns a resolved `(map-entry KEY VALUE)` node; an
+    entry-position macro may return `(seq ...)` for its caller to splice.
+*/
+List Compiler.parse_map_entry(Compiler c) => _parse_map_entry(c, 0);
+
+// collection and SymbolSet literals
+
 static Symbol _member_symbol(Compiler c) {
   Token token = c.token;
   Symbol kind = c.peek(0);
@@ -63,19 +130,6 @@ static String _member_spelling(String text) {
   if (text && text[0] == '"')
     return String.new_len(text + 1, text.len() - 2).unescape();
   return text.unescape();
-}
-
-/** Builds a typed `SymbolSet` expression from source-ordered `Symbol` values.
-    Stores the first duplicate index, or -1, through `duplicate`; a duplicate
-    returns NULL.
-*/
-List Compiler.symbol_set_expression(Compiler c, List values, int &duplicate) {
-  duplicate = _duplicate_index(values);
-  if (duplicate >= 0) return NULL;
-  Array symbols = values;
-  List set = _set_expression(symbols);
-  symbols.free();
-  return set;
 }
 
 static int _duplicate_index(List values) {
@@ -109,20 +163,14 @@ static String _octal_literal(Block bytes) {
   return output.str_free();
 }
 
-/* Arrays and Maps
-
-   `%[...]` and `%{...}` read quoted elements. A Map entry, quoted or
-   evaluated, may come from an entry-position macro, whose `(seq ...)` rows
-   join the entries in source order. */
-
-/** Parses a quoted Array literal into a typed, source-ordered `(array ...)`
-    node and consumes its closing `]`.
-*/
-List Compiler.parse_array_literal(Compiler c) {
-  c.expect(<"%[">);
-  List elems = _parse_array_elements(c);
-  c.expect(<"]">);
-  return %(expr ("Array") (array @elems));
+/* A comma may follow the last element. */
+static List _parse_array_elements(Compiler c) {
+  if (c.peek(0) == <]>) return NULL;
+  Array elements = [];
+  elements.push(_parse_array_element(c));
+  while (c.test(<,>) && c.peek(0) != <]>)
+    elements.push(_parse_array_element(c));
+  return elements.list_free();
 }
 
 /* An Expr sequence hole fills one quoted Array argument position. */
@@ -138,30 +186,10 @@ static List _parse_array_element(Compiler c) {
   return _parse_element(c);
 }
 
-/* A comma may follow the last element. */
-static List _parse_array_elements(Compiler c) {
-  if (c.peek(0) == <]>) return NULL;
-  Array elements = [];
-  elements.push(_parse_array_element(c));
-  while (c.test(<,>) && c.peek(0) != <]>)
-    elements.push(_parse_array_element(c));
-  return elements.list_free();
-}
-
-/** Parses a quoted Map literal into a typed, source-ordered `(map ...)` node
-    and consumes its closing `}`.
-*/
-List Compiler.parse_map_literal(Compiler c) {
-  c.expect(<"%{">);
-  Array entries = [];
-  while (c.peek(0) != <"}">) {
-    _push_entry(entries, _parse_quoted_entry(c));
-    if (c.peek(0) == <"}">) break;
-    c.expect(<,>);
-  }
-  List elems = entries.list_free();
-  c.expect(<"}">);
-  return %(expr ("Map") (map @elems));
+/* An Array or Map element has no splice form. */
+static List _parse_element(Compiler c) {
+  List inserted = _parse_insertion(c);
+  return inserted ? inserted : _parse_literal_element(c);
 }
 
 static void _push_entry(Array entries, Ast entry) {
@@ -193,25 +221,6 @@ static List _entry_value(Compiler c, List key, Token origin) {
   return c.resolve_map_entry(%(map-entry $key $value), origin);
 }
 
-/** Parses comma-separated `Map` entries up to but not including `}`.
-    `Entry`-position macro sequences are flattened in source order.
-*/
-List Compiler.parse_map_entries(Compiler c) => _parse_map_entries(c, 0);
-
-/** Parses an evaluated Map, `${key: value, ...}`, whose bare identifier
-    keys are expressions like any other key, and consumes its `}`. In code
-    `$` and `{` are two tokens; quoted data scans `${` as one.
-*/
-List Compiler.parse_evaluated_map(Compiler c) {
-  if (!c.test(<"${">)) {
-    c.expect(<$>);
-    c.expect(<"{">);
-  }
-  List entries = _parse_map_entries(c, 1);
-  c.expect(<"}">);
-  return %(expr ("Map") (map @entries));
-}
-
 static List _parse_map_entries(Compiler c, int evaluated) {
   Array entries = [];
   while (c.peek(0) != <"}">) {
@@ -221,13 +230,6 @@ static List _parse_map_entries(Compiler c, int evaluated) {
   }
   return entries.list_free();
 }
-
-/** Parses one `Map` entry without consuming its following comma or `}`.
-    A bare identifier key is an Atom; any other key is an expression.
-    A direct row returns a resolved `(map-entry KEY VALUE)` node; an
-    entry-position macro may return `(seq ...)` for its caller to splice.
-*/
-List Compiler.parse_map_entry(Compiler c) => _parse_map_entry(c, 0);
 
 static List _parse_map_entry(Compiler c, int evaluated) {
   List slot = c.try_parse_macro_slot(<map-entry>);

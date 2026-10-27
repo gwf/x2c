@@ -97,71 +97,6 @@ void x2c_initialize_command_environment(
   _initialize_environment(argv0, embedded_identity);
 }
 
-static void _initialize_environment(
-  const char *argv0, String embedded_identity) {
-  if (root_path) return;
-  _default_search_path();
-  executable_path = _executable(argv0);
-  external_command = embedded_identity != NULL;
-  active_identity = embedded_identity ? embedded_identity : _identity();
-  String home = Env.get("X2C_HOME");
-  if (home && !home[0]) home = NULL;
-  String root = home ? home.rstrip("/") : _locate_home(executable_path);
-  if (!root) root = _locate_home(Path.absolute("."));
-  root_found = root != NULL;
-  root_path = Path.absolute(root ? root : ".");
-  _prepare_include_dirs();
-}
-
-/* Without PATH, `execvp` searches the C library's default path, but a host
-   tool it starts that way, such as the GCC driver looking for `cc1`, finds
-   nothing. Setting that path lets the tools search where `execvp` does. */
-static void _default_search_path(void) {
-  if (Env.get("PATH")) return;
-  char buffer[PATH_MAX];
-  size_t length = confstr(_CS_PATH, buffer, sizeof(buffer));
-  if (length && length <= sizeof(buffer)) setenv("PATH", buffer, 1);
-}
-
-static String _executable(const char *argv0) {
-  char buffer[PATH_MAX];
-  ssize_t length = readlink("/proc/self/exe", buffer, sizeof(buffer) - 1);
-  if (length >= 0) {
-    buffer[length] = 0;
-    return String.new(buffer);
-  }
-  String name = String.new(argv0);
-  // A bare name came from PATH; only a path resolves against the cwd.
-  if (name && !("/" in name)) name = Env.find_program(name);
-  return Path.exists(name) ? Path.absolute(name) : NULL;
-}
-
-/* Linux names the running image itself, which stays the same file even if
-   the executable's path is replaced while the process runs. */
-static String _identity(void) =>
-  Path.content_identity(
-    Path.exists("/proc/self/exe") ? "/proc/self/exe" : executable_path);
-
-static String _locate_home(Path p) {
-  if (!p) return NULL;
-  Path directory = p.is_dir() ? p : p.dirname();
-  while (!_is_home(directory)) {
-    if (directory == "/") return NULL;
-    directory = directory.dirname();
-  }
-  return directory;
-}
-
-static int _is_home(Path p) =>
-  p.join("include").is_dir() && p.join("etc/compiler-prelude.x").is_file();
-
-static void _prepare_include_dirs(void) {
-  String include_dir = %"$root_path/include/x2c";
-  String src_dir = %"$root_path/src", lib_dir = %"$root_path/lib";
-  default_includes = cons(include_dir, NULL);
-  cpp_includes = Path.is_dir(src_dir) ? $(lib_dir, src_dir) : $(lib_dir);
-}
-
 /** Overrides the repository root and rebuilds its default include `List`s.
     The root is resolved as environment setup resolves it. The rebuilt values
     must remain valid until the next override or the process no longer uses
@@ -181,8 +116,81 @@ void x2c_set_root(String root) {
 */
 String x2c_get_root(void) => root_path;
 
+/** Returns the checked-in bootstrap's runtime directory when this process
+    is the bootstrap compiler, or NULL. Its headers and archive match the
+    runtime the bootstrap compiler was built with.
+*/
+String Compiler.bootstrap_runtime_dir(void) {
+  String executable = x2c_get_executable();
+  if (!executable || !root_path) return NULL;
+  return Path.basename(executable) == "x2c-bootstrap" &&
+         Path.dirname(executable) == %"$root_path/bin"
+       ? %"$root_path/bootstrap/lib" : NULL;
+}
+
 /** Returns the borrowed resolved executable path, or NULL when unavailable. */
 String x2c_get_executable(void) => executable_path;
+
+/** Returns `<home>/packages`, which may not exist, or NULL without a home. */
+String Compiler.home_packages(void) {
+  String home = Compiler.home_dir();
+  return home ? %"$home/packages" : NULL;
+}
+
+/** Runs an external command with inherited streams and returns its status.
+    Resolves only this compiler's libexec and passes literal arguments without
+    a shell. An unavailable command reports an error and exits with status 2.
+*/
+int Compiler.run_command(String name, List arguments) {
+  String path = Compiler.command_path(name);
+  if (!path)
+    $fail.utils_command_missing(name);
+  Map options = {env: Compiler.command_environment(), stdout: <inherit>};
+  try return $(path, @arguments).job().options(options).status();
+  catch %((!or not-found io-fail) *detail): Diagnostics.host_error(detail);
+  return 2;
+}
+
+/** Returns an executable command in this compiler's libexec, or NULL. */
+String Compiler.command_path(String name) {
+  String libexec = Compiler.home_libexec();
+  if (!libexec) return NULL;
+  String path = %"$libexec/x2c-$name";
+  return Path.is_executable(path) ? path : NULL;
+}
+
+/** Returns the command directory for this checkout or installed home. */
+String Compiler.home_libexec(void) {
+  String stage = Compiler.stage_dir();
+  if (stage) return %"$stage/libexec";
+  String home = Compiler.home_dir();
+  if (!home) {
+    String driver = Compiler.driver_executable();
+    if (driver) home = Path.dirname(Path.dirname(driver));
+  }
+  return home ? %"$home/libexec/x2c" : NULL;
+}
+
+/** Returns the directory of a compiler staged at `<home>/builds/<stage>/`,
+    or NULL for any other compiler.
+*/
+String Compiler.stage_dir(void) {
+  String driver = Compiler.driver_executable();
+  if (!driver) return NULL;
+  String stage = Path.dirname(driver);
+  return Path.dirname(stage) == %"$root_path/builds" ? stage : NULL;
+}
+
+/** Returns the home, driver, and identity supplied to external commands. */
+Map Compiler.command_environment(void) {
+  Map environment = {};
+  String home = Compiler.home_dir(), driver = Compiler.driver_executable();
+  String identity = Compiler.identity();
+  if (home) environment["X2C_HOME"] = home;
+  if (driver) environment["X2C"] = driver;
+  if (identity) environment["X2C_IDENTITY"] = identity;
+  return environment;
+}
 
 /** Returns the matching compiler executable for a recursive translation.
     External commands use the driver's X2C path or their adjacent installed
@@ -205,79 +213,6 @@ String Compiler.driver_executable(void) {
 
 /** Returns the discovered or configured home, or NULL when there is none. */
 String Compiler.home_dir(void) => root_found ? root_path : NULL;
-
-/** Returns the directory of a compiler staged at `<home>/builds/<stage>/`,
-    or NULL for any other compiler.
-*/
-String Compiler.stage_dir(void) {
-  String driver = Compiler.driver_executable();
-  if (!driver) return NULL;
-  String stage = Path.dirname(driver);
-  return Path.dirname(stage) == %"$root_path/builds" ? stage : NULL;
-}
-
-/** Returns the checked-in bootstrap's runtime directory when this process
-    is the bootstrap compiler, or NULL. Its headers and archive match the
-    runtime the bootstrap compiler was built with.
-*/
-String Compiler.bootstrap_runtime_dir(void) {
-  String executable = x2c_get_executable();
-  if (!executable || !root_path) return NULL;
-  return Path.basename(executable) == "x2c-bootstrap" &&
-         Path.dirname(executable) == %"$root_path/bin"
-       ? %"$root_path/bootstrap/lib" : NULL;
-}
-
-/** Returns `<home>/packages`, which may not exist, or NULL without a home. */
-String Compiler.home_packages(void) {
-  String home = Compiler.home_dir();
-  return home ? %"$home/packages" : NULL;
-}
-
-/** Returns the command directory for this checkout or installed home. */
-String Compiler.home_libexec(void) {
-  String stage = Compiler.stage_dir();
-  if (stage) return %"$stage/libexec";
-  String home = Compiler.home_dir();
-  if (!home) {
-    String driver = Compiler.driver_executable();
-    if (driver) home = Path.dirname(Path.dirname(driver));
-  }
-  return home ? %"$home/libexec/x2c" : NULL;
-}
-
-/** Returns an executable command in this compiler's libexec, or NULL. */
-String Compiler.command_path(String name) {
-  String libexec = Compiler.home_libexec();
-  if (!libexec) return NULL;
-  String path = %"$libexec/x2c-$name";
-  return Path.is_executable(path) ? path : NULL;
-}
-
-/** Returns the home, driver, and identity supplied to external commands. */
-Map Compiler.command_environment(void) {
-  Map environment = {};
-  String home = Compiler.home_dir(), driver = Compiler.driver_executable();
-  String identity = Compiler.identity();
-  if (home) environment["X2C_HOME"] = home;
-  if (driver) environment["X2C"] = driver;
-  if (identity) environment["X2C_IDENTITY"] = identity;
-  return environment;
-}
-
-/** Runs an external command with inherited streams and returns its status.
-    Resolves only this compiler's libexec and passes literal arguments without
-    a shell. An unavailable command reports an error and exits with status 2.
-*/
-int Compiler.run_command(String name, List arguments) {
-  String path = Compiler.command_path(name);
-  if (!path)
-    $fail.utils_command_missing(name);
-  Map options = {env: Compiler.command_environment(), stdout: <inherit>};
-  try return $(path, @arguments).job().options(options).status();
-  catch %((!or not-found io-fail) *detail): Diagnostics.host_error(detail);
-  return 2;
-}
 
 /** Returns the borrowed default include `List`, `<root>/include/x2c`.
     Returns NULL before environment setup.
@@ -371,13 +306,6 @@ int Compiler.is_package_source(String directory, String path) {
 
 // identity
 
-/** Returns the active compiler's identity in 16 hexadecimal digits.
-    Ordinary compiler startup hashes its executable with FNV-1a; an external
-    command uses the identity embedded from the compiler that built it.
-    Returns NULL if ordinary startup could not read its executable.
-*/
-String Compiler.identity(void) => active_identity;
-
 /** Returns the stamp a native module records: `x2c-module-stamp:` and the
     running compiler's identity. Returns NULL when the executable cannot be
     read. Only the compiler that built a module loads it.
@@ -386,6 +314,15 @@ String Compiler.module_stamp(void) {
   String identity = Compiler.identity();
   return identity ? %"x2c-module-stamp:$identity" : NULL;
 }
+
+
+
+/** Returns the active compiler's identity in 16 hexadecimal digits.
+    Ordinary compiler startup hashes its executable with FNV-1a; an external
+    command uses the identity embedded from the compiler that built it.
+    Returns NULL if ordinary startup could not read its executable.
+*/
+String Compiler.identity(void) => active_identity;
 
 /** Returns the identity a compiler executable at `path` has when it runs:
     the FNV-1a hash of its bytes, or NULL when `path` is NULL or unreadable.
@@ -482,17 +419,6 @@ int Job.decode_wait_status(int raw, int &signal) {
 
 // driver errors
 
-/** Prints `x2c: error: <message>` to stderr and exits with status 2.
-    The streams are flushed and `atexit` handlers do not run, so the call is
-    safe inside a `try` body or a catch arm, whose records those handlers
-    would otherwise find still live.
-*/
-void Diagnostics.driver_error(const char *message) {
-  fprintf(stderr, "x2c: error: %s\n", message);
-  fflush(NULL);
-  _exit(2);
-}
-
 /** Reports a caught `<not-found>` or `<io-fail>` through
     `Diagnostics.driver_error` as its operation, path or program, and system
     reason.
@@ -505,6 +431,19 @@ void Diagnostics.host_error(List detail) {
   $fail.utils_host_failed(detail, subject, error);
 }
 
+
+
+/** Prints `x2c: error: <message>` to stderr and exits with status 2.
+    The streams are flushed and `atexit` handlers do not run, so the call is
+    safe inside a `try` body or a catch arm, whose records those handlers
+    would otherwise find still live.
+*/
+void Diagnostics.driver_error(const char *message) {
+  fprintf(stderr, "x2c: error: %s\n", message);
+  fflush(NULL);
+  _exit(2);
+}
+
 /** Returns the per-user cache root: `X2C_CACHE_DIR`, `XDG_CACHE_HOME/x2c`,
     or `~/.cache/x2c`, whichever is set first, or NULL when none is.
 */
@@ -513,4 +452,71 @@ String Compiler.cache_root(void) {
   String home = Env.get("HOME");
   return explicit ? explicit : xdg ? %"$xdg/x2c" :
          home ? %"$home/.cache/x2c" : NULL;
+}
+
+// environment helpers
+
+static void _initialize_environment(
+  const char *argv0, String embedded_identity) {
+  if (root_path) return;
+  _default_search_path();
+  executable_path = _executable(argv0);
+  external_command = embedded_identity != NULL;
+  active_identity = embedded_identity ? embedded_identity : _identity();
+  String home = Env.get("X2C_HOME");
+  if (home && !home[0]) home = NULL;
+  String root = home ? home.rstrip("/") : _locate_home(executable_path);
+  if (!root) root = _locate_home(Path.absolute("."));
+  root_found = root != NULL;
+  root_path = Path.absolute(root ? root : ".");
+  _prepare_include_dirs();
+}
+
+/* Without PATH, `execvp` searches the C library's default path, but a host
+   tool it starts that way, such as the GCC driver looking for `cc1`, finds
+   nothing. Setting that path lets the tools search where `execvp` does. */
+static void _default_search_path(void) {
+  if (Env.get("PATH")) return;
+  char buffer[PATH_MAX];
+  size_t length = confstr(_CS_PATH, buffer, sizeof(buffer));
+  if (length && length <= sizeof(buffer)) setenv("PATH", buffer, 1);
+}
+
+static String _executable(const char *argv0) {
+  char buffer[PATH_MAX];
+  ssize_t length = readlink("/proc/self/exe", buffer, sizeof(buffer) - 1);
+  if (length >= 0) {
+    buffer[length] = 0;
+    return String.new(buffer);
+  }
+  String name = String.new(argv0);
+  // A bare name came from PATH; only a path resolves against the cwd.
+  if (name && !("/" in name)) name = Env.find_program(name);
+  return Path.exists(name) ? Path.absolute(name) : NULL;
+}
+
+/* Linux names the running image itself, which stays the same file even if
+   the executable's path is replaced while the process runs. */
+static String _identity(void) =>
+  Path.content_identity(
+    Path.exists("/proc/self/exe") ? "/proc/self/exe" : executable_path);
+
+static String _locate_home(Path p) {
+  if (!p) return NULL;
+  Path directory = p.is_dir() ? p : p.dirname();
+  while (!_is_home(directory)) {
+    if (directory == "/") return NULL;
+    directory = directory.dirname();
+  }
+  return directory;
+}
+
+static int _is_home(Path p) =>
+  p.join("include").is_dir() && p.join("etc/compiler-prelude.x").is_file();
+
+static void _prepare_include_dirs(void) {
+  String include_dir = %"$root_path/include/x2c";
+  String src_dir = %"$root_path/src", lib_dir = %"$root_path/lib";
+  default_includes = cons(include_dir, NULL);
+  cpp_includes = Path.is_dir(src_dir) ? $(lib_dir, src_dir) : $(lib_dir);
 }

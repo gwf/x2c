@@ -9,11 +9,6 @@
 #include <limits.h>
 #include <stdlib.h>
 
-static int _only_space(const char *rest) {
-  while (isspace((unsigned char) *rest)) rest++;
-  return !*rest;
-}
-
 /** Parses all of `str` as an integer, writing it through `out`.
     Returns 1 and writes `out` on success; returns 0 and leaves `out`
     untouched on failure.
@@ -91,4 +86,9 @@ meta native int String.try_double(String str, double &?out) {
     return 0;
   out = value;
   return 1;
+}
+
+static int _only_space(const char *rest) {
+  while (isspace((unsigned char) *rest)) rest++;
+  return !*rest;
 }

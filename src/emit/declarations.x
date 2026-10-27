@@ -93,6 +93,19 @@ module void _binding(Emitter &e, List ast) {
 
 // declarators
 
+module List _semantic_type(Emitter &e, Type type) {
+  List (_, base, bindings) = type.declaration_ast(NULL);
+  return _tokens(e, $(base, bindings));
+}
+
+module List _semantic_name(Emitter &e, Type type, String name) {
+  List (base, mods) = type.parts();
+  List declarator = _declarator(e, $(name), mods);
+  return $(_tokens(e, base), @declarator);
+}
+
+
+
 /* Fold one layer at a time; typedef prefixes surround the final result. */
 static List _declarator(Emitter &e, List decl, List mods) {
   int typedefs = 0;
@@ -143,20 +156,10 @@ static List _array_declarator(Emitter &e, List decl, List dimension) {
   List size = _tokens(e, dimension);
   return size ? %(@decl "[" @size "]") : %(@decl "[]");
 }
+
 static List _function_declarator(Emitter &e, List decl, List parameters) {
   if (decl.type().is_pointer()) decl = _parens(decl);
   return %(@decl "(" @(_tokens(e, parameters)) ")");
-}
-
-module List _semantic_type(Emitter &e, Type type) {
-  List (_, base, bindings) = type.declaration_ast(NULL);
-  return _tokens(e, $(base, bindings));
-}
-
-module List _semantic_name(Emitter &e, Type type, String name) {
-  List (base, mods) = type.parts();
-  List declarator = _declarator(e, $(name), mods);
-  return $(_tokens(e, base), @declarator);
 }
 
 // tagged types

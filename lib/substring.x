@@ -16,6 +16,10 @@ typedef struct Substring {
 /** Short name for the same borrowed view representation as Substring. */
 typedef Substring Substr;
 
+/** Returns a borrowed immutable view of the requested byte range. */
+Substring String.substring(String source, int offset, int length) =>
+  Substring.new(source, offset, length);
+
 /** Borrows length bytes at offset. An invalid range raises bad-arg. */
 Substring Substring.new(String source, int offset, int length) {
   if (offset < 0 || length < 0 || offset > source.len() ||
@@ -24,10 +28,6 @@ Substring Substring.new(String source, int offset, int length) {
       (offset $offset) (length $length));
   return (Substring) {source, offset, length};
 }
-
-/** Returns a borrowed immutable view of the requested byte range. */
-Substring String.substring(String source, int offset, int length) =>
-  Substring.new(source, offset, length);
 
 /** Returns the byte length without allocating. */
 inline int Substring.len(Substring view) => view.length;
@@ -54,15 +54,15 @@ inline int Substring.compare(Substring left, Substring right) {
   return left.length - right.length;
 }
 
+/** Materializes the same canonical String as str(). */
+String Substring.string(Substring view) => view.str();
+
 /** Materializes a canonical String in the active pool. Repeated conversion
     reuses the canonical value. The result follows its actual owning pool.
 */
 String Substring.str(Substring view) => view.length
   ? x2c_string_from_bytes(
     (const char *) view.source + view.offset, view.length) : NULL;
-
-/** Materializes the same canonical String as str(). */
-String Substring.string(Substring view) => view.str();
 
 /** Yields the next word view. Start the caller-owned cursor at zero. The
     source must stay live; exhaustion leaves cursor and out unchanged.

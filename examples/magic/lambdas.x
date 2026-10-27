@@ -7,10 +7,6 @@
 
 #include <stdio.h>
 
-static Func add_to(int bias) {
-  return %!(int value) => value + bias;
-}
-
 int main(void) {
   int no_arg = (%!() => 42)();
   int bare_identity = (%!(x) => x.int())(7);
@@ -28,4 +24,8 @@ int main(void) {
   printf("captured: %ld\n", add_three(4).integer());
 
   return 0;
+}
+
+static Func add_to(int bias) {
+  return %!(int value) => value + bias;
 }

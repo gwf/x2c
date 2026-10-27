@@ -2,33 +2,6 @@
 
 // definitions
 
-/** Sets a semantic type for `key` in the required active scope. */
-void Sym.set(Sym s, List key, List type) {
-  Map scope = _scope_at(s, -1).symbols;
-  if (log_should_log(<debug>, <symtab>))
-    log_debug(<symtab>, %(func "Sym.set"), %(key $key), %(val $type));
-  s.put(scope, key, type);
-  if (_retained_member(key)) s.put(s.binding_facts, %(aggfact $key), type);
-}
-
-static int _retained_member(List key) {
-  match (key) {
-    case %(struct (binding ? ?) ? *): return 1;
-    case %(struct (gensym ? ?) ? *): return 1;
-    case %(union (binding ? ?) ? *): return 1;
-    case %(union (gensym ? ?) ? *): return 1;
-    default: return 0;
-  }
-}
-
-/** Defines `key` and returns its stable binding in the active scope. */
-List Sym.define(Sym s, List key, List type) {
-  SymScope *scope = _scope_at(s, -1);
-  s.set(key, type);
-  _seed_var_tag(s, key, type);
-  return _scope_binding(s, *scope, key);
-}
-
 /** Defines `name` in the active scope as an alias of the parsed
     `expression` and returns its binding. The row carries the expression's
     type; the `(alias binding)` fact carries the expression.
@@ -41,6 +14,25 @@ List Sym.define_alias(Sym s, String name, List expression) {
   _scope_at(s, -1).aliases++;
   s.aliases++;
   return binding;
+}
+
+/** Defines `key` and returns its stable binding in the active scope. */
+List Sym.define(Sym s, List key, List type) {
+  SymScope *scope = _scope_at(s, -1);
+  s.set(key, type);
+  _seed_var_tag(s, key, type);
+  return _scope_binding(s, *scope, key);
+}
+
+
+
+/** Sets a semantic type for `key` in the required active scope. */
+void Sym.set(Sym s, List key, List type) {
+  Map scope = _scope_at(s, -1).symbols;
+  if (log_should_log(<debug>, <symtab>))
+    log_debug(<symtab>, %(func "Sym.set"), %(key $key), %(val $type));
+  s.put(scope, key, type);
+  if (_retained_member(key)) s.put(s.binding_facts, %(aggfact $key), type);
 }
 
 /** Removes the alias row `name` of the active scope, with its binding and
@@ -56,37 +48,6 @@ void Sym.undefine_alias(Sym s, String name) {
   s.drop(scope.bindings, key);
   scope.aliases--;
   s.aliases--;
-}
-
-/* A module file's static type keeps its short name as its tag, which no
-   other type of the unit may take. */
-static void _seed_var_tag(Sym s, List key, List type) {
-  String owner = _var_converter_owner(key, type);
-  if (!owner) return;
-  String converter = %"$(owner)_var", Type declared = $(owner);
-  String name = s.c.unprefixed(owner);
-  if (s.c.file_prefixes()) _claim_class_tag(s, name, owner);
-  declared.register_var_tag(name, converter);
-}
-
-static void _claim_class_tag(Sym s, String name, String owner) {
-  List fact = %(class-tag $(name.lower()));
-  Var claimed;
-  if (s.binding_facts.try_get(fact, claimed) && claimed != owner)
-    $fail.symbols_module_tag(s.c, s.c.token, name);
-  s.put(s.binding_facts, fact, owner);
-}
-
-/* A declared `Var T.var(T)` is the conformance marker that lets a named
-   type box like a builtin. Keep its tag and exact converter in the active
-   translation unit rather than the process-lifetime builtin table. */
-module String _var_converter_owner(List key, List type) {
-  match (type)
-    case %((func ((?(String named)))) "Var"):
-      match (key)
-        case %(?(String spelling)):
-          return spelling == %"$(named)_var" ? named : NULL;
-  return NULL;
 }
 
 /** Registers declared `T_var` converters in the active `Type` unit. */
@@ -126,49 +87,6 @@ void Sym.declare_enumerator(Sym s, List key, Symbol owner) {
 }
 
 // bindings
-
-static List _scope_binding(Sym s, SymScope &scope, List key) {
-  Var found;
-  List binding;
-  if (scope.bindings.try_get(key, found)) binding = found;
-  else {
-    binding = _new_binding(s, key);
-    s.put(scope.bindings, key, binding);
-  }
-  (Var binding_tag, int identity, String spelling) = binding;
-  (void) binding_tag;
-  if (!(%(known $identity) in s.binding_facts))
-    s.put(s.binding_facts, %(known $identity), spelling);
-  List self_key = %(self $binding);
-  if (!(self_key in s.binding_facts)) {
-    Var relative;
-    if (scope.symbols.try_get(%(self $spelling), relative))
-      s.put(s.binding_facts, self_key, relative);
-  }
-  if (s.c.source_facts) _note_source_key(s, scope, key, binding);
-  return binding;
-}
-
-/* Source facts find a binding's declaration through the map and key that
-   hold its symbol row. */
-static void _note_source_key(
-  Sym s, SymScope &scope, List key, List binding) {
-  Compiler c = s.c;
-  List source_key = $(scope.symbols, key);
-  s.put(s.binding_facts, %(src-key $binding), source_key);
-  Var declaration;
-  if (c.source_primary && !c.shallow &&
-      c.source_declarations.try_get(source_key, declaration))
-    c.source_definitions[binding] = declaration;
-}
-
-static List _new_binding(Sym s, List key) {
-  int identity = ++s.c.names.next_binding;
-  Var name = key.last();
-  List binding = Ast.binding(identity, name);
-  s.put(s.binding_facts, %(known $identity), name);
-  return binding;
-}
 
 /** Returns how many introduced bindings no scope holds: those
     `Sym.introduce` made, as opposed to the ones each scope makes once for
@@ -249,14 +167,133 @@ List Sym.get(Sym s, List key) {
   return retry ? s.get_exact(retry) : NULL;
 }
 
-/** Returns `key`'s type without package fallback, or `NULL`. */
-List Sym.get_exact(Sym s, List key) => _get_from(s, key, NULL);
-
 /** Reports whether a scope inside the base scopes declares `key`. */
 int Sym.has_local(Sym s, List key) {
   for (int i = (int) s.scopes.len() - 1; i >= s.base_scopes; i--)
     if (key in _scope_at(s, i).symbols) return 1;
   return 0;
+}
+
+/** Resolves an existing key and optionally stores its semantic type.
+
+    A symbol row without a binding receives a stable binding identity. A total
+    miss returns `NULL` and stores `NULL` through `type` when provided.
+*/
+List Sym.lookup(Sym s, List key, Type &?type) =>
+  _lookup_from(s, key, type, (int) s.scopes.len() - 1, 0);
+
+/** Resolves `key` or creates a forward binding in the current scope.
+
+    Stores `NULL` through `type` when no declaration supplies a type.
+*/
+List Sym.reference(Sym s, List key, Type &?type) =>
+  _lookup_from(s, key, type, (int) s.scopes.len() - 1, 1);
+
+/** Resolves a global name or creates its forward binding in the base scope.
+    Local declarations cannot capture a retained macro's global reference.
+*/
+List Sym.reference_global(Sym s, List key) {
+  List binding = s.resolve_global(key, NULL);
+  if (binding) return binding;
+  return _scope_binding(s, *_scope_at(s, s.base_scopes - 1), key);
+}
+
+/** Resolves a binding through base scopes and optionally stores its type.
+
+    Returns `NULL` when no base scope contains the key.
+*/
+List Sym.resolve_global(Sym s, List key, Type &?type) =>
+  _lookup_from(s, key, type, s.base_scopes - 1, 0);
+
+/** Returns `key`'s type without package fallback, or `NULL`. */
+List Sym.get_exact(Sym s, List key) => _get_from(s, key, NULL);
+
+// symbol bindings
+
+static int _retained_member(List key) {
+  match (key) {
+    case %(struct (binding ? ?) ? *): return 1;
+    case %(struct (gensym ? ?) ? *): return 1;
+    case %(union (binding ? ?) ? *): return 1;
+    case %(union (gensym ? ?) ? *): return 1;
+    default: return 0;
+  }
+}
+
+/* A module file's static type keeps its short name as its tag, which no
+   other type of the unit may take. */
+static void _seed_var_tag(Sym s, List key, List type) {
+  String owner = _var_converter_owner(key, type);
+  if (!owner) return;
+  String converter = %"$(owner)_var", Type declared = $(owner);
+  String name = s.c.unprefixed(owner);
+  if (s.c.file_prefixes()) _claim_class_tag(s, name, owner);
+  declared.register_var_tag(name, converter);
+}
+
+static void _claim_class_tag(Sym s, String name, String owner) {
+  List fact = %(class-tag $(name.lower()));
+  Var claimed;
+  if (s.binding_facts.try_get(fact, claimed) && claimed != owner)
+    $fail.symbols_module_tag(s.c, s.c.token, name);
+  s.put(s.binding_facts, fact, owner);
+}
+
+/* A declared `Var T.var(T)` is the conformance marker that lets a named
+   type box like a builtin. Keep its tag and exact converter in the active
+   translation unit rather than the process-lifetime builtin table. */
+module String _var_converter_owner(List key, List type) {
+  match (type)
+    case %((func ((?(String named)))) "Var"):
+      match (key)
+        case %(?(String spelling)):
+          return spelling == %"$(named)_var" ? named : NULL;
+  return NULL;
+}
+
+
+
+static List _scope_binding(Sym s, SymScope &scope, List key) {
+  Var found;
+  List binding;
+  if (scope.bindings.try_get(key, found)) binding = found;
+  else {
+    binding = _new_binding(s, key);
+    s.put(scope.bindings, key, binding);
+  }
+  (Var binding_tag, int identity, String spelling) = binding;
+  (void) binding_tag;
+  if (!(%(known $identity) in s.binding_facts))
+    s.put(s.binding_facts, %(known $identity), spelling);
+  List self_key = %(self $binding);
+  if (!(self_key in s.binding_facts)) {
+    Var relative;
+    if (scope.symbols.try_get(%(self $spelling), relative))
+      s.put(s.binding_facts, self_key, relative);
+  }
+  if (s.c.source_facts) _note_source_key(s, scope, key, binding);
+  return binding;
+}
+
+/* Source facts find a binding's declaration through the map and key that
+   hold its symbol row. */
+static void _note_source_key(
+  Sym s, SymScope &scope, List key, List binding) {
+  Compiler c = s.c;
+  List source_key = $(scope.symbols, key);
+  s.put(s.binding_facts, %(src-key $binding), source_key);
+  Var declaration;
+  if (c.source_primary && !c.shallow &&
+      c.source_declarations.try_get(source_key, declaration))
+    c.source_definitions[binding] = declaration;
+}
+
+static List _new_binding(Sym s, List key) {
+  int identity = ++s.c.names.next_binding;
+  Var name = key.last();
+  List binding = Ast.binding(identity, name);
+  s.put(s.binding_facts, %(known $identity), name);
+  return binding;
 }
 
 /* `own`, the current module file's spelling of `key`, comes first at file
@@ -293,37 +330,6 @@ module List _package_retry_key(Sym s, List key) {
   String spelling = key.car();
   String prefixed = s.c.package_spelling(spelling);
   return prefixed == spelling ? NULL : $(prefixed);
-}
-
-/** Resolves an existing key and optionally stores its semantic type.
-
-    A symbol row without a binding receives a stable binding identity. A total
-    miss returns `NULL` and stores `NULL` through `type` when provided.
-*/
-List Sym.lookup(Sym s, List key, Type &?type) =>
-  _lookup_from(s, key, type, (int) s.scopes.len() - 1, 0);
-
-/** Resolves `key` or creates a forward binding in the current scope.
-
-    Stores `NULL` through `type` when no declaration supplies a type.
-*/
-List Sym.reference(Sym s, List key, Type &?type) =>
-  _lookup_from(s, key, type, (int) s.scopes.len() - 1, 1);
-
-/** Resolves a binding through base scopes and optionally stores its type.
-
-    Returns `NULL` when no base scope contains the key.
-*/
-List Sym.resolve_global(Sym s, List key, Type &?type) =>
-  _lookup_from(s, key, type, s.base_scopes - 1, 0);
-
-/** Resolves a global name or creates its forward binding in the base scope.
-    Local declarations cannot capture a retained macro's global reference.
-*/
-List Sym.reference_global(Sym s, List key) {
-  List binding = s.resolve_global(key, NULL);
-  if (binding) return binding;
-  return _scope_binding(s, *_scope_at(s, s.base_scopes - 1), key);
 }
 
 static List _lookup_from(

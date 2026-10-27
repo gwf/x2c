@@ -28,6 +28,92 @@ static macro Stmt $fail.main_external_failed(Expr $path) =>
 static macro Stmt $fail.main_diagnostics_unwritable(Expr $diagnostics) =>
   Diagnostics.driver_error(%"cannot open diagnostics file '$($diagnostics)'");
 
+// entry point
+
+/** Initializes x2c and dispatches one command from `argv`.
+    `argv[0]` locates the installation. The process status is zero for a
+    successful translation or build, one for compiler or tool
+    failure, and the executed program's status for `run`. Help and version exit
+    with zero, while invalid CLI and preflight input exit with status two.
+    An external command replaces this process and returns its own status.
+*/
+int main(int argc, char **argv) {
+  x2c_initialize_environment(argv[0]);
+  if (argc > 1) _run_external(argc, argv);
+  Array arguments = auto CliRequest.read_arguments(argc, argv);
+  _run_command(arguments);
+  CliRequest request = CliRequest.parse_arguments(arguments);
+  String diagnostics = request.diagnostics_file;
+  if (diagnostics && !diagnostics_write_json(diagnostics))
+    $fail.main_diagnostics_unwritable(diagnostics);
+  report_configure(
+    request.quiet, request.plain, request.color_mode,
+    request.verbose || request.debugging,
+    request.dry_run, request.inspects());
+  if (request.command == <env>) return _run_env(request);
+  return _run_compiler(request);
+}
+
+// external commands
+
+/* An installed external command replaces this process, and `x2c help
+   <name>` runs it with `--help`. */
+static void _run_external(int argc, char **argv) {
+  String path = _external_path(argv[1]);
+  if (path) _exec(path, argv + 1);
+  if (argc != 3 || strcmp(argv[1], "help")) return;
+  char *args[] = { NULL, "--help", NULL };
+  path = _external_path(argv[2]);
+  if (path) _exec(path, args);
+}
+
+static String _external_path(const char *name) {
+  if (!_external_name(name) || CliRequest.is_builtin(name)) return NULL;
+  return Compiler.command_path(String.new(name));
+}
+
+static int _external_name(const char *name) {
+  if (!name || !isalpha((unsigned char) *name)) return 0;
+  for (const char *p = name + 1; *p; p++)
+    if (!isalnum((unsigned char) *p) && *p != '-' && *p != '_') return 0;
+  return 1;
+}
+
+/* Initial argument reading belongs to the driver. The command receives that
+   exact vector, so response files are never expanded a second time. */
+static void _run_command(Array arguments) {
+  if (!arguments.len()) return;
+  String operation = arguments[0];
+  String command = NULL;
+  switch (operation) {
+    case "build": case "run": case "script": command = "build"; break;
+    case "new": command = "new"; break;
+    case "install": case "remove": case "list": command = "package"; break;
+    default: return;
+  }
+  String path = Compiler.command_path(command);
+  if (!path) {
+    if (command != "build") CliRequest.parse_arguments(arguments);
+    Diagnostics.driver_error(
+      %"missing x2c-$command command; install the matching x2c commands");
+  }
+  char **args = xcalloc(arguments.len() + 3, sizeof(char *));
+  args[1] = "--driver-arguments";
+  for (int i = 0; i < arguments.len(); i++) {
+    String argument = arguments[i];
+    args[i + 2] = argument ? argument : "";
+  }
+  _exec(path, args);
+}
+
+static void _exec(String path, char **args) {
+  foreach (String (name, value) in Compiler.command_environment())
+    setenv(name, value, 1);
+  args[0] = path;
+  execv(path, args);
+  $fail.main_external_failed(path);
+}
+
 // environment
 
 /* `x2c env` prints every resolved value as `name = value`, or one bare value
@@ -67,92 +153,6 @@ static List _env_rows(CliRequest request) {
     ("cc" $(toolchain.cc))
     ("ar" $(toolchain.ar))
     ("cache_dir" $(Compiler.cache_root())));
-}
-
-// external commands
-
-/* An installed external command replaces this process, and `x2c help
-   <name>` runs it with `--help`. */
-static void _run_external(int argc, char **argv) {
-  String path = _external_path(argv[1]);
-  if (path) _exec(path, argv + 1);
-  if (argc != 3 || strcmp(argv[1], "help")) return;
-  char *args[] = { NULL, "--help", NULL };
-  path = _external_path(argv[2]);
-  if (path) _exec(path, args);
-}
-
-static String _external_path(const char *name) {
-  if (!_external_name(name) || CliRequest.is_builtin(name)) return NULL;
-  return Compiler.command_path(String.new(name));
-}
-
-static int _external_name(const char *name) {
-  if (!name || !isalpha((unsigned char) *name)) return 0;
-  for (const char *p = name + 1; *p; p++)
-    if (!isalnum((unsigned char) *p) && *p != '-' && *p != '_') return 0;
-  return 1;
-}
-
-static void _exec(String path, char **args) {
-  foreach (String (name, value) in Compiler.command_environment())
-    setenv(name, value, 1);
-  args[0] = path;
-  execv(path, args);
-  $fail.main_external_failed(path);
-}
-
-/* Initial argument reading belongs to the driver. The command receives that
-   exact vector, so response files are never expanded a second time. */
-static void _run_command(Array arguments) {
-  if (!arguments.len()) return;
-  String operation = arguments[0];
-  String command = NULL;
-  switch (operation) {
-    case "build": case "run": case "script": command = "build"; break;
-    case "new": command = "new"; break;
-    case "install": case "remove": case "list": command = "package"; break;
-    default: return;
-  }
-  String path = Compiler.command_path(command);
-  if (!path) {
-    if (command != "build") CliRequest.parse_arguments(arguments);
-    Diagnostics.driver_error(
-      %"missing x2c-$command command; install the matching x2c commands");
-  }
-  char **args = xcalloc(arguments.len() + 3, sizeof(char *));
-  args[1] = "--driver-arguments";
-  for (int i = 0; i < arguments.len(); i++) {
-    String argument = arguments[i];
-    args[i + 2] = argument ? argument : "";
-  }
-  _exec(path, args);
-}
-
-// entry point
-
-/** Initializes x2c and dispatches one command from `argv`.
-    `argv[0]` locates the installation. The process status is zero for a
-    successful translation or build, one for compiler or tool
-    failure, and the executed program's status for `run`. Help and version exit
-    with zero, while invalid CLI and preflight input exit with status two.
-    An external command replaces this process and returns its own status.
-*/
-int main(int argc, char **argv) {
-  x2c_initialize_environment(argv[0]);
-  if (argc > 1) _run_external(argc, argv);
-  Array arguments = auto CliRequest.read_arguments(argc, argv);
-  _run_command(arguments);
-  CliRequest request = CliRequest.parse_arguments(arguments);
-  String diagnostics = request.diagnostics_file;
-  if (diagnostics && !diagnostics_write_json(diagnostics))
-    $fail.main_diagnostics_unwritable(diagnostics);
-  report_configure(
-    request.quiet, request.plain, request.color_mode,
-    request.verbose || request.debugging,
-    request.dry_run, request.inspects());
-  if (request.command == <env>) return _run_env(request);
-  return _run_compiler(request);
 }
 
 /* A translation runs inside the command Context. */

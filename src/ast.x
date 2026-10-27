@@ -11,6 +11,24 @@
 #include "grammar.x"
 #include "symbolset.x"
 
+static const SymbolSet nonreturning_error_causes =
+  $error.nonreturning.causes();
+
+static List terminating_calls =
+  %("abort" "exit" "_Exit" "_exit" "quick_exit");
+
+// operators
+
+/* operator-ledger.x owns these methods in a separate implementation unit. */
+// lint: allow src-forward-declaration FI-6: leaf ledger binding
+Symbol Symbol.compound_operator(Symbol op);
+
+// lint: allow src-forward-declaration FI-6: leaf ledger binding
+Symbol Symbol.compound_assignment(Symbol op);
+
+// lint: allow src-forward-declaration FI-6: leaf ledger binding
+int Symbol.binary_precedence(Symbol op);
+
 /* binding nodes
 
    A binding node couples source spelling to a positive compiler-issued
@@ -23,26 +41,6 @@
 */
 List Ast.binding(int identity, String spelling) =>
   %(binding $identity $spelling);
-
-/** Extracts a valid `(binding positive-integer string)` node.
-    Returns one on success and writes only non-`NULL` outputs; failure returns
-    zero without changing either output.
-*/
-int Ast.try_binding(List binding, int &?identity, String &?spelling) {
-  if (binding ~= %(binding ?id ?(String name))) {
-    if (!id.is_integer() || id.integer() <= 0) return 0;
-    if (identity) identity = id;
-    if (spelling) spelling = name;
-    return 1;
-  }
-  return 0;
-}
-
-/** Returns a valid binding node's source spelling, or `NULL`. */
-String Ast.binding_spelling(List binding) {
-  String spelling = NULL;
-  return Ast.try_binding(binding, NULL, spelling) ? spelling : NULL;
-}
 
 // declarators
 
@@ -82,42 +80,7 @@ List Ast.prototype_declarator(List declarator) {
   return %(bind $(declarator.cadr()) $(modifiers.list_free()));
 }
 
-/* The function modifier for `parameters`, each without its outermost
-   `volatile`; `changed` becomes 1 when one had it. */
-static List _prototype_params(List parameters, int &changed) {
-  Array rebuilt = [];
-  foreach (List parameter in parameters) {
-    match (parameter)
-      case %(param ?type (bind ?name (volatile *rest))): {
-        parameter = %(param $type (bind $name (@rest)));
-        changed = 1;
-      }
-    rebuilt.push(parameter);
-  }
-  return %(fnmod (params @(rebuilt.list_free())));
-}
-
 // designated nodes
-
-/* Returns the innermost node `value` designates, past the forms that still
-   name the same object: an `expr` wrapper, parentheses, a member, and an
-   index into an array. What remains is a name, a designation through a
-   pointer, or another expression; a non-list designates nothing.
-*/
-static List _designated(Var value) {
-  while (value is <list>) {
-    List node = value;
-    match (node) {
-      case %(expr ? ?inner): value = inner;
-      case $($grouped(?inner)): value = inner;
-      case $($indexed(%(!set ?base (expr ((dim *) *) ?)), ?)):
-        value = base;
-      case %(op . ?base *): value = base;
-      default: return node;
-    }
-  }
-  return NULL;
-}
 
 /** Returns the binding whose stored object the lvalue `ast` names, or
     `NULL`. Pointer dereferences and pointer indexes name another object; an
@@ -127,6 +90,24 @@ List Ast.lvalue_binding(Ast ast) {
   List designated = _designated(ast);
   match (designated)
     case %(ident ?binding): return binding;
+  return NULL;
+}
+
+/** Returns the name of the pointer an expression designates through, or
+    `NULL` when it designates no object through a single name. `*pointer`,
+    `pointer[index]`, and `pointer->member` all change the object the pointer
+    holds, which `Ast.direct_identifier` reports as no name at all.
+*/
+String Ast.indirect_identifier(Var value) {
+  List designated = _designated(value);
+  match (designated) {
+    case $($indexed(%(!set ?base (expr ? ?)), ?)):
+      return Ast.direct_identifier(base);
+    case %(op (!quote ->) ?base *):
+      return Ast.direct_identifier(base);
+    case $($dereferenced(?base)):
+      return Ast.direct_identifier(base);
+  }
   return NULL;
 }
 
@@ -165,24 +146,6 @@ String Ast.direct_identifier(Var value) {
   return NULL;
 }
 
-/** Returns the name of the pointer an expression designates through, or
-    `NULL` when it designates no object through a single name. `*pointer`,
-    `pointer[index]`, and `pointer->member` all change the object the pointer
-    holds, which `Ast.direct_identifier` reports as no name at all.
-*/
-String Ast.indirect_identifier(Var value) {
-  List designated = _designated(value);
-  match (designated) {
-    case $($indexed(%(!set ?base (expr ? ?)), ?)):
-      return Ast.direct_identifier(base);
-    case %(op (!quote ->) ?base *):
-      return Ast.direct_identifier(base);
-    case $($dereferenced(?base)):
-      return Ast.direct_identifier(base);
-  }
-  return NULL;
-}
-
 /** Returns the operand a write `node` changes: the left operand of an
     assignment or prefix update, or the operand of a postfix update; `NULL`
     when `node` writes no operand.
@@ -198,16 +161,6 @@ List Ast.written_operand(Ast node) {
 }
 
 // traversal
-
-/** Applies `per_child` to each `List` child of `ast` and returns the node
-    rebuilt from the results; non-list children pass through. When no child
-    changed, no scratch storage is allocated and `ast` itself returns, so the
-    fixed-point transform driver can compare unchanged-node identity.
-*/
-Ast Ast.rewrite_children(Ast ast, Func per_child) {
-  Var child;
-  $ast.rewrite_children(ast, child, per_child(child.list()));
-}
 
 /** Returns whether any list under `value` has `kind` as its head. */
 int Ast.contains_head(Var value, Symbol kind) {
@@ -237,17 +190,6 @@ Var Ast.replace_nodes(Var root, Map replaced) {
   return _replaced_node(root, replaced);
 }
 
-static Var _replaced_node(Var node, Map replaced) {
-  Var swapped;
-  return node is <list> && replaced.try_get((void *) node.list(), swapped)
-    ? swapped : node;
-}
-
-static List _replaced_children(List node, Map replaced) {
-  Var child;
-  $ast.rewrite_children(node, child, _replaced_node(child, replaced));
-}
-
 /** Records in `referenced` the identity of every binding `node` names. */
 void Ast.collect_binding_references(Var node, Map referenced) {
   if (node is not <list>) return;
@@ -262,21 +204,6 @@ void Ast.collect_binding_references(Var node, Map referenced) {
 }
 
 // source anchors
-
-/** Returns `ast` without the `(at ORIGIN ...)` anchors it arrived wrapped
-    in. Every block statement carries one so that a transform-phase
-    diagnostic can name its line; a pass that dispatches on a statement tag
-    has to see the statement, not the anchor.
-*/
-Ast Ast.without_origin(Ast ast) {
-  while (ast) {
-    match (ast) {
-      case %(at ? ?inner): ast = inner;
-      default: return ast;
-    }
-  }
-  return ast;
-}
 
 /** Returns `replacement` under the anchors of `original`, the statement it
     replaces, so a rewrite does not lose the node's source position.
@@ -301,6 +228,18 @@ List Ast.written_definitions(List decl) {
       return Ast.rewrite_children(decl, Ast.written_definitions);
   }
   return decl;
+}
+
+
+
+/** Applies `per_child` to each `List` child of `ast` and returns the node
+    rebuilt from the results; non-list children pass through. When no child
+    changed, no scratch storage is allocated and `ast` itself returns, so the
+    fixed-point transform driver can compare unchanged-node identity.
+*/
+Ast Ast.rewrite_children(Ast ast, Func per_child) {
+  Var child;
+  $ast.rewrite_children(ast, child, per_child(child.list()));
 }
 
 /** Returns the statement calling the `void (void)` function `entry`. */
@@ -342,54 +281,52 @@ int Ast.never_returns(Ast ast) {
   return 0;
 }
 
-static const SymbolSet nonreturning_error_causes =
-  $error.nonreturning.causes();
+/** Returns a valid binding node's source spelling, or `NULL`. */
+String Ast.binding_spelling(List binding) {
+  String spelling = NULL;
+  return Ast.try_binding(binding, NULL, spelling) ? spelling : NULL;
+}
 
-static List terminating_calls =
-  %("abort" "exit" "_Exit" "_exit" "quick_exit");
-
-/* A `return` anywhere in `items`, outside a nested function. */
-static int _contains_return(List items) {
-  List node;
-  $ast.walk(items, node) {
-    if (node.car() == <function>) continue;
-    if (node.car() == <return>) return 1;
+/** Extracts a valid `(binding positive-integer string)` node.
+    Returns one on success and writes only non-`NULL` outputs; failure returns
+    zero without changing either output.
+*/
+int Ast.try_binding(List binding, int &?identity, String &?spelling) {
+  if (binding ~= %(binding ?id ?(String name))) {
+    if (!id.is_integer() || id.integer() <= 0) return 0;
+    if (identity) identity = id;
+    if (spelling) spelling = name;
+    return 1;
   }
   return 0;
 }
 
-// operators
 
-/* operator-ledger.x owns these methods in a separate implementation unit. */
-// lint: allow src-forward-declaration FI-6: leaf ledger binding
-Symbol Symbol.compound_operator(Symbol op);
 
-// lint: allow src-forward-declaration FI-6: leaf ledger binding
-Symbol Symbol.compound_assignment(Symbol op);
-
-// lint: allow src-forward-declaration FI-6: leaf ledger binding
-int Symbol.binary_precedence(Symbol op);
-
-/** Returns whether `op` is plain or compound assignment. */
-int Symbol.is_assignment_op(Symbol op) =>
-  op == <=> || op.compound_operator() != 0;
+/** Returns `ast` without the `(at ORIGIN ...)` anchors it arrived wrapped
+    in. Every block statement carries one so that a transform-phase
+    diagnostic can name its line; a pass that dispatches on a statement tag
+    has to see the statement, not the anchor.
+*/
+Ast Ast.without_origin(Ast ast) {
+  while (ast) {
+    match (ast) {
+      case %(at ? ?inner): ast = inner;
+      default: return ast;
+    }
+  }
+  return ast;
+}
 
 /** Returns whether `op` writes its left operand. */
 int Symbol.changes_left_operand(Symbol op) =>
   op == <++> || op == <--> || op.is_assignment_op();
 
-// initializer alternatives
+/** Returns whether `op` is plain or compound assignment. */
+int Symbol.is_assignment_op(Symbol op) =>
+  op == <=> || op.compound_operator() != 0;
 
-/** Returns initializer alternatives and their optional native macro input. */
-List Ast.initializer_cases(Ast ast, List &input) {
-  input = NULL;
-  match (ast)
-    case %(initval (!set ?header (input *)) *cases): {
-      input = header;
-      return cases;
-    }
-  return ast.cdr();
-}
+// initializer alternatives
 
 /** Returns function alternatives when every initializer arm calls one shared
     input, and stores that input expression in `source`. Other forms return
@@ -410,6 +347,79 @@ List Ast.initializer_functions(Ast ast, List &source) {
   }
   source = value;
   return functions;
+}
+
+
+
+/** Returns initializer alternatives and their optional native macro input. */
+List Ast.initializer_cases(Ast ast, List &input) {
+  input = NULL;
+  match (ast)
+    case %(initval (!set ?header (input *)) *cases): {
+      input = header;
+      return cases;
+    }
+  return ast.cdr();
+}
+
+// binding and traversal helpers
+
+/* The function modifier for `parameters`, each without its outermost
+   `volatile`; `changed` becomes 1 when one had it. */
+static List _prototype_params(List parameters, int &changed) {
+  Array rebuilt = [];
+  foreach (List parameter in parameters) {
+    match (parameter)
+      case %(param ?type (bind ?name (volatile *rest))): {
+        parameter = %(param $type (bind $name (@rest)));
+        changed = 1;
+      }
+    rebuilt.push(parameter);
+  }
+  return %(fnmod (params @(rebuilt.list_free())));
+}
+
+
+
+/* Returns the innermost node `value` designates, past the forms that still
+   name the same object: an `expr` wrapper, parentheses, a member, and an
+   index into an array. What remains is a name, a designation through a
+   pointer, or another expression; a non-list designates nothing.
+*/
+static List _designated(Var value) {
+  while (value is <list>) {
+    List node = value;
+    match (node) {
+      case %(expr ? ?inner): value = inner;
+      case $($grouped(?inner)): value = inner;
+      case $($indexed(%(!set ?base (expr ((dim *) *) ?)), ?)):
+        value = base;
+      case %(op . ?base *): value = base;
+      default: return node;
+    }
+  }
+  return NULL;
+}
+
+static List _replaced_children(List node, Map replaced) {
+  Var child;
+  $ast.rewrite_children(node, child, _replaced_node(child, replaced));
+}
+
+static Var _replaced_node(Var node, Map replaced) {
+  Var swapped;
+  return node is <list> && replaced.try_get((void *) node.list(), swapped)
+    ? swapped : node;
+}
+
+/* A `return` anywhere in `items`, outside a nested function. */
+static int _contains_return(List items) {
+  List node;
+  $ast.walk(items, node) {
+    if (node.car() == <function>) continue;
+    if (node.car() == <return>) return 1;
+  }
+  return 0;
 }
 
 /* One arm as the case `(condition path type callee)` when the arm calls

@@ -10,54 +10,6 @@ static typedef struct DiscardCall {
   int which, fresh;
 } DiscardCall;
 
-// forwarding wrappers
-
-/** Returns the function `result name(params) { body }` bound in this
-    unit. `result` is the storage class and result type, so static, inline
-    and external helpers share it; `params` are the parameter declarations,
-    and `body` its lowered statements.
-*/
-List Compiler.wrapper_function(
-  Compiler c, Type result, List binding, List params, List body) {
-  List lowered = Code.lowered(%(seq @body), NULL);
-  return _generated_function(
-    c, binding, $!Unit{ $result $binding(@params) { $lowered } });
-}
-
-/** Returns `(declarations arguments)` for a helper that forwards its
-    parameters of `types`: each declaration names a fresh parameter `a0`,
-    `a1`, ..., and each argument reads it. A rest parameter forwards its
-    List elements or Map entries with an explicit splice.
-*/
-List Compiler.forward_parameters(Compiler c, List types) {
-  Array declarations = [], arguments = [];
-  int index = 0;
-  foreach (Type type in types) {
-    List binding = c.sym.introduce(%"a$(index++)");
-    declarations.push(type.parameter_ast(binding));
-    Type container = type.rest_container();
-    if (container) {
-      List value = $!($container){ $binding };
-      arguments.push(%(expr $container (splice $value)));
-    }
-    else arguments.push($!($type){ $binding });
-  }
-  return $(declarations.list_free(), arguments.list_free());
-}
-
-/* Binds `syntax`, a template that defines the function `binding`. The
-   template's own definition is not authored API of this unit; a documented
-   prototype the function completes keeps its prose. */
-static List _generated_function(Compiler c, List binding, List syntax) {
-  List key = %(api-definition $binding);
-  Var authored;
-  int documented = c.semantic_binding_facts().try_get(key, authored);
-  List function = c.bind_syntax(syntax, <unit>, NULL);
-  if (documented) c.set_fact(key, authored);
-  else c.drop_fact(key);
-  return function;
-}
-
 // update helpers
 
 /** Returns a generated helper for a direct protocol-backed update.
@@ -106,24 +58,19 @@ String Compiler.protocol_update_helper(
   return name;
 }
 
-static Type _update_rhs(Type participant, Type signature) {
-  List parameters = signature.car().list().cadr();
-  Type result = signature.cdr();
-  if (parameters ~= %(?receiver ?rhs) &&
-      List.equal(receiver, participant) && result == participant)
-    return rhs;
-  return NULL;
-}
-
-static void _publish_update(Compiler c, List helper, List syntax) {
-  List function = _generated_function(c, helper, syntax);
-  if (function ~= %(function ?result ?declarator (block *body)))
-    function = %(function $result $declarator
-                  (block (at $(c.origin) (seq @body))));
-  c.add_early(function);
-}
-
 // discard helpers
+
+/** The `discard_helper` for `participant`'s protocol `member`. */
+List Compiler.protocol_discard_helper(
+  Compiler c, Type participant, String member, int which) {
+  List resolved = c.resolve_protocol_member(participant, member);
+  if (!resolved) return NULL;
+  List (binding, signature) = resolved;
+  String stem = %"$(participant.car().str().lower())_$member";
+  return c.discard_helper(binding, signature, stem, which);
+}
+
+
 
 /** Returns `(binding signature)` for a generated helper that calls the
     function `binding` of type `signature` and then discards the unnamed
@@ -158,14 +105,71 @@ List Compiler.discard_helper(
   return call.discards.len() ? _emit(call) : NULL;
 }
 
-/** The `discard_helper` for `participant`'s protocol `member`. */
-List Compiler.protocol_discard_helper(
-  Compiler c, Type participant, String member, int which) {
-  List resolved = c.resolve_protocol_member(participant, member);
-  if (!resolved) return NULL;
-  List (binding, signature) = resolved;
-  String stem = %"$(participant.car().str().lower())_$member";
-  return c.discard_helper(binding, signature, stem, which);
+// forwarding wrappers
+
+/** Returns the function `result name(params) { body }` bound in this
+    unit. `result` is the storage class and result type, so static, inline
+    and external helpers share it; `params` are the parameter declarations,
+    and `body` its lowered statements.
+*/
+List Compiler.wrapper_function(
+  Compiler c, Type result, List binding, List params, List body) {
+  List lowered = Code.lowered(%(seq @body), NULL);
+  return _generated_function(
+    c, binding, $!Unit{ $result $binding(@params) { $lowered } });
+}
+
+/** Returns `(declarations arguments)` for a helper that forwards its
+    parameters of `types`: each declaration names a fresh parameter `a0`,
+    `a1`, ..., and each argument reads it. A rest parameter forwards its
+    List elements or Map entries with an explicit splice.
+*/
+List Compiler.forward_parameters(Compiler c, List types) {
+  Array declarations = [], arguments = [];
+  int index = 0;
+  foreach (Type type in types) {
+    List binding = c.sym.introduce(%"a$(index++)");
+    declarations.push(type.parameter_ast(binding));
+    Type container = type.rest_container();
+    if (container) {
+      List value = $!($container){ $binding };
+      arguments.push(%(expr $container (splice $value)));
+    }
+    else arguments.push($!($type){ $binding });
+  }
+  return $(declarations.list_free(), arguments.list_free());
+}
+
+// generated call helpers
+
+static Type _update_rhs(Type participant, Type signature) {
+  List parameters = signature.car().list().cadr();
+  Type result = signature.cdr();
+  if (parameters ~= %(?receiver ?rhs) &&
+      List.equal(receiver, participant) && result == participant)
+    return rhs;
+  return NULL;
+}
+
+static void _publish_update(Compiler c, List helper, List syntax) {
+  List function = _generated_function(c, helper, syntax);
+  if (function ~= %(function ?result ?declarator (block *body)))
+    function = %(function $result $declarator
+                  (block (at $(c.origin) (seq @body))));
+  c.add_early(function);
+}
+
+/* Binds `syntax`, a template that defines the function `binding`. The
+   template's own definition is not authored API of this unit; a documented
+   prototype the function completes keeps its prose. */
+static List _generated_function(Compiler c, List binding, List syntax) {
+  List key = %(api-definition $binding);
+  Var authored;
+  int documented = c.semantic_binding_facts().try_get(key, authored);
+  List function = c.bind_syntax(syntax, <unit>, NULL);
+  if (documented) c.set_fact(key, authored);
+  else c.drop_fact(key);
+  return function;
 }
 
 static void _collect(DiscardCall &d) {

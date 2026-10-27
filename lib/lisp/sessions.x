@@ -7,83 +7,24 @@ static pthread_once_t lisp_initialize_once =
   (pthread_once_t) PTHREAD_ONCE_INIT;
 static int lisp_initialize_success;
 
-module unsigned _canonical_count(void) =>
-  sizeof(lisp_canonical_names) / sizeof(lisp_canonical_names[0]);
-
-static void _initialize_once(void) {
-  Var values[sizeof(lisp_canonical_names) / sizeof(lisp_canonical_names[0])];
-  for (unsigned i = 0; i < _canonical_count(); i++)
-    values[i] = Atom.intern(lisp_canonical_names[i].spelling);
-  for (unsigned i = 0; i < _canonical_count(); i++)
-    if (values[i] is <lsym> && !values[i].str().try_own()) return;
-  for (unsigned i = 0; i < _canonical_count(); i++)
-    *lisp_canonical_names[i].value = values[i];
-  lisp_initialize_success = 1;
-}
-
-static int _initialize(void) {
-  if (pthread_once(&lisp_initialize_once, _initialize_once)) {
-    fprintf(stderr, "Lisp: could not initialize canonical names\n");
-    abort();
-  }
-  return lisp_initialize_success;
-}
-
-module int _global_lookup(Lisp lisp, Var name, Var &out) {
-  for (Lisp s = lisp; s; s = s.parent)
-    if (_binding_get(s.globals, name, out)) return 1;
-  return 0;
-}
-
-/* A reserved special form, from this session or the nearest parent. A child
-   that inherits its parent's specials also inherits their identity, which is
-   what `_special_id` compares. */
-module int _reserved_lookup(Lisp lisp, Var name, Var &out) {
-  for (Lisp s = lisp; s; s = s.parent)
-    if (s.reserved.try_get(name, out)) return 1;
-  return 0;
-}
-
-/* A child may define new names but cannot replace inherited definitions. */
-module int _inherited(Lisp lisp, Var name) {
-  for (Lisp s = lisp.parent; s; s = s.parent)
-    if (name in s.globals || name in s.reserved) return 1;
-  return 0;
-}
-
-module int _binding_get(Map bindings, Var name, Var &out) {
-  Var slot;
-  if (!bindings || !bindings.try_get(name, slot)) return 0;
-  out = _cell_load(slot);
-  return 1;
-}
-
-module void _binding_set(Scope *owner, Map bindings, Var name, Var value) {
-  Var slot;
-  if (bindings.try_get(name, slot)) _cell_store(slot, value);
-  else bindings[name] = _cell(owner, value);
-}
-
-/* Bindings use separately allocated cells because a Map excludes void from
-   its value domain. */
-static Var _cell(Scope *owner, Var value) {
-  Var *slot = Scope.malloc_in(owner, sizeof(Var));
-  *slot = value;
-  return Var.new(<var*>, slot);
-}
-
-static Var _cell_load(Var cell) => *((Var *) cell.pointer());
-
-static void _cell_store(Var cell, Var value) {
-  *((Var *) cell.pointer()) = value;
-}
-
 /* sessions
 
    A kernel session holds only the evaluator's special forms, and a new
    session also evaluates the standard environment from `etc/init.xlisp`. */
 
 static String lisp_standard_source = $lisp._standard.source();
+
+/** Creates an isolated session with the standard Lisp environment loaded.
+    The caller owns the result and must pass it to `Lisp.destroy`.
+    If standard-source evaluation transfers, no handle is returned and the
+    constructed session remains allocated.
+    Raises any cause from `Lisp.kernel` or `Lisp.eval_string`.
+*/
+Lisp Lisp.new(void) {
+  Lisp lisp = Lisp.kernel();
+  lisp.eval_string(lisp_standard_source);
+  return lisp;
+}
 
 /** Creates an isolated embedded `Lisp` session with only evaluator primitives.
     The caller owns a successful session and must pass it to `Lisp.destroy`.
@@ -108,32 +49,6 @@ Lisp Lisp.kernel(void) {
     _install_specials(lisp);
   }
   return result = lisp;
-}
-
-/* A special form's reserved value is a distinct stub Func, which the
-   evaluator recognizes by identity. */
-static void _install_specials(Lisp lisp) {
-  for (unsigned i = 0; i < _canonical_count(); i++) {
-    const LispCanonicalName *info = &lisp_canonical_names[i];
-    if (!info.special) continue;
-    lisp.specials[i] = Func.new(_special_stub, $!Type{ Var (void) });
-    Atom name = Atom.intern(info.spelling);
-    lisp.reserved[name] = lisp.specials[i];
-  }
-}
-
-static Var _special_stub(void) => Var.null();
-
-/** Creates an isolated session with the standard Lisp environment loaded.
-    The caller owns the result and must pass it to `Lisp.destroy`.
-    If standard-source evaluation transfers, no handle is returned and the
-    constructed session remains allocated.
-    Raises any cause from `Lisp.kernel` or `Lisp.eval_string`.
-*/
-Lisp Lisp.new(void) {
-  Lisp lisp = Lisp.kernel();
-  lisp.eval_string(lisp_standard_source);
-  return lisp;
 }
 
 /** Releases a `Lisp` session and invalidates all session-owned state.
@@ -189,30 +104,6 @@ void Lisp.freeze(Lisp lisp) { if (lisp) lisp.frozen = 1; }
 int Lisp.try_get(Lisp lisp, String name, Var &?out) =>
   lisp && name && out && _global_lookup(lisp, Atom.intern(name), out);
 
-/** Binds `name` to `value` in the embedded Lisp global environment.
-    The session stores the value in a raw slot, so `void` remains distinct
-    from Lisp `nil`. The binding does not take ownership of value referents;
-    their canonical graphs or other owners must outlive the binding or
-    session. A host binding may shadow an inherited name in this session;
-    it does not change the ancestor. Lisp `def` still rejects inherited
-    names, including a name the host has shadowed locally.
-    Binding an `x2c.` name protects that namespace from later Lisp
-    `def` forms, but direct calls to this function may replace such a
-    binding.
-    Raises: `<bad-arg>` for a null session or name, or `<alloc-fail>`,
-    `<size-limit>`, or `<bad-enc>` while canonicalizing or storing the binding.
-*/
-void Lisp.set_global(Lisp lisp, String name, Var value) {
-  if (!lisp || !name) $error.global.args();
-  if (lisp.frozen)
-    $error.global.frozen("Lisp.set_global");
-  auto (&lisp.scope) {
-    Var interned = Atom.intern(name);
-    _binding_set(&lisp.scope, lisp.globals, interned, value);
-    if (name.startswith("x2c.")) lisp.protect_x2c = 1;
-  }
-}
-
 /** Removes this session's global binding for `name`, if present. An
     ancestor's binding of the same name becomes visible again. Code that
     already resolved the binding keeps its value; value referents keep their
@@ -244,15 +135,127 @@ void Lisp.bind(Lisp lisp, String name, Func function) {
   lisp.set_global(name, function);
 }
 
+/** Binds `name` to `value` in the embedded Lisp global environment.
+    The session stores the value in a raw slot, so `void` remains distinct
+    from Lisp `nil`. The binding does not take ownership of value referents;
+    their canonical graphs or other owners must outlive the binding or
+    session. A host binding may shadow an inherited name in this session;
+    it does not change the ancestor. Lisp `def` still rejects inherited
+    names, including a name the host has shadowed locally.
+    Binding an `x2c.` name protects that namespace from later Lisp
+    `def` forms, but direct calls to this function may replace such a
+    binding.
+    Raises: `<bad-arg>` for a null session or name, or `<alloc-fail>`,
+    `<size-limit>`, or `<bad-enc>` while canonicalizing or storing the binding.
+*/
+void Lisp.set_global(Lisp lisp, String name, Var value) {
+  if (!lisp || !name) $error.global.args();
+  if (lisp.frozen)
+    $error.global.frozen("Lisp.set_global");
+  auto (&lisp.scope) {
+    Var interned = Atom.intern(name);
+    _binding_set(&lisp.scope, lisp.globals, interned, value);
+    if (name.startswith("x2c.")) lisp.protect_x2c = 1;
+  }
+}
+
 // session storage
 
 /** Borrows the session executing the current native Lisp callback. */
 Lisp Lisp.active(void) => lisp_active;
+
 /** Borrows the storage owner for callback state retained by this session. */
 Scope *Lisp.storage(Lisp lisp) => &lisp.scope;
+
 /** Borrows the current lowered source activation's automatic storage. */
 Scope *Lisp.automatic_storage(Lisp lisp) =>
   lisp.automatic_owner ? lisp.automatic_owner : &lisp.scope;
+
 /** Borrows the caller's storage for a lowered record result. */
 Scope *Lisp.result_storage(Lisp lisp) =>
   lisp.result_owner ? lisp.result_owner : &lisp.scope;
+
+static int _initialize(void) {
+  if (pthread_once(&lisp_initialize_once, _initialize_once)) {
+    fprintf(stderr, "Lisp: could not initialize canonical names\n");
+    abort();
+  }
+  return lisp_initialize_success;
+}
+
+static void _initialize_once(void) {
+  Var values[sizeof(lisp_canonical_names) / sizeof(lisp_canonical_names[0])];
+  for (unsigned i = 0; i < _canonical_count(); i++)
+    values[i] = Atom.intern(lisp_canonical_names[i].spelling);
+  for (unsigned i = 0; i < _canonical_count(); i++)
+    if (values[i] is <lsym> && !values[i].str().try_own()) return;
+  for (unsigned i = 0; i < _canonical_count(); i++)
+    *lisp_canonical_names[i].value = values[i];
+  lisp_initialize_success = 1;
+}
+
+/* A special form's reserved value is a distinct stub Func, which the
+   evaluator recognizes by identity. */
+static void _install_specials(Lisp lisp) {
+  for (unsigned i = 0; i < _canonical_count(); i++) {
+    const LispCanonicalName *info = &lisp_canonical_names[i];
+    if (!info.special) continue;
+    lisp.specials[i] = Func.new(_special_stub, $!Type{ Var (void) });
+    Atom name = Atom.intern(info.spelling);
+    lisp.reserved[name] = lisp.specials[i];
+  }
+}
+
+module unsigned _canonical_count(void) =>
+  sizeof(lisp_canonical_names) / sizeof(lisp_canonical_names[0]);
+
+static Var _special_stub(void) => Var.null();
+
+module int _global_lookup(Lisp lisp, Var name, Var &out) {
+  for (Lisp s = lisp; s; s = s.parent)
+    if (_binding_get(s.globals, name, out)) return 1;
+  return 0;
+}
+
+module int _binding_get(Map bindings, Var name, Var &out) {
+  Var slot;
+  if (!bindings || !bindings.try_get(name, slot)) return 0;
+  out = _cell_load(slot);
+  return 1;
+}
+
+static Var _cell_load(Var cell) => *((Var *) cell.pointer());
+
+module void _binding_set(Scope *owner, Map bindings, Var name, Var value) {
+  Var slot;
+  if (bindings.try_get(name, slot)) _cell_store(slot, value);
+  else bindings[name] = _cell(owner, value);
+}
+
+/* Bindings use separately allocated cells because a Map excludes void from
+   its value domain. */
+static Var _cell(Scope *owner, Var value) {
+  Var *slot = Scope.malloc_in(owner, sizeof(Var));
+  *slot = value;
+  return Var.new(<var*>, slot);
+}
+
+static void _cell_store(Var cell, Var value) {
+  *((Var *) cell.pointer()) = value;
+}
+
+/* A reserved special form, from this session or the nearest parent. A child
+   that inherits its parent's specials also inherits their identity, which is
+   what `_special_id` compares. */
+module int _reserved_lookup(Lisp lisp, Var name, Var &out) {
+  for (Lisp s = lisp; s; s = s.parent)
+    if (s.reserved.try_get(name, out)) return 1;
+  return 0;
+}
+
+/* A child may define new names but cannot replace inherited definitions. */
+module int _inherited(Lisp lisp, Var name) {
+  for (Lisp s = lisp.parent; s; s = s.parent)
+    if (name in s.globals || name in s.reserved) return 1;
+  return 0;
+}

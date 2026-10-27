@@ -12,6 +12,24 @@
 
 typedef struct Edge { int vertex; struct Edge *next; } *Edge;
 
+int main(int argc, char **argv) {
+  if (argc != 4) return 2;
+  int n = atoi(argv[1]), jumps = atoi(argv[2]), runs = atoi(argv[3]);
+  Edge *graph = xcalloc(n, sizeof(Edge));
+  for (int i = 1; i < n; i++) _add(graph, i - 1, i);
+  uint32_t state = 1;
+  for (int v = 0; v < n; v++)
+    for (int j = 0; j < jumps; j++) {
+      state = state * 1664525u + 1013904223u;
+      int u = state % n;
+      if (u != v) _add(graph, v, u);
+    }
+  int checksum = 0;
+  for (int run = 0; run < runs; run++) checksum += _bfs(graph, n);
+  printf("%d\n", checksum);
+  return 0;
+}
+
 static void _add(Edge *graph, int a, int b) {
   Edge ab = xmalloc(sizeof(struct Edge));
   Edge ba = xmalloc(sizeof(struct Edge));
@@ -37,22 +55,4 @@ static int _bfs(Edge *graph, int n) {
   int result = distance[n - 1];
   Scope.release();
   return result;
-}
-
-int main(int argc, char **argv) {
-  if (argc != 4) return 2;
-  int n = atoi(argv[1]), jumps = atoi(argv[2]), runs = atoi(argv[3]);
-  Edge *graph = xcalloc(n, sizeof(Edge));
-  for (int i = 1; i < n; i++) _add(graph, i - 1, i);
-  uint32_t state = 1;
-  for (int v = 0; v < n; v++)
-    for (int j = 0; j < jumps; j++) {
-      state = state * 1664525u + 1013904223u;
-      int u = state % n;
-      if (u != v) _add(graph, v, u);
-    }
-  int checksum = 0;
-  for (int run = 0; run < runs; run++) checksum += _bfs(graph, n);
-  printf("%d\n", checksum);
-  return 0;
 }

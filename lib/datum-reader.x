@@ -15,6 +15,40 @@ static keyword loop $private.loop;
 #include "scan.x"
 #include <limits.h>
 
+/* One read over scanned tokens: `source` holds their text from byte `base`,
+   and `end` is the offset past the last token a form used. */
+static typedef struct LispReader {
+  Tokenizer tokenizer, char *source, unsigned base, end;
+} LispReader;
+
+/* Elements are read in a loop; only Lists and prefixes add nesting. */
+#define LISP_READ_DEPTH_MAX 1024
+
+/* Reads one Lisp form, returning `<value>` or `<eof>`. A null source or
+   cursor returns `<eof>`. On success, a nonnull `out` receives the form and
+   `cursor` advances past it; at EOF, `cursor` reaches the source length.
+   Plain spellings use the fast path; other forms use temporary Lisp tokens.
+   Result storage follows the caller's Scope and canonical pools.
+   Raises: `<incomplete>` or `<malformed>`, with `cursor` at the failing
+   form's first token and `out` unchanged, or allocation and depth failures. */
+Symbol String.read_lisp_form(String source, unsigned &?cursor, Var &?out) {
+  if (!source) return <eof>;
+  if (!cursor) return <eof>;
+  unsigned base = cursor;
+  unsigned at = base;
+  while (_blank(source[at])) at++;
+  Array items = auto [];
+  Var value = void;
+  if (source[at] && _plain_form(source, at, value, items, 1)) {
+    cursor = at;
+    if (out) out = value;
+    return <value>;
+  }
+  Scope tokens_scope = auto Scope.new_named("Lisp tokens");
+  Tokenizer tokenizer = Tokenizer.from_lisp(source + base, &tokens_scope);
+  return tokenizer.read_lisp_form(source, base, cursor, out);
+}
+
 /* reader
 
    The reader turns the shared Tokenizer's Lisp tokens into forms. A form
@@ -42,19 +76,14 @@ Symbol Tokenizer.read_lisp_form(
   return <value>;
 }
 
-/* One read over scanned tokens: `source` holds their text from byte `base`,
-   and `end` is the offset past the last token a form used. */
-static typedef struct LispReader {
-  Tokenizer tokenizer, char *source, unsigned base, end;
-} LispReader;
-
-/* Elements are read in a loop; only Lists and prefixes add nesting. */
-#define LISP_READ_DEPTH_MAX 1024
-
-static int _nested_depth(int depth) {
-  if (++depth >= LISP_READ_DEPTH_MAX)
-    raise %(size-limit (operation "Lisp.read") (depth $depth));
-  return depth;
+/* Scans all of `source` into Lisp tokens whose storage `scope` owns. */
+Tokenizer Tokenizer.from_lisp(String source, Scope *scope) {
+  Tokenizer tokenizer = NULL;
+  auto (scope) {
+    tokenizer = Tokenizer.new(source, <lisp>);
+    tokenizer.scan();
+  }
+  return tokenizer;
 }
 
 /* The form that starts at `token`, or `void` when the tokens end inside
@@ -99,6 +128,12 @@ static Var _list(LispReader &r, int depth) {
     if (element is void) return void;
     elements.push(element);
   }
+}
+
+static int _nested_depth(int depth) {
+  if (++depth >= LISP_READ_DEPTH_MAX)
+    raise %(size-limit (operation "Lisp.read") (depth $depth));
+  return depth;
 }
 
 static Var _atom(LispReader &r, Token token) {
@@ -228,42 +263,7 @@ static int _plain_atom(char *s, unsigned &at, Var &out) {
 
 static int _digit(char c) => c >= '0' && c <= '9';
 
-static int _blank(char c) => c == ' ' || c == '\n' || c == '\t' || c == '\r';
-
 /* Whether the reader's token ends before `c`. */
 static int _token_end(char c) => !c || c == ')' || _blank(c);
 
-/* Scans all of `source` into Lisp tokens whose storage `scope` owns. */
-Tokenizer Tokenizer.from_lisp(String source, Scope *scope) {
-  Tokenizer tokenizer = NULL;
-  auto (scope) {
-    tokenizer = Tokenizer.new(source, <lisp>);
-    tokenizer.scan();
-  }
-  return tokenizer;
-}
-
-/* Reads one Lisp form, returning `<value>` or `<eof>`. A null source or
-   cursor returns `<eof>`. On success, a nonnull `out` receives the form and
-   `cursor` advances past it; at EOF, `cursor` reaches the source length.
-   Plain spellings use the fast path; other forms use temporary Lisp tokens.
-   Result storage follows the caller's Scope and canonical pools.
-   Raises: `<incomplete>` or `<malformed>`, with `cursor` at the failing
-   form's first token and `out` unchanged, or allocation and depth failures. */
-Symbol String.read_lisp_form(String source, unsigned &?cursor, Var &?out) {
-  if (!source) return <eof>;
-  if (!cursor) return <eof>;
-  unsigned base = cursor;
-  unsigned at = base;
-  while (_blank(source[at])) at++;
-  Array items = auto [];
-  Var value = void;
-  if (source[at] && _plain_form(source, at, value, items, 1)) {
-    cursor = at;
-    if (out) out = value;
-    return <value>;
-  }
-  Scope tokens_scope = auto Scope.new_named("Lisp tokens");
-  Tokenizer tokenizer = Tokenizer.from_lisp(source + base, &tokens_scope);
-  return tokenizer.read_lisp_form(source, base, cursor, out);
-}
+static int _blank(char c) => c == ' ' || c == '\n' || c == '\t' || c == '\r';

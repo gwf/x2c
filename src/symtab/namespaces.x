@@ -34,41 +34,6 @@ void Compiler.record_declaration_visibility(Compiler c, List declaration) {
   }
 }
 
-/* A public object definition belongs to this source, including a tentative
-   definition. An extern declaration only names its native supplier. */
-static void _record_native_objects(Compiler c, Type spec, List rows) {
-  if (!c.shallow || c.source_private < 0 ||
-      !Path.is_x2c_source(c.filename)) return;
-  String path = Compiler.portable_path(c.canonical_path(c.filename));
-  foreach (List row in rows) {
-    List declarator = row;
-    if (row ~= %(op = ?bound ?)) declarator = bound;
-    if (spec.is_extern() && declarator == row) continue;
-    if (declarator ~= %(bind ?binding ?)) {
-      List declaration = %(declare $spec (bindings $declarator));
-      if (declaration.type_from_ast().is_function()) continue;
-      String name = Ast.binding_spelling(binding);
-      if (!name || !name.len()) continue;
-      c.sym.set(
-        %("source-node" (native-object $path $(c.token.pos) $name)),
-        %(native-object $name));
-    }
-  }
-}
-
-static void _record_rows_visibility(
-  Compiler c, List declaration, Symbol kind, int mark, List rows) {
-  foreach (List row in rows)
-    match (row) case $Ast.declarator_pattern(%(?identity *)): {
-      String name = Ast.binding_spelling(identity);
-      if (kind == <typedef> && name) {
-        c.record_source_typedef(name, declaration, mark);
-        if (mark) c.sym.mark_static(%(typedef $name));
-      }
-      if (mark && name) c.sym.mark_static($(name));
-    }
-}
-
 // module and package names
 
 /** Returns the prefix that a file-scope declaration of `type` takes in the
@@ -81,21 +46,6 @@ String Compiler.private_prefix(Compiler c, Type type) {
       !(c.source_private > 0 || (type && type.is_static())))
     return NULL;
   return c.file_prefix();
-}
-
-/** Returns `name` spelled in a declaration's scope: with `prefix`, a file
-    prefix, or else in the current package. A name the compiler derived
-    from a spelling this unit already prefixed, such as `second__Node_new`
-    or `Var_second__node` for a private class `second__Node`, stays
-    unchanged; it is unique in the unit, so code generated outside the file
-    still reaches it. Ordinary source spellings always take their file's
-    prefix, even when they resemble another generated spelling.
-*/
-String Compiler.scoped_spelling(Compiler c, String prefix, String name) {
-  if (!prefix) return c.package_spelling(name);
-  if (!name || (c.macro_stack && _derived_spelling(c.sym, name)))
-    return name;
-  return %"$prefix$name";
 }
 
 /** Returns `name` as `scoped_spelling` does for a declaration, recording
@@ -115,15 +65,19 @@ String Compiler.declared_spelling(Compiler c, String prefix, String name) {
   return spelled;
 }
 
-/* `name` is a recorded prefixed spelling, one followed by `_` and more,
-   or `Var_` and one in lower case. */
-static int _derived_spelling(Sym s, String name) {
-  if (!s.prefixed.len()) return 0;
-  if (name in s.prefixed) return 1;
-  if (name.startswith("Var_") && name[4:] in s.prefixed) return 1;
-  for (int at = 1; at < name.len() - 1; at++)
-    if (name[at] == '_' && name[:at] in s.prefixed) return 1;
-  return 0;
+/** Returns `name` spelled in a declaration's scope: with `prefix`, a file
+    prefix, or else in the current package. A name the compiler derived
+    from a spelling this unit already prefixed, such as `second__Node_new`
+    or `Var_second__node` for a private class `second__Node`, stays
+    unchanged; it is unique in the unit, so code generated outside the file
+    still reaches it. Ordinary source spellings always take their file's
+    prefix, even when they resemble another generated spelling.
+*/
+String Compiler.scoped_spelling(Compiler c, String prefix, String name) {
+  if (!prefix) return c.package_spelling(name);
+  if (!name || (c.macro_stack && _derived_spelling(c.sym, name)))
+    return name;
+  return %"$prefix$name";
 }
 
 /** Returns the static prefix of each file of the module unit. */
@@ -189,25 +143,6 @@ void Compiler.register_package_member(
   c.package_members[local] = binding;
 }
 
-/* An alias and a `with` name each claim one local spelling. Rebinding that
-   spelling, or taking one a declaration already uses, is the same conflict.
-   Both messages name what the developer wrote. */
-static void _check_package_binding(
-  Compiler c, String kind, String local, Token token) {
-  Var alias = c.package_aliases[local];
-  Var member = c.package_members[local];
-  String bound = alias is void ? NULL : alias;
-  if (!bound && member is not void) {
-    List pair = member;
-    (String package, String member_name) = pair;
-    bound = %"$package.$member_name";
-  }
-  if (bound)
-    $fail.symbols_package_bound(c, token, kind, local, bound);
-  if (c.sym.get_exact($(local)))
-    $fail.symbols_package_collision(c, token, kind, local);
-}
-
 /** Returns a visible `with` name's package-prefixed spelling, or `NULL`.
 
     An ordinary declaration of the local spelling shadows the `with` name.
@@ -219,6 +154,13 @@ String Compiler.package_member_spelling(Compiler c, String name) {
   List pair = bound;
   (String package, String member_name) = pair;
   return %"$(package)__$member_name";
+}
+
+/** Returns an unambiguous imported spelling for `name`, or `NULL`. */
+String Compiler.imported_spelling(Compiler c, String name) {
+  List packages = c.imported_providers(name);
+  if (!packages || packages.cdr()) return NULL;
+  return %"$(packages.car())__$name";
 }
 
 /** Returns sorted imported packages that publish `name`.
@@ -237,9 +179,69 @@ List Compiler.imported_providers(Compiler c, String name) {
   return packages.sort();
 }
 
-/** Returns an unambiguous imported spelling for `name`, or `NULL`. */
-String Compiler.imported_spelling(Compiler c, String name) {
-  List packages = c.imported_providers(name);
-  if (!packages || packages.cdr()) return NULL;
-  return %"$(packages.car())__$name";
+// symbol namespaces
+
+/* A public object definition belongs to this source, including a tentative
+   definition. An extern declaration only names its native supplier. */
+static void _record_native_objects(Compiler c, Type spec, List rows) {
+  if (!c.shallow || c.source_private < 0 ||
+      !Path.is_x2c_source(c.filename)) return;
+  String path = Compiler.portable_path(c.canonical_path(c.filename));
+  foreach (List row in rows) {
+    List declarator = row;
+    if (row ~= %(op = ?bound ?)) declarator = bound;
+    if (spec.is_extern() && declarator == row) continue;
+    if (declarator ~= %(bind ?binding ?)) {
+      List declaration = %(declare $spec (bindings $declarator));
+      if (declaration.type_from_ast().is_function()) continue;
+      String name = Ast.binding_spelling(binding);
+      if (!name || !name.len()) continue;
+      c.sym.set(
+        %("source-node" (native-object $path $(c.token.pos) $name)),
+        %(native-object $name));
+    }
+  }
+}
+
+static void _record_rows_visibility(
+  Compiler c, List declaration, Symbol kind, int mark, List rows) {
+  foreach (List row in rows)
+    match (row) case $Ast.declarator_pattern(%(?identity *)): {
+      String name = Ast.binding_spelling(identity);
+      if (kind == <typedef> && name) {
+        c.record_source_typedef(name, declaration, mark);
+        if (mark) c.sym.mark_static(%(typedef $name));
+      }
+      if (mark && name) c.sym.mark_static($(name));
+    }
+}
+
+/* `name` is a recorded prefixed spelling, one followed by `_` and more,
+   or `Var_` and one in lower case. */
+static int _derived_spelling(Sym s, String name) {
+  if (!s.prefixed.len()) return 0;
+  if (name in s.prefixed) return 1;
+  if (name.startswith("Var_") && name[4:] in s.prefixed) return 1;
+  for (int at = 1; at < name.len() - 1; at++)
+    if (name[at] == '_' && name[:at] in s.prefixed) return 1;
+  return 0;
+}
+
+/* An alias and a `with` name each claim one local spelling. Rebinding that
+   spelling, or taking one a declaration already uses, is the same conflict.
+   Both messages name what the developer wrote. */
+static void _check_package_binding(
+  Compiler c, String kind, String local, Token token) {
+  Var alias = c.package_aliases[local];
+  Var member = c.package_members[local];
+  String bound = alias is void ? NULL : alias;
+  if (!bound && member is not void) {
+    List pair = member;
+    (String package, String member_name) = pair;
+    bound = %"$package.$member_name";
+  }
+  if (bound)
+    $fail.symbols_package_bound(c, token, kind, local, bound);
+  if (c.sym.get_exact($(local)))
+    $fail.symbols_package_collision(c, token, kind, local);
 }

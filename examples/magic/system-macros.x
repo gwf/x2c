@@ -11,11 +11,6 @@ void Notebook.init(Notebook notebook) {
   notebook.readings = Points.new();
 }
 
-void Notebook.record(Notebook notebook, Point point) {
-  notebook.readings.push(Point.new(
-    point.x * notebook.scale, point.y * notebook.scale));
-}
-
 void Notebook.free(Notebook notebook) {
   notebook.readings.free();
   xfree(notebook);
@@ -58,4 +53,9 @@ int main(void) {
     printf("copy: %d,%d; key: %s\n", copy.x, copy.y, labels[lookup]);
   }
   return 0;
+}
+
+void Notebook.record(Notebook notebook, Point point) {
+  notebook.readings.push(Point.new(
+    point.x * notebook.scale, point.y * notebook.scale));
 }

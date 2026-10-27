@@ -2,6 +2,83 @@
 
 // declarations
 
+/** Reports whether `binding` names a file-scope static of this unit. */
+int Sym.is_file_static(Sym s, Var binding) {
+  if (binding is not <list> || !Ast.try_binding(binding, NULL, NULL))
+    return 0;
+  return $(Ast.binding_spelling(binding)) in s.statics;
+}
+
+/** Emits every local object spelled `spelling` that the current scope
+    sees, the enclosing ones too, under one fresh spelling, so a file-scope
+    name a template keeps reaches the global there, and returns them.
+    Locals of other scopes keep their spellings for the native macros that
+    name them.
+*/
+List Sym.unshadow_visible(Sym s, String spelling) {
+  List key = $(spelling), visible = NULL;
+  String alias = s.c.fresh_name("binding_shadow");
+  for (int i = s.base_scopes; i < (int) s.scopes.len(); i++) {
+    SymScope *scope = _scope_at(s, i);
+    Var binding;
+    if (key in scope.symbols && scope.bindings.try_get(key, binding) &&
+        %(automatic $binding) in s.binding_facts) {
+      _unshadow_local(s, binding, alias);
+      visible = cons(binding, visible);
+    }
+  }
+  return visible;
+}
+
+/** Installs an existing binding with `ast`'s qualifier-preserving type. */
+List Sym.bind_identity(Sym s, List context, List binding, List ast) {
+  String spelling = Ast.binding_spelling(binding);
+  List key = context ? $(@context, spelling) : $(spelling);
+  SymScope *scope = _scope_at(s, -1);
+  Type annotation = ast.type_from_ast();
+  s.put(scope.symbols, key, annotation.declared());
+  if (context === %(typedef)) {
+    key = $(spelling);
+    s.put(scope.symbols, key, %(typedef $spelling));
+    _local_typedef(s, annotation, binding);
+  }
+  s.put(scope.bindings, key, binding);
+  if (!context && !s.at_file_scope()) _mark_automatic(s, binding, annotation);
+  return binding;
+}
+
+/** Binds a local aggregate tag before its fields, preserving native spelling.
+    A reference reuses the nearest visible tag; a definition or standalone
+    forward declaration introduces the tag in the current lexical scope. A
+    macro template names its tags as template locals.
+*/
+Var Compiler.aggregate_name(
+  Compiler c, Symbol kind, Var name, int definition) {
+  Sym s = c.sym;
+  if (definition && !c.macro_holes && name ~= %(gensym *) &&
+      c.enclosing(<declarator>) ~= %(declare ?(Type base) *) &&
+      <auto> in base && !base.base_type())
+    return s.introduce(c.fresh_name("inferred_type"));
+  if (name is not <string>) return name;
+  if (c.macro_holes) {
+    List local = c.macro_tag_name(kind, name, definition);
+    return local ? local : name;
+  }
+  Type type = $(kind, name);
+  if (s.at_file_scope()) {
+    /* Only a definition or standalone forward owns this package tag.
+       A field or prototype may merely refer to a tag from a C header. */
+    if (definition && !s.get_exact(type)) s.declare_resolved(NULL, type, type);
+    return name;
+  }
+  if (!definition && s.get_exact(type)) return s.local_type(type).cadr();
+  if (!definition && c.shallow) return name;
+  List binding = s.current_binding(type);
+  return binding ? binding : s.declare(NULL, type, type);
+}
+
+
+
 /** Analyzes a complete declaration type and installs its stored declared type.
 
     Returns the declared binding. At file scope this also records static
@@ -15,32 +92,6 @@ List Sym.declare(Sym s, List context, List key, List ast) =>
 /** Installs an aggregate or named type whose parser resolved its spelling. */
 List Sym.declare_resolved(Sym s, List context, List key, List ast) =>
   _declare(s, context, key, ast, key);
-
-static List _declare(Sym s, List context, List key, List ast, List declared) {
-  if (!s.at_file_scope() && !List.equal(declared, key))
-    _link_local(s, declared);
-  key = declared;
-  _check_spelling(s.c, _declared_spelling(key));
-  Type ctxkey = %( @context @key ), type = ast.type_from_ast();
-  Type declared_type = type;
-  Type prior = type.is_function() ? s.get(ctxkey) : NULL;
-  if (prior.is_function() && !s.same_rest_convention(type, prior))
-    s.c.report_error(<type>, "conflicting rest calling convention",
-      NULL, NULL);
-  if ((int) s.scopes.len() == s.base_scopes && !context)
-    _track_static(s, (List) ctxkey, ast);
-  List binding = NULL;
-  if (context === %(typedef)) binding = s.define(key, (List) ctxkey);
-  type = _stored_type(type, ctxkey, ast);
-  if (!binding) binding = s.define(ctxkey, (List) type);
-  else {
-    s.set(ctxkey, (List) type);
-    _local_typedef(s, type, binding);
-  }
-  if (!context && !s.at_file_scope() && _names_local_object(declared_type))
-    _local_object(s, key, binding, declared_type);
-  return binding;
-}
 
 /** Returns the key a declaration of `key` with type `ast` takes in this
     unit: its file-private or package spelling at file scope, else `key`.
@@ -78,6 +129,53 @@ List Sym.declared_key(Sym s, List context, List key, List ast) {
   return key;
 }
 
+// symbol declarations
+
+static void _unshadow_local(Sym s, List binding, String alias) {
+  if (!(%(emitted $binding) in s.binding_facts))
+    s.put(s.binding_facts, %(emitted $binding), alias);
+}
+
+/* A block-local typedef emits under a fresh spelling, and a local tag
+   records its named type. */
+static void _local_typedef(Sym s, Type type, List binding) {
+  if (s.at_file_scope()) return;
+  if (type.is_aggregate_tag())
+    s.put(s.binding_facts, %(ntype $binding), type);
+  s.put(s.binding_facts, %(emitted $binding), s.c.fresh_name("local_typedef"));
+}
+
+static void _mark_automatic(Sym s, List binding, Type type) {
+  s.put(s.binding_facts, %(automatic $binding), 1);
+  s.put(s.binding_facts, %(type $binding), type);
+}
+
+static List _declare(Sym s, List context, List key, List ast, List declared) {
+  if (!s.at_file_scope() && !List.equal(declared, key))
+    _link_local(s, declared);
+  key = declared;
+  _check_spelling(s.c, _declared_spelling(key));
+  Type ctxkey = %( @context @key ), type = ast.type_from_ast();
+  Type declared_type = type;
+  Type prior = type.is_function() ? s.get(ctxkey) : NULL;
+  if (prior.is_function() && !s.same_rest_convention(type, prior))
+    s.c.report_error(<type>, "conflicting rest calling convention",
+      NULL, NULL);
+  if ((int) s.scopes.len() == s.base_scopes && !context)
+    _track_static(s, (List) ctxkey, ast);
+  List binding = NULL;
+  if (context === %(typedef)) binding = s.define(key, (List) ctxkey);
+  type = _stored_type(type, ctxkey, ast);
+  if (!binding) binding = s.define(ctxkey, (List) type);
+  else {
+    s.set(ctxkey, (List) type);
+    _local_typedef(s, type, binding);
+  }
+  if (!context && !s.at_file_scope() && _names_local_object(declared_type))
+    _local_object(s, key, binding, declared_type);
+  return binding;
+}
+
 /* A block-scope `extern` or function declaration names the file-scope
    binding it sees, so it takes that binding's key: the file's static, the
    unit's name, or the package's name. A local of the spelling hides them,
@@ -95,13 +193,6 @@ static List _linked_key(Sym s, List key) {
    spelling declares that binding, so it takes the binding's identity. */
 static void _link_local(Sym s, List key) =>
   s.put(_scope_at(s, -1).bindings, key, s.resolve_global(key, NULL));
-
-/** Reports whether `binding` names a file-scope static of this unit. */
-int Sym.is_file_static(Sym s, Var binding) {
-  if (binding is not <list> || !Ast.try_binding(binding, NULL, NULL))
-    return 0;
-  return $(Ast.binding_spelling(binding)) in s.statics;
-}
 
 static int _global_key(Sym s, List key) {
   for (int i = 0; i < s.base_scopes; i++)
@@ -191,15 +282,6 @@ static Type _stored_type(Type type, Type key, List ast) {
   return type.declared();
 }
 
-/* A block-local typedef emits under a fresh spelling, and a local tag
-   records its named type. */
-static void _local_typedef(Sym s, Type type, List binding) {
-  if (s.at_file_scope()) return;
-  if (type.is_aggregate_tag())
-    s.put(s.binding_facts, %(ntype $binding), type);
-  s.put(s.binding_facts, %(emitted $binding), s.c.fresh_name("local_typedef"));
-}
-
 /* A block-scope `extern` declaration or function prototype names an
    external symbol, so it is never a local object and keeps C's spelling. */
 static int _names_local_object(Type declared) =>
@@ -217,82 +299,4 @@ static void _local_object(Sym s, List key, List binding, Type type) {
     s.put(
       s.binding_facts, %(emitted $binding),
       s.c.fresh_name("var_converter_shadow"));
-}
-
-static void _mark_automatic(Sym s, List binding, Type type) {
-  s.put(s.binding_facts, %(automatic $binding), 1);
-  s.put(s.binding_facts, %(type $binding), type);
-}
-
-/** Emits every local object spelled `spelling` that the current scope
-    sees, the enclosing ones too, under one fresh spelling, so a file-scope
-    name a template keeps reaches the global there, and returns them.
-    Locals of other scopes keep their spellings for the native macros that
-    name them.
-*/
-List Sym.unshadow_visible(Sym s, String spelling) {
-  List key = $(spelling), visible = NULL;
-  String alias = s.c.fresh_name("binding_shadow");
-  for (int i = s.base_scopes; i < (int) s.scopes.len(); i++) {
-    SymScope *scope = _scope_at(s, i);
-    Var binding;
-    if (key in scope.symbols && scope.bindings.try_get(key, binding) &&
-        %(automatic $binding) in s.binding_facts) {
-      _unshadow_local(s, binding, alias);
-      visible = cons(binding, visible);
-    }
-  }
-  return visible;
-}
-
-static void _unshadow_local(Sym s, List binding, String alias) {
-  if (!(%(emitted $binding) in s.binding_facts))
-    s.put(s.binding_facts, %(emitted $binding), alias);
-}
-
-/** Installs an existing binding with `ast`'s qualifier-preserving type. */
-List Sym.bind_identity(Sym s, List context, List binding, List ast) {
-  String spelling = Ast.binding_spelling(binding);
-  List key = context ? $(@context, spelling) : $(spelling);
-  SymScope *scope = _scope_at(s, -1);
-  Type annotation = ast.type_from_ast();
-  s.put(scope.symbols, key, annotation.declared());
-  if (context === %(typedef)) {
-    key = $(spelling);
-    s.put(scope.symbols, key, %(typedef $spelling));
-    _local_typedef(s, annotation, binding);
-  }
-  s.put(scope.bindings, key, binding);
-  if (!context && !s.at_file_scope()) _mark_automatic(s, binding, annotation);
-  return binding;
-}
-
-/** Binds a local aggregate tag before its fields, preserving native spelling.
-    A reference reuses the nearest visible tag; a definition or standalone
-    forward declaration introduces the tag in the current lexical scope. A
-    macro template names its tags as template locals.
-*/
-Var Compiler.aggregate_name(
-  Compiler c, Symbol kind, Var name, int definition) {
-  Sym s = c.sym;
-  if (definition && !c.macro_holes && name ~= %(gensym *) &&
-      c.enclosing(<declarator>) ~= %(declare ?(Type base) *) &&
-      <auto> in base && !base.base_type())
-    return s.introduce(c.fresh_name("inferred_type"));
-  if (name is not <string>) return name;
-  if (c.macro_holes) {
-    List local = c.macro_tag_name(kind, name, definition);
-    return local ? local : name;
-  }
-  Type type = $(kind, name);
-  if (s.at_file_scope()) {
-    /* Only a definition or standalone forward owns this package tag.
-       A field or prototype may merely refer to a tag from a C header. */
-    if (definition && !s.get_exact(type)) s.declare_resolved(NULL, type, type);
-    return name;
-  }
-  if (!definition && s.get_exact(type)) return s.local_type(type).cadr();
-  if (!definition && c.shallow) return name;
-  List binding = s.current_binding(type);
-  return binding ? binding : s.declare(NULL, type, type);
 }

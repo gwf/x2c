@@ -55,21 +55,21 @@ static macro Expression $func_address(Expr $value) => &$value;
 
 static macro Expression $func_size(Expr $value) => sizeof $value;
 
-// func adapter bodies
+/* A value computed after its setup statements. */
+static macro Expression $statement_value(Expr $value, Stmt @setup) =>
+  ({ @setup $value; });
 
-/* The body of an adapter that runs `body`: a block's items and then a
-   return of no value, a void expression and then that return, or a return
-   of the expression's value as a `Var`. */
-static List _helper_body(Compiler c, List body) {
-  match (body) {
-    case %(block *items):
-      return %(block @items $(Ast.return_none()));
-    case %(expr (void) ?):
-      return %(block (stmnt $body) $(Ast.return_none()));
-  }
-  List result = c.convert_expression(body, %("Var"));
-  return %(block (stmnt (return $result)));
-}
+// func adapters
+
+/* The argument readers of one adapter, with its `Func` and argument vector
+   parameters read as expressions. */
+static typedef struct FuncReaders {
+  Compiler c;
+  Type diagnostic_type;
+  List value, reference, fn, argv;
+} FuncReaders;
+
+// func adapter bodies
 
 /** Binds the file-static context type `name` with the field rows `fields`,
     for callable defers and function-pointer `Func` values. The complete
@@ -83,33 +83,6 @@ List Compiler.capture_environment(Compiler c, List name, List fields) {
     $!Unit{ static typedef struct $name { @fields } $name; },
     <unit>, NULL);
 }
-
-/* A value computed after its setup statements. */
-static macro Expression $statement_value(Expr $value, Stmt @setup) =>
-  ({ @setup $value; });
-
-/** Puts `setup` at the entry of a block or typed expression `body`. */
-List Compiler.prepend_setup(Compiler c, List body, List setup) {
-  if (!setup) return body;
-  Macro shape = $statement_value;
-  match (body) {
-    case %(block *items):
-      return %(block @setup @items);
-    case %(!set ?expression (expr ?type ?)):
-      return c.rebuild_expression(type, shape(expression, setup));
-  }
-  return body;
-}
-
-// func adapters
-
-/* The argument readers of one adapter, with its `Func` and argument vector
-   parameters read as expressions. */
-static typedef struct FuncReaders {
-  Compiler c;
-  Type diagnostic_type;
-  List value, reference, fn, argv;
-} FuncReaders;
 
 /** Adapts a direct native function argument when `FuncAdapter` is expected.
     A noncapturing lambda is lowered to its direct function designator. Other
@@ -139,6 +112,58 @@ List Compiler.maybe_adapt_func_arg(
     c, expected_type, source_binding, source_type);
   return _func_bound(expected_type, adapter);
 }
+
+/** Builds an adapter with `type`'s public signature that passes its own
+    Func as the first argument of `target`, before the declared arguments.
+    The target can read per-instance bindings with `Func.context`.
+*/
+List Compiler.context_func_adapter(Compiler c, Type type, List target) {
+  List self = c.sym.introduce(c.fresh_name("func_binding"));
+  return _build_func_adapter(
+    c, %("Func"), type, target, self, NULL,
+    $(_func_bound(%("Func"), self)));
+}
+
+/** Puts `setup` at the entry of a block or typed expression `body`. */
+List Compiler.prepend_setup(Compiler c, List body, List setup) {
+  if (!setup) return body;
+  Macro shape = $statement_value;
+  match (body) {
+    case %(block *items):
+      return %(block @setup @items);
+    case %(!set ?expression (expr ?type ?)):
+      return c.rebuild_expression(type, shape(expression, setup));
+  }
+  return body;
+}
+
+/** Returns `(SIGNATURE (STORAGE READ)...)` for an adapter of a `Var`
+    function taking the lambda parameter rows `entries`: its Func
+    signature as a cached `List`, and each argument as `_func_reads`
+    reads it from `argv` of the Func `fn`.
+*/
+List Compiler.func_parameters(Compiler c, List entries, List fn, List argv) {
+  List types = c.lambda_param_types(entries);
+  Type adapter = c.sym.resolve_key(%("FuncAdapter"));
+  List reads = entries ? _func_reads(c, adapter, types, fn, argv) : NULL;
+  return cons(c.cache_literal_list(%((func $types) "Var")), reads);
+}
+
+/** Returns the canonical signature shared by native and meta Func adapters. */
+List Compiler.func_signature(Compiler c, Type type) {
+  List params = NULL, Type result = NULL;
+  type.function_parts(params, result);
+  Array declared = [];
+  foreach (List parameter in params)
+    declared.push(
+      parameter.type().rest_container()
+        ? parameter : parameter.type().declared());
+  List parameter_types = params ? declared.list_free() : %((void));
+  Type declared_result = result.declared();
+  return %((func $parameter_types) @declared_result);
+}
+
+// callable adapter construction
 
 static int _is_func_adapter(Compiler c, Type type) {
   if (!type) return 0;
@@ -214,17 +239,6 @@ module List _build_func_adapter(
   return adapter_binding;
 }
 
-/** Builds an adapter with `type`'s public signature that passes its own
-    Func as the first argument of `target`, before the declared arguments.
-    The target can read per-instance bindings with `Func.context`.
-*/
-List Compiler.context_func_adapter(Compiler c, Type type, List target) {
-  List self = c.sym.introduce(c.fresh_name("func_binding"));
-  return _build_func_adapter(
-    c, %("Func"), type, target, self, NULL,
-    $(_func_bound(%("Func"), self)));
-}
-
 static void _require_func_readers(
   Compiler c, Type diagnostic_type, Type source_type) {
   foreach (String helper_name in
@@ -281,24 +295,6 @@ static List _func_reads(
   return reads.list_free();
 }
 
-/** Returns `(SIGNATURE (STORAGE READ)...)` for an adapter of a `Var`
-    function taking the lambda parameter rows `entries`: its Func
-    signature as a cached `List`, and each argument as `_func_reads`
-    reads it from `argv` of the Func `fn`.
-*/
-List Compiler.func_parameters(Compiler c, List entries, List fn, List argv) {
-  List types = c.lambda_param_types(entries);
-  Type adapter = c.sym.resolve_key(%("FuncAdapter"));
-  List reads = entries ? _func_reads(c, adapter, types, fn, argv) : NULL;
-  return cons(c.cache_literal_list(%((func $types) "Var")), reads);
-}
-
-/* A rest parameter reaches native code as its container. */
-static Type _native_parameter(Type parameter) {
-  Type container = parameter.rest_container();
-  return container ? container : parameter;
-}
-
 static List _read(
   FuncReaders &r, Type parameter_type, int index, Type &storage_type) {
   parameter_type = _native_parameter(parameter_type);
@@ -310,6 +306,12 @@ static List _read(
       (resolved.is_pointer() || resolved.car() == <struct>))
     return _pointer(r, parameter_type, resolved, index, storage_type);
   return _value(r, parameter_type, tag, index, storage_type);
+}
+
+/* A rest parameter reaches native code as its container. */
+static Type _native_parameter(Type parameter) {
+  Type container = parameter.rest_container();
+  return container ? container : parameter;
 }
 
 static List _reference(
@@ -376,6 +378,22 @@ static void _publish_func_adapter(
       c.prepend_setup(_helper_body(c, body), setup).cdr()));
 }
 
+
+
+/* The body of an adapter that runs `body`: a block's items and then a
+   return of no value, a void expression and then that return, or a return
+   of the expression's value as a `Var`. */
+static List _helper_body(Compiler c, List body) {
+  match (body) {
+    case %(block *items):
+      return %(block @items $(Ast.return_none()));
+    case %(expr (void) ?):
+      return %(block (stmnt $body) $(Ast.return_none()));
+  }
+  List result = c.convert_expression(body, %("Var"));
+  return %(block (stmnt (return $result)));
+}
+
 static List _func_record_call(Compiler c, Type return_type, List call) {
   /* A record result is returned as `<p48>` to a copy of its bytes. */
   Type result_type = NULL;
@@ -391,20 +409,6 @@ static List _func_record_call(Compiler c, Type return_type, List call) {
   List boxed = _func_call(c, %("Var"), helper, $(address, size));
   return c.rebuild_statement(
     $!{ { $return_type $result = $call; return $boxed; } }).cadr();
-}
-
-/** Returns the canonical signature shared by native and meta Func adapters. */
-List Compiler.func_signature(Compiler c, Type type) {
-  List params = NULL, Type result = NULL;
-  type.function_parts(params, result);
-  Array declared = [];
-  foreach (List parameter in params)
-    declared.push(
-      parameter.type().rest_container()
-        ? parameter : parameter.type().declared());
-  List parameter_types = params ? declared.list_free() : %((void));
-  Type declared_result = result.declared();
-  return %((func $parameter_types) @declared_result);
 }
 
 static List _type_literal(Compiler c, Type type) =>

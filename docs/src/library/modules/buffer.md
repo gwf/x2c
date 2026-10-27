@@ -27,7 +27,7 @@ Growable text buffer with indentation support.
 
 Empties `buf` and its indentation stack without releasing capacity.
 
-Source: `lib/buffer.x:327`
+Source: `lib/buffer.x:271`
 
 <a id="Buffer.getindex"></a>
 #### Buffer.getindex
@@ -36,7 +36,7 @@ Source: `lib/buffer.x:327`
 
 Returns `buf.get(index)`, so `buf[index]` reads a byte.
 
-Source: `lib/buffer.x:255`
+Source: `lib/buffer.x:170`
 
 <a id="Buffer.len"></a>
 #### Buffer.len
@@ -45,7 +45,7 @@ Source: `lib/buffer.x:255`
 
 Returns the number of bytes currently stored in `buf`.
 
-Source: `lib/buffer.x:258`
+Source: `lib/buffer.x:202`
 
 <a id="Buffer.new"></a>
 #### Buffer.new
@@ -57,7 +57,7 @@ Allocates an empty `Buffer` whose `pad` method writes `padding` spaces.
 **Raises:** `<alloc-fail>` or `<size-limit>` while allocating its fixed-width
 backing `Block`s.
 
-Source: `lib/buffer.x:304`
+Source: `lib/buffer.x:248`
 
 <a id="Buffer.pop"></a>
 #### Buffer.pop
@@ -66,7 +66,7 @@ Source: `lib/buffer.x:304`
 
 Pops one indentation depth from `buf`'s stack when present.
 
-Source: `lib/buffer.x:213`
+Source: `lib/buffer.x:155`
 
 <a id="Buffer.push"></a>
 #### Buffer.push
@@ -78,7 +78,7 @@ Pushes the current column as a later indentation depth.
 **Raises:** `<size-limit>` or `<alloc-fail>` if the stack cannot grow. Failure
 leaves the stack unchanged.
 
-Source: `lib/buffer.x:207`
+Source: `lib/buffer.x:149`
 
 <a id="Buffer.truth"></a>
 #### Buffer.truth
@@ -87,7 +87,7 @@ Source: `lib/buffer.x:207`
 
 Returns nonzero when `b` contains at least one byte.
 
-Source: `lib/buffer.x:296`
+Source: `lib/buffer.x:240`
 
 <a id="Buffer.try_get"></a>
 #### Buffer.try_get
@@ -98,7 +98,7 @@ Writes the byte at normalized `index` to `out` when it exists.
 Negative indexes count from the end. Returns zero for a null `Buffer`, null
 output, or missing byte and leaves `out` unchanged.
 
-Source: `lib/buffer.x:231`
+Source: `lib/buffer.x:187`
 
 ## Advanced and interop API
 
@@ -140,7 +140,7 @@ Source: `lib/buffer.x:30`
 
 Releases `buf` and both backing `Block`s, invalidating every alias.
 
-Source: `lib/buffer.x:348`
+Source: `lib/buffer.x:292`
 
 <a id="Buffer.indent"></a>
 #### Buffer.indent
@@ -149,7 +149,7 @@ Source: `lib/buffer.x:348`
 
 Appends spaces through `buf`'s current indentation depth.
 
-Source: `lib/buffer.x:197`
+Source: `lib/buffer.x:129`
 
 <a id="Buffer.newline"></a>
 #### Buffer.newline
@@ -158,7 +158,7 @@ Source: `lib/buffer.x:197`
 
 Appends a newline to `buf`.
 
-Source: `lib/buffer.x:194`
+Source: `lib/buffer.x:118`
 
 <a id="Buffer.newline_indent"></a>
 #### Buffer.newline_indent
@@ -167,7 +167,7 @@ Source: `lib/buffer.x:194`
 
 Appends a newline followed by current indentation.
 
-Source: `lib/buffer.x:201`
+Source: `lib/buffer.x:115`
 
 <a id="Buffer.pad"></a>
 #### Buffer.pad
@@ -176,7 +176,7 @@ Source: `lib/buffer.x:201`
 
 Appends the configured number of padding spaces.
 
-Source: `lib/buffer.x:191`
+Source: `lib/buffer.x:112`
 
 <a id="Buffer.printf"></a>
 #### Buffer.printf
@@ -189,7 +189,7 @@ Appends formatted text to `buf`.
 storage cannot be allocated, or a cause from `Buffer.write_len`. Existing
 text is preserved and this call appends nothing on failure.
 
-Source: `lib/buffer.x:81`
+Source: `lib/buffer.x:60`
 
 <a id="Buffer.repr"></a>
 #### Buffer.repr
@@ -200,7 +200,7 @@ Returns the readable representation of `Buffer`.
 
 **Raises:** the same causes as `Buffer.str` or `String` rendering.
 
-Source: `lib/buffer.x:289`
+Source: `lib/buffer.x:233`
 
 <a id="Buffer.reserve"></a>
 #### Buffer.reserve
@@ -214,7 +214,7 @@ change the `Buffer` or content `Block` identity.
 **Raises:** `<size-limit>` or `<alloc-fail>` when the requested capacity
 cannot be provided.
 
-Source: `lib/buffer.x:321`
+Source: `lib/buffer.x:265`
 
 <a id="Buffer.str"></a>
 #### Buffer.str
@@ -228,7 +228,7 @@ remains live until its owning `String` pool is released.
 **Raises:** `<size-limit>` when the text exceeds `String`'s representation, or
 `<alloc-fail>` while canonicalizing it.
 
-Source: `lib/buffer.x:266`
+Source: `lib/buffer.x:210`
 
 <a id="Buffer.str_free"></a>
 #### Buffer.str_free
@@ -242,7 +242,7 @@ on success and when the conversion transfers an `Error`.
 
 **Raises:** the same causes as `Buffer.str`.
 
-Source: `lib/buffer.x:281`
+Source: `lib/buffer.x:225`
 
 <a id="Buffer.tabstop"></a>
 #### Buffer.tabstop
@@ -251,7 +251,7 @@ Source: `lib/buffer.x:281`
 
 Returns the indentation depth on top of the stack, or 0 when empty.
 
-Source: `lib/buffer.x:219`
+Source: `lib/buffer.x:161`
 
 <a id="Buffer.unwrite"></a>
 #### Buffer.unwrite
@@ -260,7 +260,7 @@ Source: `lib/buffer.x:219`
 
 Removes the final `count` bytes from `buf`.
 
-Source: `lib/buffer.x:129`
+Source: `lib/buffer.x:102`
 
 <a id="Buffer.write"></a>
 #### Buffer.write
@@ -271,7 +271,7 @@ Appends NUL-terminated `text` to `buf`.
 
 **Raises:** the same causes as `Buffer.write_len`.
 
-Source: `lib/buffer.x:71`
+Source: `lib/buffer.x:50`
 
 <a id="Buffer.write_char"></a>
 #### Buffer.write_char
@@ -284,7 +284,7 @@ Appends the non-NUL byte `value` to `buf`.
 `<alloc-fail>` when the `Buffer` cannot grow. These failures leave text and
 line state unchanged.
 
-Source: `lib/buffer.x:104`
+Source: `lib/buffer.x:125`
 
 <a id="Buffer.write_len"></a>
 #### Buffer.write_len
@@ -298,7 +298,7 @@ nonempty source or embedded NUL, or `<size-limit>` or `<alloc-fail>` when
 the `Buffer` cannot grow. Argument, allocation, and size failures leave the
 text and line state unchanged.
 
-Source: `lib/buffer.x:54`
+Source: `lib/buffer.x:87`
 
 <a id="Buffer.write_repeat"></a>
 #### Buffer.write_repeat
@@ -310,7 +310,7 @@ A zero count accepts any value. Raises: `<bad-arg>` when a nonzero write
 uses NUL, or `<size-limit>` or `<alloc-fail>` when the `Buffer` cannot
 grow. These failures leave text and line state unchanged.
 
-Source: `lib/buffer.x:120`
+Source: `lib/buffer.x:137`
 
 ## Convenience API
 
@@ -329,7 +329,7 @@ Returns the byte at `index`, or NUL when `index` is out of range.
 Stored bytes are never NUL. Prefer `Buffer.try_get` to also report
 whether the index is present.
 
-Source: `lib/buffer.x:249`
+Source: `lib/buffer.x:176`
 
 ## Runtime-internal callables
 
@@ -353,7 +353,7 @@ For a nonnull `Buffer`, raises `<bad-arg>` for a null destination slot, or
 `<alloc-fail>` when an empty slot cannot acquire a `Scope`. Failure leaves
 ownership unchanged.
 
-Source: `lib/buffer.x:340`
+Source: `lib/buffer.x:284`
 
 ## Public types
 

@@ -418,29 +418,6 @@ inline int List.truth(List list) => list != NULL;
 */
 inline int String.truth(String string) => string != NULL && *string != '\0';
 
-/** Avalanches one 64-bit word.
-    This is MurmurHash3's fmix64 finalizer, the shared mixer behind every
-    fixed-width hash in the runtime. It is six instructions, and its low bits
-    are as well distributed as its high ones, which is what `Map` masks. Use
-    `x2c_hash_bytes` for a block that spans several words.
-*/
-inline unsigned long x2c_mix64(unsigned long word) {
-  word ^= word >> 33;
-  word *= 0xff51afd7ed558ccdul;
-  word ^= word >> 33;
-  word *= 0xc4ceb9fe1a85ec53ul;
-  word ^= word >> 33;
-  return word;
-}
-
-/** Narrows a mixed word to the nonzero 32-bit hash the tables expect.
-    Zero is reserved to mark an empty bucket, so it maps to all ones.
-*/
-inline unsigned x2c_hash_word(unsigned long word) {
-  unsigned hash = (unsigned) x2c_mix64(word);
-  return hash ? hash : -1;
-}
-
 /** Hashes an arbitrary byte block through the shared 64-bit mixer.
     `seed` distinguishes callers that hash the same bytes under different
     types; the byte width distinguishes a final partial word from zero
@@ -469,6 +446,29 @@ inline unsigned x2c_hash_bytes(
   return x2c_hash_word(mixed);
 }
 
+/** Narrows a mixed word to the nonzero 32-bit hash the tables expect.
+    Zero is reserved to mark an empty bucket, so it maps to all ones.
+*/
+inline unsigned x2c_hash_word(unsigned long word) {
+  unsigned hash = (unsigned) x2c_mix64(word);
+  return hash ? hash : -1;
+}
+
+/** Avalanches one 64-bit word.
+    This is MurmurHash3's fmix64 finalizer, the shared mixer behind every
+    fixed-width hash in the runtime. It is six instructions, and its low bits
+    are as well distributed as its high ones, which is what `Map` masks. Use
+    `x2c_hash_bytes` for a block that spans several words.
+*/
+inline unsigned long x2c_mix64(unsigned long word) {
+  word ^= word >> 33;
+  word *= 0xff51afd7ed558ccdul;
+  word ^= word >> 33;
+  word *= 0xc4ceb9fe1a85ec53ul;
+  word ^= word >> 33;
+  return word;
+}
+
 // builtins to Var
 
 /** Reports whether `v` uses a scope-owned wide numeric box. */
@@ -477,9 +477,6 @@ inline int Var.is_wide(Var v) {
   return (top == 0x0005 && bottom >= 0x5) || (top == 0x0007 && bottom >= 0x6);
 }
 
-/** Returns the low 32 payload bits of an immediate `Var`. */
-inline unsigned Var.payload32(Var value) => (unsigned) value.u64;
-
 /** Decodes an immediate `<f32>` `Var`. */
 inline float Var.decode_f32(Var value) {
   unsigned raw = value.payload32();
@@ -487,6 +484,9 @@ inline float Var.decode_f32(Var value) {
   memcpy(&result, &raw, sizeof result);
   return result;
 }
+
+/** Returns the low 32 payload bits of an immediate `Var`. */
+inline unsigned Var.payload32(Var value) => (unsigned) value.u64;
 
 /** Decodes an immediate `<f64>` `Var`. */
 inline double Var.decode_f64(Var value) {
@@ -587,14 +587,19 @@ $scalar(double, Var.box_f64);
 
 // indirect primitives to Var
 
-/** Boxes a long value as `Var`. */
-inline Var    long.var(long x)           => Var.box_long(x);
 /** Boxes a `ulong` value as `Var`. */
 inline Var    ulong.var(ulong x)         => Var.box_ulong(x);
+
 /** Returns the display `String` of `long`. */
 inline String long.str(long l)           => l.var().str();
+
 /** Returns the readable representation of `long`. */
 inline String long.repr(long l)          => l.var().repr();
+
+
+
+/** Boxes a long value as `Var`. */
+inline Var    long.var(long x)           => Var.box_long(x);
 
 // Var to builtins
 
@@ -618,16 +623,17 @@ inline int Var.is_row(
 meta unsigned long Var_tag_top(Symbol tag);
 meta unsigned long Var_tag_bottom(Symbol tag);
 
+meta static int _var_tag_top(List tag) => (int) Var_tag_top(_literal_tag(tag));
+
+meta static int _var_tag_bottom(List tag) =>
+  (int) Var_tag_bottom(_literal_tag(tag));
+
 /* A `Literal` tag argument arrives as its resolved Symbol expression,
    `(expr TYPE (literal TYPE TEXT SYMBOL))`; the tables read the Symbol. */
 meta static Symbol _literal_tag(List tag) {
   if (tag ~= %(expr ? (literal ? ? ?key))) return key;
   return 0;
 }
-
-meta static int _var_tag_top(List tag) => (int) Var_tag_top(_literal_tag(tag));
-meta static int _var_tag_bottom(List tag) =>
-  (int) Var_tag_bottom(_literal_tag(tag));
 
 static macro Unit $var.tag.unbox(Type $type, Name $method, Literal $tag) {
   $type Var.$method(Var);
@@ -653,6 +659,17 @@ $var.tag.unbox(Map, map_payload, <map>);
 meta Iter Var.as_iter(Var value);
 meta File Var.file(Var value);
 meta Block Var.block(Var value);
+
+// startup
+
+/* Source-only declarations for centrally declared Block adoptions. Static
+   inline definitions are in array.x/block.x; placing these at the public
+   boundary keeps them in the protocol declaration view without changing C
+   linkage or the generated header. */
+static inline Block Array.block(Array);
+static inline Block Bytes.block(Bytes);
+static inline void Block.pop(Block);
+static inline void Block.truncate(Block, size_t);
 
 /** Extracts the `symbol` payload after the caller establishes the matching
     `Var` kind.
@@ -806,21 +823,6 @@ meta native double Var.double(Var x) {
   return x.convert(<f64>).floating();
 }
 
-// startup
-
-/* Source-only declarations for centrally declared Block adoptions. Static
-   inline definitions are in array.x/block.x; placing these at the public
-   boundary keeps them in the protocol declaration view without changing C
-   linkage or the generated header. */
-static inline Block Array.block(Array);
-static inline Block Bytes.block(Bytes);
-static inline void Block.pop(Block);
-static inline void Block.truncate(Block, size_t);
-
-/** Runs compiler-generated runtime protocol registration. */
-void x2c_initialize_protocols(void) {
-}
-
 /** Initializes the x2c runtime once for the current process. */
 void x2c_initialize(void) {
   void Atom.initialize(void), File.initialize(void);
@@ -838,6 +840,10 @@ void x2c_initialize(void) {
   x2c_match_initialize();
   File.initialize();
   Logger_initialize();
+}
+
+/** Runs compiler-generated runtime protocol registration. */
+void x2c_initialize_protocols(void) {
 }
 
 // index normalization

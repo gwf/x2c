@@ -47,6 +47,8 @@ List Compiler.lift_func_expression(Compiler c, List expression) {
   return _deref_func_lift(c, expression, payload);
 }
 
+// direct and pointer-backed Func values
+
 /* The direct function a designator names under parentheses and address-of,
    and under casts when `through_cast` is set. */
 module int _direct_func_source(
@@ -120,23 +122,6 @@ static List _direct_func_handle(
   return _func_bound(%("Func"), handle);
 }
 
-static List _func_bridge_binding(Compiler c, String stem) {
-  String hash = "%08x".printf(c.filename.hash());
-  return c.sym.introduce(c.fresh_name(%"$(stem)_$hash"));
-}
-
-static List _func_bridge_call(
-  Compiler c, List bridge, List parameters,
-  Type function_type, List arguments) {
-  List call = _func_call(
-    c, %("Func"), _func_bound(function_type, bridge), arguments);
-  /* A call through a bridge function the unit declares where it calls. */
-  return $!Func{ ({
-    extern Func $bridge(@(parameters.cdr()));
-    $call;
-  }) };
-}
-
 static Type _func_pointer_value_type(Compiler c, Type type) {
   Type resolved = c.sym.resolve_key(type);
   if (resolved) type = resolved;
@@ -150,6 +135,38 @@ static Type _func_pointer_value_type(Compiler c, Type type) {
 
 static int _func_type_qualifier(Var value) =>
   value == <const> || value == <volatile> || value == <restrict>;
+
+/* A dereferenced function pointer reaches the lift untyped or typed as a
+   bare pointer, possibly under parens or address-of shells; recover the
+   callable type from the pointer operand. Unsupported shapes pass through. */
+static List _deref_func_lift(
+  Compiler c, List expression, List payload) {
+  List probe = payload;
+  int unwrapped = 1;
+  while (unwrapped) {
+    unwrapped = 0;
+    match (probe) {
+      case $Macro.content_pattern($grouped, %(?inner)):
+        match (inner)
+          case %(expr ? ?inner_payload): {
+            probe = inner_payload;
+            unwrapped = 1;
+          }
+      case %(op & (expr ? ?inner_payload)): {
+        probe = inner_payload;
+        unwrapped = 1;
+      }
+    }
+  }
+  match (probe)
+    case %(op * (expr ?operand_type ?)): {
+      Type resolved = c.sym.resolve_key(operand_type);
+      if (resolved && resolved.is_pointer() &&
+          resolved.dereference().is_function())
+        return _indirect_func_lift(c, %(expr $resolved $payload), resolved);
+    }
+  return expression;
+}
 
 static List _indirect_func_lift(
   Compiler c, List expression, Type pointer_type) {
@@ -178,6 +195,23 @@ static List _indirect_func_lift(
   Type factory_type = %((func ($pointer_type)) "Func");
   return _func_bridge_call(
     c, bridge, parameters, factory_type, $(expression));
+}
+
+static List _func_bridge_binding(Compiler c, String stem) {
+  String hash = "%08x".printf(c.filename.hash());
+  return c.sym.introduce(c.fresh_name(%"$(stem)_$hash"));
+}
+
+static List _func_bridge_call(
+  Compiler c, List bridge, List parameters,
+  Type function_type, List arguments) {
+  List call = _func_call(
+    c, %("Func"), _func_bound(function_type, bridge), arguments);
+  /* A call through a bridge function the unit declares where it calls. */
+  return $!Func{ ({
+    extern Func $bridge(@(parameters.cdr()));
+    $call;
+  }) };
 }
 
 static List _indirect_func_value(
@@ -293,38 +327,6 @@ static List _func_present_statement(
   List result = $!Func{
     $pointer ? $constructed : $(_func_bound(%("Func"), null_binding)) };
   return c.rebuild_statement($!{ $result; }).cadr();
-}
-
-/* A dereferenced function pointer reaches the lift untyped or typed as a
-   bare pointer, possibly under parens or address-of shells; recover the
-   callable type from the pointer operand. Unsupported shapes pass through. */
-static List _deref_func_lift(
-  Compiler c, List expression, List payload) {
-  List probe = payload;
-  int unwrapped = 1;
-  while (unwrapped) {
-    unwrapped = 0;
-    match (probe) {
-      case $Macro.content_pattern($grouped, %(?inner)):
-        match (inner)
-          case %(expr ? ?inner_payload): {
-            probe = inner_payload;
-            unwrapped = 1;
-          }
-      case %(op & (expr ? ?inner_payload)): {
-        probe = inner_payload;
-        unwrapped = 1;
-      }
-    }
-  }
-  match (probe)
-    case %(op * (expr ?operand_type ?)): {
-      Type resolved = c.sym.resolve_key(operand_type);
-      if (resolved && resolved.is_pointer() &&
-          resolved.dereference().is_function())
-        return _indirect_func_lift(c, %(expr $resolved $payload), resolved);
-    }
-  return expression;
 }
 
 static List _func_signature_literal(Compiler c, Type type) =>

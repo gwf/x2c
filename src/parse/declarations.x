@@ -24,12 +24,6 @@ List Compiler.parse_declaration_row(Compiler c) {
   return %(seq @rows);
 }
 
-/** Parses one declaration group and leaves its terminating token current.
-    Declared names are installed in `Sym` as their declarators are completed;
-    the result is one `declare`, `typedef`, or initialized `dstrdecl` AST.
-*/
-List Compiler.parse_simple_declaration(Compiler c) => _declaration_group(c, 0);
-
 /** Parses a declaration that sits inside an expression or a `for` header,
     such as a cast's type name, and returns it as one `(decl ...)` node.
     When `type` is not null, it receives the declared `Type`.
@@ -41,6 +35,85 @@ List Compiler.parse_type_operand(Compiler c, Type *type) {
   if (type) *type = declaration.type_from_ast();
   return %(decl @(declaration.cdr()));
 }
+
+/** Parses one declaration group and leaves its terminating token current.
+    Declared names are installed in `Sym` as their declarators are completed;
+    the result is one `declare`, `typedef`, or initialized `dstrdecl` AST.
+*/
+List Compiler.parse_simple_declaration(Compiler c) => _declaration_group(c, 0);
+
+/** Parses a non-function, non-typedef `Decl` macro argument.
+    Parentheses group declarations with independent types. The invocation
+    delimiter remains current; flat destructuring may omit its initializer.
+*/
+List Compiler.parse_declaration_argument(Compiler c) {
+  if (c.test(<(>)) {
+    Array declarations = [];
+    do declarations.push(c.parse_declaration_argument()); while (c.test(<,>));
+    c.expect(<)>);
+    return %(seq @(declarations.list_free()));
+  }
+  List storage = _storage_class(c);
+  if (storage === %(typedef))
+    $fail.parse_decl_typedef(c, c.token);
+  List (type, binding_type) = _declaration_types(c, storage);
+  if (_destructure_starts(c))
+    return _destructure_declaration(c, type, binding_type, 1);
+  List binding = _declarator_init(c, binding_type, NULL);
+  List declaration = _finish_declaration(c, <declare>, type, $(binding), 0);
+  if (declaration.type_from_ast().is_function())
+    $fail.parse_decl_function(c, c.token);
+  return declaration;
+}
+
+/** Reports whether the current identifier starts a C static assertion. */
+int Compiler.test_static_assert(Compiler c) =>
+  c.at_word("_Static_assert");
+
+/** Parses a C assertion declaration; native C owns constant-expression
+    checks.
+*/
+List Compiler.parse_static_assert(Compiler c) {
+  if (c.shallow) {
+    _x2c_skip_shallow_expression(c, 0);
+    c.expect(<;>);
+    return %(c-assert);
+  }
+  c.next();
+  c.expect(<(>);
+  List condition = c.parse_assignment();
+  c.expect(<,>);
+  List message = c.parse_assignment();
+  c.expect(<)>);
+  c.expect(<;>);
+  return %(c-assert $condition $message);
+}
+
+/* declaration starts
+
+   Statement, expression, and row parsing share one recognizer of the
+   declaration prefix. A row can additionally require an identifier type to
+   be followed by a declarator, which resolves the one C-compatible comma
+   ambiguity. */
+
+/** Tests whether the current token can begin a declaration without consuming.
+    Typedefs, package aliases, and macro-hole kinds are resolved through the
+    current compiler state.
+*/
+int Compiler.test_declaration(Compiler c) => _test_declaration_start(c, 0);
+
+// finishing a declaration
+
+/** Rejects transparent references in object and function-result types.
+    References inside a function's parameter list remain supported.
+*/
+void Compiler.check_reference_placement(Compiler c, Type type) {
+  type = c.sym.normalize_declared_type(type);
+  if (<&> in type || <opt-ref> in type)
+    $fail.parse_reference_placement(c, NULL);
+}
+
+// declaration rows and initializers
 
 static List _declaration_group(Compiler c, int row) {
   List storage = _storage_class(c);
@@ -107,65 +180,18 @@ module List _declaration_types(Compiler c, List storage) {
   return $(c.sym.local_type(%( @storage @quals @spec )), binding_type);
 }
 
-/** Parses a non-function, non-typedef `Decl` macro argument.
-    Parentheses group declarations with independent types. The invocation
-    delimiter remains current; flat destructuring may omit its initializer.
-*/
-List Compiler.parse_declaration_argument(Compiler c) {
-  if (c.test(<(>)) {
-    Array declarations = [];
-    do declarations.push(c.parse_declaration_argument()); while (c.test(<,>));
-    c.expect(<)>);
-    return %(seq @(declarations.list_free()));
-  }
-  List storage = _storage_class(c);
-  if (storage === %(typedef))
-    $fail.parse_decl_typedef(c, c.token);
-  List (type, binding_type) = _declaration_types(c, storage);
-  if (_destructure_starts(c))
-    return _destructure_declaration(c, type, binding_type, 1);
-  List binding = _declarator_init(c, binding_type, NULL);
-  List declaration = _finish_declaration(c, <declare>, type, $(binding), 0);
-  if (declaration.type_from_ast().is_function())
-    $fail.parse_decl_function(c, c.token);
-  return declaration;
-}
-
-/** Reports whether the current identifier starts a C static assertion. */
-int Compiler.test_static_assert(Compiler c) =>
-  c.at_word("_Static_assert");
-
-/** Parses a C assertion declaration; native C owns constant-expression
-    checks.
-*/
-List Compiler.parse_static_assert(Compiler c) {
-  if (c.shallow) {
-    _x2c_skip_shallow_expression(c, 0);
-    c.expect(<;>);
-    return %(c-assert);
-  }
+/* A typedef name after a comma is ambiguous: `int i, T;` declares another
+   int, while `int i, T value;` begins a fresh declaration. Ask the same
+   declaration recognizer used by every other parser entry, but require a
+   declarator after an identifier type in this one ambiguous position. */
+module int _group_comma(Compiler c) {
+  if (c.peek(0) != <,>) return 0;
+  Token comma = c.token;
   c.next();
-  c.expect(<(>);
-  List condition = c.parse_assignment();
-  c.expect(<,>);
-  List message = c.parse_assignment();
-  c.expect(<)>);
-  c.expect(<;>);
-  return %(c-assert $condition $message);
+  int result = _test_declaration_start(c, 1);
+  c.token = comma;
+  return result;
 }
-
-/* declaration starts
-
-   Statement, expression, and row parsing share one recognizer of the
-   declaration prefix. A row can additionally require an identifier type to
-   be followed by a declarator, which resolves the one C-compatible comma
-   ambiguity. */
-
-/** Tests whether the current token can begin a declaration without consuming.
-    Typedefs, package aliases, and macro-hole kinds are resolved through the
-    current compiler state.
-*/
-int Compiler.test_declaration(Compiler c) => _test_declaration_start(c, 0);
 
 static int _test_declaration_start(
   Compiler c, int require_declarator) {
@@ -217,19 +243,6 @@ static int _type_name_starts(Compiler c, int require_declarator) {
   return next == <*> || next == <&> || (next == <ident> && !attribute) ||
          (!require_declarator && next == <)>) ||
          (require_declarator && (next == <^> || next.is_type_qualifier()));
-}
-
-/* A typedef name after a comma is ambiguous: `int i, T;` declares another
-   int, while `int i, T value;` begins a fresh declaration. Ask the same
-   declaration recognizer used by every other parser entry, but require a
-   declarator after an identifier type in this one ambiguous position. */
-module int _group_comma(Compiler c) {
-  if (c.peek(0) != <,>) return 0;
-  Token comma = c.token;
-  c.next();
-  int result = _test_declaration_start(c, 1);
-  c.token = comma;
-  return result;
 }
 
 // destructuring declarations
@@ -292,36 +305,6 @@ static List _destructure_binds(List targets) {
   return binds.list_free();
 }
 
-// finishing a declaration
-
-/** Rejects transparent references in object and function-result types.
-    References inside a function's parameter list remain supported.
-*/
-void Compiler.check_reference_placement(Compiler c, Type type) {
-  type = c.sym.normalize_declared_type(type);
-  if (<&> in type || <opt-ref> in type)
-    $fail.parse_reference_placement(c, NULL);
-}
-
-/* A file-scope function declared again with `extern` or no storage keeps the
-   internal linkage of its earlier `static` declaration, as in C, so the
-   declaration emits `static`. An object so declared has external linkage
-   and conflicts, which C reports. */
-static List _linked_static_base(Compiler c, List base, List declarators) {
-  Type type = base;
-  if (!c.sym.at_file_scope() || type.is_static() ||
-      !declarators)
-    return base;
-  foreach (List declarator in declarators) {
-    Type declared = %(declare $base (bindings $declarator)).type_from_ast();
-    List bound = declarator;
-    if (declarator ~= %(op = ?target ?)) bound = target;
-    if (!declared.is_function() || !c.sym.is_file_static(bound.cadr()))
-      return base;
-  }
-  return %(static @(base.filter(%!(item) => item != <extern>)));
-}
-
 module List _finish_declaration(
   Compiler c, Symbol tag, List base, List declarators,
   int preserved_self) {
@@ -349,6 +332,25 @@ module List _finish_declaration(
     ? _lower_self_declaration(c, declaration)
     : declaration;
   return before ? %(seq $before $declaration) : declaration;
+}
+
+/* A file-scope function declared again with `extern` or no storage keeps the
+   internal linkage of its earlier `static` declaration, as in C, so the
+   declaration emits `static`. An object so declared has external linkage
+   and conflicts, which C reports. */
+static List _linked_static_base(Compiler c, List base, List declarators) {
+  Type type = base;
+  if (!c.sym.at_file_scope() || type.is_static() ||
+      !declarators)
+    return base;
+  foreach (List declarator in declarators) {
+    Type declared = %(declare $base (bindings $declarator)).type_from_ast();
+    List bound = declarator;
+    if (declarator ~= %(op = ?target ?)) bound = target;
+    if (!declared.is_function() || !c.sym.is_file_static(bound.cadr()))
+      return base;
+  }
+  return %(static @(base.filter(%!(item) => item != <extern>)));
 }
 
 /* Keep Self only in method metadata. The binding and AST receive the

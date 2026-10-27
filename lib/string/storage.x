@@ -19,12 +19,6 @@ _Static_assert(
 /* Small construction buffers and lookup-before-allocation share this limit. */
 #define STRING_STACK_BYTES 256
 
-static inline StringHeader _header(String str) =>
-  (StringHeader) ((char *) str - sizeof(struct StringHeader));
-
-static unsigned _hash_n(const char *str, int length) =>
-  x2c_hash_bytes(0, str, (size_t) length);
-
 /** Returns the byte length of `str`, excluding the terminating NUL.
     Constant time: the length is cached in the `String`'s private header.
     Lengths count bytes, so a multibyte UTF-8 sequence counts once per byte.
@@ -78,25 +72,6 @@ meta native int String.compare(String x, String y) {
 
 // canonical construction
 
-/** Returns the canonical `String` holding the bytes of the C string `str`.
-    The input is borrowed and copied, so `str` may be a stack buffer and
-    mutating it afterwards does not disturb the result. Equal nonempty content
-    visible in the active pool chain yields the same pointer, which is why
-    `==` on canonical `String`s from that chain is a content comparison. A
-    detached or sibling pool may hold a distinct equal pointer. Empty input
-    canonicalizes to the null pointer, the empty `String`'s only
-    representation.
-    Raises: `<alloc-fail>` when canonical storage cannot be allocated. A null,
-    empty, or oversized input returns NULL, which is indistinguishable from the
-    empty `String`, without raising.
-*/
-String String.new(const char *str) {
-  if (!str || !*str) return NULL;
-  size_t length = strlen(str);
-  if (length > INT_MAX - 1) return NULL;
-  return x2c_string_from_bytes(str, (int) length);
-}
-
 /** Returns the canonical `String` holding at most `len` bytes of `str`.
     Copying stops at `len` bytes or at the first NUL, whichever comes
     first, because a `String` cannot carry embedded NUL bytes:
@@ -141,6 +116,27 @@ String String.new_in(Pool pool, const char *bytes, int length) {
 */
 meta native Self String.intern(Self string) => string.new();
 
+
+
+/** Returns the canonical `String` holding the bytes of the C string `str`.
+    The input is borrowed and copied, so `str` may be a stack buffer and
+    mutating it afterwards does not disturb the result. Equal nonempty content
+    visible in the active pool chain yields the same pointer, which is why
+    `==` on canonical `String`s from that chain is a content comparison. A
+    detached or sibling pool may hold a distinct equal pointer. Empty input
+    canonicalizes to the null pointer, the empty `String`'s only
+    representation.
+    Raises: `<alloc-fail>` when canonical storage cannot be allocated. A null,
+    empty, or oversized input returns NULL, which is indistinguishable from the
+    empty `String`, without raising.
+*/
+String String.new(const char *str) {
+  if (!str || !*str) return NULL;
+  size_t length = strlen(str);
+  if (length > INT_MAX - 1) return NULL;
+  return x2c_string_from_bytes(str, (int) length);
+}
+
 /** Canonicalizes a known NUL-free byte span in the active pool chain.
     Copies bytes only when needed; the caller retains its input storage.
     Null input or a nonpositive length returns the empty String.
@@ -148,37 +144,6 @@ meta native Self String.intern(Self string) => string.new();
 */
 String x2c_string_from_bytes(const char *bytes, int length) =>
   _from_bytes_in(Pool.current(), bytes, length);
-
-/* A short `String` probes the whole ancestor chain from borrowed bytes before
-   anything is allocated, and a miss is installed in `pool`. A long one is
-   stored first, and Pool.intern releases that candidate on a hit. */
-static String _from_bytes_in(Pool pool, const char *bytes, int length) {
-  if (!pool || !bytes || length <= 0) return NULL;
-  unsigned hash = _hash_n(bytes, length);
-  if (length <= STRING_STACK_BYTES) {
-    String existing = x2c_pool_lookup_string(pool, bytes, length, hash);
-    if (existing) return existing;
-  }
-  size_t total = sizeof(struct StringHeader) + (size_t) length + 1;
-  StringHeader header = pool.malloc(total);
-  String string = _store(header, bytes, length, hash);
-  if (length > STRING_STACK_BYTES) return pool.intern(string, header);
-  pool.insert(string);
-  return string;
-}
-
-/* Fills `header` and the `length` bytes after it, with their NUL, and
-   returns those bytes as a String. */
-static inline String _store(
-  StringHeader header, const char *bytes, int length, unsigned hash) {
-  header.length = length + 1;
-  header.hash = hash;
-  String string = (String) ((char *) header + sizeof(struct StringHeader));
-  memcpy(string, bytes, length);
-  char *out = string;
-  out[length] = '\0';
-  return string;
-}
 
 // transient buffers
 
@@ -243,44 +208,6 @@ Self String.intern_free(Self string) {
   return _intern_owned(string);
 }
 
-/* Finalization consumes a mutable Pool allocation: install the header,
-   then keep the buffer or the canonical hit. */
-module String _finish(String string, int length) {
-  if (length <= 0) {
-    _free_unchecked(string);
-    return NULL;
-  }
-  assert(memchr(string, '\0', length) == NULL);
-  char *out = string;
-  out[length] = '\0';
-  StringHeader header = _header(string);
-  header.length = length + 1;
-  header.hash = _hash_n(string, length);
-  return _intern_owned(string);
-}
-
-/* Installs a nonempty buffer that the active pool chain owns without
-   copying it, or releases it for an equal canonical `String`. Installing a
-   detached or sibling-owned pointer would leave a table entry dangling when
-   that other pool is released. */
-static String _intern_owned(String string) {
-  StringHeader header = _header(string);
-  if (!header.hash) {
-    int length = strlen(string);
-    header.length = length + 1;
-    header.hash = _hash_n(string, length);
-  }
-  Pool pool = Pool.current();
-  String found = x2c_pool_lookup_string(
-    pool, string, header.length - 1, header.hash);
-  if (!found) {
-    pool.insert(string);
-    return string;
-  }
-  if (found !== string) _free_unchecked(string);
-  return found;
-}
-
 /** Releases a transient `String.malloc` buffer early.
     The pointer is first looked up in the intern table, including the
     enclosing pools, and the call does nothing if it is the canonical `String`
@@ -297,12 +224,6 @@ meta native void String.free(String str) {
     if (existing is not void && existing.string() === str) return;
   }
   _free_unchecked(str);
-}
-
-/* Only Pool-backed transient or losing-candidate storage may enter here;
-   callers establish that the pointer is not a live canonical table entry. */
-module void _free_unchecked(String str) {
-  if (str != NULL) Pool.current().free(_header(str));
 }
 
 // pool ownership
@@ -341,6 +262,87 @@ int String.try_own(String str) {
 int String.is_permanent(String str) {
   if (!str) return 1;
   return Pool.is_permanent(str);
+}
+
+static inline StringHeader _header(String str) =>
+  (StringHeader) ((char *) str - sizeof(struct StringHeader));
+
+static unsigned _hash_n(const char *str, int length) =>
+  x2c_hash_bytes(0, str, (size_t) length);
+
+/* A short `String` probes the whole ancestor chain from borrowed bytes before
+   anything is allocated, and a miss is installed in `pool`. A long one is
+   stored first, and Pool.intern releases that candidate on a hit. */
+static String _from_bytes_in(Pool pool, const char *bytes, int length) {
+  if (!pool || !bytes || length <= 0) return NULL;
+  unsigned hash = _hash_n(bytes, length);
+  if (length <= STRING_STACK_BYTES) {
+    String existing = x2c_pool_lookup_string(pool, bytes, length, hash);
+    if (existing) return existing;
+  }
+  size_t total = sizeof(struct StringHeader) + (size_t) length + 1;
+  StringHeader header = pool.malloc(total);
+  String string = _store(header, bytes, length, hash);
+  if (length > STRING_STACK_BYTES) return pool.intern(string, header);
+  pool.insert(string);
+  return string;
+}
+
+/* Fills `header` and the `length` bytes after it, with their NUL, and
+   returns those bytes as a String. */
+static inline String _store(
+  StringHeader header, const char *bytes, int length, unsigned hash) {
+  header.length = length + 1;
+  header.hash = hash;
+  String string = (String) ((char *) header + sizeof(struct StringHeader));
+  memcpy(string, bytes, length);
+  char *out = string;
+  out[length] = '\0';
+  return string;
+}
+
+/* Installs a nonempty buffer that the active pool chain owns without
+   copying it, or releases it for an equal canonical `String`. Installing a
+   detached or sibling-owned pointer would leave a table entry dangling when
+   that other pool is released. */
+static String _intern_owned(String string) {
+  StringHeader header = _header(string);
+  if (!header.hash) {
+    int length = strlen(string);
+    header.length = length + 1;
+    header.hash = _hash_n(string, length);
+  }
+  Pool pool = Pool.current();
+  String found = x2c_pool_lookup_string(
+    pool, string, header.length - 1, header.hash);
+  if (!found) {
+    pool.insert(string);
+    return string;
+  }
+  if (found !== string) _free_unchecked(string);
+  return found;
+}
+
+/* Only Pool-backed transient or losing-candidate storage may enter here;
+   callers establish that the pointer is not a live canonical table entry. */
+module void _free_unchecked(String str) {
+  if (str != NULL) Pool.current().free(_header(str));
+}
+
+/* Finalization consumes a mutable Pool allocation: install the header,
+   then keep the buffer or the canonical hit. */
+module String _finish(String string, int length) {
+  if (length <= 0) {
+    _free_unchecked(string);
+    return NULL;
+  }
+  assert(memchr(string, '\0', length) == NULL);
+  char *out = string;
+  out[length] = '\0';
+  StringHeader header = _header(string);
+  header.length = length + 1;
+  header.hash = _hash_n(string, length);
+  return _intern_owned(string);
 }
 
 /* True when `str` is the canonical `String` visible from the active pool,

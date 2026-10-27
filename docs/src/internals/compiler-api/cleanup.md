@@ -41,7 +41,7 @@ Lowers the cleanup regions and transfers of the completed top-level
 function completion. Expressions cannot contain an unlifted function, so
 no second unit-tree traversal is needed.
 
-Source: `src/cleanup/transfers.x:63`
+Source: `src/cleanup/transfers.x:37`
 
 <a id="Compiler.lower_defer_region"></a>
 #### Compiler.lower_defer_region
@@ -74,7 +74,7 @@ because it calls, allocates, or reads an object other than a function
 name. `runtime` holds the function-local statics already known to run
 that way, or is `NULL` at file scope.
 
-Source: `src/cleanup/statics.x:118`
+Source: `src/cleanup/statics.x:19`
 
 ## Design notes
 

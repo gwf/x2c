@@ -35,11 +35,6 @@ int main(int argc, char **argv) {
   return EXIT_SUCCESS; // Root scope frees entries and table.
 }
 
-static void fail(const char *message) {
-  fprintf(stderr, "%s\n", message);
-  exit(EXIT_FAILURE);
-}
-
 static void count_words(Counts *counts, String text) {
   text = text.reject("!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~").lower();
   foreach (Substr word in text)
@@ -106,4 +101,9 @@ static void grow_counts(Counts *counts) {
   xfree(counts.buckets); // Release obsolete scope-owned storage early.
   counts.buckets = buckets;
   counts.capacity = capacity;
+}
+
+static void fail(const char *message) {
+  fprintf(stderr, "%s\n", message);
+  exit(EXIT_FAILURE);
 }

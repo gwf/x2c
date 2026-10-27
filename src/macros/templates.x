@@ -24,6 +24,19 @@ static typedef struct Landing {
    A meta-call slot in a template runs while its expansion binds. Its
    value fills the slot, and a splice slot's List becomes rows. */
 
+/** Evaluates a macro slot and returns its syntax as a row sequence.
+    `(seq ...)` contributes its children; every other result contributes one
+    row.
+*/
+List Compiler.evaluate_macro_rows(Compiler c, Var value) {
+  value = c.evaluate_macro_slot(value);
+  return value is <list> && !value.is_nil() &&
+         value.list().car() == <seq>
+       ? value.list().cdr() : $(value);
+}
+
+
+
 /** Evaluates an active template's `(macro-slot ...)` value, or a pending
     Macro value application into the invocation that expands it.
     Non-slots and slots outside an expansion are returned unchanged. A splice
@@ -37,6 +50,142 @@ Var Compiler.evaluate_macro_slot(Compiler c, Var value) {
   if (c.macro_holes || !c.macro_stack) return value;
   return _slot_value(c, slot);
 }
+
+/** Evaluates the explicit meta call `expression` at `site` with the active
+    expansion's captures visible to the SDK. A nonzero `slot` marks a
+    template slot, which reports a call the project meta build leaves.
+*/
+Var Compiler.evaluate_meta_value(
+  Compiler c, List expression, Token site, int slot) {
+  List active = c.macro_stack ? c.macro_stack.car() : NULL;
+  List bindings = active ? active.caddr() : NULL;
+  String source_file = active ? _definition_file(active.car()) : c.filename;
+  MetaContext *context = MetaContext.current();
+  with (context.has_bindings = !!bindings,
+        context.captures = _source_captures(bindings),
+        context.definition_file = source_file,
+        context.expander = c,
+        context.evaluator = c,
+        context.site = site) {
+    return c.run_meta_call(expression, site, slot);
+  }
+}
+
+/** Evaluates a declaration recipe after its owning source is collected.
+    The callback is a built-in target name and arguments are retained
+    canonical values.
+*/
+Var Compiler.evaluate_declaration_recipe(
+  Compiler c, Atom callback, List arguments) {
+  Token invocation = c.token;
+  if (c.macro_stack ~= %((? ? ? ?token) *)) invocation = token;
+  return c.apply_meta_function(callback.str(), arguments, invocation);
+}
+
+/* template calls and rebuilds
+
+   Compile-time code calls a template by name with its argument values, and
+   the compiler rebuilds a pending Macro value application from bound
+   children without binding them again. */
+
+/** Returns the syntax that invokes the template `stored`, a macro name
+    spelled as a String or a local definition, with `values`: what a template
+    call in a staged `meta` body evaluates to.
+*/
+List x2c_template_call(Var stored, List values) =>
+  _sdk_template_call(
+    stored is <string> ? Atom.intern(stored.str()) : stored, values);
+
+/** Rebuilds an expression from a pending Macro value application, preserving
+    its established root `type`, child stage, and source wrappers. Binding,
+    capture collection, hygiene, and effects do not run, and a statement
+    expression's template-origin wrappers are omitted.
+*/
+List Compiler.rebuild_expression(Compiler c, Type type, List application) {
+  List rebuilt = _rebuild(c, application, NULL);
+  return %(expr $type @(rebuilt.cddr()));
+}
+
+/** Rebuilds a statement template as a canonical unbraced `seq`. Bound
+    children keep their identities and origins; template-origin wrappers
+    are omitted because this path does not open an invocation.
+*/
+List Compiler.rebuild_statement(Compiler c, List application) =>
+  _rebuild(c, application, NULL);
+
+/** Constructs a fresh function from a Unit template after lowering. The
+    caller supplies its bound name and lowered children; binding does not
+    run.
+*/
+List Compiler.rebuild_unit_function(Compiler c, List application) {
+  List function = _rebuild(c, application, NULL).cadr();
+  if (function ~= %(api-source ? ? ?inner)) return inner;
+  return function;
+}
+
+/** Rebuilds a bound function through a Function decorator without binding it
+    again. The template keeps the target's return type and declarator.
+*/
+List Compiler.rebuild_function(Compiler c, List target, List application) =>
+  _rebuild(c, application, target).cadr();
+
+/** Binds quoted `syntax` with its `fresh` rows at `position`, as the
+    expansion of its quotation would.
+*/
+List Compiler.land_quotation(
+  Compiler c, List fresh, Var syntax, Symbol position, Type return_type) {
+  Token site = c.macro_invocation_site(<m-invoke>);
+  Landing landing = {
+    .c = c, .site = site ? site : c.token, .anchored = !!site};
+  List bound = NULL;
+  with (c.macro_application = c.macro_application + 1) {
+    SymTxn transaction = { 0 };
+    if (c.recovery_depth > 0)
+      transaction = c.begin_semantic_transaction();
+    defer transaction.rollback();
+    landing.names = _private_names(c, fresh);
+    Var filled = _fill_syntax(landing, c.thaw_declaration_syntax(syntax));
+    with (c.token = site, c.origin = c.record_origin(site)) {
+      bound = c.bind_syntax(filled, position, return_type);
+    }
+    transaction.commit();
+  }
+  if ((position == <block> || position == <statement> ||
+       position == <unit>) && bound ~= %(seq ?item)) return item;
+  return bound;
+}
+
+/** Binds a compile-time code `value` returned to a statement at
+    `context`.
+*/
+List Compiler.bind_meta_statement(
+  Compiler c, List value, Symbol context) {
+  value = _helper_result(c, value);
+  return _statement_expression(c, value)
+    ? %(stmnt $(c.lift_meta_expression(value, c.token)))
+    : c.bind_syntax(value, context, c.return_type);
+}
+
+/* compile-time results */
+
+/** Converts a compile-time value into a bound expression AST.
+    Scalars, immutable values, representable Array/Map roots, compiler-issued
+    identifiers, and nonempty code `List`s are accepted; `invocation` locates
+    an unsupported result.
+*/
+List Compiler.lift_meta_expression(
+  Compiler c, Var value, Token invocation) {
+  List literal = c.meta_value_expression(NULL, value, invocation);
+  if (literal) return literal;
+  Var identifier = _sdk_identifier_result(value);
+  if (identifier is not void)
+    return c.resolve_expression(%(expr () (ident $identifier)), invocation);
+  if (value is <list> && !value.is_nil())
+    return c.bind_syntax(_helper_result(c, value), <expression>, NULL);
+  $fail.macros_meta_expr(c, invocation, value);
+}
+
+// template evaluation, rebuilding and landing
 
 /* A meta call runs with the active expansion's captures. A construction
    requirement travels with an identifier the slot built, and a splice slot
@@ -72,37 +221,6 @@ static Var _slot_rows(Var result) {
     case %(seq *): return result;
   }
   return %(seq @(result));
-}
-
-/** Evaluates a macro slot and returns its syntax as a row sequence.
-    `(seq ...)` contributes its children; every other result contributes one
-    row.
-*/
-List Compiler.evaluate_macro_rows(Compiler c, Var value) {
-  value = c.evaluate_macro_slot(value);
-  return value is <list> && !value.is_nil() &&
-         value.list().car() == <seq>
-       ? value.list().cdr() : $(value);
-}
-
-/** Evaluates the explicit meta call `expression` at `site` with the active
-    expansion's captures visible to the SDK. A nonzero `slot` marks a
-    template slot, which reports a call the project meta build leaves.
-*/
-Var Compiler.evaluate_meta_value(
-  Compiler c, List expression, Token site, int slot) {
-  List active = c.macro_stack ? c.macro_stack.car() : NULL;
-  List bindings = active ? active.caddr() : NULL;
-  String source_file = active ? _definition_file(active.car()) : c.filename;
-  MetaContext *context = MetaContext.current();
-  with (context.has_bindings = !!bindings,
-        context.captures = _source_captures(bindings),
-        context.definition_file = source_file,
-        context.expander = c,
-        context.evaluator = c,
-        context.site = site) {
-    return c.run_meta_call(expression, site, slot);
-  }
 }
 
 /* `(src (source FILE BEGIN END) SYNTAX)` records one complete caller argument
@@ -143,31 +261,6 @@ static Var _replace_target(Var produced, Var target, Var required) {
     }
   return void;
 }
-
-/** Evaluates a declaration recipe after its owning source is collected.
-    The callback is a built-in target name and arguments are retained
-    canonical values.
-*/
-Var Compiler.evaluate_declaration_recipe(
-  Compiler c, Atom callback, List arguments) {
-  Token invocation = c.token;
-  if (c.macro_stack ~= %((? ? ? ?token) *)) invocation = token;
-  return c.apply_meta_function(callback.str(), arguments, invocation);
-}
-
-/* template calls and rebuilds
-
-   Compile-time code calls a template by name with its argument values, and
-   the compiler rebuilds a pending Macro value application from bound
-   children without binding them again. */
-
-/** Returns the syntax that invokes the template `stored`, a macro name
-    spelled as a String or a local definition, with `values`: what a template
-    call in a staged `meta` body evaluates to.
-*/
-List x2c_template_call(Var stored, List values) =>
-  _sdk_template_call(
-    stored is <string> ? Atom.intern(stored.str()) : stored, values);
 
 static List _sdk_template_call(Var stored, List values) {
   Compiler c = Compiler.expanding();
@@ -245,38 +338,19 @@ module Var _helper_result(Compiler c, Var value) {
   $ast.rewrite_children(value.list(), child, _helper_result(c, child));
 }
 
-/** Rebuilds an expression from a pending Macro value application, preserving
-    its established root `type`, child stage, and source wrappers. Binding,
-    capture collection, hygiene, and effects do not run, and a statement
-    expression's template-origin wrappers are omitted.
-*/
-List Compiler.rebuild_expression(Compiler c, Type type, List application) {
-  List rebuilt = _rebuild(c, application, NULL);
-  return %(expr $type @(rebuilt.cddr()));
+static Var _sdk_identifier_result(Var value) {
+  if (value ~= %("x2c.ident" (!is ?spelling type string)))
+    return spelling;
+  return value is <list> &&
+         Ast.try_binding(value, NULL, NULL) ? value : void;
 }
 
-/** Rebuilds a statement template as a canonical unbraced `seq`. Bound
-    children keep their identities and origins; template-origin wrappers
-    are omitted because this path does not open an invocation.
-*/
-List Compiler.rebuild_statement(Compiler c, List application) =>
-  _rebuild(c, application, NULL);
-
-/** Constructs a fresh function from a Unit template after lowering. The
-    caller supplies its bound name and lowered children; binding does not
-    run.
-*/
-List Compiler.rebuild_unit_function(Compiler c, List application) {
-  List function = _rebuild(c, application, NULL).cadr();
-  if (function ~= %(api-source ? ? ?inner)) return inner;
-  return function;
+/* An absolute path; the definition keeps the home-portable spelling. */
+module String _definition_file(List definition) {
+  String file = definition.assoc(<file>);
+  return !file || file.startswith("<")
+    ? file : Compiler.absolute_home_path(file);
 }
-
-/** Rebuilds a bound function through a Function decorator without binding it
-    again. The template keeps the target's return type and declarator.
-*/
-List Compiler.rebuild_function(Compiler c, List target, List application) =>
-  _rebuild(c, application, target).cadr();
 
 /* Substitute bound syntax into a structural template without binding it.
    The caller supplies complete children and a template with no free names,
@@ -313,68 +387,6 @@ static List _row_bindings(List keys, List row, List bindings) {
     fields = fields.cdr();
   }
   return bindings;
-}
-
-/* A capture row's source, value, expression, splice, return, and
-   declarator projections. A sequence's value stands for its expression
-   and splice, and a singular Function hole's value also supplies its
-   return type and declarator. */
-static List _row_fields(List row) {
-  match (row) {
-    case %(capture (source *sources) (value *values)):
-      return %($sources $values $values $values () ());
-    case %(capture (source ?source) (value ?value) (expression ?expression)
-                   (splice *splice)): {
-      List result = NULL, declarator = NULL;
-      if (value ~= %(function ?returned ?declared ?)) {
-        result = returned;
-        declarator = declared;
-      }
-      return $(source, value, expression, splice, result, declarator);
-    }
-  }
-  return NULL;
-}
-
-/** Binds quoted `syntax` with its `fresh` rows at `position`, as the
-    expansion of its quotation would.
-*/
-List Compiler.land_quotation(
-  Compiler c, List fresh, Var syntax, Symbol position, Type return_type) {
-  Token site = c.macro_invocation_site(<m-invoke>);
-  Landing landing = {
-    .c = c, .site = site ? site : c.token, .anchored = !!site};
-  List bound = NULL;
-  with (c.macro_application = c.macro_application + 1) {
-    SymTxn transaction = { 0 };
-    if (c.recovery_depth > 0)
-      transaction = c.begin_semantic_transaction();
-    defer transaction.rollback();
-    landing.names = _private_names(c, fresh);
-    Var filled = _fill_syntax(landing, c.thaw_declaration_syntax(syntax));
-    with (c.token = site, c.origin = c.record_origin(site)) {
-      bound = c.bind_syntax(filled, position, return_type);
-    }
-    transaction.commit();
-  }
-  if ((position == <block> || position == <statement> ||
-       position == <unit>) && bound ~= %(seq ?item)) return item;
-  return bound;
-}
-
-/* Each fresh binder's private name. */
-static Map _private_names(Compiler c, List fresh) {
-  if (!fresh) return NULL;
-  Map names = {};
-  // The outermost active row's fourth field is its invocation token.
-  Token root = c.macro_stack ? c.macro_stack.last().list()[3] : NULL;
-  int file_scope = c.sym.at_file_scope();
-  foreach (List row in fresh) {
-    (Var binder, Var spelling, Var file) = row;
-    names[binder] = _private_name(
-      c, spelling.str(), file_scope && file.int() ? root : NULL);
-  }
-  return names;
 }
 
 /* The filled syntax. A hole that is a sequence or a splice contributes
@@ -458,34 +470,40 @@ static Var _project_hole(Landing &l, List hole, Symbol projection, Var value) {
   return %(expr (<macro-expr>) $projected);
 }
 
-/* compile-time results */
-
-/** Converts a compile-time value into a bound expression AST.
-    Scalars, immutable values, representable Array/Map roots, compiler-issued
-    identifiers, and nonempty code `List`s are accepted; `invocation` locates
-    an unsupported result.
-*/
-List Compiler.lift_meta_expression(
-  Compiler c, Var value, Token invocation) {
-  List literal = c.meta_value_expression(NULL, value, invocation);
-  if (literal) return literal;
-  Var identifier = _sdk_identifier_result(value);
-  if (identifier is not void)
-    return c.resolve_expression(%(expr () (ident $identifier)), invocation);
-  if (value is <list> && !value.is_nil())
-    return c.bind_syntax(_helper_result(c, value), <expression>, NULL);
-  $fail.macros_meta_expr(c, invocation, value);
+/* A capture row's source, value, expression, splice, return, and
+   declarator projections. A sequence's value stands for its expression
+   and splice, and a singular Function hole's value also supplies its
+   return type and declarator. */
+static List _row_fields(List row) {
+  match (row) {
+    case %(capture (source *sources) (value *values)):
+      return %($sources $values $values $values () ());
+    case %(capture (source ?source) (value ?value) (expression ?expression)
+                   (splice *splice)): {
+      List result = NULL, declarator = NULL;
+      if (value ~= %(function ?returned ?declared ?)) {
+        result = returned;
+        declarator = declared;
+      }
+      return $(source, value, expression, splice, result, declarator);
+    }
+  }
+  return NULL;
 }
 
-/** Binds a compile-time code `value` returned to a statement at
-    `context`.
-*/
-List Compiler.bind_meta_statement(
-  Compiler c, List value, Symbol context) {
-  value = _helper_result(c, value);
-  return _statement_expression(c, value)
-    ? %(stmnt $(c.lift_meta_expression(value, c.token)))
-    : c.bind_syntax(value, context, c.return_type);
+/* Each fresh binder's private name. */
+static Map _private_names(Compiler c, List fresh) {
+  if (!fresh) return NULL;
+  Map names = {};
+  // The outermost active row's fourth field is its invocation token.
+  Token root = c.macro_stack ? c.macro_stack.last().list()[3] : NULL;
+  int file_scope = c.sym.at_file_scope();
+  foreach (List row in fresh) {
+    (Var binder, Var spelling, Var file) = row;
+    names[binder] = _private_name(
+      c, spelling.str(), file_scope && file.int() ? root : NULL);
+  }
+  return names;
 }
 
 /* The root inside a carrier determines whether the statement discards an
@@ -502,18 +520,4 @@ static int _statement_expression(Compiler c, List value) {
     case %(expr *): return 1;
     default: return _sdk_identifier_result(value) is not void;
   }
-}
-
-static Var _sdk_identifier_result(Var value) {
-  if (value ~= %("x2c.ident" (!is ?spelling type string)))
-    return spelling;
-  return value is <list> &&
-         Ast.try_binding(value, NULL, NULL) ? value : void;
-}
-
-/* An absolute path; the definition keeps the home-portable spelling. */
-module String _definition_file(List definition) {
-  String file = definition.assoc(<file>);
-  return !file || file.startswith("<")
-    ? file : Compiler.absolute_home_path(file);
 }

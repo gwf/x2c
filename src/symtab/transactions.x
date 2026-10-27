@@ -14,14 +14,6 @@ void Sym.drop(Sym s, Map map, Var key) {
   map.del(key);
 }
 
-static void _remember(Sym s, Map map, Var key) {
-  if (!s.transactions) return;
-  Var value = void;
-  map.try_get(key, value);
-  SymUndo row = { .map = map, .key = key, .value = value };
-  s.undo.push(&row);
-}
-
 /* semantic transactions
 
    Binding a macro's syntax runs in a transaction, so a failed expansion
@@ -48,6 +40,83 @@ SymTxn Compiler.begin_semantic_transaction(Compiler c) {
   c.sym.transactions++;
   transaction.active = 1;
   return transaction;
+}
+
+/** Returns whether the transaction's active scope changed its macro map. */
+int SymTxn.local_macros_changed(SymTxn &s) {
+  SymScope *scope = _scope_at(s.c.sym, s.scope_index);
+  Map before = s.scope.macros, after = scope.macros;
+  if (before == NULL || after == NULL) return !_same(before, after);
+  Block undo = s.c.sym.undo;
+  SymUndo *rows = undo.bytes;
+  Map seen = {};
+  for (int i = s.mark; i < (int) undo.len(); i++) {
+    SymUndo row = rows[i];
+    if (!_same(row.map, after) || row.key in seen) continue;
+    seen[row.key] = 1;
+    if (row.value is void || row.value != after[row.key]) return 1;
+  }
+  return 0;
+}
+
+/** Returns whether a semantic transaction is open. */
+int Sym.transacting(Sym s) => s.transactions > 0;
+
+// commit and rollback
+
+/** Commits an active transaction, retaining the original counters map.
+    The caller may then release the transaction's construction scope.
+    Parsing and evaluation must allocate outside that temporary scope.
+*/
+void SymTxn.commit_transient(SymTxn &s) {
+  Compiler c = s.c;
+  Map counters = c.names.counters;
+  s.commit();
+  c.names.counters = s.counters;
+  s.counters.merge(counters);
+}
+
+
+
+/** Publishes an active semantic transaction and makes rollback a no-op.
+    Its writes are already in the scope maps, so code holding a borrowed
+    map observes a committed expansion. An absent or inactive transaction
+    has no effect.
+*/
+void SymTxn.commit(SymTxn &?s) {
+  if (!s) return;
+  if (!s.active) return;
+  if (s.extended) {
+    Compiler c = s.c;
+    Map adapters = c.names.adapters;
+    c.names.adapters = s.adapters;
+    s.adapters.merge(adapters);
+  }
+  _finish(s);
+}
+
+/** Restores every semantic value captured by an active transaction.
+    An absent or inactive transaction has no effect.
+*/
+void SymTxn.rollback(SymTxn &?s) {
+  if (!s) return;
+  if (!s.active) return;
+  Compiler c = s.c;
+  _undo(s);
+  _restore(s);
+  if (s.extended) _restore_effects(s);
+  if (c.source_facts && c.source_primary) _restore_sources(s);
+  _finish(s);
+}
+
+// symbol transactions
+
+static void _remember(Sym s, Map map, Var key) {
+  if (!s.transactions) return;
+  Var value = void;
+  map.try_get(key, value);
+  SymUndo row = { .map = map, .key = key, .value = value };
+  s.undo.push(&row);
 }
 
 static void _save(SymTxn &s, SymScope scope) {
@@ -82,94 +151,13 @@ static void _save_sources(SymTxn &s) {
   s.source_occurrences = s.c.source_occurrences.len();
 }
 
-/* Rollback restores the active scope's maps, file statics, binding facts,
-   and declaration source metadata. Base-scope identities also roll back
-   with their binding facts and counter. Rows of other maps stay in the log for
-   an enclosing transaction. */
-static int _tracks(SymTxn &s, Map map) {
-  if (_same(map, s.scope.symbols) || _same(map, s.scope.bindings) ||
-      _same(map, s.scope.enumerators) || _same(map, s.scope.macros) ||
-      _same(map, s.statics) || _same(map, s.binding_facts) ||
-      _same(map, s.c.macros) || _same(map, s.c.kw_aliases)) return 1;
-  if (s.c.source_facts && _same(map, s.c.source_declarations)) return 1;
-  Sym sym = s.c.sym;
-  for (int i = 0; i < sym.base_scopes; i++)
-    if (_same(map, _scope_at(sym, i).bindings)) return 1;
-  return 0;
-}
-
 static int _same(Map a, Map b) => (void *) a == (void *) b;
-
-/** Returns whether the transaction's active scope changed its macro map. */
-int SymTxn.local_macros_changed(SymTxn &s) {
-  SymScope *scope = _scope_at(s.c.sym, s.scope_index);
-  Map before = s.scope.macros, after = scope.macros;
-  if (before == NULL || after == NULL) return !_same(before, after);
-  Block undo = s.c.sym.undo;
-  SymUndo *rows = undo.bytes;
-  Map seen = {};
-  for (int i = s.mark; i < (int) undo.len(); i++) {
-    SymUndo row = rows[i];
-    if (!_same(row.map, after) || row.key in seen) continue;
-    seen[row.key] = 1;
-    if (row.value is void || row.value != after[row.key]) return 1;
-  }
-  return 0;
-}
-
-/** Returns whether a semantic transaction is open. */
-int Sym.transacting(Sym s) => s.transactions > 0;
-
-// commit and rollback
-
-/** Publishes an active semantic transaction and makes rollback a no-op.
-    Its writes are already in the scope maps, so code holding a borrowed
-    map observes a committed expansion. An absent or inactive transaction
-    has no effect.
-*/
-void SymTxn.commit(SymTxn &?s) {
-  if (!s) return;
-  if (!s.active) return;
-  if (s.extended) {
-    Compiler c = s.c;
-    Map adapters = c.names.adapters;
-    c.names.adapters = s.adapters;
-    s.adapters.merge(adapters);
-  }
-  _finish(s);
-}
 
 /* Completing the outermost transaction empties the undo log. */
 static void _finish(SymTxn &s) {
   s.active = 0;
   Sym sym = s.c.sym;
   if (!--sym.transactions) sym.undo.clear();
-}
-
-/** Commits an active transaction, retaining the original counters map.
-    The caller may then release the transaction's construction scope.
-    Parsing and evaluation must allocate outside that temporary scope.
-*/
-void SymTxn.commit_transient(SymTxn &s) {
-  Compiler c = s.c;
-  Map counters = c.names.counters;
-  s.commit();
-  c.names.counters = s.counters;
-  s.counters.merge(counters);
-}
-
-/** Restores every semantic value captured by an active transaction.
-    An absent or inactive transaction has no effect.
-*/
-void SymTxn.rollback(SymTxn &?s) {
-  if (!s) return;
-  if (!s.active) return;
-  Compiler c = s.c;
-  _undo(s);
-  _restore(s);
-  if (s.extended) _restore_effects(s);
-  if (c.source_facts && c.source_primary) _restore_sources(s);
-  _finish(s);
 }
 
 /* Restores the logged rows this transaction tracks, newest first, and
@@ -187,6 +175,22 @@ static void _undo(SymTxn &s) {
   for (int i = s.mark; i < end; i++)
     if (!_tracks(s, rows[i].map)) rows[kept++] = rows[i];
   undo.truncate(kept);
+}
+
+/* Rollback restores the active scope's maps, file statics, binding facts,
+   and declaration source metadata. Base-scope identities also roll back
+   with their binding facts and counter. Rows of other maps stay in the log for
+   an enclosing transaction. */
+static int _tracks(SymTxn &s, Map map) {
+  if (_same(map, s.scope.symbols) || _same(map, s.scope.bindings) ||
+      _same(map, s.scope.enumerators) || _same(map, s.scope.macros) ||
+      _same(map, s.statics) || _same(map, s.binding_facts) ||
+      _same(map, s.c.macros) || _same(map, s.c.kw_aliases)) return 1;
+  if (s.c.source_facts && _same(map, s.c.source_declarations)) return 1;
+  Sym sym = s.c.sym;
+  for (int i = 0; i < sym.base_scopes; i++)
+    if (_same(map, _scope_at(sym, i).bindings)) return 1;
+  return 0;
 }
 
 static void _restore(SymTxn &s) {

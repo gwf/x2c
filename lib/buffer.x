@@ -44,27 +44,6 @@ static typedef struct _LineState { size_t pos, indent; } _LineState;
 
 // writing
 
-/** Appends `length` bytes from `text` to `buf`.
-    `text` may be a live range inside `buf.content`, including across growth.
-    A zero length accepts a null source. Raises: `<bad-arg>` for a null
-    nonempty source or embedded NUL, or `<size-limit>` or `<alloc-fail>` when
-    the `Buffer` cannot grow. Argument, allocation, and size failures leave the
-    text and line state unchanged.
-*/
-meta native Self Buffer.write_len(Self buf, const char *text, size_t length) {
-  if (!length) return buf;
-  if (!text) raise %(bad-arg);
-  if (length == 1) return _write_char(buf, *text);
-  if (memchr(text, '\0', length)) raise %(bad-arg (value 0));
-  /* The line state is read before the append, which may relocate `text`,
-     and stored after it, so a failed append changes nothing. */
-  _LineState next = _state_after(buf, text, length);
-  buf.content.append(text, length);
-  buf.pos = next.pos;
-  buf._indent = next.indent;
-  return buf;
-}
-
 /** Appends NUL-terminated `text` to `buf`.
     Raises: the same causes as `Buffer.write_len`.
 */
@@ -96,6 +75,48 @@ Self Buffer.printf(Self buf, const char *format, ...) {
   return buf.write_len(bytes, length);
 }
 
+
+
+/** Appends `length` bytes from `text` to `buf`.
+    `text` may be a live range inside `buf.content`, including across growth.
+    A zero length accepts a null source. Raises: `<bad-arg>` for a null
+    nonempty source or embedded NUL, or `<size-limit>` or `<alloc-fail>` when
+    the `Buffer` cannot grow. Argument, allocation, and size failures leave the
+    text and line state unchanged.
+*/
+meta native Self Buffer.write_len(Self buf, const char *text, size_t length) {
+  if (!length) return buf;
+  if (!text) raise %(bad-arg);
+  if (length == 1) return _write_char(buf, *text);
+  if (memchr(text, '\0', length)) raise %(bad-arg (value 0));
+  /* The line state is read before the append, which may relocate `text`,
+     and stored after it, so a failed append changes nothing. */
+  _LineState next = _state_after(buf, text, length);
+  buf.content.append(text, length);
+  buf.pos = next.pos;
+  buf._indent = next.indent;
+  return buf;
+}
+
+/** Removes the final `count` bytes from `buf`. */
+meta native Self Buffer.unwrite(Self buf, size_t count) {
+  if (count > buf.content.length) count = buf.content.length;
+  buf.content.truncate(buf.content.length - count);
+  _recompute_line_state(buf);
+  return buf;
+}
+
+// indentation
+
+/** Appends the configured number of padding spaces. */
+meta native Self Buffer.pad(Self buf) => buf.write_repeat(' ', buf.padding);
+
+/** Appends a newline followed by current indentation. */
+meta native Self Buffer.newline_indent(Self buf) => buf.newline().indent();
+
+/** Appends a newline to `buf`. */
+meta native Self Buffer.newline(Self buf) => buf.write_char('\n');
+
 /** Appends the non-NUL byte `value` to `buf`.
     Raises: `<bad-arg>` when `value` is NUL, or `<size-limit>` or
     `<alloc-fail>` when the `Buffer` cannot grow. These failures leave text and
@@ -104,13 +125,9 @@ Self Buffer.printf(Self buf, const char *format, ...) {
 meta native Self Buffer.write_char(Self buf, char value) =>
   _write_char(buf, value);
 
-/* `Buffer.write_len` also writes a single byte here. */
-static Buffer _write_char(Buffer buf, char value) {
-  if (!value) raise %(bad-arg (value 0));
-  buf.content.append(&value, 1);
-  _advance(buf, value, 1);
-  return buf;
-}
+/** Appends spaces through `buf`'s current indentation depth. */
+meta native Self Buffer.indent(Self buf) =>
+  buf.write_repeat(' ', buf.tabstop());
 
 /** Appends `count` copies of the non-NUL byte `value` to `buf`.
     A zero count accepts any value. Raises: `<bad-arg>` when a nonzero write
@@ -124,81 +141,6 @@ meta native Self Buffer.write_repeat(Self buf, char value, size_t count) {
   _advance(buf, value, count);
   return buf;
 }
-
-/** Removes the final `count` bytes from `buf`. */
-meta native Self Buffer.unwrite(Self buf, size_t count) {
-  if (count > buf.content.length) count = buf.content.length;
-  buf.content.truncate(buf.content.length - count);
-  _recompute_line_state(buf);
-  return buf;
-}
-
-/* line state
-
-   `pos` is the byte position in the final line, and `_indent` counts the
-   spaces that open it. Writes advance both, and `Buffer.unwrite` recomputes
-   them from the text. */
-
-/* Moves the line state past `count` copies of `value`. */
-static void _advance(Buffer buf, char value, size_t count) {
-  if (value == '\n') buf.pos = buf._indent = 0;
-  else {
-    if (value == ' ' && buf.pos == buf._indent) buf._indent += count;
-    buf.pos += count;
-  }
-}
-
-/* The line state once `buf` holds `text` too. */
-static _LineState _state_after(Buffer buf, const char *text, size_t length) {
-  size_t start = _last_line_start(text, length);
-  if (start != SIZE_MAX) {
-    size_t pos = length - start;
-    return (_LineState) {pos, _leading_spaces(text + start, pos)};
-  }
-  size_t indent = buf._indent;
-  if (buf.pos == buf._indent) indent += _leading_spaces(text, length);
-  return (_LineState) {buf.pos + length, indent};
-}
-
-/* The offset after the last newline in `text`, or SIZE_MAX without one. */
-static size_t _last_line_start(const char *text, size_t length) {
-  size_t start = SIZE_MAX;
-  const char *newline = memchr(text, '\n', length);
-  while (newline) {
-    start = (size_t) (newline - text) + 1;
-    newline = memchr(text + start, '\n', length - start);
-  }
-  return start;
-}
-
-static size_t _leading_spaces(const char *text, size_t limit) {
-  size_t n = 0;
-  while (n < limit && text[n] == ' ') n++;
-  return n;
-}
-
-static void _recompute_line_state(Buffer buf) {
-  const char *text = buf.content.bytes, size_t length = buf.content.length;
-  size_t start = length;
-  while (start && text[start - 1] != '\n') start--;
-  buf.pos = length - start;
-  buf._indent = _leading_spaces(text + start, buf.pos);
-}
-
-// indentation
-
-/** Appends the configured number of padding spaces. */
-meta native Self Buffer.pad(Self buf) => buf.write_repeat(' ', buf.padding);
-
-/** Appends a newline to `buf`. */
-meta native Self Buffer.newline(Self buf) => buf.write_char('\n');
-
-/** Appends spaces through `buf`'s current indentation depth. */
-meta native Self Buffer.indent(Self buf) =>
-  buf.write_repeat(' ', buf.tabstop());
-
-/** Appends a newline followed by current indentation. */
-meta native Self Buffer.newline_indent(Self buf) => buf.newline().indent();
 
 /** Pushes the current column as a later indentation depth.
     Raises: `<size-limit>` or `<alloc-fail>` if the stack cannot grow. Failure
@@ -224,6 +166,20 @@ size_t Buffer.tabstop(Buffer buf) {
 
 // reading
 
+/** Returns `buf.get(index)`, so `buf[index]` reads a byte. */
+int Buffer.getindex(Buffer buf, int index) => buf.get(index);
+
+/** Returns the byte at `index`, or NUL when `index` is out of range.
+    Stored bytes are never NUL. Prefer `Buffer.try_get` to also report
+    whether the index is present.
+*/
+char Buffer.get(Buffer buf, ptrdiff_t index) {
+  char out;
+  return buf.try_get(index, out) ? out : '\0';
+}
+
+
+
 /** Writes the byte at normalized `index` to `out` when it exists.
     Negative indexes count from the end. Returns zero for a null `Buffer`, null
     output, or missing byte and leaves `out` unchanged.
@@ -241,18 +197,6 @@ int Buffer.try_get(Buffer buf, ptrdiff_t index, char &?out) {
   out = ((char *) buf.content.bytes)[at];
   return 1;
 }
-
-/** Returns the byte at `index`, or NUL when `index` is out of range.
-    Stored bytes are never NUL. Prefer `Buffer.try_get` to also report
-    whether the index is present.
-*/
-char Buffer.get(Buffer buf, ptrdiff_t index) {
-  char out;
-  return buf.try_get(index, out) ? out : '\0';
-}
-
-/** Returns `buf.get(index)`, so `buf[index]` reads a byte. */
-int Buffer.getindex(Buffer buf, int index) => buf.get(index);
 
 /** Returns the number of bytes currently stored in `buf`. */
 size_t Buffer.len(Buffer buf) => buf ? buf.content.length : 0;
@@ -350,4 +294,66 @@ void Buffer.free(Buffer buf) {
   buf.content.free();
   buf.indents.free();
   xfree(buf);
+}
+
+// writing
+
+/* `Buffer.write_len` also writes a single byte here. */
+static Buffer _write_char(Buffer buf, char value) {
+  if (!value) raise %(bad-arg (value 0));
+  buf.content.append(&value, 1);
+  _advance(buf, value, 1);
+  return buf;
+}
+
+/* line state
+
+   `pos` is the byte position in the final line, and `_indent` counts the
+   spaces that open it. Writes advance both, and `Buffer.unwrite` recomputes
+   them from the text. */
+
+/* Moves the line state past `count` copies of `value`. */
+static void _advance(Buffer buf, char value, size_t count) {
+  if (value == '\n') buf.pos = buf._indent = 0;
+  else {
+    if (value == ' ' && buf.pos == buf._indent) buf._indent += count;
+    buf.pos += count;
+  }
+}
+
+/* The line state once `buf` holds `text` too. */
+static _LineState _state_after(Buffer buf, const char *text, size_t length) {
+  size_t start = _last_line_start(text, length);
+  if (start != SIZE_MAX) {
+    size_t pos = length - start;
+    return (_LineState) {pos, _leading_spaces(text + start, pos)};
+  }
+  size_t indent = buf._indent;
+  if (buf.pos == buf._indent) indent += _leading_spaces(text, length);
+  return (_LineState) {buf.pos + length, indent};
+}
+
+/* The offset after the last newline in `text`, or SIZE_MAX without one. */
+static size_t _last_line_start(const char *text, size_t length) {
+  size_t start = SIZE_MAX;
+  const char *newline = memchr(text, '\n', length);
+  while (newline) {
+    start = (size_t) (newline - text) + 1;
+    newline = memchr(text + start, '\n', length - start);
+  }
+  return start;
+}
+
+static size_t _leading_spaces(const char *text, size_t limit) {
+  size_t n = 0;
+  while (n < limit && text[n] == ' ') n++;
+  return n;
+}
+
+static void _recompute_line_state(Buffer buf) {
+  const char *text = buf.content.bytes, size_t length = buf.content.length;
+  size_t start = length;
+  while (start && text[start - 1] != '\n') start--;
+  buf.pos = length - start;
+  buf._indent = _leading_spaces(text + start, buf.pos);
 }

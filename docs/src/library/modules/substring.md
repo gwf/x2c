@@ -28,7 +28,7 @@ Borrowed immutable views of String bytes.
 
 Returns a borrowed immutable view of the requested byte range.
 
-Source: `lib/substring.x:29`
+Source: `lib/substring.x:20`
 
 ### `Substring`
 
@@ -75,7 +75,7 @@ Source: `lib/substring.x:33`
 
 Borrows length bytes at offset. An invalid range raises bad-arg.
 
-Source: `lib/substring.x:20`
+Source: `lib/substring.x:24`
 
 <a id="Substring.str"></a>
 #### Substring.str
@@ -85,7 +85,7 @@ Source: `lib/substring.x:20`
 Materializes a canonical String in the active pool. Repeated conversion
 reuses the canonical value. The result follows its actual owning pool.
 
-Source: `lib/substring.x:60`
+Source: `lib/substring.x:63`
 
 <a id="Substring.string"></a>
 #### Substring.string
@@ -94,7 +94,7 @@ Source: `lib/substring.x:60`
 
 Materializes the same canonical String as str().
 
-Source: `lib/substring.x:65`
+Source: `lib/substring.x:58`
 
 <a id="Substring.try_next"></a>
 #### Substring.try_next

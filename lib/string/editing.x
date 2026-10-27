@@ -55,20 +55,6 @@ meta native String String.replace_n(
   return _finish(string, length);
 }
 
-/* The length after `count` replacements of `old_len` bytes by `new_len`
-   bytes, or -1 when the result cannot fit a String. */
-static int _replaced_length(int length, int count, int old_len, int new_len) {
-  size_t total = (size_t) length;
-  if (new_len >= old_len) {
-    size_t growth = (size_t) (new_len - old_len);
-    if (growth && (size_t) count > ((size_t) (INT_MAX - 1) - total) / growth)
-      return -1;
-    total += (size_t) count * growth;
-  }
-  else total -= (size_t) count * (old_len - new_len);
-  return total > INT_MAX - 1 ? -1 : (int) total;
-}
-
 // indexing and slicing
 
 /** Returns the byte at `index` in `str` as an int, or -1 if out of range.
@@ -137,4 +123,18 @@ meta native String String.withindex(String str, int index, char value) {
   char *out = string;
   out[index] = value;
   return _finish(string, n);
+}
+
+/* The length after `count` replacements of `old_len` bytes by `new_len`
+   bytes, or -1 when the result cannot fit a String. */
+static int _replaced_length(int length, int count, int old_len, int new_len) {
+  size_t total = (size_t) length;
+  if (new_len >= old_len) {
+    size_t growth = (size_t) (new_len - old_len);
+    if (growth && (size_t) count > ((size_t) (INT_MAX - 1) - total) / growth)
+      return -1;
+    total += (size_t) count * growth;
+  }
+  else total -= (size_t) count * (old_len - new_len);
+  return total > INT_MAX - 1 ? -1 : (int) total;
 }

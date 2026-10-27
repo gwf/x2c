@@ -13,6 +13,32 @@ module typedef struct MacroCategory {
   int target, Symbol named;
 } MacroCategory;
 
+static const MacroCategory macro_categories[] = {
+  { "Expr",          <expr>,       <expression>, 1, <hole> },
+  { "Expression",    <expr>,       <expression>, 1, <result> },
+  { "Stmt",          <block>,      <block-item>, 1, <both> },
+  { "Field",         <field>,      <field>,      1, <both> },
+  { "Entry",         <map-entry>,  <map-entry>,  0, <both> },
+  { "Enumerator",    <enumerator>, <enumerator>, 0, <both> },
+  { "Unit",          <unit>,       <unit>,       1, <both> },
+  { "Declaration",   0,            <decl-unit>,  0, <result> },
+  { "Decorator",     0,            <decorator>,  0, <result> },
+  { "Function",      <function>,   0,            1, <hole> },
+  { "NamedType",     <named-type>, 0,            1, <hole> },
+  { "Type",          <type>,       0,            0, <hole> },
+  { "Decl",          <decl>,       0,            0, <hole> },
+  { "DeclaratorRow", <decl-row>,   0,            0, <hole> },
+  { "Name",          <name>,       0,            0, <hole> },
+  { "Literal",       <literal>,    0,            0, <hole> },
+  { "Param",         <param>,      0,            0, <hole> },
+  { "Catch",         <catch>,      0,            0, <hole> },
+  { "Captures",      <captures>,   0,            0, <hole> },
+  { "MatchRow",      <match-row>,  0,            0, <hole> }
+};
+
+static const int MACRO_CATEGORY_COUNT =
+  (int) (sizeof(macro_categories) / sizeof(macro_categories[0]));
+
 /** Parses the macro definition at the current token into a `macrodef` `List`.
     A source-level definition is published immediately; a definition inside a
     template remains syntax for later binding at its expansion site.
@@ -39,6 +65,8 @@ List Compiler.parse_macro_definition(Compiler c) {
   _finish(d);
   return _publish(d);
 }
+
+// macro definition reading
 
 /* Reads the result kind. A local definition names itself without `$`, and
    an anonymous one has no name to read. */
@@ -158,15 +186,6 @@ static void _arrow(Definition &d) {
   if (c.peek(0) != <"{">) _body_error(d);
 }
 
-static int _has_expression_body(Definition &d) =>
-  d.kind == <expression> ||
-  (d.kind == <decorator> && _target_kind(d) == <expr>);
-
-module Symbol _target_kind(Definition &d) {
-  if (!d.target) return 0;
-  return d.target.assoc(<kind>);
-}
-
 static void _body_error(Definition &d) {
   String form = "'{ ... }'";
   if (_has_expression_body(d)) form = "'=> expression;'";
@@ -213,6 +232,10 @@ static List _read_body(Definition &d) {
   if (c.peek(0) == <"{">) return _parse_body(c, _body_kind(d), d.using);
   return _arrow_statement(c, d.anonymous);
 }
+
+static int _has_expression_body(Definition &d) =>
+  d.kind == <expression> ||
+  (d.kind == <decorator> && _target_kind(d) == <expr>);
 
 /* A Stmt arrow's statement is a Stmt macro or decorator invocation, or else
    an expression statement. An anonymous macro's statement omits its `;`,
@@ -266,6 +289,11 @@ static Symbol _body_kind(Definition &d) {
   return target == <function> || target == <block> ? <block-item> : target;
 }
 
+module Symbol _target_kind(Definition &d) {
+  if (!d.target) return 0;
+  return d.target.assoc(<kind>);
+}
+
 /* The entries a map lists under `<order>`, oldest first, or NULL. */
 module List _recorded(Map m) {
   Var order = m != NULL ? m[<order>] : void;
@@ -299,45 +327,6 @@ static Symbol _hole_kind(Compiler c) {
   return kind;
 }
 
-module Token _hole_name_token(Compiler c, Symbol prefix) {
-  c.expect(prefix);
-  if (c.peek(0) != <ident>)
-    $fail.macros_hole_name(c, c.token);
-  Token name = c.token;
-  c.next();
-  return name;
-}
-
-static List _declare_hole(
-  Compiler c, Token token, Symbol kind, int sequence) {
-  String spelling = token.text;
-  if (_hole_record(c, Atom.intern(spelling)))
-    $fail.macros_hole_duplicate(c, token, spelling);
-  return _record_hole(c, spelling, kind, sequence);
-}
-
-module List _record_hole(
-  Compiler c, String spelling, Symbol kind, int sequence) {
-  List hole = _hole(
-    Atom.intern(sequence ? %"*$spelling" : %"?$spelling"),
-    kind, sequence);
-  c.macro_holes[Atom.intern(spelling)] = hole;
-  return hole;
-}
-
-module List _hole(Atom binder, Symbol kind, int sequence) => %(
-    macro-param
-    (binder $binder)
-    (kind $kind)
-    (sequence $sequence)
-  );
-
-module List _hole_record(Compiler c, Atom name) {
-  Var stored;
-  if (!c.macro_holes.try_get(name, stored)) return NULL;
-  return stored;
-}
-
 // The final hole records, with the kinds the body inferred.
 static List _parameter_rows(Compiler c, List parameters) {
   Array rows = [];
@@ -350,32 +339,6 @@ module Atom _hole_name(List hole) {
   String binder = hole.assoc(<binder>).str();
   return Atom.intern(binder[1:]);
 }
-
-static const MacroCategory macro_categories[] = {
-  { "Expr",          <expr>,       <expression>, 1, <hole> },
-  { "Expression",    <expr>,       <expression>, 1, <result> },
-  { "Stmt",          <block>,      <block-item>, 1, <both> },
-  { "Field",         <field>,      <field>,      1, <both> },
-  { "Entry",         <map-entry>,  <map-entry>,  0, <both> },
-  { "Enumerator",    <enumerator>, <enumerator>, 0, <both> },
-  { "Unit",          <unit>,       <unit>,       1, <both> },
-  { "Declaration",   0,            <decl-unit>,  0, <result> },
-  { "Decorator",     0,            <decorator>,  0, <result> },
-  { "Function",      <function>,   0,            1, <hole> },
-  { "NamedType",     <named-type>, 0,            1, <hole> },
-  { "Type",          <type>,       0,            0, <hole> },
-  { "Decl",          <decl>,       0,            0, <hole> },
-  { "DeclaratorRow", <decl-row>,   0,            0, <hole> },
-  { "Name",          <name>,       0,            0, <hole> },
-  { "Literal",       <literal>,    0,            0, <hole> },
-  { "Param",         <param>,      0,            0, <hole> },
-  { "Catch",         <catch>,      0,            0, <hole> },
-  { "Captures",      <captures>,   0,            0, <hole> },
-  { "MatchRow",      <match-row>,  0,            0, <hole> }
-};
-
-static const int MACRO_CATEGORY_COUNT =
-  (int) (sizeof(macro_categories) / sizeof(macro_categories[0]));
 
 module const MacroCategory *_category(String spelling) {
   String key = spelling.lower();
@@ -441,6 +404,45 @@ static void _using_clause(Compiler c, Array binders) {
     } while (c.test(<,>));
   }
   else _using_names(c);
+}
+
+module Token _hole_name_token(Compiler c, Symbol prefix) {
+  c.expect(prefix);
+  if (c.peek(0) != <ident>)
+    $fail.macros_hole_name(c, c.token);
+  Token name = c.token;
+  c.next();
+  return name;
+}
+
+static List _declare_hole(
+  Compiler c, Token token, Symbol kind, int sequence) {
+  String spelling = token.text;
+  if (_hole_record(c, Atom.intern(spelling)))
+    $fail.macros_hole_duplicate(c, token, spelling);
+  return _record_hole(c, spelling, kind, sequence);
+}
+
+module List _record_hole(
+  Compiler c, String spelling, Symbol kind, int sequence) {
+  List hole = _hole(
+    Atom.intern(sequence ? %"*$spelling" : %"?$spelling"),
+    kind, sequence);
+  c.macro_holes[Atom.intern(spelling)] = hole;
+  return hole;
+}
+
+module List _hole(Atom binder, Symbol kind, int sequence) => %(
+    macro-param
+    (binder $binder)
+    (kind $kind)
+    (sequence $sequence)
+  );
+
+module List _hole_record(Compiler c, Atom name) {
+  Var stored;
+  if (!c.macro_holes.try_get(name, stored)) return NULL;
+  return stored;
 }
 
 static void _using_names(Compiler c) {

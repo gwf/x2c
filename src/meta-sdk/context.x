@@ -33,13 +33,6 @@ Compiler Compiler.expanding(void) =>
 
 // invocations and diagnostics
 
-/** Returns the location of the active macro invocation. */
-List MetaContext.invocation_location(void) {
-  if (!active.expander || !active.expander.macro_stack || !active.site)
-    $fail.meta_sdk_invocation_missing();
-  return active.expander.token_location(active.site);
-}
-
 /** Answers `x2c_invocation_file`, declared in `lib/meta.x`. */
 String x2c_invocation_file(void) =>
   MetaContext.invocation_location().assoc(<file>);
@@ -51,6 +44,15 @@ int x2c_invocation_line(void) =>
 /** Answers `x2c_invocation_column`, declared in `lib/meta.x`. */
 int x2c_invocation_column(void) =>
   MetaContext.invocation_location().assoc(<column>);
+
+
+
+/** Returns the location of the active macro invocation. */
+List MetaContext.invocation_location(void) {
+  if (!active.expander || !active.expander.macro_stack || !active.site)
+    $fail.meta_sdk_invocation_missing();
+  return active.expander.token_location(active.site);
+}
 
 /** Answers `x2c_diagnostic_fail`, declared in `lib/meta.x`. */
 void x2c_diagnostic_fail(String message, List notes) {
@@ -83,13 +85,6 @@ void x2c_diagnostic_warn(String message, List notes) {
     <macro>, message, active.expander.token, notes);
 }
 
-static void _check_notes(String operation, List notes) {
-  _require_expansion(operation);
-  foreach (Var note in notes)
-    if (note is not <string>)
-      $fail.meta_sdk_notes_string(operation, note);
-}
-
 // rejection
 
 /** Reports `message` and `notes` at the active invocation and never
@@ -100,6 +95,15 @@ void MetaContext.reject(String message, List notes) {
   Compiler c = active.evaluator;
   if (c) c.report_error(<macro>, message, active.site, notes);
   raise %(bad-state (operation "x2c SDK rejection") (reason $message));
+}
+
+// diagnostic checks
+
+static void _check_notes(String operation, List notes) {
+  _require_expansion(operation);
+  foreach (Var note in notes)
+    if (note is not <string>)
+      $fail.meta_sdk_notes_string(operation, note);
 }
 
 // SDK operations reject use outside an active expansion.

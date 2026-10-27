@@ -28,6 +28,26 @@ Map x2c_meta_definition_hashes(void) {
   return hashes;
 }
 
+/** Adds the SDK primitives the compiler's shipped sources call through
+    `lib/compiler-meta.x` to the built-in targets `rows`.
+*/
+void Compiler.add_sdk_targets(Map rows) {
+  rows["_x2c_literal_list"] = (Func) MetaContext.literal_list;
+  rows["_x2c_native_rows"] = (Func) _native_rows;
+  rows["_x2c_declared_rows"] = (Func) _declared_targets;
+  rows["_x2c_meta_linked_hashes"] = (Func) _linked_hashes;
+  rows["_x2c_prelude_records"] = (Func) _linked_prelude;
+  rows["_x2c_symbol_set"] = (Func) _symbol_set;
+}
+
+/** Returns `values`, such as a signature, as a cached literal
+    of the expanding unit.
+*/
+List MetaContext.literal_list(List values) =>
+  active.expander.cache_literal_list(values);
+
+// compile-time SDK primitives
+
 /* Imported functions refer to their provider's shared definition hash.
    Fully parsed copies retain their own hashes and precise references. */
 static Map _linked_hashes(void) {
@@ -51,12 +71,6 @@ static Map _linked_prelude(void) {
   _require_expansion("_x2c_prelude_records");
   return active.expander.linked_prelude_records();
 }
-
-/** Returns `values`, such as a signature, as a cached literal
-    of the expanding unit.
-*/
-List MetaContext.literal_list(List values) =>
-  active.expander.cache_literal_list(values);
 
 static Var _symbol_set(List values) {
   _require_expansion("_x2c_symbol_set");
@@ -96,16 +110,4 @@ static List _declared_targets(List paths) {
   if (!rows)
     $fail.meta_sdk_native_declarations();
   return rows;
-}
-
-/** Adds the SDK primitives the compiler's shipped sources call through
-    `lib/compiler-meta.x` to the built-in targets `rows`.
-*/
-void Compiler.add_sdk_targets(Map rows) {
-  rows["_x2c_literal_list"] = (Func) MetaContext.literal_list;
-  rows["_x2c_native_rows"] = (Func) _native_rows;
-  rows["_x2c_declared_rows"] = (Func) _declared_targets;
-  rows["_x2c_meta_linked_hashes"] = (Func) _linked_hashes;
-  rows["_x2c_prelude_records"] = (Func) _linked_prelude;
-  rows["_x2c_symbol_set"] = (Func) _symbol_set;
 }

@@ -1,11 +1,26 @@
 /*  hello-worlds.x -- twelve idiomatic paths to Hello, World! */
 
-/*  hello-world: hello machine  */
 macro Expression $loud(Expr $s) => $s.upper();                  // typed macro
 
-static Var bang(Var s) { return %"$(s.string())!"; }            // Var -> Var
-meta static String lower(String s) => s.lower();                // meta
+macro Expression $greet(Literal $who) => %"Hello, $($who)!";    // literal hole
 
+int main(void) {
+  _hello_machine();
+  _string_chain();
+  _word_pipeline();
+  _partitioned();
+  _list_dsl();
+  _map_decoder();
+  _array_sort();
+  _closure_pipeline();
+  _iterator_deltas();
+  _runtime_lisp();
+  _compile_time_meta();
+  _greeting_macro();
+  return 0;
+}
+
+/*  hello-world: hello machine  */
 static void _hello_machine(void) {
   String hi = %"He$($lower("LL"))o";                            // meta call
   List tail = %("World"), words = %($hi @tail);                 // List + $/@
@@ -22,6 +37,8 @@ static void _hello_machine(void) {
       puts(%"$hello, $world!");                                 // str interp
   }
 }
+
+static Var bang(Var s) { return %"$(s.string())!"; }            // Var -> Var
 
 /*  hello-world: string chain  */
 static void _string_chain(void) {
@@ -46,7 +63,14 @@ static void _partitioned(void) {
   puts(%"$(hello.capitalize())$comma$(world.capitalize())!");
 }
 
+
 /*  hello-world: list DSL  */
+static void _list_dsl(void) {
+  List hello = %(script (title hello) (text ", ")
+                        (title world) (text "!"));
+  puts(_render(hello));
+}
+
 static String _render(List form) {
   match (form) {
     case %(text ?value): return value.str();
@@ -54,12 +78,6 @@ static String _render(List form) {
     case %(script *forms): return "".join(forms.map(_render));
   }
   raise %(bad-arg (operation "_render"));
-}
-
-static void _list_dsl(void) {
-  List hello = %(script (title hello) (text ", ")
-                        (title world) (text "!"));
-  puts(_render(hello));
 }
 
 /*  hello-world: map decoder  */
@@ -79,21 +97,22 @@ static void _array_sort(void) {
   puts(greeting);
 }
 
+
 /*  hello-world: closure pipeline  */
-static Func _says(String word) {
-  return %!(String text) => text + word;
-}
-
-static Func _then(Func first, Func next) {
-  return %!(String text) => next(first(text));
-}
-
 static void _closure_pipeline(void) {
   Func speech = %!(String text) => text;
   foreach(String word in %("Hello" ", " "World" "!"))
     speech = _then(speech, _says(word));
   String greeting = speech(%"");
   puts(greeting);
+}
+
+static Func _says(String word) {
+  return %!(String text) => text + word;
+}
+
+static Func _then(Func first, Func next) {
+  return %!(String text) => next(first(text));
 }
 
 /*  hello-world: iterator deltas  */
@@ -117,32 +136,16 @@ static void _runtime_lisp(void) {
 }
 
 /*  hello-world: compile-time meta  */
-meta static String joined(String a, String b, String c, String d) =>
-  a + b + c + d;
-
 static void _compile_time_meta(void) {
   puts($joined("Hel", "lo, ", "Wor", "ld!"));
 }
 
 /*  hello-world: greeting macro  */
-macro Expression $greet(Literal $who) => %"Hello, $($who)!";    // literal hole
-
 static void _greeting_macro(void) {
   puts($greet("World"));
 }
 
-int main(void) {
-  _hello_machine();
-  _string_chain();
-  _word_pipeline();
-  _partitioned();
-  _list_dsl();
-  _map_decoder();
-  _array_sort();
-  _closure_pipeline();
-  _iterator_deltas();
-  _runtime_lisp();
-  _compile_time_meta();
-  _greeting_macro();
-  return 0;
-}
+meta static String lower(String s) => s.lower();                // meta
+
+meta static String joined(String a, String b, String c, String d) =>
+  a + b + c + d;

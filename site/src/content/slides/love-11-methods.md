@@ -9,6 +9,15 @@ tab: methods
 // Define a type with its own named methods.
 typedef struct Point { int x, y; } *Point;
 
+~int main(void) {
+// Create and move a Point with compact dot calls.
+Point point = Point.new(1, 2);
+~assert(point.x == 1 && point.y == 2);
+point.move(3, 4);
+~assert(point.x == 4 && point.y == 6);
+~return 0;
+~}
+
 // Allocate a Point in the current Scope.
 Point Point.new(int x, int y) {
   Point point = xmalloc(sizeof(struct Point));
@@ -20,15 +29,6 @@ Point Point.new(int x, int y) {
 void Point.move(Point point, int dx, int dy) {
   point.x += dx; point.y += dy;
 }
-
-~int main(void) {
-// Create and move a Point with compact dot calls.
-Point point = Point.new(1, 2);
-~assert(point.x == 1 && point.y == 2);
-point.move(3, 4);
-~assert(point.x == 4 && point.y == 6);
-~return 0;
-~}
 ```
 
 `Point.new` and `Point.move` give a user-defined type the same calling

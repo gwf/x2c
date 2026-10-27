@@ -99,6 +99,113 @@ Var Compiler.meta_argument(
   return _scalar_value(c, value, want);
 }
 
+// folded constants
+
+/** Returns the value of the folded constant `node`, or void when part of it
+    is only known at run time. Literal folding hoists a constant into the
+    compiler cache and leaves `(cache ID)`, a graph of ids over `cons`,
+    `var` and `string` leaves.
+*/
+Var Compiler.folded_constant(Compiler c, Var node) {
+  match (node) {
+    case %(cache ?(int id)): return _cached_constant(c, c.id_keys[id]);
+    case %(cons ?head ?tail):
+      return cons(c.folded_constant(head), c.folded_constant(tail));
+    case %(nil): return %();
+  }
+  return _constant_leaf(c, node);
+}
+
+/** Returns the value of a String or character literal from its source
+    `spelling`, quotes included: adjacent pieces are unescaped on their own
+    and joined, as C does, and a character is its code.
+*/
+Var Compiler.literal_text_value(String spelling) {
+  int len = spelling.len();
+  if (len >= 2 && spelling[0] == '"') {
+    String text = "";
+    for (int i = 0; i < len; i++) {
+      if (spelling[i] != '"') continue;
+      int start = ++i;
+      while (i < len && spelling[i] != '"') i += spelling[i] == '\\' ? 2 : 1;
+      String piece = String.new_len(spelling + start, i - start).unescape();
+      text = %"$text$piece";
+    }
+    return text;
+  }
+  if (len >= 3 && spelling[0] == '\'') {
+    String body = String.new_len(spelling + 1, len - 2).unescape();
+    return (char) (body.len() ? body[0] : 0);
+  }
+  return spelling;
+}
+
+// values in code
+
+/** Returns literal code for a compile-time `value`, preserving `declared`
+    when supplied. An Array or Map, at any depth, becomes a literal that
+    builds a fresh collection on every execution; other data comes from the
+    literal cache. A cycle or a collection held twice is reported at `site`.
+    Returns NULL for code Lists or values without a literal representation.
+*/
+List Compiler.meta_value_expression(
+  Compiler c, Type declared, Var value, Token site) {
+  if (value is not <list>) _refuse(c, value, site);
+  Type type = declared ? declared : Macro.number_type(value);
+  if (value is <list> && c.sym.is_named_value_type(declared, "Macro")) {
+    List expression = c.macro_value_literal(value);
+    return %(expr ("Macro") $(expression.caddr()));
+  }
+  if (c.sym.is_var_type(type)) type = %("Var");
+  else c.sym.var_tag_for_type(type, type);
+  if ((value.is_integer() || value.is_floating()) && type !== %("Var"))
+    return _number_literal(c, declared, type, value);
+  Type kind = NULL;
+  if (value is <array>) kind = %("Array");
+  else if (value is <map>) kind = %("Map");
+  else if (value is <list>) kind = %("List");
+  // Without a declared type, a List result is code; an Array or Map is data.
+  if (declared ? type === %("Var") || type === kind
+      : kind && kind !== %("List"))
+    return _data_literal(c, declared, value, site);
+  if (value is <string>) return _string_literal(c, declared, type, value);
+  if (value is <symbol> && (!declared || type === %("Symbol")))
+    return %(expr ("Symbol") (literal ("Symbol")
+                  $(value.symbol().str()) $(value.symbol())));
+  return NULL;
+}
+
+// compile-time-only functions
+
+/** Refuses a run-time call to a `meta` function this compiler derived
+    compile-time only.
+
+    Such a function reaches a `Meta` operation, so it exists only inside a
+    compiler and the unit emits no definition for it. Unchecked, the call
+    reaches the linker as an undefined symbol, which names the C spelling
+    and not the source. Another `meta` function may call it: calling one is
+    what makes the caller compile-time only too, so a body being parsed
+    under the marker is left alone.
+*/
+void Compiler.check_meta_call(Compiler c, List callee, Token origin) {
+  if (c.meta_body || !c.meta_comptime.len()) return;
+  if (callee ~= %(
+        expr ? (ident (binding ? ?name))) &&
+      name is <string> && name in c.meta_comptime)
+    $fail.stage_function_only(c, origin, name);
+}
+
+/** Returns whether `fn` is a `meta` function this compiler recorded as
+    compile-time only, whose runtime form the unit does not emit.
+*/
+int Compiler.meta_is_comptime_only(Compiler c, List fn) {
+  if (fn ~= %(function ? (bind (binding ? ?(String name)) *) ?))
+    return name in c.meta_comptime;
+  return 0;
+}
+
+// the values crossing between meta code and the program
+
 /* Captured syntax passes as itself, except that a constant reaching a
    parameter that is neither `Var` nor `List` passes as its value. */
 static Var _captured_value(Compiler c, Var captured, Type want) {
@@ -124,23 +231,6 @@ static Var _scalar_value(Compiler c, Var value, Type want) {
   if (tag && (value.is_integer() || value.is_floating()))
     return value.convert(tag);
   return value;
-}
-
-// folded constants
-
-/** Returns the value of the folded constant `node`, or void when part of it
-    is only known at run time. Literal folding hoists a constant into the
-    compiler cache and leaves `(cache ID)`, a graph of ids over `cons`,
-    `var` and `string` leaves.
-*/
-Var Compiler.folded_constant(Compiler c, Var node) {
-  match (node) {
-    case %(cache ?(int id)): return _cached_constant(c, c.id_keys[id]);
-    case %(cons ?head ?tail):
-      return cons(c.folded_constant(head), c.folded_constant(tail));
-    case %(nil): return %();
-  }
-  return _constant_leaf(c, node);
 }
 
 static Var _cached_constant(Compiler c, List key) {
@@ -204,72 +294,6 @@ static Var _joined_constant(Compiler c, Var left, Var right) {
   return a.string().add(b);
 }
 
-/** Returns the value of a String or character literal from its source
-    `spelling`, quotes included: adjacent pieces are unescaped on their own
-    and joined, as C does, and a character is its code.
-*/
-Var Compiler.literal_text_value(String spelling) {
-  int len = spelling.len();
-  if (len >= 2 && spelling[0] == '"') {
-    String text = "";
-    for (int i = 0; i < len; i++) {
-      if (spelling[i] != '"') continue;
-      int start = ++i;
-      while (i < len && spelling[i] != '"') i += spelling[i] == '\\' ? 2 : 1;
-      String piece = String.new_len(spelling + start, i - start).unescape();
-      text = %"$text$piece";
-    }
-    return text;
-  }
-  if (len >= 3 && spelling[0] == '\'') {
-    String body = String.new_len(spelling + 1, len - 2).unescape();
-    return (char) (body.len() ? body[0] : 0);
-  }
-  return spelling;
-}
-
-// values in code
-
-/** Returns literal code for a compile-time `value`, preserving `declared`
-    when supplied. An Array or Map, at any depth, becomes a literal that
-    builds a fresh collection on every execution; other data comes from the
-    literal cache. A cycle or a collection held twice is reported at `site`.
-    Returns NULL for code Lists or values without a literal representation.
-*/
-List Compiler.meta_value_expression(
-  Compiler c, Type declared, Var value, Token site) {
-  if (value is not <list>) _refuse(c, value, site);
-  Type type = declared ? declared : Macro.number_type(value);
-  if (value is <list> && c.sym.is_named_value_type(declared, "Macro")) {
-    List expression = c.macro_value_literal(value);
-    return %(expr ("Macro") $(expression.caddr()));
-  }
-  if (c.sym.is_var_type(type)) type = %("Var");
-  else c.sym.var_tag_for_type(type, type);
-  if ((value.is_integer() || value.is_floating()) && type !== %("Var"))
-    return _number_literal(c, declared, type, value);
-  Type kind = NULL;
-  if (value is <array>) kind = %("Array");
-  else if (value is <map>) kind = %("Map");
-  else if (value is <list>) kind = %("List");
-  // Without a declared type, a List result is code; an Array or Map is data.
-  if (declared ? type === %("Var") || type === kind
-      : kind && kind !== %("List"))
-    return _data_literal(c, declared, value, site);
-  if (value is <string>) return _string_literal(c, declared, type, value);
-  if (value is <symbol> && (!declared || type === %("Symbol")))
-    return %(expr ("Symbol") (literal ("Symbol")
-                  $(value.symbol().str()) $(value.symbol())));
-  return NULL;
-}
-
-/* Reports at `site` a result that cannot become data in the program. */
-static void _refuse(Compiler c, Var value, Token site) {
-  Map marks = auto {};
-  List problem = Var.independent_data_problem(value, marks);
-  if (problem) c.report_error(<macro>, problem.car(), site, problem.cadr());
-}
-
 static List _string_literal(Compiler c, Type declared, Type type, Var value) {
   if (!declared || type === $!Type{ char * })
     return %(expr (* char) (literal (* char) $(value.repr())));
@@ -300,6 +324,13 @@ static List _data_literal(Compiler c, Type declared, Var value, Token site) {
     ? c.convert_expression(expression, declared) : expression;
 }
 
+/* Reports at `site` a result that cannot become data in the program. */
+static void _refuse(Compiler c, Var value, Token site) {
+  Map marks = auto {};
+  List problem = Var.independent_data_problem(value, marks);
+  if (problem) c.report_error(<macro>, problem.car(), site, problem.cadr());
+}
+
 /* Builds the parser's form of one data value, which
    `Var.independent_data_problem` accepted. Immutable values come from the
    literal cache; each Array or Map becomes a literal that builds a fresh
@@ -315,16 +346,6 @@ static List _data_form(Compiler c, Var value) {
   if (value is <array>) return _array_form(c, value);
   if (value is not <map>) return NULL;
   return _map_form(c, value);
-}
-
-/* Strings, atoms, numbers, and Lists that hold only such values. */
-static int _immutable(Var value) {
-  if (value is <list>) {
-    foreach (Var item in value.list()) if (!_immutable(item)) return 0;
-    return 1;
-  }
-  return value is <string> || value.is_atom() ||
-    value.is_integer() || value.is_floating();
 }
 
 static List _list_form(Compiler c, Var value) {
@@ -361,31 +382,12 @@ static List _map_form(Compiler c, Var value) {
   return %(expr ("Map") (map @(entries.list())));
 }
 
-// compile-time-only functions
-
-/** Refuses a run-time call to a `meta` function this compiler derived
-    compile-time only.
-
-    Such a function reaches a `Meta` operation, so it exists only inside a
-    compiler and the unit emits no definition for it. Unchecked, the call
-    reaches the linker as an undefined symbol, which names the C spelling
-    and not the source. Another `meta` function may call it: calling one is
-    what makes the caller compile-time only too, so a body being parsed
-    under the marker is left alone.
-*/
-void Compiler.check_meta_call(Compiler c, List callee, Token origin) {
-  if (c.meta_body || !c.meta_comptime.len()) return;
-  if (callee ~= %(
-        expr ? (ident (binding ? ?name))) &&
-      name is <string> && name in c.meta_comptime)
-    $fail.stage_function_only(c, origin, name);
-}
-
-/** Returns whether `fn` is a `meta` function this compiler recorded as
-    compile-time only, whose runtime form the unit does not emit.
-*/
-int Compiler.meta_is_comptime_only(Compiler c, List fn) {
-  if (fn ~= %(function ? (bind (binding ? ?(String name)) *) ?))
-    return name in c.meta_comptime;
-  return 0;
+/* Strings, atoms, numbers, and Lists that hold only such values. */
+static int _immutable(Var value) {
+  if (value is <list>) {
+    foreach (Var item in value.list()) if (!_immutable(item)) return 0;
+    return 1;
+  }
+  return value is <string> || value.is_atom() ||
+    value.is_integer() || value.is_floating();
 }

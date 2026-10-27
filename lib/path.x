@@ -33,47 +33,13 @@ class Path String;
 #include <sys/stat.h>
 #include <unistd.h>
 
+/* One glob's matching policy and results, shared by its directory walk. */
+static typedef struct Glob {
+  Path pattern, Array matches;
+  int rooted, directories, hidden;
+} Glob;
+
 // path spelling
-
-static String _trimmed(String path) {
-  int length = path.len();
-  while (length > 1 && path[length - 1] == '/') length--;
-  return path[:length];
-}
-
-/** Returns `name` joined to `base` with one separating slash.
-    An absolute `name`, or an empty `base`, is returned unchanged.
-*/
-meta native Self Path.join(Self base, Path name) {
-  if (!name) return base;
-  if (!base || name.startswith("/")) return name;
-  return base.endswith("/") ? %"$base$name" : %"$base/$name";
-}
-
-/** Returns the directory part of `path`: `.` when it has no slash and `/`
-    for a path directly under the root.
-*/
-meta native Self Path.dirname(Self path) {
-  String trimmed = _trimmed(path);
-  int slash = trimmed.rfind("/");
-  if (slash < 0) return ".";
-  while (slash > 0 && trimmed[slash - 1] == '/') slash--;
-  return slash ? trimmed[:slash] : "/";
-}
-
-/** Returns the last component of `path`, ignoring trailing slashes. */
-meta native Self Path.basename(Self path) {
-  String trimmed = _trimmed(path);
-  if (trimmed == "/") return trimmed;
-  int slash = trimmed.rfind("/");
-  return slash < 0 ? trimmed : trimmed[slash + 1:];
-}
-
-// The last dot of `base` starts an extension unless it begins or ends it.
-static int _extension_dot(String base) {
-  int dot = base.rfind(".");
-  return dot > 0 && dot < base.len() - 1 ? dot : -1;
-}
 
 /** Returns the extension of `path`'s last component, including its dot, or
     NULL when there is none. A leading or trailing dot does not start an
@@ -90,6 +56,148 @@ meta native String Path.stem(Path path) {
   String base = path.basename();
   int dot = _extension_dot(base);
   return dot < 0 ? base : base[:dot];
+}
+
+/** Returns the last component of `path`, ignoring trailing slashes. */
+meta native Self Path.basename(Self path) {
+  String trimmed = _trimmed(path);
+  if (trimmed == "/") return trimmed;
+  int slash = trimmed.rfind("/");
+  return slash < 0 ? trimmed : trimmed[slash + 1:];
+}
+
+// queries
+
+/** Reports whether `p` names a regular file, following links. */
+int Path.is_file(Path p) => S_ISREG(_mode(p));
+
+/** Reports whether this process may execute `path`, as the shell's `-x`. */
+int Path.is_executable(Path path) => path && access(path, X_OK) == 0;
+
+/** Returns the size of the file at `path` in bytes.
+    Raises: `<not-found>` or `<io-fail>`.
+*/
+long Path.size(Path path) => (long) _stat("Path.size", path).st_size;
+
+/** Returns the modification time of `path` in seconds since the epoch,
+    with the fraction the filesystem records.
+    Raises: `<not-found>` or `<io-fail>`.
+*/
+double Path.modified_time(Path path) {
+  struct stat info = _stat("Path.modified_time", path);
+#ifdef __APPLE__
+  return info.st_mtimespec.tv_sec + info.st_mtimespec.tv_nsec / 1e9;
+#else
+  return info.st_mtim.tv_sec + info.st_mtim.tv_nsec / 1e9;
+#endif
+}
+
+// listing and walking
+
+/** Returns a lazy iterator over every path below the directory `root`,
+    parents before their contents and siblings sorted. Symbolic links to
+    directories are listed but not followed, and a directory that cannot be
+    read is listed without its contents. Only the paths not yet visited are
+    held; the yielded paths live in the active pool.
+
+    ```x2c
+    ~#include "path.x"
+    ~int main(void) {
+    Path source = "src";
+    foreach (Path path in source.walk()) printf("%s\n", path);
+    long units = source.walk().filter(%!(p) => p.str().endswith(".x")).count();
+    ~  return units >= 0 ? 0 : 1;
+    ~}
+    ```
+
+    Raises: `<not-found>` or `<io-fail>` when `root` cannot be listed, and
+    `<io-fail>` from a pull when a directory vanishes during the walk.
+*/
+Iter Path.walk(Path root, Iter dest) {
+  Array pending = [];
+  _push_children(pending, root);
+  return dest.init((Var) {0}, _walk_next, pending);
+}
+
+// globbing
+
+/** Returns the existing paths that match the glob `pattern`, sorted.
+    The walk starts at the longest leading directory without a wildcard,
+    spelled as the pattern spells it, and descends only as deep as the
+    pattern can match. As in a shell, a name that begins with a dot matches
+    only where the pattern spells the dot, and a pattern that ends with a
+    slash matches only directories, each returned with a trailing slash.
+    No match returns an empty `List`.
+*/
+List Path.glob(Path pattern) {
+  String text = pattern;
+  const char *wildcard = strpbrk(text, "*?[\\");
+  if (!wildcard) return pattern.exists() ? $(pattern) : NULL;
+  int cut = wildcard - (const char *) text;
+  while (cut && text[cut - 1] != '/') cut--;
+  Path base = cut ? text[:cut] : NULL, root = base ? base : ".";
+  Array matches = auto [];
+  Glob g = {pattern, matches, !!base, text.endswith("/"),
+            pattern.startswith(".") || "/." in pattern};
+  if (root.is_dir()) _glob(g, root, _glob_depth(text[cut:]));
+  return matches.sort();
+}
+
+/** Reports whether `p` names an existing file, following links. */
+int Path.exists(Path p) => _mode(p) != 0;
+
+/** Reports whether all of `path` matches the glob `pattern`. A path
+    component that begins with a dot matches only a pattern component that
+    begins with one, and a run of slashes matches a run of slashes.
+*/
+int Path.glob_match(Path pattern, Path path) =>
+  pattern && path && _glob_match(pattern, path, path);
+
+// changing the filesystem
+
+/** Removes the file or symbolic link `path` when it exists.
+    Raises: `<io-fail>` when it exists and cannot be removed.
+*/
+void Path.remove_file(Path path) {
+  if (unlink(path) && errno != ENOENT)
+    File.path_error("Path.remove_file", path, errno);
+}
+
+/** Moves `source` to `target`, copying and removing when they are on
+    different filesystems.
+    Raises: `<not-found>` or `<io-fail>`.
+*/
+void Path.move_to(Path source, Path target) {
+  if (!rename(source, target)) return;
+  if (errno != EXDEV) File.path_error("Path.move_to", source, errno);
+  source.copy_tree(target);
+  source.remove_tree();
+}
+
+/** Removes `path` and everything below it when it exists.
+    Symbolic links are removed, not followed. Removal continues past an
+    entry that cannot be removed.
+    Raises: `<io-fail>` naming the first path that could not be removed.
+*/
+void Path.remove_tree(Path path) {
+  String failed = NULL;
+  int failure = 0;
+  _remove_tree(path, failed, failure);
+  if (failed) raise %(io-fail (operation "Path.remove_tree")
+                      (path $failed) (errno $failure));
+}
+
+/** Copies `source` to `target`: a directory recursively, a symbolic link as
+    a link, and a regular file with `Path.copy_file`.
+    Raises: `<not-found>` or `<io-fail>`, with `EINVAL` when `source` is a
+    directory and `target` is that directory or inside it.
+*/
+void Path.copy_tree(Path source, Path target) {
+  struct stat info;
+  if (!lstat(source, &info) && S_ISDIR(info.st_mode) &&
+      %"$(target.absolute())/".startswith(%"$(source.absolute())/"))
+    File.path_error("Path.copy_tree", target, EINVAL);
+  _copy_tree(source, target);
 }
 
 /** Returns an absolute form of `path` with symbolic links resolved.
@@ -120,63 +228,7 @@ Self Path.absolute(Self path) {
   return result;
 }
 
-// queries
 
-static int _mode(Path p) {
-  struct stat info;
-  return p && stat(p, &info) == 0 ? info.st_mode : 0;
-}
-
-/** Reports whether `p` names an existing file, following links. */
-int Path.exists(Path p) => _mode(p) != 0;
-
-/** Reports whether `p` names a directory, following links. */
-int Path.is_dir(Path p) => S_ISDIR(_mode(p));
-
-/** Reports whether `p` names a regular file, following links. */
-int Path.is_file(Path p) => S_ISREG(_mode(p));
-
-/** Reports whether this process may execute `path`, as the shell's `-x`. */
-int Path.is_executable(Path path) => path && access(path, X_OK) == 0;
-
-static struct stat _stat(String operation, String path) {
-  struct stat info;
-  if (stat(path, &info)) File.path_error(operation, path, errno);
-  return info;
-}
-
-/* A directory opens for reading, and its first read would raise without the
-   path. */
-static File _open(String operation, Path path, const char *mode) {
-  File file = fopen(path, mode);
-  if (!file) File.path_error(operation, path, errno);
-  struct stat info;
-  if (!file.stat(&info) && S_ISDIR(info.st_mode)) {
-    file.close();
-    File.path_error(operation, path, EISDIR);
-  }
-  return file;
-}
-
-/** Returns the size of the file at `path` in bytes.
-    Raises: `<not-found>` or `<io-fail>`.
-*/
-long Path.size(Path path) => (long) _stat("Path.size", path).st_size;
-
-/** Returns the modification time of `path` in seconds since the epoch,
-    with the fraction the filesystem records.
-    Raises: `<not-found>` or `<io-fail>`.
-*/
-double Path.modified_time(Path path) {
-  struct stat info = _stat("Path.modified_time", path);
-#ifdef __APPLE__
-  return info.st_mtimespec.tv_sec + info.st_mtimespec.tv_nsec / 1e9;
-#else
-  return info.st_mtim.tv_sec + info.st_mtim.tv_nsec / 1e9;
-#endif
-}
-
-// listing and walking
 
 /** Returns the names in the directory `path`, sorted, without `.` and `..`.
     Raises: `<not-found>` or `<io-fail>`.
@@ -192,6 +244,139 @@ List Path.list_dir(Path path) {
   return names.sort().list_free();
 }
 
+
+
+/** Creates the directory `p` and any missing parents.
+    An existing directory is left as it is.
+    Raises: `<io-fail>` when a component cannot be created or names an
+    existing non-directory, or `<not-found>`.
+*/
+void Path.make_dirs(Path p) {
+  if (p.is_dir()) return;
+  Path parent = p.dirname();
+  if (parent != p) parent.make_dirs();
+  if (!mkdir(p, 0777)) return;
+  int error = errno;
+  if (error != EEXIST || !p.is_dir())
+    File.path_error("Path.make_dirs", p, error == EEXIST ? ENOTDIR : error);
+}
+
+/** Returns the directory part of `path`: `.` when it has no slash and `/`
+    for a path directly under the root.
+*/
+meta native Self Path.dirname(Self path) {
+  String trimmed = _trimmed(path);
+  int slash = trimmed.rfind("/");
+  if (slash < 0) return ".";
+  while (slash > 0 && trimmed[slash - 1] == '/') slash--;
+  return slash ? trimmed[:slash] : "/";
+}
+
+/** Reports whether `p` names a directory, following links. */
+int Path.is_dir(Path p) => S_ISDIR(_mode(p));
+
+/** Copies the regular file `source` to `target`, replacing `target` and
+    giving it `source`'s permission bits. A `target` that is already the same
+    file as `source` is left as it is.
+    Raises: `<not-found>` or `<io-fail>`, including for a directory `source`.
+*/
+void Path.copy_file(Path source, Path target) {
+  File input = auto _open("Path.copy_file", source, "rb");
+  struct stat info, existing;
+  if (input.stat(&info)) File.path_error("Path.copy_file", source, errno);
+  if (!stat(target, &existing) && existing.st_dev == info.st_dev &&
+      existing.st_ino == info.st_ino)
+    return;
+  File output = auto _open("Path.copy_file", target, "wb");
+  input.copy_to(output, NULL);
+  if (output.flush()) File.path_error("Path.copy_file", target, errno);
+  if (chmod(target, info.st_mode & 07777))
+    File.path_error("Path.copy_file", target, errno);
+}
+
+/** Creates the symbolic link `link` pointing at `target`.
+    Raises: `<io-fail>` when the link cannot be created.
+*/
+void Path.symlink_to(Path link, Path target) {
+  if (symlink(target, link)) File.path_error("Path.symlink_to", link, errno);
+}
+
+// whole files and temporary directories
+
+/** Returns the contents of the file at `path`, or NULL when it is empty.
+    Raises: `<not-found>`, `<io-fail>`, or `<bad-arg>` when the file contains
+    a NUL byte.
+*/
+String Path.read_text(Path path) =>
+  _open("Path.read_text", path, "r").string_close();
+
+/** Replaces the contents of the file at `path` with `text`.
+    Raises: `<not-found>` when the directory does not exist, or `<io-fail>`.
+*/
+void Path.write_text(Path path, String text) {
+  File output = auto _open("Path.write_text", path, "w");
+  output.write_all(text, text.len());
+  if (output.flush()) File.path_error("Path.write_text", path, errno);
+}
+
+/** Creates a new private directory under `TMPDIR`, or `/tmp`, and returns
+    its path. The caller removes it, usually with `Path.remove_tree`.
+    Raises: `<io-fail>` when the directory cannot be created.
+*/
+Path Path.temp_dir(void) {
+  const char *parent = getenv("TMPDIR");
+  Path root = parent && *parent ? String.new(parent) : "/tmp";
+  String pattern = root.join("x2c-XXXXXX");
+  char *created = xmemdup(pattern, pattern.len() + 1);
+  if (!mkdtemp(created)) File.path_error("Path.temp_dir", root, errno);
+  return String.new(created);
+}
+
+/** Returns `name` joined to `base` with one separating slash.
+    An absolute `name`, or an empty `base`, is returned unchanged.
+*/
+meta native Self Path.join(Self base, Path name) {
+  if (!name) return base;
+  if (!base || name.startswith("/")) return name;
+  return base.endswith("/") ? %"$base$name" : %"$base/$name";
+}
+
+
+
+static String _trimmed(String path) {
+  int length = path.len();
+  while (length > 1 && path[length - 1] == '/') length--;
+  return path[:length];
+}
+
+// The last dot of `base` starts an extension unless it begins or ends it.
+static int _extension_dot(String base) {
+  int dot = base.rfind(".");
+  return dot > 0 && dot < base.len() - 1 ? dot : -1;
+}
+
+
+
+static int _mode(Path p) {
+  struct stat info;
+  return p && stat(p, &info) == 0 ? info.st_mode : 0;
+}
+
+static struct stat _stat(String operation, String path) {
+  struct stat info;
+  if (stat(path, &info)) File.path_error(operation, path, errno);
+  return info;
+}
+
+static int _walk_next(Iter iter, Var *out) {
+  Array pending = iter.state;
+  if (!pending.len()) return 0;
+  String path = pending.take_last();
+  if (_descends(path)) _push_children(pending, path);
+  *out = path;
+  return 1;
+}
+
 static int _descends(String path) {
   struct stat info;
   return lstat(path, &info) == 0 && S_ISDIR(info.st_mode) &&
@@ -205,83 +390,29 @@ static void _push_children(Array pending, Path directory) {
   foreach (String name in children) pending.push(directory.join(name));
 }
 
-static int _walk_next(Iter iter, Var *out) {
-  Array pending = iter.state;
-  if (!pending.len()) return 0;
-  String path = pending.take_last();
-  if (_descends(path)) _push_children(pending, path);
-  *out = path;
-  return 1;
-}
-
-/** Returns a lazy iterator over every path below the directory `root`,
-    parents before their contents and siblings sorted. Symbolic links to
-    directories are listed but not followed, and a directory that cannot be
-    read is listed without its contents. Only the paths not yet visited are
-    held; the yielded paths live in the active pool.
-
-    ```x2c
-    ~#include "path.x"
-    ~int main(void) {
-    Path source = "src";
-    foreach (Path path in source.walk()) printf("%s\n", path);
-    long units = source.walk().filter(%!(p) => p.str().endswith(".x")).count();
-    ~  return units >= 0 ? 0 : 1;
-    ~}
-    ```
-
-    Raises: `<not-found>` or `<io-fail>` when `root` cannot be listed, and
-    `<io-fail>` from a pull when a directory vanishes during the walk.
-*/
-Iter Path.walk(Path root, Iter dest) {
-  Array pending = [];
-  _push_children(pending, root);
-  return dest.init((Var) {0}, _walk_next, pending);
-}
-
-// globbing
-
-/* A `]` that opens a class is a member, as in a shell. */
-static int _class_match(const char *&pattern, unsigned char value) {
-  const char *ch = pattern, int negate = *ch == '!' || *ch == '^';
-  if (negate) ch++;
-  const char *first_member = ch;
-  int matched = 0;
-  while (*ch && (*ch != ']' || ch == first_member)) {
-    unsigned char first = *ch++;
-    if (*ch == '-' && ch[1] && ch[1] != ']') {
-      ch++;
-      unsigned char last = *ch++;
-      if (value >= first && value <= last) matched = 1;
-    }
-    else if (value == first) matched = 1;
+/* The depth a walk needs for `components`: one level per component, or -1
+   for any depth once a component is `**`. */
+static int _glob_depth(String components) {
+  int depth = 0;
+  foreach (String part in components.split("/")) {
+    if (!part) continue;
+    if (part == "**") return -1;
+    depth++;
   }
-  if (*ch != ']') return -1;
-  pattern = ch + 1;
-  return negate ? !matched : matched;
+  return depth;
 }
 
-static int _hidden(const char *text, const char *origin) =>
-  *text == '.' && (text == origin || text[-1] == '/');
-
-/* A pattern continues at a component's leading dot only where it spells
-   the dot, or where a `**` component matches no directories before it. */
-static int _passes_dot(const char *pattern) =>
-  *pattern == '.' || (pattern[0] == '\\' && pattern[1] == '.') ||
-  !strncmp(pattern, "**/", 3);
-
-/* Returns the pattern after a `?`, class, or literal that matches the
-   character at `text`, or NULL. */
-static const char *_glob_step(const char *pattern, const char *text) {
-  if (!*text || *text == '/') return NULL;
-  if (*pattern == '?') return pattern + 1;
-  if (*pattern == '[') {
-    const char *rest = pattern + 1;
-    int matched = _class_match(rest, (unsigned char) *text);
-    if (matched >= 0) return matched ? rest : NULL;
+static void _glob(Glob &g, Path directory, int depth) {
+  foreach (String name in directory.list_dir()) {
+    Path child = directory.join(name);
+    String candidate = child;
+    if (!g.rooted) candidate = candidate[2:];
+    if (g.directories) candidate = %"$candidate/";
+    if (g.pattern.glob_match(candidate) &&
+        (!g.directories || child.is_dir())) g.matches.push(candidate);
+    if (depth != 1 && (g.hidden || !name.startswith(".")) && _descends(child))
+      _glob(g, child, depth - 1);
   }
-  if (*pattern == '\\' && pattern[1]) pattern++;
-  return *pattern == *text ? pattern + 1 : NULL;
 }
 
 /* A `**` matches any text up to a component's leading dot. A `**`
@@ -338,89 +469,49 @@ static int _glob_match(
   }
 }
 
-/** Reports whether all of `path` matches the glob `pattern`. A path
-    component that begins with a dot matches only a pattern component that
-    begins with one, and a run of slashes matches a run of slashes.
-*/
-int Path.glob_match(Path pattern, Path path) =>
-  pattern && path && _glob_match(pattern, path, path);
+static int _hidden(const char *text, const char *origin) =>
+  *text == '.' && (text == origin || text[-1] == '/');
 
-/* The depth a walk needs for `components`: one level per component, or -1
-   for any depth once a component is `**`. */
-static int _glob_depth(String components) {
-  int depth = 0;
-  foreach (String part in components.split("/")) {
-    if (!part) continue;
-    if (part == "**") return -1;
-    depth++;
+/* A pattern continues at a component's leading dot only where it spells
+   the dot, or where a `**` component matches no directories before it. */
+static int _passes_dot(const char *pattern) =>
+  *pattern == '.' || (pattern[0] == '\\' && pattern[1] == '.') ||
+  !strncmp(pattern, "**/", 3);
+
+/* Returns the pattern after a `?`, class, or literal that matches the
+   character at `text`, or NULL. */
+static const char *_glob_step(const char *pattern, const char *text) {
+  if (!*text || *text == '/') return NULL;
+  if (*pattern == '?') return pattern + 1;
+  if (*pattern == '[') {
+    const char *rest = pattern + 1;
+    int matched = _class_match(rest, (unsigned char) *text);
+    if (matched >= 0) return matched ? rest : NULL;
   }
-  return depth;
+  if (*pattern == '\\' && pattern[1]) pattern++;
+  return *pattern == *text ? pattern + 1 : NULL;
 }
 
-/* One glob's matching policy and results, shared by its directory walk. */
-static typedef struct Glob {
-  Path pattern, Array matches;
-  int rooted, directories, hidden;
-} Glob;
 
-static void _glob(Glob &g, Path directory, int depth) {
-  foreach (String name in directory.list_dir()) {
-    Path child = directory.join(name);
-    String candidate = child;
-    if (!g.rooted) candidate = candidate[2:];
-    if (g.directories) candidate = %"$candidate/";
-    if (g.pattern.glob_match(candidate) &&
-        (!g.directories || child.is_dir())) g.matches.push(candidate);
-    if (depth != 1 && (g.hidden || !name.startswith(".")) && _descends(child))
-      _glob(g, child, depth - 1);
+
+/* A `]` that opens a class is a member, as in a shell. */
+static int _class_match(const char *&pattern, unsigned char value) {
+  const char *ch = pattern, int negate = *ch == '!' || *ch == '^';
+  if (negate) ch++;
+  const char *first_member = ch;
+  int matched = 0;
+  while (*ch && (*ch != ']' || ch == first_member)) {
+    unsigned char first = *ch++;
+    if (*ch == '-' && ch[1] && ch[1] != ']') {
+      ch++;
+      unsigned char last = *ch++;
+      if (value >= first && value <= last) matched = 1;
+    }
+    else if (value == first) matched = 1;
   }
-}
-
-/** Returns the existing paths that match the glob `pattern`, sorted.
-    The walk starts at the longest leading directory without a wildcard,
-    spelled as the pattern spells it, and descends only as deep as the
-    pattern can match. As in a shell, a name that begins with a dot matches
-    only where the pattern spells the dot, and a pattern that ends with a
-    slash matches only directories, each returned with a trailing slash.
-    No match returns an empty `List`.
-*/
-List Path.glob(Path pattern) {
-  String text = pattern;
-  const char *wildcard = strpbrk(text, "*?[\\");
-  if (!wildcard) return pattern.exists() ? $(pattern) : NULL;
-  int cut = wildcard - (const char *) text;
-  while (cut && text[cut - 1] != '/') cut--;
-  Path base = cut ? text[:cut] : NULL, root = base ? base : ".";
-  Array matches = auto [];
-  Glob g = {pattern, matches, !!base, text.endswith("/"),
-            pattern.startswith(".") || "/." in pattern};
-  if (root.is_dir()) _glob(g, root, _glob_depth(text[cut:]));
-  return matches.sort();
-}
-
-// changing the filesystem
-
-/** Creates the directory `p` and any missing parents.
-    An existing directory is left as it is.
-    Raises: `<io-fail>` when a component cannot be created or names an
-    existing non-directory, or `<not-found>`.
-*/
-void Path.make_dirs(Path p) {
-  if (p.is_dir()) return;
-  Path parent = p.dirname();
-  if (parent != p) parent.make_dirs();
-  if (!mkdir(p, 0777)) return;
-  int error = errno;
-  if (error != EEXIST || !p.is_dir())
-    File.path_error("Path.make_dirs", p, error == EEXIST ? ENOTDIR : error);
-}
-
-/** Removes the file or symbolic link `path` when it exists.
-    Raises: `<io-fail>` when it exists and cannot be removed.
-*/
-void Path.remove_file(Path path) {
-  if (unlink(path) && errno != ENOENT)
-    File.path_error("Path.remove_file", path, errno);
+  if (*ch != ']') return -1;
+  pattern = ch + 1;
+  return negate ? !matched : matched;
 }
 
 /* Each entry's paths are released before the next, however large the
@@ -457,38 +548,6 @@ static void _remove_tree(Path path, String &failed, int &failure) {
   else if (unlink(path) && !failed) failed = path, failure = errno;
 }
 
-/** Removes `path` and everything below it when it exists.
-    Symbolic links are removed, not followed. Removal continues past an
-    entry that cannot be removed.
-    Raises: `<io-fail>` naming the first path that could not be removed.
-*/
-void Path.remove_tree(Path path) {
-  String failed = NULL;
-  int failure = 0;
-  _remove_tree(path, failed, failure);
-  if (failed) raise %(io-fail (operation "Path.remove_tree")
-                      (path $failed) (errno $failure));
-}
-
-/** Copies the regular file `source` to `target`, replacing `target` and
-    giving it `source`'s permission bits. A `target` that is already the same
-    file as `source` is left as it is.
-    Raises: `<not-found>` or `<io-fail>`, including for a directory `source`.
-*/
-void Path.copy_file(Path source, Path target) {
-  File input = auto _open("Path.copy_file", source, "rb");
-  struct stat info, existing;
-  if (input.stat(&info)) File.path_error("Path.copy_file", source, errno);
-  if (!stat(target, &existing) && existing.st_dev == info.st_dev &&
-      existing.st_ino == info.st_ino)
-    return;
-  File output = auto _open("Path.copy_file", target, "wb");
-  input.copy_to(output, NULL);
-  if (output.flush()) File.path_error("Path.copy_file", target, errno);
-  if (chmod(target, info.st_mode & 07777))
-    File.path_error("Path.copy_file", target, errno);
-}
-
 static void _copy_tree(Path source, Path target) {
   struct stat info;
   if (lstat(source, &info)) File.path_error("Path.copy_tree", source, errno);
@@ -510,64 +569,15 @@ static void _copy_tree(Path source, Path target) {
   else source.copy_file(target);
 }
 
-/** Copies `source` to `target`: a directory recursively, a symbolic link as
-    a link, and a regular file with `Path.copy_file`.
-    Raises: `<not-found>` or `<io-fail>`, with `EINVAL` when `source` is a
-    directory and `target` is that directory or inside it.
-*/
-void Path.copy_tree(Path source, Path target) {
+/* A directory opens for reading, and its first read would raise without the
+   path. */
+static File _open(String operation, Path path, const char *mode) {
+  File file = fopen(path, mode);
+  if (!file) File.path_error(operation, path, errno);
   struct stat info;
-  if (!lstat(source, &info) && S_ISDIR(info.st_mode) &&
-      %"$(target.absolute())/".startswith(%"$(source.absolute())/"))
-    File.path_error("Path.copy_tree", target, EINVAL);
-  _copy_tree(source, target);
-}
-
-/** Moves `source` to `target`, copying and removing when they are on
-    different filesystems.
-    Raises: `<not-found>` or `<io-fail>`.
-*/
-void Path.move_to(Path source, Path target) {
-  if (!rename(source, target)) return;
-  if (errno != EXDEV) File.path_error("Path.move_to", source, errno);
-  source.copy_tree(target);
-  source.remove_tree();
-}
-
-/** Creates the symbolic link `link` pointing at `target`.
-    Raises: `<io-fail>` when the link cannot be created.
-*/
-void Path.symlink_to(Path link, Path target) {
-  if (symlink(target, link)) File.path_error("Path.symlink_to", link, errno);
-}
-
-// whole files and temporary directories
-
-/** Returns the contents of the file at `path`, or NULL when it is empty.
-    Raises: `<not-found>`, `<io-fail>`, or `<bad-arg>` when the file contains
-    a NUL byte.
-*/
-String Path.read_text(Path path) =>
-  _open("Path.read_text", path, "r").string_close();
-
-/** Replaces the contents of the file at `path` with `text`.
-    Raises: `<not-found>` when the directory does not exist, or `<io-fail>`.
-*/
-void Path.write_text(Path path, String text) {
-  File output = auto _open("Path.write_text", path, "w");
-  output.write_all(text, text.len());
-  if (output.flush()) File.path_error("Path.write_text", path, errno);
-}
-
-/** Creates a new private directory under `TMPDIR`, or `/tmp`, and returns
-    its path. The caller removes it, usually with `Path.remove_tree`.
-    Raises: `<io-fail>` when the directory cannot be created.
-*/
-Path Path.temp_dir(void) {
-  const char *parent = getenv("TMPDIR");
-  Path root = parent && *parent ? String.new(parent) : "/tmp";
-  String pattern = root.join("x2c-XXXXXX");
-  char *created = xmemdup(pattern, pattern.len() + 1);
-  if (!mkdtemp(created)) File.path_error("Path.temp_dir", root, errno);
-  return String.new(created);
+  if (!file.stat(&info) && S_ISDIR(info.st_mode)) {
+    file.close();
+    File.path_error(operation, path, EISDIR);
+  }
+  return file;
 }

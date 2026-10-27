@@ -2,38 +2,10 @@
 
 static keyword loop $private.loop;
 
-module int _null_literal(List expr) =>
-  _integer_literal_kind(expr, NULL) == <zero> ||
-  expr ~=
-    %(expr ? (ident (binding ? "NULL")));
-
 /* explicit converter calls
 
    A converter call that repeats the conversion its destination already
    performs draws a warning. */
-
-/* An explicit converter call, `value.str()` or `value.var()`, is the most
-   recent one parsed from source tokens, kept with its spelling and
-   location. A destination parser compares the expression it just parsed
-   against it, so nested calls and calls bound from constructed syntax never
-   match. An argument list keeps the note left after each argument, since
-   its destinations are known only once the call resolves. A converter takes
-   only its receiver and is named for its result: the result spelled in
-   lower case, or `str` for String. */
-module void _note_explicit_converter(
-  Compiler c, List call, String method, Token origin) {
-  Type result = call.cadr();
-  if (!(result ~= %(?))) return;
-  if (call ~= $called(?callee, ?argument)) {
-    if (callee ~= %(expr ? (ident ?binding)) &&
-        Compiler.supplies_native_meta(Ast.binding_spelling(binding))) return;
-    String spelled = result.car().str().lower();
-    if (method != spelled && (method != "str" || result !== %("String")))
-      return;
-    c.protocol_helpers["explicit-converter"] =
-      $(call, method, c.token_location(origin));
-  }
-}
 
 /** Reports `parsed` when it is the explicit converter call resolved last
     and `target` converts its receiver on its own: either side is Var, the
@@ -50,47 +22,136 @@ void Compiler.check_explicit_converter(
     target, context);
 }
 
-/* Each argument of a call spelled in source is checked against its declared
-   parameter type. A method receiver selects the method and is not a
-   destination, and a call the compiler builds for an operator is not a
-   destination the source spelled. */
-module void _check_converter_args(
-  Compiler c, List result, int method, List notes) {
-  List callee = NULL, params = NULL, arguments = NULL, supplied = NULL;
-  if (result ~= $called(?function, *values)) {
-    callee = function;
-    supplied = values;
-    arguments = method ? cdr(values) : values;
-    if (callee ~= %(expr ((func ?declared) *) ?))
-      params = method ? cdr(declared) : declared;
-  }
-  List n = notes;
-  for (List p = params, a = arguments; p && a;
-       p = Type.rest_container(car(p)) ? p : cdr(p), a = cdr(a),
-       n = cdr(n)) {
-    if (car(p) is not <list> || car(a) is not <list>) continue;
-    List param = car(p), argument = car(a);
-    Type expected = param.car() == <param> ? param.type_from_ast() : param;
-    Type container = expected.rest_container();
-    if (container == %("Map")) break;
-    if (container) {
-      expected = %("Var");
-      if (argument ~= %(expr ? (splice ?value)))
-        argument = value, expected = %("List");
-    }
-    _check_noted_converter(c, car(n), argument, expected, 0);
-  }
-  /* A static printf-family format converts each Var value it consumes. The
-     family's positions count the receiver a method call spells before the
-     dot, which `arguments` has already dropped. A format the printf
-     component cannot read leaves those values as written. */
-  const PrintfFn *info = _printf_family(callee);
-  if (!info || !c.printf_static_format(supplied[info.fmt_arg])) return;
-  int first = info.first_arg - method, index = 0;
-  for (List a = arguments, n = notes; a; a = cdr(a), n = cdr(n))
-    if (index++ >= first && car(a) is <list>)
-      _check_noted_converter(c, car(n), car(a), car(a).list().cadr(), 2);
+/** Converts a C string literal to `String` where no C meaning applies: as a
+    method receiver, a `foreach` collection, or a raise detail. Parentheses
+    and a conditional whose arms are both literals count as the literal; any
+    other expression is returned unchanged.
+*/
+List Compiler.promote_string_literal(Compiler c, List expr) =>
+  _is_raw_string_literal(expr) ? c.convert_expression(expr, %("String"))
+                                    : expr;
+
+/* destination conversion
+
+   A resolved value converts to the type its destination declares. C
+   performs every conversion this section returns unchanged. */
+
+/** Converts a resolved interpolation segment to `String` when available.
+    A missing `String` conversion is expected: the transform boxes that segment
+    to `Var` and renders it at runtime.
+
+    A declared numeric converter keeps its formatting; other numeric segments
+    use `Var.str`. A segment statically spelled `Var` uses `Var.str` for every
+    runtime tag. An ordinary `String` destination uses `Var.as_string`, which
+    returns NULL for `void` and `Null`.
+*/
+List Compiler.convert_segment_to_string(Compiler c, List expr) {
+  Type type = expr.cadr().type().canonicalize();
+  if (c.sym.is_var_type(type))
+    return %(expr ("String") (call "Var_str" (args $expr)));
+  if (!c.sym.resolve_numeric_type(type))
+    return c.convert_expression(expr, %("String"));
+  List converted = c.converter_call(expr, type, %("String"));
+  if (converted) return converted;
+  List boxed = c.convert_expression(expr, %("Var"));
+  return %(expr ("String") (call "Var_str" (args $boxed)));
 }
+
+
+
+/** Adds operations to convert a resolved expression AST to `target`.
+    The result may contain converter, boxing, unboxing, `Func`, reference, or
+    composite-literal operations. Returns the original expression when C
+    performs the conversion implicitly; an unsupported x2c conversion reports
+    a type error through `c`. Synthesized operations may add generated
+    bindings or immutable literal entries to compiler state.
+*/
+List Compiler.convert_expression(Compiler c, List expr, Type target) {
+  if (!target) return expr;
+  // Captured Func lambdas wait for reference-cell rewriting.
+  expr = _adapt_lambda_value(c, expr, target);
+  Type type = expr.cadr();
+  Type declared_source = type, declared_target = target;
+  if (type) type = type.canonicalize();
+  target = target.canonicalize();
+  int type_is_var = c.sym.is_var_type(type);
+  int target_is_var = c.sym.is_var_type(target);
+  List lifted = _lift_func_value(c, expr, type, target);
+  if (lifted) return lifted;
+  if (expr ~= %(expr ? (composite ?)))
+    return _compound_literal(c, expr, target);
+  List conditional = _convert_conditional_arms(c, expr, declared_target);
+  if (conditional) return conditional;
+  _check_null_reference(c, expr, target);
+  if (!type) return _convert_untyped(c, expr, declared_target, target_is_var);
+  _check_qualifiers(c, type, target, declared_source, declared_target);
+  if (type == target || (type_is_var && target_is_var)) return expr;
+  _check_reference_value(c, type, target);
+  if (_integer_literal_kind(expr, NULL) == <zero> &&
+      c.sym.resolve_key(target).is_pointer())
+    return expr;
+  _check_object_pointer(c, type, target, type_is_var);
+  List converted = _convert_known_value(
+    c, expr, type, target, type_is_var, target_is_var);
+  if (converted) return converted;
+  if (c.sym.resolve_numeric_type(type) &&
+      c.sym.resolve_numeric_type(target))
+    return expr; // allow implicit numeric conversions
+  _check_native_crossing(
+    c, expr, type, target, declared_source, declared_target);
+  // Everything reaching here is delegated to C: a typedef alias, array or
+  // function decay, varargs, a system-header type the collector never
+  // sees.  The report_error calls above cover every conversion x2c
+  // refuses.
+  return expr;
+}
+
+// converter calls
+
+/** The call to the converter that `type`, or the first of its typedef names
+    that declares one, provides for `target`, applied to `expr`, or NULL
+    when none declares one.
+*/
+List Compiler.converter_call(Compiler c, List expr, Type type, Type target) {
+  if (!(type ~= %(?)) || !(target ~= %(?))) return NULL;
+  List owners = type.is_bare_typedef_name()
+              ? _typedef_names(c, type).list_free() : $(type);
+  foreach (Type owner in owners) {
+    if (owner == target) return NULL;
+    int declared = 0;
+    List converted = _converter_owned_call(c, expr, owner, target, declared);
+    if (converted || declared) return converted;
+  }
+  return NULL;
+}
+
+/** The global builtin boxers and scalar formatters only observe their
+    arguments. A custom converter or a shadowed callee may change state.
+*/
+int Compiler.is_builtin_converter_call(Compiler c, List expr) {
+  if (expr ~= %(expr ?result (call ?callee (args ?argument)))) {
+    Type target = result, source = argument.cadr();
+    if (!source || !(source ~= %(?)) || !(target ~= %(?))) return 0;
+    if (!source.fixed_var_tag() ||
+        !(target == %("Var") ||
+          (source.scalar_tag() && target == %("String"))))
+      return 0;
+    List binding = NULL;
+    String spelling = NULL;
+    if (callee is <string>) spelling = callee;
+    else if (callee ~= %(expr ? (ident ?bound))) {
+      binding = bound;
+      spelling = Ast.binding_spelling(binding);
+    }
+    if (spelling != _converter_name(source, target)) return 0;
+    Type declared = NULL;
+    return !binding ||
+      binding == c.sym.resolve_global($(spelling), declared);
+  }
+  return 0;
+}
+
+// destination conversion and crossing checks
 
 static void _check_noted_converter(
   Compiler c, List noted, List parsed, Type target, int context) {
@@ -151,6 +212,79 @@ static int _defines_crossing(Compiler c, Type source, Type target) {
     c.fn_name == %"$(from)_str" || c.fn_name == %"$(from)_var";
 }
 
+/* The reader that crosses a `Var` to `target` and yields NULL for another
+   tag, when the runtime declares one, as a callee; or NULL. */
+static List _payload_reader(Compiler c, Type target) =>
+  target ~= %(?)
+    ? _var_reader(c, %"Var_$(target.car().str().lower())_payload", target)
+    : NULL;
+
+/* The global function `reader` from one `Var` to `target`, as a callee, or
+   NULL. */
+static List _var_reader(Compiler c, String reader, Type target) {
+  Type readertype = NULL;
+  List binding = c.sym.resolve_global($(reader), readertype);
+  if (!binding || !readertype || readertype.car() is not <list>) return NULL;
+  List function = readertype.car();
+  (Var function_tag, List parameters) = function;
+  if (function_tag != <func> || !parameters || parameters.cdr() ||
+      !List.equal(parameters.car(), %("Var")) ||
+      readertype.cdr() != target)
+    return NULL;
+  return %(expr $readertype (ident $binding));
+}
+
+static List _converter_owned_call(
+  Compiler c, List expr, Type owner, Type target, int &declared) {
+  String typename = owner.car().str();
+  String convfuncname = _converter_name(owner, target);
+  Type cvrtrtype = NULL;
+  List converter_binding = c.sym.resolve_global(
+    $(convfuncname), cvrtrtype);
+  declared = !!converter_binding || !!cvrtrtype;
+  List callee = %(expr $cvrtrtype (ident $converter_binding));
+  List argument = expr.cadr() == owner
+    ? expr : %(expr $owner $expr);
+  /* A return typedef may name the same declared type as the target. The
+     relaxed form still takes one source argument and must return that type;
+     a lowercased method name alone does not establish the result type. */
+  if (cvrtrtype != %((func ($owner)) @target) &&
+      (!(cvrtrtype ~= %((func (($typename))) ?)) ||
+       c.sym.normalize_declared_type(cvrtrtype.cdr()) !=
+         c.sym.normalize_declared_type(target)))
+    return NULL;
+  Macro called = $called;
+  List call = c.rebuild_expression(target, called(callee, $(argument)));
+  return _converted_temporary(c, call, owner, target);
+}
+
+/* A package converter uses the package spelling of the external owner. */
+static String _converter_name(Type owner, Type target) {
+  String typename = owner.car().str(), targetedname = target.car().str();
+  String prefix = "";
+  int split = targetedname.find("__");
+  if (split > 0) {
+    prefix = targetedname[0:split + 2];
+    targetedname = targetedname[split + 2:];
+  }
+  return targetedname == "String"
+    ? %"$prefix$(typename)_str"
+    : %"$prefix$(typename)_$(targetedname.lower())";
+}
+
+/* A converter's result exists only for the operator that asked for it.
+   Only a conversion from a number is known to be fresh; a converter from a
+   handle type may return storage its source still owns. */
+static List _converted_temporary(
+  Compiler c, List call, Type owner, Type target) {
+  if (c.sym.resolve_numeric_type(owner) &&
+      c.resolve_protocol_member(target, "discard")) {
+    if (call ~= $called(%(expr ? (ident (!set ?binding (*)))), *arguments))
+      _note_fresh_callee(c, binding);
+  }
+  return call;
+}
+
 // C string literals
 
 module int _is_raw_string_literal(List expr) {
@@ -164,140 +298,6 @@ module int _is_raw_string_literal(List expr) {
              _is_raw_string_literal(onfalse);
   }
   return 0;
-}
-
-module inline int _is_string_like(Compiler c, List expr) {
-  if (!expr) return 0;
-  Type type = expr.cadr();
-  return c.sym.is_string_type(type) ||
-         type.is_char_pointer_like();
-}
-
-/** Converts a C string literal to `String` where no C meaning applies: as a
-    method receiver, a `foreach` collection, or a raise detail. Parentheses
-    and a conditional whose arms are both literals count as the literal; any
-    other expression is returned unchanged.
-*/
-List Compiler.promote_string_literal(Compiler c, List expr) =>
-  _is_raw_string_literal(expr) ? c.convert_expression(expr, %("String"))
-                                    : expr;
-
-/* Promote raw string expressions while caching only exact literal leaves.
-   Parentheses and conditional arms retain their evaluation structure; a
-   dynamic leaf still calls String_new each time it is selected. */
-static List _raw_string_to_string(Compiler c, List expr) {
-  match (expr) {
-    case %(expr (!or (* char) ((dim *) char))
-        (literal (!or (* char) ((dim *) char)) ?)): {
-      List value = %(expr ("String") (call "String_new" (args $expr)));
-      if (c.runtime_literals) return value;
-      return %(expr ("String") $(c.cache(%(string $value))));
-    }
-    case %(expr (!or (* char) ((dim *) char))
-        $($grouped(?inner))):
-      // A statement expression's block converts as one dynamic value.
-      if (inner ~= %(expr *)) {
-        List converted = _raw_string_to_string(c, inner);
-        return %(expr ("String") (parens $converted));
-      }
-    case %(expr (!or (* char) ((dim *) char))
-        (op ? ?condition ?ontrue ?onfalse)): {
-      List converted_true = _raw_string_to_string(c, ontrue);
-      List converted_false = _raw_string_to_string(c, onfalse);
-      return %(expr ("String")
-               (op ? $condition $converted_true $converted_false));
-    }
-  }
-
-  return %(expr ("String") (call "String_new" (args $expr)));
-}
-
-/* destination conversion
-
-   A resolved value converts to the type its destination declares. C
-   performs every conversion this section returns unchanged. */
-
-/** Adds operations to convert a resolved expression AST to `target`.
-    The result may contain converter, boxing, unboxing, `Func`, reference, or
-    composite-literal operations. Returns the original expression when C
-    performs the conversion implicitly; an unsupported x2c conversion reports
-    a type error through `c`. Synthesized operations may add generated
-    bindings or immutable literal entries to compiler state.
-*/
-List Compiler.convert_expression(Compiler c, List expr, Type target) {
-  if (!target) return expr;
-  // Captured Func lambdas wait for reference-cell rewriting.
-  expr = _adapt_lambda_value(c, expr, target);
-  Type type = expr.cadr();
-  Type declared_source = type, declared_target = target;
-  if (type) type = type.canonicalize();
-  target = target.canonicalize();
-  int type_is_var = c.sym.is_var_type(type);
-  int target_is_var = c.sym.is_var_type(target);
-  List lifted = _lift_func_value(c, expr, type, target);
-  if (lifted) return lifted;
-  if (expr ~= %(expr ? (composite ?)))
-    return _compound_literal(c, expr, target);
-  List conditional = _convert_conditional_arms(c, expr, declared_target);
-  if (conditional) return conditional;
-  _check_null_reference(c, expr, target);
-  if (!type) return _convert_untyped(c, expr, declared_target, target_is_var);
-  _check_qualifiers(c, type, target, declared_source, declared_target);
-  if (type == target || (type_is_var && target_is_var)) return expr;
-  _check_reference_value(c, type, target);
-  if (_integer_literal_kind(expr, NULL) == <zero> &&
-      c.sym.resolve_key(target).is_pointer())
-    return expr;
-  _check_object_pointer(c, type, target, type_is_var);
-  List converted = _convert_known_value(
-    c, expr, type, target, type_is_var, target_is_var);
-  if (converted) return converted;
-  if (c.sym.resolve_numeric_type(type) &&
-      c.sym.resolve_numeric_type(target))
-    return expr; // allow implicit numeric conversions
-  _check_native_crossing(
-    c, expr, type, target, declared_source, declared_target);
-  // Everything reaching here is delegated to C: a typedef alias, array or
-  // function decay, varargs, a system-header type the collector never
-  // sees.  The report_error calls above cover every conversion x2c
-  // refuses.
-  return expr;
-}
-
-static List _adapt_lambda_value(Compiler c, List expr, Type target) {
-  Type type = expr.cadr();
-  if (!type.is_function()) return expr;
-  List lowered = c.lower_lambda_expr(expr);
-  return lowered == expr ? expr : c.adapt_lambda_arg(
-    lowered, c.sym.resolve_key(target.type_from_ast()));
-}
-
-static List _lift_func_value(
-  Compiler c, List expr, Type type, Type target) {
-  Type func_type = c.sym.resolve_key(%("Func"));
-  if (c.sym.resolve_key(target) == func_type) {
-    List lifted = c.lift_func_expression(expr);
-    if (lifted != expr) return lifted;
-  }
-  if (type && c.sym.resolve_key(type) == func_type &&
-      target.is_pointer() && target.dereference().is_function()) {
-    $fail.expressions_func_callback(c, NULL);
-  }
-  return NULL;
-}
-
-/* A brace that stays a native initializer outside a declaration becomes a
-   compound literal of the destination, because C accepts a bare brace only
-   as an initializer. An anonymous struct or union has no spelling for that
-   literal. */
-static List _compound_literal(Compiler c, List composite, Type target) {
-  List converted = c.convert_initializer(composite, target, NULL);
-  if (converted ~= %(expr ?type (composite *))) {
-    if (Type.tag(type) ~= %((gensym *)))
-      $fail.expressions_brace_anonymous(c, NULL);
-    return %(expr $type (cast $type $converted));
-  }
-  return converted;
 }
 
 /* Only one conditional arm runs; convert each arm when C cannot convert
@@ -356,6 +356,42 @@ static List _convert_untyped(
   return expr;
 }
 
+static List _adapt_lambda_value(Compiler c, List expr, Type target) {
+  Type type = expr.cadr();
+  if (!type.is_function()) return expr;
+  List lowered = c.lower_lambda_expr(expr);
+  return lowered == expr ? expr : c.adapt_lambda_arg(
+    lowered, c.sym.resolve_key(target.type_from_ast()));
+}
+
+static List _lift_func_value(
+  Compiler c, List expr, Type type, Type target) {
+  Type func_type = c.sym.resolve_key(%("Func"));
+  if (c.sym.resolve_key(target) == func_type) {
+    List lifted = c.lift_func_expression(expr);
+    if (lifted != expr) return lifted;
+  }
+  if (type && c.sym.resolve_key(type) == func_type &&
+      target.is_pointer() && target.dereference().is_function()) {
+    $fail.expressions_func_callback(c, NULL);
+  }
+  return NULL;
+}
+
+/* A brace that stays a native initializer outside a declaration becomes a
+   compound literal of the destination, because C accepts a bare brace only
+   as an initializer. An anonymous struct or union has no spelling for that
+   literal. */
+static List _compound_literal(Compiler c, List composite, Type target) {
+  List converted = c.convert_initializer(composite, target, NULL);
+  if (converted ~= %(expr ?type (composite *))) {
+    if (Type.tag(type) ~= %((gensym *)))
+      $fail.expressions_brace_anonymous(c, NULL);
+    return %(expr $type (cast $type $converted));
+  }
+  return converted;
+}
+
 static List _convert_known_value(
   Compiler c, List expr, Type type, Type target,
   int type_is_var, int target_is_var) {
@@ -382,6 +418,36 @@ static List _convert_known_value(
   return NULL;
 }
 
+/* Promote raw string expressions while caching only exact literal leaves.
+   Parentheses and conditional arms retain their evaluation structure; a
+   dynamic leaf still calls String_new each time it is selected. */
+static List _raw_string_to_string(Compiler c, List expr) {
+  match (expr) {
+    case %(expr (!or (* char) ((dim *) char))
+        (literal (!or (* char) ((dim *) char)) ?)): {
+      List value = %(expr ("String") (call "String_new" (args $expr)));
+      if (c.runtime_literals) return value;
+      return %(expr ("String") $(c.cache(%(string $value))));
+    }
+    case %(expr (!or (* char) ((dim *) char))
+        $($grouped(?inner))):
+      // A statement expression's block converts as one dynamic value.
+      if (inner ~= %(expr *)) {
+        List converted = _raw_string_to_string(c, inner);
+        return %(expr ("String") (parens $converted));
+      }
+    case %(expr (!or (* char) ((dim *) char))
+        (op ? ?condition ?ontrue ?onfalse)): {
+      List converted_true = _raw_string_to_string(c, ontrue);
+      List converted_false = _raw_string_to_string(c, onfalse);
+      return %(expr ("String")
+               (op ? $condition $converted_true $converted_false));
+    }
+  }
+
+  return %(expr ("String") (call "String_new" (args $expr)));
+}
+
 static List _convert_reference(
   Compiler c, List expr, Type type, Type target) {
   // T -> &T: pass the address of an addressable value.
@@ -398,27 +464,6 @@ static List _convert_reference(
   if (type.car() == <&> && cdr(type) === target)
     return %(expr $target (op * (parens $expr)));
   return NULL;
-}
-
-/** Converts a resolved interpolation segment to `String` when available.
-    A missing `String` conversion is expected: the transform boxes that segment
-    to `Var` and renders it at runtime.
-
-    A declared numeric converter keeps its formatting; other numeric segments
-    use `Var.str`. A segment statically spelled `Var` uses `Var.str` for every
-    runtime tag. An ordinary `String` destination uses `Var.as_string`, which
-    returns NULL for `void` and `Null`.
-*/
-List Compiler.convert_segment_to_string(Compiler c, List expr) {
-  Type type = expr.cadr().type().canonicalize();
-  if (c.sym.is_var_type(type))
-    return %(expr ("String") (call "Var_str" (args $expr)));
-  if (!c.sym.resolve_numeric_type(type))
-    return c.convert_expression(expr, %("String"));
-  List converted = c.converter_call(expr, type, %("String"));
-  if (converted) return converted;
-  List boxed = c.convert_expression(expr, %("Var"));
-  return %(expr ("String") (call "Var_str" (args $boxed)));
 }
 
 // Var crossings
@@ -495,28 +540,6 @@ static List _var_exact_reader(Compiler c, List expr, Type target) {
   return c.rebuild_expression(target, called(callee, $(expr)));
 }
 
-/* The reader that crosses a `Var` to `target` and yields NULL for another
-   tag, when the runtime declares one, as a callee; or NULL. */
-static List _payload_reader(Compiler c, Type target) =>
-  target ~= %(?)
-    ? _var_reader(c, %"Var_$(target.car().str().lower())_payload", target)
-    : NULL;
-
-/* The global function `reader` from one `Var` to `target`, as a callee, or
-   NULL. */
-static List _var_reader(Compiler c, String reader, Type target) {
-  Type readertype = NULL;
-  List binding = c.sym.resolve_global($(reader), readertype);
-  if (!binding || !readertype || readertype.car() is not <list>) return NULL;
-  List function = readertype.car();
-  (Var function_tag, List parameters) = function;
-  if (function_tag != <func> || !parameters || parameters.cdr() ||
-      !List.equal(parameters.car(), %("Var")) ||
-      readertype.cdr() != target)
-    return NULL;
-  return %(expr $readertype (ident $binding));
-}
-
 /* A declared T.var converter owns custom boxing before tag based boxing. */
 static List _declared_var_converter(
   Compiler c, List expr, Type type) {
@@ -559,102 +582,6 @@ static List _box_var(Compiler c, List expr, Type type) {
   }
   // Conversion runs after parsing; a NULL token anchors the statement.
   $fail.expressions_var_loss(c, NULL, type);
-}
-
-// converter calls
-
-/** The call to the converter that `type`, or the first of its typedef names
-    that declares one, provides for `target`, applied to `expr`, or NULL
-    when none declares one.
-*/
-List Compiler.converter_call(Compiler c, List expr, Type type, Type target) {
-  if (!(type ~= %(?)) || !(target ~= %(?))) return NULL;
-  List owners = type.is_bare_typedef_name()
-              ? _typedef_names(c, type).list_free() : $(type);
-  foreach (Type owner in owners) {
-    if (owner == target) return NULL;
-    int declared = 0;
-    List converted = _converter_owned_call(c, expr, owner, target, declared);
-    if (converted || declared) return converted;
-  }
-  return NULL;
-}
-
-static List _converter_owned_call(
-  Compiler c, List expr, Type owner, Type target, int &declared) {
-  String typename = owner.car().str();
-  String convfuncname = _converter_name(owner, target);
-  Type cvrtrtype = NULL;
-  List converter_binding = c.sym.resolve_global(
-    $(convfuncname), cvrtrtype);
-  declared = !!converter_binding || !!cvrtrtype;
-  List callee = %(expr $cvrtrtype (ident $converter_binding));
-  List argument = expr.cadr() == owner
-    ? expr : %(expr $owner $expr);
-  /* A return typedef may name the same declared type as the target. The
-     relaxed form still takes one source argument and must return that type;
-     a lowercased method name alone does not establish the result type. */
-  if (cvrtrtype != %((func ($owner)) @target) &&
-      (!(cvrtrtype ~= %((func (($typename))) ?)) ||
-       c.sym.normalize_declared_type(cvrtrtype.cdr()) !=
-         c.sym.normalize_declared_type(target)))
-    return NULL;
-  Macro called = $called;
-  List call = c.rebuild_expression(target, called(callee, $(argument)));
-  return _converted_temporary(c, call, owner, target);
-}
-
-/* A package converter uses the package spelling of the external owner. */
-static String _converter_name(Type owner, Type target) {
-  String typename = owner.car().str(), targetedname = target.car().str();
-  String prefix = "";
-  int split = targetedname.find("__");
-  if (split > 0) {
-    prefix = targetedname[0:split + 2];
-    targetedname = targetedname[split + 2:];
-  }
-  return targetedname == "String"
-    ? %"$prefix$(typename)_str"
-    : %"$prefix$(typename)_$(targetedname.lower())";
-}
-
-/** The global builtin boxers and scalar formatters only observe their
-    arguments. A custom converter or a shadowed callee may change state.
-*/
-int Compiler.is_builtin_converter_call(Compiler c, List expr) {
-  if (expr ~= %(expr ?result (call ?callee (args ?argument)))) {
-    Type target = result, source = argument.cadr();
-    if (!source || !(source ~= %(?)) || !(target ~= %(?))) return 0;
-    if (!source.fixed_var_tag() ||
-        !(target == %("Var") ||
-          (source.scalar_tag() && target == %("String"))))
-      return 0;
-    List binding = NULL;
-    String spelling = NULL;
-    if (callee is <string>) spelling = callee;
-    else if (callee ~= %(expr ? (ident ?bound))) {
-      binding = bound;
-      spelling = Ast.binding_spelling(binding);
-    }
-    if (spelling != _converter_name(source, target)) return 0;
-    Type declared = NULL;
-    return !binding ||
-      binding == c.sym.resolve_global($(spelling), declared);
-  }
-  return 0;
-}
-
-/* A converter's result exists only for the operator that asked for it.
-   Only a conversion from a number is known to be fresh; a converter from a
-   handle type may return storage its source still owns. */
-static List _converted_temporary(
-  Compiler c, List call, Type owner, Type target) {
-  if (c.sym.resolve_numeric_type(owner) &&
-      c.resolve_protocol_member(target, "discard")) {
-    if (call ~= $called(%(expr ? (ident (!set ?binding (*)))), *arguments))
-      _note_fresh_callee(c, binding);
-  }
-  return call;
 }
 
 // conversion checks
@@ -838,4 +765,83 @@ static Symbol _integer_literal_kind(List expr, String &?out_text) {
     }
   }
   return <unknown>;
+}
+
+module int _null_literal(List expr) =>
+  _integer_literal_kind(expr, NULL) == <zero> ||
+  expr ~=
+    %(expr ? (ident (binding ? "NULL")));
+
+
+
+/* An explicit converter call, `value.str()` or `value.var()`, is the most
+   recent one parsed from source tokens, kept with its spelling and
+   location. A destination parser compares the expression it just parsed
+   against it, so nested calls and calls bound from constructed syntax never
+   match. An argument list keeps the note left after each argument, since
+   its destinations are known only once the call resolves. A converter takes
+   only its receiver and is named for its result: the result spelled in
+   lower case, or `str` for String. */
+module void _note_explicit_converter(
+  Compiler c, List call, String method, Token origin) {
+  Type result = call.cadr();
+  if (!(result ~= %(?))) return;
+  if (call ~= $called(?callee, ?argument)) {
+    if (callee ~= %(expr ? (ident ?binding)) &&
+        Compiler.supplies_native_meta(Ast.binding_spelling(binding))) return;
+    String spelled = result.car().str().lower();
+    if (method != spelled && (method != "str" || result !== %("String")))
+      return;
+    c.protocol_helpers["explicit-converter"] =
+      $(call, method, c.token_location(origin));
+  }
+}
+
+/* Each argument of a call spelled in source is checked against its declared
+   parameter type. A method receiver selects the method and is not a
+   destination, and a call the compiler builds for an operator is not a
+   destination the source spelled. */
+module void _check_converter_args(
+  Compiler c, List result, int method, List notes) {
+  List callee = NULL, params = NULL, arguments = NULL, supplied = NULL;
+  if (result ~= $called(?function, *values)) {
+    callee = function;
+    supplied = values;
+    arguments = method ? cdr(values) : values;
+    if (callee ~= %(expr ((func ?declared) *) ?))
+      params = method ? cdr(declared) : declared;
+  }
+  List n = notes;
+  for (List p = params, a = arguments; p && a;
+       p = Type.rest_container(car(p)) ? p : cdr(p), a = cdr(a),
+       n = cdr(n)) {
+    if (car(p) is not <list> || car(a) is not <list>) continue;
+    List param = car(p), argument = car(a);
+    Type expected = param.car() == <param> ? param.type_from_ast() : param;
+    Type container = expected.rest_container();
+    if (container == %("Map")) break;
+    if (container) {
+      expected = %("Var");
+      if (argument ~= %(expr ? (splice ?value)))
+        argument = value, expected = %("List");
+    }
+    _check_noted_converter(c, car(n), argument, expected, 0);
+  }
+  /* A static printf-family format converts each Var value it consumes. The
+     family's positions count the receiver a method call spells before the
+     dot, which `arguments` has already dropped. A format the printf
+     component cannot read leaves those values as written. */
+  const PrintfFn *info = _printf_family(callee);
+  if (!info || !c.printf_static_format(supplied[info.fmt_arg])) return;
+  int first = info.first_arg - method, index = 0;
+  for (List a = arguments, n = notes; a; a = cdr(a), n = cdr(n))
+    if (index++ >= first && car(a) is <list>)
+      _check_noted_converter(c, car(n), car(a), car(a).list().cadr(), 2);
+}
+
+module inline int _is_string_like(Compiler c, List expr) {
+  if (!expr) return 0;
+  Type type = expr.cadr();
+  return c.sym.is_string_type(type) ||
+         type.is_char_pointer_like();
 }

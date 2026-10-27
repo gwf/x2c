@@ -107,12 +107,6 @@ String Type.reverse_name(String base, String participant) {
   return active.expander.reverse_converter_spelling(base, "", participant);
 }
 
-/** Answers `Type.resolve`, declared in `lib/meta.x`. */
-Type Type.resolve(Type type) {
-  _require_expansion("Type.resolve");
-  return active.expander.sym.resolve_key(type).type_from_ast();
-}
-
 /** Answers `Type.layout`, declared in `lib/meta.x`. */
 List Type.layout(Type type) {
   _require_expansion("Type.layout");
@@ -155,33 +149,6 @@ List Type.members(Type type) {
   return rows.list_free();
 }
 
-/* One enum member's `(NAME VALUE)` row: no value, a literal's spelling,
-   or the initializer's expression. */
-static List _enum_member(List member) {
-  match (member) {
-    case %(op = (?name) (expr ? (literal ? ?text))): return $(name, text);
-    case %(op = (?name) (?text)): return $(name, text);
-    case %(op = (?name) ?value): return $(name, value);
-    case %(?name): return %($name ());
-  }
-  $fail.meta_sdk_members_entry(member);
-  return %();
-}
-
-/** Answers `Type.fields`, declared in `lib/meta.x`. */
-List Type.fields(Type t) {
-  _require_expansion("Type.fields");
-  Type resolved = active.expander.sym.resolve_key(t.canonicalize());
-  if (!resolved || !resolved.is_aggregate_tag())
-    $fail.meta_sdk_fields_type(t);
-  List metadata = active.expander.sym.field_order(resolved);
-  if (!metadata)
-    $fail.meta_sdk_fields_complete(t);
-  Array named = [];
-  foreach (List row in metadata.cdr()) if (row.car()) named.push(row);
-  return named.list_free();
-}
-
 // meta parameter descriptions
 
 /** Returns what a `meta` parameter declared `TypeInfo` receives for the
@@ -222,6 +189,41 @@ List MetaContext.type_description(Var value) {
       case %(method * *): methods.push(member);
   return %((name $name) (kind $kind) (type $type) (fields $fields)
            (methods $(methods.list_free())));
+}
+
+/** Answers `Type.resolve`, declared in `lib/meta.x`. */
+Type Type.resolve(Type type) {
+  _require_expansion("Type.resolve");
+  return active.expander.sym.resolve_key(type).type_from_ast();
+}
+
+/** Answers `Type.fields`, declared in `lib/meta.x`. */
+List Type.fields(Type t) {
+  _require_expansion("Type.fields");
+  Type resolved = active.expander.sym.resolve_key(t.canonicalize());
+  if (!resolved || !resolved.is_aggregate_tag())
+    $fail.meta_sdk_fields_type(t);
+  List metadata = active.expander.sym.field_order(resolved);
+  if (!metadata)
+    $fail.meta_sdk_fields_complete(t);
+  Array named = [];
+  foreach (List row in metadata.cdr()) if (row.car()) named.push(row);
+  return named.list_free();
+}
+
+// compile-time SDK types
+
+/* One enum member's `(NAME VALUE)` row: no value, a literal's spelling,
+   or the initializer's expression. */
+static List _enum_member(List member) {
+  match (member) {
+    case %(op = (?name) (expr ? (literal ? ?text))): return $(name, text);
+    case %(op = (?name) (?text)): return $(name, text);
+    case %(op = (?name) ?value): return $(name, value);
+    case %(?name): return %($name ());
+  }
+  $fail.meta_sdk_members_entry(member);
+  return %();
 }
 
 /* Whether the type `type` is spelled by keywords alone, such as `(int)`. */

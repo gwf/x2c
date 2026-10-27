@@ -3,8 +3,6 @@
 
 typedef List Type;
 
-String Type.name(Type self) => self.car().str();
-
 int main(void) {
   Type declaration = %(int count);
   puts(declaration.name());
@@ -12,3 +10,5 @@ int main(void) {
   puts(declaration.cadr().str());
   return 0;
 }
+
+String Type.name(Type self) => self.car().str();

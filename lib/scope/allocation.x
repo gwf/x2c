@@ -104,31 +104,6 @@ void *Scope.malloc_finalized_in(Scope *s, size_t size, void (*drop)(void *)) {
   return _malloc_in(s, size, drop);
 }
 
-static void *_malloc_in(Scope *slot, size_t size, void (*drop)(void *)) {
-  if (!slot) raise %(bad-arg);
-  if (size > SIZE_MAX - sizeof(ScopeMetadata) - sizeof(struct ScopeAlloc)) {
-    if (x2c_error_runtime_ready) raise %(size-limit);
-    _raw_fatal("allocation size overflow");
-  }
-  if (!*slot) *slot = _new_scope(NULL);
-  ScopeMetadata *meta = _data_malloc(
-    sizeof(ScopeMetadata) + sizeof(struct ScopeAlloc) + size);
-  meta.requested_size = size;
-  meta.drop = drop;
-  ScopeAlloc alloc = (ScopeAlloc) (meta + 1);
-  _attach((*slot), alloc);
-  _record_allocation(size);
-  return $scope.alloc_ptr(alloc);
-}
-
-/* New blocks go first, so destruction reclaims the newest block first. */
-static void _attach(Scope scope, ScopeAlloc alloc) {
-  alloc.next = scope.first;
-  alloc.prev = $scope.tag_pointer(scope);
-  if (scope.first) scope.first.prev = alloc;
-  scope.first = alloc;
-}
-
 // zeroed and copied allocation
 
 /** Allocates `count` objects of `size` bytes each, zeroed, in the active
@@ -187,23 +162,6 @@ meta native void *Scope.memdup(const void *ptr, size_t size) {
 void *Scope.memdup_in(Scope *slot, const void *ptr, size_t size) {
   _require_running();
   return _memdup_in(slot, ptr, size);
-}
-
-static void *_calloc_in(Scope *slot, size_t count, size_t size) {
-  if (count && size > SIZE_MAX / count) {
-    if (x2c_error_runtime_ready) raise %(size-limit);
-    _raw_fatal("calloc size overflow");
-  }
-  size_t total = count * size, void *ptr = _malloc_in(slot, total, NULL);
-  if (total) memset(ptr, 0, total);
-  return ptr;
-}
-
-static void *_memdup_in(Scope *slot, const void *ptr, size_t size) {
-  if (!ptr || !size) return NULL;
-  void *copy = _malloc_in(slot, size, NULL);
-  memcpy(copy, ptr, size);
-  return copy;
 }
 
 // freeing, moving, and resizing
@@ -322,6 +280,54 @@ meta native void *Scope.realloc(void *ptr, size_t size) {
   return $scope.alloc_ptr(replacement);
 }
 
+static void *_malloc_in(Scope *slot, size_t size, void (*drop)(void *)) {
+  if (!slot) raise %(bad-arg);
+  if (size > SIZE_MAX - sizeof(ScopeMetadata) - sizeof(struct ScopeAlloc)) {
+    if (x2c_error_runtime_ready) raise %(size-limit);
+    _raw_fatal("allocation size overflow");
+  }
+  if (!*slot) *slot = _new_scope(NULL);
+  ScopeMetadata *meta = _data_malloc(
+    sizeof(ScopeMetadata) + sizeof(struct ScopeAlloc) + size);
+  meta.requested_size = size;
+  meta.drop = drop;
+  ScopeAlloc alloc = (ScopeAlloc) (meta + 1);
+  _attach((*slot), alloc);
+  _record_allocation(size);
+  return $scope.alloc_ptr(alloc);
+}
+
+/* New blocks go first, so destruction reclaims the newest block first. */
+static void _attach(Scope scope, ScopeAlloc alloc) {
+  alloc.next = scope.first;
+  alloc.prev = $scope.tag_pointer(scope);
+  if (scope.first) scope.first.prev = alloc;
+  scope.first = alloc;
+}
+
+module void *_data_malloc(size_t size) {
+  void *ptr = malloc(size);
+  if (!ptr) raise %(alloc-fail);
+  return ptr;
+}
+
+static void *_calloc_in(Scope *slot, size_t count, size_t size) {
+  if (count && size > SIZE_MAX / count) {
+    if (x2c_error_runtime_ready) raise %(size-limit);
+    _raw_fatal("calloc size overflow");
+  }
+  size_t total = count * size, void *ptr = _malloc_in(slot, total, NULL);
+  if (total) memset(ptr, 0, total);
+  return ptr;
+}
+
+static void *_memdup_in(Scope *slot, const void *ptr, size_t size) {
+  if (!ptr || !size) return NULL;
+  void *copy = _malloc_in(slot, size, NULL);
+  memcpy(copy, ptr, size);
+  return copy;
+}
+
 static void _free(ScopeAlloc alloc) {
   _detach(alloc);
   _release(alloc);
@@ -331,15 +337,6 @@ module void _detach(ScopeAlloc alloc) {
   ScopeAlloc next = alloc.next, prev = alloc.prev;
   _point_to(prev, next);
   if (next) next.prev = prev;
-}
-
-/* Puts `alloc` where a block between `prev` and `next` was. */
-static void _relink(
-  ScopeAlloc alloc, ScopeAlloc prev, ScopeAlloc next) {
-  alloc.next = next;
-  alloc.prev = prev;
-  if (next) next.prev = alloc;
-  _point_to(prev, alloc);
 }
 
 /* The link before a block is its owner's head when `prev` is the tagged
@@ -362,10 +359,13 @@ module void _release(ScopeAlloc alloc) {
   free(meta);
 }
 
-module void *_data_malloc(size_t size) {
-  void *ptr = malloc(size);
-  if (!ptr) raise %(alloc-fail);
-  return ptr;
+/* Puts `alloc` where a block between `prev` and `next` was. */
+static void _relink(
+  ScopeAlloc alloc, ScopeAlloc prev, ScopeAlloc next) {
+  alloc.next = next;
+  alloc.prev = prev;
+  if (next) next.prev = alloc;
+  _point_to(prev, alloc);
 }
 
 static void *_data_realloc(void *ptr, size_t size) {

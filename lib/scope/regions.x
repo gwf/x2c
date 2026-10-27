@@ -2,12 +2,6 @@
 
 static threaded struct ScopeThreadState scope_thread;
 
-module ScopeThreadState _thread(void) {
-  ScopeThreadState state = &scope_thread;
-  if (!state.active) state.active = &state.root;
-  return state;
-}
-
 // the active slot
 
 /** Makes the scope in `scope` active until a matching `Scope.pop`.
@@ -45,19 +39,6 @@ meta native void Scope.push(Scope *scope) {
     state.stack, state.stack_size, state.stack_capacity,
     sizeof(*state.stack));
   state.active = state.stack[state.stack_size++] = scope;
-}
-
-/** Returns the address of the active scope slot.
-    The result is the slot, not the scope. Pass it to the `_in` allocators to
-    name the active slot explicitly. Dereferencing it gives the scope, which
-    may be NULL before anything has been allocated into the slot. It names the
-    slot that was active at the call; a later `Scope.push`, `Scope.pop`,
-    `Scope.retain`, or `Scope.release` changes which slot is active, so read
-    it again instead of caching it.
-*/
-Scope *Scope.top(void) {
-  _require_running();
-  return _thread().active;
 }
 
 /** Restores the slot that was active before the matching `Scope.push`.
@@ -167,47 +148,6 @@ meta native void Scope.release(void) {
   }
 }
 
-static void _record_retain(Scope scope, Scope *slot) {
-  ScopeThreadState state = _thread();
-  state.retains = _raw_grow(
-    state.retains, state.retain_count, state.retain_capacity,
-    sizeof(*state.retains));
-  state.retains[state.retain_count++] =
-    (ScopeRetain) { .scope = scope, .slot = slot };
-}
-
-static int _forget_retain(Scope scope, Scope *slot) {
-  ScopeThreadState state = _thread();
-  for (int i = state.retain_count - 1; i >= 0; i--) {
-    if (state.retains[i].scope != scope ||
-        state.retains[i].slot != slot) continue;
-    state.retains[i] = state.retains[--state.retain_count];
-    return 1;
-  }
-  return 0;
-}
-
-/* Popping the head keeps the list valid while a finalizer runs, so scratch
-   it allocates into the dying scope is reclaimed by the same loop. */
-static void _destroy_chain(Scope scope) {
-  while (scope) {
-    Scope down = scope.down;
-    _detach_scope(scope);
-    while (1) {
-      Scope child = scope.children;
-      ScopeAlloc alloc = child ? NULL : scope.first;
-      if (alloc) _detach(alloc);
-      if (child) _destroy_chain(child);
-      else if (alloc) _release(alloc);
-      else break;
-    }
-    _unregister_name(scope);
-    atomic_fetch_add(&scope_destructions, 1);
-    free(scope);
-    scope = down;
-  }
-}
-
 // detached scopes
 
 /** Creates a detached, unnamed scope and returns it.
@@ -237,6 +177,19 @@ Scope Scope.child(void) {
   return child;
 }
 
+/** Returns the address of the active scope slot.
+    The result is the slot, not the scope. Pass it to the `_in` allocators to
+    name the active slot explicitly. Dereferencing it gives the scope, which
+    may be NULL before anything has been allocated into the slot. It names the
+    slot that was active at the call; a later `Scope.push`, `Scope.pop`,
+    `Scope.retain`, or `Scope.release` changes which slot is active, so read
+    it again instead of caching it.
+*/
+Scope *Scope.top(void) {
+  _require_running();
+  return _thread().active;
+}
+
 /** Returns this scope's lifetime parent, or NULL for a detached scope.
     This is independent of the active allocation stack and retained regions.
 */
@@ -263,13 +216,6 @@ void Scope.transfer(Scope scope, Scope destination) {
       destination.children = scope;
     }
   }
-}
-
-static void _detach_scope(Scope scope) {
-  if (scope.previous) scope.previous.next = scope.next;
-  else if (scope.parent) scope.parent.children = scope.next;
-  if (scope.next) scope.next.previous = scope.previous;
-  scope.parent = scope.previous = scope.next = NULL;
 }
 
 /** Reports whether `scope` owns `candidate` through lifetime parent links.
@@ -306,6 +252,9 @@ meta native Scope Scope.new_named(const char *name) {
   return _new_scope(name);
 }
 
+/** Ends the owned lifetime when a managed local leaves its block. */
+meta native void Scope.cleanup(Scope value) { value.destroy(); }
+
 /** Destroys a scope and frees its allocations and adopted child scopes.
     An adopted scope first detaches from its lifetime parent. This ends a
     scope you hold in a variable, and is the counterpart to
@@ -335,25 +284,6 @@ meta native void Scope.destroy(Scope scope) {
   _destroy_chain(scope);
 }
 
-/** Ends the owned lifetime when a managed local leaves its block. */
-meta native void Scope.cleanup(Scope value) { value.destroy(); }
-
-module Scope _new_scope(const char *name) {
-  Scope scope = _data_malloc(sizeof(struct Scope));
-  *scope = (struct Scope) {0};
-  _register_name(scope, name);
-  atomic_fetch_add(&scope_creations, 1);
-  return scope;
-}
-
-static void _forget_retains(Scope scope) {
-  ScopeThreadState state = _thread();
-  for (Scope cur = scope; cur; cur = cur.down)
-    for (int i = state.retain_count - 1; i >= 0; i--)
-      if (state.retains[i].scope == cur)
-        state.retains[i] = state.retains[--state.retain_count];
-}
-
 /** Destroys this thread's `Scope` chain and its push and retain stacks.
     It runs last in `x2c_thread_state_release` and repeats harmlessly; a
     thread that never created a `Scope` has nothing to destroy.
@@ -369,4 +299,74 @@ void x2c_scope_thread_release(void) {
   state.retains = NULL;
   state.retain_count = state.retain_capacity = 0;
   state.active = &state.root;
+}
+
+module ScopeThreadState _thread(void) {
+  ScopeThreadState state = &scope_thread;
+  if (!state.active) state.active = &state.root;
+  return state;
+}
+
+static void _record_retain(Scope scope, Scope *slot) {
+  ScopeThreadState state = _thread();
+  state.retains = _raw_grow(
+    state.retains, state.retain_count, state.retain_capacity,
+    sizeof(*state.retains));
+  state.retains[state.retain_count++] =
+    (ScopeRetain) { .scope = scope, .slot = slot };
+}
+
+module Scope _new_scope(const char *name) {
+  Scope scope = _data_malloc(sizeof(struct Scope));
+  *scope = (struct Scope) {0};
+  _register_name(scope, name);
+  atomic_fetch_add(&scope_creations, 1);
+  return scope;
+}
+
+static int _forget_retain(Scope scope, Scope *slot) {
+  ScopeThreadState state = _thread();
+  for (int i = state.retain_count - 1; i >= 0; i--) {
+    if (state.retains[i].scope != scope ||
+        state.retains[i].slot != slot) continue;
+    state.retains[i] = state.retains[--state.retain_count];
+    return 1;
+  }
+  return 0;
+}
+
+/* Popping the head keeps the list valid while a finalizer runs, so scratch
+   it allocates into the dying scope is reclaimed by the same loop. */
+static void _destroy_chain(Scope scope) {
+  while (scope) {
+    Scope down = scope.down;
+    _detach_scope(scope);
+    while (1) {
+      Scope child = scope.children;
+      ScopeAlloc alloc = child ? NULL : scope.first;
+      if (alloc) _detach(alloc);
+      if (child) _destroy_chain(child);
+      else if (alloc) _release(alloc);
+      else break;
+    }
+    _unregister_name(scope);
+    atomic_fetch_add(&scope_destructions, 1);
+    free(scope);
+    scope = down;
+  }
+}
+
+static void _detach_scope(Scope scope) {
+  if (scope.previous) scope.previous.next = scope.next;
+  else if (scope.parent) scope.parent.children = scope.next;
+  if (scope.next) scope.next.previous = scope.previous;
+  scope.parent = scope.previous = scope.next = NULL;
+}
+
+static void _forget_retains(Scope scope) {
+  ScopeThreadState state = _thread();
+  for (Scope cur = scope; cur; cur = cur.down)
+    for (int i = state.retain_count - 1; i >= 0; i--)
+      if (state.retains[i].scope == cur)
+        state.retains[i] = state.retains[--state.retain_count];
 }

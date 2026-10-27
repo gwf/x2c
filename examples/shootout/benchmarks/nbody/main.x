@@ -22,23 +22,6 @@ typedef struct Vec3 { double x, y, z; } Vec3;
    a run time representation: each one inlines to the same three scalar
    operations the C spells out by component. `a + b * s` and `a - b * s` stay
    single expressions so clang still fuses each multiply-accumulate. */
-static inline Vec3 Vec3.sub(Vec3 a, Vec3 b) =>
-  (Vec3) { a.x - b.x, a.y - b.y, a.z - b.z };
-
-static inline Vec3 Vec3.scale(Vec3 a, double s) =>
-  (Vec3) { a.x * s, a.y * s, a.z * s };
-
-static inline Vec3 Vec3.divide(Vec3 a, double s) =>
-  (Vec3) { a.x / s, a.y / s, a.z / s };
-
-static inline Vec3 Vec3.add_scaled(Vec3 a, Vec3 b, double s) =>
-  (Vec3) { a.x + b.x * s, a.y + b.y * s, a.z + b.z * s };
-
-static inline Vec3 Vec3.sub_scaled(Vec3 a, Vec3 b, double s) =>
-  (Vec3) { a.x - b.x * s, a.y - b.y * s, a.z - b.z * s };
-
-static inline double Vec3.dot(Vec3 a, Vec3 b) =>
-  a.x * b.x + a.y * b.y + a.z * b.z;
 
 typedef struct Body {
   Vec3 position, velocity;
@@ -63,12 +46,27 @@ static Body bodies[BODY_COUNT] = {
       -9.51592254519715870e-05 }, 5.15138902046611451e-05 }
 };
 
+int main(int argc, char **argv) {
+  for (int i = 0; i < BODY_COUNT; i++) {
+    bodies[i].velocity = bodies[i].velocity.scale(DAYS_PER_YEAR);
+    bodies[i].mass *= SOLAR_MASS;
+  }
+  _offset_momentum();
+  printf("%.9f\n", _energy());
+  for (int i = atoi(argv[1]); i; i--) _advance(0.01);
+  printf("%.9f\n", _energy());
+  return 0;
+}
+
 static void _offset_momentum(void) {
   Vec3 momentum = { 0, 0, 0 };
   for (int i = 0; i < BODY_COUNT; i++)
     momentum = momentum.add_scaled(bodies[i].velocity, bodies[i].mass);
   bodies[0].velocity = momentum.divide(-SOLAR_MASS);
 }
+
+static inline Vec3 Vec3.divide(Vec3 a, double s) =>
+  (Vec3) { a.x / s, a.y / s, a.z / s };
 
 static void _advance(double dt) {
   for (int i = 0; i < BODY_COUNT; i++) {
@@ -88,6 +86,15 @@ static void _advance(double dt) {
     bodies[i].position = bodies[i].position.add_scaled(bodies[i].velocity, dt);
 }
 
+static inline Vec3 Vec3.scale(Vec3 a, double s) =>
+  (Vec3) { a.x * s, a.y * s, a.z * s };
+
+static inline Vec3 Vec3.add_scaled(Vec3 a, Vec3 b, double s) =>
+  (Vec3) { a.x + b.x * s, a.y + b.y * s, a.z + b.z * s };
+
+static inline Vec3 Vec3.sub_scaled(Vec3 a, Vec3 b, double s) =>
+  (Vec3) { a.x - b.x * s, a.y - b.y * s, a.z - b.z * s };
+
 static double _energy(void) {
   double total = 0;
   for (int i = 0; i < BODY_COUNT; i++) {
@@ -101,14 +108,8 @@ static double _energy(void) {
   return total;
 }
 
-int main(int argc, char **argv) {
-  for (int i = 0; i < BODY_COUNT; i++) {
-    bodies[i].velocity = bodies[i].velocity.scale(DAYS_PER_YEAR);
-    bodies[i].mass *= SOLAR_MASS;
-  }
-  _offset_momentum();
-  printf("%.9f\n", _energy());
-  for (int i = atoi(argv[1]); i; i--) _advance(0.01);
-  printf("%.9f\n", _energy());
-  return 0;
-}
+static inline Vec3 Vec3.sub(Vec3 a, Vec3 b) =>
+  (Vec3) { a.x - b.x, a.y - b.y, a.z - b.z };
+
+static inline double Vec3.dot(Vec3 a, Vec3 b) =>
+  a.x * b.x + a.y * b.y + a.z * b.z;

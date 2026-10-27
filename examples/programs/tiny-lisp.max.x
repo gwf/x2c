@@ -28,26 +28,18 @@
 // initial whitespace lets the same skip operation begin and resume input.
 static int lookahead = ' ';
 
-// Reader and evaluation errors share one diagnostic and stop the program.
-// The Var result lets a failing expression occupy any evaluator return site.
-static Var _fail(void) {
-  fputs("error\n", stderr);
-  exit(1);
-}
-
-static void _next(void) {
-  lookahead = getchar();
-}
-
-// A semicolon ends an atom and starts a comment, even without a space.
-static void _skip(void) {
-  for (;;) {
-    if (lookahead != EOF && strchr(" \t\r\n", lookahead)) _next();
-    else if (lookahead == ';')
-      while (lookahead != EOF && lookahead != '\n') _next();
-    else
-      return;
+int main(void) {
+  /* The outer scope owns the mutable top-level environment. auto releases
+     temporary Buffers, Arrays, and call Maps at their lexical scope exits.
+     Strings and Lists belong to the default interning pool until process
+     shutdown, so returned values outlive those temporary containers. There
+     is no tracing collector or per-expression pool to invalidate bindings. */
+  auto {
+    Map environment = {};
+    for (_skip(); lookahead != EOF; _skip())
+      puts(_eval(_read(), environment).str());
   }
+  return 0;
 }
 
 /* The grammar has atoms, parenthesized lists, and the quote abbreviation.
@@ -82,6 +74,21 @@ static Var _read(void) {
     _next();
   } while (lookahead != EOF && !strchr(" \t\r\n()';", lookahead));
   return spelling.str();
+}
+
+// A semicolon ends an atom and starts a comment, even without a space.
+static void _skip(void) {
+  for (;;) {
+    if (lookahead != EOF && strchr(" \t\r\n", lookahead)) _next();
+    else if (lookahead == ';')
+      while (lookahead != EOF && lookahead != '\n') _next();
+    else
+      return;
+  }
+}
+
+static void _next(void) {
+  lookahead = getchar();
 }
 
 /* A Map binds atom names to values. Only () is false; every nonempty list
@@ -175,16 +182,9 @@ static Var _eval(Var expression, Map environment) {
   return _fail();
 }
 
-int main(void) {
-  /* The outer scope owns the mutable top-level environment. auto releases
-     temporary Buffers, Arrays, and call Maps at their lexical scope exits.
-     Strings and Lists belong to the default interning pool until process
-     shutdown, so returned values outlive those temporary containers. There
-     is no tracing collector or per-expression pool to invalidate bindings. */
-  auto {
-    Map environment = {};
-    for (_skip(); lookahead != EOF; _skip())
-      puts(_eval(_read(), environment).str());
-  }
-  return 0;
+// Reader and evaluation errors share one diagnostic and stop the program.
+// The Var result lets a failing expression occupy any evaluator return site.
+static Var _fail(void) {
+  fputs("error\n", stderr);
+  exit(1);
 }

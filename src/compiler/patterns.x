@@ -4,6 +4,56 @@
    expressions by a private marker, so binder analysis can distinguish a
    computed operator head from ordinary literal data. */
 
+/** Reports whether a typed `Match` pattern has a fully static value graph. */
+int Compiler.match_pattern_is_static(Compiler c, List pattern) =>
+  Compiler.match_value_is_static(c.match_pattern_value(pattern));
+
+/** Reports whether a recovered pattern value graph is fully static. */
+int Compiler.match_value_is_static(Var value) {
+  if (value == <x2c-dyn>) return 0;
+  if (value is not <list>) return 1;
+  foreach (Var part in value.list())
+    if (!Compiler.match_value_is_static(part)) return 0;
+  return 1;
+}
+
+/* match binders
+
+   A pattern's definite binders become declarations in the scope of its
+   case, or of its catch clause, whose lowering keeps the issued bindings. */
+
+/** Declares pattern locals and returns their capture-token/binding pairs. */
+List Compiler.define_pattern_binders(Compiler c, List pattern) {
+  Array rows = [];
+  foreach (Atom binder in c.match_pattern_binders(pattern, NULL)) {
+    String name = binder.str()[1:];
+    List binding;
+    if (c.macro_holes) {
+      binding = c.macro_introduced_name(name);
+      c.bind_template_local(binding, _binder_type(binder), NULL);
+    }
+    else binding = c.sym.declare(NULL, $(name), _binder_type(binder));
+    rows.push($(binder, binding));
+  }
+  return rows.list_free();
+}
+
+
+
+/** Returns definite binders from a typed `Match` pattern AST.
+
+    When `possible` is non-null, stores every binder appearing on any path.
+*/
+List Compiler.match_pattern_binders(
+  Compiler c, List pattern, List &?possible) {
+  Var value = c.match_pattern_value(pattern);
+  MatchCaptureLayout layout = MatchCaptureLayout.analyze(value);
+  List definite = layout.definite_list();
+  if (possible) possible = layout.possible_list();
+  layout.free();
+  return definite;
+}
+
 /** Recovers a pattern value graph, using `x2c-dyn` for computed values. */
 Var Compiler.match_pattern_value(Compiler c, Var node) {
   if (node is not <list>) return node;
@@ -25,6 +75,73 @@ Var Compiler.match_pattern_value(Compiler c, Var node) {
   if (head == <cons>) return _cons_value(c, second, third);
   return <x2c-dyn>;
 }
+
+/** Builds ordinary declarations from a pattern scope's issued bindings.
+    A catch reads through its handler; a match reads its capture slots.
+*/
+List Compiler.pattern_binder_declarations(
+  Compiler c, List bindings, List handle) {
+  Array declarations = [];
+  int index = 0;
+  foreach (List row in bindings) {
+    Type type = _binder_type(row.car());
+    List value = handle ? %(expr ("Var")
+      (call "x2c_error_catch_capture"
+        (args (expr ("ErrorHandler") (ident $handle))
+              (expr (int) (literal (int) $(%"$index"))))))
+      : Compiler.match_capture_value(row.car(), index);
+    index++;
+    if (handle && row.car().is_list_binder())
+      value = %(expr $type (call "Var_list_payload" (args $value)));
+    declarations.push(%(declare $type (bindings (bind $(row.cadr()) ()))));
+    declarations.push(
+      %(stmnt (expr $type (op = (expr $type (ident $(row.cadr()))) $value))));
+  }
+  return declarations.list_free();
+}
+
+/** Returns the typed expression reading one native match capture. */
+List Compiler.match_capture_value(Var binder, int index) =>
+  %(expr $(_binder_type(binder))
+    ($(Compiler.match_capture_name(binder, index))));
+
+/** Returns the name of the local that carries a native match arm's
+    `index`th capture into its body, `x2c_match_value_INDEX` or
+    `x2c_match_list_INDEX`, which the match lowering declares.
+*/
+String Compiler.match_capture_name(Var binder, int index) =>
+  %"x2c_match_$(binder.is_list_binder() ? "list" : "value")_$index";
+
+/** Opens a scope for the captures established by a true condition. Returns
+    whether a scope was opened; the caller closes it after its continuation.
+*/
+int Compiler.open_condition_scope(Compiler c, List expression) {
+  List bindings = Compiler.condition_bindings(expression);
+  if (!bindings) return 0;
+  c.sym.push_new_scope();
+  foreach (List row in bindings) {
+    Type type = row.cadr();
+    c.sym.bind_identity(NULL, row.car(), type.declaration_ast(row.car()));
+  }
+  return 1;
+}
+
+/** Returns captures established by a true condition. Other operations do
+    not establish names, including negation and disjunction.
+*/
+List Compiler.condition_bindings(List expression) {
+  match (expression) {
+    case %(expr ? (matches ? ? ? ?bindings)): return bindings;
+    case %(expr ? (parens ?inner)):
+      return Compiler.condition_bindings(inner);
+    case %(expr ? (op && ?left ?right)):
+      return Compiler.condition_bindings(left).append(
+        Compiler.condition_bindings(right));
+  }
+  return NULL;
+}
+
+// match pattern values
 
 /* A case pattern matches what its labels match. Other untyped calls are
    computed; typed builtin boxers were recognized with their expression. */
@@ -52,118 +169,5 @@ static String _converter_name(Var node) {
   return NULL;
 }
 
-/** Reports whether a recovered pattern value graph is fully static. */
-int Compiler.match_value_is_static(Var value) {
-  if (value == <x2c-dyn>) return 0;
-  if (value is not <list>) return 1;
-  foreach (Var part in value.list())
-    if (!Compiler.match_value_is_static(part)) return 0;
-  return 1;
-}
-
-/** Reports whether a typed `Match` pattern has a fully static value graph. */
-int Compiler.match_pattern_is_static(Compiler c, List pattern) =>
-  Compiler.match_value_is_static(c.match_pattern_value(pattern));
-
-/* match binders
-
-   A pattern's definite binders become declarations in the scope of its
-   case, or of its catch clause, whose lowering keeps the issued bindings. */
-
-/** Returns definite binders from a typed `Match` pattern AST.
-
-    When `possible` is non-null, stores every binder appearing on any path.
-*/
-List Compiler.match_pattern_binders(
-  Compiler c, List pattern, List &?possible) {
-  Var value = c.match_pattern_value(pattern);
-  MatchCaptureLayout layout = MatchCaptureLayout.analyze(value);
-  List definite = layout.definite_list();
-  if (possible) possible = layout.possible_list();
-  layout.free();
-  return definite;
-}
-
-/** Declares pattern locals and returns their capture-token/binding pairs. */
-List Compiler.define_pattern_binders(Compiler c, List pattern) {
-  Array rows = [];
-  foreach (Atom binder in c.match_pattern_binders(pattern, NULL)) {
-    String name = binder.str()[1:];
-    List binding;
-    if (c.macro_holes) {
-      binding = c.macro_introduced_name(name);
-      c.bind_template_local(binding, _binder_type(binder), NULL);
-    }
-    else binding = c.sym.declare(NULL, $(name), _binder_type(binder));
-    rows.push($(binder, binding));
-  }
-  return rows.list_free();
-}
-
 static List _binder_type(Var binder) =>
   binder.is_list_binder() ? %("List") : %("Var");
-
-/** Returns the name of the local that carries a native match arm's
-    `index`th capture into its body, `x2c_match_value_INDEX` or
-    `x2c_match_list_INDEX`, which the match lowering declares.
-*/
-String Compiler.match_capture_name(Var binder, int index) =>
-  %"x2c_match_$(binder.is_list_binder() ? "list" : "value")_$index";
-
-/** Returns the typed expression reading one native match capture. */
-List Compiler.match_capture_value(Var binder, int index) =>
-  %(expr $(_binder_type(binder))
-    ($(Compiler.match_capture_name(binder, index))));
-
-/** Builds ordinary declarations from a pattern scope's issued bindings.
-    A catch reads through its handler; a match reads its capture slots.
-*/
-List Compiler.pattern_binder_declarations(
-  Compiler c, List bindings, List handle) {
-  Array declarations = [];
-  int index = 0;
-  foreach (List row in bindings) {
-    Type type = _binder_type(row.car());
-    List value = handle ? %(expr ("Var")
-      (call "x2c_error_catch_capture"
-        (args (expr ("ErrorHandler") (ident $handle))
-              (expr (int) (literal (int) $(%"$index"))))))
-      : Compiler.match_capture_value(row.car(), index);
-    index++;
-    if (handle && row.car().is_list_binder())
-      value = %(expr $type (call "Var_list_payload" (args $value)));
-    declarations.push(%(declare $type (bindings (bind $(row.cadr()) ()))));
-    declarations.push(
-      %(stmnt (expr $type (op = (expr $type (ident $(row.cadr()))) $value))));
-  }
-  return declarations.list_free();
-}
-
-/** Returns captures established by a true condition. Other operations do
-    not establish names, including negation and disjunction.
-*/
-List Compiler.condition_bindings(List expression) {
-  match (expression) {
-    case %(expr ? (matches ? ? ? ?bindings)): return bindings;
-    case %(expr ? (parens ?inner)):
-      return Compiler.condition_bindings(inner);
-    case %(expr ? (op && ?left ?right)):
-      return Compiler.condition_bindings(left).append(
-        Compiler.condition_bindings(right));
-  }
-  return NULL;
-}
-
-/** Opens a scope for the captures established by a true condition. Returns
-    whether a scope was opened; the caller closes it after its continuation.
-*/
-int Compiler.open_condition_scope(Compiler c, List expression) {
-  List bindings = Compiler.condition_bindings(expression);
-  if (!bindings) return 0;
-  c.sym.push_new_scope();
-  foreach (List row in bindings) {
-    Type type = row.cadr();
-    c.sym.bind_identity(NULL, row.car(), type.declaration_ast(row.car()));
-  }
-  return 1;
-}

@@ -1,5 +1,35 @@
 /*  identifiers.x -- binding identities and reference reads */
 
+// identifiers
+
+/** Keeps `binding` reachable from the cursor where a later declaration of
+    its spelling hides it. A hidden local takes a fresh emitted spelling;
+    a hidden file-scope name makes the visible automatic locals take one.
+*/
+void Compiler.reveal_binding(Compiler c, List binding) {
+  String spelling = NULL;
+  if (!Ast.try_binding(binding, NULL, spelling)) return;
+  Type visible_type = NULL;
+  List visible = c.sym.lookup($(spelling), visible_type);
+  if (!visible || visible == binding) return;
+  if (c.sym.binding_is_local(binding)) {
+    if (!(%(emitted $binding) in c.semantic_binding_facts()))
+      c.set_fact(%(emitted $binding), c.fresh_name("binding_shadow"));
+    c.respell_captures(binding);
+  }
+  else if (visible_type && %(automatic $visible) in c.semantic_binding_facts())
+    _unshadow_visible(c, visible, spelling);
+}
+
+// binding identities and reference reads
+
+static void _unshadow_visible(Compiler c, List visible, String spelling) {
+  foreach (List local in c.sym.unshadow_visible(spelling))
+    c.respell_captures(local);
+  if (!(%(emitted $visible) in c.semantic_binding_facts()))
+    c.set_fact(%(emitted $visible), c.fresh_name("binding_shadow"));
+}
+
 module int _identifier_needs_resolution(Compiler c, List binding) {
   String spelling = Ast.binding_spelling(binding);
   Map facts = c.semantic_binding_facts();
@@ -17,7 +47,7 @@ module int _identifier_needs_resolution(Compiler c, List binding) {
      !retained_parameter && !retained_capture);
 }
 
-// identifiers
+
 
 module List _resolve_identifier(
   Compiler c, Var value, Type type, Token origin) {
@@ -174,32 +204,6 @@ static int _shadow_identifier(
     return 0;
   _unshadow_visible(c, visible, spelling);
   return 0;
-}
-
-static void _unshadow_visible(Compiler c, List visible, String spelling) {
-  foreach (List local in c.sym.unshadow_visible(spelling))
-    c.respell_captures(local);
-  if (!(%(emitted $visible) in c.semantic_binding_facts()))
-    c.set_fact(%(emitted $visible), c.fresh_name("binding_shadow"));
-}
-
-/** Keeps `binding` reachable from the cursor where a later declaration of
-    its spelling hides it. A hidden local takes a fresh emitted spelling;
-    a hidden file-scope name makes the visible automatic locals take one.
-*/
-void Compiler.reveal_binding(Compiler c, List binding) {
-  String spelling = NULL;
-  if (!Ast.try_binding(binding, NULL, spelling)) return;
-  Type visible_type = NULL;
-  List visible = c.sym.lookup($(spelling), visible_type);
-  if (!visible || visible == binding) return;
-  if (c.sym.binding_is_local(binding)) {
-    if (!(%(emitted $binding) in c.semantic_binding_facts()))
-      c.set_fact(%(emitted $binding), c.fresh_name("binding_shadow"));
-    c.respell_captures(binding);
-  }
-  else if (visible_type && %(automatic $visible) in c.semantic_binding_facts())
-    _unshadow_visible(c, visible, spelling);
 }
 
 /* An active expansion issued `binding` after it began. */

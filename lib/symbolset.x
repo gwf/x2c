@@ -35,112 +35,6 @@ protocol Contains(SymbolSet);
 */
 #define SYMBOL_SET_HEADER_SIZE 20
 
-static unsigned _byte(SymbolSet set, size_t offset) {
-  unsigned char *bytes = (unsigned char *) set;
-  return *(bytes + offset);
-}
-
-static uint32_t _u32(SymbolSet set, size_t offset) {
-  uint32_t value = 0;
-  for (int byte = 3; byte >= 0; byte--)
-    value = (value << 8) | _byte(set, offset + byte);
-  return value;
-}
-
-static uint64_t _u64(SymbolSet set, size_t offset) {
-  uint64_t value = 0;
-  for (int byte = 7; byte >= 0; byte--)
-    value = (value << 8) | _byte(set, offset + byte);
-  return value;
-}
-
-/* The splitmix64 finalizer. */
-static inline uint64_t _mix(uint64_t value) {
-  value ^= value >> 30;
-  value *= UINT64_C(0xbf58476d1ce4e5b9);
-  value ^= value >> 27;
-  value *= UINT64_C(0x94d049bb133111eb);
-  return value ^ (value >> 31);
-}
-
-/* The perfect hash puts `symbol` on one vertex in each of the three spans
-   of `mask + 1` entries. Encoding and lookup both place members here. */
-static inline void _place(
-  Symbol symbol, uint64_t seed, uint32_t mask, uint32_t *vertices) {
-  uint64_t hash = _mix((uint64_t) symbol ^ seed);
-  uint32_t span = mask + 1;
-  vertices[0] = (uint32_t) hash & mask;
-  vertices[1] = span + ((uint32_t) (hash >> 21) & mask);
-  vertices[2] = span * 2 + ((uint32_t) (hash >> 42) & mask);
-}
-
-static uint32_t _g(SymbolSet set, uint32_t vertex) {
-  unsigned width = _byte(set, 0);
-  size_t offset = SYMBOL_SET_HEADER_SIZE + (size_t) vertex * width;
-  if (width == 1) return _byte(set, offset);
-  if (width == 2)
-    return _byte(set, offset) |
-           (_byte(set, offset + 1) << 8);
-  return _u32(set, offset);
-}
-
-static size_t _order_offset(SymbolSet x, uint32_t span) =>
-  SYMBOL_SET_HEADER_SIZE + (size_t) span * 3 * _byte(x, 0);
-
-/** Returns the number of `Symbol`s in `set`, or zero for a null set. */
-size_t SymbolSet.len(SymbolSet x) => x ? _u32(x, 4) : 0;
-
-/** Returns `symbol`'s source-order index, or -1 when it is absent.
-    A null or empty set returns -1. The ordered table verifies the hash
-    candidate, so a nonmember collision is not reported as membership.
-*/
-int SymbolSet.index(SymbolSet x, Symbol symbol) {
-  if (!x) return -1;
-  uint32_t count = _u32(x, 4);
-  if (!count) return -1;
-  uint32_t mask = _u32(x, 8), span = mask + 1, vertices[3];
-  _place(symbol, _u64(x, 12), mask, vertices);
-  uint32_t index =
-    _g(x, vertices[0]) ^ _g(x, vertices[1]) ^ _g(x, vertices[2]);
-  if (index >= count) return -1;
-  Symbol stored = (Symbol) _u64(
-    x, _order_offset(x, span) + (size_t) index * sizeof(Symbol));
-  return stored == symbol ? (int) index : -1;
-}
-
-/** Reports whether `symbol` belongs to `set`. */
-int SymbolSet.contains(SymbolSet x, Symbol symbol) => x.index(symbol) >= 0;
-
-/** Returns the `Symbol` at `index`, or zero when the index is out of range.
-    Negative indices count from the end. Zero is also a valid empty `Symbol`,
-    so use `SymbolSet.len` when an out-of-range result must be distinguished.
-*/
-Symbol SymbolSet.getindex(SymbolSet x, int index) {
-  int count = (int) x.len();
-  index = x2c_normalize_index(index, count);
-  if (index < 0) return 0;
-  return (Symbol) _u64(
-    x, _order_offset(x, _u32(x, 8) + 1) + (size_t) index * sizeof(Symbol));
-}
-
-static int _next(Iter iter, Var *out) {
-  SymbolSet x = (SymbolSet) iter.obj.pointer(), int index = iter.state;
-  if (index < 0 || (size_t) index >= x.len()) return 0;
-  *out = x[index];
-  iter.state = index + 1;
-  return 1;
-}
-
-/** Initializes `dest` to iterate over the `Symbol`s in source order.
-    The caller owns `dest`, which must remain valid through every pull. The
-    iterator borrows the generated set storage and allocates nothing. A null
-    `dest` returns NULL; a null set produces an empty iterator.
-*/
-Iter SymbolSet.iter(SymbolSet x, Iter dest) {
-  if (!dest) return NULL;
-  return dest.init((void *) x, _next, 0);
-}
-
 /* encoding
 
    Each Symbol is an edge on its three vertices. A seed works when peeling,
@@ -167,6 +61,52 @@ static typedef struct Graph {
   unsigned char *removed;
 } Graph;
 
+/** Reports whether `symbol` belongs to `set`. */
+int SymbolSet.contains(SymbolSet x, Symbol symbol) => x.index(symbol) >= 0;
+
+/** Returns `symbol`'s source-order index, or -1 when it is absent.
+    A null or empty set returns -1. The ordered table verifies the hash
+    candidate, so a nonmember collision is not reported as membership.
+*/
+int SymbolSet.index(SymbolSet x, Symbol symbol) {
+  if (!x) return -1;
+  uint32_t count = _u32(x, 4);
+  if (!count) return -1;
+  uint32_t mask = _u32(x, 8), span = mask + 1, vertices[3];
+  _place(symbol, _u64(x, 12), mask, vertices);
+  uint32_t index =
+    _g(x, vertices[0]) ^ _g(x, vertices[1]) ^ _g(x, vertices[2]);
+  if (index >= count) return -1;
+  Symbol stored = (Symbol) _u64(
+    x, _order_offset(x, span) + (size_t) index * sizeof(Symbol));
+  return stored == symbol ? (int) index : -1;
+}
+
+/** Returns the `Symbol` at `index`, or zero when the index is out of range.
+    Negative indices count from the end. Zero is also a valid empty `Symbol`,
+    so use `SymbolSet.len` when an out-of-range result must be distinguished.
+*/
+Symbol SymbolSet.getindex(SymbolSet x, int index) {
+  int count = (int) x.len();
+  index = x2c_normalize_index(index, count);
+  if (index < 0) return 0;
+  return (Symbol) _u64(
+    x, _order_offset(x, _u32(x, 8) + 1) + (size_t) index * sizeof(Symbol));
+}
+
+/** Initializes `dest` to iterate over the `Symbol`s in source order.
+    The caller owns `dest`, which must remain valid through every pull. The
+    iterator borrows the generated set storage and allocates nothing. A null
+    `dest` returns NULL; a null set produces an empty iterator.
+*/
+Iter SymbolSet.iter(SymbolSet x, Iter dest) {
+  if (!dest) return NULL;
+  return dest.init((void *) x, _next, 0);
+}
+
+/** Returns the number of `Symbol`s in `set`, or zero for a null set. */
+size_t SymbolSet.len(SymbolSet x) => x ? _u32(x, 4) : 0;
+
 /** Returns the bytes of a `SymbolSet` holding `symbols` in order, in a new
     byte `Block` owned by the active `Scope`. The compiler emits them for each
     `%<<...>>` literal. Members must be distinct: the table search does not
@@ -190,6 +130,66 @@ Block SymbolSet.encode(Array symbols) {
     _put(bytes, symbols[index].symbol(), 8);
   xfree(h.table);
   return bytes;
+}
+
+static uint64_t _u64(SymbolSet set, size_t offset) {
+  uint64_t value = 0;
+  for (int byte = 7; byte >= 0; byte--)
+    value = (value << 8) | _byte(set, offset + byte);
+  return value;
+}
+
+/* The perfect hash puts `symbol` on one vertex in each of the three spans
+   of `mask + 1` entries. Encoding and lookup both place members here. */
+static inline void _place(
+  Symbol symbol, uint64_t seed, uint32_t mask, uint32_t *vertices) {
+  uint64_t hash = _mix((uint64_t) symbol ^ seed);
+  uint32_t span = mask + 1;
+  vertices[0] = (uint32_t) hash & mask;
+  vertices[1] = span + ((uint32_t) (hash >> 21) & mask);
+  vertices[2] = span * 2 + ((uint32_t) (hash >> 42) & mask);
+}
+
+/* The splitmix64 finalizer. */
+static inline uint64_t _mix(uint64_t value) {
+  value ^= value >> 30;
+  value *= UINT64_C(0xbf58476d1ce4e5b9);
+  value ^= value >> 27;
+  value *= UINT64_C(0x94d049bb133111eb);
+  return value ^ (value >> 31);
+}
+
+static uint32_t _g(SymbolSet set, uint32_t vertex) {
+  unsigned width = _byte(set, 0);
+  size_t offset = SYMBOL_SET_HEADER_SIZE + (size_t) vertex * width;
+  if (width == 1) return _byte(set, offset);
+  if (width == 2)
+    return _byte(set, offset) |
+           (_byte(set, offset + 1) << 8);
+  return _u32(set, offset);
+}
+
+static uint32_t _u32(SymbolSet set, size_t offset) {
+  uint32_t value = 0;
+  for (int byte = 3; byte >= 0; byte--)
+    value = (value << 8) | _byte(set, offset + byte);
+  return value;
+}
+
+static size_t _order_offset(SymbolSet x, uint32_t span) =>
+  SYMBOL_SET_HEADER_SIZE + (size_t) span * 3 * _byte(x, 0);
+
+static unsigned _byte(SymbolSet set, size_t offset) {
+  unsigned char *bytes = (unsigned char *) set;
+  return *(bytes + offset);
+}
+
+static int _next(Iter iter, Var *out) {
+  SymbolSet x = (SymbolSet) iter.obj.pointer(), int index = iter.state;
+  if (index < 0 || (size_t) index >= x.len()) return 0;
+  *out = x[index];
+  iter.state = index + 1;
+  return 1;
 }
 
 /* Appends the low `size` bytes of `value`, least significant first. */

@@ -47,6 +47,8 @@ List Compiler.parse_macro_quotation(Compiler c) {
        : built;
 }
 
+// macro definition quotations
+
 /* The kind a quotation builds: one a result kind names, or a type or one
    parameter, which only a hole kind names. */
 static Symbol _quotation_kind(Compiler c, Token token) {
@@ -116,16 +118,6 @@ static List _hole_local(Compiler c, Map holes, int position) {
     <block>, c.return_type);
 }
 
-/* Returns NULL if the quotation registered no expression at this offset. */
-module List _expression_hole(Compiler c, Token prefix) {
-  Var name;
-  if (!c.macro_holes ||
-      !c.macro_holes.try_get(%(expression $(prefix.pos)), name))
-    return NULL;
-  List hole = _hole_record(c, Atom.intern(name));
-  return hole ? hole : _quoted_hole(c, name, prefix);
-}
-
 /* The expression that computes a typed quotation's type: the identifier at
    the cursor, or the group there, which holds a type or a `$name` local or
    `$(expression)` hole whose value is the type. */
@@ -146,20 +138,6 @@ static List _quoted_type(Compiler c, Map holes) {
   else type = _quoted_type_name(c);
   c.expect(<)>);
   return type;
-}
-
-/* The `Type` expression `type`, which a `meta` function checks names its
-   type with a String before a typed quotation inserts it:
-   `type_name_error(type) ? (x2c_diagnostic_fail(...), type) : type`. */
-static List _checked_type(Compiler c, List type, Token origin) {
-  if (!c.meta_body) return type;
-  List error = _runtime_call(c, "type_name_error", $(type), origin);
-  List fail = _runtime_call(
-    c, "x2c_diagnostic_fail", %($error (expr ("List") (nil))), origin);
-  return c.resolve_expression(
-    %(expr () (op ? $error
-      (expr ("Type") (commas $fail $type)) $type)),
-    origin);
 }
 
 static List _quoted_type_name(Compiler c) {
@@ -386,6 +364,20 @@ static List _typed_hole(Compiler c, List row, Token start) {
     $(local, $!int{ $lifts }, $!int{ $expression }), start);
 }
 
+/* The `Type` expression `type`, which a `meta` function checks names its
+   type with a String before a typed quotation inserts it:
+   `type_name_error(type) ? (x2c_diagnostic_fail(...), type) : type`. */
+static List _checked_type(Compiler c, List type, Token origin) {
+  if (!c.meta_body) return type;
+  List error = _runtime_call(c, "type_name_error", $(type), origin);
+  List fail = _runtime_call(
+    c, "x2c_diagnostic_fail", %($error (expr ("List") (nil))), origin);
+  return c.resolve_expression(
+    %(expr () (op ? $error
+      (expr ("Type") (commas $fail $type)) $type)),
+    origin);
+}
+
 static List _runtime_call(
   Compiler c, String name, List arguments, Token start) {
   List callee = c.resolve_expression(%(expr () (ident $name)), start);
@@ -395,6 +387,16 @@ static List _runtime_call(
 
 static List _hole_value(Compiler c, List hole, Token start) =>
   c.resolve_expression(%(expr () (ident $(_hole_name(hole).str()))), start);
+
+/* Returns NULL if the quotation registered no expression at this offset. */
+module List _expression_hole(Compiler c, Token prefix) {
+  Var name;
+  if (!c.macro_holes ||
+      !c.macro_holes.try_get(%(expression $(prefix.pos)), name))
+    return NULL;
+  List hole = _hole_record(c, Atom.intern(name));
+  return hole ? hole : _quoted_hole(c, name, prefix);
+}
 
 /* A quotation's hole takes its kind from a name position, or from a
    parameter or statement position where it stands alone, which no

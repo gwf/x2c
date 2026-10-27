@@ -103,6 +103,25 @@ extern const VarDecodeGroup x2c_var_decode_groups[];
 
 #include "meta.x"
 
+meta static Symbol _update_tag(List id)     => _update_row(id)[0];
+
+meta static String _update_boxer(List id)   => _update_row(id)[1];
+
+meta static String _update_decoder(List id) => _update_row(id)[2];
+
+/* An empty cast entry means the source and destination types already agree. */
+meta static List _update_cast_in(List id)  => _update_row(id)[3].car();
+
+meta static List _update_cast_out(List id) => _update_row(id)[3].cdr().car();
+
+/* The row the invocation's `<tag>` literal names. The capture is a literal,
+   so its Symbol value is its last part. */
+meta static List _update_row(List id) {
+  match (id)
+    case %(expr ? (literal ? ? ?key)): return _update_rows().assoc(key);
+  return %();
+}
+
 /* One row per native integer and floating family. Each $native.update
    invocation reads its Var tag, boxing operations, and the casts for its
    two representation crossings. */
@@ -126,22 +145,6 @@ meta static List _update_rows(void) => %(
   (f64     (f64 "Var_box_f64" "Var_decode_f64" (() ())))
   (ldouble (ldouble "Var_box_long_double" "Var_long_double_value" (() ())))
 );
-
-/* The row the invocation's `<tag>` literal names. The capture is a literal,
-   so its Symbol value is its last part. */
-meta static List _update_row(List id) {
-  match (id)
-    case %(expr ? (literal ? ? ?key)): return _update_rows().assoc(key);
-  return %();
-}
-
-meta static Symbol _update_tag(List id)     => _update_row(id)[0];
-meta static String _update_boxer(List id)   => _update_row(id)[1];
-meta static String _update_decoder(List id) => _update_row(id)[2];
-
-/* An empty cast entry means the source and destination types already agree. */
-meta static List _update_cast_in(List id)  => _update_row(id)[3].car();
-meta static List _update_cast_out(List id) => _update_row(id)[3].cdr().car();
 
 /* The destination's current value, boxed in the family the row names. */
 meta static List _update_box(List id, List lhs) {

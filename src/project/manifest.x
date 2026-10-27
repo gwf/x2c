@@ -12,6 +12,22 @@ static typedef struct Manifest {
   String key, value, int start;
 } Manifest;
 
+// values
+
+/** Returns whether a target, profile, or manifest field name contains only
+    letters, digits, underscores, and hyphens, and is not empty.
+*/
+int ProjectBuild.valid_name(String name) {
+  if (!name) return 0;
+  foreach (char raw in name) {
+    unsigned char ch = raw;
+    if (!(isalnum(ch) || ch == '_' || ch == '-')) return 0;
+  }
+  return 1;
+}
+
+// manifest parsing and model construction
+
 /* Each line is a section header, a `key = value` field, or the next line of
    a field whose array is open. A `#` outside a string starts a comment. */
 module void _parse_manifest(Project p) {
@@ -47,14 +63,6 @@ static void _strip_comment(char *line) {
       return;
     }
   }
-}
-
-static char *_trim(char *text) {
-  text = _skip_space(text);
-  char *end = text + strlen(text);
-  while (end > text && isspace((unsigned char) end[-1])) end--;
-  *end = 0;
-  return text;
 }
 
 // sections
@@ -141,6 +149,14 @@ static void _field(Manifest &m, char *line) {
   m.value = value;
   m.start = m.line;
   _settle(m);
+}
+
+static char *_trim(char *text) {
+  text = _skip_space(text);
+  char *end = text + strlen(text);
+  while (end > text && isspace((unsigned char) end[-1])) end--;
+  *end = 0;
+  return text;
 }
 
 /* The next line of an open array continues its field's value. */
@@ -245,7 +261,7 @@ static void _set_profile_field(
   }
 }
 
-// values
+
 
 static String _string_value(Project p, int line, String value) {
   char *at = value;
@@ -315,18 +331,6 @@ static int _array_open(String value) {
   return depth > 0;
 }
 
-/** Returns whether a target, profile, or manifest field name contains only
-    letters, digits, underscores, and hyphens, and is not empty.
-*/
-int ProjectBuild.valid_name(String name) {
-  if (!name) return 0;
-  foreach (char raw in name) {
-    unsigned char ch = raw;
-    if (!(isalnum(ch) || ch == '_' || ch == '-')) return 0;
-  }
-  return 1;
-}
-
 static char *_skip_space(char *at) {
   while (isspace((unsigned char) *at)) at++;
   return at;
@@ -364,13 +368,15 @@ static ProjectProfile _new_profile(ProjectTarget target, String name) {
 
 // diagnostics
 
+module void _error_name(Project p, int line, String message, String name) {
+  _error(p, line, %"$message '$name'");
+}
+
+
+
 module void _error(Project p, int line, String message) {
   String at = line ? ":%d".printf(line) : NULL;
   if (p && p.path) message = %"manifest '$(p.path)'$at: $message";
   fprintf(stderr, "x2c: error: %s\n", message);
   exit(2);
-}
-
-module void _error_name(Project p, int line, String message, String name) {
-  _error(p, line, %"$message '$name'");
 }

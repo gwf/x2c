@@ -131,10 +131,8 @@ static macro Stmt $report.protocol_signature_conflict(
   }
 }
 
-static Type _declared(Compiler c, String name) {
-  if (c.sym.get($("generated-protocol", name))) return NULL;
-  return c.sym.get($(name));
-}
+#define PROTOCOL_VARIABLE 1
+#define PROTOCOL_VARIADIC 2
 
 /** Resolves every visible adoption into the current conformance registry.
     Resolution starts from an empty registry; diagnostics are located only for
@@ -144,65 +142,7 @@ static Type _declared(Compiler c, String name) {
 */
 void Compiler.resolve_protocols(Compiler c) => _resolve_visible(c, 1);
 
-static void _resolve_visible(Compiler c, int report) {
-  c.conforms = {};
-  String owner = _path(c);
-  foreach (List adoption in c.adoptions) {
-    Type (base, participant) = adoption.cdr();
-    Symbol storage = _adoption_storage(adoption);
-    List location = _adoption_location(adoption);
-    String path = _canonical_file(c, location);
-    if (storage == <static> && path != owner) continue;
-    if (_recorded(c, base, participant)) continue;
-    _resolve_adoption(
-      c, base, participant, report && path == owner ? location : NULL);
-  }
-}
-
 // recorded conformance
-
-/* An ordinary external conformance whose adoption the unit's collected
-   entry declares is recorded in the unit's interface as
-   `(conformance BASE PARTICIPANT FORWARD REVERSE (bindings (NAME TYPE)...)
-   (MEMBER STATUS SOURCE)...)`, with each type variable's binding and each
-   member resolved as anything but `no-member`. The expected and template
-   types follow from the protocol record and the bindings. A member that
-   resolved to a function static to this unit is left out, so it is
-   `no-member` elsewhere: no other unit can call that function. A native
-   conformance reads no participant member, so each unit resolves it. */
-module void _record_conformances(Compiler c) {
-  c.record_conformance_rows(c.conformance_rows(c.declared_adoptions()));
-}
-
-static String _recorded_spelling(Compiler c, String name) {
-  if (!name) return name;
-  List binding = c.sym.lookup($(name), NULL);
-  return binding ? Ast.binding_spelling(binding) : name;
-}
-
-static List _recorded_conformance(Compiler c, Type base, Type participant) {
-  if (_visibility(c, base, participant) != <external>) return NULL;
-  if (c.conforms[$(base, participant)] ~= %(
-        protocol-conformance ? ? ?forward ?reverse ? ?(Map bindings)
-        (members *rows))) {
-    if (_native_rows(rows)) return NULL;
-    Array bound = [], resolved = [];
-    foreach ((String name, Type type) in bindings)
-      bound.push($(name, type));
-    bound.sort();
-    foreach (List row in rows)
-      if (row ~= %(?member ?(Symbol status) ?(String source) *)) {
-        source = _recorded_spelling(c, source);
-        if (status != <no-member> && !_is_private(c, source))
-          resolved.push($(member, status, source));
-      }
-    forward = _recorded_spelling(c, forward);
-    reverse = _recorded_spelling(c, reverse);
-    return %(conformance $base $participant $forward $reverse
-             (bindings @(bound.list_free())) @(resolved.list_free()));
-  }
-  return NULL;
-}
 
 /** Returns the interface rows of the resolved conformances `adoptions`
     declare.
@@ -239,6 +179,23 @@ void Compiler.resolve_as_declared(Compiler c, Map symbols) {
   pairs.free();
 }
 
+// protocol conformance resolution
+
+static void _resolve_visible(Compiler c, int report) {
+  c.conforms = {};
+  String owner = _path(c);
+  foreach (List adoption in c.adoptions) {
+    Type (base, participant) = adoption.cdr();
+    Symbol storage = _adoption_storage(adoption);
+    List location = _adoption_location(adoption);
+    String path = _canonical_file(c, location);
+    if (storage == <static> && path != owner) continue;
+    if (_recorded(c, base, participant)) continue;
+    _resolve_adoption(
+      c, base, participant, report && path == owner ? location : NULL);
+  }
+}
+
 /* The row an included interface recorded for an adoption this unit does not
    own, or NULL. */
 static List _recorded(Compiler c, Type base, Type participant) {
@@ -248,77 +205,6 @@ static List _recorded(Compiler c, Type base, Type participant) {
         $("recorded-conformance", base, participant), recorded))
     return NULL;
   return recorded;
-}
-
-/* Installs the conformance an included interface recorded for an adoption
-   this unit does not own. Returns 0 when there is none to reuse. */
-module int _reuse_conformance(Compiler c, Type base, Type participant) {
-  if ($(_record(c, base), _recorded(c, base, participant)) ~= %(
-        (? ? ? ? (members *templates))
-        (conformance ? ? ?forward ?reverse (bindings *bound) *members))) {
-    Map variables = {}, bindings = {}, resolved = {};
-    foreach (List pair in bound) {
-      (String name, Type type) = pair;
-      variables[name] = 1;
-      bindings[name] = type;
-    }
-    foreach (List member in members) resolved[member.car()] = member;
-    Array rows = [];
-    foreach (List template in templates) {
-      (String member, Type type) = template;
-      Type expected = _substitute_signature(type, variables, bindings);
-      rows.push(_recorded_row(resolved[member], member, expected, type));
-    }
-    c.conforms[$(base, participant)] = %(
-      protocol-conformance $base $participant $forward $reverse
-      $variables $bindings (members @(rows.list_free()))
-    );
-    return 1;
-  }
-  return 0;
-}
-
-/* The recorded conformances this unit may reuse and has not installed, as
-   `((BASE PARTICIPANT) ROW)` pairs. */
-module List _unused_recorded(Compiler c) {
-  Array candidates = [], unused = [];
-  foreach (Var key in c.protocol_helpers.keys())
-    if (key ~= %("recorded-conformance" ?(Type base) ?(Type participant)))
-      candidates.push($(base, participant));
-  // Ownership answers are memoized in the helpers, so they follow the scan.
-  foreach (List pair in candidates) {
-    List row = _recorded(c, pair.car(), pair.cadr());
-    if (row && !(pair in c.conforms)) unused.push($(pair, row));
-  }
-  candidates.free();
-  return unused.list_free();
-}
-
-/* Installs each recorded conformance with a base default whose forward
-   converter is defined, so that its forwarding members are published. */
-module void _reuse_defaults(Compiler c) {
-  foreach (List entry in _unused_recorded(c))
-    if (entry ~= %((?(Type base) ?(Type participant))
-                   (conformance ? ? ?(String forward) ? ? *members)) &&
-        forward in c.fn_defs && _has_default(members))
-      _reuse_conformance(c, base, participant);
-}
-
-static int _has_default(List members) {
-  foreach (List member in members) if (member.cadr() == <base-dflt>) return 1;
-  return 0;
-}
-
-/* Rebuilds a member row as resolution writes it. A member the interface
-   does not list resolved as `no-member`. */
-static List _recorded_row(
-  Var recorded, String member, Type expected, Type template) {
-  if (recorded ~= %(? ?(Symbol status) ?(String source))) {
-    Symbol kind = status == <base-dflt> ? <ordinary> : <none>;
-    return $(member, status, source, expected, kind, template);
-  }
-  String source = NULL;
-  return %($member no-member $source $expected none $template);
 }
 
 module void _resolve_adoption(
@@ -504,9 +390,6 @@ static List _rows(NativeResolution &r, List templates, List &failure) {
   return members.list_free();
 }
 
-#define PROTOCOL_VARIABLE 1
-#define PROTOCOL_VARIADIC 2
-
 static List _native_requirement(
   String member, String native, Type template, String binder,
   Type participant_definition, Type base) {
@@ -523,17 +406,6 @@ static List _native_requirement(
       participant_definition != base)
     return %($member native result implicit);
   return NULL;
-}
-
-static int _contents(Var value, String variable) {
-  if (value is <string>)
-    return value == variable ? PROTOCOL_VARIABLE : 0;
-  if (value == <...>) return PROTOCOL_VARIADIC;
-  if (value is not <list>) return 0;
-  int contents = 0;
-  foreach (Var item in value.list())
-    contents |= _contents(item, variable);
-  return contents;
 }
 
 static int _native_converts(Type participant_definition, Type base) {
@@ -776,6 +648,11 @@ static List _complete(MemberResolution &r, List row) {
   return NULL;
 }
 
+static Type _declared(Compiler c, String name) {
+  if (c.sym.get($("generated-protocol", name))) return NULL;
+  return c.sym.get($(name));
+}
+
 static List _requirement(ProtocolAdapters &a, List rows) {
   foreach (List row in rows)
     if (row ~= %(?(String member) ?(Symbol status) ? ?
@@ -825,23 +702,26 @@ static List _conversion_requirement(
   return NULL;
 }
 
-// signature unification
-
-static int _function_parts(Type signature, List &parameters, Type &result) {
-  if (signature ~= %((func ?arguments) *return_type)) {
-    parameters = arguments;
-    result = return_type;
-    return 1;
-  }
-  return 0;
+static int _contents(Var value, String variable) {
+  if (value is <string>)
+    return value == variable ? PROTOCOL_VARIABLE : 0;
+  if (value == <...>) return PROTOCOL_VARIADIC;
+  if (value is not <list>) return 0;
+  int contents = 0;
+  foreach (Var item in value.list())
+    contents |= _contents(item, variable);
+  return contents;
 }
 
-/* A type variable is the one-element Type `("T")`. In a compound Type such
-   as `(* "T")` it is the base suffix, so walking a Type by car and cdr
-   reaches it as a whole Type in that position too. */
-static String _type_variable(Var value, Map variables) {
-  if (value ~= %(?(String name)) && name in variables) return name;
-  return NULL;
+// signature unification
+
+static int _unify_signature(
+  Type pattern, Type actual, Map variables, Map bindings) {
+  List pattern_parameters = pattern.car().list().cadr();
+  List parameters = NULL, Type result = NULL;
+  return _function_parts(actual, parameters, result) &&
+         _unify(pattern_parameters, parameters, variables, bindings) &&
+         _unify(pattern.cdr(), result, variables, bindings);
 }
 
 static int _unify(Var pattern, Var actual, Map variables, Map bindings) {
@@ -862,13 +742,14 @@ static int _unify(Var pattern, Var actual, Map variables, Map bindings) {
          _unify(left.cdr(), right.cdr(), variables, bindings);
 }
 
-static int _unify_signature(
-  Type pattern, Type actual, Map variables, Map bindings) {
-  List pattern_parameters = pattern.car().list().cadr();
-  List parameters = NULL, Type result = NULL;
-  return _function_parts(actual, parameters, result) &&
-         _unify(pattern_parameters, parameters, variables, bindings) &&
-         _unify(pattern.cdr(), result, variables, bindings);
+module Type _substitute_signature(
+  Type signature, Map variables, Map bindings) {
+  List parameters = signature.car().list().cadr();
+  Type result = signature.cdr();
+  List parameter_types = parameters.map(
+    %!(Var parameter) => _substitute(parameter, variables, bindings));
+  Type result_type = _substitute(result, variables, bindings);
+  return %((func $parameter_types) @result_type);
 }
 
 static Var _substitute(Var value, Map variables, Map bindings) {
@@ -881,14 +762,12 @@ static Var _substitute(Var value, Map variables, Map bindings) {
     _substitute(type.cdr(), variables, bindings));
 }
 
-module Type _substitute_signature(
-  Type signature, Map variables, Map bindings) {
-  List parameters = signature.car().list().cadr();
-  Type result = signature.cdr();
-  List parameter_types = parameters.map(
-    %!(Var parameter) => _substitute(parameter, variables, bindings));
-  Type result_type = _substitute(result, variables, bindings);
-  return %((func $parameter_types) @result_type);
+/* A type variable is the one-element Type `("T")`. In a compound Type such
+   as `(* "T")` it is the base suffix, so walking a Type by car and cdr
+   reaches it as a whole Type in that position too. */
+static String _type_variable(Var value, Map variables) {
+  if (value ~= %(?(String name)) && name in variables) return name;
+  return NULL;
 }
 
 static int _exact_conversion(Type signature, Type parameter, Type result) {
@@ -898,4 +777,131 @@ static int _exact_conversion(Type signature, Type parameter, Type result) {
   return parameters && !parameters.cdr() &&
          parameters.car() == parameter &&
          actual_result == result;
+}
+
+
+
+static int _function_parts(Type signature, List &parameters, Type &result) {
+  if (signature ~= %((func ?arguments) *return_type)) {
+    parameters = arguments;
+    result = return_type;
+    return 1;
+  }
+  return 0;
+}
+
+static List _recorded_conformance(Compiler c, Type base, Type participant) {
+  if (_visibility(c, base, participant) != <external>) return NULL;
+  if (c.conforms[$(base, participant)] ~= %(
+        protocol-conformance ? ? ?forward ?reverse ? ?(Map bindings)
+        (members *rows))) {
+    if (_native_rows(rows)) return NULL;
+    Array bound = [], resolved = [];
+    foreach ((String name, Type type) in bindings)
+      bound.push($(name, type));
+    bound.sort();
+    foreach (List row in rows)
+      if (row ~= %(?member ?(Symbol status) ?(String source) *)) {
+        source = _recorded_spelling(c, source);
+        if (status != <no-member> && !_is_private(c, source))
+          resolved.push($(member, status, source));
+      }
+    forward = _recorded_spelling(c, forward);
+    reverse = _recorded_spelling(c, reverse);
+    return %(conformance $base $participant $forward $reverse
+             (bindings @(bound.list_free())) @(resolved.list_free()));
+  }
+  return NULL;
+}
+
+static String _recorded_spelling(Compiler c, String name) {
+  if (!name) return name;
+  List binding = c.sym.lookup($(name), NULL);
+  return binding ? Ast.binding_spelling(binding) : name;
+}
+
+
+
+/* An ordinary external conformance whose adoption the unit's collected
+   entry declares is recorded in the unit's interface as
+   `(conformance BASE PARTICIPANT FORWARD REVERSE (bindings (NAME TYPE)...)
+   (MEMBER STATUS SOURCE)...)`, with each type variable's binding and each
+   member resolved as anything but `no-member`. The expected and template
+   types follow from the protocol record and the bindings. A member that
+   resolved to a function static to this unit is left out, so it is
+   `no-member` elsewhere: no other unit can call that function. A native
+   conformance reads no participant member, so each unit resolves it. */
+module void _record_conformances(Compiler c) {
+  c.record_conformance_rows(c.conformance_rows(c.declared_adoptions()));
+}
+
+/* Installs each recorded conformance with a base default whose forward
+   converter is defined, so that its forwarding members are published. */
+module void _reuse_defaults(Compiler c) {
+  foreach (List entry in _unused_recorded(c))
+    if (entry ~= %((?(Type base) ?(Type participant))
+                   (conformance ? ? ?(String forward) ? ? *members)) &&
+        forward in c.fn_defs && _has_default(members))
+      _reuse_conformance(c, base, participant);
+}
+
+/* Installs the conformance an included interface recorded for an adoption
+   this unit does not own. Returns 0 when there is none to reuse. */
+module int _reuse_conformance(Compiler c, Type base, Type participant) {
+  if ($(_record(c, base), _recorded(c, base, participant)) ~= %(
+        (? ? ? ? (members *templates))
+        (conformance ? ? ?forward ?reverse (bindings *bound) *members))) {
+    Map variables = {}, bindings = {}, resolved = {};
+    foreach (List pair in bound) {
+      (String name, Type type) = pair;
+      variables[name] = 1;
+      bindings[name] = type;
+    }
+    foreach (List member in members) resolved[member.car()] = member;
+    Array rows = [];
+    foreach (List template in templates) {
+      (String member, Type type) = template;
+      Type expected = _substitute_signature(type, variables, bindings);
+      rows.push(_recorded_row(resolved[member], member, expected, type));
+    }
+    c.conforms[$(base, participant)] = %(
+      protocol-conformance $base $participant $forward $reverse
+      $variables $bindings (members @(rows.list_free()))
+    );
+    return 1;
+  }
+  return 0;
+}
+
+/* The recorded conformances this unit may reuse and has not installed, as
+   `((BASE PARTICIPANT) ROW)` pairs. */
+module List _unused_recorded(Compiler c) {
+  Array candidates = [], unused = [];
+  foreach (Var key in c.protocol_helpers.keys())
+    if (key ~= %("recorded-conformance" ?(Type base) ?(Type participant)))
+      candidates.push($(base, participant));
+  // Ownership answers are memoized in the helpers, so they follow the scan.
+  foreach (List pair in candidates) {
+    List row = _recorded(c, pair.car(), pair.cadr());
+    if (row && !(pair in c.conforms)) unused.push($(pair, row));
+  }
+  candidates.free();
+  return unused.list_free();
+}
+
+static int _has_default(List members) {
+  foreach (List member in members) if (member.cadr() == <base-dflt>) return 1;
+  return 0;
+}
+
+/* Rebuilds a member row as resolution writes it. A member the interface
+   does not list resolved as `no-member`. */
+static List _recorded_row(
+  Var recorded, String member, Type expected, Type template) {
+  if (recorded ~= %(? ?(Symbol status) ?(String source))) {
+    Symbol kind = status == <base-dflt> ? <ordinary> : <none>;
+    return $(member, status, source, expected, kind, template);
+  }
+  String source = NULL;
+  return %($member no-member $source $expected none $template);
 }

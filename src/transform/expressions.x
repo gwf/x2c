@@ -32,6 +32,50 @@ List Compiler.lower_lambda_expr(Compiler c, List expression) {
   return expression;
 }
 
+// calls
+
+/** Preserves the fixed arguments for `params`, which ends in a rest
+    parameter, and packs the remaining `args` into its container. A List
+    tail uses ordinary List construction, where only an explicit splice
+    contributes more than one element. A Map tail holds `key: value` entries
+    and Map splices; later entries win. The caller changes the callee's
+    final parameter to the container before issuing this packed call.
+*/
+List Compiler.pack_rest_arguments(Compiler c, List params, List args) {
+  if (args ~= %((expr (void) ()))) args = NULL;
+  int fixed = params.len() - 1;
+  if (args.len() < fixed)
+    c.report_error(<xform>, "too few arguments for rest function",
+      NULL, NULL);
+  Array prefix = [];
+  for (int i = 0; i < fixed; i++, args = args.cdr()) {
+    _require_rest(c, args.car());
+    prefix.push(args.car());
+  }
+  auto Array elements = args.array();
+  if (Type.rest_container(params.last()) == %("Map"))
+    prefix.push(_map_tail(c, elements));
+  else {
+    foreach (List element in elements)
+      if (element ~= %(expr ? (map-entry ? ?))) _entry_without_map(c);
+    prefix.push(c.list_expression(elements, %(nil)));
+  }
+  return prefix.list_free();
+}
+
+// expression lowering
+
+/* A splice or entry outside a rest tail has no container to enter. */
+static void _require_rest(Compiler c, List argument) {
+  if (argument ~= %(expr ? (splice ?)))
+    c.report_error(<xform>, "splice requires a rest argument", NULL, NULL);
+  if (argument ~= %(expr ? (map-entry ? ?))) _entry_without_map(c);
+}
+
+static void _entry_without_map(Compiler c) =>
+  c.report_error(<xform>, "key: value argument requires a Map rest parameter",
+    NULL, NULL);
+
 module Ast _slice_node(
   Compiler c, List expression, Type type, List start, List stop, List step) {
   String nominal = NULL;
@@ -55,17 +99,18 @@ static List _slice_bound(List bound) {
   return %(expr (int) (call "x2c_slice_bound" (args $bound)));
 }
 
-/* Access admission has established the getter signature, but its target is
-   still intact here. Dispatch before lowering a read or an enclosing
-   update. */
-static List _access_source(List expression) {
-  match (expression) {
-    case %(expr ?type (getindex ?base ?key)):
-      return %(expr $type (index $base $key));
-    case %(expr ?type (parens ?inner)):
-      return %(expr $type (parens $(_access_source(inner))));
-  }
-  return expression;
+module Ast _expression_node(Compiler c, Ast ast) {
+  if (_pattern_condition(ast)) return _step(c, _condition_value(c, ast));
+  Var content = ast.caddr();
+  if (content is <list> && content.list().car() == <var>)
+    return _step(c, _to_var(c, content.list().cadr()));
+  List rewritten = _expression_rewrite(c, ast);
+  if (rewritten) return rewritten;
+  Ast expression = c.lower_typed_adapter_expr(ast);
+  expression = c.lower_lambda_expr(expression);
+  if (_op_chain_first(expression)) return _op_chain(c, expression);
+  if (expression != ast) return _step(c, expression);
+  return _default_node(c, expression);
 }
 
 /* Access and call rules see a typed expression before its children lower.
@@ -108,35 +153,17 @@ static List _expression_rewrite(Compiler c, List expression) {
     point, kind, source, <expression>, expression.cadr(), NULL) : NULL;
 }
 
-module Ast _expression_node(Compiler c, Ast ast) {
-  if (_pattern_condition(ast)) return _step(c, _condition_value(c, ast));
-  Var content = ast.caddr();
-  if (content is <list> && content.list().car() == <var>)
-    return _step(c, _to_var(c, content.list().cadr()));
-  List rewritten = _expression_rewrite(c, ast);
-  if (rewritten) return rewritten;
-  Ast expression = c.lower_typed_adapter_expr(ast);
-  expression = c.lower_lambda_expr(expression);
-  if (_op_chain_first(expression)) return _op_chain(c, expression);
-  if (expression != ast) return _step(c, expression);
-  return _default_node(c, expression);
-}
-
-/* A left-leaning operator chain nests one (expr (op ...)) level per source
-   term, so child-first transformation would recurse once per term. Walk down
-   the spine while each level survives its operator rewrites unchanged,
-   transform the deepest term, and rebuild upward. Entered only for chain
-   heads, with expression rewrites already applied. */
-static List _op_chain_first(List ast) {
-  if (ast ~= %(expr ? ?content) &&
-      content ~= %(op ? ?first *rest) &&
-      first is <list>) {
-    List operand = first;
-    if (operand ~= %(expr ? ?inner) &&
-        inner ~= %(op *parts))
-      return operand;
+/* Access admission has established the getter signature, but its target is
+   still intact here. Dispatch before lowering a read or an enclosing
+   update. */
+static List _access_source(List expression) {
+  match (expression) {
+    case %(expr ?type (getindex ?base ?key)):
+      return %(expr $type (index $base $key));
+    case %(expr ?type (parens ?inner)):
+      return %(expr $type (parens $(_access_source(inner))));
   }
-  return NULL;
+  return expression;
 }
 
 static Ast _op_chain(Compiler c, Ast ast) {
@@ -175,6 +202,23 @@ static Ast _op_chain(Compiler c, Ast ast) {
       rebuilt = %(expr $(types[i]) (op @(parts.list_free())));
     }
   return rebuilt;
+}
+
+/* A left-leaning operator chain nests one (expr (op ...)) level per source
+   term, so child-first transformation would recurse once per term. Walk down
+   the spine while each level survives its operator rewrites unchanged,
+   transform the deepest term, and rebuild upward. Entered only for chain
+   heads, with expression rewrites already applied. */
+static List _op_chain_first(List ast) {
+  if (ast ~= %(expr ? ?content) &&
+      content ~= %(op ? ?first *rest) &&
+      first is <list>) {
+    List operand = first;
+    if (operand ~= %(expr ? ?inner) &&
+        inner ~= %(op *parts))
+      return operand;
+  }
+  return NULL;
 }
 
 // casts and bracket reads
@@ -259,7 +303,7 @@ module List _return(Compiler c, List ast) {
   return ast;
 }
 
-// calls
+
 
 module List _call(Compiler c, List ast) {
   if (ast ~= $($called(?callee, *arguments))) {
@@ -328,46 +372,6 @@ module List _typed_call(
   Macro called = $called;
   return c.rebuild_expression(NULL, called(callee, newargs)).caddr();
 }
-
-/** Preserves the fixed arguments for `params`, which ends in a rest
-    parameter, and packs the remaining `args` into its container. A List
-    tail uses ordinary List construction, where only an explicit splice
-    contributes more than one element. A Map tail holds `key: value` entries
-    and Map splices; later entries win. The caller changes the callee's
-    final parameter to the container before issuing this packed call.
-*/
-List Compiler.pack_rest_arguments(Compiler c, List params, List args) {
-  if (args ~= %((expr (void) ()))) args = NULL;
-  int fixed = params.len() - 1;
-  if (args.len() < fixed)
-    c.report_error(<xform>, "too few arguments for rest function",
-      NULL, NULL);
-  Array prefix = [];
-  for (int i = 0; i < fixed; i++, args = args.cdr()) {
-    _require_rest(c, args.car());
-    prefix.push(args.car());
-  }
-  auto Array elements = args.array();
-  if (Type.rest_container(params.last()) == %("Map"))
-    prefix.push(_map_tail(c, elements));
-  else {
-    foreach (List element in elements)
-      if (element ~= %(expr ? (map-entry ? ?))) _entry_without_map(c);
-    prefix.push(c.list_expression(elements, %(nil)));
-  }
-  return prefix.list_free();
-}
-
-/* A splice or entry outside a rest tail has no container to enter. */
-static void _require_rest(Compiler c, List argument) {
-  if (argument ~= %(expr ? (splice ?)))
-    c.report_error(<xform>, "splice requires a rest argument", NULL, NULL);
-  if (argument ~= %(expr ? (map-entry ? ?))) _entry_without_map(c);
-}
-
-static void _entry_without_map(Compiler c) =>
-  c.report_error(<xform>, "key: value argument requires a Map rest parameter",
-    NULL, NULL);
 
 static int _iter_immediate_consumer(String name) =>
   name == "Iter_try_next" || name == "Iter_next" ||

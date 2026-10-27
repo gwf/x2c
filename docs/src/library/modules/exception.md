@@ -56,7 +56,7 @@ this landing and running the finalizer again; that transfer abandons this
 frame and replaces any `Error` it was already carrying. A null or already
 claimed frame reports zero.
 
-Source: `lib/exception.x:179`
+Source: `lib/exception.x:152`
 
 #### x2c_exception_is_error_target
 
@@ -65,7 +65,7 @@ Source: `lib/exception.x:179`
 Reports whether `frame` is carrying an `Error` transfer targeted to itself.
 A null, inactive, handled, or intervening frame returns false.
 
-Source: `lib/exception.x:167`
+Source: `lib/exception.x:140`
 
 #### x2c_exception_landed
 
@@ -75,7 +75,7 @@ Restores `Error` handler and dispatch state after a frame landing.
 Compiler-generated code calls this only on the nonzero `sigsetjmp` path.
 A null frame does nothing.
 
-Source: `lib/exception.x:149`
+Source: `lib/exception.x:122`
 
 #### x2c_exception_leave
 
@@ -90,7 +90,7 @@ frame's error-stack watermark and transfers to the next outer frame. A null
 or already left frame does nothing; cleanup imbalance exits through the raw
 fatal path.
 
-Source: `lib/exception.x:202`
+Source: `lib/exception.x:175`
 
 #### x2c_exception_mark_handled
 
@@ -100,7 +100,7 @@ Marks a selected exception-frame `Error` transfer as handled.
 This prevents `x2c_exception_leave` from continuing the transfer outward.
 A null frame does nothing.
 
-Source: `lib/exception.x:189`
+Source: `lib/exception.x:162`
 
 #### x2c_exception_push
 
@@ -129,7 +129,7 @@ post-cleanup handler head, and jumps to that frame's landing. It never
 returns normally. An invalid target exits through the raw exception fatal
 path. The transfer does not restore the process signal mask.
 
-Source: `lib/exception.x:127`
+Source: `lib/exception.x:198`
 
 ## Runtime-internal callables
 
@@ -148,7 +148,7 @@ for source readers but are not supported as user API.
 
 Reports whether any active frame is carrying an `Error` transfer.
 
-Source: `lib/exception.x:157`
+Source: `lib/exception.x:130`
 
 ## Public types
 

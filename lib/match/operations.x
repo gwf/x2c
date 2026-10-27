@@ -22,6 +22,16 @@ int x2c_match_try_capture(
   return MatchCache.current().try_capture(input, pattern, captures, "match");
 }
 
+/** Returns bindings when `input` matches `pat`, or `nil` on a miss.
+    A binder-free success returns the nonnull `%(())` sentinel
+    with no associations. Binding order and failures follow `List.try_match`.
+*/
+List List.match(List input, Var pat) {
+  List bindings;
+  if (!input.try_match(pat, bindings)) return NULL;
+  return bindings ? bindings : %(());
+}
+
 /** Matches `input` against `pat`, writing bindings on success.
     Returns 1 on a match and writes a reverse-slot-order association `List`, or
     returns 0 and leaves `out_bindings` unchanged. A successful binder-free
@@ -32,14 +42,15 @@ int x2c_match_try_capture(
 int List.try_match(List input, Var pat, List &?out_bindings) => out_bindings &&
   MatchCache.current().try_match(input, pat, out_bindings, "List.try_match");
 
-/** Returns bindings when `input` matches `pat`, or `nil` on a miss.
-    A binder-free success returns the nonnull `%(())` sentinel
-    with no associations. Binding order and failures follow `List.try_match`.
+/** Returns the `List` replacement when `input` matches `pat`.
+    A miss returns `input` unchanged. A successful scalar replacement cannot
+    inhabit the `List` result and returns `nil`. Matching and replacement
+    failures follow `List.try_match_replace`.
 */
-List List.match(List input, Var pat) {
-  List bindings;
-  if (!input.try_match(pat, bindings)) return NULL;
-  return bindings ? bindings : %(());
+meta native List List.match_replace(List input, Var pat, Var template) {
+  Var result;
+  if (!input.try_match_replace(pat, template, result)) return input;
+  return result is <list> ? result : NULL;
 }
 
 /** Matches `input` and writes the instantiated `template` on success.
@@ -54,17 +65,6 @@ List List.match(List input, Var pat) {
 int List.try_match_replace(List input, Var pat, Var template, Var &?out) =>
   out && MatchCache.current().try_match_replace(
     input, pat, template, out, "List.try_match_replace");
-
-/** Returns the `List` replacement when `input` matches `pat`.
-    A miss returns `input` unchanged. A successful scalar replacement cannot
-    inhabit the `List` result and returns `nil`. Matching and replacement
-    failures follow `List.try_match_replace`.
-*/
-meta native List List.match_replace(List input, Var pat, Var template) {
-  Var result;
-  if (!input.try_match_replace(pat, template, result)) return input;
-  return result is <list> ? result : NULL;
-}
 
 /** Returns every matching subtree of `input` with its bindings.
     Each result begins with `(* matched)` followed by reverse-slot-order binder

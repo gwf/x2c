@@ -49,6 +49,18 @@ static typedef struct StaticQueue {
   List arms, Symbol deferred_kind;
 } StaticQueue;
 
+// header caches
+
+/* One translation-unit-local immutable cache in a generated header. The
+   constructor eagerly establishes process-lifetime values; patched inline
+   entries retain the same guard-based fallback as source-resident caches. */
+static typedef struct HeaderCache {
+  Compiler c;
+  String prefix;
+  List guard, initializer;
+  Map bindings;
+} HeaderCache;
+
 /** Materializes cached literals and deferred file-static initialization.
     `header` and `source` must be partitioned lowered AST regions from this
     compiler. Every `(cache id)` must index `c.id_keys`, and file-static
@@ -83,55 +95,152 @@ List Compiler.setup_cache_init(
   return $(header, source, bindings);
 }
 
-static Array _cache_ids(Compiler c, List code) {
-  List seen[4096] = { 0 };
-  Array ids = [];
-  _collect_ids(c, code, seen, ids);
-  if (!ids) {
-    ids.free();
-    return NULL;
+/** Preserves native initializer shape so C infers dimensions and checks
+   designators before cached values are assigned during initialization.
+*/
+List Compiler.zero_initializer(Compiler c, List value) {
+  List zero = %(expr (int) (literal (int) "0"));
+  match (value) {
+    case %(expr ?type (!set ?body (initval *))): {
+      List header = NULL;
+      List cases = Ast.initializer_cases(body, header);
+      Array zeroed = [];
+      foreach (List choice in cases) {
+        (List condition, List path, Type destination, List input) = choice;
+        List zero = c.zero_initializer(input);
+        match (zero)
+          case %(expr ?type (!set ?body (composite *))):
+            zero = _initializer_rhs(type, NULL, NULL, type, body);
+        zeroed.push($(condition, path, destination, zero));
+      }
+      return %(expr $type (initval @(zeroed.list_free())));
+    }
+    case %(expr ?type (!set ?inner (composite *))):
+      return %(expr $type $(c.zero_initializer(inner)));
+    case %(expr ?type ?): {
+      Type resolved = c.sym.resolve_key(type);
+      return resolved.is_aggregate() ? $!($type){ { $zero } } : zero;
+    }
+    case %(composite (commas *items)): {
+      Array zeroed = [];
+      foreach (List item in items) zeroed.push(c.zero_initializer(item));
+      return %(composite (commas @(zeroed.list_free())));
+    }
+    case %((!or ?tag dotinit indexinit) ?key ?inner):
+      return $(tag, key, c.zero_initializer(inner));
   }
-  return ids;
+  return zero;
 }
 
-/* Collect dependencies before their users, in first-use source order.
-   Cold collection can allocate keys that interface replay never needs; only
-   this reachable order chooses emitted slots, leaving semantic ids intact.
-   Generated ASTs are canonical DAGs rather than trees, so the direct-mapped
-   identity memo avoids repeatedly walking shared subgraphs. A collision only
-   replaces one memo entry and may cause harmless extra work. */
-static void _collect_ids(Compiler c, Var value, List *seen, Array ids) {
-  auto Array pending = [$(value)], marked = [];
-  marked.resize(c.id_keys.len());
-  while (pending) {
-    Var frame = pending[-1];
-    if (frame.is_integer()) {
-      ids.push(pending.take_last());
-      continue;
-    }
-    List cursor = frame;
-    if (!cursor) {
-      pending.take_last();
-      continue;
-    }
-    pending[-1] = cursor.cdr();
-    Var current = cursor.car();
-    if (current is not <list>) continue;
-    List node = current;
-    unsigned slot = ((uintptr_t) node >> 4) & 4095;
-    if (seen[slot] == node) continue;
-    seen[slot] = node;
-    match (node)
-      case %(cache ?captured_id): {
-        int id = captured_id;
-        if (!marked[id].is_null()) continue;
-        marked[id] = 1;
-        pending.push(id);
-        pending.push($(c.id_keys[id]));
-        continue;
-      }
-    pending.push(node);
+/** Returns the declaration of the file's initialization `guard`, which
+    starts at zero.
+*/
+List Compiler.initialization_guard(Compiler c, List guard) =>
+  c.rebuild_statement($!{ static int $guard = 0; }).cadr();
+
+// header cache initialization
+
+static List _header_cache(
+  Compiler c, List header, Array ids, String prefix, String guard_name,
+  String initializer_name) {
+  if (!ids) return header;
+  Map bindings = auto _cache_bindings(c, ids, prefix);
+  HeaderCache cache = {
+    c, prefix, c.sym.reference($(guard_name), NULL),
+    c.sym.reference($(initializer_name), NULL), bindings};
+  return _entries(cache, header, _prelude(cache, ids));
+}
+
+static List _prelude(HeaderCache &h, Array ids) {
+  Compiler c = h.c;
+  Array declarations = [];
+  foreach (List declaration in _slot_declarations(c, ids, h.bindings))
+    declarations.push(declaration);
+  declarations.push(c.initialization_guard(h.guard));
+  Array statements = [];
+  foreach (int id in ids) {
+    List statement = _cache_initializer(c, id, h.bindings, 1);
+    statements.push(_cache_refs(statement, h.bindings, NULL));
   }
+  List body = _cache_batches(c, statements, declarations, h.prefix);
+  List type = %(("__attribute__((constructor))") static void);
+  body = c.run_once_body(
+    Ast.entry_call("x2c_initialize_protocols"), h.guard, body);
+  declarations.push(c.initializer_function(type, h.initializer, body));
+  ids.free();
+  return declarations.list_free();
+}
+
+/* The prelude precedes the first function that reads a cache, and each
+   such function calls the header's initializer through the same entry
+   decision as source functions. */
+static List _entries(HeaderCache &h, List header, List prelude) {
+  Init entry = {.c = h.c, .guard = h.guard, .entry = h.initializer};
+  Array output = [];
+  foreach (List node in header) {
+    int replaced = 0;
+    node = _cache_refs(node, h.bindings, replaced);
+    int captured = node.car() == <sourceinit>;
+    List function = captured ? node.cadr() : node;
+    if (function ~= %(function ? ? (block *)) && replaced) {
+      foreach (List item in prelude) output.push(item);
+      prelude = NULL;
+      function = entry.enter(function, 1);
+      node = captured ? %(sourceinit $function) : function;
+    }
+    output.push(node);
+  }
+  return output.list_free();
+}
+
+// Header regions replace references before their private guard is installed.
+static List _cache_refs(List node, Map bindings, int &?replaced) {
+  if (!node) return node;
+  match (node)
+    case %(cache ?id): {
+      if (replaced) replaced = 1;
+      List binding = bindings[id];
+      return %(ident $binding);
+    }
+  List child;
+  $ast.rewrite_children(node, child, _cache_refs(child, bindings, replaced));
+}
+
+/* source caches
+
+   Source cache slots and the deferred file-static initializers run in the
+   unit's `<prepare>`, `<statics>`, or `<finish>` initialization area. */
+
+/* Materialize source cache slots before ordinary file-static assignments.
+   While generating String.initialize or List.initialize, a cache graph that
+   requires that same canonicalizer runs in `<finish>`, after the
+   initializer body; dependent file-static assignments move with it. */
+static List _source_cache(
+  Compiler c, List source, Array ids, Map bindings, StaticQueue &statics) {
+  source = _rewrite_statics(c, source, statics);
+  Symbol deferred_kind = 0;
+  if (c.init_fn == "String_initialize") deferred_kind = <string>;
+  else if (c.init_fn == "List_initialize") deferred_kind = <cons>;
+  if (!ids) {
+    _queue(statics, deferred_kind);
+    return source;
+  }
+  Array early = [], late = [], declarations = [];
+  foreach (List declaration in _slot_declarations(c, ids, bindings))
+    declarations.push(declaration);
+  foreach (int id in ids) {
+    List stmt = _cache_initializer(c, id, bindings, 0);
+    int deferred =
+      deferred_kind && _reaches_kind(c, %(cache $id), deferred_kind);
+    (deferred ? late : early).push(stmt);
+  }
+  foreach (List stmt in _cache_batches(c, early, declarations, NULL))
+    c.add_init(<prepare>, stmt);
+  foreach (List stmt in _cache_batches(c, late, declarations, NULL))
+    c.add_init(<finish>, stmt);
+  _queue(statics, deferred_kind);
+  ids.free();
+  return c.place_source_prelude(source, declarations.list_free());
 }
 
 /* file-static rewrites
@@ -139,12 +248,6 @@ static void _collect_ids(Compiler c, Var value, List *seen, Array ids) {
    C does not allow a non-constant static initializer, and after lowering
    most file-static initializers are calls. Each such binding keeps its
    declaration and moves its assignment into a generated helper. */
-
-// The helper has type void (void).
-static List _helper_call(Compiler c, List helper) {
-  List callee = %(expr ((func ((void))) void) (ident $helper));
-  return c.rebuild_statement($!{ $callee(); }).cadr();
-}
 
 /* Apply file-scope initializer rewrites across one generated region. Both
    regions share one queue, so a header definition deferred into the
@@ -249,58 +352,6 @@ static List _record(StaticQueue &q, List name, List mods, List assign) {
 static List _unqualify_const(List specifiers) =>
   specifiers.filter(%!(specifier) => specifier != <const>);
 
-static List _initializer_rhs(
-  List decltype, List binding, List mods, List type, List value) {
-  if (!(value ~= %(composite *))) return %(expr $type $value);
-  List bound = %(bind $binding $mods);
-  List decl_ast = %(declare $decltype (bindings $bound));
-  Type cast_type = decl_ast.type_from_ast();
-  if (cast_type) cast_type = cast_type.canonicalize();
-  List decl = %(decl $cast_type (bindings (bind () ())));
-  List literal = %(expr () $value), rhs_value = %(cast $decl $literal);
-  return %(expr $cast_type $rhs_value);
-}
-
-static List _assignment(List binding, List type, List rhs) =>
-  %(stmnt (expr $type (op = (expr $type (ident $binding)) $rhs)));
-
-/** Preserves native initializer shape so C infers dimensions and checks
-   designators before cached values are assigned during initialization.
-*/
-List Compiler.zero_initializer(Compiler c, List value) {
-  List zero = %(expr (int) (literal (int) "0"));
-  match (value) {
-    case %(expr ?type (!set ?body (initval *))): {
-      List header = NULL;
-      List cases = Ast.initializer_cases(body, header);
-      Array zeroed = [];
-      foreach (List choice in cases) {
-        (List condition, List path, Type destination, List input) = choice;
-        List zero = c.zero_initializer(input);
-        match (zero)
-          case %(expr ?type (!set ?body (composite *))):
-            zero = _initializer_rhs(type, NULL, NULL, type, body);
-        zeroed.push($(condition, path, destination, zero));
-      }
-      return %(expr $type (initval @(zeroed.list_free())));
-    }
-    case %(expr ?type (!set ?inner (composite *))):
-      return %(expr $type $(c.zero_initializer(inner)));
-    case %(expr ?type ?): {
-      Type resolved = c.sym.resolve_key(type);
-      return resolved.is_aggregate() ? $!($type){ { $zero } } : zero;
-    }
-    case %(composite (commas *items)): {
-      Array zeroed = [];
-      foreach (List item in items) zeroed.push(c.zero_initializer(item));
-      return %(composite (commas @(zeroed.list_free())));
-    }
-    case %((!or ?tag dotinit indexinit) ?key ?inner):
-      return $(tag, key, c.zero_initializer(inner));
-  }
-  return zero;
-}
-
 // static array blocks
 
 static List _array_block(Compiler c, List target, Type array, List items) {
@@ -356,26 +407,6 @@ static List _array_choice(
   return assignment;
 }
 
-/* Reuse ordinary indexed assignments, recursing only for explicit array
-   braces. C can warn and ignore excess positional values, so writes use the
-   native object's actual dimensions rather than the initializer count. */
-static List _array_slot(Compiler c, List target, List path, List &tests) {
-  List slot = target;
-  tests = %();
-  foreach (List frame in path.reverse()) {
-    (Type owner, Symbol kind, Var selector, Type selected, List rest) = frame;
-    List parent = slot;
-    slot = c.initializer_slot(parent, $(frame));
-    if (kind == <index>) {
-      List length = %(expr (unsigned)
-        (op / (expr (unsigned) (sizeof (parens $parent)))
-              (expr (unsigned) (sizeof (parens $slot)))));
-      tests = cons($!int{ $selector < $length }, tests);
-    }
-  }
-  return slot;
-}
-
 static List _array_assignment(
   Compiler c, List slot, Type type, List value, List condition) {
   List inner = NULL, rhs = value;
@@ -394,6 +425,26 @@ static List _array_assignment(
     rhs = $!($type){ __builtin_choose_expr($condition, $rhs, $zero) };
   }
   return c.rebuild_statement($!{ $slot = $rhs; }).cadr();
+}
+
+/* Reuse ordinary indexed assignments, recursing only for explicit array
+   braces. C can warn and ignore excess positional values, so writes use the
+   native object's actual dimensions rather than the initializer count. */
+static List _array_slot(Compiler c, List target, List path, List &tests) {
+  List slot = target;
+  tests = %();
+  foreach (List frame in path.reverse()) {
+    (Type owner, Symbol kind, Var selector, Type selected, List rest) = frame;
+    List parent = slot;
+    slot = c.initializer_slot(parent, $(frame));
+    if (kind == <index>) {
+      List length = %(expr (unsigned)
+        (op / (expr (unsigned) (sizeof (parens $parent)))
+              (expr (unsigned) (sizeof (parens $slot)))));
+      tests = cons($!int{ $selector < $length }, tests);
+    }
+  }
+  return slot;
 }
 
 static List _array_input(
@@ -417,126 +468,19 @@ static List _array_input(
   return $(declaration, @code);
 }
 
-// header caches
-
-/* One translation-unit-local immutable cache in a generated header. The
-   constructor eagerly establishes process-lifetime values; patched inline
-   entries retain the same guard-based fallback as source-resident caches. */
-static typedef struct HeaderCache {
-  Compiler c;
-  String prefix;
-  List guard, initializer;
-  Map bindings;
-} HeaderCache;
-
-static List _header_cache(
-  Compiler c, List header, Array ids, String prefix, String guard_name,
-  String initializer_name) {
-  if (!ids) return header;
-  Map bindings = auto _cache_bindings(c, ids, prefix);
-  HeaderCache cache = {
-    c, prefix, c.sym.reference($(guard_name), NULL),
-    c.sym.reference($(initializer_name), NULL), bindings};
-  return _entries(cache, header, _prelude(cache, ids));
+static List _initializer_rhs(
+  List decltype, List binding, List mods, List type, List value) {
+  if (!(value ~= %(composite *))) return %(expr $type $value);
+  List bound = %(bind $binding $mods);
+  List decl_ast = %(declare $decltype (bindings $bound));
+  Type cast_type = decl_ast.type_from_ast();
+  if (cast_type) cast_type = cast_type.canonicalize();
+  List decl = %(decl $cast_type (bindings (bind () ())));
+  List literal = %(expr () $value), rhs_value = %(cast $decl $literal);
+  return %(expr $cast_type $rhs_value);
 }
 
-static List _prelude(HeaderCache &h, Array ids) {
-  Compiler c = h.c;
-  Array declarations = [];
-  foreach (List declaration in _slot_declarations(c, ids, h.bindings))
-    declarations.push(declaration);
-  declarations.push(c.initialization_guard(h.guard));
-  Array statements = [];
-  foreach (int id in ids) {
-    List statement = _cache_initializer(c, id, h.bindings, 1);
-    statements.push(_cache_refs(statement, h.bindings, NULL));
-  }
-  List body = _cache_batches(c, statements, declarations, h.prefix);
-  List type = %(("__attribute__((constructor))") static void);
-  body = c.run_once_body(
-    Ast.entry_call("x2c_initialize_protocols"), h.guard, body);
-  declarations.push(c.initializer_function(type, h.initializer, body));
-  ids.free();
-  return declarations.list_free();
-}
-
-/* The prelude precedes the first function that reads a cache, and each
-   such function calls the header's initializer through the same entry
-   decision as source functions. */
-static List _entries(HeaderCache &h, List header, List prelude) {
-  Init entry = {.c = h.c, .guard = h.guard, .entry = h.initializer};
-  Array output = [];
-  foreach (List node in header) {
-    int replaced = 0;
-    node = _cache_refs(node, h.bindings, replaced);
-    int captured = node.car() == <sourceinit>;
-    List function = captured ? node.cadr() : node;
-    if (function ~= %(function ? ? (block *)) && replaced) {
-      foreach (List item in prelude) output.push(item);
-      prelude = NULL;
-      function = entry.enter(function, 1);
-      node = captured ? %(sourceinit $function) : function;
-    }
-    output.push(node);
-  }
-  return output.list_free();
-}
-
-// Header regions replace references before their private guard is installed.
-static List _cache_refs(List node, Map bindings, int &?replaced) {
-  if (!node) return node;
-  match (node)
-    case %(cache ?id): {
-      if (replaced) replaced = 1;
-      List binding = bindings[id];
-      return %(ident $binding);
-    }
-  List child;
-  $ast.rewrite_children(node, child, _cache_refs(child, bindings, replaced));
-}
-
-/** Returns the declaration of the file's initialization `guard`, which
-    starts at zero.
-*/
-List Compiler.initialization_guard(Compiler c, List guard) =>
-  c.rebuild_statement($!{ static int $guard = 0; }).cadr();
-
-/* source caches
-
-   Source cache slots and the deferred file-static initializers run in the
-   unit's `<prepare>`, `<statics>`, or `<finish>` initialization area. */
-
-/* Materialize source cache slots before ordinary file-static assignments.
-   While generating String.initialize or List.initialize, a cache graph that
-   requires that same canonicalizer runs in `<finish>`, after the
-   initializer body; dependent file-static assignments move with it. */
-static List _source_cache(
-  Compiler c, List source, Array ids, Map bindings, StaticQueue &statics) {
-  source = _rewrite_statics(c, source, statics);
-  Symbol deferred_kind = 0;
-  if (c.init_fn == "String_initialize") deferred_kind = <string>;
-  else if (c.init_fn == "List_initialize") deferred_kind = <cons>;
-  if (!ids) {
-    _queue(statics, deferred_kind);
-    return source;
-  }
-  Array early = [], late = [], declarations = [];
-  foreach (List declaration in _slot_declarations(c, ids, bindings))
-    declarations.push(declaration);
-  foreach (int id in ids) {
-    List stmt = _cache_initializer(c, id, bindings, 0);
-    int deferred =
-      deferred_kind && _reaches_kind(c, %(cache $id), deferred_kind);
-    (deferred ? late : early).push(stmt);
-  }
-  foreach (List stmt in _cache_batches(c, early, declarations, NULL))
-    c.add_init(<prepare>, stmt);
-  foreach (List stmt in _cache_batches(c, late, declarations, NULL))
-    c.add_init(<finish>, stmt);
-  _queue(statics, deferred_kind);
-  ids.free();
-  return c.place_source_prelude(source, declarations.list_free());
-}
+// initializer batches
 
 /* Large literal graphs otherwise become one enormous native basic block.
    Bound only their generated assignments, keeping their dependency order
@@ -560,15 +504,7 @@ static List _cache_batches(
   return calls.list_free();
 }
 
-static int _reaches_kind(Compiler c, List code, Symbol kind) {
-  Array dependencies = _cache_ids(c, code);
-  if (!dependencies) return 0;
-  int found = 0;
-  foreach (int id in dependencies)
-    if (c.id_keys[id].car() == kind) { found = 1; break; }
-  dependencies.free();
-  return found;
-}
+// deferred initialization
 
 /* Queue a stable dependency walk. Dependencies precede their consumers, and
    independent roots retain source order. A dependency queued in `<finish>`
@@ -602,6 +538,71 @@ static int _deferred(StaticQueue &q, Array definitions) {
   return 0;
 }
 
+static int _reaches_kind(Compiler c, List code, Symbol kind) {
+  Array dependencies = _cache_ids(c, code);
+  if (!dependencies) return 0;
+  int found = 0;
+  foreach (int id in dependencies)
+    if (c.id_keys[id].car() == kind) { found = 1; break; }
+  dependencies.free();
+  return found;
+}
+
+// reachable cache slots
+
+static Array _cache_ids(Compiler c, List code) {
+  List seen[4096] = { 0 };
+  Array ids = [];
+  _collect_ids(c, code, seen, ids);
+  if (!ids) {
+    ids.free();
+    return NULL;
+  }
+  return ids;
+}
+
+/* Collect dependencies before their users, in first-use source order.
+   Cold collection can allocate keys that interface replay never needs; only
+   this reachable order chooses emitted slots, leaving semantic ids intact.
+   Generated ASTs are canonical DAGs rather than trees, so the direct-mapped
+   identity memo avoids repeatedly walking shared subgraphs. A collision only
+   replaces one memo entry and may cause harmless extra work. */
+static void _collect_ids(Compiler c, Var value, List *seen, Array ids) {
+  auto Array pending = [$(value)], marked = [];
+  marked.resize(c.id_keys.len());
+  while (pending) {
+    Var frame = pending[-1];
+    if (frame.is_integer()) {
+      ids.push(pending.take_last());
+      continue;
+    }
+    List cursor = frame;
+    if (!cursor) {
+      pending.take_last();
+      continue;
+    }
+    pending[-1] = cursor.cdr();
+    Var current = cursor.car();
+    if (current is not <list>) continue;
+    List node = current;
+    unsigned slot = ((uintptr_t) node >> 4) & 4095;
+    if (seen[slot] == node) continue;
+    seen[slot] = node;
+    match (node)
+      case %(cache ?captured_id): {
+        int id = captured_id;
+        if (!marked[id].is_null()) continue;
+        marked[id] = 1;
+        pending.push(id);
+        pending.push($(c.id_keys[id]));
+        continue;
+      }
+    pending.push(node);
+  }
+}
+
+// deferred initializer calls
+
 static void _add_calls(StaticQueue &q, Array definitions, Symbol area) {
   /* Each branch of a conditional group may define the binding. A definition
      runs under the directives that enclose it, since a disabled branch
@@ -612,6 +613,14 @@ static void _add_calls(StaticQueue &q, Array definitions, Symbol area) {
     foreach (List statement in Compiler.preproc_within_arms(arms, $(call)))
       q.c.add_init(area, statement);
   }
+}
+
+
+
+// The helper has type void (void).
+static List _helper_call(Compiler c, List helper) {
+  List callee = %(expr ((func ((void))) void) (ident $helper));
+  return c.rebuild_statement($!{ $callee(); }).cadr();
 }
 
 static void _report_cycle(StaticQueue &q) {
@@ -694,6 +703,9 @@ static List _cache_assignment(
   return %(block $assignment
     (stmnt (expr (int) (call $own (args (expr $type (ident $binding)))))));
 }
+
+static List _assignment(List binding, List type, List rhs) =>
+  %(stmnt (expr $type (op = (expr $type (ident $binding)) $rhs)));
 
 static List _cache_value(Compiler c, List expr, Map bindings) {
   if (!expr) return NULL;

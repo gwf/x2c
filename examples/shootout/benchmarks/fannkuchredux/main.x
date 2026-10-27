@@ -11,20 +11,9 @@
 #include <stdlib.h>
 #include "typed-array.x"
 
-/* Step to the next permutation: rotate the leading r + 1 entries left, spend
- * one turn of digit r on the count odometer, and carry into a wider rotation
- * when that digit runs out. Refilling the spent digit here is what lets the
- * next round start over at r = 1, so the caller needs no reset loop.
- * Returns 0 once the odometer has wrapped and every permutation is visited. */
-static int _advance(ArrayInt perm, ArrayInt count, int n) {
-  for (int r = 1; r != n; r++) {
-    int first = perm[0];
-    for (int i = 0; i < r; i++) perm[i] = perm[i + 1];
-    perm[r] = first;
-    int remaining = --count[r];
-    if (remaining > 0) return 1;
-    count[r] = r + 1;
-  }
+int main(int argc, char **argv) {
+  int n = argc > 1 ? atoi(argv[1]) : 7;
+  printf("Pfannkuchen(%d) = %d\n", n, _fannkuch(n));
   return 0;
 }
 
@@ -57,8 +46,19 @@ static int _fannkuch(int n) {
   return maximum;
 }
 
-int main(int argc, char **argv) {
-  int n = argc > 1 ? atoi(argv[1]) : 7;
-  printf("Pfannkuchen(%d) = %d\n", n, _fannkuch(n));
+/* Step to the next permutation: rotate the leading r + 1 entries left, spend
+ * one turn of digit r on the count odometer, and carry into a wider rotation
+ * when that digit runs out. Refilling the spent digit here is what lets the
+ * next round start over at r = 1, so the caller needs no reset loop.
+ * Returns 0 once the odometer has wrapped and every permutation is visited. */
+static int _advance(ArrayInt perm, ArrayInt count, int n) {
+  for (int r = 1; r != n; r++) {
+    int first = perm[0];
+    for (int i = 0; i < r; i++) perm[i] = perm[i + 1];
+    perm[r] = first;
+    int remaining = --count[r];
+    if (remaining > 0) return 1;
+    count[r] = r + 1;
+  }
   return 0;
 }

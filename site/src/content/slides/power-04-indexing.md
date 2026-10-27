@@ -9,6 +9,19 @@ tab: indexing
 // Store documents once; words refer to them by ID.
 typedef struct Index { Array documents; Map words; } *Index;
 
+~int main(void) {
+~Index index = Index.new();
+~index.add("garden", "red roses red tulips");
+~index.add("kitchen", "red apples green pears");
+~assert(index.find("RED") == [0, 1]);
+~assert(index.find("roses") == [0]);
+~int words = index.words.len();
+~assert(index.find("blue").len() == 0 && index.words.len() == words);
+~Array matches = index.find("roses");
+~puts(%"roses: $(index.documents[matches[0]])");
+~return 0;
+~}
+
 Index Index.new(void) {
   Index index = xmalloc(sizeof(struct Index));
   index.documents = []; index.words = {};
@@ -26,19 +39,6 @@ void Index.add(Index index, String name, String text) {
 // An unknown word has no matches; lookup does not change the index.
 Array Index.find(Index index, String word)
   => index.words.getdefault(word.lower(), []);
-
-~int main(void) {
-~Index index = Index.new();
-~index.add("garden", "red roses red tulips");
-~index.add("kitchen", "red apples green pears");
-~assert(index.find("RED") == [0, 1]);
-~assert(index.find("roses") == [0]);
-~int words = index.words.len();
-~assert(index.find("blue").len() == 0 && index.words.len() == words);
-~Array matches = index.find("roses");
-~puts(%"roses: $(index.documents[matches[0]])");
-~return 0;
-~}
 ```
 
 `Index` combines an `Array` of document names with a `Map` from words

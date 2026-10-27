@@ -98,123 +98,7 @@ $map.scaffold(
   _string_int_reinsert_error, _string_int_insert_error,
   "MapStringInt.reinsert", "MapStringInt.insert");
 
-/* The three iterators each yield one boxed key or value, so a family needs a
-   plain function per stored type. */
-
-// boxing, hashing, and comparison
-
-static Var _box_int(int value) => value;
-
-static Var _box_long(long value) => value;
-
-static Var _box_double(double value) => value;
-
-static Var _box_string(String value) => value;
-
-static MapIntInt _prepare_int_export(MapIntInt map, Context source) {
-  (void) map; (void) source;
-  return NULL;
-}
-
-static MapLongDouble _prepare_long_export(MapLongDouble map, Context source) {
-  (void) map; (void) source;
-  return NULL;
-}
-
-static unsigned _hash_int(int *key) => x2c_hash_word((unsigned) key[0]);
-
-static unsigned _hash_long(long *key) => x2c_hash_word((unsigned long) key[0]);
-
-/* A canonical String caches its content hash, so a lookup reads it instead of
-   walking bytes. Zero marks an empty bucket and the empty String hashes to
-   zero, so that one key borrows the reserved value, as Var.hash does for the
-   same String. */
-static unsigned _hash_string(String *key) {
-  unsigned hash = key[0].hash();
-  return hash ? hash : -1;
-}
-
-static int _equal_int(int *a, int *b) => a[0] == b[0];
-
-static int _equal_long(long *a, long *b) => a[0] == b[0];
-
-static int _equal_double(double *a, double *b) => a[0] == b[0];
-
-// Canonicalization makes identity the content test, as it does for a Var.
-static int _equal_string(String *a, String *b) => a[0] == b[0];
-
-static int _compare_int(int a, int b) => (a > b) - (a < b);
-static int _compare_long(long a, long b) => (a > b) - (a < b);
-static int _compare_double(double a, double b) => Var.compare(a, b);
-static int _compare_string(String a, String b) => a.compare(b);
-
-// checks and updates
-
-static void _valid_int(int *value) {
-  (void) value;
-}
-
-static void _valid_double(double *value) {
-  (void) value;
-}
-
-// NULL is the empty String, not a missing one, so every String is storable.
-static void _valid_string(String *value) {
-  (void) value;
-}
-
-static void _bad_arg(String owner) {
-  raise %(bad-arg (operation $owner));
-}
-
-static void _bad_op(Symbol op) {
-  raise %(bad-op (op $op));
-}
-
-static int _capacity_valid(unsigned capacity) =>
-  capacity >= 2 && !(capacity & (capacity - 1));
-
-static void _bad_shift(Symbol op, int count) {
-  raise %(bad-shift (op $op) (count $count) (width 32));
-}
-
 $integer.raw(_integer_raw);
-
-static int _update_int(volatile int *slot, Symbol op, int rhs) {
-  int current = slot[0];
-  unsigned a, b, raw;
-  memcpy(&a, &current, sizeof a);
-  memcpy(&b, &rhs, sizeof b);
-  if ((op == <"<<"> || op == <">>">) && (rhs < 0 || rhs >= 32))
-    _bad_shift(op, rhs);
-  raw = _integer_raw(op, a, b, 32, 0);
-  int result;
-  memcpy(&result, &raw, sizeof result);
-  slot[0] = result;
-  return result;
-}
-
-static double _update_double(volatile double *slot, Symbol op, double rhs) {
-  double current = slot[0], result;
-  switch (op) {
-    case <+>: result = current + rhs; break;
-    case <->: result = current - rhs; break;
-    case <*>: result = current * rhs; break;
-    case </>: result = current / rhs; break;
-    default: _bad_op(op);
-  }
-  slot[0] = result;
-  return result;
-}
-
-/* Concatenation is the only update a String value has. The family supplies
-   no increment value, so both postfix operators report a bad operator. */
-static String _update_string(volatile String *slot, Symbol op, String rhs) {
-  if (op != <+>) _bad_op(op);
-  String current = slot[0], result = current + rhs;
-  slot[0] = result;
-  return result;
-}
 
 // families
 
@@ -277,21 +161,6 @@ $map.core.observe(
 $map.typed.observe(
   MapStringString, String, String, _box_string, _box_string);
 
-static MapStringString _prepare_string_export(
-  MapStringString map, Context source) {
-  /* Recanonicalization can change key hashes or collapse equal keys, so stage
-     a complete destination table before export swaps the backing arrays. */
-  MapStringString staged = MapStringString.new_capacity(map.capacity);
-  MapStringString result = NULL;
-  defer if (result == NULL) staged.free_table();
-  foreach (String (key, value) in map) {
-    key = source.export_nested(key);
-    value = source.export_nested(value);
-    staged[key] = value;
-  }
-  return result = staged;
-}
-
 $map.typed.publish(
   MapStringString, String, String, mapstringstring, <mapstrings>,
   _box_string, _box_string,
@@ -313,6 +182,28 @@ $map.core.observe(
   MapStringInt, String, int, struct MapStringIntRecord,
   _box_string, _box_int, _compare_string, _compare_int);
 $map.typed.observe(MapStringInt, String, int, _box_string, _box_int);
+
+$map.typed.publish(
+  MapStringInt, String, int, mapstringint, <mapstrint>,
+  _box_string, _box_int,
+  _prepare_string_int_export);
+
+// compile-time conversions
+
+/* Compile-time code reaches the typed-map conversions through these literal
+   `meta` prototypes; a family macro cannot emit one. */
+meta Var MapIntInt.var(MapIntInt);
+meta MapIntInt Var.mapintint(Var);
+meta MapIntInt Map.mapintint(Map);
+meta Var MapLongDouble.var(MapLongDouble);
+meta MapLongDouble Var.maplongdouble(Var);
+meta MapLongDouble Map.maplongdouble(Map);
+meta Var MapStringString.var(MapStringString);
+meta MapStringString Var.mapstringstring(Var);
+meta MapStringString Map.mapstringstring(Map);
+meta Var MapStringInt.var(MapStringInt);
+meta MapStringInt Var.mapstringint(Var);
+meta MapStringInt Map.mapstringint(Map);
 
 /** Adds count using borrowed bytes for lookup. Only a missing key is
     converted to a canonical String; the map never retains the view.
@@ -338,6 +229,140 @@ int MapStringInt.add_substr(MapStringInt map, Substr key, int count) {
   return map.updateindex(key, <+>, count);
 }
 
+static void _bad_arg(String owner) {
+  raise %(bad-arg (operation $owner));
+}
+
+static int _update_int(volatile int *slot, Symbol op, int rhs) {
+  int current = slot[0];
+  unsigned a, b, raw;
+  memcpy(&a, &current, sizeof a);
+  memcpy(&b, &rhs, sizeof b);
+  if ((op == <"<<"> || op == <">>">) && (rhs < 0 || rhs >= 32))
+    _bad_shift(op, rhs);
+  raw = _integer_raw(op, a, b, 32, 0);
+  int result;
+  memcpy(&result, &raw, sizeof result);
+  slot[0] = result;
+  return result;
+}
+
+static void _bad_shift(Symbol op, int count) {
+  raise %(bad-shift (op $op) (count $count) (width 32));
+}
+
+/* The three iterators each yield one boxed key or value, so a family needs a
+   plain function per stored type. */
+
+// boxing, hashing, and comparison
+
+static Var _box_int(int value) => value;
+
+static Var _box_long(long value) => value;
+
+static Var _box_double(double value) => value;
+
+static Var _box_string(String value) => value;
+
+static MapIntInt _prepare_int_export(MapIntInt map, Context source) {
+  (void) map; (void) source;
+  return NULL;
+}
+
+static MapLongDouble _prepare_long_export(MapLongDouble map, Context source) {
+  (void) map; (void) source;
+  return NULL;
+}
+
+static unsigned _hash_int(int *key) => x2c_hash_word((unsigned) key[0]);
+
+static unsigned _hash_long(long *key) => x2c_hash_word((unsigned long) key[0]);
+
+/* A canonical String caches its content hash, so a lookup reads it instead of
+   walking bytes. Zero marks an empty bucket and the empty String hashes to
+   zero, so that one key borrows the reserved value, as Var.hash does for the
+   same String. */
+static unsigned _hash_string(String *key) {
+  unsigned hash = key[0].hash();
+  return hash ? hash : -1;
+}
+
+static int _equal_int(int *a, int *b) => a[0] == b[0];
+
+static int _equal_long(long *a, long *b) => a[0] == b[0];
+
+static int _equal_double(double *a, double *b) => a[0] == b[0];
+
+// Canonicalization makes identity the content test, as it does for a Var.
+static int _equal_string(String *a, String *b) => a[0] == b[0];
+
+static int _compare_int(int a, int b) => (a > b) - (a < b);
+
+static int _compare_long(long a, long b) => (a > b) - (a < b);
+
+static int _compare_double(double a, double b) => Var.compare(a, b);
+
+static int _compare_string(String a, String b) => a.compare(b);
+
+// checks and updates
+
+static void _valid_int(int *value) {
+  (void) value;
+}
+
+static void _valid_double(double *value) {
+  (void) value;
+}
+
+// NULL is the empty String, not a missing one, so every String is storable.
+static void _valid_string(String *value) {
+  (void) value;
+}
+
+static int _capacity_valid(unsigned capacity) =>
+  capacity >= 2 && !(capacity & (capacity - 1));
+
+static double _update_double(volatile double *slot, Symbol op, double rhs) {
+  double current = slot[0], result;
+  switch (op) {
+    case <+>: result = current + rhs; break;
+    case <->: result = current - rhs; break;
+    case <*>: result = current * rhs; break;
+    case </>: result = current / rhs; break;
+    default: _bad_op(op);
+  }
+  slot[0] = result;
+  return result;
+}
+
+/* Concatenation is the only update a String value has. The family supplies
+   no increment value, so both postfix operators report a bad operator. */
+static String _update_string(volatile String *slot, Symbol op, String rhs) {
+  if (op != <+>) _bad_op(op);
+  String current = slot[0], result = current + rhs;
+  slot[0] = result;
+  return result;
+}
+
+static void _bad_op(Symbol op) {
+  raise %(bad-op (op $op));
+}
+
+static MapStringString _prepare_string_export(
+  MapStringString map, Context source) {
+  /* Recanonicalization can change key hashes or collapse equal keys, so stage
+     a complete destination table before export swaps the backing arrays. */
+  MapStringString staged = MapStringString.new_capacity(map.capacity);
+  MapStringString result = NULL;
+  defer if (result == NULL) staged.free_table();
+  foreach (String (key, value) in map) {
+    key = source.export_nested(key);
+    value = source.export_nested(value);
+    staged[key] = value;
+  }
+  return result = staged;
+}
+
 static MapStringInt _prepare_string_int_export(
   MapStringInt map, Context source) {
   MapStringInt staged = MapStringInt.new_capacity(map.capacity);
@@ -352,25 +377,3 @@ static MapStringInt _prepare_string_int_export(
   }
   return result = staged;
 }
-
-$map.typed.publish(
-  MapStringInt, String, int, mapstringint, <mapstrint>,
-  _box_string, _box_int,
-  _prepare_string_int_export);
-
-// compile-time conversions
-
-/* Compile-time code reaches the typed-map conversions through these literal
-   `meta` prototypes; a family macro cannot emit one. */
-meta Var MapIntInt.var(MapIntInt);
-meta MapIntInt Var.mapintint(Var);
-meta MapIntInt Map.mapintint(Map);
-meta Var MapLongDouble.var(MapLongDouble);
-meta MapLongDouble Var.maplongdouble(Var);
-meta MapLongDouble Map.maplongdouble(Map);
-meta Var MapStringString.var(MapStringString);
-meta MapStringString Var.mapstringstring(Var);
-meta MapStringString Map.mapstringstring(Map);
-meta Var MapStringInt.var(MapStringInt);
-meta MapStringInt Var.mapstringint(Var);
-meta MapStringInt Map.mapstringint(Map);

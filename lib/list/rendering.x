@@ -74,6 +74,21 @@ static void _value(Render &r, Var elem) {
   else if (!_fits(r, elem)) _items(r, elem);
 }
 
+/* Writes a List's elements in turn, each rendered as `_value`
+   does. Cells are immutable, so a chain cannot reach itself; a cycle through
+   a mutable container in a car stops at that container's own guard. */
+static void _items(Render &r, Var elem) {
+  List lst = elem;
+  Buffer out = r.out;
+  if (out.pos - out.tabstop() > 5) out.newline_indent();
+  _open(lst, out);
+  for (List l = lst; l; l = l.cdr()) {
+    _value(r, l.car());
+    if (l.cdr()) out.write(" ");
+  }
+  _close(out);
+}
+
 /* A leaf that overflows the line is written again on the next one. */
 static void _leaf(Render &r, Var elem) {
   Buffer out = r.out;
@@ -100,21 +115,6 @@ static int _fits(Render &r, Var elem) {
   if (r.out.pos + line.content.length > _WIDTH) return 0;
   r.out.write_len(line.content.bytes, line.content.length);
   return 1;
-}
-
-/* Writes a List's elements in turn, each rendered as `_value`
-   does. Cells are immutable, so a chain cannot reach itself; a cycle through
-   a mutable container in a car stops at that container's own guard. */
-static void _items(Render &r, Var elem) {
-  List lst = elem;
-  Buffer out = r.out;
-  if (out.pos - out.tabstop() > 5) out.newline_indent();
-  _open(lst, out);
-  for (List l = lst; l; l = l.cdr()) {
-    _value(r, l.car());
-    if (l.cdr()) out.write(" ");
-  }
-  _close(out);
 }
 
 /* Writes into the fit-check buffer without wrapping. */

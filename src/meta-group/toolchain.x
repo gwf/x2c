@@ -14,16 +14,6 @@ void Compiler.use_meta_toolchain(String cc, String include_dir) {
   meta_include_dir.try_own();
 }
 
-/* The runtime headers this compiler was built with, which meta code shares
-   because it calls the compiler's own runtime: a built checkout stage's
-   `lib`, the checked-in bootstrap's, or else `include_dir`. */
-static String _runtime_headers(String include_dir) {
-  String stage = Compiler.stage_dir(), bootstrap = NULL;
-  if (stage && Path.is_file(%"$stage/lib/x2c.h")) return %"$stage/lib";
-  bootstrap = Compiler.bootstrap_runtime_dir();
-  return bootstrap ? bootstrap : include_dir;
-}
-
 /** Returns the C compiler and the runtime header directory that build
     `meta` code, or NULL before `Compiler.use_meta_toolchain`.
 */
@@ -51,6 +41,18 @@ String Compiler.meta_cc_run(List arguments, String directory) {
   String failure = _cc_error(errors);
   return !directory || directory in failure ? failure
     : %"$failure; the group's C is in $directory";
+}
+
+// meta group toolchain
+
+/* The runtime headers this compiler was built with, which meta code shares
+   because it calls the compiler's own runtime: a built checkout stage's
+   `lib`, the checked-in bootstrap's, or else `include_dir`. */
+static String _runtime_headers(String include_dir) {
+  String stage = Compiler.stage_dir(), bootstrap = NULL;
+  if (stage && Path.is_file(%"$stage/lib/x2c.h")) return %"$stage/lib";
+  bootstrap = Compiler.bootstrap_runtime_dir();
+  return bootstrap ? bootstrap : include_dir;
 }
 
 /* The C compiler's first located error in `errors`, or else its first

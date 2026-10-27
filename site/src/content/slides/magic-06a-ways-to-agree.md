@@ -6,12 +6,6 @@ tab: same list
 
 ```x2c
 ~#include <assert.h>
-// A meta function computes the List during translation.
-meta static List squares(int n) {
-  Array items = [];
-  for (int i = 1; i <= n; i++) items.push(i * i);
-  return items.list_free();
-}
 
 ~int main(void) {
 List comptime = $squares(3);
@@ -35,6 +29,13 @@ assert(comptime == literal && literal == constructed &&
 puts("All four lists are equal.");
 ~return 0;
 ~}
+
+// A meta function computes the List during translation.
+meta static List squares(int n) {
+  Array items = [];
+  for (int i = 1; i <= n; i++) items.push(i * i);
+  return items.list_free();
+}
 ```
 
 A `meta` function computes the squares during translation, and a literal and

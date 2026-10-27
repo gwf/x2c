@@ -49,19 +49,6 @@ static List _change(
   return _dynamic(c, <unary>, type, operation);
 }
 
-/* An operation with a `Var` operand lowers through the rule a component
-   registered for its operator on `Var`, which receives it typed `Var` and
-   returns a result of `type`. The rule's replacement normalizes here like
-   any other node. */
-static List _dynamic(
-  Compiler c, Symbol point, Type type, List operation) {
-  List kind = operation.car() == <postfix>
-    ? %(postfix $(operation.cadr()) ("Var")) : %($(operation.cadr()) ("Var"));
-  List rewritten = c.rewrite(
-    point, kind, %(expr ("Var") $operation), <expression>, type, NULL);
-  return rewritten ? rewritten.caddr() : operation;
-}
-
 module List _truthy(Compiler c, List ast) {
   match (ast) {
     case %(if ?condition ?yes) if (_pattern_condition(condition)):
@@ -114,8 +101,26 @@ static List _truthy_expression(Compiler c, List expr) {
   return $!int{ $callee($expr) };
 }
 
-static List _symbol_expression(Symbol value) =>
-  %(expr ("Symbol") "$((unsigned long) value)");
+static List _binary_operator(
+  Compiler c, List ast, Symbol operator, List lhs, Type lhs_type, List rhs,
+  Type rhs_type) {
+  Symbol compound = Symbol.compound_operator(operator);
+  if (compound)
+    return _compound(c, ast, compound, lhs, lhs_type, rhs, rhs_type);
+  switch (operator) {
+    case <=>: return _assignment(c, operator, lhs, rhs);
+    case <==>:  case <!=>:  case <===>: case <!==>:
+    case <"<">: case <"<=">: case <">">:  case <">=">:
+      return _comparison(c, ast, operator, lhs, lhs_type, rhs, rhs_type);
+  }
+  /* The dynamic binary operators are exactly those with a compound
+     assignment spelling; `Var_binary` accepts the same operators. */
+  if (operator.compound_assignment() &&
+      (c.sym.is_var_type(lhs_type) || c.sym.is_var_type(rhs_type)))
+    return _dynamic(
+      c, <binary>, %("Var"), %(op $operator $lhs $rhs));
+  return ast;
+}
 
 // Inject conversions so assignment RHS matches the annotated LHS type.
 static List _assignment(Compiler c, Symbol op, List lhs, List rhs) {
@@ -147,27 +152,6 @@ static List _comparison(
   return %(expr (int) (op $op $call $zero));
 }
 
-static List _binary_operator(
-  Compiler c, List ast, Symbol operator, List lhs, Type lhs_type, List rhs,
-  Type rhs_type) {
-  Symbol compound = Symbol.compound_operator(operator);
-  if (compound)
-    return _compound(c, ast, compound, lhs, lhs_type, rhs, rhs_type);
-  switch (operator) {
-    case <=>: return _assignment(c, operator, lhs, rhs);
-    case <==>:  case <!=>:  case <===>: case <!==>:
-    case <"<">: case <"<=">: case <">">:  case <">=">:
-      return _comparison(c, ast, operator, lhs, lhs_type, rhs, rhs_type);
-  }
-  /* The dynamic binary operators are exactly those with a compound
-     assignment spelling; `Var_binary` accepts the same operators. */
-  if (operator.compound_assignment() &&
-      (c.sym.is_var_type(lhs_type) || c.sym.is_var_type(rhs_type)))
-    return _dynamic(
-      c, <binary>, %("Var"), %(op $operator $lhs $rhs));
-  return ast;
-}
-
 static List _compound(
   Compiler c, List ast, Symbol op, List lhs, Type lhs_type, List rhs,
   Type rhs_type) {
@@ -194,6 +178,19 @@ static List _compound(
   if (!lhs_is_var && !c.sym.is_var_type(rhs_type)) return ast;
   List operation = %(op $(op.compound_assignment()) $lhs $rhs);
   return _dynamic(c, <binary>, lhs_type, operation);
+}
+
+/* An operation with a `Var` operand lowers through the rule a component
+   registered for its operator on `Var`, which receives it typed `Var` and
+   returns a result of `type`. The rule's replacement normalizes here like
+   any other node. */
+static List _dynamic(
+  Compiler c, Symbol point, Type type, List operation) {
+  List kind = operation.car() == <postfix>
+    ? %(postfix $(operation.cadr()) ("Var")) : %($(operation.cadr()) ("Var"));
+  List rewritten = c.rewrite(
+    point, kind, %(expr ("Var") $operation), <expression>, type, NULL);
+  return rewritten ? rewritten.caddr() : operation;
 }
 
 static int _string_operand(Compiler c, Type type) =>
@@ -226,6 +223,9 @@ static List _protocol_update(
   List value = rhs;
   return _update_call(arg, spell, value, helper);
 }
+
+static List _symbol_expression(Symbol value) =>
+  %(expr ("Symbol") "$((unsigned long) value)");
 
 static List _update_call(
   List target, List operator, List value, String helper) {

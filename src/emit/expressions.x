@@ -1,93 +1,5 @@
 /*  expressions.x -- C expressions, calls and literal values */
 
-static int _operator_precedence(Symbol operator) {
-  if (operator == <.> || operator == <"->">) return EMIT_POSTFIX;
-  if (operator.is_assignment_op()) return EMIT_ASSIGNMENT;
-  int level = operator.binary_precedence();
-  return level ? EMIT_CONDITIONAL + level : 0;
-}
-
-/* The precedence of the C expression a node emits. Names, literals, calls,
-   compound literals, statement expressions, and `parens` all emit text that
-   already binds as tightly as a primary expression, so the default needs no
-   grouping and adds no parentheses that C does not require. */
-static int _emitted_precedence(Var node) {
-  match (node) {
-    case %(at ? ?inner):         return _emitted_precedence(inner);
-    case %(expr ? ?content):     return _emitted_precedence(content);
-    case %(op ?operator ? ?): {
-      int level = _operator_precedence(operator);
-      return level ? level : EMIT_PRIMARY;
-    }
-    case %(op ? ?):              return EMIT_UNARY;
-    case %(op ? ? ? ?):          return EMIT_CONDITIONAL;
-    case %((!or cast sizeof) *): return EMIT_UNARY;
-    case %(postfix ? ?):         return EMIT_POSTFIX;
-    case %(commas *):            return 1;
-    case %(m-all *):             return _operator_precedence(<"&&">);
-    case %(m-any *):             return _operator_precedence(<"||">);
-    case %(m-bits *):            return _operator_precedence(<"==">);
-  }
-  return EMIT_PRIMARY;
-}
-
-// The least tightly binding operand each side of a binary form accepts.
-static int _left_operand_level(Symbol operator) {
-  int level = _operator_precedence(operator);
-  if (!level) return 0;
-  return operator.is_assignment_op() ? level + 1 : level;
-}
-
-static int _right_operand_level(Symbol operator) {
-  int level = _operator_precedence(operator);
-  // A member name is not an expression, so it never takes parentheses.
-  if (!level || operator == <.> || operator == <"->">) return 0;
-  return operator.is_assignment_op() ? level : level + 1;
-}
-
-/* Emits `node`, in parentheses when it binds less tightly than `level`. A
-   node already stored as a List enters its own dispatch directly. Wrapping
-   it in a one-element sequence would emit the same tokens through two more
-   frames per operand, which the pinned chain stack budgets cannot spend. */
-module void _operand(Emitter &e, Var node, int level) {
-  int grouped = _emitted_precedence(node) < level;
-  if (grouped) _put(e, "(");
-  if (node is <list> && !node.is_nil()) _emit(e, node);
-  else _emit(e, $(node));
-  if (grouped) _put(e, ")");
-}
-
-/* A left-leaning chain nests one (expr (op ...)) level per source term;
-   walk the spine iteratively, so a long chain spends no recursion on its
-   left operands. The walk stops where the nested operator needs
-   parentheses, leaving that operand to the ordinary recursion. */
-static void _op_spine(Emitter &e, Var operator, Var left, Var right) {
-  Array operators = auto [];
-  Array rights = auto [];
-  Var op_item = operator, left_item = left, right_item = right;
-  int level = 0;
-  for (;;) {
-    operators.push(op_item);
-    rights.push(right_item);
-    level = _left_operand_level(op_item);
-    int deeper = 0;
-    if (_emitted_precedence(left_item) >= level &&
-        left_item ~= %(expr ? (op ?next_operator ?next_left ?next_right))) {
-      op_item = next_operator;
-      left_item = next_left;
-      right_item = next_right;
-      deeper = 1;
-    }
-    if (!deeper) break;
-  }
-  _operand(e, left_item, level);
-  for (int i = (int) operators.len() - 1; i >= 0; i--) {
-    Symbol binary = operators[i];
-    _put(e, binary);
-    _operand(e, rights[i], _right_operand_level(binary));
-  }
-}
-
 /* Writes each of `tests` with the C operator `op` between them, each
    grouped as that operator's right operand needs. */
 module void _joined(Emitter &e, List tests, Symbol op) {
@@ -146,6 +58,51 @@ module void _binary(
   _operand(e, right, _right_operand_level(operator));
 }
 
+/* A left-leaning chain nests one (expr (op ...)) level per source term;
+   walk the spine iteratively, so a long chain spends no recursion on its
+   left operands. The walk stops where the nested operator needs
+   parentheses, leaving that operand to the ordinary recursion. */
+static void _op_spine(Emitter &e, Var operator, Var left, Var right) {
+  Array operators = auto [];
+  Array rights = auto [];
+  Var op_item = operator, left_item = left, right_item = right;
+  int level = 0;
+  for (;;) {
+    operators.push(op_item);
+    rights.push(right_item);
+    level = _left_operand_level(op_item);
+    int deeper = 0;
+    if (_emitted_precedence(left_item) >= level &&
+        left_item ~= %(expr ? (op ?next_operator ?next_left ?next_right))) {
+      op_item = next_operator;
+      left_item = next_left;
+      right_item = next_right;
+      deeper = 1;
+    }
+    if (!deeper) break;
+  }
+  _operand(e, left_item, level);
+  for (int i = (int) operators.len() - 1; i >= 0; i--) {
+    Symbol binary = operators[i];
+    _put(e, binary);
+    _operand(e, rights[i], _right_operand_level(binary));
+  }
+}
+
+// The least tightly binding operand each side of a binary form accepts.
+static int _left_operand_level(Symbol operator) {
+  int level = _operator_precedence(operator);
+  if (!level) return 0;
+  return operator.is_assignment_op() ? level + 1 : level;
+}
+
+static int _right_operand_level(Symbol operator) {
+  int level = _operator_precedence(operator);
+  // A member name is not an expression, so it never takes parentheses.
+  if (!level || operator == <.> || operator == <"->">) return 0;
+  return operator.is_assignment_op() ? level : level + 1;
+}
+
 module void _ident(Emitter &e, Var binding) {
   /* A template's free name in a declared type, such as an array size,
      keeps the spelling it lands with. */
@@ -171,6 +128,49 @@ module void _call(Emitter &e, Var function, Var arguments) {
   _put(e, "(");
   _node(e, arguments);
   _put(e, ")");
+}
+
+/* Emits `node`, in parentheses when it binds less tightly than `level`. A
+   node already stored as a List enters its own dispatch directly. Wrapping
+   it in a one-element sequence would emit the same tokens through two more
+   frames per operand, which the pinned chain stack budgets cannot spend. */
+module void _operand(Emitter &e, Var node, int level) {
+  int grouped = _emitted_precedence(node) < level;
+  if (grouped) _put(e, "(");
+  if (node is <list> && !node.is_nil()) _emit(e, node);
+  else _emit(e, $(node));
+  if (grouped) _put(e, ")");
+}
+
+/* The precedence of the C expression a node emits. Names, literals, calls,
+   compound literals, statement expressions, and `parens` all emit text that
+   already binds as tightly as a primary expression, so the default needs no
+   grouping and adds no parentheses that C does not require. */
+static int _emitted_precedence(Var node) {
+  match (node) {
+    case %(at ? ?inner):         return _emitted_precedence(inner);
+    case %(expr ? ?content):     return _emitted_precedence(content);
+    case %(op ?operator ? ?): {
+      int level = _operator_precedence(operator);
+      return level ? level : EMIT_PRIMARY;
+    }
+    case %(op ? ?):              return EMIT_UNARY;
+    case %(op ? ? ? ?):          return EMIT_CONDITIONAL;
+    case %((!or cast sizeof) *): return EMIT_UNARY;
+    case %(postfix ? ?):         return EMIT_POSTFIX;
+    case %(commas *):            return 1;
+    case %(m-all *):             return _operator_precedence(<"&&">);
+    case %(m-any *):             return _operator_precedence(<"||">);
+    case %(m-bits *):            return _operator_precedence(<"==">);
+  }
+  return EMIT_PRIMARY;
+}
+
+static int _operator_precedence(Symbol operator) {
+  if (operator == <.> || operator == <"->">) return EMIT_POSTFIX;
+  if (operator.is_assignment_op()) return EMIT_ASSIGNMENT;
+  int level = operator.binary_precedence();
+  return level ? EMIT_CONDITIONAL + level : 0;
 }
 
 /* A source-literal pattern gets its own process-lifetime plan site, which

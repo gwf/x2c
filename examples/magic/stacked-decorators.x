@@ -12,13 +12,13 @@ macro Decorator $require_parameter(Function $function, Name $parameter) {
 
 macro Decorator $increment(Expr $target) => $target + 1;
 
+int main(void) {
+  printf("%d\n", $increment() answer(21));
+  return 0;
+}
+
 $trace("request")
 $require_parameter(value)
 int answer(int value) {
   return value * 2;
-}
-
-int main(void) {
-  printf("%d\n", $increment() answer(21));
-  return 0;
 }

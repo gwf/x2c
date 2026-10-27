@@ -83,6 +83,14 @@ MacroMatcher Macro.matcher(Macro shape, List holes) {
   return (MacroMatcher){shape, holes, macro_subject_used ? NULL : pattern};
 }
 
+/** Tests complete code against a macro and its hole patterns. Repeated
+    recognition can retain `Macro.matcher` so the pattern is derived once.
+*/
+int Macro.matches(Macro t, List code, List holes) {
+  MacroMatcher matcher = {t, holes, NULL};
+  return matcher.matches(code);
+}
+
 /** Tests code with the same source views and identity rules as a macro
     case.
 */
@@ -96,14 +104,6 @@ int MacroMatcher.matches(MacroMatcher &m, List code) {
   MatchPlan plan = lease.plan();
   MacroFixedSlots policy = _fixed_slots(m.shape, m.holes, plan);
   return _case_match(code, plan, policy, NULL);
-}
-
-/** Tests complete code against a macro and its hole patterns. Repeated
-    recognition can retain `Macro.matcher` so the pattern is derived once.
-*/
-int Macro.matches(Macro t, List code, List holes) {
-  MacroMatcher matcher = {t, holes, NULL};
-  return matcher.matches(code);
 }
 
 /* A retained invocation of this same definition matches by its arguments,
@@ -175,6 +175,25 @@ static int _pending_capture(
   return _publish(route, captured, published);
 }
 
+/* Derives the pattern for this call. `site` keeps a pattern that does not
+   depend on the call's subject; any other is prepared for this call
+   alone. */
+static int _derived_capture(
+  MacroCaseSite *site, List code, Macro t, List names,
+  MatchCaptureBuffer *published) {
+  macro_subject_used = 0;
+  List pattern = _case_shape(t, names);
+  MacroPublishing route = _publishing(
+    t, pattern, names, _internal_names(t, names, 0));
+  if (_keep(site, t, names, pattern, route))
+    return _capture(
+      code, site.match.plan, site.policy, site.route, published);
+  MatchPlan plan = MatchPlan.prepare(pattern);
+  defer plan.free();
+  MacroFixedSlots policy = _fixed_slots(t, names, plan);
+  return _capture(code, plan, policy, route, published);
+}
+
 /* The binder each parameter is captured under inside the derived pattern:
    a Type parameter is a List splice, so it needs a List binder. Against a
    retained invocation each binder captures one argument. */
@@ -197,25 +216,6 @@ static int _capture(
   MatchCaptureBuffer captured = {values, 0, MACHINE_BINDER_MAX};
   return _case_match(code, plan, policy, captured) &&
     _publish(route, captured, published);
-}
-
-/* Derives the pattern for this call. `site` keeps a pattern that does not
-   depend on the call's subject; any other is prepared for this call
-   alone. */
-static int _derived_capture(
-  MacroCaseSite *site, List code, Macro t, List names,
-  MatchCaptureBuffer *published) {
-  macro_subject_used = 0;
-  List pattern = _case_shape(t, names);
-  MacroPublishing route = _publishing(
-    t, pattern, names, _internal_names(t, names, 0));
-  if (_keep(site, t, names, pattern, route))
-    return _capture(
-      code, site.match.plan, site.policy, site.route, published);
-  MatchPlan plan = MatchPlan.prepare(pattern);
-  defer plan.free();
-  MacroFixedSlots policy = _fixed_slots(t, names, plan);
-  return _capture(code, plan, policy, route, published);
 }
 
 /* Keeps `pattern` in `site` with its fixed slots and route once Match
@@ -263,9 +263,6 @@ static List _case_shape(Macro t, List names) {
   return _view(pattern);
 }
 
-// Declaration order gives each body-local binder its identity.
-static Atom _fixed(int index) => Atom.intern(%"?__fixed_$index");
-
 /* Removes source wrappers and template shells throughout a pattern, down
    to literals and bindings, which stay whole. */
 static Var _view(Var value) {
@@ -301,6 +298,9 @@ static MacroFixedSlots _fixed_slots(
   }
   return policy;
 }
+
+// Declaration order gives each body-local binder its identity.
+static Atom _fixed(int index) => Atom.intern(%"?__fixed_$index");
 
 /* Runs `plan` over `code` with the fixed-local relation and the unwrapping
    view, and copies captures when requested. An unprepared plan takes Match's

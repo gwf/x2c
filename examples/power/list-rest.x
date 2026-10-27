@@ -4,14 +4,6 @@
 #include <assert.h>
 #include "type.x"
 
-static List collect(List @items) => items;
-static int count_after(int fixed, List @items) => fixed + items.len();
-
-static int String.count_items(String label, List @items) {
-  printf("%s: %d\n", label, items.len());
-  return items.len();
-}
-
 int main(void) {
   List pair = %(2 3), empty = NULL;
   assert(!collect());
@@ -33,4 +25,12 @@ int main(void) {
   label.count_items(1, @pair, 4);
   puts("List arguments stay nested; explicit splices expand.");
   return 0;
+}
+
+static List collect(List @items) => items;
+static int count_after(int fixed, List @items) => fixed + items.len();
+
+static int String.count_items(String label, List @items) {
+  printf("%s: %d\n", label, items.len());
+  return items.len();
 }

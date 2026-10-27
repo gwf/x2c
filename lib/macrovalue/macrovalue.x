@@ -83,12 +83,6 @@ inline int Macro_case_own(Var content) {
   return head && head != <expr>;
 }
 
-/** The short Symbol `value` holds, or 0 for any other value. */
-inline Symbol Macro_case_symbol(Var value) {
-  Symbol symbol = value.u64 - VAR_SYMBOL_OFFSET;
-  return symbol < 1ul << 51 ? symbol : 0;
-}
-
 /** Stores in `cursor` the List a macro-valued `case` examines for
     `value`, beneath its source wrappers, and returns whether there is
     one. A List headed by another Symbol than a wrapper or `expr` is its
@@ -101,6 +95,12 @@ inline int Macro_case_enter(Var value, List &cursor) {
     return Macro_case_view(value, cursor);
   cursor = node;
   return 1;
+}
+
+/** The short Symbol `value` holds, or 0 for any other value. */
+inline Symbol Macro_case_symbol(Var value) {
+  Symbol symbol = value.u64 - VAR_SYMBOL_OFFSET;
+  return symbol < 1ul << 51 ? symbol : 0;
 }
 
 /** Retains a macro and hole patterns for repeated recognition. A pattern

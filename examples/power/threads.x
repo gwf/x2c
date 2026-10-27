@@ -1,13 +1,4 @@
 #include <assert.h>
-// Each worker squares its values and reduces them to one sum.
-static Var sum_squares(const void *input, size_t bytes) {
-  const int *values = input;
-  double sum = 0;
-  for (size_t i = 0; i < bytes / sizeof(int); i++)
-    sum += (double) values[i] * values[i];
-  return sum;
-}
-
 int main(void) {
 // Split the data; launch both workers before waiting for either.
 int values[2][3] = {{1, 2, 3}, {4, 5, 6}};
@@ -24,4 +15,13 @@ first.free(); second.free();
 printf("sum of squares: %g\n", left + right);
 assert(left == 14 && right == 77 && left + right == 91);
 return 0;
+}
+
+// Each worker squares its values and reduces them to one sum.
+static Var sum_squares(const void *input, size_t bytes) {
+  const int *values = input;
+  double sum = 0;
+  for (size_t i = 0; i < bytes / sizeof(int); i++)
+    sum += (double) values[i] * values[i];
+  return sum;
 }

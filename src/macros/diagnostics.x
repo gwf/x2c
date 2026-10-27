@@ -308,18 +308,22 @@ static macro Stmt $fail.macros_variable_unbound(
 
 // diagnostics
 
-module String _definition_note(List definition) {
-  List origin = definition.assoc(<origin>), String file = origin.assoc(<file>);
-  int line = origin.assoc(<line>), column = origin.assoc(<column>);
-  return %"definition: $file:$line:$column";
-}
-
 /** Reports that the meta call `source` failed with `error` at
     `invocation`.
 */
 void Compiler.report_meta_failure(
   Compiler c, Token invocation, List error, String source) {
   $fail.macros_meta_failed(c, invocation, source, error);
+}
+
+
+
+// macro diagnostics and source notes
+
+module String _definition_note(List definition) {
+  List origin = definition.assoc(<origin>), String file = origin.assoc(<file>);
+  int line = origin.assoc(<line>), column = origin.assoc(<column>);
+  return %"definition: $file:$line:$column";
 }
 
 /* A template names a hole, projection, or replacement variable that it

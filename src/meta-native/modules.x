@@ -3,11 +3,6 @@
     Copyright (c) 2026 Gary William Flake.
 */
 
-/* The paths of the selected native modules that define `name`, in order. */
-module List _native_module_suppliers(String name) =>
-  native_module_order.filter(
-    %!(String path) => name in ((Map) native_modules[path]));
-
 /* native modules
 
    A native module is a shared library whose entry returns its targets.
@@ -30,7 +25,23 @@ static macro Expression $compiler.targets() =>
 
 static String compiler_supplier = "<compiler>";
 
-static Map _compiler_targets(void) => $compiler.targets();
+/* The built-in algorithms and the runtime targets the compiler links are
+   native modules no request selects, loaded on first use. */
+static String builtin_supplier = "<builtin>", runtime_supplier = "<runtime>";
+
+/* linked extensions
+
+   The packages whose compile-time parts are linked into the compiler. Each
+   registers from a constructor, before the runtime starts, so the list is
+   plain C storage that lasts for the process. */
+
+static typedef struct Extension {
+  const char *name;
+  Map (*targets)(void);
+  struct Extension *next;
+} *Extension;
+
+static Extension extensions = NULL;
 
 /** Returns the compiler's own targets, the operations `lib/meta.x` declares
     with a bodyless `meta` prototype, loaded as the native module every
@@ -40,13 +51,6 @@ Map Compiler.compiler_targets(void) {
   _load_compiler_module();
   return native_modules[compiler_supplier];
 }
-
-/* The built-in algorithms and the runtime targets the compiler links are
-   native modules no request selects, loaded on first use. */
-static String builtin_supplier = "<builtin>", runtime_supplier = "<runtime>";
-
-static Map _runtime_targets(void) =>
-  $_x2c_target_map($_x2c_native_rows(<runtime>, %(), %()));
 
 /** Returns the built-in algorithms by the names compile-time code calls. */
 Map Compiler.builtin_module(void) {
@@ -63,11 +67,6 @@ Map Compiler.native_targets(void) {
   if (!_native_module_loaded(runtime_supplier))
     _add_native_module(runtime_supplier, _runtime_targets);
   return native_modules[runtime_supplier];
-}
-
-static void _load_compiler_module(void) {
-  if (!_native_module_loaded(compiler_supplier))
-    _add_native_module(compiler_supplier, _compiler_targets);
 }
 
 /** Selects the loaded native modules, by absolute path, that bodyless `meta`
@@ -109,13 +108,6 @@ void Compiler.select_package_module(
   }
 }
 
-static void _load_package_module(
-  Compiler c, String name, String module, Token token) {
-  if (_module_stamp(module) != 1)
-    $fail.meta_native_package_compiler(c, token, name, module);
-  _open_native_module(module);
-}
-
 /** Loads the native module at `path` once per process and returns its
     absolute path. Loading runs the module's code inside the compiler, so it
     happens only on request. A module from another compiler, a file that is
@@ -143,6 +135,101 @@ void Compiler.preload_native_module(String path) {
   if (X2C_NATIVE_MODULES && !_native_module_loaded(path) &&
       _module_stamp(path) == 1)
     _open_native_module(path);
+}
+
+/** Returns the name-to-`Func` Map of the loaded native module at absolute
+    `path`.
+*/
+Map Compiler.native_module_targets(String path) => native_modules[path];
+
+/** Reports whether the compiler itself supplies the native function `name`.
+    Such a function exists only inside a compiler, so a `meta` function that
+    reaches it has no runtime form.
+*/
+int Compiler.supplies_native_meta(String name) {
+  Var targets;
+  return (void *) native_modules &&
+         native_modules.try_get(compiler_supplier, targets) &&
+         name in ((Map) targets);
+}
+
+/** Registers package `name`'s compile-time part, linked into the compiler,
+    whose `targets` returns its name-to-`Func` Map. The registration unit
+    `x2c build --extension` generates calls it from a constructor.
+*/
+void x2c_register_extension(const char *name, Map (*targets)(void)) {
+  Extension extension = malloc(sizeof *extension);
+  if (!extension) abort();
+  *extension = (struct Extension) { name, targets, extensions };
+  extensions = extension;
+}
+
+/** Reports whether package `name`'s compile-time part is linked into the
+    compiler, so its import loads no module.
+*/
+int Compiler.links_extension(String name) {
+  for (Extension e = extensions; e; e = e.next)
+    if (!strcmp(name, e.name)) return 1;
+  return 0;
+}
+
+/** Returns the archive of the linked packages' objects that the build of
+    this compiler kept beside it, named by the compiler's identity, or NULL
+    when the compiler links none. Project meta code links it.
+*/
+String Compiler.extension_archive(void) =>
+  extensions ? %"$(x2c_get_executable()).extensions/"
+               + %"$(Compiler.identity()).a" : NULL;
+
+// native meta modules
+
+static void _load_compiler_module(void) {
+  if (!_native_module_loaded(compiler_supplier))
+    _add_native_module(compiler_supplier, _compiler_targets);
+}
+
+static Map _compiler_targets(void) => $compiler.targets();
+
+/* Records the name-to-`Func` Map that the entry of the native module loaded
+   from absolute `path` returns. The Funcs, names, signatures, and path last
+   for the process.
+*/
+module void _add_native_module(String path, Map (*entry)(void)) {
+  Map targets = NULL;
+  auto (&native_module_scope) {
+    if (!(void *) native_modules) {
+      Scope.shutdown_hook(_native_module_shutdown);
+      native_modules = {};
+    }
+    targets = entry();
+    native_modules[path] = targets;
+  }
+  path.try_own();
+  foreach ((String name, Func target) in targets) {
+    name.try_own();
+    target.signature().try_own();
+  }
+}
+
+static void _native_module_shutdown(void) {
+  native_module_scope.destroy();
+  native_module_scope = NULL;
+  native_modules = NULL;
+  native_module_order = NULL;
+}
+
+/* `path` is absolute, as `_add_native_module` records it. */
+module int _native_module_loaded(String path) =>
+  (void *) native_modules && path in native_modules;
+
+static Map _runtime_targets(void) =>
+  $_x2c_target_map($_x2c_native_rows(<runtime>, %(), %()));
+
+static void _load_package_module(
+  Compiler c, String name, String module, Token token) {
+  if (_module_stamp(module) != 1)
+    $fail.meta_native_package_compiler(c, token, name, module);
+  _open_native_module(module);
 }
 
 /* Reads the stamp in the bytes of the module at `path`. Loading runs a
@@ -194,92 +281,7 @@ static void _open_native_module(String path) {
   _add_native_module(path, entry);
 }
 
-/* Records the name-to-`Func` Map that the entry of the native module loaded
-   from absolute `path` returns. The Funcs, names, signatures, and path last
-   for the process.
-*/
-module void _add_native_module(String path, Map (*entry)(void)) {
-  Map targets = NULL;
-  auto (&native_module_scope) {
-    if (!(void *) native_modules) {
-      Scope.shutdown_hook(_native_module_shutdown);
-      native_modules = {};
-    }
-    targets = entry();
-    native_modules[path] = targets;
-  }
-  path.try_own();
-  foreach ((String name, Func target) in targets) {
-    name.try_own();
-    target.signature().try_own();
-  }
-}
-
-static void _native_module_shutdown(void) {
-  native_module_scope.destroy();
-  native_module_scope = NULL;
-  native_modules = NULL;
-  native_module_order = NULL;
-}
-
-/* `path` is absolute, as `_add_native_module` records it. */
-module int _native_module_loaded(String path) =>
-  (void *) native_modules && path in native_modules;
-
-/** Returns the name-to-`Func` Map of the loaded native module at absolute
-    `path`.
-*/
-Map Compiler.native_module_targets(String path) => native_modules[path];
-
-/** Reports whether the compiler itself supplies the native function `name`.
-    Such a function exists only inside a compiler, so a `meta` function that
-    reaches it has no runtime form.
-*/
-int Compiler.supplies_native_meta(String name) {
-  Var targets;
-  return (void *) native_modules &&
-         native_modules.try_get(compiler_supplier, targets) &&
-         name in ((Map) targets);
-}
-
-/* linked extensions
-
-   The packages whose compile-time parts are linked into the compiler. Each
-   registers from a constructor, before the runtime starts, so the list is
-   plain C storage that lasts for the process. */
-
-static typedef struct Extension {
-  const char *name;
-  Map (*targets)(void);
-  struct Extension *next;
-} *Extension;
-
-static Extension extensions = NULL;
-
-/** Registers package `name`'s compile-time part, linked into the compiler,
-    whose `targets` returns its name-to-`Func` Map. The registration unit
-    `x2c build --extension` generates calls it from a constructor.
-*/
-void x2c_register_extension(const char *name, Map (*targets)(void)) {
-  Extension extension = malloc(sizeof *extension);
-  if (!extension) abort();
-  *extension = (struct Extension) { name, targets, extensions };
-  extensions = extension;
-}
-
-/** Reports whether package `name`'s compile-time part is linked into the
-    compiler, so its import loads no module.
-*/
-int Compiler.links_extension(String name) {
-  for (Extension e = extensions; e; e = e.next)
-    if (!strcmp(name, e.name)) return 1;
-  return 0;
-}
-
-/** Returns the archive of the linked packages' objects that the build of
-    this compiler kept beside it, named by the compiler's identity, or NULL
-    when the compiler links none. Project meta code links it.
-*/
-String Compiler.extension_archive(void) =>
-  extensions ? %"$(x2c_get_executable()).extensions/"
-               + %"$(Compiler.identity()).a" : NULL;
+/* The paths of the selected native modules that define `name`, in order. */
+module List _native_module_suppliers(String name) =>
+  native_module_order.filter(
+    %!(String path) => name in ((Map) native_modules[path]));

@@ -33,6 +33,20 @@ List Compiler.transform(Compiler c, List ast) {
 */
 Ast Compiler.normalize(Compiler c, Ast ast) => _step(c, ast);
 
+/** Adds to the unit's pending support the file-scope code a rule gives
+    the form `source` of `kind`, bound and lowered with the support. The
+    kernel has no lowering of its own for `source`, so no rule ends the
+    translation as `_shipped_lowering` does.
+*/
+void Compiler.shipped_support(
+  Compiler c, Symbol kind, List source, String form) {
+  List bound = c.rewrite(<node>, kind, source, <unit>, NULL, NULL);
+  if (!bound) $fail.transform_no_shipped_rule(c, NULL, form);
+  else c.add_support(bound);
+}
+
+// node normalization
+
 module Ast _step(Compiler c, Ast ast) {
   if (!ast) return NULL;
   if (c.slot_watch) {
@@ -97,63 +111,6 @@ static Ast _step_tag(Compiler c, Ast ast, Symbol tag) {
   return _default_node(c, ast);
 }
 
-/* Ordinary registered patterns may replace a typed statement. */
-static Ast _statement_rewrite(Compiler c, Ast ast, Symbol tag) {
-  List rewritten = c.rewrite_rules ? c.lower_rewrite(
-    <node>, tag, ast, <statement>, c.return_type, NULL) : NULL;
-  return rewritten ? rewritten : ast;
-}
-
-/* The replacement a shipped rule gives a form the kernel no longer lowers
-   itself. No replacement is an error that ends the translation: this
-   compiler does not link the component that owns the form, or its rule
-   failed to register. */
-module List _shipped_lowering(
-  Compiler c, Symbol point, Var kind, List source, Symbol position,
-  Type expected, String form) {
-  List lowered =
-    c.lower_rewrite(point, kind, source, position, expected, NULL);
-  if (!lowered) $fail.transform_no_shipped_rule(c, NULL, form);
-  return lowered;
-}
-
-/** Adds to the unit's pending support the file-scope code a rule gives
-    the form `source` of `kind`, bound and lowered with the support. The
-    kernel has no lowering of its own for `source`, so no rule ends the
-    translation as `_shipped_lowering` does.
-*/
-void Compiler.shipped_support(
-  Compiler c, Symbol kind, List source, String form) {
-  List bound = c.rewrite(<node>, kind, source, <unit>, NULL, NULL);
-  if (!bound) $fail.transform_no_shipped_rule(c, NULL, form);
-  else c.add_support(bound);
-}
-
-static Ast _shipped_statement(Compiler c, Ast ast, Symbol tag) =>
-  _shipped_lowering(
-    c, <node>, tag, ast, <statement>, c.return_type, %"$tag statement");
-
-static Ast _destructuring(
-  Compiler c, Ast ast, Symbol tag, Symbol position) {
-  String form = position == <block>
-    ? "destructuring declaration" : "destructuring statement";
-  // The implementation belongs to src/components/destructuring.x.
-  return _shipped_lowering(
-    c, <node>, tag, ast, position, c.return_type, form);
-}
-
-static int _destructures(List statement) {
-  return statement ~= %(stmnt (expr ? (dstrasgn *)));
-}
-
-/* A destructuring assignment expression has its source's type. */
-static Ast _destructuring_value(Compiler c, Ast ast) {
-  Type type = ast.caddr().cadr();
-  return _shipped_lowering(
-    c, <literal>, <dstrasgn>, %(expr $type $ast), <expression>, type,
-    "destructuring assignment").caddr();
-}
-
 /* Placed code is lowered already, so only the source parts the active
    lowering watches within it lower here, and the rest is rendered as the C
    text emission would print, which later passes carry as written. A switch
@@ -167,18 +124,6 @@ static Ast _placed(Compiler c, Ast code) {
   match (code) case %(switch ?selector (block *items)):
     return %(switch $selector (block $(c.render_placed(items, held))));
   return c.render_placed(code, held);
-}
-
-/* `node` with each watched part lowered and recorded in `held`. */
-static Var _held_within(Compiler c, Var node, Map held) {
-  if (node is not <list> || node.is_nil()) return node;
-  Ast lowered = c.watched_step(node);
-  if (lowered) {
-    held[(void *) lowered] = 1;
-    return lowered;
-  }
-  Var child;
-  $ast.rewrite_children(node, child, _held_within(c, child, held));
 }
 
 module Ast _default_node(Compiler c, Ast ast) {
@@ -234,31 +179,6 @@ static Ast _statement_value(Compiler c, Ast value, Var expression) {
   return Ast.rewrap_origin(result, %(stmnt $(Ast.without_origin(result))));
 }
 
-static Ast _sequence_tail(Compiler c, Ast node, Ast tail) {
-  match (node) {
-    case %(at ?parent ?): return _anchored_sequence(c, node, tail, parent);
-    case %(seq *items): return items.append(tail);
-  }
-  return cons(node, tail);
-}
-
-static Ast _anchored_sequence(
-  Compiler c, Ast node, Ast tail, Var parent) {
-  match (Ast.without_origin(node))
-    case %(seq *items): return _splice_items(c, items, parent).append(tail);
-  return cons(node, tail);
-}
-
-static List _splice_items(Compiler c, List items, Var parent) {
-  Array anchored = [];
-  foreach (List item in items) {
-    c.origins.push(%(generated $parent splice));
-    int generated = c.origins.len();
-    anchored.push(%(at $generated $item));
-  }
-  return anchored.list_free();
-}
-
 static Ast _children(Compiler c, Ast ast) {
   List child;
   $ast.rewrite_children(ast, child, _step(c, child));
@@ -282,21 +202,6 @@ static Ast _at_node(Compiler c, Ast ast, int occurrence, List inner) {
   c.origins.push(%(generated $occurrence xform));
   int generated = c.origins.len();
   return %(at $generated $transformed);
-}
-
-/* A function rule sees the bound and typed definition before its body
-   lowers. Rules keyed by its return type come before those keyed by none.
-   A definition the kernel or a shipped rule wrote is not source, so only
-   shipped rules see it. */
-static List _function_rewrite(
-  Compiler c, List function, List return_type, int written) {
-  struct SlotWatch shipped = {.shipped = 1};
-  with (c.slot_watch = written ? &shipped : c.slot_watch) {
-    List replaced = c.lower_rewrite(
-      <function>, return_type, function, <unit>, NULL, NULL);
-    return replaced ? replaced : c.lower_rewrite(
-      <function>, <any>, function, <unit>, NULL, NULL);
-  }
 }
 
 /* A definition that `kernel` marks as written lowers as one the source
@@ -356,13 +261,6 @@ static List _entered_body(
   return %(block @items);
 }
 
-static Ast _defer_node(Compiler c, Ast ast) {
-  match (ast)
-    case %(defer ?finalizer):
-      return c.lower_defer_region(%(block), finalizer);
-  return ast;
-}
-
 /* A value block lowers its final expression as a value, including an
    assignment whose ordinary statement form discards its result. */
 static Ast _block_node(
@@ -388,5 +286,109 @@ static Ast _raise_node(Compiler c, Ast ast) {
           ast = _ordered_raise(c, cause, arguments);
     }
   }
+  return ast;
+}
+
+/* Ordinary registered patterns may replace a typed statement. */
+static Ast _statement_rewrite(Compiler c, Ast ast, Symbol tag) {
+  List rewritten = c.rewrite_rules ? c.lower_rewrite(
+    <node>, tag, ast, <statement>, c.return_type, NULL) : NULL;
+  return rewritten ? rewritten : ast;
+}
+
+static Ast _shipped_statement(Compiler c, Ast ast, Symbol tag) =>
+  _shipped_lowering(
+    c, <node>, tag, ast, <statement>, c.return_type, %"$tag statement");
+
+static Ast _destructuring(
+  Compiler c, Ast ast, Symbol tag, Symbol position) {
+  String form = position == <block>
+    ? "destructuring declaration" : "destructuring statement";
+  // The implementation belongs to src/components/destructuring.x.
+  return _shipped_lowering(
+    c, <node>, tag, ast, position, c.return_type, form);
+}
+
+static int _destructures(List statement) {
+  return statement ~= %(stmnt (expr ? (dstrasgn *)));
+}
+
+/* A destructuring assignment expression has its source's type. */
+static Ast _destructuring_value(Compiler c, Ast ast) {
+  Type type = ast.caddr().cadr();
+  return _shipped_lowering(
+    c, <literal>, <dstrasgn>, %(expr $type $ast), <expression>, type,
+    "destructuring assignment").caddr();
+}
+
+/* The replacement a shipped rule gives a form the kernel no longer lowers
+   itself. No replacement is an error that ends the translation: this
+   compiler does not link the component that owns the form, or its rule
+   failed to register. */
+module List _shipped_lowering(
+  Compiler c, Symbol point, Var kind, List source, Symbol position,
+  Type expected, String form) {
+  List lowered =
+    c.lower_rewrite(point, kind, source, position, expected, NULL);
+  if (!lowered) $fail.transform_no_shipped_rule(c, NULL, form);
+  return lowered;
+}
+
+/* `node` with each watched part lowered and recorded in `held`. */
+static Var _held_within(Compiler c, Var node, Map held) {
+  if (node is not <list> || node.is_nil()) return node;
+  Ast lowered = c.watched_step(node);
+  if (lowered) {
+    held[(void *) lowered] = 1;
+    return lowered;
+  }
+  Var child;
+  $ast.rewrite_children(node, child, _held_within(c, child, held));
+}
+
+static Ast _sequence_tail(Compiler c, Ast node, Ast tail) {
+  match (node) {
+    case %(at ?parent ?): return _anchored_sequence(c, node, tail, parent);
+    case %(seq *items): return items.append(tail);
+  }
+  return cons(node, tail);
+}
+
+static Ast _anchored_sequence(
+  Compiler c, Ast node, Ast tail, Var parent) {
+  match (Ast.without_origin(node))
+    case %(seq *items): return _splice_items(c, items, parent).append(tail);
+  return cons(node, tail);
+}
+
+static List _splice_items(Compiler c, List items, Var parent) {
+  Array anchored = [];
+  foreach (List item in items) {
+    c.origins.push(%(generated $parent splice));
+    int generated = c.origins.len();
+    anchored.push(%(at $generated $item));
+  }
+  return anchored.list_free();
+}
+
+/* A function rule sees the bound and typed definition before its body
+   lowers. Rules keyed by its return type come before those keyed by none.
+   A definition the kernel or a shipped rule wrote is not source, so only
+   shipped rules see it. */
+static List _function_rewrite(
+  Compiler c, List function, List return_type, int written) {
+  struct SlotWatch shipped = {.shipped = 1};
+  with (c.slot_watch = written ? &shipped : c.slot_watch) {
+    List replaced = c.lower_rewrite(
+      <function>, return_type, function, <unit>, NULL, NULL);
+    return replaced ? replaced : c.lower_rewrite(
+      <function>, <any>, function, <unit>, NULL, NULL);
+  }
+}
+
+static Ast _defer_node(Compiler c, Ast ast) {
+  match (ast)
+    case %(defer ?finalizer):
+      return c.lower_defer_region(%(block), finalizer);
   return ast;
 }

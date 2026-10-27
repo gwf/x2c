@@ -10,6 +10,24 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+int main(int argc, char **argv) {
+  if (argc != 2) return 2;
+  int runs = atoi(argv[1]);
+  List program = %(
+    (assign a (number 7))
+    (assign b (binary * (variable a) (number 6)))
+    (binary + (variable b)
+      (binary / (number 100) (number 5))));
+  uint64_t checksum = 0;
+  for (int run = 0; run < runs; run++) {
+    int variables[2] = {0};
+    foreach(List expression in program)
+      checksum += _eval(expression, variables);
+  }
+  printf("%llu\n", (unsigned long long) checksum);
+  return 0;
+}
+
 static int _eval(List ast, int *variables) {
   match (ast) {
     case %(number ?value): return value.int();
@@ -26,23 +44,5 @@ static int _eval(List ast, int *variables) {
       return a / b;
     }
   }
-  return 0;
-}
-
-int main(int argc, char **argv) {
-  if (argc != 2) return 2;
-  int runs = atoi(argv[1]);
-  List program = %(
-    (assign a (number 7))
-    (assign b (binary * (variable a) (number 6)))
-    (binary + (variable b)
-      (binary / (number 100) (number 5))));
-  uint64_t checksum = 0;
-  for (int run = 0; run < runs; run++) {
-    int variables[2] = {0};
-    foreach(List expression in program)
-      checksum += _eval(expression, variables);
-  }
-  printf("%llu\n", (unsigned long long) checksum);
   return 0;
 }

@@ -2,16 +2,57 @@
 
 // writing tokens
 
-/* Emission writes each C token to `e.out` in order, so no token List is
-   built: a form writes its text and emits its children where they stand. */
-module void _put(Emitter &e, Var token) { e.out.push(token); }
-
-/* Writes `tokens`, a token List that may nest, in order. */
-module void _put_all(Emitter &e, List tokens) {
-  foreach (Var token in tokens)
-    if (token is <list>) _put_all(e, token);
-    else e.out.push(token);
+/** Emits a bound, typed, transform-normalized AST sequence as flat C tokens.
+    Source mapping adds `src-at`/ID pairs consumed by the formatter.
+    The compiler must own the AST's binding facts and origins, and continue the
+    translation session's shared generated-name state. This operation does not
+    bind, transform, or choose header and source placement; generation supplies
+    any added scaffolding in the same normalized grammar. `cache_bindings`
+    maps semantic cache ids to generated slots; NULL keeps raw ids for
+    inspection. It preserves the top-level AST sequence and advances
+    generated-name counters as it allocates temporaries. The returned
+    `Array` holds `String`s owned by pools active during emission; promote
+    them before releasing those pools if the tokens must survive.
+*/
+Array Compiler.emit(Compiler c, List ast, Map cache_bindings) {
+  Emitter e = {
+    .c = c, .origin = 0, .native_macros = [], .out = [],
+    .cache_bindings = cache_bindings};
+  _emit(e, ast);
+  Array before = [], after = [];
+  if (e.static_support)
+    before.push("#include \"exception.h\"\n#include <string.h>");
+  foreach (List entry in e.native_macros.list_free()) {
+    (String name, String definition) = entry;
+    before.push(definition);
+    after.push(%"#undef $name");
+  }
+  return before.concat(e.out).concat(after);
 }
+
+/** Renders the placed code `code`, whose watched source parts the
+    transform lowered into the nodes `held` records, as a run of C text and
+    nodes: each held node and each cached value stays a node, which later
+    passes and emission handle, and the rest becomes the text emission would
+    print.
+*/
+List Compiler.render_placed(Compiler c, List code, Map held) {
+  Emitter e = {.c = c, .native_macros = [], .out = [], .held = held};
+  _emit(e, code);
+  Array runs = [], text = [];
+  foreach (Var token in e.out) {
+    if (token is <list>) {
+      if (text.len()) runs.push(c.code_text(text));
+      text = [];
+      runs.push(token);
+    }
+    else text.push(token);
+  }
+  if (text.len()) runs.push(c.code_text(text));
+  return runs.list_free();
+}
+
+// ordered traversal and C token assembly
 
 /* Writes `parts` in order: each String or number as a token, and each node
    emitted in place; a Symbol heads a node of its own. */
@@ -88,74 +129,11 @@ static void _conditional(Emitter &e, Var condition, Var yes, Var no) {
   _operand(e, no, EMIT_CONDITIONAL);
 }
 
-static void _cast(Emitter &e, Type type, Var expression) {
-  _put(e, "(");
-  _put_all(e, _semantic_type(e, type));
-  _put(e, ")");
-  _operand(e, expression, EMIT_UNARY);
-}
-
 static void _index(Emitter &e, Var array, Var index) {
   _operand(e, array, EMIT_POSTFIX);
   _put(e, "[");
   _node(e, index);
   _put(e, "]");
-}
-
-static void _cache(Emitter &e, Var id) {
-  if (e.held) e.out.push(%(cache $id));
-  else if (e.cache_bindings) _ident(e, e.cache_bindings[id]);
-  else _put(e, %"_$id");
-}
-
-/** Emits a bound, typed, transform-normalized AST sequence as flat C tokens.
-    Source mapping adds `src-at`/ID pairs consumed by the formatter.
-    The compiler must own the AST's binding facts and origins, and continue the
-    translation session's shared generated-name state. This operation does not
-    bind, transform, or choose header and source placement; generation supplies
-    any added scaffolding in the same normalized grammar. `cache_bindings`
-    maps semantic cache ids to generated slots; NULL keeps raw ids for
-    inspection. It preserves the top-level AST sequence and advances
-    generated-name counters as it allocates temporaries. The returned
-    `Array` holds `String`s owned by pools active during emission; promote
-    them before releasing those pools if the tokens must survive.
-*/
-Array Compiler.emit(Compiler c, List ast, Map cache_bindings) {
-  Emitter e = {
-    .c = c, .origin = 0, .native_macros = [], .out = [],
-    .cache_bindings = cache_bindings};
-  _emit(e, ast);
-  Array before = [], after = [];
-  if (e.static_support)
-    before.push("#include \"exception.h\"\n#include <string.h>");
-  foreach (List entry in e.native_macros.list_free()) {
-    (String name, String definition) = entry;
-    before.push(definition);
-    after.push(%"#undef $name");
-  }
-  return before.concat(e.out).concat(after);
-}
-
-/** Renders the placed code `code`, whose watched source parts the
-    transform lowered into the nodes `held` records, as a run of C text and
-    nodes: each held node and each cached value stays a node, which later
-    passes and emission handle, and the rest becomes the text emission would
-    print.
-*/
-List Compiler.render_placed(Compiler c, List code, Map held) {
-  Emitter e = {.c = c, .native_macros = [], .out = [], .held = held};
-  _emit(e, code);
-  Array runs = [], text = [];
-  foreach (Var token in e.out) {
-    if (token is <list>) {
-      if (text.len()) runs.push(c.code_text(text));
-      text = [];
-      runs.push(token);
-    }
-    else text.push(token);
-  }
-  if (text.len()) runs.push(c.code_text(text));
-  return runs.list_free();
 }
 
 /* Emission visits sibling nodes from left to right because generated names
@@ -406,6 +384,32 @@ static List _raise(Emitter &e, Ast ast, Var cause, List arguments) {
   "}");
 }
 
+static void _cast(Emitter &e, Type type, Var expression) {
+  _put(e, "(");
+  _put_all(e, _semantic_type(e, type));
+  _put(e, ")");
+  _operand(e, expression, EMIT_UNARY);
+}
+
+/* Writes `tokens`, a token List that may nest, in order. */
+module void _put_all(Emitter &e, List tokens) {
+  foreach (Var token in tokens)
+    if (token is <list>) _put_all(e, token);
+    else e.out.push(token);
+}
+
+static void _cache(Emitter &e, Var id) {
+  if (e.held) e.out.push(%(cache $id));
+  else if (e.cache_bindings) _ident(e, e.cache_bindings[id]);
+  else _put(e, %"_$id");
+}
+
+
+
+/* Emission writes each C token to `e.out` in order, so no token List is
+   built: a form writes its text and emits its children where they stand. */
+module void _put(Emitter &e, Var token) { e.out.push(token); }
+
 static String _c_string_literal(String value) {
   if (!value) value = "<unknown>";
   return %"\"$(value.escape())\"";
@@ -421,9 +425,6 @@ static List _preproc(Emitter &e, List ast) {
   return $(out);
 }
 
-// Wrap declarators in parentheses when pointer precedence requires it.
-module List _parens(List decl) => %("(" @decl ")");
-
 module List _commas(List items) {
   if (!items.cdr()) return items;
   Array result = [];
@@ -435,3 +436,6 @@ module List _commas(List items) {
   }
   return result.list_free();
 }
+
+// Wrap declarators in parentheses when pointer precedence requires it.
+module List _parens(List decl) => %("(" @decl ")");

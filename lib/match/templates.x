@@ -40,23 +40,6 @@ int MatchPlan.try_match_replace(
   return 1;
 }
 
-/* An absent binding leaves `binder` unchanged. */
-static Var _value(ReplacementSource &source, Var binder) {
-  if (source.captures)
-    return _captured(source.layout, source.captures, binder);
-  Var bound = source.bindings.assoc(binder);
-  return bound is void ? binder : bound;
-}
-
-/* The value captured for `binder`, or the binder when the match left it
-   unbound. */
-static Var _captured(
-  MatchCaptureLayout layout, MatchCaptureBuffer *captures, Var binder) {
-  int index = layout.index(binder);
-  if (index < 0 || !_capture_bit(captures.present, index)) return binder;
-  return captures.values[index];
-}
-
 /** Replaces named binders in `template` according to `bindings`.
     A sequence binder in list-head position splices its captured `List`;
     `!quote` removes itself and leaves its operand literal. Missing binders are
@@ -100,4 +83,21 @@ module Var _replace(Var input, ReplacementSource &source) {
     else tail = $(head, @tail);
   }
   return tail;
+}
+
+/* An absent binding leaves `binder` unchanged. */
+static Var _value(ReplacementSource &source, Var binder) {
+  if (source.captures)
+    return _captured(source.layout, source.captures, binder);
+  Var bound = source.bindings.assoc(binder);
+  return bound is void ? binder : bound;
+}
+
+/* The value captured for `binder`, or the binder when the match left it
+   unbound. */
+static Var _captured(
+  MatchCaptureLayout layout, MatchCaptureBuffer *captures, Var binder) {
+  int index = layout.index(binder);
+  if (index < 0 || !_capture_bit(captures.present, index)) return binder;
+  return captures.values[index];
 }

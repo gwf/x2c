@@ -34,7 +34,7 @@ Opens lexical capture resolution while a lambda body is parsed or bound.
 contains canonical capture rows supplied by constructed syntax. Evolving
 rows live in semantic binding facts so macro transactions restore them.
 
-Source: `src/lambdas.x:448`
+Source: `src/lambdas.x:225`
 
 <a id="Compiler.bind_lambda_expression"></a>
 #### Compiler.bind_lambda_expression
@@ -45,7 +45,7 @@ Binds a constructed lambda through the lexical capture operations used by
 source literals. Parameter declarations keep their existing declarators;
 supplied canonical capture rows retain their value or reference mode.
 
-Source: `src/lambdas.x:327`
+Source: `src/lambdas.x:165`
 
 <a id="Compiler.capture_lambda_identifier"></a>
 #### Compiler.capture_lambda_identifier
@@ -57,7 +57,7 @@ Fresh captured bindings keep sibling snapshots independent of shared-cell
 rewriting. Reference captures preserve qualifiers; snapshots of reference
 parameters copy their current referents.
 
-Source: `src/lambdas.x:478`
+Source: `src/lambdas.x:255`
 
 <a id="Compiler.end_lambda_captures"></a>
 #### Compiler.end_lambda_captures
@@ -66,7 +66,7 @@ Source: `src/lambdas.x:478`
 
 Finishes the active lambda's captures in first-use order.
 
-Source: `src/lambdas.x:457`
+Source: `src/lambdas.x:234`
 
 <a id="Compiler.lambda_capture_required"></a>
 #### Compiler.lambda_capture_required
@@ -75,7 +75,7 @@ Source: `src/lambdas.x:457`
 
 Reports whether the active lambda still needs to capture a binding.
 
-Source: `src/lambdas.x:466`
+Source: `src/lambdas.x:243`
 
 <a id="Compiler.lambda_param_types"></a>
 #### Compiler.lambda_param_types
@@ -85,7 +85,7 @@ Source: `src/lambdas.x:466`
 The parameter types of a lambda's function signature, keeping typed
 declarators; a bare parameter is a `Var`.
 
-Source: `src/lambdas.x:286`
+Source: `src/lambdas.x:196`
 
 <a id="Compiler.lift_lambda_types"></a>
 #### Compiler.lift_lambda_types
@@ -96,7 +96,7 @@ Moves a function's local type definitions reached by a lambda before
 that function, before cells and functions lower. Their semantic tags
 stay the same; emitted names keep lexical scopes distinct.
 
-Source: `src/lambdas.x:25`
+Source: `src/lambdas.x:65`
 
 <a id="Compiler.parse_lambda_literal"></a>
 #### Compiler.parse_lambda_literal
@@ -109,7 +109,7 @@ active return type, and capture rows come from `semantic_binding_facts`.
 Capturing lambdas have type `Func`; noncapturing lambdas retain a native
 function type.
 
-Source: `src/lambdas.x:153`
+Source: `src/lambdas.x:129`
 
 <a id="Compiler.respell_captures"></a>
 #### Compiler.respell_captures
@@ -119,7 +119,7 @@ Source: `src/lambdas.x:153`
 Gives the captures of `binding` that the enclosing lambdas already
 recorded the C spelling `binding` emits under.
 
-Source: `src/lambdas.x:613`
+Source: `src/lambdas.x:269`
 
 ## Design notes
 

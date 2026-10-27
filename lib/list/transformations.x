@@ -79,6 +79,15 @@ int List.all(List lst, Func pred) {
   return lst.iter(&storage).all(pred);
 }
 
+/** Maps `fn` over aligned pairs from `a` and `b`.
+    A null callback returns `nil` without examining either `List`; otherwise
+    this has the length, order, ownership, and failures of `List.zip_with`.
+*/
+List List.map2(List a, List b, Func fn) {
+  if (!fn) return NULL;
+  return a.zip_with(b, fn);
+}
+
 /** Combines aligned values from two `List`s with `fn`.
     A null `fn` produces two-element pair `List`s. The shorter input determines
     the result length, and an empty input does not inspect the callback. A
@@ -93,15 +102,6 @@ List List.zip_with(List a, List b, Func fn) {
     else values.push($(left, right));
   }
   return values;
-}
-
-/** Maps `fn` over aligned pairs from `a` and `b`.
-    A null callback returns `nil` without examining either `List`; otherwise
-    this has the length, order, ownership, and failures of `List.zip_with`.
-*/
-List List.map2(List a, List b, Func fn) {
-  if (!fn) return NULL;
-  return a.zip_with(b, fn);
 }
 
 // reshaping
@@ -192,13 +192,6 @@ meta native Self List.flatten_all(Self lst) {
   return values;
 }
 
-static void _flatten_into(Array values, List lst) {
-  foreach (Var head in lst) {
-    if (head is <list>) _flatten_into(values, head);
-    else values.push(head);
-  }
-}
-
 /** Recursively substitutes non-`List` nodes in `tree` from `alist`.
     Each association is a `List` whose first value is the key and whose second
     value is the replacement. Unmatched leaves are shared; `List` structure is
@@ -209,6 +202,13 @@ static void _flatten_into(Array values, List lst) {
 meta native List List.sublis(List alist, List tree) {
   if (!tree) return NULL;
   return _sublis_node(alist, tree);
+}
+
+static void _flatten_into(Array values, List lst) {
+  foreach (Var head in lst) {
+    if (head is <list>) _flatten_into(values, head);
+    else values.push(head);
+  }
 }
 
 static Var _sublis_node(List alist, Var node) {

@@ -4,18 +4,6 @@ static typedef struct ScopeName {
   Scope scope, char *name, struct ScopeName *next;
 } *ScopeName;
 
-/** Returns the diagnostic name of `scope`, or NULL if it has none.
-    The string belongs to the allocator's name registry and stays valid until
-    the scope is destroyed; do not free it. A scope from `Scope.new`, and one
-    the runtime created implicitly for the first allocation into an empty
-    slot, both have no name.
-*/
-const char *Scope.name(Scope scope) {
-  _require_running();
-  ScopeName node = _find_name(scope);
-  return node ? node.name : NULL;
-}
-
 /* scope names
 
    Named scopes share one registry, guarded by the metadata mutex. The
@@ -27,51 +15,6 @@ static ScopeName scope_names;
 static pthread_mutex_t scope_metadata_mutex =
   (pthread_mutex_t) PTHREAD_MUTEX_INITIALIZER;
 
-module void _register_name(Scope scope, const char *name) {
-  if (!name) return;
-  size_t length = strlen(name);
-  ScopeName node = _raw_malloc(sizeof(struct ScopeName));
-  char *copy = _raw_malloc(length + 1);
-  memcpy(copy, name, length + 1);
-  node.scope = scope;
-  node.name = copy;
-  _metadata_lock();
-  node.next = scope_names;
-  scope_names = node;
-  _metadata_unlock();
-}
-
-static ScopeName _find_name(Scope scope) {
-  _metadata_lock();
-  ScopeName node = scope_names;
-  while (node && node.scope != scope) node = node.next;
-  _metadata_unlock();
-  return node;
-}
-
-module void _unregister_name(Scope scope) {
-  _metadata_lock();
-  ScopeName *link = &scope_names;
-  while (*link && (*link).scope != scope) link = &(*link).next;
-  ScopeName node = *link;
-  if (node) {
-    *link = node.next;
-    _raw_free(node.name);
-    _raw_free(node);
-  }
-  _metadata_unlock();
-}
-
-static void _metadata_lock(void) {
-  if (pthread_mutex_lock(&scope_metadata_mutex))
-    _raw_fatal("could not lock metadata");
-}
-
-static void _metadata_unlock(void) {
-  if (pthread_mutex_unlock(&scope_metadata_mutex))
-    _raw_fatal("could not unlock metadata");
-}
-
 // statistics
 
 static atomic_size_t scope_allocation_calls, scope_reallocation_calls;
@@ -79,6 +22,18 @@ static atomic_size_t scope_free_calls;
 static atomic_size_t scope_requested_bytes, scope_largest_request;
 static atomic_size_t scope_live_requested_bytes;
 static atomic_size_t scope_peak_live_requested_bytes;
+
+/** Returns the diagnostic name of `scope`, or NULL if it has none.
+    The string belongs to the allocator's name registry and stays valid until
+    the scope is destroyed; do not free it. A scope from `Scope.new`, and one
+    the runtime created implicitly for the first allocation into an empty
+    slot, both have no name.
+*/
+const char *Scope.name(Scope scope) {
+  _require_running();
+  ScopeName node = _find_name(scope);
+  return node ? node.name : NULL;
+}
 
 /** Returns a snapshot of the allocator's counters.
     `live_allocations` and `live_scopes` are derived from the call counts, so
@@ -123,6 +78,51 @@ ScopeStats Scope.stats(void) {
   stats.live_allocations = stats.allocation_calls - stats.free_calls;
   stats.live_scopes = stats.scope_creations - stats.scope_destructions;
   return stats;
+}
+
+static ScopeName _find_name(Scope scope) {
+  _metadata_lock();
+  ScopeName node = scope_names;
+  while (node && node.scope != scope) node = node.next;
+  _metadata_unlock();
+  return node;
+}
+
+static void _metadata_lock(void) {
+  if (pthread_mutex_lock(&scope_metadata_mutex))
+    _raw_fatal("could not lock metadata");
+}
+
+static void _metadata_unlock(void) {
+  if (pthread_mutex_unlock(&scope_metadata_mutex))
+    _raw_fatal("could not unlock metadata");
+}
+
+module void _register_name(Scope scope, const char *name) {
+  if (!name) return;
+  size_t length = strlen(name);
+  ScopeName node = _raw_malloc(sizeof(struct ScopeName));
+  char *copy = _raw_malloc(length + 1);
+  memcpy(copy, name, length + 1);
+  node.scope = scope;
+  node.name = copy;
+  _metadata_lock();
+  node.next = scope_names;
+  scope_names = node;
+  _metadata_unlock();
+}
+
+module void _unregister_name(Scope scope) {
+  _metadata_lock();
+  ScopeName *link = &scope_names;
+  while (*link && (*link).scope != scope) link = &(*link).next;
+  ScopeName node = *link;
+  if (node) {
+    *link = node.next;
+    _raw_free(node.name);
+    _raw_free(node);
+  }
+  _metadata_unlock();
 }
 
 module void _record_allocation(size_t size) {

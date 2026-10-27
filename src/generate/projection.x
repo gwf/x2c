@@ -93,59 +93,6 @@ static void _add(Partition &p, Ast node) {
   }
 }
 
-/* A public node that names a static declaration could not compile in the
-   header, so it stays in the source, and what it declares stays there as
-   if it were static. */
-static void _publish_node(Partition &p, List node) {
-  if (!_names_static(node, p.statics)) {
-    p.header.push(node);
-    return;
-  }
-  _add_declared(node, p.statics);
-  _keep(p);
-}
-
-static int _names_static(List node, Map statics) {
-  if (!statics.len()) return 0;
-  List item;
-  $ast.walk(node, item) {
-    match (item) case %(binding ? ?): {
-      if (item in statics) return 1;
-      continue;
-    }
-  }
-  return 0;
-}
-
-/* Adds to `statics` each binding `node` declares: each one it holds other
-   than through an `ident` reference. */
-static void _add_declared(List node, Map statics) {
-  List item;
-  $ast.walk(node, item) {
-    match (item) {
-      case %(ident *): continue;
-      case %(binding ? ?): {
-        statics[item] = 1;
-        continue;
-      }
-    }
-  }
-}
-
-/* Records the objects or function a static declaration declares. */
-static void _add_statics(Partition &p, List declarators) {
-  foreach (List declarator in declarators) {
-    List binding = _declaration_binding(declarator);
-    if (binding) p.statics[binding] = 1;
-  }
-}
-
-/* An item the source keeps fills each group open around it. */
-static void _keep(Partition &p) {
-  p.source_started = 1;
-  foreach (Var group in p.open) p.source_groups[group] = 1;
-}
-
 /* Settle pending includes and conditional groups in the public projection.
    A marker left after promotion leaves its include to the source. */
 static List _finish(Partition &p) {
@@ -203,41 +150,6 @@ static List _without_static_type(List node) {
 static List _without_static(List type) =>
   type.filter(%!(specifier) => specifier != <static>);
 
-/* A late include declaring `names` waits as a `pending` marker in the
-   header until the whole unit has been partitioned. It fills the source
-   groups open around it. A promoted include fills the same groups in the
-   header, which then keeps them, so this changes no header placement. */
-static void _hold(Partition &p, List names, List node) {
-  p.header.push(%(pending $(p.pending.len())));
-  p.pending.push($(names, node));
-  foreach (Var group in p.open) p.source_groups[group] = 1;
-}
-
-static List _typedef_names(List node) {
-  match (node)
-    case %(typedef ? (bindings *declarators)): {
-      Array names = [];
-      foreach (List declarator in declarators)
-        match (declarator) {
-          case %(bind (binding ? ?name) ?): names.push(name);
-          case %(bind (?name) ?): names.push(name);
-        }
-      return names.list_free();
-    }
-  return NULL;
-}
-
-static List _declared_type_names(List node) {
-  List names = _typedef_names(node);
-  if (names) return names;
-  match (node) case %(declare ?type ?): {
-    List base = type.list().type().base_type();
-    match (base) case %((!or ?kind struct union enum) ?name (*)):
-      return %(($kind $name));
-  }
-  return NULL;
-}
-
 /* The markers are decided from last to first, so a promoted typedef counts
    as a later header item for the markers before it. */
 static void _promote_typedefs(Array header, Array pending) {
@@ -272,6 +184,17 @@ static int _declared_before(HeaderNeeds &n, int i, Var name) {
   return n.declared.try_get(name, first) && first.int() < i;
 }
 
+static List _declared_type_names(List node) {
+  List names = _typedef_names(node);
+  if (names) return names;
+  match (node) case %(declare ?type ?): {
+    List base = type.list().type().base_type();
+    match (base) case %((!or ?kind struct union enum) ?name (*)):
+      return %(($kind $name));
+  }
+  return NULL;
+}
+
 /* Every item after `i` is decided, so each is read once, as it stands. */
 static int _spelled_after(HeaderNeeds &n, int i, Var name) {
   if ((void *) n.spelled == 0) n.spelled = {};
@@ -282,31 +205,7 @@ static int _spelled_after(HeaderNeeds &n, int i, Var name) {
   return name in n.spelled;
 }
 
-/* Adds each typedef name `node` spells anywhere to `names`, as a
-   single-string type atom such as `("Point")`, alone or after qualifiers
-   and storage, as in `(extern "Point")`. */
-module void _spelled_types(List node, Map names) {
-  List item;
-  $ast.walk(node, item) {
-    List base = item;
-    while (base.car() is <symbol> &&
-           (base.car().symbol().is_type_qualifier() ||
-            base.car().symbol().is_storage_class()))
-      base = base.cdr();
-    if (base.car() is <string> && !base.cdr()) names[base.car()] = 1;
-    match (base)
-      case %((!or ?kind struct union enum) ?name *):
-        names[$(kind, name)] = 1;
-  }
-}
-
 // functions
-
-static List _with_attributes(Map facts, List type, Var binding) {
-  Var attributes;
-  if (!facts.try_get(%(attributes $binding), attributes)) return type;
-  return %(@(attributes.list()) @type);
-}
 
 /* A static definition stays in the source. A public one publishes its
    prototype, or its whole body when inline, after forward declarations of
@@ -324,6 +223,14 @@ static void _add_function(
   _forward_tags(p, $(type, declarator));
   p.header.push(_header_function(type, declarator, body));
   if (!type.is_inline()) _keep(p);
+}
+
+
+
+static List _with_attributes(Map facts, List type, Var binding) {
+  Var attributes;
+  if (!facts.try_get(%(attributes $binding), attributes)) return type;
+  return %(@(attributes.list()) @type);
 }
 
 /* C sees only the prototype of a helper that always raises, so a caller
@@ -401,6 +308,14 @@ static void _add_declaration(
     _publish_node(p, _header_declaration(decl, type, bindings));
 }
 
+/* Records the objects or function a static declaration declares. */
+static void _add_statics(Partition &p, List declarators) {
+  foreach (List declarator in declarators) {
+    List binding = _declaration_binding(declarator);
+    if (binding) p.statics[binding] = 1;
+  }
+}
+
 /* A positioned prototype remains visible to symbol collection, but the
    completed definition is what reaches generated C and H output. */
 static int _completed_prototype(Compiler c, List binding) {
@@ -433,10 +348,6 @@ static String _body_tag(Type type) {
   return NULL;
 }
 
-/* `type` with its tag body `core` replaced by the bare tag `name`. */
-static List _tag_only(Type type, Type core, Var name) =>
-  type.list()[:type.len() - core.len()].append($(core.car(), name));
-
 /* A public file-scope object has one definition, in the source, and an
    `extern` declaration in the header. Defining it in the header would give
    every including unit its own copy, and a runtime initializer there is not
@@ -449,6 +360,45 @@ static int _place_object(Partition &p, List decl, Type type, List bindings) {
   return 1;
 }
 
+/* A public node that names a static declaration could not compile in the
+   header, so it stays in the source, and what it declares stays there as
+   if it were static. */
+static void _publish_node(Partition &p, List node) {
+  if (!_names_static(node, p.statics)) {
+    p.header.push(node);
+    return;
+  }
+  _add_declared(node, p.statics);
+  _keep(p);
+}
+
+static int _names_static(List node, Map statics) {
+  if (!statics.len()) return 0;
+  List item;
+  $ast.walk(node, item) {
+    match (item) case %(binding ? ?): {
+      if (item in statics) return 1;
+      continue;
+    }
+  }
+  return 0;
+}
+
+/* Adds to `statics` each binding `node` declares: each one it holds other
+   than through an `ident` reference. */
+static void _add_declared(List node, Map statics) {
+  List item;
+  $ast.walk(node, item) {
+    match (item) {
+      case %(ident *): continue;
+      case %(binding ? ?): {
+        statics[item] = 1;
+        continue;
+      }
+    }
+  }
+}
+
 /* Both forms of public object use the qualifiers their C definition keeps. */
 static List _object_header(Partition &p, List decl, Type type, List bindings) {
   if (p.c.static_value_is_runtime(decl, NULL)) {
@@ -457,9 +407,6 @@ static List _object_header(Partition &p, List decl, Type type, List bindings) {
   }
   return _header_declaration(NULL, %(extern @type), bindings);
 }
-
-static List _without_const(List specifiers) =>
-  specifiers.filter(%!(specifier) => specifier != <const>);
 
 /* `bindings` with `const` removed from each const declarator whose
    initializer has to run. */
@@ -474,6 +421,9 @@ static List _runtime_without_const(Compiler c, List bindings) {
   }
   return %(bindings @(declarators.list_free()));
 }
+
+static List _without_const(List specifiers) =>
+  specifiers.filter(%!(specifier) => specifier != <const>);
 
 /* Objects and functions have linkage; a bare type declaration does not. */
 static int _declared_bindings(List bindings) {
@@ -558,6 +508,22 @@ static void _add_include(Partition &p, List node, String target, int angle) {
   List names = p.c.include_typedef_names(target, angle, p.included.copy());
   if (names) _hold(p, names, node);
   else _keep(p);
+}
+
+/* An item the source keeps fills each group open around it. */
+static void _keep(Partition &p) {
+  p.source_started = 1;
+  foreach (Var group in p.open) p.source_groups[group] = 1;
+}
+
+/* A late include declaring `names` waits as a `pending` marker in the
+   header until the whole unit has been partitioned. It fills the source
+   groups open around it. A promoted include fills the same groups in the
+   header, which then keeps them, so this changes no header placement. */
+static void _hold(Partition &p, List names, List node) {
+  p.header.push(%(pending $(p.pending.len())));
+  p.pending.push($(names, node));
+  foreach (Var group in p.open) p.source_groups[group] = 1;
 }
 
 static int _is_pragma_once(String content) =>
@@ -655,6 +621,10 @@ static List _typedef_forward(Type type, List bindings) {
   return NULL;
 }
 
+/* `type` with its tag body `core` replaced by the bare tag `name`. */
+static List _tag_only(Type type, Type core, Var name) =>
+  type.list()[:type.len() - core.len()].append($(core.car(), name));
+
 /* A typedef whose base spells a candidate alias not yet declared follows
    that alias's forward, in candidate order. `first` maps each alias to its
    first candidate; a later one for the same alias always finds it
@@ -678,6 +648,38 @@ static void _add_forwards(
   }
 }
 
+/* Adds each typedef name `node` spells anywhere to `names`, as a
+   single-string type atom such as `("Point")`, alone or after qualifiers
+   and storage, as in `(extern "Point")`. */
+module void _spelled_types(List node, Map names) {
+  List item;
+  $ast.walk(node, item) {
+    List base = item;
+    while (base.car() is <symbol> &&
+           (base.car().symbol().is_type_qualifier() ||
+            base.car().symbol().is_storage_class()))
+      base = base.cdr();
+    if (base.car() is <string> && !base.cdr()) names[base.car()] = 1;
+    match (base)
+      case %((!or ?kind struct union enum) ?name *):
+        names[$(kind, name)] = 1;
+  }
+}
+
 static void _add_names(Map available, List node) {
   foreach (String name in _typedef_names(node)) available[name] = 1;
+}
+
+static List _typedef_names(List node) {
+  match (node)
+    case %(typedef ? (bindings *declarators)): {
+      Array names = [];
+      foreach (List declarator in declarators)
+        match (declarator) {
+          case %(bind (binding ? ?name) ?): names.push(name);
+          case %(bind (?name) ?): names.push(name);
+        }
+      return names.list_free();
+    }
+  return NULL;
 }

@@ -14,17 +14,12 @@ struct MetaBindings {
   Map functions;
 };
 
-/** Creates an empty table in Scopes of its own, so creating it under a
-    narrower Context leaves nothing there.
-*/
-MetaBindings MetaBindings.new(void) {
-  Scope scope = Scope.new_named("meta bindings");
-  MetaBindings b = Scope.calloc_in(&scope, 1, sizeof(struct MetaBindings));
-  b.scope = scope;
-  b.values = Scope.new_named("meta values");
-  auto (&b.scope) b.functions = {};
-  return b;
-}
+/* One declared native function while it binds. An iterator operation's
+   `target` is `NAME_into`, and `suppliers` lists the selected modules that
+   define the target. */
+static typedef struct NativeBinding {
+  Compiler c, String name, target, List signature, suppliers, Token marker;
+} NativeBinding;
 
 /** Destroys the table's values, then the table. */
 void MetaBindings.destroy(MetaBindings b) {
@@ -33,35 +28,11 @@ void MetaBindings.destroy(MetaBindings b) {
   Scope.destroy(b.scope);
 }
 
-/** Writes the binding of `name` to `out` and returns 1, or returns 0. */
-int MetaBindings.try_get(MetaBindings b, String name, Var &out) =>
-  b.functions.try_get(Atom.intern(name), out);
-
-/** Binds `name` to `function`, which the table borrows. */
-void MetaBindings.set(MetaBindings b, String name, Var function) {
-  auto (&b.scope) b.functions[Atom.intern(name)] = function;
-}
-
 /** Binds `name` to `function` and moves its storage into the table. */
 void MetaBindings.bind(MetaBindings b, String name, Func function) {
   function.move(&b.scope);
   b.set(name, function);
 }
-
-/** Returns the unit's binding table, creating it on first use. */
-MetaBindings Compiler.bindings(Compiler c) {
-  if (!c.meta_bindings) c.meta_bindings = MetaBindings.new();
-  return c.meta_bindings;
-}
-
-/** Writes the callable compile-time code reaches as `name` to `out`: the
-    unit's binding, or else a built-in algorithm or one of the compiler's
-    own operations. Returns whether there is one.
-*/
-int Compiler.meta_binding(Compiler c, String name, Var &out) =>
-  (c.meta_bindings && c.meta_bindings.try_get(name, out)) ||
-  Compiler.builtin_module().try_get(name, out) ||
-  Compiler.compiler_targets().try_get(name, out);
 
 /* native meta functions
 
@@ -88,16 +59,86 @@ void Compiler.record_native_meta_effect(
     %(native-meta $name $(c.func_signature(type))));
 }
 
-module String _native_meta_name(
+/** Installs a prototype-only `meta` function from the compiler's trusted
+    native target registry. The declaration keeps its ordinary runtime form.
+*/
+void Compiler.install_native_meta_function(
   Compiler c, List declaration, Token marker) {
-  String name = NULL;
-  if (declaration ~= %(
-        declare ? (bindings (bind (binding ? ?(String spelling)) *))))
-    name = spelling;
-  if (!name)
-    $fail.meta_native_meta_name(c, marker);
-  return name;
+  Type type = declaration.type_from_ast().canonicalize();
+  String name = _native_meta_name(c, declaration, marker);
+  List signature = c.func_signature(type);
+  if (_bind_project_meta(c, name)) return;
+  c.native_meta[name] = signature;
+  _bind_native_meta(c, name, signature, marker);
 }
+
+/** Returns the selected file-backed native module that supplies `name`,
+    with its native `type`, or NULL for a linked or absent target.
+*/
+String Compiler.native_meta_module(Compiler c, String name, Type &type) {
+  if (!c.bind_native_meta(name)) return NULL;
+  List suppliers = _native_module_suppliers(name);
+  if (!suppliers) return NULL;
+  String path = suppliers.car();
+  if (!path.startswith("/")) return NULL;
+  Var target = ((Map) native_modules[path])[name];
+  Var bound;
+  if (!c.meta_binding(name, bound) || bound != target) return NULL;
+  type = ((Func) target.pointer()).signature();
+  return path;
+}
+
+/** Binds an included native `meta` function the first time compile-time
+    code calls `name`. Returns whether the unit now binds it. A
+    declaration-producing macro can call one during collection, before
+    the parse installs the advertisements, so the first lookup there
+    installs the ones visible so far.
+*/
+int Compiler.bind_native_meta(Compiler c, String name) {
+  if (_bind_project_meta(c, name)) return 1;
+  Var signature, bound;
+  if (!c.native_meta.len())
+    c.install_native_meta_effects(c.sym.unit_symbols());
+  if (!c.native_meta.try_get(name, signature)) return 0;
+  _bind_native_meta(c, name, signature, NULL);
+  return c.meta_binding(name, bound);
+}
+
+/** Binds `name` to `function`, which the table borrows. */
+void MetaBindings.set(MetaBindings b, String name, Var function) {
+  auto (&b.scope) b.functions[Atom.intern(name)] = function;
+}
+
+/** Returns the unit's binding table, creating it on first use. */
+MetaBindings Compiler.bindings(Compiler c) {
+  if (!c.meta_bindings) c.meta_bindings = MetaBindings.new();
+  return c.meta_bindings;
+}
+
+/** Creates an empty table in Scopes of its own, so creating it under a
+    narrower Context leaves nothing there.
+*/
+MetaBindings MetaBindings.new(void) {
+  Scope scope = Scope.new_named("meta bindings");
+  MetaBindings b = Scope.calloc_in(&scope, 1, sizeof(struct MetaBindings));
+  b.scope = scope;
+  b.values = Scope.new_named("meta values");
+  auto (&b.scope) b.functions = {};
+  return b;
+}
+
+/** Writes the callable compile-time code reaches as `name` to `out`: the
+    unit's binding, or else a built-in algorithm or one of the compiler's
+    own operations. Returns whether there is one.
+*/
+int Compiler.meta_binding(Compiler c, String name, Var &out) =>
+  (c.meta_bindings && c.meta_bindings.try_get(name, out)) ||
+  Compiler.builtin_module().try_get(name, out) ||
+  Compiler.compiler_targets().try_get(name, out);
+
+/** Writes the binding of `name` to `out` and returns 1, or returns 0. */
+int MetaBindings.try_get(MetaBindings b, String name, Var &out) =>
+  b.functions.try_get(Atom.intern(name), out);
 
 /** Records the native advertisements retained by included interfaces. Each
     binds on first use, so a unit with no compile-time code pays nothing.
@@ -119,41 +160,78 @@ void Compiler.install_native_meta_effects(Compiler c, Map globs) {
   }
 }
 
-/** Binds an included native `meta` function the first time compile-time
-    code calls `name`. Returns whether the unit now binds it. A
-    declaration-producing macro can call one during collection, before
-    the parse installs the advertisements, so the first lookup there
-    installs the ones visible so far.
+/** Answers whether the native target `function` matches the declared
+    `signature`. A declared `Func` parameter matches a target's `Var`
+    parameter, which takes the compile-time callable and adapts it. Aliases
+    of one native type match each other.
 */
-int Compiler.bind_native_meta(Compiler c, String name) {
-  if (_bind_project_meta(c, name)) return 1;
-  Var signature, bound;
-  if (!c.native_meta.len())
-    c.install_native_meta_effects(c.sym.unit_symbols());
-  if (!c.native_meta.try_get(name, signature)) return 0;
-  _bind_native_meta(c, name, signature, NULL);
-  return c.meta_binding(name, bound);
+int Compiler.native_meta_accepts(Compiler c, Var function, List signature) {
+  if (function is not <func>) return 0;
+  List target =
+    _native_signature_type(c, ((Func) function.pointer()).signature());
+  if (signature ~= %((func ?(List parameters)) *result)) {
+    if (target == _native_signature_type(c, signature)) return 1;
+    List boxed = parameters.search_replace(%("Func"), %("Var"));
+    return target == _native_signature_type(c, %((func $boxed) @result));
+  }
+  return 0;
 }
 
-/** Installs a prototype-only `meta` function from the compiler's trusted
-    native target registry. The declaration keeps its ordinary runtime form.
+/* native target inventory
+
+   The native functions interface rows advertise. The entry
+   `lib/lisp-targets/lisp-targets.x` generates its inventory from them. */
+
+/** Returns the declared native targets advertised by `meta` interface
+    rows, in the row form `lib/lisp-targets/lisp-targets.x` uses for its
+    inventory, or only those declared in the files `paths` names when it is
+    not empty. A target that takes a `Func` is left out unless `callbacks`
+    is nonzero. Sorting makes that inventory independent of Map order.
 */
-void Compiler.install_native_meta_function(
+List Compiler.native_meta_targets(List paths, int callbacks) {
+  Compiler c = Compiler.expanding();
+  if (!c) return %();
+  Map selected = {};
+  foreach (Var (key, value) in c.sym.base_symbols()) {
+    if (paths && !_declared_in(key, paths)) continue;
+    foreach (List row in _native_meta_rows(c, value)) {
+      (String name, List signature) = row;
+      if (!callbacks && _takes_callback(signature)) continue;
+      String into = %"$(name)_into";
+      selected[name] = Compiler.iterator_arity(signature) >= 0
+        ? %($name (as $into)) : $(name);
+    }
+  }
+  Array names = selected.keys();
+  List rows = %();
+  foreach (String name in names.sort()) rows = cons(selected[name], rows);
+  return rows.reverse();
+}
+
+/** Returns how many arguments a call of the iterator operation `signature`
+    passes when it omits its destination, or -1 for another signature. An
+    iterator operation takes its destination last, and its native target is
+    `NAME_into`.
+*/
+int Compiler.iterator_arity(List signature) {
+  if (signature ~= %((func ?(List parameters)) "Iter") &&
+      parameters && parameters.last() == %("Iter"))
+    return parameters.len() - 1;
+  return -1;
+}
+
+// native meta bindings
+
+module String _native_meta_name(
   Compiler c, List declaration, Token marker) {
-  Type type = declaration.type_from_ast().canonicalize();
-  String name = _native_meta_name(c, declaration, marker);
-  List signature = c.func_signature(type);
-  if (_bind_project_meta(c, name)) return;
-  c.native_meta[name] = signature;
-  _bind_native_meta(c, name, signature, marker);
+  String name = NULL;
+  if (declaration ~= %(
+        declare ? (bindings (bind (binding ? ?(String spelling)) *))))
+    name = spelling;
+  if (!name)
+    $fail.meta_native_meta_name(c, marker);
+  return name;
 }
-
-/* One declared native function while it binds. An iterator operation's
-   `target` is `NAME_into`, and `suppliers` lists the selected modules that
-   define the target. */
-static typedef struct NativeBinding {
-  Compiler c, String name, target, List signature, suppliers, Token marker;
-} NativeBinding;
 
 /* Binds a declared native function to the compiler's own linked target of
    the same name, or an iterator operation to its `_into` target, or else to
@@ -189,11 +267,6 @@ static int _linked(NativeBinding &n, Var &function) {
   return 1;
 }
 
-static Var _module_target(NativeBinding &n) {
-  String first = n.suppliers.car();
-  return ((Map) native_modules[first])[n.target];
-}
-
 /* A second module that defines the function is reported, and the
    declaration must match the target it binds. */
 static void _check(NativeBinding &n, Var function) {
@@ -205,29 +278,17 @@ static void _check(NativeBinding &n, Var function) {
     $fail.meta_native_meta_signature(c, n.marker, n);
 }
 
+static Var _module_target(NativeBinding &n) {
+  String first = n.suppliers.car();
+  return ((Map) native_modules[first])[n.target];
+}
+
 static void _meta_native_warn_duplicate(
   Compiler c, Token site, NativeBinding &n, List suppliers) {
   c.report_warning(
     <native>, "more than one native module defines this function",
     site, %("name: $(n.name)" "supplied by: $(suppliers.car())"
             "also defined by: $(", ".join(suppliers.cdr()))"));
-}
-
-/** Answers whether the native target `function` matches the declared
-    `signature`. A declared `Func` parameter matches a target's `Var`
-    parameter, which takes the compile-time callable and adapts it. Aliases
-    of one native type match each other.
-*/
-int Compiler.native_meta_accepts(Compiler c, Var function, List signature) {
-  if (function is not <func>) return 0;
-  List target =
-    _native_signature_type(c, ((Func) function.pointer()).signature());
-  if (signature ~= %((func ?(List parameters)) *result)) {
-    if (target == _native_signature_type(c, signature)) return 1;
-    List boxed = parameters.search_replace(%("Func"), %("Var"));
-    return target == _native_signature_type(c, %((func $boxed) @result));
-  }
-  return 0;
 }
 
 /* The native type a signature names: each parameter, reference target,
@@ -248,22 +309,6 @@ static List _native_parameter(Compiler c, Type parameter) {
     return cons(
       parameter.car(), c.sym.normalize_declared_type(parameter.cdr()));
   return c.sym.normalize_declared_type(parameter);
-}
-
-/** Returns the selected file-backed native module that supplies `name`,
-    with its native `type`, or NULL for a linked or absent target.
-*/
-String Compiler.native_meta_module(Compiler c, String name, Type &type) {
-  if (!c.bind_native_meta(name)) return NULL;
-  List suppliers = _native_module_suppliers(name);
-  if (!suppliers) return NULL;
-  String path = suppliers.car();
-  if (!path.startswith("/")) return NULL;
-  Var target = ((Map) native_modules[path])[name];
-  Var bound;
-  if (!c.meta_binding(name, bound) || bound != target) return NULL;
-  type = ((Func) target.pointer()).signature();
-  return path;
 }
 
 /* native lifetimes
@@ -334,37 +379,6 @@ static int _native_owned(Compiler c, List type) {
          c.protocol_members_for(type, %("Cleanup"));
 }
 
-/* native target inventory
-
-   The native functions interface rows advertise. The entry
-   `lib/lisp-targets/lisp-targets.x` generates its inventory from them. */
-
-/** Returns the declared native targets advertised by `meta` interface
-    rows, in the row form `lib/lisp-targets/lisp-targets.x` uses for its
-    inventory, or only those declared in the files `paths` names when it is
-    not empty. A target that takes a `Func` is left out unless `callbacks`
-    is nonzero. Sorting makes that inventory independent of Map order.
-*/
-List Compiler.native_meta_targets(List paths, int callbacks) {
-  Compiler c = Compiler.expanding();
-  if (!c) return %();
-  Map selected = {};
-  foreach (Var (key, value) in c.sym.base_symbols()) {
-    if (paths && !_declared_in(key, paths)) continue;
-    foreach (List row in _native_meta_rows(c, value)) {
-      (String name, List signature) = row;
-      if (!callbacks && _takes_callback(signature)) continue;
-      String into = %"$(name)_into";
-      selected[name] = Compiler.iterator_arity(signature) >= 0
-        ? %($name (as $into)) : $(name);
-    }
-  }
-  Array names = selected.keys();
-  List rows = %();
-  foreach (String name in names.sort()) rows = cons(selected[name], rows);
-  return rows.reverse();
-}
-
 /* Whether the symbol row under `key` was declared in one of the absolute
    source `paths`. */
 static int _declared_in(Var key, List paths) {
@@ -410,16 +424,4 @@ static int _takes_callback(List signature) {
   if (signature ~= %((func ?(List parameters)) *))
     return %("Func") in parameters;
   return 0;
-}
-
-/** Returns how many arguments a call of the iterator operation `signature`
-    passes when it omits its destination, or -1 for another signature. An
-    iterator operation takes its destination last, and its native target is
-    `NAME_into`.
-*/
-int Compiler.iterator_arity(List signature) {
-  if (signature ~= %((func ?(List parameters)) "Iter") &&
-      parameters && parameters.last() == %("Iter"))
-    return parameters.len() - 1;
-  return -1;
 }

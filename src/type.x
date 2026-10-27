@@ -15,6 +15,20 @@
 #include "grammar.x"
 #include "ast-rewrite.x"
 
+// var tags
+
+/* Only the leaf unit `src/type-ledger.x` imports the Var tag ledger, so it
+   defines these two tables' accessors and includes this unit. */
+// lint: allow src-forward-declaration FI-6: leaf ledger binding
+Map Type.builtin_var_tags(void);
+// lint: allow src-forward-declaration FI-6: leaf ledger binding
+Map Type.var_tag_rows(void);
+
+/* Source-declared rows are rebuilt for each translation unit because their
+   canonical Type keys and converter names may belong to that unit's pools;
+   end_unit drops the table before those pools are released. */
+static Map declared_typetags = NULL;
+
 /* types from declarations
 
    `_from_ast` converts any node inside a declaration AST. `context` is the
@@ -29,6 +43,145 @@ Type List.type_from_ast(List ast) {
   if (type ~= %((*))) return type.car();
   return type;
 }
+
+/* declarations from types
+
+   Synthesized compiler declarations go through here so pointer, array,
+   qualifier, and function-pointer precedence matches parsed source. */
+
+/** Returns the declaration specifiers `t` without the pointer, array, or
+    function modifiers an alias in them contributes, and sets `modifiers`
+    to those modifiers, for `Ast.append_modifiers` to give each declarator.
+    Storage and source specifier text, such as `("_Noreturn")`, stay on
+    the base.
+*/
+List Type.declaration_base(Type t, List &modifiers) {
+  Array storage = [], text = [], typed = [];
+  defer { storage.free(); text.free(); typed.free(); }
+  foreach (Var item in t)
+    if (item is <list> && car(item) is <string>) text.push(item);
+    else typed.push(item);
+  List (base, mods) = typed.list().type().declared().parts();
+  modifiers = mods;
+  if (!mods) return t;
+  foreach (Var item in t)
+    if (item is <symbol> &&
+        (Symbol.is_storage_class(item) || Symbol.is_inline(item)))
+      storage.push(item);
+  return %( @(storage.list()) @(text.list()) @base );
+}
+
+/** Returns a complete `(declare ...)` AST for `type` and `binding`.
+    A `NULL` binding produces an abstract declaration.
+*/
+List Type.declaration_ast(Type type, List binding) {
+  List (base, mods) = type.parts();
+  return %(declare $base (bindings (bind $binding $mods)));
+}
+
+/** Returns a complete `(param ...)` AST for `type` and `binding`.
+    A `NULL` binding produces an unnamed parameter.
+*/
+List Type.parameter_ast(Type type, List binding) {
+  List (base, mods) = type.parts();
+  return %(param $base (bind $binding $mods));
+}
+
+
+
+/** Answers `Type.parts`, declared in `lib/meta.x`, through
+    `type_declaration_parts`, which a project's helper shares.
+*/
+List Type.parts(Type type) => type_declaration_parts(type);
+
+/** Returns the unit-local `Var` tag for `type`, falling back to its fixed
+    tag.
+*/
+Symbol Type.var_tag(Type type) {
+  if (!type) return 0;
+  if (declared_typetags != NULL) {
+    Var row = declared_typetags[type.canonicalize()];
+    if (row is not void) return row.list().car();
+  }
+  return type.fixed_var_tag();
+}
+
+/** Returns the unit-local forward `Var` converter for the canonical form of
+    `type`, or `NULL`.
+*/
+String Type.var_converter(Type type) {
+  if (declared_typetags == NULL || !type) return NULL;
+  Var row = declared_typetags[type.canonicalize()];
+  if (row is void) return NULL;
+  return row.list().cadr();
+}
+
+/** Reads the encoding row of `tag` into `top`, `mask`, and `bottom` and
+    reports whether one exists. A tag whose decoded form carries a validity
+    clause, an immediate width, or a user registration has no constant row.
+*/
+int Type.var_tag_row(
+  Symbol tag, unsigned long &top, unsigned long &mask, unsigned long &bottom) {
+  Var row = Type.var_tag_rows()[tag];
+  if (row is void) return 0;
+  List fields = row;
+  top = fields.car();
+  mask = fields.cadr();
+  bottom = fields.caddr();
+  return 1;
+}
+
+/** Registers one named type's unit-local `Var` tag and exact forward
+    converter. The first row for a canonical `Type` wins. A `NULL` type,
+    name, or converter, or no active unit, leaves the table unchanged.
+*/
+void Type.register_var_tag(Type t, String name, String converter) {
+  if (declared_typetags == NULL || !t || !name || !converter) return;
+  Type key = t.canonicalize();
+  Var row = declared_typetags[key];
+  if (row is void)
+    declared_typetags[key] = $(name.lower().symbol(), converter);
+}
+
+/** Replaces a registered type's inferred `Var` tag with `tag`, or with the
+    fixed tag of `representation` when `tag` is zero. Missing rows and
+    untagged representations leave the table unchanged.
+*/
+void Type.register_var_adoption(Type type, Type representation, Symbol tag) {
+  if (declared_typetags == NULL || !type) return;
+  Type key = type.canonicalize();
+  Var row = declared_typetags[key];
+  if (!tag && representation) tag = representation.fixed_var_tag();
+  if (row is void || !tag) return;
+  declared_typetags[key] = $(tag, row.list().cadr());
+}
+
+/** Returns the process-lifetime `Var` tag fixed for `type`, or zero. */
+Symbol Type.fixed_var_tag(Type type) {
+  if (!type) return 0;
+  Symbol scalar = type.scalar_tag();
+  if (scalar) return scalar;
+  Var vtag = Type.builtin_var_tags()[type.canonicalize()];
+  return vtag is <symbol> ? vtag : 0;
+}
+
+/** Starts an empty set of source-declared `Var` rows for one translation
+    unit. Returns the enclosing unit's rows for restoration at close.
+*/
+Map Type.begin_unit(void) {
+  Map enclosing = declared_typetags;
+  declared_typetags = {};
+  return enclosing;
+}
+
+/** Restores the enclosing unit's source-declared `Var` rows before the
+    current unit's `Scope` is released.
+*/
+void Type.end_unit(Map enclosing) {
+  declared_typetags = enclosing;
+}
+
+// x2c semantic types
 
 /* Each declaration form has its own case; any other node is a modifier
    chain or converts its children. A nested declaration, such as a struct
@@ -86,15 +239,6 @@ static List _from_modifiers(List node, List context) {
   return _from_items(node, context);
 }
 
-static int _modifier_symbol(Symbol prefix) =>
-  prefix == <*> || prefix == <&> || prefix == <opt-ref> || prefix == <^> ||
-  prefix.is_type_qualifier() || prefix.is_storage_class() ||
-  prefix.is_inline();
-
-static int _nested_declarator(Type nested) =>
-  nested.is_pointer() || nested.is_array() || nested.is_function() ||
-  nested.is_bitfield();
-
 /* Converts each List child of `items`; a node with no changed child returns
    itself. */
 static List _from_items(List items, List context) {
@@ -139,6 +283,15 @@ static List _from_aggregate(List node, Var head) {
   return $(head, node.cadr());
 }
 
+static int _modifier_symbol(Symbol prefix) =>
+  prefix == <*> || prefix == <&> || prefix == <opt-ref> || prefix == <^> ||
+  prefix.is_type_qualifier() || prefix.is_storage_class() ||
+  prefix.is_inline();
+
+static int _nested_declarator(Type nested) =>
+  nested.is_pointer() || nested.is_array() || nested.is_function() ||
+  nested.is_bitfield();
+
 /* Source specifier text, `("_Noreturn")` or `("__attribute__((unused))")`,
    is written before a declaration's type and is no part of it. A named type
    is spelled the same way and is the type's last item, so only an item
@@ -156,152 +309,3 @@ static List _without_leading_text(List items) {
 
 static int _is_source_text(Var item) =>
   item is <list> && car(item) is <string>;
-
-/* declarations from types
-
-   Synthesized compiler declarations go through here so pointer, array,
-   qualifier, and function-pointer precedence matches parsed source. */
-
-/** Answers `Type.parts`, declared in `lib/meta.x`, through
-    `type_declaration_parts`, which a project's helper shares.
-*/
-List Type.parts(Type type) => type_declaration_parts(type);
-
-/** Returns the declaration specifiers `t` without the pointer, array, or
-    function modifiers an alias in them contributes, and sets `modifiers`
-    to those modifiers, for `Ast.append_modifiers` to give each declarator.
-    Storage and source specifier text, such as `("_Noreturn")`, stay on
-    the base.
-*/
-List Type.declaration_base(Type t, List &modifiers) {
-  Array storage = [], text = [], typed = [];
-  defer { storage.free(); text.free(); typed.free(); }
-  foreach (Var item in t)
-    if (item is <list> && car(item) is <string>) text.push(item);
-    else typed.push(item);
-  List (base, mods) = typed.list().type().declared().parts();
-  modifiers = mods;
-  if (!mods) return t;
-  foreach (Var item in t)
-    if (item is <symbol> &&
-        (Symbol.is_storage_class(item) || Symbol.is_inline(item)))
-      storage.push(item);
-  return %( @(storage.list()) @(text.list()) @base );
-}
-
-/** Returns a complete `(declare ...)` AST for `type` and `binding`.
-    A `NULL` binding produces an abstract declaration.
-*/
-List Type.declaration_ast(Type type, List binding) {
-  List (base, mods) = type.parts();
-  return %(declare $base (bindings (bind $binding $mods)));
-}
-
-/** Returns a complete `(param ...)` AST for `type` and `binding`.
-    A `NULL` binding produces an unnamed parameter.
-*/
-List Type.parameter_ast(Type type, List binding) {
-  List (base, mods) = type.parts();
-  return %(param $base (bind $binding $mods));
-}
-
-// var tags
-
-/* Only the leaf unit `src/type-ledger.x` imports the Var tag ledger, so it
-   defines these two tables' accessors and includes this unit. */
-// lint: allow src-forward-declaration FI-6: leaf ledger binding
-Map Type.builtin_var_tags(void);
-// lint: allow src-forward-declaration FI-6: leaf ledger binding
-Map Type.var_tag_rows(void);
-
-/* Source-declared rows are rebuilt for each translation unit because their
-   canonical Type keys and converter names may belong to that unit's pools;
-   end_unit drops the table before those pools are released. */
-static Map declared_typetags = NULL;
-
-/** Returns the unit-local `Var` tag for `type`, falling back to its fixed
-    tag.
-*/
-Symbol Type.var_tag(Type type) {
-  if (!type) return 0;
-  if (declared_typetags != NULL) {
-    Var row = declared_typetags[type.canonicalize()];
-    if (row is not void) return row.list().car();
-  }
-  return type.fixed_var_tag();
-}
-
-/** Returns the process-lifetime `Var` tag fixed for `type`, or zero. */
-Symbol Type.fixed_var_tag(Type type) {
-  if (!type) return 0;
-  Symbol scalar = type.scalar_tag();
-  if (scalar) return scalar;
-  Var vtag = Type.builtin_var_tags()[type.canonicalize()];
-  return vtag is <symbol> ? vtag : 0;
-}
-
-/** Returns the unit-local forward `Var` converter for the canonical form of
-    `type`, or `NULL`.
-*/
-String Type.var_converter(Type type) {
-  if (declared_typetags == NULL || !type) return NULL;
-  Var row = declared_typetags[type.canonicalize()];
-  if (row is void) return NULL;
-  return row.list().cadr();
-}
-
-/** Reads the encoding row of `tag` into `top`, `mask`, and `bottom` and
-    reports whether one exists. A tag whose decoded form carries a validity
-    clause, an immediate width, or a user registration has no constant row.
-*/
-int Type.var_tag_row(
-  Symbol tag, unsigned long &top, unsigned long &mask, unsigned long &bottom) {
-  Var row = Type.var_tag_rows()[tag];
-  if (row is void) return 0;
-  List fields = row;
-  top = fields.car();
-  mask = fields.cadr();
-  bottom = fields.caddr();
-  return 1;
-}
-
-/** Registers one named type's unit-local `Var` tag and exact forward
-    converter. The first row for a canonical `Type` wins. A `NULL` type,
-    name, or converter, or no active unit, leaves the table unchanged.
-*/
-void Type.register_var_tag(Type t, String name, String converter) {
-  if (declared_typetags == NULL || !t || !name || !converter) return;
-  Type key = t.canonicalize();
-  Var row = declared_typetags[key];
-  if (row is void)
-    declared_typetags[key] = $(name.lower().symbol(), converter);
-}
-
-/** Replaces a registered type's inferred `Var` tag with `tag`, or with the
-    fixed tag of `representation` when `tag` is zero. Missing rows and
-    untagged representations leave the table unchanged.
-*/
-void Type.register_var_adoption(Type type, Type representation, Symbol tag) {
-  if (declared_typetags == NULL || !type) return;
-  Type key = type.canonicalize();
-  Var row = declared_typetags[key];
-  if (!tag && representation) tag = representation.fixed_var_tag();
-  if (row is void || !tag) return;
-  declared_typetags[key] = $(tag, row.list().cadr());
-}
-
-/** Starts an empty set of source-declared `Var` rows for one translation
-    unit. Returns the enclosing unit's rows for restoration at close.
-*/
-Map Type.begin_unit(void) {
-  Map enclosing = declared_typetags;
-  declared_typetags = {};
-  return enclosing;
-}
-
-/** Restores the enclosing unit's source-declared `Var` rows before the
-    current unit's `Scope` is released.
-*/
-void Type.end_unit(Map enclosing) {
-  declared_typetags = enclosing;
-}

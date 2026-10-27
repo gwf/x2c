@@ -7,62 +7,125 @@ static keyword loop $private.loop;
 
 // declarators
 
-module List _declarator_list(Compiler c, List type, List context, int row) {
-  Array bindings = auto [];
-  loop {
-    bindings.push(_declarator_init(c, type, context));
-    if ((row && _group_comma(c)) ||
-        !c.test(<,>))
-      return bindings;
-  }
-}
-
-/* Install each declaration binding before resolving its initializer so later
-   declarators and source-order dependency analysis share the same identity. */
-module List _declarator_init(Compiler c, List type, List context) {
-  // A computed declarator name still needs ordinary binding.
-  List slot = c.peek_macro_hole() || c.peek(0) == <@>
-    ? c.try_parse_macro_slot(<decl-row>) : NULL;
-  if (slot) {
-    if (c.test(<=>)) return %(op = $slot $(c.parse_assignment()));
-    return slot;
-  }
-  Token origin = c.token;
+/** Parses one declarator row for a macro argument without installing it.
+    Its enclosing declaration supplies the base type when expanded.
+*/
+List Compiler.parse_declarator_argument(Compiler c) {
+  List slot = c.try_parse_macro_slot(<decl-row>);
+  if (slot) return slot;
   List method = NULL;
   Token first = NULL, after = NULL;
-  List bind = _declarator(c, type, context, method, first, after);
-  int preserved_self = 0;
-  bind = _install_declarator(c, type, context, bind, method, preserved_self);
-  c.record_source_declaration(bind.cadr(), first, after);
-  int function_arrow = !c.in_proto && _x2c_at_function_arrow(c) &&
-    %(declare $type (bindings $bind)).type_from_ast().is_function();
-  if (!c.in_proto && !function_arrow && c.test(<=>))
-    return _initialized(c, type, bind, origin);
+  List bind = _declarator(c, NULL, NULL, method, first, after);
+  if (c.test(<=>)) return %(op = $bind $(c.parse_assignment()));
   return bind;
 }
 
-/* Collection skips an initializer. `init_tokens` records the declarator's
-   first token, not the token where expression parsing finishes. */
-static List _initialized(Compiler c, List type, List bind, Token origin) {
-  List binding = bind.cadr();
-  if (Ast.try_binding(binding, NULL, NULL)) {
-    Token tokens = c.tokenizer.tokens;
-    c.init_tokens[binding] = origin - tokens;
+// parameters
+
+/** Parses a nonempty comma-separated parameter `List` in source order.
+    The caller owns the parameter scope; the first non-comma delimiter remains
+    current.
+*/
+List Compiler.parse_parameter_list(Compiler c) {
+  Array parameters = auto [];
+  while (1) {
+    _x2c_complete_here(c, <type>, _type_keywords());
+    List parameter = c.try_parse_macro_slot(<param>);
+    if (!parameter) parameter = c.parse_parameter();
+    parameters.push(parameter);
+    if (c.peek(0) != <,>) break;
+    c.expect(<,>);
   }
-  if (c.shallow && !c.capture_unit) {
-    _x2c_skip_shallow_expression(c, 1);
-    return bind;
-  }
-  c.enter((Ancestor){ .what = <declarator>, .base = type, .node = bind });
-  int managed = c.test(<auto>);
-  List init = c.parse_assignment();
-  if (managed)
-    init = c.bind_syntax($!( $auto($init) ), <expression>, c.return_type);
-  c.ancestors.pop();
-  c.check_explicit_converter(
-    init, %(declare $type (bindings $bind)).type_from_ast(), 0);
-  return %( op = $bind $init );
+  return parameters;
 }
+
+/** Parses one parameter and returns `(param TYPE DECLARATOR)` or `(...)`.
+    Outside macro-template parsing, a named parameter is installed in the
+    current `Sym` scope. The following delimiter remains current.
+*/
+List Compiler.parse_parameter(Compiler c) {
+  if (c.test(<...>)) return %(...);
+  List qual = _type_qualifiers(c), spec = _type_specifier(c);
+  List type = %( @qual @spec );
+  int rest = (type == %("List") || type == %("Map")) && c.test(<@>);
+  if (rest) type = %(.... @type);
+  List method = NULL;
+  Token first = NULL, after = NULL;
+  List declarator = _declarator(c, type, NULL, method, first, after);
+  if (rest && (declarator.caddr() || c.peek(0) == <,>))
+    c.report_error(<parse>, "rest parameter must be a final name",
+      c.token, NULL);
+  return _finish_parameter(c, type, declarator, method, first, after);
+}
+
+/* template declarators
+
+   In a macro template a declarator may name its binding through a
+   meta-call slot, a Name hole, a member hole, or a name each expansion
+   introduces. A method's owner may be a literal type or a type hole. */
+
+/** Installs a definition-local template binding or typedef provisionally.
+    Later template types name a local typedef by its identity, so each
+    expansion refers to that expansion's private typedef.
+*/
+void Compiler.bind_template_local(
+  Compiler c, List key, List type, List context) {
+  Var local = c.macro_holes && key ? c.macro_definition_locals()[key] : void;
+  if (c.macro_holes && local is <string> &&
+      (!context || context === %(typedef))) {
+    if (context === %(typedef)) {
+      c.sym.set($(local), %(typedef $local));
+      c.sym.set(%(typedef $local), $(key));
+    }
+    else c.sym.bind_identity(
+      NULL, key,
+      %(declare (<macro-expr>) (bindings (bind $key ()))));
+  }
+}
+
+/** Binds one constructed parameter in the current scope, including nested
+    function modifiers and reference parameter facts.
+*/
+List Compiler.bind_parameter(Compiler c, List base, List declarator) =>
+  _finish_parameter(c, base, _finish_fnmods(c, declarator), NULL, NULL, NULL);
+
+// identifiers
+
+/** Parses the current identifier or dotted owner/member as a one-item name.
+    Package aliases and imported method spellings are folded through the
+    current `Sym`, and all accepted tokens are consumed.
+*/
+List Compiler.parse_complex_identifier(Compiler c) =>
+  _complex_identifier(c, NULL);
+
+/** Returns the folded package-member spelling at the current token, or NULL.
+    The token must be an unshadowed imported alias followed by `.` and an
+    identifier. This lookahead does not consume tokens.
+*/
+String Compiler.package_alias_spelling(Compiler c) {
+  if (!c.package_aliases.len()) return NULL;
+  if (c.peek(0) != <ident> || c.peek(1) != <.>) return NULL;
+  String alias = c.token.text;
+  Var package = c.package_aliases[alias];
+  if (package is void || c.sym.get_exact($(alias))) return NULL;
+  Token member = Token.skip_trivia(Token.skip_trivia(c.token + 1) + 1);
+  return member.text.is_identifier()
+       ? %"$(package)__$(member.text)" : NULL;
+}
+
+/** Consumes and returns the current identifier, or NULL without consuming. */
+List Compiler.parse_optional_identifier(Compiler c) =>
+  c.peek(0) == <ident> ? c.parse_basic_identifier() : NULL;
+
+/** Consumes one `ident` token and returns its spelling as a one-item `List`.
+*/
+List Compiler.parse_basic_identifier(Compiler c) {
+  String ident = c.token.text;
+  c.expect(<ident>);
+  return $(ident);
+}
+
+// declarators and parameters
 
 module List _declarator(
   Compiler c, List type, List context, List &method_identity_out,
@@ -81,26 +144,6 @@ module List _declarator(
   c.bind_template_local(key, ast, context);
   method_identity_out = method_identity;
   return %( bind $key $modifiers );
-}
-
-module List _pointer(Compiler c) {
-  List ptr = NULL;
-  loop {
-    Symbol symbol = c.peek(0);
-    if (symbol == <*> || symbol == <^> || symbol == <&> ||
-        symbol.is_type_qualifier()) {
-      c.next();
-      int optional = symbol == <&> && c.peek(0) == <?>;
-      ptr = cons(optional ? <opt-ref> : symbol, ptr);
-      if (optional) c.next();
-      continue;
-    }
-    if (symbol != <ident> || !(c.token.text in c.object_macros))
-      return ptr;
-    Array quals = auto [];
-    if (!_prefix_macro_words(c, 1, quals)) return ptr;
-    foreach (Symbol qualifier in quals) ptr = cons(qualifier, ptr);
-  }
 }
 
 static List _direct_declarator(
@@ -123,21 +166,6 @@ static List _direct_declarator(
   source_first = first;
   source_after = c.token;
   return %(bind $ident ());
-}
-
-/* Whether the `(` at the cursor opens the parameters of a declarator with
-   no name, as in the type name `int (int)`: a `)`, or a type that is no
-   name to declare, follows it. As in C, a typedef name there is a type. */
-module int _parameters_follow(Compiler c) {
-  Token head = c.token;
-  c.next();
-  Symbol next = c.peek(0);
-  Type lookup = c.sym.get($(c.token.text));
-  int named = next == <ident> && !lookup.is_typedef() &&
-              !(c.signature_only && c.test_declaration());
-  int parameters = next == <)> || (!named && c.test_declaration());
-  c.token = head;
-  return parameters;
 }
 
 // Carries the source span across a nested declarator.
@@ -186,6 +214,73 @@ static List _declarator_suffix(Compiler c, int loaded_main) {
   return type;
 }
 
+
+
+/* Parameter declarations bind into a temporary scope. The declarator cannot
+   yet know whether a body follows, so keep that scope in `params`; finishing
+   a definition replays it around the body, while a prototype never pushes
+   the captured scope. */
+static List _function_parameters(Compiler c, int loaded_main) {
+  c.next();
+  _x2c_complete_here(c, <type>, _type_keywords());
+  if (c.peek(0) == <)> && !loaded_main)
+    $fail.parse_params_empty(c, c.token);
+  SymScope saved = c.params, parsed;
+  int complete = 0;
+  defer { if (!complete) c.params = saved; }
+  List params;
+  c.sym.push_new_scope();
+  {
+    defer parsed = c.sym.pop_scope();
+    params = c.peek(0) == <)> ? %((param (void) (bind () ())))
+                            : c.parse_parameter_list();
+  }
+  if (c.peek(0) != <)>) {
+    c.require_input();
+    Symbol unexpected = c.peek(0);
+    $fail.parse_params_close(c, c.token, params, unexpected);
+  }
+  else c.next();
+  c.params = parsed;
+  complete = 1;
+  return params;
+}
+
+module List _pointer(Compiler c) {
+  List ptr = NULL;
+  loop {
+    Symbol symbol = c.peek(0);
+    if (symbol == <*> || symbol == <^> || symbol == <&> ||
+        symbol.is_type_qualifier()) {
+      c.next();
+      int optional = symbol == <&> && c.peek(0) == <?>;
+      ptr = cons(optional ? <opt-ref> : symbol, ptr);
+      if (optional) c.next();
+      continue;
+    }
+    if (symbol != <ident> || !(c.token.text in c.object_macros))
+      return ptr;
+    Array quals = auto [];
+    if (!_prefix_macro_words(c, 1, quals)) return ptr;
+    foreach (Symbol qualifier in quals) ptr = cons(qualifier, ptr);
+  }
+}
+
+/* Whether the `(` at the cursor opens the parameters of a declarator with
+   no name, as in the type name `int (int)`: a `)`, or a type that is no
+   name to declare, follows it. As in C, a typedef name there is a type. */
+module int _parameters_follow(Compiler c) {
+  Token head = c.token;
+  c.next();
+  Symbol next = c.peek(0);
+  Type lookup = c.sym.get($(c.token.text));
+  int named = next == <ident> && !lookup.is_typedef() &&
+              !(c.signature_only && c.test_declaration());
+  int parameters = next == <)> || (!named && c.test_declaration());
+  c.token = head;
+  return parameters;
+}
+
 static List _array_suffix(Compiler c) {
   c.next();
   if (c.peek(0) == <]>) {
@@ -202,24 +297,7 @@ static List _array_suffix(Compiler c) {
   return %((dim $expr));
 }
 
-/** Parses one declarator row for a macro argument without installing it.
-    Its enclosing declaration supplies the base type when expanded.
-*/
-List Compiler.parse_declarator_argument(Compiler c) {
-  List slot = c.try_parse_macro_slot(<decl-row>);
-  if (slot) return slot;
-  List method = NULL;
-  Token first = NULL, after = NULL;
-  List bind = _declarator(c, NULL, NULL, method, first, after);
-  if (c.test(<=>)) return %(op = $bind $(c.parse_assignment()));
-  return bind;
-}
 
-/* template declarators
-
-   In a macro template a declarator may name its binding through a
-   meta-call slot, a Name hole, a member hole, or a name each expansion
-   introduces. A method's owner may be a literal type or a type hole. */
 
 // Returns NULL for another token, which takes the ordinary identifier path.
 static List _template_declarator(Compiler c, int member) {
@@ -279,23 +357,26 @@ static Var _method_member(Compiler c) {
   return member;
 }
 
-/** Installs a definition-local template binding or typedef provisionally.
-    Later template types name a local typedef by its identity, so each
-    expansion refers to that expansion's private typedef.
-*/
-void Compiler.bind_template_local(
-  Compiler c, List key, List type, List context) {
-  Var local = c.macro_holes && key ? c.macro_definition_locals()[key] : void;
-  if (c.macro_holes && local is <string> &&
-      (!context || context === %(typedef))) {
-    if (context === %(typedef)) {
-      c.sym.set($(local), %(typedef $local));
-      c.sym.set(%(typedef $local), $(key));
-    }
-    else c.sym.bind_identity(
-      NULL, key,
-      %(declare (<macro-expr>) (bindings (bind $key ()))));
-  }
+module List _finish_parameter(
+  Compiler c, List base, List declarator, List method_identity,
+  Token source_first, Token source_after) {
+  List rest = base, container = rest.type().rest_container();
+  base = _finish_type(c, container ? container : base);
+  if (<auto> in base && !c.macro_holes && !c.shallow)
+    $fail.parse_auto_storage(c, c.token);
+  int preserved_self = 0;
+  declarator = _install_declarator(
+    c, base, NULL, declarator,
+    method_identity, preserved_self);
+  c.record_source_declaration(declarator.cadr(), source_first, source_after);
+  List modifiers = NULL;
+  base = Type.declaration_base(base, modifiers);
+  declarator = Ast.append_modifiers(declarator, modifiers);
+  if (container) base = rest;
+  List parameter = %(param $base $declarator);
+  if (declarator ~= %(bind ?binding ?) && !c.macro_holes)
+    _parameter_facts(c, binding, parameter);
+  return parameter;
 }
 
 /* declarator installation
@@ -433,102 +514,6 @@ static void _method_facts(
   preserved_self = 1;
 }
 
-// parameters
-
-/* Parameter declarations bind into a temporary scope. The declarator cannot
-   yet know whether a body follows, so keep that scope in `params`; finishing
-   a definition replays it around the body, while a prototype never pushes
-   the captured scope. */
-static List _function_parameters(Compiler c, int loaded_main) {
-  c.next();
-  _x2c_complete_here(c, <type>, _type_keywords());
-  if (c.peek(0) == <)> && !loaded_main)
-    $fail.parse_params_empty(c, c.token);
-  SymScope saved = c.params, parsed;
-  int complete = 0;
-  defer { if (!complete) c.params = saved; }
-  List params;
-  c.sym.push_new_scope();
-  {
-    defer parsed = c.sym.pop_scope();
-    params = c.peek(0) == <)> ? %((param (void) (bind () ())))
-                            : c.parse_parameter_list();
-  }
-  if (c.peek(0) != <)>) {
-    c.require_input();
-    Symbol unexpected = c.peek(0);
-    $fail.parse_params_close(c, c.token, params, unexpected);
-  }
-  else c.next();
-  c.params = parsed;
-  complete = 1;
-  return params;
-}
-
-/** Parses a nonempty comma-separated parameter `List` in source order.
-    The caller owns the parameter scope; the first non-comma delimiter remains
-    current.
-*/
-List Compiler.parse_parameter_list(Compiler c) {
-  Array parameters = auto [];
-  while (1) {
-    _x2c_complete_here(c, <type>, _type_keywords());
-    List parameter = c.try_parse_macro_slot(<param>);
-    if (!parameter) parameter = c.parse_parameter();
-    parameters.push(parameter);
-    if (c.peek(0) != <,>) break;
-    c.expect(<,>);
-  }
-  return parameters;
-}
-
-/** Parses one parameter and returns `(param TYPE DECLARATOR)` or `(...)`.
-    Outside macro-template parsing, a named parameter is installed in the
-    current `Sym` scope. The following delimiter remains current.
-*/
-List Compiler.parse_parameter(Compiler c) {
-  if (c.test(<...>)) return %(...);
-  List qual = _type_qualifiers(c), spec = _type_specifier(c);
-  List type = %( @qual @spec );
-  int rest = (type == %("List") || type == %("Map")) && c.test(<@>);
-  if (rest) type = %(.... @type);
-  List method = NULL;
-  Token first = NULL, after = NULL;
-  List declarator = _declarator(c, type, NULL, method, first, after);
-  if (rest && (declarator.caddr() || c.peek(0) == <,>))
-    c.report_error(<parse>, "rest parameter must be a final name",
-      c.token, NULL);
-  return _finish_parameter(c, type, declarator, method, first, after);
-}
-
-/** Binds one constructed parameter in the current scope, including nested
-    function modifiers and reference parameter facts.
-*/
-List Compiler.bind_parameter(Compiler c, List base, List declarator) =>
-  _finish_parameter(c, base, _finish_fnmods(c, declarator), NULL, NULL, NULL);
-
-module List _finish_parameter(
-  Compiler c, List base, List declarator, List method_identity,
-  Token source_first, Token source_after) {
-  List rest = base, container = rest.type().rest_container();
-  base = _finish_type(c, container ? container : base);
-  if (<auto> in base && !c.macro_holes && !c.shallow)
-    $fail.parse_auto_storage(c, c.token);
-  int preserved_self = 0;
-  declarator = _install_declarator(
-    c, base, NULL, declarator,
-    method_identity, preserved_self);
-  c.record_source_declaration(declarator.cadr(), source_first, source_after);
-  List modifiers = NULL;
-  base = Type.declaration_base(base, modifiers);
-  declarator = Ast.append_modifiers(declarator, modifiers);
-  if (container) base = rest;
-  List parameter = %(param $base $declarator);
-  if (declarator ~= %(bind ?binding ?) && !c.macro_holes)
-    _parameter_facts(c, binding, parameter);
-  return parameter;
-}
-
 // Records a parameter binding and whether it is a reference, or optional.
 static void _parameter_facts(Compiler c, Var binding, List parameter) {
   if (binding) c.set_fact(%(parameter $binding), 1);
@@ -538,15 +523,6 @@ static void _parameter_facts(Compiler c, Var binding, List parameter) {
   if (type.car() == <opt-ref>)
     c.set_fact(%(optional-reference-param $binding), 1);
 }
-
-// identifiers
-
-/** Parses the current identifier or dotted owner/member as a one-item name.
-    Package aliases and imported method spellings are folded through the
-    current `Sym`, and all accepted tokens are consumed.
-*/
-List Compiler.parse_complex_identifier(Compiler c) =>
-  _complex_identifier(c, NULL);
 
 /* Accept one of two forms of dotted identifiers: TYPE.IDENTIFIER or
    IDENTIFIER.TYPE. Preserve the explicit owner/member pair for declarations
@@ -602,33 +578,6 @@ module String _package_alias_member(Compiler c) {
   return spelling;
 }
 
-/** Returns the folded package-member spelling at the current token, or NULL.
-    The token must be an unshadowed imported alias followed by `.` and an
-    identifier. This lookahead does not consume tokens.
-*/
-String Compiler.package_alias_spelling(Compiler c) {
-  if (!c.package_aliases.len()) return NULL;
-  if (c.peek(0) != <ident> || c.peek(1) != <.>) return NULL;
-  String alias = c.token.text;
-  Var package = c.package_aliases[alias];
-  if (package is void || c.sym.get_exact($(alias))) return NULL;
-  Token member = Token.skip_trivia(Token.skip_trivia(c.token + 1) + 1);
-  return member.text.is_identifier()
-       ? %"$(package)__$(member.text)" : NULL;
-}
-
-/** Consumes one `ident` token and returns its spelling as a one-item `List`.
-*/
-List Compiler.parse_basic_identifier(Compiler c) {
-  String ident = c.token.text;
-  c.expect(<ident>);
-  return $(ident);
-}
-
-/** Consumes and returns the current identifier, or NULL without consuming. */
-List Compiler.parse_optional_identifier(Compiler c) =>
-  c.peek(0) == <ident> ? c.parse_basic_identifier() : NULL;
-
 module String _syntax_exact_name(Var value) {
   if (value is <string>) return value;
   if (value is not <list>) return NULL;
@@ -673,4 +622,63 @@ static List _finish_prototype(Compiler c, List parameters) {
     }
   }
   return params.list_free();
+}
+
+
+
+module List _declarator_list(Compiler c, List type, List context, int row) {
+  Array bindings = auto [];
+  loop {
+    bindings.push(_declarator_init(c, type, context));
+    if ((row && _group_comma(c)) ||
+        !c.test(<,>))
+      return bindings;
+  }
+}
+
+/* Install each declaration binding before resolving its initializer so later
+   declarators and source-order dependency analysis share the same identity. */
+module List _declarator_init(Compiler c, List type, List context) {
+  // A computed declarator name still needs ordinary binding.
+  List slot = c.peek_macro_hole() || c.peek(0) == <@>
+    ? c.try_parse_macro_slot(<decl-row>) : NULL;
+  if (slot) {
+    if (c.test(<=>)) return %(op = $slot $(c.parse_assignment()));
+    return slot;
+  }
+  Token origin = c.token;
+  List method = NULL;
+  Token first = NULL, after = NULL;
+  List bind = _declarator(c, type, context, method, first, after);
+  int preserved_self = 0;
+  bind = _install_declarator(c, type, context, bind, method, preserved_self);
+  c.record_source_declaration(bind.cadr(), first, after);
+  int function_arrow = !c.in_proto && _x2c_at_function_arrow(c) &&
+    %(declare $type (bindings $bind)).type_from_ast().is_function();
+  if (!c.in_proto && !function_arrow && c.test(<=>))
+    return _initialized(c, type, bind, origin);
+  return bind;
+}
+
+/* Collection skips an initializer. `init_tokens` records the declarator's
+   first token, not the token where expression parsing finishes. */
+static List _initialized(Compiler c, List type, List bind, Token origin) {
+  List binding = bind.cadr();
+  if (Ast.try_binding(binding, NULL, NULL)) {
+    Token tokens = c.tokenizer.tokens;
+    c.init_tokens[binding] = origin - tokens;
+  }
+  if (c.shallow && !c.capture_unit) {
+    _x2c_skip_shallow_expression(c, 1);
+    return bind;
+  }
+  c.enter((Ancestor){ .what = <declarator>, .base = type, .node = bind });
+  int managed = c.test(<auto>);
+  List init = c.parse_assignment();
+  if (managed)
+    init = c.bind_syntax($!( $auto($init) ), <expression>, c.return_type);
+  c.ancestors.pop();
+  c.check_explicit_converter(
+    init, %(declare $type (bindings $bind)).type_from_ast(), 0);
+  return %( op = $bind $init );
 }

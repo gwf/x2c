@@ -71,6 +71,12 @@ static typedef struct Format {
   String fmt, int length, literal, cursor, offset, List args, Buffer out;
 } Format;
 
+// The type each modifier converts an integer to, signed then unsigned.
+static const Symbol _integer_targets[][2] = {
+  {<i32>, <u32>}, {<i8>, <u8>}, {<i16>, <u16>}, {<long>, <ulong>},
+  {<llong>, <ullong>}
+};
+
 // formatting
 
 /** Formats `values` through a checked, C-style subset of `fmt`.
@@ -125,11 +131,6 @@ static void _write_literal(Format &f) {
   f.out.write_len(f.fmt + f.literal, (size_t) (f.cursor - f.literal));
 }
 
-/* A conversion that reaches the end of the format is incomplete. */
-static void _need_byte(Format &f) {
-  if (f.cursor == f.length) _fail(f, $reason.incomplete());
-}
-
 // conversion specifications
 
 /* Parses the flags, width, precision, length modifier, and conversion
@@ -168,10 +169,6 @@ static void _width(Format &f, Spec &spec) {
   else spec.width = _decimal(f, "width");
 }
 
-/* A `*` width or precision is the next value as an int. */
-static int _star(Format &f) =>
-  (int) _number(f, _take(f, $reason.missing_star()), <i32>).integer();
-
 /* `*` consumes the next argument; a negative argument means unspecified. */
 static void _precision(Format &f, Spec &spec) {
   if (_byte(f) != '.') return;
@@ -183,6 +180,15 @@ static void _precision(Format &f, Spec &spec) {
   }
   else spec.precision = _decimal(f, "precision");
 }
+
+/* A conversion that reaches the end of the format is incomplete. */
+static void _need_byte(Format &f) {
+  if (f.cursor == f.length) _fail(f, $reason.incomplete());
+}
+
+/* A `*` width or precision is the next value as an int. */
+static int _star(Format &f) =>
+  (int) _number(f, _take(f, $reason.missing_star()), <i32>).integer();
 
 /* Reads the digits at the cursor. An overflow reports the offset of the
    first digit and names the field with `label`. */
@@ -197,8 +203,6 @@ static int _decimal(Format &f, String label) {
   }
   return number;
 }
-
-static int _byte(Format &f) => f.fmt[f.cursor];
 
 static int _digit(Format &f) => _byte(f) >= '0' && _byte(f) <= '9';
 
@@ -219,6 +223,8 @@ static Symbol _doubled(Format &f, char letter, Symbol once, Symbol twice) {
   f.cursor++;
   return twice;
 }
+
+static int _byte(Format &f) => f.fmt[f.cursor];
 
 /* Rejects the conversions and combinations the checked subset leaves out,
    in this order. */
@@ -264,25 +270,6 @@ static Buffer _print(Format &f, Spec spec, Var arg) {
   return _floating(f, text, spec.modifier, arg);
 }
 
-/* Writes the C spelling of `s`, with `*` values as numbers. */
-static void _spell(Spec s, char *out) {
-  int n = 0;
-  out[n++] = '%';
-  for (int bit = 0; _format_flags[bit]; bit++)
-    if (s.flags & 1 << bit) out[n++] = _format_flags[bit];
-  if (s.width) n += snprintf(out + n, 16, "%d", s.width);
-  if (s.precision >= 0) n += snprintf(out + n, 16, ".%d", s.precision);
-  snprintf(
-    out + n, 8, "%s%c",
-    _format_modifiers[format_modifiers.index(s.modifier)], s.conversion);
-}
-
-// The type each modifier converts an integer to, signed then unsigned.
-static const Symbol _integer_targets[][2] = {
-  {<i32>, <u32>}, {<i8>, <u8>}, {<i16>, <u16>}, {<long>, <ulong>},
-  {<llong>, <ullong>}
-};
-
 /* An integer is converted to its modifier's type, then printed as a long
    long, which prints every narrower value as its own modifier would. */
 static Buffer _integer(Format &f, Spec spec, Var arg) {
@@ -294,6 +281,19 @@ static Buffer _integer(Format &f, Spec spec, Var arg) {
   _spell(spec, text);
   if (is_unsigned) return f.out.printf(text, value.ulong_long());
   return f.out.printf(text, value.long_long());
+}
+
+/* Writes the C spelling of `s`, with `*` values as numbers. */
+static void _spell(Spec s, char *out) {
+  int n = 0;
+  out[n++] = '%';
+  for (int bit = 0; _format_flags[bit]; bit++)
+    if (s.flags & 1 << bit) out[n++] = _format_flags[bit];
+  if (s.width) n += snprintf(out + n, 16, "%d", s.width);
+  if (s.precision >= 0) n += snprintf(out + n, 16, ".%d", s.precision);
+  snprintf(
+    out + n, 8, "%s%c",
+    _format_modifiers[format_modifiers.index(s.modifier)], s.conversion);
 }
 
 /* `L` prints a long double, and the other modifiers a double. */
@@ -330,12 +330,14 @@ static Var _number(Format &f, Var arg, Symbol target) {
 
 // errors
 
-static void _format_error(int offset, String reason) {
-  raise %(format (offset $offset) (reason $reason));
-}
-
 static void _fail(Format &f, String reason) {
   _format_error(f.offset, reason);
+}
+
+
+
+static void _format_error(int offset, String reason) {
+  raise %(format (offset $offset) (reason $reason));
 }
 
 /* Raises `<format>` for the current conversion with the cause of a failed

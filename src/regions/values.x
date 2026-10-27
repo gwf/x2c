@@ -6,6 +6,147 @@ static protocol Var(Fact) as void *;
 
 // store targets
 
+/* The sink a store through `base` reaches. A struct local is its own
+   storage; a pointer local reaches the storage it was given, and a pointer
+   taken with `&x` reaches `x`. */
+module Symbol _sink_of(Fact base, int through, Fact &target) {
+  if (through && base && base.points) {
+    base = base.points;
+    through = 0;
+  }
+  int own = base && base.param < 0 && !base.born;
+  target = through && own ? NULL : base;
+  return !through && own ? <local> : <heap>;
+}
+
+// births and summaries
+
+/* The region fresh storage an expression makes is born in, with `born`
+   set; NULL with `born` set is the caller's active region. A mixed
+   Scope/Pool result keeps its Pool region in `other`. `type` is the
+   declared type a compound literal initializes, or NULL for its own. */
+module Region _birth(
+  Walk &w, Var value, Type type, int &born, Region &other,
+  Acquired &acquired) {
+  List arguments = NULL;
+  String callee = _callee_of(value, arguments);
+  born = 1;
+  other = NULL;
+  acquired = NULL;
+  match (callee ? _effect(w, callee) : void) {
+    case %(alloc slot): return _allocate_in(w, _slot(w, arguments.car()));
+    case %(alloc pool): return _pooled(w, born);
+    case %(alloc final) if (w.meta): return w.frame;
+    case %(alloc *): return _active(w);
+    case %(pool): return _pooled(w, born);
+  }
+  match (_under_casts(value)) {
+    /* A closure holds what it captures, so it lives no longer than they. A
+       reference capture moves its local into a cell of the active region,
+       so the closure holds the local's value, not its address. */
+    case $lambda_captured(?body, *captures, *params):
+      return _captured_birth(w, captures, born, other, acquired);
+  }
+  match (_unwrap(value)) {
+    case %(cons *): return _pooled(w, born);
+    case $($array_value(*items)):
+      return _active(w);
+    case $($map_value(*rows)):
+      return _active(w);
+    case %(composite *)
+      if (_value_class(w, type ? type : _expression_type(value)) ==
+          <container>):
+      return _active(w);
+  }
+  if (callee) return _summary_birth(w, callee, born, other);
+  born = 0;
+  return NULL;
+}
+
+static Region _summary_birth(
+  Walk &w, String callee, int &born, Region &other) {
+  int owner = _summary(w, callee).car().int();
+  if (owner == 3) {
+    born = owner;
+    other = _innermost(w, <pool>);
+    return _active(w);
+  }
+  if (owner & 2) return _pooled(w, born);
+  if (owner & 1) return _active(w);
+  born = 0;
+  return NULL;
+}
+
+/* A pool value remains pooled even without a local bracket: a caller may
+   open one around a helper call. */
+static Region _pooled(Walk &w, int &born) {
+  Region pool = _innermost(w, <pool>);
+  born = 2;
+  return pool;
+}
+
+/* A closure keeps the first captured value with an owner; an address
+   capture keeps the place it names. */
+static Region _captured_birth(
+  Walk &w, List captures, int &born, Region &other, Acquired &acquired) {
+  foreach (List capture in captures)
+    match (capture) case %(capture ? ? ?captured): {
+      Var place = _address_of(captured);
+      Fact fact = _fact_of(w, place is void ? captured : place, NULL);
+      if (fact && (fact.born || fact.region || fact.other ||
+                   _cleanup(fact.acquired))) {
+        if (fact.born) born = fact.born;
+        other = fact.other;
+        acquired = fact.acquired;
+        return fact.region;
+      }
+    }
+  return _active(w);
+}
+
+/* The argument a callee hands back as its result, when that argument is a
+   parameter or region-born, so the result keeps its identity. */
+module Fact _returned_argument(Walk &w, Var value, List &?named) {
+  List arguments = NULL;
+  String callee = _callee_of(value, arguments);
+  if (!callee) return NULL;
+  List types = _parameter_types(value);
+  foreach (List row in _summary(w, callee).cadr()) {
+    (int index, Var target) = row;
+    if (target != <return> || index >= arguments.len()) continue;
+    Type type = NULL;
+    Fact fact = _fact_of(w, _passed(types, arguments, index, type), named);
+    if (fact && (fact.param >= 0 || fact.born || fact.region || fact.other ||
+                 _cleanup(fact.acquired)))
+      return fact;
+  }
+  return NULL;
+}
+
+// facts and regions
+
+/* What is known about a value that is returned, stored, or passed on. A
+   local C array there decays to the address of its first element, which
+   is the function's own storage. */
+module Fact _value_fact(Walk &w, Var value, List &?named) {
+  Fact fact = _fact_of(w, value, named);
+  Type type = _expression_type(value);
+  if (!fact || fact.param >= 0 || !type || !type.is_array()) return fact;
+  match (_unwrap(value)) case %(ident *fields):
+    return _borrow(w, value, named);
+  return fact;
+}
+
+/* Accepts `&local` or a `Scope *` local. */
+module Fact _slot(Walk &w, Var argument) {
+  Fact fact = _fact_of(w, _address_of(argument), NULL);
+  if (fact) return fact;
+  fact = _fact_of(w, argument, NULL);
+  return fact && fact.points ? fact.points : fact;
+}
+
+
+
 module Fact _base(Walk &w, Var place, int &through) {
   through = 1;
   match (_unwrap(place)) {
@@ -69,136 +210,7 @@ static Fact _borrow(Walk &w, Var place, List &?named) {
   return borrow;
 }
 
-/* The local a place is part of, or NULL. */
-module List _root(Var place) {
-  while (1)
-    match (_unwrap(place)) {
-      case %(ident (!set ?binding (binding ? ?))): return binding;
-      case %(op ? ?base *): place = base;
-      case $($indexed(?base, ?selector)): place = base;
-      case %(getindex ?base ?): place = base;
-      default: return NULL;
-    }
-}
 
-/* The sink a store through `base` reaches. A struct local is its own
-   storage; a pointer local reaches the storage it was given, and a pointer
-   taken with `&x` reaches `x`. */
-module Symbol _sink_of(Fact base, int through, Fact &target) {
-  if (through && base && base.points) {
-    base = base.points;
-    through = 0;
-  }
-  int own = base && base.param < 0 && !base.born;
-  target = through && own ? NULL : base;
-  return !through && own ? <local> : <heap>;
-}
-
-// births and summaries
-
-/* The region fresh storage an expression makes is born in, with `born`
-   set; NULL with `born` set is the caller's active region. A mixed
-   Scope/Pool result keeps its Pool region in `other`. `type` is the
-   declared type a compound literal initializes, or NULL for its own. */
-module Region _birth(
-  Walk &w, Var value, Type type, int &born, Region &other,
-  Acquired &acquired) {
-  List arguments = NULL;
-  String callee = _callee_of(value, arguments);
-  born = 1;
-  other = NULL;
-  acquired = NULL;
-  match (callee ? _effect(w, callee) : void) {
-    case %(alloc slot): return _allocate_in(w, _slot(w, arguments.car()));
-    case %(alloc pool): return _pooled(w, born);
-    case %(alloc final) if (w.meta): return w.frame;
-    case %(alloc *): return _active(w);
-    case %(pool): return _pooled(w, born);
-  }
-  match (_under_casts(value)) {
-    /* A closure holds what it captures, so it lives no longer than they. A
-       reference capture moves its local into a cell of the active region,
-       so the closure holds the local's value, not its address. */
-    case $lambda_captured(?body, *captures, *params):
-      return _captured_birth(w, captures, born, other, acquired);
-  }
-  match (_unwrap(value)) {
-    case %(cons *): return _pooled(w, born);
-    case $($array_value(*items)):
-      return _active(w);
-    case $($map_value(*rows)):
-      return _active(w);
-    case %(composite *)
-      if (_value_class(w, type ? type : _expression_type(value)) ==
-          <container>):
-      return _active(w);
-  }
-  if (callee) return _summary_birth(w, callee, born, other);
-  born = 0;
-  return NULL;
-}
-
-/* A pool value remains pooled even without a local bracket: a caller may
-   open one around a helper call. */
-static Region _pooled(Walk &w, int &born) {
-  Region pool = _innermost(w, <pool>);
-  born = 2;
-  return pool;
-}
-
-static Region _summary_birth(
-  Walk &w, String callee, int &born, Region &other) {
-  int owner = _summary(w, callee).car().int();
-  if (owner == 3) {
-    born = owner;
-    other = _innermost(w, <pool>);
-    return _active(w);
-  }
-  if (owner & 2) return _pooled(w, born);
-  if (owner & 1) return _active(w);
-  born = 0;
-  return NULL;
-}
-
-/* A closure keeps the first captured value with an owner; an address
-   capture keeps the place it names. */
-static Region _captured_birth(
-  Walk &w, List captures, int &born, Region &other, Acquired &acquired) {
-  foreach (List capture in captures)
-    match (capture) case %(capture ? ? ?captured): {
-      Var place = _address_of(captured);
-      Fact fact = _fact_of(w, place is void ? captured : place, NULL);
-      if (fact && (fact.born || fact.region || fact.other ||
-                   _cleanup(fact.acquired))) {
-        if (fact.born) born = fact.born;
-        other = fact.other;
-        acquired = fact.acquired;
-        return fact.region;
-      }
-    }
-  return _active(w);
-}
-
-/* The argument a callee hands back as its result, when that argument is a
-   parameter or region-born, so the result keeps its identity. */
-module Fact _returned_argument(Walk &w, Var value, List &?named) {
-  List arguments = NULL;
-  String callee = _callee_of(value, arguments);
-  if (!callee) return NULL;
-  List types = _parameter_types(value);
-  foreach (List row in _summary(w, callee).cadr()) {
-    (int index, Var target) = row;
-    if (target != <return> || index >= arguments.len()) continue;
-    Type type = NULL;
-    Fact fact = _fact_of(w, _passed(types, arguments, index, type), named);
-    if (fact && (fact.param >= 0 || fact.born || fact.region || fact.other ||
-                 _cleanup(fact.acquired)))
-      return fact;
-  }
-  return NULL;
-}
-
-// facts and regions
 
 /* What is known about the local an expression names or the storage an
    address borrows, through the `Var` wrappers that pass their argument
@@ -234,24 +246,16 @@ module Fact _fact_of(Walk &w, Var expression, List &?named) {
   return _fact_of(w, arguments.car(), named);
 }
 
-/* What is known about a value that is returned, stored, or passed on. A
-   local C array there decays to the address of its first element, which
-   is the function's own storage. */
-module Fact _value_fact(Walk &w, Var value, List &?named) {
-  Fact fact = _fact_of(w, value, named);
-  Type type = _expression_type(value);
-  if (!fact || fact.param >= 0 || !type || !type.is_array()) return fact;
-  match (_unwrap(value)) case %(ident *fields):
-    return _borrow(w, value, named);
-  return fact;
-}
-
-/* Accepts `&local` or a `Scope *` local. */
-module Fact _slot(Walk &w, Var argument) {
-  Fact fact = _fact_of(w, _address_of(argument), NULL);
-  if (fact) return fact;
-  fact = _fact_of(w, argument, NULL);
-  return fact && fact.points ? fact.points : fact;
+/* The local a place is part of, or NULL. */
+module List _root(Var place) {
+  while (1)
+    match (_unwrap(place)) {
+      case %(ident (!set ?binding (binding ? ?))): return binding;
+      case %(op ? ?base *): place = base;
+      case $($indexed(?base, ?selector)): place = base;
+      case %(getindex ?base ?): place = base;
+      default: return NULL;
+    }
 }
 
 module Fact _new_fact(Walk &w, List binding, int param) {
@@ -261,20 +265,14 @@ module Fact _new_fact(Walk &w, List binding, int param) {
   return fact;
 }
 
-module Acquired _acquired(Fact fact) {
-  if (!fact.acquired)
-    fact.acquired = xcalloc(1, sizeof(struct Acquired));
-  return fact.acquired;
-}
-
-module Region _cleanup(Acquired acquired) =>
-  acquired ? acquired.cleanup : NULL;
-
 module int _closed(Region region) {
   if (!region) return 0;
   Region cleanup = _cleanup(region.acquired);
   return region.closed || (cleanup && cleanup.closed);
 }
+
+module Region _cleanup(Acquired acquired) =>
+  acquired ? acquired.cleanup : NULL;
 
 /* A known empty handle has no identity to share with another empty slot. */
 module int _empty(Var value) {
@@ -287,30 +285,6 @@ module int _empty(Var value) {
     }
   }
   return 0;
-}
-
-/* The region a Scope local's own storage forms. It ends at `Scope.destroy`
-   or at the block end of a deferred destroy; until one is seen, the
-   storage can outlive the function, so its values report only a read after
-   the end. A caller's or static slot has none. */
-module Region _owner(Walk &w, Fact slot) {
-  if (!slot || slot.param >= 0) return NULL;
-  if (!slot.owner) {
-    slot.owner = xmalloc(sizeof(struct Region));
-    *slot.owner = (struct Region) {<local>, slot.depth, slot.origin};
-  }
-  return slot.owner;
-}
-
-/* An allocation fills an empty Scope slot. A deferred destroy may already
-   own that slot, but a copy of its earlier NULL did not acquire this Scope. */
-module Region _allocate_in(Walk &w, Fact slot) {
-  Region owner = _owner(w, slot);
-  if (owner) {
-    slot.empty = 0;
-    owner.acquired = _acquired(slot);
-  }
-  return owner;
 }
 
 /* `fact` now belongs to `region`, or to an owner outside this function. */
@@ -347,6 +321,36 @@ static Region _active(Walk &w) {
     ? _allocate_in(w, region.slot) : region;
 }
 
+/* An allocation fills an empty Scope slot. A deferred destroy may already
+   own that slot, but a copy of its earlier NULL did not acquire this Scope. */
+module Region _allocate_in(Walk &w, Fact slot) {
+  Region owner = _owner(w, slot);
+  if (owner) {
+    slot.empty = 0;
+    owner.acquired = _acquired(slot);
+  }
+  return owner;
+}
+
+module Acquired _acquired(Fact fact) {
+  if (!fact.acquired)
+    fact.acquired = xcalloc(1, sizeof(struct Acquired));
+  return fact.acquired;
+}
+
+/* The region a Scope local's own storage forms. It ends at `Scope.destroy`
+   or at the block end of a deferred destroy; until one is seen, the
+   storage can outlive the function, so its values report only a read after
+   the end. A caller's or static slot has none. */
+module Region _owner(Walk &w, Fact slot) {
+  if (!slot || slot.param >= 0) return NULL;
+  if (!slot.owner) {
+    slot.owner = xmalloc(sizeof(struct Region));
+    *slot.owner = (struct Region) {<local>, slot.depth, slot.origin};
+  }
+  return slot.owner;
+}
+
 // canonical forms the pass reads
 
 /* Removes casts and parentheses, retaining the final typed expression. */
@@ -362,44 +366,12 @@ module Var _under_casts(Var value) {
   }
 }
 
-/* The parser's empty argument marker represents no arguments. */
-module List _source_call(Var value) {
-  match (value)
-    case $($called(?callee, *rows)): {
-      if (rows ~= %((expr ? ()))) rows = NULL;
-      return $(callee, rows);
-    }
-  return NULL;
-}
-
 /* A declarator initializer shares the operator but is not an assignment. */
 module List _source_assignment(Var value) {
   match (value) {
     case $($assigned(%(bind *), ?)): return NULL;
     case $($assigned(?target, ?stored)): return $(target, stored);
   }
-  return NULL;
-}
-
-/* The storage an expression names, without the wrappers that keep it. */
-module Var _unwrap(Var value) {
-  while (1)
-    match (value) {
-      case %(expr ? ?inner): value = inner;
-      case %(cast ? ?inner): value = inner;
-      case $Macro.content_pattern($grouped, %(?inner)): value = inner;
-      default: return value;
-    }
-}
-
-module List _expression_type(Var value) {
-  match (value) case %(expr ?type ?): return type;
-  return NULL;
-}
-
-module List _binding_of(Var value) {
-  match (_unwrap(value)) case %(ident (!set ?binding (binding ? ?))):
-    return binding;
   return NULL;
 }
 
@@ -421,11 +393,38 @@ module String _callee_of(Var value, List &arguments) {
   return NULL;
 }
 
+module List _binding_of(Var value) {
+  match (_unwrap(value)) case %(ident (!set ?binding (binding ? ?))):
+    return binding;
+  return NULL;
+}
+
 /* Direct calls retain their callee's resolved signature. */
 module List _parameter_types(Var call) {
   match (_source_call(_unwrap(call)))
     case %((expr ((func ?parameters) *) ?) *): return parameters;
   return NULL;
+}
+
+/* The parser's empty argument marker represents no arguments. */
+module List _source_call(Var value) {
+  match (value)
+    case $($called(?callee, *rows)): {
+      if (rows ~= %((expr ? ()))) rows = NULL;
+      return $(callee, rows);
+    }
+  return NULL;
+}
+
+/* The storage an expression names, without the wrappers that keep it. */
+module Var _unwrap(Var value) {
+  while (1)
+    match (value) {
+      case %(expr ? ?inner): value = inner;
+      case %(cast ? ?inner): value = inner;
+      case $Macro.content_pattern($grouped, %(?inner)): value = inner;
+      default: return value;
+    }
 }
 
 /* The argument a call passes at `index`, and the type it passes it as. A
@@ -444,14 +443,6 @@ module Var _passed(List types, List arguments, int index, Type &type) {
   return %(expr $type (op & $argument));
 }
 
-/* A canonical type's values belong to their pool; a container type's
-   compound literal allocates. */
-static Symbol _value_class(Walk &w, Type type) {
-  Symbol tag = w.c.sym.var_tag_for_type(type, NULL);
-  if (tag in %(string list symbol)) return <canonical>;
-  return tag in %(map array block buffer) ? <container> : 0;
-}
-
 /* Whether a destination of `type` copies `value` rather than keeping it: a
    canonical destination, or a `Var`, which boxes a C string as a fresh
    String. */
@@ -462,6 +453,14 @@ module int _copies(Walk &w, Type type, Var value) {
   return source.is_char_pointer_like();
 }
 
+/* A canonical type's values belong to their pool; a container type's
+   compound literal allocates. */
+static Symbol _value_class(Walk &w, Type type) {
+  Symbol tag = w.c.sym.var_tag_for_type(type, NULL);
+  if (tag in %(string list symbol)) return <canonical>;
+  return tag in %(map array block buffer) ? <container> : 0;
+}
+
 /* Whether `value` or a destination of `type` is a number: an integer,
    floating, or enum type. A number holds no address the program can follow
    without a cast back, so nothing the walk knows moves with it. */
@@ -469,4 +468,9 @@ module int _number(Walk &w, Type type, Var value) {
   Type given = _expression_type(value);
   return (type && w.c.sym.resolve_numeric_type(type)) ||
          (given && w.c.sym.resolve_numeric_type(given));
+}
+
+module List _expression_type(Var value) {
+  match (value) case %(expr ?type ?): return type;
+  return NULL;
 }

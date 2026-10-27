@@ -27,32 +27,6 @@ static macro Stmt $fail.cleanup_goto_region(Expr $w, Expr $site) =>
     $w, $site, "goto cannot enter or cross a protected cleanup region",
     %("jump only within the same region or outward"));
 
-/* Expressions may nest one level per operator. Visit blocks without
-   recursing through the expression spine; each keeps its cleanup owner. */
-static Array _expression_blocks(List expression) {
-  Array blocks = [];
-  List node;
-  $ast.walk(expression, node) if (node.car() == <block>) {
-    blocks.push(node);
-    continue;
-  }
-  return blocks;
-}
-
-/* Rebuild only the ancestors of changed blocks, from the leaves upward.
-   Keys are node addresses: structural hashing would revisit the same spine. */
-module List _rewrite_expression(List expression, Func rewrite) {
-  Array blocks = auto _expression_blocks(expression);
-  Map changed = auto {};
-  // The worklist visits siblings last first; initializers run in source order.
-  while (blocks.len()) {
-    List block = blocks.take_last();
-    List replacement = rewrite(block);
-    if (replacement != block) changed[(void *)block] = replacement;
-  }
-  return changed.len() ? Ast.replace_nodes(expression, changed) : expression;
-}
-
 // function cleanup
 
 /** Lowers the cleanup regions and transfers of the completed top-level
@@ -105,74 +79,6 @@ static List _lowered_function(
 }
 
 // region walk
-
-/* Collect each label's region ancestry before any `goto` is rewritten, so a
-   jump backward to a label reads the same ancestry as a jump forward. The
-   ancestry is the chain of region nodes enclosing the label, and the rewrite
-   compares against the same nodes. */
-static void _collect_labels(Walk &w, Var value, List path) {
-  if (value is not <list> || value.is_nil()) return;
-  List node = value;
-  match (node) {
-    case %(expr *): _collect_blocks(w, node, path);
-    case %(label ?name *rest): _collect_label(w, name, rest, path);
-    case %(landing ? ?rows): _collect_rows(w, rows, path);
-    case %(defer ?body *): _collect_labels(w, body, cons(body, path));
-    case %(localinit ?guard ?body):
-      _collect_local(w, node, guard, body, path);
-    case %(staticinit ? ?initial):
-      _collect_labels(w, initial, cons(node, path));
-    default: _collect_children(w, node, path);
-  }
-}
-
-static void _collect_blocks(Walk &w, List node, List path) {
-  Array blocks = auto _expression_blocks(node);
-  foreach (List block in blocks) _collect_labels(w, block, path);
-}
-
-static void _collect_label(Walk &w, Var name, List rest, List path) {
-  String spelling = _label_spelling(name);
-  if (spelling) w.labels[spelling] = path;
-  _collect_children(w, rest, path);
-}
-
-/* Each region a landing opens has its own identity, such as a `try` body
-   and each catch arm, while its outer parts keep the enclosing path. */
-static void _collect_rows(Walk &w, List rows, List path) {
-  foreach (List row in rows)
-    match (row) {
-      case %(outer ? ?node): _collect_labels(w, node, path);
-      case %(region ? ?node): _collect_labels(w, node, cons(node, path));
-    }
-}
-
-static void _collect_local(
-  Walk &w, List node, Var guard, Var body, List path) {
-  _collect_labels(w, guard, path);
-  _collect_labels(w, body, cons(node, path));
-}
-
-static void _collect_children(Walk &w, List node, List path) {
-  foreach (Var child in node) _collect_labels(w, child, path);
-}
-
-/* A label reads as a binding, as a wrapped expression, or as the bare name
-   a macro wrote. */
-static String _label_spelling(Var label) {
-  if (label is <string>) return label;
-  if (label is not <list>) return NULL;
-  List node = label;
-  match (node) {
-    case %(ident ?binding):
-      return Ast.binding_spelling(binding);
-    case %(expr ? ?inner): return _label_spelling(inner);
-    case $Macro.content_pattern($grouped, %(?inner)):
-      return _label_spelling(inner);
-    case %(?(String name)): return name;
-  }
-  return Ast.binding_spelling(node);
-}
 
 /* Only a statement expression lets an expression hold transfers or
    regions, and expressions may nest arbitrarily. Position wrappers supply
@@ -235,18 +141,6 @@ static List _lower_return(Walk &w, List node, List expression) {
   if (value != expression) node = %(return $value);
   List cleanup = _unwind(w, 0);
   return cleanup ? _return_value(w, value, cleanup) : node;
-}
-
-/* Save the returned value before cleanup runs, since cleanup may change the
-   state the expression read. */
-static List _return_value(Walk &w, List expression, List cleanup) {
-  List binding = _region_binding(w.c, "return_value");
-  Type type = w.c.return_type;
-  List declaration =
-    w.c.rebuild_statement($!{ $type $binding = $expression; }).cadr();
-  List returned = %(return (expr $type (ident $binding)));
-  List statement = %(block @cleanup $returned);
-  return %(block $declaration $statement);
 }
 
 /* A function-static initializer remains in ancestry for label checks,
@@ -312,63 +206,6 @@ static Var _inside(Walk &w, List cleanup, List marker, Var body) {
   return result;
 }
 
-/* Wrap a transfer in the cleanup it runs first. A transfer that leaves no
-   region keeps its own shape. */
-static List _transfer(Walk &w, int stop, List statement) {
-  List cleanup = _unwind(w, stop);
-  return cleanup ? %(block @cleanup $statement) : statement;
-}
-
-/* The statements that leave every region down to `stop`, innermost first.
-   Each region runs its own statements before the next one out, so an inner
-   frame leaves before an outer defer runs. */
-static List _unwind(Walk &w, int stop) {
-  Array statements = [];
-  for (int i = (int) w.regions.len() - 1; i >= stop; i--)
-    foreach (List statement in w.regions[i].list().car().list())
-      statements.push(statement);
-  return statements.list_free();
-}
-
-/* Reject a jump that would enter a region it did not open, and return the
-   depth the jump unwinds to. */
-static int _goto_stop(Walk &w, Var label) {
-  String name = _label_spelling(label);
-  Var stored;
-  if (!name || !w.labels.try_get(name, stored))
-    $fail.cleanup_goto_missing(w, w.origin);
-  List target = stored, source = _region_path(w);
-  int source_depth = source.len(), target_depth = target.len();
-  List suffix = source;
-  for (int i = source_depth; i > target_depth && suffix; i--)
-    suffix = suffix.cdr();
-  if (target_depth > source_depth || suffix !== target)
-    $fail.cleanup_goto_region(w, w.origin);
-  return target_depth;
-}
-
-/* The open regions, innermost first. A label's ancestry is this list, and a
-   jump may only leave a suffix of it. */
-static List _region_path(Walk &w) {
-  List path = %();
-  foreach (List region in w.regions) path = cons(region.cadr(), path);
-  return path;
-}
-
-/* Report at `origin`, and leave the compiler's origin as it was for whatever
-   reports next. */
-static void _report_at(Walk &w, int origin, String message, List note) {
-  with (w.c.origin = origin) {
-    w.c.report_error(<emit>, message, NULL, note);
-  }
-}
-
-/* Introduce a name this pass owns. The emitted declaration spells this
-   binding, so the record a region pushes and the record its exits leave are
-   one name by construction. */
-module List _region_binding(Compiler c, String role) =>
-  c.sym.introduce(c.fresh_name(role));
-
 /* landings
 
    A construct whose parts control re-enters through `siglongjmp` takes
@@ -407,6 +244,191 @@ static List _lower_landing(Walk &w, Var code, List rows) {
 static List _region(Walk &w, List cleanup, List body) =>
   Code.lowered(_inside(w, cleanup, body, body), NULL);
 
+/* defer regions
+
+   Registration and its captured addresses share the body's region scope. */
+
+/* Lowers a defer: its record is pushed before the body and left on each
+   of the body's exits. */
+static List _lower_defer(
+  Walk &w, List body, List env, List callback, List records) {
+  Compiler c = w.c;
+  c.needs_exception = 1;
+  List record = _region_binding(c, "defer_record");
+  List cleanup = _defer_cleanup(c, record);
+  return c.bind_syntax(
+    $!{ {
+      $(_defer_record(record, callback, env, records))
+      x2c_cleanup_push(&$record);
+      $(_region(w, cleanup, body))
+      $cleanup
+    }
+  }, <block>, c.return_type);
+}
+
+/* Rebuild only the ancestors of changed blocks, from the leaves upward.
+   Keys are node addresses: structural hashing would revisit the same spine. */
+module List _rewrite_expression(List expression, Func rewrite) {
+  Array blocks = auto _expression_blocks(expression);
+  Map changed = auto {};
+  // The worklist visits siblings last first; initializers run in source order.
+  while (blocks.len()) {
+    List block = blocks.take_last();
+    List replacement = rewrite(block);
+    if (replacement != block) changed[(void *)block] = replacement;
+  }
+  return changed.len() ? Ast.replace_nodes(expression, changed) : expression;
+}
+
+/* Collect each label's region ancestry before any `goto` is rewritten, so a
+   jump backward to a label reads the same ancestry as a jump forward. The
+   ancestry is the chain of region nodes enclosing the label, and the rewrite
+   compares against the same nodes. */
+static void _collect_labels(Walk &w, Var value, List path) {
+  if (value is not <list> || value.is_nil()) return;
+  List node = value;
+  match (node) {
+    case %(expr *): _collect_blocks(w, node, path);
+    case %(label ?name *rest): _collect_label(w, name, rest, path);
+    case %(landing ? ?rows): _collect_rows(w, rows, path);
+    case %(defer ?body *): _collect_labels(w, body, cons(body, path));
+    case %(localinit ?guard ?body):
+      _collect_local(w, node, guard, body, path);
+    case %(staticinit ? ?initial):
+      _collect_labels(w, initial, cons(node, path));
+    default: _collect_children(w, node, path);
+  }
+}
+
+static void _collect_blocks(Walk &w, List node, List path) {
+  Array blocks = auto _expression_blocks(node);
+  foreach (List block in blocks) _collect_labels(w, block, path);
+}
+
+static void _collect_label(Walk &w, Var name, List rest, List path) {
+  String spelling = _label_spelling(name);
+  if (spelling) w.labels[spelling] = path;
+  _collect_children(w, rest, path);
+}
+
+/* Each region a landing opens has its own identity, such as a `try` body
+   and each catch arm, while its outer parts keep the enclosing path. */
+static void _collect_rows(Walk &w, List rows, List path) {
+  foreach (List row in rows)
+    match (row) {
+      case %(outer ? ?node): _collect_labels(w, node, path);
+      case %(region ? ?node): _collect_labels(w, node, cons(node, path));
+    }
+}
+
+static void _collect_local(
+  Walk &w, List node, Var guard, Var body, List path) {
+  _collect_labels(w, guard, path);
+  _collect_labels(w, body, cons(node, path));
+}
+
+static void _collect_children(Walk &w, List node, List path) {
+  foreach (Var child in node) _collect_labels(w, child, path);
+}
+
+/* Expressions may nest one level per operator. Visit blocks without
+   recursing through the expression spine; each keeps its cleanup owner. */
+static Array _expression_blocks(List expression) {
+  Array blocks = [];
+  List node;
+  $ast.walk(expression, node) if (node.car() == <block>) {
+    blocks.push(node);
+    continue;
+  }
+  return blocks;
+}
+
+/* Save the returned value before cleanup runs, since cleanup may change the
+   state the expression read. */
+static List _return_value(Walk &w, List expression, List cleanup) {
+  List binding = _region_binding(w.c, "return_value");
+  Type type = w.c.return_type;
+  List declaration =
+    w.c.rebuild_statement($!{ $type $binding = $expression; }).cadr();
+  List returned = %(return (expr $type (ident $binding)));
+  List statement = %(block @cleanup $returned);
+  return %(block $declaration $statement);
+}
+
+/* Wrap a transfer in the cleanup it runs first. A transfer that leaves no
+   region keeps its own shape. */
+static List _transfer(Walk &w, int stop, List statement) {
+  List cleanup = _unwind(w, stop);
+  return cleanup ? %(block @cleanup $statement) : statement;
+}
+
+/* The statements that leave every region down to `stop`, innermost first.
+   Each region runs its own statements before the next one out, so an inner
+   frame leaves before an outer defer runs. */
+static List _unwind(Walk &w, int stop) {
+  Array statements = [];
+  for (int i = (int) w.regions.len() - 1; i >= stop; i--)
+    foreach (List statement in w.regions[i].list().car().list())
+      statements.push(statement);
+  return statements.list_free();
+}
+
+/* Reject a jump that would enter a region it did not open, and return the
+   depth the jump unwinds to. */
+static int _goto_stop(Walk &w, Var label) {
+  String name = _label_spelling(label);
+  Var stored;
+  if (!name || !w.labels.try_get(name, stored))
+    $fail.cleanup_goto_missing(w, w.origin);
+  List target = stored, source = _region_path(w);
+  int source_depth = source.len(), target_depth = target.len();
+  List suffix = source;
+  for (int i = source_depth; i > target_depth && suffix; i--)
+    suffix = suffix.cdr();
+  if (target_depth > source_depth || suffix !== target)
+    $fail.cleanup_goto_region(w, w.origin);
+  return target_depth;
+}
+
+/* A label reads as a binding, as a wrapped expression, or as the bare name
+   a macro wrote. */
+static String _label_spelling(Var label) {
+  if (label is <string>) return label;
+  if (label is not <list>) return NULL;
+  List node = label;
+  match (node) {
+    case %(ident ?binding):
+      return Ast.binding_spelling(binding);
+    case %(expr ? ?inner): return _label_spelling(inner);
+    case $Macro.content_pattern($grouped, %(?inner)):
+      return _label_spelling(inner);
+    case %(?(String name)): return name;
+  }
+  return Ast.binding_spelling(node);
+}
+
+/* The open regions, innermost first. A label's ancestry is this list, and a
+   jump may only leave a suffix of it. */
+static List _region_path(Walk &w) {
+  List path = %();
+  foreach (List region in w.regions) path = cons(region.cadr(), path);
+  return path;
+}
+
+/* Report at `origin`, and leave the compiler's origin as it was for whatever
+   reports next. */
+static void _report_at(Walk &w, int origin, String message, List note) {
+  with (w.c.origin = origin) {
+    w.c.report_error(<emit>, message, NULL, note);
+  }
+}
+
+/* Introduce a name this pass owns. The emitted declaration spells this
+   binding, so the record a region pushes and the record its exits leave are
+   one name by construction. */
+module List _region_binding(Compiler c, String role) =>
+  c.sym.introduce(c.fresh_name(role));
+
 /* Binds `code` with each token `parts` maps replaced. A template's
    definition holds none, so only the values it applies are searched. */
 static List _bind_parts(Compiler c, Var code, Map parts) {
@@ -428,28 +450,6 @@ static Var _replaced(Var value, Map parts) {
   List list = value;
   Var head = _replaced(list.car(), parts), tail = _replaced(list.cdr(), parts);
   return head == list.car() && tail == list.cdr() ? value : cons(head, tail);
-}
-
-/* defer regions
-
-   Registration and its captured addresses share the body's region scope. */
-
-/* Lowers a defer: its record is pushed before the body and left on each
-   of the body's exits. */
-static List _lower_defer(
-  Walk &w, List body, List env, List callback, List records) {
-  Compiler c = w.c;
-  c.needs_exception = 1;
-  List record = _region_binding(c, "defer_record");
-  List cleanup = _defer_cleanup(c, record);
-  return c.bind_syntax(
-    $!{ {
-      $(_defer_record(record, callback, env, records))
-      x2c_cleanup_push(&$record);
-      $(_region(w, cleanup, body))
-      $cleanup
-    }
-  }, <block>, c.return_type);
 }
 
 /* The runtime unlinks this record and calls its thunk. */

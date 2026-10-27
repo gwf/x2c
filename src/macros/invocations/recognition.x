@@ -4,6 +4,22 @@ module typedef struct MacroPos {
   Symbol kind, const char *description, int semicolon;
 } MacroPos;
 
+static const SymbolSet alias_kinds =
+  %<<expression block-item field enumerator map-entry unit decorator>>;
+
+static const SymbolSet macro_positions =
+  %<<unit block field enumerator map-entry statement expression>>;
+
+static const MacroPos macro_position_info[] = {
+  { <unit>,       "file scope",    1 },
+  { <block-item>, "block scope",   1 },
+  { <field>,      "field scope",   1 },
+  { <enumerator>, "an enum body",  0 },
+  { <map-entry>,  "a map literal", 0 },
+  { <block-item>, "block scope",   1 },
+  { <expression>, "an expression", 0 }
+};
+
 // definition forms and keyword aliases
 
 /** Publishes a canonical `macrodef` in source order and returns `node`.
@@ -17,17 +33,6 @@ List Compiler.publish_macro_definition_node(Compiler c, List node) {
       c, %(compile-time macrodef $(c.freeze_declaration_syntax(node))),
       c.token);
   return node;
-}
-
-/* Records a public source effect where its completed definition stands. */
-module void _record_compile_time_effect(Compiler c, List row, Token start) {
-  if (!c.shallow || c.source_private || c.macro_holes ||
-      !c.sym.at_file_scope() || !c.filename) return;
-  String source = Compiler.portable_path(Path.absolute(c.filename));
-  List key = %("source-node" (compile-time $source $(start.pos)));
-  List previous = c.sym.get(key);
-  if (previous) row = %(compile-time effects $previous $row);
-  c.sym.set(key, row);
 }
 
 /** Installs included compile-time definitions in their source order.
@@ -121,18 +126,6 @@ Atom Compiler.parse_keyword_definition(Compiler c) {
   return alias;
 }
 
-/* Only the built-in sources define `with` or replace a built-in alias. */
-static int _fixed_alias(Compiler c, Atom alias) {
-  Var existing;
-  return !c.builtin_defs &&
-    (alias == <with> ||
-     (_try_macro(c, c.kw_aliases, alias, existing) &&
-      existing.list().assoc(<builtin>).int()));
-}
-
-static const SymbolSet alias_kinds =
-  %<<expression block-item field enumerator map-entry unit decorator>>;
-
 /* invocation recognition
 
    At each syntax position the parser asks whether the tokens start an
@@ -145,6 +138,160 @@ static const SymbolSet alias_kinds =
 */
 int Compiler.macro_starts_target_at(Compiler c, Symbol position) =>
   _claims(c, _peek_invocation(c, position), position);
+
+// shallow collection
+
+/** Returns how collection treats the macro invocation at the cursor.
+    `<required>` covers every file-scope `Unit` macro, declaration-unit macro,
+    named-type decorator, and local `Unit` macro whose template contains
+    protocol or adoption rows. `<tried>` covers Unit decorators and other
+    local `Unit` macros. Other invocations return zero.
+*/
+Symbol Compiler.macro_invocation_collection(Compiler c) {
+  List definition = _peek_invocation(c, <unit>);
+  if (!definition) return 0;
+  if (definition.assoc(<kind>) == <decl-unit> ||
+      definition.assoc(<target>) == <named-type>) return <required>;
+  if (definition.assoc(<target>) == <unit>) return <tried>;
+  if (definition.assoc(<kind>) != <unit>) return 0;
+  if (!definition.assoc(<local>).int()) return <required>;
+  List template = definition.assoc(<template>), bindings;
+  Var matched;
+  if (template.try_search(%(!or (protocol *) (adopt *)), matched, bindings))
+    return <required>;
+  return <tried>;
+}
+
+/** Consumes a NamedType target already projected by owning-source collection.
+    CPP scanning does not produce the declaration or parse its fields again.
+*/
+int Compiler.skip_named_type_declaration(Compiler c) {
+  List definition = _peek_invocation(c, <unit>);
+  if (!definition || definition.assoc(<target>) != <named-type>) return 0;
+  c.skip_macro_invocation();
+  _x2c_skip_shallow_expression(c, 0);
+  c.expect(<;>);
+  return 1;
+}
+
+/** Consumes a macro invocation name and its balanced argument list.
+    The invocation terminator or following decorator target remains current.
+*/
+void Compiler.skip_macro_invocation(Compiler c) {
+  int bare = _bare(c.token, _peek_invocation(c, <unit>));
+  String spelling;
+  if (c.peek(0) == <$>) c.token = _scan_name(c, spelling);
+  else c.next();
+  if (!bare && c.peek(0) == <(>) c.token = c.token.after_group();
+}
+
+/** Reports whether the macro invocation at the cursor produces file-scope
+    syntax, directly or through the target it decorates. A script unit keeps
+    such an invocation at file scope. This query does not consume tokens.
+*/
+int Compiler.macro_targets_unit(Compiler c) {
+  List definition = _peek_invocation(c, <unit>);
+  if (!definition) return 0;
+  Symbol kind = _result_kind(definition);
+  return kind == <unit> || kind == <decl-unit>;
+}
+
+// macro invocation recognition
+
+/* Records a public source effect where its completed definition stands. */
+module void _record_compile_time_effect(Compiler c, List row, Token start) {
+  if (!c.shallow || c.source_private || c.macro_holes ||
+      !c.sym.at_file_scope() || !c.filename) return;
+  String source = Compiler.portable_path(Path.absolute(c.filename));
+  List key = %("source-node" (compile-time $source $(start.pos)));
+  List previous = c.sym.get(key);
+  if (previous) row = %(compile-time effects $previous $row);
+  c.sym.set(key, row);
+}
+
+/* Only the built-in sources define `with` or replace a built-in alias. */
+static int _fixed_alias(Compiler c, Atom alias) {
+  Var existing;
+  return !c.builtin_defs &&
+    (alias == <with> ||
+     (_try_macro(c, c.kw_aliases, alias, existing) &&
+      existing.list().assoc(<builtin>).int()));
+}
+
+module Atom _name(Compiler c) {
+  String spelling;
+  Token end = _scan_name(c, spelling);
+  if (!spelling)
+    $fail.macros_macro_name(c, end);
+  c.token = end;
+  return Atom.intern(spelling);
+}
+
+/* Scans the dotted name after the current `$` without consuming tokens.
+   A component after a dot may be a keyword, as in `$error.arg.void`.
+   Returns the token after the name, or the token where a name component is
+   missing with `spelling` set to NULL. */
+module Token _scan_name(Compiler c, String &spelling) {
+  Token token = c.token, String name = NULL;
+  do {
+    token = Token.skip_trivia(token + 1);
+    if (token.type != <ident> &&
+        !(name && scan_keyword_type(token.text, token.text.len()))) {
+      name = NULL;
+      break;
+    }
+    name = name ? %"$name.$(token.text)" : token.text;
+    token = Token.skip_trivia(token + 1);
+  } while (token.type == <.>);
+  spelling = name;
+  return token;
+}
+
+module List _lookup(Compiler c, Atom name, Token invocation) {
+  Var stored;
+  String spelling = name.str();
+  if (!_try_macro(c, c.macros, name, stored))
+    $fail.macros_macro_unbound(c, invocation, spelling);
+  return stored;
+}
+
+/* Includes publish names immediately. Decode a template into this unit's
+   bindings only when it is used, keeping the result in the same name map. */
+module int _try_macro(Compiler c, Map definitions, Atom name, Var &stored) {
+  if (!definitions.try_get(name, stored)) return 0;
+  if (stored ~= %(imported-macro ?definition)) {
+    stored = _rebind_imported(c, c.thaw_declaration_syntax(definition));
+    c.sym.put(definitions, name, stored);
+  }
+  return 1;
+}
+
+/* Cached templates retain global references across symbol-table resets.
+   Bind those names in the current global scope without replaying imports. */
+module Var _rebind_imported(Compiler c, Var stored) {
+  if (stored is not <list>) return stored;
+  List definition = stored;
+  if (definition.car() != <macrodef>) return definition;
+  return _rebind_globals(c, definition);
+}
+
+/* Binds each identifier of cached syntax in the current global scope. */
+module List _rebind_globals(Compiler c, List syntax) {
+  Map replacements = {};
+  _reference_bindings(c, syntax, replacements);
+  return replacements.len() ? _replace_bindings(syntax, replacements) : syntax;
+}
+
+static void _reference_bindings(Compiler c, List syntax, Map replacements) {
+  if (syntax ~= %(expr ? (ident ?binding))) {
+    String spelling = NULL;
+    if (Ast.try_binding(binding, NULL, spelling))
+      replacements[binding] = c.sym.reference_global($(spelling));
+    return;
+  }
+  foreach (Var child in syntax)
+    if (child is <list>) _reference_bindings(c, child, replacements);
+}
 
 /* An invocation is claimed where its result fits. A statement or map entry
    that does not fit parses as an expression. Elsewhere a `$` name, or an
@@ -184,19 +331,6 @@ static Type _meta_callee(Compiler c) {
   c.token = start;
   return type;
 }
-
-static const SymbolSet macro_positions =
-  %<<unit block field enumerator map-entry statement expression>>;
-
-static const MacroPos macro_position_info[] = {
-  { <unit>,       "file scope",    1 },
-  { <block-item>, "block scope",   1 },
-  { <field>,      "field scope",   1 },
-  { <enumerator>, "an enum body",  0 },
-  { <map-entry>,  "a map literal", 0 },
-  { <block-item>, "block scope",   1 },
-  { <expression>, "an expression", 0 }
-};
 
 module const MacroPos *_position(Symbol position) =>
   &macro_position_info[macro_positions.index(position)];
@@ -248,26 +382,6 @@ module List _peek_invocation(Compiler c, Symbol position) {
        ? definition : NULL;
 }
 
-/* Scans the dotted name after the current `$` without consuming tokens.
-   A component after a dot may be a keyword, as in `$error.arg.void`.
-   Returns the token after the name, or the token where a name component is
-   missing with `spelling` set to NULL. */
-module Token _scan_name(Compiler c, String &spelling) {
-  Token token = c.token, String name = NULL;
-  do {
-    token = Token.skip_trivia(token + 1);
-    if (token.type != <ident> &&
-        !(name && scan_keyword_type(token.text, token.text.len()))) {
-      name = NULL;
-      break;
-    }
-    name = name ? %"$name.$(token.text)" : token.text;
-    token = Token.skip_trivia(token + 1);
-  } while (token.type == <.>);
-  spelling = name;
-  return token;
-}
-
 /* An identifier invoking a decorator without explicit parameters has no
    argument list. */
 module int _bare(Token invocation, List definition) =>
@@ -293,116 +407,4 @@ module List _take_invocation(Compiler c, Symbol position) {
       !_try_macro(c, c.macros, name, existing))
     _unbound(c, name.str(), invocation);
   return _lookup(c, name, invocation);
-}
-
-module Atom _name(Compiler c) {
-  String spelling;
-  Token end = _scan_name(c, spelling);
-  if (!spelling)
-    $fail.macros_macro_name(c, end);
-  c.token = end;
-  return Atom.intern(spelling);
-}
-
-module List _lookup(Compiler c, Atom name, Token invocation) {
-  Var stored;
-  String spelling = name.str();
-  if (!_try_macro(c, c.macros, name, stored))
-    $fail.macros_macro_unbound(c, invocation, spelling);
-  return stored;
-}
-
-/* Includes publish names immediately. Decode a template into this unit's
-   bindings only when it is used, keeping the result in the same name map. */
-module int _try_macro(Compiler c, Map definitions, Atom name, Var &stored) {
-  if (!definitions.try_get(name, stored)) return 0;
-  if (stored ~= %(imported-macro ?definition)) {
-    stored = _rebind_imported(c, c.thaw_declaration_syntax(definition));
-    c.sym.put(definitions, name, stored);
-  }
-  return 1;
-}
-
-// shallow collection
-
-/** Returns how collection treats the macro invocation at the cursor.
-    `<required>` covers every file-scope `Unit` macro, declaration-unit macro,
-    named-type decorator, and local `Unit` macro whose template contains
-    protocol or adoption rows. `<tried>` covers Unit decorators and other
-    local `Unit` macros. Other invocations return zero.
-*/
-Symbol Compiler.macro_invocation_collection(Compiler c) {
-  List definition = _peek_invocation(c, <unit>);
-  if (!definition) return 0;
-  if (definition.assoc(<kind>) == <decl-unit> ||
-      definition.assoc(<target>) == <named-type>) return <required>;
-  if (definition.assoc(<target>) == <unit>) return <tried>;
-  if (definition.assoc(<kind>) != <unit>) return 0;
-  if (!definition.assoc(<local>).int()) return <required>;
-  List template = definition.assoc(<template>), bindings;
-  Var matched;
-  if (template.try_search(%(!or (protocol *) (adopt *)), matched, bindings))
-    return <required>;
-  return <tried>;
-}
-
-/** Consumes a macro invocation name and its balanced argument list.
-    The invocation terminator or following decorator target remains current.
-*/
-void Compiler.skip_macro_invocation(Compiler c) {
-  int bare = _bare(c.token, _peek_invocation(c, <unit>));
-  String spelling;
-  if (c.peek(0) == <$>) c.token = _scan_name(c, spelling);
-  else c.next();
-  if (!bare && c.peek(0) == <(>) c.token = c.token.after_group();
-}
-
-/** Consumes a NamedType target already projected by owning-source collection.
-    CPP scanning does not produce the declaration or parse its fields again.
-*/
-int Compiler.skip_named_type_declaration(Compiler c) {
-  List definition = _peek_invocation(c, <unit>);
-  if (!definition || definition.assoc(<target>) != <named-type>) return 0;
-  c.skip_macro_invocation();
-  _x2c_skip_shallow_expression(c, 0);
-  c.expect(<;>);
-  return 1;
-}
-
-/** Reports whether the macro invocation at the cursor produces file-scope
-    syntax, directly or through the target it decorates. A script unit keeps
-    such an invocation at file scope. This query does not consume tokens.
-*/
-int Compiler.macro_targets_unit(Compiler c) {
-  List definition = _peek_invocation(c, <unit>);
-  if (!definition) return 0;
-  Symbol kind = _result_kind(definition);
-  return kind == <unit> || kind == <decl-unit>;
-}
-
-/* Cached templates retain global references across symbol-table resets.
-   Bind those names in the current global scope without replaying imports. */
-module Var _rebind_imported(Compiler c, Var stored) {
-  if (stored is not <list>) return stored;
-  List definition = stored;
-  if (definition.car() != <macrodef>) return definition;
-  return _rebind_globals(c, definition);
-}
-
-/* Binds each identifier of cached syntax in the current global scope. */
-module List _rebind_globals(Compiler c, List syntax) {
-  Map replacements = {};
-  _reference_bindings(c, syntax, replacements);
-  return replacements.len() ? _replace_bindings(syntax, replacements) : syntax;
-}
-
-static void _reference_bindings(Compiler c, List syntax, Map replacements) {
-  if (syntax ~= %(expr ? (ident ?binding))) {
-    String spelling = NULL;
-    if (Ast.try_binding(binding, NULL, spelling))
-      replacements[binding] = c.sym.reference_global($(spelling));
-    return;
-  }
-  foreach (Var child in syntax)
-    if (child is <list>) _reference_bindings(c, child, replacements);
 }

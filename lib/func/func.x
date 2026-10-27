@@ -82,16 +82,69 @@ static struct Func {
   unsigned char data[];
 };
 
-static size_t _context_offset(void) {
-  size_t alignment = _Alignof(max_align_t);
-  size_t remainder = sizeof(struct Func) % alignment;
-  return remainder ? sizeof(struct Func) + alignment - remainder
-                   : sizeof(struct Func);
+// calls
+
+/** Prepares an explicit List splice only after the fixed parameters of a
+    List rest binding.
+    Raises `<bad-types>` when the splice occupies a fixed parameter or the
+    binding has no List rest.
+*/
+FuncArg x2c_func_splice_argument(Func fn, unsigned index, List items) {
+  _check_splice(fn, index, 1);
+  return FuncArg.splice(items);
 }
 
-static void *_context(Func f) => (unsigned char *) f + _context_offset();
+/** Marks an explicit List splice in a rest tail. The List is borrowed until
+    the synchronous call completes; ordinary List values remain one element.
+*/
+FuncArg FuncArg.splice(List items) =>
+  (FuncArg) { .data.value = items, .reference_type = %(splice) };
 
-// calls
+/** Prepares an explicit Map splice only after the fixed parameters of a
+    Map rest binding.
+    Raises `<bad-types>` when the splice occupies a fixed parameter or the
+    binding has no Map rest.
+*/
+FuncArg x2c_func_map_splice_argument(Func fn, unsigned index, Map entries) {
+  _check_splice(fn, index, 2);
+  return FuncArg.splice_map(entries);
+}
+
+/** Marks an explicit Map splice in a Map rest tail. The Map is borrowed
+    until the synchronous call completes.
+*/
+FuncArg FuncArg.splice_map(Map entries) =>
+  (FuncArg) { .data.value = entries, .reference_type = %(splice) };
+
+/** Constructs a `Func` argument borrowing a typed lvalue address.
+    The address and canonical `type` must remain valid through `Func.apply`;
+    an optional reference may use a null address. This constructor performs
+    no validation. Compiler-generated adapters use the checked reference
+    reader before calling native code.
+*/
+inline FuncArg FuncArg.reference(const void *reference, List type) =>
+  (FuncArg) { .data.reference = reference, .reference_type = type };
+
+/** Applies `fn` to one argument passed by value.
+    `value` travels as `FuncArg.value` carries it, so a callback with a
+    reference parameter raises `<bad-types>`. Returns, owns, and raises as
+    `Func.apply` does.
+*/
+inline Var Func.apply_value(Func fn, Var value) {
+  FuncArg arguments[1] = { FuncArg.value(value) };
+  return fn.apply(1, arguments);
+}
+
+/** Applies `fn` to two arguments passed by value, `left` then `right`.
+    Each travels as `Func.apply_value` carries its argument. Returns, owns,
+    and raises as `Func.apply` does.
+*/
+inline Var Func.apply_values(Func fn, Var left, Var right) {
+  FuncArg arguments[2] = { FuncArg.value(left), FuncArg.value(right) };
+  return fn.apply(2, arguments);
+}
+
+
 
 /** Invokes a bound native function synchronously and returns its boxed result.
     `argv` is borrowed only for the call. Value bits are passed by value;
@@ -124,128 +177,11 @@ Var Func.apply(Func f, unsigned argc, const FuncArg *argv) {
   return _apply_rest(f, argc, argv);
 }
 
-/* Keep tail construction and its temporary array off the fixed-call path. */
-static Var _apply_rest(Func f, unsigned argc, const FuncArg *argv) {
-  unsigned fixed = f.nparams - 1;
-  if (argc < fixed) $error.apply.arity(f.sig, fixed, argc);
-  FuncArg packed[f.nparams];
-  if (fixed) memcpy(packed, argv, fixed * sizeof(FuncArg));
-  packed[fixed] = f.rest == 2
-    ? FuncArg.value(_map_tail(f.sig, fixed, argc, argv))
-    : FuncArg.value(_list_tail(f.sig, fixed, argc, argv));
-  return f.adapter(f, packed);
-}
-
-static List _list_tail(
-  List sig, unsigned fixed, unsigned argc, const FuncArg *argv) {
-  List rest = NULL;
-  for (unsigned i = argc; i > fixed; i--) {
-    unsigned index = i - 1;
-    if (argv[index].reference_type == %(splice)) {
-      List items = argv[index].data.value;
-      rest = items.append(rest);
-    }
-    else rest = cons(_tail_value(sig, argv, index), rest);
-  }
-  return rest;
-}
-
-static Map _map_tail(
-  List sig, unsigned fixed, unsigned argc, const FuncArg *argv) {
-  Map tail = Map.new();
-  for (unsigned i = fixed; i < argc; i++) {
-    if (argv[i].reference_type == %(splice)) {
-      tail.merge(argv[i].data.value);
-      continue;
-    }
-    if (i + 1 == argc) $error.apply.arity(sig, argc + 1, argc);
-    Var key = _tail_value(sig, argv, i++);
-    tail.set(key, _tail_value(sig, argv, i));
-  }
-  return tail;
-}
-
-/* A trailing value is passed by value and is not void. */
-static Var _tail_value(List sig, const FuncArg *argv, unsigned index) {
-  if (argv[index].reference_type) $error.arg.value(sig, index);
-  Var value = argv[index].data.value;
-  if (value is void) $error.arg.void(sig, index);
-  return value;
-}
-
 /** Constructs a `Func` argument by copying one `Var` value.
     Pointer-bearing payload storage is not copied or retained and must outlive
     the call that consumes the argument.
 */
 inline FuncArg FuncArg.value(Var value) => (FuncArg) { .data.value = value };
-
-/** Marks an explicit List splice in a rest tail. The List is borrowed until
-    the synchronous call completes; ordinary List values remain one element.
-*/
-FuncArg FuncArg.splice(List items) =>
-  (FuncArg) { .data.value = items, .reference_type = %(splice) };
-
-/** Marks an explicit Map splice in a Map rest tail. The Map is borrowed
-    until the synchronous call completes.
-*/
-FuncArg FuncArg.splice_map(Map entries) =>
-  (FuncArg) { .data.value = entries, .reference_type = %(splice) };
-
-/** Prepares an explicit List splice only after the fixed parameters of a
-    List rest binding.
-    Raises `<bad-types>` when the splice occupies a fixed parameter or the
-    binding has no List rest.
-*/
-FuncArg x2c_func_splice_argument(Func fn, unsigned index, List items) {
-  _check_splice(fn, index, 1);
-  return FuncArg.splice(items);
-}
-
-/** Prepares an explicit Map splice only after the fixed parameters of a
-    Map rest binding.
-    Raises `<bad-types>` when the splice occupies a fixed parameter or the
-    binding has no Map rest.
-*/
-FuncArg x2c_func_map_splice_argument(Func fn, unsigned index, Map entries) {
-  _check_splice(fn, index, 2);
-  return FuncArg.splice_map(entries);
-}
-
-static void _check_splice(Func fn, unsigned index, int rest) {
-  if (!fn) $error.apply.args();
-  if (fn.rest != rest || index < fn.nparams - 1) {
-    List sig = fn.sig;
-    $error.arg.value(sig, index);
-  }
-}
-
-/** Constructs a `Func` argument borrowing a typed lvalue address.
-    The address and canonical `type` must remain valid through `Func.apply`;
-    an optional reference may use a null address. This constructor performs
-    no validation. Compiler-generated adapters use the checked reference
-    reader before calling native code.
-*/
-inline FuncArg FuncArg.reference(const void *reference, List type) =>
-  (FuncArg) { .data.reference = reference, .reference_type = type };
-
-/** Applies `fn` to one argument passed by value.
-    `value` travels as `FuncArg.value` carries it, so a callback with a
-    reference parameter raises `<bad-types>`. Returns, owns, and raises as
-    `Func.apply` does.
-*/
-inline Var Func.apply_value(Func fn, Var value) {
-  FuncArg arguments[1] = { FuncArg.value(value) };
-  return fn.apply(1, arguments);
-}
-
-/** Applies `fn` to two arguments passed by value, `left` then `right`.
-    Each travels as `Func.apply_value` carries its argument. Returns, owns,
-    and raises as `Func.apply` does.
-*/
-inline Var Func.apply_values(Func fn, Var left, Var right) {
-  FuncArg arguments[2] = { FuncArg.value(left), FuncArg.value(right) };
-  return fn.apply(2, arguments);
-}
 
 /* adapter arguments
 
@@ -276,16 +212,6 @@ List x2c_func_reference_type(Func fn, unsigned argc, unsigned index) {
   List parameter = _parameter(fn, index);
   return _is_reference(parameter) ? parameter.cdr() : NULL;
 }
-
-static List _parameter(Func fn, unsigned index) {
-  if (!fn || index >= fn.nparams) return NULL;
-  List params = fn.params;
-  while (params && index--) params = params.cdr();
-  return params && params.car() is <list> ? params.car() : NULL;
-}
-
-static int _is_reference(List parameter) =>
-  parameter && (parameter.car() == <&> || parameter.car() == <opt-ref>);
 
 /** Checks and converts value argument `i`, reporting its position.
     Generated adapters call this once per value parameter before unboxing, so a
@@ -380,57 +306,6 @@ void *x2c_func_declared_reference_argument(
   Func fn, const FuncArg *argv, unsigned i, List declared_target, List want) =>
   _reference_argument(fn, argv, i, declared_target, want);
 
-/* Returns reference argument `i` after checking its declared source type.
-    The adapter supplies the pointee type it will cast to.
-    `argv` must address the prepared argument array and `i` must be in bounds;
-    generated adapters establish both facts.
-    Raises: `<bad-types>` when the carrier is a value, its address is null for
-    a required reference, the `Func` signature and adapter disagree, its type
-    differs, or conversion would discard a qualifier. It does not return on
-    failure.
-*/
-static void *_reference_argument(
-  Func fn, const FuncArg *argv, unsigned i, List declared_target, List want) {
-  List declared = _parameter(fn, i), source = argv[i].reference_type;
-  int signature_reference = _is_reference(declared);
-  List target = signature_reference ? declared.cdr() : NULL;
-  if (!source ||
-      (!argv[i].data.reference && declared.car() != <opt-ref>) ||
-      !signature_reference || !want ||
-      target != declared_target ||
-      (!_reference_type_accepts(want, source) &&
-       !_reference_type_accepts(declared_target, source))) {
-    List sig = fn ? fn.sig : NULL;
-    $error.arg.ref(sig, i, source, want);
-  }
-  return (void *) argv[i].data.reference;
-}
-
-/* A reference aliases the source object itself, so only that object's leading
-   qualifiers may be strengthened. The remaining declarator must be exact:
-   accepting int * as const int * would expose int ** as const int **. */
-static int _reference_type_accepts(List target, List source) {
-  unsigned target_qualifiers = _type_qualifiers(target);
-  unsigned source_qualifiers = _type_qualifiers(source);
-  return !(source_qualifiers & ~target_qualifiers) &&
-         target == source;
-}
-
-static unsigned _type_qualifiers(List &cursor) {
-  unsigned qualifiers = 0;
-  while (cursor && cursor.car() is <symbol>) {
-    Symbol head = cursor.car();
-    switch (head) {
-      case <const>:    qualifiers |= 1; break;
-      case <volatile>: qualifiers |= 2; break;
-      case <restrict>: qualifiers |= 4; break;
-      default: return qualifiers;
-    }
-    cursor = cursor.cdr();
-  }
-  return qualifiers;
-}
-
 // construction
 
 /** Builds a native-function binding in the current `Scope`.
@@ -492,41 +367,6 @@ Func x2c_func_shared(FuncAdapter adapter, List signature) {
   return fn;
 }
 
-/* Constructors accept canonical `((func (ptype ...)) rtype ...)` Lists. The
-   pattern checks only that outer shape; compiler-generated adapters
-   interpret the parameters and result. */
-static Func _new(
-  FuncAdapter adapter, List signature, int rest,
-  const void *context, size_t context_size) {
-  if (!adapter) $error.bind.sig(signature);
-  List params = NULL;
-  if (signature ~= %((func (!is ?captured type list)) ? *))
-    params = captured;
-  if (!params) $error.bind.sig(signature);
-  if (context_size && !context)
-    $error.context.source();
-  size_t context_offset = _context_offset();
-  if (context_size > SIZE_MAX - context_offset)
-    $error.context.size(context_size);
-  Var last = params.last();
-  if (last == %(.... "List")) rest = 1;
-  else if (last == %(.... "Map")) rest = 2;
-  else if (rest && last != %("List"))
-    $error.bind.sig(signature);
-  int n = params.len();
-  int void_params = n == 1 && params.car() is <list> &&
-                    params.car() == %(void);
-  Func fn = xcalloc(1, context_offset + context_size);
-  fn.sig = signature;
-  fn.params = void_params ? NULL : params;
-  fn.adapter = adapter;
-  fn.rest = rest;
-  fn.context_size = context_size;
-  fn.nparams = void_params ? 0 : n;
-  if (context_size) memcpy(_context(fn), context, context_size);
-  return fn;
-}
-
 // access and boxing
 
 /** Returns a native binding's borrowed canonical signature.
@@ -570,4 +410,166 @@ Var Func.var(Func function) => Var.new(<func>, function);
 Func Var.func(Var v) {
   if (v is not <func>) $error.box.type(v.tag());
   return v.pointer();
+}
+
+static void _check_splice(Func fn, unsigned index, int rest) {
+  if (!fn) $error.apply.args();
+  if (fn.rest != rest || index < fn.nparams - 1) {
+    List sig = fn.sig;
+    $error.arg.value(sig, index);
+  }
+}
+
+/* Keep tail construction and its temporary array off the fixed-call path. */
+static Var _apply_rest(Func f, unsigned argc, const FuncArg *argv) {
+  unsigned fixed = f.nparams - 1;
+  if (argc < fixed) $error.apply.arity(f.sig, fixed, argc);
+  FuncArg packed[f.nparams];
+  if (fixed) memcpy(packed, argv, fixed * sizeof(FuncArg));
+  packed[fixed] = f.rest == 2
+    ? FuncArg.value(_map_tail(f.sig, fixed, argc, argv))
+    : FuncArg.value(_list_tail(f.sig, fixed, argc, argv));
+  return f.adapter(f, packed);
+}
+
+static List _list_tail(
+  List sig, unsigned fixed, unsigned argc, const FuncArg *argv) {
+  List rest = NULL;
+  for (unsigned i = argc; i > fixed; i--) {
+    unsigned index = i - 1;
+    if (argv[index].reference_type == %(splice)) {
+      List items = argv[index].data.value;
+      rest = items.append(rest);
+    }
+    else rest = cons(_tail_value(sig, argv, index), rest);
+  }
+  return rest;
+}
+
+static Map _map_tail(
+  List sig, unsigned fixed, unsigned argc, const FuncArg *argv) {
+  Map tail = Map.new();
+  for (unsigned i = fixed; i < argc; i++) {
+    if (argv[i].reference_type == %(splice)) {
+      tail.merge(argv[i].data.value);
+      continue;
+    }
+    if (i + 1 == argc) $error.apply.arity(sig, argc + 1, argc);
+    Var key = _tail_value(sig, argv, i++);
+    tail.set(key, _tail_value(sig, argv, i));
+  }
+  return tail;
+}
+
+/* A trailing value is passed by value and is not void. */
+static Var _tail_value(List sig, const FuncArg *argv, unsigned index) {
+  if (argv[index].reference_type) $error.arg.value(sig, index);
+  Var value = argv[index].data.value;
+  if (value is void) $error.arg.void(sig, index);
+  return value;
+}
+
+static List _parameter(Func fn, unsigned index) {
+  if (!fn || index >= fn.nparams) return NULL;
+  List params = fn.params;
+  while (params && index--) params = params.cdr();
+  return params && params.car() is <list> ? params.car() : NULL;
+}
+
+static int _is_reference(List parameter) =>
+  parameter && (parameter.car() == <&> || parameter.car() == <opt-ref>);
+
+/* Returns reference argument `i` after checking its declared source type.
+    The adapter supplies the pointee type it will cast to.
+    `argv` must address the prepared argument array and `i` must be in bounds;
+    generated adapters establish both facts.
+    Raises: `<bad-types>` when the carrier is a value, its address is null for
+    a required reference, the `Func` signature and adapter disagree, its type
+    differs, or conversion would discard a qualifier. It does not return on
+    failure.
+*/
+static void *_reference_argument(
+  Func fn, const FuncArg *argv, unsigned i, List declared_target, List want) {
+  List declared = _parameter(fn, i), source = argv[i].reference_type;
+  int signature_reference = _is_reference(declared);
+  List target = signature_reference ? declared.cdr() : NULL;
+  if (!source ||
+      (!argv[i].data.reference && declared.car() != <opt-ref>) ||
+      !signature_reference || !want ||
+      target != declared_target ||
+      (!_reference_type_accepts(want, source) &&
+       !_reference_type_accepts(declared_target, source))) {
+    List sig = fn ? fn.sig : NULL;
+    $error.arg.ref(sig, i, source, want);
+  }
+  return (void *) argv[i].data.reference;
+}
+
+/* A reference aliases the source object itself, so only that object's leading
+   qualifiers may be strengthened. The remaining declarator must be exact:
+   accepting int * as const int * would expose int ** as const int **. */
+static int _reference_type_accepts(List target, List source) {
+  unsigned target_qualifiers = _type_qualifiers(target);
+  unsigned source_qualifiers = _type_qualifiers(source);
+  return !(source_qualifiers & ~target_qualifiers) &&
+         target == source;
+}
+
+static unsigned _type_qualifiers(List &cursor) {
+  unsigned qualifiers = 0;
+  while (cursor && cursor.car() is <symbol>) {
+    Symbol head = cursor.car();
+    switch (head) {
+      case <const>:    qualifiers |= 1; break;
+      case <volatile>: qualifiers |= 2; break;
+      case <restrict>: qualifiers |= 4; break;
+      default: return qualifiers;
+    }
+    cursor = cursor.cdr();
+  }
+  return qualifiers;
+}
+
+/* Constructors accept canonical `((func (ptype ...)) rtype ...)` Lists. The
+   pattern checks only that outer shape; compiler-generated adapters
+   interpret the parameters and result. */
+static Func _new(
+  FuncAdapter adapter, List signature, int rest,
+  const void *context, size_t context_size) {
+  if (!adapter) $error.bind.sig(signature);
+  List params = NULL;
+  if (signature ~= %((func (!is ?captured type list)) ? *))
+    params = captured;
+  if (!params) $error.bind.sig(signature);
+  if (context_size && !context)
+    $error.context.source();
+  size_t context_offset = _context_offset();
+  if (context_size > SIZE_MAX - context_offset)
+    $error.context.size(context_size);
+  Var last = params.last();
+  if (last == %(.... "List")) rest = 1;
+  else if (last == %(.... "Map")) rest = 2;
+  else if (rest && last != %("List"))
+    $error.bind.sig(signature);
+  int n = params.len();
+  int void_params = n == 1 && params.car() is <list> &&
+                    params.car() == %(void);
+  Func fn = xcalloc(1, context_offset + context_size);
+  fn.sig = signature;
+  fn.params = void_params ? NULL : params;
+  fn.adapter = adapter;
+  fn.rest = rest;
+  fn.context_size = context_size;
+  fn.nparams = void_params ? 0 : n;
+  if (context_size) memcpy(_context(fn), context, context_size);
+  return fn;
+}
+
+static void *_context(Func f) => (unsigned char *) f + _context_offset();
+
+static size_t _context_offset(void) {
+  size_t alignment = _Alignof(max_align_t);
+  size_t remainder = sizeof(struct Func) % alignment;
+  return remainder ? sizeof(struct Func) + alignment - remainder
+                   : sizeof(struct Func);
 }

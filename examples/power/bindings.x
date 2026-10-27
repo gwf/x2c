@@ -7,9 +7,6 @@ typedef struct Reading {
   int humidity;
 } Reading;
 
-int Reading.comfort(Reading reading) =>
-  reading.celsius * 2 - reading.humidity / 10;
-
 /* A delegate field answers a dotted call the outer type does not define,
    so a Station reads like the Reading it carries. */
 typedef struct Station {
@@ -20,15 +17,6 @@ typedef struct Station {
 /* Self promises the receiver's own typedef, so a Trail stays a Trail
    instead of decaying to the List underneath it. */
 typedef List Trail;
-
-Self Trail.record(Self trail, Var sample) => cons(sample, trail);
-
-/* A reference parameter aliases the caller's object: the body reads and
-   writes it as an ordinary int, and the call site writes no `&`. */
-static void widen(int &low, int &high) {
-  low -= 1;
-  high += 1;
-}
 
 int main(void) {
   Station station = { { 21, 40 }, "north ridge" };
@@ -58,4 +46,16 @@ int main(void) {
   printf("adjusted %d %d comfort %d\n",
          station.latest.celsius, station.latest.humidity, station.comfort());
   return 0;
+}
+
+int Reading.comfort(Reading reading) =>
+  reading.celsius * 2 - reading.humidity / 10;
+
+Self Trail.record(Self trail, Var sample) => cons(sample, trail);
+
+/* A reference parameter aliases the caller's object: the body reads and
+   writes it as an ordinary int, and the call site writes no `&`. */
+static void widen(int &low, int &high) {
+  low -= 1;
+  high += 1;
 }

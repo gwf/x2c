@@ -4,38 +4,6 @@
 
 static threaded struct ErrorThreadState error_thread;
 
-module ErrorThreadState _thread(void) {
-  ErrorThreadState state = &error_thread;
-  if (!state.bound) state.bound = ERROR_DEFAULT_BOUND;
-  return state;
-}
-
-/* the error floor
-
-   The floor reports a failure that the rich error path cannot handle and
-   aborts. It is reachable before initialization, after shutdown, and when
-   raising has re-entered itself, so it allocates nothing and calls nothing
-   that can. */
-
-module void _floor(Symbol code, const char *why) {
-  char spelling[SYMBOL_MAX_5BIT + 1] = { 0 };
-  code.decode(spelling);
-  fprintf(
-    stderr, "x2c error floor: <%s>: %s\n", spelling, why ? why : "unknown");
-  fflush(stderr);
-  abort();
-}
-
-/* Pushes the thread's error scope unless it is already on top, and answers
-   whether the caller must pop it. */
-module int _scope_push(Symbol code, const char *message) {
-  ErrorThreadState state = _thread();
-  if (Scope.top() == &state.scope) return 0;
-  Scope.push(&state.scope);
-  if (Scope.top() != &state.scope) _floor(code, message);
-  return 1;
-}
-
 // lifecycle
 
 /** Initializes the current thread's `Error` runtime without lifecycle
@@ -84,6 +52,18 @@ void Error.shutdown_raw(void) {
   }
 }
 
+/** Reports whether the rich `Error` runtime can currently accept raises.
+    This is per-thread state and is false before initialization and after
+    shutdown.
+*/
+int Error.ready(void) => x2c_error_runtime_ready;
+
+module ErrorThreadState _thread(void) {
+  ErrorThreadState state = &error_thread;
+  if (!state.bound) state.bound = ERROR_DEFAULT_BOUND;
+  return state;
+}
+
 /* Reclaims the registrations the handler stack no longer names. `exit()` can
    run shutdown from inside a handler callback, which dispatch has hidden
    along with every registration it already offered the error to, or from
@@ -108,8 +88,28 @@ static void _reclaim_hidden(ErrorThreadState state) {
   }
 }
 
-/** Reports whether the rich `Error` runtime can currently accept raises.
-    This is per-thread state and is false before initialization and after
-    shutdown.
-*/
-int Error.ready(void) => x2c_error_runtime_ready;
+/* Pushes the thread's error scope unless it is already on top, and answers
+   whether the caller must pop it. */
+module int _scope_push(Symbol code, const char *message) {
+  ErrorThreadState state = _thread();
+  if (Scope.top() == &state.scope) return 0;
+  Scope.push(&state.scope);
+  if (Scope.top() != &state.scope) _floor(code, message);
+  return 1;
+}
+
+/* the error floor
+
+   The floor reports a failure that the rich error path cannot handle and
+   aborts. It is reachable before initialization, after shutdown, and when
+   raising has re-entered itself, so it allocates nothing and calls nothing
+   that can. */
+
+module void _floor(Symbol code, const char *why) {
+  char spelling[SYMBOL_MAX_5BIT + 1] = { 0 };
+  code.decode(spelling);
+  fprintf(
+    stderr, "x2c error floor: <%s>: %s\n", spelling, why ? why : "unknown");
+  fflush(stderr);
+  abort();
+}

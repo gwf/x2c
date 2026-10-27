@@ -1,11 +1,39 @@
 /*  initialization.x -- construct once-only file initialization */
 
+// initializers
+
+static macro Decorator $initializer_body(Function $function, Stmt @body) {
+  @body
+}
+
+static macro Decorator $initialized_entry(
+  Function $function, Expr $guard, Expr $entry, Stmt @body) {
+  if (!$guard) $entry();
+  @body
+}
+
 // initialization syntax
 
 /** Returns the function `type name(void)` running `body`. */
 List Compiler.initializer_function(
   Compiler c, Type type, List name, List body) =>
   c.rebuild_unit_function($!Unit{ $type $name(void) { @body } });
+
+/** Returns `function` with its entry setup: the protocol initializer and
+    the type initializer run once, and a `guarded` entry calls the region's
+    initializer unless its guard is set.
+*/
+List Init.enter(Init &i, List function, int guarded) {
+  if (function ~=
+      %(function ? (bind (binding ? ?(String name)) ?) (block *body))) {
+    if (name == "x2c_initialize_protocols")
+      return _protocol_initializer(i.c, function, body);
+    if (i.initializer && name == i.initializer)
+      return _replace_body(i.c, function, _statements(i, NULL, body));
+    if (guarded) return _guarded(i, function, body);
+  }
+  return function;
+}
 
 /** Returns a run-once initializer body: `before`, then a return when
    `guard` is set that sets it otherwise, then `after`.
@@ -14,6 +42,48 @@ List Compiler.run_once_body(Compiler c, List before, List guard, List after) {
   List flag = $!int{ $guard };
   List test = c.rebuild_statement($!{ if ($flag) return; $flag = 1; }).cdr();
   return List.concat(before, test, after);
+}
+
+/** Returns the statements queued for `phase`, in the order they were added. */
+List Compiler.init_statements(Compiler c, Symbol phase) =>
+  c.pending.area(phase);
+
+// construct once-only file initialization
+
+/* An initializer runs `entry` and its run-once test, then the `<prepare>`
+   and `<statics>` areas, its own `body`, the `<finish>` area, and the
+   shutdown registration. Cache graphs that require the initializer's own
+   String/List canonicalizer go in `<finish>`; all other cache and static
+   setup keeps its pre-body order. */
+static List _statements(Init &i, List entry, List body) {
+  Compiler c = i.c;
+  List queued = List.concat(
+    c.init_statements(<prepare>), c.init_statements(<statics>), body,
+    c.init_statements(<finish>), i.shutdown);
+  return c.run_once_body(entry, i.guard, queued);
+}
+
+/* `function` calls the region's initializer unless its guard is set. */
+static List _guarded(Init &i, List function, List body) {
+  Macro shape = $initialized_entry;
+  List guard = i.guard, condition = $!int{ $guard };
+  List callee = %(expr ((func ((void))) void) (ident $(i.entry)));
+  return i.c.rebuild_function(function, shape(condition, callee, body));
+}
+
+/* Install generated built-in protocol methods before any ordinary file
+   constructor can create a String- or List-backed cache. */
+static List _protocol_initializer(Compiler c, List function, List body) {
+  List guard = c.sym.introduce("_x2c_gensym_protocol_guard_");
+  List declaration = c.initialization_guard(guard);
+  List queued = c.init_statements(<protocol>).append(body);
+  return _replace_body(
+    c, function, c.run_once_body($(declaration), guard, queued));
+}
+
+module List _replace_body(Compiler c, List function, List statements) {
+  Macro shape = $initializer_body;
+  return c.rebuild_function(function, shape(statements));
 }
 
 /* Consume the initialization state completed by cache setup. `source`
@@ -44,22 +114,6 @@ static void _prepare(Init &i, List source) {
   if (_cache_only(c)) i.reachable = _cache_reachable(source);
 }
 
-/** Returns `function` with its entry setup: the protocol initializer and
-    the type initializer run once, and a `guarded` entry calls the region's
-    initializer unless its guard is set.
-*/
-List Init.enter(Init &i, List function, int guarded) {
-  if (function ~=
-      %(function ? (bind (binding ? ?(String name)) ?) (block *body))) {
-    if (name == "x2c_initialize_protocols")
-      return _protocol_initializer(i.c, function, body);
-    if (i.initializer && name == i.initializer)
-      return _replace_body(i.c, function, _statements(i, NULL, body));
-    if (guarded) return _guarded(i, function, body);
-  }
-  return function;
-}
-
 /* A source file guards its public entries. The protocol bootstrap
    functions are never guarded, and a cache-only file guards only the
    entries that reach a cache. */
@@ -76,18 +130,6 @@ static int _protocol_bootstrap(String name) =>
   name == "x2c_initialize_protocols" ||
   name == "x2c_register_builtin_descriptor" ||
   name == "x2c_try_register_tagged_descriptor";
-
-// initializers
-
-static macro Decorator $initializer_body(Function $function, Stmt @body) {
-  @body
-}
-
-static macro Decorator $initialized_entry(
-  Function $function, Expr $guard, Expr $entry, Stmt @body) {
-  if (!$guard) $entry();
-  @body
-}
 
 /* The synthetic initializer runs `entry` before its guard. Without a type
    initializer it is a constructor that runs protocol setup; as a
@@ -112,42 +154,6 @@ static List _synthesize(Init &i, List arms) {
   List statements =
     _statements(i, _within_definitions(arms, Ast.entry_call(entry)), NULL);
   return i.c.initializer_function(type, binding, statements);
-}
-
-/* An initializer runs `entry` and its run-once test, then the `<prepare>`
-   and `<statics>` areas, its own `body`, the `<finish>` area, and the
-   shutdown registration. Cache graphs that require the initializer's own
-   String/List canonicalizer go in `<finish>`; all other cache and static
-   setup keeps its pre-body order. */
-static List _statements(Init &i, List entry, List body) {
-  Compiler c = i.c;
-  List queued = List.concat(
-    c.init_statements(<prepare>), c.init_statements(<statics>), body,
-    c.init_statements(<finish>), i.shutdown);
-  return c.run_once_body(entry, i.guard, queued);
-}
-
-/* `function` calls the region's initializer unless its guard is set. */
-static List _guarded(Init &i, List function, List body) {
-  Macro shape = $initialized_entry;
-  List guard = i.guard, condition = $!int{ $guard };
-  List callee = %(expr ((func ((void))) void) (ident $(i.entry)));
-  return i.c.rebuild_function(function, shape(condition, callee, body));
-}
-
-module List _replace_body(Compiler c, List function, List statements) {
-  Macro shape = $initializer_body;
-  return c.rebuild_function(function, shape(statements));
-}
-
-/* Install generated built-in protocol methods before any ordinary file
-   constructor can create a String- or List-backed cache. */
-static List _protocol_initializer(Compiler c, List function, List body) {
-  List guard = c.sym.introduce("_x2c_gensym_protocol_guard_");
-  List declaration = c.initialization_guard(guard);
-  List queued = c.init_statements(<protocol>).append(body);
-  return _replace_body(
-    c, function, c.run_once_body($(declaration), guard, queued));
 }
 
 /* The registration of the unit's shutdown function, under the arms that
@@ -193,10 +199,6 @@ static List _within_definitions(List found, List statements) {
       out.push(item);
   return out.list_free();
 }
-
-/** Returns the statements queued for `phase`, in the order they were added. */
-List Compiler.init_statements(Compiler c, Symbol phase) =>
-  c.pending.area(phase);
 
 /* cache-only files
 

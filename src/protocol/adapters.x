@@ -36,64 +36,6 @@ static macro Expression $note.protocol_collision_source_notes(
     "$($second) default source: $($second_value)"
   );
 
-static void _report_requirement(
-  ProtocolAdapters &a, List failure) {
-  Type base = a.base, participant = a.participant;
-  List dedupe =
-    $("protocol-adapter-requirement", base, participant, failure.car());
-  if (dedupe in a.c.protocol_helpers) return;
-  a.c.protocol_helpers[dedupe] = 1;
-  List row = _visible_adoption(a.c, base, participant);
-  a.c.diagnostics.report(
-    <protocol>, _requirement_detail(base, participant, failure),
-    _adoption_location(row), NULL);
-}
-
-static void _report_collision(
-  Compiler c, Type participant, String member, Symbol kind, List first,
-  List second) {
-  (Type first_base, String first_source, Type first_expected) = first.cdr();
-  (Type second_base, String second_source, Type second_expected) =
-    second.cdr();
-  List dedupe = $("protocol-generated-collision", participant, member);
-  if (dedupe in c.protocol_helpers) return;
-  c.protocol_helpers[dedupe] = 1;
-  int linkage_conflict = kind == <linkage>;
-  String participant_repr = _type_spelling(participant);
-  int incompatible_signatures = first_expected != second_expected;
-  String message = $reason.protocol_collision_prefix(member, participant_repr);
-  String owners = _adoption_spelling(first_base, participant) + " and " +
-                  _adoption_spelling(second_base, participant);
-  if (linkage_conflict)
-    message += $reason.protocol_collision_linkage(owners);
-  else if (incompatible_signatures)
-    message += $reason.protocol_collision_signature(owners);
-  else
-    message += $reason.protocol_collision_ambiguous(
-      owners, participant_repr, member);
-
-  List notes = _collision_notes(kind, first, second);
-  List row = _visible_adoption(c, first_base, participant);
-  c.diagnostics.report(<protocol>, message, _adoption_location(row), notes);
-}
-
-static List _collision_notes(Symbol kind, List first, List second) {
-  (Type first_base, String first_source, Type first_expected,
-   Symbol first_storage) = first.cdr();
-  (Type second_base, String second_source, Type second_expected,
-   Symbol second_storage) = second.cdr();
-  String first_repr = _type_spelling(first_base);
-  String second_repr = _type_spelling(second_base);
-  if (kind == <linkage>)
-    return $note.protocol_collision_linkage_notes(
-      first_repr, second_repr, first_storage, second_storage);
-  if (first_expected != second_expected)
-    return $note.protocol_collision_signature_notes(
-      first_repr, second_repr, first_expected, second_expected);
-  return $note.protocol_collision_source_notes(
-    first_repr, second_repr, first_source, second_source);
-}
-
 /* adapter generation
 
    Resolved conformances become native aliases here, and `conform` forms
@@ -176,14 +118,6 @@ void Compiler.install_generated_protocol_symbols(Compiler c) {
   conformances.free();
 }
 
-/* Publish resolved external signatures before their adapters are generated. */
-static void _install_generated(
-  Compiler c, Type participant, String member, Type signature) {
-  String generated = _member_spelling(participant, member);
-  c.sym.define_global($("generated-protocol", generated), %(generated));
-  c.sym.define_global($(generated), signature);
-}
-
 /** Reports whether a generated member names a native protocol host function.
     Its defining header supplies the alias instead of a C prototype.
 */
@@ -195,6 +129,18 @@ int Compiler.native_protocol_alias(Compiler c, String name) {
         if (_member_spelling(participant, row.car()) == name) return 1;
   return 0;
 }
+
+// alias insertion
+
+/** Remembers a source typedef's declaration and visibility, which native
+    alias insertion reads for its participant.
+*/
+void Compiler.record_source_typedef(
+  Compiler c, String name, List declaration, int private) {
+  c.protocol_helpers[$("source-typedef", name)] = $(declaration, private);
+}
+
+// protocol adapter presentation and native alias placement
 
 // Numeric participants other than Symbol keep their native operators.
 static int _numeric_participant(Compiler c, Type participant) =>
@@ -280,9 +226,6 @@ static List _present(ProtocolAdapters &a, List row) {
   return NULL;
 }
 
-static int _has_descriptor(ProtocolAdapters &a) =>
-  a.base === %("Var") && !a.shares_var_tag;
-
 static List _default_part(
   ProtocolAdapters &a, String member, Type expected) {
   List decision = _generated_owner(a.c, a.participant, member);
@@ -320,6 +263,64 @@ static List _inherited_part(
   return NULL;
 }
 
+static void _report_requirement(
+  ProtocolAdapters &a, List failure) {
+  Type base = a.base, participant = a.participant;
+  List dedupe =
+    $("protocol-adapter-requirement", base, participant, failure.car());
+  if (dedupe in a.c.protocol_helpers) return;
+  a.c.protocol_helpers[dedupe] = 1;
+  List row = _visible_adoption(a.c, base, participant);
+  a.c.diagnostics.report(
+    <protocol>, _requirement_detail(base, participant, failure),
+    _adoption_location(row), NULL);
+}
+
+static void _report_collision(
+  Compiler c, Type participant, String member, Symbol kind, List first,
+  List second) {
+  (Type first_base, String first_source, Type first_expected) = first.cdr();
+  (Type second_base, String second_source, Type second_expected) =
+    second.cdr();
+  List dedupe = $("protocol-generated-collision", participant, member);
+  if (dedupe in c.protocol_helpers) return;
+  c.protocol_helpers[dedupe] = 1;
+  int linkage_conflict = kind == <linkage>;
+  String participant_repr = _type_spelling(participant);
+  int incompatible_signatures = first_expected != second_expected;
+  String message = $reason.protocol_collision_prefix(member, participant_repr);
+  String owners = _adoption_spelling(first_base, participant) + " and " +
+                  _adoption_spelling(second_base, participant);
+  if (linkage_conflict)
+    message += $reason.protocol_collision_linkage(owners);
+  else if (incompatible_signatures)
+    message += $reason.protocol_collision_signature(owners);
+  else
+    message += $reason.protocol_collision_ambiguous(
+      owners, participant_repr, member);
+
+  List notes = _collision_notes(kind, first, second);
+  List row = _visible_adoption(c, first_base, participant);
+  c.diagnostics.report(<protocol>, message, _adoption_location(row), notes);
+}
+
+static List _collision_notes(Symbol kind, List first, List second) {
+  (Type first_base, String first_source, Type first_expected,
+   Symbol first_storage) = first.cdr();
+  (Type second_base, String second_source, Type second_expected,
+   Symbol second_storage) = second.cdr();
+  String first_repr = _type_spelling(first_base);
+  String second_repr = _type_spelling(second_base);
+  if (kind == <linkage>)
+    return $note.protocol_collision_linkage_notes(
+      first_repr, second_repr, first_storage, second_storage);
+  if (first_expected != second_expected)
+    return $note.protocol_collision_signature_notes(
+      first_repr, second_repr, first_expected, second_expected);
+  return $note.protocol_collision_source_notes(
+    first_repr, second_repr, first_source, second_source);
+}
+
 /* A descriptor thunk's name and its signature with every type variable
    `Var`. */
 static List _thunk(
@@ -344,30 +345,8 @@ static List _descriptor(ProtocolAdapters &a) {
     methods, name, a.participant.var_tag(), area, @(tag ? $(tag) : NULL));
 }
 
-static List _signature_declaration(
-  Compiler c, String name, Type signature, int make_static) {
-  List parameters = signature.car().list().cadr();
-  Type result = signature.cdr();
-  Array declarations = [];
-  foreach (Type type in parameters)
-    declarations.push(type.parameter_ast(NULL));
-  List binding = c.sym.reference($(name), NULL);
-  List storage = make_static ? %(static @result) : result;
-  return %(
-    declare $storage
-      (bindings (bind $binding ((fnmod (params @(declarations.list_free()))))))
-  );
-}
-
-// alias insertion
-
-/** Remembers a source typedef's declaration and visibility, which native
-    alias insertion reads for its participant.
-*/
-void Compiler.record_source_typedef(
-  Compiler c, String name, List declaration, int private) {
-  c.protocol_helpers[$("source-typedef", name)] = $(declaration, private);
-}
+static int _has_descriptor(ProtocolAdapters &a) =>
+  a.base === %("Var") && !a.shares_var_tag;
 
 static List _native_aliases(
   Compiler c, List ast, Type base, Type participant, List rows) {
@@ -397,6 +376,21 @@ static List _native_alias(
   List native_binding = c.sym.reference($(source), NULL);
   return c.finish_foreign_alias(
     declaration, $!($signature){ $native_binding });
+}
+
+static List _signature_declaration(
+  Compiler c, String name, Type signature, int make_static) {
+  List parameters = signature.car().list().cadr();
+  Type result = signature.cdr();
+  Array declarations = [];
+  foreach (Type type in parameters)
+    declarations.push(type.parameter_ast(NULL));
+  List binding = c.sym.reference($(name), NULL);
+  List storage = make_static ? %(static @result) : result;
+  return %(
+    declare $storage
+      (bindings (bind $binding ((fnmod (params @(declarations.list_free()))))))
+  );
 }
 
 static List _insert_at_boundary(
@@ -430,4 +424,12 @@ static int _starts_private_region(List node) {
     case %(declare ?type *): return type.type().is_static();
   }
   return 0;
+}
+
+/* Publish resolved external signatures before their adapters are generated. */
+static void _install_generated(
+  Compiler c, Type participant, String member, Type signature) {
+  String generated = _member_spelling(participant, member);
+  c.sym.define_global($("generated-protocol", generated), %(generated));
+  c.sym.define_global($(generated), signature);
 }

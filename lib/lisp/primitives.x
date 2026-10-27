@@ -3,13 +3,6 @@
     Copyright (c) 2026 Gary William Flake.
 */
 
-/* primitives
-
-   The native operations Lisp code reaches through `bind`. A predicate
-   answers `<true>` or nil. */
-
-static Var _bool(int x) { if (x) return <true>; return %(); }
-
 /** Returns Lisp true for every value except nil and `void`. */
 Var lisp_truth(Var value) => _bool(value is not void && !value.is_nil());
 
@@ -47,11 +40,6 @@ Var lisp_pair(Var value) => _bool(value is <list> && !value.is_nil());
 /** Returns Lisp true when `value` is `List`-typed, including `nil`. */
 Var lisp_list(Var value) => _bool(value is <list>);
 
-static int _is_lisp_number(Var value) {
-  Symbol kind = value.kind();
-  return kind == <integer> || kind == <floating>;
-}
-
 /** Returns Lisp true when `value` has an integer or floating kind. */
 Var lisp_number(Var value) => _bool(_is_lisp_number(value));
 
@@ -69,37 +57,12 @@ Symbol lisp_type(Var value) => value.tag();
 
 // numbers
 
-/* Orders the four number classes the total order uses:
-   -inf < finite < +inf < NaN. */
-static int _number_class(Var value, long double magnitude) {
-  Symbol tag = value.tag();
-  if (tag == <-inf>) return 0;
-  if (tag == <+inf>) return 2;
-  if (tag == <nan> || magnitude != magnitude) return 3;
-  if (magnitude == 1.0L / 0.0L) return 2;
-  if (magnitude == -1.0L / 0.0L) return 0;
-  return 1;
-}
-
-/** Compares Lisp numbers by value and returns a boxed negative, zero, or
-    positive. Integer and floating encodings of one number compare equal.
-    Unlike `Var.compare`, numeric comparison does not use representation
-    rank to distinguish equal values. A nonnumeric operand raises `<bad-types>`.
-*/
-Var lisp_compare(Var a, Var b) {
-  if (!_is_lisp_number(a) || !_is_lisp_number(b))
-    raise %(bad-types (operation "lisp_compare") (left-kind $(a.kind()))
-                       (right-kind $(b.kind())));
-  Symbol ak = a.kind(), bk = b.kind();
-  long double da = ak == <floating> ? a.long_double() : 0.0L;
-  long double db = bk == <floating> ? b.long_double() : 0.0L;
-  int ca = _number_class(a, da), cb = _number_class(b, db);
-  if (ca != cb) return ca < cb ? -1 : 1;
-  if (ca != 1) return 0;
-  if (ak == <integer> && bk == <integer>) return a.integer_compare(b);
-  if (ak == <integer>) return a.integer_floating_compare(b);
-  if (bk == <integer>) return -b.integer_floating_compare(a);
-  return da < db ? -1 : da > db;
+/** Adds or concatenates every value left to right; no values gives 0. */
+Var lisp_plus(List values) {
+  Var total = 0;
+  if (values && values.car() is <string>) total = %"";
+  foreach (Var value in values) total = lisp_add(total, value);
+  return total;
 }
 
 /** Concatenates when either operand is `String`, otherwise adds dynamically.
@@ -107,14 +70,6 @@ Var lisp_compare(Var a, Var b) {
 Var lisp_add(Var a, Var b) {
   if (a is <string> || b is <string>) return %"$a$b";
   return a.binary(<+>, b);
-}
-
-/** Adds or concatenates every value left to right; no values gives 0. */
-Var lisp_plus(List values) {
-  Var total = 0;
-  if (values && values.car() is <string>) total = %"";
-  foreach (Var value in values) total = lisp_add(total, value);
-  return total;
 }
 
 /** Subtracts each later value from the first; one value negates it.
@@ -152,21 +107,6 @@ Var lisp_divide(List values) {
   return total;
 }
 
-/* Every comparison holds pairwise along the whole chain. `want` is the
-   order each neighbouring pair must have, or must avoid when `expect` is
-   zero, so `<=` and `=` read as one rule. */
-static Var _chain(List values, String operation, int want, int expect) {
-  int actual = values.len();
-  if (actual < 2)
-    raise %(bad-arity (operation $operation) (expected 2) (actual $actual));
-  for (List p = values; p.cdr(); p = p.cdr()) {
-    Var (left, right) = p;
-    int order = lisp_compare(left, right);
-    if (expect ? order != want : order == want) return _bool(0);
-  }
-  return _bool(1);
-}
-
 /** Reports whether every neighbouring pair of numbers compares equal.
     Fewer than two values raise `<bad-arity>`; a nonnumber raises
     `<bad-types>`.
@@ -197,6 +137,27 @@ Var lisp_gt_chain(List values) => _chain(values, ">", 1, 1);
 */
 Var lisp_ge_chain(List values) => _chain(values, ">=", -1, 0);
 
+/** Compares Lisp numbers by value and returns a boxed negative, zero, or
+    positive. Integer and floating encodings of one number compare equal.
+    Unlike `Var.compare`, numeric comparison does not use representation
+    rank to distinguish equal values. A nonnumeric operand raises `<bad-types>`.
+*/
+Var lisp_compare(Var a, Var b) {
+  if (!_is_lisp_number(a) || !_is_lisp_number(b))
+    raise %(bad-types (operation "lisp_compare") (left-kind $(a.kind()))
+                       (right-kind $(b.kind())));
+  Symbol ak = a.kind(), bk = b.kind();
+  long double da = ak == <floating> ? a.long_double() : 0.0L;
+  long double db = bk == <floating> ? b.long_double() : 0.0L;
+  int ca = _number_class(a, da), cb = _number_class(b, db);
+  if (ca != cb) return ca < cb ? -1 : 1;
+  if (ca != 1) return 0;
+  if (ak == <integer> && bk == <integer>) return a.integer_compare(b);
+  if (ak == <integer>) return a.integer_floating_compare(b);
+  if (bk == <integer>) return -b.integer_floating_compare(a);
+  return da < db ? -1 : da > db;
+}
+
 // strings and files
 
 /** Boxes the display `String` of `value`. */
@@ -214,10 +175,6 @@ Var lisp_substring(String string, int start, int stop) =>
 
 /** Returns a boxed lower-case copy of `string`. */
 Var lisp_string_downcase(String string) => string.lower();
-
-static char *_string_charset(Var chars) =>
-  chars.is_nil() || (chars.is_integer() && !chars.integer())
-    ? NULL : chars.string();
 
 /** Trims the bytes in `chars`, using whitespace for an empty String. */
 String lisp_string_strip(String string, Var chars) =>
@@ -259,3 +216,48 @@ Var lisp_write_file(String path, String text) {
   int wrote = !text || file.puts(text) >= 0, closed = file.close() == 0;
   return _bool(wrote && closed);
 }
+
+/* primitives
+
+   The native operations Lisp code reaches through `bind`. A predicate
+   answers `<true>` or nil. */
+
+static Var _bool(int x) { if (x) return <true>; return %(); }
+
+static int _is_lisp_number(Var value) {
+  Symbol kind = value.kind();
+  return kind == <integer> || kind == <floating>;
+}
+
+/* Every comparison holds pairwise along the whole chain. `want` is the
+   order each neighbouring pair must have, or must avoid when `expect` is
+   zero, so `<=` and `=` read as one rule. */
+static Var _chain(List values, String operation, int want, int expect) {
+  int actual = values.len();
+  if (actual < 2)
+    raise %(bad-arity (operation $operation) (expected 2) (actual $actual));
+  for (List p = values; p.cdr(); p = p.cdr()) {
+    Var (left, right) = p;
+    int order = lisp_compare(left, right);
+    if (expect ? order != want : order == want) return _bool(0);
+  }
+  return _bool(1);
+}
+
+
+
+/* Orders the four number classes the total order uses:
+   -inf < finite < +inf < NaN. */
+static int _number_class(Var value, long double magnitude) {
+  Symbol tag = value.tag();
+  if (tag == <-inf>) return 0;
+  if (tag == <+inf>) return 2;
+  if (tag == <nan> || magnitude != magnitude) return 3;
+  if (magnitude == 1.0L / 0.0L) return 2;
+  if (magnitude == -1.0L / 0.0L) return 0;
+  return 1;
+}
+
+static char *_string_charset(Var chars) =>
+  chars.is_nil() || (chars.is_integer() && !chars.integer())
+    ? NULL : chars.string();

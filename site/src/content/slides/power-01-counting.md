@@ -5,17 +5,6 @@ tab: counting
 ---
 
 ```x2c
-// Files supply lines; each line supplies words.
-Map word_count(String path) {
-  Map counts = {};
-  File input = path.open("r");
-  defer input.close();
-  foreach (String line in input)
-    foreach (String word in line.lower().words())
-      counts[word] += 1;
-  return counts;
-}
-
 ~int main(int argc, char **argv) {
 // words.txt: "Tea coffee tea" then "Milk coffee tea".
 String path = argc > 1 ? argv[1]
@@ -32,6 +21,17 @@ foreach ((String word, int n) in ranked)
   puts(%"$n $word");
 ~return 0;
 ~}
+
+// Files supply lines; each line supplies words.
+Map word_count(String path) {
+  Map counts = {};
+  File input = path.open("r");
+  defer input.close();
+  foreach (String line in input)
+    foreach (String word in line.lower().words())
+      counts[word] += 1;
+  return counts;
+}
 ```
 
 `File` iteration, `String.lower`, and `Map` updates count words without

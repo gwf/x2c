@@ -96,35 +96,6 @@ meta native String String.join(String sep, List strings) {
   return _finish(string, total);
 }
 
-/* The joined length of the `n` elements, or -1 when it cannot fit a
-   String. */
-static int _join_length(List strings, int n, int sep_len) {
-  if (sep_len && (size_t) (n - 1) > (size_t) (INT_MAX - 1) / (size_t) sep_len)
-    return -1;
-  size_t total = (size_t) (n - 1) * (size_t) sep_len;
-  foreach (String str in strings) {
-    int length = str.len();
-    if ((size_t) length > (size_t) (INT_MAX - 1) - total) return -1;
-    total += (size_t) length;
-  }
-  return (int) total;
-}
-
-static void _join_into(char *out, List strings, String sep, int sep_len) {
-  for (List p = strings; p; p = p.cdr()) {
-    String str = p.car();
-    if (str) {
-      int length = str.len();
-      memcpy(out, str, length);
-      out += length;
-    }
-    if (p.cdr() && sep) {
-      memcpy(out, sep, sep_len);
-      out += sep_len;
-    }
-  }
-}
-
 /** Pads the left side of `str` to the requested width.
     Raises: `<bad-arg>` when `fill` is NUL, `<size-limit>` when `width`
     cannot be represented, or `<alloc-fail>` when result storage cannot be
@@ -144,23 +115,6 @@ meta native String String.pad_right(String str, int width, char fill) =>
 */
 meta native String String.pad_center(String str, int width, char fill) =>
   _pad(str, width, fill, -1);
-
-/* `side` puts the padding on the left when 1, on the right when 0, and on
-   both sides when -1, with an odd byte on the right. */
-static String _pad(String str, int width, char fill, int side) {
-  if (fill == '\0') raise %(bad-arg (operation "String.pad"));
-  int length = str.len();
-  if (width <= length) return str;
-  if (width == INT_MAX)
-    raise %(size-limit (operation "String.pad") (width $width));
-  int padding = width - length, left = side ? padding : 0;
-  if (side < 0) left = padding / 2;
-  int right = padding - left, String string = String.malloc(width + 1);
-  memset(string, fill, left);
-  if (length) memcpy(string + left, str, length);
-  memset(string + left + length, fill, right);
-  return _finish(string, width);
-}
 
 /** Formats a canonical `String` from `fmt` and the trailing arguments.
     The receiver is the format `String`, so format-dependent construction reads
@@ -199,4 +153,50 @@ String String.printf(String fmt, ...) {
     return NULL;
   }
   return _finish(string, n);
+}
+
+/* The joined length of the `n` elements, or -1 when it cannot fit a
+   String. */
+static int _join_length(List strings, int n, int sep_len) {
+  if (sep_len && (size_t) (n - 1) > (size_t) (INT_MAX - 1) / (size_t) sep_len)
+    return -1;
+  size_t total = (size_t) (n - 1) * (size_t) sep_len;
+  foreach (String str in strings) {
+    int length = str.len();
+    if ((size_t) length > (size_t) (INT_MAX - 1) - total) return -1;
+    total += (size_t) length;
+  }
+  return (int) total;
+}
+
+static void _join_into(char *out, List strings, String sep, int sep_len) {
+  for (List p = strings; p; p = p.cdr()) {
+    String str = p.car();
+    if (str) {
+      int length = str.len();
+      memcpy(out, str, length);
+      out += length;
+    }
+    if (p.cdr() && sep) {
+      memcpy(out, sep, sep_len);
+      out += sep_len;
+    }
+  }
+}
+
+/* `side` puts the padding on the left when 1, on the right when 0, and on
+   both sides when -1, with an odd byte on the right. */
+static String _pad(String str, int width, char fill, int side) {
+  if (fill == '\0') raise %(bad-arg (operation "String.pad"));
+  int length = str.len();
+  if (width <= length) return str;
+  if (width == INT_MAX)
+    raise %(size-limit (operation "String.pad") (width $width));
+  int padding = width - length, left = side ? padding : 0;
+  if (side < 0) left = padding / 2;
+  int right = padding - left, String string = String.malloc(width + 1);
+  memset(string, fill, left);
+  if (length) memcpy(string + left, str, length);
+  memset(string + left + length, fill, right);
+  return _finish(string, width);
 }

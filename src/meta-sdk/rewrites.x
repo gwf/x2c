@@ -9,6 +9,87 @@ static macro Stmt $fail.meta_sdk_rewrite_pattern() =>
 static macro Stmt $fail.meta_sdk_initialization_pattern() =>
   MetaContext.reject("after-initialization requires a declaration pattern", NULL);
 
+/** Answers `Code.register_rewrite`, declared in `lib/meta.x`: the
+    pattern's form selects the family and its keys. A function rule is
+    keyed by return type, which `Compiler.normalize` dispatches once per
+    definition before its body lowers.
+*/
+Code Code.register_rewrite(Code function, List pattern, List holes) {
+  _require_expansion("Code.register_rewrite");
+  Macro shape = NULL;
+  if (pattern ~= %(macrodef *)) {
+    shape = pattern;
+    if (!holes && _function_hole(shape))
+      return _rewrite_registration(
+        function, shape, %((!and ?function (function *))), <function>,
+        %(any));
+    holes = _rewrite_holes(shape, holes);
+    pattern = shape.pattern(holes);
+  }
+  Symbol point = 0;
+  List kinds = NULL;
+  match (pattern) {
+    case %(expr ? (index ? ?)): { point = <access>; kinds = %(read); }
+    case %(expr ?type (op ?position ?left ?right)): {
+      kinds = _rule_operators(position);
+      Symbol operator = kinds.car();
+      point = operator.is_assignment_op() ? 0 : <binary>;
+      if (left ~= %(expr ? (index ? ?)) && operator.is_assignment_op())
+        point = <access>;
+      if (_rule_dynamic(type, $(left, right))) {
+        point = <binary>;
+        kinds = _rule_dynamic_kinds(kinds, <op>);
+      }
+    }
+    case %(expr ? (op ((!quote !quote) (!or ++ --)) (expr ? (index ? ?)))):
+      { point = <access>; kinds = %(prefix); }
+    case %(expr ? (postfix ? (expr ? (index ? ?)))):
+      { point = <access>; kinds = %(postfix); }
+    case %(expr ?type ((!or ?form op postfix) ?position ?operand)):
+      if (_rule_dynamic(type, $(operand))) {
+        point = <unary>;
+        kinds = _rule_dynamic_kinds(_rule_operators(position), form);
+      }
+    case %(expr ? (call (expr ? (op ((!quote !quote) .)
+            ((!quote !and) (expr ?type *)) ?)) ?)): {
+      point = <member>;
+      kinds = $(type);
+      if (type is <symbol>) holes = _unmarked(holes, type);
+    }
+    case %(expr ? (call (expr ? (ident (binding ? ?(String callee)))) ?)):
+      { point = <call>; kinds = $(callee); }
+    case %(expr ?
+           ((!or ?head array map segments dstrasgn lambda) *)):
+      { point = <literal>; kinds = $(head); }
+    case %((!quote !or)
+           ((!or ?head switch try raise match match-if dstrdecl conform)
+            *) *):
+      { point = <node>; kinds = $(head); }
+    case %((!or ?head switch try raise match match-if dstrdecl conform) *):
+      { point = <node>; kinds = $(head); }
+    case %(stmnt (expr ? (dstrasgn *))): { point = <node>; kinds = %(stmnt); }
+    case %(!or (api-source ? ? (function ?type *)) (function ?type *)):
+      { point = <function>; kinds = $(_function_rule_key(type)); }
+  }
+  if (!point) $fail.meta_sdk_rewrite_pattern();
+  return _rewrite_registration(
+    function, shape ? shape : pattern, holes, point, kinds);
+}
+
+/** Adds post-initialization block items while the declaration owner retains
+    the original declarators, their type identity, and initialization order.
+*/
+Code Code.register_after_initialization(Code c, Macro shape, List holes) {
+  _require_expansion("Code.register_after_initialization");
+  holes = _rewrite_holes(shape, holes);
+  List pattern = shape.pattern(holes);
+  if (pattern ~= %(declare *))
+    return _rewrite_registration(c, shape, holes, <decl>, %(init));
+  $fail.meta_sdk_initialization_pattern();
+}
+
+// compile-time SDK rewrites
+
 /* Default holes retain the macro's declared capture names and cardinality. */
 static List _rewrite_holes(Macro shape, List supplied) {
   if (supplied) return supplied;
@@ -97,83 +178,4 @@ static List _unmarked(List holes, Symbol mark) {
   foreach (Var hole in holes)
     kept.push(hole == %(expr $mark *) ? %(expr ? *) : hole);
   return kept.list_free();
-}
-
-/** Answers `Code.register_rewrite`, declared in `lib/meta.x`: the
-    pattern's form selects the family and its keys. A function rule is
-    keyed by return type, which `Compiler.normalize` dispatches once per
-    definition before its body lowers.
-*/
-Code Code.register_rewrite(Code function, List pattern, List holes) {
-  _require_expansion("Code.register_rewrite");
-  Macro shape = NULL;
-  if (pattern ~= %(macrodef *)) {
-    shape = pattern;
-    if (!holes && _function_hole(shape))
-      return _rewrite_registration(
-        function, shape, %((!and ?function (function *))), <function>,
-        %(any));
-    holes = _rewrite_holes(shape, holes);
-    pattern = shape.pattern(holes);
-  }
-  Symbol point = 0;
-  List kinds = NULL;
-  match (pattern) {
-    case %(expr ? (index ? ?)): { point = <access>; kinds = %(read); }
-    case %(expr ?type (op ?position ?left ?right)): {
-      kinds = _rule_operators(position);
-      Symbol operator = kinds.car();
-      point = operator.is_assignment_op() ? 0 : <binary>;
-      if (left ~= %(expr ? (index ? ?)) && operator.is_assignment_op())
-        point = <access>;
-      if (_rule_dynamic(type, $(left, right))) {
-        point = <binary>;
-        kinds = _rule_dynamic_kinds(kinds, <op>);
-      }
-    }
-    case %(expr ? (op ((!quote !quote) (!or ++ --)) (expr ? (index ? ?)))):
-      { point = <access>; kinds = %(prefix); }
-    case %(expr ? (postfix ? (expr ? (index ? ?)))):
-      { point = <access>; kinds = %(postfix); }
-    case %(expr ?type ((!or ?form op postfix) ?position ?operand)):
-      if (_rule_dynamic(type, $(operand))) {
-        point = <unary>;
-        kinds = _rule_dynamic_kinds(_rule_operators(position), form);
-      }
-    case %(expr ? (call (expr ? (op ((!quote !quote) .)
-            ((!quote !and) (expr ?type *)) ?)) ?)): {
-      point = <member>;
-      kinds = $(type);
-      if (type is <symbol>) holes = _unmarked(holes, type);
-    }
-    case %(expr ? (call (expr ? (ident (binding ? ?(String callee)))) ?)):
-      { point = <call>; kinds = $(callee); }
-    case %(expr ?
-           ((!or ?head array map segments dstrasgn lambda) *)):
-      { point = <literal>; kinds = $(head); }
-    case %((!quote !or)
-           ((!or ?head switch try raise match match-if dstrdecl conform)
-            *) *):
-      { point = <node>; kinds = $(head); }
-    case %((!or ?head switch try raise match match-if dstrdecl conform) *):
-      { point = <node>; kinds = $(head); }
-    case %(stmnt (expr ? (dstrasgn *))): { point = <node>; kinds = %(stmnt); }
-    case %(!or (api-source ? ? (function ?type *)) (function ?type *)):
-      { point = <function>; kinds = $(_function_rule_key(type)); }
-  }
-  if (!point) $fail.meta_sdk_rewrite_pattern();
-  return _rewrite_registration(
-    function, shape ? shape : pattern, holes, point, kinds);
-}
-
-/** Adds post-initialization block items while the declaration owner retains
-    the original declarators, their type identity, and initialization order.
-*/
-Code Code.register_after_initialization(Code c, Macro shape, List holes) {
-  _require_expansion("Code.register_after_initialization");
-  holes = _rewrite_holes(shape, holes);
-  List pattern = shape.pattern(holes);
-  if (pattern ~= %(declare *))
-    return _rewrite_registration(c, shape, holes, <decl>, %(init));
-  $fail.meta_sdk_initialization_pattern();
 }

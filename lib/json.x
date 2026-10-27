@@ -131,38 +131,6 @@ static struct JsonBool {
 
 static struct JsonBool _json_false = { 0 }, _json_true = { 1 };
 
-/** Boxes a JSON boolean. */
-Var JsonBool.var(JsonBool value) => Var.new(<jsonbool>, value);
-
-/** Unboxes a JSON boolean from a `Var` produced by `JsonBool.var`. */
-meta native JsonBool Var.jsonbool(Var value) => (JsonBool) value.pointer();
-
-/** Returns `true` or `false`. */
-String JsonBool.str(JsonBool value) => value.value ? "true" : "false";
-
-/** Returns `true` or `false`. */
-String JsonBool.repr(JsonBool value) => value;
-
-/** Returns nonzero for `true`. */
-int JsonBool.truth(JsonBool value) => value.value != 0;
-
-/** Returns the JSON boolean for the truth of `value`. */
-Var Json.bool(int value) => (JsonBool) (value ? &_json_true : &_json_false);
-
-/** Reports whether `value` is a JSON boolean. */
-int Json.is_bool(Var value) => value is <jsonbool>;
-
-/** Returns 1 for JSON `true` and 0 for JSON `false`.
-    Raises: `<bad-types>` when `value` is not a JSON boolean.
-*/
-int Json.boolean(Var value) {
-  if (value is not <jsonbool>) {
-    Symbol tag = value.tag();
-    $error.boolean.type(tag);
-  }
-  return !!value.jsonbool();
-}
-
 /*  reading
 
     value  = ws (object | array | string | number | true | false | null) ws
@@ -183,6 +151,44 @@ static typedef struct Reader {
   int at, depth;
 } Reader;
 
+/*  writing
+
+    Compact output has no whitespace. Pretty output puts each member and
+    element on its own line, indented two spaces per level, and writes empty
+    containers as `[]` and `{}`; it matches Python's
+    `json.dumps(value, indent=2, sort_keys=True, ensure_ascii=False)` for
+    integers, strings, and containers.
+*/
+
+/* One write: the output Buffer and whether it is indented. */
+static typedef struct Writer {
+  Buffer out;
+  int pretty;
+} Writer;
+
+/** Boxes a JSON boolean. */
+Var JsonBool.var(JsonBool value) => Var.new(<jsonbool>, value);
+
+/** Returns `true` or `false`. */
+String JsonBool.repr(JsonBool value) => value;
+
+/** Returns nonzero for `true`. */
+int JsonBool.truth(JsonBool value) => value.value != 0;
+
+/** Reports whether `value` is a JSON boolean. */
+int Json.is_bool(Var value) => value is <jsonbool>;
+
+/** Returns 1 for JSON `true` and 0 for JSON `false`.
+    Raises: `<bad-types>` when `value` is not a JSON boolean.
+*/
+int Json.boolean(Var value) {
+  if (value is not <jsonbool>) {
+    Symbol tag = value.tag();
+    $error.boolean.type(tag);
+  }
+  return !!value.jsonbool();
+}
+
 /** Returns the x2c value of the JSON text `source`.
     Objects become `Map`s, arrays `Array`s, and strings `String`s. A number
     without a fraction or exponent is an `int` `Var` when it fits, then a
@@ -201,6 +207,39 @@ meta native Var Json.parse(String source) => _parse(source, NULL);
     `Json.parse` does, with a `path` detail added.
 */
 Var Json.read_file(Path path) => _parse(path.read_text(), path);
+
+/** Returns the JSON boolean for the truth of `value`. */
+Var Json.bool(int value) => (JsonBool) (value ? &_json_true : &_json_false);
+
+/** Returns `value` as JSON text indented two spaces per level.
+    Raises: the causes of `Var.json`.
+*/
+String Var.pretty_json(Var value) => _json(value, 1);
+
+/** Replaces the file at `path` with `value` as compact JSON text.
+    Raises: the causes of `Var.json` and `Path.write_text`.
+*/
+void Json.write_file(Var value, Path path) => path.write_text(value.json());
+
+/** Returns `value` as compact JSON text.
+    `Map` names are written in byte order and must be `String`s or
+    `Symbol`s with distinct spellings; a `Symbol` value is written as a
+    string. A `List` is written as an array. A `double` is written with the
+    fewest digits that read back to the same value. Each maximal ill-formed
+    UTF-8 subsequence in a string is written as U+FFFD, as Python and
+    JavaScript decoders replace it.
+    Raises: `<bad-types>` for a value or name JSON cannot hold, `<bad-arg>`
+    for a `String` and a `Symbol` name with the same spelling,
+    `<conv-range>` for NaN or an infinity, or `<size-limit>` for nesting
+    deeper than 512 levels.
+*/
+String Var.json(Var value) => _json(value, 0);
+
+/** Unboxes a JSON boolean from a `Var` produced by `JsonBool.var`. */
+meta native JsonBool Var.jsonbool(Var value) => (JsonBool) value.pointer();
+
+/** Returns `true` or `false`. */
+String JsonBool.str(JsonBool value) => value.value ? "true" : "false";
 
 static Var _parse(String source, String path) {
   Reader r = {.text = source ? source : "", .path = path};
@@ -434,44 +473,26 @@ static void _fail(Reader &r, String why) {
   $error.read.text(why, offset, line, column);
 }
 
-/*  writing
+/* UTF-8
 
-    Compact output has no whitespace. Pretty output puts each member and
-    element on its own line, indented two spaces per level, and writes empty
-    containers as `[]` and `{}`; it matches Python's
-    `json.dumps(value, indent=2, sort_keys=True, ensure_ascii=False)` for
-    integers, strings, and containers.
-*/
+   Reading validates each unescaped sequence with `scan_utf8_length` and
+   decodes `\u` escapes; writing replaces each ill-formed subpart with
+   U+FFFD. */
 
-/* One write: the output Buffer and whether it is indented. */
-static typedef struct Writer {
-  Buffer out;
-  int pretty;
-} Writer;
-
-/** Returns `value` as compact JSON text.
-    `Map` names are written in byte order and must be `String`s or
-    `Symbol`s with distinct spellings; a `Symbol` value is written as a
-    string. A `List` is written as an array. A `double` is written with the
-    fewest digits that read back to the same value. Each maximal ill-formed
-    UTF-8 subsequence in a string is written as U+FFFD, as Python and
-    JavaScript decoders replace it.
-    Raises: `<bad-types>` for a value or name JSON cannot hold, `<bad-arg>`
-    for a `String` and a `Symbol` name with the same spelling,
-    `<conv-range>` for NaN or an infinity, or `<size-limit>` for nesting
-    deeper than 512 levels.
-*/
-String Var.json(Var value) => _json(value, 0);
-
-/** Returns `value` as JSON text indented two spaces per level.
-    Raises: the causes of `Var.json`.
-*/
-String Var.pretty_json(Var value) => _json(value, 1);
-
-/** Replaces the file at `path` with `value` as compact JSON text.
-    Raises: the causes of `Var.json` and `Path.write_text`.
-*/
-void Json.write_file(Var value, Path path) => path.write_text(value.json());
+static void _write_code_point(Buffer out, long point) {
+  if (point < 0x80) {
+    out.write_char(point);
+    return;
+  }
+  char bytes[4];
+  int length = point < 0x800 ? 2 : point < 0x10000 ? 3 : 4;
+  for (int i = length - 1; i > 0; i--) {
+    bytes[i] = 0x80 | (point & 0x3F);
+    point >>= 6;
+  }
+  bytes[0] = (0xF0 << (4 - length)) | point;
+  out.write_len(bytes, length);
+}
 
 static String _json(Var value, int pretty) {
   Buffer out = auto Buffer.new(0);
@@ -596,25 +617,4 @@ static void _write_double(Buffer out, double number) {
   }
   out.write(text);
   if (!strpbrk(text, ".e")) out.write(".0");
-}
-
-/* UTF-8
-
-   Reading validates each unescaped sequence with `scan_utf8_length` and
-   decodes `\u` escapes; writing replaces each ill-formed subpart with
-   U+FFFD. */
-
-static void _write_code_point(Buffer out, long point) {
-  if (point < 0x80) {
-    out.write_char(point);
-    return;
-  }
-  char bytes[4];
-  int length = point < 0x800 ? 2 : point < 0x10000 ? 3 : 4;
-  for (int i = length - 1; i > 0; i--) {
-    bytes[i] = 0x80 | (point & 0x3F);
-    point >>= 6;
-  }
-  bytes[0] = (0xF0 << (4 - length)) | point;
-  out.write_len(bytes, length);
 }

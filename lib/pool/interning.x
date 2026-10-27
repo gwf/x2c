@@ -22,34 +22,6 @@ $map.storage.family(
   _table_hash, _table_key_equal, _table_value_equal, _table_value_valid,
   _record_key, _record_value, _reinsert_error, _insert_error, 0);
 
-/* The stored value equal to `key`, which hashes to `key_hash`, or `void`. */
-static Var _get_hashed(
-  PoolTable table, Var key, unsigned key_hash) {
-  long index = table.find_hashed(&key, key_hash);
-  return index < 0 ? void : *_record_key(table, (unsigned) index);
-}
-
-/* String construction already knows the bytes, length, and content hash.
-   Probe the shared table without boxing a temporary String query. */
-static String _get_string(
-  PoolTable table, const char *bytes, int length, unsigned hash) {
-  unsigned *hashes = table.hashes;
-  unsigned mask = table.mask, start = hash & mask, capacity = table.capacity;
-  for (unsigned distance = 0; distance < capacity; distance++) {
-    unsigned index = (start + distance) & mask, stored = hashes[index];
-    if (!stored) break;
-    if (stored == hash) {
-      Var entry = *_record_key(table, index);
-      String string = entry.string_payload();
-      if (string && strncmp(string, bytes, (size_t) length) == 0 &&
-          ((const char *) string)[length] == '\0')
-        return string;
-    }
-    if (((capacity + index - (stored & mask)) & mask) < distance) break;
-  }
-  return NULL;
-}
-
 /** Finds an existing nonempty String from borrowed NUL-free bytes and their
     x2c_hash_bytes content hash, searching inner and its ancestors.
     Returns NULL on a miss and allocates nothing. Native comparisons cannot
@@ -67,51 +39,7 @@ String x2c_pool_lookup_string(
   return NULL;
 }
 
-/* The stored value equal to `object`, which is installed when absent. */
-module Var _setdefault(
-  PoolTable table, Var object, int &inserted) {
-  return *table.get_or_insert(&object, &object, &inserted);
-}
-
 // interning
-
-/** Returns the first value equal to `key` from `inner` outward, or `void`.
-    The returned identity remains owned by the level where it was found.
-*/
-Var Pool.lookup(Pool inner, Var key) {
-  /* Every level probes the same key, so it is hashed once here for the whole
-     chain. An empty chain probes nothing and hashes nothing, so a void key
-     raises only when a level is probed. */
-  if (!inner) return void;
-  unsigned key_hash = key.hash();
-  /* Without workers no level can be contended, so the chain is probed
-     without the locks and the `defer` that releases them. That registration
-     measured 3% of a translation's instructions. */
-  if (pool_multithreaded) return _lookup_locked(inner, key, key_hash);
-  for (Pool pool = inner; pool; pool = pool.up) {
-    Var found = _get_hashed(pool.table, key, key_hash);
-    if (found is not void) return found;
-  }
-  return void;
-}
-
-/* `_get_hashed` raises for any cause from custom equality, so the
-   branch mutex is released through one hoisted `defer`. A per-iteration
-   `defer` measured 4% of a translation against 3% for this form. `locked` is
-   the level whose mutex this call still holds. */
-static Var _lookup_locked(Pool inner, Var key, unsigned key_hash) {
-  Pool locked = NULL;
-  defer _unlock(locked);
-  for (Pool pool = inner; pool; pool = pool.up) {
-    _lock(pool);
-    locked = pool;
-    Var found = _get_hashed(pool.table, key, key_hash);
-    _unlock(pool);
-    locked = NULL;
-    if (found is not void) return found;
-  }
-  return void;
-}
 
 /** Returns the canonical value equal to `object`, installing it when absent.
     A miss lands in `inner`. `alloc` is the object's `Pool`-owned allocation;
@@ -146,14 +74,26 @@ Var Pool.intern(Pool inner, Var object, void *alloc) {
   return canonical;
 }
 
-/* Probes and installs in `inner` alone, with the pool locked. Sets `discard`
-   when a concurrent equal entry already holds the level. */
-static Var _intern_locked(Pool inner, Var object, int &discard) {
-  int inserted;
-  Var stored = _setdefault(inner.table, object, inserted);
-  if (inserted) inner.interned++;
-  else discard = 1;
-  return stored;
+
+
+/** Returns the first value equal to `key` from `inner` outward, or `void`.
+    The returned identity remains owned by the level where it was found.
+*/
+Var Pool.lookup(Pool inner, Var key) {
+  /* Every level probes the same key, so it is hashed once here for the whole
+     chain. An empty chain probes nothing and hashes nothing, so a void key
+     raises only when a level is probed. */
+  if (!inner) return void;
+  unsigned key_hash = key.hash();
+  /* Without workers no level can be contended, so the chain is probed
+     without the locks and the `defer` that releases them. That registration
+     measured 3% of a translation's instructions. */
+  if (pool_multithreaded) return _lookup_locked(inner, key, key_hash);
+  for (Pool pool = inner; pool; pool = pool.up) {
+    Var found = _get_hashed(pool.table, key, key_hash);
+    if (found is not void) return found;
+  }
+  return void;
 }
 
 /** Returns the canonical value equal to `object`, installing it in `inner`.
@@ -206,12 +146,15 @@ int Pool.owns(Pool pool, Var key) {
   return _owns_locked(pool, key);
 }
 
-module int _owns_locked(Pool pool, Var key) {
-  Var found = _get_hashed(pool.table, key, key.hash());
-  return found is not void && found.same(key);
-}
-
 // lifecycle
+
+/** Returns an unnamed child of `inner`, without making it thread-active.
+    Ownership, failures, and the comparison with `Pool.open` follow
+    `Pool.retain_named`.
+*/
+Pool Pool.retain(Pool inner) => inner.retain_named(NULL);
+
+
 
 /** Returns a new named child of `inner` without making it thread-active.
     The child owns its control `Scope`, table, and mutex and must be released
@@ -241,22 +184,6 @@ Pool Pool.retain_named(Pool inner, const char *name) {
   return pool;
 }
 
-/* A child's table starts at the capacity the last released direct child's
-   table reached. */
-static unsigned _child_capacity(Pool inner) {
-  if (!inner) return 2;
-  _lock(inner);
-  unsigned capacity = inner.child_capacity;
-  _unlock(inner);
-  return capacity;
-}
-
-/** Returns an unnamed child of `inner`, without making it thread-active.
-    Ownership, failures, and the comparison with `Pool.open` follow
-    `Pool.retain_named`.
-*/
-Pool Pool.retain(Pool inner) => inner.retain_named(NULL);
-
 /** Destroys one pool and returns its parent, or returns NULL for NULL input.
     Promoted slots and large allocations survive under the parent with stable
     addresses; other identities, the table, and the control `Scope` become
@@ -283,4 +210,83 @@ Pool Pool.release(Pool inner) {
   pthread_mutex_destroy(&inner.mutex);
   Scope.destroy(inner.scope);
   return up;
+}
+
+// table lookups
+
+/* String construction already knows the bytes, length, and content hash.
+   Probe the shared table without boxing a temporary String query. */
+static String _get_string(
+  PoolTable table, const char *bytes, int length, unsigned hash) {
+  unsigned *hashes = table.hashes;
+  unsigned mask = table.mask, start = hash & mask, capacity = table.capacity;
+  for (unsigned distance = 0; distance < capacity; distance++) {
+    unsigned index = (start + distance) & mask, stored = hashes[index];
+    if (!stored) break;
+    if (stored == hash) {
+      Var entry = *_record_key(table, index);
+      String string = entry.string_payload();
+      if (string && strncmp(string, bytes, (size_t) length) == 0 &&
+          ((const char *) string)[length] == '\0')
+        return string;
+    }
+    if (((capacity + index - (stored & mask)) & mask) < distance) break;
+  }
+  return NULL;
+}
+
+/* `_get_hashed` raises for any cause from custom equality, so the
+   branch mutex is released through one hoisted `defer`. A per-iteration
+   `defer` measured 4% of a translation against 3% for this form. `locked` is
+   the level whose mutex this call still holds. */
+static Var _lookup_locked(Pool inner, Var key, unsigned key_hash) {
+  Pool locked = NULL;
+  defer _unlock(locked);
+  for (Pool pool = inner; pool; pool = pool.up) {
+    _lock(pool);
+    locked = pool;
+    Var found = _get_hashed(pool.table, key, key_hash);
+    _unlock(pool);
+    locked = NULL;
+    if (found is not void) return found;
+  }
+  return void;
+}
+
+/* The stored value equal to `key`, which hashes to `key_hash`, or `void`. */
+static Var _get_hashed(
+  PoolTable table, Var key, unsigned key_hash) {
+  long index = table.find_hashed(&key, key_hash);
+  return index < 0 ? void : *_record_key(table, (unsigned) index);
+}
+
+/* Probes and installs in `inner` alone, with the pool locked. Sets `discard`
+   when a concurrent equal entry already holds the level. */
+static Var _intern_locked(Pool inner, Var object, int &discard) {
+  int inserted;
+  Var stored = _setdefault(inner.table, object, inserted);
+  if (inserted) inner.interned++;
+  else discard = 1;
+  return stored;
+}
+
+/* The stored value equal to `object`, which is installed when absent. */
+module Var _setdefault(
+  PoolTable table, Var object, int &inserted) {
+  return *table.get_or_insert(&object, &object, &inserted);
+}
+
+module int _owns_locked(Pool pool, Var key) {
+  Var found = _get_hashed(pool.table, key, key.hash());
+  return found is not void && found.same(key);
+}
+
+/* A child's table starts at the capacity the last released direct child's
+   table reached. */
+static unsigned _child_capacity(Pool inner) {
+  if (!inner) return 2;
+  _lock(inner);
+  unsigned capacity = inner.child_capacity;
+  _unlock(inner);
+  return capacity;
 }

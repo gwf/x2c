@@ -33,7 +33,7 @@ the emitted names visible in this unit. `effects` adds audit-only native
 contracts; neither input changes ordinary translation. Findings carry
 their function name and are returned without compiler diagnostics.
 
-Source: `src/regions/analysis.x:167`
+Source: `src/regions/analysis.x:51`
 
 <a id="Compiler.check_meta_regions"></a>
 #### Compiler.check_meta_regions
@@ -49,7 +49,7 @@ the bound and typed definition. The walk reads the summaries of the
 `meta` functions installed before `fn` and records the summary of `fn`
 in `meta_regions`.
 
-Source: `src/regions/analysis.x:147`
+Source: `src/regions/analysis.x:31`
 
 <a id="Compiler.check_regions"></a>
 #### Compiler.check_regions
@@ -61,7 +61,7 @@ Warns about values that can outlive the region that allocated them.
 lowering rewrites its `defer` and region forms. The call adds warnings to
 `c` and does not change `ast`.
 
-Source: `src/regions/analysis.x:126`
+Source: `src/regions/analysis.x:10`
 
 <a id="Compiler.has_region_row"></a>
 #### Compiler.has_region_row
@@ -71,7 +71,7 @@ Source: `src/regions/analysis.x:126`
 Reports whether the runtime table proves the lifetime effects of the
 native function `name`.
 
-Source: `src/regions/runtime.x:194`
+Source: `src/regions/runtime.x:187`
 
 <a id="Compiler.region_effect"></a>
 #### Compiler.region_effect
@@ -81,7 +81,7 @@ Source: `src/regions/runtime.x:194`
 The runtime table's effect row for the operation `name`, such as
 `(open scope)` or `(exit)`, or void when the table has no row.
 
-Source: `src/regions/runtime.x:199`
+Source: `src/regions/runtime.x:192`
 
 <a id="Compiler.region_result"></a>
 #### Compiler.region_result
@@ -93,7 +93,7 @@ for the active Scope, `<slot>` for the Scope its first argument names,
 `<pool>` for the canonical-value pool, or 0 when nothing is known. What
 the operation does to its arguments is a separate fact.
 
-Source: `src/regions/runtime.x:176`
+Source: `src/regions/runtime.x:169`
 
 <a id="Compiler.region_wrapper"></a>
 #### Compiler.region_wrapper
@@ -103,7 +103,7 @@ Source: `src/regions/runtime.x:176`
 Reports whether the runtime operation `name` returns its argument's
 storage unchanged, as a `Var` box or its unboxing does.
 
-Source: `src/regions/runtime.x:189`
+Source: `src/regions/runtime.x:182`
 
 ## Design notes
 

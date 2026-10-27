@@ -71,150 +71,11 @@ struct SlotWatch {
   SlotWatch parent;
 };
 
-module Var RewriteRule.var(RewriteRule rule) => Var.new(<p48>, rule);
-
-module RewriteRule Var.rewrite_rule(Var value) => value.pointer();
-
-/* A rule derives a macro's matcher now, or else on the first probe of its
-   family; a Match pattern is its own. */
-module RewriteRule _rewrite_rule(
-  Symbol point, Var kind, String name, List pattern, List holes,
-  int builtin, int prepared) {
-  RewriteRule rule = xcalloc(1, sizeof(struct RewriteRule));
-  MacroMatcher matcher = {NULL, NULL, pattern};
-  if (pattern.car() == <macrodef>) {
-    Macro shape = pattern;
-    matcher = prepared ? shape.matcher(holes) : (MacroMatcher){shape, holes};
-  }
-  *rule = (struct RewriteRule){name, point, kind, matcher, builtin, prepared};
-  return rule;
-}
-
 /* Rules the compiler prelude installs, by frozen row. Each is thawed once
    per process and shared by every unit; its matcher is derived on the first
    probe of its family. A row whose thawing records a cache key, binding, or
    origin in its unit is thawed for each unit instead. */
 static Map shipped_rules = NULL, static Scope shipped_scope = NULL;
-
-static void _shipped_shutdown(void) {
-  shipped_scope.destroy();
-  shipped_scope = NULL;
-  shipped_rules = NULL;
-}
-
-/* Registers an installed rewrite row. A prelude rule whose translator
-   this compiler does not link was added after it was built, so the form
-   keeps this compiler's own lowering, as a prelude component added after
-   it would. */
-module void _install_rewrite(Compiler c, List row) {
-  Var shared = shipped_rules ? shipped_rules[row] : void;
-  if (shared is void && c.builtin_defs) shared = _ship_rewrite(c, row);
-  if (shared is <p48>) {
-    _register_rewrite(c, shared.rewrite_rule());
-    return;
-  }
-  if (row ~= %(compile-time rewrite ?point ?kind ?name ?shape ?holes)) {
-    if (c.builtin_defs && !Compiler.links_meta_function(name)) return;
-    RewriteRule rule = _rewrite_rule(
-      point, c.thaw_declaration_syntax(kind), name,
-      c.thaw_declaration_syntax(shape), c.thaw_declaration_syntax(holes),
-      c.builtin_defs, 1);
-    _register_rewrite(c, rule);
-  }
-}
-
-/* The shared rule for a prelude row, or 0 when the row is bound to its
-   unit or names a translator the compiler does not link. The shared rule
-   derives its matcher on first use. */
-static Var _ship_rewrite(Compiler c, List row) {
-  auto (&shipped_scope) {
-    if (!shipped_rules) {
-      Scope.shutdown_hook(_shipped_shutdown);
-      shipped_rules = {};
-    }
-    _require_owned(row.try_own());
-    Var shared = 0;
-    match (row)
-      case %(compile-time rewrite ?point ?kind ?name ?shape ?holes): {
-        if (_unit_bound(row) || !Compiler.links_meta_function(name)) break;
-        List thawed = $(
-          c.thaw_declaration_syntax(kind), c.thaw_declaration_syntax(shape),
-          c.thaw_declaration_syntax(holes));
-        _require_owned(thawed.try_own());
-        Var (own_kind, own_shape, own_holes) = thawed;
-        shared = _rewrite_rule(
-          point, own_kind, name, own_shape, own_holes, 1, 0);
-      }
-    shipped_rules[row] = shared;
-    return shared;
-  }
-}
-
-module void _require_owned(int owned) {
-  if (owned) return;
-  fprintf(stderr, "x2c: could not retain a shipped rewrite rule\n");
-  abort();
-}
-
-static int _unit_bound(Var syntax) {
-  if (syntax is not <list>) return 0;
-  if (syntax ~= %((!or declaration-cache declaration-binding
-                       declaration-origin) *))
-    return 1;
-  foreach (Var child in syntax.list()) if (_unit_bound(child)) return 1;
-  return 0;
-}
-
-/* The first probe of a shared rule's family derives its matcher with the
-   process lifetime of the rule. */
-static MacroMatcher *_prepared_matcher(RewriteRule rule) {
-  if (!rule.prepared && rule.matcher.shape) {
-    auto (&shipped_scope) {
-      MacroMatcher matcher = rule.matcher.shape.matcher(rule.matcher.holes);
-      _require_owned(matcher.pattern.try_own());
-      rule.matcher = matcher;
-    }
-    rule.prepared = 1;
-  }
-  return &rule.matcher;
-}
-
-/* A coarse category selects candidates; each retained pattern decides whether
-   the translator applies. Only the active translator is excluded while its
-   replacement binds, so independent translations can compose. User rules
-   retain registration order ahead of builtin defaults. */
-module void _register_rewrite(Compiler c, RewriteRule rule) {
-  if (!c.rewrite_rules) c.rewrite_rules = {};
-  Var stored;
-  Map kinds;
-  if (c.rewrite_rules.try_get(rule.point, stored)) kinds = stored;
-  else c.rewrite_rules[rule.point] = kinds = {};
-  List rows = kinds.try_get(rule.kind, stored) ? stored.list() : NULL;
-  foreach (RewriteRule prior in rows)
-    if (prior.name == rule.name &&
-        prior.matcher.shape == rule.matcher.shape &&
-        prior.matcher.holes == rule.matcher.holes &&
-        (rule.matcher.shape || prior.matcher.pattern == rule.matcher.pattern))
-      return;
-  Array ordered = [];
-  int inserted = 0;
-  foreach (RewriteRule prior in rows) {
-    if (!rule.builtin && prior.builtin && !inserted) {
-      ordered.push(rule);
-      inserted = 1;
-    }
-    ordered.push(prior);
-  }
-  if (!inserted) ordered.push(rule);
-  kinds[rule.kind] = ordered.list_free();
-}
-
-static List _rewrite_candidates(Compiler c, Symbol point, Var kind) {
-  Var stored;
-  if (!c.rewrite_rules || !c.rewrite_rules.try_get(point, stored)) return NULL;
-  Map kinds = stored;
-  return kinds.try_get(kind, stored) ? stored.list() : NULL;
-}
 
 /** Matches the member rules registered for each field keyword that
     `aggregate` declares a field with, as `Compiler.rewrite` matches those
@@ -248,16 +109,6 @@ List Compiler.rewrite(
   Type expected, Token site) =>
   _rewrite(c, point, kind, source, position, expected, site, 0);
 
-/** Matches registered patterns for the statement `source`, which the
-    transform has lowered, then binds the first replacement as
-    `Compiler.rewrite` does. Binding keeps the source, and each part of it
-    the replacement holds, as lowered.
-*/
-List Compiler.rewrite_lowered(
-  Compiler c, Symbol point, Var kind, List source, Symbol position,
-  Type expected, Token site) =>
-  _rewrite(c, point, kind, source, position, expected, site, -1);
-
 /** Lowers `replacement`, which `Compiler.rewrite_lowered` bound for the
     lowered statement `source`, and keeps each part of `source` it holds as
     it is, so no statement rule is offered that part again.
@@ -284,6 +135,16 @@ List Compiler.rewrite_written(
   }
 }
 
+/** Matches registered patterns for the statement `source`, which the
+    transform has lowered, then binds the first replacement as
+    `Compiler.rewrite` does. Binding keeps the source, and each part of it
+    the replacement holds, as lowered.
+*/
+List Compiler.rewrite_lowered(
+  Compiler c, Symbol point, Var kind, List source, Symbol position,
+  Type expected, Token site) =>
+  _rewrite(c, point, kind, source, position, expected, site, -1);
+
 /** Binds and lowers a replacement while its rule remains active. The
     source expressions the replacement holds lower outside the rule, so a
     nested use of the rule applies again. A statement replacement, or a
@@ -300,6 +161,58 @@ List Compiler.lower_rewrite(
   Compiler c, Symbol point, Var kind, List source, Symbol position,
   Type expected, Token site) =>
   _rewrite(c, point, kind, source, position, expected, site, 1);
+
+/** Whether the rule whose meta function now runs is shipped, so that the
+    names it calls resolve to the copies the compiler links.
+*/
+int Compiler.applying_shipped(Compiler c) {
+  RewriteRule applying = c.applying ? c.applying.car() : NULL;
+  return applying && applying.builtin;
+}
+
+/** Records that binding built the statement `bound` again from `source`,
+    a value the active lowering watches, so it watches `bound` as well. A
+    statement without an origin, such as an unbraced body, keeps nothing
+    else that identifies it when a binder it uses binds again.
+*/
+void Compiler.rebound(Compiler c, Var source, List bound) {
+  SlotWatch watch = c.slot_watch;
+  if (!watch || watch.preparation || bound === source ||
+      _find_slot(watch, source) < 0)
+    return;
+  watch.values = watch.values.append($(bound));
+}
+
+/** Lowers `ast` when it is a value the active lowering watches; NULL
+    otherwise. A preparing watch also records what lowering produced. A
+    value that an enclosing replacement's source held as well lowers outside
+    that replacement's rule too, and that replacement still watches its own
+    values within it.
+*/
+Ast Compiler.watched_step(Compiler c, Ast ast) {
+  SlotWatch watch = c.slot_watch, owner = watch;
+  int slot = _find_slot(watch, ast);
+  if (slot < 0) return NULL;
+  while (owner.parent && _find_slot(owner.parent, ast) >= 0)
+    owner = owner.parent;
+  if (owner.kept) return ast;
+  Preparation *preparation = watch.preparation;
+  Effects before = {0};
+  if (preparation) before = _effects(c);
+  Ast lowered;
+  with (c.slot_watch = owner.parent, c.active_rewrites = owner.outer) {
+    lowered = c.normalize(ast);
+  }
+  if (preparation) {
+    preparation.inner = _add(preparation.inner, _since(_effects(c), before));
+    if (preparation.outputs[slot].list_payload()) preparation.repeated = 1;
+    preparation.outputs[slot] = lowered;
+    preparation.order.push(slot);
+  }
+  return lowered;
+}
+
+// rewrite registration and application
 
 /* `lower` is 1 to lower the replacement, 0 to bind it, and -1 to bind it
    around a lowered source. */
@@ -346,6 +259,69 @@ static List _rewrite(
   return NULL;
 }
 
+/* A replacement bound without lowering. A statement of the rule's kind
+   that a statement replacement holds, such as its source, and that is not
+   a part its source held, takes the rules after this one now, so lowering
+   never offers it to this rule again. With `lower` -1 the source is
+   lowered, so binding keeps it and the parts of it the replacement holds.
+   File-scope code that a shipped rule gives is written. */
+static List _bound(
+  Compiler c, Symbol point, Var kind, List source, Var result,
+  Symbol position, Type expected, Token site, int lower) {
+  if (point != <node>)
+    return _bind_replacement(c, result, position, expected);
+  Array parts = auto [];
+  _held_parts(source, point, parts);
+  if (lower) result = _kept_lowered(result, source, parts);
+  List bound = _bind_replacement(c, result, position, expected);
+  if (position == <unit>) bound = _written_support(c, bound);
+  struct SlotWatch held = {parts.list()};
+  return _bound_held(c, &held, kind, bound, position, expected, site, lower);
+}
+
+static Var _bound_held(
+  Compiler c, SlotWatch held, Symbol kind, Var ast, Symbol position,
+  Type expected, Token site, int lower) {
+  if (!Ast.contains_head(ast, kind) || _find_slot(held, ast) >= 0) return ast;
+  List node = ast;
+  if (node.car() == kind) {
+    List rewritten =
+      _rewrite(c, <node>, kind, node, position, expected, site, lower);
+    return rewritten ? rewritten : node;
+  }
+  Var child;
+  $ast.rewrite_children(
+    node, child,
+    _bound_held(c, held, kind, child, position, expected, site, lower));
+}
+
+/* The first probe of a shared rule's family derives its matcher with the
+   process lifetime of the rule. */
+static MacroMatcher *_prepared_matcher(RewriteRule rule) {
+  if (!rule.prepared && rule.matcher.shape) {
+    auto (&shipped_scope) {
+      MacroMatcher matcher = rule.matcher.shape.matcher(rule.matcher.holes);
+      _require_owned(matcher.pattern.try_own());
+      rule.matcher = matcher;
+    }
+    rule.prepared = 1;
+  }
+  return &rule.matcher;
+}
+
+module void _require_owned(int owned) {
+  if (owned) return;
+  fprintf(stderr, "x2c: could not retain a shipped rewrite rule\n");
+  abort();
+}
+
+static List _rewrite_candidates(Compiler c, Symbol point, Var kind) {
+  Var stored;
+  if (!c.rewrite_rules || !c.rewrite_rules.try_get(point, stored)) return NULL;
+  Map kinds = stored;
+  return kinds.try_get(kind, stored) ? stored.list() : NULL;
+}
+
 /* What `rule` answers for `source`. The code its meta function places
    while it runs is that rule's, as its replacement is. */
 static Var _applied(
@@ -372,38 +348,6 @@ static void _held_parts(List source, Symbol point, Array found) {
   }
 }
 
-/* A replacement bound without lowering. A statement of the rule's kind
-   that a statement replacement holds, such as its source, and that is not
-   a part its source held, takes the rules after this one now, so lowering
-   never offers it to this rule again. With `lower` -1 the source is
-   lowered, so binding keeps it and the parts of it the replacement holds.
-   File-scope code that a shipped rule gives is written. */
-static List _bound(
-  Compiler c, Symbol point, Var kind, List source, Var result,
-  Symbol position, Type expected, Token site, int lower) {
-  if (point != <node>)
-    return _bind_replacement(c, result, position, expected);
-  Array parts = auto [];
-  _held_parts(source, point, parts);
-  if (lower) result = _kept_lowered(result, source, parts);
-  List bound = _bind_replacement(c, result, position, expected);
-  if (position == <unit>) bound = _written_support(c, bound);
-  struct SlotWatch held = {parts.list()};
-  return _bound_held(c, &held, kind, bound, position, expected, site, lower);
-}
-
-/* Binds a replacement at `position`. Outside any local scope, as when the
-   transform lowers a function, a statement or expression replacement
-   declares its names in a scope of its own, so no other function sees
-   them. */
-static List _bind_replacement(
-  Compiler c, Var result, Symbol position, Type expected) {
-  int own = position != <unit> && c.sym.at_file_scope();
-  if (own) c.sym.push_new_scope();
-  defer if (own) c.sym.pop_scope();
-  return c.bind_syntax(result, position, expected);
-}
-
 /* `result` with `source` and each of its `parts` that it holds marked as
    lowered code, which binding keeps as it is. A lowered carrier binds as it
    is already. */
@@ -413,22 +357,6 @@ static Var _kept_lowered(Var result, List source, Array parts) {
   kept[(void *) source] = Code.lowered(source, NULL);
   foreach (List part in parts) kept[(void *) part] = Code.lowered(part, NULL);
   return Ast.replace_nodes(result, kept);
-}
-
-static Var _bound_held(
-  Compiler c, SlotWatch held, Symbol kind, Var ast, Symbol position,
-  Type expected, Token site, int lower) {
-  if (!Ast.contains_head(ast, kind) || _find_slot(held, ast) >= 0) return ast;
-  List node = ast;
-  if (node.car() == kind) {
-    List rewritten =
-      _rewrite(c, <node>, kind, node, position, expected, site, lower);
-    return rewritten ? rewritten : node;
-  }
-  Var child;
-  $ast.rewrite_children(
-    node, child,
-    _bound_held(c, held, kind, child, position, expected, site, lower));
 }
 
 /* A replacement definition binds at file scope and lowers as written,
@@ -454,50 +382,6 @@ module List _written_support(Compiler c, List bound) {
   RewriteRule writer = writers ? writers.car() : NULL;
   return writer && writer.builtin ? Ast.written_definitions(bound) : bound;
 }
-
-/** Whether the rule whose meta function now runs is shipped, so that the
-    names it calls resolve to the copies the compiler links.
-*/
-int Compiler.applying_shipped(Compiler c) {
-  RewriteRule applying = c.applying ? c.applying.car() : NULL;
-  return applying && applying.builtin;
-}
-
-/* Binds, converts, and lowers a replacement as written. */
-static List _lowered(
-  Compiler c, Var result, Symbol position, Type expected, Token site) {
-  List bound = _bind_replacement(c, result, position, expected);
-  if (position == <expression>) {
-    bound = c.convert_expression(bound, expected);
-    Type actual = bound.cadr();
-    if (actual.canonicalize() != expected.canonicalize())
-      $fail.macros_result_type(c, site, expected, actual);
-  }
-  return c.normalize(bound);
-}
-
-static Effects _effects(Compiler c) {
-  PendingMark mark = c.pending.checkpoint();
-  int pending = 0;
-  for (int i = 0; i < PENDING_AREAS; i++) pending += mark.lengths[i];
-  return (Effects){
-    c.sym.introduced(), c.names.issued, c.origins.len(), pending,
-    c.placements.len(), c.diagnostics.entries.len()};
-}
-
-static Effects _since(Effects after, Effects before) => (Effects){
-  after.bindings - before.bindings, after.names - before.names,
-  after.origins - before.origins, after.pending - before.pending,
-  after.placements - before.placements,
-  after.diagnostics - before.diagnostics};
-
-static Effects _add(Effects a, Effects b) => (Effects){
-  a.bindings + b.bindings, a.names + b.names, a.origins + b.origins,
-  a.pending + b.pending, a.placements + b.placements,
-  a.diagnostics + b.diagnostics};
-
-static int _same(Effects a, Effects b) =>
-  !memcmp(&a, &b, sizeof(Effects));
 
 /* Lowers `result` from the skeleton its template and slot signatures
    prepared in this unit, preparing one on their first use. The source's
@@ -548,6 +432,24 @@ static List _prepared(
   return lowered;
 }
 
+static Effects _effects(Compiler c) {
+  PendingMark mark = c.pending.checkpoint();
+  int pending = 0;
+  for (int i = 0; i < PENDING_AREAS; i++) pending += mark.lengths[i];
+  return (Effects){
+    c.sym.introduced(), c.names.issued, c.origins.len(), pending,
+    c.placements.len(), c.diagnostics.entries.len()};
+}
+
+static Effects _since(Effects after, Effects before) => (Effects){
+  after.bindings - before.bindings, after.names - before.names,
+  after.origins - before.origins, after.pending - before.pending,
+  after.placements - before.placements,
+  after.diagnostics - before.diagnostics};
+
+static int _same(Effects a, Effects b) =>
+  !memcmp(&a, &b, sizeof(Effects));
+
 /* Lowers `result` as written, with the source parts in it lowered outside
    the active rule. */
 static List _watched(
@@ -561,6 +463,31 @@ static List _watched(
   with (c.slot_watch = &watch) {
     return _lowered(c, result, position, expected, site);
   }
+}
+
+/* Binds, converts, and lowers a replacement as written. */
+static List _lowered(
+  Compiler c, Var result, Symbol position, Type expected, Token site) {
+  List bound = _bind_replacement(c, result, position, expected);
+  if (position == <expression>) {
+    bound = c.convert_expression(bound, expected);
+    Type actual = bound.cadr();
+    if (actual.canonicalize() != expected.canonicalize())
+      $fail.macros_result_type(c, site, expected, actual);
+  }
+  return c.normalize(bound);
+}
+
+/* Binds a replacement at `position`. Outside any local scope, as when the
+   transform lowers a function, a statement or expression replacement
+   declares its names in a scope of its own, so no other function sees
+   them. */
+static List _bind_replacement(
+  Compiler c, Var result, Symbol position, Type expected) {
+  int own = position != <unit> && c.sym.at_file_scope();
+  if (own) c.sym.push_new_scope();
+  defer if (own) c.sym.pop_scope();
+  return c.bind_syntax(result, position, expected);
 }
 
 /* Pushes each expression within `source`, which a translator may insert
@@ -707,44 +634,119 @@ static int _find_slot(SlotWatch watch, Ast ast) {
   return -1;
 }
 
-/** Records that binding built the statement `bound` again from `source`,
-    a value the active lowering watches, so it watches `bound` as well. A
-    statement without an origin, such as an unbraced body, keeps nothing
-    else that identifies it when a binder it uses binds again.
-*/
-void Compiler.rebound(Compiler c, Var source, List bound) {
-  SlotWatch watch = c.slot_watch;
-  if (!watch || watch.preparation || bound === source ||
-      _find_slot(watch, source) < 0)
+static Effects _add(Effects a, Effects b) => (Effects){
+  a.bindings + b.bindings, a.names + b.names, a.origins + b.origins,
+  a.pending + b.pending, a.placements + b.placements,
+  a.diagnostics + b.diagnostics};
+
+/* Registers an installed rewrite row. A prelude rule whose translator
+   this compiler does not link was added after it was built, so the form
+   keeps this compiler's own lowering, as a prelude component added after
+   it would. */
+module void _install_rewrite(Compiler c, List row) {
+  Var shared = shipped_rules ? shipped_rules[row] : void;
+  if (shared is void && c.builtin_defs) shared = _ship_rewrite(c, row);
+  if (shared is <p48>) {
+    _register_rewrite(c, shared.rewrite_rule());
     return;
-  watch.values = watch.values.append($(bound));
+  }
+  if (row ~= %(compile-time rewrite ?point ?kind ?name ?shape ?holes)) {
+    if (c.builtin_defs && !Compiler.links_meta_function(name)) return;
+    RewriteRule rule = _rewrite_rule(
+      point, c.thaw_declaration_syntax(kind), name,
+      c.thaw_declaration_syntax(shape), c.thaw_declaration_syntax(holes),
+      c.builtin_defs, 1);
+    _register_rewrite(c, rule);
+  }
 }
 
-/** Lowers `ast` when it is a value the active lowering watches; NULL
-    otherwise. A preparing watch also records what lowering produced. A
-    value that an enclosing replacement's source held as well lowers outside
-    that replacement's rule too, and that replacement still watches its own
-    values within it.
-*/
-Ast Compiler.watched_step(Compiler c, Ast ast) {
-  SlotWatch watch = c.slot_watch, owner = watch;
-  int slot = _find_slot(watch, ast);
-  if (slot < 0) return NULL;
-  while (owner.parent && _find_slot(owner.parent, ast) >= 0)
-    owner = owner.parent;
-  if (owner.kept) return ast;
-  Preparation *preparation = watch.preparation;
-  Effects before = {0};
-  if (preparation) before = _effects(c);
-  Ast lowered;
-  with (c.slot_watch = owner.parent, c.active_rewrites = owner.outer) {
-    lowered = c.normalize(ast);
+module RewriteRule Var.rewrite_rule(Var value) => value.pointer();
+
+/* The shared rule for a prelude row, or 0 when the row is bound to its
+   unit or names a translator the compiler does not link. The shared rule
+   derives its matcher on first use. */
+static Var _ship_rewrite(Compiler c, List row) {
+  auto (&shipped_scope) {
+    if (!shipped_rules) {
+      Scope.shutdown_hook(_shipped_shutdown);
+      shipped_rules = {};
+    }
+    _require_owned(row.try_own());
+    Var shared = 0;
+    match (row)
+      case %(compile-time rewrite ?point ?kind ?name ?shape ?holes): {
+        if (_unit_bound(row) || !Compiler.links_meta_function(name)) break;
+        List thawed = $(
+          c.thaw_declaration_syntax(kind), c.thaw_declaration_syntax(shape),
+          c.thaw_declaration_syntax(holes));
+        _require_owned(thawed.try_own());
+        Var (own_kind, own_shape, own_holes) = thawed;
+        shared = _rewrite_rule(
+          point, own_kind, name, own_shape, own_holes, 1, 0);
+      }
+    shipped_rules[row] = shared;
+    return shared;
   }
-  if (preparation) {
-    preparation.inner = _add(preparation.inner, _since(_effects(c), before));
-    if (preparation.outputs[slot].list_payload()) preparation.repeated = 1;
-    preparation.outputs[slot] = lowered;
-    preparation.order.push(slot);
+}
+
+module Var RewriteRule.var(RewriteRule rule) => Var.new(<p48>, rule);
+
+/* A rule derives a macro's matcher now, or else on the first probe of its
+   family; a Match pattern is its own. */
+module RewriteRule _rewrite_rule(
+  Symbol point, Var kind, String name, List pattern, List holes,
+  int builtin, int prepared) {
+  RewriteRule rule = xcalloc(1, sizeof(struct RewriteRule));
+  MacroMatcher matcher = {NULL, NULL, pattern};
+  if (pattern.car() == <macrodef>) {
+    Macro shape = pattern;
+    matcher = prepared ? shape.matcher(holes) : (MacroMatcher){shape, holes};
   }
-  return lowered;
+  *rule = (struct RewriteRule){name, point, kind, matcher, builtin, prepared};
+  return rule;
+}
+
+static void _shipped_shutdown(void) {
+  shipped_scope.destroy();
+  shipped_scope = NULL;
+  shipped_rules = NULL;
+}
+
+static int _unit_bound(Var syntax) {
+  if (syntax is not <list>) return 0;
+  if (syntax ~= %((!or declaration-cache declaration-binding
+                       declaration-origin) *))
+    return 1;
+  foreach (Var child in syntax.list()) if (_unit_bound(child)) return 1;
+  return 0;
+}
+
+/* A coarse category selects candidates; each retained pattern decides whether
+   the translator applies. Only the active translator is excluded while its
+   replacement binds, so independent translations can compose. User rules
+   retain registration order ahead of builtin defaults. */
+module void _register_rewrite(Compiler c, RewriteRule rule) {
+  if (!c.rewrite_rules) c.rewrite_rules = {};
+  Var stored;
+  Map kinds;
+  if (c.rewrite_rules.try_get(rule.point, stored)) kinds = stored;
+  else c.rewrite_rules[rule.point] = kinds = {};
+  List rows = kinds.try_get(rule.kind, stored) ? stored.list() : NULL;
+  foreach (RewriteRule prior in rows)
+    if (prior.name == rule.name &&
+        prior.matcher.shape == rule.matcher.shape &&
+        prior.matcher.holes == rule.matcher.holes &&
+        (rule.matcher.shape || prior.matcher.pattern == rule.matcher.pattern))
+      return;
+  Array ordered = [];
+  int inserted = 0;
+  foreach (RewriteRule prior in rows) {
+    if (!rule.builtin && prior.builtin && !inserted) {
+      ordered.push(rule);
+      inserted = 1;
+    }
+    ordered.push(prior);
+  }
+  if (!inserted) ordered.push(rule);
+  kinds[rule.kind] = ordered.list_free();
 }

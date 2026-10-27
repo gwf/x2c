@@ -18,31 +18,7 @@
 
 #include "symbol.x"
 
-/* Reports an ASCII letter without consulting the process locale. */
-inline int scan_ascii_alpha(int c) => (unsigned) ((c | 32) - 'a') < 26;
-
-/* Reports an ASCII decimal digit without consulting the process locale. */
-inline int scan_ascii_digit(int c) => (unsigned) (c - '0') < 10;
-
-/* Non-hexadecimal bytes return -1. */
-inline int scan_ascii_hex_value(int c) {
-  if (scan_ascii_digit(c)) return c - '0';
-  c |= 32;
-  return (unsigned) (c - 'a') < 6 ? c - 'a' + 10 : -1;
-}
-
 #include <string.h>
-
-static inline int _ascii_hex(int c) => scan_ascii_hex_value(c) >= 0;
-
-static inline int _token_break(int c) =>
-  !(scan_ascii_digit(c) || scan_ascii_alpha(c) || c == '_');
-
-/* Reports `why` through a nonnull `status` and returns -1. */
-static inline int _fail(Symbol *status, Symbol why) {
-  if (status) *status = why;
-  return -1;
-}
 
 /* white space and comments
 
@@ -72,6 +48,9 @@ int scan_line_comment(char *s) {
   return n;
 }
 
+/* Returns the same length as `scan_block_comment_status` without a status. */
+int scan_block_comment(char *s) => scan_block_comment_status(s, NULL);
+
 /* Returns a complete block comment's byte count, or -1 when NUL arrives
    first. `status`, when nonnull, receives `<ok>` or `<incomplete>`. Raises:
    `<bad-arg>` for NULL or a non-comment prefix. */
@@ -87,9 +66,6 @@ int scan_block_comment_status(char *s, Symbol *status) {
   return _fail(status, <incomplete>);
 }
 
-/* Returns the same length as `scan_block_comment_status` without a status. */
-int scan_block_comment(char *s) => scan_block_comment_status(s, NULL);
-
 /* Returns the borrowed preprocessor-line byte count without its final newline.
    Backslash-LF and backslash-CRLF continuations remain in the token. A
    trailing backslash at NUL returns -1. The caller has recognized `#`. */
@@ -104,6 +80,9 @@ int scan_preprocessor(char *s) {
   }
   return n;
 }
+
+/* Returns the same result as `scan_number_typed` without its type. */
+int scan_number(char *s) => scan_number_typed(s, NULL);
 
 /* numbers
 
@@ -127,87 +106,6 @@ int scan_number_typed(char *s, Symbol *type) {
   if (n <= 0) return sign ? 0 : n;
   if (type) *type = found;
   return sign + n;
-}
-
-/* Returns the same result as `scan_number_typed` without its type. */
-int scan_number(char *s) => scan_number_typed(s, NULL);
-
-/* A leading `0` starts a decimal number unless `x`, `b`, `o`, or an octal
-   digit follows it. As in C, a point or exponent after octal-looking digits
-   makes them decimal floating. */
-static int _decimal_zero(char *s) {
-  switch (s[1]) {
-    case 'x': case 'X': case 'b': case 'B': case 'o': case 'O': return 0;
-    case '1': case '2': case '3': case '4': case '5': case '6': case '7': {
-      char after = s[_digits(s, 10)];
-      return after == '.' || after == 'e' || after == 'E';
-    }
-  }
-  return 1;
-}
-
-/* Scans a hexadecimal, binary, or octal number with its `0` prefix, or
-   returns -1 when it is malformed. An octal digit after the `0` begins an
-   octal number. */
-static int _prefixed_number(char *s, Symbol &type) {
-  int n;
-  switch (s[1]) {
-    case 'x': case 'X': n = _hex_number(s + 2, type); break;
-    case 'b': case 'B': n = _radix_integer(s + 2, 2, 0); break;
-    case 'o': case 'O': n = _radix_integer(s + 2, 8, 0); break;
-    default: n = _radix_integer(s + 2, 8, 1); break;
-  }
-  return n < 0 ? -1 : n + 2;
-}
-
-/* Hexadecimal digits with an optional fraction. A `p` exponent makes the
-   number floating, and a fraction requires one. */
-static int _hex_number(char *s, Symbol &type) {
-  int n = 0;
-  while (_ascii_hex((unsigned char) s[n])) n++;
-  int digits = n, has_point = 0;
-  if (s[n] == '.') {
-    has_point = 1;
-    n++;
-    int fraction = _digits(s + n, 16);
-    digits += fraction;
-    n += fraction;
-  }
-  if (!digits) return -1;
-  if (s[n] == 'p' || s[n] == 'P') {
-    int exponent = _exponent(s + n + 1);
-    if (exponent < 0) return -1;
-    type = <float>;
-    return n + 1 + exponent;
-  }
-  if (has_point) return -1;
-  int suffix = _int_suffix(s + n);
-  if (suffix < 0) return -1;
-  type = <int>;
-  return n + suffix;
-}
-
-/* Decimal digits, then a fraction, an exponent, or an integer suffix. */
-static int _decimal_number(char *s, Symbol &?type) {
-  int n = 0;
-  while (scan_ascii_digit((unsigned char) s[n])) n++;
-  if (s[n] == '.') {
-    int fraction = _float_tail(s + n + 1, n > 0);
-    if (fraction < 0) return -1;
-    if (type) type = <float>;
-    return n + 1 + fraction;
-  }
-  if (!n) return 0;
-  if (s[n] == 'e' || s[n] == 'E') {
-    int exponent = _exponent(s + n + 1);
-    if (exponent < 0) return -1;
-    if (type) type = <float>;
-    return n + 1 + exponent;
-  }
-  int suffix = _int_suffix(s + n);
-  if (suffix < 0) return -1;
-  if (type) type = <int>;
-  return n + suffix;
 }
 
 /* Classifies an already validated `n`-byte numeric token as integer or
@@ -241,80 +139,16 @@ int scan_float(char *s) => _float_tail(s, 1);
    or -1 when the required decimal exponent is malformed. */
 int scan_hexponent(char *s) => _exponent(s);
 
-/* digits, exponents, and suffixes
-
-   The scanners of the parts after the digits return a part's length, or
-   -1 when it is malformed. A suffix must end at a token break. */
-
-static int _digits(char *s, int base) {
-  int n = 0;
-  while (_digit((unsigned char) s[n], base)) n++;
-  return n;
-}
-
-static inline int _digit(int c, int base) =>
-  base == 16 ? _ascii_hex(c) : (unsigned) (c - '0') < (unsigned) base;
-
-static int _radix_integer(char *s, int base, int digit_before) {
-  int n = _digits(s, base);
-  if (!digit_before && !n) return -1;
-  int suffix = _int_suffix(s + n);
-  return suffix < 0 ? -1 : n + suffix;
-}
-
-/* `digit_before` says a digit was consumed before the decimal point, which
-   is what scan_float promises its callers. */
-static int _float_tail(char *s, int digit_before) {
-  int n = _digits(s, 10);
-  if (!digit_before && !n) return -1;
-  if (s[n] == 'e' || s[n] == 'E') {
-    int exponent = _exponent(s + n + 1);
-    return exponent < 0 ? -1 : n + 1 + exponent;
-  }
-  int suffix = _float_suffix(s + n);
-  return suffix < 0 ? -1 : n + suffix;
-}
-
-static int _exponent(char *s) {
-  int n = 0;
-  if (s[n] == '+' || s[n] == '-') n++;
-  int digits = _digits(s + n, 10);
-  if (!digits) return -1;
-  n += digits;
-  int suffix = _float_suffix(s + n);
-  return suffix < 0 ? -1 : n + suffix;
-}
-
-/* Precondition: the integer digits have already been scanned. The suffix
-   is `u` with up to two `l`s after it, or one or two `l`s with an optional
-   `u` after them, each letter in either case. */
-static int _int_suffix(char *s) {
-  int n = 0;
-  switch (s[0]) {
-    case 'u': case 'U': n = 1 + _longs(s + 1); break;
-    case 'l': case 'L':
-      n = _is_l(s[1]) ? 2 + _is_u(s[2]) : 1 + _is_u(s[1]);
-      break;
-  }
-  return _token_break(s[n]) ? n : -1;
-}
-
-/* The length of an `l` or `ll` at `s`, or zero. */
-static int _longs(char *s) => _is_l(s[0]) ? 1 + _is_l(s[1]) : 0;
-
-static inline int _is_l(int c) => c == 'l' || c == 'L';
-static inline int _is_u(int c) => c == 'u' || c == 'U';
-
-/* Precondition: the floating digits have already been scanned. */
-static int _float_suffix(char *s) {
-  int n = 0;
-  switch (s[n]) {
-    case 'f': case 'F': case 'l': case 'L': n++; break;
-  }
-  return _token_break(s[n]) ? n : -1;
-}
-
 // identifiers, keywords, and operators
+
+/* Returns a keyword identifier's byte count or -1 for another identifier.
+   Raises: `<bad-arg>` when `s` does not begin an identifier. */
+int scan_keyword(char *s) {
+  int n = scan_identifier(s);
+  return scan_keyword_type(s, n) ? n : -1;
+}
+
+
 
 /* Returns an ASCII C identifier's byte count. Raises: `<bad-arg>` for NULL
    or a non-identifier start. */
@@ -326,12 +160,8 @@ int scan_identifier(char *s) {
   return n;
 }
 
-/* Returns a keyword identifier's byte count or -1 for another identifier.
-   Raises: `<bad-arg>` when `s` does not begin an identifier. */
-int scan_keyword(char *s) {
-  int n = scan_identifier(s);
-  return scan_keyword_type(s, n) ? n : -1;
-}
+/* Reports an ASCII letter without consulting the process locale. */
+inline int scan_ascii_alpha(int c) => (unsigned) ((c | 32) - 'a') < 26;
 
 /* Returns the keyword Symbol for exactly `n` borrowed bytes, or zero.
    The C spellings `thread_local` and `_Thread_local` normalize to `threaded`;
@@ -435,6 +265,11 @@ int scan_c_operator(char *s) {
 
 // strings and characters
 
+/* Returns the same result as `scan_c_string_status` without a status. */
+int scan_c_string(char *s) => scan_c_string_status(s, NULL);
+
+
+
 /* Returns a C String literal's complete byte count, or -1 on malformed or
    truncated input. The caller supplies the opening quote. `status`, when
    nonnull, distinguishes `<malformed>` from `<incomplete>`. */
@@ -453,9 +288,6 @@ int scan_c_string_status(char *s, Symbol *status) {
   }
   return _fail(status, <incomplete>);
 }
-
-/* Returns the same result as `scan_c_string_status` without a status. */
-int scan_c_string(char *s) => scan_c_string_status(s, NULL);
 
 /* Returns one complete C character literal's byte count, or -1.
    The caller supplies the opening quote; raw newlines and empty or multi-byte
@@ -506,6 +338,9 @@ int scan_string_segment(char *s) {
   return -1;
 }
 
+/* Returns the same result as `scan_symbol_literal_status` without a status. */
+int scan_symbol_literal(char *s) => scan_symbol_literal_status(s, NULL);
+
 /* Scans `<simple>` or `<"...">` from borrowed NUL-terminated input.
    Returns zero without an opening angle, a positive byte count on success, or
    -1. `status`, when nonnull, distinguishes `<incomplete>` from `<malformed>`;
@@ -515,46 +350,6 @@ int scan_symbol_literal_status(char *s, Symbol *status) {
   if (s[0] != '<') return 0;
   if (s[1] == '"') return _quoted_literal(s, status);
   return _simple_literal(s, status);
-}
-
-/* Returns the same result as `scan_symbol_literal_status` without a status. */
-int scan_symbol_literal(char *s) => scan_symbol_literal_status(s, NULL);
-
-static int _quoted_literal(char *s, Symbol *status) {
-  int m = _quoted_spelling(s + 1, status);
-  if (m < 0) return -1;
-  int n = 1 + m;
-  if (s[n] == '>') return n + 1;
-  return _fail(status, s[n] ? <malformed> : <incomplete>);
-}
-
-/* A simple spelling is nonempty and has no white space. */
-static int _simple_literal(char *s, Symbol *status) {
-  int n = 1;
-  while (s[n]) {
-    if (s[n] == '>') return n > 1 ? n + 1 : _fail(status, <malformed>);
-    if (s[n] == ' ' || s[n] == '\t' || s[n] == '\r' || s[n] == '\n' ||
-        s[n] == '\v' || s[n] == '\f')
-      return _fail(status, <malformed>);
-    n++;
-  }
-  return _fail(status, <incomplete>);
-}
-
-/* Scans a quoted Symbol spelling from its opening quote through its closing
-   quote, using x2c byte escapes. A raw newline is ordinary text. */
-static int _quoted_spelling(char *s, Symbol *status) {
-  int n = 1;
-  while (s[n]) {
-    if (s[n] == '\\') {
-      int m = _escape_status(s + n, status);
-      if (m < 0) return -1;
-      n += m;
-    }
-    else if (s[n] == '"') return n + 1;
-    else n++;
-  }
-  return _fail(status, <incomplete>);
 }
 
 /* One atom spelling inside `%<<...>>`. A leading quote reads the quoted
@@ -577,6 +372,9 @@ int scan_symbol_set_atom(char *s) {
   return n;
 }
 
+/* Returns the same result as `scan_atom_status` without a status. */
+int scan_atom(char *s) => scan_atom_status(s, NULL);
+
 /* One atom spelling for Lisp source and `%(...)` list literals. Reader
    punctuation, the x2c escape openers, whitespace, and a comment opener end
    it; a backslash escapes the next byte. Returns zero when no atom starts and
@@ -596,9 +394,6 @@ int scan_atom_status(char *s, Symbol *status) {
   return n;
 }
 
-/* Returns the same result as `scan_atom_status` without a status. */
-int scan_atom(char *s) => scan_atom_status(s, NULL);
-
 /* escapes
 
    An escape starts at its backslash. C literals use C escape widths and
@@ -609,75 +404,15 @@ int scan_atom(char *s) => scan_atom_status(s, NULL);
    truncated input. The caller has already recognized the backslash. */
 int scan_escape_sequence(char *s) => _escape_status(s, NULL);
 
-/* Scans x2c byte escapes and classifies truncation separately. */
-static int _escape_status(char *s, Symbol *status) {
-  switch (s[1]) {
-    case '\0': return _fail(status, <incomplete>);
-    case 'a': case 'b': case 'f': case 'n': case 'r': case 't': case 'v':
-    case '\n': case '\'': case '"': case '?': case '\\': return 2;
-    case '\r': return _crlf_escape(s, status);
-    case 'x': case 'X': case 'u': case 'U': return _byte_escape(s, status);
-    case '0': case '1': case '2': case '3': case '4': case '5': case '6':
-    case '7': return _octal_escape(s, status);
-  }
-  return _fail(status, <malformed>);
+/* Non-hexadecimal bytes return -1. */
+inline int scan_ascii_hex_value(int c) {
+  if (scan_ascii_digit(c)) return c - '0';
+  c |= 32;
+  return (unsigned) (c - 'a') < 6 ? c - 'a' + 10 : -1;
 }
 
-/* Scans a C escape and classifies truncation separately. */
-static int _c_escape_status(char *s, Symbol *status) {
-  switch (s[1]) {
-    case '\0': return _fail(status, <incomplete>);
-    case 'a': case 'b': case 'f': case 'n': case 'r': case 't': case 'v':
-    case '\n': case '\'': case '"': case '?': case '\\': return 2;
-    case '\r': return _crlf_escape(s, status);
-    case '0': case '1': case '2': case '3': case '4': case '5': case '6':
-    case '7': return _octal_escape(s, status);
-    case 'x': case 'X': return _hex_escape(s, status);
-    case 'u': return _universal_escape(s, 4, status);
-    case 'U': return _universal_escape(s, 8, status);
-  }
-  return _fail(status, <malformed>);
-}
-
-/* A backslash before CRLF continues the line; a lone CR is malformed. */
-static int _crlf_escape(char *s, Symbol *status) {
-  if (!s[2]) return _fail(status, <incomplete>);
-  return s[2] == '\n' ? 3 : _fail(status, <malformed>);
-}
-
-/* One to three octal digits. Three from `\400` up exceed the byte C
-   requires. */
-static int _octal_escape(char *s, Symbol *status) {
-  int n = 2;
-  if (s[n] >= '0' && s[n] <= '7') n++;
-  if (s[n] >= '0' && s[n] <= '7') n++;
-  return n < 4 || s[1] <= '3' ? n : _fail(status, <malformed>);
-}
-
-/* x2c's `\x`, `\X`, `\u`, and `\U` take one or two hex digits: one byte. */
-static int _byte_escape(char *s, Symbol *status) {
-  if (!s[2]) return _fail(status, <incomplete>);
-  int n = 2;
-  if (_ascii_hex((unsigned char) s[n])) n++;
-  if (_ascii_hex((unsigned char) s[n])) n++;
-  return n > 2 ? n : _fail(status, <malformed>);
-}
-
-/* C's `\x` takes every hex digit that follows it. */
-static int _hex_escape(char *s, Symbol *status) {
-  if (!s[2]) return _fail(status, <incomplete>);
-  int digits = _digits(s + 2, 16);
-  return digits ? 2 + digits : _fail(status, <malformed>);
-}
-
-/* C's `\u` and `\U` take exactly `count` hex digits. */
-static int _universal_escape(char *s, int count, Symbol *status) {
-  for (int n = 2; n < 2 + count; n++) {
-    if (!s[n]) return _fail(status, <incomplete>);
-    if (!_ascii_hex((unsigned char) s[n])) return _fail(status, <malformed>);
-  }
-  return 2 + count;
-}
+/* Reports an ASCII decimal digit without consulting the process locale. */
+inline int scan_ascii_digit(int c) => (unsigned) (c - '0') < 10;
 
 // UTF-8
 
@@ -720,4 +455,274 @@ void scan_next_line_col(char *s, int n, int &line, int &col) {
     next = newline + 1;
   }
   col += end - next;
+}
+
+/* Reports `why` through a nonnull `status` and returns -1. */
+static inline int _fail(Symbol *status, Symbol why) {
+  if (status) *status = why;
+  return -1;
+}
+
+/* A leading `0` starts a decimal number unless `x`, `b`, `o`, or an octal
+   digit follows it. As in C, a point or exponent after octal-looking digits
+   makes them decimal floating. */
+static int _decimal_zero(char *s) {
+  switch (s[1]) {
+    case 'x': case 'X': case 'b': case 'B': case 'o': case 'O': return 0;
+    case '1': case '2': case '3': case '4': case '5': case '6': case '7': {
+      char after = s[_digits(s, 10)];
+      return after == '.' || after == 'e' || after == 'E';
+    }
+  }
+  return 1;
+}
+
+/* Scans a hexadecimal, binary, or octal number with its `0` prefix, or
+   returns -1 when it is malformed. An octal digit after the `0` begins an
+   octal number. */
+static int _prefixed_number(char *s, Symbol &type) {
+  int n;
+  switch (s[1]) {
+    case 'x': case 'X': n = _hex_number(s + 2, type); break;
+    case 'b': case 'B': n = _radix_integer(s + 2, 2, 0); break;
+    case 'o': case 'O': n = _radix_integer(s + 2, 8, 0); break;
+    default: n = _radix_integer(s + 2, 8, 1); break;
+  }
+  return n < 0 ? -1 : n + 2;
+}
+
+/* Hexadecimal digits with an optional fraction. A `p` exponent makes the
+   number floating, and a fraction requires one. */
+static int _hex_number(char *s, Symbol &type) {
+  int n = 0;
+  while (_ascii_hex((unsigned char) s[n])) n++;
+  int digits = n, has_point = 0;
+  if (s[n] == '.') {
+    has_point = 1;
+    n++;
+    int fraction = _digits(s + n, 16);
+    digits += fraction;
+    n += fraction;
+  }
+  if (!digits) return -1;
+  if (s[n] == 'p' || s[n] == 'P') {
+    int exponent = _exponent(s + n + 1);
+    if (exponent < 0) return -1;
+    type = <float>;
+    return n + 1 + exponent;
+  }
+  if (has_point) return -1;
+  int suffix = _int_suffix(s + n);
+  if (suffix < 0) return -1;
+  type = <int>;
+  return n + suffix;
+}
+
+/* Decimal digits, then a fraction, an exponent, or an integer suffix. */
+static int _decimal_number(char *s, Symbol &?type) {
+  int n = 0;
+  while (scan_ascii_digit((unsigned char) s[n])) n++;
+  if (s[n] == '.') {
+    int fraction = _float_tail(s + n + 1, n > 0);
+    if (fraction < 0) return -1;
+    if (type) type = <float>;
+    return n + 1 + fraction;
+  }
+  if (!n) return 0;
+  if (s[n] == 'e' || s[n] == 'E') {
+    int exponent = _exponent(s + n + 1);
+    if (exponent < 0) return -1;
+    if (type) type = <float>;
+    return n + 1 + exponent;
+  }
+  int suffix = _int_suffix(s + n);
+  if (suffix < 0) return -1;
+  if (type) type = <int>;
+  return n + suffix;
+}
+
+static int _radix_integer(char *s, int base, int digit_before) {
+  int n = _digits(s, base);
+  if (!digit_before && !n) return -1;
+  int suffix = _int_suffix(s + n);
+  return suffix < 0 ? -1 : n + suffix;
+}
+
+/* `digit_before` says a digit was consumed before the decimal point, which
+   is what scan_float promises its callers. */
+static int _float_tail(char *s, int digit_before) {
+  int n = _digits(s, 10);
+  if (!digit_before && !n) return -1;
+  if (s[n] == 'e' || s[n] == 'E') {
+    int exponent = _exponent(s + n + 1);
+    return exponent < 0 ? -1 : n + 1 + exponent;
+  }
+  int suffix = _float_suffix(s + n);
+  return suffix < 0 ? -1 : n + suffix;
+}
+
+static int _exponent(char *s) {
+  int n = 0;
+  if (s[n] == '+' || s[n] == '-') n++;
+  int digits = _digits(s + n, 10);
+  if (!digits) return -1;
+  n += digits;
+  int suffix = _float_suffix(s + n);
+  return suffix < 0 ? -1 : n + suffix;
+}
+
+/* digits, exponents, and suffixes
+
+   The scanners of the parts after the digits return a part's length, or
+   -1 when it is malformed. A suffix must end at a token break. */
+
+static int _digits(char *s, int base) {
+  int n = 0;
+  while (_digit((unsigned char) s[n], base)) n++;
+  return n;
+}
+
+static inline int _digit(int c, int base) =>
+  base == 16 ? _ascii_hex(c) : (unsigned) (c - '0') < (unsigned) base;
+
+static inline int _ascii_hex(int c) => scan_ascii_hex_value(c) >= 0;
+
+/* Precondition: the integer digits have already been scanned. The suffix
+   is `u` with up to two `l`s after it, or one or two `l`s with an optional
+   `u` after them, each letter in either case. */
+static int _int_suffix(char *s) {
+  int n = 0;
+  switch (s[0]) {
+    case 'u': case 'U': n = 1 + _longs(s + 1); break;
+    case 'l': case 'L':
+      n = _is_l(s[1]) ? 2 + _is_u(s[2]) : 1 + _is_u(s[1]);
+      break;
+  }
+  return _token_break(s[n]) ? n : -1;
+}
+
+/* The length of an `l` or `ll` at `s`, or zero. */
+static int _longs(char *s) => _is_l(s[0]) ? 1 + _is_l(s[1]) : 0;
+
+static inline int _is_l(int c) => c == 'l' || c == 'L';
+
+static inline int _is_u(int c) => c == 'u' || c == 'U';
+
+/* Precondition: the floating digits have already been scanned. */
+static int _float_suffix(char *s) {
+  int n = 0;
+  switch (s[n]) {
+    case 'f': case 'F': case 'l': case 'L': n++; break;
+  }
+  return _token_break(s[n]) ? n : -1;
+}
+
+static inline int _token_break(int c) =>
+  !(scan_ascii_digit(c) || scan_ascii_alpha(c) || c == '_');
+
+/* Scans a C escape and classifies truncation separately. */
+static int _c_escape_status(char *s, Symbol *status) {
+  switch (s[1]) {
+    case '\0': return _fail(status, <incomplete>);
+    case 'a': case 'b': case 'f': case 'n': case 'r': case 't': case 'v':
+    case '\n': case '\'': case '"': case '?': case '\\': return 2;
+    case '\r': return _crlf_escape(s, status);
+    case '0': case '1': case '2': case '3': case '4': case '5': case '6':
+    case '7': return _octal_escape(s, status);
+    case 'x': case 'X': return _hex_escape(s, status);
+    case 'u': return _universal_escape(s, 4, status);
+    case 'U': return _universal_escape(s, 8, status);
+  }
+  return _fail(status, <malformed>);
+}
+
+/* A backslash before CRLF continues the line; a lone CR is malformed. */
+static int _crlf_escape(char *s, Symbol *status) {
+  if (!s[2]) return _fail(status, <incomplete>);
+  return s[2] == '\n' ? 3 : _fail(status, <malformed>);
+}
+
+/* One to three octal digits. Three from `\400` up exceed the byte C
+   requires. */
+static int _octal_escape(char *s, Symbol *status) {
+  int n = 2;
+  if (s[n] >= '0' && s[n] <= '7') n++;
+  if (s[n] >= '0' && s[n] <= '7') n++;
+  return n < 4 || s[1] <= '3' ? n : _fail(status, <malformed>);
+}
+
+/* C's `\x` takes every hex digit that follows it. */
+static int _hex_escape(char *s, Symbol *status) {
+  if (!s[2]) return _fail(status, <incomplete>);
+  int digits = _digits(s + 2, 16);
+  return digits ? 2 + digits : _fail(status, <malformed>);
+}
+
+/* C's `\u` and `\U` take exactly `count` hex digits. */
+static int _universal_escape(char *s, int count, Symbol *status) {
+  for (int n = 2; n < 2 + count; n++) {
+    if (!s[n]) return _fail(status, <incomplete>);
+    if (!_ascii_hex((unsigned char) s[n])) return _fail(status, <malformed>);
+  }
+  return 2 + count;
+}
+
+/* Scans x2c byte escapes and classifies truncation separately. */
+static int _escape_status(char *s, Symbol *status) {
+  switch (s[1]) {
+    case '\0': return _fail(status, <incomplete>);
+    case 'a': case 'b': case 'f': case 'n': case 'r': case 't': case 'v':
+    case '\n': case '\'': case '"': case '?': case '\\': return 2;
+    case '\r': return _crlf_escape(s, status);
+    case 'x': case 'X': case 'u': case 'U': return _byte_escape(s, status);
+    case '0': case '1': case '2': case '3': case '4': case '5': case '6':
+    case '7': return _octal_escape(s, status);
+  }
+  return _fail(status, <malformed>);
+}
+
+/* x2c's `\x`, `\X`, `\u`, and `\U` take one or two hex digits: one byte. */
+static int _byte_escape(char *s, Symbol *status) {
+  if (!s[2]) return _fail(status, <incomplete>);
+  int n = 2;
+  if (_ascii_hex((unsigned char) s[n])) n++;
+  if (_ascii_hex((unsigned char) s[n])) n++;
+  return n > 2 ? n : _fail(status, <malformed>);
+}
+
+static int _quoted_literal(char *s, Symbol *status) {
+  int m = _quoted_spelling(s + 1, status);
+  if (m < 0) return -1;
+  int n = 1 + m;
+  if (s[n] == '>') return n + 1;
+  return _fail(status, s[n] ? <malformed> : <incomplete>);
+}
+
+/* A simple spelling is nonempty and has no white space. */
+static int _simple_literal(char *s, Symbol *status) {
+  int n = 1;
+  while (s[n]) {
+    if (s[n] == '>') return n > 1 ? n + 1 : _fail(status, <malformed>);
+    if (s[n] == ' ' || s[n] == '\t' || s[n] == '\r' || s[n] == '\n' ||
+        s[n] == '\v' || s[n] == '\f')
+      return _fail(status, <malformed>);
+    n++;
+  }
+  return _fail(status, <incomplete>);
+}
+
+/* Scans a quoted Symbol spelling from its opening quote through its closing
+   quote, using x2c byte escapes. A raw newline is ordinary text. */
+static int _quoted_spelling(char *s, Symbol *status) {
+  int n = 1;
+  while (s[n]) {
+    if (s[n] == '\\') {
+      int m = _escape_status(s + n, status);
+      if (m < 0) return -1;
+      n += m;
+    }
+    else if (s[n] == '"') return n + 1;
+    else n++;
+  }
+  return _fail(status, <incomplete>);
 }

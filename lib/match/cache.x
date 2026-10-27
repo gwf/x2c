@@ -69,258 +69,6 @@ static struct MatchCache {
   unsigned long refused_memo[MATCH_ADMITTED_MEMO];
 };
 
-/** Acquires a lease for a cached prepared pattern.
-    `cache` and `lease` must be nonnull, and `owner` names the operation a
-    fence diagnostic should report. The lease is initialized on every
-    returning path. An admitted pattern reuses or creates an LRU entry; an
-    inadmissible pattern gets a transient plan owned by the lease. Returns the
-    plan's status symbol, or `<pressure>` when every entry is pinned.
-    Release the lease after any returned status; releasing the
-    inactive pressure lease is a no-op.
-    Raises: `<size-limit>` when `pattern` exceeds a lowering limit. Such a
-    pattern compiles to no program, so it is never cached and never leased.
-    `<alloc-fail>` may also be raised while preparing or growing storage.
-*/
-Symbol MatchCache.acquire(
-  MatchCache m, Var pattern, MatchLease &lease, const char *owner) {
-  lease = (MatchLease) {.slot = -1};
-  if (!_admitted(m, pattern)) return _transient(m, pattern, lease, owner);
-  unsigned long key = pattern.u64;
-  int slot = _find(m, key);
-  if (slot >= 0) {
-    _touch(m, slot);
-    _activate(m, slot, lease);
-    return m.entries[slot].plan.status;
-  }
-  slot = m.size < m.capacity ? _free_slot(m) : _victim(m);
-  if (slot < 0) return <pressure>;
-  MatchPlan plan = _prepare(m, pattern, owner);
-  if (m.entries[slot].occupied) _remove(m, slot);
-  _insert(m, slot, key, plan);
-  _activate(m, slot, lease);
-  return plan.status;
-}
-
-/* An inadmissible pattern gets a plan its lease owns. */
-static Symbol _transient(
-  MatchCache cache, Var pattern, MatchLease &lease, const char *owner) {
-  MatchPlan plan = _unfenced(MatchPlan.prepare(pattern), owner);
-  lease.cache = cache;
-  lease.transient_plan = plan;
-  lease.active = 1;
-  cache.active_leases++;
-  return plan.status;
-}
-
-/* Prepares an entry's plan in the cache's scope. An unusable plan never
-   reaches an entry or occupies a cache slot. */
-static MatchPlan _prepare(
-  MatchCache cache, Var pattern, const char *owner) {
-  MatchPlan plan = NULL;
-  auto (&cache.scope) { plan = MatchPlan.prepare(pattern); }
-  return _unfenced(plan, owner);
-}
-
-/* Frees a fenced plan and raises its fence; returns any other plan. */
-static MatchPlan _unfenced(MatchPlan plan, const char *owner) {
-  if (plan.status == <ineligible>) {
-    const char *reason = plan.reason;
-    plan.free();
-    MatchPlan.raise_ineligible(reason, owner);
-  }
-  return plan;
-}
-
-/* Installs `plan` under `key` as the most recent entry, with a fresh
-   generation. */
-static void _insert(
-  MatchCache cache, int slot, unsigned long key, MatchPlan plan) {
-  MatchCacheEntry *entry = &cache.entries[slot];
-  entry.key = key;
-  entry.plan = plan;
-  entry.occupied = 1;
-  entry.generation = ++cache.next_generation;
-  int bucket = _bucket(cache, key);
-  entry.bucket_next = cache.buckets[bucket];
-  cache.buckets[bucket] = slot;
-  _link_mru(cache, slot);
-  cache.size++;
-}
-
-static int _admitted(MatchCache cache, Var pattern) {
-  unsigned long key = pattern.u64;
-  if (!key) return 0;
-  // a level was released under this table; nothing it held can be trusted
-  if (!_resync(cache)) return 0;
-  int slot = _memo_slot(key);
-  if (cache.admitted_memo[slot] == key) return 1;
-  if (cache.refused_memo[slot] == key) return 0;
-  // an entry borrows its pattern only until its level is released
-  if (!MatchPlan.borrowable(pattern, 0)) {
-    cache.refused_memo[slot] = key;
-    return 0;
-  }
-  cache.admitted_memo[slot] = key;
-  return 1;
-}
-
-/* Drops every entry a released level could have invalidated and adopts the
-   new epoch. A pinned entry is still executing, so the table keeps its
-   contents and stays refused until a later call finds no lease outstanding. */
-static int _resync(MatchCache cache) {
-  unsigned long epoch = Pool.epoch();
-  if (cache.pool_epoch == epoch) return 1;
-  if (cache.active_leases) return 0;
-  for (int slot = 0; slot < cache.capacity; slot++)
-    if (cache.entries[slot].occupied) _remove(cache, slot);
-  memset(cache.admitted_memo, 0, sizeof(cache.admitted_memo));
-  memset(cache.refused_memo, 0, sizeof(cache.refused_memo));
-  cache.pool_epoch = epoch;
-  return 1;
-}
-
-/* The memo indexes through its own small fold of the raw bits so
-   admission consults no cache-table state and the table hash is
-   computed only after admission succeeds. */
-static int _memo_slot(unsigned long key) =>
-  (int) ((key * 0x9e3779b97f4a7c15UL >> 48) & (MATCH_ADMITTED_MEMO - 1));
-
-/* cache entries
-
-   Each bucket chains its entries through `bucket_next`. The LRU ring links
-   every entry: its head is the most recent entry, and the head's
-   predecessor the least recent. */
-
-static int _find(MatchCache cache, unsigned long key) {
-  for (int slot = cache.buckets[_bucket(cache, key)]; slot >= 0;
-       slot = cache.entries[slot].bucket_next)
-    if (cache.entries[slot].occupied && cache.entries[slot].key == key)
-      return slot;
-  return -1;
-}
-
-static int _bucket(MatchCache cache, unsigned long key) =>
-  (int) (_cache_mix(key) % (unsigned long) cache.bucket_count);
-
-static unsigned long _cache_mix(unsigned long key) {
-  key ^= key >> 33;
-  key *= 0xff51afd7ed558ccdUL;
-  key ^= key >> 33;
-  key *= 0xc4ceb9fe1a85ec53UL;
-  return key ^ (key >> 33);
-}
-
-static void _touch(MatchCache cache, int slot) {
-  int head = cache.lru_head;
-  if (head == slot) return;
-  if (cache.entries[head].lru_prev == slot) {
-    cache.lru_head = slot;
-    return;
-  }
-  _unlink(cache, slot);
-  _link_mru(cache, slot);
-}
-
-static void _unlink(MatchCache cache, int slot) {
-  MatchCacheEntry *entry = &cache.entries[slot];
-  cache.entries[entry.lru_prev].lru_next = entry.lru_next;
-  cache.entries[entry.lru_next].lru_prev = entry.lru_prev;
-  if (cache.lru_head == slot)
-    cache.lru_head = entry.lru_next == slot ? -1 : entry.lru_next;
-}
-
-static void _link_mru(MatchCache cache, int slot) {
-  MatchCacheEntry *entry = &cache.entries[slot];
-  int head = cache.lru_head;
-  entry.lru_next = head < 0 ? slot : head;
-  entry.lru_prev = head < 0 ? slot : cache.entries[head].lru_prev;
-  cache.entries[entry.lru_prev].lru_next = slot;
-  cache.entries[entry.lru_next].lru_prev = slot;
-  cache.lru_head = slot;
-}
-
-static int _free_slot(MatchCache m) {
-  for (int i = 0; i < m.capacity; i++) if (!m.entries[i].occupied) return i;
-  return -1;
-}
-
-/* The least recent entry that no lease pins, or -1. */
-static int _victim(MatchCache cache) {
-  int slot = cache.entries[cache.lru_head].lru_prev;
-  for (int i = 0; i < cache.size; i++) {
-    if (!cache.entries[slot].pin_count) return slot;
-    slot = cache.entries[slot].lru_prev;
-  }
-  return -1;
-}
-
-static void _remove(MatchCache cache, int slot) {
-  MatchCacheEntry *entry = &cache.entries[slot];
-  assert(entry.occupied && !entry.pin_count);
-  int *link = &cache.buckets[_bucket(cache, entry.key)];
-  while (*link >= 0 && *link != slot) link = &cache.entries[*link].bucket_next;
-  assert(*link == slot);
-  *link = entry.bucket_next;
-  _unlink(cache, slot);
-  entry.plan.free();
-  entry.occupied = 0;
-  cache.size--;
-}
-
-// leases
-
-/* Pins `slot` for `lease`, which records the entry's generation. */
-static void _activate(MatchCache m, int slot, MatchLease &lease) {
-  MatchCacheEntry *entry = &m.entries[slot];
-  lease.cache = m;
-  lease.generation = entry.generation;
-  lease.slot = slot;
-  lease.active = 1;
-  m.active_leases++;
-  entry.pin_count++;
-}
-
-/** Releases the prepared program held by `lease`.
-    Releasing an inactive lease has no effect. A successful release destroys a
-    transient plan or unpins its cached entry and makes the lease inactive.
-    Raises: `<bad-state>` when its cache or entry state is inconsistent. The
-    failure leaves the lease active.
-*/
-void MatchLease.release(MatchLease &lease) {
-  if (!lease.active) return;
-  if (lease.transient_plan) {
-    if (!lease.cache || lease.cache.active_leases <= 0)
-      raise %(bad-state (operation "MatchLease.release"));
-
-    lease.transient_plan.free();
-    lease.transient_plan = NULL;
-    lease.cache.active_leases--;
-    lease.active = 0;
-    return;
-  }
-  MatchCacheEntry *entry = _entry(lease);
-  if (!entry || lease.cache.active_leases <= 0 || entry.pin_count <= 0)
-    raise %(bad-state (operation "MatchLease.release"));
-
-  lease.cache.active_leases--;
-  entry.pin_count--;
-  lease.active = 0;
-}
-
-/** Borrows the acquired program until this active lease is released. */
-MatchPlan MatchLease.plan(MatchLease &m) =>
-  m.transient_plan ? m.transient_plan
-    : m.cache.entries[m.slot].plan;
-
-/* The entry an active cached lease pins, or NULL once the slot is empty or
-   recycled under a newer generation. */
-static MatchCacheEntry *_entry(MatchLease &lease) {
-  MatchCache cache = lease.cache;
-  if (!cache || lease.slot < 0 || lease.slot >= cache.capacity) return NULL;
-  MatchCacheEntry *entry = &cache.entries[lease.slot];
-  return entry.occupied && entry.generation == lease.generation ? entry : NULL;
-}
-
 /* cached consumers
 
    Each adapter preserves its consumer's result and executes only a prepared
@@ -336,6 +84,22 @@ static macro Stmt $match.plan(
   defer lease.release();
   MatchPlan $plan = status == <prepared> ? lease.plan() : NULL;
 }
+
+/* default caches
+
+   The active default cache is Context-local when a Context is open and
+   otherwise thread-local, and it is created on first use. Entries may borrow
+   runtime canonical identities, so a flush must precede the release of a
+   pool that owns an admitted pattern. */
+
+static typedef struct MatchContextState {
+  struct MatchContextState *prev, MatchCache cache;
+} *MatchContextState;
+
+static threaded struct {
+  MatchCache plan_cache;
+  MatchContextState context_top;
+} match_thread;
 
 /** Matches through `cache` into caller-owned positional storage.
     Returns 1 only after atomically committing a valid buffer. A miss,
@@ -428,21 +192,71 @@ int MatchCache.search_replace(
   return answered;
 }
 
-/* default caches
+/** Acquires a lease for a cached prepared pattern.
+    `cache` and `lease` must be nonnull, and `owner` names the operation a
+    fence diagnostic should report. The lease is initialized on every
+    returning path. An admitted pattern reuses or creates an LRU entry; an
+    inadmissible pattern gets a transient plan owned by the lease. Returns the
+    plan's status symbol, or `<pressure>` when every entry is pinned.
+    Release the lease after any returned status; releasing the
+    inactive pressure lease is a no-op.
+    Raises: `<size-limit>` when `pattern` exceeds a lowering limit. Such a
+    pattern compiles to no program, so it is never cached and never leased.
+    `<alloc-fail>` may also be raised while preparing or growing storage.
+*/
+Symbol MatchCache.acquire(
+  MatchCache m, Var pattern, MatchLease &lease, const char *owner) {
+  lease = (MatchLease) {.slot = -1};
+  if (!_admitted(m, pattern)) return _transient(m, pattern, lease, owner);
+  unsigned long key = pattern.u64;
+  int slot = _find(m, key);
+  if (slot >= 0) {
+    _touch(m, slot);
+    _activate(m, slot, lease);
+    return m.entries[slot].plan.status;
+  }
+  slot = m.size < m.capacity ? _free_slot(m) : _victim(m);
+  if (slot < 0) return <pressure>;
+  MatchPlan plan = _prepare(m, pattern, owner);
+  if (m.entries[slot].occupied) _remove(m, slot);
+  _insert(m, slot, key, plan);
+  _activate(m, slot, lease);
+  return plan.status;
+}
 
-   The active default cache is Context-local when a Context is open and
-   otherwise thread-local, and it is created on first use. Entries may borrow
-   runtime canonical identities, so a flush must precede the release of a
-   pool that owns an admitted pattern. */
+// leases
 
-static typedef struct MatchContextState {
-  struct MatchContextState *prev, MatchCache cache;
-} *MatchContextState;
+/** Releases the prepared program held by `lease`.
+    Releasing an inactive lease has no effect. A successful release destroys a
+    transient plan or unpins its cached entry and makes the lease inactive.
+    Raises: `<bad-state>` when its cache or entry state is inconsistent. The
+    failure leaves the lease active.
+*/
+void MatchLease.release(MatchLease &lease) {
+  if (!lease.active) return;
+  if (lease.transient_plan) {
+    if (!lease.cache || lease.cache.active_leases <= 0)
+      raise %(bad-state (operation "MatchLease.release"));
 
-static threaded struct {
-  MatchCache plan_cache;
-  MatchContextState context_top;
-} match_thread;
+    lease.transient_plan.free();
+    lease.transient_plan = NULL;
+    lease.cache.active_leases--;
+    lease.active = 0;
+    return;
+  }
+  MatchCacheEntry *entry = _entry(lease);
+  if (!entry || lease.cache.active_leases <= 0 || entry.pin_count <= 0)
+    raise %(bad-state (operation "MatchLease.release"));
+
+  lease.cache.active_leases--;
+  entry.pin_count--;
+  lease.active = 0;
+}
+
+/** Borrows the acquired program until this active lease is released. */
+MatchPlan MatchLease.plan(MatchLease &m) =>
+  m.transient_plan ? m.transient_plan
+    : m.cache.entries[m.slot].plan;
 
 /** Returns the active default `Match` cache, creating it on first use.
     Raises: `<alloc-fail>` when the cache cannot be created.
@@ -452,12 +266,6 @@ MatchCache MatchCache.current(void) {
   if (!*slot) *slot = MatchCache.new(256);
   x2c_match_initialize();
   return *slot;
-}
-
-/* The top Context's cache when a Context is open, or else the thread's. */
-static MatchCache *_default_slot(void) {
-  MatchContextState top = match_thread.context_top;
-  return top ? &top.cache : &match_thread.plan_cache;
 }
 
 /** Destroys the active `Context`-local or thread-local `Match` cache.
@@ -565,4 +373,198 @@ void MatchCache.dispose(MatchCache cache) {
     if (cache.entries[i].occupied) cache.entries[i].plan.free();
   }
   Scope.destroy(cache.scope);
+}
+
+/* An inadmissible pattern gets a plan its lease owns. */
+static Symbol _transient(
+  MatchCache cache, Var pattern, MatchLease &lease, const char *owner) {
+  MatchPlan plan = _unfenced(MatchPlan.prepare(pattern), owner);
+  lease.cache = cache;
+  lease.transient_plan = plan;
+  lease.active = 1;
+  cache.active_leases++;
+  return plan.status;
+}
+
+/* Prepares an entry's plan in the cache's scope. An unusable plan never
+   reaches an entry or occupies a cache slot. */
+static MatchPlan _prepare(
+  MatchCache cache, Var pattern, const char *owner) {
+  MatchPlan plan = NULL;
+  auto (&cache.scope) { plan = MatchPlan.prepare(pattern); }
+  return _unfenced(plan, owner);
+}
+
+/* Frees a fenced plan and raises its fence; returns any other plan. */
+static MatchPlan _unfenced(MatchPlan plan, const char *owner) {
+  if (plan.status == <ineligible>) {
+    const char *reason = plan.reason;
+    plan.free();
+    MatchPlan.raise_ineligible(reason, owner);
+  }
+  return plan;
+}
+
+/* Installs `plan` under `key` as the most recent entry, with a fresh
+   generation. */
+static void _insert(
+  MatchCache cache, int slot, unsigned long key, MatchPlan plan) {
+  MatchCacheEntry *entry = &cache.entries[slot];
+  entry.key = key;
+  entry.plan = plan;
+  entry.occupied = 1;
+  entry.generation = ++cache.next_generation;
+  int bucket = _bucket(cache, key);
+  entry.bucket_next = cache.buckets[bucket];
+  cache.buckets[bucket] = slot;
+  _link_mru(cache, slot);
+  cache.size++;
+}
+
+static int _admitted(MatchCache cache, Var pattern) {
+  unsigned long key = pattern.u64;
+  if (!key) return 0;
+  // a level was released under this table; nothing it held can be trusted
+  if (!_resync(cache)) return 0;
+  int slot = _memo_slot(key);
+  if (cache.admitted_memo[slot] == key) return 1;
+  if (cache.refused_memo[slot] == key) return 0;
+  // an entry borrows its pattern only until its level is released
+  if (!MatchPlan.borrowable(pattern, 0)) {
+    cache.refused_memo[slot] = key;
+    return 0;
+  }
+  cache.admitted_memo[slot] = key;
+  return 1;
+}
+
+/* Drops every entry a released level could have invalidated and adopts the
+   new epoch. A pinned entry is still executing, so the table keeps its
+   contents and stays refused until a later call finds no lease outstanding. */
+static int _resync(MatchCache cache) {
+  unsigned long epoch = Pool.epoch();
+  if (cache.pool_epoch == epoch) return 1;
+  if (cache.active_leases) return 0;
+  for (int slot = 0; slot < cache.capacity; slot++)
+    if (cache.entries[slot].occupied) _remove(cache, slot);
+  memset(cache.admitted_memo, 0, sizeof(cache.admitted_memo));
+  memset(cache.refused_memo, 0, sizeof(cache.refused_memo));
+  cache.pool_epoch = epoch;
+  return 1;
+}
+
+/* The memo indexes through its own small fold of the raw bits so
+   admission consults no cache-table state and the table hash is
+   computed only after admission succeeds. */
+static int _memo_slot(unsigned long key) =>
+  (int) ((key * 0x9e3779b97f4a7c15UL >> 48) & (MATCH_ADMITTED_MEMO - 1));
+
+/* cache entries
+
+   Each bucket chains its entries through `bucket_next`. The LRU ring links
+   every entry: its head is the most recent entry, and the head's
+   predecessor the least recent. */
+
+static int _find(MatchCache cache, unsigned long key) {
+  for (int slot = cache.buckets[_bucket(cache, key)]; slot >= 0;
+       slot = cache.entries[slot].bucket_next)
+    if (cache.entries[slot].occupied && cache.entries[slot].key == key)
+      return slot;
+  return -1;
+}
+
+static void _touch(MatchCache cache, int slot) {
+  int head = cache.lru_head;
+  if (head == slot) return;
+  if (cache.entries[head].lru_prev == slot) {
+    cache.lru_head = slot;
+    return;
+  }
+  _unlink(cache, slot);
+  _link_mru(cache, slot);
+}
+
+static void _link_mru(MatchCache cache, int slot) {
+  MatchCacheEntry *entry = &cache.entries[slot];
+  int head = cache.lru_head;
+  entry.lru_next = head < 0 ? slot : head;
+  entry.lru_prev = head < 0 ? slot : cache.entries[head].lru_prev;
+  cache.entries[entry.lru_prev].lru_next = slot;
+  cache.entries[entry.lru_next].lru_prev = slot;
+  cache.lru_head = slot;
+}
+
+static int _free_slot(MatchCache m) {
+  for (int i = 0; i < m.capacity; i++) if (!m.entries[i].occupied) return i;
+  return -1;
+}
+
+/* The least recent entry that no lease pins, or -1. */
+static int _victim(MatchCache cache) {
+  int slot = cache.entries[cache.lru_head].lru_prev;
+  for (int i = 0; i < cache.size; i++) {
+    if (!cache.entries[slot].pin_count) return slot;
+    slot = cache.entries[slot].lru_prev;
+  }
+  return -1;
+}
+
+static void _remove(MatchCache cache, int slot) {
+  MatchCacheEntry *entry = &cache.entries[slot];
+  assert(entry.occupied && !entry.pin_count);
+  int *link = &cache.buckets[_bucket(cache, entry.key)];
+  while (*link >= 0 && *link != slot) link = &cache.entries[*link].bucket_next;
+  assert(*link == slot);
+  *link = entry.bucket_next;
+  _unlink(cache, slot);
+  entry.plan.free();
+  entry.occupied = 0;
+  cache.size--;
+}
+
+static int _bucket(MatchCache cache, unsigned long key) =>
+  (int) (_cache_mix(key) % (unsigned long) cache.bucket_count);
+
+static unsigned long _cache_mix(unsigned long key) {
+  key ^= key >> 33;
+  key *= 0xff51afd7ed558ccdUL;
+  key ^= key >> 33;
+  key *= 0xc4ceb9fe1a85ec53UL;
+  return key ^ (key >> 33);
+}
+
+static void _unlink(MatchCache cache, int slot) {
+  MatchCacheEntry *entry = &cache.entries[slot];
+  cache.entries[entry.lru_prev].lru_next = entry.lru_next;
+  cache.entries[entry.lru_next].lru_prev = entry.lru_prev;
+  if (cache.lru_head == slot)
+    cache.lru_head = entry.lru_next == slot ? -1 : entry.lru_next;
+}
+
+
+
+/* Pins `slot` for `lease`, which records the entry's generation. */
+static void _activate(MatchCache m, int slot, MatchLease &lease) {
+  MatchCacheEntry *entry = &m.entries[slot];
+  lease.cache = m;
+  lease.generation = entry.generation;
+  lease.slot = slot;
+  lease.active = 1;
+  m.active_leases++;
+  entry.pin_count++;
+}
+
+/* The entry an active cached lease pins, or NULL once the slot is empty or
+   recycled under a newer generation. */
+static MatchCacheEntry *_entry(MatchLease &lease) {
+  MatchCache cache = lease.cache;
+  if (!cache || lease.slot < 0 || lease.slot >= cache.capacity) return NULL;
+  MatchCacheEntry *entry = &cache.entries[lease.slot];
+  return entry.occupied && entry.generation == lease.generation ? entry : NULL;
+}
+
+/* The top Context's cache when a Context is open, or else the thread's. */
+static MatchCache *_default_slot(void) {
+  MatchContextState top = match_thread.context_top;
+  return top ? &top.cache : &match_thread.plan_cache;
 }

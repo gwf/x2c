@@ -46,32 +46,6 @@ static macro Stmt $fail.meta_sdk_enclosing_role(Expr $value) =>
 
 // syntax queries
 
-/** Answers the compiler-backed captured-code type query. */
-Type Code.type(Code value) {
-  _require_expansion("Code.type");
-  match (value) {
-    case %(expr ?matched_type ?): {
-      Type type = matched_type;
-      if (type === %(<macro-expr>))
-        type = active.expander.resolve_expression(value, active.site).cadr();
-      return type.canonicalize();
-    }
-    case %(param ? ?): return value.type_from_ast().canonicalize();
-    case %((!or declare decl typedef) *):
-      return value.type_from_ast().canonicalize();
-  }
-  List binding = NULL;
-  if (Ast.try_binding(value, NULL, NULL)) binding = value;
-  else
-    match (value) {
-      case %(ident (!set ?captured (*)) *):
-        binding = captured;
-      case %(bind (!set ?captured (*)) *): binding = captured;
-    }
-  if (binding) return _binding_type(binding).canonicalize();
-  return List.type(value).canonicalize();
-}
-
 /** Reads a constant through the compiler's existing constant decoder. */
 Var Code.value(Code code) {
   _require_expansion("Code.value");
@@ -146,9 +120,6 @@ Code Code.promoted(Code value) {
   return active.expander.promote_string_literal(value);
 }
 
-static Type _binding_type(List binding) =>
-  active.expander.semantic_binding_facts()[%(type $binding)];
-
 /** Returns an expression reading each binding `declaration` declares. */
 List Code.declared_bindings(List declaration) {
   Array result = [];
@@ -195,42 +166,6 @@ List MetaContext.function_reference(String name) {
 
 // names and functions
 
-/** Answers `Code.binding_spelling`, declared in `lib/meta.x`. */
-String Code.binding_spelling(Var syntax) {
-  _require_expansion("Code.binding_spelling");
-  if (syntax is <string>) {
-    String spelling = syntax;
-    if (spelling.is_identifier()) return spelling;
-    $fail.meta_sdk_binding_spelling(syntax);
-  }
-  if (syntax is not <list> || syntax.is_nil())
-    $fail.meta_sdk_binding_syntax(syntax);
-  List value = syntax;
-  match (value)
-    case %(expr ? (!set ?content (? *))): value = content;
-  match (value) {
-    case %(ident (!set ?captured (*))):
-      value = captured;
-    case %(bind (!set ?captured (*)) ?): value = captured;
-  }
-  if (value ~= %((!is ?name type string))) return name;
-  return _binding_spelling(value, syntax);
-}
-
-static String _binding_spelling(List value, Var syntax) {
-  int identity = 0, String spelling = NULL;
-  if (value ~= %(binding ?id (!is ? type string)) &&
-      (!id.is_integer() || id.integer() > INT_MAX))
-    $fail.meta_sdk_binding_known(value);
-  if (!Ast.try_binding(value, identity, spelling))
-    $fail.meta_sdk_binding_identifier(syntax);
-  Var registered =
-    active.expander.semantic_binding_facts()[%(known $identity)];
-  if (registered is not <string> || registered.string() != spelling)
-    $fail.meta_sdk_binding_known(value);
-  return spelling;
-}
-
 /** Answers `x2c_ident`, declared in `lib/meta.x`. */
 List x2c_ident(String spelling) {
   _require_expansion("x2c_ident");
@@ -267,14 +202,6 @@ Var MetaContext.fresh_binding(String stem) {
   return active.expander.sym.introduce(spelling);
 }
 
-/** Answers `Code.name`, declared in `lib/meta.x`. */
-String Code.name(Code function) {
-  List identity = function;
-  if (function ~= %(function ? (bind ?binding ?) ?))
-    identity = binding is <list> ? binding.list() : NULL;
-  return Code.binding_spelling(identity);
-}
-
 /** Answers `Code.body`, declared in `lib/meta.x`. */
 List Code.body(Code function) {
   if (function ~= %(function ? ? (block *body))) return body;
@@ -307,6 +234,38 @@ Code Code.parameter(Code function, String wanted) {
   $fail.meta_sdk_parameter_missing(function, wanted);
 }
 
+/** Answers `Code.name`, declared in `lib/meta.x`. */
+String Code.name(Code function) {
+  List identity = function;
+  if (function ~= %(function ? (bind ?binding ?) ?))
+    identity = binding is <list> ? binding.list() : NULL;
+  return Code.binding_spelling(identity);
+}
+
+
+
+/** Answers `Code.binding_spelling`, declared in `lib/meta.x`. */
+String Code.binding_spelling(Var syntax) {
+  _require_expansion("Code.binding_spelling");
+  if (syntax is <string>) {
+    String spelling = syntax;
+    if (spelling.is_identifier()) return spelling;
+    $fail.meta_sdk_binding_spelling(syntax);
+  }
+  if (syntax is not <list> || syntax.is_nil())
+    $fail.meta_sdk_binding_syntax(syntax);
+  List value = syntax;
+  match (value)
+    case %(expr ? (!set ?content (? *))): value = content;
+  match (value) {
+    case %(ident (!set ?captured (*))):
+      value = captured;
+    case %(bind (!set ?captured (*)) ?): value = captured;
+  }
+  if (value ~= %((!is ?name type string))) return name;
+  return _binding_spelling(value, syntax);
+}
+
 /** Returns the `Func` signature of the function syntax `syntax`. A native
     binding stores the same signature as an ordinary Func adapter.
 */
@@ -315,6 +274,34 @@ List Code.native_signature(List syntax) {
     return active.expander.func_signature(
       %(declare $rtype (bindings $declarator)).type_from_ast());
   return active.expander.func_signature(Code.type(syntax));
+}
+
+
+
+/** Answers the compiler-backed captured-code type query. */
+Type Code.type(Code value) {
+  _require_expansion("Code.type");
+  match (value) {
+    case %(expr ?matched_type ?): {
+      Type type = matched_type;
+      if (type === %(<macro-expr>))
+        type = active.expander.resolve_expression(value, active.site).cadr();
+      return type.canonicalize();
+    }
+    case %(param ? ?): return value.type_from_ast().canonicalize();
+    case %((!or declare decl typedef) *):
+      return value.type_from_ast().canonicalize();
+  }
+  List binding = NULL;
+  if (Ast.try_binding(value, NULL, NULL)) binding = value;
+  else
+    match (value) {
+      case %(ident (!set ?captured (*)) *):
+        binding = captured;
+      case %(bind (!set ?captured (*)) *): binding = captured;
+    }
+  if (binding) return _binding_type(binding).canonicalize();
+  return List.type(value).canonicalize();
 }
 
 // ancestry and placement
@@ -339,4 +326,23 @@ void x2c_place(List where, Code code) {
 List _x2c_complete_iterator(List expression) {
   _require_expansion("private foreach iterator completion");
   return active.expander.complete_iter_chain(expression);
+}
+
+// compile-time SDK syntax
+
+static Type _binding_type(List binding) =>
+  active.expander.semantic_binding_facts()[%(type $binding)];
+
+static String _binding_spelling(List value, Var syntax) {
+  int identity = 0, String spelling = NULL;
+  if (value ~= %(binding ?id (!is ? type string)) &&
+      (!id.is_integer() || id.integer() > INT_MAX))
+    $fail.meta_sdk_binding_known(value);
+  if (!Ast.try_binding(value, identity, spelling))
+    $fail.meta_sdk_binding_identifier(syntax);
+  Var registered =
+    active.expander.semantic_binding_facts()[%(known $identity)];
+  if (registered is not <string> || registered.string() != spelling)
+    $fail.meta_sdk_binding_known(value);
+  return spelling;
 }

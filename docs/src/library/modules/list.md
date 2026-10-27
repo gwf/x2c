@@ -58,7 +58,7 @@ Linked list with `Var` elements.
 
 Returns the head of `x`, or `void` when `x` is `nil`.
 
-Source: `lib/list/traversal.x:6`
+Source: `lib/list/traversal.x:260`
 
 #### cdr
 
@@ -68,7 +68,7 @@ Returns the tail of `x`, or `nil` when `x` is `nil`.
 Nil-safe like `car`. The tail is the same canonical structure the cell was
 built from.
 
-Source: `lib/list/traversal.x:12`
+Source: `lib/list/traversal.x:269`
 
 #### cons
 
@@ -84,7 +84,7 @@ null pointer.
 `<size-limit>`, or `<invariant>` when a new canonical cell cannot be
 installed.
 
-Source: `lib/list/cells.x:20`
+Source: `lib/list/cells.x:26`
 
 ### `Array`
 
@@ -115,7 +115,7 @@ and when the conversion transfers an `Error`.
 
 **Raises:** `<alloc-fail>` while constructing the result.
 
-Source: `lib/list/building.x:26`
+Source: `lib/list/building.x:47`
 
 ### `Iter`
 
@@ -131,7 +131,7 @@ never returns for an infinite source. Elements appear in iteration order.
 **Raises:** whatever the iterator's source raises, or `<alloc-fail>` while
 constructing the result.
 
-Source: `lib/list/building.x:64`
+Source: `lib/list/building.x:58`
 
 ### `List`
 
@@ -174,7 +174,7 @@ the other side is returned as it stands.
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the copied
 prefix.
 
-Source: `lib/list/building.x:79`
+Source: `lib/list/building.x:100`
 
 <a id="List.array"></a>
 #### List.array
@@ -189,7 +189,7 @@ indexed access or in-place mutation.
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the result.
 The partial result is freed.
 
-Source: `lib/list/building.x:38`
+Source: `lib/list/building.x:20`
 
 <a id="List.concat"></a>
 #### List.concat
@@ -203,7 +203,7 @@ preceding cells are rebuilt. Inputs are not modified.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the result.
 
-Source: `lib/list/building.x:92`
+Source: `lib/list/building.x:72`
 
 <a id="List.concat_n"></a>
 #### List.concat_n
@@ -217,7 +217,7 @@ becomes the shared tail of the result.
 **Raises:** `<size-limit>` when `list_count` exceeds the supported index
 range, or `<alloc-fail>` while constructing the result.
 
-Source: `lib/list/building.x:103`
+Source: `lib/list/building.x:83`
 
 <a id="List.contains"></a>
 #### List.contains
@@ -226,7 +226,7 @@ Source: `lib/list/building.x:103`
 
 Reports whether `lst` contains `key` by `Var` equality.
 
-Source: `lib/list/traversal.x:116`
+Source: `lib/list/traversal.x:61`
 
 <a id="List.filter"></a>
 #### List.filter
@@ -283,7 +283,7 @@ Integer keys use `List.getindex`, including negative indexes; every other
 key uses `List.assoc`. Either absent form returns `void`, as does an
 integer key outside the `int` index domain, which no `List` can reach.
 
-Source: `lib/list/traversal.x:153`
+Source: `lib/list/traversal.x:104`
 
 <a id="List.getindex"></a>
 #### List.getindex
@@ -293,7 +293,7 @@ Source: `lib/list/traversal.x:153`
 Returns `list[index]`, or `void` when out of range.
 A negative index counts from the end and is found without a length pass.
 
-Source: `lib/list/traversal.x:129`
+Source: `lib/list/traversal.x:72`
 
 <a id="List.getslice"></a>
 #### List.getslice
@@ -309,7 +309,7 @@ cells there so a detached pool cannot escape through the shortcut.
 **Raises:** `<bad-arg>` when `step` is zero, or `<alloc-fail>` or
 `<size-limit>` while constructing the result.
 
-Source: `lib/list/traversal.x:239`
+Source: `lib/list/traversal.x:199`
 
 <a id="List.head"></a>
 #### List.head
@@ -323,7 +323,7 @@ canonical cells are built for the prefix.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing that prefix.
 
-Source: `lib/list/traversal.x:181`
+Source: `lib/list/traversal.x:152`
 
 <a id="List.index"></a>
 #### List.index
@@ -332,7 +332,7 @@ Source: `lib/list/traversal.x:181`
 
 Returns the first index of `key`, or -1 when absent.
 
-Source: `lib/list/traversal.x:110`
+Source: `lib/list/traversal.x:64`
 
 <a id="List.iter"></a>
 #### List.iter
@@ -344,7 +344,7 @@ The iterator borrows the immutable cells and yields their stored `Var` bits
 without retaining them, so the owning pool must outlive iteration. A null
 `dest` returns NULL; `nil` produces an exhausted iterator.
 
-Source: `lib/list/traversal.x:78`
+Source: `lib/list/traversal.x:45`
 
 <a id="List.last"></a>
 #### List.last
@@ -353,7 +353,7 @@ Source: `lib/list/traversal.x:78`
 
 Returns the last value in `lst`, or `void` when it is empty.
 
-Source: `lib/list/traversal.x:102`
+Source: `lib/list/traversal.x:53`
 
 <a id="List.len"></a>
 #### List.len
@@ -362,7 +362,7 @@ Source: `lib/list/traversal.x:102`
 
 Returns the number of cells in `lst` in O(n) time.
 
-Source: `lib/list/traversal.x:95`
+Source: `lib/list/traversal.x:215`
 
 <a id="List.list_n"></a>
 #### List.list_n
@@ -376,7 +376,7 @@ terminator. A zero count returns `nil`.
 **Raises:** `<void-op>` when an argument is `void`, or `<alloc-fail>` or
 `<size-limit>` while constructing the result.
 
-Source: `lib/list/building.x:134`
+Source: `lib/list/building.x:113`
 
 <a id="List.map"></a>
 #### List.map
@@ -403,7 +403,7 @@ Maps `fn` over aligned pairs from `a` and `b`.
 A null callback returns `nil` without examining either `List`; otherwise
 this has the length, order, ownership, and failures of `List.zip_with`.
 
-Source: `lib/list/transformations.x:102`
+Source: `lib/list/transformations.x:86`
 
 <a id="List.new"></a>
 #### List.new
@@ -427,7 +427,7 @@ gives `nil`.
 
 **Raises:** `<alloc-fail>` while constructing the result.
 
-Source: `lib/list/building.x:157`
+Source: `lib/list/building.x:126`
 
 <a id="List.sort"></a>
 #### List.sort
@@ -477,7 +477,7 @@ Returns the last `count` elements of `list`.
 The result is an existing tail of `list`, so nothing is allocated. When
 `count` reaches or exceeds the length, the whole `list` comes back.
 
-Source: `lib/list/traversal.x:195`
+Source: `lib/list/traversal.x:166`
 
 <a id="List.try_next"></a>
 #### List.try_next
@@ -492,7 +492,7 @@ cursor.
 
 `foreach (Var item in lst)` compiles to this loop.
 
-Source: `lib/list/traversal.x:63`
+Source: `lib/list/traversal.x:136`
 
 <a id="List.unique"></a>
 #### List.unique
@@ -524,7 +524,7 @@ skipped but still counted.
 **Raises:** `<size-limit>` when `destination_count` exceeds `INT_MAX`. The
 failure occurs before any destination is written.
 
-Source: `lib/list/traversal.x:265`
+Source: `lib/list/traversal.x:231`
 
 <a id="List.unpack_vars_n"></a>
 #### List.unpack_vars_n
@@ -539,7 +539,7 @@ is skipped but still counted.
 **Raises:** `<size-limit>` when `destination_count` exceeds `INT_MAX`. The
 failure occurs before any destination is written.
 
-Source: `lib/list/traversal.x:280`
+Source: `lib/list/traversal.x:246`
 
 <a id="List.write_str"></a>
 #### List.write_str
@@ -566,7 +566,7 @@ callback receives the left and right values and is invoked front to back.
 
 **Raises:** whatever `Func.apply`, `fn`, or result canonicalization raises.
 
-Source: `lib/list/transformations.x:88`
+Source: `lib/list/transformations.x:97`
 
 ### `Map`
 
@@ -583,7 +583,7 @@ pair cells are new; the keys and values are shared.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the result.
 
-Source: `lib/list/building.x:52`
+Source: `lib/list/building.x:34`
 
 ## Advanced and interop API
 
@@ -629,7 +629,7 @@ Returns the second value of the first association whose key equals `key`.
 Nil entries are skipped. A missing association and a missing second value
 both return `void`, so the two cases look the same here.
 
-Source: `lib/list/traversal.x:166`
+Source: `lib/list/traversal.x:117`
 
 <a id="List.caar"></a>
 #### List.caar
@@ -640,7 +640,7 @@ Returns `car(car(lst))`.
 Compound accessors read from right to left: `a` applies `car` and `d`
 applies `cdr`. Every step is `nil`-safe.
 
-Source: `lib/list/traversal.x:24`
+Source: `lib/list/traversal.x:9`
 
 <a id="List.caddr"></a>
 #### List.caddr
@@ -649,7 +649,7 @@ Source: `lib/list/traversal.x:24`
 
 Returns the third element, or `void`.
 
-Source: `lib/list/traversal.x:33`
+Source: `lib/list/traversal.x:18`
 
 <a id="List.cadr"></a>
 #### List.cadr
@@ -658,7 +658,7 @@ Source: `lib/list/traversal.x:33`
 
 Returns `car(cdr(lst))`, or `void` when there is no second element.
 
-Source: `lib/list/traversal.x:27`
+Source: `lib/list/traversal.x:12`
 
 <a id="List.car"></a>
 #### List.car
@@ -667,7 +667,7 @@ Source: `lib/list/traversal.x:27`
 
 Method form of `car`: the head of `lst`, or `void` when `lst` is `nil`.
 
-Source: `lib/list/traversal.x:15`
+Source: `lib/list/traversal.x:255`
 
 <a id="List.cddr"></a>
 #### List.cddr
@@ -676,7 +676,7 @@ Source: `lib/list/traversal.x:15`
 
 Returns the tail after two cells, or `nil`.
 
-Source: `lib/list/traversal.x:30`
+Source: `lib/list/traversal.x:15`
 
 <a id="List.cdr"></a>
 #### List.cdr
@@ -685,7 +685,7 @@ Source: `lib/list/traversal.x:30`
 
 Method form of `cdr`: the tail of `lst`, or `nil` when `lst` is `nil`.
 
-Source: `lib/list/traversal.x:18`
+Source: `lib/list/traversal.x:263`
 
 <a id="List.compare"></a>
 #### List.compare
@@ -695,7 +695,7 @@ Source: `lib/list/traversal.x:18`
 Compares `a` and `b` lexicographically through `Var.compare`.
 Element comparison causes propagate.
 
-Source: `lib/list/cells.x:68`
+Source: `lib/list/cells.x:54`
 
 <a id="List.cons"></a>
 #### List.cons
@@ -704,7 +704,7 @@ Source: `lib/list/cells.x:68`
 
 Method form of `cons`, with the same identity, lifetime, and failures.
 
-Source: `lib/list/cells.x:26`
+Source: `lib/list/cells.x:12`
 
 <a id="List.cons_in"></a>
 #### List.cons_in
@@ -735,7 +735,7 @@ Two `List`s built from one `long` value hold two boxes and are unequal,
 while `List.compare` reads the values and calls them equal. Use
 `List.compare` where content has to decide.
 
-Source: `lib/list/cells.x:59`
+Source: `lib/list/cells.x:74`
 
 <a id="List.flatten"></a>
 #### List.flatten
@@ -786,7 +786,7 @@ Source: `lib/list/cells.x:42`
 Returns the shared tail beginning `n` cells in.
 Returns `nil` past the end and `list` itself when `n` is nonpositive.
 
-Source: `lib/list/traversal.x:121`
+Source: `lib/list/traversal.x:94`
 
 <a id="List.promote"></a>
 #### List.promote
@@ -858,7 +858,7 @@ rebuilt canonically, and `nil` returns `nil`.
 **Raises:** a cause from key equality, or `<alloc-fail>` or `<size-limit>`
 while constructing the result.
 
-Source: `lib/list/transformations.x:209`
+Source: `lib/list/transformations.x:202`
 
 <a id="List.subseq"></a>
 #### List.subseq
@@ -871,7 +871,7 @@ Negative bounds count from the end. `step` must be positive.
 **Raises:** `<bad-arg>` when `step` is less than 1, or `<alloc-fail>` while
 constructing the result.
 
-Source: `lib/list/traversal.x:214`
+Source: `lib/list/traversal.x:185`
 
 <a id="List.write_repr"></a>
 #### List.write_repr
@@ -891,7 +891,7 @@ Source: `lib/list/rendering.x:62`
 
 Applies the `caar` selector chain to `Var`.
 
-Source: `lib/list/traversal.x:42`
+Source: `lib/list/traversal.x:27`
 
 <a id="Var.caddr"></a>
 #### Var.caddr
@@ -900,7 +900,7 @@ Source: `lib/list/traversal.x:42`
 
 Applies the `caddr` selector chain to `Var`.
 
-Source: `lib/list/traversal.x:51`
+Source: `lib/list/traversal.x:36`
 
 <a id="Var.cadr"></a>
 #### Var.cadr
@@ -909,7 +909,7 @@ Source: `lib/list/traversal.x:51`
 
 Applies the `cadr` selector chain to `Var`.
 
-Source: `lib/list/traversal.x:45`
+Source: `lib/list/traversal.x:30`
 
 <a id="Var.car"></a>
 #### Var.car
@@ -918,7 +918,7 @@ Source: `lib/list/traversal.x:45`
 
 Treats `var` as a `List` and returns its first element.
 
-Source: `lib/list/traversal.x:36`
+Source: `lib/list/traversal.x:21`
 
 <a id="Var.cddr"></a>
 #### Var.cddr
@@ -927,7 +927,7 @@ Source: `lib/list/traversal.x:36`
 
 Applies the `cddr` selector chain to `Var`.
 
-Source: `lib/list/traversal.x:48`
+Source: `lib/list/traversal.x:33`
 
 <a id="Var.cdr"></a>
 #### Var.cdr
@@ -936,7 +936,7 @@ Source: `lib/list/traversal.x:48`
 
 Treats `var` as a `List` and returns its tail.
 
-Source: `lib/list/traversal.x:39`
+Source: `lib/list/traversal.x:24`
 
 <a id="Var.cons"></a>
 #### Var.cons
@@ -945,7 +945,7 @@ Source: `lib/list/traversal.x:39`
 
 Returns `cons(head, tail)`, with the same identity and failures.
 
-Source: `lib/list/cells.x:29`
+Source: `lib/list/cells.x:15`
 
 ## Runtime-internal callables
 
@@ -973,7 +973,7 @@ concurrent promotion of an equal value still gets 1, though
 
 **Raises:** `<alloc-fail>` when promotion metadata cannot be allocated.
 
-Source: `lib/list/cells.x:126`
+Source: `lib/list/cells.x:113`
 
 ## Public types
 

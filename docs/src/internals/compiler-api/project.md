@@ -26,7 +26,7 @@ X2c project manifests.
 Returns the explicit or nearest readable project manifest, or NULL.
 Discovery uses the same request view as project parsing.
 
-Source: `src/project/planning.x:41`
+Source: `src/project/planning.x:28`
 
 ### `ProjectBuild`
 
@@ -52,7 +52,7 @@ Source: `src/project/planning.x:12`
 Returns whether a target, profile, or manifest field name contains only
 letters, digits, underscores, and hyphens, and is not empty.
 
-Source: `src/project/manifest.x:321`
+Source: `src/project/manifest.x:20`
 
 ## Public types
 

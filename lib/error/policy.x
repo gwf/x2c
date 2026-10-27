@@ -12,7 +12,12 @@
 module const SymbolSet error_nonreturning_causes =
   $error.nonreturning.causes();
 
-module int _never_returns(Symbol code) => code in error_nonreturning_causes;
+/* A capture holds only `Symbol` pairs and its own allocation, so it crosses a
+   thread boundary without borrowing `Error`, `Scope`, or `Pool` storage. The
+   pairs follow the header in the same block. */
+static typedef struct ErrorPolicyCapture {
+  int count, Symbol *pairs;
+} *ErrorPolicyCapture;
 
 /** Sets the default disposition for `code`.
     Supported policy values are `<abort>`, `<collect>`, `<log>`, and
@@ -55,12 +60,6 @@ Symbol Error.policy_get(Symbol code) {
   return found;
 }
 
-/** Returns the maximum number of errors that may remain accumulated. */
-int Error.bound(void) {
-  ErrorThreadState state = _thread();
-  return state.context_top ? state.context_top.bound : state.bound;
-}
-
 /** Sets the accumulated-error bound when `bound` is positive.
     A zero or negative value leaves the current bound unchanged.
 */
@@ -70,13 +69,6 @@ void Error.bound_set(int bound) {
   if (state.context_top) state.context_top.bound = bound;
   else state.bound = bound;
 }
-
-/* A capture holds only `Symbol` pairs and its own allocation, so it crosses a
-   thread boundary without borrowing `Error`, `Scope`, or `Pool` storage. The
-   pairs follow the header in the same block. */
-static typedef struct ErrorPolicyCapture {
-  int count, Symbol *pairs;
-} *ErrorPolicyCapture;
 
 /** Captures the calling thread's `Error` policy for another thread to adopt.
     Policy is per-thread state, so a worker starts with only the shared
@@ -100,24 +92,6 @@ void *Error.policy_capture(void) {
   int written = _fill_pairs(state.policy, capture.pairs, 0);
   capture.count = _fill_contexts(state.context_top, capture.pairs, written);
   return capture;
-}
-
-/* Outermost context first, so replaying the pairs in order reproduces the
-   overlays an inner context placed over an outer one. */
-static int _fill_contexts(ErrorContextState context, Symbol *pairs, int at) {
-  if (!context) return at;
-  at = _fill_contexts(context.prev, pairs, at);
-  return _fill_pairs(context.policy, pairs, at);
-}
-
-static int _fill_pairs(Map policy, Symbol *pairs, int at) {
-  unsigned cursor = 0;
-  Var key = void, value = void;
-  while (policy.try_next(cursor, key, value)) {
-    pairs[at++] = key;
-    pairs[at++] = value;
-  }
-  return at;
 }
 
 /** Adopts a policy capture on the calling thread and releases it.
@@ -167,6 +141,12 @@ void *Error.context_open(void) {
   return context;
 }
 
+/** Returns the maximum number of errors that may remain accumulated. */
+int Error.bound(void) {
+  ErrorThreadState state = _thread();
+  return state.context_top ? state.context_top.bound : state.bound;
+}
+
 /** Closes one `Context` `Error` overlay.
     An exception unwinding out of the `Context` keeps its records for the outer
     handler; an ordinary close discards records accumulated inside it. In both
@@ -184,4 +164,24 @@ void Error.context_close(void *token, int preserve_records) {
   _unwind_to(state, stop, !preserve_records);
   if (!preserve_records) _truncate(context.stack_height);
   state.context_top = context.prev;
+}
+
+module int _never_returns(Symbol code) => code in error_nonreturning_causes;
+
+/* Outermost context first, so replaying the pairs in order reproduces the
+   overlays an inner context placed over an outer one. */
+static int _fill_contexts(ErrorContextState context, Symbol *pairs, int at) {
+  if (!context) return at;
+  at = _fill_contexts(context.prev, pairs, at);
+  return _fill_pairs(context.policy, pairs, at);
+}
+
+static int _fill_pairs(Map policy, Symbol *pairs, int at) {
+  unsigned cursor = 0;
+  Var key = void, value = void;
+  while (policy.try_next(cursor, key, value)) {
+    pairs[at++] = key;
+    pairs[at++] = value;
+  }
+  return at;
 }

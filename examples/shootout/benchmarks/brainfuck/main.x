@@ -16,6 +16,13 @@ typedef struct Program {
   ArrayInt jumps;
 } Program;
 
+int main(int argc, char **argv) {
+  if (argc != 2) return 2;
+  Program program = _compile("noise ++++++++[>++++++++<-]>+.+.+.+. ignored");
+  printf("%llu\n", (unsigned long long) _run(program, atoi(argv[1])));
+  return 0;
+}
+
 static Program _compile(String source) {
   Program program = {source.keep("+-<>[]."), ArrayInt.new()};
   int len = program.code.len();
@@ -55,11 +62,4 @@ static uint64_t _run(Program program, int repetitions) {
     }
   }
   return checksum;
-}
-
-int main(int argc, char **argv) {
-  if (argc != 2) return 2;
-  Program program = _compile("noise ++++++++[>++++++++<-]>+.+.+.+. ignored");
-  printf("%llu\n", (unsigned long long) _run(program, atoi(argv[1])));
-  return 0;
 }

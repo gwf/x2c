@@ -20,6 +20,27 @@ struct Node {
   Kind kind; Operator op; int value; int slot; Node left, right;
 };
 
+int main(int argc, char **argv) {
+  if (argc != 2) return 2;
+  Node program[3];
+  int at = 0;
+  foreach(List expression in %(
+    (assign a (number 7))
+    (assign b (binary * (variable a) (number 6)))
+    (binary + (variable b)
+      (binary / (number 100) (number 5)))))
+    program[at++] = Node.compile(expression);
+
+  uint64_t checksum = 0;
+  int runs = atoi(argv[1]);
+  for (int run = 0; run < runs; run++) {
+    int variables[2] = {0};
+    for (int i = 0; i < 3; i++) checksum += program[i].eval(variables);
+  }
+  printf("%llu\n", (unsigned long long) checksum);
+  return 0;
+}
+
 static Node Node.compile(List source) {
   Node node = xcalloc(1, sizeof(struct Node));
   match (source) {
@@ -55,25 +76,4 @@ static int Node.eval(Node node, int *variables) {
     case MULTIPLY: return a * b;
     default: return a / b;
   }
-}
-
-int main(int argc, char **argv) {
-  if (argc != 2) return 2;
-  Node program[3];
-  int at = 0;
-  foreach(List expression in %(
-    (assign a (number 7))
-    (assign b (binary * (variable a) (number 6)))
-    (binary + (variable b)
-      (binary / (number 100) (number 5)))))
-    program[at++] = Node.compile(expression);
-
-  uint64_t checksum = 0;
-  int runs = atoi(argv[1]);
-  for (int run = 0; run < runs; run++) {
-    int variables[2] = {0};
-    for (int i = 0; i < 3; i++) checksum += program[i].eval(variables);
-  }
-  printf("%llu\n", (unsigned long long) checksum);
-  return 0;
 }

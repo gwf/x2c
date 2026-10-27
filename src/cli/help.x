@@ -19,72 +19,6 @@ static CliGroup cli_groups[] = {
   { 0 }
 };
 
-// help
-
-/* Prints top-level help for command 0, or one command's help, and exits. */
-module void _help_exit(Symbol command, int status) {
-  if (!command) _print_top_help();
-  else if (command == <help>) _print_help_usage();
-  else _print_page(*_help_page(command));
-  exit(status);
-}
-
-static void _print_help_usage(void) {
-  puts(
-    "Usage:\n"
-    "  x2c help [command]\n"
-    "\n"
-    "Show top-level help, or help for translate, build, run, new, script, "
-    "repl,\nenv, install, remove, or list.");
-}
-
-static void _print_top_help(void) {
-  puts(
-    $dedent(%"
-      Usage:
-        x2c <command> [options]
-
-      x2c translates x2c source to C and can optionally compile and link the
-      result with the host C toolchain.
-
-      Commands:
-    "));
-  for (CliCommand *command = cli_commands; command.name; command++)
-    printf("  %-12s%s\n", command.name.str(), command.description);
-  _print_external_commands();
-  _print_options(0);
-  puts("\nInput syntax:\n");
-  _print_help_row(
-    "@<file>", "Read additional arguments from a response file", 2);
-  _print_help_row("--", "End option parsing", 2);
-  puts("");
-  puts(
-    $dedent(%"
-      Run 'x2c help <command>' or 'x2c <command> --help' for command help."));
-}
-
-/* Installed external commands list themselves in `commands.txt`, one
-   `name|maturity|summary` line each. */
-static void _print_external_commands(void) {
-  String libexec = Compiler.home_libexec();
-  File manifest = libexec ? fopen(%"$libexec/commands.txt", "r") : NULL;
-  if (!manifest) return;
-  char *line = NULL, size_t capacity = 0;
-  while (getline(&line, &capacity, manifest) >= 0) {
-    char *maturity = strchr(line, '|');
-    if (!maturity) continue;
-    *maturity++ = 0;
-    if (CliRequest.is_builtin(line)) continue;
-    char *summary = strchr(maturity, '|');
-    if (!summary) continue;
-    *summary++ = 0;
-    summary[strcspn(summary, "\r\n")] = 0;
-    printf("  %-12s%s\n", line, summary);
-  }
-  free(line);
-  manifest.close();
-}
-
 /* A command's help page: its usage, its options, the rows for `@<file>` and,
    when the command reads it, `--`, then any closing notes. */
 static typedef struct HelpPage {
@@ -223,6 +157,72 @@ static HelpPage help_pages[] = {
   { 0 }
 };
 
+// help
+
+/* Prints top-level help for command 0, or one command's help, and exits. */
+module void _help_exit(Symbol command, int status) {
+  if (!command) _print_top_help();
+  else if (command == <help>) _print_help_usage();
+  else _print_page(*_help_page(command));
+  exit(status);
+}
+
+static void _print_help_usage(void) {
+  puts(
+    "Usage:\n"
+    "  x2c help [command]\n"
+    "\n"
+    "Show top-level help, or help for translate, build, run, new, script, "
+    "repl,\nenv, install, remove, or list.");
+}
+
+static void _print_top_help(void) {
+  puts(
+    $dedent(%"
+      Usage:
+        x2c <command> [options]
+
+      x2c translates x2c source to C and can optionally compile and link the
+      result with the host C toolchain.
+
+      Commands:
+    "));
+  for (CliCommand *command = cli_commands; command.name; command++)
+    printf("  %-12s%s\n", command.name.str(), command.description);
+  _print_external_commands();
+  _print_options(0);
+  puts("\nInput syntax:\n");
+  _print_help_row(
+    "@<file>", "Read additional arguments from a response file", 2);
+  _print_help_row("--", "End option parsing", 2);
+  puts("");
+  puts(
+    $dedent(%"
+      Run 'x2c help <command>' or 'x2c <command> --help' for command help."));
+}
+
+/* Installed external commands list themselves in `commands.txt`, one
+   `name|maturity|summary` line each. */
+static void _print_external_commands(void) {
+  String libexec = Compiler.home_libexec();
+  File manifest = libexec ? fopen(%"$libexec/commands.txt", "r") : NULL;
+  if (!manifest) return;
+  char *line = NULL, size_t capacity = 0;
+  while (getline(&line, &capacity, manifest) >= 0) {
+    char *maturity = strchr(line, '|');
+    if (!maturity) continue;
+    *maturity++ = 0;
+    if (CliRequest.is_builtin(line)) continue;
+    char *summary = strchr(maturity, '|');
+    if (!summary) continue;
+    *summary++ = 0;
+    summary[strcspn(summary, "\r\n")] = 0;
+    printf("  %-12s%s\n", line, summary);
+  }
+  free(line);
+  manifest.close();
+}
+
 static HelpPage *_help_page(Symbol command) {
   for (HelpPage *page = help_pages; page.command; page++)
     if (page.command == command) return page;
@@ -267,11 +267,11 @@ static void _print_group(Symbol command, CliGroup &group) {
     if (_in_group(*option, command, group.group)) _print_option(*option);
 }
 
-static int _listed(CliOption &option, Symbol command) =>
-  !option.hidden && (command in option.commands);
-
 static int _in_group(CliOption &option, Symbol command, Symbol group) =>
   _listed(option, command) && option.group == group;
+
+static int _listed(CliOption &option, Symbol command) =>
+  !option.hidden && (command in option.commands);
 
 static void _print_option(const CliOption &option) {
   String spelled;

@@ -4,42 +4,6 @@
     dispatches on a node's content.
 */
 
-/* A C string literal cast to `String` is promoted as an assignment
-   promotes it; C would reinterpret the literal's bytes as a header. */
-module List _cast_expression(Compiler c, List decl, Type type, List operand) {
-  if (c.sym.is_string_type(type) && _is_raw_string_literal(operand))
-    return c.convert_expression(operand, type);
-  return %(expr $type (cast $decl $operand));
-}
-
-/* A statement expression has the value and type of its final expression
-   statement, and is void otherwise. A defer directly inside would wrap that
-   statement in a cleanup region, and C would lose the value. A template
-   binds its statement expression where it expands. */
-module List _statement_expression(Compiler c, List block, Token origin) {
-  List items = Ast.without_origin(block).cdr();
-  if (_defers_directly(items))
-    $fail.expressions_statement_defer(c, origin);
-  Type type = c.macro_holes ? %(<macro-expr>) : _final_value_type(items);
-  return %(expr $type (parens $block));
-}
-
-static int _defers_directly(List items) {
-  foreach (List item in items)
-    match (Ast.without_origin(item)) {
-      case %(defer ?): return 1;
-      case %(seq *rows): if (_defers_directly(rows)) return 1;
-    }
-  return 0;
-}
-
-/* Reference reads retain their resolved type through the last expression. */
-static Type _final_value_type(List items) {
-  List last = items ? Ast.without_origin(items.last()) : NULL;
-  if (last ~= %(stmnt (expr ?(Type type) ?))) return type;
-  return %(void);
-}
-
 // expression resolution
 
 /** Resolves and type-annotates one expression AST in current compiler state.
@@ -72,6 +36,19 @@ List Compiler.resolve_expression(Compiler c, List input, Token origin) {
     }
   }
   return input;
+}
+
+// collection literals
+
+/** Resolves the key and value of one `(map-entry key value)` AST row.
+    Any other shape is reported at `origin` as a parse error.
+*/
+List Compiler.resolve_map_entry(Compiler c, List input, Token origin) {
+  if (input ~= %(map-entry ?key ?value))
+    return %(map-entry
+      $(c.resolve_expression(key, origin))
+      $(c.resolve_expression(value, origin)));
+  $fail.expressions_map_entry(c, origin);
 }
 
 /** True when syntax still needs ordinary binding or macro substitution. */
@@ -107,11 +84,19 @@ int Compiler.needs_resolution(Compiler c, Var value) {
   return 0;
 }
 
-// True when a receiver's type must wait for macro substitution.
-module int _deferred_receiver(List expr) {
-  if (expr ~= %(expr (<macro-expr>) ?)) return 1;
-  return 0;
+// conversions and predicates
+
+/** Builds an exact tag expression, deferring macro type slots until
+    binding.
+*/
+List Compiler.var_tag_expression(Compiler c, Type target, Token origin) {
+  if (_deferred_type_test(target))
+    return %(expr (<macro-expr>) (type-tag $target));
+  Symbol tag = _require_var_tag(c, target, origin);
+  return %(expr ("Symbol") (literal ("Symbol") $(tag.str()) $tag));
 }
+
+// expression resolution
 
 static List _content(Resolve &r, List content) {
   match (r.input) {
@@ -188,60 +173,6 @@ static List _content(Resolve &r, List content) {
   return r.input;
 }
 
-static List _operator(Resolve &r, List parts) {
-  match (parts) {
-    case %((!or (!set ?op .) (!set ?op (!quote ->)))
-           ?receiver (!set ?field (*))):
-      return _member(r, op, receiver, field);
-    case %(?op ?value): return _unary(r, op, value);
-    case %(?op ?test ?yes ?no): return _conditional(r, op, test, yes, no);
-    case %(?op ?left ?right): return _binary(r, op, left, right);
-  }
-  return r.input;
-}
-
-static List _binding(Resolve &r, List binding) {
-  if (!Ast.try_binding(binding, NULL, NULL)) return r.input;
-  return _resolve_identifier(r.c, binding, r.type, r.origin);
-}
-
-static List _lambda(Resolve &r, List body, List captures, List params) {
-  if (r.c.macro_holes) return r.input;
-  return r.c.bind_lambda_expression(
-    r.type, %(params @params), captures, body);
-}
-
-static List _source(Resolve &r, List content) {
-  if (content ~= %(at m-origin ?inner)) {
-    if (!r.c.source_map || r.c.macro_holes) return r.input;
-    return %(expr $(r.type) (at $(r.c.origin) $inner));
-  }
-  return r.input;
-}
-
-/* A meta body's own `$` calls parse as ordinary calls, so a meta call there
-   came from a template and runs where the template expands. */
-static List _meta_call(Resolve &r) {
-  if (r.c.macro_holes) return r.input;
-  if (r.origin && r.origin == r.c.meta_statement && r.c.peek(0) == <;>)
-    return r.input;
-  return r.c.evaluate_meta_expression(r.input, r.origin);
-}
-
-/* An invocation expands where it is resolved, as the binder expands one,
-   except in a template, whose expansion expands it. There a definition a
-   quotation carries by value is quoted, as a template's own invocation
-   quotes one, so filling the template leaves the definition's binders. */
-static List _invocation(Resolve &r, List content) {
-  if (!r.c.macro_holes)
-    return r.c.bind_syntax(content, <expression>, r.c.return_type);
-  match (content) case %(macro-invoke ?(List stored) ?input ?site):
-    if (stored.car() == <macrodef>)
-      return %(expr $(r.type)
-        (macro-invoke (!quote $stored) $input $site));
-  return r.input;
-}
-
 static List _macro_slot(Resolve &r, List content) {
   if (r.c.macro_holes) return r.input;
   Var value = r.c.evaluate_macro_slot(content);
@@ -252,7 +183,7 @@ static List _macro_slot(Resolve &r, List content) {
     r.c.lift_meta_expression(value, r.origin), r.origin);
 }
 
-// conversions and predicates
+
 
 static List _is_type(Resolve &r, List operand, Type target) {
   List lhs = r.c.resolve_expression(operand, r.origin);
@@ -303,54 +234,6 @@ static List _is_symbol(Resolve &r, List operand, List selector) {
   return r.c.rebuild_expression(%(int), called(callee, $(lhs, selector)));
 }
 
-/* A statically known tag whose encoding row the decoder discriminates on
-   `top` and `bottom` alone tests as two compares. `Var.is_row` takes the
-   row as constants so the C compiler folds them and the operand is
-   evaluated once. Tags with a validity clause, an immediate width, or a
-   user registration have no row and keep the deciding decode. */
-static List _constant_row_test(
-  Compiler c, List lhs, Symbol tag, Token origin) {
-  unsigned long top, mask, bottom;
-  if (!Type.var_tag_row(tag, top, mask, bottom)) return NULL;
-  List callee = _resolve_identifier(c, "Var_is_row", NULL, origin);
-  List arguments = %($lhs
-    (expr (unsigned) (literal (unsigned) "$top"))
-    (expr (unsigned long) (literal (unsigned long) "$mask"))
-    (expr (unsigned long) (literal (unsigned long) "$bottom")));
-  Macro called = $called;
-  return c.rebuild_expression(%(int), called(callee, arguments));
-}
-
-/* Returns the exact Var tag for a type test, rejecting types without one.
-   Enums retain no identity after boxing and cannot be tested this way.
-*/
-static Symbol _require_var_tag(Compiler c, Type target, Token origin) {
-  Type resolved = NULL;
-  Symbol vartag = c.sym.var_tag_for_type(target, resolved);
-  if (resolved && resolved.is_enum())
-    $fail.expressions_is_enum(c, origin, target);
-  if (!vartag)
-    $fail.expressions_is_tag(c, origin, target);
-  return vartag;
-}
-
-/** Builds an exact tag expression, deferring macro type slots until
-    binding.
-*/
-List Compiler.var_tag_expression(Compiler c, Type target, Token origin) {
-  if (_deferred_type_test(target))
-    return %(expr (<macro-expr>) (type-tag $target));
-  Symbol tag = _require_var_tag(c, target, origin);
-  return %(expr ("Symbol") (literal ("Symbol") $(tag.str()) $tag));
-}
-
-static int _deferred_type_test(Type target) {
-  foreach (Var specifier in target)
-    match (specifier)
-      case %((!or macro-bind macro-slot) *): return 1;
-  return 0;
-}
-
 static List _cast(Resolve &r, List declaration, List operand) {
   operand = r.c.resolve_expression(operand, r.origin);
   declaration = r.c.bind_syntax(declaration, <block>, r.c.return_type);
@@ -375,7 +258,7 @@ static List _tadapt(Resolve &r, List target, List source) {
   $fail.expressions_adapter_typedef(r.c, r.origin);
 }
 
-// collection literals
+
 
 static List _segments(Resolve &r, List items) {
   Array resolved = [];
@@ -445,17 +328,6 @@ static List _map_value(Resolve &r) {
       r.type, map_value(resolved.list_free()));
   }
   return r.input;
-}
-
-/** Resolves the key and value of one `(map-entry key value)` AST row.
-    Any other shape is reported at `origin` as a parse error.
-*/
-List Compiler.resolve_map_entry(Compiler c, List input, Token origin) {
-  if (input ~= %(map-entry ?key ?value))
-    return %(map-entry
-      $(c.resolve_expression(key, origin))
-      $(c.resolve_expression(value, origin)));
-  $fail.expressions_map_entry(c, origin);
 }
 
 static List _initval(Resolve &r, List content) {
@@ -556,4 +428,138 @@ static List _va_arg(Resolve &r, List argument, List declaration) {
   return %(expr $(r.type)
            (va-arg $(r.c.resolve_expression(argument, r.origin))
                    $(r.c.resolve_expression(declaration, r.origin))));
+}
+
+/* A C string literal cast to `String` is promoted as an assignment
+   promotes it; C would reinterpret the literal's bytes as a header. */
+module List _cast_expression(Compiler c, List decl, Type type, List operand) {
+  if (c.sym.is_string_type(type) && _is_raw_string_literal(operand))
+    return c.convert_expression(operand, type);
+  return %(expr $type (cast $decl $operand));
+}
+
+/* A statement expression has the value and type of its final expression
+   statement, and is void otherwise. A defer directly inside would wrap that
+   statement in a cleanup region, and C would lose the value. A template
+   binds its statement expression where it expands. */
+module List _statement_expression(Compiler c, List block, Token origin) {
+  List items = Ast.without_origin(block).cdr();
+  if (_defers_directly(items))
+    $fail.expressions_statement_defer(c, origin);
+  Type type = c.macro_holes ? %(<macro-expr>) : _final_value_type(items);
+  return %(expr $type (parens $block));
+}
+
+static int _defers_directly(List items) {
+  foreach (List item in items)
+    match (Ast.without_origin(item)) {
+      case %(defer ?): return 1;
+      case %(seq *rows): if (_defers_directly(rows)) return 1;
+    }
+  return 0;
+}
+
+/* Reference reads retain their resolved type through the last expression. */
+static Type _final_value_type(List items) {
+  List last = items ? Ast.without_origin(items.last()) : NULL;
+  if (last ~= %(stmnt (expr ?(Type type) ?))) return type;
+  return %(void);
+}
+
+// True when a receiver's type must wait for macro substitution.
+module int _deferred_receiver(List expr) {
+  if (expr ~= %(expr (<macro-expr>) ?)) return 1;
+  return 0;
+}
+
+static List _operator(Resolve &r, List parts) {
+  match (parts) {
+    case %((!or (!set ?op .) (!set ?op (!quote ->)))
+           ?receiver (!set ?field (*))):
+      return _member(r, op, receiver, field);
+    case %(?op ?value): return _unary(r, op, value);
+    case %(?op ?test ?yes ?no): return _conditional(r, op, test, yes, no);
+    case %(?op ?left ?right): return _binary(r, op, left, right);
+  }
+  return r.input;
+}
+
+static List _binding(Resolve &r, List binding) {
+  if (!Ast.try_binding(binding, NULL, NULL)) return r.input;
+  return _resolve_identifier(r.c, binding, r.type, r.origin);
+}
+
+static List _lambda(Resolve &r, List body, List captures, List params) {
+  if (r.c.macro_holes) return r.input;
+  return r.c.bind_lambda_expression(
+    r.type, %(params @params), captures, body);
+}
+
+static List _source(Resolve &r, List content) {
+  if (content ~= %(at m-origin ?inner)) {
+    if (!r.c.source_map || r.c.macro_holes) return r.input;
+    return %(expr $(r.type) (at $(r.c.origin) $inner));
+  }
+  return r.input;
+}
+
+/* A meta body's own `$` calls parse as ordinary calls, so a meta call there
+   came from a template and runs where the template expands. */
+static List _meta_call(Resolve &r) {
+  if (r.c.macro_holes) return r.input;
+  if (r.origin && r.origin == r.c.meta_statement && r.c.peek(0) == <;>)
+    return r.input;
+  return r.c.evaluate_meta_expression(r.input, r.origin);
+}
+
+/* An invocation expands where it is resolved, as the binder expands one,
+   except in a template, whose expansion expands it. There a definition a
+   quotation carries by value is quoted, as a template's own invocation
+   quotes one, so filling the template leaves the definition's binders. */
+static List _invocation(Resolve &r, List content) {
+  if (!r.c.macro_holes)
+    return r.c.bind_syntax(content, <expression>, r.c.return_type);
+  match (content) case %(macro-invoke ?(List stored) ?input ?site):
+    if (stored.car() == <macrodef>)
+      return %(expr $(r.type)
+        (macro-invoke (!quote $stored) $input $site));
+  return r.input;
+}
+
+/* A statically known tag whose encoding row the decoder discriminates on
+   `top` and `bottom` alone tests as two compares. `Var.is_row` takes the
+   row as constants so the C compiler folds them and the operand is
+   evaluated once. Tags with a validity clause, an immediate width, or a
+   user registration have no row and keep the deciding decode. */
+static List _constant_row_test(
+  Compiler c, List lhs, Symbol tag, Token origin) {
+  unsigned long top, mask, bottom;
+  if (!Type.var_tag_row(tag, top, mask, bottom)) return NULL;
+  List callee = _resolve_identifier(c, "Var_is_row", NULL, origin);
+  List arguments = %($lhs
+    (expr (unsigned) (literal (unsigned) "$top"))
+    (expr (unsigned long) (literal (unsigned long) "$mask"))
+    (expr (unsigned long) (literal (unsigned long) "$bottom")));
+  Macro called = $called;
+  return c.rebuild_expression(%(int), called(callee, arguments));
+}
+
+/* Returns the exact Var tag for a type test, rejecting types without one.
+   Enums retain no identity after boxing and cannot be tested this way.
+*/
+static Symbol _require_var_tag(Compiler c, Type target, Token origin) {
+  Type resolved = NULL;
+  Symbol vartag = c.sym.var_tag_for_type(target, resolved);
+  if (resolved && resolved.is_enum())
+    $fail.expressions_is_enum(c, origin, target);
+  if (!vartag)
+    $fail.expressions_is_tag(c, origin, target);
+  return vartag;
+}
+
+static int _deferred_type_test(Type target) {
+  foreach (Var specifier in target)
+    match (specifier)
+      case %((!or macro-bind macro-slot) *): return 1;
+  return 0;
 }

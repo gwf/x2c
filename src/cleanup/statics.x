@@ -11,6 +11,112 @@ static typedef struct RuntimeScan {
 
 // static initializers
 
+/** Reports whether the static initializer `value` has to run at runtime,
+    because it calls, allocates, or reads an object other than a function
+    name. `runtime` holds the function-local statics already known to run
+    that way, or is `NULL` at file scope.
+*/
+int Compiler.static_value_is_runtime(Compiler c, List value, Map runtime) {
+  auto Array pending = [], modes = [];
+  RuntimeScan s = {
+    .c = c, .runtime = runtime, .pending = pending, .modes = modes
+  };
+  _push(s, value, 0);
+  while (pending.len()) {
+    List node = pending.take_last();
+    int address = modes.take_last();
+    int result = address ? _address(s, node) : _value(s, node);
+    if (result > 0) return 1;
+    if (result < 0)
+      foreach (Var child in node) if (child is <list>) _push(s, child, 0);
+  }
+  return 0;
+}
+
+/* -1 means descend, 0 means this node is handled, 1 means runtime. */
+static int _value(RuntimeScan &s, List node) {
+  match (node) {
+    case %((!or cache call var array map varray vmap initval cons append) *):
+      return 1;
+    case %(expr ?type (ident ?binding)):
+      return _identifier(s, type, binding);
+    case %(expr ? (op & ?inner)):
+      return _push(s, inner, 1);
+    case %(expr ?type (!set ?content
+        $($indexed(?receiver, ?selector)))): {
+      Type native = type;
+      if (native.is_array()) return _push(s, content, 1);
+      if (native.is_pointer() || !(<const> in native)) return 1;
+      break;
+    }
+    case %(expr ? $($sizeof_expression(?operand))):
+      return _sizeof_dimensions(s, operand);
+  }
+  return -1;
+}
+
+/* The operand of sizeof is unevaluated except for VLA dimensions. Inspect
+   those dimensions through the same static-input classifier as an ordinary
+   initializer, without evaluating calls in a fixed-size operand. */
+static int _sizeof_dimensions(RuntimeScan &s, List operand) {
+  List node;
+  $ast.walk(operand, node) if (node ~= %(dim ?dimension)) {
+    if (dimension && s.c.static_value_is_runtime(dimension, s.runtime))
+      return 1;
+    continue;
+  }
+  return 0;
+}
+
+static int _identifier(RuntimeScan &s, Type type, List binding) {
+  if (_input(s, binding)) return 1;
+  if (%(function $binding) in s.c.semantic_binding_facts()) return 0;
+  Type native = type;
+  return native && !native.is_enum() && !native.is_function() &&
+         !native.is_array() &&
+         (native.is_pointer() || !(<const> in native));
+}
+
+static int _address(RuntimeScan &s, List node) {
+  match (node) {
+    case %(!or (expr ? ?inner)
+        $($grouped(?inner))
+        (op . ?inner ?)):
+      return _push(s, inner, 1);
+    case %(ident ?binding): return _input(s, binding);
+    case $($indexed(%(!set ?base (expr ?type ?)), ?index)): {
+      _push(s, index, 0);
+      return _push(s, base, type.list().type().is_array());
+    }
+    case %(op (!quote *) ?inner):
+      return _push(s, inner, 0);
+  }
+  return 1;
+}
+
+/* Queues `node` to be read as an address or a value; the 0 it returns
+   means the caller's node is handled. */
+static int _push(RuntimeScan &s, Var node, int address) {
+  s.pending.push(node);
+  s.modes.push(address);
+  return 0;
+}
+
+/* A runtime static or an automatic object read where the initializer runs. */
+static int _input(RuntimeScan &s, List binding) =>
+  (s.runtime && binding in s.runtime) ||
+  _automatic_static_input(s.c, binding);
+
+static int _automatic_static_input(Compiler c, List binding) {
+  Var automatic, stored;
+  Map facts = c.semantic_binding_facts();
+  if (!facts.try_get(%(automatic $binding), automatic) ||
+      !automatic) return 0;
+  if (!facts.try_get(%(type $binding), stored)) return 1;
+  Type type = stored;
+  return !type.is_static() && !type.is_extern() && !type.is_threaded();
+}
+
 /* A static local whose initializer runs at runtime protects the remainder
    of its block just as a cleanup region does: a jump may not enter past the
    initializer. Keeping the canonical binding makes shadowing and generated
@@ -108,110 +214,4 @@ static int _runtime_static_declaration(
           }
   }
   return found;
-}
-
-/** Reports whether the static initializer `value` has to run at runtime,
-    because it calls, allocates, or reads an object other than a function
-    name. `runtime` holds the function-local statics already known to run
-    that way, or is `NULL` at file scope.
-*/
-int Compiler.static_value_is_runtime(Compiler c, List value, Map runtime) {
-  auto Array pending = [], modes = [];
-  RuntimeScan s = {
-    .c = c, .runtime = runtime, .pending = pending, .modes = modes
-  };
-  _push(s, value, 0);
-  while (pending.len()) {
-    List node = pending.take_last();
-    int address = modes.take_last();
-    int result = address ? _address(s, node) : _value(s, node);
-    if (result > 0) return 1;
-    if (result < 0)
-      foreach (Var child in node) if (child is <list>) _push(s, child, 0);
-  }
-  return 0;
-}
-
-/* Queues `node` to be read as an address or a value; the 0 it returns
-   means the caller's node is handled. */
-static int _push(RuntimeScan &s, Var node, int address) {
-  s.pending.push(node);
-  s.modes.push(address);
-  return 0;
-}
-
-/* -1 means descend, 0 means this node is handled, 1 means runtime. */
-static int _value(RuntimeScan &s, List node) {
-  match (node) {
-    case %((!or cache call var array map varray vmap initval cons append) *):
-      return 1;
-    case %(expr ?type (ident ?binding)):
-      return _identifier(s, type, binding);
-    case %(expr ? (op & ?inner)):
-      return _push(s, inner, 1);
-    case %(expr ?type (!set ?content
-        $($indexed(?receiver, ?selector)))): {
-      Type native = type;
-      if (native.is_array()) return _push(s, content, 1);
-      if (native.is_pointer() || !(<const> in native)) return 1;
-      break;
-    }
-    case %(expr ? $($sizeof_expression(?operand))):
-      return _sizeof_dimensions(s, operand);
-  }
-  return -1;
-}
-
-static int _identifier(RuntimeScan &s, Type type, List binding) {
-  if (_input(s, binding)) return 1;
-  if (%(function $binding) in s.c.semantic_binding_facts()) return 0;
-  Type native = type;
-  return native && !native.is_enum() && !native.is_function() &&
-         !native.is_array() &&
-         (native.is_pointer() || !(<const> in native));
-}
-
-static int _address(RuntimeScan &s, List node) {
-  match (node) {
-    case %(!or (expr ? ?inner)
-        $($grouped(?inner))
-        (op . ?inner ?)):
-      return _push(s, inner, 1);
-    case %(ident ?binding): return _input(s, binding);
-    case $($indexed(%(!set ?base (expr ?type ?)), ?index)): {
-      _push(s, index, 0);
-      return _push(s, base, type.list().type().is_array());
-    }
-    case %(op (!quote *) ?inner):
-      return _push(s, inner, 0);
-  }
-  return 1;
-}
-
-/* A runtime static or an automatic object read where the initializer runs. */
-static int _input(RuntimeScan &s, List binding) =>
-  (s.runtime && binding in s.runtime) ||
-  _automatic_static_input(s.c, binding);
-
-/* The operand of sizeof is unevaluated except for VLA dimensions. Inspect
-   those dimensions through the same static-input classifier as an ordinary
-   initializer, without evaluating calls in a fixed-size operand. */
-static int _sizeof_dimensions(RuntimeScan &s, List operand) {
-  List node;
-  $ast.walk(operand, node) if (node ~= %(dim ?dimension)) {
-    if (dimension && s.c.static_value_is_runtime(dimension, s.runtime))
-      return 1;
-    continue;
-  }
-  return 0;
-}
-
-static int _automatic_static_input(Compiler c, List binding) {
-  Var automatic, stored;
-  Map facts = c.semantic_binding_facts();
-  if (!facts.try_get(%(automatic $binding), automatic) ||
-      !automatic) return 0;
-  if (!facts.try_get(%(type $binding), stored)) return 1;
-  Type type = stored;
-  return !type.is_static() && !type.is_extern() && !type.is_threaded();
 }

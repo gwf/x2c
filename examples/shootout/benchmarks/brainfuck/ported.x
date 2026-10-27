@@ -16,6 +16,14 @@ typedef struct Program {
   int len;
 } *Program;
 
+int main(int argc, char **argv) {
+  if (argc != 2) return 2;
+  Program program = Program.compile(
+    "noise ++++++++[>++++++++<-]>+.+.+.+. ignored");
+  printf("%llu\n", (unsigned long long) program.run(atoi(argv[1])));
+  return 0;
+}
+
 static Program Program.compile(const char *source) {
   size_t capacity = strlen(source);
   Program program = xmalloc(sizeof(struct Program));
@@ -57,12 +65,4 @@ static uint64_t Program.run(Program program, int repetitions) {
     }
   }
   return checksum;
-}
-
-int main(int argc, char **argv) {
-  if (argc != 2) return 2;
-  Program program = Program.compile(
-    "noise ++++++++[>++++++++<-]>+.+.+.+. ignored");
-  printf("%llu\n", (unsigned long long) program.run(atoi(argv[1])));
-  return 0;
 }

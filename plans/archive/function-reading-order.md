@@ -1,9 +1,9 @@
 # Public-first function reading order
 
-> Status: active, foundation implemented and validated, 2026-10-27.
-> Gary authorized the skill, documentation, and four-example check-in, then
-> a local conversion campaign. Optional lint is deferred. The foundation
-> commits precede campaign edits; campaign work remains local for review.
+> Status: done, skill and corpus campaign implemented, 2026-10-27.
+> Gary authorized publication to current dev after local review. Further
+> ordering refinements and optional lint are deferred. The closing campaign
+> commit contains this archived plan; publication validation follows integration.
 
 ## Result and scope
 
@@ -230,3 +230,27 @@ lint candidate protects a deliberate style convention only and remains an
 advisory review signal. Its bounded fixtures cover real grouping mistakes
 and accepted exceptions; they protect no new language restriction. No new
 recurring validation, commit requirement, or build step is proposed.
+
+## Completed campaign
+
+All 419 inventoried files were assessed: 283 changed (including four foundation
+examples), 71 already conformant, 51 without movable authored functions,
+12 constrained and unchanged, and two generated. The local campaign checked
+5,693 exact compiler-located definitions across 279 changed authored files.
+Twelve canonical gallery slide fences were reordered to match their generated
+examples, preserving hidden assertions and prose.
+
+Pre-integration verification passed 1,051 tests with 27,534 assertions,
+1,307 compiler fixtures, 64 curated example checks and documentation checks.
+Stage 0 and stage 1 matched across all 310 generated C/H files. Publication
+requires the existing agent-pr-check on the integrated tree.
+
+The 19 initially flagged files are not 19 proven ordering failures. Four
+tested permutations failed: expressions/calls, common, var-tags and the
+meta-functions example. The current calls file already has public-first
+authored functions. Operator projection and Lisp registration retain
+source-backed availability constraints. Eleven compiler-component files
+retain broader orders than classification strictly requires: one compiler
+operation or previously classified callee can establish compile-time status.
+The regions/values converter/adoption boundary is conservative. Further
+refinement is deliberately deferred after review; no body changes are selected.

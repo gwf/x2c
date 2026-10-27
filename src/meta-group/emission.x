@@ -315,13 +315,6 @@ static Map _initial_copies(Compiler c, Array units) {
   return copies;
 }
 
-static int _braced(Var node) {
-  if (node is not <list>) return 0;
-  if (((List) node).car() == <composite>) return 1;
-  foreach (Var part in (List) node) if (_braced(part)) return 1;
-  return 0;
-}
-
 /* The group's entry in the shape `x2c build --kind meta-module` writes:
    the stamp, `x2c_module_reset`, which reinitializes each mutable `meta
    static` value, and `x2c_module_targets`, a Map from the name of each
@@ -404,6 +397,13 @@ static List _resets(Compiler c, Map initials) {
           c.rebuild_statement($!{ $target = $initializer; }).cadr());
       }
   return resets.list_free();
+}
+
+static int _braced(Var node) {
+  if (node is not <list>) return 0;
+  if (((List) node).car() == <composite>) return 1;
+  foreach (Var part in (List) node) if (_braced(part)) return 1;
+  return 0;
 }
 
 /* The reset entry and each group function as `(name binding type)`. */

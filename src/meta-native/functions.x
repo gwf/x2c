@@ -48,22 +48,61 @@ void Compiler.install_collected_meta_function(
   _install_stub(c, name, declaration.type_from_ast().canonicalize(), NULL);
 }
 
-/* Host-preprocessed text holds each included file's definitions where the
-   include was. A public one binds as that include advertises it, with its
-   file as the provider whose helper table runs it, and reports that it did.
-   The unit's own and a static one bind as their file's collection binds
-   them, since a call runs in the table of the file that wrote it. */
-static int _install_included_meta(
-  Compiler c, List declaration, Token marker) {
-  Type type = declaration.type_from_ast().canonicalize();
-  String file = c.canonical_path(c.token_source(marker, NULL));
-  if (type.is_static() || file == c.canonical_path(c.filename)) return 0;
-  String name = _native_meta_name(c, declaration, marker);
-  c.install_project_meta_effect(
-    %(project-meta $name $(c.func_signature(type))
-      $(Compiler.portable_path(file))));
-  return 1;
+/** Tests a registered macro with the candidate's global and source
+    bindings. A pattern derived without them reads none.
+*/
+int Compiler.matches_macro(Compiler c, MacroMatcher &matcher, List code) {
+  if (matcher.pattern) return matcher.matches(code);
+  Var previous = Macro.subject();
+  Array arguments = auto [code];
+  Macro.use_subject(_subject_rows(c, arguments));
+  defer Macro.use_subject(previous);
+  return matcher.matches(code);
 }
+
+/** Applies a contextual `meta` marker to one initialized file-static value.
+    The unit's staged `meta` group holds the compile-time instance, which
+    its module initializes for each unit.
+*/
+void Compiler.install_meta_declaration(
+  Compiler c, List declaration, Token marker) {
+  if (declaration ~= %(declare ?spec
+        (bindings (op = (bind (binding ? ?(String name)) *) ?)))) {
+    if (!spec.type().is_static())
+      $fail.meta_native_meta_storage(c, marker, name);
+    if (c.groups_meta()) c.meta_group.push(%(static $declaration));
+    return;
+  }
+  $fail.meta_native_meta_decl(c, marker);
+}
+
+/** Records the provider of a public bodied meta function in its interface.
+    The provider owns both its native body and its compile-time state.
+*/
+void Compiler.record_project_meta_effect(
+  Compiler c, List declaration, Token marker) {
+  if (c.source_private < 0) return;
+  Type type = declaration.type_from_ast().canonicalize();
+  if (type.is_static()) return;
+  String path = Compiler.portable_path(Path.resolved_absolute(c.filename));
+  String name = _native_meta_name(c, declaration, marker);
+  if (%(function $name) in c.sym.file_statics()) return;
+  c.sym.set(
+    %("source-node" (declaration $path $(marker.pos))),
+    %(project-meta $name $(c.func_signature(type)) $path));
+}
+
+/** Installs an included meta function's evaluator advertisement. */
+void Compiler.install_project_meta_effect(Compiler c, List row) {
+  if (row ~= %(project-meta ?name ?signature ?provider)) {
+    c.project_meta[name] = $(signature, provider);
+    c.native_meta.del(name);
+    c.meta_group_bound.del(%"<unbound $name>");
+    _bind_advertised_meta(c, name, 1);
+  }
+}
+
+// native meta functions
 
 /* The stub belongs to the unit's bindings. */
 static void _install_stub(
@@ -132,18 +171,6 @@ static Array _stub_arguments(Func function, const FuncArg *argv) {
   return values;
 }
 
-/** Tests a registered macro with the candidate's global and source
-    bindings. A pattern derived without them reads none.
-*/
-int Compiler.matches_macro(Compiler c, MacroMatcher &matcher, List code) {
-  if (matcher.pattern) return matcher.matches(code);
-  Var previous = Macro.subject();
-  Array arguments = auto [code];
-  Macro.use_subject(_subject_rows(c, arguments));
-  defer Macro.use_subject(previous);
-  return matcher.matches(code);
-}
-
 /* The caller's global bindings and source-name projections for bindings in
    the arguments, carried through the existing helper subject context. */
 static List _subject_rows(Compiler c, Array values) {
@@ -175,54 +202,21 @@ static void _subject_globals(
   }
 }
 
-/** Applies a contextual `meta` marker to one initialized file-static value.
-    The unit's staged `meta` group holds the compile-time instance, which
-    its module initializes for each unit.
-*/
-void Compiler.install_meta_declaration(
+/* Host-preprocessed text holds each included file's definitions where the
+   include was. A public one binds as that include advertises it, with its
+   file as the provider whose helper table runs it, and reports that it did.
+   The unit's own and a static one bind as their file's collection binds
+   them, since a call runs in the table of the file that wrote it. */
+static int _install_included_meta(
   Compiler c, List declaration, Token marker) {
-  if (declaration ~= %(declare ?spec
-        (bindings (op = (bind (binding ? ?(String name)) *) ?)))) {
-    if (!spec.type().is_static())
-      $fail.meta_native_meta_storage(c, marker, name);
-    if (c.groups_meta()) c.meta_group.push(%(static $declaration));
-    return;
-  }
-  $fail.meta_native_meta_decl(c, marker);
-}
-
-/** Records the provider of a public bodied meta function in its interface.
-    The provider owns both its native body and its compile-time state.
-*/
-void Compiler.record_project_meta_effect(
-  Compiler c, List declaration, Token marker) {
-  if (c.source_private < 0) return;
   Type type = declaration.type_from_ast().canonicalize();
-  if (type.is_static()) return;
-  String path = Compiler.portable_path(Path.resolved_absolute(c.filename));
+  String file = c.canonical_path(c.token_source(marker, NULL));
+  if (type.is_static() || file == c.canonical_path(c.filename)) return 0;
   String name = _native_meta_name(c, declaration, marker);
-  if (%(function $name) in c.sym.file_statics()) return;
-  c.sym.set(
-    %("source-node" (declaration $path $(marker.pos))),
-    %(project-meta $name $(c.func_signature(type)) $path));
-}
-
-/** Installs an included meta function's evaluator advertisement. */
-void Compiler.install_project_meta_effect(Compiler c, List row) {
-  if (row ~= %(project-meta ?name ?signature ?provider)) {
-    c.project_meta[name] = $(signature, provider);
-    c.native_meta.del(name);
-    c.meta_group_bound.del(%"<unbound $name>");
-    _bind_advertised_meta(c, name, 1);
-  }
-}
-
-/* Binds an advertised meta function and reports whether it was found.
-   Its provider supplies the helper table and private helpers. */
-module int _bind_project_meta(Compiler c, String name) {
-  if (!c.project_meta.len())
-    c.install_native_meta_effects(c.sym.unit_symbols());
-  return _bind_advertised_meta(c, name, 0);
+  c.install_project_meta_effect(
+    %(project-meta $name $(c.func_signature(type))
+      $(Compiler.portable_path(file))));
+  return 1;
 }
 
 /* An include installs its provider at that position. Later lookups keep
@@ -243,4 +237,12 @@ static int _bind_advertised_meta(Compiler c, String name, int install) {
   if (c.meta_calls_wait()) return 0;
   _install_stub(c, name, signature, provider);
   return 1;
+}
+
+/* Binds an advertised meta function and reports whether it was found.
+   Its provider supplies the helper table and private helpers. */
+module int _bind_project_meta(Compiler c, String name) {
+  if (!c.project_meta.len())
+    c.install_native_meta_effects(c.sym.unit_symbols());
+  return _bind_advertised_meta(c, name, 0);
 }

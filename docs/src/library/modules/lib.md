@@ -35,7 +35,7 @@ Source: `lib/lib.x:42`
 Returns the representative of `x` and compresses its traversed path.
 `set` must be live and `x` must be between zero and `set.length - 1`.
 
-Source: `lib/lib.x:50`
+Source: `lib/lib.x:66`
 
 <a id="DisjointSet.init"></a>
 #### DisjointSet.init
@@ -84,7 +84,7 @@ Merges the components containing `a` and `b` by size.
 component's root wins unless the sizes tie, when the root of `a` wins.
 Merging an existing component is a no-op.
 
-Source: `lib/lib.x:66`
+Source: `lib/lib.x:52`
 
 ## Public types
 

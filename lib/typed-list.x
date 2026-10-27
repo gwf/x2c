@@ -141,6 +141,55 @@ typedef List ListString;
 */
 typedef List ListSymbol;
 
+/* Encoders and decoders are inline because the generated `car` and `cons`
+   are, and an inline body cannot call a function the header does not carry.
+   Each pair is the Var layout for one tag with the dispatch removed: the
+   32-bit families are a mask and an OR against a fixed prefix, and Symbol is
+   an add and a subtract. */
+
+inline Var _typed_list_encode_i8(char value) => Var.box_i8(value);
+
+inline char _typed_list_decode_i8(Var value) => (char) (value.u64 & 0xFFul);
+
+inline Var _typed_list_encode_i16(short value) => Var.box_i16(value);
+
+inline short _typed_list_decode_i16(Var value) =>
+  (short) (value.u64 & 0xFFFFul);
+
+inline Var _typed_list_encode_i32(int value) =>
+  Var.box_i32_bits((unsigned) value);
+
+inline int _typed_list_decode_i32(Var value) =>
+  (int) (value.u64 & 0xFFFFFFFFul);
+
+inline Var _typed_list_encode_f32(float value) => Var.box_f32(value);
+
+inline float _typed_list_decode_f32(Var value) {
+  unsigned raw = (unsigned) (value.u64 & 0xFFFFFFFFul);
+  float result;
+  memcpy(&result, &raw, sizeof result);
+  return result;
+}
+
+inline Var _typed_list_encode_f64(double value) => Var.box_f64(value);
+
+inline double _typed_list_decode_f64(Var value) => value.decode_f64();
+
+/* String keeps a checked read. Its payload is a pointer, so a masked read of
+   the wrong tag is a wild pointer rather than a wrong scalar. */
+inline Var _typed_list_encode_string(String value) {
+  unsigned long raw = (unsigned long) (uintptr_t) value;
+  return (Var) { .u64 = VAR_STRING_PREFIX | raw };
+}
+
+inline String _typed_list_decode_string(Var value) => value;
+
+inline Var _typed_list_encode_symbol(Symbol value) =>
+  (Var) { .u64 = value + VAR_SYMBOL_OFFSET };
+
+inline Symbol _typed_list_decode_symbol(Var value) =>
+  (Symbol) (value.u64 - VAR_SYMBOL_OFFSET);
+
 static void _no_convert(String owner, int index, Symbol tag) {
   raise %(no-convert (operation $owner) (index $index) (tag $tag));
 }
@@ -155,42 +204,6 @@ static int _holds(Var value, Symbol tag) {
   return tag == <f64> &&
     (found == <+inf> || found == <-inf> || found == <nan>);
 }
-
-/* Encoders and decoders are inline because the generated `car` and `cons`
-   are, and an inline body cannot call a function the header does not carry.
-   Each pair is the Var layout for one tag with the dispatch removed: the
-   32-bit families are a mask and an OR against a fixed prefix, and Symbol is
-   an add and a subtract. */
-
-inline Var _typed_list_encode_i8(char value) => Var.box_i8(value);
-inline char _typed_list_decode_i8(Var value) => (char) (value.u64 & 0xFFul);
-inline Var _typed_list_encode_i16(short value) => Var.box_i16(value);
-inline short _typed_list_decode_i16(Var value) =>
-  (short) (value.u64 & 0xFFFFul);
-inline Var _typed_list_encode_i32(int value) =>
-  Var.box_i32_bits((unsigned) value);
-inline int _typed_list_decode_i32(Var value) =>
-  (int) (value.u64 & 0xFFFFFFFFul);
-inline Var _typed_list_encode_f32(float value) => Var.box_f32(value);
-inline float _typed_list_decode_f32(Var value) {
-  unsigned raw = (unsigned) (value.u64 & 0xFFFFFFFFul);
-  float result;
-  memcpy(&result, &raw, sizeof result);
-  return result;
-}
-inline Var _typed_list_encode_f64(double value) => Var.box_f64(value);
-inline double _typed_list_decode_f64(Var value) => value.decode_f64();
-/* String keeps a checked read. Its payload is a pointer, so a masked read of
-   the wrong tag is a wild pointer rather than a wrong scalar. */
-inline Var _typed_list_encode_string(String value) {
-  unsigned long raw = (unsigned long) (uintptr_t) value;
-  return (Var) { .u64 = VAR_STRING_PREFIX | raw };
-}
-inline String _typed_list_decode_string(Var value) => value;
-inline Var _typed_list_encode_symbol(Symbol value) =>
-  (Var) { .u64 = value + VAR_SYMBOL_OFFSET };
-inline Symbol _typed_list_decode_symbol(Var value) =>
-  (Symbol) (value.u64 - VAR_SYMBOL_OFFSET);
 $list.typed.family(
   ListChar, char, _typed_list_encode_i8, _typed_list_decode_i8,
   <i8>, listchar, 0, "ListChar");

@@ -36,13 +36,6 @@ void Compiler.close_child(Compiler c, Compiler child) {
 
 // related compilers
 
-/** Shares `owner`'s pending `meta` group and the definitions it reads, which
-    belong with the bindings that hold the group's stubs.
-*/
-void Compiler.share_meta_group(Compiler c, Compiler owner) {
-  $copy_fields(c, owner, meta_group, meta_group_bound);
-}
-
 /** Takes over `owner`'s macro, object-like `#define`, keyword, literal
     cache, and binding state for one segment of a collected file.
     Segments are one translation unit, so retained macro bodies index the
@@ -53,6 +46,15 @@ void Compiler.take_unit_state(Compiler c, Compiler owner) {
   $segment_state(c, owner);
   c.borrowed_bindings = c.meta_bindings != NULL;
   c.share_meta_group(owner);
+}
+
+
+
+/** Shares `owner`'s pending `meta` group and the definitions it reads, which
+    belong with the bindings that hold the group's stubs.
+*/
+void Compiler.share_meta_group(Compiler c, Compiler owner) {
+  $copy_fields(c, owner, meta_group, meta_group_bound);
 }
 
 /** Returns that state to `owner`, so the next segment starts where this one
@@ -77,6 +79,23 @@ Compiler Compiler.new_shared(Compiler owner) {
      registered and collected exactly once for the whole unit. */
   return _new(owner);
 }
+
+/** Destroys a compiler's owned bindings, if any.
+
+    Borrowed bindings are left alive. Owned bindings not freed here are
+    destroyed when the compiler's Scope ends. This is final compiler cleanup:
+    it clears the diagnostic store and the compiler must not be reused.
+*/
+void Compiler.free_bindings(Compiler c) {
+  if (!c) return;
+  if (!c.borrowed_bindings) {
+    c.meta_bindings.destroy();
+    c.meta_bindings = NULL;
+  }
+  c.diagnostics = NULL;
+}
+
+// compiler construction
 
 // Zero finalizer-visible state before any fallible initialization.
 static Compiler _new(Compiler owner) {
@@ -127,21 +146,6 @@ static void _own_unit(Compiler c) {
               package_effects);
   c.names = xcalloc(1, sizeof(struct GenNames));
   $set_fields(c.names, {}, counters, adapters, file_scope_owners);
-}
-
-/** Destroys a compiler's owned bindings, if any.
-
-    Borrowed bindings are left alive. Owned bindings not freed here are
-    destroyed when the compiler's Scope ends. This is final compiler cleanup:
-    it clears the diagnostic store and the compiler must not be reused.
-*/
-void Compiler.free_bindings(Compiler c) {
-  if (!c) return;
-  if (!c.borrowed_bindings) {
-    c.meta_bindings.destroy();
-    c.meta_bindings = NULL;
-  }
-  c.diagnostics = NULL;
 }
 
 // Binding calls must have returned before the compiler's Scope is reclaimed.

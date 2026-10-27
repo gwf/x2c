@@ -456,18 +456,6 @@ static const SymbolSet _base_keywords = %<<typedef struct union enum unqual int
   long short char signed unsigned void float double>>;
 static const SymbolSet _type_qualifiers = %<<const restrict volatile>>;
 
-/** Returns the suffix of `type` that begins at its typedef name or base
-    keyword, sharing `type`, or `NULL` when it has none.
-*/
-List type_base_suffix(List type) {
-  for (; type; type = type.cdr()) {
-    Var head = type.car();
-    if (head is <string> || (head is <symbol> && head in _base_keywords))
-      return type;
-  }
-  return NULL;
-}
-
 /** Returns the diagnostic for a `type` that names its type with an Atom
     other than a C type keyword, as `%(String)` and `%(* Point)` do, or
     `NULL`. A type name is a String, as in `%("String")` and `%(* "Point")`;
@@ -507,6 +495,18 @@ List type_declaration_parts(List type) {
   Array syntax = [];
   foreach (Var item in reversed.reverse()) syntax.push(_modifier_syntax(item));
   return $(qualifiers.append(base), syntax.list_free());
+}
+
+/** Returns the suffix of `type` that begins at its typedef name or base
+    keyword, sharing `type`, or `NULL` when it has none.
+*/
+List type_base_suffix(List type) {
+  for (; type; type = type.cdr()) {
+    Var head = type.car();
+    if (head is <string> || (head is <symbol> && head in _base_keywords))
+      return type;
+  }
+  return NULL;
 }
 
 /* A function modifier's parameter types become parameter declarations. */

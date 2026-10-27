@@ -3,6 +3,10 @@
     Copyright (c) 2026 Gary William Flake.
 */
 
+/* The last call a `$` expression made, which a failure renders. A unit's
+   Pool holds it, so each `$` expression starts without one. */
+static List meta_call_form = NULL;
+
 /* explicit meta calls
 
    A `$f(...)` call of a `meta` function outside a `meta` body runs at
@@ -27,6 +31,51 @@ List Compiler.evaluate_meta_statement(
     return c.bind_meta_statement(value, context);
   return %(stmnt $(_meta_result(c, expression, value, site)));
 }
+
+/** Runs the explicit meta call `expression` at `site`. The project meta
+    build's own parse leaves a project function's call for the translation:
+    an expression takes a placeholder, and a template `slot`, which has
+    none, is reported.
+*/
+Var Compiler.run_meta_call(
+  Compiler c, List expression, Token site, int slot) =>
+  _run_meta(c, expression, NULL, NULL, site, slot);
+
+/** Applies the meta function spelled `name` to the evaluated `arguments`
+    at `site`, outside any expansion. A call the project meta build leaves
+    for the translation returns void.
+*/
+Var Compiler.apply_meta_function(
+  Compiler c, String name, List arguments, Token site) {
+  MetaContext *context = MetaContext.current();
+  with (context.has_bindings = 0,
+        context.captures = NULL,
+        context.definition_file = c.filename,
+        context.expander = c,
+        context.evaluator = c,
+        context.site = site,
+        meta_call_form = meta_call_form) {
+    return _run_meta(c, NULL, name, arguments, site, 0);
+  }
+}
+
+/** Calls `function`, the binding of `name`, with `arguments`; what it
+    allocates belongs to the unit's values Scope. A declared native
+    iterator operation called without its destination gets a new Iter
+    there.
+*/
+Var Compiler.apply_meta_binding(
+  Compiler c, String name, Var function, List arguments) {
+  Scope.push(&c.bindings().values);
+  defer Scope.pop();
+  Var signature;
+  if (c.native_meta.try_get(name, signature) &&
+      arguments.len() == Compiler.iterator_arity(signature))
+    arguments = arguments.append($(Iter.new()));
+  return _apply_linked(function.pointer(), arguments);
+}
+
+// native meta calls
 
 /* The expression a meta call's `value` becomes at its call. */
 static List _meta_result(
@@ -66,33 +115,6 @@ static int _code_result(Compiler c, Var value) {
   return Ast.try_binding(value, NULL, NULL);
 }
 
-/** Runs the explicit meta call `expression` at `site`. The project meta
-    build's own parse leaves a project function's call for the translation:
-    an expression takes a placeholder, and a template `slot`, which has
-    none, is reported.
-*/
-Var Compiler.run_meta_call(
-  Compiler c, List expression, Token site, int slot) =>
-  _run_meta(c, expression, NULL, NULL, site, slot);
-
-/** Applies the meta function spelled `name` to the evaluated `arguments`
-    at `site`, outside any expansion. A call the project meta build leaves
-    for the translation returns void.
-*/
-Var Compiler.apply_meta_function(
-  Compiler c, String name, List arguments, Token site) {
-  MetaContext *context = MetaContext.current();
-  with (context.has_bindings = 0,
-        context.captures = NULL,
-        context.definition_file = c.filename,
-        context.expander = c,
-        context.evaluator = c,
-        context.site = site,
-        meta_call_form = meta_call_form) {
-    return _run_meta(c, NULL, name, arguments, site, 0);
-  }
-}
-
 /* Runs the meta call `expression`, or else `name` applied to `arguments`,
    and reports its failure at `site`. */
 static Var _run_meta(
@@ -114,10 +136,6 @@ static Var _run_meta(
   return value;
 }
 
-/* The last call a `$` expression made, which a failure renders. A unit's
-   Pool holds it, so each `$` expression starts without one. */
-static List meta_call_form = NULL;
-
 /* Calls a `meta` function named at a code boundary with its evaluated
    arguments. */
 static Var _meta_call_value(Compiler c, List expression, Token site) {
@@ -131,60 +149,6 @@ static Var _meta_call_value(Compiler c, List expression, Token site) {
       return _meta_named_value(c, name, values.list_free(), site);
     }
   $fail.meta_native_call_target(c, site);
-}
-
-/* Applies the binding of `name` to `arguments`, recorded as the call a
-   failure renders. A compiled function the compiler links runs in the
-   caller's Context. */
-static Var _meta_named_value(
-  Compiler c, String name, List arguments, Token site) {
-  Var function = _shipped_callee(c, name);
-  if (function is void) function = _meta_function(c, name, site);
-  meta_call_form = cons(Atom.intern(name), arguments);
-  if (function === _linked_module()[name])
-    return _apply_linked(function.pointer(), arguments);
-  return c.apply_meta_binding(name, function, arguments);
-}
-
-/** Calls `function`, the binding of `name`, with `arguments`; what it
-    allocates belongs to the unit's values Scope. A declared native
-    iterator operation called without its destination gets a new Iter
-    there.
-*/
-Var Compiler.apply_meta_binding(
-  Compiler c, String name, Var function, List arguments) {
-  Scope.push(&c.bindings().values);
-  defer Scope.pop();
-  Var signature;
-  if (c.native_meta.try_get(name, signature) &&
-      arguments.len() == Compiler.iterator_arity(signature))
-    arguments = arguments.append($(Iter.new()));
-  return _apply_linked(function.pointer(), arguments);
-}
-
-/* The compiler's linked copy of `name` when shipped code calls it, or
-   void. A shipped rule's translator and a template defined in a linked
-   provider resolve their calls to the copies the compiler links, so a
-   program definition spelled the same is a separate definition. */
-static Var _shipped_callee(Compiler c, String name) {
-  if (!c.applying_shipped() && !_shipped_definition()) return void;
-  Var function;
-  return _linked_module().try_get(name, function) ? function : void;
-}
-
-/* Whether the template now expanding was defined in a linked provider. */
-static int _shipped_definition(void) {
-  String file = MetaContext.current().definition_file;
-  if (!file || file.startswith("<")) return 0;
-  return !!Compiler.linked_meta_provider_source(Compiler.portable_path(file));
-}
-
-static Var _apply_linked(Func function, List arguments) {
-  unsigned count = arguments.len(), index = 0;
-  FuncArg *argv = xcalloc(count + 1, sizeof(FuncArg));
-  defer xfree(argv);
-  foreach (Var argument in arguments) argv[index++] = FuncArg.value(argument);
-  return function.apply(count, argv);
 }
 
 /* Each argument evaluates as the type its parameter declares wants. */
@@ -222,6 +186,44 @@ static Array _meta_values(
     values.push(c.meta_argument(argument, want, site, _meta_call_value));
   }
   return values;
+}
+
+/* Applies the binding of `name` to `arguments`, recorded as the call a
+   failure renders. A compiled function the compiler links runs in the
+   caller's Context. */
+static Var _meta_named_value(
+  Compiler c, String name, List arguments, Token site) {
+  Var function = _shipped_callee(c, name);
+  if (function is void) function = _meta_function(c, name, site);
+  meta_call_form = cons(Atom.intern(name), arguments);
+  if (function === _linked_module()[name])
+    return _apply_linked(function.pointer(), arguments);
+  return c.apply_meta_binding(name, function, arguments);
+}
+
+/* The compiler's linked copy of `name` when shipped code calls it, or
+   void. A shipped rule's translator and a template defined in a linked
+   provider resolve their calls to the copies the compiler links, so a
+   program definition spelled the same is a separate definition. */
+static Var _shipped_callee(Compiler c, String name) {
+  if (!c.applying_shipped() && !_shipped_definition()) return void;
+  Var function;
+  return _linked_module().try_get(name, function) ? function : void;
+}
+
+/* Whether the template now expanding was defined in a linked provider. */
+static int _shipped_definition(void) {
+  String file = MetaContext.current().definition_file;
+  if (!file || file.startswith("<")) return 0;
+  return !!Compiler.linked_meta_provider_source(Compiler.portable_path(file));
+}
+
+static Var _apply_linked(Func function, List arguments) {
+  unsigned count = arguments.len(), index = 0;
+  FuncArg *argv = xcalloc(count + 1, sizeof(FuncArg));
+  defer xfree(argv);
+  foreach (Var argument in arguments) argv[index++] = FuncArg.value(argument);
+  return function.apply(count, argv);
 }
 
 /* The binding of `name`, binding an included native function on first

@@ -1,6 +1,4 @@
 #include <assert.h>
-int seats_left(String plan) => plan == "pro" ? 25 : 2;
-
 int main(void) {
 // Expose an ordinary typed function to the runtime interpreter.
 Lisp lisp = Lisp.new();
@@ -20,3 +18,5 @@ printf("together: %d; split: %d\n", whole, partial);
 assert(whole == 0 && partial == 2);
 return 0;
 }
+
+int seats_left(String plan) => plan == "pro" ? 25 : 2;

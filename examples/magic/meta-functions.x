@@ -9,11 +9,6 @@ typedef struct Response {
   String label;
 } Response;
 
-// A parameter declared `TypeInfo` receives the description of its argument's
-// type, computed by the compiler at the `$` call. Its `fields` part lists
-// the named fields of a struct in declaration order.
-meta static List fields_of(TypeInfo type) => type.assoc(<fields>);
-
 // The field names as one comma-joined String literal.
 meta static List field_names(TypeInfo type) {
   Array names = [];
@@ -33,13 +28,14 @@ meta static List field_reads(List receiver, TypeInfo type) {
   return $!( { @items } );
 }
 
+// A parameter declared `TypeInfo` receives the description of its argument's
+// type, computed by the compiler at the `$` call. Its `fields` part lists
+// the named fields of a struct in declaration order.
+meta static List fields_of(TypeInfo type) => type.assoc(<fields>);
+
 macro Expression $shape.names(Expr $value) => $field_names($value);
 
 macro Expression $shape.reads(Expr $value) => $field_reads($value, $value);
-
-// A `meta` function that reaches no compiler operation keeps both of its
-// forms: `$tag(...)` runs during translation and `tag(...)` at run time.
-meta static String tag(String name, int n) => %"$name-$n";
 
 int main(void) {
   Response found = { 200, "OK" };
@@ -54,3 +50,7 @@ int main(void) {
   assert(copy.code == 200);
   return 0;
 }
+
+// A `meta` function that reaches no compiler operation keeps both of its
+// forms: `$tag(...)` runs during translation and `tag(...)` at run time.
+meta static String tag(String name, int n) => %"$name-$n";

@@ -1,44 +1,5 @@
 /*  runtime.x -- scope runtime */
 
-module void *_raw_malloc(size_t size) {
-  void *ptr = malloc(size);
-  if (!ptr) raise %(alloc-fail);
-  atomic_fetch_add(&raw_alloc_count, 1);
-  return ptr;
-}
-
-static void *_raw_realloc(void *ptr, size_t size) {
-  void *result = realloc(ptr, size);
-  if (!result) raise %(alloc-fail);
-  return result;
-}
-
-module void _raw_free(void *ptr) {
-  if (!ptr) return;
-  atomic_fetch_add(&raw_free_count, 1);
-  free(ptr);
-}
-
-/* Returns `items` with room for one element past `count`, starting at 16 and
-   doubling `capacity` when full. */
-module void *_raw_grow(void *items, int count, int &capacity, size_t size) {
-  if (!items) {
-    items = _raw_malloc(16 * size);
-    capacity = 16;
-  }
-  else if (count == capacity) {
-    if (capacity > INT_MAX / 2) raise %(size-limit);
-    items = _raw_realloc(items, capacity * 2 * size);
-    capacity *= 2;
-  }
-  return items;
-}
-
-module void _raw_fatal(const char *message) {
-  fprintf(stderr, "Scope: %s\n", message);
-  abort();
-}
-
 // lifecycle
 
 static Symbol scope_state = <uninit>;
@@ -48,27 +9,6 @@ static int hook_count, hook_capacity;
 /** Initializes the process-wide `Scope` runtime owner. */
 void Scope.initialize(void) {
   _initialize();
-}
-
-static void _initialize(void) {
-  if (scope_state == <running> || scope_state == <shutting>) return;
-  if (scope_state == <shutdown>)
-    _raw_fatal("operation attempted after shutdown");
-  ScopeThreadState state = _thread();
-  state.active = &state.root;
-  scope_state = <running>;
-  if (atexit(Scope_shutdown))
-    _raw_fatal("could not register shutdown handler");
-}
-
-module void _require_running(void) {
-  if (scope_state != <running>) _ensure_running();
-}
-
-static void _ensure_running(void) {
-  if (scope_state == <uninit>) _initialize();
-  else if (scope_state == <shutdown>)
-    _raw_fatal("operation attempted after shutdown");
 }
 
 /** Registers `hook` to run during process-wide `Scope` shutdown.
@@ -110,6 +50,22 @@ void Scope_shutdown(void) {
   x2c_thread_state_release();
 }
 
+static void _initialize(void) {
+  if (scope_state == <running> || scope_state == <shutting>) return;
+  if (scope_state == <shutdown>)
+    _raw_fatal("operation attempted after shutdown");
+  ScopeThreadState state = _thread();
+  state.active = &state.root;
+  scope_state = <running>;
+  if (atexit(Scope_shutdown))
+    _raw_fatal("could not register shutdown handler");
+}
+
+module void _raw_fatal(const char *message) {
+  fprintf(stderr, "Scope: %s\n", message);
+  abort();
+}
+
 /* A hook that registers another runs it next, still newest first. */
 static void _run_hooks(void) {
   while (hook_count) {
@@ -119,4 +75,48 @@ static void _run_hooks(void) {
   _raw_free(hooks);
   hooks = NULL;
   hook_count = hook_capacity = 0;
+}
+
+module void _raw_free(void *ptr) {
+  if (!ptr) return;
+  atomic_fetch_add(&raw_free_count, 1);
+  free(ptr);
+}
+
+/* Returns `items` with room for one element past `count`, starting at 16 and
+   doubling `capacity` when full. */
+module void *_raw_grow(void *items, int count, int &capacity, size_t size) {
+  if (!items) {
+    items = _raw_malloc(16 * size);
+    capacity = 16;
+  }
+  else if (count == capacity) {
+    if (capacity > INT_MAX / 2) raise %(size-limit);
+    items = _raw_realloc(items, capacity * 2 * size);
+    capacity *= 2;
+  }
+  return items;
+}
+
+module void *_raw_malloc(size_t size) {
+  void *ptr = malloc(size);
+  if (!ptr) raise %(alloc-fail);
+  atomic_fetch_add(&raw_alloc_count, 1);
+  return ptr;
+}
+
+static void *_raw_realloc(void *ptr, size_t size) {
+  void *result = realloc(ptr, size);
+  if (!result) raise %(alloc-fail);
+  return result;
+}
+
+module void _require_running(void) {
+  if (scope_state != <running>) _ensure_running();
+}
+
+static void _ensure_running(void) {
+  if (scope_state == <uninit>) _initialize();
+  else if (scope_state == <shutdown>)
+    _raw_fatal("operation attempted after shutdown");
 }

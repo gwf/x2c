@@ -10,6 +10,27 @@
 #include <stdlib.h>
 #include <string.h>
 
+int main(int argc, char **argv) {
+  if (argc != 3) return 2;
+  int rows = atoi(argv[1]), runs = atoi(argv[2]);
+  String csv = _make_csv(rows);
+  double checksum = 0;
+  for (int run = 0; run < runs; run++) {
+    Scope.retain();
+    char *copy = xmalloc(csv.len() + 1), *line = copy;
+    memcpy(copy, csv, csv.len() + 1);
+    while (line && *line) {
+      char *end = strchr(line, '\n');
+      if (end) *end = 0;
+      _parse(line, &checksum);
+      line = end ? end + 1 : 0;
+    }
+    Scope.release();
+  }
+  printf("%.6f\n", checksum);
+  return 0;
+}
+
 static String _make_csv(int rows) {
   Buffer text = Buffer.new(0).reserve((size_t) rows * 96);
   for (int i = 0; i < rows; i++)
@@ -32,25 +53,4 @@ static int _parse(char *line, double *sum) {
   if (count != 6) return 0;
   *sum += strtod(fields[1], 0) + strtod(fields[3], 0) + strtod(fields[5], 0);
   return 1;
-}
-
-int main(int argc, char **argv) {
-  if (argc != 3) return 2;
-  int rows = atoi(argv[1]), runs = atoi(argv[2]);
-  String csv = _make_csv(rows);
-  double checksum = 0;
-  for (int run = 0; run < runs; run++) {
-    Scope.retain();
-    char *copy = xmalloc(csv.len() + 1), *line = copy;
-    memcpy(copy, csv, csv.len() + 1);
-    while (line && *line) {
-      char *end = strchr(line, '\n');
-      if (end) *end = 0;
-      _parse(line, &checksum);
-      line = end ? end + 1 : 0;
-    }
-    Scope.release();
-  }
-  printf("%.6f\n", checksum);
-  return 0;
 }

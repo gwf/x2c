@@ -16,28 +16,6 @@ static typedef struct Decoration {
   Symbol position, Symbol kind, int open;
 } Decoration;
 
-/* A Block decorator's Name arguments are referenced in the block's scope,
-   which opens before the arguments are read. */
-static void _bind_name_arguments(Compiler c, List definition, List arguments) {
-  List parameters = definition.assoc(<parameters>);
-  List captures = arguments.cdr();
-  while (parameters) {
-    List parameter = parameters.car();
-    if (parameter.assoc(<kind>) == <name>) {
-      Var names = captures.car().list().assoc(<value>);
-      List values = parameter.assoc(<sequence>).int()
-                  ? names : $(names);
-      foreach (Var value in values) {
-        String name = value is <list>
-          ? Ast.binding_spelling(value) : value;
-        c.sym.reference($(name), NULL);
-      }
-    }
-    parameters = parameters.cdr();
-    captures = captures.cdr();
-  }
-}
-
 /* invocations at syntax positions
 
    A claimed invocation at file, block, statement, field, enumerator, or
@@ -52,6 +30,8 @@ static void _bind_name_arguments(Compiler c, List definition, List arguments) {
 */
 List Compiler.try_parse_macro_target_at(Compiler c, Symbol position) =>
   _target_at(c, position, 0);
+
+// macro invocation targets
 
 /* An `open` statement omits its final `;`, as an anonymous Stmt arrow's
    statement does. */
@@ -98,31 +78,6 @@ static List _invoke_definition(
   return result;
 }
 
-/* Inside a template the node names its definition as the expansion will
-   find it: a definition that is itself template syntax by value, a local
-   macro by its local name, and any other macro by name. */
-module List _invocation_node(
-  Compiler c, List definition, List input, Token invocation) {
-  Var stored = definition;
-  Var site = invocation;
-  if (c.macro_holes) {
-    stored = _stored_reference(c, definition);
-    site = <m-invoke>;
-  }
-  return %(macro-invoke $stored $input $site);
-}
-
-/* A template names a visible local macro, so its expansion applies the
-   definition published where it lands, with that expansion's names. */
-static Var _stored_reference(Compiler c, List definition) {
-  Atom name = definition.assoc(<name>);
-  if (definition.assoc(<local>).int() &&
-      c.sym.lookup_macro(name) == definition)
-    return %(local-macro $name);
-  if (definition.assoc(<template>)) return %(!quote $definition);
-  return name;
-}
-
 static List _decorate(
   Compiler c, List definition, Token invocation, Symbol position, int open) {
   Decoration d = {
@@ -151,9 +106,6 @@ static List _decorate(
   return result;
 }
 
-static int _on_body(Decoration &d) =>
-  d.kind == <block> && d.position == <unit>;
-
 static void _misplaced(Decoration &d) {
   Atom name = d.definition.assoc(<name>);
   String spelling = name.str(), target = _kind_spelling(d.kind);
@@ -177,6 +129,28 @@ static List _arguments(Decoration &d, int block_scope) {
   return arguments;
 }
 
+/* A Block decorator's Name arguments are referenced in the block's scope,
+   which opens before the arguments are read. */
+static void _bind_name_arguments(Compiler c, List definition, List arguments) {
+  List parameters = definition.assoc(<parameters>);
+  List captures = arguments.cdr();
+  while (parameters) {
+    List parameter = parameters.car();
+    if (parameter.assoc(<kind>) == <name>) {
+      Var names = captures.car().list().assoc(<value>);
+      List values = parameter.assoc(<sequence>).int()
+                  ? names : $(names);
+      foreach (Var value in values) {
+        String name = value is <list>
+          ? Ast.binding_spelling(value) : value;
+        c.sym.reference($(name), NULL);
+      }
+    }
+    parameters = parameters.cdr();
+    captures = captures.cdr();
+  }
+}
+
 static List _decoration_node(Decoration &d, List arguments) {
   Compiler c = d.c;
   d.start = c.token;
@@ -188,6 +162,31 @@ static List _decoration_node(Decoration &d, List arguments) {
     $target_capture
   );
   return _invocation_node(c, d.definition, input, d.invocation);
+}
+
+/* Inside a template the node names its definition as the expansion will
+   find it: a definition that is itself template syntax by value, a local
+   macro by its local name, and any other macro by name. */
+module List _invocation_node(
+  Compiler c, List definition, List input, Token invocation) {
+  Var stored = definition;
+  Var site = invocation;
+  if (c.macro_holes) {
+    stored = _stored_reference(c, definition);
+    site = <m-invoke>;
+  }
+  return %(macro-invoke $stored $input $site);
+}
+
+/* A template names a visible local macro, so its expansion applies the
+   definition published where it lands, with that expansion's names. */
+static Var _stored_reference(Compiler c, List definition) {
+  Atom name = definition.assoc(<name>);
+  if (definition.assoc(<local>).int() &&
+      c.sym.lookup_macro(name) == definition)
+    return %(local-macro $name);
+  if (definition.assoc(<template>)) return %(!quote $definition);
+  return name;
 }
 
 static List _target(Decoration &d) {
@@ -251,6 +250,9 @@ static List _bind_decoration(Decoration &d, List node) {
   if (!_on_body(d)) return c.bind_syntax(node, d.position, c.return_type);
   return _bind_body(c, node, d.function);
 }
+
+static int _on_body(Decoration &d) =>
+  d.kind == <block> && d.position == <unit>;
 
 /* The body was bound with the function's own result type; bind the
    produced items with it too, so a `return` that needs a conversion still

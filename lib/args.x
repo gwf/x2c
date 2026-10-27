@@ -112,6 +112,42 @@ Map Args.parse(List args, List spec) {
   return complete = result;
 }
 
+/** Returns usage text for `spec` as `Args.parse` reads it: a synopsis
+    for `program`, then each option, then each operand that has help, in
+    spec order. Help text starts at column 30, as in `x2c help`.
+*/
+String Args.usage(String program, List spec) {
+  Spec parsed = _read_spec(spec);
+  defer _free(parsed);
+  auto Buffer synopsis = Buffer.new(0), options = Buffer.new(0);
+  auto Buffer operands = Buffer.new(0), out = Buffer.new(0);
+  for (int i = 0; i < parsed.count; i++) {
+    Option *option = &parsed.options[i];
+    String label = _label((*option));
+    if (!option.operand) _write_row(options, label, option.help);
+    else {
+      synopsis.printf(" %s", label);
+      if (option.help) _write_row(operands, label, option.help);
+    }
+  }
+  String option_rows = options, operand_rows = operands;
+  String words = synopsis;
+  out.printf(
+    "Usage:\n  %s%s%s\n", program, option_rows ? " [options]" : "",
+    words ? words : "");
+  if (option_rows) out.printf("\nOptions:\n%s", option_rows);
+  if (operand_rows) out.printf("\nOperands:\n%s", operand_rows);
+  return out;
+}
+
+/** Returns the program arguments that follow `argv[0]` as `String`s. */
+List Args.from_argv(int argc, char **argv) {
+  List result = NULL;
+  for (int i = argc - 1; i > 0; i--)
+    result = $(String.new(argv[i]), @result);
+  return result;
+}
+
 // spec rows
 
 static Spec _read_spec(List spec) {
@@ -224,6 +260,19 @@ static void _parse_short(Spec &s, Map result, List &rest, String word) {
   }
 }
 
+static void _assign_operands(Spec &s, Map result, List operands) {
+  for (int i = 0; i < s.count; i++) {
+    Option *option = &s.options[i];
+    if (!option.operand) continue;
+    while (operands) {
+      _store((*option), result, operands.car());
+      operands = operands.cdr();
+      if (!option.repeated) break;
+    }
+  }
+  if (operands) _bad_operand("unexpected operand", operands.car().str());
+}
+
 static Option *_find(Spec &s, String spelling) {
   Var position;
   if (!s.index.try_get(spelling, position))
@@ -255,19 +304,6 @@ static void _store(Option &o, Map result, Var value) {
   o.given++;
 }
 
-static void _assign_operands(Spec &s, Map result, List operands) {
-  for (int i = 0; i < s.count; i++) {
-    Option *option = &s.options[i];
-    if (!option.operand) continue;
-    while (operands) {
-      _store((*option), result, operands.car());
-      operands = operands.cdr();
-      if (!option.repeated) break;
-    }
-  }
-  if (operands) _bad_operand("unexpected operand", operands.car().str());
-}
-
 // errors
 
 static void _bad_option(String why, String option) {
@@ -284,34 +320,6 @@ static void _bad_spec(String why, Var entry) {
 }
 
 // usage text
-
-/** Returns usage text for `spec` as `Args.parse` reads it: a synopsis
-    for `program`, then each option, then each operand that has help, in
-    spec order. Help text starts at column 30, as in `x2c help`.
-*/
-String Args.usage(String program, List spec) {
-  Spec parsed = _read_spec(spec);
-  defer _free(parsed);
-  auto Buffer synopsis = Buffer.new(0), options = Buffer.new(0);
-  auto Buffer operands = Buffer.new(0), out = Buffer.new(0);
-  for (int i = 0; i < parsed.count; i++) {
-    Option *option = &parsed.options[i];
-    String label = _label((*option));
-    if (!option.operand) _write_row(options, label, option.help);
-    else {
-      synopsis.printf(" %s", label);
-      if (option.help) _write_row(operands, label, option.help);
-    }
-  }
-  String option_rows = options, operand_rows = operands;
-  String words = synopsis;
-  out.printf(
-    "Usage:\n  %s%s%s\n", program, option_rows ? " [options]" : "",
-    words ? words : "");
-  if (option_rows) out.printf("\nOptions:\n%s", option_rows);
-  if (operand_rows) out.printf("\nOperands:\n%s", operand_rows);
-  return out;
-}
 
 static String _label(Option &o) {
   if (o.operand) {
@@ -330,12 +338,4 @@ static void _write_row(Buffer out, String label, String help) {
   else if (label.len() + 2 >= column)
     out.printf("  %s\n%*s%s\n", label, column, "", help);
   else out.printf("  %-*s%s\n", column - 2, label, help);
-}
-
-/** Returns the program arguments that follow `argv[0]` as `String`s. */
-List Args.from_argv(int argc, char **argv) {
-  List result = NULL;
-  for (int i = argc - 1; i > 0; i--)
-    result = $(String.new(argv[i]), @result);
-  return result;
 }

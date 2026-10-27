@@ -3,24 +3,7 @@
     Copyright (c) 2025 Gary William Flake.
 */
 
-/* The code placed at the entry of the function whose row is at `depth`,
-   bound in its parameter scope once its body is complete. */
-module List _entry_code(Compiler c, int depth) {
-  Array items = [];
-  foreach (List row in _take_placements(c, depth))
-    _push_items(items, c.bind_syntax(row[3], <block>, c.return_type));
-  return items.list_free();
-}
-
 // placement and ancestry
-
-/** Enters `row` as the innermost syntax `Compiler.enclosing` answers. Its
-    owner leaves it with `Block.pop`, or with `Compiler.leave_item` for a
-    block item.
-*/
-void Compiler.enter(Compiler c, Ancestor row) {
-  c.ancestors.push(&row);
-}
 
 /** Returns the innermost `what` around the parser, or around the function
     body the transform lowers, as captured code, or NULL when there is none:
@@ -45,16 +28,6 @@ List Compiler.enclosing(Compiler c, Symbol what) {
   return NULL;
 }
 
-static List _ancestor_code(Compiler c, Ancestor row) {
-  if (row.what == <declarator>)
-    return %(declare $(row.base) (bindings $(row.node)));
-  if (row.what == <function> &&
-      row.node ~= %(declare ?type (bindings ?declarator)))
-    return %(function $type $declarator (seq));
-  int origin = row.origin ? row.origin : c.record_origin(row.token);
-  return %(at $origin (seq));
-}
-
 /** Enters the function definition `declaration`, whose body the
     transform lowers next, so a rule lowering that body places code at its
     entry. Returns the row's depth for `Compiler.leave_function`.
@@ -66,6 +39,16 @@ int Compiler.enter_function(Compiler c, List declaration, int callback) {
     .callback = callback};
   c.enter(row);
   return depth;
+}
+
+
+
+/** Enters `row` as the innermost syntax `Compiler.enclosing` answers. Its
+    owner leaves it with `Block.pop`, or with `Compiler.leave_item` for a
+    block item.
+*/
+void Compiler.enter(Compiler c, Ancestor row) {
+  c.ancestors.push(&row);
 }
 
 /** Returns the code placed at the entry of the function row at `depth`
@@ -156,21 +139,6 @@ List Compiler.leave_item(Compiler c) {
   return items.list_free();
 }
 
-/* Removes the placements anchored at the ancestor row `depth` and returns
-   them in placement order. */
-static List _take_placements(Compiler c, int depth) {
-  if (!c.placements.len()) return NULL;
-  Array taken = [];
-  int kept = 0;
-  for (int i = 0; i < (int) c.placements.len(); i++) {
-    List row = c.placements[i];
-    if (row.car().int() == depth) taken.push(row);
-    else c.placements[kept++] = row;
-  }
-  c.placements.resize(kept);
-  return taken.list_free();
-}
-
 /** Lowers block declarations whose declarators placed code after
     themselves, or that an after-initialization rewrite follows, to
     declarations followed by that code in source order, preserving their
@@ -185,6 +153,42 @@ List Compiler.finish_initializers(
   Array output = [];
   _append_managed(c, declaration, output, origin);
   return %(seq @(output.list_free()));
+}
+
+// ancestry and deferred code placement
+
+static List _ancestor_code(Compiler c, Ancestor row) {
+  if (row.what == <declarator>)
+    return %(declare $(row.base) (bindings $(row.node)));
+  if (row.what == <function> &&
+      row.node ~= %(declare ?type (bindings ?declarator)))
+    return %(function $type $declarator (seq));
+  int origin = row.origin ? row.origin : c.record_origin(row.token);
+  return %(at $origin (seq));
+}
+
+/* The code placed at the entry of the function whose row is at `depth`,
+   bound in its parameter scope once its body is complete. */
+module List _entry_code(Compiler c, int depth) {
+  Array items = [];
+  foreach (List row in _take_placements(c, depth))
+    _push_items(items, c.bind_syntax(row[3], <block>, c.return_type));
+  return items.list_free();
+}
+
+/* Removes the placements anchored at the ancestor row `depth` and returns
+   them in placement order. */
+static List _take_placements(Compiler c, int depth) {
+  if (!c.placements.len()) return NULL;
+  Array taken = [];
+  int kept = 0;
+  for (int i = 0; i < (int) c.placements.len(); i++) {
+    List row = c.placements[i];
+    if (row.car().int() == depth) taken.push(row);
+    else c.placements[kept++] = row;
+  }
+  c.placements.resize(kept);
+  return taken.list_free();
 }
 
 static void _append_managed(

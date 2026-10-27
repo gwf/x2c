@@ -2,30 +2,39 @@
 
 #include <unistd.h>
 
-static void _print_error(Symbol code, List detail) {
-  List error = cons(code, detail);
-  Stderr.printf("error: %s\n", error.repr());
-}
-
-static int _eval_input(
-  Lisp lisp, Var form, String source, int is_form, int print) {
-  try {
-    Var result = is_form ? lisp.eval(form) : lisp.eval_string(source);
-    if (print) Stdout.printf("%s\n", result.repr());
+int main(int argc, char **argv) {
+  Lisp lisp = auto Lisp.kernel();
+  const char *init = NULL;
+  char probed[512];
+  int arg = 1;
+  if (argc >= 3 && !strcmp(argv[1], "--init")) {
+    init = argv[2];
+    arg = 3;
   }
-  catch %(?code *detail): {
-    _print_error(code, detail);
-    return 0;
+  if (!init) init = getenv("X2C_LISP_INIT");
+  if (!init) init = _default_init(probed, sizeof probed);
+  if (!init) {
+    Stderr.printf(
+      "lisp: cannot find etc/init.xlisp; set X2C_LISP_INIT or --init\n"
+    );
+    return 1;
   }
-  return 1;
-}
-
-static int _eval_form(Lisp lisp, Var form) {
-  return _eval_input(lisp, form, NULL, 1, 1);
-}
-
-static int _eval_text(Lisp lisp, String source, int print) {
-  return _eval_input(lisp, void, source, 0, print);
+  int ok = _eval_file(lisp, init, 0);
+  if (!ok) {
+    return 1;
+  }
+  int remaining = argc - arg;
+  if (!remaining) ok = _repl(lisp);
+  else if (remaining == 1 && !strcmp(argv[arg], "--selftest"))
+    ok = _selftest(lisp);
+  else if (remaining == 2 && !strcmp(argv[arg], "-e"))
+    ok = _eval_text(lisp, argv[arg + 1], 1);
+  else if (remaining == 1) ok = _eval_file(lisp, argv[arg], 1);
+  else {
+    _usage(argv[0]);
+    ok = 0;
+  }
+  return ok ? 0 : 1;
 }
 
 static int _eval_file(Lisp lisp, const char *path, int print) {
@@ -94,9 +103,35 @@ static int _repl(Lisp lisp) {
   return !failed;
 }
 
+static int _eval_form(Lisp lisp, Var form) {
+  return _eval_input(lisp, form, NULL, 1, 1);
+}
+
 static int _selftest(Lisp lisp) {
   int ok = _eval_text(lisp, "(apply + '(10 20 12))", 1);
   return _eval_text(lisp, "(append '(1 2) '(3 4))", 1) && ok;
+}
+
+static int _eval_text(Lisp lisp, String source, int print) {
+  return _eval_input(lisp, void, source, 0, print);
+}
+
+static int _eval_input(
+  Lisp lisp, Var form, String source, int is_form, int print) {
+  try {
+    Var result = is_form ? lisp.eval(form) : lisp.eval_string(source);
+    if (print) Stdout.printf("%s\n", result.repr());
+  }
+  catch %(?code *detail): {
+    _print_error(code, detail);
+    return 0;
+  }
+  return 1;
+}
+
+static void _print_error(Symbol code, List detail) {
+  List error = cons(code, detail);
+  Stderr.printf("error: %s\n", error.repr());
 }
 
 static void _usage(const char *program) {
@@ -115,39 +150,4 @@ static const char *_default_init(char *buffer, size_t size) {
     strcat(prefix, "../");
   }
   return NULL;
-}
-
-int main(int argc, char **argv) {
-  Lisp lisp = auto Lisp.kernel();
-  const char *init = NULL;
-  char probed[512];
-  int arg = 1;
-  if (argc >= 3 && !strcmp(argv[1], "--init")) {
-    init = argv[2];
-    arg = 3;
-  }
-  if (!init) init = getenv("X2C_LISP_INIT");
-  if (!init) init = _default_init(probed, sizeof probed);
-  if (!init) {
-    Stderr.printf(
-      "lisp: cannot find etc/init.xlisp; set X2C_LISP_INIT or --init\n"
-    );
-    return 1;
-  }
-  int ok = _eval_file(lisp, init, 0);
-  if (!ok) {
-    return 1;
-  }
-  int remaining = argc - arg;
-  if (!remaining) ok = _repl(lisp);
-  else if (remaining == 1 && !strcmp(argv[arg], "--selftest"))
-    ok = _selftest(lisp);
-  else if (remaining == 2 && !strcmp(argv[arg], "-e"))
-    ok = _eval_text(lisp, argv[arg + 1], 1);
-  else if (remaining == 1) ok = _eval_file(lisp, argv[arg], 1);
-  else {
-    _usage(argv[0]);
-    ok = 0;
-  }
-  return ok ? 0 : 1;
 }

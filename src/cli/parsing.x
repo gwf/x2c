@@ -235,13 +235,22 @@ module CliOption cli_options[] = {
   { 0 }
 };
 
-/* The command spelled `word`, or NULL. `help` never matches: it parses no
-   options and is not a subject of `x2c help <command>`. */
-static CliCommand *_command_row(const char *word) {
-  for (CliCommand *row = cli_commands; row.name; row++)
-    if (row.name != <help> && strcmp(word, row.name.str()) == 0) return row;
-  return NULL;
-}
+/* One argument list read into a request. Options extend the argument lists
+   in the order they are written. `operands` is set after `--`, and a
+   script's words before `expanded` came from a response file. */
+static typedef struct Parse {
+  CliRequest request, Array args, int operands, expanded;
+  Array inputs, run_args, include_dirs, cpp_args, cc_args, ld_args;
+} Parse;
+
+// options
+
+/* One option as written: its table row, its spelling up to any `=`, its
+   value, and whether the value shares the spelling's word, as `-Idir`
+   does. The C compiler and linker receive an option as it was written. */
+static typedef struct Given {
+  CliOption *option, String spelling, value, int attached;
+} Given;
 
 // parsing
 
@@ -281,13 +290,51 @@ CliRequest CliRequest.parse_arguments(Array args) {
   $fail.cli_command_unknown(first);
 }
 
-/* One argument list read into a request. Options extend the argument lists
-   in the order they are written. `operands` is set after `--`, and a
-   script's words before `expanded` came from a response file. */
-static typedef struct Parse {
-  CliRequest request, Array args, int operands, expanded;
-  Array inputs, run_args, include_dirs, cpp_args, cc_args, ld_args;
-} Parse;
+// package native arguments
+
+/** Reads a package's native response options, expanding literal `{package}`
+    after tokenization. Only native include/define/thread options, ordered
+    archive/library/framework inputs, run-time library search directories,
+    and the `-Wl,` and `-Xlinker` linker pass-throughs are admitted.
+    `cc_args` and `ld_args` serve native actions; no source-preprocessing
+    options are returned.
+*/
+CliRequest CliRequest.package_options(String path, String package) {
+  Array words = auto [];
+  foreach (String word in _response_arguments(path))
+    words.push(word.replace("{package}", package));
+  CliRequest request = xcalloc(1, sizeof(struct CliRequest));
+  request.command = <build>;
+  Parse p = {
+    .request = request, .args = words, .include_dirs = [],
+    .cpp_args = [], .cc_args = [], .ld_args = []};
+  for (int i = 0; i < words.len(); i++) _native(p, i);
+  p.include_dirs.free();
+  p.cpp_args.free();
+  request.cc_args = p.cc_args.list_free();
+  request.ld_args = p.ld_args.list_free();
+  return request;
+}
+
+/** Returns whether `s` contains a driver-owned dependency option.
+    Recognizes `-MMD`, `-MP`, `-MF`, and `-MT` as leading spellings or in a
+    comma-delimited pass-through argument; `NULL` returns zero.
+*/
+int CliRequest.dependency_option(String s) {
+  return s && (
+    s.startswith("-MMD") || s.startswith("-MP") ||
+    s.startswith("-MF") || s.startswith("-MT") ||
+    ",-MMD" in s || ",-MP" in s || ",-MF" in s || ",-MT" in s
+  );
+}
+
+// diagnostics
+
+/** Reports whether a raw command name belongs to the built-in parser. */
+int CliRequest.is_builtin(const char *word) =>
+  !strcmp(word, "help") || _command_row(word) != NULL;
+
+// command and option parsing
 
 static CliRequest _parse_command(Array args, CliCommand &command) {
   Parse p = {
@@ -384,14 +431,13 @@ static void _help_command(Array args) {
   _help_exit(asked.name, 0);
 }
 
-// options
-
-/* One option as written: its table row, its spelling up to any `=`, its
-   value, and whether the value shares the spelling's word, as `-Idir`
-   does. The C compiler and linker receive an option as it was written. */
-static typedef struct Given {
-  CliOption *option, String spelling, value, int attached;
-} Given;
+/* The command spelled `word`, or NULL. `help` never matches: it parses no
+   options and is not a subject of `x2c help <command>`. */
+static CliCommand *_command_row(const char *word) {
+  for (CliCommand *row = cli_commands; row.name; row++)
+    if (row.name != <help> && strcmp(word, row.name.str()) == 0) return row;
+  return NULL;
+}
 
 /* Named retention selects the build directory; other options use the table. */
 static void _option(Parse &p, String arg, int &i) {
@@ -441,31 +487,6 @@ static Given _take_option(Array args, int &i, Symbol command) {
       (given.option.id in %<<output out-dir build-dir>>))
     $fail.cli_option_value_required(written);
   return given;
-}
-
-/* Finds the option `spelling` names for `command`. A two-letter option that
-   takes a value also accepts it in the same argument, as `-Idir`, and
-   reports the remainder through `attached`. */
-static CliOption *_find_option(
-  String spelling, Symbol command, String &attached) {
-  attached = NULL;
-  int length = spelling.len();
-  for (CliOption *option = cli_options; option.spelling; option++) {
-    if (!(command in option.commands)) continue;
-    String form = option.spelling;
-    int form_length = form.len();
-    int longer = length > form_length && spelling.startswith(form);
-    if (option.prefix) {
-      if (longer) return option;
-      continue;
-    }
-    if (spelling == form || spelling == option.alias) return option;
-    if (option.value && form_length == 2 && longer) {
-      attached = spelling[2:];
-      return option;
-    }
-  }
-  return NULL;
 }
 
 /* An option without an arm here sets the request field its row names. */
@@ -554,18 +575,6 @@ static String _xcc_argument(String value) {
   return value;
 }
 
-/** Returns whether `s` contains a driver-owned dependency option.
-    Recognizes `-MMD`, `-MP`, `-MF`, and `-MT` as leading spellings or in a
-    comma-delimited pass-through argument; `NULL` returns zero.
-*/
-int CliRequest.dependency_option(String s) {
-  return s && (
-    s.startswith("-MMD") || s.startswith("-MP") ||
-    s.startswith("-MF") || s.startswith("-MT") ||
-    ",-MMD" in s || ",-MP" in s || ",-MF" in s || ",-MT" in s
-  );
-}
-
 static void _set_field(CliRequest r, CliOption &option, String value) {
   char *field = (char *) r + option.offset;
   switch (option.apply) {
@@ -573,57 +582,6 @@ static void _set_field(CliRequest r, CliOption &option, String value) {
     case <text>: *(String *) field = value; break;
     case <list>: *(List *) field = cons(value, *(List *) field); break;
   }
-}
-
-// package native arguments
-
-/** Reads a package's native response options, expanding literal `{package}`
-    after tokenization. Only native include/define/thread options, ordered
-    archive/library/framework inputs, run-time library search directories,
-    and the `-Wl,` and `-Xlinker` linker pass-throughs are admitted.
-    `cc_args` and `ld_args` serve native actions; no source-preprocessing
-    options are returned.
-*/
-CliRequest CliRequest.package_options(String path, String package) {
-  Array words = auto [];
-  foreach (String word in _response_arguments(path))
-    words.push(word.replace("{package}", package));
-  CliRequest request = xcalloc(1, sizeof(struct CliRequest));
-  request.command = <build>;
-  Parse p = {
-    .request = request, .args = words, .include_dirs = [],
-    .cpp_args = [], .cc_args = [], .ld_args = []};
-  for (int i = 0; i < words.len(); i++) _native(p, i);
-  p.include_dirs.free();
-  p.cpp_args.free();
-  request.cc_args = p.cc_args.list_free();
-  request.ld_args = p.ld_args.list_free();
-  return request;
-}
-
-/* A package's native word is an archive to link or an option a package may
-   carry. */
-static void _native(Parse &p, int &i) {
-  String arg = p.args[i];
-  if (!arg) Diagnostics.driver_error("empty package native argument");
-  if (arg[0] != '-' && arg[0] != '@' && arg.endswith(".a")) {
-    p.ld_args.push(arg);
-    return;
-  }
-  Given given = _take_option(p.args, i, p.request.command);
-  if (!given.option || !given.option.package_native)
-    $fail.cli_native_unsupported(arg);
-  _apply(p, given);
-}
-
-// diagnostics
-
-/* Prints an error and perhaps a note, then exits with status 2. The exit
-   runs the atexit handlers, which Diagnostics.driver_error skips. */
-module void _fail(String message, String note) {
-  fprintf(stderr, "x2c: error: %s\n", message);
-  if (note) fprintf(stderr, "note: %s\n", note);
-  exit(2);
 }
 
 static void _cli_fail_output_command(void) {
@@ -653,10 +611,56 @@ static String _two_dash(String arg) {
   return _find_option(spelling, <translate>, attached) ? spelling : NULL;
 }
 
+/* Finds the option `spelling` names for `command`. A two-letter option that
+   takes a value also accepts it in the same argument, as `-Idir`, and
+   reports the remainder through `attached`. */
+static CliOption *_find_option(
+  String spelling, Symbol command, String &attached) {
+  attached = NULL;
+  int length = spelling.len();
+  for (CliOption *option = cli_options; option.spelling; option++) {
+    if (!(command in option.commands)) continue;
+    String form = option.spelling;
+    int form_length = form.len();
+    int longer = length > form_length && spelling.startswith(form);
+    if (option.prefix) {
+      if (longer) return option;
+      continue;
+    }
+    if (spelling == form || spelling == option.alias) return option;
+    if (option.value && form_length == 2 && longer) {
+      attached = spelling[2:];
+      return option;
+    }
+  }
+  return NULL;
+}
+
 static void _cli_fail_one_dash_removed(String arg, String use) {
   _fail(%"one-dash long option '$arg' was removed", %"use '$use'");
 }
 
-/** Reports whether a raw command name belongs to the built-in parser. */
-int CliRequest.is_builtin(const char *word) =>
-  !strcmp(word, "help") || _command_row(word) != NULL;
+
+
+/* Prints an error and perhaps a note, then exits with status 2. The exit
+   runs the atexit handlers, which Diagnostics.driver_error skips. */
+module void _fail(String message, String note) {
+  fprintf(stderr, "x2c: error: %s\n", message);
+  if (note) fprintf(stderr, "note: %s\n", note);
+  exit(2);
+}
+
+/* A package's native word is an archive to link or an option a package may
+   carry. */
+static void _native(Parse &p, int &i) {
+  String arg = p.args[i];
+  if (!arg) Diagnostics.driver_error("empty package native argument");
+  if (arg[0] != '-' && arg[0] != '@' && arg.endswith(".a")) {
+    p.ld_args.push(arg);
+    return;
+  }
+  Given given = _take_option(p.args, i, p.request.command);
+  if (!given.option || !given.option.package_native)
+    $fail.cli_native_unsupported(arg);
+  _apply(p, given);
+}

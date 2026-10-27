@@ -15,6 +15,71 @@
 #include "macros/macros.x"
 #include "transform/transform.x"
 
+// $auto
+
+/* Preserve the acquired value after its declaration's checks. */
+static macro Stmt $auto_release(Decl $local, Expr $binding) using $acquired {
+  @_x2c_auto_release($local, $binding, $acquired)
+}
+
+/* foreach
+
+   A collection whose owner declares a matching `try_next` runs a cursor
+   loop that calls it directly; any other iterable runs through an Iter. */
+
+/* One `foreach` expansion: its declaration, collection, and body, the
+   expressions the declaration binds, the collection's type, and the fresh
+   names the macro supplies for the loop's own variables. */
+static typedef struct Foreach {
+  List declaration, collection, body, targets, type;
+  Var iterator, item, pair, object, cursor;
+} Foreach;
+
+/* One class declaration: its name `owner`, its declared `type`, and where
+   it stands. A heap class is a pointer to its `pointee`, an alias names
+   one other type, an aggregate is a struct or union, and a positional
+   class is a struct whose fields all have Var forms. The defaults share
+   one `value` parameter and Var tag. */
+static typedef struct Shape {
+  String owner, List type, location, pointee, representation, named;
+  int heap, alias, aggregate, positional;
+  List parameter, Symbol tag;
+} Shape;
+
+/* the built-in names
+
+   Each algorithm is reachable by the name its callers use, as are the slot
+   functions that compiler quotations call. */
+
+static macro Stmt $builtin.row(Expr $rows, Expr $name, Expr $function) {
+  $rows[$name] = (Func) $function;
+}
+
+/** Returns a fresh Map of built-in algorithms by their compile-time names.
+    The Map borrows shared Func handles that live for the program.
+*/
+Map Compiler.builtin_targets(void) {
+  Map rows = {};
+  $builtin.row(rows, "_x2c_scope_expand", _scope_expand);
+  $builtin.row(rows, "_x2c_with_expand", _with_expand);
+  $builtin.row(rows, "_x2c_foreach_expand", _foreach_expand);
+  $builtin.row(rows, "_x2c_auto_expand", _auto_expand);
+  $builtin.row(rows, "_x2c_class_expand", _class_expand);
+  $builtin.row(rows, "_x2c_foreign_alias", _foreign_alias);
+  $builtin.row(rows, "_x2c_callback_adapt", _callback_adapt);
+  $builtin.row(rows, "_x2c_func_call_arguments", _x2c_func_call_arguments);
+  $builtin.row(rows, "Ast_defer_captures", Ast.defer_captures);
+  $builtin.row(rows, "class.initializer", _class_initializer);
+  $builtin.row(rows, "class.write-fields", _class_write_fields);
+  $builtin.row(rows, "class.defaults", _class_defaults);
+  $builtin.row(rows, "_x2c_auto_release", _auto_release);
+  $builtin.row(rows, "_x2c_binding_record", _binding_record);
+  $builtin.row(rows, "_x2c_binding_install", _binding_install);
+  $builtin.row(rows, "_x2c_target_map", _binding_targets);
+  Compiler.add_sdk_targets(rows);
+  return rows;
+}
+
 // $scope
 
 static List _scope_expand(List body, List destinations) {
@@ -56,13 +121,6 @@ static List _with_assignment(List assignment, List body) {
     *address = $value;
     $body
   } };
-}
-
-// $auto
-
-/* Preserve the acquired value after its declaration's checks. */
-static macro Stmt $auto_release(Decl $local, Expr $binding) using $acquired {
-  @_x2c_auto_release($local, $binding, $acquired)
 }
 
 /* `$auto(value)` returns `value` and places the release after the
@@ -121,19 +179,6 @@ static void _auto_fail(Symbol category, String message, List notes) {
     x2c_enclosing(<statement>), category, message, notes);
 }
 
-/* foreach
-
-   A collection whose owner declares a matching `try_next` runs a cursor
-   loop that calls it directly; any other iterable runs through an Iter. */
-
-/* One `foreach` expansion: its declaration, collection, and body, the
-   expressions the declaration binds, the collection's type, and the fresh
-   names the macro supplies for the loop's own variables. */
-static typedef struct Foreach {
-  List declaration, collection, body, targets, type;
-  Var iterator, item, pair, object, cursor;
-} Foreach;
-
 static List _foreach_expand(
   List declaration, List collection, List body, Var iterator, Var item,
   Var pair, Var object, Var cursor) {
@@ -166,6 +211,18 @@ static List _converter(Type type) =>
   type == %("Var") ? MetaContext.function_reference("Var_iter")
                     : type.protocol_member("iter");
 
+/* A requested element can supply a native cursor for this source. Match
+   its output exactly before considering the collection's default cursor. */
+static List _typed_cursor_spec(Type collection_type, List targets) {
+  if (!targets) return %();
+  Type requested = Code.type(targets.last());
+  List spec = _cursor_spec(collection_type, requested, targets.len());
+  if (!spec) return %();
+  List outputs = spec[2];
+  Type output = targets.len() == 1 ? outputs.last() : outputs[1];
+  return output.resolve() == requested.resolve() ? spec : %();
+}
+
 /* A source or element owner can supply `int try_next(Source, C *, O *...)`.
    Return its cursor and output types when the source and arity match. */
 static List _cursor_spec(Type collection_type, Type owner, int arity) {
@@ -193,27 +250,6 @@ static List _cursor_spec(Type collection_type, Type owner, int arity) {
   if (cursor_parameter.car() == <*>)
     return $(function, cursor_type, output_types);
   return %($function $cursor_type $output_types reference);
-}
-
-/* A requested element can supply a native cursor for this source. Match
-   its output exactly before considering the collection's default cursor. */
-static List _typed_cursor_spec(Type collection_type, List targets) {
-  if (!targets) return %();
-  Type requested = Code.type(targets.last());
-  List spec = _cursor_spec(collection_type, requested, targets.len());
-  if (!spec) return %();
-  List outputs = spec[2];
-  Type output = targets.len() == 1 ? outputs.last() : outputs[1];
-  return output.resolve() == requested.resolve() ? spec : %();
-}
-
-/* Whether `type` is named by one String or Symbol. */
-static int _atom_type(Var type) {
-  if (type is not <list>) return 0;
-  List items = type;
-  if (items.len() != 1) return 0;
-  Var name = items.car();
-  return name is <string> || name.kind() == <symbol>;
 }
 
 /* Whether each output parameter points to a named type. */
@@ -298,6 +334,15 @@ static List _iter_constructor(Foreach &f, List converter) {
   return enumerate ? enumerate : converter;
 }
 
+/* Whether `type` is named by one String or Symbol. */
+static int _atom_type(Var type) {
+  if (type is not <list>) return 0;
+  List items = type;
+  if (items.len() != 1) return 0;
+  Var name = items.car();
+  return name is <string> || name.kind() == <symbol>;
+}
+
 static List _iter_call(List function, List collection) =>
   $!Iter{ $function($collection) };
 
@@ -346,17 +391,6 @@ static List _class_expand(List capture) {
   return %($capture (declaration-recipe class.defaults
     ($owner $type $(MetaContext.invocation_location()))));
 }
-
-/* One class declaration: its name `owner`, its declared `type`, and where
-   it stands. A heap class is a pointer to its `pointee`, an alias names
-   one other type, an aggregate is a struct or union, and a positional
-   class is a struct whose fields all have Var forms. The defaults share
-   one `value` parameter and Var tag. */
-static typedef struct Shape {
-  String owner, List type, location, pointee, representation, named;
-  int heap, alias, aggregate, positional;
-  List parameter, Symbol tag;
-} Shape;
 
 static List _class_defaults(String owner, List type, List location) {
   Shape s = _shape(owner, type, location);
@@ -780,6 +814,16 @@ static List _pointer_output(String owner, List value) {
 
 // class syntax
 
+// Selects a method the class defines itself.
+static List _own_method(String owner, String member) {
+  Code found = _method($(owner), member);
+  if (found && found.binding_spelling() == %"$(owner)_$(member)")
+    return found;
+  return %();
+}
+
+
+
 /* The callee a member call `name` on a `type` receiver selects, or an empty
    List. Methods that imported packages each provide are an error. */
 static List _method(Type type, String name) {
@@ -797,12 +841,16 @@ static List _method(Type type, String name) {
   return %();
 }
 
-// Selects a method the class defines itself.
-static List _own_method(String owner, String member) {
-  Code found = _method($(owner), member);
-  if (found && found.binding_spelling() == %"$(owner)_$(member)")
-    return found;
-  return %();
+static List _field_value(List field) => _field_on(field, x2c_ident("value"));
+
+/* The field of `receiver`, cast to its value type when it is a bitfield. */
+static List _field_on(List field, List receiver) {
+  String name = field[0];
+  if (field[1] ~= %((bitfield *) *)) {
+    Type type = _value_type(field[1]);
+    return $!( ($type)$receiver.$name );
+  }
+  return $!( $receiver.$name );
 }
 
 /* `type` without qualifiers or a bitfield width. */
@@ -816,19 +864,11 @@ static List _value_type(List type) {
   return kept.list_free();
 }
 
-/* The field of `receiver`, cast to its value type when it is a bitfield. */
-static List _field_on(List field, List receiver) {
-  String name = field[0];
-  if (field[1] ~= %((bitfield *) *)) {
-    Type type = _value_type(field[1]);
-    return $!( ($type)$receiver.$name );
-  }
-  return $!( $receiver.$name );
-}
-
-static List _field_value(List field) => _field_on(field, x2c_ident("value"));
-
 static List _param(Type type, String name) => type.parameter_ast($(name));
+
+static List _default(
+  String owner, String member, List result, List parameters, List body) =>
+  %(default $(_function(%"$(owner)_$(member)", result, parameters, body)));
 
 /* A function with no parameters declares `(void)`, so its prototype is not
    an old-style declaration. */
@@ -839,10 +879,6 @@ static List _function(String name, Type result, List parameters, List body) {
     (bind ($name) ((fnmod (params @parameters)) @modifiers))
     (block @body));
 }
-
-static List _default(
-  String owner, String member, List result, List parameters, List body) =>
-  %(default $(_function(%"$(owner)_$(member)", result, parameters, body)));
 
 /* native Lisp bindings
 
@@ -880,12 +916,6 @@ static String _binding_name(Var node) {
   return NULL;
 }
 
-static List _binding_rows_for(String group, List rows) {
-  Array selected = [];
-  foreach (List row in rows) if (row.car() == group) selected.push(row);
-  return selected.list_free();
-}
-
 static List _binding_install(List lisp, Var group) {
   Compiler c = Compiler.expanding();
   String group_name = Code.binding_spelling(group);
@@ -900,6 +930,12 @@ static List _binding_install(List lisp, Var group) {
   return statements.list_free();
 }
 
+static List _binding_rows_for(String group, List rows) {
+  Array selected = [];
+  foreach (List row in rows) if (row.car() == group) selected.push(row);
+  return selected.list_free();
+}
+
 static List _binding_statement(List lisp, List row) {
   (String name, String function, List type) = row.cdr();
   List signature = MetaContext.literal_list(type);
@@ -907,12 +943,6 @@ static List _binding_statement(List lisp, List row) {
     Lisp_bind($lisp, $name, Func_new($(x2c_ident(function)), $signature));
   };
 }
-
-static List _binding_call(String name, List arguments) =>
-  %(expr () (call $(_binding_ident(name)) (args @arguments)));
-
-static List _binding_ident(String name) =>
-  %(expr () (ident $(x2c_ident(name))));
 
 static List _binding_targets(List rows) {
   Array arguments = [];
@@ -944,39 +974,11 @@ static List _binding_target(String bind_name, String name, String maker) {
     _binding_call("Func_var", $(func)));
 }
 
+static List _binding_call(String name, List arguments) =>
+  %(expr () (call $(_binding_ident(name)) (args @arguments)));
+
+static List _binding_ident(String name) =>
+  %(expr () (ident $(x2c_ident(name))));
+
 static List _binding_name_signature(String name) =>
   Code.native_signature(MetaContext.function_reference(name));
-
-/* the built-in names
-
-   Each algorithm is reachable by the name its callers use, as are the slot
-   functions that compiler quotations call. */
-
-static macro Stmt $builtin.row(Expr $rows, Expr $name, Expr $function) {
-  $rows[$name] = (Func) $function;
-}
-
-/** Returns a fresh Map of built-in algorithms by their compile-time names.
-    The Map borrows shared Func handles that live for the program.
-*/
-Map Compiler.builtin_targets(void) {
-  Map rows = {};
-  $builtin.row(rows, "_x2c_scope_expand", _scope_expand);
-  $builtin.row(rows, "_x2c_with_expand", _with_expand);
-  $builtin.row(rows, "_x2c_foreach_expand", _foreach_expand);
-  $builtin.row(rows, "_x2c_auto_expand", _auto_expand);
-  $builtin.row(rows, "_x2c_class_expand", _class_expand);
-  $builtin.row(rows, "_x2c_foreign_alias", _foreign_alias);
-  $builtin.row(rows, "_x2c_callback_adapt", _callback_adapt);
-  $builtin.row(rows, "_x2c_func_call_arguments", _x2c_func_call_arguments);
-  $builtin.row(rows, "Ast_defer_captures", Ast.defer_captures);
-  $builtin.row(rows, "class.initializer", _class_initializer);
-  $builtin.row(rows, "class.write-fields", _class_write_fields);
-  $builtin.row(rows, "class.defaults", _class_defaults);
-  $builtin.row(rows, "_x2c_auto_release", _auto_release);
-  $builtin.row(rows, "_x2c_binding_record", _binding_record);
-  $builtin.row(rows, "_x2c_binding_install", _binding_install);
-  $builtin.row(rows, "_x2c_target_map", _binding_targets);
-  Compiler.add_sdk_targets(rows);
-  return rows;
-}

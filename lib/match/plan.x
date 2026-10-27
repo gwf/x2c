@@ -31,6 +31,65 @@ static typedef struct MatchLower {
   int *sites, site_count, site_capacity, depth;
 } MatchLower;
 
+/* guards
+
+   A guard's operands compile first. An atom operand tests the current value
+   inline; any other operand is a child block the guard calls on the current
+   value. */
+
+/* The operands of one guard, or the fixed prefix of one segment, with each
+   element's entry: -1 for an atom tested inline, -2 for a sublist that
+   descends inline, or else the entry of its child block. */
+static typedef struct MatchParts {
+  Var elements[MATCH_SEGMENT_MAX];
+  int entries[MATCH_SEGMENT_MAX], count;
+} MatchParts;
+
+/* segments
+
+   A segment matches a List element by element: a fixed prefix, then at
+   most one star and the tail after it. Every child block compiles before
+   the segment's own words, so the segment emits in one linear pass. */
+
+/* Child blocks framed inside inline sublists, compiled in traversal order
+   so that emission consumes them in the same order. */
+static typedef struct MatchInlinePlan {
+  int entries[MATCH_INLINE_MAX], count, used;
+} MatchInlinePlan;
+
+/* The star that ends a segment's prefix, at `cell`, and the `tail` after
+   it. The binder has `slot`, or -1 for `*`; a `delayed` binder takes its
+   span only once the tail succeeds. The tail is the child block at `entry`,
+   and `anchor` is its first element that a scan can compare as one value,
+   `offset` elements in. */
+static typedef struct MatchStar {
+  List cell, tail;
+  int slot, delayed, entry, anchored, offset;
+  Var anchor;
+} MatchStar;
+
+/* One segment under lowering: its prefix, the framed children nested in
+   its inline sublists, and its star. */
+static typedef struct MatchSegment {
+  MatchParts prefix;
+  MatchInlinePlan nested;
+  MatchStar star;
+} MatchSegment;
+
+/* input keys
+
+   When a pattern fixes how a matching List begins, its plan records each
+   way as a key: the first element, and the first later element of the
+   fixed prefix that is a constant or a List beginning with one. `Match`
+   checks the keys before it takes a machine, so an input that begins
+   otherwise costs a few comparisons. The program tests every key itself,
+   so the check never refuses an input the plan matches. */
+
+static typedef struct MatchKeys {
+  MatchKey keys[MATCH_KEY_MAX];
+  int count;
+} MatchKeys;
+
 /** Compiles `pattern` into a reusable immutable `MatchPlan`.
     The caller owns the returned plan in the active `Scope`. Preparation
     records `<prepared>`, `<malformed>`, or `<ineligible>`
@@ -52,6 +111,17 @@ MatchPlan MatchPlan.prepare(Var pattern) {
   return plan;
 }
 
+/** Releases resources owned by `plan`.
+    A null plan is ignored; the plan, layout, program, and all aliases to them
+    are invalid afterward. Borrowed pattern constants are not released.
+*/
+void MatchPlan.free(MatchPlan plan) {
+  if (!plan) return;
+  MachineProgram.free(plan.program);
+  MatchCaptureLayout.free(plan.layout);
+  xfree(plan);
+}
+
 /* Lowers the normalized pattern and freezes an exact-sized program in the
    caller's scope. The builder interns the layout's binders first, so its
    slots are the layout's. */
@@ -68,17 +138,6 @@ static void _lower(MatchPlan plan, Var pattern) {
   xfree(l.sites);
 }
 
-/** Releases resources owned by `plan`.
-    A null plan is ignored; the plan, layout, program, and all aliases to them
-    are invalid afterward. Borrowed pattern constants are not released.
-*/
-void MatchPlan.free(MatchPlan plan) {
-  if (!plan) return;
-  MachineProgram.free(plan.program);
-  MatchCaptureLayout.free(plan.layout);
-  xfree(plan);
-}
-
 /* Compiles one pattern into a block and returns its entry, or -1. */
 static int _compile_value(MatchLower &l, Var pattern) {
   if (pattern.is_atom_binder()) return _compile_binder(l, pattern);
@@ -88,89 +147,6 @@ static int _compile_value(MatchLower &l, Var pattern) {
     return _compile_guard(l, list.car(), list.cdr());
   if (list && _is_list_literal(list)) return _compile_literal_list(l, list);
   return _compile_segment(l, list);
-}
-
-static int _compile_binder(MatchLower &l, Var binder) {
-  int entry = l.b.length;
-  if (binder == <?>) {
-    l.b.emit(MW_RET_SUCCESS, 0, 0, 0, 0, 0);
-    return _stopped(l) ? -1 : entry;
-  }
-  int base = l.site_count;
-  return _emit_binder(l, binder) ? _finish(l, entry, base) : -1;
-}
-
-/* Binds a fresh slot to the current value, or compares a bound one. */
-static int _emit_binder(MatchLower &l, Var binder) {
-  if (binder == <?>) return 1;
-  int slot = l.b.binder(binder);
-  if (slot < 0) return 0;
-  int valid = l.b.emit(MW_SLOT_VALID, slot, 0, 0, 0, -1);
-  l.b.emit(MW_SLOT_SET_VALUE, slot, 0, 0, 0, 0);
-  int done = l.b.emit(MW_JUMP, 0, 0, 0, 0, -1);
-  if (valid < 0 || done < 0) return 0;
-  int compare = l.b.length;
-  if (!_fail_site(l, MW_SLOT_EQ_VALUE, slot, 0, 0, 0)) return 0;
-  l.b.set_target(valid, compare);
-  l.b.set_target(done, l.b.length);
-  return 1;
-}
-
-static int _compile_literal(MatchLower &l, Var pattern) {
-  int entry = l.b.length, base = l.site_count;
-  return _emit_literal(l, pattern) ? _finish(l, entry, base) : -1;
-}
-
-/* The comparison a word applies to the constant `value`. */
-static int _compare_mode(Var value) =>
-  _bits_unique(value) ? MACHINE_COMPARE_BITS : MACHINE_COMPARE_EQUAL;
-
-/* Raw-bit comparison may replace general Var equality only where the two
-   agree: Symbols are canonical identities and narrow integer immediates are
-   value-encoded per family and width. Wide boxes carry value semantics
-   across distinct allocations, floating NaN is unequal to itself with equal
-   bits, and a transient mutable String can be content-equal to a canonical
-   String with different bits. Interning gives two Lists one identity
-   exactly when their elements are bit-equal, so a List answers for its
-   elements. */
-static int _bits_unique(Var value) {
-  switch (value.tag()) {
-    case <symbol>: case <lsym>:
-    case <i8>: case <u8>: case <i16>: case <u16>:
-    case <i32>: case <u32>: case <i48>: case <u48>:
-      return 1;
-    case <list>: {
-      foreach (Var part in (List) value.pointer())
-        if (!_bits_unique(part)) return 0;
-      return 1;
-    }
-  }
-  return 0;
-}
-
-/* Inline test of the current value for an atom pattern inside a guard or
-   segment template: literals compare, atom binders bind or compare through
-   the journal in slot order, and the anonymous ? matches without emitting a
-   word. Failure sites are recorded for the enclosing block to patch. */
-static int _emit_leaf_value(MatchLower &l, Var pattern) {
-  if (pattern.is_atom_binder()) return _emit_binder(l, pattern);
-  return _emit_literal(l, pattern);
-}
-
-/* Compares the current value with the constant `pattern`. */
-static int _emit_literal(MatchLower &l, Var pattern) {
-  int constant = l.b.constant(pattern);
-  return constant >= 0 &&
-    _fail_site(l, MW_EQ_VALUE_CONST, constant, 0, 0, _compare_mode(pattern));
-}
-
-/* A List with no binder and no guard at any depth. */
-static int _is_list_literal(List pat) {
-  foreach (Var head in pat) {
-    if (head.is_binder() || head.is_match_op()) return 0;
-    if (head is <list> && !_is_list_literal(head)) return 0;
-  }
-  return 1;
 }
 
 /* A binder-free literal list compares by canonical identity first and falls
@@ -207,74 +183,6 @@ static int _compile_child(MatchLower &l, Var pattern) {
   return entry;
 }
 
-/* Emits the branch word with an unresolved target and records its patch
-   site on the shared site stack. This is the only place a failure site is
-   created. Every lowering path stops immediately on emission failure. */
-static int _fail_site(MatchLower &l, int op, int a, int b, int c, int d) {
-  int site = l.b.emit(op, a, b, c, d, -1);
-  if (site < 0) return 0;
-  if (l.site_count >= l.site_capacity) {
-    int capacity = l.site_capacity ? l.site_capacity * 2 : 64;
-    l.sites = xrealloc(l.sites, sizeof(int) * capacity);
-    l.site_capacity = capacity;
-  }
-  l.sites[l.site_count++] = site;
-  return 1;
-}
-
-/* Patches every site recorded since `base` to `target` and releases them.
-   Block compilers leave the site stack at their entry base. */
-static void _patch_sites(MatchLower &l, int base, int target) {
-  for (int i = base; i < l.site_count; i++)
-    l.b.set_target(l.sites[i], target);
-  l.site_count = base;
-}
-
-/* Ends the block at `entry` with its success and failure returns and
-   returns `entry`, or -1. */
-static int _finish(MatchLower &l, int entry, int base) {
-  l.b.emit(MW_RET_SUCCESS, 0, 0, 0, 0, 0);
-  return _finish_failure(l, entry, base);
-}
-
-static int _finish_failure(MatchLower &l, int entry, int base) {
-  int failure = l.b.emit(MW_RET_FAILURE, 0, 0, 0, 0, 0);
-  if (failure < 0) return -1;
-  _patch_sites(l, base, failure);
-  return entry;
-}
-
-static int _emit_call(MatchLower &l, int child, int mode, int reg) {
-  if (l.b.emit(MW_CALL, child, mode, reg, 0, 0) < 0) return 0;
-  return _fail_site(l, MW_BR_FAIL, 0, 0, 0, 0);
-}
-
-/* Records the first ineligibility reason and returns the failed entry. */
-static int _fail(MatchLower &l, const char *reason) {
-  if (l.b.status == <prepared>) {
-    l.b.status = <ineligible>;
-    l.b.reason = reason;
-  }
-  return -1;
-}
-
-static int _stopped(MatchLower &l) =>
-  l.b.status != <prepared>;
-
-/* guards
-
-   A guard's operands compile first. An atom operand tests the current value
-   inline; any other operand is a child block the guard calls on the current
-   value. */
-
-/* The operands of one guard, or the fixed prefix of one segment, with each
-   element's entry: -1 for an atom tested inline, -2 for a sublist that
-   descends inline, or else the entry of its child block. */
-static typedef struct MatchParts {
-  Var elements[MATCH_SEGMENT_MAX];
-  int entries[MATCH_SEGMENT_MAX], count;
-} MatchParts;
-
 static int _compile_guard(MatchLower &l, Var op, List args) {
   if (op == <!or>) return _compile_or(l, args);
   if (op == <!not>) return _compile_not(l, args);
@@ -298,17 +206,6 @@ static int _guard_parts(MatchLower &l, List args, MatchParts &parts) {
   }
   parts.count = n;
   return 1;
-}
-
-static int _emit_operand(
-  MatchLower &l, MatchParts &parts, int i) =>
-  _emit_test(l, parts.elements[i], parts.entries[i]);
-
-/* Tests the current value: an atom `test` inline when `child` is negative,
-   or else by calling its child block. */
-static int _emit_test(MatchLower &l, Var test, int child) {
-  if (child < 0) return _emit_leaf_value(l, test);
-  return _emit_call(l, child, MACHINE_CALL_CURRENT, 0);
 }
 
 /* Ordered alternatives are static call, branch, and return templates: every
@@ -363,10 +260,6 @@ static int _compile_set(MatchLower &l, List args) {
        ? _finish(l, entry, base) : -1;
 }
 
-/* An anonymous atom binder also selects capture; stars do not. */
-static int _set_binds(List args) =>
-  args && args.cdr() && !args.cddr() && args.car().is_atom_binder();
-
 /* Every operand must match the current value, in order. */
 static int _compile_and(MatchLower &l, List args) {
   MatchParts operands;
@@ -377,10 +270,163 @@ static int _compile_and(MatchLower &l, List args) {
   return _finish(l, entry, base);
 }
 
+static int _compile_segment(MatchLower &l, List pattern) {
+  MatchSegment s;
+  s.nested.count = s.nested.used = 0;
+  if (!_segment_prefix(l, s, pattern) || !_segment_star(l, s.star)) return -1;
+  int entry = l.b.length, base = l.site_count;
+  if (!_fail_site(l, MW_INPUT_LIST, 0, 0, 0, 0) || !_emit_prefix(l, s) ||
+      !_segment_end(l, s.star))
+    return -1;
+  return _finish_failure(l, entry, base);
+}
+
+/* Compiles the children of the prefix, which runs up to the first star.
+   An atom executes inline against the cursor head; a star-free plain
+   sublist descends inline through the next register; guards, quoted forms,
+   literal lists, and starred or deep sublists keep a call frame with an
+   independent register bank. */
+static int _segment_prefix(MatchLower &l, MatchSegment &s, List pattern) {
+  int n = 0, List at = pattern;
+  while (at && !at.car().is_list_binder()) {
+    if (n >= MATCH_SEGMENT_MAX) return _fail(l, "segment-width") + 1;
+    Var part = at.car();
+    s.prefix.elements[n] = part;
+    if (part is not <list>) s.prefix.entries[n++] = -1;
+    else if (_inline_descend_ok(part, 0)) {
+      if (!_compile_nested(l, part, 1, s.nested)) return 0;
+      s.prefix.entries[n++] = -2;
+    }
+    else {
+      s.prefix.entries[n] = _compile_child(l, part);
+      if (s.prefix.entries[n++] < 0) return 0;
+    }
+    at = at.cdr();
+  }
+  s.prefix.count = n;
+  s.star.cell = at;
+  return 1;
+}
+
+/* Precompiles every framed child block reachable through inline descents,
+   in traversal order. */
+static int _compile_nested(
+  MatchLower &l, List pattern, int reg, MatchInlinePlan &nested) {
+  foreach (Var part in pattern) {
+    if (part is not <list>) continue;
+    List child = part;
+    if (_inline_descend_ok(child, reg)) {
+      if (!_compile_nested(l, child, reg + 1, nested)) return 0;
+      continue;
+    }
+    if (nested.count >= MATCH_INLINE_MAX) return _fail(l, "segment-width") + 1;
+    nested.entries[nested.count] = _compile_child(l, part);
+    if (nested.entries[nested.count++] < 0) return 0;
+  }
+  return 1;
+}
+
+/* Resolves the star after the prefix: its binder's slot, whether the
+   binder can defer its span, and the tail with its anchor. A binder the
+   tail never mentions is delayed until the tail succeeds. */
+static int _segment_star(MatchLower &l, MatchStar &star) {
+  List cell = star.cell;
+  star = (MatchStar) {.cell = cell, .slot = -1, .entry = -1, .anchor = void};
+  if (!cell) return 1;
+  Var binder = cell.car();
+  star.tail = cell.cdr();
+  if (binder != <*>) {
+    star.slot = l.b.binder(binder);
+    if (star.slot < 0) return 0;
+    star.delayed = star.tail && !_pattern_contains_binder(star.tail, binder);
+  }
+  if (!star.tail) return 1;
+  star.entry = _compile_tail(l, star.tail);
+  if (star.entry < 0) return 0;
+  star.anchored = _find_fixed_anchor(star.tail, star.anchor, star.offset);
+  return 1;
+}
+
+/* A star's tail compiles as a child segment under the frame-depth fence. */
+static int _compile_tail(MatchLower &l, List pattern) {
+  if (l.depth + 1 >= MACHINE_FRAME_MAX - 1) return _fail(l, "frame-depth");
+  l.depth++;
+  int entry = _compile_segment(l, pattern);
+  l.depth--;
+  return entry;
+}
+
+static int _compile_binder(MatchLower &l, Var binder) {
+  int entry = l.b.length;
+  if (binder == <?>) {
+    l.b.emit(MW_RET_SUCCESS, 0, 0, 0, 0, 0);
+    return _stopped(l) ? -1 : entry;
+  }
+  int base = l.site_count;
+  return _emit_binder(l, binder) ? _finish(l, entry, base) : -1;
+}
+
+static int _emit_operand(
+  MatchLower &l, MatchParts &parts, int i) =>
+  _emit_test(l, parts.elements[i], parts.entries[i]);
+
+/* Tests the current value: an atom `test` inline when `child` is negative,
+   or else by calling its child block. */
+static int _emit_test(MatchLower &l, Var test, int child) {
+  if (child < 0) return _emit_leaf_value(l, test);
+  return _emit_call(l, child, MACHINE_CALL_CURRENT, 0);
+}
+
+/* Inline test of the current value for an atom pattern inside a guard or
+   segment template: literals compare, atom binders bind or compare through
+   the journal in slot order, and the anonymous ? matches without emitting a
+   word. Failure sites are recorded for the enclosing block to patch. */
+static int _emit_leaf_value(MatchLower &l, Var pattern) {
+  if (pattern.is_atom_binder()) return _emit_binder(l, pattern);
+  return _emit_literal(l, pattern);
+}
+
+/* Binds a fresh slot to the current value, or compares a bound one. */
+static int _emit_binder(MatchLower &l, Var binder) {
+  if (binder == <?>) return 1;
+  int slot = l.b.binder(binder);
+  if (slot < 0) return 0;
+  int valid = l.b.emit(MW_SLOT_VALID, slot, 0, 0, 0, -1);
+  l.b.emit(MW_SLOT_SET_VALUE, slot, 0, 0, 0, 0);
+  int done = l.b.emit(MW_JUMP, 0, 0, 0, 0, -1);
+  if (valid < 0 || done < 0) return 0;
+  int compare = l.b.length;
+  if (!_fail_site(l, MW_SLOT_EQ_VALUE, slot, 0, 0, 0)) return 0;
+  l.b.set_target(valid, compare);
+  l.b.set_target(done, l.b.length);
+  return 1;
+}
+
 /* The runtime compares only one quoted operand. */
 static int _compile_quote(MatchLower &l, List args) {
   if (!args || args.cdr()) return _fail(l, "quote-arity");
   return _compile_literal(l, args.car());
+}
+
+static int _compile_literal(MatchLower &l, Var pattern) {
+  int entry = l.b.length, base = l.site_count;
+  return _emit_literal(l, pattern) ? _finish(l, entry, base) : -1;
+}
+
+/* Compares the current value with the constant `pattern`. */
+static int _emit_literal(MatchLower &l, Var pattern) {
+  int constant = l.b.constant(pattern);
+  return constant >= 0 &&
+    _fail_site(l, MW_EQ_VALUE_CONST, constant, 0, 0, _compare_mode(pattern));
+}
+
+/* Records the first ineligibility reason and returns the failed entry. */
+static int _fail(MatchLower &l, const char *reason) {
+  if (l.b.status == <prepared>) {
+    l.b.status = <ineligible>;
+    l.b.reason = reason;
+  }
+  return -1;
 }
 
 /* type tests
@@ -433,6 +479,28 @@ static int _is_type(MatchLower &l, Var type) {
        ? _finish(l, entry, base) : -1;
 }
 
+/* Ends the block at `entry` with its success and failure returns and
+   returns `entry`, or -1. */
+static int _finish(MatchLower &l, int entry, int base) {
+  l.b.emit(MW_RET_SUCCESS, 0, 0, 0, 0, 0);
+  return _finish_failure(l, entry, base);
+}
+
+static int _finish_failure(MatchLower &l, int entry, int base) {
+  int failure = l.b.emit(MW_RET_FAILURE, 0, 0, 0, 0, 0);
+  if (failure < 0) return -1;
+  _patch_sites(l, base, failure);
+  return entry;
+}
+
+/* Patches every site recorded since `base` to `target` and releases them.
+   Block compilers leave the site stack at their entry base. */
+static void _patch_sites(MatchLower &l, int base, int target) {
+  for (int i = base; i < l.site_count; i++)
+    l.b.set_target(l.sites[i], target);
+  l.site_count = base;
+}
+
 static inline Symbol _canonical_type_tag(Symbol tag) {
   if (tag == <varray>) return <array>;
   if (tag == <vmap>)   return <map>;
@@ -443,127 +511,6 @@ static inline Symbol _canonical_type_tag(Symbol tag) {
 static int _never(MatchLower &l) {
   int entry = l.b.length;
   return l.b.emit(MW_RET_FAILURE, 0, 0, 0, 0, 0) < 0 ? -1 : entry;
-}
-
-/* segments
-
-   A segment matches a List element by element: a fixed prefix, then at
-   most one star and the tail after it. Every child block compiles before
-   the segment's own words, so the segment emits in one linear pass. */
-
-/* Child blocks framed inside inline sublists, compiled in traversal order
-   so that emission consumes them in the same order. */
-static typedef struct MatchInlinePlan {
-  int entries[MATCH_INLINE_MAX], count, used;
-} MatchInlinePlan;
-
-/* The star that ends a segment's prefix, at `cell`, and the `tail` after
-   it. The binder has `slot`, or -1 for `*`; a `delayed` binder takes its
-   span only once the tail succeeds. The tail is the child block at `entry`,
-   and `anchor` is its first element that a scan can compare as one value,
-   `offset` elements in. */
-static typedef struct MatchStar {
-  List cell, tail;
-  int slot, delayed, entry, anchored, offset;
-  Var anchor;
-} MatchStar;
-
-/* One segment under lowering: its prefix, the framed children nested in
-   its inline sublists, and its star. */
-static typedef struct MatchSegment {
-  MatchParts prefix;
-  MatchInlinePlan nested;
-  MatchStar star;
-} MatchSegment;
-
-static int _compile_segment(MatchLower &l, List pattern) {
-  MatchSegment s;
-  s.nested.count = s.nested.used = 0;
-  if (!_segment_prefix(l, s, pattern) || !_segment_star(l, s.star)) return -1;
-  int entry = l.b.length, base = l.site_count;
-  if (!_fail_site(l, MW_INPUT_LIST, 0, 0, 0, 0) || !_emit_prefix(l, s) ||
-      !_segment_end(l, s.star))
-    return -1;
-  return _finish_failure(l, entry, base);
-}
-
-/* Compiles the children of the prefix, which runs up to the first star.
-   An atom executes inline against the cursor head; a star-free plain
-   sublist descends inline through the next register; guards, quoted forms,
-   literal lists, and starred or deep sublists keep a call frame with an
-   independent register bank. */
-static int _segment_prefix(MatchLower &l, MatchSegment &s, List pattern) {
-  int n = 0, List at = pattern;
-  while (at && !at.car().is_list_binder()) {
-    if (n >= MATCH_SEGMENT_MAX) return _fail(l, "segment-width") + 1;
-    Var part = at.car();
-    s.prefix.elements[n] = part;
-    if (part is not <list>) s.prefix.entries[n++] = -1;
-    else if (_inline_descend_ok(part, 0)) {
-      if (!_compile_nested(l, part, 1, s.nested)) return 0;
-      s.prefix.entries[n++] = -2;
-    }
-    else {
-      s.prefix.entries[n] = _compile_child(l, part);
-      if (s.prefix.entries[n++] < 0) return 0;
-    }
-    at = at.cdr();
-  }
-  s.prefix.count = n;
-  s.star.cell = at;
-  return 1;
-}
-
-/* A star-free plain nested segment may execute in the enclosing frame
-   through the bank's next cursor register: stars are the only other
-   consumers of registers one and two and always run in their own frame;
-   guards and quoted forms keep call frames, and literal lists keep the
-   canonical-identity path. */
-static int _inline_descend_ok(List child, int reg) {
-  if (reg + 1 >= MACHINE_CURSOR_REGS || !child ||
-      child.car().is_match_op() || _is_list_literal(child))
-    return 0;
-  foreach (Var part in child) if (part.is_list_binder()) return 0;
-  return 1;
-}
-
-/* Precompiles every framed child block reachable through inline descents,
-   in traversal order. */
-static int _compile_nested(
-  MatchLower &l, List pattern, int reg, MatchInlinePlan &nested) {
-  foreach (Var part in pattern) {
-    if (part is not <list>) continue;
-    List child = part;
-    if (_inline_descend_ok(child, reg)) {
-      if (!_compile_nested(l, child, reg + 1, nested)) return 0;
-      continue;
-    }
-    if (nested.count >= MATCH_INLINE_MAX) return _fail(l, "segment-width") + 1;
-    nested.entries[nested.count] = _compile_child(l, part);
-    if (nested.entries[nested.count++] < 0) return 0;
-  }
-  return 1;
-}
-
-/* Resolves the star after the prefix: its binder's slot, whether the
-   binder can defer its span, and the tail with its anchor. A binder the
-   tail never mentions is delayed until the tail succeeds. */
-static int _segment_star(MatchLower &l, MatchStar &star) {
-  List cell = star.cell;
-  star = (MatchStar) {.cell = cell, .slot = -1, .entry = -1, .anchor = void};
-  if (!cell) return 1;
-  Var binder = cell.car();
-  star.tail = cell.cdr();
-  if (binder != <*>) {
-    star.slot = l.b.binder(binder);
-    if (star.slot < 0) return 0;
-    star.delayed = star.tail && !_pattern_contains_binder(star.tail, binder);
-  }
-  if (!star.tail) return 1;
-  star.entry = _compile_tail(l, star.tail);
-  if (star.entry < 0) return 0;
-  star.anchored = _find_fixed_anchor(star.tail, star.anchor, star.offset);
-  return 1;
 }
 
 static int _pattern_contains_binder(List pat, Var binder) {
@@ -577,15 +524,6 @@ static int _pattern_contains_binder(List pat, Var binder) {
     }
   }
   return 0;
-}
-
-/* A star's tail compiles as a child segment under the frame-depth fence. */
-static int _compile_tail(MatchLower &l, List pattern) {
-  if (l.depth + 1 >= MACHINE_FRAME_MAX - 1) return _fail(l, "frame-depth");
-  l.depth++;
-  int entry = _compile_segment(l, pattern);
-  l.depth--;
-  return entry;
 }
 
 /* An anchor is compared as one value, so a List qualifies only when its
@@ -624,34 +562,12 @@ static int _emit_part(MatchLower &l, MatchSegment &s, int i) {
   return _emit_framed(l, entry, 0);
 }
 
-/* Tests the element at the cursor head of `reg`: `?` skips it, an atom
-   binder binds or compares it, and a literal compares it. */
-static int _emit_head_leaf(MatchLower &l, Var part, int reg) {
-  if (part == <?>) return _fail_site(l, MW_SKIP_HEAD, 0, reg, 0, 0);
-  if (part.is_atom_binder()) {
-    int slot = l.b.binder(part);
-    if (slot < 0) return 0;
-    return _fail_site(l, MW_BIND_HEAD, slot, reg, 0, 0);
-  }
-  int constant = l.b.constant(part);
-  if (constant < 0) return 0;
-  int mode = _compare_mode(part);
-  return _fail_site(l, MW_EQ_HEAD_CONST, constant, reg, 0, mode);
-}
-
 /* Descends into the sublist at the cursor head of `reg` through the next
    register, then advances past it. */
 static int _emit_descend(
   MatchLower &l, List child, int reg, MatchInlinePlan &nested) =>
   _fail_site(l, MW_DESCEND, 0, reg, reg + 1, 0) &&
   _emit_inline_segment(l, child, reg + 1, nested) &&
-  l.b.emit(MW_ADVANCE, reg, 0, 0, 0, 0) >= 0;
-
-/* Calls a child block on the cursor head of `reg`, which must exist, then
-   advances past it. */
-static int _emit_framed(MatchLower &l, int entry, int reg) =>
-  _fail_site(l, MW_NONNIL, reg, 0, 0, 0) &&
-  _emit_call(l, entry, MACHINE_CALL_HEAD, reg) &&
   l.b.emit(MW_ADVANCE, reg, 0, 0, 0, 0) >= 0;
 
 /* Emits an inline sublist through `reg`; its elements must end with it. */
@@ -671,6 +587,55 @@ static int _emit_inline_segment(
     if (!_emit_framed(l, nested.entries[nested.used++], reg)) return 0;
   }
   return _fail_site(l, MW_NIL, reg, 0, 0, 0);
+}
+
+/* A star-free plain nested segment may execute in the enclosing frame
+   through the bank's next cursor register: stars are the only other
+   consumers of registers one and two and always run in their own frame;
+   guards and quoted forms keep call frames, and literal lists keep the
+   canonical-identity path. */
+static int _inline_descend_ok(List child, int reg) {
+  if (reg + 1 >= MACHINE_CURSOR_REGS || !child ||
+      child.car().is_match_op() || _is_list_literal(child))
+    return 0;
+  foreach (Var part in child) if (part.is_list_binder()) return 0;
+  return 1;
+}
+
+/* A List with no binder and no guard at any depth. */
+static int _is_list_literal(List pat) {
+  foreach (Var head in pat) {
+    if (head.is_binder() || head.is_match_op()) return 0;
+    if (head is <list> && !_is_list_literal(head)) return 0;
+  }
+  return 1;
+}
+
+/* Tests the element at the cursor head of `reg`: `?` skips it, an atom
+   binder binds or compares it, and a literal compares it. */
+static int _emit_head_leaf(MatchLower &l, Var part, int reg) {
+  if (part == <?>) return _fail_site(l, MW_SKIP_HEAD, 0, reg, 0, 0);
+  if (part.is_atom_binder()) {
+    int slot = l.b.binder(part);
+    if (slot < 0) return 0;
+    return _fail_site(l, MW_BIND_HEAD, slot, reg, 0, 0);
+  }
+  int constant = l.b.constant(part);
+  if (constant < 0) return 0;
+  int mode = _compare_mode(part);
+  return _fail_site(l, MW_EQ_HEAD_CONST, constant, reg, 0, mode);
+}
+
+/* Calls a child block on the cursor head of `reg`, which must exist, then
+   advances past it. */
+static int _emit_framed(MatchLower &l, int entry, int reg) =>
+  _fail_site(l, MW_NONNIL, reg, 0, 0, 0) &&
+  _emit_call(l, entry, MACHINE_CALL_HEAD, reg) &&
+  l.b.emit(MW_ADVANCE, reg, 0, 0, 0, 0) >= 0;
+
+static int _emit_call(MatchLower &l, int child, int mode, int reg) {
+  if (l.b.emit(MW_CALL, child, mode, reg, 0, 0) < 0) return 0;
+  return _fail_site(l, MW_BR_FAIL, 0, 0, 0, 0);
 }
 
 /* stars
@@ -775,6 +740,25 @@ static int _star_loop(MatchLower &l, MatchStar &star) {
   return emitted ? loop : -1;
 }
 
+/* The comparison a word applies to the constant `value`. */
+static int _compare_mode(Var value) =>
+  _bits_unique(value) ? MACHINE_COMPARE_BITS : MACHINE_COMPARE_EQUAL;
+
+/* Emits the branch word with an unresolved target and records its patch
+   site on the shared site stack. This is the only place a failure site is
+   created. Every lowering path stops immediately on emission failure. */
+static int _fail_site(MatchLower &l, int op, int a, int b, int c, int d) {
+  int site = l.b.emit(op, a, b, c, d, -1);
+  if (site < 0) return 0;
+  if (l.site_count >= l.site_capacity) {
+    int capacity = l.site_capacity ? l.site_capacity * 2 : 64;
+    l.sites = xrealloc(l.sites, sizeof(int) * capacity);
+    l.site_capacity = capacity;
+  }
+  l.sites[l.site_count++] = site;
+  return 1;
+}
+
 /* A fresh binder takes the split's span before the tail runs or, when
    delayed, after it succeeds. Returns the tail's failure branch, or -1. */
 static int _star_fresh(MatchLower &l, MatchStar &star) {
@@ -807,19 +791,8 @@ static int _star_retry(MatchLower &l, MatchStar &star, int loop) {
   return l.b.emit(MW_JUMP, 0, 0, 0, 0, loop) >= 0 && !_stopped(l);
 }
 
-/* input keys
-
-   When a pattern fixes how a matching List begins, its plan records each
-   way as a key: the first element, and the first later element of the
-   fixed prefix that is a constant or a List beginning with one. `Match`
-   checks the keys before it takes a machine, so an input that begins
-   otherwise costs a few comparisons. The program tests every key itself,
-   so the check never refuses an input the plan matches. */
-
-static typedef struct MatchKeys {
-  MatchKey keys[MATCH_KEY_MAX];
-  int count;
-} MatchKeys;
+static int _stopped(MatchLower &l) =>
+  l.b.status != <prepared>;
 
 /* Records the keys of a normalized pattern; a pattern that fixes none, or
    more than the plan holds, records none. */
@@ -834,6 +807,29 @@ static void _record_keys(MatchPlan plan, Var pattern) {
       plan.key_bits = 0;
   }
   plan.key_count = found.count;
+}
+
+/* Raw-bit comparison may replace general Var equality only where the two
+   agree: Symbols are canonical identities and narrow integer immediates are
+   value-encoded per family and width. Wide boxes carry value semantics
+   across distinct allocations, floating NaN is unequal to itself with equal
+   bits, and a transient mutable String can be content-equal to a canonical
+   String with different bits. Interning gives two Lists one identity
+   exactly when their elements are bit-equal, so a List answers for its
+   elements. */
+static int _bits_unique(Var value) {
+  switch (value.tag()) {
+    case <symbol>: case <lsym>:
+    case <i8>: case <u8>: case <i16>: case <u16>:
+    case <i32>: case <u32>: case <i48>: case <u48>:
+      return 1;
+    case <list>: {
+      foreach (Var part in (List) value.pointer())
+        if (!_bits_unique(part)) return 0;
+      return 1;
+    }
+  }
+  return 0;
 }
 
 /* Adds the keys `pattern` fixes in `mode`, or returns 0. In value and List
@@ -896,6 +892,10 @@ static int _inner_keys(List rest, MatchKeys &inner) {
   }
   return 0;
 }
+
+/* An anonymous atom binder also selects capture; stars do not. */
+static int _set_binds(List args) =>
+  args && args.cdr() && !args.cddr() && args.car().is_atom_binder();
 
 static int _add(MatchKeys &keys, MatchKey key) {
   if (keys.count >= MATCH_KEY_MAX) return 0;

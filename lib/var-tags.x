@@ -15,6 +15,259 @@
 #pragma once
 #include "compiler-meta.x"
 
+// tag table and tag sets
+
+meta List _tag_info(void) {
+  Array cells = [];
+  foreach (List row in _tag_rows()) cells.push(_tag_info_row(row));
+  return $!( { @(cells.list_free()), $(_tag_info_sentinel()) } );
+}
+
+
+
+meta List _tag_info_row(List row) => $!( {
+  $(row[0]), $(_tag_kind(row)), $(_tag_top(row)), $(_tag_middle(row)),
+  $(_tag_bottom(row))
+} );
+
+/* The table ends in a void row, so a decoded index past the ledger reads a
+   descriptor rather than past the array. */
+meta List _tag_info_sentinel(void) =>
+  $!( { 0, <void>, 0x8000, 0, 0 } );
+
+meta List _tag_names(void) {
+  Array names = [];
+  foreach (List row in _tag_rows()) names.push(row[0]);
+  return names;
+}
+
+// numeric table
+
+meta List _tag_numeric_names(void) {
+  Array names = [];
+  foreach (List row in _tag_numeric_rows()) names.push(row[0]);
+  return names;
+}
+
+meta List _tag_numeric_table(void) {
+  Array cells = [];
+  foreach (List row in _tag_numeric_rows()) cells.push(_tag_numeric_row(row));
+  return $!( { @(cells.list_free()) } );
+}
+
+
+
+meta List _tag_numeric_rows(void) {
+  Array rows = [];
+  foreach (List row in _tag_rows()) if (_tag_numeric(row)) rows.push(row);
+  return rows;
+}
+
+meta int _tag_numeric(List row)  => row.len() > 6;
+
+meta List _tag_numeric_row(List row) => $!( {
+  $(row[0]), $(_tag_floating(row)), $(_tag_unsigned(row)),
+  $(_tag_bits_expr(row)), $(_tag_rank(row))
+} );
+
+meta int _tag_rank(List row)     => row[7];
+
+meta int _tag_floating(List row) => _tag_kind(row) == <floating>;
+
+meta int _tag_unsigned(List row) => row[0].str().startswith("u");
+
+/* A literal width stays a literal; a C type becomes sizeof(T) * CHAR_BIT,
+   which is still a constant expression in a static initializer. Any other
+   spelling is refused where the width is held as an `int`. */
+meta List _tag_bits_expr(List row) {
+  Var bits = _tag_bits(row);
+  /* `bits is <list>` would compile to the `Var.is_row` fast path, which has
+     no compile-time meaning, so the tag is read directly. */
+  if (bits.tag() == <list>) {
+    Type type = bits;
+    return $!( sizeof($type) * CHAR_BIT );
+  }
+  int width = bits;
+  return $!int{ $width };
+}
+
+meta Var _tag_bits(List row)     => row[6];
+
+// constant tag rows
+
+meta List _tag_constant_rows(void) {
+  List rows = _tag_decode_rows();
+  Map counts = _tag_sibling_counts(rows);
+  Array entries = [];
+  foreach (List row in rows)
+    if (_tag_constant_row(row)) entries.push(_tag_row_entry(row, counts));
+  return entries;
+}
+
+meta int _tag_constant_row(List row) {
+  if (_tag_id(row) in _tag_validated_ids()) return 0;
+  return _tag_top(row) != 0x8002 && _tag_top(row) != 0x8003;
+}
+
+/* Rows whose decoded form carries a validity clause in `_decode_builtin`,
+   and the immediate rows the decoder discriminates by middle rather than
+   bottom. Neither is one mask-and-compare, so neither gets a constant row. */
+meta List _tag_validated_ids(void) => %(
+  "_long_" "_ulong_" "_llong_" "_ullong_" "_ldouble_" "_array_" "_map_"
+  "_u8_" "_i8_" "_u16_" "_i16_" "_nan_" "_neginf_" "_posinf_");
+
+meta List _tag_row_entry(List row, Map counts) {
+  Symbol tag = row[0];
+  int top = _tag_top(row), mask = _tag_group_mask(counts[top]),
+      bottom = _tag_bottom(row);
+  return %(map-entry $($!Symbol{ $tag })
+    $(_tag_list([$!int{ $top }, $!int{ $mask }, $!int{ $bottom }])));
+}
+
+/* A `List` expression built from its elements, which is the entry's value. */
+meta List _tag_list(List items) {
+  List built = $!List{ 0 };
+  for (int i = items.len() - 1; i >= 0; i--)
+    built = $!(cons($(items[i]), $built));
+  return built;
+}
+
+// decoder table
+
+/* The compiler-linked group builder must bind before its caller so the
+   caller inherits its compile-time-only classification. */
+
+/* One group's `{mask, by_middle, {ids}}`. An immediate group is selected by
+   its middle field; any other by its bottom field under the group's mask.
+   A selector no row holds decodes to `_invalid_`. */
+meta List _tag_decode_group(List rows, Map counts, int top) {
+  int immediate = top == 0x8002 || top == 0x8003;
+  int mask = _tag_group_mask(counts.getdefault(top, 0));
+  Array ids = [];
+  for (int i = 0; i < 8; i++)
+    ids.push($!( _invalid_ ));
+  foreach (List row in rows) {
+    if (_tag_top(row) != top) continue;
+    int selector = immediate ? _tag_middle(row) : _tag_bottom(row) & mask;
+    ids[selector] = %(expr () (ident $(x2c_ident(_tag_id(row)))));
+  }
+  return $!( { $mask, $immediate, { @(ids.list_free()) } } );
+}
+
+meta List _tag_decode_groups(void) {
+  List rows = _tag_decode_rows();
+  Map counts = _tag_sibling_counts(rows);
+  Array groups = [];
+  for (int group = 0; group < 32; group++)
+    groups.push(_tag_decode_group(rows, counts, _tag_group_top(group)));
+  return $!( { @(groups.list_free()) } );
+}
+
+// built-in decoder
+
+meta List _tag_decode_rows(void) {
+  Array rows = [];
+  foreach (List row in _tag_rows()) if (_tag_decode_row(row)) rows.push(row);
+  return rows;
+}
+
+
+
+/* `f64`, `symbol` and `void` are answered before the switch is reached. */
+meta int _tag_decode_row(List row) {
+  Var tag = row[0];
+  return !(tag == <f64> || tag == <symbol> || tag == <void>);
+}
+
+/* How many decode rows share each top, counted in one pass. The mask below
+   needs the count for a row's own top, so a scan per row would read the
+   whole ledger once per row. */
+meta Map _tag_sibling_counts(List rows) {
+  Map counts = {};
+  foreach (List row in rows) {
+    Var top = _tag_top(row);
+    counts[top] = counts.getdefault(top, 0) + 1;
+  }
+  return counts;
+}
+
+
+
+/* The top a table slot resolves. `var.x` rotates the 16-bit top left one
+   bit, so the even slots are tops 0x0000-0x000F and the odd slots are tops
+   0x8000-0x800F; tops without rows get a slot of `_invalid_`. */
+meta int _tag_group_top(int slot) =>
+  slot % 2 == 0 ? slot / 2 : 0x8000 + slot / 2;
+
+
+meta int _tag_top(List row)      => row[3];
+
+meta int _tag_middle(List row)   => row[4];
+
+meta int _tag_bottom(List row)   => row[5];
+
+
+
+/* A group of one is selected by its top alone; the decoder narrows a group
+   of two or four to the low bit or two of the bottom field. */
+meta int _tag_group_mask(int count) {
+  if (count == 1) return 0;
+  if (count == 2) return 1;
+  if (count == 4) return 3;
+  return 7;
+}
+
+// enum check
+
+/* `TagId` is written out in `lib/var/var.x`; each row asserts that its ID
+   has the row's ledger position. */
+meta List _tag_id_checks(void) {
+  Array checks = [];
+  int index = 0;
+  foreach (List row in _tag_rows()) {
+    checks.push(
+      $!Unit{
+        _Static_assert(
+          $(x2c_ident(_tag_id(row))) == $index,
+          "TagId matches the var tag ledger");
+      });
+    index++;
+  }
+  return checks;
+}
+
+meta String _tag_id(List row)    => row[1];
+
+// type lookup
+
+/* Type's tag lookup: each `(TYPE TAG)` of `native`, then every boxed row
+   as its capitalized source type name and a pointer to it, such as
+   `("List") : list` and `(* "List") : <list*>`. */
+meta Map _tag_types(List native) {
+  Map types = {};
+  foreach (List row in native) types[row[0]] = row[1];
+  Symbol star = <*>;
+  foreach (List row in _tag_rows()) {
+    if (!_tag_descriptor(row)) continue;
+    String tag = row[0].str();
+    String name = tag.capitalize();
+    types[$(name)] = row[0];
+    Symbol pointer = tag + "*";
+    types[$(star, name)] = pointer;
+  }
+  return types;
+}
+
+/* A row is `(tag id kind top middle bottom)`, and a numeric row carries
+   `bits` and `rank` after it. The ledger is grouped only to keep its source
+   readable, so every projection reads one flat sequence. */
+meta List _tag_rows(void) {
+  Array rows = [];
+  foreach (List group in _tag_groups())
+    foreach (List row in group) rows.push(row);
+  return rows;
+}
+
 meta List _tag_groups(void) => %(
   (
     (<u8>  "_u8_"  <integer>  0x8002 0x0001 0x0 8 1)
@@ -141,240 +394,10 @@ meta List _tag_groups(void) => %(
   )
 );
 
-/* A row is `(tag id kind top middle bottom)`, and a numeric row carries
-   `bits` and `rank` after it. The ledger is grouped only to keep its source
-   readable, so every projection reads one flat sequence. */
-meta List _tag_rows(void) {
-  Array rows = [];
-  foreach (List group in _tag_groups())
-    foreach (List row in group) rows.push(row);
-  return rows;
-}
-
-meta String _tag_id(List row)    => row[1];
-meta Symbol _tag_kind(List row)  => row[2];
-meta int _tag_top(List row)      => row[3];
-meta int _tag_middle(List row)   => row[4];
-meta int _tag_bottom(List row)   => row[5];
-meta int _tag_numeric(List row)  => row.len() > 6;
-meta Var _tag_bits(List row)     => row[6];
-meta int _tag_rank(List row)     => row[7];
-meta int _tag_floating(List row) => _tag_kind(row) == <floating>;
-meta int _tag_unsigned(List row) => row[0].str().startswith("u");
-
-// tag table and tag sets
-
-meta List _tag_info_row(List row) => $!( {
-  $(row[0]), $(_tag_kind(row)), $(_tag_top(row)), $(_tag_middle(row)),
-  $(_tag_bottom(row))
-} );
-
-/* The table ends in a void row, so a decoded index past the ledger reads a
-   descriptor rather than past the array. */
-meta List _tag_info_sentinel(void) =>
-  $!( { 0, <void>, 0x8000, 0, 0 } );
-
-meta List _tag_info(void) {
-  Array cells = [];
-  foreach (List row in _tag_rows()) cells.push(_tag_info_row(row));
-  return $!( { @(cells.list_free()), $(_tag_info_sentinel()) } );
-}
-
 meta int _tag_descriptor(List row) =>
   _tag_kind(row) == <object> || _tag_kind(row) == <symbol>;
 
-meta List _tag_names(void) {
-  Array names = [];
-  foreach (List row in _tag_rows()) names.push(row[0]);
-  return names;
-}
-
-// numeric table
-
-meta List _tag_numeric_rows(void) {
-  Array rows = [];
-  foreach (List row in _tag_rows()) if (_tag_numeric(row)) rows.push(row);
-  return rows;
-}
-
-meta List _tag_numeric_names(void) {
-  Array names = [];
-  foreach (List row in _tag_numeric_rows()) names.push(row[0]);
-  return names;
-}
-
-/* A literal width stays a literal; a C type becomes sizeof(T) * CHAR_BIT,
-   which is still a constant expression in a static initializer. Any other
-   spelling is refused where the width is held as an `int`. */
-meta List _tag_bits_expr(List row) {
-  Var bits = _tag_bits(row);
-  /* `bits is <list>` would compile to the `Var.is_row` fast path, which has
-     no compile-time meaning, so the tag is read directly. */
-  if (bits.tag() == <list>) {
-    Type type = bits;
-    return $!( sizeof($type) * CHAR_BIT );
-  }
-  int width = bits;
-  return $!int{ $width };
-}
-
-meta List _tag_numeric_row(List row) => $!( {
-  $(row[0]), $(_tag_floating(row)), $(_tag_unsigned(row)),
-  $(_tag_bits_expr(row)), $(_tag_rank(row))
-} );
-
-meta List _tag_numeric_table(void) {
-  Array cells = [];
-  foreach (List row in _tag_numeric_rows()) cells.push(_tag_numeric_row(row));
-  return $!( { @(cells.list_free()) } );
-}
-
-// built-in decoder
-
-/* `f64`, `symbol` and `void` are answered before the switch is reached. */
-meta int _tag_decode_row(List row) {
-  Var tag = row[0];
-  return !(tag == <f64> || tag == <symbol> || tag == <void>);
-}
-
-meta List _tag_decode_rows(void) {
-  Array rows = [];
-  foreach (List row in _tag_rows()) if (_tag_decode_row(row)) rows.push(row);
-  return rows;
-}
-
-// constant tag rows
-
-/* A group of one is selected by its top alone; the decoder narrows a group
-   of two or four to the low bit or two of the bottom field. */
-meta int _tag_group_mask(int count) {
-  if (count == 1) return 0;
-  if (count == 2) return 1;
-  if (count == 4) return 3;
-  return 7;
-}
-
-/* Rows whose decoded form carries a validity clause in `_decode_builtin`,
-   and the immediate rows the decoder discriminates by middle rather than
-   bottom. Neither is one mask-and-compare, so neither gets a constant row. */
-meta List _tag_validated_ids(void) => %(
-  "_long_" "_ulong_" "_llong_" "_ullong_" "_ldouble_" "_array_" "_map_"
-  "_u8_" "_i8_" "_u16_" "_i16_" "_nan_" "_neginf_" "_posinf_");
-
-meta int _tag_constant_row(List row) {
-  if (_tag_id(row) in _tag_validated_ids()) return 0;
-  return _tag_top(row) != 0x8002 && _tag_top(row) != 0x8003;
-}
-
-/* A `List` expression built from its elements, which is the entry's value. */
-meta List _tag_list(List items) {
-  List built = $!List{ 0 };
-  for (int i = items.len() - 1; i >= 0; i--)
-    built = $!(cons($(items[i]), $built));
-  return built;
-}
-
-/* How many decode rows share each top, counted in one pass. The mask below
-   needs the count for a row's own top, so a scan per row would read the
-   whole ledger once per row. */
-meta Map _tag_sibling_counts(List rows) {
-  Map counts = {};
-  foreach (List row in rows) {
-    Var top = _tag_top(row);
-    counts[top] = counts.getdefault(top, 0) + 1;
-  }
-  return counts;
-}
-
-meta List _tag_row_entry(List row, Map counts) {
-  Symbol tag = row[0];
-  int top = _tag_top(row), mask = _tag_group_mask(counts[top]),
-      bottom = _tag_bottom(row);
-  return %(map-entry $($!Symbol{ $tag })
-    $(_tag_list([$!int{ $top }, $!int{ $mask }, $!int{ $bottom }])));
-}
-
-meta List _tag_constant_rows(void) {
-  List rows = _tag_decode_rows();
-  Map counts = _tag_sibling_counts(rows);
-  Array entries = [];
-  foreach (List row in rows)
-    if (_tag_constant_row(row)) entries.push(_tag_row_entry(row, counts));
-  return entries;
-}
-
-// decoder table
-
-/* The top a table slot resolves. `var.x` rotates the 16-bit top left one
-   bit, so the even slots are tops 0x0000-0x000F and the odd slots are tops
-   0x8000-0x800F; tops without rows get a slot of `_invalid_`. */
-meta int _tag_group_top(int slot) =>
-  slot % 2 == 0 ? slot / 2 : 0x8000 + slot / 2;
-
-/* One group's `{mask, by_middle, {ids}}`. An immediate group is selected by
-   its middle field; any other by its bottom field under the group's mask.
-   A selector no row holds decodes to `_invalid_`. */
-meta List _tag_decode_group(List rows, Map counts, int top) {
-  int immediate = top == 0x8002 || top == 0x8003;
-  int mask = _tag_group_mask(counts.getdefault(top, 0));
-  Array ids = [];
-  for (int i = 0; i < 8; i++)
-    ids.push($!( _invalid_ ));
-  foreach (List row in rows) {
-    if (_tag_top(row) != top) continue;
-    int selector = immediate ? _tag_middle(row) : _tag_bottom(row) & mask;
-    ids[selector] = %(expr () (ident $(x2c_ident(_tag_id(row)))));
-  }
-  return $!( { $mask, $immediate, { @(ids.list_free()) } } );
-}
-
-meta List _tag_decode_groups(void) {
-  List rows = _tag_decode_rows();
-  Map counts = _tag_sibling_counts(rows);
-  Array groups = [];
-  for (int group = 0; group < 32; group++)
-    groups.push(_tag_decode_group(rows, counts, _tag_group_top(group)));
-  return $!( { @(groups.list_free()) } );
-}
-
-// enum check
-
-/* `TagId` is written out in `lib/var/var.x`; each row asserts that its ID
-   has the row's ledger position. */
-meta List _tag_id_checks(void) {
-  Array checks = [];
-  int index = 0;
-  foreach (List row in _tag_rows()) {
-    checks.push(
-      $!Unit{
-        _Static_assert(
-          $(x2c_ident(_tag_id(row))) == $index,
-          "TagId matches the var tag ledger");
-      });
-    index++;
-  }
-  return checks;
-}
-
-// type lookup
-
-/* Type's tag lookup: each `(TYPE TAG)` of `native`, then every boxed row
-   as its capitalized source type name and a pointer to it, such as
-   `("List") : list` and `(* "List") : <list*>`. */
-meta Map _tag_types(List native) {
-  Map types = {};
-  foreach (List row in native) types[row[0]] = row[1];
-  Symbol star = <*>;
-  foreach (List row in _tag_rows()) {
-    if (!_tag_descriptor(row)) continue;
-    String tag = row[0].str();
-    String name = tag.capitalize();
-    types[$(name)] = row[0];
-    Symbol pointer = tag + "*";
-    types[$(star, name)] = pointer;
-  }
-  return types;
-}
+meta Symbol _tag_kind(List row)  => row[2];
 
 // consumer projections
 

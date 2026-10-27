@@ -42,7 +42,7 @@ Builds the typed List expression that conses the element expressions
 `elements`, in order, onto the cells `tail`. A `(splice EXPR)` element
 appends the List that EXPR holds, as `literal_cell` does.
 
-Source: `src/literals/quotation.x:318`
+Source: `src/literals/quotation.x:141`
 
 <a id="Compiler.literal_cell"></a>
 #### Compiler.literal_cell
@@ -53,7 +53,7 @@ Conses the element expression `head` onto the cells `tail`, or appends
 the List a `(splice EXPR)` head holds, and folds the cell into the
 literal cache when both parts are constant.
 
-Source: `src/literals/quotation.x:290`
+Source: `src/literals/quotation.x:153`
 
 <a id="Compiler.parse_array_literal"></a>
 #### Compiler.parse_array_literal
@@ -63,7 +63,7 @@ Source: `src/literals/quotation.x:290`
 Parses a quoted Array literal into a typed, source-ordered `(array ...)`
 node and consumes its closing `]`.
 
-Source: `src/literals/collections.x:121`
+Source: `src/literals/collections.x:67`
 
 <a id="Compiler.parse_atomic_literal"></a>
 #### Compiler.parse_atomic_literal
@@ -86,7 +86,7 @@ The call consumes the closing `)`. A code `Symbol`, binder, or pattern
 may be followed by `*` patterns or `(key pattern)` pairs; pattern and
 runtime-literal state is restored on every exit.
 
-Source: `src/literals/payloads.x:98`
+Source: `src/literals/payloads.x:54`
 
 <a id="Compiler.parse_evaluated_list"></a>
 #### Compiler.parse_evaluated_list
@@ -98,7 +98,7 @@ one element, converted to Var, and `@name` or `@(expression)` splices a
 List's elements, as in a quoted List. A trailing comma is allowed, and
 `$()` is the empty List.
 
-Source: `src/literals/quotation.x:235`
+Source: `src/literals/quotation.x:104`
 
 <a id="Compiler.parse_evaluated_map"></a>
 #### Compiler.parse_evaluated_map
@@ -109,7 +109,7 @@ Parses an evaluated Map, `${key: value, ...}`, whose bare identifier
 keys are expressions like any other key, and consumes its `}`. In code
 `$` and `{` are two tokens; quoted data scans `${` as one.
 
-Source: `src/literals/collections.x:205`
+Source: `src/literals/collections.x:99`
 
 <a id="Compiler.parse_list_literal"></a>
 #### Compiler.parse_list_literal
@@ -120,7 +120,7 @@ Parses a `List` literal beginning at `(` or `%(` and returns its typed
 expression after consuming `)`. Pattern parsing sets and restores
 `match_is`; `runtime_literals` disables stable-cell caching.
 
-Source: `src/literals/quotation.x:35`
+Source: `src/literals/quotation.x:52`
 
 <a id="Compiler.parse_macro_pattern_arguments"></a>
 #### Compiler.parse_macro_pattern_arguments
@@ -131,7 +131,7 @@ Parses a macro pattern's parenthesized arguments and returns the static
 pattern of each: a binder or wildcard, a nested macro pattern, or a
 `%(...)` List pattern.
 
-Source: `src/literals/quotation.x:146`
+Source: `src/literals/quotation.x:35`
 
 <a id="Compiler.parse_map_entries"></a>
 #### Compiler.parse_map_entries
@@ -141,7 +141,7 @@ Source: `src/literals/quotation.x:146`
 Parses comma-separated `Map` entries up to but not including `}`.
 `Entry`-position macro sequences are flattened in source order.
 
-Source: `src/literals/collections.x:199`
+Source: `src/literals/collections.x:93`
 
 <a id="Compiler.parse_map_entry"></a>
 #### Compiler.parse_map_entry
@@ -153,7 +153,7 @@ A bare identifier key is an Atom; any other key is an expression.
 A direct row returns a resolved `(map-entry KEY VALUE)` node; an
 entry-position macro may return `(seq ...)` for its caller to splice.
 
-Source: `src/literals/collections.x:230`
+Source: `src/literals/collections.x:114`
 
 <a id="Compiler.parse_map_literal"></a>
 #### Compiler.parse_map_literal
@@ -163,7 +163,7 @@ Source: `src/literals/collections.x:230`
 Parses a quoted Map literal into a typed, source-ordered `(map ...)` node
 and consumes its closing `}`.
 
-Source: `src/literals/collections.x:154`
+Source: `src/literals/collections.x:77`
 
 <a id="Compiler.parse_raise_literal"></a>
 #### Compiler.parse_raise_literal
@@ -197,7 +197,7 @@ Parses a `%<<...>>` literal into an immutable ordered `SymbolSet`.
 Entries must be literal compact `Symbol`s; source order defines dense
 indexes and an equal encoded `Symbol` reports a duplicate diagnostic.
 
-Source: `src/literals/collections.x:30`
+Source: `src/literals/collections.x:24`
 
 <a id="Compiler.symbol_set_expression"></a>
 #### Compiler.symbol_set_expression
@@ -208,7 +208,7 @@ Builds a typed `SymbolSet` expression from source-ordered `Symbol` values.
 Stores the first duplicate index, or -1, through `duplicate`; a duplicate
 returns NULL.
 
-Source: `src/literals/collections.x:72`
+Source: `src/literals/collections.x:49`
 
 <a id="Compiler.try_parse_macro_pattern_insertion"></a>
 #### Compiler.try_parse_macro_pattern_insertion
@@ -220,7 +220,7 @@ derived pattern, or returns NULL without consuming tokens. `content`
 selects the bare content, for the content position of an
 `(expr TYPE ...)` shell.
 
-Source: `src/literals/quotation.x:184`
+Source: `src/literals/quotation.x:76`
 
 <a id="Compiler.typed_match_pattern"></a>
 #### Compiler.typed_match_pattern
@@ -229,7 +229,7 @@ Source: `src/literals/quotation.x:184`
 
 Applies each typed capture's predicate to every unquoted occurrence.
 
-Source: `src/literals/quotation.x:371`
+Source: `src/literals/quotation.x:124`
 
 ## Design notes
 

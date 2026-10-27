@@ -16,6 +16,46 @@
 #include "type.x"
 #include "expressions/expressions.x"
 
+// diagnostics
+
+static macro Stmt $fail.lambdas_param_ident(Expr $c, Expr $site) {
+  $c.report_error(
+    <parse>, "expected identifier in parameter list",
+    $site, NULL);
+}
+
+static macro Stmt $fail.lambdas_ident_untyped(
+  Expr $c, Expr $origin, Expr $spelling) {
+  $c.report_error(
+    <type>, %"identifier '$($spelling)' has no semantic type",
+    $origin, NULL);
+}
+
+static macro Stmt $fail.lambdas_capture_enclosing(
+  Expr $c, Expr $site, Expr $original) {
+  $c.report_error(
+    <type>, "reference capture requires an enclosing reference capture",
+    $site, %("binding: $(Ast.binding_spelling($original))"));
+}
+
+static macro Stmt $fail.lambdas_capture_ref(
+  Expr $c, Expr $site, Expr $binding) {
+  $c.report_error(
+    <type>, "captured value requires 'using &name' for reference access",
+    $site, %("binding: $(Ast.binding_spelling($binding))"));
+}
+
+/* One binding's capture through one lambda frame: the frame's fields, the
+   binding and type that the frame sees, and the identifier's source
+   binding. `facts` is read before a supplied value resolves. */
+static typedef struct Capture {
+  Compiler c;
+  Map facts;
+  List frame, key, prescribed, binding, original;
+  Type type;
+  Var scope, depth, references;
+} Capture;
+
 // local types used by lifted functions
 
 /** Moves a function's local type definitions reached by a lambda before
@@ -73,70 +113,6 @@ List Compiler.lift_lambda_types(Compiler c, List function) {
            $(Code.bound(Ast.replace_nodes(function, replaced), NULL)));
 }
 
-/* Finds referenced definitions and their dependencies. Emission retains
-   declaration order, which already satisfies complete-type requirements. */
-static void _lambda_needed_types(List syntax, Map definitions, Map needed) {
-  List node;
-  $ast.walk(syntax, node)
-    if (node ~= %((!or struct union enum) ?name *)) {
-      List tag = $(node.car(), name);
-      Var definition;
-      if (!(tag in needed) && definitions.try_get(tag, definition)) {
-        needed[tag] = 1;
-        _lambda_needed_types(definition, definitions, needed);
-      }
-    }
-}
-
-/* Anonymous types gain a private typedef that the ordinary native alias
-   emitter uses. Named local tags and enumerators retain their bindings. */
-static Code _lambda_type_declaration(Compiler c, Type type, int public) {
-  List name = type.cadr();
-  String role = "lambda_type";
-  if (public) role = %"lambda_type_$(Path.identifier_hash(c.filename))";
-  List alias = c.sym.introduce(c.fresh_name(role));
-  c.set_fact(%(ntype $alias), $(type.car(), name));
-  Type base = public ? type : cons(<static>, type);
-  Code declaration = %(typedef $base (bindings (bind $alias ())));
-  if (name.car() != <gensym>)
-    c.set_fact(%(emitted $name), c.fresh_name(role));
-  if (type.is_enum())
-    foreach (List member in type.caddr()) {
-      List binding = member.car() == <op> ? member.caddr() : member;
-      c.set_fact(%(emitted $binding), c.fresh_name(%"$(role)_enumerator"));
-    }
-  return Code.bound(declaration, NULL);
-}
-
-// diagnostics
-
-static macro Stmt $fail.lambdas_param_ident(Expr $c, Expr $site) {
-  $c.report_error(
-    <parse>, "expected identifier in parameter list",
-    $site, NULL);
-}
-
-static macro Stmt $fail.lambdas_ident_untyped(
-  Expr $c, Expr $origin, Expr $spelling) {
-  $c.report_error(
-    <type>, %"identifier '$($spelling)' has no semantic type",
-    $origin, NULL);
-}
-
-static macro Stmt $fail.lambdas_capture_enclosing(
-  Expr $c, Expr $site, Expr $original) {
-  $c.report_error(
-    <type>, "reference capture requires an enclosing reference capture",
-    $site, %("binding: $(Ast.binding_spelling($original))"));
-}
-
-static macro Stmt $fail.lambdas_capture_ref(
-  Expr $c, Expr $site, Expr $binding) {
-  $c.report_error(
-    <type>, "captured value requires 'using &name' for reference access",
-    $site, %("binding: $(Ast.binding_spelling($binding))"));
-}
-
 /* lambda literals
 
    `%!(params) using &name, ... => body` parses its parameters in a scope
@@ -174,6 +150,168 @@ List Compiler.parse_lambda_literal(Compiler c) {
     Type type = captures ? %("Func") : ftype;
     return c.rebuild_expression(type, _lambda_node(body, captures, entries));
   }
+}
+
+/* constructed lambdas
+
+   A lambda that a macro or transform builds binds through the capture
+   operations of source lambdas. Its supplied rows name their targets and
+   fix their capture mode. */
+
+/** Binds a constructed lambda through the lexical capture operations used by
+    source literals. Parameter declarations keep their existing declarators;
+    supplied canonical capture rows retain their value or reference mode.
+*/
+List Compiler.bind_lambda_expression(
+  Compiler c, Type type, List parameters, List supplied, List body) {
+  Array prescribed = [], aliases = [];
+  foreach (List row in supplied) _prescribe(c, row, prescribed, aliases);
+  c.sym.push_new_scope();
+  defer c.sym.pop_scope();
+  foreach (List alias in aliases) {
+    (List binding, Type annotation) = alias;
+    c.sym.bind_identity(NULL, binding, annotation.declaration_ast(binding));
+  }
+  with (c.lambda_scopes = c.lambda_scopes) {
+    c.begin_lambda_captures(NULL, prescribed.list_free());
+    c.sym.push_new_scope();
+    defer c.sym.pop_scope();
+    Array entries = [];
+    foreach (List entry in parameters.cdr())
+      _add_param(c, entries, _declare_param(c, entry));
+    body = _bind_body(c, body);
+    List captures = c.end_lambda_captures();
+    _check_lambda_captures(c, body);
+    List params = entries.list_free();
+    if (captures)
+      return c.rebuild_expression(
+        %("Func"), _lambda_node(body, captures, params));
+    return _plain_lambda(c, type, supplied, params, body);
+  }
+}
+
+/** The parameter types of a lambda's function signature, keeping typed
+    declarators; a bare parameter is a `Var`.
+*/
+List Compiler.lambda_param_types(Compiler c, List entries) {
+  if (!entries) return %((void));
+  Array types = [];
+  foreach (List entry in entries)
+    match (entry) {
+      case %(binding ? ?): types.push(%("Var"));
+      case %(param ? ?): {
+        Type type = entry.type_from_ast().declared();
+        if (type.is_reference())
+          type = cons(
+            type.car(), c.sym.normalize_declared_type(type.cdr()));
+        types.push(type);
+      }
+    }
+  return types.list_free();
+}
+
+/* lambda captures
+
+   Each open lambda has a frame `(lambda-scope SCOPE DEPTH REFERENCES
+   SUPPLIED)` in `lambda_scopes`, innermost first. Capture rows and their
+   order live in semantic binding facts, so macro transactions restore
+   them. */
+
+/** Opens lexical capture resolution while a lambda body is parsed or bound.
+    `references` names explicitly shared surrounding bindings; `supplied`
+    contains canonical capture rows supplied by constructed syntax. Evolving
+    rows live in semantic binding facts so macro transactions restore them.
+*/
+void Compiler.begin_lambda_captures(
+  Compiler c, List references, List supplied) {
+  List scope = c.sym.introduce(c.fresh_name("lambda_scope"));
+  int depth = c.sym.scope_count();
+  c.lambda_scopes = cons(
+    %(lambda-scope $scope $depth $references $supplied), c.lambda_scopes);
+}
+
+/** Finishes the active lambda's captures in first-use order. */
+List Compiler.end_lambda_captures(Compiler c) {
+  List scope = c.lambda_scopes.car().cadr();
+  c.lambda_scopes = c.lambda_scopes.cdr();
+  List rows = c.semantic_binding_facts().getdefault(
+    %(lambda-order $scope), %());
+  return rows.reverse();
+}
+
+/** Reports whether the active lambda still needs to capture a binding. */
+int Compiler.lambda_capture_required(Compiler c, List binding) {
+  if (c.lambda_scopes ~= %((lambda-scope ? ?depth ? ?supplied) *))
+    return _prescribed_row(supplied, binding, binding) ||
+           _declared_outside(c, binding, depth);
+  return 0;
+}
+
+/** Resolves an automatic identifier through each enclosing lambda's captures.
+    Fresh captured bindings keep sibling snapshots independent of shared-cell
+    rewriting. Reference captures preserve qualifiers; snapshots of reference
+    parameters copy their current referents.
+*/
+List Compiler.capture_lambda_identifier(Compiler c, List binding, Type type) {
+  List original = binding;
+  foreach (List frame in c.lambda_scopes.reverse())
+    if (_frame_capture(c, frame, binding, original, type) ~=
+          %(capture ?captured ?captured_type ?)) {
+      binding = captured;
+      type = captured_type;
+    }
+  return $!($type){ $binding };
+}
+
+/** Gives the captures of `binding` that the enclosing lambdas already
+    recorded the C spelling `binding` emits under.
+*/
+void Compiler.respell_captures(Compiler c, List binding) {
+  Map facts = c.semantic_binding_facts();
+  foreach (List frame in c.lambda_scopes.reverse())
+    if (frame ~= %(lambda-scope ?scope * *))
+      match (facts.getdefault(%(lambda-capture $scope $binding), NULL))
+        case %(capture ?captured * *): {
+          _inherit_spelling(c, binding, captured);
+          binding = captured;
+        }
+}
+
+// lambda parsing and capture resolution
+
+/* Finds referenced definitions and their dependencies. Emission retains
+   declaration order, which already satisfies complete-type requirements. */
+static void _lambda_needed_types(List syntax, Map definitions, Map needed) {
+  List node;
+  $ast.walk(syntax, node)
+    if (node ~= %((!or struct union enum) ?name *)) {
+      List tag = $(node.car(), name);
+      Var definition;
+      if (!(tag in needed) && definitions.try_get(tag, definition)) {
+        needed[tag] = 1;
+        _lambda_needed_types(definition, definitions, needed);
+      }
+    }
+}
+
+/* Anonymous types gain a private typedef that the ordinary native alias
+   emitter uses. Named local tags and enumerators retain their bindings. */
+static Code _lambda_type_declaration(Compiler c, Type type, int public) {
+  List name = type.cadr();
+  String role = "lambda_type";
+  if (public) role = %"lambda_type_$(Path.identifier_hash(c.filename))";
+  List alias = c.sym.introduce(c.fresh_name(role));
+  c.set_fact(%(ntype $alias), $(type.car(), name));
+  Type base = public ? type : cons(<static>, type);
+  Code declaration = %(typedef $base (bindings (bind $alias ())));
+  if (name.car() != <gensym>)
+    c.set_fact(%(emitted $name), c.fresh_name(role));
+  if (type.is_enum())
+    foreach (List member in type.caddr()) {
+      List binding = member.car() == <op> ? member.caddr() : member;
+      c.set_fact(%(emitted $binding), c.fresh_name(%"$(role)_enumerator"));
+    }
+  return Code.bound(declaration, NULL);
 }
 
 static List _parse_params(Compiler c) =>
@@ -280,26 +418,6 @@ static List _parse_lambda_body(Compiler c) {
   }
 }
 
-/** The parameter types of a lambda's function signature, keeping typed
-    declarators; a bare parameter is a `Var`.
-*/
-List Compiler.lambda_param_types(Compiler c, List entries) {
-  if (!entries) return %((void));
-  Array types = [];
-  foreach (List entry in entries)
-    match (entry) {
-      case %(binding ? ?): types.push(%("Var"));
-      case %(param ? ?): {
-        Type type = entry.type_from_ast().declared();
-        if (type.is_reference())
-          type = cons(
-            type.car(), c.sym.normalize_declared_type(type.cdr()));
-        types.push(type);
-      }
-    }
-  return types.list_free();
-}
-
 /* The body hole may supply either an expression or a block. */
 static List _lambda_template(
   Compiler c, List body, List captures, List entries) {
@@ -314,42 +432,47 @@ static List _lambda_node(List body, List captures, List params) {
   return captures ? captured(body, captures, params) : lambda(body, params);
 }
 
-/* constructed lambdas
+// capture checks
 
-   A lambda that a macro or transform builds binds through the capture
-   operations of source lambdas. Its supplied rows name their targets and
-   fix their capture mode. */
-
-/** Binds a constructed lambda through the lexical capture operations used by
-    source literals. Parameter declarations keep their existing declarators;
-    supplied canonical capture rows retain their value or reference mode.
+/* Rejects writes and reference access to read-only snapshot bindings.
+   The body has already resolved identifiers and call arguments. Templates
+   defer this check until expansion; nested lambdas check their own bodies.
 */
-List Compiler.bind_lambda_expression(
-  Compiler c, Type type, List parameters, List supplied, List body) {
-  Array prescribed = [], aliases = [];
-  foreach (List row in supplied) _prescribe(c, row, prescribed, aliases);
-  c.sym.push_new_scope();
-  defer c.sym.pop_scope();
-  foreach (List alias in aliases) {
-    (List binding, Type annotation) = alias;
-    c.sym.bind_identity(NULL, binding, annotation.declaration_ast(binding));
+static void _check_lambda_captures(Compiler c, List ast) {
+  if (c.macro_holes) return;
+  List node;
+  $ast.walk(ast, node)
+    match (node) {
+      case $Ast.lambda_pattern(): continue;
+      case %(op & ?target):
+        _require_capture_lvalue(c, target);
+      case %(dstrasgn (targets *targets) ?):
+        foreach (List target in targets) _require_capture_lvalue(c, target);
+      case $Macro.call_content($called,
+          %(expr ?callee_type ?), %(*arguments)):
+        _require_reference_arguments(c, callee_type, arguments);
+      default: _require_capture_lvalue(c, Ast.written_operand(node));
+    }
+}
+
+/* An argument bound to a reference parameter is reference access. */
+static void _require_reference_arguments(
+  Compiler c, Type callee_type, List arguments) {
+  List parameters = NULL;
+  if (!Type.function_parts(callee_type, parameters, NULL)) return;
+  for (; parameters && arguments;
+       parameters = parameters.cdr(), arguments = arguments.cdr()) {
+    Type parameter = parameters.car();
+    if (parameter.is_reference())
+      _require_capture_lvalue(c, arguments.car());
   }
-  with (c.lambda_scopes = c.lambda_scopes) {
-    c.begin_lambda_captures(NULL, prescribed.list_free());
-    c.sym.push_new_scope();
-    defer c.sym.pop_scope();
-    Array entries = [];
-    foreach (List entry in parameters.cdr())
-      _add_param(c, entries, _declare_param(c, entry));
-    body = _bind_body(c, body);
-    List captures = c.end_lambda_captures();
-    _check_lambda_captures(c, body);
-    List params = entries.list_free();
-    if (captures)
-      return c.rebuild_expression(
-        %("Func"), _lambda_node(body, captures, params));
-    return _plain_lambda(c, type, supplied, params, body);
-  }
+}
+
+static void _require_capture_lvalue(Compiler c, List target) {
+  List binding = Ast.lvalue_binding(target);
+  if (binding &&
+      %(lambda-snapshot $binding) in c.semantic_binding_facts())
+    $fail.lambdas_capture_ref(c, c.token, binding);
 }
 
 /* A row's target is a spelling or a binding. An open captured type
@@ -433,92 +556,6 @@ static List _plain_lambda(
   return c.lift_func_expression(c.rebuild_expression(signature, node));
 }
 
-/* lambda captures
-
-   Each open lambda has a frame `(lambda-scope SCOPE DEPTH REFERENCES
-   SUPPLIED)` in `lambda_scopes`, innermost first. Capture rows and their
-   order live in semantic binding facts, so macro transactions restore
-   them. */
-
-/** Opens lexical capture resolution while a lambda body is parsed or bound.
-    `references` names explicitly shared surrounding bindings; `supplied`
-    contains canonical capture rows supplied by constructed syntax. Evolving
-    rows live in semantic binding facts so macro transactions restore them.
-*/
-void Compiler.begin_lambda_captures(
-  Compiler c, List references, List supplied) {
-  List scope = c.sym.introduce(c.fresh_name("lambda_scope"));
-  int depth = c.sym.scope_count();
-  c.lambda_scopes = cons(
-    %(lambda-scope $scope $depth $references $supplied), c.lambda_scopes);
-}
-
-/** Finishes the active lambda's captures in first-use order. */
-List Compiler.end_lambda_captures(Compiler c) {
-  List scope = c.lambda_scopes.car().cadr();
-  c.lambda_scopes = c.lambda_scopes.cdr();
-  List rows = c.semantic_binding_facts().getdefault(
-    %(lambda-order $scope), %());
-  return rows.reverse();
-}
-
-/** Reports whether the active lambda still needs to capture a binding. */
-int Compiler.lambda_capture_required(Compiler c, List binding) {
-  if (c.lambda_scopes ~= %((lambda-scope ? ?depth ? ?supplied) *))
-    return _prescribed_row(supplied, binding, binding) ||
-           _declared_outside(c, binding, depth);
-  return 0;
-}
-
-/** Resolves an automatic identifier through each enclosing lambda's captures.
-    Fresh captured bindings keep sibling snapshots independent of shared-cell
-    rewriting. Reference captures preserve qualifiers; snapshots of reference
-    parameters copy their current referents.
-*/
-List Compiler.capture_lambda_identifier(Compiler c, List binding, Type type) {
-  List original = binding;
-  foreach (List frame in c.lambda_scopes.reverse())
-    if (_frame_capture(c, frame, binding, original, type) ~=
-          %(capture ?captured ?captured_type ?)) {
-      binding = captured;
-      type = captured_type;
-    }
-  return $!($type){ $binding };
-}
-
-/* One binding's capture through one lambda frame: the frame's fields, the
-   binding and type that the frame sees, and the identifier's source
-   binding. `facts` is read before a supplied value resolves. */
-static typedef struct Capture {
-  Compiler c;
-  Map facts;
-  List frame, key, prescribed, binding, original;
-  Type type;
-  Var scope, depth, references;
-} Capture;
-
-/* The row that captures `binding` in `frame`, or NULL when the binding is
-   the frame's own or static. */
-static List _frame_capture(
-  Compiler c, List frame, List binding, List original, Type type) {
-  if (frame ~= %(lambda-scope ?scope ?depth ?references ?supplied)) {
-    List prescribed = _prescribed_row(supplied, binding, original);
-    if (!prescribed && !_declared_outside(c, binding, depth)) return NULL;
-    if (type.is_static()) return NULL;
-    Map facts = c.semantic_binding_facts();
-    List key = %(lambda-capture $scope $binding);
-    Var stored;
-    if (facts.try_get(key, stored)) return stored;
-    Capture k = {
-      .c = c, .facts = facts, .frame = frame, .key = key,
-      .prescribed = prescribed, .binding = binding, .original = original,
-      .type = type, .scope = scope, .depth = depth,
-      .references = references};
-    return _add(k);
-  }
-  return NULL;
-}
-
 /* The last supplied row whose target is the binding or the identifier's
    source binding. */
 static List _prescribed_row(Var supplied, List binding, List original) {
@@ -540,6 +577,28 @@ static int _declared_outside(Compiler c, List binding, int depth) {
     return captured_depth.integer() < depth;
   return %(automatic $binding) in facts &&
          c.sym.binding_is_local_before(binding, depth);
+}
+
+/* The row that captures `binding` in `frame`, or NULL when the binding is
+   the frame's own or static. */
+static List _frame_capture(
+  Compiler c, List frame, List binding, List original, Type type) {
+  if (frame ~= %(lambda-scope ?scope ?depth ?references ?supplied)) {
+    List prescribed = _prescribed_row(supplied, binding, original);
+    if (!prescribed && !_declared_outside(c, binding, depth)) return NULL;
+    if (type.is_static()) return NULL;
+    Map facts = c.semantic_binding_facts();
+    List key = %(lambda-capture $scope $binding);
+    Var stored;
+    if (facts.try_get(key, stored)) return stored;
+    Capture k = {
+      .c = c, .facts = facts, .frame = frame, .key = key,
+      .prescribed = prescribed, .binding = binding, .original = original,
+      .type = type, .scope = scope, .depth = depth,
+      .references = references};
+    return _add(k);
+  }
+  return NULL;
 }
 
 /* A supplied row fixes the captured type and value. Otherwise a binding
@@ -605,61 +664,4 @@ static void _inherit_spelling(Compiler c, List source, List captured) {
   if (facts.try_get(%(emitted $source), spelling) &&
       !(%(emitted $captured) in facts))
     c.set_fact(%(emitted $captured), spelling);
-}
-
-/** Gives the captures of `binding` that the enclosing lambdas already
-    recorded the C spelling `binding` emits under.
-*/
-void Compiler.respell_captures(Compiler c, List binding) {
-  Map facts = c.semantic_binding_facts();
-  foreach (List frame in c.lambda_scopes.reverse())
-    if (frame ~= %(lambda-scope ?scope * *))
-      match (facts.getdefault(%(lambda-capture $scope $binding), NULL))
-        case %(capture ?captured * *): {
-          _inherit_spelling(c, binding, captured);
-          binding = captured;
-        }
-}
-
-// capture checks
-
-/* Rejects writes and reference access to read-only snapshot bindings.
-   The body has already resolved identifiers and call arguments. Templates
-   defer this check until expansion; nested lambdas check their own bodies.
-*/
-static void _check_lambda_captures(Compiler c, List ast) {
-  if (c.macro_holes) return;
-  List node;
-  $ast.walk(ast, node)
-    match (node) {
-      case $Ast.lambda_pattern(): continue;
-      case %(op & ?target):
-        _require_capture_lvalue(c, target);
-      case %(dstrasgn (targets *targets) ?):
-        foreach (List target in targets) _require_capture_lvalue(c, target);
-      case $Macro.call_content($called,
-          %(expr ?callee_type ?), %(*arguments)):
-        _require_reference_arguments(c, callee_type, arguments);
-      default: _require_capture_lvalue(c, Ast.written_operand(node));
-    }
-}
-
-static void _require_capture_lvalue(Compiler c, List target) {
-  List binding = Ast.lvalue_binding(target);
-  if (binding &&
-      %(lambda-snapshot $binding) in c.semantic_binding_facts())
-    $fail.lambdas_capture_ref(c, c.token, binding);
-}
-
-/* An argument bound to a reference parameter is reference access. */
-static void _require_reference_arguments(
-  Compiler c, Type callee_type, List arguments) {
-  List parameters = NULL;
-  if (!Type.function_parts(callee_type, parameters, NULL)) return;
-  for (; parameters && arguments;
-       parameters = parameters.cdr(), arguments = arguments.cdr()) {
-    Type parameter = parameters.car();
-    if (parameter.is_reference())
-      _require_capture_lvalue(c, arguments.car());
-  }
 }

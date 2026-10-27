@@ -15,6 +15,17 @@ static typedef struct ErrorRaise {
   Symbol code, int raised_at, depth;
 } ErrorRaise;
 
+/** Raises one compiler-generated error from a prepared detail `List`.
+    The runtime copies admissible detail before synchronous handler dispatch.
+    Resumable causes may return after handling or policy; shared non-returning
+    causes may transfer to a filtered catch but never return here. Invalid
+    detail or unavailable, reentrant, or failed `Error` machinery reaches the
+    raw error floor.
+*/
+void x2c_error_raise(Symbol code, List detail) {
+  Error.raise(code, detail);
+}
+
 /** Raises one cause with optional structured detail.
     This functional entry records and dispatches like the `raise` statement
     but has no source-location record. A handled resumable error returns
@@ -35,17 +46,6 @@ Symbol Error.raise(Symbol code, List detail) {
   return _dispatch(r);
 }
 
-/** Raises one compiler-generated error from a prepared detail `List`.
-    The runtime copies admissible detail before synchronous handler dispatch.
-    Resumable causes may return after handling or policy; shared non-returning
-    causes may transfer to a filtered catch but never return here. Invalid
-    detail or unavailable, reentrant, or failed `Error` machinery reaches the
-    raw error floor.
-*/
-void x2c_error_raise(Symbol code, List detail) {
-  Error.raise(code, detail);
-}
-
 /** Raises one compiler-generated error from native key-value arguments.
     `pair_count` controls the following alternating `Var` keys and values;
     `site` may be NULL. The runtime copies admissible values and preserves
@@ -62,6 +62,22 @@ void x2c_error_raise_n(
   _record_n(site, r.code, pair_count, args);
   va_end(args);
   _dispatch(r);
+}
+
+/** Returns the current nested error-dispatch depth.
+    This is the nesting depth of error dispatch. `Error.count` returns the
+    number of accumulated errors.
+*/
+int Error.depth(void) => _thread().depth;
+
+/** Marks the current nested error dispatch as already rendered by `Logger`.
+    This suppresses only `Error`'s fallback report for a `<log>` policy.
+    Calling outside dispatch has no effect.
+*/
+void Error.note_rendered(void) {
+  ErrorThreadState state = _thread();
+  if (state.depth > 0 && state.depth <= ERROR_MAX_DEPTH)
+    state.rendered[state.depth] = 1;
 }
 
 /* A raise reaches the floor while error state is being built, when dispatch
@@ -81,14 +97,6 @@ static ErrorRaise _raise_enter(Symbol code) {
   state.rendered[r.depth] = 0;
   return r;
 }
-
-static void _leave(void) => _thread().depth--;
-
-/** Returns the current nested error-dispatch depth.
-    This is the nesting depth of error dispatch. `Error.count` returns the
-    number of accumulated errors.
-*/
-int Error.depth(void) => _thread().depth;
 
 /* dispatch
 
@@ -118,12 +126,6 @@ static Symbol _dispatch(ErrorRaise r) {
     _terminate(state, r, "non-returning error was not caught");
   if (disposition == <declined>) _apply_policy(state, r);
   return disposition;
-}
-
-/* Logger has already reported a rendered error, so the floor adds nothing. */
-static void _terminate(ErrorThreadState e, ErrorRaise r, const char *why) {
-  if (e.rendered[r.depth]) abort();
-  _floor(r.code, why);
 }
 
 /* Offers the error to each handler from `h` outward. `<handled>` consumes
@@ -170,6 +172,8 @@ static void _transfer(
         : "<unwind> from an observing registration");
 }
 
+static void _leave(void) => _thread().depth--;
+
 /* `<log>` reports an error unless Logger rendered it, and both `<log>` and
    `<ignore>` drop the records the raise added; `<collect>` keeps them. */
 static void _apply_policy(ErrorThreadState e, ErrorRaise r) {
@@ -182,20 +186,16 @@ static void _apply_policy(ErrorThreadState e, ErrorRaise r) {
   else if (policy == <ignore>) _truncate(r.raised_at);
 }
 
+/* Logger has already reported a rendered error, so the floor adds nothing. */
+static void _terminate(ErrorThreadState e, ErrorRaise r, const char *why) {
+  if (e.rendered[r.depth]) abort();
+  _floor(r.code, why);
+}
+
 /* The `<log>` fallback when Logger did not render the error. */
 static void _report(Symbol code) {
   char spelling[SYMBOL_MAX_5BIT + 1] = { 0 };
   code.decode(spelling);
   fprintf(stderr, "x2c error: <%s>\n", spelling);
   fflush(stderr);
-}
-
-/** Marks the current nested error dispatch as already rendered by `Logger`.
-    This suppresses only `Error`'s fallback report for a `<log>` policy.
-    Calling outside dispatch has no effect.
-*/
-void Error.note_rendered(void) {
-  ErrorThreadState state = _thread();
-  if (state.depth > 0 && state.depth <= ERROR_MAX_DEPTH)
-    state.rendered[state.depth] = 1;
 }

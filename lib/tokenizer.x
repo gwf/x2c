@@ -41,18 +41,37 @@ inline Var Token.var(Token x) => Var.new(<token>, x);
 /* This adoption stays local while its descriptor registers globally. */
 static protocol Var(Token);
 
+/* One logical line of significant tokens, as indices into `sig`. */
+static typedef struct _LayoutLine {
+  int first, last, indent, directive;
+} _LayoutLine;
+
+/* Edits the layout pass applies to one source token: punctuation inserted
+   before and after it, and a replacement type. */
+static typedef struct _LayoutEdit {
+  String before, after; Symbol type;
+} _LayoutEdit;
+
+/* What a block header's words say: an aggregate or enum header names no
+   parameters, unlike a function's, and a label keeps its colon. */
+static typedef struct _LayoutHeader {
+  int aggregate, enumeration, labeled;
+} _LayoutHeader;
+
+/* The layout pass over one token stream. `sig` holds the significant tokens
+   of `all`, `depths` their bracket depths, and `ternary` marks the colons
+   that close a `?`. `edits` holds the rewrite of each token of `all`.
+   `indents`, `closers`, and `enums` describe the blocks open up to `top`,
+   and `error_at` is the first inconsistently indented token. */
+static typedef struct _Layout {
+  struct Token *all, Token *sig, Token error_at;
+  int *depths, *indents, char *ternary, *enums;
+  _LayoutLine *lines, _LayoutEdit *edits, String *closers;
+  int count, nsig, nlines, top;
+} _Layout;
+
 /* Hashes a live Token's complete representation; it must be nonnull. */
 unsigned Token.hash(Token t) => x2c_hash_bytes(0, t, sizeof(struct Token));
-
-/* Compares bytes; two null Tokens are equal. */
-int Token.equal(Token a, Token b) {
-  if ((void *) a == (void *) b) return 1;
-  if (!a || !b) return 0;
-  return memcmp(a, b, sizeof(struct Token)) == 0;
-}
-
-/* Returns a live Token's borrowed canonical text. */
-String Token.str(Token token) => token.text;
 
 /* Returns a canonical rendering of a live Token and all source coordinates.
    The result follows the active String pool chain and remains live until its
@@ -64,6 +83,9 @@ String Token.repr(Token token) {
   String extent = %"len:$(token.len), pos:$(token.pos)";
   return %"$head, $location, $extent}}";
 }
+
+/* Returns a live Token's borrowed canonical text. */
+String Token.str(Token token) => token.text;
 
 // scanning
 
@@ -80,6 +102,86 @@ void Tokenizer.scan(Tokenizer t) {
   }
   if (t.layout) _layout(t);
 }
+
+/* Compares bytes; two null Tokens are equal. */
+int Token.equal(Token a, Token b) {
+  if ((void *) a == (void *) b) return 1;
+  if (!a || !b) return 0;
+  return memcmp(a, b, sizeof(struct Token)) == 0;
+}
+
+// token output
+
+/* Invokes one non-retained scanner at the current source byte. `scanner` must
+   be nonnull. A positive length appends `type`, zero makes no progress, and
+   -1 records a malformed token stream. A cause from the callback or token
+   append does not return here. */
+int Tokenizer.do_scanner(Tokenizer t, int (*scanner)(char *), Symbol type) {
+  int len = scanner(t.text + t.pos);
+  if (len > 0) return t.tokenize(len, type);
+  if (len < 0) return t.error();
+  return 0;
+}
+
+/* Records the first lexical failure as `<malformed>`, appends zero-width
+   `<error>` and `<eof>` sentinels at the current position, and returns zero.
+   Raises: `<alloc-fail>` or `<size-limit>` while appending. */
+int Tokenizer.error(Tokenizer tokenizer) => _error(tokenizer, <malformed>);
+
+
+
+/* Copies the next `len` source bytes into one token, appends it, advances the
+   zero-based byte position and one-based line and column, and returns one.
+   `len` must fit the remaining source. State advances only after token storage
+   is installed.
+   Raises: `<alloc-fail>` or `<size-limit>` while copying or appending. */
+int Tokenizer.tokenize(Tokenizer t, int len, Symbol type) {
+  String text = String.new_len(t.text + t.pos, len);
+  struct Token tok = {
+    .type = type, .len = len, .text = text,
+    .line = t.line, .col = t.col, .pos = t.pos
+  };
+  t.tokens = t.tokens.append(&tok, 1);
+  scan_next_line_col(t.text + t.pos, len, t.line, t.col);
+  t.pos += len;
+  return 1;
+}
+
+// lifecycle
+
+/* Prepares a scope-owned Tokenizer starting in `mode`.
+   It borrows `text` through `Tokenizer.scan`; null denotes empty input. The
+   caller selects a mode understood by the scan driver, such as `<x2c>`.
+   Raises: `<alloc-fail>` while creating internal storage. */
+void Tokenizer.init(Tokenizer tokenizer, char *text, Symbol mode) {
+  /* Empty String is a null pointer, but scanning always dereferences text.
+     Use an addressable empty buffer so the first step reaches end-of-file. */
+  tokenizer.text = text ? text : "";
+  tokenizer.line = 1;
+  tokenizer.col = 1;
+  tokenizer.scan_status = <ok>;
+  tokenizer.modes = [mode];
+  tokenizer.tokens = Bytes.new(sizeof(struct Token));
+}
+
+/* Returns the next semantic Token after a completed scan.
+   Whitespace and comments are skipped, preprocessor tokens are retained, and
+   repeated calls at EOF return the same pointer. The returned pointer borrows
+   Tokenizer storage. A null Tokenizer or empty stream returns NULL. */
+Token Tokenizer.next(Tokenizer tokenizer) {
+  if (!tokenizer) return NULL;
+  alias tokenizer.cursor {
+    if (_ && _.type == <eof>) return _;
+    if (!_ && !tokenizer.tokens.len()) return NULL;
+    Token token = _ ? _ + 1 : (void *) tokenizer.tokens;
+    while (token.type == <space> || token.type == <comment>) token++;
+    _ = token;
+    return token;
+  }
+}
+
+/* `<malformed>` for a null Tokenizer. */
+Symbol Tokenizer.status(Tokenizer t) => t ? t.scan_status : <malformed>;
 
 static int _step(Tokenizer t) {
   switch (_scan_mode(t)) {
@@ -106,60 +208,6 @@ static int _language_tokens(Tokenizer t) =>
   _common_tokens(t) ||
   ((t.text[t.pos] == '$' || t.text[t.pos] == '@') && _named_reference(t)) ||
   _percent_tokens(t) || _angle_symbol_literal(t) || _c_tokens(t);
-
-static int _common_tokens(Tokenizer t) {
-  char *text = t.text + t.pos;
-  switch (text[0]) {
-    case ' ': case '\t': case '\v': case '\f': case '\n': case '\r':
-      return t.do_scanner(scan_white_space, <space>);
-    case '#': return _preprocessor(t);
-    case '/':
-      if (text[1] == '/') return t.do_scanner(scan_line_comment, <comment>);
-      if (text[1] == '*')
-        return _status_scanner(t, scan_block_comment_status, <comment>);
-      return 0;
-    case '\'': return t.do_scanner(scan_c_character, <lit-char>);
-    case '0': case '1': case '2': case '3': case '4':
-    case '5': case '6': case '7': case '8': case '9':
-      return _number(t);
-    case '.':
-      if (scan_ascii_digit((unsigned char) text[1])) return _number(t);
-  }
-  return 0;
-}
-
-/* Scans one directive. `#pragma indent` before the first line of code
-   selects the indentation syntax. */
-static int _preprocessor(Tokenizer t) {
-  if (!t.do_scanner(scan_preprocessor, <preproc>)) return 0;
-  Token directive = _significant_back(t, 0), before = directive;
-  if (t.layout || !directive.text.startswith("#pragma indent") ||
-      directive.text.strip(" \t\r\n") != "#pragma indent")
-    return 1;
-  while ((before = _significant_before(t, before)) &&
-         before.type == <preproc>) { }
-  if (!before) t.layout = 1;
-  return 1;
-}
-
-static int _number(Tokenizer tokenizer) {
-  char *text = tokenizer.text + tokenizer.pos, Symbol type;
-  int len = scan_number_typed(text, &type);
-  if (len < 0) return _error(tokenizer, <malformed>);
-  if (len == 0) return 0;
-  type = (type == <int>) ? <lit-int> : <lit-float>;
-  return tokenizer.tokenize(len, type);
-}
-
-/* Consume the sigil before calling scan_identifier, whose input must begin
-   with an identifier character. */
-static int _named_reference(Tokenizer tokenizer) {
-  char *text = tokenizer.text + tokenizer.pos;
-  _operator(tokenizer, 1);
-  if (text[1] == '_' || scan_ascii_alpha((unsigned char) text[1]))
-    return tokenizer.do_scanner(scan_identifier, <ident>);
-  return 1;
-}
 
 static int _percent_tokens(Tokenizer t) {
   char *text = t.text + t.pos;
@@ -220,6 +268,41 @@ static int _lisp_tokens(Tokenizer t) {
   return _status_scanner(t, scan_atom_status, list ? <lit-atom> : <ident>);
 }
 
+static int _common_tokens(Tokenizer t) {
+  char *text = t.text + t.pos;
+  switch (text[0]) {
+    case ' ': case '\t': case '\v': case '\f': case '\n': case '\r':
+      return t.do_scanner(scan_white_space, <space>);
+    case '#': return _preprocessor(t);
+    case '/':
+      if (text[1] == '/') return t.do_scanner(scan_line_comment, <comment>);
+      if (text[1] == '*')
+        return _status_scanner(t, scan_block_comment_status, <comment>);
+      return 0;
+    case '\'': return t.do_scanner(scan_c_character, <lit-char>);
+    case '0': case '1': case '2': case '3': case '4':
+    case '5': case '6': case '7': case '8': case '9':
+      return _number(t);
+    case '.':
+      if (scan_ascii_digit((unsigned char) text[1])) return _number(t);
+  }
+  return 0;
+}
+
+/* Scans one directive. `#pragma indent` before the first line of code
+   selects the indentation syntax. */
+static int _preprocessor(Tokenizer t) {
+  if (!t.do_scanner(scan_preprocessor, <preproc>)) return 0;
+  Token directive = _significant_back(t, 0), before = directive;
+  if (t.layout || !directive.text.startswith("#pragma indent") ||
+      directive.text.strip(" \t\r\n") != "#pragma indent")
+    return 1;
+  while ((before = _significant_before(t, before)) &&
+         before.type == <preproc>) { }
+  if (!before) t.layout = 1;
+  return 1;
+}
+
 /* A token its first characters decide: `void` in a collection, a list's
    `?(` capture and bare `@` atoms, and the `$` and `@` escapes into x2c.
    Lisp source escapes only `$name`. In quoted data, `$(` and `@(` open one
@@ -268,6 +351,15 @@ static int _lisp_punctuation(Tokenizer t, int list, int collection) {
       break;
   }
   return -1;
+}
+
+static int _number(Tokenizer tokenizer) {
+  char *text = tokenizer.text + tokenizer.pos, Symbol type;
+  int len = scan_number_typed(text, &type);
+  if (len < 0) return _error(tokenizer, <malformed>);
+  if (len == 0) return 0;
+  type = (type == <int>) ? <lit-int> : <lit-float>;
+  return tokenizer.tokenize(len, type);
 }
 
 /* A Symbol literal, or -1 when `<` is an operator atom here. */
@@ -322,34 +414,14 @@ static int _string_tokens(Tokenizer t) {
   return t.tokenize(len, <segment>);
 }
 
-// token output
-
-/* Copies the next `len` source bytes into one token, appends it, advances the
-   zero-based byte position and one-based line and column, and returns one.
-   `len` must fit the remaining source. State advances only after token storage
-   is installed.
-   Raises: `<alloc-fail>` or `<size-limit>` while copying or appending. */
-int Tokenizer.tokenize(Tokenizer t, int len, Symbol type) {
-  String text = String.new_len(t.text + t.pos, len);
-  struct Token tok = {
-    .type = type, .len = len, .text = text,
-    .line = t.line, .col = t.col, .pos = t.pos
-  };
-  t.tokens = t.tokens.append(&tok, 1);
-  scan_next_line_col(t.text + t.pos, len, t.line, t.col);
-  t.pos += len;
+/* Consume the sigil before calling scan_identifier, whose input must begin
+   with an identifier character. */
+static int _named_reference(Tokenizer tokenizer) {
+  char *text = tokenizer.text + tokenizer.pos;
+  _operator(tokenizer, 1);
+  if (text[1] == '_' || scan_ascii_alpha((unsigned char) text[1]))
+    return tokenizer.do_scanner(scan_identifier, <ident>);
   return 1;
-}
-
-/* Invokes one non-retained scanner at the current source byte. `scanner` must
-   be nonnull. A positive length appends `type`, zero makes no progress, and
-   -1 records a malformed token stream. A cause from the callback or token
-   append does not return here. */
-int Tokenizer.do_scanner(Tokenizer t, int (*scanner)(char *), Symbol type) {
-  int len = scanner(t.text + t.pos);
-  if (len > 0) return t.tokenize(len, type);
-  if (len < 0) return t.error();
-  return 0;
 }
 
 /* Preserve a status-bearing scanner's lexical classification for readers. */
@@ -361,11 +433,6 @@ static int _status_scanner(
   if (len < 0) return _error(tokenizer, status);
   return 0;
 }
-
-/* Records the first lexical failure as `<malformed>`, appends zero-width
-   `<error>` and `<eof>` sentinels at the current position, and returns zero.
-   Raises: `<alloc-fail>` or `<size-limit>` while appending. */
-int Tokenizer.error(Tokenizer tokenizer) => _error(tokenizer, <malformed>);
 
 static int _error(Tokenizer tokenizer, Symbol status) {
   if (tokenizer.scan_status == <ok>) tokenizer.scan_status = status;
@@ -594,42 +661,6 @@ static void _layout(Tokenizer t) {
   t.tokens = _emit(l);
 }
 
-/* One logical line of significant tokens, as indices into `sig`. */
-static typedef struct _LayoutLine {
-  int first, last, indent, directive;
-} _LayoutLine;
-
-/* Edits the layout pass applies to one source token: punctuation inserted
-   before and after it, and a replacement type. */
-static typedef struct _LayoutEdit {
-  String before, after; Symbol type;
-} _LayoutEdit;
-
-/* What a block header's words say: an aggregate or enum header names no
-   parameters, unlike a function's, and a label keeps its colon. */
-static typedef struct _LayoutHeader {
-  int aggregate, enumeration, labeled;
-} _LayoutHeader;
-
-/* The layout pass over one token stream. `sig` holds the significant tokens
-   of `all`, `depths` their bracket depths, and `ternary` marks the colons
-   that close a `?`. `edits` holds the rewrite of each token of `all`.
-   `indents`, `closers`, and `enums` describe the blocks open up to `top`,
-   and `error_at` is the first inconsistently indented token. */
-static typedef struct _Layout {
-  struct Token *all, Token *sig, Token error_at;
-  int *depths, *indents, char *ternary, *enums;
-  _LayoutLine *lines, _LayoutEdit *edits, String *closers;
-  int count, nsig, nlines, top;
-} _Layout;
-
-/* Layout arrays are raw storage freed by `_close`. */
-static void *_layout_alloc(size_t count, size_t size) {
-  void *storage = calloc(count, size);
-  if (!storage) raise %(alloc-fail);
-  return storage;
-}
-
 static _Layout _layout_open(Tokenizer t) {
   int count = t.tokens.len() - 1;
   _Layout l = {
@@ -648,14 +679,17 @@ static _Layout _layout_open(Tokenizer t) {
   return l;
 }
 
+/* Layout arrays are raw storage freed by `_close`. */
+static void *_layout_alloc(size_t count, size_t size) {
+  void *storage = calloc(count, size);
+  if (!storage) raise %(alloc-fail);
+  return storage;
+}
+
 static void _close(_Layout &l) {
   free(l.sig); free(l.depths); free(l.lines); free(l.edits);
   free(l.indents); free(l.closers); free(l.enums); free(l.ternary);
 }
-
-/* Significant-token indexes map back to the complete token array. */
-static _LayoutEdit *_edit(_Layout &l, int k) =>
-  &l.edits[l.sig[k] - l.all];
 
 // logical lines
 
@@ -846,6 +880,10 @@ static int _condition(_Layout &l, int first, int colon, String body) {
   return 1;
 }
 
+/* Significant-token indexes map back to the complete token array. */
+static _LayoutEdit *_edit(_Layout &l, int k) =>
+  &l.edits[l.sig[k] - l.all];
+
 static int _control_keyword(_Layout &l, int first, int colon) {
   int key = -1;
   for (int m = first; m < colon; m++)
@@ -921,39 +959,3 @@ static inline int _conditional(Token t) =>
 
 static int _is_label(String word) =>
   word == "case" || word == "default" || word == "catch";
-
-// lifecycle
-
-/* Prepares a scope-owned Tokenizer starting in `mode`.
-   It borrows `text` through `Tokenizer.scan`; null denotes empty input. The
-   caller selects a mode understood by the scan driver, such as `<x2c>`.
-   Raises: `<alloc-fail>` while creating internal storage. */
-void Tokenizer.init(Tokenizer tokenizer, char *text, Symbol mode) {
-  /* Empty String is a null pointer, but scanning always dereferences text.
-     Use an addressable empty buffer so the first step reaches end-of-file. */
-  tokenizer.text = text ? text : "";
-  tokenizer.line = 1;
-  tokenizer.col = 1;
-  tokenizer.scan_status = <ok>;
-  tokenizer.modes = [mode];
-  tokenizer.tokens = Bytes.new(sizeof(struct Token));
-}
-
-/* Returns the next semantic Token after a completed scan.
-   Whitespace and comments are skipped, preprocessor tokens are retained, and
-   repeated calls at EOF return the same pointer. The returned pointer borrows
-   Tokenizer storage. A null Tokenizer or empty stream returns NULL. */
-Token Tokenizer.next(Tokenizer tokenizer) {
-  if (!tokenizer) return NULL;
-  alias tokenizer.cursor {
-    if (_ && _.type == <eof>) return _;
-    if (!_ && !tokenizer.tokens.len()) return NULL;
-    Token token = _ ? _ + 1 : (void *) tokenizer.tokens;
-    while (token.type == <space> || token.type == <comment>) token++;
-    _ = token;
-    return token;
-  }
-}
-
-/* `<malformed>` for a null Tokenizer. */
-Symbol Tokenizer.status(Tokenizer t) => t ? t.scan_status : <malformed>;

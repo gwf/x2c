@@ -15,7 +15,7 @@
 /** The receiverless owner of the difference operations. */
 typedef Symbol Diff;
 
-// line edits
+// private representation
 
 static const int _LIMIT = 2000;
 
@@ -24,6 +24,42 @@ static const int _LIMIT = 2000;
 static typedef struct Script {
   Array old, new, edits, int lo, n, m;
 } Script;
+
+/* The frontiers of every step in one buffer: step `s` starts at `s * s`
+   and has `2s + 1` entries, indexed by `k + s`. */
+static typedef int *Trace;
+
+static const int _CONTEXT = 3;
+
+/* One hunk's bounds in the edits, where it starts in each text, and how
+   many lines of each text it covers. */
+static typedef struct Hunk {
+  int start, end, old_start, old_count, new_start, new_count;
+} Hunk;
+
+/** Returns the unified difference between `old` and `new`, as `diff -u`
+    prints it with `old_name` and `new_name` in the header and three lines
+    of context, or NULL when the texts are equal line for line.
+*/
+meta native String Diff.unified(
+  String old, String new, String old_name, String new_name) {
+  Array edits = auto Diff.lines(old, new);
+  Buffer out = auto Buffer.new(0);
+  int count = edits.len(), at = 0, old_line = 0, new_line = 0;
+  while (at < count) {
+    if (_kind(edits, at) == <same>) {
+      at++, old_line++, new_line++;
+      continue;
+    }
+    if (!out.len()) out.printf("--- %s\n+++ %s\n", old_name, new_name);
+    Hunk h = _hunk(edits, at, old_line, new_line);
+    _write(h, edits, out);
+    at = h.end;
+    old_line = h.old_start + h.old_count;
+    new_line = h.new_start + h.new_count;
+  }
+  return out;
+}
 
 /** Returns the line edits that turn `old` into `new`: a `List` of
     `(same line)`, `(delete line)`, and `(insert line)` forms in order, with
@@ -42,6 +78,8 @@ meta native List Diff.lines(String old, String new) {
   return edits;
 }
 
+// line edits
+
 /* Emits the lines both texts start with and sets the middle to the lines
    before those both texts end with. */
 static void _trim(Script &s) {
@@ -53,28 +91,11 @@ static void _trim(Script &s) {
   s.lo = lo, s.n = old_hi - lo, s.m = new_hi - lo;
 }
 
-/* Past `_LIMIT`, the middle becomes one run of deletions and one run of
-   insertions. */
-static void _replace(Script &s) {
-  for (int i = s.lo; i < s.lo + s.n; i++) _emit(s, <delete>, s.old[i]);
-  for (int j = s.lo; j < s.lo + s.m; j++) _emit(s, <insert>, s.new[j]);
-}
-
-static void _emit(Script &s, Symbol kind, String line) =>
-  s.edits.push($(kind, line));
-
-static int _same(Script &s, int i, int j) =>
-  s.old[i].string() == s.new[j].string();
-
 /* frontier search
 
    Step `s` of the search holds, for each diagonal `k = x - y` in -s..s,
    the furthest old index `x` that `s` edits reach on it. A walk back
    through the frontiers from the end recovers the edits. */
-
-/* The frontiers of every step in one buffer: step `s` starts at `s * s`
-   and has `2s + 1` entries, indexed by `k + s`. */
-static typedef int *Trace;
 
 /* Myers' greedy search over the middle. Returns the edit count after
    emitting the edits, or -1 past `_LIMIT`. */
@@ -120,17 +141,6 @@ static int _entry(Trace trace, int step, int k) {
   return _inserted(step, k, left, right) ? right : left + 1;
 }
 
-/* The furthest old index on diagonal `k` at `step`, or -1 off its
-   frontier. */
-static int _at(Trace trace, int step, int k) =>
-  k < -step || k > step ? -1 : trace[step * step + k + step];
-
-/* True when `step` reaches diagonal `k` by an insertion from diagonal
-   `k + 1`, which reached old index `right` a step earlier, and false for a
-   deletion from diagonal `k - 1`, which reached `left`. */
-static int _inserted(int step, int k, int left, int right) =>
-  k == -step || (k != step && left < right);
-
 /* Walks back from the end of both middles and returns the path as
    `(same i j)`, `(delete i j)`, and `(insert i j)` steps in order, with
    indexes into the middles. */
@@ -163,41 +173,33 @@ static List _diagonal(List path, int x, int y, int to_x, int to_y) {
   return path;
 }
 
-// unified differences
+/* The furthest old index on diagonal `k` at `step`, or -1 off its
+   frontier. */
+static int _at(Trace trace, int step, int k) =>
+  k < -step || k > step ? -1 : trace[step * step + k + step];
 
-static const int _CONTEXT = 3;
+/* True when `step` reaches diagonal `k` by an insertion from diagonal
+   `k + 1`, which reached old index `right` a step earlier, and false for a
+   deletion from diagonal `k - 1`, which reached `left`. */
+static int _inserted(int step, int k, int left, int right) =>
+  k == -step || (k != step && left < right);
 
-/* One hunk's bounds in the edits, where it starts in each text, and how
-   many lines of each text it covers. */
-static typedef struct Hunk {
-  int start, end, old_start, old_count, new_start, new_count;
-} Hunk;
+// edit construction
 
-/** Returns the unified difference between `old` and `new`, as `diff -u`
-    prints it with `old_name` and `new_name` in the header and three lines
-    of context, or NULL when the texts are equal line for line.
-*/
-meta native String Diff.unified(
-  String old, String new, String old_name, String new_name) {
-  Array edits = auto Diff.lines(old, new);
-  Buffer out = auto Buffer.new(0);
-  int count = edits.len(), at = 0, old_line = 0, new_line = 0;
-  while (at < count) {
-    if (_kind(edits, at) == <same>) {
-      at++, old_line++, new_line++;
-      continue;
-    }
-    if (!out.len()) out.printf("--- %s\n+++ %s\n", old_name, new_name);
-    Hunk h = _hunk(edits, at, old_line, new_line);
-    _write(h, edits, out);
-    at = h.end;
-    old_line = h.old_start + h.old_count;
-    new_line = h.new_start + h.new_count;
-  }
-  return out;
+/* Past `_LIMIT`, the middle becomes one run of deletions and one run of
+   insertions. */
+static void _replace(Script &s) {
+  for (int i = s.lo; i < s.lo + s.n; i++) _emit(s, <delete>, s.old[i]);
+  for (int j = s.lo; j < s.lo + s.m; j++) _emit(s, <insert>, s.new[j]);
 }
 
-static Symbol _kind(Array edits, int at) => edits[at].list().car();
+static void _emit(Script &s, Symbol kind, String line) =>
+  s.edits.push($(kind, line));
+
+static int _same(Script &s, int i, int j) =>
+  s.old[i].string() == s.new[j].string();
+
+// unified differences
 
 /* The hunk around the change at `at`, which `old_line` lines of the old
    text and `new_line` of the new precede. */
@@ -224,14 +226,6 @@ static int _hunk_end(Array edits, int at) {
   return end;
 }
 
-static char _mark(Symbol kind) {
-  switch (kind) {
-    case <same>:   return ' ';
-    case <delete>: return '-';
-  }
-  return '+';
-}
-
 /* An empty side of a hunk starts at the line before it, as `diff -u`
    prints it. */
 static void _write(Hunk &h, Array edits, Buffer out) {
@@ -245,3 +239,13 @@ static void _write(Hunk &h, Array edits, Buffer out) {
     out.write_char('\n');
   }
 }
+
+static char _mark(Symbol kind) {
+  switch (kind) {
+    case <same>:   return ' ';
+    case <delete>: return '-';
+  }
+  return '+';
+}
+
+static Symbol _kind(Array edits, int at) => edits[at].list().car();

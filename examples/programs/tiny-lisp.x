@@ -16,11 +16,16 @@
    still a list of 24 t's: there are no numeric primitives.
 */
 
-Var F(void){fputs("error\n",stderr);exit(1);}
 int c=' ';
-void N(void){c=getchar();}
-void W(void){for(;;)if(c!=EOF&&strchr(" \t\r\n",c))N();else if(c==';'){while(c!=EOF&&c!='\n')N();}else return;}
+
+int main(void){auto{Map e={};for(W();c!=EOF;W())puts(E(R(),e).str());}return 0;}
+
 Var R(void){W();if(c==EOF||c==')')return F();if(c=='\''){N();return cons("quote",cons(R(),NULL));}if(c=='('){N();Array a=auto [];for(W();c!=')';W())a.push(R());N();return a.list();}Buffer b=auto Buffer.new(0);do{b.write_char(c);N();}while(c!=EOF&&!strchr(" \t\r\n()';",c));return b.str();}
+
+void W(void){for(;;)if(c!=EOF&&strchr(" \t\r\n",c))N();else if(c==';'){while(c!=EOF&&c!='\n')N();}else return;}
+
+void N(void){c=getchar();}
+
 Var E(Var x,Map e){
   if(x is String){if(x in e)return e[x];return F();}
   if(x==%())return x;
@@ -44,4 +49,5 @@ Var E(Var x,Map e){
   }
   return F();
 }
-int main(void){auto{Map e={};for(W();c!=EOF;W())puts(E(R(),e).str());}return 0;}
+
+Var F(void){fputs("error\n",stderr);exit(1);}

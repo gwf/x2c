@@ -56,6 +56,8 @@ List Compiler.parse_atomic_literal(Compiler c) {
   $fail.literals_atom_expected(c, c.token, kind);
 }
 
+// scalar literals and Symbol decoding
+
 /* Shallow declaration discovery gives a number outside every supported
    scalar type a provisional type. */
 static List _number_literal(Compiler c, String text, int floating) {
@@ -76,17 +78,6 @@ module List _atom_literal(Compiler c, String text) {
   return %(literal ("Atom") $spelling $value);
 }
 
-/* In a pattern, a spelling that starts with `?` or `*` must be a binder
-   name, except that `?binder?` and `*binder?` may end an `!is` form. */
-static void _check_binder(Compiler c, Atom atom) {
-  if (!c.in_pattern || !atom.is_atom()) return;
-  char first = atom.first();
-  if ((first != '?' && first != '*') || atom.is_binder()) return;
-  int reserved = atom == <?binder?> || atom == <*binder?>;
-  if (reserved && c.match_is && c.peek(1) == <)>) return;
-  $fail.literals_binder_name(c, c.token, atom);
-}
-
 /* The preprocessor never sees a literal, so a macro's name here is data.
    The author who wanted its value must unquote it. */
 static void _warn_macro_name(Compiler c, String spelling) {
@@ -104,6 +95,17 @@ static List _symbol_literal(Compiler c, String text) {
   Symbol symbol = _exact_symbol(c, c.token, _angle_spelling(text));
   _check_binder(c, symbol);
   return %(literal ("Symbol") $text $symbol);
+}
+
+/* In a pattern, a spelling that starts with `?` or `*` must be a binder
+   name, except that `?binder?` and `*binder?` may end an `!is` form. */
+static void _check_binder(Compiler c, Atom atom) {
+  if (!c.in_pattern || !atom.is_atom()) return;
+  char first = atom.first();
+  if ((first != '?' && first != '*') || atom.is_binder()) return;
+  int reserved = atom == <?binder?> || atom == <*binder?>;
+  if (reserved && c.match_is && c.peek(1) == <)>) return;
+  $fail.literals_binder_name(c, c.token, atom);
 }
 
 /* The angle brackets are not part of a Symbol's value, nor are the quotes

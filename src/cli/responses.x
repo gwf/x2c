@@ -3,6 +3,16 @@
     Copyright (c) 2026 Gary William Flake.
 */
 
+/* Response-file words. Whitespace separates words; quotes and a backslash
+   keep what they cover, newlines included; and `#` as the first nonspace
+   character of a line starts a comment. `blank` holds until a line's first
+   nonspace character, and `started` marks a word begun, perhaps by empty
+   quotes. */
+static typedef struct Words {
+  Array out, String path, Buffer word;
+  int line, blank, started, quote, escaped, comment;
+} Words;
+
 /** Reads initial arguments. Script options defer response-file expansion
     until parsing, so program arguments remain literal. The caller owns
     the returned Array.
@@ -102,16 +112,6 @@ static int _valid_utf8(const unsigned char *text) {
   return 1;
 }
 
-/* Response-file words. Whitespace separates words; quotes and a backslash
-   keep what they cover, newlines included; and `#` as the first nonspace
-   character of a line starts a comment. `blank` holds until a line's first
-   nonspace character, and `started` marks a word begun, perhaps by empty
-   quotes. */
-static typedef struct Words {
-  Array out, String path, Buffer word;
-  int line, blank, started, quote, escaped, comment;
-} Words;
-
 static Array _response_words(String path, const char *text, size_t length) {
   Words w = {
     .out = [], .path = path, .word = Buffer.new(0), .line = 1, .blank = 1};
@@ -174,19 +174,19 @@ static void _newline(Words &w) {
   w.line++;
 }
 
-static void _flush(Words &w) {
-  if (!w.started) return;
-  w.out.push(w.word.str());
-  w.word.clear();
-  w.started = 0;
-}
-
 /* The text may end in a comment, but not in quotes or after a backslash. */
 static void _finish_words(Words &w) {
   if (w.comment) return;
   if (w.escaped) _response_error(w.path, w.line, "trailing backslash");
   if (w.quote) _response_error(w.path, w.line, "unterminated quote");
   _flush(w);
+}
+
+static void _flush(Words &w) {
+  if (!w.started) return;
+  w.out.push(w.word.str());
+  w.word.clear();
+  w.started = 0;
 }
 
 static void _response_error(String path, int line, const char *message) {

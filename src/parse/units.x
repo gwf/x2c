@@ -5,6 +5,35 @@
 
 // top-level forms
 
+/** Parses one submission from the current token stream. `end_position` is
+    the byte offset after supplied input, before any synthetic closing text.
+    Missing required syntax raises `<incomplete>`; trailing items are rejected.
+    Temporary parser scopes and captured parameters are restored on every exit.
+    The caller owns the semantic transaction and commits after execution.
+*/
+List Compiler.parse_submission(Compiler c, int end_position) {
+  Token boundary = c.input_boundary;
+  SymScope params = c.params;
+  int scope_count = c.sym.scope_count();
+  defer {
+    while (c.sym.scope_count() > scope_count) (void) c.sym.pop_scope();
+    c.params = params;
+    c.input_boundary = boundary;
+  }
+  Token token = c.token;
+  while (token.type != <eof> && token.pos < end_position) token++;
+  c.input_boundary = token;
+  List result = c.parse_top_level();
+  if (c.peek(0) != <eof>)
+    $fail.parse_unit_single(c, c.token);
+  return result;
+}
+
+/** Parses one full top-level form through the shared classifier. */
+List Compiler.parse_top_level(Compiler c) => c.parse_top_level_mode(0);
+
+
+
 /** Parses one top-level form and applies its source-ordered compiler effects.
     Returns its AST, or NULL when a keyword definition, linkage brace, or
     compile-time-only `meta` function only updates compiler state, with the
@@ -57,6 +86,134 @@ List Compiler.parse_top_level_mode(Compiler c, int skip_body) {
   if (c.macro_form_is_definition()) return c.parse_macro_definition();
   return _declaration_form(c, skip_body);
 }
+
+// script units
+
+/** Reports whether the unit's tokens define a function named `main` at file
+    scope. A script unit that does is an ordinary program: its declarations
+    stay at file scope and it may not have top-level statements. Both parse
+    passes read the same tokens, so they agree before either parses.
+*/
+int Compiler.defines_main(Compiler c) {
+  for (Token token = Token.skip_trivia(c.tokenizer.tokens);
+       token.type != <eof>; token = token.after_group()) {
+    Token open = Token.skip_trivia(token + 1);
+    if (token.type != <ident> || token.text != "main" || open.type != <(>)
+      continue;
+    Token body = open.after_group();
+    if (body.type == <"{"> || (body.type == <=> &&
+        Token.skip_trivia(body + 1).type == <">">))
+      return 1;
+  }
+  return 0;
+}
+
+/** Reports whether the top-level item at the cursor is a script statement
+    that runs, rather than a declaration: an expression, control flow, a
+    `with` block, or a statement macro. This query does not consume tokens.
+*/
+int Compiler.script_statement_executes(Compiler c) =>
+  c.script_statement_starts() &&
+  (c.peek(0) == <$> || c.at_word("with") || !c.test_declaration() ||
+   c.auto_region_form(<unit>) == <statement>);
+
+/** Reports whether the top-level item at the cursor is one of a script
+    unit's statements, which become `main`'s body.
+    Preprocessor lines, imports, protocols, compile-time definitions,
+    file-scope macro invocations, `typedef`, `static`, and `extern`
+    declarations, linkage braces, type definitions, and function prototypes
+    and definitions stay at file scope. This query does not consume tokens.
+*/
+int Compiler.script_statement_starts(Compiler c) {
+  switch (c.peek(0)) {
+    case <eof>: case <import>: case <protocol>:
+    case <typedef>: case <static>: case <extern>: case <"}">:
+      return 0;
+  }
+  if (_module_storage_form(c)) return 0;
+  if (c.test_static_assert() || c.keyword_form_is_definition() ||
+      c.macro_form_is_definition() || c.meta_form_is_declaration() ||
+      c.protocol_form_starts())
+    return 0;
+  if (c.peek(0) == <auto>) return c.auto_region_form(<unit>) != <function>;
+  if (c.alias_form_starts()) return 0;
+  if (c.at_word("with")) return 1;
+  if (c.macro_starts_target_at(<unit>)) return !c.macro_targets_unit();
+  return !c.test_declaration() || !_declaration_stays(c);
+}
+
+// markers
+
+/** Reports whether the cursor begins a protocol declaration or adoption,
+    including its `meta` and `static` markers. This query does not consume
+    tokens.
+*/
+int Compiler.protocol_form_starts(Compiler c) {
+  int at = c.at_word("meta");
+  if (c.peek(at) == <static>) at++;
+  return c.peek(at) == <protocol>;
+}
+
+/** Reports whether the cursor begins a contextual top-level `meta`
+    declaration: a function or an initialized file-static value.
+*/
+int Compiler.meta_form_is_declaration(Compiler c) {
+  if (!c.at_word("meta")) return 0;
+  Token head = c.token;
+  _take_meta_marker(c, NULL);
+  int marker = c.test_declaration();
+  c.token = head;
+  return marker;
+}
+
+// file-scope definitions
+
+/** Returns the body of the doc comment that documents the definition
+    starting at `start`, or NULL. A doc comment opens with two asterisks and
+    ends on the line before `start` or on its line. Macro templates carry the
+    text until their selected body binds at the invocation.
+*/
+String Compiler.definition_doc(Compiler c, Token start) {
+  Token first = c.tokenizer.tokens;
+  if (start <= first) return NULL;
+  Token token = start - 1;
+  while (token > first && token.type == <space>) token--;
+  if (token.type != <comment> || token.len < 5 ||
+      !token.text.startswith("/**")) return NULL;
+  int lines = 0;
+  for (int position = token.pos + token.len; position < start.pos;
+       position++)
+    if (c.text[position] == '\n' && ++lines > 1) return NULL;
+  return String.new_len(token.text + 3, token.len - 5);
+}
+
+// foreign aliases
+
+/** Constructs a foreign alias from one direct function declaration and target.
+    `native_syntax` must resolve to a different direct identifier and, when
+    typed, a function. Storage is limited to `static` or `inline`, when
+    present, and variadic parameters are rejected.
+*/
+List Compiler.finish_foreign_alias(
+  Compiler c, List declaration, List native_syntax) {
+  match (declaration) {
+    case %(function *):
+      $fail.parse_alias_body(c, c.token);
+    /* A function returning a pointer puts its pointer modifiers after the
+       fnmod. The trailing modifiers are the return type's pointer depth; the
+       declaration is still one direct function. */
+    case %(declare (!set ?base (*))
+           (bindings
+             (bind ?binding ((fnmod (params *parameters)) *)))): {
+      _alias_storage(c, base);
+      _alias_parameters(c, parameters);
+      return _alias_target(c, declaration, binding, native_syntax);
+    }
+  }
+  $fail.parse_alias_target(c, c.token);
+}
+
+// top-level forms and definitions
 
 /* Static storage also applies to source types and protocols. */
 static int _static_interface_form(Compiler c) {
@@ -190,129 +347,6 @@ static List _declaration_form(Compiler c, int skip_body) {
   $fail.parse_body_expected(c, c.token, unexpected);
 }
 
-/** Parses one full top-level form through the shared classifier. */
-List Compiler.parse_top_level(Compiler c) => c.parse_top_level_mode(0);
-
-/** Parses one submission from the current token stream. `end_position` is
-    the byte offset after supplied input, before any synthetic closing text.
-    Missing required syntax raises `<incomplete>`; trailing items are rejected.
-    Temporary parser scopes and captured parameters are restored on every exit.
-    The caller owns the semantic transaction and commits after execution.
-*/
-List Compiler.parse_submission(Compiler c, int end_position) {
-  Token boundary = c.input_boundary;
-  SymScope params = c.params;
-  int scope_count = c.sym.scope_count();
-  defer {
-    while (c.sym.scope_count() > scope_count) (void) c.sym.pop_scope();
-    c.params = params;
-    c.input_boundary = boundary;
-  }
-  Token token = c.token;
-  while (token.type != <eof> && token.pos < end_position) token++;
-  c.input_boundary = token;
-  List result = c.parse_top_level();
-  if (c.peek(0) != <eof>)
-    $fail.parse_unit_single(c, c.token);
-  return result;
-}
-
-// script units
-
-/** Reports whether the unit's tokens define a function named `main` at file
-    scope. A script unit that does is an ordinary program: its declarations
-    stay at file scope and it may not have top-level statements. Both parse
-    passes read the same tokens, so they agree before either parses.
-*/
-int Compiler.defines_main(Compiler c) {
-  for (Token token = Token.skip_trivia(c.tokenizer.tokens);
-       token.type != <eof>; token = token.after_group()) {
-    Token open = Token.skip_trivia(token + 1);
-    if (token.type != <ident> || token.text != "main" || open.type != <(>)
-      continue;
-    Token body = open.after_group();
-    if (body.type == <"{"> || (body.type == <=> &&
-        Token.skip_trivia(body + 1).type == <">">))
-      return 1;
-  }
-  return 0;
-}
-
-/** Reports whether the top-level item at the cursor is one of a script
-    unit's statements, which become `main`'s body.
-    Preprocessor lines, imports, protocols, compile-time definitions,
-    file-scope macro invocations, `typedef`, `static`, and `extern`
-    declarations, linkage braces, type definitions, and function prototypes
-    and definitions stay at file scope. This query does not consume tokens.
-*/
-int Compiler.script_statement_starts(Compiler c) {
-  switch (c.peek(0)) {
-    case <eof>: case <import>: case <protocol>:
-    case <typedef>: case <static>: case <extern>: case <"}">:
-      return 0;
-  }
-  if (_module_storage_form(c)) return 0;
-  if (c.test_static_assert() || c.keyword_form_is_definition() ||
-      c.macro_form_is_definition() || c.meta_form_is_declaration() ||
-      c.protocol_form_starts())
-    return 0;
-  if (c.peek(0) == <auto>) return c.auto_region_form(<unit>) != <function>;
-  if (c.alias_form_starts()) return 0;
-  if (c.at_word("with")) return 1;
-  if (c.macro_starts_target_at(<unit>)) return !c.macro_targets_unit();
-  return !c.test_declaration() || !_declaration_stays(c);
-}
-
-/* A declaration in a script unit stays at file scope when a body follows
-   its declarator, `{` for a function or aggregate and `=>` for an
-   expression-bodied function, or when it ends right after a parameter list
-   as a prototype does. An initialized or plain object declaration belongs
-   to `main`. */
-module int _declaration_stays(Compiler c) {
-  Symbol previous = 0;
-  for (Token token = c.token; token.type != <eof>;
-       previous = token.type, token = token.after_group()) {
-    if (token.type == <;>) return previous == <(>;
-    if (token.type == <"{">) return 1;
-    if (token.type == <=>)
-      return Token.skip_trivia(token + 1).type == <">">;
-  }
-  return 0;
-}
-
-/** Reports whether the top-level item at the cursor is a script statement
-    that runs, rather than a declaration: an expression, control flow, a
-    `with` block, or a statement macro. This query does not consume tokens.
-*/
-int Compiler.script_statement_executes(Compiler c) =>
-  c.script_statement_starts() &&
-  (c.peek(0) == <$> || c.at_word("with") || !c.test_declaration() ||
-   c.auto_region_form(<unit>) == <statement>);
-
-// markers
-
-/** Reports whether the cursor begins a protocol declaration or adoption,
-    including its `meta` and `static` markers. This query does not consume
-    tokens.
-*/
-int Compiler.protocol_form_starts(Compiler c) {
-  int at = c.at_word("meta");
-  if (c.peek(at) == <static>) at++;
-  return c.peek(at) == <protocol>;
-}
-
-/** Reports whether the cursor begins a contextual top-level `meta`
-    declaration: a function or an initialized file-static value.
-*/
-int Compiler.meta_form_is_declaration(Compiler c) {
-  if (!c.at_word("meta")) return 0;
-  Token head = c.token;
-  _take_meta_marker(c, NULL);
-  int marker = c.test_declaration();
-  c.token = head;
-  return marker;
-}
-
 /* Consumes the `meta` marker at the cursor and the contextual `native`
    marker that may follow it, and returns the `meta` token. `native` binds
    the definition after it the way a bodyless prototype would. `*native`,
@@ -403,7 +437,7 @@ static List _import_members(Compiler c, String name) {
   return members.list_free();
 }
 
-// file-scope definitions
+
 
 /* A declaration ends at `;`. A `meta` one installs its compile-time form
    and publishes its prose; an ordinary function prototype keeps its name
@@ -580,23 +614,49 @@ module void _definition_source(
   }
 }
 
-/** Returns the body of the doc comment that documents the definition
-    starting at `start`, or NULL. A doc comment opens with two asterisks and
-    ends on the line before `start` or on its line. Macro templates carry the
-    text until their selected body binds at the invocation.
-*/
-String Compiler.definition_doc(Compiler c, Token start) {
-  Token first = c.tokenizer.tokens;
-  if (start <= first) return NULL;
-  Token token = start - 1;
-  while (token > first && token.type == <space>) token--;
-  if (token.type != <comment> || token.len < 5 ||
-      !token.text.startswith("/**")) return NULL;
-  int lines = 0;
-  for (int position = token.pos + token.len; position < start.pos;
-       position++)
-    if (c.text[position] == '\n' && ++lines > 1) return NULL;
-  return String.new_len(token.text + 3, token.len - 5);
+/* A declaration in a script unit stays at file scope when a body follows
+   its declarator, `{` for a function or aggregate and `=>` for an
+   expression-bodied function, or when it ends right after a parameter list
+   as a prototype does. An initialized or plain object declaration belongs
+   to `main`. */
+module int _declaration_stays(Compiler c) {
+  Symbol previous = 0;
+  for (Token token = c.token; token.type != <eof>;
+       previous = token.type, token = token.after_group()) {
+    if (token.type == <;>) return previous == <(>;
+    if (token.type == <"{">) return 1;
+    if (token.type == <=>)
+      return Token.skip_trivia(token + 1).type == <">">;
+  }
+  return 0;
+}
+
+static void _alias_storage(Compiler c, Var base) {
+  foreach (Var part in base) {
+    if (part is not <symbol>) continue;
+    Symbol specifier = part;
+    if (specifier.is_storage_class() && specifier != <static>)
+      $fail.parse_alias_storage(c, c.token);
+  }
+}
+
+static void _alias_parameters(Compiler c, List parameters) {
+  foreach (Var parameter in parameters)
+    if (parameter ~= %(...)) $fail.parse_alias_variadic(c, c.token);
+}
+
+static List _alias_target(
+  Compiler c, List declaration, Var binding, List native_syntax) {
+  List native = c.resolve_expression(native_syntax, c.token);
+  match (native)
+    case %(expr (!set ?native_type (*)) (ident ?native_binding)): {
+      if (native_type && !native_type.type().is_function())
+        $fail.parse_alias_function(c, c.token, native_type);
+      if (List.equal(binding, native_binding))
+        $fail.parse_alias_self(c, c.token);
+      return %(falias $declaration $native_binding);
+    }
+  $fail.parse_alias_identifier(c, c.token);
 }
 
 // constructed file-scope forms
@@ -695,12 +755,6 @@ static void _append_rows(Array output, List syntax) {
   }
 }
 
-module List _bind_recipe(
-  Compiler c, Var callback, Var arguments, Symbol context) {
-  Var syntax = c.evaluate_declaration_recipe(callback, arguments);
-  return c.bind_syntax(syntax, context, c.return_type);
-}
-
 /* Collection keeps a declaration recipe pending with the macro stack that
    constructed it; the full parse evaluates it. */
 module List _bind_decl_recipe(Compiler c, Var callback, Var arguments) {
@@ -708,6 +762,12 @@ module List _bind_decl_recipe(Compiler c, Var callback, Var arguments) {
     return %(declaration-pending $callback $arguments
               $(c.macro_stack) $(c.source_private));
   return _bind_recipe(c, callback, arguments, <unit>);
+}
+
+module List _bind_recipe(
+  Compiler c, Var callback, Var arguments, Symbol context) {
+  Var syntax = c.evaluate_declaration_recipe(callback, arguments);
+  return c.bind_syntax(syntax, context, c.return_type);
 }
 
 module List _bind_default(Compiler c, Var function) {
@@ -739,58 +799,4 @@ module List _bind_preproc(Compiler c, List directive) {
 module List _bind_alias(Compiler c, Var declaration, Var native) {
   List bound = c.bind_syntax(declaration, <unit>, c.return_type);
   return c.finish_foreign_alias(bound, native);
-}
-
-// foreign aliases
-
-/** Constructs a foreign alias from one direct function declaration and target.
-    `native_syntax` must resolve to a different direct identifier and, when
-    typed, a function. Storage is limited to `static` or `inline`, when
-    present, and variadic parameters are rejected.
-*/
-List Compiler.finish_foreign_alias(
-  Compiler c, List declaration, List native_syntax) {
-  match (declaration) {
-    case %(function *):
-      $fail.parse_alias_body(c, c.token);
-    /* A function returning a pointer puts its pointer modifiers after the
-       fnmod. The trailing modifiers are the return type's pointer depth; the
-       declaration is still one direct function. */
-    case %(declare (!set ?base (*))
-           (bindings
-             (bind ?binding ((fnmod (params *parameters)) *)))): {
-      _alias_storage(c, base);
-      _alias_parameters(c, parameters);
-      return _alias_target(c, declaration, binding, native_syntax);
-    }
-  }
-  $fail.parse_alias_target(c, c.token);
-}
-
-static void _alias_storage(Compiler c, Var base) {
-  foreach (Var part in base) {
-    if (part is not <symbol>) continue;
-    Symbol specifier = part;
-    if (specifier.is_storage_class() && specifier != <static>)
-      $fail.parse_alias_storage(c, c.token);
-  }
-}
-
-static void _alias_parameters(Compiler c, List parameters) {
-  foreach (Var parameter in parameters)
-    if (parameter ~= %(...)) $fail.parse_alias_variadic(c, c.token);
-}
-
-static List _alias_target(
-  Compiler c, List declaration, Var binding, List native_syntax) {
-  List native = c.resolve_expression(native_syntax, c.token);
-  match (native)
-    case %(expr (!set ?native_type (*)) (ident ?native_binding)): {
-      if (native_type && !native_type.type().is_function())
-        $fail.parse_alias_function(c, c.token, native_type);
-      if (List.equal(binding, native_binding))
-        $fail.parse_alias_self(c, c.token);
-      return %(falias $declaration $native_binding);
-    }
-  $fail.parse_alias_identifier(c, c.token);
 }

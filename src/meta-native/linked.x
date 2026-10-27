@@ -9,40 +9,6 @@
    from a context that has not installed the provider's callees yet. */
 static Map shipped_targets = NULL;
 
-/* The linked body an advertisement binds when its texts and signature
-   agree, or 0. */
-module Var _linked_target(
-  Compiler c, String name, List signature, String provider) {
-  List key = $(name, signature, provider);
-  Var function = 0;
-  if (shipped_targets && shipped_targets.try_get(key, function))
-    return function;
-  if (!_project_meta_uses_linked(c, name, provider)) return 0;
-  function = _linked_module()[name];
-  if (!c.native_meta_accepts(function, signature)) return 0;
-  if (c.builtin_defs) auto (&native_module_scope) {
-    if (!shipped_targets) shipped_targets = {};
-    key.try_own();
-    shipped_targets[key] = function;
-  }
-  return function;
-}
-
-/* Answers whether a provider's function can use its linked body.
-   Copied definitions retain precise callees; runtime bodies retain their
-   provider's source dependencies, including private helpers. */
-static int _project_meta_uses_linked(
-  Compiler c, String name, String provider) {
-  Map linked = _linked_module();
-  if (!(name in linked)) return 0;
-  Map hashes = c.meta_provider_hashes(provider);
-  with (c.filename = Compiler.absolute_home_path(provider),
-        c.meta_hashes = hashes,
-        c.meta_calls = {}) {
-    return _linked_copy(c, name, linked);
-  }
-}
-
 /* linked meta definitions
 
    The shipped `meta` definitions compiled into the compiler
@@ -75,6 +41,17 @@ int Compiler.bind_linked_meta(Compiler c, List fn, Type type) {
   return 1;
 }
 
+/** Reports whether the compiler links the `meta` function `name`. */
+int Compiler.links_meta_function(String name) => name in _linked_module();
+
+/** Returns a linked provider's source and dependency hashes. */
+List Compiler.linked_meta_provider_source(String provider) {
+  _linked_module();
+  return linked_hashes[provider];
+}
+
+// native meta linked
+
 /* The linked module's targets, loaded with the definition hashes on first
    use. */
 module Map _linked_module(void) {
@@ -87,15 +64,6 @@ module Map _linked_module(void) {
     }
   }
   return native_modules[linked_supplier];
-}
-
-/** Reports whether the compiler links the `meta` function `name`. */
-int Compiler.links_meta_function(String name) => name in _linked_module();
-
-/** Returns a linked provider's source and dependency hashes. */
-List Compiler.linked_meta_provider_source(String provider) {
-  _linked_module();
-  return linked_hashes[provider];
 }
 
 /* A row without a hash is the runtime library's own compiled definition
@@ -151,4 +119,38 @@ static int _linked_texts_match(
     foreach (String callee in names.list())
       if (!_linked_texts_match(c, callee, linked, reached)) return 0;
   return 1;
+}
+
+/* The linked body an advertisement binds when its texts and signature
+   agree, or 0. */
+module Var _linked_target(
+  Compiler c, String name, List signature, String provider) {
+  List key = $(name, signature, provider);
+  Var function = 0;
+  if (shipped_targets && shipped_targets.try_get(key, function))
+    return function;
+  if (!_project_meta_uses_linked(c, name, provider)) return 0;
+  function = _linked_module()[name];
+  if (!c.native_meta_accepts(function, signature)) return 0;
+  if (c.builtin_defs) auto (&native_module_scope) {
+    if (!shipped_targets) shipped_targets = {};
+    key.try_own();
+    shipped_targets[key] = function;
+  }
+  return function;
+}
+
+/* Answers whether a provider's function can use its linked body.
+   Copied definitions retain precise callees; runtime bodies retain their
+   provider's source dependencies, including private helpers. */
+static int _project_meta_uses_linked(
+  Compiler c, String name, String provider) {
+  Map linked = _linked_module();
+  if (!(name in linked)) return 0;
+  Map hashes = c.meta_provider_hashes(provider);
+  with (c.filename = Compiler.absolute_home_path(provider),
+        c.meta_hashes = hashes,
+        c.meta_calls = {}) {
+    return _linked_copy(c, name, linked);
+  }
 }

@@ -88,38 +88,6 @@ static macro Stmt $fail.emit_static_switch(Expr $c, Expr $site) {
    argument types, and `__builtin_choose_expr` selects among a value's
    typed alternatives. */
 
-/* Native macro arguments expand once before C sees the selected conversion.
-   Generated bodies have no source-map directives; the original argument keeps
-   its ordinary mapping at the invocation and its original storage scope. */
-module List _initializer_macro(Emitter &e, List input, List body) {
-  Buffer parameters = Buffer.new(0);
-  foreach (List argument in input.cdr()) {
-    if (parameters.len()) parameters.write_char(',');
-    parameters.write(argument.car().str());
-  }
-  String formal = parameters.str_free();
-  String hash = Path.identifier_hash(e.c.filename);
-  String name = e.c.fresh_name(%"initializer_choice_$hash");
-  String replacement;
-  with (e.c.source_map = 0) {
-    Array tokens = _captured(e, body);
-    String formatted = e.c.code_pretty_string(tokens, NULL);
-    replacement = formatted.rstrip("\n").replace("\n", "\\\n");
-  }
-  String expanded = %"$(name)_expanded";
-  String definition =
-    $emit.initializer.expanded(expanded, formal, replacement);
-  e.native_macros.push($(expanded, definition));
-  String forwarding = $emit.initializer.forwarding(name, formal, expanded);
-  e.native_macros.push($(name, forwarding));
-  Array arguments = [];
-  foreach (List argument in input.cdr()) {
-    List emitted = _tokens(e, argument.cadr());
-    arguments.push(%("(" @emitted ")"));
-  }
-  return %($name "(" @(_commas(arguments.list_free())) ")");
-}
-
 module List _initializer_value(Emitter &e, List ast) {
   List source = NULL;
   List functions = Ast.initializer_functions(ast, source);
@@ -289,6 +257,40 @@ module List _source_initializer(Emitter &e, List function) {
   List emitted = %(@(declarations.list_free())
     (function $type $binding $body));
   return _initializer_macro(e, %(input @(inputs.list_free())), emitted);
+}
+
+
+
+/* Native macro arguments expand once before C sees the selected conversion.
+   Generated bodies have no source-map directives; the original argument keeps
+   its ordinary mapping at the invocation and its original storage scope. */
+module List _initializer_macro(Emitter &e, List input, List body) {
+  Buffer parameters = Buffer.new(0);
+  foreach (List argument in input.cdr()) {
+    if (parameters.len()) parameters.write_char(',');
+    parameters.write(argument.car().str());
+  }
+  String formal = parameters.str_free();
+  String hash = Path.identifier_hash(e.c.filename);
+  String name = e.c.fresh_name(%"initializer_choice_$hash");
+  String replacement;
+  with (e.c.source_map = 0) {
+    Array tokens = _captured(e, body);
+    String formatted = e.c.code_pretty_string(tokens, NULL);
+    replacement = formatted.rstrip("\n").replace("\n", "\\\n");
+  }
+  String expanded = %"$(name)_expanded";
+  String definition =
+    $emit.initializer.expanded(expanded, formal, replacement);
+  e.native_macros.push($(expanded, definition));
+  String forwarding = $emit.initializer.forwarding(name, formal, expanded);
+  e.native_macros.push($(name, forwarding));
+  Array arguments = [];
+  foreach (List argument in input.cdr()) {
+    List emitted = _tokens(e, argument.cadr());
+    arguments.push(%("(" @emitted ")"));
+  }
+  return %($name "(" @(_commas(arguments.list_free())) ")");
 }
 
 static List _capture_source(

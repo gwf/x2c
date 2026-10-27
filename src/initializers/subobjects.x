@@ -7,20 +7,6 @@
 
 static keyword loop $private.loop;
 
-/* A qualified alias can expose another typedef below its qualifier. */
-static Type _resolve_shape(Compiler c, Type type) {
-  if (!type) return type;
-  type = c.sym.resolve_key(type);
-  int hops = 0;
-  loop {
-    Type key = type.canonicalize();
-    if (key === type) return type;
-    Type next = c.sym.next_typedef(key, hops);
-    if (!next) return key;
-    type = c.sym.resolve_key(next);
-  }
-}
-
 // subobject choices
 
 /** Returns (original cases) rows; each case is
@@ -46,6 +32,30 @@ List Compiler.initializer_rows(
   }
   return rows.list_free();
 }
+
+/** Returns the initializer path selecting one visible aggregate field.
+    Anonymous aggregate members remain explicit path frames, so consumers
+    observe the same member promotion as native initializer conversion.
+*/
+List Compiler.initializer_field_path(
+  Compiler c, Type type, List field) =>
+  _named_field_path(c, type, field.car(), NULL);
+
+// initializer paths
+
+/** Selects a native subobject without evaluating it when used by sizeof. */
+List Compiler.initializer_slot(Compiler c, List target, List path) {
+  foreach (List frame in path.reverse()) {
+    (Type owner, Symbol kind, Var selector, Type selected, List rest) = frame;
+    if (kind == <index>)
+      target = %(expr $selected (index $target $selector));
+    else if (selector)
+      target = %(expr $selected (op . $target ($selector)));
+  }
+  return target;
+}
+
+// initializer destinations and native bounds
 
 static List _advance_row(
   Compiler c, Type root, List original, List target,
@@ -143,14 +153,6 @@ static List _named_field_path(Compiler c, Type type, Var name, List parent) {
   return NULL;
 }
 
-/** Returns the initializer path selecting one visible aggregate field.
-    Anonymous aggregate members remain explicit path frames, so consumers
-    observe the same member promotion as native initializer conversion.
-*/
-List Compiler.initializer_field_path(
-  Compiler c, Type type, List field) =>
-  _named_field_path(c, type, field.car(), NULL);
-
 /* An enum constant captures one native index expansion where the original
    designator occurred. Its ordinary cast shape survives normalization. */
 static List _capture_index(Compiler c, List index, List &reference) {
@@ -203,57 +205,12 @@ static int _fills_whole(Compiler c, Type type, List value) {
   return !resolved.is_array() && !resolved.is_aggregate();
 }
 
-static int _fills_char_array(Compiler c, Type type, List value) {
-  match (value) {
-    case %(expr ? (literal ?literal_type ?)): {
-      if (!Type.is_char_pointer_like(literal_type)) return 0;
-      Type array = _resolve_shape(c, type);
-      if (!array.is_array()) return 0;
-      Type element = c.sym.resolve_key(array.cdr()).scalar();
-      return element === %(char) || element === %(signed char) ||
-             element === %(unsigned char);
-    }
-  }
-  return 0;
-}
 
-// initializer paths
 
 static Type _path_type(List path, Type root) {
   if (!path) return root;
   List frame = path.car();
   return frame[3];
-}
-
-static List _first_path(Compiler c, Type type, List parent) {
-  Type owner = _resolve_shape(c, type);
-  if (owner.is_array()) {
-    List zero = $!int{ 0 };
-    return cons(%($owner index $zero $(owner.cdr()) ()), parent);
-  }
-  if (owner.is_aggregate())
-    return _field_path(owner, c.sym.field_order(owner).cdr(), parent);
-  return NULL;
-}
-
-static List _field_path(Type owner, List fields, List parent) {
-  fields = _next_field(fields);
-  if (!fields) return NULL;
-  List row = fields.car();
-  return cons(
-    %($owner field $(row.car()) $(row.cadr()) $(fields.cdr())), parent);
-}
-
-/* C positional initialization skips unnamed bit-fields, not anonymous
-   aggregate subobjects. The ordered metadata retains both kinds. */
-static List _next_field(List fields) {
-  while (fields) {
-    List row = fields.car();
-    Type type = row.cadr();
-    if (row.car() || !type.is_bitfield()) break;
-    fields = fields.cdr();
-  }
-  return fields;
 }
 
 static void _advance_path(
@@ -314,18 +271,6 @@ static List _index_inside(
   return %(expr (int)
     (op < (expr (int) (parens $index))
           (expr (unsigned) (parens $length))));
-}
-
-/** Selects a native subobject without evaluating it when used by sizeof. */
-List Compiler.initializer_slot(Compiler c, List target, List path) {
-  foreach (List frame in path.reverse()) {
-    (Type owner, Symbol kind, Var selector, Type selected, List rest) = frame;
-    if (kind == <index>)
-      target = %(expr $selected (index $target $selector));
-    else if (selector)
-      target = %(expr $selected (op . $target ($selector)));
-  }
-  return target;
 }
 
 /* scalar runs
@@ -430,6 +375,65 @@ static List _record_layout(
   }
   if (!count) return NULL;
   return $(type, count, children.list());
+}
+
+static int _fills_char_array(Compiler c, Type type, List value) {
+  match (value) {
+    case %(expr ? (literal ?literal_type ?)): {
+      if (!Type.is_char_pointer_like(literal_type)) return 0;
+      Type array = _resolve_shape(c, type);
+      if (!array.is_array()) return 0;
+      Type element = c.sym.resolve_key(array.cdr()).scalar();
+      return element === %(char) || element === %(signed char) ||
+             element === %(unsigned char);
+    }
+  }
+  return 0;
+}
+
+static List _first_path(Compiler c, Type type, List parent) {
+  Type owner = _resolve_shape(c, type);
+  if (owner.is_array()) {
+    List zero = $!int{ 0 };
+    return cons(%($owner index $zero $(owner.cdr()) ()), parent);
+  }
+  if (owner.is_aggregate())
+    return _field_path(owner, c.sym.field_order(owner).cdr(), parent);
+  return NULL;
+}
+
+/* A qualified alias can expose another typedef below its qualifier. */
+static Type _resolve_shape(Compiler c, Type type) {
+  if (!type) return type;
+  type = c.sym.resolve_key(type);
+  int hops = 0;
+  loop {
+    Type key = type.canonicalize();
+    if (key === type) return type;
+    Type next = c.sym.next_typedef(key, hops);
+    if (!next) return key;
+    type = c.sym.resolve_key(next);
+  }
+}
+
+static List _field_path(Type owner, List fields, List parent) {
+  fields = _next_field(fields);
+  if (!fields) return NULL;
+  List row = fields.car();
+  return cons(
+    %($owner field $(row.car()) $(row.cadr()) $(fields.cdr())), parent);
+}
+
+/* C positional initialization skips unnamed bit-fields, not anonymous
+   aggregate subobjects. The ordered metadata retains both kinds. */
+static List _next_field(List fields) {
+  while (fields) {
+    List row = fields.car();
+    Type type = row.cadr();
+    if (row.car() || !type.is_bitfield()) break;
+    fields = fields.cdr();
+  }
+  return fields;
 }
 
 static void _ordinal_cases(

@@ -18,6 +18,33 @@
 #include <stdlib.h>
 #include <string.h>
 
+int main(int argc, char **argv) {
+  int n = argc > 1 ? atoi(argv[1]) : 7;
+  printf("Pfannkuchen(%d) = %d\n", n, _fannkuchredux(n));
+  return 0;
+}
+
+static int _fannkuchredux(int n) {
+  int *perm = xmalloc(n * sizeof(int));
+  int *perm1 = xmalloc(n * sizeof(int));
+  int *count = xmalloc(n * sizeof(int));
+  for (int i = 0; i < n; i++) {
+    perm1[i] = i;
+    count[i] = i + 1;
+  }
+
+  int max_flips_count = 0, checksum = 0, perm_count = 0;
+  do {
+    int flips_count = _flips(perm1, perm, n);
+    if (flips_count > max_flips_count)
+      max_flips_count = flips_count;
+    checksum += perm_count++ % 2 == 0 ? flips_count : -flips_count;
+  } while (_advance(perm1, count, n));
+
+  printf("%d\n", checksum);
+  return max_flips_count;
+}
+
 /* Copy perm1 into perm, then keep reversing the leading perm[0] + 1 entries
  * until the front entry is 0, and report how many reversals that took. */
 static inline int _flips(const int *perm1, int *perm, int n) {
@@ -50,32 +77,5 @@ static inline int _advance(int *perm1, int *count, int n) {
       return 1;
     count[r] = r + 1;
   }
-  return 0;
-}
-
-static int _fannkuchredux(int n) {
-  int *perm = xmalloc(n * sizeof(int));
-  int *perm1 = xmalloc(n * sizeof(int));
-  int *count = xmalloc(n * sizeof(int));
-  for (int i = 0; i < n; i++) {
-    perm1[i] = i;
-    count[i] = i + 1;
-  }
-
-  int max_flips_count = 0, checksum = 0, perm_count = 0;
-  do {
-    int flips_count = _flips(perm1, perm, n);
-    if (flips_count > max_flips_count)
-      max_flips_count = flips_count;
-    checksum += perm_count++ % 2 == 0 ? flips_count : -flips_count;
-  } while (_advance(perm1, count, n));
-
-  printf("%d\n", checksum);
-  return max_flips_count;
-}
-
-int main(int argc, char **argv) {
-  int n = argc > 1 ? atoi(argv[1]) : 7;
-  printf("Pfannkuchen(%d) = %d\n", n, _fannkuchredux(n));
   return 0;
 }

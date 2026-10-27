@@ -140,6 +140,315 @@ static typedef struct Stdio { int input, output, errors; } Stdio;
    its errno. */
 static typedef struct Failure { Symbol step, int error; } Failure;
 
+// jobs
+
+/** Returns a `Job` for `command`, a command or pipeline, without starting
+    it. The job captures standard output and passes standard error through.
+    Its first result starts it, waits, and records the run. A `Job`
+    destination calls this converter, so the call is usually left implicit.
+
+    ```x2c
+    ~#include "process.x"
+    ~int main(void) {
+    Job job = %(printf "a\nb\n");
+    ~  return job.status() == 0 && job.lines().len() == 2 ? 0 : 1;
+    ~}
+    ```
+*/
+meta native Job List.job(List command) => Job.new(command);
+
+/** Adds `command` after the last stage of `job`, reading that stage's
+    output, and returns the job. A pipeline `command` adds each of its
+    stages.
+    Raises: `<bad-arg>` for a job that has started.
+*/
+Job Job.pipe(Job job, List command) {
+  _unstarted(job, "Job.pipe");
+  job.stages = job.stages.append(_stages(command));
+  return job;
+}
+
+// options
+
+/** Sets `options` on `job` and returns it.
+    The keys are atoms: `dir` names the working directory, `env` is a `Map`
+    of variables added to the inherited environment, and `input` is a
+    `String` given to the first stage's standard input. `stdout` is
+    `capture`, `inherit`, or a file path and applies to the last stage;
+    `stderr` is `inherit`, `capture`, `stdout` to merge, or a file path and
+    applies to every stage. A key set again replaces its earlier value.
+
+    ```x2c
+    ~#include "process.x"
+    ~int main(void) {
+    String root = %(pwd).job().options({dir: "/"}).output();
+    ~  return root == "/\n" ? 0 : 1;
+    ~}
+    ```
+
+    Raises: `<bad-arg>` for an unknown key or a job that has started.
+*/
+Job Job.options(Job job, Map options) {
+  _unstarted(job, "Job.options");
+  foreach (Var (key, value) in options) {
+    if (key is not Symbol) $error.options.key();
+    _set(job.launch, key, value);
+  }
+  return job;
+}
+
+// running jobs
+
+/** Passes standard output through, waits for `job`, and raises when its
+    status is not zero: `live()` followed by `check()`.
+    Raises: the causes of `Job.live` and `Job.check`.
+*/
+void Job.run(Job job) {
+  job.live().check();
+}
+
+/** Makes `job` pass standard output through instead of capturing it, the
+    same as `options({stdout: <inherit>})`, and returns it.
+    Raises: `<bad-arg>` for a job that has started.
+*/
+Job Job.live(Job job) {
+  _route_output(_unstarted(job, "Job.options").launch, <inherit>);
+  return job;
+}
+
+/** Returns the captured standard output of `job` as lines without their
+    endings.
+    Raises: the causes of `Job.output`.
+*/
+List Job.lines(Job job) => job.output().split_lines(0);
+
+/** Returns the captured standard output of `job`, starting it and waiting
+    as needed. A live job, or one whose output was empty, returns NULL.
+    Raises: the causes of `Job.check`, or `<bad-arg>` when the output
+    contains a NUL byte.
+*/
+String Job.output(Job job) {
+  job.check();
+  return _text(job.output_text, job.nul_output, "Job.output");
+}
+
+/** Returns `job` once its status is zero, starting it and waiting as needed.
+    Raises: `<cmd-fail>` with `command` and `status` details, plus `output`
+    and `errors` when they were captured, or the start causes of `Job.start`.
+*/
+Job Job.check(Job job) {
+  int status = job.status();
+  if (!status) return job;
+  List stages = job.stages;
+  List command = stages.cdr() ? stages : stages.car();
+  String output = job.output_text, errors = job.errors_text;
+  int captured = job.launch.capture_output;
+  int logged = job.launch.capture_errors;
+  if (captured && logged)
+    $error.check.both(command, status, output, errors);
+  if (captured)
+    $error.check.output(command, status, output);
+  if (logged)
+    $error.check.errors(command, status, errors);
+  $error.check.status(command, status);
+}
+
+/** Returns the captured standard error of `job`, starting it and waiting as
+    needed, or NULL when standard error was not captured or was empty.
+    Raises: the start causes of `Job.start`, or `<bad-arg>` when the captured
+    text contains a NUL byte.
+*/
+String Job.errors(Job job) {
+  job.status();
+  return _text(job.errors_text, job.nul_errors, "Job.errors");
+}
+
+/** Returns the status of `job`, starting it and waiting as needed: the exit
+    status, or 128 plus a signal. A stage that never ran because the start
+    raised reports 127. A status that is not zero is an ordinary result here.
+    Raises: the start causes of `Job.start`.
+*/
+int Job.status(Job job) {
+  job.start();
+  for (int i = 0; i < job.count; i++) if (job.pids[i]) _reap(job, i, 0);
+  _finish(job);
+  return job.status;
+}
+
+
+
+/** Starts `job` without waiting and returns it. A job that has started is
+    returned unchanged.
+    Raises: `<not-found>` when a program or the `dir` option does not exist,
+    `<io-fail>` when a pipe, fork, output file, or other start step fails, or
+    `<bad-arg>` for an empty command.
+*/
+meta native Job Job.start(Job job) {
+  if (!job.started) _start(job);
+  return job;
+}
+
+/** Terminates and reaps a job that is still running: `SIGTERM`, then
+    `SIGKILL` to any stage still running a second later.
+*/
+void Job.cleanup(Job job) {
+  if (!job || !job.started || job.finished) return;
+  _terminate(job);
+  _finish(job);
+}
+
+/** Sends `signal` to every stage of `job` that is still running. */
+void Job.kill(Job job, int signal) {
+  for (int i = 0; i < job.count; i++)
+    if (job.pids[i]) kill((pid_t) job.pids[i], signal);
+}
+
+/** Removes and returns the first job in `jobs` that has finished, waiting
+    until one does. An empty `jobs` returns NULL.
+    Raises: `<bad-arg>` when a job in `jobs` has not started.
+*/
+Job Job.wait_any(Array jobs) {
+  foreach (Job job in jobs)
+    if (!job.started)
+      $error.wait.unstarted();
+  while (jobs.len()) {
+    for (int i = 0; i < jobs.len(); i++) {
+      Job job = jobs[i];
+      if (job.ready()) return jobs.remove(i);
+    }
+    usleep(1000);
+  }
+  return NULL;
+}
+
+/** Reports whether every stage of `job` has exited, without blocking. A job
+    that has not started reports 0.
+*/
+int Job.ready(Job job) {
+  if (!job.started) return 0;
+  if (job.finished) return 1;
+  if (_running(job)) return 0;
+  _finish(job);
+  return 1;
+}
+
+// the environment
+
+/** Returns the value of this process's environment variable `name`, or
+    NULL when it is unset. The `env` option sets variables for a child
+    instead.
+*/
+String Env.get(String name) {
+  const char *value = getenv(name);
+  return value ? String.new(value) : NULL;
+}
+
+static Job Job.new(List command) {
+  Job job = Scope.malloc_finalized(sizeof(struct Job), _drop_job);
+  memset(job, 0, sizeof(struct Job));
+  job.stages = _stages(command);
+  job.launch.capture_output = 1;
+  return job;
+}
+
+static void _drop_job(void *ptr) {
+  Job job = ptr;
+  if (job.started && !job.finished) _terminate(job);
+  if (job.output_file) job.output_file.close();
+  if (job.errors_file) job.errors_file.close();
+  job.output_file = job.errors_file = NULL;
+  free(job.pids);
+}
+
+// waiting
+
+/* Terminates and reaps every running stage without touching capture files,
+   which may already be reclaimed when a finalizer calls this. */
+static void _terminate(Job job) {
+  job.kill(SIGTERM);
+  for (int waited = 0; waited < 1000 && _running(job); waited++) usleep(1000);
+  job.kill(SIGKILL);
+  for (int i = 0; i < job.count; i++) if (job.pids[i]) _reap(job, i, 0);
+}
+
+static int _running(Job job) {
+  int running = 0;
+  for (int i = 0; i < job.count; i++) {
+    if (job.pids[i]) _reap(job, i, WNOHANG);
+    if (job.pids[i]) running = 1;
+  }
+  return running;
+}
+
+
+
+static void _reap(Job job, int index, int flags) {
+  int status;
+  pid_t pid;
+  do pid = waitpid((pid_t) job.pids[index], &status, flags);
+  while (pid < 0 && errno == EINTR);
+  if (!pid) return;
+  job.statuses[index] = pid < 0 ? -1 : _decoded_status(status);
+  job.pids[index] = 0;
+}
+
+static int _decoded_status(int status) {
+  if (WIFEXITED(status)) return WEXITSTATUS(status);
+  if (WIFSIGNALED(status)) return 128 + WTERMSIG(status);
+  return -1;
+}
+
+// A command whose first element is a List is a pipeline of those commands.
+static List _stages(List command) =>
+  command && command.car() is List ? command : $(command);
+
+static Job _unstarted(Job job, String operation) {
+  if (job.started) $error.job.started(operation);
+  return job;
+}
+
+static void _set(JobLaunch &l, Symbol name, Var value) {
+  switch (name) {
+    case <dir>:    l.dir = value; break;
+    case <env>:    l.environment = _environment(value); break;
+    case <input>:  l.input = value; l.has_input = 1; break;
+    case <stdout>: _route_output(l, value); break;
+    case <stderr>: _route_errors(l, value); break;
+    default: $error.options.unknown(name);
+  }
+}
+
+static void _route_output(JobLaunch &l, Var value) {
+  l.capture_output = _is(value, <capture>);
+  l.stdout_path = l.capture_output || _is(value, <inherit>) ? NULL : value;
+}
+
+static void _route_errors(JobLaunch &l, Var value) {
+  l.capture_errors = _is(value, <capture>);
+  l.errors_to_output = _is(value, <stdout>);
+  l.stderr_path = l.capture_errors || l.errors_to_output ||
+    _is(value, <inherit>) ? NULL : value;
+}
+
+static int _is(Var value, Symbol name) =>
+  value is Symbol && value == name;
+
+static char **_environment(Map env) {
+  Map names = {};
+  foreach (Var name in env.keys()) names[name.str()] = 1;
+  Array entries = [];
+  for (char **entry = environ; *entry; entry++) {
+    String text = String.new(*entry);
+    int equals = text.find("=");
+    if (!((equals < 0 ? text : text[:equals]) in names)) entries.push(text);
+  }
+  foreach (Var (name, value) in env) entries.push(%"$name=$value");
+  char **out = xcalloc(entries.len() + 1, sizeof(char *));
+  int index = 0;
+  foreach (String entry in entries) out[index++] = entry;
+  return out;
+}
+
 // launching
 
 /* The one launch of a job. The job counts as started before the first
@@ -320,10 +629,6 @@ static File _capture_file(void) {
   return file;
 }
 
-static void _close_on_exec(int fd) {
-  fcntl(fd, F_SETFD, fcntl(fd, F_GETFD) | FD_CLOEXEC);
-}
-
 static int _open_output(String path) {
   int fd = open(path, O_WRONLY | O_CREAT | O_TRUNC, 0666);
   if (fd < 0) {
@@ -340,39 +645,16 @@ static void _pipe(int fds[2]) {
   _close_on_exec(fds[1]);
 }
 
+static void _close_on_exec(int fd) {
+  fcntl(fd, F_SETFD, fcntl(fd, F_GETFD) | FD_CLOEXEC);
+}
+
 static void _close(int fd) {
   if (fd >= 0) close(fd);
 }
 
 static void _io_fail(int error) {
   $error.start.io(error);
-}
-
-// waiting
-
-static void _reap(Job job, int index, int flags) {
-  int status;
-  pid_t pid;
-  do pid = waitpid((pid_t) job.pids[index], &status, flags);
-  while (pid < 0 && errno == EINTR);
-  if (!pid) return;
-  job.statuses[index] = pid < 0 ? -1 : _decoded_status(status);
-  job.pids[index] = 0;
-}
-
-static int _decoded_status(int status) {
-  if (WIFEXITED(status)) return WEXITSTATUS(status);
-  if (WIFSIGNALED(status)) return 128 + WTERMSIG(status);
-  return -1;
-}
-
-static int _running(Job job) {
-  int running = 0;
-  for (int i = 0; i < job.count; i++) {
-    if (job.pids[i]) _reap(job, i, WNOHANG);
-    if (job.pids[i]) running = 1;
-  }
-  return running;
 }
 
 static void _finish(Job job) {
@@ -398,285 +680,7 @@ static String _captured(File &file, int &nul) {
   return text;
 }
 
-/* Terminates and reaps every running stage without touching capture files,
-   which may already be reclaimed when a finalizer calls this. */
-static void _terminate(Job job) {
-  job.kill(SIGTERM);
-  for (int waited = 0; waited < 1000 && _running(job); waited++) usleep(1000);
-  job.kill(SIGKILL);
-  for (int i = 0; i < job.count; i++) if (job.pids[i]) _reap(job, i, 0);
-}
-
-// jobs
-
-/** Returns a `Job` for `command`, a command or pipeline, without starting
-    it. The job captures standard output and passes standard error through.
-    Its first result starts it, waits, and records the run. A `Job`
-    destination calls this converter, so the call is usually left implicit.
-
-    ```x2c
-    ~#include "process.x"
-    ~int main(void) {
-    Job job = %(printf "a\nb\n");
-    ~  return job.status() == 0 && job.lines().len() == 2 ? 0 : 1;
-    ~}
-    ```
-*/
-meta native Job List.job(List command) => Job.new(command);
-
-static Job Job.new(List command) {
-  Job job = Scope.malloc_finalized(sizeof(struct Job), _drop_job);
-  memset(job, 0, sizeof(struct Job));
-  job.stages = _stages(command);
-  job.launch.capture_output = 1;
-  return job;
-}
-
-static void _drop_job(void *ptr) {
-  Job job = ptr;
-  if (job.started && !job.finished) _terminate(job);
-  if (job.output_file) job.output_file.close();
-  if (job.errors_file) job.errors_file.close();
-  job.output_file = job.errors_file = NULL;
-  free(job.pids);
-}
-
-// A command whose first element is a List is a pipeline of those commands.
-static List _stages(List command) =>
-  command && command.car() is List ? command : $(command);
-
-/** Adds `command` after the last stage of `job`, reading that stage's
-    output, and returns the job. A pipeline `command` adds each of its
-    stages.
-    Raises: `<bad-arg>` for a job that has started.
-*/
-Job Job.pipe(Job job, List command) {
-  _unstarted(job, "Job.pipe");
-  job.stages = job.stages.append(_stages(command));
-  return job;
-}
-
-static Job _unstarted(Job job, String operation) {
-  if (job.started) $error.job.started(operation);
-  return job;
-}
-
-// options
-
-/** Sets `options` on `job` and returns it.
-    The keys are atoms: `dir` names the working directory, `env` is a `Map`
-    of variables added to the inherited environment, and `input` is a
-    `String` given to the first stage's standard input. `stdout` is
-    `capture`, `inherit`, or a file path and applies to the last stage;
-    `stderr` is `inherit`, `capture`, `stdout` to merge, or a file path and
-    applies to every stage. A key set again replaces its earlier value.
-
-    ```x2c
-    ~#include "process.x"
-    ~int main(void) {
-    String root = %(pwd).job().options({dir: "/"}).output();
-    ~  return root == "/\n" ? 0 : 1;
-    ~}
-    ```
-
-    Raises: `<bad-arg>` for an unknown key or a job that has started.
-*/
-Job Job.options(Job job, Map options) {
-  _unstarted(job, "Job.options");
-  foreach (Var (key, value) in options) {
-    if (key is not Symbol) $error.options.key();
-    _set(job.launch, key, value);
-  }
-  return job;
-}
-
-static void _set(JobLaunch &l, Symbol name, Var value) {
-  switch (name) {
-    case <dir>:    l.dir = value; break;
-    case <env>:    l.environment = _environment(value); break;
-    case <input>:  l.input = value; l.has_input = 1; break;
-    case <stdout>: _route_output(l, value); break;
-    case <stderr>: _route_errors(l, value); break;
-    default: $error.options.unknown(name);
-  }
-}
-
-static void _route_output(JobLaunch &l, Var value) {
-  l.capture_output = _is(value, <capture>);
-  l.stdout_path = l.capture_output || _is(value, <inherit>) ? NULL : value;
-}
-
-static void _route_errors(JobLaunch &l, Var value) {
-  l.capture_errors = _is(value, <capture>);
-  l.errors_to_output = _is(value, <stdout>);
-  l.stderr_path = l.capture_errors || l.errors_to_output ||
-    _is(value, <inherit>) ? NULL : value;
-}
-
-static int _is(Var value, Symbol name) =>
-  value is Symbol && value == name;
-
-/** Makes `job` pass standard output through instead of capturing it, the
-    same as `options({stdout: <inherit>})`, and returns it.
-    Raises: `<bad-arg>` for a job that has started.
-*/
-Job Job.live(Job job) {
-  _route_output(_unstarted(job, "Job.options").launch, <inherit>);
-  return job;
-}
-
-// running jobs
-
-/** Starts `job` without waiting and returns it. A job that has started is
-    returned unchanged.
-    Raises: `<not-found>` when a program or the `dir` option does not exist,
-    `<io-fail>` when a pipe, fork, output file, or other start step fails, or
-    `<bad-arg>` for an empty command.
-*/
-meta native Job Job.start(Job job) {
-  if (!job.started) _start(job);
-  return job;
-}
-
-/** Returns the status of `job`, starting it and waiting as needed: the exit
-    status, or 128 plus a signal. A stage that never ran because the start
-    raised reports 127. A status that is not zero is an ordinary result here.
-    Raises: the start causes of `Job.start`.
-*/
-int Job.status(Job job) {
-  job.start();
-  for (int i = 0; i < job.count; i++) if (job.pids[i]) _reap(job, i, 0);
-  _finish(job);
-  return job.status;
-}
-
-/** Returns `job` once its status is zero, starting it and waiting as needed.
-    Raises: `<cmd-fail>` with `command` and `status` details, plus `output`
-    and `errors` when they were captured, or the start causes of `Job.start`.
-*/
-Job Job.check(Job job) {
-  int status = job.status();
-  if (!status) return job;
-  List stages = job.stages;
-  List command = stages.cdr() ? stages : stages.car();
-  String output = job.output_text, errors = job.errors_text;
-  int captured = job.launch.capture_output;
-  int logged = job.launch.capture_errors;
-  if (captured && logged)
-    $error.check.both(command, status, output, errors);
-  if (captured)
-    $error.check.output(command, status, output);
-  if (logged)
-    $error.check.errors(command, status, errors);
-  $error.check.status(command, status);
-}
-
-/** Passes standard output through, waits for `job`, and raises when its
-    status is not zero: `live()` followed by `check()`.
-    Raises: the causes of `Job.live` and `Job.check`.
-*/
-void Job.run(Job job) {
-  job.live().check();
-}
-
-/** Returns the captured standard output of `job`, starting it and waiting
-    as needed. A live job, or one whose output was empty, returns NULL.
-    Raises: the causes of `Job.check`, or `<bad-arg>` when the output
-    contains a NUL byte.
-*/
-String Job.output(Job job) {
-  job.check();
-  return _text(job.output_text, job.nul_output, "Job.output");
-}
-
 static String _text(String text, int nul, String operation) {
   if (nul) $error.text.nul(operation);
   return text;
-}
-
-/** Returns the captured standard output of `job` as lines without their
-    endings.
-    Raises: the causes of `Job.output`.
-*/
-List Job.lines(Job job) => job.output().split_lines(0);
-
-/** Returns the captured standard error of `job`, starting it and waiting as
-    needed, or NULL when standard error was not captured or was empty.
-    Raises: the start causes of `Job.start`, or `<bad-arg>` when the captured
-    text contains a NUL byte.
-*/
-String Job.errors(Job job) {
-  job.status();
-  return _text(job.errors_text, job.nul_errors, "Job.errors");
-}
-
-/** Reports whether every stage of `job` has exited, without blocking. A job
-    that has not started reports 0.
-*/
-int Job.ready(Job job) {
-  if (!job.started) return 0;
-  if (job.finished) return 1;
-  if (_running(job)) return 0;
-  _finish(job);
-  return 1;
-}
-
-/** Sends `signal` to every stage of `job` that is still running. */
-void Job.kill(Job job, int signal) {
-  for (int i = 0; i < job.count; i++)
-    if (job.pids[i]) kill((pid_t) job.pids[i], signal);
-}
-
-/** Terminates and reaps a job that is still running: `SIGTERM`, then
-    `SIGKILL` to any stage still running a second later.
-*/
-void Job.cleanup(Job job) {
-  if (!job || !job.started || job.finished) return;
-  _terminate(job);
-  _finish(job);
-}
-
-/** Removes and returns the first job in `jobs` that has finished, waiting
-    until one does. An empty `jobs` returns NULL.
-    Raises: `<bad-arg>` when a job in `jobs` has not started.
-*/
-Job Job.wait_any(Array jobs) {
-  foreach (Job job in jobs)
-    if (!job.started)
-      $error.wait.unstarted();
-  while (jobs.len()) {
-    for (int i = 0; i < jobs.len(); i++) {
-      Job job = jobs[i];
-      if (job.ready()) return jobs.remove(i);
-    }
-    usleep(1000);
-  }
-  return NULL;
-}
-
-// the environment
-
-/** Returns the value of this process's environment variable `name`, or
-    NULL when it is unset. The `env` option sets variables for a child
-    instead.
-*/
-String Env.get(String name) {
-  const char *value = getenv(name);
-  return value ? String.new(value) : NULL;
-}
-
-static char **_environment(Map env) {
-  Map names = {};
-  foreach (Var name in env.keys()) names[name.str()] = 1;
-  Array entries = [];
-  for (char **entry = environ; *entry; entry++) {
-    String text = String.new(*entry);
-    int equals = text.find("=");
-    if (!((equals < 0 ? text : text[:equals]) in names)) entries.push(text);
-  }
-  foreach (Var (name, value) in env) entries.push(%"$name=$value");
-  char **out = xcalloc(entries.len() + 1, sizeof(char *));
-  int index = 0;
-  foreach (String entry in entries) out[index++] = entry;
-  return out;
 }

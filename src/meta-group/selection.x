@@ -37,29 +37,6 @@ void Compiler.group_meta_function(Compiler c, List fn) {
     }
 }
 
-/** Answers whether a `meta` body reaches the compiler itself: it names a
-    compile-time-only function or a compiler operation, or constructs a
-    template. Such a function has no runtime form.
-*/
-int Compiler.meta_reaches_compile_time(Compiler c, Var node) {
-  if (node is not <list>) return 0;
-  List syntax = node;
-  match (syntax) {
-    case %((!or tpl-call meta-call) *): return 1;
-    case %(ident (binding ? ?name)): {
-      if (name is not <string>) break;
-      String spelling = name;
-      // Expansion can insert a call typed by its macro definition.
-      if (spelling in c.native_meta) c.bind_native_meta(spelling);
-      return spelling in c.meta_comptime ||
-             Compiler.supplies_native_meta(spelling);
-    }
-  }
-  foreach (Var child in syntax)
-    if (c.meta_reaches_compile_time(child)) return 1;
-  return 0;
-}
-
 /** Closes compile-time-only calls across later meta definitions.
     Retained group bodies hold the bound calls, including literal insertions.
     Select runtime definitions only after that relation is complete.
@@ -88,6 +65,83 @@ void Compiler.finish_meta_functions(Compiler c, Array nodes) {
   nodes.resize(retained);
 }
 
+/** Answers whether a `meta` body reaches the compiler itself: it names a
+    compile-time-only function or a compiler operation, or constructs a
+    template. Such a function has no runtime form.
+*/
+int Compiler.meta_reaches_compile_time(Compiler c, Var node) {
+  if (node is not <list>) return 0;
+  List syntax = node;
+  match (syntax) {
+    case %((!or tpl-call meta-call) *): return 1;
+    case %(ident (binding ? ?name)): {
+      if (name is not <string>) break;
+      String spelling = name;
+      // Expansion can insert a call typed by its macro definition.
+      if (spelling in c.native_meta) c.bind_native_meta(spelling);
+      return spelling in c.meta_comptime ||
+             Compiler.supplies_native_meta(spelling);
+    }
+  }
+  foreach (Var child in syntax)
+    if (c.meta_reaches_compile_time(child)) return 1;
+  return 0;
+}
+
+// what the group reaches
+
+/** Answers whether a definition has public native linkage.
+    Main is excluded because its process entry needs a separate adapter.
+*/
+int Compiler.public_native_function(
+  Compiler c, List function, String name) =>
+  name != "main" && !(%(function $name) in c.sym.file_statics()) &&
+  !%(declare $(function.cadr()) (bindings $(function.caddr())))
+     .type_from_ast().is_static();
+
+// refusing a call
+
+/** Reports at `site` that the group function `name` cannot run at compile
+    time when its result is a struct or union, which its type alone
+    decides.
+*/
+void Compiler.refuse_record_meta_call(Compiler c, String name, Token site) {
+  String missing = c.meta_call_missing(name);
+  if (missing.startswith("a struct")) c.refuse_meta_call(name, site, missing);
+}
+
+
+
+/** Returns why the group function `name` has no compile-time entry, from
+    its type.
+*/
+String Compiler.meta_call_missing(Compiler c, String name) {
+  Type type = NULL;
+  foreach (List entry in c.meta_group)
+    match (entry) case %(function ? ?(String target) ?(Type own)):
+      if (target == name) type = own;
+  Type result = type ? type.apply() : NULL;
+  if (result && !c.sym.is_var_type(result)) result = c.sym.resolve_key(result);
+  if (result && result.is_aggregate())
+    return "a struct or union result has no compile-time value; return its "
+           "fields as a List or Map";
+  if (result && result.is_pointer())
+    return "an address result has no compile-time value; return data built "
+           "from the pointed-to values";
+  return "a parameter or the result has no Var form, such as C's bool; use "
+         "int, a String, a Symbol, or a List";
+}
+
+/** Reports at `site` that the `meta` function `name` cannot run at compile
+    time, and `why`.
+*/
+void Compiler.refuse_meta_call(
+  Compiler c, String name, Token site, String why) {
+  $fail.meta_group_function_unavailable(c, site, name, why);
+}
+
+// meta group selection
+
 /* Reuse the ordinary call check with the parsed statement's origin after
    closure. Native and ordinary copies are absent from the staged group. */
 static void _check_runtime_meta_calls(Compiler c, Var root) {
@@ -103,7 +157,7 @@ static void _check_runtime_meta_calls(Compiler c, Var root) {
   }
 }
 
-// what the group reaches
+
 
 /* The unit's definitions so far that the group can reach, in source order:
    directives, declarations, included providers, reached functions, and
@@ -163,26 +217,6 @@ static Map _source_order(Compiler c, Array ordered, String lib) {
     ordered.push(copy);
   }
   return later;
-}
-
-/* A later variable declaration, kept only when a meta function reaches
-   one of its names. Types and directives stay. */
-static int _optional(List item, Map later) {
-  if (!((void *) item in later)) return 0;
-  if (item ~= %(declare ?(Type spec) (bindings ? *)))
-    return !spec.is_typedef();
-  return 0;
-}
-
-// Whether `item` declares a name in `reached`.
-static int _declares_reached(List item, Map reached) {
-  match (item) case %(declare ? (bindings *rows)):
-    foreach (List row in rows) {
-      match (row) case %(op = ?bound ?): row = bound;
-      if ((row ~= %(bind (binding ?identity ?) ?)) &&
-          identity in reached) return 1;
-    }
-  return 0;
 }
 
 /* The values the project meta build's parse put in place of calls left for
@@ -311,6 +345,26 @@ static Array _reachable(Compiler c, Array ordered, Map reached, Map later) {
   return units;
 }
 
+/* A later variable declaration, kept only when a meta function reaches
+   one of its names. Types and directives stay. */
+static int _optional(List item, Map later) {
+  if (!((void *) item in later)) return 0;
+  if (item ~= %(declare ?(Type spec) (bindings ? *)))
+    return !spec.is_typedef();
+  return 0;
+}
+
+// Whether `item` declares a name in `reached`.
+static int _declares_reached(List item, Map reached) {
+  match (item) case %(declare ? (bindings *rows)):
+    foreach (List row in rows) {
+      match (row) case %(op = ?bound ?): row = bound;
+      if ((row ~= %(bind (binding ?identity ?) ?)) &&
+          identity in reached) return 1;
+    }
+  return 0;
+}
+
 module int _function_identity(List fn, Var &identity, String &name) {
   match (fn)
     case %(function ? (bind (binding ?id ?(String spelling)) *) ?): {
@@ -319,54 +373,6 @@ module int _function_identity(List fn, Var &identity, String &name) {
       return 1;
     }
   return 0;
-}
-
-/** Answers whether a definition has public native linkage.
-    Main is excluded because its process entry needs a separate adapter.
-*/
-int Compiler.public_native_function(
-  Compiler c, List function, String name) =>
-  name != "main" && !(%(function $name) in c.sym.file_statics()) &&
-  !%(declare $(function.cadr()) (bindings $(function.caddr())))
-     .type_from_ast().is_static();
-
-// refusing a call
-
-/** Returns why the group function `name` has no compile-time entry, from
-    its type.
-*/
-String Compiler.meta_call_missing(Compiler c, String name) {
-  Type type = NULL;
-  foreach (List entry in c.meta_group)
-    match (entry) case %(function ? ?(String target) ?(Type own)):
-      if (target == name) type = own;
-  Type result = type ? type.apply() : NULL;
-  if (result && !c.sym.is_var_type(result)) result = c.sym.resolve_key(result);
-  if (result && result.is_aggregate())
-    return "a struct or union result has no compile-time value; return its "
-           "fields as a List or Map";
-  if (result && result.is_pointer())
-    return "an address result has no compile-time value; return data built "
-           "from the pointed-to values";
-  return "a parameter or the result has no Var form, such as C's bool; use "
-         "int, a String, a Symbol, or a List";
-}
-
-/** Reports at `site` that the `meta` function `name` cannot run at compile
-    time, and `why`.
-*/
-void Compiler.refuse_meta_call(
-  Compiler c, String name, Token site, String why) {
-  $fail.meta_group_function_unavailable(c, site, name, why);
-}
-
-/** Reports at `site` that the group function `name` cannot run at compile
-    time when its result is a struct or union, which its type alone
-    decides.
-*/
-void Compiler.refuse_record_meta_call(Compiler c, String name, Token site) {
-  String missing = c.meta_call_missing(name);
-  if (missing.startswith("a struct")) c.refuse_meta_call(name, site, missing);
 }
 
 /* Why the group cannot link, or NULL: a function it calls is a bodyless

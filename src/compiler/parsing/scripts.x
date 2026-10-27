@@ -12,6 +12,70 @@ static typedef struct ScriptParse {
   int gap, first;
 } ScriptParse;
 
+/* A script unit's `main` is ordinary source the parser reads after the last
+   top-level form: this template with the statement runs, in source order,
+   in place of `x2c_script_statements`. The statements run in their own
+   function, so the `try` that reports an uncaught error leaves their locals
+   ordinary. A failed command's status becomes the exit status; any other
+   uncaught error exits with 1. */
+static String script_main =
+%"static int x2c_script(int argc, char **argv, List args) {
+  (void) argc, (void) argv, (void) args;
+  x2c_script_statements
+  return 0;
+}
+int main(int argc, char **argv) {
+  try {
+    return x2c_script(argc, argv, Args.from_argv(argc, argv));
+  }
+  catch %(cmd-fail (command ?command) (status ?status) *): {
+    fprintf(stderr, \"%s: command %s failed with status %ld\\n\",
+            argv[0], command.repr().str(), status.integer());
+    return (int) status.integer();
+  }
+  catch %(?code *detail): {
+    fprintf(stderr, \"%s: %s %s\\n\",
+            argv[0], code, detail.repr().str());
+    return 1;
+  }
+}
+";
+
+/** Skips a collected script statement, or diagnoses one beside `main`.
+    Called after top-level directives establish source visibility.
+*/
+int Compiler.skip_collected_script_statement(Compiler c) {
+  if (!c.script) return 0;
+  if (!c.script.defines_main && c.script_statement_starts()) {
+    _skip_script_statement(c);
+    return 1;
+  }
+  _reject_statement(c);
+  return 0;
+}
+
+// script statements and generated entry points
+
+/* Moves past one run of a script unit's statement tokens, through a `;` or
+   a closing `}` outside every bracket. A statement that ends early this
+   way leaves its remainder as the next run, and runs are rejoined in order.
+*/
+static void _skip_script_statement(Compiler c) {
+  for (int depth = 0; c.peek(0) != <eof>;) {
+    Symbol type = c.peek(0);
+    depth += type.group_step();
+    c.next();
+    if (depth <= 0 && (type == <;> || type == <"}">)) return;
+  }
+}
+
+/* A script unit either defines `main` or runs its top-level statements, so
+   a statement beside `main` is the one form it rejects. */
+static void _reject_statement(Compiler c) {
+  if (c.script && c.script.defines_main && c.script_statement_executes())
+    $fail.compiler_script_main(c, c.token);
+}
+
 /* File-scope forms establish effects before the retained statements parse.
    A macro may define main where the initial token scan saw none. Report that
    conflict outside recovery, as for the original script's entry point. */
@@ -73,39 +137,6 @@ static void _hoist(ScriptParse &p, int begin, Token tokens) {
   if (p.first < 0) p.first = begin;
 }
 
-/** Skips a collected script statement, or diagnoses one beside `main`.
-    Called after top-level directives establish source visibility.
-*/
-int Compiler.skip_collected_script_statement(Compiler c) {
-  if (!c.script) return 0;
-  if (!c.script.defines_main && c.script_statement_starts()) {
-    _skip_script_statement(c);
-    return 1;
-  }
-  _reject_statement(c);
-  return 0;
-}
-
-/* Moves past one run of a script unit's statement tokens, through a `;` or
-   a closing `}` outside every bracket. A statement that ends early this
-   way leaves its remainder as the next run, and runs are rejoined in order.
-*/
-static void _skip_script_statement(Compiler c) {
-  for (int depth = 0; c.peek(0) != <eof>;) {
-    Symbol type = c.peek(0);
-    depth += type.group_step();
-    c.next();
-    if (depth <= 0 && (type == <;> || type == <"}">)) return;
-  }
-}
-
-/* A script unit either defines `main` or runs its top-level statements, so
-   a statement beside `main` is the one form it rejects. */
-static void _reject_statement(Compiler c) {
-  if (c.script && c.script.defines_main && c.script_statement_executes())
-    $fail.compiler_script_main(c, c.token);
-}
-
 /* A file-scope conditional directive also governs the statements it
    surrounds, so a copy of each joins the statement runs in source order and
    the script body keeps the file's conditional structure. */
@@ -121,35 +152,6 @@ static void _push_conditionals(
     statements.push(i + 1);
   }
 }
-
-/* A script unit's `main` is ordinary source the parser reads after the last
-   top-level form: this template with the statement runs, in source order,
-   in place of `x2c_script_statements`. The statements run in their own
-   function, so the `try` that reports an uncaught error leaves their locals
-   ordinary. A failed command's status becomes the exit status; any other
-   uncaught error exits with 1. */
-static String script_main =
-%"static int x2c_script(int argc, char **argv, List args) {
-  (void) argc, (void) argv, (void) args;
-  x2c_script_statements
-  return 0;
-}
-int main(int argc, char **argv) {
-  try {
-    return x2c_script(argc, argv, Args.from_argv(argc, argv));
-  }
-  catch %(cmd-fail (command ?command) (status ?status) *): {
-    fprintf(stderr, \"%s: command %s failed with status %ld\\n\",
-            argv[0], command.repr().str(), status.integer());
-    return (int) status.integer();
-  }
-  catch %(?code *detail): {
-    fprintf(stderr, \"%s: %s %s\\n\",
-            argv[0], code, detail.repr().str());
-    return 1;
-  }
-}
-";
 
 /* Replaces the token stream with a copy that ends in the script's `main`.
    The copy keeps every consumed token at its index, so recorded token

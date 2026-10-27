@@ -49,6 +49,45 @@ void Compiler.generate_code(Compiler c, List ast, String dir) {
 List Compiler.generate_code_text(Compiler c, List ast, String basename) =>
   _generated_code(c, _without_trivia(ast), basename);
 
+/** Places generated `declarations` after source types and includes, before
+    the first function or captured initializer that can use them. An outer
+    conditional containing that first use follows the declarations. A unit
+    without such a use gets them at its end, after the declarations they
+    may assign.
+*/
+List Compiler.place_source_prelude(
+  Compiler c, List source, List declarations) {
+  (void) c;
+  Array out = [], int prelude = _anchors(source, 0).function, position = 0;
+  foreach (List node in source) {
+    if (position++ == prelude)
+      foreach (List declaration in declarations) out.push(declaration);
+    out.push(node);
+  }
+  if (prelude < 0)
+    foreach (List declaration in declarations) out.push(declaration);
+  return out.list_free();
+}
+
+/* file text
+
+   Both files open with the generated banner. The header guards its public
+   declarations; the source suppresses cyclic includes of that header and
+   consumes its own ordered declarations. */
+
+/** Returns the guard macro of the header generated for this unit, named
+    from its path below the home when it has one there, else as spelled, so
+    a meta group that copies the unit names the same guard.
+*/
+String Compiler.header_guard(Compiler c) {
+  String home = Compiler.home_dir(), name = c.filename;
+  String path = home ? Path.absolute(name) : NULL;
+  if (path && path.startswith(%"$home/")) name = path[home.len() + 1:];
+  return %"__GUARD_0x$(Path.identifier_hash(name))__";
+}
+
+// assemble and publish generated files
+
 static List _without_trivia(List ast) =>
   ast.filter(%!(node) => {
     match (node.list()) {
@@ -101,24 +140,62 @@ static void _publish_files(Compiler c, List outputs) {
   $fail.generate_file_write(c, c.token, failure);
 }
 
-/** Places generated `declarations` after source types and includes, before
-    the first function or captured initializer that can use them. An outer
-    conditional containing that first use follows the declarations. A unit
-    without such a use gets them at its end, after the declarations they
-    may assign.
-*/
-List Compiler.place_source_prelude(
-  Compiler c, List source, List declarations) {
-  (void) c;
-  Array out = [], int prelude = _anchors(source, 0).function, position = 0;
-  foreach (List node in source) {
-    if (position++ == prelude)
-      foreach (List declaration in declarations) out.push(declaration);
-    out.push(node);
-  }
-  if (prelude < 0)
-    foreach (List declaration in declarations) out.push(declaration);
+
+
+static List _vertical_spacing(List code) {
+  Array out = [];
+  foreach (List node in code) _push_line(out, node);
   return out.list_free();
+}
+
+/* A unit that uses the runtime includes it inside the header's guard. */
+static List _include_guard(Compiler c, List content) {
+  if (c.runtime_inc && !_has_runtime_include(content))
+    content = cons(%(preproc "#include \"x2c.x\""), content);
+  return %(@(_banner()) @(_header_guard(content, c.header_guard())));
+}
+
+static int _has_runtime_include(List content) {
+  foreach (List node in content)
+    if (node ~= %(preproc ?(String text))) {
+      int angle = 0;
+      if (Compiler.preproc_include_target(text, angle) == "x2c.x") return 1;
+    }
+  return 0;
+}
+
+static List _header_guard(List content, String guard) => %(
+    (preproc "#pragma once")
+    (space "\n\n")
+    (preproc "#ifndef $guard")
+    (space "\n")
+    (preproc "#define $guard")
+    (space "\n\n")
+    @content
+    (space "\n")
+    (preproc "#endif /* $guard */")
+    (space "\n")
+  );
+
+/* The source defines its own header's guard, so a cyclic include of that
+   header adds nothing; its own declarations follow in order. The runtime
+   headers that lowering needs precede their first uses. */
+static List _source_unit(Compiler c, List content) {
+  List runtime = c.runtime_inc ? _include_directive("x2c.x") : NULL;
+  Anchors at = _anchors(content, 1);
+  List error = at.error >= 0 ? _include_directive("error.h") : NULL;
+  List exception =
+    c.needs_exception ? _include_directive("exception.h") : NULL;
+  Array lines = [], int position = 0;
+  foreach (List node in content) {
+    if (position == at.error)
+      foreach (List include in error) _push_line(lines, include);
+    if (position++ == at.function)
+      foreach (List include in exception) _push_line(lines, include);
+    _push_line(lines, _runtime_entry(c, node));
+  }
+  return %(@(_banner()) (preproc "#define $(c.header_guard())") @runtime
+           @(lines.list_free()));
 }
 
 /* The anchors of `source`; `error` is sought only with `errors`. */
@@ -154,37 +231,9 @@ static int _needs_errors(List item) {
     "ErrorCatchSite" in types || "ErrorHandler" in types;
 }
 
-/* file text
-
-   Both files open with the generated banner. The header guards its public
-   declarations; the source suppresses cyclic includes of that header and
-   consumes its own ordered declarations. */
-
-static List _vertical_spacing(List code) {
-  Array out = [];
-  foreach (List node in code) _push_line(out, node);
-  return out.list_free();
-}
-
 static void _push_line(Array out, Var node) {
   out.push(node);
   out.push(%(space "\n"));
-}
-
-/* A unit that uses the runtime includes it inside the header's guard. */
-static List _include_guard(Compiler c, List content) {
-  if (c.runtime_inc && !_has_runtime_include(content))
-    content = cons(%(preproc "#include \"x2c.x\""), content);
-  return %(@(_banner()) @(_header_guard(content, c.header_guard())));
-}
-
-static int _has_runtime_include(List content) {
-  foreach (List node in content)
-    if (node ~= %(preproc ?(String text))) {
-      int angle = 0;
-      if (Compiler.preproc_include_target(text, angle) == "x2c.x") return 1;
-    }
-  return 0;
 }
 
 static List _banner(void) => %(
@@ -192,51 +241,6 @@ static List _banner(void) => %(
     (space "\n")
     (space "\n")
   );
-
-static List _header_guard(List content, String guard) => %(
-    (preproc "#pragma once")
-    (space "\n\n")
-    (preproc "#ifndef $guard")
-    (space "\n")
-    (preproc "#define $guard")
-    (space "\n\n")
-    @content
-    (space "\n")
-    (preproc "#endif /* $guard */")
-    (space "\n")
-  );
-
-/** Returns the guard macro of the header generated for this unit, named
-    from its path below the home when it has one there, else as spelled, so
-    a meta group that copies the unit names the same guard.
-*/
-String Compiler.header_guard(Compiler c) {
-  String home = Compiler.home_dir(), name = c.filename;
-  String path = home ? Path.absolute(name) : NULL;
-  if (path && path.startswith(%"$home/")) name = path[home.len() + 1:];
-  return %"__GUARD_0x$(Path.identifier_hash(name))__";
-}
-
-/* The source defines its own header's guard, so a cyclic include of that
-   header adds nothing; its own declarations follow in order. The runtime
-   headers that lowering needs precede their first uses. */
-static List _source_unit(Compiler c, List content) {
-  List runtime = c.runtime_inc ? _include_directive("x2c.x") : NULL;
-  Anchors at = _anchors(content, 1);
-  List error = at.error >= 0 ? _include_directive("error.h") : NULL;
-  List exception =
-    c.needs_exception ? _include_directive("exception.h") : NULL;
-  Array lines = [], int position = 0;
-  foreach (List node in content) {
-    if (position == at.error)
-      foreach (List include in error) _push_line(lines, include);
-    if (position++ == at.function)
-      foreach (List include in exception) _push_line(lines, include);
-    _push_line(lines, _runtime_entry(c, node));
-  }
-  return %(@(_banner()) (preproc "#define $(c.header_guard())") @runtime
-           @(lines.list_free()));
-}
 
 /* `main` initializes the runtime before anything else, including its file
    initialization guard. Its prototype comes from the runtime header, so

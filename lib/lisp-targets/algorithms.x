@@ -10,26 +10,8 @@
 #include "x2c.x"
 #include "lisp/lisp.x"
 
-static int _nil(Var value) => value == %();
-
-static Var _truth(int x) {
-  if (x) return <true>;
-  return %();
-}
-
-static String _string(Var value, String operation) {
-  if (value is not <string>)
-    raise %(bad-types (operation $operation) (actual $(value.tag()))
-                       (want string));
-  return value;
-}
-
-static List _list(Var value, String operation) {
-  if (value is not <list>)
-    raise %(bad-types (operation $operation) (actual $(value.tag()))
-                       (want list));
-  return value;
-}
+/* Returns the value of the last argument, or nil without arguments. */
+Var lisp_begin(List values) => lisp_last(values);
 
 /* Returns the last element of `values`, or nil when it is nil. */
 Var lisp_last(Var values) {
@@ -38,36 +20,12 @@ Var lisp_last(Var values) {
   return lisp_car(values);
 }
 
-/* Returns the value of the last argument, or nil without arguments. */
-Var lisp_begin(List values) => lisp_last(values);
-
 /* Returns the first tail of `values` whose head is `Var.equal` to `value`,
    or nil. */
 Var lisp_member(Var value, Var values) {
   while (!_nil(values) && !lisp_car(values).equal(value))
     values = lisp_cdr(values);
   return values;
-}
-
-/* Returns the first pair in `pairs` whose head is `Var.equal` to `key`, or
-   nil. Elements that are not pairs are skipped. */
-Var lisp_assoc(Var key, Var pairs) {
-  for (; !_nil(pairs); pairs = lisp_cdr(pairs)) {
-    Var pair = lisp_car(pairs);
-    if (pair is <list> && !pair.is_nil() && lisp_car(pair).equal(key))
-      return pair;
-  }
-  return %();
-}
-
-static Var _append2(Var left, Var right) {
-  List items = NULL;
-  for (; !_nil(left); left = lisp_cdr(left))
-    items = cons(lisp_car(left), items);
-  if (!items) return right;
-  List tail = _list(right, "append");
-  foreach (Var value in items) tail = cons(value, tail);
-  return tail;
 }
 
 /* Concatenates its list arguments; the last is shared, not copied. */
@@ -86,21 +44,33 @@ Var lisp_not(Var value) => _truth(_nil(value));
 Var lisp_null(Var value) => _truth(_nil(value));
 
 Var lisp_sub(Var a, Var b) => a.binary(<->, b);
+
 Var lisp_mul(Var a, Var b) => a.binary(<*>, b);
+
 Var lisp_div(Var a, Var b) => a.binary(</>, b);
+
 Var lisp_mod(Var a, Var b) => a.binary(<%>, b);
 
 Var lisp_caar(Var v) => lisp_car(lisp_car(v));
-Var lisp_cadr(Var v) => lisp_car(lisp_cdr(v));
+
 Var lisp_cdar(Var v) => lisp_cdr(lisp_car(v));
+
 Var lisp_cddr(Var v) => lisp_cdr(lisp_cdr(v));
+
 Var lisp_caaar(Var v) => lisp_car(lisp_car(lisp_car(v)));
+
 Var lisp_caadr(Var v) => lisp_car(lisp_car(lisp_cdr(v)));
+
 Var lisp_cadar(Var v) => lisp_car(lisp_cdr(lisp_car(v)));
+
 Var lisp_caddr(Var v) => lisp_car(lisp_cdr(lisp_cdr(v)));
+
 Var lisp_cdaar(Var v) => lisp_cdr(lisp_car(lisp_car(v)));
+
 Var lisp_cdadr(Var v) => lisp_cdr(lisp_car(lisp_cdr(v)));
+
 Var lisp_cddar(Var v) => lisp_cdr(lisp_cdr(lisp_car(v)));
+
 Var lisp_cdddr(Var v) => lisp_cdr(lisp_cdr(lisp_cdr(v)));
 
 /* Returns the bindings of `pat` against `input`, or nil when `input` is
@@ -116,6 +86,19 @@ Var lisp_match(Var input, Var pat) {
 Var lisp_bound(Var bindings, Var name) =>
   lisp_cadr(lisp_assoc(name, bindings));
 
+/* Returns the first pair in `pairs` whose head is `Var.equal` to `key`, or
+   nil. Elements that are not pairs are skipped. */
+Var lisp_assoc(Var key, Var pairs) {
+  for (; !_nil(pairs); pairs = lisp_cdr(pairs)) {
+    Var pair = lisp_car(pairs);
+    if (pair is <list> && !pair.is_nil() && lisp_car(pair).equal(key))
+      return pair;
+  }
+  return %();
+}
+
+Var lisp_cadr(Var v) => lisp_car(lisp_cdr(v));
+
 /* Replaces `input` when its root matches `pat`; otherwise replaces every
    matching sublist.
 */
@@ -123,15 +106,6 @@ Var lisp_search_replace(Var input, Var pat, Var template) {
   List list = _list(input, "search-replace");
   if (_nil(list.match(pat))) return list.search_replace(pat, template);
   return lisp_match_replace(list, pat, template);
-}
-
-/* Returns true when `value` is a pattern binder: a symbol spelled `?`
-    or `*` followed by at least one character.
-*/
-Var lisp_binder(Var value) {
-  if (value.kind() != <symbol> && value.tag() != <lsym>) return %();
-  String name = value.str();
-  return _truth(name.len() > 1 && (name[0] == '?' || name[0] == '*'));
 }
 
 /* Returns the binders of `pat` in order, repeats included. */
@@ -146,6 +120,15 @@ Var lisp_binders(Var pat) {
     foreach (Atom binder in binders) reversed = cons(binder, reversed);
   }
   return reversed.reverse();
+}
+
+/* Returns true when `value` is a pattern binder: a symbol spelled `?`
+    or `*` followed by at least one character.
+*/
+Var lisp_binder(Var value) {
+  if (value.kind() != <symbol> && value.tag() != <lsym>) return %();
+  String name = value.str();
+  return _truth(name.len() > 1 && (name[0] == '?' || name[0] == '*'));
 }
 
 /* Returns `let` rows binding each of `binders` to its value in the match
@@ -166,4 +149,35 @@ Var lisp_string_append_all(List strings) {
   foreach (Var s in strings)
     text = lisp_string_append(text, _string(s, "string-append"));
   return text;
+}
+
+static int _nil(Var value) => value == %();
+
+static Var _append2(Var left, Var right) {
+  List items = NULL;
+  for (; !_nil(left); left = lisp_cdr(left))
+    items = cons(lisp_car(left), items);
+  if (!items) return right;
+  List tail = _list(right, "append");
+  foreach (Var value in items) tail = cons(value, tail);
+  return tail;
+}
+
+static List _list(Var value, String operation) {
+  if (value is not <list>)
+    raise %(bad-types (operation $operation) (actual $(value.tag()))
+                       (want list));
+  return value;
+}
+
+static Var _truth(int x) {
+  if (x) return <true>;
+  return %();
+}
+
+static String _string(Var value, String operation) {
+  if (value is not <string>)
+    raise %(bad-types (operation $operation) (actual $(value.tag()))
+                       (want string));
+  return value;
 }

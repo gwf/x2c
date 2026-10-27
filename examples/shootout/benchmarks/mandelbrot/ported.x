@@ -11,23 +11,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static uint32_t _hash_byte(uint32_t hash, unsigned byte) {
-  return (hash << 5) + hash + byte;
-}
-
-/* One pixel: 1 while the orbit of (cr, ci) has not escaped after 50 steps. */
-static unsigned _in_set(int x, int y, int width, int height) {
-  double zr = 0, zi = 0, tr = 0, ti = 0;
-  double cr = 2.0 * x / width - 1.5, ci = 2.0 * y / height - 1.0;
-  for (int i = 0; i < 50 && tr + ti <= 4.0; i++) {
-    zi = 2.0 * zr * zi + ci;
-    zr = tr - ti + cr;
-    tr = zr * zr;
-    ti = zi * zi;
-  }
-  return tr + ti <= 4.0;
-}
-
 int main(int argc, char **argv) {
   if (argc != 4) return 2;
   int width = atoi(argv[1]), height = atoi(argv[2]);
@@ -53,4 +36,21 @@ int main(int argc, char **argv) {
   }
   printf("%u\n", hash);
   return 0;
+}
+
+static uint32_t _hash_byte(uint32_t hash, unsigned byte) {
+  return (hash << 5) + hash + byte;
+}
+
+/* One pixel: 1 while the orbit of (cr, ci) has not escaped after 50 steps. */
+static unsigned _in_set(int x, int y, int width, int height) {
+  double zr = 0, zi = 0, tr = 0, ti = 0;
+  double cr = 2.0 * x / width - 1.5, ci = 2.0 * y / height - 1.0;
+  for (int i = 0; i < 50 && tr + ti <= 4.0; i++) {
+    zi = 2.0 * zr * zi + ci;
+    zr = tr - ti + cr;
+    tr = zr * zr;
+    ti = zi * zi;
+  }
+  return tr + ti <= 4.0;
 }

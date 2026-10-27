@@ -12,11 +12,6 @@
 
 typedef struct Grid { unsigned char *alive; int w, h; } Grid;
 
-/* The board is a torus, so every read wraps on both axes. */
-static inline int Grid.at(Grid g, int x, int y) {
-  return g.alive[((y + g.h) % g.h) * g.w + (x + g.w) % g.w];
-}
-
 int main(int argc, char **argv) {
   if (argc != 4) return 2;
   int w = atoi(argv[1]), h = atoi(argv[2]), steps = atoi(argv[3]);
@@ -39,4 +34,9 @@ int main(int argc, char **argv) {
   for (int i = 0; i < n; i++) hash = (hash ^ cells.alive[i]) * 16777619u;
   printf("%u\n", hash);
   return 0;
+}
+
+/* The board is a torus, so every read wraps on both axes. */
+static inline int Grid.at(Grid g, int x, int y) {
+  return g.alive[((y + g.h) % g.h) * g.w + (x + g.w) % g.w];
 }

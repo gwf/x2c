@@ -11,19 +11,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-static void _sort(int *a, int left, int right) {
-  int i = left, j = right, pivot = a[(left + right) / 2];
-  while (i <= j) {
-    while (a[i] < pivot) i++;
-    while (a[j] > pivot) j--;
-    if (i <= j) {
-      int swap = a[i]; a[i++] = a[j]; a[j--] = swap;
-    }
-  }
-  if (left < j) _sort(a, left, j);
-  if (i < right) _sort(a, i, right);
-}
-
 int main(int argc, char **argv) {
   if (argc != 3) return 2;
   int n = atoi(argv[1]), runs = atoi(argv[2]);
@@ -41,4 +28,17 @@ int main(int argc, char **argv) {
   }
   printf("%u\n", checksum);
   return 0;
+}
+
+static void _sort(int *a, int left, int right) {
+  int i = left, j = right, pivot = a[(left + right) / 2];
+  while (i <= j) {
+    while (a[i] < pivot) i++;
+    while (a[j] > pivot) j--;
+    if (i <= j) {
+      int swap = a[i]; a[i++] = a[j]; a[j--] = swap;
+    }
+  }
+  if (left < j) _sort(a, left, j);
+  if (i < right) _sort(a, i, right);
 }

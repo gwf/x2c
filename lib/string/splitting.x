@@ -74,12 +74,6 @@ meta native String String.dedent(String str) {
   return String.new_len(body, tail);
 }
 
-/* The width of the one line break that may open a dedented text. */
-static int _newline_width(String str) {
-  if (str.startswith("\r\n")) return 2;
-  return str.startswith("\n") ? 1 : 0;
-}
-
 /** Removes `prefix` when `str` starts with it and returns a canonical
     `String`.
     A null or absent prefix returns `str` unchanged; removing the complete
@@ -143,4 +137,10 @@ meta native List String.rpartition(String str, String sep) {
   String after = String.new_len(
     str + found + sep_length, str.len() - found - sep_length);
   return $(before, sep, after);
+}
+
+/* The width of the one line break that may open a dedented text. */
+static int _newline_width(String str) {
+  if (str.startswith("\r\n")) return 2;
+  return str.startswith("\n") ? 1 : 0;
 }

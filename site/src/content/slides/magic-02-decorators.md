@@ -12,15 +12,15 @@ macro Decorator $trace(Function $function) {
   @Code.body($function)
 }
 
-$trace()
-int answer(void) => 42;
-
 ~int main(void) {
 // Prints "enter answer", then "leave answer".
 int result = answer();
 ~assert(result == 42);
 ~return 0;
 ~}
+
+$trace()
+int answer(void) => 42;
 ```
 
 `$trace` receives a parsed `Function` and wraps its body while

@@ -10,32 +10,6 @@ typedef struct Work {
   Scope output;
 } Work;
 
-static Var count(const void *input, size_t input_size) {
-  const Work *work = input;
-  if (input_size != sizeof(Work))
-    raise %(bad-arg (operation "count worker"));
-
-  for (int i = 0; i < work.iterations; i++) {
-    String scratch = %"$(work.name)-$i";
-    List garbage = %(iteration $i scratch $scratch);
-    (void) garbage;
-
-    work.mutex.lock();
-    (*work.counter)++;
-    work.mutex.unlock();
-  }
-
-  String message = %"$(work.name) complete";
-  log_info(<worker>, %(message $message));
-  Map result = {
-    name: work.name,
-    message: message
-  };
-  Scope output = work.output;
-  result.move_to(&output);
-  return result;
-}
-
 int main(void) {
   int counter = 0;
   Mutex mutex = Mutex.new();
@@ -67,4 +41,30 @@ int main(void) {
   logger.free();
   mutex.free();
   return 0;
+}
+
+static Var count(const void *input, size_t input_size) {
+  const Work *work = input;
+  if (input_size != sizeof(Work))
+    raise %(bad-arg (operation "count worker"));
+
+  for (int i = 0; i < work.iterations; i++) {
+    String scratch = %"$(work.name)-$i";
+    List garbage = %(iteration $i scratch $scratch);
+    (void) garbage;
+
+    work.mutex.lock();
+    (*work.counter)++;
+    work.mutex.unlock();
+  }
+
+  String message = %"$(work.name) complete";
+  log_info(<worker>, %(message $message));
+  Map result = {
+    name: work.name,
+    message: message
+  };
+  Scope output = work.output;
+  result.move_to(&output);
+  return result;
 }

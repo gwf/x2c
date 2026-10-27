@@ -41,36 +41,6 @@ module List _forward_declarations(
   return f.out.list_free();
 }
 
-/* Every public inline definition has C internal linkage, including the
-   authored prototypes in a file that reaches its defining source. */
-static List _inline_prototype(Compiler c, List node) {
-  match (node) {
-    case %(declare ?type (!set ?declarator
-             (bind ?binding ((fnmod *) *)))):
-      if (!type.type().is_static() && _inline_binding(c, binding))
-        return %(declare (static @type) $declarator);
-    case %(declare ?type (bindings *declarators))
-      if (!type.type().is_static()): {
-      Array rows = [], int changed = 0;
-      foreach (List declarator in declarators) {
-        List base = type;
-        if (declarator ~= %(bind ?binding ((fnmod *) *)) &&
-            _inline_binding(c, binding)) {
-          base = %(static @type);
-          changed = 1;
-        }
-        rows.push(%(declare $base (bindings $declarator)));
-      }
-      if (changed) return rows.list_free();
-      rows.free();
-    }
-  }
-  return node;
-}
-
-static int _inline_binding(Compiler c, List binding) =>
-  c.sym.get($("function-inline", Ast.binding_spelling(binding))) != NULL;
-
 /* Native directives and initializer inputs keep their source order.
    Public inline definitions keep their macro state at their positions.
    Ordinary function bodies follow the file's declarations and directives,
@@ -145,49 +115,6 @@ static void _place_bodies(Array out, Array bodies, List arms) {
 
 // declared names
 
-/* Adds to `available` each binding `value` declares, with each function's
-   native spelling and each typedef's spelling. */
-static void _collect_declared(Var value, Map available) {
-  if (value is not <list> || value.is_nil()) return;
-  List node = value;
-  match (node) {
-    case %(function ? (!set ?declarator (bind (binding ? ?) ?)) ?):
-      _set_function(available, _declaration_binding(declarator), 1);
-    case %(declare ? (!set ?declarator (bind (binding ? ?) ?))):
-      if (node.type_from_ast().is_function())
-        _set_function(available, _declaration_binding(declarator), 1);
-    case %(declare (*) (bindings *declarators)):
-      foreach (List declarator in declarators) {
-        List binding = _declaration_binding(declarator);
-        if (binding) available[binding] = 1;
-      }
-    case %(typedef (*) (bindings *declarators)):
-      foreach (List declarator in declarators)
-        _set_typedef(available, _declaration_binding(declarator), 1);
-    default: foreach (Var child in node) _collect_declared(child, available);
-  }
-}
-
-/* A function is found by its binding and by its native spelling. */
-static void _set_function(Map names, Var binding, Var value) {
-  names[binding] = value;
-  names[%(native $(Ast.binding_spelling(binding)))] = value;
-}
-
-/* A typedef is found by its binding and by its spelling. */
-static void _set_typedef(Map names, List binding, Var value) {
-  if (!binding) return;
-  names[binding] = value;
-  names[Ast.binding_spelling(binding)] = value;
-}
-
-module List _declaration_binding(List declarator) {
-  match (declarator)
-    case $Ast.declarator_pattern(%((!set ?binding (binding ? ?)) ?)):
-      return binding;
-  return NULL;
-}
-
 /* Records source declarations by binding: every defined function's
    prototype, also under its native spelling, static objects without their
    initializers, and typedefs, also under their spellings. */
@@ -221,24 +148,6 @@ static void _dependencies(Forward &f, Var value) {
   if (value is not <list> || value.is_nil()) return;
   Array resume = auto [];
   for (List node = value; node; node = _next(node, resume)) _visit(f, node);
-}
-
-/* The next nonempty List after `node` in a preorder walk, or NULL at the
-   end. `resume` holds the sibling suffixes still to visit. */
-static List _next(List node, Array resume) {
-  List rest = node;
-  for (;;) {
-    while (!rest) {
-      if (!resume.len()) return NULL;
-      rest = resume.take_last();
-    }
-    Var child = rest.car();
-    rest = rest.cdr();
-    if (child is <list> && !child.is_nil()) {
-      if (rest) resume.push(rest);
-      return child;
-    }
-  }
 }
 
 static void _visit(Forward &f, List node) {
@@ -297,4 +206,97 @@ static void _types(Forward &f, Type type) {
   foreach (Var modifier in type)
     if (modifier ~= %(func (*parameters)))
       foreach (Type parameter in parameters) _types(f, parameter);
+}
+
+/* Every public inline definition has C internal linkage, including the
+   authored prototypes in a file that reaches its defining source. */
+static List _inline_prototype(Compiler c, List node) {
+  match (node) {
+    case %(declare ?type (!set ?declarator
+             (bind ?binding ((fnmod *) *)))):
+      if (!type.type().is_static() && _inline_binding(c, binding))
+        return %(declare (static @type) $declarator);
+    case %(declare ?type (bindings *declarators))
+      if (!type.type().is_static()): {
+      Array rows = [], int changed = 0;
+      foreach (List declarator in declarators) {
+        List base = type;
+        if (declarator ~= %(bind ?binding ((fnmod *) *)) &&
+            _inline_binding(c, binding)) {
+          base = %(static @type);
+          changed = 1;
+        }
+        rows.push(%(declare $base (bindings $declarator)));
+      }
+      if (changed) return rows.list_free();
+      rows.free();
+    }
+  }
+  return node;
+}
+
+static int _inline_binding(Compiler c, List binding) =>
+  c.sym.get($("function-inline", Ast.binding_spelling(binding))) != NULL;
+
+
+
+/* Adds to `available` each binding `value` declares, with each function's
+   native spelling and each typedef's spelling. */
+static void _collect_declared(Var value, Map available) {
+  if (value is not <list> || value.is_nil()) return;
+  List node = value;
+  match (node) {
+    case %(function ? (!set ?declarator (bind (binding ? ?) ?)) ?):
+      _set_function(available, _declaration_binding(declarator), 1);
+    case %(declare ? (!set ?declarator (bind (binding ? ?) ?))):
+      if (node.type_from_ast().is_function())
+        _set_function(available, _declaration_binding(declarator), 1);
+    case %(declare (*) (bindings *declarators)):
+      foreach (List declarator in declarators) {
+        List binding = _declaration_binding(declarator);
+        if (binding) available[binding] = 1;
+      }
+    case %(typedef (*) (bindings *declarators)):
+      foreach (List declarator in declarators)
+        _set_typedef(available, _declaration_binding(declarator), 1);
+    default: foreach (Var child in node) _collect_declared(child, available);
+  }
+}
+
+/* A function is found by its binding and by its native spelling. */
+static void _set_function(Map names, Var binding, Var value) {
+  names[binding] = value;
+  names[%(native $(Ast.binding_spelling(binding)))] = value;
+}
+
+/* A typedef is found by its binding and by its spelling. */
+static void _set_typedef(Map names, List binding, Var value) {
+  if (!binding) return;
+  names[binding] = value;
+  names[Ast.binding_spelling(binding)] = value;
+}
+
+module List _declaration_binding(List declarator) {
+  match (declarator)
+    case $Ast.declarator_pattern(%((!set ?binding (binding ? ?)) ?)):
+      return binding;
+  return NULL;
+}
+
+/* The next nonempty List after `node` in a preorder walk, or NULL at the
+   end. `resume` holds the sibling suffixes still to visit. */
+static List _next(List node, Array resume) {
+  List rest = node;
+  for (;;) {
+    while (!rest) {
+      if (!resume.len()) return NULL;
+      rest = resume.take_last();
+    }
+    Var child = rest.car();
+    rest = rest.cdr();
+    if (child is <list> && !child.is_nil()) {
+      if (rest) resume.push(rest);
+      return child;
+    }
+  }
 }

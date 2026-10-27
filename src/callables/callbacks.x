@@ -68,6 +68,47 @@ List Compiler.lower_typed_adapter_expr(Compiler c, List expression) {
   return expression;
 }
 
+/** Adapts a lowered noncapturing lambda helper to a typed callback.
+    `argument` must be a resolved helper reference produced by
+    `Compiler.lower_lambda_expr`, optionally wrapped in parentheses.
+    `expected_type` must describe a fixed, nonvariadic function. Unless its
+    parameters and result are already `Var`,
+    a queued static helper converts callback arguments to the lowered lambda's
+    original parameter types before calling it, then converts its `Var` result
+    to the expected return type. Already compatible or unsupported shapes pass
+    through unchanged.
+*/
+List Compiler.adapt_lambda_arg(Compiler c, List argument, List expected_type) {
+  Callback cb = {.c = c, .target = expected_type};
+  match (argument) {
+    case %(expr ? $($grouped(?inner))): {
+      List adapted = c.adapt_lambda_arg(inner, expected_type);
+      if (adapted == inner) return argument;
+      Macro grouped = $grouped;
+      return c.rebuild_expression(expected_type, grouped(adapted));
+    }
+    case %(expr ?type (ident ?binding)): {
+      cb.source = type;
+      cb.source_binding = binding;
+    }
+    default: return argument;
+  }
+  List raw_params = NULL, Var return_type = void;
+  if (!_lambda_adapter_signature(expected_type, raw_params, return_type) ||
+      _typed_params_variadic(raw_params))
+    return argument;
+  int all_var = _collect_param_types(raw_params, cb.params);
+  List source_params = NULL;
+  cb.source.function_parts(source_params, NULL);
+  _collect_param_types(source_params, cb.source_params);
+  List result = return_type is <list> ? return_type : $(return_type);
+  if (all_var && result === %("Var")) return argument;
+  cb.result = result;
+  return _publish_lambda(cb);
+}
+
+// typed native and lambda callback adaptation
+
 /* The source is a direct function, and both signatures are complete and
    fixed. */
 static void _split(Callback &c) {
@@ -151,45 +192,6 @@ static List _function(Callback &cb, List binding) {
     : %((return $(cb.result) $(c.convert_expression(call, cb.result))));
   return c.wrapper_function(
     %(static @(cb.result)), binding, declarations, body);
-}
-
-/** Adapts a lowered noncapturing lambda helper to a typed callback.
-    `argument` must be a resolved helper reference produced by
-    `Compiler.lower_lambda_expr`, optionally wrapped in parentheses.
-    `expected_type` must describe a fixed, nonvariadic function. Unless its
-    parameters and result are already `Var`,
-    a queued static helper converts callback arguments to the lowered lambda's
-    original parameter types before calling it, then converts its `Var` result
-    to the expected return type. Already compatible or unsupported shapes pass
-    through unchanged.
-*/
-List Compiler.adapt_lambda_arg(Compiler c, List argument, List expected_type) {
-  Callback cb = {.c = c, .target = expected_type};
-  match (argument) {
-    case %(expr ? $($grouped(?inner))): {
-      List adapted = c.adapt_lambda_arg(inner, expected_type);
-      if (adapted == inner) return argument;
-      Macro grouped = $grouped;
-      return c.rebuild_expression(expected_type, grouped(adapted));
-    }
-    case %(expr ?type (ident ?binding)): {
-      cb.source = type;
-      cb.source_binding = binding;
-    }
-    default: return argument;
-  }
-  List raw_params = NULL, Var return_type = void;
-  if (!_lambda_adapter_signature(expected_type, raw_params, return_type) ||
-      _typed_params_variadic(raw_params))
-    return argument;
-  int all_var = _collect_param_types(raw_params, cb.params);
-  List source_params = NULL;
-  cb.source.function_parts(source_params, NULL);
-  _collect_param_types(source_params, cb.source_params);
-  List result = return_type is <list> ? return_type : $(return_type);
-  if (all_var && result === %("Var")) return argument;
-  cb.result = result;
-  return _publish_lambda(cb);
 }
 
 static List _publish_lambda(Callback &cb) {

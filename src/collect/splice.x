@@ -43,10 +43,7 @@ ModuleSource Compiler.module_source(Compiler c, String path, String text) {
   return source;
 }
 
-/* The token scan decides whether `module` opens a block, including when
-   comments separate it from its brace. */
-static int _spells_block(const char *text) =>
-  text && strstr(text, "module");
+// source collection splice
 
 /* Appends a file with its block spliced and reports whether it had one.
    Each file's text is marked as its own, so its rows carry its file
@@ -74,6 +71,30 @@ static int _file(
     _own(s, close.pos + 1, text.len(), close.line);
     return 1;
   }
+}
+
+/* Appends a member relative to the file that names it. A file being
+   spliced cannot be spliced again inside itself. */
+static void _member(Splice &s, String spelling, Token site) {
+  String dir = Path.dirname(s.path), text = NULL;
+  String path = Path.join(dir, spelling);
+  String resolved = Path.absolute(path);
+  if (resolved in s.splicing)
+    $fail.collect_module_cycle(s.c, site, spelling, resolved);
+  if (!s.c.read_source(path, text))
+    $fail.collect_module_read(s.c, site, path);
+  s.members[_canonical_path(path)] = _content_hash(text);
+  String prefix = s.prefix ? Path.join(s.prefix, spelling) : spelling;
+  String relative = _relative_member(s.root, resolved);
+  String own = _file_prefix(
+    Path.join(Path.dirname(relative), Path.stem(relative)));
+  if (own in s.prefixes)
+    $fail.collect_module_prefix(s.c, site, spelling, s.prefixes[own]);
+  s.prefixes[own] = spelling;
+  s.splicing[resolved] = 1;
+  _file(s, path, text, Path.dirname(prefix), own);
+  s.splicing.del(resolved);
+  _end_line(s);
 }
 
 /* The `module` that opens the file's file-scope block, or NULL. The word
@@ -104,6 +125,11 @@ static Token _block(Splice &s) {
   return block;
 }
 
+/* The token scan decides whether `module` opens a block, including when
+   comments separate it from its brace. */
+static int _spells_block(const char *text) =>
+  text && strstr(text, "module");
+
 static int _is_word(String text) =>
   isalnum((unsigned char) text[0]) || text[0] == '_';
 
@@ -122,30 +148,6 @@ static List _members(Splice &s, Token block, Token &close) {
   }
   close = token;
   return members.list_free();
-}
-
-/* Appends a member relative to the file that names it. A file being
-   spliced cannot be spliced again inside itself. */
-static void _member(Splice &s, String spelling, Token site) {
-  String dir = Path.dirname(s.path), text = NULL;
-  String path = Path.join(dir, spelling);
-  String resolved = Path.absolute(path);
-  if (resolved in s.splicing)
-    $fail.collect_module_cycle(s.c, site, spelling, resolved);
-  if (!s.c.read_source(path, text))
-    $fail.collect_module_read(s.c, site, path);
-  s.members[_canonical_path(path)] = _content_hash(text);
-  String prefix = s.prefix ? Path.join(s.prefix, spelling) : spelling;
-  String relative = _relative_member(s.root, resolved);
-  String own = _file_prefix(
-    Path.join(Path.dirname(relative), Path.stem(relative)));
-  if (own in s.prefixes)
-    $fail.collect_module_prefix(s.c, site, spelling, s.prefixes[own]);
-  s.prefixes[own] = spelling;
-  s.splicing[resolved] = 1;
-  _file(s, path, text, Path.dirname(prefix), own);
-  s.splicing.del(resolved);
-  _end_line(s);
 }
 
 /* Spell a resolved member relative to the entry directory, including

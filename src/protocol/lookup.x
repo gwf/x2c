@@ -11,79 +11,6 @@ static typedef struct GeneratedOwners {
   Symbol first_storage;
 } GeneratedOwners;
 
-// conformance lookup
-
-/** Returns the resolved conformance for `participant` and `base`, if any.
-    Lookup canonicalizes the participant and may use the nearest adopted
-    typedef ancestor. Native conformances install their generated bindings
-    before the cached conformance row is returned.
-*/
-List Compiler.protocol_members_for(Compiler c, Type participant, Type base) {
-  participant = participant.canonicalize();
-  if (c.import_protocols) _install_imports(c);
-  Type owner = participant;
-  if (!_is_adopted(c, base, owner)) {
-    List ancestry = _ancestry(c, participant).cdr();
-    for (; ancestry; ancestry = ancestry.cdr()) {
-      owner = ancestry.car();
-      if (_is_adopted(c, base, owner)) break;
-    }
-    if (!ancestry) return NULL;
-  }
-  List key = $(base, owner);
-  Var stored = c.conforms[key];
-  /* One adoption is resolved where it is asked for when the parse has not
-     resolved it. `_publish` already skips resolving during
-     a shallow pass, and an import installed just above resolves nothing.
-     `adoptions` holds only the adoptions this compiler may use, and the full
-     parse resolves all of them before it starts, except those an included
-     interface recorded, which are installed here on first use. */
-  if (stored is void) {
-    if (!_reuse_conformance(c, base, owner))
-      _resolve_adoption(c, base, owner, NULL);
-    stored = c.conforms[key];
-  }
-  if (stored is not <list>) return NULL;
-  List conformance = stored;
-  _install_native_bindings(c, owner, conformance.last().list().cdr());
-  return conformance;
-}
-
-/* Collection skips bodies and leaves protocol registries empty. A canonical
-   template can need protocols before full parsing, so install the visible
-   symbols on first use and resolve only the conformance requested. */
-static void _install_imports(Compiler c) {
-  c.import_protocols = 0;
-  c.rebuild_protocols(c.sym.unit_symbols());
-}
-
-module List _ancestry(Compiler c, Type participant) {
-  List result = NULL;
-  $memo(c.proto_cache, $("protocol-ancestry", participant), result) {
-    Array ancestry = [], Type current = participant;
-    for (int distance = 0; current && distance <= 128; distance++) {
-      ancestry.push(current);
-      if (!current.is_typedef_name() && !current.is_typedef()) break;
-      current = c.sym.get(current).type().canonicalize();
-    }
-    result = ancestry.list_free();
-  }
-  return result;
-}
-
-static List _ordered_occurrences(Compiler c) {
-  if (c.import_protocols) _install_imports(c);
-  List result = NULL;
-  $memo(c.proto_cache, <proto-ordr>, result) {
-    Array ordered = [];
-    foreach ((Type base, List occurrence) in c.protocols)
-      ordered.push($(base, occurrence));
-    ordered.sort();
-    result = ordered.list_free();
-  }
-  return result;
-}
-
 /* Runs visit once for each conformance participant adopts, in protocols
    order, after setting the caller's base to the protocol and rows to its
    member rows. */
@@ -99,6 +26,8 @@ static macro Decorator $adopted_rows(
     $visit;
   }
 }
+
+// conformance lookup
 
 /** Returns unique member spellings from the participant's visible adopted
     conformances. Resolution remains responsible for selecting a binding.
@@ -146,16 +75,6 @@ int Compiler.protocol_rejects_direct_member(
   return rejects;
 }
 
-static List _member_row(
-  Compiler c, List protocols, Type participant, String member) {
-  Type base = NULL;
-  List rows = NULL;
-  $adopted_rows(c, protocols, participant, base, rows) {
-    foreach (List row in rows) if (row.car() == member) return row;
-  }
-  return NULL;
-}
-
 /** Prints stable conformance rows for typedefs in `globs`.
     Rows are ordered by participant and protocol and identify whether each
     adoption is owned by this unit, so prelude and live symbol modes can be
@@ -180,6 +99,110 @@ void Compiler.dump_conformance(Compiler c, Map globs) {
   names.free();
 }
 
+// member resolution
+
+/** Resolves a protocol member for `participant`.
+    Returns a `(binding signature)` pair for the selected implementation or
+    null when no eligible resolved member exists; positive and negative
+    results are cached. Inside the selected implementation itself the result
+    is null, so the member's own body keeps the native operation.
+*/
+List Compiler.resolve_protocol_member(
+  Compiler c, Type participant, String member_name) {
+  // A const or volatile receiver adopts exactly what its unqualified type
+  // adopts, so conformance is keyed on the unqualified participant.
+  List resolved = _resolve_member(c, participant.canonicalize(), member_name);
+  if (!resolved) return NULL;
+  (String spelling, Type signature) = resolved;
+  if (spelling == c.fn_name) return NULL;
+  return $(c.sym.reference($(spelling), NULL), signature);
+}
+
+
+
+/** Returns the resolved conformance for `participant` and `base`, if any.
+    Lookup canonicalizes the participant and may use the nearest adopted
+    typedef ancestor. Native conformances install their generated bindings
+    before the cached conformance row is returned.
+*/
+List Compiler.protocol_members_for(Compiler c, Type participant, Type base) {
+  participant = participant.canonicalize();
+  if (c.import_protocols) _install_imports(c);
+  Type owner = participant;
+  if (!_is_adopted(c, base, owner)) {
+    List ancestry = _ancestry(c, participant).cdr();
+    for (; ancestry; ancestry = ancestry.cdr()) {
+      owner = ancestry.car();
+      if (_is_adopted(c, base, owner)) break;
+    }
+    if (!ancestry) return NULL;
+  }
+  List key = $(base, owner);
+  Var stored = c.conforms[key];
+  /* One adoption is resolved where it is asked for when the parse has not
+     resolved it. `_publish` already skips resolving during
+     a shallow pass, and an import installed just above resolves nothing.
+     `adoptions` holds only the adoptions this compiler may use, and the full
+     parse resolves all of them before it starts, except those an included
+     interface recorded, which are installed here on first use. */
+  if (stored is void) {
+    if (!_reuse_conformance(c, base, owner))
+      _resolve_adoption(c, base, owner, NULL);
+    stored = c.conforms[key];
+  }
+  if (stored is not <list>) return NULL;
+  List conformance = stored;
+  _install_native_bindings(c, owner, conformance.last().list().cdr());
+  return conformance;
+}
+
+// protocol member lookup
+
+module List _ancestry(Compiler c, Type participant) {
+  List result = NULL;
+  $memo(c.proto_cache, $("protocol-ancestry", participant), result) {
+    Array ancestry = [], Type current = participant;
+    for (int distance = 0; current && distance <= 128; distance++) {
+      ancestry.push(current);
+      if (!current.is_typedef_name() && !current.is_typedef()) break;
+      current = c.sym.get(current).type().canonicalize();
+    }
+    result = ancestry.list_free();
+  }
+  return result;
+}
+
+static List _ordered_occurrences(Compiler c) {
+  if (c.import_protocols) _install_imports(c);
+  List result = NULL;
+  $memo(c.proto_cache, <proto-ordr>, result) {
+    Array ordered = [];
+    foreach ((Type base, List occurrence) in c.protocols)
+      ordered.push($(base, occurrence));
+    ordered.sort();
+    result = ordered.list_free();
+  }
+  return result;
+}
+
+/* Collection skips bodies and leaves protocol registries empty. A canonical
+   template can need protocols before full parsing, so install the visible
+   symbols on first use and resolve only the conformance requested. */
+static void _install_imports(Compiler c) {
+  c.import_protocols = 0;
+  c.rebuild_protocols(c.sym.unit_symbols());
+}
+
+static List _member_row(
+  Compiler c, List protocols, Type participant, String member) {
+  Type base = NULL;
+  List rows = NULL;
+  $adopted_rows(c, protocols, participant, base, rows) {
+    foreach (List row in rows) if (row.car() == member) return row;
+  }
+  return NULL;
+}
+
 static void _dump_row(
   const char *kind, int owned, Type base, Type participant, List rows) {
   printf(
@@ -202,25 +225,6 @@ static void _dump_row(
         " (%s %s %s %s)", member, name, source ? source : "-", punctuation);
     }
   printf(")\n");
-}
-
-// member resolution
-
-/** Resolves a protocol member for `participant`.
-    Returns a `(binding signature)` pair for the selected implementation or
-    null when no eligible resolved member exists; positive and negative
-    results are cached. Inside the selected implementation itself the result
-    is null, so the member's own body keeps the native operation.
-*/
-List Compiler.resolve_protocol_member(
-  Compiler c, Type participant, String member_name) {
-  // A const or volatile receiver adopts exactly what its unqualified type
-  // adopts, so conformance is keyed on the unqualified participant.
-  List resolved = _resolve_member(c, participant.canonicalize(), member_name);
-  if (!resolved) return NULL;
-  (String spelling, Type signature) = resolved;
-  if (spelling == c.fn_name) return NULL;
-  return $(c.sym.reference($(spelling), NULL), signature);
 }
 
 /* Cache the selected declaration, not a transaction-owned binding identity. */
