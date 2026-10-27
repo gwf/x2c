@@ -8,10 +8,10 @@ meta int output_cells(int unused) {
   long integer = 9;
   double floating = 9.0;
   int cursor = 0, byte = 9;
-  if (!"42".try_long(&integer) || integer != 42 ||
-      "bad".try_long(&integer) || integer != 42 ||
-      !"1.25".try_double(&floating) || floating != 1.25 ||
-      "bad".try_double(&floating) || floating != 1.25 ||
+  if (!"42".try_long(integer) || integer != 42 ||
+      "bad".try_long(integer) || integer != 42 ||
+      !"1.25".try_double(floating) || floating != 1.25 ||
+      "bad".try_double(floating) || floating != 1.25 ||
       !"A".try_next(cursor, byte) || cursor != 1 || byte != 'A' ||
       "A".try_next(cursor, byte) || cursor != 1 || byte != 'A')
     return 0;
@@ -56,15 +56,15 @@ meta int output_cells(int unused) {
   if (map.try_del("remove", value) || value != 9) return 0;
 
   Symbol symbol = <old>;
-  if (!Symbol.try_new("valid", &symbol) || symbol != <valid>) return 0;
+  if (!Symbol.try_new("valid", symbol) || symbol != <valid>) return 0;
   symbol = <old>;
-  if (Symbol.try_new("read_only", &symbol) || symbol != <old>) return 0;
+  if (Symbol.try_new("read_only", symbol) || symbol != <old>) return 0;
 
   struct SymbolCell cell = { <old> };
-  if (!Symbol.try_new("field", &cell.value) || cell.value != <field>)
+  if (!Symbol.try_new("field", cell.value) || cell.value != <field>)
     return 0;
   cell.value = <old>;
-  return !Symbol.try_new("read_only", &cell.value) && cell.value == <old>;
+  return !Symbol.try_new("read_only", cell.value) && cell.value == <old>;
 }
 
 meta int represented_results(int unused) {

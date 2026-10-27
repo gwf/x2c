@@ -477,13 +477,13 @@ static Var Reader.form(Reader &self, Token token) {
       return String.new_len(text + 1, token.len - 2).unescape();                 // Chain construction and unescaping.
     case <lit-int>: {                                                            // Token types are Symbol constants.
       long value;                                                                // Ordinary C integer local.
-      if (!text.try_long(&value)) break;                                         // Conversion with a success result.
+      if (!text.try_long(value)) break;                                          // Conversion with a success result.
       if (value == (int) value) return (int) value;                              // int implicitly boxes as Var.
       return value;                                                              // Native long implicitly boxes as Var.
     }
     case <lit-float>: {                                                          // Select a floating-point token.
       double value;                                                              // Ordinary C scalar local.
-      if (text.try_double(&value)) return value;                                 // double implicitly boxes as Var.
+      if (text.try_double(value)) return value;                                  // double implicitly boxes as Var.
       break;
     }
     case <lit-symbol>: {                                                         // Switch on the encoded token kind.

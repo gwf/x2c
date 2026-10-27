@@ -73,7 +73,7 @@ cmp "$tmp/updates-expected" "$tmp/updates"
 # without one become session values, and assert and NULL are C's own.
 printf '%s\n' '' '// just a comment' 'List sel = %(1 2);' \
   'Var (a, b) = sel;' 'a + b;' 'long q;' 'Var v;' 'String t;' \
-  '"42".try_long(&q);' 'q;' 't == NULL;' 'int *p = NULL;' 'p == NULL;' \
+  '"42".try_long(q);' 'q;' 't == NULL;' 'int *p = NULL;' 'p == NULL;' \
   'assert(q == 42);' 'int g(void) { assert(b == 2); return a + q; }' 'g();' \
   'assert(a  > b);' 'q;' |
   builds/0/libexec/x2c-repl >"$tmp/forms" 2>"$tmp/forms-err" || true

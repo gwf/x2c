@@ -34,17 +34,17 @@ static void symbol_invalid_inputs(void) {
 
 static void symbol_try_new_requires_exact_spelling(void) {
   Symbol symbol = <unchanged>;
-  EXPECT_TRUE(Symbol.try_new("abcdefghij", &symbol));
+  EXPECT_TRUE(Symbol.try_new("abcdefghij", symbol));
   EXPECT_TRUE(symbol == <abcdefghij>);
-  EXPECT_TRUE(Symbol.try_new(NULL, &symbol));
+  EXPECT_TRUE(Symbol.try_new(NULL, symbol));
   EXPECT_INT_EQ(symbol, 0);
 
   symbol = <unchanged>;
-  EXPECT_FALSE(Symbol.try_new("read_only", &symbol));
+  EXPECT_FALSE(Symbol.try_new("read_only", symbol));
   EXPECT_TRUE(symbol == <unchanged>);
-  EXPECT_FALSE(Symbol.try_new("abcdefghijk", &symbol));
+  EXPECT_FALSE(Symbol.try_new("abcdefghijk", symbol));
   EXPECT_TRUE(symbol == <unchanged>);
-  EXPECT_FALSE(Symbol.try_new("Token@!!", &symbol));
+  EXPECT_FALSE(Symbol.try_new("Token@!!", symbol));
   EXPECT_TRUE(symbol == <unchanged>);
   EXPECT_FALSE(Symbol.try_new("exact", NULL));
 }

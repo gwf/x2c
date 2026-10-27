@@ -119,7 +119,7 @@ module String _angle_spelling(String text) {
 module Symbol _exact_symbol(
   Compiler c, Token token, String spelling) {
   Symbol symbol;
-  if (Symbol.try_new(spelling, &symbol)) return symbol;
+  if (Symbol.try_new(spelling, symbol)) return symbol;
   Symbol lossy = spelling ? Symbol.new(spelling) : 0;
   $fail.literals_symbol_truncated(c, token, spelling, lossy);
 }
