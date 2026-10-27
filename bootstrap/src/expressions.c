@@ -3506,11 +3506,11 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_5(void)
   _2894 = List_var(_2893);
   _2895 = cons(_156, _33);
   _2896 = List_var(_2895);
-  _2897 = int_var(343);
+  _2897 = int_var(345);
   _2898 = cons(_2897, NULL);
   _2899 = cons(_196, _2898);
   _2900 = List_var(_2899);
-  _2901 = int_var(96176);
+  _2901 = int_var(96300);
   _2902 = cons(_2901, NULL);
   _2903 = cons(_209, _2902);
   _2904 = List_var(_2903);
@@ -6683,7 +6683,7 @@ List _x2c_func_call_arguments(List function, List storage, List arguments){
         Type type = Var_type(List_cadr(argument));
         int forwarded = x2c_var_equal(List_car(Type_list(type)), Symbol_var(33330008396));
         List source = Compiler_cache_literal_list(c, Type_list(Sym_normalize_declared_type(c -> sym, forwarded ? List_cdr(type) : type)));
-        List value = Compiler_bind_syntax(c, List_var(Sym_var_tag_for_type(c -> sym, type, NULL) ? Macro_apply(boxed, cons(List_var(Compiler_convert_expression(c, argument, List_type(_643))), NULL)) : Macro_apply(opaque, cons(List_var(function), cons(List_var(index), cons(List_var(source), NULL))))), 405758822009820, NULL);
+        List value = Compiler_bind_syntax(c, List_var(Sym_var_tag_for_type(c -> sym, type, NULL) || Type_is_char_pointer_like(Type_canonicalize(type)) ? Macro_apply(boxed, cons(List_var(Compiler_convert_expression(c, argument, List_type(_643))), NULL)) : Macro_apply(opaque, cons(List_var(function), cons(List_var(index), cons(List_var(source), NULL))))), 405758822009820, NULL);
         if(_null_literal(argument)){
           Array_push(prepared, List_var(Macro_apply(absent, cons(List_var(function), cons(List_var(storage), cons(List_var(count), cons(List_var(index), cons(List_var(value), NULL))))))));
           continue;

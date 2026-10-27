@@ -68,7 +68,7 @@ the last formal in `P` canonicalize to `Iter`. `Iter` arguments are
 completed recursively; a call missing only that last formal receives the
 hidden destination. Variadic calls and `Iter_unzip` are returned unchanged.
 
-Source: `src/expressions/calls.x:450`
+Source: `src/expressions/calls.x:452`
 
 <a id="Compiler.convert_expression"></a>
 #### Compiler.convert_expression
@@ -123,7 +123,7 @@ Var, or `(no-value)` when it has no Var form; its address, or 0; and its
 type, which is `(expr ("List") (ident reference))` for a null argument
 that takes the callee's own type.
 
-Source: `src/expressions/calls.x:384`
+Source: `src/expressions/calls.x:386`
 
 <a id="Compiler.is_builtin_converter_call"></a>
 #### Compiler.is_builtin_converter_call
@@ -276,7 +276,7 @@ literal, the canonical `String` one becomes, or the `String_new` of one;
 any other format, such as a variable or an object macro, is not readable
 here. A `String` literal's text is spelled as a C literal.
 
-Source: `src/expressions/calls.x:538`
+Source: `src/expressions/calls.x:540`
 
 <a id="Compiler.promote_string_literal"></a>
 #### Compiler.promote_string_literal
