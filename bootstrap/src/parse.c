@@ -1413,7 +1413,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _549 = cons(_548, NULL);
   _550 = cons(_464, _549);
   _551 = List_var(_550);
-  _552 = int_var(679);
+  _552 = int_var(680);
   _553 = cons(_552, NULL);
   _554 = cons(_470, _553);
   _555 = List_var(_554);
@@ -1423,7 +1423,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _559 = List_var(_558);
   _560 = cons(_480, _477);
   _561 = List_var(_560);
-  _562 = int_var(112435);
+  _562 = int_var(112470);
   _563 = cons(_562, NULL);
   _564 = cons(_485, _563);
   _565 = List_var(_564);
@@ -6386,7 +6386,7 @@ static List _install_declarator(Compiler c, List base, List context, List declar
     Var _x2c_gensym_literal_part_65 = List_var(base);  Var _x2c_gensym_literal_part_66 = List_var(cons(_40, cons(List_var(cons(_91, cons(_92, cons(List_var(mods), NULL)))), NULL)));  cons(_41, cons(_x2c_gensym_literal_part_65, cons(_x2c_gensym_literal_part_66, NULL)));
   }
   );
-  List prior = Var_is_row(name, 9, 7, 4) ? Var_list_payload(name) : NULL;
+  List prior = Var_list_payload(name);
   List method = List_truth(method_identity) ? method_identity : List_truth(prior) ? Compiler_fact(c, List_var(cons(_95, cons(List_var(prior), NULL)))) : NULL;
   List self_signature = List_truth(prior) ? Compiler_fact(c, List_var(cons(_96, cons(List_var(prior), NULL)))) : NULL;
   Type declared_type = List_type(List_append(mods, base));

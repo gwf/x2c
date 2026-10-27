@@ -184,7 +184,8 @@ static List _scalar_row(Compiler c, List sources, int retain) {
     if (forwarded) return forwarded;
   }
   Var value = retain ? source : _source_unwrap(source);
-  List values = value is <list> ? value : NULL;
+  /* The List destination maps other value tags to nil. */
+  List values = value;
   if (!singular)
     return _capture_layout(
       1, %(source @sources), %(value @values), NULL, NULL, NULL);

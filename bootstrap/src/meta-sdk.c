@@ -1203,7 +1203,7 @@ String Code_name(Code function){
     {List _x2c_gensym_match_at_82, _x2c_gensym_match_at_83, _x2c_gensym_match_at_84, _x2c_gensym_match_at_85, _x2c_gensym_match_at_86, _x2c_gensym_match_at_87, _x2c_gensym_match_at_88, _x2c_gensym_match_at_89; Var x2c_match_value_0; if(_x2c_gensym_match_expr_15 && _x2c_gensym_match_expr_15 ->car.u64 == 9224498395122781148ULL &&(_x2c_gensym_match_at_82 = _x2c_gensym_match_expr_15 ->cdr) &&(_x2c_gensym_match_at_83 = _x2c_gensym_match_at_82 ->cdr) &&(Var_is(_x2c_gensym_match_at_83 -> car, 806120) &&(_x2c_gensym_match_at_84 = Var_list_payload(_x2c_gensym_match_at_83 -> car), 1)) && _x2c_gensym_match_at_84 && _x2c_gensym_match_at_84 ->car.u64 == 9224497936761768840ULL &&(_x2c_gensym_match_at_85 = _x2c_gensym_match_at_84 ->cdr) &&(x2c_match_value_0 = _x2c_gensym_match_at_85 ->car, 1) &&(_x2c_gensym_match_at_86 = _x2c_gensym_match_at_85 ->cdr) && !(_x2c_gensym_match_at_87 = _x2c_gensym_match_at_86 ->cdr) &&(_x2c_gensym_match_at_88 = _x2c_gensym_match_at_83 ->cdr) && !(_x2c_gensym_match_at_89 = _x2c_gensym_match_at_88 ->cdr)){
       Var binding;
       binding = x2c_match_value_0;
-      identity = Var_is_row(binding, 9, 7, 4) ? Var_list(binding) : NULL;
+      identity = Var_list_payload(binding);
     }
 
   }
@@ -1609,7 +1609,7 @@ static int f8_rewrites____ground(Var pattern){
   if(! Var_is_row(pattern, 9, 7, 4)) return ! Var_is_binder(pattern) && ! Var_is_match_op(pattern);
   {
     Var part;
-    List _x2c_gensym_macro_object_14 = Var_list(pattern);
+    List _x2c_gensym_macro_object_14 = Var_list_payload(pattern);
     List _x2c_gensym_macro_cursor_14 = _x2c_gensym_macro_object_14;
     Var _x2c_gensym_macro_cursor_output_11;
     while(List_try_next(_x2c_gensym_macro_object_14, &(_x2c_gensym_macro_cursor_14), &(_x2c_gensym_macro_cursor_output_11))){

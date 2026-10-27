@@ -3591,7 +3591,7 @@ static Map f8_emission____initial_copies(Compiler c, Array units){
                 }
                 )));  continue;
               }
-              int copied = f8_emission____braced(initializer) &&(! c -> meta_build || Var_is_row(List_car(Type_tag(type)), 9, 7, 4));  if(! c -> meta_build && ! copied) continue;  List copy = copied ? Sym_introduce(c -> sym, String_join(NULL, cons(String_var(_1133), cons(String_var(Var_str(List_last(Var_list(binding)))), NULL)))) : NULL;  for(int i = 0;  i <(int) Array_len(units);  i ++) if(x2c_var_equal(Array_getindex(units, i), declaration)){
+              int copied = f8_emission____braced(initializer) &&(! c -> meta_build || Var_is_row(List_car(Type_tag(type)), 9, 7, 4));  if(! c -> meta_build && ! copied) continue;  List identity = Var_list_payload(binding);  List copy = copied ? Sym_introduce(c -> sym, String_join(NULL, cons(String_var(_1133), cons(String_var(Var_str(List_last(identity))), NULL)))) : NULL;  for(int i = 0;  i <(int) Array_len(units);  i ++) if(x2c_var_equal(Array_getindex(units, i), declaration)){
                 List original = Var_list_payload(c -> meta_build ? bound : List_var(cons(_209, cons(_210, cons(bound, cons(initializer, NULL))))));  List bindings = copied ?({
                   Var _x2c_gensym_literal_part_163 = List_var(original);  Var _x2c_gensym_literal_part_164 = List_var(({
                     Var _x2c_gensym_literal_part_162 = List_var(cons(_16, cons(List_var(copy), cons(mods, NULL))));  cons(_209, cons(_210, cons(_x2c_gensym_literal_part_162, cons(initializer, NULL))));

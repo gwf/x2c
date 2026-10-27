@@ -202,11 +202,13 @@ static void _completion_owner_methods(
     (String spelling, Var raw) = row;
     if (raw is not <list>) continue;
     Type signature = raw;
-    if (signature.is_function() && spelling.startswith(prefix))
+    /* Only function Types contribute method names. */
+    if (!signature.is_function()) continue;
+    if (spelling.startswith(prefix))
       _completion_add(seen, names, spelling.remove_prefix(prefix));
     foreach (String (package, _) in c.package_roots) {
       String imported = %"$(package)__$prefix";
-      if (signature.is_function() && spelling.startswith(imported))
+      if (spelling.startswith(imported))
         _completion_add(seen, names, spelling.remove_prefix(imported));
     }
   }

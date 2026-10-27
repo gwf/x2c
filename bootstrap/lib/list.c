@@ -409,7 +409,7 @@ static void f5_cells____promote_node(Var node){
 }
 
 static int f5_cells____try_own_node(Var node){
-  if(Var_is_row(node, 11, 7, 1)) return String_try_own(Var_string(node));
+  if(Var_is_row(node, 11, 7, 1)) return String_try_own(Var_string_payload(node));
   if(Var_is(node, 826970)) return String_try_own(Var_str(node));
   if(! Var_is_row(node, 9, 7, 4)) return 1;
   for(List cur = Var_list_payload(node);  List_truth(cur);  cur = cur -> cdr){

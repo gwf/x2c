@@ -648,7 +648,7 @@ static int _syntax_origin(Var node){
   }
   {
     Var child;
-    List _x2c_gensym_macro_object_2 = Var_list(node);
+    List _x2c_gensym_macro_object_2 = Var_list_payload(node);
     List _x2c_gensym_macro_cursor_2 = _x2c_gensym_macro_object_2;
     Var _x2c_gensym_macro_cursor_output_4;
     while(List_try_next(_x2c_gensym_macro_object_2, &(_x2c_gensym_macro_cursor_2), &(_x2c_gensym_macro_cursor_output_4))){

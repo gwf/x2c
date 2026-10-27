@@ -50,7 +50,8 @@ int List.try_match(List input, Var pat, List &?out_bindings) => out_bindings &&
 meta native List List.match_replace(List input, Var pat, Var template) {
   Var result;
   if (!input.try_match_replace(pat, template, result)) return input;
-  return result is <list> ? result : NULL;
+  /* The List destination maps scalar replacement results to nil. */
+  return result;
 }
 
 /** Matches `input` and writes the instantiated `template` on success.

@@ -6237,7 +6237,7 @@ static List f20_invocations_captures____scalar_row(Compiler c, List sources, int
     if(List_truth(forwarded)) return forwarded;
   }
   Var value = retain ? source : _source_unwrap(source);
-  List values = Var_is_row(value, 9, 7, 4) ? Var_list_payload(value) : NULL;
+  List values = Var_list_payload(value);
   if(! singular) return _capture_layout(1, cons(_36, List_append(sources, NULL)), cons(_186, List_append(values, NULL)), NULL, NULL, NULL);
   Var expression = f20_invocations_captures____identifier_expression(value);
   return _capture_layout(0, cons(_36, cons(source, NULL)), cons(_186, cons(value, NULL)), cons(_187, cons(expression, NULL)), cons(_188, List_append(values, NULL)), NULL);

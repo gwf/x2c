@@ -434,7 +434,8 @@ module Var _unwrap(Var value) {
 module Var _passed(List types, List arguments, int index, Type &type) {
   Var argument = arguments[index];
   Var declared = types[index];
-  type = declared is <list> ? declared.list() : NULL;
+  /* The Type destination maps other value tags to nil. */
+  type = declared;
   if (!type.is_reference()) return argument;
   Type given = _expression_type(argument);
   if (given.is_reference()) return argument;

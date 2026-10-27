@@ -856,7 +856,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _288 = String_var(_287);
   _289 = List_var(NULL);
   _290 = Symbol_var(106239471489226);
-  _291 = int_var(2234);
+  _291 = int_var(2237);
   _292 = String_new("");
   _293 = String_var(_292);
   _294 = Atom_intern(String_new("macro-param"));
@@ -2958,7 +2958,7 @@ static void _restore_declaration_bindings(Compiler c, Var syntax, Map facts, Map
   }
   {
     Var child;
-    List _x2c_gensym_macro_object_18 = Var_list(syntax);
+    List _x2c_gensym_macro_object_18 = Var_list_payload(syntax);
     List _x2c_gensym_macro_cursor_18 = _x2c_gensym_macro_object_18;
     Var _x2c_gensym_macro_cursor_output_16;
     while(List_try_next(_x2c_gensym_macro_object_18, &(_x2c_gensym_macro_cursor_18), &(_x2c_gensym_macro_cursor_output_16))){
@@ -3170,7 +3170,7 @@ static Var f28_declarations_portable_syntax____freeze_cache_key(Compiler c, Var 
 
 }
 Array out = Array_new(); {
-  Var child;  List _x2c_gensym_macro_object_20 = Var_list(key);  List _x2c_gensym_macro_cursor_20 = _x2c_gensym_macro_object_20;  Var _x2c_gensym_macro_cursor_output_18;  while(List_try_next(_x2c_gensym_macro_object_20, &(_x2c_gensym_macro_cursor_20), &(_x2c_gensym_macro_cursor_output_18))){
+  Var child;  List _x2c_gensym_macro_object_20 = Var_list_payload(key);  List _x2c_gensym_macro_cursor_20 = _x2c_gensym_macro_object_20;  Var _x2c_gensym_macro_cursor_output_18;  while(List_try_next(_x2c_gensym_macro_object_20, &(_x2c_gensym_macro_cursor_20), &(_x2c_gensym_macro_cursor_output_18))){
     child = _x2c_gensym_macro_cursor_output_18;  Array_push(out, f28_declarations_portable_syntax____freeze_cache_key(c, child));
   }
 
@@ -3189,7 +3189,7 @@ static Var f28_declarations_portable_syntax____thaw_cache_key(Compiler c, Var ke
 
   }
   Array out = Array_new(); {
-    Var child;  List _x2c_gensym_macro_object_21 = Var_list(key);  List _x2c_gensym_macro_cursor_21 = _x2c_gensym_macro_object_21;  Var _x2c_gensym_macro_cursor_output_19;  while(List_try_next(_x2c_gensym_macro_object_21, &(_x2c_gensym_macro_cursor_21), &(_x2c_gensym_macro_cursor_output_19))){
+    Var child;  List _x2c_gensym_macro_object_21 = Var_list_payload(key);  List _x2c_gensym_macro_cursor_21 = _x2c_gensym_macro_object_21;  Var _x2c_gensym_macro_cursor_output_19;  while(List_try_next(_x2c_gensym_macro_object_21, &(_x2c_gensym_macro_cursor_21), &(_x2c_gensym_macro_cursor_output_19))){
       child = _x2c_gensym_macro_cursor_output_19;  Array_push(out, f28_declarations_portable_syntax____thaw_cache_key(c, child));
     }
 
@@ -4024,7 +4024,7 @@ int Compiler_match_pattern_is_static(Compiler c, List pattern){
 
 int Compiler_match_value_is_static(Var value){
   if(! _init_guard_) _file_init_();  if(x2c_var_equal(value, Symbol_var(1059020478773725))) return 0;  if(! Var_is_row(value, 9, 7, 4)) return 1; {
-    Var part;  List _x2c_gensym_macro_object_39 = Var_list(value);  List _x2c_gensym_macro_cursor_39 = _x2c_gensym_macro_object_39;  Var _x2c_gensym_macro_cursor_output_37;  while(List_try_next(_x2c_gensym_macro_object_39, &(_x2c_gensym_macro_cursor_39), &(_x2c_gensym_macro_cursor_output_37))){
+    Var part;  List _x2c_gensym_macro_object_39 = Var_list_payload(value);  List _x2c_gensym_macro_cursor_39 = _x2c_gensym_macro_object_39;  Var _x2c_gensym_macro_cursor_output_37;  while(List_try_next(_x2c_gensym_macro_object_39, &(_x2c_gensym_macro_cursor_39), &(_x2c_gensym_macro_cursor_output_37))){
       part = _x2c_gensym_macro_cursor_output_37;  if(! Compiler_match_value_is_static(part)) return 0;
     }
 

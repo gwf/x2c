@@ -107,6 +107,7 @@ module void _restore_declaration_bindings(
       facts.getdefault(%(source-spelling $syntax), spelling));
     return;
   }
-  foreach (Var child in syntax.list())
+  /* The preceding tag guard establishes the List payload. */
+  foreach (Var child in syntax.list_payload())
     _restore_declaration_bindings(c, child, facts, seen);
 }

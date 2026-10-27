@@ -167,7 +167,8 @@ module void _retain_rows(List parts) {
 /* A value the cache keeps must be owned beyond every unit's pools. */
 module void _retain(Var value) {
   if (value is <list>) _require_retained(value.list().try_own());
-  if (value is <string>) _require_retained(value.string().try_own());
+  /* The tag test establishes the String payload kept by the cache. */
+  if (value is <string>) _require_retained(value.string_payload().try_own());
 }
 
 module void _require_retained(int owned) {

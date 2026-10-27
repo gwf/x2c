@@ -1449,7 +1449,7 @@ static void _retain_rows(List parts){
 
 static void _retain(Var value){
   if(Var_is_row(value, 9, 7, 4)) _require_retained(List_try_own(Var_list(value)));
-  if(Var_is_row(value, 11, 7, 1)) _require_retained(String_try_own(Var_string(value)));
+  if(Var_is_row(value, 11, 7, 1)) _require_retained(String_try_own(Var_string_payload(value)));
 }
 
 static void _require_retained(int owned){

@@ -115,8 +115,9 @@ static int _linked_texts_match(
   if (names is <string>)
     return c.linked_meta_definitions_current(
       Compiler.absolute_home_path(names));
+  /* The List branch reads the payload whose tag it establishes. */
   if (names is <list>)
-    foreach (String callee in names.list())
+    foreach (String callee in names.list_payload())
       if (!_linked_texts_match(c, callee, linked, reached)) return 0;
   return 1;
 }

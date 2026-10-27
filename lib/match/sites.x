@@ -40,7 +40,7 @@ int x2c_match_site_try_capture(
   MatchPlan plan = _published(site, pattern);
   // a pattern the site cannot retain takes the ordinary runtime route
   if (!plan) return x2c_match_try_capture(input, pattern, captures);
-  if (plan.status == <malformed>) return 0;
+  /* _prepared owns the status decision before capture validation. */
   return _prepared(plan, "match") &&
          _buffer_valid(plan.layout, captures) &&
          _capture(plan, input, captures, NULL) == 1;
@@ -78,7 +78,7 @@ int x2c_match_site_try_match(
   MatchCaptureSite *site, List input, Var pat, List &?out_bindings) {
   MatchPlan plan = _plan(site, pat);
   if (!plan) return input.try_match(pat, out_bindings);
-  if (!out_bindings) return 0;
+  /* Plan operations reject null outputs; wrappers map non-success to zero. */
   return plan.try_match(input, out_bindings) == 1;
 }
 
@@ -90,7 +90,6 @@ int x2c_match_site_try_search(
   List &?out_bindings) {
   MatchPlan plan = _plan(site, pat);
   if (!plan) return input.try_search(pat, out_match, out_bindings);
-  if (!out_match || !out_bindings) return 0;
   return plan.try_search(input, out_match, out_bindings) == 1;
 }
 
@@ -113,7 +112,8 @@ List x2c_match_site_match_replace(
   Var result;
   if (!x2c_match_site_try_match_replace(site, input, pat, template, result))
     return input;
-  return result is <list> ? result : NULL;
+  /* The List destination maps scalar replacement results to nil. */
+  return result;
 }
 
 /** `Match`-replaces through one compiler-owned site.
@@ -123,7 +123,6 @@ int x2c_match_site_try_match_replace(
   MatchCaptureSite *site, List input, Var pat, Var template, Var &?out) {
   MatchPlan plan = _plan(site, pat);
   if (!plan) return input.try_match_replace(pat, template, out);
-  if (!out) return 0;
   return plan.try_match_replace(input, template, out) == 1;
 }
 
@@ -281,7 +280,8 @@ static void _sites_shutdown(void) {
                            ? match_capture_sites.bytes : NULL;
   for (size_t i = 0; i < match_capture_sites.length; i++) {
     MatchCaptureSite *site = sites[i];
-    if (!site || !site.plan) continue;
+    /* The registry contains live nonnull sites accepted by _published. */
+    if (!site.plan) continue;
     site.plan.free();
     site.plan = NULL;
   }

@@ -151,7 +151,9 @@ static Var _meta_stub(Func function, const FuncArg *argv) {
 }
 
 static Array _stub_arguments(Func function, const FuncArg *argv) {
-  List parameters = Func.signature(function).car().list().cadr();
+  /* Func construction retains a signature with a List parameter header. */
+  List header = Func.signature(function).car();
+  List parameters = header.cadr();
   if (parameters == %((void))) parameters = NULL;
   Array values = [];
   int count = parameters.len();

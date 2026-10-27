@@ -126,7 +126,8 @@ static void _promote_node(Var node) {
 }
 
 static int _try_own_node(Var node) {
-  if (node is <string>) return node.string().try_own();
+  /* The tag test establishes the String payload used for promotion. */
+  if (node is <string>) return node.string_payload().try_own();
   if (node is <lsym>) return node.str().try_own();
   if (node is not <list>) return 1;
   for (List cur = node; cur; cur = cur.cdr) {

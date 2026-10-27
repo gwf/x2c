@@ -3807,7 +3807,7 @@ static int f6_linked____linked_texts_match(Compiler c, String name, Map linked, 
   if(Var_is_row(names, 11, 7, 1)) return Compiler_linked_meta_definitions_current(c, Compiler_absolute_home_path(Var_as_string(names)));
   if(Var_is_row(names, 9, 7, 4)){
     String callee;
-    List _x2c_gensym_macro_object_2 = Var_list(names);
+    List _x2c_gensym_macro_object_2 = Var_list_payload(names);
     List _x2c_gensym_macro_cursor_2 = _x2c_gensym_macro_object_2;
     Var _x2c_gensym_macro_cursor_output_4;
     while(List_try_next(_x2c_gensym_macro_object_2, &(_x2c_gensym_macro_cursor_2), &(_x2c_gensym_macro_cursor_output_4))){
@@ -4201,7 +4201,8 @@ Type Type_rest_container(Type);
 static List Type_list(Type);
 
 static Array f9_functions____stub_arguments(Func function, const FuncArg * argv){
-  List parameters = Var_list_payload(List_cadr(Var_list(List_car(Func_signature(function)))));
+  List header = Var_list_payload(List_car(Func_signature(function)));
+  List parameters = Var_list_payload(List_cadr(header));
   if(List_equal(parameters, _239)) parameters = NULL;
   Array values = Array_new();
   int count = List_len(parameters);

@@ -296,9 +296,11 @@ static Map _initial_copies(Compiler c, Array units) {
         int copied = _braced(initializer) &&
                      (!c.meta_build || type.tag().car() is <list>);
         if (!c.meta_build && !copied) continue;
+        /* Static meta entries retain their declaration's binding List. */
+        List identity = binding;
         List copy = copied
           ? c.sym.introduce(
-            %"_x2c_gensym_meta_initial_$(binding.list().last())") : NULL;
+            %"_x2c_gensym_meta_initial_$(identity.last())") : NULL;
         for (int i = 0; i < (int) units.len(); i++)
           if (units[i] == declaration) {
             List original = c.meta_build ? bound : %(op = $bound $initializer);

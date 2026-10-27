@@ -3482,8 +3482,8 @@ int MatchPlan_try_capture(MatchPlan plan, List input, MatchCaptureBuffer * captu
 
 int MatchPlan_execute_capture(MatchPlan m, Var input, MatchCaptureBuffer * captures, MachineStats * stats){
   if(! _init_guard_) _file_init_();
-  if(! _prepared(m, "MatchPlan.execute_capture") || ! _buffer_valid(m -> layout, captures)) return - 1;
-  return _capture(m, input, captures, stats);
+  if(! _prepared(m, "MatchPlan.execute_capture") || ! captures || ! _buffer_valid(m -> layout, &((* captures)))) return - 1;
+  return _capture(m, input, &((* captures)), stats);
 }
 
 int MatchPlan_execute(MatchPlan plan, Var input, List * out_bindings, MachineStats * stats);
@@ -3540,14 +3540,14 @@ static int _prepared(MatchPlan plan, const char * owner){
 }
 
 static int _buffer_valid(MatchCaptureLayout layout, MatchCaptureBuffer * captures){
-  if(! captures || ! layout ||(* captures).capacity < layout -> binder_count) return 0;
+  if((* captures).capacity < layout -> binder_count) return 0;
   return ! layout -> binder_count ||(* captures).values != NULL;
 }
 
 static int _capture(MatchPlan m, Var input, MatchCaptureBuffer * captures, MachineStats * stats){
   if(! MatchPlan_admits(m, input, NULL)) return 0;
   MatchMachine * machine = MatchMachine_acquire(stats);
-  int result = _run_capture(MachineProgram_view(m -> program), &(* machine), input, captures);
+  int result = _run_capture(MachineProgram_view(m -> program), &(* machine), input, &((* captures)));
   MatchMachine_release(machine);
   return result;
 }
@@ -3568,7 +3568,7 @@ static int f9_execution____key_admits(MatchPlan plan, MatchKey * key, List list,
 
 static List f9_execution____seen_list(Var value, Var(* view)(Var)){
   if(view) value = view(value);
-  return Var_is_row(value, 9, 7, 4) ? Var_list(value) : NULL;
+  return Var_list_payload(value);
 }
 
 static int f9_execution____key_equal(MatchPlan plan, Var value, Var key){
@@ -3576,7 +3576,7 @@ static int f9_execution____key_equal(MatchPlan plan, Var value, Var key){
 }
 
 static int _run_capture(MachineView view, MatchMachine * m, Var input, MatchCaptureBuffer * captures){
-  if(! captures ||(* captures).capacity < view.binder_count ||(view.binder_count && !(* captures).values)) return - 1;
+  if((* captures).capacity < view.binder_count ||(view.binder_count && !(* captures).values)) return - 1;
   MatchMachine_begin(&((* m)), view, input);
   MatchMachine_run(&((* m)));
   int result = - 1;
@@ -3916,7 +3916,6 @@ int x2c_match_site_try_capture(MatchCaptureSite * site, List input, Var pattern,
   if(! captures) return 0;
   MatchPlan plan = f5_sites____published(site, pattern);
   if(! plan) return x2c_match_try_capture(input, pattern, &((* captures)));
-  if(plan -> status == 28682226919752) return 0;
   return _prepared(plan, "match") && _buffer_valid(plan -> layout, &((* captures))) && _capture(plan, List_var(input), &((* captures)), NULL) == 1;
 }
 
@@ -3945,8 +3944,7 @@ int x2c_match_site_try_match(MatchCaptureSite * site, List input, Var pat, List 
   if(! _init_guard_) _file_init_();
   MatchPlan plan = f5_sites____plan(site, pat);
   if(! plan) return List_try_match(input, pat, out_bindings);
-  if(! out_bindings) return 0;
-  return MatchPlan_try_match(plan, input, &((* out_bindings))) == 1;
+  return MatchPlan_try_match(plan, input, out_bindings) == 1;
 }
 
 int List_try_search(List input, Var pat, Var * out_match, List * out_bindings);
@@ -3955,8 +3953,7 @@ int x2c_match_site_try_search(MatchCaptureSite * site, List input, Var pat, Var 
   if(! _init_guard_) _file_init_();
   MatchPlan plan = f5_sites____plan(site, pat);
   if(! plan) return List_try_search(input, pat, out_match, out_bindings);
-  if(! out_match || ! out_bindings) return 0;
-  return MatchPlan_try_search(plan, input, &((* out_match)), &((* out_bindings))) == 1;
+  return MatchPlan_try_search(plan, input, out_match, out_bindings) == 1;
 }
 
 List List_search(List input, Var pat);
@@ -3976,7 +3973,7 @@ List x2c_match_site_match_replace(MatchCaptureSite * site, List input, Var pat, 
   if(! _init_guard_) _file_init_();
   Var result;
   if(! x2c_match_site_try_match_replace(site, input, pat, template, &(result))) return input;
-  return Var_is_row(result, 9, 7, 4) ? Var_list_payload(result) : NULL;
+  return Var_list_payload(result);
 }
 
 int List_try_match_replace(List input, Var pat, Var template, Var * out);
@@ -3985,8 +3982,7 @@ int x2c_match_site_try_match_replace(MatchCaptureSite * site, List input, Var pa
   if(! _init_guard_) _file_init_();
   MatchPlan plan = f5_sites____plan(site, pat);
   if(! plan) return List_try_match_replace(input, pat, template, out);
-  if(! out) return 0;
-  return MatchPlan_try_match_replace(plan, input, template, &((* out))) == 1;
+  return MatchPlan_try_match_replace(plan, input, template, out) == 1;
 }
 
 List List_search_replace(List input, Var pat, Var template);
@@ -4166,7 +4162,7 @@ static void f5_sites____sites_shutdown(void){
   MatchCaptureSite * * sites = f5_sites___match_capture_sites != NULL ? f5_sites___match_capture_sites -> bytes : NULL;
   for(size_t i = 0;  i < f5_sites___match_capture_sites -> length;  i ++){
     MatchCaptureSite * site = sites[i];
-    if(! site || ! site -> plan) continue;
+    if(! site -> plan) continue;
     MatchPlan_free(site -> plan);
     site -> plan = NULL;
   }
@@ -4202,7 +4198,7 @@ List List_match_replace(List input, Var pat, Var template){
   if(! _init_guard_) _file_init_();
   Var result;
   if(! List_try_match_replace(input, pat, template, &(result))) return input;
-  return Var_is_row(result, 9, 7, 4) ? Var_list_payload(result) : NULL;
+  return Var_list_payload(result);
 }
 
 int List_try_match_replace(List input, Var pat, Var template, Var * out){
