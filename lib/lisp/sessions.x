@@ -51,9 +51,10 @@ module int _inherited(Lisp lisp, Var name) {
   return 0;
 }
 
+/* Map.try_get reports a null bindings Map as absent. */
 module int _binding_get(Map bindings, Var name, Var &out) {
   Var slot;
-  if (!bindings || !bindings.try_get(name, slot)) return 0;
+  if (!bindings.try_get(name, slot)) return 0;
   out = _cell_load(slot);
   return 1;
 }

@@ -79,8 +79,8 @@ static int _rule_dynamic(Var type, List operands) {
   return 0;
 }
 
-static int _rule_var(Var type) =>
-  type is <list> && active.expander.sym.is_var_type(type);
+/* Non-List patterns convert to the empty Type, which is_var_type rejects. */
+static int _rule_var(Type type) => active.expander.sym.is_var_type(type);
 
 /* The dynamic family's keys for `operators` in `form`, `op` or `postfix`. */
 static List _rule_dynamic_kinds(List operators, Symbol form) {

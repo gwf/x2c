@@ -169,15 +169,16 @@ static Ast _placed(Compiler c, Ast code) {
   return c.render_placed(code, held);
 }
 
-/* `node` with each watched part lowered and recorded in `held`. */
-static Var _held_within(Compiler c, Var node, Map held) {
-  if (node is not <list> || node.is_nil()) return node;
+/* `node` with each watched part lowered and recorded in `held`.
+   The root is an Ast; rewrite_children visits only List children. */
+static Ast _held_within(Compiler c, Ast node, Map held) {
+  if (!node) return node;
   Ast lowered = c.watched_step(node);
   if (lowered) {
     held[(void *) lowered] = 1;
     return lowered;
   }
-  Var child;
+  List child;
   $ast.rewrite_children(node, child, _held_within(c, child, held));
 }
 

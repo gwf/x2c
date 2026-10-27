@@ -77,10 +77,11 @@ meta static List _string_case_index(
 
 /* `node` with each label the switch owns replaced by its index; `site` is
    the innermost origin around it. A nested switch owns its labels, and an
-   expression holds none. */
-meta static Var _string_cases(
-  Var node, Map indices, Array labels, List site) {
-  if (node is not <list> || node.is_nil()) return node;
+   expression holds none. The root is a statement; rewrite_children visits
+   only Lists. */
+meta static List _string_cases(
+  List node, Map indices, Array labels, List site) {
+  if (!node) return node;
   match (node) {
     case %((!or expr switch match) *): return node;
     case %(at ? ?inner):
@@ -89,7 +90,7 @@ meta static Var _string_cases(
     case %(case ?label):
       return %(case $(_string_case_index(label, indices, labels, site)));
   }
-  Var child;
+  List child;
   $ast.rewrite_children(
     node, child, _string_cases(child, indices, labels, site));
 }

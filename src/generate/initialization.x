@@ -232,8 +232,9 @@ static Map _cache_reachable(List source) {
    returns whether `value` uses a cache. Functions are keyed by spelling,
    which names one file-scope function in the unit. Binding numbers do not:
    class defaults selected during macro-library preload are numbered apart
-   from the unit's own walk. */
-static int _record_calls(Var value, Var caller, Map callers) {
+   from the unit's own walk. The caller name is a canonical binding's String
+   spelling and stays unchanged through recursion. */
+static int _record_calls(Var value, String caller, Map callers) {
   if (value is not <list>) return 0;
   List node = value;
   match (node) {

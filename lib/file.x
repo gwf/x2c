@@ -359,9 +359,9 @@ Iter File.iter(File file, Iter dest) {
   return dest;
 }
 
+/* File.iter installs this callback only for a nonnull borrowed File. */
 static int _next_line(Iter iter, Var *out) {
   File file = iter.obj;
-  if (!file) return 0;
   Block line = iter.state;
   if (line == NULL) return 0;
   int keep = 0;

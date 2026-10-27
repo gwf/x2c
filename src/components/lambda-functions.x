@@ -148,8 +148,8 @@ meta static int _lambda_mentions(Var item, Map cells) {
    declaration copies each target into its cell after it. A for initializer
    declares its cells in a block around the loop, preserving its scope and
    leaving continue to run the loop's increment. Only the cells are source
-   to bind. */
-meta static Var _lambda_declare_cells(List node, Map cells) {
+   to bind. The caller supplies rebuilt syntax as a List. */
+meta static Code _lambda_declare_cells(List node, Map cells) {
   Array items = [];
   int celled = 0;
   match (node) {

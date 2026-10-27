@@ -388,15 +388,12 @@ static int _call(Thread thread) {
    other policy resolves the cause and returns to its raise, exactly as it does
    on the starting thread, so the backstop never sees it. The replacement cause
    dispatches outward from here, which is the `try` in `_work` and nothing
-   else. */
+   else. Error supplies records with a Symbol code field. */
 static Symbol _capture_errors(List errors, Var data) {
   Thread thread = data;
   if (!errors) return <declined>;
-  Var newest = errors.last();
-  if (newest is not <list>) return <declined>;
-  List entry = newest;
-  Var code = entry.assoc(<code>);
-  if (code is not <symbol>) return <declined>;
+  List entry = errors.last();
+  Symbol code = entry.assoc(<code>);
   if (Error.policy_get(code) != <abort>) return <declined>;
   thread.errors = Error.snapshot_in(
     errors, &thread.error_scope, thread.error_pool);
