@@ -91,12 +91,12 @@
                                (args (expr ("Var") (ident (binding 17 "value")))))) 
                         (expr (int) (literal (int) "1")))))))) 
              (args (expr (int) (literal (int) "5"))))))))) 
-  (at 10 
+  (at 11 
    (if (expr (int) 
         (op != (expr ("binding_phase5_Value") (ident (binding 15 "value"))) 
          (expr (int) (literal (int) "11")))) 
-    (return (int) (expr (int) (literal (int) "1"))))) 
-  (at 11 
+    (at 10 (return (int) (expr (int) (literal (int) "1")))))) 
+  (at 13 
    (if (expr (int) 
         (op != 
          (expr ("binding_phase5_Value") 
@@ -105,13 +105,13 @@
                  (ident (binding 10 "binding_phase5_Box_bump"))) 
            (args (expr ("binding_phase5_Box") (ident (binding 14 "box"))) 
             (expr (int) (literal (int) "2"))))) (expr (int) (literal (int) "5")))) 
-    (return (int) (expr (int) (literal (int) "2"))))) 
-  (at 12 
+    (at 12 (return (int) (expr (int) (literal (int) "2")))))) 
+  (at 15 
    (if (expr (int) 
         (op != 
          (expr (int) 
           (call (expr ((func (("Var"))) (int)) (ident (binding 18 "Var_int"))) 
            (args (expr ("Var") (ident (binding 16 "lambda")))))) 
          (expr (int) (literal (int) "6")))) 
-    (return (int) (expr (int) (literal (int) "3"))))) 
-  (at 13 (return (int) (expr (int) (literal (int) "0"))))))
+    (at 14 (return (int) (expr (int) (literal (int) "3")))))) 
+  (at 16 (return (int) (expr (int) (literal (int) "0"))))))

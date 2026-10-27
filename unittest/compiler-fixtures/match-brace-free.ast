@@ -11,13 +11,13 @@
   (at 2 (declare (int) 
          (bindings 
           (op = (bind (binding 3 "hit") ()) (expr (int) (literal (int) "0")))))) 
-  (at 3 (match (expr ("List") (ident (binding 2 "value"))) 
+  (at 4 (match (expr ("List") (ident (binding 2 "value"))) 
          (((expr ("List") (expr ("List") (cache 1))) 
-           (stmnt 
-            (expr (int) 
-             (op = (expr (int) (ident (binding 3 "hit"))) 
-              (expr (int) (literal (int) "1"))))))))) 
-  (at 4 (return (int) 
+           (at 3 (stmnt 
+                  (expr (int) 
+                   (op = (expr (int) (ident (binding 3 "hit"))) 
+                    (expr (int) (literal (int) "1")))))))))) 
+  (at 5 (return (int) 
          (expr (int) 
           (op ? (expr (int) 
                  (op == (expr (int) (ident (binding 3 "hit"))) 

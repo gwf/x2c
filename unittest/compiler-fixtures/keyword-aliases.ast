@@ -164,13 +164,16 @@
       (expr (int) 
        (op += (expr (int) (ident (binding 20 "statements"))) 
         (expr (int) (literal (int) "2")))))))) 
-  (at 45 
+  (at 47 
    (if (expr (int) (literal (int) "1")) 
-    (block 
-     (at 43 
-      (stmnt 
-       (expr (int) (postfix ++ (expr (int) (ident (binding 21 "conditional")))))))))) 
-  (at 48 
+    (at 46 
+     (block 
+      (at 44 
+       (at 43 
+        (stmnt 
+         (expr (int) 
+          (postfix ++ (expr (int) (ident (binding 21 "conditional")))))))))))) 
+  (at 50 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 22 "printf"))) 
@@ -226,22 +229,10 @@
         (call (expr ((func ((void))) int) 
                (ident (binding 15 "stacked_function"))) 
          (args (expr (void) ())))) (expr (int) (ident (binding 19 "imported")))))))) 
-  (at 49 (return (int) (expr (int) (literal (int) "0"))))))
+  (at 51 (return (int) (expr (int) (literal (int) "0"))))))
 
 (function (static void) 
  (bind (binding 23 "direct_captured_raise") 
-  ((fnmod (params (param (void) (bind () ())))))) 
- (block 
-  (at 52 
-   (block 
-    (block 
-     (at 50 
-      (if (expr (int) (literal (int) "0")) 
-       (raise (expr ("Symbol") (literal ("Symbol") "invariant" invariant)) 
-        (args)))))))))
-
-(function (static void) 
- (bind (binding 24 "aliased_captured_raise") 
   ((fnmod (params (param (void) (bind () ())))))) 
  (block 
   (at 55 
@@ -249,5 +240,19 @@
     (block 
      (at 53 
       (if (expr (int) (literal (int) "0")) 
-       (raise (expr ("Symbol") (literal ("Symbol") "invariant" invariant)) 
-        (args)))))))))
+       (at 52 
+        (raise (expr ("Symbol") (literal ("Symbol") "invariant" invariant)) 
+         (args))))))))))
+
+(function (static void) 
+ (bind (binding 24 "aliased_captured_raise") 
+  ((fnmod (params (param (void) (bind () ())))))) 
+ (block 
+  (at 59 
+   (block 
+    (block 
+     (at 57 
+      (if (expr (int) (literal (int) "0")) 
+       (at 56 
+        (raise (expr ("Symbol") (literal ("Symbol") "invariant" invariant)) 
+         (args))))))))))

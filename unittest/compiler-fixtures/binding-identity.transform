@@ -36,7 +36,7 @@
                  (op += 
                   (expr ("binding_phase5_Value") (ident (binding 8 "result"))) 
                   (expr ("binding_phase5_Value") (ident (binding 9 "value"))))))))) 
-  (at 14 
+  (at 17 
    (return 
     (expr (int) 
      (op + (expr (int) 
@@ -50,7 +50,7 @@
     (params (param ("binding_phase5_Box") (bind (binding 11 "box") ())) 
      (param ("binding_phase5_Value") (bind (binding 12 "value") ())))))) 
  (block 
-  (at 15 
+  (at 18 
    (return 
     (expr (int) 
      (op + (expr ("binding_phase5_Value") 
@@ -61,7 +61,7 @@
 (function (int) 
  (bind (binding 13 "main") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 16 
+  (at 19 
    (declare ("binding_phase5_Box") 
     (bindings 
      (op = (bind (binding 14 "box") ()) 
@@ -75,7 +75,7 @@
                          "binding_phase5_Value") 
                    (ident (binding 6 "binding_phase5_shadow"))) 
              (args (expr (int) (literal (int) "4"))))))))) 
-  (at 17 
+  (at 20 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 16 "lambda") ()) 
@@ -87,12 +87,12 @@
         (args (expr ("Var") 
                (call (expr ((func ((int))) "Var") (ident (binding 18 "int_var"))) 
                 (args (expr (int) (literal (int) "5")))))))))))) 
-  (at 18 
+  (at 22 
    (if (expr (int) 
         (op != (expr ("binding_phase5_Value") (ident (binding 15 "value"))) 
          (expr (int) (literal (int) "11")))) 
-    (return (expr (int) (literal (int) "1"))))) 
-  (at 19 
+    (at 21 (return (expr (int) (literal (int) "1")))))) 
+  (at 24 
    (if (expr (int) 
         (op != 
          (expr ("binding_phase5_Value") 
@@ -101,16 +101,16 @@
                  (ident (binding 10 "binding_phase5_Box_bump"))) 
            (args (expr ("binding_phase5_Box") (ident (binding 14 "box"))) 
             (expr (int) (literal (int) "2"))))) (expr (int) (literal (int) "5")))) 
-    (return (expr (int) (literal (int) "2"))))) 
-  (at 20 
+    (at 23 (return (expr (int) (literal (int) "2")))))) 
+  (at 26 
    (if (expr (int) 
         (op != 
          (expr (int) 
           (call (expr ((func (("Var"))) (int)) (ident (binding 19 "Var_int"))) 
            (args (expr ("Var") (ident (binding 16 "lambda")))))) 
          (expr (int) (literal (int) "6")))) 
-    (return (expr (int) (literal (int) "3"))))) 
-  (at 21 (return (expr (int) (literal (int) "0"))))))
+    (at 25 (return (expr (int) (literal (int) "3")))))) 
+  (at 27 (return (expr (int) (literal (int) "0"))))))
 
 (function (static "Var") 
  (bind (binding 17 "_x2c_gensym_lambda_0") 

@@ -137,7 +137,7 @@ static void direct_captured_raise(void){
   {
     {
       if(0){
-        static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "unittest/compiler-fixtures/keyword-aliases.x",.function = "direct_captured_raise",.line = 127};
+        static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "unittest/compiler-fixtures/keyword-aliases.x",.function = "direct_captured_raise",.line = 128};
         x2c_error_raise_n(& _x2c_gensym_error_site_0, 20800632064936, 0);
         __builtin_unreachable();
       }
@@ -152,7 +152,7 @@ static void aliased_captured_raise(void){
   {
     {
       if(0){
-        static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "unittest/compiler-fixtures/keyword-aliases.x",.function = "aliased_captured_raise",.line = 134};
+        static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "unittest/compiler-fixtures/keyword-aliases.x",.function = "aliased_captured_raise",.line = 135};
         x2c_error_raise_n(& _x2c_gensym_error_site_1, 20800632064936, 0);
         __builtin_unreachable();
       }

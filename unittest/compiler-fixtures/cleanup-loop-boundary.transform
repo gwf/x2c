@@ -25,204 +25,208 @@
          (bindings 
           (op = (bind (binding 5 "caught") (volatile)) 
            (expr (int) (literal (int) "0")))))) 
-  (at 7 (block 
-         (declare ("ExceptionFrame") 
-          (bindings (bind (binding 6 "_x2c_gensym_exception_frame_0") ()))) 
-         (declare (static "MatchCaptureSite") 
-          (bindings 
-           (bind (binding 7 "_x2c_gensym_macro_arms_0") 
-            ((dim (expr (macro-expr) (expr (int) (literal (int) "1")))))))) 
-         (declare ("Var") 
-          (bindings 
-           (bind (binding 8 "_x2c_gensym_macro_patterns_0") 
-            ((dim (expr (macro-expr) (expr (int) (literal (int) "1")))))))) 
-         (declare (static "ErrorCatchSite") 
-          (bindings 
-           (op = (bind (binding 9 "_x2c_gensym_macro_site_0") ()) 
-            (expr () 
-             (composite 
-              (commas 
-               (expr ((dim (expr (macro-expr) ("1"))) static "MatchCaptureSite") 
-                (ident (binding 7 "_x2c_gensym_macro_arms_0"))) 
-               (expr (int) (literal (int) "-1")) 
-               (expr (int) (literal (int) "1")) 
-               (expr (int) "ERROR_CATCH_PENDING") 
-               (expr (int) (op - (expr (int) (literal (int) "1")))))))))) 
-         (if (expr (int) 
-              (call (expr ((func ((* "ErrorCatchSite"))) int) 
-                     (ident (binding 10 "x2c_error_catch_site_pending"))) 
-               (args (expr (* static "ErrorCatchSite") 
-                      (op & (expr (static "ErrorCatchSite") 
-                             (ident (binding 9 "_x2c_gensym_macro_site_0")))))))) 
-          (block 
-           (stmnt 
-            (expr ("Var") 
-             (op = (expr ("Var") 
-                    (index 
-                     (expr ((dim (expr (macro-expr) ("1"))) "Var") 
-                      (ident (binding 8 "_x2c_gensym_macro_patterns_0"))) 
-                     (expr (int) (literal (int) "0")))) 
-              (expr ("Var") 
-               (call (expr ((func (("List"))) "Var") 
-                      (ident (binding 11 "List_var"))) 
-                (args (expr ("List") 
-                       (expr ("List") 
-                        (cons (expr ("Var") 
-                               (call (expr ((func (("Symbol"))) "Var") 
-                                      (ident (binding 12 "Symbol_var"))) 
-                                (args (expr ("Symbol") 
-                                       (literal ("Symbol") "invariant" invariant))))) 
-                         (nil)))))))))))) 
-         (declare (volatile "ErrorHandler") 
-          (bindings 
-           (op = (bind (binding 13 "_x2c_gensym_error_handler_0") ()) 
-            (expr ("ErrorHandler") 
-             (call (expr ((func ((* void) (* "ErrorCatchSite") (* "Var"))) 
-                          "ErrorHandler") 
-                    (ident (binding 14 "x2c_error_catch_site_push"))) 
-              (args (expr (* "ExceptionFrame") 
-                     (op & (expr ("ExceptionFrame") 
-                            (ident (binding 6 "_x2c_gensym_exception_frame_0"))))) 
-               (expr (* static "ErrorCatchSite") 
-                (op & (expr (static "ErrorCatchSite") 
-                       (ident (binding 9 "_x2c_gensym_macro_site_0"))))) 
-               (expr ((dim (expr (macro-expr) ("1"))) "Var") 
-                (ident (binding 8 "_x2c_gensym_macro_patterns_0"))))))))) 
-         (stmnt 
-          (expr (void) 
-           (call (expr ((func ((* "ExceptionFrame"))) void) 
-                  (ident (binding 15 "x2c_exception_push"))) 
+  (at 12 
+   (block 
+    (declare ("ExceptionFrame") 
+     (bindings (bind (binding 6 "_x2c_gensym_exception_frame_0") ()))) 
+    (declare (static "MatchCaptureSite") 
+     (bindings 
+      (bind (binding 7 "_x2c_gensym_macro_arms_0") 
+       ((dim (expr (macro-expr) (expr (int) (literal (int) "1")))))))) 
+    (declare ("Var") 
+     (bindings 
+      (bind (binding 8 "_x2c_gensym_macro_patterns_0") 
+       ((dim (expr (macro-expr) (expr (int) (literal (int) "1")))))))) 
+    (declare (static "ErrorCatchSite") 
+     (bindings 
+      (op = (bind (binding 9 "_x2c_gensym_macro_site_0") ()) 
+       (expr () 
+        (composite 
+         (commas 
+          (expr ((dim (expr (macro-expr) ("1"))) static "MatchCaptureSite") 
+           (ident (binding 7 "_x2c_gensym_macro_arms_0"))) 
+          (expr (int) (literal (int) "-1")) (expr (int) (literal (int) "1")) 
+          (expr (int) "ERROR_CATCH_PENDING") 
+          (expr (int) (op - (expr (int) (literal (int) "1")))))))))) 
+    (if (expr (int) 
+         (call (expr ((func ((* "ErrorCatchSite"))) int) 
+                (ident (binding 10 "x2c_error_catch_site_pending"))) 
+          (args (expr (* static "ErrorCatchSite") 
+                 (op & (expr (static "ErrorCatchSite") 
+                        (ident (binding 9 "_x2c_gensym_macro_site_0")))))))) 
+     (block 
+      (stmnt 
+       (expr ("Var") 
+        (op = (expr ("Var") 
+               (index 
+                (expr ((dim (expr (macro-expr) ("1"))) "Var") 
+                 (ident (binding 8 "_x2c_gensym_macro_patterns_0"))) 
+                (expr (int) (literal (int) "0")))) 
+         (expr ("Var") 
+          (call (expr ((func (("List"))) "Var") (ident (binding 11 "List_var"))) 
+           (args (expr ("List") 
+                  (expr ("List") 
+                   (cons (expr ("Var") 
+                          (call (expr ((func (("Symbol"))) "Var") 
+                                 (ident (binding 12 "Symbol_var"))) 
+                           (args (expr ("Symbol") 
+                                  (literal ("Symbol") "invariant" invariant))))) 
+                    (nil)))))))))))) 
+    (declare (volatile "ErrorHandler") 
+     (bindings 
+      (op = (bind (binding 13 "_x2c_gensym_error_handler_0") ()) 
+       (expr ("ErrorHandler") 
+        (call (expr ((func ((* void) (* "ErrorCatchSite") (* "Var"))) 
+                     "ErrorHandler") 
+               (ident (binding 14 "x2c_error_catch_site_push"))) 
+         (args (expr (* "ExceptionFrame") 
+                (op & (expr ("ExceptionFrame") 
+                       (ident (binding 6 "_x2c_gensym_exception_frame_0"))))) 
+          (expr (* static "ErrorCatchSite") 
+           (op & (expr (static "ErrorCatchSite") 
+                  (ident (binding 9 "_x2c_gensym_macro_site_0"))))) 
+          (expr ((dim (expr (macro-expr) ("1"))) "Var") 
+           (ident (binding 8 "_x2c_gensym_macro_patterns_0"))))))))) 
+    (stmnt 
+     (expr (void) 
+      (call (expr ((func ((* "ExceptionFrame"))) void) 
+             (ident (binding 15 "x2c_exception_push"))) 
+       (args (expr (* "ExceptionFrame") 
+              (op & (expr ("ExceptionFrame") 
+                     (ident (binding 6 "_x2c_gensym_exception_frame_0"))))))))) 
+    (if (expr (int) 
+         (op ! (expr () 
+                (call (expr () (ident (binding 16 "sigsetjmp"))) 
+                 (args (expr ("sigjmp_buf") 
+                        (op . (expr ("ExceptionFrame") 
+                               (ident 
+                                (binding 6 "_x2c_gensym_exception_frame_0"))) 
+                         ("env"))) (expr (int) (literal (int) "0"))))))) 
+     (at 9 (block 
+            (at 8 (for (decl (int) 
+                        (bindings 
+                         (op = (bind (binding 17 "i") (volatile)) 
+                          (expr (int) (literal (int) "0"))))) 
+                   (expr (int) 
+                    (op < (expr (int) (ident (binding 17 "i"))) 
+                     (expr (int) (literal (int) "3")))) 
+                   (expr (int) 
+                    (postfix ++ (expr (int) (ident (binding 17 "i"))))) 
+                   (at 7 (block 
+                          (at 4 (if (expr (int) 
+                                     (op == 
+                                      (expr (int) (ident (binding 17 "i"))) 
+                                      (expr (int) (literal (int) "0")))) 
+                                 (at 3 (continue)))) 
+                          (at 6 (if (expr (int) 
+                                     (op == 
+                                      (expr (int) (ident (binding 17 "i"))) 
+                                      (expr (int) (literal (int) "1")))) 
+                                 (at 5 (raise 
+                                        (expr ("Symbol") 
+                                         (literal ("Symbol") "invariant" 
+                                          invariant)) (args))))))))))) 
+     (block 
+      (stmnt 
+       (expr (void) 
+        (call (expr ((func ((* "ExceptionFrame"))) void) 
+               (ident (binding 18 "x2c_exception_landed"))) 
+         (args (expr (* "ExceptionFrame") 
+                (op & (expr ("ExceptionFrame") 
+                       (ident (binding 6 "_x2c_gensym_exception_frame_0"))))))))) 
+      (if (expr (int) 
+           (call (expr ((func ((* "ExceptionFrame"))) int) 
+                  (ident (binding 19 "x2c_exception_is_error_target"))) 
             (args (expr (* "ExceptionFrame") 
                    (op & (expr ("ExceptionFrame") 
-                          (ident (binding 6 "_x2c_gensym_exception_frame_0"))))))))) 
-         (if (expr (int) 
-              (op ! (expr () 
-                     (call (expr () (ident (binding 16 "sigsetjmp"))) 
-                      (args (expr ("sigjmp_buf") 
-                             (op . (expr ("ExceptionFrame") 
-                                    (ident 
-                                     (binding 6 "_x2c_gensym_exception_frame_0"))) 
-                              ("env"))) (expr (int) (literal (int) "0"))))))) 
-          (block 
-           (at 5 (for (decl (int) 
-                       (bindings 
-                        (op = (bind (binding 17 "i") (volatile)) 
-                         (expr (int) (literal (int) "0"))))) 
-                  (expr (int) 
-                   (op < (expr (int) (ident (binding 17 "i"))) 
-                    (expr (int) (literal (int) "3")))) 
-                  (expr (int) (postfix ++ (expr (int) (ident (binding 17 "i"))))) 
-                  (block 
-                   (at 3 (if (expr (int) 
-                              (op == (expr (int) (ident (binding 17 "i"))) 
-                               (expr (int) (literal (int) "0")))) (continue))) 
-                   (at 4 (if (expr (int) 
-                              (op == (expr (int) (ident (binding 17 "i"))) 
-                               (expr (int) (literal (int) "1")))) 
-                          (raise 
-                           (expr ("Symbol") 
-                            (literal ("Symbol") "invariant" invariant)) 
-                           (args)))))))) 
-          (block 
-           (stmnt 
-            (expr (void) 
-             (call (expr ((func ((* "ExceptionFrame"))) void) 
-                    (ident (binding 18 "x2c_exception_landed"))) 
-              (args (expr (* "ExceptionFrame") 
-                     (op & (expr ("ExceptionFrame") 
-                            (ident (binding 6 "_x2c_gensym_exception_frame_0"))))))))) 
-           (if (expr (int) 
-                (call (expr ((func ((* "ExceptionFrame"))) int) 
-                       (ident (binding 19 "x2c_exception_is_error_target"))) 
-                 (args (expr (* "ExceptionFrame") 
-                        (op & (expr ("ExceptionFrame") 
-                               (ident 
-                                (binding 6 "_x2c_gensym_exception_frame_0")))))))) 
-            (block 
-             (declare (int) 
-              (bindings 
-               (op = (bind (binding 20 "_x2c_gensym_macro_selected_0") ()) 
-                (expr (int) 
-                 (call (expr ((func (("ErrorHandler"))) int) 
-                        (ident (binding 21 "x2c_error_catch_selected"))) 
-                  (args (expr (volatile "ErrorHandler") 
-                         (ident (binding 13 "_x2c_gensym_error_handler_0"))))))))) 
+                          (ident (binding 6 "_x2c_gensym_exception_frame_0")))))))) 
+       (block 
+        (declare (int) 
+         (bindings 
+          (op = (bind (binding 20 "_x2c_gensym_macro_selected_0") ()) 
+           (expr (int) 
+            (call (expr ((func (("ErrorHandler"))) int) 
+                   (ident (binding 21 "x2c_error_catch_selected"))) 
+             (args (expr (volatile "ErrorHandler") 
+                    (ident (binding 13 "_x2c_gensym_error_handler_0"))))))))) 
+        (stmnt 
+         (expr (void) 
+          (call (expr ((func (("ErrorHandler"))) void) 
+                 (ident (binding 22 "x2c_error_catch_detach"))) 
+           (args (expr (volatile "ErrorHandler") 
+                  (ident (binding 13 "_x2c_gensym_error_handler_0"))))))) 
+        (stmnt 
+         (expr (void) 
+          (call (expr ((func ((* "ExceptionFrame"))) void) 
+                 (ident (binding 23 "x2c_exception_mark_handled"))) 
+           (args (expr (* "ExceptionFrame") 
+                  (op & (expr ("ExceptionFrame") 
+                         (ident (binding 6 "_x2c_gensym_exception_frame_0"))))))))) 
+        (if (expr (int) 
+             (op == 
+              (expr (int) (ident (binding 20 "_x2c_gensym_macro_selected_0"))) 
+              (expr (int) (literal (int) "0")))) 
+         (block 
+          (at 11 
+           (block 
+            (at 10 
              (stmnt 
-              (expr (void) 
-               (call (expr ((func (("ErrorHandler"))) void) 
-                      (ident (binding 22 "x2c_error_catch_detach"))) 
-                (args (expr (volatile "ErrorHandler") 
-                       (ident (binding 13 "_x2c_gensym_error_handler_0"))))))) 
-             (stmnt 
-              (expr (void) 
-               (call (expr ((func ((* "ExceptionFrame"))) void) 
-                      (ident (binding 23 "x2c_exception_mark_handled"))) 
-                (args (expr (* "ExceptionFrame") 
-                       (op & (expr ("ExceptionFrame") 
-                              (ident (binding 6 "_x2c_gensym_exception_frame_0"))))))))) 
-             (if (expr (int) 
-                  (op == 
-                   (expr (int) 
-                    (ident (binding 20 "_x2c_gensym_macro_selected_0"))) 
-                   (expr (int) (literal (int) "0")))) 
-              (block 
-               (block 
-                (at 6 (stmnt 
-                       (expr (int) 
-                        (op = (expr (int) (ident (binding 5 "caught"))) 
-                         (expr (int) (literal (int) "1")))))))))) 
-            (block 
-             (stmnt 
-              (expr (void) 
-               (call (expr ((func (("ErrorHandler"))) void) 
-                      (ident (binding 24 "x2c_error_catch_close"))) 
-                (args (expr (("ErrorHandler")) 
-                       (ident (binding 13 "_x2c_gensym_error_handler_0"))))))) 
-             (stmnt 
-              (expr (("ErrorHandler")) 
-               (op = (expr (("ErrorHandler")) 
-                      (ident (binding 13 "_x2c_gensym_error_handler_0"))) 
-                (expr () (ident (binding 25 "NULL")))))) 
-             (stmnt 
-              (expr (void) 
-               (call (expr ((func ((* "ExceptionFrame"))) void) 
-                      (ident (binding 26 "x2c_exception_leave"))) 
-                (args (expr (* ("ExceptionFrame")) 
-                       (op & (expr (("ExceptionFrame")) 
-                              (ident (binding 6 "_x2c_gensym_exception_frame_0"))))))))) 
-             (stmnt 
-              (expr () 
-               (call (expr () (ident (binding 27 "__builtin_unreachable"))) 
-                (args (expr (void) ()))))))))) 
-         (stmnt 
-          (expr (void) 
-           (call (expr ((func (("ErrorHandler"))) void) 
-                  (ident (binding 24 "x2c_error_catch_close"))) 
-            (args (expr (("ErrorHandler")) 
-                   (ident (binding 13 "_x2c_gensym_error_handler_0"))))))) 
-         (stmnt 
-          (expr (("ErrorHandler")) 
-           (op = (expr (("ErrorHandler")) 
-                  (ident (binding 13 "_x2c_gensym_error_handler_0"))) 
-            (expr () (ident (binding 25 "NULL")))))) 
-         (stmnt 
-          (expr (void) 
-           (call (expr ((func ((* "ExceptionFrame"))) void) 
-                  (ident (binding 26 "x2c_exception_leave"))) 
-            (args (expr (* ("ExceptionFrame")) 
-                   (op & (expr (("ExceptionFrame")) 
-                          (ident (binding 6 "_x2c_gensym_exception_frame_0"))))))))))) 
-  (at 65 (return (expr (int) (ident (binding 5 "caught")))))))
+              (expr (int) 
+               (op = (expr (int) (ident (binding 5 "caught"))) 
+                (expr (int) (literal (int) "1"))))))))))) 
+       (block 
+        (stmnt 
+         (expr (void) 
+          (call (expr ((func (("ErrorHandler"))) void) 
+                 (ident (binding 24 "x2c_error_catch_close"))) 
+           (args (expr (("ErrorHandler")) 
+                  (ident (binding 13 "_x2c_gensym_error_handler_0"))))))) 
+        (stmnt 
+         (expr (("ErrorHandler")) 
+          (op = (expr (("ErrorHandler")) 
+                 (ident (binding 13 "_x2c_gensym_error_handler_0"))) 
+           (expr () (ident (binding 25 "NULL")))))) 
+        (stmnt 
+         (expr (void) 
+          (call (expr ((func ((* "ExceptionFrame"))) void) 
+                 (ident (binding 26 "x2c_exception_leave"))) 
+           (args (expr (* ("ExceptionFrame")) 
+                  (op & (expr (("ExceptionFrame")) 
+                         (ident (binding 6 "_x2c_gensym_exception_frame_0"))))))))) 
+        (stmnt 
+         (expr () 
+          (call (expr () (ident (binding 27 "__builtin_unreachable"))) 
+           (args (expr (void) ()))))))))) 
+    (stmnt 
+     (expr (void) 
+      (call (expr ((func (("ErrorHandler"))) void) 
+             (ident (binding 24 "x2c_error_catch_close"))) 
+       (args (expr (("ErrorHandler")) 
+              (ident (binding 13 "_x2c_gensym_error_handler_0"))))))) 
+    (stmnt 
+     (expr (("ErrorHandler")) 
+      (op = (expr (("ErrorHandler")) 
+             (ident (binding 13 "_x2c_gensym_error_handler_0"))) 
+       (expr () (ident (binding 25 "NULL")))))) 
+    (stmnt 
+     (expr (void) 
+      (call (expr ((func ((* "ExceptionFrame"))) void) 
+             (ident (binding 26 "x2c_exception_leave"))) 
+       (args (expr (* ("ExceptionFrame")) 
+              (op & (expr (("ExceptionFrame")) 
+                     (ident (binding 6 "_x2c_gensym_exception_frame_0"))))))))))) 
+  (at 82 (return (expr (int) (ident (binding 5 "caught")))))))
 
 (function (static void) 
  (bind (binding 28 "break_inside_switch") 
   ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 9 (stmnt 
-         (expr (int) 
-          (op = (expr (int) (ident (binding 1 "order"))) 
-           (expr (int) (literal (int) "0")))))) 
-  (at 10 
+  (at 14 
+   (stmnt 
+    (expr (int) 
+     (op = (expr (int) (ident (binding 1 "order"))) 
+      (expr (int) (literal (int) "0")))))) 
+  (at 16 
    (block 
     (declare ("X2CCleanup") 
      (bindings 
@@ -242,20 +246,21 @@
               (op & (expr ("X2CCleanup") 
                      (ident (binding 29 "_x2c_gensym_defer_record_0"))))))))) 
     (block 
-     (at 11 
+     (at 17 
       (declare (int) 
        (bindings 
         (op = (bind (binding 32 "selector") ()) (expr (int) (literal (int) "1")))))) 
-     (at 17 
+     (at 24 
       (switch (expr (int) (ident (binding 32 "selector"))) 
-       (block (at 12 (case (expr (int) (literal (int) "1")))) 
-        (at 13 
-         (stmnt 
-          (expr (void) 
-           (call (expr ((func ((int))) void) (ident (binding 2 "record_step"))) 
-            (args (expr (int) (literal (int) "1"))))))) 
-        (at 14 (break)) (at 15 (default)) (at 16 (break))))) 
-     (at 18 
+       (at 23 
+        (block (at 18 (case (expr (int) (literal (int) "1")))) 
+         (at 19 
+          (stmnt 
+           (expr (void) 
+            (call (expr ((func ((int))) void) (ident (binding 2 "record_step"))) 
+             (args (expr (int) (literal (int) "1"))))))) 
+         (at 20 (break)) (at 21 (default)) (at 22 (break)))))) 
+     (at 25 
       (stmnt 
        (expr (void) 
         (call (expr ((func ((int))) void) (ident (binding 2 "record_step"))) 
@@ -272,12 +277,12 @@
  (bind (binding 34 "continue_inside_foreach") 
   ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 19 
+  (at 26 
    (declare (int) 
     (bindings 
      (op = (bind (binding 35 "caught") (volatile)) 
       (expr (int) (literal (int) "0")))))) 
-  (at 68 
+  (at 86 
    (block 
     (declare ("ExceptionFrame") 
      (bindings (bind (binding 36 "_x2c_gensym_exception_frame_1") ()))) 
@@ -354,74 +359,77 @@
                                (ident 
                                 (binding 36 "_x2c_gensym_exception_frame_1"))) 
                          ("env"))) (expr (int) (literal (int) "0"))))))) 
-     (block 
-      (at 67 
-       (block (declare ("Var") (bindings (bind (binding 41 "item") (volatile)))) 
-        (declare ("List") 
-         (bindings 
-          (op = (bind (binding 42 "_x2c_gensym_macro_object_0") ()) 
-           (expr ("List") (expr ("List") (cache 5)))))) 
-        (declare ("List") 
-         (bindings 
-          (op = (bind (binding 43 "_x2c_gensym_macro_cursor_0") ()) 
-           (expr ("List") (ident (binding 42 "_x2c_gensym_macro_object_0")))))) 
-        (stmnt 
-         (expr (volatile * const volatile void) 
-          (op = (expr (volatile * const volatile void) 
-                 (ident (binding 44 "x2c_exception_escaped"))) 
-           (expr (* "List") 
-            (op & (expr ("List") 
-                   (ident (binding 43 "_x2c_gensym_macro_cursor_0")))))))) 
-        (declare ("Var") 
-         (bindings (bind (binding 45 "_x2c_gensym_macro_cursor_output_0") ()))) 
-        (stmnt 
-         (expr (volatile * const volatile void) 
-          (op = (expr (volatile * const volatile void) 
-                 (ident (binding 44 "x2c_exception_escaped"))) 
-           (expr (* "Var") 
-            (op & (expr ("Var") 
-                   (ident (binding 45 "_x2c_gensym_macro_cursor_output_0")))))))) 
-        (at 66 
-         (while 
-          (expr (int) 
-           (call (expr ((func (("List") (opt-ref "List") (opt-ref "Var"))) int) 
-                  (ident (binding 46 "List_try_next"))) 
-            (args (expr ("List") 
-                   (ident (binding 42 "_x2c_gensym_macro_object_0"))) 
-             (expr (opt-ref "List") 
-              (op & (parens 
-                     (expr ("List") 
-                      (ident (binding 43 "_x2c_gensym_macro_cursor_0")))))) 
-             (expr (opt-ref "Var") 
-              (op & (parens 
-                     (expr ("Var") 
-                      (ident (binding 45 "_x2c_gensym_macro_cursor_output_0"))))))))) 
-          (block 
-           (stmnt 
-            (expr ("Var") 
-             (op = (expr ("Var") (ident (binding 41 "item"))) 
-              (expr ("Var") 
-               (ident (binding 45 "_x2c_gensym_macro_cursor_output_0")))))) 
+     (at 85 
+      (block 
+       (at 84 
+        (block 
+         (declare ("Var") (bindings (bind (binding 41 "item") (volatile)))) 
+         (declare ("List") 
+          (bindings 
+           (op = (bind (binding 42 "_x2c_gensym_macro_object_0") ()) 
+            (expr ("List") (expr ("List") (cache 5)))))) 
+         (declare ("List") 
+          (bindings 
+           (op = (bind (binding 43 "_x2c_gensym_macro_cursor_0") ()) 
+            (expr ("List") (ident (binding 42 "_x2c_gensym_macro_object_0")))))) 
+         (stmnt 
+          (expr (volatile * const volatile void) 
+           (op = (expr (volatile * const volatile void) 
+                  (ident (binding 44 "x2c_exception_escaped"))) 
+            (expr (* "List") 
+             (op & (expr ("List") 
+                    (ident (binding 43 "_x2c_gensym_macro_cursor_0")))))))) 
+         (declare ("Var") 
+          (bindings (bind (binding 45 "_x2c_gensym_macro_cursor_output_0") ()))) 
+         (stmnt 
+          (expr (volatile * const volatile void) 
+           (op = (expr (volatile * const volatile void) 
+                  (ident (binding 44 "x2c_exception_escaped"))) 
+            (expr (* "Var") 
+             (op & (expr ("Var") 
+                    (ident (binding 45 "_x2c_gensym_macro_cursor_output_0")))))))) 
+         (at 83 
+          (while 
+           (expr (int) 
+            (call (expr ((func (("List") (opt-ref "List") (opt-ref "Var"))) int) 
+                   (ident (binding 46 "List_try_next"))) 
+             (args (expr ("List") 
+                    (ident (binding 42 "_x2c_gensym_macro_object_0"))) 
+              (expr (opt-ref "List") 
+               (op & (parens 
+                      (expr ("List") 
+                       (ident (binding 43 "_x2c_gensym_macro_cursor_0")))))) 
+              (expr (opt-ref "Var") 
+               (op & (parens 
+                      (expr ("Var") 
+                       (ident (binding 45 "_x2c_gensym_macro_cursor_output_0"))))))))) 
            (block 
-            (at 20 
-             (if (expr (int) 
-                  (op == 
-                   (expr (int) 
-                    (call (expr ((func (("Var"))) (int)) 
-                           (ident (binding 47 "Var_int"))) 
-                     (args (expr ("Var") (ident (binding 41 "item")))))) 
-                   (expr (int) (literal (int) "1")))) (continue))) 
-            (at 21 
-             (if (expr (int) 
-                  (op == 
-                   (expr (int) 
-                    (call (expr ((func (("Var"))) (int)) 
-                           (ident (binding 47 "Var_int"))) 
-                     (args (expr ("Var") (ident (binding 41 "item")))))) 
-                   (expr (int) (literal (int) "2")))) 
-              (raise 
-               (expr ("Symbol") (literal ("Symbol") "invariant" invariant)) 
-               (args))))))))))) 
+            (stmnt 
+             (expr ("Var") 
+              (op = (expr ("Var") (ident (binding 41 "item"))) 
+               (expr ("Var") 
+                (ident (binding 45 "_x2c_gensym_macro_cursor_output_0")))))) 
+            (block 
+             (at 28 
+              (if (expr (int) 
+                   (op == 
+                    (expr (int) 
+                     (call (expr ((func (("Var"))) (int)) 
+                            (ident (binding 47 "Var_int"))) 
+                      (args (expr ("Var") (ident (binding 41 "item")))))) 
+                    (expr (int) (literal (int) "1")))) (at 27 (continue)))) 
+             (at 30 
+              (if (expr (int) 
+                   (op == 
+                    (expr (int) 
+                     (call (expr ((func (("Var"))) (int)) 
+                            (ident (binding 47 "Var_int"))) 
+                      (args (expr ("Var") (ident (binding 41 "item")))))) 
+                    (expr (int) (literal (int) "2")))) 
+               (at 29 
+                (raise 
+                 (expr ("Symbol") (literal ("Symbol") "invariant" invariant)) 
+                 (args))))))))))))) 
      (block 
       (stmnt 
        (expr (void) 
@@ -463,12 +471,13 @@
               (expr (int) (ident (binding 48 "_x2c_gensym_macro_selected_1"))) 
               (expr (int) (literal (int) "0")))) 
          (block 
-          (block 
-           (at 31 
-            (stmnt 
-             (expr (int) 
-              (op = (expr (int) (ident (binding 35 "caught"))) 
-               (expr (int) (literal (int) "1")))))))))) 
+          (at 42 
+           (block 
+            (at 41 
+             (stmnt 
+              (expr (int) 
+               (op = (expr (int) (ident (binding 35 "caught"))) 
+                (expr (int) (literal (int) "1"))))))))))) 
        (block 
         (stmnt 
          (expr (void) 
@@ -510,18 +519,18 @@
        (args (expr (* ("ExceptionFrame")) 
               (op & (expr (("ExceptionFrame")) 
                      (ident (binding 36 "_x2c_gensym_exception_frame_1"))))))))))) 
-  (at 69 (return (expr (int) (ident (binding 35 "caught")))))))
+  (at 87 (return (expr (int) (ident (binding 35 "caught")))))))
 
 (function (static void) 
  (bind (binding 49 "loop_switch_boundaries") 
   ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 34 
+  (at 45 
    (stmnt 
     (expr (int) 
      (op = (expr (int) (ident (binding 1 "order"))) 
       (expr (int) (literal (int) "0")))))) 
-  (at 70 
+  (at 89 
    (for (decl (int) 
          (bindings 
           (op = (bind (binding 50 "i") ()) (expr (int) (literal (int) "0"))))) 
@@ -529,31 +538,104 @@
      (op < (expr (int) (ident (binding 50 "i"))) 
       (expr (int) (literal (int) "3")))) 
     (expr (int) (postfix ++ (expr (int) (ident (binding 50 "i"))))) 
-    (block 
-     (at 35 
-      (block 
-       (declare ("X2CCleanup") 
-        (bindings 
-         (op = (bind (binding 51 "_x2c_gensym_defer_record_1") ()) 
-          (expr () 
-           (composite 
-            (commas 
-             (dotinit ("fn") 
-              (expr ((func ((* void))) void) 
-               (ident (binding 52 "_x2c_gensym_defer_cleanup_1")))) 
-             (dotinit ("env") (expr (int) (literal (int) "0"))))))))) 
-       (stmnt 
-        (expr (void) 
-         (call (expr ((func ((* "X2CCleanup"))) void) 
-                (ident (binding 31 "x2c_cleanup_push"))) 
-          (args (expr (* "X2CCleanup") 
-                 (op & (expr ("X2CCleanup") 
-                        (ident (binding 51 "_x2c_gensym_defer_record_1"))))))))) 
+    (at 88 
+     (block 
+      (at 47 
        (block 
-        (at 40 
-         (switch (expr (int) (ident (binding 50 "i"))) 
-          (block (at 36 (case (expr (int) (literal (int) "0")))) 
-           (at 37 
+        (declare ("X2CCleanup") 
+         (bindings 
+          (op = (bind (binding 51 "_x2c_gensym_defer_record_1") ()) 
+           (expr () 
+            (composite 
+             (commas 
+              (dotinit ("fn") 
+               (expr ((func ((* void))) void) 
+                (ident (binding 52 "_x2c_gensym_defer_cleanup_1")))) 
+              (dotinit ("env") (expr (int) (literal (int) "0"))))))))) 
+        (stmnt 
+         (expr (void) 
+          (call (expr ((func ((* "X2CCleanup"))) void) 
+                 (ident (binding 31 "x2c_cleanup_push"))) 
+           (args (expr (* "X2CCleanup") 
+                  (op & (expr ("X2CCleanup") 
+                         (ident (binding 51 "_x2c_gensym_defer_record_1"))))))))) 
+        (block 
+         (at 53 
+          (switch (expr (int) (ident (binding 50 "i"))) 
+           (at 52 
+            (block (at 48 (case (expr (int) (literal (int) "0")))) 
+             (at 49 
+              (block 
+               (stmnt 
+                (expr (void) 
+                 (call (expr ((func ((* "X2CCleanup"))) void) 
+                        (ident (binding 33 "x2c_cleanup_leave"))) 
+                  (args (expr (* ("X2CCleanup")) 
+                         (op & (expr (("X2CCleanup")) 
+                                (ident (binding 51 "_x2c_gensym_defer_record_1"))))))))) 
+               (continue))) (at 50 (default)) (at 51 (break)))))) 
+         (at 54 
+          (stmnt 
+           (expr (void) 
+            (call (expr ((func ((int))) void) (ident (binding 2 "record_step"))) 
+             (args (expr (int) (ident (binding 50 "i"))))))))) 
+        (stmnt 
+         (expr (void) 
+          (call (expr ((func ((* "X2CCleanup"))) void) 
+                 (ident (binding 33 "x2c_cleanup_leave"))) 
+           (args (expr (* ("X2CCleanup")) 
+                  (op & (expr (("X2CCleanup")) 
+                         (ident (binding 51 "_x2c_gensym_defer_record_1")))))))))))))))))
+
+(function (static void) 
+ (bind (binding 53 "switch_loop_boundaries") 
+  ((fnmod (params (param (void) (bind () ())))))) 
+ (block 
+  (at 57 
+   (stmnt 
+    (expr (int) 
+     (op = (expr (int) (ident (binding 1 "order"))) 
+      (expr (int) (literal (int) "0")))))) 
+  (at 58 
+   (declare (int) 
+    (bindings 
+     (op = (bind (binding 54 "selector") ()) (expr (int) (literal (int) "1")))))) 
+  (at 92 
+   (switch (expr (int) (ident (binding 54 "selector"))) 
+    (at 91 
+     (block (at 59 (case (expr (int) (literal (int) "1")))) 
+      (at 90 
+       (block 
+        (at 61 
+         (block 
+          (declare ("X2CCleanup") 
+           (bindings 
+            (op = (bind (binding 55 "_x2c_gensym_defer_record_2") ()) 
+             (expr () 
+              (composite 
+               (commas 
+                (dotinit ("fn") 
+                 (expr ((func ((* void))) void) 
+                  (ident (binding 56 "_x2c_gensym_defer_cleanup_2")))) 
+                (dotinit ("env") (expr (int) (literal (int) "0"))))))))) 
+          (stmnt 
+           (expr (void) 
+            (call (expr ((func ((* "X2CCleanup"))) void) 
+                   (ident (binding 31 "x2c_cleanup_push"))) 
+             (args (expr (* "X2CCleanup") 
+                    (op & (expr ("X2CCleanup") 
+                           (ident (binding 55 "_x2c_gensym_defer_record_2"))))))))) 
+          (block 
+           (at 64 
+            (while (expr (int) (literal (int) "1")) 
+             (at 63 (block (at 62 (break)))))) 
+           (at 65 
+            (stmnt 
+             (expr (void) 
+              (call (expr ((func ((int))) void) 
+                     (ident (binding 2 "record_step"))) 
+               (args (expr (int) (literal (int) "5"))))))) 
+           (at 66 
             (block 
              (stmnt 
               (expr (void) 
@@ -561,85 +643,17 @@
                       (ident (binding 33 "x2c_cleanup_leave"))) 
                 (args (expr (* ("X2CCleanup")) 
                        (op & (expr (("X2CCleanup")) 
-                              (ident (binding 51 "_x2c_gensym_defer_record_1"))))))))) 
-             (continue))) (at 38 (default)) (at 39 (break))))) 
-        (at 41 
-         (stmnt 
-          (expr (void) 
-           (call (expr ((func ((int))) void) (ident (binding 2 "record_step"))) 
-            (args (expr (int) (ident (binding 50 "i"))))))))) 
-       (stmnt 
-        (expr (void) 
-         (call (expr ((func ((* "X2CCleanup"))) void) 
-                (ident (binding 33 "x2c_cleanup_leave"))) 
-          (args (expr (* ("X2CCleanup")) 
-                 (op & (expr (("X2CCleanup")) 
-                        (ident (binding 51 "_x2c_gensym_defer_record_1"))))))))))))))))
-
-(function (static void) 
- (bind (binding 53 "switch_loop_boundaries") 
-  ((fnmod (params (param (void) (bind () ())))))) 
- (block 
-  (at 43 
-   (stmnt 
-    (expr (int) 
-     (op = (expr (int) (ident (binding 1 "order"))) 
-      (expr (int) (literal (int) "0")))))) 
-  (at 44 
-   (declare (int) 
-    (bindings 
-     (op = (bind (binding 54 "selector") ()) (expr (int) (literal (int) "1")))))) 
+                              (ident (binding 55 "_x2c_gensym_defer_record_2"))))))))) 
+             (break)))) 
+          (stmnt 
+           (expr (void) 
+            (call (expr ((func ((* "X2CCleanup"))) void) 
+                   (ident (binding 33 "x2c_cleanup_leave"))) 
+             (args (expr (* ("X2CCleanup")) 
+                    (op & (expr (("X2CCleanup")) 
+                           (ident (binding 55 "_x2c_gensym_defer_record_2"))))))))))))) 
+      (at 68 (default)) (at 69 (break)))))) 
   (at 72 
-   (switch (expr (int) (ident (binding 54 "selector"))) 
-    (block (at 45 (case (expr (int) (literal (int) "1")))) 
-     (at 71 
-      (block 
-       (at 46 
-        (block 
-         (declare ("X2CCleanup") 
-          (bindings 
-           (op = (bind (binding 55 "_x2c_gensym_defer_record_2") ()) 
-            (expr () 
-             (composite 
-              (commas 
-               (dotinit ("fn") 
-                (expr ((func ((* void))) void) 
-                 (ident (binding 56 "_x2c_gensym_defer_cleanup_2")))) 
-               (dotinit ("env") (expr (int) (literal (int) "0"))))))))) 
-         (stmnt 
-          (expr (void) 
-           (call (expr ((func ((* "X2CCleanup"))) void) 
-                  (ident (binding 31 "x2c_cleanup_push"))) 
-            (args (expr (* "X2CCleanup") 
-                   (op & (expr ("X2CCleanup") 
-                          (ident (binding 55 "_x2c_gensym_defer_record_2"))))))))) 
-         (block 
-          (at 48 
-           (while (expr (int) (literal (int) "1")) (block (at 47 (break))))) 
-          (at 49 
-           (stmnt 
-            (expr (void) 
-             (call (expr ((func ((int))) void) (ident (binding 2 "record_step"))) 
-              (args (expr (int) (literal (int) "5"))))))) 
-          (at 50 
-           (block 
-            (stmnt 
-             (expr (void) 
-              (call (expr ((func ((* "X2CCleanup"))) void) 
-                     (ident (binding 33 "x2c_cleanup_leave"))) 
-               (args (expr (* ("X2CCleanup")) 
-                      (op & (expr (("X2CCleanup")) 
-                             (ident (binding 55 "_x2c_gensym_defer_record_2"))))))))) 
-            (break)))) 
-         (stmnt 
-          (expr (void) 
-           (call (expr ((func ((* "X2CCleanup"))) void) 
-                  (ident (binding 33 "x2c_cleanup_leave"))) 
-            (args (expr (* ("X2CCleanup")) 
-                   (op & (expr (("X2CCleanup")) 
-                          (ident (binding 55 "_x2c_gensym_defer_record_2"))))))))))))) 
-     (at 52 (default)) (at 53 (break))))) 
-  (at 55 
    (stmnt 
     (expr (void) 
      (call (expr ((func ((int))) void) (ident (binding 2 "record_step"))) 
@@ -648,7 +662,7 @@
 (function (int) 
  (bind (binding 57 "main") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 56 
+  (at 73 
    (declare (int) 
     (bindings 
      (op = (bind (binding 58 "from_try") ()) 
@@ -656,13 +670,13 @@
        (call (expr ((func ((void))) int) 
               (ident (binding 4 "continue_inside_try"))) 
         (args (expr (void) ())))))))) 
-  (at 57 
+  (at 74 
    (stmnt 
     (expr (void) 
      (call (expr ((func ((void))) void) 
             (ident (binding 28 "break_inside_switch"))) 
       (args (expr (void) ())))))) 
-  (at 58 
+  (at 75 
    (declare (int) 
     (bindings 
      (op = (bind (binding 59 "from_switch") ()) 
@@ -672,29 +686,29 @@
        (call (expr ((func ((void))) int) 
               (ident (binding 34 "continue_inside_foreach"))) 
         (args (expr (void) ())))))))) 
-  (at 59 
+  (at 76 
    (stmnt 
     (expr (void) 
      (call (expr ((func ((void))) void) 
             (ident (binding 49 "loop_switch_boundaries"))) 
       (args (expr (void) ())))))) 
-  (at 60 
+  (at 77 
    (declare (int) 
     (bindings 
      (op = (bind (binding 61 "from_loop_switch") ()) 
       (expr (int) (ident (binding 1 "order"))))))) 
-  (at 61 
+  (at 78 
    (stmnt 
     (expr (void) 
      (call (expr ((func ((void))) void) 
             (ident (binding 53 "switch_loop_boundaries"))) 
       (args (expr (void) ())))))) 
-  (at 62 
+  (at 79 
    (declare (int) 
     (bindings 
      (op = (bind (binding 62 "from_switch_loop") ()) 
       (expr (int) (ident (binding 1 "order"))))))) 
-  (at 63 
+  (at 80 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 63 "printf"))) 
@@ -704,7 +718,7 @@
        (expr (int) (ident (binding 60 "from_foreach"))) 
        (expr (int) (ident (binding 61 "from_loop_switch"))) 
        (expr (int) (ident (binding 62 "from_switch_loop")))))))) 
-  (at 73 
+  (at 93 
    (return 
     (expr (int) 
      (op ? (expr (int) 
@@ -737,27 +751,30 @@
   ((fnmod 
     (params (param (void) (bind (binding 64 "_x2c_gensym_defer_opaque_0") (*))))))) 
  (block 
-  (stmnt 
-   (expr (void) 
-    (call (expr ((func ((int))) void) (ident (binding 2 "record_step"))) 
-     (args (expr (int) (literal (int) "2"))))))))
+  (at 15 
+   (stmnt 
+    (expr (void) 
+     (call (expr ((func ((int))) void) (ident (binding 2 "record_step"))) 
+      (args (expr (int) (literal (int) "2")))))))))
 
 (function (static void) 
  (bind (binding 52 "_x2c_gensym_defer_cleanup_1") 
   ((fnmod 
     (params (param (void) (bind (binding 65 "_x2c_gensym_defer_opaque_1") (*))))))) 
  (block 
-  (stmnt 
-   (expr (void) 
-    (call (expr ((func ((int))) void) (ident (binding 2 "record_step"))) 
-     (args (expr (int) (literal (int) "9"))))))))
+  (at 46 
+   (stmnt 
+    (expr (void) 
+     (call (expr ((func ((int))) void) (ident (binding 2 "record_step"))) 
+      (args (expr (int) (literal (int) "9")))))))))
 
 (function (static void) 
  (bind (binding 56 "_x2c_gensym_defer_cleanup_2") 
   ((fnmod 
     (params (param (void) (bind (binding 66 "_x2c_gensym_defer_opaque_2") (*))))))) 
  (block 
-  (stmnt 
-   (expr (void) 
-    (call (expr ((func ((int))) void) (ident (binding 2 "record_step"))) 
-     (args (expr (int) (literal (int) "4"))))))))
+  (at 60 
+   (stmnt 
+    (expr (void) 
+     (call (expr ((func ((int))) void) (ident (binding 2 "record_step"))) 
+      (args (expr (int) (literal (int) "4")))))))))

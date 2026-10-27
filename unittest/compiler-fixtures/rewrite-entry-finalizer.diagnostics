@@ -1,3 +1,5 @@
-unittest/compiler-fixtures/rewrite-entry-finalizer.x:31:1: macro: code placed at function entry cannot land in a defer finalizer
+unittest/compiler-fixtures/rewrite-entry-finalizer.x:22:11: macro: code placed at function entry cannot land in a defer finalizer
+      defer printf("finalizer %d\n", tally(n));
+            ^^^^^^
   note: a finalizer runs as its own callback; place after a statement
 

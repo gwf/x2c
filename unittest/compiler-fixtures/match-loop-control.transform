@@ -12,7 +12,7 @@
          (bindings 
           (op = (bind (binding 3 "matched") ()) (expr (int) (literal (int) "0"))) 
           (op = (bind (binding 4 "after") ()) (expr (int) (literal (int) "0")))))) 
-  (at 37 
+  (at 39 
    (block (declare ("Var") (bindings (bind (binding 5 "item") ()))) 
     (declare ("List") 
      (bindings 
@@ -24,7 +24,7 @@
        (expr ("List") (ident (binding 6 "_x2c_gensym_macro_object_0")))))) 
     (declare ("Var") 
      (bindings (bind (binding 8 "_x2c_gensym_macro_cursor_output_0") ()))) 
-    (at 36 
+    (at 38 
      (while 
       (expr (int) 
        (call (expr ((func (("List") (opt-ref "List") (opt-ref "Var"))) int) 
@@ -43,7 +43,7 @@
          (op = (expr ("Var") (ident (binding 5 "item"))) 
           (expr ("Var") (ident (binding 8 "_x2c_gensym_macro_cursor_output_0")))))) 
        (block 
-        (at 34 
+        (at 36 
          (declare ("List") 
           (bindings 
            (op = (bind (binding 10 "value") ()) 
@@ -51,7 +51,7 @@
              (call (expr ((func (("Var"))) "List") 
                     (ident (binding 11 "Var_list_payload"))) 
               (args (expr ("Var") (ident (binding 5 "item")))))))))) 
-        (at 35 
+        (at 37 
          (block 
           (declare ("List") 
            (bindings 
@@ -61,24 +61,25 @@
            (block 
             (
              "default:{List _x2c_gensym_match_at_0, _x2c_gensym_match_at_1, _x2c_gensym_match_at_2; if(_x2c_gensym_match_expr_0 &&(Var_is(_x2c_gensym_match_expr_0 -> car, 806120) &&(_x2c_gensym_match_at_0 = Var_list_payload(_x2c_gensym_match_expr_0 -> car), 1)) && _x2c_gensym_match_at_0 && _x2c_gensym_match_at_0 ->car.u64 == 9224497936761619414ULL && !(_x2c_gensym_match_at_1 = _x2c_gensym_match_at_0 ->cdr) && !(_x2c_gensym_match_at_2 = _x2c_gensym_match_expr_0 ->cdr)){" 
-             (block 
-              (at 4 (stmnt 
-                     (expr (int) 
-                      (postfix ++ (expr (int) (ident (binding 3 "matched"))))))) 
-              (at 5 (break))) (break) "}}"))))) 
-        (at 7 (stmnt 
+             (at 6 (block 
+                    (at 4 (stmnt 
+                           (expr (int) 
+                            (postfix ++ 
+                             (expr (int) (ident (binding 3 "matched"))))))) 
+                    (at 5 (break)))) (break) "}}"))))) 
+        (at 8 (stmnt 
                (expr (int) (postfix ++ (expr (int) (ident (binding 4 "after"))))))))))))) 
-  (at 17 
+  (at 18 
    (declare ("List") 
     (bindings 
      (op = (bind (binding 13 "continue_inputs") ()) 
       (expr ("List") (expr ("List") (cache 19))))))) 
-  (at 18 
+  (at 19 
    (declare (int) 
     (bindings 
      (op = (bind (binding 14 "visited") ()) (expr (int) (literal (int) "0"))) 
      (op = (bind (binding 15 "accepted") ()) (expr (int) (literal (int) "0")))))) 
-  (at 41 
+  (at 43 
    (block (declare ("Var") (bindings (bind (binding 16 "item") ()))) 
     (declare ("List") 
      (bindings 
@@ -90,7 +91,7 @@
        (expr ("List") (ident (binding 17 "_x2c_gensym_macro_object_1")))))) 
     (declare ("Var") 
      (bindings (bind (binding 19 "_x2c_gensym_macro_cursor_output_1") ()))) 
-    (at 40 
+    (at 42 
      (while 
       (expr (int) 
        (call (expr ((func (("List") (opt-ref "List") (opt-ref "Var"))) int) 
@@ -110,7 +111,7 @@
          (op = (expr ("Var") (ident (binding 16 "item"))) 
           (expr ("Var") (ident (binding 19 "_x2c_gensym_macro_cursor_output_1")))))) 
        (block 
-        (at 38 
+        (at 40 
          (declare ("List") 
           (bindings 
            (op = (bind (binding 20 "value") ()) 
@@ -118,10 +119,10 @@
              (call (expr ((func (("Var"))) "List") 
                     (ident (binding 11 "Var_list_payload"))) 
               (args (expr ("Var") (ident (binding 16 "item")))))))))) 
-        (at 20 
+        (at 21 
          (stmnt 
           (expr (int) (postfix ++ (expr (int) (ident (binding 14 "visited"))))))) 
-        (at 39 
+        (at 41 
          (block 
           (declare ("List") 
            (bindings 
@@ -131,11 +132,11 @@
            (block 
             (
              "default:{List _x2c_gensym_match_at_3, _x2c_gensym_match_at_4, _x2c_gensym_match_at_5; if(_x2c_gensym_match_expr_1 &&(Var_is(_x2c_gensym_match_expr_1 -> car, 806120) &&(_x2c_gensym_match_at_3 = Var_list_payload(_x2c_gensym_match_expr_1 -> car), 1)) && _x2c_gensym_match_at_3 && _x2c_gensym_match_at_3 ->car.u64 == 9224497936762886752ULL && !(_x2c_gensym_match_at_4 = _x2c_gensym_match_at_3 ->cdr) && !(_x2c_gensym_match_at_5 = _x2c_gensym_match_expr_1 ->cdr)){" 
-             (continue) "break;}}"))))) 
-        (at 22 
+             (at 22 (continue)) "break;}}"))))) 
+        (at 24 
          (stmnt 
           (expr (int) (postfix ++ (expr (int) (ident (binding 15 "accepted"))))))))))))) 
-  (at 32 
+  (at 34 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 22 "printf"))) 
@@ -144,7 +145,7 @@
        (expr (int) (ident (binding 4 "after"))) 
        (expr (int) (ident (binding 14 "visited"))) 
        (expr (int) (ident (binding 15 "accepted")))))))) 
-  (at 42 
+  (at 44 
    (return 
     (expr (int) 
      (op ? (expr (int) 

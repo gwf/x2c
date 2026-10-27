@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/governed-statement-location.x:7:5: type: cannot pass (int) where (* int) is expected
+      take(count);
+      ^^^^
+  note: write &value to pass its address
+

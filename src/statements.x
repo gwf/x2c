@@ -575,15 +575,17 @@ static List _catch_filter(Compiler c) {
     takes the statement of each later arm and the closing directive, so a
     statement macro that wraps its body in braces keeps the whole group
     inside them. A later statement in the same arm follows the governed one,
-    as in C.
+    as in C. A governed source statement is anchored where it starts, as a
+    block item is, so a transform diagnostic names it rather than its
+    keyword.
 */
 List Compiler.parse_governed(Compiler c, Symbol position) {
   Array items = auto [];
   int depth = _take_directives(c, items);
   loop {
     Token start = c.token;
-    items.push(
-      position == <block> ? c.parse_block_item() : _statement(c, <statement>));
+    items.push(position == <block> ? c.parse_block_item()
+                                   : _governed_statement(c, start));
     depth = _depth_after(c, start, depth);
     if (depth <= 0) break;
     Symbol end = _arm_end(c.leading_preproc());
@@ -595,6 +597,13 @@ List Compiler.parse_governed(Compiler c, Symbol position) {
       break;
   }
   return items.len() == 1 ? items[0] : %(group @(items.list()));
+}
+
+/* A template's statements already land at its invocation's origin, and its
+   macro patterns read the template without origin wrappers. */
+static List _governed_statement(Compiler c, Token start) {
+  List statement = _statement(c, <statement>);
+  return c.macro_holes ? statement : c.anchor_origin(statement, start);
 }
 
 /* Adds the directives before the cursor to `items` and returns how many

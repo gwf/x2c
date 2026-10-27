@@ -254,7 +254,7 @@
                                    (expr ("Symbol") 
                                     (literal ("Symbol") "answer" answer)) 
                                    (expr (int) (literal (int) "42")))))))) (nil)))))))))))))) 
-  (at 24 
+  (at 25 
    (if (expr (int) 
         (op || 
          (expr (int) 
@@ -269,24 +269,24 @@
                         (ident (binding 35 "List_equal"))) 
                   (args (expr ("List") (ident (binding 12 "splice"))) 
                    (expr ("List") (expr ("List") (cache 24)))))))))) 
-    (return (int) (expr (int) (literal (int) "1"))))) 
-  (at 25 
+    (at 24 (return (int) (expr (int) (literal (int) "1")))))) 
+  (at 27 
    (if (expr (int) 
         (op ! (expr (int) 
                (call (expr ((func (("List") ("List"))) int) 
                       (ident (binding 35 "List_equal"))) 
                 (args (expr ("List") (ident (binding 13 "short_splice"))) 
                  (expr ("List") (ident (binding 12 "splice")))))))) 
-    (return (int) (expr (int) (literal (int) "2"))))) 
-  (at 26 
+    (at 26 (return (int) (expr (int) (literal (int) "2")))))) 
+  (at 29 
    (if (expr (int) 
         (op ! (expr (int) 
                (call (expr ((func (("List") ("List"))) int) 
                       (ident (binding 35 "List_equal"))) 
                 (args (expr ("List") (ident (binding 14 "nested"))) 
                  (expr ("List") (expr ("List") (cache 26)))))))) 
-    (return (int) (expr (int) (literal (int) "3"))))) 
-  (at 27 
+    (at 28 (return (int) (expr (int) (literal (int) "3")))))) 
+  (at 31 
    (if (expr (int) 
         (op ! (expr (int) 
                (call (expr ((func (("String") ("String"))) int) 
@@ -300,16 +300,16 @@
                                  (ident (binding 16 "nested_string"))) 
                                 (expr (int) (literal (int) "0"))))))) 
                  (expr ("String") (cache 19))))))) 
-    (return (int) (expr (int) (literal (int) "4"))))) 
-  (at 28 
+    (at 30 (return (int) (expr (int) (literal (int) "4")))))) 
+  (at 33 
    (if (expr (int) 
         (op ! (expr (int) 
                (call (expr ((func (("List") ("List"))) int) 
                       (ident (binding 35 "List_equal"))) 
                 (args (expr ("List") (ident (binding 19 "short_then_list"))) 
                  (expr ("List") (expr ("List") (cache 28)))))))) 
-    (return (int) (expr (int) (literal (int) "5"))))) 
-  (at 29 
+    (at 32 (return (int) (expr (int) (literal (int) "5")))))) 
+  (at 35 
    (if (expr (int) 
         (op || 
          (expr (int) 
@@ -322,24 +322,24 @@
                   (args (expr ("List") 
                          (ident (binding 21 "nested_compile_time"))) 
                    (expr ("List") (expr ("List") (cache 17)))))))))) 
-    (return (int) (expr (int) (literal (int) "6"))))) 
-  (at 30 
+    (at 34 (return (int) (expr (int) (literal (int) "6")))))) 
+  (at 37 
    (if (expr (int) 
         (op ! (expr (int) 
                (call (expr ((func (("String") ("String"))) int) 
                       (ident (binding 36 "String_equal"))) 
                 (args (expr ("String") (ident (binding 22 "text"))) 
                  (expr ("String") (cache 19))))))) 
-    (return (int) (expr (int) (literal (int) "7"))))) 
-  (at 31 
+    (at 36 (return (int) (expr (int) (literal (int) "7")))))) 
+  (at 39 
    (if (expr (int) 
         (op ! (expr (int) 
                (call (expr ((func (("String") ("String"))) int) 
                       (ident (binding 36 "String_equal"))) 
                 (args (expr ("String") (ident (binding 23 "short_then_text"))) 
                  (expr ("String") (cache 29))))))) 
-    (return (int) (expr (int) (literal (int) "8"))))) 
-  (at 32 
+    (at 38 (return (int) (expr (int) (literal (int) "8")))))) 
+  (at 41 
    (if (expr (int) 
         (op || 
          (expr (int) 
@@ -358,8 +358,8 @@
                     (getindex (expr ("Map") (ident (binding 25 "map"))) 
                      (expr ("Symbol") (literal ("Symbol") "<answer>" answer))))))) 
            (expr (int) (literal (int) "42")))))) 
-    (return (int) (expr (int) (literal (int) "9"))))) 
-  (at 33 
+    (at 40 (return (int) (expr (int) (literal (int) "9")))))) 
+  (at 43 
    (if (expr (int) 
         (op || 
          (expr (int) 
@@ -368,8 +368,8 @@
          (expr (int) 
           (op != (expr (int) (ident (binding 1 "calls"))) 
            (expr (int) (literal (int) "1")))))) 
-    (return (int) (expr (int) (literal (int) "10"))))) 
-  (at 34 
+    (at 42 (return (int) (expr (int) (literal (int) "10")))))) 
+  (at 45 
    (if (expr (int) 
         (op || 
          (expr (int) 
@@ -381,8 +381,8 @@
          (expr (int) 
           (op != (expr (int) (ident (binding 27 "comma"))) 
            (expr (int) (literal (int) "1")))))) 
-    (return (int) (expr (int) (literal (int) "11"))))) 
-  (at 35 
+    (at 44 (return (int) (expr (int) (literal (int) "11")))))) 
+  (at 47 
    (if (expr (int) 
         (op || 
          (expr (int) 
@@ -397,8 +397,8 @@
                         (ident (binding 35 "List_equal"))) 
                   (args (expr ("List") (ident (binding 31 "ternary"))) 
                    (expr ("List") (expr ("List") (cache 17)))))))))) 
-    (return (int) (expr (int) (literal (int) "12"))))) 
-  (at 36 
+    (at 46 (return (int) (expr (int) (literal (int) "12")))))) 
+  (at 49 
    (if (expr (int) 
         (op || 
          (expr (int) 
@@ -462,10 +462,10 @@
                                (expr (int) (literal (int) "3"))))))) 
                      (expr ("Symbol") (literal ("Symbol") "<answer>" answer))))))) 
            (expr (int) (literal (int) "42")))))) 
-    (return (int) (expr (int) (literal (int) "13"))))) 
-  (at 37 
+    (at 48 (return (int) (expr (int) (literal (int) "13")))))) 
+  (at 50 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 41 "printf"))) 
       (args (expr (* char) (literal (* char) "\"grouped unquote ok\\n\""))))))) 
-  (at 38 (return (int) (expr (int) (literal (int) "0"))))))
+  (at 51 (return (int) (expr (int) (literal (int) "0"))))))

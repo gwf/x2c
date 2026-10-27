@@ -98,48 +98,48 @@
                               (call (expr ((func (("Var"))) (int)) 
                                      (ident (binding 19 "Var_int"))) 
                                (args (expr ("Var") (ident (binding 18 "value")))))))))))))))))) 
-  (at 8 (try (block 
-              (at 6 (defer 
-                     (stmnt 
-                      (expr (void) 
-                       (call (expr ((func ((void))) void) 
-                              (ident (binding 9 "record_cleanup"))) 
-                        (args (expr (void) ()))))))) 
-              (at 7 (raise 
-                     (expr ("Symbol") (literal ("Symbol") "invariant" invariant)) 
-                     (args)))) 
-         (catchcases 
-          (((expr ("List") 
-             (expr ("List") 
-              (cons (expr ("Var") 
-                     (call (expr ((func (("Symbol"))) "Var") 
-                            (ident (binding 20 "Symbol_var"))) 
-                      (args (expr ("Symbol") 
-                             (literal ("Symbol") "invariant" invariant))))) 
-               (nil)))) (block (block)))) 
-          (binding 21 "_x2c_gensym_error_handler_0")) 
-         ())) 
-  (at 9 (declare (int) 
-         (bindings 
-          (op = (bind (binding 22 "sentinels") ()) 
-           (expr (int) 
-            (op + (expr (int) 
-                   (op + (expr (int) 
-                          (op + (expr (int) 
-                                 (op + (expr (int) 
-                                        (op + (expr (int) 
-                                               (ident 
-                                                (binding 2 "user_lambda_0"))) 
-                                         (expr (int) 
-                                          (ident 
-                                           (binding 3 "user_lambda_adapt_0"))))) 
-                                  (expr (int) 
-                                   (ident (binding 4 "user_exception_frame_0"))))) 
-                           (expr (int) 
-                            (ident (binding 5 "user_cleanup_guard_0"))))) 
-                    (expr (int) (ident (binding 6 "user_cleanup_prev_0"))))) 
-             (expr (int) (ident (binding 7 "user_cleanup_state_0"))))))))) 
-  (at 10 
+  (at 11 
+   (try (at 9 (block 
+               (at 7 (defer 
+                      (at 6 (stmnt 
+                             (expr (void) 
+                              (call (expr ((func ((void))) void) 
+                                     (ident (binding 9 "record_cleanup"))) 
+                               (args (expr (void) ())))))))) 
+               (at 8 (raise 
+                      (expr ("Symbol") 
+                       (literal ("Symbol") "invariant" invariant)) 
+                      (args))))) 
+    (catchcases 
+     (((expr ("List") 
+        (expr ("List") 
+         (cons (expr ("Var") 
+                (call (expr ((func (("Symbol"))) "Var") 
+                       (ident (binding 20 "Symbol_var"))) 
+                 (args (expr ("Symbol") 
+                        (literal ("Symbol") "invariant" invariant))))) 
+          (nil)))) (block (at 10 (block))))) 
+     (binding 21 "_x2c_gensym_error_handler_0")) 
+    ())) 
+  (at 12 
+   (declare (int) 
+    (bindings 
+     (op = (bind (binding 22 "sentinels") ()) 
+      (expr (int) 
+       (op + (expr (int) 
+              (op + (expr (int) 
+                     (op + (expr (int) 
+                            (op + (expr (int) 
+                                   (op + (expr (int) 
+                                          (ident (binding 2 "user_lambda_0"))) 
+                                    (expr (int) 
+                                     (ident (binding 3 "user_lambda_adapt_0"))))) 
+                             (expr (int) 
+                              (ident (binding 4 "user_exception_frame_0"))))) 
+                      (expr (int) (ident (binding 5 "user_cleanup_guard_0"))))) 
+               (expr (int) (ident (binding 6 "user_cleanup_prev_0"))))) 
+        (expr (int) (ident (binding 7 "user_cleanup_state_0"))))))))) 
+  (at 13 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 23 "printf"))) 
@@ -147,7 +147,7 @@
        (expr (int) (ident (binding 17 "mapped"))) 
        (expr (int) (ident (binding 8 "cleaned"))) 
        (expr (int) (ident (binding 22 "sentinels")))))))) 
-  (at 11 
+  (at 14 
    (return (int) 
     (expr (int) 
      (op ? (expr (int) 

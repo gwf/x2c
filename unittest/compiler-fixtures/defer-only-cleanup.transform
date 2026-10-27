@@ -9,7 +9,7 @@
   (at 1 (declare (int) 
          (bindings 
           (op = (bind (binding 3 "value") ()) (expr (int) (literal (int) "7")))))) 
-  (at 11 
+  (at 13 
    (block 
     (declare ("_x2c_gensym_defer_env_0") 
      (bindings 
@@ -45,11 +45,11 @@
               (op & (expr ("X2CCleanup") 
                      (ident (binding 5 "_x2c_gensym_defer_record_0"))))))))) 
     (block 
-     (at 3 (stmnt 
+     (at 4 (stmnt 
             (expr (int) 
              (op = (expr (int) (ident (binding 3 "value"))) 
               (expr (int) (literal (int) "42")))))) 
-     (at 10 
+     (at 12 
       (block 
        (declare (int) 
         (bindings 
@@ -75,7 +75,7 @@
 (function (static int) 
  (bind (binding 10 "global_only") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 13 
+  (at 15 
    (block 
     (declare ("X2CCleanup") 
      (bindings 
@@ -95,7 +95,7 @@
               (op & (expr ("X2CCleanup") 
                      (ident (binding 11 "_x2c_gensym_defer_record_1"))))))))) 
     (block 
-     (at 12 
+     (at 14 
       (block 
        (declare (int) 
         (bindings 
@@ -121,7 +121,7 @@
 (function (int) 
  (bind (binding 14 "main") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 7 (declare (int) 
+  (at 9 (declare (int) 
          (bindings 
           (op = (bind (binding 15 "result") ()) 
            (expr (int) 
@@ -131,14 +131,15 @@
            (expr (int) 
             (call (expr ((func ((void))) int) (ident (binding 10 "global_only"))) 
              (args (expr (void) ())))))))) 
-  (at 8 (stmnt 
-         (expr () 
-          (call (expr () (ident (binding 17 "printf"))) 
-           (args (expr (* char) (literal (* char) "\"%d %d %d\\n\"")) 
-            (expr (int) (ident (binding 15 "result"))) 
-            (expr (int) (ident (binding 16 "before"))) 
-            (expr (int) (ident (binding 1 "observed")))))))) 
-  (at 14 
+  (at 10 
+   (stmnt 
+    (expr () 
+     (call (expr () (ident (binding 17 "printf"))) 
+      (args (expr (* char) (literal (* char) "\"%d %d %d\\n\"")) 
+       (expr (int) (ident (binding 15 "result"))) 
+       (expr (int) (ident (binding 16 "before"))) 
+       (expr (int) (ident (binding 1 "observed")))))))) 
+  (at 16 
    (return 
     (expr (int) 
      (op ? (expr (int) 
@@ -174,20 +175,21 @@
      (expr (* "_x2c_gensym_defer_env_0") 
       (cast (* "_x2c_gensym_defer_env_0") 
        (expr (* void) (ident (binding 20 "_x2c_gensym_defer_opaque_0")))))))) 
-  (stmnt 
-   (expr (int) 
-    (op = (expr (int) (ident (binding 1 "observed"))) 
-     (expr (int) 
-      (parens 
-       (expr (int) 
-        (op * (expr (* int) 
-               (cast (* int) 
-                (expr (* const void) 
-                 "_x2c_gensym_defer_data_0->_x2c_gensym_defer_capture_0"))))))))))))
+  (at 2 (stmnt 
+         (expr (int) 
+          (op = (expr (int) (ident (binding 1 "observed"))) 
+           (expr (int) 
+            (parens 
+             (expr (int) 
+              (op * (expr (* int) 
+                     (cast (* int) 
+                      (expr (* const void) 
+                       "_x2c_gensym_defer_data_0->_x2c_gensym_defer_capture_0")))))))))))))
 
 (function (static void) 
  (bind (binding 12 "_x2c_gensym_defer_cleanup_1") 
   ((fnmod 
     (params (param (void) (bind (binding 22 "_x2c_gensym_defer_opaque_1") (*))))))) 
  (block 
-  (stmnt (expr (int) (postfix ++ (expr (int) (ident (binding 1 "observed"))))))))
+  (at 6 (stmnt 
+         (expr (int) (postfix ++ (expr (int) (ident (binding 1 "observed")))))))))

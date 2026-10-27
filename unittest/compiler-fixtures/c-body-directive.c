@@ -183,7 +183,7 @@ static int governed(List items){
     if(! sigsetjmp(_x2c_gensym_exception_frame_0.env, 0))
 #ifdef FAIL
     {
-      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "unittest/compiler-fixtures/c-body-directive.x",.function = "governed",.line = 103};
+      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "unittest/compiler-fixtures/c-body-directive.x",.function = "governed",.line = 105};
       x2c_error_raise_n(& _x2c_gensym_error_site_0, 162778, 0);
     }
 #else

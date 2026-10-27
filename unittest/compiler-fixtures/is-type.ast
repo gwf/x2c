@@ -61,22 +61,22 @@
       (bind (binding 19 "function") 
        (* (fnmod (params (param (void) (bind () ()))))))))))) 
  (block 
-  (at 5 (if (expr (* (func ((void))) int) (ident (binding 19 "function"))) 
-         (return ("Var") 
-          (expr (int) 
-           (call (expr (* (func ((void))) int) (ident (binding 19 "function"))) 
-            (args (expr (void) ()))))))) 
-  (at 6 (return ("Var") (expr ("Var") (literal ("Var") "void"))))))
+  (at 6 (if (expr (* (func ((void))) int) (ident (binding 19 "function"))) 
+         (at 5 (return ("Var") 
+                (expr (int) 
+                 (call (expr (* (func ((void))) int) 
+                        (ident (binding 19 "function"))) (args (expr (void) ())))))))) 
+  (at 7 (return ("Var") (expr ("Var") (literal ("Var") "void"))))))
 
 (function (static int) 
  (bind (binding 20 "symbol_shadows_type") 
   ((fnmod (params (param ("Var") (bind (binding 21 "value") ())))))) 
  (block 
-  (at 7 (declare ("Symbol") 
+  (at 8 (declare ("Symbol") 
          (bindings 
           (op = (bind (binding 22 "NativeInt") ()) 
            (expr ("Symbol") (literal ("Symbol") "<i32>" i32)))))) 
-  (at 8 (return (int) 
+  (at 9 (return (int) 
          (expr (int) 
           (call (expr ((func (("Var") ("Symbol"))) int) 
                  (ident (binding 23 "Var_is"))) 
@@ -87,18 +87,19 @@
  (bind (binding 24 "custom_visible_before_protocol") 
   ((fnmod (params (param ("Var") (bind (binding 25 "value") ())))))) 
  (block 
-  (at 9 (return (int) 
-         (expr (int) 
-          (call (expr ((func (("Var") ("Symbol"))) int) 
-                 (ident (binding 23 "Var_is"))) 
-           (args (expr ("Var") (ident (binding 25 "value"))) 
-            (expr ("Symbol") "660840135016"))))))))
+  (at 10 
+   (return (int) 
+    (expr (int) 
+     (call (expr ((func (("Var") ("Symbol"))) int) 
+            (ident (binding 23 "Var_is"))) 
+      (args (expr ("Var") (ident (binding 25 "value"))) 
+       (expr ("Symbol") "660840135016"))))))))
 
 (function ("Var") 
  (bind (binding 10 "IsWidget_var") 
   ((fnmod (params (param ("IsWidget") (bind (binding 26 "widget") ())))))) 
  (block 
-  (at 10 
+  (at 11 
    (return ("Var") 
     (expr ("Var") 
      (call (expr ((func (("Symbol") (...))) "Var") 
@@ -110,7 +111,7 @@
  (bind (binding 12 "Var_iswidget") 
   ((fnmod (params (param ("Var") (bind (binding 28 "value") ())))))) 
  (block 
-  (at 11 
+  (at 12 
    (return ("IsWidget") 
     (expr (* void) 
      (call (expr ((func (("Var"))) (* void)) (ident (binding 29 "Var_pointer"))) 
@@ -123,13 +124,13 @@
 (function (int) 
  (bind (binding 30 "main") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 12 
+  (at 13 
    (stmnt 
     (expr (void) 
      (call (expr ((func (("String"))) void) 
             (ident (binding 31 "x2c_register_type"))) 
       (args (expr ("String") (cache 0))))))) 
-  (at 13 
+  (at 14 
    (declare (int) 
     (bindings 
      (op = (bind (binding 32 "integer") ()) (expr (int) (literal (int) "7"))) 
@@ -137,111 +138,111 @@
       (expr (* int) (op & (expr (int) (ident (binding 32 "integer")))))) 
      (op = (bind (binding 34 "double_pointer") (* *)) 
       (expr (* * int) (op & (expr (* int) (ident (binding 33 "pointer"))))))))) 
-  (at 14 
+  (at 15 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 35 "scalar") ()) 
       (expr (int) (ident (binding 32 "integer"))))))) 
-  (at 15 
+  (at 16 
    (declare ("Dynamic") 
     (bindings 
      (op = (bind (binding 36 "alias") ()) 
       (expr ("Var") (ident (binding 35 "scalar"))))))) 
-  (at 16 
+  (at 17 
    (declare ("DynamicAgain") 
     (bindings 
      (op = (bind (binding 37 "nested_alias") ()) 
       (expr ("Dynamic") (ident (binding 36 "alias"))))))) 
-  (at 17 
+  (at 18 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 38 "signed_byte") ()) 
       (expr (signed char) 
        (cast (decl (signed char) (bindings (bind () ()))) 
         (expr (int) (op - (expr (int) (literal (int) "1")))))))))) 
-  (at 18 
+  (at 19 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 39 "unsigned_byte") ()) 
       (expr (unsigned char) 
        (cast (decl (unsigned char) (bindings (bind () ()))) 
         (expr (int) (literal (int) "255")))))))) 
-  (at 19 
+  (at 20 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 40 "unsigned_value") ()) 
       (expr (unsigned) 
        (cast (decl (unsigned) (bindings (bind () ()))) 
         (expr (int) (literal (int) "7")))))))) 
-  (at 20 
+  (at 21 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 41 "wide_integer") ()) 
       (expr (long long) 
        (cast (decl (long long) (bindings (bind () ()))) 
         (expr (int) (literal (int) "7")))))))) 
-  (at 21 
+  (at 22 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 42 "wide_unsigned") ()) 
       (expr (unsigned long long) 
        (cast (decl (unsigned long long) (bindings (bind () ()))) 
         (expr (int) (literal (int) "7")))))))) 
-  (at 22 
+  (at 23 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 43 "floating") ()) 
       (expr (float) 
        (cast (decl (float) (bindings (bind () ()))) 
         (expr (double) (literal (double) "1.5")))))))) 
-  (at 23 
+  (at 24 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 44 "wide_floating") ()) 
       (expr (long double) 
        (cast (decl (long double) (bindings (bind () ()))) 
         (expr (double) (literal (double) "1.5")))))))) 
-  (at 24 
+  (at 25 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 45 "system_integer") ()) 
       (expr ("int32_t") 
        (cast (decl ("int32_t") (bindings (bind () ()))) 
         (expr (int) (literal (int) "7")))))))) 
-  (at 25 
-   (declare ("Var") 
-    (bindings (op = (bind (binding 46 "list") ()) (expr ("List") (nil)))))) 
   (at 26 
    (declare ("Var") 
-    (bindings (op = (bind (binding 47 "string") ()) (expr ("String") (0)))))) 
+    (bindings (op = (bind (binding 46 "list") ()) (expr ("List") (nil)))))) 
   (at 27 
+   (declare ("Var") 
+    (bindings (op = (bind (binding 47 "string") ()) (expr ("String") (0)))))) 
+  (at 28 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 48 "symbol") ()) 
       (expr ("Symbol") (literal ("Symbol") "<fixture>" fixture)))))) 
-  (at 28 
+  (at 29 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 49 "pointer_value") ()) 
       (expr (* int) (ident (binding 33 "pointer"))))))) 
-  (at 29 
+  (at 30 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 50 "double_pointer_value") ()) 
       (expr (* * int) (ident (binding 34 "double_pointer"))))))) 
-  (at 30 
+  (at 31 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 51 "null_value") ()) 
       (expr (* void) 
        (cast (decl (void) (bindings (bind () (*)))) 
         (expr () (ident (binding 52 "NULL"))))))))) 
-  (at 31 
+  (at 32 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 53 "absent") ()) 
       (expr ("Var") (literal ("Var") "void")))))) 
-  (at 32 
+  (at 33 
    (declare ("IsWidget") 
     (bindings 
      (op = (bind (binding 54 "widget") ()) 
@@ -250,32 +251,32 @@
         (args (expr ("size_t") 
                (sizeof 
                 (parens (decl (struct "IsWidgetData") (bindings (bind () ()))))))))))))) 
-  (at 33 
+  (at 34 
    (stmnt 
     (expr (int) 
      (op = (expr (int) 
             (op -> (expr ("IsWidget") (ident (binding 54 "widget"))) 
              ("value"))) (expr (int) (literal (int) "9")))))) 
-  (at 34 
+  (at 35 
    (declare ("IsWidgetAlias") 
     (bindings 
      (op = (bind (binding 56 "widget_alias") ()) 
       (expr ("IsWidget") (ident (binding 54 "widget"))))))) 
-  (at 35 
+  (at 36 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 57 "custom") ()) 
       (expr ("IsWidgetAlias") (ident (binding 56 "widget_alias"))))))) 
-  (at 36 
+  (at 37 
    (declare ("Symbol") 
     (bindings 
      (op = (bind (binding 58 "scalar_tag") ()) 
       (expr ("Symbol") (literal ("Symbol") "<i32>" i32)))))) 
-  (at 37 
+  (at 38 
    (declare (int) 
     (bindings 
      (op = (bind (binding 59 "is") ()) (expr (int) (literal (int) "1")))))) 
-  (at 38 
+  (at 39 
    (declare (int) 
     (bindings 
      (op = (bind (binding 60 "ok") ()) 
@@ -2057,7 +2058,7 @@
             (args (expr ("Var") (ident (binding 35 "scalar"))) 
              (expr ("Symbol") (literal ("Symbol") "<i32>" i32))))))) 
         (expr (int) (ident (binding 59 "is"))))))))) 
-  (at 39 
+  (at 40 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 63 "printf"))) 
@@ -2065,7 +2066,7 @@
        (expr (int) (ident (binding 60 "ok"))) 
        (expr (int) (ident (binding 14 "calls"))) 
        (expr (int) (ident (binding 15 "tag_calls")))))))) 
-  (at 40 
+  (at 41 
    (return (int) 
     (expr (int) 
      (op ? (expr (int) (ident (binding 60 "ok"))) 

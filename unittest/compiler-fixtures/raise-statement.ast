@@ -194,20 +194,21 @@
  (bind (binding 27 "raise_after_return") 
   ((fnmod (params (param (int) (bind (binding 28 "code") ())))))) 
  (block 
-  (at 18 
+  (at 19 
    (if (expr (int) (op ! (expr (int) (ident (binding 28 "code"))))) 
-    (return))) 
-  (at 19 (raise (expr ("Symbol") (literal ("Symbol") "bad-arg" bad-arg)) (args)))))
+    (at 18 (return)))) 
+  (at 20 (raise (expr ("Symbol") (literal ("Symbol") "bad-arg" bad-arg)) (args)))))
 
 (function (static void) 
  (bind (binding 29 "raise_caught") 
   ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 21 
-   (try (block 
-         (at 20 
-          (raise (expr ("Symbol") (literal ("Symbol") "bad-arg" bad-arg)) 
-           (args)))) 
+  (at 24 
+   (try (at 22 
+         (block 
+          (at 21 
+           (raise (expr ("Symbol") (literal ("Symbol") "bad-arg" bad-arg)) 
+            (args))))) 
     (catchcases 
      (((expr ("List") 
         (expr ("List") 
@@ -215,5 +216,6 @@
                 (call (expr ((func (("Symbol"))) "Var") 
                        (ident (binding 30 "Symbol_var"))) 
                  (args (expr ("Symbol") (literal ("Symbol") "bad-arg" bad-arg))))) 
-          (nil)))) (block (block)))) (binding 31 "_x2c_gensym_error_handler_0")) 
+          (nil)))) (block (at 23 (block))))) 
+     (binding 31 "_x2c_gensym_error_handler_0")) 
     ()))))

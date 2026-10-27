@@ -279,30 +279,32 @@
    (declare (int) 
     (bindings 
      (op = (bind (binding 44 "branch") ()) (expr (int) (literal (int) "0")))))) 
-  (at 50 
-   (if (expr ("Dynamic") (ident (binding 18 "a"))) 
-    (stmnt (expr (int) (postfix ++ (expr (int) (ident (binding 44 "branch")))))))) 
   (at 51 
+   (if (expr ("Dynamic") (ident (binding 18 "a"))) 
+    (at 50 
+     (stmnt (expr (int) (postfix ++ (expr (int) (ident (binding 44 "branch"))))))))) 
+  (at 52 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 45 "remaining") ()) 
       (expr (int) (literal (int) "2")))))) 
-  (at 54 
+  (at 56 
    (while (expr ("Var") (ident (binding 45 "remaining"))) 
-    (block 
-     (at 52 
-      (stmnt 
-       (expr (int) (postfix ++ (expr (int) (ident (binding 44 "branch"))))))) 
-     (at 53 
-      (stmnt 
-       (expr ("Var") 
-        (op -= (expr ("Var") (ident (binding 45 "remaining"))) 
-         (expr (int) (literal (int) "1"))))))))) 
-  (at 55 
+    (at 55 
+     (block 
+      (at 53 
+       (stmnt 
+        (expr (int) (postfix ++ (expr (int) (ident (binding 44 "branch"))))))) 
+      (at 54 
+       (stmnt 
+        (expr ("Var") 
+         (op -= (expr ("Var") (ident (binding 45 "remaining"))) 
+          (expr (int) (literal (int) "1")))))))))) 
+  (at 57 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 46 "for_cond") ()) (expr (int) (literal (int) "0")))))) 
-  (at 56 
+  (at 59 
    (for (expr ("Var") 
          (op = (expr ("Var") (ident (binding 46 "for_cond"))) 
           (expr ("Var") 
@@ -312,86 +314,89 @@
     (expr ("Var") 
      (op -= (expr ("Var") (ident (binding 46 "for_cond"))) 
       (expr (int) (literal (int) "1")))) 
-    (stmnt (expr (int) (postfix ++ (expr (int) (ident (binding 44 "branch")))))))) 
-  (at 57 
+    (at 58 
+     (stmnt (expr (int) (postfix ++ (expr (int) (ident (binding 44 "branch"))))))))) 
+  (at 60 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 48 "do_cond") ()) (expr (int) (literal (int) "0")))))) 
-  (at 59 
-   (do (block 
-        (at 58 
-         (stmnt 
-          (expr (int) (postfix ++ (expr (int) (ident (binding 44 "branch")))))))) 
+  (at 63 
+   (do (at 62 
+        (block 
+         (at 61 
+          (stmnt 
+           (expr (int) (postfix ++ (expr (int) (ident (binding 44 "branch"))))))))) 
     (expr ("Var") (ident (binding 48 "do_cond"))))) 
-  (at 60 (empty)) 
-  (at 61 
+  (at 64 (empty)) 
+  (at 65 
    (declare (int) 
     (bindings 
      (op = (bind (binding 49 "preserved") ()) 
       (expr (int) (literal (int) "1")))))) 
-  (at 62 
+  (at 66 
    (declare ("NumericBox") 
     (bindings 
      (op = (bind (binding 50 "preserved_box") ()) 
       (expr () (composite (commas (expr (int) (literal (int) "2"))))))))) 
-  (at 63 
+  (at 67 
    (declare (int) 
     (bindings 
      (op = (bind (binding 51 "preserved_values") ((dim))) 
       (expr () (composite (commas (expr (int) (literal (int) "3")))))) 
      (op = (bind (binding 52 "addressed") ()) (expr (int) (literal (int) "4")))))) 
-  (at 64 
+  (at 68 
    (declare ("NumericBox") 
     (bindings 
      (op = (bind (binding 53 "addressed_box") ()) 
       (expr () (composite (commas (expr (int) (literal (int) "5"))))))))) 
-  (at 73 
-   (try (block 
-         (at 65 
-          (stmnt 
-           (expr (int) 
-            (op += (expr (int) (ident (binding 49 "preserved"))) 
-             (expr ("DynamicAlias") (ident (binding 19 "b"))))))) 
-         (at 66 
-          (stmnt 
-           (expr (int) 
-            (op += 
-             (expr (int) 
-              (op . (expr ("NumericBox") (ident (binding 50 "preserved_box"))) 
-               ("value"))) (expr ("DynamicAlias") (ident (binding 19 "b"))))))) 
-         (at 67 
-          (stmnt 
-           (expr (int) 
-            (op += 
-             (expr (int) 
-              (index (expr ((dim) int) (ident (binding 51 "preserved_values"))) 
-               (expr (int) (literal (int) "0")))) 
-             (expr ("DynamicAlias") (ident (binding 19 "b"))))))) 
-         (at 68 
-          (stmnt 
-           (expr (int) 
-            (op += 
-             (expr (int) 
-              (op * (expr (* int) 
-                     (parens 
-                      (expr (* int) 
-                       (op & (expr (int) (ident (binding 52 "addressed"))))))))) 
-             (expr ("DynamicAlias") (ident (binding 19 "b"))))))) 
-         (at 69 
-          (stmnt 
-           (expr (int) 
-            (op += 
-             (expr (int) 
-              (op -> 
-               (expr (* "NumericBox") 
-                (parens 
-                 (expr (* "NumericBox") 
-                  (op & (expr ("NumericBox") 
-                         (ident (binding 53 "addressed_box"))))))) 
-               ("value"))) (expr ("DynamicAlias") (ident (binding 19 "b"))))))) 
-         (at 70 
-          (raise (expr ("Symbol") (literal ("Symbol") "invariant" invariant)) 
-           (args)))) 
+  (at 80 
+   (try (at 75 
+         (block 
+          (at 69 
+           (stmnt 
+            (expr (int) 
+             (op += (expr (int) (ident (binding 49 "preserved"))) 
+              (expr ("DynamicAlias") (ident (binding 19 "b"))))))) 
+          (at 70 
+           (stmnt 
+            (expr (int) 
+             (op += 
+              (expr (int) 
+               (op . (expr ("NumericBox") (ident (binding 50 "preserved_box"))) 
+                ("value"))) (expr ("DynamicAlias") (ident (binding 19 "b"))))))) 
+          (at 71 
+           (stmnt 
+            (expr (int) 
+             (op += 
+              (expr (int) 
+               (index (expr ((dim) int) (ident (binding 51 "preserved_values"))) 
+                (expr (int) (literal (int) "0")))) 
+              (expr ("DynamicAlias") (ident (binding 19 "b"))))))) 
+          (at 72 
+           (stmnt 
+            (expr (int) 
+             (op += 
+              (expr (int) 
+               (op * (expr (* int) 
+                      (parens 
+                       (expr (* int) 
+                        (op & (expr (int) (ident (binding 52 "addressed"))))))))) 
+              (expr ("DynamicAlias") (ident (binding 19 "b"))))))) 
+          (at 73 
+           (stmnt 
+            (expr (int) 
+             (op += 
+              (expr (int) 
+               (op -> 
+                (expr (* "NumericBox") 
+                 (parens 
+                  (expr (* "NumericBox") 
+                   (op & (expr ("NumericBox") 
+                          (ident (binding 53 "addressed_box"))))))) 
+                ("value"))) (expr ("DynamicAlias") (ident (binding 19 "b"))))))) 
+          (at 74 
+           (raise (expr ("Symbol") (literal ("Symbol") "invariant" invariant)) 
+            (args))))) 
     (catchcases 
      (((expr ("List") 
         (expr ("List") 
@@ -402,16 +407,18 @@
                         (literal ("Symbol") "invariant" invariant))))) 
           (nil)))) 
        (block 
-        (block 
-         (at 71 
-          (stmnt 
-           (expr (int) (postfix ++ (expr (int) (ident (binding 44 "branch"))))))))))) 
+        (at 77 
+         (block 
+          (at 76 
+           (stmnt 
+            (expr (int) (postfix ++ (expr (int) (ident (binding 44 "branch")))))))))))) 
      (binding 55 "_x2c_gensym_error_handler_0")) 
-    (block 
-     (at 72 
-      (stmnt 
-       (expr (int) (postfix ++ (expr (int) (ident (binding 44 "branch")))))))))) 
-  (at 74 
+    (at 79 
+     (block 
+      (at 78 
+       (stmnt 
+        (expr (int) (postfix ++ (expr (int) (ident (binding 44 "branch"))))))))))) 
+  (at 81 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 56 "printf"))) 
@@ -434,7 +441,7 @@
                (ident (binding 58 "Var_double"))) 
          (args (expr ("Var") (ident (binding 24 "quotient")))))) 
        (expr (double) (ident (binding 25 "converted")))))))) 
-  (at 75 
+  (at 82 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 56 "printf"))) 
@@ -455,7 +462,7 @@
          ("value"))) (expr (int) (ident (binding 5 "base_calls"))) 
        (expr (int) (ident (binding 6 "index_calls"))) 
        (expr (int) (ident (binding 7 "rhs_calls")))))))) 
-  (at 76 
+  (at 83 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 56 "printf"))) 
@@ -470,7 +477,7 @@
        (expr (int) (ident (binding 44 "branch"))) 
        (expr (int) (ident (binding 49 "preserved"))) 
        (expr (int) (ident (binding 8 "skipped_calls")))))))) 
-  (at 77 
+  (at 84 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 56 "printf"))) 
@@ -496,4 +503,4 @@
        (expr (int) 
         (op . (expr ("NumericBox") (ident (binding 53 "addressed_box"))) 
          ("value")))))))) 
-  (at 78 (return (int) (expr (int) (literal (int) "0"))))))
+  (at 85 (return (int) (expr (int) (literal (int) "0"))))))

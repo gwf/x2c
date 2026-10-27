@@ -31,12 +31,12 @@ int filtered(int volatile mode){
     x2c_exception_push(& _x2c_gensym_exception_frame_0);
     if(! sigsetjmp(_x2c_gensym_exception_frame_0.env, 0)){
       if(mode == 1){
-        static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "unittest/compiler-fixtures/catch-filter-arms.x",.function = "filtered",.line = 5};
+        static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "unittest/compiler-fixtures/catch-filter-arms.x",.function = "filtered",.line = 6};
         x2c_error_raise_n(& _x2c_gensym_error_site_0, 97614135954008, 1, Symbol_var(5874022), int_var(mode));
         __builtin_unreachable();
       }
       if(mode == 2){
-        static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "unittest/compiler-fixtures/catch-filter-arms.x",.function = "filtered",.line = 7};
+        static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "unittest/compiler-fixtures/catch-filter-arms.x",.function = "filtered",.line = 8};
         x2c_error_raise_n(& _x2c_gensym_error_site_1, 4372499598, 1, Symbol_var(46228810), int_var(mode));
         __builtin_unreachable();
       }

@@ -153,7 +153,7 @@
                 (expr (int) (ident (binding 10 "count")))))) 
              (map-entry (expr (* char) (literal (* char) "\"macro\"")) 
               (expr (int) (literal (int) "12"))))))))) 
-  (at 10 
+  (at 11 
    (if (expr (int) 
         (op || 
          (expr (int) 
@@ -188,8 +188,8 @@
                                (expr (int) (literal (int) "1"))))))) 
                      (expr ("Symbol") (literal ("Symbol") "<map>" map))))))) 
            (expr (int) (literal (int) "7")))))) 
-    (return (int) (expr (int) (literal (int) "1"))))) 
-  (at 11 
+    (at 10 (return (int) (expr (int) (literal (int) "1")))))) 
+  (at 13 
    (if (expr (int) 
         (op ! (expr (int) 
                (call (expr ((func (("String") ("String"))) int) 
@@ -202,8 +202,8 @@
                                 (expr ("Array") (ident (binding 17 "values"))) 
                                 (expr (int) (literal (int) "0"))))))) 
                  (expr ("String") (cache 4))))))) 
-    (return (int) (expr (int) (literal (int) "2"))))) 
-  (at 12 
+    (at 12 (return (int) (expr (int) (literal (int) "2")))))) 
+  (at 15 
    (if (expr (int) 
         (op ! (expr (int) 
                (call (expr ((func (("String") ("String"))) int) 
@@ -216,8 +216,8 @@
                                 (expr ("Array") (ident (binding 17 "values"))) 
                                 (expr (int) (literal (int) "1"))))))) 
                  (expr ("String") (cache 5))))))) 
-    (return (int) (expr (int) (literal (int) "3"))))) 
-  (at 13 
+    (at 14 (return (int) (expr (int) (literal (int) "3")))))) 
+  (at 17 
    (if (expr (int) 
         (op ! (expr (int) 
                (call (expr ((func (("String") ("String"))) int) 
@@ -230,8 +230,8 @@
                                 (expr ("Array") (ident (binding 17 "values"))) 
                                 (expr (int) (literal (int) "2"))))))) 
                  (expr ("String") (cache 0))))))) 
-    (return (int) (expr (int) (literal (int) "4"))))) 
-  (at 14 
+    (at 16 (return (int) (expr (int) (literal (int) "4")))))) 
+  (at 19 
    (if (expr (int) 
         (op != 
          (expr (long) 
@@ -248,8 +248,8 @@
                              (expr (int) (literal (int) "3"))))))) 
                    (expr (int) (literal (int) "1"))))))) 
          (expr (int) (literal (int) "7")))) 
-    (return (int) (expr (int) (literal (int) "5"))))) 
-  (at 15 
+    (at 18 (return (int) (expr (int) (literal (int) "5")))))) 
+  (at 21 
    (if (expr (int) 
         (op ! (expr (int) 
                (call (expr ((func (("String") ("String"))) int) 
@@ -270,8 +270,8 @@
                                 (expr ("Symbol") 
                                  (literal ("Symbol") "<kind>" kind))))))) 
                  (expr ("String") (cache 6))))))) 
-    (return (int) (expr (int) (literal (int) "6"))))) 
-  (at 16 
+    (at 20 (return (int) (expr (int) (literal (int) "6")))))) 
+  (at 23 
    (if (expr (int) 
         (op || 
          (expr (int) 
@@ -292,8 +292,8 @@
                     (getindex (expr ("Array") (ident (binding 17 "values"))) 
                      (expr (int) (literal (int) "6"))))))) 
            (expr (int) (op - (expr (int) (literal (int) "3")))))))) 
-    (return (int) (expr (int) (literal (int) "7"))))) 
-  (at 17 
+    (at 22 (return (int) (expr (int) (literal (int) "7")))))) 
+  (at 25 
    (if (expr (int) 
         (op != 
          (expr (char) 
@@ -302,8 +302,8 @@
                   (getindex (expr ("Array") (ident (binding 17 "values"))) 
                    (expr (int) (literal (int) "7"))))))) 
          (expr (char) (literal (char) "\'q\'")))) 
-    (return (int) (expr (int) (literal (int) "8"))))) 
-  (at 18 
+    (at 24 (return (int) (expr (int) (literal (int) "8")))))) 
+  (at 27 
    (if (expr (int) 
         (op || 
          (expr (int) 
@@ -330,8 +330,8 @@
                                   (expr ("Array") (ident (binding 17 "values"))) 
                                   (expr (int) (literal (int) "9"))))))) 
                    (expr ("String") (cache 8))))))))) 
-    (return (int) (expr (int) (literal (int) "9"))))) 
-  (at 19 
+    (at 26 (return (int) (expr (int) (literal (int) "9")))))) 
+  (at 29 
    (if (expr (int) 
         (op || 
          (expr (int) 
@@ -378,8 +378,8 @@
                     (getindex (expr ("Array") (ident (binding 17 "values"))) 
                      (expr (int) (literal (int) "13"))))))) 
            (expr ("Symbol") (literal ("Symbol") "<+>" +)))))) 
-    (return (int) (expr (int) (literal (int) "10"))))) 
-  (at 20 
+    (at 28 (return (int) (expr (int) (literal (int) "10")))))) 
+  (at 31 
    (if (expr (int) 
         (op || 
          (expr (int) 
@@ -433,8 +433,8 @@
                                   (expr ("Array") (ident (binding 17 "values"))) 
                                   (expr (int) (literal (int) "17"))))))) 
                    (expr ("String") (cache 10))))))))) 
-    (return (int) (expr (int) (literal (int) "11"))))) 
-  (at 21 
+    (at 30 (return (int) (expr (int) (literal (int) "11")))))) 
+  (at 33 
    (if (expr (int) 
         (op || 
          (expr (int) 
@@ -471,8 +471,8 @@
          (expr (int) 
           (op != (expr (int) (ident (binding 11 "evals"))) 
            (expr (int) (literal (int) "1")))))) 
-    (return (int) (expr (int) (literal (int) "12"))))) 
-  (at 22 
+    (at 32 (return (int) (expr (int) (literal (int) "12")))))) 
+  (at 35 
    (if (expr (int) 
         (op || 
          (expr (int) 
@@ -526,8 +526,8 @@
                     (getindex (expr ("Array") (ident (binding 17 "values"))) 
                      (expr (int) (literal (int) "25"))))))) 
            (expr (int) (literal (int) "25")))))) 
-    (return (int) (expr (int) (literal (int) "13"))))) 
-  (at 23 
+    (at 34 (return (int) (expr (int) (literal (int) "13")))))) 
+  (at 37 
    (if (expr (int) 
         (op ! (expr (int) 
                (call (expr ((func (("String") ("String"))) int) 
@@ -541,8 +541,8 @@
                                 (expr ("Symbol") 
                                  (literal ("Symbol") "<name>" name))))))) 
                  (expr ("String") (cache 3))))))) 
-    (return (int) (expr (int) (literal (int) "14"))))) 
-  (at 24 
+    (at 36 (return (int) (expr (int) (literal (int) "14")))))) 
+  (at 39 
    (if (expr (int) 
         (op != 
          (expr (long) 
@@ -552,8 +552,8 @@
                   (getindex (expr ("Map") (ident (binding 19 "config"))) 
                    (expr ("Symbol") (literal ("Symbol") "<runtime>" runtime))))))) 
          (expr (int) (literal (int) "7")))) 
-    (return (int) (expr (int) (literal (int) "15"))))) 
-  (at 25 
+    (at 38 (return (int) (expr (int) (literal (int) "15")))))) 
+  (at 41 
    (if (expr (int) 
         (op != 
          (expr (long) 
@@ -563,8 +563,8 @@
                   (getindex (expr ("Map") (ident (binding 19 "config"))) 
                    (expr ("Symbol") (literal ("Symbol") "<computed>" computed))))))) 
          (expr (int) (literal (int) "9")))) 
-    (return (int) (expr (int) (literal (int) "16"))))) 
-  (at 26 
+    (at 40 (return (int) (expr (int) (literal (int) "16")))))) 
+  (at 43 
    (if (expr (int) 
         (op != 
          (expr (long) 
@@ -582,8 +582,8 @@
                               (literal ("Symbol") "<nested>" nested))))))) 
                    (expr ("Symbol") (literal ("Symbol") "<depth>" depth))))))) 
          (expr (int) (literal (int) "8")))) 
-    (return (int) (expr (int) (literal (int) "17"))))) 
-  (at 27 
+    (at 42 (return (int) (expr (int) (literal (int) "17")))))) 
+  (at 45 
    (if (expr (int) 
         (op != 
          (expr (long) 
@@ -601,8 +601,8 @@
                               (literal ("Symbol") "<values>" values))))))) 
                    (expr (int) (literal (int) "1"))))))) 
          (expr (int) (literal (int) "7")))) 
-    (return (int) (expr (int) (literal (int) "18"))))) 
-  (at 28 
+    (at 44 (return (int) (expr (int) (literal (int) "18")))))) 
+  (at 47 
    (if (expr (int) 
         (op != 
          (expr (long) 
@@ -612,10 +612,10 @@
                   (getindex (expr ("Map") (ident (binding 19 "config"))) 
                    (expr (* char) (literal (* char) "\"macro\""))))))) 
          (expr (int) (literal (int) "12")))) 
-    (return (int) (expr (int) (literal (int) "19"))))) 
-  (at 29 
+    (at 46 (return (int) (expr (int) (literal (int) "19")))))) 
+  (at 48 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 30 "printf"))) 
       (args (expr (* char) (literal (* char) "\"quoted collections ok\\n\""))))))) 
-  (at 30 (return (int) (expr (int) (literal (int) "0"))))))
+  (at 49 (return (int) (expr (int) (literal (int) "0"))))))

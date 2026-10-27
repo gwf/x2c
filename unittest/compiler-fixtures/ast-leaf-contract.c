@@ -188,7 +188,7 @@ int main(void){
     x2c_exception_push(& _x2c_gensym_exception_frame_0);
     if(! sigsetjmp(_x2c_gensym_exception_frame_0.env, 0)){
       if(callback((int) count) > 0){
-        static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "unittest/compiler-fixtures/ast-leaf-contract.x",.function = "main",.line = 82};
+        static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "unittest/compiler-fixtures/ast-leaf-contract.x",.function = "main",.line = 83};
         x2c_error_raise_n(& _x2c_gensym_error_site_0, 20800632064936, 1, Symbol_var(46228810), left_value);
         __builtin_unreachable();
       }

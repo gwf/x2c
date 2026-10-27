@@ -42,12 +42,12 @@
 
 (function (int) 
  (bind (binding 12 "main") ((fnmod (params (param (void) (bind () ())))))) 
- (block (at 14 (typedef (int) (bindings (bind (binding 13 "LocalCount") ())))) 
-  (at 15 
+ (block (at 16 (typedef (int) (bindings (bind (binding 13 "LocalCount") ())))) 
+  (at 17 
    (declare (int) 
     (bindings 
      (op = (bind (binding 14 "value") ()) (expr (int) (literal (int) "9")))))) 
-  (at 17 
+  (at 19 
    (declare ("Func") 
     (bindings 
      (op = (bind (binding 15 "captured") ()) 
@@ -57,12 +57,12 @@
          (capture (binding 16 "value") (int) 
           (expr (int) (ident (binding 14 "value"))))) 
         (expr (int) (ident (binding 16 "value"))))))))) 
-  (at 18 
+  (at 20 
    (stmnt 
     (expr (int) 
      (op = (expr (int) (ident (binding 14 "value"))) 
       (expr (int) (literal (int) "10")))))) 
-  (at 20 
+  (at 23 
    (if (expr (int) 
         (op || 
          (expr (int) 
@@ -72,7 +72,7 @@
                    (ident (binding 8 "constructed_types"))) 
              (args (expr (void) ())))) (expr (int) (literal (int) "8")))) 
          (expr (int) 
-          (at 19 
+          (at 21 
            (op != 
             (expr ("Var") 
              (call (expr ((func (("Func") (unsigned) (* const "FuncArg"))) 
@@ -80,20 +80,20 @@
               (args (expr ("Func") (ident (binding 15 "captured"))) 
                (expr (int) (literal (int) "0")) (expr (int) (literal (int) "0"))))) 
             (expr (int) (literal (int) "9"))))))) 
-    (return (int) (expr (int) (literal (int) "1"))))) 
-  (at 21 (typedef ("Base") (bindings (bind (binding 18 "Alias") ())))) 
-  (at 22 
+    (at 22 (return (int) (expr (int) (literal (int) "1")))))) 
+  (at 24 (typedef ("Base") (bindings (bind (binding 18 "Alias") ())))) 
+  (at 25 
    (declare ("Base") 
     (bindings 
      (op = (bind (binding 19 "referent") ()) (expr (int) (literal (int) "1")))))) 
-  (at 30 
-   (block (at 23 (typedef (double) (bindings (bind (binding 20 "Base") ())))) 
-    (at 24 
+  (at 34 
+   (block (at 26 (typedef (double) (bindings (bind (binding 20 "Base") ())))) 
+    (at 27 
      (declare (double) 
       (bindings 
        (op = (bind (binding 21 "fraction") ()) 
         (expr (double) (literal (double) "0.5")))))) 
-    (at 26 
+    (at 29 
      (declare ("Func") 
       (bindings 
        (op = (bind (binding 22 "reference") ()) 
@@ -105,16 +105,16 @@
              (op & (expr ("Base") (ident (binding 19 "referent"))))))) 
           (expr ("Base") 
            (op * (expr (& "Base") (ident (binding 23 "referent"))))))))))) 
-    (at 27 
+    (at 30 
      (stmnt 
       (expr ("Base") 
        (op = (expr ("Base") (ident (binding 19 "referent"))) 
         (expr (int) (literal (int) "2")))))) 
-    (at 29 
+    (at 33 
      (if (expr (int) 
           (op || 
            (expr (int) 
-            (at 28 
+            (at 31 
              (op != 
               (expr ("Var") 
                (call (expr ((func (("Func") (unsigned) (* const "FuncArg"))) 
@@ -126,12 +126,12 @@
            (expr (int) 
             (op != (expr (double) (ident (binding 21 "fraction"))) 
              (expr (double) (literal (double) "0.5")))))) 
-      (return (int) (expr (int) (literal (int) "2"))))))) 
-  (at 31 
+      (at 32 (return (int) (expr (int) (literal (int) "2")))))))) 
+  (at 35 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 24 "puts"))) 
       (args (expr (* char) 
              (literal (* char) 
               "\"constructed declarations and resolved capture types preserve scope\""))))))) 
-  (at 32 (return (int) (expr (int) (literal (int) "0"))))))
+  (at 36 (return (int) (expr (int) (literal (int) "0"))))))
