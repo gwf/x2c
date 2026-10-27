@@ -195,15 +195,28 @@ static Array _meta_values(
   Array values = [];
   foreach (List argument in arguments) {
     Type want = NULL;
-    int rest = params && params.car() == %(....);
+    Type rest = params ? Type.rest_container(params.car()) : NULL;
     if (params && !rest) {
       want = params.car();
       params = params.cdr();
     }
+    /* Func.apply packs a Map rest tail from keys each followed by a value. */
     if (rest && argument ~= %(expr ? (splice ?items))) {
-      List splice = c.meta_argument(
-        items, %("List"), site, _meta_call_value);
-      foreach (Var value in splice) values.push(value);
+      Var splice = c.meta_argument(items, rest, site, _meta_call_value);
+      if (rest == %("Map")) {
+        Map entries = splice;
+        foreach (Var (key, value) in entries)
+          values.push(key), values.push(value);
+      }
+      else {
+        List elements = splice;
+        foreach (Var value in elements) values.push(value);
+      }
+      continue;
+    }
+    if (rest && argument ~= %(expr ? (map-entry ?key ?value))) {
+      values.push(c.meta_argument(key, NULL, site, _meta_call_value));
+      values.push(c.meta_argument(value, NULL, site, _meta_call_value));
       continue;
     }
     values.push(c.meta_argument(argument, want, site, _meta_call_value));

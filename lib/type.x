@@ -188,15 +188,23 @@ int Type.function_parts(Type type, List &params, Type &?return_type) {
   return 0;
 }
 
-/** Returns whether this parameter is the List rest calling convention. */
-int Type.is_list_rest(Type type) => type === %(....);
-
-/** Returns the fixed prefix length, or -1 for a callable without List rest.
+/** Returns the container Type, `("List")` or `("Map")`, that a rest
+    parameter packs its arguments into, or NULL for any other parameter.
+    `List @name` has the Type `(....)` and `Map @name` has `(.... "Map")`.
 */
-int Type.list_rest_index(Type type) {
+Type Type.rest_container(Type type) {
+  if (type === %(....)) return %("List");
+  if (type === %(.... "Map")) return %("Map");
+  return NULL;
+}
+
+/** Returns the fixed prefix length, or -1 for a callable without a rest
+    parameter.
+*/
+int Type.rest_index(Type type) {
   List parameters = NULL;
   if (!type.function_parts(parameters, NULL) || !parameters ||
-      !parameters.last().type().is_list_rest()) return -1;
+      !parameters.last().type().rest_container()) return -1;
   return parameters.len() - 1;
 }
 

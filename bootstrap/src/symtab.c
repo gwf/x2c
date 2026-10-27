@@ -227,7 +227,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _44 = Symbol_var(24018396);
   _45 = Symbol_var(1256204);
   _46 = Symbol_var(42018494834);
-  _47 = String_new("conflicting List rest calling convention");
+  _47 = String_new("conflicting rest calling convention");
   _48 = Symbol_var(44661285196);
   _49 = cons(_48, NULL);
   _50 = List_var(NULL);
@@ -1027,7 +1027,7 @@ int Type_is_function(Type);
 
 static List Type_list(Type);
 
-int Sym_same_list_rest_convention(Sym s, Type source, Type target);
+int Sym_same_rest_convention(Sym s, Type source, Type target);
 
 static List f12_declarations____declare(Sym s, List context, List key, List ast, List declared){
   if(! Sym_at_file_scope(s) && ! List_equal(declared, key)) f12_declarations____link_local(s, declared);
@@ -1036,7 +1036,7 @@ static List f12_declarations____declare(Sym s, List context, List key, List ast,
   Type ctxkey = List_type(List_append(context, List_append(key, NULL))), type = List_type_from_ast(ast);
   Type declared_type = type;
   Type prior = Type_is_function(type) ? List_type(Sym_get(s, Type_list(ctxkey))) : NULL;
-  if(Type_is_function(prior) && ! Sym_same_list_rest_convention(s, type, prior)) Compiler_report_error(s -> c, 1362954, _47, NULL, NULL);
+  if(Type_is_function(prior) && ! Sym_same_rest_convention(s, type, prior)) Compiler_report_error(s -> c, 1362954, _47, NULL, NULL);
   if((int) Block_len(s -> scopes) == s -> base_scopes && ! List_truth(context)) f12_declarations____track_static(s, (List) ctxkey, ast);
   List binding = NULL;
   if(context == _49) binding = Sym_define(s, key, (List) ctxkey);
@@ -2036,9 +2036,11 @@ Type Sym_aggregate_of(Sym s, Type type){
 
 int Type_function_parts(Type, List *, Type *);
 
-int Type_list_rest_index(Type);
+int Type_rest_index(Type);
 
-int Sym_same_list_rest_convention(Sym s, Type source, Type target){
+Type Type_rest_container(Type);
+
+int Sym_same_rest_convention(Sym s, Type source, Type target){
   if(! _init_guard_) _file_init_();
   if(List_equal(Type_list(source), Type_list(target))) return 1;
   source = Sym_resolve_key(s, source);
@@ -2047,14 +2049,14 @@ int Sym_same_list_rest_convention(Sym s, Type source, Type target){
   List left = NULL, right = NULL;
   Type left_result = NULL, right_result = NULL;
   if(Type_function_parts(source, &(left), &(left_result)) && Type_function_parts(target, &(right), &(right_result))){
-    if(Type_list_rest_index(source) != Type_list_rest_index(target)) return 0;
+    if(Type_rest_index(source) != Type_rest_index(target)) return 0;
     while(List_truth(left) && List_truth(right)){
-      if(! Sym_same_list_rest_convention(s, Var_type(List_car(left)), Var_type(List_car(right)))) return 0;
+      if(! List_equal(Type_list(Type_rest_container(Var_type(List_car(left)))), Type_list(Type_rest_container(Var_type(List_car(right))))) || ! Sym_same_rest_convention(s, Var_type(List_car(left)), Var_type(List_car(right)))) return 0;
       left = List_cdr(left), right = List_cdr(right);
     }
-    return Sym_same_list_rest_convention(s, left_result, right_result);
+    return Sym_same_rest_convention(s, left_result, right_result);
   }
-  if(Type_is_pointer(source) && Type_is_pointer(target)) return Sym_same_list_rest_convention(s, Type_dereference(source), Type_dereference(target));
+  if(Type_is_pointer(source) && Type_is_pointer(target)) return Sym_same_rest_convention(s, Type_dereference(source), Type_dereference(target));
   return 1;
 }
 

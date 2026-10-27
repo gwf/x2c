@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/map-rest-positional.x:5:18: xform: a Map rest argument must be a key: value entry or a splice
+  int main(void) { return count(1); }
+                   ^^^^^^
+

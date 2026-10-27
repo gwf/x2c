@@ -1,4 +1,4 @@
-unittest/compiler-fixtures/list-rest-declaration-mismatch.x:3:23: type: conflicting List rest calling convention
+unittest/compiler-fixtures/list-rest-declaration-mismatch.x:3:23: type: conflicting rest calling convention
   int count(List items) => items.len();
                         ^
 

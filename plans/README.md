@@ -50,7 +50,7 @@ and status; it does not implement the remaining features.
 | [Language-reference writing](review-remediation-2026-10-11.md) | Complete the selected source-form, rewrite, and Lisp explanations. | Identify exact missing coverage in the existing book, then fill it. |
 | [Structured lint findings](x2c-lint-and-format.md) | Approved phase 8 List output and compiler consumption. | Add the optional interface; preserve the experimental distribution and conditional editor integration. |
 | [Detached Channel ownership](detached-channel-ownership.md) | Close out evidence for the correction already present on `dev`. | Recover final benchmark, verification, and delivery/hold records; do not repeat implementation. |
-| [Map and Array rest parameters](map-and-array-rest-parameters.md) | Keyword arguments through `Map @name` are decided and not started; `Array @name` is deferred. | Implement Map rest when scheduled; Array waits for a caller that needs indexed access. |
+| [Map and Array rest parameters](map-and-array-rest-parameters.md) | `Map @name` keyword arguments are implemented; `Array @name` is deferred. | Array waits for a caller that needs indexed access to its tail. |
 
 ### Research and reference
 

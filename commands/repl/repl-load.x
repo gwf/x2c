@@ -544,6 +544,11 @@ static Var _call(Func function, const FuncArg *argv) {
     Var value = x2c_func_value_argument(function, argv, i, <var>);
     if (parameter.car() == %(....))
       foreach (Var item, value.list()) arguments.push(item);
+    else if (parameter.car() == %(.... "Map")) {
+      Map entries = value;
+      foreach (Var (key, item), entries)
+        arguments.push(key), arguments.push(item);
+    }
     else arguments.push(value);
   }
   List problem = Var.independent_data_problem(arguments, {});

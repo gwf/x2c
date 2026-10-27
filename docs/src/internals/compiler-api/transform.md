@@ -15,7 +15,7 @@ X2c AST transformation pipeline.
 | [`Compiler.call_in_order`](#Compiler.call_in_order) | Calls the typed callable `callee` with `arguments`, each converted to its parameter and evaluated once, in source order, as a statement expression. |
 | [`Compiler.lower_lambda_expr`](#Compiler.lower_lambda_expr) | Lowers a resolved lambda expression, under any position wrappers and parentheses, through the lambda rule of `src/components/lambda-functions.x`; other expressions pass through. |
 | [`Compiler.normalize`](#Compiler.normalize) | Normalizes one bound and typed node. |
-| [`Compiler.pack_rest_arguments`](#Compiler.pack_rest_arguments) | Preserves the fixed arguments for `params`, which ends in `(....)`, and packs the remaining `args` through ordinary List construction. |
+| [`Compiler.pack_rest_arguments`](#Compiler.pack_rest_arguments) | Preserves the fixed arguments for `params`, which ends in a rest parameter, and packs the remaining `args` into its container. |
 | [`Compiler.shipped_support`](#Compiler.shipped_support) | Adds to the unit's pending support the file-scope code a rule gives the form `source` of `kind`, bound and lowered with the support. |
 | [`Compiler.transform`](#Compiler.transform) | Lowers a bound and typed top-level AST to the normalized form consumed by emission. |
 
@@ -30,7 +30,7 @@ Calls the typed callable `callee` with `arguments`, each converted to
 its parameter and evaluated once, in source order, as a statement
 expression.
 
-Source: `src/transform/literals.x:225`
+Source: `src/transform/literals.x:266`
 
 <a id="Compiler.lower_lambda_expr"></a>
 #### Compiler.lower_lambda_expr
@@ -62,12 +62,14 @@ Source: `src/transform/traversal.x:34`
 
 `List Compiler.pack_rest_arguments(Compiler c, List params, List args)`
 
-Preserves the fixed arguments for `params`, which ends in `(....)`, and
-packs the remaining `args` through ordinary List construction. Only an
-explicit splice contributes more than one element. The caller changes
-the callee's final parameter to List before issuing this packed call.
+Preserves the fixed arguments for `params`, which ends in a rest
+parameter, and packs the remaining `args` into its container. A List
+tail uses ordinary List construction, where only an explicit splice
+contributes more than one element. A Map tail holds `key: value` entries
+and Map splices; later entries win. The caller changes the callee's
+final parameter to the container before issuing this packed call.
 
-Source: `src/transform/expressions.x:338`
+Source: `src/transform/expressions.x:339`
 
 <a id="Compiler.shipped_support"></a>
 #### Compiler.shipped_support

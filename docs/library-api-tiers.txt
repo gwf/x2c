@@ -103,9 +103,11 @@ lib/file.x|internal|File.initialize
 lib/func/func.x|advanced|Func.apply,Func.apply_value,Func.apply_values,Func.context
 lib/func/func.x|advanced|Func.new,Func.new_context
 lib/func/func.x|advanced|Func.new_rest,Func.var,FuncArg.reference,FuncArg.splice,FuncArg.value
+lib/func/func.x|advanced|FuncArg.splice_map
 lib/func/func.x|advanced|Var.func,x2c_func_pointer_argument,x2c_func_record_result
 lib/func/func.x|advanced|x2c_func_reference_argument,x2c_func_value_argument
 lib/func/func.x|internal|Func.move,Func.signature,x2c_func_shared,x2c_func_splice_argument
+lib/func/func.x|internal|x2c_func_map_splice_argument
 lib/func/func.x|internal|x2c_func_declared_reference_argument,x2c_func_reference_type,x2c_func_unrepresentable_argument
 lib/iter.x|advanced|Iter.init,Iter.unzip
 lib/iter.x|compatibility|Iter.accumulate,Iter.next

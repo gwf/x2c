@@ -92,7 +92,7 @@ The compiler's semantic symbol table.
 | [`Sym.resolve_global`](#Sym.resolve_global) | Resolves a binding through base scopes and optionally stores its type. |
 | [`Sym.resolve_key`](#Sym.resolve_key) | Resolves a canonical typedef key to the end of its declared chain. |
 | [`Sym.resolve_numeric_type`](#Sym.resolve_numeric_type) | Resolves a numeric typedef without reducing semantic object types. |
-| [`Sym.same_list_rest_convention`](#Sym.same_list_rest_convention) | Compares only List rest conventions in corresponding callable positions, including callback parameters and returned function pointers. |
+| [`Sym.same_rest_convention`](#Sym.same_rest_convention) | Compares only rest conventions in corresponding callable positions, including callback parameters and returned function pointers. |
 | [`Sym.scope_count`](#Sym.scope_count) | Returns the number of semantic scopes, including base scopes. |
 | [`Sym.seed_var_tags`](#Sym.seed_var_tags) | Registers declared `T_var` converters in the active `Type` unit. |
 | [`Sym.set`](#Sym.set) | Sets a semantic type for `key` in the required active scope. |
@@ -943,12 +943,12 @@ recognized builtin numeric typedef.
 
 Source: `src/symtab/types.x:161`
 
-<a id="Sym.same_list_rest_convention"></a>
-#### Sym.same_list_rest_convention
+<a id="Sym.same_rest_convention"></a>
+#### Sym.same_rest_convention
 
-`int Sym.same_list_rest_convention(Sym s, Type source, Type target)`
+`int Sym.same_rest_convention(Sym s, Type source, Type target)`
 
-Compares only List rest conventions in corresponding callable positions,
+Compares only rest conventions in corresponding callable positions,
 including callback parameters and returned function pointers. Native C
 checking owns other type differences, but cannot see this convention.
 

@@ -33,6 +33,7 @@ prefix.
 | [`x2c_exception_push`](exception.md#x2c_exception_push) | `lib/exception.x` | `void x2c_exception_push(ExceptionFrame *e)` |
 | [`x2c_exception_unwinding`](exception.md#x2c_exception_unwinding) | `lib/exception.x` | `int x2c_exception_unwinding(void)` |
 | [`x2c_func_declared_reference_argument`](func.md#x2c_func_declared_reference_argument) | `lib/func/func.x` | `void *x2c_func_declared_reference_argument( Func fn, const FuncArg *argv, unsigned i, List declared_target, List want)` |
+| [`x2c_func_map_splice_argument`](func.md#x2c_func_map_splice_argument) | `lib/func/func.x` | `FuncArg x2c_func_map_splice_argument(Func fn, unsigned index, Map entries)` |
 | [`x2c_func_pointer_argument`](func.md#x2c_func_pointer_argument) | `lib/func/func.x` | `void *x2c_func_pointer_argument(Func fn, const FuncArg *argv, unsigned i)` |
 | [`x2c_func_record_result`](func.md#x2c_func_record_result) | `lib/func/func.x` | `Var x2c_func_record_result(const void *bytes, size_t size)` |
 | [`x2c_func_reference_argument`](func.md#x2c_func_reference_argument) | `lib/func/func.x` | `void *x2c_func_reference_argument( Func fn, const FuncArg *argv, unsigned i, List want)` |
@@ -108,4 +109,4 @@ prefix.
 | [`x2c_var_update_ulong_long`](var.md#x2c_var_update_ulong_long) | `lib/var/var.x` | `unsigned long long x2c_var_update_ulong_long(volatile unsigned long long *lhs, Symbol op, Var rhs)` |
 | [`x2c_var_update_volatile`](var.md#x2c_var_update_volatile) | `lib/var/var.x` | `Var x2c_var_update_volatile(volatile Var &?lhs, Symbol op, Var rhs)` |
 
-Total: 96 functions.
+Total: 97 functions.

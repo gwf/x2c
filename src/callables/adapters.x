@@ -178,15 +178,14 @@ module List _build_func_adapter(
     Type func_type = c.sym.resolve_key(%("Func"));
     $fail.callable_variadic(c, diagnostic_type, source_type, func_type);
   }
-  /* Func.apply already packed the tail. Read and call its native List ABI. */
-  if (params && params.last() == %(....)) {
-    params = params.map(%!(Type parameter) =>
-      parameter == %(....) ? %("List") : parameter);
+  /* Func.apply already packed the tail. Read and call its native container
+     ABI. */
+  if (params && params.last().type().rest_container()) {
+    params = params.map(_native_parameter);
     Type native_type = target.cadr();
     List target_params = NULL, Type target_result = NULL;
     native_type.function_parts(target_params, target_result);
-    target_params = target_params.map(%!(Type parameter) =>
-      parameter == %(....) ? %("List") : parameter);
+    target_params = target_params.map(_native_parameter);
     Type direct = %((func $target_params) @target_result);
     native_type = native_type.is_pointer() ? %(* @direct) : direct;
     target = %(expr $native_type $(target.caddr()));
@@ -294,9 +293,15 @@ List Compiler.func_parameters(Compiler c, List entries, List fn, List argv) {
   return cons(c.cache_literal_list(%((func $types) "Var")), reads);
 }
 
+/* A rest parameter reaches native code as its container. */
+static Type _native_parameter(Type parameter) {
+  Type container = parameter.rest_container();
+  return container ? container : parameter;
+}
+
 static List _read(
   FuncReaders &r, Type parameter_type, int index, Type &storage_type) {
-  if (parameter_type == %(....)) parameter_type = %("List");
+  parameter_type = _native_parameter(parameter_type);
   if (parameter_type.is_reference())
     return _reference(r, parameter_type, index, storage_type);
   Symbol tag = r.c.sym.var_tag_for_type(parameter_type, NULL);
@@ -395,7 +400,8 @@ List Compiler.func_signature(Compiler c, Type type) {
   Array declared = [];
   foreach (List parameter in params)
     declared.push(
-      parameter == %(....) ? parameter : parameter.type().declared());
+      parameter.type().rest_container()
+        ? parameter : parameter.type().declared());
   List parameter_types = params ? declared.list_free() : %((void));
   Type declared_result = result.declared();
   return %((func $parameter_types) @declared_result);

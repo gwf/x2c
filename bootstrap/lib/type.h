@@ -74,9 +74,9 @@ Type Type_apply(Type type);
 
 int Type_function_parts(Type type, List * params, Type * return_type);
 
-int Type_is_list_rest(Type type);
+Type Type_rest_container(Type type);
 
-int Type_list_rest_index(Type type);
+int Type_rest_index(Type type);
 
 int Type_is_static(Type type);
 
