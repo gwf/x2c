@@ -767,7 +767,8 @@ static List _view_since(ErrorRegion * region, int mark){
   for(int i = Error_count() - 1;  i >= mark;  i --){
     ErrorRecord * record = _record_at(i);
     Var entry = _copy_value(region, List_var(record -> entry));
-    out = region ? _cons(region, entry, out) : cons(entry, out);
+    if(region) out = _cons(&((* region)), entry, out);
+    else out = cons(entry, out);
   }
   return out;
 }
