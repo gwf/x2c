@@ -217,7 +217,7 @@ String Code.binding_spelling(Var syntax) {
   return _binding_spelling(value, syntax);
 }
 
-static String _binding_spelling(List value, Var syntax) {
+static String _binding_spelling(List value, List syntax) {
   int identity = 0, String spelling = NULL;
   if (value ~= %(binding ?id (!is ? type string)) &&
       (!id.is_integer() || id.integer() > INT_MAX))

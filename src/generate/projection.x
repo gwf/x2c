@@ -259,7 +259,7 @@ static int _at(HeaderNeeds &n, int i, List names) {
 
 /* Only positions after the marker being decided have changed, so the first
    declarations come from the header as it is when first needed. */
-static int _declared_before(HeaderNeeds &n, int i, Var name) {
+static int _declared_before(HeaderNeeds &n, int i, String name) {
   if ((void *) n.declared == 0) {
     n.declared = {};
     int count = n.header.len();
@@ -273,7 +273,7 @@ static int _declared_before(HeaderNeeds &n, int i, Var name) {
 }
 
 /* Every item after `i` is decided, so each is read once, as it stands. */
-static int _spelled_after(HeaderNeeds &n, int i, Var name) {
+static int _spelled_after(HeaderNeeds &n, int i, String name) {
   if ((void *) n.spelled == 0) n.spelled = {};
   while (n.walked > i + 1) {
     Var item = n.header[--n.walked];

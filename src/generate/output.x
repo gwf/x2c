@@ -166,7 +166,7 @@ static List _vertical_spacing(List code) {
   return out.list_free();
 }
 
-static void _push_line(Array out, Var node) {
+static void _push_line(Array out, List node) {
   out.push(node);
   out.push(%(space "\n"));
 }

@@ -637,10 +637,9 @@ static Var _retain_wide(LogMemorySink l, Var value) {
   return copy;
 }
 
-static Var _retain_string(LogMemorySink l, Var value) {
+static Var _retain_string(LogMemorySink l, String value) {
   if (_pool_chain_owns(l.pool, value)) return value;
-  String string = value;
-  return String.new_in(l.pool, string, string.len());
+  return String.new_in(l.pool, value, value.len());
 }
 
 static Var _retain_lisp_symbol(LogMemorySink l, Var value) {

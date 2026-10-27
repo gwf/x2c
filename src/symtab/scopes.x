@@ -165,14 +165,14 @@ List Sym.visible_symbols(Sym s) {
   return rows.list_free();
 }
 
-static int _unseen(Map seen, Var name) {
+static int _unseen(Map seen, String name) {
   if (name in seen) return 0;
   seen[name] = 1;
   return 1;
 }
 
-static Symbol _macro_kind(Var definition) {
-  Symbol kind = definition is <list> ? definition.list().assoc(<kind>) : 0;
+static Symbol _macro_kind(List definition) {
+  Symbol kind = definition.assoc(<kind>);
   return kind == <type> ? <typemacro> : <macro>;
 }
 

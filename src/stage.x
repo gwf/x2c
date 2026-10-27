@@ -270,9 +270,9 @@ static void _refuse(Compiler c, Var value, Token site) {
   if (problem) c.report_error(<macro>, problem.car(), site, problem.cadr());
 }
 
-static List _string_literal(Compiler c, Type declared, Type type, Var value) {
+static List _string_literal(Compiler c, Type declared, Type type, String value) {
   if (!declared || type === $!Type{ char * })
-    return %(expr (* char) (literal (* char) $(value.repr())));
+    return %(expr (* char) (literal (* char) $(((Var) value).repr())));
   if (type !== %("String")) return NULL;
   List literal = %(expr ("String") (literal ("String") $value));
   return %(expr $declared $(c.cache(%(string $literal))));
@@ -327,9 +327,9 @@ static int _immutable(Var value) {
     value.is_integer() || value.is_floating();
 }
 
-static List _list_form(Compiler c, Var value) {
+static List _list_form(Compiler c, List value) {
   List tail = %(nil);
-  foreach (Var item in value.list().reverse()) {
+  foreach (Var item in value.reverse()) {
     List head = _data_form(c, item);
     if (!head) return NULL;
     tail = %(expr ("List") (cons $head $tail));
@@ -337,9 +337,9 @@ static List _list_form(Compiler c, Var value) {
   return tail;
 }
 
-static List _array_form(Compiler c, Var value) {
+static List _array_form(Compiler c, Array value) {
   Array items = auto [];
-  foreach (Var item in value.array()) {
+  foreach (Var item in value) {
     List code = _data_form(c, item);
     if (!code) return NULL;
     items.push(code);
@@ -347,8 +347,7 @@ static List _array_form(Compiler c, Var value) {
   return %(expr ("Array") (array @(items.list())));
 }
 
-static List _map_form(Compiler c, Var value) {
-  Map map = value;
+static List _map_form(Compiler c, Map map) {
   auto Array keys = [], entries = [];
   foreach (Var (key, item) in map) keys.push(key);
   // Cache ids and emission must not depend on bucket layout.

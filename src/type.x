@@ -130,7 +130,7 @@ static List _from_fields(List fields, List context) {
 
 /* (struct tag) stays as written, (struct (fields)) converts its fields, and
    (struct tag (fields)) drops its body; a union converts the same way. */
-static List _from_aggregate(List node, Var head) {
+static List _from_aggregate(List node, Symbol head) {
   if (node.type().is_aggregate_tag()) return node;
   if (!node.type().is_aggregate_tag_body()) {
     List fields = _from_ast(node.cadr(), NULL).flatten();
