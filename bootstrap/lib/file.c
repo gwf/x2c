@@ -391,7 +391,7 @@ static String _finish_text(String text, size_t length){
 static void _validate_text(const void * bytes, size_t length){
   if(! length) return;  if(memchr(bytes, '\0', length)){
     Var _x2c_gensym_literal_part_1 = String_var(String_join(NULL, cons(String_var(String_new("File.text")), NULL)));  Var _x2c_gensym_literal_part_2 = String_var(String_join(NULL, cons(String_var(String_new("embedded NUL")), NULL))); {
-      static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/file.x",.function = "_validate_text",.line = 225,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_4, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_1, Symbol_var(1218550748), _x2c_gensym_literal_part_2);  __builtin_unreachable();
+      static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/file.x",.function = "_validate_text",.line = 226,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_4, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_1, Symbol_var(1218550748), _x2c_gensym_literal_part_2);  __builtin_unreachable();
     }
 
   }
@@ -555,7 +555,7 @@ Buffer File_write_repr(File file, Buffer out){
 
 _Noreturn void File_path_error(Var operation, String path, int error){
   if(! _init_guard_) File_initialize();  if(error == ENOENT){
-    static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/file.x",.function = "File_path_error",.line = 494,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_6, 31862161386376, 3, Symbol_var(34096809266140), operation, Symbol_var(1051920), String_var(path), Symbol_var(11703198), int_var(error));  __builtin_unreachable();
+    static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/file.x",.function = "File_path_error",.line = 495,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_6, 31862161386376, 3, Symbol_var(34096809266140), operation, Symbol_var(1051920), String_var(path), Symbol_var(11703198), int_var(error));  __builtin_unreachable();
   }
   {
     static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/file.x",.function = "File_path_error",.line = 496,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_7, 20399393368, 3, Symbol_var(34096809266140), operation, Symbol_var(1051920), String_var(path), Symbol_var(11703198), int_var(error));  __builtin_unreachable();

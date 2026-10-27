@@ -644,7 +644,7 @@ check_lifetimes() {
   grep -q "$indirect" "$tmp/lifetime-escapes-line"
   branch_unknown='call .*lifetime-escapes.x" "lifetime_branch_unknown" '
   branch_unknown="$branch_unknown\"lifetime_native\" "
-  branch_unknown="$branch_unknown(location .*lifetime-escapes.x\" 87 3)"
+  branch_unknown="$branch_unknown(location .*lifetime-escapes.x\" 87 12)"
   grep -q "$branch_unknown" "$tmp/lifetime-escapes-line"
   if grep -q 'lifetime_branch_assignment' "$tmp/lifetime-escapes-line"; then
     echo "lifetime-escapes followed a branch assignment" >&2

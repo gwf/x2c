@@ -607,7 +607,7 @@ Channel Channel_new(Var type, Var capacity){
     else capacity = int_var(0);
   }
   if(! Var_is(type, 1328354264) ||(! x2c_var_equal(type, Symbol_var(45156)) && ! Var_known_tag(Var_symbol(type)))){
-    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/channel.x",.function = "Channel_new",.line = 115,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/channel.x",.function = "Channel_new",.line = 117,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_1, 4372499598, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Channel.new")), NULL))), Symbol_var(107888847784), Symbol_var(1362954));
     __builtin_unreachable();
   }
@@ -862,12 +862,12 @@ static void _send(Channel channel, Var value, int owned){
     __builtin_unreachable();
   }
   if(channel -> type != 45156 && Var_tag(value) != channel -> type){
-    static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/channel.x",.function = "_send",.line = 303,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/channel.x",.function = "_send",.line = 304,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_6, 4477479911782, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Channel.send")), NULL))));
     __builtin_unreachable();
   }
   if(owned && ! Var_pointer(value)){
-    static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/channel.x",.function = "_send",.line = 305,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/channel.x",.function = "_send",.line = 306,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_7, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Channel.send_owned")), NULL))));
     __builtin_unreachable();
   }

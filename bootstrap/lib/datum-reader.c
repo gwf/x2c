@@ -134,7 +134,7 @@ static int _nested_depth(int depth){
   if(++ depth >= LISP_READ_DEPTH_MAX){
     Var _x2c_gensym_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("Lisp.read")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/datum-reader.x",.function = "_nested_depth",.line = 55,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/datum-reader.x",.function = "_nested_depth",.line = 56,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_0, 1358596898646632, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(8750352), int_var(depth));
       __builtin_unreachable();
     }

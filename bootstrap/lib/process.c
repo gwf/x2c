@@ -715,7 +715,7 @@ _Noreturn static void _child_failed(Failure failure, String dir, char * * argv){
   if(error == ENOENT){
     Var _x2c_gensym_literal_part_2 = String_var(String_join(NULL, cons(String_var(String_new("Job.start")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/process.x",.function = "_child_failed",.line = 309,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/process.x",.function = "_child_failed",.line = 310,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_2, 31862161386376, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_2, Symbol_var(35599650906), String_var(program), Symbol_var(11703198), int_var(error));
       __builtin_unreachable();
     }
@@ -1061,17 +1061,17 @@ Job Job_check(Job job){
   int captured = job -> launch.capture_output;
   int logged = job -> launch.capture_errors;
   if(captured && logged){
-    static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/process.x",.function = "Job_check",.line = 565,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/process.x",.function = "Job_check",.line = 566,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_9, 234409560664, 4, Symbol_var(7477201800), List_var(command), Symbol_var(1317119334), int_var(status), Symbol_var(1052018024), String_var(output), Symbol_var(374504614), String_var(errors));
     __builtin_unreachable();
   }
   if(captured){
-    static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../lib/process.x",.function = "Job_check",.line = 567,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../lib/process.x",.function = "Job_check",.line = 568,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_10, 234409560664, 3, Symbol_var(7477201800), List_var(command), Symbol_var(1317119334), int_var(status), Symbol_var(1052018024), String_var(output));
     __builtin_unreachable();
   }
   if(logged){
-    static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../lib/process.x",.function = "Job_check",.line = 569,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../lib/process.x",.function = "Job_check",.line = 570,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_11, 234409560664, 3, Symbol_var(7477201800), List_var(command), Symbol_var(1317119334), int_var(status), Symbol_var(374504614), String_var(errors));
     __builtin_unreachable();
   }
@@ -1157,7 +1157,7 @@ Job Job_wait_any(Array jobs){
         Var _x2c_gensym_literal_part_13 = String_var(String_join(NULL, cons(String_var(String_new("Job.wait_any")), NULL)));
         Var _x2c_gensym_literal_part_14 = String_var(String_join(NULL, cons(String_var(String_new("a job has not started")), NULL)));
         {
-          static const X2CErrorSite _x2c_gensym_error_site_14 = {.file = "../../lib/process.x",.function = "Job_wait_any",.line = 644,.runtime = 1};
+          static const X2CErrorSite _x2c_gensym_error_site_14 = {.file = "../../lib/process.x",.function = "Job_wait_any",.line = 646,.runtime = 1};
           x2c_error_raise_n(& _x2c_gensym_error_site_14, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_13, Symbol_var(1218550748), _x2c_gensym_literal_part_14);
           __builtin_unreachable();
         }

@@ -584,8 +584,8 @@ List Compiler.parse_governed(Compiler c, Symbol position) {
   int depth = _take_directives(c, items);
   loop {
     Token start = c.token;
-    items.push(position == <block> ? c.parse_block_item()
-                                   : _governed_statement(c, start));
+    items.push(
+      position == <block> ? c.parse_block_item() : _governed(c, start));
     depth = _depth_after(c, start, depth);
     if (depth <= 0) break;
     Symbol end = _arm_end(c.leading_preproc());
@@ -601,7 +601,7 @@ List Compiler.parse_governed(Compiler c, Symbol position) {
 
 /* A template's statements already land at its invocation's origin, and a
    macro pattern derived from the template would read a wrapper as syntax. */
-static List _governed_statement(Compiler c, Token start) {
+static List _governed(Compiler c, Token start) {
   List statement = _statement(c, <statement>);
   return c.macro_holes ? statement : c.anchor_origin(statement, start);
 }

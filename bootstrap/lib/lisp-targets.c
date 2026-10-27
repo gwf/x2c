@@ -2600,7 +2600,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _206 = cons(_205, _51);
   _207 = String_new("List_concat");
   _208 = Symbol_var(194457181);
-  _209 = cons(_208, NULL);
+  _209 = cons(_208, _51);
   _210 = List_var(_209);
   _211 = cons(_210, NULL);
   _212 = List_var(_211);
@@ -4251,7 +4251,7 @@ static String f10_algorithms____string(Var value, String operation){
     Var _x2c_gensym_literal_part_0 = String_var(operation);
     Var _x2c_gensym_literal_part_1 = Symbol_var(Var_tag(value));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/lisp-targets/algorithms.x",.function = "f10_algorithms____string",.line = 21,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/lisp-targets/algorithms.x",.function = "f10_algorithms____string",.line = 22,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_0, 4477479911782, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(74754136), _x2c_gensym_literal_part_1, Symbol_var(1510312), Symbol_var(1318210446));
       __builtin_unreachable();
     }
@@ -4267,7 +4267,7 @@ static List f10_algorithms____list(Var value, String operation){
     Var _x2c_gensym_literal_part_2 = String_var(operation);
     Var _x2c_gensym_literal_part_3 = Symbol_var(Var_tag(value));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/lisp-targets/algorithms.x",.function = "f10_algorithms____list",.line = 28,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/lisp-targets/algorithms.x",.function = "f10_algorithms____list",.line = 29,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_1, 4477479911782, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_2, Symbol_var(74754136), _x2c_gensym_literal_part_3, Symbol_var(1510312), Symbol_var(806120));
       __builtin_unreachable();
     }
@@ -4631,7 +4631,7 @@ Buffer Buffer_write_len(Buffer, const char *, size_t);
 
 static Buffer f12_lisp_targets____buffer_write_len(Buffer buf, const char * text, size_t length){
   if(text && strnlen(text, length) < length){
-    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "f12_lisp_targets____buffer_write_len",.line = 224,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "f12_lisp_targets____buffer_write_len",.line = 225,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_2, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Buffer.write_len")), NULL))));
     __builtin_unreachable();
   }

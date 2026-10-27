@@ -115,7 +115,7 @@ void Context_initialize(void);
 Var Context_export(Context context, Var value){
   if(! _init_guard_) Context_initialize();
   if(! context || current_context != context){
-    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/context.x",.function = "Context_export",.line = 69,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/context.x",.function = "Context_export",.line = 70,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_0, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Context.export")), NULL))));
     __builtin_unreachable();
   }
@@ -489,7 +489,7 @@ Context Context_current(void){
 void Context_close(Context c){
   if(! _init_guard_) Context_initialize();
   if(! c || current_context != c){
-    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/context.x",.function = "Context_close",.line = 416,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/context.x",.function = "Context_close",.line = 417,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_2, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Context.close")), NULL))));
     __builtin_unreachable();
   }

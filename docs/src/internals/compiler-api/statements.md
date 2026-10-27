@@ -46,7 +46,7 @@ Parses one block-position declaration, statement, or macro insertion.
 The caller owns the surrounding scope; a macro insertion may return a
 `(seq ...)` node containing several block items.
 
-Source: `src/statements.x:662`
+Source: `src/statements.x:671`
 
 <a id="Compiler.parse_block_items"></a>
 #### Compiler.parse_block_items
@@ -56,7 +56,7 @@ Source: `src/statements.x:662`
 Parses block items after an already-consumed opening brace through `}` in
 a new lexical scope. `anchor_items` records statement origins.
 
-Source: `src/statements.x:706`
+Source: `src/statements.x:715`
 
 <a id="Compiler.parse_callable_body"></a>
 #### Compiler.parse_callable_body
@@ -65,7 +65,7 @@ Source: `src/statements.x:706`
 
 Parses a callable's outer block in its active parameter scope.
 
-Source: `src/statements.x:713`
+Source: `src/statements.x:722`
 
 <a id="Compiler.parse_case_body"></a>
 #### Compiler.parse_case_body
@@ -85,7 +85,7 @@ Source: `src/statements.x:432`
 Parses a compound body after its opening brace and consumes the closing
 `}`, returning an origin-anchored `(block ...)` node.
 
-Source: `src/statements.x:701`
+Source: `src/statements.x:710`
 
 <a id="Compiler.parse_governed"></a>
 #### Compiler.parse_governed
@@ -99,9 +99,11 @@ each directive stays where C read it. A conditional group they open also
 takes the statement of each later arm and the closing directive, so a
 statement macro that wraps its body in braces keeps the whole group
 inside them. A later statement in the same arm follows the governed one,
-as in C.
+as in C. A governed source statement is anchored where it starts, as a
+block item is, so a transform diagnostic names it rather than its
+keyword.
 
-Source: `src/statements.x:580`
+Source: `src/statements.x:582`
 
 <a id="Compiler.parse_match_condition"></a>
 #### Compiler.parse_match_condition

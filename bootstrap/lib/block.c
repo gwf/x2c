@@ -175,7 +175,7 @@ static void _append_growing(Block b, const void * source, size_t count){
   }
   size_t size = count * b -> width, offset = _reserved_offset(b, source);
   if(offset != SIZE_MAX && size > b -> cap * b -> width - offset){
-    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/block.x",.function = "_append_growing",.line = 111,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/block.x",.function = "_append_growing",.line = 112,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_2, 4372499598, 1, Symbol_var(7318440), Var_box_ulong(count));
     __builtin_unreachable();
   }
@@ -214,7 +214,7 @@ void Block_append_fill(Block b, const void * element, size_t count){
   size_t length = b -> length, used = length * b -> width;
   size_t offset = _reserved_offset(b, element);
   if(offset != SIZE_MAX &&(offset > used || b -> width > used - offset)){
-    static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/block.x",.function = "Block_append_fill",.line = 160,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/block.x",.function = "Block_append_fill",.line = 161,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_6, 4372499598, 0);
     __builtin_unreachable();
   }
