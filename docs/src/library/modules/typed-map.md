@@ -166,7 +166,7 @@ The input `Map` is unchanged.
 **Raises:** any conversion cause, or `<alloc-fail>`, `<size-limit>`, or
 `<invariant>` while inserting.
 
-Source: `lib/typed-map.x:228`
+Source: `lib/typed-map.x`
 
 <a id="Map.maplongdouble"></a>
 #### Map.maplongdouble
@@ -181,7 +181,7 @@ The input `Map` is unchanged.
 **Raises:** any conversion cause, or `<alloc-fail>`, `<size-limit>`, or
 `<invariant>` while inserting.
 
-Source: `lib/typed-map.x:248`
+Source: `lib/typed-map.x`
 
 <a id="Map.mapstringint"></a>
 #### Map.mapstringint
@@ -196,7 +196,7 @@ The input `Map` is unchanged.
 **Raises:** any conversion cause, or `<alloc-fail>`, `<size-limit>`, or
 `<invariant>` while inserting.
 
-Source: `lib/typed-map.x:307`
+Source: `lib/typed-map.x`
 
 <a id="Map.mapstringstring"></a>
 #### Map.mapstringstring
@@ -211,7 +211,7 @@ The input `Map` is unchanged.
 **Raises:** any conversion cause, or `<alloc-fail>`, `<size-limit>`, or
 `<invariant>` while inserting.
 
-Source: `lib/typed-map.x:269`
+Source: `lib/typed-map.x`
 
 ### `MapIntInt`
 
@@ -222,7 +222,7 @@ Source: `lib/typed-map.x:269`
 
 Releases the record and its backing Blocks, borrowing stored values.
 
-Source: `lib/typed-map.x:237`
+Source: `lib/typed-map.x`
 
 <a id="MapIntInt.compare"></a>
 #### MapIntInt.compare
@@ -237,7 +237,7 @@ crosses `qsort`, cleanup, memory safety, and container state are not
 guaranteed. Raises: `<alloc-fail>` while creating temporary storage, or
 key/value comparison causes during the final comparison after sorting.
 
-Source: `lib/typed-map.x:236`
+Source: `lib/typed-map.x`
 
 <a id="MapIntInt.contains"></a>
 #### MapIntInt.contains
@@ -246,7 +246,7 @@ Source: `lib/typed-map.x:236`
 
 Returns one when `key` is present, or zero for a null map.
 
-Source: `lib/typed-map.x:228`
+Source: `lib/typed-map.x`
 
 <a id="MapIntInt.copy"></a>
 #### MapIntInt.copy
@@ -259,7 +259,7 @@ fields. A null input produces a fresh empty map.
 
 **Raises:** an allocation, size, or invariant cause while copying.
 
-Source: `lib/typed-map.x:228`
+Source: `lib/typed-map.x`
 
 <a id="MapIntInt.del"></a>
 #### MapIntInt.del
@@ -271,7 +271,7 @@ Successful removal invalidates live cursors and iterators.
 Prefer `try_del` when absence is an ordinary outcome. Boxed families
 return `void` for absence; native families raise `<bad-arg>`.
 
-Source: `lib/typed-map.x:228`
+Source: `lib/typed-map.x`
 
 <a id="MapIntInt.enumerate"></a>
 #### MapIntInt.enumerate
@@ -293,7 +293,7 @@ anything retaining it must not outlive that `Scope`.
 for MapLongDouble, `<alloc-fail>` or `<bad-enc>` while boxing its key.
 Shared causes do not return from the pull.
 
-Source: `lib/typed-map.x:237`
+Source: `lib/typed-map.x`
 
 <a id="MapIntInt.equal"></a>
 #### MapIntInt.equal
@@ -303,7 +303,7 @@ Source: `lib/typed-map.x:237`
 Reports key/value equality independent of bucket and insertion order.
 Two null maps compare equal; a null and a nonnull map compare unequal.
 
-Source: `lib/typed-map.x:228`
+Source: `lib/typed-map.x`
 
 <a id="MapIntInt.get"></a>
 #### MapIntInt.get
@@ -314,7 +314,7 @@ Returns the value for `key`.
 Prefer `try_get` when absence is an ordinary outcome. Boxed families
 return `void` for absence; native families raise `<bad-arg>`.
 
-Source: `lib/typed-map.x:228`
+Source: `lib/typed-map.x`
 
 <a id="MapIntInt.getdefault"></a>
 #### MapIntInt.getdefault
@@ -324,7 +324,7 @@ Source: `lib/typed-map.x:228`
 Returns the value for `key`, or `defval` without inserting it.
 A null map is treated as an empty one.
 
-Source: `lib/typed-map.x:228`
+Source: `lib/typed-map.x`
 
 <a id="MapIntInt.getindex"></a>
 #### MapIntInt.getindex
@@ -335,7 +335,7 @@ Returns the value selected by bracket indexing.
 This is the bracket-facing form of `MapIntInt.get`, with the same failure
 behavior. Prefer bracket indexing in ordinary code.
 
-Source: `lib/typed-map.x:228`
+Source: `lib/typed-map.x`
 
 <a id="MapIntInt.iter"></a>
 #### MapIntInt.iter
@@ -348,7 +348,7 @@ live during traversal. A null `dest` returns NULL. Values follow bucket
 order, a null map is exhausted, and structural mutation invalidates the
 iterator.
 
-Source: `lib/typed-map.x:237`
+Source: `lib/typed-map.x`
 
 <a id="MapIntInt.keys"></a>
 #### MapIntInt.keys
@@ -368,7 +368,7 @@ that `Scope`.
 **Raises:** MapLongDouble iteration may raise `<alloc-fail>` or `<bad-enc>`
 while boxing a key.
 
-Source: `lib/typed-map.x:237`
+Source: `lib/typed-map.x`
 
 <a id="MapIntInt.len"></a>
 #### MapIntInt.len
@@ -377,7 +377,7 @@ Source: `lib/typed-map.x:237`
 
 Returns the number of entries, or zero for a null map.
 
-Source: `lib/typed-map.x:228`
+Source: `lib/typed-map.x`
 
 <a id="MapIntInt.map"></a>
 #### MapIntInt.map
@@ -389,7 +389,7 @@ A null input returns NULL. The typed Map and its storage are unchanged.
 
 **Raises:** any cause from boxing or inserting an entry.
 
-Source: `lib/typed-map.x:236`
+Source: `lib/typed-map.x`
 
 <a id="MapIntInt.merge"></a>
 #### MapIntInt.merge
@@ -403,7 +403,7 @@ entries already copied remain; a newly created destination is discarded.
 
 **Raises:** an allocation, size, or invariant cause while inserting.
 
-Source: `lib/typed-map.x:228`
+Source: `lib/typed-map.x`
 
 <a id="MapIntInt.move_to"></a>
 #### MapIntInt.move_to
@@ -417,7 +417,7 @@ a scope if empty. NULL maps do nothing.
 **Raises:** `<bad-arg>` for a NULL destination slot, or `<alloc-fail>` while
 creating its scope. Those failures leave ownership unchanged.
 
-Source: `lib/typed-map.x:221`
+Source: `lib/typed-map.x`
 
 <a id="MapIntInt.new"></a>
 #### MapIntInt.new
@@ -429,7 +429,7 @@ The initial table has two buckets and grows automatically.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` when storage cannot be created.
 
-Source: `lib/typed-map.x:228`
+Source: `lib/typed-map.x`
 
 <a id="MapIntInt.new_capacity"></a>
 #### MapIntInt.new_capacity
@@ -443,7 +443,7 @@ The result and its backing arrays belong to the current `Scope`.
 **Raises:** `<bad-arg>` for another capacity, or `<alloc-fail>` /
 `<size-limit>` when storage cannot be created.
 
-Source: `lib/typed-map.x:228`
+Source: `lib/typed-map.x`
 
 <a id="MapIntInt.postfixindex"></a>
 #### MapIntInt.postfixindex
@@ -457,7 +457,7 @@ these operations.
 **Raises:** `<bad-arg>` for a null map or absent key, or `<bad-op>` for an
 unsupported operation. These failures leave the value unchanged.
 
-Source: `lib/typed-map.x:228`
+Source: `lib/typed-map.x`
 
 <a id="MapIntInt.repr"></a>
 #### MapIntInt.repr
@@ -466,7 +466,7 @@ Source: `lib/typed-map.x:228`
 
 Returns the readable typed-Map representation.
 
-Source: `lib/typed-map.x:236`
+Source: `lib/typed-map.x`
 
 <a id="MapIntInt.scope"></a>
 #### MapIntInt.scope
@@ -480,7 +480,7 @@ explicitly moved into it. NULL returns NULL.
 
 **Raises:** `<alloc-fail>` when creating the scope.
 
-Source: `lib/typed-map.x:221`
+Source: `lib/typed-map.x`
 
 <a id="MapIntInt.set"></a>
 #### MapIntInt.set
@@ -494,7 +494,7 @@ Insertion invalidates live cursors and iterators; replacement does not.
 cause while inserting. Allocation and size failures leave the table
 unchanged.
 
-Source: `lib/typed-map.x:228`
+Source: `lib/typed-map.x`
 
 <a id="MapIntInt.setdefault"></a>
 #### MapIntInt.setdefault
@@ -509,7 +509,7 @@ cursors and iterators; an existing-key read does not mutate the table.
 cause while inserting. Allocation and size failures leave the table
 unchanged.
 
-Source: `lib/typed-map.x:228`
+Source: `lib/typed-map.x`
 
 <a id="MapIntInt.setindex"></a>
 #### MapIntInt.setindex
@@ -520,7 +520,7 @@ Stores `val` under `key` and returns `val`.
 This is the bracket-facing form of `MapIntInt.set`, with the same cursor
 invalidation and failure behavior.
 
-Source: `lib/typed-map.x:228`
+Source: `lib/typed-map.x`
 
 <a id="MapIntInt.str"></a>
 #### MapIntInt.str
@@ -529,7 +529,7 @@ Source: `lib/typed-map.x:228`
 
 Returns the typed-Map display String.
 
-Source: `lib/typed-map.x:236`
+Source: `lib/typed-map.x`
 
 <a id="MapIntInt.truth"></a>
 #### MapIntInt.truth
@@ -538,7 +538,7 @@ Source: `lib/typed-map.x:236`
 
 Returns one when `map` contains an entry.
 
-Source: `lib/typed-map.x:228`
+Source: `lib/typed-map.x`
 
 <a id="MapIntInt.try_del"></a>
 #### MapIntInt.try_del
@@ -549,7 +549,7 @@ Removes `key`, writes its value to `out`, and returns one when present.
 A null map, null `out`, or absent key returns zero without writing or
 mutation. Successful removal invalidates live cursors and iterators.
 
-Source: `lib/typed-map.x:228`
+Source: `lib/typed-map.x`
 
 <a id="MapIntInt.try_get"></a>
 #### MapIntInt.try_get
@@ -559,7 +559,7 @@ Source: `lib/typed-map.x:228`
 Writes the value for `key` to `out` and returns one when present.
 A null map, null `out`, or absent key returns zero without writing.
 
-Source: `lib/typed-map.x:228`
+Source: `lib/typed-map.x`
 
 <a id="MapIntInt.try_next"></a>
 #### MapIntInt.try_next
@@ -572,7 +572,7 @@ exhaustion returns zero without changing `key` or `val`. Traversal
 follows bucket order, not insertion order, and structural mutation
 invalidates the cursor.
 
-Source: `lib/typed-map.x:228`
+Source: `lib/typed-map.x`
 
 <a id="MapIntInt.updateindex"></a>
 #### MapIntInt.updateindex
@@ -588,7 +588,7 @@ the generated value operation, or an allocation, size, or invariant cause
 while inserting. Invalid operations leave an existing value unchanged.
 Allocation and size failures leave the table unchanged.
 
-Source: `lib/typed-map.x:228`
+Source: `lib/typed-map.x`
 
 <a id="MapIntInt.var"></a>
 #### MapIntInt.var
@@ -598,7 +598,7 @@ Source: `lib/typed-map.x:228`
 Boxes `map` with its registered typed-map tag without copying it.
 The typed pointer and `Var` share the same mutable map identity.
 
-Source: `lib/typed-map.x:237`
+Source: `lib/typed-map.x`
 
 <a id="MapIntInt.write_repr"></a>
 #### MapIntInt.write_repr
@@ -607,7 +607,7 @@ Source: `lib/typed-map.x:237`
 
 Appends the readable typed-Map representation in bucket order.
 
-Source: `lib/typed-map.x:236`
+Source: `lib/typed-map.x`
 
 <a id="MapIntInt.write_str"></a>
 #### MapIntInt.write_str
@@ -616,7 +616,7 @@ Source: `lib/typed-map.x:236`
 
 Appends the typed-Map display text in bucket order.
 
-Source: `lib/typed-map.x:236`
+Source: `lib/typed-map.x`
 
 ### `MapLongDouble`
 
@@ -627,7 +627,7 @@ Source: `lib/typed-map.x:236`
 
 Releases the record and its backing Blocks, borrowing stored values.
 
-Source: `lib/typed-map.x:257`
+Source: `lib/typed-map.x`
 
 <a id="MapLongDouble.compare"></a>
 #### MapLongDouble.compare
@@ -642,7 +642,7 @@ crosses `qsort`, cleanup, memory safety, and container state are not
 guaranteed. Raises: `<alloc-fail>` while creating temporary storage, or
 key/value comparison causes during the final comparison after sorting.
 
-Source: `lib/typed-map.x:256`
+Source: `lib/typed-map.x`
 
 <a id="MapLongDouble.contains"></a>
 #### MapLongDouble.contains
@@ -651,7 +651,7 @@ Source: `lib/typed-map.x:256`
 
 Returns one when `key` is present, or zero for a null map.
 
-Source: `lib/typed-map.x:248`
+Source: `lib/typed-map.x`
 
 <a id="MapLongDouble.copy"></a>
 #### MapLongDouble.copy
@@ -664,7 +664,7 @@ fields. A null input produces a fresh empty map.
 
 **Raises:** an allocation, size, or invariant cause while copying.
 
-Source: `lib/typed-map.x:248`
+Source: `lib/typed-map.x`
 
 <a id="MapLongDouble.del"></a>
 #### MapLongDouble.del
@@ -676,7 +676,7 @@ Successful removal invalidates live cursors and iterators.
 Prefer `try_del` when absence is an ordinary outcome. Boxed families
 return `void` for absence; native families raise `<bad-arg>`.
 
-Source: `lib/typed-map.x:248`
+Source: `lib/typed-map.x`
 
 <a id="MapLongDouble.enumerate"></a>
 #### MapLongDouble.enumerate
@@ -698,7 +698,7 @@ anything retaining it must not outlive that `Scope`.
 for MapLongDouble, `<alloc-fail>` or `<bad-enc>` while boxing its key.
 Shared causes do not return from the pull.
 
-Source: `lib/typed-map.x:257`
+Source: `lib/typed-map.x`
 
 <a id="MapLongDouble.equal"></a>
 #### MapLongDouble.equal
@@ -708,7 +708,7 @@ Source: `lib/typed-map.x:257`
 Reports key/value equality independent of bucket and insertion order.
 Two null maps compare equal; a null and a nonnull map compare unequal.
 
-Source: `lib/typed-map.x:248`
+Source: `lib/typed-map.x`
 
 <a id="MapLongDouble.get"></a>
 #### MapLongDouble.get
@@ -719,7 +719,7 @@ Returns the value for `key`.
 Prefer `try_get` when absence is an ordinary outcome. Boxed families
 return `void` for absence; native families raise `<bad-arg>`.
 
-Source: `lib/typed-map.x:248`
+Source: `lib/typed-map.x`
 
 <a id="MapLongDouble.getdefault"></a>
 #### MapLongDouble.getdefault
@@ -729,7 +729,7 @@ Source: `lib/typed-map.x:248`
 Returns the value for `key`, or `defval` without inserting it.
 A null map is treated as an empty one.
 
-Source: `lib/typed-map.x:248`
+Source: `lib/typed-map.x`
 
 <a id="MapLongDouble.getindex"></a>
 #### MapLongDouble.getindex
@@ -740,7 +740,7 @@ Returns the value selected by bracket indexing.
 This is the bracket-facing form of `MapLongDouble.get`, with the same failure
 behavior. Prefer bracket indexing in ordinary code.
 
-Source: `lib/typed-map.x:248`
+Source: `lib/typed-map.x`
 
 <a id="MapLongDouble.iter"></a>
 #### MapLongDouble.iter
@@ -753,7 +753,7 @@ live during traversal. A null `dest` returns NULL. Values follow bucket
 order, a null map is exhausted, and structural mutation invalidates the
 iterator.
 
-Source: `lib/typed-map.x:257`
+Source: `lib/typed-map.x`
 
 <a id="MapLongDouble.keys"></a>
 #### MapLongDouble.keys
@@ -773,7 +773,7 @@ that `Scope`.
 **Raises:** MapLongDouble iteration may raise `<alloc-fail>` or `<bad-enc>`
 while boxing a key.
 
-Source: `lib/typed-map.x:257`
+Source: `lib/typed-map.x`
 
 <a id="MapLongDouble.len"></a>
 #### MapLongDouble.len
@@ -782,7 +782,7 @@ Source: `lib/typed-map.x:257`
 
 Returns the number of entries, or zero for a null map.
 
-Source: `lib/typed-map.x:248`
+Source: `lib/typed-map.x`
 
 <a id="MapLongDouble.map"></a>
 #### MapLongDouble.map
@@ -794,7 +794,7 @@ A null input returns NULL. The typed Map and its storage are unchanged.
 
 **Raises:** any cause from boxing or inserting an entry.
 
-Source: `lib/typed-map.x:256`
+Source: `lib/typed-map.x`
 
 <a id="MapLongDouble.merge"></a>
 #### MapLongDouble.merge
@@ -808,7 +808,7 @@ entries already copied remain; a newly created destination is discarded.
 
 **Raises:** an allocation, size, or invariant cause while inserting.
 
-Source: `lib/typed-map.x:248`
+Source: `lib/typed-map.x`
 
 <a id="MapLongDouble.move_to"></a>
 #### MapLongDouble.move_to
@@ -822,7 +822,7 @@ a scope if empty. NULL maps do nothing.
 **Raises:** `<bad-arg>` for a NULL destination slot, or `<alloc-fail>` while
 creating its scope. Those failures leave ownership unchanged.
 
-Source: `lib/typed-map.x:241`
+Source: `lib/typed-map.x`
 
 <a id="MapLongDouble.new"></a>
 #### MapLongDouble.new
@@ -834,7 +834,7 @@ The initial table has two buckets and grows automatically.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` when storage cannot be created.
 
-Source: `lib/typed-map.x:248`
+Source: `lib/typed-map.x`
 
 <a id="MapLongDouble.new_capacity"></a>
 #### MapLongDouble.new_capacity
@@ -848,7 +848,7 @@ The result and its backing arrays belong to the current `Scope`.
 **Raises:** `<bad-arg>` for another capacity, or `<alloc-fail>` /
 `<size-limit>` when storage cannot be created.
 
-Source: `lib/typed-map.x:248`
+Source: `lib/typed-map.x`
 
 <a id="MapLongDouble.postfixindex"></a>
 #### MapLongDouble.postfixindex
@@ -862,7 +862,7 @@ these operations.
 **Raises:** `<bad-arg>` for a null map or absent key, or `<bad-op>` for an
 unsupported operation. These failures leave the value unchanged.
 
-Source: `lib/typed-map.x:248`
+Source: `lib/typed-map.x`
 
 <a id="MapLongDouble.repr"></a>
 #### MapLongDouble.repr
@@ -871,7 +871,7 @@ Source: `lib/typed-map.x:248`
 
 Returns the readable typed-Map representation.
 
-Source: `lib/typed-map.x:256`
+Source: `lib/typed-map.x`
 
 <a id="MapLongDouble.scope"></a>
 #### MapLongDouble.scope
@@ -885,7 +885,7 @@ explicitly moved into it. NULL returns NULL.
 
 **Raises:** `<alloc-fail>` when creating the scope.
 
-Source: `lib/typed-map.x:241`
+Source: `lib/typed-map.x`
 
 <a id="MapLongDouble.set"></a>
 #### MapLongDouble.set
@@ -899,7 +899,7 @@ Insertion invalidates live cursors and iterators; replacement does not.
 cause while inserting. Allocation and size failures leave the table
 unchanged.
 
-Source: `lib/typed-map.x:248`
+Source: `lib/typed-map.x`
 
 <a id="MapLongDouble.setdefault"></a>
 #### MapLongDouble.setdefault
@@ -914,7 +914,7 @@ cursors and iterators; an existing-key read does not mutate the table.
 cause while inserting. Allocation and size failures leave the table
 unchanged.
 
-Source: `lib/typed-map.x:248`
+Source: `lib/typed-map.x`
 
 <a id="MapLongDouble.setindex"></a>
 #### MapLongDouble.setindex
@@ -925,7 +925,7 @@ Stores `val` under `key` and returns `val`.
 This is the bracket-facing form of `MapLongDouble.set`, with the same cursor
 invalidation and failure behavior.
 
-Source: `lib/typed-map.x:248`
+Source: `lib/typed-map.x`
 
 <a id="MapLongDouble.str"></a>
 #### MapLongDouble.str
@@ -934,7 +934,7 @@ Source: `lib/typed-map.x:248`
 
 Returns the typed-Map display String.
 
-Source: `lib/typed-map.x:256`
+Source: `lib/typed-map.x`
 
 <a id="MapLongDouble.truth"></a>
 #### MapLongDouble.truth
@@ -943,7 +943,7 @@ Source: `lib/typed-map.x:256`
 
 Returns one when `map` contains an entry.
 
-Source: `lib/typed-map.x:248`
+Source: `lib/typed-map.x`
 
 <a id="MapLongDouble.try_del"></a>
 #### MapLongDouble.try_del
@@ -954,7 +954,7 @@ Removes `key`, writes its value to `out`, and returns one when present.
 A null map, null `out`, or absent key returns zero without writing or
 mutation. Successful removal invalidates live cursors and iterators.
 
-Source: `lib/typed-map.x:248`
+Source: `lib/typed-map.x`
 
 <a id="MapLongDouble.try_get"></a>
 #### MapLongDouble.try_get
@@ -964,7 +964,7 @@ Source: `lib/typed-map.x:248`
 Writes the value for `key` to `out` and returns one when present.
 A null map, null `out`, or absent key returns zero without writing.
 
-Source: `lib/typed-map.x:248`
+Source: `lib/typed-map.x`
 
 <a id="MapLongDouble.try_next"></a>
 #### MapLongDouble.try_next
@@ -977,7 +977,7 @@ exhaustion returns zero without changing `key` or `val`. Traversal
 follows bucket order, not insertion order, and structural mutation
 invalidates the cursor.
 
-Source: `lib/typed-map.x:248`
+Source: `lib/typed-map.x`
 
 <a id="MapLongDouble.updateindex"></a>
 #### MapLongDouble.updateindex
@@ -993,7 +993,7 @@ the generated value operation, or an allocation, size, or invariant cause
 while inserting. Invalid operations leave an existing value unchanged.
 Allocation and size failures leave the table unchanged.
 
-Source: `lib/typed-map.x:248`
+Source: `lib/typed-map.x`
 
 <a id="MapLongDouble.var"></a>
 #### MapLongDouble.var
@@ -1003,7 +1003,7 @@ Source: `lib/typed-map.x:248`
 Boxes `map` with its registered typed-map tag without copying it.
 The typed pointer and `Var` share the same mutable map identity.
 
-Source: `lib/typed-map.x:257`
+Source: `lib/typed-map.x`
 
 <a id="MapLongDouble.write_repr"></a>
 #### MapLongDouble.write_repr
@@ -1012,7 +1012,7 @@ Source: `lib/typed-map.x:257`
 
 Appends the readable typed-Map representation in bucket order.
 
-Source: `lib/typed-map.x:256`
+Source: `lib/typed-map.x`
 
 <a id="MapLongDouble.write_str"></a>
 #### MapLongDouble.write_str
@@ -1021,7 +1021,7 @@ Source: `lib/typed-map.x:256`
 
 Appends the typed-Map display text in bucket order.
 
-Source: `lib/typed-map.x:256`
+Source: `lib/typed-map.x`
 
 ### `MapStringInt`
 
@@ -1034,7 +1034,7 @@ Adds count using borrowed bytes for lookup. Only a missing key is
 converted to a canonical String; the map never retains the view.
 Integer addition and insertion follow updateindex.
 
-Source: `lib/typed-map.x:321`
+Source: `lib/typed-map.x`
 
 <a id="MapStringInt.cleanup"></a>
 #### MapStringInt.cleanup
@@ -1043,7 +1043,7 @@ Source: `lib/typed-map.x:321`
 
 Releases the record and its backing Blocks, borrowing stored values.
 
-Source: `lib/typed-map.x:356`
+Source: `lib/typed-map.x`
 
 <a id="MapStringInt.compare"></a>
 #### MapStringInt.compare
@@ -1058,7 +1058,7 @@ crosses `qsort`, cleanup, memory safety, and container state are not
 guaranteed. Raises: `<alloc-fail>` while creating temporary storage, or
 key/value comparison causes during the final comparison after sorting.
 
-Source: `lib/typed-map.x:315`
+Source: `lib/typed-map.x`
 
 <a id="MapStringInt.contains"></a>
 #### MapStringInt.contains
@@ -1067,7 +1067,7 @@ Source: `lib/typed-map.x:315`
 
 Returns one when `key` is present, or zero for a null map.
 
-Source: `lib/typed-map.x:307`
+Source: `lib/typed-map.x`
 
 <a id="MapStringInt.copy"></a>
 #### MapStringInt.copy
@@ -1080,7 +1080,7 @@ fields. A null input produces a fresh empty map.
 
 **Raises:** an allocation, size, or invariant cause while copying.
 
-Source: `lib/typed-map.x:307`
+Source: `lib/typed-map.x`
 
 <a id="MapStringInt.del"></a>
 #### MapStringInt.del
@@ -1092,7 +1092,7 @@ Successful removal invalidates live cursors and iterators.
 Prefer `try_del` when absence is an ordinary outcome. Boxed families
 return `void` for absence; native families raise `<bad-arg>`.
 
-Source: `lib/typed-map.x:307`
+Source: `lib/typed-map.x`
 
 <a id="MapStringInt.enumerate"></a>
 #### MapStringInt.enumerate
@@ -1114,7 +1114,7 @@ anything retaining it must not outlive that `Scope`.
 for MapLongDouble, `<alloc-fail>` or `<bad-enc>` while boxing its key.
 Shared causes do not return from the pull.
 
-Source: `lib/typed-map.x:356`
+Source: `lib/typed-map.x`
 
 <a id="MapStringInt.equal"></a>
 #### MapStringInt.equal
@@ -1124,7 +1124,7 @@ Source: `lib/typed-map.x:356`
 Reports key/value equality independent of bucket and insertion order.
 Two null maps compare equal; a null and a nonnull map compare unequal.
 
-Source: `lib/typed-map.x:307`
+Source: `lib/typed-map.x`
 
 <a id="MapStringInt.get"></a>
 #### MapStringInt.get
@@ -1135,7 +1135,7 @@ Returns the value for `key`.
 Prefer `try_get` when absence is an ordinary outcome. Boxed families
 return `void` for absence; native families raise `<bad-arg>`.
 
-Source: `lib/typed-map.x:307`
+Source: `lib/typed-map.x`
 
 <a id="MapStringInt.getdefault"></a>
 #### MapStringInt.getdefault
@@ -1145,7 +1145,7 @@ Source: `lib/typed-map.x:307`
 Returns the value for `key`, or `defval` without inserting it.
 A null map is treated as an empty one.
 
-Source: `lib/typed-map.x:307`
+Source: `lib/typed-map.x`
 
 <a id="MapStringInt.getindex"></a>
 #### MapStringInt.getindex
@@ -1156,7 +1156,7 @@ Returns the value selected by bracket indexing.
 This is the bracket-facing form of `MapStringInt.get`, with the same failure
 behavior. Prefer bracket indexing in ordinary code.
 
-Source: `lib/typed-map.x:307`
+Source: `lib/typed-map.x`
 
 <a id="MapStringInt.iter"></a>
 #### MapStringInt.iter
@@ -1169,7 +1169,7 @@ live during traversal. A null `dest` returns NULL. Values follow bucket
 order, a null map is exhausted, and structural mutation invalidates the
 iterator.
 
-Source: `lib/typed-map.x:356`
+Source: `lib/typed-map.x`
 
 <a id="MapStringInt.keys"></a>
 #### MapStringInt.keys
@@ -1189,7 +1189,7 @@ that `Scope`.
 **Raises:** MapLongDouble iteration may raise `<alloc-fail>` or `<bad-enc>`
 while boxing a key.
 
-Source: `lib/typed-map.x:356`
+Source: `lib/typed-map.x`
 
 <a id="MapStringInt.len"></a>
 #### MapStringInt.len
@@ -1198,7 +1198,7 @@ Source: `lib/typed-map.x:356`
 
 Returns the number of entries, or zero for a null map.
 
-Source: `lib/typed-map.x:307`
+Source: `lib/typed-map.x`
 
 <a id="MapStringInt.map"></a>
 #### MapStringInt.map
@@ -1210,7 +1210,7 @@ A null input returns NULL. The typed Map and its storage are unchanged.
 
 **Raises:** any cause from boxing or inserting an entry.
 
-Source: `lib/typed-map.x:315`
+Source: `lib/typed-map.x`
 
 <a id="MapStringInt.merge"></a>
 #### MapStringInt.merge
@@ -1224,7 +1224,7 @@ entries already copied remain; a newly created destination is discarded.
 
 **Raises:** an allocation, size, or invariant cause while inserting.
 
-Source: `lib/typed-map.x:307`
+Source: `lib/typed-map.x`
 
 <a id="MapStringInt.move_to"></a>
 #### MapStringInt.move_to
@@ -1238,7 +1238,7 @@ a scope if empty. NULL maps do nothing.
 **Raises:** `<bad-arg>` for a NULL destination slot, or `<alloc-fail>` while
 creating its scope. Those failures leave ownership unchanged.
 
-Source: `lib/typed-map.x:300`
+Source: `lib/typed-map.x`
 
 <a id="MapStringInt.new"></a>
 #### MapStringInt.new
@@ -1250,7 +1250,7 @@ The initial table has two buckets and grows automatically.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` when storage cannot be created.
 
-Source: `lib/typed-map.x:307`
+Source: `lib/typed-map.x`
 
 <a id="MapStringInt.new_capacity"></a>
 #### MapStringInt.new_capacity
@@ -1264,7 +1264,7 @@ The result and its backing arrays belong to the current `Scope`.
 **Raises:** `<bad-arg>` for another capacity, or `<alloc-fail>` /
 `<size-limit>` when storage cannot be created.
 
-Source: `lib/typed-map.x:307`
+Source: `lib/typed-map.x`
 
 <a id="MapStringInt.postfixindex"></a>
 #### MapStringInt.postfixindex
@@ -1278,7 +1278,7 @@ these operations.
 **Raises:** `<bad-arg>` for a null map or absent key, or `<bad-op>` for an
 unsupported operation. These failures leave the value unchanged.
 
-Source: `lib/typed-map.x:307`
+Source: `lib/typed-map.x`
 
 <a id="MapStringInt.repr"></a>
 #### MapStringInt.repr
@@ -1287,7 +1287,7 @@ Source: `lib/typed-map.x:307`
 
 Returns the readable typed-Map representation.
 
-Source: `lib/typed-map.x:315`
+Source: `lib/typed-map.x`
 
 <a id="MapStringInt.scope"></a>
 #### MapStringInt.scope
@@ -1301,7 +1301,7 @@ explicitly moved into it. NULL returns NULL.
 
 **Raises:** `<alloc-fail>` when creating the scope.
 
-Source: `lib/typed-map.x:300`
+Source: `lib/typed-map.x`
 
 <a id="MapStringInt.set"></a>
 #### MapStringInt.set
@@ -1315,7 +1315,7 @@ Insertion invalidates live cursors and iterators; replacement does not.
 cause while inserting. Allocation and size failures leave the table
 unchanged.
 
-Source: `lib/typed-map.x:307`
+Source: `lib/typed-map.x`
 
 <a id="MapStringInt.setdefault"></a>
 #### MapStringInt.setdefault
@@ -1330,7 +1330,7 @@ cursors and iterators; an existing-key read does not mutate the table.
 cause while inserting. Allocation and size failures leave the table
 unchanged.
 
-Source: `lib/typed-map.x:307`
+Source: `lib/typed-map.x`
 
 <a id="MapStringInt.setindex"></a>
 #### MapStringInt.setindex
@@ -1341,7 +1341,7 @@ Stores `val` under `key` and returns `val`.
 This is the bracket-facing form of `MapStringInt.set`, with the same cursor
 invalidation and failure behavior.
 
-Source: `lib/typed-map.x:307`
+Source: `lib/typed-map.x`
 
 <a id="MapStringInt.str"></a>
 #### MapStringInt.str
@@ -1350,7 +1350,7 @@ Source: `lib/typed-map.x:307`
 
 Returns the typed-Map display String.
 
-Source: `lib/typed-map.x:315`
+Source: `lib/typed-map.x`
 
 <a id="MapStringInt.truth"></a>
 #### MapStringInt.truth
@@ -1359,7 +1359,7 @@ Source: `lib/typed-map.x:315`
 
 Returns one when `map` contains an entry.
 
-Source: `lib/typed-map.x:307`
+Source: `lib/typed-map.x`
 
 <a id="MapStringInt.try_del"></a>
 #### MapStringInt.try_del
@@ -1370,7 +1370,7 @@ Removes `key`, writes its value to `out`, and returns one when present.
 A null map, null `out`, or absent key returns zero without writing or
 mutation. Successful removal invalidates live cursors and iterators.
 
-Source: `lib/typed-map.x:307`
+Source: `lib/typed-map.x`
 
 <a id="MapStringInt.try_get"></a>
 #### MapStringInt.try_get
@@ -1380,7 +1380,7 @@ Source: `lib/typed-map.x:307`
 Writes the value for `key` to `out` and returns one when present.
 A null map, null `out`, or absent key returns zero without writing.
 
-Source: `lib/typed-map.x:307`
+Source: `lib/typed-map.x`
 
 <a id="MapStringInt.try_next"></a>
 #### MapStringInt.try_next
@@ -1393,7 +1393,7 @@ exhaustion returns zero without changing `key` or `val`. Traversal
 follows bucket order, not insertion order, and structural mutation
 invalidates the cursor.
 
-Source: `lib/typed-map.x:307`
+Source: `lib/typed-map.x`
 
 <a id="MapStringInt.updateindex"></a>
 #### MapStringInt.updateindex
@@ -1409,7 +1409,7 @@ the generated value operation, or an allocation, size, or invariant cause
 while inserting. Invalid operations leave an existing value unchanged.
 Allocation and size failures leave the table unchanged.
 
-Source: `lib/typed-map.x:307`
+Source: `lib/typed-map.x`
 
 <a id="MapStringInt.var"></a>
 #### MapStringInt.var
@@ -1419,7 +1419,7 @@ Source: `lib/typed-map.x:307`
 Boxes `map` with its registered typed-map tag without copying it.
 The typed pointer and `Var` share the same mutable map identity.
 
-Source: `lib/typed-map.x:356`
+Source: `lib/typed-map.x`
 
 <a id="MapStringInt.write_repr"></a>
 #### MapStringInt.write_repr
@@ -1428,7 +1428,7 @@ Source: `lib/typed-map.x:356`
 
 Appends the readable typed-Map representation in bucket order.
 
-Source: `lib/typed-map.x:315`
+Source: `lib/typed-map.x`
 
 <a id="MapStringInt.write_str"></a>
 #### MapStringInt.write_str
@@ -1437,7 +1437,7 @@ Source: `lib/typed-map.x:315`
 
 Appends the typed-Map display text in bucket order.
 
-Source: `lib/typed-map.x:315`
+Source: `lib/typed-map.x`
 
 ### `MapStringString`
 
@@ -1448,7 +1448,7 @@ Source: `lib/typed-map.x:315`
 
 Releases the record and its backing Blocks, borrowing stored values.
 
-Source: `lib/typed-map.x:295`
+Source: `lib/typed-map.x`
 
 <a id="MapStringString.compare"></a>
 #### MapStringString.compare
@@ -1463,7 +1463,7 @@ crosses `qsort`, cleanup, memory safety, and container state are not
 guaranteed. Raises: `<alloc-fail>` while creating temporary storage, or
 key/value comparison causes during the final comparison after sorting.
 
-Source: `lib/typed-map.x:277`
+Source: `lib/typed-map.x`
 
 <a id="MapStringString.contains"></a>
 #### MapStringString.contains
@@ -1472,7 +1472,7 @@ Source: `lib/typed-map.x:277`
 
 Returns one when `key` is present, or zero for a null map.
 
-Source: `lib/typed-map.x:269`
+Source: `lib/typed-map.x`
 
 <a id="MapStringString.copy"></a>
 #### MapStringString.copy
@@ -1485,7 +1485,7 @@ fields. A null input produces a fresh empty map.
 
 **Raises:** an allocation, size, or invariant cause while copying.
 
-Source: `lib/typed-map.x:269`
+Source: `lib/typed-map.x`
 
 <a id="MapStringString.del"></a>
 #### MapStringString.del
@@ -1497,7 +1497,7 @@ Successful removal invalidates live cursors and iterators.
 Prefer `try_del` when absence is an ordinary outcome. Boxed families
 return `void` for absence; native families raise `<bad-arg>`.
 
-Source: `lib/typed-map.x:269`
+Source: `lib/typed-map.x`
 
 <a id="MapStringString.enumerate"></a>
 #### MapStringString.enumerate
@@ -1519,7 +1519,7 @@ anything retaining it must not outlive that `Scope`.
 for MapLongDouble, `<alloc-fail>` or `<bad-enc>` while boxing its key.
 Shared causes do not return from the pull.
 
-Source: `lib/typed-map.x:295`
+Source: `lib/typed-map.x`
 
 <a id="MapStringString.equal"></a>
 #### MapStringString.equal
@@ -1529,7 +1529,7 @@ Source: `lib/typed-map.x:295`
 Reports key/value equality independent of bucket and insertion order.
 Two null maps compare equal; a null and a nonnull map compare unequal.
 
-Source: `lib/typed-map.x:269`
+Source: `lib/typed-map.x`
 
 <a id="MapStringString.get"></a>
 #### MapStringString.get
@@ -1540,7 +1540,7 @@ Returns the value for `key`.
 Prefer `try_get` when absence is an ordinary outcome. Boxed families
 return `void` for absence; native families raise `<bad-arg>`.
 
-Source: `lib/typed-map.x:269`
+Source: `lib/typed-map.x`
 
 <a id="MapStringString.getdefault"></a>
 #### MapStringString.getdefault
@@ -1550,7 +1550,7 @@ Source: `lib/typed-map.x:269`
 Returns the value for `key`, or `defval` without inserting it.
 A null map is treated as an empty one.
 
-Source: `lib/typed-map.x:269`
+Source: `lib/typed-map.x`
 
 <a id="MapStringString.getindex"></a>
 #### MapStringString.getindex
@@ -1561,7 +1561,7 @@ Returns the value selected by bracket indexing.
 This is the bracket-facing form of `MapStringString.get`, with the same failure
 behavior. Prefer bracket indexing in ordinary code.
 
-Source: `lib/typed-map.x:269`
+Source: `lib/typed-map.x`
 
 <a id="MapStringString.iter"></a>
 #### MapStringString.iter
@@ -1574,7 +1574,7 @@ live during traversal. A null `dest` returns NULL. Values follow bucket
 order, a null map is exhausted, and structural mutation invalidates the
 iterator.
 
-Source: `lib/typed-map.x:295`
+Source: `lib/typed-map.x`
 
 <a id="MapStringString.keys"></a>
 #### MapStringString.keys
@@ -1594,7 +1594,7 @@ that `Scope`.
 **Raises:** MapLongDouble iteration may raise `<alloc-fail>` or `<bad-enc>`
 while boxing a key.
 
-Source: `lib/typed-map.x:295`
+Source: `lib/typed-map.x`
 
 <a id="MapStringString.len"></a>
 #### MapStringString.len
@@ -1603,7 +1603,7 @@ Source: `lib/typed-map.x:295`
 
 Returns the number of entries, or zero for a null map.
 
-Source: `lib/typed-map.x:269`
+Source: `lib/typed-map.x`
 
 <a id="MapStringString.map"></a>
 #### MapStringString.map
@@ -1615,7 +1615,7 @@ A null input returns NULL. The typed Map and its storage are unchanged.
 
 **Raises:** any cause from boxing or inserting an entry.
 
-Source: `lib/typed-map.x:277`
+Source: `lib/typed-map.x`
 
 <a id="MapStringString.merge"></a>
 #### MapStringString.merge
@@ -1629,7 +1629,7 @@ entries already copied remain; a newly created destination is discarded.
 
 **Raises:** an allocation, size, or invariant cause while inserting.
 
-Source: `lib/typed-map.x:269`
+Source: `lib/typed-map.x`
 
 <a id="MapStringString.move_to"></a>
 #### MapStringString.move_to
@@ -1643,7 +1643,7 @@ a scope if empty. NULL maps do nothing.
 **Raises:** `<bad-arg>` for a NULL destination slot, or `<alloc-fail>` while
 creating its scope. Those failures leave ownership unchanged.
 
-Source: `lib/typed-map.x:262`
+Source: `lib/typed-map.x`
 
 <a id="MapStringString.new"></a>
 #### MapStringString.new
@@ -1655,7 +1655,7 @@ The initial table has two buckets and grows automatically.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` when storage cannot be created.
 
-Source: `lib/typed-map.x:269`
+Source: `lib/typed-map.x`
 
 <a id="MapStringString.new_capacity"></a>
 #### MapStringString.new_capacity
@@ -1669,7 +1669,7 @@ The result and its backing arrays belong to the current `Scope`.
 **Raises:** `<bad-arg>` for another capacity, or `<alloc-fail>` /
 `<size-limit>` when storage cannot be created.
 
-Source: `lib/typed-map.x:269`
+Source: `lib/typed-map.x`
 
 <a id="MapStringString.postfixindex"></a>
 #### MapStringString.postfixindex
@@ -1683,7 +1683,7 @@ these operations.
 **Raises:** `<bad-arg>` for a null map or absent key, or `<bad-op>` for an
 unsupported operation. These failures leave the value unchanged.
 
-Source: `lib/typed-map.x:269`
+Source: `lib/typed-map.x`
 
 <a id="MapStringString.repr"></a>
 #### MapStringString.repr
@@ -1692,7 +1692,7 @@ Source: `lib/typed-map.x:269`
 
 Returns the readable typed-Map representation.
 
-Source: `lib/typed-map.x:277`
+Source: `lib/typed-map.x`
 
 <a id="MapStringString.scope"></a>
 #### MapStringString.scope
@@ -1706,7 +1706,7 @@ explicitly moved into it. NULL returns NULL.
 
 **Raises:** `<alloc-fail>` when creating the scope.
 
-Source: `lib/typed-map.x:262`
+Source: `lib/typed-map.x`
 
 <a id="MapStringString.set"></a>
 #### MapStringString.set
@@ -1720,7 +1720,7 @@ Insertion invalidates live cursors and iterators; replacement does not.
 cause while inserting. Allocation and size failures leave the table
 unchanged.
 
-Source: `lib/typed-map.x:269`
+Source: `lib/typed-map.x`
 
 <a id="MapStringString.setdefault"></a>
 #### MapStringString.setdefault
@@ -1735,7 +1735,7 @@ cursors and iterators; an existing-key read does not mutate the table.
 cause while inserting. Allocation and size failures leave the table
 unchanged.
 
-Source: `lib/typed-map.x:269`
+Source: `lib/typed-map.x`
 
 <a id="MapStringString.setindex"></a>
 #### MapStringString.setindex
@@ -1746,7 +1746,7 @@ Stores `val` under `key` and returns `val`.
 This is the bracket-facing form of `MapStringString.set`, with the same cursor
 invalidation and failure behavior.
 
-Source: `lib/typed-map.x:269`
+Source: `lib/typed-map.x`
 
 <a id="MapStringString.str"></a>
 #### MapStringString.str
@@ -1755,7 +1755,7 @@ Source: `lib/typed-map.x:269`
 
 Returns the typed-Map display String.
 
-Source: `lib/typed-map.x:277`
+Source: `lib/typed-map.x`
 
 <a id="MapStringString.truth"></a>
 #### MapStringString.truth
@@ -1764,7 +1764,7 @@ Source: `lib/typed-map.x:277`
 
 Returns one when `map` contains an entry.
 
-Source: `lib/typed-map.x:269`
+Source: `lib/typed-map.x`
 
 <a id="MapStringString.try_del"></a>
 #### MapStringString.try_del
@@ -1775,7 +1775,7 @@ Removes `key`, writes its value to `out`, and returns one when present.
 A null map, null `out`, or absent key returns zero without writing or
 mutation. Successful removal invalidates live cursors and iterators.
 
-Source: `lib/typed-map.x:269`
+Source: `lib/typed-map.x`
 
 <a id="MapStringString.try_get"></a>
 #### MapStringString.try_get
@@ -1785,7 +1785,7 @@ Source: `lib/typed-map.x:269`
 Writes the value for `key` to `out` and returns one when present.
 A null map, null `out`, or absent key returns zero without writing.
 
-Source: `lib/typed-map.x:269`
+Source: `lib/typed-map.x`
 
 <a id="MapStringString.try_next"></a>
 #### MapStringString.try_next
@@ -1798,7 +1798,7 @@ exhaustion returns zero without changing `key` or `val`. Traversal
 follows bucket order, not insertion order, and structural mutation
 invalidates the cursor.
 
-Source: `lib/typed-map.x:269`
+Source: `lib/typed-map.x`
 
 <a id="MapStringString.updateindex"></a>
 #### MapStringString.updateindex
@@ -1814,7 +1814,7 @@ the generated value operation, or an allocation, size, or invariant cause
 while inserting. Invalid operations leave an existing value unchanged.
 Allocation and size failures leave the table unchanged.
 
-Source: `lib/typed-map.x:269`
+Source: `lib/typed-map.x`
 
 <a id="MapStringString.var"></a>
 #### MapStringString.var
@@ -1824,7 +1824,7 @@ Source: `lib/typed-map.x:269`
 Boxes `map` with its registered typed-map tag without copying it.
 The typed pointer and `Var` share the same mutable map identity.
 
-Source: `lib/typed-map.x:295`
+Source: `lib/typed-map.x`
 
 <a id="MapStringString.write_repr"></a>
 #### MapStringString.write_repr
@@ -1833,7 +1833,7 @@ Source: `lib/typed-map.x:295`
 
 Appends the readable typed-Map representation in bucket order.
 
-Source: `lib/typed-map.x:277`
+Source: `lib/typed-map.x`
 
 <a id="MapStringString.write_str"></a>
 #### MapStringString.write_str
@@ -1842,7 +1842,7 @@ Source: `lib/typed-map.x:277`
 
 Appends the typed-Map display text in bucket order.
 
-Source: `lib/typed-map.x:277`
+Source: `lib/typed-map.x`
 
 ### `Var`
 
@@ -1855,7 +1855,7 @@ Returns the typed-map pointer carried by `value`.
 `value` must carry this family's registered tag; the converter does
 not validate the tag before reading its pointer payload.
 
-Source: `lib/typed-map.x:237`
+Source: `lib/typed-map.x`
 
 <a id="Var.maplongdouble"></a>
 #### Var.maplongdouble
@@ -1866,7 +1866,7 @@ Returns the typed-map pointer carried by `value`.
 `value` must carry this family's registered tag; the converter does
 not validate the tag before reading its pointer payload.
 
-Source: `lib/typed-map.x:257`
+Source: `lib/typed-map.x`
 
 <a id="Var.mapstringint"></a>
 #### Var.mapstringint
@@ -1877,7 +1877,7 @@ Returns the typed-map pointer carried by `value`.
 `value` must carry this family's registered tag; the converter does
 not validate the tag before reading its pointer payload.
 
-Source: `lib/typed-map.x:356`
+Source: `lib/typed-map.x`
 
 <a id="Var.mapstringstring"></a>
 #### Var.mapstringstring
@@ -1888,7 +1888,7 @@ Returns the typed-map pointer carried by `value`.
 `value` must carry this family's registered tag; the converter does
 not validate the tag before reading its pointer payload.
 
-Source: `lib/typed-map.x:295`
+Source: `lib/typed-map.x`
 
 ## Public types
 
@@ -1910,7 +1910,7 @@ map, while `MapIntInt.copy` makes an independent table. Compound indexed
 updates support arithmetic, remainder, bitwise, and shift operators, plus
 postfix increment and decrement.
 
-Source: `lib/typed-map.x:28`
+Source: `lib/typed-map.x`
 
 <a id="MapLongDouble"></a>
 ### MapLongDouble
@@ -1923,7 +1923,7 @@ map, while `MapLongDouble.copy` makes an independent table. Compound
 indexed updates support `+`, `-`, `*`, and `/`, plus postfix increment and
 decrement.
 
-Source: `lib/typed-map.x:41`
+Source: `lib/typed-map.x`
 
 <a id="MapStringInt"></a>
 ### MapStringInt
@@ -1936,7 +1936,7 @@ before replacing its storage. Compound indexed updates support arithmetic,
 remainder, bitwise, and shift operators, plus postfix increment and
 decrement.
 
-Source: `lib/typed-map.x:69`
+Source: `lib/typed-map.x`
 
 <a id="MapStringString"></a>
 ### MapStringString
@@ -1951,7 +1951,7 @@ or outer-owned `String`s retain their existing pool lifetime, which must
 outlive the map. Compound indexed update supports only concatenation;
 postfix update is unsupported.
 
-Source: `lib/typed-map.x:56`
+Source: `lib/typed-map.x`
 
 ## Design notes
 

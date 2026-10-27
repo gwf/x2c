@@ -37,7 +37,7 @@ X2c command-line parsing and presentation.
 Copies the driver's already-read vector, or returns NULL for direct
 invocation. The caller owns the Array; no word is expanded again.
 
-Source: `src/cli/responses.x:23`
+Source: `src/cli/responses.x`
 
 <a id="CliRequest.dependency_option"></a>
 #### CliRequest.dependency_option
@@ -48,7 +48,7 @@ Returns whether `s` contains a driver-owned dependency option.
 Recognizes `-MMD`, `-MP`, `-MF`, and `-MT` as leading spellings or in a
 comma-delimited pass-through argument; `NULL` returns zero.
 
-Source: `src/cli/parsing.x:561`
+Source: `src/cli/parsing.x`
 
 <a id="CliRequest.inspects"></a>
 #### CliRequest.inspects
@@ -57,7 +57,7 @@ Source: `src/cli/parsing.x:561`
 
 Returns whether `request` selects a terminating inspection or dump mode.
 
-Source: `src/cli/requests.x:67`
+Source: `src/cli/requests.x`
 
 <a id="CliRequest.is_builtin"></a>
 #### CliRequest.is_builtin
@@ -66,7 +66,7 @@ Source: `src/cli/requests.x:67`
 
 Reports whether a raw command name belongs to the built-in parser.
 
-Source: `src/cli/parsing.x:661`
+Source: `src/cli/parsing.x`
 
 <a id="CliRequest.new"></a>
 #### CliRequest.new
@@ -75,7 +75,7 @@ Source: `src/cli/parsing.x:661`
 
 Constructs a request with the command's ordinary CLI defaults.
 
-Source: `src/cli/requests.x:39`
+Source: `src/cli/requests.x`
 
 <a id="CliRequest.package_options"></a>
 #### CliRequest.package_options
@@ -89,7 +89,7 @@ and the `-Wl,` and `-Xlinker` linker pass-throughs are admitted.
 `cc_args` and `ld_args` serve native actions; no source-preprocessing
 options are returned.
 
-Source: `src/cli/parsing.x:587`
+Source: `src/cli/parsing.x`
 
 <a id="CliRequest.package_roots"></a>
 #### CliRequest.package_roots
@@ -102,7 +102,7 @@ when it exists. A root named twice is searched twice and resolves the
 same entries. Explicit directories are borrowed; the result is a fresh
 `List` only when the home directory is appended.
 
-Source: `src/cli/requests.x:75`
+Source: `src/cli/requests.x`
 
 <a id="CliRequest.parse"></a>
 #### CliRequest.parse
@@ -118,7 +118,7 @@ canonical-pool lifetimes described by `CliRequest`.
 **Raises:** `<alloc-fail>` or `<size-limit>` while expanding response files or
 constructing request values.
 
-Source: `src/cli/parsing.x:257`
+Source: `src/cli/parsing.x`
 
 <a id="CliRequest.parse_arguments"></a>
 #### CliRequest.parse_arguments
@@ -127,7 +127,7 @@ Source: `src/cli/parsing.x:257`
 
 Parses already-read arguments, preserving deferred script expansion.
 
-Source: `src/cli/parsing.x:263`
+Source: `src/cli/parsing.x`
 
 <a id="CliRequest.read_arguments"></a>
 #### CliRequest.read_arguments
@@ -138,7 +138,7 @@ Reads initial arguments. Script options defer response-file expansion
 until parsing, so program arguments remain literal. The caller owns
 the returned Array.
 
-Source: `src/cli/responses.x:10`
+Source: `src/cli/responses.x`
 
 <a id="CliRequest.require_input"></a>
 #### CliRequest.require_input
@@ -148,7 +148,7 @@ Source: `src/cli/responses.x:10`
 Exits with a driver error unless `input` names a regular file.
 A wildcard or directory operand adds a note on what to pass instead.
 
-Source: `src/cli/requests.x:97`
+Source: `src/cli/requests.x`
 
 ### `Compiler`
 
@@ -159,7 +159,7 @@ Source: `src/cli/requests.x:97`
 
 Returns the version line `--version` prints, without a newline.
 
-Source: `src/cli/requests.x:64`
+Source: `src/cli/requests.x`
 
 ### `TargetKind`
 
@@ -172,7 +172,7 @@ Returns the target kind spelled `spelling`, or 0 when no kind has that
 spelling. `refusal` says why this compiler refuses a known spelling, and
 is NULL otherwise.
 
-Source: `src/cli/requests.x:19`
+Source: `src/cli/requests.x`
 
 <a id="TargetKind.of"></a>
 #### TargetKind.of
@@ -182,7 +182,7 @@ Source: `src/cli/requests.x:19`
 Returns the row of target kind `kind`; any other kind reads as an
 executable.
 
-Source: `src/cli/requests.x:30`
+Source: `src/cli/requests.x`
 
 ## Public types
 
@@ -201,7 +201,7 @@ Holds one compiler command and its command-specific inputs and options.
 shallow: request storage and referenced canonical values keep their
 producing `Scope` and pool lifetimes.
 
-Source: `src/cli/cli.x:18`
+Source: `src/cli/cli.x`
 
 <a id="TargetKind"></a>
 ### TargetKind
@@ -212,7 +212,7 @@ Describes one target kind: its spelling on the command line and in a
 manifest, the noun a report uses, and the default output file name
 around the target's name.
 
-Source: `src/cli/cli.x:44`
+Source: `src/cli/cli.x`
 
 ## Design notes
 

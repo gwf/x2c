@@ -30,7 +30,7 @@ Calls the typed callable `callee` with `arguments`, each converted to
 its parameter and evaluated once, in source order, as a statement
 expression.
 
-Source: `src/transform/literals.x:266`
+Source: `src/transform/literals.x`
 
 <a id="Compiler.lower_lambda_expr"></a>
 #### Compiler.lower_lambda_expr
@@ -44,7 +44,7 @@ other expressions pass through. A noncapturing lambda typed `Func`,
 which only a meta body leaves unlifted, lifts to a `Func` of its native
 signature.
 
-Source: `src/transform/expressions.x:10`
+Source: `src/transform/expressions.x`
 
 <a id="Compiler.normalize"></a>
 #### Compiler.normalize
@@ -55,7 +55,7 @@ Normalizes one bound and typed node. Newly constructed syntax is
 normalized where it is produced; children enter the same operation, so
 completed units do not require another unit walk.
 
-Source: `src/transform/traversal.x:34`
+Source: `src/transform/traversal.x`
 
 <a id="Compiler.pack_rest_arguments"></a>
 #### Compiler.pack_rest_arguments
@@ -69,7 +69,7 @@ contributes more than one element. A Map tail holds `key: value` entries
 and Map splices; later entries win. The caller changes the callee's
 final parameter to the container before issuing this packed call.
 
-Source: `src/transform/expressions.x:339`
+Source: `src/transform/expressions.x`
 
 <a id="Compiler.shipped_support"></a>
 #### Compiler.shipped_support
@@ -81,7 +81,7 @@ the form `source` of `kind`, bound and lowered with the support. The
 kernel has no lowering of its own for `source`, so no rule ends the
 translation as `_shipped_lowering` does.
 
-Source: `src/transform/traversal.x:125`
+Source: `src/transform/traversal.x`
 
 <a id="Compiler.transform"></a>
 #### Compiler.transform
@@ -96,7 +96,7 @@ support declarations are lowered and appended after the input units. Their
 storage determines their interface visibility. The call may add
 generated origins or diagnostics to `c`.
 
-Source: `src/transform/traversal.x:13`
+Source: `src/transform/traversal.x`
 
 ## Design notes
 

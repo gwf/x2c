@@ -67,7 +67,7 @@ lifetime.
 
 **Raises:** `<no-convert>` for the first foreign element.
 
-Source: `lib/typed-list.x:194`
+Source: `lib/typed-list.x`
 
 <a id="List.listdbl"></a>
 #### List.listdbl
@@ -82,7 +82,7 @@ lifetime.
 
 **Raises:** `<no-convert>` for the first foreign element.
 
-Source: `lib/typed-list.x:210`
+Source: `lib/typed-list.x`
 
 <a id="List.listfloat"></a>
 #### List.listfloat
@@ -97,7 +97,7 @@ lifetime.
 
 **Raises:** `<no-convert>` for the first foreign element.
 
-Source: `lib/typed-list.x:206`
+Source: `lib/typed-list.x`
 
 <a id="List.listint"></a>
 #### List.listint
@@ -112,7 +112,7 @@ lifetime.
 
 **Raises:** `<no-convert>` for the first foreign element.
 
-Source: `lib/typed-list.x:202`
+Source: `lib/typed-list.x`
 
 <a id="List.listshort"></a>
 #### List.listshort
@@ -127,7 +127,7 @@ lifetime.
 
 **Raises:** `<no-convert>` for the first foreign element.
 
-Source: `lib/typed-list.x:198`
+Source: `lib/typed-list.x`
 
 <a id="List.liststring"></a>
 #### List.liststring
@@ -142,7 +142,7 @@ lifetime.
 
 **Raises:** `<no-convert>` for the first foreign element.
 
-Source: `lib/typed-list.x:214`
+Source: `lib/typed-list.x`
 
 <a id="List.listsymbol"></a>
 #### List.listsymbol
@@ -157,7 +157,7 @@ lifetime.
 
 **Raises:** `<no-convert>` for the first foreign element.
 
-Source: `lib/typed-list.x:218`
+Source: `lib/typed-list.x`
 
 ### `ListChar`
 
@@ -169,7 +169,7 @@ Source: `lib/typed-list.x:218`
 Returns the first `char` in `xs`, or `0` when `xs` is `nil`.
 A nonempty `xs` must retain the `ListChar` element-tag invariant.
 
-Source: `lib/typed-list.x:194`
+Source: `lib/typed-list.x`
 
 <a id="ListChar.cons"></a>
 #### ListChar.cons
@@ -184,7 +184,7 @@ pool when an existing cell is reused.
 **Raises:** `<alloc-fail>` or `<size-limit>` while installing a new
 canonical cell.
 
-Source: `lib/typed-list.x:194`
+Source: `lib/typed-list.x`
 
 <a id="ListChar.index"></a>
 #### ListChar.index
@@ -193,7 +193,7 @@ Source: `lib/typed-list.x:194`
 
 Returns the first zero-based index of `value`, or -1 when absent.
 
-Source: `lib/typed-list.x:194`
+Source: `lib/typed-list.x`
 
 <a id="ListChar.last"></a>
 #### ListChar.last
@@ -204,7 +204,7 @@ Returns the final `char` in `xs`, or `0` when `xs` is `nil`,
 after an O(n) walk.
 A nonempty `xs` must retain the `ListChar` element-tag invariant.
 
-Source: `lib/typed-list.x:194`
+Source: `lib/typed-list.x`
 
 ### `ListDbl`
 
@@ -216,7 +216,7 @@ Source: `lib/typed-list.x:194`
 Returns the first `double` in `xs`, or `0.0` when `xs` is `nil`.
 A nonempty `xs` must retain the `ListDbl` element-tag invariant.
 
-Source: `lib/typed-list.x:210`
+Source: `lib/typed-list.x`
 
 <a id="ListDbl.cons"></a>
 #### ListDbl.cons
@@ -231,7 +231,7 @@ pool when an existing cell is reused.
 **Raises:** `<alloc-fail>` or `<size-limit>` while installing a new
 canonical cell.
 
-Source: `lib/typed-list.x:210`
+Source: `lib/typed-list.x`
 
 <a id="ListDbl.index"></a>
 #### ListDbl.index
@@ -240,7 +240,7 @@ Source: `lib/typed-list.x:210`
 
 Returns the first zero-based index of `value`, or -1 when absent.
 
-Source: `lib/typed-list.x:210`
+Source: `lib/typed-list.x`
 
 <a id="ListDbl.last"></a>
 #### ListDbl.last
@@ -251,7 +251,7 @@ Returns the final `double` in `xs`, or `0.0` when `xs` is `nil`,
 after an O(n) walk.
 A nonempty `xs` must retain the `ListDbl` element-tag invariant.
 
-Source: `lib/typed-list.x:210`
+Source: `lib/typed-list.x`
 
 ### `ListFloat`
 
@@ -263,7 +263,7 @@ Source: `lib/typed-list.x:210`
 Returns the first `float` in `xs`, or `0.0f` when `xs` is `nil`.
 A nonempty `xs` must retain the `ListFloat` element-tag invariant.
 
-Source: `lib/typed-list.x:206`
+Source: `lib/typed-list.x`
 
 <a id="ListFloat.cons"></a>
 #### ListFloat.cons
@@ -278,7 +278,7 @@ pool when an existing cell is reused.
 **Raises:** `<alloc-fail>` or `<size-limit>` while installing a new
 canonical cell.
 
-Source: `lib/typed-list.x:206`
+Source: `lib/typed-list.x`
 
 <a id="ListFloat.index"></a>
 #### ListFloat.index
@@ -287,7 +287,7 @@ Source: `lib/typed-list.x:206`
 
 Returns the first zero-based index of `value`, or -1 when absent.
 
-Source: `lib/typed-list.x:206`
+Source: `lib/typed-list.x`
 
 <a id="ListFloat.last"></a>
 #### ListFloat.last
@@ -298,7 +298,7 @@ Returns the final `float` in `xs`, or `0.0f` when `xs` is `nil`,
 after an O(n) walk.
 A nonempty `xs` must retain the `ListFloat` element-tag invariant.
 
-Source: `lib/typed-list.x:206`
+Source: `lib/typed-list.x`
 
 ### `ListInt`
 
@@ -310,7 +310,7 @@ Source: `lib/typed-list.x:206`
 Returns the first `int` in `xs`, or `0` when `xs` is `nil`.
 A nonempty `xs` must retain the `ListInt` element-tag invariant.
 
-Source: `lib/typed-list.x:202`
+Source: `lib/typed-list.x`
 
 <a id="ListInt.cons"></a>
 #### ListInt.cons
@@ -325,7 +325,7 @@ pool when an existing cell is reused.
 **Raises:** `<alloc-fail>` or `<size-limit>` while installing a new
 canonical cell.
 
-Source: `lib/typed-list.x:202`
+Source: `lib/typed-list.x`
 
 <a id="ListInt.index"></a>
 #### ListInt.index
@@ -334,7 +334,7 @@ Source: `lib/typed-list.x:202`
 
 Returns the first zero-based index of `value`, or -1 when absent.
 
-Source: `lib/typed-list.x:202`
+Source: `lib/typed-list.x`
 
 <a id="ListInt.last"></a>
 #### ListInt.last
@@ -345,7 +345,7 @@ Returns the final `int` in `xs`, or `0` when `xs` is `nil`,
 after an O(n) walk.
 A nonempty `xs` must retain the `ListInt` element-tag invariant.
 
-Source: `lib/typed-list.x:202`
+Source: `lib/typed-list.x`
 
 ### `ListShort`
 
@@ -357,7 +357,7 @@ Source: `lib/typed-list.x:202`
 Returns the first `short` in `xs`, or `0` when `xs` is `nil`.
 A nonempty `xs` must retain the `ListShort` element-tag invariant.
 
-Source: `lib/typed-list.x:198`
+Source: `lib/typed-list.x`
 
 <a id="ListShort.cons"></a>
 #### ListShort.cons
@@ -372,7 +372,7 @@ pool when an existing cell is reused.
 **Raises:** `<alloc-fail>` or `<size-limit>` while installing a new
 canonical cell.
 
-Source: `lib/typed-list.x:198`
+Source: `lib/typed-list.x`
 
 <a id="ListShort.index"></a>
 #### ListShort.index
@@ -381,7 +381,7 @@ Source: `lib/typed-list.x:198`
 
 Returns the first zero-based index of `value`, or -1 when absent.
 
-Source: `lib/typed-list.x:198`
+Source: `lib/typed-list.x`
 
 <a id="ListShort.last"></a>
 #### ListShort.last
@@ -392,7 +392,7 @@ Returns the final `short` in `xs`, or `0` when `xs` is `nil`,
 after an O(n) walk.
 A nonempty `xs` must retain the `ListShort` element-tag invariant.
 
-Source: `lib/typed-list.x:198`
+Source: `lib/typed-list.x`
 
 ### `ListString`
 
@@ -404,7 +404,7 @@ Source: `lib/typed-list.x:198`
 Returns the first `String` in `xs`, or `NULL` when `xs` is `nil`.
 A nonempty `xs` must retain the `ListString` element-tag invariant.
 
-Source: `lib/typed-list.x:214`
+Source: `lib/typed-list.x`
 
 <a id="ListString.cons"></a>
 #### ListString.cons
@@ -419,7 +419,7 @@ pool when an existing cell is reused.
 **Raises:** `<alloc-fail>` or `<size-limit>` while installing a new
 canonical cell.
 
-Source: `lib/typed-list.x:214`
+Source: `lib/typed-list.x`
 
 <a id="ListString.index"></a>
 #### ListString.index
@@ -428,7 +428,7 @@ Source: `lib/typed-list.x:214`
 
 Returns the first zero-based index of `value`, or -1 when absent.
 
-Source: `lib/typed-list.x:214`
+Source: `lib/typed-list.x`
 
 <a id="ListString.last"></a>
 #### ListString.last
@@ -439,7 +439,7 @@ Returns the final `String` in `xs`, or `NULL` when `xs` is `nil`,
 after an O(n) walk.
 A nonempty `xs` must retain the `ListString` element-tag invariant.
 
-Source: `lib/typed-list.x:214`
+Source: `lib/typed-list.x`
 
 ### `ListSymbol`
 
@@ -451,7 +451,7 @@ Source: `lib/typed-list.x:214`
 Returns the first `Symbol` in `xs`, or `0` when `xs` is `nil`.
 A nonempty `xs` must retain the `ListSymbol` element-tag invariant.
 
-Source: `lib/typed-list.x:218`
+Source: `lib/typed-list.x`
 
 <a id="ListSymbol.cons"></a>
 #### ListSymbol.cons
@@ -466,7 +466,7 @@ pool when an existing cell is reused.
 **Raises:** `<alloc-fail>` or `<size-limit>` while installing a new
 canonical cell.
 
-Source: `lib/typed-list.x:218`
+Source: `lib/typed-list.x`
 
 <a id="ListSymbol.index"></a>
 #### ListSymbol.index
@@ -475,7 +475,7 @@ Source: `lib/typed-list.x:218`
 
 Returns the first zero-based index of `value`, or -1 when absent.
 
-Source: `lib/typed-list.x:218`
+Source: `lib/typed-list.x`
 
 <a id="ListSymbol.last"></a>
 #### ListSymbol.last
@@ -486,7 +486,7 @@ Returns the final `Symbol` in `xs`, or `0` when `xs` is `nil`,
 after an O(n) walk.
 A nonempty `xs` must retain the `ListSymbol` element-tag invariant.
 
-Source: `lib/typed-list.x:218`
+Source: `lib/typed-list.x`
 
 ### `Var`
 
@@ -502,7 +502,7 @@ the same element validation, identity, and lifetime rules as
 
 **Raises:** `<no-convert>` for the first foreign element.
 
-Source: `lib/typed-list.x:194`
+Source: `lib/typed-list.x`
 
 <a id="Var.listdbl"></a>
 #### Var.listdbl
@@ -516,7 +516,7 @@ the same element validation, identity, and lifetime rules as
 
 **Raises:** `<no-convert>` for the first foreign element.
 
-Source: `lib/typed-list.x:210`
+Source: `lib/typed-list.x`
 
 <a id="Var.listfloat"></a>
 #### Var.listfloat
@@ -530,7 +530,7 @@ the same element validation, identity, and lifetime rules as
 
 **Raises:** `<no-convert>` for the first foreign element.
 
-Source: `lib/typed-list.x:206`
+Source: `lib/typed-list.x`
 
 <a id="Var.listint"></a>
 #### Var.listint
@@ -544,7 +544,7 @@ the same element validation, identity, and lifetime rules as
 
 **Raises:** `<no-convert>` for the first foreign element.
 
-Source: `lib/typed-list.x:202`
+Source: `lib/typed-list.x`
 
 <a id="Var.listshort"></a>
 #### Var.listshort
@@ -558,7 +558,7 @@ the same element validation, identity, and lifetime rules as
 
 **Raises:** `<no-convert>` for the first foreign element.
 
-Source: `lib/typed-list.x:198`
+Source: `lib/typed-list.x`
 
 <a id="Var.liststring"></a>
 #### Var.liststring
@@ -572,7 +572,7 @@ the same element validation, identity, and lifetime rules as
 
 **Raises:** `<no-convert>` for the first foreign element.
 
-Source: `lib/typed-list.x:214`
+Source: `lib/typed-list.x`
 
 <a id="Var.listsymbol"></a>
 #### Var.listsymbol
@@ -586,7 +586,7 @@ the same element validation, identity, and lifetime rules as
 
 **Raises:** `<no-convert>` for the first foreign element.
 
-Source: `lib/typed-list.x:218`
+Source: `lib/typed-list.x`
 
 ## Public types
 
@@ -607,7 +607,7 @@ Source: `lib/typed-list.x:218`
 
 Typed view of canonical `List` cells whose cars are `<i8>` char values.
 
-Source: `lib/typed-list.x:125`
+Source: `lib/typed-list.x`
 
 <a id="ListDbl"></a>
 ### ListDbl
@@ -616,7 +616,7 @@ Source: `lib/typed-list.x:125`
 
 Typed view of canonical `List` cells whose cars are `<f64>` double values.
 
-Source: `lib/typed-list.x:136`
+Source: `lib/typed-list.x`
 
 <a id="ListFloat"></a>
 ### ListFloat
@@ -625,7 +625,7 @@ Source: `lib/typed-list.x:136`
 
 Typed view of canonical `List` cells whose cars are `<f32>` float values.
 
-Source: `lib/typed-list.x:133`
+Source: `lib/typed-list.x`
 
 <a id="ListInt"></a>
 ### ListInt
@@ -634,7 +634,7 @@ Source: `lib/typed-list.x:133`
 
 Typed view of canonical `List` cells whose cars are `<i32>` int values.
 
-Source: `lib/typed-list.x:130`
+Source: `lib/typed-list.x`
 
 <a id="ListShort"></a>
 ### ListShort
@@ -643,7 +643,7 @@ Source: `lib/typed-list.x:130`
 
 Typed view of canonical `List` cells whose cars are `<i16>` short values.
 
-Source: `lib/typed-list.x:128`
+Source: `lib/typed-list.x`
 
 <a id="ListString"></a>
 ### ListString
@@ -652,7 +652,7 @@ Source: `lib/typed-list.x:128`
 
 Typed view of canonical `List` cells whose cars are `<string>` `String`s.
 
-Source: `lib/typed-list.x:139`
+Source: `lib/typed-list.x`
 
 <a id="ListSymbol"></a>
 ### ListSymbol
@@ -661,7 +661,7 @@ Source: `lib/typed-list.x:139`
 
 Typed view of canonical `List` cells whose cars are `<symbol>` `Symbol`s.
 
-Source: `lib/typed-list.x:142`
+Source: `lib/typed-list.x`
 
 ## Design notes
 

@@ -35,7 +35,7 @@ Builds a return node for an optional expression without consuming tokens.
 A present expression is resolved in the current `Sym` scope and includes
 the current `return_type` for later conversion.
 
-Source: `src/statements.x:253`
+Source: `src/statements.x`
 
 <a id="Compiler.parse_block_item"></a>
 #### Compiler.parse_block_item
@@ -46,7 +46,7 @@ Parses one block-position declaration, statement, or macro insertion.
 The caller owns the surrounding scope; a macro insertion may return a
 `(seq ...)` node containing several block items.
 
-Source: `src/statements.x:671`
+Source: `src/statements.x`
 
 <a id="Compiler.parse_block_items"></a>
 #### Compiler.parse_block_items
@@ -56,7 +56,7 @@ Source: `src/statements.x:671`
 Parses block items after an already-consumed opening brace through `}` in
 a new lexical scope. `anchor_items` records statement origins.
 
-Source: `src/statements.x:715`
+Source: `src/statements.x`
 
 <a id="Compiler.parse_callable_body"></a>
 #### Compiler.parse_callable_body
@@ -65,7 +65,7 @@ Source: `src/statements.x:715`
 
 Parses a callable's outer block in its active parameter scope.
 
-Source: `src/statements.x:722`
+Source: `src/statements.x`
 
 <a id="Compiler.parse_case_body"></a>
 #### Compiler.parse_case_body
@@ -75,7 +75,7 @@ Source: `src/statements.x:722`
 Parses a source match arm's guard and body, declaring its typed
 `types` captures, inside the arm scope that the binder opened.
 
-Source: `src/statements.x:432`
+Source: `src/statements.x`
 
 <a id="Compiler.parse_compound_statement"></a>
 #### Compiler.parse_compound_statement
@@ -85,7 +85,7 @@ Source: `src/statements.x:432`
 Parses a compound body after its opening brace and consumes the closing
 `}`, returning an origin-anchored `(block ...)` node.
 
-Source: `src/statements.x:710`
+Source: `src/statements.x`
 
 <a id="Compiler.parse_governed"></a>
 #### Compiler.parse_governed
@@ -103,7 +103,7 @@ as in C. A governed source statement is anchored where it starts, as a
 block item is, so a transform diagnostic names it rather than its
 keyword.
 
-Source: `src/statements.x:582`
+Source: `src/statements.x`
 
 <a id="Compiler.parse_match_condition"></a>
 #### Compiler.parse_match_condition
@@ -112,7 +112,7 @@ Source: `src/statements.x:582`
 
 Parses the pattern operand of `~=` through the match pattern owner.
 
-Source: `src/statements.x:416`
+Source: `src/statements.x`
 
 <a id="Compiler.parse_match_row_argument"></a>
 #### Compiler.parse_match_row_argument
@@ -121,7 +121,7 @@ Source: `src/statements.x:416`
 
 Parses one MatchRow macro argument with the ordinary match-arm owner.
 
-Source: `src/statements.x:377`
+Source: `src/statements.x`
 
 <a id="Compiler.parse_source_clause"></a>
 #### Compiler.parse_source_clause
@@ -133,7 +133,7 @@ Parses the clause `kind` of a source `if`, `while`, `do`, `for`,
 reaches that clause. An absent `else`, `for` header, `catch`, or
 `finally` clause is NULL.
 
-Source: `src/statements.x:172`
+Source: `src/statements.x`
 
 <a id="Compiler.typed_capture_declarations"></a>
 #### Compiler.typed_capture_declarations
@@ -143,7 +143,7 @@ Source: `src/statements.x:172`
 Declares typed pattern captures in a new scope, returning their native
 declarations and the preceding Var temporaries. The caller closes it.
 
-Source: `src/statements.x:454`
+Source: `src/statements.x`
 
 ## Design notes
 

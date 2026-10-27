@@ -36,7 +36,7 @@ Returns source-ordered preprocessor nodes in the preceding trivia.
 
 Spaces and comments remain trivia rather than becoming AST nodes.
 
-Source: `src/preprocess.x:286`
+Source: `src/preprocess.x`
 
 <a id="Compiler.note_object_macro"></a>
 #### Compiler.note_object_macro
@@ -49,7 +49,7 @@ can be read. The directive after `#define` is scanned as x2c tokens. An
 `#undef` drops the name, so later source reads it as an ordinary
 identifier.
 
-Source: `src/preprocess.x:310`
+Source: `src/preprocess.x`
 
 <a id="Compiler.note_preprocessor_macros"></a>
 #### Compiler.note_preprocessor_macros
@@ -59,7 +59,7 @@ Source: `src/preprocess.x:310`
 Records object-like `#define` names and removes names after `#undef`.
 Source storage determines visibility independently of directives.
 
-Source: `src/preprocess.x:300`
+Source: `src/preprocess.x`
 
 <a id="Compiler.preproc_branch_state"></a>
 #### Compiler.preproc_branch_state
@@ -69,7 +69,7 @@ Source: `src/preprocess.x:300`
 Returns a group's hidden-arm state after its `#elif` or `#else`: 2 when
 the group's state was 1, and 0 otherwise.
 
-Source: `src/preprocess.x:82`
+Source: `src/preprocess.x`
 
 <a id="Compiler.preproc_conditional_kind"></a>
 #### Compiler.preproc_conditional_kind
@@ -80,7 +80,7 @@ Classifies the preprocessor line `text` as a conditional directive:
 `<open>` for `#if`, `#ifdef`, and `#ifndef`, `<branch>` for `#elif`
 and `#else` forms, `<close>` for `#endif`, or 0 for any other line.
 
-Source: `src/preprocess.x:30`
+Source: `src/preprocess.x`
 
 <a id="Compiler.preproc_directive"></a>
 #### Compiler.preproc_directive
@@ -90,7 +90,7 @@ Source: `src/preprocess.x:30`
 Returns the preprocessor line `text` without its `#` and the blanks
 around the directive.
 
-Source: `src/preprocess.x:23`
+Source: `src/preprocess.x`
 
 <a id="Compiler.preproc_include_target"></a>
 #### Compiler.preproc_include_target
@@ -101,7 +101,7 @@ Returns the file named by the `#include` line `text`, or `NULL` for any
 other line. `angle` is 1 for a `<...>` name and 0 otherwise. Text after
 the name, such as a comment, is ignored.
 
-Source: `src/preprocess.x:88`
+Source: `src/preprocess.x`
 
 <a id="Compiler.preproc_marker_file"></a>
 #### Compiler.preproc_marker_file
@@ -112,7 +112,7 @@ Returns the file that the host preprocessor's line marker `text`,
 `# N "file" flags`, names and sets `line` to N, or returns `NULL` for
 any other line.
 
-Source: `src/preprocess.x:103`
+Source: `src/preprocess.x`
 
 <a id="Compiler.preproc_open_state"></a>
 #### Compiler.preproc_open_state
@@ -125,7 +125,7 @@ never-defined name or is `0`; 1 when C never takes the arms after its
 first `#else`, because the condition is exactly `!defined(NAME)`; and 0
 otherwise.
 
-Source: `src/preprocess.x:44`
+Source: `src/preprocess.x`
 
 <a id="Compiler.preproc_track_arms"></a>
 #### Compiler.preproc_track_arms
@@ -136,7 +136,7 @@ Follows the conditional groups open after the preprocessor line `text`.
 `arms` holds one entry per open group, innermost first, listing the
 `preproc` nodes that select that group's current arm.
 
-Source: `src/preprocess.x:411`
+Source: `src/preprocess.x`
 
 <a id="Compiler.preproc_within_arms"></a>
 #### Compiler.preproc_within_arms
@@ -147,7 +147,7 @@ Returns `items` inside the conditional arms `arms` tracked by
 `Compiler.preproc_track_arms`: the directives that reopen each group,
 outermost first, then `items`, then one `#endif` per group.
 
-Source: `src/preprocess.x:424`
+Source: `src/preprocess.x`
 
 <a id="Compiler.scan_conditionals"></a>
 #### Compiler.scan_conditionals
@@ -158,7 +158,7 @@ Records the open groups after each conditional directive of the
 tokenized unit, and marks layout attributes where written or where a
 macro expands to one.
 
-Source: `src/preprocess.x:150`
+Source: `src/preprocess.x`
 
 ## Design notes
 

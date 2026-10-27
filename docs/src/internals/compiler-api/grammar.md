@@ -27,7 +27,7 @@ The source forms that lowering recognizes.
 
 Returns a pattern for a declarator row, with or without its initializer.
 
-Source: `src/grammar.x:29`
+Source: `src/grammar.x`
 
 <a id="Ast.lambda_pattern"></a>
 #### Ast.lambda_pattern
@@ -36,7 +36,7 @@ Source: `src/grammar.x:29`
 
 Returns a pattern for either lambda form, with or without captures.
 
-Source: `src/grammar.x:26`
+Source: `src/grammar.x`
 
 <a id="Ast.return_none"></a>
 #### Ast.return_none
@@ -45,7 +45,7 @@ Source: `src/grammar.x:26`
 
 Returns the return of no value that ends a function returning `Var`.
 
-Source: `src/grammar.x:22`
+Source: `src/grammar.x`
 
 ### `Macro`
 
@@ -57,7 +57,7 @@ Source: `src/grammar.x:22`
 Returns bare call content with the supplied callee and argument
 patterns.
 
-Source: `src/grammar.x:42`
+Source: `src/grammar.x`
 
 <a id="Macro.content_pattern"></a>
 #### Macro.content_pattern
@@ -68,7 +68,7 @@ Returns a source form's content pattern without its typed shell.
 Bare-content dispatch arms retain the fixed head the match emitter labels.
 Inside a shell, write `%(expr ? $($shape(...)))` instead.
 
-Source: `src/grammar.x:36`
+Source: `src/grammar.x`
 
 ## Public types
 
@@ -85,7 +85,7 @@ Represents one compiler AST node as a canonical immutable `List`.
 `NULL` denotes no node, and nonempty nodes have the canonical `List`-pool
 lifetime.
 
-Source: `src/grammar.x:19`
+Source: `src/grammar.x`
 
 ## Design notes
 

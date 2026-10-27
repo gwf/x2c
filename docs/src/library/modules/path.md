@@ -51,7 +51,7 @@ stable identity.
 **Raises:** `<io-fail>` when a relative path needs the current directory and
 it cannot be read.
 
-Source: `lib/path.x:102`
+Source: `lib/path.x`
 
 <a id="Path.basename"></a>
 #### Path.basename
@@ -60,7 +60,7 @@ Source: `lib/path.x:102`
 
 Returns the last component of `path`, ignoring trailing slashes.
 
-Source: `lib/path.x:65`
+Source: `lib/path.x`
 
 <a id="Path.copy_file"></a>
 #### Path.copy_file
@@ -73,7 +73,7 @@ file as `source` is left as it is.
 
 **Raises:** `<not-found>` or `<io-fail>`, including for a directory `source`.
 
-Source: `lib/path.x:478`
+Source: `lib/path.x`
 
 <a id="Path.copy_tree"></a>
 #### Path.copy_tree
@@ -86,7 +86,7 @@ a link, and a regular file with `Path.copy_file`.
 **Raises:** `<not-found>` or `<io-fail>`, with `EINVAL` when `source` is a
 directory and `target` is that directory or inside it.
 
-Source: `lib/path.x:518`
+Source: `lib/path.x`
 
 <a id="Path.dirname"></a>
 #### Path.dirname
@@ -96,7 +96,7 @@ Source: `lib/path.x:518`
 Returns the directory part of `path`: `.` when it has no slash and `/`
 for a path directly under the root.
 
-Source: `lib/path.x:56`
+Source: `lib/path.x`
 
 <a id="Path.exists"></a>
 #### Path.exists
@@ -105,7 +105,7 @@ Source: `lib/path.x:56`
 
 Reports whether `p` names an existing file, following links.
 
-Source: `lib/path.x:131`
+Source: `lib/path.x`
 
 <a id="Path.extension"></a>
 #### Path.extension
@@ -116,7 +116,7 @@ Returns the extension of `path`'s last component, including its dot, or
 NULL when there is none. A leading or trailing dot does not start an
 extension, so `..` and `notes.` have none.
 
-Source: `lib/path.x:82`
+Source: `lib/path.x`
 
 <a id="Path.glob"></a>
 #### Path.glob
@@ -131,7 +131,7 @@ only where the pattern spells the dot, and a pattern that ends with a
 slash matches only directories, each returned with a trailing slash.
 No match returns an empty `List`.
 
-Source: `lib/path.x:387`
+Source: `lib/path.x`
 
 <a id="Path.glob_match"></a>
 #### Path.glob_match
@@ -142,7 +142,7 @@ Reports whether all of `path` matches the glob `pattern`. A path
 component that begins with a dot matches only a pattern component that
 begins with one, and a run of slashes matches a run of slashes.
 
-Source: `lib/path.x:345`
+Source: `lib/path.x`
 
 <a id="Path.is_dir"></a>
 #### Path.is_dir
@@ -151,7 +151,7 @@ Source: `lib/path.x:345`
 
 Reports whether `p` names a directory, following links.
 
-Source: `lib/path.x:134`
+Source: `lib/path.x`
 
 <a id="Path.is_executable"></a>
 #### Path.is_executable
@@ -160,7 +160,7 @@ Source: `lib/path.x:134`
 
 Reports whether this process may execute `path`, as the shell's `-x`.
 
-Source: `lib/path.x:140`
+Source: `lib/path.x`
 
 <a id="Path.is_file"></a>
 #### Path.is_file
@@ -169,7 +169,7 @@ Source: `lib/path.x:140`
 
 Reports whether `p` names a regular file, following links.
 
-Source: `lib/path.x:137`
+Source: `lib/path.x`
 
 <a id="Path.join"></a>
 #### Path.join
@@ -179,7 +179,7 @@ Source: `lib/path.x:137`
 Returns `name` joined to `base` with one separating slash.
 An absolute `name`, or an empty `base`, is returned unchanged.
 
-Source: `lib/path.x:47`
+Source: `lib/path.x`
 
 <a id="Path.list_dir"></a>
 #### Path.list_dir
@@ -190,7 +190,7 @@ Returns the names in the directory `path`, sorted, without `.` and `..`.
 
 **Raises:** `<not-found>` or `<io-fail>`.
 
-Source: `lib/path.x:184`
+Source: `lib/path.x`
 
 <a id="Path.make_dirs"></a>
 #### Path.make_dirs
@@ -203,7 +203,7 @@ An existing directory is left as it is.
 **Raises:** `<io-fail>` when a component cannot be created or names an
 existing non-directory, or `<not-found>`.
 
-Source: `lib/path.x:408`
+Source: `lib/path.x`
 
 <a id="Path.modified_time"></a>
 #### Path.modified_time
@@ -215,7 +215,7 @@ with the fraction the filesystem records.
 
 **Raises:** `<not-found>` or `<io-fail>`.
 
-Source: `lib/path.x:170`
+Source: `lib/path.x`
 
 <a id="Path.move_to"></a>
 #### Path.move_to
@@ -227,7 +227,7 @@ different filesystems.
 
 **Raises:** `<not-found>` or `<io-fail>`.
 
-Source: `lib/path.x:530`
+Source: `lib/path.x`
 
 <a id="Path.read_text"></a>
 #### Path.read_text
@@ -239,7 +239,7 @@ Returns the contents of the file at `path`, or NULL when it is empty.
 **Raises:** `<not-found>`, `<io-fail>`, or `<bad-arg>` when the file contains
 a NUL byte.
 
-Source: `lib/path.x:550`
+Source: `lib/path.x`
 
 <a id="Path.remove_file"></a>
 #### Path.remove_file
@@ -250,7 +250,7 @@ Removes the file or symbolic link `path` when it exists.
 
 **Raises:** `<io-fail>` when it exists and cannot be removed.
 
-Source: `lib/path.x:421`
+Source: `lib/path.x`
 
 <a id="Path.remove_tree"></a>
 #### Path.remove_tree
@@ -263,7 +263,7 @@ entry that cannot be removed.
 
 **Raises:** `<io-fail>` naming the first path that could not be removed.
 
-Source: `lib/path.x:465`
+Source: `lib/path.x`
 
 <a id="Path.size"></a>
 #### Path.size
@@ -274,7 +274,7 @@ Returns the size of the file at `path` in bytes.
 
 **Raises:** `<not-found>` or `<io-fail>`.
 
-Source: `lib/path.x:164`
+Source: `lib/path.x`
 
 <a id="Path.stem"></a>
 #### Path.stem
@@ -283,7 +283,7 @@ Source: `lib/path.x:164`
 
 Returns `path`'s last component without its extension.
 
-Source: `lib/path.x:89`
+Source: `lib/path.x`
 
 <a id="Path.symlink_to"></a>
 #### Path.symlink_to
@@ -294,7 +294,7 @@ Creates the symbolic link `link` pointing at `target`.
 
 **Raises:** `<io-fail>` when the link cannot be created.
 
-Source: `lib/path.x:540`
+Source: `lib/path.x`
 
 <a id="Path.temp_dir"></a>
 #### Path.temp_dir
@@ -306,7 +306,7 @@ its path. The caller removes it, usually with `Path.remove_tree`.
 
 **Raises:** `<io-fail>` when the directory cannot be created.
 
-Source: `lib/path.x:566`
+Source: `lib/path.x`
 
 <a id="Path.walk"></a>
 #### Path.walk
@@ -332,7 +332,7 @@ long units = source.walk().filter(%!(p) => p.str().endswith(".x")).count();
 **Raises:** `<not-found>` or `<io-fail>` when `root` cannot be listed, and
 `<io-fail>` from a pull when a directory vanishes during the walk.
 
-Source: `lib/path.x:236`
+Source: `lib/path.x`
 
 <a id="Path.write_text"></a>
 #### Path.write_text
@@ -343,7 +343,7 @@ Replaces the contents of the file at `path` with `text`.
 
 **Raises:** `<not-found>` when the directory does not exist, or `<io-fail>`.
 
-Source: `lib/path.x:556`
+Source: `lib/path.x`
 
 ## Public types
 
@@ -360,7 +360,7 @@ A `String` that names a filesystem location. A literal or a `String`
 converts to a `Path` wherever one is expected, and a `Path` passes
 wherever a `String` is expected. Slicing and `+` are `String` operations.
 
-Source: `lib/path.x:25`
+Source: `lib/path.x`
 
 ## Design notes
 

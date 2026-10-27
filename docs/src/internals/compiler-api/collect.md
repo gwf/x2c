@@ -60,7 +60,7 @@ Source-ordered shallow symbol collection and replay.
 
 Retains source proofs and one definition hash per linked provider.
 
-Source: `src/collect/providers.x:113`
+Source: `src/collect/providers.x`
 
 <a id="Compiler.callable_symbols"></a>
 #### Compiler.callable_symbols
@@ -72,7 +72,7 @@ of `names`, including their receiver rows. Includes contribute their
 selected declarations, without replaying compile-time effects.
 Unselected functions and variables do not enter the result.
 
-Source: `src/collect/declarations.x:429`
+Source: `src/collect/declarations.x`
 
 <a id="Compiler.collect_package"></a>
 #### Compiler.collect_package
@@ -88,7 +88,7 @@ protocol rows enter the current symbol state, and dependencies enter the
 importing compiler. Replay also merges recorded function definitions.
 `token` locates lookup and public-surface errors.
 
-Source: `src/collect/packages.x:25`
+Source: `src/collect/packages.x`
 
 <a id="Compiler.collect_symbols"></a>
 #### Compiler.collect_symbols
@@ -105,7 +105,7 @@ is `globs`. Collection also updates dependencies, function definitions,
 and macro state. Keyword alias maps and seen-name state are file-local
 and restored when each file walk ends.
 
-Source: `src/collect/walk.x:18`
+Source: `src/collect/walk.x`
 
 <a id="Compiler.collected_names"></a>
 #### Compiler.collected_names
@@ -116,7 +116,7 @@ Returns the one-part names that the source at home-relative `path`
 declares itself, without its includes, as this process collected it.
 A source this process has not collected declares no names.
 
-Source: `src/collect/declarations.x:203`
+Source: `src/collect/declarations.x`
 
 <a id="Compiler.complete_meta_hashes"></a>
 #### Compiler.complete_meta_hashes
@@ -126,7 +126,7 @@ Source: `src/collect/declarations.x:203`
 Completes a linked function's own source hashes before a shallow call.
 A lookahead entry never replaces the file's ordinary contribution.
 
-Source: `src/collect/providers.x:96`
+Source: `src/collect/providers.x`
 
 <a id="Compiler.configure_interfaces"></a>
 #### Compiler.configure_interfaces
@@ -140,7 +140,7 @@ stage directory when it runs from `<home>/builds/`, otherwise under the
 home. A `cold` process reads no interface and still writes its own. Call
 it before opening any translation unit's Context.
 
-Source: `src/collect/interfaces.x:26`
+Source: `src/collect/interfaces.x`
 
 <a id="Compiler.configure_package"></a>
 #### Compiler.configure_package
@@ -150,7 +150,7 @@ Source: `src/collect/interfaces.x:26`
 Selects a source file's own package, as its standalone translation does.
 A cold provider does not register an import in its including unit.
 
-Source: `src/collect/walk.x:439`
+Source: `src/collect/walk.x`
 
 <a id="Compiler.declared_adoptions"></a>
 #### Compiler.declared_adoptions
@@ -162,7 +162,7 @@ declares, in no particular order. A file that imports a package
 declares none here: the walk that records them for a cold entry does
 not install a package's surface.
 
-Source: `src/collect/declarations.x:610`
+Source: `src/collect/declarations.x`
 
 <a id="Compiler.forget_provisional_entries"></a>
 #### Compiler.forget_provisional_entries
@@ -173,7 +173,7 @@ Drops the entries a meta build collected without declaration defaults
 or with placeholders for its meta calls. Call after the meta build's
 parses.
 
-Source: `src/collect/cache.x:170`
+Source: `src/collect/cache.x`
 
 <a id="Compiler.include_function_declarations"></a>
 #### Compiler.include_function_declarations
@@ -187,7 +187,7 @@ signatures alone do not establish a runtime declaration either. Emission
 reads the entries collection already installed without invalidating
 them.
 
-Source: `src/collect/declarations.x:181`
+Source: `src/collect/declarations.x`
 
 <a id="Compiler.include_type_dependencies"></a>
 #### Compiler.include_type_dependencies
@@ -198,7 +198,7 @@ The semantic type rows reached by an ordinary source include. Each
 file contributes once to `seen`; the current unit does not contribute
 through a cycle back to its own still-open header.
 
-Source: `src/collect/declarations.x:140`
+Source: `src/collect/declarations.x`
 
 <a id="Compiler.include_typedef_names"></a>
 #### Compiler.include_typedef_names
@@ -212,7 +212,7 @@ is skipped with the files it reaches, and each file reached is added to
 `seen`. NULL when the include does not resolve to x2c source; a runtime
 module adds nothing the prelude has not declared.
 
-Source: `src/collect/declarations.x:126`
+Source: `src/collect/declarations.x`
 
 <a id="Compiler.included_compile_time_effects"></a>
 #### Compiler.included_compile_time_effects
@@ -224,7 +224,7 @@ The ordered cache walk counts each file once and groups effects by the
 canonical path of the unit's direct include. The parser installs those
 effects when it reaches that include.
 
-Source: `src/collect/walk.x:667`
+Source: `src/collect/walk.x`
 
 <a id="Compiler.install_included_effects"></a>
 #### Compiler.install_included_effects
@@ -234,7 +234,7 @@ Source: `src/collect/walk.x:667`
 Installs the definitions of each include among the directives before
 the cursor.
 
-Source: `src/collect/walk.x:714`
+Source: `src/collect/walk.x`
 
 <a id="Compiler.install_syntax_prelude"></a>
 #### Compiler.install_syntax_prelude
@@ -245,7 +245,7 @@ Installs the syntax prelude's macros and keyword aliases into `c`'s
 macro state once. A later file walk with the same macros, whose keyword
 aliases start empty, merges the aliases again.
 
-Source: `src/collect/walk.x:137`
+Source: `src/collect/walk.x`
 
 <a id="Compiler.interface_text"></a>
 #### Compiler.interface_text
@@ -258,7 +258,7 @@ identity is unknown, since no compiler could replay that interface. A
 contribution that the interface grammar cannot spell is reported as an
 `emit` diagnostic.
 
-Source: `src/collect/interfaces.x:269`
+Source: `src/collect/interfaces.x`
 
 <a id="Compiler.is_prelude_source"></a>
 #### Compiler.is_prelude_source
@@ -267,7 +267,7 @@ Source: `src/collect/interfaces.x:269`
 
 Reports whether the canonical `path` is a compiler prelude source.
 
-Source: `src/collect/walk.x:70`
+Source: `src/collect/walk.x`
 
 <a id="Compiler.linked_meta_definitions_current"></a>
 #### Compiler.linked_meta_definitions_current
@@ -277,7 +277,7 @@ Source: `src/collect/walk.x:70`
 Reports whether a provider's linked definition hashes still match.
 Changes outside definitions do not require a project helper.
 
-Source: `src/collect/providers.x:55`
+Source: `src/collect/providers.x`
 
 <a id="Compiler.linked_meta_provider_current"></a>
 #### Compiler.linked_meta_provider_current
@@ -287,7 +287,7 @@ Source: `src/collect/providers.x:55`
 Reports whether a linked provider and the files it read are unchanged.
 The linked inventory retains the ordinary collector's dependency proof.
 
-Source: `src/collect/providers.x:9`
+Source: `src/collect/providers.x`
 
 <a id="Compiler.linked_prelude_records"></a>
 #### Compiler.linked_prelude_records
@@ -301,7 +301,7 @@ the records hold this compiler's collection rather than a table linked
 into it; the unit's own entries for them are restored afterwards. A
 record the interface grammar cannot spell is left out.
 
-Source: `src/collect/interfaces.x:364`
+Source: `src/collect/interfaces.x`
 
 <a id="Compiler.loaded_call_type"></a>
 #### Compiler.loaded_call_type
@@ -312,7 +312,7 @@ Returns the native calling type of a loaded function. Array parameters
 decay to pointers, and a parameter's outer qualifiers affect only its
 local copy. Keep the declared type for inspection and reload checks.
 
-Source: `src/collect/providers.x:182`
+Source: `src/collect/providers.x`
 
 <a id="Compiler.loaded_provider"></a>
 #### Compiler.loaded_provider
@@ -322,7 +322,7 @@ Source: `src/collect/providers.x:182`
 Returns this source's native definitions with their canonical declarations
 and the public type rows needed to check other units' declarations.
 
-Source: `src/collect/providers.x:161`
+Source: `src/collect/providers.x`
 
 <a id="Compiler.meta_provider_hashes"></a>
 #### Compiler.meta_provider_hashes
@@ -331,7 +331,7 @@ Source: `src/collect/providers.x:161`
 
 Returns the shared function hashes of an advertised meta provider.
 
-Source: `src/collect/providers.x:109`
+Source: `src/collect/providers.x`
 
 <a id="Compiler.module_source"></a>
 #### Compiler.module_source
@@ -345,7 +345,7 @@ to the file that names them, and their own blocks are spliced in turn.
 A member's quoted include of a file beside it is spelled from the
 entry's directory, so it names the same file there.
 
-Source: `src/collect/splice.x:28`
+Source: `src/collect/splice.x`
 
 <a id="Compiler.name_loaded_provider"></a>
 #### Compiler.name_loaded_provider
@@ -355,7 +355,7 @@ Source: `src/collect/splice.x:28`
 Names declared bindings through one loaded provider. Its own source
 declarations remain authoritative; private bindings never link out.
 
-Source: `src/collect/providers.x:215`
+Source: `src/collect/providers.x`
 
 <a id="Compiler.name_meta_provider_bindings"></a>
 #### Compiler.name_meta_provider_bindings
@@ -366,7 +366,7 @@ Selects helper C spellings for public definitions owned by `path`.
 Bindings, rather than source tokens, keep unrelated private names and
 fields unchanged. Native supplier declarations retain their C names.
 
-Source: `src/collect/providers.x:145`
+Source: `src/collect/providers.x`
 
 <a id="Compiler.prelude_interface"></a>
 #### Compiler.prelude_interface
@@ -377,7 +377,7 @@ Returns the path of the first prelude interface this compiler wrote, or
 NULL when there is none or the compiler's identity is unknown. Its
 source hashes are not checked.
 
-Source: `src/collect/interfaces.x:225`
+Source: `src/collect/interfaces.x`
 
 <a id="Compiler.prelude_missing_interfaces"></a>
 #### Compiler.prelude_missing_interfaces
@@ -390,7 +390,7 @@ NULL when every one is present or there is no prelude interface. A
 missing interface walks that unit cold in every process, so a converged
 stage build reports none.
 
-Source: `src/collect/interfaces.x:234`
+Source: `src/collect/interfaces.x`
 
 <a id="Compiler.prelude_sources"></a>
 #### Compiler.prelude_sources
@@ -400,7 +400,7 @@ Source: `src/collect/interfaces.x:234`
 Returns the compiler-owned prelude sources relative to its home. Their
 runtime implementations are already linked into the shipped binaries.
 
-Source: `src/collect/walk.x:53`
+Source: `src/collect/walk.x`
 
 <a id="Compiler.publish_inline_types"></a>
 #### Compiler.publish_inline_types
@@ -410,7 +410,7 @@ Source: `src/collect/walk.x:53`
 Promotes the selected type families after the owning ordinary full
 parse. The header and Xi then use the same complete family selection.
 
-Source: `src/collect/declarations.x:503`
+Source: `src/collect/declarations.x`
 
 <a id="Compiler.publishes_type_family"></a>
 #### Compiler.publishes_type_family
@@ -419,7 +419,7 @@ Source: `src/collect/declarations.x:503`
 
 Reports whether this unit's interface publishes the type `family`.
 
-Source: `src/collect/declarations.x:249`
+Source: `src/collect/declarations.x`
 
 <a id="Compiler.publishes_typedef"></a>
 #### Compiler.publishes_typedef
@@ -428,7 +428,7 @@ Source: `src/collect/declarations.x:249`
 
 Reports whether this unit's selected interface publishes `name`.
 
-Source: `src/collect/declarations.x:244`
+Source: `src/collect/declarations.x`
 
 <a id="Compiler.record_conformance_rows"></a>
 #### Compiler.record_conformance_rows
@@ -441,7 +441,7 @@ publishes, as `record_generated_symbol` adds its rows. A row an earlier
 cold walk recorded may sit in an earlier map. The cache retains each key
 and value.
 
-Source: `src/collect/declarations.x:585`
+Source: `src/collect/declarations.x`
 
 <a id="Compiler.record_generated_symbol"></a>
 #### Compiler.record_generated_symbol
@@ -453,7 +453,7 @@ current file's collected entry contributes, which is the map its
 interface publishes. A file without a collected declaration map records
 nothing. The cache retains `signature`.
 
-Source: `src/collect/declarations.x:565`
+Source: `src/collect/declarations.x`
 
 <a id="Compiler.refresh_source_collections"></a>
 #### Compiler.refresh_source_collections
@@ -464,7 +464,7 @@ Makes the next collection recheck source files and interfaces after an
 interactive edit. Drops cache indexes, retaining their backing rows:
 already-open units may still use those declarations.
 
-Source: `src/collect/cache.x:151`
+Source: `src/collect/cache.x`
 
 <a id="Compiler.runtime_function_declarations"></a>
 #### Compiler.runtime_function_declarations
@@ -474,7 +474,7 @@ Source: `src/collect/cache.x:151`
 The runtime umbrella includes each listed module's generated header.
 Compiler components in the semantic prelude supply no runtime header.
 
-Source: `src/collect/declarations.x:191`
+Source: `src/collect/declarations.x`
 
 ### `SourceView`
 
@@ -486,7 +486,7 @@ Source: `src/collect/declarations.x:191`
 The file the include of `target` from `includer_dir` names, searched as
 collection searches `dirs`, or NULL.
 
-Source: `src/collect/walk.x:526`
+Source: `src/collect/walk.x`
 
 ## Design notes
 

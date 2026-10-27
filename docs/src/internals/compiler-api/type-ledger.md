@@ -24,7 +24,7 @@ The compiler's Var tag tables, projected from the ledger.
 
 Returns the process-lifetime `Var` tag of each builtin type.
 
-Source: `src/type-ledger.x:39`
+Source: `src/type-ledger.x`
 
 <a id="Type.var_tag_rows"></a>
 #### Type.var_tag_rows
@@ -33,7 +33,7 @@ Source: `src/type-ledger.x:39`
 
 Returns each constant-row tag's `(top mask bottom)` encoding row.
 
-Source: `src/type-ledger.x:42`
+Source: `src/type-ledger.x`
 
 ## Design notes
 

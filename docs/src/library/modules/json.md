@@ -32,7 +32,7 @@ JSON text to and from ordinary x2c values.
 
 Returns the JSON boolean for the truth of `value`.
 
-Source: `lib/json.x:150`
+Source: `lib/json.x`
 
 <a id="Json.boolean"></a>
 #### Json.boolean
@@ -43,7 +43,7 @@ Returns 1 for JSON `true` and 0 for JSON `false`.
 
 **Raises:** `<bad-types>` when `value` is not a JSON boolean.
 
-Source: `lib/json.x:158`
+Source: `lib/json.x`
 
 <a id="Json.is_bool"></a>
 #### Json.is_bool
@@ -52,7 +52,7 @@ Source: `lib/json.x:158`
 
 Reports whether `value` is a JSON boolean.
 
-Source: `lib/json.x:153`
+Source: `lib/json.x`
 
 <a id="Json.parse"></a>
 #### Json.parse
@@ -71,7 +71,7 @@ when `source` is not one JSON value surrounded only by whitespace, nests
 arrays and objects more than 512 deep, or contains a number too large for
 a `double`, an unpaired surrogate escape, or `\u0000`.
 
-Source: `lib/json.x:197`
+Source: `lib/json.x`
 
 <a id="Json.read_file"></a>
 #### Json.read_file
@@ -83,7 +83,7 @@ Returns the x2c value of the JSON file at `path`, as `Json.parse` does.
 **Raises:** the causes of `Path.read_text`, or `<malformed>` as
 `Json.parse` does, with a `path` detail added.
 
-Source: `lib/json.x:203`
+Source: `lib/json.x`
 
 <a id="Json.write_file"></a>
 #### Json.write_file
@@ -94,7 +94,7 @@ Replaces the file at `path` with `value` as compact JSON text.
 
 **Raises:** the causes of `Var.json` and `Path.write_text`.
 
-Source: `lib/json.x:474`
+Source: `lib/json.x`
 
 ### `JsonBool`
 
@@ -105,7 +105,7 @@ Source: `lib/json.x:474`
 
 Returns `true` or `false`.
 
-Source: `lib/json.x:144`
+Source: `lib/json.x`
 
 <a id="JsonBool.str"></a>
 #### JsonBool.str
@@ -114,7 +114,7 @@ Source: `lib/json.x:144`
 
 Returns `true` or `false`.
 
-Source: `lib/json.x:141`
+Source: `lib/json.x`
 
 <a id="JsonBool.truth"></a>
 #### JsonBool.truth
@@ -123,7 +123,7 @@ Source: `lib/json.x:141`
 
 Returns nonzero for `true`.
 
-Source: `lib/json.x:147`
+Source: `lib/json.x`
 
 <a id="JsonBool.var"></a>
 #### JsonBool.var
@@ -132,7 +132,7 @@ Source: `lib/json.x:147`
 
 Boxes a JSON boolean.
 
-Source: `lib/json.x:135`
+Source: `lib/json.x`
 
 ### `Var`
 
@@ -154,7 +154,7 @@ for a `String` and a `Symbol` name with the same spelling,
 `<conv-range>` for NaN or an infinity, or `<size-limit>` for nesting
 deeper than 512 levels.
 
-Source: `lib/json.x:464`
+Source: `lib/json.x`
 
 <a id="Var.jsonbool"></a>
 #### Var.jsonbool
@@ -163,7 +163,7 @@ Source: `lib/json.x:464`
 
 Unboxes a JSON boolean from a `Var` produced by `JsonBool.var`.
 
-Source: `lib/json.x:138`
+Source: `lib/json.x`
 
 <a id="Var.pretty_json"></a>
 #### Var.pretty_json
@@ -174,7 +174,7 @@ Returns `value` as JSON text indented two spaces per level.
 
 **Raises:** the causes of `Var.json`.
 
-Source: `lib/json.x:469`
+Source: `lib/json.x`
 
 ## Public types
 
@@ -190,7 +190,7 @@ Source: `lib/json.x:469`
 
 The receiverless owner of `Json.parse` and the other JSON operations.
 
-Source: `lib/json.x:20`
+Source: `lib/json.x`
 
 <a id="JsonBool"></a>
 ### JsonBool
@@ -200,7 +200,7 @@ Source: `lib/json.x:20`
 A JSON `true` or `false`, kept distinct from the numbers 1 and 0.
 The two values are process-lifetime singletons made by `Json.bool`.
 
-Source: `lib/json.x:25`
+Source: `lib/json.x`
 
 ## Design notes
 

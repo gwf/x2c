@@ -39,7 +39,7 @@ original parameter types before calling it, then converts its `Var` result
 to the expected return type. Already compatible or unsupported shapes pass
 through unchanged.
 
-Source: `src/callables/callbacks.x:166`
+Source: `src/callables/callbacks.x`
 
 <a id="Compiler.capture_environment"></a>
 #### Compiler.capture_environment
@@ -51,7 +51,7 @@ for callable defers and function-pointer `Func` values. The complete
 typedef is bound at once, so each field keeps its member type. It binds
 at file scope whatever local scope is open.
 
-Source: `src/callables/adapters.x:79`
+Source: `src/callables/adapters.x`
 
 <a id="Compiler.context_func_adapter"></a>
 #### Compiler.context_func_adapter
@@ -62,7 +62,7 @@ Builds an adapter with `type`'s public signature that passes its own
 Func as the first argument of `target`, before the declared arguments.
 The target can read per-instance bindings with `Func.context`.
 
-Source: `src/callables/adapters.x:221`
+Source: `src/callables/adapters.x`
 
 <a id="Compiler.func_parameters"></a>
 #### Compiler.func_parameters
@@ -74,7 +74,7 @@ function taking the lambda parameter rows `entries`: its Func
 signature as a cached `List`, and each argument as `_func_reads`
 reads it from `argv` of the Func `fn`.
 
-Source: `src/callables/adapters.x:289`
+Source: `src/callables/adapters.x`
 
 <a id="Compiler.func_signature"></a>
 #### Compiler.func_signature
@@ -83,7 +83,7 @@ Source: `src/callables/adapters.x:289`
 
 Returns the canonical signature shared by native and meta Func adapters.
 
-Source: `src/callables/adapters.x:397`
+Source: `src/callables/adapters.x`
 
 <a id="Compiler.lift_func_expression"></a>
 #### Compiler.lift_func_expression
@@ -98,7 +98,7 @@ pointers producing null `Func`. Lambda expressions are lowered first, and
 unrelated expressions pass through unchanged. Public inline functions
 reach the queued helpers through generated bridge functions.
 
-Source: `src/callables/values.x:13`
+Source: `src/callables/values.x`
 
 <a id="Compiler.lower_typed_adapter_expr"></a>
 #### Compiler.lower_typed_adapter_expr
@@ -112,7 +112,7 @@ Compatible helpers are cached by source binding and target type, queued
 with `Compiler.add_early`, and returned as typed identifiers; other
 expressions pass through unchanged.
 
-Source: `src/callables/callbacks.x:55`
+Source: `src/callables/callbacks.x`
 
 <a id="Compiler.maybe_adapt_func_arg"></a>
 #### Compiler.maybe_adapt_func_arg
@@ -126,7 +126,7 @@ cast, or addressed; an indirect function-pointer value is rejected.
 A function already having the adapter's pointee type passes through,
 and new helpers are cached and queued with `Compiler.add_early`.
 
-Source: `src/callables/adapters.x:121`
+Source: `src/callables/adapters.x`
 
 <a id="Compiler.prepend_setup"></a>
 #### Compiler.prepend_setup
@@ -135,7 +135,7 @@ Source: `src/callables/adapters.x:121`
 
 Puts `setup` at the entry of a block or typed expression `body`.
 
-Source: `src/callables/adapters.x:92`
+Source: `src/callables/adapters.x`
 
 ## Design notes
 

@@ -396,7 +396,7 @@ static void _entry(Array lines, Map module, Map item, int level):
   _heading(lines, item["name"], level)
   _add(lines, $("", %"`$(item["signature"])`", ""))
   _doc(lines, module, item)
-  _add(lines, $(%"Source: `$(item["path"]):$(item["line"])`", ""))
+  _add(lines, $(%"Source: `$(item["path"])`", ""))
 
 /* Public types, then the types the tier ledger marks internal. */
 static void _types(Array lines, Map module):

@@ -24,7 +24,7 @@ Translates a request synchronously. Optional per-input directories and a
 parent-process progress callback let a caller own build state. Without a
 callback, translation reports its own progress and receipt.
 
-Source: `src/translation.x:206`
+Source: `src/translation.x`
 
 ## Design notes
 

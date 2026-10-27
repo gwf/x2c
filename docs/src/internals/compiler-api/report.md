@@ -36,7 +36,7 @@ progress additionally requires terminal stderr and non-plain output.
 Plain output disables color; automatic color respects terminal capability
 and `NO_COLOR`.
 
-Source: `src/report.x:48`
+Source: `src/report.x`
 
 #### report_duration
 
@@ -45,7 +45,7 @@ Source: `src/report.x:48`
 Formats microseconds as integer `us`, rounded whole `ms`, or seconds with
 two decimal places.
 
-Source: `src/report.x:255`
+Source: `src/report.x`
 
 #### report_generated
 
@@ -54,7 +54,7 @@ Source: `src/report.x:255`
 Writes the muted receipt for `n` generated C files and as many headers,
 `bytes` in all, when receipts are enabled.
 
-Source: `src/report.x:190`
+Source: `src/report.x`
 
 #### report_line
 
@@ -64,7 +64,7 @@ Writes one newline-terminated receipt to stderr when receipts are enabled.
 In transient mode the receipt first clears the terminal line, which
 another process may be drawing, and `line` must be non-NULL.
 
-Source: `src/report.x:162`
+Source: `src/report.x`
 
 #### report_now_us
 
@@ -73,7 +73,7 @@ Source: `src/report.x:162`
 Returns monotonic time in microseconds, or zero when the clock read fails.
 The value measures elapsed time; it is not a wall-clock timestamp.
 
-Source: `src/report.x:236`
+Source: `src/report.x`
 
 #### report_phase
 
@@ -83,7 +83,7 @@ Writes a muted phase receipt when receipts are enabled.
 A fully cached nonempty phase is marked up to date; a partial cache reports
 its cached count, and every receipt includes the elapsed time.
 
-Source: `src/report.x:173`
+Source: `src/report.x`
 
 #### report_progress
 
@@ -94,7 +94,7 @@ active. Updates start after 125 ms and incomplete work is limited to one
 update per 50 ms. `detail` may be NULL; output is clipped to the configured
 terminal width and has no newline.
 
-Source: `src/report.x:88`
+Source: `src/report.x`
 
 #### report_receipts
 
@@ -102,7 +102,7 @@ Source: `src/report.x:88`
 
 Returns whether stable completion receipts are currently enabled.
 
-Source: `src/report.x:77`
+Source: `src/report.x`
 
 #### report_size
 
@@ -111,7 +111,7 @@ Source: `src/report.x:77`
 Formats bytes as `B`, `KiB`, or `MiB` using binary unit boundaries.
 Byte counts are exact; larger units use one decimal place.
 
-Source: `src/report.x:264`
+Source: `src/report.x`
 
 #### report_suspend
 
@@ -120,7 +120,7 @@ Source: `src/report.x:264`
 Clears the active transient line from stderr, if this process drew one.
 Forked workers inherit the state but leave the line to their parent.
 
-Source: `src/report.x:150`
+Source: `src/report.x`
 
 ### `Path`
 
@@ -132,7 +132,7 @@ Source: `src/report.x:150`
 Returns the size of a regular file.
 NULL, a failed `stat`, or a non-regular path returns zero.
 
-Source: `src/report.x:246`
+Source: `src/report.x`
 
 ## Design notes
 

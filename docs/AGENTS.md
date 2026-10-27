@@ -71,7 +71,8 @@ the generic templates that own published definitions:
   from the compiler's symbol table, rather than repeated tags.
 - A source-shaped `Unit` macro may own public definitions. Put each callable's
   doc comment directly above its function template; the reference scanner
-  substitutes captured invocation arguments and reports the invocation line.
+  substitutes captured invocation arguments and attributes the definition to
+  the invocation's file.
   It does not run meta functions or compute declaration names, and
   every expanded signature is still checked against the compiler artifact.
 - Published callables and types default to the primary tier. The compact
