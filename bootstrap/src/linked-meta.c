@@ -3287,14 +3287,14 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _507 = cons(_506, NULL);
   _508 = cons(_89, _507);
   _509 = List_var(_508);
-  _510 = int_var(645);
+  _510 = int_var(650);
   _511 = cons(_510, NULL);
 }
 
 __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void){
   _512 = cons(_95, _511);
   _513 = List_var(_512);
-  _514 = int_var(24351);
+  _514 = int_var(24563);
   _515 = cons(_514, NULL);
   _516 = cons(_108, _515);
   _517 = List_var(_516);
@@ -12934,7 +12934,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_19(void
   _10097 = cons(_10096, NULL);
   _10098 = cons(_10094, _10097);
   _10099 = List_var(_10098);
-  _10100 = String_new("bd6356c6");
+  _10100 = String_new("146c389b");
   _10101 = String_var(_10100);
   _10102 = cons(_10101, NULL);
   _10103 = cons(_506, _10102);
@@ -13118,7 +13118,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_20(void
   _10278 = String_var(_10277);
   _10279 = String_new("lib/tokenizer.x");
   _10280 = String_var(_10279);
-  _10281 = String_new("79fdf926");
+  _10281 = String_new("1d4bb12f");
   _10282 = String_var(_10281);
   _10283 = cons(_10282, NULL);
   _10284 = cons(_10280, _10283);
@@ -15240,7 +15240,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_24(void
   _12388 = cons(_10081, _12387);
   _12389 = cons(_10337, _12388);
   _12390 = List_var(_12389);
-  _12391 = String_new("144b4b28");
+  _12391 = String_new("bb8712fa");
   _12392 = String_var(_12391);
   _12393 = cons(_12392, NULL);
   _12394 = cons(_12390, _12393);
@@ -16944,7 +16944,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_27(void
   _14083 = List_var(_14082);
   _14084 = String_new("src/compiler/binding-facts.x");
   _14085 = String_var(_14084);
-  _14086 = String_new("85029503");
+  _14086 = String_new("fb6b3291");
   _14087 = String_var(_14086);
   _14088 = cons(_14087, NULL);
   _14089 = cons(_14085, _14088);

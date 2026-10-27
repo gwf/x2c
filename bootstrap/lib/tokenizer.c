@@ -141,6 +141,8 @@ typedef struct _Layout{
 }
 _Layout;
 
+static void * _layout_alloc(size_t count, size_t size);
+
 static _Layout _layout_open(Tokenizer t);
 
 static void _close(_Layout * l);
@@ -1058,10 +1060,25 @@ static void _layout(Tokenizer t){
 
 }
 
+#include "error.h"
+
+
+
+
+static void * _layout_alloc(size_t count, size_t size){
+  void * storage = calloc(count, size);
+  if(! storage){
+    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/tokenizer.x",.function = "_layout_alloc",.line = 629,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_0, 97614135954008, 0);
+    __builtin_unreachable();
+  }
+  return storage;
+}
+
 static _Layout _layout_open(Tokenizer t){
   int count = Bytes_len(t -> tokens) - 1;
   _Layout l ={
-    .all =(struct Token *) t -> tokens, .count = count, .sig = calloc(count + 1, sizeof(Token)), .depths = calloc(count + 1, sizeof(int)), .lines = calloc(count + 1, sizeof(_LayoutLine)), .edits = calloc(count + 1, sizeof(_LayoutEdit)), .indents = calloc(count + 2, sizeof(int)), .closers = calloc(count + 2, sizeof(String)), .enums = calloc(count + 2, 1), .ternary = calloc(count + 1, 1)
+    .all =(struct Token *) t -> tokens, .count = count, .sig = _layout_alloc(count + 1, sizeof(Token)), .depths = _layout_alloc(count + 1, sizeof(int)), .lines = _layout_alloc(count + 1, sizeof(_LayoutLine)), .edits = _layout_alloc(count + 1, sizeof(_LayoutEdit)), .indents = _layout_alloc(count + 2, sizeof(int)), .closers = _layout_alloc(count + 2, sizeof(String)), .enums = _layout_alloc(count + 2, 1), .ternary = _layout_alloc(count + 1, 1)
   }
   ;
   for(int i = 0;  i < count;  i ++) if(l.all[i].type != 40896714 && l.all[i].type != 7477210024) l.sig[l.nsig ++] = & l.all[i];

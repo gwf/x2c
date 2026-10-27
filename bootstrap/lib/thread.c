@@ -454,7 +454,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _163 = cons(_159, _162);
   _164 = List_var(_163);
   _165 = Symbol_var(805770);
-  _166 = int_var(645);
+  _166 = int_var(650);
   _167 = cons(_166, NULL);
   _168 = cons(_165, _167);
   _169 = List_var(_168);
@@ -467,7 +467,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _176 = cons(_173, _175);
   _177 = List_var(_176);
   _178 = Symbol_var(1133019155420);
-  _179 = int_var(24351);
+  _179 = int_var(24563);
   _180 = cons(_179, NULL);
   _181 = cons(_178, _180);
   _182 = List_var(_181);
@@ -1053,8 +1053,9 @@ Var Thread_join(Thread t){
 static Var _read_result(Thread t){
   if(! Var_is_void(t -> errors)){
     Var errors = Context_export_scope(t -> error_scope, t -> error_pool, t -> errors);
+    t -> errors =((void) 0, Void);
     {
-      static const X2CErrorSite _x2c_gensym_error_site_12 = {.file = "../../lib/thread.x",.function = "_read_result",.line = 495,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_12 = {.file = "../../lib/thread.x",.function = "_read_result",.line = 498,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_12, 23041356991064, 1, Symbol_var(374504614), errors);
       __builtin_unreachable();
     }
@@ -1075,7 +1076,7 @@ static void _finish_join(Thread thread){
 void Thread_free(Thread t){
   if(! _init_guard_) _file_init_();
   if(! t || __atomic_load_n(& t -> state, __ATOMIC_SEQ_CST) != 703164744){
-    static const X2CErrorSite _x2c_gensym_error_site_13 = {.file = "../../lib/thread.x",.function = "Thread_free",.line = 516,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_13 = {.file = "../../lib/thread.x",.function = "Thread_free",.line = 519,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_13, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Thread.free")), NULL))));
     __builtin_unreachable();
   }
@@ -1174,11 +1175,11 @@ void Thread_finish_all(Array pending){
   }
   if(! List_truth(failures)) return;
   if(unwinding){
-    fprintf(stderr, "Thread.finish_all: cleanup failed; %zu handle(s) remain.\n", Array_len(pending));
+    if(Array_len(pending)) fprintf(stderr, "Thread.finish_all: cleanup failed; %zu handle(s) remain.\n", Array_len(pending));
     return;
   }
   {
-    static const X2CErrorSite _x2c_gensym_error_site_14 = {.file = "../../lib/thread.x",.function = "Thread_finish_all",.line = 582,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_14 = {.file = "../../lib/thread.x",.function = "Thread_finish_all",.line = 587,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_14, 23041356991064, 1, Symbol_var(374504614), List_var(List_reverse(failures)));
     __builtin_unreachable();
   }
@@ -1334,7 +1335,7 @@ ParallelMap Iter_parallel_map(Iter i, ThreadValueFn function, int workers){
 ParallelMap Iter_parallel_map_in(Iter i, Pool pool, ThreadValueFn function, int workers){
   if(! _init_guard_) _file_init_();
   if(! pool){
-    static const X2CErrorSite _x2c_gensym_error_site_15 = {.file = "../../lib/thread.x",.function = "Iter_parallel_map_in",.line = 676,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_15 = {.file = "../../lib/thread.x",.function = "Iter_parallel_map_in",.line = 681,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_15, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Iter.parallel_map_in")), NULL))));
     __builtin_unreachable();
   }
@@ -1345,7 +1346,7 @@ static ParallelMap _parallel_map(Iter i, Pool pool, ThreadValueFn function, int 
   if(workers <= 0){
     String operation = pool ? _239 : _240;
     {
-      static const X2CErrorSite _x2c_gensym_error_site_16 = {.file = "../../lib/thread.x",.function = "_parallel_map",.line = 684,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_16 = {.file = "../../lib/thread.x",.function = "_parallel_map",.line = 689,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_16, 4372499598, 1, Symbol_var(34096809266140), String_var(operation));
       __builtin_unreachable();
     }
@@ -1395,7 +1396,7 @@ Var ParallelMap_foldl(ParallelMap map, Var seed, Func accumulate){
         Var item = _read_result(worker);
         active --;
         if(Var_is_void(item)){
-          static const X2CErrorSite _x2c_gensym_error_site_17 = {.file = "../../lib/thread.x",.function = "ParallelMap_foldl",.line = 733,.runtime = 1};
+          static const X2CErrorSite _x2c_gensym_error_site_17 = {.file = "../../lib/thread.x",.function = "ParallelMap_foldl",.line = 738,.runtime = 1};
           x2c_error_raise_n(& _x2c_gensym_error_site_17, 48270474208, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("ParallelMap.foldl")), NULL))));
           __builtin_unreachable();
         }
