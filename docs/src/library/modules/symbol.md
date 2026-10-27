@@ -48,7 +48,7 @@ Source: `lib/symbol.x:102`
 <a id="Symbol.try_new"></a>
 #### Symbol.try_new
 
-`meta native int Symbol.try_new(String spelling, Symbol *out)`
+`meta native int Symbol.try_new(String spelling, Symbol &?out)`
 
 Encodes `spelling` only when the `Symbol` preserves every byte.
 Returns 1 and writes `out` on success; returns 0 and leaves `out`
