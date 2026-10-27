@@ -5,39 +5,37 @@
 #include "datum-reader.h"
 #include <stdio.h>
 #include <stdlib.h>
-static List _50, _48, _43, _42, _40, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21;
+static List _47, _46, _45, _44, _43, _42, _41, _40, _39, _38, _16, _14, _9, _8, _6;
 
-static String _59, _58, _57, _56, _55, _54, _53, _52, _51, _46, _45, _44, _38, _36, _35, _34, _33, _32, _31, _19, _17, _15, _13, _11, _9, _7, _5, _3, _1, _0;
+static String _59, _58, _57, _56, _55, _54, _53, _52, _51, _50, _49, _48, _36, _34, _32, _30, _28, _26, _24, _22, _20, _18, _17, _12, _11, _10, _4, _2, _1, _0;
 
-static Var _49, _47, _41, _39, _37, _20, _18, _16, _14, _12, _10, _8, _6, _4, _2;
+static Var _37, _35, _33, _31, _29, _27, _25, _23, _21, _19, _15, _13, _7, _5, _3;
 
 static int _init_guard_ = 0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
-static int _tag_headed(List list);
-
 static int _write_list(Buffer out, List list, int tagged);
-
-static int _write_atom(Buffer out, Var value, int tagged);
-
-static void _write_number(Buffer out, Var value);
 
 static int _write_array(Buffer out, Array array);
 
 static int _write_map(Buffer out, Map map);
 
+static int _tag_headed(List list);
+
+static int _write_atom(Buffer out, Var value, int tagged);
+
+static void _write_number(Buffer out, Var value);
+
 static Var _decode(Var value);
 
 static List _decode_list(List list);
 
-static Var _decode_number(String tag, String text);
-
 static Map _decode_map(List entries);
 
-static List _items_problem(Var value, Map marks);
+static Var _decode_number(String tag, String text);
 
-static int _x2c_gensym_string_switch_0(String s);
+static List _items_problem(Var value, Map marks);
 
 typedef struct _x2c_gensym_defer_env_0{
   const void * _x2c_gensym_defer_capture_0;
@@ -45,6 +43,8 @@ typedef struct _x2c_gensym_defer_env_0{
 _x2c_gensym_defer_env_0;
 
 static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0);
+
+static int _x2c_gensym_string_switch_0(String s);
 
 static Var String_var(String);
 
@@ -61,57 +61,57 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
-  _0 = String_new("x2c.");
-  _1 = String_new("x2c.void");
-  _2 = String_var(_1);
-  _3 = String_new("x2c.null");
-  _4 = String_var(_3);
-  _5 = String_new("x2c.symbol0");
-  _6 = String_var(_5);
-  _7 = String_new("x2c.atom");
-  _8 = String_var(_7);
-  _9 = String_new("x2c.symbol");
-  _10 = String_var(_9);
-  _11 = String_new("x2c.number");
-  _12 = String_var(_11);
-  _13 = String_new("x2c.array");
-  _14 = String_var(_13);
-  _15 = String_new("x2c.map");
-  _16 = String_var(_15);
-  _17 = String_new("x2c.token");
-  _18 = String_var(_17);
-  _19 = String_new("x2c.quote");
-  _20 = String_var(_19);
-  _21 = cons(_20, NULL);
-  _22 = cons(_18, _21);
-  _23 = cons(_16, _22);
-  _24 = cons(_14, _23);
-  _25 = cons(_12, _24);
-  _26 = cons(_10, _25);
-  _27 = cons(_8, _26);
-  _28 = cons(_6, _27);
-  _29 = cons(_4, _28);
-  _30 = cons(_2, _29);
-  _31 = String_new("f");
-  _32 = String_new("ldouble");
-  _33 = String_new("u");
-  _34 = String_new("\n");
-  _35 = String_new("\n");
-  _36 = String_new("compile-time result is a compiler address");
+  _0 = String_new("\n");
+  _1 = String_new("\n");
+  _2 = String_new("compile-time result is a compiler address");
+  _3 = String_var(_2);
+  _4 = String_new("return data built from the pointed-to values instead");
+  _5 = String_var(_4);
+  _6 = cons(_5, NULL);
+  _7 = List_var(_6);
+  _8 = cons(_7, NULL);
+  _9 = cons(_3, _8);
+  _10 = String_new("compile-time result contains itself");
+  _11 = String_new("compile-time result holds one collection twice");
+  _12 = String_new("each Array and Map in a result is built separately");
+  _13 = String_var(_12);
+  _14 = cons(_13, NULL);
+  _15 = List_var(_14);
+  _16 = cons(_15, NULL);
+  _17 = String_new("x2c.");
+  _18 = String_new("x2c.void");
+  _19 = String_var(_18);
+  _20 = String_new("x2c.null");
+  _21 = String_var(_20);
+  _22 = String_new("x2c.symbol0");
+  _23 = String_var(_22);
+  _24 = String_new("x2c.atom");
+  _25 = String_var(_24);
+  _26 = String_new("x2c.symbol");
+  _27 = String_var(_26);
+  _28 = String_new("x2c.number");
+  _29 = String_var(_28);
+  _30 = String_new("x2c.array");
+  _31 = String_var(_30);
+  _32 = String_new("x2c.map");
+  _33 = String_var(_32);
+  _34 = String_new("x2c.token");
+  _35 = String_var(_34);
+  _36 = String_new("x2c.quote");
   _37 = String_var(_36);
-  _38 = String_new("return data built from the pointed-to values instead");
-  _39 = String_var(_38);
-  _40 = cons(_39, NULL);
-  _41 = List_var(_40);
-  _42 = cons(_41, NULL);
-  _43 = cons(_37, _42);
-  _44 = String_new("compile-time result contains itself");
-  _45 = String_new("compile-time result holds one collection twice");
-  _46 = String_new("each Array and Map in a result is built separately");
-  _47 = String_var(_46);
-  _48 = cons(_47, NULL);
-  _49 = List_var(_48);
-  _50 = cons(_49, NULL);
+  _38 = cons(_37, NULL);
+  _39 = cons(_35, _38);
+  _40 = cons(_33, _39);
+  _41 = cons(_31, _40);
+  _42 = cons(_29, _41);
+  _43 = cons(_27, _42);
+  _44 = cons(_25, _43);
+  _45 = cons(_23, _44);
+  _46 = cons(_21, _45);
+  _47 = cons(_19, _46);
+  _48 = String_new("f");
+  _49 = String_new("ldouble");
+  _50 = String_new("u");
   _51 = String_new("x2c.void");
   _52 = String_new("x2c.null");
   _53 = String_new("x2c.symbol0");
@@ -123,40 +123,63 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _59 = String_new("x2c.array");
 }
 
-static int List_truth(List);
+Buffer Buffer_new(size_t);
 
-static Var List_car(List);
+void x2c_cleanup_push(X2CCleanup *);
 
-int Var_is_atom(Var);
+int Buffer_write_datum(Buffer out, Var value, int tagged);
 
-String Var_str(Var);
+void x2c_cleanup_leave(X2CCleanup *);
 
-int String_startswith(String, String);
+Buffer Buffer_write(Buffer, const char *);
 
-static int List_try_next(List, List *, Var *);
+size_t Buffer_len(Buffer);
 
-String Var_as_string(Var);
+String Buffer_str(Buffer);
 
-int String_equal(String, String);
+String String_join(String, List);
 
-static int _tag_headed(List list){
-  if(! List_truth(list)) return 0;
-  Var head = List_car(list);
-  if(! Var_is_atom(head)) return 0;
-  String text = Var_str(head);
-  if(! String_startswith(text, _0)) return 0;
+int Buffer_write_datum_frame(Buffer out, Var value){
+  if(! _init_guard_) _file_init_();
+  Buffer body = Buffer_new(0);
+  const Buffer _x2c_gensym_macro_acquired_0 = body;
   {
-    String tag;
-    List _x2c_gensym_macro_object_0 = _30;
-    List _x2c_gensym_macro_cursor_0 = _x2c_gensym_macro_object_0;
-    Var _x2c_gensym_macro_cursor_output_0;
-    while(List_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_0), &(_x2c_gensym_macro_cursor_output_0))){
-      tag = Var_as_string(_x2c_gensym_macro_cursor_output_0);
-      if(String_equal(text, tag)) return 1;
+    _x2c_gensym_defer_env_0 _x2c_gensym_macro_environment_0 ={
+      0
     }
+    ;
+    _x2c_gensym_macro_environment_0._x2c_gensym_defer_capture_0 =(const void *) & _x2c_gensym_macro_acquired_0;
+    X2CCleanup _x2c_gensym_defer_record_0 ={
+      .fn = _x2c_gensym_defer_cleanup_0, .env = & _x2c_gensym_macro_environment_0
+    }
+    ;
+    x2c_cleanup_push(& _x2c_gensym_defer_record_0);
+    {
+      if(! Buffer_write_datum(body, value, 1)){
+        int _x2c_gensym_return_value_0 = 0;
+        {
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
+          return _x2c_gensym_return_value_0;
+        }
 
+      }
+      Buffer_write(out, ({
+        Var _x2c_gensym_literal_part_0 = String_var(Var_str(Var_box_ulong(Buffer_len(body))));  Var _x2c_gensym_literal_part_1 = String_var(Buffer_str(body));  String_join(NULL, cons(_x2c_gensym_literal_part_0, cons(String_var(_0), cons(_x2c_gensym_literal_part_1, NULL))));
+      }
+      ));
+      {
+        int _x2c_gensym_return_value_1 = 1;
+        {
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
+          return _x2c_gensym_return_value_1;
+        }
+
+      }
+
+    }
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
   }
-  return 0;
+
 }
 
 static int Var_is_row(Var, unsigned, unsigned long, unsigned long);
@@ -165,13 +188,13 @@ static List Var_list_payload(Var);
 
 int Var_is_null(Var);
 
-Buffer Buffer_write(Buffer, const char *);
-
 int Var_is_void(Var);
 
 int Var_is(Var, Symbol);
 
 static Symbol Var_symbol(Var);
+
+int Var_is_atom(Var);
 
 String Var_repr(Var);
 
@@ -207,7 +230,77 @@ int Buffer_write_datum(Buffer out, Var value, int tagged){
   return 1;
 }
 
+int String_find(String, String);
+
+int String_len(String);
+
+String String_new_len(const char *, int);
+
+int String_read_datum(String text, unsigned * cursor, Var * out);
+
+static Var Symbol_var(Symbol);
+
+#include "error.h"
+
+
+
+
+int String_read_datum_frame(String input, size_t * used, Var * value){
+  if(! _init_guard_) _file_init_();
+  int newline = String_find(input, _1);
+  if(newline <= 0) return 0;
+  size_t length = strtoul(input, NULL, 10);
+  if(String_len(input) < newline + 1 + length) return 0;
+  String frame = String_new_len(input + newline + 1, length);
+  unsigned cursor = 0;
+  (* value) =((void) 0, Void);
+  if(! String_read_datum(frame, &(cursor), &((* value)))){
+    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/datum.x",.function = "String_read_datum_frame",.line = 73,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_0, 28682226919752, 1, Symbol_var(13765450), String_var(frame));
+    __builtin_unreachable();
+  }
+  (* used) = newline + 1 + length;
+  return 1;
+}
+
+int String_read_datum(String text, unsigned * cursor, Var * out){
+  if(! _init_guard_) _file_init_();
+  Var value =((void) 0, Void);
+  if(String_read_lisp_form(text, &((* cursor)), &(value)) != 46228810) return 0;
+  (* out) = _decode(value);
+  return 1;
+}
+
+int Var_is_pointer(Var);
+
+int Map_contains(Map, Var);
+
+static Var ulong_var(ulong);
+
+Var Map_getindex(Map, Var);
+
+static Var int_var(int);
+
+Var Map_setindex(Map, Var, Var);
+
+static int List_truth(List);
+
+List Var_independent_data_problem(Var value, Map marks){
+  if(! _init_guard_) _file_init_();
+  if(Var_is_pointer(value) && value.u64) return _9;
+  if(Var_is_row(value, 9, 7, 4)) return _items_problem(value, marks);
+  if(! Var_is(value, 3313778) && ! Var_is(value, 26720)) return NULL;
+  ulong address =(ulong) value.u64;
+  if(Map_contains(marks, ulong_var(address))) return cons(String_var(x2c_var_equal(Map_getindex(marks, ulong_var(address)), int_var(1)) ? _10 : _11), _16);
+  Map_setindex(marks, ulong_var(address), int_var(1));
+  List problem = _items_problem(value, marks);
+  if(! List_truth(problem)) Map_setindex(marks, ulong_var(address), int_var(2));
+  return problem;
+}
+
 static List List_cdr(List);
+
+static Var List_car(List);
 
 Buffer Buffer_write_char(Buffer, char);
 
@@ -220,6 +313,87 @@ static int _write_list(Buffer out, List list, int tagged){
   }
   Buffer_write(out, quoted ? "))" : ")");
   return 1;
+}
+
+int Array_try_next(Array, int *, Var *);
+
+static int _write_array(Buffer out, Array array){
+  Buffer_write(out, "(x2c.array");
+  {
+    Var item;
+    Array _x2c_gensym_macro_object_0 = array;
+    int _x2c_gensym_macro_cursor_0 = 0;
+    Var _x2c_gensym_macro_cursor_output_0;
+    while(Array_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_0), &(_x2c_gensym_macro_cursor_output_0))){
+      item = _x2c_gensym_macro_cursor_output_0;
+      {
+        Buffer_write_char(out, ' ');
+        if(! Buffer_write_datum(out, item, 1)) return 0;
+      }
+
+    }
+
+  }
+  Buffer_write_char(out, ')');
+  return 1;
+}
+
+int Map_try_next(Map, unsigned *, Var *, Var *);
+
+static int _write_map(Buffer out, Map map){
+  Buffer_write(out, "(x2c.map");
+  {
+    Var key, item;
+    Map _x2c_gensym_macro_object_1 = map;
+    unsigned _x2c_gensym_macro_cursor_1 = 0;
+    Var _x2c_gensym_macro_cursor_output_1;
+    Var _x2c_gensym_macro_cursor_output_2;
+    while(Map_try_next(_x2c_gensym_macro_object_1, &(_x2c_gensym_macro_cursor_1), &(_x2c_gensym_macro_cursor_output_1), &(_x2c_gensym_macro_cursor_output_2))){
+      key = _x2c_gensym_macro_cursor_output_1;
+      item = _x2c_gensym_macro_cursor_output_2;
+      {
+        Buffer_write(out, " (");
+        if(! Buffer_write_datum(out, key, 1)) return 0;
+        Buffer_write_char(out, ' ');
+        if(! Buffer_write_datum(out, item, 1)) return 0;
+        Buffer_write_char(out, ')');
+      }
+
+    }
+
+  }
+  Buffer_write_char(out, ')');
+  return 1;
+}
+
+String Var_str(Var);
+
+int String_startswith(String, String);
+
+static int List_try_next(List, List *, Var *);
+
+String Var_as_string(Var);
+
+int String_equal(String, String);
+
+static int _tag_headed(List list){
+  if(! List_truth(list)) return 0;
+  Var head = List_car(list);
+  if(! Var_is_atom(head)) return 0;
+  String text = Var_str(head);
+  if(! String_startswith(text, _17)) return 0;
+  {
+    String tag;
+    List _x2c_gensym_macro_object_2 = _47;
+    List _x2c_gensym_macro_cursor_2 = _x2c_gensym_macro_object_2;
+    Var _x2c_gensym_macro_cursor_output_3;
+    while(List_try_next(_x2c_gensym_macro_object_2, &(_x2c_gensym_macro_cursor_2), &(_x2c_gensym_macro_cursor_output_3))){
+      tag = Var_as_string(_x2c_gensym_macro_cursor_output_3);
+      if(String_equal(text, tag)) return 1;
+    }
+
+  }
+  return 0;
 }
 
 int Atom_bare_spelling(String);
@@ -249,70 +423,9 @@ static void _write_number(Buffer out, Var value){
   Buffer_write(out, "\")");
 }
 
-int Array_try_next(Array, int *, Var *);
-
-static int _write_array(Buffer out, Array array){
-  Buffer_write(out, "(x2c.array");
-  {
-    Var item;
-    Array _x2c_gensym_macro_object_1 = array;
-    int _x2c_gensym_macro_cursor_1 = 0;
-    Var _x2c_gensym_macro_cursor_output_1;
-    while(Array_try_next(_x2c_gensym_macro_object_1, &(_x2c_gensym_macro_cursor_1), &(_x2c_gensym_macro_cursor_output_1))){
-      item = _x2c_gensym_macro_cursor_output_1;
-      {
-        Buffer_write_char(out, ' ');
-        if(! Buffer_write_datum(out, item, 1)) return 0;
-      }
-
-    }
-
-  }
-  Buffer_write_char(out, ')');
-  return 1;
-}
-
-int Map_try_next(Map, unsigned *, Var *, Var *);
-
-static int _write_map(Buffer out, Map map){
-  Buffer_write(out, "(x2c.map");
-  {
-    Var key, item;
-    Map _x2c_gensym_macro_object_2 = map;
-    unsigned _x2c_gensym_macro_cursor_2 = 0;
-    Var _x2c_gensym_macro_cursor_output_2;
-    Var _x2c_gensym_macro_cursor_output_3;
-    while(Map_try_next(_x2c_gensym_macro_object_2, &(_x2c_gensym_macro_cursor_2), &(_x2c_gensym_macro_cursor_output_2), &(_x2c_gensym_macro_cursor_output_3))){
-      key = _x2c_gensym_macro_cursor_output_2;
-      item = _x2c_gensym_macro_cursor_output_3;
-      {
-        Buffer_write(out, " (");
-        if(! Buffer_write_datum(out, key, 1)) return 0;
-        Buffer_write_char(out, ' ');
-        if(! Buffer_write_datum(out, item, 1)) return 0;
-        Buffer_write_char(out, ')');
-      }
-
-    }
-
-  }
-  Buffer_write_char(out, ')');
-  return 1;
-}
-
-int String_read_datum(String text, unsigned * cursor, Var * out){
-  if(! _init_guard_) _file_init_();
-  Var value =((void) 0, Void);
-  if(String_read_lisp_form(text, &((* cursor)), &(value)) != 46228810) return 0;
-  (* out) = _decode(value);
-  return 1;
-}
-
 int Var_is_nil(Var);
 
 Var Var_null(void);
-
-static Var Symbol_var(Symbol);
 
 Atom Atom_intern(String);
 
@@ -371,25 +484,7 @@ static List _decode_list(List list){
   return Array_list_free(items);
 }
 
-Var Var_convert(Var, Symbol);
-
-static Var _decode_number(String tag, String text){
-  Symbol target = Symbol_new(tag);
-  if(String_startswith(tag, _31) || String_equal(tag, _32)){
-    long double value = strtold(text, NULL);
-    return Var_convert(Var_box_long_double(value), target);
-  }
-  if(String_startswith(tag, _33)){
-    unsigned long long value = strtoull(text, NULL, 10);
-    return Var_convert(Var_box_ulong_long(value), target);
-  }
-  long long value = strtoll(text, NULL, 10);
-  return Var_convert(Var_box_long_long(value), target);
-}
-
 Map Map_new(void);
-
-Var Map_setindex(Map, Var, Var);
 
 static Map _decode_map(List entries){
   Map map = Map_new();
@@ -407,111 +502,20 @@ static Map _decode_map(List entries){
   return map;
 }
 
-Buffer Buffer_new(size_t);
+Var Var_convert(Var, Symbol);
 
-void x2c_cleanup_push(X2CCleanup *);
-
-void x2c_cleanup_leave(X2CCleanup *);
-
-size_t Buffer_len(Buffer);
-
-String Buffer_str(Buffer);
-
-String String_join(String, List);
-
-int Buffer_write_datum_frame(Buffer out, Var value){
-  if(! _init_guard_) _file_init_();
-  Buffer body = Buffer_new(0);
-  const Buffer _x2c_gensym_macro_acquired_0 = body;
-  {
-    _x2c_gensym_defer_env_0 _x2c_gensym_macro_environment_0 ={
-      0
-    }
-    ;
-    _x2c_gensym_macro_environment_0._x2c_gensym_defer_capture_0 =(const void *) & _x2c_gensym_macro_acquired_0;
-    X2CCleanup _x2c_gensym_defer_record_0 ={
-      .fn = _x2c_gensym_defer_cleanup_0, .env = & _x2c_gensym_macro_environment_0
-    }
-    ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_0);
-    {
-      if(! Buffer_write_datum(body, value, 1)){
-        int _x2c_gensym_return_value_0 = 0;
-        {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
-          return _x2c_gensym_return_value_0;
-        }
-
-      }
-      Buffer_write(out, ({
-        Var _x2c_gensym_literal_part_0 = String_var(Var_str(Var_box_ulong(Buffer_len(body))));  Var _x2c_gensym_literal_part_1 = String_var(Buffer_str(body));  String_join(NULL, cons(_x2c_gensym_literal_part_0, cons(String_var(_34), cons(_x2c_gensym_literal_part_1, NULL))));
-      }
-      ));
-      {
-        int _x2c_gensym_return_value_1 = 1;
-        {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
-          return _x2c_gensym_return_value_1;
-        }
-
-      }
-
-    }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
+static Var _decode_number(String tag, String text){
+  Symbol target = Symbol_new(tag);
+  if(String_startswith(tag, _48) || String_equal(tag, _49)){
+    long double value = strtold(text, NULL);
+    return Var_convert(Var_box_long_double(value), target);
   }
-
-}
-
-int String_find(String, String);
-
-int String_len(String);
-
-String String_new_len(const char *, int);
-
-#include "error.h"
-
-
-
-
-int String_read_datum_frame(String input, size_t * used, Var * value){
-  if(! _init_guard_) _file_init_();
-  int newline = String_find(input, _35);
-  if(newline <= 0) return 0;
-  size_t length = strtoul(input, NULL, 10);
-  if(String_len(input) < newline + 1 + length) return 0;
-  String frame = String_new_len(input + newline + 1, length);
-  unsigned cursor = 0;
-  (* value) =((void) 0, Void);
-  if(! String_read_datum(frame, &(cursor), &((* value)))){
-    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/datum.x",.function = "String_read_datum_frame",.line = 222,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_0, 28682226919752, 1, Symbol_var(13765450), String_var(frame));
-    __builtin_unreachable();
+  if(String_startswith(tag, _50)){
+    unsigned long long value = strtoull(text, NULL, 10);
+    return Var_convert(Var_box_ulong_long(value), target);
   }
-  (* used) = newline + 1 + length;
-  return 1;
-}
-
-int Var_is_pointer(Var);
-
-int Map_contains(Map, Var);
-
-static Var ulong_var(ulong);
-
-Var Map_getindex(Map, Var);
-
-static Var int_var(int);
-
-List Var_independent_data_problem(Var value, Map marks){
-  if(! _init_guard_) _file_init_();
-  if(Var_is_pointer(value) && value.u64) return _43;
-  if(Var_is_row(value, 9, 7, 4)) return _items_problem(value, marks);
-  if(! Var_is(value, 3313778) && ! Var_is(value, 26720)) return NULL;
-  ulong address =(ulong) value.u64;
-  if(Map_contains(marks, ulong_var(address))) return cons(String_var(x2c_var_equal(Map_getindex(marks, ulong_var(address)), int_var(1)) ? _44 : _45), _50);
-  Map_setindex(marks, ulong_var(address), int_var(1));
-  List problem = _items_problem(value, marks);
-  if(! List_truth(problem)) Map_setindex(marks, ulong_var(address), int_var(2));
-  return problem;
+  long long value = strtoll(text, NULL, 10);
+  return Var_convert(Var_box_long_long(value), target);
 }
 
 List Var_list(Var);
@@ -570,6 +574,13 @@ static List _items_problem(Var value, Map marks){
   return NULL;
 }
 
+void Buffer_cleanup(Buffer);
+
+static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0){
+  _x2c_gensym_defer_env_0 * _x2c_gensym_defer_data_0 =(_x2c_gensym_defer_env_0 *) _x2c_gensym_defer_opaque_0;
+  Buffer_cleanup((*(const Buffer *) _x2c_gensym_defer_data_0->_x2c_gensym_defer_capture_0));
+}
+
 static int _x2c_gensym_string_switch_0(String s){
   if(String_equal(s, _51)) return 1;
   if(String_equal(s, _52)) return 2;
@@ -581,12 +592,5 @@ static int _x2c_gensym_string_switch_0(String s){
   if(String_equal(s, _58)) return 8;
   if(String_equal(s, _59)) return 9;
   return 0;
-}
-
-void Buffer_cleanup(Buffer);
-
-static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0){
-  _x2c_gensym_defer_env_0 * _x2c_gensym_defer_data_0 =(_x2c_gensym_defer_env_0 *) _x2c_gensym_defer_opaque_0;
-  Buffer_cleanup((*(const Buffer *) _x2c_gensym_defer_data_0->_x2c_gensym_defer_capture_0));
 }
 

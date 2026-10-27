@@ -16,19 +16,19 @@
 #include "lambdas.h"
 #include <stdint.h>
 #include <string.h>
-List Compiler_parse_list_literal(Compiler c);
-
 List Compiler_parse_macro_pattern_arguments(Compiler c);
+
+List Compiler_parse_list_literal(Compiler c);
 
 List Compiler_try_parse_macro_pattern_insertion(Compiler c, int content);
 
 List Compiler_parse_evaluated_list(Compiler c);
 
-List Compiler_literal_cell(Compiler c, List head, List tail);
+List Compiler_typed_match_pattern(Compiler c, List pattern, List types);
 
 List Compiler_list_expression(Compiler c, Array elements, List tail);
 
-List Compiler_typed_match_pattern(Compiler c, List pattern, List types);
+List Compiler_literal_cell(Compiler c, List head, List tail);
 
 List Compiler_parse_raise_literal(Compiler c);
 

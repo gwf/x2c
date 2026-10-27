@@ -104,61 +104,7 @@ static String * _string_int_key(MapStringInt _x2c_gensym_macro_map_6, unsigned _
 
 static int * _string_int_value(MapStringInt _x2c_gensym_macro_map_7, unsigned _x2c_gensym_macro_index_7);
 
-static Var _box_int(int value);
-
-static Var _box_long(long value);
-
-static Var _box_double(double value);
-
-static Var _box_string(String value);
-
-static MapIntInt _prepare_int_export(MapIntInt map, Context source);
-
-static MapLongDouble _prepare_long_export(MapLongDouble map, Context source);
-
-static unsigned _hash_int(int * key);
-
-static unsigned _hash_long(long * key);
-
-static unsigned _hash_string(String * key);
-
-static int _equal_int(int * a, int * b);
-
-static int _equal_long(long * a, long * b);
-
-static int _equal_double(double * a, double * b);
-
-static int _equal_string(String * a, String * b);
-
-static int _compare_int(int a, int b);
-
-static int _compare_long(long a, long b);
-
-static int _compare_double(double a, double b);
-
-static int _compare_string(String a, String b);
-
-static void _valid_int(int * value);
-
-static void _valid_double(double * value);
-
-static void _valid_string(String * value);
-
-_Noreturn static void _bad_arg(String owner);
-
-_Noreturn static void _bad_op(Symbol op);
-
-static int _capacity_valid(unsigned capacity);
-
-_Noreturn static void _bad_shift(Symbol op, int count);
-
 static inline unsigned long long _integer_raw(Symbol _x2c_gensym_macro_op_0, unsigned long long _x2c_gensym_macro_a_0, unsigned long long _x2c_gensym_macro_b_0, int _x2c_gensym_macro_bits_0, int _x2c_gensym_macro_unsigned_value_0);
-
-static int _update_int(volatile int * slot, Symbol op, int rhs);
-
-static double _update_double(volatile double * slot, Symbol op, double rhs);
-
-static String _update_string(volatile String * slot, Symbol op, String rhs);
 
 static void MapIntInt_free_table(MapIntInt _x2c_gensym_macro_map_10);
 
@@ -294,8 +240,6 @@ static int MapStringString_compare_entries(MapStringString _x2c_gensym_macro_a_1
 
 static Buffer MapStringString_write_entries(MapStringString _x2c_gensym_macro_map_151, Buffer _x2c_gensym_macro_out_43, Symbol _x2c_gensym_macro_mode_2);
 
-static MapStringString _prepare_string_export(MapStringString map, Context source);
-
 static int _x2c_gensym_macro__step_2(Iter _x2c_gensym_macro_iter_8, String * _x2c_gensym_macro_key_95, String * _x2c_gensym_macro_val_35);
 
 static int _x2c_gensym_macro__next_2(Iter _x2c_gensym_macro_iter_9, Var * _x2c_gensym_macro_out_48);
@@ -344,8 +288,6 @@ static int MapStringInt_compare_entries(MapStringInt _x2c_gensym_macro_a_19, Map
 
 static Buffer MapStringInt_write_entries(MapStringInt _x2c_gensym_macro_map_203, Buffer _x2c_gensym_macro_out_60, Symbol _x2c_gensym_macro_mode_3);
 
-static MapStringInt _prepare_string_int_export(MapStringInt map, Context source);
-
 static int _x2c_gensym_macro__step_3(Iter _x2c_gensym_macro_iter_12, String * _x2c_gensym_macro_key_128, int * _x2c_gensym_macro_val_48);
 
 static int _x2c_gensym_macro__next_3(Iter _x2c_gensym_macro_iter_13, Var * _x2c_gensym_macro_out_65);
@@ -355,6 +297,64 @@ static int _x2c_gensym_macro__keys_next_3(Iter _x2c_gensym_macro_iter_14, Var * 
 static int _x2c_gensym_macro__enumerate_next_3(Iter _x2c_gensym_macro_iter_15, Var * _x2c_gensym_macro_out_67);
 
 static MapStringInt MapStringInt_export_context(MapStringInt _x2c_gensym_macro_map_210, Context _x2c_gensym_macro_source_3);
+
+_Noreturn static void _bad_arg(String owner);
+
+static int _update_int(volatile int * slot, Symbol op, int rhs);
+
+_Noreturn static void _bad_shift(Symbol op, int count);
+
+static Var _box_int(int value);
+
+static Var _box_long(long value);
+
+static Var _box_double(double value);
+
+static Var _box_string(String value);
+
+static MapIntInt _prepare_int_export(MapIntInt map, Context source);
+
+static MapLongDouble _prepare_long_export(MapLongDouble map, Context source);
+
+static unsigned _hash_int(int * key);
+
+static unsigned _hash_long(long * key);
+
+static unsigned _hash_string(String * key);
+
+static int _equal_int(int * a, int * b);
+
+static int _equal_long(long * a, long * b);
+
+static int _equal_double(double * a, double * b);
+
+static int _equal_string(String * a, String * b);
+
+static int _compare_int(int a, int b);
+
+static int _compare_long(long a, long b);
+
+static int _compare_double(double a, double b);
+
+static int _compare_string(String a, String b);
+
+static void _valid_int(int * value);
+
+static void _valid_double(double * value);
+
+static void _valid_string(String * value);
+
+static int _capacity_valid(unsigned capacity);
+
+static double _update_double(volatile double * slot, Symbol op, double rhs);
+
+static String _update_string(volatile String * slot, Symbol op, String rhs);
+
+_Noreturn static void _bad_op(Symbol op);
+
+static MapStringString _prepare_string_export(MapStringString map, Context source);
+
+static MapStringInt _prepare_string_int_export(MapStringInt map, Context source);
 
 static inline String _x2c_gensym_proto_mapintint_str_0(Var a0);
 
@@ -685,20 +685,20 @@ static void _x2c_gensym_defer_cleanup_26(void * _x2c_gensym_defer_opaque_26);
 
 typedef struct _x2c_gensym_defer_env_27{
   const void * _x2c_gensym_defer_capture_45;
-  const void * _x2c_gensym_defer_capture_46;
 }
 _x2c_gensym_defer_env_27;
 
 static void _x2c_gensym_defer_cleanup_27(void * _x2c_gensym_defer_opaque_27);
 
 typedef struct _x2c_gensym_defer_env_28{
-  const void * _x2c_gensym_defer_capture_47;
+  const void * _x2c_gensym_defer_capture_46;
 }
 _x2c_gensym_defer_env_28;
 
 static void _x2c_gensym_defer_cleanup_28(void * _x2c_gensym_defer_opaque_28);
 
 typedef struct _x2c_gensym_defer_env_29{
+  const void * _x2c_gensym_defer_capture_47;
   const void * _x2c_gensym_defer_capture_48;
 }
 _x2c_gensym_defer_env_29;
@@ -708,13 +708,13 @@ static void _x2c_gensym_defer_cleanup_29(void * _x2c_gensym_defer_opaque_29);
 typedef struct _x2c_gensym_defer_env_30{
   const void * _x2c_gensym_defer_capture_49;
   const void * _x2c_gensym_defer_capture_50;
+  const void * _x2c_gensym_defer_capture_51;
 }
 _x2c_gensym_defer_env_30;
 
 static void _x2c_gensym_defer_cleanup_30(void * _x2c_gensym_defer_opaque_30);
 
 typedef struct _x2c_gensym_defer_env_31{
-  const void * _x2c_gensym_defer_capture_51;
   const void * _x2c_gensym_defer_capture_52;
   const void * _x2c_gensym_defer_capture_53;
 }
@@ -724,20 +724,20 @@ static void _x2c_gensym_defer_cleanup_31(void * _x2c_gensym_defer_opaque_31);
 
 typedef struct _x2c_gensym_defer_env_32{
   const void * _x2c_gensym_defer_capture_54;
-  const void * _x2c_gensym_defer_capture_55;
 }
 _x2c_gensym_defer_env_32;
 
 static void _x2c_gensym_defer_cleanup_32(void * _x2c_gensym_defer_opaque_32);
 
 typedef struct _x2c_gensym_defer_env_33{
-  const void * _x2c_gensym_defer_capture_56;
+  const void * _x2c_gensym_defer_capture_55;
 }
 _x2c_gensym_defer_env_33;
 
 static void _x2c_gensym_defer_cleanup_33(void * _x2c_gensym_defer_opaque_33);
 
 typedef struct _x2c_gensym_defer_env_34{
+  const void * _x2c_gensym_defer_capture_56;
   const void * _x2c_gensym_defer_capture_57;
 }
 _x2c_gensym_defer_env_34;
@@ -963,136 +963,6 @@ static int * _string_int_value(MapStringInt _x2c_gensym_macro_map_7, unsigned _x
   return & _x2c_gensym_macro_records_7[_x2c_gensym_macro_index_7].val;
 }
 
-static Var _box_int(int value){
-  return int_var(value);
-}
-
-static Var long_var(long);
-
-static Var _box_long(long value){
-  return long_var(value);
-}
-
-static Var double_var(double);
-
-static Var _box_double(double value){
-  return double_var(value);
-}
-
-static Var _box_string(String value){
-  return String_var(value);
-}
-
-static MapIntInt _prepare_int_export(MapIntInt map, Context source){
-  (void) map;
-  (void) source;
-  return NULL;
-}
-
-static MapLongDouble _prepare_long_export(MapLongDouble map, Context source){
-  (void) map;
-  (void) source;
-  return NULL;
-}
-
-static unsigned x2c_hash_word(unsigned long);
-
-static unsigned _hash_int(int * key){
-  return x2c_hash_word((unsigned) key[0]);
-}
-
-static unsigned _hash_long(long * key){
-  return x2c_hash_word((unsigned long) key[0]);
-}
-
-unsigned String_hash(String);
-
-static unsigned _hash_string(String * key){
-  unsigned hash = String_hash(key[0]);
-  return hash ? hash : - 1;
-}
-
-static int _equal_int(int * a, int * b){
-  return a[0] == b[0];
-}
-
-static int _equal_long(long * a, long * b){
-  return a[0] == b[0];
-}
-
-static int _equal_double(double * a, double * b){
-  return a[0] == b[0];
-}
-
-int String_equal(String, String);
-
-static int _equal_string(String * a, String * b){
-  return String_equal(a[0], b[0]);
-}
-
-static int _compare_int(int a, int b){
-  return(a > b) -(a < b);
-}
-
-static int _compare_long(long a, long b){
-  return(a > b) -(a < b);
-}
-
-int Var_compare(Var, Var);
-
-static int _compare_double(double a, double b){
-  return Var_compare(double_var(a), double_var(b));
-}
-
-int String_compare(String, String);
-
-static int _compare_string(String a, String b){
-  return String_compare(a, b);
-}
-
-static void _valid_int(int * value){
-  (void) value;
-}
-
-static void _valid_double(double * value){
-  (void) value;
-}
-
-static void _valid_string(String * value){
-  (void) value;
-}
-
-_Noreturn static void _bad_arg(String owner){
-  {
-    static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/typed-map.x",.function = "_bad_arg",.line = 167,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_8, 4372499598, 1, Symbol_var(34096809266140), String_var(owner));
-    __builtin_unreachable();
-  }
-
-}
-
-_Noreturn static void _bad_op(Symbol op){
-  {
-    static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/typed-map.x",.function = "_bad_op",.line = 171,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_9, 136641504, 1, Symbol_var(992), Symbol_var(op));
-    __builtin_unreachable();
-  }
-
-}
-
-static int _capacity_valid(unsigned capacity){
-  return capacity >= 2 && !(capacity &(capacity - 1));
-}
-
-_Noreturn static void _bad_shift(Symbol op, int count){
-  {
-    static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../lib/typed-map.x",.function = "_bad_shift",.line = 178,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_10, 4477476686248, 3, Symbol_var(992), Symbol_var(op), Symbol_var(7318440), int_var(count), Symbol_var(48833808), int_var(32));
-    __builtin_unreachable();
-  }
-
-}
-
 unsigned long long Var_width_mask(int);
 
 long long Var_signed_from_bits(unsigned long long, int);
@@ -1113,8 +983,8 @@ static inline unsigned long long _integer_raw(Symbol _x2c_gensym_macro_op_0, uns
     case 189 : _x2c_gensym_macro_raw_0 = _x2c_gensym_macro_a_0 ^ _x2c_gensym_macro_b_0;
     break;
     case 95 : case 75 : if(! _x2c_gensym_macro_b_0){
-      static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../lib/typed-map.x",.function = "_integer_raw",.line = 181,.runtime = 1};
-      x2c_error_raise_n(& _x2c_gensym_error_site_11, 295748381854, 1, Symbol_var(992), Symbol_var(_x2c_gensym_macro_op_0));
+      static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/typed-map.x",.function = "_integer_raw",.line = 101,.runtime = 1};
+      x2c_error_raise_n(& _x2c_gensym_error_site_8, 295748381854, 1, Symbol_var(992), Symbol_var(_x2c_gensym_macro_op_0));
       __builtin_unreachable();
     }
     if(_x2c_gensym_macro_unsigned_value_0) _x2c_gensym_macro_raw_0 = _x2c_gensym_macro_op_0 == 95 ? _x2c_gensym_macro_a_0 / _x2c_gensym_macro_b_0 : _x2c_gensym_macro_a_0 % _x2c_gensym_macro_b_0;
@@ -1132,52 +1002,13 @@ static inline unsigned long long _integer_raw(Symbol _x2c_gensym_macro_op_0, uns
     if(! _x2c_gensym_macro_unsigned_value_0 && _x2c_gensym_macro_b_0 &&(_x2c_gensym_macro_a_0 &(1ull <<(_x2c_gensym_macro_bits_0 - 1)))) _x2c_gensym_macro_raw_0 |= _x2c_gensym_macro_mask_0 <<(_x2c_gensym_macro_bits_0 - _x2c_gensym_macro_b_0);
     break;
     default:{
-      static const X2CErrorSite _x2c_gensym_error_site_12 = {.file = "../../lib/typed-map.x",.function = "_integer_raw",.line = 181,.runtime = 1};
-      x2c_error_raise_n(& _x2c_gensym_error_site_12, 136641504, 1, Symbol_var(992), Symbol_var(_x2c_gensym_macro_op_0));
+      static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/typed-map.x",.function = "_integer_raw",.line = 101,.runtime = 1};
+      x2c_error_raise_n(& _x2c_gensym_error_site_9, 136641504, 1, Symbol_var(992), Symbol_var(_x2c_gensym_macro_op_0));
       __builtin_unreachable();
     }
 
   }
   return _x2c_gensym_macro_raw_0 & _x2c_gensym_macro_mask_0;
-}
-
-static int _update_int(volatile int * slot, Symbol op, int rhs){
-  int current = slot[0];
-  unsigned a, b, raw;
-  memcpy(& a, & current, sizeof a);
-  memcpy(& b, & rhs, sizeof b);
-  if((op == 15481 || op == 15997) &&(rhs < 0 || rhs >= 32)) _bad_shift(op, rhs);
-  raw = _integer_raw(op, a, b, 32, 0);
-  int result;
-  memcpy(& result, & raw, sizeof result);
-  slot[0] = result;
-  return result;
-}
-
-static double _update_double(volatile double * slot, Symbol op, double rhs){
-  double current = slot[0], result;
-  switch(op){
-    case 56 : result = current + rhs;
-    break;
-    case 62 : result = current - rhs;
-    break;
-    case 54 : result = current * rhs;
-    break;
-    case 95 : result = current / rhs;
-    break;
-    default: _bad_op(op);
-  }
-  slot[0] = result;
-  return result;
-}
-
-String String_add(String, String);
-
-static String _update_string(volatile String * slot, Symbol op, String rhs){
-  if(op != 56) _bad_op(op);
-  String current = slot[0], result = String_add(current, rhs);
-  slot[0] = result;
-  return result;
 }
 
 void Scope_destroy(Scope);
@@ -1284,8 +1115,8 @@ static void _x2c_gensym_macro__expand_0(MapIntInt _x2c_gensym_macro_map_16){
   struct MapIntIntRecord * _x2c_gensym_macro_entries_1 = _x2c_gensym_macro_map_16 -> entries;
   unsigned _x2c_gensym_macro_cap_2 = _x2c_gensym_macro_map_16 -> capacity;
   if(_x2c_gensym_macro_cap_2 > ~ 0u / 2){
-    static const X2CErrorSite _x2c_gensym_error_site_13 = {.file = "../../lib/typed-map.x",.function = "_x2c_gensym_macro__expand_0",.line = 221,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_13, 1358596898646632, 1, Symbol_var(1265290), unsigned_var(_x2c_gensym_macro_cap_2));
+    static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../lib/typed-map.x",.function = "_x2c_gensym_macro__expand_0",.line = 105,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_10, 1358596898646632, 1, Symbol_var(1265290), unsigned_var(_x2c_gensym_macro_cap_2));
     __builtin_unreachable();
   }
   unsigned _x2c_gensym_macro_capacity_9 = _x2c_gensym_macro_cap_2 * 2;
@@ -1567,8 +1398,8 @@ MapIntInt MapIntInt_new_capacity(unsigned _x2c_gensym_macro_capacity_10){
     if(0){
       Var _x2c_gensym_literal_part_8 = String_var(String_join(NULL, cons(String_var(String_new("Map.new_capacity")), NULL)));
       {
-        static const X2CErrorSite _x2c_gensym_error_site_14 = {.file = "../../lib/typed-map.x",.function = "MapIntInt_new_capacity",.line = 228,.runtime = 1};
-        x2c_error_raise_n(& _x2c_gensym_error_site_14, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_8, Symbol_var(209381969202), unsigned_var(_x2c_gensym_macro_capacity_10));
+        static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../lib/typed-map.x",.function = "MapIntInt_new_capacity",.line = 112,.runtime = 1};
+        x2c_error_raise_n(& _x2c_gensym_error_site_11, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_8, Symbol_var(209381969202), unsigned_var(_x2c_gensym_macro_capacity_10));
         __builtin_unreachable();
       }
 
@@ -1617,8 +1448,8 @@ int MapIntInt_setdefault(MapIntInt _x2c_gensym_macro_map_35, int _x2c_gensym_mac
   if(! _init_guard_) _file_init_();
   if((void *) _x2c_gensym_macro_map_35 == 0)(void) _bad_arg(_0);
   if(0 && Var_is_void(int_var(_x2c_gensym_macro_key_16))){
-    static const X2CErrorSite _x2c_gensym_error_site_15 = {.file = "../../lib/typed-map.x",.function = "MapIntInt_setdefault",.line = 228,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_15, 48270474208, 0);
+    static const X2CErrorSite _x2c_gensym_error_site_12 = {.file = "../../lib/typed-map.x",.function = "MapIntInt_setdefault",.line = 112,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_12, 48270474208, 0);
     __builtin_unreachable();
   }
   int _x2c_gensym_macro_inserted_2;
@@ -1634,8 +1465,8 @@ void MapIntInt_set(MapIntInt _x2c_gensym_macro_map_37, int _x2c_gensym_macro_key
   if(! _init_guard_) _file_init_();
   if((void *) _x2c_gensym_macro_map_37 == 0)(void) _bad_arg(_0);
   if(0 &&(Var_is_void(int_var(_x2c_gensym_macro_key_18)) || Var_is_void(int_var(_x2c_gensym_macro_val_5)))){
-    static const X2CErrorSite _x2c_gensym_error_site_16 = {.file = "../../lib/typed-map.x",.function = "MapIntInt_set",.line = 228,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_16, 48270474208, 0);
+    static const X2CErrorSite _x2c_gensym_error_site_13 = {.file = "../../lib/typed-map.x",.function = "MapIntInt_set",.line = 112,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_13, 48270474208, 0);
     __builtin_unreachable();
   }
   MapIntInt_set_entry(_x2c_gensym_macro_map_37, & _x2c_gensym_macro_key_18, & _x2c_gensym_macro_val_5);
@@ -2161,8 +1992,8 @@ static void _x2c_gensym_macro__expand_1(MapLongDouble _x2c_gensym_macro_map_68){
   struct MapLongDoubleRecord * _x2c_gensym_macro_entries_6 = _x2c_gensym_macro_map_68 -> entries;
   unsigned _x2c_gensym_macro_cap_6 = _x2c_gensym_macro_map_68 -> capacity;
   if(_x2c_gensym_macro_cap_6 > ~ 0u / 2){
-    static const X2CErrorSite _x2c_gensym_error_site_17 = {.file = "../../lib/typed-map.x",.function = "_x2c_gensym_macro__expand_1",.line = 241,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_17, 1358596898646632, 1, Symbol_var(1265290), unsigned_var(_x2c_gensym_macro_cap_6));
+    static const X2CErrorSite _x2c_gensym_error_site_14 = {.file = "../../lib/typed-map.x",.function = "_x2c_gensym_macro__expand_1",.line = 125,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_14, 1358596898646632, 1, Symbol_var(1265290), unsigned_var(_x2c_gensym_macro_cap_6));
     __builtin_unreachable();
   }
   unsigned _x2c_gensym_macro_capacity_12 = _x2c_gensym_macro_cap_6 * 2;
@@ -2432,8 +2263,8 @@ MapLongDouble MapLongDouble_new_capacity(unsigned _x2c_gensym_macro_capacity_13)
     if(0){
       Var _x2c_gensym_literal_part_9 = String_var(String_join(NULL, cons(String_var(String_new("Map.new_capacity")), NULL)));
       {
-        static const X2CErrorSite _x2c_gensym_error_site_18 = {.file = "../../lib/typed-map.x",.function = "MapLongDouble_new_capacity",.line = 248,.runtime = 1};
-        x2c_error_raise_n(& _x2c_gensym_error_site_18, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_9, Symbol_var(209381969202), unsigned_var(_x2c_gensym_macro_capacity_13));
+        static const X2CErrorSite _x2c_gensym_error_site_15 = {.file = "../../lib/typed-map.x",.function = "MapLongDouble_new_capacity",.line = 132,.runtime = 1};
+        x2c_error_raise_n(& _x2c_gensym_error_site_15, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_9, Symbol_var(209381969202), unsigned_var(_x2c_gensym_macro_capacity_13));
         __builtin_unreachable();
       }
 
@@ -2476,12 +2307,14 @@ double MapLongDouble_getdefault(MapLongDouble _x2c_gensym_macro_map_86, long _x2
   return MapLongDouble_try_get(_x2c_gensym_macro_map_86, _x2c_gensym_macro_key_48, &(_x2c_gensym_macro_out_23)) ? _x2c_gensym_macro_out_23 : _x2c_gensym_macro_defval_2;
 }
 
+static Var long_var(long);
+
 double MapLongDouble_setdefault(MapLongDouble _x2c_gensym_macro_map_87, long _x2c_gensym_macro_key_49, double _x2c_gensym_macro_defval_3){
   if(! _init_guard_) _file_init_();
   if((void *) _x2c_gensym_macro_map_87 == 0)(void) _bad_arg(_1);
   if(0 && Var_is_void(long_var(_x2c_gensym_macro_key_49))){
-    static const X2CErrorSite _x2c_gensym_error_site_19 = {.file = "../../lib/typed-map.x",.function = "MapLongDouble_setdefault",.line = 248,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_19, 48270474208, 0);
+    static const X2CErrorSite _x2c_gensym_error_site_16 = {.file = "../../lib/typed-map.x",.function = "MapLongDouble_setdefault",.line = 132,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_16, 48270474208, 0);
     __builtin_unreachable();
   }
   int _x2c_gensym_macro_inserted_6;
@@ -2493,12 +2326,14 @@ int MapLongDouble_contains(MapLongDouble _x2c_gensym_macro_map_88, long _x2c_gen
   return MapLongDouble_truth(_x2c_gensym_macro_map_88) && MapLongDouble_find_index(_x2c_gensym_macro_map_88, & _x2c_gensym_macro_key_50) >= 0;
 }
 
+static Var double_var(double);
+
 void MapLongDouble_set(MapLongDouble _x2c_gensym_macro_map_89, long _x2c_gensym_macro_key_51, double _x2c_gensym_macro_val_18){
   if(! _init_guard_) _file_init_();
   if((void *) _x2c_gensym_macro_map_89 == 0)(void) _bad_arg(_1);
   if(0 &&(Var_is_void(long_var(_x2c_gensym_macro_key_51)) || Var_is_void(double_var(_x2c_gensym_macro_val_18)))){
-    static const X2CErrorSite _x2c_gensym_error_site_20 = {.file = "../../lib/typed-map.x",.function = "MapLongDouble_set",.line = 248,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_20, 48270474208, 0);
+    static const X2CErrorSite _x2c_gensym_error_site_17 = {.file = "../../lib/typed-map.x",.function = "MapLongDouble_set",.line = 132,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_17, 48270474208, 0);
     __builtin_unreachable();
   }
   MapLongDouble_set_entry(_x2c_gensym_macro_map_89, & _x2c_gensym_macro_key_51, & _x2c_gensym_macro_val_18);
@@ -2990,8 +2825,8 @@ static void _x2c_gensym_macro__expand_2(MapStringString _x2c_gensym_macro_map_12
   struct MapStringStringRecord * _x2c_gensym_macro_entries_11 = _x2c_gensym_macro_map_120 -> entries;
   unsigned _x2c_gensym_macro_cap_10 = _x2c_gensym_macro_map_120 -> capacity;
   if(_x2c_gensym_macro_cap_10 > ~ 0u / 2){
-    static const X2CErrorSite _x2c_gensym_error_site_21 = {.file = "../../lib/typed-map.x",.function = "_x2c_gensym_macro__expand_2",.line = 262,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_21, 1358596898646632, 1, Symbol_var(1265290), unsigned_var(_x2c_gensym_macro_cap_10));
+    static const X2CErrorSite _x2c_gensym_error_site_18 = {.file = "../../lib/typed-map.x",.function = "_x2c_gensym_macro__expand_2",.line = 146,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_18, 1358596898646632, 1, Symbol_var(1265290), unsigned_var(_x2c_gensym_macro_cap_10));
     __builtin_unreachable();
   }
   unsigned _x2c_gensym_macro_capacity_15 = _x2c_gensym_macro_cap_10 * 2;
@@ -3261,8 +3096,8 @@ MapStringString MapStringString_new_capacity(unsigned _x2c_gensym_macro_capacity
     if(0){
       Var _x2c_gensym_literal_part_10 = String_var(String_join(NULL, cons(String_var(String_new("Map.new_capacity")), NULL)));
       {
-        static const X2CErrorSite _x2c_gensym_error_site_22 = {.file = "../../lib/typed-map.x",.function = "MapStringString_new_capacity",.line = 269,.runtime = 1};
-        x2c_error_raise_n(& _x2c_gensym_error_site_22, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_10, Symbol_var(209381969202), unsigned_var(_x2c_gensym_macro_capacity_16));
+        static const X2CErrorSite _x2c_gensym_error_site_19 = {.file = "../../lib/typed-map.x",.function = "MapStringString_new_capacity",.line = 153,.runtime = 1};
+        x2c_error_raise_n(& _x2c_gensym_error_site_19, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_10, Symbol_var(209381969202), unsigned_var(_x2c_gensym_macro_capacity_16));
         __builtin_unreachable();
       }
 
@@ -3309,8 +3144,8 @@ String MapStringString_setdefault(MapStringString _x2c_gensym_macro_map_139, Str
   if(! _init_guard_) _file_init_();
   if((void *) _x2c_gensym_macro_map_139 == 0)(void) _bad_arg(_2);
   if(0 && Var_is_void(String_var(_x2c_gensym_macro_key_82))){
-    static const X2CErrorSite _x2c_gensym_error_site_23 = {.file = "../../lib/typed-map.x",.function = "MapStringString_setdefault",.line = 269,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_23, 48270474208, 0);
+    static const X2CErrorSite _x2c_gensym_error_site_20 = {.file = "../../lib/typed-map.x",.function = "MapStringString_setdefault",.line = 153,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_20, 48270474208, 0);
     __builtin_unreachable();
   }
   int _x2c_gensym_macro_inserted_10;
@@ -3326,8 +3161,8 @@ void MapStringString_set(MapStringString _x2c_gensym_macro_map_141, String _x2c_
   if(! _init_guard_) _file_init_();
   if((void *) _x2c_gensym_macro_map_141 == 0)(void) _bad_arg(_2);
   if(0 &&(Var_is_void(String_var(_x2c_gensym_macro_key_84)) || Var_is_void(String_var(_x2c_gensym_macro_val_31)))){
-    static const X2CErrorSite _x2c_gensym_error_site_24 = {.file = "../../lib/typed-map.x",.function = "MapStringString_set",.line = 269,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_24, 48270474208, 0);
+    static const X2CErrorSite _x2c_gensym_error_site_21 = {.file = "../../lib/typed-map.x",.function = "MapStringString_set",.line = 153,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_21, 48270474208, 0);
     __builtin_unreachable();
   }
   MapStringString_set_entry(_x2c_gensym_macro_map_141, & _x2c_gensym_macro_key_84, & _x2c_gensym_macro_val_31);
@@ -3625,60 +3460,6 @@ Map MapStringString_map(MapStringString _x2c_gensym_macro_map_156){
 
 }
 
-Var Context_export_nested(Context, Var);
-
-static MapStringString _prepare_string_export(MapStringString map, Context source){
-  MapStringString staged = MapStringString_new_capacity(map -> capacity);
-  MapStringString result = NULL;
-  {
-    _x2c_gensym_defer_env_26 _x2c_gensym_macro_environment_26 ={
-      0
-    }
-    ;
-    _x2c_gensym_macro_environment_26._x2c_gensym_defer_capture_43 =(const void *) & result;
-    _x2c_gensym_macro_environment_26._x2c_gensym_defer_capture_44 =(const void *) & staged;
-    X2CCleanup _x2c_gensym_defer_record_26 ={
-      .fn = _x2c_gensym_defer_cleanup_26, .env = & _x2c_gensym_macro_environment_26
-    }
-    ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_26);
-    {
-      {
-        String key, value;
-        MapStringString _x2c_gensym_macro_object_0 = map;
-        unsigned _x2c_gensym_macro_cursor_40 = 0;
-        String _x2c_gensym_macro_cursor_output_0;
-        String _x2c_gensym_macro_cursor_output_1;
-        while(MapStringString_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_40), &(_x2c_gensym_macro_cursor_output_0), &(_x2c_gensym_macro_cursor_output_1))){
-          key = _x2c_gensym_macro_cursor_output_0;
-          value = _x2c_gensym_macro_cursor_output_1;
-          {
-            key = Var_as_string(Context_export_nested(source, String_var(key)));
-            value = Var_as_string(Context_export_nested(source, String_var(value)));
-            ({
-              MapStringString _x2c_gensym_protocol_arg_9 = staged;  String _x2c_gensym_protocol_arg_10 = key;  String _x2c_gensym_protocol_arg_11 = value;  MapStringString_setindex(_x2c_gensym_protocol_arg_9, _x2c_gensym_protocol_arg_10, _x2c_gensym_protocol_arg_11);
-            }
-            );
-          }
-
-        }
-
-      }
-      {
-        MapStringString _x2c_gensym_return_value_23 = result = staged;
-        {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_26);
-          return _x2c_gensym_return_value_23;
-        }
-
-      }
-
-    }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_26);
-  }
-
-}
-
 Var MapStringString_var(MapStringString _x2c_gensym_macro_map_157){
   return Var_new(918134391927270, _x2c_gensym_macro_map_157);
 }
@@ -3739,17 +3520,17 @@ static MapStringString MapStringString_export_context(MapStringString _x2c_gensy
   if((void *) _x2c_gensym_macro_map_158 == 0 || ! Context_owns(_x2c_gensym_macro_source_2, _x2c_gensym_macro_map_158)) return _x2c_gensym_macro_map_158;
   MapStringString _x2c_gensym_macro_staged_2 = _prepare_string_export(_x2c_gensym_macro_map_158, _x2c_gensym_macro_source_2), _x2c_gensym_macro_committed_2 = NULL;
   {
-    _x2c_gensym_defer_env_27 _x2c_gensym_macro_environment_27 ={
+    _x2c_gensym_defer_env_26 _x2c_gensym_macro_environment_26 ={
       0
     }
     ;
-    _x2c_gensym_macro_environment_27._x2c_gensym_defer_capture_45 =(const void *) & _x2c_gensym_macro_staged_2;
-    _x2c_gensym_macro_environment_27._x2c_gensym_defer_capture_46 =(const void *) & _x2c_gensym_macro_committed_2;
-    X2CCleanup _x2c_gensym_defer_record_27 ={
-      .fn = _x2c_gensym_defer_cleanup_27, .env = & _x2c_gensym_macro_environment_27
+    _x2c_gensym_macro_environment_26._x2c_gensym_defer_capture_43 =(const void *) & _x2c_gensym_macro_staged_2;
+    _x2c_gensym_macro_environment_26._x2c_gensym_defer_capture_44 =(const void *) & _x2c_gensym_macro_committed_2;
+    X2CCleanup _x2c_gensym_defer_record_26 ={
+      .fn = _x2c_gensym_defer_cleanup_26, .env = & _x2c_gensym_macro_environment_26
     }
     ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_27);
+    x2c_cleanup_push(& _x2c_gensym_defer_record_26);
     {
       if((void *) _x2c_gensym_macro_staged_2 != 0){
         Bytes _x2c_gensym_macro_old_hashes_2 = _x2c_gensym_macro_map_158 -> hashes, _x2c_gensym_macro_old_entries_2 = _x2c_gensym_macro_map_158 -> entries;
@@ -3773,16 +3554,16 @@ static MapStringString MapStringString_export_context(MapStringString _x2c_gensy
       Context_move_scope(_x2c_gensym_macro_source_2, _x2c_gensym_macro_map_158 -> scope);
       _x2c_gensym_macro_committed_2 = _x2c_gensym_macro_map_158;
       {
-        MapStringString _x2c_gensym_return_value_24 = _x2c_gensym_macro_map_158;
+        MapStringString _x2c_gensym_return_value_23 = _x2c_gensym_macro_map_158;
         {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_27);
-          return _x2c_gensym_return_value_24;
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_26);
+          return _x2c_gensym_return_value_23;
         }
 
       }
 
     }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_27);
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_26);
   }
 
 }
@@ -3875,37 +3656,37 @@ static void _x2c_gensym_macro__expand_3(MapStringInt _x2c_gensym_macro_map_172){
   struct MapStringIntRecord * _x2c_gensym_macro_entries_16 = _x2c_gensym_macro_map_172 -> entries;
   unsigned _x2c_gensym_macro_cap_14 = _x2c_gensym_macro_map_172 -> capacity;
   if(_x2c_gensym_macro_cap_14 > ~ 0u / 2){
-    static const X2CErrorSite _x2c_gensym_error_site_25 = {.file = "../../lib/typed-map.x",.function = "_x2c_gensym_macro__expand_3",.line = 300,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_25, 1358596898646632, 1, Symbol_var(1265290), unsigned_var(_x2c_gensym_macro_cap_14));
+    static const X2CErrorSite _x2c_gensym_error_site_22 = {.file = "../../lib/typed-map.x",.function = "_x2c_gensym_macro__expand_3",.line = 169,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_22, 1358596898646632, 1, Symbol_var(1265290), unsigned_var(_x2c_gensym_macro_cap_14));
     __builtin_unreachable();
   }
   unsigned _x2c_gensym_macro_capacity_18 = _x2c_gensym_macro_cap_14 * 2;
   Bytes _x2c_gensym_macro_staged_hashes_3 = Bytes_new(sizeof(unsigned));
   {
-    _x2c_gensym_defer_env_29 _x2c_gensym_macro_environment_29 ={
+    _x2c_gensym_defer_env_28 _x2c_gensym_macro_environment_28 ={
       0
     }
     ;
-    _x2c_gensym_macro_environment_29._x2c_gensym_defer_capture_48 =(const void *) & _x2c_gensym_macro_staged_hashes_3;
-    X2CCleanup _x2c_gensym_defer_record_28 ={
-      .fn = _x2c_gensym_defer_cleanup_29, .env = & _x2c_gensym_macro_environment_29
+    _x2c_gensym_macro_environment_28._x2c_gensym_defer_capture_46 =(const void *) & _x2c_gensym_macro_staged_hashes_3;
+    X2CCleanup _x2c_gensym_defer_record_27 ={
+      .fn = _x2c_gensym_defer_cleanup_28, .env = & _x2c_gensym_macro_environment_28
     }
     ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_28);
+    x2c_cleanup_push(& _x2c_gensym_defer_record_27);
     {
       _x2c_gensym_macro_staged_hashes_3 = Bytes_append(_x2c_gensym_macro_staged_hashes_3, 0, _x2c_gensym_macro_capacity_18);
       Bytes _x2c_gensym_macro_staged_entries_3 = Bytes_new(sizeof(struct MapStringIntRecord));
       {
-        _x2c_gensym_defer_env_28 _x2c_gensym_macro_environment_28 ={
+        _x2c_gensym_defer_env_27 _x2c_gensym_macro_environment_27 ={
           0
         }
         ;
-        _x2c_gensym_macro_environment_28._x2c_gensym_defer_capture_47 =(const void *) & _x2c_gensym_macro_staged_entries_3;
-        X2CCleanup _x2c_gensym_defer_record_29 ={
-          .fn = _x2c_gensym_defer_cleanup_28, .env = & _x2c_gensym_macro_environment_28
+        _x2c_gensym_macro_environment_27._x2c_gensym_defer_capture_45 =(const void *) & _x2c_gensym_macro_staged_entries_3;
+        X2CCleanup _x2c_gensym_defer_record_28 ={
+          .fn = _x2c_gensym_defer_cleanup_27, .env = & _x2c_gensym_macro_environment_27
         }
         ;
-        x2c_cleanup_push(& _x2c_gensym_defer_record_29);
+        x2c_cleanup_push(& _x2c_gensym_defer_record_28);
         {
           _x2c_gensym_macro_staged_entries_3 = Bytes_append(_x2c_gensym_macro_staged_entries_3, 0, _x2c_gensym_macro_capacity_18);
           struct MapStringInt _x2c_gensym_macro_expanded_3 = * _x2c_gensym_macro_map_172;
@@ -3928,11 +3709,11 @@ static void _x2c_gensym_macro__expand_3(MapStringInt _x2c_gensym_macro_map_172){
           Bytes_free((Bytes) _x2c_gensym_macro_hashes_20);
           Bytes_free((Bytes) _x2c_gensym_macro_entries_16);
         }
-        x2c_cleanup_leave(& _x2c_gensym_defer_record_29);
+        x2c_cleanup_leave(& _x2c_gensym_defer_record_28);
       }
 
     }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_28);
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_27);
   }
 
 }
@@ -4040,30 +3821,30 @@ static void _x2c_gensym_macro__insert_all_3(MapStringInt _x2c_gensym_macro_map_1
 static MapStringInt MapStringInt_copy_entries(MapStringInt _x2c_gensym_macro_map_178){
   MapStringInt _x2c_gensym_macro_copy_3 = MapStringInt_new_table(_x2c_gensym_macro_map_178, 2), _x2c_gensym_macro_result_6 = 0;
   {
-    _x2c_gensym_defer_env_30 _x2c_gensym_macro_environment_30 ={
+    _x2c_gensym_defer_env_29 _x2c_gensym_macro_environment_29 ={
       0
     }
     ;
-    _x2c_gensym_macro_environment_30._x2c_gensym_defer_capture_49 =(const void *) & _x2c_gensym_macro_result_6;
-    _x2c_gensym_macro_environment_30._x2c_gensym_defer_capture_50 =(const void *) & _x2c_gensym_macro_copy_3;
-    X2CCleanup _x2c_gensym_defer_record_30 ={
-      .fn = _x2c_gensym_defer_cleanup_30, .env = & _x2c_gensym_macro_environment_30
+    _x2c_gensym_macro_environment_29._x2c_gensym_defer_capture_47 =(const void *) & _x2c_gensym_macro_result_6;
+    _x2c_gensym_macro_environment_29._x2c_gensym_defer_capture_48 =(const void *) & _x2c_gensym_macro_copy_3;
+    X2CCleanup _x2c_gensym_defer_record_29 ={
+      .fn = _x2c_gensym_defer_cleanup_29, .env = & _x2c_gensym_macro_environment_29
     }
     ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_30);
+    x2c_cleanup_push(& _x2c_gensym_defer_record_29);
     {
       _x2c_gensym_macro__insert_all_3(_x2c_gensym_macro_copy_3, _x2c_gensym_macro_map_178);
       {
-        MapStringInt _x2c_gensym_return_value_25 = _x2c_gensym_macro_result_6 = _x2c_gensym_macro_copy_3;
+        MapStringInt _x2c_gensym_return_value_24 = _x2c_gensym_macro_result_6 = _x2c_gensym_macro_copy_3;
         {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_30);
-          return _x2c_gensym_return_value_25;
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_29);
+          return _x2c_gensym_return_value_24;
         }
 
       }
 
     }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_30);
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_29);
   }
 
 }
@@ -4079,31 +3860,31 @@ static MapStringInt MapStringInt_merge_entries(MapStringInt _x2c_gensym_macro_ma
   }
   MapStringInt _x2c_gensym_macro_result_7 = 0;
   {
-    _x2c_gensym_defer_env_31 _x2c_gensym_macro_environment_31 ={
+    _x2c_gensym_defer_env_30 _x2c_gensym_macro_environment_30 ={
       0
     }
     ;
-    _x2c_gensym_macro_environment_31._x2c_gensym_defer_capture_51 =(const void *) & _x2c_gensym_macro_created_3;
-    _x2c_gensym_macro_environment_31._x2c_gensym_defer_capture_52 =(const void *) & _x2c_gensym_macro_result_7;
-    _x2c_gensym_macro_environment_31._x2c_gensym_defer_capture_53 =(const void *) & _x2c_gensym_macro_map_179;
-    X2CCleanup _x2c_gensym_defer_record_31 ={
-      .fn = _x2c_gensym_defer_cleanup_31, .env = & _x2c_gensym_macro_environment_31
+    _x2c_gensym_macro_environment_30._x2c_gensym_defer_capture_49 =(const void *) & _x2c_gensym_macro_created_3;
+    _x2c_gensym_macro_environment_30._x2c_gensym_defer_capture_50 =(const void *) & _x2c_gensym_macro_result_7;
+    _x2c_gensym_macro_environment_30._x2c_gensym_defer_capture_51 =(const void *) & _x2c_gensym_macro_map_179;
+    X2CCleanup _x2c_gensym_defer_record_30 ={
+      .fn = _x2c_gensym_defer_cleanup_30, .env = & _x2c_gensym_macro_environment_30
     }
     ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_31);
+    x2c_cleanup_push(& _x2c_gensym_defer_record_30);
     {
       _x2c_gensym_macro__insert_all_3(_x2c_gensym_macro_map_179, _x2c_gensym_macro_other_10);
       {
-        MapStringInt _x2c_gensym_return_value_26 = _x2c_gensym_macro_result_7 = _x2c_gensym_macro_map_179;
+        MapStringInt _x2c_gensym_return_value_25 = _x2c_gensym_macro_result_7 = _x2c_gensym_macro_map_179;
         {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_31);
-          return _x2c_gensym_return_value_26;
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_30);
+          return _x2c_gensym_return_value_25;
         }
 
       }
 
     }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_31);
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_30);
   }
 
 }
@@ -4146,8 +3927,8 @@ MapStringInt MapStringInt_new_capacity(unsigned _x2c_gensym_macro_capacity_19){
     if(0){
       Var _x2c_gensym_literal_part_11 = String_var(String_join(NULL, cons(String_var(String_new("Map.new_capacity")), NULL)));
       {
-        static const X2CErrorSite _x2c_gensym_error_site_26 = {.file = "../../lib/typed-map.x",.function = "MapStringInt_new_capacity",.line = 307,.runtime = 1};
-        x2c_error_raise_n(& _x2c_gensym_error_site_26, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_11, Symbol_var(209381969202), unsigned_var(_x2c_gensym_macro_capacity_19));
+        static const X2CErrorSite _x2c_gensym_error_site_23 = {.file = "../../lib/typed-map.x",.function = "MapStringInt_new_capacity",.line = 176,.runtime = 1};
+        x2c_error_raise_n(& _x2c_gensym_error_site_23, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_11, Symbol_var(209381969202), unsigned_var(_x2c_gensym_macro_capacity_19));
         __builtin_unreachable();
       }
 
@@ -4194,8 +3975,8 @@ int MapStringInt_setdefault(MapStringInt _x2c_gensym_macro_map_191, String _x2c_
   if(! _init_guard_) _file_init_();
   if((void *) _x2c_gensym_macro_map_191 == 0)(void) _bad_arg(_4);
   if(0 && Var_is_void(String_var(_x2c_gensym_macro_key_115))){
-    static const X2CErrorSite _x2c_gensym_error_site_27 = {.file = "../../lib/typed-map.x",.function = "MapStringInt_setdefault",.line = 307,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_27, 48270474208, 0);
+    static const X2CErrorSite _x2c_gensym_error_site_24 = {.file = "../../lib/typed-map.x",.function = "MapStringInt_setdefault",.line = 176,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_24, 48270474208, 0);
     __builtin_unreachable();
   }
   int _x2c_gensym_macro_inserted_14;
@@ -4211,8 +3992,8 @@ void MapStringInt_set(MapStringInt _x2c_gensym_macro_map_193, String _x2c_gensym
   if(! _init_guard_) _file_init_();
   if((void *) _x2c_gensym_macro_map_193 == 0)(void) _bad_arg(_4);
   if(0 &&(Var_is_void(String_var(_x2c_gensym_macro_key_117)) || Var_is_void(int_var(_x2c_gensym_macro_val_44)))){
-    static const X2CErrorSite _x2c_gensym_error_site_28 = {.file = "../../lib/typed-map.x",.function = "MapStringInt_set",.line = 307,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_28, 48270474208, 0);
+    static const X2CErrorSite _x2c_gensym_error_site_25 = {.file = "../../lib/typed-map.x",.function = "MapStringInt_set",.line = 176,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_25, 48270474208, 0);
     __builtin_unreachable();
   }
   MapStringInt_set_entry(_x2c_gensym_macro_map_193, & _x2c_gensym_macro_key_117, & _x2c_gensym_macro_val_44);
@@ -4292,36 +4073,36 @@ MapStringInt Map_mapstringint(Map _x2c_gensym_macro_entries_19){
   _x2c_gensym_macro_packed_3 = MapStringInt_new_table(_x2c_gensym_macro_packed_3, 2);
   MapStringInt _x2c_gensym_macro_finished_6 = 0;
   {
-    _x2c_gensym_defer_env_32 _x2c_gensym_macro_environment_32 ={
+    _x2c_gensym_defer_env_31 _x2c_gensym_macro_environment_31 ={
       0
     }
     ;
-    _x2c_gensym_macro_environment_32._x2c_gensym_defer_capture_54 =(const void *) & _x2c_gensym_macro_finished_6;
-    _x2c_gensym_macro_environment_32._x2c_gensym_defer_capture_55 =(const void *) & _x2c_gensym_macro_packed_3;
-    X2CCleanup _x2c_gensym_defer_record_32 ={
-      .fn = _x2c_gensym_defer_cleanup_32, .env = & _x2c_gensym_macro_environment_32
+    _x2c_gensym_macro_environment_31._x2c_gensym_defer_capture_52 =(const void *) & _x2c_gensym_macro_finished_6;
+    _x2c_gensym_macro_environment_31._x2c_gensym_defer_capture_53 =(const void *) & _x2c_gensym_macro_packed_3;
+    X2CCleanup _x2c_gensym_defer_record_31 ={
+      .fn = _x2c_gensym_defer_cleanup_31, .env = & _x2c_gensym_macro_environment_31
     }
     ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_32);
+    x2c_cleanup_push(& _x2c_gensym_defer_record_31);
     {
       unsigned _x2c_gensym_macro_cursor_35 = 0;
       Var _x2c_gensym_macro_key_124, _x2c_gensym_macro_val_47;
       while(Map_try_next(_x2c_gensym_macro_entries_19, &(_x2c_gensym_macro_cursor_35), &(_x2c_gensym_macro_key_124), &(_x2c_gensym_macro_val_47)))({
-        MapStringInt _x2c_gensym_protocol_arg_12 = _x2c_gensym_macro_packed_3;  String _x2c_gensym_protocol_arg_13 = Var_as_string(_x2c_gensym_macro_key_124);  int _x2c_gensym_protocol_arg_14 = Var_int(Var_convert(_x2c_gensym_macro_val_47, 3453797));  MapStringInt_setindex(_x2c_gensym_protocol_arg_12, _x2c_gensym_protocol_arg_13, _x2c_gensym_protocol_arg_14);
+        MapStringInt _x2c_gensym_protocol_arg_9 = _x2c_gensym_macro_packed_3;  String _x2c_gensym_protocol_arg_10 = Var_as_string(_x2c_gensym_macro_key_124);  int _x2c_gensym_protocol_arg_11 = Var_int(Var_convert(_x2c_gensym_macro_val_47, 3453797));  MapStringInt_setindex(_x2c_gensym_protocol_arg_9, _x2c_gensym_protocol_arg_10, _x2c_gensym_protocol_arg_11);
       }
       );
       _x2c_gensym_macro_finished_6 = _x2c_gensym_macro_packed_3;
       {
-        MapStringInt _x2c_gensym_return_value_27 = _x2c_gensym_macro_packed_3;
+        MapStringInt _x2c_gensym_return_value_26 = _x2c_gensym_macro_packed_3;
         {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_32);
-          return _x2c_gensym_return_value_27;
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_31);
+          return _x2c_gensym_return_value_26;
         }
 
       }
 
     }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_32);
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_31);
   }
 
 }
@@ -4342,16 +4123,16 @@ static int MapStringInt_compare_entries(MapStringInt _x2c_gensym_macro_a_19, Map
   Scope _x2c_gensym_macro_scratch_3 = Scope_new();
   const Scope _x2c_gensym_macro_acquired_3 = _x2c_gensym_macro_scratch_3;
   {
-    _x2c_gensym_defer_env_33 _x2c_gensym_macro_environment_33 ={
+    _x2c_gensym_defer_env_32 _x2c_gensym_macro_environment_32 ={
       0
     }
     ;
-    _x2c_gensym_macro_environment_33._x2c_gensym_defer_capture_56 =(const void *) & _x2c_gensym_macro_acquired_3;
-    X2CCleanup _x2c_gensym_defer_record_33 ={
-      .fn = _x2c_gensym_defer_cleanup_33, .env = & _x2c_gensym_macro_environment_33
+    _x2c_gensym_macro_environment_32._x2c_gensym_defer_capture_54 =(const void *) & _x2c_gensym_macro_acquired_3;
+    X2CCleanup _x2c_gensym_defer_record_32 ={
+      .fn = _x2c_gensym_defer_cleanup_32, .env = & _x2c_gensym_macro_environment_32
     }
     ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_33);
+    x2c_cleanup_push(& _x2c_gensym_defer_record_32);
     {
       struct MapStringIntRecord * _x2c_gensym_macro_arecs_3 = Scope_malloc_in(& _x2c_gensym_macro_scratch_3, _x2c_gensym_macro_asz_3 * sizeof(struct MapStringIntRecord));
       struct MapStringIntRecord * _x2c_gensym_macro_brecs_3 = Scope_malloc_in(& _x2c_gensym_macro_scratch_3, _x2c_gensym_macro_bsz_3 * sizeof(struct MapStringIntRecord));
@@ -4373,26 +4154,26 @@ static int MapStringInt_compare_entries(MapStringInt _x2c_gensym_macro_a_19, Map
       for(unsigned _x2c_gensym_macro_i_7 = 0;  _x2c_gensym_macro_i_7 < _x2c_gensym_macro_asz_3;  _x2c_gensym_macro_i_7 ++){
         int _x2c_gensym_macro_comparison_7 = _x2c_gensym_macro__record_compare_3(_x2c_gensym_macro_arecs_3 + _x2c_gensym_macro_i_7, _x2c_gensym_macro_brecs_3 + _x2c_gensym_macro_i_7);
         if(_x2c_gensym_macro_comparison_7){
-          int _x2c_gensym_return_value_28 = _x2c_gensym_macro_comparison_7;
+          int _x2c_gensym_return_value_27 = _x2c_gensym_macro_comparison_7;
           {
-            x2c_cleanup_leave(& _x2c_gensym_defer_record_33);
-            return _x2c_gensym_return_value_28;
+            x2c_cleanup_leave(& _x2c_gensym_defer_record_32);
+            return _x2c_gensym_return_value_27;
           }
 
         }
 
       }
       {
-        int _x2c_gensym_return_value_29 = 0;
+        int _x2c_gensym_return_value_28 = 0;
         {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_33);
-          return _x2c_gensym_return_value_29;
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_32);
+          return _x2c_gensym_return_value_28;
         }
 
       }
 
     }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_33);
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_32);
   }
 
 }
@@ -4401,16 +4182,16 @@ static Buffer MapStringInt_write_entries(MapStringInt _x2c_gensym_macro_map_203,
   RenderPath _x2c_gensym_macro_path_3;
   if(! RenderPath_enter(&(_x2c_gensym_macro_path_3), _x2c_gensym_macro_map_203)) return Buffer_printf(_x2c_gensym_macro_out_60, "<map: 0x%012lX>", (long) _x2c_gensym_macro_map_203);
   {
-    _x2c_gensym_defer_env_34 _x2c_gensym_macro_environment_34 ={
+    _x2c_gensym_defer_env_33 _x2c_gensym_macro_environment_33 ={
       0
     }
     ;
-    _x2c_gensym_macro_environment_34._x2c_gensym_defer_capture_57 =(const void *) & _x2c_gensym_macro_path_3;
-    X2CCleanup _x2c_gensym_defer_record_34 ={
-      .fn = _x2c_gensym_defer_cleanup_34, .env = & _x2c_gensym_macro_environment_34
+    _x2c_gensym_macro_environment_33._x2c_gensym_defer_capture_55 =(const void *) & _x2c_gensym_macro_path_3;
+    X2CCleanup _x2c_gensym_defer_record_33 ={
+      .fn = _x2c_gensym_defer_cleanup_33, .env = & _x2c_gensym_macro_environment_33
     }
     ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_34);
+    x2c_cleanup_push(& _x2c_gensym_defer_record_33);
     {
       Buffer_write(_x2c_gensym_macro_out_60, "{ ");
       unsigned _x2c_gensym_macro_cursor_37 = 0;
@@ -4433,16 +4214,16 @@ static Buffer MapStringInt_write_entries(MapStringInt _x2c_gensym_macro_map_203,
         _x2c_gensym_macro_first_3 = 0;
       }
       {
-        Buffer _x2c_gensym_return_value_30 = Buffer_write(_x2c_gensym_macro_out_60, " }");
+        Buffer _x2c_gensym_return_value_29 = Buffer_write(_x2c_gensym_macro_out_60, " }");
         {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_34);
-          return _x2c_gensym_return_value_30;
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_33);
+          return _x2c_gensym_return_value_29;
         }
 
       }
 
     }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_34);
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_33);
   }
 
 }
@@ -4476,17 +4257,17 @@ Map MapStringInt_map(MapStringInt _x2c_gensym_macro_map_208){
   if(_x2c_gensym_macro_map_208 == NULL) return NULL;
   Map _x2c_gensym_macro_boxed_3 = Map_new(), _x2c_gensym_macro_finished_7 = NULL;
   {
-    _x2c_gensym_defer_env_35 _x2c_gensym_macro_environment_35 ={
+    _x2c_gensym_defer_env_34 _x2c_gensym_macro_environment_34 ={
       0
     }
     ;
-    _x2c_gensym_macro_environment_35._x2c_gensym_defer_capture_58 =(const void *) & _x2c_gensym_macro_finished_7;
-    _x2c_gensym_macro_environment_35._x2c_gensym_defer_capture_59 =(const void *) & _x2c_gensym_macro_boxed_3;
-    X2CCleanup _x2c_gensym_defer_record_35 ={
-      .fn = _x2c_gensym_defer_cleanup_35, .env = & _x2c_gensym_macro_environment_35
+    _x2c_gensym_macro_environment_34._x2c_gensym_defer_capture_56 =(const void *) & _x2c_gensym_macro_finished_7;
+    _x2c_gensym_macro_environment_34._x2c_gensym_defer_capture_57 =(const void *) & _x2c_gensym_macro_boxed_3;
+    X2CCleanup _x2c_gensym_defer_record_34 ={
+      .fn = _x2c_gensym_defer_cleanup_34, .env = & _x2c_gensym_macro_environment_34
     }
     ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_35);
+    x2c_cleanup_push(& _x2c_gensym_defer_record_34);
     {
       unsigned _x2c_gensym_macro_cursor_38 = 0;
       String _x2c_gensym_macro_key_127;
@@ -4494,77 +4275,16 @@ Map MapStringInt_map(MapStringInt _x2c_gensym_macro_map_208){
       while(MapStringInt_try_next(_x2c_gensym_macro_map_208, &(_x2c_gensym_macro_cursor_38), &(_x2c_gensym_macro_key_127), &(_x2c_gensym_macro_value_14))) Map_setindex(_x2c_gensym_macro_boxed_3, _box_string(_x2c_gensym_macro_key_127), _box_int(_x2c_gensym_macro_value_14));
       _x2c_gensym_macro_finished_7 = _x2c_gensym_macro_boxed_3;
       {
-        Map _x2c_gensym_return_value_31 = _x2c_gensym_macro_boxed_3;
+        Map _x2c_gensym_return_value_30 = _x2c_gensym_macro_boxed_3;
         {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_35);
-          return _x2c_gensym_return_value_31;
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_34);
+          return _x2c_gensym_return_value_30;
         }
 
       }
 
     }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_35);
-  }
-
-}
-
-int String_len(String);
-
-int MapStringInt_add_substr(MapStringInt map, Substr key, int count){
-  if(! _init_guard_) _file_init_();
-  if((void *) map == NULL) _bad_arg(_4);
-  unsigned hash = Substring_hash(key);
-  if(! hash) hash = - 1;
-  unsigned * hashes = map -> hashes;
-  struct MapStringIntRecord * entries = map -> entries;
-  unsigned capacity = map -> capacity, mask = map -> mask, start = hash & mask;
-  const char * bytes = key.length ?(const char *) key.source + key.offset : NULL;
-  for(unsigned distance = 0;  distance < capacity;  distance ++){
-    unsigned index =(start + distance) & mask, stored = hashes[index];
-    if(! stored) break;
-    if(stored == hash && String_len(entries[index].key) == key.length &&(! key.length || memcmp(entries[index].key, bytes, key.length) == 0)) return _update_int(& entries[index].val, 56, count);
-    if(((capacity + index -(stored & mask)) & mask) < distance) break;
-  }
-  return MapStringInt_updateindex(map, Substring_str(key), 56, count);
-}
-
-static MapStringInt _prepare_string_int_export(MapStringInt map, Context source){
-  MapStringInt staged = MapStringInt_new_capacity(map -> capacity);
-  MapStringInt result = NULL;
-  {
-    _x2c_gensym_defer_env_36 _x2c_gensym_macro_environment_36 ={
-      0
-    }
-    ;
-    _x2c_gensym_macro_environment_36._x2c_gensym_defer_capture_60 =(const void *) & result;
-    _x2c_gensym_macro_environment_36._x2c_gensym_defer_capture_61 =(const void *) & staged;
-    X2CCleanup _x2c_gensym_defer_record_36 ={
-      .fn = _x2c_gensym_defer_cleanup_36, .env = & _x2c_gensym_macro_environment_36
-    }
-    ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_36);
-    {
-      unsigned cursor = 0;
-      String key;
-      int value;
-      while(MapStringInt_try_next(map, &(cursor), &(key), &(value))){
-        key = Var_as_string(Context_export_nested(source, String_var(key)));
-        ({
-          MapStringInt _x2c_gensym_protocol_arg_15 = staged;  String _x2c_gensym_protocol_arg_16 = key;  int _x2c_gensym_protocol_arg_17 = value;  MapStringInt_setindex(_x2c_gensym_protocol_arg_15, _x2c_gensym_protocol_arg_16, _x2c_gensym_protocol_arg_17);
-        }
-        );
-      }
-      {
-        MapStringInt _x2c_gensym_return_value_32 = result = staged;
-        {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_36);
-          return _x2c_gensym_return_value_32;
-        }
-
-      }
-
-    }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_36);
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_34);
   }
 
 }
@@ -4629,17 +4349,17 @@ static MapStringInt MapStringInt_export_context(MapStringInt _x2c_gensym_macro_m
   if((void *) _x2c_gensym_macro_map_210 == 0 || ! Context_owns(_x2c_gensym_macro_source_3, _x2c_gensym_macro_map_210)) return _x2c_gensym_macro_map_210;
   MapStringInt _x2c_gensym_macro_staged_3 = _prepare_string_int_export(_x2c_gensym_macro_map_210, _x2c_gensym_macro_source_3), _x2c_gensym_macro_committed_3 = NULL;
   {
-    _x2c_gensym_defer_env_37 _x2c_gensym_macro_environment_37 ={
+    _x2c_gensym_defer_env_35 _x2c_gensym_macro_environment_35 ={
       0
     }
     ;
-    _x2c_gensym_macro_environment_37._x2c_gensym_defer_capture_62 =(const void *) & _x2c_gensym_macro_staged_3;
-    _x2c_gensym_macro_environment_37._x2c_gensym_defer_capture_63 =(const void *) & _x2c_gensym_macro_committed_3;
-    X2CCleanup _x2c_gensym_defer_record_37 ={
-      .fn = _x2c_gensym_defer_cleanup_37, .env = & _x2c_gensym_macro_environment_37
+    _x2c_gensym_macro_environment_35._x2c_gensym_defer_capture_58 =(const void *) & _x2c_gensym_macro_staged_3;
+    _x2c_gensym_macro_environment_35._x2c_gensym_defer_capture_59 =(const void *) & _x2c_gensym_macro_committed_3;
+    X2CCleanup _x2c_gensym_defer_record_35 ={
+      .fn = _x2c_gensym_defer_cleanup_35, .env = & _x2c_gensym_macro_environment_35
     }
     ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_37);
+    x2c_cleanup_push(& _x2c_gensym_defer_record_35);
     {
       if((void *) _x2c_gensym_macro_staged_3 != 0){
         Bytes _x2c_gensym_macro_old_hashes_3 = _x2c_gensym_macro_map_210 -> hashes, _x2c_gensym_macro_old_entries_3 = _x2c_gensym_macro_map_210 -> entries;
@@ -4663,7 +4383,291 @@ static MapStringInt MapStringInt_export_context(MapStringInt _x2c_gensym_macro_m
       Context_move_scope(_x2c_gensym_macro_source_3, _x2c_gensym_macro_map_210 -> scope);
       _x2c_gensym_macro_committed_3 = _x2c_gensym_macro_map_210;
       {
-        MapStringInt _x2c_gensym_return_value_33 = _x2c_gensym_macro_map_210;
+        MapStringInt _x2c_gensym_return_value_31 = _x2c_gensym_macro_map_210;
+        {
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_35);
+          return _x2c_gensym_return_value_31;
+        }
+
+      }
+
+    }
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_35);
+  }
+
+}
+
+void MapStringInt_cleanup(MapStringInt _x2c_gensym_macro_map_211){
+  MapStringInt_free_table(_x2c_gensym_macro_map_211);
+}
+
+int String_len(String);
+
+int MapStringInt_add_substr(MapStringInt map, Substr key, int count){
+  if(! _init_guard_) _file_init_();
+  if((void *) map == NULL) _bad_arg(_4);
+  unsigned hash = Substring_hash(key);
+  if(! hash) hash = - 1;
+  unsigned * hashes = map -> hashes;
+  struct MapStringIntRecord * entries = map -> entries;
+  unsigned capacity = map -> capacity, mask = map -> mask, start = hash & mask;
+  const char * bytes = key.length ?(const char *) key.source + key.offset : NULL;
+  for(unsigned distance = 0;  distance < capacity;  distance ++){
+    unsigned index =(start + distance) & mask, stored = hashes[index];
+    if(! stored) break;
+    if(stored == hash && String_len(entries[index].key) == key.length &&(! key.length || memcmp(entries[index].key, bytes, key.length) == 0)) return _update_int(& entries[index].val, 56, count);
+    if(((capacity + index -(stored & mask)) & mask) < distance) break;
+  }
+  return MapStringInt_updateindex(map, Substring_str(key), 56, count);
+}
+
+_Noreturn static void _bad_arg(String owner){
+  {
+    static const X2CErrorSite _x2c_gensym_error_site_26 = {.file = "../../lib/typed-map.x",.function = "_bad_arg",.line = 233,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_26, 4372499598, 1, Symbol_var(34096809266140), String_var(owner));
+    __builtin_unreachable();
+  }
+
+}
+
+static int _update_int(volatile int * slot, Symbol op, int rhs){
+  int current = slot[0];
+  unsigned a, b, raw;
+  memcpy(& a, & current, sizeof a);
+  memcpy(& b, & rhs, sizeof b);
+  if((op == 15481 || op == 15997) &&(rhs < 0 || rhs >= 32)) _bad_shift(op, rhs);
+  raw = _integer_raw(op, a, b, 32, 0);
+  int result;
+  memcpy(& result, & raw, sizeof result);
+  slot[0] = result;
+  return result;
+}
+
+_Noreturn static void _bad_shift(Symbol op, int count){
+  {
+    static const X2CErrorSite _x2c_gensym_error_site_27 = {.file = "../../lib/typed-map.x",.function = "_bad_shift",.line = 251,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_27, 4477476686248, 3, Symbol_var(992), Symbol_var(op), Symbol_var(7318440), int_var(count), Symbol_var(48833808), int_var(32));
+    __builtin_unreachable();
+  }
+
+}
+
+static Var _box_int(int value){
+  return int_var(value);
+}
+
+static Var _box_long(long value){
+  return long_var(value);
+}
+
+static Var _box_double(double value){
+  return double_var(value);
+}
+
+static Var _box_string(String value){
+  return String_var(value);
+}
+
+static MapIntInt _prepare_int_export(MapIntInt map, Context source){
+  (void) map;
+  (void) source;
+  return NULL;
+}
+
+static MapLongDouble _prepare_long_export(MapLongDouble map, Context source){
+  (void) map;
+  (void) source;
+  return NULL;
+}
+
+static unsigned x2c_hash_word(unsigned long);
+
+static unsigned _hash_int(int * key){
+  return x2c_hash_word((unsigned) key[0]);
+}
+
+static unsigned _hash_long(long * key){
+  return x2c_hash_word((unsigned long) key[0]);
+}
+
+unsigned String_hash(String);
+
+static unsigned _hash_string(String * key){
+  unsigned hash = String_hash(key[0]);
+  return hash ? hash : - 1;
+}
+
+static int _equal_int(int * a, int * b){
+  return a[0] == b[0];
+}
+
+static int _equal_long(long * a, long * b){
+  return a[0] == b[0];
+}
+
+static int _equal_double(double * a, double * b){
+  return a[0] == b[0];
+}
+
+int String_equal(String, String);
+
+static int _equal_string(String * a, String * b){
+  return String_equal(a[0], b[0]);
+}
+
+static int _compare_int(int a, int b){
+  return(a > b) -(a < b);
+}
+
+static int _compare_long(long a, long b){
+  return(a > b) -(a < b);
+}
+
+int Var_compare(Var, Var);
+
+static int _compare_double(double a, double b){
+  return Var_compare(double_var(a), double_var(b));
+}
+
+int String_compare(String, String);
+
+static int _compare_string(String a, String b){
+  return String_compare(a, b);
+}
+
+static void _valid_int(int * value){
+  (void) value;
+}
+
+static void _valid_double(double * value){
+  (void) value;
+}
+
+static void _valid_string(String * value){
+  (void) value;
+}
+
+static int _capacity_valid(unsigned capacity){
+  return capacity >= 2 && !(capacity &(capacity - 1));
+}
+
+static double _update_double(volatile double * slot, Symbol op, double rhs){
+  double current = slot[0], result;
+  switch(op){
+    case 56 : result = current + rhs;
+    break;
+    case 62 : result = current - rhs;
+    break;
+    case 54 : result = current * rhs;
+    break;
+    case 95 : result = current / rhs;
+    break;
+    default: _bad_op(op);
+  }
+  slot[0] = result;
+  return result;
+}
+
+String String_add(String, String);
+
+static String _update_string(volatile String * slot, Symbol op, String rhs){
+  if(op != 56) _bad_op(op);
+  String current = slot[0], result = String_add(current, rhs);
+  slot[0] = result;
+  return result;
+}
+
+_Noreturn static void _bad_op(Symbol op){
+  {
+    static const X2CErrorSite _x2c_gensym_error_site_28 = {.file = "../../lib/typed-map.x",.function = "_bad_op",.line = 348,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_28, 136641504, 1, Symbol_var(992), Symbol_var(op));
+    __builtin_unreachable();
+  }
+
+}
+
+Var Context_export_nested(Context, Var);
+
+static MapStringString _prepare_string_export(MapStringString map, Context source){
+  MapStringString staged = MapStringString_new_capacity(map -> capacity);
+  MapStringString result = NULL;
+  {
+    _x2c_gensym_defer_env_36 _x2c_gensym_macro_environment_36 ={
+      0
+    }
+    ;
+    _x2c_gensym_macro_environment_36._x2c_gensym_defer_capture_60 =(const void *) & result;
+    _x2c_gensym_macro_environment_36._x2c_gensym_defer_capture_61 =(const void *) & staged;
+    X2CCleanup _x2c_gensym_defer_record_36 ={
+      .fn = _x2c_gensym_defer_cleanup_36, .env = & _x2c_gensym_macro_environment_36
+    }
+    ;
+    x2c_cleanup_push(& _x2c_gensym_defer_record_36);
+    {
+      {
+        String key, value;
+        MapStringString _x2c_gensym_macro_object_0 = map;
+        unsigned _x2c_gensym_macro_cursor_40 = 0;
+        String _x2c_gensym_macro_cursor_output_0;
+        String _x2c_gensym_macro_cursor_output_1;
+        while(MapStringString_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_40), &(_x2c_gensym_macro_cursor_output_0), &(_x2c_gensym_macro_cursor_output_1))){
+          key = _x2c_gensym_macro_cursor_output_0;
+          value = _x2c_gensym_macro_cursor_output_1;
+          {
+            key = Var_as_string(Context_export_nested(source, String_var(key)));
+            value = Var_as_string(Context_export_nested(source, String_var(value)));
+            ({
+              MapStringString _x2c_gensym_protocol_arg_12 = staged;  String _x2c_gensym_protocol_arg_13 = key;  String _x2c_gensym_protocol_arg_14 = value;  MapStringString_setindex(_x2c_gensym_protocol_arg_12, _x2c_gensym_protocol_arg_13, _x2c_gensym_protocol_arg_14);
+            }
+            );
+          }
+
+        }
+
+      }
+      {
+        MapStringString _x2c_gensym_return_value_32 = result = staged;
+        {
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_36);
+          return _x2c_gensym_return_value_32;
+        }
+
+      }
+
+    }
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_36);
+  }
+
+}
+
+static MapStringInt _prepare_string_int_export(MapStringInt map, Context source){
+  MapStringInt staged = MapStringInt_new_capacity(map -> capacity);
+  MapStringInt result = NULL;
+  {
+    _x2c_gensym_defer_env_37 _x2c_gensym_macro_environment_37 ={
+      0
+    }
+    ;
+    _x2c_gensym_macro_environment_37._x2c_gensym_defer_capture_62 =(const void *) & result;
+    _x2c_gensym_macro_environment_37._x2c_gensym_defer_capture_63 =(const void *) & staged;
+    X2CCleanup _x2c_gensym_defer_record_37 ={
+      .fn = _x2c_gensym_defer_cleanup_37, .env = & _x2c_gensym_macro_environment_37
+    }
+    ;
+    x2c_cleanup_push(& _x2c_gensym_defer_record_37);
+    {
+      unsigned cursor = 0;
+      String key;
+      int value;
+      while(MapStringInt_try_next(map, &(cursor), &(key), &(value))){
+        key = Var_as_string(Context_export_nested(source, String_var(key)));
+        ({
+          MapStringInt _x2c_gensym_protocol_arg_15 = staged;  String _x2c_gensym_protocol_arg_16 = key;  int _x2c_gensym_protocol_arg_17 = value;  MapStringInt_setindex(_x2c_gensym_protocol_arg_15, _x2c_gensym_protocol_arg_16, _x2c_gensym_protocol_arg_17);
+        }
+        );
+      }
+      {
+        MapStringInt _x2c_gensym_return_value_33 = result = staged;
         {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_37);
           return _x2c_gensym_return_value_33;
@@ -4675,10 +4679,6 @@ static MapStringInt MapStringInt_export_context(MapStringInt _x2c_gensym_macro_m
     x2c_cleanup_leave(& _x2c_gensym_defer_record_37);
   }
 
-}
-
-void MapStringInt_cleanup(MapStringInt _x2c_gensym_macro_map_211){
-  MapStringInt_free_table(_x2c_gensym_macro_map_211);
 }
 
 static inline String _x2c_gensym_proto_mapintint_str_0(Var a0){
@@ -5043,61 +5043,61 @@ static void _x2c_gensym_defer_cleanup_25(void * _x2c_gensym_defer_opaque_25){
 
 static void _x2c_gensym_defer_cleanup_26(void * _x2c_gensym_defer_opaque_26){
   _x2c_gensym_defer_env_26 * _x2c_gensym_defer_data_26 =(_x2c_gensym_defer_env_26 *) _x2c_gensym_defer_opaque_26;
-  if((*(MapStringString *) _x2c_gensym_defer_data_26->_x2c_gensym_defer_capture_43) == NULL) MapStringString_free_table((*(MapStringString *) _x2c_gensym_defer_data_26->_x2c_gensym_defer_capture_44));
+  if((void *)(*(MapStringString *) _x2c_gensym_defer_data_26->_x2c_gensym_defer_capture_43) != 0 &&(void *)(*(MapStringString *) _x2c_gensym_defer_data_26->_x2c_gensym_defer_capture_44) == 0) MapStringString_free_table((*(MapStringString *) _x2c_gensym_defer_data_26->_x2c_gensym_defer_capture_43));
 }
 
 static void _x2c_gensym_defer_cleanup_27(void * _x2c_gensym_defer_opaque_27){
   _x2c_gensym_defer_env_27 * _x2c_gensym_defer_data_27 =(_x2c_gensym_defer_env_27 *) _x2c_gensym_defer_opaque_27;
-  if((void *)(*(MapStringString *) _x2c_gensym_defer_data_27->_x2c_gensym_defer_capture_45) != 0 &&(void *)(*(MapStringString *) _x2c_gensym_defer_data_27->_x2c_gensym_defer_capture_46) == 0) MapStringString_free_table((*(MapStringString *) _x2c_gensym_defer_data_27->_x2c_gensym_defer_capture_45));
+  Bytes_cleanup((*(Bytes *) _x2c_gensym_defer_data_27->_x2c_gensym_defer_capture_45));
 }
 
 static void _x2c_gensym_defer_cleanup_28(void * _x2c_gensym_defer_opaque_28){
   _x2c_gensym_defer_env_28 * _x2c_gensym_defer_data_28 =(_x2c_gensym_defer_env_28 *) _x2c_gensym_defer_opaque_28;
-  Bytes_cleanup((*(Bytes *) _x2c_gensym_defer_data_28->_x2c_gensym_defer_capture_47));
+  Bytes_cleanup((*(Bytes *) _x2c_gensym_defer_data_28->_x2c_gensym_defer_capture_46));
 }
 
 static void _x2c_gensym_defer_cleanup_29(void * _x2c_gensym_defer_opaque_29){
   _x2c_gensym_defer_env_29 * _x2c_gensym_defer_data_29 =(_x2c_gensym_defer_env_29 *) _x2c_gensym_defer_opaque_29;
-  Bytes_cleanup((*(Bytes *) _x2c_gensym_defer_data_29->_x2c_gensym_defer_capture_48));
+  if((void *)(*(MapStringInt *) _x2c_gensym_defer_data_29->_x2c_gensym_defer_capture_47) == 0) MapStringInt_free_table((*(MapStringInt *) _x2c_gensym_defer_data_29->_x2c_gensym_defer_capture_48));
 }
 
 static void _x2c_gensym_defer_cleanup_30(void * _x2c_gensym_defer_opaque_30){
   _x2c_gensym_defer_env_30 * _x2c_gensym_defer_data_30 =(_x2c_gensym_defer_env_30 *) _x2c_gensym_defer_opaque_30;
-  if((void *)(*(MapStringInt *) _x2c_gensym_defer_data_30->_x2c_gensym_defer_capture_49) == 0) MapStringInt_free_table((*(MapStringInt *) _x2c_gensym_defer_data_30->_x2c_gensym_defer_capture_50));
+  if((*(int *) _x2c_gensym_defer_data_30->_x2c_gensym_defer_capture_49) && ! MapStringInt_truth((*(MapStringInt *) _x2c_gensym_defer_data_30->_x2c_gensym_defer_capture_50))) MapStringInt_free_table((*(MapStringInt *) _x2c_gensym_defer_data_30->_x2c_gensym_defer_capture_51));
 }
 
 static void _x2c_gensym_defer_cleanup_31(void * _x2c_gensym_defer_opaque_31){
   _x2c_gensym_defer_env_31 * _x2c_gensym_defer_data_31 =(_x2c_gensym_defer_env_31 *) _x2c_gensym_defer_opaque_31;
-  if((*(int *) _x2c_gensym_defer_data_31->_x2c_gensym_defer_capture_51) && ! MapStringInt_truth((*(MapStringInt *) _x2c_gensym_defer_data_31->_x2c_gensym_defer_capture_52))) MapStringInt_free_table((*(MapStringInt *) _x2c_gensym_defer_data_31->_x2c_gensym_defer_capture_53));
+  if((void *)(*(MapStringInt *) _x2c_gensym_defer_data_31->_x2c_gensym_defer_capture_52) == 0) MapStringInt_free_table((*(MapStringInt *) _x2c_gensym_defer_data_31->_x2c_gensym_defer_capture_53));
 }
 
 static void _x2c_gensym_defer_cleanup_32(void * _x2c_gensym_defer_opaque_32){
   _x2c_gensym_defer_env_32 * _x2c_gensym_defer_data_32 =(_x2c_gensym_defer_env_32 *) _x2c_gensym_defer_opaque_32;
-  if((void *)(*(MapStringInt *) _x2c_gensym_defer_data_32->_x2c_gensym_defer_capture_54) == 0) MapStringInt_free_table((*(MapStringInt *) _x2c_gensym_defer_data_32->_x2c_gensym_defer_capture_55));
+  Scope_cleanup((*(const Scope *) _x2c_gensym_defer_data_32->_x2c_gensym_defer_capture_54));
 }
 
 static void _x2c_gensym_defer_cleanup_33(void * _x2c_gensym_defer_opaque_33){
   _x2c_gensym_defer_env_33 * _x2c_gensym_defer_data_33 =(_x2c_gensym_defer_env_33 *) _x2c_gensym_defer_opaque_33;
-  Scope_cleanup((*(const Scope *) _x2c_gensym_defer_data_33->_x2c_gensym_defer_capture_56));
+  RenderPath_leave(&((*(RenderPath *) _x2c_gensym_defer_data_33->_x2c_gensym_defer_capture_55)));
 }
 
 static void _x2c_gensym_defer_cleanup_34(void * _x2c_gensym_defer_opaque_34){
   _x2c_gensym_defer_env_34 * _x2c_gensym_defer_data_34 =(_x2c_gensym_defer_env_34 *) _x2c_gensym_defer_opaque_34;
-  RenderPath_leave(&((*(RenderPath *) _x2c_gensym_defer_data_34->_x2c_gensym_defer_capture_57)));
+  if((void *)(*(Map *) _x2c_gensym_defer_data_34->_x2c_gensym_defer_capture_56) == 0) Map_cleanup((*(Map *) _x2c_gensym_defer_data_34->_x2c_gensym_defer_capture_57));
 }
 
 static void _x2c_gensym_defer_cleanup_35(void * _x2c_gensym_defer_opaque_35){
   _x2c_gensym_defer_env_35 * _x2c_gensym_defer_data_35 =(_x2c_gensym_defer_env_35 *) _x2c_gensym_defer_opaque_35;
-  if((void *)(*(Map *) _x2c_gensym_defer_data_35->_x2c_gensym_defer_capture_58) == 0) Map_cleanup((*(Map *) _x2c_gensym_defer_data_35->_x2c_gensym_defer_capture_59));
+  if((void *)(*(MapStringInt *) _x2c_gensym_defer_data_35->_x2c_gensym_defer_capture_58) != 0 &&(void *)(*(MapStringInt *) _x2c_gensym_defer_data_35->_x2c_gensym_defer_capture_59) == 0) MapStringInt_free_table((*(MapStringInt *) _x2c_gensym_defer_data_35->_x2c_gensym_defer_capture_58));
 }
 
 static void _x2c_gensym_defer_cleanup_36(void * _x2c_gensym_defer_opaque_36){
   _x2c_gensym_defer_env_36 * _x2c_gensym_defer_data_36 =(_x2c_gensym_defer_env_36 *) _x2c_gensym_defer_opaque_36;
-  if((*(MapStringInt *) _x2c_gensym_defer_data_36->_x2c_gensym_defer_capture_60) == NULL) MapStringInt_free_table((*(MapStringInt *) _x2c_gensym_defer_data_36->_x2c_gensym_defer_capture_61));
+  if((*(MapStringString *) _x2c_gensym_defer_data_36->_x2c_gensym_defer_capture_60) == NULL) MapStringString_free_table((*(MapStringString *) _x2c_gensym_defer_data_36->_x2c_gensym_defer_capture_61));
 }
 
 static void _x2c_gensym_defer_cleanup_37(void * _x2c_gensym_defer_opaque_37){
   _x2c_gensym_defer_env_37 * _x2c_gensym_defer_data_37 =(_x2c_gensym_defer_env_37 *) _x2c_gensym_defer_opaque_37;
-  if((void *)(*(MapStringInt *) _x2c_gensym_defer_data_37->_x2c_gensym_defer_capture_62) != 0 &&(void *)(*(MapStringInt *) _x2c_gensym_defer_data_37->_x2c_gensym_defer_capture_63) == 0) MapStringInt_free_table((*(MapStringInt *) _x2c_gensym_defer_data_37->_x2c_gensym_defer_capture_62));
+  if((*(MapStringInt *) _x2c_gensym_defer_data_37->_x2c_gensym_defer_capture_62) == NULL) MapStringInt_free_table((*(MapStringInt *) _x2c_gensym_defer_data_37->_x2c_gensym_defer_capture_63));
 }
 

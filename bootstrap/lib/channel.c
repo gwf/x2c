@@ -56,15 +56,15 @@ static int _init_guard_ = 0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
-static void _native_check(int error);
-
 static void _drop(void * bytes);
+
+static void _native_check(int error);
 
 static size_t _capacity(Var value);
 
-static Code _new_empty(Code code);
+static void _send(Channel channel, Var value, int owned);
 
-static Code _new_one(Code code);
+static int _rendezvous_send(Channel channel, Var value, int owned);
 
 static void _append_wait(ChannelWaits * queue, ChannelWait wait);
 
@@ -72,15 +72,9 @@ static void _remove_wait(ChannelWaits * queue, ChannelWait wait);
 
 static ChannelWait _live_wait(ChannelWaits * queue);
 
-static void _notify(Channel channel);
-
-static int _rendezvous_send(Channel channel, Var value, int owned);
-
-static int _rendezvous_receive(Channel channel, Var * out, int * owned);
-
 static int _buffer_send(Channel channel, ChannelMessage message);
 
-static int _buffer_receive(Channel channel, ChannelMessage * out);
+static void _notify(Channel channel);
 
 static ChannelMessage _message(Var value, int owned);
 
@@ -90,9 +84,15 @@ static Scope _container_contents(Var value);
 
 static void _move_container(Var value, Scope * destination);
 
-static void _send(Channel channel, Var value, int owned);
+static int _rendezvous_receive(Channel channel, Var * out, int * owned);
+
+static int _buffer_receive(Channel channel, ChannelMessage * out);
 
 static int _next(Iter iter, Var * out);
+
+static Code _new_empty(Code code);
+
+static Code _new_one(Code code);
 
 static inline Iter _x2c_gensym_proto_channel_iter_0(Var a0, Iter a1);
 
@@ -228,7 +228,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _93 = cons(_89, _92);
   _94 = List_var(_93);
   _95 = Symbol_var(805770);
-  _96 = int_var(135);
+  _96 = int_var(64);
   _97 = cons(_96, NULL);
   _98 = cons(_95, _97);
   _99 = List_var(_98);
@@ -241,7 +241,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _106 = cons(_103, _105);
   _107 = List_var(_106);
   _108 = Symbol_var(1133019155420);
-  _109 = int_var(4180);
+  _109 = int_var(1789);
   _110 = cons(_109, NULL);
   _111 = cons(_108, _110);
   _112 = List_var(_111);
@@ -436,11 +436,11 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _301 = cons(_300, NULL);
   _302 = cons(_77, _301);
   _303 = List_var(_302);
-  _304 = int_var(136);
+  _304 = int_var(65);
   _305 = cons(_304, NULL);
   _306 = cons(_95, _305);
   _307 = List_var(_306);
-  _308 = int_var(4236);
+  _308 = int_var(1845);
   _309 = cons(_308, NULL);
   _310 = cons(_108, _309);
   _311 = List_var(_310);
@@ -483,15 +483,181 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _348 = cons(_347, NULL);
 }
 
-static void _native_check(int error){
-  if(! error) return;
-  fprintf(stderr, "Channel: native synchronization failed (%d)\n", error);
-  abort();
+void Channel_free(Channel channel);
+
+void Channel_cleanup(Channel _x2c_gensym_macro_value_0){
+  Channel_free(_x2c_gensym_macro_value_0);
 }
+
+int Var_is_void(Var);
+
+int Var_known_tag(Symbol);
+
+Scope Scope_child(void);
+
+void x2c_cleanup_push(X2CCleanup *);
+
+void * Scope_malloc_finalized_in(Scope *, size_t, void(*)(void *));
+
+void x2c_cleanup_leave(X2CCleanup *);
+
+#include "error.h"
+
+
+
+
+Channel Channel_new(Var type, Var capacity){
+  if(Var_is_void(capacity)){
+    if(x2c_var_equal(type, Symbol_var(47146907607368)) || ! Var_is(type, 1328354264)){
+      capacity = type;
+      type = Symbol_var(45156);
+    }
+    else capacity = int_var(0);
+  }
+  if(! Var_is(type, 1328354264) ||(! x2c_var_equal(type, Symbol_var(45156)) && ! Var_known_tag(Var_symbol(type)))){
+    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/channel.x",.function = "Channel_new",.line = 93,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_0, 4372499598, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Channel.new")), NULL))), Symbol_var(107888847784), Symbol_var(1362954));
+    __builtin_unreachable();
+  }
+  size_t limit = _capacity(capacity);
+  Scope lifetime = Scope_child();
+  int ready = 0;
+  {
+    _x2c_gensym_defer_env_0 _x2c_gensym_macro_environment_0 ={
+      0
+    }
+    ;
+    _x2c_gensym_macro_environment_0._x2c_gensym_defer_capture_0 =(const void *) & ready;
+    _x2c_gensym_macro_environment_0._x2c_gensym_defer_capture_1 =(const void *) & lifetime;
+    X2CCleanup _x2c_gensym_defer_record_0 ={
+      .fn = _x2c_gensym_defer_cleanup_0, .env = & _x2c_gensym_macro_environment_0
+    }
+    ;
+    x2c_cleanup_push(& _x2c_gensym_defer_record_0);
+    {
+      Channel channel = Scope_malloc_finalized_in(& lifetime, sizeof(struct Channel), _drop);
+      memset(channel, 0, sizeof(struct Channel));
+      channel -> lifetime = lifetime;
+      channel -> type = Var_symbol(type);
+      channel -> capacity = limit;
+      int error = pthread_cond_init(& channel -> changed, NULL);
+      if(error){
+        Var _x2c_gensym_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("pthread_cond_init")), NULL)));
+        {
+          static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/channel.x",.function = "Channel_new",.line = 105,.runtime = 1};
+          x2c_error_raise_n(& _x2c_gensym_error_site_1, 20399393368, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(11703198), int_var(error));
+          __builtin_unreachable();
+        }
+
+      }
+      channel -> initialized = 1;
+      ready = 1;
+      {
+        Channel _x2c_gensym_return_value_0 = channel;
+        {
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
+          return _x2c_gensym_return_value_0;
+        }
+
+      }
+
+    }
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
+  }
+
+}
+
+Scope Channel_scope(Channel channel){
+  return channel ? channel -> lifetime : NULL;
+}
+
+void Channel_send(Channel c, Var value){
+  _send(c, value, 0);
+}
+
+void Channel_send_owned(Channel c, Var value){
+  _send(c, value, 1);
+}
+
+void Channel_close(Channel channel);
 
 void Scope_destroy(Scope);
 
+void Channel_free(Channel channel){
+  if(channel){
+    Channel_close(channel);
+    Scope_destroy(channel -> lifetime);
+  }
+
+}
+
+void Channel_close(Channel channel){
+  if(! channel){
+    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/channel.x",.function = "Channel_close",.line = 160,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_2, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Channel.close")), NULL))));
+    __builtin_unreachable();
+  }
+  x2c_thread_wait_lock();
+  channel -> closed = 1;
+  _notify(channel);
+  x2c_thread_wait_unlock();
+}
+
+Var Channel_var(Channel channel){
+  return Var_new(6982365528, channel);
+}
+
+Channel Var_channel(Var value){
+  if(! Var_is(value, 6982365528)){
+    static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/channel.x",.function = "Var_channel",.line = 176,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_3, 4477479911782, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.channel")), NULL))));
+    __builtin_unreachable();
+  }
+  return Var_pointer(value);
+}
+
+Iter Channel_iter(Channel c, Iter dest){
+  return Iter_init(dest, Channel_var(c), _next, ((void) 0, Void));
+}
+
+Scope * Scope_top(void);
+
+Scope Scope_new(void);
+
 Scope Scope_owner(void *);
+
+void Scope_transfer(Scope, Scope);
+
+Var Channel_receive(Channel channel){
+  if(! channel){
+    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/channel.x",.function = "Channel_receive",.line = 196,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_4, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Channel.receive")), NULL))));
+    __builtin_unreachable();
+  }
+  Scope * destination = Scope_top();
+  if(! * destination) * destination = Scope_new();
+  Var value =((void) 0, Void);
+  ChannelMessage message = NULL;
+  int owned = 0;
+  x2c_thread_wait_lock();
+  int status = channel -> capacity ? _buffer_receive(channel, &(message)) : _rendezvous_receive(channel, &(value), &(owned));
+  if(message){
+    value = message -> value;
+    owned = message -> owned;
+  }
+  x2c_thread_wait_unlock();
+  if(message) free(message);
+  if(owned){
+    Scope transport = Scope_owner(Var_pointer(value));
+    if(_container(value)){
+      _move_container(value, destination);
+      Scope_destroy(transport);
+    }
+    else Scope_transfer(transport, * destination);
+  }
+  if(status < 0) x2c_thread_cancel();
+  return value;
+}
 
 static void _drop(void * bytes){
   Channel channel = bytes;
@@ -508,12 +674,13 @@ static void _drop(void * bytes){
   if(channel -> initialized) _native_check(pthread_cond_destroy(& channel -> changed));
 }
 
+static void _native_check(int error){
+  if(! error) return;
+  fprintf(stderr, "Channel: native synchronization failed (%d)\n", error);
+  abort();
+}
+
 int Var_is_integer(Var);
-
-#include "error.h"
-
-
-
 
 int x2c_error_catch_site_pending(ErrorCatchSite *);
 
@@ -579,265 +746,9 @@ static size_t _capacity(Var value){
     if(capacity >= 0) return(size_t) capacity;
   }
   {
-    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/channel.x",.function = "_capacity",.line = 96,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_0, 4372499598, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Channel.new")), NULL))), Symbol_var(107888847784), Symbol_var(209381969202));
+    static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/channel.x",.function = "_capacity",.line = 252,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_5, 4372499598, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Channel.new")), NULL))), Symbol_var(107888847784), Symbol_var(209381969202));
     __builtin_unreachable();
-  }
-
-}
-
-int Var_is_void(Var);
-
-int Var_known_tag(Symbol);
-
-Scope Scope_child(void);
-
-void x2c_cleanup_push(X2CCleanup *);
-
-void * Scope_malloc_finalized_in(Scope *, size_t, void(*)(void *));
-
-void x2c_cleanup_leave(X2CCleanup *);
-
-Channel Channel_new(Var type, Var capacity){
-  if(Var_is_void(capacity)){
-    if(x2c_var_equal(type, Symbol_var(47146907607368)) || ! Var_is(type, 1328354264)){
-      capacity = type;
-      type = Symbol_var(45156);
-    }
-    else capacity = int_var(0);
-  }
-  if(! Var_is(type, 1328354264) ||(! x2c_var_equal(type, Symbol_var(45156)) && ! Var_known_tag(Var_symbol(type)))){
-    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/channel.x",.function = "Channel_new",.line = 117,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_1, 4372499598, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Channel.new")), NULL))), Symbol_var(107888847784), Symbol_var(1362954));
-    __builtin_unreachable();
-  }
-  size_t limit = _capacity(capacity);
-  Scope lifetime = Scope_child();
-  int ready = 0;
-  {
-    _x2c_gensym_defer_env_0 _x2c_gensym_macro_environment_0 ={
-      0
-    }
-    ;
-    _x2c_gensym_macro_environment_0._x2c_gensym_defer_capture_0 =(const void *) & ready;
-    _x2c_gensym_macro_environment_0._x2c_gensym_defer_capture_1 =(const void *) & lifetime;
-    X2CCleanup _x2c_gensym_defer_record_0 ={
-      .fn = _x2c_gensym_defer_cleanup_0, .env = & _x2c_gensym_macro_environment_0
-    }
-    ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_0);
-    {
-      Channel channel = Scope_malloc_finalized_in(& lifetime, sizeof(struct Channel), _drop);
-      memset(channel, 0, sizeof(struct Channel));
-      channel -> lifetime = lifetime;
-      channel -> type = Var_symbol(type);
-      channel -> capacity = limit;
-      int error = pthread_cond_init(& channel -> changed, NULL);
-      if(error){
-        Var _x2c_gensym_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("pthread_cond_init")), NULL)));
-        {
-          static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/channel.x",.function = "Channel_new",.line = 129,.runtime = 1};
-          x2c_error_raise_n(& _x2c_gensym_error_site_2, 20399393368, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(11703198), int_var(error));
-          __builtin_unreachable();
-        }
-
-      }
-      channel -> initialized = 1;
-      ready = 1;
-      {
-        Channel _x2c_gensym_return_value_0 = channel;
-        {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
-          return _x2c_gensym_return_value_0;
-        }
-
-      }
-
-    }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
-  }
-
-}
-
-static Code _new_empty(Code code){
-  {
-    List _x2c_gensym_match_expr_0 = code;
-    MatchCaptureBuffer _x2c_gensym_match_capture_0 ={
-      0
-    }
-    ;
-    {static MacroCaseSite _x2c_gensym_macro_site_1; if(Macro_case_capture_at(& _x2c_gensym_macro_site_1, _x2c_gensym_match_expr_0, _154, NULL, & _x2c_gensym_match_capture_0)){{
-      return _199;
-    }
-    }}
-  }
-  return code;
-}
-
-Var Macro_inserted(Var, int, int);
-
-static Code _new_one(Code code){
-  {
-    List _x2c_gensym_match_expr_1 = code;
-    Var _x2c_gensym_match_values_1[1];
-    MatchCaptureBuffer _x2c_gensym_match_capture_1 ={
-      .values = _x2c_gensym_match_values_1, .capacity = 1
-    }
-    ;
-    {static MacroCaseSite _x2c_gensym_macro_site_2; if(Macro_case_capture_at(& _x2c_gensym_macro_site_2, _x2c_gensym_match_expr_1, _333, _207, & _x2c_gensym_match_capture_1)){Var x2c_match_value_0 = _x2c_gensym_match_values_1[0];
-    {
-      Var value;
-      value = x2c_match_value_0;
-      return cons(_38, cons(_158, cons(List_var(cons(_42, cons(_56, cons(List_var(cons(_31, cons(Macro_inserted(value, 1, 1), _348))), NULL)))), NULL)));
-    }
-    }}
-  }
-  return code;
-}
-
-Scope Channel_scope(Channel channel){
-  return channel ? channel -> lifetime : NULL;
-}
-
-static void _append_wait(ChannelWaits * queue, ChannelWait wait){
-  wait -> previous =(* queue).last;
-  if((* queue).last)(* queue).last -> next = wait;
-  else(* queue).first = wait;
-  (* queue).last = wait;
-}
-
-static void _remove_wait(ChannelWaits * queue, ChannelWait wait){
-  if(wait -> previous) wait -> previous -> next = wait -> next;
-  else(* queue).first = wait -> next;
-  if(wait -> next) wait -> next -> previous = wait -> previous;
-  else(* queue).last = wait -> previous;
-}
-
-static ChannelWait _live_wait(ChannelWaits * queue){
-  for(ChannelWait wait =(* queue).first;  wait;  wait = wait -> next) if(! x2c_thread_wait_stopped(wait -> owner)) return wait;
-  return NULL;
-}
-
-static void _notify(Channel channel){
-  _native_check(pthread_cond_broadcast(& channel -> changed));
-}
-
-static int _rendezvous_send(Channel channel, Var value, int owned){
-  if(x2c_thread_stopping()) return - 1;
-  if(channel -> closed) return 0;
-  ChannelWait receiver = _live_wait(&(channel -> receivers));
-  if(receiver){
-    receiver -> value = value;
-    receiver -> owned = owned;
-    receiver -> committed = 1;
-    _remove_wait(&(channel -> receivers), receiver);
-    _notify(channel);
-    return 1;
-  }
-  ChannelWait wait = & rendezvous_wait;
-  * wait =(struct ChannelWait){
-    .value = value, .owner = x2c_thread_wait_owner(), .owned = owned
-  }
-  ;
-  _append_wait(&(channel -> senders), wait);
-  while(! wait -> committed && ! channel -> closed && ! x2c_thread_stopping()) x2c_thread_wait(& channel -> changed);
-  if(wait -> committed) return 1;
-  _remove_wait(&(channel -> senders), wait);
-  return x2c_thread_stopping() ? - 1 : 0;
-}
-
-static int _rendezvous_receive(Channel channel, Var * out, int * owned){
-  if(x2c_thread_stopping()) return - 1;
-  ChannelWait sender = _live_wait(&(channel -> senders));
-  if(sender && ! channel -> closed){
-    (* out) = sender -> value;
-    (* owned) = sender -> owned;
-    sender -> committed = 1;
-    _remove_wait(&(channel -> senders), sender);
-    _notify(channel);
-    return 1;
-  }
-  if(channel -> closed) return 0;
-  ChannelWait wait = & rendezvous_wait;
-  * wait =(struct ChannelWait){
-    .owner = x2c_thread_wait_owner()
-  }
-  ;
-  _append_wait(&(channel -> receivers), wait);
-  while(! wait -> committed && ! channel -> closed && ! x2c_thread_stopping()) x2c_thread_wait(& channel -> changed);
-  if(wait -> committed){
-    (* out) = wait -> value;
-    (* owned) = wait -> owned;
-    return 1;
-  }
-  _remove_wait(&(channel -> receivers), wait);
-  return x2c_thread_stopping() ? - 1 : 0;
-}
-
-static int _buffer_send(Channel channel, ChannelMessage message){
-  while(channel -> count == channel -> capacity && ! channel -> closed && ! x2c_thread_stopping()) x2c_thread_wait(& channel -> changed);
-  if(x2c_thread_stopping()) return - 1;
-  if(channel -> closed) return 0;
-  if(channel -> last) channel -> last -> next = message;
-  else channel -> first = message;
-  channel -> last = message;
-  channel -> count ++;
-  _notify(channel);
-  return 1;
-}
-
-static int _buffer_receive(Channel channel, ChannelMessage * out){
-  while(! channel -> count && ! channel -> closed && ! x2c_thread_stopping()) x2c_thread_wait(& channel -> changed);
-  if(x2c_thread_stopping()) return - 1;
-  if(! channel -> count) return 0;
-  ChannelMessage message = channel -> first;
-  channel -> first = message -> next;
-  if(! channel -> first) channel -> last = NULL;
-  channel -> count --;
-  (* out) = message;
-  _notify(channel);
-  return 1;
-}
-
-static ChannelMessage _message(Var value, int owned){
-  ChannelMessage message = malloc(sizeof(struct ChannelMessage));
-  if(! message){
-    static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/channel.x",.function = "_message",.line = 271,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_3, 97614135954008, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Channel.send")), NULL))));
-    __builtin_unreachable();
-  }
-  * message =(struct ChannelMessage){
-    .value = value, .owned = owned
-  }
-  ;
-  return message;
-}
-
-static int _container(Var value){
-  return Var_is(value, 3313778) || Var_is(value, 26720);
-}
-
-static Scope _container_contents(Var value){
-  if(Var_is(value, 26720)){
-    Map map = Var_map_payload(value);
-    return map -> scope;
-  }
-  Block array = Var_pointer(value);
-  return array -> lifetime;
-}
-
-void Map_move_to(Map, Scope *);
-
-void Block_move_to(Block, Scope *);
-
-static void _move_container(Var value, Scope * destination){
-  if(Var_is(value, 26720)){
-    Map map = Var_map_payload(value);
-    Map_move_to(map, destination);
-  }
-  else{
-    Block array = Var_pointer(value);
-    Block_move_to(array, destination);
   }
 
 }
@@ -846,29 +757,25 @@ Symbol Var_tag(Var);
 
 Scope Scope_parent(Scope);
 
-Scope Scope_new(void);
-
-void Scope_transfer(Scope, Scope);
-
 static void _send(Channel channel, Var value, int owned){
   if(! channel){
-    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/channel.x",.function = "_send",.line = 301,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_4, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Channel.send")), NULL))));
+    static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/channel.x",.function = "_send",.line = 256,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_6, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Channel.send")), NULL))));
     __builtin_unreachable();
   }
   if(Var_is_void(value)){
-    static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/channel.x",.function = "_send",.line = 302,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_5, 48270474208, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Channel.send")), NULL))));
+    static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/channel.x",.function = "_send",.line = 257,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_7, 48270474208, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Channel.send")), NULL))));
     __builtin_unreachable();
   }
   if(channel -> type != 45156 && Var_tag(value) != channel -> type){
-    static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/channel.x",.function = "_send",.line = 304,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_6, 4477479911782, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Channel.send")), NULL))));
+    static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/channel.x",.function = "_send",.line = 259,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_8, 4477479911782, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Channel.send")), NULL))));
     __builtin_unreachable();
   }
   if(owned && ! Var_pointer(value)){
-    static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/channel.x",.function = "_send",.line = 306,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_7, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Channel.send_owned")), NULL))));
+    static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/channel.x",.function = "_send",.line = 261,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_9, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Channel.send_owned")), NULL))));
     __builtin_unreachable();
   }
   ChannelMessage message = NULL;
@@ -917,8 +824,8 @@ static void _send(Channel channel, Var value, int owned){
       }
       if(status < 0) x2c_thread_cancel();
       if(! status){
-        static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/channel.x",.function = "_send",.line = 340,.runtime = 1};
-        x2c_error_raise_n(& _x2c_gensym_error_site_8, 4477477457162, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Channel.send")), NULL))), Symbol_var(227514696), int_var(1));
+        static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../lib/channel.x",.function = "_send",.line = 295,.runtime = 1};
+        x2c_error_raise_n(& _x2c_gensym_error_site_10, 4477477457162, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Channel.send")), NULL))), Symbol_var(227514696), int_var(1));
         __builtin_unreachable();
       }
 
@@ -928,82 +835,147 @@ static void _send(Channel channel, Var value, int owned){
 
 }
 
-void Channel_send(Channel c, Var value){
-  _send(c, value, 0);
+static int _rendezvous_send(Channel channel, Var value, int owned){
+  if(x2c_thread_stopping()) return - 1;
+  if(channel -> closed) return 0;
+  ChannelWait receiver = _live_wait(&(channel -> receivers));
+  if(receiver){
+    receiver -> value = value;
+    receiver -> owned = owned;
+    receiver -> committed = 1;
+    _remove_wait(&(channel -> receivers), receiver);
+    _notify(channel);
+    return 1;
+  }
+  ChannelWait wait = & rendezvous_wait;
+  * wait =(struct ChannelWait){
+    .value = value, .owner = x2c_thread_wait_owner(), .owned = owned
+  }
+  ;
+  _append_wait(&(channel -> senders), wait);
+  while(! wait -> committed && ! channel -> closed && ! x2c_thread_stopping()) x2c_thread_wait(& channel -> changed);
+  if(wait -> committed) return 1;
+  _remove_wait(&(channel -> senders), wait);
+  return x2c_thread_stopping() ? - 1 : 0;
 }
 
-void Channel_send_owned(Channel c, Var value){
-  _send(c, value, 1);
+static void _append_wait(ChannelWaits * queue, ChannelWait wait){
+  wait -> previous =(* queue).last;
+  if((* queue).last)(* queue).last -> next = wait;
+  else(* queue).first = wait;
+  (* queue).last = wait;
 }
 
-Scope * Scope_top(void);
-
-Var Channel_receive(Channel channel){
-  if(! channel){
-    static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/channel.x",.function = "Channel_receive",.line = 378,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_9, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Channel.receive")), NULL))));
-    __builtin_unreachable();
-  }
-  Scope * destination = Scope_top();
-  if(! * destination) * destination = Scope_new();
-  Var value =((void) 0, Void);
-  ChannelMessage message = NULL;
-  int owned = 0;
-  x2c_thread_wait_lock();
-  int status = channel -> capacity ? _buffer_receive(channel, &(message)) : _rendezvous_receive(channel, &(value), &(owned));
-  if(message){
-    value = message -> value;
-    owned = message -> owned;
-  }
-  x2c_thread_wait_unlock();
-  if(message) free(message);
-  if(owned){
-    Scope transport = Scope_owner(Var_pointer(value));
-    if(_container(value)){
-      _move_container(value, destination);
-      Scope_destroy(transport);
-    }
-    else Scope_transfer(transport, * destination);
-  }
-  if(status < 0) x2c_thread_cancel();
-  return value;
+static void _remove_wait(ChannelWaits * queue, ChannelWait wait){
+  if(wait -> previous) wait -> previous -> next = wait -> next;
+  else(* queue).first = wait -> next;
+  if(wait -> next) wait -> next -> previous = wait -> previous;
+  else(* queue).last = wait -> previous;
 }
 
-void Channel_close(Channel channel){
-  if(! channel){
-    static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../lib/channel.x",.function = "Channel_close",.line = 408,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_10, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Channel.close")), NULL))));
-    __builtin_unreachable();
-  }
-  x2c_thread_wait_lock();
-  channel -> closed = 1;
+static ChannelWait _live_wait(ChannelWaits * queue){
+  for(ChannelWait wait =(* queue).first;  wait;  wait = wait -> next) if(! x2c_thread_wait_stopped(wait -> owner)) return wait;
+  return NULL;
+}
+
+static int _buffer_send(Channel channel, ChannelMessage message){
+  while(channel -> count == channel -> capacity && ! channel -> closed && ! x2c_thread_stopping()) x2c_thread_wait(& channel -> changed);
+  if(x2c_thread_stopping()) return - 1;
+  if(channel -> closed) return 0;
+  if(channel -> last) channel -> last -> next = message;
+  else channel -> first = message;
+  channel -> last = message;
+  channel -> count ++;
   _notify(channel);
-  x2c_thread_wait_unlock();
+  return 1;
 }
 
-void Channel_free(Channel channel){
-  if(channel){
-    Channel_close(channel);
-    Scope_destroy(channel -> lifetime);
-  }
-
+static void _notify(Channel channel){
+  _native_check(pthread_cond_broadcast(& channel -> changed));
 }
 
-void Channel_cleanup(Channel _x2c_gensym_macro_value_0){
-  Channel_free(_x2c_gensym_macro_value_0);
-}
-
-Var Channel_var(Channel channel){
-  return Var_new(6982365528, channel);
-}
-
-Channel Var_channel(Var value){
-  if(! Var_is(value, 6982365528)){
-    static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../lib/channel.x",.function = "Var_channel",.line = 436,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_11, 4477479911782, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.channel")), NULL))));
+static ChannelMessage _message(Var value, int owned){
+  ChannelMessage message = malloc(sizeof(struct ChannelMessage));
+  if(! message){
+    static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../lib/channel.x",.function = "_message",.line = 373,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_11, 97614135954008, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Channel.send")), NULL))));
     __builtin_unreachable();
   }
-  return Var_pointer(value);
+  * message =(struct ChannelMessage){
+    .value = value, .owned = owned
+  }
+  ;
+  return message;
+}
+
+static int _container(Var value){
+  return Var_is(value, 3313778) || Var_is(value, 26720);
+}
+
+static Scope _container_contents(Var value){
+  if(Var_is(value, 26720)){
+    Map map = Var_map_payload(value);
+    return map -> scope;
+  }
+  Block array = Var_pointer(value);
+  return array -> lifetime;
+}
+
+void Map_move_to(Map, Scope *);
+
+void Block_move_to(Block, Scope *);
+
+static void _move_container(Var value, Scope * destination){
+  if(Var_is(value, 26720)){
+    Map map = Var_map_payload(value);
+    Map_move_to(map, destination);
+  }
+  else{
+    Block array = Var_pointer(value);
+    Block_move_to(array, destination);
+  }
+
+}
+
+static int _rendezvous_receive(Channel channel, Var * out, int * owned){
+  if(x2c_thread_stopping()) return - 1;
+  ChannelWait sender = _live_wait(&(channel -> senders));
+  if(sender && ! channel -> closed){
+    (* out) = sender -> value;
+    (* owned) = sender -> owned;
+    sender -> committed = 1;
+    _remove_wait(&(channel -> senders), sender);
+    _notify(channel);
+    return 1;
+  }
+  if(channel -> closed) return 0;
+  ChannelWait wait = & rendezvous_wait;
+  * wait =(struct ChannelWait){
+    .owner = x2c_thread_wait_owner()
+  }
+  ;
+  _append_wait(&(channel -> receivers), wait);
+  while(! wait -> committed && ! channel -> closed && ! x2c_thread_stopping()) x2c_thread_wait(& channel -> changed);
+  if(wait -> committed){
+    (* out) = wait -> value;
+    (* owned) = wait -> owned;
+    return 1;
+  }
+  _remove_wait(&(channel -> receivers), wait);
+  return x2c_thread_stopping() ? - 1 : 0;
+}
+
+static int _buffer_receive(Channel channel, ChannelMessage * out){
+  while(! channel -> count && ! channel -> closed && ! x2c_thread_stopping()) x2c_thread_wait(& channel -> changed);
+  if(x2c_thread_stopping()) return - 1;
+  if(! channel -> count) return 0;
+  ChannelMessage message = channel -> first;
+  channel -> first = message -> next;
+  if(! channel -> first) channel -> last = NULL;
+  channel -> count --;
+  (* out) = message;
+  _notify(channel);
+  return 1;
 }
 
 static int _next(Iter iter, Var * out){
@@ -1017,8 +989,40 @@ static int _next(Iter iter, Var * out){
   return 1;
 }
 
-Iter Channel_iter(Channel c, Iter dest){
-  return Iter_init(dest, Channel_var(c), _next, ((void) 0, Void));
+static Code _new_empty(Code code){
+  {
+    List _x2c_gensym_match_expr_0 = code;
+    MatchCaptureBuffer _x2c_gensym_match_capture_0 ={
+      0
+    }
+    ;
+    {static MacroCaseSite _x2c_gensym_macro_site_1; if(Macro_case_capture_at(& _x2c_gensym_macro_site_1, _x2c_gensym_match_expr_0, _154, NULL, & _x2c_gensym_match_capture_0)){{
+      return _199;
+    }
+    }}
+  }
+  return code;
+}
+
+Var Macro_inserted(Var, int, int);
+
+static Code _new_one(Code code){
+  {
+    List _x2c_gensym_match_expr_1 = code;
+    Var _x2c_gensym_match_values_1[1];
+    MatchCaptureBuffer _x2c_gensym_match_capture_1 ={
+      .values = _x2c_gensym_match_values_1, .capacity = 1
+    }
+    ;
+    {static MacroCaseSite _x2c_gensym_macro_site_2; if(Macro_case_capture_at(& _x2c_gensym_macro_site_2, _x2c_gensym_match_expr_1, _333, _207, & _x2c_gensym_match_capture_1)){Var x2c_match_value_0 = _x2c_gensym_match_values_1[0];
+    {
+      Var value;
+      value = x2c_match_value_0;
+      return cons(_38, cons(_158, cons(List_var(cons(_42, cons(_56, cons(List_var(cons(_31, cons(Macro_inserted(value, 1, 1), _348))), NULL)))), NULL)));
+    }
+    }}
+  }
+  return code;
 }
 
 static inline Iter _x2c_gensym_proto_channel_iter_0(Var a0, Iter a1){

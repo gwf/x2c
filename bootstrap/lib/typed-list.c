@@ -23,10 +23,6 @@ static int _init_guard_ = 0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
-_Noreturn static void _no_convert(String owner, int index, Symbol tag);
-
-static int _holds(Var value, Symbol tag);
-
 static Var Var_box_i8(char);
 
 static inline Var _typed_list_encode_i8(char value){
@@ -106,6 +102,10 @@ static inline Var _typed_list_encode_symbol(Symbol value){
 static inline Symbol _typed_list_decode_symbol(Var value){
   return(Symbol)(value.u64 - VAR_SYMBOL_OFFSET);
 }
+
+_Noreturn static void _no_convert(String owner, int index, Symbol tag);
+
+static int _holds(Var value, Symbol tag);
 
 static int List_truth(List);
 
@@ -193,7 +193,7 @@ static Var int_var(int);
 
 _Noreturn static void _no_convert(String owner, int index, Symbol tag){
   {
-    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/typed-list.x",.function = "_no_convert",.line = 145,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/typed-list.x",.function = "_no_convert",.line = 194,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_0, 1020285550996648, 3, Symbol_var(34096809266140), String_var(owner), Symbol_var(19800432), int_var(index), Symbol_var(41038), Symbol_var(tag));
     __builtin_unreachable();
   }

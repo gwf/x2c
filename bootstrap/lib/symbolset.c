@@ -11,22 +11,6 @@
 #include "scope/scope.h"
 #include "var/var.h"
 #define SYMBOL_SET_HEADER_SIZE 20
-static unsigned _byte(SymbolSet set, size_t offset);
-
-static uint32_t _u32(SymbolSet set, size_t offset);
-
-static uint64_t _u64(SymbolSet set, size_t offset);
-
-static inline uint64_t _mix(uint64_t value);
-
-static inline void _place(Symbol symbol, uint64_t seed, uint32_t mask, uint32_t * vertices);
-
-static uint32_t _g(SymbolSet set, uint32_t vertex);
-
-static size_t _order_offset(SymbolSet x, uint32_t span);
-
-static int _next(Iter iter, Var * out);
-
 typedef struct Hash{
   uint32_t span, * table;
   uint64_t seed;
@@ -47,6 +31,22 @@ typedef struct Graph{
 }
 Graph;
 
+static uint64_t _u64(SymbolSet set, size_t offset);
+
+static inline void _place(Symbol symbol, uint64_t seed, uint32_t mask, uint32_t * vertices);
+
+static inline uint64_t _mix(uint64_t value);
+
+static uint32_t _g(SymbolSet set, uint32_t vertex);
+
+static uint32_t _u32(SymbolSet set, size_t offset);
+
+static size_t _order_offset(SymbolSet x, uint32_t span);
+
+static unsigned _byte(SymbolSet set, size_t offset);
+
+static int _next(Iter iter, Var * out);
+
 static void _put(Block bytes, uint64_t value, int size);
 
 static Hash _hash(Array symbols);
@@ -61,58 +61,15 @@ static void _assign(Graph * g, uint32_t * table);
 
 static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0);
 
+int SymbolSet_index(SymbolSet x, Symbol symbol);
+
 #include "exception.h"
 
 
 
 
-static unsigned _byte(SymbolSet set, size_t offset){
-  unsigned char * bytes =(unsigned char *) set;
-  return *(bytes + offset);
-}
-
-static uint32_t _u32(SymbolSet set, size_t offset){
-  uint32_t value = 0;
-  for(int byte = 3;  byte >= 0;  byte --) value =(value << 8) | _byte(set, offset + byte);
-  return value;
-}
-
-static uint64_t _u64(SymbolSet set, size_t offset){
-  uint64_t value = 0;
-  for(int byte = 7;  byte >= 0;  byte --) value =(value << 8) | _byte(set, offset + byte);
-  return value;
-}
-
-static inline uint64_t _mix(uint64_t value){
-  value ^= value >> 30;
-  value *= UINT64_C(0xbf58476d1ce4e5b9);
-  value ^= value >> 27;
-  value *= UINT64_C(0x94d049bb133111eb);
-  return value ^(value >> 31);
-}
-
-static inline void _place(Symbol symbol, uint64_t seed, uint32_t mask, uint32_t * vertices){
-  uint64_t hash = _mix((uint64_t) symbol ^ seed);
-  uint32_t span = mask + 1;
-  vertices[0] =(uint32_t) hash & mask;
-  vertices[1] = span +((uint32_t)(hash >> 21) & mask);
-  vertices[2] = span * 2 +((uint32_t)(hash >> 42) & mask);
-}
-
-static uint32_t _g(SymbolSet set, uint32_t vertex){
-  unsigned width = _byte(set, 0);
-  size_t offset = SYMBOL_SET_HEADER_SIZE +(size_t) vertex * width;
-  if(width == 1) return _byte(set, offset);
-  if(width == 2) return _byte(set, offset) |(_byte(set, offset + 1) << 8);
-  return _u32(set, offset);
-}
-
-static size_t _order_offset(SymbolSet x, uint32_t span){
-  return SYMBOL_SET_HEADER_SIZE +(size_t) span * 3 * _byte(x, 0);
-}
-
-size_t SymbolSet_len(SymbolSet x){
-  return x ? _u32(x, 4) : 0;
+int SymbolSet_contains(SymbolSet x, Symbol symbol){
+  return SymbolSet_index(x, symbol) >= 0;
 }
 
 int SymbolSet_index(SymbolSet x, Symbol symbol){
@@ -127,9 +84,7 @@ int SymbolSet_index(SymbolSet x, Symbol symbol){
   return stored == symbol ?(int) index : - 1;
 }
 
-int SymbolSet_contains(SymbolSet x, Symbol symbol){
-  return SymbolSet_index(x, symbol) >= 0;
-}
+size_t SymbolSet_len(SymbolSet x);
 
 Symbol SymbolSet_getindex(SymbolSet x, int index){
   int count =(int) SymbolSet_len(x);
@@ -138,18 +93,13 @@ Symbol SymbolSet_getindex(SymbolSet x, int index){
   return(Symbol) _u64(x, _order_offset(x, _u32(x, 8) + 1) +(size_t) index * sizeof(Symbol));
 }
 
-static int _next(Iter iter, Var * out){
-  SymbolSet x =(SymbolSet) Var_pointer(iter -> obj);
-  int index = Var_int(Var_convert(iter -> state, 3453797));
-  if(index < 0 ||(size_t) index >= SymbolSet_len(x)) return 0;
-  * out = Symbol_var(SymbolSet_getindex(x, index));
-  iter -> state = int_var(index + 1);
-  return 1;
-}
-
 Iter SymbolSet_iter(SymbolSet x, Iter dest){
   if(! Iter_truth(dest)) return NULL;
   return Iter_init(dest, Var_new(3683441, (void *) x), _next, int_var(0));
+}
+
+size_t SymbolSet_len(SymbolSet x){
+  return x ? _u32(x, 4) : 0;
 }
 
 Block SymbolSet_encode(Array symbols){
@@ -168,6 +118,60 @@ Block SymbolSet_encode(Array symbols){
   for(int index = 0;  index < count;  index ++) _put(bytes, Var_symbol(Array_getindex(symbols, index)), 8);
   xfree(h.table);
   return bytes;
+}
+
+static uint64_t _u64(SymbolSet set, size_t offset){
+  uint64_t value = 0;
+  for(int byte = 7;  byte >= 0;  byte --) value =(value << 8) | _byte(set, offset + byte);
+  return value;
+}
+
+static inline void _place(Symbol symbol, uint64_t seed, uint32_t mask, uint32_t * vertices){
+  uint64_t hash = _mix((uint64_t) symbol ^ seed);
+  uint32_t span = mask + 1;
+  vertices[0] =(uint32_t) hash & mask;
+  vertices[1] = span +((uint32_t)(hash >> 21) & mask);
+  vertices[2] = span * 2 +((uint32_t)(hash >> 42) & mask);
+}
+
+static inline uint64_t _mix(uint64_t value){
+  value ^= value >> 30;
+  value *= UINT64_C(0xbf58476d1ce4e5b9);
+  value ^= value >> 27;
+  value *= UINT64_C(0x94d049bb133111eb);
+  return value ^(value >> 31);
+}
+
+static uint32_t _g(SymbolSet set, uint32_t vertex){
+  unsigned width = _byte(set, 0);
+  size_t offset = SYMBOL_SET_HEADER_SIZE +(size_t) vertex * width;
+  if(width == 1) return _byte(set, offset);
+  if(width == 2) return _byte(set, offset) |(_byte(set, offset + 1) << 8);
+  return _u32(set, offset);
+}
+
+static uint32_t _u32(SymbolSet set, size_t offset){
+  uint32_t value = 0;
+  for(int byte = 3;  byte >= 0;  byte --) value =(value << 8) | _byte(set, offset + byte);
+  return value;
+}
+
+static size_t _order_offset(SymbolSet x, uint32_t span){
+  return SYMBOL_SET_HEADER_SIZE +(size_t) span * 3 * _byte(x, 0);
+}
+
+static unsigned _byte(SymbolSet set, size_t offset){
+  unsigned char * bytes =(unsigned char *) set;
+  return *(bytes + offset);
+}
+
+static int _next(Iter iter, Var * out){
+  SymbolSet x =(SymbolSet) Var_pointer(iter -> obj);
+  int index = Var_int(Var_convert(iter -> state, 3453797));
+  if(index < 0 ||(size_t) index >= SymbolSet_len(x)) return 0;
+  * out = Symbol_var(SymbolSet_getindex(x, index));
+  iter -> state = int_var(index + 1);
+  return 1;
 }
 
 static void _put(Block bytes, uint64_t value, int size){

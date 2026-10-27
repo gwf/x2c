@@ -33,33 +33,15 @@ DiagnosticsHold;
 #include <unistd.h>
 Diagnostics Diagnostics_new(Compiler printer, int limit);
 
-void Diagnostics_reset(Diagnostics diag);
-
 DiagnosticsHold Diagnostics_hold(Diagnostics diag);
 
 void Diagnostics_release(Diagnostics diag, DiagnosticsHold hold, int keep);
 
-List Diagnostics_entries(Diagnostics diag);
-
 int Diagnostics_reached_limit(Diagnostics diag);
-
-void Diagnostics_report(Diagnostics diag, Symbol code, String message, List location, List notes);
 
 int diagnostics_write_json(String path);
 
-void Compiler_print_diagnostic(Compiler compiler, List entry);
-
-List Compiler_origin_location(Compiler compiler, int occurrence);
-
-String Compiler_display_path(Compiler compiler, String path);
-
-List Compiler_token_location(Compiler compiler, Token token);
-
-String Compiler_token_source(Compiler c, Token token, int * line);
-
 String Compiler_file_prefix(Compiler c);
-
-int Compiler_token_column(Compiler c, Token token);
 
 String Compiler_text_source(Compiler c, int position, int * offset);
 
@@ -67,15 +49,33 @@ _Noreturn void Compiler_report_error(Compiler compiler, Symbol code, String mess
 
 void Compiler_report_problem(Compiler c, Symbol code, String message, Token token, List notes);
 
+void Diagnostics_report(Diagnostics diag, Symbol code, String message, List location, List notes);
+
 void Compiler_report_warning(Compiler c, Symbol code, String message, Token token, List notes);
+
+List Compiler_origin_location(Compiler compiler, int occurrence);
+
+List Compiler_token_location(Compiler compiler, Token token);
+
+String Compiler_display_path(Compiler compiler, String path);
+
+String Compiler_token_source(Compiler c, Token token, int * line);
+
+int Compiler_token_column(Compiler c, Token token);
 
 void Compiler_report_warning_at(Compiler compiler, Symbol code, String message, List location, List notes);
 
+void Compiler_print_diagnostic(Compiler compiler, List entry);
+
 void Compiler_take_diagnostics(Compiler c, Compiler child);
+
+void Diagnostics_reset(Diagnostics diag);
 
 int Compiler_error_count(Compiler compiler);
 
 List Compiler_diagnostics(Compiler compiler);
+
+List Diagnostics_entries(Diagnostics diag);
 
 void Compiler_dump_tokens(Compiler compiler);
 

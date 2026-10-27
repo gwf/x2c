@@ -46,19 +46,40 @@ static inline Var Token_var(Token x){
   return Var_new(42948956, x);
 }
 
+typedef struct _LayoutLine{
+  int first, last, indent, directive;
+}
+_LayoutLine;
+
+typedef struct _LayoutEdit{
+  String before, after;
+  Symbol type;
+}
+_LayoutEdit;
+
+typedef struct _LayoutHeader{
+  int aggregate, enumeration, labeled;
+}
+_LayoutHeader;
+
+typedef struct _Layout{
+  struct Token * all;
+  Token * sig;
+  Token error_at;
+  int * depths, * indents;
+  char * ternary, * enums;
+  _LayoutLine * lines;
+  _LayoutEdit * edits;
+  String * closers;
+  int count, nsig, nlines, top;
+}
+_Layout;
+
 static int _step(Tokenizer t);
 
 static int _end_of_file(Tokenizer t);
 
 static int _language_tokens(Tokenizer t);
-
-static int _common_tokens(Tokenizer t);
-
-static int _preprocessor(Tokenizer t);
-
-static int _number(Tokenizer tokenizer);
-
-static int _named_reference(Tokenizer tokenizer);
 
 static int _percent_tokens(Tokenizer t);
 
@@ -68,9 +89,15 @@ static int _c_tokens(Tokenizer tokenizer);
 
 static int _lisp_tokens(Tokenizer t);
 
+static int _common_tokens(Tokenizer t);
+
+static int _preprocessor(Tokenizer t);
+
 static int _lisp_prefix(Tokenizer t, int list, int collection);
 
 static int _lisp_punctuation(Tokenizer t, int list, int collection);
+
+static int _number(Tokenizer tokenizer);
 
 static int _lisp_symbol(Tokenizer t);
 
@@ -79,6 +106,8 @@ static int _collection_atom(Tokenizer t);
 static int _symbol_set_tokens(Tokenizer t);
 
 static int _string_tokens(Tokenizer t);
+
+static int _named_reference(Tokenizer tokenizer);
 
 static int _status_scanner(Tokenizer tokenizer, int(* scanner)(char *, Symbol *), Symbol type);
 
@@ -112,42 +141,11 @@ static Token _significant_before(Tokenizer tokenizer, Token token);
 
 static void _layout(Tokenizer t);
 
-typedef struct _LayoutLine{
-  int first, last, indent, directive;
-}
-_LayoutLine;
-
-typedef struct _LayoutEdit{
-  String before, after;
-  Symbol type;
-}
-_LayoutEdit;
-
-typedef struct _LayoutHeader{
-  int aggregate, enumeration, labeled;
-}
-_LayoutHeader;
-
-typedef struct _Layout{
-  struct Token * all;
-  Token * sig;
-  Token error_at;
-  int * depths, * indents;
-  char * ternary, * enums;
-  _LayoutLine * lines;
-  _LayoutEdit * edits;
-  String * closers;
-  int count, nsig, nlines, top;
-}
-_Layout;
+static _Layout _layout_open(Tokenizer t);
 
 static void * _layout_alloc(size_t count, size_t size);
 
-static _Layout _layout_open(Tokenizer t);
-
 static void _close(_Layout * l);
-
-static _LayoutEdit * _edit(_Layout * l, int k);
 
 static void _split_lines(_Layout * l);
 
@@ -174,6 +172,8 @@ static void _one_line_body(_Layout * l, _LayoutLine line);
 static int _hole(_Layout * l, _LayoutLine line);
 
 static int _condition(_Layout * l, int first, int colon, String body);
+
+static _LayoutEdit * _edit(_Layout * l, int k);
 
 static int _control_keyword(_Layout * l, int first, int colon);
 
@@ -500,17 +500,9 @@ unsigned Token_hash(Token t){
   return x2c_hash_bytes(0, t, sizeof(struct Token));
 }
 
-int Token_equal(Token a, Token b){
-  if((void *) a ==(void *) b) return 1;
-  if(! a || ! b) return 0;
-  return memcmp(a, b, sizeof(struct Token)) == 0;
-}
-
-String Token_str(Token token){
-  return token -> text;
-}
-
 static Var String_var(String);
+
+String Token_str(Token token);
 
 String Symbol_str(Symbol);
 
@@ -529,6 +521,10 @@ String Token_repr(Token token){
   return String_join(NULL, cons(String_var(head), cons(String_var(_6), cons(String_var(location), cons(String_var(_6), cons(String_var(extent), cons(String_var(_7), NULL)))))));
 }
 
+String Token_str(Token token){
+  return token -> text;
+}
+
 int Tokenizer_error(Tokenizer tokenizer);
 
 void Tokenizer_scan(Tokenizer t){
@@ -541,6 +537,77 @@ void Tokenizer_scan(Tokenizer t){
   if(t -> layout) _layout(t);
 }
 
+int Token_equal(Token a, Token b){
+  if((void *) a ==(void *) b) return 1;
+  if(! a || ! b) return 0;
+  return memcmp(a, b, sizeof(struct Token)) == 0;
+}
+
+int Tokenizer_tokenize(Tokenizer t, int len, Symbol type);
+
+int Tokenizer_do_scanner(Tokenizer t, int(* scanner)(char *), Symbol type){
+  int len = scanner(t -> text + t -> pos);
+  if(len > 0) return Tokenizer_tokenize(t, len, type);
+  if(len < 0) return Tokenizer_error(t);
+  return 0;
+}
+
+int Tokenizer_error(Tokenizer tokenizer){
+  return _error(tokenizer, 28682226919752);
+}
+
+String String_new_len(const char *, int);
+
+static Bytes Bytes_append(Bytes, const void *, size_t);
+
+void scan_next_line_col(char *, int, int *, int *);
+
+int Tokenizer_tokenize(Tokenizer t, int len, Symbol type){
+  String text = String_new_len(t -> text + t -> pos, len);
+  struct Token tok ={
+    .type = type, .len = len, .text = text, .line = t -> line, .col = t -> col, .pos = t -> pos
+  }
+  ;
+  t -> tokens = Bytes_append(t -> tokens, & tok, 1);
+  scan_next_line_col(t -> text + t -> pos, len, &(t -> line), &(t -> col));
+  t -> pos += len;
+  return 1;
+}
+
+Array Array_update_n(Array, unsigned, ...);
+
+Array Array_new(void);
+
+static Var Symbol_var(Symbol);
+
+Bytes Bytes_new(size_t);
+
+void Tokenizer_init(Tokenizer tokenizer, char * text, Symbol mode){
+  tokenizer -> text = text ? text : "";
+  tokenizer -> line = 1;
+  tokenizer -> col = 1;
+  tokenizer -> scan_status = 982;
+  tokenizer -> modes = Array_update_n(Array_new(), 1, Symbol_var(mode));
+  tokenizer -> tokens = Bytes_new(sizeof(struct Token));
+}
+
+Token Tokenizer_next(Tokenizer tokenizer){
+  if(! tokenizer) return NULL;
+  {
+    if(tokenizer -> cursor && tokenizer -> cursor -> type == 11212) return tokenizer -> cursor;
+    if(! tokenizer -> cursor && ! Bytes_len(tokenizer -> tokens)) return NULL;
+    Token token = tokenizer -> cursor ? tokenizer -> cursor + 1 :(void *) tokenizer -> tokens;
+    while(token -> type == 40896714 || token -> type == 7477210024) token ++;
+    tokenizer -> cursor = token;
+    return token;
+  }
+
+}
+
+Symbol Tokenizer_status(Tokenizer t){
+  return t ? t -> scan_status : 28682226919752;
+}
+
 static int _step(Tokenizer t){
   switch(_scan_mode(t)){
     case 3945159 : case 1059020479160805 : return _language_tokens(t);
@@ -551,8 +618,6 @@ static int _step(Tokenizer t){
   return 0;
 }
 
-int Tokenizer_tokenize(Tokenizer t, int len, Symbol type);
-
 static int _end_of_file(Tokenizer t){
   if(t -> text[t -> pos] == '\0') return Tokenizer_tokenize(t, 0, 11212);
   return 0;
@@ -562,7 +627,71 @@ static int _language_tokens(Tokenizer t){
   return _common_tokens(t) ||((t -> text[t -> pos] == '$' || t -> text[t -> pos] == '@') && _named_reference(t)) || _percent_tokens(t) || _angle_symbol_literal(t) || _c_tokens(t);
 }
 
-int Tokenizer_do_scanner(Tokenizer t, int(* scanner)(char *), Symbol type);
+Symbol Symbol_new_len(const char *, int);
+
+static int _percent_tokens(Tokenizer t){
+  char * text = t -> text + t -> pos;
+  if(text[0] != '%' || ! text[1]) return 0;
+  char next = text[1];
+  if(next == '!'){
+    if(_percent_is_operator(t)) return _operator(t, 1);
+    return Tokenizer_tokenize(t, 2, Symbol_new_len(text, 2));
+  }
+  if(! strchr("([{<\"", next)) return 0;
+  int quoted = next == '"' || next == '[' ||(next == '<' && text[2] == '<');
+  if(! quoted && _percent_is_operator(t)) return _operator(t, 1);
+  if(next == '<' && text[2] != '<') return Tokenizer_error(t);
+  return _operator(t, next == '<' ? 3 : 2);
+}
+
+int scan_symbol_literal(char *);
+
+static int _angle_symbol_literal(Tokenizer tokenizer){
+  char * text = tokenizer -> text + tokenizer -> pos;
+  if(text[0] != '<' || ! _can_start_symbol_literal(tokenizer)) return 0;
+  int len = scan_symbol_literal(text);
+  if(len > 0) return Tokenizer_tokenize(tokenizer, len, 865658429314008);
+  if(len < 0) return Tokenizer_error(tokenizer);
+  return 0;
+}
+
+int scan_c_string_status(char *, Symbol *);
+
+static int scan_ascii_alpha(int);
+
+int scan_identifier(char *);
+
+Symbol scan_keyword_type(const char *, int);
+
+int scan_c_operator(char *);
+
+static int _c_tokens(Tokenizer tokenizer){
+  static const char * opchars = "-,;:!?.()[]{}*/&%^+<=>|~@";
+  char * text = tokenizer -> text + tokenizer -> pos;
+  int n;
+  if(text[0] == '"') return _status_scanner(tokenizer, scan_c_string_status, 27051791223990);
+  if(text[0] == '_' || scan_ascii_alpha((unsigned char) text[0])){
+    n = scan_identifier(text);
+    Symbol type = scan_keyword_type(text, n);
+    return Tokenizer_tokenize(tokenizer, n, type ? type : 19147688);
+  }
+  if(strchr(opchars, text[0]) &&(n = scan_c_operator(text)) > 0) return _operator(tokenizer, n);
+  return 0;
+}
+
+int scan_atom_status(char *, Symbol *);
+
+static int _lisp_tokens(Tokenizer t){
+  Symbol mode = _scan_mode(t);
+  int list = mode == 806120, collection = mode == 3313778 || mode == 26720;
+  if(collection && _common_tokens(t)) return 1;
+  if(_lisp_prefix(t, list, collection)) return 1;
+  int punctuation = _lisp_punctuation(t, list, collection);
+  if(punctuation >= 0) return punctuation;
+  if(collection) return _collection_atom(t);
+  if(_common_tokens(t)) return 1;
+  return _status_scanner(t, scan_atom_status, list ? 845368370138 : 19147688);
+}
 
 int scan_white_space(char *);
 
@@ -608,91 +737,6 @@ static int _preprocessor(Tokenizer t){
   return 1;
 }
 
-int scan_number_typed(char *, Symbol *);
-
-static int _number(Tokenizer tokenizer){
-  char * text = tokenizer -> text + tokenizer -> pos;
-  Symbol type;
-  int len = scan_number_typed(text, & type);
-  if(len < 0) return _error(tokenizer, 28682226919752);
-  if(len == 0) return 0;
-  type =(type == 19368) ? 26417777576 : 27051797805160;
-  return Tokenizer_tokenize(tokenizer, len, type);
-}
-
-static int scan_ascii_alpha(int);
-
-int scan_identifier(char *);
-
-static int _named_reference(Tokenizer tokenizer){
-  char * text = tokenizer -> text + tokenizer -> pos;
-  _operator(tokenizer, 1);
-  if(text[1] == '_' || scan_ascii_alpha((unsigned char) text[1])) return Tokenizer_do_scanner(tokenizer, scan_identifier, 19147688);
-  return 1;
-}
-
-Symbol Symbol_new_len(const char *, int);
-
-static int _percent_tokens(Tokenizer t){
-  char * text = t -> text + t -> pos;
-  if(text[0] != '%' || ! text[1]) return 0;
-  char next = text[1];
-  if(next == '!'){
-    if(_percent_is_operator(t)) return _operator(t, 1);
-    return Tokenizer_tokenize(t, 2, Symbol_new_len(text, 2));
-  }
-  if(! strchr("([{<\"", next)) return 0;
-  int quoted = next == '"' || next == '[' ||(next == '<' && text[2] == '<');
-  if(! quoted && _percent_is_operator(t)) return _operator(t, 1);
-  if(next == '<' && text[2] != '<') return Tokenizer_error(t);
-  return _operator(t, next == '<' ? 3 : 2);
-}
-
-int scan_symbol_literal(char *);
-
-static int _angle_symbol_literal(Tokenizer tokenizer){
-  char * text = tokenizer -> text + tokenizer -> pos;
-  if(text[0] != '<' || ! _can_start_symbol_literal(tokenizer)) return 0;
-  int len = scan_symbol_literal(text);
-  if(len > 0) return Tokenizer_tokenize(tokenizer, len, 865658429314008);
-  if(len < 0) return Tokenizer_error(tokenizer);
-  return 0;
-}
-
-int scan_c_string_status(char *, Symbol *);
-
-Symbol scan_keyword_type(const char *, int);
-
-int scan_c_operator(char *);
-
-static int _c_tokens(Tokenizer tokenizer){
-  static const char * opchars = "-,;:!?.()[]{}*/&%^+<=>|~@";
-  char * text = tokenizer -> text + tokenizer -> pos;
-  int n;
-  if(text[0] == '"') return _status_scanner(tokenizer, scan_c_string_status, 27051791223990);
-  if(text[0] == '_' || scan_ascii_alpha((unsigned char) text[0])){
-    n = scan_identifier(text);
-    Symbol type = scan_keyword_type(text, n);
-    return Tokenizer_tokenize(tokenizer, n, type ? type : 19147688);
-  }
-  if(strchr(opchars, text[0]) &&(n = scan_c_operator(text)) > 0) return _operator(tokenizer, n);
-  return 0;
-}
-
-int scan_atom_status(char *, Symbol *);
-
-static int _lisp_tokens(Tokenizer t){
-  Symbol mode = _scan_mode(t);
-  int list = mode == 806120, collection = mode == 3313778 || mode == 26720;
-  if(collection && _common_tokens(t)) return 1;
-  if(_lisp_prefix(t, list, collection)) return 1;
-  int punctuation = _lisp_punctuation(t, list, collection);
-  if(punctuation >= 0) return punctuation;
-  if(collection) return _collection_atom(t);
-  if(_common_tokens(t)) return 1;
-  return _status_scanner(t, scan_atom_status, list ? 845368370138 : 19147688);
-}
-
 int strncmp(const char *, const char *, size_t);
 
 static int _lisp_prefix(Tokenizer t, int list, int collection){
@@ -727,6 +771,18 @@ static int _lisp_punctuation(Tokenizer t, int list, int collection){
     break;
   }
   return - 1;
+}
+
+int scan_number_typed(char *, Symbol *);
+
+static int _number(Tokenizer tokenizer){
+  char * text = tokenizer -> text + tokenizer -> pos;
+  Symbol type;
+  int len = scan_number_typed(text, & type);
+  if(len < 0) return _error(tokenizer, 28682226919752);
+  if(len == 0) return 0;
+  type =(type == 19368) ? 26417777576 : 27051797805160;
+  return Tokenizer_tokenize(tokenizer, len, type);
 }
 
 int scan_symbol_literal_status(char *, Symbol *);
@@ -782,29 +838,11 @@ static int _string_tokens(Tokenizer t){
   return Tokenizer_tokenize(t, len, 41153276840);
 }
 
-String String_new_len(const char *, int);
-
-static Bytes Bytes_append(Bytes, const void *, size_t);
-
-void scan_next_line_col(char *, int, int *, int *);
-
-int Tokenizer_tokenize(Tokenizer t, int len, Symbol type){
-  String text = String_new_len(t -> text + t -> pos, len);
-  struct Token tok ={
-    .type = type, .len = len, .text = text, .line = t -> line, .col = t -> col, .pos = t -> pos
-  }
-  ;
-  t -> tokens = Bytes_append(t -> tokens, & tok, 1);
-  scan_next_line_col(t -> text + t -> pos, len, &(t -> line), &(t -> col));
-  t -> pos += len;
+static int _named_reference(Tokenizer tokenizer){
+  char * text = tokenizer -> text + tokenizer -> pos;
+  _operator(tokenizer, 1);
+  if(text[1] == '_' || scan_ascii_alpha((unsigned char) text[1])) return Tokenizer_do_scanner(tokenizer, scan_identifier, 19147688);
   return 1;
-}
-
-int Tokenizer_do_scanner(Tokenizer t, int(* scanner)(char *), Symbol type){
-  int len = scanner(t -> text + t -> pos);
-  if(len > 0) return Tokenizer_tokenize(t, len, type);
-  if(len < 0) return Tokenizer_error(t);
-  return 0;
 }
 
 static int _status_scanner(Tokenizer tokenizer, int(* scanner)(char *, Symbol *), Symbol type){
@@ -815,10 +853,6 @@ static int _status_scanner(Tokenizer tokenizer, int(* scanner)(char *, Symbol *)
   return 0;
 }
 
-int Tokenizer_error(Tokenizer tokenizer){
-  return _error(tokenizer, 28682226919752);
-}
-
 static int _error(Tokenizer tokenizer, Symbol status){
   if(tokenizer -> scan_status == 982) tokenizer -> scan_status = status;
   Tokenizer_tokenize(tokenizer, 0, 11703268);
@@ -827,8 +861,6 @@ static int _error(Tokenizer tokenizer, Symbol status){
 }
 
 Var Array_push(Array, Var);
-
-static Var Symbol_var(Symbol);
 
 Var Array_take_last(Array);
 
@@ -1060,21 +1092,6 @@ static void _layout(Tokenizer t){
 
 }
 
-#include "error.h"
-
-
-
-
-static void * _layout_alloc(size_t count, size_t size){
-  void * storage = calloc(count, size);
-  if(! storage){
-    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/tokenizer.x",.function = "_layout_alloc",.line = 629,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_0, 97614135954008, 0);
-    __builtin_unreachable();
-  }
-  return storage;
-}
-
 static _Layout _layout_open(Tokenizer t){
   int count = Bytes_len(t -> tokens) - 1;
   _Layout l ={
@@ -1083,6 +1100,21 @@ static _Layout _layout_open(Tokenizer t){
   ;
   for(int i = 0;  i < count;  i ++) if(l.all[i].type != 40896714 && l.all[i].type != 7477210024) l.sig[l.nsig ++] = & l.all[i];
   return l;
+}
+
+#include "error.h"
+
+
+
+
+static void * _layout_alloc(size_t count, size_t size){
+  void * storage = calloc(count, size);
+  if(! storage){
+    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/tokenizer.x",.function = "_layout_alloc",.line = 685,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_0, 97614135954008, 0);
+    __builtin_unreachable();
+  }
+  return storage;
 }
 
 static void _close(_Layout * l){
@@ -1094,10 +1126,6 @@ static void _close(_Layout * l){
   free((* l).closers);
   free((* l).enums);
   free((* l).ternary);
-}
-
-static _LayoutEdit * _edit(_Layout * l, int k){
-  return &(* l).edits[(* l).sig[k] -(* l).all];
 }
 
 static void _split_lines(_Layout * l){
@@ -1255,6 +1283,10 @@ static int _condition(_Layout * l, int first, int colon, String body){
   return 1;
 }
 
+static _LayoutEdit * _edit(_Layout * l, int k){
+  return &(* l).edits[(* l).sig[k] -(* l).all];
+}
+
 static int _control_keyword(_Layout * l, int first, int colon){
   int key = - 1;
   for(int m = first;  m < colon;  m ++) if(!(* l).depths[m] && _conditional((* l).sig[m]) &&(m == first || ! String_equal((* l).sig[m - 1] -> text, _14))) key = m;
@@ -1266,8 +1298,6 @@ static int _wrapped(_Layout * l, int key, int colon){
   for(int m = key + 2;  wrapped && m < colon - 1;  m ++) wrapped =(* l).depths[m] > 0;
   return wrapped;
 }
-
-Bytes Bytes_new(size_t);
 
 static Bytes _emit(_Layout * l){
   Bytes out = Bytes_new(sizeof(struct Token));
@@ -1326,36 +1356,6 @@ static inline int _conditional(Token t){
 
 static int _is_label(String word){
   return String_equal(word, _31) || String_equal(word, _32) || String_equal(word, _33);
-}
-
-Array Array_update_n(Array, unsigned, ...);
-
-Array Array_new(void);
-
-void Tokenizer_init(Tokenizer tokenizer, char * text, Symbol mode){
-  tokenizer -> text = text ? text : "";
-  tokenizer -> line = 1;
-  tokenizer -> col = 1;
-  tokenizer -> scan_status = 982;
-  tokenizer -> modes = Array_update_n(Array_new(), 1, Symbol_var(mode));
-  tokenizer -> tokens = Bytes_new(sizeof(struct Token));
-}
-
-Token Tokenizer_next(Tokenizer tokenizer){
-  if(! tokenizer) return NULL;
-  {
-    if(tokenizer -> cursor && tokenizer -> cursor -> type == 11212) return tokenizer -> cursor;
-    if(! tokenizer -> cursor && ! Bytes_len(tokenizer -> tokens)) return NULL;
-    Token token = tokenizer -> cursor ? tokenizer -> cursor + 1 :(void *) tokenizer -> tokens;
-    while(token -> type == 40896714 || token -> type == 7477210024) token ++;
-    tokenizer -> cursor = token;
-    return token;
-  }
-
-}
-
-Symbol Tokenizer_status(Tokenizer t){
-  return t ? t -> scan_status : 28682226919752;
 }
 
 static inline String _x2c_gensym_proto_token_str_0(Var a0){

@@ -64,35 +64,17 @@ void Buffer_cleanup(Buffer _x2c_gensym_macro_value_0){
   Buffer_free(_x2c_gensym_macro_value_0);
 }
 
+Buffer Buffer_write_len(Buffer buf, const char * text, size_t length);
+
 #include "error.h"
 
 
 
 
-Buffer Buffer_write_len(Buffer buf, const char * text, size_t length){
-  if(! length) return buf;
-  if(! text){
-    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/buffer.x",.function = "Buffer_write_len",.line = 56,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_0, 4372499598, 0);
-    __builtin_unreachable();
-  }
-  if(length == 1) return _write_char(buf, * text);
-  if(memchr(text, '\0', length)){
-    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/buffer.x",.function = "Buffer_write_len",.line = 58,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_1, 4372499598, 1, Symbol_var(46228810), int_var(0));
-    __builtin_unreachable();
-  }
-  _LineState next = _state_after(buf, text, length);
-  Block_append(buf -> content, text, length);
-  buf -> pos = next.pos;
-  buf -> _indent = next.indent;
-  return buf;
-}
-
 Buffer Buffer_write(Buffer buf, const char * text){
   if(! text){
-    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/buffer.x",.function = "Buffer_write",.line = 72,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_2, 4372499598, 0);
+    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/buffer.x",.function = "Buffer_write",.line = 51,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_0, 4372499598, 0);
     __builtin_unreachable();
   }
   return Buffer_write_len(buf, text, strlen(text));
@@ -105,8 +87,8 @@ Buffer Buffer_printf(Buffer buf, const char * format, ...){
   int length = vsnprintf(stack, sizeof stack, format, args);
   va_end(args);
   if(length < 0){
-    static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/buffer.x",.function = "Buffer_printf",.line = 88,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_3, 435316840, 0);
+    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/buffer.x",.function = "Buffer_printf",.line = 67,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_1, 435316840, 0);
     __builtin_unreachable();
   }
   if((size_t) length < sizeof stack) return Buffer_write_len(buf, stack, length);
@@ -127,8 +109,8 @@ Buffer Buffer_printf(Buffer buf, const char * format, ...){
       int written = vsnprintf(bytes, (size_t) length + 1, format, args);
       va_end(args);
       if(written < 0){
-        static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/buffer.x",.function = "Buffer_printf",.line = 95,.runtime = 1};
-        x2c_error_raise_n(& _x2c_gensym_error_site_4, 435316840, 0);
+        static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/buffer.x",.function = "Buffer_printf",.line = 74,.runtime = 1};
+        x2c_error_raise_n(& _x2c_gensym_error_site_2, 435316840, 0);
         __builtin_unreachable();
       }
       {
@@ -146,30 +128,23 @@ Buffer Buffer_printf(Buffer buf, const char * format, ...){
 
 }
 
-Buffer Buffer_write_char(Buffer buf, char value){
-  return _write_char(buf, value);
-}
-
-static Buffer _write_char(Buffer buf, char value){
-  if(! value){
-    static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/buffer.x",.function = "_write_char",.line = 109,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_5, 4372499598, 1, Symbol_var(46228810), int_var(0));
+Buffer Buffer_write_len(Buffer buf, const char * text, size_t length){
+  if(! length) return buf;
+  if(! text){
+    static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/buffer.x",.function = "Buffer_write_len",.line = 89,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_3, 4372499598, 0);
     __builtin_unreachable();
   }
-  Block_append(buf -> content, & value, 1);
-  _advance(buf, value, 1);
-  return buf;
-}
-
-Buffer Buffer_write_repeat(Buffer buf, char value, size_t count){
-  if(! count) return buf;
-  if(! value){
-    static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/buffer.x",.function = "Buffer_write_repeat",.line = 122,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_6, 4372499598, 1, Symbol_var(46228810), int_var(0));
+  if(length == 1) return _write_char(buf, * text);
+  if(memchr(text, '\0', length)){
+    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/buffer.x",.function = "Buffer_write_len",.line = 91,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_4, 4372499598, 1, Symbol_var(46228810), int_var(0));
     __builtin_unreachable();
   }
-  Block_append_fill(buf -> content, & value, count);
-  _advance(buf, value, count);
+  _LineState next = _state_after(buf, text, length);
+  Block_append(buf -> content, text, length);
+  buf -> pos = next.pos;
+  buf -> _indent = next.indent;
   return buf;
 }
 
@@ -180,63 +155,28 @@ Buffer Buffer_unwrite(Buffer buf, size_t count){
   return buf;
 }
 
-static void _advance(Buffer buf, char value, size_t count){
-  if(value == '\n') buf -> pos = buf -> _indent = 0;
-  else{
-    if(value == ' ' && buf -> pos == buf -> _indent) buf -> _indent += count;
-    buf -> pos += count;
-  }
-
-}
-
-static _LineState _state_after(Buffer buf, const char * text, size_t length){
-  size_t start = _last_line_start(text, length);
-  if(start != SIZE_MAX){
-    size_t pos = length - start;
-    return(_LineState){
-      pos, _leading_spaces(text + start, pos)
-    }
-    ;
-  }
-  size_t indent = buf -> _indent;
-  if(buf -> pos == buf -> _indent) indent += _leading_spaces(text, length);
-  return(_LineState){
-    buf -> pos + length, indent
-  }
-  ;
-}
-
-static size_t _last_line_start(const char * text, size_t length){
-  size_t start = SIZE_MAX;
-  const char * newline = memchr(text, '\n', length);
-  while(newline){
-    start =(size_t)(newline - text) + 1;
-    newline = memchr(text + start, '\n', length - start);
-  }
-  return start;
-}
-
-static size_t _leading_spaces(const char * text, size_t limit){
-  size_t n = 0;
-  while(n < limit && text[n] == ' ') n ++;
-  return n;
-}
-
-static void _recompute_line_state(Buffer buf){
-  const char * text = buf -> content -> bytes;
-  size_t length = buf -> content -> length;
-  size_t start = length;
-  while(start && text[start - 1] != '\n') start --;
-  buf -> pos = length - start;
-  buf -> _indent = _leading_spaces(text + start, buf -> pos);
-}
+Buffer Buffer_write_repeat(Buffer buf, char value, size_t count);
 
 Buffer Buffer_pad(Buffer buf){
   return Buffer_write_repeat(buf, ' ', buf -> padding);
 }
 
+Buffer Buffer_indent(Buffer buf);
+
+Buffer Buffer_newline(Buffer buf);
+
+Buffer Buffer_newline_indent(Buffer buf){
+  return Buffer_indent(Buffer_newline(buf));
+}
+
+Buffer Buffer_write_char(Buffer buf, char value);
+
 Buffer Buffer_newline(Buffer buf){
   return Buffer_write_char(buf, '\n');
+}
+
+Buffer Buffer_write_char(Buffer buf, char value){
+  return _write_char(buf, value);
 }
 
 size_t Buffer_tabstop(Buffer buf);
@@ -245,8 +185,16 @@ Buffer Buffer_indent(Buffer buf){
   return Buffer_write_repeat(buf, ' ', Buffer_tabstop(buf));
 }
 
-Buffer Buffer_newline_indent(Buffer buf){
-  return Buffer_indent(Buffer_newline(buf));
+Buffer Buffer_write_repeat(Buffer buf, char value, size_t count){
+  if(! count) return buf;
+  if(! value){
+    static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/buffer.x",.function = "Buffer_write_repeat",.line = 139,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_5, 4372499598, 1, Symbol_var(46228810), int_var(0));
+    __builtin_unreachable();
+  }
+  Block_append_fill(buf -> content, & value, count);
+  _advance(buf, value, count);
+  return buf;
 }
 
 Buffer Buffer_push(Buffer buf){
@@ -265,6 +213,19 @@ size_t Buffer_tabstop(Buffer buf){
   return indents[buf -> indents -> length - 1];
 }
 
+char Buffer_get(Buffer buf, ptrdiff_t index);
+
+int Buffer_getindex(Buffer buf, int index){
+  return Buffer_get(buf, index);
+}
+
+int Buffer_try_get(Buffer buf, ptrdiff_t index, char * out);
+
+char Buffer_get(Buffer buf, ptrdiff_t index){
+  char out;
+  return Buffer_try_get(buf, index, &(out)) ? out : '\0';
+}
+
 int Buffer_truth(Buffer b);
 
 int Buffer_try_get(Buffer buf, ptrdiff_t index, char * out){
@@ -281,15 +242,6 @@ int Buffer_try_get(Buffer buf, ptrdiff_t index, char * out){
   return 1;
 }
 
-char Buffer_get(Buffer buf, ptrdiff_t index){
-  char out;
-  return Buffer_try_get(buf, index, &(out)) ? out : '\0';
-}
-
-int Buffer_getindex(Buffer buf, int index){
-  return Buffer_get(buf, index);
-}
-
 size_t Buffer_len(Buffer buf){
   return Buffer_truth(buf) ? buf -> content -> length : 0;
 }
@@ -302,8 +254,8 @@ String Buffer_str(Buffer buf){
     {
       Var _x2c_gensym_literal_part_0 = Var_box_ulong(length);
       {
-        static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/buffer.x",.function = "Buffer_str",.line = 270,.runtime = 1};
-        x2c_error_raise_n(& _x2c_gensym_error_site_7, 1358596898646632, 2, Symbol_var(1265290), _x2c_gensym_literal_part_0, Symbol_var(25782888), int_var(limit));
+        static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/buffer.x",.function = "Buffer_str",.line = 214,.runtime = 1};
+        x2c_error_raise_n(& _x2c_gensym_error_site_6, 1358596898646632, 2, Symbol_var(1265290), _x2c_gensym_literal_part_0, Symbol_var(25782888), int_var(limit));
         __builtin_unreachable();
       }
 
@@ -384,6 +336,68 @@ void Buffer_free(Buffer buf){
   Block_free(buf -> content);
   Block_free(buf -> indents);
   xfree(buf);
+}
+
+static Buffer _write_char(Buffer buf, char value){
+  if(! value){
+    static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/buffer.x",.function = "_write_char",.line = 303,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_7, 4372499598, 1, Symbol_var(46228810), int_var(0));
+    __builtin_unreachable();
+  }
+  Block_append(buf -> content, & value, 1);
+  _advance(buf, value, 1);
+  return buf;
+}
+
+static void _advance(Buffer buf, char value, size_t count){
+  if(value == '\n') buf -> pos = buf -> _indent = 0;
+  else{
+    if(value == ' ' && buf -> pos == buf -> _indent) buf -> _indent += count;
+    buf -> pos += count;
+  }
+
+}
+
+static _LineState _state_after(Buffer buf, const char * text, size_t length){
+  size_t start = _last_line_start(text, length);
+  if(start != SIZE_MAX){
+    size_t pos = length - start;
+    return(_LineState){
+      pos, _leading_spaces(text + start, pos)
+    }
+    ;
+  }
+  size_t indent = buf -> _indent;
+  if(buf -> pos == buf -> _indent) indent += _leading_spaces(text, length);
+  return(_LineState){
+    buf -> pos + length, indent
+  }
+  ;
+}
+
+static size_t _last_line_start(const char * text, size_t length){
+  size_t start = SIZE_MAX;
+  const char * newline = memchr(text, '\n', length);
+  while(newline){
+    start =(size_t)(newline - text) + 1;
+    newline = memchr(text + start, '\n', length - start);
+  }
+  return start;
+}
+
+static size_t _leading_spaces(const char * text, size_t limit){
+  size_t n = 0;
+  while(n < limit && text[n] == ' ') n ++;
+  return n;
+}
+
+static void _recompute_line_state(Buffer buf){
+  const char * text = buf -> content -> bytes;
+  size_t length = buf -> content -> length;
+  size_t start = length;
+  while(start && text[start - 1] != '\n') start --;
+  buf -> pos = length - start;
+  buf -> _indent = _leading_spaces(text + start, buf -> pos);
 }
 
 static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0){

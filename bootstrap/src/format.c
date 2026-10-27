@@ -29,11 +29,11 @@ static void _before(Pretty * p, String token);
 
 static void _after(Pretty * p, String token, char last, String next);
 
+static int _need_space(String prev, String curr);
+
 static int _is_prefix_punct(char ch);
 
 static int _is_suffix_punct(char ch);
-
-static int _need_space(String prev, String curr);
 
 static int _token_is(String token, char ch);
 
@@ -41,11 +41,11 @@ static int _is_preprocessor(String token);
 
 static void _write_indent(Buffer buff, int indent);
 
-static void _write_newline(Buffer buff);
+static void _write_token(Buffer buff, String token, int source_line);
 
 static void _write_mapped_newline(Buffer buff, int source_line);
 
-static void _write_token(Buffer buff, String token, int source_line);
+static void _write_newline(Buffer buff);
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -193,14 +193,6 @@ static void _after(Pretty * p, String token, char last, String next){
   else(* p).prev_token = token;
 }
 
-static int _is_prefix_punct(char ch){
-  return ch == '.' || ch == '[' || ch == '(' || ch == '{';
-}
-
-static int _is_suffix_punct(char ch){
-  return ch == '(' || ch == '.' || ch == '[' || ch == ']' || ch == ')' || ch == ';' || ch == ',' || ch == '{' || ch == '}';
-}
-
 static int _need_space(String prev, String curr){
   if(! String_truth(prev) || ! String_truth(curr)) return 0;
   char p = String_getindex(prev, - 1), c = String_getindex(curr, 0);
@@ -208,6 +200,14 @@ static int _need_space(String prev, String curr){
   if(_is_suffix_punct(c)) return 0;
   if(_is_prefix_punct(p)) return 0;
   return 1;
+}
+
+static int _is_prefix_punct(char ch){
+  return ch == '.' || ch == '[' || ch == '(' || ch == '{';
+}
+
+static int _is_suffix_punct(char ch){
+  return ch == '(' || ch == '.' || ch == '[' || ch == ']' || ch == ')' || ch == ';' || ch == ',' || ch == '{' || ch == '}';
 }
 
 static int _token_is(String token, char ch){
@@ -229,16 +229,6 @@ static void _write_indent(Buffer buff, int indent){
 
 }
 
-static void _write_newline(Buffer buff){
-  while(Buffer_len(buff) > 0 && Buffer_getindex(buff, - 1) == ' ') Buffer_unwrite(buff, 1);
-  Buffer_newline(buff);
-}
-
-static void _write_mapped_newline(Buffer buff, int source_line){
-  _write_newline(buff);
-  if(source_line) Buffer_write(buff, String_join(NULL, cons(String_var(_3), cons(String_var(int_str(source_line)), cons(String_var(_6), NULL)))));
-}
-
 static void _write_token(Buffer buff, String token, int source_line){
   const char * start = token;
   while(start && * start){
@@ -252,5 +242,15 @@ static void _write_token(Buffer buff, String token, int source_line){
     start = newline + 1;
   }
 
+}
+
+static void _write_mapped_newline(Buffer buff, int source_line){
+  _write_newline(buff);
+  if(source_line) Buffer_write(buff, String_join(NULL, cons(String_var(_3), cons(String_var(int_str(source_line)), cons(String_var(_6), NULL)))));
+}
+
+static void _write_newline(Buffer buff){
+  while(Buffer_len(buff) > 0 && Buffer_getindex(buff, - 1) == ' ') Buffer_unwrite(buff, 1);
+  Buffer_newline(buff);
 }
 

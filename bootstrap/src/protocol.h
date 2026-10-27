@@ -18,23 +18,21 @@ Symbol Compiler_operator_member(Symbol op);
 
 Symbol Compiler_derived_member(Symbol op);
 
-String Compiler_reverse_converter_spelling(Compiler c, String base_name, String infix, String participant);
-
 List Compiler_publish_protocol_node(Compiler c, List node, Token participant_token, Token representation_token);
+
+String Compiler_reverse_converter_spelling(Compiler c, String base_name, String infix, String participant);
 
 void Compiler_rebuild_protocols(Compiler c, Map symbols);
 
 List Compiler_parse_protocol_declaration(Compiler c);
 
+#define PROTOCOL_VARIABLE 1
+#define PROTOCOL_VARIADIC 2
 void Compiler_resolve_protocols(Compiler c);
 
 Map Compiler_conformance_rows(Compiler c, List adoptions);
 
 void Compiler_resolve_as_declared(Compiler c, Map symbols);
-
-#define PROTOCOL_VARIABLE 1
-#define PROTOCOL_VARIADIC 2
-List Compiler_protocol_members_for(Compiler c, Type participant, Type base);
 
 List Compiler_protocol_member_names(Compiler c, Type participant);
 
@@ -44,15 +42,17 @@ void Compiler_dump_conformance(Compiler c, Map globs);
 
 List Compiler_resolve_protocol_member(Compiler c, Type participant, String member_name);
 
-List Compiler_wrapper_function(Compiler c, Type result, List binding, List params, List body);
-
-List Compiler_forward_parameters(Compiler c, List types);
+List Compiler_protocol_members_for(Compiler c, Type participant, Type base);
 
 String Compiler_protocol_update_helper(Compiler c, Type participant, String member, int postfix);
 
+List Compiler_protocol_discard_helper(Compiler c, Type participant, String member, int which);
+
 List Compiler_discard_helper(Compiler c, List binding, Type signature, String stem, int which);
 
-List Compiler_protocol_discard_helper(Compiler c, Type participant, String member, int which);
+List Compiler_wrapper_function(Compiler c, Type result, List binding, List params, List body);
+
+List Compiler_forward_parameters(Compiler c, List types);
 
 List Compiler_generate_protocol_adapters(Compiler c, List ast);
 

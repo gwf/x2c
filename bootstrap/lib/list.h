@@ -24,39 +24,21 @@ List List_cons_in(Pool pool, Var head, List tail);
 
 List List_new(List items);
 
-List cons(Var head, List tail);
-
 List List_cons(Var head, List tail);
 
 List Var_cons(Var head, List tail);
 
+List cons(Var head, List tail);
+
 unsigned List_hash(List lst);
 
-int List_equal(List a, List b);
-
 int List_compare(List a, List b);
+
+int List_equal(List a, List b);
 
 List List_promote(List lst);
 
 int List_try_own(List lst);
-
-static int List_truth(List);
-
-static inline Var car(List x){
-  return List_truth(x) ? x -> car :((void) 0, Void);
-}
-
-static inline List cdr(List x){
-  return List_truth(x) ? x -> cdr : NULL;
-}
-
-static inline Var List_car(List lst){
-  return car(lst);
-}
-
-static inline List List_cdr(List lst){
-  return cdr(lst);
-}
 
 static List Var_list_payload(Var);
 
@@ -96,6 +78,26 @@ static inline Var Var_caddr(Var var){
   return car(cdr(cdr(Var_list_payload(var))));
 }
 
+Iter List_iter(List lst, Iter dest);
+
+Var List_last(List lst);
+
+int List_contains(List lst, Var key);
+
+int List_index(List l, Var key);
+
+Var List_getindex(List list, int index);
+
+List List_nth_cdr(List list, int n);
+
+Var List_get(List list, Var key);
+
+Var List_assoc(List list, Var key);
+
+static int List_truth(List);
+
+static inline Var List_car(List lst);
+
 static inline int List_try_next(List lst, List * cursor, Var * out){
   if(! cursor) return 0;
   if(! out) return 0;
@@ -106,24 +108,6 @@ static inline int List_try_next(List lst, List * cursor, Var * out){
   return 1;
 }
 
-Iter List_iter(List lst, Iter dest);
-
-int List_len(List lst);
-
-Var List_last(List lst);
-
-int List_index(List l, Var key);
-
-int List_contains(List lst, Var key);
-
-List List_nth_cdr(List list, int n);
-
-Var List_getindex(List list, int index);
-
-Var List_get(List list, Var key);
-
-Var List_assoc(List list, Var key);
-
 List List_head(List list, unsigned count);
 
 List List_tail(List list, unsigned count);
@@ -132,25 +116,43 @@ List List_subseq(List list, int start, int stop, int step);
 
 List List_getslice(List list, int start, int stop, int step);
 
+int List_len(List lst);
+
 int List_unpack_n(List src, unsigned destination_count, ...);
 
 int List_unpack_vars_n(List src, unsigned destination_count, ...);
 
-List Array_list(Array arr);
+static inline Var List_car(List lst){
+  return car(lst);
+}
 
-List Array_list_free(Array arr);
+static inline Var car(List x){
+  return List_truth(x) ? x -> car :((void) 0, Void);
+}
+
+static inline List List_cdr(List lst){
+  return cdr(lst);
+}
+
+static inline List cdr(List x){
+  return List_truth(x) ? x -> cdr : NULL;
+}
+
+List Array_list(Array arr);
 
 Array List_array(List lst);
 
 List Map_list(Map map);
 
-List Iter_list(Iter iter);
+List Array_list_free(Array arr);
 
-List List_append(List a, List b);
+List Iter_list(Iter iter);
 
 List List_concat(List lists);
 
 List List_concat_n(unsigned list_count, ...);
+
+List List_append(List a, List b);
 
 List List_list_n(unsigned element_count, ...);
 
@@ -168,9 +170,9 @@ int List_any(List lst, Func pred);
 
 int List_all(List lst, Func pred);
 
-List List_zip_with(List a, List b, Func fn);
-
 List List_map2(List a, List b, Func fn);
+
+List List_zip_with(List a, List b, Func fn);
 
 List List_sort(List lst);
 

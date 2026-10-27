@@ -31,19 +31,19 @@ int Sym_base_scope_count(Sym s);
 
 int Sym_has_aliases(Sym s);
 
-int Sym_at_file_scope(Sym s);
-
 Block Sym_close_local_scopes(Sym s);
 
 void Sym_reopen_scopes(Sym s, Block local);
 
 Map Sym_global_symbols(Sym s);
 
+Map Sym_unit_symbols(Sym s);
+
+int Sym_at_file_scope(Sym s);
+
 Map Sym_base_symbols(Sym s);
 
 Map Sym_current_symbols(Sym s);
-
-Map Sym_unit_symbols(Sym s);
 
 Map Sym_file_statics(Sym s);
 
@@ -61,11 +61,11 @@ Map Compiler_macro_definition_locals(Compiler c);
 
 int Compiler_macro_template_local(Compiler c, List binding);
 
-void Sym_set(Sym s, List key, List type);
+List Sym_define_alias(Sym s, String name, List expression);
 
 List Sym_define(Sym s, List key, List type);
 
-List Sym_define_alias(Sym s, String name, List expression);
+void Sym_set(Sym s, List key, List type);
 
 void Sym_undefine_alias(Sym s, String name);
 
@@ -99,23 +99,17 @@ void Compiler_drop_fact(Compiler c, Var key);
 
 List Sym_get(Sym s, List key);
 
-List Sym_get_exact(Sym s, List key);
-
 int Sym_has_local(Sym s, List key);
 
 List Sym_lookup(Sym s, List key, Type * type);
 
 List Sym_reference(Sym s, List key, Type * type);
 
-List Sym_resolve_global(Sym s, List key, Type * type);
-
 List Sym_reference_global(Sym s, List key);
 
-List Sym_declare(Sym s, List context, List key, List ast);
+List Sym_resolve_global(Sym s, List key, Type * type);
 
-List Sym_declare_resolved(Sym s, List context, List key, List ast);
-
-List Sym_declared_key(Sym s, List context, List key, List ast);
+List Sym_get_exact(Sym s, List key);
 
 int Sym_is_file_static(Sym s, Var binding);
 
@@ -125,13 +119,19 @@ List Sym_bind_identity(Sym s, List context, List binding, List ast);
 
 Var Compiler_aggregate_name(Compiler c, Symbol kind, Var name, int definition);
 
+List Sym_declare(Sym s, List context, List key, List ast);
+
+List Sym_declare_resolved(Sym s, List context, List key, List ast);
+
+List Sym_declared_key(Sym s, List context, List key, List ast);
+
 void Compiler_record_declaration_visibility(Compiler c, List declaration);
 
 String Compiler_private_prefix(Compiler c, Type type);
 
-String Compiler_scoped_spelling(Compiler c, String prefix, String name);
-
 String Compiler_declared_spelling(Compiler c, String prefix, String name);
+
+String Compiler_scoped_spelling(Compiler c, String prefix, String name);
 
 List Compiler_file_prefixes(Compiler c);
 
@@ -145,19 +145,13 @@ void Compiler_register_package_member(Compiler c, String name, String member, St
 
 String Compiler_package_member_spelling(Compiler c, String name);
 
-List Compiler_imported_providers(Compiler c, String name);
-
 String Compiler_imported_spelling(Compiler c, String name);
+
+List Compiler_imported_providers(Compiler c, String name);
 
 #define RESOLVE_KEY_MAX_TYPEDEFS 64
 #define RESOLVE_KEY_MAX_HOPS (2 * RESOLVE_KEY_MAX_TYPEDEFS)
-Type Sym_resolve_key(Sym s, Type key);
-
-Type Sym_next_typedef(Sym s, Type type, int * hops);
-
 Type Sym_sole_typedef(Sym s, Type type);
-
-Type Sym_normalize_declared_type(Sym s, Type type);
 
 Type Sym_local_type(Sym s, Type type);
 
@@ -177,9 +171,9 @@ int Sym_is_named_value_type(Sym s, Type type, String name);
 
 Type Sym_lookup_field(Sym s, Type type, List field);
 
-void Sym_declare_field_order(Sym s, Type type, List fields);
+Type Sym_normalize_declared_type(Sym s, Type type);
 
-List Sym_field_order(Sym s, Type type);
+void Sym_declare_field_order(Sym s, Type type, List fields);
 
 void Sym_mark_field(Sym s, Type aggregate, Symbol mark, String name);
 
@@ -187,7 +181,13 @@ List Sym_marked_fields(Sym s, Type aggregate, Symbol mark);
 
 Type Sym_aggregate_of(Sym s, Type type);
 
+Type Sym_next_typedef(Sym s, Type type, int * hops);
+
 int Sym_same_rest_convention(Sym s, Type source, Type target);
+
+Type Sym_resolve_key(Sym s, Type key);
+
+List Sym_field_order(Sym s, Type type);
 
 void Sym_put(Sym s, Map map, Var key, Var value);
 
@@ -199,9 +199,9 @@ int SymTxn_local_macros_changed(SymTxn * s);
 
 int Sym_transacting(Sym s);
 
-void SymTxn_commit(SymTxn * s);
-
 void SymTxn_commit_transient(SymTxn * s);
+
+void SymTxn_commit(SymTxn * s);
 
 void SymTxn_rollback(SymTxn * s);
 

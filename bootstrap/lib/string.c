@@ -47,9 +47,9 @@ static inline f7_storage___StringHeader f7_storage____header(String str);
 static unsigned f7_storage____hash_n(const char * str, int length);
 static String f7_storage____from_bytes_in(Pool pool, const char * bytes, int length);
 static inline String f7_storage____store(f7_storage___StringHeader header, const char * bytes, int length, unsigned hash);
-static String _finish(String string, int length);
 static String f7_storage____intern_owned(String string);
 static void _free_unchecked(String str);
+static String _finish(String string, int length);
 static int _is_active_canonical(String str);
 static int f6_search____clamp(int index, int n);
 static const char * _find_bytes(const char * haystack, int haystack_len, const char * needle, int needle_len);
@@ -67,11 +67,11 @@ static int f8_adapters____next(Iter iter, Var * out);
 #include "scan.h"
 static inline int f6_escape____escape_byte(unsigned char ch, char * out);
 static inline char f6_escape____escape_letter(unsigned char ch);
-static int f6_escape____unescape_into(char * out, const char * src);
 static inline int f6_escape____decode_escape(const char * * at);
 static inline int f6_escape____hex_escape(const char * * at, int esc);
 static inline int f6_escape____octal_escape(const char * * at, int esc);
 static inline int f6_escape____named_escape(int esc);
+static int f6_escape____unescape_into(char * out, const char * src);
 #include <limits.h>
 #include <stdio.h>
 #include <string.h>
@@ -97,23 +97,6 @@ typedef struct f6_format___Format{
   String fmt;  int length, literal, cursor, offset;  List args;  Buffer out;
 }
 f6_format___Format;
-static void f6_format____conversion(f6_format___Format * f);
-static void f6_format____write_literal(f6_format___Format * f);
-static void f6_format____need_byte(f6_format___Format * f);
-static f6_format___Spec f6_format____spec(f6_format___Format * f);
-static int f6_format____flags(f6_format___Format * f);
-static void f6_format____width(f6_format___Format * f, f6_format___Spec * spec);
-static int f6_format____star(f6_format___Format * f);
-static void f6_format____precision(f6_format___Format * f, f6_format___Spec * spec);
-static int f6_format____decimal(f6_format___Format * f, String label);
-static int f6_format____byte(f6_format___Format * f);
-static int f6_format____digit(f6_format___Format * f);
-static Symbol f6_format____modifier(f6_format___Format * f);
-static Symbol f6_format____doubled(f6_format___Format * f, char letter, Symbol once, Symbol twice);
-static void f6_format____check(f6_format___Format * f, f6_format___Spec spec);
-static Var f6_format____take(f6_format___Format * f, String reason);
-static Buffer f6_format____print(f6_format___Format * f, f6_format___Spec spec, Var arg);
-static void f6_format____spell(f6_format___Spec s, char * out);
 static const Symbol f6_format____integer_targets[][2] ={
   {
     3453797, 3847013
@@ -133,13 +116,30 @@ static const Symbol f6_format____integer_targets[][2] ={
 
 }
 ;
+static void f6_format____conversion(f6_format___Format * f);
+static void f6_format____write_literal(f6_format___Format * f);
+static f6_format___Spec f6_format____spec(f6_format___Format * f);
+static int f6_format____flags(f6_format___Format * f);
+static void f6_format____width(f6_format___Format * f, f6_format___Spec * spec);
+static void f6_format____precision(f6_format___Format * f, f6_format___Spec * spec);
+static void f6_format____need_byte(f6_format___Format * f);
+static int f6_format____star(f6_format___Format * f);
+static int f6_format____decimal(f6_format___Format * f, String label);
+static int f6_format____digit(f6_format___Format * f);
+static Symbol f6_format____modifier(f6_format___Format * f);
+static Symbol f6_format____doubled(f6_format___Format * f, char letter, Symbol once, Symbol twice);
+static int f6_format____byte(f6_format___Format * f);
+static void f6_format____check(f6_format___Format * f, f6_format___Spec spec);
+static Var f6_format____take(f6_format___Format * f, String reason);
+static Buffer f6_format____print(f6_format___Format * f, f6_format___Spec spec, Var arg);
 static Buffer f6_format____integer(f6_format___Format * f, f6_format___Spec spec, Var arg);
+static void f6_format____spell(f6_format___Spec s, char * out);
 static Buffer f6_format____floating(f6_format___Format * f, const char * text, Symbol modifier, Var arg);
 static Buffer f6_format____character(f6_format___Format * f, const char * text, Var arg);
 static Buffer f6_format____string(f6_format___Format * f, const char * text, Var arg);
 static Var f6_format____number(f6_format___Format * f, Var arg, Symbol target);
-_Noreturn static void f6_format____format_error(int offset, String reason);
 static void f6_format____fail(f6_format___Format * f, String reason);
+_Noreturn static void f6_format____format_error(int offset, String reason);
 _Noreturn static void f6_format____nested(f6_format___Format * f, String reason, Var code, List details);
 #include <ctype.h>
 #include <errno.h>
@@ -207,15 +207,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();  if(_init_guard_) return;  _init_guard_ = 1;  _x2c_gensym_protocol_methods_0 =(VarMethods){
     .iter = _x2c_gensym_proto_split_iter_0
   }
-  ;  if(! x2c_register_builtin_descriptor(40919656, _x2c_gensym_protocol_methods_0)) x2c_register_descriptor(String_new("split"), _x2c_gensym_protocol_methods_0);  _0 = String_new("\n");  _1 = String_new("\n");  _2 = String_new("\r\n");  _3 = String_new("\"\"");  _4 = String_new("\"%s\"");  _5 = String_new("\\");  _6 = String_new("excess values");  _7 = String_new("missing value");  _8 = String_new("incomplete conversion");  _9 = String_new("width exceeds int range");  _10 = String_new("width");  _11 = String_new("missing star value");  _12 = String_new("precision");  _13 = String_new(" exceeds int range");  _14 = String_new("unsupported length modifier");  _15 = String_new("positional formats are unsupported");  _16 = String_new("unsupported conversion");  _17 = String_new("unsupported integer length");  _18 = String_new("unsupported floating length");  _19 = String_new("wide strings and characters are unsupported");  _20 = String_new("unsupported flag for conversion");  _21 = String_new("unsupported precision for %c");  _22 = String_new("%c cannot produce an embedded NUL");  _23 = String_new("string conversion failed");  _24 = String_new("value conversion failed");
-}
-
-static inline f7_storage___StringHeader f7_storage____header(String str){
-  return(f7_storage___StringHeader)((char *) str - sizeof(struct f7_storage___StringHeader));
-}
-
-static unsigned f7_storage____hash_n(const char * str, int length){
-  return x2c_hash_bytes(0, str, (size_t) length);
+  ;  if(! x2c_register_builtin_descriptor(40919656, _x2c_gensym_protocol_methods_0)) x2c_register_descriptor(String_new("split"), _x2c_gensym_protocol_methods_0);  _0 = String_new("\n");  _1 = String_new("\n");  _2 = String_new("\r\n");  _3 = String_new("\"\"");  _4 = String_new("\"%s\"");  _5 = String_new("\\");  _6 = String_new("excess values");  _7 = String_new("missing value");  _8 = String_new("width exceeds int range");  _9 = String_new("width");  _10 = String_new("precision");  _11 = String_new("incomplete conversion");  _12 = String_new("missing star value");  _13 = String_new(" exceeds int range");  _14 = String_new("unsupported length modifier");  _15 = String_new("positional formats are unsupported");  _16 = String_new("unsupported conversion");  _17 = String_new("unsupported integer length");  _18 = String_new("unsupported floating length");  _19 = String_new("wide strings and characters are unsupported");  _20 = String_new("unsupported flag for conversion");  _21 = String_new("unsupported precision for %c");  _22 = String_new("%c cannot produce an embedded NUL");  _23 = String_new("string conversion failed");  _24 = String_new("value conversion failed");
 }
 
 int String_len(String str){
@@ -235,10 +227,6 @@ int String_compare(String x, String y){
 }
 
 String x2c_string_from_bytes(const char * bytes, int length);
-String String_new(const char * str){
-  if(! str || ! * str) return NULL;  size_t length = strlen(str);  if(length > INT_MAX - 1) return NULL;  return x2c_string_from_bytes(str, (int) length);
-}
-
 String String_new_len(const char * str, int len){
   if(! str || len <= 0) return NULL;  size_t length = strnlen(str, (size_t) len);  if(length == 0) return NULL;  return x2c_string_from_bytes(str, (int) length);
 }
@@ -247,24 +235,17 @@ String String_new_in(Pool pool, const char * bytes, int length){
   if(! pool || ! bytes || length <= 0) return NULL;  size_t bounded = strnlen(bytes, (size_t) length);  if(! bounded || bounded > INT_MAX - 1) return NULL;  return f7_storage____from_bytes_in(pool, bytes, (int) bounded);
 }
 
+String String_new(const char * str);
 String String_intern(String string){
   return String_new(string);
 }
 
+String String_new(const char * str){
+  if(! str || ! * str) return NULL;  size_t length = strlen(str);  if(length > INT_MAX - 1) return NULL;  return x2c_string_from_bytes(str, (int) length);
+}
+
 String x2c_string_from_bytes(const char * bytes, int length){
   return f7_storage____from_bytes_in(Pool_current(), bytes, length);
-}
-
-String Var_as_string(Var);
-static String f7_storage____from_bytes_in(Pool pool, const char * bytes, int length){
-  if(! pool || ! bytes || length <= 0) return NULL;  unsigned hash = f7_storage____hash_n(bytes, length);  if(length <= STRING_STACK_BYTES){
-    String existing = x2c_pool_lookup_string(pool, bytes, length, hash);  if(String_truth(existing)) return existing;
-  }
-  size_t total = sizeof(struct f7_storage___StringHeader) +(size_t) length + 1;  f7_storage___StringHeader header = Pool_malloc(pool, total);  String string = f7_storage____store(header, bytes, length, hash);  if(length > STRING_STACK_BYTES) return Var_as_string(Pool_intern(pool, String_var(string), header));  Pool_insert(pool, String_var(string));  return string;
-}
-
-static inline String f7_storage____store(f7_storage___StringHeader header, const char * bytes, int length, unsigned hash){
-  header -> length = length + 1;  header -> hash = hash;  String string =(String)((char *) header + sizeof(struct f7_storage___StringHeader));  memcpy(string, bytes, length);  char * out = string;  out[length] = '\0';  return string;
 }
 
 String String_malloc(int len){
@@ -278,32 +259,11 @@ String String_intern_free(String string){
   return f7_storage____intern_owned(string);
 }
 
-static String _finish(String string, int length){
-  if(length <= 0){
-    _free_unchecked(string);  return NULL;
-  }
-  assert(memchr(string, '\0', length) == NULL);  char * out = string;  out[length] = '\0';  f7_storage___StringHeader header = f7_storage____header(string);  header -> length = length + 1;  header -> hash = f7_storage____hash_n(string, length);  return f7_storage____intern_owned(string);
-}
-
-static String f7_storage____intern_owned(String string){
-  f7_storage___StringHeader header = f7_storage____header(string);  if(! header -> hash){
-    int length = strlen(string);  header -> length = length + 1;  header -> hash = f7_storage____hash_n(string, length);
-  }
-  Pool pool = Pool_current();  String found = x2c_pool_lookup_string(pool, string, header -> length - 1, header -> hash);  if(! String_truth(found)){
-    Pool_insert(pool, String_var(string));  return string;
-  }
-  if(found != string) _free_unchecked(string);  return found;
-}
-
 void String_free(String str){
   if(str == NULL) return;  if(f7_storage____header(str) -> hash){
     Var existing = Pool_lookup(Pool_current(), String_var(str));  if(! Var_is_void(existing) && Var_string(existing) == str) return;
   }
   _free_unchecked(str);
-}
-
-static void _free_unchecked(String str){
-  if(str != NULL) Pool_free(Pool_current(), f7_storage____header(str));
 }
 
 String String_promote(String str){
@@ -318,31 +278,56 @@ int String_is_permanent(String str){
   if(! String_truth(str)) return 1;  return Pool_is_permanent(String_var(str));
 }
 
+static inline f7_storage___StringHeader f7_storage____header(String str){
+  return(f7_storage___StringHeader)((char *) str - sizeof(struct f7_storage___StringHeader));
+}
+
+static unsigned f7_storage____hash_n(const char * str, int length){
+  return x2c_hash_bytes(0, str, (size_t) length);
+}
+
+String Var_as_string(Var);
+static String f7_storage____from_bytes_in(Pool pool, const char * bytes, int length){
+  if(! pool || ! bytes || length <= 0) return NULL;  unsigned hash = f7_storage____hash_n(bytes, length);  if(length <= STRING_STACK_BYTES){
+    String existing = x2c_pool_lookup_string(pool, bytes, length, hash);  if(String_truth(existing)) return existing;
+  }
+  size_t total = sizeof(struct f7_storage___StringHeader) +(size_t) length + 1;  f7_storage___StringHeader header = Pool_malloc(pool, total);  String string = f7_storage____store(header, bytes, length, hash);  if(length > STRING_STACK_BYTES) return Var_as_string(Pool_intern(pool, String_var(string), header));  Pool_insert(pool, String_var(string));  return string;
+}
+
+static inline String f7_storage____store(f7_storage___StringHeader header, const char * bytes, int length, unsigned hash){
+  header -> length = length + 1;  header -> hash = hash;  String string =(String)((char *) header + sizeof(struct f7_storage___StringHeader));  memcpy(string, bytes, length);  char * out = string;  out[length] = '\0';  return string;
+}
+
+static String f7_storage____intern_owned(String string){
+  f7_storage___StringHeader header = f7_storage____header(string);  if(! header -> hash){
+    int length = strlen(string);  header -> length = length + 1;  header -> hash = f7_storage____hash_n(string, length);
+  }
+  Pool pool = Pool_current();  String found = x2c_pool_lookup_string(pool, string, header -> length - 1, header -> hash);  if(! String_truth(found)){
+    Pool_insert(pool, String_var(string));  return string;
+  }
+  if(found != string) _free_unchecked(string);  return found;
+}
+
+static void _free_unchecked(String str){
+  if(str != NULL) Pool_free(Pool_current(), f7_storage____header(str));
+}
+
+static String _finish(String string, int length){
+  if(length <= 0){
+    _free_unchecked(string);  return NULL;
+  }
+  assert(memchr(string, '\0', length) == NULL);  char * out = string;  out[length] = '\0';  f7_storage___StringHeader header = f7_storage____header(string);  header -> length = length + 1;  header -> hash = f7_storage____hash_n(string, length);  return f7_storage____intern_owned(string);
+}
+
 static int _is_active_canonical(String str){
   return x2c_var_identical(Pool_lookup(Pool_current(), String_var(str)), String_var(str));
-}
-
-int String_find_within(String str, String sub, int start, int end);
-int String_find(String str, String sub){
-  return String_find_within(str, sub, 0, - 1);
-}
-
-int String_find_within(String str, String sub, int start, int end){
-  int n = String_len(str), m = String_len(sub);  if(start < 0) start += n;  if(end == - 1) end = n;  else if(end < 0) end += n;  start = f6_search____clamp(start, n);  end = f6_search____clamp(end, n);  if(start + m > end) return - 1;  if(m == 0) return start;  if(! String_truth(str)) return - 1;  const char * p = _find_bytes(str + start, end - start, sub, m);  if(! p) return - 1;  return p - str;
-}
-
-static int f6_search____clamp(int index, int n){
-  if(index < 0) return 0;  return index > n ? n : index;
-}
-
-static const char * _find_bytes(const char * haystack, int haystack_len, const char * needle, int needle_len){
-  if(needle_len == 0) return haystack;  if(! haystack || haystack_len < needle_len) return NULL;  for(int i = 0;  i <= haystack_len - needle_len;  i ++) if((unsigned char) haystack[i] ==(unsigned char) needle[0] && memcmp(haystack + i, needle, needle_len) == 0) return haystack + i;  return NULL;
 }
 
 int String_rfind(String str, String sub){
   int n = String_len(str), m = String_len(sub);  if(m == 0) return n;  if(! String_truth(str) || m > n) return - 1;  for(int i = n - m;  i >= 0;  i --) if(memcmp(str + i, sub, m) == 0) return i;  return - 1;
 }
 
+int String_find_within(String str, String sub, int start, int end);
 List String_find_all(String str, String sub, int start, int end){
   if(! String_truth(str) || ! String_truth(sub)) return NULL;  Array results = Array_new();  int n = String_len(sub), pos = start;  for(; ; ){
     pos = String_find_within(str, sub, pos, end);  if(pos < 0) break;  Array_push(results, int_var(pos));  pos += n;
@@ -354,16 +339,18 @@ int String_count(String str, String sub){
   if(! String_truth(str) || ! String_truth(sub)) return 0;  return _count_matches(str, sub, - 1);
 }
 
-static int _count_matches(String str, String sub, int limit){
-  int str_len = String_len(str), sub_len = String_len(sub), count = 0, pos = 0;  while(pos <= str_len - sub_len &&(limit < 0 || count < limit)){
-    const char * found = _find_bytes(str + pos, str_len - pos, sub, sub_len);  if(! found) break;  count ++;  pos = found - str + sub_len;
-  }
-  return count;
-}
-
 int String_getindex(String str, int index);
+int String_find(String str, String sub);
 int String_contains(String str, String sub){
   if(! String_truth(sub)) return 1;  if(! String_truth(str)) return 0;  if(String_len(sub) == 1) return strchr(str, String_getindex(sub, 0)) != NULL;  return String_find(str, sub) != - 1;
+}
+
+int String_find(String str, String sub){
+  return String_find_within(str, sub, 0, - 1);
+}
+
+int String_find_within(String str, String sub, int start, int end){
+  int n = String_len(str), m = String_len(sub);  if(start < 0) start += n;  if(end == - 1) end = n;  else if(end < 0) end += n;  start = f6_search____clamp(start, n);  end = f6_search____clamp(end, n);  if(start + m > end) return - 1;  if(m == 0) return start;  if(! String_truth(str)) return - 1;  const char * p = _find_bytes(str + start, end - start, sub, m);  if(! p) return - 1;  return p - str;
 }
 
 int String_startswith(String str, String prefix){
@@ -372,6 +359,21 @@ int String_startswith(String str, String prefix){
 
 int String_endswith(String str, String suffix){
   int str_len = String_len(str), suffix_len = String_len(suffix);  if(suffix_len == 0) return 1;  return String_truth(str) && suffix_len <= str_len && memcmp(str + str_len - suffix_len, suffix, suffix_len) == 0;
+}
+
+static int f6_search____clamp(int index, int n){
+  if(index < 0) return 0;  return index > n ? n : index;
+}
+
+static const char * _find_bytes(const char * haystack, int haystack_len, const char * needle, int needle_len){
+  if(needle_len == 0) return haystack;  if(! haystack || haystack_len < needle_len) return NULL;  for(int i = 0;  i <= haystack_len - needle_len;  i ++) if((unsigned char) haystack[i] ==(unsigned char) needle[0] && memcmp(haystack + i, needle, needle_len) == 0) return haystack + i;  return NULL;
+}
+
+static int _count_matches(String str, String sub, int limit){
+  int str_len = String_len(str), sub_len = String_len(sub), count = 0, pos = 0;  while(pos <= str_len - sub_len &&(limit < 0 || count < limit)){
+    const char * found = _find_bytes(str + pos, str_len - pos, sub, sub_len);  if(! found) break;  count ++;  pos = found - str + sub_len;
+  }
+  return count;
 }
 
 String String_replace_n(String str, String old, String replacement, int max_replacements);
@@ -387,13 +389,6 @@ String String_replace_n(String str, String old, String replacement, int max_repl
     copied = found - str + old_len;  replaced ++;
   }
   memcpy(dst, str + copied, str_len - copied);  return _finish(string, length);
-}
-
-static int f7_editing____replaced_length(int length, int count, int old_len, int new_len){
-  size_t total =(size_t) length;  if(new_len >= old_len){
-    size_t growth =(size_t)(new_len - old_len);  if(growth &&(size_t) count >((size_t)(INT_MAX - 1) - total) / growth) return - 1;  total +=(size_t) count * growth;
-  }
-  else total -=(size_t) count *(old_len - new_len);  return total > INT_MAX - 1 ? - 1 :(int) total;
 }
 
 int String_getindex(String str, int index){
@@ -413,11 +408,18 @@ String String_join(String sep, List strings);
 String String_withindex(String str, int index, char value){
   if(! String_truth(str) || ! * str) return str;  if(value == '\0'){
     Var _x2c_gensym_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("String.withindex")), NULL))); {
-      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/string/editing.x",.function = "String_withindex",.line = 130,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_0, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(19800432), int_var(index));  __builtin_unreachable();
+      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/string/editing.x",.function = "String_withindex",.line = 116,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_0, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(19800432), int_var(index));  __builtin_unreachable();
     }
 
   }
   int n = String_len(str);  if(index < 0) index += n;  if(index < 0 || index >= n) return str;  if(String_getindex(str, index) == value && _is_active_canonical(str)) return str;  String string = String_malloc(n + 1);  memcpy(string, str, n);  char * out = string;  out[index] = value;  return _finish(string, n);
+}
+
+static int f7_editing____replaced_length(int length, int count, int old_len, int new_len){
+  size_t total =(size_t) length;  if(new_len >= old_len){
+    size_t growth =(size_t)(new_len - old_len);  if(growth &&(size_t) count >((size_t)(INT_MAX - 1) - total) / growth) return - 1;  total +=(size_t) count * growth;
+  }
+  else total -=(size_t) count *(old_len - new_len);  return total > INT_MAX - 1 ? - 1 :(int) total;
 }
 
 String String_add(String str, String other){
@@ -457,6 +459,31 @@ String String_join(String sep, List strings){
   String string = String_malloc(total + 1);  f8_building____join_into(string, strings, sep, sep_len);  return _finish(string, total);
 }
 
+String String_pad_left(String str, int width, char fill){
+  return f8_building____pad(str, width, fill, 1);
+}
+
+String String_pad_right(String str, int width, char fill){
+  return f8_building____pad(str, width, fill, 0);
+}
+
+String String_pad_center(String str, int width, char fill){
+  return f8_building____pad(str, width, fill, - 1);
+}
+
+String String_printf(String fmt, ...){
+  if(! String_truth(fmt) || ! * fmt) return NULL;  va_list args, measure;  va_start(args, fmt);  va_copy(measure, args);  int n = vsnprintf(NULL, 0, fmt, measure);  va_end(measure);  if(n < 0){
+    va_end(args);  return NULL;
+  }
+  if(n <= STRING_STACK_BYTES){
+    char bytes[STRING_STACK_BYTES + 1];  int written = vsnprintf(bytes, n + 1, fmt, args);  va_end(args);  if(written != n) return NULL;  return x2c_string_from_bytes(bytes, n);
+  }
+  String string = String_malloc(n + 1);  int written = vsnprintf(string, n + 1, fmt, args);  va_end(args);  if(written != n){
+    _free_unchecked(string);  return NULL;
+  }
+  return _finish(string, n);
+}
+
 static int f8_building____join_length(List strings, int n, int sep_len){
   if(sep_len &&(size_t)(n - 1) >(size_t)(INT_MAX - 1) /(size_t) sep_len) return - 1;  size_t total =(size_t)(n - 1) *(size_t) sep_len; {
     String str;  List _x2c_gensym_macro_object_0 = strings;  List _x2c_gensym_macro_cursor_0 = _x2c_gensym_macro_object_0;  Var _x2c_gensym_macro_cursor_output_0;  while(List_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_0), &(_x2c_gensym_macro_cursor_output_0))){
@@ -483,42 +510,17 @@ static void f8_building____join_into(char * out, List strings, String sep, int s
 
 }
 
-String String_pad_left(String str, int width, char fill){
-  return f8_building____pad(str, width, fill, 1);
-}
-
-String String_pad_right(String str, int width, char fill){
-  return f8_building____pad(str, width, fill, 0);
-}
-
-String String_pad_center(String str, int width, char fill){
-  return f8_building____pad(str, width, fill, - 1);
-}
-
 static String f8_building____pad(String str, int width, char fill, int side){
   if(fill == '\0'){
-    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/string/building.x",.function = "f8_building____pad",.line = 151,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_4, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("String.pad")), NULL))));  __builtin_unreachable();
+    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/string/building.x",.function = "f8_building____pad",.line = 190,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_4, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("String.pad")), NULL))));  __builtin_unreachable();
   }
   int length = String_len(str);  if(width <= length) return str;  if(width == INT_MAX){
     Var _x2c_gensym_literal_part_2 = String_var(String_join(NULL, cons(String_var(String_new("String.pad")), NULL))); {
-      static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/string/building.x",.function = "f8_building____pad",.line = 155,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_5, 1358596898646632, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_2, Symbol_var(48833808), int_var(width));  __builtin_unreachable();
+      static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/string/building.x",.function = "f8_building____pad",.line = 194,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_5, 1358596898646632, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_2, Symbol_var(48833808), int_var(width));  __builtin_unreachable();
     }
 
   }
   int padding = width - length, left = side ? padding : 0;  if(side < 0) left = padding / 2;  int right = padding - left;  String string = String_malloc(width + 1);  memset(string, fill, left);  if(length) memcpy(string + left, str, length);  memset(string + left + length, fill, right);  return _finish(string, width);
-}
-
-String String_printf(String fmt, ...){
-  if(! String_truth(fmt) || ! * fmt) return NULL;  va_list args, measure;  va_start(args, fmt);  va_copy(measure, args);  int n = vsnprintf(NULL, 0, fmt, measure);  va_end(measure);  if(n < 0){
-    va_end(args);  return NULL;
-  }
-  if(n <= STRING_STACK_BYTES){
-    char bytes[STRING_STACK_BYTES + 1];  int written = vsnprintf(bytes, n + 1, fmt, args);  va_end(args);  if(written != n) return NULL;  return x2c_string_from_bytes(bytes, n);
-  }
-  String string = String_malloc(n + 1);  int written = vsnprintf(string, n + 1, fmt, args);  va_end(args);  if(written != n){
-    _free_unchecked(string);  return NULL;
-  }
-  return _finish(string, n);
 }
 
 String String_strip(String str, char * negChars){
@@ -537,10 +539,6 @@ String String_dedent(String str){
   if(! _init_guard_) _file_init_();  if(! String_truth(str)) return NULL;  int length = String_len(str), skip = f9_splitting____newline_width(str), width = 0;  while(skip + width < length &&(String_getindex(str, skip + width) == ' ' || String_getindex(str, skip + width) == '\t')) width ++;  String prefix = String_new_len(str + skip, width);  String body = String_new(str + skip + width);  if(width) body = String_replace(body, String_join(NULL, cons(String_var(_0), cons(String_var(prefix), NULL))), _1);  int end = String_len(body), tail = end;  while(tail > 0 &&(String_getindex(body, tail - 1) == ' ' || String_getindex(body, tail - 1) == '\t')) tail --;  if(tail == end ||(tail > 0 && String_getindex(body, tail - 1) != '\n')) return body;  return String_new_len(body, tail);
 }
 
-static int f9_splitting____newline_width(String str){
-  if(String_startswith(str, _2)) return 2;  return String_startswith(str, _1) ? 1 : 0;
-}
-
 String String_remove_prefix(String str, String prefix){
   if(! String_truth(prefix) || ! String_startswith(str, prefix)) return str;  return String_new_len(str + String_len(prefix), String_len(str) - String_len(prefix));
 }
@@ -555,6 +553,10 @@ List String_partition(String str, String sep){
 
 List String_rpartition(String str, String sep){
   String empty = NULL;  if(! String_truth(sep)) return cons(String_var(empty), cons(String_var(empty), cons(String_var(str), NULL)));  int sep_length = String_len(sep), found = String_rfind(str, sep);  if(found < 0) return cons(String_var(empty), cons(String_var(empty), cons(String_var(str), NULL)));  String before = String_new_len(str, found);  String after = String_new_len(str + found + sep_length, String_len(str) - found - sep_length);  return cons(String_var(before), cons(String_var(sep), cons(String_var(after), NULL)));
+}
+
+static int f9_splitting____newline_width(String str){
+  if(String_startswith(str, _2)) return 2;  return String_startswith(str, _1) ? 1 : 0;
 }
 
 String String_lower(String str){
@@ -737,12 +739,12 @@ Iter String_iter(String x, Iter dest){
   if(! Iter_truth(dest)) return NULL;  return Iter_init(dest, String_var(x), f8_adapters____next, int_var(0));
 }
 
-static int f8_adapters____next(Iter iter, Var * out){
-  int index = Var_int(Var_convert(iter -> state, 3453797));  String str = Var_as_string(iter -> obj);  if(index >= String_len(str)) return 0;  * out = int_var(String_getindex(str, index));  iter -> state = int_var(index + 1);  return 1;
-}
-
 int String_try_next(String str, int * cursor, int * out){
   if(! cursor) return 0;  if(! out) return 0;  if(! String_truth(str) ||(* cursor) < 0) return 0;  if((* cursor) >= String_len(str)) return 0; (* out) = String_getindex(str, (* cursor)); (* cursor) += 1;  return 1;
+}
+
+static int f8_adapters____next(Iter iter, Var * out){
+  int index = Var_int(Var_convert(iter -> state, 3453797));  String str = Var_as_string(iter -> obj);  if(index >= String_len(str)) return 0;  * out = int_var(String_getindex(str, index));  iter -> state = int_var(index + 1);  return 1;
 }
 
 int String_contains_digit(String str){
@@ -793,11 +795,45 @@ int String_is_upper_under(String s){
   if(! String_truth(s)) return 0;  for(unsigned char * p =(unsigned char *) s;  * p;  p ++) if(! isupper(* p) && * p != '_') return 0;  return 1;
 }
 
+String String_escape(String str);
+String String_repr(String str){
+  if(! _init_guard_) _file_init_();  if(! String_truth(str)) return _3;  return String_printf(_4, String_escape(str));
+}
+
 String String_escape(String str){
   if(! String_truth(str)) return NULL;  int bytes = 0;  for(const char * at = str;  * at;  at ++){
     int width = f6_escape____escape_byte((unsigned char) * at, NULL);  if(bytes > INT_MAX - width - 1) return NULL;  bytes += width;
   }
   String string = String_malloc(bytes + 1);  char * dst = string;  for(const char * at = str;  * at;  at ++) dst += f6_escape____escape_byte((unsigned char) * at, dst);  * dst = '\0';  return String_intern_free(string);
+}
+
+Buffer String_write_repr(String str, Buffer out){
+  Buffer_write_char(out, '"');  for(const char * at = str;  at && * at;  at ++){
+    char escaped[4];  int width = f6_escape____escape_byte((unsigned char) * at, escaped);  Buffer_write_len(out, escaped, width);
+  }
+  return Buffer_write_char(out, '"');
+}
+
+int String_parse_char(String str){
+  if(! String_truth(str)) return - 1;  const char * at = str;  if(* at ++ != '\'' || ! * at) return - 1;  int byte = * at ++;  if(byte == '\\'){
+    if(! * at) return - 1;  byte = f6_escape____decode_escape(&(at));  if(byte < 0 || byte > 0377) return - 1;
+  }
+  return * at == '\'' ? byte : - 1;
+}
+
+String String_unescape(String str);
+String String_parse(String str){
+  if(! _init_guard_) _file_init_();  if(! String_truth(str)) return NULL;  int n = String_len(str);  if(String_getindex(str, 0) == '%' && String_getindex(str, 1) == '"' && String_getindex(str, n - 1) == '"') return String_unescape(String_new_len(str + 2, n - 3));  if(String_getindex(str, 0) == '"' && String_getindex(str, n - 1) == '"') return String_unescape(String_new_len(str + 1, n - 2));  return String_unescape(str);
+}
+
+String String_unescape(String str){
+  if(! _init_guard_) _file_init_();  int n = String_len(str);  if(n == 0) return NULL;  if(!(String_contains(str, _5))) return str;  String string = String_malloc(n + 1);  if(f6_escape____unescape_into(string, str) < 0){
+    String_free(string); {
+      static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/string/escape.x",.function = "String_unescape",.line = 124,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_7, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("String.unescape")), NULL))));  __builtin_unreachable();
+    }
+
+  }
+  return String_intern_free(string);
 }
 
 static inline int f6_escape____escape_byte(unsigned char ch, char * out){
@@ -821,37 +857,6 @@ static inline char f6_escape____escape_letter(unsigned char ch){
     case '\n' : return 'n';  case '\r' : return 'r';  case '\t' : return 't';  case '\b' : return 'b';  case '\f' : return 'f';  case '\v' : return 'v';  case '\\' : return '\\';  case '"' : return '"';  case '\'' : return '\'';
   }
   return 0;
-}
-
-String String_repr(String str){
-  if(! _init_guard_) _file_init_();  if(! String_truth(str)) return _3;  return String_printf(_4, String_escape(str));
-}
-
-Buffer String_write_repr(String str, Buffer out){
-  Buffer_write_char(out, '"');  for(const char * at = str;  at && * at;  at ++){
-    char escaped[4];  int width = f6_escape____escape_byte((unsigned char) * at, escaped);  Buffer_write_len(out, escaped, width);
-  }
-  return Buffer_write_char(out, '"');
-}
-
-String String_unescape(String str){
-  if(! _init_guard_) _file_init_();  int n = String_len(str);  if(n == 0) return NULL;  if(!(String_contains(str, _5))) return str;  String string = String_malloc(n + 1);  if(f6_escape____unescape_into(string, str) < 0){
-    String_free(string); {
-      static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/string/escape.x",.function = "String_unescape",.line = 125,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_7, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("String.unescape")), NULL))));  __builtin_unreachable();
-    }
-
-  }
-  return String_intern_free(string);
-}
-
-static int f6_escape____unescape_into(char * out, const char * src){
-  char * dst = out;  while(* src){
-    if(* src != '\\'){
-      * dst ++ = * src ++;  continue;
-    }
-    src ++;  if(! * src) break;  int byte = f6_escape____decode_escape(&(src));  if(byte > 0377) return - 1;  if(byte > 0) * dst ++ = byte;
-  }
-  * dst = '\0';  return(int)(dst - out);
 }
 
 static inline int f6_escape____decode_escape(const char * * at){
@@ -882,15 +887,14 @@ static inline int f6_escape____named_escape(int esc){
   return esc;
 }
 
-int String_parse_char(String str){
-  if(! String_truth(str)) return - 1;  const char * at = str;  if(* at ++ != '\'' || ! * at) return - 1;  int byte = * at ++;  if(byte == '\\'){
-    if(! * at) return - 1;  byte = f6_escape____decode_escape(&(at));  if(byte < 0 || byte > 0377) return - 1;
+static int f6_escape____unescape_into(char * out, const char * src){
+  char * dst = out;  while(* src){
+    if(* src != '\\'){
+      * dst ++ = * src ++;  continue;
+    }
+    src ++;  if(! * src) break;  int byte = f6_escape____decode_escape(&(src));  if(byte > 0377) return - 1;  if(byte > 0) * dst ++ = byte;
   }
-  return * at == '\'' ? byte : - 1;
-}
-
-String String_parse(String str){
-  if(! _init_guard_) _file_init_();  if(! String_truth(str)) return NULL;  int n = String_len(str);  if(String_getindex(str, 0) == '%' && String_getindex(str, 1) == '"' && String_getindex(str, n - 1) == '"') return String_unescape(String_new_len(str + 2, n - 3));  if(String_getindex(str, 0) == '"' && String_getindex(str, n - 1) == '"') return String_unescape(String_new_len(str + 1, n - 2));  return String_unescape(str);
+  * dst = '\0';  return(int)(dst - out);
 }
 
 String String_format(String fmt, List values){
@@ -932,10 +936,6 @@ static void f6_format____write_literal(f6_format___Format * f){
   if((* f).cursor ==(* f).literal) return;  Buffer_write_len((* f).out, (* f).fmt +(* f).literal, (size_t)((* f).cursor -(* f).literal));
 }
 
-static void f6_format____need_byte(f6_format___Format * f){
-  if((* f).cursor ==(* f).length) f6_format____fail(&((* f)), _8);
-}
-
 static f6_format___Spec f6_format____spec(f6_format___Format * f){
   f6_format___Spec spec ={
     .flags = f6_format____flags(&((* f))), .precision = - 1
@@ -953,20 +953,24 @@ static int f6_format____flags(f6_format___Format * f){
 int abs(int);
 static void f6_format____width(f6_format___Format * f, f6_format___Spec * spec){
   if(f6_format____byte(&((* f))) == '*'){
-    int width = f6_format____star(&((* f)));  if(width == INT_MIN) f6_format____fail(&((* f)), _9);  if(width < 0)(* spec).flags |= FORMAT_LEFT; (* spec).width = abs(width); (* f).cursor ++;
+    int width = f6_format____star(&((* f)));  if(width == INT_MIN) f6_format____fail(&((* f)), _8);  if(width < 0)(* spec).flags |= FORMAT_LEFT; (* spec).width = abs(width); (* f).cursor ++;
   }
-  else(* spec).width = f6_format____decimal(&((* f)), _10);
-}
-
-static int f6_format____star(f6_format___Format * f){
-  return(int) Var_integer(f6_format____number(&((* f)), f6_format____take(&((* f)), _11), 3453797));
+  else(* spec).width = f6_format____decimal(&((* f)), _9);
 }
 
 static void f6_format____precision(f6_format___Format * f, f6_format___Spec * spec){
   if(f6_format____byte(&((* f))) != '.') return; (* f).cursor ++;  f6_format____need_byte(&((* f)));  if(f6_format____byte(&((* f))) == '*'){
     (* spec).precision = f6_format____star(&((* f))); (* f).cursor ++;
   }
-  else(* spec).precision = f6_format____decimal(&((* f)), _12);
+  else(* spec).precision = f6_format____decimal(&((* f)), _10);
+}
+
+static void f6_format____need_byte(f6_format___Format * f){
+  if((* f).cursor ==(* f).length) f6_format____fail(&((* f)), _11);
+}
+
+static int f6_format____star(f6_format___Format * f){
+  return(int) Var_integer(f6_format____number(&((* f)), f6_format____take(&((* f)), _12), 3453797));
 }
 
 static int f6_format____decimal(f6_format___Format * f, String label){
@@ -974,10 +978,6 @@ static int f6_format____decimal(f6_format___Format * f, String label){
     int digit = f6_format____byte(&((* f))) - '0';  if(number >(INT_MAX - digit) / 10) f6_format____format_error(start, String_join(NULL, cons(String_var(label), cons(String_var(_13), NULL))));  number = number * 10 + digit; (* f).cursor ++;
   }
   return number;
-}
-
-static int f6_format____byte(f6_format___Format * f){
-  return String_getindex((* f).fmt, (* f).cursor);
 }
 
 static int f6_format____digit(f6_format___Format * f){
@@ -993,6 +993,10 @@ static Symbol f6_format____modifier(f6_format___Format * f){
 
 static Symbol f6_format____doubled(f6_format___Format * f, char letter, Symbol once, Symbol twice){
   (* f).cursor ++;  if(f6_format____byte(&((* f))) != letter) return once; (* f).cursor ++;  return twice;
+}
+
+static int f6_format____byte(f6_format___Format * f){
+  return String_getindex((* f).fmt, (* f).cursor);
 }
 
 static void f6_format____check(f6_format___Format * f, f6_format___Spec spec){
@@ -1011,12 +1015,12 @@ static Buffer f6_format____print(f6_format___Format * f, f6_format___Spec spec, 
 }
 
 int SymbolSet_index(SymbolSet, Symbol);
-static void f6_format____spell(f6_format___Spec s, char * out){
-  int n = 0;  out[n ++] = '%';  for(int bit = 0;  f6_format____format_flags[bit];  bit ++) if(s.flags & 1 << bit) out[n ++] = f6_format____format_flags[bit];  if(s.width) n += snprintf(out + n, 16, "%d", s.width);  if(s.precision >= 0) n += snprintf(out + n, 16, ".%d", s.precision);  snprintf(out + n, 8, "%s%c", f6_format____format_modifiers[SymbolSet_index(f6_format___format_modifiers, s.modifier)], s.conversion);
-}
-
 static Buffer f6_format____integer(f6_format___Format * f, f6_format___Spec spec, Var arg){
   int is_unsigned = strchr("ouxX", spec.conversion) != NULL;  int modifier = SymbolSet_index(f6_format___format_modifiers, spec.modifier);  Var value = f6_format____number(&((* f)), arg, f6_format____integer_targets[modifier][is_unsigned]);  char text[48];  spec.modifier = 25983886;  f6_format____spell(spec, text);  if(is_unsigned) return Buffer_printf((* f).out, text, Var_ulong_long(value));  return Buffer_printf((* f).out, text, Var_long_long(value));
+}
+
+static void f6_format____spell(f6_format___Spec s, char * out){
+  int n = 0;  out[n ++] = '%';  for(int bit = 0;  f6_format____format_flags[bit];  bit ++) if(s.flags & 1 << bit) out[n ++] = f6_format____format_flags[bit];  if(s.width) n += snprintf(out + n, 16, "%d", s.width);  if(s.precision >= 0) n += snprintf(out + n, 16, ".%d", s.precision);  snprintf(out + n, 8, "%s%c", f6_format____format_modifiers[SymbolSet_index(f6_format___format_modifiers, s.modifier)], s.conversion);
 }
 
 static Buffer f6_format____floating(f6_format___Format * f, const char * text, Symbol modifier, Var arg){
@@ -1082,29 +1086,25 @@ static Var f6_format____number(f6_format___Format * f, Var arg, Symbol target){
   return converted;
 }
 
-_Noreturn static void f6_format____format_error(int offset, String reason){
-  {
-    static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/string/format.x",.function = "f6_format____format_error",.line = 334,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_8, 435316840, 2, Symbol_var(1019648360), int_var(offset), Symbol_var(1218550748), String_var(reason));  __builtin_unreachable();
-  }
-
-}
-
 static void f6_format____fail(f6_format___Format * f, String reason){
   f6_format____format_error((* f).offset, reason);
+}
+
+_Noreturn static void f6_format____format_error(int offset, String reason){
+  {
+    static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/string/format.x",.function = "f6_format____format_error",.line = 340,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_8, 435316840, 2, Symbol_var(1019648360), int_var(offset), Symbol_var(1218550748), String_var(reason));  __builtin_unreachable();
+  }
+
 }
 
 _Noreturn static void f6_format____nested(f6_format___Format * f, String reason, Var code, List details){
   List cause = cons(code, details); {
     Var _x2c_gensym_literal_part_4 = int_var((* f).offset); {
-      static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/string/format.x",.function = "f6_format____nested",.line = 345,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_9, 435316840, 3, Symbol_var(1019648360), _x2c_gensym_literal_part_4, Symbol_var(1218550748), String_var(reason), Symbol_var(6401226), List_var(cause));  __builtin_unreachable();
+      static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/string/format.x",.function = "f6_format____nested",.line = 347,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_9, 435316840, 3, Symbol_var(1019648360), _x2c_gensym_literal_part_4, Symbol_var(1218550748), String_var(reason), Symbol_var(6401226), List_var(cause));  __builtin_unreachable();
     }
 
   }
 
-}
-
-static int f6_number____only_space(const char * rest){
-  while(isspace((unsigned char) * rest)) rest ++;  return ! * rest;
 }
 
 int String_try_long(String str, long * out){
@@ -1121,12 +1121,55 @@ int String_try_double(String str, double * out){
   if(! out) return 0;  if(! String_truth(str)) return 0;  char * stop = NULL;  errno = 0;  double value = strtod(str, & stop);  if(stop ==(const char *) str || errno == ERANGE || ! f6_number____only_space(stop)) return 0; (* out) = value;  return 1;
 }
 
+static int f6_number____only_space(const char * rest){
+  while(isspace((unsigned char) * rest)) rest ++;  return ! * rest;
+}
+
 Var Split_var(Split split){
   return Var_new(40919656, split);
 }
 
 Split Var_split(Var value){
   return(Split) Var_pointer(value);
+}
+
+List String_split_n(String str, String sep, int max_splits);
+List String_split(String str, String sep){
+  return String_split_n(str, sep, - 1);
+}
+
+List String_split_n(String str, String sep, int max_splits){
+  if(! String_truth(str)) return NULL;  Array results = Array_new();  int start = 0, splits = 0;  while(start >= 0){
+    int next = - 1;  int end = max_splits >= 0 && splits >= max_splits ? String_len(str) : f7_cursors____end(str, sep, start, &(next));  String field = String_new_len(str + start, end - start);  Array_push(results, String_var(field));  start = next;  splits ++;
+  }
+  return Array_list_free(results);
+}
+
+List String_split_lines(String str, int keep_ends){
+  if(! String_truth(str)) return NULL;  Array results = Array_new();  int start = 0;  while(start < String_len(str)){
+    int next, end = f7_cursors____line_end(str, start, keep_ends, &(next));  String field = String_new_len(str + start, end - start);  Array_push(results, String_var(field));  start = next;
+  }
+  return Array_list_free(results);
+}
+
+Split String_words(String str){
+  return f7_cursors____new(str, NULL, f7_cursors____words_next);
+}
+
+Split String_lines(String str){
+  return f7_cursors____new(str, NULL, f7_cursors____lines_next);
+}
+
+Split String_splits(String str, String sep){
+  return f7_cursors____new(str, sep, f7_cursors____splits_next);
+}
+
+Iter Split_iter(Split split, Iter dest){
+  if(! Iter_truth(dest)) return NULL;  return Iter_init(dest, Var_new(3683441, (void *) split), split ? f7_cursors____iter_next : NULL, int_var(0));
+}
+
+int Split_try_next(Split split, int * cursor, String * out){
+  if(! split || ! cursor || ! out) return 0;  return split -> next(split, &(* cursor), &(* out));
 }
 
 static inline int f7_cursors____end(String str, String sep, int start, int * next){
@@ -1141,24 +1184,6 @@ static inline int f7_cursors____end(String str, String sep, int start, int * nex
 
 static inline int f7_cursors____line_end(String str, int start, int keep_ends, int * next){
   int length = String_len(str);  if(start >= length) return - 1;  const char * text = str;  int end = start;  while(end < length && text[end] != '\n' && text[end] != '\r') end ++;  int ending = 0;  if(end < length) ending = text[end] == '\r' && end + 1 < length && text[end + 1] == '\n' ? 2 : 1; (* next) = end + ending;  return keep_ends ?(* next) : end;
-}
-
-List String_split_n(String str, String sep, int max_splits){
-  if(! String_truth(str)) return NULL;  Array results = Array_new();  int start = 0, splits = 0;  while(start >= 0){
-    int next = - 1;  int end = max_splits >= 0 && splits >= max_splits ? String_len(str) : f7_cursors____end(str, sep, start, &(next));  String field = String_new_len(str + start, end - start);  Array_push(results, String_var(field));  start = next;  splits ++;
-  }
-  return Array_list_free(results);
-}
-
-List String_split(String str, String sep){
-  return String_split_n(str, sep, - 1);
-}
-
-List String_split_lines(String str, int keep_ends){
-  if(! String_truth(str)) return NULL;  Array results = Array_new();  int start = 0;  while(start < String_len(str)){
-    int next, end = f7_cursors____line_end(str, start, keep_ends, &(next));  String field = String_new_len(str + start, end - start);  Array_push(results, String_var(field));  start = next;
-  }
-  return Array_list_free(results);
 }
 
 static Split f7_cursors____new(String str, String sep, int(* next)(Split split, int * cursor, String * out)){
@@ -1180,28 +1205,8 @@ static int f7_cursors____splits_next(Split split, int * cursor, String * out){
   if(! String_truth(split -> str)) return 0;  int start = * cursor, next;  int end = f7_cursors____end(split -> str, split -> sep, start, &(next));  if(end < 0) return 0;  String field = String_new_len(split -> str + start, end - start);  * out = field;  * cursor = next;  return 1;
 }
 
-Split String_words(String str){
-  return f7_cursors____new(str, NULL, f7_cursors____words_next);
-}
-
-Split String_lines(String str){
-  return f7_cursors____new(str, NULL, f7_cursors____lines_next);
-}
-
-Split String_splits(String str, String sep){
-  return f7_cursors____new(str, sep, f7_cursors____splits_next);
-}
-
-int Split_try_next(Split split, int * cursor, String * out){
-  if(! split || ! cursor || ! out) return 0;  return split -> next(split, &(* cursor), &(* out));
-}
-
 static int f7_cursors____iter_next(Iter iter, Var * out){
   Split split = Var_split(iter -> obj);  int cursor = Var_int(Var_convert(iter -> state, 3453797));  String value;  if(! Split_try_next(split, &(cursor), &(value))) return 0;  iter -> state = int_var(cursor);  * out = String_var(value);  return 1;
-}
-
-Iter Split_iter(Split split, Iter dest){
-  if(! Iter_truth(dest)) return NULL;  return Iter_init(dest, Var_new(3683441, (void *) split), split ? f7_cursors____iter_next : NULL, int_var(0));
 }
 
 static inline Iter _x2c_gensym_proto_split_iter_0(Var a0, Iter a1){

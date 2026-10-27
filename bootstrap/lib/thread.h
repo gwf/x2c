@@ -33,43 +33,43 @@ typedef struct Thread * Thread;
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-void x2c_thread_wait_lock(void);
-
-void x2c_thread_wait_unlock(void);
-
-Thread x2c_thread_wait_owner(void);
-
-int x2c_thread_wait_stopped(Thread owner);
-
-int x2c_thread_stopping(void);
-
-void x2c_thread_wait(pthread_cond_t * condition);
-
-_Noreturn void x2c_thread_cancel(void);
-
-void Thread_stop(Thread t);
-
 Thread Thread_start_raw(ThreadFn function, const void * input, size_t input_size);
 
 Thread Thread_start(ThreadValueFn function, Var value);
 
-Thread Thread_wait_any(Array pending);
-
-Var Thread_join(Thread t);
-
-void Thread_free(Thread t);
+void Thread_run(Array jobs, Func completed);
 
 Var Thread_finish_any(Array pending);
 
-void Thread_finish_all(Array pending);
-
-void Thread_run(Array jobs, Func completed);
+Thread Thread_wait_any(Array pending);
 
 ParallelMap Iter_parallel_map(Iter i, ThreadValueFn function, int workers);
 
 ParallelMap Iter_parallel_map_in(Iter i, Pool pool, ThreadValueFn function, int workers);
 
 Var ParallelMap_foldl(ParallelMap map, Var seed, Func accumulate);
+
+int x2c_thread_stopping(void);
+
+void x2c_thread_wait(pthread_cond_t * condition);
+
+Thread x2c_thread_wait_owner(void);
+
+int x2c_thread_wait_stopped(Thread owner);
+
+_Noreturn void x2c_thread_cancel(void);
+
+void Thread_stop(Thread t);
+
+void x2c_thread_wait_lock(void);
+
+void x2c_thread_wait_unlock(void);
+
+void Thread_finish_all(Array pending);
+
+Var Thread_join(Thread t);
+
+void Thread_free(Thread t);
 
 
 #endif /* __GUARD_0x65427DDE__ */

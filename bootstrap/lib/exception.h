@@ -40,8 +40,6 @@ void x2c_cleanup_leave(X2CCleanup * record);
 
 void x2c_exception_push(ExceptionFrame * e);
 
-void ExceptionFrame_unwind(void * target_ptr);
-
 void x2c_exception_landed(ExceptionFrame * frame);
 
 int x2c_exception_unwinding(void);
@@ -53,6 +51,8 @@ int x2c_exception_claim(ExceptionFrame * frame);
 void x2c_exception_mark_handled(ExceptionFrame * frame);
 
 void x2c_exception_leave(ExceptionFrame * frame);
+
+void ExceptionFrame_unwind(void * target_ptr);
 
 
 #endif /* __GUARD_0xC7EB5E0F__ */

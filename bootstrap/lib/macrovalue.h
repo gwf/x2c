@@ -63,11 +63,6 @@ static inline int Macro_case_own(Var content){
   return head && head != 377892;
 }
 
-static inline Symbol Macro_case_symbol(Var value){
-  Symbol symbol = value.u64 - VAR_SYMBOL_OFFSET;
-  return symbol < 1ul << 51 ? symbol : 0;
-}
-
 int Macro_case_view(Var, List *);
 
 static inline int Macro_case_enter(Var value, List * cursor){
@@ -76,6 +71,11 @@ static inline int Macro_case_enter(Var value, List * cursor){
   if(! head || head == 104 || head == 40070 || head == 377892) return Macro_case_view(value, &((* cursor)));
   (* cursor) = node;
   return 1;
+}
+
+static inline Symbol Macro_case_symbol(Var value){
+  Symbol symbol = value.u64 - VAR_SYMBOL_OFFSET;
+  return symbol < 1ul << 51 ? symbol : 0;
 }
 
 typedef struct MacroMatcher{
@@ -88,13 +88,13 @@ Macro Macro_close(Macro value, List captures);
 
 List Macro_apply(Macro t, List values);
 
-Var Macro_inserted(Var value, int lifts, int expression);
-
 Var Macro_declared(Var value);
 
 List Macro_inserted_items(List values);
 
 List Macro_typed(List type, Var value);
+
+Var Macro_inserted(Var value, int lifts, int expression);
 
 List Macro_number_type(Var value);
 
@@ -120,9 +120,9 @@ int Macro_case_view(Var value, List * cursor);
 
 MacroMatcher Macro_matcher(Macro shape, List holes);
 
-int MacroMatcher_matches(MacroMatcher * m, List code);
-
 int Macro_matches(Macro t, List code, List holes);
+
+int MacroMatcher_matches(MacroMatcher * m, List code);
 
 
 #endif /* __GUARD_0x2696A50F__ */

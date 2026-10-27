@@ -8,19 +8,15 @@
 #include "x2c.h"
 #include "compiler/compiler.h"
 #include <ctype.h>
-String Compiler_preproc_directive(String text);
-
-Symbol Compiler_preproc_conditional_kind(String text);
-
-int Compiler_preproc_open_state(String text);
-
-int Compiler_preproc_branch_state(int state);
-
 String Compiler_preproc_include_target(String text, int * angle);
 
 String Compiler_preproc_marker_file(String text, int * line);
 
 void Compiler_scan_conditionals(Compiler c);
+
+int Compiler_preproc_open_state(String text);
+
+int Compiler_preproc_branch_state(int state);
 
 List Compiler_leading_preproc(Compiler c);
 
@@ -29,6 +25,10 @@ void Compiler_note_preprocessor_macros(Compiler c, List directives);
 void Compiler_note_object_macro(Compiler c, String content);
 
 List Compiler_preproc_track_arms(List arms, String text);
+
+Symbol Compiler_preproc_conditional_kind(String text);
+
+String Compiler_preproc_directive(String text);
 
 List Compiler_preproc_within_arms(List arms, List items);
 

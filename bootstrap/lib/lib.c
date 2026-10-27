@@ -262,16 +262,7 @@ void DisjointSet_drop(DisjointSet set){
   xfree(set -> size);
 }
 
-int DisjointSet_find(DisjointSet set, int x){
-  int p = set -> parent[x];
-  if(p == x) return x;
-  while(p != set -> parent[p]){
-    set -> parent[x] = set -> parent[p];
-    x = p;
-    p = set -> parent[p];
-  }
-  return p;
-}
+int DisjointSet_find(DisjointSet set, int x);
 
 void DisjointSet_union(DisjointSet set, int a, int b){
   int a_root = DisjointSet_find(set, a), b_root = DisjointSet_find(set, b);
@@ -284,6 +275,17 @@ void DisjointSet_union(DisjointSet set, int a, int b){
   set -> parent[b_root] = a_root;
   set -> size[a_root] += set -> size[b_root];
   set -> ncmpnts --;
+}
+
+int DisjointSet_find(DisjointSet set, int x){
+  int p = set -> parent[x];
+  if(p == x) return x;
+  while(p != set -> parent[p]){
+    set -> parent[x] = set -> parent[p];
+    x = p;
+    p = set -> parent[p];
+  }
+  return p;
 }
 
 Array Array_new(void);

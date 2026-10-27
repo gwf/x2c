@@ -57,11 +57,9 @@ unsigned long Var_tag_top(Symbol tag);
 
 unsigned long Var_tag_bottom(Symbol tag);
 
-Symbol Var_tag(Var v);
-
 int Var_is(Var var, Symbol tag);
 
-Symbol Var_kind(Var v);
+Symbol Var_tag(Var v);
 
 int Var_is_floating(Var v);
 
@@ -72,6 +70,8 @@ int Var_is_pointer(Var v);
 int Var_is_reference(Var v);
 
 int Var_is_object(Var v);
+
+Symbol Var_kind(Var v);
 
 int Var_is_void(Var v);
 
@@ -101,11 +101,11 @@ VarDescriptor * x2c_var_custom_descriptor(Var value);
 
 Var Var_box_record(Symbol tag, const void * record, size_t size);
 
-void * Var_pointer(Var v);
-
 int Var_register_object_tag(Symbol tag);
 
 VarDescriptor * x2c_var_declare(Symbol tag);
+
+void * Var_pointer(Var v);
 
 Var Var_new(Symbol tag, ...);
 
@@ -139,13 +139,13 @@ long long Var_long_long_value(Var v);
 
 unsigned long long Var_ulong_long_value(Var v);
 
-long double Var_long_double_value(Var v);
-
 unsigned Var_wide_hash(Var v);
 
 int Var_wide_equal(Var a, Var b);
 
 int Var_wide_compare(Var a, Var b);
+
+long double Var_long_double_value(Var v);
 
 int Var_integer_compare(Var a, Var b);
 
@@ -175,23 +175,23 @@ extern const X2CVarNumericInfo x2c_var_numerics[];
 
 Var Var_convert(Var value, Symbol target);
 
-int Var_numeric_info(Symbol tag, X2CVarNumericInfo * out);
-
 void Var_numeric_decode(Var value, X2CVarNumeric * out);
 
 Var Var_integer_box(Symbol target, unsigned long long raw);
 
+int Var_numeric_info(Symbol tag, X2CVarNumericInfo * out);
+
 Symbol Var_integer_tag(int rank, int unsigned_value);
-
-unsigned long long Var_width_mask(int bits);
-
-long long Var_signed_from_bits(unsigned long long raw, int bits);
 
 float X2CVarNumeric_f32(X2CVarNumeric * value);
 
 double X2CVarNumeric_f64(X2CVarNumeric * value);
 
 long double X2CVarNumeric_ldouble(X2CVarNumeric * value);
+
+long long Var_signed_from_bits(unsigned long long raw, int bits);
+
+unsigned long long Var_width_mask(int bits);
 
 char x2c_var_update_i8(volatile char * lhs, Symbol op, Var rhs);
 
@@ -221,19 +221,7 @@ double x2c_var_update_f64(volatile double * lhs, Symbol op, Var rhs);
 
 long double x2c_var_update_long_double(volatile long double * lhs, Symbol op, Var rhs);
 
-Var Var_binary(Var lhs, Symbol op, Var rhs);
-
-Var Var_add(Var lhs, Var rhs);
-
-Var Var_sub(Var lhs, Var rhs);
-
-Var Var_mul(Var lhs, Var rhs);
-
 Var Var_matmul(Var lhs, Var rhs);
-
-Var Var_div(Var lhs, Var rhs);
-
-Var Var_mod(Var lhs, Var rhs);
 
 Var Var_neg(Var value);
 
@@ -249,11 +237,23 @@ int Var_fallback_truth(Var value);
 
 Var Var_update(Var * lhs, Symbol op, Var rhs);
 
-Var x2c_var_update_volatile(volatile Var * lhs, Symbol op, Var rhs);
-
 Var Var_postfix(Var * lhs, Symbol op);
 
 Var x2c_var_postfix_volatile(volatile Var * lhs, Symbol op);
+
+Var x2c_var_update_volatile(volatile Var * lhs, Symbol op, Var rhs);
+
+Var Var_binary(Var lhs, Symbol op, Var rhs);
+
+Var Var_add(Var lhs, Var rhs);
+
+Var Var_sub(Var lhs, Var rhs);
+
+Var Var_mul(Var lhs, Var rhs);
+
+Var Var_div(Var lhs, Var rhs);
+
+Var Var_mod(Var lhs, Var rhs);
 
 
 #endif /* __GUARD_0x396FB77F__ */

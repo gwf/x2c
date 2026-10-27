@@ -32,13 +32,11 @@ VarDescriptor * x2c_var_declare(Symbol tag);
 
 int x2c_var_tag_descriptor_index(Symbol tag);
 
-String Var_str(Var v);
-
 String Var_as_string(Var v);
 
-String Var_fallback_str(Var v);
+String Var_str(Var v);
 
-String Var_pointer_string(Var v);
+String Var_fallback_str(Var v);
 
 Buffer Var_write_str(Var v, Buffer out);
 
@@ -47,6 +45,8 @@ Buffer Var_fallback_write_str(Var v, Buffer out);
 String Var_repr(Var v);
 
 String Var_fallback_repr(Var v);
+
+String Var_pointer_string(Var v);
 
 Buffer Var_write_repr(Var v, Buffer out);
 
@@ -74,9 +74,9 @@ int Var_compare(Var a, Var b);
 
 int Var_fallback_compare(Var a, Var b);
 
-Iter Var_iter(Var x, Iter dest);
-
 Iter Var_enumerate(Var x, Iter dest);
+
+Iter Var_iter(Var x, Iter dest);
 
 Iter Var_fallback_iter(Var x, Iter dest);
 
@@ -102,13 +102,13 @@ void x2c_register_type(String name);
 
 int x2c_register_builtin_descriptor(Symbol tag, VarMethods methods);
 
-int x2c_try_register_descriptor(String name, VarMethods methods);
-
 void x2c_register_descriptor(String name, VarMethods methods);
 
-int x2c_try_register_tagged_descriptor(Symbol tag, String name, VarMethods methods);
+int x2c_try_register_descriptor(String name, VarMethods methods);
 
 void x2c_register_tagged_descriptor(Symbol tag, String name, VarMethods methods);
+
+int x2c_try_register_tagged_descriptor(Symbol tag, String name, VarMethods methods);
 
 void x2c_descriptor_thread_start_begin(void);
 

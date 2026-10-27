@@ -14,9 +14,9 @@ Substring;
 
 typedef Substring Substr;
 
-Substring Substring_new(String source, int offset, int length);
-
 Substring String_substring(String source, int offset, int length);
+
+Substring Substring_new(String source, int offset, int length);
 
 static inline int Substring_len(Substring view){
   return view.length;
@@ -39,9 +39,9 @@ static inline int Substring_compare(Substring left, Substring right){
   return left.length - right.length;
 }
 
-String Substring_str(Substring view);
-
 String Substring_string(Substring view);
+
+String Substring_str(Substring view);
 
 int Substring_try_next(String source, int * cursor, Substring * out);
 

@@ -63,8 +63,6 @@ void * Scope_realloc(void * ptr, size_t size);
 
 void Scope_push(Scope * scope);
 
-Scope * Scope_top(void);
-
 void Scope_pop(void);
 
 void Scope_retain(void);
@@ -75,6 +73,8 @@ Scope Scope_new(void);
 
 Scope Scope_child(void);
 
+Scope * Scope_top(void);
+
 Scope Scope_parent(Scope scope);
 
 void Scope_transfer(Scope scope, Scope destination);
@@ -83,9 +83,9 @@ int Scope_contains(Scope scope, Scope candidate);
 
 Scope Scope_new_named(const char * name);
 
-void Scope_destroy(Scope scope);
-
 void Scope_cleanup(Scope value);
+
+void Scope_destroy(Scope scope);
 
 void x2c_scope_thread_release(void);
 

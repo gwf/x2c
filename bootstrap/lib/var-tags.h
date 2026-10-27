@@ -6,23 +6,23 @@
 #define __GUARD_0x874D0B13__
 
 #include "compiler-meta.h"
-List _tag_groups(void);
+List _tag_info(void);
 
-List _tag_rows(void);
+List _tag_info_row(List row);
 
-String _tag_id(List row);
+List _tag_info_sentinel(void);
 
-Symbol _tag_kind(List row);
+List _tag_names(void);
 
-int _tag_top(List row);
+List _tag_numeric_names(void);
 
-int _tag_middle(List row);
+List _tag_numeric_table(void);
 
-int _tag_bottom(List row);
+List _tag_numeric_rows(void);
 
 int _tag_numeric(List row);
 
-Var _tag_bits(List row);
+List _tag_numeric_row(List row);
 
 int _tag_rank(List row);
 
@@ -30,47 +30,47 @@ int _tag_floating(List row);
 
 int _tag_unsigned(List row);
 
-List _tag_info_row(List row);
-
-List _tag_info_sentinel(void);
-
-List _tag_info(void);
-
-int _tag_descriptor(List row);
-
-List _tag_names(void);
-
-List _tag_numeric_rows(void);
-
-List _tag_numeric_names(void);
-
 List _tag_bits_expr(List row);
 
-List _tag_numeric_row(List row);
-
-List _tag_numeric_table(void);
-
-int _tag_decode_row(List row);
-
-List _tag_decode_rows(void);
-
-int _tag_group_mask(int count);
-
-List _tag_validated_ids(void);
-
-int _tag_constant_row(List row);
-
-List _tag_list(List items);
-
-Map _tag_sibling_counts(List rows);
-
-List _tag_row_entry(List row, Map counts);
+Var _tag_bits(List row);
 
 List _tag_constant_rows(void);
 
+int _tag_constant_row(List row);
+
+List _tag_validated_ids(void);
+
+List _tag_row_entry(List row, Map counts);
+
+List _tag_list(List items);
+
+List _tag_decode_rows(void);
+
+int _tag_decode_row(List row);
+
+Map _tag_sibling_counts(List rows);
+
 int _tag_group_top(int slot);
 
+int _tag_top(List row);
+
+int _tag_middle(List row);
+
+int _tag_bottom(List row);
+
+int _tag_group_mask(int count);
+
+String _tag_id(List row);
+
 Map _tag_types(List native);
+
+List _tag_rows(void);
+
+List _tag_groups(void);
+
+int _tag_descriptor(List row);
+
+Symbol _tag_kind(List row);
 
 
 #endif /* __GUARD_0x874D0B13__ */

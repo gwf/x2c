@@ -63,19 +63,19 @@ static inline Var Token_var(Token x){
 
 unsigned Token_hash(Token t);
 
-int Token_equal(Token a, Token b);
+String Token_repr(Token token);
 
 String Token_str(Token token);
 
-String Token_repr(Token token);
-
 void Tokenizer_scan(Tokenizer t);
 
-int Tokenizer_tokenize(Tokenizer t, int len, Symbol type);
+int Token_equal(Token a, Token b);
 
 int Tokenizer_do_scanner(Tokenizer t, int(* scanner)(char *), Symbol type);
 
 int Tokenizer_error(Tokenizer tokenizer);
+
+int Tokenizer_tokenize(Tokenizer t, int len, Symbol type);
 
 void Tokenizer_init(Tokenizer tokenizer, char * text, Symbol mode);
 

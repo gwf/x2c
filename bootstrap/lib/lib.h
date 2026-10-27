@@ -39,9 +39,9 @@ void DisjointSet_init(DisjointSet set, int n);
 
 void DisjointSet_drop(DisjointSet set);
 
-int DisjointSet_find(DisjointSet set, int x);
-
 void DisjointSet_union(DisjointSet set, int a, int b);
+
+int DisjointSet_find(DisjointSet set, int x);
 
 List DisjointSet_sizes(DisjointSet set);
 

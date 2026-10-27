@@ -338,8 +338,6 @@ String MapStringInt_repr(MapStringInt _x2c_gensym_macro_map_207);
 
 Map MapStringInt_map(MapStringInt _x2c_gensym_macro_map_208);
 
-int MapStringInt_add_substr(MapStringInt map, Substr key, int count);
-
 Var MapStringInt_var(MapStringInt _x2c_gensym_macro_map_209);
 
 MapStringInt Var_mapstringint(Var _x2c_gensym_macro_value_15);
@@ -351,6 +349,8 @@ Iter MapStringInt_keys(MapStringInt _x2c_gensym_macro_map_214, Iter _x2c_gensym_
 Iter MapStringInt_enumerate(MapStringInt _x2c_gensym_macro_map_215, Iter _x2c_gensym_macro_dest_11);
 
 void MapStringInt_cleanup(MapStringInt _x2c_gensym_macro_map_211);
+
+int MapStringInt_add_substr(MapStringInt map, Substr key, int count);
 
 
 #endif /* __GUARD_0x095418B9__ */

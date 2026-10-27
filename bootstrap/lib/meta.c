@@ -159,14 +159,6 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _7 = Symbol_var(1077021542);
 }
 
-List type_base_suffix(List type){
-  for(;  List_truth(type);  type = List_cdr(type)){
-    Var head = List_car(type);
-    if(Var_is_row(head, 11, 7, 1) ||(Var_is(head, 1328354264) && SymbolSet_contains(_base_keywords, Var_symbol(head)))) return type;
-  }
-  return NULL;
-}
-
 String type_name_error(List type){
   if(! _init_guard_) _file_init_();
   Var name = List_last(type);
@@ -180,6 +172,8 @@ String type_name_error(List type){
   }
   );
 }
+
+List type_base_suffix(List type);
 
 List type_declaration_parts(List type){
   if(! _init_guard_) _file_init_();
@@ -216,6 +210,14 @@ return({
   Var _x2c_gensym_literal_part_1 = List_var(List_append(qualifiers, base));  Var _x2c_gensym_literal_part_2 = List_var(Array_list_free(syntax));  cons(_x2c_gensym_literal_part_1, cons(_x2c_gensym_literal_part_2, NULL));
 }
 );
+}
+
+List type_base_suffix(List type){
+  for(;  List_truth(type);  type = List_cdr(type)){
+    Var head = List_car(type);
+    if(Var_is_row(head, 11, 7, 1) ||(Var_is(head, 1328354264) && SymbolSet_contains(_base_keywords, Var_symbol(head)))) return type;
+  }
+  return NULL;
 }
 
 static Var _modifier_syntax(Var modifier){

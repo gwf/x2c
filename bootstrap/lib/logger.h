@@ -45,42 +45,6 @@ typedef void(* LogFlusher)(Logger logger, Var data);
 #include "string/string.h"
 #include "symbol.h"
 #include "var/var.h"
-void Logger_log(Logger logger, Symbol level, Symbol category, List fields);
-
-int Logger_should_log(Logger logger, Symbol level, Symbol category);
-
-int log_should_log(Symbol level, Symbol category);
-
-int Logger_level_priority(Symbol level);
-
-Symbol Logger_min_level(Logger logger);
-
-int Logger_set_min_level(Logger logger, Symbol level);
-
-LogSink Logger_add_sink(Logger logger, LogEmitter emit, LogFlusher flush, Var data);
-
-int Logger_remove_sink(Logger logger, LogSink sink);
-
-void Logger_clear_sinks(Logger logger);
-
-int Logger_sink_count(Logger logger);
-
-void Logger_flush(Logger logger);
-
-LogSink Logger_add_stderr_sink(Logger logger);
-
-LogSink Logger_add_file_sink(Logger logger, File file);
-
-LogSink Logger_add_memory_sink(Logger logger, List * destination);
-
-Logger log_set_global_logger(Logger logger);
-
-Logger log_get_global_logger(void);
-
-void log_event(Symbol level, Symbol category, List fields);
-
-Symbol Logger_error_handler(List errors, Var data);
-
 void Logger_trace(Logger logger, Symbol category, List fields);
 
 void Logger_debug(Logger logger, Symbol category, List fields);
@@ -105,13 +69,49 @@ void log_error(Symbol category, List fields);
 
 void log_fatal(Symbol category, List fields);
 
-Logger Logger_new(Symbol min_level);
+int Logger_should_log(Logger logger, Symbol level, Symbol category);
 
-void Logger_free(Logger logger);
+int log_should_log(Symbol level, Symbol category);
+
+int Logger_level_priority(Symbol level);
+
+Symbol Logger_min_level(Logger logger);
+
+int Logger_set_min_level(Logger logger, Symbol level);
+
+LogSink Logger_add_sink(Logger logger, LogEmitter emit, LogFlusher flush, Var data);
+
+int Logger_remove_sink(Logger logger, LogSink sink);
+
+LogSink Logger_add_file_sink(Logger logger, File file);
+
+LogSink Logger_add_memory_sink(Logger logger, List * destination);
+
+Logger log_set_global_logger(Logger logger);
+
+void log_event(Symbol level, Symbol category, List fields);
 
 void Logger_initialize(void);
 
+LogSink Logger_add_stderr_sink(Logger logger);
+
+Symbol Logger_error_handler(List errors, Var data);
+
+int Logger_sink_count(Logger logger);
+
+Logger log_get_global_logger(void);
+
+Logger Logger_new(Symbol min_level);
+
 void Logger_shutdown(void);
+
+void Logger_log(Logger logger, Symbol level, Symbol category, List fields);
+
+void Logger_free(Logger logger);
+
+void Logger_clear_sinks(Logger logger);
+
+void Logger_flush(Logger logger);
 
 
 #endif /* __GUARD_0x85DD9BE4__ */

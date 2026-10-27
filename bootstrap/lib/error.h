@@ -41,9 +41,9 @@ Atom Atom_intern(String spelling);
 String Atom_str(Atom atom);
 
 #define ERROR_MAX_DEPTH 4
-Symbol Error_raise(Symbol code, List detail);
-
 void x2c_error_raise(Symbol code, List detail);
+
+Symbol Error_raise(Symbol code, List detail);
 
 void x2c_error_raise_n(const X2CErrorSite * site, Symbol code, unsigned pair_count, ...);
 
@@ -55,8 +55,6 @@ void Error_policy_set(Symbol code, Symbol disposition);
 
 Symbol Error_policy_get(Symbol code);
 
-int Error_bound(void);
-
 void Error_bound_set(int bound);
 
 void * Error_policy_capture(void);
@@ -67,15 +65,17 @@ void Error_policy_release(void * capture);
 
 void * Error_context_open(void);
 
-void Error_context_close(void * token, int preserve_records);
+int Error_bound(void);
 
-int Error_count(void);
+void Error_context_close(void * token, int preserve_records);
 
 int Error_mark(void);
 
 List Error_since(int mark);
 
 List Error_since_in(int mark, Scope * values, Pool pool);
+
+int Error_count(void);
 
 Var Error_snapshot(Var value);
 
@@ -88,13 +88,11 @@ ErrorHandler Error_push(ErrorHandlerFn fn, Var data);
 
 void Error_pop(ErrorHandler handle);
 
-int Error_handler_depth(void);
-
 void * Error_handler_head(void);
 
-ErrorHandler x2c_error_catch_site_push(void * target, ErrorCatchSite * site, Var * patterns);
-
 ErrorHandler x2c_error_catch_push(void * target, unsigned arm_count, ...);
+
+ErrorHandler x2c_error_catch_site_push(void * target, ErrorCatchSite * site, Var * patterns);
 
 int x2c_error_catch_site_pending(ErrorCatchSite * site);
 
@@ -113,6 +111,8 @@ void Error_restore_landing(void * saved_head, int saved_depth);
 void Error_trim(void * saved_head, int stack_height);
 
 void Error_restore(int handler_depth, int stack_height);
+
+int Error_handler_depth(void);
 
 #define ERROR_DEFAULT_BOUND 4096
 void Error_initialize_raw(void);

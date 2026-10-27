@@ -8,9 +8,9 @@
 #include "x2c.h"
 typedef Symbol Diff;
 
-List Diff_lines(String old, String new);
-
 String Diff_unified(String old, String new, String old_name, String new_name);
+
+List Diff_lines(String old, String new);
 
 
 #endif /* __GUARD_0x0A217399__ */

@@ -23,21 +23,9 @@ void Block_cleanup(Block _x2c_gensym_macro_value_0);
 
 void Bytes_cleanup(Bytes _x2c_gensym_macro_value_1);
 
-static inline Block Bytes_block(Bytes bytes){
-  if(bytes == NULL) return NULL;
-  unsigned char * data = bytes;
-  return *((Block *)(data - sizeof(Block)));
-}
+static inline Block Bytes_block(Bytes bytes);
 
-void Block_append(Block b, const void * source, size_t count);
-
-static inline Bytes Bytes_append(Bytes bytes, const void * source, size_t count){
-  Block block = Bytes_block(bytes);
-  Block_append(block, source, count);
-  return block -> bytes;
-}
-
-void Block_append_fill(Block b, const void * element, size_t count);
+void Block_append_fill(Block, const void *, size_t);
 
 static inline Bytes Bytes_append_fill(Bytes bytes, const void * element, size_t count){
   Block block = Bytes_block(bytes);
@@ -45,21 +33,37 @@ static inline Bytes Bytes_append_fill(Bytes bytes, const void * element, size_t 
   return block -> bytes;
 }
 
+void Block_append_fill(Block b, const void * element, size_t count);
+
+void Block_append(Block, const void *, size_t);
+
 static inline void Block_push(Block block, const void * source){
   Block_append(block, source, 1);
 }
+
+static inline Bytes Bytes_append(Bytes bytes, const void * source, size_t count);
 
 static inline Bytes Bytes_push(Bytes bytes, const void * source){
   return Bytes_append(bytes, source, 1);
 }
 
-void Block_reserve(Block block, size_t minimum);
+static inline Bytes Bytes_append(Bytes bytes, const void * source, size_t count){
+  Block block = Bytes_block(bytes);
+  Block_append(block, source, count);
+  return block -> bytes;
+}
+
+void Block_append(Block b, const void * source, size_t count);
+
+void Block_reserve(Block, size_t);
 
 static inline Bytes Bytes_reserve(Bytes bytes, size_t minimum){
   Block block = Bytes_block(bytes);
   Block_reserve(block, minimum);
   return block -> bytes;
 }
+
+void Block_reserve(Block block, size_t minimum);
 
 static inline size_t Block_len(Block b){
   return b != NULL ? b -> length : 0;
@@ -79,6 +83,22 @@ static inline void Block_clear(Block block){
   if(block != NULL) block -> length = 0;
 }
 
+static inline int Block_try_pop(Block b, void * out);
+
+static inline int Bytes_try_pop(Bytes bytes, void * out){
+  return Block_try_pop(Bytes_block(bytes), out);
+}
+
+static inline Block Bytes_block(Bytes bytes){
+  if(bytes == NULL) return NULL;
+  unsigned char * data = bytes;
+  return *((Block *)(data - sizeof(Block)));
+}
+
+static inline void Block_pop(Block block){
+  Block_try_pop(block, NULL);
+}
+
 static inline int Block_try_pop(Block b, void * out){
   if(b == NULL || ! b -> length) return 0;
   size_t index = b -> length - 1;
@@ -87,19 +107,11 @@ static inline int Block_try_pop(Block b, void * out){
   return 1;
 }
 
-static inline int Bytes_try_pop(Bytes bytes, void * out){
-  return Block_try_pop(Bytes_block(bytes), out);
-}
-
-static inline void Block_pop(Block block){
-  Block_try_pop(block, NULL);
-}
-
-Block Block_new(size_t width);
-
 Scope Block_scope(Block b);
 
 Bytes Bytes_new(size_t width);
+
+Block Block_new(size_t width);
 
 void Block_free(Block b);
 

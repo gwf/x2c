@@ -34,25 +34,23 @@ struct Context{
 
 static _Thread_local Context current_context;
 
+static pthread_once_t context_shutdown_once;
+
 static int _init_guard_ = 0;
 
+#include "exception.h"
+
+
+
+
+_x2c_gensym_initializer_choice_C34B3F4F_0((context_shutdown_once =(pthread_once_t) PTHREAD_ONCE_INIT))
 static Var _export_root(Context c, Var value);
-
-static int _visited(Context c, Var value);
-
-static Map _export_memo(Context c);
-
-static int _scheduled_owner(Context c, Scope scope);
 
 static void _commit_export(Context c);
 
+static int _scheduled_owner(Context c, Scope scope);
+
 static Var _export_value(Context c, Var v);
-
-static Var _export_wide(Context c, Var v);
-
-static String _export_string(Context c, String value);
-
-static Var _export_atom(Context c, Var value);
 
 static List _export_list(Context c, List list);
 
@@ -62,23 +60,25 @@ static Map _export_map(Context c, Map map);
 
 static Var _export_callback(Var value, Context c);
 
+static int _visited(Context c, Var value);
+
+static Var _export_wide(Context c, Var v);
+
+static String _export_string(Context c, String value);
+
+static Var _export_atom(Context c, Var value);
+
 static Var _export_storage(Context c, Var v);
+
+static Map _export_memo(Context c);
 
 static int _owns_scope(Context context, Scope owner);
 
 static Context _open(const char * name, int isolated);
 
-static pthread_once_t context_shutdown_once;
-
-#include "exception.h"
-
-
-
-
-_x2c_gensym_initializer_choice_C34B3F4F_0((context_shutdown_once =(pthread_once_t) PTHREAD_ONCE_INIT))
-static void _shutdown(void);
-
 static void _register_shutdown(void);
+
+static void _shutdown(void);
 
 typedef struct _x2c_gensym_defer_env_0{
   const void * _x2c_gensym_defer_capture_0;
@@ -87,12 +87,12 @@ _x2c_gensym_defer_env_0;
 
 static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0);
 
-static void _x2c_gensym_defer_cleanup_1(void * _x2c_gensym_defer_opaque_1);
-
 typedef struct _x2c_gensym_defer_env_1{
   const void * _x2c_gensym_defer_capture_1;
 }
 _x2c_gensym_defer_env_1;
+
+static void _x2c_gensym_defer_cleanup_1(void * _x2c_gensym_defer_opaque_1);
 
 static void _x2c_gensym_defer_cleanup_2(void * _x2c_gensym_defer_opaque_2);
 
@@ -115,7 +115,7 @@ void Context_initialize(void);
 Var Context_export(Context context, Var value){
   if(! _init_guard_) Context_initialize();
   if(! context || current_context != context){
-    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/context.x",.function = "Context_export",.line = 70,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/context.x",.function = "Context_export",.line = 73,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_0, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Context.export")), NULL))));
     __builtin_unreachable();
   }
@@ -129,6 +129,104 @@ Var Context_export_scope(Scope source_scope, Pool pool, Var value){
   }
   ;
   return _export_root(& source, value);
+}
+
+Var Context_export_nested(Context c, Var value){
+  if(! _init_guard_) Context_initialize();
+  return _export_value(c, value);
+}
+
+Scope * Context_export_destination(Context c){
+  if(! _init_guard_) Context_initialize();
+  return c ? c -> destination_scope : NULL;
+}
+
+int Context_owns(Context context, void * allocation);
+
+void Context_move_allocation(Context c, void * allocation){
+  if(! _init_guard_) Context_initialize();
+  if(Context_owns(c, allocation)) Map_set(_export_memo(c), Var_new(3683441, allocation), int_var(1));
+}
+
+void Context_move_scope(Context c, Scope storage);
+
+void Context_move_block(Context c, Block block){
+  if(! _init_guard_) Context_initialize();
+  if(! Context_owns(c, block)) return;
+  Map_set(_export_memo(c), Block_var(block), int_var(1));
+  Context_move_scope(c, block -> lifetime);
+}
+
+int Context_owns(Context context, void * allocation){
+  if(! _init_guard_) Context_initialize();
+  return allocation && context && !(context -> exported != NULL && Map_contains(context -> exported, Var_new(3683441, allocation))) && _owns_scope(context, Scope_owner(allocation));
+}
+
+void Context_move_scope(Context c, Scope storage){
+  if(! _init_guard_) Context_initialize();
+  if(_owns_scope(c, storage)) Map_set(_export_memo(c), Var_new(40074250, storage), int_var(1));
+}
+
+Context Context_open(void){
+  if(! _init_guard_) Context_initialize();
+  return _open(NULL, 0);
+}
+
+Context Context_open_named(const char * name){
+  if(! _init_guard_) Context_initialize();
+  return _open(name, 0);
+}
+
+Context Context_open_isolated(void){
+  if(! _init_guard_) Context_initialize();
+  return _open(NULL, 1);
+}
+
+Context Context_open_isolated_named(const char * name){
+  if(! _init_guard_) Context_initialize();
+  return _open(name, 1);
+}
+
+Context Context_current(void){
+  if(! _init_guard_) Context_initialize();
+  return current_context;
+}
+
+void Context_close(Context c);
+
+void Context_cleanup(Context value){
+  if(! _init_guard_) Context_initialize();
+  Context_close(value);
+}
+
+void Context_initialize(void){
+  if(_init_guard_) return;
+  _init_guard_ = 1;
+  _x2c_gensym_static_initialize_0();
+  if(pthread_once(& context_shutdown_once, _register_shutdown)){
+    fprintf(stderr, "Context: could not register shutdown\n");
+    abort();
+  }
+
+}
+
+void Context_close(Context c){
+  if(! _init_guard_) Context_initialize();
+  if(! c || current_context != c){
+    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/context.x",.function = "Context_close",.line = 241,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_1, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Context.close")), NULL))));
+    __builtin_unreachable();
+  }
+  MatchCache_context_close(c -> match_state);
+  Error_context_close(c -> error_state, x2c_exception_unwinding());
+  if(c -> pool) Pool_close();
+  Scope scope = c -> scope;
+  Context parent = c -> parent;
+  while(Scope_top() != & c -> scope) Scope_pop();
+  Scope_pop();
+  Scope_destroy(scope);
+  current_context = parent;
+  xfree(c);
 }
 
 static Var _export_root(Context c, Var value){
@@ -160,23 +258,6 @@ static Var _export_root(Context c, Var value){
     x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
   }
 
-}
-
-static int _visited(Context c, Var value){
-  _export_memo(c);
-  if(Map_contains(c -> exported, value)) return 1;
-  Map_set(c -> exported, value, int_var(1));
-  return 0;
-}
-
-static Map _export_memo(Context c){
-  if(c -> exported == NULL) c -> exported = Map_new();
-  return c -> exported;
-}
-
-static int _scheduled_owner(Context c, Scope scope){
-  for(;  scope;  scope = Scope_parent(scope)) if(Map_contains(c -> exported, Var_new(40074250, scope))) return 1;
-  return 0;
 }
 
 int Iter_try_next(Iter, Var *);
@@ -232,6 +313,11 @@ static void _commit_export(Context c){
 
 }
 
+static int _scheduled_owner(Context c, Scope scope){
+  for(;  scope;  scope = Scope_parent(scope)) if(Map_contains(c -> exported, Var_new(40074250, scope))) return 1;
+  return 0;
+}
+
 static Var _export_value(Context c, Var v){
   if(Var_is_void(v) || Var_is_null(v) || Var_is_nil(v) || Var_is(v, 1328354264)) return v;
   if(Var_is_wide(v)) return _export_wide(c, v);
@@ -248,13 +334,81 @@ static Var _export_value(Context c, Var v){
   {
     Var _x2c_gensym_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("Context.export")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/context.x",.function = "_export_value",.line = 171,.runtime = 1};
-      x2c_error_raise_n(& _x2c_gensym_error_site_1, 4477479911782, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(41038), Symbol_var(tag));
+      static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/context.x",.function = "_export_value",.line = 322,.runtime = 1};
+      x2c_error_raise_n(& _x2c_gensym_error_site_2, 4477479911782, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(41038), Symbol_var(tag));
       __builtin_unreachable();
     }
 
   }
 
+}
+
+static List _export_list(Context c, List list){
+  if(! List_truth(list) ||(c -> pool && ! Pool_owns(c -> pool, List_var(list)))) return list;
+  Block heads = Block_new(sizeof(Var));
+  const Block _x2c_gensym_macro_acquired_0 = heads;
+  {
+    _x2c_gensym_defer_env_1 _x2c_gensym_macro_environment_1 ={
+      0
+    }
+    ;
+    _x2c_gensym_macro_environment_1._x2c_gensym_defer_capture_1 =(const void *) & _x2c_gensym_macro_acquired_0;
+    X2CCleanup _x2c_gensym_defer_record_1 ={
+      .fn = _x2c_gensym_defer_cleanup_1, .env = & _x2c_gensym_macro_environment_1
+    }
+    ;
+    x2c_cleanup_push(& _x2c_gensym_defer_record_1);
+    {
+      List tail = list;
+      while(List_truth(tail) &&(! c -> pool || Pool_owns(c -> pool, List_var(tail)))){
+        Var head = _export_value(c, tail -> car);
+        Block_push(heads, & head);
+        tail = tail -> cdr;
+      }
+      Var * items = heads -> bytes;
+      for(size_t i = heads -> length;  i;  i --) tail = c -> pool ? List_cons_in(c -> destination_pool, items[i - 1], tail) : List_cons(items[i - 1], tail);
+      {
+        List _x2c_gensym_return_value_1 = tail;
+        {
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_1);
+          return _x2c_gensym_return_value_1;
+        }
+
+      }
+
+    }
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_1);
+  }
+
+}
+
+static Array _export_array(Context c, Array array){
+  if(! Context_owns(c, array) || _visited(c, Array_var(array))) return array;
+  Context_move_block(c, Array_block(array));
+  Var * items = array -> bytes;
+  for(size_t i = 0;  i < array -> length;  i ++) items[i] = _export_value(c, items[i]);
+  return array;
+}
+
+static Map _export_map(Context c, Map map){
+  if(! Context_owns(c, map) || _visited(c, Map_var(map))) return map;
+  Map_export_to(map, c, _export_callback, c -> destination_scope);
+  Context_move_allocation(c, map);
+  Context_move_block(c, Bytes_block(map -> hashes));
+  Context_move_block(c, Bytes_block(map -> entries));
+  Context_move_scope(c, map -> scope);
+  return map;
+}
+
+static Var _export_callback(Var value, Context c){
+  return _export_value(c, value);
+}
+
+static int _visited(Context c, Var value){
+  _export_memo(c);
+  if(Map_contains(c -> exported, value)) return 1;
+  Map_set(c -> exported, value, int_var(1));
+  return 0;
 }
 
 static Var _export_wide(Context c, Var v){
@@ -265,15 +419,15 @@ static Var _export_wide(Context c, Var v){
     Scope_push(& scratch);
     {
       {
-        X2CCleanup _x2c_gensym_defer_record_1 ={
-          .fn = _x2c_gensym_defer_cleanup_1, .env = 0
+        X2CCleanup _x2c_gensym_defer_record_2 ={
+          .fn = _x2c_gensym_defer_cleanup_2, .env = 0
         }
         ;
-        x2c_cleanup_push(& _x2c_gensym_defer_record_1);
+        x2c_cleanup_push(& _x2c_gensym_defer_record_2);
         {
           Map_set(memo, Var_box_ulong(v.u64), v);
         }
-        x2c_cleanup_leave(& _x2c_gensym_defer_record_1);
+        x2c_cleanup_leave(& _x2c_gensym_defer_record_2);
       }
 
     }
@@ -294,75 +448,6 @@ static Var _export_atom(Context c, Var value){
   return Var_new(826970, result);
 }
 
-static List _export_list(Context c, List list){
-  if(! List_truth(list) ||(c -> pool && ! Pool_owns(c -> pool, List_var(list)))) return list;
-  Block heads = Block_new(sizeof(Var));
-  const Block _x2c_gensym_macro_acquired_0 = heads;
-  {
-    _x2c_gensym_defer_env_1 _x2c_gensym_macro_environment_1 ={
-      0
-    }
-    ;
-    _x2c_gensym_macro_environment_1._x2c_gensym_defer_capture_1 =(const void *) & _x2c_gensym_macro_acquired_0;
-    X2CCleanup _x2c_gensym_defer_record_2 ={
-      .fn = _x2c_gensym_defer_cleanup_2, .env = & _x2c_gensym_macro_environment_1
-    }
-    ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_2);
-    {
-      List tail = list;
-      while(List_truth(tail) &&(! c -> pool || Pool_owns(c -> pool, List_var(tail)))){
-        Var head = _export_value(c, tail -> car);
-        Block_push(heads, & head);
-        tail = tail -> cdr;
-      }
-      Var * items = heads -> bytes;
-      for(size_t i = heads -> length;  i;  i --) tail = c -> pool ? List_cons_in(c -> destination_pool, items[i - 1], tail) : List_cons(items[i - 1], tail);
-      {
-        List _x2c_gensym_return_value_1 = tail;
-        {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_2);
-          return _x2c_gensym_return_value_1;
-        }
-
-      }
-
-    }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_2);
-  }
-
-}
-
-int Context_owns(Context context, void * allocation);
-
-void Context_move_block(Context c, Block block);
-
-static Array _export_array(Context c, Array array){
-  if(! Context_owns(c, array) || _visited(c, Array_var(array))) return array;
-  Context_move_block(c, Array_block(array));
-  Var * items = array -> bytes;
-  for(size_t i = 0;  i < array -> length;  i ++) items[i] = _export_value(c, items[i]);
-  return array;
-}
-
-void Context_move_allocation(Context c, void * allocation);
-
-void Context_move_scope(Context c, Scope storage);
-
-static Map _export_map(Context c, Map map){
-  if(! Context_owns(c, map) || _visited(c, Map_var(map))) return map;
-  Map_export_to(map, c, _export_callback, c -> destination_scope);
-  Context_move_allocation(c, map);
-  Context_move_block(c, Bytes_block(map -> hashes));
-  Context_move_block(c, Bytes_block(map -> entries));
-  Context_move_scope(c, map -> scope);
-  return map;
-}
-
-static Var _export_callback(Var value, Context c){
-  return _export_value(c, value);
-}
-
 static Var _export_storage(Context c, Var v){
   void * allocation = Var_is_row(v, 8, 7, 3) ? Bytes_block(Var_bytes(v)) : Var_pointer(v);
   if(! Context_owns(c, allocation)) return v;
@@ -371,62 +456,15 @@ static Var _export_storage(Context c, Var v){
   return v;
 }
 
-Var Context_export_nested(Context c, Var value){
-  if(! _init_guard_) Context_initialize();
-  return _export_value(c, value);
-}
-
-int Context_owns(Context context, void * allocation){
-  if(! _init_guard_) Context_initialize();
-  return allocation && context && !(context -> exported != NULL && Map_contains(context -> exported, Var_new(3683441, allocation))) && _owns_scope(context, Scope_owner(allocation));
+static Map _export_memo(Context c){
+  if(c -> exported == NULL) c -> exported = Map_new();
+  return c -> exported;
 }
 
 static int _owns_scope(Context context, Scope owner){
   if(! context || ! owner) return 0;
   for(Scope scope = context -> scope;  scope;  scope = scope -> down) if(Scope_contains(scope, owner)) return 1;
   return 0;
-}
-
-Scope * Context_export_destination(Context c){
-  if(! _init_guard_) Context_initialize();
-  return c ? c -> destination_scope : NULL;
-}
-
-void Context_move_allocation(Context c, void * allocation){
-  if(! _init_guard_) Context_initialize();
-  if(Context_owns(c, allocation)) Map_set(_export_memo(c), Var_new(3683441, allocation), int_var(1));
-}
-
-void Context_move_scope(Context c, Scope storage){
-  if(! _init_guard_) Context_initialize();
-  if(_owns_scope(c, storage)) Map_set(_export_memo(c), Var_new(40074250, storage), int_var(1));
-}
-
-void Context_move_block(Context c, Block block){
-  if(! _init_guard_) Context_initialize();
-  if(! Context_owns(c, block)) return;
-  Map_set(_export_memo(c), Block_var(block), int_var(1));
-  Context_move_scope(c, block -> lifetime);
-}
-
-Context Context_open(void){
-  if(! _init_guard_) Context_initialize();
-  return _open(NULL, 0);
-}
-
-Context Context_open_named(const char * name){
-  if(! _init_guard_) Context_initialize();
-  return _open(name, 0);
-}
-
-Context Context_open_isolated(void){
-  if(! _init_guard_) Context_initialize();
-  return _open(NULL, 1);
-}
-
-Context Context_open_isolated_named(const char * name){
-  if(! _init_guard_) Context_initialize();
-  return _open(name, 1);
 }
 
 static Context _open(const char * name, int isolated){
@@ -478,52 +516,12 @@ static Context _open(const char * name, int isolated){
 
 }
 
-Context Context_current(void){
-  if(! _init_guard_) Context_initialize();
-  return current_context;
-}
-
-void Context_close(Context c){
-  if(! _init_guard_) Context_initialize();
-  if(! c || current_context != c){
-    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/context.x",.function = "Context_close",.line = 415,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_2, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Context.close")), NULL))));
-    __builtin_unreachable();
-  }
-  MatchCache_context_close(c -> match_state);
-  Error_context_close(c -> error_state, x2c_exception_unwinding());
-  if(c -> pool) Pool_close();
-  Scope scope = c -> scope;
-  Context parent = c -> parent;
-  while(Scope_top() != & c -> scope) Scope_pop();
-  Scope_pop();
-  Scope_destroy(scope);
-  current_context = parent;
-  xfree(c);
-}
-
-void Context_cleanup(Context value){
-  if(! _init_guard_) Context_initialize();
-  Context_close(value);
-}
-
-void Context_initialize(void){
-  if(_init_guard_) return;
-  _init_guard_ = 1;
-  _x2c_gensym_static_initialize_0();
-  if(pthread_once(& context_shutdown_once, _register_shutdown)){
-    fprintf(stderr, "Context: could not register shutdown\n");
-    abort();
-  }
-
+static void _register_shutdown(void){
+  Scope_shutdown_hook(_shutdown);
 }
 
 static void _shutdown(void){
   while(current_context) Context_close(current_context);
-}
-
-static void _register_shutdown(void){
-  Scope_shutdown_hook(_shutdown);
 }
 
 static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0){
@@ -536,12 +534,12 @@ static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0){
 }
 
 static void _x2c_gensym_defer_cleanup_1(void * _x2c_gensym_defer_opaque_1){
-  Scope_pop();
+  _x2c_gensym_defer_env_1 * _x2c_gensym_defer_data_1 =(_x2c_gensym_defer_env_1 *) _x2c_gensym_defer_opaque_1;
+  Block_cleanup((*(const Block *) _x2c_gensym_defer_data_1->_x2c_gensym_defer_capture_1));
 }
 
 static void _x2c_gensym_defer_cleanup_2(void * _x2c_gensym_defer_opaque_2){
-  _x2c_gensym_defer_env_1 * _x2c_gensym_defer_data_1 =(_x2c_gensym_defer_env_1 *) _x2c_gensym_defer_opaque_2;
-  Block_cleanup((*(const Block *) _x2c_gensym_defer_data_1->_x2c_gensym_defer_capture_1));
+  Scope_pop();
 }
 
 static void _x2c_gensym_defer_cleanup_3(void * _x2c_gensym_defer_opaque_3){

@@ -37,11 +37,29 @@ VarDescriptor * x2c_var_declare(Symbol tag);
 
 int x2c_var_tag_descriptor_index(Symbol tag);
 
+static _Thread_local RenderPath * render_path;
+
+static pthread_mutex_t descriptor_mutex;
+
+static pthread_once_t descriptor_mutex_once;
+
 static String _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
 static int _init_guard_ = 0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
+
+#include "exception.h"
+
+
+
+
+_x2c_gensym_initializer_choice_4D85CB6E_0((descriptor_mutex_once =(pthread_once_t) PTHREAD_ONCE_INIT))
+static int descriptor_registration_frozen;
+
+static inline int Var_same(Var a, Var b){
+  return a.u64 == b.u64;
+}
 
 static VarDescriptor * _descriptor(Var value);
 
@@ -61,20 +79,9 @@ static Buffer _write_byte_repr(Buffer out, unsigned byte);
 
 static Buffer _write_float_repr(Buffer out, long double value, Symbol width, String suffix);
 
-static _Thread_local RenderPath * render_path;
-
 static unsigned _nonzero(unsigned hash);
 
 static unsigned _default_hash(Var v);
-
-#include "exception.h"
-
-
-
-
-static inline int Var_same(Var a, Var b){
-  return a.u64 == b.u64;
-}
 
 static int _group(Symbol kind, Symbol tag);
 
@@ -84,8 +91,6 @@ static int _group_compare(Var a, Var b, Symbol kind, Symbol atag, Symbol btag);
 
 static int _compare_addresses(Var a, Var b);
 
-static int _compare_bits(Var a, Var b);
-
 static int _numeric_compare(Var a, Var b, Symbol ak, Symbol bk, Symbol atag, Symbol btag);
 
 static long double _float_value(Var v, Symbol kind, int wide);
@@ -93,6 +98,8 @@ static long double _float_value(Var v, Symbol kind, int wide);
 static int _numeric_class(Symbol tag, long double value);
 
 static int _numeric_tie(Var a, Var b, Symbol atag, Symbol btag, int wide);
+
+static int _compare_bits(Var a, Var b);
 
 static int _numeric_rank(Symbol tag);
 
@@ -104,28 +111,21 @@ static VarBinaryFn _binary_callback(VarMethods * methods, Symbol member);
 
 static VarDescriptor * _reserve(String name);
 
-static VarDescriptor * _reserve_tagged(Symbol tag, String name);
-
 static VarDescriptor * _tag_row(Symbol tag);
 
 static VarDescriptor * _declare(Symbol tag);
 
 static VarDescriptor * _claim_name(VarDescriptor * descriptor, Symbol tag, String name);
 
-static void _install_methods(VarDescriptor * descriptor, VarMethods methods);
-
-static pthread_mutex_t descriptor_mutex;
-
-static pthread_once_t descriptor_mutex_once;
-
-_x2c_gensym_initializer_choice_4D85CB6E_0((descriptor_mutex_once =(pthread_once_t) PTHREAD_ONCE_INIT))
-static int descriptor_registration_frozen;
-
 static void _lock(void);
 
 static void _unlock(void);
 
 static void _mutex_initialize(void);
+
+static void _install_methods(VarDescriptor * descriptor, VarMethods methods);
+
+static VarDescriptor * _reserve_tagged(Symbol tag, String name);
 
 static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0);
 
@@ -140,36 +140,34 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   if(_init_guard_) return;
   _init_guard_ = 1;
   _0 = String_new("void");
-  _1 = String_new("%c");
-  _2 = String_new("%d");
-  _3 = String_new("%ld");
-  _4 = String_new("%lld");
-  _5 = String_new("%u");
-  _6 = String_new("%lu");
-  _7 = String_new("%llu");
-  _8 = String_new("%lf");
-  _9 = String_new("%Lf");
-  _10 = String_new("<0x%012lX>");
-  _11 = String_new("<%s: 0x%012lX>");
-  _12 = String_new("f");
-  _13 = String_new("l");
-  _14 = String_new("receiver");
-  _15 = String_new("needle");
-  _16 = String_new("key");
-  _17 = String_new("value");
-  _18 = String_new("right");
+  _1 = String_new("<0x%012lX>");
+  _2 = String_new("<%s: 0x%012lX>");
+  _3 = String_new("receiver");
+  _4 = String_new("needle");
+  _5 = String_new("key");
+  _6 = String_new("value");
+  _7 = String_new("right");
+  _8 = String_new("%c");
+  _9 = String_new("%d");
+  _10 = String_new("%ld");
+  _11 = String_new("%lld");
+  _12 = String_new("%u");
+  _13 = String_new("%lu");
+  _14 = String_new("%llu");
+  _15 = String_new("%lf");
+  _16 = String_new("%Lf");
+  _17 = String_new("f");
+  _18 = String_new("l");
   _x2c_gensym_static_initialize_0();
 }
 
-static VarDescriptor * _descriptor(Var value){
-  VarDescriptor * descriptor = _row(x2c_var_descriptor_index(value));
-  if(! descriptor) descriptor = x2c_var_custom_descriptor(value);
-  return descriptor && descriptor -> value_dispatch ? descriptor : NULL;
-}
+String Var_str(Var v);
 
-static VarDescriptor * _row(int index){
-  int count = sizeof(builtin_descriptors) / sizeof(builtin_descriptors[0]);
-  return index >= 0 && index < count ? & builtin_descriptors[index] : NULL;
+String Var_as_string(Var v){
+  if(! _init_guard_) _file_init_();
+  String text = Var_string_payload(v);
+  if(String_truth(text) || Var_is_row(v, 11, 7, 1)) return text;
+  return Var_is_void(v) || Var_is_null(v) ? NULL : Var_str(v);
 }
 
 String Var_fallback_str(Var v);
@@ -179,13 +177,6 @@ String Var_str(Var v){
   VarDescriptor * descriptor = _descriptor(v);
   if(descriptor && descriptor -> methods.str) return descriptor -> methods.str(v);
   return Var_fallback_str(v);
-}
-
-String Var_as_string(Var v){
-  if(! _init_guard_) _file_init_();
-  String text = Var_string_payload(v);
-  if(String_truth(text) || Var_is_row(v, 11, 7, 1)) return text;
-  return Var_is_void(v) || Var_is_null(v) ? NULL : Var_str(v);
 }
 
 String Var_pointer_string(Var v);
@@ -201,29 +192,6 @@ String Var_fallback_str(Var v){
   return Var_pointer_string(v);
 }
 
-static String _primitive_str(Var v, Symbol tag){
-  switch(tag){
-    case 26993 : case 30065 : return String_printf(_1, Var_int(Var_convert(v, 3453797)));
-    case 3453293 : case 3453797 : return String_printf(_2, Var_int(Var_convert(v, 3453797)));
-    case 3454065 : case 818062 : return String_printf(_3, Var_long(Var_convert(v, 818062)));
-    case 25983886 : return String_printf(_4, Var_long_long(Var_convert(v, 25983886)));
-    case 3846509 : case 3847013 : return String_printf(_5, Var_uint(Var_convert(v, 3847013)));
-    case 3847281 : case 44858254 : return String_printf(_6, Var_ulong(Var_convert(v, 44858254)));
-    case 1435270030 : return String_printf(_7, Var_ulong_long(Var_convert(v, 1435270030)));
-    case 3355493 : case 3356265 : return String_printf(_8, Var_floating(Var_convert(v, 3356265)));
-    case 26071077642 : return String_printf(_9, Var_long_double(Var_convert(v, 26071077642)));
-    case 28764 : case 1854348 : case 2050956 : return String_join(NULL, cons(String_var(Symbol_str(tag)), NULL));
-  }
-  return Var_pointer_string(v);
-}
-
-String Var_pointer_string(Var v){
-  if(! _init_guard_) _file_init_();
-  Symbol tag = Var_tag(v);
-  if(tag == 3683441) return String_printf(_10, (long) Var_pointer(v));
-  return String_printf(_11, Symbol_str(tag), (long) Var_pointer(v));
-}
-
 Buffer Var_fallback_write_str(Var v, Buffer out);
 
 Buffer Var_write_str(Var v, Buffer out){
@@ -235,10 +203,6 @@ Buffer Var_write_str(Var v, Buffer out){
   return Var_fallback_write_str(v, out);
 }
 
-static Buffer _write_text(Buffer out, String text){
-  return String_truth(text) ? Buffer_write(out, text) : out;
-}
-
 Buffer Var_fallback_write_str(Var v, Buffer out){
   if(! _init_guard_) _file_init_();
   Symbol tag = Var_tag(v);
@@ -246,22 +210,6 @@ Buffer Var_fallback_write_str(Var v, Buffer out){
     case 439096724366 : case 20309162340 : return _write_primitive_str(v, tag, out);
     case 35386204516 : case 39939274535114 : return Buffer_write(out, Var_pointer_string(v));
     case 1473096 : return Buffer_write(out, "void");
-  }
-  return Buffer_write(out, Var_pointer_string(v));
-}
-
-static Buffer _write_primitive_str(Var v, Symbol tag, Buffer out){
-  switch(tag){
-    case 26993 : case 30065 : return Buffer_printf(out, "%c", Var_int(Var_convert(v, 3453797)));
-    case 3453293 : case 3453797 : return Buffer_printf(out, "%d", Var_int(Var_convert(v, 3453797)));
-    case 3454065 : case 818062 : return Buffer_printf(out, "%ld", Var_long(Var_convert(v, 818062)));
-    case 25983886 : return Buffer_printf(out, "%lld", Var_long_long(Var_convert(v, 25983886)));
-    case 3846509 : case 3847013 : return Buffer_printf(out, "%u", Var_uint(Var_convert(v, 3847013)));
-    case 3847281 : case 44858254 : return Buffer_printf(out, "%lu", Var_ulong(Var_convert(v, 44858254)));
-    case 1435270030 : return Buffer_printf(out, "%llu", Var_ulong_long(Var_convert(v, 1435270030)));
-    case 3355493 : case 3356265 : return Buffer_printf(out, "%lf", Var_floating(Var_convert(v, 3356265)));
-    case 26071077642 : return Buffer_printf(out, "%Lf", Var_long_double(Var_convert(v, 26071077642)));
-    case 28764 : case 1854348 : case 2050956 : return Buffer_write(out, String_join(NULL, cons(String_var(Symbol_str(tag)), NULL)));
   }
   return Buffer_write(out, Var_pointer_string(v));
 }
@@ -287,8 +235,11 @@ String Var_fallback_repr(Var v){
   return Var_pointer_string(v);
 }
 
-static String _primitive_repr(Var v, Symbol tag){
-  return Buffer_str_free(_write_primitive_repr(v, tag, Buffer_new(0)));
+String Var_pointer_string(Var v){
+  if(! _init_guard_) _file_init_();
+  Symbol tag = Var_tag(v);
+  if(tag == 3683441) return String_printf(_1, (long) Var_pointer(v));
+  return String_printf(_2, Symbol_str(tag), (long) Var_pointer(v));
 }
 
 Buffer Var_fallback_write_repr(Var v, Buffer out);
@@ -316,6 +267,519 @@ Buffer Var_fallback_write_repr(Var v, Buffer out){
   return Var_write_pointer_repr(v, out);
 }
 
+Buffer Var_write_pointer_repr(Var v, Buffer out){
+  if(! _init_guard_) _file_init_();
+  Symbol tag = Var_tag(v);
+  if(tag == 3683441) return Buffer_printf(out, "<0x%012lX>", (long) Var_pointer(v));
+  char name[32] ={
+    0
+  }
+  ;
+  Symbol_decode(tag, name);
+  return Buffer_printf(out, "<%s: 0x%012lX>", name, (long) Var_pointer(v));
+}
+
+int RenderPath_enter(RenderPath * path, const void * identity){
+  if(! _init_guard_) _file_init_();
+  for(RenderPath * active = render_path;  active;  active = active -> previous) if(active -> identity == identity) return 0;
+  path -> identity = identity;
+  path -> previous = render_path;
+  render_path = path;
+  return 1;
+}
+
+void RenderPath_leave(RenderPath * path){
+  if(! _init_guard_) _file_init_();
+  render_path = path -> previous;
+}
+
+#include "error.h"
+
+
+
+
+unsigned Var_hash(Var v){
+  if(! _init_guard_) _file_init_();
+  if(v.u64 == VAR_VOID_BITS){
+    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/dispatch.x",.function = "Var_hash",.line = 226,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_0, 48270474208, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.hash")), NULL))));
+    __builtin_unreachable();
+  }
+  if(Var_is_wide(v)) return Var_wide_hash(v);
+  List list = Var_list_payload(v);
+  if(List_truth(list)) return List_hash(list);
+  String text = Var_string_payload(v);
+  if(String_truth(text)) return _nonzero(String_hash(text));
+  VarDescriptor * descriptor = _descriptor(v);
+  if(descriptor && descriptor -> methods.hash) return _nonzero(descriptor -> methods.hash(v));
+  return _default_hash(v);
+}
+
+unsigned Var_fallback_hash(Var v){
+  if(! _init_guard_) _file_init_();
+  if(v.u64 == VAR_VOID_BITS){
+    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/dispatch.x",.function = "Var_fallback_hash",.line = 246,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_1, 48270474208, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.fallback_hash")), NULL))));
+    __builtin_unreachable();
+  }
+  if(Var_is_wide(v)) return Var_wide_hash(v);
+  return _default_hash(v);
+}
+
+int Var_equal(Var a, Var b){
+  if(! _init_guard_) _file_init_();
+  if(a.u64 == b.u64) return 1;
+  if(a.u64 == VAR_VOID_BITS || b.u64 == VAR_VOID_BITS) return 0;
+  int index = x2c_var_descriptor_index(a);
+  VarDescriptor * row = _row(index);
+  if(row){
+    if(x2c_var_descriptor_index(b) != index) return 0;
+    return row -> value_dispatch && row -> methods.equal ? row -> methods.equal(a, b) : 0;
+  }
+  Symbol atag = Var_tag(a), btag = Var_tag(b);
+  if(atag == btag){
+    if(Var_is_wide(a)) return Var_wide_equal(a, b);
+    VarDescriptor * descriptor = _descriptor(a);
+    if(descriptor && descriptor -> methods.equal) return descriptor -> methods.equal(a, b);
+  }
+  return 0;
+}
+
+int Var_fallback_equal(Var a, Var b){
+  if(! _init_guard_) _file_init_();
+  if(a.u64 == b.u64) return 1;
+  if(a.u64 == VAR_VOID_BITS || b.u64 == VAR_VOID_BITS) return 0;
+  if(Var_tag(a) == Var_tag(b) && Var_is_wide(a)) return Var_wide_equal(a, b);
+  return 0;
+}
+
+int Var_compare(Var a, Var b){
+  if(! _init_guard_) _file_init_();
+  if(a.u64 == VAR_VOID_BITS || b.u64 == VAR_VOID_BITS){
+    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/dispatch.x",.function = "Var_compare",.line = 305,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_2, 48270474208, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.compare")), NULL))));
+    __builtin_unreachable();
+  }
+  if(a.u64 == b.u64) return 0;
+  Symbol ak = Var_kind(a), bk = Var_kind(b), atag = Var_tag(a), btag = Var_tag(b);
+  int ag = _group(ak, atag), bg = _group(bk, btag);
+  if(ag != bg) return(ag < bg) ? - 1 : 1;
+  if(ag == 0) return _numeric_compare(a, b, ak, bk, atag, btag);
+  VarDescriptor * descriptor = atag == btag ? _descriptor(a) : NULL;
+  if(descriptor && descriptor -> methods.compare) return descriptor -> methods.compare(a, b);
+  return _group_compare(a, b, ak, atag, btag);
+}
+
+int Var_fallback_compare(Var a, Var b){
+  if(! _init_guard_) _file_init_();
+  if(a.u64 == VAR_VOID_BITS || b.u64 == VAR_VOID_BITS){
+    static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/dispatch.x",.function = "Var_fallback_compare",.line = 322,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_3, 48270474208, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.compare")), NULL))));
+    __builtin_unreachable();
+  }
+  if(a.u64 == b.u64) return 0;
+  Symbol ak = Var_kind(a), bk = Var_kind(b), atag = Var_tag(a), btag = Var_tag(b);
+  int ag = _group(ak, atag), bg = _group(bk, btag);
+  if(ag != bg) return(ag < bg) ? - 1 : 1;
+  if(ag == 0) return _numeric_compare(a, b, ak, bk, atag, btag);
+  return _group_compare(a, b, ak, atag, btag);
+}
+
+Iter Var_iter(Var x, Iter dest);
+
+Iter Var_enumerate(Var x, Iter dest){
+  if(! _init_guard_) _file_init_();
+  if(Var_is(x, 26720)) return Map_enumerate(Var_map(x), dest);
+  return Var_iter(x, dest);
+}
+
+Iter Var_fallback_iter(Var x, Iter dest);
+
+Iter Var_iter(Var x, Iter dest){
+  if(! _init_guard_) _file_init_();
+  if(x.u64 == VAR_VOID_BITS){
+    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/dispatch.x",.function = "Var_iter",.line = 351,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_4, 48270474208, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.iter")), NULL))));
+    __builtin_unreachable();
+  }
+  if(! Iter_truth(dest)) return NULL;
+  VarDescriptor * descriptor = _descriptor(x);
+  if(descriptor && descriptor -> methods.iter) return descriptor -> methods.iter(x, dest);
+  return Var_fallback_iter(x, dest);
+}
+
+Iter Var_fallback_iter(Var x, Iter dest){
+  if(! _init_guard_) _file_init_();
+  if(x.u64 == VAR_VOID_BITS){
+    static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/dispatch.x",.function = "Var_fallback_iter",.line = 364,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_5, 48270474208, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.iter")), NULL))));
+    __builtin_unreachable();
+  }
+  if(! Iter_truth(dest)) return NULL;
+  return Iter_init(dest, (Var){
+    0
+  }
+  , NULL, (Var){
+    .u64 = 0
+  }
+  );
+}
+
+int Var_contains(Var value, Var needle){
+  if(! _init_guard_) _file_init_();
+  _valid_member_operand(value, _3);
+  _valid_member_operand(needle, _4);
+  Symbol member = 239352236966;
+  VarDescriptor * descriptor = _required_descriptor(value, member);
+  if(descriptor -> methods.contains) return descriptor -> methods.contains(value, needle);
+  Symbol tag = Var_tag(value);
+  {
+    static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/dispatch.x",.function = "Var_contains",.line = 383,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_6, 31884573479268, 2, Symbol_var(41038), Symbol_var(tag), Symbol_var(883757412), Symbol_var(member));
+    __builtin_unreachable();
+  }
+
+}
+
+Var Var_getindex(Var value, Var key){
+  if(! _init_guard_) _file_init_();
+  _valid_member_operand(value, _3);
+  _valid_member_operand(key, _5);
+  Symbol member = 493135733104;
+  VarDescriptor * descriptor = _required_descriptor(value, member);
+  if(descriptor -> methods.getindex) return descriptor -> methods.getindex(value, key);
+  Symbol tag = Var_tag(value);
+  {
+    static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/dispatch.x",.function = "Var_getindex",.line = 398,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_7, 31884573479268, 2, Symbol_var(41038), Symbol_var(tag), Symbol_var(883757412), Symbol_var(member));
+    __builtin_unreachable();
+  }
+
+}
+
+Var Var_setindex(Var value, Var key, Var replacement){
+  if(! _init_guard_) _file_init_();
+  _valid_member_operand(value, _3);
+  _valid_member_operand(key, _5);
+  _valid_member_operand(replacement, _6);
+  Symbol member = 1317769453936;
+  VarDescriptor * descriptor = _required_descriptor(value, member);
+  if(descriptor -> methods.setindex) return descriptor -> methods.setindex(value, key, replacement);
+  Symbol tag = Var_tag(value);
+  {
+    static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/dispatch.x",.function = "Var_setindex",.line = 414,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_8, 31884573479268, 2, Symbol_var(41038), Symbol_var(tag), Symbol_var(883757412), Symbol_var(member));
+    __builtin_unreachable();
+  }
+
+}
+
+Var Var_updateindex(Var value, Var key, Symbol op, Var rhs){
+  if(! _init_guard_) _file_init_();
+  _valid_member_operand(value, _3);
+  _valid_member_operand(key, _5);
+  _valid_member_operand(rhs, _7);
+  Symbol member = 1513206379923760;
+  VarDescriptor * descriptor = _required_descriptor(value, member);
+  if(descriptor -> methods.updateindex) return descriptor -> methods.updateindex(value, key, op, rhs);
+  Symbol tag = Var_tag(value);
+  {
+    static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/dispatch.x",.function = "Var_updateindex",.line = 432,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_9, 31884573479268, 2, Symbol_var(41038), Symbol_var(tag), Symbol_var(883757412), Symbol_var(member));
+    __builtin_unreachable();
+  }
+
+}
+
+Var Var_postfixindex(Var value, Var key, Symbol op){
+  if(! _init_guard_) _file_init_();
+  _valid_member_operand(value, _3);
+  _valid_member_operand(key, _5);
+  Symbol member = 1160234330442032;
+  VarDescriptor * descriptor = _required_descriptor(value, member);
+  if(descriptor -> methods.postfixindex) return descriptor -> methods.postfixindex(value, key, op);
+  Symbol tag = Var_tag(value);
+  {
+    static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../lib/dispatch.x",.function = "Var_postfixindex",.line = 447,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_10, 31884573479268, 2, Symbol_var(41038), Symbol_var(tag), Symbol_var(883757412), Symbol_var(member));
+    __builtin_unreachable();
+  }
+
+}
+
+int Var_dispatch_truth(Var value, int * handled){
+  if(! _init_guard_) _file_init_();
+  if(! handled) return 0;
+  (* handled) = 0;
+  VarDescriptor * descriptor = _descriptor(value);
+  if(! descriptor || ! descriptor -> methods.truth) return 0;
+  (* handled) = 1;
+  return descriptor -> methods.truth(value);
+}
+
+int Var_try_dispatch_binary(Var lhs, Symbol member, Var rhs, Var * result){
+  if(! _init_guard_) _file_init_();
+  if(! result) return 0;
+  VarDescriptor * descriptor = _descriptor(lhs);
+  if(! descriptor) return 0;
+  VarBinaryFn callback = _binary_callback(& descriptor -> methods, member);
+  if(! callback) return 0;
+  (* result) = callback(lhs, rhs);
+  return 1;
+}
+
+int Var_try_dispatch_unary(Var value, Symbol member, Var * result){
+  if(! _init_guard_) _file_init_();
+  if(! result) return 0;
+  VarDescriptor * descriptor = _descriptor(value);
+  if(! descriptor || member != 29006 || ! descriptor -> methods.neg) return 0;
+  (* result) = descriptor -> methods.neg(value);
+  return 1;
+}
+
+int Var_try_export_context(Var value, Context source, Var * out){
+  if(! _init_guard_) _file_init_();
+  if(! out) return 0;
+  VarDescriptor * descriptor = _descriptor(value);
+  if(! descriptor || ! descriptor -> methods.export_context) return 0;
+  (* out) = descriptor -> methods.export_context(value, source);
+  return 1;
+}
+
+void x2c_register_type(String name){
+  if(! _init_guard_) _file_init_();
+  _lock();
+  {
+    X2CCleanup _x2c_gensym_defer_record_0 ={
+      .fn = _x2c_gensym_defer_cleanup_0, .env = 0
+    }
+    ;
+    x2c_cleanup_push(& _x2c_gensym_defer_record_0);
+    {
+      if(descriptor_registration_frozen){
+        static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../lib/dispatch.x",.function = "x2c_register_type",.line = 526,.runtime = 1};
+        x2c_error_raise_n(& _x2c_gensym_error_site_11, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("x2c_register_type")), NULL))));
+        __builtin_unreachable();
+      }
+      _reserve(name);
+    }
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
+  }
+
+}
+
+int x2c_register_builtin_descriptor(Symbol tag, VarMethods methods){
+  _lock();
+  {
+    X2CCleanup _x2c_gensym_defer_record_1 ={
+      .fn = _x2c_gensym_defer_cleanup_1, .env = 0
+    }
+    ;
+    x2c_cleanup_push(& _x2c_gensym_defer_record_1);
+    {
+      if(descriptor_registration_frozen){
+        static const X2CErrorSite _x2c_gensym_error_site_12 = {.file = "../../lib/dispatch.x",.function = "x2c_register_builtin_descriptor",.line = 543,.runtime = 1};
+        x2c_error_raise_n(& _x2c_gensym_error_site_12, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("x2c_register_builtin_descriptor")), NULL))));
+        __builtin_unreachable();
+      }
+      VarDescriptor * descriptor = _tag_row(tag);
+      if(! descriptor){
+        int _x2c_gensym_return_value_0 = 0;
+        {
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_1);
+          return _x2c_gensym_return_value_0;
+        }
+
+      }
+      descriptor -> value_dispatch = 1;
+      _install_methods(descriptor, methods);
+      {
+        int _x2c_gensym_return_value_1 = 1;
+        {
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_1);
+          return _x2c_gensym_return_value_1;
+        }
+
+      }
+
+    }
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_1);
+  }
+
+}
+
+int x2c_try_register_descriptor(String name, VarMethods methods);
+
+void x2c_register_descriptor(String name, VarMethods methods){
+  if(! _init_guard_) _file_init_();
+  x2c_try_register_descriptor(name, methods);
+}
+
+int x2c_try_register_descriptor(String name, VarMethods methods){
+  if(! _init_guard_) _file_init_();
+  _lock();
+  {
+    X2CCleanup _x2c_gensym_defer_record_2 ={
+      .fn = _x2c_gensym_defer_cleanup_2, .env = 0
+    }
+    ;
+    x2c_cleanup_push(& _x2c_gensym_defer_record_2);
+    {
+      if(descriptor_registration_frozen){
+        static const X2CErrorSite _x2c_gensym_error_site_13 = {.file = "../../lib/dispatch.x",.function = "x2c_try_register_descriptor",.line = 583,.runtime = 1};
+        x2c_error_raise_n(& _x2c_gensym_error_site_13, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("x2c_try_register_descriptor")), NULL))));
+        __builtin_unreachable();
+      }
+      VarDescriptor * descriptor = _reserve(name);
+      if(! descriptor){
+        int _x2c_gensym_return_value_2 = 0;
+        {
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_2);
+          return _x2c_gensym_return_value_2;
+        }
+
+      }
+      _install_methods(descriptor, methods);
+      {
+        int _x2c_gensym_return_value_3 = 1;
+        {
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_2);
+          return _x2c_gensym_return_value_3;
+        }
+
+      }
+
+    }
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_2);
+  }
+
+}
+
+int x2c_try_register_tagged_descriptor(Symbol tag, String name, VarMethods methods);
+
+void x2c_register_tagged_descriptor(Symbol tag, String name, VarMethods methods){
+  if(! _init_guard_) _file_init_();
+  if(! x2c_try_register_tagged_descriptor(tag, name, methods)){
+    Var _x2c_gensym_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("x2c_register_tagged_descriptor")), NULL)));
+    {
+      static const X2CErrorSite _x2c_gensym_error_site_14 = {.file = "../../lib/dispatch.x",.function = "x2c_register_tagged_descriptor",.line = 597,.runtime = 1};
+      x2c_error_raise_n(& _x2c_gensym_error_site_14, 4477477457162, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(41038), Symbol_var(tag), Symbol_var(920394), String_var(name));
+      __builtin_unreachable();
+    }
+
+  }
+
+}
+
+int x2c_try_register_tagged_descriptor(Symbol tag, String name, VarMethods methods){
+  _lock();
+  {
+    X2CCleanup _x2c_gensym_defer_record_3 ={
+      .fn = _x2c_gensym_defer_cleanup_3, .env = 0
+    }
+    ;
+    x2c_cleanup_push(& _x2c_gensym_defer_record_3);
+    {
+      if(descriptor_registration_frozen){
+        static const X2CErrorSite _x2c_gensym_error_site_15 = {.file = "../../lib/dispatch.x",.function = "x2c_try_register_tagged_descriptor",.line = 617,.runtime = 1};
+        x2c_error_raise_n(& _x2c_gensym_error_site_15, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("x2c_try_register_tagged_descriptor")), NULL))));
+        __builtin_unreachable();
+      }
+      VarDescriptor * descriptor = _reserve_tagged(tag, name);
+      if(! descriptor){
+        int _x2c_gensym_return_value_4 = 0;
+        {
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
+          return _x2c_gensym_return_value_4;
+        }
+
+      }
+      _install_methods(descriptor, methods);
+      {
+        int _x2c_gensym_return_value_5 = 1;
+        {
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
+          return _x2c_gensym_return_value_5;
+        }
+
+      }
+
+    }
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
+  }
+
+}
+
+void x2c_descriptor_thread_start_begin(void){
+  if(! _init_guard_) _file_init_();
+  _lock();
+}
+
+void x2c_descriptor_thread_start_end(int success){
+  if(! _init_guard_) _file_init_();
+  if(success) descriptor_registration_frozen = 1;
+  _unlock();
+}
+
+int x2c_descriptor_registration_frozen(void){
+  if(! _init_guard_) _file_init_();
+  _lock();
+  int frozen = descriptor_registration_frozen;
+  _unlock();
+  return frozen;
+}
+
+static VarDescriptor * _descriptor(Var value){
+  VarDescriptor * descriptor = _row(x2c_var_descriptor_index(value));
+  if(! descriptor) descriptor = x2c_var_custom_descriptor(value);
+  return descriptor && descriptor -> value_dispatch ? descriptor : NULL;
+}
+
+static VarDescriptor * _row(int index){
+  int count = sizeof(builtin_descriptors) / sizeof(builtin_descriptors[0]);
+  return index >= 0 && index < count ? & builtin_descriptors[index] : NULL;
+}
+
+static String _primitive_str(Var v, Symbol tag){
+  switch(tag){
+    case 26993 : case 30065 : return String_printf(_8, Var_int(Var_convert(v, 3453797)));
+    case 3453293 : case 3453797 : return String_printf(_9, Var_int(Var_convert(v, 3453797)));
+    case 3454065 : case 818062 : return String_printf(_10, Var_long(Var_convert(v, 818062)));
+    case 25983886 : return String_printf(_11, Var_long_long(Var_convert(v, 25983886)));
+    case 3846509 : case 3847013 : return String_printf(_12, Var_uint(Var_convert(v, 3847013)));
+    case 3847281 : case 44858254 : return String_printf(_13, Var_ulong(Var_convert(v, 44858254)));
+    case 1435270030 : return String_printf(_14, Var_ulong_long(Var_convert(v, 1435270030)));
+    case 3355493 : case 3356265 : return String_printf(_15, Var_floating(Var_convert(v, 3356265)));
+    case 26071077642 : return String_printf(_16, Var_long_double(Var_convert(v, 26071077642)));
+    case 28764 : case 1854348 : case 2050956 : return String_join(NULL, cons(String_var(Symbol_str(tag)), NULL));
+  }
+  return Var_pointer_string(v);
+}
+
+static Buffer _write_text(Buffer out, String text){
+  return String_truth(text) ? Buffer_write(out, text) : out;
+}
+
+static Buffer _write_primitive_str(Var v, Symbol tag, Buffer out){
+  switch(tag){
+    case 26993 : case 30065 : return Buffer_printf(out, "%c", Var_int(Var_convert(v, 3453797)));
+    case 3453293 : case 3453797 : return Buffer_printf(out, "%d", Var_int(Var_convert(v, 3453797)));
+    case 3454065 : case 818062 : return Buffer_printf(out, "%ld", Var_long(Var_convert(v, 818062)));
+    case 25983886 : return Buffer_printf(out, "%lld", Var_long_long(Var_convert(v, 25983886)));
+    case 3846509 : case 3847013 : return Buffer_printf(out, "%u", Var_uint(Var_convert(v, 3847013)));
+    case 3847281 : case 44858254 : return Buffer_printf(out, "%lu", Var_ulong(Var_convert(v, 44858254)));
+    case 1435270030 : return Buffer_printf(out, "%llu", Var_ulong_long(Var_convert(v, 1435270030)));
+    case 3355493 : case 3356265 : return Buffer_printf(out, "%lf", Var_floating(Var_convert(v, 3356265)));
+    case 26071077642 : return Buffer_printf(out, "%Lf", Var_long_double(Var_convert(v, 26071077642)));
+    case 28764 : case 1854348 : case 2050956 : return Buffer_write(out, String_join(NULL, cons(String_var(Symbol_str(tag)), NULL)));
+  }
+  return Buffer_write(out, Var_pointer_string(v));
+}
+
+static String _primitive_repr(Var v, Symbol tag){
+  return Buffer_str_free(_write_primitive_repr(v, tag, Buffer_new(0)));
+}
+
 static Buffer _write_primitive_repr(Var v, Symbol tag, Buffer out){
   switch(tag){
     case 26993 : case 30065 : return _write_byte_repr(out, (unsigned)(uchar) Var_long(v));
@@ -328,9 +792,9 @@ static Buffer _write_primitive_repr(Var v, Symbol tag, Buffer out){
     case 44858254 : return Buffer_printf(out, "%luul", Var_ulong(v));
     case 25983886 : return Buffer_printf(out, "%lldll", Var_long_long(v));
     case 1435270030 : return Buffer_printf(out, "%lluull", Var_ulong_long(v));
-    case 3355493 : return _write_float_repr(out, Var_floating(v), 3355493, _12);
+    case 3355493 : return _write_float_repr(out, Var_floating(v), 3355493, _17);
     case 3356265 : return _write_float_repr(out, Var_floating(v), 3356265, NULL);
-    case 26071077642 : return _write_float_repr(out, Var_long_double(v), 26071077642, _13);
+    case 26071077642 : return _write_float_repr(out, Var_long_double(v), 26071077642, _18);
     case 28764 : return Buffer_write(out, "NaN");
     case 1854348 : return Buffer_write(out, "+Inf");
     case 2050956 : return Buffer_write(out, "-Inf");
@@ -369,130 +833,12 @@ static Buffer _write_float_repr(Buffer out, long double value, Symbol width, Str
   return String_truth(suffix) ? Buffer_write(out, suffix) : out;
 }
 
-Buffer Var_write_pointer_repr(Var v, Buffer out){
-  if(! _init_guard_) _file_init_();
-  Symbol tag = Var_tag(v);
-  if(tag == 3683441) return Buffer_printf(out, "<0x%012lX>", (long) Var_pointer(v));
-  char name[32] ={
-    0
-  }
-  ;
-  Symbol_decode(tag, name);
-  return Buffer_printf(out, "<%s: 0x%012lX>", name, (long) Var_pointer(v));
-}
-
-int RenderPath_enter(RenderPath * path, const void * identity){
-  if(! _init_guard_) _file_init_();
-  for(RenderPath * active = render_path;  active;  active = active -> previous) if(active -> identity == identity) return 0;
-  path -> identity = identity;
-  path -> previous = render_path;
-  render_path = path;
-  return 1;
-}
-
-void RenderPath_leave(RenderPath * path){
-  if(! _init_guard_) _file_init_();
-  render_path = path -> previous;
-}
-
-#include "error.h"
-
-
-
-
-unsigned Var_hash(Var v){
-  if(! _init_guard_) _file_init_();
-  if(v.u64 == VAR_VOID_BITS){
-    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/dispatch.x",.function = "Var_hash",.line = 340,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_0, 48270474208, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.hash")), NULL))));
-    __builtin_unreachable();
-  }
-  if(Var_is_wide(v)) return Var_wide_hash(v);
-  List list = Var_list_payload(v);
-  if(List_truth(list)) return List_hash(list);
-  String text = Var_string_payload(v);
-  if(String_truth(text)) return _nonzero(String_hash(text));
-  VarDescriptor * descriptor = _descriptor(v);
-  if(descriptor && descriptor -> methods.hash) return _nonzero(descriptor -> methods.hash(v));
-  return _default_hash(v);
-}
-
 static unsigned _nonzero(unsigned hash){
   return hash ? hash : - 1;
 }
 
-unsigned Var_fallback_hash(Var v){
-  if(! _init_guard_) _file_init_();
-  if(v.u64 == VAR_VOID_BITS){
-    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/dispatch.x",.function = "Var_fallback_hash",.line = 363,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_1, 48270474208, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.fallback_hash")), NULL))));
-    __builtin_unreachable();
-  }
-  if(Var_is_wide(v)) return Var_wide_hash(v);
-  return _default_hash(v);
-}
-
 static unsigned _default_hash(Var v){
   return x2c_hash_word(v.u64);
-}
-
-int Var_equal(Var a, Var b){
-  if(! _init_guard_) _file_init_();
-  if(a.u64 == b.u64) return 1;
-  if(a.u64 == VAR_VOID_BITS || b.u64 == VAR_VOID_BITS) return 0;
-  int index = x2c_var_descriptor_index(a);
-  VarDescriptor * row = _row(index);
-  if(row){
-    if(x2c_var_descriptor_index(b) != index) return 0;
-    return row -> value_dispatch && row -> methods.equal ? row -> methods.equal(a, b) : 0;
-  }
-  Symbol atag = Var_tag(a), btag = Var_tag(b);
-  if(atag == btag){
-    if(Var_is_wide(a)) return Var_wide_equal(a, b);
-    VarDescriptor * descriptor = _descriptor(a);
-    if(descriptor && descriptor -> methods.equal) return descriptor -> methods.equal(a, b);
-  }
-  return 0;
-}
-
-int Var_fallback_equal(Var a, Var b){
-  if(! _init_guard_) _file_init_();
-  if(a.u64 == b.u64) return 1;
-  if(a.u64 == VAR_VOID_BITS || b.u64 == VAR_VOID_BITS) return 0;
-  if(Var_tag(a) == Var_tag(b) && Var_is_wide(a)) return Var_wide_equal(a, b);
-  return 0;
-}
-
-int Var_compare(Var a, Var b){
-  if(! _init_guard_) _file_init_();
-  if(a.u64 == VAR_VOID_BITS || b.u64 == VAR_VOID_BITS){
-    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/dispatch.x",.function = "Var_compare",.line = 427,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_2, 48270474208, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.compare")), NULL))));
-    __builtin_unreachable();
-  }
-  if(a.u64 == b.u64) return 0;
-  Symbol ak = Var_kind(a), bk = Var_kind(b), atag = Var_tag(a), btag = Var_tag(b);
-  int ag = _group(ak, atag), bg = _group(bk, btag);
-  if(ag != bg) return(ag < bg) ? - 1 : 1;
-  if(ag == 0) return _numeric_compare(a, b, ak, bk, atag, btag);
-  VarDescriptor * descriptor = atag == btag ? _descriptor(a) : NULL;
-  if(descriptor && descriptor -> methods.compare) return descriptor -> methods.compare(a, b);
-  return _group_compare(a, b, ak, atag, btag);
-}
-
-int Var_fallback_compare(Var a, Var b){
-  if(! _init_guard_) _file_init_();
-  if(a.u64 == VAR_VOID_BITS || b.u64 == VAR_VOID_BITS){
-    static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/dispatch.x",.function = "Var_fallback_compare",.line = 444,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_3, 48270474208, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.compare")), NULL))));
-    __builtin_unreachable();
-  }
-  if(a.u64 == b.u64) return 0;
-  Symbol ak = Var_kind(a), bk = Var_kind(b), atag = Var_tag(a), btag = Var_tag(b);
-  int ag = _group(ak, atag), bg = _group(bk, btag);
-  if(ag != bg) return(ag < bg) ? - 1 : 1;
-  if(ag == 0) return _numeric_compare(a, b, ak, bk, atag, btag);
-  return _group_compare(a, b, ak, atag, btag);
 }
 
 static int _group(Symbol kind, Symbol tag){
@@ -525,11 +871,6 @@ static int _compare_addresses(Var a, Var b){
   uintptr_t ap =(uintptr_t) Var_pointer(a), bp =(uintptr_t) Var_pointer(b);
   if(ap == bp) return 0;
   return(ap < bp) ? - 1 : 1;
-}
-
-static int _compare_bits(Var a, Var b){
-  if(a.u64 == b.u64) return 0;
-  return(a.u64 < b.u64) ? - 1 : 1;
 }
 
 static int _numeric_compare(Var a, Var b, Symbol ak, Symbol bk, Symbol atag, Symbol btag){
@@ -572,6 +913,11 @@ static int _numeric_tie(Var a, Var b, Symbol atag, Symbol btag, int wide){
   return _compare_bits(a, b);
 }
 
+static int _compare_bits(Var a, Var b){
+  if(a.u64 == b.u64) return 0;
+  return(a.u64 < b.u64) ? - 1 : 1;
+}
+
 static int _numeric_rank(Symbol tag){
   if(tag == 13400168) tag = 3355493;
   if(tag == 301273866) tag = 3356265;
@@ -579,134 +925,14 @@ static int _numeric_rank(Symbol tag){
   return Var_numeric_info(tag, &(info)) ? info.rank : 0;
 }
 
-Iter Var_fallback_iter(Var x, Iter dest);
-
-Iter Var_iter(Var x, Iter dest){
-  if(! _init_guard_) _file_init_();
-  if(x.u64 == VAR_VOID_BITS){
-    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/dispatch.x",.function = "Var_iter",.line = 557,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_4, 48270474208, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.iter")), NULL))));
-    __builtin_unreachable();
-  }
-  if(! Iter_truth(dest)) return NULL;
-  VarDescriptor * descriptor = _descriptor(x);
-  if(descriptor && descriptor -> methods.iter) return descriptor -> methods.iter(x, dest);
-  return Var_fallback_iter(x, dest);
-}
-
-Iter Var_enumerate(Var x, Iter dest){
-  if(! _init_guard_) _file_init_();
-  if(Var_is(x, 26720)) return Map_enumerate(Var_map(x), dest);
-  return Var_iter(x, dest);
-}
-
-Iter Var_fallback_iter(Var x, Iter dest){
-  if(! _init_guard_) _file_init_();
-  if(x.u64 == VAR_VOID_BITS){
-    static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/dispatch.x",.function = "Var_fallback_iter",.line = 581,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_5, 48270474208, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.iter")), NULL))));
-    __builtin_unreachable();
-  }
-  if(! Iter_truth(dest)) return NULL;
-  return Iter_init(dest, (Var){
-    0
-  }
-  , NULL, (Var){
-    .u64 = 0
-  }
-  );
-}
-
-int Var_contains(Var value, Var needle){
-  if(! _init_guard_) _file_init_();
-  _valid_member_operand(value, _14);
-  _valid_member_operand(needle, _15);
-  Symbol member = 239352236966;
-  VarDescriptor * descriptor = _required_descriptor(value, member);
-  if(descriptor -> methods.contains) return descriptor -> methods.contains(value, needle);
-  Symbol tag = Var_tag(value);
-  {
-    static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/dispatch.x",.function = "Var_contains",.line = 600,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_6, 31884573479268, 2, Symbol_var(41038), Symbol_var(tag), Symbol_var(883757412), Symbol_var(member));
-    __builtin_unreachable();
-  }
-
-}
-
-Var Var_getindex(Var value, Var key){
-  if(! _init_guard_) _file_init_();
-  _valid_member_operand(value, _14);
-  _valid_member_operand(key, _16);
-  Symbol member = 493135733104;
-  VarDescriptor * descriptor = _required_descriptor(value, member);
-  if(descriptor -> methods.getindex) return descriptor -> methods.getindex(value, key);
-  Symbol tag = Var_tag(value);
-  {
-    static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/dispatch.x",.function = "Var_getindex",.line = 615,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_7, 31884573479268, 2, Symbol_var(41038), Symbol_var(tag), Symbol_var(883757412), Symbol_var(member));
-    __builtin_unreachable();
-  }
-
-}
-
-Var Var_setindex(Var value, Var key, Var replacement){
-  if(! _init_guard_) _file_init_();
-  _valid_member_operand(value, _14);
-  _valid_member_operand(key, _16);
-  _valid_member_operand(replacement, _17);
-  Symbol member = 1317769453936;
-  VarDescriptor * descriptor = _required_descriptor(value, member);
-  if(descriptor -> methods.setindex) return descriptor -> methods.setindex(value, key, replacement);
-  Symbol tag = Var_tag(value);
-  {
-    static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/dispatch.x",.function = "Var_setindex",.line = 631,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_8, 31884573479268, 2, Symbol_var(41038), Symbol_var(tag), Symbol_var(883757412), Symbol_var(member));
-    __builtin_unreachable();
-  }
-
-}
-
-Var Var_updateindex(Var value, Var key, Symbol op, Var rhs){
-  if(! _init_guard_) _file_init_();
-  _valid_member_operand(value, _14);
-  _valid_member_operand(key, _16);
-  _valid_member_operand(rhs, _18);
-  Symbol member = 1513206379923760;
-  VarDescriptor * descriptor = _required_descriptor(value, member);
-  if(descriptor -> methods.updateindex) return descriptor -> methods.updateindex(value, key, op, rhs);
-  Symbol tag = Var_tag(value);
-  {
-    static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/dispatch.x",.function = "Var_updateindex",.line = 649,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_9, 31884573479268, 2, Symbol_var(41038), Symbol_var(tag), Symbol_var(883757412), Symbol_var(member));
-    __builtin_unreachable();
-  }
-
-}
-
-Var Var_postfixindex(Var value, Var key, Symbol op){
-  if(! _init_guard_) _file_init_();
-  _valid_member_operand(value, _14);
-  _valid_member_operand(key, _16);
-  Symbol member = 1160234330442032;
-  VarDescriptor * descriptor = _required_descriptor(value, member);
-  if(descriptor -> methods.postfixindex) return descriptor -> methods.postfixindex(value, key, op);
-  Symbol tag = Var_tag(value);
-  {
-    static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../lib/dispatch.x",.function = "Var_postfixindex",.line = 664,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_10, 31884573479268, 2, Symbol_var(41038), Symbol_var(tag), Symbol_var(883757412), Symbol_var(member));
-    __builtin_unreachable();
-  }
-
-}
-
 static void _valid_member_operand(Var value, String side){
   if(! Var_encoding_valid(value)){
     unsigned long bits = value.u64;
     {
-      Var _x2c_gensym_literal_part_0 = Var_box_ulong(bits);
+      Var _x2c_gensym_literal_part_1 = Var_box_ulong(bits);
       {
-        static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../lib/dispatch.x",.function = "_valid_member_operand",.line = 670,.runtime = 1};
-        x2c_error_raise_n(& _x2c_gensym_error_site_11, 4372507526, 2, Symbol_var(46228810), _x2c_gensym_literal_part_0, Symbol_var(1263882), String_var(side));
+        static const X2CErrorSite _x2c_gensym_error_site_16 = {.file = "../../lib/dispatch.x",.function = "_valid_member_operand",.line = 881,.runtime = 1};
+        x2c_error_raise_n(& _x2c_gensym_error_site_16, 4372507526, 2, Symbol_var(46228810), _x2c_gensym_literal_part_1, Symbol_var(1263882), String_var(side));
         __builtin_unreachable();
       }
 
@@ -714,8 +940,8 @@ static void _valid_member_operand(Var value, String side){
 
   }
   if(Var_is_void(value)){
-    static const X2CErrorSite _x2c_gensym_error_site_12 = {.file = "../../lib/dispatch.x",.function = "_valid_member_operand",.line = 672,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_12, 48270474208, 1, Symbol_var(1263882), String_var(side));
+    static const X2CErrorSite _x2c_gensym_error_site_17 = {.file = "../../lib/dispatch.x",.function = "_valid_member_operand",.line = 883,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_17, 48270474208, 1, Symbol_var(1263882), String_var(side));
     __builtin_unreachable();
   }
 
@@ -726,32 +952,11 @@ static VarDescriptor * _required_descriptor(Var value, Symbol member){
   if(descriptor) return descriptor;
   Symbol tag = Var_tag(value);
   {
-    static const X2CErrorSite _x2c_gensym_error_site_13 = {.file = "../../lib/dispatch.x",.function = "_required_descriptor",.line = 679,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_13, 31884573479268, 2, Symbol_var(41038), Symbol_var(tag), Symbol_var(883757412), Symbol_var(member));
+    static const X2CErrorSite _x2c_gensym_error_site_18 = {.file = "../../lib/dispatch.x",.function = "_required_descriptor",.line = 890,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_18, 31884573479268, 2, Symbol_var(41038), Symbol_var(tag), Symbol_var(883757412), Symbol_var(member));
     __builtin_unreachable();
   }
 
-}
-
-int Var_dispatch_truth(Var value, int * handled){
-  if(! _init_guard_) _file_init_();
-  if(! handled) return 0;
-  (* handled) = 0;
-  VarDescriptor * descriptor = _descriptor(value);
-  if(! descriptor || ! descriptor -> methods.truth) return 0;
-  (* handled) = 1;
-  return descriptor -> methods.truth(value);
-}
-
-int Var_try_dispatch_binary(Var lhs, Symbol member, Var rhs, Var * result){
-  if(! _init_guard_) _file_init_();
-  if(! result) return 0;
-  VarDescriptor * descriptor = _descriptor(lhs);
-  if(! descriptor) return 0;
-  VarBinaryFn callback = _binary_callback(& descriptor -> methods, member);
-  if(! callback) return 0;
-  (* result) = callback(lhs, rhs);
-  return 1;
 }
 
 static VarBinaryFn _binary_callback(VarMethods * methods, Symbol member){
@@ -766,199 +971,12 @@ static VarBinaryFn _binary_callback(VarMethods * methods, Symbol member){
   return NULL;
 }
 
-int Var_try_dispatch_unary(Var value, Symbol member, Var * result){
-  if(! _init_guard_) _file_init_();
-  if(! result) return 0;
-  VarDescriptor * descriptor = _descriptor(value);
-  if(! descriptor || member != 29006 || ! descriptor -> methods.neg) return 0;
-  (* result) = descriptor -> methods.neg(value);
-  return 1;
-}
-
-int Var_try_export_context(Var value, Context source, Var * out){
-  if(! _init_guard_) _file_init_();
-  if(! out) return 0;
-  VarDescriptor * descriptor = _descriptor(value);
-  if(! descriptor || ! descriptor -> methods.export_context) return 0;
-  (* out) = descriptor -> methods.export_context(value, source);
-  return 1;
-}
-
-void x2c_register_type(String name){
-  if(! _init_guard_) _file_init_();
-  _lock();
-  {
-    X2CCleanup _x2c_gensym_defer_record_0 ={
-      .fn = _x2c_gensym_defer_cleanup_0, .env = 0
-    }
-    ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_0);
-    {
-      if(descriptor_registration_frozen){
-        static const X2CErrorSite _x2c_gensym_error_site_14 = {.file = "../../lib/dispatch.x",.function = "x2c_register_type",.line = 770,.runtime = 1};
-        x2c_error_raise_n(& _x2c_gensym_error_site_14, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("x2c_register_type")), NULL))));
-        __builtin_unreachable();
-      }
-      _reserve(name);
-    }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
-  }
-
-}
-
-int x2c_register_builtin_descriptor(Symbol tag, VarMethods methods){
-  _lock();
-  {
-    X2CCleanup _x2c_gensym_defer_record_1 ={
-      .fn = _x2c_gensym_defer_cleanup_1, .env = 0
-    }
-    ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_1);
-    {
-      if(descriptor_registration_frozen){
-        static const X2CErrorSite _x2c_gensym_error_site_15 = {.file = "../../lib/dispatch.x",.function = "x2c_register_builtin_descriptor",.line = 787,.runtime = 1};
-        x2c_error_raise_n(& _x2c_gensym_error_site_15, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("x2c_register_builtin_descriptor")), NULL))));
-        __builtin_unreachable();
-      }
-      VarDescriptor * descriptor = _tag_row(tag);
-      if(! descriptor){
-        int _x2c_gensym_return_value_0 = 0;
-        {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_1);
-          return _x2c_gensym_return_value_0;
-        }
-
-      }
-      descriptor -> value_dispatch = 1;
-      _install_methods(descriptor, methods);
-      {
-        int _x2c_gensym_return_value_1 = 1;
-        {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_1);
-          return _x2c_gensym_return_value_1;
-        }
-
-      }
-
-    }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_1);
-  }
-
-}
-
-int x2c_try_register_descriptor(String name, VarMethods methods){
-  if(! _init_guard_) _file_init_();
-  _lock();
-  {
-    X2CCleanup _x2c_gensym_defer_record_2 ={
-      .fn = _x2c_gensym_defer_cleanup_2, .env = 0
-    }
-    ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_2);
-    {
-      if(descriptor_registration_frozen){
-        static const X2CErrorSite _x2c_gensym_error_site_16 = {.file = "../../lib/dispatch.x",.function = "x2c_try_register_descriptor",.line = 812,.runtime = 1};
-        x2c_error_raise_n(& _x2c_gensym_error_site_16, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("x2c_try_register_descriptor")), NULL))));
-        __builtin_unreachable();
-      }
-      VarDescriptor * descriptor = _reserve(name);
-      if(! descriptor){
-        int _x2c_gensym_return_value_2 = 0;
-        {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_2);
-          return _x2c_gensym_return_value_2;
-        }
-
-      }
-      _install_methods(descriptor, methods);
-      {
-        int _x2c_gensym_return_value_3 = 1;
-        {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_2);
-          return _x2c_gensym_return_value_3;
-        }
-
-      }
-
-    }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_2);
-  }
-
-}
-
-void x2c_register_descriptor(String name, VarMethods methods){
-  if(! _init_guard_) _file_init_();
-  x2c_try_register_descriptor(name, methods);
-}
-
-int x2c_try_register_tagged_descriptor(Symbol tag, String name, VarMethods methods){
-  _lock();
-  {
-    X2CCleanup _x2c_gensym_defer_record_3 ={
-      .fn = _x2c_gensym_defer_cleanup_3, .env = 0
-    }
-    ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_3);
-    {
-      if(descriptor_registration_frozen){
-        static const X2CErrorSite _x2c_gensym_error_site_17 = {.file = "../../lib/dispatch.x",.function = "x2c_try_register_tagged_descriptor",.line = 850,.runtime = 1};
-        x2c_error_raise_n(& _x2c_gensym_error_site_17, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("x2c_try_register_tagged_descriptor")), NULL))));
-        __builtin_unreachable();
-      }
-      VarDescriptor * descriptor = _reserve_tagged(tag, name);
-      if(! descriptor){
-        int _x2c_gensym_return_value_4 = 0;
-        {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
-          return _x2c_gensym_return_value_4;
-        }
-
-      }
-      _install_methods(descriptor, methods);
-      {
-        int _x2c_gensym_return_value_5 = 1;
-        {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
-          return _x2c_gensym_return_value_5;
-        }
-
-      }
-
-    }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
-  }
-
-}
-
-void x2c_register_tagged_descriptor(Symbol tag, String name, VarMethods methods){
-  if(! _init_guard_) _file_init_();
-  if(! x2c_try_register_tagged_descriptor(tag, name, methods)){
-    Var _x2c_gensym_literal_part_1 = String_var(String_join(NULL, cons(String_var(String_new("x2c_register_tagged_descriptor")), NULL)));
-    {
-      static const X2CErrorSite _x2c_gensym_error_site_18 = {.file = "../../lib/dispatch.x",.function = "x2c_register_tagged_descriptor",.line = 864,.runtime = 1};
-      x2c_error_raise_n(& _x2c_gensym_error_site_18, 4477477457162, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_1, Symbol_var(41038), Symbol_var(tag), Symbol_var(920394), String_var(name));
-      __builtin_unreachable();
-    }
-
-  }
-
-}
-
 static VarDescriptor * _reserve(String name){
   if(! String_truth(name) || ! String_equal(name, String_lower(name))) return 0;
   Symbol tag = Symbol_new(name);
   if(! tag) return 0;
   VarDescriptor * row = _tag_row(tag);
   if(row && row -> value_dispatch) return _claim_name(row, tag, name);
-  return _claim_name(_declare(tag), tag, name);
-}
-
-static VarDescriptor * _reserve_tagged(Symbol tag, String name){
-  if(! tag || ! String_truth(name)) return 0;
-  if(_tag_row(tag)){
-    fprintf(stderr, "Var descriptor: explicit tag <%s> is built in\n", Symbol_str(tag));
-    abort();
-  }
   return _claim_name(_declare(tag), tag, name);
 }
 
@@ -981,17 +999,6 @@ static VarDescriptor * _claim_name(VarDescriptor * descriptor, Symbol tag, Strin
   return descriptor;
 }
 
-static void _install_methods(VarDescriptor * descriptor, VarMethods methods){
-  char * installed =(char *) & descriptor -> methods;
-  const char * supplied =(const char *) & methods;
-  void(* method)(void);
-  for(size_t i = 0;  i < sizeof methods;  i += sizeof method){
-    memcpy(& method, supplied + i, sizeof method);
-    if(method) memcpy(installed + i, & method, sizeof method);
-  }
-
-}
-
 static void _lock(void){
   Mutex_recursive_lock(& descriptor_mutex, & descriptor_mutex_once, _mutex_initialize, "Var descriptor: could not lock mutex");
 }
@@ -1004,23 +1011,24 @@ static void _mutex_initialize(void){
   Mutex_recursive_initialize(& descriptor_mutex, "Var descriptor: could not initialize mutex");
 }
 
-void x2c_descriptor_thread_start_begin(void){
-  if(! _init_guard_) _file_init_();
-  _lock();
+static void _install_methods(VarDescriptor * descriptor, VarMethods methods){
+  char * installed =(char *) & descriptor -> methods;
+  const char * supplied =(const char *) & methods;
+  void(* method)(void);
+  for(size_t i = 0;  i < sizeof methods;  i += sizeof method){
+    memcpy(& method, supplied + i, sizeof method);
+    if(method) memcpy(installed + i, & method, sizeof method);
+  }
+
 }
 
-void x2c_descriptor_thread_start_end(int success){
-  if(! _init_guard_) _file_init_();
-  if(success) descriptor_registration_frozen = 1;
-  _unlock();
-}
-
-int x2c_descriptor_registration_frozen(void){
-  if(! _init_guard_) _file_init_();
-  _lock();
-  int frozen = descriptor_registration_frozen;
-  _unlock();
-  return frozen;
+static VarDescriptor * _reserve_tagged(Symbol tag, String name){
+  if(! tag || ! String_truth(name)) return 0;
+  if(_tag_row(tag)){
+    fprintf(stderr, "Var descriptor: explicit tag <%s> is built in\n", Symbol_str(tag));
+    abort();
+  }
+  return _claim_name(_declare(tag), tag, name);
 }
 
 static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0){

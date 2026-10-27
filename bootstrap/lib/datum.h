@@ -9,13 +9,13 @@
 #include "datum-reader.h"
 #include <stdio.h>
 #include <stdlib.h>
-int Buffer_write_datum(Buffer out, Var value, int tagged);
-
-int String_read_datum(String text, unsigned * cursor, Var * out);
-
 int Buffer_write_datum_frame(Buffer out, Var value);
 
+int Buffer_write_datum(Buffer out, Var value, int tagged);
+
 int String_read_datum_frame(String input, size_t * used, Var * value);
+
+int String_read_datum(String text, unsigned * cursor, Var * out);
 
 List Var_independent_data_problem(Var value, Map marks);
 

@@ -97,15 +97,14 @@ _Static_assert(_Generic(& setbuf, void(*)(File, char *) : 1, default: 0), "nativ
 #endif
 #define File_setbuf setbuf
 void File_cleanup(File _x2c_gensym_macro_value_0);
-String File_string(File file);
 String File_readline(File file);
 String File_readblock(File file, long size);
 String File_string_close(File file);
-FileReadStatus File_readline_into(File f, Block dest);
 FileReadStatus File_read_into(File f, Block dest);
 int File_write_all(File file, const void * ptr, size_t size);
 int File_copy_to(File source, File output, size_t * copied);
 Iter File_iter(File file, Iter dest);
+FileReadStatus File_readline_into(File f, Block dest);
 static inline char * File_gets(File f, char * str, int size){
   return fgets(str, size, f);
 }
@@ -146,23 +145,24 @@ static inline void File_setbuffer(File file, char * buf, int size){
   setbuffer(file, buf, size);
 }
 
-static inline int File_stat(File file, struct stat * buf){
-  return fstat(File_fileno(file), buf);
-}
-
 int File_printf(File file, const char * format, ...);
 int File_scanf(File file, const char * format, ...);
 unsigned File_hash(File file);
 int File_equal(File x, File y);
 String File_repr(File file);
 String File_str(File file);
+String File_string(File file);
+static inline int File_stat(File file, struct stat * buf){
+  return fstat(File_fileno(file), buf);
+}
+
 Buffer File_write_repr(File file, Buffer out);
-_Noreturn void File_path_error(Var operation, String path, int error);
 File String_open(String s, const char * mode);
 File File_open(const char * path, const char * mode);
 File File_fdopen(int fildes, const char * mode);
 File File_popen(const char * cmd, const char * mode);
 File File_reopen(File file, const char * path, const char * mode);
+_Noreturn void File_path_error(Var operation, String path, int error);
 void File_initialize(void);
 
 #endif /* __GUARD_0x0D8DDB50__ */

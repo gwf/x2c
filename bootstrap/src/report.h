@@ -27,11 +27,11 @@ void report_progress(Symbol phase, int done, int total, String detail);
 
 void report_suspend(void);
 
-void report_line(Symbol tone, String line);
-
 void report_phase(Symbol phase, int count, String noun, int cached, unsigned long microseconds);
 
 void report_generated(int n, unsigned long long bytes);
+
+void report_line(Symbol tone, String line);
 
 unsigned long report_now_us(void);
 

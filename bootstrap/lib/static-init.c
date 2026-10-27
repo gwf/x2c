@@ -34,11 +34,11 @@ _x2c_gensym_initializer_choice_A509A3AF_0((static_mutex =(pthread_mutex_t) PTHRE
 static pthread_cond_t static_changed;
 
 _x2c_gensym_initializer_choice_A509A3AF_1((static_changed =(pthread_cond_t) PTHREAD_COND_INITIALIZER))
-static void _native_error(int error);
-
 static void _lock(void);
 
 static void _unlock(void);
+
+static void _native_error(int error);
 
 static int _cycle(X2CStatic * guard, StaticThread * self);
 
@@ -50,29 +50,6 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _init_guard_ = 1;
   _x2c_gensym_static_initialize_0();
   _x2c_gensym_static_initialize_1();
-}
-
-static void _native_error(int error){
-  if(! error) return;
-  fprintf(stderr, "static initialization: synchronization failed (%d)\n", error);
-  abort();
-}
-
-static void _lock(void){
-  _native_error(pthread_mutex_lock(& static_mutex));
-}
-
-static void _unlock(void){
-  _native_error(pthread_mutex_unlock(& static_mutex));
-}
-
-static int _cycle(X2CStatic * guard, StaticThread * self){
-  StaticThread * owner = guard -> owner;
-  while(owner){
-    if(owner == self) return 1;
-    owner = owner -> waiting ? owner -> waiting -> owner : NULL;
-  }
-  return 0;
 }
 
 void x2c_static_abort(void * data);
@@ -94,7 +71,7 @@ int x2c_static_acquire(X2CStatic * guard, size_t size, size_t alignment, int per
         Var _x2c_gensym_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("static initialization")), NULL)));
         Var _x2c_gensym_literal_part_1 = String_var(String_join(NULL, cons(String_var(String_new("recursive or cyclic initialization")), NULL)));
         {
-          static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/static-init.x",.function = "x2c_static_acquire",.line = 70,.runtime = 1};
+          static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/static-init.x",.function = "x2c_static_acquire",.line = 50,.runtime = 1};
           x2c_error_raise_n(& _x2c_gensym_error_site_0, 4477477457162, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(1218550748), _x2c_gensym_literal_part_1);
           __builtin_unreachable();
         }
@@ -118,7 +95,7 @@ int x2c_static_acquire(X2CStatic * guard, size_t size, size_t alignment, int per
     if(posix_memalign(& payload, alignment, size ? size : 1)){
       x2c_static_abort(guard);
       {
-        static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/static-init.x",.function = "x2c_static_acquire",.line = 89,.runtime = 1};
+        static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/static-init.x",.function = "x2c_static_acquire",.line = 69,.runtime = 1};
         x2c_error_raise_n(& _x2c_gensym_error_site_1, 97614135954008, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("static initialization")), NULL))));
         __builtin_unreachable();
       }
@@ -154,6 +131,39 @@ void x2c_static_abort(void * data){
   _unlock();
 }
 
+void x2c_static_thread_release(void){
+  if(! _init_guard_) _file_init_();
+  _release(&(static_thread.values));
+}
+
+void x2c_static_shutdown(void){
+  if(! _init_guard_) _file_init_();
+  _release(&(static_values));
+}
+
+static void _lock(void){
+  _native_error(pthread_mutex_lock(& static_mutex));
+}
+
+static void _unlock(void){
+  _native_error(pthread_mutex_unlock(& static_mutex));
+}
+
+static void _native_error(int error){
+  if(! error) return;
+  fprintf(stderr, "static initialization: synchronization failed (%d)\n", error);
+  abort();
+}
+
+static int _cycle(X2CStatic * guard, StaticThread * self){
+  StaticThread * owner = guard -> owner;
+  while(owner){
+    if(owner == self) return 1;
+    owner = owner -> waiting ? owner -> waiting -> owner : NULL;
+  }
+  return 0;
+}
+
 static void _release(X2CStatic * * values){
   while((* values)){
     X2CStatic * guard =(* values);
@@ -164,16 +174,6 @@ static void _release(X2CStatic * * values){
     __atomic_store_n(& guard -> ready, 0, __ATOMIC_RELEASE);
   }
 
-}
-
-void x2c_static_thread_release(void){
-  if(! _init_guard_) _file_init_();
-  _release(&(static_thread.values));
-}
-
-void x2c_static_shutdown(void){
-  if(! _init_guard_) _file_init_();
-  _release(&(static_values));
 }
 
 #undef _x2c_gensym_initializer_choice_A509A3AF_0_expanded

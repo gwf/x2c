@@ -22,15 +22,9 @@ typedef struct JsonBool * JsonBool;
 #define JSON_MAX_DEPTH 512
 Var JsonBool_var(JsonBool value);
 
-JsonBool Var_jsonbool(Var value);
-
-String JsonBool_str(JsonBool value);
-
 String JsonBool_repr(JsonBool value);
 
 int JsonBool_truth(JsonBool value);
-
-Var Json_bool(int value);
 
 int Json_is_bool(Var value);
 
@@ -40,11 +34,17 @@ Var Json_parse(String source);
 
 Var Json_read_file(Path path);
 
-String Var_json(Var value);
+Var Json_bool(int value);
 
 String Var_pretty_json(Var value);
 
 void Json_write_file(Var value, Path path);
+
+String Var_json(Var value);
+
+JsonBool Var_jsonbool(Var value);
+
+String JsonBool_str(JsonBool value);
 
 
 #endif /* __GUARD_0x14EFA7BC__ */

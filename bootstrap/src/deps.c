@@ -136,6 +136,34 @@ int Compiler_write_depfile(Compiler compiler, CliRequest request, String input, 
   return 0;
 }
 
+List translation_depfile_parse(String text){
+  const char * ch = text;
+  while(ch && * ch && * ch != '\n'){
+    if(* ch == '\\' && ch[1]){
+      ch += 2;
+      continue;
+    }
+    if(* ch == ':') break;
+    ch ++;
+  }
+  if(! ch || * ch != ':') return NULL;
+  Array paths = Array_new();
+  Buffer word = Buffer_new(0);
+  for(ch ++;  * ch && * ch != '\n';  ch ++){
+    if(* ch == '\\' && ch[1]){
+      ch ++;
+      if(* ch != '\n') Buffer_write_char(word, * ch);
+      continue;
+    }
+    if(* ch == '$' && ch[1] == '$') ch ++;
+    if(* ch == ' ' || * ch == '\t' || * ch == '\r') _push_word(paths, word);
+    else Buffer_write_char(word, * ch);
+  }
+  _push_word(paths, word);
+  Buffer_free(word);
+  return Array_list_free(paths);
+}
+
 Path Path_absolute(Path);
 
 static String _contents(CliRequest request, Compiler compiler, String input, String output_dir){
@@ -315,34 +343,6 @@ static void _write_word(Buffer out, String word){
 
   }
 
-}
-
-List translation_depfile_parse(String text){
-  const char * ch = text;
-  while(ch && * ch && * ch != '\n'){
-    if(* ch == '\\' && ch[1]){
-      ch += 2;
-      continue;
-    }
-    if(* ch == ':') break;
-    ch ++;
-  }
-  if(! ch || * ch != ':') return NULL;
-  Array paths = Array_new();
-  Buffer word = Buffer_new(0);
-  for(ch ++;  * ch && * ch != '\n';  ch ++){
-    if(* ch == '\\' && ch[1]){
-      ch ++;
-      if(* ch != '\n') Buffer_write_char(word, * ch);
-      continue;
-    }
-    if(* ch == '$' && ch[1] == '$') ch ++;
-    if(* ch == ' ' || * ch == '\t' || * ch == '\r') _push_word(paths, word);
-    else Buffer_write_char(word, * ch);
-  }
-  _push_word(paths, word);
-  Buffer_free(word);
-  return Array_list_free(paths);
 }
 
 static void _push_word(Array paths, Buffer word){

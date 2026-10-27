@@ -365,14 +365,8 @@ static inline int String_truth(String string){
   return string != NULL && * string != '\0';
 }
 
-static inline unsigned long x2c_mix64(unsigned long word){
-  word ^= word >> 33;  word *= 0xff51afd7ed558ccdul;  word ^= word >> 33;  word *= 0xc4ceb9fe1a85ec53ul;  word ^= word >> 33;  return word;
-}
-
-static inline unsigned x2c_hash_word(unsigned long word){
-  unsigned hash =(unsigned) x2c_mix64(word);  return hash ? hash : - 1;
-}
-
+static inline unsigned long x2c_mix64(unsigned long word);
+static inline unsigned x2c_hash_word(unsigned long word);
 static inline unsigned x2c_hash_bytes(unsigned long seed, const void * data, size_t width){
   const unsigned char * bytes = data;  unsigned long mixed = x2c_mix64(seed ^(unsigned long) width);  size_t offset = 0;  for(;  width - offset >= sizeof(unsigned long);  offset += sizeof(unsigned long)){
     unsigned long word;  memcpy(& word, bytes + offset, sizeof word);
@@ -387,16 +381,25 @@ static inline unsigned x2c_hash_bytes(unsigned long seed, const void * data, siz
   return x2c_hash_word(mixed);
 }
 
+static inline unsigned x2c_hash_word(unsigned long word){
+  unsigned hash =(unsigned) x2c_mix64(word);  return hash ? hash : - 1;
+}
+
+static inline unsigned long x2c_mix64(unsigned long word){
+  word ^= word >> 33;  word *= 0xff51afd7ed558ccdul;  word ^= word >> 33;  word *= 0xc4ceb9fe1a85ec53ul;  word ^= word >> 33;  return word;
+}
+
 static inline int Var_is_wide(Var v){
   unsigned top = v.u64 >> 48, bottom = v.u64 & 0x7;  return(top == 0x0005 && bottom >= 0x5) ||(top == 0x0007 && bottom >= 0x6);
 }
 
-static inline unsigned Var_payload32(Var value){
-  return(unsigned) value.u64;
-}
-
+static inline unsigned Var_payload32(Var value);
 static inline float Var_decode_f32(Var value){
   unsigned raw = Var_payload32(value);  float result;  memcpy(& result, & raw, sizeof result);  return result;
+}
+
+static inline unsigned Var_payload32(Var value){
+  return(unsigned) value.u64;
 }
 
 static inline double Var_decode_f64(Var value){
@@ -628,14 +631,11 @@ static inline String double_repr(double _x2c_gensym_macro_x_26){
   return Var_repr(Var_box_f64(_x2c_gensym_macro_x_26));
 }
 
-static inline Var long_var(long x){
-  return Var_box_long(x);
-}
-
 static inline Var ulong_var(ulong x){
   return Var_box_ulong(x);
 }
 
+static inline Var long_var(long x);
 static inline String long_str(long l){
   return Var_str(long_var(l));
 }
@@ -644,15 +644,19 @@ static inline String long_repr(long l){
   return Var_repr(long_var(l));
 }
 
+static inline Var long_var(long x){
+  return Var_box_long(x);
+}
+
 static inline int Var_is_row(Var value, unsigned top, unsigned long mask, unsigned long bottom){
   return value.u64 >> 48 == top &&(value.u64 & mask) == bottom;
 }
 
 unsigned long Var_tag_top(Symbol tag);
 unsigned long Var_tag_bottom(Symbol tag);
-static Symbol _literal_tag(List tag);
 static int _var_tag_top(List tag);
 static int _var_tag_bottom(List tag);
+static Symbol _literal_tag(List tag);
 static inline String Var_string_payload(Var _x2c_gensym_macro_value_0){
   if(_x2c_gensym_macro_value_0.u64 >> 48 != 11 ||(_x2c_gensym_macro_value_0.u64 & 0x7) != 1) return NULL;  return(String)(_x2c_gensym_macro_value_0.u64 & 0x0000FFFFFFFFFFF8ul);
 }
@@ -692,6 +696,10 @@ static inline Map Var_map_payload(Var _x2c_gensym_macro_value_8){
 Iter Var_as_iter(Var value);
 File Var_file(Var value);
 Block Var_block(Var value);
+static inline Block Array_block(Array);
+static inline Block Bytes_block(Bytes);
+static inline void Block_pop(Block);
+static inline void Block_truncate(Block, size_t);
 static inline Symbol Var_symbol(Var x){
   if(Var_is(x, 1328354264)) return Var_integer(x);  return 0;
 }
@@ -700,10 +708,6 @@ static inline int Var_int(Var x){
   if((x.u64 >> 32) ==(VAR_I32_PREFIX >> 32)) return(int) Var_payload32(x);  return(int) Var_integer(Var_convert(x, 3453797));
 }
 
-static inline Block Array_block(Array);
-static inline Block Bytes_block(Bytes);
-static inline void Block_pop(Block);
-static inline void Block_truncate(Block, size_t);
 #include "dispatch.h"
 File Stdin, Stdout, Stderr;
 Var Void =(Var){
@@ -796,6 +800,14 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();  if(_init_guard_) return;  _init_guard_ = 1;
 }
 
+static int _var_tag_top(List tag){
+  return(int) Var_tag_top(_literal_tag(tag));
+}
+
+static int _var_tag_bottom(List tag){
+  return(int) Var_tag_bottom(_literal_tag(tag));
+}
+
 static Symbol _literal_tag(List tag){
   {
     List _x2c_gensym_match_expr_0 = tag; {List _x2c_gensym_match_at_0, _x2c_gensym_match_at_1, _x2c_gensym_match_at_2, _x2c_gensym_match_at_3, _x2c_gensym_match_at_4, _x2c_gensym_match_at_5, _x2c_gensym_match_at_6, _x2c_gensym_match_at_7; Var x2c_match_value_0; if(_x2c_gensym_match_expr_0 && _x2c_gensym_match_expr_0 ->car.u64 == 9224497936761996324ULL &&(_x2c_gensym_match_at_0 = _x2c_gensym_match_expr_0 ->cdr) &&(_x2c_gensym_match_at_1 = _x2c_gensym_match_at_0 ->cdr) &&(Var_is(_x2c_gensym_match_at_1 -> car, 806120) &&(_x2c_gensym_match_at_2 = Var_list_payload(_x2c_gensym_match_at_1 -> car), 1)) && _x2c_gensym_match_at_2 && _x2c_gensym_match_at_2 ->car.u64 == 9224497963177709656ULL &&(_x2c_gensym_match_at_3 = _x2c_gensym_match_at_2 ->cdr) &&(_x2c_gensym_match_at_4 = _x2c_gensym_match_at_3 ->cdr) &&(_x2c_gensym_match_at_5 = _x2c_gensym_match_at_4 ->cdr) &&(x2c_match_value_0 = _x2c_gensym_match_at_5 ->car, 1) && !(_x2c_gensym_match_at_6 = _x2c_gensym_match_at_5 ->cdr) && !(_x2c_gensym_match_at_7 = _x2c_gensym_match_at_1 ->cdr)){
@@ -806,14 +818,6 @@ static Symbol _literal_tag(List tag){
 
 }
 return 0;
-}
-
-static int _var_tag_top(List tag){
-  return(int) Var_tag_top(_literal_tag(tag));
-}
-
-static int _var_tag_bottom(List tag){
-  return(int) Var_tag_bottom(_literal_tag(tag));
 }
 
 char Var_char(Var x){
@@ -868,6 +872,10 @@ double Var_double(Var x){
   if(! _init_guard_) _file_init_();  if(Var_is(x, 3356265)) return Var_floating(x);  return Var_floating(Var_convert(x, 3356265));
 }
 
+void x2c_initialize(void){
+  if(! _init_guard_) _file_init_();  void Atom_initialize(void), File_initialize(void);  void Pool_initialize(void), Scope_initialize(void);  void x2c_match_initialize(void), Logger_initialize(void);  Scope Scope_new(void), * Scope_top(void);  static int initialized = 0;  if(initialized) return;  initialized = 1;  x2c_initialize_protocols();  Scope_initialize();  if(! * Scope_top()) * Scope_top() = Scope_new();  Pool_initialize();  Atom_initialize();  x2c_match_initialize();  File_initialize();  Logger_initialize();
+}
+
 void x2c_initialize_protocols(void){
   static int _x2c_gensym_protocol_guard_ = 0;  if(_x2c_gensym_protocol_guard_) return;  _x2c_gensym_protocol_guard_ = 1;  _x2c_gensym_protocol_methods_0 =(VarMethods){
     .str = _x2c_gensym_proto_array_str_0, .repr = _x2c_gensym_proto_array_repr_0, .write_str = _x2c_gensym_proto_array_write_str_0, .write_repr = _x2c_gensym_proto_array_write_repr_0, .equal = _x2c_gensym_proto_array_equal_0, .compare = _x2c_gensym_proto_array_compare_0, .truth = _x2c_gensym_proto_array_truth_0, .iter = _x2c_gensym_proto_array_iter_0, .contains = _x2c_gensym_proto_array_contains_0, .getindex = _x2c_gensym_proto_array_getindex_0, .setindex = _x2c_gensym_proto_array_setindex_0, .updateindex = _x2c_gensym_proto_array_updateindex_0, .postfixindex = _x2c_gensym_proto_array_postfixindex_0
@@ -902,10 +910,6 @@ void x2c_initialize_protocols(void){
   ;  x2c_register_builtin_descriptor(1328354264, _x2c_gensym_protocol_methods_9);
 }
 
-void x2c_initialize(void){
-  if(! _init_guard_) _file_init_();  void Atom_initialize(void), File_initialize(void);  void Pool_initialize(void), Scope_initialize(void);  void x2c_match_initialize(void), Logger_initialize(void);  Scope Scope_new(void), * Scope_top(void);  static int initialized = 0;  if(initialized) return;  initialized = 1;  x2c_initialize_protocols();  Scope_initialize();  if(! * Scope_top()) * Scope_top() = Scope_new();  Pool_initialize();  Atom_initialize();  x2c_match_initialize();  File_initialize();  Logger_initialize();
-}
-
 #include "error.h"
 
 
@@ -914,7 +918,7 @@ void x2c_initialize(void){
 int x2c_normalize_index(int index, int length){
   if(! _init_guard_) _file_init_();  if(length < 0){
     Var _x2c_gensym_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("x2c_normalize_index")), NULL))); {
-      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/common.x",.function = "x2c_normalize_index",.line = 852,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_0, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(816725264), int_var(length));  __builtin_unreachable();
+      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/common.x",.function = "x2c_normalize_index",.line = 858,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_0, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(816725264), int_var(length));  __builtin_unreachable();
     }
 
   }
@@ -927,7 +931,7 @@ int x2c_slice_bound(int bound){
 
 int x2c_normalize_slice(int * start, int * stop, int step, int length){
   if(! _init_guard_) _file_init_();  if(! step || length < 0){
-    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/common.x",.function = "x2c_normalize_slice",.line = 877,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_1, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("x2c_normalize_slice")), NULL))));  __builtin_unreachable();
+    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/common.x",.function = "x2c_normalize_slice",.line = 883,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_1, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("x2c_normalize_slice")), NULL))));  __builtin_unreachable();
   }
   int orig_stop =(* stop);  if((* start) == INT_MIN)(* start) =(step > 0) ? 0 : length - 1;  if((* stop) == INT_MIN)(* stop) = - 1;  if((* start) < 0){
     (* start) += length;  if((* start) < 0)(* start) =(step < 0) ? - 1 : 0;

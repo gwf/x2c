@@ -31,6 +31,12 @@ static inline int Substring_compare(Substring left, Substring right){
   return left.length - right.length;
 }
 
+Substring Substring_new(String source, int offset, int length);
+
+Substring String_substring(String source, int offset, int length){
+  return Substring_new(source, offset, length);
+}
+
 static Var String_var(String);
 
 static Var Symbol_var(Symbol);
@@ -46,7 +52,7 @@ Substring Substring_new(String source, int offset, int length){
   if(offset < 0 || length < 0 || offset > String_len(source) || length > String_len(source) - offset){
     Var _x2c_gensym_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("Substring.new")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/substring.x",.function = "Substring_new",.line = 23,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/substring.x",.function = "Substring_new",.line = 27,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_0, 4372499598, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(1019648360), int_var(offset), Symbol_var(816725264), int_var(length));
       __builtin_unreachable();
     }
@@ -58,16 +64,14 @@ Substring Substring_new(String source, int offset, int length){
   ;
 }
 
-Substring String_substring(String source, int offset, int length){
-  return Substring_new(source, offset, length);
+String Substring_str(Substring view);
+
+String Substring_string(Substring view){
+  return Substring_str(view);
 }
 
 String Substring_str(Substring view){
   return view.length ? x2c_string_from_bytes((const char *) view.source + view.offset, view.length) : NULL;
-}
-
-String Substring_string(Substring view){
-  return Substring_str(view);
 }
 
 int Substring_try_next(String source, int * cursor, Substring * out){

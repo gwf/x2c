@@ -11,9 +11,11 @@
 #include "../lib/type.h"
 #include "grammar.h"
 #include "ast-rewrite.h"
-Type List_type_from_ast(List ast);
+Map Type_builtin_var_tags(void);
 
-List Type_parts(Type type);
+Map Type_var_tag_rows(void);
+
+Type List_type_from_ast(List ast);
 
 List Type_declaration_base(Type t, List * modifiers);
 
@@ -21,13 +23,9 @@ List Type_declaration_ast(Type type, List binding);
 
 List Type_parameter_ast(Type type, List binding);
 
-Map Type_builtin_var_tags(void);
-
-Map Type_var_tag_rows(void);
+List Type_parts(Type type);
 
 Symbol Type_var_tag(Type type);
-
-Symbol Type_fixed_var_tag(Type type);
 
 String Type_var_converter(Type type);
 
@@ -36,6 +34,8 @@ int Type_var_tag_row(Symbol tag, unsigned long * top, unsigned long * mask, unsi
 void Type_register_var_tag(Type t, String name, String converter);
 
 void Type_register_var_adoption(Type type, Type representation, Symbol tag);
+
+Symbol Type_fixed_var_tag(Type type);
 
 Map Type_begin_unit(void);
 

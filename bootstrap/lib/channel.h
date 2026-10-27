@@ -17,6 +17,8 @@
 #include <string.h>
 typedef struct Channel * Channel;
 
+void Channel_cleanup(Channel _x2c_gensym_macro_value_0);
+
 Channel Channel_new(Var type, Var capacity);
 
 Scope Channel_scope(Channel channel);
@@ -25,19 +27,17 @@ void Channel_send(Channel c, Var value);
 
 void Channel_send_owned(Channel c, Var value);
 
-Var Channel_receive(Channel channel);
-
-void Channel_close(Channel channel);
-
 void Channel_free(Channel channel);
 
-void Channel_cleanup(Channel _x2c_gensym_macro_value_0);
+void Channel_close(Channel channel);
 
 Var Channel_var(Channel channel);
 
 Channel Var_channel(Var value);
 
 Iter Channel_iter(Channel c, Iter dest);
+
+Var Channel_receive(Channel channel);
 
 
 #endif /* __GUARD_0xF74C1343__ */

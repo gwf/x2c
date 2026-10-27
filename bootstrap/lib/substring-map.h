@@ -25,14 +25,6 @@ Scope MapSubInt_scope(MapSubInt _x2c_gensym_macro_map_2);
 
 void MapSubInt_move_to(MapSubInt _x2c_gensym_macro_map_3, Scope * _x2c_gensym_macro_destination_0);
 
-MapSubInt MapSubInt_new(void);
-
-void MapSubInt_increment(MapSubInt map, Substr word);
-
-int MapSubInt_try_next(MapSubInt map, unsigned * cursor, Substr * word, int * count);
-
-Map MapSubInt_strings(MapSubInt map);
-
 Var MapSubInt_var(MapSubInt _x2c_gensym_macro_map_19);
 
 MapSubInt Var_mapsubint(Var _x2c_gensym_macro_value_0);
@@ -44,6 +36,14 @@ Iter MapSubInt_keys(MapSubInt _x2c_gensym_macro_map_24, Iter _x2c_gensym_macro_d
 Iter MapSubInt_enumerate(MapSubInt _x2c_gensym_macro_map_25, Iter _x2c_gensym_macro_dest_2);
 
 void MapSubInt_cleanup(MapSubInt _x2c_gensym_macro_map_21);
+
+MapSubInt MapSubInt_new(void);
+
+void MapSubInt_increment(MapSubInt map, Substr word);
+
+Map MapSubInt_strings(MapSubInt map);
+
+int MapSubInt_try_next(MapSubInt map, unsigned * cursor, Substr * word, int * count);
 
 
 #endif /* __GUARD_0x582B3A60__ */

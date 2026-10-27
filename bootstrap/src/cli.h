@@ -53,9 +53,9 @@ CliRequest CliRequest_parse(int argc, char * * argv);
 
 CliRequest CliRequest_parse_arguments(Array args);
 
-int CliRequest_dependency_option(String s);
-
 CliRequest CliRequest_package_options(String path, String package);
+
+int CliRequest_dependency_option(String s);
 
 int CliRequest_is_builtin(const char * word);
 

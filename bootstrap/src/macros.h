@@ -47,15 +47,15 @@ List Compiler_macro_tag_name(Compiler c, Symbol kind, String name, int definitio
 
 List Compiler_parse_macro_quotation(Compiler c);
 
+int Compiler_meta_call_starts_declaration(Compiler c);
+
+List Compiler_try_parse_macro_member(Compiler c);
+
 List Compiler_try_parse_macro_slot(Compiler c, Symbol role);
 
 List Compiler_peek_macro_hole(Compiler c);
 
 Token Compiler_after_hole(Compiler c);
-
-int Compiler_meta_call_starts_declaration(Compiler c);
-
-List Compiler_try_parse_macro_member(Compiler c);
 
 List Compiler_expand_macro_invocation_node(Compiler c, Var stored, List arguments, Token invocation, Symbol position);
 
@@ -88,11 +88,11 @@ int Compiler_has_rewrites(Compiler c, Symbol point, Var kind);
 
 List Compiler_rewrite(Compiler c, Symbol point, Var kind, List source, Symbol position, Type expected, Token site);
 
-List Compiler_rewrite_lowered(Compiler c, Symbol point, Var kind, List source, Symbol position, Type expected, Token site);
-
 List Compiler_lower_replacement(Compiler c, List replacement, List source);
 
 List Compiler_rewrite_written(Compiler c, Symbol kind, List source, Type expected);
+
+List Compiler_rewrite_lowered(Compiler c, Symbol point, Var kind, List source, Symbol position, Type expected, Token site);
 
 List Compiler_lower_rewrite(Compiler c, Symbol point, Var kind, List source, Symbol position, Type expected, Token site);
 
@@ -118,9 +118,9 @@ int Compiler_macro_starts_target_at(Compiler c, Symbol position);
 
 Symbol Compiler_macro_invocation_collection(Compiler c);
 
-void Compiler_skip_macro_invocation(Compiler c);
-
 int Compiler_skip_named_type_declaration(Compiler c);
+
+void Compiler_skip_macro_invocation(Compiler c);
 
 int Compiler_macro_targets_unit(Compiler c);
 
@@ -128,9 +128,9 @@ List Compiler_try_parse_macro_target_at(Compiler c, Symbol position);
 
 List Compiler_try_parse_macro_expression(Compiler c);
 
-Var Compiler_evaluate_macro_slot(Compiler c, Var value);
-
 List Compiler_evaluate_macro_rows(Compiler c, Var value);
+
+Var Compiler_evaluate_macro_slot(Compiler c, Var value);
 
 Var Compiler_evaluate_meta_value(Compiler c, List expression, Token site, int slot);
 
@@ -148,19 +148,19 @@ List Compiler_rebuild_function(Compiler c, List target, List application);
 
 List Compiler_land_quotation(Compiler c, List fresh, Var syntax, Symbol position, Type return_type);
 
-List Compiler_lift_meta_expression(Compiler c, Var value, Token invocation);
-
 List Compiler_bind_meta_statement(Compiler c, List value, Symbol context);
 
-List Compiler_macro_value_literal(Compiler c, List value);
+List Compiler_lift_meta_expression(Compiler c, Var value, Token invocation);
 
 List Compiler_try_parse_macro_pattern(Compiler c);
 
-Token Compiler_macro_pattern_at(Compiler c, Token at, String * spelling, Var * stored);
-
 List Compiler_try_parse_macro_subpattern(Compiler c, int content);
 
+Token Compiler_macro_pattern_at(Compiler c, Token at, String * spelling, Var * stored);
+
 List Compiler_capture_macro_value(Compiler c, List definition);
+
+List Compiler_macro_value_literal(Compiler c, List value);
 
 int Compiler_take_code_value(Compiler c, Var input, Var * value, int * retained);
 

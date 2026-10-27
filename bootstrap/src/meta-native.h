@@ -86,31 +86,31 @@ struct MetaBindings{
 }
 ;
 
-MetaBindings MetaBindings_new(void);
-
 void MetaBindings_destroy(MetaBindings b);
-
-int MetaBindings_try_get(MetaBindings b, String name, Var * out);
-
-void MetaBindings_set(MetaBindings b, String name, Var function);
 
 void MetaBindings_bind(MetaBindings b, String name, Func function);
 
-MetaBindings Compiler_bindings(Compiler c);
-
-int Compiler_meta_binding(Compiler c, String name, Var * out);
-
 void Compiler_record_native_meta_effect(Compiler c, List declaration, Token marker);
-
-void Compiler_install_native_meta_effects(Compiler c, Map globs);
-
-int Compiler_bind_native_meta(Compiler c, String name);
 
 void Compiler_install_native_meta_function(Compiler c, List declaration, Token marker);
 
-int Compiler_native_meta_accepts(Compiler c, Var function, List signature);
-
 String Compiler_native_meta_module(Compiler c, String name, Type * type);
+
+int Compiler_bind_native_meta(Compiler c, String name);
+
+void MetaBindings_set(MetaBindings b, String name, Var function);
+
+MetaBindings Compiler_bindings(Compiler c);
+
+MetaBindings MetaBindings_new(void);
+
+int Compiler_meta_binding(Compiler c, String name, Var * out);
+
+int MetaBindings_try_get(MetaBindings b, String name, Var * out);
+
+void Compiler_install_native_meta_effects(Compiler c, Map globs);
+
+int Compiler_native_meta_accepts(Compiler c, Var function, List signature);
 
 List Compiler_native_meta_targets(List paths, int callbacks);
 

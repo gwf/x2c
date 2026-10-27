@@ -41,17 +41,17 @@ int Compiler_meta_calls_wait(Compiler c);
 
 void Compiler_group_meta_function(Compiler c, List fn);
 
-int Compiler_meta_reaches_compile_time(Compiler c, Var node);
-
 void Compiler_finish_meta_functions(Compiler c, Array nodes);
 
+int Compiler_meta_reaches_compile_time(Compiler c, Var node);
+
 int Compiler_public_native_function(Compiler c, List function, String name);
+
+void Compiler_refuse_record_meta_call(Compiler c, String name, Token site);
 
 String Compiler_meta_call_missing(Compiler c, String name);
 
 void Compiler_refuse_meta_call(Compiler c, String name, Token site, String why);
-
-void Compiler_refuse_record_meta_call(Compiler c, String name, Token site);
 
 void Compiler_use_meta_build_directory(String directory, Array owners, Map providers);
 

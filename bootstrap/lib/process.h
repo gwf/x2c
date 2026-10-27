@@ -58,29 +58,29 @@ Job Job_pipe(Job job, List command);
 
 Job Job_options(Job job, Map options);
 
-Job Job_live(Job job);
-
-Job Job_start(Job job);
-
-int Job_status(Job job);
-
-Job Job_check(Job job);
-
 void Job_run(Job job);
 
-String Job_output(Job job);
+Job Job_live(Job job);
 
 List Job_lines(Job job);
 
+String Job_output(Job job);
+
+Job Job_check(Job job);
+
 String Job_errors(Job job);
 
-int Job_ready(Job job);
+int Job_status(Job job);
 
-void Job_kill(Job job, int signal);
+Job Job_start(Job job);
 
 void Job_cleanup(Job job);
 
+void Job_kill(Job job, int signal);
+
 Job Job_wait_any(Array jobs);
+
+int Job_ready(Job job);
 
 String Env_get(String name);
 

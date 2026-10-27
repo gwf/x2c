@@ -203,9 +203,9 @@ void Compiler_own_diagnostics(Compiler c);
 
 void Compiler_close_child(Compiler c, Compiler child);
 
-void Compiler_share_meta_group(Compiler c, Compiler owner);
-
 void Compiler_take_unit_state(Compiler c, Compiler owner);
+
+void Compiler_share_meta_group(Compiler c, Compiler owner);
 
 void Compiler_return_unit_state(Compiler c, Compiler owner);
 
@@ -237,15 +237,11 @@ int Compiler_skip_collected_script_statement(Compiler c);
 
 void Compiler_tokenize(Compiler c, char * text);
 
-Symbol Compiler_peek(Compiler c, int steps);
-
-Token Token_skip_trivia(Token token);
+Symbol Compiler_expect(Compiler c, Symbol type);
 
 void Compiler_require_input(Compiler c);
 
-Symbol Compiler_expect(Compiler c, Symbol type);
-
-void Compiler_next(Compiler c);
+void Compiler_next(Compiler);
 
 static inline int Compiler_test(Compiler c, Symbol type){
   if(c -> token -> type != type) return 0;
@@ -253,21 +249,27 @@ static inline int Compiler_test(Compiler c, Symbol type){
   return 1;
 }
 
-int Compiler_at_word(Compiler c, String word);
-
 int Compiler_take_word(Compiler c, String word);
 
-int Symbol_group_step(Symbol s);
+void Compiler_next(Compiler c);
 
-Token Token_group_close(Token t);
+int Compiler_at_word(Compiler c, String word);
+
+Symbol Compiler_peek(Compiler c, int steps);
 
 Token Token_after_group(Token t);
 
+Token Token_skip_trivia(Token token);
+
+Token Token_group_close(Token t);
+
+int Symbol_group_step(Symbol s);
+
 void Compiler_mark_completion(Compiler c, int position);
 
-int Compiler_at_completion(Compiler c);
-
 void _x2c_complete_here(Compiler c, Symbol role, List keywords);
+
+int Compiler_at_completion(Compiler c);
 
 int Compiler_collect_unit_macro(Compiler c);
 
@@ -279,17 +281,17 @@ Var Compiler_thaw_declaration_syntax(Compiler c, Var syntax);
 
 Map Compiler_select_declaration_defaults(Compiler c, String path, Map symbols, Array parts, Map definitions, Map statics);
 
-int Compiler_record_origin(Compiler c, Token token);
-
 List Compiler_anchor_origin(Compiler c, List node, Token token);
+
+int Compiler_record_origin(Compiler c, Token token);
 
 void Compiler_record_source_declaration(Compiler c, List binding, Token first, Token after);
 
 void Compiler_record_source_reference(Compiler c, List binding, Type type, Token first, Token after);
 
-void Compiler_copy_source_declaration(Compiler c, Map target, Map source, List key);
-
 void Compiler_merge_source_declarations(Compiler c, Map target, Map source);
+
+void Compiler_copy_source_declaration(Compiler c, Map target, Map source, List key);
 
 String Compiler_fresh_name(Compiler c, String stem);
 
@@ -313,67 +315,67 @@ void Pending_restore(Pending * p, PendingMark mark);
 
 String Compiler_emitted_binding_name(Compiler c, List binding);
 
-List Compiler_present_references(Compiler c);
-
-void Compiler_mark_reference_present(Compiler c, List binding);
-
 void Compiler_settle_condition(Compiler c, List condition, List yes, List no);
 
 List Compiler_assume_condition(Compiler c, List condition, int holds);
 
+void Compiler_mark_reference_present(Compiler c, List binding);
+
 void Compiler_restore_reference_presence(Compiler c, List before);
+
+List Compiler_present_references(Compiler c);
 
 List Compiler_proven_references(Compiler c, List condition, int holds);
 
-List Compiler_cache(Compiler c, List key);
-
 List Compiler_cache_cons_cell(Compiler c, List head, List tail);
-
-List Compiler_cache_literal_var(Compiler c, Var value);
 
 List Compiler_cache_literal_list(Compiler c, List values);
 
-Var Compiler_match_pattern_value(Compiler c, Var node);
+List Compiler_cache_literal_var(Compiler c, Var value);
 
-int Compiler_match_value_is_static(Var value);
+List Compiler_cache(Compiler c, List key);
 
 int Compiler_match_pattern_is_static(Compiler c, List pattern);
 
-List Compiler_match_pattern_binders(Compiler c, List pattern, List * possible);
+int Compiler_match_value_is_static(Var value);
 
 List Compiler_define_pattern_binders(Compiler c, List pattern);
 
-String Compiler_match_capture_name(Var binder, int index);
+List Compiler_match_pattern_binders(Compiler c, List pattern, List * possible);
 
-List Compiler_match_capture_value(Var binder, int index);
+Var Compiler_match_pattern_value(Compiler c, Var node);
 
 List Compiler_pattern_binder_declarations(Compiler c, List bindings, List handle);
 
-List Compiler_condition_bindings(List expression);
+List Compiler_match_capture_value(Var binder, int index);
+
+String Compiler_match_capture_name(Var binder, int index);
 
 int Compiler_open_condition_scope(Compiler c, List expression);
 
-int Compiler_read_source(Compiler c, String path, String volatile * text);
+List Compiler_condition_bindings(List expression);
 
-String Compiler_canonical_path(Compiler c, String path);
+int Compiler_read_source(Compiler c, String path, String volatile * text);
 
 int Compiler_owns_package_source(Compiler c, String path);
 
-String Path_real(String path);
+String Compiler_source_path(Compiler c, String file);
+
+String Compiler_canonical_path(Compiler c, String path);
 
 String Path_resolved_absolute(String path);
+
+String Path_real(String path);
 
 String Compiler_portable_path(String path);
 
 String Compiler_absolute_home_path(String spelling);
 
-void Map_merge_translation_dependency(Map m, String path, Var content_hash);
-
 void Compiler_add_translation_dependency(Compiler c, String path);
 
 void Compiler_merge_translation_dependencies(Compiler c, Map dependencies);
 
-String Compiler_source_path(Compiler c, String file);
+void Map_merge_translation_dependency(Map m, String path, Var content_hash);
 
 
 #endif /* __GUARD_0x4A50A1AE__ */

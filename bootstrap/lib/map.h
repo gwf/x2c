@@ -67,18 +67,6 @@ int Map_truth(Map _x2c_gensym_macro_map_38);
 
 int Map_equal(Map _x2c_gensym_macro_a_3, Map _x2c_gensym_macro_b_3);
 
-Map Map_merge_with(Map map, Map other, Func combine);
-
-Var Map_updateindex(Map map, Var key, Symbol op, Var rhs);
-
-Var Map_postfixindex(Map map, Var key, Symbol op);
-
-Var Map_get_hashed(Map map, Var key, unsigned key_hash);
-
-Map Map_update_n(Map map, unsigned pair_count, ...);
-
-void Map_export_to(Map map, Context source, VarExportContextFn export_value, Scope * scope);
-
 int Map_compare(Map _x2c_gensym_macro_a_6, Map _x2c_gensym_macro_b_6);
 
 Buffer Map_write_repr(Map _x2c_gensym_macro_map_40, Buffer _x2c_gensym_macro_out_10);
@@ -94,6 +82,18 @@ Iter Map_iter(Map _x2c_gensym_macro_map_45, Iter _x2c_gensym_macro_dest_0);
 Iter Map_keys(Map _x2c_gensym_macro_map_46, Iter _x2c_gensym_macro_dest_1);
 
 Iter Map_enumerate(Map _x2c_gensym_macro_map_47, Iter _x2c_gensym_macro_dest_2);
+
+Map Map_merge_with(Map map, Map other, Func combine);
+
+Var Map_updateindex(Map map, Var key, Symbol op, Var rhs);
+
+Var Map_postfixindex(Map map, Var key, Symbol op);
+
+Var Map_get_hashed(Map map, Var key, unsigned key_hash);
+
+Map Map_update_n(Map map, unsigned pair_count, ...);
+
+void Map_export_to(Map map, Context source, VarExportContextFn export_value, Scope * scope);
 
 void Map_cleanup(Map value);
 

@@ -15,15 +15,15 @@
 #include "scope/scope.h"
 #include "var/var.h"
 #define SYMBOL_SET_HEADER_SIZE 20
-size_t SymbolSet_len(SymbolSet x);
+int SymbolSet_contains(SymbolSet x, Symbol symbol);
 
 int SymbolSet_index(SymbolSet x, Symbol symbol);
-
-int SymbolSet_contains(SymbolSet x, Symbol symbol);
 
 Symbol SymbolSet_getindex(SymbolSet x, int index);
 
 Iter SymbolSet_iter(SymbolSet x, Iter dest);
+
+size_t SymbolSet_len(SymbolSet x);
 
 Block SymbolSet_encode(Array symbols);
 

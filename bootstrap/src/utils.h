@@ -31,25 +31,25 @@ void x2c_set_root(String root);
 
 String x2c_get_root(void);
 
+String Compiler_bootstrap_runtime_dir(void);
+
 String x2c_get_executable(void);
+
+String Compiler_home_packages(void);
+
+int Compiler_run_command(String name, List arguments);
+
+String Compiler_command_path(String name);
+
+String Compiler_home_libexec(void);
+
+String Compiler_stage_dir(void);
+
+Map Compiler_command_environment(void);
 
 String Compiler_driver_executable(void);
 
 String Compiler_home_dir(void);
-
-String Compiler_stage_dir(void);
-
-String Compiler_bootstrap_runtime_dir(void);
-
-String Compiler_home_packages(void);
-
-String Compiler_home_libexec(void);
-
-String Compiler_command_path(String name);
-
-Map Compiler_command_environment(void);
-
-int Compiler_run_command(String name, List arguments);
 
 List Compiler_default_include_dirs(void);
 
@@ -67,9 +67,9 @@ String SourceView_package_entry(SourceView sources, List roots, String name, Str
 
 int Compiler_is_package_source(String directory, String path);
 
-String Compiler_identity(void);
-
 String Compiler_module_stamp(void);
+
+String Compiler_identity(void);
 
 String Path_content_identity(String path);
 
@@ -85,9 +85,9 @@ void Path_publish_files(List outputs);
 
 int Job_decode_wait_status(int raw, int * signal);
 
-_Noreturn void Diagnostics_driver_error(const char * message);
-
 void Diagnostics_host_error(List detail);
+
+_Noreturn void Diagnostics_driver_error(const char * message);
 
 String Compiler_cache_root(void);
 

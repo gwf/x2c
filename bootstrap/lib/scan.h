@@ -7,34 +7,20 @@
 
 #include "error-macros.h"
 #include "symbol.h"
-static inline int scan_ascii_alpha(int c){
-  return(unsigned)((c | 32) - 'a') < 26;
-}
-
-static inline int scan_ascii_digit(int c){
-  return(unsigned)(c - '0') < 10;
-}
-
-static inline int scan_ascii_hex_value(int c){
-  if(scan_ascii_digit(c)) return c - '0';
-  c |= 32;
-  return(unsigned)(c - 'a') < 6 ? c - 'a' + 10 : - 1;
-}
-
 #include <string.h>
 int scan_white_space(char * s);
 
 int scan_line_comment(char * s);
 
-int scan_block_comment_status(char * s, Symbol * status);
-
 int scan_block_comment(char * s);
+
+int scan_block_comment_status(char * s, Symbol * status);
 
 int scan_preprocessor(char * s);
 
-int scan_number_typed(char * s, Symbol * type);
-
 int scan_number(char * s);
+
+int scan_number_typed(char * s, Symbol * type);
 
 Symbol scan_number_type(char * s, int n);
 
@@ -44,33 +30,49 @@ int scan_float(char * s);
 
 int scan_hexponent(char * s);
 
+int scan_keyword(char * s);
+
 int scan_identifier(char * s);
 
-int scan_keyword(char * s);
+static inline int scan_ascii_alpha(int c){
+  return(unsigned)((c | 32) - 'a') < 26;
+}
 
 Symbol scan_keyword_type(const char * s, int n);
 
 int scan_c_operator(char * s);
 
-int scan_c_string_status(char * s, Symbol * status);
-
 int scan_c_string(char * s);
+
+int scan_c_string_status(char * s, Symbol * status);
 
 int scan_c_character(char * s);
 
 int scan_string_segment(char * s);
 
-int scan_symbol_literal_status(char * s, Symbol * status);
-
 int scan_symbol_literal(char * s);
+
+int scan_symbol_literal_status(char * s, Symbol * status);
 
 int scan_symbol_set_atom(char * s);
 
-int scan_atom_status(char * s, Symbol * status);
-
 int scan_atom(char * s);
 
+int scan_atom_status(char * s, Symbol * status);
+
 int scan_escape_sequence(char * s);
+
+static inline int scan_ascii_digit(int c);
+
+static inline int scan_ascii_hex_value(int c){
+  if(scan_ascii_digit(c)) return c - '0';
+  c |= 32;
+  return(unsigned)(c - 'a') < 6 ? c - 'a' + 10 : - 1;
+}
+
+static inline int scan_ascii_digit(int c){
+  return(unsigned)(c - '0') < 10;
+}
 
 int scan_utf8_length(const unsigned char * s);
 

@@ -12,15 +12,7 @@
 #include <string.h>
 #include "buffer.h"
 #include "string/string.h"
-Symbol Symbol_new_len(const char * str, int len);
-
-Symbol Symbol_new(const char * str);
-
 int Symbol_try_new(String spelling, Symbol * out);
-
-int Symbol_len(Symbol symbol);
-
-void Symbol_decode(Symbol symbol, char * dest);
 
 String Symbol_str(Symbol symbol);
 
@@ -32,11 +24,19 @@ Buffer Symbol_write_str(Symbol symbol, Buffer out);
 
 Buffer Symbol_write_repr(Symbol symbol, Buffer out);
 
+void Symbol_decode(Symbol symbol, char * dest);
+
 char Symbol_first(Symbol symbol);
+
+int Symbol_len(Symbol symbol);
 
 char Symbol_last(Symbol symbol);
 
 Symbol Symbol_parse(char * text);
+
+Symbol Symbol_new(const char * str);
+
+Symbol Symbol_new_len(const char * str, int len);
 
 
 #endif /* __GUARD_0x77FF39EC__ */

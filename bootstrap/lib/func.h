@@ -33,22 +33,13 @@ typedef Var(* FuncAdapter)(Func fn, const FuncArg * argv);
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
-Var Func_apply(Func f, unsigned argc, const FuncArg * argv);
-
-static inline FuncArg FuncArg_value(Var value){
-  return(FuncArg){
-    .data.value = value
-  }
-  ;
-}
+FuncArg x2c_func_splice_argument(Func fn, unsigned index, List items);
 
 FuncArg FuncArg_splice(List items);
 
-FuncArg FuncArg_splice_map(Map entries);
-
-FuncArg x2c_func_splice_argument(Func fn, unsigned index, List items);
-
 FuncArg x2c_func_map_splice_argument(Func fn, unsigned index, Map entries);
+
+FuncArg FuncArg_splice_map(Map entries);
 
 static inline FuncArg FuncArg_reference(const void * reference, List type){
   return(FuncArg){
@@ -56,6 +47,10 @@ static inline FuncArg FuncArg_reference(const void * reference, List type){
   }
   ;
 }
+
+static inline FuncArg FuncArg_value(Var value);
+
+Var Func_apply(Func, unsigned, const FuncArg *);
 
 static inline Var Func_apply_value(Func fn, Var value){
   FuncArg arguments[1] ={
@@ -71,6 +66,15 @@ static inline Var Func_apply_values(Func fn, Var left, Var right){
   }
   ;
   return Func_apply(fn, 2, arguments);
+}
+
+Var Func_apply(Func f, unsigned argc, const FuncArg * argv);
+
+static inline FuncArg FuncArg_value(Var value){
+  return(FuncArg){
+    .data.value = value
+  }
+  ;
 }
 
 List x2c_func_reference_type(Func fn, unsigned argc, unsigned index);

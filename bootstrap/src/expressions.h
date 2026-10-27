@@ -25,41 +25,41 @@ PrintfFn;
 #include "initializers/initializers.h"
 #include "macros/macros.h"
 #include "expressions-reports.h"
-List Compiler_parse_expression(Compiler c);
-
-List Compiler_parse_assignment(Compiler c);
-
-List Compiler_parse_conditional(Compiler c);
-
 List Compiler_parse_pattern_operand(Compiler c);
 
 List Compiler_parse_parenthesized_statement(Compiler c);
 
 List Compiler_parse_macro_expression_target(Compiler c);
 
+List Compiler_parse_expression(Compiler c);
+
+List Compiler_parse_assignment(Compiler c);
+
+List Compiler_parse_conditional(Compiler c);
+
 List Compiler_parse_call_splice(Compiler c);
 
-List Compiler_parse_call_entry(Compiler c);
-
 List Compiler_parse_primary(Compiler c);
+
+List Compiler_parse_call_entry(Compiler c);
 
 List Compiler_parse_variable(Compiler c);
 
 List Compiler_resolve_expression(Compiler c, List input, Token origin);
 
+List Compiler_resolve_map_entry(Compiler c, List input, Token origin);
+
 int Compiler_needs_resolution(Compiler c, Var value);
 
 List Compiler_var_tag_expression(Compiler c, Type target, Token origin);
-
-List Compiler_resolve_map_entry(Compiler c, List input, Token origin);
 
 void Compiler_reveal_binding(Compiler c, List binding);
 
 List _x2c_nominal_getindex(Compiler c, Type type);
 
-List Compiler_resolve_postfix_member(Compiler c, Type receiver_type, List field, Symbol access, int call_context);
-
 List Compiler_postfix_completions(Compiler c, Type receiver, Symbol access);
+
+List Compiler_resolve_postfix_member(Compiler c, Type receiver_type, List field, Symbol access, int call_context);
 
 List _x2c_func_call_arguments(List function, List storage, List arguments);
 
@@ -75,9 +75,9 @@ void Compiler_check_explicit_converter(Compiler c, List parsed, Type target, int
 
 List Compiler_promote_string_literal(Compiler c, List expr);
 
-List Compiler_convert_expression(Compiler c, List expr, Type target);
-
 List Compiler_convert_segment_to_string(Compiler c, List expr);
+
+List Compiler_convert_expression(Compiler c, List expr, Type target);
 
 List Compiler_converter_call(Compiler c, List expr, Type type, Type target);
 

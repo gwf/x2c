@@ -25,8 +25,6 @@ static int _match_names(Var part, Array names);
 
 static List _match_capture(Var binder, int index);
 
-static int _match_fresh(Array cursors, List how);
-
 static List _match_tests(List value, Array cursors);
 
 static List _match_value(Var part, Var cell, List steps, Array cursors);
@@ -34,6 +32,8 @@ static List _match_value(Var part, Var cell, List steps, Array cursors);
 static List _match_list(List list, Var at, List steps, Array cursors);
 
 static List _match_guard(Var op, List args, Var cell, List steps, Array cursors);
+
+static int _match_fresh(Array cursors, List how);
 
 static List _match_is(List args, Var cell);
 
@@ -241,11 +241,6 @@ static List _match_capture(Var binder, int index){
   return cons(_2, cons(List_var(cons(_3, cons(String_var(String_join(NULL, cons(String_var(_4), cons(String_var(kind), cons(String_var(_5), cons(String_var(int_str(index)), NULL)))))), NULL))), NULL));
 }
 
-static int _match_fresh(Array cursors, List how){
-  Array_push(cursors, List_var(how));
-  return Array_len(cursors) - 1;
-}
-
 static List _match_tests(List value, Array cursors){
   return List_truth(value) && Var_is_match_op(List_car(value)) ? _match_guard(List_car(value), List_cdr(value), Symbol_var(42216335592), NULL, cursors) : _match_list(value, Symbol_var(1211368), NULL, cursors);
 }
@@ -343,6 +338,11 @@ static List _match_guard(Var op, List args, Var cell, List steps, Array cursors)
   else if(! x2c_var_equal(op, Symbol_var(62436)) && ! x2c_var_equal(op, Symbol_var(2005352))) return NULL;
   Array_push(tests, List_var(choice));
   return cons(_14, List_append(Array_list_free(tests), NULL));
+}
+
+static int _match_fresh(Array cursors, List how){
+  Array_push(cursors, List_var(how));
+  return Array_len(cursors) - 1;
 }
 
 static List _match_is(List args, Var cell){

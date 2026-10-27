@@ -13,9 +13,9 @@
 #include "lisp/lisp.h"
 static List _1823, _1821, _1820, _1818, _1809, _1807, _1806, _1804, _1802, _1800, _1799, _1797, _1787, _1785, _1784, _1782, _1780, _1778, _1777, _1775, _1769, _1767, _1766, _1764, _1762, _1760, _1759, _1757, _1753, _1751, _1750, _1748, _1747, _1743, _1741, _1740, _1738, _1736, _1734, _1733, _1731, _1730, _1723, _1720, _1718, _1717, _1715, _1714, _1712, _1710, _1708, _1707, _1705, _1704, _1702, _1698, _1696, _1682, _1680, _1678, _1676, _1675, _1673, _1668, _1666, _1665, _1663, _1661, _1659, _1658, _1656, _1654, _1652, _1651, _1649, _1646, _1644, _1640, _1638, _1637, _1635, _1633, _1631, _1630, _1628, _1627, _1625, _1617, _1615, _1614, _1612, _1610, _1608, _1607, _1605, _1577, _1575, _1573, _1571, _1566, _1564, _1563, _1561, _1559, _1557, _1556, _1554, _1545, _1543, _1542, _1540, _1537, _1535, _1534, _1532, _1529, _1527, _1526, _1523, _1522, _1518, _1516, _1515, _1513, _1510, _1507, _1506, _1504, _1503, _1499, _1498, _1494, _1493, _1487, _1486, _1482, _1481, _1476, _1475, _1471, _1470, _1466, _1465, _1461, _1459, _1458, _1456, _1454, _1452, _1451, _1449, _1447, _1442, _1440, _1438, _1436, _1432, _1431, _1428, _1427, _1423, _1422, _1418, _1404, _1400, _1399, _1396, _1395, _1390, _1388, _1387, _1384, _1381, _1378, _1375, _1373, _1372, _1368, _1366, _1364, _1362, _1360, _1358, _1356, _1354, _1351, _1349, _1348, _1346, _1345, _1343, _1341, _1338, _1336, _1334, _1333, _1331, _1325, _1323, _1322, _1320, _1319, _1317, _1316, _1313, _1311, _1310, _1308, _1307, _1305, _1304, _1298, _1296, _1294, _1293, _1290, _1285, _1283, _1282, _1280, _1279, _1277, _1275, _1274, _1262, _1260, _1259, _1257, _1256, _1254, _1252, _1251, _1249, _1246, _1243, _1241, _1240, _1238, _1236, _1234, _1233, _1231, _1217, _1215, _1213, _1212, _1210, _1208, _1206, _1204, _1202, _1201, _1199, _1190, _1187, _1185, _1184, _1182, _1178, _1176, _1175, _1173, _1171, _1169, _1168, _1165, _1163, _1161, _1160, _1157, _1155, _1153, _1152, _1150, _1149, _1147, _1145, _1143, _1142, _1140, _1138, _1137, _1135, _1133, _1131, _1130, _1128, _1124, _1122, _1121, _1119, _1117, _1113, _1112, _1110, _1109, _1107, _1104, _1102, _1101, _1099, _1097, _1094, _1092, _1091, _1089, _1087, _1082, _1080, _1079, _1077, _1075, _1073, _1072, _1070, _1068, _1063, _1061, _1059, _1057, _1056, _1054, _1052, _1050, _1049, _1046, _1044, _1042, _1040, _1038, _1036, _1034, _1029, _1027, _1026, _1024, _1022, _1020, _1019, _1017, _1016, _1013, _1011, _1010, _1008, _1006, _1004, _1002, _1000, _999, _997, _995, _993, _992, _990, _988, _986, _985, _983, _981, _977, _975, _974, _972, _970, _966, _964, _963, _961, _959, _955, _953, _952, _950, _948, _940, _937, _934, _932, _930, _929, _927, _924, _922, _921, _919, _918, _916, _914, _912, _911, _909, _905, _903, _902, _900, _897, _895, _893, _892, _890, _888, _883, _881, _880, _876, _874, _873, _871, _867, _864, _862, _859, _857, _856, _854, _853, _851, _849, _847, _846, _844, _843, _841, _839, _838, _835, _833, _832, _830, _829, _827, _825, _824, _822, _821, _819, _816, _814, _813, _811, _809, _806, _804, _803, _801, _799, _795, _793, _792, _790, _789, _787, _785, _784, _782, _781, _779, _777, _776, _774, _773, _770, _768, _767, _765, _764, _762, _761, _760, _756, _753, _751, _750, _748, _746, _739, _737, _736, _732, _730, _729, _727, _725, _723, _722, _718, _716, _715, _713, _712, _710, _706, _704, _703, _701, _700, _697, _691, _689, _688, _686, _685, _684, _680, _678, _677, _675, _674, _671, _669, _667, _666, _664, _662, _660, _659, _657, _656, _652, _650, _649, _647, _645, _643, _642, _640, _639, _635, _632, _630, _629, _627, _626, _620, _618, _616, _614, _612, _611, _609, _606, _604, _603, _599, _597, _595, _593, _591, _589, _587, _585, _583, _582, _580, _578, _574, _572, _571, _569, _567, _563, _561, _560, _558, _556, _552, _550, _549, _547, _545, _541, _539, _538, _536, _534, _530, _528, _527, _525, _523, _519, _517, _516, _514, _512, _508, _506, _505, _502, _500, _499, _497, _496, _493, _491, _488, _486, _485, _483, _480, _478, _477, _475, _473, _471, _469, _467, _466, _464, _462, _460, _459, _457, _456, _453, _451, _450, _448, _446, _444, _443, _441, _439, _437, _436, _434, _432, _429, _426, _424, _421, _419, _418, _416, _414, _412, _410, _408, _407, _405, _403, _397, _395, _393, _391, _389, _387, _385, _381, _380, _376, _375, _371, _370, _366, _365, _361, _360, _356, _355, _351, _350, _343, _339, _337, _335, _333, _326, _324, _323, _321, _291, _289, _287, _286, _284, _283, _282, _279, _277, _276, _274, _272, _270, _269, _267, _265, _263, _262, _260, _248, _245, _243, _242, _240, _239, _235, _232, _230, _229, _227, _225, _223, _222, _220, _218, _216, _214, _213, _211, _209, _206, _204, _203, _196, _195, _191, _189, _188, _186, _181, _179, _178, _176, _175, _172, _169, _167, _166, _164, _162, _160, _159, _157, _156, _155, _153, _151, _150, _148, _147, _146, _144, _142, _141, _139, _138, _137, _135, _133, _132, _130, _128, _124, _122, _121, _119, _118, _117, _115, _113, _109, _107, _106, _104, _103, _101, _97, _95, _94, _92, _91, _90, _88, _86, _83, _81, _80, _78, _77, _76, _74, _72, _68, _66, _65, _63, _62, _61, _59, _56, _52, _51, _47, _46, _44, _42, _40, _39, _37, _36, _35, _33, _32, _31, _25, _22, _18, _17, _14, _13, _11, _9;
 
-static String _1817, _1816, _1815, _1814, _1813, _1812, _1811, _1810, _1803, _1796, _1795, _1794, _1793, _1792, _1791, _1790, _1789, _1788, _1781, _1774, _1773, _1772, _1771, _1770, _1763, _1756, _1755, _1754, _1746, _1745, _1744, _1737, _1728, _1727, _1726, _1725, _1724, _1722, _1721, _1711, _1701, _1700, _1699, _1697, _1695, _1694, _1693, _1692, _1691, _1690, _1689, _1688, _1687, _1686, _1685, _1684, _1683, _1681, _1679, _1671, _1670, _1669, _1662, _1655, _1647, _1645, _1643, _1642, _1641, _1634, _1624, _1623, _1622, _1621, _1620, _1619, _1618, _1611, _1604, _1603, _1602, _1601, _1600, _1599, _1598, _1597, _1596, _1595, _1594, _1593, _1592, _1591, _1590, _1589, _1588, _1587, _1586, _1585, _1584, _1583, _1582, _1581, _1580, _1579, _1578, _1576, _1574, _1572, _1570, _1569, _1568, _1567, _1560, _1553, _1552, _1551, _1550, _1549, _1548, _1547, _1546, _1538, _1530, _1524, _1520, _1519, _1512, _1511, _1509, _1508, _1505, _1501, _1500, _1496, _1495, _1491, _1490, _1489, _1488, _1485, _1484, _1483, _1479, _1478, _1477, _1473, _1472, _1468, _1467, _1463, _1462, _1455, _1448, _1446, _1445, _1444, _1443, _1441, _1439, _1437, _1435, _1434, _1433, _1430, _1429, _1426, _1425, _1424, _1420, _1419, _1417, _1416, _1415, _1414, _1413, _1412, _1411, _1410, _1409, _1408, _1407, _1406, _1405, _1403, _1402, _1401, _1397, _1393, _1392, _1391, _1385, _1383, _1382, _1380, _1379, _1377, _1376, _1374, _1370, _1369, _1367, _1365, _1363, _1361, _1359, _1357, _1355, _1353, _1352, _1342, _1340, _1339, _1337, _1330, _1329, _1328, _1327, _1326, _1314, _1302, _1301, _1300, _1299, _1297, _1291, _1289, _1288, _1287, _1286, _1278, _1272, _1271, _1270, _1269, _1268, _1267, _1266, _1265, _1264, _1263, _1255, _1248, _1247, _1245, _1244, _1237, _1230, _1229, _1228, _1227, _1226, _1225, _1224, _1223, _1222, _1221, _1220, _1219, _1218, _1216, _1209, _1207, _1205, _1198, _1197, _1196, _1195, _1194, _1193, _1192, _1191, _1189, _1188, _1181, _1180, _1179, _1172, _1166, _1164, _1158, _1156, _1146, _1136, _1134, _1126, _1125, _1115, _1114, _1106, _1105, _1098, _1096, _1095, _1085, _1084, _1083, _1076, _1069, _1067, _1066, _1065, _1064, _1062, _1060, _1053, _1047, _1045, _1043, _1041, _1039, _1037, _1035, _1033, _1032, _1031, _1030, _1023, _1015, _1014, _1007, _1005, _1003, _996, _989, _979, _978, _968, _967, _957, _956, _946, _945, _944, _943, _942, _941, _939, _938, _936, _935, _933, _926, _925, _917, _915, _908, _907, _906, _899, _898, _896, _886, _885, _884, _878, _877, _870, _869, _868, _866, _865, _863, _861, _860, _852, _850, _842, _836, _828, _820, _818, _817, _810, _808, _807, _797, _796, _788, _780, _771, _758, _757, _755, _754, _747, _745, _744, _743, _742, _741, _740, _734, _733, _726, _720, _719, _708, _707, _699, _698, _696, _695, _694, _693, _692, _683, _682, _681, _672, _670, _663, _655, _654, _653, _646, _638, _637, _636, _634, _633, _625, _624, _623, _622, _621, _619, _617, _615, _608, _607, _605, _601, _600, _598, _596, _594, _592, _590, _588, _586, _576, _575, _565, _564, _554, _553, _543, _542, _532, _531, _521, _520, _510, _509, _503, _495, _494, _492, _490, _489, _482, _481, _474, _472, _470, _463, _455, _454, _447, _440, _430, _428, _427, _425, _423, _422, _415, _413, _411, _404, _402, _401, _400, _399, _398, _396, _394, _392, _390, _388, _386, _384, _383, _382, _378, _377, _373, _372, _368, _367, _363, _362, _358, _357, _353, _352, _348, _347, _346, _345, _344, _342, _341, _340, _338, _336, _334, _332, _331, _330, _329, _328, _327, _320, _319, _318, _317, _316, _315, _314, _313, _312, _311, _310, _309, _308, _307, _306, _305, _304, _303, _302, _301, _300, _299, _298, _297, _296, _295, _294, _293, _292, _290, _280, _273, _266, _259, _258, _257, _256, _255, _254, _253, _252, _251, _250, _249, _247, _246, _237, _236, _234, _233, _226, _219, _217, _207, _201, _200, _199, _198, _197, _193, _192, _185, _184, _183, _182, _174, _173, _171, _170, _163, _154, _145, _136, _126, _125, _111, _110, _99, _98, _84, _70, _69, _54, _53, _49, _43, _29, _20, _19, _7, _5, _4, _1, _0;
+static String _1817, _1816, _1815, _1814, _1813, _1812, _1811, _1810, _1803, _1796, _1795, _1794, _1793, _1792, _1791, _1790, _1789, _1788, _1781, _1774, _1773, _1772, _1771, _1770, _1763, _1756, _1755, _1754, _1746, _1745, _1744, _1737, _1728, _1727, _1726, _1725, _1724, _1722, _1721, _1711, _1701, _1700, _1699, _1697, _1695, _1694, _1693, _1692, _1691, _1690, _1689, _1688, _1687, _1686, _1685, _1684, _1683, _1681, _1679, _1671, _1670, _1669, _1662, _1655, _1647, _1645, _1643, _1642, _1641, _1634, _1624, _1623, _1622, _1621, _1620, _1619, _1618, _1611, _1604, _1603, _1602, _1601, _1600, _1599, _1598, _1597, _1596, _1595, _1594, _1593, _1592, _1591, _1590, _1589, _1588, _1587, _1586, _1585, _1584, _1583, _1582, _1581, _1580, _1579, _1578, _1576, _1574, _1572, _1570, _1569, _1568, _1567, _1560, _1553, _1552, _1551, _1550, _1549, _1548, _1547, _1546, _1538, _1530, _1524, _1520, _1519, _1512, _1511, _1509, _1508, _1505, _1501, _1500, _1496, _1495, _1491, _1490, _1489, _1488, _1485, _1484, _1483, _1479, _1478, _1477, _1473, _1472, _1468, _1467, _1463, _1462, _1455, _1448, _1446, _1445, _1444, _1443, _1441, _1439, _1437, _1435, _1434, _1433, _1430, _1429, _1426, _1425, _1424, _1420, _1419, _1417, _1416, _1415, _1414, _1413, _1412, _1411, _1410, _1409, _1408, _1407, _1406, _1405, _1403, _1402, _1401, _1397, _1393, _1392, _1391, _1385, _1383, _1382, _1380, _1379, _1377, _1376, _1374, _1370, _1369, _1367, _1365, _1363, _1361, _1359, _1357, _1355, _1353, _1352, _1342, _1340, _1339, _1337, _1330, _1329, _1328, _1327, _1326, _1314, _1302, _1301, _1300, _1299, _1297, _1291, _1289, _1288, _1287, _1286, _1278, _1272, _1271, _1270, _1269, _1268, _1267, _1266, _1265, _1264, _1263, _1255, _1248, _1247, _1245, _1244, _1237, _1230, _1229, _1228, _1227, _1226, _1225, _1224, _1223, _1222, _1221, _1220, _1219, _1218, _1216, _1209, _1207, _1205, _1198, _1197, _1196, _1195, _1194, _1193, _1192, _1191, _1189, _1188, _1181, _1180, _1179, _1172, _1166, _1164, _1158, _1156, _1146, _1136, _1134, _1126, _1125, _1115, _1114, _1106, _1105, _1098, _1096, _1095, _1085, _1084, _1083, _1076, _1069, _1067, _1066, _1065, _1064, _1062, _1060, _1053, _1047, _1045, _1043, _1041, _1039, _1037, _1035, _1033, _1032, _1031, _1030, _1023, _1015, _1014, _1007, _1005, _1003, _996, _989, _979, _978, _968, _967, _957, _956, _946, _945, _944, _943, _942, _941, _939, _938, _936, _935, _933, _926, _925, _917, _915, _908, _907, _906, _899, _898, _896, _886, _885, _884, _878, _877, _870, _869, _868, _866, _865, _863, _861, _860, _852, _850, _842, _836, _828, _820, _818, _817, _810, _808, _807, _797, _796, _788, _780, _771, _758, _757, _755, _754, _747, _745, _744, _743, _742, _741, _740, _734, _733, _726, _720, _719, _708, _707, _699, _698, _696, _695, _694, _693, _692, _683, _682, _681, _672, _670, _663, _655, _654, _653, _646, _638, _637, _636, _634, _633, _625, _624, _623, _622, _621, _619, _617, _615, _608, _607, _605, _601, _600, _598, _596, _594, _592, _590, _588, _586, _576, _575, _565, _564, _554, _553, _543, _542, _532, _531, _521, _520, _510, _509, _503, _495, _494, _492, _490, _489, _482, _481, _474, _472, _470, _463, _455, _454, _447, _440, _430, _428, _427, _425, _423, _422, _415, _413, _411, _404, _402, _401, _400, _399, _398, _396, _394, _392, _390, _388, _386, _384, _383, _382, _378, _377, _373, _372, _368, _367, _363, _362, _358, _357, _353, _352, _348, _347, _346, _345, _344, _342, _341, _340, _338, _336, _334, _332, _331, _330, _329, _328, _327, _320, _319, _318, _317, _316, _315, _314, _313, _312, _311, _310, _309, _308, _307, _306, _305, _304, _303, _302, _301, _300, _299, _298, _297, _296, _295, _294, _293, _292, _290, _280, _273, _266, _259, _258, _257, _256, _255, _254, _253, _252, _251, _250, _249, _247, _246, _237, _236, _234, _233, _226, _219, _217, _207, _201, _200, _199, _198, _197, _193, _192, _185, _184, _183, _182, _174, _173, _171, _170, _163, _154, _145, _136, _126, _125, _111, _110, _99, _98, _84, _70, _69, _54, _53, _49, _43, _29, _20, _19, _7, _5, _4, _3, _0;
 
-static Var _1822, _1819, _1808, _1805, _1801, _1798, _1786, _1783, _1779, _1776, _1768, _1765, _1761, _1758, _1752, _1749, _1742, _1739, _1735, _1732, _1729, _1719, _1716, _1713, _1709, _1706, _1703, _1677, _1674, _1672, _1667, _1664, _1660, _1657, _1653, _1650, _1648, _1639, _1636, _1632, _1629, _1626, _1616, _1613, _1609, _1606, _1565, _1562, _1558, _1555, _1544, _1541, _1539, _1536, _1533, _1531, _1528, _1525, _1521, _1517, _1514, _1502, _1497, _1492, _1480, _1474, _1469, _1464, _1460, _1457, _1453, _1450, _1421, _1398, _1394, _1389, _1386, _1371, _1350, _1347, _1344, _1335, _1332, _1324, _1321, _1318, _1315, _1312, _1309, _1306, _1303, _1295, _1292, _1284, _1281, _1276, _1273, _1261, _1258, _1253, _1250, _1242, _1239, _1235, _1232, _1214, _1211, _1203, _1200, _1186, _1183, _1177, _1174, _1170, _1167, _1162, _1159, _1154, _1151, _1148, _1144, _1141, _1139, _1132, _1129, _1127, _1123, _1120, _1118, _1116, _1111, _1108, _1103, _1100, _1093, _1090, _1088, _1086, _1081, _1078, _1074, _1071, _1058, _1055, _1051, _1048, _1028, _1025, _1021, _1018, _1012, _1009, _1001, _998, _994, _991, _987, _984, _982, _980, _976, _973, _971, _969, _965, _962, _960, _958, _954, _951, _949, _947, _931, _928, _923, _920, _913, _910, _904, _901, _894, _891, _889, _887, _882, _879, _875, _872, _858, _855, _848, _845, _840, _837, _834, _831, _826, _823, _815, _812, _805, _802, _800, _798, _794, _791, _786, _783, _778, _775, _772, _769, _766, _763, _759, _752, _749, _738, _735, _731, _728, _724, _721, _717, _714, _711, _709, _705, _702, _690, _687, _679, _676, _673, _668, _665, _661, _658, _651, _648, _644, _641, _631, _628, _613, _610, _602, _584, _581, _579, _577, _573, _570, _568, _566, _562, _559, _557, _555, _551, _548, _546, _544, _540, _537, _535, _533, _529, _526, _524, _522, _518, _515, _513, _511, _507, _504, _501, _498, _487, _484, _479, _476, _468, _465, _461, _458, _452, _449, _445, _442, _438, _435, _433, _431, _420, _417, _409, _406, _379, _374, _369, _364, _359, _354, _349, _325, _322, _288, _285, _281, _278, _275, _271, _268, _264, _261, _244, _241, _238, _231, _228, _224, _221, _215, _212, _210, _208, _205, _202, _194, _190, _187, _180, _177, _168, _165, _161, _158, _152, _149, _143, _140, _134, _131, _129, _127, _123, _120, _116, _114, _112, _108, _105, _102, _100, _96, _93, _89, _87, _85, _82, _79, _75, _73, _71, _67, _64, _60, _58, _57, _55, _50, _48, _45, _41, _38, _34, _30, _28, _27, _26, _24, _23, _21, _16, _15, _12, _10, _8, _6, _3, _2;
+static Var _1822, _1819, _1808, _1805, _1801, _1798, _1786, _1783, _1779, _1776, _1768, _1765, _1761, _1758, _1752, _1749, _1742, _1739, _1735, _1732, _1729, _1719, _1716, _1713, _1709, _1706, _1703, _1677, _1674, _1672, _1667, _1664, _1660, _1657, _1653, _1650, _1648, _1639, _1636, _1632, _1629, _1626, _1616, _1613, _1609, _1606, _1565, _1562, _1558, _1555, _1544, _1541, _1539, _1536, _1533, _1531, _1528, _1525, _1521, _1517, _1514, _1502, _1497, _1492, _1480, _1474, _1469, _1464, _1460, _1457, _1453, _1450, _1421, _1398, _1394, _1389, _1386, _1371, _1350, _1347, _1344, _1335, _1332, _1324, _1321, _1318, _1315, _1312, _1309, _1306, _1303, _1295, _1292, _1284, _1281, _1276, _1273, _1261, _1258, _1253, _1250, _1242, _1239, _1235, _1232, _1214, _1211, _1203, _1200, _1186, _1183, _1177, _1174, _1170, _1167, _1162, _1159, _1154, _1151, _1148, _1144, _1141, _1139, _1132, _1129, _1127, _1123, _1120, _1118, _1116, _1111, _1108, _1103, _1100, _1093, _1090, _1088, _1086, _1081, _1078, _1074, _1071, _1058, _1055, _1051, _1048, _1028, _1025, _1021, _1018, _1012, _1009, _1001, _998, _994, _991, _987, _984, _982, _980, _976, _973, _971, _969, _965, _962, _960, _958, _954, _951, _949, _947, _931, _928, _923, _920, _913, _910, _904, _901, _894, _891, _889, _887, _882, _879, _875, _872, _858, _855, _848, _845, _840, _837, _834, _831, _826, _823, _815, _812, _805, _802, _800, _798, _794, _791, _786, _783, _778, _775, _772, _769, _766, _763, _759, _752, _749, _738, _735, _731, _728, _724, _721, _717, _714, _711, _709, _705, _702, _690, _687, _679, _676, _673, _668, _665, _661, _658, _651, _648, _644, _641, _631, _628, _613, _610, _602, _584, _581, _579, _577, _573, _570, _568, _566, _562, _559, _557, _555, _551, _548, _546, _544, _540, _537, _535, _533, _529, _526, _524, _522, _518, _515, _513, _511, _507, _504, _501, _498, _487, _484, _479, _476, _468, _465, _461, _458, _452, _449, _445, _442, _438, _435, _433, _431, _420, _417, _409, _406, _379, _374, _369, _364, _359, _354, _349, _325, _322, _288, _285, _281, _278, _275, _271, _268, _264, _261, _244, _241, _238, _231, _228, _224, _221, _215, _212, _210, _208, _205, _202, _194, _190, _187, _180, _177, _168, _165, _161, _158, _152, _149, _143, _140, _134, _131, _129, _127, _123, _120, _116, _114, _112, _108, _105, _102, _100, _96, _93, _89, _87, _85, _82, _79, _75, _73, _71, _67, _64, _60, _58, _57, _55, _50, _48, _45, _41, _38, _34, _30, _28, _27, _26, _24, _23, _21, _16, _15, _12, _10, _8, _6, _2, _1;
 
 static int _init_guard_ = 0;
 
@@ -31,13 +31,13 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_3(void)
 
 static int f10_algorithms____nil(Var value);
 
-static Var f10_algorithms____truth(int x);
-
-static String f10_algorithms____string(Var value, String operation);
+static Var f10_algorithms____append2(Var left, Var right);
 
 static List f10_algorithms____list(Var value, String operation);
 
-static Var f10_algorithms____append2(Var left, Var right);
+static Var f10_algorithms____truth(int x);
+
+static String f10_algorithms____string(Var value, String operation);
 
 #include "list-selectors.h"
 #include "process.h"
@@ -2391,11 +2391,11 @@ List cons(Var, List);
 static Var List_var(List);
 
 __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void){
-  _0 = String_new("append");
-  _1 = String_new("search-replace");
-  _2 = Symbol_var(37059850);
-  _3 = Symbol_var(5221256);
-  _4 = String_new("string-append");
+  _0 = String_new("search-replace");
+  _1 = Symbol_var(37059850);
+  _2 = Symbol_var(5221256);
+  _3 = String_new("string-append");
+  _4 = String_new("append");
   _5 = String_new("Var_is_void");
   _6 = Symbol_var(437126);
   _7 = String_new("Var");
@@ -4226,54 +4226,11 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_3(void)
   _1823 = cons(_1822, _9);
 }
 
-static int f10_algorithms____nil(Var value){
-  return x2c_var_equal(value, List_var(NULL));
-}
+Var lisp_last(Var values);
 
-static Var f10_algorithms____truth(int x){
-  if(x) return Symbol_var(1348938);
-  return List_var(NULL);
-}
-
-static int Var_is_row(Var, unsigned, unsigned long, unsigned long);
-
-Symbol Var_tag(Var);
-
-String Var_as_string(Var);
-
-#include "error.h"
-
-
-
-
-static String f10_algorithms____string(Var value, String operation){
-  if(! Var_is_row(value, 11, 7, 1)){
-    Var _x2c_gensym_literal_part_0 = String_var(operation);
-    Var _x2c_gensym_literal_part_1 = Symbol_var(Var_tag(value));
-    {
-      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/lisp-targets/algorithms.x",.function = "f10_algorithms____string",.line = 22,.runtime = 1};
-      x2c_error_raise_n(& _x2c_gensym_error_site_0, 4477479911782, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(74754136), _x2c_gensym_literal_part_1, Symbol_var(1510312), Symbol_var(1318210446));
-      __builtin_unreachable();
-    }
-
-  }
-  return Var_as_string(value);
-}
-
-static List Var_list_payload(Var);
-
-static List f10_algorithms____list(Var value, String operation){
-  if(! Var_is_row(value, 9, 7, 4)){
-    Var _x2c_gensym_literal_part_2 = String_var(operation);
-    Var _x2c_gensym_literal_part_3 = Symbol_var(Var_tag(value));
-    {
-      static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/lisp-targets/algorithms.x",.function = "f10_algorithms____list",.line = 29,.runtime = 1};
-      x2c_error_raise_n(& _x2c_gensym_error_site_1, 4477479911782, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_2, Symbol_var(74754136), _x2c_gensym_literal_part_3, Symbol_var(1510312), Symbol_var(806120));
-      __builtin_unreachable();
-    }
-
-  }
-  return Var_list_payload(value);
+Var lisp_begin(List values){
+  if(! _init_guard_) _file_init_();
+  return lisp_last(List_var(values));
 }
 
 Var lisp_last(Var values){
@@ -4281,11 +4238,6 @@ Var lisp_last(Var values){
   if(f10_algorithms____nil(values)) return values;
   while(! f10_algorithms____nil(lisp_cdr(values))) values = lisp_cdr(values);
   return lisp_car(values);
-}
-
-Var lisp_begin(List values){
-  if(! _init_guard_) _file_init_();
-  return lisp_last(List_var(values));
 }
 
 int Var_equal(Var, Var);
@@ -4296,45 +4248,15 @@ Var lisp_member(Var value, Var values){
   return values;
 }
 
-int Var_is_nil(Var);
-
-Var lisp_assoc(Var key, Var pairs){
-  if(! _init_guard_) _file_init_();
-  for(;  ! f10_algorithms____nil(pairs);  pairs = lisp_cdr(pairs)){
-    Var pair = lisp_car(pairs);
-    if(Var_is_row(pair, 9, 7, 4) && ! Var_is_nil(pair) && Var_equal(lisp_car(pair), key)) return pair;
-  }
-  return List_var(NULL);
-}
-
 static int List_truth(List);
-
-static int List_try_next(List, List *, Var *);
-
-static Var f10_algorithms____append2(Var left, Var right){
-  List items = NULL;
-  for(;  ! f10_algorithms____nil(left);  left = lisp_cdr(left)) items = cons(lisp_car(left), items);
-  if(! List_truth(items)) return right;
-  List tail = f10_algorithms____list(right, _0);
-  {
-    Var value;
-    List _x2c_gensym_macro_object_0 = items;
-    List _x2c_gensym_macro_cursor_0 = _x2c_gensym_macro_object_0;
-    Var _x2c_gensym_macro_cursor_output_0;
-    while(List_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_0), &(_x2c_gensym_macro_cursor_output_0))){
-      value = _x2c_gensym_macro_cursor_output_0;
-      tail = cons(value, tail);
-    }
-
-  }
-  return List_var(tail);
-}
 
 List List_reverse(List);
 
 static Var List_car(List);
 
 static List List_cdr(List);
+
+static int List_try_next(List, List *, Var *);
 
 Var lisp_append(List lists){
   if(! _init_guard_) _file_init_();
@@ -4343,11 +4265,11 @@ Var lisp_append(List lists){
   Var result = List_car(reversed);
   {
     Var left;
-    List _x2c_gensym_macro_object_1 = List_cdr(reversed);
-    List _x2c_gensym_macro_cursor_1 = _x2c_gensym_macro_object_1;
-    Var _x2c_gensym_macro_cursor_output_1;
-    while(List_try_next(_x2c_gensym_macro_object_1, &(_x2c_gensym_macro_cursor_1), &(_x2c_gensym_macro_cursor_output_1))){
-      left = _x2c_gensym_macro_cursor_output_1;
+    List _x2c_gensym_macro_object_0 = List_cdr(reversed);
+    List _x2c_gensym_macro_cursor_0 = _x2c_gensym_macro_object_0;
+    Var _x2c_gensym_macro_cursor_output_0;
+    while(List_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_0), &(_x2c_gensym_macro_cursor_output_0))){
+      left = _x2c_gensym_macro_cursor_output_0;
       result = f10_algorithms____append2(left, result);
     }
 
@@ -4390,11 +4312,6 @@ Var lisp_mod(Var a, Var b){
 Var lisp_caar(Var v){
   if(! _init_guard_) _file_init_();
   return lisp_car(lisp_car(v));
-}
-
-Var lisp_cadr(Var v){
-  if(! _init_guard_) _file_init_();
-  return lisp_car(lisp_cdr(v));
 }
 
 Var lisp_cdar(Var v){
@@ -4447,6 +4364,10 @@ Var lisp_cdddr(Var v){
   return lisp_cdr(lisp_cdr(lisp_cdr(v)));
 }
 
+static int Var_is_row(Var, unsigned, unsigned long, unsigned long);
+
+static List Var_list_payload(Var);
+
 List List_match(List, Var);
 
 Var lisp_match(Var input, Var pat){
@@ -4456,34 +4377,41 @@ Var lisp_match(Var input, Var pat){
   return List_var(List_match(list, pat));
 }
 
+Var lisp_cadr(Var v);
+
+Var lisp_assoc(Var key, Var pairs);
+
 Var lisp_bound(Var bindings, Var name){
   if(! _init_guard_) _file_init_();
   return lisp_cadr(lisp_assoc(name, bindings));
+}
+
+int Var_is_nil(Var);
+
+Var lisp_assoc(Var key, Var pairs){
+  if(! _init_guard_) _file_init_();
+  for(;  ! f10_algorithms____nil(pairs);  pairs = lisp_cdr(pairs)){
+    Var pair = lisp_car(pairs);
+    if(Var_is_row(pair, 9, 7, 4) && ! Var_is_nil(pair) && Var_equal(lisp_car(pair), key)) return pair;
+  }
+  return List_var(NULL);
+}
+
+Var lisp_cadr(Var v){
+  if(! _init_guard_) _file_init_();
+  return lisp_car(lisp_cdr(v));
 }
 
 List List_search_replace(List, Var, Var);
 
 Var lisp_search_replace(Var input, Var pat, Var template){
   if(! _init_guard_) _file_init_();
-  List list = f10_algorithms____list(input, _1);
+  List list = f10_algorithms____list(input, _0);
   if(f10_algorithms____nil(List_var(List_match(list, pat)))) return List_var(List_search_replace(list, pat, template));
   return lisp_match_replace(list, pat, template);
 }
 
-Symbol Var_kind(Var);
-
-String Var_str(Var);
-
-int String_len(String);
-
-int String_getindex(String, int);
-
-Var lisp_binder(Var value){
-  if(! _init_guard_) _file_init_();
-  if(Var_kind(value) != 1328354264 && Var_tag(value) != 826970) return List_var(NULL);
-  String name = Var_str(value);
-  return f10_algorithms____truth(String_len(name) > 1 &&(String_getindex(name, 0) == '?' || String_getindex(name, 0) == '*'));
-}
+Var lisp_binder(Var value);
 
 List Var_cons(Var, List);
 
@@ -4498,11 +4426,11 @@ Var lisp_binders(Var pat){
     List binders = Var_list_payload(lisp_binders(lisp_car(parts)));
     {
       Atom binder;
-      List _x2c_gensym_macro_object_2 = binders;
-      List _x2c_gensym_macro_cursor_2 = _x2c_gensym_macro_object_2;
-      Var _x2c_gensym_macro_cursor_output_2;
-      while(List_try_next(_x2c_gensym_macro_object_2, &(_x2c_gensym_macro_cursor_2), &(_x2c_gensym_macro_cursor_output_2))){
-        binder = _x2c_gensym_macro_cursor_output_2;
+      List _x2c_gensym_macro_object_1 = binders;
+      List _x2c_gensym_macro_cursor_1 = _x2c_gensym_macro_object_1;
+      Var _x2c_gensym_macro_cursor_output_1;
+      while(List_try_next(_x2c_gensym_macro_object_1, &(_x2c_gensym_macro_cursor_1), &(_x2c_gensym_macro_cursor_output_1))){
+        binder = _x2c_gensym_macro_cursor_output_1;
         reversed = cons(binder, reversed);
       }
 
@@ -4512,37 +4440,117 @@ Var lisp_binders(Var pat){
   return List_var(List_reverse(reversed));
 }
 
+Symbol Var_kind(Var);
+
+Symbol Var_tag(Var);
+
+String Var_str(Var);
+
+int String_len(String);
+
+int String_getindex(String, int);
+
+Var lisp_binder(Var value){
+  if(! _init_guard_) _file_init_();
+  if(Var_kind(value) != 1328354264 && Var_tag(value) != 826970) return List_var(NULL);
+  String name = Var_str(value);
+  return f10_algorithms____truth(String_len(name) > 1 &&(String_getindex(name, 0) == '?' || String_getindex(name, 0) == '*'));
+}
+
 Var lisp_binder_lets(Var bindings, Var binders){
   if(! _init_guard_) _file_init_();
   List reversed = NULL;
   for(;  ! f10_algorithms____nil(binders);  binders = lisp_cdr(binders)){
     Var name = lisp_car(binders);
     reversed = cons(List_var(({
-      Var _x2c_gensym_literal_part_6 = name;  Var _x2c_gensym_literal_part_7 = List_var(({
-        Var _x2c_gensym_literal_part_4 = bindings;  Var _x2c_gensym_literal_part_5 = List_var(cons(_2, cons(name, NULL)));  cons(_3, cons(_x2c_gensym_literal_part_4, cons(_x2c_gensym_literal_part_5, NULL)));
+      Var _x2c_gensym_literal_part_2 = name;  Var _x2c_gensym_literal_part_3 = List_var(({
+        Var _x2c_gensym_literal_part_0 = bindings;  Var _x2c_gensym_literal_part_1 = List_var(cons(_1, cons(name, NULL)));  cons(_2, cons(_x2c_gensym_literal_part_0, cons(_x2c_gensym_literal_part_1, NULL)));
       }
-      ));  cons(_x2c_gensym_literal_part_6, cons(_x2c_gensym_literal_part_7, NULL));
+      ));  cons(_x2c_gensym_literal_part_2, cons(_x2c_gensym_literal_part_3, NULL));
     }
     )), reversed);
   }
   return List_var(List_reverse(reversed));
 }
 
+String Var_as_string(Var);
+
 Var lisp_string_append_all(List strings){
   if(! _init_guard_) _file_init_();
   Var text = String_var(0);
   {
     Var s;
-    List _x2c_gensym_macro_object_3 = strings;
-    List _x2c_gensym_macro_cursor_3 = _x2c_gensym_macro_object_3;
-    Var _x2c_gensym_macro_cursor_output_3;
-    while(List_try_next(_x2c_gensym_macro_object_3, &(_x2c_gensym_macro_cursor_3), &(_x2c_gensym_macro_cursor_output_3))){
-      s = _x2c_gensym_macro_cursor_output_3;
-      text = lisp_string_append(Var_as_string(text), f10_algorithms____string(s, _4));
+    List _x2c_gensym_macro_object_2 = strings;
+    List _x2c_gensym_macro_cursor_2 = _x2c_gensym_macro_object_2;
+    Var _x2c_gensym_macro_cursor_output_2;
+    while(List_try_next(_x2c_gensym_macro_object_2, &(_x2c_gensym_macro_cursor_2), &(_x2c_gensym_macro_cursor_output_2))){
+      s = _x2c_gensym_macro_cursor_output_2;
+      text = lisp_string_append(Var_as_string(text), f10_algorithms____string(s, _3));
     }
 
   }
   return text;
+}
+
+static int f10_algorithms____nil(Var value){
+  return x2c_var_equal(value, List_var(NULL));
+}
+
+static Var f10_algorithms____append2(Var left, Var right){
+  List items = NULL;
+  for(;  ! f10_algorithms____nil(left);  left = lisp_cdr(left)) items = cons(lisp_car(left), items);
+  if(! List_truth(items)) return right;
+  List tail = f10_algorithms____list(right, _4);
+  {
+    Var value;
+    List _x2c_gensym_macro_object_3 = items;
+    List _x2c_gensym_macro_cursor_3 = _x2c_gensym_macro_object_3;
+    Var _x2c_gensym_macro_cursor_output_3;
+    while(List_try_next(_x2c_gensym_macro_object_3, &(_x2c_gensym_macro_cursor_3), &(_x2c_gensym_macro_cursor_output_3))){
+      value = _x2c_gensym_macro_cursor_output_3;
+      tail = cons(value, tail);
+    }
+
+  }
+  return List_var(tail);
+}
+
+#include "error.h"
+
+
+
+
+static List f10_algorithms____list(Var value, String operation){
+  if(! Var_is_row(value, 9, 7, 4)){
+    Var _x2c_gensym_literal_part_4 = String_var(operation);
+    Var _x2c_gensym_literal_part_5 = Symbol_var(Var_tag(value));
+    {
+      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/lisp-targets/algorithms.x",.function = "f10_algorithms____list",.line = 168,.runtime = 1};
+      x2c_error_raise_n(& _x2c_gensym_error_site_0, 4477479911782, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_4, Symbol_var(74754136), _x2c_gensym_literal_part_5, Symbol_var(1510312), Symbol_var(806120));
+      __builtin_unreachable();
+    }
+
+  }
+  return Var_list_payload(value);
+}
+
+static Var f10_algorithms____truth(int x){
+  if(x) return Symbol_var(1348938);
+  return List_var(NULL);
+}
+
+static String f10_algorithms____string(Var value, String operation){
+  if(! Var_is_row(value, 11, 7, 1)){
+    Var _x2c_gensym_literal_part_6 = String_var(operation);
+    Var _x2c_gensym_literal_part_7 = Symbol_var(Var_tag(value));
+    {
+      static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/lisp-targets/algorithms.x",.function = "f10_algorithms____string",.line = 180,.runtime = 1};
+      x2c_error_raise_n(& _x2c_gensym_error_site_1, 4477479911782, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_6, Symbol_var(74754136), _x2c_gensym_literal_part_7, Symbol_var(1510312), Symbol_var(1318210446));
+      __builtin_unreachable();
+    }
+
+  }
+  return Var_as_string(value);
 }
 
 Map lisp_native_targets(void){

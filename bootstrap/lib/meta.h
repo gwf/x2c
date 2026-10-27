@@ -133,11 +133,11 @@ void x2c_diagnostic_warn(String message, List notes);
 
 Map x2c_meta_definition_hashes(void);
 
-List type_base_suffix(List type);
-
 String type_name_error(List type);
 
 List type_declaration_parts(List type);
+
+List type_base_suffix(List type);
 
 
 #endif /* __GUARD_0x194AFD99__ */

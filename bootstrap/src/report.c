@@ -23,6 +23,13 @@ static struct ReportState{
 }
 report;
 
+enum{
+  BAR_WIDTH = 14
+}
+;
+
+static const char _clear[] = "\r\033[K";
+
 static String _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
 static int _init_guard_ = 0;
@@ -32,11 +39,6 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 static int _columns(void);
 
 static int _use_color(int plain, Symbol mode, int terminal);
-
-enum{
-  BAR_WIDTH = 14
-}
-;
 
 static int _update_due(unsigned long now, int done, int total);
 
@@ -48,15 +50,13 @@ static void _fill_bar(char * bar, int done, int total);
 
 static int _clip(char * line, int limit);
 
-static String _cache_note(int count, int cached);
-
-static const char _clear[] = "\r\033[K";
-
 static void _emit(const char * prefix, int prefix_length, const char * color, const char * line, int newline);
 
 static struct iovec _part(const char * text, size_t length);
 
 static const char * _color(Symbol tone);
+
+static String _cache_note(int count, int cached);
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -64,29 +64,29 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _init_guard_ = 1;
   _0 = String_new("TERM");
   _1 = String_new("dumb");
-  _2 = String_new("COLUMNS");
-  _3 = String_new("NO_COLOR");
-  _4 = String_new("  ");
-  _5 = String_new(" ");
-  _6 = String_new(" in ");
-  _7 = String_new(" (up to date)");
-  _8 = String_new(", ");
-  _9 = String_new(" cached");
-  _10 = String_new("");
-  _11 = String_new("C file");
-  _12 = String_new("C files");
-  _13 = String_new("header");
-  _14 = String_new("headers");
-  _15 = String_new("  Generated ");
-  _16 = String_new(" and ");
-  _17 = String_new(" (");
-  _18 = String_new(")");
-  _19 = String_new("%lu us");
-  _20 = String_new("%.0f ms");
-  _21 = String_new("%.2f s");
-  _22 = String_new("%llu B");
-  _23 = String_new("%.1f KiB");
-  _24 = String_new("%.1f MiB");
+  _2 = String_new("  ");
+  _3 = String_new(" ");
+  _4 = String_new(" in ");
+  _5 = String_new("C file");
+  _6 = String_new("C files");
+  _7 = String_new("header");
+  _8 = String_new("headers");
+  _9 = String_new("  Generated ");
+  _10 = String_new(" and ");
+  _11 = String_new(" (");
+  _12 = String_new(")");
+  _13 = String_new("%lu us");
+  _14 = String_new("%.0f ms");
+  _15 = String_new("%.2f s");
+  _16 = String_new("%llu B");
+  _17 = String_new("%.1f KiB");
+  _18 = String_new("%.1f MiB");
+  _19 = String_new("COLUMNS");
+  _20 = String_new("NO_COLOR");
+  _21 = String_new(" (up to date)");
+  _22 = String_new(", ");
+  _23 = String_new(" cached");
+  _24 = String_new("");
 }
 
 unsigned long report_now_us(void);
@@ -106,20 +106,6 @@ void report_configure(int quiet, int plain, Symbol color_mode, int verbose, int 
   report.color = _use_color(plain, color_mode, terminal);
 }
 
-static int _columns(void){
-  struct winsize size;
-  if(ioctl(fileno(stderr), TIOCGWINSZ, & size) == 0 && size.ws_col > 0) return size.ws_col;
-  String columns = Env_get(_2);
-  int parsed = String_is_digit(columns) ? atoi(columns) : 0;
-  return parsed >= 20 && parsed <= 1000 ? parsed : 80;
-}
-
-static int _use_color(int plain, Symbol mode, int terminal){
-  if(plain || mode == 29733220) return 0;
-  if(mode == 93785702) return 1;
-  return terminal && ! String_truth(Env_get(_3));
-}
-
 int report_receipts(void){
   return report.receipts;
 }
@@ -130,6 +116,81 @@ void report_progress(Symbol phase, int done, int total, String detail){
   if(! _update_due(now, done, total)) return;
   report.update = now;
   if(_own_line()) _draw(phase, done, total, detail);
+}
+
+void report_suspend(void){
+  if(! report.width || getpid() != report.pid) return;
+  report.width = 0;
+  _emit(_clear, sizeof(_clear) - 1, "", "", 0);
+}
+
+String report_duration(unsigned long microseconds);
+
+void report_line(Symbol tone, String line);
+
+void report_phase(Symbol phase, int count, String noun, int cached, unsigned long microseconds){
+  if(! _init_guard_) _file_init_();
+  String cache = _cache_note(count, cached);
+  String name = String_capitalize(Symbol_str(phase));
+  String duration = report_duration(microseconds);
+  report_line(28680520, String_join(NULL, cons(String_var(_2), cons(String_var(name), cons(String_var(_3), cons(String_var(int_str(count)), cons(String_var(_3), cons(String_var(noun), cons(String_var(_4), cons(String_var(duration), cons(String_var(cache), NULL)))))))))));
+}
+
+String report_size(unsigned long long bytes);
+
+void report_generated(int n, unsigned long long bytes){
+  if(! _init_guard_) _file_init_();
+  String size = report_size(bytes);
+  String c_noun = n == 1 ? _5 : _6;
+  String h_noun = n == 1 ? _7 : _8;
+  report_line(28680520, String_join(NULL, cons(String_var(_9), cons(String_var(int_str(n)), cons(String_var(_3), cons(String_var(c_noun), cons(String_var(_10), cons(String_var(int_str(n)), cons(String_var(_3), cons(String_var(h_noun), cons(String_var(_11), cons(String_var(size), cons(String_var(_12), NULL)))))))))))));
+}
+
+void report_line(Symbol tone, String line){
+  report.width = 0;
+  if(! report.receipts) return;
+  int clear = report.transient ? sizeof(_clear) - 1 : 0;
+  _emit(_clear, clear, _color(tone), line, 1);
+}
+
+unsigned long report_now_us(void){
+  struct timespec now;
+  if(clock_gettime(CLOCK_MONOTONIC, & now)) return 0;
+  return(unsigned long) now.tv_sec * 1000000ul +(unsigned long) now.tv_nsec / 1000ul;
+}
+
+unsigned long long Path_regular_bytes(String path){
+  struct stat info;
+  if(! String_truth(path) || stat(path, & info) || ! S_ISREG(info.st_mode)) return 0;
+  return(unsigned long long) info.st_size;
+}
+
+String report_duration(unsigned long microseconds){
+  if(! _init_guard_) _file_init_();
+  if(microseconds < 1000) return String_printf(_13, microseconds);
+  if(microseconds < 1000000) return String_printf(_14, microseconds / 1000.0);
+  return String_printf(_15, microseconds / 1000000.0);
+}
+
+String report_size(unsigned long long bytes){
+  if(! _init_guard_) _file_init_();
+  if(bytes < 1024) return String_printf(_16, bytes);
+  if(bytes < 1024ull * 1024ull) return String_printf(_17, bytes / 1024.0);
+  return String_printf(_18, bytes /(1024.0 * 1024.0));
+}
+
+static int _columns(void){
+  struct winsize size;
+  if(ioctl(fileno(stderr), TIOCGWINSZ, & size) == 0 && size.ws_col > 0) return size.ws_col;
+  String columns = Env_get(_19);
+  int parsed = String_is_digit(columns) ? atoi(columns) : 0;
+  return parsed >= 20 && parsed <= 1000 ? parsed : 80;
+}
+
+static int _use_color(int plain, Symbol mode, int terminal){
+  if(plain || mode == 29733220) return 0;
+  if(mode == 93785702) return 1;
+  return terminal && ! String_truth(Env_get(_20));
 }
 
 static int _update_due(unsigned long now, int done, int total){
@@ -176,44 +237,6 @@ static int _clip(char * line, int limit){
   return limit;
 }
 
-void report_suspend(void){
-  if(! report.width || getpid() != report.pid) return;
-  report.width = 0;
-  _emit(_clear, sizeof(_clear) - 1, "", "", 0);
-}
-
-void report_line(Symbol tone, String line){
-  report.width = 0;
-  if(! report.receipts) return;
-  int clear = report.transient ? sizeof(_clear) - 1 : 0;
-  _emit(_clear, clear, _color(tone), line, 1);
-}
-
-String report_duration(unsigned long microseconds);
-
-void report_phase(Symbol phase, int count, String noun, int cached, unsigned long microseconds){
-  if(! _init_guard_) _file_init_();
-  String cache = _cache_note(count, cached);
-  String name = String_capitalize(Symbol_str(phase));
-  String duration = report_duration(microseconds);
-  report_line(28680520, String_join(NULL, cons(String_var(_4), cons(String_var(name), cons(String_var(_5), cons(String_var(int_str(count)), cons(String_var(_5), cons(String_var(noun), cons(String_var(_6), cons(String_var(duration), cons(String_var(cache), NULL)))))))))));
-}
-
-static String _cache_note(int count, int cached){
-  if(cached == count && count) return _7;
-  return cached ? String_join(NULL, cons(String_var(_8), cons(String_var(int_str(cached)), cons(String_var(_9), NULL)))) : _10;
-}
-
-String report_size(unsigned long long bytes);
-
-void report_generated(int n, unsigned long long bytes){
-  if(! _init_guard_) _file_init_();
-  String size = report_size(bytes);
-  String c_noun = n == 1 ? _11 : _12;
-  String h_noun = n == 1 ? _13 : _14;
-  report_line(28680520, String_join(NULL, cons(String_var(_15), cons(String_var(int_str(n)), cons(String_var(_5), cons(String_var(c_noun), cons(String_var(_16), cons(String_var(int_str(n)), cons(String_var(_5), cons(String_var(h_noun), cons(String_var(_17), cons(String_var(size), cons(String_var(_18), NULL)))))))))))));
-}
-
 static void _emit(const char * prefix, int prefix_length, const char * color, const char * line, int newline){
   struct iovec parts[5];
   int count = 0;
@@ -247,29 +270,8 @@ static const char * _color(Symbol tone){
 
 }
 
-unsigned long report_now_us(void){
-  struct timespec now;
-  if(clock_gettime(CLOCK_MONOTONIC, & now)) return 0;
-  return(unsigned long) now.tv_sec * 1000000ul +(unsigned long) now.tv_nsec / 1000ul;
-}
-
-unsigned long long Path_regular_bytes(String path){
-  struct stat info;
-  if(! String_truth(path) || stat(path, & info) || ! S_ISREG(info.st_mode)) return 0;
-  return(unsigned long long) info.st_size;
-}
-
-String report_duration(unsigned long microseconds){
-  if(! _init_guard_) _file_init_();
-  if(microseconds < 1000) return String_printf(_19, microseconds);
-  if(microseconds < 1000000) return String_printf(_20, microseconds / 1000.0);
-  return String_printf(_21, microseconds / 1000000.0);
-}
-
-String report_size(unsigned long long bytes){
-  if(! _init_guard_) _file_init_();
-  if(bytes < 1024) return String_printf(_22, bytes);
-  if(bytes < 1024ull * 1024ull) return String_printf(_23, bytes / 1024.0);
-  return String_printf(_24, bytes /(1024.0 * 1024.0));
+static String _cache_note(int count, int cached){
+  if(cached == count && count) return _21;
+  return cached ? String_join(NULL, cons(String_var(_22), cons(String_var(int_str(cached)), cons(String_var(_23), NULL)))) : _24;
 }
 

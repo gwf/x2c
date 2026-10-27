@@ -20,25 +20,25 @@ typedef struct Buffer{
 
 void Buffer_cleanup(Buffer _x2c_gensym_macro_value_0);
 
-Buffer Buffer_write_len(Buffer buf, const char * text, size_t length);
-
 Buffer Buffer_write(Buffer buf, const char * text);
 
 Buffer Buffer_printf(Buffer buf, const char * format, ...);
 
-Buffer Buffer_write_char(Buffer buf, char value);
-
-Buffer Buffer_write_repeat(Buffer buf, char value, size_t count);
+Buffer Buffer_write_len(Buffer buf, const char * text, size_t length);
 
 Buffer Buffer_unwrite(Buffer buf, size_t count);
 
 Buffer Buffer_pad(Buffer buf);
 
+Buffer Buffer_newline_indent(Buffer buf);
+
 Buffer Buffer_newline(Buffer buf);
+
+Buffer Buffer_write_char(Buffer buf, char value);
 
 Buffer Buffer_indent(Buffer buf);
 
-Buffer Buffer_newline_indent(Buffer buf);
+Buffer Buffer_write_repeat(Buffer buf, char value, size_t count);
 
 Buffer Buffer_push(Buffer buf);
 
@@ -46,11 +46,11 @@ Buffer Buffer_pop(Buffer buf);
 
 size_t Buffer_tabstop(Buffer buf);
 
-int Buffer_try_get(Buffer buf, ptrdiff_t index, char * out);
+int Buffer_getindex(Buffer buf, int index);
 
 char Buffer_get(Buffer buf, ptrdiff_t index);
 
-int Buffer_getindex(Buffer buf, int index);
+int Buffer_try_get(Buffer buf, ptrdiff_t index, char * out);
 
 size_t Buffer_len(Buffer buf);
 

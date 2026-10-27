@@ -568,14 +568,8 @@ static inline int String_truth(String string){
   return string != NULL && * string != '\0';
 }
 
-static inline unsigned long x2c_mix64(unsigned long word){
-  word ^= word >> 33;  word *= 0xff51afd7ed558ccdul;  word ^= word >> 33;  word *= 0xc4ceb9fe1a85ec53ul;  word ^= word >> 33;  return word;
-}
-
-static inline unsigned x2c_hash_word(unsigned long word){
-  unsigned hash =(unsigned) x2c_mix64(word);  return hash ? hash : - 1;
-}
-
+static inline unsigned long x2c_mix64(unsigned long word);
+static inline unsigned x2c_hash_word(unsigned long word);
 static inline unsigned x2c_hash_bytes(unsigned long seed, const void * data, size_t width){
   const unsigned char * bytes = data;  unsigned long mixed = x2c_mix64(seed ^(unsigned long) width);  size_t offset = 0;  for(;  width - offset >= sizeof(unsigned long);  offset += sizeof(unsigned long)){
     unsigned long word;  memcpy(& word, bytes + offset, sizeof word);
@@ -590,16 +584,25 @@ static inline unsigned x2c_hash_bytes(unsigned long seed, const void * data, siz
   return x2c_hash_word(mixed);
 }
 
+static inline unsigned x2c_hash_word(unsigned long word){
+  unsigned hash =(unsigned) x2c_mix64(word);  return hash ? hash : - 1;
+}
+
+static inline unsigned long x2c_mix64(unsigned long word){
+  word ^= word >> 33;  word *= 0xff51afd7ed558ccdul;  word ^= word >> 33;  word *= 0xc4ceb9fe1a85ec53ul;  word ^= word >> 33;  return word;
+}
+
 static inline int Var_is_wide(Var v){
   unsigned top = v.u64 >> 48, bottom = v.u64 & 0x7;  return(top == 0x0005 && bottom >= 0x5) ||(top == 0x0007 && bottom >= 0x6);
 }
 
-static inline unsigned Var_payload32(Var value){
-  return(unsigned) value.u64;
-}
-
+static inline unsigned Var_payload32(Var value);
 static inline float Var_decode_f32(Var value){
   unsigned raw = Var_payload32(value);  float result;  memcpy(& result, & raw, sizeof result);  return result;
+}
+
+static inline unsigned Var_payload32(Var value){
+  return(unsigned) value.u64;
 }
 
 static inline double Var_decode_f64(Var value){
@@ -831,20 +834,21 @@ static inline String double_repr(double _x2c_gensym_macro_x_26){
   return Var_repr(Var_box_f64(_x2c_gensym_macro_x_26));
 }
 
-static inline Var long_var(long x){
-  return Var_box_long(x);
-}
-
 static inline Var ulong_var(ulong x){
   return Var_box_ulong(x);
 }
 
+static inline Var long_var(long x);
 static inline String long_str(long l){
   return Var_str(long_var(l));
 }
 
 static inline String long_repr(long l){
   return Var_repr(long_var(l));
+}
+
+static inline Var long_var(long x){
+  return Var_box_long(x);
 }
 
 static inline int Var_is_row(Var value, unsigned top, unsigned long mask, unsigned long bottom){
@@ -913,8 +917,8 @@ unsigned long long Var_ulong_long(Var x);
 long double Var_long_double(Var x);
 float Var_float(Var x);
 double Var_double(Var x);
-void x2c_initialize_protocols(void);
 void x2c_initialize(void);
+void x2c_initialize_protocols(void);
 int x2c_normalize_index(int index, int length);
 int x2c_slice_bound(int bound);
 int x2c_normalize_slice(int * start, int * stop, int step, int length);

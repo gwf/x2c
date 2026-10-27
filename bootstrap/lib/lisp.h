@@ -39,9 +39,9 @@ Var lisp_source_function(Var callable);
 
 extern Map lisp_native_targets(void);
 
-Lisp Lisp_kernel(void);
-
 Lisp Lisp_new(void);
+
+Lisp Lisp_kernel(void);
 
 void Lisp_destroy(Lisp lisp);
 
@@ -51,11 +51,11 @@ void Lisp_freeze(Lisp lisp);
 
 int Lisp_try_get(Lisp lisp, String name, Var * out);
 
-void Lisp_set_global(Lisp lisp, String name, Var value);
-
 void Lisp_remove_global(Lisp lisp, String name);
 
 void Lisp_bind(Lisp lisp, String name, Func function);
+
+void Lisp_set_global(Lisp lisp, String name, Var value);
 
 Lisp Lisp_active(void);
 
@@ -89,11 +89,9 @@ Var lisp_procedure(Var value);
 
 Symbol lisp_type(Var value);
 
-Var lisp_compare(Var a, Var b);
+Var lisp_plus(List values);
 
 Var lisp_add(Var a, Var b);
-
-Var lisp_plus(List values);
 
 Var lisp_minus(List values);
 
@@ -110,6 +108,8 @@ Var lisp_le_chain(List values);
 Var lisp_gt_chain(List values);
 
 Var lisp_ge_chain(List values);
+
+Var lisp_compare(Var a, Var b);
 
 Var lisp_str(Var value);
 

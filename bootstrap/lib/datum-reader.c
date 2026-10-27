@@ -5,12 +5,6 @@
 #include "tokenizer.h"
 #include "scan.h"
 #include <limits.h>
-static String _3, _2, _1, _0;
-
-static int _init_guard_ = 0;
-
-__attribute__((constructor, noinline, cold)) static void _file_init_(void);
-
 typedef struct LispReader{
   Tokenizer tokenizer;
   char * source;
@@ -19,13 +13,19 @@ typedef struct LispReader{
 LispReader;
 
 #define LISP_READ_DEPTH_MAX 1024
-static int _nested_depth(int depth);
+static String _3, _2, _1, _0;
+
+static int _init_guard_ = 0;
+
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static Var _parse_form(LispReader * r, Token token, int depth);
 
 static Var _prefixed(LispReader * r, Var prefix, int depth);
 
 static Var _list(LispReader * r, int depth);
+
+static int _nested_depth(int depth);
 
 static Var _atom(LispReader * r, Token token);
 
@@ -51,9 +51,9 @@ static int _plain_atom(char * s, unsigned * at, Var * out);
 
 static int _digit(char c);
 
-static int _blank(char c);
-
 static int _token_end(char c);
+
+static int _blank(char c);
 
 typedef struct _x2c_gensym_defer_env_0{
   const void * _x2c_gensym_defer_capture_0;
@@ -62,12 +62,12 @@ _x2c_gensym_defer_env_0;
 
 static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0);
 
-static void _x2c_gensym_defer_cleanup_1(void * _x2c_gensym_defer_opaque_1);
-
 typedef struct _x2c_gensym_defer_env_1{
   const void * _x2c_gensym_defer_capture_1;
 }
 _x2c_gensym_defer_env_1;
+
+static void _x2c_gensym_defer_cleanup_1(void * _x2c_gensym_defer_opaque_1);
 
 static void _x2c_gensym_defer_cleanup_2(void * _x2c_gensym_defer_opaque_2);
 
@@ -91,6 +91,92 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _1 = String_new("quasiquote");
   _2 = String_new("unquote");
   _3 = String_new("unquote-splicing");
+}
+
+static int String_truth(String);
+
+int String_getindex(String, int);
+
+Array Array_new(void);
+
+void x2c_cleanup_push(X2CCleanup *);
+
+void x2c_cleanup_leave(X2CCleanup *);
+
+Scope Scope_new_named(const char *);
+
+Tokenizer Tokenizer_from_lisp(String source, Scope * scope);
+
+Symbol Tokenizer_read_lisp_form(Tokenizer t, String source, unsigned base, unsigned * cursor, Var * out);
+
+Symbol String_read_lisp_form(String source, unsigned * cursor, Var * out){
+  if(! _init_guard_) _file_init_();
+  if(! String_truth(source)) return 11212;
+  if(! cursor) return 11212;
+  unsigned base =(* cursor);
+  unsigned at = base;
+  while(_blank(String_getindex(source, at))) at ++;
+  Array items = Array_new();
+  const Array _x2c_gensym_macro_acquired_0 = items;
+  {
+    _x2c_gensym_defer_env_1 _x2c_gensym_macro_environment_1 ={
+      0
+    }
+    ;
+    _x2c_gensym_macro_environment_1._x2c_gensym_defer_capture_1 =(const void *) & _x2c_gensym_macro_acquired_0;
+    X2CCleanup _x2c_gensym_defer_record_0 ={
+      .fn = _x2c_gensym_defer_cleanup_1, .env = & _x2c_gensym_macro_environment_1
+    }
+    ;
+    x2c_cleanup_push(& _x2c_gensym_defer_record_0);
+    {
+      Var value =((void) 0, Void);
+      if(String_getindex(source, at) && _plain_form(source, &(at), &(value), items, 1)){
+        (* cursor) = at;
+        if(out)(* out) = value;
+        {
+          Symbol _x2c_gensym_return_value_0 = 46228810;
+          {
+            x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
+            return _x2c_gensym_return_value_0;
+          }
+
+        }
+
+      }
+      Scope tokens_scope = Scope_new_named("Lisp tokens");
+      const Scope _x2c_gensym_macro_acquired_1 = tokens_scope;
+      {
+        _x2c_gensym_defer_env_0 _x2c_gensym_macro_environment_0 ={
+          0
+        }
+        ;
+        _x2c_gensym_macro_environment_0._x2c_gensym_defer_capture_0 =(const void *) & _x2c_gensym_macro_acquired_1;
+        X2CCleanup _x2c_gensym_defer_record_1 ={
+          .fn = _x2c_gensym_defer_cleanup_0, .env = & _x2c_gensym_macro_environment_0
+        }
+        ;
+        x2c_cleanup_push(& _x2c_gensym_defer_record_1);
+        {
+          Tokenizer tokenizer = Tokenizer_from_lisp(source + base, & tokens_scope);
+          {
+            Symbol _x2c_gensym_return_value_1 = Tokenizer_read_lisp_form(tokenizer, source, base, &((* cursor)), out);
+            {
+              x2c_cleanup_leave(& _x2c_gensym_defer_record_1);
+              x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
+              return _x2c_gensym_return_value_1;
+            }
+
+          }
+
+        }
+        x2c_cleanup_leave(& _x2c_gensym_defer_record_1);
+      }
+
+    }
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
+  }
+
 }
 
 int String_len(String);
@@ -117,30 +203,33 @@ Symbol Tokenizer_read_lisp_form(Tokenizer t, String source, unsigned base, unsig
   return 46228810;
 }
 
-static Var String_var(String);
+void Scope_push(Scope *);
 
-String String_join(String, List);
-
-static Var Symbol_var(Symbol);
-
-static Var int_var(int);
-
-#include "error.h"
-
-
-
-
-static int _nested_depth(int depth){
-  if(++ depth >= LISP_READ_DEPTH_MAX){
-    Var _x2c_gensym_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("Lisp.read")), NULL)));
+Tokenizer Tokenizer_from_lisp(String source, Scope * scope){
+  Tokenizer tokenizer = NULL;
+  {
+    Scope_push(scope);
     {
-      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/datum-reader.x",.function = "_nested_depth",.line = 56,.runtime = 1};
-      x2c_error_raise_n(& _x2c_gensym_error_site_0, 1358596898646632, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(8750352), int_var(depth));
-      __builtin_unreachable();
+      {
+        X2CCleanup _x2c_gensym_defer_record_2 ={
+          .fn = _x2c_gensym_defer_cleanup_2, .env = 0
+        }
+        ;
+        x2c_cleanup_push(& _x2c_gensym_defer_record_2);
+        {
+          {
+            tokenizer = Tokenizer_new(source, 806112);
+            Tokenizer_scan(tokenizer);
+          }
+
+        }
+        x2c_cleanup_leave(& _x2c_gensym_defer_record_2);
+      }
+
     }
 
   }
-  return depth;
+  return tokenizer;
 }
 
 Atom Atom_intern(String);
@@ -175,48 +264,42 @@ static Var _prefixed(LispReader * r, Var prefix, int depth){
   return List_var(cons(prefix, cons(inner, NULL)));
 }
 
-Array Array_new(void);
-
-void x2c_cleanup_push(X2CCleanup *);
-
-void x2c_cleanup_leave(X2CCleanup *);
-
 List Array_list(Array);
 
 Var Array_push(Array, Var);
 
 static Var _list(LispReader * r, int depth){
   Array elements = Array_new();
-  const Array _x2c_gensym_macro_acquired_0 = elements;
+  const Array _x2c_gensym_macro_acquired_2 = elements;
   {
-    _x2c_gensym_defer_env_0 _x2c_gensym_macro_environment_0 ={
+    _x2c_gensym_defer_env_2 _x2c_gensym_macro_environment_2 ={
       0
     }
     ;
-    _x2c_gensym_macro_environment_0._x2c_gensym_defer_capture_0 =(const void *) & _x2c_gensym_macro_acquired_0;
-    X2CCleanup _x2c_gensym_defer_record_0 ={
-      .fn = _x2c_gensym_defer_cleanup_0, .env = & _x2c_gensym_macro_environment_0
+    _x2c_gensym_macro_environment_2._x2c_gensym_defer_capture_2 =(const void *) & _x2c_gensym_macro_acquired_2;
+    X2CCleanup _x2c_gensym_defer_record_3 ={
+      .fn = _x2c_gensym_defer_cleanup_3, .env = & _x2c_gensym_macro_environment_2
     }
     ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_0);
+    x2c_cleanup_push(& _x2c_gensym_defer_record_3);
     {
       while(1){
         Token token = Tokenizer_next((* r).tokenizer);
         if(! token || token -> type == 11212){
-          Var _x2c_gensym_return_value_0 =((void) 0, Void);
+          Var _x2c_gensym_return_value_2 =((void) 0, Void);
           {
-            x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
-            return _x2c_gensym_return_value_0;
+            x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
+            return _x2c_gensym_return_value_2;
           }
 
         }
         if(token -> type == 83){
           (* r).end = token -> pos + token -> len;
           {
-            Var _x2c_gensym_return_value_1 = List_var(Array_list(elements));
+            Var _x2c_gensym_return_value_3 = List_var(Array_list(elements));
             {
-              x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
-              return _x2c_gensym_return_value_1;
+              x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
+              return _x2c_gensym_return_value_3;
             }
 
           }
@@ -224,10 +307,10 @@ static Var _list(LispReader * r, int depth){
         }
         Var element = _parse_form(&((* r)), token, depth);
         if(Var_is_void(element)){
-          Var _x2c_gensym_return_value_2 =((void) 0, Void);
+          Var _x2c_gensym_return_value_4 =((void) 0, Void);
           {
-            x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
-            return _x2c_gensym_return_value_2;
+            x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
+            return _x2c_gensym_return_value_4;
           }
 
         }
@@ -235,9 +318,35 @@ static Var _list(LispReader * r, int depth){
       }
 
     }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
   }
 
+}
+
+static Var String_var(String);
+
+String String_join(String, List);
+
+static Var Symbol_var(Symbol);
+
+static Var int_var(int);
+
+#include "error.h"
+
+
+
+
+static int _nested_depth(int depth){
+  if(++ depth >= LISP_READ_DEPTH_MAX){
+    Var _x2c_gensym_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("Lisp.read")), NULL)));
+    {
+      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/datum-reader.x",.function = "_nested_depth",.line = 135,.runtime = 1};
+      x2c_error_raise_n(& _x2c_gensym_error_site_0, 1358596898646632, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(8750352), int_var(depth));
+      __builtin_unreachable();
+    }
+
+  }
+  return depth;
 }
 
 String String_unescape(String);
@@ -279,10 +388,6 @@ static Var _floating(LispReader * r, Token token){
   return double_var(value);
 }
 
-int String_getindex(String, int);
-
-static int String_truth(String);
-
 Symbol Symbol_new(const char *);
 
 static Var _symbol(LispReader * r, Token token){
@@ -299,7 +404,7 @@ _Noreturn static Var _malformed_token(LispReader * r, Token token){
   int line = 1, column = 1;
   scan_next_line_col(source, (int) at, &(line), &(column));
   {
-    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/datum-reader.x",.function = "_malformed_token",.line = 147,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/datum-reader.x",.function = "_malformed_token",.line = 182,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_1, 28682226919752, 3, Symbol_var(1307939018), String_var(source), Symbol_var(805770), int_var(line), Symbol_var(233614172), int_var(column));
     __builtin_unreachable();
   }
@@ -310,7 +415,7 @@ _Noreturn static Var _incomplete(String source, unsigned at){
   int line = 1, column = 1;
   scan_next_line_col(source, (int) at, &(line), &(column));
   {
-    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/datum-reader.x",.function = "_incomplete",.line = 153,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/datum-reader.x",.function = "_incomplete",.line = 188,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_2, 664344300629258, 3, Symbol_var(1307939018), String_var(source), Symbol_var(805770), int_var(line), Symbol_var(233614172), int_var(column));
     __builtin_unreachable();
   }
@@ -388,133 +493,32 @@ static int _digit(char c){
   return c >= '0' && c <= '9';
 }
 
-static int _blank(char c){
-  return c == ' ' || c == '\n' || c == '\t' || c == '\r';
-}
-
 static int _token_end(char c){
   return ! c || c == ')' || _blank(c);
 }
 
-void Scope_push(Scope *);
-
-Tokenizer Tokenizer_from_lisp(String source, Scope * scope){
-  Tokenizer tokenizer = NULL;
-  {
-    Scope_push(scope);
-    {
-      {
-        X2CCleanup _x2c_gensym_defer_record_1 ={
-          .fn = _x2c_gensym_defer_cleanup_1, .env = 0
-        }
-        ;
-        x2c_cleanup_push(& _x2c_gensym_defer_record_1);
-        {
-          {
-            tokenizer = Tokenizer_new(source, 806112);
-            Tokenizer_scan(tokenizer);
-          }
-
-        }
-        x2c_cleanup_leave(& _x2c_gensym_defer_record_1);
-      }
-
-    }
-
-  }
-  return tokenizer;
-}
-
-Scope Scope_new_named(const char *);
-
-Symbol String_read_lisp_form(String source, unsigned * cursor, Var * out){
-  if(! _init_guard_) _file_init_();
-  if(! String_truth(source)) return 11212;
-  if(! cursor) return 11212;
-  unsigned base =(* cursor);
-  unsigned at = base;
-  while(_blank(String_getindex(source, at))) at ++;
-  Array items = Array_new();
-  const Array _x2c_gensym_macro_acquired_1 = items;
-  {
-    _x2c_gensym_defer_env_2 _x2c_gensym_macro_environment_2 ={
-      0
-    }
-    ;
-    _x2c_gensym_macro_environment_2._x2c_gensym_defer_capture_2 =(const void *) & _x2c_gensym_macro_acquired_1;
-    X2CCleanup _x2c_gensym_defer_record_2 ={
-      .fn = _x2c_gensym_defer_cleanup_3, .env = & _x2c_gensym_macro_environment_2
-    }
-    ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_2);
-    {
-      Var value =((void) 0, Void);
-      if(String_getindex(source, at) && _plain_form(source, &(at), &(value), items, 1)){
-        (* cursor) = at;
-        if(out)(* out) = value;
-        {
-          Symbol _x2c_gensym_return_value_3 = 46228810;
-          {
-            x2c_cleanup_leave(& _x2c_gensym_defer_record_2);
-            return _x2c_gensym_return_value_3;
-          }
-
-        }
-
-      }
-      Scope tokens_scope = Scope_new_named("Lisp tokens");
-      const Scope _x2c_gensym_macro_acquired_2 = tokens_scope;
-      {
-        _x2c_gensym_defer_env_1 _x2c_gensym_macro_environment_1 ={
-          0
-        }
-        ;
-        _x2c_gensym_macro_environment_1._x2c_gensym_defer_capture_1 =(const void *) & _x2c_gensym_macro_acquired_2;
-        X2CCleanup _x2c_gensym_defer_record_3 ={
-          .fn = _x2c_gensym_defer_cleanup_2, .env = & _x2c_gensym_macro_environment_1
-        }
-        ;
-        x2c_cleanup_push(& _x2c_gensym_defer_record_3);
-        {
-          Tokenizer tokenizer = Tokenizer_from_lisp(source + base, & tokens_scope);
-          {
-            Symbol _x2c_gensym_return_value_4 = Tokenizer_read_lisp_form(tokenizer, source, base, &((* cursor)), out);
-            {
-              x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
-              x2c_cleanup_leave(& _x2c_gensym_defer_record_2);
-              return _x2c_gensym_return_value_4;
-            }
-
-          }
-
-        }
-        x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
-      }
-
-    }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_2);
-  }
-
-}
-
-void Array_cleanup(Array);
-
-static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0){
-  _x2c_gensym_defer_env_0 * _x2c_gensym_defer_data_0 =(_x2c_gensym_defer_env_0 *) _x2c_gensym_defer_opaque_0;
-  Array_cleanup((*(const Array *) _x2c_gensym_defer_data_0->_x2c_gensym_defer_capture_0));
-}
-
-void Scope_pop(void);
-
-static void _x2c_gensym_defer_cleanup_1(void * _x2c_gensym_defer_opaque_1){
-  Scope_pop();
+static int _blank(char c){
+  return c == ' ' || c == '\n' || c == '\t' || c == '\r';
 }
 
 void Scope_cleanup(Scope);
 
+static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0){
+  _x2c_gensym_defer_env_0 * _x2c_gensym_defer_data_0 =(_x2c_gensym_defer_env_0 *) _x2c_gensym_defer_opaque_0;
+  Scope_cleanup((*(const Scope *) _x2c_gensym_defer_data_0->_x2c_gensym_defer_capture_0));
+}
+
+void Array_cleanup(Array);
+
+static void _x2c_gensym_defer_cleanup_1(void * _x2c_gensym_defer_opaque_1){
+  _x2c_gensym_defer_env_1 * _x2c_gensym_defer_data_1 =(_x2c_gensym_defer_env_1 *) _x2c_gensym_defer_opaque_1;
+  Array_cleanup((*(const Array *) _x2c_gensym_defer_data_1->_x2c_gensym_defer_capture_1));
+}
+
+void Scope_pop(void);
+
 static void _x2c_gensym_defer_cleanup_2(void * _x2c_gensym_defer_opaque_2){
-  _x2c_gensym_defer_env_1 * _x2c_gensym_defer_data_1 =(_x2c_gensym_defer_env_1 *) _x2c_gensym_defer_opaque_2;
-  Scope_cleanup((*(const Scope *) _x2c_gensym_defer_data_1->_x2c_gensym_defer_capture_1));
+  Scope_pop();
 }
 
 static void _x2c_gensym_defer_cleanup_3(void * _x2c_gensym_defer_opaque_3){

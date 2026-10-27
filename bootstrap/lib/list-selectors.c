@@ -2,11 +2,11 @@
 
 #define __GUARD_0x18ABE119__
 #include "x2c.h"
-static List _67, _66, _65, _64, _55, _50, _49, _48, _46, _45, _43, _42, _37, _36, _35, _33, _32, _28, _27, _20, _19, _18, _16, _15, _13, _12, _5;
+static List _67, _66, _65, _64, _53, _50, _49, _48, _46, _45, _43, _42, _37, _36, _35, _33, _32, _28, _27, _20, _19, _18, _16, _15, _13, _12, _5;
 
-static String _70, _69, _68, _62, _60, _58, _56, _53, _52, _40, _23, _10, _0;
+static String _70, _69, _68, _62, _60, _58, _56, _55, _54, _40, _23, _10, _0;
 
-static Var _63, _61, _59, _57, _54, _51, _47, _44, _41, _39, _38, _34, _31, _30, _29, _26, _25, _24, _22, _21, _17, _14, _11, _9, _8, _7, _6, _4, _3, _2, _1;
+static Var _63, _61, _59, _57, _52, _51, _47, _44, _41, _39, _38, _34, _31, _30, _29, _26, _25, _24, _22, _21, _17, _14, _11, _9, _8, _7, _6, _4, _3, _2, _1;
 
 static int _init_guard_ = 0;
 
@@ -14,13 +14,13 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static List _selector_chain(String spelling, List value);
 
-static List _selector_double(List steps);
+static List _selector_definitions(Macro car, Macro cdr);
 
 static List _selector_middles(void);
 
-static List _selector_units(List middles, Macro car, Macro cdr);
+static List _selector_double(List steps);
 
-static List _selector_definitions(Macro car, Macro cdr);
+static List _selector_units(List middles, Macro car, Macro cdr);
 
 static List cdr(List);
 
@@ -286,10 +286,10 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _49 = cons(_6, _48);
   _50 = cons(_3, _49);
   _51 = List_var(_50);
-  _52 = String_new("a");
-  _53 = String_new("d");
-  _54 = String_var(0);
-  _55 = cons(_54, NULL);
+  _52 = String_var(0);
+  _53 = cons(_52, NULL);
+  _54 = String_new("a");
+  _55 = String_new("d");
   _56 = String_new("aa");
   _57 = String_var(_56);
   _58 = String_new("ad");
@@ -316,6 +316,21 @@ static List _selector_chain(String spelling, List value){
   return value;
 }
 
+static List _selector_definitions(Macro car, Macro cdr){
+  return _selector_units(_selector_middles(), car, cdr);
+}
+
+List List_append(List, List);
+
+static List _selector_middles(void){
+  List level = _53, middles = NULL;
+  for(int length = 1;  length <= 4;  length ++){
+    level = _selector_double(level);
+    if(length > 1) middles = List_append(middles, level);
+  }
+  return middles;
+}
+
 static int List_truth(List);
 
 String Var_as_string(Var);
@@ -328,22 +343,11 @@ static List List_cdr(List);
 
 static List _selector_double(List steps){
   if(! List_truth(steps)) return NULL;
-  String rest = Var_as_string(List_car(steps)), a = String_join(NULL, cons(String_var(_52), cons(String_var(rest), NULL))), d = String_join(NULL, cons(String_var(_53), cons(String_var(rest), NULL)));
+  String rest = Var_as_string(List_car(steps)), a = String_join(NULL, cons(String_var(_54), cons(String_var(rest), NULL))), d = String_join(NULL, cons(String_var(_55), cons(String_var(rest), NULL)));
   return({
     Var _x2c_gensym_literal_part_0 = String_var(a);  Var _x2c_gensym_literal_part_1 = String_var(d);  List _x2c_gensym_literal_part_2 = _selector_double(List_cdr(steps));  cons(_x2c_gensym_literal_part_0, cons(_x2c_gensym_literal_part_1, List_append(_x2c_gensym_literal_part_2, NULL)));
   }
   );
-}
-
-List List_append(List, List);
-
-static List _selector_middles(void){
-  List level = _55, middles = NULL;
-  for(int length = 1;  length <= 4;  length ++){
-    level = _selector_double(level);
-    if(length > 1) middles = List_append(middles, level);
-  }
-  return middles;
 }
 
 int List_contains(List, Var);
@@ -362,9 +366,5 @@ static List _selector_units(List middles, Macro car, Macro cdr){
     Var _x2c_gensym_literal_part_3 = List_var(String_startswith(middle, _70) ? Macro_apply(car, cons(String_var(name), NULL)) : Macro_apply(cdr, cons(String_var(name), NULL)));  cons(_x2c_gensym_literal_part_3, List_append(rest, NULL));
   }
   );
-}
-
-static List _selector_definitions(Macro car, Macro cdr){
-  return _selector_units(_selector_middles(), car, cdr);
 }
 

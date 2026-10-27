@@ -38,13 +38,13 @@ static void _parse_long(Spec * s, Map result, List * rest, String word);
 
 static void _parse_short(Spec * s, Map result, List * rest, String word);
 
+static void _assign_operands(Spec * s, Map result, List operands);
+
 static Option * _find(Spec * s, String spelling);
 
 static String _next_value(List * rest, String spelling);
 
 static void _store(Option * o, Map result, Var value);
-
-static void _assign_operands(Spec * s, Map result, List operands);
 
 _Noreturn static void _bad_option(String why, String option);
 
@@ -80,41 +80,41 @@ static void _x2c_gensym_defer_cleanup_2(void * _x2c_gensym_defer_opaque_2);
 
 typedef struct _x2c_gensym_defer_env_3{
   const void * _x2c_gensym_defer_capture_4;
-  const void * _x2c_gensym_defer_capture_5;
 }
 _x2c_gensym_defer_env_3;
 
 static void _x2c_gensym_defer_cleanup_3(void * _x2c_gensym_defer_opaque_3);
 
 typedef struct _x2c_gensym_defer_env_4{
-  const void * _x2c_gensym_defer_capture_6;
+  const void * _x2c_gensym_defer_capture_5;
 }
 _x2c_gensym_defer_env_4;
 
 static void _x2c_gensym_defer_cleanup_4(void * _x2c_gensym_defer_opaque_4);
 
 typedef struct _x2c_gensym_defer_env_5{
-  const void * _x2c_gensym_defer_capture_7;
+  const void * _x2c_gensym_defer_capture_6;
 }
 _x2c_gensym_defer_env_5;
 
 static void _x2c_gensym_defer_cleanup_5(void * _x2c_gensym_defer_opaque_5);
 
 typedef struct _x2c_gensym_defer_env_6{
-  const void * _x2c_gensym_defer_capture_8;
+  const void * _x2c_gensym_defer_capture_7;
 }
 _x2c_gensym_defer_env_6;
 
 static void _x2c_gensym_defer_cleanup_6(void * _x2c_gensym_defer_opaque_6);
 
 typedef struct _x2c_gensym_defer_env_7{
-  const void * _x2c_gensym_defer_capture_9;
+  const void * _x2c_gensym_defer_capture_8;
 }
 _x2c_gensym_defer_env_7;
 
 static void _x2c_gensym_defer_cleanup_7(void * _x2c_gensym_defer_opaque_7);
 
 typedef struct _x2c_gensym_defer_env_8{
+  const void * _x2c_gensym_defer_capture_9;
   const void * _x2c_gensym_defer_capture_10;
 }
 _x2c_gensym_defer_env_8;
@@ -142,9 +142,9 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _9 = String_new("=");
   _10 = String_new("unexpected value");
   _11 = String_new("-");
-  _12 = String_new("unknown option");
-  _13 = String_new("missing value");
-  _14 = String_new("unexpected operand");
+  _12 = String_new("unexpected operand");
+  _13 = String_new("unknown option");
+  _14 = String_new("missing value");
   _15 = String_new("<");
   _16 = String_new(">");
   _17 = String_new("...");
@@ -276,6 +276,142 @@ Map Args_parse(List args, List spec){
 
 }
 
+Buffer Buffer_new(size_t);
+
+Buffer Buffer_printf(Buffer, const char *, ...);
+
+static int String_truth(String);
+
+String Buffer_str(Buffer);
+
+String Args_usage(String program, List spec){
+  if(! _init_guard_) _file_init_();
+  Spec parsed = _read_spec(spec);
+  {
+    _x2c_gensym_defer_env_3 _x2c_gensym_macro_environment_7 ={
+      0
+    }
+    ;
+    _x2c_gensym_macro_environment_7._x2c_gensym_defer_capture_4 =(const void *) & parsed;
+    X2CCleanup _x2c_gensym_defer_record_3 ={
+      .fn = _x2c_gensym_defer_cleanup_3, .env = & _x2c_gensym_macro_environment_7
+    }
+    ;
+    x2c_cleanup_push(& _x2c_gensym_defer_record_3);
+    {
+      Buffer synopsis = Buffer_new(0);
+      {
+        _x2c_gensym_defer_env_7 _x2c_gensym_macro_environment_6 ={
+          0
+        }
+        ;
+        _x2c_gensym_macro_environment_6._x2c_gensym_defer_capture_8 =(const void *) & synopsis;
+        X2CCleanup _x2c_gensym_defer_record_4 ={
+          .fn = _x2c_gensym_defer_cleanup_7, .env = & _x2c_gensym_macro_environment_6
+        }
+        ;
+        x2c_cleanup_push(& _x2c_gensym_defer_record_4);
+        {
+          Buffer options = Buffer_new(0);
+          {
+            _x2c_gensym_defer_env_6 _x2c_gensym_macro_environment_5 ={
+              0
+            }
+            ;
+            _x2c_gensym_macro_environment_5._x2c_gensym_defer_capture_7 =(const void *) & options;
+            X2CCleanup _x2c_gensym_defer_record_5 ={
+              .fn = _x2c_gensym_defer_cleanup_6, .env = & _x2c_gensym_macro_environment_5
+            }
+            ;
+            x2c_cleanup_push(& _x2c_gensym_defer_record_5);
+            {
+              Buffer operands = Buffer_new(0);
+              {
+                _x2c_gensym_defer_env_5 _x2c_gensym_macro_environment_4 ={
+                  0
+                }
+                ;
+                _x2c_gensym_macro_environment_4._x2c_gensym_defer_capture_6 =(const void *) & operands;
+                X2CCleanup _x2c_gensym_defer_record_6 ={
+                  .fn = _x2c_gensym_defer_cleanup_5, .env = & _x2c_gensym_macro_environment_4
+                }
+                ;
+                x2c_cleanup_push(& _x2c_gensym_defer_record_6);
+                {
+                  Buffer out = Buffer_new(0);
+                  {
+                    _x2c_gensym_defer_env_4 _x2c_gensym_macro_environment_3 ={
+                      0
+                    }
+                    ;
+                    _x2c_gensym_macro_environment_3._x2c_gensym_defer_capture_5 =(const void *) & out;
+                    X2CCleanup _x2c_gensym_defer_record_7 ={
+                      .fn = _x2c_gensym_defer_cleanup_4, .env = & _x2c_gensym_macro_environment_3
+                    }
+                    ;
+                    x2c_cleanup_push(& _x2c_gensym_defer_record_7);
+                    {
+                      for(int i = 0;  i < parsed.count;  i ++){
+                        Option * option = & parsed.options[i];
+                        String label = _label(&((* option)));
+                        if(! option -> operand) _write_row(options, label, option -> help);
+                        else{
+                          Buffer_printf(synopsis, " %s", label);
+                          if(String_truth(option -> help)) _write_row(operands, label, option -> help);
+                        }
+
+                      }
+                      String option_rows = Buffer_str(options), operand_rows = Buffer_str(operands);
+                      String words = Buffer_str(synopsis);
+                      Buffer_printf(out, "Usage:\n  %s%s%s\n", program, String_truth(option_rows) ? " [options]" : "", String_truth(words) ? words : "");
+                      if(String_truth(option_rows)) Buffer_printf(out, "\nOptions:\n%s", option_rows);
+                      if(String_truth(operand_rows)) Buffer_printf(out, "\nOperands:\n%s", operand_rows);
+                      {
+                        String _x2c_gensym_return_value_1 = Buffer_str(out);
+                        {
+                          x2c_cleanup_leave(& _x2c_gensym_defer_record_7);
+                          x2c_cleanup_leave(& _x2c_gensym_defer_record_6);
+                          x2c_cleanup_leave(& _x2c_gensym_defer_record_5);
+                          x2c_cleanup_leave(& _x2c_gensym_defer_record_4);
+                          x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
+                          return _x2c_gensym_return_value_1;
+                        }
+
+                      }
+
+                    }
+                    x2c_cleanup_leave(& _x2c_gensym_defer_record_7);
+                  }
+
+                }
+                x2c_cleanup_leave(& _x2c_gensym_defer_record_6);
+              }
+
+            }
+            x2c_cleanup_leave(& _x2c_gensym_defer_record_5);
+          }
+
+        }
+        x2c_cleanup_leave(& _x2c_gensym_defer_record_4);
+      }
+
+    }
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
+  }
+
+}
+
+String String_new(const char *);
+
+List Args_from_argv(int argc, char * * argv){
+  List result = NULL;
+  for(int i = argc - 1;  i > 0;  i --) result =({
+    Var _x2c_gensym_literal_part_0 = String_var(String_new(argv[i]));  cons(_x2c_gensym_literal_part_0, List_append(result, NULL));
+  }
+  );
+  return result;
+}
+
 int List_len(List);
 
 void * xcalloc(size_t, size_t);
@@ -297,17 +433,17 @@ static Spec _read_spec(List spec){
   ;
   int complete = 0;
   {
-    _x2c_gensym_defer_env_3 _x2c_gensym_macro_environment_3 ={
+    _x2c_gensym_defer_env_8 _x2c_gensym_macro_environment_8 ={
       0
     }
     ;
-    _x2c_gensym_macro_environment_3._x2c_gensym_defer_capture_4 =(const void *) & complete;
-    _x2c_gensym_macro_environment_3._x2c_gensym_defer_capture_5 =(const void *) & result;
-    X2CCleanup _x2c_gensym_defer_record_3 ={
-      .fn = _x2c_gensym_defer_cleanup_3, .env = & _x2c_gensym_macro_environment_3
+    _x2c_gensym_macro_environment_8._x2c_gensym_defer_capture_9 =(const void *) & complete;
+    _x2c_gensym_macro_environment_8._x2c_gensym_defer_capture_10 =(const void *) & result;
+    X2CCleanup _x2c_gensym_defer_record_8 ={
+      .fn = _x2c_gensym_defer_cleanup_8, .env = & _x2c_gensym_macro_environment_8
     }
     ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_3);
+    x2c_cleanup_push(& _x2c_gensym_defer_record_8);
     {
       result.options = xcalloc(result.count, sizeof(Option));
       int position = 0;
@@ -332,16 +468,16 @@ static Spec _read_spec(List spec){
       }
       complete = 1;
       {
-        Spec _x2c_gensym_return_value_1 = result;
+        Spec _x2c_gensym_return_value_2 = result;
         {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
-          return _x2c_gensym_return_value_1;
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_8);
+          return _x2c_gensym_return_value_2;
         }
 
       }
 
     }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_8);
   }
 
 }
@@ -349,8 +485,6 @@ static Spec _read_spec(List spec){
 int String_startswith(String, String);
 
 static int Var_is_row(Var, unsigned, unsigned long, unsigned long);
-
-static int String_truth(String);
 
 String String_join(String, List);
 
@@ -373,7 +507,7 @@ static void _read_row(Option * o, List row, Map index, int position){
         if(String_startswith(text, _3)){
           if(! String_truth((* o).spelling) ||(String_startswith(text, _0) && ! String_startswith((* o).spelling, _0)))(* o).spelling = text;
           (* o).spellings = String_truth((* o).spellings) ?({
-            Var _x2c_gensym_literal_part_0 = String_var((* o).spellings);  String_join(NULL, cons(_x2c_gensym_literal_part_0, cons(String_var(_4), cons(String_var(text), NULL))));
+            Var _x2c_gensym_literal_part_1 = String_var((* o).spellings);  String_join(NULL, cons(_x2c_gensym_literal_part_1, cons(String_var(_4), cons(String_var(text), NULL))));
           }
           ) : text;
           Map_setindex(index, String_var(text), int_var(position));
@@ -456,14 +590,28 @@ static void _parse_short(Spec * s, Map result, List * rest, String word){
 
 }
 
+static void _assign_operands(Spec * s, Map result, List operands){
+  for(int i = 0;  i <(* s).count;  i ++){
+    Option * option = &(* s).options[i];
+    if(! option -> operand) continue;
+    while(List_truth(operands)){
+      _store(&((* option)), result, List_car(operands));
+      operands = List_cdr(operands);
+      if(! option -> repeated) break;
+    }
+
+  }
+  if(List_truth(operands)) _bad_operand(_12, Var_str(List_car(operands)));
+}
+
 static Option * _find(Spec * s, String spelling){
   Var position;
-  if(! Map_try_get((* s).index, String_var(spelling), &(position))) _bad_option(_12, spelling);
+  if(! Map_try_get((* s).index, String_var(spelling), &(position))) _bad_option(_13, spelling);
   return &(* s).options[Var_integer(position)];
 }
 
 static String _next_value(List * rest, String spelling){
-  if(! List_truth(List_cdr((* rest)))) _bad_option(_13, spelling);
+  if(! List_truth(List_cdr((* rest)))) _bad_option(_14, spelling);
   (* rest) = List_cdr((* rest));
   return Var_str(List_car((* rest)));
 }
@@ -483,20 +631,6 @@ static void _store(Option * o, Map result, Var value){
   (* o).given ++;
 }
 
-static void _assign_operands(Spec * s, Map result, List operands){
-  for(int i = 0;  i <(* s).count;  i ++){
-    Option * option = &(* s).options[i];
-    if(! option -> operand) continue;
-    while(List_truth(operands)){
-      _store(&((* option)), result, List_car(operands));
-      operands = List_cdr(operands);
-      if(! option -> repeated) break;
-    }
-
-  }
-  if(List_truth(operands)) _bad_operand(_14, Var_str(List_car(operands)));
-}
-
 static Var Symbol_var(Symbol);
 
 #include "error.h"
@@ -506,10 +640,10 @@ static Var Symbol_var(Symbol);
 
 _Noreturn static void _bad_option(String why, String option){
   {
-    Var _x2c_gensym_literal_part_1 = String_var(String_join(NULL, cons(String_var(String_new("Args.parse")), NULL)));
+    Var _x2c_gensym_literal_part_2 = String_var(String_join(NULL, cons(String_var(String_new("Args.parse")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/args.x",.function = "_bad_option",.line = 274,.runtime = 1};
-      x2c_error_raise_n(& _x2c_gensym_error_site_0, 4372499598, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_1, Symbol_var(1218550748), String_var(why), Symbol_var(1041517532), String_var(option));
+      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/args.x",.function = "_bad_option",.line = 310,.runtime = 1};
+      x2c_error_raise_n(& _x2c_gensym_error_site_0, 4372499598, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_2, Symbol_var(1218550748), String_var(why), Symbol_var(1041517532), String_var(option));
       __builtin_unreachable();
     }
 
@@ -519,10 +653,10 @@ _Noreturn static void _bad_option(String why, String option){
 
 _Noreturn static void _bad_operand(String why, String operand){
   {
-    Var _x2c_gensym_literal_part_2 = String_var(String_join(NULL, cons(String_var(String_new("Args.parse")), NULL)));
+    Var _x2c_gensym_literal_part_3 = String_var(String_join(NULL, cons(String_var(String_new("Args.parse")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/args.x",.function = "_bad_operand",.line = 278,.runtime = 1};
-      x2c_error_raise_n(& _x2c_gensym_error_site_1, 4372499598, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_2, Symbol_var(1218550748), String_var(why), Symbol_var(33297664904), String_var(operand));
+      static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/args.x",.function = "_bad_operand",.line = 314,.runtime = 1};
+      x2c_error_raise_n(& _x2c_gensym_error_site_1, 4372499598, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_3, Symbol_var(1218550748), String_var(why), Symbol_var(33297664904), String_var(operand));
       __builtin_unreachable();
     }
 
@@ -532,136 +666,13 @@ _Noreturn static void _bad_operand(String why, String operand){
 
 _Noreturn static void _bad_spec(String why, Var entry){
   {
-    Var _x2c_gensym_literal_part_3 = String_var(String_join(NULL, cons(String_var(String_new("Args.parse")), NULL)));
+    Var _x2c_gensym_literal_part_4 = String_var(String_join(NULL, cons(String_var(String_new("Args.parse")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/args.x",.function = "_bad_spec",.line = 283,.runtime = 1};
-      x2c_error_raise_n(& _x2c_gensym_error_site_2, 4372499598, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_3, Symbol_var(1218550748), String_var(why), Symbol_var(1278278), entry);
+      static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/args.x",.function = "_bad_spec",.line = 319,.runtime = 1};
+      x2c_error_raise_n(& _x2c_gensym_error_site_2, 4372499598, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_4, Symbol_var(1218550748), String_var(why), Symbol_var(1278278), entry);
       __builtin_unreachable();
     }
 
-  }
-
-}
-
-Buffer Buffer_new(size_t);
-
-Buffer Buffer_printf(Buffer, const char *, ...);
-
-String Buffer_str(Buffer);
-
-String Args_usage(String program, List spec){
-  if(! _init_guard_) _file_init_();
-  Spec parsed = _read_spec(spec);
-  {
-    _x2c_gensym_defer_env_4 _x2c_gensym_macro_environment_8 ={
-      0
-    }
-    ;
-    _x2c_gensym_macro_environment_8._x2c_gensym_defer_capture_6 =(const void *) & parsed;
-    X2CCleanup _x2c_gensym_defer_record_4 ={
-      .fn = _x2c_gensym_defer_cleanup_4, .env = & _x2c_gensym_macro_environment_8
-    }
-    ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_4);
-    {
-      Buffer synopsis = Buffer_new(0);
-      {
-        _x2c_gensym_defer_env_8 _x2c_gensym_macro_environment_7 ={
-          0
-        }
-        ;
-        _x2c_gensym_macro_environment_7._x2c_gensym_defer_capture_10 =(const void *) & synopsis;
-        X2CCleanup _x2c_gensym_defer_record_5 ={
-          .fn = _x2c_gensym_defer_cleanup_8, .env = & _x2c_gensym_macro_environment_7
-        }
-        ;
-        x2c_cleanup_push(& _x2c_gensym_defer_record_5);
-        {
-          Buffer options = Buffer_new(0);
-          {
-            _x2c_gensym_defer_env_7 _x2c_gensym_macro_environment_6 ={
-              0
-            }
-            ;
-            _x2c_gensym_macro_environment_6._x2c_gensym_defer_capture_9 =(const void *) & options;
-            X2CCleanup _x2c_gensym_defer_record_6 ={
-              .fn = _x2c_gensym_defer_cleanup_7, .env = & _x2c_gensym_macro_environment_6
-            }
-            ;
-            x2c_cleanup_push(& _x2c_gensym_defer_record_6);
-            {
-              Buffer operands = Buffer_new(0);
-              {
-                _x2c_gensym_defer_env_6 _x2c_gensym_macro_environment_5 ={
-                  0
-                }
-                ;
-                _x2c_gensym_macro_environment_5._x2c_gensym_defer_capture_8 =(const void *) & operands;
-                X2CCleanup _x2c_gensym_defer_record_7 ={
-                  .fn = _x2c_gensym_defer_cleanup_6, .env = & _x2c_gensym_macro_environment_5
-                }
-                ;
-                x2c_cleanup_push(& _x2c_gensym_defer_record_7);
-                {
-                  Buffer out = Buffer_new(0);
-                  {
-                    _x2c_gensym_defer_env_5 _x2c_gensym_macro_environment_4 ={
-                      0
-                    }
-                    ;
-                    _x2c_gensym_macro_environment_4._x2c_gensym_defer_capture_7 =(const void *) & out;
-                    X2CCleanup _x2c_gensym_defer_record_8 ={
-                      .fn = _x2c_gensym_defer_cleanup_5, .env = & _x2c_gensym_macro_environment_4
-                    }
-                    ;
-                    x2c_cleanup_push(& _x2c_gensym_defer_record_8);
-                    {
-                      for(int i = 0;  i < parsed.count;  i ++){
-                        Option * option = & parsed.options[i];
-                        String label = _label(&((* option)));
-                        if(! option -> operand) _write_row(options, label, option -> help);
-                        else{
-                          Buffer_printf(synopsis, " %s", label);
-                          if(String_truth(option -> help)) _write_row(operands, label, option -> help);
-                        }
-
-                      }
-                      String option_rows = Buffer_str(options), operand_rows = Buffer_str(operands);
-                      String words = Buffer_str(synopsis);
-                      Buffer_printf(out, "Usage:\n  %s%s%s\n", program, String_truth(option_rows) ? " [options]" : "", String_truth(words) ? words : "");
-                      if(String_truth(option_rows)) Buffer_printf(out, "\nOptions:\n%s", option_rows);
-                      if(String_truth(operand_rows)) Buffer_printf(out, "\nOperands:\n%s", operand_rows);
-                      {
-                        String _x2c_gensym_return_value_2 = Buffer_str(out);
-                        {
-                          x2c_cleanup_leave(& _x2c_gensym_defer_record_8);
-                          x2c_cleanup_leave(& _x2c_gensym_defer_record_7);
-                          x2c_cleanup_leave(& _x2c_gensym_defer_record_6);
-                          x2c_cleanup_leave(& _x2c_gensym_defer_record_5);
-                          x2c_cleanup_leave(& _x2c_gensym_defer_record_4);
-                          return _x2c_gensym_return_value_2;
-                        }
-
-                      }
-
-                    }
-                    x2c_cleanup_leave(& _x2c_gensym_defer_record_8);
-                  }
-
-                }
-                x2c_cleanup_leave(& _x2c_gensym_defer_record_7);
-              }
-
-            }
-            x2c_cleanup_leave(& _x2c_gensym_defer_record_6);
-          }
-
-        }
-        x2c_cleanup_leave(& _x2c_gensym_defer_record_5);
-      }
-
-    }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_4);
   }
 
 }
@@ -674,7 +685,7 @@ static String _label(Option * o){
   }
   String label =(* o).spellings;
   if(String_truth((* o).value)) label =({
-    Var _x2c_gensym_literal_part_4 = String_var(label);  Var _x2c_gensym_literal_part_5 = String_var((* o).value);  String_join(NULL, cons(_x2c_gensym_literal_part_4, cons(String_var(_20), cons(_x2c_gensym_literal_part_5, cons(String_var(_16), NULL)))));
+    Var _x2c_gensym_literal_part_5 = String_var(label);  Var _x2c_gensym_literal_part_6 = String_var((* o).value);  String_join(NULL, cons(_x2c_gensym_literal_part_5, cons(String_var(_20), cons(_x2c_gensym_literal_part_6, cons(String_var(_16), NULL)))));
   }
   );
   return String_startswith(label, _0) ? String_join(NULL, cons(String_var(_21), cons(String_var(label), NULL))) : label;
@@ -685,17 +696,6 @@ static void _write_row(Buffer out, String label, String help){
   if(! String_truth(help)) Buffer_printf(out, "  %s\n", label);
   else if(String_len(label) + 2 >= column) Buffer_printf(out, "  %s\n%*s%s\n", label, column, "", help);
   else Buffer_printf(out, "  %-*s%s\n", column - 2, label, help);
-}
-
-String String_new(const char *);
-
-List Args_from_argv(int argc, char * * argv){
-  List result = NULL;
-  for(int i = argc - 1;  i > 0;  i --) result =({
-    Var _x2c_gensym_literal_part_6 = String_var(String_new(argv[i]));  cons(_x2c_gensym_literal_part_6, List_append(result, NULL));
-  }
-  );
-  return result;
 }
 
 static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0){
@@ -717,33 +717,33 @@ static void _x2c_gensym_defer_cleanup_2(void * _x2c_gensym_defer_opaque_2){
 
 static void _x2c_gensym_defer_cleanup_3(void * _x2c_gensym_defer_opaque_3){
   _x2c_gensym_defer_env_3 * _x2c_gensym_defer_data_3 =(_x2c_gensym_defer_env_3 *) _x2c_gensym_defer_opaque_3;
-  if(!(*(int *) _x2c_gensym_defer_data_3->_x2c_gensym_defer_capture_4)) _free(&((*(Spec *) _x2c_gensym_defer_data_3->_x2c_gensym_defer_capture_5)));
-}
-
-static void _x2c_gensym_defer_cleanup_4(void * _x2c_gensym_defer_opaque_4){
-  _x2c_gensym_defer_env_4 * _x2c_gensym_defer_data_4 =(_x2c_gensym_defer_env_4 *) _x2c_gensym_defer_opaque_4;
-  _free(&((*(Spec *) _x2c_gensym_defer_data_4->_x2c_gensym_defer_capture_6)));
+  _free(&((*(Spec *) _x2c_gensym_defer_data_3->_x2c_gensym_defer_capture_4)));
 }
 
 void Buffer_cleanup(Buffer);
 
+static void _x2c_gensym_defer_cleanup_4(void * _x2c_gensym_defer_opaque_4){
+  _x2c_gensym_defer_env_4 * _x2c_gensym_defer_data_4 =(_x2c_gensym_defer_env_4 *) _x2c_gensym_defer_opaque_4;
+  Buffer_cleanup((*(Buffer *) _x2c_gensym_defer_data_4->_x2c_gensym_defer_capture_5));
+}
+
 static void _x2c_gensym_defer_cleanup_5(void * _x2c_gensym_defer_opaque_5){
   _x2c_gensym_defer_env_5 * _x2c_gensym_defer_data_5 =(_x2c_gensym_defer_env_5 *) _x2c_gensym_defer_opaque_5;
-  Buffer_cleanup((*(Buffer *) _x2c_gensym_defer_data_5->_x2c_gensym_defer_capture_7));
+  Buffer_cleanup((*(Buffer *) _x2c_gensym_defer_data_5->_x2c_gensym_defer_capture_6));
 }
 
 static void _x2c_gensym_defer_cleanup_6(void * _x2c_gensym_defer_opaque_6){
   _x2c_gensym_defer_env_6 * _x2c_gensym_defer_data_6 =(_x2c_gensym_defer_env_6 *) _x2c_gensym_defer_opaque_6;
-  Buffer_cleanup((*(Buffer *) _x2c_gensym_defer_data_6->_x2c_gensym_defer_capture_8));
+  Buffer_cleanup((*(Buffer *) _x2c_gensym_defer_data_6->_x2c_gensym_defer_capture_7));
 }
 
 static void _x2c_gensym_defer_cleanup_7(void * _x2c_gensym_defer_opaque_7){
   _x2c_gensym_defer_env_7 * _x2c_gensym_defer_data_7 =(_x2c_gensym_defer_env_7 *) _x2c_gensym_defer_opaque_7;
-  Buffer_cleanup((*(Buffer *) _x2c_gensym_defer_data_7->_x2c_gensym_defer_capture_9));
+  Buffer_cleanup((*(Buffer *) _x2c_gensym_defer_data_7->_x2c_gensym_defer_capture_8));
 }
 
 static void _x2c_gensym_defer_cleanup_8(void * _x2c_gensym_defer_opaque_8){
   _x2c_gensym_defer_env_8 * _x2c_gensym_defer_data_8 =(_x2c_gensym_defer_env_8 *) _x2c_gensym_defer_opaque_8;
-  Buffer_cleanup((*(Buffer *) _x2c_gensym_defer_data_8->_x2c_gensym_defer_capture_10));
+  if(!(*(int *) _x2c_gensym_defer_data_8->_x2c_gensym_defer_capture_9)) _free(&((*(Spec *) _x2c_gensym_defer_data_8->_x2c_gensym_defer_capture_10)));
 }
 

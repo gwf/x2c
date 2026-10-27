@@ -35,15 +35,15 @@ String Compiler_header_guard(Compiler c);
 
 List Compiler_initializer_function(Compiler c, Type type, List name, List body);
 
-List Compiler_run_once_body(Compiler c, List before, List guard, List after);
-
 List Init_enter(Init * i, List function, int guarded);
+
+List Compiler_run_once_body(Compiler c, List before, List guard, List after);
 
 List Compiler_init_statements(Compiler c, Symbol phase);
 
-List Compiler_definition_rows(Compiler c, List ast);
-
 void Compiler_dump_definitions(Compiler c, List ast);
+
+List Compiler_definition_rows(Compiler c, List ast);
 
 
 #endif /* __GUARD_0xB3C1026E__ */

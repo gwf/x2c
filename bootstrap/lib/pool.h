@@ -50,9 +50,9 @@ PoolStats;
 #include "map/map.h"
 String x2c_pool_lookup_string(Pool inner, const char * bytes, int length, unsigned hash);
 
-Var Pool_lookup(Pool inner, Var key);
-
 Var Pool_intern(Pool inner, Var object, void * alloc);
+
+Var Pool_lookup(Pool inner, Var key);
 
 Var Pool_intern_new(Pool inner, Var object, void * alloc);
 
@@ -60,9 +60,9 @@ void Pool_insert(Pool inner, Var object);
 
 int Pool_owns(Pool pool, Var key);
 
-Pool Pool_retain_named(Pool inner, const char * name);
-
 Pool Pool_retain(Pool inner);
+
+Pool Pool_retain_named(Pool inner, const char * name);
 
 Pool Pool_release(Pool inner);
 
@@ -78,23 +78,23 @@ PoolStats Pool_stats(Pool inner);
 
 void Pool_thread_start(void);
 
-Pool Pool_current(void);
-
 Pool x2c_pool_exchange(Pool pool);
-
-void Pool_initialize(void);
 
 void Pool_thread_initialize(void);
 
 void Pool_shutdown(void);
 
-Pool Pool_open_named(const char * name);
-
 Pool Pool_open(void);
+
+Pool Pool_open_named(const char * name);
 
 void Pool_close(void);
 
 Pool Pool_detach(void);
+
+Pool Pool_current(void);
+
+void Pool_initialize(void);
 
 int Pool_is_permanent(Var value);
 

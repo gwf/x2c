@@ -65,10 +65,6 @@ extern const SymbolSet x2c_var_tags;
 extern const VarDecodeGroup x2c_var_decode_groups[];
 
 #include "meta.h"
-static List _update_rows(void);
-
-static List _update_row(List id);
-
 static Symbol _update_tag(List id);
 
 static String _update_boxer(List id);
@@ -79,6 +75,10 @@ static List _update_cast_in(List id);
 
 static List _update_cast_out(List id);
 
+static List _update_row(List id);
+
+static List _update_rows(void);
+
 typedef struct f8_encoding___VarDecoded{
   TagId id;
   int custom_id, valid;
@@ -87,7 +87,7 @@ f8_encoding___VarDecoded;
 
 static TagId _tag2id(Symbol tag);
 
-static inline unsigned long _bitmask(unsigned n);
+static f8_encoding___VarDecoded f8_encoding____decode(Var value);
 
 static inline unsigned _top_bits(Var v);
 
@@ -95,15 +95,15 @@ static inline unsigned _middle_bits(Var v);
 
 static inline unsigned _bottom_bits(Var v);
 
-static void * _address(Var value);
-
-static f8_encoding___VarDecoded f8_encoding____decode(Var value);
-
 static inline int f8_encoding____group_id(unsigned top, unsigned mid, unsigned btm);
 
 static inline unsigned _group_slot(unsigned top);
 
 static f8_encoding___VarDecoded f8_encoding____decode_builtin(TagId id, Var value);
+
+static void * _address(Var value);
+
+static inline unsigned long _bitmask(unsigned n);
 
 #define VAR_CUSTOM_TAG_TOP     0x800C
 #define VAR_CUSTOM_TAG_COUNT   32
@@ -130,8 +130,6 @@ VarCell;
 static Map f7_classes___cells;
 
 #define RECORD_PREFIX sizeof(max_align_t)
-static VarDescriptor * _declared(Symbol tag);
-
 static unsigned f7_classes____row_count(void);
 
 static VarDescriptor * _row_descriptor(int id, Var value);
@@ -140,25 +138,27 @@ static inline int _custom_top(unsigned top);
 
 static inline int _custom_id(unsigned top, unsigned bottom);
 
-static inline int _custom_valid(int id, Var value);
-
 static int _custom_row(Symbol tag, VarDescriptor * * descriptor);
 
-static int f7_classes____assign_row(VarDescriptor * descriptor);
+static VarDescriptor * _declared(Symbol tag);
 
-static VarCell * _cell(VarDescriptor * descriptor, void * pointer);
+static int f7_classes____assign_row(VarDescriptor * descriptor);
 
 static Var _new_custom_pointer(int id, void * ptr);
 
 static void f7_classes____classes_shutdown(void);
 
-static inline void f12_construction____require_aligned(Symbol tag, void * address, unsigned mask);
+static inline int _custom_valid(int id, Var value);
 
-_Noreturn static void f12_construction____misaligned(Symbol tag);
+static VarCell * _cell(VarDescriptor * descriptor, void * pointer);
 
 static Var f12_construction____new_builtin(TagId id, Symbol tag, va_list ap);
 
 static Var f12_construction____new_pointer(TagId id, void * ptr);
+
+static inline void f12_construction____require_aligned(Symbol tag, void * address, unsigned mask);
+
+_Noreturn static void f12_construction____misaligned(Symbol tag);
 
 static Var f12_construction____floating_arg(TagId id, Symbol tag, va_list ap);
 
@@ -191,11 +191,9 @@ typedef struct f7_numbers___VarWideBox{
 }
 * f7_numbers___VarWideBox;
 
-static f7_numbers___VarWideBox f7_numbers____wide_box(Var v);
-
-static int _wide_encoding_valid(Var value, Symbol tag);
-
 static Var f7_numbers____new_wide(TagId id, f7_numbers___VarWideValue value);
+
+static f7_numbers___VarWideBox f7_numbers____wide_box(Var v);
 
 static double f7_numbers____f64_floating(Var v);
 
@@ -204,6 +202,8 @@ static long f7_numbers____i48_integer(Var v);
 static long f7_numbers____wide_integer(Var v);
 
 static unsigned f7_numbers____hash_wide(Symbol tag, f7_numbers___VarWideValue * value, size_t width);
+
+static int _wide_encoding_valid(Var value, Symbol tag);
 
 typedef struct f8_ordering___VarIntegerParts{
   int negative;
@@ -263,10 +263,6 @@ static double f9_operators____f64_step(Symbol _x2c_gensym_macro_op_2, double _x2
 
 static long double f9_operators____ldouble_step(Symbol _x2c_gensym_macro_op_3, long double _x2c_gensym_macro_a_3, long double _x2c_gensym_macro_b_3);
 
-static Var f9_operators____predicate(int holds);
-
-static int f9_operators____logical(Var lhs, Symbol op, Var rhs);
-
 static Var f9_operators____protocol_arithmetic(Var lhs, Symbol member, Symbol op, Var rhs);
 
 static Var f9_operators____fast_numeric(Symbol op, Var lhs, Var rhs);
@@ -289,17 +285,25 @@ static Var f9_operators____integer_binary(Symbol op, X2CVarNumeric lhs, X2CVarNu
 
 static Symbol f9_operators____integer_result_tag(X2CVarNumeric * lhs, X2CVarNumeric * rhs);
 
+static Var f9_operators____shift_binary(Symbol op, X2CVarNumeric lhs, X2CVarNumeric rhs);
+
 static void f9_operators____promote_integer(X2CVarNumeric * value);
 
 static unsigned long long f9_operators____raw_for_width(X2CVarNumeric * value, int bits);
 
 static unsigned long long f9_operators____extended(X2CVarNumeric * value);
 
-static Var f9_operators____shift_binary(Symbol op, X2CVarNumeric lhs, X2CVarNumeric rhs);
-
 static Symbol f9_operators____floating_tag(X2CVarNumeric * lhs, X2CVarNumeric * rhs);
 
 static Var f9_operators____floating_binary(Symbol op, X2CVarNumeric lhs, X2CVarNumeric rhs, Symbol tag);
+
+static inline void f9_operators____valid_operands(Var lhs, Var rhs);
+
+_Noreturn static void f9_operators____bad_side(Var value, Symbol side);
+
+static inline void f9_operators____valid_operand(Var value);
+
+_Noreturn static void f9_operators____bad_bits(Var value);
 
 static inline int f9_operators____numeric(Var value);
 
@@ -311,17 +315,13 @@ static double f9_operators____floating_order(X2CVarNumeric * lhs, X2CVarNumeric 
 
 static int f9_operators____numeric_truth(Var value);
 
+static Var f9_operators____predicate(int holds);
+
+static int f9_operators____logical(Var lhs, Symbol op, Var rhs);
+
 static inline int f9_operators____same_tag_update(Var lhs, Var rhs);
 
 static Var f9_operators____native_update(Var lhs, Symbol target, Symbol op, Var rhs);
-
-static inline void f9_operators____valid_operand(Var value);
-
-static inline void f9_operators____valid_operands(Var lhs, Var rhs);
-
-_Noreturn static void f9_operators____bad_bits(Var value);
-
-_Noreturn static void f9_operators____bad_side(Var value, Symbol side);
 
 static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0);
 
@@ -578,26 +578,6 @@ int Var_known_tag(Symbol tag){
   return _tag2id(tag) != _invalid_ || _declared(tag) != NULL;
 }
 
-static List _update_rows(void){
-  return _227;
-}
-
-static List _update_row(List id){
-  {
-    List _x2c_gensym_match_expr_0 = id;
-    switch(_x2c_gensym_match_expr_0 ? _x2c_gensym_match_expr_0 -> car.u64 : 0){
-      case 9224497936761996324ULL :{List _x2c_gensym_match_at_0, _x2c_gensym_match_at_1, _x2c_gensym_match_at_2, _x2c_gensym_match_at_3, _x2c_gensym_match_at_4, _x2c_gensym_match_at_5, _x2c_gensym_match_at_6, _x2c_gensym_match_at_7; Var x2c_match_value_0; if(_x2c_gensym_match_expr_0 && _x2c_gensym_match_expr_0 ->car.u64 == 9224497936761996324ULL &&(_x2c_gensym_match_at_0 = _x2c_gensym_match_expr_0 ->cdr) &&(_x2c_gensym_match_at_1 = _x2c_gensym_match_at_0 ->cdr) &&(Var_is(_x2c_gensym_match_at_1 -> car, 806120) &&(_x2c_gensym_match_at_2 = Var_list_payload(_x2c_gensym_match_at_1 -> car), 1)) && _x2c_gensym_match_at_2 && _x2c_gensym_match_at_2 ->car.u64 == 9224497963177709656ULL &&(_x2c_gensym_match_at_3 = _x2c_gensym_match_at_2 ->cdr) &&(_x2c_gensym_match_at_4 = _x2c_gensym_match_at_3 ->cdr) &&(_x2c_gensym_match_at_5 = _x2c_gensym_match_at_4 ->cdr) &&(x2c_match_value_0 = _x2c_gensym_match_at_5 ->car, 1) && !(_x2c_gensym_match_at_6 = _x2c_gensym_match_at_5 ->cdr) && !(_x2c_gensym_match_at_7 = _x2c_gensym_match_at_1 ->cdr)){{
-        Var key;
-        key = x2c_match_value_0;
-        return Var_list_payload(List_assoc(_update_rows(), key));
-      }
-      break;}} default: break;
-    }
-
-  }
-  return NULL;
-}
-
 static Symbol _update_tag(List id){
   return Var_symbol(List_getindex(_update_row(id), 0));
 }
@@ -618,28 +598,24 @@ static List _update_cast_out(List id){
   return Var_list_payload(List_car(Var_cdr(List_getindex(_update_row(id), 3))));
 }
 
-static TagId _tag2id(Symbol tag){
-  return(TagId) SymbolSet_index(x2c_var_tags, tag);
+static List _update_row(List id){
+  {
+    List _x2c_gensym_match_expr_0 = id;
+    switch(_x2c_gensym_match_expr_0 ? _x2c_gensym_match_expr_0 -> car.u64 : 0){
+      case 9224497936761996324ULL :{List _x2c_gensym_match_at_0, _x2c_gensym_match_at_1, _x2c_gensym_match_at_2, _x2c_gensym_match_at_3, _x2c_gensym_match_at_4, _x2c_gensym_match_at_5, _x2c_gensym_match_at_6, _x2c_gensym_match_at_7; Var x2c_match_value_0; if(_x2c_gensym_match_expr_0 && _x2c_gensym_match_expr_0 ->car.u64 == 9224497936761996324ULL &&(_x2c_gensym_match_at_0 = _x2c_gensym_match_expr_0 ->cdr) &&(_x2c_gensym_match_at_1 = _x2c_gensym_match_at_0 ->cdr) &&(Var_is(_x2c_gensym_match_at_1 -> car, 806120) &&(_x2c_gensym_match_at_2 = Var_list_payload(_x2c_gensym_match_at_1 -> car), 1)) && _x2c_gensym_match_at_2 && _x2c_gensym_match_at_2 ->car.u64 == 9224497963177709656ULL &&(_x2c_gensym_match_at_3 = _x2c_gensym_match_at_2 ->cdr) &&(_x2c_gensym_match_at_4 = _x2c_gensym_match_at_3 ->cdr) &&(_x2c_gensym_match_at_5 = _x2c_gensym_match_at_4 ->cdr) &&(x2c_match_value_0 = _x2c_gensym_match_at_5 ->car, 1) && !(_x2c_gensym_match_at_6 = _x2c_gensym_match_at_5 ->cdr) && !(_x2c_gensym_match_at_7 = _x2c_gensym_match_at_1 ->cdr)){{
+        Var key;
+        key = x2c_match_value_0;
+        return Var_list_payload(List_assoc(_update_rows(), key));
+      }
+      break;}} default: break;
+    }
+
+  }
+  return NULL;
 }
 
-static inline unsigned long _bitmask(unsigned n){
-  return(1ul << n) - 1;
-}
-
-static inline unsigned _top_bits(Var v){
-  return v.u64 >> 48;
-}
-
-static inline unsigned _middle_bits(Var v){
-  return(v.u64 >> 32) & _bitmask(16);
-}
-
-static inline unsigned _bottom_bits(Var v){
-  return v.u64 & _bitmask(3);
-}
-
-static void * _address(Var value){
-  return(void *)(value.u64 &(_bitmask(48) - 0x7));
+static List _update_rows(void){
+  return _227;
 }
 
 #include "error.h"
@@ -652,7 +628,7 @@ unsigned long Var_tag_top(Symbol tag){
   if(id == _invalid_){
     Var _x2c_gensym_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("Var.tag_top")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/var/encoding.x",.function = "Var_tag_top",.line = 65,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/var/encoding.x",.function = "Var_tag_top",.line = 52,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_0, 143279306979688, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(1345468776), Symbol_var(tag));
       __builtin_unreachable();
     }
@@ -666,7 +642,7 @@ unsigned long Var_tag_bottom(Symbol tag){
   if(id == _invalid_){
     Var _x2c_gensym_literal_part_1 = String_var(String_join(NULL, cons(String_var(String_new("Var.tag_bottom")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/var/encoding.x",.function = "Var_tag_bottom",.line = 73,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/var/encoding.x",.function = "Var_tag_bottom",.line = 60,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_1, 143279306979688, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_1, Symbol_var(1345468776), Symbol_var(tag));
       __builtin_unreachable();
     }
@@ -675,71 +651,10 @@ unsigned long Var_tag_bottom(Symbol tag){
   return x2c_var_taginfo[id].bottom;
 }
 
-static f8_encoding___VarDecoded f8_encoding____decode(Var value){
-  unsigned top = _top_bits(value), btm = _bottom_bits(value);
-  if(value.u64 == VAR_VOID_BITS) return(f8_encoding___VarDecoded){
-    _void_, - 1, 1
-  }
-  ;
-  if(value.u64 == VAR_F64_NEG_MAX_ESCAPE) return(f8_encoding___VarDecoded){
-    _f64_, - 1, 1
-  }
-  ;
-  int id = f8_encoding____group_id(top, _middle_bits(value), btm);
-  if(id != _invalid_) return f8_encoding____decode_builtin((TagId) id, value);
-  if(top >= 0x8004 && top <= 0x800B) return(f8_encoding___VarDecoded){
-    _symbol_, - 1, 1
-  }
-  ;
-  if(_custom_top(top)){
-    int custom = _custom_id(top, btm);
-    return(f8_encoding___VarDecoded){
-      _invalid_, custom, _custom_valid(custom, value)
-    }
-    ;
-  }
-  if((top >= 0x0010 && top <= 0x7FFF) || top >= 0x8010) return(f8_encoding___VarDecoded){
-    _f64_, - 1, 1
-  }
-  ;
-  return(f8_encoding___VarDecoded){
-    _f64_, - 1, 0
-  }
-  ;
-}
+Symbol Var_tag(Var v);
 
-static inline int f8_encoding____group_id(unsigned top, unsigned mid, unsigned btm){
-  unsigned slot = _group_slot(top);
-  if(slot >= 32) return _invalid_;
-  const VarDecodeGroup * group = & x2c_var_decode_groups[slot];
-  unsigned selector = group -> by_middle ? mid : btm & group -> mask;
-  return selector < 8 ? group -> ids[selector] : _invalid_;
-}
-
-static inline unsigned _group_slot(unsigned top){
-  return((top << 1) |(top >> 15)) & 0xFFFF;
-}
-
-static f8_encoding___VarDecoded f8_encoding____decode_builtin(TagId id, Var value){
-  int valid = 1;
-  unsigned payload =(unsigned) value.u64;
-  switch(id){
-    case _long_ : case _ulong_ : case _llong_ : case _ullong_ : case _ldouble_ : valid = _wide_encoding_valid(value, x2c_var_taginfo[id].tag);
-    break;
-    case _array_ : case _map_ : valid = _address(value) != NULL;
-    break;
-    case _u8_ : case _i8_ : valid =(payload & ~ 0xffu) == 0;
-    break;
-    case _u16_ : case _i16_ : valid =(payload & ~ 0xffffu) == 0;
-    break;
-    case _nan_ : case _neginf_ : case _posinf_ : valid =(value.u64 & _bitmask(32)) == 0;
-    break;
-    default: break;
-  }
-  return(f8_encoding___VarDecoded){
-    id, - 1, valid
-  }
-  ;
+int Var_is(Var var, Symbol tag){
+  return Var_tag(var) == tag;
 }
 
 Symbol Var_tag(Var v){
@@ -748,15 +663,7 @@ Symbol Var_tag(Var v){
   return x2c_var_taginfo[decoded.valid ? decoded.id : _f64_].tag;
 }
 
-int Var_is(Var var, Symbol tag){
-  return Var_tag(var) == tag;
-}
-
-Symbol Var_kind(Var v){
-  f8_encoding___VarDecoded decoded = f8_encoding____decode(v);
-  if(decoded.valid && decoded.custom_id >= 0) return 1011493096;
-  return x2c_var_taginfo[decoded.valid ? decoded.id : _f64_].kind;
-}
+Symbol Var_kind(Var v);
 
 int Var_is_floating(Var v){
   return Var_kind(v) == 439096724366;
@@ -776,6 +683,12 @@ int Var_is_reference(Var v){
 
 int Var_is_object(Var v){
   return Var_kind(v) == 1011493096;
+}
+
+Symbol Var_kind(Var v){
+  f8_encoding___VarDecoded decoded = f8_encoding____decode(v);
+  if(decoded.valid && decoded.custom_id >= 0) return 1011493096;
+  return x2c_var_taginfo[decoded.valid ? decoded.id : _f64_].kind;
 }
 
 int Var_is_void(Var v){
@@ -817,12 +730,220 @@ int x2c_var_tag_descriptor_index(Symbol tag){
   return id >= _array_ && id <= _var_ ? id - _array_ : - 1;
 }
 
-void * Var_pointer(Var v);
+static TagId _tag2id(Symbol tag){
+  return(TagId) SymbolSet_index(x2c_var_tags, tag);
+}
 
-static VarDescriptor * _declared(Symbol tag){
-  if(f7_classes___declared == NULL) return NULL;
-  Var found = Map_getindex(f7_classes___declared, Symbol_var(tag));
-  return Var_is_void(found) ? NULL : Var_pointer(found);
+static f8_encoding___VarDecoded f8_encoding____decode(Var value){
+  unsigned top = _top_bits(value), btm = _bottom_bits(value);
+  if(value.u64 == VAR_VOID_BITS) return(f8_encoding___VarDecoded){
+    _void_, - 1, 1
+  }
+  ;
+  if(value.u64 == VAR_F64_NEG_MAX_ESCAPE) return(f8_encoding___VarDecoded){
+    _f64_, - 1, 1
+  }
+  ;
+  int id = f8_encoding____group_id(top, _middle_bits(value), btm);
+  if(id != _invalid_) return f8_encoding____decode_builtin((TagId) id, value);
+  if(top >= 0x8004 && top <= 0x800B) return(f8_encoding___VarDecoded){
+    _symbol_, - 1, 1
+  }
+  ;
+  if(_custom_top(top)){
+    int custom = _custom_id(top, btm);
+    return(f8_encoding___VarDecoded){
+      _invalid_, custom, _custom_valid(custom, value)
+    }
+    ;
+  }
+  if((top >= 0x0010 && top <= 0x7FFF) || top >= 0x8010) return(f8_encoding___VarDecoded){
+    _f64_, - 1, 1
+  }
+  ;
+  return(f8_encoding___VarDecoded){
+    _f64_, - 1, 0
+  }
+  ;
+}
+
+static inline unsigned _top_bits(Var v){
+  return v.u64 >> 48;
+}
+
+static inline unsigned _middle_bits(Var v){
+  return(v.u64 >> 32) & _bitmask(16);
+}
+
+static inline unsigned _bottom_bits(Var v){
+  return v.u64 & _bitmask(3);
+}
+
+static inline int f8_encoding____group_id(unsigned top, unsigned mid, unsigned btm){
+  unsigned slot = _group_slot(top);
+  if(slot >= 32) return _invalid_;
+  const VarDecodeGroup * group = & x2c_var_decode_groups[slot];
+  unsigned selector = group -> by_middle ? mid : btm & group -> mask;
+  return selector < 8 ? group -> ids[selector] : _invalid_;
+}
+
+static inline unsigned _group_slot(unsigned top){
+  return((top << 1) |(top >> 15)) & 0xFFFF;
+}
+
+static f8_encoding___VarDecoded f8_encoding____decode_builtin(TagId id, Var value){
+  int valid = 1;
+  unsigned payload =(unsigned) value.u64;
+  switch(id){
+    case _long_ : case _ulong_ : case _llong_ : case _ullong_ : case _ldouble_ : valid = _wide_encoding_valid(value, x2c_var_taginfo[id].tag);
+    break;
+    case _array_ : case _map_ : valid = _address(value) != NULL;
+    break;
+    case _u8_ : case _i8_ : valid =(payload & ~ 0xffu) == 0;
+    break;
+    case _u16_ : case _i16_ : valid =(payload & ~ 0xffffu) == 0;
+    break;
+    case _nan_ : case _neginf_ : case _posinf_ : valid =(value.u64 & _bitmask(32)) == 0;
+    break;
+    default: break;
+  }
+  return(f8_encoding___VarDecoded){
+    id, - 1, valid
+  }
+  ;
+}
+
+static void * _address(Var value){
+  return(void *)(value.u64 &(_bitmask(48) - 0x7));
+}
+
+static inline unsigned long _bitmask(unsigned n){
+  return(1ul << n) - 1;
+}
+
+VarDescriptor * x2c_var_custom_descriptor(Var value){
+  unsigned top = _top_bits(value);
+  if(! _custom_top(top)) return NULL;
+  int id = _custom_id(top, _bottom_bits(value));
+  if(id < VAR_DIRECT_ROWS) return id <(int) f7_classes____row_count() ? f7_classes___rows[id] : NULL;
+  return _address(value) ? _row_descriptor(id, value) : NULL;
+}
+
+Var Var_box_record(Symbol tag, const void * record, size_t size){
+  VarDescriptor * descriptor = NULL;
+  int row = _custom_row(tag, &(descriptor));
+  if(row < 0){
+    Var _x2c_gensym_literal_part_2 = String_var(String_join(NULL, cons(String_var(String_new("Var.box_record")), NULL)));
+    {
+      static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/var/classes.x",.function = "Var_box_record",.line = 70,.runtime = 1};
+      x2c_error_raise_n(& _x2c_gensym_error_site_2, 143279306979688, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_2, Symbol_var(1345468776), Symbol_var(tag));
+      __builtin_unreachable();
+    }
+
+  }
+  if(row < VAR_DIRECT_ROWS) return _new_custom_pointer(row, xmemdup(record, size));
+  char * copy = xmalloc(RECORD_PREFIX + size);
+  *(VarDescriptor * *) copy = descriptor;
+  memcpy(copy + RECORD_PREFIX, record, size);
+  return _new_custom_pointer(VAR_RECORD_ROW, copy + RECORD_PREFIX);
+}
+
+VarDescriptor * x2c_var_declare(Symbol tag);
+
+int Var_register_object_tag(Symbol tag){
+  x2c_descriptor_thread_start_begin();
+  {
+    X2CCleanup _x2c_gensym_defer_record_0 ={
+      .fn = _x2c_gensym_defer_cleanup_0, .env = 0
+    }
+    ;
+    x2c_cleanup_push(& _x2c_gensym_defer_record_0);
+    {
+      if(x2c_descriptor_registration_frozen()){
+        static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/var/classes.x",.function = "Var_register_object_tag",.line = 92,.runtime = 1};
+        x2c_error_raise_n(& _x2c_gensym_error_site_3, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.register_object_tag")), NULL))));
+        __builtin_unreachable();
+      }
+      if(! tag){
+        int _x2c_gensym_return_value_0 = - 1;
+        {
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
+          return _x2c_gensym_return_value_0;
+        }
+
+      }
+      if(_tag2id(tag) != _invalid_){
+        int _x2c_gensym_return_value_1 = - 1;
+        {
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
+          return _x2c_gensym_return_value_1;
+        }
+
+      }
+      x2c_var_declare(tag);
+      {
+        int _x2c_gensym_return_value_2 = 0;
+        {
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
+          return _x2c_gensym_return_value_2;
+        }
+
+      }
+
+    }
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
+  }
+
+}
+
+VarDescriptor * x2c_var_declare(Symbol tag){
+  VarDescriptor * descriptor = _declared(tag);
+  if(descriptor) return descriptor;
+  if(! f7_classes___class_scope){
+    f7_classes___class_scope = Scope_new_named("Var classes");
+    Scope_shutdown_hook(f7_classes____classes_shutdown);
+  }
+  {
+    Scope_push(& f7_classes___class_scope);
+    {
+      {
+        X2CCleanup _x2c_gensym_defer_record_1 ={
+          .fn = _x2c_gensym_defer_cleanup_1, .env = 0
+        }
+        ;
+        x2c_cleanup_push(& _x2c_gensym_defer_record_1);
+        {
+          {
+            if(f7_classes___declared == NULL) f7_classes___declared = Map_new();
+            descriptor = xcalloc(1, sizeof(VarDescriptor));
+            descriptor -> tag = tag;
+            descriptor -> row = - 1;
+            Map_setindex(f7_classes___declared, Symbol_var(tag), Var_new(3683441, (void *) descriptor));
+          }
+
+        }
+        x2c_cleanup_leave(& _x2c_gensym_defer_record_1);
+      }
+
+    }
+
+  }
+  return descriptor;
+}
+
+void * Var_pointer(Var v){
+  unsigned top = _top_bits(v), btm = _bottom_bits(v);
+  if(top <= 0x0002) return(void *)(v.u64 & _bitmask(48));
+  if(top == 0x0003) return(void *)(v.u64 &(_bitmask(48) - 0x1));
+  if(top == 0x0004) return(void *)(v.u64 &(_bitmask(48) - 0x3));
+  if(top == 0x0005 && btm > 0x4) return NULL;
+  if(top == 0x0007 && btm > 0x5) return NULL;
+  if(top == 0x000B &&(btm == 0x2 || btm > 0x6)) return NULL;
+  if(top == 0x000F && btm > 0x6) return NULL;
+  if(top >= 0x0005 && top <= 0x000F) return _address(v);
+  if((v.u64 & VAR_CELL_MASK) == VAR_CELL_BITS) return((VarCell *) _address(v)) -> pointer;
+  if(_custom_top(top)) return _address(v);
+  return NULL;
 }
 
 static unsigned f7_classes____row_count(void){
@@ -843,37 +964,6 @@ static inline int _custom_id(unsigned top, unsigned bottom){
   return(int)((top - VAR_CUSTOM_TAG_TOP) * 8 + bottom);
 }
 
-static inline int _custom_valid(int id, Var value){
-  return id < VAR_DIRECT_ROWS ? id <(int) f7_classes____row_count() : _address(value) != NULL;
-}
-
-VarDescriptor * x2c_var_custom_descriptor(Var value){
-  unsigned top = _top_bits(value);
-  if(! _custom_top(top)) return NULL;
-  int id = _custom_id(top, _bottom_bits(value));
-  if(id < VAR_DIRECT_ROWS) return id <(int) f7_classes____row_count() ? f7_classes___rows[id] : NULL;
-  return _address(value) ? _row_descriptor(id, value) : NULL;
-}
-
-Var Var_box_record(Symbol tag, const void * record, size_t size){
-  VarDescriptor * descriptor = NULL;
-  int row = _custom_row(tag, &(descriptor));
-  if(row < 0){
-    Var _x2c_gensym_literal_part_2 = String_var(String_join(NULL, cons(String_var(String_new("Var.box_record")), NULL)));
-    {
-      static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/var/classes.x",.function = "Var_box_record",.line = 99,.runtime = 1};
-      x2c_error_raise_n(& _x2c_gensym_error_site_2, 143279306979688, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_2, Symbol_var(1345468776), Symbol_var(tag));
-      __builtin_unreachable();
-    }
-
-  }
-  if(row < VAR_DIRECT_ROWS) return _new_custom_pointer(row, xmemdup(record, size));
-  char * copy = xmalloc(RECORD_PREFIX + size);
-  *(VarDescriptor * *) copy = descriptor;
-  memcpy(copy + RECORD_PREFIX, record, size);
-  return _new_custom_pointer(VAR_RECORD_ROW, copy + RECORD_PREFIX);
-}
-
 static int _custom_row(Symbol tag, VarDescriptor * * descriptor){
   unsigned count = f7_classes____row_count();
   for(unsigned i = 0;  i < count;  i ++) if(f7_classes___rows[i] -> tag == tag) return(int) i;
@@ -881,23 +971,29 @@ static int _custom_row(Symbol tag, VarDescriptor * * descriptor){
   return(* descriptor) ? f7_classes____assign_row((* descriptor)) : - 1;
 }
 
+static VarDescriptor * _declared(Symbol tag){
+  if(f7_classes___declared == NULL) return NULL;
+  Var found = Map_getindex(f7_classes___declared, Symbol_var(tag));
+  return Var_is_void(found) ? NULL : Var_pointer(found);
+}
+
 static int f7_classes____assign_row(VarDescriptor * descriptor){
   int row = __atomic_load_n(& descriptor -> row, __ATOMIC_ACQUIRE);
   if(row >= 0) return row;
   x2c_descriptor_thread_start_begin();
   {
-    X2CCleanup _x2c_gensym_defer_record_0 ={
-      .fn = _x2c_gensym_defer_cleanup_0, .env = 0
+    X2CCleanup _x2c_gensym_defer_record_2 ={
+      .fn = _x2c_gensym_defer_cleanup_2, .env = 0
     }
     ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_0);
+    x2c_cleanup_push(& _x2c_gensym_defer_record_2);
     {
       row = descriptor -> row;
       if(row >= 0){
-        int _x2c_gensym_return_value_0 = row;
+        int _x2c_gensym_return_value_3 = row;
         {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
-          return _x2c_gensym_return_value_0;
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_2);
+          return _x2c_gensym_return_value_3;
         }
 
       }
@@ -909,28 +1005,50 @@ static int f7_classes____assign_row(VarDescriptor * descriptor){
       }
       __atomic_store_n(& descriptor -> row, row, __ATOMIC_RELEASE);
       {
-        int _x2c_gensym_return_value_1 = row;
+        int _x2c_gensym_return_value_4 = row;
         {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
-          return _x2c_gensym_return_value_1;
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_2);
+          return _x2c_gensym_return_value_4;
         }
 
       }
 
     }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_2);
   }
 
+}
+
+static Var _new_custom_pointer(int id, void * ptr){
+  uintptr_t raw =(uintptr_t) ptr;
+  Var v ={
+    .u64 = raw & _bitmask(48)
+  }
+  ;
+  v.u64 |=(unsigned long)(VAR_CUSTOM_TAG_TOP + id / 8) << 48;
+  v.u64 |= id % 8;
+  return v;
+}
+
+static void f7_classes____classes_shutdown(void){
+  Scope_destroy(f7_classes___class_scope);
+  f7_classes___class_scope = NULL;
+  f7_classes___declared = f7_classes___cells = NULL;
+  f7_classes___row_count = 0;
+}
+
+static inline int _custom_valid(int id, Var value){
+  return id < VAR_DIRECT_ROWS ? id <(int) f7_classes____row_count() : _address(value) != NULL;
 }
 
 static VarCell * _cell(VarDescriptor * descriptor, void * pointer){
   x2c_descriptor_thread_start_begin();
   {
-    X2CCleanup _x2c_gensym_defer_record_1 ={
-      .fn = _x2c_gensym_defer_cleanup_1, .env = 0
+    X2CCleanup _x2c_gensym_defer_record_3 ={
+      .fn = _x2c_gensym_defer_cleanup_3, .env = 0
     }
     ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_1);
+    x2c_cleanup_push(& _x2c_gensym_defer_record_3);
     {
       Var key ={
         .p64 = pointer
@@ -941,11 +1059,11 @@ static VarCell * _cell(VarDescriptor * descriptor, void * pointer){
         Scope_push(& f7_classes___class_scope);
         {
           {
-            X2CCleanup _x2c_gensym_defer_record_2 ={
-              .fn = _x2c_gensym_defer_cleanup_2, .env = 0
+            X2CCleanup _x2c_gensym_defer_record_4 ={
+              .fn = _x2c_gensym_defer_cleanup_4, .env = 0
             }
             ;
-            x2c_cleanup_push(& _x2c_gensym_defer_record_2);
+            x2c_cleanup_push(& _x2c_gensym_defer_record_4);
             {
               {
                 if(f7_classes___cells == NULL) f7_classes___cells = Map_new();
@@ -965,88 +1083,14 @@ static VarCell * _cell(VarDescriptor * descriptor, void * pointer){
               }
 
             }
-            x2c_cleanup_leave(& _x2c_gensym_defer_record_2);
+            x2c_cleanup_leave(& _x2c_gensym_defer_record_4);
           }
 
         }
 
       }
       {
-        VarCell * _x2c_gensym_return_value_2 = cell;
-        {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_1);
-          return _x2c_gensym_return_value_2;
-        }
-
-      }
-
-    }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_1);
-  }
-
-}
-
-static Var _new_custom_pointer(int id, void * ptr){
-  uintptr_t raw =(uintptr_t) ptr;
-  Var v ={
-    .u64 = raw & _bitmask(48)
-  }
-  ;
-  v.u64 |=(unsigned long)(VAR_CUSTOM_TAG_TOP + id / 8) << 48;
-  v.u64 |= id % 8;
-  return v;
-}
-
-void * Var_pointer(Var v){
-  unsigned top = _top_bits(v), btm = _bottom_bits(v);
-  if(top <= 0x0002) return(void *)(v.u64 & _bitmask(48));
-  if(top == 0x0003) return(void *)(v.u64 &(_bitmask(48) - 0x1));
-  if(top == 0x0004) return(void *)(v.u64 &(_bitmask(48) - 0x3));
-  if(top == 0x0005 && btm > 0x4) return NULL;
-  if(top == 0x0007 && btm > 0x5) return NULL;
-  if(top == 0x000B &&(btm == 0x2 || btm > 0x6)) return NULL;
-  if(top == 0x000F && btm > 0x6) return NULL;
-  if(top >= 0x0005 && top <= 0x000F) return _address(v);
-  if((v.u64 & VAR_CELL_MASK) == VAR_CELL_BITS) return((VarCell *) _address(v)) -> pointer;
-  if(_custom_top(top)) return _address(v);
-  return NULL;
-}
-
-VarDescriptor * x2c_var_declare(Symbol tag);
-
-int Var_register_object_tag(Symbol tag){
-  x2c_descriptor_thread_start_begin();
-  {
-    X2CCleanup _x2c_gensym_defer_record_3 ={
-      .fn = _x2c_gensym_defer_cleanup_3, .env = 0
-    }
-    ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_3);
-    {
-      if(x2c_descriptor_registration_frozen()){
-        static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/var/classes.x",.function = "Var_register_object_tag",.line = 211,.runtime = 1};
-        x2c_error_raise_n(& _x2c_gensym_error_site_3, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.register_object_tag")), NULL))));
-        __builtin_unreachable();
-      }
-      if(! tag){
-        int _x2c_gensym_return_value_3 = - 1;
-        {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
-          return _x2c_gensym_return_value_3;
-        }
-
-      }
-      if(_tag2id(tag) != _invalid_){
-        int _x2c_gensym_return_value_4 = - 1;
-        {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
-          return _x2c_gensym_return_value_4;
-        }
-
-      }
-      x2c_var_declare(tag);
-      {
-        int _x2c_gensym_return_value_5 = 0;
+        VarCell * _x2c_gensym_return_value_5 = cell;
         {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
           return _x2c_gensym_return_value_5;
@@ -1058,48 +1102,6 @@ int Var_register_object_tag(Symbol tag){
     x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
   }
 
-}
-
-VarDescriptor * x2c_var_declare(Symbol tag){
-  VarDescriptor * descriptor = _declared(tag);
-  if(descriptor) return descriptor;
-  if(! f7_classes___class_scope){
-    f7_classes___class_scope = Scope_new_named("Var classes");
-    Scope_shutdown_hook(f7_classes____classes_shutdown);
-  }
-  {
-    Scope_push(& f7_classes___class_scope);
-    {
-      {
-        X2CCleanup _x2c_gensym_defer_record_4 ={
-          .fn = _x2c_gensym_defer_cleanup_4, .env = 0
-        }
-        ;
-        x2c_cleanup_push(& _x2c_gensym_defer_record_4);
-        {
-          {
-            if(f7_classes___declared == NULL) f7_classes___declared = Map_new();
-            descriptor = xcalloc(1, sizeof(VarDescriptor));
-            descriptor -> tag = tag;
-            descriptor -> row = - 1;
-            Map_setindex(f7_classes___declared, Symbol_var(tag), Var_new(3683441, (void *) descriptor));
-          }
-
-        }
-        x2c_cleanup_leave(& _x2c_gensym_defer_record_4);
-      }
-
-    }
-
-  }
-  return descriptor;
-}
-
-static void f7_classes____classes_shutdown(void){
-  Scope_destroy(f7_classes___class_scope);
-  f7_classes___class_scope = NULL;
-  f7_classes___declared = f7_classes___cells = NULL;
-  f7_classes___row_count = 0;
 }
 
 Var Var_new(Symbol tag, ...){
@@ -1129,19 +1131,22 @@ Var Var_new(Symbol tag, ...){
   return v;
 }
 
-static inline void f12_construction____require_aligned(Symbol tag, void * address, unsigned mask){
-  if((uintptr_t) address & mask) f12_construction____misaligned(tag);
-}
-
-_Noreturn static void f12_construction____misaligned(Symbol tag){
-  {
-    Var _x2c_gensym_literal_part_4 = String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL)));
-    {
-      static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/var/construction.x",.function = "f12_construction____misaligned",.line = 55,.runtime = 1};
-      x2c_error_raise_n(& _x2c_gensym_error_site_5, 4372507526, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_4, Symbol_var(1345468776), Symbol_var(tag));
-      __builtin_unreachable();
+Var Var_parse(String str, Symbol kind){
+  switch(kind){
+    case 19368 :{
+      long value;
+      if(! String_try_long(str, &(value)) || value < INT_MIN || value > INT_MAX) return((void) 0, Void);
+      return int_var((int) value);
     }
-
+    case 13400168 : case 301273866 :{
+      double value;
+      if(! String_try_double(str, &(value))) return((void) 0, Void);
+      return double_var(value);
+    }
+    case 1318210446 : return String_var(String_parse(str));
+    case 1328354264 : return Symbol_var(Symbol_parse(str));
+    case 213092 : return int_var(String_parse_char(str));
+    default: return((void) 0, Void);
   }
 
 }
@@ -1155,10 +1160,10 @@ static Var f12_construction____new_builtin(TagId id, Symbol tag, va_list ap){
     case 1473096 : return((void) 0, Void);
   }
   {
-    Var _x2c_gensym_literal_part_5 = String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL)));
+    Var _x2c_gensym_literal_part_4 = String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/var/construction.x",.function = "f12_construction____new_builtin",.line = 68,.runtime = 1};
-      x2c_error_raise_n(& _x2c_gensym_error_site_6, 20800632064936, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_5, Symbol_var(1345468776), Symbol_var(tag));
+      static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/var/construction.x",.function = "f12_construction____new_builtin",.line = 105,.runtime = 1};
+      x2c_error_raise_n(& _x2c_gensym_error_site_5, 20800632064936, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_4, Symbol_var(1345468776), Symbol_var(tag));
       __builtin_unreachable();
     }
 
@@ -1171,10 +1176,10 @@ static Var f12_construction____new_pointer(TagId id, void * ptr){
   if((id == _array_ || id == _map_) && ! ptr){
     Symbol tag = x2c_var_taginfo[id].tag;
     {
-      Var _x2c_gensym_literal_part_6 = String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL)));
+      Var _x2c_gensym_literal_part_5 = String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL)));
       {
-        static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/var/construction.x",.function = "f12_construction____new_pointer",.line = 80,.runtime = 1};
-        x2c_error_raise_n(& _x2c_gensym_error_site_7, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_6, Symbol_var(1345468776), Symbol_var(tag));
+        static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/var/construction.x",.function = "f12_construction____new_pointer",.line = 117,.runtime = 1};
+        x2c_error_raise_n(& _x2c_gensym_error_site_6, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_5, Symbol_var(1345468776), Symbol_var(tag));
         __builtin_unreachable();
       }
 
@@ -1192,6 +1197,23 @@ static Var f12_construction____new_pointer(TagId id, void * ptr){
   v.u64 |= top << 48;
   v.u64 |= x2c_var_taginfo[id].bottom;
   return v;
+}
+
+static inline void f12_construction____require_aligned(Symbol tag, void * address, unsigned mask){
+  if((uintptr_t) address & mask) f12_construction____misaligned(tag);
+}
+
+_Noreturn static void f12_construction____misaligned(Symbol tag){
+  {
+    Var _x2c_gensym_literal_part_6 = String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL)));
+    {
+      static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/var/construction.x",.function = "f12_construction____misaligned",.line = 137,.runtime = 1};
+      x2c_error_raise_n(& _x2c_gensym_error_site_7, 4372507526, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_6, Symbol_var(1345468776), Symbol_var(tag));
+      __builtin_unreachable();
+    }
+
+  }
+
 }
 
 Var Var_box_long_double(long double value);
@@ -1261,7 +1283,7 @@ static Var f12_construction____integer_arg(TagId id, Symbol tag, va_list ap){
   {
     Var _x2c_gensym_literal_part_7 = String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/var/construction.x",.function = "f12_construction____integer_arg",.line = 136,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/var/construction.x",.function = "f12_construction____integer_arg",.line = 184,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_8, 20800632064936, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_7, Symbol_var(1345468776), Symbol_var(tag));
       __builtin_unreachable();
     }
@@ -1277,7 +1299,7 @@ static Var f12_construction____new_integer(TagId id, long value){
     {
       Var _x2c_gensym_literal_part_8 = String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL)));
       {
-        static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/var/construction.x",.function = "f12_construction____new_integer",.line = 145,.runtime = 1};
+        static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/var/construction.x",.function = "f12_construction____new_integer",.line = 193,.runtime = 1};
         x2c_error_raise_n(& _x2c_gensym_error_site_9, 245103016899018, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_8, Symbol_var(1345468776), Symbol_var(target));
         __builtin_unreachable();
       }
@@ -1301,7 +1323,7 @@ static unsigned f12_construction____integer_width(TagId id){
     case _u32_ : case _i32_ : return 32;
     case _u48_ : case _i48_ : return 48;
     default:{
-      static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../lib/var/construction.x",.function = "f12_construction____integer_width",.line = 159,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../lib/var/construction.x",.function = "f12_construction____integer_width",.line = 207,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_10, 20800632064936, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL))));
       __builtin_unreachable();
     }
@@ -1320,7 +1342,7 @@ static int f12_construction____integer_fits(TagId id, long value, unsigned bits)
 
 static Var f12_construction____new_symbol(unsigned long u){
   if(u >=(1ul << 51)){
-    static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../lib/var/construction.x",.function = "f12_construction____new_symbol",.line = 173,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../lib/var/construction.x",.function = "f12_construction____new_symbol",.line = 221,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_11, 245103016899018, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL))), Symbol_var(1345468776), Symbol_var(1328354264));
     __builtin_unreachable();
   }
@@ -1328,58 +1350,6 @@ static Var f12_construction____new_symbol(unsigned long u){
     .u64 = u + VAR_SYMBOL_OFFSET
   }
   ;
-}
-
-Var Var_parse(String str, Symbol kind){
-  switch(kind){
-    case 19368 :{
-      long value;
-      if(! String_try_long(str, &(value)) || value < INT_MIN || value > INT_MAX) return((void) 0, Void);
-      return int_var((int) value);
-    }
-    case 13400168 : case 301273866 :{
-      double value;
-      if(! String_try_double(str, &(value))) return((void) 0, Void);
-      return double_var(value);
-    }
-    case 1318210446 : return String_var(String_parse(str));
-    case 1328354264 : return Symbol_var(Symbol_parse(str));
-    case 213092 : return int_var(String_parse_char(str));
-    default: return((void) 0, Void);
-  }
-
-}
-
-static f7_numbers___VarWideBox f7_numbers____wide_box(Var v){
-  return(f7_numbers___VarWideBox) _address(v);
-}
-
-static int _wide_encoding_valid(Var value, Symbol tag){
-  f7_numbers___VarWideBox box = f7_numbers____wide_box(value);
-  return box && box -> tag == tag;
-}
-
-static Var f7_numbers____new_wide(TagId id, f7_numbers___VarWideValue value){
-  f7_numbers___VarWideBox box = xmalloc(sizeof(struct f7_numbers___VarWideBox));
-  box -> tag = x2c_var_taginfo[id].tag;
-  box -> value = value;
-  uintptr_t raw =(uintptr_t) box;
-  if((raw & 0x7) != 0 || raw >=(1ul << 48)){
-    xfree(box);
-    {
-      static const X2CErrorSite _x2c_gensym_error_site_12 = {.file = "../../lib/var/numbers.x",.function = "f7_numbers____new_wide",.line = 37,.runtime = 1};
-      x2c_error_raise_n(& _x2c_gensym_error_site_12, 4372507526, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.box")), NULL))));
-      __builtin_unreachable();
-    }
-
-  }
-  Var v ={
-    .u64 = raw
-  }
-  ;
-  v.u64 |= x2c_var_taginfo[id].top << 48;
-  v.u64 |= x2c_var_taginfo[id].bottom;
-  return v;
 }
 
 Var Var_box_long(long value){
@@ -1436,8 +1406,8 @@ Var Var_clone_wide(Var value){
   if((raw & 0x7) != 0 || raw >=(1ul << 48)){
     xfree(box);
     {
-      static const X2CErrorSite _x2c_gensym_error_site_13 = {.file = "../../lib/var/numbers.x",.function = "Var_clone_wide",.line = 139,.runtime = 1};
-      x2c_error_raise_n(& _x2c_gensym_error_site_13, 4372507526, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.clone_wide")), NULL))));
+      static const X2CErrorSite _x2c_gensym_error_site_12 = {.file = "../../lib/var/numbers.x",.function = "Var_clone_wide",.line = 117,.runtime = 1};
+      x2c_error_raise_n(& _x2c_gensym_error_site_12, 4372507526, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.clone_wide")), NULL))));
       __builtin_unreachable();
     }
 
@@ -1470,13 +1440,6 @@ double Var_floating(Var v){
   return 0.0;
 }
 
-static double f7_numbers____f64_floating(Var v){
-  unsigned long u = v.u64 == VAR_F64_NEG_MAX_ESCAPE ? VAR_F64_NEG_MAX_RAW : v.u64 - VAR_F64_SHIFT;
-  double d;
-  memcpy(& d, & u, sizeof d);
-  return d;
-}
-
 long Var_integer(Var v){
   unsigned top = _top_bits(v);
   if(top == x2c_var_taginfo[_u48_].top) return v.u64 & _bitmask(48);
@@ -1501,21 +1464,6 @@ long Var_integer(Var v){
   return 0;
 }
 
-static long f7_numbers____i48_integer(Var v){
-  unsigned long mask = _bitmask(48), raw = v.u64 & mask;
-  if(raw &(1ul << 47)) return -(long)((~ raw & mask) + 1ul);
-  return(long) raw;
-}
-
-static long f7_numbers____wide_integer(Var v){
-  switch(_bottom_bits(v)){
-    case 0x5 : return f7_numbers____wide_box(v) -> value.long_value;
-    case 0x6 : return(long) f7_numbers____wide_box(v) -> value.ulong_value;
-    case 0x7 : return(long) f7_numbers____wide_box(v) -> value.long_long_value;
-  }
-  return 0;
-}
-
 long Var_long_value(Var v){
   return Var_is(v, 818062) ? f7_numbers____wide_box(v) -> value.long_value : 0;
 }
@@ -1532,10 +1480,6 @@ unsigned long long Var_ulong_long_value(Var v){
   return Var_is(v, 1435270030) ? f7_numbers____wide_box(v) -> value.ulong_long_value : 0;
 }
 
-long double Var_long_double_value(Var v){
-  return Var_is(v, 26071077642) ? f7_numbers____wide_box(v) -> value.long_double_value : 0.0L;
-}
-
 unsigned Var_wide_hash(Var v){
   if(! Var_is_wide(v)) return 0;
   f7_numbers___VarWideValue * value = & f7_numbers____wide_box(v) -> value;
@@ -1548,10 +1492,6 @@ unsigned Var_wide_hash(Var v){
     case 26071077642 : return f7_numbers____hash_wide(tag, value, sizeof(long double));
   }
   return 0;
-}
-
-static unsigned f7_numbers____hash_wide(Symbol tag, f7_numbers___VarWideValue * value, size_t width){
-  return x2c_hash_bytes((unsigned) tag, value, width);
 }
 
 int Var_wide_equal(Var a, Var b){
@@ -1571,6 +1511,8 @@ int Var_wide_equal(Var a, Var b){
 
 int Var_integer_compare(Var a, Var b);
 
+long double Var_long_double_value(Var v);
+
 int Var_wide_compare(Var a, Var b){
   if(! Var_is_wide(a) || ! Var_is_wide(b)) return 0;
   Symbol tag = Var_tag(a);
@@ -1583,12 +1525,87 @@ int Var_wide_compare(Var a, Var b){
   return cmp < 0 ? - 1 : cmp > 0 ? 1 : 0;
 }
 
+long double Var_long_double_value(Var v){
+  return Var_is(v, 26071077642) ? f7_numbers____wide_box(v) -> value.long_double_value : 0.0L;
+}
+
+static Var f7_numbers____new_wide(TagId id, f7_numbers___VarWideValue value){
+  f7_numbers___VarWideBox box = xmalloc(sizeof(struct f7_numbers___VarWideBox));
+  box -> tag = x2c_var_taginfo[id].tag;
+  box -> value = value;
+  uintptr_t raw =(uintptr_t) box;
+  if((raw & 0x7) != 0 || raw >=(1ul << 48)){
+    xfree(box);
+    {
+      static const X2CErrorSite _x2c_gensym_error_site_13 = {.file = "../../lib/var/numbers.x",.function = "f7_numbers____new_wide",.line = 346,.runtime = 1};
+      x2c_error_raise_n(& _x2c_gensym_error_site_13, 4372507526, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.box")), NULL))));
+      __builtin_unreachable();
+    }
+
+  }
+  Var v ={
+    .u64 = raw
+  }
+  ;
+  v.u64 |= x2c_var_taginfo[id].top << 48;
+  v.u64 |= x2c_var_taginfo[id].bottom;
+  return v;
+}
+
+static f7_numbers___VarWideBox f7_numbers____wide_box(Var v){
+  return(f7_numbers___VarWideBox) _address(v);
+}
+
+static double f7_numbers____f64_floating(Var v){
+  unsigned long u = v.u64 == VAR_F64_NEG_MAX_ESCAPE ? VAR_F64_NEG_MAX_RAW : v.u64 - VAR_F64_SHIFT;
+  double d;
+  memcpy(& d, & u, sizeof d);
+  return d;
+}
+
+static long f7_numbers____i48_integer(Var v){
+  unsigned long mask = _bitmask(48), raw = v.u64 & mask;
+  if(raw &(1ul << 47)) return -(long)((~ raw & mask) + 1ul);
+  return(long) raw;
+}
+
+static long f7_numbers____wide_integer(Var v){
+  switch(_bottom_bits(v)){
+    case 0x5 : return f7_numbers____wide_box(v) -> value.long_value;
+    case 0x6 : return(long) f7_numbers____wide_box(v) -> value.ulong_value;
+    case 0x7 : return(long) f7_numbers____wide_box(v) -> value.long_long_value;
+  }
+  return 0;
+}
+
+static unsigned f7_numbers____hash_wide(Symbol tag, f7_numbers___VarWideValue * value, size_t width){
+  return x2c_hash_bytes((unsigned) tag, value, width);
+}
+
+static int _wide_encoding_valid(Var value, Symbol tag){
+  f7_numbers___VarWideBox box = f7_numbers____wide_box(value);
+  return box && box -> tag == tag;
+}
+
 int Var_integer_compare(Var a, Var b){
   f8_ordering___VarIntegerParts ap = f8_ordering____integer_parts(a), bp = f8_ordering____integer_parts(b);
   if(ap.negative != bp.negative) return ap.negative ? - 1 : 1;
   if(ap.magnitude == bp.magnitude) return 0;
   if(ap.negative) return ap.magnitude > bp.magnitude ? - 1 : 1;
   return ap.magnitude < bp.magnitude ? - 1 : 1;
+}
+
+int Var_integer_floating_compare(Var integer, Var floating){
+  f8_ordering___VarIntegerParts parts = f8_ordering____integer_parts(integer);
+  long double value = Var_is(floating, 26071077642) ? Var_long_double_value(floating) :(long double) Var_floating(floating);
+  if(value != value || value == 1.0L / 0.0L) return - 1;
+  if(value == - 1.0L / 0.0L) return 1;
+  if(parts.negative){
+    if(value >= 0.0L) return - 1;
+    return - f8_ordering____magnitude_compare(parts.magnitude, - value);
+  }
+  if(value < 0.0L) return 1;
+  return f8_ordering____magnitude_compare(parts.magnitude, value);
 }
 
 static f8_ordering___VarIntegerParts f8_ordering____integer_parts(Var v){
@@ -1619,19 +1636,6 @@ static f8_ordering___VarIntegerParts f8_ordering____signed_parts(long long value
 static unsigned long long f8_ordering____signed_magnitude(long long value){
   if(value >= 0) return(unsigned long long) value;
   return(unsigned long long)(-(value + 1)) + 1;
-}
-
-int Var_integer_floating_compare(Var integer, Var floating){
-  f8_ordering___VarIntegerParts parts = f8_ordering____integer_parts(integer);
-  long double value = Var_is(floating, 26071077642) ? Var_long_double_value(floating) :(long double) Var_floating(floating);
-  if(value != value || value == 1.0L / 0.0L) return - 1;
-  if(value == - 1.0L / 0.0L) return 1;
-  if(parts.negative){
-    if(value >= 0.0L) return - 1;
-    return - f8_ordering____magnitude_compare(parts.magnitude, - value);
-  }
-  if(value < 0.0L) return 1;
-  return f8_ordering____magnitude_compare(parts.magnitude, value);
 }
 
 static int f8_ordering____magnitude_compare(unsigned long long integer, long double floating){
@@ -1815,6 +1819,71 @@ Var Var_convert(Var value, Symbol target){
   return info.floating ? f10_conversion____convert_to_float(&(source), target) : f10_conversion____convert_to_integer(&(source), target, info.unsigned_value, info.bits);
 }
 
+void Var_numeric_decode(Var value, X2CVarNumeric * out){
+  if(! out){
+    static const X2CErrorSite _x2c_gensym_error_site_28 = {.file = "../../lib/var/conversion.x",.function = "Var_numeric_decode",.line = 157,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_28, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.numeric_decode")), NULL))));
+    __builtin_unreachable();
+  }
+  if(! Var_encoding_valid(value)){
+    unsigned long bits = value.u64;
+    {
+      static const X2CErrorSite _x2c_gensym_error_site_29 = {.file = "../../lib/var/conversion.x",.function = "Var_numeric_decode",.line = 160,.runtime = 1};
+      x2c_error_raise_n(& _x2c_gensym_error_site_29, 4372507526, 1, Symbol_var(46228810), Var_box_ulong(bits));
+      __builtin_unreachable();
+    }
+
+  }
+  if(Var_is_void(value)){
+    static const X2CErrorSite _x2c_gensym_error_site_30 = {.file = "../../lib/var/conversion.x",.function = "Var_numeric_decode",.line = 162,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_30, 48270474208, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.numeric_decode")), NULL))));
+    __builtin_unreachable();
+  }
+  X2CVarNumericInfo info;
+  Symbol tag = Var_tag(value);
+  if(! Var_numeric_info(tag, &(info))){
+    static const X2CErrorSite _x2c_gensym_error_site_31 = {.file = "../../lib/var/conversion.x",.function = "Var_numeric_decode",.line = 165,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_31, 4477479911782, 1, Symbol_var(1307939018), Symbol_var(tag));
+    __builtin_unreachable();
+  }
+  f10_conversion____numeric_decode(value, info, &((* out)));
+}
+
+unsigned long long Var_width_mask(int bits);
+
+long long Var_signed_from_bits(unsigned long long raw, int bits);
+
+Var Var_integer_box(Symbol target, unsigned long long raw){
+  X2CVarNumericInfo info;
+  if(! Var_numeric_info(target, &(info)) || info.floating){
+    static const X2CErrorSite _x2c_gensym_error_site_32 = {.file = "../../lib/var/conversion.x",.function = "Var_integer_box",.line = 181,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_32, 143279306979688, 1, Symbol_var(1345468776), Symbol_var(target));
+    __builtin_unreachable();
+  }
+  raw &= Var_width_mask(info.bits);
+  long long signed_value = Var_signed_from_bits(raw, info.bits);
+  switch(target){
+    case 26993 : return Var_box_i8((char) signed_value);
+    case 30065 : return Var_box_u8((uchar) raw);
+    case 3453293 : return Var_box_i16((short) signed_value);
+    case 3846509 : return Var_box_u16((ushort) raw);
+    case 3453797 : return Var_box_i32_bits((unsigned) raw);
+    case 3847013 : return Var_box_u32((unsigned) raw);
+    case 3454065 : return Var_new(3454065, (long) signed_value);
+    case 3847281 : return Var_new(3847281, (unsigned long) raw);
+    case 818062 : return Var_box_long((long) signed_value);
+    case 44858254 : return Var_box_ulong((unsigned long) raw);
+    case 25983886 : return Var_box_long_long(signed_value);
+    case 1435270030 : return Var_box_ulong_long(raw);
+  }
+  {
+    static const X2CErrorSite _x2c_gensym_error_site_33 = {.file = "../../lib/var/conversion.x",.function = "Var_integer_box",.line = 198,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_33, 143279306979688, 1, Symbol_var(1345468776), Symbol_var(target));
+    __builtin_unreachable();
+  }
+
+}
+
 int Var_numeric_info(Symbol tag, X2CVarNumericInfo * out){
   if(! out) return 0;
   if(tag == 28764 || tag == 2050956 || tag == 1854348) tag = 3356265;
@@ -1824,37 +1893,47 @@ int Var_numeric_info(Symbol tag, X2CVarNumericInfo * out){
   return 1;
 }
 
-void Var_numeric_decode(Var value, X2CVarNumeric * out){
-  if(! out){
-    static const X2CErrorSite _x2c_gensym_error_site_28 = {.file = "../../lib/var/conversion.x",.function = "Var_numeric_decode",.line = 170,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_28, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.numeric_decode")), NULL))));
-    __builtin_unreachable();
-  }
-  if(! Var_encoding_valid(value)){
-    unsigned long bits = value.u64;
-    {
-      static const X2CErrorSite _x2c_gensym_error_site_29 = {.file = "../../lib/var/conversion.x",.function = "Var_numeric_decode",.line = 173,.runtime = 1};
-      x2c_error_raise_n(& _x2c_gensym_error_site_29, 4372507526, 1, Symbol_var(46228810), Var_box_ulong(bits));
-      __builtin_unreachable();
-    }
-
-  }
-  if(Var_is_void(value)){
-    static const X2CErrorSite _x2c_gensym_error_site_30 = {.file = "../../lib/var/conversion.x",.function = "Var_numeric_decode",.line = 175,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_30, 48270474208, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.numeric_decode")), NULL))));
-    __builtin_unreachable();
-  }
-  X2CVarNumericInfo info;
-  Symbol tag = Var_tag(value);
-  if(! Var_numeric_info(tag, &(info))){
-    static const X2CErrorSite _x2c_gensym_error_site_31 = {.file = "../../lib/var/conversion.x",.function = "Var_numeric_decode",.line = 178,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_31, 4477479911782, 1, Symbol_var(1307939018), Symbol_var(tag));
-    __builtin_unreachable();
-  }
-  f10_conversion____numeric_decode(value, info, &((* out)));
+Symbol Var_integer_tag(int rank, int unsigned_value){
+  if(rank <= 3) return unsigned_value ? 3847013 : 3453797;
+  if(rank == 4) return unsigned_value ? 3847281 : 3454065;
+  if(rank == 5) return unsigned_value ? 44858254 : 818062;
+  if(rank == 6) return unsigned_value ? 1435270030 : 25983886;
+  return 0;
 }
 
-unsigned long long Var_width_mask(int bits);
+float X2CVarNumeric_f32(X2CVarNumeric * value){
+  if((* value).floating) return(float)(* value).floating_value;
+  if((* value).unsigned_value) return(float)(* value).raw;
+  return(float) Var_signed_from_bits((* value).raw, (* value).bits);
+}
+
+double X2CVarNumeric_f64(X2CVarNumeric * value){
+  if((* value).floating) return(double)(* value).floating_value;
+  if((* value).unsigned_value) return(double)(* value).raw;
+  return(double) Var_signed_from_bits((* value).raw, (* value).bits);
+}
+
+long double X2CVarNumeric_ldouble(X2CVarNumeric * value){
+  if((* value).floating) return(* value).floating_value;
+  if((* value).unsigned_value) return(long double)(* value).raw;
+  return(long double) Var_signed_from_bits((* value).raw, (* value).bits);
+}
+
+long long Var_signed_from_bits(unsigned long long raw, int bits){
+  if(bits <(int)(sizeof(unsigned long long) * CHAR_BIT)){
+    unsigned long long mask = Var_width_mask(bits), sign = 1ull <<(bits - 1);
+    raw &= mask;
+    if(raw & sign) return -(long long)((~ raw & mask) + 1ull);
+    return(long long) raw;
+  }
+  long long value;
+  memcpy(& value, & raw, sizeof value);
+  return value;
+}
+
+unsigned long long Var_width_mask(int bits){
+  return bits >=(int)(sizeof(unsigned long long) * CHAR_BIT) ? ULLONG_MAX :(1ull << bits) - 1ull;
+}
 
 static void f10_conversion____numeric_decode(Var value, X2CVarNumericInfo info, X2CVarNumeric * out){
   X2CVarNumeric decoded ={
@@ -1887,10 +1966,6 @@ static void f10_conversion____numeric_decode(Var value, X2CVarNumericInfo info, 
   (* out) = decoded;
 }
 
-long long Var_signed_from_bits(unsigned long long raw, int bits);
-
-Var Var_integer_box(Symbol target, unsigned long long raw);
-
 static Var f10_conversion____convert_to_integer(X2CVarNumeric * source, Symbol target, int unsigned_target, int bits){
   if(!(* source).floating){
     unsigned long long raw =(* source).unsigned_value ?(* source).raw :(unsigned long long) Var_signed_from_bits((* source).raw, (* source).bits);
@@ -1910,8 +1985,8 @@ static Var f10_conversion____convert_to_integer(X2CVarNumeric * source, Symbol t
 _Noreturn static void f10_conversion____out_of_range(X2CVarNumeric * source, Symbol target){
   Symbol source_tag =(* source).tag;
   {
-    static const X2CErrorSite _x2c_gensym_error_site_32 = {.file = "../../lib/var/conversion.x",.function = "f10_conversion____out_of_range",.line = 237,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_32, 245103016899018, 2, Symbol_var(1307939018), Symbol_var(source_tag), Symbol_var(1345468776), Symbol_var(target));
+    static const X2CErrorSite _x2c_gensym_error_site_34 = {.file = "../../lib/var/conversion.x",.function = "f10_conversion____out_of_range",.line = 335,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_34, 245103016899018, 2, Symbol_var(1307939018), Symbol_var(source_tag), Symbol_var(1345468776), Symbol_var(target));
     __builtin_unreachable();
   }
 
@@ -1922,98 +1997,19 @@ static long double f10_conversion____integer_limit(int bits){
   return(long double)(1ull << bits);
 }
 
-Var Var_integer_box(Symbol target, unsigned long long raw){
-  X2CVarNumericInfo info;
-  if(! Var_numeric_info(target, &(info)) || info.floating){
-    static const X2CErrorSite _x2c_gensym_error_site_33 = {.file = "../../lib/var/conversion.x",.function = "Var_integer_box",.line = 255,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_33, 143279306979688, 1, Symbol_var(1345468776), Symbol_var(target));
-    __builtin_unreachable();
-  }
-  raw &= Var_width_mask(info.bits);
-  long long signed_value = Var_signed_from_bits(raw, info.bits);
-  switch(target){
-    case 26993 : return Var_box_i8((char) signed_value);
-    case 30065 : return Var_box_u8((uchar) raw);
-    case 3453293 : return Var_box_i16((short) signed_value);
-    case 3846509 : return Var_box_u16((ushort) raw);
-    case 3453797 : return Var_box_i32_bits((unsigned) raw);
-    case 3847013 : return Var_box_u32((unsigned) raw);
-    case 3454065 : return Var_new(3454065, (long) signed_value);
-    case 3847281 : return Var_new(3847281, (unsigned long) raw);
-    case 818062 : return Var_box_long((long) signed_value);
-    case 44858254 : return Var_box_ulong((unsigned long) raw);
-    case 25983886 : return Var_box_long_long(signed_value);
-    case 1435270030 : return Var_box_ulong_long(raw);
-  }
-  {
-    static const X2CErrorSite _x2c_gensym_error_site_34 = {.file = "../../lib/var/conversion.x",.function = "Var_integer_box",.line = 272,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_34, 143279306979688, 1, Symbol_var(1345468776), Symbol_var(target));
-    __builtin_unreachable();
-  }
-
-}
-
-Symbol Var_integer_tag(int rank, int unsigned_value){
-  if(rank <= 3) return unsigned_value ? 3847013 : 3453797;
-  if(rank == 4) return unsigned_value ? 3847281 : 3454065;
-  if(rank == 5) return unsigned_value ? 44858254 : 818062;
-  if(rank == 6) return unsigned_value ? 1435270030 : 25983886;
-  return 0;
-}
-
-unsigned long long Var_width_mask(int bits){
-  return bits >=(int)(sizeof(unsigned long long) * CHAR_BIT) ? ULLONG_MAX :(1ull << bits) - 1ull;
-}
-
-long long Var_signed_from_bits(unsigned long long raw, int bits){
-  if(bits <(int)(sizeof(unsigned long long) * CHAR_BIT)){
-    unsigned long long mask = Var_width_mask(bits), sign = 1ull <<(bits - 1);
-    raw &= mask;
-    if(raw & sign) return -(long long)((~ raw & mask) + 1ull);
-    return(long long) raw;
-  }
-  long long value;
-  memcpy(& value, & raw, sizeof value);
-  return value;
-}
-
-float X2CVarNumeric_f32(X2CVarNumeric * value);
-
-double X2CVarNumeric_f64(X2CVarNumeric * value);
-
-long double X2CVarNumeric_ldouble(X2CVarNumeric * value);
-
 static Var f10_conversion____convert_to_float(X2CVarNumeric * source, Symbol target){
   switch(target){
     case 3355493 : return Var_box_f32(X2CVarNumeric_f32(&((* source))));
     case 3356265 : return Var_box_f64(X2CVarNumeric_f64(&((* source))));
     case 26071077642 : return Var_box_long_double(X2CVarNumeric_ldouble(&((* source))));
     default:{
-      static const X2CErrorSite _x2c_gensym_error_site_35 = {.file = "../../lib/var/conversion.x",.function = "f10_conversion____convert_to_float",.line = 320,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_35 = {.file = "../../lib/var/conversion.x",.function = "f10_conversion____convert_to_float",.line = 351,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_35, 143279306979688, 1, Symbol_var(1345468776), Symbol_var(target));
       __builtin_unreachable();
     }
 
   }
 
-}
-
-float X2CVarNumeric_f32(X2CVarNumeric * value){
-  if((* value).floating) return(float)(* value).floating_value;
-  if((* value).unsigned_value) return(float)(* value).raw;
-  return(float) Var_signed_from_bits((* value).raw, (* value).bits);
-}
-
-double X2CVarNumeric_f64(X2CVarNumeric * value){
-  if((* value).floating) return(double)(* value).floating_value;
-  if((* value).unsigned_value) return(double)(* value).raw;
-  return(double) Var_signed_from_bits((* value).raw, (* value).bits);
-}
-
-long double X2CVarNumeric_ldouble(X2CVarNumeric * value){
-  if((* value).floating) return(* value).floating_value;
-  if((* value).unsigned_value) return(long double)(* value).raw;
-  return(long double) Var_signed_from_bits((* value).raw, (* value).bits);
 }
 
 char x2c_var_update_i8(volatile char * lhs, Symbol op, Var rhs){
@@ -2283,9 +2279,154 @@ static long double f9_operators____ldouble_step(Symbol _x2c_gensym_macro_op_3, l
   return _x2c_gensym_macro_a_3 / _x2c_gensym_macro_b_3;
 }
 
-Var Var_add(Var lhs, Var rhs);
+Var Var_matmul(Var lhs, Var rhs){
+  return f9_operators____protocol_arithmetic(lhs, 875851096, 129, rhs);
+}
 
 Var Var_sub(Var lhs, Var rhs);
+
+Var Var_neg(Var value){
+  f9_operators____valid_operand(value);
+  if(Var_is_void(value)){
+    static const X2CErrorSite _x2c_gensym_error_site_52 = {.file = "../../lib/var/operators.x",.function = "Var_neg",.line = 103,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_52, 48270474208, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.neg")), NULL))));
+    __builtin_unreachable();
+  }
+  Var result;
+  if(Var_try_dispatch_unary(value, 29006, &(result))) return result;
+  if(Var_kind(value) == 1011493096){
+    Symbol tag = Var_tag(value);
+    {
+      static const X2CErrorSite _x2c_gensym_error_site_53 = {.file = "../../lib/var/operators.x",.function = "Var_neg",.line = 108,.runtime = 1};
+      x2c_error_raise_n(& _x2c_gensym_error_site_53, 31884573479268, 2, Symbol_var(41038), Symbol_var(tag), Symbol_var(883757412), Symbol_var(29006));
+      __builtin_unreachable();
+    }
+
+  }
+  return Var_sub(int_var(0), value);
+}
+
+int x2c_var_equal(Var a, Var b){
+  if(a.u64 == b.u64) return ! f9_operators____nan(a);
+  if(f9_operators____numeric(a) && f9_operators____numeric(b)) return f9_operators____numeric_order(a, b) == 0;
+  return Var_equal(a, b);
+}
+
+int x2c_var_identical(Var a, Var b){
+  return a.u64 == b.u64 || Var_wide_equal(a, b);
+}
+
+double x2c_var_order(Var a, Var b){
+  if(f9_operators____numeric(a) && f9_operators____numeric(b)) return f9_operators____numeric_order(a, b);
+  return Var_compare(a, b);
+}
+
+int Var_fallback_truth(Var value);
+
+int Var_truth(Var value){
+  if(! Var_encoding_valid(value) || Var_is_void(value)) return Var_fallback_truth(value);
+  switch(Var_tag(value)){
+    case 26993 : case 30065 : case 3453293 : case 3846509 : case 3453797 : case 3847013 : return Var_payload32(value) != 0;
+    case 3454065 : case 3847281 : return(value.u64 &((1ul << 48) - 1)) != 0;
+  }
+  int handled = 0, truth = Var_dispatch_truth(value, &(handled));
+  return handled ? ! ! truth : Var_fallback_truth(value);
+}
+
+int Var_fallback_truth(Var value){
+  f9_operators____valid_operand(value);
+  if(Var_is_void(value)){
+    static const X2CErrorSite _x2c_gensym_error_site_54 = {.file = "../../lib/var/operators.x",.function = "Var_fallback_truth",.line = 180,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_54, 48270474208, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.truth")), NULL))));
+    __builtin_unreachable();
+  }
+  X2CVarNumericInfo info;
+  if(Var_numeric_info(Var_tag(value), &(info))) return f9_operators____numeric_truth(value);
+  Symbol kind = Var_kind(value);
+  if(kind == 1328354264) return Var_symbol(value) != 0;
+  if(kind == 35386204516 || kind == 39939274535114 || kind == 1011493096) return Var_pointer(value) != NULL;
+  Symbol source = Var_tag(value);
+  {
+    Var _x2c_gensym_literal_part_27 = Symbol_var(source);
+    Var _x2c_gensym_literal_part_28 = String_var(String_join(NULL, cons(String_var(String_new("truthy")), NULL)));
+    {
+      static const X2CErrorSite _x2c_gensym_error_site_55 = {.file = "../../lib/var/operators.x",.function = "Var_fallback_truth",.line = 188,.runtime = 1};
+      x2c_error_raise_n(& _x2c_gensym_error_site_55, 4477479911782, 2, Symbol_var(1307939018), _x2c_gensym_literal_part_27, Symbol_var(34096809266140), _x2c_gensym_literal_part_28);
+      __builtin_unreachable();
+    }
+
+  }
+
+}
+
+Var x2c_var_update_volatile(volatile Var * lhs, Symbol op, Var rhs);
+
+Var Var_update(Var * lhs, Symbol op, Var rhs){
+  if(! _init_guard_) _file_init_();
+  return x2c_var_update_volatile(lhs, op, rhs);
+}
+
+Var x2c_var_postfix_volatile(volatile Var * lhs, Symbol op);
+
+Var Var_postfix(Var * lhs, Symbol op){
+  if(! _init_guard_) _file_init_();
+  return x2c_var_postfix_volatile(lhs, op);
+}
+
+Var x2c_var_postfix_volatile(volatile Var * lhs, Symbol op){
+  if(! _init_guard_) _file_init_();
+  if(! lhs){
+    static const X2CErrorSite _x2c_gensym_error_site_56 = {.file = "../../lib/var/operators.x",.function = "x2c_var_postfix_volatile",.line = 222,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_56, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.postfix")), NULL))));
+    __builtin_unreachable();
+  }
+  f9_operators____valid_operand((* lhs));
+  if(Var_is_void((* lhs))){
+    static const X2CErrorSite _x2c_gensym_error_site_57 = {.file = "../../lib/var/operators.x",.function = "x2c_var_postfix_volatile",.line = 224,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_57, 48270474208, 1, Symbol_var(992), Symbol_var(op));
+    __builtin_unreachable();
+  }
+  Symbol binary_op;
+  if(op == 1848) binary_op = 56;
+  else if(op == 2046) binary_op = 62;
+  else{
+    static const X2CErrorSite _x2c_gensym_error_site_58 = {.file = "../../lib/var/operators.x",.function = "x2c_var_postfix_volatile",.line = 228,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_58, 136641504, 1, Symbol_var(992), Symbol_var(op));
+    __builtin_unreachable();
+  }
+  Var old =(* lhs), one = Var_box_i32_bits(1);
+  if(Var_is_void(x2c_var_update_volatile(&((* lhs)), binary_op, one))) return((void) 0, Void);
+  return old;
+}
+
+Var Var_binary(Var lhs, Symbol op, Var rhs);
+
+Var x2c_var_update_volatile(volatile Var * lhs, Symbol op, Var rhs){
+  if(! _init_guard_) _file_init_();
+  if(! lhs){
+    static const X2CErrorSite _x2c_gensym_error_site_59 = {.file = "../../lib/var/operators.x",.function = "x2c_var_update_volatile",.line = 239,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_59, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.update")), NULL))));
+    __builtin_unreachable();
+  }
+  f9_operators____valid_operands((* lhs), rhs);
+  if(Var_is_void((* lhs)) || Var_is_void(rhs)){
+    static const X2CErrorSite _x2c_gensym_error_site_60 = {.file = "../../lib/var/operators.x",.function = "x2c_var_update_volatile",.line = 241,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_60, 48270474208, 1, Symbol_var(992), Symbol_var(op));
+    __builtin_unreachable();
+  }
+  if(! f9_operators____numeric_operator(op)){
+    static const X2CErrorSite _x2c_gensym_error_site_61 = {.file = "../../lib/var/operators.x",.function = "x2c_var_update_volatile",.line = 242,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_61, 136641504, 1, Symbol_var(992), Symbol_var(op));
+    __builtin_unreachable();
+  }
+  Var result = Var_binary((* lhs), op, rhs);
+  if(Var_is_void(result)) return((void) 0, Void);
+  Var stored = f9_operators____same_tag_update((* lhs), rhs) ? result : Var_convert(result, Var_tag((* lhs)));
+  (* lhs) = stored;
+  return stored;
+}
+
+Var Var_add(Var lhs, Var rhs);
 
 Var Var_mul(Var lhs, Var rhs);
 
@@ -2311,8 +2452,8 @@ Var Var_binary(Var lhs, Symbol op, Var rhs){
     case 1097083 : return Var_box_i32_bits((unsigned)(! x2c_var_identical(lhs, rhs)));
   }
   if(Var_is_void(lhs) || Var_is_void(rhs)){
-    static const X2CErrorSite _x2c_gensym_error_site_52 = {.file = "../../lib/var/operators.x",.function = "Var_binary",.line = 121,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_52, 48270474208, 1, Symbol_var(992), Symbol_var(op));
+    static const X2CErrorSite _x2c_gensym_error_site_62 = {.file = "../../lib/var/operators.x",.function = "Var_binary",.line = 286,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_62, 48270474208, 1, Symbol_var(992), Symbol_var(op));
     __builtin_unreachable();
   }
   switch(op){
@@ -2324,22 +2465,11 @@ Var Var_binary(Var lhs, Symbol op, Var rhs){
     case 77 : case 249 : case 189 : case 15481 : case 15997 : return f9_operators____general_numeric_binary(op, lhs, rhs);
   }
   {
-    static const X2CErrorSite _x2c_gensym_error_site_53 = {.file = "../../lib/var/operators.x",.function = "Var_binary",.line = 131,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_53, 136641504, 1, Symbol_var(992), Symbol_var(op));
+    static const X2CErrorSite _x2c_gensym_error_site_63 = {.file = "../../lib/var/operators.x",.function = "Var_binary",.line = 296,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_63, 136641504, 1, Symbol_var(992), Symbol_var(op));
     __builtin_unreachable();
   }
 
-}
-
-static Var f9_operators____predicate(int holds){
-  return Var_box_i32_bits((unsigned) holds);
-}
-
-int Var_truth(Var value);
-
-static int f9_operators____logical(Var lhs, Symbol op, Var rhs){
-  int left = ! ! Var_truth(lhs), right = ! ! Var_truth(rhs);
-  return op == 9805 ? left && right : left || right;
 }
 
 Var Var_add(Var lhs, Var rhs){
@@ -2352,10 +2482,6 @@ Var Var_sub(Var lhs, Var rhs){
 
 Var Var_mul(Var lhs, Var rhs){
   return f9_operators____protocol_arithmetic(lhs, 27992, 54, rhs);
-}
-
-Var Var_matmul(Var lhs, Var rhs){
-  return f9_operators____protocol_arithmetic(lhs, 875851096, 129, rhs);
 }
 
 Var Var_div(Var lhs, Var rhs){
@@ -2371,8 +2497,8 @@ static Var f9_operators____protocol_arithmetic(Var lhs, Symbol member, Symbol op
   if(result.u64 != VAR_VOID_BITS) return result;
   f9_operators____valid_operands(lhs, rhs);
   if(Var_is_void(lhs) || Var_is_void(rhs)){
-    static const X2CErrorSite _x2c_gensym_error_site_54 = {.file = "../../lib/var/operators.x",.function = "f9_operators____protocol_arithmetic",.line = 193,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_54, 48270474208, 1, Symbol_var(992), Symbol_var(op));
+    static const X2CErrorSite _x2c_gensym_error_site_64 = {.file = "../../lib/var/operators.x",.function = "f9_operators____protocol_arithmetic",.line = 342,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_64, 48270474208, 1, Symbol_var(992), Symbol_var(op));
     __builtin_unreachable();
   }
   if(op == 56 && Var_is_row(lhs, 11, 7, 1) && Var_is_row(rhs, 11, 7, 1)) return String_var(String_add(Var_string(lhs), Var_as_string(rhs)));
@@ -2381,34 +2507,13 @@ static Var f9_operators____protocol_arithmetic(Var lhs, Symbol member, Symbol op
   if(Var_kind(lhs) == 1011493096){
     Symbol tag = Var_tag(lhs);
     {
-      static const X2CErrorSite _x2c_gensym_error_site_55 = {.file = "../../lib/var/operators.x",.function = "f9_operators____protocol_arithmetic",.line = 203,.runtime = 1};
-      x2c_error_raise_n(& _x2c_gensym_error_site_55, 31884573479268, 2, Symbol_var(41038), Symbol_var(tag), Symbol_var(883757412), Symbol_var(member));
+      static const X2CErrorSite _x2c_gensym_error_site_65 = {.file = "../../lib/var/operators.x",.function = "f9_operators____protocol_arithmetic",.line = 352,.runtime = 1};
+      x2c_error_raise_n(& _x2c_gensym_error_site_65, 31884573479268, 2, Symbol_var(41038), Symbol_var(tag), Symbol_var(883757412), Symbol_var(member));
       __builtin_unreachable();
     }
 
   }
   return f9_operators____general_numeric_binary(op, lhs, rhs);
-}
-
-Var Var_neg(Var value){
-  f9_operators____valid_operand(value);
-  if(Var_is_void(value)){
-    static const X2CErrorSite _x2c_gensym_error_site_56 = {.file = "../../lib/var/operators.x",.function = "Var_neg",.line = 217,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_56, 48270474208, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.neg")), NULL))));
-    __builtin_unreachable();
-  }
-  Var result;
-  if(Var_try_dispatch_unary(value, 29006, &(result))) return result;
-  if(Var_kind(value) == 1011493096){
-    Symbol tag = Var_tag(value);
-    {
-      static const X2CErrorSite _x2c_gensym_error_site_57 = {.file = "../../lib/var/operators.x",.function = "Var_neg",.line = 222,.runtime = 1};
-      x2c_error_raise_n(& _x2c_gensym_error_site_57, 31884573479268, 2, Symbol_var(41038), Symbol_var(tag), Symbol_var(883757412), Symbol_var(29006));
-      __builtin_unreachable();
-    }
-
-  }
-  return Var_sub(int_var(0), value);
 }
 
 static Var f9_operators____fast_numeric(Symbol op, Var lhs, Var rhs){
@@ -2461,8 +2566,8 @@ static inline Symbol f9_operators____fast_numeric_tag(Var lhs, Var rhs){
 
 static Var f9_operators____fast_i32(Symbol op, unsigned a, unsigned b, int unsigned_value){
   if((op == 15481 || op == 15997) && b >= 32){
-    static const X2CErrorSite _x2c_gensym_error_site_58 = {.file = "../../lib/var/operators.x",.function = "f9_operators____fast_i32",.line = 290,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_58, 4477476686248, 3, Symbol_var(992), Symbol_var(op), Symbol_var(7318440), unsigned_var(b), Symbol_var(48833808), int_var(32));
+    static const X2CErrorSite _x2c_gensym_error_site_66 = {.file = "../../lib/var/operators.x",.function = "f9_operators____fast_i32",.line = 420,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_66, 4477476686248, 3, Symbol_var(992), Symbol_var(op), Symbol_var(7318440), unsigned_var(b), Symbol_var(48833808), int_var(32));
     __builtin_unreachable();
   }
   unsigned raw = f9_operators____integer_raw(op, a, b, 32, unsigned_value);
@@ -2475,20 +2580,20 @@ static Var f9_operators____general_numeric_binary(Symbol op, Var lhs, Var rhs){
   Var_numeric_decode(rhs, &(right));
   switch(op){
     case 15481 : case 15997 : if(left.floating || right.floating){
-      static const X2CErrorSite _x2c_gensym_error_site_59 = {.file = "../../lib/var/operators.x",.function = "f9_operators____general_numeric_binary",.line = 303,.runtime = 1};
-      x2c_error_raise_n(& _x2c_gensym_error_site_59, 4477479911782, 1, Symbol_var(992), Symbol_var(op));
+      static const X2CErrorSite _x2c_gensym_error_site_67 = {.file = "../../lib/var/operators.x",.function = "f9_operators____general_numeric_binary",.line = 433,.runtime = 1};
+      x2c_error_raise_n(& _x2c_gensym_error_site_67, 4477479911782, 1, Symbol_var(992), Symbol_var(op));
       __builtin_unreachable();
     }
     return f9_operators____shift_binary(op, left, right);
     case 75 : case 77 : case 249 : case 189 : if(left.floating || right.floating){
-      static const X2CErrorSite _x2c_gensym_error_site_60 = {.file = "../../lib/var/operators.x",.function = "f9_operators____general_numeric_binary",.line = 306,.runtime = 1};
-      x2c_error_raise_n(& _x2c_gensym_error_site_60, 4477479911782, 1, Symbol_var(992), Symbol_var(op));
+      static const X2CErrorSite _x2c_gensym_error_site_68 = {.file = "../../lib/var/operators.x",.function = "f9_operators____general_numeric_binary",.line = 436,.runtime = 1};
+      x2c_error_raise_n(& _x2c_gensym_error_site_68, 4477479911782, 1, Symbol_var(992), Symbol_var(op));
       __builtin_unreachable();
     }
     return f9_operators____integer_binary(op, left, right);
     case 129 :{
-      static const X2CErrorSite _x2c_gensym_error_site_61 = {.file = "../../lib/var/operators.x",.function = "f9_operators____general_numeric_binary",.line = 308,.runtime = 1};
-      x2c_error_raise_n(& _x2c_gensym_error_site_61, 136641504, 1, Symbol_var(992), Symbol_var(op));
+      static const X2CErrorSite _x2c_gensym_error_site_69 = {.file = "../../lib/var/operators.x",.function = "f9_operators____general_numeric_binary",.line = 438,.runtime = 1};
+      x2c_error_raise_n(& _x2c_gensym_error_site_69, 136641504, 1, Symbol_var(992), Symbol_var(op));
       __builtin_unreachable();
     }
     case 56 : case 62 : case 54 : case 95 : break;
@@ -2519,6 +2624,29 @@ static Symbol f9_operators____integer_result_tag(X2CVarNumeric * lhs, X2CVarNume
   return Var_integer_tag(signed_value -> rank, 1);
 }
 
+static Var f9_operators____shift_binary(Symbol op, X2CVarNumeric lhs, X2CVarNumeric rhs){
+  f9_operators____promote_integer(&(lhs));
+  f9_operators____promote_integer(&(rhs));
+  unsigned long long count = f9_operators____extended(&(rhs));
+  if(! rhs.unsigned_value &&(long long) count < 0){
+    static const X2CErrorSite _x2c_gensym_error_site_70 = {.file = "../../lib/var/operators.x",.function = "f9_operators____shift_binary",.line = 482,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_70, 4477476686248, 1, Symbol_var(992), Symbol_var(op));
+    __builtin_unreachable();
+  }
+  if(count >=(unsigned long long) lhs.bits){
+    Var _x2c_gensym_literal_part_29 = Symbol_var(op);
+    Var _x2c_gensym_literal_part_30 = Var_box_ulong_long(count);
+    {
+      static const X2CErrorSite _x2c_gensym_error_site_71 = {.file = "../../lib/var/operators.x",.function = "f9_operators____shift_binary",.line = 484,.runtime = 1};
+      x2c_error_raise_n(& _x2c_gensym_error_site_71, 4477476686248, 3, Symbol_var(992), _x2c_gensym_literal_part_29, Symbol_var(7318440), _x2c_gensym_literal_part_30, Symbol_var(48833808), int_var(lhs.bits));
+      __builtin_unreachable();
+    }
+
+  }
+  unsigned long long raw = f9_operators____integer_raw(op, f9_operators____raw_for_width(&(lhs), lhs.bits), count, lhs.bits, lhs.unsigned_value);
+  return Var_integer_box(lhs.tag, raw);
+}
+
 static void f9_operators____promote_integer(X2CVarNumeric * value){
   if((* value).rank >= 3) return;
   if(!(* value).unsigned_value)(* value).raw = f9_operators____extended(&((* value)));
@@ -2534,29 +2662,6 @@ static unsigned long long f9_operators____raw_for_width(X2CVarNumeric * value, i
 
 static unsigned long long f9_operators____extended(X2CVarNumeric * value){
   return(* value).unsigned_value ?(* value).raw :(unsigned long long) Var_signed_from_bits((* value).raw, (* value).bits);
-}
-
-static Var f9_operators____shift_binary(Symbol op, X2CVarNumeric lhs, X2CVarNumeric rhs){
-  f9_operators____promote_integer(&(lhs));
-  f9_operators____promote_integer(&(rhs));
-  unsigned long long count = f9_operators____extended(&(rhs));
-  if(! rhs.unsigned_value &&(long long) count < 0){
-    static const X2CErrorSite _x2c_gensym_error_site_62 = {.file = "../../lib/var/operators.x",.function = "f9_operators____shift_binary",.line = 370,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_62, 4477476686248, 1, Symbol_var(992), Symbol_var(op));
-    __builtin_unreachable();
-  }
-  if(count >=(unsigned long long) lhs.bits){
-    Var _x2c_gensym_literal_part_27 = Symbol_var(op);
-    Var _x2c_gensym_literal_part_28 = Var_box_ulong_long(count);
-    {
-      static const X2CErrorSite _x2c_gensym_error_site_63 = {.file = "../../lib/var/operators.x",.function = "f9_operators____shift_binary",.line = 372,.runtime = 1};
-      x2c_error_raise_n(& _x2c_gensym_error_site_63, 4477476686248, 3, Symbol_var(992), _x2c_gensym_literal_part_27, Symbol_var(7318440), _x2c_gensym_literal_part_28, Symbol_var(48833808), int_var(lhs.bits));
-      __builtin_unreachable();
-    }
-
-  }
-  unsigned long long raw = f9_operators____integer_raw(op, f9_operators____raw_for_width(&(lhs), lhs.bits), count, lhs.bits, lhs.unsigned_value);
-  return Var_integer_box(lhs.tag, raw);
 }
 
 static Symbol f9_operators____floating_tag(X2CVarNumeric * lhs, X2CVarNumeric * rhs){
@@ -2578,19 +2683,38 @@ static Var f9_operators____floating_binary(Symbol op, X2CVarNumeric lhs, X2CVarN
   return Var_box_long_double(f9_operators____ldouble_step(op, a, b));
 }
 
-int x2c_var_equal(Var a, Var b){
-  if(a.u64 == b.u64) return ! f9_operators____nan(a);
-  if(f9_operators____numeric(a) && f9_operators____numeric(b)) return f9_operators____numeric_order(a, b) == 0;
-  return Var_equal(a, b);
+static inline void f9_operators____valid_operands(Var lhs, Var rhs){
+  if(! Var_encoding_valid(lhs)) f9_operators____bad_side(lhs, 797096);
+  if(! Var_encoding_valid(rhs)) f9_operators____bad_side(rhs, 38353448);
 }
 
-int x2c_var_identical(Var a, Var b){
-  return a.u64 == b.u64 || Var_wide_equal(a, b);
+_Noreturn static void f9_operators____bad_side(Var value, Symbol side){
+  unsigned long bits = value.u64;
+  String text = Symbol_str(side);
+  {
+    Var _x2c_gensym_literal_part_31 = Var_box_ulong(bits);
+    {
+      static const X2CErrorSite _x2c_gensym_error_site_72 = {.file = "../../lib/var/operators.x",.function = "f9_operators____bad_side",.line = 539,.runtime = 1};
+      x2c_error_raise_n(& _x2c_gensym_error_site_72, 4372507526, 2, Symbol_var(46228810), _x2c_gensym_literal_part_31, Symbol_var(1263882), String_var(text));
+      __builtin_unreachable();
+    }
+
+  }
+
 }
 
-double x2c_var_order(Var a, Var b){
-  if(f9_operators____numeric(a) && f9_operators____numeric(b)) return f9_operators____numeric_order(a, b);
-  return Var_compare(a, b);
+static inline void f9_operators____valid_operand(Var value){
+  if(! Var_encoding_valid(value)) f9_operators____bad_bits(value);
+}
+
+_Noreturn static void f9_operators____bad_bits(Var value){
+  unsigned long bits = value.u64;
+  {
+    static const X2CErrorSite _x2c_gensym_error_site_73 = {.file = "../../lib/var/operators.x",.function = "f9_operators____bad_bits",.line = 555,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_73, 4372507526, 1, Symbol_var(46228810), Var_box_ulong(bits));
+    __builtin_unreachable();
+  }
+
 }
 
 static inline int f9_operators____numeric(Var value){
@@ -2643,80 +2767,19 @@ static double f9_operators____floating_order(X2CVarNumeric * lhs, X2CVarNumeric 
   return a == b ? 0 : 0.0 / 0.0;
 }
 
-int Var_fallback_truth(Var value);
-
-int Var_truth(Var value){
-  if(! Var_encoding_valid(value) || Var_is_void(value)) return Var_fallback_truth(value);
-  switch(Var_tag(value)){
-    case 26993 : case 30065 : case 3453293 : case 3846509 : case 3453797 : case 3847013 : return Var_payload32(value) != 0;
-    case 3454065 : case 3847281 : return(value.u64 &((1ul << 48) - 1)) != 0;
-  }
-  int handled = 0, truth = Var_dispatch_truth(value, &(handled));
-  return handled ? ! ! truth : Var_fallback_truth(value);
-}
-
-int Var_fallback_truth(Var value){
-  f9_operators____valid_operand(value);
-  if(Var_is_void(value)){
-    static const X2CErrorSite _x2c_gensym_error_site_64 = {.file = "../../lib/var/operators.x",.function = "Var_fallback_truth",.line = 526,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_64, 48270474208, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.truth")), NULL))));
-    __builtin_unreachable();
-  }
-  X2CVarNumericInfo info;
-  if(Var_numeric_info(Var_tag(value), &(info))) return f9_operators____numeric_truth(value);
-  Symbol kind = Var_kind(value);
-  if(kind == 1328354264) return Var_symbol(value) != 0;
-  if(kind == 35386204516 || kind == 39939274535114 || kind == 1011493096) return Var_pointer(value) != NULL;
-  Symbol source = Var_tag(value);
-  {
-    Var _x2c_gensym_literal_part_29 = Symbol_var(source);
-    Var _x2c_gensym_literal_part_30 = String_var(String_join(NULL, cons(String_var(String_new("truthy")), NULL)));
-    {
-      static const X2CErrorSite _x2c_gensym_error_site_65 = {.file = "../../lib/var/operators.x",.function = "Var_fallback_truth",.line = 534,.runtime = 1};
-      x2c_error_raise_n(& _x2c_gensym_error_site_65, 4477479911782, 2, Symbol_var(1307939018), _x2c_gensym_literal_part_29, Symbol_var(34096809266140), _x2c_gensym_literal_part_30);
-      __builtin_unreachable();
-    }
-
-  }
-
-}
-
 static int f9_operators____numeric_truth(Var value){
   X2CVarNumeric numeric;
   Var_numeric_decode(value, &(numeric));
   return numeric.floating ? numeric.floating_value != 0.0L : numeric.raw != 0;
 }
 
-Var x2c_var_update_volatile(volatile Var * lhs, Symbol op, Var rhs);
-
-Var Var_update(Var * lhs, Symbol op, Var rhs){
-  if(! _init_guard_) _file_init_();
-  return x2c_var_update_volatile(lhs, op, rhs);
+static Var f9_operators____predicate(int holds){
+  return Var_box_i32_bits((unsigned) holds);
 }
 
-Var x2c_var_update_volatile(volatile Var * lhs, Symbol op, Var rhs){
-  if(! _init_guard_) _file_init_();
-  if(! lhs){
-    static const X2CErrorSite _x2c_gensym_error_site_66 = {.file = "../../lib/var/operators.x",.function = "x2c_var_update_volatile",.line = 563,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_66, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.update")), NULL))));
-    __builtin_unreachable();
-  }
-  f9_operators____valid_operands((* lhs), rhs);
-  if(Var_is_void((* lhs)) || Var_is_void(rhs)){
-    static const X2CErrorSite _x2c_gensym_error_site_67 = {.file = "../../lib/var/operators.x",.function = "x2c_var_update_volatile",.line = 565,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_67, 48270474208, 1, Symbol_var(992), Symbol_var(op));
-    __builtin_unreachable();
-  }
-  if(! f9_operators____numeric_operator(op)){
-    static const X2CErrorSite _x2c_gensym_error_site_68 = {.file = "../../lib/var/operators.x",.function = "x2c_var_update_volatile",.line = 566,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_68, 136641504, 1, Symbol_var(992), Symbol_var(op));
-    __builtin_unreachable();
-  }
-  Var result = Var_binary((* lhs), op, rhs);
-  if(Var_is_void(result)) return((void) 0, Void);
-  Var stored = f9_operators____same_tag_update((* lhs), rhs) ? result : Var_convert(result, Var_tag((* lhs)));
-  (* lhs) = stored;
-  return stored;
+static int f9_operators____logical(Var lhs, Symbol op, Var rhs){
+  int left = ! ! Var_truth(lhs), right = ! ! Var_truth(rhs);
+  return op == 9805 ? left && right : left || right;
 }
 
 static inline int f9_operators____same_tag_update(Var lhs, Var rhs){
@@ -2728,77 +2791,10 @@ static inline int f9_operators____same_tag_update(Var lhs, Var rhs){
   return f9_operators____fast_numeric_tag(lhs, rhs) == 3356265;
 }
 
-Var x2c_var_postfix_volatile(volatile Var * lhs, Symbol op);
-
-Var Var_postfix(Var * lhs, Symbol op){
-  if(! _init_guard_) _file_init_();
-  return x2c_var_postfix_volatile(lhs, op);
-}
-
-Var x2c_var_postfix_volatile(volatile Var * lhs, Symbol op){
-  if(! _init_guard_) _file_init_();
-  if(! lhs){
-    static const X2CErrorSite _x2c_gensym_error_site_69 = {.file = "../../lib/var/operators.x",.function = "x2c_var_postfix_volatile",.line = 607,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_69, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.postfix")), NULL))));
-    __builtin_unreachable();
-  }
-  f9_operators____valid_operand((* lhs));
-  if(Var_is_void((* lhs))){
-    static const X2CErrorSite _x2c_gensym_error_site_70 = {.file = "../../lib/var/operators.x",.function = "x2c_var_postfix_volatile",.line = 609,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_70, 48270474208, 1, Symbol_var(992), Symbol_var(op));
-    __builtin_unreachable();
-  }
-  Symbol binary_op;
-  if(op == 1848) binary_op = 56;
-  else if(op == 2046) binary_op = 62;
-  else{
-    static const X2CErrorSite _x2c_gensym_error_site_71 = {.file = "../../lib/var/operators.x",.function = "x2c_var_postfix_volatile",.line = 613,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_71, 136641504, 1, Symbol_var(992), Symbol_var(op));
-    __builtin_unreachable();
-  }
-  Var old =(* lhs), one = Var_box_i32_bits(1);
-  if(Var_is_void(x2c_var_update_volatile(&((* lhs)), binary_op, one))) return((void) 0, Void);
-  return old;
-}
-
 static Var f9_operators____native_update(Var lhs, Symbol target, Symbol op, Var rhs){
   Var result = Var_binary(lhs, op, rhs);
   if(Var_is_void(result)) return((void) 0, Void);
   return Var_convert(result, target);
-}
-
-static inline void f9_operators____valid_operand(Var value){
-  if(! Var_encoding_valid(value)) f9_operators____bad_bits(value);
-}
-
-static inline void f9_operators____valid_operands(Var lhs, Var rhs){
-  if(! Var_encoding_valid(lhs)) f9_operators____bad_side(lhs, 797096);
-  if(! Var_encoding_valid(rhs)) f9_operators____bad_side(rhs, 38353448);
-}
-
-_Noreturn static void f9_operators____bad_bits(Var value){
-  unsigned long bits = value.u64;
-  {
-    static const X2CErrorSite _x2c_gensym_error_site_72 = {.file = "../../lib/var/operators.x",.function = "f9_operators____bad_bits",.line = 644,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_72, 4372507526, 1, Symbol_var(46228810), Var_box_ulong(bits));
-    __builtin_unreachable();
-  }
-
-}
-
-_Noreturn static void f9_operators____bad_side(Var value, Symbol side){
-  unsigned long bits = value.u64;
-  String text = Symbol_str(side);
-  {
-    Var _x2c_gensym_literal_part_31 = Var_box_ulong(bits);
-    {
-      static const X2CErrorSite _x2c_gensym_error_site_73 = {.file = "../../lib/var/operators.x",.function = "f9_operators____bad_side",.line = 650,.runtime = 1};
-      x2c_error_raise_n(& _x2c_gensym_error_site_73, 4372507526, 2, Symbol_var(46228810), _x2c_gensym_literal_part_31, Symbol_var(1263882), String_var(text));
-      __builtin_unreachable();
-    }
-
-  }
-
 }
 
 static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0){
@@ -2806,11 +2802,11 @@ static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0){
 }
 
 static void _x2c_gensym_defer_cleanup_1(void * _x2c_gensym_defer_opaque_1){
-  x2c_descriptor_thread_start_end(0);
+  Scope_pop();
 }
 
 static void _x2c_gensym_defer_cleanup_2(void * _x2c_gensym_defer_opaque_2){
-  Scope_pop();
+  x2c_descriptor_thread_start_end(0);
 }
 
 static void _x2c_gensym_defer_cleanup_3(void * _x2c_gensym_defer_opaque_3){

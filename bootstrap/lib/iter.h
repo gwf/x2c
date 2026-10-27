@@ -47,11 +47,7 @@ struct UnzipShared{
 #include <limits.h>
 #include <stdlib.h>
 #define UNZIP_COMPACT_THRESHOLD 256
-Iter Iter_init(Iter iter, Var obj, IterNextFn next, Var state);
-
 Iter Iter_new(void);
-
-int Iter_try_next(Iter iter, Var * out);
 
 Var Iter_next(Iter iter);
 
@@ -69,9 +65,9 @@ Iter Iter_accumulate(Iter iter, Var initial, Iter dest);
 
 Iter Iter_zip(Iter left, Iter right, Iter dest);
 
-Iter Iter_zip_with(Iter left, Iter right, Func fn, Iter dest);
-
 Iter Iter_map2(Iter left, Iter right, Func fn, Iter dest);
+
+Iter Iter_zip_with(Iter left, Iter right, Func fn, Iter dest);
 
 Iter Iter_enumerate(Iter iter, int start, Iter dest);
 
@@ -84,6 +80,8 @@ Iter Iter_repeat(Var value, int count, Iter dest);
 Iter Iter_unique(Iter iter, Iter dest);
 
 Iter Iter_unzip(Iter iter, UnzipShared * shared, Iter dest);
+
+Iter Iter_init(Iter iter, Var obj, IterNextFn next, Var state);
 
 Var Iter_foldl(Iter iter, Var seed, Func fn);
 
@@ -102,6 +100,8 @@ Var Iter_product(Iter iter);
 Var Iter_max(Iter iter);
 
 Var Iter_min(Iter iter);
+
+int Iter_try_next(Iter iter, Var * out);
 
 
 #endif /* __GUARD_0x134469EC__ */

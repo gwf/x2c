@@ -11,13 +11,11 @@
 #include "json.h"
 #include "x2c.h"
 #include "lisp/lisp.h"
-Var lisp_last(Var values);
-
 Var lisp_begin(List values);
 
-Var lisp_member(Var value, Var values);
+Var lisp_last(Var values);
 
-Var lisp_assoc(Var key, Var pairs);
+Var lisp_member(Var value, Var values);
 
 Var lisp_append(List lists);
 
@@ -34,8 +32,6 @@ Var lisp_div(Var a, Var b);
 Var lisp_mod(Var a, Var b);
 
 Var lisp_caar(Var v);
-
-Var lisp_cadr(Var v);
 
 Var lisp_cdar(Var v);
 
@@ -61,11 +57,15 @@ Var lisp_match(Var input, Var pat);
 
 Var lisp_bound(Var bindings, Var name);
 
+Var lisp_assoc(Var key, Var pairs);
+
+Var lisp_cadr(Var v);
+
 Var lisp_search_replace(Var input, Var pat, Var template);
 
-Var lisp_binder(Var value);
-
 Var lisp_binders(Var pat);
+
+Var lisp_binder(Var value);
 
 Var lisp_binder_lets(Var bindings, Var binders);
 

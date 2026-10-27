@@ -28,15 +28,15 @@ Var Context_export_scope(Scope source_scope, Pool pool, Var value);
 
 Var Context_export_nested(Context c, Var value);
 
-int Context_owns(Context context, void * allocation);
-
 Scope * Context_export_destination(Context c);
 
 void Context_move_allocation(Context c, void * allocation);
 
-void Context_move_scope(Context c, Scope storage);
-
 void Context_move_block(Context c, Block block);
+
+int Context_owns(Context context, void * allocation);
+
+void Context_move_scope(Context c, Scope storage);
 
 Context Context_open(void);
 
@@ -48,11 +48,11 @@ Context Context_open_isolated_named(const char * name);
 
 Context Context_current(void);
 
-void Context_close(Context c);
-
 void Context_cleanup(Context value);
 
 void Context_initialize(void);
+
+void Context_close(Context c);
 
 
 #endif /* __GUARD_0x87EC50EF__ */

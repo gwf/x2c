@@ -42,22 +42,6 @@ static int f5_cells____try_own_node(Var node);
 
 
 
-static inline Var car(List x){
-  return List_truth(x) ? x -> car :((void) 0, Void);
-}
-
-static inline List cdr(List x){
-  return List_truth(x) ? x -> cdr : NULL;
-}
-
-static inline Var List_car(List lst){
-  return car(lst);
-}
-
-static inline List List_cdr(List lst){
-  return cdr(lst);
-}
-
 static inline Var List_caar(List lst){
   return car(Var_list_payload(car(lst)));
 }
@@ -90,6 +74,8 @@ static inline Var Var_caddr(Var var){
   return car(cdr(cdr(Var_list_payload(var))));
 }
 
+static inline Var List_car(List lst);
+
 static inline int List_try_next(List lst, List * cursor, Var * out){
   if(! cursor) return 0;
   if(! out) return 0;
@@ -98,6 +84,22 @@ static inline int List_try_next(List lst, List * cursor, Var * out){
   (* out) = List_car(rest);
   (* cursor) = rest -> cdr;
   return 1;
+}
+
+static inline Var List_car(List lst){
+  return car(lst);
+}
+
+static inline Var car(List x){
+  return List_truth(x) ? x -> car :((void) 0, Void);
+}
+
+static inline List List_cdr(List lst){
+  return cdr(lst);
+}
+
+static inline List cdr(List x){
+  return List_truth(x) ? x -> cdr : NULL;
 }
 
 static int f9_traversal____next(Iter iter, Var * out);
@@ -110,9 +112,9 @@ static int f9_traversal____unpack_va(List src, unsigned n, va_list ap, int lists
 
 static List f8_building____prepend_array(Array values, List tail);
 
-static List f8_building____concat_va(unsigned n, va_list ap);
-
 static List f8_building____concat_lists(Array lists);
+
+static List f8_building____concat_va(unsigned n, va_list ap);
 
 static List f8_building____list_va(unsigned n, va_list ap);
 
@@ -130,13 +132,13 @@ f9_rendering___Render;
 
 static void f9_rendering____value(f9_rendering___Render * r, Var elem);
 
+static void f9_rendering____items(f9_rendering___Render * r, List lst);
+
 static void f9_rendering____leaf(f9_rendering___Render * r, Var elem);
 
 static void f9_rendering____nil(Buffer out);
 
 static int f9_rendering____fits(f9_rendering___Render * r, List elem);
-
-static void f9_rendering____items(f9_rendering___Render * r, List lst);
 
 static void f9_rendering____flat(f9_rendering___Render * r, Var elem);
 
@@ -178,13 +180,13 @@ static void _x2c_gensym_defer_cleanup_3(void * _x2c_gensym_defer_opaque_3);
 
 typedef struct _x2c_gensym_defer_env_4{
   const void * _x2c_gensym_defer_capture_4;
+  const void * _x2c_gensym_defer_capture_5;
 }
 _x2c_gensym_defer_env_4;
 
 static void _x2c_gensym_defer_cleanup_4(void * _x2c_gensym_defer_opaque_4);
 
 typedef struct _x2c_gensym_defer_env_5{
-  const void * _x2c_gensym_defer_capture_5;
   const void * _x2c_gensym_defer_capture_6;
 }
 _x2c_gensym_defer_env_5;
@@ -330,19 +332,7 @@ List List_new(List items){
   return items;
 }
 
-#include "error.h"
-
-
-
-
-List cons(Var head, List tail){
-  if(Var_is_void(head)){
-    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/list/cells.x",.function = "cons",.line = 21,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_0, 48270474208, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("List.cons")), NULL))));
-    __builtin_unreachable();
-  }
-  return List_cons_in(Pool_current(), head, tail);
-}
+List cons(Var head, List tail);
 
 List List_cons(Var head, List tail){
   return cons(head, tail);
@@ -350,6 +340,20 @@ List List_cons(Var head, List tail){
 
 List Var_cons(Var head, List tail){
   return cons(head, tail);
+}
+
+#include "error.h"
+
+
+
+
+List cons(Var head, List tail){
+  if(Var_is_void(head)){
+    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/list/cells.x",.function = "cons",.line = 27,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_0, 48270474208, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("List.cons")), NULL))));
+    __builtin_unreachable();
+  }
+  return List_cons_in(Pool_current(), head, tail);
 }
 
 unsigned List_hash(List lst){
@@ -361,11 +365,7 @@ unsigned List_hash(List lst){
   return result ? result : - 1;
 }
 
-int List_equal(List a, List b){
-  if((void *) a ==(void *) b) return 1;
-  if(! List_truth(a) || ! List_truth(b)) return 0;
-  return Var_same(a -> car, b -> car) && a -> cdr == b -> cdr;
-}
+int List_equal(List a, List b);
 
 int List_compare(List a, List b){
   if((void *) a ==(void *) b) return 0;
@@ -379,10 +379,20 @@ int List_compare(List a, List b){
   return List_truth(a) ? 1 : - 1;
 }
 
+int List_equal(List a, List b){
+  if((void *) a ==(void *) b) return 1;
+  if(! List_truth(a) || ! List_truth(b)) return 0;
+  return Var_same(a -> car, b -> car) && a -> cdr == b -> cdr;
+}
+
 List List_promote(List lst){
   if(! List_truth(lst)) return lst;
   f5_cells____promote_node(List_var(lst));
   return lst;
+}
+
+int List_try_own(List lst){
+  return ! List_truth(lst) || f5_cells____try_own_node(List_var(lst));
 }
 
 String Var_as_string(Var);
@@ -396,10 +406,6 @@ static void f5_cells____promote_node(Var node){
     f5_cells____promote_node(cur -> car);
   }
 
-}
-
-int List_try_own(List lst){
-  return ! List_truth(lst) || f5_cells____try_own_node(List_var(lst));
 }
 
 static int f5_cells____try_own_node(Var node){
@@ -426,21 +432,6 @@ Iter List_iter(List lst, Iter dest){
   return Iter_init(dest, List_var(lst), f9_traversal____next, List_var(lst));
 }
 
-static int f9_traversal____next(Iter iter, Var * out){
-  List lst = Var_list_payload(iter -> state);
-  if(! List_truth(lst)) return 0;
-  * out = List_car(lst);
-  lst = lst -> cdr;
-  iter -> state = List_var(lst);
-  return 1;
-}
-
-int List_len(List lst){
-  int len = 0;
-  for(List l = lst;  List_truth(l);  l = List_cdr(l)) len ++;
-  return len;
-}
-
 Var List_last(List lst){
   if(! List_truth(lst)) return((void) 0, Void);
   List tail;
@@ -448,19 +439,18 @@ Var List_last(List lst){
   return List_car(lst);
 }
 
-int List_index(List l, Var key){
-  for(int index = 0;  List_truth(l);  l = List_cdr(l), index ++) if(x2c_var_equal(l -> car, key)) return index;
-  return - 1;
-}
+int List_index(List l, Var key);
 
 int List_contains(List lst, Var key){
   return List_index(lst, key) != - 1;
 }
 
-List List_nth_cdr(List list, int n){
-  while(n -- > 0 && List_truth(list)) list = List_cdr(list);
-  return list;
+int List_index(List l, Var key){
+  for(int index = 0;  List_truth(l);  l = List_cdr(l), index ++) if(x2c_var_equal(l -> car, key)) return index;
+  return - 1;
 }
+
+List List_nth_cdr(List list, int n);
 
 Var List_getindex(List list, int index){
   if(index < 0){
@@ -479,6 +469,11 @@ Var List_getindex(List list, int index){
   }
   List nth = List_nth_cdr(list, index);
   return List_truth(nth) ? nth -> car :((void) 0, Void);
+}
+
+List List_nth_cdr(List list, int n){
+  while(n -- > 0 && List_truth(list)) list = List_cdr(list);
+  return list;
 }
 
 Var List_assoc(List list, Var key);
@@ -572,11 +567,13 @@ List List_tail(List list, unsigned count){
   return lag;
 }
 
+int List_len(List lst);
+
 List List_subseq(List list, int start, int stop, int step){
   if(step < 1){
     Var _x2c_gensym_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("List.subseq")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/list/traversal.x",.function = "List_subseq",.line = 215,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/list/traversal.x",.function = "List_subseq",.line = 186,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_1, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(1286496), int_var(step));
       __builtin_unreachable();
     }
@@ -586,49 +583,13 @@ List List_subseq(List list, int start, int stop, int step){
   return f9_traversal____collect_subseq(list, start, step, span);
 }
 
-static List f9_traversal____collect_subseq(List list, int start, int step, int span){
-  if(span <= 0) return NULL;
-  for(int i = 0;  List_truth(list) && i < start;  i ++) list = List_cdr(list);
-  Array values = Array_new();
-  const Array _x2c_gensym_macro_acquired_1 = values;
-  {
-    _x2c_gensym_defer_env_1 _x2c_gensym_macro_environment_1 ={
-      0
-    }
-    ;
-    _x2c_gensym_macro_environment_1._x2c_gensym_defer_capture_1 =(const void *) & _x2c_gensym_macro_acquired_1;
-    X2CCleanup _x2c_gensym_defer_record_1 ={
-      .fn = _x2c_gensym_defer_cleanup_1, .env = & _x2c_gensym_macro_environment_1
-    }
-    ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_1);
-    {
-      while(List_truth(list) && span --){
-        Array_push(values, list -> car);
-        for(int i = 0;  List_truth(list) && i < step;  i ++) list = List_cdr(list);
-      }
-      {
-        List _x2c_gensym_return_value_2 = Array_list(values);
-        {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_1);
-          return _x2c_gensym_return_value_2;
-        }
-
-      }
-
-    }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_1);
-  }
-
-}
-
 Array List_array(List lst);
 
 List List_getslice(List list, int start, int stop, int step){
   if(! step){
     Var _x2c_gensym_literal_part_1 = String_var(String_join(NULL, cons(String_var(String_new("List.getslice")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/list/traversal.x",.function = "List_getslice",.line = 240,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/list/traversal.x",.function = "List_getslice",.line = 200,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_2, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_1, Symbol_var(1286496), int_var(step));
       __builtin_unreachable();
     }
@@ -639,56 +600,58 @@ List List_getslice(List list, int start, int stop, int step){
   if(step > 0) return f9_traversal____collect_subseq(list, start, step, span);
   if(span <= 0) return NULL;
   Array source = List_array(list);
-  const Array _x2c_gensym_macro_acquired_2 = source;
+  const Array _x2c_gensym_macro_acquired_1 = source;
   {
-    _x2c_gensym_defer_env_3 _x2c_gensym_macro_environment_3 ={
+    _x2c_gensym_defer_env_2 _x2c_gensym_macro_environment_2 ={
       0
     }
     ;
-    _x2c_gensym_macro_environment_3._x2c_gensym_defer_capture_3 =(const void *) & _x2c_gensym_macro_acquired_2;
-    X2CCleanup _x2c_gensym_defer_record_2 ={
-      .fn = _x2c_gensym_defer_cleanup_3, .env = & _x2c_gensym_macro_environment_3
+    _x2c_gensym_macro_environment_2._x2c_gensym_defer_capture_2 =(const void *) & _x2c_gensym_macro_acquired_1;
+    X2CCleanup _x2c_gensym_defer_record_1 ={
+      .fn = _x2c_gensym_defer_cleanup_2, .env = & _x2c_gensym_macro_environment_2
     }
     ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_2);
+    x2c_cleanup_push(& _x2c_gensym_defer_record_1);
     {
       Array values = Array_new();
-      const Array _x2c_gensym_macro_acquired_3 = values;
+      const Array _x2c_gensym_macro_acquired_2 = values;
       {
-        _x2c_gensym_defer_env_2 _x2c_gensym_macro_environment_2 ={
+        _x2c_gensym_defer_env_1 _x2c_gensym_macro_environment_1 ={
           0
         }
         ;
-        _x2c_gensym_macro_environment_2._x2c_gensym_defer_capture_2 =(const void *) & _x2c_gensym_macro_acquired_3;
-        X2CCleanup _x2c_gensym_defer_record_3 ={
-          .fn = _x2c_gensym_defer_cleanup_2, .env = & _x2c_gensym_macro_environment_2
+        _x2c_gensym_macro_environment_1._x2c_gensym_defer_capture_1 =(const void *) & _x2c_gensym_macro_acquired_2;
+        X2CCleanup _x2c_gensym_defer_record_2 ={
+          .fn = _x2c_gensym_defer_cleanup_1, .env = & _x2c_gensym_macro_environment_1
         }
         ;
-        x2c_cleanup_push(& _x2c_gensym_defer_record_3);
+        x2c_cleanup_push(& _x2c_gensym_defer_record_2);
         {
           for(int i = 0;  i < span;  i ++) Array_push(values, Array_getindex(source, start + i * step));
           {
-            List _x2c_gensym_return_value_3 = Array_list(values);
+            List _x2c_gensym_return_value_2 = Array_list(values);
             {
-              x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
               x2c_cleanup_leave(& _x2c_gensym_defer_record_2);
-              return _x2c_gensym_return_value_3;
+              x2c_cleanup_leave(& _x2c_gensym_defer_record_1);
+              return _x2c_gensym_return_value_2;
             }
 
           }
 
         }
-        x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
+        x2c_cleanup_leave(& _x2c_gensym_defer_record_2);
       }
 
     }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_2);
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_1);
   }
 
 }
 
-static int f9_traversal____is_active_canonical(List list){
-  return x2c_var_identical(Pool_lookup(Pool_current(), List_var(list)), List_var(list));
+int List_len(List lst){
+  int len = 0;
+  for(List l = lst;  List_truth(l);  l = List_cdr(l)) len ++;
+  return len;
 }
 
 int List_unpack_n(List src, unsigned destination_count, ...){
@@ -707,11 +670,60 @@ int List_unpack_vars_n(List src, unsigned destination_count, ...){
   return count;
 }
 
+static int f9_traversal____next(Iter iter, Var * out){
+  List lst = Var_list_payload(iter -> state);
+  if(! List_truth(lst)) return 0;
+  * out = List_car(lst);
+  lst = lst -> cdr;
+  iter -> state = List_var(lst);
+  return 1;
+}
+
+static List f9_traversal____collect_subseq(List list, int start, int step, int span){
+  if(span <= 0) return NULL;
+  for(int i = 0;  List_truth(list) && i < start;  i ++) list = List_cdr(list);
+  Array values = Array_new();
+  const Array _x2c_gensym_macro_acquired_3 = values;
+  {
+    _x2c_gensym_defer_env_3 _x2c_gensym_macro_environment_3 ={
+      0
+    }
+    ;
+    _x2c_gensym_macro_environment_3._x2c_gensym_defer_capture_3 =(const void *) & _x2c_gensym_macro_acquired_3;
+    X2CCleanup _x2c_gensym_defer_record_3 ={
+      .fn = _x2c_gensym_defer_cleanup_3, .env = & _x2c_gensym_macro_environment_3
+    }
+    ;
+    x2c_cleanup_push(& _x2c_gensym_defer_record_3);
+    {
+      while(List_truth(list) && span --){
+        Array_push(values, list -> car);
+        for(int i = 0;  List_truth(list) && i < step;  i ++) list = List_cdr(list);
+      }
+      {
+        List _x2c_gensym_return_value_3 = Array_list(values);
+        {
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
+          return _x2c_gensym_return_value_3;
+        }
+
+      }
+
+    }
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
+  }
+
+}
+
+static int f9_traversal____is_active_canonical(List list){
+  return x2c_var_identical(Pool_lookup(Pool_current(), List_var(list)), List_var(list));
+}
+
 static int f9_traversal____unpack_va(List src, unsigned n, va_list ap, int lists){
   if(n > INT_MAX){
     Var _x2c_gensym_literal_part_2 = String_var(String_join(NULL, cons(String_var(String_new("List.unpack_n")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/list/traversal.x",.function = "f9_traversal____unpack_va",.line = 291,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/list/traversal.x",.function = "f9_traversal____unpack_va",.line = 297,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_3, 1358596898646632, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_2, Symbol_var(7318440), unsigned_var(n));
       __builtin_unreachable();
     }
@@ -736,54 +748,20 @@ List Array_list(Array arr){
   return f8_building____prepend_array(arr, NULL);
 }
 
-static List f8_building____prepend_array(Array values, List tail){
-  Var * items = values -> bytes;
-  for(size_t i = Array_len(values);  i;  i --) tail = cons(items[i - 1], tail);
-  return tail;
-}
-
-List Array_list_free(Array arr){
+Array List_array(List lst){
+  Array output = Array_new(), result = NULL;
   {
     _x2c_gensym_defer_env_4 _x2c_gensym_macro_environment_4 ={
       0
     }
     ;
-    _x2c_gensym_macro_environment_4._x2c_gensym_defer_capture_4 =(const void *) & arr;
+    _x2c_gensym_macro_environment_4._x2c_gensym_defer_capture_4 =(const void *) & result;
+    _x2c_gensym_macro_environment_4._x2c_gensym_defer_capture_5 =(const void *) & output;
     X2CCleanup _x2c_gensym_defer_record_4 ={
       .fn = _x2c_gensym_defer_cleanup_4, .env = & _x2c_gensym_macro_environment_4
     }
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_4);
-    {
-      {
-        List _x2c_gensym_return_value_4 = Array_list(arr);
-        {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_4);
-          return _x2c_gensym_return_value_4;
-        }
-
-      }
-
-    }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_4);
-  }
-
-}
-
-Array List_array(List lst){
-  Array output = Array_new(), result = NULL;
-  {
-    _x2c_gensym_defer_env_5 _x2c_gensym_macro_environment_5 ={
-      0
-    }
-    ;
-    _x2c_gensym_macro_environment_5._x2c_gensym_defer_capture_5 =(const void *) & result;
-    _x2c_gensym_macro_environment_5._x2c_gensym_defer_capture_6 =(const void *) & output;
-    X2CCleanup _x2c_gensym_defer_record_5 ={
-      .fn = _x2c_gensym_defer_cleanup_5, .env = & _x2c_gensym_macro_environment_5
-    }
-    ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_5);
     {
       {
         Var value;
@@ -797,19 +775,21 @@ Array List_array(List lst){
 
       }
       {
-        Array _x2c_gensym_return_value_5 = result = output;
+        Array _x2c_gensym_return_value_4 = result = output;
         {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_5);
-          return _x2c_gensym_return_value_5;
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_4);
+          return _x2c_gensym_return_value_4;
         }
 
       }
 
     }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_5);
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_4);
   }
 
 }
+
+List Array_list_free(Array arr);
 
 List Map_list(Map map){
   Array pairs = Array_new();
@@ -827,6 +807,34 @@ List Map_list(Map map){
 
   }
   return Array_list_free(pairs);
+}
+
+List Array_list_free(Array arr){
+  {
+    _x2c_gensym_defer_env_5 _x2c_gensym_macro_environment_5 ={
+      0
+    }
+    ;
+    _x2c_gensym_macro_environment_5._x2c_gensym_defer_capture_6 =(const void *) & arr;
+    X2CCleanup _x2c_gensym_defer_record_5 ={
+      .fn = _x2c_gensym_defer_cleanup_5, .env = & _x2c_gensym_macro_environment_5
+    }
+    ;
+    x2c_cleanup_push(& _x2c_gensym_defer_record_5);
+    {
+      {
+        List _x2c_gensym_return_value_5 = Array_list(arr);
+        {
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_5);
+          return _x2c_gensym_return_value_5;
+        }
+
+      }
+
+    }
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_5);
+  }
+
 }
 
 List Iter_list(Iter iter){
@@ -869,10 +877,8 @@ List Iter_list(Iter iter){
 
 }
 
-List List_append(List a, List b){
-  if(! List_truth(a)) return b;
-  if(! List_truth(b)) return a;
-  Array values = List_array(a);
+List List_concat(List lists){
+  Array values = List_array(lists);
   const Array _x2c_gensym_macro_acquired_5 = values;
   {
     _x2c_gensym_defer_env_7 _x2c_gensym_macro_environment_7 ={
@@ -887,7 +893,7 @@ List List_append(List a, List b){
     x2c_cleanup_push(& _x2c_gensym_defer_record_7);
     {
       {
-        List _x2c_gensym_return_value_7 = f8_building____prepend_array(values, b);
+        List _x2c_gensym_return_value_7 = f8_building____concat_lists(values);
         {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_7);
           return _x2c_gensym_return_value_7;
@@ -901,8 +907,18 @@ List List_append(List a, List b){
 
 }
 
-List List_concat(List lists){
-  Array values = List_array(lists);
+List List_concat_n(unsigned list_count, ...){
+  va_list ap;
+  va_start(ap, list_count);
+  List out = f8_building____concat_va(list_count, ap);
+  va_end(ap);
+  return out;
+}
+
+List List_append(List a, List b){
+  if(! List_truth(a)) return b;
+  if(! List_truth(b)) return a;
+  Array values = List_array(a);
   const Array _x2c_gensym_macro_acquired_6 = values;
   {
     _x2c_gensym_defer_env_8 _x2c_gensym_macro_environment_8 ={
@@ -917,7 +933,7 @@ List List_concat(List lists){
     x2c_cleanup_push(& _x2c_gensym_defer_record_8);
     {
       {
-        List _x2c_gensym_return_value_8 = f8_building____concat_lists(values);
+        List _x2c_gensym_return_value_8 = f8_building____prepend_array(values, b);
         {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_8);
           return _x2c_gensym_return_value_8;
@@ -931,19 +947,50 @@ List List_concat(List lists){
 
 }
 
-List List_concat_n(unsigned list_count, ...){
+List List_list_n(unsigned element_count, ...){
   va_list ap;
-  va_start(ap, list_count);
-  List out = f8_building____concat_va(list_count, ap);
+  va_start(ap, element_count);
+  List out = f8_building____list_va(element_count, ap);
   va_end(ap);
   return out;
+}
+
+List List_reverse(List lst){
+  List rev = NULL;
+  {
+    Var value;
+    List _x2c_gensym_macro_object_4 = lst;
+    List _x2c_gensym_macro_cursor_4 = _x2c_gensym_macro_object_4;
+    Var _x2c_gensym_macro_cursor_output_4;
+    while(List_try_next(_x2c_gensym_macro_object_4, &(_x2c_gensym_macro_cursor_4), &(_x2c_gensym_macro_cursor_output_4))){
+      value = _x2c_gensym_macro_cursor_output_4;
+      rev = cons(value, rev);
+    }
+
+  }
+  return rev;
+}
+
+static List f8_building____prepend_array(Array values, List tail){
+  Var * items = values -> bytes;
+  for(size_t i = Array_len(values);  i;  i --) tail = cons(items[i - 1], tail);
+  return tail;
+}
+
+static List f8_building____concat_lists(Array lists){
+  List tail = NULL;
+  for(int i =(int) Array_len(lists) - 1;  i >= 0;  i --){
+    List current = Var_list_payload(Array_getindex(lists, i));
+    tail = List_append(current, tail);
+  }
+  return tail;
 }
 
 static List f8_building____concat_va(unsigned n, va_list ap){
   if(n > INT_MAX){
     Var _x2c_gensym_literal_part_3 = String_var(String_join(NULL, cons(String_var(String_new("List.concat_n")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/list/building.x",.function = "f8_building____concat_va",.line = 112,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/list/building.x",.function = "f8_building____concat_va",.line = 149,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_4, 1358596898646632, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_3, Symbol_var(7318440), unsigned_var(n));
       __builtin_unreachable();
     }
@@ -979,23 +1026,6 @@ static List f8_building____concat_va(unsigned n, va_list ap){
 
 }
 
-static List f8_building____concat_lists(Array lists){
-  List tail = NULL;
-  for(int i =(int) Array_len(lists) - 1;  i >= 0;  i --){
-    List current = Var_list_payload(Array_getindex(lists, i));
-    tail = List_append(current, tail);
-  }
-  return tail;
-}
-
-List List_list_n(unsigned element_count, ...){
-  va_list ap;
-  va_start(ap, element_count);
-  List out = f8_building____list_va(element_count, ap);
-  va_end(ap);
-  return out;
-}
-
 static List f8_building____list_va(unsigned n, va_list ap){
   Array values = Array_new();
   const Array _x2c_gensym_macro_acquired_8 = values;
@@ -1016,7 +1046,7 @@ static List f8_building____list_va(unsigned n, va_list ap){
         if(Var_is_void(value)){
           Var _x2c_gensym_literal_part_4 = String_var(String_join(NULL, cons(String_var(String_new("List.list_n")), NULL)));
           {
-            static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/list/building.x",.function = "f8_building____list_va",.line = 146,.runtime = 1};
+            static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/list/building.x",.function = "f8_building____list_va",.line = 159,.runtime = 1};
             x2c_error_raise_n(& _x2c_gensym_error_site_5, 48270474208, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_4, Symbol_var(19800432), unsigned_var(i));
             __builtin_unreachable();
           }
@@ -1037,22 +1067,6 @@ static List f8_building____list_va(unsigned n, va_list ap){
     x2c_cleanup_leave(& _x2c_gensym_defer_record_10);
   }
 
-}
-
-List List_reverse(List lst){
-  List rev = NULL;
-  {
-    Var value;
-    List _x2c_gensym_macro_object_4 = lst;
-    List _x2c_gensym_macro_cursor_4 = _x2c_gensym_macro_object_4;
-    Var _x2c_gensym_macro_cursor_output_4;
-    while(List_try_next(_x2c_gensym_macro_object_4, &(_x2c_gensym_macro_cursor_4), &(_x2c_gensym_macro_cursor_output_4))){
-      value = _x2c_gensym_macro_cursor_output_4;
-      rev = cons(value, rev);
-    }
-
-  }
-  return rev;
 }
 
 List List_map(List lst, Func fn){
@@ -1159,6 +1173,13 @@ int List_all(List lst, Func pred){
   return Iter_all(List_iter(lst, & storage), pred);
 }
 
+List List_zip_with(List a, List b, Func fn);
+
+List List_map2(List a, List b, Func fn){
+  if(! fn) return NULL;
+  return List_zip_with(a, b, fn);
+}
+
 List List_zip_with(List a, List b, Func fn){
   Array values = Array_new();
   const Array _x2c_gensym_macro_acquired_11 = values;
@@ -1192,11 +1213,6 @@ List List_zip_with(List a, List b, Func fn){
     x2c_cleanup_leave(& _x2c_gensym_defer_record_13);
   }
 
-}
-
-List List_map2(List a, List b, Func fn){
-  if(! fn) return NULL;
-  return List_zip_with(a, b, fn);
 }
 
 List List_sort(List lst){
@@ -1424,6 +1440,11 @@ List List_flatten_all(List lst){
 
 }
 
+List List_sublis(List alist, List tree){
+  if(! List_truth(tree)) return NULL;
+  return Var_list_payload(f15_transformations____sublis_node(alist, List_var(tree)));
+}
+
 static void f15_transformations____flatten_into(Array values, List lst){
   {
     Var head;
@@ -1441,11 +1462,6 @@ static void f15_transformations____flatten_into(Array values, List lst){
 
   }
 
-}
-
-List List_sublis(List alist, List tree){
-  if(! List_truth(tree)) return NULL;
-  return Var_list_payload(f15_transformations____sublis_node(alist, List_var(tree)));
 }
 
 static Var f15_transformations____sublis_node(List alist, Var node){
@@ -1618,6 +1634,17 @@ static void f9_rendering____value(f9_rendering___Render * r, Var elem){
   else if(! f9_rendering____fits(&((* r)), Var_list_payload(elem))) f9_rendering____items(&((* r)), Var_list_payload(elem));
 }
 
+static void f9_rendering____items(f9_rendering___Render * r, List lst){
+  Buffer out =(* r).out;
+  if(out -> pos - Buffer_tabstop(out) > 5) Buffer_newline_indent(out);
+  f9_rendering____open(lst, out);
+  for(List l = lst;  List_truth(l);  l = List_cdr(l)){
+    f9_rendering____value(&((* r)), List_car(l));
+    if(List_truth(List_cdr(l))) Buffer_write(out, " ");
+  }
+  f9_rendering____close(out);
+}
+
 static void f9_rendering____leaf(f9_rendering___Render * r, Var elem){
   Buffer out =(* r).out;
   size_t before = out -> content -> length, position = out -> pos;
@@ -1678,17 +1705,6 @@ static int f9_rendering____fits(f9_rendering___Render * r, List elem){
 
 }
 
-static void f9_rendering____items(f9_rendering___Render * r, List lst){
-  Buffer out =(* r).out;
-  if(out -> pos - Buffer_tabstop(out) > 5) Buffer_newline_indent(out);
-  f9_rendering____open(lst, out);
-  for(List l = lst;  List_truth(l);  l = List_cdr(l)){
-    f9_rendering____value(&((* r)), List_car(l));
-    if(List_truth(List_cdr(l))) Buffer_write(out, " ");
-  }
-  f9_rendering____close(out);
-}
-
 static void f9_rendering____flat(f9_rendering___Render * r, Var elem){
   if(! Var_is_row(elem, 9, 7, 4)) f9_rendering____write_leaf(&((* r)), elem);
   else if(! List_truth(Var_list(elem))) Buffer_write((* r).out, "()");
@@ -1747,12 +1763,12 @@ static void _x2c_gensym_defer_cleanup_3(void * _x2c_gensym_defer_opaque_3){
 
 static void _x2c_gensym_defer_cleanup_4(void * _x2c_gensym_defer_opaque_4){
   _x2c_gensym_defer_env_4 * _x2c_gensym_defer_data_4 =(_x2c_gensym_defer_env_4 *) _x2c_gensym_defer_opaque_4;
-  Array_free((*(Array *) _x2c_gensym_defer_data_4->_x2c_gensym_defer_capture_4));
+  if((*(Array *) _x2c_gensym_defer_data_4->_x2c_gensym_defer_capture_4) == NULL) Array_free((*(Array *) _x2c_gensym_defer_data_4->_x2c_gensym_defer_capture_5));
 }
 
 static void _x2c_gensym_defer_cleanup_5(void * _x2c_gensym_defer_opaque_5){
   _x2c_gensym_defer_env_5 * _x2c_gensym_defer_data_5 =(_x2c_gensym_defer_env_5 *) _x2c_gensym_defer_opaque_5;
-  if((*(Array *) _x2c_gensym_defer_data_5->_x2c_gensym_defer_capture_5) == NULL) Array_free((*(Array *) _x2c_gensym_defer_data_5->_x2c_gensym_defer_capture_6));
+  Array_free((*(Array *) _x2c_gensym_defer_data_5->_x2c_gensym_defer_capture_6));
 }
 
 static void _x2c_gensym_defer_cleanup_6(void * _x2c_gensym_defer_opaque_6){

@@ -651,8 +651,6 @@ _x2c_gensym_initializer_choice_6D011170_0((0 < sizeof(cli_options) / sizeof(cli_
   0
 }
 ))
-static CliCommand * f7_parsing____command_row(const char * word);
-
 typedef struct f7_parsing___Parse{
   CliRequest request;
   Array args;
@@ -660,6 +658,13 @@ typedef struct f7_parsing___Parse{
   Array inputs, run_args, include_dirs, cpp_args, cc_args, ld_args;
 }
 f7_parsing___Parse;
+
+typedef struct f7_parsing___Given{
+  CliOption * option;
+  String spelling, value;
+  int attached;
+}
+f7_parsing___Given;
 
 static CliRequest f7_parsing____parse_command(Array args, CliCommand * command);
 
@@ -677,20 +682,13 @@ static void f7_parsing____check(CliRequest r);
 
 static void f7_parsing____help_command(Array args);
 
-typedef struct f7_parsing___Given{
-  CliOption * option;
-  String spelling, value;
-  int attached;
-}
-f7_parsing___Given;
+static CliCommand * f7_parsing____command_row(const char * word);
 
 static void f7_parsing____option(f7_parsing___Parse * p, String arg, int * i);
 
 static void f7_parsing____save_temps_dir(CliRequest r, String arg);
 
 static f7_parsing___Given f7_parsing____take_option(Array args, int * i, Symbol command);
-
-static CliOption * f7_parsing____find_option(String spelling, Symbol command, String * attached);
 
 static void f7_parsing____apply(f7_parsing___Parse * p, f7_parsing___Given given);
 
@@ -710,10 +708,6 @@ static String f7_parsing____xcc_argument(String value);
 
 static void f7_parsing____set_field(CliRequest r, CliOption * option, String value);
 
-static void f7_parsing____native(f7_parsing___Parse * p, int * i);
-
-_Noreturn static void _fail(String message, String note);
-
 static void f7_parsing____cli_fail_output_command(void);
 
 static void f7_parsing____cli_fail_expected_command(String arg);
@@ -722,7 +716,21 @@ static void f7_parsing____unknown_option(String arg, Symbol command);
 
 static String f7_parsing____two_dash(String arg);
 
+static CliOption * f7_parsing____find_option(String spelling, Symbol command, String * attached);
+
 static void f7_parsing____cli_fail_one_dash_removed(String arg, String use);
+
+_Noreturn static void _fail(String message, String note);
+
+static void f7_parsing____native(f7_parsing___Parse * p, int * i);
+
+typedef struct f9_responses___Words{
+  Array out;
+  String path;
+  Buffer word;
+  int line, blank, started, quote, escaped, comment;
+}
+f9_responses___Words;
 
 static void _expand_argument(Array out, String arg, List stack);
 
@@ -734,14 +742,6 @@ static long f9_responses____response_size(FILE * file, String path);
 
 static int f9_responses____valid_utf8(const unsigned char * text);
 
-typedef struct f9_responses___Words{
-  Array out;
-  String path;
-  Buffer word;
-  int line, blank, started, quote, escaped, comment;
-}
-f9_responses___Words;
-
 static Array f9_responses____response_words(String path, const char * text, size_t length);
 
 static void f9_responses____scan(f9_responses___Words * w, int c);
@@ -752,9 +752,9 @@ static void f9_responses____put(f9_responses___Words * w, int c);
 
 static void f9_responses____newline(f9_responses___Words * w);
 
-static void f9_responses____flush(f9_responses___Words * w);
-
 static void f9_responses____finish_words(f9_responses___Words * w);
+
+static void f9_responses____flush(f9_responses___Words * w);
 
 _Noreturn static void f9_responses____response_error(String path, int line, const char * message);
 
@@ -799,14 +799,6 @@ static f4_help___CliGroup f4_help___cli_groups[] ={
 }
 ;
 
-_Noreturn static void _help_exit(Symbol command, int status);
-
-static void f4_help____print_help_usage(void);
-
-static void f4_help____print_top_help(void);
-
-static void f4_help____print_external_commands(void);
-
 typedef struct f4_help___HelpPage{
   Symbol command;
   const char * usage, * response, * end, * notes;
@@ -849,36 +841,44 @@ static f4_help___HelpPage f4_help___help_pages[] ={
 ;
 
 _x2c_gensym_initializer_choice_6D011170_1((0 < sizeof(f4_help___help_pages) / sizeof(f4_help___help_pages[0])), (f4_help___help_pages[0] =(f4_help___HelpPage){
-  45220543335690, _127, "Read additional arguments from a response file", "End option parsing", _128
+  45220543335690, _124, "Read additional arguments from a response file", "End option parsing", _125
 }
 ), (1ULL < sizeof(f4_help___help_pages) / sizeof(f4_help___help_pages[1ULL])), (f4_help___help_pages[1ULL] =(f4_help___HelpPage){
-  5589768, _129, "Read additional arguments from a response file", "End option parsing", _130
+  5589768, _126, "Read additional arguments from a response file", "End option parsing", _127
 }
 ), (2ULL < sizeof(f4_help___help_pages) / sizeof(f4_help___help_pages[2ULL])), (f4_help___help_pages[2ULL] =(f4_help___HelpPage){
-  38236, _131, "Read additional arguments from a response file", "End build options and begin program arguments", _132
+  38236, _128, "Read additional arguments from a response file", "End build options and begin program arguments", _129
 }
 ), (3ULL < sizeof(f4_help___help_pages) / sizeof(f4_help___help_pages[3ULL])), (f4_help___help_pages[3ULL] =(f4_help___HelpPage){
-  29038, _133, "Read additional arguments from a response file", NULL, _134
+  29038, _130, "Read additional arguments from a response file", NULL, _131
 }
 ), (4ULL < sizeof(f4_help___help_pages) / sizeof(f4_help___help_pages[4ULL])), (f4_help___help_pages[4ULL] =(f4_help___HelpPage){
-  1282559016, _135, "Read additional options from a response file", NULL, _136
+  1282559016, _132, "Read additional options from a response file", NULL, _133
 }
 ), (5ULL < sizeof(f4_help___help_pages) / sizeof(f4_help___help_pages[5ULL])), (f4_help___help_pages[5ULL] =(f4_help___HelpPage){
-  11180, _137, "Read additional arguments from a response file", NULL, _138
+  11180, _134, "Read additional arguments from a response file", NULL, _135
 }
 ), (6ULL < sizeof(f4_help___help_pages) / sizeof(f4_help___help_pages[6ULL])), (f4_help___help_pages[6ULL] =(f4_help___HelpPage){
-  20308036376, _139, "Read additional arguments from a response file", NULL, _140
+  20308036376, _136, "Read additional arguments from a response file", NULL, _137
 }
 ), (7ULL < sizeof(f4_help___help_pages) / sizeof(f4_help___help_pages[7ULL])), (f4_help___help_pages[7ULL] =(f4_help___HelpPage){
-  1219329418, _141, "Read additional arguments from a response file"
+  1219329418, _138, "Read additional arguments from a response file"
 }
 ), (8ULL < sizeof(f4_help___help_pages) / sizeof(f4_help___help_pages[8ULL])), (f4_help___help_pages[8ULL] =(f4_help___HelpPage){
-  806120, _142, "Read additional arguments from a response file"
+  806120, _139, "Read additional arguments from a response file"
 }
 ), (9ULL < sizeof(f4_help___help_pages) / sizeof(f4_help___help_pages[9ULL])), (f4_help___help_pages[9ULL] =(f4_help___HelpPage){
   0
 }
 ))
+_Noreturn static void _help_exit(Symbol command, int status);
+
+static void f4_help____print_help_usage(void);
+
+static void f4_help____print_top_help(void);
+
+static void f4_help____print_external_commands(void);
+
 static f4_help___HelpPage * f4_help____help_page(Symbol command);
 
 static void f4_help____print_page(f4_help___HelpPage * page);
@@ -887,9 +887,9 @@ static void f4_help____print_options(Symbol command);
 
 static void f4_help____print_group(Symbol command, f4_help___CliGroup * group);
 
-static int f4_help____listed(CliOption * option, Symbol command);
-
 static int f4_help____in_group(CliOption * option, Symbol command, Symbol group);
+
+static int f4_help____listed(CliOption * option, Symbol command);
 
 static void f4_help____print_option(const CliOption * option);
 
@@ -916,7 +916,7 @@ _x2c_gensym_initializer_choice_6D011170_2((0 < sizeof(f8_requests___target_kinds
   404971770155786, _145, _145, _146, _146
 }
 ), (1ULL < sizeof(f8_requests___target_kinds) / sizeof(f8_requests___target_kinds[1ULL])), (f8_requests___target_kinds[1ULL] =(TargetKind){
-  1381098885964356, _147, _148, _149, _112
+  1381098885964356, _147, _148, _149, _121
 }
 ), (2ULL < sizeof(f8_requests___target_kinds) / sizeof(f8_requests___target_kinds[2ULL])), (f8_requests___target_kinds[2ULL] =(TargetKind){
   904178442, _150, _151, _146, _152
@@ -936,14 +936,14 @@ _x2c_gensym_defer_env_0;
 
 static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0);
 
-static int _x2c_gensym_string_switch_0(String s);
-
 typedef struct _x2c_gensym_defer_env_1{
   const void * _x2c_gensym_defer_capture_1;
 }
 _x2c_gensym_defer_env_1;
 
 static void _x2c_gensym_defer_cleanup_1(void * _x2c_gensym_defer_opaque_1);
+
+static int _x2c_gensym_string_switch_0(String s);
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -1034,64 +1034,64 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _82 = String_new(" ...");
   _83 = String_new("unknown command or global option \'");
   _84 = String_new("\'");
-  _85 = String_new("--");
-  _86 = String_new("@");
-  _87 = String_new(" requires exactly one operand");
-  _88 = String_new(" accepts no operands");
-  _89 = String_new("unknown help command \'");
-  _90 = String_new("--save-temps=");
-  _91 = String_new("=");
-  _92 = String_new("option takes no value \'");
-  _93 = String_new("option requires a value \'");
-  _94 = String_new("job count");
-  _95 = String_new("error limit");
-  _96 = String_new("-isystem");
-  _97 = String_new("-Wl,-rpath,");
-  _98 = String_new("invalid color mode \'");
-  _99 = String_new("unknown target kind \'");
-  _100 = String_new("invalid ");
-  _101 = String_new(" \'");
-  _102 = String_new("C dependency option is driver-owned \'");
-  _103 = String_new("-MMD");
-  _104 = String_new("-MP");
-  _105 = String_new("-MF");
-  _106 = String_new("-MT");
-  _107 = String_new(",-MMD");
-  _108 = String_new(",-MP");
-  _109 = String_new(",-MF");
-  _110 = String_new(",-MT");
-  _111 = String_new("{package}");
-  _112 = String_new(".a");
-  _113 = String_new("unsupported package native argument \'");
-  _114 = String_new("option '-o' needs build or run");
-  _115 = String_new("use '--out-dir' for translation directories");
-  _116 = String_new("expected a command before \'");
-  _117 = String_new("use \'x2c translate ");
-  _118 = String_new("unknown option \'");
-  _119 = String_new("-");
-  _120 = String_new("one-dash long option \'");
-  _121 = String_new("\' was removed");
-  _122 = String_new("use \'");
+  _85 = String_new("{package}");
+  _86 = String_new("-MMD");
+  _87 = String_new("-MP");
+  _88 = String_new("-MF");
+  _89 = String_new("-MT");
+  _90 = String_new(",-MMD");
+  _91 = String_new(",-MP");
+  _92 = String_new(",-MF");
+  _93 = String_new(",-MT");
+  _94 = String_new("--");
+  _95 = String_new("@");
+  _96 = String_new(" requires exactly one operand");
+  _97 = String_new(" accepts no operands");
+  _98 = String_new("unknown help command \'");
+  _99 = String_new("--save-temps=");
+  _100 = String_new("=");
+  _101 = String_new("option takes no value \'");
+  _102 = String_new("option requires a value \'");
+  _103 = String_new("job count");
+  _104 = String_new("error limit");
+  _105 = String_new("-isystem");
+  _106 = String_new("-Wl,-rpath,");
+  _107 = String_new("invalid color mode \'");
+  _108 = String_new("unknown target kind \'");
+  _109 = String_new("invalid ");
+  _110 = String_new(" \'");
+  _111 = String_new("C dependency option is driver-owned \'");
+  _112 = String_new("option '-o' needs build or run");
+  _113 = String_new("use '--out-dir' for translation directories");
+  _114 = String_new("expected a command before \'");
+  _115 = String_new("use \'x2c translate ");
+  _116 = String_new("unknown option \'");
+  _117 = String_new("-");
+  _118 = String_new("one-dash long option \'");
+  _119 = String_new("\' was removed");
+  _120 = String_new("use \'");
+  _121 = String_new(".a");
+  _122 = String_new("unsupported package native argument \'");
   _123 = String_new("recursive response-file inclusion: ");
-  _124 = String_new("Usage:\n  x2c <command> [options]\n\nx2c translates x2c source to C and can optionally compile and link the\nresult with the host C toolchain.\n\nCommands:\n");
-  _125 = String_new("Run \'x2c help <command>\' or \'x2c <command> --help\' for command help.");
-  _126 = String_new("/commands.txt");
-  _127 = String_new("Usage:\n  x2c translate [options] <input.x>...\n\nTranslate each x2c input into a matching C source and header.");
-  _128 = String_new("The output directory defaults to the current directory. Use --out-dir\nto select another directory; missing directories are created.\nShell wildcards are allowed because the shell expands them; x2c does not\ninterpret wildcard characters in input operands.\nInputs translate in parallel, one job per online processor. Under Make\nthe default is one job; -j 1 translates serially.");
-  _129 = String_new("Usage:\n  x2c build [options] <input>...\n  x2c build [options] [--target <name>]\n\nTranslate x2c sources, compile C sources, and link one target.\nWith explicit inputs, the default target is an executable. Without\ninputs, x2c reads the nearest x2c.toml and builds its default\ntarget.");
-  _130 = String_new("Inputs may be .x, .c, .o, or .a files. x2c links its runtime and\nrequired platform libraries automatically. Directory operands and\nunexpanded wildcard operands are rejected.\nDirect builds default to a.out, lib<first-input-stem>.a, or\n<first-input-stem>.so. Compile-only builds default to <stem>.o in the\ncurrent directory; a named build directory keeps multiple objects there.\nManifest products default to <project>/.x2c-build/<target-product>.\nOne manifest target is selected automatically; several need --target\nor project.default-target. Profiles apply only when selected.\nDirect intermediates are temporary. --save-temps retains and reuses them\nin .x2c-build; --save-temps=<dir> and --build-dir <dir> select a directory.\nThe last named directory wins. Under Make, jobs default to one;\notherwise they default to the online processor count.\n--debug logs compiler activity; -g emits native debug information.\nAdd --source-map -O0 to -g for debugging original x2c sources.");
-  _131 = String_new("Usage:\n  x2c run [build-options] <input>... [-- <argument>...]\n  x2c run [build-options] [--target <name>] [-- <argument>...]\n\nBuild one executable and run it. Arguments after -- are passed\nunchanged to the executable.");
-  _132 = String_new("The selected target must be executable. After a successful build,\nx2c returns the program\'s exit status.\nDirect runs use a temporary executable unless intermediates are retained.\n--save-temps retains and reuses intermediates in .x2c-build.\n--save-temps=<dir> and --build-dir <dir> select the retained directory;\nthe last named directory wins. Manifest products default to\n<project>/.x2c-build/<target-product>.\n--debug logs compiler activity; use -g --source-map -O0 for source\ndebugging. See \'x2c help build\' for other build defaults.");
-  _133 = String_new("Usage:\n  x2c new [options] <dir>\n\nCreate a project in <dir> that builds and runs as written: x2c.toml,\nsrc/main.x, and .gitignore. The directory may be missing or empty.");
-  _134 = String_new("The target is named after the last component of <dir>, which may\ncontain letters, digits, \'_\', and \'-\'. Run \'x2c run\' in <dir> next.");
-  _135 = String_new("Usage:\n  x2c script [options] <file> [<argument>...]\n\nRun an x2c source file as a script. The first run builds an executable in\nthe per-user cache; later runs start it directly until the script, a file\nit includes or imports, the compiler, the runtime, or an option changes.");
-  _136 = String_new("Every word after <file> is passed unchanged to the script, including\nwords that begin with - or @. A script whose first line is the shebang\n\'#!/usr/bin/env -S x2c script\' runs directly. The cache is X2C_CACHE_DIR,\nXDG_CACHE_HOME/x2c, or ~/.cache/x2c. Builds remove the entries of\nscripts that no longer exist.");
-  _137 = String_new("Usage:\n  x2c env [options] [name]\n\nPrint the home, executable, include directory, runtime archive, command\ndirectory, identity, package roots, host tools, and script cache this\ncompiler resolved, one \'name = value\' line each, or only one value.");
-  _138 = String_new("The home is X2C_HOME when set; otherwise the nearest directory above\nthe executable, then above the current directory, holding include/\nand etc/compiler-prelude.x. Package roots join with \':\'.");
-  _139 = String_new("Usage:\n  x2c install [options] <package>\n\nInstall one package under <home>/packages. The package is a local\ndirectory, a local .tar.gz, a URL with --sha256, or a name resolved\nthrough the package index. A bundle installs as built; a pure-x2c\nsource package is built by this compiler.");
-  _140 = String_new("A bundle records the x2c version that built it and is refused for\nanother version unless --force. A source package with native\ndependencies is refused; install its bundle instead.");
-  _141 = String_new("Usage:\n  x2c remove [options] <name>\n\nRemove one installed package from <home>/packages.");
-  _142 = String_new("Usage:\n  x2c list\n\nList installed packages as \'name version kind\' lines.");
+  _124 = String_new("Usage:\n  x2c translate [options] <input.x>...\n\nTranslate each x2c input into a matching C source and header.");
+  _125 = String_new("The output directory defaults to the current directory. Use --out-dir\nto select another directory; missing directories are created.\nShell wildcards are allowed because the shell expands them; x2c does not\ninterpret wildcard characters in input operands.\nInputs translate in parallel, one job per online processor. Under Make\nthe default is one job; -j 1 translates serially.");
+  _126 = String_new("Usage:\n  x2c build [options] <input>...\n  x2c build [options] [--target <name>]\n\nTranslate x2c sources, compile C sources, and link one target.\nWith explicit inputs, the default target is an executable. Without\ninputs, x2c reads the nearest x2c.toml and builds its default\ntarget.");
+  _127 = String_new("Inputs may be .x, .c, .o, or .a files. x2c links its runtime and\nrequired platform libraries automatically. Directory operands and\nunexpanded wildcard operands are rejected.\nDirect builds default to a.out, lib<first-input-stem>.a, or\n<first-input-stem>.so. Compile-only builds default to <stem>.o in the\ncurrent directory; a named build directory keeps multiple objects there.\nManifest products default to <project>/.x2c-build/<target-product>.\nOne manifest target is selected automatically; several need --target\nor project.default-target. Profiles apply only when selected.\nDirect intermediates are temporary. --save-temps retains and reuses them\nin .x2c-build; --save-temps=<dir> and --build-dir <dir> select a directory.\nThe last named directory wins. Under Make, jobs default to one;\notherwise they default to the online processor count.\n--debug logs compiler activity; -g emits native debug information.\nAdd --source-map -O0 to -g for debugging original x2c sources.");
+  _128 = String_new("Usage:\n  x2c run [build-options] <input>... [-- <argument>...]\n  x2c run [build-options] [--target <name>] [-- <argument>...]\n\nBuild one executable and run it. Arguments after -- are passed\nunchanged to the executable.");
+  _129 = String_new("The selected target must be executable. After a successful build,\nx2c returns the program\'s exit status.\nDirect runs use a temporary executable unless intermediates are retained.\n--save-temps retains and reuses intermediates in .x2c-build.\n--save-temps=<dir> and --build-dir <dir> select the retained directory;\nthe last named directory wins. Manifest products default to\n<project>/.x2c-build/<target-product>.\n--debug logs compiler activity; use -g --source-map -O0 for source\ndebugging. See \'x2c help build\' for other build defaults.");
+  _130 = String_new("Usage:\n  x2c new [options] <dir>\n\nCreate a project in <dir> that builds and runs as written: x2c.toml,\nsrc/main.x, and .gitignore. The directory may be missing or empty.");
+  _131 = String_new("The target is named after the last component of <dir>, which may\ncontain letters, digits, \'_\', and \'-\'. Run \'x2c run\' in <dir> next.");
+  _132 = String_new("Usage:\n  x2c script [options] <file> [<argument>...]\n\nRun an x2c source file as a script. The first run builds an executable in\nthe per-user cache; later runs start it directly until the script, a file\nit includes or imports, the compiler, the runtime, or an option changes.");
+  _133 = String_new("Every word after <file> is passed unchanged to the script, including\nwords that begin with - or @. A script whose first line is the shebang\n\'#!/usr/bin/env -S x2c script\' runs directly. The cache is X2C_CACHE_DIR,\nXDG_CACHE_HOME/x2c, or ~/.cache/x2c. Builds remove the entries of\nscripts that no longer exist.");
+  _134 = String_new("Usage:\n  x2c env [options] [name]\n\nPrint the home, executable, include directory, runtime archive, command\ndirectory, identity, package roots, host tools, and script cache this\ncompiler resolved, one \'name = value\' line each, or only one value.");
+  _135 = String_new("The home is X2C_HOME when set; otherwise the nearest directory above\nthe executable, then above the current directory, holding include/\nand etc/compiler-prelude.x. Package roots join with \':\'.");
+  _136 = String_new("Usage:\n  x2c install [options] <package>\n\nInstall one package under <home>/packages. The package is a local\ndirectory, a local .tar.gz, a URL with --sha256, or a name resolved\nthrough the package index. A bundle installs as built; a pure-x2c\nsource package is built by this compiler.");
+  _137 = String_new("A bundle records the x2c version that built it and is refused for\nanother version unless --force. A source package with native\ndependencies is refused; install its bundle instead.");
+  _138 = String_new("Usage:\n  x2c remove [options] <name>\n\nRemove one installed package from <home>/packages.");
+  _139 = String_new("Usage:\n  x2c list\n\nList installed packages as \'name version kind\' lines.");
+  _140 = String_new("Usage:\n  x2c <command> [options]\n\nx2c translates x2c source to C and can optionally compile and link the\nresult with the host C toolchain.\n\nCommands:\n");
+  _141 = String_new("Run \'x2c help <command>\' or \'x2c <command> --help\' for command help.");
+  _142 = String_new("/commands.txt");
   _143 = String_new(", ");
   _144 = String_new(" ");
   _145 = String_new("executable");
@@ -1104,20 +1104,15 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _152 = String_new(".so");
   _153 = String_new("shared-library");
   _154 = String_new("shared-library is not supported by this compiler");
-  _155 = String_new("MAKELEVEL");
-  _156 = String_new("x2c 0.15.1");
-  _157 = String_new("input is not a regular file: ");
+  _155 = String_new("x2c 0.15.1");
+  _156 = String_new("input is not a regular file: ");
+  _157 = String_new("MAKELEVEL");
   _158 = String_new("auto");
   _159 = String_new("always");
   _160 = String_new("never");
   _x2c_gensym_static_initialize_0();
   _x2c_gensym_static_initialize_1();
   _x2c_gensym_static_initialize_2();
-}
-
-static CliCommand * f7_parsing____command_row(const char * word){
-  for(CliCommand * row = cli_commands;  row -> name;  row ++) if(row -> name != 535328 && strcmp(word, Symbol_str(row -> name)) == 0) return row;
-  return NULL;
 }
 
 Array CliRequest_read_arguments(int argc, char * * argv);
@@ -1177,6 +1172,69 @@ CliRequest CliRequest_parse_arguments(Array args){
   Diagnostics_driver_error(String_join(NULL, cons(String_var(_83), cons(String_var(first), cons(String_var(_84), NULL)))));
 }
 
+CliRequest CliRequest_package_options(String path, String package){
+  if(! _init_guard_) _file_init_();
+  Array words = Array_new();
+  const Array _x2c_gensym_macro_acquired_1 = words;
+  {
+    _x2c_gensym_defer_env_1 _x2c_gensym_macro_environment_1 ={
+      0
+    }
+    ;
+    _x2c_gensym_macro_environment_1._x2c_gensym_defer_capture_1 =(const void *) & _x2c_gensym_macro_acquired_1;
+    X2CCleanup _x2c_gensym_defer_record_1 ={
+      .fn = _x2c_gensym_defer_cleanup_1, .env = & _x2c_gensym_macro_environment_1
+    }
+    ;
+    x2c_cleanup_push(& _x2c_gensym_defer_record_1);
+    {
+      {
+        String word;
+        List _x2c_gensym_macro_object_0 = _response_arguments(path);
+        List _x2c_gensym_macro_cursor_0 = _x2c_gensym_macro_object_0;
+        Var _x2c_gensym_macro_cursor_output_0;
+        while(List_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_0), &(_x2c_gensym_macro_cursor_output_0))){
+          word = Var_as_string(_x2c_gensym_macro_cursor_output_0);
+          Array_push(words, String_var(String_replace(word, _85, package)));
+        }
+
+      }
+      CliRequest request = xcalloc(1, sizeof(struct CliRequest));
+      request -> command = 5589768;
+      f7_parsing___Parse p ={
+        .request = request, .args = words, .include_dirs = Array_new(), .cpp_args = Array_new(), .cc_args = Array_new(), .ld_args = Array_new()
+      }
+      ;
+      for(int i = 0;  i < Array_len(words);  i ++) f7_parsing____native(&(p), &(i));
+      Array_free(p.include_dirs);
+      Array_free(p.cpp_args);
+      request -> cc_args = Array_list_free(p.cc_args);
+      request -> ld_args = Array_list_free(p.ld_args);
+      {
+        CliRequest _x2c_gensym_return_value_1 = request;
+        {
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_1);
+          return _x2c_gensym_return_value_1;
+        }
+
+      }
+
+    }
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_1);
+  }
+
+}
+
+int CliRequest_dependency_option(String s){
+  if(! _init_guard_) _file_init_();
+  return String_truth(s) &&(String_startswith(s, _86) || String_startswith(s, _87) || String_startswith(s, _88) || String_startswith(s, _89) || String_contains(s, _90) || String_contains(s, _91) || String_contains(s, _92) || String_contains(s, _93));
+}
+
+int CliRequest_is_builtin(const char * word){
+  if(! _init_guard_) _file_init_();
+  return ! strcmp(word, "help") || f7_parsing____command_row(word) != NULL;
+}
+
 CliRequest CliRequest_new(Symbol command);
 
 static CliRequest f7_parsing____parse_command(Array args, CliCommand * command){
@@ -1192,14 +1250,14 @@ static CliRequest f7_parsing____parse_command(Array args, CliCommand * command){
 
 static void f7_parsing____word(f7_parsing___Parse * p, int * i){
   String arg = Var_as_string(Array_getindex((* p).args, (* i)));
-  if(!(* p).operands && String_equal(arg, _85))(* p).operands = 1;
+  if(!(* p).operands && String_equal(arg, _94))(* p).operands = 1;
   else if(f7_parsing____expands(&((* p)), arg, (* i))) f7_parsing____expand(&((* p)), arg, &((* i)));
   else if((* p).operands || ! String_truth(arg) || String_getindex(arg, 0) != '-') f7_parsing____operand(&((* p)), arg, &((* i)));
   else f7_parsing____option(&((* p)), arg, &((* i)));
 }
 
 static int f7_parsing____expands(f7_parsing___Parse * p, String arg, int i){
-  return(* p).request -> command == 1282559016 && !(* p).operands && i >=(* p).expanded && String_startswith(arg, _86);
+  return(* p).request -> command == 1282559016 && !(* p).operands && i >=(* p).expanded && String_startswith(arg, _95);
 }
 
 static void f7_parsing____expand(f7_parsing___Parse * p, String arg, int * i){
@@ -1237,8 +1295,8 @@ static void f7_parsing____check(CliRequest r){
   if(r -> no_deps &&(String_truth(r -> dep_file) || String_truth(r -> dep_target) || r -> no_phony_deps)) Diagnostics_driver_error("--no-deps conflicts with dependency output options");
   if(r -> compile_only && r -> kind != 404971770155786) Diagnostics_driver_error("--compile-only conflicts with a library target kind");
   if(name == 11180 && List_truth(List_cdr(inputs))) Diagnostics_driver_error("env accepts at most one name");
-  if((SymbolSet_contains((SymbolSet) "\001\000\000\000\003\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\003\000\000\000\000\002\030\013\164\272\004\000\000\000\212\175\255\110\000\000\000\000\156\161\000\000\000\000\000\000", name)) &&(! List_truth(inputs) || List_truth(List_cdr(inputs)))) Diagnostics_driver_error(String_join(NULL, cons(String_var(Symbol_str(name)), cons(String_var(_87), NULL))));
-  if(name == 806120 && List_truth(inputs)) Diagnostics_driver_error(String_join(NULL, cons(String_var(Symbol_str(name)), cons(String_var(_88), NULL))));
+  if((SymbolSet_contains((SymbolSet) "\001\000\000\000\003\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\003\000\000\000\000\002\030\013\164\272\004\000\000\000\212\175\255\110\000\000\000\000\156\161\000\000\000\000\000\000", name)) &&(! List_truth(inputs) || List_truth(List_cdr(inputs)))) Diagnostics_driver_error(String_join(NULL, cons(String_var(Symbol_str(name)), cons(String_var(_96), NULL))));
+  if(name == 806120 && List_truth(inputs)) Diagnostics_driver_error(String_join(NULL, cons(String_var(Symbol_str(name)), cons(String_var(_97), NULL))));
   if(name == 1282559016 && ! List_truth(inputs)) Diagnostics_driver_error("script requires a script file");
 }
 
@@ -1248,13 +1306,18 @@ static void f7_parsing____help_command(Array args){
   String name = Var_as_string(Array_getindex(args, 1));
   if(String_equal(name, _80) || String_equal(name, _1) || String_equal(name, _0)) _help_exit(535328, 0);
   CliCommand * asked = String_truth(name) ? f7_parsing____command_row(name) : NULL;
-  if(! asked) Diagnostics_driver_error(String_join(NULL, cons(String_var(_89), cons(String_var(name), cons(String_var(_84), NULL)))));
+  if(! asked) Diagnostics_driver_error(String_join(NULL, cons(String_var(_98), cons(String_var(name), cons(String_var(_84), NULL)))));
   _help_exit(asked -> name, 0);
+}
+
+static CliCommand * f7_parsing____command_row(const char * word){
+  for(CliCommand * row = cli_commands;  row -> name;  row ++) if(row -> name != 535328 && strcmp(word, Symbol_str(row -> name)) == 0) return row;
+  return NULL;
 }
 
 static void f7_parsing____option(f7_parsing___Parse * p, String arg, int * i){
   if(String_equal(arg, _30) &&(* p).request -> command == 45220543335690) f7_parsing____cli_fail_output_command();
-  if((SymbolSet_contains((SymbolSet) "\001\000\000\000\002\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\000\001\000\000\000\000\010\113\125\000\000\000\000\000\134\225\000\000\000\000\000\000", (* p).request -> command)) && String_startswith(arg, _90)){
+  if((SymbolSet_contains((SymbolSet) "\001\000\000\000\002\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\000\001\000\000\000\000\010\113\125\000\000\000\000\000\134\225\000\000\000\000\000\000", (* p).request -> command)) && String_startswith(arg, _99)){
     f7_parsing____save_temps_dir((* p).request, arg);
     return;
   }
@@ -1265,13 +1328,13 @@ static void f7_parsing____option(f7_parsing___Parse * p, String arg, int * i){
 
 static void f7_parsing____save_temps_dir(CliRequest r, String arg){
   r -> save_temps = 1;
-  r -> build_dir = String_remove_prefix(arg, _90);
+  r -> build_dir = String_remove_prefix(arg, _99);
   if(! String_truth(r -> build_dir)) Diagnostics_driver_error("--save-temps= requires a directory");
 }
 
 static f7_parsing___Given f7_parsing____take_option(Array args, int * i, Symbol command){
   String arg = Var_as_string(Array_getindex(args, (* i))), written = arg, joined = NULL, suffix = NULL;
-  int equals = String_startswith(arg, _85) ? String_find(arg, _91) : - 1;
+  int equals = String_startswith(arg, _94) ? String_find(arg, _100) : - 1;
   if(equals > 2){
     written = String_getslice(arg, (-2147483647 - 1), x2c_slice_bound(equals), 1);
     joined = String_getslice(arg, x2c_slice_bound(equals + 1), (-2147483647 - 1), 1);
@@ -1281,15 +1344,148 @@ static f7_parsing___Given f7_parsing____take_option(Array args, int * i, Symbol 
   }
   ;
   if(! given.option) return given;
-  if(equals > 2 && ! given.option -> value) Diagnostics_driver_error(String_join(NULL, cons(String_var(_92), cons(String_var(arg), cons(String_var(_84), NULL)))));
+  if(equals > 2 && ! given.option -> value) Diagnostics_driver_error(String_join(NULL, cons(String_var(_101), cons(String_var(arg), cons(String_var(_84), NULL)))));
   given.value = equals > 2 ? joined : suffix;
   given.attached = suffix != NULL;
   if(given.option -> value && ! String_truth(given.value) && equals <= 2){
-    if(++(* i) == Array_len(args)) Diagnostics_driver_error(String_join(NULL, cons(String_var(_93), cons(String_var(arg), cons(String_var(_84), NULL)))));
+    if(++(* i) == Array_len(args)) Diagnostics_driver_error(String_join(NULL, cons(String_var(_102), cons(String_var(arg), cons(String_var(_84), NULL)))));
     given.value = Var_as_string(Array_getindex(args, (* i)));
   }
-  if(! String_truth(given.value) &&(SymbolSet_contains((SymbolSet) "\001\000\000\000\003\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\002\000\000\000\002\001\150\205\264\076\000\000\000\000\144\042\237\326\007\000\000\000\144\042\237\260\124\005\000\000", given.option -> id))) Diagnostics_driver_error(String_join(NULL, cons(String_var(_93), cons(String_var(written), cons(String_var(_84), NULL)))));
+  if(! String_truth(given.value) &&(SymbolSet_contains((SymbolSet) "\001\000\000\000\003\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\002\000\000\000\002\001\150\205\264\076\000\000\000\000\144\042\237\326\007\000\000\000\144\042\237\260\124\005\000\000", given.option -> id))) Diagnostics_driver_error(String_join(NULL, cons(String_var(_102), cons(String_var(written), cons(String_var(_84), NULL)))));
   return given;
+}
+
+static void f7_parsing____apply(f7_parsing___Parse * p, f7_parsing___Given given){
+  CliRequest r =(* p).request;
+  String spelling = given.spelling, value = given.value;
+  switch(given.option -> id){
+    case 535328 : _help_exit(r -> command, 0);
+    break;
+    case 7300068 : r -> color_mode = f7_parsing____color_mode(value);
+    break;
+    case 20273998090 : f7_parsing____include_dir(&((* p)), value);
+    break;
+    case 54927135910154 : Array_push((* p).include_dirs, String_var(value));
+    break;
+    case 1374366630 : case 320883072032 : case 247458062609318 : case 320883068136 : case 1447057375073126 : case 10268258302218 : case 42507336486 : case 10268258311770 : case 328584264751626 : case 7478869146 : case 10268258347430 : r -> dump = given.option -> id;
+    break;
+    case 740232 : r -> kind_explicit = 1;
+    r -> kind = f7_parsing____target_kind(value);
+    break;
+    case 686246 : r -> jobs = f7_parsing____count(value, 1, _103);
+    break;
+    case 918708911504550 : r -> max_errors = f7_parsing____count(value, 0, _104);
+    break;
+    case 6551812 : r -> compile_commands = value;
+    r -> save_temps = 1;
+    break;
+    case 8747647543562 : f7_parsing____push_pair((* p).cc_args, _41, value);
+    break;
+    case 274059207002 : f7_parsing____push_pair((* p).cc_args, _105, value);
+    break;
+    case 31784 : case 14 : Array_push((* p).cc_args, String_var(spelling));
+    break;
+    case 279333770 : case 1473453116298 : f7_parsing____forward((* p).cpp_args, given);
+    f7_parsing____forward((* p).cc_args, given);
+    break;
+    case 49350 : Array_push((* p).cc_args, String_var(f7_parsing____xcc_argument(value)));
+    break;
+    case 26380018276 : case 26379160754 : f7_parsing____forward((* p).ld_args, given);
+    break;
+    case 38800656 : Array_push((* p).ld_args, String_var(String_join(NULL, cons(String_var(_106), cons(String_var(value), NULL)))));
+    break;
+    case 35719882824 : Array_push((* p).cc_args, String_var(spelling));
+    Array_push((* p).ld_args, String_var(spelling));
+    break;
+    case 14434122038422 : case 52364728676 : f7_parsing____push_pair((* p).ld_args, spelling, value);
+    break;
+    case 1496 : Array_push((* p).ld_args, String_var(spelling));
+    break;
+    default: f7_parsing____set_field(r, &(* given.option), value);
+    break;
+  }
+
+}
+
+static Symbol f7_parsing____color_mode(String value){
+  if(! String_truth(value)) Diagnostics_driver_error("--color requires auto, always, or never");
+  switch(_x2c_gensym_string_switch_0(value)){
+    case 1 : return 109854;
+    case 2 : return 93785702;
+    case 3 : return 29733220;
+  }
+  Diagnostics_driver_error(String_join(NULL, cons(String_var(_107), cons(String_var(value), cons(String_var(_84), NULL)))));
+}
+
+Symbol TargetKind_named(String spelling, String * refusal);
+
+static Symbol f7_parsing____target_kind(String value){
+  String refusal = NULL;
+  Symbol kind = TargetKind_named(value, &(refusal));
+  if(String_truth(refusal)) Diagnostics_driver_error(refusal);
+  if(! kind) Diagnostics_driver_error(String_join(NULL, cons(String_var(_108), cons(String_var(value), cons(String_var(_84), NULL)))));
+  return kind;
+}
+
+static int f7_parsing____count(String value, int minimum, String noun){
+  char * end = NULL;
+  errno = 0;
+  long count = String_truth(value) ? strtol(value, & end, 10) : 0;
+  if(! String_truth(value) || errno || * end || count < minimum || count > INT_MAX) Diagnostics_driver_error(String_join(NULL, cons(String_var(_109), cons(String_var(noun), cons(String_var(_110), cons(String_var(value), cons(String_var(_84), NULL)))))));
+  return(int) count;
+}
+
+static void f7_parsing____include_dir(f7_parsing___Parse * p, String dir){
+  Array_push((* p).include_dirs, String_var(dir));
+  if((* p).request -> command != 45220543335690) f7_parsing____push_pair((* p).cc_args, _41, dir);
+}
+
+static void f7_parsing____forward(Array out, f7_parsing___Given given){
+  if(given.attached) Array_push(out, String_var(given.spelling));
+  else f7_parsing____push_pair(out, given.spelling, given.value);
+}
+
+static void f7_parsing____push_pair(Array out, String option, String value){
+  Array_push(out, String_var(option));
+  Array_push(out, String_var(value));
+}
+
+static String f7_parsing____xcc_argument(String value){
+  if(CliRequest_dependency_option(value)) Diagnostics_driver_error(String_join(NULL, cons(String_var(_111), cons(String_var(value), cons(String_var(_84), NULL)))));
+  return value;
+}
+
+static void f7_parsing____set_field(CliRequest r, CliOption * option, String value){
+  char * field =(char *) r +(* option).offset;
+  switch((* option).apply){
+    case 417870 : *(int *) field = 1;
+    break;
+    case 1322536 : *(String *) field = value;
+    break;
+    case 806120 : *(List *) field = cons(String_var(value), *(List *) field);
+    break;
+  }
+
+}
+
+static void f7_parsing____cli_fail_output_command(void){
+  _fail(_112, _113);
+}
+
+static void f7_parsing____cli_fail_expected_command(String arg){
+  _fail(String_join(NULL, cons(String_var(_114), cons(String_var(arg), cons(String_var(_84), NULL)))), String_join(NULL, cons(String_var(_115), cons(String_var(arg), cons(String_var(_84), NULL)))));
+}
+
+static void f7_parsing____unknown_option(String arg, Symbol command){
+  String spelling = command == 45220543335690 ? f7_parsing____two_dash(arg) : NULL;
+  if(String_truth(spelling)) f7_parsing____cli_fail_one_dash_removed(arg, spelling);
+  Diagnostics_driver_error(String_join(NULL, cons(String_var(_116), cons(String_var(arg), cons(String_var(_84), NULL)))));
+}
+
+static String f7_parsing____two_dash(String arg){
+  if(String_len(arg) <= 2 || String_getindex(arg, 0) != '-' || String_getindex(arg, 1) == '-') return NULL;
+  String spelling = String_join(NULL, cons(String_var(_117), cons(String_var(arg), NULL))), attached;
+  return f7_parsing____find_option(spelling, 45220543335690, &(attached)) ? spelling : NULL;
 }
 
 static CliOption * f7_parsing____find_option(String spelling, Symbol command, String * attached){
@@ -1314,189 +1510,8 @@ static CliOption * f7_parsing____find_option(String spelling, Symbol command, St
   return NULL;
 }
 
-static void f7_parsing____apply(f7_parsing___Parse * p, f7_parsing___Given given){
-  CliRequest r =(* p).request;
-  String spelling = given.spelling, value = given.value;
-  switch(given.option -> id){
-    case 535328 : _help_exit(r -> command, 0);
-    break;
-    case 7300068 : r -> color_mode = f7_parsing____color_mode(value);
-    break;
-    case 20273998090 : f7_parsing____include_dir(&((* p)), value);
-    break;
-    case 54927135910154 : Array_push((* p).include_dirs, String_var(value));
-    break;
-    case 1374366630 : case 320883072032 : case 247458062609318 : case 320883068136 : case 1447057375073126 : case 10268258302218 : case 42507336486 : case 10268258311770 : case 328584264751626 : case 7478869146 : case 10268258347430 : r -> dump = given.option -> id;
-    break;
-    case 740232 : r -> kind_explicit = 1;
-    r -> kind = f7_parsing____target_kind(value);
-    break;
-    case 686246 : r -> jobs = f7_parsing____count(value, 1, _94);
-    break;
-    case 918708911504550 : r -> max_errors = f7_parsing____count(value, 0, _95);
-    break;
-    case 6551812 : r -> compile_commands = value;
-    r -> save_temps = 1;
-    break;
-    case 8747647543562 : f7_parsing____push_pair((* p).cc_args, _41, value);
-    break;
-    case 274059207002 : f7_parsing____push_pair((* p).cc_args, _96, value);
-    break;
-    case 31784 : case 14 : Array_push((* p).cc_args, String_var(spelling));
-    break;
-    case 279333770 : case 1473453116298 : f7_parsing____forward((* p).cpp_args, given);
-    f7_parsing____forward((* p).cc_args, given);
-    break;
-    case 49350 : Array_push((* p).cc_args, String_var(f7_parsing____xcc_argument(value)));
-    break;
-    case 26380018276 : case 26379160754 : f7_parsing____forward((* p).ld_args, given);
-    break;
-    case 38800656 : Array_push((* p).ld_args, String_var(String_join(NULL, cons(String_var(_97), cons(String_var(value), NULL)))));
-    break;
-    case 35719882824 : Array_push((* p).cc_args, String_var(spelling));
-    Array_push((* p).ld_args, String_var(spelling));
-    break;
-    case 14434122038422 : case 52364728676 : f7_parsing____push_pair((* p).ld_args, spelling, value);
-    break;
-    case 1496 : Array_push((* p).ld_args, String_var(spelling));
-    break;
-    default: f7_parsing____set_field(r, &(* given.option), value);
-    break;
-  }
-
-}
-
-static Symbol f7_parsing____color_mode(String value){
-  if(! String_truth(value)) Diagnostics_driver_error("--color requires auto, always, or never");
-  switch(_x2c_gensym_string_switch_0(value)){
-    case 1 : return 109854;
-    case 2 : return 93785702;
-    case 3 : return 29733220;
-  }
-  Diagnostics_driver_error(String_join(NULL, cons(String_var(_98), cons(String_var(value), cons(String_var(_84), NULL)))));
-}
-
-Symbol TargetKind_named(String spelling, String * refusal);
-
-static Symbol f7_parsing____target_kind(String value){
-  String refusal = NULL;
-  Symbol kind = TargetKind_named(value, &(refusal));
-  if(String_truth(refusal)) Diagnostics_driver_error(refusal);
-  if(! kind) Diagnostics_driver_error(String_join(NULL, cons(String_var(_99), cons(String_var(value), cons(String_var(_84), NULL)))));
-  return kind;
-}
-
-static int f7_parsing____count(String value, int minimum, String noun){
-  char * end = NULL;
-  errno = 0;
-  long count = String_truth(value) ? strtol(value, & end, 10) : 0;
-  if(! String_truth(value) || errno || * end || count < minimum || count > INT_MAX) Diagnostics_driver_error(String_join(NULL, cons(String_var(_100), cons(String_var(noun), cons(String_var(_101), cons(String_var(value), cons(String_var(_84), NULL)))))));
-  return(int) count;
-}
-
-static void f7_parsing____include_dir(f7_parsing___Parse * p, String dir){
-  Array_push((* p).include_dirs, String_var(dir));
-  if((* p).request -> command != 45220543335690) f7_parsing____push_pair((* p).cc_args, _41, dir);
-}
-
-static void f7_parsing____forward(Array out, f7_parsing___Given given){
-  if(given.attached) Array_push(out, String_var(given.spelling));
-  else f7_parsing____push_pair(out, given.spelling, given.value);
-}
-
-static void f7_parsing____push_pair(Array out, String option, String value){
-  Array_push(out, String_var(option));
-  Array_push(out, String_var(value));
-}
-
-int CliRequest_dependency_option(String s);
-
-static String f7_parsing____xcc_argument(String value){
-  if(CliRequest_dependency_option(value)) Diagnostics_driver_error(String_join(NULL, cons(String_var(_102), cons(String_var(value), cons(String_var(_84), NULL)))));
-  return value;
-}
-
-int CliRequest_dependency_option(String s){
-  if(! _init_guard_) _file_init_();
-  return String_truth(s) &&(String_startswith(s, _103) || String_startswith(s, _104) || String_startswith(s, _105) || String_startswith(s, _106) || String_contains(s, _107) || String_contains(s, _108) || String_contains(s, _109) || String_contains(s, _110));
-}
-
-static void f7_parsing____set_field(CliRequest r, CliOption * option, String value){
-  char * field =(char *) r +(* option).offset;
-  switch((* option).apply){
-    case 417870 : *(int *) field = 1;
-    break;
-    case 1322536 : *(String *) field = value;
-    break;
-    case 806120 : *(List *) field = cons(String_var(value), *(List *) field);
-    break;
-  }
-
-}
-
-CliRequest CliRequest_package_options(String path, String package){
-  if(! _init_guard_) _file_init_();
-  Array words = Array_new();
-  const Array _x2c_gensym_macro_acquired_1 = words;
-  {
-    _x2c_gensym_defer_env_1 _x2c_gensym_macro_environment_1 ={
-      0
-    }
-    ;
-    _x2c_gensym_macro_environment_1._x2c_gensym_defer_capture_1 =(const void *) & _x2c_gensym_macro_acquired_1;
-    X2CCleanup _x2c_gensym_defer_record_1 ={
-      .fn = _x2c_gensym_defer_cleanup_1, .env = & _x2c_gensym_macro_environment_1
-    }
-    ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_1);
-    {
-      {
-        String word;
-        List _x2c_gensym_macro_object_0 = _response_arguments(path);
-        List _x2c_gensym_macro_cursor_0 = _x2c_gensym_macro_object_0;
-        Var _x2c_gensym_macro_cursor_output_0;
-        while(List_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_0), &(_x2c_gensym_macro_cursor_output_0))){
-          word = Var_as_string(_x2c_gensym_macro_cursor_output_0);
-          Array_push(words, String_var(String_replace(word, _111, package)));
-        }
-
-      }
-      CliRequest request = xcalloc(1, sizeof(struct CliRequest));
-      request -> command = 5589768;
-      f7_parsing___Parse p ={
-        .request = request, .args = words, .include_dirs = Array_new(), .cpp_args = Array_new(), .cc_args = Array_new(), .ld_args = Array_new()
-      }
-      ;
-      for(int i = 0;  i < Array_len(words);  i ++) f7_parsing____native(&(p), &(i));
-      Array_free(p.include_dirs);
-      Array_free(p.cpp_args);
-      request -> cc_args = Array_list_free(p.cc_args);
-      request -> ld_args = Array_list_free(p.ld_args);
-      {
-        CliRequest _x2c_gensym_return_value_1 = request;
-        {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_1);
-          return _x2c_gensym_return_value_1;
-        }
-
-      }
-
-    }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_1);
-  }
-
-}
-
-static void f7_parsing____native(f7_parsing___Parse * p, int * i){
-  String arg = Var_as_string(Array_getindex((* p).args, (* i)));
-  if(! String_truth(arg)) Diagnostics_driver_error("empty package native argument");
-  if(String_getindex(arg, 0) != '-' && String_getindex(arg, 0) != '@' && String_endswith(arg, _112)){
-    Array_push((* p).ld_args, String_var(arg));
-    return;
-  }
-  f7_parsing___Given given = f7_parsing____take_option((* p).args, &((* i)), (* p).request -> command);
-  if(! given.option || ! given.option -> package_native) Diagnostics_driver_error(String_join(NULL, cons(String_var(_113), cons(String_var(arg), cons(String_var(_84), NULL)))));
-  f7_parsing____apply(&((* p)), given);
+static void f7_parsing____cli_fail_one_dash_removed(String arg, String use){
+  _fail(String_join(NULL, cons(String_var(_118), cons(String_var(arg), cons(String_var(_119), NULL)))), String_join(NULL, cons(String_var(_120), cons(String_var(use), cons(String_var(_84), NULL)))));
 }
 
 _Noreturn static void _fail(String message, String note){
@@ -1505,33 +1520,16 @@ _Noreturn static void _fail(String message, String note){
   exit(2);
 }
 
-static void f7_parsing____cli_fail_output_command(void){
-  _fail(_114, _115);
-}
-
-static void f7_parsing____cli_fail_expected_command(String arg){
-  _fail(String_join(NULL, cons(String_var(_116), cons(String_var(arg), cons(String_var(_84), NULL)))), String_join(NULL, cons(String_var(_117), cons(String_var(arg), cons(String_var(_84), NULL)))));
-}
-
-static void f7_parsing____unknown_option(String arg, Symbol command){
-  String spelling = command == 45220543335690 ? f7_parsing____two_dash(arg) : NULL;
-  if(String_truth(spelling)) f7_parsing____cli_fail_one_dash_removed(arg, spelling);
-  Diagnostics_driver_error(String_join(NULL, cons(String_var(_118), cons(String_var(arg), cons(String_var(_84), NULL)))));
-}
-
-static String f7_parsing____two_dash(String arg){
-  if(String_len(arg) <= 2 || String_getindex(arg, 0) != '-' || String_getindex(arg, 1) == '-') return NULL;
-  String spelling = String_join(NULL, cons(String_var(_119), cons(String_var(arg), NULL))), attached;
-  return f7_parsing____find_option(spelling, 45220543335690, &(attached)) ? spelling : NULL;
-}
-
-static void f7_parsing____cli_fail_one_dash_removed(String arg, String use){
-  _fail(String_join(NULL, cons(String_var(_120), cons(String_var(arg), cons(String_var(_121), NULL)))), String_join(NULL, cons(String_var(_122), cons(String_var(use), cons(String_var(_84), NULL)))));
-}
-
-int CliRequest_is_builtin(const char * word){
-  if(! _init_guard_) _file_init_();
-  return ! strcmp(word, "help") || f7_parsing____command_row(word) != NULL;
+static void f7_parsing____native(f7_parsing___Parse * p, int * i){
+  String arg = Var_as_string(Array_getindex((* p).args, (* i)));
+  if(! String_truth(arg)) Diagnostics_driver_error("empty package native argument");
+  if(String_getindex(arg, 0) != '-' && String_getindex(arg, 0) != '@' && String_endswith(arg, _121)){
+    Array_push((* p).ld_args, String_var(arg));
+    return;
+  }
+  f7_parsing___Given given = f7_parsing____take_option((* p).args, &((* i)), (* p).request -> command);
+  if(! given.option || ! given.option -> package_native) Diagnostics_driver_error(String_join(NULL, cons(String_var(_122), cons(String_var(arg), cons(String_var(_84), NULL)))));
+  f7_parsing____apply(&((* p)), given);
 }
 
 Array CliRequest_read_arguments(int argc, char * * argv){
@@ -1686,18 +1684,18 @@ static void f9_responses____newline(f9_responses___Words * w){
   (* w).line ++;
 }
 
-static void f9_responses____flush(f9_responses___Words * w){
-  if(!(* w).started) return;
-  Array_push((* w).out, String_var(Buffer_str((* w).word)));
-  Buffer_clear((* w).word);
-  (* w).started = 0;
-}
-
 static void f9_responses____finish_words(f9_responses___Words * w){
   if((* w).comment) return;
   if((* w).escaped) f9_responses____response_error((* w).path, (* w).line, "trailing backslash");
   if((* w).quote) f9_responses____response_error((* w).path, (* w).line, "unterminated quote");
   f9_responses____flush(&((* w)));
+}
+
+static void f9_responses____flush(f9_responses___Words * w){
+  if(!(* w).started) return;
+  Array_push((* w).out, String_var(Buffer_str((* w).word)));
+  Buffer_clear((* w).word);
+  (* w).started = 0;
 }
 
 _Noreturn static void f9_responses____response_error(String path, int line, const char * message){
@@ -1717,7 +1715,7 @@ static void f4_help____print_help_usage(void){
 }
 
 static void f4_help____print_top_help(void){
-  puts(_124);
+  puts(_140);
   for(CliCommand * command = cli_commands;  command -> name;  command ++) printf("  %-12s%s\n", Symbol_str(command -> name), command -> description);
   f4_help____print_external_commands();
   f4_help____print_options(0);
@@ -1725,12 +1723,12 @@ static void f4_help____print_top_help(void){
   f4_help____print_help_row("@<file>", "Read additional arguments from a response file", 2);
   f4_help____print_help_row("--", "End option parsing", 2);
   puts("");
-  puts(_125);
+  puts(_141);
 }
 
 static void f4_help____print_external_commands(void){
   String libexec = Compiler_home_libexec();
-  File manifest = String_truth(libexec) ? fopen(String_join(NULL, cons(String_var(libexec), cons(String_var(_126), NULL))), "r") : NULL;
+  File manifest = String_truth(libexec) ? fopen(String_join(NULL, cons(String_var(libexec), cons(String_var(_142), NULL))), "r") : NULL;
   if(! manifest) return;
   char * line = NULL;
   size_t capacity = 0;
@@ -1751,7 +1749,7 @@ static void f4_help____print_external_commands(void){
 
 static f4_help___HelpPage * f4_help____help_page(Symbol command){
   for(f4_help___HelpPage * page = f4_help___help_pages;  page -> command;  page ++) if(page -> command == command) return page;
-  Diagnostics_driver_error(String_join(NULL, cons(String_var(_89), cons(String_var(Symbol_str(command)), cons(String_var(_84), NULL)))));
+  Diagnostics_driver_error(String_join(NULL, cons(String_var(_98), cons(String_var(Symbol_str(command)), cons(String_var(_84), NULL)))));
 }
 
 static void f4_help____print_page(f4_help___HelpPage * page){
@@ -1783,12 +1781,12 @@ static void f4_help____print_group(Symbol command, f4_help___CliGroup * group){
   for(;  String_truth(option -> spelling);  option ++) if(f4_help____in_group(&(* option), command, (* group).group)) f4_help____print_option(&(* option));
 }
 
-static int f4_help____listed(CliOption * option, Symbol command){
-  return !(* option).hidden &&(SymbolSet_contains((* option).commands, command));
-}
-
 static int f4_help____in_group(CliOption * option, Symbol command, Symbol group){
   return f4_help____listed(&((* option)), command) &&(* option).group == group;
+}
+
+static int f4_help____listed(CliOption * option, Symbol command){
+  return !(* option).hidden &&(SymbolSet_contains((* option).commands, command));
 }
 
 static void f4_help____print_option(const CliOption * option){
@@ -1803,7 +1801,7 @@ static void f4_help____print_option(const CliOption * option){
     Var _x2c_gensym_literal_part_2 = String_var(spelled);  Var _x2c_gensym_literal_part_3 = String_var(String_new((* option).value));  String_join(NULL, cons(_x2c_gensym_literal_part_2, cons(String_var(_144), cons(_x2c_gensym_literal_part_3, NULL))));
   }
   ) : spelled;
-  f4_help____print_help_row(label, (* option).description, String_startswith(label, _85) ? 6 : 2);
+  f4_help____print_help_row(label, (* option).description, String_startswith(label, _94) ? 6 : 2);
 }
 
 static void f4_help____print_help_row(const char * label, const char * description, int indent){
@@ -1843,22 +1841,9 @@ CliRequest CliRequest_new(Symbol command){
   return request;
 }
 
-static int f8_requests____default_jobs(void){
-  if(f8_requests____make_owned()) return 1;
-  long count = sysconf(_SC_NPROCESSORS_ONLN);
-  return count > 0 && count <= INT_MAX ?(int) count : 1;
-}
-
-String Env_get(String);
-
-static int f8_requests____make_owned(void){
-  String level = Env_get(_155);
-  return String_is_digit(level) && atol(level) > 0;
-}
-
 String Compiler_version(void){
   if(! _init_guard_) _file_init_();
-  return _156;
+  return _155;
 }
 
 int CliRequest_inspects(CliRequest request){
@@ -1888,10 +1873,23 @@ void CliRequest_require_input(String input){
     fputs("note: pass source files, use a shell wildcard, or define a " "manifest target\n", stderr);
     exit(2);
   }
-  if(Path_exists(input)) Diagnostics_driver_error(String_join(NULL, cons(String_var(_157), cons(String_var(input), NULL))));
+  if(Path_exists(input)) Diagnostics_driver_error(String_join(NULL, cons(String_var(_156), cons(String_var(input), NULL))));
   fprintf(stderr, "x2c: error: input does not exist: %s\n", input);
   if(strpbrk(input, "*?[")) fputs("note: x2c does not expand wildcard operands\n", stderr);
   exit(2);
+}
+
+static int f8_requests____default_jobs(void){
+  if(f8_requests____make_owned()) return 1;
+  long count = sysconf(_SC_NPROCESSORS_ONLN);
+  return count > 0 && count <= INT_MAX ?(int) count : 1;
+}
+
+String Env_get(String);
+
+static int f8_requests____make_owned(void){
+  String level = Env_get(_157);
+  return String_is_digit(level) && atol(level) > 0;
 }
 
 static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0){
@@ -1899,16 +1897,16 @@ static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0){
   Array_cleanup((*(const Array *) _x2c_gensym_defer_data_0->_x2c_gensym_defer_capture_0));
 }
 
+static void _x2c_gensym_defer_cleanup_1(void * _x2c_gensym_defer_opaque_1){
+  _x2c_gensym_defer_env_1 * _x2c_gensym_defer_data_1 =(_x2c_gensym_defer_env_1 *) _x2c_gensym_defer_opaque_1;
+  Array_cleanup((*(const Array *) _x2c_gensym_defer_data_1->_x2c_gensym_defer_capture_1));
+}
+
 static int _x2c_gensym_string_switch_0(String s){
   if(String_equal(s, _158)) return 1;
   if(String_equal(s, _159)) return 2;
   if(String_equal(s, _160)) return 3;
   return 0;
-}
-
-static void _x2c_gensym_defer_cleanup_1(void * _x2c_gensym_defer_opaque_1){
-  _x2c_gensym_defer_env_1 * _x2c_gensym_defer_data_1 =(_x2c_gensym_defer_env_1 *) _x2c_gensym_defer_opaque_1;
-  Array_cleanup((*(const Array *) _x2c_gensym_defer_data_1->_x2c_gensym_defer_capture_1));
 }
 
 #undef _x2c_gensym_initializer_choice_6D011170_0_expanded

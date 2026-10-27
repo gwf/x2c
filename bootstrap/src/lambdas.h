@@ -16,9 +16,9 @@ List Compiler_lift_lambda_types(Compiler c, List function);
 
 List Compiler_parse_lambda_literal(Compiler c);
 
-List Compiler_lambda_param_types(Compiler c, List entries);
-
 List Compiler_bind_lambda_expression(Compiler c, Type type, List parameters, List supplied, List body);
+
+List Compiler_lambda_param_types(Compiler c, List entries);
 
 void Compiler_begin_lambda_captures(Compiler c, List references, List supplied);
 

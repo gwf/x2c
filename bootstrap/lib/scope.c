@@ -67,22 +67,22 @@ _Static_assert((sizeof(f10_allocation___ScopeMetadata) + sizeof(struct ScopeAllo
 static int _init_guard_ = 0;
 static void * f10_allocation____malloc_in(Scope * slot, size_t size, void(* drop)(void *));
 static void f10_allocation____attach(Scope scope, ScopeAlloc alloc);
+static void * _data_malloc(size_t size);
 static void * f10_allocation____calloc_in(Scope * slot, size_t count, size_t size);
 static void * f10_allocation____memdup_in(Scope * slot, const void * ptr, size_t size);
 static void f10_allocation____free(ScopeAlloc alloc);
 static void _detach(ScopeAlloc alloc);
-static void f10_allocation____relink(ScopeAlloc alloc, ScopeAlloc prev, ScopeAlloc next);
 static void f10_allocation____point_to(ScopeAlloc prev, ScopeAlloc alloc);
 static void _release(ScopeAlloc alloc);
-static void * _data_malloc(size_t size);
+static void f10_allocation____relink(ScopeAlloc alloc, ScopeAlloc prev, ScopeAlloc next);
 static void * f10_allocation____data_realloc(void * ptr, size_t size);
 static _Thread_local struct ScopeThreadState f7_regions___scope_thread;
 static ScopeThreadState _thread(void);
 static void f7_regions____record_retain(Scope scope, Scope * slot);
+static Scope _new_scope(const char * name);
 static int f7_regions____forget_retain(Scope scope, Scope * slot);
 static void f7_regions____destroy_chain(Scope scope);
 static void f7_regions____detach_scope(Scope scope);
-static Scope _new_scope(const char * name);
 static void f7_regions____forget_retains(Scope scope);
 typedef struct f10_accounting___ScopeName{
   Scope scope;  char * name;  struct f10_accounting___ScopeName * next;
@@ -91,16 +91,16 @@ typedef struct f10_accounting___ScopeName{
 static f10_accounting___ScopeName f10_accounting___scope_names;
 static pthread_mutex_t f10_accounting___scope_metadata_mutex;
 _x2c_gensym_initializer_choice_7792FEF9_0((f10_accounting___scope_metadata_mutex =(pthread_mutex_t) PTHREAD_MUTEX_INITIALIZER))
-static void _register_name(Scope scope, const char * name);
-static f10_accounting___ScopeName f10_accounting____find_name(Scope scope);
-static void _unregister_name(Scope scope);
-static void f10_accounting____metadata_lock(void);
-static void f10_accounting____metadata_unlock(void);
 static atomic_size_t f10_accounting___scope_allocation_calls, f10_accounting___scope_reallocation_calls;
 static atomic_size_t f10_accounting___scope_free_calls;
 static atomic_size_t f10_accounting___scope_requested_bytes, f10_accounting___scope_largest_request;
 static atomic_size_t f10_accounting___scope_live_requested_bytes;
 static atomic_size_t f10_accounting___scope_peak_live_requested_bytes;
+static f10_accounting___ScopeName f10_accounting____find_name(Scope scope);
+static void f10_accounting____metadata_lock(void);
+static void f10_accounting____metadata_unlock(void);
+static void _register_name(Scope scope, const char * name);
+static void _unregister_name(Scope scope);
 static void _record_allocation(size_t size);
 static void _record_resize(size_t old_size, size_t size);
 static void _record_free(size_t size);
@@ -110,19 +110,19 @@ static void f10_accounting____record_live_remove(size_t size);
 static void _report_leaks(void);
 static size_t f10_accounting____allocation_count(Scope s);
 static void _free_name_registry(void);
-static void * _raw_malloc(size_t size);
-static void * f7_runtime____raw_realloc(void * ptr, size_t size);
-static void _raw_free(void * ptr);
-static void * _raw_grow(void * items, int count, int * capacity, size_t size);
-_Noreturn static void _raw_fatal(const char * message);
 static Symbol f7_runtime___scope_state;
 _x2c_gensym_initializer_choice_7792FEF9_1((f7_runtime___scope_state = 1439265384))
 static void(* * f7_runtime___hooks)(void);
 static int f7_runtime___hook_count, f7_runtime___hook_capacity;
 static void f7_runtime____initialize(void);
+_Noreturn static void _raw_fatal(const char * message);
+static void f7_runtime____run_hooks(void);
+static void _raw_free(void * ptr);
+static void * _raw_grow(void * items, int count, int * capacity, size_t size);
+static void * _raw_malloc(size_t size);
+static void * f7_runtime____raw_realloc(void * ptr, size_t size);
 static void _require_running(void);
 static void f7_runtime____ensure_running(void);
-static void f7_runtime____run_hooks(void);
 void * Scope_malloc(size_t size);
 #ifndef X2CCPP
 _Static_assert(_Generic(& Scope_malloc, void *(*)(size_t) : 1, default: 0), "native alias xmalloc does not match Scope_malloc");
@@ -176,23 +176,6 @@ void * Scope_malloc_finalized_in(Scope * s, size_t size, void(* drop)(void *)){
   return f10_allocation____malloc_in(s, size, drop);
 }
 
-static void * f10_allocation____malloc_in(Scope * slot, size_t size, void(* drop)(void *)){
-  if(! slot){
-    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/scope/allocation.x",.function = "f10_allocation____malloc_in",.line = 108,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_2, 4372499598, 0);  __builtin_unreachable();
-  }
-  if(size > SIZE_MAX - sizeof(f10_allocation___ScopeMetadata) - sizeof(struct ScopeAlloc)){
-    if(x2c_error_runtime_ready){
-      static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/scope/allocation.x",.function = "f10_allocation____malloc_in",.line = 110,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_3, 1358596898646632, 0);  __builtin_unreachable();
-    }
-    _raw_fatal("allocation size overflow");
-  }
-  if(! * slot) * slot = _new_scope(NULL);  f10_allocation___ScopeMetadata * meta = _data_malloc(sizeof(f10_allocation___ScopeMetadata) + sizeof(struct ScopeAlloc) + size);  meta -> requested_size = size;  meta -> drop = drop;  ScopeAlloc alloc =(ScopeAlloc)(meta + 1);  f10_allocation____attach((* slot), alloc);  _record_allocation(size);  return((void *)((char *)(alloc) + sizeof(struct ScopeAlloc)));
-}
-
-static void f10_allocation____attach(Scope scope, ScopeAlloc alloc){
-  alloc -> next = scope -> first;  alloc -> prev =((void *)((uintptr_t)(scope) |(uintptr_t) 1));  if(scope -> first) scope -> first -> prev = alloc;  scope -> first = alloc;
-}
-
 void * Scope_calloc(size_t count, size_t size){
   if(! _init_guard_) Scope_initialize();  _require_running();  return f10_allocation____calloc_in(_thread() -> active, count, size);
 }
@@ -209,20 +192,6 @@ void * Scope_memdup_in(Scope * slot, const void * ptr, size_t size){
   if(! _init_guard_) Scope_initialize();  _require_running();  return f10_allocation____memdup_in(slot, ptr, size);
 }
 
-static void * f10_allocation____calloc_in(Scope * slot, size_t count, size_t size){
-  if(count && size > SIZE_MAX / count){
-    if(x2c_error_runtime_ready){
-      static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/scope/allocation.x",.function = "f10_allocation____calloc_in",.line = 194,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_4, 1358596898646632, 0);  __builtin_unreachable();
-    }
-    _raw_fatal("calloc size overflow");
-  }
-  size_t total = count * size;  void * ptr = f10_allocation____malloc_in(slot, total, NULL);  if(total) memset(ptr, 0, total);  return ptr;
-}
-
-static void * f10_allocation____memdup_in(Scope * slot, const void * ptr, size_t size){
-  if(! ptr || ! size) return NULL;  void * copy = f10_allocation____malloc_in(slot, size, NULL);  memcpy(copy, ptr, size);  return copy;
-}
-
 void Scope_free(void * ptr){
   if(! _init_guard_) Scope_initialize();  _require_running();  if(! ptr) return;  f10_allocation____free(((ScopeAlloc)((char *)(ptr) - sizeof(struct ScopeAlloc))));
 }
@@ -233,7 +202,7 @@ Scope Scope_owner(void * ptr){
 
 void Scope_move(void * ptr, Scope * slot){
   if(! _init_guard_) Scope_initialize();  _require_running();  if(! ptr) return;  if(! slot){
-    static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/scope/allocation.x",.function = "Scope_move",.line = 273,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_5, 4372499598, 0);  __builtin_unreachable();
+    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/scope/allocation.x",.function = "Scope_move",.line = 231,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_2, 4372499598, 0);  __builtin_unreachable();
   }
   if(! * slot) * slot = _new_scope(NULL);  ScopeAlloc alloc =((ScopeAlloc)((char *)(ptr) - sizeof(struct ScopeAlloc)));  _detach(alloc);  f10_allocation____attach((* slot), alloc);
 }
@@ -247,9 +216,47 @@ void * Scope_realloc(void * ptr, size_t size){
     f10_allocation____free(((ScopeAlloc)((char *)(ptr) - sizeof(struct ScopeAlloc))));  return NULL;
   }
   ScopeAlloc old =((ScopeAlloc)((char *)(ptr) - sizeof(struct ScopeAlloc))), next = old -> next, prev = old -> prev;  f10_allocation___ScopeMetadata * old_meta =(((f10_allocation___ScopeMetadata *)(old)) - 1);  size_t old_size = old_meta -> requested_size;  if(size > SIZE_MAX - sizeof(f10_allocation___ScopeMetadata) - sizeof(struct ScopeAlloc)){
-    static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/scope/allocation.x",.function = "Scope_realloc",.line = 315,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_6, 1358596898646632, 0);  __builtin_unreachable();
+    static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/scope/allocation.x",.function = "Scope_realloc",.line = 273,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_3, 1358596898646632, 0);  __builtin_unreachable();
   }
   f10_allocation___ScopeMetadata * meta = f10_allocation____data_realloc(old_meta, sizeof(f10_allocation___ScopeMetadata) + sizeof(struct ScopeAlloc) + size);  meta -> requested_size = size;  ScopeAlloc replacement =(ScopeAlloc)(meta + 1);  f10_allocation____relink(replacement, prev, next);  _record_resize(old_size, size);  return((void *)((char *)(replacement) + sizeof(struct ScopeAlloc)));
+}
+
+static void * f10_allocation____malloc_in(Scope * slot, size_t size, void(* drop)(void *)){
+  if(! slot){
+    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/scope/allocation.x",.function = "f10_allocation____malloc_in",.line = 284,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_4, 4372499598, 0);  __builtin_unreachable();
+  }
+  if(size > SIZE_MAX - sizeof(f10_allocation___ScopeMetadata) - sizeof(struct ScopeAlloc)){
+    if(x2c_error_runtime_ready){
+      static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/scope/allocation.x",.function = "f10_allocation____malloc_in",.line = 286,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_5, 1358596898646632, 0);  __builtin_unreachable();
+    }
+    _raw_fatal("allocation size overflow");
+  }
+  if(! * slot) * slot = _new_scope(NULL);  f10_allocation___ScopeMetadata * meta = _data_malloc(sizeof(f10_allocation___ScopeMetadata) + sizeof(struct ScopeAlloc) + size);  meta -> requested_size = size;  meta -> drop = drop;  ScopeAlloc alloc =(ScopeAlloc)(meta + 1);  f10_allocation____attach((* slot), alloc);  _record_allocation(size);  return((void *)((char *)(alloc) + sizeof(struct ScopeAlloc)));
+}
+
+static void f10_allocation____attach(Scope scope, ScopeAlloc alloc){
+  alloc -> next = scope -> first;  alloc -> prev =((void *)((uintptr_t)(scope) |(uintptr_t) 1));  if(scope -> first) scope -> first -> prev = alloc;  scope -> first = alloc;
+}
+
+static void * _data_malloc(size_t size){
+  void * ptr = malloc(size);  if(! ptr){
+    static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/scope/allocation.x",.function = "_data_malloc",.line = 310,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_6, 97614135954008, 0);  __builtin_unreachable();
+  }
+  return ptr;
+}
+
+static void * f10_allocation____calloc_in(Scope * slot, size_t count, size_t size){
+  if(count && size > SIZE_MAX / count){
+    if(x2c_error_runtime_ready){
+      static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/scope/allocation.x",.function = "f10_allocation____calloc_in",.line = 316,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_7, 1358596898646632, 0);  __builtin_unreachable();
+    }
+    _raw_fatal("calloc size overflow");
+  }
+  size_t total = count * size;  void * ptr = f10_allocation____malloc_in(slot, total, NULL);  if(total) memset(ptr, 0, total);  return ptr;
+}
+
+static void * f10_allocation____memdup_in(Scope * slot, const void * ptr, size_t size){
+  if(! ptr || ! size) return NULL;  void * copy = f10_allocation____malloc_in(slot, size, NULL);  memcpy(copy, ptr, size);  return copy;
 }
 
 static void f10_allocation____free(ScopeAlloc alloc){
@@ -258,10 +265,6 @@ static void f10_allocation____free(ScopeAlloc alloc){
 
 static void _detach(ScopeAlloc alloc){
   ScopeAlloc next = alloc -> next, prev = alloc -> prev;  f10_allocation____point_to(prev, next);  if(next) next -> prev = prev;
-}
-
-static void f10_allocation____relink(ScopeAlloc alloc, ScopeAlloc prev, ScopeAlloc next){
-  alloc -> next = next;  alloc -> prev = prev;  if(next) next -> prev = alloc;  f10_allocation____point_to(prev, alloc);
 }
 
 static void f10_allocation____point_to(ScopeAlloc prev, ScopeAlloc alloc){
@@ -275,11 +278,8 @@ static void _release(ScopeAlloc alloc){
   f10_allocation___ScopeMetadata * meta =(((f10_allocation___ScopeMetadata *)(alloc)) - 1);  void(* drop)(void *) = meta -> drop;  _record_free(meta -> requested_size);  if(drop) drop(((void *)((char *)(alloc) + sizeof(struct ScopeAlloc))));  free(meta);
 }
 
-static void * _data_malloc(size_t size){
-  void * ptr = malloc(size);  if(! ptr){
-    static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/scope/allocation.x",.function = "_data_malloc",.line = 367,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_7, 97614135954008, 0);  __builtin_unreachable();
-  }
-  return ptr;
+static void f10_allocation____relink(ScopeAlloc alloc, ScopeAlloc prev, ScopeAlloc next){
+  alloc -> next = next;  alloc -> prev = prev;  if(next) next -> prev = alloc;  f10_allocation____point_to(prev, alloc);
 }
 
 static void * f10_allocation____data_realloc(void * ptr, size_t size){
@@ -289,24 +289,16 @@ static void * f10_allocation____data_realloc(void * ptr, size_t size){
   return result;
 }
 
-static ScopeThreadState _thread(void){
-  ScopeThreadState state = & f7_regions___scope_thread;  if(! state -> active) state -> active = & state -> root;  return state;
-}
-
 void Scope_push(Scope * scope){
   if(! _init_guard_) Scope_initialize();  _require_running();  if(! scope){
-    static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/scope/regions.x",.function = "Scope_push",.line = 42,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_9, 4372499598, 0);  __builtin_unreachable();
+    static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/scope/regions.x",.function = "Scope_push",.line = 36,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_9, 4372499598, 0);  __builtin_unreachable();
   }
   ScopeThreadState state = _thread();  state -> stack = _raw_grow(state -> stack, state -> stack_size, &(state -> stack_capacity), sizeof(* state -> stack));  state -> active = state -> stack[state -> stack_size ++] = scope;
 }
 
-Scope * Scope_top(void){
-  if(! _init_guard_) Scope_initialize();  _require_running();  return _thread() -> active;
-}
-
 void Scope_pop(void){
   if(! _init_guard_) Scope_initialize();  _require_running();  ScopeThreadState state = _thread();  if(! state -> stack_size){
-    static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../lib/scope/regions.x",.function = "Scope_pop",.line = 76,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_10, 4477477457162, 0);  __builtin_unreachable();
+    static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../lib/scope/regions.x",.function = "Scope_pop",.line = 57,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_10, 4477477457162, 0);  __builtin_unreachable();
   }
   state -> stack_size --;  state -> active = state -> stack_size ? state -> stack[state -> stack_size - 1] : & state -> root;
 }
@@ -321,11 +313,73 @@ void Scope_retain(void){
 void Scope_release(void){
   if(! _init_guard_) Scope_initialize();  _require_running();  ScopeThreadState state = _thread(); {
     if(! * state -> active || ! f7_regions____forget_retain((* state -> active), state -> active)){
-      static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../lib/scope/regions.x",.function = "Scope_release",.line = 159,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_11, 4477477457162, 0);  __builtin_unreachable();
+      static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../lib/scope/regions.x",.function = "Scope_release",.line = 140,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_11, 4477477457162, 0);  __builtin_unreachable();
     }
     Scope top = * state -> active;  if((* state -> active = top -> down))(* state -> active) -> up = NULL;  top -> down = NULL;  f7_regions____destroy_chain(top);
   }
 
+}
+
+Scope Scope_new(void){
+  if(! _init_guard_) Scope_initialize();  _require_running();  return _new_scope(NULL);
+}
+
+Scope * Scope_top(void);
+void Scope_transfer(Scope scope, Scope destination);
+Scope Scope_child(void){
+  if(! _init_guard_) Scope_initialize();  Scope * active = Scope_top();  if(! * active) * active = _new_scope(NULL);  Scope child = _new_scope(NULL);  Scope_transfer(child, * active);  return child;
+}
+
+Scope * Scope_top(void){
+  if(! _init_guard_) Scope_initialize();  _require_running();  return _thread() -> active;
+}
+
+Scope Scope_parent(Scope scope){
+  if(! _init_guard_) Scope_initialize();  return scope ? scope -> parent : NULL;
+}
+
+void Scope_transfer(Scope scope, Scope destination){
+  if(! _init_guard_) Scope_initialize();  if(! scope) return;  if(scope -> parent != destination){
+    f7_regions____detach_scope(scope);  scope -> parent = destination;  if(destination){
+      scope -> next = destination -> children;  if(scope -> next) scope -> next -> previous = scope;  destination -> children = scope;
+    }
+
+  }
+
+}
+
+int Scope_contains(Scope scope, Scope candidate){
+  if(! _init_guard_) Scope_initialize();  if(! scope || ! candidate) return 0;  while(candidate && candidate != scope) candidate = candidate -> parent;  return candidate == scope;
+}
+
+Scope Scope_new_named(const char * name){
+  if(! _init_guard_) Scope_initialize();  _require_running();  return _new_scope(name);
+}
+
+void Scope_destroy(Scope scope);
+void Scope_cleanup(Scope value){
+  if(! _init_guard_) Scope_initialize();  Scope_destroy(value);
+}
+
+void Scope_destroy(Scope scope){
+  if(! _init_guard_) Scope_initialize();  if(! scope) return;  _require_running();  ScopeThreadState state = _thread();  if(scope == state -> root){
+    static const X2CErrorSite _x2c_gensym_error_site_12 = {.file = "../../lib/scope/regions.x",.function = "Scope_destroy",.line = 279,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_12, 4477477457162, 0);  __builtin_unreachable();
+  }
+  for(int i = 0;  i < state -> stack_size;  i ++) if(scope == * state -> stack[i]){
+    static const X2CErrorSite _x2c_gensym_error_site_13 = {.file = "../../lib/scope/regions.x",.function = "Scope_destroy",.line = 281,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_13, 4477477457162, 0);  __builtin_unreachable();
+  }
+  if(scope -> up){
+    static const X2CErrorSite _x2c_gensym_error_site_14 = {.file = "../../lib/scope/regions.x",.function = "Scope_destroy",.line = 282,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_14, 4477477457162, 0);  __builtin_unreachable();
+  }
+  f7_regions____forget_retains(scope);  f7_regions____destroy_chain(scope);
+}
+
+void x2c_scope_thread_release(void){
+  if(! _init_guard_) Scope_initialize();  ScopeThreadState state = & f7_regions___scope_thread;  if(state -> root) f7_regions____destroy_chain(state -> root);  state -> root = NULL;  _raw_free(state -> stack);  state -> stack = NULL;  state -> stack_size = state -> stack_capacity = 0;  _raw_free(state -> retains);  state -> retains = NULL;  state -> retain_count = state -> retain_capacity = 0;  state -> active = & state -> root;
+}
+
+static ScopeThreadState _thread(void){
+  ScopeThreadState state = & f7_regions___scope_thread;  if(! state -> active) state -> active = & state -> root;  return state;
 }
 
 static void f7_regions____record_retain(Scope scope, Scope * slot){
@@ -333,6 +387,13 @@ static void f7_regions____record_retain(Scope scope, Scope * slot){
     .scope = scope, .slot = slot
   }
   ;
+}
+
+static Scope _new_scope(const char * name){
+  Scope scope = _data_malloc(sizeof(struct Scope));  * scope =(struct Scope){
+    0
+  }
+  ;  _register_name(scope, name);  atomic_fetch_add(& scope_creations, 1);  return scope;
 }
 
 static int f7_regions____forget_retain(Scope scope, Scope * slot){
@@ -352,98 +413,16 @@ static void f7_regions____destroy_chain(Scope scope){
 
 }
 
-Scope Scope_new(void){
-  if(! _init_guard_) Scope_initialize();  _require_running();  return _new_scope(NULL);
-}
-
-void Scope_transfer(Scope scope, Scope destination);
-Scope Scope_child(void){
-  if(! _init_guard_) Scope_initialize();  Scope * active = Scope_top();  if(! * active) * active = _new_scope(NULL);  Scope child = _new_scope(NULL);  Scope_transfer(child, * active);  return child;
-}
-
-Scope Scope_parent(Scope scope){
-  if(! _init_guard_) Scope_initialize();  return scope ? scope -> parent : NULL;
-}
-
-void Scope_transfer(Scope scope, Scope destination){
-  if(! _init_guard_) Scope_initialize();  if(! scope) return;  if(scope -> parent != destination){
-    f7_regions____detach_scope(scope);  scope -> parent = destination;  if(destination){
-      scope -> next = destination -> children;  if(scope -> next) scope -> next -> previous = scope;  destination -> children = scope;
-    }
-
-  }
-
-}
-
 static void f7_regions____detach_scope(Scope scope){
   if(scope -> previous) scope -> previous -> next = scope -> next;  else if(scope -> parent) scope -> parent -> children = scope -> next;  if(scope -> next) scope -> next -> previous = scope -> previous;  scope -> parent = scope -> previous = scope -> next = NULL;
-}
-
-int Scope_contains(Scope scope, Scope candidate){
-  if(! _init_guard_) Scope_initialize();  if(! scope || ! candidate) return 0;  while(candidate && candidate != scope) candidate = candidate -> parent;  return candidate == scope;
-}
-
-Scope Scope_new_named(const char * name){
-  if(! _init_guard_) Scope_initialize();  _require_running();  return _new_scope(name);
-}
-
-void Scope_destroy(Scope scope){
-  if(! _init_guard_) Scope_initialize();  if(! scope) return;  _require_running();  ScopeThreadState state = _thread();  if(scope == state -> root){
-    static const X2CErrorSite _x2c_gensym_error_site_12 = {.file = "../../lib/scope/regions.x",.function = "Scope_destroy",.line = 330,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_12, 4477477457162, 0);  __builtin_unreachable();
-  }
-  for(int i = 0;  i < state -> stack_size;  i ++) if(scope == * state -> stack[i]){
-    static const X2CErrorSite _x2c_gensym_error_site_13 = {.file = "../../lib/scope/regions.x",.function = "Scope_destroy",.line = 332,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_13, 4477477457162, 0);  __builtin_unreachable();
-  }
-  if(scope -> up){
-    static const X2CErrorSite _x2c_gensym_error_site_14 = {.file = "../../lib/scope/regions.x",.function = "Scope_destroy",.line = 333,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_14, 4477477457162, 0);  __builtin_unreachable();
-  }
-  f7_regions____forget_retains(scope);  f7_regions____destroy_chain(scope);
-}
-
-void Scope_cleanup(Scope value){
-  if(! _init_guard_) Scope_initialize();  Scope_destroy(value);
-}
-
-static Scope _new_scope(const char * name){
-  Scope scope = _data_malloc(sizeof(struct Scope));  * scope =(struct Scope){
-    0
-  }
-  ;  _register_name(scope, name);  atomic_fetch_add(& scope_creations, 1);  return scope;
 }
 
 static void f7_regions____forget_retains(Scope scope){
   ScopeThreadState state = _thread();  for(Scope cur = scope;  cur;  cur = cur -> down) for(int i = state -> retain_count - 1;  i >= 0;  i --) if(state -> retains[i].scope == cur) state -> retains[i] = state -> retains[-- state -> retain_count];
 }
 
-void x2c_scope_thread_release(void){
-  if(! _init_guard_) Scope_initialize();  ScopeThreadState state = & f7_regions___scope_thread;  if(state -> root) f7_regions____destroy_chain(state -> root);  state -> root = NULL;  _raw_free(state -> stack);  state -> stack = NULL;  state -> stack_size = state -> stack_capacity = 0;  _raw_free(state -> retains);  state -> retains = NULL;  state -> retain_count = state -> retain_capacity = 0;  state -> active = & state -> root;
-}
-
 const char * Scope_name(Scope scope){
   if(! _init_guard_) Scope_initialize();  _require_running();  f10_accounting___ScopeName node = f10_accounting____find_name(scope);  return node ? node -> name : NULL;
-}
-
-static void _register_name(Scope scope, const char * name){
-  if(! name) return;  size_t length = strlen(name);  f10_accounting___ScopeName node = _raw_malloc(sizeof(struct f10_accounting___ScopeName));  char * copy = _raw_malloc(length + 1);  memcpy(copy, name, length + 1);  node -> scope = scope;  node -> name = copy;  f10_accounting____metadata_lock();  node -> next = f10_accounting___scope_names;  f10_accounting___scope_names = node;  f10_accounting____metadata_unlock();
-}
-
-static f10_accounting___ScopeName f10_accounting____find_name(Scope scope){
-  f10_accounting____metadata_lock();  f10_accounting___ScopeName node = f10_accounting___scope_names;  while(node && node -> scope != scope) node = node -> next;  f10_accounting____metadata_unlock();  return node;
-}
-
-static void _unregister_name(Scope scope){
-  f10_accounting____metadata_lock();  f10_accounting___ScopeName * link = & f10_accounting___scope_names;  while(* link &&(* link) -> scope != scope) link = &(* link) -> next;  f10_accounting___ScopeName node = * link;  if(node){
-    * link = node -> next;  _raw_free(node -> name);  _raw_free(node);
-  }
-  f10_accounting____metadata_unlock();
-}
-
-static void f10_accounting____metadata_lock(void){
-  if(pthread_mutex_lock(& f10_accounting___scope_metadata_mutex)) _raw_fatal("could not lock metadata");
-}
-
-static void f10_accounting____metadata_unlock(void){
-  if(pthread_mutex_unlock(& f10_accounting___scope_metadata_mutex)) _raw_fatal("could not unlock metadata");
 }
 
 ScopeStats Scope_stats(void){
@@ -457,6 +436,29 @@ ScopeStats Scope_stats(void){
     stats.scope_creations = atomic_load(& scope_creations);  stats.scope_destructions = atomic_load(& scope_destructions);
   }
   while(stats.scope_destructions > stats.scope_creations); ;  stats.live_allocations = stats.allocation_calls - stats.free_calls;  stats.live_scopes = stats.scope_creations - stats.scope_destructions;  return stats;
+}
+
+static f10_accounting___ScopeName f10_accounting____find_name(Scope scope){
+  f10_accounting____metadata_lock();  f10_accounting___ScopeName node = f10_accounting___scope_names;  while(node && node -> scope != scope) node = node -> next;  f10_accounting____metadata_unlock();  return node;
+}
+
+static void f10_accounting____metadata_lock(void){
+  if(pthread_mutex_lock(& f10_accounting___scope_metadata_mutex)) _raw_fatal("could not lock metadata");
+}
+
+static void f10_accounting____metadata_unlock(void){
+  if(pthread_mutex_unlock(& f10_accounting___scope_metadata_mutex)) _raw_fatal("could not unlock metadata");
+}
+
+static void _register_name(Scope scope, const char * name){
+  if(! name) return;  size_t length = strlen(name);  f10_accounting___ScopeName node = _raw_malloc(sizeof(struct f10_accounting___ScopeName));  char * copy = _raw_malloc(length + 1);  memcpy(copy, name, length + 1);  node -> scope = scope;  node -> name = copy;  f10_accounting____metadata_lock();  node -> next = f10_accounting___scope_names;  f10_accounting___scope_names = node;  f10_accounting____metadata_unlock();
+}
+
+static void _unregister_name(Scope scope){
+  f10_accounting____metadata_lock();  f10_accounting___ScopeName * link = & f10_accounting___scope_names;  while(* link &&(* link) -> scope != scope) link = &(* link) -> next;  f10_accounting___ScopeName node = * link;  if(node){
+    * link = node -> next;  _raw_free(node -> name);  _raw_free(node);
+  }
+  f10_accounting____metadata_unlock();
 }
 
 static void _record_allocation(size_t size){
@@ -504,18 +506,37 @@ static void _free_name_registry(void){
 
 }
 
-static void * _raw_malloc(size_t size){
-  void * ptr = malloc(size);  if(! ptr){
-    static const X2CErrorSite _x2c_gensym_error_site_15 = {.file = "../../lib/scope/runtime.x",.function = "_raw_malloc",.line = 5,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_15, 97614135954008, 0);  __builtin_unreachable();
-  }
-  atomic_fetch_add(& raw_alloc_count, 1);  return ptr;
+void Scope_initialize(void){
+  if(_init_guard_) return;  _init_guard_ = 1;  _x2c_gensym_static_initialize_0();  _x2c_gensym_static_initialize_1();  f7_runtime____initialize();
 }
 
-static void * f7_runtime____raw_realloc(void * ptr, size_t size){
-  void * result = realloc(ptr, size);  if(! result){
-    static const X2CErrorSite _x2c_gensym_error_site_16 = {.file = "../../lib/scope/runtime.x",.function = "f7_runtime____raw_realloc",.line = 12,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_16, 97614135954008, 0);  __builtin_unreachable();
+void Scope_shutdown_hook(void(* hook)(void)){
+  if(! _init_guard_) Scope_initialize();  _require_running();  if(! hook){
+    static const X2CErrorSite _x2c_gensym_error_site_15 = {.file = "../../lib/scope/runtime.x",.function = "Scope_shutdown_hook",.line = 25,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_15, 4372499598, 0);  __builtin_unreachable();
   }
-  return result;
+  f7_runtime___hooks = _raw_grow(f7_runtime___hooks, f7_runtime___hook_count, &(f7_runtime___hook_capacity), sizeof(* f7_runtime___hooks));  f7_runtime___hooks[f7_runtime___hook_count ++] = hook;
+}
+
+void Scope_shutdown(void){
+  if(! _init_guard_) Scope_initialize();  if(f7_runtime___scope_state == 1324301450716 || f7_runtime___scope_state == 1324302486414) return;  if(f7_runtime___scope_state == 1439265384){
+    f7_runtime___scope_state = 1324301450716;  return;
+  }
+  f7_runtime___scope_state = 1324302486414;  f7_runtime____run_hooks();  x2c_static_shutdown();  x2c_scope_thread_release();  _report_leaks();  _free_name_registry();  f7_runtime___scope_state = 1324301450716;  x2c_thread_state_release();
+}
+
+static void f7_runtime____initialize(void){
+  if(f7_runtime___scope_state == 40094288782 || f7_runtime___scope_state == 1324302486414) return;  if(f7_runtime___scope_state == 1324301450716) _raw_fatal("operation attempted after shutdown");  ScopeThreadState state = _thread();  state -> active = & state -> root;  f7_runtime___scope_state = 40094288782;  if(atexit(Scope_shutdown)) _raw_fatal("could not register shutdown handler");
+}
+
+_Noreturn static void _raw_fatal(const char * message){
+  fprintf(stderr, "Scope: %s\n", message);  abort();
+}
+
+static void f7_runtime____run_hooks(void){
+  while(f7_runtime___hook_count){
+    void(* hook)(void) = f7_runtime___hooks[-- f7_runtime___hook_count];  hook();
+  }
+  _raw_free(f7_runtime___hooks);  f7_runtime___hooks = NULL;  f7_runtime___hook_count = f7_runtime___hook_capacity = 0;
 }
 
 static void _raw_free(void * ptr){
@@ -528,24 +549,25 @@ static void * _raw_grow(void * items, int count, int * capacity, size_t size){
   }
   else if(count ==(* capacity)){
     if((* capacity) > INT_MAX / 2){
-      static const X2CErrorSite _x2c_gensym_error_site_17 = {.file = "../../lib/scope/runtime.x",.function = "_raw_grow",.line = 30,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_17, 1358596898646632, 0);  __builtin_unreachable();
+      static const X2CErrorSite _x2c_gensym_error_site_16 = {.file = "../../lib/scope/runtime.x",.function = "_raw_grow",.line = 94,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_16, 1358596898646632, 0);  __builtin_unreachable();
     }
     items = f7_runtime____raw_realloc(items, (* capacity) * 2 * size); (* capacity) *= 2;
   }
   return items;
 }
 
-_Noreturn static void _raw_fatal(const char * message){
-  fprintf(stderr, "Scope: %s\n", message);  abort();
+static void * _raw_malloc(size_t size){
+  void * ptr = malloc(size);  if(! ptr){
+    static const X2CErrorSite _x2c_gensym_error_site_17 = {.file = "../../lib/scope/runtime.x",.function = "_raw_malloc",.line = 103,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_17, 97614135954008, 0);  __builtin_unreachable();
+  }
+  atomic_fetch_add(& raw_alloc_count, 1);  return ptr;
 }
 
-void Scope_initialize(void){
-  if(_init_guard_) return;  _init_guard_ = 1;  _x2c_gensym_static_initialize_0();  _x2c_gensym_static_initialize_1();  f7_runtime____initialize();
-}
-
-void Scope_shutdown(void);
-static void f7_runtime____initialize(void){
-  if(f7_runtime___scope_state == 40094288782 || f7_runtime___scope_state == 1324302486414) return;  if(f7_runtime___scope_state == 1324301450716) _raw_fatal("operation attempted after shutdown");  ScopeThreadState state = _thread();  state -> active = & state -> root;  f7_runtime___scope_state = 40094288782;  if(atexit(Scope_shutdown)) _raw_fatal("could not register shutdown handler");
+static void * f7_runtime____raw_realloc(void * ptr, size_t size){
+  void * result = realloc(ptr, size);  if(! result){
+    static const X2CErrorSite _x2c_gensym_error_site_18 = {.file = "../../lib/scope/runtime.x",.function = "f7_runtime____raw_realloc",.line = 110,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_18, 97614135954008, 0);  __builtin_unreachable();
+  }
+  return result;
 }
 
 static void _require_running(void){
@@ -554,27 +576,6 @@ static void _require_running(void){
 
 static void f7_runtime____ensure_running(void){
   if(f7_runtime___scope_state == 1439265384) f7_runtime____initialize();  else if(f7_runtime___scope_state == 1324301450716) _raw_fatal("operation attempted after shutdown");
-}
-
-void Scope_shutdown_hook(void(* hook)(void)){
-  if(! _init_guard_) Scope_initialize();  _require_running();  if(! hook){
-    static const X2CErrorSite _x2c_gensym_error_site_18 = {.file = "../../lib/scope/runtime.x",.function = "Scope_shutdown_hook",.line = 85,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_18, 4372499598, 0);  __builtin_unreachable();
-  }
-  f7_runtime___hooks = _raw_grow(f7_runtime___hooks, f7_runtime___hook_count, &(f7_runtime___hook_capacity), sizeof(* f7_runtime___hooks));  f7_runtime___hooks[f7_runtime___hook_count ++] = hook;
-}
-
-void Scope_shutdown(void){
-  if(! _init_guard_) Scope_initialize();  if(f7_runtime___scope_state == 1324301450716 || f7_runtime___scope_state == 1324302486414) return;  if(f7_runtime___scope_state == 1439265384){
-    f7_runtime___scope_state = 1324301450716;  return;
-  }
-  f7_runtime___scope_state = 1324302486414;  f7_runtime____run_hooks();  x2c_static_shutdown();  x2c_scope_thread_release();  _report_leaks();  _free_name_registry();  f7_runtime___scope_state = 1324301450716;  x2c_thread_state_release();
-}
-
-static void f7_runtime____run_hooks(void){
-  while(f7_runtime___hook_count){
-    void(* hook)(void) = f7_runtime___hooks[-- f7_runtime___hook_count];  hook();
-  }
-  _raw_free(f7_runtime___hooks);  f7_runtime___hooks = NULL;  f7_runtime___hook_count = f7_runtime___hook_capacity = 0;
 }
 
 #undef _x2c_gensym_initializer_choice_7792FEF9_0_expanded

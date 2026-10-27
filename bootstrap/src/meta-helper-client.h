@@ -18,8 +18,6 @@
 #include <sys/wait.h>
 #include <time.h>
 #include <unistd.h>
-void Compiler_report_meta_error(Compiler c, Var node, Symbol category, String message, Token site, List notes, int fatal);
-
 typedef struct MetaHelper{
   String path, snapshot;
   Map failures, units;
@@ -33,6 +31,8 @@ typedef struct MetaHelper{
 Var Compiler_meta_helper_call(Compiler c, String name, Token site, List arguments, String provider);
 
 Var Compiler_loaded_helper_call(Compiler c, String name, Token site, List arguments, String provider);
+
+void Compiler_report_meta_error(Compiler c, Var node, Symbol category, String message, Token site, List notes, int fatal);
 
 MetaHelper MetaHelper_new(String path, Map failures, Map units);
 

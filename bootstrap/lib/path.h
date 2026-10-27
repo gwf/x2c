@@ -10,21 +10,11 @@ typedef String Path;
 
 Path Path_new(const char * a0);
 
-Path Path_join(Path base, Path name);
-
-Path Path_dirname(Path path);
-
-Path Path_basename(Path path);
-
 String Path_extension(Path path);
 
 String Path_stem(Path path);
 
-Path Path_absolute(Path path);
-
-int Path_exists(Path p);
-
-int Path_is_dir(Path p);
+Path Path_basename(Path path);
 
 int Path_is_file(Path p);
 
@@ -34,25 +24,33 @@ long Path_size(Path path);
 
 double Path_modified_time(Path path);
 
-List Path_list_dir(Path path);
-
 Iter Path_walk(Path root, Iter dest);
-
-int Path_glob_match(Path pattern, Path path);
 
 List Path_glob(Path pattern);
 
-void Path_make_dirs(Path p);
+int Path_exists(Path p);
+
+int Path_glob_match(Path pattern, Path path);
 
 void Path_remove_file(Path path);
 
-void Path_remove_tree(Path path);
+void Path_move_to(Path source, Path target);
 
-void Path_copy_file(Path source, Path target);
+void Path_remove_tree(Path path);
 
 void Path_copy_tree(Path source, Path target);
 
-void Path_move_to(Path source, Path target);
+Path Path_absolute(Path path);
+
+List Path_list_dir(Path path);
+
+void Path_make_dirs(Path p);
+
+Path Path_dirname(Path path);
+
+int Path_is_dir(Path p);
+
+void Path_copy_file(Path source, Path target);
 
 void Path_symlink_to(Path link, Path target);
 
@@ -61,6 +59,8 @@ String Path_read_text(Path path);
 void Path_write_text(Path path, String text);
 
 Path Path_temp_dir(void);
+
+Path Path_join(Path base, Path name);
 
 
 #endif /* __GUARD_0x1E3143B9__ */

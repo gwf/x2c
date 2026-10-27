@@ -26,19 +26,19 @@ ModuleSource Compiler_module_source(Compiler c, String path, String text);
 
 Map Compiler_collect_symbols(Compiler c, Map globs);
 
-List Compiler_prelude_sources(void);
-
 int Compiler_is_prelude_source(String path);
 
 void Compiler_install_syntax_prelude(Compiler c);
 
 void Compiler_configure_package(Compiler c, List roots, String filename);
 
-String SourceView_resolve_include(SourceView s, List dirs, String includer_dir, String target, int angle);
-
 Map Compiler_included_compile_time_effects(Compiler c, Map globs);
 
+List Compiler_prelude_sources(void);
+
 void Compiler_install_included_effects(Compiler c);
+
+String SourceView_resolve_include(SourceView s, List dirs, String includer_dir, String target, int angle);
 
 List Compiler_include_typedef_names(Compiler c, String target, int angle, Map seen);
 
@@ -64,9 +64,9 @@ void Compiler_record_conformance_rows(Compiler c, Map rows);
 
 List Compiler_declared_adoptions(Compiler c);
 
-int Compiler_linked_meta_provider_current(Compiler c, String path);
-
 int Compiler_linked_meta_definitions_current(Compiler c, String path);
+
+int Compiler_linked_meta_provider_current(Compiler c, String path);
 
 void Compiler_complete_meta_hashes(Compiler c);
 
@@ -78,17 +78,17 @@ void Compiler_name_meta_provider_bindings(Compiler c, String path, int index);
 
 List Compiler_loaded_provider(Compiler c);
 
-Type Compiler_loaded_call_type(Compiler c, Type type);
-
 void Compiler_name_loaded_provider(Compiler c, String path, int index, List provider);
+
+Type Compiler_loaded_call_type(Compiler c, Type type);
 
 void Compiler_collect_package(Compiler c, String name, Token token);
 
 void Compiler_configure_interfaces(String out_dir, int cold);
 
-String Compiler_prelude_interface(void);
-
 List Compiler_prelude_missing_interfaces(void);
+
+String Compiler_prelude_interface(void);
 
 String Compiler_interface_text(Compiler c);
 

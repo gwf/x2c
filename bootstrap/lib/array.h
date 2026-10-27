@@ -65,33 +65,7 @@ Array Array_reverse(Array _x2c_gensym_macro_array_32);
 
 int Array_equal(Array _x2c_gensym_macro_a_3, Array _x2c_gensym_macro_b_3);
 
-Var Array_getindex(Array array, int index);
-
-Var Array_setindex(Array array, int index, Var value);
-
-static inline Block Array_block(Array x){
-  return(Block) x;
-}
-
-static inline Array Block_array(Block x){
-  return(Array) x;
-}
-
 void Array_free(Array array);
-
-void Array_resize(Array arr, size_t size);
-
-Array Array_update_n(Array array, unsigned element_count, ...);
-
-Var Array_updateindex(Array array, int index, Symbol op, Var rhs);
-
-Var Array_postfixindex(Array array, int index, Symbol op);
-
-Array Array_map(Array array, Func func);
-
-Array Array_map2(Array a, Array b, Func func);
-
-Var Array_foldl(Array array, Var seed, Func fn);
 
 int Array_compare(Array _x2c_gensym_macro_a_4, Array _x2c_gensym_macro_b_4);
 
@@ -107,9 +81,35 @@ Iter Array_iter(Array, Iter);
 
 Iter Array_iter(Array _x2c_gensym_macro_array_39, Iter _x2c_gensym_macro_dest_0);
 
+Var Array_getindex(Array array, int index);
+
+Var Array_setindex(Array array, int index, Var value);
+
+static inline Block Array_block(Array x){
+  return(Block) x;
+}
+
+static inline Array Block_array(Block x){
+  return(Array) x;
+}
+
+Array Array_update_n(Array array, unsigned element_count, ...);
+
+Var Array_updateindex(Array array, int index, Symbol op, Var rhs);
+
+Var Array_postfixindex(Array array, int index, Symbol op);
+
+Array Array_map(Array array, Func func);
+
+Array Array_map2(Array a, Array b, Func func);
+
+Var Array_foldl(Array array, Var seed, Func fn);
+
 Array Array_sort(Array array);
 
 Array Array_sort_with(Array array, Func compare);
+
+void Array_resize(Array arr, size_t size);
 
 Array Array_sort_by(Array array, Func key);
 

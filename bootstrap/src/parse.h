@@ -18,17 +18,17 @@
 #include "macros/macros.h"
 #include "protocol/protocol.h"
 #include "utils.h"
-List Compiler_parse_top_level_mode(Compiler c, int skip_body);
+List Compiler_parse_submission(Compiler c, int end_position);
 
 List Compiler_parse_top_level(Compiler c);
 
-List Compiler_parse_submission(Compiler c, int end_position);
+List Compiler_parse_top_level_mode(Compiler c, int skip_body);
 
 int Compiler_defines_main(Compiler c);
 
-int Compiler_script_statement_starts(Compiler c);
-
 int Compiler_script_statement_executes(Compiler c);
+
+int Compiler_script_statement_starts(Compiler c);
 
 int Compiler_protocol_form_starts(Compiler c);
 
@@ -40,9 +40,9 @@ List Compiler_finish_foreign_alias(Compiler c, List declaration, List native_syn
 
 List Compiler_parse_declaration_row(Compiler c);
 
-List Compiler_parse_simple_declaration(Compiler c);
-
 List Compiler_parse_type_operand(Compiler c, Type * type);
+
+List Compiler_parse_simple_declaration(Compiler c);
 
 List Compiler_parse_declaration_argument(Compiler c);
 
@@ -56,13 +56,13 @@ void Compiler_check_reference_placement(Compiler c, Type type);
 
 Type Compiler_parse_type_name(Compiler c);
 
+List Compiler_parse_named_type(Compiler c);
+
 List Compiler_parse_members(Compiler c, Symbol position, List context);
 
 List Compiler_parse_fields(Compiler c, List context);
 
 List Compiler_parse_field(Compiler c, List context);
-
-List Compiler_parse_named_type(Compiler c);
 
 List Compiler_parse_enumerators(Compiler c, List context);
 
@@ -70,11 +70,11 @@ List Compiler_parse_enumerator(Compiler c, Type context);
 
 List Compiler_parse_declarator_argument(Compiler c);
 
-void Compiler_bind_template_local(Compiler c, List key, List type, List context);
-
 List Compiler_parse_parameter_list(Compiler c);
 
 List Compiler_parse_parameter(Compiler c);
+
+void Compiler_bind_template_local(Compiler c, List key, List type, List context);
 
 List Compiler_bind_parameter(Compiler c, List base, List declarator);
 
@@ -82,23 +82,23 @@ List Compiler_parse_complex_identifier(Compiler c);
 
 String Compiler_package_alias_spelling(Compiler c);
 
-List Compiler_parse_basic_identifier(Compiler c);
-
 List Compiler_parse_optional_identifier(Compiler c);
+
+List Compiler_parse_basic_identifier(Compiler c);
 
 Symbol Compiler_auto_region_form(Compiler c, Symbol position);
 
-List Compiler_parse_function_definition(Compiler c);
-
 List Compiler_parse_function_target(Compiler c);
 
-Type Ast_declared_return(List declaration);
+List Compiler_parse_function_definition(Compiler c);
 
-void Compiler_enter(Compiler c, Ancestor row);
+Type Ast_declared_return(List declaration);
 
 List Compiler_enclosing(Compiler c, Symbol what);
 
 int Compiler_enter_function(Compiler c, List declaration, int callback);
+
+void Compiler_enter(Compiler c, Ancestor row);
 
 List Compiler_function_entry(Compiler c, int depth);
 
@@ -114,17 +114,17 @@ List Compiler_leave_item(Compiler c);
 
 List Compiler_finish_initializers(Compiler c, List declaration, Token origin);
 
-List Compiler_bind_syntax(Compiler c, Var syntax, Symbol context, Type return_type);
-
-Var Compiler_source_clause(Symbol kind);
-
 List Compiler_bind_source_statement(Compiler c);
+
+List Compiler_bind_syntax(Compiler c, Var syntax, Symbol context, Type return_type);
 
 List Compiler_bind_catch_arm(Compiler c, List pattern, Var body, Token start, List handle);
 
 List Compiler_bind_match_arm(Compiler c, List pattern, Var body, Token start, int binds, List types);
 
 List Compiler_bind_callable_body(Compiler c, List syntax, Type return_type);
+
+Var Compiler_source_clause(Symbol kind);
 
 List Compiler_bind_match_condition(Compiler c, List subject, List pattern, List types, Token origin);
 

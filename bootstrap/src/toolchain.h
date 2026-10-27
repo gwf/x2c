@@ -44,8 +44,6 @@ Toolchain Toolchain_for_meta(String cc);
 
 String Toolchain_meta_cc(String explicit);
 
-ToolAction ToolAction_new(Symbol phase, List arguments, int verbose, int dry_run);
-
 void ToolAction_as_program(ToolAction action);
 
 ToolAction Toolchain_compile_action(Toolchain t, String source, String object, String depfile, List gen_dirs);
@@ -58,6 +56,8 @@ ToolAction Toolchain_link_action(Toolchain t, String output, List inputs);
 
 ToolAction Toolchain_module_action(Toolchain t, String output, List inputs, String loader);
 
+ToolAction ToolAction_new(Symbol phase, List arguments, int verbose, int dry_run);
+
 int ToolAction_run(ToolAction action);
 
 ToolRun ToolAction_start(ToolAction action);
@@ -66,11 +66,11 @@ int ToolRun_ready(ToolRun t);
 
 int ToolRun_wait(ToolRun execution);
 
-int tool_capture(List arguments, String * output, String * errors);
-
 int Toolchain_preprocess(Toolchain t, const char * fname, List include_dirs, const char * imacros, String * output, String * errors, String * dependencies);
 
 List Toolchain_search_directories(Toolchain t);
+
+int tool_capture(List arguments, String * output, String * errors);
 
 
 #endif /* __GUARD_0x44CAB048__ */

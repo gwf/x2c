@@ -2,16 +2,16 @@
 
 #define __GUARD_0x05A21DE5__
 #include "common.h"
-static String _0;
-
-static int _init_guard_ = 0;
-
 #include "buffer.h"
 #include "dispatch.h"
 #include "scan.h"
 #include "string/string.h"
 #include "symbol.h"
 #include <stdlib.h>
+static String _0;
+
+static int _init_guard_ = 0;
+
 static int _numeric_prefix(String spelling);
 
 static int _escape_byte(String spelling, int index);
@@ -51,6 +51,45 @@ int Atom_bare_spelling(String spelling){
   return scan_atom(spelling) == length;
 }
 
+int Var_is_atom(Var value){
+  if(! _init_guard_) Atom_initialize();
+  return Var_is(value, 1328354264) || Var_is(value, 826970);
+}
+
+char Atom_first(Atom atom){
+  if(! _init_guard_) Atom_initialize();
+  if(Var_is(atom, 1328354264)) return Symbol_first(Var_symbol(atom));
+  String spelling = Var_is(atom, 826970) ?(String) Var_pointer(atom) : NULL;
+  return String_truth(spelling) ? String_getindex(spelling, 0) : '\0';
+}
+
+Buffer Atom_write_str(Atom atom, Buffer out);
+
+Buffer Atom_write_repr(Atom value, Buffer out);
+
+#include "error.h"
+
+
+
+
+void Atom_initialize(void){
+  if(_init_guard_) return;
+  _init_guard_ = 1;
+  _0 = String_new("lsym");
+  static int initialized = 0;
+  if(initialized) return;
+  VarMethods methods ={
+    .str =(VarStrFn) Atom_str, .repr = _repr, .hash = _hash, .equal = _equal, .compare = _compare, .truth = _truth, .write_str = Atom_write_str, .write_repr = Atom_write_repr
+  }
+  ;
+  if(! x2c_try_register_descriptor(_0, methods)){
+    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/atom.x",.function = "Atom_initialize",.line = 83,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_0, 20774016911960, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Atom")), NULL))));
+    __builtin_unreachable();
+  }
+  initialized = 1;
+}
+
 Buffer Atom_write_str(Atom atom, Buffer out){
   if(! _init_guard_) Atom_initialize();
   if(Var_is(atom, 1328354264)) return Symbol_write_str(Var_symbol(atom), out);
@@ -77,11 +116,6 @@ Buffer Atom_write_repr(Atom value, Buffer out){
   return out;
 }
 
-int Var_is_atom(Var value){
-  if(! _init_guard_) Atom_initialize();
-  return Var_is(value, 1328354264) || Var_is(value, 826970);
-}
-
 String Atom_str(Atom atom){
   if(! _init_guard_) Atom_initialize();
   if(Var_is(atom, 1328354264)) return Symbol_str(Var_symbol(atom));
@@ -89,11 +123,20 @@ String Atom_str(Atom atom){
   return NULL;
 }
 
-char Atom_first(Atom atom){
+Atom Atom_intern(String spelling){
   if(! _init_guard_) Atom_initialize();
-  if(Var_is(atom, 1328354264)) return Symbol_first(Var_symbol(atom));
-  String spelling = Var_is(atom, 826970) ?(String) Var_pointer(atom) : NULL;
-  return String_truth(spelling) ? String_getindex(spelling, 0) : '\0';
+  if(! String_truth(spelling) || ! * spelling){
+    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/atom.x",.function = "Atom_intern",.line = 144,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_1, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Atom.intern")), NULL))));
+    __builtin_unreachable();
+  }
+  String canonical = String_new(spelling);
+  int length = String_len(canonical);
+  Symbol compact = Symbol_new_len(canonical, length);
+  if(_decodes_to(compact, canonical, length)) return Symbol_var(compact);
+  compact = _exact_7bit(canonical);
+  if(_decodes_to(compact, canonical, length)) return Symbol_var(compact);
+  return Var_new(826970, canonical);
 }
 
 static int _numeric_prefix(String spelling){
@@ -139,29 +182,6 @@ static int _truth(Var value){
   return Var_pointer(value) != NULL;
 }
 
-#include "error.h"
-
-
-
-
-void Atom_initialize(void){
-  if(_init_guard_) return;
-  _init_guard_ = 1;
-  _0 = String_new("lsym");
-  static int initialized = 0;
-  if(initialized) return;
-  VarMethods methods ={
-    .str =(VarStrFn) Atom_str, .repr = _repr, .hash = _hash, .equal = _equal, .compare = _compare, .truth = _truth, .write_str = Atom_write_str, .write_repr = Atom_write_repr
-  }
-  ;
-  if(! x2c_try_register_descriptor(_0, methods)){
-    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/atom.x",.function = "Atom_initialize",.line = 175,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_0, 20774016911960, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Atom")), NULL))));
-    __builtin_unreachable();
-  }
-  initialized = 1;
-}
-
 static Symbol _exact_7bit(String spelling){
   int length = String_len(spelling);
   if(length > SYMBOL_MAX_7BIT) return 0;
@@ -190,21 +210,5 @@ static int _decodes_to(Symbol compact, String canonical, int length){
   char text[SYMBOL_MAX_5BIT + 1];
   Symbol_decode(compact, text);
   return(int) strlen(text) == length && ! memcmp(text, canonical, length);
-}
-
-Atom Atom_intern(String spelling){
-  if(! _init_guard_) Atom_initialize();
-  if(! String_truth(spelling) || ! * spelling){
-    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/atom.x",.function = "Atom_intern",.line = 212,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_1, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Atom.intern")), NULL))));
-    __builtin_unreachable();
-  }
-  String canonical = String_new(spelling);
-  int length = String_len(canonical);
-  Symbol compact = Symbol_new_len(canonical, length);
-  if(_decodes_to(compact, canonical, length)) return Symbol_var(compact);
-  compact = _exact_7bit(canonical);
-  if(_decodes_to(compact, canonical, length)) return Symbol_var(compact);
-  return Var_new(826970, canonical);
 }
 

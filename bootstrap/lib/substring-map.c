@@ -29,14 +29,6 @@ static Substr * _key(MapSubInt _x2c_gensym_macro_map_0, unsigned _x2c_gensym_mac
 
 static int * _value(MapSubInt _x2c_gensym_macro_map_1, unsigned _x2c_gensym_macro_index_1);
 
-static unsigned _hash(Substr * key);
-
-static int _equal_key(Substr * a, Substr * b);
-
-static int _equal_value(int * a, int * b);
-
-static void _valid(int * value);
-
 static void MapSubInt_free_table(MapSubInt _x2c_gensym_macro_map_4);
 
 static MapSubInt MapSubInt_new_table(MapSubInt _x2c_gensym_macro_unused_0, unsigned _x2c_gensym_macro_capacity_2);
@@ -69,12 +61,6 @@ static int MapSubInt_has_entries(MapSubInt _x2c_gensym_macro_map_18);
 
 static int MapSubInt_equal_entries(MapSubInt _x2c_gensym_macro_a_0, MapSubInt _x2c_gensym_macro_b_0);
 
-static Var _box_key(Substr word);
-
-static Var _box_value(int count);
-
-static MapSubInt _prepare_export(MapSubInt map, Context source);
-
 static int _x2c_gensym_macro__step_0(Iter _x2c_gensym_macro_iter_0, Substr * _x2c_gensym_macro_key_9, int * _x2c_gensym_macro_val_4);
 
 static int _x2c_gensym_macro__next_0(Iter _x2c_gensym_macro_iter_1, Var * _x2c_gensym_macro_out_2);
@@ -84,6 +70,20 @@ static int _x2c_gensym_macro__keys_next_0(Iter _x2c_gensym_macro_iter_2, Var * _
 static int _x2c_gensym_macro__enumerate_next_0(Iter _x2c_gensym_macro_iter_3, Var * _x2c_gensym_macro_out_4);
 
 static MapSubInt MapSubInt_export_context(MapSubInt _x2c_gensym_macro_map_20, Context _x2c_gensym_macro_source_0);
+
+static unsigned _hash(Substr * key);
+
+static int _equal_key(Substr * a, Substr * b);
+
+static int _equal_value(int * a, int * b);
+
+static void _valid(int * value);
+
+static Var _box_key(Substr word);
+
+static Var _box_value(int count);
+
+static MapSubInt _prepare_export(MapSubInt map, Context source);
 
 static inline Iter _x2c_gensym_proto_mapsubint_iter_0(Var a0, Iter a1);
 
@@ -197,23 +197,6 @@ static int * _value(MapSubInt _x2c_gensym_macro_map_1, unsigned _x2c_gensym_macr
   return & _x2c_gensym_macro_records_1[_x2c_gensym_macro_index_1].val;
 }
 
-static unsigned _hash(Substr * key){
-  unsigned hash = Substring_hash(key[0]);
-  return hash ? hash : - 1;
-}
-
-static int _equal_key(Substr * a, Substr * b){
-  return Substring_equal(a[0], b[0]);
-}
-
-static int _equal_value(int * a, int * b){
-  return a[0] == b[0];
-}
-
-static void _valid(int * value){
-  (void) value;
-}
-
 void Scope_destroy(Scope);
 
 void Scope_free(void *);
@@ -318,7 +301,7 @@ static void _x2c_gensym_macro__expand_0(MapSubInt _x2c_gensym_macro_map_10){
   struct MapSubIntRecord * _x2c_gensym_macro_entries_1 = _x2c_gensym_macro_map_10 -> entries;
   unsigned _x2c_gensym_macro_cap_2 = _x2c_gensym_macro_map_10 -> capacity;
   if(_x2c_gensym_macro_cap_2 > ~ 0u / 2){
-    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/substring-map.x",.function = "_x2c_gensym_macro__expand_0",.line = 33,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/substring-map.x",.function = "_x2c_gensym_macro__expand_0",.line = 25,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_2, 1358596898646632, 1, Symbol_var(1265290), unsigned_var(_x2c_gensym_macro_cap_2));
     __builtin_unreachable();
   }
@@ -591,58 +574,6 @@ void MapSubInt_move_to(MapSubInt _x2c_gensym_macro_map_3, Scope * _x2c_gensym_ma
   Scope_transfer(_x2c_gensym_macro_map_3 -> scope, * _x2c_gensym_macro_destination_0);
 }
 
-MapSubInt MapSubInt_new(void){
-  MapSubInt map = NULL;
-  return MapSubInt_new_table(map, 2);
-}
-
-void MapSubInt_increment(MapSubInt map, Substr word){
-  int one = 1, inserted;
-  int * count = MapSubInt_get_or_insert(map, & word, & one, & inserted);
-  if(! inserted) ++ * count;
-}
-
-int MapSubInt_try_next(MapSubInt map, unsigned * cursor, Substr * word, int * count){
-  return MapSubInt_try_next_entry(map, &(* cursor), &(* word), &(* count));
-}
-
-Map MapSubInt_strings(MapSubInt map){
-  Map result = Map_new();
-  unsigned cursor = 0;
-  Substr word;
-  int count;
-  while(MapSubInt_try_next(map, &(cursor), &(word), &(count))) Map_setindex(result, String_var(Substring_str(word)), int_var(count));
-  return result;
-}
-
-static Var _box_key(Substr word){
-  return String_var(Substring_str(word));
-}
-
-static Var _box_value(int count){
-  return int_var(count);
-}
-
-int String_equal(String, String);
-
-String Var_as_string(Var);
-
-static MapSubInt _prepare_export(MapSubInt map, Context source){
-  unsigned * hashes = map -> hashes;
-  struct MapSubIntRecord * entries = map -> entries;
-  String previous = NULL, exported = NULL;
-  for(unsigned i = 0;  i < map -> capacity;  ++ i){
-    if(! hashes[i]) continue;
-    Substr * word = & entries[i].key;
-    if(! String_equal(word -> source, previous)){
-      previous = word -> source;
-      exported = Var_as_string(Context_export_nested(source, String_var(previous)));
-    }
-    word -> source = exported;
-  }
-  return NULL;
-}
-
 Var Var_new(Symbol, ...);
 
 Var MapSubInt_var(MapSubInt _x2c_gensym_macro_map_19){
@@ -654,6 +585,8 @@ void * Var_pointer(Var);
 MapSubInt Var_mapsubint(Var _x2c_gensym_macro_value_0){
   return(MapSubInt) Var_pointer(_x2c_gensym_macro_value_0);
 }
+
+int MapSubInt_try_next(MapSubInt map, unsigned * cursor, Substr * word, int * count);
 
 static int _x2c_gensym_macro__step_0(Iter _x2c_gensym_macro_iter_0, Substr * _x2c_gensym_macro_key_9, int * _x2c_gensym_macro_val_4){
   MapSubInt _x2c_gensym_macro_map_22 = Var_mapsubint(_x2c_gensym_macro_iter_0 -> obj);
@@ -763,6 +696,75 @@ static MapSubInt MapSubInt_export_context(MapSubInt _x2c_gensym_macro_map_20, Co
 
 void MapSubInt_cleanup(MapSubInt _x2c_gensym_macro_map_21){
   MapSubInt_free_table(_x2c_gensym_macro_map_21);
+}
+
+MapSubInt MapSubInt_new(void){
+  MapSubInt map = NULL;
+  return MapSubInt_new_table(map, 2);
+}
+
+void MapSubInt_increment(MapSubInt map, Substr word){
+  int one = 1, inserted;
+  int * count = MapSubInt_get_or_insert(map, & word, & one, & inserted);
+  if(! inserted) ++ * count;
+}
+
+Map MapSubInt_strings(MapSubInt map){
+  Map result = Map_new();
+  unsigned cursor = 0;
+  Substr word;
+  int count;
+  while(MapSubInt_try_next(map, &(cursor), &(word), &(count))) Map_setindex(result, String_var(Substring_str(word)), int_var(count));
+  return result;
+}
+
+int MapSubInt_try_next(MapSubInt map, unsigned * cursor, Substr * word, int * count){
+  return MapSubInt_try_next_entry(map, &(* cursor), &(* word), &(* count));
+}
+
+static unsigned _hash(Substr * key){
+  unsigned hash = Substring_hash(key[0]);
+  return hash ? hash : - 1;
+}
+
+static int _equal_key(Substr * a, Substr * b){
+  return Substring_equal(a[0], b[0]);
+}
+
+static int _equal_value(int * a, int * b){
+  return a[0] == b[0];
+}
+
+static void _valid(int * value){
+  (void) value;
+}
+
+static Var _box_key(Substr word){
+  return String_var(Substring_str(word));
+}
+
+static Var _box_value(int count){
+  return int_var(count);
+}
+
+int String_equal(String, String);
+
+String Var_as_string(Var);
+
+static MapSubInt _prepare_export(MapSubInt map, Context source){
+  unsigned * hashes = map -> hashes;
+  struct MapSubIntRecord * entries = map -> entries;
+  String previous = NULL, exported = NULL;
+  for(unsigned i = 0;  i < map -> capacity;  ++ i){
+    if(! hashes[i]) continue;
+    Substr * word = & entries[i].key;
+    if(! String_equal(word -> source, previous)){
+      previous = word -> source;
+      exported = Var_as_string(Context_export_nested(source, String_var(previous)));
+    }
+    word -> source = exported;
+  }
+  return NULL;
 }
 
 static inline Iter _x2c_gensym_proto_mapsubint_iter_0(Var a0, Iter a1){

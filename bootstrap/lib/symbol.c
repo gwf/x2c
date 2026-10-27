@@ -10,52 +10,11 @@
 #include "string/string.h"
 static const char _symbol_alphabet[] = "\0abcdefghijklmnopqrstuvwxyz*+?!-";
 
-static int _char_to_5bit(int c);
-
 static int _bytes_fit_5bit(const char * str, int len);
 
-static int _char_to_5bit(int c){
-  if(c >= 'a' && c <= 'z') return c - 'a' + 1;
-  if(c >= 'A' && c <= 'Z') return c - 'A' + 1;
-  switch(c){
-    case '*' : return 27;
-    case '+' : return 28;
-    case '?' : return 29;
-    case '!' : return 30;
-    case '_' : case '-' : return 31;
-    default: return 0;
-  }
+static int _char_to_5bit(int c);
 
-}
-
-static int _bytes_fit_5bit(const char * str, int len){
-  for(int i = 0;  i < len;  i ++) if(! _char_to_5bit(str[i])) return 0;
-  return 1;
-}
-
-Symbol Symbol_new_len(const char * str, int len){
-  if(! str || len <= 0) return 0;
-  int is_5bit = _bytes_fit_5bit(str, len);
-  int max_len = is_5bit ? SYMBOL_MAX_5BIT : SYMBOL_MAX_7BIT;
-  if(len > max_len) len = max_len;
-  uint64_t result = 0;
-  if(is_5bit){
-    for(int i = 0;  i < len;  i ++){
-      result <<= 5;
-      result |=(uint64_t)(0x1F & _char_to_5bit(str[i]));
-    }
-    return result << 1;
-  }
-  for(int i = 0;  i < len;  i ++){
-    result <<= 7;
-    result |=(uint64_t)(0x7F &(unsigned char) str[i]);
-  }
-  return(result << 1) | 1;
-}
-
-Symbol Symbol_new(const char * str){
-  return Symbol_new_len(str, strlen(str));
-}
+Symbol Symbol_new(const char * str);
 
 String Symbol_str(Symbol symbol);
 
@@ -67,34 +26,7 @@ int Symbol_try_new(String spelling, Symbol * out){
   return 1;
 }
 
-int Symbol_len(Symbol symbol){
-  int len = 0, bits =(symbol & 1) ? 7 : 5;
-  for(symbol >>= 1;  symbol;  symbol >>= bits) len ++;
-  return len;
-}
-
-void Symbol_decode(Symbol symbol, char * dest){
-  if(! dest || ! symbol) return;
-  int len = Symbol_len(symbol);
-  memset(dest, 0, SYMBOL_MAX_5BIT + 1);
-  if(symbol & 1){
-    symbol >>= 1;
-    for(int i = 0;  i < len;  i ++){
-      dest[len - i - 1] = symbol & 0x7F;
-      symbol >>= 7;
-    }
-
-  }
-  else{
-    symbol >>= 1;
-    for(int i = 0;  i < len;  i ++){
-      dest[len - i - 1] = _symbol_alphabet[symbol & 0x1F];
-      symbol >>= 5;
-    }
-
-  }
-  dest[len] = '\0';
-}
+void Symbol_decode(Symbol symbol, char * dest);
 
 String Symbol_str(Symbol symbol){
   char text[SYMBOL_MAX_5BIT + 1];
@@ -102,6 +34,8 @@ String Symbol_str(Symbol symbol){
   Symbol_decode(symbol, text);
   return String_new_len(text, strlen(text));
 }
+
+int Symbol_len(Symbol symbol);
 
 int Symbol_compare(Symbol a, Symbol b){
   if(a == b) return 0;
@@ -149,6 +83,29 @@ Buffer Symbol_write_repr(Symbol symbol, Buffer out){
   return Buffer_write_char(out, '>');
 }
 
+void Symbol_decode(Symbol symbol, char * dest){
+  if(! dest || ! symbol) return;
+  int len = Symbol_len(symbol);
+  memset(dest, 0, SYMBOL_MAX_5BIT + 1);
+  if(symbol & 1){
+    symbol >>= 1;
+    for(int i = 0;  i < len;  i ++){
+      dest[len - i - 1] = symbol & 0x7F;
+      symbol >>= 7;
+    }
+
+  }
+  else{
+    symbol >>= 1;
+    for(int i = 0;  i < len;  i ++){
+      dest[len - i - 1] = _symbol_alphabet[symbol & 0x1F];
+      symbol >>= 5;
+    }
+
+  }
+  dest[len] = '\0';
+}
+
 char Symbol_first(Symbol symbol){
   if(! symbol) return '\0';
   int bits =(symbol & 1) ? 7 : 5;
@@ -160,6 +117,12 @@ char Symbol_first(Symbol symbol){
   return value & 0x7F;
 }
 
+int Symbol_len(Symbol symbol){
+  int len = 0, bits =(symbol & 1) ? 7 : 5;
+  for(symbol >>= 1;  symbol;  symbol >>= bits) len ++;
+  return len;
+}
+
 char Symbol_last(Symbol symbol){
   if(! symbol) return '\0';
   int bits =(symbol & 1) ? 7 : 5;
@@ -167,6 +130,8 @@ char Symbol_last(Symbol symbol){
   if(bits == 5) return _symbol_alphabet[value & 0x1F];
   return value & 0x7F;
 }
+
+Symbol Symbol_new_len(const char * str, int len);
 
 Symbol Symbol_parse(char * text){
   int scan_symbol_literal(char * s);
@@ -186,5 +151,48 @@ Symbol Symbol_parse(char * text){
     return Symbol_new(unquoted);
   }
   return Symbol_new_len(text + 1, len - 2);
+}
+
+Symbol Symbol_new(const char * str){
+  return Symbol_new_len(str, strlen(str));
+}
+
+Symbol Symbol_new_len(const char * str, int len){
+  if(! str || len <= 0) return 0;
+  int is_5bit = _bytes_fit_5bit(str, len);
+  int max_len = is_5bit ? SYMBOL_MAX_5BIT : SYMBOL_MAX_7BIT;
+  if(len > max_len) len = max_len;
+  uint64_t result = 0;
+  if(is_5bit){
+    for(int i = 0;  i < len;  i ++){
+      result <<= 5;
+      result |=(uint64_t)(0x1F & _char_to_5bit(str[i]));
+    }
+    return result << 1;
+  }
+  for(int i = 0;  i < len;  i ++){
+    result <<= 7;
+    result |=(uint64_t)(0x7F &(unsigned char) str[i]);
+  }
+  return(result << 1) | 1;
+}
+
+static int _bytes_fit_5bit(const char * str, int len){
+  for(int i = 0;  i < len;  i ++) if(! _char_to_5bit(str[i])) return 0;
+  return 1;
+}
+
+static int _char_to_5bit(int c){
+  if(c >= 'a' && c <= 'z') return c - 'a' + 1;
+  if(c >= 'A' && c <= 'Z') return c - 'A' + 1;
+  switch(c){
+    case '*' : return 27;
+    case '+' : return 28;
+    case '?' : return 29;
+    case '!' : return 30;
+    case '_' : case '-' : return 31;
+    default: return 0;
+  }
+
 }
 

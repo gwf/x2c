@@ -26,13 +26,13 @@ MetaContext * MetaContext_current(void);
 
 Compiler Compiler_expanding(void);
 
-List MetaContext_invocation_location(void);
-
 String x2c_invocation_file(void);
 
 int x2c_invocation_line(void);
 
 int x2c_invocation_column(void);
+
+List MetaContext_invocation_location(void);
 
 void x2c_diagnostic_fail(String message, List notes);
 
@@ -70,8 +70,6 @@ Type Type_return_type(Type type);
 
 String Type_reverse_name(String base, String participant);
 
-Type Type_resolve(Type type);
-
 List Type_layout(Type type);
 
 int Type_is_value(Type type);
@@ -80,11 +78,11 @@ Symbol Type_tag_name(String name);
 
 List Type_members(Type type);
 
-List Type_fields(Type t);
-
 List MetaContext_type_description(Var value);
 
-Type Code_type(Code value);
+Type Type_resolve(Type type);
+
+List Type_fields(Type t);
 
 Var Code_value(Code code);
 
@@ -112,8 +110,6 @@ List Code_declared_bindings(List declaration);
 
 List MetaContext_function_reference(String name);
 
-String Code_binding_spelling(Var syntax);
-
 List x2c_ident(String spelling);
 
 List x2c_binding_fresh(String role);
@@ -122,15 +118,19 @@ List x2c_binding_for(Var key, String role);
 
 Var MetaContext_fresh_binding(String stem);
 
-String Code_name(Code function);
-
 List Code_body(Code function);
 
 List Code_arguments(Code parameters);
 
 Code Code_parameter(Code function, String wanted);
 
+String Code_name(Code function);
+
+String Code_binding_spelling(Var syntax);
+
 List Code_native_signature(List syntax);
+
+Type Code_type(Code value);
 
 Code x2c_enclosing(Symbol what);
 
@@ -142,17 +142,17 @@ Code Code_register_rewrite(Code function, List pattern, List holes);
 
 Code Code_register_after_initialization(Code c, Macro shape, List holes);
 
-String Code_source_text(Var value);
-
 String x2c_embed_text(Var requested);
 
 List MetaContext_source_description(Var value);
 
+String Code_source_text(Var value);
+
 Map x2c_meta_definition_hashes(void);
 
-List MetaContext_literal_list(List values);
-
 void Compiler_add_sdk_targets(Map rows);
+
+List MetaContext_literal_list(List values);
 
 
 #endif /* __GUARD_0xB37FE70E__ */

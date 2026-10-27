@@ -12,6 +12,54 @@
 #include "symbolset.h"
 #include "native-scalar-types.h"
 #include <limits.h>
+int Symbol_is_type_modifier(Symbol sym);
+
+int Symbol_is_builtin_type(Symbol sym);
+
+int Type_is_aggregate(Type type);
+
+List Type_tag(Type type);
+
+List Type_body(Type t);
+
+int Type_is_aggregate_tag(Type t);
+
+int Type_is_aggregate_tag_body(Type t);
+
+int Type_is_enum_tag(Type type);
+
+int Type_is_enum_tag_body(Type type);
+
+int Type_is_reference(Type t);
+
+int Type_is_optional_reference(Type t);
+
+int Type_is_function(Type type);
+
+int Type_is_bitfield(Type type);
+
+Type Type_reference(Type type);
+
+static inline List Type_list(Type x){
+  return(List) x;
+}
+
+Type Type_apply(Type type);
+
+int Type_rest_index(Type type);
+
+int Type_function_parts(Type type, List * params, Type * return_type);
+
+Type Type_dereference(Type type);
+
+static inline Type List_type(List x){
+  return(void *) x;
+}
+
+int Type_is_pointer(Type t);
+
+int Type_is_array(Type type);
+
 static int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 
 void * Var_pointer(Var);
@@ -20,65 +68,9 @@ static inline Type Var_type(Var x){
   return Var_is_row(x, 9, 7, 4) ?(Type) Var_pointer(x) :(Type) NULL;
 }
 
-static inline List Type_list(Type x){
-  return(List) x;
-}
-
-static inline Type List_type(List x){
-  return(void *) x;
-}
-
-int Symbol_is_storage_class(Symbol sym);
-
-int Symbol_is_inline(Symbol sym);
-
-int Symbol_is_type_qualifier(Symbol sym);
-
-int Symbol_is_type_modifier(Symbol sym);
-
-int Symbol_is_builtin_type(Symbol sym);
-
-int Type_is_aggregate(Type type);
-
-int Type_is_aggregate_tag(Type t);
-
-int Type_is_aggregate_tag_body(Type t);
-
-int Type_is_enum(Type type);
-
-int Type_is_enum_tag(Type type);
-
-int Type_is_enum_tag_body(Type type);
-
-List Type_tag(Type type);
-
-List Type_body(Type t);
-
-int Type_is_pointer(Type t);
-
-int Type_is_reference(Type t);
-
-int Type_is_optional_reference(Type t);
-
-int Type_is_array(Type type);
-
-int Type_is_function(Type type);
-
-int Type_is_bitfield(Type type);
-
-Type Type_dereference(Type type);
-
 Type Type_qualify(Type type, Type source);
 
-Type Type_reference(Type type);
-
-Type Type_apply(Type type);
-
-int Type_function_parts(Type type, List * params, Type * return_type);
-
 Type Type_rest_container(Type type);
-
-int Type_rest_index(Type type);
 
 int Type_is_static(Type type);
 
@@ -89,8 +81,6 @@ int Type_is_extern(Type type);
 int Type_is_threaded(Type type);
 
 int Type_is_typedef(Type type);
-
-Type Type_base_type(Type type);
 
 Type Type_canonicalize(Type type);
 
@@ -104,29 +94,39 @@ int Type_is_builtin(Type type);
 
 int Type_is_typedef_name(Type type);
 
+Type Type_base_type(Type type);
+
 int Type_is_bare_typedef_name(Type t);
 
 int Type_is_number(Type type);
-
-int Type_is_integral(Type type);
-
-Type Type_scalar(Type t);
-
-Symbol Type_scalar_tag(Type type);
 
 String Type_var_numeric_extractor(Type type);
 
 String Type_var_numeric_update_helper(Type type);
 
-Type Type_promote(Type type);
-
 Type Type_widest(Type a, Type b);
+
+Type Type_promote(Type type);
 
 Type Type_numeric_literal(String text, int floating);
 
 Var Type_numeric_literal_value(Type type, String text);
 
 int Type_integer_literal_magnitude(Type type, String text, unsigned long long * value);
+
+int Type_is_integral(Type type);
+
+int Type_is_enum(Type type);
+
+Symbol Type_scalar_tag(Type type);
+
+Type Type_scalar(Type t);
+
+int Symbol_is_storage_class(Symbol sym);
+
+int Symbol_is_inline(Symbol sym);
+
+int Symbol_is_type_qualifier(Symbol sym);
 
 
 #endif /* __GUARD_0x2654FD8E__ */

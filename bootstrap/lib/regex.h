@@ -69,9 +69,9 @@ String Regex_replace_all(Regex regex, String subject, String replacement);
 
 String Regex_replace_fn(Regex regex, String subject, Func fn);
 
-RegexCapture RegexMatch_capture(RegexMatch found, Var key);
-
 String RegexMatch_getindex(RegexMatch found, Var key);
+
+RegexCapture RegexMatch_capture(RegexMatch found, Var key);
 
 int RegexCapture_index(RegexCapture capture);
 

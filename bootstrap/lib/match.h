@@ -234,9 +234,9 @@ int MachineBuilder_constant(MachineBuilder * b, Var value);
 
 int MachineBuilder_binder(MachineBuilder * b, Atom binder);
 
-void MachineBuilder_set_target(MachineBuilder * b, int site, int target);
-
 void MachineBuilder_patch(MachineBuilder * b, int * sites, int count, int target);
+
+void MachineBuilder_set_target(MachineBuilder * b, int site, int target);
 
 MachineProgram MachineBuilder_freeze(MachineBuilder * b);
 
@@ -248,13 +248,15 @@ MachineBuilder MachineBuilder_new(void);
 
 void MachineBuilder_init(MachineBuilder * b);
 
-void MachineBuilder_drop(MachineBuilder * b);
-
 void MachineBuilder_free(MachineBuilder * b);
+
+void MachineBuilder_drop(MachineBuilder *);
 
 static inline void MachineBuilder_cleanup(MachineBuilder b){
   MachineBuilder_drop(&(b));
 }
+
+void MachineBuilder_drop(MachineBuilder * b);
 
 typedef struct MatchCaptureLayout{
   Atom * binders;
@@ -306,19 +308,19 @@ int MatchMachine_step(MatchMachine * m);
 
 List MatchMachine_materialize_span(MatchMachine * m, MachineSpan span);
 
-void MatchMachine_open(MatchMachine * m);
-
 void MatchMachine_begin(MatchMachine * m, MachineView program, Var input);
 
 void MatchMachine_finish(MatchMachine * m);
 
 int MatchMachine_clean(MatchMachine * m);
 
-void MatchMachine_dispose(MatchMachine * m);
-
 MatchMachine * MatchMachine_acquire(MachineStats * stats);
 
+void MatchMachine_open(MatchMachine * m);
+
 void MatchMachine_release(MatchMachine * m);
+
+void MatchMachine_dispose(MatchMachine * m);
 
 void MatchMachine_release_spares(void);
 
@@ -339,12 +341,6 @@ typedef struct MatchLease{
 MatchLease;
 
 #define MATCH_ADMITTED_MEMO 256
-Symbol MatchCache_acquire(MatchCache m, Var pattern, MatchLease * lease, const char * owner);
-
-void MatchLease_release(MatchLease * lease);
-
-MatchPlan MatchLease_plan(MatchLease * m);
-
 int MatchCache_try_capture(MatchCache cache, List input, Var pattern, MatchCaptureBuffer * captures, const char * owner);
 
 int MatchCache_try_match(MatchCache cache, List input, Var pattern, List * out_bindings, const char * owner);
@@ -356,6 +352,12 @@ int MatchCache_search(MatchCache cache, List input, Var pattern, List * out_resu
 int MatchCache_try_match_replace(MatchCache cache, List input, Var pattern, Var template, Var * out, const char * owner);
 
 int MatchCache_search_replace(MatchCache cache, List input, Var pattern, Var template, List * out, const char * owner);
+
+Symbol MatchCache_acquire(MatchCache m, Var pattern, MatchLease * lease, const char * owner);
+
+void MatchLease_release(MatchLease * lease);
+
+MatchPlan MatchLease_plan(MatchLease * m);
 
 MatchCache MatchCache_current(void);
 
@@ -371,6 +373,8 @@ MatchCache MatchCache_new(int capacity);
 
 void MatchCache_dispose(MatchCache cache);
 
+MatchCaptureLayout MatchCaptureLayout_analyze(Var pattern);
+
 int Var_is_atom_binder(Var atom);
 
 int Var_is_list_binder(Var atom);
@@ -378,8 +382,6 @@ int Var_is_list_binder(Var atom);
 int Var_is_binder(Var atom);
 
 int Var_is_match_op(Var atom);
-
-MatchCaptureLayout MatchCaptureLayout_analyze(Var pattern);
 
 void MatchCaptureLayout_free(MatchCaptureLayout layout);
 
@@ -391,17 +393,17 @@ int MatchCaptureLayout_index(MatchCaptureLayout layout, Atom binder);
 
 int MatchCaptureBuffer_has(MatchCaptureBuffer * m, int index);
 
-_Noreturn void MatchPlan_raise_ineligible(const char * reason, const char * owner);
+int MatchPlan_try_capture(MatchPlan plan, List input, MatchCaptureBuffer * captures);
 
 int MatchPlan_execute_capture(MatchPlan m, Var input, MatchCaptureBuffer * captures, MachineStats * stats);
 
-int MatchPlan_try_capture(MatchPlan plan, List input, MatchCaptureBuffer * captures);
-
-int MatchPlan_admits(MatchPlan plan, Var input, Var(* view)(Var));
+int MatchPlan_try_match(MatchPlan plan, List input, List * out_bindings);
 
 int MatchPlan_execute(MatchPlan plan, Var input, List * out_bindings, MachineStats * stats);
 
-int MatchPlan_try_match(MatchPlan plan, List input, List * out_bindings);
+_Noreturn void MatchPlan_raise_ineligible(const char * reason, const char * owner);
+
+int MatchPlan_admits(MatchPlan plan, Var input, Var(* view)(Var));
 
 int MatchPlan_try_match_replace(MatchPlan plan, List input, Var template, Var * out);
 
@@ -413,39 +415,39 @@ int MatchPlan_search(MatchPlan plan, List input, List * out_results);
 
 int MatchPlan_search_replace(MatchPlan plan, List input, Var template, List * out);
 
-int MatchPlan_borrowable(Var pattern, int permanent_lists);
-
 int x2c_match_site_try_capture(MatchCaptureSite * site, List input, Var pattern, MatchCaptureBuffer * captures);
 
 int x2c_match_pattern_retainable(Var pattern);
 
 MatchPlan x2c_match_site_prepare(MatchCaptureSite * site, Var pattern);
 
-int x2c_match_site_try_match(MatchCaptureSite * site, List input, Var pat, List * out_bindings);
-
 List x2c_match_site_match(MatchCaptureSite * site, List input, Var pat);
+
+int x2c_match_site_try_match(MatchCaptureSite * site, List input, Var pat, List * out_bindings);
 
 int x2c_match_site_try_search(MatchCaptureSite * site, List input, Var pat, Var * out_match, List * out_bindings);
 
 List x2c_match_site_search(MatchCaptureSite * site, List input, Var pat);
 
-int x2c_match_site_try_match_replace(MatchCaptureSite * site, List input, Var pat, Var template, Var * out);
-
 List x2c_match_site_match_replace(MatchCaptureSite * site, List input, Var pat, Var template);
 
+int x2c_match_site_try_match_replace(MatchCaptureSite * site, List input, Var pat, Var template, Var * out);
+
 List x2c_match_site_search_replace(MatchCaptureSite * site, List input, Var pat, Var template);
+
+int MatchPlan_borrowable(Var pattern, int permanent_lists);
 
 void x2c_match_initialize(void);
 
 int x2c_match_try_capture(List input, Var pattern, MatchCaptureBuffer * captures);
 
-int List_try_match(List input, Var pat, List * out_bindings);
-
 List List_match(List input, Var pat);
 
-int List_try_match_replace(List input, Var pat, Var template, Var * out);
+int List_try_match(List input, Var pat, List * out_bindings);
 
 List List_match_replace(List input, Var pat, Var template);
+
+int List_try_match_replace(List input, Var pat, Var template, Var * out);
 
 List List_search(List input, Var pat);
 

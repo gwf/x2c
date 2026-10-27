@@ -6,21 +6,27 @@
 #define __GUARD_0x05A21DE5__
 
 #include "common.h"
+#include "buffer.h"
+#include "dispatch.h"
+#include "scan.h"
+#include "string/string.h"
+#include "symbol.h"
+#include <stdlib.h>
 Atom Atom_promote(Atom atom);
 
 int Atom_bare_spelling(String spelling);
+
+int Var_is_atom(Var value);
+
+char Atom_first(Atom atom);
+
+void Atom_initialize(void);
 
 Buffer Atom_write_str(Atom atom, Buffer out);
 
 Buffer Atom_write_repr(Atom value, Buffer out);
 
-int Var_is_atom(Var value);
-
 String Atom_str(Atom atom);
-
-char Atom_first(Atom atom);
-
-void Atom_initialize(void);
 
 Atom Atom_intern(String spelling);
 

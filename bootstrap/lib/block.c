@@ -17,35 +17,7 @@ typedef struct Block{
 
 #include "exception.h"
 #include "scope/scope.h"
-static size_t _allocation_size(size_t width, size_t cap);
-
-static void * _allocation(Block b);
-
-static void _attach(Block b, unsigned char * allocation);
-
-static unsigned char * _end(Block b);
-
-static inline Block Bytes_block(Bytes bytes){
-  if(bytes == NULL) return NULL;
-  unsigned char * data = bytes;
-  return *((Block *)(data - sizeof(Block)));
-}
-
-static void _append_in_place(Block b, const void * source, size_t count);
-
-static void _append_growing(Block b, const void * source, size_t count);
-
-static size_t _reserved_offset(Block b, const void * p);
-
-void Block_append(Block b, const void * source, size_t count);
-
-static inline Bytes Bytes_append(Bytes bytes, const void * source, size_t count){
-  Block block = Bytes_block(bytes);
-  Block_append(block, source, count);
-  return block -> bytes;
-}
-
-static void _fill(Block b, const void * element, size_t count);
+static inline Block Bytes_block(Bytes bytes);
 
 void Block_append_fill(Block b, const void * element, size_t count);
 
@@ -55,15 +27,23 @@ static inline Bytes Bytes_append_fill(Bytes bytes, const void * element, size_t 
   return block -> bytes;
 }
 
+void Block_append(Block b, const void * source, size_t count);
+
 static inline void Block_push(Block block, const void * source){
   Block_append(block, source, 1);
 }
+
+static inline Bytes Bytes_append(Bytes bytes, const void * source, size_t count);
 
 static inline Bytes Bytes_push(Bytes bytes, const void * source){
   return Bytes_append(bytes, source, 1);
 }
 
-static size_t _grown_capacity(size_t cap, size_t minimum);
+static inline Bytes Bytes_append(Bytes bytes, const void * source, size_t count){
+  Block block = Bytes_block(bytes);
+  Block_append(block, source, count);
+  return block -> bytes;
+}
 
 void Block_reserve(Block block, size_t minimum);
 
@@ -89,6 +69,22 @@ static inline void Block_clear(Block block){
   if(block != NULL) block -> length = 0;
 }
 
+static inline int Block_try_pop(Block b, void * out);
+
+static inline int Bytes_try_pop(Bytes bytes, void * out){
+  return Block_try_pop(Bytes_block(bytes), out);
+}
+
+static inline Block Bytes_block(Bytes bytes){
+  if(bytes == NULL) return NULL;
+  unsigned char * data = bytes;
+  return *((Block *)(data - sizeof(Block)));
+}
+
+static inline void Block_pop(Block block){
+  Block_try_pop(block, NULL);
+}
+
 static inline int Block_try_pop(Block b, void * out){
   if(b == NULL || ! b -> length) return 0;
   size_t index = b -> length - 1;
@@ -97,13 +93,23 @@ static inline int Block_try_pop(Block b, void * out){
   return 1;
 }
 
-static inline int Bytes_try_pop(Bytes bytes, void * out){
-  return Block_try_pop(Bytes_block(bytes), out);
-}
+static size_t _allocation_size(size_t width, size_t cap);
 
-static inline void Block_pop(Block block){
-  Block_try_pop(block, NULL);
-}
+static void * _allocation(Block b);
+
+static void _attach(Block b, unsigned char * allocation);
+
+static size_t _reserved_offset(Block b, const void * p);
+
+static void _fill(Block b, const void * element, size_t count);
+
+static unsigned char * _end(Block b);
+
+static size_t _grown_capacity(size_t cap, size_t minimum);
+
+static void _append_in_place(Block b, const void * source, size_t count);
+
+static void _append_growing(Block b, const void * source, size_t count);
 
 void Block_free(Block b);
 
@@ -115,6 +121,133 @@ void Bytes_free(Bytes a0);
 
 void Bytes_cleanup(Bytes _x2c_gensym_macro_value_1){
   Bytes_free(_x2c_gensym_macro_value_1);
+}
+
+#include "error.h"
+
+
+
+
+void Block_append_fill(Block b, const void * element, size_t count){
+  if(b == NULL){
+    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/block.x",.function = "Block_append_fill",.line = 69,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_0, 4372499598, 0);
+    __builtin_unreachable();
+  }
+  if(! count) return;
+  if(! element){
+    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/block.x",.function = "Block_append_fill",.line = 71,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_1, 4372499598, 0);
+    __builtin_unreachable();
+  }
+  if(count > SIZE_MAX - b -> length){
+    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/block.x",.function = "Block_append_fill",.line = 72,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_2, 1358596898646632, 1, Symbol_var(7318440), Var_box_ulong(count));
+    __builtin_unreachable();
+  }
+  size_t length = b -> length, used = length * b -> width;
+  size_t offset = _reserved_offset(b, element);
+  if(offset != SIZE_MAX &&(offset > used || b -> width > used - offset)){
+    static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/block.x",.function = "Block_append_fill",.line = 76,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_3, 4372499598, 0);
+    __builtin_unreachable();
+  }
+  Block_reserve(b, length + count);
+  if(offset != SIZE_MAX) element =(unsigned char *) b -> bytes + offset;
+  _fill(b, element, count);
+  b -> length = length + count;
+}
+
+void Block_append(Block b, const void * source, size_t count){
+  if(b == NULL){
+    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/block.x",.function = "Block_append",.line = 115,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_4, 4372499598, 0);
+    __builtin_unreachable();
+  }
+  if(! count) return;
+  if(count <= b -> cap - b -> length) _append_in_place(b, source, count);
+  else _append_growing(b, source, count);
+}
+
+void Block_reserve(Block block, size_t minimum){
+  if(block == NULL){
+    static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/block.x",.function = "Block_reserve",.line = 144,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_5, 4372499598, 0);
+    __builtin_unreachable();
+  }
+  if(minimum <= block -> cap) return;
+  size_t cap = _grown_capacity(block -> cap, minimum);
+  size_t size = _allocation_size(block -> width, cap);
+  if(! size){
+    size_t width = block -> width;
+    {
+      Var _x2c_gensym_literal_part_0 = Var_box_ulong(width);
+      Var _x2c_gensym_literal_part_1 = Var_box_ulong(cap);
+      {
+        static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/block.x",.function = "Block_reserve",.line = 150,.runtime = 1};
+        x2c_error_raise_n(& _x2c_gensym_error_site_6, 1358596898646632, 2, Symbol_var(48833808), _x2c_gensym_literal_part_0, Symbol_var(6240), _x2c_gensym_literal_part_1);
+        __builtin_unreachable();
+      }
+
+    }
+
+  }
+  _attach(block, xrealloc(_allocation(block), size));
+  block -> cap = cap;
+}
+
+int Block_truth(Block block){
+  return block != NULL && block -> length != 0;
+}
+
+Scope Block_scope(Block b){
+  if(b == NULL) return NULL;
+  if(! b -> lifetime){
+    b -> lifetime = Scope_new();
+    Scope_transfer(b -> lifetime, Scope_owner(b));
+  }
+  return b -> lifetime;
+}
+
+Block Block_new(size_t width);
+
+Bytes Bytes_new(size_t width){
+  return Block_new(width) -> bytes;
+}
+
+Block Block_new(size_t width){
+  if(! width){
+    static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/block.x",.function = "Block_new",.line = 238,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_7, 4372499598, 0);
+    __builtin_unreachable();
+  }
+  Block block = xmalloc(sizeof(struct Block));
+  * block =(struct Block){
+    .width = width, .length = 0, .cap = 1
+  }
+  ;
+  size_t size = _allocation_size(width, block -> cap);
+  if(! size){
+    static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/block.x",.function = "Block_new",.line = 242,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_8, 1358596898646632, 1, Symbol_var(48833808), Var_box_ulong(width));
+    __builtin_unreachable();
+  }
+  _attach(block, xmalloc(size));
+  return block;
+}
+
+void Block_free(Block b){
+  if(b == NULL) return;
+  if(b -> lifetime) Scope_destroy(b -> lifetime);
+  xfree(_allocation(b));
+  xfree(b);
+}
+
+void Block_move_to(Block block, Scope * scope){
+  if(block == NULL) return;
+  Scope_move(_allocation(block), scope);
+  Scope_move(block, scope);
+  Scope_transfer(block -> lifetime, * scope);
 }
 
 static size_t _allocation_size(size_t width, size_t cap){
@@ -131,24 +264,29 @@ static void _attach(Block b, unsigned char * allocation){
   b -> bytes = allocation + sizeof(Block);
 }
 
+static size_t _reserved_offset(Block b, const void * p){
+  uintptr_t start =(uintptr_t) b -> bytes, at =(uintptr_t) p;
+  if(at < start || at - start >= b -> cap * b -> width) return SIZE_MAX;
+  return at - start;
+}
+
+static void _fill(Block b, const void * element, size_t count){
+  unsigned char * end = _end(b);
+  if(b -> width == 1) memset(end, *((const unsigned char *) element), count);
+  else for(size_t i = 0;  i < count;  i ++) memmove(end + i * b -> width, element, b -> width);
+}
+
 static unsigned char * _end(Block b){
   return(unsigned char *) b -> bytes + b -> length * b -> width;
 }
 
-#include "error.h"
-
-
-
-
-void Block_append(Block b, const void * source, size_t count){
-  if(b == NULL){
-    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/block.x",.function = "Block_append",.line = 88,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_0, 4372499598, 0);
-    __builtin_unreachable();
+static size_t _grown_capacity(size_t cap, size_t minimum){
+  if(! cap) cap = 1;
+  while(cap < minimum){
+    if(cap > SIZE_MAX / 2) return minimum;
+    cap *= 2;
   }
-  if(! count) return;
-  if(count <= b -> cap - b -> length) _append_in_place(b, source, count);
-  else _append_growing(b, source, count);
+  return cap;
 }
 
 static void _append_in_place(Block b, const void * source, size_t count){
@@ -162,11 +300,11 @@ static void _append_growing(Block b, const void * source, size_t count){
   if(count > SIZE_MAX - b -> length || count > SIZE_MAX / b -> width){
     size_t width = b -> width;
     {
-      Var _x2c_gensym_literal_part_0 = Var_box_ulong(width);
-      Var _x2c_gensym_literal_part_1 = Var_box_ulong(count);
+      Var _x2c_gensym_literal_part_2 = Var_box_ulong(width);
+      Var _x2c_gensym_literal_part_3 = Var_box_ulong(count);
       {
-        static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/block.x",.function = "_append_growing",.line = 108,.runtime = 1};
-        x2c_error_raise_n(& _x2c_gensym_error_site_1, 1358596898646632, 2, Symbol_var(48833808), _x2c_gensym_literal_part_0, Symbol_var(7318440), _x2c_gensym_literal_part_1);
+        static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/block.x",.function = "_append_growing",.line = 335,.runtime = 1};
+        x2c_error_raise_n(& _x2c_gensym_error_site_9, 1358596898646632, 2, Symbol_var(48833808), _x2c_gensym_literal_part_2, Symbol_var(7318440), _x2c_gensym_literal_part_3);
         __builtin_unreachable();
       }
 
@@ -175,8 +313,8 @@ static void _append_growing(Block b, const void * source, size_t count){
   }
   size_t size = count * b -> width, offset = _reserved_offset(b, source);
   if(offset != SIZE_MAX && size > b -> cap * b -> width - offset){
-    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/block.x",.function = "_append_growing",.line = 112,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_2, 4372499598, 1, Symbol_var(7318440), Var_box_ulong(count));
+    static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../lib/block.x",.function = "_append_growing",.line = 339,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_10, 4372499598, 1, Symbol_var(7318440), Var_box_ulong(count));
     __builtin_unreachable();
   }
   size_t length = b -> length;
@@ -186,136 +324,6 @@ static void _append_growing(Block b, const void * source, size_t count){
   else if(offset != SIZE_MAX) memmove(end, (unsigned char *) b -> bytes + offset, size);
   else memcpy(end, source, size);
   b -> length = length + count;
-}
-
-static size_t _reserved_offset(Block b, const void * p){
-  uintptr_t start =(uintptr_t) b -> bytes, at =(uintptr_t) p;
-  if(at < start || at - start >= b -> cap * b -> width) return SIZE_MAX;
-  return at - start;
-}
-
-void Block_append_fill(Block b, const void * element, size_t count){
-  if(b == NULL){
-    static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/block.x",.function = "Block_append_fill",.line = 154,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_3, 4372499598, 0);
-    __builtin_unreachable();
-  }
-  if(! count) return;
-  if(! element){
-    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/block.x",.function = "Block_append_fill",.line = 156,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_4, 4372499598, 0);
-    __builtin_unreachable();
-  }
-  if(count > SIZE_MAX - b -> length){
-    static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/block.x",.function = "Block_append_fill",.line = 157,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_5, 1358596898646632, 1, Symbol_var(7318440), Var_box_ulong(count));
-    __builtin_unreachable();
-  }
-  size_t length = b -> length, used = length * b -> width;
-  size_t offset = _reserved_offset(b, element);
-  if(offset != SIZE_MAX &&(offset > used || b -> width > used - offset)){
-    static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/block.x",.function = "Block_append_fill",.line = 161,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_6, 4372499598, 0);
-    __builtin_unreachable();
-  }
-  Block_reserve(b, length + count);
-  if(offset != SIZE_MAX) element =(unsigned char *) b -> bytes + offset;
-  _fill(b, element, count);
-  b -> length = length + count;
-}
-
-static void _fill(Block b, const void * element, size_t count){
-  unsigned char * end = _end(b);
-  if(b -> width == 1) memset(end, *((const unsigned char *) element), count);
-  else for(size_t i = 0;  i < count;  i ++) memmove(end + i * b -> width, element, b -> width);
-}
-
-void Block_reserve(Block block, size_t minimum){
-  if(block == NULL){
-    static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/block.x",.function = "Block_reserve",.line = 207,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_7, 4372499598, 0);
-    __builtin_unreachable();
-  }
-  if(minimum <= block -> cap) return;
-  size_t cap = _grown_capacity(block -> cap, minimum);
-  size_t size = _allocation_size(block -> width, cap);
-  if(! size){
-    size_t width = block -> width;
-    {
-      Var _x2c_gensym_literal_part_2 = Var_box_ulong(width);
-      Var _x2c_gensym_literal_part_3 = Var_box_ulong(cap);
-      {
-        static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/block.x",.function = "Block_reserve",.line = 213,.runtime = 1};
-        x2c_error_raise_n(& _x2c_gensym_error_site_8, 1358596898646632, 2, Symbol_var(48833808), _x2c_gensym_literal_part_2, Symbol_var(6240), _x2c_gensym_literal_part_3);
-        __builtin_unreachable();
-      }
-
-    }
-
-  }
-  _attach(block, xrealloc(_allocation(block), size));
-  block -> cap = cap;
-}
-
-static size_t _grown_capacity(size_t cap, size_t minimum){
-  if(! cap) cap = 1;
-  while(cap < minimum){
-    if(cap > SIZE_MAX / 2) return minimum;
-    cap *= 2;
-  }
-  return cap;
-}
-
-int Block_truth(Block block){
-  return block != NULL && block -> length != 0;
-}
-
-Block Block_new(size_t width){
-  if(! width){
-    static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/block.x",.function = "Block_new",.line = 290,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_9, 4372499598, 0);
-    __builtin_unreachable();
-  }
-  Block block = xmalloc(sizeof(struct Block));
-  * block =(struct Block){
-    .width = width, .length = 0, .cap = 1
-  }
-  ;
-  size_t size = _allocation_size(width, block -> cap);
-  if(! size){
-    static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../lib/block.x",.function = "Block_new",.line = 294,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_10, 1358596898646632, 1, Symbol_var(48833808), Var_box_ulong(width));
-    __builtin_unreachable();
-  }
-  _attach(block, xmalloc(size));
-  return block;
-}
-
-Scope Block_scope(Block b){
-  if(b == NULL) return NULL;
-  if(! b -> lifetime){
-    b -> lifetime = Scope_new();
-    Scope_transfer(b -> lifetime, Scope_owner(b));
-  }
-  return b -> lifetime;
-}
-
-Bytes Bytes_new(size_t width){
-  return Block_new(width) -> bytes;
-}
-
-void Block_free(Block b){
-  if(b == NULL) return;
-  if(b -> lifetime) Scope_destroy(b -> lifetime);
-  xfree(_allocation(b));
-  xfree(b);
-}
-
-void Block_move_to(Block block, Scope * scope){
-  if(block == NULL) return;
-  Scope_move(_allocation(block), scope);
-  Scope_move(block, scope);
-  Scope_transfer(block -> lifetime, * scope);
 }
 
 void Bytes_clear(Bytes a0){

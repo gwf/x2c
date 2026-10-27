@@ -44,17 +44,17 @@ int Frontend_open_session(Frontend frontend, ParsedUnit * unit);
 
 int Frontend_start(Frontend frontend, String filename, ParsedUnit * unit);
 
-int ParsedUnit_collect(ParsedUnit * unit, Frontend frontend);
-
 int ParsedUnit_parse(ParsedUnit * p);
-
-void ParsedUnit_close(ParsedUnit * unit);
 
 int Frontend_load_prelude(Frontend frontend);
 
-void Frontend_load_support(CliRequest request);
+int ParsedUnit_collect(ParsedUnit * unit, Frontend frontend);
+
+void ParsedUnit_close(ParsedUnit * unit);
 
 Frontend Frontend_new(CliRequest request);
+
+void Frontend_load_support(CliRequest request);
 
 
 #endif /* __GUARD_0xE9AB94A7__ */

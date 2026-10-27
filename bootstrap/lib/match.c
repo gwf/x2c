@@ -234,19 +234,19 @@ static inline int MachineSlot_final_equal(MachineSlot * slot, List input, Machin
 
 #include <string.h>
 #include "exception.h"
-static int f8_wordcode____grow_code(MachineBuilder * b);
-
-static int f8_wordcode____grow_consts(MachineBuilder * b);
-
-static int f8_wordcode____fail(MachineBuilder * b, const char * reason);
-
-static size_t f8_wordcode____program_bytes(int length, int const_count, int binder_count);
-
 void MachineBuilder_drop(MachineBuilder * b);
 
 static inline void MachineBuilder_cleanup(MachineBuilder b){
   MachineBuilder_drop(&(b));
 }
+
+static int f8_wordcode____grow_code(MachineBuilder * b);
+
+static int f8_wordcode____fail(MachineBuilder * b, const char * reason);
+
+static int f8_wordcode____grow_consts(MachineBuilder * b);
+
+static size_t f8_wordcode____program_bytes(int length, int const_count, int binder_count);
 
 typedef struct MatchCaptureLayout{
   Atom * binders;
@@ -296,82 +296,6 @@ MatchCaptureSite;
 #include "scope/scope.h"
 #include "array/array.h"
 #include "exception.h"
-static List * f7_machine____cursor(MatchMachine * m, int reg);
-
-static int * f7_machine____distance(MatchMachine * m, int reg);
-
-static int * f7_machine____int_reg(MatchMachine * m, int reg);
-
-static MachineMark * f7_machine____mark(MatchMachine * m);
-
-static Var f7_machine____const(MatchMachine * m, int index);
-
-static void f7_machine____clear_registers(MatchMachine * m, int depth);
-
-static void f7_machine____execute(MatchMachine * m, const MachineWord * w);
-
-static int f7_machine____equal(int mode, Var left, Var right);
-
-static void f7_machine____tag(MatchMachine * m, const MachineWord * w);
-
-static int f7_machine____is_kind(Var value, int kind);
-
-static int f7_machine____enter(MatchMachine * m, int reg, Var input);
-
-static int f7_machine____advance(MatchMachine * m, int reg);
-
-static void f7_machine____move(MatchMachine * m, const MachineWord * w);
-
-static void f7_machine____offset(MatchMachine * m, const MachineWord * w);
-
-static void f7_machine____descend(MatchMachine * m, const MachineWord * w);
-
-static void f7_machine____scan(MatchMachine * m, const MachineWord * w);
-
-static void f7_machine____cursor_value(MatchMachine * m, const MachineWord * w);
-
-static void f7_machine____skip(MatchMachine * m, int reg, List at);
-
-static void f7_machine____call(MatchMachine * m, const MachineWord * w);
-
-static void f7_machine____push_frame(MatchMachine * m, Var argument, int entry);
-
-static void f7_machine____return(MatchMachine * m, Symbol status);
-
-static void f7_machine____pop_frame(MatchMachine * m);
-
-static void f7_machine____set_value(MatchMachine * m, int index, Var value, int replace_span);
-
-static void f7_machine____set_span(MatchMachine * m, const MachineWord * w);
-
-static void f7_machine____journal(MatchMachine * m, int index, MachineSlot capture);
-
-static void f7_machine____rollback(MatchMachine * m, int mark);
-
-static void f7_machine____restore(MatchMachine * m, const MachineWord * w);
-
-static int f7_machine____value_equal(MatchMachine * m, int index, Var value);
-
-static void f7_machine____eq_prefix(MatchMachine * m, const MachineWord * w);
-
-static int f7_machine____sequence_equal(MatchMachine * m, int index, List input, int length, int final);
-
-static void f7_machine____eq_head(MatchMachine * m, const MachineWord * w);
-
-static void f7_machine____bind_head(MatchMachine * m, const MachineWord * w);
-
-static int f7_machine____copy_span(MatchMachine * m, MachineSpan span);
-
-static void f7_machine____ensure_scratch(MatchMachine * m, int length);
-
-static List f7_machine____cons_scratch(MatchMachine * m, int length);
-
-static void f7_machine____error(MatchMachine * m, Symbol code);
-
-static void f7_machine____count_call(MatchMachine * m);
-
-static void f7_machine____count_share(MatchMachine * m);
-
 enum{
   MACHINE_SPARES = 8
 }
@@ -383,9 +307,85 @@ static _Thread_local struct{
 }
 f7_machine___machine_thread;
 
-static void f7_machine____clear_slots(MatchMachine * m);
+static void f7_machine____execute(MatchMachine * m, const MachineWord * w);
+
+static int * f7_machine____int_reg(MatchMachine * m, int reg);
+
+static void f7_machine____tag(MatchMachine * m, const MachineWord * w);
+
+static int f7_machine____is_kind(Var value, int kind);
+
+static void f7_machine____move(MatchMachine * m, const MachineWord * w);
+
+static void f7_machine____offset(MatchMachine * m, const MachineWord * w);
+
+static int f7_machine____advance(MatchMachine * m, int reg);
+
+static void f7_machine____descend(MatchMachine * m, const MachineWord * w);
+
+static int f7_machine____enter(MatchMachine * m, int reg, Var input);
+
+static void f7_machine____scan(MatchMachine * m, const MachineWord * w);
+
+static void f7_machine____cursor_value(MatchMachine * m, const MachineWord * w);
+
+static void f7_machine____call(MatchMachine * m, const MachineWord * w);
+
+static void f7_machine____push_frame(MatchMachine * m, Var argument, int entry);
+
+static void f7_machine____return(MatchMachine * m, Symbol status);
+
+static void f7_machine____pop_frame(MatchMachine * m);
+
+static void f7_machine____set_span(MatchMachine * m, const MachineWord * w);
+
+static void f7_machine____restore(MatchMachine * m, const MachineWord * w);
+
+static MachineMark * f7_machine____mark(MatchMachine * m);
+
+static void f7_machine____eq_prefix(MatchMachine * m, const MachineWord * w);
+
+static int f7_machine____sequence_equal(MatchMachine * m, int index, List input, int length, int final);
+
+static void f7_machine____eq_head(MatchMachine * m, const MachineWord * w);
+
+static Var f7_machine____const(MatchMachine * m, int index);
+
+static int f7_machine____equal(int mode, Var left, Var right);
+
+static void f7_machine____bind_head(MatchMachine * m, const MachineWord * w);
+
+static void f7_machine____skip(MatchMachine * m, int reg, List at);
+
+static List * f7_machine____cursor(MatchMachine * m, int reg);
+
+static int * f7_machine____distance(MatchMachine * m, int reg);
+
+static void f7_machine____set_value(MatchMachine * m, int index, Var value, int replace_span);
+
+static void f7_machine____journal(MatchMachine * m, int index, MachineSlot capture);
+
+static int f7_machine____value_equal(MatchMachine * m, int index, Var value);
+
+static int f7_machine____copy_span(MatchMachine * m, MachineSpan span);
+
+static void f7_machine____ensure_scratch(MatchMachine * m, int length);
+
+static List f7_machine____cons_scratch(MatchMachine * m, int length);
+
+static void f7_machine____error(MatchMachine * m, Symbol code);
+
+static void f7_machine____rollback(MatchMachine * m, int mark);
+
+static void f7_machine____count_call(MatchMachine * m);
+
+static void f7_machine____count_share(MatchMachine * m);
 
 static void f7_machine____clear_frames(MatchMachine * m);
+
+static void f7_machine____clear_registers(MatchMachine * m, int depth);
+
+static void f7_machine____clear_slots(MatchMachine * m);
 
 #include <assert.h>
 #include "scope/scope.h"
@@ -398,81 +398,11 @@ typedef struct f4_plan___MatchLower{
 }
 f4_plan___MatchLower;
 
-static void f4_plan____lower(MatchPlan plan, Var pattern);
-
-static int f4_plan____compile_value(f4_plan___MatchLower * l, Var pattern);
-
-static int f4_plan____compile_binder(f4_plan___MatchLower * l, Var binder);
-
-static int f4_plan____emit_binder(f4_plan___MatchLower * l, Var binder);
-
-static int f4_plan____compile_literal(f4_plan___MatchLower * l, Var pattern);
-
-static int f4_plan____compare_mode(Var value);
-
-static int f4_plan____bits_unique(Var value);
-
-static int f4_plan____emit_leaf_value(f4_plan___MatchLower * l, Var pattern);
-
-static int f4_plan____emit_literal(f4_plan___MatchLower * l, Var pattern);
-
-static int f4_plan____is_list_literal(List pat);
-
-static int f4_plan____compile_literal_list(f4_plan___MatchLower * l, List pattern);
-
-static int f4_plan____compile_child(f4_plan___MatchLower * l, Var pattern);
-
-static int f4_plan____fail_site(f4_plan___MatchLower * l, int op, int a, int b, int c, int d);
-
-static void f4_plan____patch_sites(f4_plan___MatchLower * l, int base, int target);
-
-static int f4_plan____finish(f4_plan___MatchLower * l, int entry, int base);
-
-static int f4_plan____finish_failure(f4_plan___MatchLower * l, int entry, int base);
-
-static int f4_plan____emit_call(f4_plan___MatchLower * l, int child, int mode, int reg);
-
-static int f4_plan____fail(f4_plan___MatchLower * l, const char * reason);
-
-static int f4_plan____stopped(f4_plan___MatchLower * l);
-
 typedef struct f4_plan___MatchParts{
   Var elements[MATCH_SEGMENT_MAX];
   int entries[MATCH_SEGMENT_MAX], count;
 }
 f4_plan___MatchParts;
-
-static int f4_plan____compile_guard(f4_plan___MatchLower * l, Var op, List args);
-
-static int f4_plan____guard_parts(f4_plan___MatchLower * l, List args, f4_plan___MatchParts * parts);
-
-static int f4_plan____emit_operand(f4_plan___MatchLower * l, f4_plan___MatchParts * parts, int i);
-
-static int f4_plan____emit_test(f4_plan___MatchLower * l, Var test, int child);
-
-static int f4_plan____compile_or(f4_plan___MatchLower * l, List args);
-
-static int f4_plan____compile_not(f4_plan___MatchLower * l, List args);
-
-static int f4_plan____compile_set(f4_plan___MatchLower * l, List args);
-
-static int f4_plan____set_binds(List args);
-
-static int f4_plan____compile_and(f4_plan___MatchLower * l, List args);
-
-static int f4_plan____compile_quote(f4_plan___MatchLower * l, List args);
-
-static int f4_plan____compile_is(f4_plan___MatchLower * l, List args);
-
-static int f4_plan____is_kind(f4_plan___MatchLower * l, int kind);
-
-static int f4_plan____is_atom(f4_plan___MatchLower * l);
-
-static int f4_plan____is_type(f4_plan___MatchLower * l, Var type);
-
-static inline Symbol f4_plan____canonical_type_tag(Symbol tag);
-
-static int f4_plan____never(f4_plan___MatchLower * l);
 
 typedef struct f4_plan___MatchInlinePlan{
   int entries[MATCH_INLINE_MAX], count, used;
@@ -493,19 +423,79 @@ typedef struct f4_plan___MatchSegment{
 }
 f4_plan___MatchSegment;
 
+typedef struct f4_plan___MatchKeys{
+  MatchKey keys[MATCH_KEY_MAX];
+  int count;
+}
+f4_plan___MatchKeys;
+
+static void f4_plan____lower(MatchPlan plan, Var pattern);
+
+static int f4_plan____compile_value(f4_plan___MatchLower * l, Var pattern);
+
+static int f4_plan____compile_literal_list(f4_plan___MatchLower * l, List pattern);
+
+static int f4_plan____compile_child(f4_plan___MatchLower * l, Var pattern);
+
+static int f4_plan____compile_guard(f4_plan___MatchLower * l, Var op, List args);
+
+static int f4_plan____guard_parts(f4_plan___MatchLower * l, List args, f4_plan___MatchParts * parts);
+
+static int f4_plan____compile_or(f4_plan___MatchLower * l, List args);
+
+static int f4_plan____compile_not(f4_plan___MatchLower * l, List args);
+
+static int f4_plan____compile_set(f4_plan___MatchLower * l, List args);
+
+static int f4_plan____compile_and(f4_plan___MatchLower * l, List args);
+
 static int f4_plan____compile_segment(f4_plan___MatchLower * l, List pattern);
 
 static int f4_plan____segment_prefix(f4_plan___MatchLower * l, f4_plan___MatchSegment * s, List pattern);
-
-static int f4_plan____inline_descend_ok(List child, int reg);
 
 static int f4_plan____compile_nested(f4_plan___MatchLower * l, List pattern, int reg, f4_plan___MatchInlinePlan * nested);
 
 static int f4_plan____segment_star(f4_plan___MatchLower * l, f4_plan___MatchStar * star);
 
-static int f4_plan____pattern_contains_binder(List pat, Var binder);
-
 static int f4_plan____compile_tail(f4_plan___MatchLower * l, List pattern);
+
+static int f4_plan____compile_binder(f4_plan___MatchLower * l, Var binder);
+
+static int f4_plan____emit_operand(f4_plan___MatchLower * l, f4_plan___MatchParts * parts, int i);
+
+static int f4_plan____emit_test(f4_plan___MatchLower * l, Var test, int child);
+
+static int f4_plan____emit_leaf_value(f4_plan___MatchLower * l, Var pattern);
+
+static int f4_plan____emit_binder(f4_plan___MatchLower * l, Var binder);
+
+static int f4_plan____compile_quote(f4_plan___MatchLower * l, List args);
+
+static int f4_plan____compile_literal(f4_plan___MatchLower * l, Var pattern);
+
+static int f4_plan____emit_literal(f4_plan___MatchLower * l, Var pattern);
+
+static int f4_plan____fail(f4_plan___MatchLower * l, const char * reason);
+
+static int f4_plan____compile_is(f4_plan___MatchLower * l, List args);
+
+static int f4_plan____is_kind(f4_plan___MatchLower * l, int kind);
+
+static int f4_plan____is_atom(f4_plan___MatchLower * l);
+
+static int f4_plan____is_type(f4_plan___MatchLower * l, Var type);
+
+static int f4_plan____finish(f4_plan___MatchLower * l, int entry, int base);
+
+static int f4_plan____finish_failure(f4_plan___MatchLower * l, int entry, int base);
+
+static void f4_plan____patch_sites(f4_plan___MatchLower * l, int base, int target);
+
+static inline Symbol f4_plan____canonical_type_tag(Symbol tag);
+
+static int f4_plan____never(f4_plan___MatchLower * l);
+
+static int f4_plan____pattern_contains_binder(List pat, Var binder);
 
 static int f4_plan____find_fixed_anchor(List pat, Var * anchor, int * offset);
 
@@ -513,13 +503,19 @@ static int f4_plan____emit_prefix(f4_plan___MatchLower * l, f4_plan___MatchSegme
 
 static int f4_plan____emit_part(f4_plan___MatchLower * l, f4_plan___MatchSegment * s, int i);
 
-static int f4_plan____emit_head_leaf(f4_plan___MatchLower * l, Var part, int reg);
-
 static int f4_plan____emit_descend(f4_plan___MatchLower * l, List child, int reg, f4_plan___MatchInlinePlan * nested);
+
+static int f4_plan____emit_inline_segment(f4_plan___MatchLower * l, List pattern, int reg, f4_plan___MatchInlinePlan * nested);
+
+static int f4_plan____inline_descend_ok(List child, int reg);
+
+static int f4_plan____is_list_literal(List pat);
+
+static int f4_plan____emit_head_leaf(f4_plan___MatchLower * l, Var part, int reg);
 
 static int f4_plan____emit_framed(f4_plan___MatchLower * l, int entry, int reg);
 
-static int f4_plan____emit_inline_segment(f4_plan___MatchLower * l, List pattern, int reg, f4_plan___MatchInlinePlan * nested);
+static int f4_plan____emit_call(f4_plan___MatchLower * l, int child, int mode, int reg);
 
 static int f4_plan____segment_end(f4_plan___MatchLower * l, f4_plan___MatchStar * star);
 
@@ -529,25 +525,29 @@ static int f4_plan____search_star(f4_plan___MatchLower * l, f4_plan___MatchStar 
 
 static int f4_plan____star_loop(f4_plan___MatchLower * l, f4_plan___MatchStar * star);
 
+static int f4_plan____compare_mode(Var value);
+
+static int f4_plan____fail_site(f4_plan___MatchLower * l, int op, int a, int b, int c, int d);
+
 static int f4_plan____star_fresh(f4_plan___MatchLower * l, f4_plan___MatchStar * star);
 
 static int f4_plan____star_tail(f4_plan___MatchLower * l, f4_plan___MatchStar * star);
 
 static int f4_plan____star_retry(f4_plan___MatchLower * l, f4_plan___MatchStar * star, int loop);
 
-typedef struct f4_plan___MatchKeys{
-  MatchKey keys[MATCH_KEY_MAX];
-  int count;
-}
-f4_plan___MatchKeys;
+static int f4_plan____stopped(f4_plan___MatchLower * l);
 
 static void f4_plan____record_keys(MatchPlan plan, Var pattern);
+
+static int f4_plan____bits_unique(Var value);
 
 static int f4_plan____keys(Var pattern, Symbol mode, f4_plan___MatchKeys * keys);
 
 static int f4_plan____segment_keys(List pattern, Symbol mode, f4_plan___MatchKeys * keys);
 
 static int f4_plan____inner_keys(List rest, f4_plan___MatchKeys * inner);
+
+static int f4_plan____set_binds(List args);
 
 static int f4_plan____add(f4_plan___MatchKeys * keys, MatchKey key);
 
@@ -586,6 +586,18 @@ struct MatchCache{
 }
 ;
 
+typedef struct f5_cache___MatchContextState{
+  struct f5_cache___MatchContextState * prev;
+  MatchCache cache;
+}
+* f5_cache___MatchContextState;
+
+static _Thread_local struct{
+  MatchCache plan_cache;
+  f5_cache___MatchContextState context_top;
+}
+f5_cache___match_thread;
+
 static Symbol f5_cache____transient(MatchCache cache, Var pattern, MatchLease * lease, const char * owner);
 
 static MatchPlan f5_cache____prepare(MatchCache cache, Var pattern, const char * owner);
@@ -602,13 +614,7 @@ static int f5_cache____memo_slot(unsigned long key);
 
 static int f5_cache____find(MatchCache cache, unsigned long key);
 
-static int f5_cache____bucket(MatchCache cache, unsigned long key);
-
-static unsigned long f5_cache____cache_mix(unsigned long key);
-
 static void f5_cache____touch(MatchCache cache, int slot);
-
-static void f5_cache____unlink(MatchCache cache, int slot);
 
 static void f5_cache____link_mru(MatchCache cache, int slot);
 
@@ -618,21 +624,15 @@ static int f5_cache____victim(MatchCache cache);
 
 static void f5_cache____remove(MatchCache cache, int slot);
 
+static int f5_cache____bucket(MatchCache cache, unsigned long key);
+
+static unsigned long f5_cache____cache_mix(unsigned long key);
+
+static void f5_cache____unlink(MatchCache cache, int slot);
+
 static void f5_cache____activate(MatchCache m, int slot, MatchLease * lease);
 
 static f5_cache___MatchCacheEntry * f5_cache____entry(MatchLease * lease);
-
-typedef struct f5_cache___MatchContextState{
-  struct f5_cache___MatchContextState * prev;
-  MatchCache cache;
-}
-* f5_cache___MatchContextState;
-
-static _Thread_local struct{
-  MatchCache plan_cache;
-  f5_cache___MatchContextState context_top;
-}
-f5_cache___match_thread;
 
 static MatchCache * f5_cache____default_slot(void);
 
@@ -653,17 +653,13 @@ typedef struct f6_layout___MatchSlots{
 }
 f6_layout___MatchSlots;
 
-static int f6_layout____binder_kind(Var atom);
-
-static int _named_binder(Var value);
-
-static int f6_layout____reserved_predicate(Var atom);
-
 static List f6_layout____normalize_pattern(List pattern);
 
 static List f6_layout____normalize_elements(List elements);
 
 static void f6_layout____collect(f6_layout___MatchLayoutBuilder * b, Var pattern);
+
+static int f6_layout____reserved_predicate(Var atom);
 
 static void f6_layout____atom(f6_layout___MatchLayoutBuilder * b, Var atom);
 
@@ -677,11 +673,15 @@ static f6_layout___MatchSlots f6_layout____slots(MatchCaptureLayout m, Var patte
 
 static f6_layout___MatchSlots f6_layout____guard_slots(MatchCaptureLayout m, Var op, List args);
 
-static int f6_layout____set_capture(List args);
-
 static f6_layout___MatchSlots f6_layout____sequence_slots(MatchCaptureLayout m, List patterns);
 
 static f6_layout___MatchSlots f6_layout____choice_slots(MatchCaptureLayout m, List patterns);
+
+static int _named_binder(Var value);
+
+static int f6_layout____set_capture(List args);
+
+static int f6_layout____binder_kind(Var atom);
 
 static f6_layout___MatchSlots f6_layout____binder_slot(MatchCaptureLayout m, Var binder);
 
@@ -699,9 +699,9 @@ static int _buffer_valid(MatchCaptureLayout layout, MatchCaptureBuffer * capture
 
 static int _capture(MatchPlan m, Var input, MatchCaptureBuffer * captures, MachineStats * stats);
 
-static List f9_execution____seen_list(Var value, Var(* view)(Var));
-
 static int f9_execution____key_admits(MatchPlan plan, MatchKey * key, List list, Var(* view)(Var));
+
+static List f9_execution____seen_list(Var value, Var(* view)(Var));
 
 static int f9_execution____key_equal(MatchPlan plan, Var value, Var key);
 
@@ -724,11 +724,11 @@ typedef struct f9_templates___ReplacementCell{
 }
 f9_templates___ReplacementCell;
 
+static Var _replace(Var input, ReplacementSource * source);
+
 static Var f9_templates____value(ReplacementSource * source, Var binder);
 
 static Var f9_templates____captured(MatchCaptureLayout layout, MatchCaptureBuffer * captures, Var binder);
-
-static Var _replace(Var input, ReplacementSource * source);
 
 typedef struct f9_traversal___MatchWalk{
   MatchPlan plan;
@@ -742,27 +742,23 @@ typedef struct f9_traversal___MatchWalk{
 }
 f9_traversal___MatchWalk;
 
-static int f9_traversal____test(f9_traversal___MatchWalk * m, Var node);
-
-static List f9_traversal____hit(f9_traversal___MatchWalk * walk, Var node);
-
-static Var f9_traversal____spine_get(Block spine, size_t index);
-
-static int f9_traversal____walk_all(f9_traversal___MatchWalk * walk, Var input, int include_empty);
-
-static void f9_traversal____answer(f9_traversal___MatchWalk * walk, size_t base);
-
 static int f9_traversal____walk_first(f9_traversal___MatchWalk * walk, Var input, int include_empty);
 
 static int f9_traversal____settle(f9_traversal___MatchWalk * walk, Var node);
 
+static int f9_traversal____test(f9_traversal___MatchWalk * m, Var node);
+
+static int f9_traversal____walk_all(f9_traversal___MatchWalk * walk, Var input, int include_empty);
+
+static List f9_traversal____hit(f9_traversal___MatchWalk * walk, Var node);
+
+static void f9_traversal____answer(f9_traversal___MatchWalk * walk, size_t base);
+
+static Var f9_traversal____spine_get(Block spine, size_t index);
+
 static Var f9_traversal____rewrite(f9_traversal___MatchWalk * walk, Var node, int include_empty);
 
 static Var f9_traversal____replace_node(f9_traversal___MatchWalk * walk, Var node);
-
-static int f5_sites____pattern_borrowable(Var value, int depth, int permanent_lists);
-
-static int f5_sites____object_borrowable(Var value, int depth, int permanent_lists);
 
 static Scope f5_sites___match_capture_site_scope;
 
@@ -771,11 +767,18 @@ static Block f5_sites___match_capture_sites;
 static pthread_mutex_t f5_sites___match_site_mutex;
 
 _x2c_gensym_initializer_choice_CE191C9B_0((f5_sites___match_site_mutex =(pthread_mutex_t) PTHREAD_MUTEX_INITIALIZER))
+static pthread_once_t f5_sites___match_shutdown_once;
+
+_x2c_gensym_initializer_choice_CE191C9B_1((f5_sites___match_shutdown_once =(pthread_once_t) PTHREAD_ONCE_INIT))
 static MatchPlan f5_sites____published(MatchCaptureSite * site, Var pattern);
 
 static MatchPlan f5_sites____publish_plan(MatchCaptureSite * m, Var pattern);
 
 static void f5_sites____prepare(MatchCaptureSite * site, Var pattern);
+
+static int f5_sites____pattern_borrowable(Var value, int depth, int permanent_lists);
+
+static int f5_sites____object_borrowable(Var value, int depth, int permanent_lists);
 
 static void f5_sites____sites_initialize(void);
 
@@ -785,16 +788,13 @@ static void f5_sites____site_unlock(void);
 
 static void f5_sites____thread_check(int status, const char * action);
 
-static MatchPlan f5_sites____plan(MatchCaptureSite * site, Var pattern);
-
-static pthread_once_t f5_sites___match_shutdown_once;
-
-_x2c_gensym_initializer_choice_CE191C9B_1((f5_sites___match_shutdown_once =(pthread_once_t) PTHREAD_ONCE_INIT))
 static void f5_sites____register_shutdown_once(void);
 
 static void f5_sites____shutdown(void);
 
 static void f5_sites____sites_shutdown(void);
+
+static MatchPlan f5_sites____plan(MatchCaptureSite * site, Var pattern);
 
 static inline String _x2c_gensym_proto_machineprogram_str_0(Var a0);
 
@@ -838,47 +838,47 @@ _x2c_gensym_defer_env_3;
 
 static void _x2c_gensym_defer_cleanup_3(void * _x2c_gensym_defer_opaque_3);
 
-static void _x2c_gensym_defer_cleanup_4(void * _x2c_gensym_defer_opaque_4);
-
 typedef struct _x2c_gensym_defer_env_4{
   const void * _x2c_gensym_defer_capture_4;
 }
 _x2c_gensym_defer_env_4;
 
-static void _x2c_gensym_defer_cleanup_5(void * _x2c_gensym_defer_opaque_5);
+static void _x2c_gensym_defer_cleanup_4(void * _x2c_gensym_defer_opaque_4);
 
 typedef struct _x2c_gensym_defer_env_5{
   const void * _x2c_gensym_defer_capture_5;
 }
 _x2c_gensym_defer_env_5;
 
-static void _x2c_gensym_defer_cleanup_6(void * _x2c_gensym_defer_opaque_6);
+static void _x2c_gensym_defer_cleanup_5(void * _x2c_gensym_defer_opaque_5);
 
 typedef struct _x2c_gensym_defer_env_6{
   const void * _x2c_gensym_defer_capture_6;
 }
 _x2c_gensym_defer_env_6;
 
-static void _x2c_gensym_defer_cleanup_7(void * _x2c_gensym_defer_opaque_7);
+static void _x2c_gensym_defer_cleanup_6(void * _x2c_gensym_defer_opaque_6);
 
 typedef struct _x2c_gensym_defer_env_7{
   const void * _x2c_gensym_defer_capture_7;
 }
 _x2c_gensym_defer_env_7;
 
-static void _x2c_gensym_defer_cleanup_8(void * _x2c_gensym_defer_opaque_8);
+static void _x2c_gensym_defer_cleanup_7(void * _x2c_gensym_defer_opaque_7);
 
 typedef struct _x2c_gensym_defer_env_8{
   const void * _x2c_gensym_defer_capture_8;
 }
 _x2c_gensym_defer_env_8;
 
-static void _x2c_gensym_defer_cleanup_9(void * _x2c_gensym_defer_opaque_9);
+static void _x2c_gensym_defer_cleanup_8(void * _x2c_gensym_defer_opaque_8);
 
 typedef struct _x2c_gensym_defer_env_9{
   const void * _x2c_gensym_defer_capture_9;
 }
 _x2c_gensym_defer_env_9;
+
+static void _x2c_gensym_defer_cleanup_9(void * _x2c_gensym_defer_opaque_9);
 
 static void _x2c_gensym_defer_cleanup_10(void * _x2c_gensym_defer_opaque_10);
 
@@ -1098,17 +1098,6 @@ int MachineBuilder_emit(MachineBuilder * b, int op, int a, int operand_b, int c,
   return(* b).length ++;
 }
 
-static int f8_wordcode____grow_code(MachineBuilder * b){
-  if((* b).length <(* b).code_capacity) return 0;
-  if((* b).code_capacity >= MACHINE_CODE_MAX) return f8_wordcode____fail(&((* b)), "code-capacity");
-  int capacity =(* b).code_capacity ?(* b).code_capacity * 2 : 64;
-  if(capacity > MACHINE_CODE_MAX) capacity = MACHINE_CODE_MAX;
-  MachineWord * grown = xrealloc((* b).code, sizeof(MachineWord) * capacity);
-  (* b).code = grown;
-  (* b).code_capacity = capacity;
-  return 0;
-}
-
 int MachineBuilder_constant(MachineBuilder * b, Var value){
   if(! _init_guard_) _file_init_();
   if((* b).status != 1138535534920) return - 1;
@@ -1118,17 +1107,6 @@ int MachineBuilder_constant(MachineBuilder * b, Var value){
   return(* b).const_count ++;
 }
 
-static int f8_wordcode____grow_consts(MachineBuilder * b){
-  if((* b).const_count <(* b).const_capacity) return 0;
-  if((* b).const_capacity >= MACHINE_CONST_MAX) return f8_wordcode____fail(&((* b)), "constant-capacity");
-  int capacity =(* b).const_capacity ?(* b).const_capacity * 2 : 16;
-  if(capacity > MACHINE_CONST_MAX) capacity = MACHINE_CONST_MAX;
-  Var * grown = xrealloc((* b).consts, sizeof(Var) * capacity);
-  (* b).consts = grown;
-  (* b).const_capacity = capacity;
-  return 0;
-}
-
 int MachineBuilder_binder(MachineBuilder * b, Atom binder){
   if(! _init_guard_) _file_init_();
   if((* b).status != 1138535534920) return - 1;
@@ -1136,6 +1114,14 @@ int MachineBuilder_binder(MachineBuilder * b, Atom binder){
   if((* b).binder_count >= MACHINE_BINDER_MAX) return f8_wordcode____fail(&((* b)), "binder-capacity");
   (* b).binders[(* b).binder_count] = binder;
   return(* b).binder_count ++;
+}
+
+void MachineBuilder_set_target(MachineBuilder * b, int site, int target);
+
+void MachineBuilder_patch(MachineBuilder * b, int * sites, int count, int target){
+  if(! _init_guard_) _file_init_();
+  if(target < 0 || target >= MACHINE_CODE_MAX) MachineBuilder_set_target(&((* b)), - 1, target);
+  for(int i = 0;  i < count;  i ++) MachineBuilder_set_target(&((* b)), sites[i], target);
 }
 
 #include "error.h"
@@ -1149,27 +1135,13 @@ void MachineBuilder_set_target(MachineBuilder * b, int site, int target){
   else if(target < 0 || target >= MACHINE_CODE_MAX){
     Var _x2c_gensym_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("MachineBuilder.set_target")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/match/wordcode.x",.function = "MachineBuilder_set_target",.line = 378,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/match/wordcode.x",.function = "MachineBuilder_set_target",.line = 362,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_0, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(1345468776), int_var(target));
       __builtin_unreachable();
     }
 
   }
   else if(site >= 0)(* b).code[site].target = target;
-}
-
-void MachineBuilder_patch(MachineBuilder * b, int * sites, int count, int target){
-  if(! _init_guard_) _file_init_();
-  if(target < 0 || target >= MACHINE_CODE_MAX) MachineBuilder_set_target(&((* b)), - 1, target);
-  for(int i = 0;  i < count;  i ++) MachineBuilder_set_target(&((* b)), sites[i], target);
-}
-
-static int f8_wordcode____fail(MachineBuilder * b, const char * reason){
-  if((* b).status == 1138535534920){
-    (* b).status = 664475009618698;
-    (* b).reason = reason;
-  }
-  return - 1;
 }
 
 MachineProgram MachineBuilder_freeze(MachineBuilder * b){
@@ -1188,10 +1160,6 @@ MachineProgram MachineBuilder_freeze(MachineBuilder * b){
   if((* b).const_count) memcpy(consts, (* b).consts, sizeof(Var) *(* b).const_count);
   if((* b).binder_count) memcpy(binders, (* b).binders, sizeof(Atom) *(* b).binder_count);
   return program;
-}
-
-static size_t f8_wordcode____program_bytes(int length, int const_count, int binder_count){
-  return sizeof(struct MachineProgram) + sizeof(MachineWord) * length + sizeof(Var) * const_count + sizeof(Atom) * binder_count;
 }
 
 MachineView MachineProgram_view(MachineProgram program){
@@ -1228,39 +1196,49 @@ void MachineBuilder_init(MachineBuilder * b){
   ;
 }
 
+void MachineBuilder_free(MachineBuilder * b){
+  if(! _init_guard_) _file_init_();
+  MachineBuilder_drop(&((* b)));
+}
+
 void MachineBuilder_drop(MachineBuilder * b){
   if(! _init_guard_) _file_init_();
   xfree((* b).code);
   xfree((* b).consts);
 }
 
-void MachineBuilder_free(MachineBuilder * b){
-  if(! _init_guard_) _file_init_();
-  MachineBuilder_drop(&((* b)));
+static int f8_wordcode____grow_code(MachineBuilder * b){
+  if((* b).length <(* b).code_capacity) return 0;
+  if((* b).code_capacity >= MACHINE_CODE_MAX) return f8_wordcode____fail(&((* b)), "code-capacity");
+  int capacity =(* b).code_capacity ?(* b).code_capacity * 2 : 64;
+  if(capacity > MACHINE_CODE_MAX) capacity = MACHINE_CODE_MAX;
+  MachineWord * grown = xrealloc((* b).code, sizeof(MachineWord) * capacity);
+  (* b).code = grown;
+  (* b).code_capacity = capacity;
+  return 0;
 }
 
-static List * f7_machine____cursor(MatchMachine * m, int reg){
-  return &(* m).regs[(* m).fp].cursors[reg];
+static int f8_wordcode____fail(MachineBuilder * b, const char * reason){
+  if((* b).status == 1138535534920){
+    (* b).status = 664475009618698;
+    (* b).reason = reason;
+  }
+  return - 1;
 }
 
-static int * f7_machine____distance(MatchMachine * m, int reg){
-  return &(* m).regs[(* m).fp].distances[reg];
+static int f8_wordcode____grow_consts(MachineBuilder * b){
+  if((* b).const_count <(* b).const_capacity) return 0;
+  if((* b).const_capacity >= MACHINE_CONST_MAX) return f8_wordcode____fail(&((* b)), "constant-capacity");
+  int capacity =(* b).const_capacity ?(* b).const_capacity * 2 : 16;
+  if(capacity > MACHINE_CONST_MAX) capacity = MACHINE_CONST_MAX;
+  Var * grown = xrealloc((* b).consts, sizeof(Var) * capacity);
+  (* b).consts = grown;
+  (* b).const_capacity = capacity;
+  return 0;
 }
 
-static int * f7_machine____int_reg(MatchMachine * m, int reg){
-  return &(* m).regs[(* m).fp].ints[reg];
-}
-
-static MachineMark * f7_machine____mark(MatchMachine * m){
-  return &(* m).regs[(* m).fp].mark;
-}
-
-static Var f7_machine____const(MatchMachine * m, int index){
-  return(* m).program.consts[index];
-}
-
-static void f7_machine____clear_registers(MatchMachine * m, int depth){
-  memset(&(* m).regs[depth], 0, sizeof(MachineRegs));
+static size_t f8_wordcode____program_bytes(int length, int const_count, int binder_count){
+  return sizeof(struct MachineProgram) + sizeof(MachineWord) * length + sizeof(Var) * const_count + sizeof(Atom) * binder_count;
 }
 
 int MatchMachine_step(MatchMachine * m);
@@ -1278,6 +1256,122 @@ int MatchMachine_step(MatchMachine * m){
   if(!(* m).running) return 0;
   f7_machine____execute(&((* m)), &((* m).program.code[(* m).pc ++]));
   return(* m).running;
+}
+
+List MatchMachine_materialize_span(MatchMachine * m, MachineSpan span){
+  if(! _init_guard_) _file_init_();
+  if((* m).stats)(* m).stats -> materialization_requests ++;
+  if(! List_truth(span.end)){
+    f7_machine____count_share(&((* m)));
+    return span.begin;
+  }
+  if(span.length && ! f7_machine____copy_span(&((* m)), span)){
+    f7_machine____error(&((* m)), 139921162332);
+    return NULL;
+  }
+  List out = f7_machine____cons_scratch(&((* m)), span.length);
+  if((* m).stats)(* m).stats -> materialization_completions ++;
+  return out;
+}
+
+void MatchMachine_begin(MatchMachine * m, MachineView program, Var input){
+  if(! _init_guard_) _file_init_();
+  if((* m).running ||(* m).undo_count ||(* m).fp){
+    f7_machine____error(&((* m)), 995692716810);
+    return;
+  }
+  (* m).program = program;
+  (* m).pc = program.root;
+  (* m).status = 40094288782;
+  (* m).running = 1;
+  (* m).value = input;
+  (* m).error =((void) 0, Void);
+  (* m).current_entry_undo = 0;
+  (* m).slot_count = program.binder_count;
+  f7_machine____clear_slots(&((* m)));
+  f7_machine____clear_registers(&((* m)), 0);
+  f7_machine____count_call(&((* m)));
+}
+
+void MatchMachine_finish(MatchMachine * m){
+  if(! _init_guard_) _file_init_();
+  if((* m).running){
+    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/match/machine.x",.function = "MatchMachine_finish",.line = 104,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_1, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("MatchMachine.finish")), NULL))));
+    __builtin_unreachable();
+  }
+  f7_machine____clear_slots(&((* m)));
+  f7_machine____clear_frames(&((* m)));
+  (* m).slot_count = 0;
+  (* m).undo_count = 0;
+  (* m).current_entry_undo = 0;
+  (* m).pc = 0;
+  (* m).value =((void) 0, Void);
+  (* m).error =((void) 0, Void);
+  (* m).status = 598794;
+  memset(&(* m).program, 0, sizeof(MachineView));
+}
+
+int MatchMachine_clean(MatchMachine * m){
+  if(! _init_guard_) _file_init_();
+  if((* m).running ||(* m).program.code ||(* m).fp ||(* m).undo_count ||(* m).slot_count) return 0;
+  return(* m).status == 598794 && Var_is_void((* m).error);
+}
+
+void MatchMachine_open(MatchMachine * m);
+
+MatchMachine * MatchMachine_acquire(MachineStats * stats){
+  if(! _init_guard_) _file_init_();
+  MatchMachine * m = f7_machine___machine_thread.count ? f7_machine___machine_thread.spares[-- f7_machine___machine_thread.count] : calloc(1, sizeof(MatchMachine));
+  if(! m){
+    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/match/machine.x",.function = "MatchMachine_acquire",.line = 134,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_2, 97614135954008, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("MatchMachine.acquire")), NULL))));
+    __builtin_unreachable();
+  }
+  MatchMachine_open(&((* m)));
+  m -> stats = stats;
+  return m;
+}
+
+void MatchMachine_open(MatchMachine * m){
+  if(! _init_guard_) _file_init_();
+  memset(&(* m).program, 0, sizeof(MachineView));
+  (* m).pc = 0;
+  (* m).status = 598794;
+  (* m).running = 0;
+  (* m).value =((void) 0, Void);
+  (* m).error =((void) 0, Void);
+  (* m).fp = 0;
+  (* m).current_entry_undo = 0;
+  (* m).undo_count = 0;
+  (* m).slot_count = 0;
+  (* m).stats = NULL;
+  (* m).relation = NULL;
+  (* m).relation_context = NULL;
+  (* m).view = NULL;
+  (* m).scratch = NULL;
+  (* m).scratch_capacity = 0;
+}
+
+void MatchMachine_dispose(MatchMachine * m);
+
+void MatchMachine_release(MatchMachine * m){
+  if(! _init_guard_) _file_init_();
+  MatchMachine_dispose(&((* m)));
+  if(f7_machine___machine_thread.count < MACHINE_SPARES) f7_machine___machine_thread.spares[f7_machine___machine_thread.count ++] = m;
+  else free(m);
+}
+
+void MatchMachine_dispose(MatchMachine * m){
+  if(! _init_guard_) _file_init_();
+  if((* m).scratch) xfree((* m).scratch);
+  (* m).scratch = NULL;
+  (* m).scratch_capacity = 0;
+}
+
+void MatchMachine_release_spares(void){
+  if(! _init_guard_) _file_init_();
+  while(f7_machine___machine_thread.count) free(f7_machine___machine_thread.spares[-- f7_machine___machine_thread.count]);
 }
 
 static void f7_machine____execute(MatchMachine * m, const MachineWord * w){
@@ -1353,8 +1447,8 @@ static void f7_machine____execute(MatchMachine * m, const MachineWord * w){
 
 }
 
-static int f7_machine____equal(int mode, Var left, Var right){
-  return mode == MACHINE_COMPARE_BITS ? left.u64 == right.u64 : Var_equal(left, right);
+static int * f7_machine____int_reg(MatchMachine * m, int reg){
+  return &(* m).regs[(* m).fp].ints[reg];
 }
 
 static void f7_machine____tag(MatchMachine * m, const MachineWord * w){
@@ -1380,21 +1474,6 @@ static int f7_machine____is_kind(Var value, int kind){
   return 0;
 }
 
-static int f7_machine____enter(MatchMachine * m, int reg, Var input){
-  Var seen =(* m).view ?(* m).view(input) : input;
-  if(! Var_is_row(seen, 9, 7, 4)) return 0;
-  * f7_machine____cursor(&((* m)), reg) = Var_list_payload(seen);
-  * f7_machine____distance(&((* m)), reg) = 0;
-  return 1;
-}
-
-static int f7_machine____advance(MatchMachine * m, int reg){
-  List at = * f7_machine____cursor(&((* m)), reg);
-  if(! List_truth(at)) return 0;
-  f7_machine____skip(&((* m)), reg, at);
-  return 1;
-}
-
 static void f7_machine____move(MatchMachine * m, const MachineWord * w){
   * f7_machine____cursor(&((* m)), (* w).a) = * f7_machine____cursor(&((* m)), (* w).b);
   * f7_machine____distance(&((* m)), (* w).a) = * f7_machine____distance(&((* m)), (* w).b);
@@ -1404,9 +1483,24 @@ static void f7_machine____offset(MatchMachine * m, const MachineWord * w){
   for(int n = 0;  n <(* w).b;  n ++) if(! f7_machine____advance(&((* m)), (* w).a)) return;
 }
 
+static int f7_machine____advance(MatchMachine * m, int reg){
+  List at = * f7_machine____cursor(&((* m)), reg);
+  if(! List_truth(at)) return 0;
+  f7_machine____skip(&((* m)), reg, at);
+  return 1;
+}
+
 static void f7_machine____descend(MatchMachine * m, const MachineWord * w){
   List at = * f7_machine____cursor(&((* m)), (* w).b);
   if(! List_truth(at) || ! f7_machine____enter(&((* m)), (* w).c, List_car(at)))(* m).pc =(* w).target;
+}
+
+static int f7_machine____enter(MatchMachine * m, int reg, Var input){
+  Var seen =(* m).view ?(* m).view(input) : input;
+  if(! Var_is_row(seen, 9, 7, 4)) return 0;
+  * f7_machine____cursor(&((* m)), reg) = Var_list_payload(seen);
+  * f7_machine____distance(&((* m)), reg) = 0;
+  return 1;
 }
 
 static void f7_machine____scan(MatchMachine * m, const MachineWord * w){
@@ -1431,11 +1525,6 @@ static void f7_machine____scan(MatchMachine * m, const MachineWord * w){
 static void f7_machine____cursor_value(MatchMachine * m, const MachineWord * w){
   (* m).value = List_var(* f7_machine____cursor(&((* m)), (* w).a));
   if((* w).b) f7_machine____count_share(&((* m)));
-}
-
-static void f7_machine____skip(MatchMachine * m, int reg, List at){
-  * f7_machine____cursor(&((* m)), reg) = List_cdr(at);
-  (* f7_machine____distance(&((* m)), reg)) ++;
 }
 
 static void f7_machine____call(MatchMachine * m, const MachineWord * w){
@@ -1484,16 +1573,6 @@ static void f7_machine____pop_frame(MatchMachine * m){
   (* m).value = frame -> caller_value;
 }
 
-static void f7_machine____set_value(MatchMachine * m, int index, Var value, int replace_span){
-  MachineSlot capture ={
-    .kind = 46228810, .value = value
-  }
-  ;
-  Symbol expected = replace_span ? 1278044 : 20313104968;
-  if((* m).slots[index].kind != expected) f7_machine____error(&((* m)), 1364470281800970);
-  else f7_machine____journal(&((* m)), index, capture);
-}
-
 static void f7_machine____set_span(MatchMachine * m, const MachineWord * w){
   int length = * f7_machine____distance(&((* m)), (* w).c) - * f7_machine____distance(&((* m)), (* w).b);
   MachineSlot capture ={
@@ -1508,43 +1587,19 @@ static void f7_machine____set_span(MatchMachine * m, const MachineWord * w){
   else f7_machine____journal(&((* m)), (* w).a, capture);
 }
 
-static void f7_machine____journal(MatchMachine * m, int index, MachineSlot capture){
-  if((* m).undo_count >= MACHINE_UNDO_MAX){
-    f7_machine____error(&((* m)), 1473475733616);
-    return;
-  }
-  MachineUndo * entry = &(* m).undo[(* m).undo_count ++];
-  entry -> slot = index;
-  entry -> prior =(* m).slots[index];
-  (* m).slots[index] = capture;
-}
-
-static void f7_machine____rollback(MatchMachine * m, int mark){
-  while((* m).undo_count > mark){
-    MachineUndo undo =(* m).undo[--(* m).undo_count];
-    (* m).slots[undo.slot] = undo.prior;
-  }
-
-}
-
 static void f7_machine____restore(MatchMachine * m, const MachineWord * w){
   f7_machine____rollback(&((* m)), f7_machine____mark(&((* m))) -> undo_count);
   if((* m).stats &&(* w).b == MACHINE_ROLLBACK_RETRY)(* m).stats -> retries ++;
 }
 
-static int f7_machine____value_equal(MatchMachine * m, int index, Var value){
-  MachineSlot * slot = &(* m).slots[index];
-  if(slot -> kind != 46228810) return 0;
-  if((* m).relation) return(* m).relation(&(* m), index, slot -> value, value, (* m).relation_context);
-  return Var_equal(slot -> value, value);
+static MachineMark * f7_machine____mark(MatchMachine * m){
+  return &(* m).regs[(* m).fp].mark;
 }
 
 static void f7_machine____eq_prefix(MatchMachine * m, const MachineWord * w){
   int length = * f7_machine____distance(&((* m)), (* w).c) - * f7_machine____distance(&((* m)), (* w).b);
   if(! f7_machine____sequence_equal(&((* m)), (* w).a, * f7_machine____cursor(&((* m)), (* w).b), length, 0))(* m).pc =(* w).target;
 }
-
-List MatchMachine_materialize_span(MatchMachine * m, MachineSpan span);
 
 static int f7_machine____sequence_equal(MatchMachine * m, int index, List input, int length, int final){
   MachineSlot * slot = &(* m).slots[index];
@@ -1567,6 +1622,14 @@ static void f7_machine____eq_head(MatchMachine * m, const MachineWord * w){
   else(* m).pc =(* w).target;
 }
 
+static Var f7_machine____const(MatchMachine * m, int index){
+  return(* m).program.consts[index];
+}
+
+static int f7_machine____equal(int mode, Var left, Var right){
+  return mode == MACHINE_COMPARE_BITS ? left.u64 == right.u64 : Var_equal(left, right);
+}
+
 static void f7_machine____bind_head(MatchMachine * m, const MachineWord * w){
   List at = * f7_machine____cursor(&((* m)), (* w).b);
   if(! List_truth(at))(* m).pc =(* w).target;
@@ -1578,20 +1641,45 @@ static void f7_machine____bind_head(MatchMachine * m, const MachineWord * w){
   else(* m).pc =(* w).target;
 }
 
-List MatchMachine_materialize_span(MatchMachine * m, MachineSpan span){
-  if(! _init_guard_) _file_init_();
-  if((* m).stats)(* m).stats -> materialization_requests ++;
-  if(! List_truth(span.end)){
-    f7_machine____count_share(&((* m)));
-    return span.begin;
+static void f7_machine____skip(MatchMachine * m, int reg, List at){
+  * f7_machine____cursor(&((* m)), reg) = List_cdr(at);
+  (* f7_machine____distance(&((* m)), reg)) ++;
+}
+
+static List * f7_machine____cursor(MatchMachine * m, int reg){
+  return &(* m).regs[(* m).fp].cursors[reg];
+}
+
+static int * f7_machine____distance(MatchMachine * m, int reg){
+  return &(* m).regs[(* m).fp].distances[reg];
+}
+
+static void f7_machine____set_value(MatchMachine * m, int index, Var value, int replace_span){
+  MachineSlot capture ={
+    .kind = 46228810, .value = value
   }
-  if(span.length && ! f7_machine____copy_span(&((* m)), span)){
-    f7_machine____error(&((* m)), 139921162332);
-    return NULL;
+  ;
+  Symbol expected = replace_span ? 1278044 : 20313104968;
+  if((* m).slots[index].kind != expected) f7_machine____error(&((* m)), 1364470281800970);
+  else f7_machine____journal(&((* m)), index, capture);
+}
+
+static void f7_machine____journal(MatchMachine * m, int index, MachineSlot capture){
+  if((* m).undo_count >= MACHINE_UNDO_MAX){
+    f7_machine____error(&((* m)), 1473475733616);
+    return;
   }
-  List out = f7_machine____cons_scratch(&((* m)), span.length);
-  if((* m).stats)(* m).stats -> materialization_completions ++;
-  return out;
+  MachineUndo * entry = &(* m).undo[(* m).undo_count ++];
+  entry -> slot = index;
+  entry -> prior =(* m).slots[index];
+  (* m).slots[index] = capture;
+}
+
+static int f7_machine____value_equal(MatchMachine * m, int index, Var value){
+  MachineSlot * slot = &(* m).slots[index];
+  if(slot -> kind != 46228810) return 0;
+  if((* m).relation) return(* m).relation(&(* m), index, slot -> value, value, (* m).relation_context);
+  return Var_equal(slot -> value, value);
 }
 
 static int f7_machine____copy_span(MatchMachine * m, MachineSpan span){
@@ -1633,6 +1721,14 @@ static void f7_machine____error(MatchMachine * m, Symbol code){
   (* m).running = 0;
 }
 
+static void f7_machine____rollback(MatchMachine * m, int mark){
+  while((* m).undo_count > mark){
+    MachineUndo undo =(* m).undo[--(* m).undo_count];
+    (* m).slots[undo.slot] = undo.prior;
+  }
+
+}
+
 static void f7_machine____count_call(MatchMachine * m){
   if(!(* m).stats) return;
   (* m).stats -> calls ++;
@@ -1645,100 +1741,13 @@ static void f7_machine____count_share(MatchMachine * m){
   (* m).stats -> materializations_avoided ++;
 }
 
-void MatchMachine_open(MatchMachine * m){
-  if(! _init_guard_) _file_init_();
-  memset(&(* m).program, 0, sizeof(MachineView));
-  (* m).pc = 0;
-  (* m).status = 598794;
-  (* m).running = 0;
-  (* m).value =((void) 0, Void);
-  (* m).error =((void) 0, Void);
+static void f7_machine____clear_frames(MatchMachine * m){
+  for(int depth = 0;  depth <=(* m).fp;  depth ++) f7_machine____clear_registers(&((* m)), depth);
   (* m).fp = 0;
-  (* m).current_entry_undo = 0;
-  (* m).undo_count = 0;
-  (* m).slot_count = 0;
-  (* m).stats = NULL;
-  (* m).relation = NULL;
-  (* m).relation_context = NULL;
-  (* m).view = NULL;
-  (* m).scratch = NULL;
-  (* m).scratch_capacity = 0;
 }
 
-void MatchMachine_begin(MatchMachine * m, MachineView program, Var input){
-  if(! _init_guard_) _file_init_();
-  if((* m).running ||(* m).undo_count ||(* m).fp){
-    f7_machine____error(&((* m)), 995692716810);
-    return;
-  }
-  (* m).program = program;
-  (* m).pc = program.root;
-  (* m).status = 40094288782;
-  (* m).running = 1;
-  (* m).value = input;
-  (* m).error =((void) 0, Void);
-  (* m).current_entry_undo = 0;
-  (* m).slot_count = program.binder_count;
-  f7_machine____clear_slots(&((* m)));
-  f7_machine____clear_registers(&((* m)), 0);
-  f7_machine____count_call(&((* m)));
-}
-
-void MatchMachine_finish(MatchMachine * m){
-  if(! _init_guard_) _file_init_();
-  if((* m).running){
-    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/match/machine.x",.function = "MatchMachine_finish",.line = 507,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_1, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("MatchMachine.finish")), NULL))));
-    __builtin_unreachable();
-  }
-  f7_machine____clear_slots(&((* m)));
-  f7_machine____clear_frames(&((* m)));
-  (* m).slot_count = 0;
-  (* m).undo_count = 0;
-  (* m).current_entry_undo = 0;
-  (* m).pc = 0;
-  (* m).value =((void) 0, Void);
-  (* m).error =((void) 0, Void);
-  (* m).status = 598794;
-  memset(&(* m).program, 0, sizeof(MachineView));
-}
-
-int MatchMachine_clean(MatchMachine * m){
-  if(! _init_guard_) _file_init_();
-  if((* m).running ||(* m).program.code ||(* m).fp ||(* m).undo_count ||(* m).slot_count) return 0;
-  return(* m).status == 598794 && Var_is_void((* m).error);
-}
-
-void MatchMachine_dispose(MatchMachine * m){
-  if(! _init_guard_) _file_init_();
-  if((* m).scratch) xfree((* m).scratch);
-  (* m).scratch = NULL;
-  (* m).scratch_capacity = 0;
-}
-
-MatchMachine * MatchMachine_acquire(MachineStats * stats){
-  if(! _init_guard_) _file_init_();
-  MatchMachine * m = f7_machine___machine_thread.count ? f7_machine___machine_thread.spares[-- f7_machine___machine_thread.count] : calloc(1, sizeof(MatchMachine));
-  if(! m){
-    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/match/machine.x",.function = "MatchMachine_acquire",.line = 561,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_2, 97614135954008, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("MatchMachine.acquire")), NULL))));
-    __builtin_unreachable();
-  }
-  MatchMachine_open(&((* m)));
-  m -> stats = stats;
-  return m;
-}
-
-void MatchMachine_release(MatchMachine * m){
-  if(! _init_guard_) _file_init_();
-  MatchMachine_dispose(&((* m)));
-  if(f7_machine___machine_thread.count < MACHINE_SPARES) f7_machine___machine_thread.spares[f7_machine___machine_thread.count ++] = m;
-  else free(m);
-}
-
-void MatchMachine_release_spares(void){
-  if(! _init_guard_) _file_init_();
-  while(f7_machine___machine_thread.count) free(f7_machine___machine_thread.spares[-- f7_machine___machine_thread.count]);
+static void f7_machine____clear_registers(MatchMachine * m, int depth){
+  memset(&(* m).regs[depth], 0, sizeof(MachineRegs));
 }
 
 static void f7_machine____clear_slots(MatchMachine * m){
@@ -1747,11 +1756,6 @@ static void f7_machine____clear_slots(MatchMachine * m){
     (* m).slots[i].kind = 20313104968;
   }
 
-}
-
-static void f7_machine____clear_frames(MatchMachine * m){
-  for(int depth = 0;  depth <=(* m).fp;  depth ++) f7_machine____clear_registers(&((* m)), depth);
-  (* m).fp = 0;
 }
 
 MatchCaptureLayout MatchCaptureLayout_analyze(Var pattern);
@@ -1768,6 +1772,16 @@ MatchPlan MatchPlan_prepare(Var pattern){
   if(plan -> status == 1138535534920) f4_plan____lower(plan, normalized);
   if(plan -> status == 1138535534920) f4_plan____record_keys(plan, normalized);
   return plan;
+}
+
+void MatchCaptureLayout_free(MatchCaptureLayout layout);
+
+void MatchPlan_free(MatchPlan plan){
+  if(! _init_guard_) _file_init_();
+  if(! plan) return;
+  MachineProgram_free(plan -> program);
+  MatchCaptureLayout_free(plan -> layout);
+  xfree(plan);
 }
 
 static void f4_plan____lower(MatchPlan plan, Var pattern){
@@ -1800,16 +1814,6 @@ static void f4_plan____lower(MatchPlan plan, Var pattern){
 
 }
 
-void MatchCaptureLayout_free(MatchCaptureLayout layout);
-
-void MatchPlan_free(MatchPlan plan){
-  if(! _init_guard_) _file_init_();
-  if(! plan) return;
-  MachineProgram_free(plan -> program);
-  MatchCaptureLayout_free(plan -> layout);
-  xfree(plan);
-}
-
 static int f4_plan____compile_value(f4_plan___MatchLower * l, Var pattern){
   if(Var_is_atom_binder(pattern)) return f4_plan____compile_binder(&((* l)), pattern);
   if(! Var_is_row(pattern, 9, 7, 4)) return f4_plan____compile_literal(&((* l)), pattern);
@@ -1817,91 +1821,6 @@ static int f4_plan____compile_value(f4_plan___MatchLower * l, Var pattern){
   if(List_truth(list) && Var_is_match_op(List_car(list))) return f4_plan____compile_guard(&((* l)), List_car(list), List_cdr(list));
   if(List_truth(list) && f4_plan____is_list_literal(list)) return f4_plan____compile_literal_list(&((* l)), list);
   return f4_plan____compile_segment(&((* l)), list);
-}
-
-static int f4_plan____compile_binder(f4_plan___MatchLower * l, Var binder){
-  int entry =(* l).b.length;
-  if(x2c_var_equal(binder, Symbol_var(58))){
-    MachineBuilder_emit(&((* l).b), MW_RET_SUCCESS, 0, 0, 0, 0, 0);
-    return f4_plan____stopped(&((* l))) ? - 1 : entry;
-  }
-  int base =(* l).site_count;
-  return f4_plan____emit_binder(&((* l)), binder) ? f4_plan____finish(&((* l)), entry, base) : - 1;
-}
-
-static int f4_plan____emit_binder(f4_plan___MatchLower * l, Var binder){
-  if(x2c_var_equal(binder, Symbol_var(58))) return 1;
-  int slot = MachineBuilder_binder(&((* l).b), binder);
-  if(slot < 0) return 0;
-  int valid = MachineBuilder_emit(&((* l).b), MW_SLOT_VALID, slot, 0, 0, 0, - 1);
-  MachineBuilder_emit(&((* l).b), MW_SLOT_SET_VALUE, slot, 0, 0, 0, 0);
-  int done = MachineBuilder_emit(&((* l).b), MW_JUMP, 0, 0, 0, 0, - 1);
-  if(valid < 0 || done < 0) return 0;
-  int compare =(* l).b.length;
-  if(! f4_plan____fail_site(&((* l)), MW_SLOT_EQ_VALUE, slot, 0, 0, 0)) return 0;
-  MachineBuilder_set_target(&((* l).b), valid, compare);
-  MachineBuilder_set_target(&((* l).b), done, (* l).b.length);
-  return 1;
-}
-
-static int f4_plan____compile_literal(f4_plan___MatchLower * l, Var pattern){
-  int entry =(* l).b.length, base =(* l).site_count;
-  return f4_plan____emit_literal(&((* l)), pattern) ? f4_plan____finish(&((* l)), entry, base) : - 1;
-}
-
-static int f4_plan____compare_mode(Var value){
-  return f4_plan____bits_unique(value) ? MACHINE_COMPARE_BITS : MACHINE_COMPARE_EQUAL;
-}
-
-static int f4_plan____bits_unique(Var value){
-  switch(Var_tag(value)){
-    case 1328354264 : case 826970 : case 26993 : case 30065 : case 3453293 : case 3846509 : case 3453797 : case 3847013 : case 3454065 : case 3847281 : return 1;
-    case 806120 :{
-      {
-        Var part;
-        List _x2c_gensym_macro_object_0 =(List) Var_pointer(value);
-        List _x2c_gensym_macro_cursor_0 = _x2c_gensym_macro_object_0;
-        Var _x2c_gensym_macro_cursor_output_0;
-        while(List_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_0), &(_x2c_gensym_macro_cursor_output_0))){
-          part = _x2c_gensym_macro_cursor_output_0;
-          if(! f4_plan____bits_unique(part)) return 0;
-        }
-
-      }
-      return 1;
-    }
-
-  }
-  return 0;
-}
-
-static int f4_plan____emit_leaf_value(f4_plan___MatchLower * l, Var pattern){
-  if(Var_is_atom_binder(pattern)) return f4_plan____emit_binder(&((* l)), pattern);
-  return f4_plan____emit_literal(&((* l)), pattern);
-}
-
-static int f4_plan____emit_literal(f4_plan___MatchLower * l, Var pattern){
-  int constant = MachineBuilder_constant(&((* l).b), pattern);
-  return constant >= 0 && f4_plan____fail_site(&((* l)), MW_EQ_VALUE_CONST, constant, 0, 0, f4_plan____compare_mode(pattern));
-}
-
-static int f4_plan____is_list_literal(List pat){
-  {
-    Var head;
-    List _x2c_gensym_macro_object_1 = pat;
-    List _x2c_gensym_macro_cursor_1 = _x2c_gensym_macro_object_1;
-    Var _x2c_gensym_macro_cursor_output_1;
-    while(List_try_next(_x2c_gensym_macro_object_1, &(_x2c_gensym_macro_cursor_1), &(_x2c_gensym_macro_cursor_output_1))){
-      head = _x2c_gensym_macro_cursor_output_1;
-      {
-        if(Var_is_binder(head) || Var_is_match_op(head)) return 0;
-        if(Var_is_row(head, 9, 7, 4) && ! f4_plan____is_list_literal(Var_list_payload(head))) return 0;
-      }
-
-    }
-
-  }
-  return 1;
 }
 
 static int f4_plan____compile_literal_list(f4_plan___MatchLower * l, List pattern){
@@ -1924,52 +1843,6 @@ static int f4_plan____compile_child(f4_plan___MatchLower * l, Var pattern){
   return entry;
 }
 
-static int f4_plan____fail_site(f4_plan___MatchLower * l, int op, int a, int b, int c, int d){
-  int site = MachineBuilder_emit(&((* l).b), op, a, b, c, d, - 1);
-  if(site < 0) return 0;
-  if((* l).site_count >=(* l).site_capacity){
-    int capacity =(* l).site_capacity ?(* l).site_capacity * 2 : 64;
-    (* l).sites = xrealloc((* l).sites, sizeof(int) * capacity);
-    (* l).site_capacity = capacity;
-  }
-  (* l).sites[(* l).site_count ++] = site;
-  return 1;
-}
-
-static void f4_plan____patch_sites(f4_plan___MatchLower * l, int base, int target){
-  for(int i = base;  i <(* l).site_count;  i ++) MachineBuilder_set_target(&((* l).b), (* l).sites[i], target);
-  (* l).site_count = base;
-}
-
-static int f4_plan____finish(f4_plan___MatchLower * l, int entry, int base){
-  MachineBuilder_emit(&((* l).b), MW_RET_SUCCESS, 0, 0, 0, 0, 0);
-  return f4_plan____finish_failure(&((* l)), entry, base);
-}
-
-static int f4_plan____finish_failure(f4_plan___MatchLower * l, int entry, int base){
-  int failure = MachineBuilder_emit(&((* l).b), MW_RET_FAILURE, 0, 0, 0, 0, 0);
-  if(failure < 0) return - 1;
-  f4_plan____patch_sites(&((* l)), base, failure);
-  return entry;
-}
-
-static int f4_plan____emit_call(f4_plan___MatchLower * l, int child, int mode, int reg){
-  if(MachineBuilder_emit(&((* l).b), MW_CALL, child, mode, reg, 0, 0) < 0) return 0;
-  return f4_plan____fail_site(&((* l)), MW_BR_FAIL, 0, 0, 0, 0);
-}
-
-static int f4_plan____fail(f4_plan___MatchLower * l, const char * reason){
-  if((* l).b.status == 1138535534920){
-    (* l).b.status = 664475009618698;
-    (* l).b.reason = reason;
-  }
-  return - 1;
-}
-
-static int f4_plan____stopped(f4_plan___MatchLower * l){
-  return(* l).b.status != 1138535534920;
-}
-
 static int f4_plan____compile_guard(f4_plan___MatchLower * l, Var op, List args){
   if(x2c_var_equal(op, Symbol_var(62436))) return f4_plan____compile_or(&((* l)), args);
   if(x2c_var_equal(op, Symbol_var(1995752))) return f4_plan____compile_not(&((* l)), args);
@@ -1983,11 +1856,11 @@ static int f4_plan____guard_parts(f4_plan___MatchLower * l, List args, f4_plan__
   int n = 0;
   {
     Var part;
-    List _x2c_gensym_macro_object_2 = args;
-    List _x2c_gensym_macro_cursor_2 = _x2c_gensym_macro_object_2;
-    Var _x2c_gensym_macro_cursor_output_2;
-    while(List_try_next(_x2c_gensym_macro_object_2, &(_x2c_gensym_macro_cursor_2), &(_x2c_gensym_macro_cursor_output_2))){
-      part = _x2c_gensym_macro_cursor_output_2;
+    List _x2c_gensym_macro_object_0 = args;
+    List _x2c_gensym_macro_cursor_0 = _x2c_gensym_macro_object_0;
+    Var _x2c_gensym_macro_cursor_output_0;
+    while(List_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_0), &(_x2c_gensym_macro_cursor_output_0))){
+      part = _x2c_gensym_macro_cursor_output_0;
       {
         if(n >= MATCH_SEGMENT_MAX) return f4_plan____fail(&((* l)), "guard-width") + 1;
         (* parts).elements[n] = part;
@@ -2004,15 +1877,6 @@ static int f4_plan____guard_parts(f4_plan___MatchLower * l, List args, f4_plan__
   }
   (* parts).count = n;
   return 1;
-}
-
-static int f4_plan____emit_operand(f4_plan___MatchLower * l, f4_plan___MatchParts * parts, int i){
-  return f4_plan____emit_test(&((* l)), (* parts).elements[i], (* parts).entries[i]);
-}
-
-static int f4_plan____emit_test(f4_plan___MatchLower * l, Var test, int child){
-  if(child < 0) return f4_plan____emit_leaf_value(&((* l)), test);
-  return f4_plan____emit_call(&((* l)), child, MACHINE_CALL_CURRENT, 0);
 }
 
 static int f4_plan____compile_or(f4_plan___MatchLower * l, List args){
@@ -2062,10 +1926,6 @@ static int f4_plan____compile_set(f4_plan___MatchLower * l, List args){
   return f4_plan____emit_binder(&((* l)), binder) && f4_plan____emit_test(&((* l)), test, child) ? f4_plan____finish(&((* l)), entry, base) : - 1;
 }
 
-static int f4_plan____set_binds(List args){
-  return List_truth(args) && List_truth(List_cdr(args)) && ! List_truth(List_cddr(args)) && Var_is_atom_binder(List_car(args));
-}
-
 static int f4_plan____compile_and(f4_plan___MatchLower * l, List args){
   f4_plan___MatchParts operands;
   if(! f4_plan____guard_parts(&((* l)), args, &(operands))) return - 1;
@@ -2074,9 +1934,153 @@ static int f4_plan____compile_and(f4_plan___MatchLower * l, List args){
   return f4_plan____finish(&((* l)), entry, base);
 }
 
+static int f4_plan____compile_segment(f4_plan___MatchLower * l, List pattern){
+  f4_plan___MatchSegment s;
+  s.nested.count = s.nested.used = 0;
+  if(! f4_plan____segment_prefix(&((* l)), &(s), pattern) || ! f4_plan____segment_star(&((* l)), &(s.star))) return - 1;
+  int entry =(* l).b.length, base =(* l).site_count;
+  if(! f4_plan____fail_site(&((* l)), MW_INPUT_LIST, 0, 0, 0, 0) || ! f4_plan____emit_prefix(&((* l)), &(s)) || ! f4_plan____segment_end(&((* l)), &(s.star))) return - 1;
+  return f4_plan____finish_failure(&((* l)), entry, base);
+}
+
+static int f4_plan____segment_prefix(f4_plan___MatchLower * l, f4_plan___MatchSegment * s, List pattern){
+  int n = 0;
+  List at = pattern;
+  while(List_truth(at) && ! Var_is_list_binder(List_car(at))){
+    if(n >= MATCH_SEGMENT_MAX) return f4_plan____fail(&((* l)), "segment-width") + 1;
+    Var part = List_car(at);
+    (* s).prefix.elements[n] = part;
+    if(! Var_is_row(part, 9, 7, 4))(* s).prefix.entries[n ++] = - 1;
+    else if(f4_plan____inline_descend_ok(Var_list_payload(part), 0)){
+      if(! f4_plan____compile_nested(&((* l)), Var_list_payload(part), 1, &((* s).nested))) return 0;
+      (* s).prefix.entries[n ++] = - 2;
+    }
+    else{
+      (* s).prefix.entries[n] = f4_plan____compile_child(&((* l)), part);
+      if((* s).prefix.entries[n ++] < 0) return 0;
+    }
+    at = List_cdr(at);
+  }
+  (* s).prefix.count = n;
+  (* s).star.cell = at;
+  return 1;
+}
+
+static int f4_plan____compile_nested(f4_plan___MatchLower * l, List pattern, int reg, f4_plan___MatchInlinePlan * nested){
+  {
+    Var part;
+    List _x2c_gensym_macro_object_1 = pattern;
+    List _x2c_gensym_macro_cursor_1 = _x2c_gensym_macro_object_1;
+    Var _x2c_gensym_macro_cursor_output_1;
+    while(List_try_next(_x2c_gensym_macro_object_1, &(_x2c_gensym_macro_cursor_1), &(_x2c_gensym_macro_cursor_output_1))){
+      part = _x2c_gensym_macro_cursor_output_1;
+      {
+        if(! Var_is_row(part, 9, 7, 4)) continue;
+        List child = Var_list_payload(part);
+        if(f4_plan____inline_descend_ok(child, reg)){
+          if(! f4_plan____compile_nested(&((* l)), child, reg + 1, &((* nested)))) return 0;
+          continue;
+        }
+        if((* nested).count >= MATCH_INLINE_MAX) return f4_plan____fail(&((* l)), "segment-width") + 1;
+        (* nested).entries[(* nested).count] = f4_plan____compile_child(&((* l)), part);
+        if((* nested).entries[(* nested).count ++] < 0) return 0;
+      }
+
+    }
+
+  }
+  return 1;
+}
+
+static int f4_plan____segment_star(f4_plan___MatchLower * l, f4_plan___MatchStar * star){
+  List cell =(* star).cell;
+  (* star) =(f4_plan___MatchStar){
+    .cell = cell, .slot = - 1, .entry = - 1, .anchor =((void) 0, Void)
+  }
+  ;
+  if(! List_truth(cell)) return 1;
+  Var binder = List_car(cell);
+  (* star).tail = List_cdr(cell);
+  if(! x2c_var_equal(binder, Symbol_var(54))){
+    (* star).slot = MachineBuilder_binder(&((* l).b), binder);
+    if((* star).slot < 0) return 0;
+    (* star).delayed = List_truth((* star).tail) && ! f4_plan____pattern_contains_binder((* star).tail, binder);
+  }
+  if(! List_truth((* star).tail)) return 1;
+  (* star).entry = f4_plan____compile_tail(&((* l)), (* star).tail);
+  if((* star).entry < 0) return 0;
+  (* star).anchored = f4_plan____find_fixed_anchor((* star).tail, &((* star).anchor), &((* star).offset));
+  return 1;
+}
+
+static int f4_plan____compile_tail(f4_plan___MatchLower * l, List pattern){
+  if((* l).depth + 1 >= MACHINE_FRAME_MAX - 1) return f4_plan____fail(&((* l)), "frame-depth");
+  (* l).depth ++;
+  int entry = f4_plan____compile_segment(&((* l)), pattern);
+  (* l).depth --;
+  return entry;
+}
+
+static int f4_plan____compile_binder(f4_plan___MatchLower * l, Var binder){
+  int entry =(* l).b.length;
+  if(x2c_var_equal(binder, Symbol_var(58))){
+    MachineBuilder_emit(&((* l).b), MW_RET_SUCCESS, 0, 0, 0, 0, 0);
+    return f4_plan____stopped(&((* l))) ? - 1 : entry;
+  }
+  int base =(* l).site_count;
+  return f4_plan____emit_binder(&((* l)), binder) ? f4_plan____finish(&((* l)), entry, base) : - 1;
+}
+
+static int f4_plan____emit_operand(f4_plan___MatchLower * l, f4_plan___MatchParts * parts, int i){
+  return f4_plan____emit_test(&((* l)), (* parts).elements[i], (* parts).entries[i]);
+}
+
+static int f4_plan____emit_test(f4_plan___MatchLower * l, Var test, int child){
+  if(child < 0) return f4_plan____emit_leaf_value(&((* l)), test);
+  return f4_plan____emit_call(&((* l)), child, MACHINE_CALL_CURRENT, 0);
+}
+
+static int f4_plan____emit_leaf_value(f4_plan___MatchLower * l, Var pattern){
+  if(Var_is_atom_binder(pattern)) return f4_plan____emit_binder(&((* l)), pattern);
+  return f4_plan____emit_literal(&((* l)), pattern);
+}
+
+static int f4_plan____emit_binder(f4_plan___MatchLower * l, Var binder){
+  if(x2c_var_equal(binder, Symbol_var(58))) return 1;
+  int slot = MachineBuilder_binder(&((* l).b), binder);
+  if(slot < 0) return 0;
+  int valid = MachineBuilder_emit(&((* l).b), MW_SLOT_VALID, slot, 0, 0, 0, - 1);
+  MachineBuilder_emit(&((* l).b), MW_SLOT_SET_VALUE, slot, 0, 0, 0, 0);
+  int done = MachineBuilder_emit(&((* l).b), MW_JUMP, 0, 0, 0, 0, - 1);
+  if(valid < 0 || done < 0) return 0;
+  int compare =(* l).b.length;
+  if(! f4_plan____fail_site(&((* l)), MW_SLOT_EQ_VALUE, slot, 0, 0, 0)) return 0;
+  MachineBuilder_set_target(&((* l).b), valid, compare);
+  MachineBuilder_set_target(&((* l).b), done, (* l).b.length);
+  return 1;
+}
+
 static int f4_plan____compile_quote(f4_plan___MatchLower * l, List args){
   if(! List_truth(args) || List_truth(List_cdr(args))) return f4_plan____fail(&((* l)), "quote-arity");
   return f4_plan____compile_literal(&((* l)), List_car(args));
+}
+
+static int f4_plan____compile_literal(f4_plan___MatchLower * l, Var pattern){
+  int entry =(* l).b.length, base =(* l).site_count;
+  return f4_plan____emit_literal(&((* l)), pattern) ? f4_plan____finish(&((* l)), entry, base) : - 1;
+}
+
+static int f4_plan____emit_literal(f4_plan___MatchLower * l, Var pattern){
+  int constant = MachineBuilder_constant(&((* l).b), pattern);
+  return constant >= 0 && f4_plan____fail_site(&((* l)), MW_EQ_VALUE_CONST, constant, 0, 0, f4_plan____compare_mode(pattern));
+}
+
+static int f4_plan____fail(f4_plan___MatchLower * l, const char * reason){
+  if((* l).b.status == 1138535534920){
+    (* l).b.status = 664475009618698;
+    (* l).b.reason = reason;
+  }
+  return - 1;
 }
 
 static int f4_plan____compile_is(f4_plan___MatchLower * l, List args){
@@ -2127,6 +2131,23 @@ static int f4_plan____is_type(f4_plan___MatchLower * l, Var type){
   return constant >= 0 && f4_plan____fail_site(&((* l)), MW_TAG, constant, 0, 0, 0) ? f4_plan____finish(&((* l)), entry, base) : - 1;
 }
 
+static int f4_plan____finish(f4_plan___MatchLower * l, int entry, int base){
+  MachineBuilder_emit(&((* l).b), MW_RET_SUCCESS, 0, 0, 0, 0, 0);
+  return f4_plan____finish_failure(&((* l)), entry, base);
+}
+
+static int f4_plan____finish_failure(f4_plan___MatchLower * l, int entry, int base){
+  int failure = MachineBuilder_emit(&((* l).b), MW_RET_FAILURE, 0, 0, 0, 0, 0);
+  if(failure < 0) return - 1;
+  f4_plan____patch_sites(&((* l)), base, failure);
+  return entry;
+}
+
+static void f4_plan____patch_sites(f4_plan___MatchLower * l, int base, int target){
+  for(int i = base;  i <(* l).site_count;  i ++) MachineBuilder_set_target(&((* l).b), (* l).sites[i], target);
+  (* l).site_count = base;
+}
+
 static inline Symbol f4_plan____canonical_type_tag(Symbol tag){
   if(tag == 1479708786) return 3313778;
   if(tag == 1468512) return 26720;
@@ -2138,109 +2159,14 @@ static int f4_plan____never(f4_plan___MatchLower * l){
   return MachineBuilder_emit(&((* l).b), MW_RET_FAILURE, 0, 0, 0, 0, 0) < 0 ? - 1 : entry;
 }
 
-static int f4_plan____compile_segment(f4_plan___MatchLower * l, List pattern){
-  f4_plan___MatchSegment s;
-  s.nested.count = s.nested.used = 0;
-  if(! f4_plan____segment_prefix(&((* l)), &(s), pattern) || ! f4_plan____segment_star(&((* l)), &(s.star))) return - 1;
-  int entry =(* l).b.length, base =(* l).site_count;
-  if(! f4_plan____fail_site(&((* l)), MW_INPUT_LIST, 0, 0, 0, 0) || ! f4_plan____emit_prefix(&((* l)), &(s)) || ! f4_plan____segment_end(&((* l)), &(s.star))) return - 1;
-  return f4_plan____finish_failure(&((* l)), entry, base);
-}
-
-static int f4_plan____segment_prefix(f4_plan___MatchLower * l, f4_plan___MatchSegment * s, List pattern){
-  int n = 0;
-  List at = pattern;
-  while(List_truth(at) && ! Var_is_list_binder(List_car(at))){
-    if(n >= MATCH_SEGMENT_MAX) return f4_plan____fail(&((* l)), "segment-width") + 1;
-    Var part = List_car(at);
-    (* s).prefix.elements[n] = part;
-    if(! Var_is_row(part, 9, 7, 4))(* s).prefix.entries[n ++] = - 1;
-    else if(f4_plan____inline_descend_ok(Var_list_payload(part), 0)){
-      if(! f4_plan____compile_nested(&((* l)), Var_list_payload(part), 1, &((* s).nested))) return 0;
-      (* s).prefix.entries[n ++] = - 2;
-    }
-    else{
-      (* s).prefix.entries[n] = f4_plan____compile_child(&((* l)), part);
-      if((* s).prefix.entries[n ++] < 0) return 0;
-    }
-    at = List_cdr(at);
-  }
-  (* s).prefix.count = n;
-  (* s).star.cell = at;
-  return 1;
-}
-
-static int f4_plan____inline_descend_ok(List child, int reg){
-  if(reg + 1 >= MACHINE_CURSOR_REGS || ! List_truth(child) || Var_is_match_op(List_car(child)) || f4_plan____is_list_literal(child)) return 0;
-  {
-    Var part;
-    List _x2c_gensym_macro_object_3 = child;
-    List _x2c_gensym_macro_cursor_3 = _x2c_gensym_macro_object_3;
-    Var _x2c_gensym_macro_cursor_output_3;
-    while(List_try_next(_x2c_gensym_macro_object_3, &(_x2c_gensym_macro_cursor_3), &(_x2c_gensym_macro_cursor_output_3))){
-      part = _x2c_gensym_macro_cursor_output_3;
-      if(Var_is_list_binder(part)) return 0;
-    }
-
-  }
-  return 1;
-}
-
-static int f4_plan____compile_nested(f4_plan___MatchLower * l, List pattern, int reg, f4_plan___MatchInlinePlan * nested){
-  {
-    Var part;
-    List _x2c_gensym_macro_object_4 = pattern;
-    List _x2c_gensym_macro_cursor_4 = _x2c_gensym_macro_object_4;
-    Var _x2c_gensym_macro_cursor_output_4;
-    while(List_try_next(_x2c_gensym_macro_object_4, &(_x2c_gensym_macro_cursor_4), &(_x2c_gensym_macro_cursor_output_4))){
-      part = _x2c_gensym_macro_cursor_output_4;
-      {
-        if(! Var_is_row(part, 9, 7, 4)) continue;
-        List child = Var_list_payload(part);
-        if(f4_plan____inline_descend_ok(child, reg)){
-          if(! f4_plan____compile_nested(&((* l)), child, reg + 1, &((* nested)))) return 0;
-          continue;
-        }
-        if((* nested).count >= MATCH_INLINE_MAX) return f4_plan____fail(&((* l)), "segment-width") + 1;
-        (* nested).entries[(* nested).count] = f4_plan____compile_child(&((* l)), part);
-        if((* nested).entries[(* nested).count ++] < 0) return 0;
-      }
-
-    }
-
-  }
-  return 1;
-}
-
-static int f4_plan____segment_star(f4_plan___MatchLower * l, f4_plan___MatchStar * star){
-  List cell =(* star).cell;
-  (* star) =(f4_plan___MatchStar){
-    .cell = cell, .slot = - 1, .entry = - 1, .anchor =((void) 0, Void)
-  }
-  ;
-  if(! List_truth(cell)) return 1;
-  Var binder = List_car(cell);
-  (* star).tail = List_cdr(cell);
-  if(! x2c_var_equal(binder, Symbol_var(54))){
-    (* star).slot = MachineBuilder_binder(&((* l).b), binder);
-    if((* star).slot < 0) return 0;
-    (* star).delayed = List_truth((* star).tail) && ! f4_plan____pattern_contains_binder((* star).tail, binder);
-  }
-  if(! List_truth((* star).tail)) return 1;
-  (* star).entry = f4_plan____compile_tail(&((* l)), (* star).tail);
-  if((* star).entry < 0) return 0;
-  (* star).anchored = f4_plan____find_fixed_anchor((* star).tail, &((* star).anchor), &((* star).offset));
-  return 1;
-}
-
 static int f4_plan____pattern_contains_binder(List pat, Var binder){
   {
     Var part;
-    List _x2c_gensym_macro_object_5 = pat;
-    List _x2c_gensym_macro_cursor_5 = _x2c_gensym_macro_object_5;
-    Var _x2c_gensym_macro_cursor_output_5;
-    while(List_try_next(_x2c_gensym_macro_object_5, &(_x2c_gensym_macro_cursor_5), &(_x2c_gensym_macro_cursor_output_5))){
-      part = _x2c_gensym_macro_cursor_output_5;
+    List _x2c_gensym_macro_object_2 = pat;
+    List _x2c_gensym_macro_cursor_2 = _x2c_gensym_macro_object_2;
+    Var _x2c_gensym_macro_cursor_output_2;
+    while(List_try_next(_x2c_gensym_macro_object_2, &(_x2c_gensym_macro_cursor_2), &(_x2c_gensym_macro_cursor_output_2))){
+      part = _x2c_gensym_macro_cursor_output_2;
       {
         if(x2c_var_equal(part, binder)) return 1;
         if(Var_is_row(part, 9, 7, 4)){
@@ -2256,23 +2182,15 @@ static int f4_plan____pattern_contains_binder(List pat, Var binder){
   return 0;
 }
 
-static int f4_plan____compile_tail(f4_plan___MatchLower * l, List pattern){
-  if((* l).depth + 1 >= MACHINE_FRAME_MAX - 1) return f4_plan____fail(&((* l)), "frame-depth");
-  (* l).depth ++;
-  int entry = f4_plan____compile_segment(&((* l)), pattern);
-  (* l).depth --;
-  return entry;
-}
-
 static int f4_plan____find_fixed_anchor(List pat, Var * anchor, int * offset){
   int width = 0;
   {
     Var part;
-    List _x2c_gensym_macro_object_6 = pat;
-    List _x2c_gensym_macro_cursor_6 = _x2c_gensym_macro_object_6;
-    Var _x2c_gensym_macro_cursor_output_6;
-    while(List_try_next(_x2c_gensym_macro_object_6, &(_x2c_gensym_macro_cursor_6), &(_x2c_gensym_macro_cursor_output_6))){
-      part = _x2c_gensym_macro_cursor_output_6;
+    List _x2c_gensym_macro_object_3 = pat;
+    List _x2c_gensym_macro_cursor_3 = _x2c_gensym_macro_object_3;
+    Var _x2c_gensym_macro_cursor_output_3;
+    while(List_try_next(_x2c_gensym_macro_object_3, &(_x2c_gensym_macro_cursor_3), &(_x2c_gensym_macro_cursor_output_3))){
+      part = _x2c_gensym_macro_cursor_output_3;
       {
         if(Var_is_list_binder(part)) return 0;
         if((! Var_is_row(part, 9, 7, 4) && ! Var_is_binder(part)) ||(Var_is_row(part, 9, 7, 4) && f4_plan____is_list_literal(Var_list_payload(part)) && f4_plan____bits_unique(part))){
@@ -2301,35 +2219,18 @@ static int f4_plan____emit_part(f4_plan___MatchLower * l, f4_plan___MatchSegment
   return f4_plan____emit_framed(&((* l)), entry, 0);
 }
 
-static int f4_plan____emit_head_leaf(f4_plan___MatchLower * l, Var part, int reg){
-  if(x2c_var_equal(part, Symbol_var(58))) return f4_plan____fail_site(&((* l)), MW_SKIP_HEAD, 0, reg, 0, 0);
-  if(Var_is_atom_binder(part)){
-    int slot = MachineBuilder_binder(&((* l).b), part);
-    if(slot < 0) return 0;
-    return f4_plan____fail_site(&((* l)), MW_BIND_HEAD, slot, reg, 0, 0);
-  }
-  int constant = MachineBuilder_constant(&((* l).b), part);
-  if(constant < 0) return 0;
-  int mode = f4_plan____compare_mode(part);
-  return f4_plan____fail_site(&((* l)), MW_EQ_HEAD_CONST, constant, reg, 0, mode);
-}
-
 static int f4_plan____emit_descend(f4_plan___MatchLower * l, List child, int reg, f4_plan___MatchInlinePlan * nested){
   return f4_plan____fail_site(&((* l)), MW_DESCEND, 0, reg, reg + 1, 0) && f4_plan____emit_inline_segment(&((* l)), child, reg + 1, &((* nested))) && MachineBuilder_emit(&((* l).b), MW_ADVANCE, reg, 0, 0, 0, 0) >= 0;
-}
-
-static int f4_plan____emit_framed(f4_plan___MatchLower * l, int entry, int reg){
-  return f4_plan____fail_site(&((* l)), MW_NONNIL, reg, 0, 0, 0) && f4_plan____emit_call(&((* l)), entry, MACHINE_CALL_HEAD, reg) && MachineBuilder_emit(&((* l).b), MW_ADVANCE, reg, 0, 0, 0, 0) >= 0;
 }
 
 static int f4_plan____emit_inline_segment(f4_plan___MatchLower * l, List pattern, int reg, f4_plan___MatchInlinePlan * nested){
   {
     Var part;
-    List _x2c_gensym_macro_object_7 = pattern;
-    List _x2c_gensym_macro_cursor_7 = _x2c_gensym_macro_object_7;
-    Var _x2c_gensym_macro_cursor_output_7;
-    while(List_try_next(_x2c_gensym_macro_object_7, &(_x2c_gensym_macro_cursor_7), &(_x2c_gensym_macro_cursor_output_7))){
-      part = _x2c_gensym_macro_cursor_output_7;
+    List _x2c_gensym_macro_object_4 = pattern;
+    List _x2c_gensym_macro_cursor_4 = _x2c_gensym_macro_object_4;
+    Var _x2c_gensym_macro_cursor_output_4;
+    while(List_try_next(_x2c_gensym_macro_object_4, &(_x2c_gensym_macro_cursor_4), &(_x2c_gensym_macro_cursor_output_4))){
+      part = _x2c_gensym_macro_cursor_output_4;
       {
         if(! Var_is_row(part, 9, 7, 4)){
           if(! f4_plan____emit_head_leaf(&((* l)), part, reg)) return 0;
@@ -2348,6 +2249,63 @@ static int f4_plan____emit_inline_segment(f4_plan___MatchLower * l, List pattern
 
   }
   return f4_plan____fail_site(&((* l)), MW_NIL, reg, 0, 0, 0);
+}
+
+static int f4_plan____inline_descend_ok(List child, int reg){
+  if(reg + 1 >= MACHINE_CURSOR_REGS || ! List_truth(child) || Var_is_match_op(List_car(child)) || f4_plan____is_list_literal(child)) return 0;
+  {
+    Var part;
+    List _x2c_gensym_macro_object_5 = child;
+    List _x2c_gensym_macro_cursor_5 = _x2c_gensym_macro_object_5;
+    Var _x2c_gensym_macro_cursor_output_5;
+    while(List_try_next(_x2c_gensym_macro_object_5, &(_x2c_gensym_macro_cursor_5), &(_x2c_gensym_macro_cursor_output_5))){
+      part = _x2c_gensym_macro_cursor_output_5;
+      if(Var_is_list_binder(part)) return 0;
+    }
+
+  }
+  return 1;
+}
+
+static int f4_plan____is_list_literal(List pat){
+  {
+    Var head;
+    List _x2c_gensym_macro_object_6 = pat;
+    List _x2c_gensym_macro_cursor_6 = _x2c_gensym_macro_object_6;
+    Var _x2c_gensym_macro_cursor_output_6;
+    while(List_try_next(_x2c_gensym_macro_object_6, &(_x2c_gensym_macro_cursor_6), &(_x2c_gensym_macro_cursor_output_6))){
+      head = _x2c_gensym_macro_cursor_output_6;
+      {
+        if(Var_is_binder(head) || Var_is_match_op(head)) return 0;
+        if(Var_is_row(head, 9, 7, 4) && ! f4_plan____is_list_literal(Var_list_payload(head))) return 0;
+      }
+
+    }
+
+  }
+  return 1;
+}
+
+static int f4_plan____emit_head_leaf(f4_plan___MatchLower * l, Var part, int reg){
+  if(x2c_var_equal(part, Symbol_var(58))) return f4_plan____fail_site(&((* l)), MW_SKIP_HEAD, 0, reg, 0, 0);
+  if(Var_is_atom_binder(part)){
+    int slot = MachineBuilder_binder(&((* l).b), part);
+    if(slot < 0) return 0;
+    return f4_plan____fail_site(&((* l)), MW_BIND_HEAD, slot, reg, 0, 0);
+  }
+  int constant = MachineBuilder_constant(&((* l).b), part);
+  if(constant < 0) return 0;
+  int mode = f4_plan____compare_mode(part);
+  return f4_plan____fail_site(&((* l)), MW_EQ_HEAD_CONST, constant, reg, 0, mode);
+}
+
+static int f4_plan____emit_framed(f4_plan___MatchLower * l, int entry, int reg){
+  return f4_plan____fail_site(&((* l)), MW_NONNIL, reg, 0, 0, 0) && f4_plan____emit_call(&((* l)), entry, MACHINE_CALL_HEAD, reg) && MachineBuilder_emit(&((* l).b), MW_ADVANCE, reg, 0, 0, 0, 0) >= 0;
+}
+
+static int f4_plan____emit_call(f4_plan___MatchLower * l, int child, int mode, int reg){
+  if(MachineBuilder_emit(&((* l).b), MW_CALL, child, mode, reg, 0, 0) < 0) return 0;
+  return f4_plan____fail_site(&((* l)), MW_BR_FAIL, 0, 0, 0, 0);
 }
 
 static int f4_plan____segment_end(f4_plan___MatchLower * l, f4_plan___MatchStar * star){
@@ -2426,6 +2384,22 @@ static int f4_plan____star_loop(f4_plan___MatchLower * l, f4_plan___MatchStar * 
   return emitted ? loop : - 1;
 }
 
+static int f4_plan____compare_mode(Var value){
+  return f4_plan____bits_unique(value) ? MACHINE_COMPARE_BITS : MACHINE_COMPARE_EQUAL;
+}
+
+static int f4_plan____fail_site(f4_plan___MatchLower * l, int op, int a, int b, int c, int d){
+  int site = MachineBuilder_emit(&((* l).b), op, a, b, c, d, - 1);
+  if(site < 0) return 0;
+  if((* l).site_count >=(* l).site_capacity){
+    int capacity =(* l).site_capacity ?(* l).site_capacity * 2 : 64;
+    (* l).sites = xrealloc((* l).sites, sizeof(int) * capacity);
+    (* l).site_capacity = capacity;
+  }
+  (* l).sites[(* l).site_count ++] = site;
+  return 1;
+}
+
 static int f4_plan____star_fresh(f4_plan___MatchLower * l, f4_plan___MatchStar * star){
   int slot =(* star).slot;
   if(slot >= 0 && !(* star).delayed) MachineBuilder_emit(&((* l).b), MW_SLOT_SET_SPAN, slot, 0, 1, 0, 0);
@@ -2451,6 +2425,10 @@ static int f4_plan____star_retry(f4_plan___MatchLower * l, f4_plan___MatchStar *
   return MachineBuilder_emit(&((* l).b), MW_JUMP, 0, 0, 0, 0, loop) >= 0 && ! f4_plan____stopped(&((* l)));
 }
 
+static int f4_plan____stopped(f4_plan___MatchLower * l){
+  return(* l).b.status != 1138535534920;
+}
+
 static void f4_plan____record_keys(MatchPlan plan, Var pattern){
   f4_plan___MatchKeys found ={
     .count = 0
@@ -2464,6 +2442,28 @@ static void f4_plan____record_keys(MatchPlan plan, Var pattern){
     if(! f4_plan____bits_unique(key.head) ||(key.index && ! f4_plan____bits_unique(key.inner))) plan -> key_bits = 0;
   }
   plan -> key_count = found.count;
+}
+
+static int f4_plan____bits_unique(Var value){
+  switch(Var_tag(value)){
+    case 1328354264 : case 826970 : case 26993 : case 30065 : case 3453293 : case 3846509 : case 3453797 : case 3847013 : case 3454065 : case 3847281 : return 1;
+    case 806120 :{
+      {
+        Var part;
+        List _x2c_gensym_macro_object_7 =(List) Var_pointer(value);
+        List _x2c_gensym_macro_cursor_7 = _x2c_gensym_macro_object_7;
+        Var _x2c_gensym_macro_cursor_output_7;
+        while(List_try_next(_x2c_gensym_macro_object_7, &(_x2c_gensym_macro_cursor_7), &(_x2c_gensym_macro_cursor_output_7))){
+          part = _x2c_gensym_macro_cursor_output_7;
+          if(! f4_plan____bits_unique(part)) return 0;
+        }
+
+      }
+      return 1;
+    }
+
+  }
+  return 0;
 }
 
 static int f4_plan____keys(Var pattern, Symbol mode, f4_plan___MatchKeys * keys){
@@ -2563,10 +2563,228 @@ static int f4_plan____inner_keys(List rest, f4_plan___MatchKeys * inner){
   return 0;
 }
 
+static int f4_plan____set_binds(List args){
+  return List_truth(args) && List_truth(List_cdr(args)) && ! List_truth(List_cddr(args)) && Var_is_atom_binder(List_car(args));
+}
+
 static int f4_plan____add(f4_plan___MatchKeys * keys, MatchKey key){
   if((* keys).count >= MATCH_KEY_MAX) return 0;
   (* keys).keys[(* keys).count ++] = key;
   return 1;
+}
+
+Symbol MatchCache_acquire(MatchCache m, Var pattern, MatchLease * lease, const char * owner);
+
+MatchPlan MatchLease_plan(MatchLease * m);
+
+int MatchPlan_try_capture(MatchPlan plan, List input, MatchCaptureBuffer * captures);
+
+int MatchCache_try_capture(MatchCache cache, List input, Var pattern, MatchCaptureBuffer * captures, const char * owner){
+  if(! _init_guard_) _file_init_();
+  MatchLease _x2c_gensym_macro_lease_0;
+  Symbol _x2c_gensym_macro_status_0 = MatchCache_acquire(cache, pattern, &(_x2c_gensym_macro_lease_0), owner);
+  {
+    _x2c_gensym_defer_env_4 _x2c_gensym_macro_environment_4 ={
+      0
+    }
+    ;
+    _x2c_gensym_macro_environment_4._x2c_gensym_defer_capture_4 =(const void *) & _x2c_gensym_macro_lease_0;
+    X2CCleanup _x2c_gensym_defer_record_4 ={
+      .fn = _x2c_gensym_defer_cleanup_4, .env = & _x2c_gensym_macro_environment_4
+    }
+    ;
+    x2c_cleanup_push(& _x2c_gensym_defer_record_4);
+    {
+      MatchPlan plan = _x2c_gensym_macro_status_0 == 1138535534920 ? MatchLease_plan(&(_x2c_gensym_macro_lease_0)) : NULL;
+      {
+        int _x2c_gensym_return_value_3 = plan && MatchPlan_try_capture(plan, input, captures) == 1;
+        {
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_4);
+          return _x2c_gensym_return_value_3;
+        }
+
+      }
+
+    }
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_4);
+  }
+
+}
+
+int MatchPlan_try_match(MatchPlan plan, List input, List * out_bindings);
+
+int MatchCache_try_match(MatchCache cache, List input, Var pattern, List * out_bindings, const char * owner){
+  if(! _init_guard_) _file_init_();
+  MatchLease _x2c_gensym_macro_lease_1;
+  Symbol _x2c_gensym_macro_status_1 = MatchCache_acquire(cache, pattern, &(_x2c_gensym_macro_lease_1), owner);
+  {
+    _x2c_gensym_defer_env_5 _x2c_gensym_macro_environment_5 ={
+      0
+    }
+    ;
+    _x2c_gensym_macro_environment_5._x2c_gensym_defer_capture_5 =(const void *) & _x2c_gensym_macro_lease_1;
+    X2CCleanup _x2c_gensym_defer_record_5 ={
+      .fn = _x2c_gensym_defer_cleanup_5, .env = & _x2c_gensym_macro_environment_5
+    }
+    ;
+    x2c_cleanup_push(& _x2c_gensym_defer_record_5);
+    {
+      MatchPlan plan = _x2c_gensym_macro_status_1 == 1138535534920 ? MatchLease_plan(&(_x2c_gensym_macro_lease_1)) : NULL;
+      {
+        int _x2c_gensym_return_value_4 = plan && MatchPlan_try_match(plan, input, out_bindings) == 1;
+        {
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_5);
+          return _x2c_gensym_return_value_4;
+        }
+
+      }
+
+    }
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_5);
+  }
+
+}
+
+int MatchPlan_try_search(MatchPlan plan, List input, Var * out_match, List * out_bindings);
+
+int MatchCache_try_search(MatchCache cache, List input, Var pattern, Var * out_match, List * out_bindings, const char * owner){
+  if(! _init_guard_) _file_init_();
+  MatchLease _x2c_gensym_macro_lease_2;
+  Symbol _x2c_gensym_macro_status_2 = MatchCache_acquire(cache, pattern, &(_x2c_gensym_macro_lease_2), owner);
+  {
+    _x2c_gensym_defer_env_6 _x2c_gensym_macro_environment_6 ={
+      0
+    }
+    ;
+    _x2c_gensym_macro_environment_6._x2c_gensym_defer_capture_6 =(const void *) & _x2c_gensym_macro_lease_2;
+    X2CCleanup _x2c_gensym_defer_record_6 ={
+      .fn = _x2c_gensym_defer_cleanup_6, .env = & _x2c_gensym_macro_environment_6
+    }
+    ;
+    x2c_cleanup_push(& _x2c_gensym_defer_record_6);
+    {
+      MatchPlan plan = _x2c_gensym_macro_status_2 == 1138535534920 ? MatchLease_plan(&(_x2c_gensym_macro_lease_2)) : NULL;
+      {
+        int _x2c_gensym_return_value_5 = plan && MatchPlan_try_search(plan, input, out_match, out_bindings) == 1;
+        {
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_6);
+          return _x2c_gensym_return_value_5;
+        }
+
+      }
+
+    }
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_6);
+  }
+
+}
+
+int MatchPlan_search(MatchPlan plan, List input, List * out_results);
+
+int MatchCache_search(MatchCache cache, List input, Var pattern, List * out_results, const char * owner){
+  if(! _init_guard_) _file_init_();
+  MatchLease _x2c_gensym_macro_lease_3;
+  Symbol _x2c_gensym_macro_status_3 = MatchCache_acquire(cache, pattern, &(_x2c_gensym_macro_lease_3), owner);
+  {
+    _x2c_gensym_defer_env_7 _x2c_gensym_macro_environment_7 ={
+      0
+    }
+    ;
+    _x2c_gensym_macro_environment_7._x2c_gensym_defer_capture_7 =(const void *) & _x2c_gensym_macro_lease_3;
+    X2CCleanup _x2c_gensym_defer_record_7 ={
+      .fn = _x2c_gensym_defer_cleanup_7, .env = & _x2c_gensym_macro_environment_7
+    }
+    ;
+    x2c_cleanup_push(& _x2c_gensym_defer_record_7);
+    {
+      MatchPlan plan = _x2c_gensym_macro_status_3 == 1138535534920 ? MatchLease_plan(&(_x2c_gensym_macro_lease_3)) : NULL;
+      List results = NULL;
+      if(plan) MatchPlan_search(plan, input, &(results));
+      (* out_results) = results;
+      {
+        int _x2c_gensym_return_value_6 = results != NULL;
+        {
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_7);
+          return _x2c_gensym_return_value_6;
+        }
+
+      }
+
+    }
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_7);
+  }
+
+}
+
+int MatchPlan_try_match_replace(MatchPlan plan, List input, Var template, Var * out);
+
+int MatchCache_try_match_replace(MatchCache cache, List input, Var pattern, Var template, Var * out, const char * owner){
+  if(! _init_guard_) _file_init_();
+  MatchLease _x2c_gensym_macro_lease_4;
+  Symbol _x2c_gensym_macro_status_4 = MatchCache_acquire(cache, pattern, &(_x2c_gensym_macro_lease_4), owner);
+  {
+    _x2c_gensym_defer_env_8 _x2c_gensym_macro_environment_8 ={
+      0
+    }
+    ;
+    _x2c_gensym_macro_environment_8._x2c_gensym_defer_capture_8 =(const void *) & _x2c_gensym_macro_lease_4;
+    X2CCleanup _x2c_gensym_defer_record_8 ={
+      .fn = _x2c_gensym_defer_cleanup_8, .env = & _x2c_gensym_macro_environment_8
+    }
+    ;
+    x2c_cleanup_push(& _x2c_gensym_defer_record_8);
+    {
+      MatchPlan plan = _x2c_gensym_macro_status_4 == 1138535534920 ? MatchLease_plan(&(_x2c_gensym_macro_lease_4)) : NULL;
+      {
+        int _x2c_gensym_return_value_7 = plan && MatchPlan_try_match_replace(plan, input, template, out) == 1;
+        {
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_8);
+          return _x2c_gensym_return_value_7;
+        }
+
+      }
+
+    }
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_8);
+  }
+
+}
+
+int MatchPlan_search_replace(MatchPlan plan, List input, Var template, List * out);
+
+int MatchCache_search_replace(MatchCache cache, List input, Var pattern, Var template, List * out, const char * owner){
+  if(! _init_guard_) _file_init_();
+  MatchLease _x2c_gensym_macro_lease_5;
+  Symbol _x2c_gensym_macro_status_5 = MatchCache_acquire(cache, pattern, &(_x2c_gensym_macro_lease_5), owner);
+  {
+    _x2c_gensym_defer_env_9 _x2c_gensym_macro_environment_9 ={
+      0
+    }
+    ;
+    _x2c_gensym_macro_environment_9._x2c_gensym_defer_capture_9 =(const void *) & _x2c_gensym_macro_lease_5;
+    X2CCleanup _x2c_gensym_defer_record_9 ={
+      .fn = _x2c_gensym_defer_cleanup_9, .env = & _x2c_gensym_macro_environment_9
+    }
+    ;
+    x2c_cleanup_push(& _x2c_gensym_defer_record_9);
+    {
+      MatchPlan plan = _x2c_gensym_macro_status_5 == 1138535534920 ? MatchLease_plan(&(_x2c_gensym_macro_lease_5)) : NULL;
+      List result = input;
+      int answered = plan && MatchPlan_search_replace(plan, input, template, &(result)) >= 0;
+      (* out) = result;
+      {
+        int _x2c_gensym_return_value_8 = answered;
+        {
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_9);
+          return _x2c_gensym_return_value_8;
+        }
+
+      }
+
+    }
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_9);
+  }
+
 }
 
 Symbol MatchCache_acquire(MatchCache m, Var pattern, MatchLease * lease, const char * owner){
@@ -2592,6 +2810,158 @@ Symbol MatchCache_acquire(MatchCache m, Var pattern, MatchLease * lease, const c
   return plan -> status;
 }
 
+void MatchLease_release(MatchLease * lease){
+  if(! _init_guard_) _file_init_();
+  if(!(* lease).active) return;
+  if((* lease).transient_plan){
+    if(!(* lease).cache ||(* lease).cache -> active_leases <= 0){
+      static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/match/cache.x",.function = "MatchLease_release",.line = 239,.runtime = 1};
+      x2c_error_raise_n(& _x2c_gensym_error_site_3, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("MatchLease.release")), NULL))));
+      __builtin_unreachable();
+    }
+    MatchPlan_free((* lease).transient_plan);
+    (* lease).transient_plan = NULL;
+    (* lease).cache -> active_leases --;
+    (* lease).active = 0;
+    return;
+  }
+  f5_cache___MatchCacheEntry * entry = f5_cache____entry(&((* lease)));
+  if(! entry ||(* lease).cache -> active_leases <= 0 || entry -> pin_count <= 0){
+    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/match/cache.x",.function = "MatchLease_release",.line = 249,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_4, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("MatchLease.release")), NULL))));
+    __builtin_unreachable();
+  }
+  (* lease).cache -> active_leases --;
+  entry -> pin_count --;
+  (* lease).active = 0;
+}
+
+MatchPlan MatchLease_plan(MatchLease * m){
+  if(! _init_guard_) _file_init_();
+  return(* m).transient_plan ?(* m).transient_plan :(* m).cache -> entries[(* m).slot].plan;
+}
+
+MatchCache MatchCache_new(int capacity);
+
+void x2c_match_initialize(void);
+
+MatchCache MatchCache_current(void){
+  if(! _init_guard_) _file_init_();
+  MatchCache * slot = f5_cache____default_slot();
+  if(! * slot) * slot = MatchCache_new(256);
+  x2c_match_initialize();
+  return * slot;
+}
+
+void MatchCache_dispose(MatchCache cache);
+
+void MatchCache_flush_default(void){
+  if(! _init_guard_) _file_init_();
+  MatchCache * slot = f5_cache____default_slot();
+  if(! * slot) return;
+  MatchCache_dispose((* slot));
+  * slot = NULL;
+}
+
+void * MatchCache_context_open(void){
+  if(! _init_guard_) _file_init_();
+  f5_cache___MatchContextState state = xmalloc(sizeof(struct f5_cache___MatchContextState));
+  state -> prev = f5_cache___match_thread.context_top;
+  state -> cache = NULL;
+  f5_cache___match_thread.context_top = state;
+  return state;
+}
+
+void MatchCache_context_close(void * token){
+  if(! _init_guard_) _file_init_();
+  f5_cache___MatchContextState state = token;
+  if(! state) return;
+  if(f5_cache___match_thread.context_top != state){
+    static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/match/cache.x",.function = "MatchCache_context_close",.line = 309,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_5, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("MatchCache.context_close")), NULL))));
+    __builtin_unreachable();
+  }
+  if(state -> cache) MatchCache_dispose(state -> cache);
+  f5_cache___match_thread.context_top = state -> prev;
+}
+
+void x2c_match_thread_release(void){
+  if(! _init_guard_) _file_init_();
+  MatchMachine_release_spares();
+  if(! f5_cache___match_thread.plan_cache) return;
+  MatchCache_dispose(f5_cache___match_thread.plan_cache);
+  f5_cache___match_thread.plan_cache = NULL;
+}
+
+MatchCache MatchCache_new(int capacity){
+  if(! _init_guard_) _file_init_();
+  if(capacity <= 0){
+    Var _x2c_gensym_literal_part_1 = String_var(String_join(NULL, cons(String_var(String_new("MatchCache.new")), NULL)));
+    {
+      static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/match/cache.x",.function = "MatchCache_new",.line = 341,.runtime = 1};
+      x2c_error_raise_n(& _x2c_gensym_error_site_6, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_1, Symbol_var(209381969202), int_var(capacity));
+      __builtin_unreachable();
+    }
+
+  }
+  if(capacity >(INT_MAX - 1) / 2){
+    Var _x2c_gensym_literal_part_2 = String_var(String_join(NULL, cons(String_var(String_new("MatchCache.new")), NULL)));
+    {
+      static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/match/cache.x",.function = "MatchCache_new",.line = 343,.runtime = 1};
+      x2c_error_raise_n(& _x2c_gensym_error_site_7, 1358596898646632, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_2, Symbol_var(209381969202), int_var(capacity));
+      __builtin_unreachable();
+    }
+
+  }
+  Scope owner = Scope_new_named("Match plan cache");
+  MatchCache cache;
+  {
+    Scope_push(& owner);
+    {
+      {
+        X2CCleanup _x2c_gensym_defer_record_10 ={
+          .fn = _x2c_gensym_defer_cleanup_10, .env = 0
+        }
+        ;
+        x2c_cleanup_push(& _x2c_gensym_defer_record_10);
+        {
+          {
+            cache = xcalloc(1, sizeof(struct MatchCache));
+            cache -> scope = owner;
+            cache -> capacity = capacity;
+            cache -> bucket_count = capacity * 2 + 1;
+            cache -> lru_head = - 1;
+            cache -> pool_epoch = Pool_epoch();
+            cache -> entries = xcalloc(capacity, sizeof(f5_cache___MatchCacheEntry));
+            cache -> buckets = xmalloc(sizeof(int) * cache -> bucket_count);
+            for(int i = 0;  i < cache -> bucket_count;  i ++) cache -> buckets[i] = - 1;
+          }
+
+        }
+        x2c_cleanup_leave(& _x2c_gensym_defer_record_10);
+      }
+
+    }
+
+  }
+  return cache;
+}
+
+void MatchCache_dispose(MatchCache cache){
+  if(! _init_guard_) _file_init_();
+  if(! cache) return;
+  if(cache -> active_leases){
+    static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/match/cache.x",.function = "MatchCache_dispose",.line = 369,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_8, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("MatchCache.dispose")), NULL))));
+    __builtin_unreachable();
+  }
+  for(int i = 0;  i < cache -> capacity;  i ++){
+    assert(! cache -> entries[i].pin_count);
+    if(cache -> entries[i].occupied) MatchPlan_free(cache -> entries[i].plan);
+  }
+  Scope_destroy(cache -> scope);
+}
+
 static Symbol f5_cache____transient(MatchCache cache, Var pattern, MatchLease * lease, const char * owner){
   MatchPlan plan = f5_cache____unfenced(MatchPlan_prepare(pattern), owner);
   (* lease).cache = cache;
@@ -2607,18 +2977,18 @@ static MatchPlan f5_cache____prepare(MatchCache cache, Var pattern, const char *
     Scope_push(& cache -> scope);
     {
       {
-        X2CCleanup _x2c_gensym_defer_record_4 ={
-          .fn = _x2c_gensym_defer_cleanup_4, .env = 0
+        X2CCleanup _x2c_gensym_defer_record_11 ={
+          .fn = _x2c_gensym_defer_cleanup_11, .env = 0
         }
         ;
-        x2c_cleanup_push(& _x2c_gensym_defer_record_4);
+        x2c_cleanup_push(& _x2c_gensym_defer_record_11);
         {
           {
             plan = MatchPlan_prepare(pattern);
           }
 
         }
-        x2c_cleanup_leave(& _x2c_gensym_defer_record_4);
+        x2c_cleanup_leave(& _x2c_gensym_defer_record_11);
       }
 
     }
@@ -2688,18 +3058,6 @@ static int f5_cache____find(MatchCache cache, unsigned long key){
   return - 1;
 }
 
-static int f5_cache____bucket(MatchCache cache, unsigned long key){
-  return(int)(f5_cache____cache_mix(key) %(unsigned long) cache -> bucket_count);
-}
-
-static unsigned long f5_cache____cache_mix(unsigned long key){
-  key ^= key >> 33;
-  key *= 0xff51afd7ed558ccdUL;
-  key ^= key >> 33;
-  key *= 0xc4ceb9fe1a85ec53UL;
-  return key ^(key >> 33);
-}
-
 static void f5_cache____touch(MatchCache cache, int slot){
   int head = cache -> lru_head;
   if(head == slot) return;
@@ -2709,13 +3067,6 @@ static void f5_cache____touch(MatchCache cache, int slot){
   }
   f5_cache____unlink(cache, slot);
   f5_cache____link_mru(cache, slot);
-}
-
-static void f5_cache____unlink(MatchCache cache, int slot){
-  f5_cache___MatchCacheEntry * entry = & cache -> entries[slot];
-  cache -> entries[entry -> lru_prev].lru_next = entry -> lru_next;
-  cache -> entries[entry -> lru_next].lru_prev = entry -> lru_prev;
-  if(cache -> lru_head == slot) cache -> lru_head = entry -> lru_next == slot ? - 1 : entry -> lru_next;
 }
 
 static void f5_cache____link_mru(MatchCache cache, int slot){
@@ -2755,6 +3106,25 @@ static void f5_cache____remove(MatchCache cache, int slot){
   cache -> size --;
 }
 
+static int f5_cache____bucket(MatchCache cache, unsigned long key){
+  return(int)(f5_cache____cache_mix(key) %(unsigned long) cache -> bucket_count);
+}
+
+static unsigned long f5_cache____cache_mix(unsigned long key){
+  key ^= key >> 33;
+  key *= 0xff51afd7ed558ccdUL;
+  key ^= key >> 33;
+  key *= 0xc4ceb9fe1a85ec53UL;
+  return key ^(key >> 33);
+}
+
+static void f5_cache____unlink(MatchCache cache, int slot){
+  f5_cache___MatchCacheEntry * entry = & cache -> entries[slot];
+  cache -> entries[entry -> lru_prev].lru_next = entry -> lru_next;
+  cache -> entries[entry -> lru_next].lru_prev = entry -> lru_prev;
+  if(cache -> lru_head == slot) cache -> lru_head = entry -> lru_next == slot ? - 1 : entry -> lru_next;
+}
+
 static void f5_cache____activate(MatchCache m, int slot, MatchLease * lease){
   f5_cache___MatchCacheEntry * entry = & m -> entries[slot];
   (* lease).cache = m;
@@ -2765,37 +3135,6 @@ static void f5_cache____activate(MatchCache m, int slot, MatchLease * lease){
   entry -> pin_count ++;
 }
 
-void MatchLease_release(MatchLease * lease){
-  if(! _init_guard_) _file_init_();
-  if(!(* lease).active) return;
-  if((* lease).transient_plan){
-    if(!(* lease).cache ||(* lease).cache -> active_leases <= 0){
-      static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/match/cache.x",.function = "MatchLease_release",.line = 293,.runtime = 1};
-      x2c_error_raise_n(& _x2c_gensym_error_site_3, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("MatchLease.release")), NULL))));
-      __builtin_unreachable();
-    }
-    MatchPlan_free((* lease).transient_plan);
-    (* lease).transient_plan = NULL;
-    (* lease).cache -> active_leases --;
-    (* lease).active = 0;
-    return;
-  }
-  f5_cache___MatchCacheEntry * entry = f5_cache____entry(&((* lease)));
-  if(! entry ||(* lease).cache -> active_leases <= 0 || entry -> pin_count <= 0){
-    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/match/cache.x",.function = "MatchLease_release",.line = 303,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_4, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("MatchLease.release")), NULL))));
-    __builtin_unreachable();
-  }
-  (* lease).cache -> active_leases --;
-  entry -> pin_count --;
-  (* lease).active = 0;
-}
-
-MatchPlan MatchLease_plan(MatchLease * m){
-  if(! _init_guard_) _file_init_();
-  return(* m).transient_plan ?(* m).transient_plan :(* m).cache -> entries[(* m).slot].plan;
-}
-
 static f5_cache___MatchCacheEntry * f5_cache____entry(MatchLease * lease){
   MatchCache cache =(* lease).cache;
   if(! cache ||(* lease).slot < 0 ||(* lease).slot >= cache -> capacity) return NULL;
@@ -2803,340 +3142,29 @@ static f5_cache___MatchCacheEntry * f5_cache____entry(MatchLease * lease){
   return entry -> occupied && entry -> generation ==(* lease).generation ? entry : NULL;
 }
 
-int MatchPlan_try_capture(MatchPlan plan, List input, MatchCaptureBuffer * captures);
-
-int MatchCache_try_capture(MatchCache cache, List input, Var pattern, MatchCaptureBuffer * captures, const char * owner){
-  if(! _init_guard_) _file_init_();
-  MatchLease _x2c_gensym_macro_lease_0;
-  Symbol _x2c_gensym_macro_status_0 = MatchCache_acquire(cache, pattern, &(_x2c_gensym_macro_lease_0), owner);
-  {
-    _x2c_gensym_defer_env_4 _x2c_gensym_macro_environment_4 ={
-      0
-    }
-    ;
-    _x2c_gensym_macro_environment_4._x2c_gensym_defer_capture_4 =(const void *) & _x2c_gensym_macro_lease_0;
-    X2CCleanup _x2c_gensym_defer_record_5 ={
-      .fn = _x2c_gensym_defer_cleanup_5, .env = & _x2c_gensym_macro_environment_4
-    }
-    ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_5);
-    {
-      MatchPlan plan = _x2c_gensym_macro_status_0 == 1138535534920 ? MatchLease_plan(&(_x2c_gensym_macro_lease_0)) : NULL;
-      {
-        int _x2c_gensym_return_value_3 = plan && MatchPlan_try_capture(plan, input, captures) == 1;
-        {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_5);
-          return _x2c_gensym_return_value_3;
-        }
-
-      }
-
-    }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_5);
-  }
-
-}
-
-int MatchPlan_try_match(MatchPlan plan, List input, List * out_bindings);
-
-int MatchCache_try_match(MatchCache cache, List input, Var pattern, List * out_bindings, const char * owner){
-  if(! _init_guard_) _file_init_();
-  MatchLease _x2c_gensym_macro_lease_1;
-  Symbol _x2c_gensym_macro_status_1 = MatchCache_acquire(cache, pattern, &(_x2c_gensym_macro_lease_1), owner);
-  {
-    _x2c_gensym_defer_env_5 _x2c_gensym_macro_environment_5 ={
-      0
-    }
-    ;
-    _x2c_gensym_macro_environment_5._x2c_gensym_defer_capture_5 =(const void *) & _x2c_gensym_macro_lease_1;
-    X2CCleanup _x2c_gensym_defer_record_6 ={
-      .fn = _x2c_gensym_defer_cleanup_6, .env = & _x2c_gensym_macro_environment_5
-    }
-    ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_6);
-    {
-      MatchPlan plan = _x2c_gensym_macro_status_1 == 1138535534920 ? MatchLease_plan(&(_x2c_gensym_macro_lease_1)) : NULL;
-      {
-        int _x2c_gensym_return_value_4 = plan && MatchPlan_try_match(plan, input, out_bindings) == 1;
-        {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_6);
-          return _x2c_gensym_return_value_4;
-        }
-
-      }
-
-    }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_6);
-  }
-
-}
-
-int MatchPlan_try_search(MatchPlan plan, List input, Var * out_match, List * out_bindings);
-
-int MatchCache_try_search(MatchCache cache, List input, Var pattern, Var * out_match, List * out_bindings, const char * owner){
-  if(! _init_guard_) _file_init_();
-  MatchLease _x2c_gensym_macro_lease_2;
-  Symbol _x2c_gensym_macro_status_2 = MatchCache_acquire(cache, pattern, &(_x2c_gensym_macro_lease_2), owner);
-  {
-    _x2c_gensym_defer_env_6 _x2c_gensym_macro_environment_6 ={
-      0
-    }
-    ;
-    _x2c_gensym_macro_environment_6._x2c_gensym_defer_capture_6 =(const void *) & _x2c_gensym_macro_lease_2;
-    X2CCleanup _x2c_gensym_defer_record_7 ={
-      .fn = _x2c_gensym_defer_cleanup_7, .env = & _x2c_gensym_macro_environment_6
-    }
-    ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_7);
-    {
-      MatchPlan plan = _x2c_gensym_macro_status_2 == 1138535534920 ? MatchLease_plan(&(_x2c_gensym_macro_lease_2)) : NULL;
-      {
-        int _x2c_gensym_return_value_5 = plan && MatchPlan_try_search(plan, input, out_match, out_bindings) == 1;
-        {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_7);
-          return _x2c_gensym_return_value_5;
-        }
-
-      }
-
-    }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_7);
-  }
-
-}
-
-int MatchPlan_search(MatchPlan plan, List input, List * out_results);
-
-int MatchCache_search(MatchCache cache, List input, Var pattern, List * out_results, const char * owner){
-  if(! _init_guard_) _file_init_();
-  MatchLease _x2c_gensym_macro_lease_3;
-  Symbol _x2c_gensym_macro_status_3 = MatchCache_acquire(cache, pattern, &(_x2c_gensym_macro_lease_3), owner);
-  {
-    _x2c_gensym_defer_env_7 _x2c_gensym_macro_environment_7 ={
-      0
-    }
-    ;
-    _x2c_gensym_macro_environment_7._x2c_gensym_defer_capture_7 =(const void *) & _x2c_gensym_macro_lease_3;
-    X2CCleanup _x2c_gensym_defer_record_8 ={
-      .fn = _x2c_gensym_defer_cleanup_8, .env = & _x2c_gensym_macro_environment_7
-    }
-    ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_8);
-    {
-      MatchPlan plan = _x2c_gensym_macro_status_3 == 1138535534920 ? MatchLease_plan(&(_x2c_gensym_macro_lease_3)) : NULL;
-      List results = NULL;
-      if(plan) MatchPlan_search(plan, input, &(results));
-      (* out_results) = results;
-      {
-        int _x2c_gensym_return_value_6 = results != NULL;
-        {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_8);
-          return _x2c_gensym_return_value_6;
-        }
-
-      }
-
-    }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_8);
-  }
-
-}
-
-int MatchPlan_try_match_replace(MatchPlan plan, List input, Var template, Var * out);
-
-int MatchCache_try_match_replace(MatchCache cache, List input, Var pattern, Var template, Var * out, const char * owner){
-  if(! _init_guard_) _file_init_();
-  MatchLease _x2c_gensym_macro_lease_4;
-  Symbol _x2c_gensym_macro_status_4 = MatchCache_acquire(cache, pattern, &(_x2c_gensym_macro_lease_4), owner);
-  {
-    _x2c_gensym_defer_env_8 _x2c_gensym_macro_environment_8 ={
-      0
-    }
-    ;
-    _x2c_gensym_macro_environment_8._x2c_gensym_defer_capture_8 =(const void *) & _x2c_gensym_macro_lease_4;
-    X2CCleanup _x2c_gensym_defer_record_9 ={
-      .fn = _x2c_gensym_defer_cleanup_9, .env = & _x2c_gensym_macro_environment_8
-    }
-    ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_9);
-    {
-      MatchPlan plan = _x2c_gensym_macro_status_4 == 1138535534920 ? MatchLease_plan(&(_x2c_gensym_macro_lease_4)) : NULL;
-      {
-        int _x2c_gensym_return_value_7 = plan && MatchPlan_try_match_replace(plan, input, template, out) == 1;
-        {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_9);
-          return _x2c_gensym_return_value_7;
-        }
-
-      }
-
-    }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_9);
-  }
-
-}
-
-int MatchPlan_search_replace(MatchPlan plan, List input, Var template, List * out);
-
-int MatchCache_search_replace(MatchCache cache, List input, Var pattern, Var template, List * out, const char * owner){
-  if(! _init_guard_) _file_init_();
-  MatchLease _x2c_gensym_macro_lease_5;
-  Symbol _x2c_gensym_macro_status_5 = MatchCache_acquire(cache, pattern, &(_x2c_gensym_macro_lease_5), owner);
-  {
-    _x2c_gensym_defer_env_9 _x2c_gensym_macro_environment_9 ={
-      0
-    }
-    ;
-    _x2c_gensym_macro_environment_9._x2c_gensym_defer_capture_9 =(const void *) & _x2c_gensym_macro_lease_5;
-    X2CCleanup _x2c_gensym_defer_record_10 ={
-      .fn = _x2c_gensym_defer_cleanup_10, .env = & _x2c_gensym_macro_environment_9
-    }
-    ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_10);
-    {
-      MatchPlan plan = _x2c_gensym_macro_status_5 == 1138535534920 ? MatchLease_plan(&(_x2c_gensym_macro_lease_5)) : NULL;
-      List result = input;
-      int answered = plan && MatchPlan_search_replace(plan, input, template, &(result)) >= 0;
-      (* out) = result;
-      {
-        int _x2c_gensym_return_value_8 = answered;
-        {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_10);
-          return _x2c_gensym_return_value_8;
-        }
-
-      }
-
-    }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_10);
-  }
-
-}
-
-MatchCache MatchCache_new(int capacity);
-
-void x2c_match_initialize(void);
-
-MatchCache MatchCache_current(void){
-  if(! _init_guard_) _file_init_();
-  MatchCache * slot = f5_cache____default_slot();
-  if(! * slot) * slot = MatchCache_new(256);
-  x2c_match_initialize();
-  return * slot;
-}
-
 static MatchCache * f5_cache____default_slot(void){
   f5_cache___MatchContextState top = f5_cache___match_thread.context_top;
   return top ? & top -> cache : & f5_cache___match_thread.plan_cache;
 }
 
-void MatchCache_dispose(MatchCache cache);
-
-void MatchCache_flush_default(void){
+MatchCaptureLayout MatchCaptureLayout_analyze(Var pattern){
   if(! _init_guard_) _file_init_();
-  MatchCache * slot = f5_cache____default_slot();
-  if(! * slot) return;
-  MatchCache_dispose((* slot));
-  * slot = NULL;
-}
-
-void * MatchCache_context_open(void){
-  if(! _init_guard_) _file_init_();
-  f5_cache___MatchContextState state = xmalloc(sizeof(struct f5_cache___MatchContextState));
-  state -> prev = f5_cache___match_thread.context_top;
-  state -> cache = NULL;
-  f5_cache___match_thread.context_top = state;
-  return state;
-}
-
-void MatchCache_context_close(void * token){
-  if(! _init_guard_) _file_init_();
-  f5_cache___MatchContextState state = token;
-  if(! state) return;
-  if(f5_cache___match_thread.context_top != state){
-    static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/match/cache.x",.function = "MatchCache_context_close",.line = 501,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_5, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("MatchCache.context_close")), NULL))));
-    __builtin_unreachable();
+  f6_layout___MatchLayoutBuilder builder ={
+    _x2c_gensym_initializer_choice_CE191C9B_2((0))
   }
-  if(state -> cache) MatchCache_dispose(state -> cache);
-  f5_cache___match_thread.context_top = state -> prev;
-}
-
-void x2c_match_thread_release(void){
-  if(! _init_guard_) _file_init_();
-  MatchMachine_release_spares();
-  if(! f5_cache___match_thread.plan_cache) return;
-  MatchCache_dispose(f5_cache___match_thread.plan_cache);
-  f5_cache___match_thread.plan_cache = NULL;
-}
-
-MatchCache MatchCache_new(int capacity){
-  if(! _init_guard_) _file_init_();
-  if(capacity <= 0){
-    Var _x2c_gensym_literal_part_1 = String_var(String_join(NULL, cons(String_var(String_new("MatchCache.new")), NULL)));
-    {
-      static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/match/cache.x",.function = "MatchCache_new",.line = 533,.runtime = 1};
-      x2c_error_raise_n(& _x2c_gensym_error_site_6, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_1, Symbol_var(209381969202), int_var(capacity));
-      __builtin_unreachable();
-    }
-
+  ;
+  f6_layout____collect(&(builder), pattern);
+  const char * malformed = f6_layout____malformed(&(builder));
+  Var normalized = pattern;
+  if(malformed) builder.count = 0;
+  else if(Var_is_row(pattern, 9, 7, 4)) normalized = List_var(f6_layout____normalize_pattern(Var_list_payload(pattern)));
+  MatchCaptureLayout layout = f6_layout____layout(&(builder), normalized, malformed);
+  if(! malformed && builder.count){
+    f6_layout___MatchSlots slots = f6_layout____slots(layout, normalized);
+    layout -> definite = slots.definite;
+    layout -> possible = slots.possible;
   }
-  if(capacity >(INT_MAX - 1) / 2){
-    Var _x2c_gensym_literal_part_2 = String_var(String_join(NULL, cons(String_var(String_new("MatchCache.new")), NULL)));
-    {
-      static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/match/cache.x",.function = "MatchCache_new",.line = 535,.runtime = 1};
-      x2c_error_raise_n(& _x2c_gensym_error_site_7, 1358596898646632, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_2, Symbol_var(209381969202), int_var(capacity));
-      __builtin_unreachable();
-    }
-
-  }
-  Scope owner = Scope_new_named("Match plan cache");
-  MatchCache cache;
-  {
-    Scope_push(& owner);
-    {
-      {
-        X2CCleanup _x2c_gensym_defer_record_11 ={
-          .fn = _x2c_gensym_defer_cleanup_11, .env = 0
-        }
-        ;
-        x2c_cleanup_push(& _x2c_gensym_defer_record_11);
-        {
-          {
-            cache = xcalloc(1, sizeof(struct MatchCache));
-            cache -> scope = owner;
-            cache -> capacity = capacity;
-            cache -> bucket_count = capacity * 2 + 1;
-            cache -> lru_head = - 1;
-            cache -> pool_epoch = Pool_epoch();
-            cache -> entries = xcalloc(capacity, sizeof(f5_cache___MatchCacheEntry));
-            cache -> buckets = xmalloc(sizeof(int) * cache -> bucket_count);
-            for(int i = 0;  i < cache -> bucket_count;  i ++) cache -> buckets[i] = - 1;
-          }
-
-        }
-        x2c_cleanup_leave(& _x2c_gensym_defer_record_11);
-      }
-
-    }
-
-  }
-  return cache;
-}
-
-void MatchCache_dispose(MatchCache cache){
-  if(! _init_guard_) _file_init_();
-  if(! cache) return;
-  if(cache -> active_leases){
-    static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/match/cache.x",.function = "MatchCache_dispose",.line = 561,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_8, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("MatchCache.dispose")), NULL))));
-    __builtin_unreachable();
-  }
-  for(int i = 0;  i < cache -> capacity;  i ++){
-    assert(! cache -> entries[i].pin_count);
-    if(cache -> entries[i].occupied) MatchPlan_free(cache -> entries[i].plan);
-  }
-  Scope_destroy(cache -> scope);
+  return layout;
 }
 
 int Var_is_atom_binder(Var atom){
@@ -3164,32 +3192,30 @@ int Var_is_match_op(Var atom){
   return 0;
 }
 
-static int f6_layout____binder_kind(Var atom){
-  char sigil = Atom_first(atom);
-  if(sigil != '?' && sigil != '*') return 0;
-  char decoded[SYMBOL_MAX_5BIT + 1];
-  const char * spelling;
-  if(Var_is(atom, 1328354264)){
-    Symbol_decode(Var_symbol(atom), decoded);
-    spelling = decoded;
-  }
-  else spelling = Var_pointer(atom);
-  if(! spelling[1]) return sigil;
-  unsigned char first =(unsigned char) spelling[1];
-  if(! scan_ascii_alpha(first) && first != '_') return - 1;
-  for(int i = 2;  spelling[i];  i ++){
-    unsigned char ch =(unsigned char) spelling[i];
-    if(! scan_ascii_alpha(ch) && ! scan_ascii_digit(ch) && ch != '_') return - 1;
-  }
-  return sigil;
+void MatchCaptureLayout_free(MatchCaptureLayout layout){
+  if(! _init_guard_) _file_init_();
+  if(layout) xfree(layout);
 }
 
-static int _named_binder(Var value){
-  return Var_is_binder(value) && ! x2c_var_equal(value, Symbol_var(58)) && ! x2c_var_equal(value, Symbol_var(54));
+List MatchCaptureLayout_definite_list(MatchCaptureLayout layout){
+  if(! _init_guard_) _file_init_();
+  return layout ? f6_layout____binders(layout, layout -> definite) : NULL;
 }
 
-static int f6_layout____reserved_predicate(Var atom){
-  return Var_is(atom, 1328354264) &&(x2c_var_equal(atom, Symbol_var(1997793406138)) || x2c_var_equal(atom, Symbol_var(1860354452666)) || x2c_var_equal(atom, Symbol_var(1997882)));
+List MatchCaptureLayout_possible_list(MatchCaptureLayout layout){
+  if(! _init_guard_) _file_init_();
+  return layout ? f6_layout____binders(layout, layout -> possible) : NULL;
+}
+
+int MatchCaptureLayout_index(MatchCaptureLayout layout, Atom binder){
+  if(! _init_guard_) _file_init_();
+  return layout ? f6_layout____find(layout, binder) : - 1;
+}
+
+int MatchCaptureBuffer_has(MatchCaptureBuffer * m, int index){
+  if(! _init_guard_) _file_init_();
+  if(! m || index < 0 || index >=(* m).capacity || index >= MACHINE_BINDER_MAX) return 0;
+  return _capture_bit((* m).present, index);
 }
 
 static List f6_layout____normalize_pattern(List pattern){
@@ -3250,26 +3276,6 @@ static List f6_layout____normalize_elements(List elements){
 
 }
 
-MatchCaptureLayout MatchCaptureLayout_analyze(Var pattern){
-  if(! _init_guard_) _file_init_();
-  f6_layout___MatchLayoutBuilder builder ={
-    _x2c_gensym_initializer_choice_CE191C9B_2((0))
-  }
-  ;
-  f6_layout____collect(&(builder), pattern);
-  const char * malformed = f6_layout____malformed(&(builder));
-  Var normalized = pattern;
-  if(malformed) builder.count = 0;
-  else if(Var_is_row(pattern, 9, 7, 4)) normalized = List_var(f6_layout____normalize_pattern(Var_list_payload(pattern)));
-  MatchCaptureLayout layout = f6_layout____layout(&(builder), normalized, malformed);
-  if(! malformed && builder.count){
-    f6_layout___MatchSlots slots = f6_layout____slots(layout, normalized);
-    layout -> definite = slots.definite;
-    layout -> possible = slots.possible;
-  }
-  return layout;
-}
-
 static void f6_layout____collect(f6_layout___MatchLayoutBuilder * b, Var pattern){
   if(! Var_is_row(pattern, 9, 7, 4)){
     f6_layout____atom(&((* b)), pattern);
@@ -3292,6 +3298,10 @@ static void f6_layout____collect(f6_layout___MatchLayoutBuilder * b, Var pattern
     if((* b).malformed_binder) return;
   }
 
+}
+
+static int f6_layout____reserved_predicate(Var atom){
+  return Var_is(atom, 1328354264) &&(x2c_var_equal(atom, Symbol_var(1997793406138)) || x2c_var_equal(atom, Symbol_var(1860354452666)) || x2c_var_equal(atom, Symbol_var(1997882)));
 }
 
 static void f6_layout____atom(f6_layout___MatchLayoutBuilder * b, Var atom){
@@ -3360,10 +3370,6 @@ static f6_layout___MatchSlots f6_layout____guard_slots(MatchCaptureLayout m, Var
   ;
 }
 
-static int f6_layout____set_capture(List args){
-  return List_truth(args) && List_truth(List_cdr(args)) && ! List_truth(List_cddr(args)) && Var_is_atom_binder(List_car(args));
-}
-
 static f6_layout___MatchSlots f6_layout____sequence_slots(MatchCaptureLayout m, List patterns){
   f6_layout___MatchSlots slots ={
     0, 0
@@ -3409,6 +3415,34 @@ static f6_layout___MatchSlots f6_layout____choice_slots(MatchCaptureLayout m, Li
   return slots;
 }
 
+static int _named_binder(Var value){
+  return Var_is_binder(value) && ! x2c_var_equal(value, Symbol_var(58)) && ! x2c_var_equal(value, Symbol_var(54));
+}
+
+static int f6_layout____set_capture(List args){
+  return List_truth(args) && List_truth(List_cdr(args)) && ! List_truth(List_cddr(args)) && Var_is_atom_binder(List_car(args));
+}
+
+static int f6_layout____binder_kind(Var atom){
+  char sigil = Atom_first(atom);
+  if(sigil != '?' && sigil != '*') return 0;
+  char decoded[SYMBOL_MAX_5BIT + 1];
+  const char * spelling;
+  if(Var_is(atom, 1328354264)){
+    Symbol_decode(Var_symbol(atom), decoded);
+    spelling = decoded;
+  }
+  else spelling = Var_pointer(atom);
+  if(! spelling[1]) return sigil;
+  unsigned char first =(unsigned char) spelling[1];
+  if(! scan_ascii_alpha(first) && first != '_') return - 1;
+  for(int i = 2;  spelling[i];  i ++){
+    unsigned char ch =(unsigned char) spelling[i];
+    if(! scan_ascii_alpha(ch) && ! scan_ascii_digit(ch) && ch != '_') return - 1;
+  }
+  return sigil;
+}
+
 static f6_layout___MatchSlots f6_layout____binder_slot(MatchCaptureLayout m, Var binder){
   unsigned long bit = 1UL << f6_layout____find(m, binder);
   return(f6_layout___MatchSlots){
@@ -3429,51 +3463,75 @@ static int f6_layout____find(MatchCaptureLayout layout, Atom binder){
   return - 1;
 }
 
-void MatchCaptureLayout_free(MatchCaptureLayout layout){
-  if(! _init_guard_) _file_init_();
-  if(layout) xfree(layout);
-}
-
-List MatchCaptureLayout_definite_list(MatchCaptureLayout layout){
-  if(! _init_guard_) _file_init_();
-  return layout ? f6_layout____binders(layout, layout -> definite) : NULL;
-}
-
-List MatchCaptureLayout_possible_list(MatchCaptureLayout layout){
-  if(! _init_guard_) _file_init_();
-  return layout ? f6_layout____binders(layout, layout -> possible) : NULL;
-}
-
 static List f6_layout____binders(MatchCaptureLayout layout, unsigned long included){
   List binders = NULL;
   for(int i = layout -> binder_count - 1;  i >= 0;  i --) if(_capture_bit(included, i)) binders = cons(layout -> binders[i], binders);
   return binders;
 }
 
-int MatchCaptureLayout_index(MatchCaptureLayout layout, Atom binder){
-  if(! _init_guard_) _file_init_();
-  return layout ? f6_layout____find(layout, binder) : - 1;
-}
-
-int MatchCaptureBuffer_has(MatchCaptureBuffer * m, int index){
-  if(! _init_guard_) _file_init_();
-  if(! m || index < 0 || index >=(* m).capacity || index >= MACHINE_BINDER_MAX) return 0;
-  return _capture_bit((* m).present, index);
-}
-
 static int _capture_bit(unsigned long bits, int index){
   return(int)((bits >> index) & 1UL);
+}
+
+int MatchPlan_execute_capture(MatchPlan m, Var input, MatchCaptureBuffer * captures, MachineStats * stats);
+
+int MatchPlan_try_capture(MatchPlan plan, List input, MatchCaptureBuffer * captures){
+  if(! _init_guard_) _file_init_();
+  return MatchPlan_execute_capture(plan, List_var(input), captures, NULL);
+}
+
+int MatchPlan_execute_capture(MatchPlan m, Var input, MatchCaptureBuffer * captures, MachineStats * stats){
+  if(! _init_guard_) _file_init_();
+  if(! _prepared(m, "MatchPlan.execute_capture") || ! _buffer_valid(m -> layout, captures)) return - 1;
+  return _capture(m, input, captures, stats);
+}
+
+int MatchPlan_execute(MatchPlan plan, Var input, List * out_bindings, MachineStats * stats);
+
+int MatchPlan_try_match(MatchPlan plan, List input, List * out_bindings){
+  if(! _init_guard_) _file_init_();
+  return MatchPlan_execute(plan, List_var(input), out_bindings, NULL);
+}
+
+int MatchPlan_admits(MatchPlan plan, Var input, Var(* view)(Var));
+
+int MatchPlan_execute(MatchPlan plan, Var input, List * out_bindings, MachineStats * stats){
+  if(! _init_guard_) _file_init_();
+  if(! _prepared(plan, "MatchPlan.execute")) return - 1;
+  if(! out_bindings) return - 1;
+  if(! MatchPlan_admits(plan, input, NULL)) return 0;
+  MatchMachine * machine = MatchMachine_acquire(stats);
+  Var values[MACHINE_BINDER_MAX];
+  MatchCaptureBuffer captures ={
+    values, 0, MACHINE_BINDER_MAX
+  }
+  ;
+  int result = _run_capture(MachineProgram_view(plan -> program), &(* machine), input, &(captures));
+  List bindings;
+  if(result == 1) bindings = _publish_captures(plan -> layout, &(captures));
+  MatchMachine_release(machine);
+  if(result == 1)(* out_bindings) = bindings;
+  return result;
 }
 
 _Noreturn void MatchPlan_raise_ineligible(const char * reason, const char * owner){
   if(! _init_guard_) _file_init_();
   String fence = String_new(reason), site = String_new(owner);
   {
-    static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/match/execution.x",.function = "MatchPlan_raise_ineligible",.line = 17,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/match/execution.x",.function = "MatchPlan_raise_ineligible",.line = 80,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_9, 1358596898646632, 2, Symbol_var(34096809266140), String_var(site), Symbol_var(12939466), String_var(fence));
     __builtin_unreachable();
   }
 
+}
+
+int MatchPlan_admits(MatchPlan plan, Var input, Var(* view)(Var)){
+  if(! _init_guard_) _file_init_();
+  if(! plan -> key_count) return 1;
+  List list = f9_execution____seen_list(input, view);
+  if(! List_truth(list)) return 0;
+  for(int i = 0;  i < plan -> key_count;  i ++) if(f9_execution____key_admits(plan, & plan -> keys[i], list, view)) return 1;
+  return 0;
 }
 
 static int _prepared(MatchPlan plan, const char * owner){
@@ -3486,39 +3544,12 @@ static int _buffer_valid(MatchCaptureLayout layout, MatchCaptureBuffer * capture
   return ! layout -> binder_count ||(* captures).values != NULL;
 }
 
-int MatchPlan_execute_capture(MatchPlan m, Var input, MatchCaptureBuffer * captures, MachineStats * stats){
-  if(! _init_guard_) _file_init_();
-  if(! _prepared(m, "MatchPlan.execute_capture") || ! _buffer_valid(m -> layout, captures)) return - 1;
-  return _capture(m, input, captures, stats);
-}
-
-int MatchPlan_try_capture(MatchPlan plan, List input, MatchCaptureBuffer * captures){
-  if(! _init_guard_) _file_init_();
-  return MatchPlan_execute_capture(plan, List_var(input), captures, NULL);
-}
-
-int MatchPlan_admits(MatchPlan plan, Var input, Var(* view)(Var));
-
 static int _capture(MatchPlan m, Var input, MatchCaptureBuffer * captures, MachineStats * stats){
   if(! MatchPlan_admits(m, input, NULL)) return 0;
   MatchMachine * machine = MatchMachine_acquire(stats);
   int result = _run_capture(MachineProgram_view(m -> program), &(* machine), input, captures);
   MatchMachine_release(machine);
   return result;
-}
-
-int MatchPlan_admits(MatchPlan plan, Var input, Var(* view)(Var)){
-  if(! _init_guard_) _file_init_();
-  if(! plan -> key_count) return 1;
-  List list = f9_execution____seen_list(input, view);
-  if(! List_truth(list)) return 0;
-  for(int i = 0;  i < plan -> key_count;  i ++) if(f9_execution____key_admits(plan, & plan -> keys[i], list, view)) return 1;
-  return 0;
-}
-
-static List f9_execution____seen_list(Var value, Var(* view)(Var)){
-  if(view) value = view(value);
-  return Var_is_row(value, 9, 7, 4) ? Var_list(value) : NULL;
 }
 
 static int f9_execution____key_admits(MatchPlan plan, MatchKey * key, List list, Var(* view)(Var)){
@@ -3533,6 +3564,11 @@ static int f9_execution____key_admits(MatchPlan plan, MatchKey * key, List list,
     element = List_car(inner);
   }
   return f9_execution____key_equal(plan, element, key -> inner);
+}
+
+static List f9_execution____seen_list(Var value, Var(* view)(Var)){
+  if(view) value = view(value);
+  return Var_is_row(value, 9, 7, 4) ? Var_list(value) : NULL;
 }
 
 static int f9_execution____key_equal(MatchPlan plan, Var value, Var key){
@@ -3567,30 +3603,6 @@ static int f9_execution____commit(MachineView view, MatchMachine * m, MatchCaptu
   return 1;
 }
 
-int MatchPlan_execute(MatchPlan plan, Var input, List * out_bindings, MachineStats * stats){
-  if(! _init_guard_) _file_init_();
-  if(! _prepared(plan, "MatchPlan.execute")) return - 1;
-  if(! out_bindings) return - 1;
-  if(! MatchPlan_admits(plan, input, NULL)) return 0;
-  MatchMachine * machine = MatchMachine_acquire(stats);
-  Var values[MACHINE_BINDER_MAX];
-  MatchCaptureBuffer captures ={
-    values, 0, MACHINE_BINDER_MAX
-  }
-  ;
-  int result = _run_capture(MachineProgram_view(plan -> program), &(* machine), input, &(captures));
-  List bindings;
-  if(result == 1) bindings = _publish_captures(plan -> layout, &(captures));
-  MatchMachine_release(machine);
-  if(result == 1)(* out_bindings) = bindings;
-  return result;
-}
-
-int MatchPlan_try_match(MatchPlan plan, List input, List * out_bindings){
-  if(! _init_guard_) _file_init_();
-  return MatchPlan_execute(plan, List_var(input), out_bindings, NULL);
-}
-
 static List _publish_captures(MatchCaptureLayout layout, MatchCaptureBuffer * captures){
   List bindings = NULL;
   for(int i = 0;  i < layout -> binder_count;  i ++){
@@ -3621,18 +3633,6 @@ int MatchPlan_try_match_replace(MatchPlan plan, List input, Var template, Var * 
   ;
   (* out) = _replace(template, &(source));
   return 1;
-}
-
-static Var f9_templates____value(ReplacementSource * source, Var binder){
-  if((* source).captures) return f9_templates____captured((* source).layout, (* source).captures, binder);
-  Var bound = List_assoc((* source).bindings, binder);
-  return Var_is_void(bound) ? binder : bound;
-}
-
-static Var f9_templates____captured(MatchCaptureLayout layout, MatchCaptureBuffer * captures, Var binder){
-  int index = MatchCaptureLayout_index(layout, binder);
-  if(index < 0 || ! _capture_bit(captures -> present, index)) return binder;
-  return captures -> values[index];
 }
 
 List List_replace(List template, List bindings){
@@ -3706,6 +3706,18 @@ static Var _replace(Var input, ReplacementSource * source){
 
 }
 
+static Var f9_templates____value(ReplacementSource * source, Var binder){
+  if((* source).captures) return f9_templates____captured((* source).layout, (* source).captures, binder);
+  Var bound = List_assoc((* source).bindings, binder);
+  return Var_is_void(bound) ? binder : bound;
+}
+
+static Var f9_templates____captured(MatchCaptureLayout layout, MatchCaptureBuffer * captures, Var binder){
+  int index = MatchCaptureLayout_index(layout, binder);
+  if(index < 0 || ! _capture_bit(captures -> present, index)) return binder;
+  return captures -> values[index];
+}
+
 int MatchPlan_try_search(MatchPlan plan, List input, Var * out_match, List * out_bindings){
   if(! _init_guard_) _file_init_();
   if(! _prepared(plan, "MatchPlan.try_search")) return - 1;
@@ -3776,53 +3788,6 @@ int MatchPlan_search_replace(MatchPlan plan, List input, Var template, List * ou
   return 1;
 }
 
-static int f9_traversal____test(f9_traversal___MatchWalk * m, Var node){
-  return MatchPlan_admits((* m).plan, node, NULL) ? _run_capture((* m).view, &(*(* m).m), node, &(*(* m).captures)) : 0;
-}
-
-static List f9_traversal____hit(f9_traversal___MatchWalk * walk, Var node){
-  return cons(List_var(cons(_1, cons(node, NULL))), _publish_captures((* walk).plan -> layout, &(*(* walk).captures)));
-}
-
-static Var f9_traversal____spine_get(Block spine, size_t index){
-  return((Var *) spine -> bytes)[index];
-}
-
-static int f9_traversal____walk_all(f9_traversal___MatchWalk * walk, Var input, int include_empty){
-  Block hits =(* walk).spine;
-  size_t base = hits -> length;
-  int visit_tail = 1;
-  while(Var_is_row(input, 9, 7, 4)){
-    List lst = Var_list_payload(input);
-    if(! List_truth(lst)){
-      visit_tail = include_empty;
-      break;
-    }
-    if(f9_traversal____walk_all(&((* walk)), List_car(lst), 1) < 0) return - 1;
-    int status = f9_traversal____test(&((* walk)), input);
-    if(status < 0) return - 1;
-    if(status == 1){
-      Var hit = List_var(f9_traversal____hit(&((* walk)), input));
-      Block_push(hits, & hit);
-    }
-    input = List_var(List_cdr(lst));
-    include_empty = 0;
-  }
-  if(visit_tail){
-    int status = f9_traversal____test(&((* walk)), input);
-    if(status < 0) return - 1;
-    if(status == 1)(* walk).results = cons(List_var(f9_traversal____hit(&((* walk)), input)), (* walk).results);
-  }
-  f9_traversal____answer(&((* walk)), base);
-  return 0;
-}
-
-static void f9_traversal____answer(f9_traversal___MatchWalk * walk, size_t base){
-  Block hits =(* walk).spine;
-  for(size_t i = hits -> length;  i > base;  i --)(* walk).results = cons(f9_traversal____spine_get(hits, i - 1), (* walk).results);
-  Block_truncate(hits, base);
-}
-
 static int f9_traversal____walk_first(f9_traversal___MatchWalk * walk, Var input, int include_empty){
   Var last_cell =((void) 0, Void);
   int have_cell = 0, visit_tail = 1;
@@ -3856,6 +3821,53 @@ static int f9_traversal____settle(f9_traversal___MatchWalk * walk, Var node){
   (* walk).found = node;
   (* walk).bindings = _publish_captures((* walk).plan -> layout, &(*(* walk).captures));
   return 1;
+}
+
+static int f9_traversal____test(f9_traversal___MatchWalk * m, Var node){
+  return MatchPlan_admits((* m).plan, node, NULL) ? _run_capture((* m).view, &(*(* m).m), node, &(*(* m).captures)) : 0;
+}
+
+static int f9_traversal____walk_all(f9_traversal___MatchWalk * walk, Var input, int include_empty){
+  Block hits =(* walk).spine;
+  size_t base = hits -> length;
+  int visit_tail = 1;
+  while(Var_is_row(input, 9, 7, 4)){
+    List lst = Var_list_payload(input);
+    if(! List_truth(lst)){
+      visit_tail = include_empty;
+      break;
+    }
+    if(f9_traversal____walk_all(&((* walk)), List_car(lst), 1) < 0) return - 1;
+    int status = f9_traversal____test(&((* walk)), input);
+    if(status < 0) return - 1;
+    if(status == 1){
+      Var hit = List_var(f9_traversal____hit(&((* walk)), input));
+      Block_push(hits, & hit);
+    }
+    input = List_var(List_cdr(lst));
+    include_empty = 0;
+  }
+  if(visit_tail){
+    int status = f9_traversal____test(&((* walk)), input);
+    if(status < 0) return - 1;
+    if(status == 1)(* walk).results = cons(List_var(f9_traversal____hit(&((* walk)), input)), (* walk).results);
+  }
+  f9_traversal____answer(&((* walk)), base);
+  return 0;
+}
+
+static List f9_traversal____hit(f9_traversal___MatchWalk * walk, Var node){
+  return cons(List_var(cons(_1, cons(node, NULL))), _publish_captures((* walk).plan -> layout, &(*(* walk).captures)));
+}
+
+static void f9_traversal____answer(f9_traversal___MatchWalk * walk, size_t base){
+  Block hits =(* walk).spine;
+  for(size_t i = hits -> length;  i > base;  i --)(* walk).results = cons(f9_traversal____spine_get(hits, i - 1), (* walk).results);
+  Block_truncate(hits, base);
+}
+
+static Var f9_traversal____spine_get(Block spine, size_t index){
+  return((Var *) spine -> bytes)[index];
 }
 
 static Var f9_traversal____rewrite(f9_traversal___MatchWalk * walk, Var node, int include_empty){
@@ -3897,45 +3909,6 @@ static Var f9_traversal____replace_node(f9_traversal___MatchWalk * walk, Var nod
   return _replace((* walk).template, &(source));
 }
 
-static int f5_sites____pattern_borrowable(Var value, int depth, int permanent_lists){
-  if(depth >= 128) return 0;
-  switch(Var_kind(value)){
-    case 1328354264 : return 1;
-    case 35386204516 : case 39939274535114 : return 0;
-    case 1011493096 : return f5_sites____object_borrowable(value, depth, permanent_lists);
-  }
-  return ! Var_is(value, 818062) && ! Var_is(value, 44858254) && ! Var_is(value, 25983886) && ! Var_is(value, 1435270030) && ! Var_is(value, 26071077642);
-}
-
-int String_is_permanent(String);
-
-String Var_as_string(Var);
-
-static int f5_sites____object_borrowable(Var value, int depth, int permanent_lists){
-  if(Var_is(value, 826970)) return String_is_permanent((String) Var_pointer(value));
-  if(Var_is_row(value, 11, 7, 1)) return String_is_permanent(Var_as_string(value));
-  if(! Var_is_row(value, 9, 7, 4)) return 0;
-  if(! Var_pointer(value)) return 1;
-  if(permanent_lists && ! Pool_is_permanent(value)) return 0;
-  {
-    Var part;
-    List _x2c_gensym_macro_object_13 =(List) Var_pointer(value);
-    List _x2c_gensym_macro_cursor_13 = _x2c_gensym_macro_object_13;
-    Var _x2c_gensym_macro_cursor_output_13;
-    while(List_try_next(_x2c_gensym_macro_object_13, &(_x2c_gensym_macro_cursor_13), &(_x2c_gensym_macro_cursor_output_13))){
-      part = _x2c_gensym_macro_cursor_output_13;
-      if(! f5_sites____pattern_borrowable(part, depth + 1, permanent_lists)) return 0;
-    }
-
-  }
-  return 1;
-}
-
-int MatchPlan_borrowable(Var pattern, int permanent_lists){
-  if(! _init_guard_) _file_init_();
-  return f5_sites____pattern_borrowable(pattern, 0, permanent_lists);
-}
-
 int x2c_match_try_capture(List input, Var pattern, MatchCaptureBuffer * captures);
 
 int x2c_match_site_try_capture(MatchCaptureSite * site, List input, Var pattern, MatchCaptureBuffer * captures){
@@ -3945,6 +3918,97 @@ int x2c_match_site_try_capture(MatchCaptureSite * site, List input, Var pattern,
   if(! plan) return x2c_match_try_capture(input, pattern, &((* captures)));
   if(plan -> status == 28682226919752) return 0;
   return _prepared(plan, "match") && _buffer_valid(plan -> layout, &((* captures))) && _capture(plan, List_var(input), &((* captures)), NULL) == 1;
+}
+
+int x2c_match_pattern_retainable(Var pattern){
+  if(! _init_guard_) _file_init_();
+  return MatchPlan_borrowable(pattern, 1);
+}
+
+MatchPlan x2c_match_site_prepare(MatchCaptureSite * site, Var pattern){
+  if(! _init_guard_) _file_init_();
+  return f5_sites____published(site, pattern);
+}
+
+int x2c_match_site_try_match(MatchCaptureSite * site, List input, Var pat, List * out_bindings);
+
+List x2c_match_site_match(MatchCaptureSite * site, List input, Var pat){
+  if(! _init_guard_) _file_init_();
+  List bindings;
+  if(! x2c_match_site_try_match(site, input, pat, &(bindings))) return NULL;
+  return List_truth(bindings) ? bindings : _3;
+}
+
+int List_try_match(List input, Var pat, List * out_bindings);
+
+int x2c_match_site_try_match(MatchCaptureSite * site, List input, Var pat, List * out_bindings){
+  if(! _init_guard_) _file_init_();
+  MatchPlan plan = f5_sites____plan(site, pat);
+  if(! plan) return List_try_match(input, pat, out_bindings);
+  if(! out_bindings) return 0;
+  return MatchPlan_try_match(plan, input, &((* out_bindings))) == 1;
+}
+
+int List_try_search(List input, Var pat, Var * out_match, List * out_bindings);
+
+int x2c_match_site_try_search(MatchCaptureSite * site, List input, Var pat, Var * out_match, List * out_bindings){
+  if(! _init_guard_) _file_init_();
+  MatchPlan plan = f5_sites____plan(site, pat);
+  if(! plan) return List_try_search(input, pat, out_match, out_bindings);
+  if(! out_match || ! out_bindings) return 0;
+  return MatchPlan_try_search(plan, input, &((* out_match)), &((* out_bindings))) == 1;
+}
+
+List List_search(List input, Var pat);
+
+List x2c_match_site_search(MatchCaptureSite * site, List input, Var pat){
+  if(! _init_guard_) _file_init_();
+  MatchPlan plan = f5_sites____plan(site, pat);
+  if(! plan) return List_search(input, pat);
+  List results = NULL;
+  MatchPlan_search(plan, input, &(results));
+  return results;
+}
+
+int x2c_match_site_try_match_replace(MatchCaptureSite * site, List input, Var pat, Var template, Var * out);
+
+List x2c_match_site_match_replace(MatchCaptureSite * site, List input, Var pat, Var template){
+  if(! _init_guard_) _file_init_();
+  Var result;
+  if(! x2c_match_site_try_match_replace(site, input, pat, template, &(result))) return input;
+  return Var_is_row(result, 9, 7, 4) ? Var_list_payload(result) : NULL;
+}
+
+int List_try_match_replace(List input, Var pat, Var template, Var * out);
+
+int x2c_match_site_try_match_replace(MatchCaptureSite * site, List input, Var pat, Var template, Var * out){
+  if(! _init_guard_) _file_init_();
+  MatchPlan plan = f5_sites____plan(site, pat);
+  if(! plan) return List_try_match_replace(input, pat, template, out);
+  if(! out) return 0;
+  return MatchPlan_try_match_replace(plan, input, template, &((* out))) == 1;
+}
+
+List List_search_replace(List input, Var pat, Var template);
+
+List x2c_match_site_search_replace(MatchCaptureSite * site, List input, Var pat, Var template){
+  if(! _init_guard_) _file_init_();
+  MatchPlan plan = f5_sites____plan(site, pat);
+  if(! plan) return List_search_replace(input, pat, template);
+  List result = input;
+  MatchPlan_search_replace(plan, input, template, &(result));
+  return result;
+}
+
+int MatchPlan_borrowable(Var pattern, int permanent_lists){
+  if(! _init_guard_) _file_init_();
+  return f5_sites____pattern_borrowable(pattern, 0, permanent_lists);
+}
+
+void x2c_match_initialize(void){
+  if(! _init_guard_) _file_init_();
+  int status = pthread_once(& f5_sites___match_shutdown_once, f5_sites____register_shutdown_once);
+  f5_sites____thread_check(status, "register shutdown");
 }
 
 static MatchPlan f5_sites____published(MatchCaptureSite * site, Var pattern){
@@ -4013,6 +4077,40 @@ static void f5_sites____prepare(MatchCaptureSite * site, Var pattern){
   __atomic_store_n(& site -> plan, plan, __ATOMIC_RELEASE);
 }
 
+static int f5_sites____pattern_borrowable(Var value, int depth, int permanent_lists){
+  if(depth >= 128) return 0;
+  switch(Var_kind(value)){
+    case 1328354264 : return 1;
+    case 35386204516 : case 39939274535114 : return 0;
+    case 1011493096 : return f5_sites____object_borrowable(value, depth, permanent_lists);
+  }
+  return ! Var_is(value, 818062) && ! Var_is(value, 44858254) && ! Var_is(value, 25983886) && ! Var_is(value, 1435270030) && ! Var_is(value, 26071077642);
+}
+
+int String_is_permanent(String);
+
+String Var_as_string(Var);
+
+static int f5_sites____object_borrowable(Var value, int depth, int permanent_lists){
+  if(Var_is(value, 826970)) return String_is_permanent((String) Var_pointer(value));
+  if(Var_is_row(value, 11, 7, 1)) return String_is_permanent(Var_as_string(value));
+  if(! Var_is_row(value, 9, 7, 4)) return 0;
+  if(! Var_pointer(value)) return 1;
+  if(permanent_lists && ! Pool_is_permanent(value)) return 0;
+  {
+    Var part;
+    List _x2c_gensym_macro_object_13 =(List) Var_pointer(value);
+    List _x2c_gensym_macro_cursor_13 = _x2c_gensym_macro_object_13;
+    Var _x2c_gensym_macro_cursor_output_13;
+    while(List_try_next(_x2c_gensym_macro_object_13, &(_x2c_gensym_macro_cursor_13), &(_x2c_gensym_macro_cursor_output_13))){
+      part = _x2c_gensym_macro_cursor_output_13;
+      if(! f5_sites____pattern_borrowable(part, depth + 1, permanent_lists)) return 0;
+    }
+
+  }
+  return 1;
+}
+
 static void f5_sites____sites_initialize(void){
   if(f5_sites___match_capture_site_scope) return;
   f5_sites___match_capture_site_scope = Scope_new_named("Match source-site plans");
@@ -4054,93 +4152,6 @@ static void f5_sites____thread_check(int status, const char * action){
   abort();
 }
 
-int x2c_match_pattern_retainable(Var pattern){
-  if(! _init_guard_) _file_init_();
-  return MatchPlan_borrowable(pattern, 1);
-}
-
-MatchPlan x2c_match_site_prepare(MatchCaptureSite * site, Var pattern){
-  if(! _init_guard_) _file_init_();
-  return f5_sites____published(site, pattern);
-}
-
-static MatchPlan f5_sites____plan(MatchCaptureSite * site, Var pattern){
-  MatchPlan plan = f5_sites____published(site, pattern);
-  return plan && plan -> status != 664475009618698 ? plan : NULL;
-}
-
-int List_try_match(List input, Var pat, List * out_bindings);
-
-int x2c_match_site_try_match(MatchCaptureSite * site, List input, Var pat, List * out_bindings){
-  if(! _init_guard_) _file_init_();
-  MatchPlan plan = f5_sites____plan(site, pat);
-  if(! plan) return List_try_match(input, pat, out_bindings);
-  if(! out_bindings) return 0;
-  return MatchPlan_try_match(plan, input, &((* out_bindings))) == 1;
-}
-
-List x2c_match_site_match(MatchCaptureSite * site, List input, Var pat){
-  if(! _init_guard_) _file_init_();
-  List bindings;
-  if(! x2c_match_site_try_match(site, input, pat, &(bindings))) return NULL;
-  return List_truth(bindings) ? bindings : _3;
-}
-
-int List_try_search(List input, Var pat, Var * out_match, List * out_bindings);
-
-int x2c_match_site_try_search(MatchCaptureSite * site, List input, Var pat, Var * out_match, List * out_bindings){
-  if(! _init_guard_) _file_init_();
-  MatchPlan plan = f5_sites____plan(site, pat);
-  if(! plan) return List_try_search(input, pat, out_match, out_bindings);
-  if(! out_match || ! out_bindings) return 0;
-  return MatchPlan_try_search(plan, input, &((* out_match)), &((* out_bindings))) == 1;
-}
-
-List List_search(List input, Var pat);
-
-List x2c_match_site_search(MatchCaptureSite * site, List input, Var pat){
-  if(! _init_guard_) _file_init_();
-  MatchPlan plan = f5_sites____plan(site, pat);
-  if(! plan) return List_search(input, pat);
-  List results = NULL;
-  MatchPlan_search(plan, input, &(results));
-  return results;
-}
-
-int List_try_match_replace(List input, Var pat, Var template, Var * out);
-
-int x2c_match_site_try_match_replace(MatchCaptureSite * site, List input, Var pat, Var template, Var * out){
-  if(! _init_guard_) _file_init_();
-  MatchPlan plan = f5_sites____plan(site, pat);
-  if(! plan) return List_try_match_replace(input, pat, template, out);
-  if(! out) return 0;
-  return MatchPlan_try_match_replace(plan, input, template, &((* out))) == 1;
-}
-
-List x2c_match_site_match_replace(MatchCaptureSite * site, List input, Var pat, Var template){
-  if(! _init_guard_) _file_init_();
-  Var result;
-  if(! x2c_match_site_try_match_replace(site, input, pat, template, &(result))) return input;
-  return Var_is_row(result, 9, 7, 4) ? Var_list_payload(result) : NULL;
-}
-
-List List_search_replace(List input, Var pat, Var template);
-
-List x2c_match_site_search_replace(MatchCaptureSite * site, List input, Var pat, Var template){
-  if(! _init_guard_) _file_init_();
-  MatchPlan plan = f5_sites____plan(site, pat);
-  if(! plan) return List_search_replace(input, pat, template);
-  List result = input;
-  MatchPlan_search_replace(plan, input, template, &(result));
-  return result;
-}
-
-void x2c_match_initialize(void){
-  if(! _init_guard_) _file_init_();
-  int status = pthread_once(& f5_sites___match_shutdown_once, f5_sites____register_shutdown_once);
-  f5_sites____thread_check(status, "register shutdown");
-}
-
 static void f5_sites____register_shutdown_once(void){
   Scope_shutdown_hook(f5_sites____shutdown);
 }
@@ -4164,15 +4175,15 @@ static void f5_sites____sites_shutdown(void){
   f5_sites___match_capture_site_scope = NULL;
 }
 
+static MatchPlan f5_sites____plan(MatchCaptureSite * site, Var pattern){
+  MatchPlan plan = f5_sites____published(site, pattern);
+  return plan && plan -> status != 664475009618698 ? plan : NULL;
+}
+
 int x2c_match_try_capture(List input, Var pattern, MatchCaptureBuffer * captures){
   if(! _init_guard_) _file_init_();
   if(! captures) return 0;
   return MatchCache_try_capture(MatchCache_current(), input, pattern, &((* captures)), "match");
-}
-
-int List_try_match(List input, Var pat, List * out_bindings){
-  if(! _init_guard_) _file_init_();
-  return out_bindings && MatchCache_try_match(MatchCache_current(), input, pat, &((* out_bindings)), "List.try_match");
 }
 
 List List_match(List input, Var pat){
@@ -4182,9 +4193,9 @@ List List_match(List input, Var pat){
   return List_truth(bindings) ? bindings : _3;
 }
 
-int List_try_match_replace(List input, Var pat, Var template, Var * out){
+int List_try_match(List input, Var pat, List * out_bindings){
   if(! _init_guard_) _file_init_();
-  return out && MatchCache_try_match_replace(MatchCache_current(), input, pat, template, &((* out)), "List.try_match_replace");
+  return out_bindings && MatchCache_try_match(MatchCache_current(), input, pat, &((* out_bindings)), "List.try_match");
 }
 
 List List_match_replace(List input, Var pat, Var template){
@@ -4192,6 +4203,11 @@ List List_match_replace(List input, Var pat, Var template){
   Var result;
   if(! List_try_match_replace(input, pat, template, &(result))) return input;
   return Var_is_row(result, 9, 7, 4) ? Var_list_payload(result) : NULL;
+}
+
+int List_try_match_replace(List input, Var pat, Var template, Var * out){
+  if(! _init_guard_) _file_init_();
+  return out && MatchCache_try_match_replace(MatchCache_current(), input, pat, template, &((* out)), "List.try_match_replace");
 }
 
 List List_search(List input, Var pat){
@@ -4260,37 +4276,37 @@ static void _x2c_gensym_defer_cleanup_3(void * _x2c_gensym_defer_opaque_3){
 }
 
 static void _x2c_gensym_defer_cleanup_4(void * _x2c_gensym_defer_opaque_4){
-  Scope_pop();
-}
-
-static void _x2c_gensym_defer_cleanup_5(void * _x2c_gensym_defer_opaque_5){
-  _x2c_gensym_defer_env_4 * _x2c_gensym_defer_data_4 =(_x2c_gensym_defer_env_4 *) _x2c_gensym_defer_opaque_5;
+  _x2c_gensym_defer_env_4 * _x2c_gensym_defer_data_4 =(_x2c_gensym_defer_env_4 *) _x2c_gensym_defer_opaque_4;
   MatchLease_release(&((*(MatchLease *) _x2c_gensym_defer_data_4->_x2c_gensym_defer_capture_4)));
 }
 
-static void _x2c_gensym_defer_cleanup_6(void * _x2c_gensym_defer_opaque_6){
-  _x2c_gensym_defer_env_5 * _x2c_gensym_defer_data_5 =(_x2c_gensym_defer_env_5 *) _x2c_gensym_defer_opaque_6;
+static void _x2c_gensym_defer_cleanup_5(void * _x2c_gensym_defer_opaque_5){
+  _x2c_gensym_defer_env_5 * _x2c_gensym_defer_data_5 =(_x2c_gensym_defer_env_5 *) _x2c_gensym_defer_opaque_5;
   MatchLease_release(&((*(MatchLease *) _x2c_gensym_defer_data_5->_x2c_gensym_defer_capture_5)));
 }
 
-static void _x2c_gensym_defer_cleanup_7(void * _x2c_gensym_defer_opaque_7){
-  _x2c_gensym_defer_env_6 * _x2c_gensym_defer_data_6 =(_x2c_gensym_defer_env_6 *) _x2c_gensym_defer_opaque_7;
+static void _x2c_gensym_defer_cleanup_6(void * _x2c_gensym_defer_opaque_6){
+  _x2c_gensym_defer_env_6 * _x2c_gensym_defer_data_6 =(_x2c_gensym_defer_env_6 *) _x2c_gensym_defer_opaque_6;
   MatchLease_release(&((*(MatchLease *) _x2c_gensym_defer_data_6->_x2c_gensym_defer_capture_6)));
 }
 
-static void _x2c_gensym_defer_cleanup_8(void * _x2c_gensym_defer_opaque_8){
-  _x2c_gensym_defer_env_7 * _x2c_gensym_defer_data_7 =(_x2c_gensym_defer_env_7 *) _x2c_gensym_defer_opaque_8;
+static void _x2c_gensym_defer_cleanup_7(void * _x2c_gensym_defer_opaque_7){
+  _x2c_gensym_defer_env_7 * _x2c_gensym_defer_data_7 =(_x2c_gensym_defer_env_7 *) _x2c_gensym_defer_opaque_7;
   MatchLease_release(&((*(MatchLease *) _x2c_gensym_defer_data_7->_x2c_gensym_defer_capture_7)));
 }
 
-static void _x2c_gensym_defer_cleanup_9(void * _x2c_gensym_defer_opaque_9){
-  _x2c_gensym_defer_env_8 * _x2c_gensym_defer_data_8 =(_x2c_gensym_defer_env_8 *) _x2c_gensym_defer_opaque_9;
+static void _x2c_gensym_defer_cleanup_8(void * _x2c_gensym_defer_opaque_8){
+  _x2c_gensym_defer_env_8 * _x2c_gensym_defer_data_8 =(_x2c_gensym_defer_env_8 *) _x2c_gensym_defer_opaque_8;
   MatchLease_release(&((*(MatchLease *) _x2c_gensym_defer_data_8->_x2c_gensym_defer_capture_8)));
 }
 
-static void _x2c_gensym_defer_cleanup_10(void * _x2c_gensym_defer_opaque_10){
-  _x2c_gensym_defer_env_9 * _x2c_gensym_defer_data_9 =(_x2c_gensym_defer_env_9 *) _x2c_gensym_defer_opaque_10;
+static void _x2c_gensym_defer_cleanup_9(void * _x2c_gensym_defer_opaque_9){
+  _x2c_gensym_defer_env_9 * _x2c_gensym_defer_data_9 =(_x2c_gensym_defer_env_9 *) _x2c_gensym_defer_opaque_9;
   MatchLease_release(&((*(MatchLease *) _x2c_gensym_defer_data_9->_x2c_gensym_defer_capture_9)));
+}
+
+static void _x2c_gensym_defer_cleanup_10(void * _x2c_gensym_defer_opaque_10){
+  Scope_pop();
 }
 
 static void _x2c_gensym_defer_cleanup_11(void * _x2c_gensym_defer_opaque_11){

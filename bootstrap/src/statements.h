@@ -15,8 +15,6 @@
 #include "macros/macros.h"
 List Compiler_parse_source_clause(Compiler c, Symbol kind);
 
-List Compiler_finish_return_statement(Compiler c, List expr);
-
 List Compiler_parse_match_row_argument(Compiler c);
 
 List Compiler_parse_match_condition(Compiler c, List subject, Token origin);
@@ -24,6 +22,8 @@ List Compiler_parse_match_condition(Compiler c, List subject, Token origin);
 List Compiler_parse_case_body(Compiler c, List types);
 
 List Compiler_typed_capture_declarations(Compiler c, List types, List * temporaries);
+
+List Compiler_parse_callable_body(Compiler c);
 
 List Compiler_parse_governed(Compiler c, Symbol position);
 
@@ -33,7 +33,7 @@ List Compiler_parse_compound_statement(Compiler c);
 
 List Compiler_parse_block_items(Compiler c, int anchor_items);
 
-List Compiler_parse_callable_body(Compiler c);
+List Compiler_finish_return_statement(Compiler c, List expr);
 
 
 #endif /* __GUARD_0x5ACF8839__ */
