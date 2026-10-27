@@ -2558,7 +2558,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_3(void)
   _1952 = cons(_1951, NULL);
   _1953 = cons(_190, _1952);
   _1954 = List_var(_1953);
-  _1955 = int_var(257);
+  _1955 = int_var(260);
   _1956 = cons(_1955, NULL);
   _1957 = cons(_196, _1956);
   _1958 = List_var(_1957);
@@ -2566,7 +2566,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_3(void)
   _1960 = cons(_1959, NULL);
   _1961 = cons(_204, _1960);
   _1962 = List_var(_1961);
-  _1963 = int_var(92537);
+  _1963 = int_var(92577);
   _1964 = cons(_1963, NULL);
   _1965 = cons(_209, _1964);
   _1966 = List_var(_1965);
@@ -2761,11 +2761,11 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_4(void)
   _2152 = cons(_2151, NULL);
   _2153 = cons(_156, _2152);
   _2154 = List_var(_2153);
-  _2155 = int_var(265);
+  _2155 = int_var(268);
   _2156 = cons(_2155, NULL);
   _2157 = cons(_196, _2156);
   _2158 = List_var(_2157);
-  _2159 = int_var(92899);
+  _2159 = int_var(92939);
   _2160 = cons(_2159, NULL);
   _2161 = cons(_209, _2160);
   _2162 = List_var(_2161);
@@ -2878,11 +2878,11 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_4(void)
   _2269 = cons(_2268, NULL);
   _2270 = cons(_156, _2269);
   _2271 = List_var(_2270);
-  _2272 = int_var(286);
+  _2272 = int_var(289);
   _2273 = cons(_2272, NULL);
   _2274 = cons(_196, _2273);
   _2275 = List_var(_2274);
-  _2276 = int_var(93661);
+  _2276 = int_var(93701);
   _2277 = cons(_2276, NULL);
   _2278 = cons(_209, _2277);
   _2279 = List_var(_2278);
@@ -2976,11 +2976,11 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_4(void)
   _2367 = cons(_2366, NULL);
   _2368 = cons(_156, _2367);
   _2369 = List_var(_2368);
-  _2370 = int_var(289);
+  _2370 = int_var(292);
   _2371 = cons(_2370, NULL);
   _2372 = cons(_196, _2371);
   _2373 = List_var(_2372);
-  _2374 = int_var(93745);
+  _2374 = int_var(93785);
   _2375 = cons(_2374, NULL);
   _2376 = cons(_209, _2375);
   _2377 = List_var(_2376);
@@ -3101,11 +3101,11 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_4(void)
   _2492 = cons(_2491, NULL);
   _2493 = cons(_156, _2492);
   _2494 = List_var(_2493);
-  _2495 = int_var(281);
+  _2495 = int_var(284);
   _2496 = cons(_2495, NULL);
   _2497 = cons(_196, _2496);
   _2498 = List_var(_2497);
-  _2499 = int_var(93482);
+  _2499 = int_var(93522);
   _2500 = cons(_2499, NULL);
   _2501 = cons(_209, _2500);
   _2502 = List_var(_2501);
@@ -3202,11 +3202,11 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_5(void)
   _2590 = cons(_2589, NULL);
   _2591 = cons(_156, _2590);
   _2592 = List_var(_2591);
-  _2593 = int_var(276);
+  _2593 = int_var(279);
   _2594 = cons(_2593, NULL);
   _2595 = cons(_196, _2594);
   _2596 = List_var(_2595);
-  _2597 = int_var(93311);
+  _2597 = int_var(93351);
   _2598 = cons(_2597, NULL);
   _2599 = cons(_209, _2598);
   _2600 = List_var(_2599);
@@ -3294,11 +3294,11 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_5(void)
   _2682 = cons(_2681, NULL);
   _2683 = cons(_156, _2682);
   _2684 = List_var(_2683);
-  _2685 = int_var(293);
+  _2685 = int_var(296);
   _2686 = cons(_2685, NULL);
   _2687 = cons(_196, _2686);
   _2688 = List_var(_2687);
-  _2689 = int_var(93952);
+  _2689 = int_var(93992);
   _2690 = cons(_2689, NULL);
   _2691 = cons(_209, _2690);
   _2692 = List_var(_2691);
@@ -3506,11 +3506,11 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_5(void)
   _2894 = List_var(_2893);
   _2895 = cons(_156, _33);
   _2896 = List_var(_2895);
-  _2897 = int_var(345);
+  _2897 = int_var(348);
   _2898 = cons(_2897, NULL);
   _2899 = cons(_196, _2898);
   _2900 = List_var(_2899);
-  _2901 = int_var(96300);
+  _2901 = int_var(96340);
   _2902 = cons(_2901, NULL);
   _2903 = cons(_209, _2902);
   _2904 = List_var(_2903);
@@ -6358,7 +6358,15 @@ static int f5_calls____parameters_variadic(List parameters){
     Var _x2c_gensym_macro_cursor_output_27;
     while(List_try_next(_x2c_gensym_macro_object_28, &(_x2c_gensym_macro_cursor_29), &(_x2c_gensym_macro_cursor_output_27))){
       parameter = _x2c_gensym_macro_cursor_output_27;
-      if(x2c_var_equal(parameter, Symbol_var(1519197)) ||(Var_is_row(parameter, 9, 7, 4) && ! Var_is_nil(parameter) &&(x2c_var_equal(Var_car(parameter), Symbol_var(1519197)) || x2c_var_equal(Var_car(parameter), Symbol_var(194457181))))) return 1;
+      {
+        if(x2c_var_equal(parameter, Symbol_var(1519197))) return 1;
+        if(Var_is_row(parameter, 9, 7, 4) && ! Var_is_nil(parameter)){
+          Type type = Var_type(parameter);
+          if(x2c_var_equal(List_car(Type_list(type)), Symbol_var(1519197)) || List_truth(Type_list(Type_rest_container(type)))) return 1;
+        }
+
+      }
+
     }
 
   }
@@ -7231,7 +7239,7 @@ static int f9_operators____convert_string_addition(Compiler c, Symbol operator, 
 }
 
 static void f9_operators____check_untyped_operand(Compiler c, Symbol operator, Type participant, List other, Token origin){
-  Symbol member = Compiler_operator_member(c, operator);  if(! member || operator == 15739 || operator == 8571) return;  if(f9_operators____converts_operands(c, participant)) if(List_truth(Compiler_resolve_protocol_member(c, participant, Symbol_str(member)))){
+  Symbol member = Compiler_operator_member(operator);  if(! member || operator == 15739 || operator == 8571) return;  if(f9_operators____converts_operands(c, participant)) if(List_truth(Compiler_resolve_protocol_member(c, participant, Symbol_str(member)))){
     List _x2c_gensym_match_expr_76 = other; {List _x2c_gensym_match_at_463, _x2c_gensym_match_at_464, _x2c_gensym_match_at_465, _x2c_gensym_match_at_466, _x2c_gensym_match_at_467, _x2c_gensym_match_at_468; if(_x2c_gensym_match_expr_76 && _x2c_gensym_match_expr_76 ->car.u64 == 9224497936761996324ULL &&(_x2c_gensym_match_at_463 = _x2c_gensym_match_expr_76 ->cdr) &&(_x2c_gensym_match_at_464 = _x2c_gensym_match_at_463 ->cdr) &&(Var_is(_x2c_gensym_match_at_464 -> car, 806120) &&(_x2c_gensym_match_at_465 = Var_list_payload(_x2c_gensym_match_at_464 -> car), 1)) && _x2c_gensym_match_at_465 && _x2c_gensym_match_at_465 ->car.u64 == 9224497936780766120ULL &&(_x2c_gensym_match_at_466 = _x2c_gensym_match_at_465 ->cdr) && !(_x2c_gensym_match_at_467 = _x2c_gensym_match_at_466 ->cdr) && !(_x2c_gensym_match_at_468 = _x2c_gensym_match_at_464 ->cdr)){
       Compiler_report_error(c, 1362954, _3082, origin, _3085);
     }
@@ -7293,7 +7301,7 @@ static List f9_operators____protocol_operator_expression(Compiler c, Symbol op, 
     if(_is_operator_temporary(c, lhs)) which |= 1;  if(List_truth(rhs) && _is_operator_temporary(c, rhs)) which |= 2;
   }
   if(! derived && List_truth(Compiler_resolve_protocol_member(c, result, _3089))) _note_fresh_callee(c, binding);  if(which){
-    Symbol member = List_truth(rhs) ? Compiler_operator_member(c, op) : 29006;  if(! member) member = Compiler_derived_member(c, op);  Type participant = Var_type(List_cadr(lhs));  participant = Type_canonicalize(participant);  List helper = Compiler_protocol_discard_helper(c, participant, Symbol_str(member), which);  if(List_truth(helper)){
+    Symbol member = List_truth(rhs) ? Compiler_operator_member(op) : 29006;  if(! member) member = Compiler_derived_member(op);  Type participant = Var_type(List_cadr(lhs));  participant = Type_canonicalize(participant);  List helper = Compiler_protocol_discard_helper(c, participant, Symbol_str(member), which);  if(List_truth(helper)){
       List _x2c_gensym_destructure_7 = helper;  binding = Var_list_payload(List_getindex(_x2c_gensym_destructure_7, 0));  signature = Var_type(List_getindex(_x2c_gensym_destructure_7, 1));
     }
 
@@ -7315,7 +7323,7 @@ static List f9_operators____resolve_protocol_operator(Compiler c, Symbol op, Lis
     participant = rhs_type;  member = 239352236966;
   }
   else{
-    if(! List_truth(Type_list(participant))) return NULL;  member = Compiler_operator_member(c, op);  Symbol source = Compiler_derived_member(c, op);  if(! member) member = source; (* derived) = source;  if(! member) return NULL;  if((member == 11642968 || member == 7477398666) && Sym_is_var_type(c -> sym, participant)) return NULL;  if(participant != rhs_type){
+    if(! List_truth(Type_list(participant))) return NULL;  member = Compiler_operator_member(op);  Symbol source = Compiler_derived_member(op);  if(! member) member = source; (* derived) = source;  if(! member) return NULL;  if((member == 11642968 || member == 7477398666) && Sym_is_var_type(c -> sym, participant)) return NULL;  if(participant != rhs_type){
       participant = f9_operators____converted_participant(c, member, participant, rhs_type, &((* lhs)), &((* rhs)));  if(! List_truth(Type_list(participant))) return NULL;
     }
 

@@ -3863,7 +3863,7 @@ static int f9_operators____string_operand(Compiler c, Type type){
 #endif
 #ifndef X2C_TRANSFORM_SOURCE
 static List f9_operators____protocol_update(Compiler c, Type type, Symbol op, List arg, List * rhs, Symbol spelled){
-  Symbol member = Compiler_operator_member(c, op);
+  Symbol member = Compiler_operator_member(op);
   if(! member) return NULL;
   String member_name = Symbol_str(member);
   List resolved = Compiler_resolve_protocol_member(c, type, member_name);

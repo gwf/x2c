@@ -14,9 +14,9 @@
 #include "expressions/expressions.h"
 #include "parse/parse.h"
 #include "meta.h"
-Symbol Compiler_operator_member(Compiler c, Symbol op);
+Symbol Compiler_operator_member(Symbol op);
 
-Symbol Compiler_derived_member(Compiler c, Symbol op);
+Symbol Compiler_derived_member(Symbol op);
 
 String Compiler_reverse_converter_spelling(Compiler c, String base_name, String infix, String participant);
 

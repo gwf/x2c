@@ -135,8 +135,7 @@ Symbol Symbol_compound_assignment(Symbol op){
   return 0;
 }
 
-Symbol Compiler_operator_member(Compiler c, Symbol op){
-  (void) c;
+Symbol Compiler_operator_member(Symbol op){
   switch(op){
     case 15739 : return 11642968;
     case 56 : return 2312;
@@ -148,8 +147,7 @@ Symbol Compiler_operator_member(Compiler c, Symbol op){
   return 0;
 }
 
-Symbol Compiler_derived_member(Compiler c, Symbol op){
-  (void) c;
+Symbol Compiler_derived_member(Symbol op){
   switch(op){
     case 8571 : return 11642968;
     case 121 : return 7477398666;
