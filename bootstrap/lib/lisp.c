@@ -2706,9 +2706,11 @@ static int _inherited(Lisp lisp, Var name){
   return 0;
 }
 
+int Map_truth(Map);
+
 static int _binding_get(Map bindings, Var name, Var * out){
   Var slot;
-  if(! Map_try_get(bindings, name, &(slot))) return 0;
+  if(! Map_truth(bindings) || ! Map_try_get(bindings, name, &(slot))) return 0;
   (* out) = f8_sessions____cell_load(slot);
   return 1;
 }

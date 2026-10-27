@@ -13865,7 +13865,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_21(void
   _11022 = List_var(_11021);
   _11023 = String_new("lib/lisp/sessions.x");
   _11024 = String_var(_11023);
-  _11025 = String_new("40afdcc0");
+  _11025 = String_new("6a343324");
   _11026 = String_var(_11025);
   _11027 = cons(_11026, NULL);
   _11028 = cons(_11024, _11027);
@@ -14113,7 +14113,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_22(void
   _11267 = cons(_223, _11266);
   _11268 = String_new("lib/logger.x");
   _11269 = String_var(_11268);
-  _11270 = String_new("408c1161");
+  _11270 = String_new("ef2dc9ac");
   _11271 = String_var(_11270);
   _11272 = String_new("cwd:./assert.h");
   _11273 = String_var(_11272);
