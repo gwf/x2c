@@ -456,7 +456,7 @@ Func x2c_func_shared(FuncAdapter adapter, List signature){
 
 static Func f4_func____new(FuncAdapter adapter, List signature, int rest, const void * context, size_t context_size){
   if(! adapter){
-    static const X2CErrorSite _x2c_gensym_error_site_16 = {.file = "../../lib/func/func.x",.function = "f4_func____new",.line = 443,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_16 = {.file = "../../lib/func/func.x",.function = "f4_func____new",.line = 445,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_16, 4372535886, 1, Symbol_var(39502), List_var(signature));
     __builtin_unreachable();
   }
@@ -471,12 +471,12 @@ static Func f4_func____new(FuncAdapter adapter, List signature, int rest, const 
      } }
   }
   if(! List_truth(params)){
-    static const X2CErrorSite _x2c_gensym_error_site_17 = {.file = "../../lib/func/func.x",.function = "f4_func____new",.line = 447,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_17 = {.file = "../../lib/func/func.x",.function = "f4_func____new",.line = 449,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_17, 4372535886, 1, Symbol_var(39502), List_var(signature));
     __builtin_unreachable();
   }
   if(context_size && ! context){
-    static const X2CErrorSite _x2c_gensym_error_site_18 = {.file = "../../lib/func/func.x",.function = "f4_func____new",.line = 448,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_18 = {.file = "../../lib/func/func.x",.function = "f4_func____new",.line = 450,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_18, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Func.new_context")), NULL))));
     __builtin_unreachable();
   }
@@ -485,7 +485,7 @@ static Func f4_func____new(FuncAdapter adapter, List signature, int rest, const 
     Var _x2c_gensym_literal_part_8 = String_var(String_join(NULL, cons(String_var(String_new("Func.new_context")), NULL)));
     Var _x2c_gensym_literal_part_9 = Var_box_ulong(context_size);
     {
-      static const X2CErrorSite _x2c_gensym_error_site_19 = {.file = "../../lib/func/func.x",.function = "f4_func____new",.line = 451,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_19 = {.file = "../../lib/func/func.x",.function = "f4_func____new",.line = 453,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_19, 1358596898646632, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_8, Symbol_var(1265290), _x2c_gensym_literal_part_9);
       __builtin_unreachable();
     }
@@ -494,7 +494,7 @@ static Func f4_func____new(FuncAdapter adapter, List signature, int rest, const 
   Var last = List_last(params);
   if(x2c_var_equal(last, List_var(_3))) rest = 1;
   else if(rest && ! x2c_var_equal(last, List_var(_6))){
-    static const X2CErrorSite _x2c_gensym_error_site_20 = {.file = "../../lib/func/func.x",.function = "f4_func____new",.line = 454,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_20 = {.file = "../../lib/func/func.x",.function = "f4_func____new",.line = 456,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_20, 4372535886, 1, Symbol_var(39502), List_var(signature));
     __builtin_unreachable();
   }
@@ -513,7 +513,7 @@ static Func f4_func____new(FuncAdapter adapter, List signature, int rest, const 
 
 List Func_signature(Func function){
   if(! function){
-    static const X2CErrorSite _x2c_gensym_error_site_21 = {.file = "../../lib/func/func.x",.function = "Func_signature",.line = 478,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_21 = {.file = "../../lib/func/func.x",.function = "Func_signature",.line = 480,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_21, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Func.signature")), NULL))));
     __builtin_unreachable();
   }
@@ -522,7 +522,7 @@ List Func_signature(Func function){
 
 const void * Func_context(Func function){
   if(! function){
-    static const X2CErrorSite _x2c_gensym_error_site_22 = {.file = "../../lib/func/func.x",.function = "Func_context",.line = 488,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_22 = {.file = "../../lib/func/func.x",.function = "Func_context",.line = 490,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_22, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Func.context")), NULL))));
     __builtin_unreachable();
   }
@@ -539,7 +539,7 @@ Var Func_var(Func function){
 
 Func Var_func(Var v){
   if(! Var_is_row(v, 9, 7, 1)){
-    static const X2CErrorSite _x2c_gensym_error_site_23 = {.file = "../../lib/func/func.x",.function = "Var_func",.line = 512,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_23 = {.file = "../../lib/func/func.x",.function = "Var_func",.line = 514,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_23, 4477479911782, 2, Symbol_var(1510312), Symbol_var(437126), Symbol_var(74754136), Symbol_var(Var_tag(v)));
     __builtin_unreachable();
   }
