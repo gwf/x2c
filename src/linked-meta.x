@@ -1839,7 +1839,7 @@ static Code _match_lowered(Code subject, List rows) {
   List prologue = _match_prologue(subject, frame, viewing, values);
   List switched = Code.lowered(
     %(placed (switch $selector (block @(items.list_free())))), NULL);
-  return $!{ { @prologue $switched } };
+  return %(block @prologue $switched);
 }
 
 /** Lowers the bound match `node` to a block around its subject, patterns,
