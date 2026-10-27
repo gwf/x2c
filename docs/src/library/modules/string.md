@@ -108,7 +108,7 @@ input `String`s, and `dest` must remain live until iteration ends.
 Constructing the iterator does not raise. Pulling may raise
 `<alloc-fail>` as `Split.try_next` does. A null `dest` returns NULL.
 
-Source: `lib/string/cursors.x:270`
+Source: `lib/string/cursors.x:272`
 
 <a id="Split.try_next"></a>
 #### Split.try_next

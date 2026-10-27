@@ -242,8 +242,10 @@ meta native Split String.splits(String str, String sep) =>
     arguments produce exhaustion without raising.
 */
 int Split.try_next(Split split, int &?cursor, String &?out) {
-  if (!split || !cursor || !out || !split.next) return 0;
-  return split.next(split, cursor, out);
+  if (!split || !split.next) return 0;
+  if (!cursor) return 0;
+  if (!out) return 0;
+  return split.next(split, &cursor, &out);
 }
 
 static int _iter_next(Iter iter, Var *out) {

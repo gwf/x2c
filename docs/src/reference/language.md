@@ -688,15 +688,30 @@ static int bump_if_present(int &?value) {
 ```
 
 A direct test is the parameter itself, its negation, or its comparison with
-`NULL` or `0`. A direct test proves the parameter nonnull in the matching arm
-of an `if` or `?:`, after an `if` whose null arm returns or raises, and in the
-right operand of `&&` or `||` when the left operand is the test:
+`NULL` or `0`. A condition joins direct tests with `!`, `&&`, `||`, and
+parentheses. It proves each parameter whose test its outcome requires: a true
+`&&` requires both operands' tests, and a false `||` requires both operands'
+tests. Other outcomes prove nothing, because either operand alone can decide
+them.
+
+A condition proves its parameters nonnull in the matching arm of an `if` or
+`?:`, after an `if` whose other arm returns or raises, and in the right operand
+of `&&` or `||` when it is the left operand:
 
 ```x2c
 static int positive(int &?value) => value && value > 0;
 static int is_unset_or_zero(int &?value) => !value || value == 0;
 static int read_or(int &?value, int fallback) => value ? value : fallback;
+
+static int sum(int &?left, int &?right) {
+  if (!left || !right) return 0;
+  return left + right;
+}
 ```
+
+In `(ready && !value) || value > 0`, the right operand runs whenever the left
+operand is false. That includes `ready` false with `value` null, so reading
+`value` there is a compile error.
 
 On a proven path the parameter is an ordinary `T` lvalue: reads, writes, and
 reference forwarding use the caller's storage transparently. The proof ends
