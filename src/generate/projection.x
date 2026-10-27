@@ -105,17 +105,13 @@ static void _publish_node(Partition &p, List node) {
   _keep(p);
 }
 
-/* Both walks keep pending parts off the C stack, since an expression can
-   nest deeply. */
 static int _names_static(List node, Map statics) {
   if (!statics.len()) return 0;
-  Array pending = auto [node];
-  while (pending.len()) {
-    Var item = pending.take_last();
-    if (item is not <list>) continue;
-    match (item) {
-      case %(binding ? ?): if (item in statics) return 1;
-      default: foreach (Var part in item) pending.push(part);
+  List item;
+  $ast.walk(node, item) {
+    match (item) case %(binding ? ?): {
+      if (item in statics) return 1;
+      continue;
     }
   }
   return 0;
@@ -124,14 +120,14 @@ static int _names_static(List node, Map statics) {
 /* Adds to `statics` each binding `node` declares: each one it holds other
    than through an `ident` reference. */
 static void _add_declared(List node, Map statics) {
-  Array pending = auto [node];
-  while (pending.len()) {
-    Var item = pending.take_last();
-    if (item is not <list>) continue;
+  List item;
+  $ast.walk(node, item) {
     match (item) {
       case %(ident *): continue;
-      case %(binding ? ?): statics[item] = 1;
-      default: foreach (Var part in item) pending.push(part);
+      case %(binding ? ?): {
+        statics[item] = 1;
+        continue;
+      }
     }
   }
 }
