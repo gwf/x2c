@@ -138,6 +138,7 @@ static Var _target(List rest) => rest.cdr() ? rest : rest.car()
 
 static String _render(Var node, String declarator):
   if node is not <list>: return _joined(node.str(), declarator)
+  if List.equal(node, %(....)): return _joined("List", "@" + declarator)
   List parts = node
   if !parts: raise %(api-fatal (reason "empty type node"))
   if !parts.cdr(): return _render(parts.car(), declarator)

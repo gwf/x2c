@@ -194,7 +194,7 @@ Source: `lib/list/building.x:38`
 <a id="List.concat"></a>
 #### List.concat
 
-`List List.concat(.... lists)`
+`List List.concat(List @lists)`
 
 Returns the concatenation of the List arguments in order.
 Each argument is one List; `@lists` splices a List of Lists. No arguments
@@ -408,7 +408,7 @@ Source: `lib/list/transformations.x:102`
 <a id="List.new"></a>
 #### List.new
 
-`List List.new(.... items)`
+`List List.new(List @items)`
 
 Returns the List packed from the supplied values and explicit splices.
 An ordinary List argument remains one element. With no values, returns

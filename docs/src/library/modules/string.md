@@ -318,7 +318,7 @@ Source: `lib/string/search.x:29`
 <a id="String.format"></a>
 #### String.format
 
-`String String.format(String fmt, .... values)`
+`String String.format(String fmt, List @values)`
 
 Formats `values` through a checked, C-style subset of `fmt`.
 The receiver is decoded runtime text. Pass separate arguments as

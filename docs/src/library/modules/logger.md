@@ -68,7 +68,7 @@ Source: `lib/logger.x:817`
 
 #### log_debug
 
-`void log_debug(Symbol category, .... fields)`
+`void log_debug(Symbol category, List @fields)`
 
 Logs borrowed `fields` globally at debug level under `category`.
 Pass separate `(key value)` Lists or splice an existing `@fields` List.
@@ -78,7 +78,7 @@ Source: `lib/logger.x:802`
 
 #### log_error
 
-`void log_error(Symbol category, .... fields)`
+`void log_error(Symbol category, List @fields)`
 
 Logs borrowed `fields` globally at error level under `category`.
 Pass separate `(key value)` Lists or splice an existing `@fields` List.
@@ -88,7 +88,7 @@ Source: `lib/logger.x:805`
 
 #### log_event
 
-`void log_event(Symbol level, Symbol category, .... fields)`
+`void log_event(Symbol level, Symbol category, List @fields)`
 
 Delivers one event synchronously through the current global `Logger`.
 With no global `Logger` this is a no-op; otherwise delivery and failures
@@ -98,7 +98,7 @@ Source: `lib/logger.x:698`
 
 #### log_fatal
 
-`void log_fatal(Symbol category, .... fields)`
+`void log_fatal(Symbol category, List @fields)`
 
 Logs borrowed `fields` globally at fatal level under `category`.
 Pass separate `(key value)` Lists or splice an existing `@fields` List.
@@ -116,7 +116,7 @@ Source: `lib/logger.x:692`
 
 #### log_info
 
-`void log_info(Symbol category, .... fields)`
+`void log_info(Symbol category, List @fields)`
 
 Logs borrowed `fields` globally at info level under `category`.
 Pass separate `(key value)` Lists or splice an existing `@fields` List.
@@ -145,7 +145,7 @@ Source: `lib/logger.x:203`
 
 #### log_trace
 
-`void log_trace(Symbol category, .... fields)`
+`void log_trace(Symbol category, List @fields)`
 
 Logs borrowed `fields` globally at trace level under `category`.
 Pass separate `(key value)` Lists or splice an existing `@fields` List.
@@ -155,7 +155,7 @@ Source: `lib/logger.x:801`
 
 #### log_warn
 
-`void log_warn(Symbol category, .... fields)`
+`void log_warn(Symbol category, List @fields)`
 
 Logs borrowed `fields` globally at warn level under `category`.
 Pass separate `(key value)` Lists or splice an existing `@fields` List.
@@ -245,7 +245,7 @@ Source: `lib/logger.x:287`
 <a id="Logger.debug"></a>
 #### Logger.debug
 
-`void Logger.debug(Logger logger, Symbol category, .... fields)`
+`void Logger.debug(Logger logger, Symbol category, List @fields)`
 
 Logs borrowed `fields` synchronously at debug level under `category`.
 Pass separate `(key value)` Lists or splice an existing `@fields` List.
@@ -256,7 +256,7 @@ Source: `lib/logger.x:783`
 <a id="Logger.error"></a>
 #### Logger.error
 
-`void Logger.error(Logger logger, Symbol category, .... fields)`
+`void Logger.error(Logger logger, Symbol category, List @fields)`
 
 Logs borrowed `fields` synchronously at error level under `category`.
 Pass separate `(key value)` Lists or splice an existing `@fields` List.
@@ -267,7 +267,7 @@ Source: `lib/logger.x:786`
 <a id="Logger.fatal"></a>
 #### Logger.fatal
 
-`void Logger.fatal(Logger logger, Symbol category, .... fields)`
+`void Logger.fatal(Logger logger, Symbol category, List @fields)`
 
 Logs borrowed `fields` synchronously at fatal level under `category`.
 Pass separate `(key value)` Lists or splice an existing `@fields` List.
@@ -306,7 +306,7 @@ Source: `lib/logger.x:835`
 <a id="Logger.info"></a>
 #### Logger.info
 
-`void Logger.info(Logger logger, Symbol category, .... fields)`
+`void Logger.info(Logger logger, Symbol category, List @fields)`
 
 Logs borrowed `fields` synchronously at info level under `category`.
 Pass separate `(key value)` Lists or splice an existing `@fields` List.
@@ -342,7 +342,7 @@ Source: `lib/logger.x:229`
 <a id="Logger.log"></a>
 #### Logger.log
 
-`void Logger.log(Logger logger, Symbol level, Symbol category, .... fields)`
+`void Logger.log(Logger logger, Symbol level, Symbol category, List @fields)`
 
 Delivers one event synchronously to eligible sinks in registration order.
 Pass each field as a `(key value)` List, or splice a field List with
@@ -432,7 +432,7 @@ Source: `lib/logger.x:301`
 <a id="Logger.trace"></a>
 #### Logger.trace
 
-`void Logger.trace(Logger logger, Symbol category, .... fields)`
+`void Logger.trace(Logger logger, Symbol category, List @fields)`
 
 Logs borrowed `fields` synchronously at trace level under `category`.
 Pass separate `(key value)` Lists or splice an existing `@fields` List.
@@ -443,7 +443,7 @@ Source: `lib/logger.x:782`
 <a id="Logger.warn"></a>
 #### Logger.warn
 
-`void Logger.warn(Logger logger, Symbol category, .... fields)`
+`void Logger.warn(Logger logger, Symbol category, List @fields)`
 
 Logs borrowed `fields` synchronously at warn level under `category`.
 Pass separate `(key value)` Lists or splice an existing `@fields` List.

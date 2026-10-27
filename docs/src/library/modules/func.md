@@ -140,7 +140,7 @@ NULL when the binding has no context.
 
 **Raises:** `<bad-arg>` for a null binding. It does not return on failure.
 
-Source: `lib/func/func.x:487`
+Source: `lib/func/func.x:489`
 
 <a id="Func.new"></a>
 #### Func.new
@@ -148,7 +148,8 @@ Source: `lib/func/func.x:487`
 `Func Func.new(FuncAdapter adapter, List signature)`
 
 Builds a native-function binding in the current `Scope`.
-A final `....` signature parameter selects List-rest calling semantics.
+A final `(....)` signature parameter, the Type of a `List @name`
+parameter, selects List-rest calling semantics.
 A direct function expression is compiler-adapted; an expression already
 typed `FuncAdapter` is stored as supplied. The canonical `signature` and
 adapter code are borrowed for the `Func` lifetime. Only the signature's
@@ -158,7 +159,7 @@ parameter count and types.
 **Raises:** `<bad-sig>` for a null adapter or a malformed signature, and
 `<alloc-fail>` when binding storage cannot be allocated.
 
-Source: `lib/func/func.x:394`
+Source: `lib/func/func.x:395`
 
 <a id="Func.new_context"></a>
 #### Func.new_context
@@ -166,7 +167,8 @@ Source: `lib/func/func.x:394`
 `Func Func.new_context( FuncAdapter adapter, List signature, const void *context, size_t context_size)`
 
 Builds a binding with copied context in the current `Scope`.
-A final `....` signature parameter selects List-rest calling semantics.
+A final `(....)` signature parameter, the Type of a `List @name`
+parameter, selects List-rest calling semantics.
 The max_align_t-aligned bytes share the `Func` allocation. The byte copy is
 shallow: changing the source bytes does not change the binding, while any
 pointers inside them keep their original targets and lifetimes. A zero
@@ -177,7 +179,7 @@ borrowed for the `Func` lifetime.
 the allocation size overflows, `<bad-sig>` for a null adapter or malformed
 signature, or `<alloc-fail>` when storage cannot be allocated. None return.
 
-Source: `lib/func/func.x:420`
+Source: `lib/func/func.x:422`
 
 <a id="Func.new_rest"></a>
 #### Func.new_rest
@@ -185,16 +187,16 @@ Source: `lib/func/func.x:420`
 `Func Func.new_rest(FuncAdapter adapter, List signature)`
 
 Builds a native binding with fixed parameters and a List rest tail.
-The signature ends in `List` or `....`. The adapter receives fixed
+The signature ends in `List` or `(....)`. The adapter receives fixed
 arguments followed by a List containing the remaining values in order.
 A signature with only one List parameter retains the zero-prefix behavior.
 The canonical signature and adapter code are borrowed for the Func
 lifetime. The result belongs to the current Scope.
 
 **Raises:** `<bad-sig>` for a null adapter, malformed signature, or a final
-parameter other than List or `....`, and `<alloc-fail>` for storage.
+parameter other than List or `(....)`, and `<alloc-fail>` for storage.
 
-Source: `lib/func/func.x:406`
+Source: `lib/func/func.x:407`
 
 <a id="Func.var"></a>
 #### Func.var
@@ -205,7 +207,7 @@ Boxes `function` without copying or retaining the `Func`.
 The returned `Var` carries the same pointer and shares its `Scope`
 lifetime.
 
-Source: `lib/func/func.x:506`
+Source: `lib/func/func.x:508`
 
 ### `FuncArg`
 
@@ -254,7 +256,7 @@ Returns the borrowed native callable carried by `v`.
 
 **Raises:** `<bad-types>` when the value is not a `Func`.
 
-Source: `lib/func/func.x:511`
+Source: `lib/func/func.x:513`
 
 ## Runtime-internal callables
 
@@ -309,7 +311,7 @@ and `Func.move` never transfers it.
 
 **Raises:** the causes of `Func.new`.
 
-Source: `lib/func/func.x:431`
+Source: `lib/func/func.x:433`
 
 #### x2c_func_splice_argument
 
@@ -344,7 +346,7 @@ operation that takes ownership. A NULL `function` does nothing.
 
 **Raises:** the causes of `Scope.move`, which leave ownership unchanged.
 
-Source: `lib/func/func.x:498`
+Source: `lib/func/func.x:500`
 
 <a id="Func.signature"></a>
 #### Func.signature
@@ -355,7 +357,7 @@ Returns a native binding's borrowed canonical signature.
 The result has the `((func (PARAMETERS...)) RESULT...)` shape supplied to
 the constructor and remains valid for the binding's lifetime.
 
-Source: `lib/func/func.x:477`
+Source: `lib/func/func.x:479`
 
 ## Public types
 

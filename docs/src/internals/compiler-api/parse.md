@@ -150,7 +150,7 @@ Source: `src/parse/binding.x:620`
 Binds one constructed parameter in the current scope, including nested
 function modifiers and reference parameter facts.
 
-Source: `src/parse/declarators.x:506`
+Source: `src/parse/declarators.x:507`
 
 <a id="Compiler.bind_source_statement"></a>
 #### Compiler.bind_source_statement
@@ -346,7 +346,7 @@ Returns the folded package-member spelling at the current token, or NULL.
 The token must be an unshadowed imported alias followed by `.` and an
 identifier. This lookahead does not consume tokens.
 
-Source: `src/parse/declarators.x:608`
+Source: `src/parse/declarators.x:609`
 
 <a id="Compiler.parse_basic_identifier"></a>
 #### Compiler.parse_basic_identifier
@@ -355,7 +355,7 @@ Source: `src/parse/declarators.x:608`
 
 Consumes one `ident` token and returns its spelling as a one-item `List`.
 
-Source: `src/parse/declarators.x:621`
+Source: `src/parse/declarators.x:622`
 
 <a id="Compiler.parse_complex_identifier"></a>
 #### Compiler.parse_complex_identifier
@@ -366,7 +366,7 @@ Parses the current identifier or dotted owner/member as a one-item name.
 Package aliases and imported method spellings are folded through the
 current `Sym`, and all accepted tokens are consumed.
 
-Source: `src/parse/declarators.x:547`
+Source: `src/parse/declarators.x:548`
 
 <a id="Compiler.parse_declaration_argument"></a>
 #### Compiler.parse_declaration_argument
@@ -498,7 +498,7 @@ Source: `src/parse/types.x:425`
 
 Consumes and returns the current identifier, or NULL without consuming.
 
-Source: `src/parse/declarators.x:628`
+Source: `src/parse/declarators.x:629`
 
 <a id="Compiler.parse_parameter"></a>
 #### Compiler.parse_parameter
