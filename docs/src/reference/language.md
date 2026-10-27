@@ -669,9 +669,9 @@ int main(void) {
 The call does not write `&`; x2c takes each argument's address. Passing a
 reference parameter to another reference parameter forwards the same object.
 The argument must be an addressable lvalue of the referenced type whose
-storage remains live for the call. A pointer, `NULL` or `0` is a compile
-error for a required reference; to pass the object a pointer `p` addresses,
-write `*p`.
+storage remains live for the call; a `struct T` lvalue matches a `T` that
+names that struct. A pointer, `NULL` or `0` is a compile error for a required
+reference; to pass the object a pointer `p` addresses, write `*p`.
 
 An optional reference parameter is written `T &?name`. It accepts either an
 addressable `T` or `NULL` (or `0`). A null optional reference means that no
@@ -691,8 +691,8 @@ In the nonnull arm of a direct test, or after a null arm that returns or
 raises, the parameter is an ordinary `T` lvalue: reads, writes, and reference
 forwarding use the caller's storage transparently. Outside such a proven
 nonnull path it remains a nullable address and can be tested or forwarded to
-another optional reference. Required references still reject null at compile
-time.
+another optional reference. Forwarding it to a required reference is a compile
+error, as is passing null.
 
 Generated C uses a pointer parameter and explicit address-taking and
 dereferencing. Reference parameters add no runtime representation or ownership
