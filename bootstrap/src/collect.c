@@ -6196,7 +6196,7 @@ static Map f10_interfaces____read_rows(List stored){
         List _x2c_gensym_destructure_3 = pair;
         key = List_getindex(_x2c_gensym_destructure_3, 0);
         value = List_getindex(_x2c_gensym_destructure_3, 1);
-        if(Var_is_row(value, 9, 7, 4)){
+        {
           Var _x2c_gensym_match_var_18 = value;
           int _x2c_gensym_match_none_18 = ! Var_is(_x2c_gensym_match_var_18, 806120);
           List _x2c_gensym_match_expr_39 = Var_list_payload(_x2c_gensym_match_var_18);

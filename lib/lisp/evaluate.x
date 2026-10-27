@@ -197,8 +197,9 @@ static Var _special_eval(Lisp lisp, List args, LispEnv env) {
 }
 
 /* `bind` finds a native target by name. The target carries its own
-   signature, so the given one is checked for shape only. */
-static Var _special_bind(Lisp lisp, List args, LispEnv env) {
+   signature, so the given one is checked for shape only. The missing-target
+   check ensures the result is the native Func. */
+static Func _special_bind(Lisp lisp, List args, LispEnv env) {
   _arity(args, 2, "bind");
   Var (name_form, signature_form) = args;
   Var name = _eval(lisp, name_form, env);

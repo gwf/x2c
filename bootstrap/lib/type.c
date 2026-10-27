@@ -475,15 +475,14 @@ int Type_is_bitfield(Type type){
   return _declarator_kind(type) == 158121667336;
 }
 
-static int List_truth(List);
-
 int Var_is(Var, Symbol);
 
 static Var int_var(int);
 
 static Symbol _declarator_kind(Type type){
-  while(List_truth(Type_list(type)) && Var_is_row(List_car(Type_list(type)), 9, 7, 4)) type = Var_type(List_car(Type_list(type)));
-  return Var_symbol(List_truth(Type_list(type)) && Var_is(List_car(Type_list(type)), 1328354264) ? List_car(Type_list(type)) : int_var(0));
+  while(Var_is_row(List_car(Type_list(type)), 9, 7, 4)) type = Var_type(List_car(Type_list(type)));
+  Var head = List_car(Type_list(type));
+  return Var_symbol(Var_is(head, 1328354264) ? head : int_var(0));
 }
 
 Type Type_qualify(Type type, Type source);
@@ -542,6 +541,8 @@ Type Type_reference(Type type){
   if(! _init_guard_) _file_init_();
   return List_type(cons(_0, List_append(Type_list(type), NULL)));
 }
+
+static int List_truth(List);
 
 Type Type_apply(Type type){
   if(! _init_guard_) _file_init_();
@@ -695,7 +696,7 @@ int Type_is_threaded(Type type){
 }
 
 int Type_is_typedef(Type type){
-  if(! _init_guard_) _file_init_();  return List_truth(Type_list(type)) && x2c_var_equal(List_car(Type_list(type)), Symbol_var(44661285196));
+  if(! _init_guard_) _file_init_();  return x2c_var_equal(List_car(Type_list(type)), Symbol_var(44661285196));
 }
 
 Type Type_base_type(Type type){
@@ -739,7 +740,7 @@ int Type_discards_qualifiers(Type source, Type target){
 }
 
 static unsigned _qualifiers(Type * cursor){
-  unsigned found = 0;  Type type =(* cursor);  while(List_truth(Type_list(type)) && Var_is(List_car(Type_list(type)), 1328354264)){
+  unsigned found = 0;  Type type =(* cursor);  while(Var_is(List_car(Type_list(type)), 1328354264)){
     Symbol head = Var_symbol(List_car(Type_list(type)));  if(! Symbol_is_type_qualifier(head)) break;  switch(head){
       case 7304424 : found |= 1;  break;  case 1544849476362 : found |= 2;  break;  case 1249006209256 : found |= 4;  break;
     }
@@ -749,7 +750,7 @@ static unsigned _qualifiers(Type * cursor){
 }
 
 int Type_is_char_pointer_like(Type type){
-  if(! _init_guard_) _file_init_();  return List_truth(Type_list(type)) &&(({
+  if(! _init_guard_) _file_init_();  return({
     int _x2c_gensym_condition_13 = 0; {
       List _x2c_gensym_match_expr_16 = Type_list(type); {List _x2c_gensym_match_at_39, _x2c_gensym_match_at_40, _x2c_gensym_match_at_41; if(_x2c_gensym_match_expr_16 &&((Var_is(_x2c_gensym_match_expr_16 -> car, 806120) &&(_x2c_gensym_match_at_39 = Var_list_payload(_x2c_gensym_match_expr_16 -> car), 1)) && _x2c_gensym_match_at_39 && _x2c_gensym_match_at_39 ->car.u64 == 9224497936761627226ULL || _x2c_gensym_match_expr_16 ->car.u64 == 9224497936761618486ULL) &&(_x2c_gensym_match_at_40 = _x2c_gensym_match_expr_16 ->cdr) && _x2c_gensym_match_at_40 ->car.u64 == 9224497936761831524ULL && !(_x2c_gensym_match_at_41 = _x2c_gensym_match_at_40 ->cdr)){
         _x2c_gensym_condition_13 = 1;
@@ -771,7 +772,7 @@ int Type_is_char_pointer_like(Type type){
 }
 _x2c_gensym_condition_14;
 }
-));
+);
 }
 
 Type Type_scalar(Type t);
@@ -780,11 +781,11 @@ int Type_is_builtin(Type type){
 }
 
 static int _is_tagged(Type type){
-  if(! List_truth(Type_list(type))) return 0;  Var first = List_car(Type_list(type));  if(Var_is(first, 1328354264)) return _is_tag_keyword(Var_symbol(first));  return 0;
+  Var first = List_car(Type_list(type));  if(Var_is(first, 1328354264)) return _is_tag_keyword(Var_symbol(first));  return 0;
 }
 
 int Type_is_typedef_name(Type type){
-  if(! _init_guard_) _file_init_();  type = Type_base_type(type);  return List_truth(Type_list(type)) && List_len(Type_list(type)) == 1 && Var_is_row(List_car(Type_list(type)), 11, 7, 1);
+  if(! _init_guard_) _file_init_();  type = Type_base_type(type);  return List_len(Type_list(type)) == 1 && Var_is_row(List_car(Type_list(type)), 11, 7, 1);
 }
 
 int Type_is_bare_typedef_name(Type t){

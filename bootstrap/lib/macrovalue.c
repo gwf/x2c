@@ -114,7 +114,7 @@ static Var macro_subject;
 _x2c_gensym_initializer_choice_D484EB6F_0((macro_subject =((void) 0, Void)))
 _Thread_local static int macro_subject_used;
 
-static Var f8_patterns____free_reference(String spelling);
+static List f8_patterns____free_reference(String spelling);
 
 static List _pattern(Macro t, List names, int case_pattern);
 
@@ -130,7 +130,7 @@ static Atom _name_identity(List hole);
 
 static Var f8_patterns____inline(List environment, Var tree);
 
-static Macro f8_patterns____child(List environment, Var binding);
+static Macro f8_patterns____child(List environment, List binding);
 
 static List f8_patterns____instantiate(Macro t, List values);
 
@@ -574,8 +574,8 @@ void Macro_use_subject(Var rows){
   macro_subject = rows;
 }
 
-static Var f8_patterns____free_reference(String spelling){
-  if(Var_is_void(macro_subject)) return List_var(cons(_75, cons(_76, cons(String_var(spelling), NULL))));
+static List f8_patterns____free_reference(String spelling){
+  if(Var_is_void(macro_subject)) return cons(_75, cons(_76, cons(String_var(spelling), NULL)));
   macro_subject_used = 1;
   {
     List row;
@@ -584,11 +584,11 @@ static Var f8_patterns____free_reference(String spelling){
     Var _x2c_gensym_macro_cursor_output_2;
     while(List_try_next(_x2c_gensym_macro_object_2, &(_x2c_gensym_macro_cursor_2), &(_x2c_gensym_macro_cursor_output_2))){
       row = Var_list_payload(_x2c_gensym_macro_cursor_output_2);
-      if(x2c_var_equal(List_car(row), String_var(spelling))) return List_cadr(row);
+      if(x2c_var_equal(List_car(row), String_var(spelling))) return Var_list_payload(List_cadr(row));
     }
 
   }
-  return List_var(cons(_77, cons(String_var(spelling), NULL)));
+  return cons(_77, cons(String_var(spelling), NULL));
 }
 
 List Macro_pattern(Macro t, List names){
@@ -707,7 +707,7 @@ static Var f8_patterns____inline(List environment, Var tree){
         binding = x2c_match_value_0;
         List arguments;
         arguments = x2c_match_list_1;
-        return List_var(f8_patterns____instantiate(f8_patterns____child(environment, binding), arguments));
+        return List_var(f8_patterns____instantiate(f8_patterns____child(environment, Var_list_payload(binding)), arguments));
       }
       break;}} case 9224497963177709656ULL : if(! _x2c_gensym_match_none_2){if(_x2c_gensym_match_expr_3 && _x2c_gensym_match_expr_3 ->car.u64 == 9224497963177709656ULL){return tree;
       break;}} default: break;
@@ -729,7 +729,7 @@ static Var f8_patterns____inline(List environment, Var tree){
   return List_var(Array_list_free(parts));
 }
 
-static Macro f8_patterns____child(List environment, Var binding){
+static Macro f8_patterns____child(List environment, List binding){
   {
     List row;
     List _x2c_gensym_macro_object_5 = environment;
@@ -737,7 +737,7 @@ static Macro f8_patterns____child(List environment, Var binding){
     Var _x2c_gensym_macro_cursor_output_5;
     while(List_try_next(_x2c_gensym_macro_object_5, &(_x2c_gensym_macro_cursor_5), &(_x2c_gensym_macro_cursor_output_5))){
       row = Var_list_payload(_x2c_gensym_macro_cursor_output_5);
-      if(List_compare(Var_list_payload(List_car(row)), Var_list_payload(binding)) == 0) return Var_list_payload(List_cadr(row));
+      if(List_compare(Var_list_payload(List_car(row)), binding) == 0) return Var_list_payload(List_cadr(row));
     }
 
   }
@@ -828,7 +828,7 @@ static Var f8_patterns____pattern_view(Var value){
           Var _x2c_gensym_match_value_2 = name;
           {
             String name = Var_as_string(_x2c_gensym_match_value_2);
-            return f8_patterns____free_reference(name);
+            return List_var(f8_patterns____free_reference(name));
           }
 
         }

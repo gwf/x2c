@@ -172,7 +172,8 @@ static List _enum_member(List member) {
 List Type.fields(Type t) {
   _require_expansion("Type.fields");
   Type resolved = active.expander.sym.resolve_key(t.canonicalize());
-  if (!resolved || !resolved.is_aggregate_tag())
+  /* is_aggregate_tag rejects an empty resolved Type. */
+  if (!resolved.is_aggregate_tag())
     $fail.meta_sdk_fields_type(t);
   List metadata = active.expander.sym.field_order(resolved);
   if (!metadata)

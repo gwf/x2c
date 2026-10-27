@@ -856,7 +856,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _288 = String_var(_287);
   _289 = List_var(NULL);
   _290 = Symbol_var(106239471489226);
-  _291 = int_var(2217);
+  _291 = int_var(2216);
   _292 = String_new("");
   _293 = String_var(_292);
   _294 = Atom_intern(String_new("macro-param"));
@@ -2624,7 +2624,6 @@ Symbol Compiler_peek(Compiler c, int steps){
 
 Token Token_skip_trivia(Token token){
   if(! _init_guard_) _file_init_();
-  if(token -> type == 11212) return token;
   while(1){
     switch(token -> type){
       case 40896714 : case 7477210024 : case 35579270086 : token ++;
@@ -3378,19 +3377,19 @@ static void f21_declarations_defaults____produce_rows(Compiler c, List rows, Arr
 }
 
 static List f21_declarations_defaults____generated_rows(Compiler c, Var callback, Var arguments){
-  List generated = Compiler_bind_syntax(c, Compiler_evaluate_declaration_recipe(c, callback, Var_list_payload(arguments)), 1405544, NULL);  List additions = cons(List_var(generated), NULL); {
+  List generated = Compiler_bind_syntax(c, Compiler_evaluate_declaration_recipe(c, callback, Var_list_payload(arguments)), 1405544, NULL); {
     List _x2c_gensym_match_expr_30 = generated;  switch(_x2c_gensym_match_expr_30 ? _x2c_gensym_match_expr_30 -> car.u64 : 0){
       case 9224497936761657698ULL :{List _x2c_gensym_match_at_232; List x2c_match_list_0; if(_x2c_gensym_match_expr_30 && _x2c_gensym_match_expr_30 ->car.u64 == 9224497936761657698ULL &&(_x2c_gensym_match_at_232 = _x2c_gensym_match_expr_30 ->cdr, 1) &&(x2c_match_list_0 = _x2c_gensym_match_at_232, 1)){{
-        List children;  children = x2c_match_list_0;  additions = children;
+        List children;  children = x2c_match_list_0;  return children;
       }
       break;}} default:{List _x2c_gensym_match_at_232, _x2c_gensym_match_at_233, _x2c_gensym_match_at_234, _x2c_gensym_match_at_235; List x2c_match_list_0; if(_x2c_gensym_match_expr_30 && Var_equal(_x2c_gensym_match_expr_30 -> car, _241 -> car) &&(_x2c_gensym_match_at_232 = _x2c_gensym_match_expr_30 ->cdr) &&(Var_is(_x2c_gensym_match_at_232 -> car, 806120) &&(_x2c_gensym_match_at_233 = Var_list_payload(_x2c_gensym_match_at_232 -> car), 1)) && _x2c_gensym_match_at_233 && _x2c_gensym_match_at_233 ->car.u64 == 9224497936762830310ULL &&(_x2c_gensym_match_at_234 = _x2c_gensym_match_at_233 ->cdr, 1) &&(x2c_match_list_0 = _x2c_gensym_match_at_234, 1) && !(_x2c_gensym_match_at_235 = _x2c_gensym_match_at_232 ->cdr)){{
-        List children;  children = x2c_match_list_0;  additions = children;
+        List children;  children = x2c_match_list_0;  return children;
       }
       break;}}
     }
 
   }
-  return additions;
+  return cons(List_var(generated), NULL);
 }
 
 static void f21_declarations_defaults____select(f21_declarations_defaults___Defaults * d){

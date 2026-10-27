@@ -189,7 +189,8 @@ List MetaContext.function_reference(String name) {
   if (!c) raise %(bad-state (operation "_x2c.function.reference"));
   Type type = NULL;
   List binding = c.sym.lookup($(name), type);
-  if (!binding || !type || !type.is_function()) return %();
+  /* Lookup clears the type on misses; is_function rejects an empty Type. */
+  if (!type.is_function()) return %();
   return %(expr $type (ident $binding));
 }
 
@@ -226,7 +227,8 @@ static String _binding_spelling(List value, List syntax) {
     $fail.meta_sdk_binding_identifier(syntax);
   Var registered =
     active.expander.semantic_binding_facts()[%(known $identity)];
-  if (registered is not <string> || registered.string() != spelling)
+  /* The tag test establishes the String payload used by the comparison. */
+  if (registered is not <string> || registered.string_payload() != spelling)
     $fail.meta_sdk_binding_known(value);
   return spelling;
 }

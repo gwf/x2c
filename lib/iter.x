@@ -350,10 +350,10 @@ meta native Iter Iter.filter(Iter iter, Func func, Iter dest) {
   return dest;
 }
 
+/* try_next rejects a null source before invoking its callback. */
 static int _filter_next(Iter iter, Var *out) {
   Iter source = iter.obj;
   Func func = iter.aux;
-  if (!source) return 0;
   foreach (Var value in source) {
     if (func.apply_value(value)) {
       *out = value;
@@ -398,9 +398,9 @@ meta native Iter Iter.scan(Iter iter, Var seed, Func fn, Iter dest) {
   return dest;
 }
 
+/* The required callback is installed before the iterator is exposed. */
 static int _scan_next(Iter iter, Var *out) {
   Iter source = iter.obj;
-  if (!source || !iter.aux) return 0;
   Var item;
   if (!source.try_next(item)) return 0;
   iter.state = iter.aux.apply_values(iter.state, item);
@@ -470,7 +470,7 @@ meta native Iter Iter.zip_with(Iter left, Iter right, Func fn, Iter dest) {
 
 static int _zip_with_next(Iter iter, Var *out) {
   Iter left_iter = iter.obj, right_iter = iter.state;
-  if (!left_iter || !right_iter) return 0;
+  if (!right_iter) return 0;
   Var left, right;
   if (!left_iter.try_next(left) || !right_iter.try_next(right)) return 0;
   if (iter.aux) *out = iter.aux.apply_values(left, right);
@@ -531,11 +531,11 @@ meta native Iter Iter.chain(Iter first, Iter second, Iter dest) {
 
 static int _chain_next(Iter iter, Var *out) {
   Iter current = iter.obj;
-  if (current && current.try_next(*out)) return 1;
+  if (current.try_next(*out)) return 1;
   current = iter.state;
   iter.obj = current;
   iter.state = void;
-  return current && current.try_next(*out);
+  return current.try_next(*out);
 }
 
 /** Returns a lazy iterator over at most `count` leading source values.
@@ -553,7 +553,7 @@ meta native Iter Iter.head(Iter iter, int count, Iter dest) {
 static int _head_next(Iter iter, Var *out) {
   Iter source = iter.obj;
   int remaining = iter.state;
-  if (!source || remaining <= 0) return 0;
+  if (remaining <= 0) return 0;
   if (!source.try_next(*out)) return 0;
   iter.state = remaining - 1;
   return 1;
@@ -595,7 +595,6 @@ meta native Iter Iter.unique(Iter iter, Iter dest) {
 static int _unique_next(Iter iter, Var *out) {
   Iter source = iter.obj;
   Map seen = iter.state;
-  if (!source) return 0;
   loop {
     Var value;
     if (!source.try_next(value)) return 0;
@@ -664,9 +663,9 @@ static void _unzip_shared_init(UnzipShared *u, Iter source) {
   }
 }
 
+/* Both callbacks receive initialized shared storage and stable columns. */
 static int _unzip_next(Iter iter, Var *out) {
   UnzipSharedRef shared = iter.obj;
-  if (!shared) return 0;
   int stage = iter.state;
   if (stage >= 2) return 0;
   Iter child = &shared.column_iters[stage];
@@ -677,7 +676,6 @@ static int _unzip_next(Iter iter, Var *out) {
 
 static int _unzip_column_next(Iter iter, Var *out) {
   UnzipColumnRef state = iter.obj;
-  if (!state) return 0;
   UnzipShared *shared = state.shared;
   if (!_unzip_ensure(shared, state.column)) return 0;
   *out = shared.buffers[state.column][shared.heads[state.column]];

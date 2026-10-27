@@ -112,7 +112,7 @@ Symbol Compiler.peek(Compiler c, int steps) {
     comment, or preprocessor line. The stream must end in `eof`.
 */
 Token Token.skip_trivia(Token token) {
-  if (token.type == <eof>) return token;
+  /* The default arm returns eof and every non-trivia token unchanged. */
   loop {
     switch (token.type) {
       case <space>: case <comment>: case <preproc>: token++; break;

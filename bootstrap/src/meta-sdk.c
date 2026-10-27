@@ -770,7 +770,7 @@ List Type_fields(Type t){
   if(! _init_guard_) _file_init_();
   _require_expansion(_52);
   Type resolved = Sym_resolve_key(active.expander -> sym, Type_canonicalize(t));
-  if(! List_truth(Type_list(resolved)) || ! Type_is_aggregate_tag(resolved)) _reject_value(_53, List_var(t));
+  if(! Type_is_aggregate_tag(resolved)) _reject_value(_53, List_var(t));
   List metadata = Sym_field_order(active.expander -> sym, resolved);
   if(! List_truth(metadata)) _reject_value(_54, List_var(t));
   Array named = Array_new();
@@ -1092,7 +1092,7 @@ List MetaContext_function_reference(String name){
   }
   Type type = NULL;
   List binding = Sym_lookup(c -> sym, cons(String_var(name), NULL), &(type));
-  if(! List_truth(binding) || ! List_truth(Type_list(type)) || ! Type_is_function(type)) return NULL;
+  if(! Type_is_function(type)) return NULL;
   return({
     Var _x2c_gensym_literal_part_12 = List_var(type);  Var _x2c_gensym_literal_part_13 = List_var(cons(_92, cons(List_var(binding), NULL)));  cons(_68, cons(_x2c_gensym_literal_part_12, cons(_x2c_gensym_literal_part_13, NULL)));
   }
@@ -1168,7 +1168,7 @@ static String f6_syntax____binding_spelling(List value, List syntax){
 }
 if(! Ast_try_binding(value, &(identity), &(spelling))) _reject_value(_101, List_var(syntax));
 Var registered = Map_getindex(Compiler_semantic_binding_facts(active.expander), List_var(cons(_102, cons(int_var(identity), NULL))));
-if(! Var_is_row(registered, 11, 7, 1) || ! String_equal(Var_string(registered), spelling)) MetaContext_reject(_99, cons(String_var(String_join(NULL, cons(String_var(_100), cons(String_var(List_repr(value)), NULL)))), NULL));
+if(! Var_is_row(registered, 11, 7, 1) || ! String_equal(Var_string_payload(registered), spelling)) MetaContext_reject(_99, cons(String_var(String_join(NULL, cons(String_var(_100), cons(String_var(List_repr(value)), NULL)))), NULL));
 return spelling;
 }
 

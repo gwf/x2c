@@ -130,9 +130,11 @@ int Type.is_function(Type type) {
 */
 int Type.is_bitfield(Type type) => _declarator_kind(type) == <bitfield>;
 
+/* List accessors accept nil, whose head is void and length is zero. */
 static Symbol _declarator_kind(Type type) {
-  while (type && type.car() is <list>) type = type.car();
-  return type && type.car() is <symbol> ? type.car() : 0;
+  while (type.car() is <list>) type = type.car();
+  Var head = type.car();
+  return head is <symbol> ? head : 0;
 }
 
 /** Removes one outer pointer-like or array modifier, or returns `NULL`. */
@@ -226,7 +228,7 @@ int Type.is_extern(Type type) => type ~= %(* extern *);
 int Type.is_threaded(Type type) => type ~= %(* threaded *);
 
 /** Returns whether `type` begins with the `typedef` storage class. */
-int Type.is_typedef(Type type) => type && type.car() == <typedef>;
+int Type.is_typedef(Type type) => type.car() == <typedef>;
 
 // canonical forms
 
@@ -293,7 +295,7 @@ int Type.discards_qualifiers(Type source, Type target) {
 static unsigned _qualifiers(Type &cursor) {
   unsigned found = 0;
   Type type = cursor;
-  while (type && type.car() is <symbol>) {
+  while (type.car() is <symbol>) {
     Symbol head = type.car();
     if (!head.is_type_qualifier()) break;
     switch (head) {
@@ -313,16 +315,14 @@ static unsigned _qualifiers(Type &cursor) {
     `const char`, without resolving typedefs or removing qualifiers.
 */
 int Type.is_char_pointer_like(Type type) {
-  return type &&
-         (type ~= %((!or (dim *) (!quote *)) char) ||
-          type ~= %((!or (dim *) (!quote *)) const char));
+  return type ~= %((!or (dim *) (!quote *)) char) ||
+         type ~= %((!or (dim *) (!quote *)) const char);
 }
 
 /** Returns whether `type` is a builtin scalar, struct, union, or enum. */
 int Type.is_builtin(Type type) => !!type.scalar() || _is_tagged(type);
 
 static int _is_tagged(Type type) {
-  if (!type) return 0;
   Var first = type.car();
   if (first is <symbol>) return _is_tag_keyword(first);
   return 0;
@@ -331,7 +331,7 @@ static int _is_tagged(Type type) {
 /** Returns whether the base of `type` is exactly one typedef-name `String`. */
 int Type.is_typedef_name(Type type) {
   type = type.base_type();
-  return type && type.len() == 1 && type.car() is <string>;
+  return type.len() == 1 && type.car() is <string>;
 }
 
 /** Returns whether `t` is one bare typedef-name `String`.

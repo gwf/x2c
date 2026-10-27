@@ -127,9 +127,9 @@ static void _aliased(Preserve &p, List body) {
   }
 }
 
-module Var _preserve_locals(Preserve &p, Var value) {
-  if (value is not <list> || value.is_nil()) return value;
-  List node = value;
+/* Completed declarations, statements, blocks, and child rewrites supply Lists. */
+module List _preserve_locals(Preserve &p, List node) {
+  if (!node) return node;
   // Only declarations and parameters carry a qualifier. A statement
   // expression's own locals follow any landing around it, so they need one
   // only when a statement expression in the function holds a landing.
@@ -145,7 +145,7 @@ module Var _preserve_locals(Preserve &p, Var value) {
     case %(!set ?declaration ((!or declare decl) ? (bindings *))):
       return _declaration(p, declaration, NULL);
   }
-  Var child;
+  List child;
   $ast.rewrite_children(node, child, _preserve_locals(p, child));
 }
 

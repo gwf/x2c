@@ -25,8 +25,9 @@ void Macro.use_subject(Var rows) { macro_subject = rows; }
 /* The pattern for a `using` reference to `spelling`: any binding of it, or
    only the subject's file-scope binding while a call sets a subject. A free
    reference matches any binding of its spelling, since it binds where its
-   expansion lands. */
-static Var _free_reference(String spelling) {
+   expansion lands. Subject rows pair each global spelling with its binding
+   List. */
+static List _free_reference(String spelling) {
   if (macro_subject is void) return %(binding ? $spelling);
   macro_subject_used = 1;
   foreach (List row in macro_subject.list())
@@ -144,8 +145,8 @@ static Var _inline(List environment, Var tree) {
   return parts.list_free();
 }
 
-/* The Macro value the environment captured for `binding`, or NULL. */
-static Macro _child(List environment, Var binding) {
+/* Environment keys and the sought binding are compared as Lists. */
+static Macro _child(List environment, List binding) {
   foreach (List row in environment)
     if (List.compare(row.car(), binding) == 0) return row.cadr();
   return NULL;

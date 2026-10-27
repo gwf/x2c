@@ -94,16 +94,15 @@ static void _produce_rows(Compiler c, List rows, Array selected) {
   }
 }
 
-// A recipe's rows: the children of a sequence or bundle, or its one node.
+/* Bound sequences and bundles already carry canonical row Lists. */
 static List _generated_rows(Compiler c, Var callback, Var arguments) {
   List generated = c.bind_syntax(
     c.evaluate_declaration_recipe(callback, arguments), <unit>, NULL);
-  List additions = $(generated);
   match (generated) {
-    case %(seq *children): additions = children;
-    case %(declaration-bundle (rows *children)): additions = children;
+    case %(seq *children): return children;
+    case %(declaration-bundle (rows *children)): return children;
   }
-  return additions;
+  return $(generated);
 }
 
 /* Each production selects its defaults, and a forwarded constructor
