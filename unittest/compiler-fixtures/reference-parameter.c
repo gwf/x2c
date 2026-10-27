@@ -8,6 +8,11 @@ typedef struct Counter{
 }
 Counter;
 
+typedef struct Tally{
+  struct Counter counter;
+}
+Tally;
+
 static void increment(int * value);
 
 static void swap(int * left, int * right);
@@ -42,11 +47,19 @@ int main(void){
     10
   }
   ;
+  Tally tally ={
+    {
+      1
+    }
+
+  }
+  ;
   increment(&(first));
   swap(&(first), &(second));
   increment_twice(&(second));
   advance(&(counter), 7);
-  printf("%d %d %d\n", first, second, counter.value);
+  advance(&(tally.counter), 2);
+  printf("%d %d %d %d\n", first, second, counter.value, tally.counter.value);
   return 0;
 }
 

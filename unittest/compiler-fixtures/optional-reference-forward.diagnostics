@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/optional-reference-forward.x:6:3: type: check optional reference before using its value
+    increment(value);
+    ^^^^^^^^^
+

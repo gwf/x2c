@@ -507,6 +507,8 @@ static void f11_conversions____check_qualifiers(Compiler c, Type type, Type targ
 
 static void f11_conversions____check_reference_value(Compiler c, Type type, Type target);
 
+static int f11_conversions____takes_reference(Compiler c, Type type, Type target);
+
 static void f11_conversions____check_object_pointer(Compiler c, Type type, Type target, int type_is_var);
 
 static void f11_conversions____check_native_crossing(Compiler c, List expr, Type type, Type target, Type declared_source, Type declared_target);
@@ -7204,7 +7206,7 @@ static List f11_conversions____convert_known_value(Compiler c, List expr, Type t
 }
 
 static List f11_conversions____convert_reference(Compiler c, List expr, Type type, Type target){
-  if(type == cdr(Type_list(target)) && Type_is_reference(target)){
+  if(f11_conversions____takes_reference(c, type, target)){
     if(! _is_addressable(c, expr)) Compiler_report_error(c, 1362954, _3380, NULL, NULL);  return({
       Var _x2c_gensym_literal_part_194 = List_var(target);  Var _x2c_gensym_literal_part_195 = List_var(cons(_5, cons(_33, cons(List_var(cons(_8, cons(List_var(expr), NULL))), NULL))));  cons(_1, cons(_x2c_gensym_literal_part_194, cons(_x2c_gensym_literal_part_195, NULL)));
     }
@@ -7470,7 +7472,7 @@ static void f11_conversions____check_null_reference(Compiler c, List expr, Type 
 }
 
 static void f11_conversions____check_qualifiers(Compiler c, Type type, Type target, Type source, Type destination){
-  int take_reference = Type_is_reference(target) && type == cdr(Type_list(target));  Type qualified = take_reference ? Type_reference(source) : source;  if((take_reference || List_equal(Type_list(type), Type_list(target)) || List_equal(cdr(Type_list(type)), cdr(Type_list(target))) ||(Type_is_pointer(type) && Type_is_pointer(target) &&(Type_base_type(destination) == _470 || Type_base_type(source) == _470))) && Type_discards_qualifiers(qualified, destination)){
+  int take_reference = f11_conversions____takes_reference(c, type, target);  Type qualified = take_reference ? Type_reference(source) : source;  if((take_reference || List_equal(Type_list(type), Type_list(target)) || List_equal(cdr(Type_list(type)), cdr(Type_list(target))) ||(Type_is_pointer(type) && Type_is_pointer(target) &&(Type_base_type(destination) == _470 || Type_base_type(source) == _470))) && Type_discards_qualifiers(qualified, destination)){
     Compiler_report_error(c, 1362954, ({
       Var _x2c_gensym_literal_part_232 = String_var(List_repr(Type_list(source)));  Var _x2c_gensym_literal_part_233 = String_var(List_repr(Type_list(destination)));  String_join(NULL, cons(String_var(_3397), cons(_x2c_gensym_literal_part_232, cons(String_var(_3412), cons(_x2c_gensym_literal_part_233, NULL)))));
     }
@@ -7480,10 +7482,14 @@ static void f11_conversions____check_qualifiers(Compiler c, Type type, Type targ
 }
 
 static void f11_conversions____check_reference_value(Compiler c, Type type, Type target){
-  if(x2c_var_equal(List_car(Type_list(type)), Symbol_var(33330008396)) && ! Type_is_reference(target) && ! Type_is_pointer(Sym_resolve_key(c -> sym, target))) Compiler_report_error(c, 1362954, _3226, NULL, NULL);  if(Type_is_reference(target) && ! Type_is_reference(type) && type != cdr(Type_list(target))) Compiler_report_error(c, 1362954, ({
+  if(x2c_var_equal(List_car(Type_list(type)), Symbol_var(33330008396)) &&(x2c_var_equal(List_car(Type_list(target)), Symbol_var(77)) || ! Type_is_pointer(Sym_resolve_key(c -> sym, target)))) Compiler_report_error(c, 1362954, _3226, NULL, NULL);  if(Type_is_reference(target) && ! Type_is_reference(type) && ! f11_conversions____takes_reference(c, type, target)) Compiler_report_error(c, 1362954, ({
     Var _x2c_gensym_literal_part_234 = String_var(List_repr(Type_list(type)));  Var _x2c_gensym_literal_part_235 = String_var(List_repr(Type_list(target)));  String_join(NULL, cons(String_var(_3416), cons(_x2c_gensym_literal_part_234, cons(String_var(_3417), cons(_x2c_gensym_literal_part_235, cons(String_var(_3302), NULL))))));
   }
   ), NULL, _3420);
+}
+
+static int f11_conversions____takes_reference(Compiler c, Type type, Type target){
+  if(! Type_is_reference(target)) return 0;  Type referenced = List_type(cdr(Type_list(target)));  return type == referenced ||(Type_is_aggregate_tag(type) && Sym_resolve_key(c -> sym, referenced) == type) ||(Type_is_aggregate_tag(referenced) && Sym_resolve_key(c -> sym, type) == referenced);
 }
 
 static void f11_conversions____check_object_pointer(Compiler c, Type type, Type target, int type_is_var){

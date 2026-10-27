@@ -318,17 +318,17 @@ static int _case_match(
   machine.view = _unwrap;
   machine.begin(plan.program.view(), code);
   machine.run();
-  int matched = machine.status == <ok> &&
-    (!captured || _take_slots(machine, captured));
+  int matched = machine.status == <ok> && _take_slots(machine, captured);
   machine.finish();
   machine.dispose();
   return matched;
 }
 
-/* Copies each slot the machine filled, materializing spans, and returns
-   whether the machine is still ok. */
+/* Copies each slot the machine filled into `captured` when requested,
+   materializing spans, and returns whether the machine is still ok. */
 static int _take_slots(
-  MatchMachine &machine, MatchCaptureBuffer &captured) {
+  MatchMachine &machine, MatchCaptureBuffer &?captured) {
+  if (!captured) return machine.status == <ok>;
   for (int i = 0; i < machine.slot_count; i++) {
     MachineSlot *slot = &machine.slots[i];
     if (slot.kind == <invalid>) continue;

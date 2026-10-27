@@ -2,6 +2,10 @@ typedef struct Counter {
   int value;
 } Counter;
 
+typedef struct Tally {
+  struct Counter counter;
+} Tally;
+
 static void increment(int &value) {
   value += 1;
 }
@@ -24,10 +28,12 @@ static void advance(Counter &counter, int amount) {
 int main(void) {
   int first = 4, second = 9;
   Counter counter = { 10 };
+  Tally tally = { { 1 } };
   increment(first);
   swap(first, second);
   increment_twice(second);
   advance(counter, 7);
-  printf("%d %d %d\n", first, second, counter.value);
+  advance(tally.counter, 2);
+  printf("%d %d %d %d\n", first, second, counter.value, tally.counter.value);
   return 0;
 }

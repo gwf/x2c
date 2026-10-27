@@ -382,7 +382,7 @@ static List _convert_known_value(
 static List _convert_reference(
   Compiler c, List expr, Type type, Type target) {
   // T -> &T: pass the address of an addressable value.
-  if (type === cdr(target) && target.is_reference()) {
+  if (_takes_reference(c, type, target)) {
     if (!_is_addressable(c, expr))
       $fail.expressions_ref_address(c, NULL);
     return %(expr $target (op & (parens $expr)));
@@ -667,7 +667,7 @@ static void _check_null_reference(
 /* Same-address conversions must keep qualifiers, including void pointers. */
 static void _check_qualifiers(
   Compiler c, Type type, Type target, Type source, Type destination) {
-  int take_reference = target.is_reference() && type === cdr(target);
+  int take_reference = _takes_reference(c, type, target);
   Type qualified = take_reference ? source.reference() : source;
   if ((take_reference || type == target || cdr(type) == cdr(target) ||
        (type.is_pointer() && target.is_pointer() &&
@@ -680,14 +680,24 @@ static void _check_qualifiers(
 
 static void _check_reference_value(
   Compiler c, Type type, Type target) {
-  /* An optional reference forwards only to another address type. */
-  if (type.car() == <opt-ref> && !target.is_reference() &&
-      !c.sym.resolve_key(target).is_pointer())
+  /* An unchecked optional reference forwards only to another optional
+     reference or a pointer. */
+  if (type.car() == <opt-ref> &&
+      (target.car() == <&> || !c.sym.resolve_key(target).is_pointer()))
     $fail.expressions_optional_ref_unchecked(c, NULL);
-  /* A reference takes an lvalue of its referenced type. */
   if (target.is_reference() && !type.is_reference() &&
-      type !== cdr(target))
+      !_takes_reference(c, type, target))
     $fail.expressions_ref_lvalue(c, NULL, type, target);
+}
+
+/* A reference takes an lvalue of its referenced type, which may be spelled
+   by its typedef name or by its struct or union tag. */
+static int _takes_reference(Compiler c, Type type, Type target) {
+  if (!target.is_reference()) return 0;
+  Type referenced = cdr(target);
+  return type === referenced ||
+    (type.is_aggregate_tag() && c.sym.resolve_key(referenced) === type) ||
+    (referenced.is_aggregate_tag() && c.sym.resolve_key(type) === referenced);
 }
 
 static void _check_object_pointer(

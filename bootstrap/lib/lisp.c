@@ -2890,13 +2890,14 @@ void Lisp_freeze(Lisp lisp){
 
 int Lisp_try_get(Lisp lisp, String name, Var * out){
   if(! _init_guard_) _file_init_();
-  return lisp && String_truth(name) && out && _global_lookup(lisp, Atom_intern(name), out);
+  if(! out) return 0;
+  return lisp && String_truth(name) && _global_lookup(lisp, Atom_intern(name), &((* out)));
 }
 
 void Lisp_set_global(Lisp lisp, String name, Var value){
   if(! _init_guard_) _file_init_();
   if(! lisp || ! String_truth(name)){
-    static const X2CErrorSite _x2c_gensym_error_site_37 = {.file = "../../lib/lisp/sessions.x",.function = "Lisp_set_global",.line = 206,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_37 = {.file = "../../lib/lisp/sessions.x",.function = "Lisp_set_global",.line = 208,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_37, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Lisp.set_global")), NULL))));
     __builtin_unreachable();
   }
@@ -2904,7 +2905,7 @@ void Lisp_set_global(Lisp lisp, String name, Var value){
     Var _x2c_gensym_literal_part_44 = String_var(String_new("Lisp.set_global"));
     Var _x2c_gensym_literal_part_45 = String_var(String_join(NULL, cons(String_var(String_new("frozen")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_38 = {.file = "../../lib/lisp/sessions.x",.function = "Lisp_set_global",.line = 207,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_38 = {.file = "../../lib/lisp/sessions.x",.function = "Lisp_set_global",.line = 209,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_38, 4477477457162, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_44, Symbol_var(1218550748), _x2c_gensym_literal_part_45);
       __builtin_unreachable();
     }
@@ -2941,7 +2942,7 @@ Var Map_del(Map, Var);
 void Lisp_remove_global(Lisp lisp, String name){
   if(! _init_guard_) _file_init_();
   if(! lisp || ! String_truth(name)){
-    static const X2CErrorSite _x2c_gensym_error_site_39 = {.file = "../../lib/lisp/sessions.x",.function = "Lisp_remove_global",.line = 225,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_39 = {.file = "../../lib/lisp/sessions.x",.function = "Lisp_remove_global",.line = 227,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_39, 4372499598, 1, Symbol_var(34096809266140), String_var(String_new("Lisp.remove_global")));
     __builtin_unreachable();
   }
@@ -2949,7 +2950,7 @@ void Lisp_remove_global(Lisp lisp, String name){
     Var _x2c_gensym_literal_part_46 = String_var(String_new("Lisp.remove_global"));
     Var _x2c_gensym_literal_part_47 = String_var(String_join(NULL, cons(String_var(String_new("frozen")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_40 = {.file = "../../lib/lisp/sessions.x",.function = "Lisp_remove_global",.line = 226,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_40 = {.file = "../../lib/lisp/sessions.x",.function = "Lisp_remove_global",.line = 228,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_40, 4477477457162, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_46, Symbol_var(1218550748), _x2c_gensym_literal_part_47);
       __builtin_unreachable();
     }
@@ -2961,7 +2962,7 @@ void Lisp_remove_global(Lisp lisp, String name){
 void Lisp_bind(Lisp lisp, String name, Func function){
   if(! _init_guard_) _file_init_();
   if(! lisp || ! String_truth(name) || ! function){
-    static const X2CErrorSite _x2c_gensym_error_site_41 = {.file = "../../lib/lisp/sessions.x",.function = "Lisp_bind",.line = 242,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_41 = {.file = "../../lib/lisp/sessions.x",.function = "Lisp_bind",.line = 244,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_41, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Lisp.bind")), NULL))));
     __builtin_unreachable();
   }
