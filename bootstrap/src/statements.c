@@ -102,7 +102,7 @@ static List _catch_body(Compiler c);
 
 static List _catch_filter(Compiler c);
 
-static List _governed_statement(Compiler c, Token start);
+static List _governed(Compiler c, Token start);
 
 static int _take_directives(Compiler c, Array items);
 
@@ -1050,7 +1050,7 @@ List Compiler_parse_governed(Compiler c, Symbol position){
       int depth = _take_directives(c, items);
       while(1){
         Token start = c -> token;
-        Array_push(items, List_var(position == 5011670 ? Compiler_parse_block_item(c) : _governed_statement(c, start)));
+        Array_push(items, List_var(position == 5011670 ? Compiler_parse_block_item(c) : _governed(c, start)));
         depth = _depth_after(c, start, depth);
         if(depth <= 0) break;
         Symbol end = _arm_end(Compiler_leading_preproc(c));
@@ -1074,7 +1074,7 @@ List Compiler_parse_governed(Compiler c, Symbol position){
 
 }
 
-static List _governed_statement(Compiler c, Token start){
+static List _governed(Compiler c, Token start){
   List statement = _statement(c, 43159332400040);
   return Map_truth(c -> macro_holes) ? statement : Compiler_anchor_origin(c, statement, start);
 }
