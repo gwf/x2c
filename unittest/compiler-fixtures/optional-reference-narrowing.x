@@ -21,17 +21,9 @@ static int negated(int &?value) {
   return -1;
 }
 
-static int chained(int &?value) => 1 && value && use(value);
-
-static int guarded(Point &?point, int limit) {
-  if (!point || limit < 0 || point.x > limit) return 0;
-  return 1;
-}
-
 static int report(int &?value, Point &?point) {
-  printf("%d %d %d %d %d %d %d %d %d\n", both(value), either(value),
-         pick(value), pick_absent(value), compared(value), field(point),
-         negated(value), chained(value), guarded(point, 5));
+  printf("%d %d %d %d %d %d %d\n", both(value), either(value), pick(value),
+         pick_absent(value), compared(value), field(point), negated(value));
   return 0;
 }
 

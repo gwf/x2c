@@ -688,17 +688,14 @@ static int bump_if_present(int &?value) {
 ```
 
 A direct test is the parameter itself, its negation, or its comparison with
-`NULL` or `0`. A condition proves the parameter nonnull when its outcome
-requires a direct test to find the object; the test may be an operand of `&&`
-or `||`. The proof holds in the matching arm of an `if` or `?:`, after an `if`
-whose other arm returns or raises, and in the right operand of `&&` or `||`
-when the left operand's outcome proves it:
+`NULL` or `0`. A direct test proves the parameter nonnull in the matching arm
+of an `if` or `?:`, after an `if` whose null arm returns or raises, and in the
+right operand of `&&` or `||` when the left operand is the test:
 
 ```x2c
 static int positive(int &?value) => value && value > 0;
 static int is_unset_or_zero(int &?value) => !value || value == 0;
 static int read_or(int &?value, int fallback) => value ? value : fallback;
-static int below(int &?value, int top) => top > 0 && value && value < top;
 ```
 
 On a proven path the parameter is an ordinary `T` lvalue: reads, writes, and
