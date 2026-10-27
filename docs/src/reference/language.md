@@ -4286,7 +4286,6 @@ It evaluates the subject once, has equality precedence, and uses the same
 patterns and typed captures as `match`.
 
 ```x2c
-~#include "x2c.x"
 List row = %(pair 2 3);
 if (row ~= %(pair ?(int a) ?(int b)) && a < b) {
   printf("%d %d\n", a, b);
