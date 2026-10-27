@@ -454,9 +454,9 @@ static List f7_binding____bind_if(Compiler c, Var condition, Var ontrue);
 
 static List f7_binding____bind_if_else(Compiler c, Var condition, Var ontrue, Var onfalse);
 
-static List f7_binding____bind_condition_branch(Compiler c, List test, Var arm, List binding, int present);
+static List f7_binding____bind_condition_branch(Compiler c, List test, Var arm);
 
-static List f7_binding____bind_branch(Compiler c, Var arm, List binding, int present);
+static List f7_binding____bind_branch(Compiler c, Var arm, List test, int holds);
 
 static List f7_binding____bind_for(Compiler c, Var init, Var condition, Var increment, Var body);
 
@@ -8687,24 +8687,20 @@ static List f7_binding____bind_switch(Compiler c, Var expr, Var body){
 
 static List f7_binding____bind_if(Compiler c, Var condition, Var ontrue){
   List test = f7_binding____bind_clause(c, condition);
-  int true_is_present = 1;
-  List binding = Compiler_optional_reference_test(c, test, &(true_is_present));
-  List yes = f7_binding____bind_condition_branch(c, test, ontrue, binding, true_is_present);
-  Compiler_settle_reference(c, binding, true_is_present, yes, NULL);
+  List yes = f7_binding____bind_condition_branch(c, test, ontrue);
+  Compiler_settle_condition(c, test, yes, NULL);
   return cons(_1571, cons(List_var(test), cons(List_var(yes), NULL)));
 }
 
 static List f7_binding____bind_if_else(Compiler c, Var condition, Var ontrue, Var onfalse){
   List test = f7_binding____bind_clause(c, condition);
-  int true_is_present = 1;
-  List binding = Compiler_optional_reference_test(c, test, &(true_is_present));
-  List yes = f7_binding____bind_condition_branch(c, test, ontrue, binding, true_is_present);
-  List no = f7_binding____bind_branch(c, onfalse, binding, ! true_is_present);
-  Compiler_settle_reference(c, binding, true_is_present, yes, no);
+  List yes = f7_binding____bind_condition_branch(c, test, ontrue);
+  List no = f7_binding____bind_branch(c, onfalse, test, 0);
+  Compiler_settle_condition(c, test, yes, no);
   return List_truth(no) ? cons(_1571, cons(List_var(test), cons(List_var(yes), cons(List_var(no), NULL)))) : cons(_1571, cons(List_var(test), cons(List_var(yes), NULL)));
 }
 
-static List f7_binding____bind_condition_branch(Compiler c, List test, Var arm, List binding, int present){
+static List f7_binding____bind_condition_branch(Compiler c, List test, Var arm){
   int scoped = Compiler_open_condition_scope(c, test);
   {
     _x2c_gensym_defer_env_34 _x2c_gensym_macro_environment_34 ={
@@ -8720,7 +8716,7 @@ static List f7_binding____bind_condition_branch(Compiler c, List test, Var arm, 
     x2c_cleanup_push(& _x2c_gensym_defer_record_34);
     {
       {
-        List _x2c_gensym_return_value_23 = f7_binding____bind_branch(c, arm, binding, present);
+        List _x2c_gensym_return_value_23 = f7_binding____bind_branch(c, arm, test, 1);
         {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_34);
           return _x2c_gensym_return_value_23;
@@ -8734,10 +8730,8 @@ static List f7_binding____bind_condition_branch(Compiler c, List test, Var arm, 
 
 }
 
-static List f7_binding____bind_branch(Compiler c, Var arm, List binding, int present){
-  if(! List_truth(binding)) return f7_binding____bind_statement(c, arm);
-  List before = Compiler_present_references(c);
-  if(present) Compiler_mark_reference_present(c, binding);
+static List f7_binding____bind_branch(Compiler c, Var arm, List test, int holds){
+  List before = Compiler_assume_condition(c, test, holds);
   List bound = f7_binding____bind_statement(c, arm);
   Compiler_restore_reference_presence(c, before);
   return bound;

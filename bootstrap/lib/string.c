@@ -1194,7 +1194,7 @@ Split String_splits(String str, String sep){
 }
 
 int Split_try_next(Split split, int * cursor, String * out){
-  if(! split || ! cursor || ! out || ! split -> next) return 0;  return split -> next(split, cursor, out);
+  if(! split || ! split -> next) return 0;  if(! cursor) return 0;  if(! out) return 0;  return split -> next(split, &(* cursor), &(* out));
 }
 
 static int f7_cursors____iter_next(Iter iter, Var * out){
