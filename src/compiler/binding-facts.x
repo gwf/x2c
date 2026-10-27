@@ -102,7 +102,11 @@ static int _null_literal(List expr) {
     case %(expr ? $($grouped(?inner))):
       return _null_literal(inner);
     case %(expr ? (ident (binding ? "NULL"))): return 1;
-    case %(expr ? (literal ? "0")): return 1;
+    case %(expr ? (literal ?ltype ?text)): {
+      Type type = ltype, String spelling = text;
+      unsigned long long value;
+      return type.integer_literal_magnitude(spelling, value) && !value;
+    }
   }
   return 0;
 }

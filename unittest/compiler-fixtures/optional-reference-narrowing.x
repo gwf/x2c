@@ -14,6 +14,8 @@ static int pick_absent(int &?value) => !value ? -1 : use(value);
 
 static int compared(int &?value) => NULL == value ? -1 : use(value);
 
+static int long_zero(int &?value) => value != 0L ? use(value) : -1;
+
 static int field(Point &?point) => point != NULL && point.x > 3;
 
 static int negated(int &?value) {
@@ -40,6 +42,7 @@ static int grouped(int &?value, int &?other) {
 static int report(int &?value, int &?other, Point &?point) {
   printf("%d %d %d %d %d %d %d\n", both(value), either(value), pick(value),
          pick_absent(value), compared(value), field(point), negated(value));
+  printf("%d\n", long_zero(value));
   printf("%d %d %d %d\n", guarded(value, other), chained(value, other),
          joined(value, other), grouped(value, other));
   return 0;
