@@ -599,8 +599,8 @@ List Compiler.parse_governed(Compiler c, Symbol position) {
   return items.len() == 1 ? items[0] : %(group @(items.list()));
 }
 
-/* A template's statements already land at its invocation's origin, and its
-   macro patterns read the template without origin wrappers. */
+/* A template's statements already land at its invocation's origin, and a
+   macro pattern derived from the template would read a wrapper as syntax. */
 static List _governed_statement(Compiler c, Token start) {
   List statement = _statement(c, <statement>);
   return c.macro_holes ? statement : c.anchor_origin(statement, start);
