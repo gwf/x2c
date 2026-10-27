@@ -40,9 +40,9 @@ Reused owners:
   reference (first `:` outside brackets and not part of `?:`) is unchanged.
 - Packing builds the existing `$map_value(...)` syntax and lets
   `src/components/collection-literals.x` lower it, as a bare `{...}` does.
-- The parameter Type generalizes from `(....)` to a marker that names its
-  container, for example `(.... "Map")`. Each existing `(....)` site then
-  branches on the container instead of assuming List.
+- The parameter Type names its container: `(.... "Map")` beside List's
+  marker, which became `(.... "List")` on 2026-10-27. Each rest site reads
+  the container through `Type.rest_container` instead of assuming List.
 
 Decisions (Gary, 2026-10-27):
 
