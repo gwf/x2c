@@ -276,10 +276,13 @@ stored empty `List` inside a larger structure is a visible node that search can
 find. What is *not* a node is the implicit terminal cdr of a proper `List`.
 
 A `match` statement binds captured values to arm-local variables. Captured
-values keep their ordinary [lifetime rules](memory.md). A pattern built from
-literals, nested Lists, unique `?` binders, typed or not, and a final `*` or
-`*name` is tested in place: the compiler emits direct checks and captures.
-Other patterns use the runtime matcher with the same semantics.
+values keep their ordinary [lifetime rules](memory.md). The compiler tests a
+pattern written in the source in place: it emits direct checks and captures
+for literals, nested Lists, binders, and every pattern operator. Three kinds
+of pattern use the runtime matcher instead, with the same semantics: a `*` or
+`*name` before the end of its List, which needs a search; a binder that only
+some alternatives of an `!or` set and that the pattern uses again; and a
+pattern with parts known only when the program runs.
 
 ## break and continue inside an arm
 
