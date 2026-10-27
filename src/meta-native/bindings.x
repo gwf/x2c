@@ -244,6 +244,9 @@ static List _native_signature_type(Compiler c, List signature) {
 }
 
 static List _native_parameter(Compiler c, Type parameter) {
+  /* Transition: an optional reference matches a seed's pointer target. */
+  if (parameter.car() == <opt-ref>)
+    return cons(<*>, c.sym.normalize_declared_type(parameter.cdr()));
   if (parameter.is_reference())
     return cons(
       parameter.car(), c.sym.normalize_declared_type(parameter.cdr()));
