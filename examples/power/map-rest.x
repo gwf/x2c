@@ -20,8 +20,7 @@ int main(void) {
   puts(connect("example.org", @secure, port: 8443));
 
   Func dynamic = connect;
-  String local = "localhost";
-  assert(dynamic(local, port: 3000).str() == "http://localhost:3000");
+  assert(dynamic("localhost", port: 3000).str() == "http://localhost:3000");
   assert(count() == 0 && count(a: 1, a: 2) == 1);
   puts("Later entries win; splices merge in place.");
   return 0;

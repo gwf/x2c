@@ -316,8 +316,10 @@ List _x2c_func_call_arguments(List function, List storage, List arguments) {
     int forwarded = type.car() == <opt-ref>;
     List source = c.cache_literal_list(
       c.sym.normalize_declared_type(forwarded ? type.cdr() : type));
+    /* C text boxes as a String, as it does for any Var destination. */
     List value = c.bind_syntax(
-      c.sym.var_tag_for_type(type, NULL)
+      c.sym.var_tag_for_type(type, NULL) ||
+      type.canonicalize().is_char_pointer_like()
         ? boxed(c.convert_expression(argument, %("Var")))
         : opaque(function, index, source),
       <expression>, NULL);

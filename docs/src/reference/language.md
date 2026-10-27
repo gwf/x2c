@@ -3856,7 +3856,9 @@ Value parameters and results need a lossless `Var`
 conversion, and reference
 parameters retain their typed lvalue address. A pointer parameter whose type
 has no `Var` tag of its own, such as `const char *` or `struct timespec *`,
-accepts any pointer or `String` argument. A struct parameter taken by value
+accepts any pointer or `String` argument. A C string argument, such as
+`"localhost"` or a `char *` value, converts to `String` as it does for any
+`Var` destination. A struct parameter taken by value
 receives a `<p48>` pointer to the bytes to copy, and a struct result arrives
 as a `<p48>` pointer to a copy of its bytes in the active `Scope`. Native code
 passes such an address as a `void *`, because a struct pointer has no lossless
