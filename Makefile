@@ -93,11 +93,7 @@ build-safe: configure					## Conservatively rebuild the compiler
 
 rebuild-from-bootstrap:
 	$(MAKE) -C builds clean
-	$(MAKE) -C include all
-	$(MAKE) -C lib x2c.x
-	tools/gen-linked-meta.sh
-	tools/gen-meta-queries.sh
-	$(PARALLEL_MAKE) -C builds x2c
+	$(MAKE) build
 
 commands: build					## Build checkout external commands
 	@$(MAKE) --no-print-directory command-artifacts
@@ -143,6 +139,7 @@ packages: configure-packages				## Build packages and examples
 	$(MAKE) build
 	$(MAKE) -C packages/pcre2 build short-example example lisp-example
 	$(MAKE) -C packages/yyjson build short-example example lisp-example
+	$(MAKE) -C packages/sqlite build short-example example lisp-example
 	$(MAKE) -C packages/libcurl build short-example example lisp-example
 	$(MAKE) -C examples/packages/http-json-releases build
 	$(MAKE) -C packages/termbox2 build short-example example
@@ -158,6 +155,7 @@ packages: configure-packages				## Build packages and examples
 packages-check: build					## Test the completed packages
 	$(MAKE) -C packages/pcre2 test run run-lisp
 	$(MAKE) -C packages/yyjson test run run-lisp
+	$(MAKE) -C packages/sqlite test run run-lisp
 	$(MAKE) -C packages/libcurl test run run-lisp
 	$(MAKE) -C examples/packages/http-json-releases test
 	$(MAKE) -C packages/termbox2 test run

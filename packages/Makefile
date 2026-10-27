@@ -1,8 +1,8 @@
 PACKAGES := pcre2 yyjson sqlite termbox2 raylib libcurl libuv blis torch \
   autodiff
 # The packages the root `make packages-check` builds and runs.
-CHECKED_PACKAGES := pcre2 yyjson libcurl termbox2 blis libuv raylib torch \
-  autodiff
+CHECKED_PACKAGES := pcre2 yyjson sqlite libcurl termbox2 blis libuv raylib \
+  torch autodiff
 
 .PHONY: test-deps cache-path prepare-checked \
 	$(addprefix prepare-,$(PACKAGES))

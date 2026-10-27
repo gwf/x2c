@@ -41,6 +41,8 @@ jobs:
             targets: test run run-lisp
           - package: yyjson
             targets: test run run-lisp
+          - package: sqlite
+            targets: test run run-lisp
           - package: libcurl
             targets: test run run-lisp
           - package: termbox2
