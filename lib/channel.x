@@ -233,8 +233,6 @@ static void _drop(void *bytes) {
     _native_check(pthread_cond_destroy(&channel.changed));
 }
 
-
-
 static void _native_check(int error) {
   if (!error) return;
   fprintf(stderr, "Channel: native synchronization failed (%d)\n", error);
@@ -323,8 +321,6 @@ static int _rendezvous_send(Channel channel, Var value, int owned) {
   return x2c_thread_stopping() ? -1 : 0;
 }
 
-
-
 static void _append_wait(ChannelWaits &queue, ChannelWait wait) {
   wait.previous = queue.last;
   if (queue.last) queue.last.next = wait;
@@ -363,8 +359,6 @@ static int _buffer_send(Channel channel, ChannelMessage message) {
 
 static void _notify(Channel channel) =>
   _native_check(pthread_cond_broadcast(&channel.changed));
-
-
 
 /* A sender owns native queue storage until commitment. The queue, then the
    receiver, owns the accepted node independently of Scope lists. */

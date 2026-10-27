@@ -236,8 +236,6 @@ List Ast.lone_item(List node) {
   return node;
 }
 
-
-
 /** Applies `per_child` to each `List` child of `ast` and returns the node
     rebuilt from the results; non-list children pass through. When no child
     changed, no scratch storage is allocated and `ast` itself returns, so the
@@ -307,8 +305,6 @@ int Ast.try_binding(List binding, int &?identity, String &?spelling) {
   return 0;
 }
 
-
-
 /** Returns `ast` without the `(at ORIGIN ...)` anchors it arrived wrapped
     in. Every block statement carries one so that a transform-phase
     diagnostic can name its line; a pass that dispatches on a statement tag
@@ -355,8 +351,6 @@ List Ast.initializer_functions(Ast ast, List &source) {
   return functions;
 }
 
-
-
 /** Returns initializer alternatives and their optional native macro input. */
 List Ast.initializer_cases(Ast ast, List &input) {
   input = NULL;
@@ -384,8 +378,6 @@ static List _prototype_params(List parameters, int &changed) {
   }
   return %(fnmod (params @(rebuilt.list_free())));
 }
-
-
 
 /* Returns the innermost node `value` designates, past the forms that still
    name the same object: an `expr` wrapper, parentheses, a member, and an

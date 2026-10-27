@@ -596,8 +596,6 @@ inline String long.str(long l)           => l.var().str();
 /** Returns the readable representation of `long`. */
 inline String long.repr(long l)          => l.var().repr();
 
-
-
 /** Boxes a long value as `Var`. */
 inline Var    long.var(long x)           => Var.box_long(x);
 

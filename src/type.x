@@ -87,8 +87,6 @@ List Type.parameter_ast(Type type, List binding) {
   return %(param $base (bind $binding $mods));
 }
 
-
-
 /** Answers `Type.parts`, declared in `lib/meta.x`, through
     `type_declaration_parts`, which a project's helper shares.
 */

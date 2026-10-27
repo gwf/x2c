@@ -175,8 +175,6 @@ static int _need_space(String prev, String curr) {
   return 1;
 }
 
-
-
 static int _is_prefix_punct(char ch) =>
   ch == '.' || ch == '[' || ch == '(' || ch == '{';
 

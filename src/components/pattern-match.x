@@ -173,8 +173,6 @@ meta static List _match_guard(
   return %(and @(tests.list_free()));
 }
 
-
-
 /* A static pattern first becomes a tree of tests: (and T ...),
    (or T ...), (not T), (true), and leaves that test one cell. A cell is a
    cursor whose head holds a value; `<subject>` is the subject itself,

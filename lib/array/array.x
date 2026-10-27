@@ -431,8 +431,6 @@ static int _sort_key_compare(const void *ap, const void *bp) {
   return order ? order : (a.index > b.index) - (a.index < b.index);
 }
 
-
-
 static void _heap_shift_up(Array heap, int i) {
   while (i > 0) {
     int p = (i - 1) / 2;

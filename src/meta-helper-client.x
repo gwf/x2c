@@ -477,8 +477,6 @@ static int _stop(int signal) {
 static int _running(void) =>
   active && active.pid > 0 && active.owner == getpid();
 
-
-
 /* Sends one frame, returning 1, 0 when the helper has gone, or -1 when
    `deadline` passes. A helper that has exited must not end the compiler
    with SIGPIPE; a helper not reading must not block its deadline. */

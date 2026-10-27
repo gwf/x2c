@@ -368,8 +368,6 @@ void Thread.stop(Thread t) {
   x2c_thread_wait_unlock();
 }
 
-
-
 /** Locks the internal monitor shared by stop publication and queue commits.
     Native synchronization failure aborts without entering Error dispatch.
 */
@@ -680,8 +678,6 @@ static int _parallel_park(Thread thread) {
   return again;
 }
 
-
-
 static void _completion_check(int error) {
   if (!error) return;
   fprintf(stderr, "Thread: completion synchronization failed (%d)\n", error);
@@ -736,8 +732,6 @@ static void _finish_join(Thread thread) {
   thread.errors = void;
   __atomic_store_n(&thread.state, <joined>, __ATOMIC_SEQ_CST);
 }
-
-
 
 static Var _batch_call(const void *bytes, size_t size) {
   (void) size;

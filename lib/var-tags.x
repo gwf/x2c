@@ -23,8 +23,6 @@ meta List _tag_info(void) {
   return $!( { @(cells.list_free()), $(_tag_info_sentinel()) } );
 }
 
-
-
 meta List _tag_info_row(List row) => $!( {
   $(row[0]), $(_tag_kind(row)), $(_tag_top(row)), $(_tag_middle(row)),
   $(_tag_bottom(row))
@@ -54,8 +52,6 @@ meta List _tag_numeric_table(void) {
   foreach (List row in _tag_numeric_rows()) cells.push(_tag_numeric_row(row));
   return $!( { @(cells.list_free()) } );
 }
-
-
 
 meta List _tag_numeric_rows(void) {
   Array rows = [];
@@ -93,7 +89,7 @@ meta List _tag_bits_expr(List row) {
 
 meta Var _tag_bits(List row)     => row[6];
 
-// constant tag rows
+// direct decoder entries
 
 meta List _tag_constant_rows(void) {
   List rows = _tag_decode_rows();
@@ -171,8 +167,6 @@ meta List _tag_decode_rows(void) {
   return rows;
 }
 
-
-
 /* `f64`, `symbol` and `void` are answered before the switch is reached. */
 meta int _tag_decode_row(List row) {
   Var tag = row[0];
@@ -191,22 +185,17 @@ meta Map _tag_sibling_counts(List rows) {
   return counts;
 }
 
-
-
 /* The top a table slot resolves. `var.x` rotates the 16-bit top left one
    bit, so the even slots are tops 0x0000-0x000F and the odd slots are tops
    0x8000-0x800F; tops without rows get a slot of `_invalid_`. */
 meta int _tag_group_top(int slot) =>
   slot % 2 == 0 ? slot / 2 : 0x8000 + slot / 2;
 
-
 meta int _tag_top(List row)      => row[3];
 
 meta int _tag_middle(List row)   => row[4];
 
 meta int _tag_bottom(List row)   => row[5];
-
-
 
 /* A group of one is selected by its top alone; the decoder narrows a group
    of two or four to the low bit or two of the bottom field. */

@@ -75,8 +75,6 @@ Self Buffer.printf(Self buf, const char *format, ...) {
   return buf.write_len(bytes, length);
 }
 
-
-
 /** Appends `length` bytes from `text` to `buf`.
     `text` may be a live range inside `buf.content`, including across growth.
     A zero length accepts a null source. Raises: `<bad-arg>` for a null
@@ -177,8 +175,6 @@ char Buffer.get(Buffer buf, ptrdiff_t index) {
   char out;
   return buf.try_get(index, out) ? out : '\0';
 }
-
-
 
 /** Writes the byte at normalized `index` to `out` when it exists.
     Negative indexes count from the end. Returns zero for a null `Buffer`, null

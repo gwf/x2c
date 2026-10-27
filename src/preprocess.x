@@ -182,8 +182,6 @@ Symbol Compiler.preproc_conditional_kind(String text) {
   return 0;
 }
 
-
-
 /** Returns the preprocessor line `text` without its `#` and the blanks
     around the directive.
 */
@@ -203,7 +201,7 @@ List Compiler.preproc_within_arms(List arms, List items) {
   return out.list_free();
 }
 
-// directive handling
+// conditional branch tracking
 
 static void _directive(ArmScan &s, Token token, size_t i) {
   Symbol kind = Compiler.preproc_conditional_kind(token.text);

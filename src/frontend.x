@@ -224,8 +224,6 @@ Frontend Frontend.new(CliRequest request) {
   return f;
 }
 
-
-
 /** Loads process-owned collection support and the native modules `request`
     names before units, and selects those modules, in order, for its
     compile-time calls.

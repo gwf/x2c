@@ -160,8 +160,6 @@ meta native char Symbol.first(Symbol symbol) {
   return value & 0x7F;
 }
 
-
-
 /** Returns the number of decoded bytes in `symbol`. */
 meta native int Symbol.len(Symbol symbol) {
   int len = 0, bits = (symbol & 1) ? 7 : 5;

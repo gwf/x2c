@@ -817,8 +817,6 @@ static List _own_method(String owner, String member) {
   return %();
 }
 
-
-
 /* The callee a member call `name` on a `type` receiver selects, or an empty
    List. Methods that imported packages each provide are an error. */
 static List _method(Type type, String name) {

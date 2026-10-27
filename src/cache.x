@@ -138,7 +138,7 @@ List Compiler.zero_initializer(Compiler c, List value) {
 List Compiler.initialization_guard(Compiler c, List guard) =>
   c.rebuild_statement($!{ static int $guard = 0; }).cadr();
 
-// header cache initialization
+// stored literals and initialization
 
 static List _header_cache(
   Compiler c, List header, Array ids, String prefix, String guard_name,
@@ -614,8 +614,6 @@ static void _add_calls(StaticQueue &q, Array definitions, Symbol area) {
       q.c.add_init(area, statement);
   }
 }
-
-
 
 // The helper has type void (void).
 static List _helper_call(Compiler c, List helper) {

@@ -275,8 +275,6 @@ int Job.status(Job job) {
   return job.status;
 }
 
-
-
 /** Starts `job` without waiting and returns it. A job that has started is
     returned unchanged.
     Raises: `<not-found>` when a program or the `dir` option does not exist,
@@ -379,8 +377,6 @@ static int _running(Job job) {
   }
   return running;
 }
-
-
 
 static void _reap(Job job, int index, int flags) {
   int status;

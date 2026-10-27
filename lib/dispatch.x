@@ -341,8 +341,6 @@ meta native Iter Var.enumerate(Var x, Iter dest) {
   return Var.iter(x, dest);
 }
 
-
-
 /** Returns an iterator over `Var`.
     Raises: `<void-op>` for `void`. A null `dest` returns NULL without
     raising.

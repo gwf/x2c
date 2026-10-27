@@ -207,8 +207,6 @@ Iter File.iter(File file, Iter dest) {
   return dest;
 }
 
-
-
 /** Reads one raw line into caller-owned byte storage.
     Valid inputs clear `dest`, then include the newline when one is read.
     Returns `<data>` when bytes were read or `<eof>` at clean EOF.
@@ -336,8 +334,6 @@ String File.repr(File file) {
     pointer representation without reading.
 */
 String File.str(File file) => file ? file.string() : Var.pointer_string(file);
-
-
 
 /** Reads the remaining stream into one canonical `String`.
     Starts at the current position, advances through EOF, and returns NULL when

@@ -148,8 +148,6 @@ int scan_keyword(char *s) {
   return scan_keyword_type(s, n) ? n : -1;
 }
 
-
-
 /* Returns an ASCII C identifier's byte count. Raises: `<bad-arg>` for NULL
    or a non-identifier start. */
 int scan_identifier(char *s) {
@@ -267,8 +265,6 @@ int scan_c_operator(char *s) {
 
 /* Returns the same result as `scan_c_string_status` without a status. */
 int scan_c_string(char *s) => scan_c_string_status(s, NULL);
-
-
 
 /* Returns a C String literal's complete byte count, or -1 on malformed or
    truncated input. The caller supplies the opening quote. `status`, when

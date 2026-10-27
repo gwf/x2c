@@ -315,8 +315,6 @@ String Compiler.module_stamp(void) {
   return identity ? %"x2c-module-stamp:$identity" : NULL;
 }
 
-
-
 /** Returns the active compiler's identity in 16 hexadecimal digits.
     Ordinary compiler startup hashes its executable with FNV-1a; an external
     command uses the identity embedded from the compiler that built it.
@@ -430,8 +428,6 @@ void Diagnostics.host_error(List detail) {
   long error = detail.assoc(<"errno">);
   $fail.utils_host_failed(detail, subject, error);
 }
-
-
 
 /** Prints `x2c: error: <message>` to stderr and exits with status 2.
     The streams are flushed and `atexit` handlers do not run, so the call is

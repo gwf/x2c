@@ -144,8 +144,6 @@ inline Var Func.apply_values(Func fn, Var left, Var right) {
   return fn.apply(2, arguments);
 }
 
-
-
 /** Invokes a bound native function synchronously and returns its boxed result.
     `argv` is borrowed only for the call. Value bits are passed by value;
     reference arguments alias their caller-owned targets and may be mutated.

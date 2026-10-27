@@ -99,8 +99,6 @@ inline Self Bytes.append(Self bytes, const void *source, size_t count) {
   return block.bytes;
 }
 
-
-
 /** Appends `count` elements copied from `source` to `block`.
     The source may be NULL for zero-filled elements; otherwise it must name
     `count` readable elements. When growth is required, an initialized range
@@ -130,8 +128,6 @@ inline Self Bytes.reserve(Self bytes, size_t minimum) {
   block.reserve(minimum);
   return block.bytes;
 }
-
-
 
 /** Ensures `block` can hold at least `minimum` elements.
     The `Block` handle and contents remain stable, but growth may replace
@@ -226,8 +222,6 @@ Scope Block.scope(Block b) {
     Raises: the same causes as `Block.new`.
 */
 Bytes Bytes.new(size_t width) => Block.new(width).bytes;
-
-
 
 /** Allocates an empty `Block` for elements of `width` bytes.
     Raises: `<bad-arg>` when `width` is zero, `<size-limit>` when the initial

@@ -363,8 +363,6 @@ int Compiler.error_count(Compiler compiler) => compiler.diagnostics.count;
 */
 List Compiler.diagnostics(Compiler compiler) => compiler.diagnostics.entries();
 
-
-
 /** Returns an immutable `List` snapshot in publication order.
     Snapshot cells are canonicalized through the active pool hierarchy and
     retain their actual producing-pool lifetime. They share the stored entry
@@ -416,8 +414,6 @@ static void _forget(Diagnostics diag, int from) {
       diag.published.del(diag.entries[i]);
   }
 }
-
-
 
 /* A diagnostic's text notes form one line, such as `token: ; kind: ;`. */
 static String _note_line(List l) {
@@ -632,8 +628,6 @@ static void _publish_limit_notice(Diagnostics diag) {
   _emit_entry(diag, entry);
 }
 
-
-
 /* Diagnostic entries always carry code, severity, message, location, and
    notes rows. The severity is the submitting operation's, not the code's: a
    category such as `literal` or `region` reports both errors and warnings.
@@ -666,8 +660,6 @@ static List _compiler_location(Compiler compiler, Token token) {
   }
   return compiler.token_location(token);
 }
-
-
 
 // debug rendering
 

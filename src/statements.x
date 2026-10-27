@@ -180,8 +180,6 @@ List Compiler.parse_governed(Compiler c, Symbol position) {
   return items.len() == 1 ? items[0] : %(group @(items.list()));
 }
 
-
-
 /** Parses one block-position declaration, statement, or macro insertion.
     The caller owns the surrounding scope; a macro insertion may return a
     `(seq ...)` node containing several block items.
@@ -263,8 +261,6 @@ static List _for_clause(Compiler c, Symbol end) {
   return clause;
 }
 
-
-
 static List _match_arms(Compiler c) {
   if (!c.test(<"{">)) return cons(_match_case(c), NULL);
   List cases = _match_cases(c);
@@ -321,8 +317,6 @@ static int _default_after_directive(Array groups, int saw_default, List d) {
   }
   return saw_default;
 }
-
-
 
 static List _match_case(Compiler c) {
   Symbol peek = c.peek(0), Token start = c.token;
@@ -589,8 +583,6 @@ static List _paren_expr(Compiler c) {
   c.expect(<)>);
   return expr;
 }
-
-
 
 static List _return_statement(Compiler c) {
   c.expect(<return>);

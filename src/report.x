@@ -117,8 +117,6 @@ void report_generated(int n, unsigned long long bytes) {
   report_line(<muted>, %"  Generated $n $c_noun and $n $h_noun ($size)");
 }
 
-
-
 /** Writes one newline-terminated receipt to stderr when receipts are enabled.
     In transient mode the receipt first clears the terminal line, which
     another process may be drawing, and `line` must be non-NULL.

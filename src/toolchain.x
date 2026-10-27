@@ -156,8 +156,6 @@ ToolAction Toolchain.module_action(
     <link>,
     %($(t.cc) @inputs @(t.ld_args) @(_module_shape(loader)) "-o" $output));
 
-
-
 /** Creates a `Scope`-owned action that reports nonzero status by default.
     The action retains `arguments` without copying them.
 

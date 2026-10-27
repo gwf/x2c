@@ -228,8 +228,6 @@ Self Path.absolute(Self path) {
   return result;
 }
 
-
-
 /** Returns the names in the directory `path`, sorted, without `.` and `..`.
     Raises: `<not-found>` or `<io-fail>`.
 */
@@ -243,8 +241,6 @@ List Path.list_dir(Path path) {
   closedir(directory);
   return names.sort().list_free();
 }
-
-
 
 /** Creates the directory `p` and any missing parents.
     An existing directory is left as it is.
@@ -341,8 +337,6 @@ meta native Self Path.join(Self base, Path name) {
   return base.endswith("/") ? %"$base$name" : %"$base/$name";
 }
 
-
-
 static String _trimmed(String path) {
   int length = path.len();
   while (length > 1 && path[length - 1] == '/') length--;
@@ -354,8 +348,6 @@ static int _extension_dot(String base) {
   int dot = base.rfind(".");
   return dot > 0 && dot < base.len() - 1 ? dot : -1;
 }
-
-
 
 static int _mode(Path p) {
   struct stat info;
@@ -491,8 +483,6 @@ static const char *_glob_step(const char *pattern, const char *text) {
   if (*pattern == '\\' && pattern[1]) pattern++;
   return *pattern == *text ? pattern + 1 : NULL;
 }
-
-
 
 /* A `]` that opens a class is a member, as in a shell. */
 static int _class_match(const char *&pattern, unsigned char value) {

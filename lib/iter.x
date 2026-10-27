@@ -415,8 +415,6 @@ Iter Iter.unzip(Iter iter, UnzipShared *shared, Iter dest) {
   return dest.init((UnzipSharedRef) shared, _unzip_next, 0);
 }
 
-
-
 /** Initializes caller-supplied iterator storage and returns it.
     `iter` is caller-owned storage, normally a `struct Iter` local. This call
     writes `obj`, the `next` callback, and the initial `state`, clears the

@@ -166,15 +166,11 @@ Type Type.dereference(Type type) {
 /** Views `x` as a `Type` without validating its type shape. */
 inline Type List.type(List x) => (void *) x;
 
-
-
 /** Returns whether `t` begins with a pointer-like modifier. */
 int Type.is_pointer(Type t) => t ~= %((!or (!quote *) & opt-ref ^) *);
 
 /** Returns whether the outer declarator represented by `type` is an array. */
 int Type.is_array(Type type) => _declarator_kind(type) == <dim>;
-
-
 
 /** Returns the `List` payload of `x` as a `Type`, or `NULL` for another tag.
 */
@@ -274,8 +270,6 @@ int Type.is_typedef_name(Type type) {
   return type && type.len() == 1 && type.car() is <string>;
 }
 
-
-
 /** Returns the suffix of `type` beginning at its builtin or typedef base.
     The result shares the original `List` and is `NULL` when no base is
     present.
@@ -332,8 +326,6 @@ Type Type.widest(Type a, Type b) {
   if (signed_bits > unsigned_bits) return signed_type;
   return _unsigned_scalar(signed_type);
 }
-
-
 
 /** Applies integer promotion to `type`.
     Enums and narrow integers become `int`; other scalars retain their

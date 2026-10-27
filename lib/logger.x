@@ -331,8 +331,6 @@ void Logger.initialize(void) {
   logger_error_handler = Error.push(Logger.error_handler, void);
 }
 
-
-
 /** Adds a text sink for borrowed `stderr` and returns its `Logger`-owned
     handle. The sink selects color from terminal state at registration and
     flushes after every event. A NULL `Logger` returns NULL.
@@ -385,8 +383,6 @@ int Logger.sink_count(Logger logger) {
 /** Returns the borrowed current global `Logger`, or NULL when none is set. */
 synchronized
 Logger log_get_global_logger(void) => global_logger;
-
-
 
 /** Creates a `Logger` in the active `Scope`, filtering below `min_level`.
     The `Logger` borrows the active canonical pool for any memory sinks and
@@ -508,8 +504,6 @@ static void _lock(void) =>
   Mutex.recursive_lock(
     &logger_mutex, &logger_mutex_once, _mutex_initialize,
     "Logger: could not lock mutex");
-
-
 
 static void _mutex_initialize(void) =>
   Mutex.recursive_initialize(

@@ -128,8 +128,6 @@ int Tokenizer.do_scanner(Tokenizer t, int (*scanner)(char *), Symbol type) {
    Raises: `<alloc-fail>` or `<size-limit>` while appending. */
 int Tokenizer.error(Tokenizer tokenizer) => _error(tokenizer, <malformed>);
 
-
-
 /* Copies the next `len` source bytes into one token, appends it, advances the
    zero-based byte position and one-based line and column, and returns one.
    `len` must fit the remaining source. State advances only after token storage
