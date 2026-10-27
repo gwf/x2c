@@ -5088,6 +5088,7 @@ static List f8_bindings____native_signature_type(Compiler c, List signature){
 int Type_is_reference(Type);
 
 static List f8_bindings____native_parameter(Compiler c, Type parameter){
+  if(x2c_var_equal(List_car(Type_list(parameter)), Symbol_var(33330008396))) return cons(Symbol_var(54), Type_list(Sym_normalize_declared_type(c -> sym, List_cdr(parameter))));
   if(Type_is_reference(parameter)) return cons(List_car(Type_list(parameter)), Type_list(Sym_normalize_declared_type(c -> sym, List_cdr(parameter))));
   return Type_list(Sym_normalize_declared_type(c -> sym, parameter));
 }
