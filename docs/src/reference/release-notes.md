@@ -6,6 +6,8 @@ commands, and packages since the previous release. The
 
 ## Unreleased
 
+### Language
+
 - The compiler no longer evaluates Lisp. The compile-time `$(...)` and
   `@(...)` forms, including `$(import "file.xlisp")`, are removed; each one
   is reported where it is written as `compile-time Lisp forms are not
@@ -19,8 +21,46 @@ commands, and packages since the previous release. The
   `$lisp.install` keep their behavior. A `meta` function that uses Lisp runs
   in the project helper or the REPL; a native module the compiler loads no
   longer receives Lisp. See [Runtime Lisp](language.md#runtime-lisp).
+- `$(...)` now builds a List from evaluated expressions, `@(...)` splices a
+  List or Map into a literal or call, and `${key: value}` builds a Map whose
+  bare identifier keys are Symbols. See
+  [Evaluated Lists and Maps](language.md#evaluated-lists-and-maps).
+- A final `List @name` parameter packs the trailing call arguments into one
+  List, and `List.new(a, b, c)` builds a List the same way. See
+  [List rest parameters](language.md#list-rest-parameters).
+- A final `Map @name` parameter receives `key: value` call arguments as a
+  Map, and `@map` passes a Map through. See
+  [Map rest parameters](language.md#map-rest-parameters).
+- `with (place = value) { ... }` assigns for the block and restores the
+  old value on every exit, replacing `$let`. See
+  [Temporary assignments with `with`](language.md#temporary-assignments-with-with).
+- `alias expr as name;` substitutes an expression for a name until the end
+  of its scope, `static alias` does so at file scope, and `unalias name;`
+  ends an alias early. The old `with` alias form is removed. See
+  [Expression aliases with `alias`](language.md#expression-aliases-with-alias).
+- `subject ~= pattern` is a condition that binds the pattern's names where
+  it holds, so a one-case `match` reads as an `if`. See
+  [Pattern conditions](language.md#pattern-conditions).
+- Reference parameters: a `struct T` lvalue satisfies a `T` reference to
+  that struct; a pointer, `NULL`, or `0` for a required reference, a
+  pointer value where a pointer to its type is declared, and an unchecked
+  optional reference forwarded to a required one are compile errors. An
+  optional reference is proven through `!`, `&&`, `||`, and `?:`. See
+  [Reference parameters](language.md#reference-parameters).
+- `match` compiles to inline tests instead of runtime pattern machinery;
+  behavior is unchanged.
+
+### Library
+
 - `Code.native_signature` returns the `Func` signature of a function for
   compile-time code.
+- A C string passed through a `Func` is boxed as a `String`, so `String`,
+  native pointer, and `Var` parameters all accept it.
+- `Thread.finish_all` no longer prints a cleanup diagnostic during an error
+  unwind when every worker was joined.
+
+### Commands and packages
+
 - The x2c home is now marked by `etc/compiler-prelude.x`, which holds the
   builtin macros, in place of `etc/compiler-sdk.xlisp`.
 - `x2c repl --package-dir DIR` searches DIR for packages in every `:load`,
@@ -42,7 +82,8 @@ commands, and packages since the previous release. The
   of generated code, and a loaded file's diagnostics print as `x2c build`
   prints them.
 - REPL completion leaves out runtime names that the library reference
-  marks internal.
+  marks internal, and `x2c repl` is listed as experimental.
+- The sqlite package joins the checked packages.
 
 ## 0.15.1 (2026-10-17)
 
@@ -90,6 +131,7 @@ before replacing an existing prefix.
   variable may supply a `raise` code.
 - Optional reference parameters, GNU statement expressions, `threaded`
   thread-local storage, and the contextual `in` membership operator.
+- A `switch` whose selector is a `String` selects its case by content.
 - `class` types gain `alloc` and a refusing `init`, and `init` takes
   constructor arguments.
 - Twelve language features moved out of the compiler kernel into
