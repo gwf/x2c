@@ -256,7 +256,7 @@ static void _statement_clear(Prepared statement) {
     Pass separate values or splice an existing List with
     `statement.bind(@values)`.
 */
-Prepared Prepared.bind(Prepared statement, .... values) {
+Prepared Prepared.bind(Prepared statement, List @values) {
   _statement_live(statement, "bind");
   int count = sqlite3_bind_parameter_count(statement.handle);
   if (values.len() != count)

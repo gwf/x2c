@@ -380,8 +380,9 @@ static void _interpreter_ownership(ReplSession s) {
 }
 
 static void _rest_arguments(ReplSession s) {
-  _expect(s, "List rest_items(.... items) { return items; }", <defined>, void);
-  _expect(s, "int rest_count(int prefix, .... items) "
+  _expect(s, "List rest_items(List @items) { return items; }",
+          <defined>, void);
+  _expect(s, "int rest_count(int prefix, List @items) "
              "{ return prefix + items.len(); }", <defined>, void);
   _expect(s, "List rest_pair = %(2 3);", <executed>, void);
   _expect(s, "List rest_empty = NULL;", <executed>, void);

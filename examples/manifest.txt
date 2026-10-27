@@ -52,7 +52,7 @@ power/finance|showcase|run||expected/iter-finance.stdout|Running balances, loan 
 power/generics|showcase|run||expected/power-generics.stdout|Standalone power generics gallery example.
 power/greet-client|showcase|run||expected/import-greet.stdout|Package import: alias-qualified names and a linked package archive.
 power/imports|optional|none||-|PCRE2 named request captures; checked with optional packages.
-power/list-rest|showcase|run||expected/list-rest.stdout|Four-dot List rest parameters through direct, method, pointer, and Func calls.
+power/list-rest|showcase|run||expected/list-rest.stdout|List rest parameters through direct, method, pointer, and Func calls.
 power/indexing|showcase|run||expected/power-indexing.stdout|Standalone power indexing gallery example.
 power/iterators|showcase|run||expected/iter-data.stdout|Lazy selection, merging, validation, and enumeration.
 power/match|showcase|run||expected/power-match.stdout|Standalone power match gallery example.

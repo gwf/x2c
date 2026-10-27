@@ -4,10 +4,10 @@
 #include <assert.h>
 #include "type.x"
 
-static List collect(.... items) => items;
-static int count_after(int fixed, .... items) => fixed + items.len();
+static List collect(List @items) => items;
+static int count_after(int fixed, List @items) => fixed + items.len();
 
-static int String.count_items(String label, .... items) {
+static int String.count_items(String label, List @items) {
   printf("%s: %d\n", label, items.len());
   return items.len();
 }
@@ -20,7 +20,7 @@ int main(void) {
   assert(collect(integer, real) == $(integer, real));
   assert(collect(1, @pair, @empty, 4) == %(1 2 3 4));
 
-  int (*count)(int, .... items) = count_after;
+  int (*count)(int, List @items) = count_after;
   assert(count(10, pair) == 11);
   assert(count(10, @pair) == 12);
 

@@ -3,12 +3,12 @@
 #include <stdarg.h>
 #include <assert.h>
 
-typedef int (*GlobalRest)(....);
+typedef int (*GlobalRest)(List @);
 int through_alias(GlobalRest callback) => callback(%(1 2));
-int count(.... items);
-int count(.... items) => items.len();
-int plus(int prefix, .... items) => prefix + items.len();
-int String.total(String self, int prefix, .... items) =>
+int count(List @items);
+int count(List @items) => items.len();
+int plus(int prefix, List @items) => prefix + items.len();
+int String.total(String self, int prefix, List @items) =>
   self.len() + prefix + items.len();
 
 static int sequence;
@@ -17,7 +17,7 @@ static List pair(void) {
   int first = next(), second = next();
   return %($first $second);
 }
-static int ordered(.... items) => items.equal(%(1 2 3 4));
+static int ordered(List @items) => items.equal(%(1 2 3 4));
 static int c_variadic(int first, ...) {
   va_list args;
   va_start(args, first);
@@ -30,8 +30,8 @@ int main(void) {
   List values = %(1 2), empty = NULL;
   Type type = %(int);
   String text = "hey";
-  int (*pointer)(int, .... items) = plus;
-  typedef int (*Rest)(....);
+  int (*pointer)(int, List @items) = plus;
+  typedef int (*Rest)(List @);
   Rest alias_pointer = count;
   assert(plus(10) == 10);
   assert(pointer(10) == 10);

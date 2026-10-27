@@ -385,7 +385,7 @@ A C no-argument parameter list is explicitly `(params (param (void) (bind ()
 ())))`. Do not replace it with `(params)` solely because lambdas and calls
 permit empty parameter/argument sequences.
 
-A four-dot rest parameter uses `(param (....) (bind NAME ()))`. Its
+A List rest parameter, `List @NAME`, uses `(param (....) (bind NAME ()))`. Its
 semantic parameter Type is `(....)`, distinct from `("List")`, while its
 bound local and emitted native parameter are ordinary Lists. The final
 position in the parameter sequence owns the rest convention.

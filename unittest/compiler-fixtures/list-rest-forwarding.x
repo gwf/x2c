@@ -5,12 +5,12 @@ typedef struct Measure { long value; } *Measure;
 typedef struct Reading { Measure measure; } *Reading;
 
 protocol Measure(T) {
-  long T.total(T, .... values);
+  long T.total(T, List @values);
 }
 
 Measure Reading.measure(Reading value) => value.measure;
 
-long Measure.total(Measure value, .... values) {
+long Measure.total(Measure value, List @values) {
   long result = value.value;
   foreach (Var item in values) result += item.integer();
   return result;

@@ -317,8 +317,8 @@ python3 commands/repl/tests/reload.py "$tmp"
 # prefix uses an object envelope; its explicit rest splice still packs once.
 cat >"$tmp/rest.x" <<'EOF'
 int rest_global = 10;
-List loaded_rest(.... items) { return items; }
-int loaded_rest_ref(int &value, .... items) {
+List loaded_rest(List @items) { return items; }
+int loaded_rest_ref(int &value, List @items) {
   value += items.len();
   return value;
 }

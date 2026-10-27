@@ -1,7 +1,7 @@
 #include "lib.x"
 #include "meta.x"
 #include "rewrite.x"
-int count(int fixed, .... items) => fixed + items.len();
+int count(int fixed, List @items) => fixed + items.len();
 macro Expression $counted(Expr @args) => count(@args);
 $rewrite($counted)
 meta Code ordered_count(Code call) {

@@ -513,7 +513,7 @@ nested();  // 3
 A returned noncapturing lambda or named function needs a `(Func)` cast,
 as in native code.
 
-The REPL provides `String.format(String fmt, .... values)`. Pass separate
+The REPL provides `String.format(String fmt, List @values)`. Pass separate
 arguments, or splice an existing List with `@values`:
 
 ```x2c

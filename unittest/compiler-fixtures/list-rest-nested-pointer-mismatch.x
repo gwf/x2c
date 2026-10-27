@@ -1,6 +1,6 @@
 #include "lib.x"
 typedef int (*Ordinary)(List);
-typedef int (*Rest)(....);
+typedef int (*Rest)(List @);
 int ordinary(List items) => items.len();
 int invoke_rest(Rest callback) { return callback(%(1 2)); }
 int main(void) {

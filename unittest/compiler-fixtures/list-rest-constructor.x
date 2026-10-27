@@ -10,7 +10,7 @@ int main(void) {
   assert(List.new(1, @pair, @(empty), 4) == $(1, @pair, @(empty), 4));
   assert(List.new(pair) == $(pair));
   assert(List.new() == $());
-  List (*constructor)(....) = List.new;
+  List (*constructor)(List @) = List.new;
   Func dynamic = List.new;
   assert(constructor(pair) == %($pair));
   assert(dynamic(1, @pair, 4).list() == %(1 2 3 4));

@@ -41,10 +41,10 @@ bundle() {
 cat >src/helpers.x <<'EOF'
 #include "x2c.x"
 meta int triple(int);
-meta int rest_total(int, ....);
+meta int rest_total(int, List @);
 
 int triple(int x) { return 3 * x; }
-int rest_total(int prefix, .... items) {
+int rest_total(int prefix, List @items) {
   foreach (int item in items) prefix += item;
   return prefix;
 }

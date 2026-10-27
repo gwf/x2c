@@ -6,7 +6,7 @@
     An ordinary List argument remains one element. With no values, returns
     nil. The result has ordinary List identity and pool lifetime.
 */
-List List.new(.... items) => items;
+List List.new(List @items) => items;
 
 /** Returns the canonical cons cell for `head` and `tail`.
     Repeating the call with the same head bits and canonical tail returns the

@@ -1,11 +1,11 @@
 #include "x2c.x"
 
 typedef List Type;
-typedef List (*RestPointer)(int, ....);
+typedef List (*RestPointer)(int, List @);
 
-static List collect(int prefix, .... items) => cons(prefix, items);
-static int count(.... items) => items.len();
-static int change(int &value, .... items) {
+static List collect(int prefix, List @items) => cons(prefix, items);
+static int count(List @items) => items.len();
+static int change(int &value, List @items) {
   value += items.len();
   return value;
 }
@@ -29,9 +29,9 @@ int main(void) {
   printf("reference %d %d\n", changed, value);
   result = f(0, next(), @(splice()), next());
   printf("order %d %d\n", result == %(0 1 8 9 3), effects);
-  Func lambda = %!(int prefix, .... items) => prefix + items.len();
+  Func lambda = %!(int prefix, List @items) => prefix + items.len();
   int captured = 20;
-  Func closure = %!(.... items) => captured + items.len();
+  Func closure = %!(List @items) => captured + items.len();
   printf("lambda %d %d\n", lambda(5, 1, 2).int(), closure(1, 2, 3).int());
   int caught = 0;
   try f(); catch %(bad-arity *): caught++;

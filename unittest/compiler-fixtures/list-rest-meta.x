@@ -1,10 +1,10 @@
 #include "x2c.x"
 
-meta int total(int prefix, .... items) {
+meta int total(int prefix, List @items) {
   foreach (int item in items) prefix += item;
   return prefix;
 }
-meta int length(.... items) => items.len();
+meta int length(List @items) => items.len();
 meta List numbers(void) => %(2 3);
 meta List empty(void) => NULL;
 meta int dynamic(void) {

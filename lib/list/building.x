@@ -89,7 +89,7 @@ Self List.append(Self a, Self b) {
     preceding cells are rebuilt. Inputs are not modified.
     Raises: `<alloc-fail>` or `<size-limit>` while constructing the result.
 */
-List List.concat(.... lists) {
+List List.concat(List @lists) {
   Array values = auto lists;
   return _concat_lists(values);
 }

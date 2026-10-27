@@ -146,7 +146,7 @@ static keyword synchronized $logger.synchronized;
     Raises: any cause from an emitter or fatal-event flusher; later callbacks
     are then skipped.
 */
-void Logger.log(Logger logger, Symbol level, Symbol category, .... fields) =>
+void Logger.log(Logger logger, Symbol level, Symbol category, List @fields) =>
   _log_fields(logger, level, category, fields);
 
 synchronized
@@ -695,7 +695,7 @@ Logger log_get_global_logger(void) => global_logger;
     With no global `Logger` this is a no-op; otherwise delivery and failures
     are those of `Logger.log`.
 */
-void log_event(Symbol level, Symbol category, .... fields) =>
+void log_event(Symbol level, Symbol category, List @fields) =>
   _log_global_fields(level, category, fields);
 
 synchronized
@@ -772,7 +772,7 @@ static macro Unit $logger.method(Name $method, Literal $level) {
   */
   void Logger.$method(
     Logger $x2c_ident("logger"), Symbol $x2c_ident("category"),
-    .... $x2c_ident("fields")) {
+    List @$x2c_ident("fields")) {
     _log_fields(
       $x2c_ident("logger"), $level,
       $x2c_ident("category"), $x2c_ident("fields"));
@@ -792,7 +792,7 @@ static macro Unit $logger.global(
       Pass separate `(key value)` Lists or splice an existing `@fields` List.
       Delivery and failure behavior follow `log_event`.
   */
-  void $function(Symbol $x2c_ident("category"), .... $x2c_ident("fields")) {
+  void $function(Symbol $x2c_ident("category"), List @$x2c_ident("fields")) {
     _log_global_fields(
       $level, $x2c_ident("category"), $x2c_ident("fields"));
   }
