@@ -887,6 +887,10 @@ choice.unlink()
 (root / 'first' / suffix / 'choice.h').unlink()
 check('removed', 'first', False)
 check('removed-unchanged', 'first', True)
+(root / 'extra').mkdir(exist_ok=True)
+env['CPATH'] = str(root / 'extra')
+check('environment', 'first', False)
+check('environment-unchanged', 'first', True)
 PY_XLAT_REUSE
 done
 

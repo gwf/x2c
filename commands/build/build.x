@@ -349,6 +349,9 @@ static uint64_t _translation_options(
   hash = _state_text(hash, request.cpp_symbols ? "cpp-symbols" : "raw");
   hash = _state_text(
     hash, request.source_map ? "source-map" : "generated-lines");
+  // The translation's preprocessor run consults these as the C compiler does.
+  foreach (String name, %("CPATH" "C_INCLUDE_PATH" "SDKROOT"))
+    hash = _state_text(hash, Env.get(name));
   // A loaded module's functions can compute what the translation emits.
   foreach (String module, request.native_modules)
     hash = _state_file(hash, module, ok);
@@ -1231,8 +1234,7 @@ static uint64_t _script_fingerprint(
   hash = _state_list(hash, request.inputs);
   hash = _translation_options(hash, request, ok);
   hash = _state_list(hash, request.ld_args);
-  foreach (String name, %("CPATH" "C_INCLUDE_PATH" "LIBRARY_PATH" "SDKROOT"))
-    hash = _state_text(hash, Env.get(name));
+  hash = _state_text(hash, Env.get("LIBRARY_PATH"));
   foreach (String path, prerequisites) hash = _state_entry(hash, path, ok);
   return hash;
 }
