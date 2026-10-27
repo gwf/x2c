@@ -12,7 +12,7 @@
 
 static typedef struct LoadedSource {
   ReplResult result;
-  Map symbols, signatures, globals;
+  Map symbols, globals;
 } LoadedSource;
 
 static typedef struct LoadedCall {
@@ -200,20 +200,21 @@ static void _check_names(
    their exact declared meaning. Declarations the file no longer publishes
    are removals, which `_check_removed` checks. */
 static void _check_replacement(
-  ReplLoadedFile file, Map symbols, Map signatures) {
-  foreach (Var (name, signature), file.signatures) {
-    Var replacement;
-    if (!signatures.try_get(name, replacement)) continue;
-    if (!signature.equal(replacement))
-      _changed(%"function type changed: $name");
-    List receiver = %(self $name);
-    if (!file.symbols[receiver].equal(symbols[receiver]))
-      _changed(%"receiver type changed: $name");
-  }
+  Compiler c, ReplLoadedFile file, Map symbols) {
+  foreach (Var (key, declaration), file.symbols)
+    match (key) case %(?(String name)): {
+      Type type = declaration, replacement = _function_type(symbols, name);
+      if (!type.is_function() || !replacement) continue;
+      if (!c.func_signature(type).equal(c.func_signature(replacement)))
+        _changed(%"function type changed: $name");
+      List receiver = %(self $name);
+      if (!file.symbols[receiver].equal(symbols[receiver]))
+        _changed(%"receiver type changed: $name");
+    }
   foreach (Var (key, declaration), file.symbols) {
     match (key) {
-      case %(?name): if (name in file.signatures) continue;
-      case %(self ?name): if (name in file.signatures) continue;
+      case %(?name): if (_function_type(file.symbols, name)) continue;
+      case %(self ?name): if (_function_type(file.symbols, name)) continue;
     }
     Var replacement;
     if (symbols.try_get(key, replacement) && !declaration.equal(replacement))
@@ -356,7 +357,7 @@ static int _holds(Compiler c, String name, Map globals, Var callable) {
 static ReplLoadedFile _main_owner(ReplSession session) {
   foreach (Var (path, record), session.files) {
     ReplLoadedFile file = record;
-    if ("main" in file.signatures) return file;
+    if (_function_type(file.symbols, "main")) return file;
   }
   return NULL;
 }
@@ -429,18 +430,16 @@ static List _remove(
   session.files.del(retired.path);
   List kept = retired.types.filter(%!(List family) => !(family in dropped));
   retired.symbols.cleanup();
-  retired.signatures.cleanup();
   xfree(retired);
   return kept;
 }
 
-static Map _signatures(Compiler c, Map symbols, List names) {
-  Map signatures = {};
-  foreach (String name, names) {
-    Type type = symbols[$(name)];
-    if (type.is_function()) signatures[name] = c.func_signature(type);
-  }
-  return signatures;
+/* The function declaration already retained in a file's public symbols. */
+static Type _function_type(Map symbols, String name) {
+  Var declaration;
+  if (!symbols.try_get($(name), declaration)) return NULL;
+  Type type = declaration;
+  return type.is_function() ? type : NULL;
 }
 
 /* Declarations leave the source Context; every file uses the candidate
@@ -645,8 +644,10 @@ static void _publish(
   }
   _publish_types(session, loaded.symbols);
   _publish_globals(session, file, loaded.globals);
-  foreach (Var (name, signature), loaded.signatures) {
-    if (file.signatures && name in file.signatures) continue;
+  foreach (String name, loaded.result.value.list()) {
+    Type type = _function_type(loaded.symbols, name);
+    if (!type || _function_type(file.symbols, name)) continue;
+    List signature = session.compiler.func_signature(type);
     LoadedCall call = {.session = session, .file = file, .name = name};
     Func function = Func.new_context(_call, signature, &call, sizeof call);
     session.evaluator.set_global(name, function);
@@ -654,10 +655,8 @@ static void _publish(
     session.names[name] = %(native (source $filename) (objects $adapter));
   }
   if (file.symbols) file.symbols.cleanup();
-  if (file.signatures) file.signatures.cleanup();
   file.symbols = loaded.symbols;
-  file.signatures = loaded.signatures;
-  loaded.symbols = loaded.signatures = NULL;
+  loaded.symbols = NULL;
   session.files[filename] = (void *) file;
 }
 
@@ -704,7 +703,6 @@ ReplResult ReplSession.load(
       LoadedSource *loaded = value.pointer();
       if (loaded->globals) loaded->globals.cleanup();
       if (loaded->symbols) loaded->symbols.cleanup();
-      if (loaded->signatures) loaded->signatures.cleanup();
       xfree(loaded);
     }
   }
@@ -730,8 +728,7 @@ ReplResult ReplSession.load(
       loaded->symbols.cleanup();
       loaded->symbols = normalized;
       List names = loaded->result.value;
-      loaded->signatures = _signatures(session.compiler, normalized, names);
-      if (file) _check_replacement(file, normalized, loaded->signatures);
+      if (file) _check_replacement(session.compiler, file, normalized);
       _check_names(session, file, retired, visible, normalized, names);
       visible.merge(normalized);
       published.merge(normalized);

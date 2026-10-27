@@ -14,7 +14,7 @@
     Callable adapters borrow this record until the session closes. */
 typedef struct ReplLoadedFile {
   String path;
-  Map symbols, signatures;
+  Map symbols;
   List types;
 } *ReplLoadedFile;
 
@@ -813,7 +813,6 @@ void ReplSession.close(ReplSession session) {
   foreach (Var (path, value), session.files) {
     ReplLoadedFile file = value;
     file.symbols.cleanup();
-    file.signatures.cleanup();
     xfree(file);
   }
   xfree(session.helper);
