@@ -547,7 +547,120 @@ static void match_flat_capture_agrees_with_runtime(void) {
     }
 }
 
+/* The operator arms below, as values, in the same order. */
+static List _operator_patterns(void) => %(
+  (status (!or ok created) ?code)
+  (status (!not ok) ?code)
+  (color (!and (!not red) (!not blue)))
+  (key (!is type string))
+  (key (!is ?found atom))
+  (tag (!quote (a b)))
+  (tag (!quote ?x))
+  ((!or ?kind typedef struct union) ?name *)
+  (pair ?x ?x)
+  (alt (!or (binding ?x ?) (gensym ?x ?)))
+  (set (!set ?w a b) ?y)
+  (isb (!is var binder) (!is list binder) (!is binder) (!is op))
+  (num 3 "s" (!or 4 "t"))
+  (deep ((!or a b) (c ?z)) *rest)
+  (neg ?x (!not ?x))
+  (swap (!or (p ?x ?y) (q ?y ?x)) ?x)
+  (none (!not (!or (a *) (b ?))) *tail)
+  (!set ?whole (node ?a ?b))
+  (other ?x (!not (!or ?x z)))
+);
+
+/* The first operator arm `input` matches, with its captures in `values`. */
+static int _operator_arm(List input, Var *values) {
+  match (input) {
+    case %(status (!or ok created) ?code): { values[0] = code; return 1; }
+    case %(status (!not ok) ?code): { values[0] = code; return 2; }
+    case %(color (!and (!not red) (!not blue))): return 3;
+    case %(key (!is type string)): return 4;
+    case %(key (!is ?found atom)): { values[0] = found; return 5; }
+    case %(tag (!quote (a b))): return 6;
+    case %(tag (!quote ?x)): return 7;
+    case %((!or ?kind typedef struct union) ?name *): {
+      values[0] = kind;
+      values[1] = name;
+      return 8;
+    }
+    case %(pair ?x ?x): { values[0] = x; return 9; }
+    case %(alt (!or (binding ?x ?) (gensym ?x ?))): {
+      values[0] = x;
+      return 10;
+    }
+    case %(set (!set ?w a b) ?y): {
+      values[0] = w;
+      values[1] = y;
+      return 11;
+    }
+    case %(isb (!is var binder) (!is list binder) (!is binder) (!is op)):
+      return 12;
+    case %(num 3 "s" (!or 4 "t")): return 13;
+    case %(deep ((!or a b) (c ?z)) *rest): {
+      values[0] = z;
+      values[1] = rest;
+      return 14;
+    }
+    case %(neg ?x (!not ?x)): { values[0] = x; return 15; }
+    case %(swap (!or (p ?x ?y) (q ?y ?x)) ?x): {
+      values[0] = x;
+      values[1] = y;
+      return 16;
+    }
+    case %(none (!not (!or (a *) (b ?))) *tail): {
+      values[0] = tail;
+      return 17;
+    }
+    case %(!set ?whole (node ?a ?b)): {
+      values[0] = whole;
+      values[1] = a;
+      values[2] = b;
+      return 18;
+    }
+    case %(other ?x (!not (!or ?x z))): { values[0] = x; return 19; }
+  }
+  return 0;
+}
+
+static void match_operator_arms_agree_with_runtime(void) {
+  $test.scoped();
+  List inputs = %(
+    (status ok 200) (status created 201) (status bad 400) (status ok)
+    (color green) (color red) (key "abc") (key 42) (key (l))
+    (tag (a b)) (tag ?x) (tag (a c))
+    (typedef T int) (struct S) (union U a b) (enum E)
+    (pair 1 1) (pair 1 2) (pair 3 3L)
+    (alt (binding b 1)) (alt (gensym g 2)) (alt (other o 3)) (alt (binding b))
+    (set a 1) (set b 2) (set c 3)
+    (isb ?v *l ?w !or) (isb a *l ?w !or)
+    (num 3 "s" 4) (num 3 "s" "t") (num 3 "s" 5) (num 3L "s" 4)
+    (deep (a (c 9)) r1 r2) (deep (b (c 8))) (deep (d (c 7)))
+    (neg 1 2) (neg 1 1)
+    (swap (p 1 2) 1) (swap (q 2 1) 1) (swap (p 1 2) 2) (swap (q 1 2) 1)
+    (none (c) t1 t2) (none (a 1)) (none (b 1)) (none (b 1 2))
+    (node 1 2) (node 1) (other 1 2) (other 1 1) (other 1 z) ()
+  );
+  foreach (List input in inputs) {
+    Var actual[3] = {0}, expected[3] = {0};
+    int arm = _operator_arm(input, actual), reference = 0, index = 0;
+    foreach (List pattern in _operator_patterns()) {
+      MatchCaptureBuffer capture = {.values = expected, .capacity = 3};
+      index++;
+      if (x2c_match_try_capture(input, pattern, capture)) {
+        reference = index;
+        break;
+      }
+    }
+    EXPECT_INT_EQ(arm, reference);
+    for (int i = 0; arm && i < 3; i++)
+      EXPECT_TRUE(actual[i].equal(expected[i]));
+  }
+}
+
 void match_stmt_suite(void) {
+  $test.run(match_operator_arms_agree_with_runtime);
   $test.run(match_flat_capture_agrees_with_runtime);
   $test.run(match_flat_typed_capture_agrees_with_runtime);
   $test.run(match_binds_values);

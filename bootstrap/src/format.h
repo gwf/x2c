@@ -9,5 +9,7 @@
 #include "compiler/compiler.h"
 char * Compiler_code_pretty_string(Compiler c, Array code, String output_file);
 
+String Compiler_code_text(Compiler c, Array tokens);
+
 
 #endif /* __GUARD_0x8FDDE00C__ */

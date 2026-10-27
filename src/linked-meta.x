@@ -1177,42 +1177,6 @@ Code lambda_cells(Code node) {
 
 /* --- src/components/pattern-match.x -------------------------------------- */
 
-static void _match_flush(Buffer b, Array out) {
-  if (b.len()) {
-    out.push(b.str());
-    b.clear();
-  }
-}
-
-static void _match_place(Buffer b, Array out, Var node) {
-  _match_flush(b, out);
-  out.push(node);
-}
-
-static List _match_items(Array out) {
-  Array items = [], run = [];
-  foreach (Var piece in out) {
-    if (piece ~= %(preproc ?)) {
-      if (run.len()) items.push(cons(" ", run));
-      run.clear();
-      items.push(piece);
-      continue;
-    }
-    run.push(piece);
-  }
-  if (run.len()) items.push(cons(" ", run));
-  return items.list_free();
-}
-
-static int _match_nesting(String text) {
-  String directive = text.strip(" \t").remove_prefix("#").strip(" \t");
-  if (directive.startswith("endif")) return -1;
-  return directive.startswith("if");
-}
-
-static String _match_cursor(int depth) =>
-  depth ? %"_x2c_gensym_match_cursor$depth" : "_x2c_gensym_match_cursor";
-
 static Symbol _match_head(Var value) {
   if (value is not <list> || !value.list()) return 0;
   Var head = value.list().car();
@@ -1229,175 +1193,452 @@ static List _match_binders(Var value) {
   return binders;
 }
 
-static Symbol _match_capture_tag(Var element, Var &binder) {
-  if ((element ~= %((!quote !is) ?name type ?(Symbol tag))) &&
-      tag != <x2c-dyn> && tag != <varray> && tag != <vmap>) {
-    binder = name;
-    return tag;
+static int _match_slot(List binders, Var binder) {
+  int slot = 0;
+  foreach (Var name in binders) {
+    if (name == binder) return slot;
+    slot++;
   }
-  return 0;
+  return -1;
 }
 
-static void _match_and(Buffer b, int &testing) {
-  b.write(testing ? " && " : " if (");
-  testing = 1;
-}
-
-static int _match_bind(
-  Buffer b, Var binder, String cell, Array seen, Array binders, int &testing,
-  int &braces) {
-  int list = binder.is_list_binder();
-  if (binders != NULL) {
-    int slot = binders.index(binder);
-    if (slot < 0) return 0;
-    _match_and(b, testing);
-    b.printf(
-      "(_x2c_gensym_match_values[%d] = %s%s%s, 1)",
-      slot, list ? "List_var(" : "", cell, list ? ")" : "");
+static int _match_names(Var part, Array names) {
+  if (part is <list> && !part.is_nil()) {
+    List list = part;
+    if (list.car() == <!quote>) return 1;
+    foreach (Var element in list)
+      if (!_match_names(element, names)) return 0;
     return 1;
   }
-  if (testing) {
-    b.write(") {");
-    braces++;
-    testing = 0;
-  }
-  b.printf(
-    " %s _x2c_gensym_match_%s_%d = %s;",
-    list ? "List" : "Var", list ? "list" : "value", seen.len() - 1, cell);
+  if (!part.is_binder() || part == <?> || part == <*>) return 1;
+  if (part in names) return !part.is_list_binder();
+  names.push(part);
   return 1;
 }
 
-static int _match_element(
-  Buffer b, Var part, String cell, Array seen, Array binders, int &testing,
-  int &braces) {
-  Var binder = part;
-  Symbol tag = part is <list> ? _match_capture_tag(part, binder) : 0;
-  if (tag) {
-    _match_and(b, testing);
-    b.printf("Var_is(%s, %lu)", cell, (unsigned long) tag);
-    part = binder;
+static List _match_capture(Var binder, int index) {
+  String kind = binder.is_list_binder() ? "list" : "value";
+  return %(ident (binding-name $(%"x2c_match_$(kind)_$index")));
+}
+
+static int _match_fresh(Array cursors, List how) {
+  cursors.push(how);
+  return cursors.len() - 1;
+}
+
+static List _match_tests(List value, Array cursors) =>
+  value && value.car().is_match_op()
+    ? _match_guard(value.car(), value.cdr(), <subject>, NULL, cursors)
+    : _match_list(value, <root>, NULL, cursors);
+
+static List _match_value(
+  Var part, Var cell, List steps, Array cursors) {
+  if (part == <?>) return %(true);
+  if (part.is_atom_binder()) return %(bind $cell $part);
+  if (part.is_list_binder() || part == <x2c-dyn>) return NULL;
+  if (part is <symbol>) return %(bits $cell $part);
+  if (part is not <list> || part.is_nil()) return %(equal $cell $steps);
+  List list = part;
+  steps = cons(<in>, steps);
+  if (list.car() == <x2c-dyn>) return NULL;
+  if (list.car().is_match_op())
+    return _match_guard(list.car(), list.cdr(), cell, steps, cursors);
+  if (cell == <subject>) return _match_list(list, <root>, steps, cursors);
+  Var first = <none>;
+  if (list.car() != <*> || list.cdr()) first = _match_fresh(cursors, %(first));
+  List tests = _match_list(list, first, steps, cursors);
+  return tests ? %(and (listp $cell $first) $tests) : NULL;
+}
+
+static List _match_list(
+  List list, Var at, List steps, Array cursors) {
+  Array tests = [];
+  for (;; list = list.cdr()) {
+    if (!list) {
+      tests.push(%(end $at));
+      break;
+    }
+    Var part = list.car();
+    if (part.is_list_binder()) {
+      if (list.cdr()) return NULL;
+      if (part != <*>) tests.push(%(rest $at $part));
+      break;
+    }
+    List test = _match_value(part, at, steps, cursors);
+    if (!test) return NULL;
+    tests.push(%(some $at));
+    if (test.car() != <true>) tests.push(test);
+    List next = list.cdr();
+    if (!next || next.car() != <*> || next.cdr())
+      at = _match_fresh(cursors, %(cdr $at));
+    steps = cons(<cdr>, steps);
   }
-  Var literal = part;
-  match (part) case %((!quote !quote) ?(Symbol quoted)): {
-    literal = quoted;
-    _match_and(b, testing);
-    b.printf("%s.u64 == %lluULL", cell, (unsigned long long) literal.u64);
+  return %(and @(tests.list_free()));
+}
+
+static List _match_guard(
+  Var op, List args, Var cell, List steps, Array cursors) {
+  steps = cons(<cdr>, steps);
+  if (op == <!quote>) {
+    if (!args || args.cdr()) return NULL;
+    return args.car() is <symbol> ? %(bits $cell $(args.car()))
+                                  : %(equal $cell $steps);
+  }
+  Array tests = [];
+  while (args && args.car().is_binder() && args.cdr()) {
+    if (args.car().is_list_binder()) return NULL;
+    if (args.car() != <?>) tests.push(%(bind $cell $(args.car())));
+    args = args.cdr();
+    steps = cons(<cdr>, steps);
+  }
+  if (op == <!is>) {
+    List test = _match_is(args, cell);
+    if (!test) return NULL;
+    tests.push(test);
+    return %(and @(tests.list_free()));
+  }
+  Array operands = [];
+  foreach (Var operand in args) {
+    List test = _match_value(operand, cell, steps, cursors);
+    if (!test) return NULL;
+    operands.push(test);
+    steps = cons(<cdr>, steps);
+  }
+  List choice = %(or @(operands.list_free()));
+  if (op == <!and>) choice = %(and @(choice.cdr()));
+  else if (op == <!not>) choice = %(not $choice);
+  else if (op != <!or> && op != <!set>) return NULL;
+  tests.push(choice);
+  return %(and @(tests.list_free()));
+}
+
+static List _match_is(List args, Var cell) {
+  match (args) {
+    case %(var binder): return %(kind $cell "is_atom_binder");
+    case %(list binder): return %(kind $cell "is_list_binder");
+    case %(binder): return %(kind $cell "is_binder");
+    case %(op): return %(kind $cell "is_match_op");
+    case %(atom): return %(atom $cell);
+    case %(type ?(Symbol tag)): {
+      if (tag == <x2c-dyn>) return NULL;
+      if (tag == <varray>) tag = <array>;
+      if (tag == <vmap>) tag = <map>;
+      return %(tag $cell $tag);
+    }
+  }
+  return NULL;
+}
+
+static int _match_viewable(List test, Array seen) {
+  Var op = test.car();
+  if (op == <or> || op == <not> || op == <kind> || op == <atom> ||
+      op == <equal>)
     return 0;
+  match (test) case %((!or bind rest) ? ?binder): {
+    if (binder in seen) return 0;
+    seen.push(binder);
   }
-  if (part == <?>) return 0;
-  if (part.is_atom_binder() && !(part in seen)) {
-    seen.push(part);
-    return _match_bind(b, part, cell, seen, binders, testing, braces) ? 0 : -1;
-  }
-  List list = part is <list> ? part.list() : NULL;
-  if (part.is_binder() || part.is_match_op() || part == <x2c-dyn> ||
-      (list && list.car().is_match_op()))
-    return -1;
-  if (part is <list> && binders != NULL) return 1;
-  if (part is not <symbol> && !list) return binders != NULL ? -1 : 2;
-  Symbol tested = <list>;
-  _match_and(b, testing);
-  if (list) b.printf("Var_is(%s, %lu)", cell, (unsigned long) tested);
-  else b.printf("%s.u64 == %lluULL", cell, (unsigned long long) literal.u64);
-  return !!list;
+  foreach (Var part in test.cdr())
+    if (part is <list> && !_match_viewable(part, seen)) return 0;
+  return 1;
 }
 
-static int _match_nested(
-  Buffer b, Array out, List pattern, Var value, Array binders, int &depths) {
-  int viewed = binders != NULL;
-  if ((!viewed &&
-       !(pattern ~= %(expr ? (!or (cache ?) (expr ? (cache ?)))))) ||
-      value is not <list>)
-    return -1;
-  _match_flush(b, out);
-  Array rests = [], paths = [], seen = [];
-  int mark = out.len(), testing = viewed, braces = 0, step = 0;
-  int deepest = 0;
-  List rest = value;
-  String path = "";
-  if (!viewed)
-    b.write(" _x2c_gensym_match_cursor = _x2c_gensym_match_expr;");
-  for (;;) {
-    int levels = rests.len();
-    String cursor = _match_cursor(levels);
-    Var part = rest ? rest.car() : NULL;
-    if (rest && !part.is_list_binder()) {
-      String cell = %"$cursor->car";
-      _match_and(b, testing);
-      b.write(cursor);
-      step = _match_element(b, part, cell, seen, binders, testing, braces);
-      if (step == 1) {
-        _match_and(b, testing);
-        String next = _match_cursor(levels + 1);
-        if (viewed) b.printf("Macro_case_enter(%s, &%s)", cell, next);
-        else b.printf("(%s = Var_list_payload(%s), 1)", next, cell);
-        rests.push(rest);
-        paths.push(path);
-        if (levels >= deepest) deepest = levels + 1;
-        rest = part;
-        path = path + "->car)";
-        continue;
-      }
-      if (step == 2) {
-        _match_and(b, testing);
-        b.printf("Var_equal(%s, ", cell);
-        for (int level = levels; level; level--) b.write("Var_list_payload(");
-        _match_place(b, out, pattern);
-        if (path) b.write(path);
-        b.write("->car)");
-      }
+static int _match_settled(List test, Array bound, Array unsure) {
+  match (test) {
+    case %(and *parts): {
+      foreach (List part in parts)
+        if (!_match_settled(part, bound, unsure)) return 0;
     }
-    else {
-      if (!rest) {
-        _match_and(b, testing);
-        b.printf("!%s", cursor);
+    case %(or *parts): {
+      Array every = NULL, some = [];
+      foreach (List part in parts) {
+        Array mine = bound.copy();
+        if (!_match_settled(part, mine, unsure)) return 0;
+        Array both = [];
+        foreach (Var name in mine) {
+          if (every == NULL || name in every) both.push(name);
+          if (!(name in some)) some.push(name);
+        }
+        every = both;
       }
-      else if (rest.cdr() || part in seen) step = -1;
-      else if (part != <*>) {
-        seen.push(part);
-        if (!_match_bind(b, part, cursor, seen, binders, testing, braces))
-          step = -1;
-      }
-      if (step < 0 || !levels) break;
-      rest = rests.take_last();
-      path = paths.take_last();
-      cursor = _match_cursor(levels - 1);
+      foreach (Var name in some)
+        if (every == NULL || !(name in every)) unsure.push(name);
+        else if (!(name in bound)) bound.push(name);
     }
-    if (step < 0) break;
-    _match_and(b, testing);
-    b.printf("(%s = %s->cdr, 1)", cursor, cursor);
-    rest = rest.cdr();
-    path = path + "->cdr";
+    case %(not ?inner): return _match_settled(inner, bound.copy(), unsure);
+    case %((!or bind rest) ? ?binder): {
+      if (binder in unsure) return 0;
+      if (!(binder in bound)) bound.push(binder);
+    }
   }
-  if (viewed && seen.len() < binders.len()) step = -1;
-  if (step < 0) {
-    while (out.len() > mark) out.take_last();
-    b.clear();
-    return -1;
-  }
-  if (testing && !viewed) {
-    b.write(") {");
-    braces++;
-  }
-  if (deepest > depths) depths = deepest;
-  return braces;
+  return 1;
 }
 
-static void _match_captures(Buffer b, List binders) {
+static List _match_method(String owner, String name) {
+  Type type = $(owner);
+  match (type.resolve_member(name, 1))
+    case %(method ?binding ?(List signature)): {
+      Type callable = signature;
+      return $!($callable){ $binding };
+    }
+  return NULL;
+}
+
+static List _match_int(int value) {
+  switch (value) {
+    case 0: return %(literal (int) "0");
+    case 1: return %(literal (int) "1");
+    case 2: return %(literal (int) "2");
+  }
+  return %(literal (int) $(%"$value"));
+}
+
+static List _match_joined(Symbol kind, Array parts) {
+  if (parts.len() == 1) return parts[0];
+  if (!parts.len()) return _match_int(kind == <m-all>);
+  return $(kind, @(parts.list_free()));
+}
+
+static List _match_bits(Var value) {
+  unsigned long long bits = value.u64;
+  return %(literal (uint64_t) $(%"$(bits)ULL"));
+}
+
+static List _match_cursor(Var cell, List root, Array cursors) {
+  if (cell == <root>) return root;
+  List row = cursors[cell.int()];
+  return row.car();
+}
+
+static List _match_held(Var cell, List root, Array cursors) {
+  if (cell == <subject>) return %(call List_var (args $root));
+  return %(op -> $(_match_cursor(cell, root, cursors)) car);
+}
+
+static List _match_literal(Code pattern, List steps) {
+  List cell = pattern;
+  foreach (Var step in steps.reverse())
+    cell = step == <in> ? %(call Var_list_payload (args (op -> $cell car)))
+                        : %(op -> $cell cdr);
+  return %(op -> $cell car);
+}
+
+static List _match_assigned(List left, List right) =>
+  %(commas (op = $left $right) $(_match_int(1)));
+
+static void _match_need(
+  Var cell, Array cursors, Array ready, List root, Array parts) {
+  if (cell is <symbol> || cell in ready) return;
+  List row = cursors[cell.int()];
+  match (row) case %(? (cdr ?prior)): {
+    _match_need(prior, cursors, ready, root, parts);
+    List source = _match_cursor(prior, root, cursors);
+    parts.push(%(m-next $(_match_cursor(cell, root, cursors)) $source));
+    ready.push(cell);
+  }
+}
+
+static List _match_stepped(Array parts, List at) {
+  int last = parts.len() - 1;
+  if (last >= 0 && (parts[last] ~= %(m-next ?cursor ?prior)) &&
+      cursor === at) {
+    parts.take_last();
+    return %(m-step $at $prior);
+  }
+  return at;
+}
+
+static void _match_leaf(
+  List test, Var cell, Code pattern, List root, Array cursors, Array ready,
+  Array bound, Map locals, Array parts) {
+  _match_need(cell, cursors, ready, root, parts);
+  List held = _match_held(cell, root, cursors);
+  List at = cell == <subject> ? NULL : _match_cursor(cell, root, cursors);
+  List tested = NULL;
+  Symbol tagged = <list>;
+  List list = $!Symbol{ $tagged };
+  match (test) {
+    case %(some ?): tested = _match_stepped(parts, at);
+    case %(end ?): tested = %(op ! $(_match_stepped(parts, at)));
+    case %(listp ? ?first): {
+      List listed = %(call Var_is (args $held $list));
+      if (first == <none>)
+        tested = pattern ? listed
+                         : $!int{ Macro_case_enter($held, &(List){0}) };
+      else {
+        List cursor = _match_cursor(first, root, cursors);
+        List payload = %(call Var_list_payload (args $held));
+        ready.push(first);
+        tested = pattern
+          ? %(op && $listed $(_match_assigned(cursor, payload)))
+          : %(call Macro_case_enter (args $held (op & $cursor)));
+      }
+    }
+    case %(atom ?): tested = %(op ! (call Var_is (args $held $list)));
+    case %(bits ? ?literal):
+      tested = at ? %(m-bits $at $(_match_bits(literal)))
+                  : %(op == (op . $held u64) $(_match_bits(literal)));
+    case %(tag ? ?(Symbol tag)):
+      tested = %(call Var_is (args $held $($!Symbol{ $tag })));
+    case %(kind ? ?(String predicate)):
+      tested = %(call $(_match_method("Var", predicate)) (args $held));
+    case %(equal ? ?steps): {
+      List literal = _match_literal(pattern, steps);
+      tested = %(call Var_equal (args $held $literal));
+    }
+    case %(bind ? ?binder): {
+      List local = locals[binder];
+      if (binder in bound) tested = %(call Var_equal (args $held $local));
+      else {
+        bound.push(binder);
+        tested = at ? %(m-take $local $at) : _match_assigned(local, held);
+      }
+    }
+    case %(rest ? ?binder): {
+      List local = locals[binder];
+      bound.push(binder);
+      tested = _match_assigned(
+        local, pattern ? at : %(call List_var (args $at)));
+    }
+  }
+  parts.push(tested);
+}
+
+static void _match_conditions(
+  List test, Code pattern, List root, Array cursors, Array ready,
+  Array bound, Map locals, Array parts) {
+  match (test) {
+    case %(true): return;
+    case %(and *items): {
+      foreach (List part in items)
+        _match_conditions(
+          part, pattern, root, cursors, ready, bound, locals, parts);
+    }
+    case %(or *items): {
+      Array choices = [];
+      Array common = NULL;
+      foreach (List part in items) {
+        Array mine = bound.copy(), choice = [];
+        _match_conditions(
+          part, pattern, root, cursors, ready.copy(), mine, locals, choice);
+        choices.push(_match_joined(<m-all>, choice));
+        Array both = [];
+        foreach (Var name in mine)
+          if (common == NULL || name in common) both.push(name);
+        common = both;
+      }
+      if (common != NULL)
+        foreach (Var name in common) if (!(name in bound)) bound.push(name);
+      parts.push(_match_joined(<m-any>, choices));
+    }
+    case %(not ?inner): {
+      Array none = [];
+      _match_conditions(
+        inner, pattern, root, cursors, ready.copy(), bound.copy(), locals,
+        none);
+      parts.push(%(op ! $(_match_joined(<m-all>, none))));
+    }
+    case %(? ?cell *):
+      _match_leaf(
+        test, cell, pattern, root, cursors, ready, bound, locals, parts);
+  }
+}
+
+static List _match_condition_of(
+  List test, Code pattern, List root, Array cursors, Array ready,
+  Array bound, Map locals) {
+  Array parts = [];
+  _match_conditions(test, pattern, root, cursors, ready, bound, locals, parts);
+  return _match_joined(<m-all>, parts);
+}
+
+static Array _match_named(Array cursors, Array pool) {
+  Array rows = [];
+  int index = 0;
+  foreach (List how in cursors) {
+    if (index == pool.len()) pool.push(x2c_binding_fresh("match_at"));
+    rows.push($(pool[index++], how));
+  }
+  return rows;
+}
+
+static List _match_declare(Type type, List binding, List value) =>
+  value
+    ? %(declare $type (bindings (op = (bind $binding ()) (expr $type $value))))
+    : %(declare $type (bindings (bind $binding ())));
+
+static void _match_cursors(Array cursors, Array declared) {
+  Array names = [];
+  foreach (List row in cursors) names.push(%(bind $(row.car()) ()));
+  if (names.len())
+    declared.push(%(declare ("List") (bindings @(names.list_free()))));
+}
+
+static List _match_frame(Code subject) => $(
+  x2c_binding_fresh("match_expr"),
+  subject.type().is_named("Var") ? x2c_binding_fresh("match_none") : NULL,
+  NULL, NULL, NULL);
+
+static List _match_capturing(List frame) {
+  List (expr, none, cursor) = frame;
+  if (cursor) return frame;
+  return $(expr, none, x2c_binding_fresh("match_cursor"),
+           x2c_binding_fresh("match_capture"),
+           x2c_binding_fresh("match_values"));
+}
+
+static List _match_captures(List binders, List values) {
+  Array copied = [];
   int index = 0;
   foreach (Atom binder in binders) {
-    int list = binder.is_list_binder();
-    b.printf(
-      " %s _x2c_gensym_match_%s_%d = %s_x2c_gensym_match_values[%d]%s;",
-      list ? "List" : "Var", list ? "list" : "value", index,
-      list ? "Var_list_payload(" : "", index, list ? ")" : "");
+    List local = _match_capture(binder, index);
+    List slot = %(index $values $(_match_int(index)));
+    if (binder.is_list_binder()) {
+      List payload = %(call Var_list_payload (args $slot));
+      copied.push(_match_declare(%("List"), local, payload));
+    }
+    else copied.push(_match_declare(%("Var"), local, slot));
     index++;
   }
+  return copied.list_free();
 }
 
-static int _match_viewed(
-  Buffer b, Array out, List template, List labels, Code shape, List binders,
-  int &depths) {
+static List _match_arm(
+  List pattern, Var value, List expr, List finished, Array pool) {
+  if (!pattern.match(%(expr ? (!or (cache ?) (expr ? (cache ?))))) ||
+      value is not <list>)
+    return NULL;
+  Array names = [], cursors = [];
+  Map locals = {};
+  if (!_match_names(value, names)) return NULL;
+  List test = _match_tests(value, cursors);
+  if (!test || !_match_settled(test, [], [])) return NULL;
+  cursors = _match_named(cursors, pool);
+  List definite = _match_binders(value);
+  Array declared = [];
+  _match_cursors(cursors, declared);
+  Array values = [], lists = [];
+  foreach (Var name in names) {
+    int slot = _match_slot(definite, name);
+    List local = slot >= 0 ? _match_capture(name, slot)
+                           : x2c_binding_fresh("match_bound");
+    locals[name] = local;
+    (name.is_list_binder() ? lists : values).push(%(bind $local ()));
+  }
+  if (values.len())
+    declared.push(%(declare ("Var") (bindings @(values.list_free()))));
+  if (lists.len())
+    declared.push(%(declare ("List") (bindings @(lists.list_free()))));
+  List condition = _match_condition_of(
+    test, (Code) pattern, expr, cursors, [], [], locals);
+  declared.push(%(if $condition $finished));
+  return %(block @(declared.list_free()));
+}
+
+static List _match_viewed(
+  List template, List labels, Code shape, List binders, List frame,
+  List finished, Array pool) {
+  List (expr, none, cursor, capture, values) = frame;
   Var derived = shape.pattern_value();
   int statement = 0;
   match (derived) case %((!quote !or) ?single (seq ?again)): {
@@ -1407,164 +1648,201 @@ static int _match_viewed(
       statement = 1;
     }
   }
-  Buffer tests = Buffer.new(0);
-  if (_match_nested(tests, [], NULL, derived, binders, depths) < 0)
-    return -1;
-  b.write(" { int _x2c_gensym_match_root = ");
+  Array names = [], cursors = [];
+  Map locals = {};
+  if (derived is not <list> || !_match_names(derived, names) ||
+      names.len() != binders.len() ||
+      _match_binders(derived).len() != binders.len())
+    return NULL;
+  foreach (Var name in names) {
+    int slot = _match_slot(binders, name);
+    if (slot < 0) return NULL;
+    locals[name] = %(index $values $(_match_int(slot)));
+  }
+  List test = _match_tests(derived, cursors);
+  if (!test || !_match_viewable(test, [])) return NULL;
+  cursors = _match_named(cursors, pool);
+  List condition =
+    _match_condition_of(test, NULL, cursor, cursors, [], [], locals);
+  Array declared = [];
+  _match_cursors(cursors, declared);
+  List state = x2c_binding_fresh("match_root");
+  List rooted = %(call Macro_case_root (args $expr $template $labels
+    $(_match_int(statement)) (op & $cursor) (op & $capture)));
   Symbol head = _match_head(derived);
-  if (head && !(head in %(at src seq)))
-    b.printf(
-      "Macro_case_start(_x2c_gensym_match_expr, %lluULL, "
-      "&_x2c_gensym_match_cursor); if (_x2c_gensym_match_root < 0) "
-      "_x2c_gensym_match_root = ",
-      (unsigned long long) head);
-  b.write("Macro_case_root(_x2c_gensym_match_expr, ");
-  _match_place(b, out, template);
-  b.write(", ");
-  _match_place(b, out, labels);
-  b.printf(
-    ", %d, &_x2c_gensym_match_cursor, &_x2c_gensym_match_capture); "
-    "if (_x2c_gensym_match_root == 1 || (_x2c_gensym_match_root == 2%s)) {",
-    statement, tests.str_free());
-  return 2;
+  if (head && !(head in %(at src seq))) {
+    List started = %(call Macro_case_start
+      (args $expr $($!Symbol{ $head }) (op & $cursor)));
+    List missed = %(op < $state $(_match_int(0)));
+    List again = %(stmnt (op = $state $rooted));
+    declared.push(_match_declare(%(int), state, started));
+    declared.push(%(if $missed $again));
+  }
+  else declared.push(_match_declare(%(int), state, rooted));
+  List chosen = %(op || (op == $state $(_match_int(1)))
+                        (op && (op == $state $(_match_int(2))) $condition));
+  List body = _match_captures(binders, values);
+  declared.push(%(if $chosen (block @body $finished)));
+  return %(block @(declared.list_free()));
 }
 
-static int _match_test(
-  Buffer b, Array out, List pattern, List binders, int &sites, int &depths) {
+static List _match_fallback(
+  List pattern, List binders, List frame, List finished, int &viewing,
+  Array pool) {
+  List (expr, none, cursor, capture, values) = frame;
+  List body = _match_captures(binders, values);
+  List buffer = %(op & $capture);
+  List boxed = %(call List_var (args $pattern));
   match (pattern)
     case %(expr ? (call (expr ? (ident (binding ? (!or "Macro_case_pattern"
                                                      "Macro_case_shape"))))
                         (args ?template ?labels *shape))): {
-      int braces = shape
-        ? _match_viewed(b, out, template, labels, shape.car(), binders, depths)
-        : -1;
-      if (braces >= 0) return braces;
-      int site = sites++;
-      b.printf(
-        " static MacroCaseSite _x2c_gensym_macro_site_%d; "
-        "if (Macro_case_capture_at(&_x2c_gensym_macro_site_%d, "
-        "_x2c_gensym_match_expr, ",
-        site, site);
-      _match_place(b, out, template);
-      b.write(", ");
-      _match_place(b, out, labels);
-      b.write(", &_x2c_gensym_match_capture)) {");
-      return 1;
+      List viewed = NULL;
+      if (shape)
+        viewed = _match_viewed(
+          template, labels, shape.car(), binders, frame, finished, pool);
+      if (viewed) {
+        viewing = 1;
+        return viewed;
+      }
+      List site = x2c_binding_fresh("macro_site");
+      List captured = %(call Macro_case_capture_at
+        (args (op & $site) $expr $template $labels $buffer));
+      return %(block
+        (declare (static "MacroCaseSite") (bindings (bind $site ())))
+        (if $captured (block @body $finished)));
     }
-  if (((Code) pattern).is_static_pattern()) {
-    int site = sites++;
-    b.printf(
-      " static MatchCaptureSite _x2c_gensym_match_site_%d; "
-      "if (x2c_match_site_try_capture(&_x2c_gensym_match_site_%d, ",
-      site, site);
+  if (!((Code) pattern).is_static_pattern()) {
+    List captured =
+      %(call x2c_match_try_capture (args $expr $boxed $buffer));
+    return %(if $captured (block @body $finished));
   }
-  else b.write(" if (x2c_match_try_capture(");
-  b.write("_x2c_gensym_match_expr, List_var(");
-  _match_place(b, out, pattern);
-  b.write("), &_x2c_gensym_match_capture)) {");
-  return 1;
+  List site = x2c_binding_fresh("match_site");
+  List captured = %(call x2c_match_site_try_capture
+    (args (op & $site) $expr $boxed $buffer));
+  return %(block
+    (declare (static "MatchCaptureSite") (bindings (bind $site ())))
+    (if $captured (block @body $finished)));
 }
 
-static void _match_body(Buffer b, Array out, List body, int braces) {
-  int finish = 1;
-  match (body) case %(guarded ?inner): {
-    body = inner;
-    finish = 0;
-  }
-  _match_place(b, out, body);
-  if (finish) b.write(" break;");
-  while (braces--) b.write(" }");
+static List _match_finished(List body) {
+  match (body) case %(guarded ?inner): return inner;
+  return %(block $body (break));
 }
 
-static String _match_label(Symbol head, Array heads, int &labelling) {
+static List _match_labels(Var value, Array heads, int &labelling) {
   if (!labelling) return NULL;
-  if (!head) {
+  Symbol head = _match_head(value);
+  List alternatives = head ? $(head) : NULL;
+  if (!head && value is <list> && value.list())
+    match (value.list().car()) case %((!quote !or) *rest): {
+      alternatives = rest;
+      foreach (Var alternative in rest)
+        if (alternative is not <symbol> || alternative.is_binder() ||
+            alternative.is_match_op() || alternative == <x2c-dyn>)
+          alternatives = NULL;
+    }
+  if (!alternatives) {
     labelling = 0;
-    return " default: ;";
+    return %((default));
   }
-  if (head in heads) return NULL;
-  heads.push(head);
-  Var literal = head;
-  return %" case $((unsigned long long) literal.u64)ULL: ;";
+  Array labels = [];
+  foreach (Var alternative in alternatives) {
+    if (alternative in heads) continue;
+    heads.push(alternative);
+    labels.push(%(case $(_match_bits(alternative))));
+  }
+  return labels.list_free();
 }
 
-static String _match_locals(int depths, int values) {
-  Buffer b = Buffer.new(0);
-  b.write(";");
-  for (int depth = 0; depth <= depths; depth++) {
-    b.write(depth ? ", " : " List ");
-    b.write(_match_cursor(depth));
+static int _match_nesting(String text) {
+  String directive = text.strip(" \t").remove_prefix("#").strip(" \t");
+  if (directive.startswith("endif")) return -1;
+  return directive.startswith("if");
+}
+
+static List _match_prologue(
+  Code subject, List frame, int viewing, int values) {
+  List (expr, none, cursor, capture, buffer) = frame;
+  Symbol list = <list>;
+  Array declared = [];
+  if (subject.type().is_named("Var")) {
+    List read = x2c_binding_fresh("match_var");
+    List reading = $!{
+      Var $read = $subject;
+      int $none = !Var_is($read, $list);
+      List $expr = Var_list_payload($read);
+    };
+    declared.push(reading);
   }
-  if (depths >= 0) b.write(";");
-  if (values > 0)
-    b.printf(
-      " Var _x2c_gensym_match_values[%d]; "
-      "MatchCaptureBuffer _x2c_gensym_match_capture = "
-      "{ .values = _x2c_gensym_match_values, .capacity = %d };",
-      values, values);
-  else if (!values)
-    b.write(" MatchCaptureBuffer _x2c_gensym_match_capture = { 0 };");
-  return b.str_free();
+  else {
+    List converted = subject.convert(%("List"));
+    declared.push($!{ List $expr = $converted; });
+  }
+  if (viewing) declared.push($!{ List $cursor; });
+  if (values > 0) {
+    List buffered = $!{
+      Var $buffer[$values];
+      MatchCaptureBuffer $capture = {.values = $buffer, .capacity = $values};
+    };
+    declared.push(buffered);
+  }
+  else if (!values) declared.push($!{ MatchCaptureBuffer $capture = {0}; });
+  return declared.list_free();
+}
+
+static List _match_listed(List arm, List none) {
+  return %(if (op ! $none) $arm);
 }
 
 static Code _match_lowered(Code subject, List rows) {
-  Buffer b = Buffer.new(0);
-  Array out = [], heads = [];
-  int labelling = 1, opening = 0, depth = 0, sites = 0;
-  int depths = -1, values = -1;
+  Array items = [], heads = [];
+  int labelling = 1, opening = 0, depth = 0, viewing = 0, values = -1;
   int dynamic = subject.type().is_named("Var");
+  List frame = _match_frame(subject);
+  List (expr, none) = frame;
+  Array pool = [];
   foreach (List row in rows) {
     if (row ~= %(preproc ?(String text))) {
       int nesting = _match_nesting(text);
-      _match_place(b, out, row);
-      if (nesting > 0 && !depth) opening = out.len() - 1;
+      items.push(row);
+      if (nesting > 0 && !depth) opening = items.len() - 1;
       depth += nesting;
       continue;
     }
     List (pattern, body) = row;
     int otherwise = pattern.car() == <*>;
     Var value = otherwise ? %() : ((Code) pattern).pattern_value();
-    String label = _match_label(_match_head(value), heads, labelling);
-    if (label && depth) out.insert(opening++, label);
-    else if (label) b.write(label);
-    int guarded = dynamic && !otherwise;
-    if (guarded) b.write(" if (!_x2c_gensym_match_none) {");
-    int braces =
-      otherwise ? 0 : _match_nested(b, out, pattern, value, NULL, depths);
-    if (braces < 0) {
+    foreach (List label in _match_labels(value, heads, labelling)) {
+      if (depth) items.insert(opening++, label);
+      else items.push(label);
+    }
+    List finished = _match_finished(body);
+    List arm =
+      otherwise ? finished : _match_arm(pattern, value, expr, finished, pool);
+    if (!arm) {
       List binders = _match_binders(value);
       if (binders.len() > values) values = binders.len();
-      braces = _match_test(b, out, pattern, binders, sites, depths);
-      _match_captures(b, binders);
+      frame = _match_capturing(frame);
+      arm = _match_fallback(pattern, binders, frame, finished, viewing, pool);
     }
-    _match_body(b, out, body, braces + guarded);
+    items.push(dynamic && !otherwise ? _match_listed(arm, none) : arm);
   }
-  if (labelling) b.write(" default: break;");
-  _match_flush(b, out);
-  String selector = heads.len()
-    ? "_x2c_gensym_match_expr ? _x2c_gensym_match_expr->car.u64 : 0" : "0";
-  List items = _match_items(out);
-  String locals = _match_locals(depths, values);
-  List prologue = dynamic
-    ? _match_dynamic_read(subject, locals)
-    : $("List _x2c_gensym_match_expr =", subject.convert(%("List")), locals);
-  return Code.lowered(
-    %(block $prologue
-            (switch (expr ("uint64_t") ($selector)) (block @items))), NULL);
+  if (labelling) {
+    items.push(%(default));
+    items.push(%(break));
+  }
+  List selector = _match_int(0);
+  Symbol choose = <"?">;
+  if (heads.len())
+    selector = %(op $choose $expr (op . (op -> $expr car) u64) $selector);
+  List prologue = _match_prologue(subject, frame, viewing, values);
+  List switched = Code.lowered(
+    %(placed (switch $selector (block @(items.list_free())))), NULL);
+  return $!{ { @prologue $switched } };
 }
 
-static List _match_dynamic_read(Code subject, String locals) {
-  Symbol list = <list>;
-  String tested = "; int _x2c_gensym_match_none = "
-    "!Var_is(_x2c_gensym_match_var, %lu);"
-    .printf((unsigned long) list);
-  return $(
-    "Var _x2c_gensym_match_var =", subject, tested,
-    "List _x2c_gensym_match_expr = Var_list_payload(_x2c_gensym_match_var)",
-    locals);
-}
-
-/** Lowers the bound match `node` to C text around its subject, patterns,
+/** Lowers the bound match `node` to a block around its subject, patterns,
     and bodies.
 */
 Code match_lowering(Code node) {
@@ -1574,27 +1852,22 @@ Code match_lowering(Code node) {
 }
 
 static Code _match_condition(Code subject, List pattern, List body) {
-  Buffer b = Buffer.new(0);
-  Array out = [];
-  int sites = 0, depths = -1, values = -1;
-  int dynamic = subject.type().is_named("Var");
-  if (dynamic) b.write(" if (!_x2c_gensym_match_none) {");
-  int braces = _match_nested(
-    b, out, pattern, ((Code) pattern).pattern_value(), NULL, depths);
-  if (braces < 0) {
-    List binders = _match_binders(((Code) pattern).pattern_value());
+  int viewing = 0, values = -1;
+  List frame = _match_frame(subject);
+  List (expr, none) = frame;
+  Var value = ((Code) pattern).pattern_value();
+  Array pool = [];
+  List arm = _match_arm(pattern, value, expr, body, pool);
+  if (!arm) {
+    List binders = _match_binders(value);
     values = binders.len();
-    braces = _match_test(b, out, pattern, binders, sites, depths);
-    _match_captures(b, binders);
+    frame = _match_capturing(frame);
+    arm = _match_fallback(pattern, binders, frame, body, viewing, pool);
   }
-  _match_place(b, out, body);
-  braces += dynamic;
-  while (braces--) b.write(" }");
-  _match_flush(b, out);
-  String locals = _match_locals(depths, values);
-  List prologue = dynamic ? _match_dynamic_read(subject, locals)
-    : $("List _x2c_gensym_match_expr =", subject.convert(%("List")), locals);
-  return Code.lowered(%(block $prologue @(_match_items(out))), NULL);
+  if (subject.type().is_named("Var")) arm = _match_listed(arm, none);
+  List prologue = _match_prologue(subject, frame, viewing, values);
+  List kept = Code.lowered(%(placed $arm), NULL);
+  return $!{ { @prologue $kept } };
 }
 
 /** Lowers a pattern condition through the ordinary match tests. */
@@ -2296,26 +2569,47 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_lambda_designated", _lambda_designated);
   $linked.row(rows, "_lambda_shared", _lambda_shared);
   $linked.row(rows, "lambda_cells", lambda_cells);
-  $linked.row(rows, "_match_flush", _match_flush);
-  $linked.row(rows, "_match_place", _match_place);
-  $linked.row(rows, "_match_items", _match_items);
-  $linked.row(rows, "_match_nesting", _match_nesting);
-  $linked.row(rows, "_match_cursor", _match_cursor);
   $linked.row(rows, "_match_head", _match_head);
   $linked.row(rows, "_match_binders", _match_binders);
-  $linked.row(rows, "_match_capture_tag", _match_capture_tag);
-  $linked.row(rows, "_match_and", _match_and);
-  $linked.row(rows, "_match_bind", _match_bind);
-  $linked.row(rows, "_match_element", _match_element);
-  $linked.row(rows, "_match_nested", _match_nested);
+  $linked.row(rows, "_match_slot", _match_slot);
+  $linked.row(rows, "_match_names", _match_names);
+  $linked.row(rows, "_match_capture", _match_capture);
+  $linked.row(rows, "_match_fresh", _match_fresh);
+  $linked.row(rows, "_match_tests", _match_tests);
+  $linked.row(rows, "_match_value", _match_value);
+  $linked.row(rows, "_match_list", _match_list);
+  $linked.row(rows, "_match_guard", _match_guard);
+  $linked.row(rows, "_match_is", _match_is);
+  $linked.row(rows, "_match_viewable", _match_viewable);
+  $linked.row(rows, "_match_settled", _match_settled);
+  $linked.row(rows, "_match_method", _match_method);
+  $linked.row(rows, "_match_int", _match_int);
+  $linked.row(rows, "_match_joined", _match_joined);
+  $linked.row(rows, "_match_bits", _match_bits);
+  $linked.row(rows, "_match_cursor", _match_cursor);
+  $linked.row(rows, "_match_held", _match_held);
+  $linked.row(rows, "_match_literal", _match_literal);
+  $linked.row(rows, "_match_assigned", _match_assigned);
+  $linked.row(rows, "_match_need", _match_need);
+  $linked.row(rows, "_match_stepped", _match_stepped);
+  $linked.row(rows, "_match_leaf", _match_leaf);
+  $linked.row(rows, "_match_conditions", _match_conditions);
+  $linked.row(rows, "_match_condition_of", _match_condition_of);
+  $linked.row(rows, "_match_named", _match_named);
+  $linked.row(rows, "_match_declare", _match_declare);
+  $linked.row(rows, "_match_cursors", _match_cursors);
+  $linked.row(rows, "_match_frame", _match_frame);
+  $linked.row(rows, "_match_capturing", _match_capturing);
   $linked.row(rows, "_match_captures", _match_captures);
+  $linked.row(rows, "_match_arm", _match_arm);
   $linked.row(rows, "_match_viewed", _match_viewed);
-  $linked.row(rows, "_match_test", _match_test);
-  $linked.row(rows, "_match_body", _match_body);
-  $linked.row(rows, "_match_label", _match_label);
-  $linked.row(rows, "_match_locals", _match_locals);
+  $linked.row(rows, "_match_fallback", _match_fallback);
+  $linked.row(rows, "_match_finished", _match_finished);
+  $linked.row(rows, "_match_labels", _match_labels);
+  $linked.row(rows, "_match_nesting", _match_nesting);
+  $linked.row(rows, "_match_prologue", _match_prologue);
+  $linked.row(rows, "_match_listed", _match_listed);
   $linked.row(rows, "_match_lowered", _match_lowered);
-  $linked.row(rows, "_match_dynamic_read", _match_dynamic_read);
   $linked.row(rows, "match_lowering", match_lowering);
   $linked.row(rows, "_match_condition", _match_condition);
   $linked.row(rows, "match_condition_lowering", match_condition_lowering);

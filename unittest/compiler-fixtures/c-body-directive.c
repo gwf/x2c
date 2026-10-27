@@ -257,17 +257,16 @@ static int governed(List items){
     x2c_exception_leave(& _x2c_gensym_exception_frame_1);
   }
   {
-    List _x2c_gensym_match_expr = items; List _x2c_gensym_match_cursor;
+    List _x2c_gensym_match_expr_0 = items;
     switch(0){
-        default: ;
-       _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && Var_equal(_x2c_gensym_match_cursor->car, _3 ->car) && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && Var_equal(_x2c_gensym_match_cursor->car, _3 ->cdr->car) && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {
+      default:{List _x2c_gensym_match_at_0, _x2c_gensym_match_at_1; if(_x2c_gensym_match_expr_0 && Var_equal(_x2c_gensym_match_expr_0 -> car, _3 -> car) &&(_x2c_gensym_match_at_0 = _x2c_gensym_match_expr_0 ->cdr) && Var_equal(_x2c_gensym_match_at_0 -> car, _3 -> cdr -> car) && !(_x2c_gensym_match_at_1 = _x2c_gensym_match_at_0 ->cdr)){
 #ifdef QUIET
       total = 0;
 #else
       total += 10000;
 #endif
-       break; } total = - 1;
-       break;
+      break;}}{total = - 1;
+      break;}
     }
 
   }

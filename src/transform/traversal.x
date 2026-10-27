@@ -62,6 +62,7 @@ static Ast _step_tag(Compiler c, Ast ast, Symbol tag) {
   switch (tag) {
     case <protocol>: case <adopt>: case <macrodef>: case <literal>:
       return ast;
+    case <placed>: return _placed(c, ast.cadr());
     case <expr>: return _expression_node(c, ast);
     case <array>: case <varray>: case <map>: case <vmap>:
       return _collection_literal(c, ast, tag);
@@ -151,6 +152,33 @@ static Ast _destructuring_value(Compiler c, Ast ast) {
   return _shipped_lowering(
     c, <literal>, <dstrasgn>, %(expr $type $ast), <expression>, type,
     "destructuring assignment").caddr();
+}
+
+/* Placed code is lowered already, so only the source parts the active
+   lowering watches within it lower here, and the rest is rendered as the C
+   text emission would print, which later passes carry as written. A switch
+   stays a node, so the passes that lower exits see where a break inside it
+   goes. With no watch, nothing names those parts, and the code lowers as
+   written. */
+static Ast _placed(Compiler c, Ast code) {
+  if (!c.slot_watch) return _step(c, code);
+  Map held = {};
+  code = _held_within(c, code, held);
+  match (code) case %(switch ?selector (block *items)):
+    return %(switch $selector (block $(c.render_placed(items, held))));
+  return c.render_placed(code, held);
+}
+
+/* `node` with each watched part lowered and recorded in `held`. */
+static Var _held_within(Compiler c, Var node, Map held) {
+  if (node is not <list> || node.is_nil()) return node;
+  Ast lowered = c.watched_step(node);
+  if (lowered) {
+    held[(void *) lowered] = 1;
+    return lowered;
+  }
+  Var child;
+  $ast.rewrite_children(node, child, _held_within(c, child, held));
 }
 
 module Ast _default_node(Compiler c, Ast ast) {

@@ -292,20 +292,25 @@ static Money money_scale(Money amount, int factor){
 Code money_times(Code code){
   if(! _init_guard_) _file_init_();
   {
-    List _x2c_gensym_match_expr = code; List _x2c_gensym_match_cursor, _x2c_gensym_match_cursor1; Var _x2c_gensym_match_values[2]; MatchCaptureBuffer _x2c_gensym_match_capture = { .values = _x2c_gensym_match_values, .capacity = 2 };
+    List _x2c_gensym_match_expr_0 = code;
+    List _x2c_gensym_match_cursor_0;
+    Var _x2c_gensym_match_values_0[2];
+    MatchCaptureBuffer _x2c_gensym_match_capture_0 ={
+      .values = _x2c_gensym_match_values_0, .capacity = 2
+    }
+    ;
     switch(0){
-        default: ; { int _x2c_gensym_match_root = Macro_case_start(_x2c_gensym_match_expr, 377892ULL, &_x2c_gensym_match_cursor); if (_x2c_gensym_match_root < 0) _x2c_gensym_match_root = Macro_case_root(_x2c_gensym_match_expr, _230, _231, 0, &_x2c_gensym_match_cursor, &_x2c_gensym_match_capture); if (_x2c_gensym_match_root == 1 || (_x2c_gensym_match_root == 2 && _x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497936761996324ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && Macro_case_enter(_x2c_gensym_match_cursor->car, &_x2c_gensym_match_cursor1) && _x2c_gensym_match_cursor1 && _x2c_gensym_match_cursor1->car.u64 == 9224497936761619424ULL && (_x2c_gensym_match_cursor1 = _x2c_gensym_match_cursor1->cdr, 1) && _x2c_gensym_match_cursor1 && _x2c_gensym_match_cursor1->car.u64 == 9224497936761618486ULL && (_x2c_gensym_match_cursor1 = _x2c_gensym_match_cursor1->cdr, 1) && _x2c_gensym_match_cursor1 && (_x2c_gensym_match_values[0] = _x2c_gensym_match_cursor1->car, 1) && (_x2c_gensym_match_cursor1 = _x2c_gensym_match_cursor1->cdr, 1) && _x2c_gensym_match_cursor1 && (_x2c_gensym_match_values[1] = _x2c_gensym_match_cursor1->car, 1) && (_x2c_gensym_match_cursor1 = _x2c_gensym_match_cursor1->cdr, 1) && !_x2c_gensym_match_cursor1 && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor)) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_values[0]; Var _x2c_gensym_match_value_1 = _x2c_gensym_match_values[1];
-      {
+      default:{List _x2c_gensym_match_at_0, _x2c_gensym_match_at_1, _x2c_gensym_match_at_2, _x2c_gensym_match_at_3, _x2c_gensym_match_at_4, _x2c_gensym_match_at_5, _x2c_gensym_match_at_6, _x2c_gensym_match_at_7; int _x2c_gensym_match_root_0 = Macro_case_start(_x2c_gensym_match_expr_0, 377892, & _x2c_gensym_match_cursor_0); if(_x2c_gensym_match_root_0 < 0) _x2c_gensym_match_root_0 = Macro_case_root(_x2c_gensym_match_expr_0, _230, _231, 0, & _x2c_gensym_match_cursor_0, & _x2c_gensym_match_capture_0); if(_x2c_gensym_match_root_0 == 1 || _x2c_gensym_match_root_0 == 2 &&(_x2c_gensym_match_cursor_0 && _x2c_gensym_match_cursor_0 ->car.u64 == 9224497936761996324ULL &&(_x2c_gensym_match_at_0 = _x2c_gensym_match_cursor_0 ->cdr) &&(_x2c_gensym_match_at_1 = _x2c_gensym_match_at_0 ->cdr) && Macro_case_enter(_x2c_gensym_match_at_1 -> car, & _x2c_gensym_match_at_2) && _x2c_gensym_match_at_2 && _x2c_gensym_match_at_2 ->car.u64 == 9224497936761619424ULL &&(_x2c_gensym_match_at_3 = _x2c_gensym_match_at_2 ->cdr) && _x2c_gensym_match_at_3 ->car.u64 == 9224497936761618486ULL &&(_x2c_gensym_match_at_4 = _x2c_gensym_match_at_3 ->cdr) &&(_x2c_gensym_match_values_0[0] = _x2c_gensym_match_at_4 ->car, 1) &&(_x2c_gensym_match_at_5 = _x2c_gensym_match_at_4 ->cdr) &&(_x2c_gensym_match_values_0[1] = _x2c_gensym_match_at_5 ->car, 1) && !(_x2c_gensym_match_at_6 = _x2c_gensym_match_at_5 ->cdr) && !(_x2c_gensym_match_at_7 = _x2c_gensym_match_at_1 ->cdr))){Var x2c_match_value_0 = _x2c_gensym_match_values_0[0]; Var x2c_match_value_1 = _x2c_gensym_match_values_0[1];{{
         Var amount;
-        amount = _x2c_gensym_match_value_0;
+        amount = x2c_match_value_0;
         Var factor;
-        factor = _x2c_gensym_match_value_1;
+        factor = x2c_match_value_1;
         return cons(_28, cons(_235, cons(List_var(cons(_236, cons(_250, cons(List_var(({
           Var _x2c_gensym_literal_part_0 = Macro_inserted(amount, 1, 1);  Var _x2c_gensym_literal_part_1 = Macro_inserted(factor, 1, 1);  cons(_62, cons(_x2c_gensym_literal_part_0, cons(_x2c_gensym_literal_part_1, NULL)));
         }
         )), NULL)))), NULL)));
       }
-       break; } }
+      break;}}}
     }
 
   }

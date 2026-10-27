@@ -234,12 +234,12 @@
        (stmnt 
         (expr ("Var") 
          (op = (expr ("Var") (ident (binding 50 "head"))) 
-          (expr ("Var") ("_x2c_gensym_match_value_0"))))) 
+          (expr ("Var") ("x2c_match_value_0"))))) 
        (declare ("List") (bindings (bind (binding 51 "tail") ()))) 
        (stmnt 
         (expr ("List") 
          (op = (expr ("List") (ident (binding 51 "tail"))) 
-          (expr ("List") ("_x2c_gensym_match_list_1"))))) 
+          (expr ("List") ("x2c_match_list_1"))))) 
        (block 
         (at 26 
          (stmnt 

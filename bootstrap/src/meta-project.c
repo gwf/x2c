@@ -1117,10 +1117,10 @@ static String _loaded_providers(Helper * h){
               {
                 List provider = _loaded_provider(&((* h)), path, index ++);
                 {
-                  List _x2c_gensym_match_expr = provider; List _x2c_gensym_match_cursor;
-                    _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497949733334154ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && Var_is(_x2c_gensym_match_cursor->car, 1318210446)) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {{
+                  List _x2c_gensym_match_expr_0 = provider;
+                  {List _x2c_gensym_match_at_0, _x2c_gensym_match_at_1; Var x2c_match_value_0; if(_x2c_gensym_match_expr_0 && _x2c_gensym_match_expr_0 ->car.u64 == 9224497949733334154ULL &&(_x2c_gensym_match_at_0 = _x2c_gensym_match_expr_0 ->cdr) &&(x2c_match_value_0 = _x2c_gensym_match_at_0 ->car, 1) && Var_is(_x2c_gensym_match_at_0 -> car, 1318210446) && !(_x2c_gensym_match_at_1 = _x2c_gensym_match_at_0 ->cdr)){
                     Var message;
-                    message = _x2c_gensym_match_value_0;
+                    message = x2c_match_value_0;
                     Var _x2c_gensym_match_value_0 = message;
                     {
                       String message = Var_as_string(_x2c_gensym_match_value_0);
@@ -1137,91 +1137,92 @@ static String _loaded_providers(Helper * h){
                     }
 
                   }
-                   } }
-                }
-                Map_setindex((* h).providers, String_var(path), List_var(provider));
-                if(_package_source(&((* h)), path)){
-                  String name;
-                  Iter _x2c_gensym_macro_iterator_13 = Map_keys(Var_map(List_car(provider)), &(struct Iter){
-                    int_var(0)
-                  }
-                  );
-                  Var _x2c_gensym_macro_item_13;
-                  while(Iter_try_next(_x2c_gensym_macro_iterator_13, &(_x2c_gensym_macro_item_13))){
-                    name = Var_as_string(_x2c_gensym_macro_item_13);
-                    Map_setindex(packaged, String_var(name), int_var(1));
-                  }
 
                 }
 
               }
-
-            }
-
-          }
-          {
-            String path;
-            Array _x2c_gensym_macro_object_16 =(* h).owners;
-            int _x2c_gensym_macro_cursor_16 = 0;
-            Var _x2c_gensym_macro_cursor_output_14;
-            while(Array_try_next(_x2c_gensym_macro_object_16, &(_x2c_gensym_macro_cursor_16), &(_x2c_gensym_macro_cursor_output_14))){
-              path = Var_as_string(_x2c_gensym_macro_cursor_output_14);
-              {
-                Map declarations = Var_map_payload(List_car(Var_list(Map_getindex((* h).providers, String_var(path)))));
-                if(! _package_source(&((* h)), path)) _drop_imported(declarations, packaged);
-                {
-                  String name;
-                  Iter _x2c_gensym_macro_iterator_15 = Map_keys(declarations, &(struct Iter){
-                    int_var(0)
-                  }
-                  );
-                  Var _x2c_gensym_macro_item_15;
-                  while(Iter_try_next(_x2c_gensym_macro_iterator_15, &(_x2c_gensym_macro_item_15))){
-                    name = Var_as_string(_x2c_gensym_macro_item_15);
-                    {
-                      Var previous;
-                      if(Map_try_get(owners, String_var(name), &(previous))){
-                        String _x2c_gensym_return_value_6 =({
-                          Var _x2c_gensym_literal_part_19 = String_var(name);  Var _x2c_gensym_literal_part_20 = String_var(Var_str(previous));  String_join(NULL, cons(String_var(_46), cons(_x2c_gensym_literal_part_19, cons(String_var(_47), cons(_x2c_gensym_literal_part_20, cons(String_var(_48), cons(String_var(path), cons(String_var(_49), NULL))))))));
-                        }
-                        );
-                        {
-                          x2c_cleanup_leave(& _x2c_gensym_defer_record_4);
-                          x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
-                          return _x2c_gensym_return_value_6;
-                        }
-
-                      }
-                      Map_setindex(owners, String_var(name), String_var(path));
-                    }
-
-                  }
-
+              Map_setindex((* h).providers, String_var(path), List_var(provider));
+              if(_package_source(&((* h)), path)){
+                String name;
+                Iter _x2c_gensym_macro_iterator_13 = Map_keys(Var_map(List_car(provider)), &(struct Iter){
+                  int_var(0)
+                }
+                );
+                Var _x2c_gensym_macro_item_13;
+                while(Iter_try_next(_x2c_gensym_macro_iterator_13, &(_x2c_gensym_macro_item_13))){
+                  name = Var_as_string(_x2c_gensym_macro_item_13);
+                  Map_setindex(packaged, String_var(name), int_var(1));
                 }
 
               }
 
-            }
-
-          }
-          {
-            String _x2c_gensym_return_value_7 = NULL;
-            {
-              x2c_cleanup_leave(& _x2c_gensym_defer_record_4);
-              x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
-              return _x2c_gensym_return_value_7;
             }
 
           }
 
         }
-        x2c_cleanup_leave(& _x2c_gensym_defer_record_4);
+        {
+          String path;
+          Array _x2c_gensym_macro_object_16 =(* h).owners;
+          int _x2c_gensym_macro_cursor_16 = 0;
+          Var _x2c_gensym_macro_cursor_output_14;
+          while(Array_try_next(_x2c_gensym_macro_object_16, &(_x2c_gensym_macro_cursor_16), &(_x2c_gensym_macro_cursor_output_14))){
+            path = Var_as_string(_x2c_gensym_macro_cursor_output_14);
+            {
+              Map declarations = Var_map_payload(List_car(Var_list(Map_getindex((* h).providers, String_var(path)))));
+              if(! _package_source(&((* h)), path)) _drop_imported(declarations, packaged);
+              {
+                String name;
+                Iter _x2c_gensym_macro_iterator_15 = Map_keys(declarations, &(struct Iter){
+                  int_var(0)
+                }
+                );
+                Var _x2c_gensym_macro_item_15;
+                while(Iter_try_next(_x2c_gensym_macro_iterator_15, &(_x2c_gensym_macro_item_15))){
+                  name = Var_as_string(_x2c_gensym_macro_item_15);
+                  {
+                    Var previous;
+                    if(Map_try_get(owners, String_var(name), &(previous))){
+                      String _x2c_gensym_return_value_6 =({
+                        Var _x2c_gensym_literal_part_19 = String_var(name);  Var _x2c_gensym_literal_part_20 = String_var(Var_str(previous));  String_join(NULL, cons(String_var(_46), cons(_x2c_gensym_literal_part_19, cons(String_var(_47), cons(_x2c_gensym_literal_part_20, cons(String_var(_48), cons(String_var(path), cons(String_var(_49), NULL))))))));
+                      }
+                      );
+                      {
+                        x2c_cleanup_leave(& _x2c_gensym_defer_record_4);
+                        x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
+                        return _x2c_gensym_return_value_6;
+                      }
+
+                    }
+                    Map_setindex(owners, String_var(name), String_var(path));
+                  }
+
+                }
+
+              }
+
+            }
+
+          }
+
+        }
+        {
+          String _x2c_gensym_return_value_7 = NULL;
+          {
+            x2c_cleanup_leave(& _x2c_gensym_defer_record_4);
+            x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
+            return _x2c_gensym_return_value_7;
+          }
+
+        }
+
       }
-
+      x2c_cleanup_leave(& _x2c_gensym_defer_record_4);
     }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
-  }
 
+  }
+  x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
+}
 }
 
 static int _package_source(Helper * h, String path){

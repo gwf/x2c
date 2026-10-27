@@ -32,18 +32,16 @@ int main(void){
   if(! _init_guard_) _file_init_();
   List input = _7;
   {
-    List _x2c_gensym_match_expr = input; List _x2c_gensym_match_cursor;
-    switch(_x2c_gensym_match_expr ? _x2c_gensym_match_expr->car.u64 : 0){
-        case 9224497936762566922ULL: ;
-       _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497936762566922ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1)) { List _x2c_gensym_match_list_1 = _x2c_gensym_match_cursor;
-      {
+    List _x2c_gensym_match_expr_0 = input;
+    switch(_x2c_gensym_match_expr_0 ? _x2c_gensym_match_expr_0 -> car.u64 : 0){
+      case 9224497936762566922ULL :{List _x2c_gensym_match_at_0, _x2c_gensym_match_at_1; Var x2c_match_value_0; List x2c_match_list_1; if(_x2c_gensym_match_expr_0 && _x2c_gensym_match_expr_0 ->car.u64 == 9224497936762566922ULL &&(_x2c_gensym_match_at_0 = _x2c_gensym_match_expr_0 ->cdr) &&(x2c_match_value_0 = _x2c_gensym_match_at_0 ->car, 1) &&(_x2c_gensym_match_at_1 = _x2c_gensym_match_at_0 ->cdr, 1) &&(x2c_match_list_1 = _x2c_gensym_match_at_1, 1)){{
         Var value;
-        value = _x2c_gensym_match_value_0;
+        value = x2c_match_value_0;
         List rest;
-        rest = _x2c_gensym_match_list_1;
+        rest = x2c_match_list_1;
         printf("%d %d\n", Var_int(value), List_len(rest));
       }
-       break; } } default: break;
+      break;}} default: break;
     }
 
   }

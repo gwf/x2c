@@ -4,11 +4,7 @@
 #include "x2c.h"
 
 #include "rewrite.h"
-static List _31, _30, _28, _27, _26, _25, _24, _22, _19, _18, _17, _13, _12, _10, _5, _4, _3;
-
-static String _32;
-
-static Var _29, _23, _21, _20, _16, _15, _14, _11, _9, _8, _7, _6, _2, _1, _0;
+static String _0;
 
 static int _init_guard_ = 0;
 
@@ -22,39 +18,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
-  _0 = Symbol_var(62436);
-  _1 = Symbol_var(1318234344);
-  _2 = Symbol_var(44977116);
-  _3 = cons(_2, NULL);
-  _4 = cons(_1, _3);
-  _5 = cons(_0, _4);
-  _6 = List_var(_5);
-  _7 = Symbol_var(1941582);
-  _8 = Symbol_var(1995752);
-  _9 = Symbol_var(54);
-  _10 = cons(_9, NULL);
-  _11 = List_var(_10);
-  _12 = cons(_11, NULL);
-  _13 = cons(_8, _12);
-  _14 = List_var(_13);
-  _15 = Symbol_var(481205850);
-  _16 = Symbol_var(58);
-  _17 = cons(_16, NULL);
-  _18 = cons(_16, _17);
-  _19 = cons(_15, _18);
-  _20 = List_var(_19);
-  _21 = Symbol_var(4928588686);
-  _22 = cons(_21, _18);
-  _23 = List_var(_22);
-  _24 = cons(_23, NULL);
-  _25 = cons(_20, _24);
-  _26 = cons(_14, _25);
-  _27 = cons(_7, _26);
-  _28 = cons(_0, _27);
-  _29 = List_var(_28);
-  _30 = cons(_29, NULL);
-  _31 = cons(_6, _30);
-  _32 = String_new(".");
+  _0 = String_new(".");
 }
 
 List type_base_suffix(List);
@@ -62,22 +26,33 @@ List type_base_suffix(List);
 static String _delegate_type_name(Type type){
   List base = type_base_suffix(type);
   {
-    List _x2c_gensym_match_expr = base; Var _x2c_gensym_match_values[1]; MatchCaptureBuffer _x2c_gensym_match_capture = { .values = _x2c_gensym_match_values, .capacity = 1 };
-      static MatchCaptureSite _x2c_gensym_match_site_0; if (x2c_match_site_try_capture(&_x2c_gensym_match_site_0, _x2c_gensym_match_expr, List_var(_31), &_x2c_gensym_match_capture)) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_values[0]; {
-      Var tag;  tag = _x2c_gensym_match_value_0;  return Var_str(tag);
+    List _x2c_gensym_match_expr_0 = base;
+    {List _x2c_gensym_match_at_0, _x2c_gensym_match_at_1, _x2c_gensym_match_at_2, _x2c_gensym_match_at_3, _x2c_gensym_match_at_4, _x2c_gensym_match_at_5, _x2c_gensym_match_at_6, _x2c_gensym_match_at_7, _x2c_gensym_match_at_8, _x2c_gensym_match_at_9; Var x2c_match_value_0; if(_x2c_gensym_match_expr_0 &&(_x2c_gensym_match_expr_0 ->car.u64 == 9224497938079852776ULL || _x2c_gensym_match_expr_0 ->car.u64 == 9224497936806595548ULL) &&(_x2c_gensym_match_at_0 = _x2c_gensym_match_expr_0 ->cdr) &&(x2c_match_value_0 = _x2c_gensym_match_at_0 ->car, 1) &&(! Var_is(_x2c_gensym_match_at_0 -> car, 806120) ||(Var_is(_x2c_gensym_match_at_0 -> car, 806120) &&(_x2c_gensym_match_at_1 = Var_list_payload(_x2c_gensym_match_at_0 -> car), 1)) && _x2c_gensym_match_at_1 && _x2c_gensym_match_at_1 ->car.u64 == 9224497937242824282ULL &&(_x2c_gensym_match_at_2 = _x2c_gensym_match_at_1 ->cdr) &&(_x2c_gensym_match_at_3 = _x2c_gensym_match_at_2 ->cdr) && !(_x2c_gensym_match_at_4 = _x2c_gensym_match_at_3 ->cdr) ||(Var_is(_x2c_gensym_match_at_0 -> car, 806120) &&(_x2c_gensym_match_at_5 = Var_list_payload(_x2c_gensym_match_at_0 -> car), 1)) && _x2c_gensym_match_at_5 && _x2c_gensym_match_at_5 ->car.u64 == 9224497941690207118ULL &&(_x2c_gensym_match_at_6 = _x2c_gensym_match_at_5 ->cdr) &&(_x2c_gensym_match_at_7 = _x2c_gensym_match_at_6 ->cdr) && !(_x2c_gensym_match_at_8 = _x2c_gensym_match_at_7 ->cdr)) && !(_x2c_gensym_match_at_9 = _x2c_gensym_match_at_0 ->cdr)){
+      Var tag;
+      tag = x2c_match_value_0;
+      return Var_str(tag);
     }
-     }
+
   }
-  return Var_str(List_car(base));
+
+}
+return Var_str(List_car(base));
 }
 
 static String _delegate_path(Type type, List fields, String member){
-  Array parts = Array_update_n(Array_new(), 1, String_var(_delegate_type_name(type))); {
-    String field;  List _x2c_gensym_macro_object_0 = fields;  List _x2c_gensym_macro_cursor_0 = _x2c_gensym_macro_object_0;  Var _x2c_gensym_macro_cursor_output_0;  while(List_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_0), &(_x2c_gensym_macro_cursor_output_0))){
-      field = Var_as_string(_x2c_gensym_macro_cursor_output_0);  Array_push(parts, String_var(field));
+  Array parts = Array_update_n(Array_new(), 1, String_var(_delegate_type_name(type)));
+  {
+    String field;
+    List _x2c_gensym_macro_object_0 = fields;
+    List _x2c_gensym_macro_cursor_0 = _x2c_gensym_macro_object_0;
+    Var _x2c_gensym_macro_cursor_output_0;
+    while(List_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_0), &(_x2c_gensym_macro_cursor_output_0))){
+      field = Var_as_string(_x2c_gensym_macro_cursor_output_0);
+      Array_push(parts, String_var(field));
     }
 
   }
-  if(String_truth(member)) Array_push(parts, String_var(member));  return String_join(_32, Array_list_free(parts));
+  if(String_truth(member)) Array_push(parts, String_var(member));
+  return String_join(_0, Array_list_free(parts));
 }
 
