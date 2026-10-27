@@ -117,11 +117,12 @@ static Array _stub_arguments(Func function, const FuncArg *argv) {
   Array values = [];
   int count = parameters.len();
   for (int i = 0; i < count; i++) {
-    if (parameters.car() == %(....)) {
+    Type container = Type.rest_container(parameters.car());
+    if (container == %("List")) {
       List rest = argv[i].data.value;
       foreach (Var value in rest) values.push(value);
     }
-    else if (parameters.car() == %(.... "Map")) {
+    else if (container == %("Map")) {
       Map rest = argv[i].data.value;
       foreach (Var (key, value) in rest) values.push(key), values.push(value);
     }

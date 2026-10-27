@@ -505,7 +505,7 @@ static Func _new(
   if (context_size > SIZE_MAX - context_offset)
     $error.context.size(context_size);
   Var last = params.last();
-  if (last == %(....)) rest = 1;
+  if (last == %(....) || last == %(.... "List")) rest = 1;
   else if (last == %(.... "Map")) rest = 2;
   else if (rest && last != %("List"))
     $error.bind.sig(signature);

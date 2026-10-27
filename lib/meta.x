@@ -490,6 +490,8 @@ String type_name_error(List type) {
     declarator precedence.
 */
 List type_declaration_parts(List type) {
+  // A rest parameter's Type is one marker, not modifiers on its container.
+  if (type ~= %(.... *)) return %($type ());
   List base = type_base_suffix(type);
   if (!base) return %($type ());
   List reversed = %(), qualifiers = %();

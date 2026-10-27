@@ -491,7 +491,7 @@ List Compiler.parse_parameter(Compiler c) {
   List qual = _type_qualifiers(c), spec = _type_specifier(c);
   List type = %( @qual @spec );
   int rest = (type == %("List") || type == %("Map")) && c.test(<@>);
-  if (rest) type = type == %("List") ? %(....) : %(.... "Map");
+  if (rest) type = %(.... @type);
   List method = NULL;
   Token first = NULL, after = NULL;
   List declarator = _declarator(c, type, NULL, method, first, after);

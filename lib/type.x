@@ -190,11 +190,12 @@ int Type.function_parts(Type type, List &params, Type &?return_type) {
 
 /** Returns the container Type, `("List")` or `("Map")`, that a rest
     parameter packs its arguments into, or NULL for any other parameter.
-    `List @name` has the Type `(....)` and `Map @name` has `(.... "Map")`.
+    `List @name` has the Type `(.... "List")` and `Map @name` has
+    `(.... "Map")`.
 */
 Type Type.rest_container(Type type) {
   if (type === %(....)) return %("List");
-  if (type === %(.... "Map")) return %("Map");
+  if (type ~= %(.... ?(String container))) return $(container);
   return NULL;
 }
 

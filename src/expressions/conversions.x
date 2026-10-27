@@ -66,7 +66,8 @@ module void _check_converter_args(
   }
   List n = notes;
   for (List p = params, a = arguments; p && a;
-       p = car(p) == %(....) ? p : cdr(p), a = cdr(a), n = cdr(n)) {
+       p = Type.rest_container(car(p)) ? p : cdr(p), a = cdr(a),
+       n = cdr(n)) {
     if (car(p) is not <list> || car(a) is not <list>) continue;
     List param = car(p), argument = car(a);
     Type expected = param.car() == <param> ? param.type_from_ast() : param;
