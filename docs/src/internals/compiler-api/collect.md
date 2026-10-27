@@ -72,7 +72,7 @@ of `names`, including their receiver rows. Includes contribute their
 selected declarations, without replaying compile-time effects.
 Unselected functions and variables do not enter the result.
 
-Source: `src/collect/declarations.x:423`
+Source: `src/collect/declarations.x:429`
 
 <a id="Compiler.collect_package"></a>
 #### Compiler.collect_package
@@ -116,7 +116,7 @@ Returns the one-part names that the source at home-relative `path`
 declares itself, without its includes, as this process collected it.
 A source this process has not collected declares no names.
 
-Source: `src/collect/declarations.x:197`
+Source: `src/collect/declarations.x:203`
 
 <a id="Compiler.complete_meta_hashes"></a>
 #### Compiler.complete_meta_hashes
@@ -162,7 +162,7 @@ declares, in no particular order. A file that imports a package
 declares none here: the walk that records them for a cold entry does
 not install a package's surface.
 
-Source: `src/collect/declarations.x:615`
+Source: `src/collect/declarations.x:610`
 
 <a id="Compiler.forget_provisional_entries"></a>
 #### Compiler.forget_provisional_entries
@@ -187,7 +187,7 @@ signatures alone do not establish a runtime declaration either. Emission
 reads the entries collection already installed without invalidating
 them.
 
-Source: `src/collect/declarations.x:175`
+Source: `src/collect/declarations.x:181`
 
 <a id="Compiler.include_type_dependencies"></a>
 #### Compiler.include_type_dependencies
@@ -198,7 +198,7 @@ The semantic type rows reached by an ordinary source include. Each
 file contributes once to `seen`; the current unit does not contribute
 through a cycle back to its own still-open header.
 
-Source: `src/collect/declarations.x:134`
+Source: `src/collect/declarations.x:140`
 
 <a id="Compiler.include_typedef_names"></a>
 #### Compiler.include_typedef_names
@@ -212,7 +212,7 @@ is skipped with the files it reaches, and each file reached is added to
 `seen`. NULL when the include does not resolve to x2c source; a runtime
 module adds nothing the prelude has not declared.
 
-Source: `src/collect/declarations.x:120`
+Source: `src/collect/declarations.x:126`
 
 <a id="Compiler.included_compile_time_effects"></a>
 #### Compiler.included_compile_time_effects
@@ -410,7 +410,7 @@ Source: `src/collect/walk.x:53`
 Promotes the selected type families after the owning ordinary full
 parse. The header and Xi then use the same complete family selection.
 
-Source: `src/collect/declarations.x:497`
+Source: `src/collect/declarations.x:503`
 
 <a id="Compiler.publishes_type_family"></a>
 #### Compiler.publishes_type_family
@@ -419,7 +419,7 @@ Source: `src/collect/declarations.x:497`
 
 Reports whether this unit's interface publishes the type `family`.
 
-Source: `src/collect/declarations.x:243`
+Source: `src/collect/declarations.x:249`
 
 <a id="Compiler.publishes_typedef"></a>
 #### Compiler.publishes_typedef
@@ -428,7 +428,7 @@ Source: `src/collect/declarations.x:243`
 
 Reports whether this unit's selected interface publishes `name`.
 
-Source: `src/collect/declarations.x:238`
+Source: `src/collect/declarations.x:244`
 
 <a id="Compiler.record_conformance_rows"></a>
 #### Compiler.record_conformance_rows
@@ -441,7 +441,7 @@ publishes, as `record_generated_symbol` adds its rows. A row an earlier
 cold walk recorded may sit in an earlier map. The cache retains each key
 and value.
 
-Source: `src/collect/declarations.x:590`
+Source: `src/collect/declarations.x:585`
 
 <a id="Compiler.record_generated_symbol"></a>
 #### Compiler.record_generated_symbol
@@ -453,7 +453,7 @@ current file's collected entry contributes, which is the map its
 interface publishes. A file without a collected declaration map records
 nothing. The cache retains `signature`.
 
-Source: `src/collect/declarations.x:570`
+Source: `src/collect/declarations.x:565`
 
 <a id="Compiler.refresh_source_collections"></a>
 #### Compiler.refresh_source_collections
@@ -474,7 +474,7 @@ Source: `src/collect/cache.x:151`
 The runtime umbrella includes each listed module's generated header.
 Compiler components in the semantic prelude supply no runtime header.
 
-Source: `src/collect/declarations.x:185`
+Source: `src/collect/declarations.x:191`
 
 ### `SourceView`
 
