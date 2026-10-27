@@ -4175,7 +4175,7 @@ int x2c_match_try_capture(List input, Var pattern, MatchCaptureBuffer * captures
 
 int List_try_match(List input, Var pat, List * out_bindings){
   if(! _init_guard_) _file_init_();
-  return out_bindings && MatchCache_try_match(MatchCache_current(), input, pat, out_bindings, "List.try_match");
+  return out_bindings && MatchCache_try_match(MatchCache_current(), input, pat, &((* out_bindings)), "List.try_match");
 }
 
 List List_match(List input, Var pat){
@@ -4187,7 +4187,7 @@ List List_match(List input, Var pat){
 
 int List_try_match_replace(List input, Var pat, Var template, Var * out){
   if(! _init_guard_) _file_init_();
-  return out && MatchCache_try_match_replace(MatchCache_current(), input, pat, template, out, "List.try_match_replace");
+  return out && MatchCache_try_match_replace(MatchCache_current(), input, pat, template, &((* out)), "List.try_match_replace");
 }
 
 List List_match_replace(List input, Var pat, Var template){

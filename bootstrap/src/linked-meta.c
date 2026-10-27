@@ -13383,7 +13383,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_20(void
   _10543 = List_var(_10542);
   _10544 = String_new("lib/error/records.x");
   _10545 = String_var(_10544);
-  _10546 = String_new("6ce057c1");
+  _10546 = String_new("cf0021ea");
   _10547 = String_var(_10546);
   _10548 = cons(_10547, NULL);
   _10549 = cons(_10545, _10548);
@@ -14247,7 +14247,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_22(void
   _11401 = List_var(_11400);
   _11402 = String_new("lib/macrovalue/recognition.x");
   _11403 = String_var(_11402);
-  _11404 = String_new("6bfb6135");
+  _11404 = String_new("b142223d");
   _11405 = String_var(_11404);
   _11406 = cons(_11405, NULL);
   _11407 = cons(_11403, _11406);

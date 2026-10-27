@@ -1337,14 +1337,13 @@ static int f11_recognition____case_match(List code, MatchPlan plan, MacroFixedSl
   machine.view = f11_recognition____unwrap;
   MatchMachine_begin(&(machine), MachineProgram_view(plan -> program), List_var(code));
   MatchMachine_run(&(machine));
-  int matched = machine.status == 982 && f11_recognition____take_slots(&(machine), captured);
+  int matched = machine.status == 982 &&(! captured || f11_recognition____take_slots(&(machine), &((* captured))));
   MatchMachine_finish(&(machine));
   MatchMachine_dispose(&(machine));
   return matched;
 }
 
 static int f11_recognition____take_slots(MatchMachine * machine, MatchCaptureBuffer * captured){
-  if(! captured) return(* machine).status == 982;
   for(int i = 0;  i <(* machine).slot_count;  i ++){
     MachineSlot * slot = &(* machine).slots[i];
     if(slot -> kind == 20313104968) continue;

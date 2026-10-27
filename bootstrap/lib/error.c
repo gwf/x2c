@@ -677,8 +677,7 @@ static Var _copy_value(ErrorRegion * region, Var value){
 }
 
 static Var f7_records____copy_wide(ErrorRegion * region, Var value){
-  if(! region) return f7_records____snapshot_wide(value);
-  return f7_records____clone_in(&(* region).values, value);
+  return region ? f7_records____clone_in(&(* region).values, value) : f7_records____snapshot_wide(value);
 }
 
 static Var f7_records____snapshot_wide(Var v){
@@ -767,8 +766,7 @@ static List _view_since(ErrorRegion * region, int mark){
   for(int i = Error_count() - 1;  i >= mark;  i --){
     ErrorRecord * record = _record_at(i);
     Var entry = _copy_value(region, List_var(record -> entry));
-    if(region) out = _cons(&((* region)), entry, out);
-    else out = cons(entry, out);
+    out = region ? _cons(&((* region)), entry, out) : cons(entry, out);
   }
   return out;
 }
