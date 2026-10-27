@@ -385,13 +385,13 @@ A C no-argument parameter list is explicitly `(params (param (void) (bind ()
 ())))`. Do not replace it with `(params)` solely because lambdas and calls
 permit empty parameter/argument sequences.
 
-A List rest parameter, `List @NAME`, uses `(param (....) (bind NAME ()))`. Its
-semantic parameter Type is `(....)`, distinct from `("List")`, while its
-bound local and emitted native parameter are ordinary Lists. A Map rest
-parameter, `Map @NAME`, uses `(.... "Map")` the same way, with a Map local
-and native parameter. A `key: value` call argument is
-`(expr ("Map") (map-entry KEY VALUE))`. The final
-position in the parameter sequence owns the rest convention.
+A rest parameter `List @NAME` or `Map @NAME` uses
+`(param (.... CONTAINER) (bind NAME ()))`, where CONTAINER is `"List"` or
+`"Map"`. Its semantic parameter Type `(.... CONTAINER)` is one marker, not a
+modifier on CONTAINER, and is distinct from `(CONTAINER)`; its bound local and
+emitted native parameter are ordinary CONTAINER values. A `key: value` call
+argument is `(expr ("Map") (map-entry KEY VALUE))`. The final position in the
+parameter sequence owns the rest convention.
 
 Owners: [_declarator, _declarator_suffix, _array_suffix,
 Compiler.parse_parameter][declarators]; [List.type_from_ast][compiler-type];
@@ -414,7 +414,7 @@ ENUMERATORS ::= (ENUMERATOR*)
 ENUMERATOR ::= NAME | DECLARATOR | (op = NAME EXPR)
              | (op = DECLARATOR EXPR) | ENUMERATOR-SLOT
 TYPE       ::= (SEMANTIC-PREFIX* SEMANTIC-TAIL) | UNQUAL-TYPE
-             | (<macro-expr>) | (....)
+             | (<macro-expr>) | (.... "List") | (.... "Map")
 SEMANTIC-PREFIX ::= QUALIFIER | STORAGE | inline | meta
                    | SEMANTIC-MODIFIER | (NATIVE-TEXT)
 SEMANTIC-TAIL ::= TYPE-WORD+ | SPELLING | struct TAG-NAME

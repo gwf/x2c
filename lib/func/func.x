@@ -434,8 +434,9 @@ static unsigned _type_qualifiers(List &cursor) {
 // construction
 
 /** Builds a native-function binding in the current `Scope`.
-    A final `(....)` or `(.... "Map")` signature parameter, the Type of a
-    `List @name` or `Map @name` parameter, selects rest calling semantics.
+    A final `(.... "List")` or `(.... "Map")` signature parameter, the Type
+    of a `List @name` or `Map @name` parameter, selects rest calling
+    semantics.
     A direct function expression is compiler-adapted; an expression already
     typed `FuncAdapter` is stored as supplied. The canonical `signature` and
     adapter code are borrowed for the `Func` lifetime. Only the signature's
@@ -448,20 +449,23 @@ Func Func.new(FuncAdapter adapter, List signature) =>
   _new(adapter, signature, 0, NULL, 0);
 
 /** Builds a native binding with fixed parameters and a List rest tail.
-    The signature ends in `List` or `(....)`. The adapter receives fixed
-    arguments followed by a List containing the remaining values in order.
+    The signature ends in `List` or `(.... "List")`. The adapter receives
+    fixed arguments followed by a List containing the remaining values in
+    order.
     A signature with only one List parameter retains the zero-prefix behavior.
     The canonical signature and adapter code are borrowed for the Func
     lifetime. The result belongs to the current Scope.
     Raises: `<bad-sig>` for a null adapter, malformed signature, or a final
-    parameter other than List or `(....)`, and `<alloc-fail>` for storage.
+    parameter other than List or `(.... "List")`, and `<alloc-fail>` for
+    storage.
 */
 Func Func.new_rest(FuncAdapter adapter, List signature) =>
   _new(adapter, signature, 1, NULL, 0);
 
 /** Builds a binding with copied context in the current `Scope`.
-    A final `(....)` or `(.... "Map")` signature parameter, the Type of a
-    `List @name` or `Map @name` parameter, selects rest calling semantics.
+    A final `(.... "List")` or `(.... "Map")` signature parameter, the Type
+    of a `List @name` or `Map @name` parameter, selects rest calling
+    semantics.
     The max_align_t-aligned bytes share the `Func` allocation. The byte copy is
     shallow: changing the source bytes does not change the binding, while any
     pointers inside them keep their original targets and lifetimes. A zero
@@ -505,7 +509,7 @@ static Func _new(
   if (context_size > SIZE_MAX - context_offset)
     $error.context.size(context_size);
   Var last = params.last();
-  if (last == %(....) || last == %(.... "List")) rest = 1;
+  if (last == %(.... "List")) rest = 1;
   else if (last == %(.... "Map")) rest = 2;
   else if (rest && last != %("List"))
     $error.bind.sig(signature);

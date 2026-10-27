@@ -194,7 +194,6 @@ int Type.function_parts(Type type, List &params, Type &?return_type) {
     `(.... "Map")`.
 */
 Type Type.rest_container(Type type) {
-  if (type === %(....)) return %("List");
   if (type ~= %(.... ?(String container))) return $(container);
   return NULL;
 }
