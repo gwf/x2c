@@ -16421,7 +16421,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_26(void
   _13563 = List_var(_13562);
   _13564 = String_new("src/protocol/protocol.x");
   _13565 = String_var(_13564);
-  _13566 = String_new("70b7192c");
+  _13566 = String_new("d7ba9806");
   _13567 = String_var(_13566);
   _13568 = cons(_13567, NULL);
   _13569 = cons(_13565, _13568);
@@ -17658,7 +17658,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_28(void
   _14794 = List_var(_14793);
   _14795 = String_new("src/expressions/calls.x");
   _14796 = String_var(_14795);
-  _14797 = String_new("0b2c127c");
+  _14797 = String_new("52584a98");
   _14798 = String_var(_14797);
   _14799 = cons(_14798, NULL);
   _14800 = cons(_14796, _14799);
@@ -17703,7 +17703,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_28(void
   _14839 = List_var(_14838);
   _14840 = String_new("src/expressions/operators.x");
   _14841 = String_var(_14840);
-  _14842 = String_new("e6fa76d6");
+  _14842 = String_new("59cae255");
   _14843 = String_var(_14842);
   _14844 = cons(_14843, NULL);
   _14845 = cons(_14841, _14844);
@@ -18144,7 +18144,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_29(void
   _15277 = List_var(_15276);
   _15278 = String_new("src/operator-ledger.x");
   _15279 = String_var(_15278);
-  _15280 = String_new("c5b683af");
+  _15280 = String_new("e37ea4ae");
   _15281 = String_var(_15280);
   _15282 = cons(_15281, NULL);
   _15283 = cons(_15279, _15282);
@@ -19273,7 +19273,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_32(void
   _16397 = cons(_10926, _16396);
   _16398 = cons(_14498, _16397);
   _16399 = List_var(_16398);
-  _16400 = String_new("d30473b5");
+  _16400 = String_new("ba07b29c");
   _16401 = String_var(_16400);
   _16402 = cons(_16401, NULL);
   _16403 = cons(_16399, _16402);
@@ -19980,7 +19980,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_33(void
   _17101 = List_var(_17100);
   _17102 = String_new("src/transform/operators.x");
   _17103 = String_var(_17102);
-  _17104 = String_new("9eb46c8f");
+  _17104 = String_new("83bbbbe2");
   _17105 = String_var(_17104);
   _17106 = cons(_17105, NULL);
   _17107 = cons(_17103, _17106);
