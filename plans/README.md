@@ -50,7 +50,6 @@ and status; it does not implement the remaining features.
 | [Language-reference writing](review-remediation-2026-10-11.md) | Complete the selected source-form, rewrite, and Lisp explanations. | Identify exact missing coverage in the existing book, then fill it. |
 | [Structured lint findings](x2c-lint-and-format.md) | Approved phase 8 List output and compiler consumption. | Add the optional interface; preserve the experimental distribution and conditional editor integration. |
 | [Detached Channel ownership](detached-channel-ownership.md) | Close out evidence for the correction already present on `dev`. | Recover final benchmark, verification, and delivery/hold records; do not repeat implementation. |
-| [Match pattern tests](match-pattern-tests.md) | Test every Match operator in place through V1-style pattern tests; prototype measured 5.6% fewer self-translation instructions. | Gary approves or declines the design. |
 | [Map and Array rest parameters](map-and-array-rest-parameters.md) | `Map @name` keyword arguments are implemented; `Array @name` is deferred. | Array waits for a caller that needs indexed access to its tail. |
 
 ### Research and reference
@@ -80,6 +79,8 @@ first-cutover recovery prerequisite. No production promotion is selected here.
 
 Completed work archived on 2026-10-27:
 
+- [Match pattern tests](archive/match-pattern-tests.md): delivered in
+  `5fd0a079e`; every Match operator is tested in place.
 - [List rest parameters](archive/list-rest-parameters.md): delivered in
   `075623030`; its `.... name` spelling became `List @name`.
 

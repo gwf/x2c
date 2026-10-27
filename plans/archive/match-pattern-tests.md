@@ -1,11 +1,13 @@
 # Match lowering through pattern tests
 
-> Status: active
-> Proposed 2026-10-26; awaiting Gary's approval. Measured at `76bc02a81`.
-> Later `dev` commits through `169ea7882` removed repeated Match machine
-> state checks, which may lower the baseline slightly; not remeasured.
-> Replaces the binder-free `!or` plan published in `76bc02a81`. A scratch
-> prototype was built, verified, and measured; nothing is implemented.
+> Status: done
+> Delivered 2026-10-27 in `5fd0a079e`, with bootstrap `920878b51`. Every
+> Match operator is tested in place; only segment searches, binders reused
+> after only some `!or` alternatives set them, and runtime pattern parts
+> call Match.
+> The delivered writer builds the tests as emitter nodes inside placed
+> code rather than C text. Self-translation took 4.5% fewer instructions
+> than `fc1eee8da`; translating one match statement took 32% more.
 
 ## Result
 
