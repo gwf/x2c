@@ -458,7 +458,7 @@ outermost `Scope`, so nested caller brackets may be released safely.
 Invalid or identity-bearing values and failures while copying reach the raw
 error floor; they never re-enter handler dispatch.
 
-Source: `lib/error/records.x:273`
+Source: `lib/error/records.x:274`
 
 <a id="Error.trim"></a>
 #### Error.trim
@@ -541,7 +541,7 @@ live until that `Scope` is destroyed. An unavailable runtime or negative
 mark returns `nil`. `Null` owners or failures while copying reach the raw
 floor.
 
-Source: `lib/error/records.x:248`
+Source: `lib/error/records.x:249`
 
 <a id="Error.snapshot_in"></a>
 #### Error.snapshot_in
@@ -555,7 +555,7 @@ live until their actual owning pool is released. Wide scalar boxes enter
 live until that `Scope` is destroyed. `Null` owners, invalid or
 identity-bearing values, and failures while copying reach the raw floor.
 
-Source: `lib/error/records.x:288`
+Source: `lib/error/records.x:289`
 
 ## Public types
 

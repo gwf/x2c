@@ -149,7 +149,7 @@ noncapturing lambda converts to a shared handle that lives for the
 program; the session only borrows it. Values inside the `Func`,
 including its signature graph, retain their existing owners.
 
-Source: `lib/lisp/sessions.x:241`
+Source: `lib/lisp/sessions.x:243`
 
 <a id="Lisp.call_budget"></a>
 #### Lisp.call_budget
@@ -357,7 +357,7 @@ owners.
 frozen session, or `<alloc-fail>` or `<bad-enc>` while canonicalizing
 the name.
 
-Source: `lib/lisp/sessions.x:224`
+Source: `lib/lisp/sessions.x:226`
 
 <a id="Lisp.set_global"></a>
 #### Lisp.set_global
@@ -378,7 +378,7 @@ binding.
 **Raises:** `<bad-arg>` for a null session or name, or `<alloc-fail>`,
 `<size-limit>`, or `<bad-enc>` while canonicalizing or storing the binding.
 
-Source: `lib/lisp/sessions.x:205`
+Source: `lib/lisp/sessions.x:207`
 
 ## Runtime-internal callables
 
@@ -676,7 +676,7 @@ Source: `lib/lisp/primitives.x:257`
 
 Borrows the session executing the current native Lisp callback.
 
-Source: `lib/lisp/sessions.x:250`
+Source: `lib/lisp/sessions.x:252`
 
 <a id="Lisp.automatic_storage"></a>
 #### Lisp.automatic_storage
@@ -685,7 +685,7 @@ Source: `lib/lisp/sessions.x:250`
 
 Borrows the current lowered source activation's automatic storage.
 
-Source: `lib/lisp/sessions.x:254`
+Source: `lib/lisp/sessions.x:256`
 
 <a id="Lisp.result_storage"></a>
 #### Lisp.result_storage
@@ -694,7 +694,7 @@ Source: `lib/lisp/sessions.x:254`
 
 Borrows the caller's storage for a lowered record result.
 
-Source: `lib/lisp/sessions.x:257`
+Source: `lib/lisp/sessions.x:259`
 
 <a id="Lisp.storage"></a>
 #### Lisp.storage
@@ -703,7 +703,7 @@ Source: `lib/lisp/sessions.x:257`
 
 Borrows the storage owner for callback state retained by this session.
 
-Source: `lib/lisp/sessions.x:252`
+Source: `lib/lisp/sessions.x:254`
 
 ## Public types
 
