@@ -8,10 +8,10 @@ parallel directory-counting API. These files are the canonical tutorial sources.
 | Version | Lines | Change |
 | --- | ---: | --- |
 | [0](words-v0.c) | 183 | Native C: explicit hash table, allocation, sorting, and cleanup. |
-| [1](words-v1.x) | 143 | Scope allocation, pointer member access with dots, and defer. |
+| [1](words-v1.x) | 143 | Scope allocation, required references, pointer member access with dots, and defer. |
 | [2](words-v2.x) | 109 | Substr word views and whole-file reading; retain the explicit hash table. |
 | [3](words-v3.x) | 102 | Bounded Array min-heap of `(count word)` Lists and typed destructured printing. |
-| [4](words-v4.x) | 47 | A native Substr count map and mixed-type foreach replace the explicit table traversal. |
+| [4](words-v4.x) | 45 | A native Substr count map and mixed-type foreach replace the explicit table traversal. |
 | [5](words-v5.x) | 42 | One file counting function; interpolated output. |
 | [6](words-v6.x) | 59 | A file or recursive directory traversal; merge native per-file count maps into MapStringInt. |
 | [7](words-v7.x) | 59 | Four persistent workers for directories; a single file runs directly. |
@@ -19,6 +19,14 @@ parallel directory-counting API. These files are the canonical tutorial sources.
 
 Line counts include comments. The viewer hides comments and calculates its
 diffs and displayed line numbers from that representation.
+
+Versions 1-3 borrow each `Counts` object through required reference parameters.
+Callers pass the object directly; the compiler supplies its address. Version 4
+uses an expression body for its forwarding function. Version 6 gives the
+file-counting callback its concrete `Path` input and `MapSubInt` result; `map`
+adapts that typed function through `Func`. Versions 7-8 retain the `Var` callback
+required by the parallel worker API. Evaluated `$(...)` Lists carry the
+computed ranking pairs.
 
 ## Version 8: a reusable API
 
@@ -177,8 +185,8 @@ materializes a String only when inserting a new word. It merges
 and releases each consumed count table. Ranking traverses typed String/int
 bindings. Version 7 borrows the table while its worker waits for accumulation
 to finish; no automatic result export is needed. Its source Strings use the
-shared canonical pool. Versions 6 and 7 differ only in using `map` or
-`parallel_map`.
+shared canonical pool. Version 7 replaces `map` with `parallel_map` and uses
+its required `Var` callback signature.
 
 Versions 0-2 print descending counts with ascending word ties. Versions 3-7
 keep the largest ten `(count word)` tuples in an Array min-heap. Once the
