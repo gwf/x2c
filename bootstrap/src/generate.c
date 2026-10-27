@@ -61,9 +61,9 @@ static List f6_output____without_trivia(List ast);
 
 static List f6_output____generated_code(Compiler c, List ast, String basename);
 
-static List f6_output____emit_header(Compiler c, List header);
+static Array f6_output____emit_header(Compiler c, List header);
 
-static List f6_output____emit_source(Compiler c, List source, Map bindings, Map inline_bodies);
+static Array f6_output____emit_source(Compiler c, List source, Map bindings, Map inline_bodies);
 
 static void f6_output____publish_files(Compiler c, List outputs);
 
@@ -1177,7 +1177,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _722 = cons(_719, _721);
   _723 = List_var(_722);
   _724 = Symbol_var(1133019155420);
-  _725 = int_var(39637);
+  _725 = int_var(39641);
   _726 = cons(_725, NULL);
   _727 = cons(_724, _726);
   _728 = List_var(_727);
@@ -1260,7 +1260,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _805 = cons(_804, NULL);
   _806 = cons(_711, _805);
   _807 = List_var(_806);
-  _808 = int_var(39551);
+  _808 = int_var(39555);
   _809 = cons(_808, NULL);
   _810 = cons(_724, _809);
   _811 = List_var(_810);
@@ -1473,8 +1473,8 @@ static List f6_output____generated_code(Compiler c, List ast, String basename){
         ;
         x2c_cleanup_push(& _x2c_gensym_defer_record_1);
         {
-          List hcode = f6_output____emit_header(c, header);
-          List ccode = f6_output____emit_source(c, source, bindings, inline_bodies);
+          Array hcode = f6_output____emit_header(c, header);
+          Array ccode = f6_output____emit_source(c, source, bindings, inline_bodies);
           String hfile = String_join(NULL, cons(String_var(basename), cons(String_var(_6), NULL))), cfile = String_join(NULL, cons(String_var(basename), cons(String_var(_7), NULL)));
           {
             List _x2c_gensym_return_value_0 =({
@@ -1499,12 +1499,12 @@ static List f6_output____generated_code(Compiler c, List ast, String basename){
 
 }
 
-static List f6_output____emit_header(Compiler c, List header){
+static Array f6_output____emit_header(Compiler c, List header){
   header = _forward_declarations(c, header, 0);
   return Compiler_emit(c, f6_output____include_guard(c, f6_output____vertical_spacing(header)), NULL);
 }
 
-static List f6_output____emit_source(Compiler c, List source, Map bindings, Map inline_bodies){
+static Array f6_output____emit_source(Compiler c, List source, Map bindings, Map inline_bodies){
   source = _forward_declarations(c, _move_bodies(_file_init(c, source), inline_bodies), 1);
   return Compiler_emit(c, f6_output____source_unit(c, source), bindings);
 }

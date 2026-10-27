@@ -102,7 +102,7 @@ module List _initializer_macro(Emitter &e, List input, List body) {
   String name = e.c.fresh_name(%"initializer_choice_$hash");
   String replacement;
   with (e.c.source_map = 0) {
-    List tokens = _emit(e, body).flatten_all();
+    Array tokens = _captured(e, body);
     String formatted = e.c.code_pretty_string(tokens, NULL);
     replacement = formatted.rstrip("\n").replace("\n", "\\\n");
   }
@@ -114,7 +114,7 @@ module List _initializer_macro(Emitter &e, List input, List body) {
   e.native_macros.push($(name, forwarding));
   Array arguments = [];
   foreach (List argument in input.cdr()) {
-    List emitted = _emit(e, argument.cadr());
+    List emitted = _tokens(e, argument.cadr());
     arguments.push(%("(" @emitted ")"));
   }
   return %($name "(" @(_commas(arguments.list_free())) ")");
@@ -124,7 +124,7 @@ module List _initializer_value(Emitter &e, List ast) {
   List source = NULL;
   List functions = Ast.initializer_functions(ast, source);
   if (functions)
-    return _emit(e, %(call (expr () (initval @functions)) (args $source)));
+    return _tokens(e, %(call (expr () (initval @functions)) (args $source)));
   List input = NULL;
   List cases = Ast.initializer_cases(ast, input);
   if (input)
@@ -135,10 +135,10 @@ module List _initializer_value(Emitter &e, List ast) {
     if (value ~= %(expr ? (composite *)))
       value = type ? %(expr $type (cast $type $value))
                    : %(expr (int) (literal (int) "0"));
-    List emitted = _emit(e, $(value));
+    List emitted = _tokens(e, value);
     if (!result || !condition) result = emitted;
     else {
-      List test = _emit(e, $(condition));
+      List test = _tokens(e, condition);
       result = %("__builtin_choose_expr(" @test ","
                   @emitted "," @result ")");
     }
@@ -149,13 +149,13 @@ module List _initializer_value(Emitter &e, List ast) {
 module List _index_init(Emitter &e, Var index, List value) {
   String assign = value.car() == <dotinit> ||
                   value.car() == <indexinit> ? "" : " =";
-  return %("[" @(_emit(e, $(index))) "]" $assign @(_emit(e, $(value))));
+  return %("[" @(_tokens(e, index)) "]" $assign @(_tokens(e, value)));
 }
 
 module List _dot_init(Emitter &e, Var field, List value) {
   String assign = value.car() == <dotinit> ||
                   value.car() == <indexinit> ? "" : "=";
-  return %("." @(_emit(e, $(field))) $assign @(_emit(e, $(value))));
+  return %("." @(_tokens(e, field)) $assign @(_tokens(e, value)));
 }
 
 // local statics
@@ -182,7 +182,7 @@ module List _local_static(
     _static_binding(e, binding, declared_base, base_name, storage, output);
   /* The region shares its source block, including a statement expression's
      final value; another C block here would turn that value into void. */
-  output.push(_emit(e, body));
+  output.push(_tokens(e, body));
   return output.list_free();
 }
 
@@ -218,7 +218,7 @@ static void _static_binding(
   if (!initial ||
       !e.c.static_value_is_runtime(initial, e.static_objects)) {
     List native = _semantic_name(e, type, spelling);
-    List value = initial ? %("=" @(_emit(e, initial))) : NULL;
+    List value = initial ? %("=" @(_tokens(e, initial))) : NULL;
     output.push(%($storage @native @value ";"));
     return;
   }
@@ -252,7 +252,7 @@ static void _prepare(StaticRuntime &r) {
   }
   List alias_decl = _semantic_name((*r.e), r.type, r.alias);
   r.e.static_objects[r.name] = r.pointer;
-  List value = _emit((*r.e), r.initial);
+  List value = _tokens((*r.e), r.initial);
   r.prefix = $emit.object.fixed_alias(alias_decl, r.alias);
   r.initial_copy = %($(r.alias) $(r.temporary) "=" @value ";");
   r.source = $("&", r.temporary);

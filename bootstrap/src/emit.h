@@ -14,7 +14,7 @@
 #include "ast.h"
 #include "format.h"
 #include "cleanup/cleanup.h"
-List Compiler_emit(Compiler c, List ast, Map cache_bindings);
+Array Compiler_emit(Compiler c, List ast, Map cache_bindings);
 
 
 #endif /* __GUARD_0xA506BF2E__ */

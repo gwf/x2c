@@ -71,21 +71,21 @@ static List _generated_code(Compiler c, List ast, String basename) {
     %"_x2c_gensym_hcache_guard_$hash",
     %"_x2c_gensym_hcache_init_$hash");
   defer bindings.cleanup();
-  List hcode = _emit_header(c, header);
-  List ccode = _emit_source(c, source, bindings, inline_bodies);
+  Array hcode = _emit_header(c, header);
+  Array ccode = _emit_source(c, source, bindings, inline_bodies);
   String hfile = %"$basename.h", cfile = %"$basename.c";
   return $(
     hfile, c.code_pretty_string(hcode, hfile), cfile,
     c.code_pretty_string(ccode, cfile));
 }
 
-static List _emit_header(Compiler c, List header) {
+static Array _emit_header(Compiler c, List header) {
   header = _forward_declarations(c, header, 0);
   return c.emit(_include_guard(c, _vertical_spacing(header)), NULL);
 }
 
 /* Each source use follows the declarations it needs. */
-static List _emit_source(
+static Array _emit_source(
   Compiler c, List source, Map bindings, Map inline_bodies) {
   source = _forward_declarations(
     c, _move_bodies(_file_init(c, source), inline_bodies), 1);

@@ -2,7 +2,7 @@
 
     Copyright (c) 2025 Gary William Flake
 
-    Formats emitted token `List`s as C text without changing token order.
+    Formats emitted token `Array`s as C text without changing token order.
     Parenthesis depth suppresses statement breaks within expressions, and
     `Buffer` materializes the final `String`.
 */
@@ -22,27 +22,28 @@ static typedef struct Pretty {
   int output_line, scanned, source_line;
 } Pretty;
 
-/** Returns a canonical formatted C `String` for an emitted token `List`.
+/** Returns a canonical formatted C `String` for an emitted token `Array`.
     Token order and `code` are unchanged. Braces indent by two spaces,
     semicolons break lines only outside parentheses, and preprocessor tokens
-    occupy their own lines. An empty `List` returns the empty `String`.
+    occupy their own lines. An empty `Array` returns the empty `String`.
     Emitted `src-at` markers carry existing compiler origin IDs; zero restores
     `output_file` at its physical line.
 
     Raises: `<size-limit>` or `<alloc-fail>` while materializing the result.
 */
-char *Compiler.code_pretty_string(Compiler c, List code, String output_file) {
+char *Compiler.code_pretty_string(
+  Compiler c, Array code, String output_file) {
   Pretty p = {
     .c = c, .buff = Buffer.new(0), .output_file = output_file,
     .output_line = 1
   };
-  for (List lst = code; lst; lst = lst.cdr()) {
-    if (lst.car() == <src-at>) {
-      lst = lst.cdr();
-      _source_marker(p, lst.car());
+  int count = code.len();
+  for (int i = 0; i < count; i++) {
+    if (code[i] == <src-at>) {
+      _source_marker(p, code[++i]);
       continue;
     }
-    String token = lst.car().str();
+    String token = code[i].str();
     /* A directive writes its own newline. The emitter may follow it with a
        space token beginning with another newline; consume that byte so no
        blank line appears that the intended C does not have. */
@@ -58,7 +59,8 @@ char *Compiler.code_pretty_string(Compiler c, List code, String output_file) {
       _directive(p, token);
       continue;
     }
-    _ordinary(p, token, lst.cdr());
+    String next = i + 1 < count ? code[i + 1].str() : NULL;
+    _ordinary(p, token, next);
   }
   return p.buff.str_free();
 }
@@ -94,7 +96,7 @@ static void _directive(Pretty &p, String token) {
 }
 
 /* Surrounds the token with its leading and trailing layout. */
-static void _ordinary(Pretty &p, String token, List rest) {
+static void _ordinary(Pretty &p, String token, String next) {
   char last = token ? token[-1] : '\0';
   if (last == '(') p.paren_depth++;
   else if (last == ')') {
@@ -103,7 +105,7 @@ static void _ordinary(Pretty &p, String token, List rest) {
   }
   _before(p, token);
   _write_token(p.buff, token, p.source_line);
-  _after(p, token, last, rest);
+  _after(p, token, last, next);
 }
 
 static void _before(Pretty &p, String token) {
@@ -117,7 +119,7 @@ static void _before(Pretty &p, String token) {
   else if (_need_space(p.prev_token, token)) p.buff.write(" ");
 }
 
-static void _after(Pretty &p, String token, char last, List rest) {
+static void _after(Pretty &p, String token, char last, String next) {
   if (_token_is(token, '{')) {
     p.indent += 2;
     _write_mapped_newline(p.buff, p.source_line);
@@ -127,7 +129,7 @@ static void _after(Pretty &p, String token, char last, List rest) {
   else if (last == ';') {
     if (p.paren_depth == 0) {
       _write_mapped_newline(p.buff, p.source_line);
-      if (!_next_is_closing_brace(rest) && p.indent > 0)
+      if (!_token_is(next, '}') && p.indent > 0)
         _write_indent(p.buff, p.indent);
       p.prev_token = NULL;
     }
@@ -201,9 +203,4 @@ static void _write_token(Buffer buff, String token, int source_line) {
     _write_mapped_newline(buff, source_line);
     start = newline + 1;
   }
-}
-
-static int _next_is_closing_brace(List rest) {
-  if (!rest) return 0;
-  return _token_is(rest.car().str(), '}');
 }

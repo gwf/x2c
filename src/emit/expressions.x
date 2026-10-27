@@ -42,23 +42,23 @@ static int _right_operand_level(Symbol operator) {
   return operator.is_assignment_op() ? level : level + 1;
 }
 
-/* A node already stored as a List enters its own dispatch directly. Wrapping
+/* Emits `node`, in parentheses when it binds less tightly than `level`. A
+   node already stored as a List enters its own dispatch directly. Wrapping
    it in a one-element sequence would emit the same tokens through two more
    frames per operand, which the pinned chain stack budgets cannot spend. */
-module List _operand(Emitter &e, Var node, int level) {
-  List code = node is <list> && !node.is_nil()
-            ? _emit(e, node) : _emit(e, $(node));
-  if (_emitted_precedence(node) < level) return _parens(code);
-  return code;
+module void _operand(Emitter &e, Var node, int level) {
+  int grouped = _emitted_precedence(node) < level;
+  if (grouped) _put(e, "(");
+  if (node is <list> && !node.is_nil()) _emit(e, node);
+  else _emit(e, $(node));
+  if (grouped) _put(e, ")");
 }
 
 /* A left-leaning chain nests one (expr (op ...)) level per source term;
-   walk the spine and build the token stream iteratively, folding from the
-   right so each emitted piece is copied once. A separate function keeps the
-   spine arrays out of _emit's frame on every other recursion path. The walk
-   stops where the nested operator needs parentheses, leaving that operand to
-   the ordinary recursion. */
-static List _op_spine(Emitter &e, Var operator, Var left, Var right) {
+   walk the spine iteratively, so a long chain spends no recursion on its
+   left operands. The walk stops where the nested operator needs
+   parentheses, leaving that operand to the ordinary recursion. */
+static void _op_spine(Emitter &e, Var operator, Var left, Var right) {
   Array operators = auto [];
   Array rights = auto [];
   Var op_item = operator, left_item = left, right_item = right;
@@ -77,105 +77,119 @@ static List _op_spine(Emitter &e, Var operator, Var left, Var right) {
     }
     if (!deeper) break;
   }
-  List result = _operand(e, left_item, level);
-  Array pieces = auto [];
+  _operand(e, left_item, level);
   for (int i = (int) operators.len() - 1; i >= 0; i--) {
     Symbol binary = operators[i];
-    pieces.push(operators[i]);
-    pieces.push(_operand(e, rights[i], _right_operand_level(binary)));
+    _put(e, binary);
+    _operand(e, rights[i], _right_operand_level(binary));
   }
-  List tail = NULL;
-  for (int i = (int) pieces.len() - 1; i >= 0; i--) {
-    Var piece = pieces[i];
-    if (piece is <list>) tail = piece.list().append(tail);
-    else tail = cons(piece, tail);
-  }
-  return result.append(tail);
 }
 
 // expressions
 
-module List _postfix(Emitter &e, Symbol operator, Var argument) {
-  List c_arg = _operand(e, argument, EMIT_POSTFIX);
-  return $(@c_arg, operator);
+module void _postfix(Emitter &e, Symbol operator, Var argument) {
+  _operand(e, argument, EMIT_POSTFIX);
+  _put(e, operator);
 }
 
-module List _generic(Emitter &e, Var control, List associations) {
-  List c_control = _emit(e, $(control));
-  Array rows = [];
-  foreach (List association in associations) match (association) {
-    case %(association default ?value):
-      rows.push(%("default" ":" @(_emit(e, $(value)))));
-    case %(association ?type ?value):
-      rows.push(%(@(_semantic_type(e, type)) ":" @(_emit(e, $(value)))));
+module void _generic(Emitter &e, Var control, List associations) {
+  _put(e, "_Generic(");
+  _node(e, control);
+  _put(e, ", ");
+  int first = 1;
+  foreach (List association in associations) {
+    if (!first) _put(e, ", ");
+    first = 0;
+    match (association) {
+      case %(association default ?value): {
+        _put(e, "default");
+        _put(e, ":");
+        _node(e, value);
+      }
+      case %(association ?type ?value): {
+        _put_all(e, _semantic_type(e, type));
+        _put(e, ":");
+        _node(e, value);
+      }
+    }
   }
-  List c_rows = _commas(rows.list_free());
-  return %("_Generic(" @c_control ", " @c_rows ")");
+  _put(e, ")");
 }
 
-module List _unary(Emitter &e, Symbol operator, Var argument) {
-  List c_arg = _operand(e, argument, EMIT_UNARY);
-  return $(operator, @c_arg);
+module void _unary(Emitter &e, Symbol operator, Var argument) {
+  _put(e, operator);
+  _operand(e, argument, EMIT_UNARY);
 }
 
-module List _binary(
+module void _binary(
   Emitter &e, Symbol operator, Var left, Var right) {
-  if (left ~= %(expr ? (op *))) return _op_spine(e, operator, left, right);
-  Symbol binary = operator;
-  return $(
-    @(_operand(e, left, _left_operand_level(binary))), operator,
-    @(_operand(e, right, _right_operand_level(binary))));
+  if (left ~= %(expr ? (op *))) {
+    _op_spine(e, operator, left, right);
+    return;
+  }
+  _operand(e, left, _left_operand_level(operator));
+  _put(e, operator);
+  _operand(e, right, _right_operand_level(operator));
 }
 
-module List _ident(Emitter &e, Var binding) {
+module void _ident(Emitter &e, Var binding) {
   /* A template's free name in a declared type, such as an array size,
      keeps the spelling it lands with. */
-  if (binding ~= %((!or binding-name binding-global) ?(String spelling)))
-    return $(spelling);
+  if (binding ~= %((!or binding-name binding-global) ?(String spelling))) {
+    _put(e, spelling);
+    return;
+  }
   Var pointer;
-  if (e.static_objects && e.static_objects.try_get(binding, pointer))
-    return %("(*" $pointer ")");
-  return _emit(e, $(binding));
+  if (e.static_objects && e.static_objects.try_get(binding, pointer)) {
+    _put(e, "(*");
+    _put(e, pointer);
+    _put(e, ")");
+    return;
+  }
+  _node(e, binding);
 }
 
 // calls
 
-module List _call(Emitter &e, Var function, Var arguments) {
-  List site_call = _match_site_call(e, function, arguments);
-  if (site_call) return site_call;
-  return %(@(_operand(e, function, EMIT_POSTFIX)) "("
-           @(_emit(e, $(arguments))) ")");
+module void _call(Emitter &e, Var function, Var arguments) {
+  if (_match_site_call(e, function, arguments)) return;
+  _operand(e, function, EMIT_POSTFIX);
+  _put(e, "(");
+  _node(e, arguments);
+  _put(e, ")");
 }
 
 /* A source-literal pattern gets its own process-lifetime plan site, which
    retains a borrowable pattern's plan. Computed patterns use the ordinary
    entry's active plan cache: admitted canonical patterns reuse plans; other
    patterns need transient plans. Only a direct global function binding
-   identifies a runtime operation. Returns NULL for other calls or computed
-   patterns. */
-static List _match_site_call(Emitter &e, Var function, Var arguments) {
+   identifies a runtime operation. Writes the call and returns 1, or returns
+   0 for other calls or computed patterns. */
+static int _match_site_call(Emitter &e, Var function, Var arguments) {
   List binding = NULL;
   while (!binding && function is <list>) match (function) {
     case %(expr ? (parens ?inner)): function = inner;
     case %(expr ? (ident ?target)): binding = target;
-    default: return NULL;
+    default: return 0;
   }
   String name = Ast.binding_spelling(binding);
   String entry = _match_site_entry(name);
-  if (!entry) return NULL;
+  if (!entry) return 0;
   Type type = NULL;
   List global = e.c.sym.resolve_global($(name), type);
   if (!global || global != binding || !type.is_function())
-    return NULL;
+    return 0;
   List args = arguments;
   if (args ~= %(args ? ?pattern *) && pattern is <list> &&
       e.match_pattern_is_static(pattern)) {
     String site = e.fresh_name("match_site");
-    List c_args = _emit(e, $(arguments));
-    return %("({ static MatchCaptureSite " $site ";"
-             $entry "(&" $site "," @c_args "); })");
+    _put_all(e, %("({ static MatchCaptureSite " $site ";"
+                  $entry "(&" $site ","));
+    _node(e, arguments);
+    _put(e, "); })");
+    return 1;
   }
-  return NULL;
+  return 0;
 }
 
 /* Each `List_` matcher has an `x2c_match_site_` entry of the same name. */
@@ -187,18 +201,27 @@ static String _match_site_entry(String name) =>
 
 // literals
 
-module List _literal(Emitter &e, List ast) {
+module void _literal(Emitter &e, List ast) {
   (List type, String text, Var value) = ast.cdr();
-  if (type === %("Var") && text == "void") return %("((void) 0, Void)");
+  if (type === %("Var") && text == "void") {
+    _put(e, "((void) 0, Void)");
+    return;
+  }
   if (type === %("String")) {
-    text = %"\"$(text.escape())\"";
-    return %("String_new" "(" $text ")");
+    _put(e, "String_new");
+    _put(e, "(");
+    _put(e, %"\"$(text.escape())\"");
+    _put(e, ")");
+    return;
   }
   if (type === %("Symbol")) {
     Symbol symbol = value;
     text = %"$((long) symbol)";
   }
-  if (type === %("Atom")) return _atom_intern(text);
+  if (type === %("Atom")) {
+    _put(e, _atom_intern(text));
+    return;
+  }
   Type numeric = type;
   if (text[0] == '-') {
     unsigned long long magnitude;
@@ -221,25 +244,24 @@ module List _literal(Emitter &e, List ast) {
   if (text[digits] == '0' &&
       (text[digits + 1] == 'o' || text[digits + 1] == 'O'))
     text = text[:digits] + "0" + String.new(text + digits + 2);
-  return $(text);
+  _put(e, text);
 }
 
-static List _atom_intern(String spelling) {
+static String _atom_intern(String spelling) {
   String text = %"\"$(spelling.escape())\"";
   Atom atom = Atom.intern(spelling);
-  if (atom is <symbol>) return %( "Symbol_var(Symbol_new($text))" );
-  return %( "Atom_intern(String_new($text))" );
+  if (atom is <symbol>) return %"Symbol_var(Symbol_new($text))";
+  return %"Atom_intern(String_new($text))";
 }
 
-module List _args(Emitter &e, List ast) {
-  Array result = [];
+module void _args(Emitter &e, List ast) {
   int first = 1;
   foreach (List argument in ast.cdr()) {
-    List emitted = _emit(e, argument);
-    if (argument ~= %(expr ? (commas *))) emitted = _parens(emitted);
-    if (!first) result.push(", ");
-    result.push(emitted);
+    if (!first) _put(e, ", ");
     first = 0;
+    int grouped = argument ~= %(expr ? (commas *));
+    if (grouped) _put(e, "(");
+    _emit(e, argument);
+    if (grouped) _put(e, ")");
   }
-  return result.list_free();
 }

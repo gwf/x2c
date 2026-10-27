@@ -1,80 +1,111 @@
 /*  dispatch.x -- ordered traversal and C token assembly */
 
-// form templates
+// writing tokens
 
-static macro Expression $emit.cons(Expr $e, Expr $item, Expr $tail) =>
-  %("cons(" @(_emit($e, $($item))) ", " @(_emit($e, $($tail))) ")");
+/* Emission writes each C token to `e.out` in order, so no token List is
+   built: a form writes its text and emits its children where they stand. */
+module void _put(Emitter &e, Var token) { e.out.push(token); }
 
-static macro Expression $emit.append(Expr $e, Expr $head_list, Expr $tail) =>
-  %("List_append(" @(_emit($e, $($head_list))) ", "
-    @(_emit($e, $($tail))) ")");
+/* Writes `tokens`, a token List that may nest, in order. */
+module void _put_all(Emitter &e, List tokens) {
+  foreach (Var token in tokens)
+    if (token is <list>) _put_all(e, token);
+    else e.out.push(token);
+}
 
-static macro Expression $emit.c_assert(
-  Expr $e, Expr $condition, Expr $message) =>
-  %("_Static_assert(" @(_emit($e, $($condition))) ","
-    @(_emit($e, $($message))) ");");
+/* Writes `parts` in order: each String or number as a token, and each node
+   emitted in place; a Symbol heads a node of its own. */
+module void _write(Emitter &e, List parts) {
+  foreach (Var part in parts) _node(e, part);
+}
 
-static macro Expression $emit.initcode(Expr $e, Expr $input, Expr $body) =>
-  %(@(_initializer_macro($e, $input, $body)) ";");
+/* Emits `item` as `_emit` emits the one-element sequence holding it. */
+module void _node(Emitter &e, Var item) {
+  if (item is <list>) _emit(e, item);
+  else if (item is <symbol>) _emit(e, $(item));
+  else e.out.push(item);
+}
 
-static macro Expression $emit.cast(Expr $e, Expr $type, Expr $expression) =>
-  %("(" @(_semantic_type($e, $type)) ")"
-    @(_operand($e, $expression, EMIT_UNARY)));
+/* The tokens `_emit` writes for `ast`, apart from `e.out`, for a form that
+   places them out of order or inspects them. */
+module Array _captured(Emitter &e, Var ast) {
+  Array saved = e.out;
+  e.out = [];
+  _node(e, ast);
+  Array tokens = e.out;
+  e.out = saved;
+  return tokens;
+}
 
-static macro Expression $emit.cache(Expr $e, Expr $id) =>
-  $e.cache_bindings ? _ident($e, $e.cache_bindings[$id])
-                   : %("_$($id)");
+module List _tokens(Emitter &e, Var ast) => _captured(e, ast).list_free();
 
-static macro Expression $emit.vararg(
-  Expr $e, Expr $expression, Expr $declaration) =>
-  %("va_arg(" @(_emit($e, $($expression))) ", "
-    @(_emit($e, $($declaration))) ")");
+/* The items of the sequence `ast` as `_commas` separates them: each item
+   before a Symbol on its own, then each token of the node that Symbol
+   heads. */
+module List _grouped(Emitter &e, List ast) {
+  Array items = [];
+  while (ast && ast.car() is not <symbol>) {
+    items.push(_tokens(e, ast.car()));
+    ast = ast.cdr();
+  }
+  foreach (Var token in _tokens(e, ast)) items.push(token);
+  return items.list_free();
+}
 
-static macro Expression $emit.offset(Expr $e, Expr $type, Expr $member) =>
-  %("offsetof(" @(_semantic_type($e, $type)) ", " @(_emit($e, $member))
-    ")");
+/* Writes the sequence `ast` with commas between its items. */
+static void _comma_items(Emitter &e, List ast) {
+  int first = 1;
+  while (ast && ast.car() is not <symbol>) {
+    if (!first) _put(e, ", ");
+    _node(e, ast.car());
+    ast = ast.cdr();
+    first = 0;
+  }
+  if (!ast) return;
+  foreach (Var token in _tokens(e, ast)) {
+    if (!first) _put(e, ", ");
+    _put(e, token);
+    first = 0;
+  }
+}
 
-static macro Expression $emit.index(Expr $e, Expr $array, Expr $index) =>
-  %(@(_operand($e, $array, EMIT_POSTFIX)) "[" @(_emit($e, $($index)))
-    "]");
+static void _keyword_group(
+  Emitter &e, String keyword, Var inner, Var body) {
+  _put(e, keyword);
+  _put(e, "(");
+  _node(e, inner);
+  _put(e, ")");
+  _node(e, body);
+}
 
 /* Between `?` and `:` C accepts a complete expression, so only the
    condition and the false arm can regroup. */
-static macro Expression $emit.conditional(
-  Expr $e, Expr $condition, Expr $ontrue, Expr $onfalse) =>
-  %(@(_operand($e, $condition, EMIT_CONDITIONAL + 1)) "?"
-    @(_emit($e, $($ontrue))) ":"
-    @(_operand($e, $onfalse, EMIT_CONDITIONAL)));
+static void _conditional(Emitter &e, Var condition, Var yes, Var no) {
+  _operand(e, condition, EMIT_CONDITIONAL + 1);
+  _put(e, "?");
+  _node(e, yes);
+  _put(e, ":");
+  _operand(e, no, EMIT_CONDITIONAL);
+}
 
-static macro Expression $emit.if(Expr $e, Expr $condition, Expr $ontrue) =>
-  %("if" "(" @(_emit($e, $($condition))) ")" @(_emit($e, $($ontrue))));
+static void _cast(Emitter &e, Type type, Var expression) {
+  _put(e, "(");
+  _put_all(e, _semantic_type(e, type));
+  _put(e, ")");
+  _operand(e, expression, EMIT_UNARY);
+}
 
-static macro Expression $emit.if_else(
-  Expr $e, Expr $condition, Expr $ontrue, Expr $onfalse) =>
-  %("if" "(" @(_emit($e, $($condition))) ")" @(_emit($e, $($ontrue)))
-    "else" @(_emit($e, $($onfalse))));
+static void _index(Emitter &e, Var array, Var index) {
+  _operand(e, array, EMIT_POSTFIX);
+  _put(e, "[");
+  _node(e, index);
+  _put(e, "]");
+}
 
-static macro Expression $emit.while(Expr $e, Expr $condition, Expr $body) =>
-  %("while" "(" @(_emit($e, $($condition))) ")"
-    @(_emit($e, $($body))));
-
-static macro Expression $emit.do(Expr $e, Expr $body, Expr $condition) =>
-  %("do" @(_emit($e, $($body))) "while"
-    "(" @(_emit($e, $($condition))) ")" ";");
-
-static macro Expression $emit.for(Expr $e, Expr $ast) => ({
-  Var (initial, condition, increment, body) = $ast.cdr();
-  %("for" "(" @(_emit($e, $(initial))) ";"
-    @(_emit($e, $(condition))) ";" @(_emit($e, $(increment))) ")"
-    @(_emit($e, $(body))));
-});
-
-static macro Expression $emit.switch(Expr $e, Expr $expression, Expr $body) =>
-  %("switch" "(" @(_emit($e, $($expression))) ")"
-    @(_emit($e, $($body))));
-
-static macro Expression $emit.goto(Expr $e, Expr $label) =>
-  %("goto" @(_emit($e, $($label))) ";");
+static void _cache(Emitter &e, Var id) {
+  if (e.cache_bindings) _ident(e, e.cache_bindings[id]);
+  else _put(e, %"_$id");
+}
 
 /** Emits a bound, typed, transform-normalized AST sequence as flat C tokens.
     Source mapping adds `src-at`/ID pairs consumed by the formatter.
@@ -84,18 +115,15 @@ static macro Expression $emit.goto(Expr $e, Expr $label) =>
     any added scaffolding in the same normalized grammar. `cache_bindings`
     maps semantic cache ids to generated slots; NULL keeps raw ids for
     inspection. It preserves the top-level AST sequence and advances
-    generated-name counters as it allocates temporaries. Returned canonical
-    `List`s and `String`s are owned by pools
-    active during emission; promote them before releasing those pools if the
-    tokens must survive.
+    generated-name counters as it allocates temporaries. The returned
+    `Array` holds `String`s owned by pools active during emission; promote
+    them before releasing those pools if the tokens must survive.
 */
-List Compiler.emit(Compiler c, List ast, Map cache_bindings) {
+Array Compiler.emit(Compiler c, List ast, Map cache_bindings) {
   Emitter e = {
-    .c = c, .origin = 0, .native_macros = [],
+    .c = c, .origin = 0, .native_macros = [], .out = [],
     .cache_bindings = cache_bindings};
-  // flatten_all leaves no list element behind, so one pass is the fixed
-  // point and a second call would only re-cons the whole unit to prove it.
-  List code = _emit(e, ast).flatten_all();
+  _emit(e, ast);
   Array before = [], after = [];
   if (e.static_support)
     before.push("#include \"exception.h\"\n#include <string.h>");
@@ -104,168 +132,199 @@ List Compiler.emit(Compiler c, List ast, Map cache_bindings) {
     before.push(definition);
     after.push(%"#undef $name");
   }
-  return before.list_free().append(code).append(after.list_free());
+  return before.concat(e.out).concat(after);
 }
 
 /* Emission visits sibling nodes from left to right because generated names
    and origins change during the walk. Generic sequences walk their items in
-   order; a specialized form builds its tokens in one literal, whose parts
-   x2c evaluates left to right. This orders tokens, not C operand
+   order; a specialized form writes its text and emits its children in the
+   order C reads them. This orders tokens, not C operand
    evaluation; only producer-marked forms such as statement-expression
    blocks introduce runtime sequencing. Parser, transform, and generation
    produce every recognized AST shape, so the fallback handles only already
    C-shaped nodes. */
-module List _emit(Emitter &e, List ast) {
-  if (!ast) return ast;
+module void _emit(Emitter &e, List ast) {
+  if (!ast) return;
   Var head = ast.car();
-  if (head is not <symbol>) return _sequence(e, ast);
+  if (head is not <symbol>) {
+    _sequence(e, ast);
+    return;
+  }
   if (head != <typedef> &&
       (head.symbol().is_storage_class() ||
        head.symbol().is_type_qualifier() ||
        head.symbol().is_inline())) {
-    return _prefix(e, ast);
+    _prefix(e, ast);
+    return;
   }
   match (ast) {
-    case %(unqual *type):
-      return %("__typeof__((0, (" @(_semantic_type(e, type)) "){0}))");
-    case %(at ?origin ?inner): return _at(e, origin, inner);
-    case %(cons ?item ?tail): return $emit.cons(e, item, tail);
-    case %(append ?head ?tail): return $emit.append(e, head, tail);
-    case %(c-assert ?test ?message): return $emit.c_assert(e, test, message);
-    case %(initcode ?input ?body): return $emit.initcode(e, input, body);
-    case %(localinit ?decl (block *body)): return _local_static(e, decl, body);
-    case %(sourceinit ?fn): return _source_initializer(e, fn);
-    case %(initval *): return _initializer_value(e, ast);
-    case %(indexinit ?index ?value): return _index_init(e, index, value);
-    case %(dotinit ?field ?value): return _dot_init(e, field, value);
-    case %(cast ?type ?expr): return $emit.cast(e, type, expr);
-    case %(cache ?id): return $emit.cache(e, id);
-    case %(expr ? ?content): return _emit(e, $(content));
-    case %(postfix ?op ?argument): return _postfix(e, op, argument);
-    case %(generic ?control *rows): return _generic(e, control, rows);
-    case %(va-arg ?expr ?decl): return $emit.vararg(e, expr, decl);
-    case %(offsetof ?type ?member): return $emit.offset(e, type, member);
-    case %(call ?fn ?args): return _call(e, fn, args);
-    case %(index ?array ?index): return $emit.index(e, array, index);
-    case %(op ?op ?argument): return _unary(e, op, argument);
-    case %(op ?op ?left ?right): return _binary(e, op, left, right);
-    case %(op ? ?test ?yes ?no): return $emit.conditional(e, test, yes, no);
-    case %(break): return %("break;");
-    case %(continue): return %("continue;");
-    case %(if ?test ?yes): return $emit.if(e, test, yes);
-    case %(if ?test ?yes ?no): return $emit.if_else(e, test, yes, no);
-    case %(while ?test ?body): return $emit.while(e, test, body);
-    case %(do ?body ?test): return $emit.do(e, body, test);
-    case %(for ? ? ? ?): return $emit.for(e, ast);
-    case %(switch ?expr ?body): return $emit.switch(e, expr, body);
-    case %(return): return %("return;");
-    case %(return (!set ?expr (expr ? ?))): return _return(e, expr);
-    case %(goto ?label): return $emit.goto(e, label);
-    case %(raise ?cause (args *args)): return _raise(e, ast, cause, args);
-    case %((!or fnmod func) ?params): return _parameters(e, params);
-    case %(label ?name): return _label(e, name);
-    case %(ident ?binding): return _ident(e, binding);
-    case %(declare ?type ?bindings):
-      return %(@(_declare(e, type, bindings)) ";");
-    case %(decl ?type ?bindings): return _declare(e, type, bindings);
-    case %(bind ?ident ?mods): return _bind(e, ident, mods);
-    case %(param ?type ?mods): return _param(e, type, mods);
+    case %(unqual *type): {
+      _put(e, "__typeof__((0, (");
+      _put_all(e, _semantic_type(e, type));
+      _put(e, "){0}))");
+    }
+    case %(at ?origin ?inner): _at(e, origin, inner);
+    case %(cons ?item ?tail):
+      _write(e, %("cons(" $item ", " $tail ")"));
+    case %(append ?head ?tail):
+      _write(e, %("List_append(" $head ", " $tail ")"));
+    case %(c-assert ?test ?message):
+      _write(e, %("_Static_assert(" $test "," $message ");"));
+    case %(initcode ?input ?body): {
+      _put_all(e, _initializer_macro(e, input, body));
+      _put(e, ";");
+    }
+    case %(localinit ?decl (block *body)):
+      _put_all(e, _local_static(e, decl, body));
+    case %(sourceinit ?fn): _put_all(e, _source_initializer(e, fn));
+    case %(initval *): _put_all(e, _initializer_value(e, ast));
+    case %(indexinit ?index ?value): _put_all(e, _index_init(e, index, value));
+    case %(dotinit ?field ?value): _put_all(e, _dot_init(e, field, value));
+    case %(cast ?type ?expr): _cast(e, type, expr);
+    case %(cache ?id): _cache(e, id);
+    case %(expr ? ?content): _node(e, content);
+    case %(postfix ?op ?argument): _postfix(e, op, argument);
+    case %(generic ?control *rows): _generic(e, control, rows);
+    case %(va-arg ?expr ?decl): _write(e, %("va_arg(" $expr ", " $decl ")"));
+    case %(offsetof ?type ?member): {
+      _put(e, "offsetof(");
+      _put_all(e, _semantic_type(e, type));
+      _put(e, ", ");
+      _emit(e, member);
+      _put(e, ")");
+    }
+    case %(call ?fn ?args): _call(e, fn, args);
+    case %(index ?array ?index): _index(e, array, index);
+    case %(op ?op ?argument): _unary(e, op, argument);
+    case %(op ?op ?left ?right): _binary(e, op, left, right);
+    case %(op ? ?test ?yes ?no): _conditional(e, test, yes, no);
+    case %(break): _put(e, "break;");
+    case %(continue): _put(e, "continue;");
+    case %(if ?test ?yes): _keyword_group(e, "if", test, yes);
+    case %(if ?test ?yes ?no): {
+      _keyword_group(e, "if", test, yes);
+      _put(e, "else");
+      _node(e, no);
+    }
+    case %(while ?test ?body): _keyword_group(e, "while", test, body);
+    case %(do ?body ?test):
+      _write(e, %("do" $body "while" "(" $test ")" ";"));
+    case %(for ?initial ?test ?step ?body):
+      _write(e, %("for" "(" $initial ";" $test ";" $step ")" $body));
+    case %(switch ?expr ?body): _keyword_group(e, "switch", expr, body);
+    case %(return): _put(e, "return;");
+    case %(return (!set ?expr (expr ? ?))): _return(e, expr);
+    case %(goto ?label): _write(e, %("goto" $label ";"));
+    case %(raise ?cause (args *args)): _put_all(e, _raise(e, ast, cause, args));
+    case %((!or fnmod func) ?params): _parameters(e, params);
+    case %(label ?name): _label(e, name);
+    case %(ident ?binding): _ident(e, binding);
+    case %(declare ?type ?bindings): {
+      _declare(e, type, bindings);
+      _put(e, ";");
+    }
+    case %(decl ?type ?bindings): _declare(e, type, bindings);
+    case %(bind ?ident ?mods): _bind(e, ident, mods);
+    case %(param ?type ?mods): _param(e, type, mods);
     case %(function ?type ?bindings ?body):
-      return _function(e, type, bindings, body);
+      _function(e, type, bindings, body);
     case %(falias (!set ?declaration (declare ? (bindings (bind ?target ?))))
                   ?native):
-      return _foreign_alias(e, declaration, target, native);
+      _put_all(e, _foreign_alias(e, declaration, target, native));
+    default: _leaf(e, ast);
   }
-  return _leaf(e, ast);
 }
 
 /* A run of nodes and verbatim C text: each node is emitted in place and
    each String is written as it is, so a lowered carrier can hold C text
    around the nodes it lowers. A Symbol ends the run and heads a node. */
-static List _sequence(Emitter &e, List ast) {
-  Array emitted = auto [];
-  while (ast && ast.car() is not <symbol>) {
-    Var item = ast.car();
-    emitted.push(item is <list> ? _emit(e, item) : item);
-    ast = ast.cdr();
-  }
-  List result = _emit(e, ast);
-  for (int i = (int) emitted.len() - 1; i >= 0; i--)
-    result = cons(emitted[i], result);
-  return result;
+static void _sequence(Emitter &e, List ast) {
+  for (; ast && ast.car() is not <symbol>; ast = ast.cdr()) _node(e, ast.car());
+  _emit(e, ast);
 }
 
-static List _prefix(Emitter &e, List ast) {
-  Array prefix = [];
+static void _prefix(Emitter &e, List ast) {
   while (ast && ast.car() is <symbol>) {
     Symbol item = ast.car();
     if (item == <typedef> ||
         (!item.is_storage_class() && !item.is_type_qualifier() &&
          !item.is_inline()))
       break;
-    if (item == <threaded>) prefix.push("_Thread_local");
-    else prefix.push(ast.car());
+    if (item == <threaded>) _put(e, "_Thread_local");
+    else _put(e, ast.car());
     ast = ast.cdr();
   }
-  return prefix.list_free().append(_emit(e, ast));
+  _emit(e, ast);
 }
 
-static List _leaf(Emitter &e, List ast) {
+static void _leaf(Emitter &e, List ast) {
   Var head = ast.car();
   switch (head.symbol()) {
-    case <adopt>: case <macrodef>: case <protocol>: return NULL;
-    case <literal>:    return _literal(e, ast);
-    case <preproc>:    return _preproc(e, ast);
-    case <enum>:       return _enum(e, ast);
-    case <struct>:     return _aggregate(e, ast);
-    case <typedef>:    return _typedef(e, ast);
-    case <union>:      return _aggregate(e, ast);
-    case <args>:       return _args(e, ast);
-    case <bindings>: case <params>: return _commas(_emit(e, ast.cdr()));
-    case <fields>:     return _emit(e, ast.cdr());
-    case <block>:      return _block(e, ast);
-    case <group>:      return _emit(e, ast.cdr());
-    case <parens>:     return %("(" @(_emit(e, ast.cdr())) ")");
-    case <sizeof>: return %("sizeof" @(_emit(e, ast.cdr())));
-    case <case>: return %("case" $(_emit(e, ast.cdr())) ":");
-    case <composite>: return %("{" @(_emit(e, ast.cdr())) "}");
-    case <default>:    return %("default:");
-    case <empty>:      return %(";");
-    case <stmnt>:      return %( @(_emit(e, ast.cdr())) ";");
-    case <binding>:    return _binding(e, ast);
-    case <commas>: return _commas(_emit(e, ast.cdr()));
-    case <comment>:    return ast.cdr();
-    case <nil>:        return %("NULL");
-    case <space>:      return ast.cdr();
+    case <adopt>: case <macrodef>: case <protocol>: return;
+    case <literal>:    _literal(e, ast); return;
+    case <preproc>:    _put_all(e, _preproc(e, ast)); return;
+    case <enum>:       _put_all(e, _enum(e, ast)); return;
+    case <struct>:     _put_all(e, _aggregate(e, ast)); return;
+    case <typedef>:    _typedef(e, ast); return;
+    case <union>:      _put_all(e, _aggregate(e, ast)); return;
+    case <args>:       _args(e, ast); return;
+    case <bindings>: case <params>: case <commas>:
+      _comma_items(e, ast.cdr());
+      return;
+    case <fields>: case <group>: _emit(e, ast.cdr()); return;
+    case <block>:      _block(e, ast); return;
+    case <parens>:     _surround(e, "(", ast.cdr(), ")"); return;
+    case <sizeof>:     _put(e, "sizeof"); _emit(e, ast.cdr()); return;
+    case <case>:       _surround(e, "case", ast.cdr(), ":"); return;
+    case <composite>:  _surround(e, "{", ast.cdr(), "}"); return;
+    case <default>:    _put(e, "default:"); return;
+    case <empty>:      _put(e, ";"); return;
+    case <stmnt>:      _emit(e, ast.cdr()); _put(e, ";"); return;
+    case <binding>:    _binding(e, ast); return;
+    case <comment>: case <space>: _put_all(e, ast.cdr()); return;
+    case <nil>:        _put(e, "NULL"); return;
   }
-  return $(head, @(_emit(e, ast.cdr())));
+  _put(e, head);
+  _emit(e, ast.cdr());
 }
 
-static List _at(Emitter &e, int origin, List inner) {
+static void _surround(Emitter &e, String open, List inner, String close) {
+  _put(e, open);
+  _emit(e, inner);
+  _put(e, close);
+}
+
+static void _at(Emitter &e, int origin, List inner) {
   int old_origin = e.origin;
   e.origin = origin;
-  List result = _emit(e, inner);
+  if (e.c.source_map) {
+    _put(e, <src-at>);
+    _put(e, origin);
+  }
+  _emit(e, inner);
   e.origin = old_origin;
-  if (e.c.source_map)
-    return %(src-at $origin @result src-at $old_origin);
-  return result;
+  if (e.c.source_map) {
+    _put(e, <src-at>);
+    _put(e, old_origin);
+  }
 }
 
 // statements
 
-static List _return(Emitter &e, Var expression) {
-  List value = _emit(e, $(expression));
-  return %("return" @value ";");
+static void _return(Emitter &e, Var expression) {
+  _put(e, "return");
+  _node(e, expression);
+  _put(e, ";");
 }
 
-static List _label(Emitter &e, Var name) {
-  List c_name = _emit(e, $(name));
-  return %(@c_name ":");
+static void _label(Emitter &e, Var name) {
+  _node(e, name);
+  _put(e, ":");
 }
 
 static List _raise(Emitter &e, Ast ast, Var cause, List arguments) {
-  List code = _emit(e, cause);
-  List arg_tokens = _commas(_emit(e, arguments));
+  List code = _tokens(e, cause);
+  List arg_tokens = _commas(_grouped(e, arguments));
   String site_name = e.fresh_name("error_site");
   List location = e.origin_location(e.origin);
   String file = location

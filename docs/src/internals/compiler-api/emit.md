@@ -19,7 +19,7 @@ C tokens from normalized x2c ASTs.
 <a id="Compiler.emit"></a>
 #### Compiler.emit
 
-`List Compiler.emit(Compiler c, List ast, Map cache_bindings)`
+`Array Compiler.emit(Compiler c, List ast, Map cache_bindings)`
 
 Emits a bound, typed, transform-normalized AST sequence as flat C tokens.
 Source mapping adds `src-at`/ID pairs consumed by the formatter.
@@ -29,17 +29,16 @@ bind, transform, or choose header and source placement; generation supplies
 any added scaffolding in the same normalized grammar. `cache_bindings`
 maps semantic cache ids to generated slots; NULL keeps raw ids for
 inspection. It preserves the top-level AST sequence and advances
-generated-name counters as it allocates temporaries. Returned canonical
-`List`s and `String`s are owned by pools
-active during emission; promote them before releasing those pools if the
-tokens must survive.
+generated-name counters as it allocates temporaries. The returned
+`Array` holds `String`s owned by pools active during emission; promote
+them before releasing those pools if the tokens must survive.
 
-Source: `src/emit/dispatch.x:92`
+Source: `src/emit/dispatch.x:122`
 
 ## Design notes
 
 This module owns emission: it turns a bound, typed, transform-normalized
-AST into the token `List`s that formatting prints as C. One stack-local
+AST into the token `Array` that formatting prints as C. One stack-local
 Emitter holds the current function's name, static objects, and native
 aliases, so emission is reentrant and a failed translation cannot
 contaminate later units. `transform.x` has already placed each cleanup

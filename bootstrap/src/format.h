@@ -7,7 +7,7 @@
 
 #include "x2c.h"
 #include "compiler/compiler.h"
-char * Compiler_code_pretty_string(Compiler c, List code, String output_file);
+char * Compiler_code_pretty_string(Compiler c, Array code, String output_file);
 
 
 #endif /* __GUARD_0x8FDDE00C__ */

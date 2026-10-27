@@ -1,7 +1,7 @@
 /*  emit.x -- C tokens from normalized x2c ASTs
 
     This module owns emission: it turns a bound, typed, transform-normalized
-    AST into the token `List`s that formatting prints as C. One stack-local
+    AST into the token `Array` that formatting prints as C. One stack-local
     Emitter holds the current function's name, static objects, and native
     aliases, so emission is reentrant and a failed translation cannot
     contaminate later units. `transform.x` has already placed each cleanup
@@ -22,13 +22,14 @@
 
 /* `native_macros` holds the `#define` rows initializer choices need, and
    `static_support` records that a runtime static was emitted, so the unit
-   includes its runtime headers. */
+   includes its runtime headers. `out` holds the tokens written so far. */
 module typedef struct Emitter {
   delegate Compiler c;
   int origin, String fn_name, List native_aliases;
   Array native_macros;
   Map static_objects, cache_bindings;
   int static_support;
+  Array out;
 } Emitter;
 
 // operator grouping

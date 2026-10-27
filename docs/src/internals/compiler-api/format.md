@@ -12,19 +12,19 @@ Code formatting helpers for the x2c compiler.
 
 | Function | Summary |
 | --- | --- |
-| [`Compiler.code_pretty_string`](#Compiler.code_pretty_string) | Returns a canonical formatted C `String` for an emitted token `List`. |
+| [`Compiler.code_pretty_string`](#Compiler.code_pretty_string) | Returns a canonical formatted C `String` for an emitted token `Array`. |
 
 ### `Compiler`
 
 <a id="Compiler.code_pretty_string"></a>
 #### Compiler.code_pretty_string
 
-`char *Compiler.code_pretty_string(Compiler c, List code, String output_file)`
+`char *Compiler.code_pretty_string( Compiler c, Array code, String output_file)`
 
-Returns a canonical formatted C `String` for an emitted token `List`.
+Returns a canonical formatted C `String` for an emitted token `Array`.
 Token order and `code` are unchanged. Braces indent by two spaces,
 semicolons break lines only outside parentheses, and preprocessor tokens
-occupy their own lines. An empty `List` returns the empty `String`.
+occupy their own lines. An empty `Array` returns the empty `String`.
 Emitted `src-at` markers carry existing compiler origin IDs; zero restores
 `output_file` at its physical line.
 
@@ -34,6 +34,6 @@ Source: `src/format.x:34`
 
 ## Design notes
 
-Formats emitted token `List`s as C text without changing token order.
+Formats emitted token `Array`s as C text without changing token order.
 Parenthesis depth suppresses statement breaks within expressions, and
 `Buffer` materializes the final `String`.

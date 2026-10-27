@@ -12,32 +12,30 @@ static macro Expression $emit.alias.checked(
     @($pointer), ": 1, default: 0), ", %"\"$($message)\");", "#endif",
     $definition);
 
-module List _parameters(Emitter &e, Var parameters) {
-  List c_params = _emit(e, $(parameters));
-  return %("(" @c_params ")");
+module void _parameters(Emitter &e, Var parameters) {
+  _put(e, "(");
+  _node(e, parameters);
+  _put(e, ")");
 }
 
 // declarations
 
-module List _declare(Emitter &e, List type, List bindings) {
-  type = _emit(e, $(type));
-  bindings = $(bindings);
-  return type.append(_emit(e, bindings));
+module void _declare(Emitter &e, List type, List bindings) {
+  _node(e, type);
+  _node(e, bindings);
 }
 
-module List _bind(Emitter &e, List ident, List mods) {
-  ident = _emit(e, ident);
-  if (!mods) return ident;
-  return _declarator(e, ident, mods);
+module void _bind(Emitter &e, List ident, List mods) {
+  if (!mods) _emit(e, ident);
+  else _put_all(e, _declarator(e, _tokens(e, ident), mods));
 }
 
-module List _param(Emitter &e, List type, List mods) {
-  List code = _emit(e, type === %(....) ? %("List") : type);
-  mods = $(mods);
-  return code.append(_emit(e, mods));
+module void _param(Emitter &e, List type, List mods) {
+  _emit(e, type === %(....) ? %("List") : type);
+  _node(e, mods);
 }
 
-module List _function(Emitter &e, List type, List bindings, List body) {
+module void _function(Emitter &e, List type, List bindings, List body) {
   String old_fn = e.fn_name;
   List function_binding = bindings.cadr();
   e.fn_name = Ast.binding_spelling(function_binding);
@@ -45,16 +43,12 @@ module List _function(Emitter &e, List type, List bindings, List body) {
   if (e.semantic_binding_facts().try_get(
     %(defer-ownr $function_binding), defer_owner))
     e.fn_name = defer_owner;
-  type = _emit(e, $(type));
-  bindings = $(bindings);
-  body = $(body);
-  List decl, body_code;
+  _node(e, type);
   with (e.static_objects = {}) {
-    decl = _emit(e, bindings);
-    body_code = _emit(e, body);
+    _node(e, bindings);
+    _node(e, body);
   }
   e.fn_name = old_fn;
-  return %(@type @decl @body_code);
 }
 
 // Emit a checked native-function alias without a wrapper object.
@@ -63,7 +57,7 @@ module List _foreign_alias(
   Type function_type = declaration.type_from_ast().declared();
   Type pointer_type = function_type.reference();
   List pointer = _semantic_type(e, pointer_type);
-  List native = _emit(e, native_binding);
+  List native = _tokens(e, native_binding);
   String target_name = e.emitted_binding_name(target);
   String native_name = e.emitted_binding_name(native_binding);
   String message = %"native alias $target_name does not match $native_name";
@@ -71,8 +65,10 @@ module List _foreign_alias(
   return $emit.alias.checked(native, pointer, message, define);
 }
 
-module List _typedef(Emitter &e, List ast) {
-  List code = %("typedef" @(_emit(e, ast.cdr())) ";");
+module void _typedef(Emitter &e, List ast) {
+  _put(e, "typedef");
+  _emit(e, ast.cdr());
+  _put(e, ";");
   if (ast ~= %(typedef ? (bindings *declarators)))
     foreach (List declarator in declarators) {
       List binding = declarator.cadr();
@@ -80,17 +76,19 @@ module List _typedef(Emitter &e, List ast) {
       if (e.semantic_binding_facts().try_get(%(ntype $binding), type))
         e.native_aliases = cons($(type, binding), e.native_aliases);
     }
-  return code;
 }
 
-module List _block(Emitter &e, List ast) {
+module void _block(Emitter &e, List ast) {
   with (e.native_aliases = e.native_aliases) {
-    return %("{" @(_emit(e, ast.cdr())) "}");
+    _put(e, "{");
+    _emit(e, ast.cdr());
+    _put(e, "}");
   }
 }
 
-module List _binding(Emitter &e, List ast) =>
-  $(e.emitted_binding_name(ast));
+module void _binding(Emitter &e, List ast) {
+  _put(e, e.emitted_binding_name(ast));
+}
 
 // declarators
 
@@ -123,11 +121,11 @@ static List _list_declarator(Emitter &e, List decl, Type mod) {
   if (mod.car() == <fnmod>) return _function_declarator(e, decl, mod.cadr());
   if (mod.car() is <string>) return %(@decl @mod);
   if (mod.is_array()) return _array_declarator(e, decl, mod.cadr());
-  return %(@decl ":" @(_emit(e, mod.cadr())));
+  return %(@decl ":" @(_tokens(e, mod.cadr())));
 }
 
 static List _bitfield_declarator(Emitter &e, List &mods) {
-  List tokens = _emit(e, mods.cdr());
+  List tokens = _tokens(e, mods.cdr());
   mods = NULL;
   return tokens;
 }
@@ -141,23 +139,23 @@ static List _native_declarator(List decl, List &mods, Symbol sym) {
 
 static List _array_declarator(Emitter &e, List decl, List dimension) {
   if (decl.type().is_pointer()) decl = _parens(decl);
-  List size = _emit(e, dimension);
+  List size = _tokens(e, dimension);
   return size ? %(@decl "[" @size "]") : %(@decl "[]");
 }
 static List _function_declarator(Emitter &e, List decl, List parameters) {
   if (decl.type().is_pointer()) decl = _parens(decl);
-  return %(@decl "(" @(_emit(e, parameters)) ")");
+  return %(@decl "(" @(_tokens(e, parameters)) ")");
 }
 
 module List _semantic_type(Emitter &e, Type type) {
   List (_, base, bindings) = type.declaration_ast(NULL);
-  return _declare(e, base, bindings);
+  return _tokens(e, $(base, bindings));
 }
 
 module List _semantic_name(Emitter &e, Type type, String name) {
   List (base, mods) = type.parts();
   List declarator = _declarator(e, $(name), mods);
-  return $(_emit(e, base), @declarator);
+  return $(_tokens(e, base), @declarator);
 }
 
 // tagged types
@@ -165,28 +163,25 @@ module List _semantic_name(Emitter &e, Type type, String name) {
 module List _enum(Emitter &e, List ast) {
   if (ast.type().is_enum_tag()) {
     Var alias = e.native_aliases.assoc(ast);
-    if (alias is <list>) return _emit(e, alias);
+    if (alias is <list>) return _tokens(e, alias);
   }
   List name = ast.type().tag(), body = ast.type().body().car();
   if (_is_gensym_tag(name) && !ast.type().is_enum_tag()) name = NULL;
-  if (name) name = _emit(e, name);
-  body = _emit(e, body);
-  body = _commas(body);
+  if (name) name = _tokens(e, name);
+  body = _commas(_grouped(e, body));
   return _tagged(ast, name, body);
 }
 
 module List _aggregate(Emitter &e, List ast) {
   if (ast.type().is_aggregate_tag()) {
     Var alias = e.native_aliases.assoc(ast);
-    if (alias is <list>) return _emit(e, alias);
+    if (alias is <list>) return _tokens(e, alias);
   }
   List tag = ast.type().tag();
   if (_is_gensym_tag(tag) && !ast.type().is_aggregate_tag()) tag = NULL;
-  if (tag) tag = _emit(e, tag);
+  if (tag) tag = _tokens(e, tag);
   if (ast.type().is_aggregate_tag()) return $(ast.car(), @tag);
-  List body = ast.type().body();
-  body = _emit(e, body);
-  body = body.flatten_all();
+  List body = _tokens(e, ast.type().body());
   return _tagged(ast, tag, body);
 }
 
